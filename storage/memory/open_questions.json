@@ -1,0 +1,388 @@
+[
+  {
+    "question": "12/VIX 策略能否擴展到亞洲市場（台灣、日本、韓國）？需要當地 VIX 等價物還是 US VIX proxy 就夠？",
+    "priority": "high",
+    "status": "answered",
+    "sub_tasks": [
+      "N118: US VIX 對 EWT 無效 ✓",
+      "N119: 0050.TW EWMA VT 有效 ✓",
+      "待做: 12/VIXTWN 策略測試",
+      "待做: 日本 VIX (JNIV) 測試"
+    ],
+    "id": "oq_784bb32f",
+    "timestamp": "2026-03-16T19:11:09.117180",
+    "answer": "Q1: Taiwan 8.63/VIX validated (Sharpe 1.16, MDD -13.4%). Q16: VIX timing alpha unreliable cross-market, but MDD improvement universal (10-16% for all 7 assets). → 詳見：「Q&A: 12/VIX 能否擴展到亞洲市場？——台灣可以，但 Timing Alpha 不可靠」、「12/VIX 策略跨市場驗證：台灣 0050.TW 的 8.63/VIX 調整公式」、「VIX 跨市場適用性：Timing Alpha 不可靠，但 MDD 保護普遍有效」",
+    "feed_articles": [
+      "mile_fa6c8f36",
+      "mile_66c30b90",
+      "mile_45e78a59"
+    ],
+    "proposer": "用戶",
+    "score_breakdown": {
+      "relevance": 27,
+      "practical": 25,
+      "answerable": 20,
+      "novelty": 12,
+      "general": 9
+    },
+    "score": 93
+  },
+  {
+    "question": "非專業投資人最佳的 multi-asset portfolio 是什麼？40/30/30 能否進一步優化？",
+    "priority": "high",
+    "status": "answered",
+    "sub_tasks": [
+      "N173: 40/30/30 Sharpe 1.024 ✓",
+      "N176: Conditional TLT Sharpe 1.078 ✓",
+      "待做: Robustness check for rate-conditional rule",
+      "待做: 加入國際 ETF (EFA/EEM)"
+    ],
+    "id": "oq_40f0d5b5",
+    "timestamp": "2026-03-16T19:11:09.117192",
+    "answer": "Q21: 50/50 SPY/GLD + 12/VIX is optimal (Sharpe 0.826, MDD -15.5%). QQQ hurts (tail dep λ_L=0.82). Decision tree: zero calc→VIX Step; monthly→50/50 12/VIX. → 詳見：「Q&A: 最佳零售投資組合——50/50 SPY/GLD + 12/VIX」、「非專業投資人最佳組合：50/50 SPY/GLD + 12/VIX 完整操作手冊」",
+    "feed_articles": [
+      "mile_dfce900a",
+      "mile_ba2e81e1"
+    ],
+    "proposer": "用戶",
+    "score_breakdown": {
+      "relevance": 25,
+      "practical": 25,
+      "answerable": 20,
+      "novelty": 10,
+      "general": 10
+    },
+    "score": 90
+  },
+  {
+    "question": "GARCH 波動率預測除了 VT 和 VaR，還能在哪些投資決策中創造價值？",
+    "priority": "medium",
+    "status": "answered",
+    "sub_tasks": [
+      "N90: GARCH overlay 無增值 ✓",
+      "N174: ES targeting 失敗 ✓",
+      "待做: Options IV vs GARCH mis-pricing signal",
+      "待做: Credit spread prediction"
+    ],
+    "id": "oq_25ec3e84",
+    "timestamp": "2026-03-16T19:11:09.117194",
+    "answer": "Phase R tested 7 applications. Only VRP straddle timing works (weekly Sharpe 3.0 at ratio>1.3). Macro prediction, factor VT, gamma-switching, risk budgeting all null. GARCH has exactly 3 value domains: vol forecasting, VaR/ES, VRP timing. → 詳見：「Phase R: GARCH 的三個應用領域——波動預測、風險測量、VRP Timing」、「VIX/GARCH Ratio 預測選擇權策略：賣出波動率的最佳時機」、「VIX/GARCH Ratio 與選擇權策略完整指南：從理論到實務的 VRP Timing」",
+    "feed_articles": [
+      "mile_789396fe",
+      "mile_9de0c36e",
+      "mile_ca55520e"
+    ],
+    "proposer": "用戶",
+    "score_breakdown": {
+      "relevance": 28,
+      "practical": 22,
+      "answerable": 18,
+      "novelty": 12,
+      "general": 8
+    },
+    "score": 88
+  },
+  {
+    "question": "結構性 gamma decline（SPY 從 0.31 降到 0.19）會影響 VT 的長期有效性嗎？",
+    "priority": "medium",
+    "status": "answered",
+    "sub_tasks": [
+      "N54: 個股 -65%, SPY -53% ✓",
+      "N60: Gamma decline 不影響 VT effectiveness ✓",
+      "N156: 25 年 gamma 趨勢確認下降 ✓",
+      "非重疊區間無顯著趨勢 (p=0.41) — 非結構性衰退，而是周期性 ✓",
+      "MC: gamma=0 時 VT 仍 100% 有效 ✓",
+      "GJR 在最低 gamma 時期仍顯著優於 GARCH (DM=-2.89) ✓",
+      "VT dMDD vs gamma: rho=-0.086, p=0.87 — 完全無關 ✓",
+      "結論: gamma 是周期性非結構性，VT 不受影響 ✓"
+    ],
+    "id": "oq_dc685ef1",
+    "timestamp": "2026-03-16T19:11:09.117204",
+    "answer": "Q20: Gamma decline is cyclical not structural (3yr trend p=0.41). VT completely independent of gamma (ρ=-0.029). MC: gamma=0 → VT still 100% effective. → 詳見：「Q&A: Gamma Decline 會影響 VT 嗎？——不會，數學上證明」",
+    "feed_articles": [
+      "mile_57502993"
+    ],
+    "proposer": "用戶",
+    "score_breakdown": {
+      "relevance": 28,
+      "practical": 18,
+      "answerable": 20,
+      "novelty": 13,
+      "general": 8
+    },
+    "score": 87
+  },
+  {
+    "question": "12/VIX 的 drawdown recovery paradox 有解嗎？能否在保持 MDD 保護的同時加速反彈參與？",
+    "priority": "medium",
+    "status": "answered",
+    "sub_tasks": [
+      "N85: Recovery paradox 確認 ✓",
+      "N86: Percentile target +0.047 Sharpe ✓",
+      "待做: VIX term structure signal for re-leveraging",
+      "待做: Momentum overlay on VT"
+    ],
+    "id": "oq_ffddc5e4",
+    "timestamp": "2026-03-16T19:11:09.117195",
+    "answer": "Q8: Momentum Overlay works for SPY only (Harvey t=4.00). Q9: Cross-asset 0/4 fail. SPY-specific V-shaped recovery dynamics unique to US large-cap. → 詳見：「Q&A: VT Recovery Paradox 有解嗎？——SPY 有，但不通用」、「VT Recovery Paradox 破解：Momentum Overlay 通過 Harvey 門檻」",
+    "feed_articles": [
+      "mile_f98025e6",
+      "mile_efa0577d"
+    ],
+    "proposer": "Codex",
+    "score_breakdown": {
+      "relevance": 25,
+      "practical": 23,
+      "answerable": 18,
+      "novelty": 11,
+      "general": 9
+    },
+    "score": 86
+  },
+  {
+    "question": "Gamma-mechanism proposition 在什麼條件下會失敗？邊界條件是什麼？",
+    "priority": "high",
+    "status": "answered",
+    "sub_tasks": [
+      "N98: Safe-haven 例外 ✓",
+      "N161: 5d lookback 反向 ✓",
+      "待做: Gamma regime switching 測試",
+      "待做: 更多 EM 市場驗證"
+    ],
+    "id": "oq_7d15f1ee",
+    "timestamp": "2026-03-16T19:11:09.117188",
+    "answer": "Q19: Gamma predicts VT within equities (ρ=0.886, p=0.019) but not cross-asset (ρ=-0.448, p=0.14). VIX correlation is better cross-asset predictor. MDD improvement universal (ρ=0.944 with vol level). → 詳見：「Q&A: Gamma-Mechanism 的適用範圍——Equity Only」、「Gamma-Mechanism 邊界條件：12 資產測試揭示 equity-only 適用範圍」",
+    "feed_articles": [
+      "mile_23e8ddaf",
+      "mile_736ae4c2"
+    ],
+    "proposer": "用戶",
+    "score_breakdown": {
+      "relevance": 30,
+      "practical": 15,
+      "answerable": 18,
+      "novelty": 15,
+      "general": 7
+    },
+    "score": 85
+  },
+  {
+    "question": "5-min 高頻數據累積後，Realized GARCH 能否突破 QLIKE ceiling（-9.034）？",
+    "priority": "medium",
+    "status": "partially_answered",
+    "sub_tasks": [
+      "N131: 41 天 HAR-RV R²=0.047（太少）✓",
+      "待做: 60 天後重測 HAR-RV（~2026 Q2）",
+      "待做: 252 天後測 Realized GARCH（~2027 Q1）"
+    ],
+    "id": "oq_94fee9ca",
+    "timestamp": "2026-03-16T19:11:09.117190",
+    "answer": "R9 pilot (42d): RV 10.5x less noisy. Realized GARCH pilot -18% QLIKE. HAR-RV needs 60+ days (ETA 2026-04-07). T3: Rough vol H=0.105 but QLIKE NS (DM p=0.80). QLIKE ceiling holds at daily freq with all tested models. Blocked until 60+ days 5-min data.",
+    "feed_articles": [
+      "mile_3efce925"
+    ],
+    "proposer": "Claude",
+    "score_breakdown": {
+      "relevance": 28,
+      "practical": 20,
+      "answerable": 15,
+      "novelty": 13,
+      "general": 8
+    },
+    "score": 84
+  },
+  {
+    "question": "2026 Hormuz 危機如果持續 6 個月，投資組合該如何調整？12/VIX 自動調整是否足夠？",
+    "priority": "high",
+    "status": "answered",
+    "sub_tasks": [
+      "N134: 3月 SPY -3.5%, VT -1.9% ✓",
+      "N148: IRGC 封鎖升級 ✓",
+      "N150: 歷史類比分析 ✓",
+      "持續追蹤: VIX 變化",
+      "持續追蹤: 油價走勢"
+    ],
+    "id": "oq_5126157e",
+    "timestamp": "2026-03-16T19:11:09.117202",
+    "answer": "R8 confirms: 12/VIX auto-adjusts sufficiently. During Iran crisis, VT auto-reduced to 58% exposure. MDD -43% maintained. VIX/GARCH ratio 1.6 triggered alert. No manual intervention needed — the system is self-correcting. → 詳見：「Extended OOS 驗證：15 個月新數據確認所有核心發現」、「FOMC 前夕風險評估：VIX/GARCH Ratio 1.6 觸發警報」",
+    "feed_articles": [
+      "mile_3efce925",
+      "mile_4e55efdb"
+    ],
+    "proposer": "用戶",
+    "score_breakdown": {
+      "relevance": 20,
+      "practical": 23,
+      "answerable": 18,
+      "novelty": 8,
+      "general": 9
+    },
+    "score": 78
+  },
+  {
+    "question": "台灣 VT 論文（paper/taiwan-vt/）的核心 contribution 是什麼？目標投稿哪個期刊？",
+    "priority": "medium",
+    "status": "answered",
+    "sub_tasks": [
+      "N119-N126: 數據完備 ✓",
+      "N139: 論文大綱完成 ✓",
+      "待做: 取得 VIXTWN 歷史數據",
+      "待做: 完善 body.tex",
+      "目標: 台灣財金學刊 or Finance Research Letters"
+    ],
+    "id": "oq_8b3aea93",
+    "timestamp": "2026-03-16T19:11:09.117200",
+    "proposer": "用戶",
+    "score_breakdown": {
+      "relevance": 22,
+      "practical": 18,
+      "answerable": 18,
+      "novelty": 10,
+      "general": 7
+    },
+    "score": 75,
+    "answer": "H10-H13完成。核心 contribution: (1) TZ information transmission (c2c 6/8 markets PASS Harvey, 但 I8 降級為學術發現非交易策略) (2) Taiwan VT 8.63/VIX with VIXTWN ratio (3) 進口YoY macro guard。目標: Pacific-Basin Finance Journal 或 Emerging Markets Review。32頁, 引用驗證 14/14 OK。"
+  },
+  {
+    "question": "網站架構從研究工具到公開產品的路徑是什麼？需要哪些功能？",
+    "priority": "low",
+    "status": "open",
+    "sub_tasks": [
+      "已完成: 統一 Next.js 架構",
+      "已完成: GitHub auto-deploy",
+      "待做: 用戶認證 (if needed)",
+      "待做: 多語言 (EN/ZH)",
+      "待做: Mobile responsive 優化"
+    ],
+    "id": "oq_c7238733",
+    "timestamp": "2026-03-16T19:11:09.117205",
+    "proposer": "Codex",
+    "score_breakdown": {
+      "relevance": 10,
+      "practical": 25,
+      "answerable": 20,
+      "novelty": 8,
+      "general": 10
+    },
+    "score": 73
+  },
+  {
+    "question": "論文如何從 32/100 提升到 70+/100？Codex 指出的結構性問題如何解決？",
+    "priority": "high",
+    "status": "answered",
+    "sub_tasks": [
+      "Codex: 砍到 2 contributions ✓",
+      "Codex: OOS prediction 升為 main test",
+      "待做: Introduction 重寫為 one question",
+      "待做: 12/VIX 和 VaR 移到 appendix",
+      "待做: 台灣另寫一篇"
+    ],
+    "id": "oq_77704254",
+    "timestamp": "2026-03-16T19:11:09.117197",
+    "answer": "論文從 44/100 提升到 69/100 (+25)。修正：(1) Abstract/Intro 統一 2 contributions (2) 不完整引用修正 (3) σ_target 不一致修正 (4) Window size 說明 (5) Yahoo Finance 交叉驗證 (6) Transaction costs 移到 methodology (7) 29 DOIs 添加 (8) 6 引用錯誤修正 (9) Proposition N94→1 (10) Complexity ceiling section (11) Extended OOS 驗證 (12) 62pp→50pp。Codex re-review: 殘留問題是 scope creep（需更多精簡）和 window framing。 → 詳見：「LaTeX 學術審查報告」",
+    "proposer": "Codex",
+    "score_breakdown": {
+      "relevance": 15,
+      "practical": 20,
+      "answerable": 20,
+      "novelty": 5,
+      "general": 5
+    },
+    "score": 65,
+    "feed_articles": []
+  },
+  {
+    "id": "uq_btc_halving",
+    "timestamp": "2026-03-17T10:30:00Z",
+    "question": "BTC 半減期前後的波動率是否有可預測的 pattern？GARCH 能否捕捉？",
+    "status": "answered",
+    "proposer": "會員",
+    "priority": "high",
+    "score": 82,
+    "answer": "BTC 半減期後 vol 確實下降（3/3 events，平均 -44%），但 N=3 統計檢定力極低。Placebo test 顯示降幅方向不罕見（52%），但幅度略為極端（p~8%）。GJR-GARCH 無法捕捉（排程事件非 return shock）。不推薦用 GARCH 做半減期 timing。下次驗證機會：2028 H5。"
+  },
+  {
+    "id": "uq_vix_term",
+    "timestamp": "2026-03-17T12:00:00Z",
+    "question": "能否用 VIX 期貨的期限結構（contango/backwardation）來改善 VT 策略的進出場時機？",
+    "status": "answered",
+    "proposer": "會員",
+    "priority": "medium",
+    "score": 75,
+    "score_breakdown": {
+      "relevance": 24,
+      "practical": 18,
+      "answerable": 16,
+      "novelty": 10,
+      "general": 7
+    },
+    "answer": "P37-P46 已深入研究。VIX backwardation（VIX > VIX3M）同日 Harvey t=4.31（顯著），但 T-1 lag 後 t=-2.22（完全失效）。Backwardation 是描述性指標（描述當前恐慌），不是預測性指標（無法提前知道）。Subsample 不穩定：只有 2015-2019 顯著。結論：不能用 VIX term structure 改善 VT 進出場。12/VIX 自身已是最佳。 → 詳見：「VIX Backwardation 策略被執行延遲測試擊殺」、「Phase Q 總結：Complexity Ceiling」",
+    "feed_articles": [
+      "mile_aaecb28b",
+      "mile_f0f8a922"
+    ]
+  },
+  {
+    "id": "Q014",
+    "timestamp": "2026-03-17T13:36:28.028413",
+    "question": "Does vol hub-ness (being the highest avg-corr asset) predict future regime changes? If an asset becomes hub, does that forecast a vol spike?",
+    "proposed_by": "Claude (from Gemini's network topology suggestion)",
+    "status": "partially_answered",
+    "tags": [
+      "network_topology",
+      "prediction"
+    ],
+    "priority": "low",
+    "answer": "S3 Vol Network Topology: hub 不固定 (QQQ 2021-22-25, SPY 2023-24, TLT COVID)。2024 fragmentation: hub corr 0.80→0.33。Hub-ness 不穩定，不能用來預測 regime。Descriptive finding, not predictive."
+  },
+  {
+    "id": "Q015",
+    "timestamp": "2026-03-17T13:36:28.028430",
+    "question": "Is the 2024 vol correlation fragmentation (avg corr dropping from 0.80 to 0.33) related to Magnificent 7 concentration? Would adding NVDA separately reveal this?",
+    "proposed_by": "Claude (from pilot analysis)",
+    "status": "partially_answered",
+    "tags": [
+      "network_topology",
+      "Mag7",
+      "market_structure"
+    ],
+    "priority": "low",
+    "answer": "S3: 2024 fragmentation 確認 (meta-corr=-0.003)。可能與 Mag7 有關但未單獨測 NVDA。BTC integration 非單調。靜態相關假設危險。"
+  },
+  {
+    "id": "oq_rough_vol",
+    "timestamp": "2026-03-17T18:00:00Z",
+    "question": "Rough Volatility (fBm H≈0.1) 能否打破我們的 QLIKE ceiling？Gatheral 2014 的 RFSV model 在日頻和 5-min 頻率上是否勝過 GJR-GARCH？",
+    "status": "answered",
+    "priority": "high",
+    "proposer": "Claude",
+    "answer": "T3: RFSV H=0.105 確認 roughness 但方法依賴 (variogram vs R/S vs DFA 結果不同)。QLIKE: GJR wins (DM p=0.80 NS)。MSE(log): RFSV wins (p<0.001)。不同 loss function 不同結論。QLIKE ceiling holds。需更多 5-min 數據做 HAR-RV/Realized GARCH 最終測試。"
+  },
+  {
+    "id": "oq_xai_vol",
+    "timestamp": "2026-03-17T18:00:00Z",
+    "question": "能否用 Explainable AI (XAI) 方法解釋 GARCH 和 ML 模型的 vol 預測差異？SHAP/LIME 能告訴我們什麼是 GARCH 遺漏的 signal？",
+    "status": "open",
+    "priority": "low",
+    "proposer": "Claude",
+    "answer": "未正式測試。但 QLIKE ceiling 15+ 確認 + R10 GINN null + T22 GBM null → ML 在日頻無增量。XAI 的價值可能在解釋「為什麼沒增量」而非找到增量。低優先。"
+  },
+  {
+    "id": "oq_panel_ml",
+    "timestamp": "2026-03-17T18:00:00Z",
+    "question": "多資產同時輸入 ML 模型（panel data approach）是否優於單一資產 GARCH？我們有 12 資產的完整數據可以測試",
+    "status": "answered",
+    "priority": "high",
+    "proposer": "Claude",
+    "answer": "U1: Panel GARCH-X null result（顯著更差）。A(+QQQ) -3.75% NS, B(+4 assets) -8.31% p=0.022, C(ensemble) -5.24% p=0.010。更多變數=更多估計噪音。QLIKE ceiling #14。多資產 panel approach 不優於單一資產 GARCH。"
+  },
+  {
+    "id": "a1cbe8b2",
+    "timestamp": "2026-03-17T19:24:32.053130",
+    "question": "情緒與財務指標能否改善台股/美股的波動率預測或 VT 策略？包括 CNN Fear Index、Google Trends、融資融券、外資買賣超、PE/PB/殖利率等。首要問題是資料可得性。",
+    "priority": "high",
+    "status": "answered",
+    "answer": "Phase J 全面測試：J3 Google Trends partial r=0.634 但 VT NS。J4 CAPE 月頻 partial r=0.000。J8 AAII null。J14 PE/DY null。G3 CNN null。G5 SKEW/credit/yield null。G8 台股4指標 null。G9 FRED 42 vars null。G12 台灣 MIDAS 27 指標 null。K1 SKEW/VVIX/VIX3M null。VIX sufficient statistic 15 次確認。所有情緒/財務/總經/options 指標都被 VIX 吸收。",
+    "related_experiments": []
+  }
+]

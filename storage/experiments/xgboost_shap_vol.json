@@ -1,0 +1,358 @@
+{
+  "experiment_id": "xgboost_shap_vol_20260322",
+  "model": "XGBoost + SHAP Interpretability",
+  "description": "Tests whether XGBoost can beat GJR-GARCH for SPY 22-day vol prediction. Uses SHAP to identify which features matter most — even if ML doesn't beat GARCH, feature importance ranking is valuable.",
+  "hypothesis": "Non-linear ML cannot significantly beat GARCH for vol prediction (Branco 2024), but SHAP can reveal feature importance structure",
+  "asset": "SPY",
+  "target": "22-day forward realized volatility (annualized)",
+  "train_period": "2006-07-17 to 2021-12-31",
+  "test_period": "2022-01-03 to 2026-02-18",
+  "n_train": 3894,
+  "n_test": 1035,
+  "n_features": 25,
+  "features": [
+    "ret_5d",
+    "ret_10d",
+    "ret_22d",
+    "ret_63d",
+    "rv_5d",
+    "rv_10d",
+    "rv_22d",
+    "rv_63d",
+    "rv_ratio_5_22",
+    "rv_ratio_22_63",
+    "vix",
+    "vix_chg_1d",
+    "vix_chg_5d",
+    "vix_zscore",
+    "vix_vix3m_ratio",
+    "vix_rv22_spread",
+    "rsi_14",
+    "macd_signal",
+    "bb_bandwidth",
+    "day_of_week",
+    "month",
+    "days_to_fomc",
+    "gld_ret_5d",
+    "tlt_ret_5d",
+    "eem_ret_5d"
+  ],
+  "created_at": "2026-03-22",
+  "results": {
+    "linear_regression": {
+      "mse": 0.004620506902484784,
+      "r2": 0.2674194695251272,
+      "qlike": -2.5287008963445388
+    },
+    "xgboost_default": {
+      "mse": 0.005860103360904334,
+      "r2": 0.07088167610782614,
+      "qlike": -2.4566892797313025,
+      "params": {
+        "n_estimators": 500,
+        "max_depth": 6,
+        "learning_rate": 0.1,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8
+      }
+    },
+    "xgboost_tuned": {
+      "mse": 0.0045257368634133086,
+      "r2": 0.28244524201315657,
+      "qlike": -2.574585708824255,
+      "best_params": {
+        "subsample": 0.7,
+        "n_estimators": 200,
+        "min_child_weight": 10,
+        "max_depth": 5,
+        "learning_rate": 0.01,
+        "colsample_bytree": 0.7
+      }
+    },
+    "gjr_garch": {
+      "mse": 0.0054426901731450235,
+      "r2": 0.1370624612401844,
+      "qlike": -2.5987593131840834,
+      "window": 2000,
+      "n_predictions": 1035
+    },
+    "dm_tests": {
+      "xgb_tuned_vs_linear": {
+        "dm_stat": -1.4504680819944458,
+        "p_value": 0.14692803363533002,
+        "interpretation": "negative DM = XGBoost better"
+      },
+      "xgb_tuned_vs_gjr": {
+        "dm_stat": 0.5162212320466218,
+        "p_value": 0.6056999027914745,
+        "interpretation": "positive DM = GJR better"
+      },
+      "linear_vs_gjr": {
+        "dm_stat": 1.4923801530610785,
+        "p_value": 0.13559951497097966,
+        "interpretation": "positive DM = GJR better"
+      }
+    }
+  },
+  "shap_analysis": {
+    "feature_importance_ranking": [
+      {
+        "rank": 1,
+        "feature": "vix",
+        "mean_abs_shap": 0.016167866066098213,
+        "pct_of_total": 29.291418075561523
+      },
+      {
+        "rank": 2,
+        "feature": "ret_63d",
+        "mean_abs_shap": 0.007270801346749067,
+        "pct_of_total": 13.172554969787598
+      },
+      {
+        "rank": 3,
+        "feature": "vix_vix3m_ratio",
+        "mean_abs_shap": 0.0053569176234304905,
+        "pct_of_total": 9.705160140991211
+      },
+      {
+        "rank": 4,
+        "feature": "rv_22d",
+        "mean_abs_shap": 0.004197469912469387,
+        "pct_of_total": 7.604580879211426
+      },
+      {
+        "rank": 5,
+        "feature": "rv_10d",
+        "mean_abs_shap": 0.003461762797087431,
+        "pct_of_total": 6.271696090698242
+      },
+      {
+        "rank": 6,
+        "feature": "rv_63d",
+        "mean_abs_shap": 0.003379379166290164,
+        "pct_of_total": 6.12244176864624
+      },
+      {
+        "rank": 7,
+        "feature": "month",
+        "mean_abs_shap": 0.0030242400243878365,
+        "pct_of_total": 5.479033470153809
+      },
+      {
+        "rank": 8,
+        "feature": "vix_zscore",
+        "mean_abs_shap": 0.00252050650306046,
+        "pct_of_total": 4.5664167404174805
+      },
+      {
+        "rank": 9,
+        "feature": "rv_ratio_22_63",
+        "mean_abs_shap": 0.0021451872307807207,
+        "pct_of_total": 3.886448621749878
+      },
+      {
+        "rank": 10,
+        "feature": "vix_rv22_spread",
+        "mean_abs_shap": 0.0012861398281529546,
+        "pct_of_total": 2.3301072120666504
+      },
+      {
+        "rank": 11,
+        "feature": "macd_signal",
+        "mean_abs_shap": 0.000797219283413142,
+        "pct_of_total": 1.4443268775939941
+      },
+      {
+        "rank": 12,
+        "feature": "ret_22d",
+        "mean_abs_shap": 0.0007842063205316663,
+        "pct_of_total": 1.4207513332366943
+      },
+      {
+        "rank": 13,
+        "feature": "eem_ret_5d",
+        "mean_abs_shap": 0.0007259187987074256,
+        "pct_of_total": 1.3151514530181885
+      },
+      {
+        "rank": 14,
+        "feature": "days_to_fomc",
+        "mean_abs_shap": 0.000716120470315218,
+        "pct_of_total": 1.2973997592926025
+      },
+      {
+        "rank": 15,
+        "feature": "bb_bandwidth",
+        "mean_abs_shap": 0.0006762352422811091,
+        "pct_of_total": 1.2251393795013428
+      },
+      {
+        "rank": 16,
+        "feature": "rv_5d",
+        "mean_abs_shap": 0.0005666441284120083,
+        "pct_of_total": 1.0265926122665405
+      },
+      {
+        "rank": 17,
+        "feature": "tlt_ret_5d",
+        "mean_abs_shap": 0.0005206115893088281,
+        "pct_of_total": 0.9431951642036438
+      },
+      {
+        "rank": 18,
+        "feature": "ret_10d",
+        "mean_abs_shap": 0.0004692458896897733,
+        "pct_of_total": 0.8501355648040771
+      },
+      {
+        "rank": 19,
+        "feature": "ret_5d",
+        "mean_abs_shap": 0.00034122963552363217,
+        "pct_of_total": 0.6182077527046204
+      },
+      {
+        "rank": 20,
+        "feature": "gld_ret_5d",
+        "mean_abs_shap": 0.00027425982989370823,
+        "pct_of_total": 0.4968782067298889
+      },
+      {
+        "rank": 21,
+        "feature": "rsi_14",
+        "mean_abs_shap": 0.0002118703123414889,
+        "pct_of_total": 0.3838467299938202
+      },
+      {
+        "rank": 22,
+        "feature": "vix_chg_5d",
+        "mean_abs_shap": 0.00013530450814869255,
+        "pct_of_total": 0.24513199925422668
+      },
+      {
+        "rank": 23,
+        "feature": "rv_ratio_5_22",
+        "mean_abs_shap": 0.000131271401187405,
+        "pct_of_total": 0.2378251850605011
+      },
+      {
+        "rank": 24,
+        "feature": "vix_chg_1d",
+        "mean_abs_shap": 3.227678462280892e-05,
+        "pct_of_total": 0.0584760457277298
+      },
+      {
+        "rank": 25,
+        "feature": "day_of_week",
+        "mean_abs_shap": 3.912956799467793e-06,
+        "pct_of_total": 0.007089126855134964
+      }
+    ],
+    "feature_group_importance": [
+      {
+        "group": "VIX-based",
+        "total_shap": 0.0254990104585886,
+        "pct": 46.196712493896484
+      },
+      {
+        "group": "Realized Vol",
+        "total_shap": 0.013881715014576912,
+        "pct": 25.149587631225586
+      },
+      {
+        "group": "Returns",
+        "total_shap": 0.008865484036505222,
+        "pct": 16.061649322509766
+      },
+      {
+        "group": "Technical",
+        "total_shap": 0.0016853248234838247,
+        "pct": 3.0533130168914795
+      },
+      {
+        "group": "Calendar",
+        "total_shap": 0.0037442734465003014,
+        "pct": 6.783522605895996
+      },
+      {
+        "group": "Cross-Asset",
+        "total_shap": 0.001520790159702301,
+        "pct": 2.7552247047424316
+      }
+    ],
+    "top5_dependence": {
+      "vix": {
+        "correlation_with_shap": 0.9409368440849469,
+        "feature_mean": 19.200647380847286,
+        "feature_std": 5.562723211240801,
+        "shap_mean": 0.0007962675881572068,
+        "shap_std": 0.021508608013391495,
+        "interpretation": "Higher vix → higher predicted vol"
+      },
+      "ret_63d": {
+        "correlation_with_shap": -0.5800372559424873,
+        "feature_mean": 0.030591388606936016,
+        "feature_std": 0.07026051334601588,
+        "shap_mean": 0.0014389019925147295,
+        "shap_std": 0.010605706833302975,
+        "interpretation": "Higher ret_63d → lower predicted vol"
+      },
+      "vix_vix3m_ratio": {
+        "correlation_with_shap": 0.5742312430624548,
+        "feature_mean": 0.9004662160230869,
+        "feature_std": 0.062002545103996415,
+        "shap_mean": -0.003078275127336383,
+        "shap_std": 0.008537594228982925,
+        "interpretation": "Higher vix_vix3m_ratio → higher predicted vol"
+      },
+      "rv_22d": {
+        "correlation_with_shap": 0.8220913106611871,
+        "feature_mean": 0.16116765971563554,
+        "feature_std": 0.07926554358568595,
+        "shap_mean": -0.0011176852276548743,
+        "shap_std": 0.00727178854867816,
+        "interpretation": "Higher rv_22d → higher predicted vol"
+      },
+      "rv_10d": {
+        "correlation_with_shap": 0.8341284850774296,
+        "feature_mean": 0.1571131470499429,
+        "feature_std": 0.08840030371467456,
+        "shap_mean": -0.0011632705572992563,
+        "shap_std": 0.006757493130862713,
+        "interpretation": "Higher rv_10d → higher predicted vol"
+      }
+    },
+    "redundant_pairs": []
+  },
+  "dm_tests": {
+    "xgb_tuned_vs_linear": {
+      "dm_stat": -1.4504680819944458,
+      "p_value": 0.14692803363533002,
+      "interpretation": "negative DM = XGBoost better"
+    },
+    "xgb_tuned_vs_gjr": {
+      "dm_stat": 0.5162212320466218,
+      "p_value": 0.6056999027914745,
+      "interpretation": "positive DM = GJR better"
+    },
+    "linear_vs_gjr": {
+      "dm_stat": 1.4923801530610785,
+      "p_value": 0.13559951497097966,
+      "interpretation": "positive DM = GJR better"
+    }
+  },
+  "conclusions": {
+    "best_model_by_qlike": "gjr_garch",
+    "xgb_vs_gjr_verdict": "NO significant difference between XGBoost and GJR-GARCH",
+    "vix_sufficiency_verdict": "CONFIRMED: Volatility information (VIX + RV) dominates predictions",
+    "vix_group_pct": 46.196712493896484,
+    "vol_info_total_pct": 71.34630012512207,
+    "key_findings": [
+      "Best model by QLIKE: gjr_garch",
+      "XGBoost vs GJR: NO significant difference between XGBoost and GJR-GARCH (DM=0.516, p=0.6057)",
+      "VIX + RV features account for 71.3% of prediction importance",
+      "Top feature: vix (29.3%)",
+      "0 redundant feature pairs found (|SHAP corr| > 0.7)",
+      "Non-vol features (technical+calendar+cross-asset) contribute 12.6% — marginal"
+    ]
+  }
+}
