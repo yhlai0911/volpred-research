@@ -75,3 +75,7 @@ data/intraday/*.csv
 # Temp files
 /tmp/
 *.tmp
+
+# Keep data/vixtwn (small) but ignore large 5-min CSVs
+!data/
+!data/vixtwn/
