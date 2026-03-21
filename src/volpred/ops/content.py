@@ -85,14 +85,38 @@ def _normalize_release_settings(row: dict | None = None) -> dict:
     }
 
 
+def _local_release_settings_path() -> Path:
+    return project_path("storage", ".release_settings.json")
+
+
 def get_content_release_settings() -> dict:
-    rows = _select_rows("content_release_settings", id="default")
-    return _normalize_release_settings(rows[0] if rows else None)
+    """Read release settings from local JSON (no Supabase hit)."""
+    local = _local_release_settings_path()
+    data = load_json(local, None)
+    if data is not None:
+        return _normalize_release_settings(data)
+    # First run or missing file: try Supabase once, then cache locally
+    try:
+        rows = _select_rows("content_release_settings", id="default")
+        row = rows[0] if rows else None
+    except Exception:
+        row = None
+    settings = _normalize_release_settings(row)
+    dump_json(local, settings)
+    return settings
 
 
 def _update_content_release_settings(fields: dict) -> bool:
-    payload = {**fields, "updated_at": datetime.now(timezone.utc).isoformat()}
-    return _patch_where("content_release_settings", {"id": "default"}, payload)
+    """Update release settings in local JSON and optionally sync to Supabase."""
+    local = _local_release_settings_path()
+    current = load_json(local, {**DEFAULT_RELEASE_SETTINGS})
+    payload = {**current, **fields, "updated_at": datetime.now(timezone.utc).isoformat()}
+    dump_json(local, payload)
+    # Best-effort Supabase sync (don't fail if DB is down)
+    try:
+        return _patch_where("content_release_settings", {"id": "default"}, payload)
+    except Exception:
+        return False
 
 
 def _parse_datetime(value: str | None) -> datetime | None:

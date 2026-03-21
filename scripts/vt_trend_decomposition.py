@@ -689,7 +689,7 @@ def main():
     # ─────────────────────────────────────────
     # Save results
     # ─────────────────────────────────────────
-    output_path = Path("/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/vt_trend_decomposition.json")
+    output_path = Path("/Users/yhlai0911/Desktop/volpred-research/storage/experiments/vt_trend_decomposition.json")
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with open(output_path, "w", encoding="utf-8") as f:

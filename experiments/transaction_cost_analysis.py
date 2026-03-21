@@ -345,11 +345,11 @@ print(f"  Breakeven: {breakeven_bps:.1f} bps（遠超實際成本）")
 # ==================================================================
 print("\n\n[Recording to MemorySystem and Publisher...]")
 
-sys.path.insert(0, "/Users/yhlai0911/Dropbox/自我研究波動預測模型/src")
+sys.path.insert(0, "/Users/yhlai0911/Desktop/volpred-research/src")
 from volpred.memory.system import MemorySystem
 from volpred.publisher.publisher import Publisher
 
-storage_dir = "/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage"
+storage_dir = "/Users/yhlai0911/Desktop/volpred-research/storage"
 mem = MemorySystem(storage_dir=storage_dir)
 pub = Publisher(storage_dir=storage_dir)
 
@@ -395,7 +395,7 @@ for cost_bps in COST_LEVELS_BPS:
         "total_growth": round(r["total_growth"], 2),
     }
 
-out_path = "/Users/yhlai0911/Dropbox/自我研究波動預測模型/experiments/transaction_cost_results.json"
+out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/transaction_cost_results.json"
 with open(out_path, "w") as f:
     json.dump(output, f, indent=2)
 print(f"  Results saved to {out_path}")

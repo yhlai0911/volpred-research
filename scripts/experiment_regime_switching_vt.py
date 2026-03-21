@@ -10,7 +10,7 @@ so regime-switching should be a null result. But worth testing explicitly.
 Literature: Hamilton (1989) regime-switching, Ang & Bekaert (2002).
 """
 import sys
-sys.path.insert(0, '/Users/yhlai0911/Dropbox/自我研究波動預測模型')
+sys.path.insert(0, '/Users/yhlai0911/Desktop/volpred-research')
 
 import json
 import warnings
@@ -682,7 +682,7 @@ output = {
     ],
 }
 
-output_path = "/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/regime_switching_vt.json"
+output_path = "/Users/yhlai0911/Desktop/volpred-research/storage/experiments/regime_switching_vt.json"
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(output, f, ensure_ascii=False, indent=2, default=str)
 

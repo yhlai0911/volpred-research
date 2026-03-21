@@ -371,7 +371,7 @@ for name, pred in approaches:
     m = mae(y_oos, pred)
     output["results"][name] = {"R2": round(float(r2), 6), "MAE": round(float(m), 6)}
 
-with open("/Users/yhlai0911/Dropbox/自我研究波動預測模型/experiments/vix_term_structure_results_v2.json", "w") as f:
+with open("/Users/yhlai0911/Desktop/volpred-research/experiments/vix_term_structure_results_v2.json", "w") as f:
     json.dump(output, f, indent=2)
 
 print("Results saved to experiments/vix_term_structure_results_v2.json")

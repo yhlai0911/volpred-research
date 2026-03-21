@@ -54,7 +54,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
    - 每日發文摘要
    - 若未配置 SMTP，會先寫入 `storage/notifications/`，不算真正寄出
 4. Feed 發文用 `feed-publisher` skill；若涉及文章池、排程、節奏釋出、下架、釋出規則、管理通知，轉交 `admin-ops`
-5. 改前端代碼時：`mcp__zeabur__upload-codebase` 部署 `frontend-v2/`（待 frontend-v2-fix 穩定後切換）
+5. 改前端代碼時：Zeabur CLI 部署 `frontend-v2-fix/`（見下方 Zeabur CLI 指令）
 6. 新增策略用 `add_strategy.py`（只寫 DB，不需部署）
 7. 測試貼文清理優先走 `uv run volpred ops cleanup-post <pub_id>`，不要手改 feed/DB
 
@@ -165,6 +165,20 @@ uv run volpred ops jobs --status queued              # 查看待處理任務
 uv run volpred ops job-show <job_id>                 # 查看任務詳情及日誌
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務
 uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
+
+# Zeabur CLI（部署 + 域名管理）
+# Project ID: 69b5b264800a475a1f82b073
+# Environment ID: 69b5b2646853f6f4f5f6a16d
+# Services: volpred-web (69b5b279e0a0c18cef9d780d), volpred-v2 (69b8ed895a53b5901a3c8d25), volpred-v3 (69be521a1066986b9a1692be)
+npx zeabur@latest auth status                    # 確認登入狀態
+npx zeabur@latest service list --project-id 69b5b264800a475a1f82b073 --json  # 列出服務
+npx zeabur@latest domain list --id <service_id> -i=false --json              # 列出域名
+npx zeabur@latest domain create --id <service_id> --domain <subdomain> --env-id 69b5b2646853f6f4f5f6a16d -g -y -i=false  # 綁定 *.zeabur.app 域名（-g 時只寫子域名如 'volpred'，不要寫完整 'volpred.zeabur.app'）
+npx zeabur@latest domain delete --id <domain_id> -i=false -y                 # 刪除域名
+npx zeabur@latest service redeploy --id <service_id> -i=false -y             # 重新部署
+# 部署前端代碼到 volpred-v3:
+cd frontend-v2-fix && npx zeabur@latest deploy --project-id 69b5b264800a475a1f82b073 --service-id 69be521a1066986b9a1692be --json
+# 注意：所有 CLI 命令加 -i=false 避免互動式 prompt
 
 # 發佈
 uv run python scripts/record_and_publish.py --title "標題" --thinking "推理" --knowledge "知識" --phase "Phase_X"
@@ -296,6 +310,17 @@ Codex 和 Gemini 可以：
 - 幫忙設計實驗
 - 生成論文段落草稿
 - 延伸研究到新資產/新市場
+
+### 研究主題來源（必須多元，不能只靠 Claude 自選）
+研究主題的來源應該包括：
+1. **Codex/Gemini 建議**：每 5-10 個實驗主動問一次「接下來該研究什麼方向？」，將建議寫入 research_program.md
+2. **用戶指定**：用戶提出的方向優先執行
+3. **會員問題**：每 6 小時 cron 自動評估會員提問
+4. **文獻搜索**：WebSearch arXiv/SSRN 發現的前沿方向
+5. **Claude 自選**：基於 research_program.md 的待探索方向
+6. **跨 AI 交叉驗證**：一個 AI 提出假說 → 另一個 AI 設計實驗 → Claude 執行
+
+**標準流程**：每開始新一輪實驗前，先問 Codex 或 Gemini「給我 3-5 個研究方向」→ 從中選擇 → 標注 `[提出: Codex/Gemini]` → 執行
 
 ## 硬體資源
 

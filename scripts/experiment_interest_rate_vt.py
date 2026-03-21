@@ -553,7 +553,7 @@ if corr_tbill is not None:
 output["conclusions_zh"] = conclusions
 
 # Save
-output_path = Path("/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/interest_rate_vt.json")
+output_path = Path("/Users/yhlai0911/Desktop/volpred-research/storage/experiments/interest_rate_vt.json")
 output_path.parent.mkdir(parents=True, exist_ok=True)
 with open(output_path, "w", encoding="utf-8") as f:
     json.dump(output, f, ensure_ascii=False, indent=2, default=str)

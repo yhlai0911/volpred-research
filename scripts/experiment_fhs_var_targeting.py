@@ -26,7 +26,7 @@ import pandas as pd
 
 warnings.filterwarnings("ignore")
 
-PROJECT_ROOT = Path("/Users/yhlai0911/Dropbox/自我研究波動預測模型")
+PROJECT_ROOT = Path("/Users/yhlai0911/Desktop/volpred-research")
 sys.path.insert(0, str(PROJECT_ROOT))
 
 from arch import arch_model

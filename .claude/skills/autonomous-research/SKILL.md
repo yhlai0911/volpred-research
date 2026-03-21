@@ -196,6 +196,24 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 
 ## Key Rules
 
+0. **數據誠實：不造假，不把模擬當實證** — 這是最高優先規則，違反即研究無效。
+   - **每個實驗開頭必須有 Data & Methodology 區塊**，包含：
+     - **數據來源**：明確寫出來源（yfinance, FRED, Supabase, 自建模擬, etc.）
+     - **數據期間**：起訖日期 + 觀測數量
+     - **代理變數（proxy）**：如果用 proxy 代替理想變數，必須說明 (a) 理想變數是什麼 (b) 為什麼用這個 proxy (c) proxy 的已知偏誤
+     - **方法論類型**：明確區分——
+       - `empirical`：用真實觀測數據直接分析
+       - `theoretical/simulation`：用模型或公式生成結果（即使輸入是真實數據，但如果結論依賴假設參數如 λ=2.25，就是 theoretical）
+       - `descriptive`：描述數據特徵，不做因果推論
+     - **結論強度**：theoretical finding ≠ empirical discovery。不能用模擬結果說「發現了 X」，只能說「在 Y 假設下，模型預測 X」
+   - **禁止行為**：
+     - 用市場價格套行為經濟學公式，然後宣稱「發現投資人行為偏誤」（沒有投資人數據就不能下投資人行為的結論）
+     - 用 proxy 變數得到顯著結果，然後標題寫成好像直接測量了真實變數
+     - 省略數據來源讓讀者以為是原始數據
+   - **正確做法**：
+     - 「基於 SPY 日頻 return (yfinance, 2007-2024) 的理論模擬顯示，在 Prospect Theory 框架 (λ=2.25) 下，VT 策略的主觀效用低於 B&H」✓
+     - ~~「發現投資人因為 regret aversion 不採用 VT」~~ ✗（沒有投資人數據）
+
 1. **`m.think()` 只寫研究決策邏輯** — 必須包含：(a) 決策前思考「為什麼做這個？預期？」(b) 思路推理「A→X→Y→測 Z」(c) 反思「結果跟預期不同因為...」(d) 自我質疑「可靠嗎？有前瞻偏誤？」(e) 未來方向「基於此發現應探索...」。**禁止寫入**：結果摘要、文章內容、投資建議。發佈事件記 `m.add_log_entry()`
 2. **Every experiment compared to previous best** + record why better/worse
 3. **Milestones published in 繁體中文 to Web platform**

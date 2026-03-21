@@ -798,7 +798,7 @@ results = {
 }
 
 # Save
-output_path = "/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/spy_gld_correlation.json"
+output_path = "/Users/yhlai0911/Desktop/volpred-research/storage/experiments/spy_gld_correlation.json"
 with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(results, f, indent=2, ensure_ascii=False)
 

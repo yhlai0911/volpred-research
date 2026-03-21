@@ -485,7 +485,7 @@ for line in conclusion_lines:
     print(f"  {line}")
 
 # Save
-outpath = '/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/gld_contrarian_vt.json'
+outpath = '/Users/yhlai0911/Desktop/volpred-research/storage/experiments/gld_contrarian_vt.json'
 with open(outpath, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=2, ensure_ascii=False, default=str)
 print(f"\nSaved to {outpath}")

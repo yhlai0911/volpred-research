@@ -37,8 +37,8 @@ START_DATE = '2007-01-01'
 END_DATE = '2026-03-20'
 VIX_THRESHOLD = 12.0
 TSMOM_LOOKBACK = 252
-K53_PATH = '/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/vt_tsmom_expanded.json'
-OUTPUT_PATH = '/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/vt_tsmom_final_n22.json'
+K53_PATH = '/Users/yhlai0911/Desktop/volpred-research/storage/experiments/vt_tsmom_expanded.json'
+OUTPUT_PATH = '/Users/yhlai0911/Desktop/volpred-research/storage/experiments/vt_tsmom_final_n22.json'
 
 
 def download_data():

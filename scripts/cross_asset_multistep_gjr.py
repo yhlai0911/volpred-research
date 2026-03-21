@@ -450,7 +450,7 @@ def main():
     print(f"  Not found in: {non_amplifying if non_amplifying else 'none'}")
 
     # Save results
-    df.to_csv("/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/results/cross_asset_multistep_gjr.csv",
+    df.to_csv("/Users/yhlai0911/Desktop/volpred-research/storage/results/cross_asset_multistep_gjr.csv",
               index=False)
     print(f"\nResults saved to storage/results/cross_asset_multistep_gjr.csv")
 

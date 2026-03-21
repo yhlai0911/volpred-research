@@ -8986,5 +8986,216 @@
       "面向G",
       "非vol研究"
     ]
+  },
+  {
+    "id": "K932",
+    "title": "K109: Hawkes Process vol jump clustering — GARCH dominates",
+    "content": "[提出: Claude 面向G, 執行: Claude] K109: ★ Hawkes Process for vol jump clustering。自建 MLE (μ=0.0191, α=0.0699, β=0.0964)。半衰期 7.2d，branching ratio 0.725（強 self-excitation）。CoV=2.33 確認跳躍聚集是真實的。但 OOS AUC: GARCH 0.813 > Hawkes 0.717，最佳組合 Hawkes 權重=0%。Hawkes VT overlay MDD -8.1%（vs 12/VIX -11.6%）但 Sharpe 代價 -0.118。結論：GARCH 連續方差追蹤嚴格支配 Hawkes 離散跳躍建模。QLIKE ceiling 第 16 次確認。新模型類別（point process）也無法打破。",
+    "category": "experiment",
+    "tags": [
+      "hawkes",
+      "point-process",
+      "vol-jump",
+      "QLIKE-ceiling",
+      "SPY"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T00:46:44.838743"
+  },
+  {
+    "id": "K933",
+    "title": "K111: Wavelet vol decomposition — GARCH dominates all frequency bands",
+    "content": "[提出: Claude 面向G, 執行: Claude] K111: Wavelet Decomposition for Multi-Scale Vol Prediction。DWT 分解 r² 為 5 個頻率成分（D1-D4 + A4）。最可預測成分: A4 >32d (R²=0.28, AC=0.996)。但 GARCH beta 已隱含捕捉。高頻 D1+D2 佔 54% 方差但 noisy (D1 AC=-0.65)。OOS QLIKE: GJR 贏 Wavelet-AR 0.8-3.1% (DM p<0.001 for SPY/GLD, p=0.008 for TLT)。Wavelet-GARCH 更差 1.6-3.4%。M-Z R²: GJR 0.04 vs Wavelet ~0。結論: 分離頻率喪失 leverage effect + adaptive weighting。QLIKE ceiling 第 17 次確認。",
+    "category": "experiment",
+    "tags": [
+      "wavelet",
+      "DWT",
+      "multi-scale",
+      "QLIKE-ceiling",
+      "SPY",
+      "GLD",
+      "TLT"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T00:47:09.651270"
+  },
+  {
+    "id": "K934",
+    "title": "K113: Order flow microstructure vol proxy — definitive null (0/12)",
+    "content": "[提出: Claude 面向G, 執行: Claude] K113: Order Flow Imbalance → Vol Prediction。4 個日頻微結構 proxy（Volume Ratio, Amihud, Volume Asymmetry, Price Impact）× 3 資產（SPY/QQQ/EEM）= 12 cells 全部 null。GARCH-X 加入任何指標都惡化 QLIKE（-0.17% ~ -4.29%，DM p>0.48）。In-sample 相關性存在（r=0.05-0.30）但 OOS 不 translate。COVID 期間同樣 null。日頻 volume 太粗糙，真正 OFI 需要 tick data（Cont et al. 2014）。VIX sufficient statistic 再次確認。",
+    "category": "experiment",
+    "tags": [
+      "order-flow",
+      "microstructure",
+      "volume",
+      "Amihud",
+      "QLIKE-ceiling",
+      "SPY",
+      "QQQ",
+      "EEM"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T00:55:03.448303"
+  },
+  {
+    "id": "K935",
+    "title": "K114: Information entropy vol regime — null (VIX 7-10x stronger)",
+    "content": "[提出: Claude 面向G, 執行: Claude] K114: Information Entropy (SampEn/PE/ApEn) for Vol Regime Detection。跨學科方向（資訊理論）。Raw corr with fwd RV: |r|~0.09（全顯著），但 VIX r=0.70 是 7-10x 更強。Partial r controlling VIX: SampEn 0.001 (NS), PE 0.070 (sig but tiny), ApEn 0.017 (NS)。所有 entropy VT 策略 OOS 都不如 12/VIX（best: SampEn regime 0.98 vs 12/VIX 0.99）。跨資產: GLD PE inverse (-0.111), BTC tiny (+0.060)。結論: entropy 測量的市場複雜度已被 VIX 編碼。VIX sufficient statistic 再次確認。",
+    "category": "experiment",
+    "tags": [
+      "entropy",
+      "SampEn",
+      "permutation-entropy",
+      "information-theory",
+      "VIX-sufficient",
+      "SPY",
+      "GLD",
+      "BTC"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T00:55:37.038923"
+  },
+  {
+    "id": "K936",
+    "title": "K112: EMD-GARCH — null, QLIKE ceiling 18th (decomposition fundamental failure)",
+    "content": "[提出: Claude 面向G, 執行: Claude] K112: EMD-GARCH (Empirical Mode Decomposition + GARCH)。6-7 個 IMFs，IMF1 佔 51.6% 方差但 AC=-0.30（noise）。EMD-AR/EMD-GARCH/EMD-Hybrid 全部 worse than GJR (0/9 顯著)。QLIKE 差距 +0.45%~+3.47%。關鍵診斷: IMF 上的 GARCH persistence=1.000（IGARCH boundary）——分解破壞了 GARCH 有效運作的方差結構。★ 科學結論: K111 Wavelet（固定基底）+ K112 EMD（自適應基底）都失敗 → QLIKE ceiling 是 r² 序列的基本屬性，非 basis 選擇問題。GARCH 遞歸結構隱含最優處理跨尺度交互作用。QLIKE ceiling 第 18 次確認。",
+    "category": "experiment",
+    "tags": [
+      "EMD",
+      "decomposition",
+      "multi-scale",
+      "QLIKE-ceiling",
+      "SPY",
+      "GLD",
+      "TLT"
+    ],
+    "confidence": 0.95,
+    "timestamp": "2026-03-22T00:57:23.519559"
+  },
+  {
+    "id": "K937",
+    "title": "K110: ★★ VT Crowding Simulation — not systemic risk, tipping at 40%",
+    "content": "[提出: Claude 面向G, 執行: Claude] K110: ★★ Agent-Based Simulation of VT Crowding。1000 simulations per adoption rate。關鍵發現: (1) 目前 adoption ~5% (300-500B/50T)，Sharpe 衰退僅 2.3% (2) Tipping point ~40%: VT Sharpe < B&H Sharpe (3) VT 是市場穩定力量: contrarian flow → dampening (autocorrelation -0.10→-0.19) (4) 衰退線性: 每 1% adoption 損失 0.50% Sharpe，無突然崩壞 (5) 極端情境 (50%/k=0.5): Sharpe 0.052, vol +24.8% (6) Kurtosis 隨 adoption 下降（尾部風險減少）。結論: VT 在可預見的零售 adoption 水平（<20%）下安全，不構成系統性風險。與 Basak & Pavlova (2013) 一致。",
+    "category": "experiment",
+    "tags": [
+      "agent-based",
+      "crowding",
+      "systemic-risk",
+      "VT",
+      "simulation",
+      "market-stability"
+    ],
+    "confidence": 0.85,
+    "timestamp": "2026-03-22T00:58:56.328010"
+  },
+  {
+    "id": "K938",
+    "title": "K115: Pairs trading GARCH-enhanced — double null (0/7 cointegrated)",
+    "content": "[提出: Claude 面向C, 執行: Claude] K115: GARCH-Enhanced Pairs Trading。7 ETF pairs 全部 FAIL cointegration test (p>0.19)。所有策略 OOS Sharpe 負值 (-0.19~-1.65)。GARCH dynamic threshold 平均改善 -0.046 Sharpe (p=0.81 NS)。結論: 2010-2024 ETF pairs cointegration 已崩壞（市場效率提升）。GARCH 在解決錯誤的問題——binding constraint 是找到 cointegrated 資產，不是優化門檻。",
+    "category": "experiment",
+    "tags": [
+      "pairs-trading",
+      "cointegration",
+      "GARCH-application",
+      "null"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T01:11:00.324007"
+  },
+  {
+    "id": "K939",
+    "title": "K116: Tail Risk Parity (CVaR) — null, 50/50 unbeatable 9th time",
+    "content": "[提出: Claude 面向C, 執行: Claude] K116: Tail Risk Parity Portfolio (GARCH-Skewed-t CVaR)。2 資產: Static 50/50 Sharpe 0.623 > CVaR TRP 0.604 > Var RP 0.603。MDD 改善 1.5% 但 NS (bootstrap p>0.72)。COVID 期間 RP 省 7% 但全樣本不顯著。3 資產加 TLT 嚴格更差（2022 利率）。CVaR/VaR/Variance RP 幾乎相同（weights corr~0.99）。結論: 50/50 SPY/GLD 第 9 次確認不可動搖 (K2/K16/K19/K24/K54/K63/K64/K89/K116)。",
+    "category": "experiment",
+    "tags": [
+      "tail-risk-parity",
+      "CVaR",
+      "portfolio",
+      "50-50-unbeatable",
+      "SPY",
+      "GLD"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T01:11:00.324016"
+  },
+  {
+    "id": "K940",
+    "title": "K117: Climate event vol impact — mixed/mostly null (VIX absorbs)",
+    "content": "[提出: Claude 面向G, 執行: Claude] K117: Climate/Weather Event Vol Impact。市場 proxy 識別 4 類事件（Insurance/Energy/Agriculture/Combined）。30/32 tests 顯著（BH-corrected）但 VIX-controlled analysis 揭露: 低 VIX regime 所有事件 NS (p=0.55-0.90)。事件 proxy 本質上是 noisy VIX regime filter。有趣發現: Insurance Disaster 頻率趨勢 +1.01/yr (p=0.017)，但 COVID 污染嚴重（73/93 events in 2020-24）。結論: VIX remains sufficient statistic，氣候 proxy 無增量。",
+    "category": "experiment",
+    "tags": [
+      "climate",
+      "weather",
+      "insurance",
+      "energy",
+      "agriculture",
+      "VIX-sufficient"
+    ],
+    "confidence": 0.85,
+    "timestamp": "2026-03-22T01:11:00.324017"
+  },
+  {
+    "id": "K941",
+    "title": "K118: ★★★ Behavioral VT adoption barriers — regret aversion dominant",
+    "content": "[提出: Claude 面向G, 執行: Claude] K118: ★★★ Behavioral Finance — Why Investors Don't Use VT。(1) Regret aversion 最強: VT 在 67% 月份落後 B&H, 最長連續累積落後 159 個月(~13年)。(2) Mental accounting: 4%/yr 保險費主觀放大 2.26x (loss aversion λ=2.25)。(3) Prospect theory 反直覺: 日/月/季評估 VT PTU > B&H (損失更小)，但年度以上 B&H 勝出 (複利拖累)。(4) Disposition effect: 62% VT 下跌賣出後反彈 → 強烈後悔。(5) VT 結構等同天災保險 → 同樣的低採購率機制 (Kunreuther 1996)。結論: VT 是行為上注定被拒絕的完美保險。建議: (a) 減少評估頻率 (b) 框架為風險預算不是 alpha 策略 (c) 自動化避免決策疲勞。",
+    "category": "experiment",
+    "tags": [
+      "behavioral-finance",
+      "prospect-theory",
+      "regret-aversion",
+      "VT-adoption",
+      "mental-accounting",
+      "insurance"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T01:49:03.666705"
+  },
+  {
+    "id": "K942",
+    "title": "K120: Dynamic lead-lag network — null (effective N=2% of raw N)",
+    "content": "[提出: Claude 面向G, 執行: Claude] K120: Dynamic Lead-Lag Network for Vol Prediction。數據: yfinance 6 資產 (SPY/QQQ/GLD/TLT/EEM/BTC) 2015-2024 日頻。方法: Rolling 252d Granger causality, 30 directed pairs × 702 windows。描述性發現: GLD 最常是 vol leader (33%, 非 SPY)，hub 每年重組。OOS partial r (controlling VIX): density -0.172, SPY centrality -0.232，看似顯著。但 4 項 robustness 全失敗: (1) Sign consistency 3正3負 (2) Rolling partial_r 劇烈震盪 (3) ★ Effective N=15 (raw 709 的 2%, fwd RV autocorr=0.96) → adjusted p=0.43 NS (4) Network VT Sharpe +0.048 p=0.52。★★ 方法論教訓: overlapping forward RV 嚴重膨脹顯著性，必須用 effective N 調整。VIX sufficient statistic 再次確認。",
+    "category": "experiment",
+    "tags": [
+      "network",
+      "lead-lag",
+      "Granger",
+      "effective-N",
+      "VIX-sufficient",
+      "methodology"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T01:52:41.165168"
+  },
+  {
+    "id": "K943",
+    "title": "K124: ★★ GJR vs EWMA crisis deep dive — GJR wins 6/6, gamma premium 1.23%",
+    "content": "[提出: Claude 面向D, 執行: Claude] K124: GJR vs EWMA(0.97) Crisis Response Deep Dive。數據: yfinance SPY 2007-2024 日頻 (empirical)。6 場危機分析: GJR wins MDD 6/6。COVID 最大差異: GJR -10.8% vs EWMA -15.3% (gamma premium 4.51%)。機制: GJR gamma 項放大負衝擊反應 4-11x vs EWMA fixed lambda。反應速度: GJR 2-9 天 vs EWMA 4-52 天。Recovery: COVID GJR 53d vs EWMA 259d (5x faster)。突然衝擊 (GFC/COVID) gamma premium 最大, 慢熊 (Rate Hike) 差異最小 (0.05%)。Full-period Sharpe 幾乎相同 (0.122 vs 0.125)。結論: GJR 是免費的危機保險（不犧牲 Sharpe），可直接寫入論文 Section 5。",
+    "category": "experiment",
+    "tags": [
+      "GJR",
+      "EWMA",
+      "crisis",
+      "gamma-premium",
+      "COVID",
+      "paper-ready"
+    ],
+    "confidence": 0.92,
+    "timestamp": "2026-03-22T02:21:50.593743"
+  },
+  {
+    "id": "K944",
+    "title": "K125: ★ Retail VT implementation — cost negligible, MDD halved, 5min/month",
+    "content": "[提出: Claude 面向C, 執行: Claude] K125: Retail Investor VT Implementation Guide。數據: yfinance SPY+GLD+SHY 2015-2024 (empirical)。$100K 10yr: VT $179K (6.0%/yr, MDD -14.1%) vs SPY $285K (11.1%, MDD -34.1%) vs 60/40 $171K (5.5%, MDD -28.5%)。成本: 10yr 總 TX $487 (0.49%)，ETF 費 $305/yr。COVID 實戰: 自動降到 21% equity (VIX=57), 全年 +8.8%。操作: 每月 5 分鐘查 VIX。vs Robo-advisor 省 $3,484 顧問費。結論: 成本可忽略, 核心價值是 MDD 保護不是報酬增強。",
+    "category": "experiment",
+    "tags": [
+      "retail",
+      "implementation",
+      "cost-analysis",
+      "SPY",
+      "GLD",
+      "SHY"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T02:21:50.593756"
   }
 ]

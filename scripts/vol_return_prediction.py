@@ -670,7 +670,7 @@ experiment = {
 }
 
 # Save
-out_path = Path("/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/vol_return_prediction.json")
+out_path = Path("/Users/yhlai0911/Desktop/volpred-research/storage/experiments/vol_return_prediction.json")
 out_path.parent.mkdir(parents=True, exist_ok=True)
 with open(out_path, "w", encoding="utf-8") as f:
     json.dump(experiment, f, indent=2, ensure_ascii=False, default=str)
@@ -811,10 +811,10 @@ article_content += """
 
 # Publish as draft
 import sys
-sys.path.insert(0, "/Users/yhlai0911/Dropbox/自我研究波動預測模型/src")
+sys.path.insert(0, "/Users/yhlai0911/Desktop/volpred-research/src")
 from volpred.publisher.publisher import Publisher
 
-pub = Publisher(storage_dir="/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage")
+pub = Publisher(storage_dir="/Users/yhlai0911/Desktop/volpred-research/storage")
 pub_id = pub.publish_milestone(
     title="波動率 → 報酬預測：VIX 能預測未來報酬嗎？",
     description=article_content,

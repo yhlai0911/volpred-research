@@ -607,7 +607,7 @@ if "OOS (2023-2026)" in all_results:
     # VIX sufficient statistic confirmed if nothing adds value
     output["conclusion"]["vix_sufficient_statistic_confirmed"] = not (vvix_better or skew_better or ts_better)
 
-out_path = Path("/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/vvix_skew_analysis.json")
+out_path = Path("/Users/yhlai0911/Desktop/volpred-research/storage/experiments/vvix_skew_analysis.json")
 out_path.parent.mkdir(parents=True, exist_ok=True)
 with open(out_path, "w", encoding="utf-8") as f:
     json.dump(output, f, ensure_ascii=False, indent=2, default=str)

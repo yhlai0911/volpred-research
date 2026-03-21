@@ -325,11 +325,11 @@ for r in all_results:
 # ==================================================================
 print("\n[5/5] Recording to MemorySystem and Publisher...")
 
-sys.path.insert(0, "/Users/yhlai0911/Dropbox/自我研究波動預測模型/src")
+sys.path.insert(0, "/Users/yhlai0911/Desktop/volpred-research/src")
 from volpred.memory.system import MemorySystem
 from volpred.publisher.publisher import Publisher
 
-storage_dir = "/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage"
+storage_dir = "/Users/yhlai0911/Desktop/volpred-research/storage"
 mem = MemorySystem(storage_dir=storage_dir)
 pub = Publisher(storage_dir=storage_dir)
 
@@ -375,7 +375,7 @@ for r in all_results:
     }
     output["periods"].append(period_data)
 
-out_path = "/Users/yhlai0911/Dropbox/自我研究波動預測模型/experiments/vix_zone_cross_period_results.json"
+out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/vix_zone_cross_period_results.json"
 with open(out_path, "w") as f:
     json.dump(output, f, indent=2, default=str)
 print(f"  Results JSON saved to {out_path}")

@@ -29,7 +29,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[0].parent / "src"))
 
 # Try to find the actual project root
 for candidate in [
-    Path("/Users/yhlai0911/Dropbox/自我研究波動預測模型"),
+    Path("/Users/yhlai0911/Desktop/volpred-research"),
     Path(__file__).resolve().parents[0],
 ]:
     if (candidate / "src" / "volpred").exists():

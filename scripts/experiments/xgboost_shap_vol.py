@@ -618,7 +618,7 @@ findings.append(f"Non-vol features (technical+calendar+cross-asset) contribute {
 
 output["conclusions"]["key_findings"] = findings
 
-out_path = Path("/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/xgboost_shap_vol.json")
+out_path = Path("/Users/yhlai0911/Desktop/volpred-research/storage/experiments/xgboost_shap_vol.json")
 out_path.parent.mkdir(parents=True, exist_ok=True)
 with open(out_path, "w") as f:
     json.dump(output, f, indent=2, ensure_ascii=False)

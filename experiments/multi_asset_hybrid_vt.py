@@ -501,7 +501,7 @@ for name in strategies_order:
         "trades_per_year": round(r.get("trades_per_year", 0), 0),
     }
 
-out_path = "/Users/yhlai0911/Dropbox/自我研究波動預測模型/experiments/multi_asset_hybrid_vt_results.json"
+out_path = "/Users/yhlai0911/Desktop/volpred-research/experiments/multi_asset_hybrid_vt_results.json"
 with open(out_path, "w") as f:
     json.dump(output, f, indent=2)
 print(f"\nResults saved to {out_path}")
@@ -511,11 +511,11 @@ print(f"\nResults saved to {out_path}")
 # ==================================================================
 print("\n[6/6] Recording to MemorySystem and Publisher...")
 
-sys.path.insert(0, "/Users/yhlai0911/Dropbox/自我研究波動預測模型/src")
+sys.path.insert(0, "/Users/yhlai0911/Desktop/volpred-research/src")
 from volpred.memory.system import MemorySystem
 from volpred.publisher.publisher import Publisher
 
-storage_dir = "/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage"
+storage_dir = "/Users/yhlai0911/Desktop/volpred-research/storage"
 mem = MemorySystem(storage_dir=storage_dir)
 pub = Publisher(storage_dir=storage_dir)
 

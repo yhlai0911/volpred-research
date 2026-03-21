@@ -877,7 +877,7 @@ for period_name in results:
     for strat_name in results[period_name]:
         output['results'][period_name][strat_name] = results[period_name][strat_name]
 
-outpath = '/Users/yhlai0911/Dropbox/自我研究波動預測模型/storage/experiments/multi_asset_portfolio.json'
+outpath = '/Users/yhlai0911/Desktop/volpred-research/storage/experiments/multi_asset_portfolio.json'
 with open(outpath, 'w', encoding='utf-8') as f:
     json.dump(output, f, indent=2, ensure_ascii=False, default=str)
 print(f"\nSaved to {outpath}")
