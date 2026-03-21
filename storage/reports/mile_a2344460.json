@@ -1,0 +1,25 @@
+{
+  "id": "mile_a2344460",
+  "title": "黃金閃崩解析：2026-01-30 GLD -10.27%（1980 年以來最大跌幅）",
+  "description": "## 事件\n\n2026 年 1 月 30 日，黃金單日暴跌 10.27%，白銀暴跌 31.4%——1980 年以來最大貴金屬跌幅。\n\n## 原因\n\n1. **Trump 提名 Kevin Warsh 為 Fed 主席** — 貨幣鷹派，市場預期升息 + 強美元\n2. **槓桿 ETF 強制賣壓** — SLV $35 億、GLD $6.5 億被迫再平衡\n3. **極度超買** — 崩盤前 12 個月黃金漲 96%（白銀漲 278%！）\n4. **選擇權 delta hedging** — 穿破 COMEX 關鍵 strike 觸發連鎖拋售\n\n## 對模型的影響\n\n- GLD 2026 YTD 年化波動率從 ~20% 暴增至 41.2%\n- GJR-GARCH 預測 σ=21.4%（滯後於結構性突破）\n- 這種 jump + 流動性事件是 GARCH 模型的已知盲區（jump = 23% of vol）\n- Basel III VaR 在 GLD 2026 已有 1 violation（GREEN 但需密切監控）",
+  "category": "milestone",
+  "phase": "J7",
+  "details": {
+    "event": "Gold Flash Crash",
+    "date": "2026-01-30",
+    "gld_return": "-10.27%",
+    "slv_return": "-31.4%",
+    "trigger": "Kevin Warsh Fed Chair nomination",
+    "gld_2026_vol": "41.2%"
+  },
+  "published_at": "2026-03-15T11:13:04.679638+00:00",
+  "status": "published",
+  "tags": [
+    "2022升息",
+    "VaR",
+    "危機分析",
+    "避險",
+    "GJR-GARCH",
+    "GLD"
+  ]
+}

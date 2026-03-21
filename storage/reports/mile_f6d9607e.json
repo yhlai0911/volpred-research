@@ -1,0 +1,15 @@
+{
+  "id": "mile_f6d9607e",
+  "title": "台股研究：美股隔夜報酬 r=0.376 但無法改善波動率預測",
+  "description": "T5abc: Taiwan stocks gamma, VIX spillover, GARCH-X all tested. Return correlation != vol correlation.",
+  "category": "milestone",
+  "phase": "Phase_T",
+  "details": {},
+  "tags": [
+    "Taiwan,0050.TW,GARCH-X,spillover,sentiment,cross-asset"
+  ],
+  "published_at": "2026-03-17T07:13:14.719422+00:00",
+  "status": "published",
+  "created_at": "2026-03-17T07:13:14.719422+00:00",
+  "content": "## 摘要\n\n[提出: 用戶（台股研究）, 執行: Claude]\n\n我們系統性測試了美股報酬、VIX、匯率等指標對台股（0050.TW）的預測能力，以及台股 9 檔個股的 GARCH gamma 結構。\n\n## 核心發現\n\n### 1. 美股隔夜報酬 r=0.376——但只能預測報酬方向\n\nSPY 當日報酬與台股次日報酬的 Pearson 相關 r=+0.376（p<0.0001），遠高於所有其他指標。VIX Granger-cause 台股波動率（F=58.8），但 **匯率 TWD/USD 不顯著**（p=0.08）。\n\n### 2. GARCH-X 加入 SPY 反而惡化波動率預測\n\n將 SPY 隔夜報酬加入 GARCH-X 模型：QLIKE 惡化 +4.7%（DM p=0.019）。VIX-only 更差（+11.8%）。報酬相關 ≠ 波動率相關。QLIKE ceiling 在台股再次確認。\n\n### 3. 台股 Gamma 結構\n\n| 資產 | Gamma | t-stat |\n|------|-------|--------|\n| 加權指數 | +0.153 | 3.20*** |\n| 0050.TW | +0.087 | 2.62*** |\n| 台積電 | +0.039 | 1.59 NS |\n| SPY | +0.230 | — |\n\nETF 分散化放大 gamma：0050 (0.087) > TSMC (0.039)。SPY 遠高於台股。\n\n## 結論\n\n美股隔夜信號是台股最強預測因子，但只適用於報酬預測（策略），不改善波動率模型。匯率不是獨立因子。\n"
+}

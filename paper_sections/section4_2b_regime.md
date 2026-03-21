@@ -1,0 +1,11 @@
+# 4.2.5 Regime-Dependent Leverage in Gold
+
+A critical extension of the inverted leverage finding emerges when we examine the full 2005–2026 sample. During the 2013–2015 gold bear market, gamma turns sharply positive (mean γ = +0.20), exhibiting standard leverage behavior identical to equities. The reversal is confirmed by a two-sample t-test comparing bull market (252-day trailing return > 0) and bear market estimates: bull market γ = −0.043 versus bear market γ = +0.048, with a test statistic of t = −4.71 (p < 0.0001).
+
+This regime-dependence is unique to gold among the assets we study. For SPY, gamma shows no dependence on market regime (bull γ = +0.24, bear γ = +0.24, p = 0.95), consistent with the capital structure mechanism operating regardless of market direction.
+
+The economic interpretation is clear. During fear-driven gold rallies, the safe-haven mechanism produces inverted leverage: rising gold prices reflect elevated uncertainty, which manifests as higher conditional variance. During gold bear markets driven by liquidation or dollar strength, falling gold prices behave like falling equity prices—the decline itself signals increased risk, producing standard leverage.
+
+Strikingly, the same regime-dependence appears in crude oil during the 2026 Iran crisis. Pre-crisis, USO exhibits standard leverage (γ = +0.10), consistent with demand-driven price dynamics. During the Strait of Hormuz closure (March 2026), gamma flips to −0.13 as supply-shock-driven price spikes create uncertainty. The oil market's conditional variance reached 107% annualized—a fourfold increase from pre-crisis levels—confirming that supply-side disruptions produce inverted leverage in real time.
+
+This finding has three implications. First, it strengthens the case for using **current estimated γ** rather than fixed asset-class assignments, as gold's leverage direction can reverse with market regime. Second, the trailing 252-day return serves as a useful regime indicator, correctly predicting the sign of next-quarter γ in 72% of cases. Third, the regime-dependence itself is a novel empirical finding that connects the leverage effect literature to the safe-haven literature: the leverage direction reflects the economic mechanism driving price changes, not merely the statistical properties of the return series.

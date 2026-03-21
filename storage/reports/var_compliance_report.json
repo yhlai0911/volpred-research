@@ -1,0 +1,69 @@
+{
+  "asset": "BTC-USD",
+  "model": "GJR-GARCH(1,1) w=504",
+  "distribution": "Student-t(df=5.0) Adaptive",
+  "generated_at": "2026-03-15T18:54:20.019856",
+  "years": [
+    {
+      "year": 2020,
+      "days": "366",
+      "violations_normal": 5,
+      "violations_studentt": 3,
+      "zone": "GREEN",
+      "kupiec_p": 0.7204
+    },
+    {
+      "year": 2021,
+      "days": "365",
+      "violations_normal": 6,
+      "violations_studentt": 4,
+      "zone": "GREEN",
+      "kupiec_p": 0.8561
+    },
+    {
+      "year": 2022,
+      "days": "365",
+      "violations_normal": 8,
+      "violations_studentt": 7,
+      "zone": "YELLOW",
+      "kupiec_p": 0.1177
+    },
+    {
+      "year": 2023,
+      "days": "365",
+      "violations_normal": 2,
+      "violations_studentt": 2,
+      "zone": "GREEN",
+      "kupiec_p": 0.3425
+    },
+    {
+      "year": 2024,
+      "days": "366",
+      "violations_normal": 8,
+      "violations_studentt": 4,
+      "zone": "GREEN",
+      "kupiec_p": 0.8603
+    },
+    {
+      "year": 2025,
+      "days": "365",
+      "violations_normal": 3,
+      "violations_studentt": 3,
+      "zone": "GREEN",
+      "kupiec_p": 0.7242
+    },
+    {
+      "year": 2026,
+      "days": "73",
+      "violations_normal": 4,
+      "violations_studentt": 2,
+      "zone": "GREEN",
+      "kupiec_p": 0.2185
+    }
+  ],
+  "total_days": 2265,
+  "total_violations_normal": 36,
+  "total_violations_studentt": 25,
+  "kupiec_p_overall": 0.6255,
+  "green_zone_ratio": "6/7"
+}

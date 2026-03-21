@@ -1,0 +1,21 @@
+{
+  "id": "mile_e0cd27b8",
+  "title": "Occam 勝利：GJR/GED 分配以最小改動解決 VaR 問題",
+  "description": "只把分配從 Normal 換成 GED（廣義誤差分配），就同時達成：\n- QLIKE=-9.032（只比 Normal 差 0.02%，幾乎無損失）\n- VaR 1% = 1.8% 通過 Kupiec ✓（Normal 版是 2.0% 失敗）\n\nGED 的 shape 參數提供了剛好足夠的尾部靈活性。\n不需要複雜的模型修改、組合策略、或自建方程式。\n\n更新排行榜：\n1. **GJR/GED** — QLIKE=-9.032, VaR ✓（最簡潔）\n2. 70%GJR+30%HAR — QLIKE=-9.027, VaR ✓（最穩健）\n3. GJR-custom — QLIKE=-9.025, VaR ✓（自建 MLE）\n\nOccam's Razor：最簡單的改動往往是最好的解法。\n但仍需在 2022-2023 高波動 OOS 驗證穩健性。\n    ",
+  "category": "milestone",
+  "phase": "distribution_exploration",
+  "details": {
+    "gjr_ged_qlike": -9.032,
+    "gjr_ged_var1": "1.8% PASS"
+  },
+  "published_at": "2026-03-14T12:41:27.425080+00:00",
+  "status": "published",
+  "tags": [
+    "VaR",
+    "波動率預測",
+    "GJR-GARCH",
+    "HAR-RV",
+    "Normal-VaR",
+    "Kupiec"
+  ]
+}

@@ -1,0 +1,1094 @@
+{
+  "sub_period_robustness": {
+    "Pre-2020 (2015-2019)": {
+      "baseline": {
+        "name": "50/50 SPY/GLD",
+        "ann_return": 8.56,
+        "ann_vol": 8.32,
+        "sharpe": 1.0295,
+        "mdd": -11.48,
+        "sortino": 1.487,
+        "calmar": 0.7462,
+        "skewness": -0.2134,
+        "kurtosis": 1.6027,
+        "max_daily_loss": -2.27,
+        "t_stat": 2.3,
+        "n_years": 5.0
+      },
+      "btc_5pct": {
+        "name": "47.5/47.5/5 SPY/GLD/BTC",
+        "ann_return": 12.81,
+        "ann_vol": 8.89,
+        "sharpe": 1.4407,
+        "mdd": -13.74,
+        "sortino": 2.1211,
+        "calmar": 0.932,
+        "skewness": -0.2661,
+        "kurtosis": 1.3418,
+        "max_daily_loss": -2.8,
+        "t_stat": 3.22,
+        "n_years": 5.0
+      },
+      "sharpe_diff_test": {
+        "sharpe_diff": 0.4112,
+        "p_value": 0.0154,
+        "ci_95": [
+          0.0396,
+          0.9073
+        ]
+      },
+      "n_days": 1257
+    },
+    "COVID+Crypto Winter (2020-2022)": {
+      "baseline": {
+        "name": "50/50 SPY/GLD",
+        "ann_return": 8.39,
+        "ann_vol": 15.85,
+        "sharpe": 0.5295,
+        "mdd": -20.51,
+        "sortino": 0.6711,
+        "calmar": 0.4093,
+        "skewness": -0.341,
+        "kurtosis": 7.8761,
+        "max_daily_loss": -6.62,
+        "t_stat": 0.92,
+        "n_years": 3.0
+      },
+      "btc_5pct": {
+        "name": "47.5/47.5/5 SPY/GLD/BTC",
+        "ann_return": 10.75,
+        "ann_vol": 16.78,
+        "sharpe": 0.6408,
+        "mdd": -21.3,
+        "sortino": 0.7875,
+        "calmar": 0.5047,
+        "skewness": -0.6573,
+        "kurtosis": 9.0053,
+        "max_daily_loss": -8.04,
+        "t_stat": 1.11,
+        "n_years": 3.0
+      },
+      "sharpe_diff_test": {
+        "sharpe_diff": 0.1113,
+        "p_value": 0.201,
+        "ci_95": [
+          -0.1288,
+          0.3757
+        ]
+      },
+      "n_days": 756
+    },
+    "Recovery+Bull (2023-2026)": {
+      "baseline": {
+        "name": "50/50 SPY/GLD",
+        "ann_return": 24.14,
+        "ann_vol": 12.8,
+        "sharpe": 1.8866,
+        "mdd": -11.77,
+        "sortino": 2.3524,
+        "calmar": 2.0515,
+        "skewness": -0.223,
+        "kurtosis": 11.4168,
+        "max_daily_loss": -5.8,
+        "t_stat": 3.37,
+        "n_years": 3.2
+      },
+      "btc_5pct": {
+        "name": "47.5/47.5/5 SPY/GLD/BTC",
+        "ann_return": 25.82,
+        "ann_vol": 13.03,
+        "sharpe": 1.9813,
+        "mdd": -11.98,
+        "sortino": 2.5253,
+        "calmar": 2.1547,
+        "skewness": -0.1345,
+        "kurtosis": 10.2648,
+        "max_daily_loss": -5.57,
+        "t_stat": 3.54,
+        "n_years": 3.2
+      },
+      "sharpe_diff_test": {
+        "sharpe_diff": 0.0947,
+        "p_value": 0.2976,
+        "ci_95": [
+          -0.1383,
+          0.2838
+        ]
+      },
+      "n_days": 806
+    },
+    "Full Period": {
+      "baseline": {
+        "name": "50/50 SPY/GLD",
+        "ann_return": 12.97,
+        "ann_vol": 12.05,
+        "sharpe": 1.0768,
+        "mdd": -20.51,
+        "sortino": 1.3589,
+        "calmar": 0.6325,
+        "skewness": -0.3066,
+        "kurtosis": 11.3887,
+        "max_daily_loss": -6.62,
+        "t_stat": 3.6,
+        "n_years": 11.2
+      },
+      "btc_5pct": {
+        "name": "47.5/47.5/5 SPY/GLD/BTC",
+        "ann_return": 15.98,
+        "ann_vol": 12.62,
+        "sharpe": 1.2657,
+        "mdd": -21.3,
+        "sortino": 1.5894,
+        "calmar": 0.75,
+        "skewness": -0.499,
+        "kurtosis": 11.7989,
+        "max_daily_loss": -8.04,
+        "t_stat": 4.23,
+        "n_years": 11.2
+      },
+      "sharpe_diff_test": {
+        "sharpe_diff": 0.189,
+        "p_value": 0.0146,
+        "ci_95": [
+          0.0189,
+          0.3849
+        ]
+      },
+      "n_days": 2819
+    }
+  },
+  "allocation_sweep": {
+    "replace_from_SPY": {
+      "BTC_1pct": {
+        "name": "49/50/1",
+        "ann_return": 13.57,
+        "ann_vol": 12.08,
+        "sharpe": 1.1237,
+        "mdd": -20.56,
+        "sortino": 1.4125,
+        "calmar": 0.6601,
+        "skewness": -0.35,
+        "kurtosis": 11.5699,
+        "max_daily_loss": -6.88,
+        "t_stat": 3.76,
+        "n_years": 11.2
+      },
+      "BTC_2pct": {
+        "name": "48/50/2",
+        "ann_return": 14.17,
+        "ann_vol": 12.14,
+        "sharpe": 1.1667,
+        "mdd": -20.61,
+        "sortino": 1.4662,
+        "calmar": 0.6875,
+        "skewness": -0.3927,
+        "kurtosis": 11.6423,
+        "max_daily_loss": -7.13,
+        "t_stat": 3.9,
+        "n_years": 11.2
+      },
+      "BTC_3pct": {
+        "name": "47/50/3",
+        "ann_return": 14.77,
+        "ann_vol": 12.25,
+        "sharpe": 1.2055,
+        "mdd": -20.66,
+        "sortino": 1.516,
+        "calmar": 0.7147,
+        "skewness": -0.433,
+        "kurtosis": 11.6113,
+        "max_daily_loss": -7.39,
+        "t_stat": 4.03,
+        "n_years": 11.2
+      },
+      "BTC_5pct": {
+        "name": "45/50/5",
+        "ann_return": 15.96,
+        "ann_vol": 12.56,
+        "sharpe": 1.2705,
+        "mdd": -20.76,
+        "sortino": 1.6022,
+        "calmar": 0.7686,
+        "skewness": -0.5007,
+        "kurtosis": 11.2876,
+        "max_daily_loss": -7.9,
+        "t_stat": 4.25,
+        "n_years": 11.2
+      },
+      "BTC_7pct": {
+        "name": "43/50/7",
+        "ann_return": 17.15,
+        "ann_vol": 13.01,
+        "sharpe": 1.3188,
+        "mdd": -21.6,
+        "sortino": 1.6777,
+        "calmar": 0.7941,
+        "skewness": -0.5455,
+        "kurtosis": 10.7249,
+        "max_daily_loss": -8.41,
+        "t_stat": 4.41,
+        "n_years": 11.2
+      },
+      "BTC_10pct": {
+        "name": "40/50/10",
+        "ann_return": 18.93,
+        "ann_vol": 13.88,
+        "sharpe": 1.3639,
+        "mdd": -23.49,
+        "sortino": 1.7632,
+        "calmar": 0.806,
+        "skewness": -0.5663,
+        "kurtosis": 9.7197,
+        "max_daily_loss": -9.18,
+        "t_stat": 4.56,
+        "n_years": 11.2
+      },
+      "BTC_15pct": {
+        "name": "35/50/15",
+        "ann_return": 21.9,
+        "ann_vol": 15.79,
+        "sharpe": 1.3865,
+        "mdd": -26.6,
+        "sortino": 1.838,
+        "calmar": 0.8233,
+        "skewness": -0.5079,
+        "kurtosis": 8.2807,
+        "max_daily_loss": -10.47,
+        "t_stat": 4.64,
+        "n_years": 11.2
+      },
+      "BTC_20pct": {
+        "name": "30/50/20",
+        "ann_return": 24.85,
+        "ann_vol": 18.1,
+        "sharpe": 1.3732,
+        "mdd": -29.68,
+        "sortino": 1.8522,
+        "calmar": 0.8371,
+        "skewness": -0.398,
+        "kurtosis": 7.4031,
+        "max_daily_loss": -11.76,
+        "t_stat": 4.59,
+        "n_years": 11.2
+      }
+    },
+    "replace_from_GLD": {
+      "BTC_1pct": {
+        "name": "50/49/1",
+        "ann_return": 13.58,
+        "ann_vol": 12.1,
+        "sharpe": 1.1219,
+        "mdd": -20.77,
+        "sortino": 1.4088,
+        "calmar": 0.6536,
+        "skewness": -0.3457,
+        "kurtosis": 11.7666,
+        "max_daily_loss": -6.93,
+        "t_stat": 3.75,
+        "n_years": 11.2
+      },
+      "BTC_2pct": {
+        "name": "50/48/2",
+        "ann_return": 14.18,
+        "ann_vol": 12.2,
+        "sharpe": 1.1628,
+        "mdd": -21.04,
+        "sortino": 1.4564,
+        "calmar": 0.6741,
+        "skewness": -0.3858,
+        "kurtosis": 12.0442,
+        "max_daily_loss": -7.25,
+        "t_stat": 3.89,
+        "n_years": 11.2
+      },
+      "BTC_3pct": {
+        "name": "50/47/3",
+        "ann_return": 14.79,
+        "ann_vol": 12.33,
+        "sharpe": 1.1992,
+        "mdd": -21.31,
+        "sortino": 1.5002,
+        "calmar": 0.694,
+        "skewness": -0.4255,
+        "kurtosis": 12.2218,
+        "max_daily_loss": -7.56,
+        "t_stat": 4.01,
+        "n_years": 11.2
+      },
+      "BTC_5pct": {
+        "name": "50/45/5",
+        "ann_return": 15.99,
+        "ann_vol": 12.71,
+        "sharpe": 1.2585,
+        "mdd": -21.84,
+        "sortino": 1.5757,
+        "calmar": 0.7323,
+        "skewness": -0.4979,
+        "kurtosis": 12.3046,
+        "max_daily_loss": -8.19,
+        "t_stat": 4.21,
+        "n_years": 11.2
+      },
+      "BTC_7pct": {
+        "name": "50/43/7",
+        "ann_return": 17.19,
+        "ann_vol": 13.22,
+        "sharpe": 1.3008,
+        "mdd": -22.37,
+        "sortino": 1.6359,
+        "calmar": 0.7687,
+        "skewness": -0.5542,
+        "kurtosis": 12.1049,
+        "max_daily_loss": -8.82,
+        "t_stat": 4.35,
+        "n_years": 11.2
+      },
+      "BTC_10pct": {
+        "name": "50/40/10",
+        "ann_return": 18.99,
+        "ann_vol": 14.2,
+        "sharpe": 1.3374,
+        "mdd": -24.44,
+        "sortino": 1.6943,
+        "calmar": 0.777,
+        "skewness": -0.6021,
+        "kurtosis": 11.515,
+        "max_daily_loss": -9.78,
+        "t_stat": 4.47,
+        "n_years": 11.2
+      },
+      "BTC_15pct": {
+        "name": "50/35/15",
+        "ann_return": 21.97,
+        "ann_vol": 16.28,
+        "sharpe": 1.3491,
+        "mdd": -28.08,
+        "sortino": 1.7409,
+        "calmar": 0.7822,
+        "skewness": -0.6003,
+        "kurtosis": 10.4038,
+        "max_daily_loss": -11.39,
+        "t_stat": 4.51,
+        "n_years": 11.2
+      },
+      "BTC_20pct": {
+        "name": "50/30/20",
+        "ann_return": 24.92,
+        "ann_vol": 18.75,
+        "sharpe": 1.3291,
+        "mdd": -31.76,
+        "sortino": 1.7336,
+        "calmar": 0.7846,
+        "skewness": -0.5444,
+        "kurtosis": 9.5405,
+        "max_daily_loss": -13.02,
+        "t_stat": 4.45,
+        "n_years": 11.2
+      }
+    },
+    "replace_equally": {
+      "BTC_1pct": {
+        "name": "49.5/49.5/1",
+        "ann_return": 13.57,
+        "ann_vol": 12.09,
+        "sharpe": 1.1228,
+        "mdd": -20.67,
+        "sortino": 1.4105,
+        "calmar": 0.6568,
+        "skewness": -0.3478,
+        "kurtosis": 11.6682,
+        "max_daily_loss": -6.9,
+        "t_stat": 3.76,
+        "n_years": 11.2
+      },
+      "BTC_2pct": {
+        "name": "49.0/49.0/2",
+        "ann_return": 14.18,
+        "ann_vol": 12.17,
+        "sharpe": 1.1649,
+        "mdd": -20.83,
+        "sortino": 1.4615,
+        "calmar": 0.6807,
+        "skewness": -0.3891,
+        "kurtosis": 11.8432,
+        "max_daily_loss": -7.19,
+        "t_stat": 3.9,
+        "n_years": 11.2
+      },
+      "BTC_3pct": {
+        "name": "48.5/48.5/3",
+        "ann_return": 14.78,
+        "ann_vol": 12.29,
+        "sharpe": 1.2028,
+        "mdd": -20.98,
+        "sortino": 1.5091,
+        "calmar": 0.7042,
+        "skewness": -0.429,
+        "kurtosis": 11.9169,
+        "max_daily_loss": -7.47,
+        "t_stat": 4.02,
+        "n_years": 11.2
+      },
+      "BTC_5pct": {
+        "name": "47.5/47.5/5",
+        "ann_return": 15.98,
+        "ann_vol": 12.62,
+        "sharpe": 1.2657,
+        "mdd": -21.3,
+        "sortino": 1.5894,
+        "calmar": 0.75,
+        "skewness": -0.499,
+        "kurtosis": 11.7989,
+        "max_daily_loss": -8.04,
+        "t_stat": 4.23,
+        "n_years": 11.2
+      },
+      "BTC_7pct": {
+        "name": "46.5/46.5/7",
+        "ann_return": 17.17,
+        "ann_vol": 13.09,
+        "sharpe": 1.3122,
+        "mdd": -21.93,
+        "sortino": 1.6573,
+        "calmar": 0.7829,
+        "skewness": -0.55,
+        "kurtosis": 11.4223,
+        "max_daily_loss": -8.62,
+        "t_stat": 4.39,
+        "n_years": 11.2
+      },
+      "BTC_10pct": {
+        "name": "45.0/45.0/10",
+        "ann_return": 18.96,
+        "ann_vol": 13.99,
+        "sharpe": 1.3549,
+        "mdd": -23.96,
+        "sortino": 1.7337,
+        "calmar": 0.7912,
+        "skewness": -0.5855,
+        "kurtosis": 10.6342,
+        "max_daily_loss": -9.48,
+        "t_stat": 4.53,
+        "n_years": 11.2
+      },
+      "BTC_15pct": {
+        "name": "42.5/42.5/15",
+        "ann_return": 21.93,
+        "ann_vol": 15.94,
+        "sharpe": 1.3753,
+        "mdd": -27.27,
+        "sortino": 1.7949,
+        "calmar": 0.804,
+        "skewness": -0.5577,
+        "kurtosis": 9.3784,
+        "max_daily_loss": -10.92,
+        "t_stat": 4.6,
+        "n_years": 11.2
+      },
+      "BTC_20pct": {
+        "name": "40.0/40.0/20",
+        "ann_return": 24.88,
+        "ann_vol": 18.28,
+        "sharpe": 1.3612,
+        "mdd": -30.68,
+        "sortino": 1.7988,
+        "calmar": 0.8109,
+        "skewness": -0.4762,
+        "kurtosis": 8.5302,
+        "max_daily_loss": -12.38,
+        "t_stat": 4.55,
+        "n_years": 11.2
+      }
+    },
+    "bootstrap_vs_baseline": {
+      "2% equal": {
+        "sharpe_diff": 0.0881,
+        "p_value": 0.0069,
+        "ci_95": [
+          0.0183,
+          0.1743
+        ]
+      },
+      "3% equal": {
+        "sharpe_diff": 0.126,
+        "p_value": 0.009,
+        "ci_95": [
+          0.0226,
+          0.2513
+        ]
+      },
+      "5% equal": {
+        "sharpe_diff": 0.189,
+        "p_value": 0.0135,
+        "ci_95": [
+          0.022,
+          0.3852
+        ]
+      },
+      "7% equal": {
+        "sharpe_diff": 0.2354,
+        "p_value": 0.02,
+        "ci_95": [
+          0.0094,
+          0.4939
+        ]
+      },
+      "10% equal": {
+        "sharpe_diff": 0.2781,
+        "p_value": 0.0375,
+        "ci_95": [
+          -0.024,
+          0.6086
+        ]
+      }
+    }
+  },
+  "vt_overlay": {
+    "50/50 no VT": {
+      "name": "50/50 no VT",
+      "ann_return": 12.97,
+      "ann_vol": 12.05,
+      "sharpe": 1.0768,
+      "mdd": -20.51,
+      "sortino": 1.3589,
+      "calmar": 0.6325,
+      "skewness": -0.3066,
+      "kurtosis": 11.3887,
+      "max_daily_loss": -6.62,
+      "t_stat": 3.6,
+      "n_years": 11.2
+    },
+    "50/50 + 12/VIX": {
+      "name": "50/50 + 12/VIX",
+      "ann_return": 11.94,
+      "ann_vol": 11.9,
+      "sharpe": 1.0029,
+      "mdd": -21.86,
+      "sortino": 1.2554,
+      "calmar": 0.5461,
+      "skewness": -0.3282,
+      "kurtosis": 11.9526,
+      "max_daily_loss": -6.62,
+      "t_stat": 3.35,
+      "n_years": 11.2
+    },
+    "47.5/47.5/5 no VT": {
+      "name": "47.5/47.5/5 no VT",
+      "ann_return": 15.98,
+      "ann_vol": 12.62,
+      "sharpe": 1.2657,
+      "mdd": -21.3,
+      "sortino": 1.5894,
+      "calmar": 0.75,
+      "skewness": -0.499,
+      "kurtosis": 11.7989,
+      "max_daily_loss": -8.04,
+      "t_stat": 4.23,
+      "n_years": 11.2
+    },
+    "47.5/47.5/5 + 12/VIX (all)": {
+      "name": "47.5/47.5/5 + 12/VIX (all)",
+      "ann_return": 14.86,
+      "ann_vol": 12.48,
+      "sharpe": 1.1902,
+      "mdd": -22.64,
+      "sortino": 1.4825,
+      "calmar": 0.6563,
+      "skewness": -0.5213,
+      "kurtosis": 12.3459,
+      "max_daily_loss": -8.04,
+      "t_stat": 3.98,
+      "n_years": 11.2
+    },
+    "VT_equity_only_BTC_static": {
+      "name": "47.5/47.5/5 VT(SPY+GLD only)",
+      "ann_return": 16.31,
+      "ann_vol": 13.36,
+      "sharpe": 1.2205,
+      "mdd": -24.34,
+      "sortino": 1.477,
+      "calmar": 0.67,
+      "skewness": -0.9416,
+      "kurtosis": 17.7621,
+      "max_daily_loss": -10.91,
+      "t_stat": 4.08,
+      "n_years": 11.2
+    },
+    "VIX_VT_eq_plus_BTC_RV_VT": {
+      "name": "47.5/47.5/5 VIX-VT(eq) + RV-VT(BTC)",
+      "ann_return": 13.17,
+      "ann_vol": 12.21,
+      "sharpe": 1.0788,
+      "mdd": -22.76,
+      "sortino": 1.3177,
+      "calmar": 0.5786,
+      "skewness": -0.6102,
+      "kurtosis": 14.549,
+      "max_daily_loss": -8.48,
+      "t_stat": 3.61,
+      "n_years": 11.2
+    }
+  },
+  "tail_risk": {
+    "coskewness": {
+      "BTC_with_SPY_sq": -0.3212,
+      "BTC_with_GLD_sq": -0.0029,
+      "SPY_with_BTC_sq": -0.4482,
+      "GLD_with_BTC_sq": -0.1274,
+      "portfolio_skewness_5050": -0.3066,
+      "portfolio_skewness_47_47_5": -0.499
+    },
+    "crash_episodes": [
+      {
+        "start": "2015-08-24",
+        "end": "2015-10-07",
+        "SPY_return": 1.3,
+        "GLD_return": -1.3,
+        "BTC_return": 4.5,
+        "days": 32.0
+      },
+      {
+        "start": "2016-01-13",
+        "end": "2016-03-02",
+        "SPY_return": 2.8,
+        "GLD_return": 13.9,
+        "BTC_return": -2.7,
+        "days": 34.0
+      },
+      {
+        "start": "2018-02-08",
+        "end": "2018-02-14",
+        "SPY_return": 0.7,
+        "GLD_return": 2.8,
+        "BTC_return": 24.6,
+        "days": 5.0
+      },
+      {
+        "start": "2018-12-14",
+        "end": "2019-02-14",
+        "SPY_return": 4.0,
+        "GLD_return": 5.6,
+        "BTC_return": 9.2,
+        "days": 42.0
+      },
+      {
+        "start": "2020-02-27",
+        "end": "2020-06-05",
+        "SPY_return": 3.1,
+        "GLD_return": 2.6,
+        "BTC_return": 9.6,
+        "days": 70.0
+      },
+      {
+        "start": "2020-06-11",
+        "end": "2020-07-13",
+        "SPY_return": -0.9,
+        "GLD_return": 3.6,
+        "BTC_return": -6.3,
+        "days": 22.0
+      },
+      {
+        "start": "2022-02-22",
+        "end": "2022-03-24",
+        "SPY_return": 4.1,
+        "GLD_return": 3.4,
+        "BTC_return": 9.8,
+        "days": 23.0
+      },
+      {
+        "start": "2022-04-22",
+        "end": "2023-06-29",
+        "SPY_return": 2.1,
+        "GLD_return": -2.7,
+        "BTC_return": -24.9,
+        "days": 298.0
+      },
+      {
+        "start": "2023-10-25",
+        "end": "2023-11-13",
+        "SPY_return": 3.9,
+        "GLD_return": -1.3,
+        "BTC_return": 7.7,
+        "days": 14.0
+      },
+      {
+        "start": "2025-03-13",
+        "end": "2025-05-09",
+        "SPY_return": 1.3,
+        "GLD_return": 13.5,
+        "BTC_return": 23.0,
+        "days": 41.0
+      }
+    ],
+    "conditional_correlation": {
+      "BTC_SPY_normal": 0.1519,
+      "BTC_SPY_crash": 0.4407,
+      "BTC_GLD_full": 0.089
+    },
+    "mdd_comparison": {
+      "BTC_0pct": {
+        "mdd": -20.51,
+        "worst_date": "2020-03-20"
+      },
+      "BTC_2pct": {
+        "mdd": -20.83,
+        "worst_date": "2020-03-20"
+      },
+      "BTC_5pct": {
+        "mdd": -21.3,
+        "worst_date": "2020-03-20"
+      },
+      "BTC_7pct": {
+        "mdd": -21.93,
+        "worst_date": "2022-10-14"
+      },
+      "BTC_10pct": {
+        "mdd": -23.96,
+        "worst_date": "2022-10-14"
+      },
+      "BTC_15pct": {
+        "mdd": -27.27,
+        "worst_date": "2022-10-14"
+      },
+      "BTC_20pct": {
+        "mdd": -30.68,
+        "worst_date": "2022-10-14"
+      }
+    },
+    "tail_SPY": {
+      "VaR_5pct": -1.6677,
+      "CVaR_5pct": -2.704
+    },
+    "tail_GLD": {
+      "VaR_5pct": -1.5001,
+      "CVaR_5pct": -2.2659
+    },
+    "tail_BTC": {
+      "VaR_5pct": -6.0278,
+      "CVaR_5pct": -9.638
+    },
+    "tail_50/50": {
+      "VaR_5pct": -1.1177,
+      "CVaR_5pct": -1.7906
+    },
+    "tail_47.5/47.5/5": {
+      "VaR_5pct": -1.1539,
+      "CVaR_5pct": -1.8703
+    }
+  },
+  "regime_analysis": {
+    "full_period_correlations": {
+      "SPY_GLD": 0.0489,
+      "SPY_BTC": 0.2297,
+      "GLD_BTC": 0.089
+    },
+    "yearly_corr_BTC_SPY": {
+      "2016": -0.0479,
+      "2017": 0.0668,
+      "2018": 0.0725,
+      "2019": -0.1227,
+      "2020": 0.4282,
+      "2021": 0.2604,
+      "2022": 0.5639,
+      "2023": 0.1523,
+      "2024": 0.3604,
+      "2025": 0.4219
+    }
+  },
+  "recency_bias": {
+    "rolling_3yr_btc_win_rate": "32/33 (97%)",
+    "rolling_windows": [
+      {
+        "end_date": "2018-01-03",
+        "sharpe_5050": 0.967,
+        "sharpe_47_47_5": 1.766,
+        "diff": 0.799,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2018-04-05",
+        "sharpe_5050": 0.845,
+        "sharpe_47_47_5": 1.532,
+        "diff": 0.686,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2018-07-05",
+        "sharpe_5050": 0.89,
+        "sharpe_47_47_5": 1.569,
+        "diff": 0.679,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2018-10-03",
+        "sharpe_5050": 1.156,
+        "sharpe_47_47_5": 1.862,
+        "diff": 0.706,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2019-01-04",
+        "sharpe_5050": 1.039,
+        "sharpe_47_47_5": 1.527,
+        "diff": 0.488,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2019-04-05",
+        "sharpe_5050": 1.041,
+        "sharpe_47_47_5": 1.591,
+        "diff": 0.55,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2019-07-08",
+        "sharpe_5050": 1.004,
+        "sharpe_47_47_5": 1.672,
+        "diff": 0.667,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2019-10-04",
+        "sharpe_5050": 1.142,
+        "sharpe_47_47_5": 1.72,
+        "diff": 0.578,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2020-01-06",
+        "sharpe_5050": 1.637,
+        "sharpe_47_47_5": 2.023,
+        "diff": 0.386,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2020-04-06",
+        "sharpe_5050": 0.722,
+        "sharpe_47_47_5": 1.053,
+        "diff": 0.331,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2020-07-07",
+        "sharpe_5050": 1.008,
+        "sharpe_47_47_5": 1.198,
+        "diff": 0.19,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2020-10-05",
+        "sharpe_5050": 1.044,
+        "sharpe_47_47_5": 1.165,
+        "diff": 0.121,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2021-01-05",
+        "sharpe_5050": 1.034,
+        "sharpe_47_47_5": 1.137,
+        "diff": 0.103,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2021-04-07",
+        "sharpe_5050": 1.013,
+        "sharpe_47_47_5": 1.264,
+        "diff": 0.251,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2021-07-07",
+        "sharpe_5050": 1.162,
+        "sharpe_47_47_5": 1.342,
+        "diff": 0.179,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2021-10-05",
+        "sharpe_5050": 1.098,
+        "sharpe_47_47_5": 1.33,
+        "diff": 0.232,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2022-01-04",
+        "sharpe_5050": 1.347,
+        "sharpe_47_47_5": 1.598,
+        "diff": 0.251,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2022-04-05",
+        "sharpe_5050": 1.161,
+        "sharpe_47_47_5": 1.391,
+        "diff": 0.23,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2022-07-07",
+        "sharpe_5050": 0.718,
+        "sharpe_47_47_5": 0.792,
+        "diff": 0.074,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2022-10-05",
+        "sharpe_5050": 0.57,
+        "sharpe_47_47_5": 0.689,
+        "diff": 0.118,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2023-01-05",
+        "sharpe_5050": 0.488,
+        "sharpe_47_47_5": 0.596,
+        "diff": 0.108,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2023-04-06",
+        "sharpe_5050": 0.93,
+        "sharpe_47_47_5": 1.08,
+        "diff": 0.15,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2023-07-10",
+        "sharpe_5050": 0.681,
+        "sharpe_47_47_5": 0.848,
+        "diff": 0.166,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2023-10-06",
+        "sharpe_5050": 0.407,
+        "sharpe_47_47_5": 0.583,
+        "diff": 0.176,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2024-01-08",
+        "sharpe_5050": 0.539,
+        "sharpe_47_47_5": 0.606,
+        "diff": 0.068,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2024-04-09",
+        "sharpe_5050": 0.921,
+        "sharpe_47_47_5": 0.934,
+        "diff": 0.014,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2024-07-10",
+        "sharpe_5050": 0.887,
+        "sharpe_47_47_5": 0.938,
+        "diff": 0.051,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2024-10-08",
+        "sharpe_5050": 1.073,
+        "sharpe_47_47_5": 1.051,
+        "diff": -0.023,
+        "btc_wins": false
+      },
+      {
+        "end_date": "2025-01-08",
+        "sharpe_5050": 0.95,
+        "sharpe_47_47_5": 1.011,
+        "diff": 0.061,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2025-04-10",
+        "sharpe_5050": 0.97,
+        "sharpe_47_47_5": 1.008,
+        "diff": 0.039,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2025-07-14",
+        "sharpe_5050": 1.63,
+        "sharpe_47_47_5": 1.769,
+        "diff": 0.139,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2025-10-10",
+        "sharpe_5050": 2.091,
+        "sharpe_47_47_5": 2.217,
+        "diff": 0.125,
+        "btc_wins": true
+      },
+      {
+        "end_date": "2026-01-12",
+        "sharpe_5050": 2.313,
+        "sharpe_47_47_5": 2.427,
+        "diff": 0.114,
+        "btc_wins": true
+      }
+    ]
+  },
+  "verdict": {
+    "conclusion": "5% BTC 是合理的分散投資，但效果主要來自報酬增強而非風險降低",
+    "points": [
+      "Full-period Sharpe difference IS statistically significant",
+      "BTC allocation wins in 4/4 sub-periods",
+      "BTC allocation wins in 32/33 rolling 3-year windows",
+      "Pre-2020: BTC helps (not just recent bull run)",
+      "Portfolio skewness change: -0.1924 (negative = worse tail risk)"
+    ],
+    "is_genuine_diversifier": true,
+    "full_period_baseline": {
+      "name": "50/50 Baseline",
+      "ann_return": 12.97,
+      "ann_vol": 12.05,
+      "sharpe": 1.0768,
+      "mdd": -20.51,
+      "sortino": 1.3589,
+      "calmar": 0.6325,
+      "skewness": -0.3066,
+      "kurtosis": 11.3887,
+      "max_daily_loss": -6.62,
+      "t_stat": 3.6,
+      "n_years": 11.2
+    },
+    "full_period_btc5": {
+      "name": "47.5/47.5/5 BTC",
+      "ann_return": 15.98,
+      "ann_vol": 12.62,
+      "sharpe": 1.2657,
+      "mdd": -21.3,
+      "sortino": 1.5894,
+      "calmar": 0.75,
+      "skewness": -0.499,
+      "kurtosis": 11.7989,
+      "max_daily_loss": -8.04,
+      "t_stat": 4.23,
+      "n_years": 11.2
+    },
+    "bootstrap_test": {
+      "sharpe_diff": 0.189,
+      "p_value": 0.0135,
+      "ci_95": [
+        0.022,
+        0.3852
+      ]
+    }
+  },
+  "metadata": {
+    "experiment_id": "K64_followup_btc_deep_dive",
+    "date": "2026-03-21 16:09",
+    "data_range": "2015-01-05 to 2026-03-20",
+    "n_days": 2819,
+    "tc_rates": {
+      "SPY": "0.05%",
+      "GLD": "0.05%",
+      "BTC": "0.10%"
+    },
+    "rebalance": "monthly",
+    "weights": "lagged"
+  }
+}

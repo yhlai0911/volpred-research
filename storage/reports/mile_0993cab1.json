@@ -1,0 +1,23 @@
+{
+  "id": "mile_0993cab1",
+  "title": "研究長文：從「為什麼 2025 更難預測？」到日頻波動率天花板的發現",
+  "description": "## 從「為什麼 2025 更難預測？」到日頻波動率天花板的發現\n\n*2026-03-15 Phase H 研究心路歷程*\n\n---\n\n### 起點：一個簡單的問題\n\nPhase H 的研究始於一個簡單的觀察：當我們用 GJR-GARCH 預測 SPY 的 2025 年波動率時，QLIKE 從 2023-2024 的 **-9.034** 下降到 **-8.798**——差了 2.6%。所有模型都變差了。\n\n為什麼？\n\n### 第一個假說：偏態翻轉\n\n分析 SPY 2025 年的資料特性時，我發現了一個驚人的數字：**偏態從 -0.78 翻轉到 +1.09**。\n\n| 期間 | 偏態 | 峰態 | 年化波動 |\n|------|------|------|---------|\n| 2018-2022 | -0.78 | 11.2 | 21.6% |\n| 2023-2024 | -0.29 | 0.8 | 12.8% |\n| **2025** | **+1.09** | **20.5** | **19.3%** |\n\nGJR-GARCH 的核心假設是「壞消息增加波動（gamma 項）」。偏態翻正意味著大漲比大跌多——GJR 的假設被打破了？\n\n### 矛盾：gamma 反而增大\n\n為了驗證，我提取了 GJR 在 2025 rolling windows 中的 gamma 估計值。結果**完全相反**：\n\n| Window | IS 偏態 | gamma | alpha |\n|--------|---------|-------|-------|\n| 2025 初 | -0.56 | 0.177 | 0.000 |\n| **2025 末** | **+1.12** | **0.237** | **0.000** |\n\ngamma 不但沒趨近零，反而**增大**了。而且 alpha=0——GJR 把所有 ARCH 效應都放在非對稱項上。\n\n### 自我修正：persistence 才是主因\n\n矛盾迫使我重新思考。更仔細地分析發現：\n\n**整體偏態 ≠ 條件偏態。** 2025 的正偏態由少數幾天的極端正收益驅動（max gain +9.99%），但日常的波動率動態仍然由負向衝擊主導——leverage ratio 達到 1.54，是 8 年來第二高。\n\n真正的罪魁禍首是 **persistence 增加**：從 0.891 上升到 0.960。half-life 從 6 天增加到 17 天。模型的反應速度跟不上波動率的快速變化。\n\n### Window Size 消融：一個意外的發現\n\n如果 persistence 增加，更長的 window 應該更好（捕捉更多長期記憶）？還是更短的 window 更好（更快適應）？\n\n| Window | QLIKE | VaR 1% |\n|--------|-------|--------|\n| 126 | -8.788 | 2.4% ✓ |\n| **252** | **-8.798** | 2.4% ✓ |\n| **504** | **-8.818** | 2.0% ✓ |\n| 1000 | -8.741 | 2.0% ✓ |\n| Expanding | -8.405 | — |\n\n**Window=504 勝出**——推翻了「短 window 更快適應」的假說。但 expanding window 竟然是最差的！\n\n查文獻發現：**GARCH(1,1) 最少需要 500 個觀察值**（Hwang & Valls Pereira 2006）。我們一直用的 window=252 低於這個門檻。504 改善可能部分因為終於滿足了統計門檻。\n\n而 expanding window（6300 天）包含了 dot-com 泡沫、2008 金融危機、COVID——這些遠古的高波動事件讓模型過度保守。\n\n**QLIKE 和 VaR 隨 window 反向移動**：短 window 追踪精準但不安全，長 window 保守但安全。這是 estimation precision vs risk management 的根本矛盾。\n\n### DL 天花板：信號已被用完\n\n日頻天花板的終極確認來自 Ljung-Box 檢定：\n\n| z² Lag | LB Statistic | p-value |\n|--------|-------------|---------|\n| 5 | 2.60 | **0.762** |\n| 10 | 4.24 | **0.936** |\n| 22 | 11.03 | **0.974** |\n\nGJR 的標準化殘差**完全是 iid**。日頻波動率的所有可學結構都已被 GARCH 捕捉。DL（LSTM/GRU/hybrid）無法在殘差中找到改善空間。\n\nPhase F 的 DL 失敗不是「數據太少」，而是「**信號被用完了**」。\n\n### 跨資產驚喜：TLT 需要不同的 window\n\n最後一個轉折來自 TLT（長期國債 ETF）。用 w=504 跑 TLT 時，VaR 5% FAIL——但不是高估風險，是**低估安全**（violation rate 只有 2%，模型太保守）。\n\n改用 w=252 後，QLIKE 改善 0.7%，VaR 從 FAIL 變 PASS。原因：利率轉折期的 regime change 比股票快，504 天包含太多過時的高利率環境。\n\n量化這個差異：SPY 的 persistence stability（rolling std）是 0.007，TLT 是 0.214——**30 倍差距**。\n\n### 結論\n\n| 發現 | 意義 |\n|------|------|\n| 日頻 GARCH 天花板 QLIKE≈-9.034 | DL 無法改善 |\n| Window=504 是 SPY sweet spot | QLIKE + VaR 最佳平衡 |\n| 最佳 window 因資產而異 | SPY=504, TLT=252 |\n| Persistence stability 量化 window 選擇 | 可操作的 adaptive 規則 |\n| 2025 偏態翻正但 leverage 更強 | 整體 ≠ 條件分佈 |\n\n這條推理鏈教會了我：**研究不是跑完實驗就結束——是假說→矛盾→修正→發現的循環。**",
+  "category": "milestone",
+  "phase": "research_article",
+  "details": {
+    "type": "research_article",
+    "subtype": "research_journey",
+    "phase": "H",
+    "word_count": 2683
+  },
+  "published_at": "2026-03-14T21:31:25.615514+00:00",
+  "status": "published",
+  "tags": [
+    "偏態",
+    "危機分析",
+    "厚尾",
+    "波動率預測",
+    "GJR-GARCH",
+    "SPY"
+  ]
+}

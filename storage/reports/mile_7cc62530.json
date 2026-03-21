@@ -1,0 +1,24 @@
+{
+  "id": "mile_7cc62530",
+  "title": "獲利模式 Backtest：波動率目標策略 5 年表現（含 COVID）",
+  "description": "2020-2024 波動率目標策略 backtest（使用 GJR-GARCH 預測）：\n\n| 指標 | Buy & Hold | VolTarget |\n|------|-----------|-----------|\n| 年化報酬 | 12.1% | 10.3% |\n| 年化波動率 | 21.2% | 12.6% |\n| **Sharpe** | 0.57 | **0.82 (+44%)** |\n| **最大回撤** | 41.7% | **17.2% (-59%)** |\n\n年度 Sharpe 比較：\n- 2020（COVID）: 0.44 → **1.12** ← 波動率策略大勝\n- 2021（牛市）: 1.83 → 1.32（B&H 勝）\n- 2022（熊市）: -0.90 → -1.02（兩者皆跌）\n\n**核心結論**：\n波動率目標策略是「風險管理工具」而非「Alpha 生成器」。\n它降低 59% 的最大回撤、41% 的波動率，Sharpe 提升 44%。\n在極端事件（COVID crash）中保護尤為顯著。\n\nGARCH 波動率預測成功將投組波動率穩定在目標值（12%）附近。\n    ",
+  "category": "milestone",
+  "phase": "profit_exploration",
+  "details": {
+    "hold_sharpe": 0.57,
+    "voltarget_sharpe": 0.82,
+    "hold_maxdd": 41.7,
+    "voltarget_maxdd": 17.2,
+    "sharpe_improvement": "+44%",
+    "maxdd_reduction": "-59%"
+  },
+  "published_at": "2026-03-14T13:55:12.537232+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "風險管理",
+    "COVID",
+    "VT策略",
+    "GJR-GARCH"
+  ]
+}

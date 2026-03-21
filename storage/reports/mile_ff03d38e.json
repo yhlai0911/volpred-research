@@ -1,0 +1,20 @@
+{
+  "id": "mile_ff03d38e",
+  "title": "BTC 分配悖論：沒有單一分配能同時通過 VaR 1% 和 5%",
+  "description": "BTC-USD 的尾部結構不符合任何標準參數分配：\n\n| 分配 | QLIKE | VaR 1% | VaR 5% |\n|------|-------|--------|--------|\n| Normal | -6.375 | 2.1% ✗ | 4.1% ✓ |\n| GED | -6.361 | 1.9% ✗ | 4.1% ✓ |\n| Student-t | -6.196 | **0.96% ✓** | 2.3% ✗ |\n\nStudent-t 讓 VaR 1% 幾乎完美（0.96%），但太保守導致 VaR 5% 失敗。\nNormal/GED 在 5% 正常但 1% 失敗。\n\n結論：BTC 的尾部比 Normal 厚但比 Student-t 薄——\n處於兩者之間。可能需要 mixture distribution 或 EVT。\n\n這與股票市場（SPY 用 GED 即可解決）完全不同。\n    ",
+  "category": "milestone",
+  "phase": "multi_asset",
+  "details": {
+    "btc_distribution_paradox": true
+  },
+  "published_at": "2026-03-14T12:47:04.913284+00:00",
+  "status": "published",
+  "tags": [
+    "VaR",
+    "波動率預測",
+    "EVT",
+    "BTC",
+    "SPY",
+    "Normal-VaR"
+  ]
+}

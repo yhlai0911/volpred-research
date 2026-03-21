@@ -1,0 +1,451 @@
+{
+  "experiment": "K92: VT Performance by Volatility Regime — When Is VT Most/Least Valuable?",
+  "experiment_id": "K92",
+  "description": "[提出: 用戶, 執行: Claude] 系統性分析 VT (12/VIX) 在五個 VIX regime 下的表現。VT 在所有 regime 都犧牲報酬（保險成本），但在超低波和危機時期 Sharpe 改善。核心發現：VT 的價值是 risk-adjusted，不是 raw return。",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T20:42:25.377988",
+  "config": {
+    "asset": "SPY",
+    "data_range": "1993-02-02 to 2026-03-20",
+    "n_trading_days": 8340,
+    "n_years": 33.1,
+    "vt_strategy": "12/VIX monthly rebalance, lagged, cap=100%",
+    "vt_target": 12.0,
+    "regimes": {
+      "ultra_low": {
+        "label": "超低波 VIX<13",
+        "vix_range": "0-13"
+      },
+      "low": {
+        "label": "低波 13-17",
+        "vix_range": "13-17"
+      },
+      "normal": {
+        "label": "正常 17-22",
+        "vix_range": "17-22"
+      },
+      "elevated": {
+        "label": "高波 22-30",
+        "vix_range": "22-30"
+      },
+      "crisis": {
+        "label": "危機 VIX>30",
+        "vix_range": "30-999"
+      }
+    },
+    "n_bootstrap": 10000
+  },
+  "results": {
+    "per_regime": {
+      "ultra_low": {
+        "label": "超低波 VIX<13",
+        "n_days": 1532,
+        "pct_time": 18.4,
+        "n_episodes": 194,
+        "avg_episode_duration": 11.1,
+        "median_episode_duration": 5.0,
+        "max_episode_duration": 115,
+        "avg_vix": 11.8,
+        "avg_weight": 0.934,
+        "returns": {
+          "bh_ann_pct": 10.89,
+          "vt_ann_pct": 10.67,
+          "delta_ann_pct": -0.21,
+          "insurance_cost_pct_yr": 0.21
+        },
+        "risk": {
+          "bh_vol_pct": 8.18,
+          "vt_vol_pct": 7.74,
+          "vol_reduction_pct": 5.3,
+          "bh_worst_day_pct": -3.91,
+          "vt_worst_day_pct": -3.91,
+          "worst_day_protection_pct": 0.0
+        },
+        "risk_adjusted": {
+          "bh_sharpe": 1.331,
+          "vt_sharpe": 1.378,
+          "delta_sharpe": 0.047,
+          "bh_sortino": 1.741,
+          "vt_sortino": 1.788
+        },
+        "drawdowns": {
+          "bh_mdd_pct": -20.98,
+          "vt_mdd_pct": -12.1,
+          "mdd_protection_pct": -8.88,
+          "avg_episode_mdd_bh_pct": -0.94,
+          "avg_episode_mdd_vt_pct": -0.87
+        },
+        "tail_risk": {
+          "bh_skewness": -0.657,
+          "vt_skewness": -0.694,
+          "bh_kurtosis": 3.869,
+          "vt_kurtosis": 4.687,
+          "vt_tail_protection_pct": 66.2
+        }
+      },
+      "low": {
+        "label": "低波 13-17",
+        "n_days": 2355,
+        "pct_time": 28.2,
+        "n_episodes": 398,
+        "avg_episode_duration": 7.7,
+        "median_episode_duration": 4.0,
+        "max_episode_duration": 63,
+        "avg_vix": 14.9,
+        "avg_weight": 0.798,
+        "returns": {
+          "bh_ann_pct": 8.96,
+          "vt_ann_pct": 6.32,
+          "delta_ann_pct": -2.64,
+          "insurance_cost_pct_yr": 2.64
+        },
+        "risk": {
+          "bh_vol_pct": 11.03,
+          "vt_vol_pct": 9.03,
+          "vol_reduction_pct": 18.1,
+          "bh_worst_day_pct": -3.24,
+          "vt_worst_day_pct": -3.13,
+          "worst_day_protection_pct": -0.11
+        },
+        "risk_adjusted": {
+          "bh_sharpe": 0.812,
+          "vt_sharpe": 0.699,
+          "delta_sharpe": -0.113,
+          "bh_sortino": 1.094,
+          "vt_sortino": 0.915
+        },
+        "drawdowns": {
+          "bh_mdd_pct": -29.27,
+          "vt_mdd_pct": -18.62,
+          "mdd_protection_pct": -10.66,
+          "avg_episode_mdd_bh_pct": -1.14,
+          "avg_episode_mdd_vt_pct": -0.92
+        },
+        "tail_risk": {
+          "bh_skewness": -0.533,
+          "vt_skewness": -0.589,
+          "bh_kurtosis": 1.375,
+          "vt_kurtosis": 1.805,
+          "vt_tail_protection_pct": 94.1
+        }
+      },
+      "normal": {
+        "label": "正常 17-22",
+        "n_days": 2060,
+        "pct_time": 24.7,
+        "n_episodes": 402,
+        "avg_episode_duration": 7.4,
+        "median_episode_duration": 4.0,
+        "max_episode_duration": 82,
+        "avg_vix": 19.4,
+        "avg_weight": 0.627,
+        "returns": {
+          "bh_ann_pct": 5.27,
+          "vt_ann_pct": 4.37,
+          "delta_ann_pct": -0.9,
+          "insurance_cost_pct_yr": 0.9
+        },
+        "risk": {
+          "bh_vol_pct": 15.78,
+          "vt_vol_pct": 10.1,
+          "vol_reduction_pct": 36.0,
+          "bh_worst_day_pct": -4.93,
+          "vt_worst_day_pct": -3.71,
+          "worst_day_protection_pct": -1.22
+        },
+        "risk_adjusted": {
+          "bh_sharpe": 0.334,
+          "vt_sharpe": 0.433,
+          "delta_sharpe": 0.099,
+          "bh_sortino": 0.47,
+          "vt_sortino": 0.595
+        },
+        "drawdowns": {
+          "bh_mdd_pct": -39.21,
+          "vt_mdd_pct": -25.13,
+          "mdd_protection_pct": -14.09,
+          "avg_episode_mdd_bh_pct": -1.64,
+          "avg_episode_mdd_vt_pct": -1.02
+        },
+        "tail_risk": {
+          "bh_skewness": -0.416,
+          "vt_skewness": -0.498,
+          "bh_kurtosis": 0.768,
+          "vt_kurtosis": 1.571,
+          "vt_tail_protection_pct": 100.0
+        }
+      },
+      "elevated": {
+        "label": "高波 22-30",
+        "n_days": 1690,
+        "pct_time": 20.3,
+        "n_episodes": 278,
+        "avg_episode_duration": 8.2,
+        "median_episode_duration": 5.0,
+        "max_episode_duration": 69,
+        "avg_vix": 25.2,
+        "avg_weight": 0.496,
+        "returns": {
+          "bh_ann_pct": 10.77,
+          "vt_ann_pct": 4.86,
+          "delta_ann_pct": -5.91,
+          "insurance_cost_pct_yr": 5.91
+        },
+        "risk": {
+          "bh_vol_pct": 21.8,
+          "vt_vol_pct": 11.02,
+          "vol_reduction_pct": 49.5,
+          "bh_worst_day_pct": -7.25,
+          "vt_worst_day_pct": -4.17,
+          "worst_day_protection_pct": -3.08
+        },
+        "risk_adjusted": {
+          "bh_sharpe": 0.494,
+          "vt_sharpe": 0.441,
+          "delta_sharpe": -0.053,
+          "bh_sortino": 0.723,
+          "vt_sortino": 0.614
+        },
+        "drawdowns": {
+          "bh_mdd_pct": -43.21,
+          "vt_mdd_pct": -27.26,
+          "mdd_protection_pct": -15.96,
+          "avg_episode_mdd_bh_pct": -2.44,
+          "avg_episode_mdd_vt_pct": -1.22
+        },
+        "tail_risk": {
+          "bh_skewness": -0.273,
+          "vt_skewness": -0.466,
+          "bh_kurtosis": 1.246,
+          "vt_kurtosis": 2.242,
+          "vt_tail_protection_pct": 100.0
+        }
+      },
+      "crisis": {
+        "label": "危機 VIX>30",
+        "n_days": 703,
+        "pct_time": 8.4,
+        "n_episodes": 83,
+        "avg_episode_duration": 12.1,
+        "median_episode_duration": 4.0,
+        "max_episode_duration": 170,
+        "avg_vix": 38.5,
+        "avg_weight": 0.369,
+        "returns": {
+          "bh_ann_pct": 43.15,
+          "vt_ann_pct": 19.22,
+          "delta_ann_pct": -23.93,
+          "insurance_cost_pct_yr": 23.93
+        },
+        "risk": {
+          "bh_vol_pct": 40.97,
+          "vt_vol_pct": 15.07,
+          "vol_reduction_pct": 63.2,
+          "bh_worst_day_pct": -10.94,
+          "vt_worst_day_pct": -4.55,
+          "worst_day_protection_pct": -6.39
+        },
+        "risk_adjusted": {
+          "bh_sharpe": 1.053,
+          "vt_sharpe": 1.275,
+          "delta_sharpe": 0.222,
+          "bh_sortino": 1.53,
+          "vt_sortino": 1.862
+        },
+        "drawdowns": {
+          "bh_mdd_pct": -55.19,
+          "vt_mdd_pct": -29.51,
+          "mdd_protection_pct": -25.68,
+          "avg_episode_mdd_bh_pct": -3.65,
+          "avg_episode_mdd_vt_pct": -1.45
+        },
+        "tail_risk": {
+          "bh_skewness": 0.078,
+          "vt_skewness": 0.199,
+          "bh_kurtosis": 3.341,
+          "vt_kurtosis": 4.225,
+          "vt_tail_protection_pct": 100.0
+        }
+      }
+    },
+    "crisis_asymmetry": {
+      "n_crisis_episodes": 83,
+      "crisis_duration_stats": {
+        "mean_days": 8.5,
+        "median_days": 2.0
+      },
+      "entry_21d": {
+        "n": 23,
+        "mean_excess_pct": 0.71,
+        "median_excess_pct": 1.09,
+        "vt_win_rate_pct": 52.2
+      },
+      "exit_21d": {
+        "n": 83,
+        "mean_excess_pct": -1.15,
+        "median_excess_pct": -1.01,
+        "vt_win_rate_pct": 30.1
+      },
+      "full_crisis": {
+        "n": 83,
+        "mean_excess_pct": -0.62,
+        "median_excess_pct": -0.8,
+        "vt_win_rate_pct": 18.1
+      },
+      "asymmetry_ratio": 0.62,
+      "net_entry_exit_pct": -0.44
+    },
+    "drawdown_protection_worst5pct": {
+      "ultra_low": {
+        "label": "超低波 VIX<13",
+        "n_worst_periods": 76,
+        "avg_bh_loss_pct": -4.35,
+        "avg_vt_loss_pct": -3.85,
+        "avg_protection_pct": 0.5,
+        "protection_ratio": 0.886,
+        "vt_win_rate_pct": 90.8
+      },
+      "low": {
+        "label": "低波 13-17",
+        "n_worst_periods": 117,
+        "avg_bh_loss_pct": -4.89,
+        "avg_vt_loss_pct": -3.91,
+        "avg_protection_pct": 0.98,
+        "protection_ratio": 0.799,
+        "vt_win_rate_pct": 100.0
+      },
+      "normal": {
+        "label": "正常 17-22",
+        "n_worst_periods": 102,
+        "avg_bh_loss_pct": -9.33,
+        "avg_vt_loss_pct": -5.38,
+        "avg_protection_pct": 3.94,
+        "protection_ratio": 0.577,
+        "vt_win_rate_pct": 100.0
+      },
+      "elevated": {
+        "label": "高波 22-30",
+        "n_worst_periods": 84,
+        "avg_bh_loss_pct": -11.42,
+        "avg_vt_loss_pct": -5.38,
+        "avg_protection_pct": 6.04,
+        "protection_ratio": 0.471,
+        "vt_win_rate_pct": 100.0
+      },
+      "crisis": {
+        "label": "危機 VIX>30",
+        "n_worst_periods": 35,
+        "avg_bh_loss_pct": -18.89,
+        "avg_vt_loss_pct": -5.44,
+        "avg_protection_pct": 13.45,
+        "protection_ratio": 0.288,
+        "vt_win_rate_pct": 100.0
+      }
+    },
+    "bootstrap_sharpe_test": {
+      "ultra_low": {
+        "label": "超低波 VIX<13",
+        "obs_delta_sharpe": 0.047,
+        "ci_95_lower": -0.019,
+        "ci_95_upper": 0.115,
+        "p_vt_better_sharpe": 0.9208,
+        "significant_95": false
+      },
+      "low": {
+        "label": "低波 13-17",
+        "obs_delta_sharpe": -0.113,
+        "ci_95_lower": -0.204,
+        "ci_95_upper": -0.022,
+        "p_vt_better_sharpe": 0.0068,
+        "significant_95": true
+      },
+      "normal": {
+        "label": "正常 17-22",
+        "obs_delta_sharpe": 0.099,
+        "ci_95_lower": -0.029,
+        "ci_95_upper": 0.225,
+        "p_vt_better_sharpe": 0.939,
+        "significant_95": false
+      },
+      "elevated": {
+        "label": "高波 22-30",
+        "obs_delta_sharpe": -0.053,
+        "ci_95_lower": -0.209,
+        "ci_95_upper": 0.105,
+        "p_vt_better_sharpe": 0.2607,
+        "significant_95": false
+      },
+      "crisis": {
+        "label": "危機 VIX>30",
+        "obs_delta_sharpe": 0.222,
+        "ci_95_lower": -0.147,
+        "ci_95_upper": 0.591,
+        "p_vt_better_sharpe": 0.8782,
+        "significant_95": false
+      }
+    },
+    "transition_matrix_pct": {
+      "ultra_low": {
+        "ultra_low": 87.3,
+        "low": 12.5,
+        "normal": 0.2,
+        "elevated": 0.0,
+        "crisis": 0.0
+      },
+      "low": {
+        "ultra_low": 8.2,
+        "low": 83.1,
+        "normal": 8.6,
+        "elevated": 0.1,
+        "crisis": 0.0
+      },
+      "normal": {
+        "ultra_low": 0.0,
+        "low": 10.0,
+        "normal": 80.5,
+        "elevated": 9.4,
+        "crisis": 0.1
+      },
+      "elevated": {
+        "ultra_low": 0.0,
+        "low": 0.0,
+        "normal": 11.6,
+        "elevated": 83.6,
+        "crisis": 4.8
+      },
+      "crisis": {
+        "ultra_low": 0.0,
+        "low": 0.0,
+        "normal": 0.0,
+        "elevated": 11.8,
+        "crisis": 88.2
+      }
+    }
+  },
+  "conditional_vt_strategies": {
+    "note": "Performance of VT applied only in specific regimes (B&H otherwise)",
+    "always_vt": {
+      "ann_ret_pct": 7.43,
+      "sharpe": 0.732,
+      "mdd_pct": -29.51
+    },
+    "bh_reference": {
+      "ann_ret_pct": 11.65,
+      "sharpe": 0.626,
+      "mdd_pct": -55.19
+    }
+  },
+  "key_findings": [
+    "VT 在所有五個 regime 都犧牲 raw return（保險成本），但降低波動率和改善尾部風險",
+    "超低波（VIX<13）：VT Sharpe +0.047，因為 vol 已低所以 cost 最小",
+    "低波（13-17）：VT Sharpe -0.113，BH 在低波時已很好",
+    "正常（17-22）：VT Sharpe +0.099，vol 降低補償了 return 犧牲",
+    "高波（22-30）：VT Sharpe -0.053，insurance cost 較高但波動率大幅降低",
+    "危機（VIX>30）：VT Sharpe +0.222，VT 大幅降低 vol 但也錯過反彈",
+    "VT 尾部保護在高波/危機時期最強（worst 5% 天數 VT 勝率最高）",
+    "Regime 高度持久（80-88% 持續率），VT 月度再平衡足以追蹤",
+    "危機平均持續約 8.5 天",
+    "結論：VT 永遠是保險，不是 alpha。價值在於 risk-adjusted terms，與 K41 一致"
+  ]
+}

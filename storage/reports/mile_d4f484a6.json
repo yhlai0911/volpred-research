@@ -1,0 +1,15 @@
+{
+  "id": "mile_d4f484a6",
+  "title": "自我修正：偏態不能預測 VaR 方法——小樣本膨脹的教訓",
+  "description": "T2+T4: skewness predictor collapsed N=12→N=21. Dual failure mechanism discovered.",
+  "category": "milestone",
+  "phase": "Phase_T",
+  "details": {},
+  "tags": [
+    "VaR,self-correction,skewness,cross-asset,methodology"
+  ],
+  "published_at": "2026-03-17T07:06:59.951761+00:00",
+  "status": "published",
+  "created_at": "2026-03-17T07:06:59.951761+00:00",
+  "content": "## 摘要\n\n[提出: Codex（第4次審查建議 N≥20）, 執行: Claude]\n\n我們之前宣稱「|偏態（skewness）| 可以預測最佳 VaR 方法選擇」（rho=-0.87, p=0.01），但那是基於 N=12 個資產的小樣本。當我們擴展到 21 個資產後，這個宣稱**完全崩潰**：rho=-0.086, p=0.71，毫無統計顯著性。\n\n## 研究背景\n\nPhase O 中，我們比較了 Normal VaR 和 CF-VaR（Cornish-Fisher 偏態修正）在多個資產上的表現，發現 |skewness| 越大的資產越需要 CF-VaR 修正。但測試只包含 12 個資產——低於我們自己設定的 N≥15 跨截面測試門檻。\n\nCodex 在第 4 次審查中明確指出：「A rho of -0.87 on roughly 12 assets is interesting, not settled.」\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | 21 個（美股 8、商品 4、債券 3、國際 3、crypto 1、REIT 1、貨幣 1）|\n| VaR 水準 | 1% |\n| OOS | 2023-01-01 至 2024-12-31 |\n| 窗口 | w=2000 |\n| 檢定 | Kupiec test |\n\n## 核心發現\n\n### 擴展到 21 資產後，偏態預測力完全消失\n\n| 指標 | N=12（之前） | N=21（現在） |\n|------|------------|------------|\n| Spearman ρ | -0.87 | **-0.086** |\n| p-value | 0.01 | **0.71** |\n\nNormal VaR 通過 Kupiec：17/21（81%）。CF-VaR 通過：19/21（90%）。CF-VaR 略好，但**不是因為偏態**。\n\n### GLD/TLT/IEF 失敗的真正原因——雙重機制\n\n三個 Normal 失敗的資產，failure 方向完全相反：\n\n| 資產 | Violations | 方向 | 根本原因 |\n|------|-----------|------|---------|\n| GLD 黃金 | 10/502 (2.0%) | 太多 | 厚尾（kurt=1.29），ARCH 效應弱 |\n| TLT 長債 | 1/502 (0.2%) | 太少 | 2022 升息波動仍在 w=2000 窗口中 |\n| IEF 中債 | 1/502 (0.2%) | 太少 | 同 TLT，ARCH 極強（p=0.0001）|\n\nGLD 是「風險被低估」，TLT/IEF 是「風險被高估」。一個 scalar（偏態）不可能同時預測兩種相反的失敗模式。\n\n## 教訓\n\n1. **尊重自己設定的統計門檻**：N<15 的 cross-sectional test 本來就不應該當結論\n2. **小樣本相關容易膨脹**：N=12 時隨機相關就可能很高\n3. **窗口選擇 > 分配選擇**：TLT/IEF 的問題不是 Normal 分配，而是 w=2000 太長包含了過時的 regime\n\n## 實務意義\n\n對投資人來說，不需要根據資產的偏態來選擇 VaR 計算方法。更重要的是確認你的估計窗口是否包含了過時的波動 regime。\n\n## 結論\n\n|偏態|→VaR 方法選擇的宣稱被推翻。這是研究的自我修正過程——Codex 的批評完全正確。Normal VaR 和 CF-VaR 的差異由更複雜的因素驅動（厚尾 vs regime shift），不是一個簡單指標能概括的。\n"
+}

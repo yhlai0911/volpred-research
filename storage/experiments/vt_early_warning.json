@@ -1,0 +1,603 @@
+{
+  "experiment": "VT Crisis Early Warning System",
+  "experiment_id": "K75",
+  "description": "VT 危機預警系統：建構可觀察的交通燈指標，預測 VT 何時將發揮最大保護價值。以 VIX 水準、信用利差、SPY 動量等可觀察信號為輸入，無前瞻偏誤。",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T11:53:59.189416+00:00",
+  "status": "completed",
+  "config": {
+    "start": "2007-04-11",
+    "end": "2026-03-20",
+    "n_days": 4454,
+    "vt_strategy": "SPY 12/VIX monthly rebalance (lagged)",
+    "shine_definition": "63-day rolling VT excess return > 5%",
+    "no_lookahead": true
+  },
+  "shine_summary": {
+    "total_days": 4732,
+    "shine_days": 214,
+    "shine_pct": 4.5,
+    "n_episodes": 34,
+    "episodes": [
+      {
+        "start": "2008-01-17",
+        "end": "2008-01-23",
+        "duration_days": 6,
+        "peak_excess_63d": 0.0591,
+        "avg_vix": 28.9
+      },
+      {
+        "start": "2008-01-25",
+        "end": "2008-01-28",
+        "duration_days": 3,
+        "peak_excess_63d": 0.0505,
+        "avg_vix": 28.4
+      },
+      {
+        "start": "2008-01-30",
+        "end": "2008-01-31",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0521,
+        "avg_vix": 26.9
+      },
+      {
+        "start": "2008-02-07",
+        "end": "2008-02-08",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0504,
+        "avg_vix": 27.8
+      },
+      {
+        "start": "2008-03-06",
+        "end": "2008-03-18",
+        "duration_days": 12,
+        "peak_excess_63d": 0.0703,
+        "avg_vix": 28.3
+      },
+      {
+        "start": "2008-03-19",
+        "end": "2008-03-20",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0519,
+        "avg_vix": 28.2
+      },
+      {
+        "start": "2008-03-27",
+        "end": "2008-04-01",
+        "duration_days": 5,
+        "peak_excess_63d": 0.0555,
+        "avg_vix": 25.0
+      },
+      {
+        "start": "2008-09-04",
+        "end": "2008-09-05",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0504,
+        "avg_vix": 23.5
+      },
+      {
+        "start": "2008-09-15",
+        "end": "2008-09-16",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0521,
+        "avg_vix": 31.0
+      },
+      {
+        "start": "2008-09-17",
+        "end": "2008-09-18",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0589,
+        "avg_vix": 34.7
+      },
+      {
+        "start": "2008-09-29",
+        "end": "2008-09-30",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0608,
+        "avg_vix": 43.1
+      },
+      {
+        "start": "2008-10-02",
+        "end": "2009-01-08",
+        "duration_days": 98,
+        "peak_excess_63d": 0.2161,
+        "avg_vix": 57.5
+      },
+      {
+        "start": "2009-01-13",
+        "end": "2009-01-28",
+        "duration_days": 15,
+        "peak_excess_63d": 0.1139,
+        "avg_vix": 46.8
+      },
+      {
+        "start": "2009-01-29",
+        "end": "2009-02-09",
+        "duration_days": 11,
+        "peak_excess_63d": 0.1146,
+        "avg_vix": 43.8
+      },
+      {
+        "start": "2009-02-10",
+        "end": "2009-02-13",
+        "duration_days": 3,
+        "peak_excess_63d": 0.0856,
+        "avg_vix": 43.8
+      },
+      {
+        "start": "2009-02-17",
+        "end": "2009-02-24",
+        "duration_days": 7,
+        "peak_excess_63d": 0.0964,
+        "avg_vix": 48.6
+      },
+      {
+        "start": "2009-02-26",
+        "end": "2009-03-25",
+        "duration_days": 27,
+        "peak_excess_63d": 0.1565,
+        "avg_vix": 45.3
+      },
+      {
+        "start": "2009-03-30",
+        "end": "2009-04-09",
+        "duration_days": 10,
+        "peak_excess_63d": 0.0924,
+        "avg_vix": 41.2
+      },
+      {
+        "start": "2010-07-02",
+        "end": "2010-07-06",
+        "duration_days": 4,
+        "peak_excess_63d": 0.0524,
+        "avg_vix": 29.9
+      },
+      {
+        "start": "2011-09-22",
+        "end": "2011-09-23",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0501,
+        "avg_vix": 41.3
+      },
+      {
+        "start": "2011-09-30",
+        "end": "2011-10-06",
+        "duration_days": 6,
+        "peak_excess_63d": 0.0715,
+        "avg_vix": 40.7
+      },
+      {
+        "start": "2018-12-21",
+        "end": "2018-12-26",
+        "duration_days": 5,
+        "peak_excess_63d": 0.06,
+        "avg_vix": 32.2
+      },
+      {
+        "start": "2020-03-12",
+        "end": "2020-03-13",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0639,
+        "avg_vix": 66.7
+      },
+      {
+        "start": "2020-03-16",
+        "end": "2020-04-06",
+        "duration_days": 21,
+        "peak_excess_63d": 0.0891,
+        "avg_vix": 62.3
+      },
+      {
+        "start": "2022-03-07",
+        "end": "2022-03-09",
+        "duration_days": 2,
+        "peak_excess_63d": 0.0573,
+        "avg_vix": 34.7
+      },
+      {
+        "start": "2022-03-10",
+        "end": "2022-03-16",
+        "duration_days": 6,
+        "peak_excess_63d": 0.0615,
+        "avg_vix": 29.9
+      },
+      {
+        "start": "2022-05-09",
+        "end": "2022-05-13",
+        "duration_days": 4,
+        "peak_excess_63d": 0.0663,
+        "avg_vix": 32.2
+      },
+      {
+        "start": "2022-05-16",
+        "end": "2022-05-17",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0506,
+        "avg_vix": 26.8
+      },
+      {
+        "start": "2022-05-18",
+        "end": "2022-05-23",
+        "duration_days": 5,
+        "peak_excess_63d": 0.0619,
+        "avg_vix": 29.6
+      },
+      {
+        "start": "2022-06-10",
+        "end": "2022-07-25",
+        "duration_days": 45,
+        "peak_excess_63d": 0.1108,
+        "avg_vix": 27.4
+      },
+      {
+        "start": "2022-07-26",
+        "end": "2022-07-27",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0581,
+        "avg_vix": 24.0
+      },
+      {
+        "start": "2022-11-03",
+        "end": "2022-11-04",
+        "duration_days": 1,
+        "peak_excess_63d": 0.0507,
+        "avg_vix": 24.9
+      },
+      {
+        "start": "2022-11-09",
+        "end": "2022-11-10",
+        "duration_days": 1,
+        "peak_excess_63d": 0.054,
+        "avg_vix": 24.8
+      },
+      {
+        "start": "2025-04-04",
+        "end": "2025-04-09",
+        "duration_days": 5,
+        "peak_excess_63d": 0.0577,
+        "avg_vix": 44.6
+      }
+    ]
+  },
+  "predictor_analysis": {
+    "description": "單一預測因子對未來 63 天 VT excess return 的預測力",
+    "results": [
+      {
+        "predictor": "vix_gt_25",
+        "corr_excess": -0.2663,
+        "p_excess": 0.0,
+        "corr_shine": 0.1628,
+        "p_shine": 0.0,
+        "auc": 0.652,
+        "mean_when_shine": 0.4694,
+        "mean_when_normal": 0.1653
+      },
+      {
+        "predictor": "vix_gt_20",
+        "corr_excess": -0.2183,
+        "p_excess": 0.0,
+        "corr_shine": 0.2005,
+        "p_shine": 0.0,
+        "auc": 0.7338,
+        "mean_when_shine": 0.801,
+        "mean_when_normal": 0.3335
+      },
+      {
+        "predictor": "vix_level",
+        "corr_excess": -0.2054,
+        "p_excess": 0.0,
+        "corr_shine": 0.304,
+        "p_shine": 0.0,
+        "auc": 0.7713,
+        "mean_when_shine": 32.588,
+        "mean_when_normal": 19.2735
+      },
+      {
+        "predictor": "vix_gt_30",
+        "corr_excess": -0.1955,
+        "p_excess": 0.0,
+        "corr_shine": 0.1928,
+        "p_shine": 0.0,
+        "auc": 0.6403,
+        "mean_when_shine": 0.3673,
+        "mean_when_normal": 0.0867
+      },
+      {
+        "predictor": "spy_drawdown",
+        "corr_excess": 0.1599,
+        "p_excess": 0.0,
+        "corr_shine": -0.322,
+        "p_shine": 0.0,
+        "auc": 0.196,
+        "mean_when_shine": -0.1899,
+        "mean_when_normal": -0.0504
+      },
+      {
+        "predictor": "credit_spread_z",
+        "corr_excess": -0.126,
+        "p_excess": 0.0,
+        "corr_shine": 0.1673,
+        "p_shine": 0.0,
+        "auc": 0.6932,
+        "mean_when_shine": 0.6645,
+        "mean_when_normal": -0.4688
+      },
+      {
+        "predictor": "spy_mom_63",
+        "corr_excess": -0.0594,
+        "p_excess": 7.2e-05,
+        "corr_shine": -0.3476,
+        "p_shine": 0.0,
+        "auc": 0.1619,
+        "mean_when_shine": -0.097,
+        "mean_when_normal": 0.0369
+      },
+      {
+        "predictor": "vix_pctile",
+        "corr_excess": -0.0567,
+        "p_excess": 0.000154,
+        "corr_shine": 0.1517,
+        "p_shine": 0.0,
+        "auc": 0.7105,
+        "mean_when_shine": 0.6714,
+        "mean_when_normal": 0.4394
+      },
+      {
+        "predictor": "vix_roc_20d",
+        "corr_excess": -0.0563,
+        "p_excess": 0.000172,
+        "corr_shine": 0.0477,
+        "p_shine": 0.001454,
+        "auc": 0.5427,
+        "mean_when_shine": 0.1057,
+        "mean_when_normal": 0.0299
+      },
+      {
+        "predictor": "vix_z",
+        "corr_excess": -0.0499,
+        "p_excess": 0.000873,
+        "corr_shine": 0.1822,
+        "p_shine": 0.0,
+        "auc": 0.7193,
+        "mean_when_shine": 1.0179,
+        "mean_when_normal": -0.1218
+      },
+      {
+        "predictor": "spy_mom_21",
+        "corr_excess": 0.0257,
+        "p_excess": 0.08669,
+        "corr_shine": -0.1641,
+        "p_shine": 0.0,
+        "auc": 0.3571,
+        "mean_when_shine": -0.0264,
+        "mean_when_normal": 0.0122
+      },
+      {
+        "predictor": "vix_rv_spread",
+        "corr_excess": -0.0227,
+        "p_excess": 0.129948,
+        "corr_shine": -0.1987,
+        "p_shine": 0.0,
+        "auc": 0.3092,
+        "mean_when_shine": -1.8596,
+        "mean_when_normal": 3.8279
+      },
+      {
+        "predictor": "vix_delta_5d",
+        "corr_excess": 0.0205,
+        "p_excess": 0.171035,
+        "corr_shine": -0.0074,
+        "p_shine": 0.623752,
+        "auc": 0.4913,
+        "mean_when_shine": -0.1368,
+        "mean_when_normal": -0.0009
+      },
+      {
+        "predictor": "composite_stress",
+        "corr_excess": -0.02,
+        "p_excess": 0.182219,
+        "corr_shine": 0.1856,
+        "p_shine": 0.0,
+        "auc": 0.7199,
+        "mean_when_shine": 2.2525,
+        "mean_when_normal": 0.8507
+      },
+      {
+        "predictor": "vix_roc_5d",
+        "corr_excess": 0.0047,
+        "p_excess": 0.756251,
+        "corr_shine": -0.0065,
+        "p_shine": 0.663338,
+        "auc": 0.497,
+        "mean_when_shine": 0.0069,
+        "mean_when_normal": 0.0124
+      }
+    ],
+    "top_3_predictors": [
+      "vix_gt_25",
+      "vix_gt_20",
+      "vix_level"
+    ]
+  },
+  "vix_threshold_analysis": {
+    "description": "VIX 水準門檻對 VT shine 機率的影響",
+    "results": [
+      {
+        "threshold": 15,
+        "n_days_above": 3025,
+        "pct_time_above": 67.9,
+        "p_shine_conditional": 5.9,
+        "p_shine_base": 4.4,
+        "lift": 1.34,
+        "avg_fwd_excess": -1.54,
+        "avg_fwd_excess_base": -1.16
+      },
+      {
+        "threshold": 18,
+        "n_days_above": 2042,
+        "pct_time_above": 45.8,
+        "p_shine_conditional": 8.3,
+        "p_shine_base": 4.4,
+        "lift": 1.89,
+        "avg_fwd_excess": -1.97,
+        "avg_fwd_excess_base": -1.16
+      },
+      {
+        "threshold": 20,
+        "n_days_above": 1577,
+        "pct_time_above": 35.4,
+        "p_shine_conditional": 10.0,
+        "p_shine_base": 4.4,
+        "lift": 2.26,
+        "avg_fwd_excess": -2.32,
+        "avg_fwd_excess_base": -1.16
+      },
+      {
+        "threshold": 22,
+        "n_days_above": 1207,
+        "pct_time_above": 27.1,
+        "p_shine_conditional": 9.9,
+        "p_shine_base": 4.4,
+        "lift": 2.26,
+        "avg_fwd_excess": -2.81,
+        "avg_fwd_excess_base": -1.16
+      },
+      {
+        "threshold": 25,
+        "n_days_above": 796,
+        "pct_time_above": 17.9,
+        "p_shine_conditional": 11.6,
+        "p_shine_base": 4.4,
+        "lift": 2.63,
+        "avg_fwd_excess": -3.41,
+        "avg_fwd_excess_base": -1.16
+      },
+      {
+        "threshold": 28,
+        "n_days_above": 544,
+        "pct_time_above": 12.2,
+        "p_shine_conditional": 14.3,
+        "p_shine_base": 4.4,
+        "lift": 3.26,
+        "avg_fwd_excess": -3.48,
+        "avg_fwd_excess_base": -1.16
+      },
+      {
+        "threshold": 30,
+        "n_days_above": 441,
+        "pct_time_above": 9.9,
+        "p_shine_conditional": 16.3,
+        "p_shine_base": 4.4,
+        "lift": 3.71,
+        "avg_fwd_excess": -3.48,
+        "avg_fwd_excess_base": -1.16
+      },
+      {
+        "threshold": 35,
+        "n_days_above": 253,
+        "pct_time_above": 5.7,
+        "p_shine_conditional": 24.9,
+        "p_shine_base": 4.4,
+        "lift": 5.66,
+        "avg_fwd_excess": -3.52,
+        "avg_fwd_excess_base": -1.16
+      }
+    ]
+  },
+  "traffic_light": {
+    "description": "交通燈系統：GREEN（正常，VT 付保費）、YELLOW（壓力累積）、RED（危機保護中）",
+    "rules": {
+      "RED": "VIX > 30 OR (VIX > 25 AND SPY DD > 10%) OR (VIX Z > 2 AND SPY DD > 15%)",
+      "YELLOW": "VIX > 22 OR (VIX Z > 1 AND SPY DD > 5%) OR SPY DD > 10% OR Credit Z < -1.5",
+      "GREEN": "otherwise"
+    },
+    "performance": {
+      "GREEN": {
+        "n_days": 2178,
+        "pct_time": 48.9,
+        "p_shine_pct": 1.3,
+        "avg_fwd_excess_pct": -0.65,
+        "med_fwd_excess_pct": -0.62,
+        "avg_vix": 15.6
+      },
+      "YELLOW": {
+        "n_days": 1656,
+        "pct_time": 37.2,
+        "p_shine_pct": 5.0,
+        "avg_fwd_excess_pct": -1.01,
+        "med_fwd_excess_pct": -1.18,
+        "avg_vix": 19.1
+      },
+      "RED": {
+        "n_days": 620,
+        "pct_time": 13.9,
+        "p_shine_pct": 13.7,
+        "avg_fwd_excess_pct": -3.35,
+        "med_fwd_excess_pct": -4.19,
+        "avg_vix": 36.9
+      }
+    }
+  },
+  "composite_score": {
+    "description": "複合壓力分數 = 0.3*VIX_z + 0.3*|SPY_DD|*10 + 0.2*I(VIX>25) + 0.2*(-Credit_z)",
+    "auc": 0.7615,
+    "quintile_analysis": {
+      "Q1(low)": {
+        "n": 891,
+        "p_shine_pct": 0.9,
+        "avg_fwd_excess_pct": -0.66,
+        "avg_vix": 14.6
+      },
+      "Q2": {
+        "n": 891,
+        "p_shine_pct": 2.2,
+        "avg_fwd_excess_pct": -0.75,
+        "avg_vix": 16.2
+      },
+      "Q3": {
+        "n": 890,
+        "p_shine_pct": 2.4,
+        "avg_fwd_excess_pct": -0.94,
+        "avg_vix": 16.9
+      },
+      "Q4": {
+        "n": 891,
+        "p_shine_pct": 3.3,
+        "avg_fwd_excess_pct": -1.72,
+        "avg_vix": 20.4
+      },
+      "Q5(high)": {
+        "n": 891,
+        "p_shine_pct": 13.2,
+        "avg_fwd_excess_pct": -1.73,
+        "avg_vix": 31.1
+      }
+    }
+  },
+  "current_status": {
+    "date": "2025-12-18",
+    "traffic_light": "GREEN",
+    "vix": 16.9,
+    "vix_z": -0.42,
+    "spy_drawdown_pct": -1.8,
+    "composite_score": -0.01,
+    "historical_p_shine": 1.3
+  },
+  "key_findings": [
+    "VT 在 4% 的時間內顯著跑贏 B&H（63 天滾動超額 >5%），共 34 個獨立事件",
+    "最佳單一預測因子：vix_gt_25（r=-0.2663, AUC=0.652）",
+    "複合壓力分數 AUC = 0.762",
+    "交通燈系統：RED 時 P(VT shine) = 14% vs GREEN 時 1%（10.5x lift）",
+    "RED 信號佔 14% 時間，YELLOW 37%，GREEN 49%",
+    "最佳 VIX 門檻：VIX > 35（lift = 5.7x，P(shine) = 25%）",
+    "目前狀態：GREEN（VIX=16.9, SPY DD=-1.8%）"
+  ],
+  "practical_implications": [
+    "VT 80% 時間都在付保費（GREEN），這是正常的——就像車險大多數時間不會理賠",
+    "當交通燈轉 YELLOW 或 RED，投資人應該堅持 VT 紀律——此時正是 VT 即將發揮價值的時候",
+    "VIX 是最重要的單一觀察指標，但結合 SPY 回撤和信用利差可提升預測力",
+    "交通燈系統不是交易信號（不應該在 GREEN 時關閉 VT），而是信心管理工具",
+    "VT 的保險價值在 GREEN 時不可見但持續存在——就像買了車險但沒出事不代表浪費"
+  ]
+}

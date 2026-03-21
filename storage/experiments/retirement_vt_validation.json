@@ -1,0 +1,885 @@
+{
+  "experiment": "K85 Cross-Validation: Retirement VT Claim",
+  "experiment_id": "K85_validation",
+  "description": "嚴格驗證 K79/K85 宣稱 VT 可將安全提領率從 4% 提升至 8%。使用多種 bootstrap 方法、歷史滾動視窗、壓力測試、Bengen 基準比較、現金收益分解等六大軸線交叉驗證。",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T11:33:01.367358+00:00",
+  "referenced_experiments": [
+    "K79",
+    "K85",
+    "K41"
+  ],
+  "verification_type": "cross_validation",
+  "config": {
+    "n_simulations": 5000,
+    "retirement_years": 30,
+    "withdrawal_rates_tested": [
+      0.04,
+      0.05,
+      0.06,
+      0.07,
+      0.08
+    ],
+    "bootstrap_methods": [
+      "block_3",
+      "block_6",
+      "block_12",
+      "block_24",
+      "stationary_12"
+    ],
+    "stress_configs": [
+      "baseline",
+      "high_inflation_3pct",
+      "actual_cpi",
+      "zero_cash_return",
+      "double_tx_cost",
+      "vix_lag_2_months",
+      "combined_worst",
+      "actual_cpi_zero_cash_2x_tx"
+    ],
+    "data_period_spy": "1993-02-28 to 2026-03-31",
+    "n_months_spy": 398
+  },
+  "section_a_lookahead_bias": {
+    "verdict": "PASS — no look-ahead bias",
+    "explanation": "VIX lag=1 使用前月底 VIX 決定當月權重，時序上可實施。月度再平衡在月初進行，參考前月底 VIX 數值。"
+  },
+  "section_b_bootstrap_sensitivity": {
+    "block_3": {
+      "4%": {
+        "bh_survival": 0.9762,
+        "vt_survival": 0.9808,
+        "vt_improvement": 0.0046
+      },
+      "5%": {
+        "bh_survival": 0.9294,
+        "vt_survival": 0.902,
+        "vt_improvement": -0.0274
+      },
+      "6%": {
+        "bh_survival": 0.85,
+        "vt_survival": 0.7218,
+        "vt_improvement": -0.1282
+      },
+      "7%": {
+        "bh_survival": 0.7388,
+        "vt_survival": 0.4882,
+        "vt_improvement": -0.2506
+      },
+      "8%": {
+        "bh_survival": 0.6152,
+        "vt_survival": 0.2706,
+        "vt_improvement": -0.3446
+      }
+    },
+    "block_6": {
+      "4%": {
+        "bh_survival": 0.9632,
+        "vt_survival": 0.978,
+        "vt_improvement": 0.0148
+      },
+      "5%": {
+        "bh_survival": 0.9154,
+        "vt_survival": 0.8944,
+        "vt_improvement": -0.021
+      },
+      "6%": {
+        "bh_survival": 0.8404,
+        "vt_survival": 0.7178,
+        "vt_improvement": -0.1226
+      },
+      "7%": {
+        "bh_survival": 0.7338,
+        "vt_survival": 0.4858,
+        "vt_improvement": -0.248
+      },
+      "8%": {
+        "bh_survival": 0.6052,
+        "vt_survival": 0.268,
+        "vt_improvement": -0.3372
+      }
+    },
+    "block_12": {
+      "4%": {
+        "bh_survival": 0.9538,
+        "vt_survival": 0.9662,
+        "vt_improvement": 0.0124
+      },
+      "5%": {
+        "bh_survival": 0.8938,
+        "vt_survival": 0.8632,
+        "vt_improvement": -0.0306
+      },
+      "6%": {
+        "bh_survival": 0.8066,
+        "vt_survival": 0.6766,
+        "vt_improvement": -0.13
+      },
+      "7%": {
+        "bh_survival": 0.7008,
+        "vt_survival": 0.453,
+        "vt_improvement": -0.2478
+      },
+      "8%": {
+        "bh_survival": 0.5828,
+        "vt_survival": 0.2532,
+        "vt_improvement": -0.3296
+      }
+    },
+    "block_24": {
+      "4%": {
+        "bh_survival": 0.9486,
+        "vt_survival": 0.9638,
+        "vt_improvement": 0.0152
+      },
+      "5%": {
+        "bh_survival": 0.8884,
+        "vt_survival": 0.8578,
+        "vt_improvement": -0.0306
+      },
+      "6%": {
+        "bh_survival": 0.8016,
+        "vt_survival": 0.6724,
+        "vt_improvement": -0.1292
+      },
+      "7%": {
+        "bh_survival": 0.7016,
+        "vt_survival": 0.472,
+        "vt_improvement": -0.2296
+      },
+      "8%": {
+        "bh_survival": 0.597,
+        "vt_survival": 0.2826,
+        "vt_improvement": -0.3144
+      }
+    },
+    "stationary_12": {
+      "4%": {
+        "bh_survival": 0.9534,
+        "vt_survival": 0.9688,
+        "vt_improvement": 0.0154
+      },
+      "5%": {
+        "bh_survival": 0.8946,
+        "vt_survival": 0.874,
+        "vt_improvement": -0.0206
+      },
+      "6%": {
+        "bh_survival": 0.813,
+        "vt_survival": 0.6846,
+        "vt_improvement": -0.1284
+      },
+      "7%": {
+        "bh_survival": 0.7072,
+        "vt_survival": 0.4666,
+        "vt_improvement": -0.2406
+      },
+      "8%": {
+        "bh_survival": 0.5896,
+        "vt_survival": 0.2664,
+        "vt_improvement": -0.3232
+      }
+    }
+  },
+  "section_c_rolling_windows": {
+    "10yr": {
+      "4%": {
+        "n_windows": 279,
+        "bh_survival": 1.0,
+        "vt_survival": 1.0,
+        "bh_failed": 0,
+        "vt_failed": 0
+      },
+      "5%": {
+        "n_windows": 279,
+        "bh_survival": 1.0,
+        "vt_survival": 1.0,
+        "bh_failed": 0,
+        "vt_failed": 0
+      },
+      "6%": {
+        "n_windows": 279,
+        "bh_survival": 1.0,
+        "vt_survival": 1.0,
+        "bh_failed": 0,
+        "vt_failed": 0
+      },
+      "7%": {
+        "n_windows": 279,
+        "bh_survival": 1.0,
+        "vt_survival": 1.0,
+        "bh_failed": 0,
+        "vt_failed": 0
+      },
+      "8%": {
+        "n_windows": 279,
+        "bh_survival": 0.9606,
+        "vt_survival": 1.0,
+        "bh_failed": 11,
+        "vt_failed": 0
+      }
+    },
+    "15yr": {
+      "4%": {
+        "n_windows": 219,
+        "bh_survival": 1.0,
+        "vt_survival": 1.0,
+        "bh_failed": 0,
+        "vt_failed": 0
+      },
+      "5%": {
+        "n_windows": 219,
+        "bh_survival": 1.0,
+        "vt_survival": 1.0,
+        "bh_failed": 0,
+        "vt_failed": 0
+      },
+      "6%": {
+        "n_windows": 219,
+        "bh_survival": 0.8995,
+        "vt_survival": 0.9954,
+        "bh_failed": 22,
+        "vt_failed": 1
+      },
+      "7%": {
+        "n_windows": 219,
+        "bh_survival": 0.8219,
+        "vt_survival": 0.8311,
+        "bh_failed": 39,
+        "vt_failed": 37
+      },
+      "8%": {
+        "n_windows": 219,
+        "bh_survival": 0.7169,
+        "vt_survival": 0.6712,
+        "bh_failed": 62,
+        "vt_failed": 72
+      }
+    },
+    "20yr": {
+      "4%": {
+        "n_windows": 159,
+        "bh_survival": 1.0,
+        "vt_survival": 1.0,
+        "bh_failed": 0,
+        "vt_failed": 0
+      },
+      "5%": {
+        "n_windows": 159,
+        "bh_survival": 0.8868,
+        "vt_survival": 0.9811,
+        "bh_failed": 18,
+        "vt_failed": 3
+      },
+      "6%": {
+        "n_windows": 159,
+        "bh_survival": 0.7547,
+        "vt_survival": 0.7296,
+        "bh_failed": 39,
+        "vt_failed": 43
+      },
+      "7%": {
+        "n_windows": 159,
+        "bh_survival": 0.6226,
+        "vt_survival": 0.5031,
+        "bh_failed": 60,
+        "vt_failed": 79
+      },
+      "8%": {
+        "n_windows": 159,
+        "bh_survival": 0.3836,
+        "vt_survival": 0.2013,
+        "bh_failed": 98,
+        "vt_failed": 127
+      }
+    },
+    "25yr": {
+      "4%": {
+        "n_windows": 99,
+        "bh_survival": 1.0,
+        "vt_survival": 1.0,
+        "bh_failed": 0,
+        "vt_failed": 0
+      },
+      "5%": {
+        "n_windows": 99,
+        "bh_survival": 0.7374,
+        "vt_survival": 0.6869,
+        "bh_failed": 26,
+        "vt_failed": 31
+      },
+      "6%": {
+        "n_windows": 99,
+        "bh_survival": 0.5657,
+        "vt_survival": 0.4848,
+        "bh_failed": 43,
+        "vt_failed": 51
+      },
+      "7%": {
+        "n_windows": 99,
+        "bh_survival": 0.4848,
+        "vt_survival": 0.303,
+        "bh_failed": 51,
+        "vt_failed": 69
+      },
+      "8%": {
+        "n_windows": 99,
+        "bh_survival": 0.3737,
+        "vt_survival": 0.0707,
+        "bh_failed": 62,
+        "vt_failed": 92
+      }
+    }
+  },
+  "section_d_stress_tests": {
+    "baseline": {
+      "4%": {
+        "bh_survival": 0.9538,
+        "vt_survival": 0.9662
+      },
+      "5%": {
+        "bh_survival": 0.8938,
+        "vt_survival": 0.8632
+      },
+      "6%": {
+        "bh_survival": 0.8066,
+        "vt_survival": 0.6766
+      },
+      "7%": {
+        "bh_survival": 0.7008,
+        "vt_survival": 0.453
+      },
+      "8%": {
+        "bh_survival": 0.5828,
+        "vt_survival": 0.2532
+      }
+    },
+    "high_inflation_3pct": {
+      "4%": {
+        "bh_survival": 0.9286,
+        "vt_survival": 0.9244
+      },
+      "5%": {
+        "bh_survival": 0.8458,
+        "vt_survival": 0.7628
+      },
+      "6%": {
+        "bh_survival": 0.7412,
+        "vt_survival": 0.5278
+      },
+      "7%": {
+        "bh_survival": 0.6162,
+        "vt_survival": 0.2932
+      },
+      "8%": {
+        "bh_survival": 0.482,
+        "vt_survival": 0.144
+      }
+    },
+    "actual_cpi": {
+      "4%": {
+        "bh_survival": 0.9538,
+        "vt_survival": 0.9662
+      },
+      "5%": {
+        "bh_survival": 0.8938,
+        "vt_survival": 0.8632
+      },
+      "6%": {
+        "bh_survival": 0.8066,
+        "vt_survival": 0.6766
+      },
+      "7%": {
+        "bh_survival": 0.7008,
+        "vt_survival": 0.453
+      },
+      "8%": {
+        "bh_survival": 0.5828,
+        "vt_survival": 0.2532
+      }
+    },
+    "zero_cash_return": {
+      "4%": {
+        "bh_survival": 0.9538,
+        "vt_survival": 0.9346
+      },
+      "5%": {
+        "bh_survival": 0.8938,
+        "vt_survival": 0.795
+      },
+      "6%": {
+        "bh_survival": 0.8066,
+        "vt_survival": 0.5654
+      },
+      "7%": {
+        "bh_survival": 0.7008,
+        "vt_survival": 0.338
+      },
+      "8%": {
+        "bh_survival": 0.5828,
+        "vt_survival": 0.17
+      }
+    },
+    "double_tx_cost": {
+      "4%": {
+        "bh_survival": 0.9538,
+        "vt_survival": 0.964
+      },
+      "5%": {
+        "bh_survival": 0.8938,
+        "vt_survival": 0.8578
+      },
+      "6%": {
+        "bh_survival": 0.8066,
+        "vt_survival": 0.6652
+      },
+      "7%": {
+        "bh_survival": 0.7008,
+        "vt_survival": 0.4418
+      },
+      "8%": {
+        "bh_survival": 0.5828,
+        "vt_survival": 0.2444
+      }
+    },
+    "vix_lag_2_months": {
+      "4%": {
+        "bh_survival": 0.9538,
+        "vt_survival": 0.9568
+      },
+      "5%": {
+        "bh_survival": 0.8938,
+        "vt_survival": 0.8406
+      },
+      "6%": {
+        "bh_survival": 0.8066,
+        "vt_survival": 0.6516
+      },
+      "7%": {
+        "bh_survival": 0.7008,
+        "vt_survival": 0.442
+      },
+      "8%": {
+        "bh_survival": 0.5828,
+        "vt_survival": 0.2592
+      }
+    },
+    "combined_worst": {
+      "4%": {
+        "bh_survival": 0.9286,
+        "vt_survival": 0.8426
+      },
+      "5%": {
+        "bh_survival": 0.8458,
+        "vt_survival": 0.6236
+      },
+      "6%": {
+        "bh_survival": 0.7412,
+        "vt_survival": 0.3888
+      },
+      "7%": {
+        "bh_survival": 0.6162,
+        "vt_survival": 0.2032
+      },
+      "8%": {
+        "bh_survival": 0.482,
+        "vt_survival": 0.0922
+      }
+    },
+    "actual_cpi_zero_cash_2x_tx": {
+      "4%": {
+        "bh_survival": 0.9538,
+        "vt_survival": 0.9316
+      },
+      "5%": {
+        "bh_survival": 0.8938,
+        "vt_survival": 0.7848
+      },
+      "6%": {
+        "bh_survival": 0.8066,
+        "vt_survival": 0.5546
+      },
+      "7%": {
+        "bh_survival": 0.7008,
+        "vt_survival": 0.3266
+      },
+      "8%": {
+        "bh_survival": 0.5828,
+        "vt_survival": 0.163
+      }
+    }
+  },
+  "section_d_max_safe_wr": {
+    "baseline": {
+      "bh_max": 4,
+      "vt_max": 4,
+      "ratio": 1.0
+    },
+    "high_inflation_3pct": {
+      "bh_max": 3,
+      "vt_max": 3,
+      "ratio": 1.0
+    },
+    "actual_cpi": {
+      "bh_max": 4,
+      "vt_max": 4,
+      "ratio": 1.0
+    },
+    "zero_cash_return": {
+      "bh_max": 4,
+      "vt_max": 3,
+      "ratio": 0.75
+    },
+    "double_tx_cost": {
+      "bh_max": 4,
+      "vt_max": 4,
+      "ratio": 1.0
+    },
+    "vix_lag_2_months": {
+      "bh_max": 4,
+      "vt_max": 4,
+      "ratio": 1.0
+    },
+    "combined_worst": {
+      "bh_max": 3,
+      "vt_max": 3,
+      "ratio": 1.0
+    },
+    "actual_cpi_zero_cash_2x_tx": {
+      "bh_max": 4,
+      "vt_max": 3,
+      "ratio": 0.75
+    }
+  },
+  "section_e_bengen_benchmark": {
+    "4%": {
+      "bengen_5050_survival": 0.9714,
+      "bh_spy_survival": 0.9726,
+      "vt_spy_survival": 0.984
+    },
+    "5%": {
+      "bengen_5050_survival": 0.8836,
+      "bh_spy_survival": 0.9282,
+      "vt_spy_survival": 0.893
+    },
+    "6%": {
+      "bengen_5050_survival": 0.6994,
+      "bh_spy_survival": 0.856,
+      "vt_spy_survival": 0.699
+    },
+    "7%": {
+      "bengen_5050_survival": 0.459,
+      "bh_spy_survival": 0.7584,
+      "vt_spy_survival": 0.4508
+    },
+    "8%": {
+      "bengen_5050_survival": 0.2316,
+      "bh_spy_survival": 0.6512,
+      "vt_spy_survival": 0.2336
+    }
+  },
+  "section_f_fairness_decomposition": {
+    "4%": {
+      "bh_survival": 0.9538,
+      "vt_with_tbill": 0.9662,
+      "vt_with_zero_cash": 0.9346,
+      "total_improvement": 0.0124,
+      "dd_protection_component": -0.0192,
+      "cash_yield_component": 0.0316,
+      "pct_from_dd_protection": -154.8,
+      "pct_from_cash_yield": 254.8
+    },
+    "6%": {
+      "bh_survival": 0.8066,
+      "vt_with_tbill": 0.6766,
+      "vt_with_zero_cash": 0.5654,
+      "total_improvement": -0.13,
+      "dd_protection_component": -0.2412,
+      "cash_yield_component": 0.1112,
+      "pct_from_dd_protection": null,
+      "pct_from_cash_yield": null
+    },
+    "8%": {
+      "bh_survival": 0.5828,
+      "vt_with_tbill": 0.2532,
+      "vt_with_zero_cash": 0.17,
+      "total_improvement": -0.3296,
+      "dd_protection_component": -0.4128,
+      "cash_yield_component": 0.0832,
+      "pct_from_dd_protection": null,
+      "pct_from_cash_yield": null
+    }
+  },
+  "section_g_survivorship": {
+    "spy_annual_return": 0.1163,
+    "spy_annual_vol": 0.1472,
+    "sample_sharpe": 0.654,
+    "sub_period_analysis": [
+      {
+        "start": "1993-02",
+        "annual_ret": 0.101,
+        "bh_final": 1796127.0,
+        "vt_final": 1577440.0,
+        "vt_ratio": 0.878
+      },
+      {
+        "start": "1994-02",
+        "annual_ret": 0.1209,
+        "bh_final": 2134946.0,
+        "vt_final": 1668393.0,
+        "vt_ratio": 0.781
+      },
+      {
+        "start": "1995-02",
+        "annual_ret": 0.1269,
+        "bh_final": 2339713.0,
+        "vt_final": 1789726.0,
+        "vt_ratio": 0.765
+      },
+      {
+        "start": "1996-02",
+        "annual_ret": 0.1012,
+        "bh_final": 1747585.0,
+        "vt_final": 1292938.0,
+        "vt_ratio": 0.74
+      },
+      {
+        "start": "1997-02",
+        "annual_ret": 0.0908,
+        "bh_final": 1520774.0,
+        "vt_final": 1216316.0,
+        "vt_ratio": 0.8
+      },
+      {
+        "start": "1998-02",
+        "annual_ret": 0.0614,
+        "bh_final": 1075078.0,
+        "vt_final": 1026027.0,
+        "vt_ratio": 0.954
+      },
+      {
+        "start": "1999-02",
+        "annual_ret": -0.0151,
+        "bh_final": 431464.0,
+        "vt_final": 643939.0,
+        "vt_ratio": 1.492
+      },
+      {
+        "start": "2000-02",
+        "annual_ret": 0.0043,
+        "bh_final": 467113.0,
+        "vt_final": 650511.0,
+        "vt_ratio": 1.393
+      },
+      {
+        "start": "2001-02",
+        "annual_ret": 0.0259,
+        "bh_final": 578262.0,
+        "vt_final": 665072.0,
+        "vt_ratio": 1.15
+      },
+      {
+        "start": "2002-02",
+        "annual_ret": 0.0479,
+        "bh_final": 846926.0,
+        "vt_final": 857271.0,
+        "vt_ratio": 1.012
+      },
+      {
+        "start": "2003-02",
+        "annual_ret": 0.09,
+        "bh_final": 1503680.0,
+        "vt_final": 1182934.0,
+        "vt_ratio": 0.787
+      },
+      {
+        "start": "2004-02",
+        "annual_ret": 0.0791,
+        "bh_final": 1224264.0,
+        "vt_final": 1111119.0,
+        "vt_ratio": 0.908
+      },
+      {
+        "start": "2005-02",
+        "annual_ret": 0.087,
+        "bh_final": 1321878.0,
+        "vt_final": 1178486.0,
+        "vt_ratio": 0.892
+      },
+      {
+        "start": "2006-02",
+        "annual_ret": 0.0766,
+        "bh_final": 1174203.0,
+        "vt_final": 1026727.0,
+        "vt_ratio": 0.874
+      },
+      {
+        "start": "2007-02",
+        "annual_ret": 0.0815,
+        "bh_final": 1167828.0,
+        "vt_final": 973741.0,
+        "vt_ratio": 0.834
+      },
+      {
+        "start": "2008-02",
+        "annual_ret": 0.1096,
+        "bh_final": 1599796.0,
+        "vt_final": 1269436.0,
+        "vt_ratio": 0.793
+      },
+      {
+        "start": "2009-02",
+        "annual_ret": 0.1588,
+        "bh_final": 3170821.0,
+        "vt_final": 1495794.0,
+        "vt_ratio": 0.472
+      },
+      {
+        "start": "2010-02",
+        "annual_ret": 0.1471,
+        "bh_final": 2789529.0,
+        "vt_final": 1776741.0,
+        "vt_ratio": 0.637
+      },
+      {
+        "start": "2011-02",
+        "annual_ret": 0.144,
+        "bh_final": 2612743.0,
+        "vt_final": 1639378.0,
+        "vt_ratio": 0.627
+      },
+      {
+        "start": "2012-02",
+        "annual_ret": 0.1628,
+        "bh_final": 3184481.0,
+        "vt_final": 1862784.0,
+        "vt_ratio": 0.585
+      },
+      {
+        "start": "2013-02",
+        "annual_ret": 0.138,
+        "bh_final": 2492702.0,
+        "vt_final": 1585433.0,
+        "vt_ratio": 0.636
+      },
+      {
+        "start": "2014-02",
+        "annual_ret": 0.1377,
+        "bh_final": 2414071.0,
+        "vt_final": 1563828.0,
+        "vt_ratio": 0.648
+      },
+      {
+        "start": "2015-02",
+        "annual_ret": 0.1495,
+        "bh_final": 2653513.0,
+        "vt_final": 1688162.0,
+        "vt_ratio": 0.636
+      },
+      {
+        "start": "2016-02",
+        "annual_ret": 0.1675,
+        "bh_final": 3249330.0,
+        "vt_final": 2017452.0,
+        "vt_ratio": 0.621
+      }
+    ],
+    "vt_always_better_10yr": false,
+    "vt_ratio_range": [
+      0.472,
+      1.492
+    ],
+    "warning": "1993-2026 對美股偏有利，絕對存活率可能高估，但 VT vs B&H 相對優勢受影響較小"
+  },
+  "conclusions": {
+    "original_claim": "VT doubles safe WR from 4% to 8% (2.0x)",
+    "verdict": "★★★ CLAIM REFUTED — K79 had a critical bug",
+    "baseline_verification": {
+      "bh_max_wr_95pct": 4,
+      "vt_max_wr_95pct": 4,
+      "ratio": 1.0
+    },
+    "reproduction_verdict": "使用完全相同的資料期間和參數重現 K79，VT 在 5%+ WR 時存活率反而低於 B&H。K79 的 VT=100% 結果幾乎確定是實作 bug。",
+    "correct_finding": "VT 僅在低提領率（≤4%）時微幅改善存活率（+1-2%），但在高提領率時嚴重惡化結果。8% WR 時 VT 存活率僅 22.8%（vs B&H 61.3%）。",
+    "root_cause": "VT 的年化保險費（~2.9%/yr）在 30 年退休期間複合累積（2.2x），與提領額疊加後加速投資組合耗盡。這與 K41 的發現一致：VT 保險費會複合。",
+    "key_findings": [
+      "K79/K85 的 'VT doubles safe WR' 宣稱被推翻",
+      "K79 存在實作 bug：VT 存活率被嚴重高估",
+      "VT 僅在 ≤4% WR 時微幅改善（+1-2%），5%+ WR 時反而有害",
+      "8% WR: VT 存活率 22.8% vs B&H 61.3%（VT 差 2.7x）",
+      "5 種 bootstrap 方法全部一致：VT 在高 WR 時有害",
+      "歷史滾動視窗（最強測試）確認：25年期 8% WR VT 僅 7.1% 存活 vs B&H 37.4%",
+      "VT 年化拖累 ~2.9% 在 30 年複合為 2.2x 差距",
+      "50/50 SPY/GLD 在退休情境中優於 VT SPY（更穩定但同樣受 VT 拖累）",
+      "VT 對退休投組的正確定位：保護 vs 成長的取捨，不是免費的存活率提升"
+    ],
+    "consistency_with_k41": "完全一致。K41 已指出 VT 是恆定 ~4%/yr 保險費，會複合累積。退休提領 + VT 拖累 = 雙重耗損，加速破產。",
+    "revised_recommendation": "退休投組不應使用 VT 作為提高提領率的工具。VT 適合降低回撤風險（在 4% WR 下微幅改善），但不能提高安全提領率。50/50 SPY/GLD（不加 VT）是退休情境的最佳選擇。"
+  },
+  "section_h_k79_reproduction": {
+    "description": "使用與 K79 完全相同的資料期間 (2005-2026, 254 months) 和 10,000 次 block bootstrap 重現 K79 結果",
+    "data_period": "2005-02 to 2026-03 (254 months, matching K79)",
+    "n_simulations": 10000,
+    "block_size": 12,
+    "reproduction_results": {
+      "4%": {
+        "bh_spy": 0.963,
+        "vt_spy": 0.975,
+        "bh_5050": 0.997,
+        "vt_5050": 0.992
+      },
+      "5%": {
+        "bh_spy": 0.904,
+        "vt_spy": 0.87,
+        "bh_5050": 0.98,
+        "vt_5050": 0.924
+      },
+      "6%": {
+        "bh_spy": 0.831,
+        "vt_spy": 0.666,
+        "bh_5050": 0.936,
+        "vt_5050": 0.722
+      },
+      "7%": {
+        "bh_spy": 0.736,
+        "vt_spy": 0.434,
+        "bh_5050": 0.865,
+        "vt_5050": 0.45
+      },
+      "8%": {
+        "bh_spy": 0.613,
+        "vt_spy": 0.228,
+        "bh_5050": 0.718,
+        "vt_5050": 0.208
+      }
+    },
+    "k79_original_results": {
+      "4%": {
+        "bh_spy": 0.963,
+        "vt_spy": 1.0,
+        "bh_5050": 0.997,
+        "vt_5050": 1.0
+      },
+      "8%": {
+        "bh_spy": 0.63,
+        "vt_spy": 0.955,
+        "bh_5050": 0.739,
+        "vt_5050": 0.732
+      }
+    },
+    "discrepancy": "K79 的 VT 存活率遠高於重現結果。4% WR: K79 報告 VT=100%，重現為 97.5%；8% WR: K79 報告 VT=95.5%，重現為 22.8%。",
+    "diagnosis": "K79 幾乎確定存在實作錯誤。最可能的 bug：(1) VT weight 沒有正確限制現金部位的拖累，(2) 提領金額沒有正確隨通膨調整，或 (3) bootstrap 沒有正確打亂 VIX/SPY 的對應關係。"
+  },
+  "section_i_vt_insurance_premium_analysis": {
+    "description": "VT 的保險費（年化約 2.9%）在 30 年退休期間會複合累積，與提領額疊加後導致投資組合加速耗盡",
+    "avg_vt_weight": 0.704,
+    "avg_equity_exposure": "70.4%",
+    "avg_cash_allocation": "29.6%",
+    "bh_expected_annual_return": 0.116,
+    "vt_expected_annual_return": 0.087,
+    "annual_drag": 0.029,
+    "30yr_compound_drag_ratio": 2.22,
+    "mechanism": "4% 提領率 + 2.9% VT 拖累 = 6.9% 年度總耗損，遠超 VT 的回撤保護效益。VT 在短期（10年）退休窗口有效，但 30 年期間保險費複合效應壓倒回撤保護。"
+  }
+}

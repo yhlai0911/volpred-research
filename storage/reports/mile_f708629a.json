@@ -1,0 +1,12 @@
+{
+  "id": "mile_f708629a",
+  "title": "I9: Monthly Strategy Tournament — 50/50 Static is King",
+  "description": "I8 confirmed monthly rebalancing immune to gap timing bias. Tested 8 monthly strategy variants: Dual Momentum, VIX Regime, Trend SMA200, Combined, plus variants. Key surprise: plain 50/50 Static SPY/GLD (Sharpe 0.810, Harvey t=3.13) is extremely hard to beat — NO strategy significantly outperforms i...",
+  "category": "milestone",
+  "phase": "Phase_I",
+  "details": {},
+  "tags": [],
+  "published_at": "2026-03-17T19:14:32.082904+00:00",
+  "status": "published",
+  "content": "I8 confirmed monthly rebalancing immune to gap timing bias. Tested 8 monthly strategy variants: Dual Momentum, VIX Regime, Trend SMA200, Combined, plus variants. Key surprise: plain 50/50 Static SPY/GLD (Sharpe 0.810, Harvey t=3.13) is extremely hard to beat — NO strategy significantly outperforms it (Jobson-Korkie test all p>0.22). Our baseline 12/VIX variant actually underperforms Static on return (p=0.007) due to VIX cash drag, though it wins on MDD (-11.5% vs -20.5%). VIX Regime Portfolio (0.784) is a cleaner alternative to continuous 12/VIX. Dual Momentum completely fails (0.50, whipsaw). Trend SMA200→GLD has highest gross Sharpe (0.821) but worst MDD (-27.8%). Adding complexity (VIX+Trend) gives trivial gain. MDD bootstrap: all improvements over SPY have p>0.65 — none individually significant at 5%. This reinforces that diversification (SPY+GLD correlation ~0.1) is the primary driver of risk-adjusted returns, not signal timing."
+}

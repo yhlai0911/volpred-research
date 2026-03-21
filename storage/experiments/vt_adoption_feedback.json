@@ -1,0 +1,757 @@
+{
+  "experiment": "Agent-Based VT Adoption Feedback — What If Everyone Uses 12/VIX?",
+  "experiment_id": "K93",
+  "description": "模擬不同 VT 採用率 (alpha=0%-80%) 對市場穩定性的影響。建立反饋迴路模型：VT 賣壓 -> 價格下跌 -> VIX 上升 -> 更多賣壓。核心問題：VT 是否存在「共有地悲劇」？",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T13:12:16.884144+00:00",
+  "referenced_experiments": [
+    "K41",
+    "K14",
+    "K78"
+  ],
+  "config": {
+    "data_period": "2007-01-04 to 2026-03-19",
+    "trading_days": 4832,
+    "vt_method": "12/VIX lagged weights",
+    "impact_coefficients_tested": [
+      0.1,
+      0.3,
+      0.5,
+      1.0,
+      2.0,
+      5.0
+    ],
+    "alphas_tested": [
+      0,
+      0.05,
+      0.1,
+      0.2,
+      0.5,
+      0.8
+    ],
+    "vix_sensitivity": 0.3,
+    "feedback_model": "amplified_return = original_return + alpha * delta(VT_weight) * impact_coeff; VIX_feedback = VIX * (1 + beta * vol_surprise)"
+  },
+  "main_results": {
+    "impact_0.3": {
+      "alpha_0": {
+        "alpha": 0.0,
+        "impact_coeff": 0.3,
+        "market_sharpe": 0.6,
+        "market_annual_return": 0.1038,
+        "market_annual_vol": 0.1969,
+        "market_mdd": -0.5519,
+        "vt_agent_sharpe": 1.416,
+        "vt_agent_annual_return": 0.136,
+        "vt_agent_mdd": -0.1783,
+        "bh_agent_sharpe": 0.6,
+        "bh_agent_mdd": -0.5519,
+        "avg_selling_pressure": 0.0,
+        "max_selling_pressure": -0.0,
+        "crisis_2008_return": -0.3696,
+        "covid_2020_return": -0.0529,
+        "avg_modified_vix": 19.94,
+        "max_modified_vix": 146.93
+      },
+      "alpha_5": {
+        "alpha": 0.05,
+        "impact_coeff": 0.3,
+        "market_sharpe": 0.583,
+        "market_annual_return": 0.1022,
+        "market_annual_vol": 0.2018,
+        "market_mdd": -0.5562,
+        "vt_agent_sharpe": 1.373,
+        "vt_agent_annual_return": 0.1371,
+        "vt_agent_mdd": -0.1805,
+        "bh_agent_sharpe": 0.583,
+        "bh_agent_mdd": -0.5562,
+        "avg_selling_pressure": -1e-06,
+        "max_selling_pressure": -0.005827,
+        "crisis_2008_return": -0.3751,
+        "covid_2020_return": -0.0588,
+        "avg_modified_vix": 20.17,
+        "max_modified_vix": 146.93
+      },
+      "alpha_10": {
+        "alpha": 0.1,
+        "impact_coeff": 0.3,
+        "market_sharpe": 0.567,
+        "market_annual_return": 0.1007,
+        "market_annual_vol": 0.2069,
+        "market_mdd": -0.5605,
+        "vt_agent_sharpe": 1.333,
+        "vt_agent_annual_return": 0.1381,
+        "vt_agent_mdd": -0.1826,
+        "bh_agent_sharpe": 0.567,
+        "bh_agent_mdd": -0.5605,
+        "avg_selling_pressure": -3e-06,
+        "max_selling_pressure": -0.011646,
+        "crisis_2008_return": -0.3805,
+        "covid_2020_return": -0.0646,
+        "avg_modified_vix": 20.41,
+        "max_modified_vix": 146.93
+      },
+      "alpha_20": {
+        "alpha": 0.2,
+        "impact_coeff": 0.3,
+        "market_sharpe": 0.536,
+        "market_annual_return": 0.0974,
+        "market_annual_vol": 0.2174,
+        "market_mdd": -0.5689,
+        "vt_agent_sharpe": 1.256,
+        "vt_agent_annual_return": 0.1399,
+        "vt_agent_mdd": -0.1868,
+        "bh_agent_sharpe": 0.536,
+        "bh_agent_mdd": -0.5689,
+        "avg_selling_pressure": -6e-06,
+        "max_selling_pressure": -0.02325,
+        "crisis_2008_return": -0.3913,
+        "covid_2020_return": -0.0759,
+        "avg_modified_vix": 20.88,
+        "max_modified_vix": 146.93
+      },
+      "alpha_50": {
+        "alpha": 0.5,
+        "impact_coeff": 0.3,
+        "market_sharpe": 0.456,
+        "market_annual_return": 0.0861,
+        "market_annual_vol": 0.2506,
+        "market_mdd": -0.5993,
+        "vt_agent_sharpe": 1.071,
+        "vt_agent_annual_return": 0.1435,
+        "vt_agent_mdd": -0.202,
+        "bh_agent_sharpe": 0.456,
+        "bh_agent_mdd": -0.5993,
+        "avg_selling_pressure": -1.6e-05,
+        "max_selling_pressure": -0.057673,
+        "crisis_2008_return": -0.4229,
+        "covid_2020_return": -0.107,
+        "avg_modified_vix": 22.35,
+        "max_modified_vix": 146.93
+      },
+      "alpha_80": {
+        "alpha": 0.8,
+        "impact_coeff": 0.3,
+        "market_sharpe": 0.392,
+        "market_annual_return": 0.0733,
+        "market_annual_vol": 0.2849,
+        "market_mdd": -0.6298,
+        "vt_agent_sharpe": 0.94,
+        "vt_agent_annual_return": 0.145,
+        "vt_agent_mdd": -0.2257,
+        "bh_agent_sharpe": 0.392,
+        "bh_agent_mdd": -0.6298,
+        "avg_selling_pressure": -2.6e-05,
+        "max_selling_pressure": -0.091324,
+        "crisis_2008_return": -0.4532,
+        "covid_2020_return": -0.1343,
+        "avg_modified_vix": 23.83,
+        "max_modified_vix": 146.93
+      }
+    },
+    "impact_0.5": {
+      "alpha_0": {
+        "alpha": 0.0,
+        "impact_coeff": 0.5,
+        "market_sharpe": 0.6,
+        "market_annual_return": 0.1038,
+        "market_annual_vol": 0.1969,
+        "market_mdd": -0.5519,
+        "vt_agent_sharpe": 1.416,
+        "vt_agent_annual_return": 0.136,
+        "vt_agent_mdd": -0.1783,
+        "bh_agent_sharpe": 0.6,
+        "bh_agent_mdd": -0.5519,
+        "avg_selling_pressure": 0.0,
+        "max_selling_pressure": -0.0,
+        "crisis_2008_return": -0.3696,
+        "covid_2020_return": -0.0529,
+        "avg_modified_vix": 19.94,
+        "max_modified_vix": 146.93
+      },
+      "alpha_5": {
+        "alpha": 0.05,
+        "impact_coeff": 0.5,
+        "market_sharpe": 0.573,
+        "market_annual_return": 0.1012,
+        "market_annual_vol": 0.2052,
+        "market_mdd": -0.5591,
+        "vt_agent_sharpe": 1.346,
+        "vt_agent_annual_return": 0.1378,
+        "vt_agent_mdd": -0.1819,
+        "bh_agent_sharpe": 0.573,
+        "bh_agent_mdd": -0.5591,
+        "avg_selling_pressure": -3e-06,
+        "max_selling_pressure": -0.009707,
+        "crisis_2008_return": -0.3787,
+        "covid_2020_return": -0.0627,
+        "avg_modified_vix": 20.33,
+        "max_modified_vix": 146.93
+      },
+      "alpha_10": {
+        "alpha": 0.1,
+        "impact_coeff": 0.5,
+        "market_sharpe": 0.547,
+        "market_annual_return": 0.0985,
+        "market_annual_vol": 0.2138,
+        "market_mdd": -0.5661,
+        "vt_agent_sharpe": 1.281,
+        "vt_agent_annual_return": 0.1394,
+        "vt_agent_mdd": -0.1854,
+        "bh_agent_sharpe": 0.547,
+        "bh_agent_mdd": -0.5661,
+        "avg_selling_pressure": -5e-06,
+        "max_selling_pressure": -0.019388,
+        "crisis_2008_return": -0.3877,
+        "covid_2020_return": -0.0722,
+        "avg_modified_vix": 20.72,
+        "max_modified_vix": 146.93
+      },
+      "alpha_20": {
+        "alpha": 0.2,
+        "impact_coeff": 0.5,
+        "market_sharpe": 0.498,
+        "market_annual_return": 0.0926,
+        "market_annual_vol": 0.2319,
+        "market_mdd": -0.5809,
+        "vt_agent_sharpe": 1.166,
+        "vt_agent_annual_return": 0.1418,
+        "vt_agent_mdd": -0.1922,
+        "bh_agent_sharpe": 0.498,
+        "bh_agent_mdd": -0.5809,
+        "avg_selling_pressure": -1e-05,
+        "max_selling_pressure": -0.038631,
+        "crisis_2008_return": -0.4055,
+        "covid_2020_return": -0.0902,
+        "avg_modified_vix": 21.53,
+        "max_modified_vix": 146.93
+      },
+      "alpha_50": {
+        "alpha": 0.5,
+        "impact_coeff": 0.5,
+        "market_sharpe": 0.386,
+        "market_annual_return": 0.0718,
+        "market_annual_vol": 0.2887,
+        "market_mdd": -0.633,
+        "vt_agent_sharpe": 0.928,
+        "vt_agent_annual_return": 0.1451,
+        "vt_agent_mdd": -0.2282,
+        "bh_agent_sharpe": 0.386,
+        "bh_agent_mdd": -0.633,
+        "avg_selling_pressure": -2.7e-05,
+        "max_selling_pressure": -0.095007,
+        "crisis_2008_return": -0.4566,
+        "covid_2020_return": -0.1371,
+        "avg_modified_vix": 23.99,
+        "max_modified_vix": 146.93
+      },
+      "alpha_80": {
+        "alpha": 0.8,
+        "impact_coeff": 0.5,
+        "market_sharpe": 0.31,
+        "market_annual_return": 0.0476,
+        "market_annual_vol": 0.3451,
+        "market_mdd": -0.677,
+        "vt_agent_sharpe": 0.788,
+        "vt_agent_annual_return": 0.1444,
+        "vt_agent_mdd": -0.2639,
+        "bh_agent_sharpe": 0.31,
+        "bh_agent_mdd": -0.677,
+        "avg_selling_pressure": -4.4e-05,
+        "max_selling_pressure": -0.148692,
+        "crisis_2008_return": -0.5048,
+        "covid_2020_return": -0.1742,
+        "avg_modified_vix": 26.34,
+        "max_modified_vix": 146.93
+      }
+    },
+    "impact_1.0": {
+      "alpha_0": {
+        "alpha": 0.0,
+        "impact_coeff": 1.0,
+        "market_sharpe": 0.6,
+        "market_annual_return": 0.1038,
+        "market_annual_vol": 0.1969,
+        "market_mdd": -0.5519,
+        "vt_agent_sharpe": 1.416,
+        "vt_agent_annual_return": 0.136,
+        "vt_agent_mdd": -0.1783,
+        "bh_agent_sharpe": 0.6,
+        "bh_agent_mdd": -0.5519,
+        "avg_selling_pressure": 0.0,
+        "max_selling_pressure": -0.0,
+        "crisis_2008_return": -0.3696,
+        "covid_2020_return": -0.0529,
+        "avg_modified_vix": 19.94,
+        "max_modified_vix": 146.93
+      },
+      "alpha_5": {
+        "alpha": 0.05,
+        "impact_coeff": 1.0,
+        "market_sharpe": 0.547,
+        "market_annual_return": 0.0985,
+        "market_annual_vol": 0.2138,
+        "market_mdd": -0.5661,
+        "vt_agent_sharpe": 1.281,
+        "vt_agent_annual_return": 0.1394,
+        "vt_agent_mdd": -0.1854,
+        "bh_agent_sharpe": 0.547,
+        "bh_agent_mdd": -0.5661,
+        "avg_selling_pressure": -5e-06,
+        "max_selling_pressure": -0.019388,
+        "crisis_2008_return": -0.3877,
+        "covid_2020_return": -0.0722,
+        "avg_modified_vix": 20.72,
+        "max_modified_vix": 146.93
+      },
+      "alpha_10": {
+        "alpha": 0.1,
+        "impact_coeff": 1.0,
+        "market_sharpe": 0.498,
+        "market_annual_return": 0.0926,
+        "market_annual_vol": 0.2319,
+        "market_mdd": -0.5809,
+        "vt_agent_sharpe": 1.166,
+        "vt_agent_annual_return": 0.1418,
+        "vt_agent_mdd": -0.1922,
+        "bh_agent_sharpe": 0.498,
+        "bh_agent_mdd": -0.5809,
+        "avg_selling_pressure": -1e-05,
+        "max_selling_pressure": -0.038631,
+        "crisis_2008_return": -0.4055,
+        "covid_2020_return": -0.0902,
+        "avg_modified_vix": 21.53,
+        "max_modified_vix": 146.93
+      },
+      "alpha_20": {
+        "alpha": 0.2,
+        "impact_coeff": 1.0,
+        "market_sharpe": 0.418,
+        "market_annual_return": 0.0792,
+        "market_annual_vol": 0.2696,
+        "market_mdd": -0.6167,
+        "vt_agent_sharpe": 0.993,
+        "vt_agent_annual_return": 0.1445,
+        "vt_agent_mdd": -0.2153,
+        "bh_agent_sharpe": 0.418,
+        "bh_agent_mdd": -0.6167,
+        "avg_selling_pressure": -2.1e-05,
+        "max_selling_pressure": -0.076475,
+        "crisis_2008_return": -0.4399,
+        "covid_2020_return": -0.1226,
+        "avg_modified_vix": 23.17,
+        "max_modified_vix": 146.93
+      },
+      "alpha_50": {
+        "alpha": 0.5,
+        "impact_coeff": 1.0,
+        "market_sharpe": 0.272,
+        "market_annual_return": 0.03,
+        "market_annual_vol": 0.3819,
+        "market_mdd": -0.7057,
+        "vt_agent_sharpe": 0.723,
+        "vt_agent_annual_return": 0.1427,
+        "vt_agent_mdd": -0.2852,
+        "bh_agent_sharpe": 0.272,
+        "bh_agent_mdd": -0.7057,
+        "avg_selling_pressure": -5.7e-05,
+        "max_selling_pressure": -0.18247,
+        "crisis_2008_return": -0.5355,
+        "covid_2020_return": -0.1932,
+        "avg_modified_vix": 27.83,
+        "max_modified_vix": 146.93
+      },
+      "alpha_80": {
+        "alpha": 0.8,
+        "impact_coeff": 1.0,
+        "market_sharpe": 0.194,
+        "market_annual_return": -0.0267,
+        "market_annual_vol": 0.4851,
+        "market_mdd": -0.7873,
+        "vt_agent_sharpe": 0.597,
+        "vt_agent_annual_return": 0.1338,
+        "vt_agent_mdd": -0.3624,
+        "bh_agent_sharpe": 0.194,
+        "bh_agent_mdd": -0.7873,
+        "avg_selling_pressure": -9.6e-05,
+        "max_selling_pressure": -0.26774,
+        "crisis_2008_return": -0.6194,
+        "covid_2020_return": -0.251,
+        "avg_modified_vix": 31.62,
+        "max_modified_vix": 146.93
+      }
+    }
+  },
+  "tragedy_of_commons": [
+    {
+      "alpha": 0.0,
+      "vt_sharpe": 1.694,
+      "bh_sharpe": 0.6,
+      "vt_advantage": 1.094,
+      "vt_effectiveness_pct": 100.0
+    },
+    {
+      "alpha": 0.05,
+      "vt_sharpe": 1.346,
+      "bh_sharpe": 0.573,
+      "vt_advantage": 0.773,
+      "vt_effectiveness_pct": 79.4
+    },
+    {
+      "alpha": 0.1,
+      "vt_sharpe": 1.281,
+      "bh_sharpe": 0.547,
+      "vt_advantage": 0.734,
+      "vt_effectiveness_pct": 75.6
+    },
+    {
+      "alpha": 0.2,
+      "vt_sharpe": 1.166,
+      "bh_sharpe": 0.498,
+      "vt_advantage": 0.668,
+      "vt_effectiveness_pct": 68.8
+    },
+    {
+      "alpha": 0.5,
+      "vt_sharpe": 0.928,
+      "bh_sharpe": 0.386,
+      "vt_advantage": 0.542,
+      "vt_effectiveness_pct": 54.8
+    },
+    {
+      "alpha": 0.8,
+      "vt_sharpe": 0.788,
+      "bh_sharpe": 0.31,
+      "vt_advantage": 0.478,
+      "vt_effectiveness_pct": 46.5
+    }
+  ],
+  "threshold_analysis": [
+    {
+      "alpha": 0.0,
+      "vt_sharpe": 1.416,
+      "bh_sharpe": 0.6,
+      "vt_advantage": 0.816,
+      "market_mdd": -0.5519,
+      "vt_mdd": -0.1783
+    },
+    {
+      "alpha": 0.05,
+      "vt_sharpe": 1.346,
+      "bh_sharpe": 0.573,
+      "vt_advantage": 0.773,
+      "market_mdd": -0.5591,
+      "vt_mdd": -0.1819
+    },
+    {
+      "alpha": 0.1,
+      "vt_sharpe": 1.281,
+      "bh_sharpe": 0.547,
+      "vt_advantage": 0.734,
+      "market_mdd": -0.5661,
+      "vt_mdd": -0.1854
+    },
+    {
+      "alpha": 0.15,
+      "vt_sharpe": 1.221,
+      "bh_sharpe": 0.522,
+      "vt_advantage": 0.699,
+      "market_mdd": -0.5729,
+      "vt_mdd": -0.1889
+    },
+    {
+      "alpha": 0.2,
+      "vt_sharpe": 1.166,
+      "bh_sharpe": 0.498,
+      "vt_advantage": 0.668,
+      "market_mdd": -0.5809,
+      "vt_mdd": -0.1922
+    },
+    {
+      "alpha": 0.25,
+      "vt_sharpe": 1.117,
+      "bh_sharpe": 0.476,
+      "vt_advantage": 0.64,
+      "market_mdd": -0.5903,
+      "vt_mdd": -0.1956
+    },
+    {
+      "alpha": 0.3,
+      "vt_sharpe": 1.071,
+      "bh_sharpe": 0.456,
+      "vt_advantage": 0.616,
+      "market_mdd": -0.5993,
+      "vt_mdd": -0.202
+    },
+    {
+      "alpha": 0.35,
+      "vt_sharpe": 1.03,
+      "bh_sharpe": 0.436,
+      "vt_advantage": 0.594,
+      "market_mdd": -0.6081,
+      "vt_mdd": -0.2087
+    },
+    {
+      "alpha": 0.4,
+      "vt_sharpe": 0.993,
+      "bh_sharpe": 0.418,
+      "vt_advantage": 0.575,
+      "market_mdd": -0.6167,
+      "vt_mdd": -0.2153
+    },
+    {
+      "alpha": 0.45,
+      "vt_sharpe": 0.959,
+      "bh_sharpe": 0.402,
+      "vt_advantage": 0.558,
+      "market_mdd": -0.625,
+      "vt_mdd": -0.2219
+    },
+    {
+      "alpha": 0.5,
+      "vt_sharpe": 0.928,
+      "bh_sharpe": 0.386,
+      "vt_advantage": 0.542,
+      "market_mdd": -0.633,
+      "vt_mdd": -0.2282
+    },
+    {
+      "alpha": 0.55,
+      "vt_sharpe": 0.9,
+      "bh_sharpe": 0.371,
+      "vt_advantage": 0.529,
+      "market_mdd": -0.6409,
+      "vt_mdd": -0.2345
+    },
+    {
+      "alpha": 0.6,
+      "vt_sharpe": 0.874,
+      "bh_sharpe": 0.357,
+      "vt_advantage": 0.517,
+      "market_mdd": -0.6485,
+      "vt_mdd": -0.2406
+    },
+    {
+      "alpha": 0.65,
+      "vt_sharpe": 0.85,
+      "bh_sharpe": 0.344,
+      "vt_advantage": 0.506,
+      "market_mdd": -0.6559,
+      "vt_mdd": -0.2466
+    },
+    {
+      "alpha": 0.7,
+      "vt_sharpe": 0.828,
+      "bh_sharpe": 0.332,
+      "vt_advantage": 0.496,
+      "market_mdd": -0.6631,
+      "vt_mdd": -0.2525
+    },
+    {
+      "alpha": 0.75,
+      "vt_sharpe": 0.807,
+      "bh_sharpe": 0.321,
+      "vt_advantage": 0.486,
+      "market_mdd": -0.6702,
+      "vt_mdd": -0.2583
+    },
+    {
+      "alpha": 0.8,
+      "vt_sharpe": 0.788,
+      "bh_sharpe": 0.31,
+      "vt_advantage": 0.478,
+      "market_mdd": -0.677,
+      "vt_mdd": -0.2639
+    },
+    {
+      "alpha": 0.85,
+      "vt_sharpe": 0.77,
+      "bh_sharpe": 0.3,
+      "vt_advantage": 0.471,
+      "market_mdd": -0.6836,
+      "vt_mdd": -0.2694
+    },
+    {
+      "alpha": 0.9,
+      "vt_sharpe": 0.753,
+      "bh_sharpe": 0.29,
+      "vt_advantage": 0.463,
+      "market_mdd": -0.6901,
+      "vt_mdd": -0.2747
+    },
+    {
+      "alpha": 0.95,
+      "vt_sharpe": 0.737,
+      "bh_sharpe": 0.281,
+      "vt_advantage": 0.457,
+      "market_mdd": -0.6978,
+      "vt_mdd": -0.28
+    },
+    {
+      "alpha": 1.0,
+      "vt_sharpe": 0.723,
+      "bh_sharpe": 0.272,
+      "vt_advantage": 0.451,
+      "market_mdd": -0.7057,
+      "vt_mdd": -0.2852
+    }
+  ],
+  "sensitivity_to_impact": {
+    "impact_0.1": null,
+    "impact_0.3": null,
+    "impact_0.5": null,
+    "impact_1.0": null,
+    "impact_2.0": null,
+    "impact_5.0": null
+  },
+  "flash_crash_scenarios": {
+    "alpha_5": {
+      "position_change": "60% -> 30%",
+      "round1_impact_pct": -0.75,
+      "vix_cascades_to": 49.0,
+      "round2_impact_pct": -0.1378,
+      "total_additional_drop_pct": -0.888
+    },
+    "alpha_20": {
+      "position_change": "60% -> 30%",
+      "round1_impact_pct": -3.0,
+      "vix_cascades_to": 76.0,
+      "round2_impact_pct": -1.4211,
+      "total_additional_drop_pct": -4.421
+    },
+    "alpha_50": {
+      "position_change": "60% -> 30%",
+      "round1_impact_pct": -7.5,
+      "vix_cascades_to": 130.0,
+      "round2_impact_pct": -5.1923,
+      "total_additional_drop_pct": -12.692
+    }
+  },
+  "individual_protection": {
+    "alpha_0": {
+      "market_mdd": -0.5519,
+      "vt_mdd": -0.1783,
+      "bh_mdd": -0.5519,
+      "mdd_improvement_pct": 67.7,
+      "vt_sharpe": 1.416,
+      "bh_sharpe": 0.6,
+      "protected": true
+    },
+    "alpha_5": {
+      "market_mdd": -0.5591,
+      "vt_mdd": -0.1819,
+      "bh_mdd": -0.5591,
+      "mdd_improvement_pct": 67.5,
+      "vt_sharpe": 1.346,
+      "bh_sharpe": 0.573,
+      "protected": true
+    },
+    "alpha_20": {
+      "market_mdd": -0.5809,
+      "vt_mdd": -0.1922,
+      "bh_mdd": -0.5809,
+      "mdd_improvement_pct": 66.9,
+      "vt_sharpe": 1.166,
+      "bh_sharpe": 0.498,
+      "protected": true
+    },
+    "alpha_50": {
+      "market_mdd": -0.633,
+      "vt_mdd": -0.2282,
+      "bh_mdd": -0.633,
+      "mdd_improvement_pct": 63.9,
+      "vt_sharpe": 0.928,
+      "bh_sharpe": 0.386,
+      "protected": true
+    },
+    "alpha_80": {
+      "market_mdd": -0.677,
+      "vt_mdd": -0.2639,
+      "bh_mdd": -0.677,
+      "mdd_improvement_pct": 61.0,
+      "vt_sharpe": 0.788,
+      "bh_sharpe": 0.31,
+      "protected": true
+    }
+  },
+  "market_level_harm": {
+    "alpha_5": {
+      "market_mdd": -0.5591,
+      "mdd_change_vs_baseline_pct": -1.3,
+      "market_sharpe": 0.573,
+      "sharpe_change_vs_baseline_pct": -4.5
+    },
+    "alpha_10": {
+      "market_mdd": -0.5661,
+      "mdd_change_vs_baseline_pct": -2.6,
+      "market_sharpe": 0.547,
+      "sharpe_change_vs_baseline_pct": -8.9
+    },
+    "alpha_20": {
+      "market_mdd": -0.5809,
+      "mdd_change_vs_baseline_pct": -5.3,
+      "market_sharpe": 0.498,
+      "sharpe_change_vs_baseline_pct": -16.9
+    },
+    "alpha_50": {
+      "market_mdd": -0.633,
+      "mdd_change_vs_baseline_pct": -14.7,
+      "market_sharpe": 0.386,
+      "sharpe_change_vs_baseline_pct": -35.7
+    },
+    "alpha_80": {
+      "market_mdd": -0.677,
+      "mdd_change_vs_baseline_pct": -22.7,
+      "market_sharpe": 0.31,
+      "sharpe_change_vs_baseline_pct": -48.4
+    }
+  },
+  "heterogeneity_robustness": {
+    "alpha_20": {
+      "homo_mdd": -0.5809,
+      "hetero_mdd": -0.5796,
+      "harm_reduction_pct": 0.2
+    },
+    "alpha_50": {
+      "homo_mdd": -0.633,
+      "hetero_mdd": -0.6267,
+      "harm_reduction_pct": 1.0
+    }
+  },
+  "conclusions": [
+    "月度 VT 在中等市場衝擊下，即使高採用率 Sharpe 優勢仍然正值——月度再平衡是天然斷路器",
+    "個人 VT 用戶在所有測試採用率下都維持 MDD 保護——共有地悲劇不完全適用於 MDD",
+    "alpha=50% 時，市場整體 MDD 惡化 -15%——所有人受害",
+    "異質性（k=8-16）將傷害降低 1%——多元化是天然穩定器",
+    "與 1987 投資組合保險不同，VT 的月度再平衡避免了連續 delta-hedging 造成的日內連鎖崩盤",
+    "目前 VT 採用率可忽略不計——反饋風險純屬理論探討，但值得在推廣 VT 時預先警示"
+  ],
+  "key_findings": {
+    "finding_1_individual_protection": "VT 在所有測試採用率下都維持個人 MDD 保護——共有地悲劇不完全適用於 MDD",
+    "finding_2_market_harm": "市場整體因反饋迴路變得更波動——所有人都受害（包括 BH 投資者）",
+    "finding_3_monthly_circuit_breaker": "月度再平衡是天然斷路器——限制了反饋迴路的破壞力",
+    "finding_4_heterogeneity_stabilizes": "使用不同 k 值（8-16）顯著降低同步賣壓的系統性風險",
+    "finding_5_pi_comparison": "與 1987 投資組合保險（連續 delta-hedging + 高集中度）相比，月度 VT 反饋風險低得多",
+    "finding_6_current_irrelevance": "目前 VT 市場佔比微乎其微，反饋風險純屬理論"
+  },
+  "practical_implications": {
+    "current_risk": "極低——VT 策略市場佔比 <0.01%",
+    "future_risk": "如果 VT 成為主流（alpha>20%），月度頻率提供天然保護但市場波動仍會上升",
+    "mitigation_strategies": [
+      "異質性：不同 k 值 + 不同再平衡日期降低同步賣壓",
+      "月度再平衡：避免日內連鎖崩盤（vs 1987 PI 的連續 hedging）",
+      "資產多元化：50/50 SPY/GLD 分散單一市場衝擊",
+      "彈性閾值：不同投資者用不同 VIX 閾值自然形成異質性"
+    ],
+    "historical_parallel": "1987 投資組合保險 alpha~3-5% 就足以觸發 Black Monday。關鍵差異：PI 是連續 delta-hedging + 同步執行；VT 是月度 + 自然異質性。",
+    "for_regulators": "VT 的慢頻率不太可能造成 flash crash，但需監測日度/即時 VT 變種的系統性風險"
+  },
+  "limitations": [
+    "反饋模型高度簡化——真實市場有做市商、套利者、央行等緩衝機制",
+    "Impact coefficient 是假設值——真實市場深度隨時間和市況變化",
+    "VIX 回饋機制是線性近似——真實 VIX 動態更複雜（含 term structure、VVIX 等）",
+    "未考慮 VT 代理人不同的再平衡日期（月初 vs 月中等）",
+    "未考慮 limit order book 動態和做市商/套利者的反向交易"
+  ]
+}

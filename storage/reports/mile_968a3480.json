@@ -1,0 +1,22 @@
+{
+  "id": "mile_968a3480",
+  "title": "Phase F 突破：GRU 首次在公平 OOS 超越 GARCH（-0.06%）",
+  "description": "有了 25 年（5500 天）的訓練數據，GRU 終於穩定了！\n\n| 模型 | QLIKE | vs GARCH |\n|------|-------|---------|\n| **GRU (32-unit, 2-layer)** | **-8.9588** | **-0.06%** |\n| GARCH (GJR) | -8.9533 | 基準 |\n| XGBoost | -8.8137 | +1.31% |\n\n**首次有 DL 模型在公平 OOS 中超越 GARCH。**\n\n但改善極小（0.06%），實務上可忽略。\nGARCH 用 3 個參數 + 252 天就能達到幾乎同樣的精度。\nGRU 需要 5500 天訓練 + 32 維隱藏層 + GPU。\n\n**結論**：GARCH 的線性遞迴已捕捉 99.9%+ 的波動率 pattern。\nDL 能找到的非線性殘餘 < 0.1%。\n    ",
+  "category": "milestone",
+  "phase": "phase_f_retry",
+  "details": {
+    "gru_qlike": -8.9588,
+    "garch_qlike": -8.9533,
+    "improvement": "-0.06%",
+    "training_days": 5500,
+    "xgboost_qlike": -8.8137
+  },
+  "published_at": "2026-03-14T17:05:41.458449+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "GARCH",
+    "GJR-GARCH",
+    "LSTM"
+  ]
+}

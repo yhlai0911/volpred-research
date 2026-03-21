@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-03-21T10:57:08.301060+00:00",
+  "cadence_hint": "每 6 小時檢查 pending_questions，評分後呼叫 question-rerank；既有榜單相對順序不應變動。",
+  "table_columns": [
+    "排名",
+    "前次排名",
+    "主題",
+    "提出者",
+    "狀態"
+  ],
+  "health": {
+    "active_ranked": 1,
+    "pending_evaluation": 0,
+    "researching": 0,
+    "answered": 8,
+    "scored_questions": 9,
+    "candidate_pool": 0,
+    "latest_member_question_at": "2026-03-20T14:51:48.640783+00:00",
+    "latest_answered_at": null
+  },
+  "ranked_table": [
+    {
+      "rank": 1,
+      "prev_rank": null,
+      "rank_delta": null,
+      "rank_direction": "new",
+      "question_id": "54ba8732-2c80-46fb-a8bb-439658d589c4",
+      "question": "testtewtrwqetwqtewqtqwet",
+      "proposer": "yhlai",
+      "status": "ranked",
+      "score": 1,
+      "linked_articles_count": 0,
+      "created_at": "2026-03-20T14:51:48.640783+00:00"
+    }
+  ],
+  "pending_questions": [],
+  "candidate_pool": [],
+  "suggestions": [
+    "前 1 名中仍有未連文章題目，適合優先安排研究或發文。",
+    "目前沒有研究中的會員題目，可從榜首或候選池中領取下一題。"
+  ],
+  "workflow_name": "member_question_rerank_cycle",
+  "workflow_steps": [
+    "讀 pending_questions 與 ranked_table，理解現有榜單與待評分題目。",
+    "用 LLM 對 pending_questions 逐題評分，填入 evaluation_template。",
+    "執行 question-rerank，把新題目插入既有榜單，且不改變舊榜單相對順序。"
+  ],
+  "evaluation_template": [],
+  "next_commands": {
+    "read_summary": "uv run python -m volpred.cli ops question-ranking-summary --source user --limit 5",
+    "apply_rerank": "uv run python -m volpred.cli ops question-rerank --evaluations-json /path/to/evaluations.json"
+  }
+}

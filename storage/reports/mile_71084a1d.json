@@ -1,0 +1,25 @@
+{
+  "id": "mile_71084a1d",
+  "title": "Window Size Trade-off：QLIKE 精準度 vs VaR 安全性的根本矛盾",
+  "description": "## Window Size 系統性比較\n\nSPY GJR-arch/Normal，三種 window 在兩個 OOS 期間：\n\n| Window | 2023-2024 QLIKE | 2025 QLIKE | VaR 1% Rate | ES Ratio 1% |\n|--------|----------------|------------|-------------|-------------|\n| 252 | **-9.034** | -8.798 | 2.0% | 1.20 |\n| 504 | — | **-8.818** | 2.0% | 1.27 |\n| 1000 | -8.994 | -8.741 | **2.0%** | **1.09** |\n\n## 發現\n\n**QLIKE 和 VaR 隨 window size 反向移動**：\n- 短 window (252)：追踪精準（QLIKE 最好），但參數估計不穩定（低於 500 門檻）\n- 長 window (1000)：參數穩定（ES ratio 最接近 1），但反應遲鈍（QLIKE 差 0.4%）\n- **Window=504 是 QLIKE+VaR 的 sweet spot**\n\n## 財金意義\n\n這是 **estimation precision vs risk management 的根本矛盾**——精準預測和保守風控不能兩全。w=504 在文獻推薦門檻（≥500）上，同時保持了合理的 QLIKE。",
+  "category": "milestone",
+  "phase": "window_tradeoff",
+  "details": {
+    "w252_qlike_2023": -9.034,
+    "w252_qlike_2025": -8.798,
+    "w504_qlike_2025": -8.818,
+    "w1000_qlike_2023": -8.994,
+    "w1000_qlike_2025": -8.741,
+    "w1000_es_ratio": 1.09
+  },
+  "published_at": "2026-03-14T20:41:26.403482+00:00",
+  "status": "published",
+  "tags": [
+    "ES",
+    "VaR",
+    "波動率預測",
+    "風險管理",
+    "GJR-GARCH",
+    "Normal-VaR"
+  ]
+}

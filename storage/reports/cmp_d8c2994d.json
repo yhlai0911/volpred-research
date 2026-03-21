@@ -1,0 +1,44 @@
+{
+  "id": "cmp_d8c2994d",
+  "experiment_ids": [],
+  "title": "4 資產 Adaptive Window 指南：Persistence Stability 決定最佳 Window",
+  "category": "comparison",
+  "ranking": [
+    {
+      "rank": 1,
+      "asset": "SPY",
+      "pers_std_2023": 0.007,
+      "optimal_window": 504,
+      "status": "stable"
+    },
+    {
+      "rank": 2,
+      "asset": "GLD",
+      "pers_std_2023": 0.071,
+      "optimal_window": "252→504",
+      "status": "stabilizing"
+    },
+    {
+      "rank": 3,
+      "asset": "BTC",
+      "pers_std_2023": 0.139,
+      "optimal_window": "252→504",
+      "status": "stabilizing"
+    },
+    {
+      "rank": 4,
+      "asset": "TLT",
+      "pers_std_2023": 0.214,
+      "optimal_window": 252,
+      "status": "unstable"
+    }
+  ],
+  "analysis": "4 資產 Persistence Stability 指南（rolling 60-day std of GJR persistence）：\n\n**SPY** (std=0.007)：極穩定 → **w=504**\n**GLD** (std 0.12→0.02)：2022 不穩但 2024-25 趨穩 → **w=252→504 轉換中**\n**BTC** (std 0.18→0.03)：2024 前不穩但 2025 突然穩定 → **w=252，觀察是否可轉 504**\n**TLT** (std=0.21)：利率政策驅動的 structural break → **w=252**\n\n**操作規則**：persistence std < 0.02 → w=504；std > 0.05 → w=252；中間 → 可用 w=378（18個月）",
+  "tags": [
+    "adaptive window",
+    "跨資產",
+    "persistence stability"
+  ],
+  "published_at": "2026-03-14T21:19:16.657072+00:00",
+  "status": "published"
+}

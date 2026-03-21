@@ -1,0 +1,1261 @@
+{
+  "experiment": "Interest Rate Regime VT Analysis",
+  "description": "利率環境對 VT 策略經濟學的影響。高利率時期，VT 持有的現金部位可賺取 T-bill 收益，降低保險成本。分析 SPY 12/VIX 和 50/50 SPY/GLD 在不同利率環境下的表現。",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T15:52:54.410219",
+  "status": "draft",
+  "config": {
+    "start": "2005-02-28",
+    "end": "2026-03-20",
+    "vix_threshold": 12.0,
+    "rebalance": "monthly",
+    "weight_lag": "1 month (lagged)",
+    "cash_proxy": "^IRX (3-month T-bill yield)",
+    "regime_thresholds": {
+      "high": ">3%",
+      "mid": "1-3%",
+      "low": "<1%"
+    }
+  },
+  "full_sample": {
+    "results": {
+      "spy_bh": {
+        "label": "SPY B&H",
+        "n_days": 5294,
+        "ann_return": 0.1165,
+        "ann_vol": 0.1906,
+        "sharpe": 0.522,
+        "sharpe_rf0": 0.6116,
+        "mdd": -0.5519,
+        "calmar": 0.2112,
+        "sortino": 0.6373
+      },
+      "spy_vt_cash0": {
+        "label": "SPY 12/VIX (cash=0%)",
+        "n_days": 5294,
+        "ann_return": 0.0745,
+        "ann_vol": 0.1165,
+        "sharpe": 0.4931,
+        "sharpe_rf0": 0.6396,
+        "mdd": -0.293,
+        "calmar": 0.2542,
+        "sortino": 0.6074
+      },
+      "spy_vt_cash_tbill": {
+        "label": "SPY 12/VIX (cash=T-bill)",
+        "n_days": 5294,
+        "ann_return": 0.0783,
+        "ann_vol": 0.1165,
+        "sharpe": 0.5259,
+        "sharpe_rf0": 0.6725,
+        "mdd": -0.284,
+        "calmar": 0.2758,
+        "sortino": 0.6476
+      },
+      "port_bh": {
+        "label": "50/50 SPY/GLD B&H",
+        "n_days": 5294,
+        "ann_return": 0.1201,
+        "ann_vol": 0.1352,
+        "sharpe": 0.7621,
+        "sharpe_rf0": 0.8884,
+        "mdd": -0.3249,
+        "calmar": 0.3696,
+        "sortino": 0.9767
+      },
+      "port_vt_cash0": {
+        "label": "50/50 12/VIX (cash=0%)",
+        "n_days": 5294,
+        "ann_return": 0.0796,
+        "ann_vol": 0.0868,
+        "sharpe": 0.7199,
+        "sharpe_rf0": 0.9166,
+        "mdd": -0.1758,
+        "calmar": 0.4525,
+        "sortino": 0.9193
+      },
+      "port_vt_cash_tbill": {
+        "label": "50/50 12/VIX (cash=T-bill)",
+        "n_days": 5294,
+        "ann_return": 0.0834,
+        "ann_vol": 0.0868,
+        "sharpe": 0.764,
+        "sharpe_rf0": 0.9607,
+        "mdd": -0.1733,
+        "calmar": 0.4811,
+        "sortino": 0.9754
+      }
+    },
+    "insurance_cost": {
+      "spy": {
+        "raw_annual_pct": 4.2,
+        "cash_yield_earned_pct": 0.38,
+        "adjusted_annual_pct": 3.82,
+        "cash_offset_pct": 0.38
+      },
+      "port_5050": {
+        "raw_annual_pct": 4.05,
+        "cash_yield_earned_pct": 0.38,
+        "adjusted_annual_pct": 3.67,
+        "cash_offset_pct": 0.38
+      }
+    }
+  },
+  "regime_analysis": {
+    "high": {
+      "avg_irx": 4.46,
+      "n_days": 1507,
+      "spy_bh": {
+        "label": "SPY B&H [high]",
+        "n_days": 1507,
+        "ann_return": 0.1216,
+        "ann_vol": 0.1486,
+        "sharpe": 0.5176,
+        "sharpe_rf0": 0.8177,
+        "mdd": -0.2588,
+        "calmar": 0.4697,
+        "sortino": 0.7015
+      },
+      "spy_vt_cash0": {
+        "label": "SPY VT(0%) [high]",
+        "n_days": 1507,
+        "ann_return": 0.0942,
+        "ann_vol": 0.1076,
+        "sharpe": 0.4615,
+        "sharpe_rf0": 0.8762,
+        "mdd": -0.167,
+        "calmar": 0.5645,
+        "sortino": 0.6238
+      },
+      "spy_vt_cash_tbill": {
+        "label": "SPY VT(Tbill) [high]",
+        "n_days": 1507,
+        "ann_return": 0.1036,
+        "ann_vol": 0.1076,
+        "sharpe": 0.5483,
+        "sharpe_rf0": 0.963,
+        "mdd": -0.1609,
+        "calmar": 0.644,
+        "sortino": 0.7408
+      },
+      "spy_insurance_raw": 0.0273,
+      "spy_cash_yield_earned": 0.0093,
+      "spy_insurance_adjusted": 0.018,
+      "port_bh": {
+        "label": "50/50 B&H [high]",
+        "n_days": 1507,
+        "ann_return": 0.2042,
+        "ann_vol": 0.1316,
+        "sharpe": 1.2123,
+        "sharpe_rf0": 1.5512,
+        "mdd": -0.1413,
+        "calmar": 1.4445,
+        "sortino": 1.6267
+      },
+      "port_vt_cash0": {
+        "label": "50/50 VT(0%) [high]",
+        "n_days": 1507,
+        "ann_return": 0.158,
+        "ann_vol": 0.1021,
+        "sharpe": 1.1115,
+        "sharpe_rf0": 1.5486,
+        "mdd": -0.1413,
+        "calmar": 1.1182,
+        "sortino": 1.4478
+      },
+      "port_vt_cash_tbill": {
+        "label": "50/50 VT(Tbill) [high]",
+        "n_days": 1507,
+        "ann_return": 0.1674,
+        "ann_vol": 0.1021,
+        "sharpe": 1.2031,
+        "sharpe_rf0": 1.6402,
+        "mdd": -0.1413,
+        "calmar": 1.1843,
+        "sortino": 1.565
+      },
+      "port_insurance_raw": 0.0461,
+      "port_cash_yield_earned": 0.0093,
+      "port_insurance_adjusted": 0.0368
+    },
+    "mid": {
+      "avg_irx": 1.9,
+      "n_days": 1002,
+      "spy_bh": {
+        "label": "SPY B&H [mid]",
+        "n_days": 1002,
+        "ann_return": 0.0638,
+        "ann_vol": 0.168,
+        "sharpe": 0.2667,
+        "sharpe_rf0": 0.3801,
+        "mdd": -0.1935,
+        "calmar": 0.33,
+        "sortino": 0.3306
+      },
+      "spy_vt_cash0": {
+        "label": "SPY VT(0%) [mid]",
+        "n_days": 1002,
+        "ann_return": 0.0537,
+        "ann_vol": 0.1172,
+        "sharpe": 0.2954,
+        "sharpe_rf0": 0.458,
+        "mdd": -0.1335,
+        "calmar": 0.4018,
+        "sortino": 0.3539
+      },
+      "spy_vt_cash_tbill": {
+        "label": "SPY VT(Tbill) [mid]",
+        "n_days": 1002,
+        "ann_return": 0.0586,
+        "ann_vol": 0.1172,
+        "sharpe": 0.3373,
+        "sharpe_rf0": 0.4998,
+        "mdd": -0.1328,
+        "calmar": 0.4409,
+        "sortino": 0.404
+      },
+      "spy_insurance_raw": 0.0102,
+      "spy_cash_yield_earned": 0.0049,
+      "spy_insurance_adjusted": 0.0053,
+      "port_bh": {
+        "label": "50/50 B&H [mid]",
+        "n_days": 1002,
+        "ann_return": 0.0411,
+        "ann_vol": 0.1088,
+        "sharpe": 0.2027,
+        "sharpe_rf0": 0.3778,
+        "mdd": -0.191,
+        "calmar": 0.2151,
+        "sortino": 0.2553
+      },
+      "port_vt_cash0": {
+        "label": "50/50 VT(0%) [mid]",
+        "n_days": 1002,
+        "ann_return": 0.0419,
+        "ann_vol": 0.0739,
+        "sharpe": 0.3097,
+        "sharpe_rf0": 0.5673,
+        "mdd": -0.1137,
+        "calmar": 0.369,
+        "sortino": 0.3989
+      },
+      "port_vt_cash_tbill": {
+        "label": "50/50 VT(Tbill) [mid]",
+        "n_days": 1002,
+        "ann_return": 0.0468,
+        "ann_vol": 0.0739,
+        "sharpe": 0.3761,
+        "sharpe_rf0": 0.6336,
+        "mdd": -0.1115,
+        "calmar": 0.4201,
+        "sortino": 0.4841
+      },
+      "port_insurance_raw": -0.0009,
+      "port_cash_yield_earned": 0.0049,
+      "port_insurance_adjusted": -0.0058
+    },
+    "low": {
+      "avg_irx": 0.15,
+      "n_days": 2785,
+      "spy_bh": {
+        "label": "SPY B&H [low]",
+        "n_days": 2785,
+        "ann_return": 0.1328,
+        "ann_vol": 0.2166,
+        "sharpe": 0.6062,
+        "sharpe_rf0": 0.6129,
+        "mdd": -0.4405,
+        "calmar": 0.3014,
+        "sortino": 0.7252
+      },
+      "spy_vt_cash0": {
+        "label": "SPY VT(0%) [low]",
+        "n_days": 2785,
+        "ann_return": 0.0713,
+        "ann_vol": 0.1208,
+        "sharpe": 0.5782,
+        "sharpe_rf0": 0.5903,
+        "mdd": -0.1883,
+        "calmar": 0.3787,
+        "sortino": 0.6938
+      },
+      "spy_vt_cash_tbill": {
+        "label": "SPY VT(Tbill) [low]",
+        "n_days": 2785,
+        "ann_return": 0.0718,
+        "ann_vol": 0.1208,
+        "sharpe": 0.582,
+        "sharpe_rf0": 0.5941,
+        "mdd": -0.1877,
+        "calmar": 0.3823,
+        "sortino": 0.6984
+      },
+      "spy_insurance_raw": 0.0615,
+      "spy_cash_yield_earned": 0.0005,
+      "spy_insurance_adjusted": 0.061,
+      "port_bh": {
+        "label": "50/50 B&H [low]",
+        "n_days": 2785,
+        "ann_return": 0.103,
+        "ann_vol": 0.1452,
+        "sharpe": 0.6993,
+        "sharpe_rf0": 0.7094,
+        "mdd": -0.2342,
+        "calmar": 0.4399,
+        "sortino": 0.8853
+      },
+      "port_vt_cash0": {
+        "label": "50/50 VT(0%) [low]",
+        "n_days": 2785,
+        "ann_return": 0.0506,
+        "ann_vol": 0.0819,
+        "sharpe": 0.6004,
+        "sharpe_rf0": 0.6182,
+        "mdd": -0.12,
+        "calmar": 0.4219,
+        "sortino": 0.7569
+      },
+      "port_vt_cash_tbill": {
+        "label": "50/50 VT(Tbill) [low]",
+        "n_days": 2785,
+        "ann_return": 0.0511,
+        "ann_vol": 0.0819,
+        "sharpe": 0.606,
+        "sharpe_rf0": 0.6238,
+        "mdd": -0.1198,
+        "calmar": 0.4264,
+        "sortino": 0.764
+      },
+      "port_insurance_raw": 0.0524,
+      "port_cash_yield_earned": 0.0005,
+      "port_insurance_adjusted": 0.052
+    }
+  },
+  "yearly_decomposition": {
+    "2005": {
+      "year": 2005,
+      "avg_irx": 3.26,
+      "avg_equity_weight": 0.92,
+      "avg_cash_alloc": 0.08,
+      "bh_return": 0.0559,
+      "vt_return_cash0": 0.0505,
+      "vt_return_cash_tbill": 0.0531,
+      "insurance_raw": 0.0055,
+      "cash_yield_earned": 0.0026,
+      "insurance_adjusted": 0.0029
+    },
+    "2006": {
+      "year": 2006,
+      "avg_irx": 4.72,
+      "avg_equity_weight": 0.942,
+      "avg_cash_alloc": 0.058,
+      "bh_return": 0.1533,
+      "vt_return_cash0": 0.1427,
+      "vt_return_cash_tbill": 0.1455,
+      "insurance_raw": 0.0106,
+      "cash_yield_earned": 0.0028,
+      "insurance_adjusted": 0.0078
+    },
+    "2007": {
+      "year": 2007,
+      "avg_irx": 4.33,
+      "avg_equity_weight": 0.784,
+      "avg_cash_alloc": 0.216,
+      "bh_return": 0.063,
+      "vt_return_cash0": 0.0394,
+      "vt_return_cash_tbill": 0.0479,
+      "insurance_raw": 0.0236,
+      "cash_yield_earned": 0.0085,
+      "insurance_adjusted": 0.0151
+    },
+    "2008": {
+      "year": 2008,
+      "avg_irx": 1.33,
+      "avg_equity_weight": 0.483,
+      "avg_cash_alloc": 0.517,
+      "bh_return": -0.3721,
+      "vt_return_cash0": -0.2022,
+      "vt_return_cash_tbill": -0.1958,
+      "insurance_raw": -0.1699,
+      "cash_yield_earned": 0.0063,
+      "insurance_adjusted": -0.1763
+    },
+    "2009": {
+      "year": 2009,
+      "avg_irx": 0.14,
+      "avg_equity_weight": 0.36,
+      "avg_cash_alloc": 0.64,
+      "bh_return": 0.2693,
+      "vt_return_cash0": 0.1061,
+      "vt_return_cash_tbill": 0.107,
+      "insurance_raw": 0.1632,
+      "cash_yield_earned": 0.0009,
+      "insurance_adjusted": 0.1623
+    },
+    "2010": {
+      "year": 2010,
+      "avg_irx": 0.13,
+      "avg_equity_weight": 0.511,
+      "avg_cash_alloc": 0.489,
+      "bh_return": 0.1569,
+      "vt_return_cash0": 0.0669,
+      "vt_return_cash_tbill": 0.0676,
+      "insurance_raw": 0.09,
+      "cash_yield_earned": 0.0006,
+      "insurance_adjusted": 0.0894
+    },
+    "2011": {
+      "year": 2011,
+      "avg_irx": 0.04,
+      "avg_equity_weight": 0.582,
+      "avg_cash_alloc": 0.418,
+      "bh_return": 0.0453,
+      "vt_return_cash0": 0.0089,
+      "vt_return_cash_tbill": 0.0091,
+      "insurance_raw": 0.0364,
+      "cash_yield_earned": 0.0002,
+      "insurance_adjusted": 0.0362
+    },
+    "2012": {
+      "year": 2012,
+      "avg_irx": 0.08,
+      "avg_equity_weight": 0.639,
+      "avg_cash_alloc": 0.361,
+      "bh_return": 0.1576,
+      "vt_return_cash0": 0.0783,
+      "vt_return_cash_tbill": 0.0785,
+      "insurance_raw": 0.0794,
+      "cash_yield_earned": 0.0003,
+      "insurance_adjusted": 0.0791
+    },
+    "2013": {
+      "year": 2013,
+      "avg_irx": 0.05,
+      "avg_equity_weight": 0.792,
+      "avg_cash_alloc": 0.208,
+      "bh_return": 0.2862,
+      "vt_return_cash0": 0.228,
+      "vt_return_cash_tbill": 0.2281,
+      "insurance_raw": 0.0582,
+      "cash_yield_earned": 0.0001,
+      "insurance_adjusted": 0.0581
+    },
+    "2014": {
+      "year": 2014,
+      "avg_irx": 0.02,
+      "avg_equity_weight": 0.862,
+      "avg_cash_alloc": 0.138,
+      "bh_return": 0.1327,
+      "vt_return_cash0": 0.1157,
+      "vt_return_cash_tbill": 0.1158,
+      "insurance_raw": 0.0169,
+      "cash_yield_earned": 0.0,
+      "insurance_adjusted": 0.0169
+    },
+    "2015": {
+      "year": 2015,
+      "avg_irx": 0.04,
+      "avg_equity_weight": 0.736,
+      "avg_cash_alloc": 0.264,
+      "bh_return": 0.0241,
+      "vt_return_cash0": -0.0317,
+      "vt_return_cash_tbill": -0.0316,
+      "insurance_raw": 0.0559,
+      "cash_yield_earned": 0.0001,
+      "insurance_adjusted": 0.0558
+    },
+    "2016": {
+      "year": 2016,
+      "avg_irx": 0.3,
+      "avg_equity_weight": 0.775,
+      "avg_cash_alloc": 0.225,
+      "bh_return": 0.1223,
+      "vt_return_cash0": 0.0897,
+      "vt_return_cash_tbill": 0.0904,
+      "insurance_raw": 0.0326,
+      "cash_yield_earned": 0.0007,
+      "insurance_adjusted": 0.032
+    },
+    "2017": {
+      "year": 2017,
+      "avg_irx": 0.92,
+      "avg_equity_weight": 0.973,
+      "avg_cash_alloc": 0.027,
+      "bh_return": 0.1996,
+      "vt_return_cash0": 0.1907,
+      "vt_return_cash_tbill": 0.1909,
+      "insurance_raw": 0.0088,
+      "cash_yield_earned": 0.0002,
+      "insurance_adjusted": 0.0087
+    },
+    "2018": {
+      "year": 2018,
+      "avg_irx": 1.92,
+      "avg_equity_weight": 0.815,
+      "avg_cash_alloc": 0.185,
+      "bh_return": -0.0324,
+      "vt_return_cash0": -0.0177,
+      "vt_return_cash_tbill": -0.0141,
+      "insurance_raw": -0.0147,
+      "cash_yield_earned": 0.0036,
+      "insurance_adjusted": -0.0183
+    },
+    "2019": {
+      "year": 2019,
+      "avg_irx": 2.04,
+      "avg_equity_weight": 0.746,
+      "avg_cash_alloc": 0.254,
+      "bh_return": 0.2797,
+      "vt_return_cash0": 0.1931,
+      "vt_return_cash_tbill": 0.1984,
+      "insurance_raw": 0.0865,
+      "cash_yield_earned": 0.0053,
+      "insurance_adjusted": 0.0813
+    },
+    "2020": {
+      "year": 2020,
+      "avg_irx": 0.34,
+      "avg_equity_weight": 0.486,
+      "avg_cash_alloc": 0.514,
+      "bh_return": 0.2238,
+      "vt_return_cash0": 0.0156,
+      "vt_return_cash_tbill": 0.0164,
+      "insurance_raw": 0.2082,
+      "cash_yield_earned": 0.0008,
+      "insurance_adjusted": 0.2074
+    },
+    "2021": {
+      "year": 2021,
+      "avg_irx": 0.03,
+      "avg_equity_weight": 0.608,
+      "avg_cash_alloc": 0.392,
+      "bh_return": 0.2611,
+      "vt_return_cash0": 0.1516,
+      "vt_return_cash_tbill": 0.1518,
+      "insurance_raw": 0.1094,
+      "cash_yield_earned": 0.0001,
+      "insurance_adjusted": 0.1093
+    },
+    "2022": {
+      "year": 2022,
+      "avg_irx": 2.0,
+      "avg_equity_weight": 0.474,
+      "avg_cash_alloc": 0.526,
+      "bh_return": -0.172,
+      "vt_return_cash0": -0.0713,
+      "vt_return_cash_tbill": -0.0605,
+      "insurance_raw": -0.1007,
+      "cash_yield_earned": 0.0109,
+      "insurance_adjusted": -0.1115
+    },
+    "2023": {
+      "year": 2023,
+      "avg_irx": 5.05,
+      "avg_equity_weight": 0.704,
+      "avg_cash_alloc": 0.296,
+      "bh_return": 0.243,
+      "vt_return_cash0": 0.1413,
+      "vt_return_cash_tbill": 0.156,
+      "insurance_raw": 0.1017,
+      "cash_yield_earned": 0.0147,
+      "insurance_adjusted": 0.087
+    },
+    "2024": {
+      "year": 2024,
+      "avg_irx": 4.95,
+      "avg_equity_weight": 0.834,
+      "avg_cash_alloc": 0.166,
+      "bh_return": 0.2302,
+      "vt_return_cash0": 0.2013,
+      "vt_return_cash_tbill": 0.2092,
+      "insurance_raw": 0.0289,
+      "cash_yield_earned": 0.0079,
+      "insurance_adjusted": 0.0211
+    },
+    "2025": {
+      "year": 2025,
+      "avg_irx": 4.05,
+      "avg_equity_weight": 0.686,
+      "avg_cash_alloc": 0.314,
+      "bh_return": 0.1832,
+      "vt_return_cash0": 0.1135,
+      "vt_return_cash_tbill": 0.1263,
+      "insurance_raw": 0.0697,
+      "cash_yield_earned": 0.0128,
+      "insurance_adjusted": 0.0569
+    }
+  },
+  "rolling_sharpe_vs_rate": {
+    "correlation_cash0": 0.648,
+    "correlation_cash_tbill": 0.733,
+    "n_windows": 73,
+    "window_size_days": 756,
+    "data": [
+      {
+        "period_end": "2008-03-04",
+        "avg_irx": 4.05,
+        "bh_sharpe": 0.436,
+        "vt_cash0_sharpe": 0.558,
+        "vt_tbill_sharpe": 0.607,
+        "sharpe_improvement_cash0": 0.122,
+        "sharpe_improvement_tbill": 0.17
+      },
+      {
+        "period_end": "2008-06-03",
+        "avg_irx": 3.94,
+        "bh_sharpe": 0.538,
+        "vt_cash0_sharpe": 0.66,
+        "vt_tbill_sharpe": 0.714,
+        "sharpe_improvement_cash0": 0.123,
+        "sharpe_improvement_tbill": 0.176
+      },
+      {
+        "period_end": "2008-09-02",
+        "avg_irx": 3.82,
+        "bh_sharpe": 0.315,
+        "vt_cash0_sharpe": 0.481,
+        "vt_tbill_sharpe": 0.536,
+        "sharpe_improvement_cash0": 0.166,
+        "sharpe_improvement_tbill": 0.221
+      },
+      {
+        "period_end": "2008-12-01",
+        "avg_irx": 3.56,
+        "bh_sharpe": -0.357,
+        "vt_cash0_sharpe": -0.115,
+        "vt_tbill_sharpe": -0.073,
+        "sharpe_improvement_cash0": 0.242,
+        "sharpe_improvement_tbill": 0.283
+      },
+      {
+        "period_end": "2009-03-04",
+        "avg_irx": 3.23,
+        "bh_sharpe": -0.503,
+        "vt_cash0_sharpe": -0.27,
+        "vt_tbill_sharpe": -0.23,
+        "sharpe_improvement_cash0": 0.233,
+        "sharpe_improvement_tbill": 0.273
+      },
+      {
+        "period_end": "2009-06-03",
+        "avg_irx": 2.86,
+        "bh_sharpe": -0.134,
+        "vt_cash0_sharpe": -0.072,
+        "vt_tbill_sharpe": -0.032,
+        "sharpe_improvement_cash0": 0.062,
+        "sharpe_improvement_tbill": 0.103
+      },
+      {
+        "period_end": "2009-09-01",
+        "avg_irx": 2.46,
+        "bh_sharpe": -0.079,
+        "vt_cash0_sharpe": -0.058,
+        "vt_tbill_sharpe": -0.02,
+        "sharpe_improvement_cash0": 0.021,
+        "sharpe_improvement_tbill": 0.059
+      },
+      {
+        "period_end": "2009-12-01",
+        "avg_irx": 2.06,
+        "bh_sharpe": -0.039,
+        "vt_cash0_sharpe": -0.105,
+        "vt_tbill_sharpe": -0.069,
+        "sharpe_improvement_cash0": -0.066,
+        "sharpe_improvement_tbill": -0.03
+      },
+      {
+        "period_end": "2010-03-04",
+        "avg_irx": 1.66,
+        "bh_sharpe": 0.001,
+        "vt_cash0_sharpe": -0.047,
+        "vt_tbill_sharpe": -0.01,
+        "sharpe_improvement_cash0": -0.047,
+        "sharpe_improvement_tbill": -0.011
+      },
+      {
+        "period_end": "2010-06-03",
+        "avg_irx": 1.27,
+        "bh_sharpe": -0.139,
+        "vt_cash0_sharpe": -0.322,
+        "vt_tbill_sharpe": -0.289,
+        "sharpe_improvement_cash0": -0.183,
+        "sharpe_improvement_tbill": -0.15
+      },
+      {
+        "period_end": "2010-09-01",
+        "avg_irx": 0.9,
+        "bh_sharpe": -0.112,
+        "vt_cash0_sharpe": -0.27,
+        "vt_tbill_sharpe": -0.241,
+        "sharpe_improvement_cash0": -0.158,
+        "sharpe_improvement_tbill": -0.129
+      },
+      {
+        "period_end": "2010-12-02",
+        "avg_irx": 0.61,
+        "bh_sharpe": 0.012,
+        "vt_cash0_sharpe": -0.127,
+        "vt_tbill_sharpe": -0.107,
+        "sharpe_improvement_cash0": -0.139,
+        "sharpe_improvement_tbill": -0.119
+      },
+      {
+        "period_end": "2011-03-04",
+        "avg_irx": 0.41,
+        "bh_sharpe": 0.218,
+        "vt_cash0_sharpe": 0.119,
+        "vt_tbill_sharpe": 0.133,
+        "sharpe_improvement_cash0": -0.1,
+        "sharpe_improvement_tbill": -0.085
+      },
+      {
+        "period_end": "2011-06-03",
+        "avg_irx": 0.29,
+        "bh_sharpe": 0.157,
+        "vt_cash0_sharpe": 0.046,
+        "vt_tbill_sharpe": 0.056,
+        "sharpe_improvement_cash0": -0.111,
+        "sharpe_improvement_tbill": -0.101
+      },
+      {
+        "period_end": "2011-09-01",
+        "avg_irx": 0.15,
+        "bh_sharpe": 0.161,
+        "vt_cash0_sharpe": 0.033,
+        "vt_tbill_sharpe": 0.038,
+        "sharpe_improvement_cash0": -0.128,
+        "sharpe_improvement_tbill": -0.123
+      },
+      {
+        "period_end": "2011-12-01",
+        "avg_irx": 0.1,
+        "bh_sharpe": 0.811,
+        "vt_cash0_sharpe": 0.614,
+        "vt_tbill_sharpe": 0.619,
+        "sharpe_improvement_cash0": -0.197,
+        "sharpe_improvement_tbill": -0.192
+      },
+      {
+        "period_end": "2012-03-05",
+        "avg_irx": 0.09,
+        "bh_sharpe": 1.226,
+        "vt_cash0_sharpe": 0.879,
+        "vt_tbill_sharpe": 0.884,
+        "sharpe_improvement_cash0": -0.347,
+        "sharpe_improvement_tbill": -0.342
+      },
+      {
+        "period_end": "2012-06-04",
+        "avg_irx": 0.09,
+        "bh_sharpe": 0.752,
+        "vt_cash0_sharpe": 0.482,
+        "vt_tbill_sharpe": 0.486,
+        "sharpe_improvement_cash0": -0.27,
+        "sharpe_improvement_tbill": -0.266
+      },
+      {
+        "period_end": "2012-08-31",
+        "avg_irx": 0.08,
+        "bh_sharpe": 0.814,
+        "vt_cash0_sharpe": 0.59,
+        "vt_tbill_sharpe": 0.593,
+        "sharpe_improvement_cash0": -0.224,
+        "sharpe_improvement_tbill": -0.22
+      },
+      {
+        "period_end": "2012-12-04",
+        "avg_irx": 0.08,
+        "bh_sharpe": 0.635,
+        "vt_cash0_sharpe": 0.442,
+        "vt_tbill_sharpe": 0.445,
+        "sharpe_improvement_cash0": -0.194,
+        "sharpe_improvement_tbill": -0.19
+      },
+      {
+        "period_end": "2013-03-07",
+        "avg_irx": 0.08,
+        "bh_sharpe": 0.789,
+        "vt_cash0_sharpe": 0.644,
+        "vt_tbill_sharpe": 0.647,
+        "sharpe_improvement_cash0": -0.145,
+        "sharpe_improvement_tbill": -0.142
+      },
+      {
+        "period_end": "2013-06-06",
+        "avg_irx": 0.08,
+        "bh_sharpe": 0.945,
+        "vt_cash0_sharpe": 0.883,
+        "vt_tbill_sharpe": 0.886,
+        "sharpe_improvement_cash0": -0.063,
+        "sharpe_improvement_tbill": -0.06
+      },
+      {
+        "period_end": "2013-09-05",
+        "avg_irx": 0.07,
+        "bh_sharpe": 1.064,
+        "vt_cash0_sharpe": 0.975,
+        "vt_tbill_sharpe": 0.978,
+        "sharpe_improvement_cash0": -0.088,
+        "sharpe_improvement_tbill": -0.086
+      },
+      {
+        "period_end": "2013-12-04",
+        "avg_irx": 0.06,
+        "bh_sharpe": 0.988,
+        "vt_cash0_sharpe": 0.965,
+        "vt_tbill_sharpe": 0.967,
+        "sharpe_improvement_cash0": -0.022,
+        "sharpe_improvement_tbill": -0.021
+      },
+      {
+        "period_end": "2014-03-07",
+        "avg_irx": 0.05,
+        "bh_sharpe": 0.92,
+        "vt_cash0_sharpe": 0.92,
+        "vt_tbill_sharpe": 0.922,
+        "sharpe_improvement_cash0": 0.0,
+        "sharpe_improvement_tbill": 0.002
+      },
+      {
+        "period_end": "2014-06-06",
+        "avg_irx": 0.05,
+        "bh_sharpe": 1.034,
+        "vt_cash0_sharpe": 1.077,
+        "vt_tbill_sharpe": 1.079,
+        "sharpe_improvement_cash0": 0.043,
+        "sharpe_improvement_tbill": 0.044
+      },
+      {
+        "period_end": "2014-09-05",
+        "avg_irx": 0.05,
+        "bh_sharpe": 1.423,
+        "vt_cash0_sharpe": 1.57,
+        "vt_tbill_sharpe": 1.572,
+        "sharpe_improvement_cash0": 0.147,
+        "sharpe_improvement_tbill": 0.149
+      },
+      {
+        "period_end": "2014-12-04",
+        "avg_irx": 0.05,
+        "bh_sharpe": 1.668,
+        "vt_cash0_sharpe": 1.601,
+        "vt_tbill_sharpe": 1.603,
+        "sharpe_improvement_cash0": -0.066,
+        "sharpe_improvement_tbill": -0.065
+      },
+      {
+        "period_end": "2015-03-09",
+        "avg_irx": 0.05,
+        "bh_sharpe": 1.404,
+        "vt_cash0_sharpe": 1.351,
+        "vt_tbill_sharpe": 1.352,
+        "sharpe_improvement_cash0": -0.053,
+        "sharpe_improvement_tbill": -0.052
+      },
+      {
+        "period_end": "2015-06-08",
+        "avg_irx": 0.04,
+        "bh_sharpe": 1.623,
+        "vt_cash0_sharpe": 1.563,
+        "vt_tbill_sharpe": 1.564,
+        "sharpe_improvement_cash0": -0.06,
+        "sharpe_improvement_tbill": -0.059
+      },
+      {
+        "period_end": "2015-09-04",
+        "avg_irx": 0.04,
+        "bh_sharpe": 1.068,
+        "vt_cash0_sharpe": 1.057,
+        "vt_tbill_sharpe": 1.058,
+        "sharpe_improvement_cash0": -0.011,
+        "sharpe_improvement_tbill": -0.01
+      },
+      {
+        "period_end": "2015-12-04",
+        "avg_irx": 0.03,
+        "bh_sharpe": 1.268,
+        "vt_cash0_sharpe": 1.117,
+        "vt_tbill_sharpe": 1.118,
+        "sharpe_improvement_cash0": -0.151,
+        "sharpe_improvement_tbill": -0.15
+      },
+      {
+        "period_end": "2016-03-08",
+        "avg_irx": 0.05,
+        "bh_sharpe": 0.832,
+        "vt_cash0_sharpe": 0.707,
+        "vt_tbill_sharpe": 0.708,
+        "sharpe_improvement_cash0": -0.124,
+        "sharpe_improvement_tbill": -0.123
+      },
+      {
+        "period_end": "2016-06-07",
+        "avg_irx": 0.07,
+        "bh_sharpe": 0.876,
+        "vt_cash0_sharpe": 0.716,
+        "vt_tbill_sharpe": 0.718,
+        "sharpe_improvement_cash0": -0.16,
+        "sharpe_improvement_tbill": -0.158
+      },
+      {
+        "period_end": "2016-09-06",
+        "avg_irx": 0.09,
+        "bh_sharpe": 0.912,
+        "vt_cash0_sharpe": 0.767,
+        "vt_tbill_sharpe": 0.769,
+        "sharpe_improvement_cash0": -0.145,
+        "sharpe_improvement_tbill": -0.143
+      },
+      {
+        "period_end": "2016-12-06",
+        "avg_irx": 0.11,
+        "bh_sharpe": 0.741,
+        "vt_cash0_sharpe": 0.599,
+        "vt_tbill_sharpe": 0.601,
+        "sharpe_improvement_cash0": -0.142,
+        "sharpe_improvement_tbill": -0.139
+      },
+      {
+        "period_end": "2017-03-09",
+        "avg_irx": 0.15,
+        "bh_sharpe": 0.806,
+        "vt_cash0_sharpe": 0.668,
+        "vt_tbill_sharpe": 0.671,
+        "sharpe_improvement_cash0": -0.137,
+        "sharpe_improvement_tbill": -0.134
+      },
+      {
+        "period_end": "2017-06-08",
+        "avg_irx": 0.22,
+        "bh_sharpe": 0.792,
+        "vt_cash0_sharpe": 0.651,
+        "vt_tbill_sharpe": 0.654,
+        "sharpe_improvement_cash0": -0.14,
+        "sharpe_improvement_tbill": -0.137
+      },
+      {
+        "period_end": "2017-09-07",
+        "avg_irx": 0.3,
+        "bh_sharpe": 0.751,
+        "vt_cash0_sharpe": 0.605,
+        "vt_tbill_sharpe": 0.608,
+        "sharpe_improvement_cash0": -0.147,
+        "sharpe_improvement_tbill": -0.144
+      },
+      {
+        "period_end": "2017-12-06",
+        "avg_irx": 0.39,
+        "bh_sharpe": 0.857,
+        "vt_cash0_sharpe": 0.757,
+        "vt_tbill_sharpe": 0.76,
+        "sharpe_improvement_cash0": -0.101,
+        "sharpe_improvement_tbill": -0.098
+      },
+      {
+        "period_end": "2018-03-09",
+        "avg_irx": 0.51,
+        "bh_sharpe": 0.983,
+        "vt_cash0_sharpe": 0.926,
+        "vt_tbill_sharpe": 0.93,
+        "sharpe_improvement_cash0": -0.057,
+        "sharpe_improvement_tbill": -0.053
+      },
+      {
+        "period_end": "2018-06-08",
+        "avg_irx": 0.66,
+        "bh_sharpe": 0.949,
+        "vt_cash0_sharpe": 0.859,
+        "vt_tbill_sharpe": 0.866,
+        "sharpe_improvement_cash0": -0.09,
+        "sharpe_improvement_tbill": -0.082
+      },
+      {
+        "period_end": "2018-09-07",
+        "avg_irx": 0.82,
+        "bh_sharpe": 1.33,
+        "vt_cash0_sharpe": 1.194,
+        "vt_tbill_sharpe": 1.205,
+        "sharpe_improvement_cash0": -0.136,
+        "sharpe_improvement_tbill": -0.124
+      },
+      {
+        "period_end": "2018-12-07",
+        "avg_irx": 1.0,
+        "bh_sharpe": 0.828,
+        "vt_cash0_sharpe": 0.844,
+        "vt_tbill_sharpe": 0.856,
+        "sharpe_improvement_cash0": 0.016,
+        "sharpe_improvement_tbill": 0.028
+      },
+      {
+        "period_end": "2019-03-12",
+        "avg_irx": 1.18,
+        "bh_sharpe": 1.138,
+        "vt_cash0_sharpe": 1.124,
+        "vt_tbill_sharpe": 1.144,
+        "sharpe_improvement_cash0": -0.014,
+        "sharpe_improvement_tbill": 0.005
+      },
+      {
+        "period_end": "2019-06-11",
+        "avg_irx": 1.35,
+        "bh_sharpe": 1.038,
+        "vt_cash0_sharpe": 1.043,
+        "vt_tbill_sharpe": 1.065,
+        "sharpe_improvement_cash0": 0.005,
+        "sharpe_improvement_tbill": 0.027
+      },
+      {
+        "period_end": "2019-09-10",
+        "avg_irx": 1.5,
+        "bh_sharpe": 1.01,
+        "vt_cash0_sharpe": 0.997,
+        "vt_tbill_sharpe": 1.022,
+        "sharpe_improvement_cash0": -0.013,
+        "sharpe_improvement_tbill": 0.012
+      },
+      {
+        "period_end": "2019-12-09",
+        "avg_irx": 1.61,
+        "bh_sharpe": 1.118,
+        "vt_cash0_sharpe": 1.096,
+        "vt_tbill_sharpe": 1.125,
+        "sharpe_improvement_cash0": -0.021,
+        "sharpe_improvement_tbill": 0.007
+      },
+      {
+        "period_end": "2020-03-11",
+        "avg_irx": 1.68,
+        "bh_sharpe": 0.518,
+        "vt_cash0_sharpe": 0.557,
+        "vt_tbill_sharpe": 0.582,
+        "sharpe_improvement_cash0": 0.039,
+        "sharpe_improvement_tbill": 0.064
+      },
+      {
+        "period_end": "2020-06-10",
+        "avg_irx": 1.62,
+        "bh_sharpe": 0.615,
+        "vt_cash0_sharpe": 0.502,
+        "vt_tbill_sharpe": 0.523,
+        "sharpe_improvement_cash0": -0.113,
+        "sharpe_improvement_tbill": -0.092
+      },
+      {
+        "period_end": "2020-09-09",
+        "avg_irx": 1.54,
+        "bh_sharpe": 0.677,
+        "vt_cash0_sharpe": 0.528,
+        "vt_tbill_sharpe": 0.549,
+        "sharpe_improvement_cash0": -0.15,
+        "sharpe_improvement_tbill": -0.128
+      },
+      {
+        "period_end": "2020-12-08",
+        "avg_irx": 1.46,
+        "bh_sharpe": 0.696,
+        "vt_cash0_sharpe": 0.457,
+        "vt_tbill_sharpe": 0.478,
+        "sharpe_improvement_cash0": -0.239,
+        "sharpe_improvement_tbill": -0.218
+      },
+      {
+        "period_end": "2021-03-11",
+        "avg_irx": 1.34,
+        "bh_sharpe": 0.703,
+        "vt_cash0_sharpe": 0.392,
+        "vt_tbill_sharpe": 0.415,
+        "sharpe_improvement_cash0": -0.31,
+        "sharpe_improvement_tbill": -0.288
+      },
+      {
+        "period_end": "2021-06-10",
+        "avg_irx": 1.19,
+        "bh_sharpe": 0.819,
+        "vt_cash0_sharpe": 0.506,
+        "vt_tbill_sharpe": 0.526,
+        "sharpe_improvement_cash0": -0.312,
+        "sharpe_improvement_tbill": -0.293
+      },
+      {
+        "period_end": "2021-09-09",
+        "avg_irx": 1.03,
+        "bh_sharpe": 0.852,
+        "vt_cash0_sharpe": 0.548,
+        "vt_tbill_sharpe": 0.565,
+        "sharpe_improvement_cash0": -0.305,
+        "sharpe_improvement_tbill": -0.288
+      },
+      {
+        "period_end": "2021-12-08",
+        "avg_irx": 0.85,
+        "bh_sharpe": 1.058,
+        "vt_cash0_sharpe": 0.808,
+        "vt_tbill_sharpe": 0.825,
+        "sharpe_improvement_cash0": -0.25,
+        "sharpe_improvement_tbill": -0.234
+      },
+      {
+        "period_end": "2022-03-10",
+        "avg_irx": 0.67,
+        "bh_sharpe": 0.816,
+        "vt_cash0_sharpe": 0.604,
+        "vt_tbill_sharpe": 0.616,
+        "sharpe_improvement_cash0": -0.211,
+        "sharpe_improvement_tbill": -0.2
+      },
+      {
+        "period_end": "2022-06-09",
+        "avg_irx": 0.54,
+        "bh_sharpe": 0.659,
+        "vt_cash0_sharpe": 0.5,
+        "vt_tbill_sharpe": 0.511,
+        "sharpe_improvement_cash0": -0.159,
+        "sharpe_improvement_tbill": -0.148
+      },
+      {
+        "period_end": "2022-09-09",
+        "avg_irx": 0.56,
+        "bh_sharpe": 0.623,
+        "vt_cash0_sharpe": 0.483,
+        "vt_tbill_sharpe": 0.499,
+        "sharpe_improvement_cash0": -0.14,
+        "sharpe_improvement_tbill": -0.124
+      },
+      {
+        "period_end": "2022-12-08",
+        "avg_irx": 0.73,
+        "bh_sharpe": 0.502,
+        "vt_cash0_sharpe": 0.333,
+        "vt_tbill_sharpe": 0.358,
+        "sharpe_improvement_cash0": -0.169,
+        "sharpe_improvement_tbill": -0.144
+      },
+      {
+        "period_end": "2023-03-13",
+        "avg_irx": 0.99,
+        "bh_sharpe": 0.663,
+        "vt_cash0_sharpe": 0.564,
+        "vt_tbill_sharpe": 0.605,
+        "sharpe_improvement_cash0": -0.099,
+        "sharpe_improvement_tbill": -0.058
+      },
+      {
+        "period_end": "2023-06-12",
+        "avg_irx": 1.39,
+        "bh_sharpe": 0.724,
+        "vt_cash0_sharpe": 0.847,
+        "vt_tbill_sharpe": 0.915,
+        "sharpe_improvement_cash0": 0.124,
+        "sharpe_improvement_tbill": 0.192
+      },
+      {
+        "period_end": "2023-09-12",
+        "avg_irx": 1.82,
+        "bh_sharpe": 0.678,
+        "vt_cash0_sharpe": 0.805,
+        "vt_tbill_sharpe": 0.882,
+        "sharpe_improvement_cash0": 0.127,
+        "sharpe_improvement_tbill": 0.204
+      },
+      {
+        "period_end": "2023-12-11",
+        "avg_irx": 2.25,
+        "bh_sharpe": 0.593,
+        "vt_cash0_sharpe": 0.706,
+        "vt_tbill_sharpe": 0.791,
+        "sharpe_improvement_cash0": 0.113,
+        "sharpe_improvement_tbill": 0.198
+      },
+      {
+        "period_end": "2024-03-13",
+        "avg_irx": 2.68,
+        "bh_sharpe": 0.693,
+        "vt_cash0_sharpe": 0.929,
+        "vt_tbill_sharpe": 1.018,
+        "sharpe_improvement_cash0": 0.236,
+        "sharpe_improvement_tbill": 0.324
+      },
+      {
+        "period_end": "2024-06-12",
+        "avg_irx": 3.12,
+        "bh_sharpe": 0.645,
+        "vt_cash0_sharpe": 0.931,
+        "vt_tbill_sharpe": 1.023,
+        "sharpe_improvement_cash0": 0.286,
+        "sharpe_improvement_tbill": 0.378
+      },
+      {
+        "period_end": "2024-09-12",
+        "avg_irx": 3.54,
+        "bh_sharpe": 0.586,
+        "vt_cash0_sharpe": 0.851,
+        "vt_tbill_sharpe": 0.942,
+        "sharpe_improvement_cash0": 0.265,
+        "sharpe_improvement_tbill": 0.356
+      },
+      {
+        "period_end": "2024-12-11",
+        "avg_irx": 3.91,
+        "bh_sharpe": 0.663,
+        "vt_cash0_sharpe": 0.943,
+        "vt_tbill_sharpe": 1.044,
+        "sharpe_improvement_cash0": 0.28,
+        "sharpe_improvement_tbill": 0.381
+      },
+      {
+        "period_end": "2025-03-17",
+        "avg_irx": 4.25,
+        "bh_sharpe": 0.731,
+        "vt_cash0_sharpe": 0.959,
+        "vt_tbill_sharpe": 1.07,
+        "sharpe_improvement_cash0": 0.228,
+        "sharpe_improvement_tbill": 0.338
+      },
+      {
+        "period_end": "2025-06-16",
+        "avg_irx": 4.53,
+        "bh_sharpe": 0.924,
+        "vt_cash0_sharpe": 1.024,
+        "vt_tbill_sharpe": 1.136,
+        "sharpe_improvement_cash0": 0.1,
+        "sharpe_improvement_tbill": 0.212
+      },
+      {
+        "period_end": "2025-09-16",
+        "avg_irx": 4.69,
+        "bh_sharpe": 1.122,
+        "vt_cash0_sharpe": 1.164,
+        "vt_tbill_sharpe": 1.279,
+        "sharpe_improvement_cash0": 0.043,
+        "sharpe_improvement_tbill": 0.158
+      },
+      {
+        "period_end": "2025-12-15",
+        "avg_irx": 4.69,
+        "bh_sharpe": 1.33,
+        "vt_cash0_sharpe": 1.331,
+        "vt_tbill_sharpe": 1.44,
+        "sharpe_improvement_cash0": 0.001,
+        "sharpe_improvement_tbill": 0.11
+      },
+      {
+        "period_end": "2026-03-18",
+        "avg_irx": 4.61,
+        "bh_sharpe": 1.357,
+        "vt_cash0_sharpe": 1.31,
+        "vt_tbill_sharpe": 1.412,
+        "sharpe_improvement_cash0": -0.046,
+        "sharpe_improvement_tbill": 0.055
+      }
+    ]
+  },
+  "conclusions_zh": [
+    "K41 原始保險費估計 ~4%/yr (cash=0%)。本研究全樣本：raw=4.20%/yr, adjusted (cash=Tbill)=3.82%/yr。現金收益抵消 0.38%/yr。",
+    "高利率期 (IRX>3%, avg=4.5%): SPY VT 保險費 raw=2.73% → adjusted=1.80%。現金收益抵消 0.93%/yr。",
+    "低利率期 (IRX<1%, avg=0.1%): SPY VT 保險費 raw=6.15% → adjusted=6.10%。現金部位幾乎無貢獻 (0.05%/yr)。",
+    "利率環境差異：高利率期現金抵消 0.93%/yr vs 低利率期 0.05%/yr，差距 0.88%/yr。",
+    "滾動 3 年相關性（利率水平 vs VT Sharpe 增量）：cash=0% r=0.648, cash=Tbill r=0.733。高利率確實改善 VT 經濟學。"
+  ]
+}

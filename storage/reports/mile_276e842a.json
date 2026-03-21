@@ -1,0 +1,22 @@
+{
+  "id": "mile_276e842a",
+  "title": "VaR-Targeting vs σ-Targeting：更原則但非更好的風險控制",
+  "description": "## 摘要\n\n[提出: Gemini, 執行: Claude] 用 GJR-GARCH + Skewed-t 的 1% VaR 替代年化波動率做 targeting。結論：VaR-targeting 本質是 rescaled σ-targeting，不產生新 alpha，但提供更直觀的風險選擇框架。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY, QQQ, GLD, EEM |\n| 模型 | GJR-GARCH(1,1) + Skewed-t |\n| Window | w=2000, refit 每 5 天 |\n| OOS | 2023-01-01 ~ 2026-03-20 (806 天) |\n\n## 核心發現\n\n### 發現一：VaR-targeting = rescaled σ-targeting\nWeight = target_VaR / predicted_VaR。因為 VaR = σ × quantile，而 Skewed-t quantile 近似常數（平均 -2.74），所以 VaR-targeting 只是用不同 scaling factor 的 σ-targeting。\n\n### 發現二：三種風險偏好的最佳設定\n\n| VaR Target | 等效 | Sharpe | MDD | 適合 |\n|-----------|------|--------|-----|------|\n| 1.5% | 保守 | 0.746 | -9.0% | 怕跌的投資人 |\n| 2.0% | ≈ σ-12% | 0.857 | -11.9% | 中性 |\n| 2.5% | 積極 | 0.935 | -14.6% | 追求報酬 |\n\n### 發現三：無策略通過 Harvey 門檻\n最佳 GLD VaR 2.5% 的 DM t=2.98，仍未達 Harvey t≥3.0。VaR-targeting 不是新的 alpha 來源。\n\n## 實務意義\n\nVaR-targeting 的價值不在於更高報酬，而在於更直觀的風險選擇。「我能接受每天最多虧 2%」比「我的目標波動率是 12%」更容易理解。投資人可以根據自己的風險承受力直接選擇 VaR target。\n\n## 結論\n\nSharpe-MDD tradeoff 是線性的——更保守的 weighting 減少 MDD 但也等比例減少報酬。VaR-targeting 是更原則性的風險控制框架，但不改變這個基本 tradeoff。",
+  "category": "milestone",
+  "phase": "research",
+  "details": {},
+  "tags": [
+    "[\"VaR\"",
+    "\"FHS\"",
+    "\"VT策略\"",
+    "\"Skewed-t\"",
+    "\"SPY\"",
+    "\"QQQ\"",
+    "\"GLD\"",
+    "\"EEM\"",
+    "\"風險管理\"]"
+  ],
+  "created_at": "2026-03-21T06:20:13.041843+00:00",
+  "published_at": "2026-03-21T07:04:05.189759+00:00",
+  "status": "published"
+}

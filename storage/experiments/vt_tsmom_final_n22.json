@@ -1,0 +1,1167 @@
+{
+  "experiment": "K55: Final VT-TSMOM Cross-Sectional Analysis (N=22)",
+  "description": "Expand K53 (N=15) to N=22 for Paper 3 submission. Added ['EWJ', 'EWG', 'EWU', 'EWA', 'INDA', 'VNQ', 'SLV']. Full methodology: GJR-GARCH gamma, 12/VIX monthly lagged VT, Newey-West HAC, orthogonalized TSMOM, contemporaneous T-bill RF.",
+  "proposed_by": "Codex (K50 critique) + Paper 3 outline",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T17:08:27.078924",
+  "config": {
+    "original_tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "XLF",
+      "XLE",
+      "DIA",
+      "EEM",
+      "EFA",
+      "FXI",
+      "EWZ",
+      "GLD",
+      "TLT",
+      "USO",
+      "HYG",
+      "LQD"
+    ],
+    "new_tickers": [
+      "EWJ",
+      "EWG",
+      "EWU",
+      "EWA",
+      "INDA",
+      "VNQ",
+      "SLV"
+    ],
+    "all_tickers": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "XLF",
+      "XLE",
+      "DIA",
+      "EEM",
+      "EFA",
+      "FXI",
+      "EWZ",
+      "GLD",
+      "TLT",
+      "USO",
+      "HYG",
+      "LQD",
+      "EWJ",
+      "EWG",
+      "EWU",
+      "EWA",
+      "INDA",
+      "VNQ",
+      "SLV"
+    ],
+    "start_date": "2007-01-01",
+    "end_date": "2026-03-20",
+    "vix_threshold": 12.0,
+    "tsmom_lookback": 252,
+    "se_type": "Newey-West HAC (auto lag)",
+    "rf_source": "^IRX (3-month T-bill)"
+  },
+  "asset_results": {
+    "SPY": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.26107402717268285,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0601,
+        "ann_vol": 0.0944,
+        "sharpe": 0.6373
+      },
+      "bh_performance": {
+        "ann_return": 0.1097,
+        "ann_vol": 0.1988,
+        "sharpe": 0.5521
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.013483,
+        "alpha_t_nw": 1.4426,
+        "alpha_p": 0.149134,
+        "beta_mkt": 0.4252,
+        "beta_mkt_t": 16.4601,
+        "r2": 0.802
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": 0.009863,
+        "alpha_t_nw": 1.1298,
+        "alpha_p": 0.258545,
+        "beta_mkt": 0.4197,
+        "beta_mkt_t": 21.1231,
+        "beta_tsmom_raw": 0.1208,
+        "beta_tsmom_raw_t": 7.6452,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8667
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.013483,
+        "alpha_t_nw": 1.5744,
+        "beta_mkt": 0.4252,
+        "beta_mkt_t": 21.2355,
+        "beta_tsmom_orth": 0.1208,
+        "beta_tsmom_orth_t": 7.6452,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8667
+      },
+      "alpha_reduction_pct": 26.85
+    },
+    "QQQ": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.22508658486092475,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0912,
+        "ann_vol": 0.1177,
+        "sharpe": 0.775
+      },
+      "bh_performance": {
+        "ann_return": 0.158,
+        "ann_vol": 0.2238,
+        "sharpe": 0.7059
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.015516,
+        "alpha_t_nw": 1.4377,
+        "alpha_p": 0.150527,
+        "beta_mkt": 0.479,
+        "beta_mkt_t": 21.3124,
+        "r2": 0.8301
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": 0.011274,
+        "alpha_t_nw": 1.1487,
+        "alpha_p": 0.250696,
+        "beta_mkt": 0.4431,
+        "beta_mkt_t": 23.0866,
+        "beta_tsmom_raw": 0.1116,
+        "beta_tsmom_raw_t": 6.5843,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8706
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.015516,
+        "alpha_t_nw": 1.6063,
+        "beta_mkt": 0.479,
+        "beta_mkt_t": 23.3709,
+        "beta_tsmom_orth": 0.1116,
+        "beta_tsmom_orth_t": 6.5843,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8706
+      },
+      "alpha_reduction_pct": 27.34
+    },
+    "IWM": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.14413932274144253,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.045,
+        "ann_vol": 0.1301,
+        "sharpe": 0.3458
+      },
+      "bh_performance": {
+        "ann_return": 0.0995,
+        "ann_vol": 0.2493,
+        "sharpe": 0.3992
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.001926,
+        "alpha_t_nw": -0.157,
+        "alpha_p": 0.875243,
+        "beta_mkt": 0.4716,
+        "beta_mkt_t": 20.9016,
+        "r2": 0.816
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.004953,
+        "alpha_t_nw": -0.5282,
+        "alpha_p": 0.597388,
+        "beta_mkt": 0.4818,
+        "beta_mkt_t": 34.5011,
+        "beta_tsmom_raw": 0.137,
+        "beta_tsmom_raw_t": 9.9582,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8845
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.001926,
+        "alpha_t_nw": -0.2048,
+        "beta_mkt": 0.4716,
+        "beta_mkt_t": 33.0726,
+        "beta_tsmom_orth": 0.137,
+        "beta_tsmom_orth_t": 9.9582,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8845
+      },
+      "alpha_reduction_pct": -157.2
+    },
+    "XLF": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.17406924904012513,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.052,
+        "ann_vol": 0.1366,
+        "sharpe": 0.3805
+      },
+      "bh_performance": {
+        "ann_return": 0.0962,
+        "ann_vol": 0.3064,
+        "sharpe": 0.3139
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.01346,
+        "alpha_t_nw": 1.0272,
+        "alpha_p": 0.304313,
+        "beta_mkt": 0.4005,
+        "beta_mkt_t": 19.3646,
+        "r2": 0.8072
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": 0.007314,
+        "alpha_t_nw": 0.7222,
+        "alpha_p": 0.470147,
+        "beta_mkt": 0.468,
+        "beta_mkt_t": 33.9734,
+        "beta_tsmom_raw": 0.1416,
+        "beta_tsmom_raw_t": 11.5754,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8852
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.01346,
+        "alpha_t_nw": 1.3346,
+        "beta_mkt": 0.4005,
+        "beta_mkt_t": 27.3846,
+        "beta_tsmom_orth": 0.1416,
+        "beta_tsmom_orth_t": 11.5754,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8852
+      },
+      "alpha_reduction_pct": 45.66
+    },
+    "XLE": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.078233723117949,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0273,
+        "ann_vol": 0.1561,
+        "sharpe": 0.1748
+      },
+      "bh_performance": {
+        "ann_return": 0.088,
+        "ann_vol": 0.3055,
+        "sharpe": 0.288
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.013144,
+        "alpha_t_nw": -0.8837,
+        "alpha_p": 0.376854,
+        "beta_mkt": 0.4595,
+        "beta_mkt_t": 17.2434,
+        "r2": 0.8087
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.018218,
+        "alpha_t_nw": -1.3808,
+        "alpha_p": 0.16735,
+        "beta_mkt": 0.4779,
+        "beta_mkt_t": 29.2642,
+        "beta_tsmom_raw": 0.1126,
+        "beta_tsmom_raw_t": 6.9474,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.856
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.013144,
+        "alpha_t_nw": -0.993,
+        "beta_mkt": 0.4595,
+        "beta_mkt_t": 25.3169,
+        "beta_tsmom_orth": 0.1126,
+        "beta_tsmom_orth_t": 6.9474,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.856
+      },
+      "alpha_reduction_pct": -38.61
+    },
+    "DIA": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.23490814534820373,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0527,
+        "ann_vol": 0.0896,
+        "sharpe": 0.5887
+      },
+      "bh_performance": {
+        "ann_return": 0.0974,
+        "ann_vol": 0.1897,
+        "sharpe": 0.5137
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.011891,
+        "alpha_t_nw": 1.2441,
+        "alpha_p": 0.213465,
+        "beta_mkt": 0.4192,
+        "beta_mkt_t": 14.133,
+        "r2": 0.7879
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": 0.005473,
+        "alpha_t_nw": 0.7542,
+        "alpha_p": 0.450746,
+        "beta_mkt": 0.4246,
+        "beta_mkt_t": 27.5383,
+        "beta_tsmom_raw": 0.1477,
+        "beta_tsmom_raw_t": 11.5659,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8857
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.011891,
+        "alpha_t_nw": 1.6452,
+        "beta_mkt": 0.4192,
+        "beta_mkt_t": 26.9925,
+        "beta_tsmom_orth": 0.1477,
+        "beta_tsmom_orth_t": 11.5659,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8857
+      },
+      "alpha_reduction_pct": 53.97
+    },
+    "EEM": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.12083287973174062,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": -0.004,
+        "ann_vol": 0.1355,
+        "sharpe": -0.0292
+      },
+      "bh_performance": {
+        "ann_return": 0.0557,
+        "ann_vol": 0.2765,
+        "sharpe": 0.2015
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.027971,
+        "alpha_t_nw": -2.0906,
+        "alpha_p": 0.036564,
+        "beta_mkt": 0.4309,
+        "beta_mkt_t": 13.5843,
+        "r2": 0.7738
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.032437,
+        "alpha_t_nw": -2.8857,
+        "alpha_p": 0.003906,
+        "beta_mkt": 0.4757,
+        "beta_mkt_t": 28.3834,
+        "beta_tsmom_raw": 0.1415,
+        "beta_tsmom_raw_t": 8.5615,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.849
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.027971,
+        "alpha_t_nw": -2.4863,
+        "beta_mkt": 0.4309,
+        "beta_mkt_t": 21.5222,
+        "beta_tsmom_orth": 0.1415,
+        "beta_tsmom_orth_t": 8.5615,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.849
+      },
+      "alpha_reduction_pct": -15.97
+    },
+    "EFA": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.15168471473040024,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0157,
+        "ann_vol": 0.1075,
+        "sharpe": 0.1458
+      },
+      "bh_performance": {
+        "ann_return": 0.0532,
+        "ann_vol": 0.2185,
+        "sharpe": 0.2433
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.00773,
+        "alpha_t_nw": -0.7668,
+        "alpha_p": 0.443201,
+        "beta_mkt": 0.4401,
+        "beta_mkt_t": 16.6029,
+        "r2": 0.8007
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.003511,
+        "alpha_t_nw": -0.4104,
+        "alpha_p": 0.681513,
+        "beta_mkt": 0.4723,
+        "beta_mkt_t": 27.8885,
+        "beta_tsmom_raw": 0.1251,
+        "beta_tsmom_raw_t": 8.1091,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8611
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.00773,
+        "alpha_t_nw": -0.9068,
+        "beta_mkt": 0.4401,
+        "beta_mkt_t": 23.5408,
+        "beta_tsmom_orth": 0.1251,
+        "beta_tsmom_orth_t": 8.1091,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8611
+      },
+      "alpha_reduction_pct": 54.58
+    },
+    "FXI": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.0692065724632978,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": -0.0094,
+        "ann_vol": 0.1788,
+        "sharpe": -0.0523
+      },
+      "bh_performance": {
+        "ann_return": 0.0419,
+        "ann_vol": 0.3317,
+        "sharpe": 0.1264
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.029628,
+        "alpha_t_nw": -1.888,
+        "alpha_p": 0.059027,
+        "beta_mkt": 0.4836,
+        "beta_mkt_t": 16.9432,
+        "r2": 0.8051
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.023809,
+        "alpha_t_nw": -1.7974,
+        "alpha_p": 0.072271,
+        "beta_mkt": 0.5118,
+        "beta_mkt_t": 29.7957,
+        "beta_tsmom_raw": 0.1312,
+        "beta_tsmom_raw_t": 7.6779,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8615
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.029628,
+        "alpha_t_nw": -2.2359,
+        "beta_mkt": 0.4836,
+        "beta_mkt_t": 24.8778,
+        "beta_tsmom_orth": 0.1312,
+        "beta_tsmom_orth_t": 7.6779,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8615
+      },
+      "alpha_reduction_pct": 19.64
+    },
+    "EWZ": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.0737304554210984,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": -0.0077,
+        "ann_vol": 0.2095,
+        "sharpe": -0.0365
+      },
+      "bh_performance": {
+        "ann_return": 0.0583,
+        "ann_vol": 0.3725,
+        "sharpe": 0.1565
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.036902,
+        "alpha_t_nw": -1.9065,
+        "alpha_p": 0.05658,
+        "beta_mkt": 0.5019,
+        "beta_mkt_t": 15.1765,
+        "r2": 0.7965
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.023777,
+        "alpha_t_nw": -1.2978,
+        "alpha_p": 0.194352,
+        "beta_mkt": 0.534,
+        "beta_mkt_t": 26.422,
+        "beta_tsmom_raw": 0.1207,
+        "beta_tsmom_raw_t": 6.0524,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8393
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.036902,
+        "alpha_t_nw": -2.0513,
+        "beta_mkt": 0.5019,
+        "beta_mkt_t": 20.7026,
+        "beta_tsmom_orth": 0.1207,
+        "beta_tsmom_orth_t": 6.0524,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8393
+      },
+      "alpha_reduction_pct": 35.57
+    },
+    "GLD": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": -0.037419606888514076,
+      "asset_class": "non_equity",
+      "vt_performance": {
+        "ann_return": 0.0477,
+        "ann_vol": 0.1121,
+        "sharpe": 0.4253
+      },
+      "bh_performance": {
+        "ann_return": 0.0916,
+        "ann_vol": 0.1794,
+        "sharpe": 0.5105
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.005523,
+        "alpha_t_nw": -0.5507,
+        "alpha_p": 0.581836,
+        "beta_mkt": 0.5811,
+        "beta_mkt_t": 29.1932,
+        "r2": 0.8643
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.006351,
+        "alpha_t_nw": -0.6872,
+        "alpha_p": 0.491947,
+        "beta_mkt": 0.6179,
+        "beta_mkt_t": 24.9518,
+        "beta_tsmom_raw": -0.0729,
+        "beta_tsmom_raw_t": -3.1831,
+        "beta_tsmom_raw_p": 0.001457,
+        "r2": 0.8744
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.005523,
+        "alpha_t_nw": -0.5976,
+        "beta_mkt": 0.5811,
+        "beta_mkt_t": 30.5412,
+        "beta_tsmom_orth": -0.0729,
+        "beta_tsmom_orth_t": -3.1831,
+        "beta_tsmom_orth_p": 0.001457,
+        "r2": 0.8744
+      },
+      "alpha_reduction_pct": -14.99
+    },
+    "TLT": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": -0.014520757515930283,
+      "asset_class": "non_equity",
+      "vt_performance": {
+        "ann_return": 0.0228,
+        "ann_vol": 0.0949,
+        "sharpe": 0.2403
+      },
+      "bh_performance": {
+        "ann_return": 0.0245,
+        "ann_vol": 0.1538,
+        "sharpe": 0.1597
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.008769,
+        "alpha_t_nw": 1.1647,
+        "alpha_p": 0.244155,
+        "beta_mkt": 0.5718,
+        "beta_mkt_t": 24.0513,
+        "r2": 0.8581
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": 0.008714,
+        "alpha_t_nw": 1.2087,
+        "alpha_p": 0.226789,
+        "beta_mkt": 0.5979,
+        "beta_mkt_t": 34.6561,
+        "beta_tsmom_raw": -0.078,
+        "beta_tsmom_raw_t": -4.5504,
+        "beta_tsmom_raw_p": 5e-06,
+        "r2": 0.8723
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.008769,
+        "alpha_t_nw": 1.2163,
+        "beta_mkt": 0.5718,
+        "beta_mkt_t": 27.3012,
+        "beta_tsmom_orth": -0.078,
+        "beta_tsmom_orth_t": -4.5504,
+        "beta_tsmom_orth_p": 5e-06,
+        "r2": 0.8723
+      },
+      "alpha_reduction_pct": 0.62
+    },
+    "USO": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.061202854666307184,
+      "asset_class": "non_equity",
+      "vt_performance": {
+        "ann_return": -0.0064,
+        "ann_vol": 0.2151,
+        "sharpe": -0.0298
+      },
+      "bh_performance": {
+        "ann_return": -0.034,
+        "ann_vol": 0.3736,
+        "sharpe": -0.091
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.011455,
+        "alpha_t_nw": 0.5512,
+        "alpha_p": 0.581527,
+        "beta_mkt": 0.5256,
+        "beta_mkt_t": 21.1202,
+        "r2": 0.833
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": 0.010957,
+        "alpha_t_nw": 0.5481,
+        "alpha_p": 0.583621,
+        "beta_mkt": 0.543,
+        "beta_mkt_t": 29.5726,
+        "beta_tsmom_raw": 0.0645,
+        "beta_tsmom_raw_t": 3.5546,
+        "beta_tsmom_raw_p": 0.000378,
+        "r2": 0.8447
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.011455,
+        "alpha_t_nw": 0.572,
+        "beta_mkt": 0.5256,
+        "beta_mkt_t": 24.1493,
+        "beta_tsmom_orth": 0.0645,
+        "beta_tsmom_orth_t": 3.5546,
+        "beta_tsmom_orth_p": 0.000378,
+        "r2": 0.8447
+      },
+      "alpha_reduction_pct": 4.34
+    },
+    "HYG": {
+      "n_obs": 4512,
+      "nw_lags": 9,
+      "gjr_gamma": 0.18430967398648154,
+      "asset_class": "non_equity",
+      "vt_performance": {
+        "ann_return": 0.0204,
+        "ann_vol": 0.0477,
+        "sharpe": 0.4278
+      },
+      "bh_performance": {
+        "ann_return": 0.0439,
+        "ann_vol": 0.1106,
+        "sharpe": 0.3972
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.003555,
+        "alpha_t_nw": 0.6626,
+        "alpha_p": 0.507573,
+        "beta_mkt": 0.3839,
+        "beta_mkt_t": 13.6598,
+        "r2": 0.7912
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.002851,
+        "alpha_t_nw": -0.675,
+        "alpha_p": 0.499645,
+        "beta_mkt": 0.4326,
+        "beta_mkt_t": 25.0782,
+        "beta_tsmom_raw": 0.1272,
+        "beta_tsmom_raw_t": 7.9437,
+        "beta_tsmom_raw_p": 0.0,
+        "r2": 0.8654
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.003555,
+        "alpha_t_nw": 0.8368,
+        "beta_mkt": 0.3839,
+        "beta_mkt_t": 20.5001,
+        "beta_tsmom_orth": 0.1272,
+        "beta_tsmom_orth_t": 7.9437,
+        "beta_tsmom_orth_p": 0.0,
+        "r2": 0.8654
+      },
+      "alpha_reduction_pct": 180.19
+    },
+    "LQD": {
+      "n_obs": 4579,
+      "nw_lags": 9,
+      "gjr_gamma": 0.055447325053418886,
+      "asset_class": "non_equity",
+      "vt_performance": {
+        "ann_return": 0.02,
+        "ann_vol": 0.0454,
+        "sharpe": 0.4399
+      },
+      "bh_performance": {
+        "ann_return": 0.0306,
+        "ann_vol": 0.0896,
+        "sharpe": 0.342
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.006282,
+        "alpha_t_nw": 1.2749,
+        "alpha_p": 0.202359,
+        "beta_mkt": 0.4471,
+        "beta_mkt_t": 10.8289,
+        "r2": 0.7776
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": 0.005847,
+        "alpha_t_nw": 1.1392,
+        "alpha_p": 0.254617,
+        "beta_mkt": 0.4432,
+        "beta_mkt_t": 12.213,
+        "beta_tsmom_raw": 0.0833,
+        "beta_tsmom_raw_t": 3.4864,
+        "beta_tsmom_raw_p": 0.00049,
+        "r2": 0.8045
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.006282,
+        "alpha_t_nw": 1.2355,
+        "beta_mkt": 0.4471,
+        "beta_mkt_t": 12.1821,
+        "beta_tsmom_orth": 0.0833,
+        "beta_tsmom_orth_t": 3.4864,
+        "beta_tsmom_orth_p": 0.00049,
+        "r2": 0.8045
+      },
+      "alpha_reduction_pct": 6.93
+    },
+    "EWJ": {
+      "n_obs": 4578,
+      "nw_lags": 9,
+      "gjr_gamma": 0.1008199017628816,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0264,
+        "ann_vol": 0.1187,
+        "sharpe": 0.2221
+      },
+      "bh_performance": {
+        "ann_return": 0.0438,
+        "ann_vol": 0.2049,
+        "sharpe": 0.2138
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.022717,
+        "alpha_t_nw": -1.2493,
+        "alpha_p": 0.21161,
+        "beta_mkt": 0.8168,
+        "beta_mkt_t": 46.7488,
+        "r2": 0.5043
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.022656,
+        "alpha_t_nw": -1.2459,
+        "alpha_p": 0.212862,
+        "beta_mkt": 0.8196,
+        "beta_mkt_t": 44.0951,
+        "beta_tsmom_raw": -0.0059,
+        "beta_tsmom_raw_t": -0.624,
+        "beta_tsmom_raw_p": 0.532672,
+        "r2": 0.5044
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.022717,
+        "alpha_t_nw": -1.2495,
+        "beta_mkt": 0.8168,
+        "beta_mkt_t": 47.3347,
+        "beta_tsmom_orth": -0.0059,
+        "beta_tsmom_orth_t": -0.624,
+        "beta_tsmom_orth_p": 0.532672,
+        "r2": 0.5044
+      },
+      "alpha_reduction_pct": 0.27
+    },
+    "EWG": {
+      "n_obs": 4578,
+      "nw_lags": 9,
+      "gjr_gamma": 0.11726217577289455,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0265,
+        "ann_vol": 0.1386,
+        "sharpe": 0.1909
+      },
+      "bh_performance": {
+        "ann_return": 0.0612,
+        "ann_vol": 0.2559,
+        "sharpe": 0.2393
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.048075,
+        "alpha_t_nw": -2.3995,
+        "alpha_p": 0.016456,
+        "beta_mkt": 1.0238,
+        "beta_mkt_t": 38.199,
+        "r2": 0.5925
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.048277,
+        "alpha_t_nw": -2.4056,
+        "alpha_p": 0.016184,
+        "beta_mkt": 1.0145,
+        "beta_mkt_t": 38.0419,
+        "beta_tsmom_raw": 0.0195,
+        "beta_tsmom_raw_t": 1.756,
+        "beta_tsmom_raw_p": 0.07916,
+        "r2": 0.5933
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.048075,
+        "alpha_t_nw": -2.397,
+        "beta_mkt": 1.0238,
+        "beta_mkt_t": 38.2469,
+        "beta_tsmom_orth": 0.0195,
+        "beta_tsmom_orth_t": 1.756,
+        "beta_tsmom_orth_p": 0.07916,
+        "r2": 0.5933
+      },
+      "alpha_reduction_pct": -0.42
+    },
+    "EWU": {
+      "n_obs": 4578,
+      "nw_lags": 9,
+      "gjr_gamma": 0.13540214793421337,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0202,
+        "ann_vol": 0.1229,
+        "sharpe": 0.1644
+      },
+      "bh_performance": {
+        "ann_return": 0.0488,
+        "ann_vol": 0.2305,
+        "sharpe": 0.2118
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.038532,
+        "alpha_t_nw": -2.2954,
+        "alpha_p": 0.021755,
+        "beta_mkt": 0.8989,
+        "beta_mkt_t": 31.5164,
+        "r2": 0.589
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.038463,
+        "alpha_t_nw": -2.2908,
+        "alpha_p": 0.022019,
+        "beta_mkt": 0.9022,
+        "beta_mkt_t": 30.1126,
+        "beta_tsmom_raw": -0.0067,
+        "beta_tsmom_raw_t": -0.5248,
+        "beta_tsmom_raw_p": 0.599751,
+        "r2": 0.5891
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.038532,
+        "alpha_t_nw": -2.2957,
+        "beta_mkt": 0.8989,
+        "beta_mkt_t": 31.6592,
+        "beta_tsmom_orth": -0.0067,
+        "beta_tsmom_orth_t": -0.5248,
+        "beta_tsmom_orth_p": 0.599751,
+        "r2": 0.5891
+      },
+      "alpha_reduction_pct": 0.18
+    },
+    "EWA": {
+      "n_obs": 4578,
+      "nw_lags": 9,
+      "gjr_gamma": 0.10914376891894623,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0273,
+        "ann_vol": 0.148,
+        "sharpe": 0.1847
+      },
+      "bh_performance": {
+        "ann_return": 0.0777,
+        "ann_vol": 0.2794,
+        "sharpe": 0.2782
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.049136,
+        "alpha_t_nw": -2.3208,
+        "alpha_p": 0.020344,
+        "beta_mkt": 1.0521,
+        "beta_mkt_t": 41.9406,
+        "r2": 0.5664
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.049019,
+        "alpha_t_nw": -2.3169,
+        "alpha_p": 0.020553,
+        "beta_mkt": 1.0575,
+        "beta_mkt_t": 41.1097,
+        "beta_tsmom_raw": -0.0112,
+        "beta_tsmom_raw_t": -0.9153,
+        "beta_tsmom_raw_p": 0.360075,
+        "r2": 0.5666
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.049136,
+        "alpha_t_nw": -2.3225,
+        "beta_mkt": 1.0521,
+        "beta_mkt_t": 42.4644,
+        "beta_tsmom_orth": -0.0112,
+        "beta_tsmom_orth_t": -0.9153,
+        "beta_tsmom_orth_p": 0.360075,
+        "r2": 0.5666
+      },
+      "alpha_reduction_pct": 0.24
+    },
+    "INDA": {
+      "n_obs": 3532,
+      "nw_lags": 8,
+      "gjr_gamma": 0.107078331329719,
+      "asset_class": "equity",
+      "vt_performance": {
+        "ann_return": 0.0334,
+        "ann_vol": 0.1448,
+        "sharpe": 0.2309
+      },
+      "bh_performance": {
+        "ann_return": 0.0644,
+        "ann_vol": 0.2186,
+        "sharpe": 0.2949
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.028131,
+        "alpha_t_nw": -0.8993,
+        "alpha_p": 0.368567,
+        "beta_mkt": 0.7721,
+        "beta_mkt_t": 22.5086,
+        "r2": 0.2919
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.027236,
+        "alpha_t_nw": -0.8703,
+        "alpha_p": 0.38419,
+        "beta_mkt": 0.7521,
+        "beta_mkt_t": 18.3412,
+        "beta_tsmom_raw": 0.0231,
+        "beta_tsmom_raw_t": 1.2046,
+        "beta_tsmom_raw_p": 0.228432,
+        "r2": 0.2924
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.028131,
+        "alpha_t_nw": -0.9008,
+        "beta_mkt": 0.7721,
+        "beta_mkt_t": 22.6464,
+        "beta_tsmom_orth": 0.0231,
+        "beta_tsmom_orth_t": 1.2046,
+        "beta_tsmom_orth_p": 0.228432,
+        "r2": 0.2924
+      },
+      "alpha_reduction_pct": 3.18
+    },
+    "VNQ": {
+      "n_obs": 4578,
+      "nw_lags": 9,
+      "gjr_gamma": 0.08954299741229832,
+      "asset_class": "non_equity",
+      "vt_performance": {
+        "ann_return": 0.0313,
+        "ann_vol": 0.1397,
+        "sharpe": 0.2243
+      },
+      "bh_performance": {
+        "ann_return": 0.0755,
+        "ann_vol": 0.2975,
+        "sharpe": 0.2538
+      },
+      "model1_mkt_only": {
+        "alpha_ann": -0.011036,
+        "alpha_t_nw": -0.4989,
+        "alpha_p": 0.617888,
+        "beta_mkt": 0.8881,
+        "beta_mkt_t": 30.8351,
+        "r2": 0.4547
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": -0.010059,
+        "alpha_t_nw": -0.4549,
+        "alpha_p": 0.649214,
+        "beta_mkt": 0.9334,
+        "beta_mkt_t": 29.122,
+        "beta_tsmom_raw": -0.0944,
+        "beta_tsmom_raw_t": -4.6473,
+        "beta_tsmom_raw_p": 3e-06,
+        "r2": 0.4724
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": -0.011036,
+        "alpha_t_nw": -0.5001,
+        "beta_mkt": 0.8881,
+        "beta_mkt_t": 31.0792,
+        "beta_tsmom_orth": -0.0944,
+        "beta_tsmom_orth_t": -4.6473,
+        "beta_tsmom_orth_p": 3e-06,
+        "r2": 0.4724
+      },
+      "alpha_reduction_pct": 8.85
+    },
+    "SLV": {
+      "n_obs": 4578,
+      "nw_lags": 9,
+      "gjr_gamma": -0.022131117963038727,
+      "asset_class": "non_equity",
+      "vt_performance": {
+        "ann_return": 0.0571,
+        "ann_vol": 0.2073,
+        "sharpe": 0.2752
+      },
+      "bh_performance": {
+        "ann_return": 0.1254,
+        "ann_vol": 0.3258,
+        "sharpe": 0.3849
+      },
+      "model1_mkt_only": {
+        "alpha_ann": 0.036328,
+        "alpha_t_nw": 0.738,
+        "alpha_p": 0.460574,
+        "beta_mkt": 0.3236,
+        "beta_mkt_t": 7.3777,
+        "r2": 0.0259
+      },
+      "model2_raw_tsmom": {
+        "alpha_ann": 0.035758,
+        "alpha_t_nw": 0.7273,
+        "alpha_p": 0.467077,
+        "beta_mkt": 0.2972,
+        "beta_mkt_t": 6.614,
+        "beta_tsmom_raw": 0.0552,
+        "beta_tsmom_raw_t": 2.5963,
+        "beta_tsmom_raw_p": 0.009455,
+        "r2": 0.0285
+      },
+      "model3_orth_tsmom": {
+        "alpha_ann": 0.036328,
+        "alpha_t_nw": 0.7391,
+        "beta_mkt": 0.3236,
+        "beta_mkt_t": 7.3921,
+        "beta_tsmom_orth": 0.0552,
+        "beta_tsmom_orth_t": 2.5963,
+        "beta_tsmom_orth_p": 0.009455,
+        "r2": 0.0285
+      },
+      "alpha_reduction_pct": 1.57
+    }
+  },
+  "cross_sectional_analysis": {
+    "n_assets": 22,
+    "assets_used": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "XLF",
+      "XLE",
+      "DIA",
+      "EEM",
+      "EFA",
+      "FXI",
+      "EWZ",
+      "GLD",
+      "TLT",
+      "USO",
+      "HYG",
+      "LQD",
+      "EWJ",
+      "EWG",
+      "EWU",
+      "EWA",
+      "INDA",
+      "VNQ",
+      "SLV"
+    ],
+    "beta_tsmom_orth_vs_gamma": {
+      "pearson_r": 0.5644,
+      "pearson_p": 0.006216,
+      "pearson_ci_95": [
+        0.2629,
+        0.7719
+      ],
+      "spearman_rho": 0.5438,
+      "spearman_p": 0.008902
+    },
+    "beta_tsmom_raw_vs_gamma": {
+      "pearson_r": 0.5644,
+      "pearson_p": 0.006216
+    },
+    "cs_regression_orth": {
+      "gamma0": 0.0009,
+      "gamma0_t": 0.0348,
+      "gamma1": 0.5681,
+      "gamma1_t": 3.0575,
+      "gamma1_p": 0.006216,
+      "r2": 0.3185
+    },
+    "alpha_reduction_vs_gamma": {
+      "pearson_r": 0.2913,
+      "pearson_p": 0.188477
+    }
+  },
+  "equity_vs_non_equity": {
+    "equity_beta_tsmom_orth_mean": 0.0872,
+    "equity_beta_tsmom_orth_std": 0.0604,
+    "equity_n": 15,
+    "non_equity_beta_tsmom_orth_mean": 0.0121,
+    "non_equity_beta_tsmom_orth_std": 0.0842,
+    "non_equity_n": 7,
+    "welch_t_beta": 1.978,
+    "welch_p_beta": 0.080185,
+    "equity_alpha_reduction_mean": 3.69,
+    "non_equity_alpha_reduction_mean": 26.79,
+    "welch_t_alpha": -0.797,
+    "welch_p_alpha": 0.4452
+  },
+  "comparison_with_k53": {
+    "k53_n": 15,
+    "k55_n": 22,
+    "k53_pearson_r": 0.742,
+    "k53_pearson_p": 0.0015,
+    "k55_pearson_r": 0.5644,
+    "k55_pearson_p": 0.006216,
+    "k53_spearman_rho": 0.6357,
+    "k55_spearman_rho": 0.5438,
+    "k53_cs_r2": 0.5506,
+    "k55_cs_r2": 0.3185,
+    "k53_welch_p": 0.0687,
+    "k55_welch_p": 0.080185
+  },
+  "conclusions": {
+    "main_finding": "在 22 個資產中，17 個有顯著 TSMOM_orth loading (|t|>1.96)。Pearson r(gamma, TSMOM_orth) = 0.564 (p=0.0062)。",
+    "cross_sectional": "GJR gamma vs beta_TSMOM_orth: Pearson r=0.564 (p=0.0062), Spearman rho=0.544 (p=0.0089). Bootstrap 95% CI: [0.263, 0.772]. Cross-sectional R²=0.319.",
+    "classification": "Equity vs Non-Equity TSMOM_orth beta: Equity mean=0.0872 (n=15), Non-Equity mean=0.0121 (n=7). Welch t=1.978 (p=0.0802).",
+    "robustness": "N=15→N=22 擴展後相關性方向與顯著性 維持。K53 r=0.742 → K55 r=0.564。",
+    "paper3_ready": "Cross-sectional sample size N=22 滿足 Paper 3 requirement (N≥20)."
+  }
+}

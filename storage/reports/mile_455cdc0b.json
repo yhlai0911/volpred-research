@@ -1,0 +1,22 @@
+{
+  "id": "mile_455cdc0b",
+  "title": "多資產 VT 策略：EW VT Sharpe 1.08，MaxDD 僅 -13.8%",
+  "description": "## 多資產 Leverage-Aware VT 策略比較（2010-2026）\n\nSPY(GJR) + GLD(GARCH) + TLT(GARCH)，模型根據 leverage direction 自動選擇。\n\n| 策略 | 年化報酬 | 年化波動 | Sharpe | MaxDD | $1M → |\n|------|---------|---------|--------|-------|--------|\n| Equal Weight BH | +9.5% | 9.2% | 1.02 | -22.7% | $4.3M |\n| **EW VT** | **+6.4%** | **5.9%** | **1.08** | **-13.8%** | **$2.7M** |\n| Risk Parity | +9.1% | 8.7% | 1.05 | -22.3% | $4.1M |\n| RP + VT | +10.6% | 9.9% | 1.07 | -22.9% | $5.1M |\n| SPY BH | +13.7% | 17.2% | 0.80 | -33.7% | - |\n\n### 核心發現\n- 分散化（SPY+GLD+TLT）是 Sharpe > 1 的主因\n- VT 主要改善 MaxDD（-22.7% → -13.8%），Sharpe 改善有限\n- Leverage-aware model selection 確保每個資產用最適合的 GARCH\n\n⚠️ Sharpe > 1 含 2020-2025 黃金大牛市 tailwind",
+  "category": "milestone",
+  "phase": "K4",
+  "details": {
+    "ew_vt_sharpe": 1.08,
+    "ew_vt_maxdd": -13.8,
+    "period": "2010-2026"
+  },
+  "published_at": "2026-03-15T13:30:41.307193+00:00",
+  "status": "published",
+  "tags": [
+    "跨資產",
+    "Risk-Parity",
+    "VT策略",
+    "GJR-GARCH",
+    "GLD",
+    "SPY"
+  ]
+}

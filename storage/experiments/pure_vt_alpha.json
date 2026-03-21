@@ -1,0 +1,768 @@
+{
+  "experiment": "K47: Pure VT Alpha — Remove Trend Following Component",
+  "description": "Decompose VT return into trend following (TSMOM) and residual. Construct TSMOM-hedged VT using rolling regression (252d). Test if residual α is tradeable and if MDD protection survives after removing trend following exposure.",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T14:39:55.422996",
+  "config": {
+    "start": "2005-01-01",
+    "oos_start": "2023-01-01",
+    "rolling_window": 252,
+    "vix_threshold": 12.0,
+    "tsmom_lookbacks": [
+      21,
+      63,
+      252
+    ],
+    "cash_proxy": "SHY",
+    "n_bootstrap": 5000
+  },
+  "spy_results": {
+    "rolling_betas": {
+      "mean_alpha": 9.509717964574467e-06,
+      "mean_beta_mkt": -0.4571790981361317,
+      "mean_beta_tsmom": 0.17266129658917748,
+      "std_beta_tsmom": 0.05830830107367562,
+      "pct_positive_beta_tsmom": 1.0
+    },
+    "full_sample_beta": {
+      "alpha": 4.929874869217984e-05,
+      "beta_mkt": -0.5363210547615251,
+      "beta_tsmom": 0.2206360403297585
+    },
+    "correlations": {
+      "vt_tsmom": 0.11191357147323999,
+      "hedged_vt_tsmom": -0.19348961428474684
+    },
+    "mdd_analysis": {
+      "bh_mdd": -0.5519,
+      "vt_mdd": -0.2466,
+      "hedged_vt_mdd": -0.2687,
+      "mdd_protection_vt_pct": -55.3179923899257,
+      "mdd_protection_hedged_pct": -51.31364377604638,
+      "mdd_protection_lost_pct": -4.004348613879316
+    },
+    "period_results": {
+      "full": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 5084,
+          "ann_return": 0.118151,
+          "ann_vol": 0.193256,
+          "sharpe": 0.6114,
+          "sharpe_se": 0.2226,
+          "sharpe_t": 2.746,
+          "mdd": -0.5519,
+          "sortino": 0.7455,
+          "calmar": 0.2141
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 5084,
+          "ann_return": 0.07432,
+          "ann_vol": 0.093243,
+          "sharpe": 0.7971,
+          "sharpe_se": 0.2226,
+          "sharpe_t": 3.5801,
+          "mdd": -0.2466,
+          "sortino": 1.0651,
+          "calmar": 0.3014
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 4831,
+          "ann_return": 0.070861,
+          "ann_vol": 0.096152,
+          "sharpe": 0.737,
+          "sharpe_se": 0.2284,
+          "sharpe_t": 3.2268,
+          "mdd": -0.2687,
+          "sortino": 0.9527,
+          "calmar": 0.2637
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 5084,
+          "ann_return": 0.068727,
+          "ann_vol": 0.09485,
+          "sharpe": 0.7246,
+          "sharpe_se": 0.2226,
+          "sharpe_t": 3.2546,
+          "mdd": -0.2881,
+          "sortino": 0.9232,
+          "calmar": 0.2386
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 5084,
+          "ann_return": 0.025347,
+          "ann_vol": 0.147611,
+          "sharpe": 0.1717,
+          "sharpe_se": 0.2226,
+          "sharpe_t": 0.7713,
+          "mdd": -0.2747,
+          "sortino": 0.1832,
+          "calmar": 0.0923
+        }
+      },
+      "oos": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 806,
+          "ann_return": 0.189855,
+          "ann_vol": 0.151734,
+          "sharpe": 1.2512,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 2.2377,
+          "mdd": -0.1876,
+          "sortino": 1.6933,
+          "calmar": 1.0123
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 806,
+          "ann_return": 0.130898,
+          "ann_vol": 0.091905,
+          "sharpe": 1.4243,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 2.5472,
+          "mdd": -0.1014,
+          "sortino": 1.9835,
+          "calmar": 1.2912
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 806,
+          "ann_return": 0.11033,
+          "ann_vol": 0.083578,
+          "sharpe": 1.3201,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 2.3609,
+          "mdd": -0.1022,
+          "sortino": 1.8019,
+          "calmar": 1.0801
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 806,
+          "ann_return": 0.108366,
+          "ann_vol": 0.083181,
+          "sharpe": 1.3028,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 2.3299,
+          "mdd": -0.1042,
+          "sortino": 1.7625,
+          "calmar": 1.0402
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 806,
+          "ann_return": 0.102122,
+          "ann_vol": 0.111757,
+          "sharpe": 0.9138,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 1.6342,
+          "mdd": -0.1091,
+          "sortino": 0.9249,
+          "calmar": 0.9363
+        }
+      },
+      "pre_covid": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 3543,
+          "ann_return": 0.103999,
+          "ann_vol": 0.187432,
+          "sharpe": 0.5549,
+          "sharpe_se": 0.2667,
+          "sharpe_t": 2.0805,
+          "mdd": -0.5519,
+          "sortino": 0.6734,
+          "calmar": 0.1884
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 3543,
+          "ann_return": 0.070331,
+          "ann_vol": 0.092168,
+          "sharpe": 0.7631,
+          "sharpe_se": 0.2667,
+          "sharpe_t": 2.8612,
+          "mdd": -0.2466,
+          "sortino": 1.0074,
+          "calmar": 0.2852
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 3290,
+          "ann_return": 0.0677,
+          "ann_vol": 0.094687,
+          "sharpe": 0.715,
+          "sharpe_se": 0.2768,
+          "sharpe_t": 2.5834,
+          "mdd": -0.2687,
+          "sortino": 0.91,
+          "calmar": 0.252
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 3543,
+          "ann_return": 0.066032,
+          "ann_vol": 0.094454,
+          "sharpe": 0.6991,
+          "sharpe_se": 0.2667,
+          "sharpe_t": 2.6213,
+          "mdd": -0.2881,
+          "sortino": 0.8758,
+          "calmar": 0.2292
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 3543,
+          "ann_return": 0.019483,
+          "ann_vol": 0.147205,
+          "sharpe": 0.1324,
+          "sharpe_se": 0.2667,
+          "sharpe_t": 0.4963,
+          "mdd": -0.2747,
+          "sortino": 0.1447,
+          "calmar": 0.0709
+        }
+      },
+      "covid": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 356,
+          "ann_return": 0.262546,
+          "ann_vol": 0.290933,
+          "sharpe": 0.9024,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 1.0726,
+          "mdd": -0.3372,
+          "sortino": 1.0014,
+          "calmar": 0.7787
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 356,
+          "ann_return": 0.120295,
+          "ann_vol": 0.093852,
+          "sharpe": 1.2818,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 1.5235,
+          "mdd": -0.1195,
+          "sortino": 1.565,
+          "calmar": 1.0068
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 356,
+          "ann_return": 0.126032,
+          "ann_vol": 0.118041,
+          "sharpe": 1.0677,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 1.269,
+          "mdd": -0.127,
+          "sortino": 1.3028,
+          "calmar": 0.9922
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 356,
+          "ann_return": 0.109209,
+          "ann_vol": 0.097981,
+          "sharpe": 1.1146,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 1.3248,
+          "mdd": -0.1156,
+          "sortino": 1.3358,
+          "calmar": 0.9445
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 356,
+          "ann_return": 0.050246,
+          "ann_vol": 0.220014,
+          "sharpe": 0.2284,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 0.2714,
+          "mdd": -0.2238,
+          "sortino": 0.2206,
+          "calmar": 0.2245
+        }
+      },
+      "post_covid": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 1185,
+          "ann_return": 0.117084,
+          "ann_vol": 0.172734,
+          "sharpe": 0.6778,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 1.4699,
+          "mdd": -0.245,
+          "sortino": 0.9352,
+          "calmar": 0.478
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 1185,
+          "ann_return": 0.072434,
+          "ann_vol": 0.096269,
+          "sharpe": 0.7524,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 1.6316,
+          "mdd": -0.1627,
+          "sortino": 1.0707,
+          "calmar": 0.4453
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 1185,
+          "ann_return": 0.063064,
+          "ann_vol": 0.092886,
+          "sharpe": 0.6789,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 1.4723,
+          "mdd": -0.1485,
+          "sortino": 0.9428,
+          "calmar": 0.4247
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 1185,
+          "ann_return": 0.064623,
+          "ann_vol": 0.095149,
+          "sharpe": 0.6792,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 1.4728,
+          "mdd": -0.1412,
+          "sortino": 0.9319,
+          "calmar": 0.4577
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 1185,
+          "ann_return": 0.035402,
+          "ann_vol": 0.119171,
+          "sharpe": 0.2971,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 0.6442,
+          "mdd": -0.2587,
+          "sortino": 0.3241,
+          "calmar": 0.1369
+        }
+      }
+    },
+    "bootstrap_mdd": {
+      "pct_vt_better": 0.4392,
+      "mdd_diff_mean": -0.0029,
+      "mdd_diff_ci95": [
+        -0.0537,
+        0.0479
+      ],
+      "n_boot": 5000
+    }
+  },
+  "blend_results": {
+    "rolling_betas": {
+      "mean_alpha": 2.1486867677595897e-05,
+      "mean_beta_mkt": -0.4193891826288354,
+      "mean_beta_tsmom": 0.12650505818491434,
+      "std_beta_tsmom": 0.09016793983412678,
+      "pct_positive_beta_tsmom": 0.9509519867549668
+    },
+    "full_sample_beta": {
+      "alpha": 5.168691998833814e-05,
+      "beta_mkt": -0.5300041885314009,
+      "beta_tsmom": 0.18676391798024386
+    },
+    "correlations": {
+      "vt_tsmom": 0.4073816041432257,
+      "hedged_vt_tsmom": 0.22401383769987152
+    },
+    "mdd_analysis": {
+      "bh_mdd": -0.3249,
+      "vt_mdd": -0.1241,
+      "hedged_vt_mdd": -0.1312,
+      "mdd_protection_vt_pct": -61.80363188673439,
+      "mdd_protection_hedged_pct": -59.61834410587873,
+      "mdd_protection_lost_pct": -2.18528778085566
+    },
+    "period_results": {
+      "full": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 5084,
+          "ann_return": 0.118314,
+          "ann_vol": 0.13678,
+          "sharpe": 0.865,
+          "sharpe_se": 0.2226,
+          "sharpe_t": 3.8852,
+          "mdd": -0.3249,
+          "sortino": 1.1064,
+          "calmar": 0.3642
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 5084,
+          "ann_return": 0.07738,
+          "ann_vol": 0.078777,
+          "sharpe": 0.9823,
+          "sharpe_se": 0.2226,
+          "sharpe_t": 4.412,
+          "mdd": -0.1241,
+          "sortino": 1.3002,
+          "calmar": 0.6235
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 4831,
+          "ann_return": 0.065736,
+          "ann_vol": 0.070196,
+          "sharpe": 0.9365,
+          "sharpe_se": 0.2284,
+          "sharpe_t": 4.1002,
+          "mdd": -0.1312,
+          "sortino": 1.2228,
+          "calmar": 0.5011
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 5084,
+          "ann_return": 0.072912,
+          "ann_vol": 0.072438,
+          "sharpe": 1.0065,
+          "sharpe_se": 0.2226,
+          "sharpe_t": 4.521,
+          "mdd": -0.1349,
+          "sortino": 1.3193,
+          "calmar": 0.5404
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 5084,
+          "ann_return": 0.023925,
+          "ann_vol": 0.103085,
+          "sharpe": 0.2321,
+          "sharpe_se": 0.2226,
+          "sharpe_t": 1.0425,
+          "mdd": -0.3177,
+          "sortino": 0.2667,
+          "calmar": 0.0753
+        }
+      },
+      "oos": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 806,
+          "ann_return": 0.243375,
+          "ann_vol": 0.127144,
+          "sharpe": 1.9142,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 3.4233,
+          "mdd": -0.113,
+          "sortino": 2.4262,
+          "calmar": 2.1543
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 806,
+          "ann_return": 0.176872,
+          "ann_vol": 0.085832,
+          "sharpe": 2.0607,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 3.6853,
+          "mdd": -0.0691,
+          "sortino": 2.6422,
+          "calmar": 2.5593
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 806,
+          "ann_return": 0.134771,
+          "ann_vol": 0.066524,
+          "sharpe": 2.0259,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 3.6231,
+          "mdd": -0.0555,
+          "sortino": 2.7426,
+          "calmar": 2.4261
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 806,
+          "ann_return": 0.146242,
+          "ann_vol": 0.068898,
+          "sharpe": 2.1226,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 3.796,
+          "mdd": -0.0609,
+          "sortino": 2.7952,
+          "calmar": 2.3994
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 806,
+          "ann_return": 0.164003,
+          "ann_vol": 0.106638,
+          "sharpe": 1.5379,
+          "sharpe_se": 0.5592,
+          "sharpe_t": 2.7505,
+          "mdd": -0.0911,
+          "sortino": 1.8136,
+          "calmar": 1.8011
+        }
+      },
+      "pre_covid": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 3543,
+          "ann_return": 0.097287,
+          "ann_vol": 0.133006,
+          "sharpe": 0.7314,
+          "sharpe_se": 0.2667,
+          "sharpe_t": 2.7426,
+          "mdd": -0.3249,
+          "sortino": 0.9435,
+          "calmar": 0.2994
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 3543,
+          "ann_return": 0.064663,
+          "ann_vol": 0.078676,
+          "sharpe": 0.8219,
+          "sharpe_se": 0.2667,
+          "sharpe_t": 3.0818,
+          "mdd": -0.1241,
+          "sortino": 1.0846,
+          "calmar": 0.521
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 3290,
+          "ann_return": 0.056074,
+          "ann_vol": 0.071073,
+          "sharpe": 0.789,
+          "sharpe_se": 0.2768,
+          "sharpe_t": 2.8507,
+          "mdd": -0.1312,
+          "sortino": 1.0218,
+          "calmar": 0.4274
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 3543,
+          "ann_return": 0.064053,
+          "ann_vol": 0.073813,
+          "sharpe": 0.8678,
+          "sharpe_se": 0.2667,
+          "sharpe_t": 3.2538,
+          "mdd": -0.1349,
+          "sortino": 1.1271,
+          "calmar": 0.4747
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 3543,
+          "ann_return": 0.003266,
+          "ann_vol": 0.101597,
+          "sharpe": 0.0321,
+          "sharpe_se": 0.2667,
+          "sharpe_t": 0.1205,
+          "mdd": -0.3177,
+          "sortino": 0.0363,
+          "calmar": 0.0103
+        }
+      },
+      "covid": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 356,
+          "ann_return": 0.176577,
+          "ann_vol": 0.186159,
+          "sharpe": 0.9485,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 1.1274,
+          "mdd": -0.2032,
+          "sortino": 1.1007,
+          "calmar": 0.8692
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 356,
+          "ann_return": 0.084855,
+          "ann_vol": 0.067678,
+          "sharpe": 1.2538,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 1.4902,
+          "mdd": -0.0548,
+          "sortino": 1.6008,
+          "calmar": 1.5488
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 356,
+          "ann_return": 0.083886,
+          "ann_vol": 0.064773,
+          "sharpe": 1.2951,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 1.5393,
+          "mdd": -0.0586,
+          "sortino": 1.4659,
+          "calmar": 1.4325
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 356,
+          "ann_return": 0.079531,
+          "ann_vol": 0.057796,
+          "sharpe": 1.3761,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 1.6355,
+          "mdd": -0.0517,
+          "sortino": 1.6967,
+          "calmar": 1.5392
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 356,
+          "ann_return": 0.02851,
+          "ann_vol": 0.110553,
+          "sharpe": 0.2579,
+          "sharpe_se": 0.8413,
+          "sharpe_t": 0.3065,
+          "mdd": -0.1012,
+          "sortino": 0.3072,
+          "calmar": 0.2816
+        }
+      },
+      "post_covid": {
+        "Buy & Hold": {
+          "name": "Buy & Hold",
+          "n_obs": 1185,
+          "ann_return": 0.163678,
+          "ann_vol": 0.130336,
+          "sharpe": 1.2558,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 2.7232,
+          "mdd": -0.1803,
+          "sortino": 1.6871,
+          "calmar": 0.9077
+        },
+        "12/VIX VT": {
+          "name": "12/VIX VT",
+          "n_obs": 1185,
+          "ann_return": 0.113157,
+          "ann_vol": 0.08212,
+          "sharpe": 1.3779,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 2.9881,
+          "mdd": -0.1193,
+          "sortino": 1.8566,
+          "calmar": 0.9483
+        },
+        "TSMOM-Hedged VT (rolling)": {
+          "name": "TSMOM-Hedged VT (rolling)",
+          "n_obs": 1185,
+          "ann_return": 0.087108,
+          "ann_vol": 0.06934,
+          "sharpe": 1.2562,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 2.7242,
+          "mdd": -0.1114,
+          "sortino": 1.7682,
+          "calmar": 0.7816
+        },
+        "TSMOM-Hedged VT (fixed)": {
+          "name": "TSMOM-Hedged VT (fixed)",
+          "n_obs": 1185,
+          "ann_return": 0.097409,
+          "ann_vol": 0.072267,
+          "sharpe": 1.3479,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 2.9229,
+          "mdd": -0.1077,
+          "sortino": 1.8609,
+          "calmar": 0.9046
+        },
+        "Pure TSMOM": {
+          "name": "Pure TSMOM",
+          "n_obs": 1185,
+          "ann_return": 0.084316,
+          "ann_vol": 0.105155,
+          "sharpe": 0.8018,
+          "sharpe_se": 0.4611,
+          "sharpe_t": 1.7387,
+          "mdd": -0.1738,
+          "sortino": 0.9723,
+          "calmar": 0.4851
+        }
+      }
+    },
+    "bootstrap_mdd": {
+      "pct_vt_better": 0.2516,
+      "mdd_diff_mean": -0.0064,
+      "mdd_diff_ci95": [
+        -0.0303,
+        0.0177
+      ],
+      "n_boot": 5000
+    }
+  },
+  "alpha_regressions": {
+    "SPY": {
+      "full_sample": {
+        "alpha_daily": 5.268809739143575e-05,
+        "alpha_annual": 0.01327740054264181,
+        "alpha_annual_pct": 1.33,
+        "alpha_t": 2.132,
+        "alpha_p": 0.033,
+        "beta_mkt": -0.5316,
+        "beta_tsmom": 0.225,
+        "r2": 0.9412
+      },
+      "oos": {
+        "alpha_daily": 1.8306931054531355e-05,
+        "alpha_annual": 0.004613346625741902,
+        "alpha_annual_pct": 0.46,
+        "alpha_t": 0.544,
+        "alpha_p": 0.5861,
+        "beta_tsmom": 0.2475
+      }
+    },
+    "50/50": {
+      "full_sample": {
+        "alpha_daily": 6.204903255652884e-05,
+        "alpha_annual": 0.01563635620424527,
+        "alpha_annual_pct": 1.56,
+        "alpha_t": 2.353,
+        "alpha_p": 0.0186,
+        "beta_mkt": -0.5183,
+        "beta_tsmom": 0.1985,
+        "r2": 0.8472
+      },
+      "oos": {
+        "alpha_daily": 8.168503675712642e-05,
+        "alpha_annual": 0.020584629262795858,
+        "alpha_annual_pct": 2.06,
+        "alpha_t": 1.956,
+        "alpha_p": 0.0505,
+        "beta_tsmom": 0.2603
+      }
+    }
+  },
+  "key_findings": [
+    "SPY: 移除 TSMOM 後 Sharpe 0.7971 → 0.7370 (Δ=-0.0601)",
+    "SPY: 移除 TSMOM 後 MDD -0.2466 → -0.2687 (Δ=-0.0221)",
+    "50/50: 移除 TSMOM 後 Sharpe 0.9823 → 0.9365 (Δ=-0.0458)",
+    "50/50: 移除 TSMOM 後 MDD -0.1241 → -0.1312 (Δ=-0.0071)",
+    "SPY: 殘差 α 年化 1.33% (t=2.132, p=0.0330)",
+    "SPY OOS: 殘差 α 年化 0.46% (t=0.544, p=0.5861)",
+    "50/50: 殘差 α 年化 1.56% (t=2.353, p=0.0186)",
+    "50/50 OOS: 殘差 α 年化 2.06% (t=1.956, p=0.0505)",
+    "★ SPY: 移除 TSMOM 降低 Sharpe → VT alpha 部分來自 trend following",
+    "★ SPY: 移除 TSMOM 後 MDD 改善 → MDD 保護不完全來自 trend following"
+  ]
+}

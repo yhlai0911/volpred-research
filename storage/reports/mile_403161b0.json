@@ -1,0 +1,20 @@
+{
+  "id": "mile_403161b0",
+  "title": "ML 探索：純 XGBoost 在波動率預測上失敗",
+  "description": "XGBoost 使用 14 個精心設計的特徵（squared returns, range, HAR, asymmetric 等），\nQLIKE=-8.615 — 遠差於 GJR-GARCH 的 -9.034。\n\n失敗原因：\n1. Target（r² 或 RV）極度嘈雜 — 一天可變化 1000 倍\n2. 504 天 training window 太短 — XGBoost 需要數千觀測\n3. Feature importance 全為 0 — 模型退化為常數預測\n4. GARCH 的遞迴結構是不可替代的領域知識\n\n**結論**：ML 不能「替代」GARCH，但可能作為 GARCH 的「修正器」有效。\n需要更長的歷史數據或 GARCH-informed 的 hybrid 架構。\n    ",
+  "category": "milestone",
+  "phase": "ml_exploration",
+  "details": {
+    "xgb_qlike": -8.615,
+    "gjr_qlike": -9.034,
+    "failure_reason": "noisy target + insufficient data"
+  },
+  "published_at": "2026-03-14T13:48:36.034001+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "GJR-GARCH",
+    "HAR-RV",
+    "LSTM"
+  ]
+}

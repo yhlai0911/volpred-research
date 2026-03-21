@@ -1,0 +1,22 @@
+{
+  "id": "mile_6371498d",
+  "title": "FHS 對 SPY 無效：GJR 的動態變異數已充分捕捉尾部",
+  "description": "正確實作的 FHS（用 GARCH conditional sigma 標準化殘差）在 SPY 上反而增加 VaR 違反。\n\n原因：GJR 的 standardized residuals 的 1% quantile (-2.29) 比 Normal (-2.33) 更薄。\nGJR 的非對稱項已經將大部分尾部行為吸收進 sigma 動態中。\n\n**深刻洞見：FHS 的價值取決於模型殘差是否非 Normal。**\n- SPY + GJR：殘差接近 Normal → FHS 無用，改善 sigma 水平更重要\n- BTC + GARCH：殘差厚尾 → FHS 有效（之前已驗證）\n\n這確認了 GJR-HAR/組合預測是 SPY 的正確方向。\n    ",
+  "category": "milestone",
+  "phase": "fhs_analysis",
+  "details": {
+    "fhs_spygg_var1": "2.4% FAIL",
+    "empirical_z1": -2.29,
+    "normal_z1": -2.33
+  },
+  "published_at": "2026-03-14T13:23:53.481976+00:00",
+  "status": "published",
+  "tags": [
+    "VaR",
+    "厚尾",
+    "GJR-GARCH",
+    "FHS",
+    "BTC",
+    "SPY"
+  ]
+}

@@ -1,0 +1,90 @@
+{
+  "id": "pub_fdbde66e",
+  "experiment_id": "fdbde66e",
+  "title": "Baseline Best: GJR-GARCH/Normal on SPY (QLIKE=-9.034)",
+  "summary": "mse=0.000000, mae=0.002996, qlike=-9.033727, hmse=0.669902, r2_log=-0.558787, n_forecasts=501, mean_actual_var=0.000043, mean_forecast_var=0.000073",
+  "category": "experiment",
+  "metrics": {
+    "mse": 3.424842023427002e-09,
+    "mae": 0.002996401976282911,
+    "qlike": -9.03372716045227,
+    "hmse": 0.6699015257717993,
+    "r2_log": -0.5587865894487924,
+    "n_forecasts": 501,
+    "mean_actual_var": 4.345471044859623e-05,
+    "mean_forecast_var": 7.32827974075056e-05,
+    "var_es": {
+      "alpha_0.01": {
+        "alpha": 0.01,
+        "n_violations": 10,
+        "violation_rate": 0.01996007984031936,
+        "expected_rate": 0.01,
+        "kupiec": {
+          "statistic": 3.8933555949658682,
+          "p_value": 0.04847747440189365,
+          "observed_rate": 0.01996007984031936,
+          "expected_rate": 0.01,
+          "n_violations": 10,
+          "total": 501,
+          "conclusion": "reject"
+        },
+        "christoffersen": {
+          "independence_stat": 0.0,
+          "independence_pval": 1.0,
+          "n00": 480,
+          "n01": 10,
+          "n10": 10,
+          "n11": 0,
+          "pi01": 0.02040816326530612,
+          "pi11": 0.0,
+          "conclusion": "independent"
+        },
+        "avg_loss_given_violation": 0.019750514345262336,
+        "avg_es_forecast": 0.01837256478531297,
+        "es_ratio": 1.0750003919458704,
+        "var_mean": 0.019161502162436995,
+        "es_mean": 0.021952653176417185
+      },
+      "alpha_0.05": {
+        "alpha": 0.05,
+        "n_violations": 26,
+        "violation_rate": 0.05189620758483034,
+        "expected_rate": 0.05,
+        "kupiec": {
+          "statistic": 0.037478415972231005,
+          "p_value": 0.846494243308977,
+          "observed_rate": 0.05189620758483034,
+          "expected_rate": 0.05,
+          "n_violations": 26,
+          "total": 501,
+          "conclusion": "fail_to_reject"
+        },
+        "christoffersen": {
+          "independence_stat": 0.11111221345702837,
+          "independence_pval": 0.7388814323463857,
+          "n00": 449,
+          "n01": 25,
+          "n10": 25,
+          "n11": 1,
+          "pi01": 0.052742616033755275,
+          "pi11": 0.038461538461538464,
+          "conclusion": "independent"
+        },
+        "avg_loss_given_violation": 0.016805166161602072,
+        "avg_es_forecast": 0.015612535200575595,
+        "es_ratio": 1.0763893208697142,
+        "var_mean": 0.01354821722126055,
+        "es_mean": 0.01699001097926343
+      }
+    }
+  },
+  "tags": [
+    "SPY",
+    "GJR-GARCH",
+    "QLIKE",
+    "波動率預測",
+    "Normal"
+  ],
+  "published_at": "2026-03-14T11:35:15.199367+00:00",
+  "status": "published"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "mile_8c9413d7",
+  "title": "VIX Term Structure 預測力：VIX/VIX3M 與未來波動率相關 0.51",
+  "description": "## VIX Term Structure 分析\n\nVIX/VIX3M ratio（近月/遠月 implied vol 比）2018-2025：\n\n| 指標 | 值 |\n|------|-----|\n| 平均 ratio | 0.902 (contango) |\n| Backwardation 佔比 | 8.7% |\n| **與未來 22d realized vol 相關** | **0.51 (p<0.001)** |\n\n## 與 GARCH 的比較\n\n| 信號 | 與 realized vol 相關 | 信息來源 |\n|------|---------------------|---------|\n| r² (GARCH 輸入) | 0.46 | 歷史價格 |\n| Parkinson RV | 0.46 | 歷史 HL |\n| **VIX/VIX3M** | **0.51** | **Option market 前瞻定價** |\n\n## 啟示\n\nVIX term structure 包含 GARCH 沒有的前瞻性信息。之前 VIX level 作為 GARCH-X 外部變數失敗（因為跟 sigma 共線性），但 VIX/VIX3M **ratio** 不同——它反映市場對未來波動結構的預期。\n\n這可能是突破日頻 GARCH 天花板的突破口。",
+  "category": "milestone",
+  "phase": "vix_term_structure",
+  "details": {
+    "ratio_mean": 0.902,
+    "backwardation_pct": 0.087,
+    "corr_with_future_vol": 0.51,
+    "r2_corr": 0.46
+  },
+  "published_at": "2026-03-15T05:32:35.319654+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "GARCH",
+    "VT策略"
+  ]
+}

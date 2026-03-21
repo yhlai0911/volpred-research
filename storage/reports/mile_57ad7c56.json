@@ -1,0 +1,20 @@
+{
+  "id": "mile_57ad7c56",
+  "title": "Rate-Hike Regime Filter Null：VT 已內建 Fed 保護",
+  "description": "## 摘要\n\n[提出: Claude, 延伸 S2 Monetary Anti-Signal]\n\nS2 發現升息時高 VIX Z-score 預測負報酬（t=-5.0）。假說：降低升息期 VT 曝險。結果：**所有保守變體都更差。**\n\n## 核心發現\n\n| 策略 | Sharpe | MDD |\n|------|--------|-----|\n| 12/VIX baseline | 0.565 | -17.7% |\n| 8/VIX in hikes | 0.557 | -15.8% |\n| Cash in hikes | 0.488 | -14.2% |\n| 50% weight in hikes | 0.471 | -14.2% |\n\n**MDD 改善 3.5pp 但 Sharpe 下降 0.01-0.30。**\n\n## 為什麼不管用？\n\n12/VIX 已透過 VIX 水平自動調整曝險——VIX 在升息期間本來就偏高，weight 已經自動降低。額外加 regime overlay 等於「雙重減碼」，移除了太多正報酬天。\n\nS2 的 anti-signal (t=-5.0) 是 conditional on Z>1.5 的特定信號，不適用於 unconditional VT weight。\n",
+  "category": "milestone",
+  "phase": "Phase_S",
+  "details": {
+    "finding": "rate-hike VT filter null"
+  },
+  "tags": [
+    "Phase S",
+    "Rate Hike",
+    "VT策略",
+    "12/VIX",
+    "Fed",
+    "Null Result"
+  ],
+  "published_at": "2026-03-17T06:11:23.328735+00:00",
+  "status": "published"
+}

@@ -1,0 +1,25 @@
+{
+  "id": "mile_1aaa8bbd",
+  "title": "H4 策略 2025 更新：慢調整 VT 在牛市中跑輸，但風險更低",
+  "description": "## 2025-01 ~ 2026-03 策略表現\n\n| 指標 | 慢調整 VT | Buy & Hold |\n|------|---------|-----------|\n| 年化報酬 | 4.7% | 10.5% |\n| 年化波動 | **13.1%** | 18.3% |\n| Sharpe | 0.36 | **0.58** |\n| MaxDD | **-15.2%** | -19.5% |\n| 累計報酬 | 4.6% | 11.1% |\n\n設定：GJR-arch w=504, target_vol=12%, MA=5 smoothing, 交易成本 0.14%/年。\n\n## 分析\n\n2025 是牛市，VT 平均持倉 91%（略微減碼）。VT 在牛市中跑輸 BH 是**設計上的 trade-off**——它用報酬換取了 28% 的波動率降低和 22% 的 MaxDD 改善。\n\n## 啟示\n\nVT 是 **risk management 策略**，不是 alpha 策略。牛市跑輸是正常的。投資建議應清楚溝通：高波動環境 VT 防守優勢明顯，低波動牛市 VT 是代價。\n\n假設投入 100 萬：VT → 104.6 萬，BH → 111.1 萬。差距 6.5 萬。",
+  "category": "milestone",
+  "phase": "h4_strategy",
+  "details": {
+    "vt_ann_return": 0.047,
+    "vt_sharpe": 0.36,
+    "vt_maxdd": -0.152,
+    "bh_ann_return": 0.105,
+    "bh_sharpe": 0.58,
+    "bh_maxdd": -0.195,
+    "mean_weight": 0.91
+  },
+  "published_at": "2026-03-14T21:12:16.829527+00:00",
+  "status": "published",
+  "tags": [
+    "投資策略",
+    "波動率預測",
+    "風險管理",
+    "VT策略",
+    "GJR-GARCH"
+  ]
+}

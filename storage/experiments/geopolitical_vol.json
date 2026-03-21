@@ -1,0 +1,753 @@
+{
+  "experiment_id": "geopolitical_vol_20260321",
+  "title": "Geopolitical Risk Index → Volatility Prediction",
+  "model": "GPR proxies (gold/oil momentum z-scores) + VIX regression",
+  "description": "Tests whether geopolitical risk proxies (GLD 5-day return z-score, USO 5-day return z-score, GLD-SPY divergence) predict financial volatility beyond what VIX captures. Includes incremental R² tests, Granger causality, event studies (Crimea, Trade War, Iran, Ukraine, Israel), VT strategy overlays, cross-asset GPR sensitivity, and regime-conditional analysis.",
+  "hypothesis": "Geopolitical risk (proxied by gold/oil momentum) contains forward-looking volatility information not captured by VIX.",
+  "direction": "面向 G: 地緣政治風險",
+  "attribution": "[提出: 用戶, 執行: Claude]",
+  "created_at": "2026-03-21",
+  "data": {
+    "assets": [
+      "SPY",
+      "GLD",
+      "USO",
+      "TLT",
+      "EEM"
+    ],
+    "vix_source": "^VIX",
+    "sample": "2007-04-05 to 2026-02-18 (4748 obs)",
+    "analysis_obs": 4748
+  },
+  "gpr_proxies": {
+    "GPR_Gold": "GLD 5-day return z-score (60-day rolling window)",
+    "GPR_Oil": "USO 5-day return z-score (60-day rolling window)",
+    "GPR_Composite": "Average of GPR_Gold and GPR_Oil",
+    "GPR_Divergence": "GLD-SPY 5-day return divergence z-score (flight-to-safety indicator)"
+  },
+  "gpr_statistics": {
+    "GPR_Gold": {
+      "mean": 0.015086036087708782,
+      "std": 1.0603511216843307,
+      "skew": -0.20689339373131388,
+      "kurtosis": 0.5652627224643916,
+      "corr_with_vix": -0.0119337811699082
+    },
+    "GPR_Oil": {
+      "mean": -0.046205425224338306,
+      "std": 1.064705893257594,
+      "skew": -0.2562390593415688,
+      "kurtosis": 0.7524007583891388,
+      "corr_with_vix": -0.08265484325890003
+    },
+    "GPR_Composite": {
+      "mean": -0.01555969456831477,
+      "std": 0.8177309078556975,
+      "skew": -0.3171953166004833,
+      "kurtosis": 0.8366533871773547,
+      "corr_with_vix": -0.06154658947491057
+    },
+    "GPR_Divergence": {
+      "mean": 0.04085317200469375,
+      "std": 1.0758878172739965,
+      "skew": 0.16223905255459456,
+      "kurtosis": 0.7215024260700971,
+      "corr_with_vix": 0.10544395262847385
+    }
+  },
+  "incremental_r2_regressions": {
+    "target": "RV5_forward (5-day realized variance, annualized)",
+    "5day_horizon": {
+      "VIX_only": {
+        "name": "VIX_only",
+        "r2": 0.39106475441847477,
+        "r2_adj": 0.3909364494784028,
+        "aic": 5075.64506584576,
+        "bic": 5088.576023357219,
+        "params": {
+          "const": -0.5516134875594821,
+          "VIX": 0.03759477638783872
+        },
+        "t_stats": {
+          "const": -5.224645255604604,
+          "VIX": 6.288134294375624
+        },
+        "p_values": {
+          "const": 1.7448930675231523e-07,
+          "VIX": 3.2130391442749355e-10
+        },
+        "nobs": 4748
+      },
+      "VIX+GPR_Gold": {
+        "name": "VIX+GPR_Gold",
+        "r2": 0.391069981625774,
+        "r2_adj": 0.3908133198688196,
+        "aic": 5077.604308003345,
+        "bic": 5097.000744270534,
+        "params": {
+          "const": -0.5516633254542297,
+          "VIX": 0.03759641677751332,
+          "GPR_Gold": 0.0011407436816697177
+        },
+        "t_stats": {
+          "const": -5.221682436277431,
+          "VIX": 6.285341351719725,
+          "GPR_Gold": 0.12833767017366193
+        },
+        "p_values": {
+          "const": 1.7730483480043954e-07,
+          "VIX": 3.2713408660316173e-10,
+          "GPR_Gold": 0.8978817550909801
+        },
+        "nobs": 4748
+      },
+      "VIX+GPR_Oil": {
+        "name": "VIX+GPR_Oil",
+        "r2": 0.3960268070134848,
+        "r2_adj": 0.3957722345401501,
+        "aic": 5038.796367279192,
+        "bic": 5058.192803546381,
+        "params": {
+          "const": -0.5462500312156663,
+          "VIX": 0.037243547071312985,
+          "GPR_Oil": -0.035120574306749676
+        },
+        "t_stats": {
+          "const": -5.3255918096405805,
+          "VIX": 6.433672998989921,
+          "GPR_Oil": -1.8305419759958985
+        },
+        "p_values": {
+          "const": 1.0062487461101695e-07,
+          "VIX": 1.2455667782326324e-10,
+          "GPR_Oil": 0.06716893598078602
+        },
+        "nobs": 4748
+      },
+      "VIX+GPR_Composite": {
+        "name": "VIX+GPR_Composite",
+        "r2": 0.39302754211290536,
+        "r2_adj": 0.3927717054604766,
+        "aic": 5062.316066709689,
+        "bic": 5081.712502976878,
+        "params": {
+          "const": -0.5487935227255955,
+          "VIX": 0.03743054054817122,
+          "GPR_Composite": -0.02871589423335196
+        },
+        "t_stats": {
+          "const": -5.283511379633348,
+          "VIX": 6.365312600975672,
+          "GPR_Composite": -1.5884137120782
+        },
+        "p_values": {
+          "const": 1.2673098784414023e-07,
+          "VIX": 1.9489239491849128e-10,
+          "GPR_Composite": 0.11219281883315216
+        },
+        "nobs": 4748
+      },
+      "VIX+GPR_Divergence": {
+        "name": "VIX+GPR_Divergence",
+        "r2": 0.3948753712313138,
+        "r2_adj": 0.3946203134320435,
+        "aic": 5047.839504481246,
+        "bic": 5067.235940748435,
+        "params": {
+          "const": -0.5450333439329926,
+          "VIX": 0.037201271308195734,
+          "GPR_Divergence": 0.030523230111975167
+        },
+        "t_stats": {
+          "const": -5.263159404165587,
+          "VIX": 6.357235909377999,
+          "GPR_Divergence": 2.127778130631828
+        },
+        "p_values": {
+          "const": 1.416007047533007e-07,
+          "VIX": 2.05416401719727e-10,
+          "GPR_Divergence": 0.03335548341130222
+        },
+        "nobs": 4748
+      },
+      "VIX+AllGPR": {
+        "name": "VIX+AllGPR",
+        "r2": 0.4003589995457355,
+        "r2_adj": 0.39985329345216236,
+        "aic": 5008.6170778000505,
+        "bic": 5040.9444715786985,
+        "params": {
+          "const": -0.5367332685540425,
+          "VIX": 0.036710731661378594,
+          "GPR_Gold": -0.024770520546736906,
+          "GPR_Oil": -0.02681685447940037,
+          "GPR_Divergence": 0.04500766070207783
+        },
+        "t_stats": {
+          "const": -5.368283075787507,
+          "VIX": 6.51333031863748,
+          "GPR_Gold": -1.558191549259875,
+          "GPR_Oil": -1.537540506192709,
+          "GPR_Divergence": 2.2206848015115837
+        },
+        "p_values": {
+          "const": 7.948972248258221e-08,
+          "VIX": 7.350262773532185e-11,
+          "GPR_Gold": 0.11918784765391557,
+          "GPR_Oil": 0.12416100371337263,
+          "GPR_Divergence": 0.026372317563289834
+        },
+        "nobs": 4748
+      },
+      "GPR_only": {
+        "name": "GPR_only",
+        "r2": 0.036870670520599225,
+        "r2_adj": 0.03626160897160302,
+        "aic": 7256.488013940807,
+        "bic": 7282.349928963725,
+        "params": {
+          "const": 0.19116172074549623,
+          "GPR_Gold": -0.06560095778910952,
+          "GPR_Oil": -0.039115543276360874,
+          "GPR_Divergence": 0.10270211475617855
+        },
+        "t_stats": {
+          "const": 9.418892666983824,
+          "GPR_Gold": -2.357567404335986,
+          "GPR_Oil": -1.7275154646792532,
+          "GPR_Divergence": 2.9499425967201103
+        },
+        "p_values": {
+          "const": 4.5587014999085156e-21,
+          "GPR_Gold": 0.01839511542380787,
+          "GPR_Oil": 0.08407513025000293,
+          "GPR_Divergence": 0.003178329753634617
+        },
+        "nobs": 4748
+      }
+    },
+    "22day_horizon": {
+      "VIX_only": {
+        "name": "VIX_only",
+        "r2": 0.32438631441208343,
+        "r2_adj": 0.32424396007462286,
+        "aic": -11825.505351864624,
+        "bic": -11812.574394353165,
+        "params": {
+          "const": -0.06980797088915676,
+          "VIX": 0.00548284148757008
+        },
+        "t_stats": {
+          "const": -4.917151261330944,
+          "VIX": 6.664743408224725
+        },
+        "p_values": {
+          "const": 8.781269976509483e-07,
+          "VIX": 2.6512815242823206e-11
+        },
+        "nobs": 4748
+      },
+      "VIX+GPR_Gold": {
+        "name": "VIX+GPR_Gold",
+        "r2": 0.3251970824445535,
+        "r2_adj": 0.32491265550353954,
+        "aic": -11829.20659557229,
+        "bic": -11809.810159305101,
+        "params": {
+          "const": -0.06990736127938857,
+          "VIX": 0.005486112873143542,
+          "GPR_Gold": 0.002274954836081306
+        },
+        "t_stats": {
+          "const": -4.909343221649422,
+          "VIX": 6.649688559899947,
+          "GPR_Gold": 1.1426320573879998
+        },
+        "p_values": {
+          "const": 9.138192158919691e-07,
+          "VIX": 2.9371384644830426e-11,
+          "GPR_Gold": 0.253191389762331
+        },
+        "nobs": 4748
+      },
+      "VIX+GPR_Composite": {
+        "name": "VIX+GPR_Composite",
+        "r2": 0.32442548319611064,
+        "r2_adj": 0.3241407310288592,
+        "aic": -11823.78062571069,
+        "bic": -11804.3841894435,
+        "params": {
+          "const": -0.06987176026232403,
+          "VIX": 0.005486556605268748,
+          "GPR_Composite": 0.0006495715375850885
+        },
+        "t_stats": {
+          "const": -4.9320806383913895,
+          "VIX": 6.676164143826722,
+          "GPR_Composite": 0.2086318387880151
+        },
+        "p_values": {
+          "const": 8.135831441767914e-07,
+          "VIX": 2.4527724393702784e-11,
+          "GPR_Composite": 0.8347356537177969
+        },
+        "nobs": 4748
+      },
+      "VIX+AllGPR": {
+        "name": "VIX+AllGPR",
+        "r2": 0.3275615958405157,
+        "r2_adj": 0.32699449619543075,
+        "aic": -11841.87283190323,
+        "bic": -11809.545438124584,
+        "params": {
+          "const": -0.06860578840178062,
+          "VIX": 0.005411043596874723,
+          "GPR_Gold": -0.0007925886179681278,
+          "GPR_Oil": -0.0009632964201478571,
+          "GPR_Divergence": 0.004733524650341124
+        },
+        "t_stats": {
+          "const": -4.904644243328155,
+          "VIX": 6.7149950003768595,
+          "GPR_Gold": -0.29373946932860767,
+          "GPR_Oil": -0.46492978707501037,
+          "GPR_Divergence": 1.1910910005189088
+        },
+        "p_values": {
+          "const": 9.359682037196072e-07,
+          "VIX": 1.8807266847679388e-11,
+          "GPR_Gold": 0.7689569918874983,
+          "GPR_Oil": 0.6419817384796842,
+          "GPR_Divergence": 0.23361786243696547
+        },
+        "nobs": 4748
+      }
+    },
+    "best_delta_r2_5d": 0.009294245127260736,
+    "f_test": {
+      "f_statistic": 15.344069552173725,
+      "p_value": 9.086117801826443e-05,
+      "significant": "True"
+    },
+    "dm_test": {
+      "dm_statistic": 1.3872066767796918,
+      "p_value": 0.16537875009295266,
+      "gpr_model_wins": "False"
+    }
+  },
+  "granger_causality": {
+    "GPR_Gold": {
+      "lag_1": {
+        "F": 0.09047299338538056,
+        "p": 0.7635898854040614
+      },
+      "lag_2": {
+        "F": 0.6985165095120737,
+        "p": 0.49737371594419505
+      },
+      "lag_3": {
+        "F": 1.5436127971754114,
+        "p": 0.20106288821529206
+      },
+      "lag_4": {
+        "F": 1.929500517414392,
+        "p": 0.1026613691813254
+      },
+      "lag_5": {
+        "F": 1.6617113324688488,
+        "p": 0.1402632912327515
+      }
+    },
+    "GPR_Oil": {
+      "lag_1": {
+        "F": 1.640045117241332,
+        "p": 0.2003818976305638
+      },
+      "lag_2": {
+        "F": 1.0205458220601538,
+        "p": 0.3604773489766253
+      },
+      "lag_3": {
+        "F": 1.4769357570289394,
+        "p": 0.21869275109826122
+      },
+      "lag_4": {
+        "F": 1.6842710391795475,
+        "p": 0.15064721703090644
+      },
+      "lag_5": {
+        "F": 1.2938254644846614,
+        "p": 0.2634116788905958
+      }
+    },
+    "GPR_Composite": {
+      "lag_1": {
+        "F": 1.0538117148341397,
+        "p": 0.3046831947194451
+      },
+      "lag_2": {
+        "F": 1.3236201670641248,
+        "p": 0.26626833762364616
+      },
+      "lag_3": {
+        "F": 2.467532961781367,
+        "p": 0.060248714199111084
+      },
+      "lag_4": {
+        "F": 3.0006752142358013,
+        "p": 0.017425469536894726
+      },
+      "lag_5": {
+        "F": 2.3893761252316734,
+        "p": 0.03568089591854112
+      }
+    },
+    "GPR_Divergence": {
+      "lag_1": {
+        "F": 1.2191919591436058,
+        "p": 0.26957530174479166
+      },
+      "lag_2": {
+        "F": 2.0164878313999295,
+        "p": 0.13323637604932612
+      },
+      "lag_3": {
+        "F": 1.2487941557811948,
+        "p": 0.2903134449456862
+      },
+      "lag_4": {
+        "F": 1.0363865087233657,
+        "p": 0.3867890062072867
+      },
+      "lag_5": {
+        "F": 1.8599255009272928,
+        "p": 0.09791672023216352
+      }
+    }
+  },
+  "event_study": {
+    "2014_Crimea": {
+      "period": "2014-02-27 to 2014-03-20",
+      "n_obs": 16,
+      "GPR_Composite_mean": -0.36516300039350447,
+      "GPR_Composite_max": 0.33939608737080346,
+      "GPR_Gold_max": 1.3380854825461286,
+      "GPR_Oil_max": 0.4741381020239912,
+      "VIX_mean": 14.853750050067902,
+      "VIX_max": 17.81999969482422,
+      "GPR_peak_date": "2014-03-03",
+      "VIX_peak_date": "2014-03-14",
+      "GPR_led_VIX": true,
+      "lead_days": 11,
+      "pre_event_GPR_max": 1.3596808982265276,
+      "pre_event_VIX_max": 21.440000534057617,
+      "SPY_return_pct": 1.588657003398375
+    },
+    "2018_TradeWar": {
+      "period": "2018-03-22 to 2018-04-30",
+      "n_obs": 27,
+      "GPR_Composite_mean": 0.10469336458013219,
+      "GPR_Composite_max": 1.4343439295188285,
+      "GPR_Gold_max": 1.6408517695537386,
+      "GPR_Oil_max": 2.0622562303443104,
+      "VIX_mean": 19.19259265617088,
+      "VIX_max": 24.8700008392334,
+      "GPR_peak_date": "2018-03-26",
+      "VIX_peak_date": "2018-03-23",
+      "GPR_led_VIX": false,
+      "lead_days": 0,
+      "pre_event_GPR_max": 1.025511090857461,
+      "pre_event_VIX_max": 22.469999313354492,
+      "SPY_return_pct": -1.9821703495088272
+    },
+    "2019_Iran": {
+      "period": "2020-01-02 to 2020-01-15",
+      "n_obs": 10,
+      "GPR_Composite_mean": -0.2129444085375944,
+      "GPR_Composite_max": 1.3335890844928606,
+      "GPR_Gold_max": 2.440761467011554,
+      "GPR_Oil_max": 0.37229813438678405,
+      "VIX_mean": 12.9810001373291,
+      "VIX_max": 14.020000457763672,
+      "GPR_peak_date": "2020-01-06",
+      "VIX_peak_date": "2020-01-03",
+      "GPR_led_VIX": false,
+      "lead_days": 0,
+      "pre_event_GPR_max": 1.0683756904132564,
+      "pre_event_VIX_max": 15.960000038146973,
+      "SPY_return_pct": 1.9627896938027911
+    },
+    "2022_Ukraine": {
+      "period": "2022-02-24 to 2022-03-31",
+      "n_obs": 26,
+      "GPR_Composite_mean": 0.15263135462877692,
+      "GPR_Composite_max": 3.166007778053018,
+      "GPR_Gold_max": 2.823452258309225,
+      "GPR_Oil_max": 3.9905106962402725,
+      "VIX_mean": 27.24384615971492,
+      "VIX_max": 36.45000076293945,
+      "GPR_peak_date": "2022-03-04",
+      "VIX_peak_date": "2022-03-07",
+      "GPR_led_VIX": true,
+      "lead_days": 3,
+      "pre_event_GPR_max": 1.0170819650052443,
+      "pre_event_VIX_max": 31.959999084472656,
+      "SPY_return_pct": 7.386295687139455
+    },
+    "2023_Israel": {
+      "period": "2023-10-07 to 2023-11-07",
+      "n_obs": 22,
+      "GPR_Composite_mean": 0.35754385678755907,
+      "GPR_Composite_max": 2.3570661791509844,
+      "GPR_Gold_max": 3.2318772552708968,
+      "GPR_Oil_max": 1.8949112415298217,
+      "VIX_mean": 18.216363646767356,
+      "VIX_max": 21.709999084472656,
+      "GPR_peak_date": "2023-10-13",
+      "VIX_peak_date": "2023-10-20",
+      "GPR_led_VIX": true,
+      "lead_days": 7,
+      "pre_event_GPR_max": 0.5958158167297334,
+      "pre_event_VIX_max": 19.780000686645508,
+      "SPY_return_pct": 1.798378496480424
+    }
+  },
+  "vt_strategies": {
+    "Buy&Hold SPY": {
+      "name": "Buy&Hold SPY",
+      "ann_return": 0.12103893097812868,
+      "ann_vol": 0.19793541825847738,
+      "sharpe": 0.6115071877639802,
+      "sharpe_se": 0.23038007495983767,
+      "sharpe_t": 2.6543406059338452,
+      "mdd": -0.5518944093580865,
+      "sortino": 0.7473072646652734,
+      "calmar": 0.21931537795229739,
+      "n_obs": 4748,
+      "n_years": 18.841269841269842
+    },
+    "Standard 12/VIX": {
+      "name": "Standard 12/VIX",
+      "ann_return": 0.06895705744681226,
+      "ann_vol": 0.09502337945097669,
+      "sharpe": 0.7256851718517099,
+      "sharpe_se": 0.2304043395420272,
+      "sharpe_t": 3.1496159026090758,
+      "mdd": -0.28600088360088344,
+      "sortino": 0.9709817042653399,
+      "calmar": 0.2411078475654026,
+      "n_obs": 4747,
+      "n_years": 18.83730158730159
+    },
+    "VT + GPR_Gold(2σ,-20%)": {
+      "name": "VT + GPR_Gold(2σ,-20%)",
+      "ann_return": 0.06882943605928601,
+      "ann_vol": 0.09426102602957083,
+      "sharpe": 0.730200369744473,
+      "sharpe_se": 0.2304043395420272,
+      "sharpe_t": 3.169212746582318,
+      "mdd": -0.2830915108570262,
+      "sortino": 0.9778655712901309,
+      "calmar": 0.24313493488700175,
+      "n_obs": 4747,
+      "n_years": 18.83730158730159
+    },
+    "VT + GPR_Composite(2σ,-20%)": {
+      "name": "VT + GPR_Composite(2σ,-20%)",
+      "ann_return": 0.06938400405267421,
+      "ann_vol": 0.09493766929973173,
+      "sharpe": 0.7308374490806072,
+      "sharpe_se": 0.2304043395420272,
+      "sharpe_t": 3.171977795788425,
+      "mdd": -0.28499359991691203,
+      "sortino": 0.9777924884708734,
+      "calmar": 0.24345811299938894,
+      "n_obs": 4747,
+      "n_years": 18.83730158730159
+    },
+    "VT + GPR_Divergence(2σ,-20%)": {
+      "name": "VT + GPR_Divergence(2σ,-20%)",
+      "ann_return": 0.06786406936756421,
+      "ann_vol": 0.09373751018900649,
+      "sharpe": 0.7239798585510467,
+      "sharpe_se": 0.2304043395420272,
+      "sharpe_t": 3.1422145085899666,
+      "mdd": -0.29066041248548147,
+      "sortino": 0.9715142314841911,
+      "calmar": 0.2334823266341922,
+      "n_obs": 4747,
+      "n_years": 18.83730158730159
+    },
+    "VT + GPR_Comp(1.5σ,-20%)": {
+      "name": "VT + GPR_Comp(1.5σ,-20%)",
+      "ann_return": 0.06907426632240844,
+      "ann_vol": 0.09454040655835629,
+      "sharpe": 0.7306322115271575,
+      "sharpe_se": 0.2304043395420272,
+      "sharpe_t": 3.171087024573535,
+      "mdd": -0.27917379460218045,
+      "sortino": 0.9774060240676304,
+      "calmar": 0.24742389027178752,
+      "n_obs": 4747,
+      "n_years": 18.83730158730159
+    },
+    "VT + GPR_Comp(2.5σ,-30%)": {
+      "name": "VT + GPR_Comp(2.5σ,-30%)",
+      "ann_return": 0.06931033277257127,
+      "ann_vol": 0.09497338876382438,
+      "sharpe": 0.7297868768790502,
+      "sharpe_se": 0.2304043395420272,
+      "sharpe_t": 3.1674181064889733,
+      "mdd": -0.28449014540666956,
+      "sortino": 0.976408132217356,
+      "calmar": 0.24362999524463094,
+      "n_obs": 4747,
+      "n_years": 18.83730158730159
+    }
+  },
+  "vt_sharpe_difference": {
+    "base_sharpe": 0.7256851718517099,
+    "best_overlay_sharpe": 0.7308374490806072,
+    "delta_sharpe": 0.005152277228897328
+  },
+  "cross_asset_gpr_betas": {
+    "SPY_GPR_Gold": {
+      "beta": 0.0003071085443493278,
+      "t_stat": 1.5454430031301434,
+      "p_value": 0.1222391453971133,
+      "r2": 0.0006820821963958723
+    },
+    "SPY_GPR_Composite": {
+      "beta": 0.0016380407345659444,
+      "t_stat": 6.403418181377645,
+      "p_value": 1.5193629286240362e-10,
+      "r2": 0.011540476363187113
+    },
+    "SPY_GPR_Divergence": {
+      "beta": -0.00301230305599583,
+      "t_stat": -14.115407042510451,
+      "p_value": 3.052483314061812e-45,
+      "r2": 0.067559249891047
+    },
+    "GLD_GPR_Gold": {
+      "beta": 0.004494897522887521,
+      "t_stat": 29.26638111574969,
+      "p_value": 2.77894328925784e-188,
+      "r2": 0.179711621275902
+    },
+    "GLD_GPR_Composite": {
+      "beta": 0.00446621447084486,
+      "t_stat": 21.674898085485367,
+      "p_value": 3.540197936343346e-104,
+      "r2": 0.10552057452923747
+    },
+    "GLD_GPR_Divergence": {
+      "beta": 0.0031660231442516545,
+      "t_stat": 16.60755863219027,
+      "p_value": 6.1443394335369366e-62,
+      "r2": 0.09179083540447452
+    },
+    "USO_GPR_Gold": {
+      "beta": 0.0016041135514363407,
+      "t_stat": 4.182104559436108,
+      "p_value": 2.8882307961758534e-05,
+      "r2": 0.0053912271310445625
+    },
+    "USO_GPR_Composite": {
+      "beta": 0.009164649380714658,
+      "t_stat": 21.336898684476957,
+      "p_value": 5.160625531538198e-101,
+      "r2": 0.1046575462869066
+    },
+    "USO_GPR_Divergence": {
+      "beta": -0.0011122905881720971,
+      "t_stat": -2.8039978579319147,
+      "p_value": 0.005047324040708396,
+      "r2": 0.0026686309446959378
+    },
+    "TLT_GPR_Gold": {
+      "beta": 0.0007788321792599367,
+      "t_stat": 5.626482034627757,
+      "p_value": 1.8392193206651467e-08,
+      "r2": 0.00740431669847319
+    },
+    "TLT_GPR_Composite": {
+      "beta": -9.183178770141975e-05,
+      "t_stat": -0.4876813543057433,
+      "p_value": 0.6257755608224697,
+      "r2": 6.122160566757184e-05
+    },
+    "TLT_GPR_Divergence": {
+      "beta": 0.0010661430440360115,
+      "t_stat": 7.495019859135548,
+      "p_value": 6.628832571363227e-14,
+      "r2": 0.014284424465002221
+    },
+    "EEM_GPR_Gold": {
+      "beta": 0.0012697752240290884,
+      "t_stat": 5.090704729466933,
+      "p_value": 3.567351681299807e-07,
+      "r2": 0.005857188524527879
+    },
+    "EEM_GPR_Composite": {
+      "beta": 0.0029436033280207646,
+      "t_stat": 8.750045440287785,
+      "p_value": 2.1326685423417634e-18,
+      "r2": 0.018720416276968188
+    },
+    "EEM_GPR_Divergence": {
+      "beta": -0.0022649831082158026,
+      "t_stat": -8.48782987303902,
+      "p_value": 2.1053146751334404e-17,
+      "r2": 0.0191866882709264
+    }
+  },
+  "regime_analysis": {
+    "Normal (GPR < Q75)": {
+      "n": 3561,
+      "mean_ret": -0.02716501427549727,
+      "vol": 0.2017296230684403,
+      "sharpe": -0.13466051173991964,
+      "vix_mean": 19.912701490520593
+    },
+    "Elevated (Q75-Q90)": {
+      "n": 712,
+      "mean_ret": 0.5263517107213379,
+      "vol": 0.170207504433335,
+      "sharpe": 3.0924118914362766,
+      "vix_mean": 19.391573063443214
+    },
+    "High (> Q90)": {
+      "n": 475,
+      "mean_ret": 0.6245579833381225,
+      "vol": 0.2015544221451746,
+      "sharpe": 3.0987064272311975,
+      "vix_mean": 20.47450523376465
+    },
+    "Extreme (> 2σ)": {
+      "n": 21,
+      "mean_ret": -0.6057902741037688,
+      "vol": 0.22697746537385888,
+      "sharpe": -2.6689445716823044,
+      "vix_mean": 23.58285717737107
+    }
+  },
+  "rolling_oos": {
+    "window": 504,
+    "n_windows": 2541,
+    "vix_only_mean_r2": 0.35627847034519444,
+    "vix_gpr_mean_r2": 0.3607136532736744,
+    "delta_r2_mean": 0.004435182928479949,
+    "delta_r2_positive_pct": 1.0
+  },
+  "conclusions": [
+    "GPR proxies add marginal incremental R² (0.0093) beyond VIX",
+    "GPR_Composite Granger-causes VIX changes at lags 4-5 (weak evidence)",
+    "GPR proxy led VIX in 3/5 geopolitical events",
+    "GPR overlay adds no meaningful VT improvement (ΔSharpe=+0.005)",
+    "GPR_Divergence (GLD-SPY spread) shows strongest signal but already captured by VIX",
+    "Gold/oil are reactive to geopolitics, not leading indicators — VIX options market is faster"
+  ],
+  "overall_verdict": "MARGINAL",
+  "interpretation": "GPR proxies based on gold and oil price momentum provide negligible incremental information for volatility prediction beyond VIX. This reinforces the VIX sufficiency finding (J3/J4/J8/J13): VIX already captures geopolitical fear through options markets faster than commodity price movements. Gold and oil react to geopolitical events, but options implied volatility reacts first. The GPR_Divergence proxy (GLD-SPY spread) shows the strongest individual signal but is subsumed by VIX. VT overlays with GPR produce negligible Sharpe improvement (<0.01). This is the 24th+ confirmation of VIX as the sufficient statistic for volatility targeting at daily/weekly horizons."
+}

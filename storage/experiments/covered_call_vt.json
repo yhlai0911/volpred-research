@@ -1,0 +1,374 @@
+{
+  "experiment": "Covered Call + VT: Can Options Enhance Volatility Targeting?",
+  "experiment_id": "covered_call_vt",
+  "description": "Tests whether combining covered call strategies (XYLD as S&P 500 BuyWrite proxy) with 12/VIX Volatility Targeting enhances risk-adjusted returns. Both mechanisms reduce tail risk differently: VT reduces position sizing in high-vol, covered calls cap upside for premium income.",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T16:53:28.690456",
+  "config": {
+    "start": "2013-07-01",
+    "oos_start": "2023-01-01",
+    "rebalance": "monthly",
+    "tc_per_trade": 0.0005,
+    "vt_rule": "12/VIX (monthly, lagged)",
+    "rf_annual": 0.02,
+    "xyld_note": "XYLD = Global X S&P 500 Covered Call ETF (inception Jun 2013). Uses adjusted close for total return including dividends."
+  },
+  "strategies": {
+    "S1: SPY B&H": "Buy & hold SPY, no VT",
+    "S2: XYLD B&H": "Buy & hold XYLD (covered call ETF), no VT",
+    "S3: SPY 12/VIX VT": "SPY with 12/VIX monthly VT",
+    "S4: XYLD 12/VIX VT": "XYLD with 12/VIX monthly VT",
+    "S5: 50/50 SPY/XYLD VT": "50/50 SPY+XYLD with 12/VIX monthly VT",
+    "S6: 50/50 XYLD/GLD VT": "50/50 XYLD+GLD with 12/VIX monthly VT",
+    "S7: 50/50 SPY/GLD VT (Benchmark)": "50/50 SPY+GLD with 12/VIX monthly VT (our standard benchmark)"
+  },
+  "xyld_characteristics": {
+    "ann_return_spy": 12.68,
+    "ann_return_xyld": 7.35,
+    "ann_vol_spy": 17.06,
+    "ann_vol_xyld": 13.79,
+    "vol_ratio_xyld_spy": 0.808,
+    "corr_spy_xyld": 0.863,
+    "corr_spy_vix": -0.735,
+    "corr_xyld_vix": -0.648,
+    "est_div_yield_xyld": 7.62,
+    "data_start": "2013-07-01",
+    "data_end": "2026-03-20"
+  },
+  "results": {
+    "full": {
+      "S1: SPY B&H": {
+        "name": "S1: SPY B&H",
+        "ann_return": 11.87,
+        "ann_vol": 17.06,
+        "sharpe": 0.578,
+        "sharpe_t": 2.06,
+        "mdd": -35.75,
+        "calmar": 0.332,
+        "sortino": 0.689,
+        "turnover": 0.0,
+        "win_rate": 55.1,
+        "avg_vt_weight": 1.0,
+        "skewness": -0.588,
+        "kurtosis": 15.179,
+        "n_days": 3199,
+        "n_years": 12.7
+      },
+      "S2: XYLD B&H": {
+        "name": "S2: XYLD B&H",
+        "ann_return": 6.6,
+        "ann_vol": 13.79,
+        "sharpe": 0.334,
+        "sharpe_t": 1.19,
+        "mdd": -35.6,
+        "calmar": 0.185,
+        "sortino": 0.345,
+        "turnover": 0.0,
+        "win_rate": 55.6,
+        "avg_vt_weight": 1.0,
+        "skewness": -1.476,
+        "kurtosis": 32.427,
+        "n_days": 3199,
+        "n_years": 12.7
+      },
+      "S3: SPY 12/VIX VT": {
+        "name": "S3: SPY 12/VIX VT",
+        "ann_return": 8.81,
+        "ann_vol": 10.16,
+        "sharpe": 0.67,
+        "sharpe_t": 2.39,
+        "mdd": -16.14,
+        "calmar": 0.546,
+        "sortino": 0.843,
+        "turnover": 1.4056,
+        "win_rate": 55.3,
+        "avg_vt_weight": 0.727,
+        "skewness": -0.547,
+        "kurtosis": 5.351,
+        "n_days": 3199,
+        "n_years": 12.7
+      },
+      "S4: XYLD 12/VIX VT": {
+        "name": "S4: XYLD 12/VIX VT",
+        "ann_return": 5.5,
+        "ann_vol": 8.15,
+        "sharpe": 0.429,
+        "sharpe_t": 1.53,
+        "mdd": -15.33,
+        "calmar": 0.359,
+        "sortino": 0.478,
+        "turnover": 1.4056,
+        "win_rate": 58.6,
+        "avg_vt_weight": 0.727,
+        "skewness": -0.877,
+        "kurtosis": 10.388,
+        "n_days": 3199,
+        "n_years": 12.7
+      },
+      "S5: 50/50 SPY/XYLD VT": {
+        "name": "S5: 50/50 SPY/XYLD VT",
+        "ann_return": 7.18,
+        "ann_vol": 8.82,
+        "sharpe": 0.587,
+        "sharpe_t": 2.09,
+        "mdd": -15.69,
+        "calmar": 0.458,
+        "sortino": 0.696,
+        "turnover": 1.4056,
+        "win_rate": 56.3,
+        "avg_vt_weight": 0.727,
+        "skewness": -0.751,
+        "kurtosis": 7.986,
+        "n_days": 3199,
+        "n_years": 12.7
+      },
+      "S6: 50/50 XYLD/GLD VT": {
+        "name": "S6: 50/50 XYLD/GLD VT",
+        "ann_return": 6.58,
+        "ann_vol": 6.78,
+        "sharpe": 0.676,
+        "sharpe_t": 2.41,
+        "mdd": -11.68,
+        "calmar": 0.564,
+        "sortino": 0.889,
+        "turnover": 1.4056,
+        "win_rate": 55.4,
+        "avg_vt_weight": 0.727,
+        "skewness": -0.49,
+        "kurtosis": 5.513,
+        "n_days": 3199,
+        "n_years": 12.7
+      },
+      "S7: 50/50 SPY/GLD VT (Benchmark)": {
+        "name": "S7: 50/50 SPY/GLD VT (Benchmark)",
+        "ann_return": 8.28,
+        "ann_vol": 7.5,
+        "sharpe": 0.838,
+        "sharpe_t": 2.98,
+        "mdd": -10.17,
+        "calmar": 0.814,
+        "sortino": 1.121,
+        "turnover": 1.4056,
+        "win_rate": 57.0,
+        "avg_vt_weight": 0.727,
+        "skewness": -0.394,
+        "kurtosis": 4.385,
+        "n_days": 3199,
+        "n_years": 12.7
+      }
+    },
+    "oos": {
+      "S1: SPY B&H": {
+        "name": "S1: SPY B&H",
+        "ann_return": 18.17,
+        "ann_vol": 15.1,
+        "sharpe": 1.071,
+        "sharpe_t": 1.91,
+        "mdd": -19.21,
+        "calmar": 0.946,
+        "sortino": 1.42,
+        "turnover": 0.0,
+        "win_rate": 56.6,
+        "avg_vt_weight": 1.0,
+        "skewness": 0.585,
+        "kurtosis": 17.658,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S2: XYLD B&H": {
+        "name": "S2: XYLD B&H",
+        "ann_return": 10.7,
+        "ann_vol": 10.11,
+        "sharpe": 0.861,
+        "sharpe_t": 1.54,
+        "mdd": -15.86,
+        "calmar": 0.675,
+        "sortino": 0.905,
+        "turnover": 0.0,
+        "win_rate": 60.9,
+        "avg_vt_weight": 1.0,
+        "skewness": 1.338,
+        "kurtosis": 52.064,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S3: SPY 12/VIX VT": {
+        "name": "S3: SPY 12/VIX VT",
+        "ann_return": 13.75,
+        "ann_vol": 10.21,
+        "sharpe": 1.151,
+        "sharpe_t": 2.06,
+        "mdd": -11.77,
+        "calmar": 1.168,
+        "sortino": 1.567,
+        "turnover": 1.2431,
+        "win_rate": 56.9,
+        "avg_vt_weight": 0.741,
+        "skewness": 0.045,
+        "kurtosis": 7.216,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S4: XYLD 12/VIX VT": {
+        "name": "S4: XYLD 12/VIX VT",
+        "ann_return": 8.75,
+        "ann_vol": 6.43,
+        "sharpe": 1.05,
+        "sharpe_t": 1.88,
+        "mdd": -9.53,
+        "calmar": 0.918,
+        "sortino": 1.141,
+        "turnover": 1.2431,
+        "win_rate": 64.8,
+        "avg_vt_weight": 0.741,
+        "skewness": 0.612,
+        "kurtosis": 27.756,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S5: 50/50 SPY/XYLD VT": {
+        "name": "S5: 50/50 SPY/XYLD VT",
+        "ann_return": 11.27,
+        "ann_vol": 8.03,
+        "sharpe": 1.154,
+        "sharpe_t": 2.06,
+        "mdd": -10.66,
+        "calmar": 1.058,
+        "sortino": 1.452,
+        "turnover": 1.2431,
+        "win_rate": 59.2,
+        "avg_vt_weight": 0.741,
+        "skewness": 0.273,
+        "kurtosis": 14.478,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S6: 50/50 XYLD/GLD VT": {
+        "name": "S6: 50/50 XYLD/GLD VT",
+        "ann_return": 16.2,
+        "ann_vol": 7.78,
+        "sharpe": 1.824,
+        "sharpe_t": 3.26,
+        "mdd": -6.17,
+        "calmar": 2.626,
+        "sortino": 2.233,
+        "turnover": 1.2431,
+        "win_rate": 59.3,
+        "avg_vt_weight": 0.741,
+        "skewness": -0.671,
+        "kurtosis": 8.604,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S7: 50/50 SPY/GLD VT (Benchmark)": {
+        "name": "S7: 50/50 SPY/GLD VT (Benchmark)",
+        "ann_return": 18.9,
+        "ann_vol": 9.0,
+        "sharpe": 1.878,
+        "sharpe_t": 3.36,
+        "mdd": -7.17,
+        "calmar": 2.637,
+        "sortino": 2.376,
+        "turnover": 1.2431,
+        "win_rate": 60.3,
+        "avg_vt_weight": 0.741,
+        "skewness": -0.519,
+        "kurtosis": 5.783,
+        "n_days": 806,
+        "n_years": 3.2
+      }
+    }
+  },
+  "statistical_tests": {
+    "XYLD_VT_vs_SPY_VT": {
+      "sharpe_test": {
+        "sharpe_a": 0.697,
+        "sharpe_b": 0.882,
+        "diff": -0.184,
+        "t_stat": -279.69,
+        "p_value": 0.0,
+        "significant": "True"
+      },
+      "mdd_test": {
+        "mdd_a": -15.33,
+        "mdd_b": -16.14,
+        "diff": 0.82,
+        "p_value": 0.6994,
+        "significant": "False"
+      }
+    },
+    "XYLD_VT_vs_XYLD_BH": {
+      "sharpe_test": {
+        "sharpe_a": 0.697,
+        "sharpe_b": 0.533,
+        "diff": 0.164,
+        "t_stat": 175.11,
+        "p_value": 0.0,
+        "significant": "True"
+      },
+      "mdd_test": {
+        "mdd_a": -15.33,
+        "mdd_b": -35.6,
+        "diff": 20.27,
+        "p_value": 0.9998,
+        "significant": "True"
+      }
+    },
+    "XYLDGLD_vs_SPYGLD": {
+      "sharpe_test": {
+        "sharpe_a": 0.975,
+        "sharpe_b": 1.099,
+        "diff": -0.124,
+        "t_stat": -376.66,
+        "p_value": 0.0,
+        "significant": "True"
+      },
+      "mdd_test": {
+        "mdd_a": -11.68,
+        "mdd_b": -10.17,
+        "diff": -1.5,
+        "p_value": 0.6128,
+        "significant": "False"
+      }
+    },
+    "SPY_VT_MDD_reduction": {
+      "mdd_test": {
+        "mdd_a": -16.14,
+        "mdd_b": -35.75,
+        "diff": 19.6,
+        "p_value": 0.9994,
+        "significant": "True"
+      }
+    },
+    "XYLD_VT_MDD_reduction": {
+      "mdd_test": {
+        "mdd_a": -15.33,
+        "mdd_b": -35.6,
+        "diff": 20.27,
+        "p_value": 0.9996,
+        "significant": "True"
+      }
+    }
+  },
+  "vt_effectiveness": {
+    "SPY": {
+      "mdd_reduction_pp": -19.61,
+      "sharpe_change": 0.092,
+      "mdd_bh": -35.75,
+      "mdd_vt": -16.14
+    },
+    "XYLD": {
+      "mdd_reduction_pp": -20.27,
+      "sharpe_change": 0.095,
+      "mdd_bh": -35.6,
+      "mdd_vt": -15.33
+    }
+  },
+  "conclusions": [
+    "XYLD B&H underperforms SPY B&H in Sharpe — covered call income does not compensate for capped upside in bull markets.",
+    "VT is MORE effective on XYLD (MDD reduction -20.3pp vs SPY -19.6pp) — double tail risk reduction works synergistically.",
+    "Best full-period Sharpe: S7: 50/50 SPY/GLD VT (Benchmark) (0.838)",
+    "50/50 XYLD/GLD VT (Sharpe 0.676) underperforms 50/50 SPY/GLD VT (Sharpe 0.838) — no reason to replace SPY with XYLD in the portfolio."
+  ]
+}

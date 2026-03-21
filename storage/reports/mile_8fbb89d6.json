@@ -1,0 +1,11 @@
+{
+  "id": "mile_8fbb89d6",
+  "title": "Phase U1: Panel Data vs Single-Asset GARCH — Null Result",
+  "description": "Panel data methods (GARCH-X with cross-asset lagged RV, ensemble averaging) all UNDERPERFORM single-asset GJR-GARCH for SPY vol forecasting. This is a clean negative result: cross-asset information adds noise rather than signal for 1-step-ahead vol prediction. The two-step GARCH-X approach (OLS adjustment using lagged 5d RV from QQQ/GLD/TLT/EEM) and the 5-asset ensemble both have significantly WORSE QLIKE (DM p=0.022 and p=0.010 respectively, but in the wrong direction). Even QQQ alone (ρ=0.97 with SPY RV) doesn't help — the high contemporaneous correlation doesn't translate to lagged predictive power. R² of lagged cross-asset RV for SPY squared returns is only 0.05-0.21, insufficient to overcome the estimation noise from additional parameters.",
+  "category": "milestone",
+  "phase": "Phase_U",
+  "details": {},
+  "tags": [],
+  "published_at": "2026-03-17T10:50:14.761167+00:00",
+  "status": "published"
+}

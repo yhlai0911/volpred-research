@@ -1,0 +1,544 @@
+{
+  "experiment": "DCA 50/50 SPY/GLD — Optimal VT Threshold",
+  "experiment_id": "K65",
+  "description": "K59 發現 DCA 投資人應用 24/VIX（較溫和的 VT）。K64 確認 50/50 SPY/GLD 是不可動搖的最佳組合。本實驗測試：當已有 50/50 分散化時，VT 是否多餘？最佳 VT 門檻是否應更溫和（30/VIX 或甚至不用）？",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T08:38:29.424464+00:00",
+  "config": {
+    "start": "2007-01-01",
+    "end": "2026-03-20",
+    "monthly_contribution": 1000,
+    "portfolio": "50/50 SPY/GLD",
+    "rebalance": "monthly (first trading day)",
+    "weight_lag": "previous month-end VIX",
+    "transaction_cost": 0.0005,
+    "cash_instrument": "T-bill (IRX)",
+    "thresholds_tested": [
+      null,
+      12,
+      18,
+      24,
+      30,
+      36
+    ],
+    "fine_sweep": [
+      6,
+      8,
+      10,
+      12,
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      26,
+      28,
+      30,
+      32,
+      34,
+      36,
+      38,
+      40,
+      42
+    ]
+  },
+  "main_results": {
+    "No_VT": {
+      "terminal_wealth": 859709.83,
+      "total_invested": 230000.0,
+      "total_gain": 629709.83,
+      "total_return_pct": 273.79,
+      "profit_factor": 3.7379,
+      "max_drawdown_pct": -21.85,
+      "max_underwater_months": 12.0,
+      "worst_12m_return_pct": -8.39,
+      "worst_12m_date": "2022-10",
+      "gfc_drawdown_pct": -17.97,
+      "gfc_recovery_months": 0.1,
+      "covid_drawdown_pct": -19.92,
+      "covid_recovery_months": 0.0,
+      "dd_2022_pct": -14.92,
+      "xirr_annualized_pct": 12.32,
+      "avg_equity_weight": 1.0,
+      "n_months": 230,
+      "avg_turnover_per_rebal": 0.04039,
+      "total_turnover": 9.2897
+    },
+    "12_VIX": {
+      "terminal_wealth": 555234.52,
+      "total_invested": 230000.0,
+      "total_gain": 325234.52,
+      "total_return_pct": 141.41,
+      "profit_factor": 2.4141,
+      "max_drawdown_pct": -7.65,
+      "max_underwater_months": 9.2,
+      "worst_12m_return_pct": -2.78,
+      "worst_12m_date": "2022-10",
+      "gfc_drawdown_pct": -2.79,
+      "gfc_recovery_months": 0.1,
+      "covid_drawdown_pct": -7.52,
+      "covid_recovery_months": 0.0,
+      "dd_2022_pct": -6.69,
+      "xirr_annualized_pct": 8.45,
+      "avg_equity_weight": 0.6736,
+      "n_months": 230,
+      "avg_turnover_per_rebal": 0.21573,
+      "total_turnover": 49.6171
+    },
+    "18_VIX": {
+      "terminal_wealth": 717041.86,
+      "total_invested": 230000.0,
+      "total_gain": 487041.86,
+      "total_return_pct": 211.76,
+      "profit_factor": 3.1176,
+      "max_drawdown_pct": -12.73,
+      "max_underwater_months": 16.2,
+      "worst_12m_return_pct": -7.18,
+      "worst_12m_date": "2022-10",
+      "gfc_drawdown_pct": -5.52,
+      "gfc_recovery_months": 0.1,
+      "covid_drawdown_pct": -11.4,
+      "covid_recovery_months": 0.0,
+      "dd_2022_pct": -11.9,
+      "xirr_annualized_pct": 10.73,
+      "avg_equity_weight": 0.8809,
+      "n_months": 230,
+      "avg_turnover_per_rebal": 0.15946,
+      "total_turnover": 36.6751
+    },
+    "24_VIX": {
+      "terminal_wealth": 798136.78,
+      "total_invested": 230000.0,
+      "total_gain": 568136.78,
+      "total_return_pct": 247.02,
+      "profit_factor": 3.4702,
+      "max_drawdown_pct": -15.98,
+      "max_underwater_months": 11.9,
+      "worst_12m_return_pct": -8.66,
+      "worst_12m_date": "2022-10",
+      "gfc_drawdown_pct": -9.01,
+      "gfc_recovery_months": 0.1,
+      "covid_drawdown_pct": -13.88,
+      "covid_recovery_months": 0.0,
+      "dd_2022_pct": -14.61,
+      "xirr_annualized_pct": 11.68,
+      "avg_equity_weight": 0.9544,
+      "n_months": 230,
+      "avg_turnover_per_rebal": 0.10076,
+      "total_turnover": 23.1737
+    },
+    "30_VIX": {
+      "terminal_wealth": 829481.3,
+      "total_invested": 230000.0,
+      "total_gain": 599481.3,
+      "total_return_pct": 260.64,
+      "profit_factor": 3.6064,
+      "max_drawdown_pct": -16.64,
+      "max_underwater_months": 12.0,
+      "worst_12m_return_pct": -8.21,
+      "worst_12m_date": "2022-10",
+      "gfc_drawdown_pct": -12.5,
+      "gfc_recovery_months": 0.1,
+      "covid_drawdown_pct": -16.13,
+      "covid_recovery_months": 0.0,
+      "dd_2022_pct": -14.77,
+      "xirr_annualized_pct": 12.01,
+      "avg_equity_weight": 0.9805,
+      "n_months": 230,
+      "avg_turnover_per_rebal": 0.06714,
+      "total_turnover": 15.4425
+    },
+    "36_VIX": {
+      "terminal_wealth": 836131.42,
+      "total_invested": 230000.0,
+      "total_gain": 606131.42,
+      "total_return_pct": 263.54,
+      "profit_factor": 3.6354,
+      "max_drawdown_pct": -19.97,
+      "max_underwater_months": 12.0,
+      "worst_12m_return_pct": -8.3,
+      "worst_12m_date": "2022-10",
+      "gfc_drawdown_pct": -15.99,
+      "gfc_recovery_months": 0.1,
+      "covid_drawdown_pct": -18.37,
+      "covid_recovery_months": 0.0,
+      "dd_2022_pct": -14.86,
+      "xirr_annualized_pct": 12.08,
+      "avg_equity_weight": 0.9904,
+      "n_months": 230,
+      "avg_turnover_per_rebal": 0.05447,
+      "total_turnover": 12.5292
+    }
+  },
+  "comparison_benchmarks": {
+    "SPY_BH": {
+      "terminal_wealth": 927884.28,
+      "total_invested": 230000.0,
+      "max_drawdown_pct": -33.53,
+      "worst_12m_return_pct": -16.28,
+      "worst_12m_date": "2022-12",
+      "xirr_annualized_pct": 12.99,
+      "avg_equity_weight": 1.0
+    },
+    "SPY_12VIX": {
+      "terminal_wealth": 552813.56,
+      "total_invested": 230000.0,
+      "max_drawdown_pct": -14.07,
+      "worst_12m_return_pct": -8.3,
+      "worst_12m_date": "2022-12",
+      "xirr_annualized_pct": 8.41,
+      "avg_equity_weight": 0.6736
+    },
+    "SPY_24VIX": {
+      "terminal_wealth": 835260.02,
+      "total_invested": 230000.0,
+      "max_drawdown_pct": -23.44,
+      "worst_12m_return_pct": -17.86,
+      "worst_12m_date": "2022-12",
+      "xirr_annualized_pct": 12.07,
+      "avg_equity_weight": 0.9544
+    }
+  },
+  "fine_sweep_results": {
+    "6_VIX": {
+      "threshold": 6,
+      "terminal_wealth": 393644.18,
+      "max_drawdown_pct": -3.71,
+      "xirr_annualized_pct": 5.27,
+      "avg_equity_weight": 0.34,
+      "worst_12m_return_pct": 2.31,
+      "gfc_drawdown_pct": -1.37,
+      "covid_drawdown_pct": -3.5
+    },
+    "8_VIX": {
+      "threshold": 8,
+      "terminal_wealth": 442802.76,
+      "max_drawdown_pct": -4.95,
+      "xirr_annualized_pct": 6.38,
+      "avg_equity_weight": 0.4533,
+      "worst_12m_return_pct": 0.56,
+      "gfc_drawdown_pct": -1.84,
+      "covid_drawdown_pct": -4.85
+    },
+    "10_VIX": {
+      "threshold": 10,
+      "terminal_wealth": 497930.43,
+      "max_drawdown_pct": -6.31,
+      "xirr_annualized_pct": 7.46,
+      "avg_equity_weight": 0.5664,
+      "worst_12m_return_pct": -1.15,
+      "gfc_drawdown_pct": -2.32,
+      "covid_drawdown_pct": -6.19
+    },
+    "12_VIX": {
+      "threshold": 12,
+      "terminal_wealth": 555234.52,
+      "max_drawdown_pct": -7.65,
+      "xirr_annualized_pct": 8.45,
+      "avg_equity_weight": 0.6736,
+      "worst_12m_return_pct": -2.78,
+      "gfc_drawdown_pct": -2.79,
+      "covid_drawdown_pct": -7.52
+    },
+    "14_VIX": {
+      "threshold": 14,
+      "terminal_wealth": 614498.58,
+      "max_drawdown_pct": -9.3,
+      "xirr_annualized_pct": 9.36,
+      "avg_equity_weight": 0.765,
+      "worst_12m_return_pct": -4.36,
+      "gfc_drawdown_pct": -3.26,
+      "covid_drawdown_pct": -8.82
+    },
+    "16_VIX": {
+      "threshold": 16,
+      "terminal_wealth": 672375.93,
+      "max_drawdown_pct": -11.29,
+      "xirr_annualized_pct": 10.17,
+      "avg_equity_weight": 0.833,
+      "worst_12m_return_pct": -5.92,
+      "gfc_drawdown_pct": -4.35,
+      "covid_drawdown_pct": -10.12
+    },
+    "18_VIX": {
+      "threshold": 18,
+      "terminal_wealth": 717041.86,
+      "max_drawdown_pct": -12.73,
+      "xirr_annualized_pct": 10.73,
+      "avg_equity_weight": 0.8809,
+      "worst_12m_return_pct": -7.18,
+      "gfc_drawdown_pct": -5.52,
+      "covid_drawdown_pct": -11.4
+    },
+    "20_VIX": {
+      "threshold": 20,
+      "terminal_wealth": 743895.33,
+      "max_drawdown_pct": -14.27,
+      "xirr_annualized_pct": 11.06,
+      "avg_equity_weight": 0.9129,
+      "worst_12m_return_pct": -8.2,
+      "gfc_drawdown_pct": -6.7,
+      "covid_drawdown_pct": -12.37
+    },
+    "22_VIX": {
+      "threshold": 22,
+      "terminal_wealth": 772570.19,
+      "max_drawdown_pct": -15.32,
+      "xirr_annualized_pct": 11.39,
+      "avg_equity_weight": 0.9362,
+      "worst_12m_return_pct": -8.63,
+      "gfc_drawdown_pct": -7.86,
+      "covid_drawdown_pct": -13.12
+    },
+    "24_VIX": {
+      "threshold": 24,
+      "terminal_wealth": 798136.78,
+      "max_drawdown_pct": -15.98,
+      "xirr_annualized_pct": 11.68,
+      "avg_equity_weight": 0.9544,
+      "worst_12m_return_pct": -8.66,
+      "gfc_drawdown_pct": -9.01,
+      "covid_drawdown_pct": -13.88
+    },
+    "26_VIX": {
+      "threshold": 26,
+      "terminal_wealth": 812852.96,
+      "max_drawdown_pct": -16.59,
+      "xirr_annualized_pct": 11.84,
+      "avg_equity_weight": 0.9672,
+      "worst_12m_return_pct": -8.71,
+      "gfc_drawdown_pct": -10.17,
+      "covid_drawdown_pct": -14.63
+    },
+    "28_VIX": {
+      "threshold": 28,
+      "terminal_wealth": 822175.58,
+      "max_drawdown_pct": -16.52,
+      "xirr_annualized_pct": 11.94,
+      "avg_equity_weight": 0.9748,
+      "worst_12m_return_pct": -8.34,
+      "gfc_drawdown_pct": -11.33,
+      "covid_drawdown_pct": -15.38
+    },
+    "30_VIX": {
+      "threshold": 30,
+      "terminal_wealth": 829481.3,
+      "max_drawdown_pct": -16.64,
+      "xirr_annualized_pct": 12.01,
+      "avg_equity_weight": 0.9805,
+      "worst_12m_return_pct": -8.21,
+      "gfc_drawdown_pct": -12.5,
+      "covid_drawdown_pct": -16.13
+    },
+    "32_VIX": {
+      "threshold": 32,
+      "terminal_wealth": 831526.25,
+      "max_drawdown_pct": -17.75,
+      "xirr_annualized_pct": 12.03,
+      "avg_equity_weight": 0.9848,
+      "worst_12m_return_pct": -8.24,
+      "gfc_drawdown_pct": -13.66,
+      "covid_drawdown_pct": -16.88
+    },
+    "34_VIX": {
+      "threshold": 34,
+      "terminal_wealth": 834647.53,
+      "max_drawdown_pct": -18.86,
+      "xirr_annualized_pct": 12.07,
+      "avg_equity_weight": 0.988,
+      "worst_12m_return_pct": -8.3,
+      "gfc_drawdown_pct": -14.83,
+      "covid_drawdown_pct": -17.63
+    },
+    "36_VIX": {
+      "threshold": 36,
+      "terminal_wealth": 836131.42,
+      "max_drawdown_pct": -19.97,
+      "xirr_annualized_pct": 12.08,
+      "avg_equity_weight": 0.9904,
+      "worst_12m_return_pct": -8.3,
+      "gfc_drawdown_pct": -15.99,
+      "covid_drawdown_pct": -18.37
+    },
+    "38_VIX": {
+      "threshold": 38,
+      "terminal_wealth": 836588.94,
+      "max_drawdown_pct": -21.08,
+      "xirr_annualized_pct": 12.09,
+      "avg_equity_weight": 0.9926,
+      "worst_12m_return_pct": -8.3,
+      "gfc_drawdown_pct": -17.16,
+      "covid_drawdown_pct": -19.12
+    },
+    "40_VIX": {
+      "threshold": 40,
+      "terminal_wealth": 835992.53,
+      "max_drawdown_pct": -21.85,
+      "xirr_annualized_pct": 12.08,
+      "avg_equity_weight": 0.9945,
+      "worst_12m_return_pct": -8.3,
+      "gfc_drawdown_pct": -17.97,
+      "covid_drawdown_pct": -19.87
+    },
+    "42_VIX": {
+      "threshold": 42,
+      "terminal_wealth": 840312.06,
+      "max_drawdown_pct": -21.85,
+      "xirr_annualized_pct": 12.13,
+      "avg_equity_weight": 0.9957,
+      "worst_12m_return_pct": -8.32,
+      "gfc_drawdown_pct": -17.97,
+      "covid_drawdown_pct": -19.92
+    }
+  },
+  "analysis": {
+    "diversification_alone": {
+      "mdd_improvement_pp": -11.7,
+      "wealth_effect_pct": -7.3,
+      "note": "50/50 SPY/GLD vs pure SPY — diversification already does most of the heavy lifting"
+    },
+    "additional_vt_on_5050": {
+      "12": {
+        "mdd_improvement_pp": -14.2,
+        "wealth_cost_pct": -35.4
+      },
+      "18": {
+        "mdd_improvement_pp": -9.1,
+        "wealth_cost_pct": -16.6
+      },
+      "24": {
+        "mdd_improvement_pp": -5.9,
+        "wealth_cost_pct": -7.2
+      },
+      "30": {
+        "mdd_improvement_pp": -5.2,
+        "wealth_cost_pct": -3.5
+      },
+      "36": {
+        "mdd_improvement_pp": -1.9,
+        "wealth_cost_pct": -2.7
+      }
+    },
+    "spy_vt_benefit_24": {
+      "mdd_improvement_pp": -10.1,
+      "wealth_cost_pct": -10.0
+    }
+  },
+  "conclusions": {
+    "optimal_for_most_dca_investors": "No VT (pure 50/50 SPY/GLD DCA)",
+    "optimal_for_risk_averse": "30/VIX (mild VT)",
+    "not_recommended": "12/VIX on 50/50 (over-insured)",
+    "vs_k59": "K59 recommends 24/VIX for SPY DCA; K65 finds even milder or no VT for 50/50 DCA",
+    "key_insight": "Diversification (50/50) does most of the heavy lifting. VT provides diminishing returns on an already-diversified portfolio.",
+    "vt_effectiveness_on_5050_vs_spy": "58% — VT only provides 58% of its SPY benefit when applied to 50/50",
+    "key_findings": [
+      "50/50 SPY/GLD 自身將 MDD 從 -33.5% 降至 -21.9%（-11.7pp），是最有效且免費的防禦層",
+      "在 50/50 上加 24/VIX VT 只再改善 -5.9pp MDD，但損失 7.2% 終端財富",
+      "VT 在 50/50 上的 MDD 效益只有純 SPY 的 58%（5.9 vs 10.1pp）",
+      "最溫和的 30/VIX 以 3.5% 財富成本換取 5.2pp MDD 改善——是最佳邊際 VT",
+      "防禦層級：(1) 分散化 > (2) DCA > (3) 溫和 VT。12/VIX 對已分散化組合是過度保險",
+      "DCA 投資人的第一步應該是 50/50 分散化，而非 VT"
+    ]
+  },
+  "deep_analysis": {
+    "vt_effectiveness_ratio_5050_vs_spy": 0.582,
+    "insurance_premiums": {
+      "12_VIX": {
+        "wealth_cost_pct": 35.4,
+        "mdd_saved_pp": 14.2,
+        "annual_cost_pct": 1.84,
+        "cost_per_mdd_pp": 2.5
+      },
+      "18_VIX": {
+        "wealth_cost_pct": 16.6,
+        "mdd_saved_pp": 9.1,
+        "annual_cost_pct": 0.86,
+        "cost_per_mdd_pp": 1.8
+      },
+      "24_VIX": {
+        "wealth_cost_pct": 7.2,
+        "mdd_saved_pp": 5.9,
+        "annual_cost_pct": 0.37,
+        "cost_per_mdd_pp": 1.2
+      },
+      "30_VIX": {
+        "wealth_cost_pct": 3.5,
+        "mdd_saved_pp": 5.2,
+        "annual_cost_pct": 0.18,
+        "cost_per_mdd_pp": 0.7
+      },
+      "36_VIX": {
+        "wealth_cost_pct": 2.7,
+        "mdd_saved_pp": 1.9,
+        "annual_cost_pct": 0.14,
+        "cost_per_mdd_pp": 1.5
+      }
+    },
+    "decision_matrix": {
+      "max_wealth": {
+        "config": "50/50 No VT",
+        "mdd": -21.85,
+        "irr": 12.32
+      },
+      "moderate": {
+        "config": "50/50 + 30/VIX",
+        "mdd": -16.64,
+        "irr": 12.01
+      },
+      "conservative": {
+        "config": "50/50 + 18/VIX",
+        "mdd": -12.73,
+        "irr": 10.73
+      },
+      "very_conservative": {
+        "config": "50/50 + 12/VIX",
+        "mdd": -7.65,
+        "irr": 8.45
+      }
+    },
+    "defense_hierarchy": [
+      {
+        "layer": 1,
+        "defense": "50/50 SPY/GLD",
+        "mdd_impact_pp": -11.7,
+        "wealth_cost_pct": -7.3,
+        "cost_per_mdd_pp": 0,
+        "note": "FREE — diversification"
+      },
+      {
+        "layer": 2,
+        "defense": "Monthly DCA",
+        "mdd_impact_pp": null,
+        "wealth_cost_pct": 0,
+        "cost_per_mdd_pp": 0,
+        "note": "FREE — dollar-cost averaging"
+      },
+      {
+        "layer": 3,
+        "defense": "30/VIX mild VT",
+        "mdd_impact_pp": -5.2,
+        "wealth_cost_pct": -3.5,
+        "cost_per_mdd_pp": 0.7,
+        "note": "CHEAP"
+      },
+      {
+        "layer": 4,
+        "defense": "24/VIX moderate VT",
+        "mdd_impact_pp": -5.9,
+        "wealth_cost_pct": -7.2,
+        "cost_per_mdd_pp": 1.2,
+        "note": "MODERATE"
+      },
+      {
+        "layer": 5,
+        "defense": "12/VIX aggressive VT",
+        "mdd_impact_pp": -14.2,
+        "wealth_cost_pct": -35.4,
+        "cost_per_mdd_pp": 2.5,
+        "note": "EXPENSIVE"
+      }
+    ]
+  }
+}

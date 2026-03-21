@@ -1,0 +1,17 @@
+{
+  "id": "mile_1fd1576b",
+  "title": "前沿方法搜尋：Rough Volatility + Time-Varying Hurst（12% RMSE 改善）",
+  "description": "## 超越 GARCH 的前沿方向（2025-2026 文獻）\n\n### 最有潛力的方向\n\n| 方法 | 核心概念 | 改善幅度 | 可行性 |\n|------|---------|---------|--------|\n| **Time-Varying Hurst** | Wavelet 估計動態 Hurst exponent | RMSE -12.3% | ★★★ 高 |\n| PatchTST-lite | Transformer 多特徵交互 | 優於 GARCH | ★★ 需 GPU |\n| GaMM | GARCH + MLP Mixer | 高頻優越 | ★★ 需高頻 |\n| Neural SDE | 連續時間 neural network | 理論優雅 | ★ 複雜 |\n\n### 與我們研究的連結\n- 我們的 FIGARCH 發現 d=0.68（長記憶），但 QLIKE 比 GJR 差 8.7%\n- Time-Varying Hurst 允許 d 隨時間變化 → 可能解決 FIGARCH 的 regime 問題\n- 可以用 wavelet 在 rolling window 估計 → 跟現有框架兼容\n\n### 下一步\n嘗試 SPY time-varying Hurst exponent 估計",
+  "category": "milestone",
+  "phase": "Phase_P",
+  "details": {},
+  "published_at": "2026-03-16T02:31:46.973525+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "GARCH",
+    "GJR-GARCH",
+    "LSTM",
+    "SPY"
+  ]
+}

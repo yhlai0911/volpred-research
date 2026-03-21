@@ -1,0 +1,370 @@
+{
+  "experiment_id": "cross_market_transmission_20260321",
+  "date": "2026-03-21",
+  "title": "Cross-Market Information Transmission: SPY Momentum → Taiwan 0050.TW VT",
+  "methodology": {
+    "returns": "Open-to-open (o2o) for implementable strategies",
+    "standard_errors": "Newey-West HAC",
+    "oos_period": "2023-01-01 ~ 2026-03-20",
+    "data_range": "2009-01-01 ~ 2026-03-20",
+    "bias_control": "I8 timing bias avoided via lagged signals + o2o returns",
+    "data_fix": "Two zero Open prices in 0050.TW (2009-08-13, 2010-01-25) replaced with Close"
+  },
+  "findings": {
+    "lead_lag": {
+      "c2c_lag1_corr": 0.3753,
+      "o2o_lag0_corr": 0.1725,
+      "o2o_lag1_corr": 0.1762,
+      "note": "c2c corr inflated by gap component; o2o spread across lag0+lag1"
+    },
+    "information_decomposition": {
+      "TW_c2c(t+1)": 0.2772,
+      "TW_o2o(t+1)": 0.2685,
+      "TW_gap(t+1)": 0.2527,
+      "TW_intra(t+1)": 0.0471
+    },
+    "gap_absorption_pct": 83.1,
+    "granger_spy_to_tw": {
+      "spy_c2c_beta": 0.494009,
+      "spy_c2c_t": 12.242,
+      "spy_c2c_p": 0.0,
+      "tw_o2o_ar1_beta": -0.155494,
+      "tw_o2o_ar1_t": -2.5908,
+      "tw_o2o_ar1_p": 0.009609,
+      "r2": 0.096321
+    },
+    "impulse_response": {
+      "0": {
+        "beta": 0.002194,
+        "r2": 1e-06,
+        "p_value": 0.939389
+      },
+      "1": {
+        "beta": 0.493694,
+        "r2": 0.072076,
+        "p_value": 0.0
+      },
+      "2": {
+        "beta": -0.018736,
+        "r2": 0.000104,
+        "p_value": 0.515614
+      },
+      "3": {
+        "beta": 0.067876,
+        "r2": 0.001365,
+        "p_value": 0.018425
+      },
+      "4": {
+        "beta": 0.017241,
+        "r2": 8.8e-05,
+        "p_value": 0.549425
+      },
+      "5": {
+        "beta": -0.021193,
+        "r2": 0.000133,
+        "p_value": 0.461767
+      },
+      "6": {
+        "beta": -0.046003,
+        "r2": 0.000628,
+        "p_value": 0.110105
+      },
+      "7": {
+        "beta": 0.012871,
+        "r2": 4.9e-05,
+        "p_value": 0.65442
+      },
+      "8": {
+        "beta": 0.05238,
+        "r2": 0.000818,
+        "p_value": 0.068325
+      },
+      "9": {
+        "beta": -0.070395,
+        "r2": 0.001481,
+        "p_value": 0.014175
+      },
+      "10": {
+        "beta": 0.029299,
+        "r2": 0.000258,
+        "p_value": 0.306056
+      }
+    },
+    "weight_tsmom_corrs": {
+      "21d": 0.3136,
+      "63d": 0.3192,
+      "126d": 0.3091,
+      "252d": 0.2982
+    },
+    "mechanism": "SPY↑ → VIX↓ → VT_weight↑ (mechanical, not alpha)",
+    "vix_spy_tsmom_corr": -0.3701,
+    "vt_weight_vix_corr": -0.864,
+    "strategies_full": {
+      "B&H": {
+        "name": "B&H",
+        "n_years": 16.1,
+        "ann_ret%": 15.65,
+        "ann_vol%": 32.57,
+        "sharpe": 0.48,
+        "harvey_t": 1.928,
+        "mdd%": -76.96,
+        "calmar": 0.203,
+        "sortino": 0.44
+      },
+      "VT Monthly": {
+        "name": "VT Monthly",
+        "n_years": 16.1,
+        "ann_ret%": 5.56,
+        "ann_vol%": 14.99,
+        "sharpe": 0.371,
+        "harvey_t": 1.489,
+        "mdd%": -48.46,
+        "calmar": 0.115,
+        "sortino": 0.297
+      },
+      "VT+SPY_21d_filter": {
+        "name": "VT+SPY_21d_filter",
+        "n_years": 16.1,
+        "ann_ret%": 6.88,
+        "ann_vol%": 14.25,
+        "sharpe": 0.483,
+        "harvey_t": 1.938,
+        "mdd%": -47.99,
+        "calmar": 0.143,
+        "sortino": 0.374
+      },
+      "VT+SPY_63d_filter": {
+        "name": "VT+SPY_63d_filter",
+        "n_years": 16.1,
+        "ann_ret%": 5.97,
+        "ann_vol%": 14.56,
+        "sharpe": 0.41,
+        "harvey_t": 1.644,
+        "mdd%": -48.46,
+        "calmar": 0.123,
+        "sortino": 0.321
+      },
+      "VT+SPY_126d_filter": {
+        "name": "VT+SPY_126d_filter",
+        "n_years": 16.1,
+        "ann_ret%": 5.64,
+        "ann_vol%": 14.73,
+        "sharpe": 0.383,
+        "harvey_t": 1.536,
+        "mdd%": -48.46,
+        "calmar": 0.116,
+        "sortino": 0.302
+      },
+      "VT+SPY_drop_signal": {
+        "name": "VT+SPY_drop_signal",
+        "n_years": 16.1,
+        "ann_ret%": 6.94,
+        "ann_vol%": 14.86,
+        "sharpe": 0.467,
+        "harvey_t": 1.876,
+        "mdd%": -48.46,
+        "calmar": 0.143,
+        "sortino": 0.374
+      },
+      "VT+SPY_Monthly_Filter": {
+        "name": "VT+SPY_Monthly_Filter",
+        "n_years": 16.1,
+        "ann_ret%": 4.69,
+        "ann_vol%": 14.85,
+        "sharpe": 0.316,
+        "harvey_t": 1.267,
+        "mdd%": -48.46,
+        "calmar": 0.097,
+        "sortino": 0.25
+      }
+    },
+    "strategies_oos": {
+      "B&H": {
+        "name": "B&H",
+        "n_years": 3.0,
+        "ann_ret%": 39.14,
+        "ann_vol%": 21.11,
+        "sharpe": 1.853,
+        "harvey_t": 3.185,
+        "mdd%": -24.36,
+        "calmar": 1.607,
+        "sortino": 2.287
+      },
+      "VT Monthly": {
+        "name": "VT Monthly",
+        "n_years": 3.0,
+        "ann_ret%": 21.46,
+        "ann_vol%": 10.88,
+        "sharpe": 1.972,
+        "harvey_t": 3.389,
+        "mdd%": -10.64,
+        "calmar": 2.017,
+        "sortino": 2.563
+      },
+      "VT+SPY_21d_filter": {
+        "name": "VT+SPY_21d_filter",
+        "n_years": 3.0,
+        "ann_ret%": 21.8,
+        "ann_vol%": 9.32,
+        "sharpe": 2.34,
+        "harvey_t": 4.02,
+        "mdd%": -9.34,
+        "calmar": 2.334,
+        "sortino": 3.288
+      },
+      "VT+SPY_63d_filter": {
+        "name": "VT+SPY_63d_filter",
+        "n_years": 3.0,
+        "ann_ret%": 21.68,
+        "ann_vol%": 10.12,
+        "sharpe": 2.142,
+        "harvey_t": 3.681,
+        "mdd%": -10.62,
+        "calmar": 2.042,
+        "sortino": 2.853
+      },
+      "VT+SPY_126d_filter": {
+        "name": "VT+SPY_126d_filter",
+        "n_years": 3.0,
+        "ann_ret%": 20.94,
+        "ann_vol%": 10.56,
+        "sharpe": 1.983,
+        "harvey_t": 3.407,
+        "mdd%": -10.62,
+        "calmar": 1.973,
+        "sortino": 2.538
+      },
+      "VT+SPY_drop_signal": {
+        "name": "VT+SPY_drop_signal",
+        "n_years": 3.0,
+        "ann_ret%": 21.6,
+        "ann_vol%": 10.87,
+        "sharpe": 1.987,
+        "harvey_t": 3.415,
+        "mdd%": -10.64,
+        "calmar": 2.03,
+        "sortino": 2.582
+      },
+      "VT+SPY_Monthly_Filter": {
+        "name": "VT+SPY_Monthly_Filter",
+        "n_years": 3.0,
+        "ann_ret%": 20.81,
+        "ann_vol%": 10.81,
+        "sharpe": 1.926,
+        "harvey_t": 3.309,
+        "mdd%": -10.64,
+        "calmar": 1.956,
+        "sortino": 2.483
+      }
+    },
+    "dm_tests": {
+      "VT+SPY_21d_filter": {
+        "t_stat": 2.104,
+        "p_value": 0.0355,
+        "mean_diff_bps": 0.52
+      },
+      "VT+SPY_63d_filter": {
+        "t_stat": 0.809,
+        "p_value": 0.4188,
+        "mean_diff_bps": 0.16
+      },
+      "VT+SPY_126d_filter": {
+        "t_stat": 0.204,
+        "p_value": 0.8386,
+        "mean_diff_bps": 0.03
+      },
+      "VT+SPY_drop_signal": {
+        "t_stat": 4.068,
+        "p_value": 0.0,
+        "mean_diff_bps": 0.55
+      },
+      "VT+SPY_Monthly_Filter": {
+        "t_stat": -2.711,
+        "p_value": 0.0067,
+        "mean_diff_bps": -0.35
+      }
+    },
+    "bootstrap_mdd": {
+      "baseline_mdd%": -48.46,
+      "filter_mdd%": -48.46,
+      "diff%": -0.01,
+      "p_value": 0.3406
+    },
+    "decomposition_regressions": {
+      "Full_2009_2026": {
+        "reg1_full": {
+          "r2": 0.9551,
+          "spy_tsmom_126d": {
+            "t_stat": -0.797,
+            "p_value": 0.4252,
+            "significant": false
+          },
+          "tw_tsmom_126d": {
+            "t_stat": 1.259,
+            "p_value": 0.2082,
+            "significant": false
+          },
+          "tw_mkt": {
+            "t_stat": -11.089,
+            "p_value": 0.0,
+            "significant": true
+          }
+        },
+        "reg2_with_vix": {
+          "r2": 0.9552,
+          "vix_level": {
+            "t_stat": 0.904,
+            "p_value": 0.3662,
+            "significant": false
+          },
+          "note": "VIX level adds nothing beyond market factor"
+        },
+        "subsumption": {
+          "r2_spy_only": 0.9551,
+          "r2_tw_only": 0.9551,
+          "r2_both": 0.9551,
+          "conclusion": "Neither TSMOM significant — market factor dominates (R²≈0.955)"
+        }
+      },
+      "OOS_2023_2026": {
+        "reg1_full": {
+          "r2": 0.9503,
+          "spy_tsmom_126d": {
+            "t_stat": 0.472,
+            "p_value": 0.6369,
+            "significant": false
+          },
+          "tw_tsmom_126d": {
+            "t_stat": 1.181,
+            "p_value": 0.2381,
+            "significant": false
+          }
+        },
+        "reg4_multi_horizon": {
+          "r2": 0.9504,
+          "spy_252d": {
+            "t_stat": 2.412,
+            "p_value": 0.0161,
+            "significant": true
+          },
+          "note": "SPY 252d marginal significance in OOS — but tiny R² increment"
+        }
+      }
+    }
+  },
+  "conclusions": [
+    "1. ★ VT weight 與 SPY TSMOM(126d) corr≈0.84 是機械性的：SPY↑→VIX↓→weight↑",
+    "2. 機制鏈：corr(VIX, SPY_TSMOM_126d)=-0.37, corr(VT_weight, VIX)=-0.86",
+    "3. SPY TSMOM 對 VT 超額報酬無顯著解釋力（全樣本 t=-0.80, p=0.43）",
+    "4. TW TSMOM 同樣不顯著（t=1.26, p=0.21）——VT excess 由 market factor 主導（R²=0.955）",
+    "5. SPY→0050 lead-lag 顯著：Granger β=0.494 (t=12.2)，1 天 R²=7.2%",
+    "6. 信息 83% 透過隔夜 gap 吸收，盤中僅貢獻 3%",
+    "7. 信息吸收速度：1 天 R²=7.2%，2 天後 R²=0.01%（幾乎完全吸收）",
+    "8. 日度 SPY 21d filter 和 drop signal 在 DM test 顯著（t=2.1, 4.1），但均為日度信號",
+    "9. 月度 SPY filter（唯一可實施且無 timing bias 的方案）反而顯著惡化績效（t=-2.7）",
+    "10. Bootstrap MDD test: 月度 SPY filter 對 MDD 無改善（p=0.34，兩者相同 -48.46%）",
+    "11. ★★ 核心結論：VIX 在月度頻率是 sufficient statistic——SPY momentum 被完全吸收",
+    "12. 加入 SPY momentum 不改善月度 VT，日度改善可能來自 higher-frequency timing（有 bias 風險）",
+    "13. 確認 J3/J4/J8/J13 一致結論：VIX 是 VT 的 irreducible kernel"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "id": "mile_d34e46b1",
+  "title": "2026-03-21 \u672c\u65e5\u6301\u5009\u6bd4\u7387\u5efa\u8b70\uff08\u4f9d\u64da 2026-03-20 \u6536\u76e4\u6578\u64da\uff09",
+  "description": "## \u7b56\u7565\u5efa\u8b70\uff082026-03-20 \u6578\u64da \u2192 \u9810\u6e2c\u4e0b\u4e00\u4ea4\u6613\u65e5\uff09\n\n\u03c3 = 20.3% \u00b7 VIX = 26.78\n\n| \u7b56\u7565 | \u914d\u7f6e | \u73fe\u91d1 |\n|------|------|------|\n| GARCH VT (SPY) | **SPY 45%** | 55% |\n| Risk Parity (SPY+GLD) | **SPY 42%** + **GLD 24%** | 34% |\n| 12/VIX (SPY) | **SPY 45%** | 55% |\n| 50/50 SPY/GLD | **SPY 23%** + **GLD 23%** | 54% |\n| \u53f0\u7063 VT (0050.TW) | **0050.TW 32%** | 68% |\n| VIX+\u666f\u6c23\u9818\u5148 (0050.TW) | **0050.TW 22%** | 78% |\n\n",
+  "category": "milestone",
+  "phase": "daily_update",
+  "details": {
+    "date": "2026-03-21",
+    "spy_date": "2026-03-20",
+    "spy_close": 648.57,
+    "gld_close": 413.38,
+    "sigma_annual": 20.3,
+    "vix_level": 26.78,
+    "overnight_gap": null,
+    "gap_alert_level": null,
+    "strategies": {
+      "slow_vt": {
+        "SPY": 0.45
+      },
+      "risk_parity": {
+        "SPY": 0.42,
+        "GLD": 0.24
+      },
+      "simple_12vix": {
+        "SPY": 0.45
+      },
+      "recommended_5050": {
+        "SPY": 0.23,
+        "GLD": 0.23
+      },
+      "taiwan_8.63vix": {
+        "0050.TW": 0.32
+      },
+      "taiwan_spy_momentum": {
+        "0050.TW": 0.0
+      },
+      "tz_tw_jp_5050": {
+        "0050.TW": 0.0,
+        "^N225": 0.0
+      },
+      "global_vt_tz": {
+        "SPY": 0.12,
+        "GLD": 0.12,
+        "0050.TW": 0.0
+      },
+      "vix_leading_guard": {
+        "0050.TW": 0.22
+      }
+    }
+  },
+  "tags": [
+    "\u6301\u5009\u5efa\u8b70",
+    "daily-update",
+    "12/VIX",
+    "SPY",
+    "GLD",
+    "0050.TW",
+    "VT\u7b56\u7565"
+  ],
+  "created_at": "2026-03-20T22:03:04.933832+00:00",
+  "published_at": "2026-03-20T22:03:04.933832+00:00",
+  "status": "published"
+}

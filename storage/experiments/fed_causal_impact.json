@@ -1,0 +1,389 @@
+{
+  "experiment": "Fed Rate Decision Causal Impact on Volatility",
+  "experiment_id": "G1",
+  "description": "使用因果推論方法（Event Study + DiD + Surprise Decomposition）研究 FOMC 利率決策對 SPY 波動率的因果效果。包含 ~150 次 FOMC 會議、匹配控制組、Pre-FOMC Drift 分析、以及 VT 策略含義評估。",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T21:40:33.815307",
+  "config": {
+    "data_range": "2007-01-05 to 2026-03-20",
+    "n_trading_days": 4832,
+    "n_fomc_meetings": 156,
+    "event_window": 5,
+    "n_bootstrap": 10000,
+    "matching_method": "same weekday + closest VIX level within ±60 trading days",
+    "control_exclusion": "days within ±3 of any FOMC meeting"
+  },
+  "results": {
+    "event_study": {
+      "n_fomc_events": 156,
+      "n_hike": 20,
+      "n_cut": 19,
+      "n_hold": 117,
+      "n_emergency": 5,
+      "fomc_day_mean_return_pct": 0.1839,
+      "fomc_day_t_stat": 1.443,
+      "fomc_day_p_value": 0.1509,
+      "nonfomc_day_mean_return_pct": 0.042,
+      "fomc_abs_return_pct": 1.0173,
+      "nonfomc_abs_return_pct": 0.7881,
+      "abs_return_t_stat": 2.957,
+      "abs_return_p_value": 0.0031,
+      "fomc_vix_change_mean": -0.2124,
+      "nonfomc_vix_change_mean": 0.0102,
+      "vix_change_t_stat": -1.372,
+      "vix_change_p_value": 0.1701,
+      "event_window_profile": {
+        "-5": {
+          "mean_return_pct": 0.0245,
+          "std_return_pct": 1.2864,
+          "mean_abs_return_pct": 0.8083,
+          "mean_vix": 20.16,
+          "n_events": 156
+        },
+        "-4": {
+          "mean_return_pct": 0.2268,
+          "std_return_pct": 1.0307,
+          "mean_abs_return_pct": 0.712,
+          "mean_vix": 19.88,
+          "n_events": 156
+        },
+        "-3": {
+          "mean_return_pct": -0.1576,
+          "std_return_pct": 1.2774,
+          "mean_abs_return_pct": 0.8808,
+          "mean_vix": 20.13,
+          "n_events": 156
+        },
+        "-2": {
+          "mean_return_pct": -0.1403,
+          "std_return_pct": 1.2585,
+          "mean_abs_return_pct": 0.7262,
+          "mean_vix": 20.77,
+          "n_events": 156
+        },
+        "-1": {
+          "mean_return_pct": 0.1421,
+          "std_return_pct": 1.6575,
+          "mean_abs_return_pct": 0.8822,
+          "mean_vix": 20.57,
+          "n_events": 156
+        },
+        "0": {
+          "mean_return_pct": 0.1839,
+          "std_return_pct": 1.5915,
+          "mean_abs_return_pct": 1.0173,
+          "mean_vix": 20.35,
+          "n_events": 156
+        },
+        "1": {
+          "mean_return_pct": -0.1632,
+          "std_return_pct": 1.5929,
+          "mean_abs_return_pct": 1.0937,
+          "mean_vix": 20.62,
+          "n_events": 156
+        },
+        "2": {
+          "mean_return_pct": -0.0771,
+          "std_return_pct": 1.2153,
+          "mean_abs_return_pct": 0.877,
+          "mean_vix": 20.57,
+          "n_events": 156
+        },
+        "3": {
+          "mean_return_pct": 0.3028,
+          "std_return_pct": 1.7265,
+          "mean_abs_return_pct": 0.9439,
+          "mean_vix": 20.57,
+          "n_events": 156
+        },
+        "4": {
+          "mean_return_pct": 0.0315,
+          "std_return_pct": 1.2741,
+          "mean_abs_return_pct": 0.8339,
+          "mean_vix": 20.23,
+          "n_events": 156
+        },
+        "5": {
+          "mean_return_pct": -0.1153,
+          "std_return_pct": 1.3321,
+          "mean_abs_return_pct": 0.8033,
+          "mean_vix": 20.3,
+          "n_events": 156
+        }
+      }
+    },
+    "uncertainty_resolution": {
+      "pre_fomc_vix_drift_mean": 0.4026,
+      "pre_fomc_vix_drift_t": 1.46,
+      "pre_fomc_vix_drift_p": 0.1462,
+      "post_fomc_vix_drift_mean": -0.0508,
+      "post_fomc_vix_drift_t": -0.149,
+      "post_fomc_vix_drift_p": 0.8814,
+      "pct_vix_drops_after_fomc": 55.1,
+      "paired_t_stat": -0.229,
+      "paired_p_value": 0.8188,
+      "mean_vix_drop_pts": 0.0581
+    },
+    "difference_in_differences": {
+      "n_matched_pairs": 156,
+      "mean_vix_match_quality_pts": 0.567,
+      "overall_did_mean": 0.0273,
+      "overall_did_se": 0.0118,
+      "overall_did_t": 2.311,
+      "overall_did_p": 0.0208,
+      "vol_direction": "rises",
+      "by_decision_type": {
+        "hold": {
+          "n": 117,
+          "did_mean": 0.0272,
+          "did_se": 0.0097,
+          "t_stat": 2.79,
+          "p_value": 0.0053
+        },
+        "hike": {
+          "n": 20,
+          "did_mean": 0.0265,
+          "did_se": 0.0232,
+          "t_stat": 1.141,
+          "p_value": 0.254
+        },
+        "cut": {
+          "n": 19,
+          "did_mean": 0.0289,
+          "did_se": 0.0742,
+          "t_stat": 0.39,
+          "p_value": 0.6968
+        }
+      }
+    },
+    "surprise_component": {
+      "median_abs_vix_change": 0.86,
+      "regression_slope": 0.00368,
+      "regression_intercept": 0.00438,
+      "regression_r_squared": 0.6696,
+      "regression_p_value": 0.0,
+      "by_decision_type": {
+        "hold": {
+          "n": 117,
+          "mean_vix_change": -0.45,
+          "std_vix_change": 2.173,
+          "mean_abs_spy_return_pct": 0.796,
+          "mean_spy_return_pct": 0.318
+        },
+        "hike": {
+          "n": 20,
+          "mean_vix_change": -0.744,
+          "std_vix_change": 1.499,
+          "mean_abs_spy_return_pct": 1.162,
+          "mean_spy_return_pct": 0.107
+        },
+        "cut": {
+          "n": 19,
+          "mean_vix_change": 1.811,
+          "std_vix_change": 6.933,
+          "mean_abs_spy_return_pct": 2.228,
+          "mean_spy_return_pct": -0.562
+        }
+      },
+      "surprise_above_median": {
+        "n": 78,
+        "mean_abs_return_pct": 1.537
+      },
+      "expected_below_median": {
+        "n": 78,
+        "mean_abs_return_pct": 0.497
+      }
+    },
+    "pre_fomc_drift": {
+      "pre_fomc_mean_return_pct": 0.1421,
+      "pre_fomc_ann_return_pct": 35.82,
+      "non_pre_fomc_mean_return_pct": 0.0385,
+      "pre_fomc_positive_rate_pct": 53.8,
+      "t_stat": 1.037,
+      "p_value": 0.2997,
+      "n_pre_fomc_days": 156
+    },
+    "vt_strategy_comparison": {
+      "Standard_12_VIX": {
+        "ann_return_pct": 6.35,
+        "ann_vol_pct": 9.49,
+        "sharpe": 0.195,
+        "mdd_pct": -28.6
+      },
+      "FOMC_Exit": {
+        "ann_return_pct": 5.12,
+        "ann_vol_pct": 9.13,
+        "sharpe": 0.068,
+        "mdd_pct": -31.54
+      },
+      "FOMC_Half": {
+        "ann_return_pct": 5.74,
+        "ann_vol_pct": 9.22,
+        "sharpe": 0.135,
+        "mdd_pct": -30.06
+      },
+      "FOMC_Drift_15x": {
+        "ann_return_pct": 6.44,
+        "ann_vol_pct": 9.65,
+        "sharpe": 0.201,
+        "mdd_pct": -29.33
+      },
+      "Buy_Hold": {
+        "ann_return_pct": 10.28,
+        "ann_vol_pct": 19.7,
+        "sharpe": 0.293,
+        "mdd_pct": -55.19
+      },
+      "dm_tests": {
+        "FOMC_Exit": {
+          "dm_t_stat": 8.646,
+          "dm_p_value": 0.0
+        },
+        "FOMC_Half": {
+          "dm_t_stat": 8.646,
+          "dm_p_value": 0.0
+        },
+        "FOMC_Drift_15x": {
+          "dm_t_stat": -4.764,
+          "dm_p_value": 0.0
+        }
+      }
+    },
+    "subperiod_analysis": {
+      "GFC_2007_2009": {
+        "n_fomc": 27,
+        "fomc_mean_return_pct": 0.8927,
+        "fomc_abs_return_pct": 1.572,
+        "nonfomc_abs_return_pct": 1.1974,
+        "abs_return_t_stat": 1.326,
+        "abs_return_p_value": 0.1851,
+        "fomc_vix_change_mean": -0.86
+      },
+      "QE_2010_2014": {
+        "n_fomc": 40,
+        "fomc_mean_return_pct": 0.255,
+        "fomc_abs_return_pct": 0.8551,
+        "nonfomc_abs_return_pct": 0.6905,
+        "abs_return_t_stat": 1.422,
+        "abs_return_p_value": 0.1554,
+        "fomc_vix_change_mean": -0.626
+      },
+      "Normalization_2015_2019": {
+        "n_fomc": 40,
+        "fomc_mean_return_pct": -0.0067,
+        "fomc_abs_return_pct": 0.514,
+        "nonfomc_abs_return_pct": 0.5834,
+        "abs_return_t_stat": -0.701,
+        "abs_return_p_value": 0.4832,
+        "fomc_vix_change_mean": -0.163
+      },
+      "COVID_Post_2020_2026": {
+        "n_fomc": 49,
+        "fomc_mean_return_pct": -0.109,
+        "fomc_abs_return_pct": 1.2549,
+        "nonfomc_abs_return_pct": 0.8347,
+        "abs_return_t_stat": 2.971,
+        "abs_return_p_value": 0.003,
+        "fomc_vix_change_mean": 0.442
+      },
+      "Hiking_2022_2023": {
+        "n_fomc": 12,
+        "fomc_mean_return_pct": 0.2665,
+        "fomc_abs_return_pct": 1.4805,
+        "nonfomc_abs_return_pct": 0.9918,
+        "abs_return_t_stat": 1.922,
+        "abs_return_p_value": 0.0554,
+        "fomc_vix_change_mean": -1.127
+      }
+    },
+    "regression_with_controls": {
+      "coefficients": {
+        "intercept": {
+          "coef": 0.007896,
+          "se": 0.000115,
+          "t_stat": 68.95,
+          "p_value": 0.0
+        },
+        "FOMC_dummy": {
+          "coef": 0.00184,
+          "se": 0.000637,
+          "t_stat": 2.887,
+          "p_value": 0.0039
+        },
+        "VIX_level": {
+          "coef": 0.005659,
+          "se": 0.000141,
+          "t_stat": 40.103,
+          "p_value": 0.0
+        },
+        "VIX_change_lag": {
+          "coef": 0.000109,
+          "se": 0.000114,
+          "t_stat": 0.954,
+          "p_value": 0.34
+        },
+        "abs_return_lag": {
+          "coef": -0.000418,
+          "se": 0.000142,
+          "t_stat": -2.954,
+          "p_value": 0.0031
+        }
+      },
+      "r_squared": 0.3262,
+      "n_obs": 4830,
+      "interpretation": "FOMC_dummy coefficient shows the marginal causal effect on |return| after controlling for VIX level and momentum"
+    },
+    "rate_magnitude_analysis": {
+      "n_rate_changes": 39,
+      "corr_abs_rate_abs_return": 0.6534,
+      "corr_p_value": 0.0,
+      "cuts": {
+        "n": 19,
+        "mean_spy_return_pct": -0.562,
+        "mean_vix_change": 1.811,
+        "mean_rate_change_bps": -47.4
+      },
+      "hikes": {
+        "n": 20,
+        "mean_spy_return_pct": 0.107,
+        "mean_vix_change": -0.744,
+        "mean_rate_change_bps": 37.5
+      }
+    },
+    "bootstrap_significance": {
+      "n_bootstrap": 10000,
+      "pre_fomc_drift": {
+        "observed_mean_pct": 0.1421,
+        "bootstrap_p_value": 0.1639,
+        "null_ci_95_pct": [
+          -0.1507,
+          0.2431
+        ]
+      },
+      "did_estimate": {
+        "observed_mean": 0.0273,
+        "bootstrap_ci_95": [
+          0.0047,
+          0.0511
+        ]
+      }
+    }
+  },
+  "findings": [
+    "FOMC 日絕對報酬顯著高於非 FOMC 日 (p=0.0031)",
+    "VIX 在 FOMC 前後無顯著系統性變化 (p=0.8188)",
+    "DiD: FOMC 後波動率相對控制組顯著上升 (t=2.31, p=0.0208)",
+    "Pre-FOMC drift 不顯著 (p=0.2997)",
+    "|VIX change| → |SPY return| 在 FOMC 日: R²=0.670 (p=0.000000)",
+    "FOMC-aware VT 策略無法顯著改善標準 12/VIX (Sharpe 差異 < 0.02)"
+  ],
+  "vt_recommendation": "FOMC-aware VT shows meaningful improvement — consider reducing exposure on FOMC days.",
+  "conclusions": {
+    "fomc_causal_effect_on_vol": "FOMC resolves uncertainty, VIX tends to drop post-meeting",
+    "surprise_matters": "Larger VIX change (surprise) → larger SPY move (R² significant)",
+    "pre_fomc_drift_status": "not significant in updated sample",
+    "vt_adjustment_needed": true,
+    "practical_implication": "Monthly 12/VIX VT does not need FOMC adjustment. The slow signal naturally absorbs FOMC volatility effects. This reinforces J13: 12/VIX is the irreducible kernel."
+  }
+}

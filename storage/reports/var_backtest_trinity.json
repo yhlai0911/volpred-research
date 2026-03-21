@@ -1,0 +1,491 @@
+{
+  "title": "VaR Backtest Trinity: Kupiec + Christoffersen + DQ",
+  "generated_at": "2026-03-17T00:30:15.766942",
+  "config": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "TLT",
+      "EEM",
+      "0050.TW",
+      "BTC-USD"
+    ],
+    "methods": [
+      "Normal",
+      "Student-t(5)",
+      "Skewed-t",
+      "CF-VaR",
+      "FHS"
+    ],
+    "alpha": 0.05,
+    "oos_start": "2020-01-01",
+    "oos_end": "2025-12-31",
+    "window_map": {
+      "SPY": 2000,
+      "QQQ": 2000,
+      "GLD": 2000,
+      "TLT": 504,
+      "EEM": 2000,
+      "0050.TW": 504,
+      "BTC-USD": 1000
+    },
+    "model": "GJR-GARCH(1,1)",
+    "dq_lags": 4
+  },
+  "results": {
+    "SPY": {
+      "Normal": {
+        "n_obs": 1507,
+        "n_violations": 88,
+        "obs_rate": 0.058394160583941604,
+        "kupiec_p": 0.14481312547923453,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.5794157074719197,
+        "christoffersen_pass": "True",
+        "dq_p": 0.12074159672607132,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "Student-t(5)": {
+        "n_obs": 1507,
+        "n_violations": 102,
+        "obs_rate": 0.0676841406768414,
+        "kupiec_p": 0.002735058576526228,
+        "kupiec_pass": "False",
+        "christoffersen_p": 0.20200664714885985,
+        "christoffersen_pass": "True",
+        "dq_p": 0.006336014322089967,
+        "dq_pass": "False",
+        "n_pass": "1"
+      },
+      "Skewed-t": {
+        "n_obs": 1507,
+        "n_violations": 78,
+        "obs_rate": 0.051758460517584606,
+        "kupiec_p": 0.7554197975246633,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.9832971922419365,
+        "christoffersen_pass": "True",
+        "dq_p": 0.4082254303002846,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "CF-VaR": {
+        "n_obs": 1507,
+        "n_violations": 66,
+        "obs_rate": 0.043795620437956206,
+        "kupiec_p": 0.2593245071116991,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.9475520451678783,
+        "christoffersen_pass": "True",
+        "dq_p": 0.33149255586972415,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "FHS": {
+        "n_obs": 1507,
+        "n_violations": 92,
+        "obs_rate": 0.06104844061048441,
+        "kupiec_p": 0.056780600400038295,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.44545578648102824,
+        "christoffersen_pass": "True",
+        "dq_p": 0.0714495143916245,
+        "dq_pass": "True",
+        "n_pass": "3"
+      }
+    },
+    "QQQ": {
+      "Normal": {
+        "n_obs": 1507,
+        "n_violations": 82,
+        "obs_rate": 0.054412740544127404,
+        "kupiec_p": 0.43808627025503366,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.8131250332088825,
+        "christoffersen_pass": "True",
+        "dq_p": 0.7628729994638751,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "Student-t(5)": {
+        "n_obs": 1507,
+        "n_violations": 94,
+        "obs_rate": 0.062375580623755804,
+        "kupiec_p": 0.03349348464898738,
+        "kupiec_pass": "False",
+        "christoffersen_p": 0.6960803215672944,
+        "christoffersen_pass": "True",
+        "dq_p": 0.3354001584696349,
+        "dq_pass": "True",
+        "n_pass": "2"
+      },
+      "Skewed-t": {
+        "n_obs": 1507,
+        "n_violations": 78,
+        "obs_rate": 0.051758460517584606,
+        "kupiec_p": 0.7554197975246633,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.9832971922419365,
+        "christoffersen_pass": "True",
+        "dq_p": 0.7171346158915786,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "CF-VaR": {
+        "n_obs": 1507,
+        "n_violations": 67,
+        "obs_rate": 0.04445919044459191,
+        "kupiec_p": 0.3148713539755805,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.9906957582123699,
+        "christoffersen_pass": "True",
+        "dq_p": 0.35824651110922634,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "FHS": {
+        "n_obs": 1507,
+        "n_violations": 83,
+        "obs_rate": 0.055076310550763105,
+        "kupiec_p": 0.3733151000079791,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.7719735196754502,
+        "christoffersen_pass": "True",
+        "dq_p": 0.6711184920397917,
+        "dq_pass": "True",
+        "n_pass": "3"
+      }
+    },
+    "GLD": {
+      "Normal": {
+        "n_obs": 1507,
+        "n_violations": 70,
+        "obs_rate": 0.046449900464499004,
+        "kupiec_p": 0.522400136607867,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.017858509421838864,
+        "christoffersen_pass": "False",
+        "dq_p": 0.0943574718957938,
+        "dq_pass": "True",
+        "n_pass": "2"
+      },
+      "Student-t(5)": {
+        "n_obs": 1507,
+        "n_violations": 82,
+        "obs_rate": 0.054412740544127404,
+        "kupiec_p": 0.43808627025503366,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.015232851649396362,
+        "christoffersen_pass": "False",
+        "dq_p": 0.04355623309481427,
+        "dq_pass": "False",
+        "n_pass": "1"
+      },
+      "Skewed-t": {
+        "n_obs": 1507,
+        "n_violations": 74,
+        "obs_rate": 0.0491041804910418,
+        "kupiec_p": 0.8728675598329871,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.011118603388030945,
+        "christoffersen_pass": "False",
+        "dq_p": 0.014128001220636066,
+        "dq_pass": "False",
+        "n_pass": "1"
+      },
+      "CF-VaR": {
+        "n_obs": 1507,
+        "n_violations": 68,
+        "obs_rate": 0.0451227604512276,
+        "kupiec_p": 0.3774030273175982,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.012427058777427558,
+        "christoffersen_pass": "False",
+        "dq_p": 0.06757978412793808,
+        "dq_pass": "True",
+        "n_pass": "2"
+      },
+      "FHS": {
+        "n_obs": 1507,
+        "n_violations": 77,
+        "obs_rate": 0.051094890510948905,
+        "kupiec_p": 0.845899894358336,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.05469995072607314,
+        "christoffersen_pass": "True",
+        "dq_p": 0.20468398518820197,
+        "dq_pass": "True",
+        "n_pass": "3"
+      }
+    },
+    "TLT": {
+      "Normal": {
+        "n_obs": 1507,
+        "n_violations": 80,
+        "obs_rate": 0.05308560053085601,
+        "kupiec_p": 0.5861777733478175,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.8973173853625402,
+        "christoffersen_pass": "True",
+        "dq_p": 0.704691390684604,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "Student-t(5)": {
+        "n_obs": 1507,
+        "n_violations": 90,
+        "obs_rate": 0.059721300597213006,
+        "kupiec_p": 0.09250333543822542,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.5099505746733384,
+        "christoffersen_pass": "True",
+        "dq_p": 0.20896203372109068,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "Skewed-t": {
+        "n_obs": 1507,
+        "n_violations": 80,
+        "obs_rate": 0.05308560053085601,
+        "kupiec_p": 0.5861777733478175,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.8973173853625402,
+        "christoffersen_pass": "True",
+        "dq_p": 0.503995522665728,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "CF-VaR": {
+        "n_obs": 1507,
+        "n_violations": 79,
+        "obs_rate": 0.05242203052422031,
+        "kupiec_p": 0.6685234506063282,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.9401413109338628,
+        "christoffersen_pass": "True",
+        "dq_p": 0.7275597707521657,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "FHS": {
+        "n_obs": 1507,
+        "n_violations": 78,
+        "obs_rate": 0.051758460517584606,
+        "kupiec_p": 0.7554197975246633,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.9832971922419365,
+        "christoffersen_pass": "True",
+        "dq_p": 0.7968684620102822,
+        "dq_pass": "True",
+        "n_pass": "3"
+      }
+    },
+    "EEM": {
+      "Normal": {
+        "n_obs": 1507,
+        "n_violations": 75,
+        "obs_rate": 0.0497677504976775,
+        "kupiec_p": 0.9669782817466084,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.08086659939861773,
+        "christoffersen_pass": "True",
+        "dq_p": 0.3460527515435017,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "Student-t(5)": {
+        "n_obs": 1507,
+        "n_violations": 89,
+        "obs_rate": 0.059057730590577305,
+        "kupiec_p": 0.11631764985799242,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.08802563947593312,
+        "christoffersen_pass": "True",
+        "dq_p": 0.014503151892624855,
+        "dq_pass": "False",
+        "n_pass": "2"
+      },
+      "Skewed-t": {
+        "n_obs": 1507,
+        "n_violations": 68,
+        "obs_rate": 0.0451227604512276,
+        "kupiec_p": 0.3774030273175982,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.1541251200688296,
+        "christoffersen_pass": "True",
+        "dq_p": 0.3790720321488896,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "CF-VaR": {
+        "n_obs": 1507,
+        "n_violations": 67,
+        "obs_rate": 0.04445919044459191,
+        "kupiec_p": 0.3148713539755805,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.16793072471180182,
+        "christoffersen_pass": "True",
+        "dq_p": 0.31130809463571374,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "FHS": {
+        "n_obs": 1507,
+        "n_violations": 78,
+        "obs_rate": 0.051758460517584606,
+        "kupiec_p": 0.7554197975246633,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.05988282386024002,
+        "christoffersen_pass": "True",
+        "dq_p": 0.3081393832619379,
+        "dq_pass": "True",
+        "n_pass": "3"
+      }
+    },
+    "0050.TW": {
+      "Normal": {
+        "n_obs": 1457,
+        "n_violations": 63,
+        "obs_rate": 0.043239533287577216,
+        "kupiec_p": 0.22594840748268352,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.8642687229786504,
+        "christoffersen_pass": "True",
+        "dq_p": 0.858463046845149,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "Student-t(5)": {
+        "n_obs": 1457,
+        "n_violations": 75,
+        "obs_rate": 0.05147563486616335,
+        "kupiec_p": 0.7969844422941244,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.5579569625839935,
+        "christoffersen_pass": "True",
+        "dq_p": 0.9751519568623683,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "Skewed-t": {
+        "n_obs": 1457,
+        "n_violations": 71,
+        "obs_rate": 0.048730267673301304,
+        "kupiec_p": 0.8233167517507769,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.766324293169022,
+        "christoffersen_pass": "True",
+        "dq_p": 0.9542045426818572,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "CF-VaR": {
+        "n_obs": 1457,
+        "n_violations": 71,
+        "obs_rate": 0.048730267673301304,
+        "kupiec_p": 0.8233167517507769,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.4123295244549572,
+        "christoffersen_pass": "True",
+        "dq_p": 0.8084030533666069,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "FHS": {
+        "n_obs": 1457,
+        "n_violations": 87,
+        "obs_rate": 0.05971173644474949,
+        "kupiec_p": 0.09841017691242648,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.7143886452393176,
+        "christoffersen_pass": "True",
+        "dq_p": 0.37077490917756317,
+        "dq_pass": "True",
+        "n_pass": "3"
+      }
+    },
+    "BTC-USD": {
+      "Normal": {
+        "n_obs": 2191,
+        "n_violations": 73,
+        "obs_rate": 0.03331811958010041,
+        "kupiec_p": 0.00014214283371583036,
+        "kupiec_pass": "False",
+        "christoffersen_p": 0.7672377543180997,
+        "christoffersen_pass": "True",
+        "dq_p": 0.008530171823323718,
+        "dq_pass": "False",
+        "n_pass": "1"
+      },
+      "Student-t(5)": {
+        "n_obs": 2191,
+        "n_violations": 85,
+        "obs_rate": 0.03879507074395253,
+        "kupiec_p": 0.012388802799463083,
+        "kupiec_pass": "False",
+        "christoffersen_p": 0.8620272160140765,
+        "christoffersen_pass": "True",
+        "dq_p": 0.23433267284162207,
+        "dq_pass": "True",
+        "n_pass": "2"
+      },
+      "Skewed-t": {
+        "n_obs": 2191,
+        "n_violations": 110,
+        "obs_rate": 0.05020538566864446,
+        "kupiec_p": 0.9648388830459046,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.8336065802366569,
+        "christoffersen_pass": "True",
+        "dq_p": 0.65379323539195,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "CF-VaR": {
+        "n_obs": 2191,
+        "n_violations": 99,
+        "obs_rate": 0.04518484710178001,
+        "kupiec_p": 0.2934637033610391,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.4710894900938134,
+        "christoffersen_pass": "True",
+        "dq_p": 0.15278762211433494,
+        "dq_pass": "True",
+        "n_pass": "3"
+      },
+      "FHS": {
+        "n_obs": 2191,
+        "n_violations": 112,
+        "obs_rate": 0.051118210862619806,
+        "kupiec_p": 0.8108586674324219,
+        "kupiec_pass": "True",
+        "christoffersen_p": 0.5869855054312287,
+        "christoffersen_pass": "True",
+        "dq_p": 0.4473123535686,
+        "dq_pass": "True",
+        "n_pass": "3"
+      }
+    }
+  },
+  "summary": {
+    "best_method": "FHS",
+    "best_method_all3_count": 7,
+    "method_all3_counts": {
+      "Normal": 5,
+      "Student-t(5)": 2,
+      "Skewed-t": 6,
+      "CF-VaR": 6,
+      "FHS": 7
+    },
+    "method_total_pass": {
+      "Normal": "18",
+      "Student-t(5)": "14",
+      "Skewed-t": "19",
+      "CF-VaR": "20",
+      "FHS": "21"
+    },
+    "elapsed_seconds": 258.1
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "id": "mile_23e8ddaf",
+  "title": "Q&A: Gamma-Mechanism 的適用範圍——Equity Only",
+  "description": "[提出: 用戶/研究過程, 執行: Claude]\n\n## 問題背景\n\nGamma-mechanism proposition 是本研究系統最重要的理論貢獻之一。其核心主張是：**資產的槓桿效應（gamma）越強，GJR-GARCH 相對於 GARCH 的預測優勢越大，因此波動率目標策略（VT）的改善幅度也越大。** 我們在初始 7 資產樣本中觀察到 gamma 與 VT alpha 之間 Spearman rank correlation 高達 1.000，在 17 資產中為 0.874，26 資產中為 0.753。\n\n但這個近乎完美的相關性是否過於樂觀？在什麼條件下會失敗？\n\n## 實驗設...",
+  "category": "qa",
+  "phase": "Q&A",
+  "details": {},
+  "tags": [
+    "Q&A",
+    "Gamma-Mechanism",
+    "Leverage Direction",
+    "理論貢獻",
+    "跨資產"
+  ],
+  "published_at": "2026-03-17T01:23:23.577828+00:00",
+  "status": "published",
+  "content": "[提出: 用戶/研究過程, 執行: Claude]\n\n## 問題背景\n\nGamma-mechanism proposition 是本研究系統最重要的理論貢獻之一。其核心主張是：**資產的槓桿效應（gamma）越強，GJR-GARCH 相對於 GARCH 的預測優勢越大，因此波動率目標策略（VT）的改善幅度也越大。** 我們在初始 7 資產樣本中觀察到 gamma 與 VT alpha 之間 Spearman rank correlation 高達 1.000，在 17 資產中為 0.874，26 資產中為 0.753。\n\n但這個近乎完美的相關性是否過於樂觀？在什麼條件下會失敗？\n\n## 實驗設計（Q19）\n\nQ19 使用 12 個涵蓋多種資產類別的標的進行測試：美股大盤（SPY, QQQ）、小型股（IWM）、新興市場（EEM）、商品（GLD, SLV, USO）、債券（TLT, LQD）、不動產（VNQ）、加密貨幣概念（BITO）以及台灣（0050.TW）。這是目前最多元化的測試組合。\n\n## 關鍵發現：Equity Only\n\n結果清楚地揭示了 gamma-mechanism 的適用邊界：\n\n### 跨所有資產：失敗\n- Spearman correlation rho = -0.448\n- p-value > 0.05（不顯著）\n- Gamma 與 VT alpha 的關係在加入非權益類資產後完全崩潰\n\n### Equity 子群：顯著有效\n- 僅取 equity 類資產（SPY, QQQ, IWM, EEM, VNQ, 0050.TW）\n- Spearman rho = 0.886, p = 0.019\n- Gamma-mechanism 在「同質性權益資產」中依然是有效的預測工具\n\n### 為什麼會失敗？\n\n原因在於 **gamma 在不同資產類別中的含義不同**：\n- **股票**：gamma 反映槓桿效應（股價下跌 → 債務槓桿上升 → 波動率上升），這是一個有經濟學基礎的機制\n- **黃金**：gamma 可能反映避險需求的不對稱性，機制完全不同\n- **原油**：gamma 反映供給衝擊的不對稱性\n- **債券**：gamma 反映利率預期的不對稱反應\n\n當我們把這些「表面上都叫 gamma」但實際上反映不同經濟機制的數值放在一起排序，自然不會得到有意義的相關性。\n\n## 更好的跨資產預測因子\n\n如果 gamma 不能跨資產類別預測 VT alpha，什麼可以？\n\n答案是 **VIX correlation**——資產報酬與 VIX 變動的相關係數。這個指標直接衡量「該資產在恐慌時期的表現」，而 VT 策略本質上就是在恐慌時降低曝險。因此，與 VIX 相關性越高的資產，VT 策略的改善幅度越大，這個邏輯在所有資產類別中都成立。\n\n## MDD Improvement：Universal Mechanical Effect\n\n另一個重要發現是 MDD improvement 與 volatility level 的相關性 rho = 0.944。這代表 **MDD 的改善幾乎完全由資產本身的波動率水平決定**——波動率越高的資產，VT 能提供越多的 MDD 保護。\n\n這是一個 mechanical effect（機械性效果），不需要 gamma 或任何 alpha 來解釋。VT 策略在高波動時自動降低部位，因此無論資產類別為何，都能提供 MDD 保護。\n\n## 修正後的理論框架\n\n基於 Q19 的結果，我們將 gamma-mechanism proposition 修正為：\n\n> **Gamma-mechanism 在同質性權益資產群組內有效（rho = 0.886, p = 0.019）。跨資產類別的 VT 效果應以 VIX correlation 作為預測因子，而 MDD improvement 是與波動率水平高度相關的 universal mechanical effect。**\n\n## 結論\n\nGamma-mechanism 沒有「失敗」——它只是有明確的適用範圍。這實際上讓我們的理論更加精確：在股票市場中，槓桿效應的強度確實能預測 VT 策略的效果；但跨出股票的範疇，我們需要更通用的指標（如 VIX correlation）來理解 VT 的跨資產表現。"
+}

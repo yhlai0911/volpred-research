@@ -1,0 +1,18 @@
+{
+  "id": "mile_b895f923",
+  "title": "Phase I 總結：日內資訊的價值在風險警示，不在改善 VT",
+  "description": "## Phase I: Intraday Patterns 研究總結\n\n[提出: Claude, 執行: Claude]\n\nPhase I 探索日內資訊（OHLC、overnight gap）能否改善波動率預測與 VT 策略。5 個實驗的結論明確：**日內資訊的主要價值在風險警示，不在改善 VT 策略本身。**\n\n---\n\n### 實驗結果\n\n#### I1: Overnight/Intraday 波動率分解\n將日收益拆解為 overnight gap 與 intraday return 兩部分，分別建 GARCH 模型。\n\n- Intraday-only GARCH 的 QLIKE 比 cl...",
+  "category": "milestone",
+  "phase": "Phase_I",
+  "details": {},
+  "tags": [
+    "Phase I",
+    "Intraday",
+    "GARCH",
+    "Overnight Gap",
+    "Parkinson"
+  ],
+  "published_at": "2026-03-17T17:52:25.101508+00:00",
+  "status": "published",
+  "content": "## Phase I: Intraday Patterns 研究總結\n\n[提出: Claude, 執行: Claude]\n\nPhase I 探索日內資訊（OHLC、overnight gap）能否改善波動率預測與 VT 策略。5 個實驗的結論明確：**日內資訊的主要價值在風險警示，不在改善 VT 策略本身。**\n\n---\n\n### 實驗結果\n\n#### I1: Overnight/Intraday 波動率分解\n將日收益拆解為 overnight gap 與 intraday return 兩部分，分別建 GARCH 模型。\n\n- Intraday-only GARCH 的 QLIKE 比 close-to-close GARCH **惡化 10.3%**\n- Gap-down 事件後波動率放大 **3.07 倍**\n- 結論：拆開建模會損失訊息，但 overnight gap 本身是有力的風險信號\n\n#### I2: Parkinson Estimator vs GARCH 跨資產比較\nParkinson range-based estimator（用 OHLC 計算 realized vol）直覺上更「精確」，但跨 7 資產全面測試後：\n\n- GARCH **7/7 全贏**（QLIKE 指標）\n- G28 所謂「Parkinson 更好」是 measurement tautology —— Parkinson 用 OHLC 計算，再用 OHLC-based realized vol 當 benchmark，等於自己評自己\n- 用 close-to-close realized vol 當 benchmark 時，GARCH 始終優於 Parkinson\n\n#### I3: Intraday GARCH VT 策略\n用 intraday return（扣除 overnight gap）建 GARCH，看能否改善 VT 策略。\n\n- 結果：**Null**（無顯著改善）\n- 原因：intraday return 僅捕捉 **57%** 的總 variance，丟失了 overnight gap 中的關鍵波動資訊\n- 槓桿效應看似存在但實為假象 —— intraday 的非對稱性不足以驅動更好的 VT\n\n#### I4: Overnight Gap 危機偵測\n測試大幅 overnight gap（|gap| > 1.5%）能否提前偵測危機。\n\n- |gap| > 1.5% 時 VaR 突破率提升 **4.7 倍**，確認 gap 是風險指標\n- 但 EWMA 波動率估計早 **1-4 天**就已反應\n- Gap 的角色是 **confirmation**（確認已知風險），而非 early warning\n- 實務價值：gap 出現時可確認「風險確實在升高」，但不能取代既有的波動率監控\n\n#### I5: Gap 分級警報系統\n將 I4 的發現整合進 daily_update 系統，建立四級警報：\n\n| 等級 | 條件 | 含義 |\n|------|------|------|\n| Yellow | \\|gap\\| > 1.0% | 注意 |\n| Orange | \\|gap\\| > 1.5% | 警戒 |\n| Red | \\|gap\\| > 2.0% | 高風險 |\n| Critical | \\|gap\\| > 3.0% | 極端事件 |\n\n已部署於 ，每日自動執行。\n\n---\n\n### 核心洞見\n\n1. **日內拆解損失資訊**：overnight gap 佔總 variance 的 43%，只看 intraday 是自斷一臂\n2. **Parkinson 的優勢是幻覺**：用 OHLC benchmark 評 OHLC estimator 是 circular reasoning\n3. **VT 策略不需要日內精細度**：close-to-close GARCH 已足夠，更精細的 intraday 模型反而更差\n4. **Overnight gap 是風險確認信號**：不是預測工具，但能增加風險評估的信心\n5. **實務整合 > 理論改善**：I5 的四級警報系統是 Phase I 最具實務價值的產出\n\n### 研究含義\n\nPhase I 進一步鞏固了本系統的核心結論：**簡單模型（close-to-close GARCH + 12/VIX）在波動率預測和 VT 策略上難以被更複雜的方法打敗。** 日內資訊的正確使用方式是作為風險監控的輔助工具，而非直接替代既有模型。\n"
+}

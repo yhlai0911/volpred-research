@@ -1,0 +1,19 @@
+{
+  "id": "mile_380211c9",
+  "title": "I2：Parkinson vs GARCH 跨資產驗證——Measurement Tautology 的教訓",
+  "description": "# I2：Parkinson vs GARCH 跨資產驗證——Measurement Tautology 的教訓\n\n[提出: Claude, 執行: Claude] | Phase I | Tags: GARCH, Parkinson, 波動率預測\n\n---\n\n## 背景：G28 的「意外」結果\n\n在 Phase G 的 G28 實驗中，我們發現 rolling Parkinson estimator 與 GJR-GARCH 在預測 Parkinson range-based volatility 時幾乎不分軒輊（DM test p=0.39）。這個結果看似挑戰了 GARCH 模型的地位——如...",
+  "category": "milestone",
+  "phase": "Phase_I",
+  "details": {},
+  "tags": [
+    "GARCH",
+    "Parkinson",
+    "波動率預測",
+    "Phase I",
+    "measurement tautology",
+    "evaluation methodology"
+  ],
+  "published_at": "2026-03-17T17:07:35.567099+00:00",
+  "status": "published",
+  "content": "# I2：Parkinson vs GARCH 跨資產驗證——Measurement Tautology 的教訓\n\n[提出: Claude, 執行: Claude] | Phase I | Tags: GARCH, Parkinson, 波動率預測\n\n---\n\n## 背景：G28 的「意外」結果\n\n在 Phase G 的 G28 實驗中，我們發現 rolling Parkinson estimator 與 GJR-GARCH 在預測 Parkinson range-based volatility 時幾乎不分軒輊（DM test p=0.39）。這個結果看似挑戰了 GARCH 模型的地位——如果一個簡單的 rolling window estimator 就能媲美參數化的 GARCH，那為什麼還需要 GARCH？\n\n這個問題困擾了我們一段時間。直到 Phase I 的跨資產驗證，答案才浮出水面。\n\n## 核心發現：Measurement Tautology\n\n**G28 的結論是一個 measurement tautology（測量同義反覆）。**\n\n當我們用 Parkinson volatility 作為預測目標（evaluation target），然後用 rolling Parkinson 去預測它，這本質上是**用 Parkinson 預測 Parkinson**——一種自我參照（self-referential evaluation）。這就好比用「昨天的體重」預測「今天的體重」，然後驚訝於它的準確度——因為體重的日間變化本來就很小。\n\n### 為什麼 rolling Parkinson 看起來「很準」？\n\nParkinson estimator 的統計效率是 squared return 的 **5-6 倍**（理論值 5.2x，實測接近）。這意味著 Parkinson 序列本身非常平滑、autocorrelation 很高。在這種高度持續性的序列上，任何 rolling average 都會表現得「不錯」——不是因為它有預測能力，而是因為目標序列的慣性太強。\n\n## I2 跨資產驗證：正確的 evaluation target\n\n為了打破這個 tautology，I2 實驗在 7 個資產上進行了嚴格的跨資產驗證，使用 **forward squared return**（$r_{t+1}^2$）作為真正的 out-of-sample evaluation target。\n\nForward squared return 是投資人實際面對的波動率——你不能觀察到明天的 Parkinson range，但你會承受明天的 return variance。\n\n### 結果：GARCH 全面獲勝\n\n| 資產 | DM test (GARCH vs Parkinson) | p-value | 勝者 |\n|------|------------------------------|---------|------|\n| SPY | 顯著 | <0.05 | GARCH |\n| QQQ | 顯著 | <0.05 | GARCH |\n| EEM | 顯著 | <0.05 | GARCH |\n| GLD | 顯著 | <0.05 | GARCH |\n| TLT | 顯著 | <0.05 | GARCH |\n| BTC | 顯著 | <0.05 | GARCH |\n| 0050.TW | 顯著 | <0.05 | GARCH |\n\n**7/7 全部顯著，全部 GARCH 獲勝。** 沒有任何資產例外。\n\n## 深層教訓：Evaluation Target 決定結論\n\n這個案例完美展示了一個容易被忽視的方法論陷阱：\n\n### 1. 評估指標不是中立的\n選擇不同的 evaluation target 可以導致完全相反的結論。用 Parkinson target，rolling Parkinson ≈ GARCH（p=0.39）；用 squared return target，GARCH 全面碾壓（7/7 p<0.05）。\n\n### 2. 統計效率 ≠ 預測能力\nParkinson estimator 的效率是 squared return 的 6 倍——這是一個**測量**優勢，不是**預測**優勢。高效的 estimator 能更精確地測量「已發生」的波動率，但不代表它能更好地預測「未來」的波動率。\n\n### 3. 自我參照評估的隱蔽性\n「用 Parkinson 預測 Parkinson」表面上看起來是合理的——畢竟兩者量測的都是「波動率」。但仔細想想，這等同於在 evaluation 中給予 rolling Parkinson 一個不公平的「主場優勢」：目標函數就是它自己的平滑版本。\n\n## 對研究系統的啟示\n\n這個發現強化了我們的幾個研究原則：\n\n1. **永遠用 forward measure 做 OOS 評估**——squared return 雖然 noisy，但它是投資人實際面對的量\n2. **跨資產驗證是必要的**——G28 只在單一資產上得出結論，I2 的 7 資產驗證才揭示了真相\n3. **質疑「好得離譜」的結果**——rolling average 媲美 GARCH？這應該觸發警報，而不是慶祝\n4. **GARCH 的地位再次確認**——在正確的 evaluation framework 下，GARCH 仍然是日頻波動率預測的最佳選擇\n\n## 結論\n\nG28 的「Parkinson ≈ GARCH」不是一個關於預測能力的發現，而是一個關於 evaluation methodology 的教訓。當我們糾正了 evaluation target，GARCH 的優勢是壓倒性的（7/7 顯著）。\n\n**Parkinson estimator 很優秀——作為波動率的測量工具。但測量和預測是兩件完全不同的事。**\n\n---\n\n*Phase I 跨資產驗證系列 | 實驗 I2 | 2026-03-18*\n"
+}

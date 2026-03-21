@@ -1,0 +1,23 @@
+{
+  "id": "mile_71c0d805",
+  "title": "高收益債加入投組後 Sharpe 提升 26%——60/20/20 通過 Harvey 門檻",
+  "description": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\n高收益債 ETF (HYG) 單獨使用 VIX VT 效果不顯著，但加入投組後效果驚人：60/20/20 SPY/GLD/HYG + 12/VIX 的 Sharpe 達 0.972（Harvey t=3.51 通過），比 50/50 SPY/GLD 提升 26%。HYG 的 ~5% 年股息收益是關鍵差異化。\n\n## 研究背景\n\n跨資產 VT 地圖已確認：股票 ✓、外匯 carry ✓、商品 ✗。高收益債介於股票和債券之間——VIX 相關性 -0.469（中等），gamma 0.183（有槓桿效應）。它適合 VIX VT 嗎？\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | HYG（高收益債）、LQD（投資等級債，對照）|\n| OOS | 2012-01 至 2024-12（13 年）|\n| VT | 12/VIX 月度再平衡，lagged |\n| ⚠️ | 使用 adj_close（含股息），raw close 漏掉 65pp |\n\n## 核心發現\n\n### 發現一：HYG 單獨 VT 不顯著\n\n| 策略 | Sharpe | MDD |\n|------|--------|-----|\n| HYG Buy & Hold | 0.604 | -15.2% |\n| HYG 12/VIX VT | 0.697 | -11.7% |\n| DM test p-value | 0.194 (NS) | — |\n\nMDD 改善 3.5pp，5/5 OOS 期間一致，但 Sharpe 改善不顯著。\n\n### 發現二：投組效果顯著——60/20/20 通過 Harvey\n\n| 投組 | Sharpe | t-stat | MDD |\n|------|--------|--------|-----|\n| 50/50 SPY/GLD + VIX | 0.769 | 2.77 | -12.0% |\n| **60/20/20 SPY/GLD/HYG + VIX** | **0.972** | **3.51★** | **-13.8%** |\n\nHYG 的 ~5%/yr 股息 + 與 SPY 0.683 相關性（高但不完美）→ 增加收益同時保留部分分散效果。\n\n### 發現三：K 值需要調整\n\nHYG 的最佳 K=4（vs equity K=12），反映其較低的波動率（~8% vs ~16%）。\n\n## 跨資產 VT 地圖更新\n\n| 資產 | VIX corr | standalone VT | 投組價值 |\n|------|----------|--------------|---------|\n| 股票 | -0.73 | ✓ 強效 | ✓✓ |\n| 外匯 carry | -0.47 | ✓ 強效 | ✓ |\n| **高收益債** | **-0.47** | **△ NS** | **✓✓ (t=3.51★)** |\n| 商品 | -0.27 | ✗ | ✗ |\n\n## 實務意義\n\n⚠️ **尚未修改推薦**——需要 cross-OOS 驗證（特別是 2008 GFC 期間 HYG 表現）。但方向有前景：若通過驗證，零售投資人的最佳組合可能從 50/50 升級為 60/20/20。\n\n## 結論\n\nHYG 的投組價值來自其「介於股票和債券」的特性——yield 提升收益，VIX 相關性提供部分風控。但 standalone VT 不顯著，限制了直接應用。\n",
+  "category": "milestone",
+  "phase": "Phase_K",
+  "details": {
+    "experiment": "K22",
+    "audience": "research"
+  },
+  "tags": [
+    "HYG",
+    "高收益債",
+    "投資組合",
+    "VT策略",
+    "12/VIX",
+    "SPY",
+    "GLD",
+    "跨資產"
+  ],
+  "published_at": "2026-03-18T04:22:04.622536+00:00",
+  "status": "published"
+}

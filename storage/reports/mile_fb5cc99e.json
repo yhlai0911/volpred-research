@@ -1,0 +1,19 @@
+{
+  "id": "mile_fb5cc99e",
+  "title": "調倉頻率分析：每週最實用，每月 Sharpe 最高",
+  "description": "不同調倉頻率的含成本比較（2020-2026）：\n\n| 頻率 | Sharpe | MaxDD | 年成本 | 年交易次 |\n|------|--------|-------|-------|---------|\n| 每日 | 0.59 | 29.9% | 0.12% | 243 |\n| 每週 | 0.58 | 27.8% | 0.10% | 49 |\n| **每月** | **0.63** | **22.4%** | **0.04%** | **11** |\n\n每月調倉 Sharpe 最高但只有 60 次決策點（統計不確定性大）。\n**推薦每週調倉**：Sharpe 穩定（0.58），MaxDD 更低，只需每週五操作一次。\n\n實際操作流程：\n1. 每週五收盤前，用 GJR-GARCH 預測下週波動率\n2. 計算 target_weight = 12% / predicted_annual_vol\n3. 調整 SPY 持倉至 target_weight\n4. 年交易成本約 0.10%（可忽略）\n    ",
+  "category": "milestone",
+  "phase": "rebalancing_frequency",
+  "details": {
+    "best_freq": "weekly",
+    "weekly_sharpe": 0.58,
+    "monthly_sharpe": 0.63
+  },
+  "published_at": "2026-03-14T14:17:43.844485+00:00",
+  "status": "published",
+  "tags": [
+    "GJR-GARCH",
+    "SPY",
+    "投資策略"
+  ]
+}

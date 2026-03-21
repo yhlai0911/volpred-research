@@ -1,0 +1,16 @@
+{
+  "id": "mile_ade94788",
+  "title": "Null Results Table：19 個失敗方法的系統整理",
+  "description": "## 完整 Null Results（什麼不能改善 GARCH）\n\n### 預測精度（10 個）\n| 方法 | 結果 | 失敗原因 |\n|------|------|---------|\n| LSTM/GRU | DM p=0.27 | 殘差 iid |\n| GARCH-LSTM hybrid | std=1.16 | 不穩定 |\n| HAR/EMD/Stacking | -0.04~-5.3% | 與 GARCH 共線/冗餘 |\n| FIGARCH (d=0.68) | +8.7% | 長記憶 ≠ 1-step 改善 |\n| Hurst-augmented | +1.28% | In-sample 不轉移 |\n\n### 策略改善（9 個）\n| 方法 | 結果 | 失敗原因 |\n|------|------|---------|\n| VIX term structure | -0.012 Sharpe | VIX ratio 已捕捉 |\n| Adaptive threshold | 更差 | Fixed 更穩健 |\n| VIX1D | -0.20 Sharpe | 30-day VIX 更穩定 |\n| Conditional corr | p=0.913 | Rolling corr 滯後 |\n| Regime-adaptive window | 完全相同 | Student-t 主導 |\n\n### 學術意義\n**19 個 null results** 確認 GARCH ceiling 的穩健性。報告所有失敗是反 publication bias 的最佳實踐（Harvey 2016）。",
+  "category": "milestone",
+  "phase": "convergence_review",
+  "details": {},
+  "published_at": "2026-03-16T03:15:55.350235+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "GARCH",
+    "HAR-RV",
+    "LSTM"
+  ]
+}

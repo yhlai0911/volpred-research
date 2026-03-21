@@ -1,0 +1,878 @@
+{
+  "experiment": "K66: VT + Factor Tilts — Can Value/Momentum/Quality Improve 50/50?",
+  "experiment_id": "K66",
+  "description": "50/50 SPY/GLD + 12/VIX 已被 7 次驗證為不可動搖的最佳組合（K64）。本實驗測試：用 factor ETF（MTUM/VLUE/QUAL/USMV）取代 SPY，能否進一步提升風險調整後報酬？",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T11:38:34.046059+00:00",
+  "config": {
+    "start": "2013-11-01",
+    "end": "2026-03-21",
+    "oos_start": "2023-01-01",
+    "vix_threshold": 12.0,
+    "tx_cost": 0.0005,
+    "rf_annual": 0.04,
+    "rebalance": "monthly (first trading day)",
+    "weight_lag": "previous month-end VIX",
+    "factor_etfs": {
+      "MTUM": "iShares MSCI USA Momentum Factor ETF (inception 2013-04)",
+      "VLUE": "iShares MSCI USA Value Factor ETF (inception 2013-04)",
+      "QUAL": "iShares MSCI USA Quality Factor ETF (inception 2013-07)",
+      "USMV": "iShares MSCI USA Min Vol Factor ETF (inception 2011-10)"
+    }
+  },
+  "portfolios_tested": [
+    "SPY_GLD_50_50",
+    "MTUM_GLD_50_50",
+    "VLUE_GLD_50_50",
+    "QUAL_GLD_50_50",
+    "USMV_GLD_50_50",
+    "MTUM_VLUE_GLD_25_25_50",
+    "MTUM_QUAL_GLD_33_33_33"
+  ],
+  "full_sample_results": {
+    "SPY_GLD_50_50": {
+      "config": {
+        "equity": {
+          "SPY": 0.5
+        },
+        "gld": 0.5,
+        "label": "50/50 SPY/GLD (Baseline)"
+      },
+      "bh": {
+        "label": "50/50 SPY/GLD (Baseline) B&H",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 12.45,
+        "ann_vol_pct": 11.86,
+        "sharpe": 0.719,
+        "sharpe_t": 2.52,
+        "sortino": 0.67,
+        "mdd_pct": -20.32,
+        "calmar": 0.613,
+        "win_rate": 57.1,
+        "skewness": -0.221,
+        "kurtosis": 11.741
+      },
+      "vt": {
+        "label": "50/50 SPY/GLD (Baseline) + 12/VIX",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.34,
+        "ann_vol_pct": 7.52,
+        "sharpe": 0.703,
+        "sharpe_t": 2.46,
+        "sortino": 0.659,
+        "mdd_pct": -9.25,
+        "calmar": 1.01,
+        "win_rate": 57.5,
+        "skewness": -0.437,
+        "kurtosis": 5.28
+      },
+      "vt_net": {
+        "label": "50/50 SPY/GLD (Baseline) + 12/VIX (net)",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.26,
+        "ann_vol_pct": 7.52,
+        "sharpe": 0.694,
+        "sharpe_t": 2.43,
+        "sortino": 0.65,
+        "mdd_pct": -9.32,
+        "calmar": 0.994,
+        "win_rate": 57.5,
+        "skewness": -0.437,
+        "kurtosis": 5.28
+      },
+      "avg_vt_weight": 0.7247,
+      "vt_weight_std": 0.1905,
+      "annual_turnover": 1.4,
+      "data_start": "2013-12-02",
+      "data_end": "2026-03-20"
+    },
+    "MTUM_GLD_50_50": {
+      "config": {
+        "equity": {
+          "MTUM": 0.5
+        },
+        "gld": 0.5,
+        "label": "50/50 MTUM/GLD"
+      },
+      "bh": {
+        "label": "50/50 MTUM/GLD B&H",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 12.89,
+        "ann_vol_pct": 13.04,
+        "sharpe": 0.695,
+        "sharpe_t": 2.43,
+        "sortino": 0.645,
+        "mdd_pct": -21.0,
+        "calmar": 0.614,
+        "win_rate": 55.4,
+        "skewness": -0.266,
+        "kurtosis": 10.18
+      },
+      "vt": {
+        "label": "50/50 MTUM/GLD + 12/VIX",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.95,
+        "ann_vol_pct": 8.36,
+        "sharpe": 0.707,
+        "sharpe_t": 2.48,
+        "sortino": 0.668,
+        "mdd_pct": -11.95,
+        "calmar": 0.833,
+        "win_rate": 55.7,
+        "skewness": -0.477,
+        "kurtosis": 5.16
+      },
+      "vt_net": {
+        "label": "50/50 MTUM/GLD + 12/VIX (net)",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.87,
+        "ann_vol_pct": 8.36,
+        "sharpe": 0.699,
+        "sharpe_t": 2.45,
+        "sortino": 0.659,
+        "mdd_pct": -12.02,
+        "calmar": 0.821,
+        "win_rate": 55.7,
+        "skewness": -0.477,
+        "kurtosis": 5.159
+      },
+      "avg_vt_weight": 0.7247,
+      "vt_weight_std": 0.1905,
+      "annual_turnover": 1.4,
+      "data_start": "2013-12-02",
+      "data_end": "2026-03-20"
+    },
+    "VLUE_GLD_50_50": {
+      "config": {
+        "equity": {
+          "VLUE": 0.5
+        },
+        "gld": 0.5,
+        "label": "50/50 VLUE/GLD"
+      },
+      "bh": {
+        "label": "50/50 VLUE/GLD B&H",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 11.21,
+        "ann_vol_pct": 12.36,
+        "sharpe": 0.604,
+        "sharpe_t": 2.12,
+        "sortino": 0.556,
+        "mdd_pct": -23.54,
+        "calmar": 0.476,
+        "win_rate": 54.7,
+        "skewness": -0.451,
+        "kurtosis": 11.981
+      },
+      "vt": {
+        "label": "50/50 VLUE/GLD + 12/VIX",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 8.5,
+        "ann_vol_pct": 7.78,
+        "sharpe": 0.583,
+        "sharpe_t": 2.04,
+        "sortino": 0.549,
+        "mdd_pct": -11.29,
+        "calmar": 0.753,
+        "win_rate": 55.0,
+        "skewness": -0.452,
+        "kurtosis": 4.63
+      },
+      "vt_net": {
+        "label": "50/50 VLUE/GLD + 12/VIX (net)",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 8.42,
+        "ann_vol_pct": 7.78,
+        "sharpe": 0.574,
+        "sharpe_t": 2.01,
+        "sortino": 0.54,
+        "mdd_pct": -11.45,
+        "calmar": 0.736,
+        "win_rate": 55.0,
+        "skewness": -0.452,
+        "kurtosis": 4.63
+      },
+      "avg_vt_weight": 0.7247,
+      "vt_weight_std": 0.1905,
+      "annual_turnover": 1.4,
+      "data_start": "2013-12-02",
+      "data_end": "2026-03-20"
+    },
+    "QUAL_GLD_50_50": {
+      "config": {
+        "equity": {
+          "QUAL": 0.5
+        },
+        "gld": 0.5,
+        "label": "50/50 QUAL/GLD"
+      },
+      "bh": {
+        "label": "50/50 QUAL/GLD B&H",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 12.16,
+        "ann_vol_pct": 11.91,
+        "sharpe": 0.694,
+        "sharpe_t": 2.43,
+        "sortino": 0.651,
+        "mdd_pct": -20.08,
+        "calmar": 0.606,
+        "win_rate": 56.0,
+        "skewness": -0.159,
+        "kurtosis": 11.269
+      },
+      "vt": {
+        "label": "50/50 QUAL/GLD + 12/VIX",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.12,
+        "ann_vol_pct": 7.56,
+        "sharpe": 0.674,
+        "sharpe_t": 2.36,
+        "sortino": 0.634,
+        "mdd_pct": -10.87,
+        "calmar": 0.839,
+        "win_rate": 56.4,
+        "skewness": -0.468,
+        "kurtosis": 5.281
+      },
+      "vt_net": {
+        "label": "50/50 QUAL/GLD + 12/VIX (net)",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.04,
+        "ann_vol_pct": 7.56,
+        "sharpe": 0.665,
+        "sharpe_t": 2.33,
+        "sortino": 0.625,
+        "mdd_pct": -10.94,
+        "calmar": 0.827,
+        "win_rate": 56.4,
+        "skewness": -0.468,
+        "kurtosis": 5.28
+      },
+      "avg_vt_weight": 0.7247,
+      "vt_weight_std": 0.1905,
+      "annual_turnover": 1.4,
+      "data_start": "2013-12-02",
+      "data_end": "2026-03-20"
+    },
+    "USMV_GLD_50_50": {
+      "config": {
+        "equity": {
+          "USMV": 0.5
+        },
+        "gld": 0.5,
+        "label": "50/50 USMV/GLD"
+      },
+      "bh": {
+        "label": "50/50 USMV/GLD B&H",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 10.95,
+        "ann_vol_pct": 10.94,
+        "sharpe": 0.647,
+        "sharpe_t": 2.27,
+        "sortino": 0.6,
+        "mdd_pct": -19.99,
+        "calmar": 0.548,
+        "win_rate": 55.9,
+        "skewness": -0.411,
+        "kurtosis": 11.508
+      },
+      "vt": {
+        "label": "50/50 USMV/GLD + 12/VIX",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 8.45,
+        "ann_vol_pct": 6.99,
+        "sharpe": 0.635,
+        "sharpe_t": 2.22,
+        "sortino": 0.595,
+        "mdd_pct": -8.67,
+        "calmar": 0.975,
+        "win_rate": 56.4,
+        "skewness": -0.579,
+        "kurtosis": 4.676
+      },
+      "vt_net": {
+        "label": "50/50 USMV/GLD + 12/VIX (net)",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 8.38,
+        "ann_vol_pct": 6.99,
+        "sharpe": 0.625,
+        "sharpe_t": 2.19,
+        "sortino": 0.585,
+        "mdd_pct": -8.68,
+        "calmar": 0.965,
+        "win_rate": 56.3,
+        "skewness": -0.58,
+        "kurtosis": 4.675
+      },
+      "avg_vt_weight": 0.7247,
+      "vt_weight_std": 0.1905,
+      "annual_turnover": 1.4,
+      "data_start": "2013-12-02",
+      "data_end": "2026-03-20"
+    },
+    "MTUM_VLUE_GLD_25_25_50": {
+      "config": {
+        "equity": {
+          "MTUM": 0.25,
+          "VLUE": 0.25
+        },
+        "gld": 0.5,
+        "label": "25/25/50 MTUM/VLUE/GLD"
+      },
+      "bh": {
+        "label": "25/25/50 MTUM/VLUE/GLD B&H",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 12.11,
+        "ann_vol_pct": 12.27,
+        "sharpe": 0.674,
+        "sharpe_t": 2.36,
+        "sortino": 0.624,
+        "mdd_pct": -21.84,
+        "calmar": 0.554,
+        "win_rate": 55.4,
+        "skewness": -0.368,
+        "kurtosis": 12.162
+      },
+      "vt": {
+        "label": "25/25/50 MTUM/VLUE/GLD + 12/VIX",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.25,
+        "ann_vol_pct": 7.78,
+        "sharpe": 0.672,
+        "sharpe_t": 2.35,
+        "sortino": 0.632,
+        "mdd_pct": -10.44,
+        "calmar": 0.885,
+        "win_rate": 56.0,
+        "skewness": -0.513,
+        "kurtosis": 5.44
+      },
+      "vt_net": {
+        "label": "25/25/50 MTUM/VLUE/GLD + 12/VIX (net)",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.17,
+        "ann_vol_pct": 7.78,
+        "sharpe": 0.663,
+        "sharpe_t": 2.32,
+        "sortino": 0.624,
+        "mdd_pct": -10.52,
+        "calmar": 0.872,
+        "win_rate": 56.0,
+        "skewness": -0.513,
+        "kurtosis": 5.439
+      },
+      "avg_vt_weight": 0.7247,
+      "vt_weight_std": 0.1905,
+      "annual_turnover": 1.4,
+      "data_start": "2013-12-02",
+      "data_end": "2026-03-20"
+    },
+    "MTUM_QUAL_GLD_33_33_33": {
+      "config": {
+        "equity": {
+          "MTUM": 0.333,
+          "QUAL": 0.333
+        },
+        "gld": 0.334,
+        "label": "33/33/33 MTUM/QUAL/GLD"
+      },
+      "bh": {
+        "label": "33/33/33 MTUM/QUAL/GLD B&H",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 12.89,
+        "ann_vol_pct": 13.37,
+        "sharpe": 0.681,
+        "sharpe_t": 2.38,
+        "sortino": 0.634,
+        "mdd_pct": -24.57,
+        "calmar": 0.525,
+        "win_rate": 55.5,
+        "skewness": -0.172,
+        "kurtosis": 13.216
+      },
+      "vt": {
+        "label": "33/33/33 MTUM/QUAL/GLD + 12/VIX",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.69,
+        "ann_vol_pct": 8.24,
+        "sharpe": 0.688,
+        "sharpe_t": 2.41,
+        "sortino": 0.649,
+        "mdd_pct": -13.06,
+        "calmar": 0.741,
+        "win_rate": 55.9,
+        "skewness": -0.377,
+        "kurtosis": 4.286
+      },
+      "vt_net": {
+        "label": "33/33/33 MTUM/QUAL/GLD + 12/VIX (net)",
+        "n_obs": 3093,
+        "years": 12.3,
+        "ann_return_pct": 9.61,
+        "ann_vol_pct": 8.24,
+        "sharpe": 0.679,
+        "sharpe_t": 2.38,
+        "sortino": 0.64,
+        "mdd_pct": -13.14,
+        "calmar": 0.732,
+        "win_rate": 55.9,
+        "skewness": -0.376,
+        "kurtosis": 4.285
+      },
+      "avg_vt_weight": 0.7247,
+      "vt_weight_std": 0.1905,
+      "annual_turnover": 1.4,
+      "data_start": "2013-12-02",
+      "data_end": "2026-03-20"
+    }
+  },
+  "oos_results": {
+    "SPY_GLD_50_50": {
+      "vt_net": {
+        "label": "50/50 SPY/GLD (Baseline) OOS VT(net)",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 20.0,
+        "ann_vol_pct": 9.13,
+        "sharpe": 1.615,
+        "sharpe_t": 2.89,
+        "sortino": 1.604,
+        "mdd_pct": -7.43,
+        "calmar": 2.694,
+        "win_rate": 60.5,
+        "skewness": -0.564,
+        "kurtosis": 7.078
+      },
+      "bh": {
+        "label": "50/50 SPY/GLD (Baseline) OOS B&H",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 26.52,
+        "ann_vol_pct": 12.71,
+        "sharpe": 1.606,
+        "sharpe_t": 2.87,
+        "sortino": 1.646,
+        "mdd_pct": -11.3,
+        "calmar": 2.347,
+        "win_rate": 60.3,
+        "skewness": -0.059,
+        "kurtosis": 11.099
+      }
+    },
+    "MTUM_GLD_50_50": {
+      "vt_net": {
+        "label": "50/50 MTUM/GLD OOS VT(net)",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 19.75,
+        "ann_vol_pct": 10.44,
+        "sharpe": 1.404,
+        "sharpe_t": 2.51,
+        "sortino": 1.435,
+        "mdd_pct": -7.91,
+        "calmar": 2.496,
+        "win_rate": 56.3,
+        "skewness": -0.608,
+        "kurtosis": 6.376
+      },
+      "bh": {
+        "label": "50/50 MTUM/GLD OOS B&H",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 26.01,
+        "ann_vol_pct": 14.32,
+        "sharpe": 1.413,
+        "sharpe_t": 2.53,
+        "sortino": 1.475,
+        "mdd_pct": -11.84,
+        "calmar": 2.197,
+        "win_rate": 56.1,
+        "skewness": -0.307,
+        "kurtosis": 8.749
+      }
+    },
+    "VLUE_GLD_50_50": {
+      "vt_net": {
+        "label": "50/50 VLUE/GLD OOS VT(net)",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 19.61,
+        "ann_vol_pct": 9.43,
+        "sharpe": 1.531,
+        "sharpe_t": 2.74,
+        "sortino": 1.576,
+        "mdd_pct": -6.45,
+        "calmar": 3.041,
+        "win_rate": 58.1,
+        "skewness": -0.616,
+        "kurtosis": 5.943
+      },
+      "bh": {
+        "label": "50/50 VLUE/GLD OOS B&H",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 25.86,
+        "ann_vol_pct": 13.01,
+        "sharpe": 1.532,
+        "sharpe_t": 2.74,
+        "sortino": 1.609,
+        "mdd_pct": -10.12,
+        "calmar": 2.554,
+        "win_rate": 57.7,
+        "skewness": -0.392,
+        "kurtosis": 7.035
+      }
+    },
+    "QUAL_GLD_50_50": {
+      "vt_net": {
+        "label": "50/50 QUAL/GLD OOS VT(net)",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 19.88,
+        "ann_vol_pct": 9.11,
+        "sharpe": 1.606,
+        "sharpe_t": 2.87,
+        "sortino": 1.62,
+        "mdd_pct": -7.36,
+        "calmar": 2.7,
+        "win_rate": 59.3,
+        "skewness": -0.736,
+        "kurtosis": 7.306
+      },
+      "bh": {
+        "label": "50/50 QUAL/GLD OOS B&H",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 26.23,
+        "ann_vol_pct": 12.6,
+        "sharpe": 1.601,
+        "sharpe_t": 2.86,
+        "sortino": 1.654,
+        "mdd_pct": -11.2,
+        "calmar": 2.341,
+        "win_rate": 59.2,
+        "skewness": -0.362,
+        "kurtosis": 8.945
+      }
+    },
+    "USMV_GLD_50_50": {
+      "vt_net": {
+        "label": "50/50 USMV/GLD OOS VT(net)",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 16.46,
+        "ann_vol_pct": 8.23,
+        "sharpe": 1.416,
+        "sharpe_t": 2.53,
+        "sortino": 1.415,
+        "mdd_pct": -6.34,
+        "calmar": 2.595,
+        "win_rate": 58.1,
+        "skewness": -0.845,
+        "kurtosis": 6.344
+      },
+      "bh": {
+        "label": "50/50 USMV/GLD OOS B&H",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 21.16,
+        "ann_vol_pct": 11.46,
+        "sharpe": 1.391,
+        "sharpe_t": 2.49,
+        "sortino": 1.406,
+        "mdd_pct": -10.45,
+        "calmar": 2.025,
+        "win_rate": 57.7,
+        "skewness": -0.672,
+        "kurtosis": 6.694
+      }
+    },
+    "MTUM_VLUE_GLD_25_25_50": {
+      "vt_net": {
+        "label": "25/25/50 MTUM/VLUE/GLD OOS VT(net)",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 19.72,
+        "ann_vol_pct": 9.59,
+        "sharpe": 1.517,
+        "sharpe_t": 2.71,
+        "sortino": 1.522,
+        "mdd_pct": -7.17,
+        "calmar": 2.75,
+        "win_rate": 59.2,
+        "skewness": -0.685,
+        "kurtosis": 6.928
+      },
+      "bh": {
+        "label": "25/25/50 MTUM/VLUE/GLD OOS B&H",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 26.01,
+        "ann_vol_pct": 13.24,
+        "sharpe": 1.516,
+        "sharpe_t": 2.71,
+        "sortino": 1.556,
+        "mdd_pct": -10.84,
+        "calmar": 2.398,
+        "win_rate": 58.4,
+        "skewness": -0.38,
+        "kurtosis": 8.871
+      }
+    },
+    "MTUM_QUAL_GLD_33_33_33": {
+      "vt_net": {
+        "label": "33/33/33 MTUM/QUAL/GLD OOS VT(net)",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 18.04,
+        "ann_vol_pct": 9.54,
+        "sharpe": 1.376,
+        "sharpe_t": 2.46,
+        "sortino": 1.433,
+        "mdd_pct": -7.55,
+        "calmar": 2.39,
+        "win_rate": 56.8,
+        "skewness": -0.239,
+        "kurtosis": 5.227
+      },
+      "bh": {
+        "label": "33/33/33 MTUM/QUAL/GLD OOS B&H",
+        "n_obs": 806,
+        "years": 3.2,
+        "ann_return_pct": 23.86,
+        "ann_vol_pct": 13.22,
+        "sharpe": 1.389,
+        "sharpe_t": 2.48,
+        "sortino": 1.48,
+        "mdd_pct": -12.8,
+        "calmar": 1.865,
+        "win_rate": 56.5,
+        "skewness": 0.166,
+        "kurtosis": 11.208
+      }
+    }
+  },
+  "dm_tests_vs_baseline": {
+    "MTUM_GLD_50_50": {
+      "mean_diff_bps": 0.25,
+      "t_stat": 0.78,
+      "p_value": 0.4354,
+      "significant": "False",
+      "n_obs": 3093
+    },
+    "VLUE_GLD_50_50": {
+      "mean_diff_bps": -0.3,
+      "t_stat": -0.995,
+      "p_value": 0.3196,
+      "significant": "False",
+      "n_obs": 3093
+    },
+    "QUAL_GLD_50_50": {
+      "mean_diff_bps": -0.08,
+      "t_stat": -0.62,
+      "p_value": 0.5356,
+      "significant": "False",
+      "n_obs": 3093
+    },
+    "USMV_GLD_50_50": {
+      "mean_diff_bps": -0.34,
+      "t_stat": -1.165,
+      "p_value": 0.244,
+      "significant": "False",
+      "n_obs": 3093
+    },
+    "MTUM_VLUE_GLD_25_25_50": {
+      "mean_diff_bps": -0.03,
+      "t_stat": -0.132,
+      "p_value": 0.8952,
+      "significant": "False",
+      "n_obs": 3093
+    },
+    "MTUM_QUAL_GLD_33_33_33": {
+      "mean_diff_bps": 0.15,
+      "t_stat": 0.403,
+      "p_value": 0.687,
+      "significant": "False",
+      "n_obs": 3093
+    }
+  },
+  "mdd_bootstrap_tests": {
+    "MTUM_GLD_50_50": {
+      "comp_mdd_pct": -12.02,
+      "base_mdd_pct": -9.32,
+      "diff_pct": -2.7,
+      "bootstrap_p": 0.2468,
+      "comp_better": "False"
+    },
+    "VLUE_GLD_50_50": {
+      "comp_mdd_pct": -11.45,
+      "base_mdd_pct": -9.32,
+      "diff_pct": -2.13,
+      "bootstrap_p": 0.2752,
+      "comp_better": "False"
+    },
+    "QUAL_GLD_50_50": {
+      "comp_mdd_pct": -10.94,
+      "base_mdd_pct": -9.32,
+      "diff_pct": -1.62,
+      "bootstrap_p": 0.0522,
+      "comp_better": "False"
+    },
+    "USMV_GLD_50_50": {
+      "comp_mdd_pct": -8.68,
+      "base_mdd_pct": -9.32,
+      "diff_pct": 0.64,
+      "bootstrap_p": 0.519,
+      "comp_better": "True"
+    },
+    "MTUM_VLUE_GLD_25_25_50": {
+      "comp_mdd_pct": -10.52,
+      "base_mdd_pct": -9.32,
+      "diff_pct": -1.2,
+      "bootstrap_p": 0.307,
+      "comp_better": "False"
+    },
+    "MTUM_QUAL_GLD_33_33_33": {
+      "comp_mdd_pct": -13.14,
+      "base_mdd_pct": -9.32,
+      "diff_pct": -3.82,
+      "bootstrap_p": 0.1278,
+      "comp_better": "False"
+    }
+  },
+  "correlation_analysis": {
+    "factor_gld_correlation": {
+      "SPY": 0.0389,
+      "MTUM": 0.0657,
+      "VLUE": 0.027,
+      "QUAL": 0.0374,
+      "USMV": 0.0866
+    },
+    "factor_vix_correlation": {
+      "SPY": -0.7325,
+      "MTUM": -0.6874,
+      "VLUE": -0.6591,
+      "QUAL": -0.7097,
+      "USMV": -0.6323
+    },
+    "full_correlation_matrix": {
+      "SPY": {
+        "SPY": 1.0,
+        "MTUM": 0.9,
+        "VLUE": 0.9049,
+        "QUAL": 0.9824,
+        "USMV": 0.9021,
+        "GLD": 0.0389
+      },
+      "MTUM": {
+        "SPY": 0.9,
+        "MTUM": 1.0,
+        "VLUE": 0.7661,
+        "QUAL": 0.881,
+        "USMV": 0.8045,
+        "GLD": 0.0657
+      },
+      "VLUE": {
+        "SPY": 0.9049,
+        "MTUM": 0.7661,
+        "VLUE": 1.0,
+        "QUAL": 0.8894,
+        "USMV": 0.8349,
+        "GLD": 0.027
+      },
+      "QUAL": {
+        "SPY": 0.9824,
+        "MTUM": 0.881,
+        "VLUE": 0.8894,
+        "QUAL": 1.0,
+        "USMV": 0.9057,
+        "GLD": 0.0374
+      },
+      "USMV": {
+        "SPY": 0.9021,
+        "MTUM": 0.8045,
+        "VLUE": 0.8349,
+        "QUAL": 0.9057,
+        "USMV": 1.0,
+        "GLD": 0.0866
+      },
+      "GLD": {
+        "SPY": 0.0389,
+        "MTUM": 0.0657,
+        "VLUE": 0.027,
+        "QUAL": 0.0374,
+        "USMV": 0.0866,
+        "GLD": 1.0
+      }
+    }
+  },
+  "conclusion": {
+    "factor_alpha_survives_vt": false,
+    "any_significant_improvement": false,
+    "best_sharpe_portfolio": "MTUM_GLD_50_50",
+    "best_sharpe_value": 0.699,
+    "baseline_sharpe": 0.694,
+    "sharpe_improvement": 0.005,
+    "best_mdd_portfolio": "USMV_GLD_50_50",
+    "best_mdd_value": -8.68,
+    "baseline_mdd": -9.32,
+    "verdict": "Factor tilts do NOT meaningfully improve 50/50 SPY/GLD + 12/VIX. Baseline remains optimal."
+  },
+  "key_findings": {
+    "F1_factor_alpha_survival": {
+      "question": "Does factor alpha survive VT position sizing?",
+      "answer": false,
+      "detail": "Factor tilts do NOT meaningfully improve 50/50 SPY/GLD + 12/VIX. Baseline remains optimal."
+    },
+    "F2_best_factor": {
+      "question": "Which factor works best with VT?",
+      "best_portfolio": "MTUM_GLD_50_50",
+      "sharpe": 0.699,
+      "vs_baseline": "+0.005"
+    },
+    "F3_diversification_benefit": {
+      "question": "Do factor ETFs offer better diversification with GLD?",
+      "factor_gld_correlations": {
+        "SPY": 0.0389,
+        "MTUM": 0.0657,
+        "VLUE": 0.027,
+        "QUAL": 0.0374,
+        "USMV": 0.0866
+      },
+      "spy_gld_correlation": 0.0389,
+      "interpretation": "Factor ETFs that have lower GLD correlation provide better diversification benefit."
+    },
+    "F4_vt_effectiveness": {
+      "question": "Is VT more or less effective with factor ETFs?",
+      "factor_vix_correlations": {
+        "SPY": -0.7325,
+        "MTUM": -0.6874,
+        "VLUE": -0.6591,
+        "QUAL": -0.7097,
+        "USMV": -0.6323
+      },
+      "interpretation": "VT effectiveness depends on asset-VIX correlation. Factors closer to SPY correlation retain VT benefits."
+    }
+  }
+}

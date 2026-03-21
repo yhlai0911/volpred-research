@@ -1,0 +1,726 @@
+{
+  "experiment_id": "vt_drawdown_anatomy",
+  "title": "VT Drawdown Anatomy — VT 何時失效？失效模式完整解析",
+  "timestamp": "2026-03-21T09:08:46.767894+00:00",
+  "data_range": "2007-01-03 to 2026-03-20",
+  "n_trading_days": 4834,
+  "strategy": "12/VIX SPY (lagged weights, no leverage)",
+  "full_period_summary": {
+    "vt_ann_return_pct": 6.32,
+    "bh_ann_return_pct": 10.29,
+    "vt_sharpe": 0.665,
+    "bh_sharpe": 0.522,
+    "vt_mdd_pct": -28.6,
+    "bh_mdd_pct": -55.19
+  },
+  "rolling_underperformance": {
+    "21d (1 month)": {
+      "window_days": 21,
+      "underperform_pct": 73.8,
+      "avg_underperform_pct": -1.31,
+      "worst_underperform_pct": -18.66,
+      "avg_outperform_pct": 2.14,
+      "best_outperform_pct": 24.05
+    },
+    "63d (1 quarter)": {
+      "window_days": 63,
+      "underperform_pct": 80.3,
+      "avg_underperform_pct": -2.52,
+      "worst_underperform_pct": -26.33,
+      "avg_outperform_pct": 3.5,
+      "best_outperform_pct": 32.17
+    },
+    "126d (6 months)": {
+      "window_days": 126,
+      "underperform_pct": 85.6,
+      "avg_underperform_pct": -4.11,
+      "worst_underperform_pct": -29.74,
+      "avg_outperform_pct": 5.98,
+      "best_outperform_pct": 33.73
+    },
+    "252d (1 year)": {
+      "window_days": 252,
+      "underperform_pct": 88.2,
+      "avg_underperform_pct": -7.1,
+      "worst_underperform_pct": -40.56,
+      "avg_outperform_pct": 8.64,
+      "best_outperform_pct": 32.55
+    }
+  },
+  "underperformance_episodes": [
+    {
+      "start": "2020-05-26",
+      "end": "2020-10-29",
+      "duration_days": 156,
+      "worst_63d_underperform_pct": -26.33,
+      "avg_vix": 27.5,
+      "spy_return_pct": 11.26
+    },
+    {
+      "start": "2009-04-14",
+      "end": "2010-02-09",
+      "duration_days": 301,
+      "worst_63d_underperform_pct": -24.89,
+      "avg_vix": 26.0,
+      "spy_return_pct": 29.13
+    },
+    {
+      "start": "2025-04-30",
+      "end": "2026-03-05",
+      "duration_days": 309,
+      "worst_63d_underperform_pct": -14.15,
+      "avg_vix": 17.6,
+      "spy_return_pct": 23.93
+    },
+    {
+      "start": "2011-10-21",
+      "end": "2012-05-14",
+      "duration_days": 206,
+      "worst_63d_underperform_pct": -11.23,
+      "avg_vix": 21.8,
+      "spy_return_pct": 9.34
+    },
+    {
+      "start": "2020-11-03",
+      "end": "2021-11-30",
+      "duration_days": 392,
+      "worst_63d_underperform_pct": -9.7,
+      "avg_vix": 20.1,
+      "spy_return_pct": 37.48
+    },
+    {
+      "start": "2019-01-23",
+      "end": "2019-05-28",
+      "duration_days": 125,
+      "worst_63d_underperform_pct": -8.69,
+      "avg_vix": 15.0,
+      "spy_return_pct": 6.82
+    },
+    {
+      "start": "2022-12-12",
+      "end": "2023-03-06",
+      "duration_days": 84,
+      "worst_63d_underperform_pct": -7.33,
+      "avg_vix": 20.5,
+      "spy_return_pct": 1.85
+    },
+    {
+      "start": "2010-09-02",
+      "end": "2011-06-06",
+      "duration_days": 277,
+      "worst_63d_underperform_pct": -7.15,
+      "avg_vix": 18.8,
+      "spy_return_pct": 19.65
+    },
+    {
+      "start": "2015-10-05",
+      "end": "2016-01-07",
+      "duration_days": 94,
+      "worst_63d_underperform_pct": -6.44,
+      "avg_vix": 17.2,
+      "spy_return_pct": -1.65
+    },
+    {
+      "start": "2016-03-10",
+      "end": "2016-06-24",
+      "duration_days": 106,
+      "worst_63d_underperform_pct": -5.71,
+      "avg_vix": 15.4,
+      "spy_return_pct": 2.91
+    },
+    {
+      "start": "2022-08-05",
+      "end": "2022-08-26",
+      "duration_days": 21,
+      "worst_63d_underperform_pct": -5.51,
+      "avg_vix": 21.3,
+      "spy_return_pct": -1.97
+    },
+    {
+      "start": "2023-03-16",
+      "end": "2023-09-25",
+      "duration_days": 193,
+      "worst_63d_underperform_pct": -5.21,
+      "avg_vix": 16.2,
+      "spy_return_pct": 10.33
+    },
+    {
+      "start": "2008-04-16",
+      "end": "2008-06-20",
+      "duration_days": 65,
+      "worst_63d_underperform_pct": -5.2,
+      "avg_vix": 19.9,
+      "spy_return_pct": -3.37
+    },
+    {
+      "start": "2010-02-11",
+      "end": "2010-05-19",
+      "duration_days": 97,
+      "worst_63d_underperform_pct": -4.98,
+      "avg_vix": 20.4,
+      "spy_return_pct": 3.78
+    },
+    {
+      "start": "2024-08-13",
+      "end": "2025-03-03",
+      "duration_days": 202,
+      "worst_63d_underperform_pct": -4.9,
+      "avg_vix": 17.2,
+      "spy_return_pct": 8.39
+    }
+  ],
+  "regime_analysis": {
+    "Low (<15)": {
+      "n_days": 1546,
+      "pct_of_total": 32.0,
+      "avg_daily_excess_bps": -2.93,
+      "avg_ann_excess_pct": -7.39,
+      "pct_days_underperform": 50.6
+    },
+    "Normal (15-20)": {
+      "n_days": 1535,
+      "pct_of_total": 31.8,
+      "avg_daily_excess_bps": -6.32,
+      "avg_ann_excess_pct": -15.94,
+      "pct_days_underperform": 56.3
+    },
+    "Elevated (20-25)": {
+      "n_days": 880,
+      "pct_of_total": 18.2,
+      "avg_daily_excess_bps": -3.49,
+      "avg_ann_excess_pct": -8.8,
+      "pct_days_underperform": 49.8
+    },
+    "High (25-35)": {
+      "n_days": 619,
+      "pct_of_total": 12.8,
+      "avg_daily_excess_bps": 2.15,
+      "avg_ann_excess_pct": 5.42,
+      "pct_days_underperform": 43.9
+    },
+    "Crisis (>35)": {
+      "n_days": 253,
+      "pct_of_total": 5.2,
+      "avg_daily_excess_bps": 24.06,
+      "avg_ann_excess_pct": 60.63,
+      "pct_days_underperform": 45.8
+    }
+  },
+  "regime_detail_vix_direction": {
+    "Low (<15) + Market Up": {
+      "n_days": 1377,
+      "avg_ann_excess_pct": -6.93,
+      "pct_underperform": 51.1
+    },
+    "Low (<15) + Market Down": {
+      "n_days": 169,
+      "avg_ann_excess_pct": -11.15,
+      "pct_underperform": 46.7
+    },
+    "Normal (15-20) + Market Up": {
+      "n_days": 1058,
+      "avg_ann_excess_pct": -18.75,
+      "pct_underperform": 59.9
+    },
+    "Normal (15-20) + Market Down": {
+      "n_days": 477,
+      "avg_ann_excess_pct": -9.71,
+      "pct_underperform": 48.2
+    },
+    "Elevated (20-25) + Market Up": {
+      "n_days": 505,
+      "avg_ann_excess_pct": -23.13,
+      "pct_underperform": 52.5
+    },
+    "Elevated (20-25) + Market Down": {
+      "n_days": 375,
+      "avg_ann_excess_pct": 10.51,
+      "pct_underperform": 46.1
+    },
+    "High (25-35) + Market Up": {
+      "n_days": 234,
+      "avg_ann_excess_pct": -42.06,
+      "pct_underperform": 55.1
+    },
+    "High (25-35) + Market Down": {
+      "n_days": 385,
+      "avg_ann_excess_pct": 34.27,
+      "pct_underperform": 37.1
+    },
+    "Crisis (>35) + Market Up": {
+      "n_days": 80,
+      "avg_ann_excess_pct": -79.3,
+      "pct_underperform": 58.8
+    },
+    "Crisis (>35) + Market Down": {
+      "n_days": 173,
+      "avg_ann_excess_pct": 125.34,
+      "pct_underperform": 39.9
+    }
+  },
+  "named_event_analysis": {
+    "GFC Bear (2007-10 to 2009-03)": {
+      "vt_return_pct": -27.28,
+      "bh_return_pct": -54.56,
+      "excess_pct": 27.28,
+      "avg_equity_weight_pct": 43.9,
+      "avg_vix": 32.4,
+      "vt_wins": true
+    },
+    "GFC Recovery (2009-03 to 2010-04)": {
+      "vt_return_pct": 26.54,
+      "bh_return_pct": 83.74,
+      "excess_pct": -57.2,
+      "avg_equity_weight_pct": 49.2,
+      "avg_vix": 26.0,
+      "vt_wins": false
+    },
+    "2010 Flash Crash (2010-04 to 2010-07)": {
+      "vt_return_pct": -8.74,
+      "bh_return_pct": -15.7,
+      "excess_pct": 6.96,
+      "avg_equity_weight_pct": 43.1,
+      "avg_vix": 29.6,
+      "vt_wins": true
+    },
+    "2011 Debt Ceiling (2011-07 to 2011-10)": {
+      "vt_return_pct": -9.7,
+      "bh_return_pct": -17.89,
+      "excess_pct": 8.19,
+      "avg_equity_weight_pct": 37.6,
+      "avg_vix": 34.3,
+      "vt_wins": true
+    },
+    "Post-2011 Recovery (2011-10 to 2012-04)": {
+      "vt_return_pct": 12.84,
+      "bh_return_pct": 30.41,
+      "excess_pct": -17.58,
+      "avg_equity_weight_pct": 53.7,
+      "avg_vix": 24.1,
+      "vt_wins": false
+    },
+    "2015 China Scare (2015-08 to 2016-02)": {
+      "vt_return_pct": -9.17,
+      "bh_return_pct": -12.2,
+      "excess_pct": 3.02,
+      "avg_equity_weight_pct": 62.1,
+      "avg_vix": 20.5,
+      "vt_wins": true
+    },
+    "Post-China Recovery (2016-02 to 2016-08)": {
+      "vt_return_pct": 13.18,
+      "bh_return_pct": 21.06,
+      "excess_pct": -7.88,
+      "avg_equity_weight_pct": 79.2,
+      "avg_vix": 15.6,
+      "vt_wins": false
+    },
+    "Low-Vol Melt-Up 2017": {
+      "vt_return_pct": 19.56,
+      "bh_return_pct": 20.78,
+      "excess_pct": -1.22,
+      "avg_equity_weight_pct": 98.3,
+      "avg_vix": 11.1,
+      "vt_wins": false
+    },
+    "Volmageddon 2018-Q1 (2018-01 to 2018-03)": {
+      "vt_return_pct": -8.04,
+      "bh_return_pct": -9.59,
+      "excess_pct": 1.56,
+      "avg_equity_weight_pct": 65.7,
+      "avg_vix": 19.8,
+      "vt_wins": true
+    },
+    "2018-Q4 Selloff (2018-10 to 2018-12)": {
+      "vt_return_pct": -12.45,
+      "bh_return_pct": -19.2,
+      "excess_pct": 6.75,
+      "avg_equity_weight_pct": 62.0,
+      "avg_vix": 20.5,
+      "vt_wins": true
+    },
+    "2019 Recovery (2019-01 to 2019-04)": {
+      "vt_return_pct": 13.88,
+      "bh_return_pct": 20.93,
+      "excess_pct": -7.05,
+      "avg_equity_weight_pct": 79.1,
+      "avg_vix": 15.5,
+      "vt_wins": false
+    },
+    "COVID Crash (2020-02 to 2020-03)": {
+      "vt_return_pct": -13.08,
+      "bh_return_pct": -33.72,
+      "excess_pct": 20.64,
+      "avg_equity_weight_pct": 35.8,
+      "avg_vix": 46.4,
+      "vt_wins": true
+    },
+    "COVID V-Recovery (2020-03 to 2020-08)": {
+      "vt_return_pct": 13.64,
+      "bh_return_pct": 52.56,
+      "excess_pct": -38.92,
+      "avg_equity_weight_pct": 38.4,
+      "avg_vix": 33.3,
+      "vt_wins": false
+    },
+    "2022 Bear Market (2022-01 to 2022-10)": {
+      "vt_return_pct": -14.35,
+      "bh_return_pct": -24.5,
+      "excess_pct": 10.15,
+      "avg_equity_weight_pct": 47.6,
+      "avg_vix": 26.0,
+      "vt_wins": true
+    },
+    "2022 Q4 Recovery (2022-10 to 2023-02)": {
+      "vt_return_pct": 7.67,
+      "bh_return_pct": 17.43,
+      "excess_pct": -9.75,
+      "avg_equity_weight_pct": 52.7,
+      "avg_vix": 23.1,
+      "vt_wins": false
+    },
+    "AI Melt-Up 2023 (2023-03 to 2023-12)": {
+      "vt_return_pct": 17.64,
+      "bh_return_pct": 25.58,
+      "excess_pct": -7.94,
+      "avg_equity_weight_pct": 76.4,
+      "avg_vix": 16.1,
+      "vt_wins": false
+    },
+    "2024 Low-Vol Rally": {
+      "vt_return_pct": 18.2,
+      "bh_return_pct": 25.59,
+      "excess_pct": -7.39,
+      "avg_equity_weight_pct": 79.8,
+      "avg_vix": 15.6,
+      "vt_wins": false
+    }
+  },
+  "vix_return_interaction": {
+    "VIX>20": {
+      "high_up_days": 826,
+      "high_down_days": 926,
+      "avg_ann_drag_when_up_pct": -193.03,
+      "avg_ann_gain_when_down_pct": 184.01,
+      "net_ann_effect_pct": 2.27
+    },
+    "VIX>25": {
+      "high_up_days": 388,
+      "high_down_days": 484,
+      "avg_ann_drag_when_up_pct": -285.91,
+      "avg_ann_gain_when_down_pct": 267.83,
+      "net_ann_effect_pct": 3.87
+    },
+    "VIX>30": {
+      "high_up_days": 197,
+      "high_down_days": 250,
+      "avg_ann_drag_when_up_pct": -392.86,
+      "avg_ann_gain_when_down_pct": 380.91,
+      "net_ann_effect_pct": 3.69
+    },
+    "VIX>35": {
+      "high_up_days": 116,
+      "high_down_days": 137,
+      "avg_ann_drag_when_up_pct": -468.21,
+      "avg_ann_gain_when_down_pct": 508.41,
+      "net_ann_effect_pct": 3.17
+    }
+  },
+  "relative_drawdown_episodes": [
+    {
+      "start": "2007-05-16",
+      "trough_date": "2007-07-19",
+      "recovery_date": "2007-08-15",
+      "max_relative_dd_pct": -3.33,
+      "days_to_trough": 64,
+      "days_to_recover": 27,
+      "total_episode_days": 91
+    },
+    {
+      "start": "2007-08-22",
+      "trough_date": "2007-10-12",
+      "recovery_date": "2008-01-17",
+      "max_relative_dd_pct": -5.53,
+      "days_to_trough": 51,
+      "days_to_recover": 97,
+      "total_episode_days": 148
+    },
+    {
+      "start": "2008-01-28",
+      "trough_date": "2008-02-01",
+      "recovery_date": "2008-03-10",
+      "max_relative_dd_pct": -3.74,
+      "days_to_trough": 4,
+      "days_to_recover": 38,
+      "total_episode_days": 42
+    },
+    {
+      "start": "2008-03-11",
+      "trough_date": "2008-05-19",
+      "recovery_date": "2008-07-15",
+      "max_relative_dd_pct": -5.92,
+      "days_to_trough": 69,
+      "days_to_recover": 57,
+      "total_episode_days": 126
+    },
+    {
+      "start": "2008-07-18",
+      "trough_date": "2008-08-11",
+      "recovery_date": "2008-09-17",
+      "max_relative_dd_pct": -4.0,
+      "days_to_trough": 24,
+      "days_to_recover": 37,
+      "total_episode_days": 61
+    },
+    {
+      "start": "2008-09-19",
+      "trough_date": "2008-09-19",
+      "recovery_date": "2008-09-29",
+      "max_relative_dd_pct": -4.31,
+      "days_to_trough": 0,
+      "days_to_recover": 10,
+      "total_episode_days": 10
+    },
+    {
+      "start": "2008-09-30",
+      "trough_date": "2008-10-01",
+      "recovery_date": "2008-10-03",
+      "max_relative_dd_pct": -2.99,
+      "days_to_trough": 1,
+      "days_to_recover": 2,
+      "total_episode_days": 3
+    },
+    {
+      "start": "2008-10-13",
+      "trough_date": "2008-10-13",
+      "recovery_date": "2008-10-24",
+      "max_relative_dd_pct": -10.5,
+      "days_to_trough": 0,
+      "days_to_recover": 11,
+      "total_episode_days": 11
+    },
+    {
+      "start": "2008-10-28",
+      "trough_date": "2008-11-04",
+      "recovery_date": "2008-11-19",
+      "max_relative_dd_pct": -13.75,
+      "days_to_trough": 7,
+      "days_to_recover": 15,
+      "total_episode_days": 22
+    },
+    {
+      "start": "2008-11-21",
+      "trough_date": "2009-01-06",
+      "recovery_date": "2009-03-02",
+      "max_relative_dd_pct": -16.43,
+      "days_to_trough": 46,
+      "days_to_recover": 55,
+      "total_episode_days": 101
+    },
+    {
+      "start": "2009-03-10",
+      "trough_date": "2026-02-25",
+      "recovery_date": "ongoing",
+      "max_relative_dd_pct": -68.49,
+      "days_to_trough": 6196,
+      "days_to_recover": null,
+      "total_episode_days": null
+    }
+  ],
+  "recovery_statistics": {
+    "n_episodes": 11,
+    "n_recovered": 10,
+    "median_recovery_days": 32.0,
+    "mean_recovery_days": 35.0,
+    "max_recovery_days": 97
+  },
+  "practical_expectations": {
+    "1 month": {
+      "window_days": 21,
+      "pct_underperform_bh": 72.7,
+      "worst_excess_pct": -20.04,
+      "best_excess_pct": 21.41,
+      "vt_worst_return_pct": -12.37,
+      "bh_worst_return_pct": -32.75,
+      "vt_max_loss_improvement_pct": 20.38
+    },
+    "1 quarter": {
+      "window_days": 63,
+      "pct_underperform_bh": 78.0,
+      "worst_excess_pct": -30.6,
+      "best_excess_pct": 26.77,
+      "vt_worst_return_pct": -14.69,
+      "bh_worst_return_pct": -41.47,
+      "vt_max_loss_improvement_pct": 26.77
+    },
+    "6 months": {
+      "window_days": 126,
+      "pct_underperform_bh": 81.7,
+      "worst_excess_pct": -37.17,
+      "best_excess_pct": 28.05,
+      "vt_worst_return_pct": -17.99,
+      "bh_worst_return_pct": -45.45,
+      "vt_max_loss_improvement_pct": 27.46
+    },
+    "1 year": {
+      "window_days": 252,
+      "pct_underperform_bh": 84.8,
+      "worst_excess_pct": -56.19,
+      "best_excess_pct": 26.88,
+      "vt_worst_return_pct": -21.55,
+      "bh_worst_return_pct": -47.35,
+      "vt_max_loss_improvement_pct": 25.81
+    },
+    "3 years": {
+      "window_days": 756,
+      "pct_underperform_bh": 89.6,
+      "worst_excess_pct": -80.78,
+      "best_excess_pct": 20.23,
+      "vt_worst_return_pct": -16.47,
+      "bh_worst_return_pct": -28.37,
+      "vt_max_loss_improvement_pct": 11.9
+    }
+  },
+  "whipsaw_analysis": {
+    "avg_monthly_turnover": 0.6775,
+    "vix_crosses_20_per_year": 15.0,
+    "whipsaw_excess_ann_pct": -8.62,
+    "normal_excess_ann_pct": -4.84,
+    "whipsaw_penalty_ann_pct": -3.78
+  },
+  "vix_high_rally_streaks": [
+    {
+      "start": "2008-09-12",
+      "end": "2009-07-16",
+      "duration_days": 307,
+      "spy_return_pct": -24.16,
+      "avg_vix": 44.0,
+      "avg_equity_weight_pct": 29.5,
+      "vt_return_pct": -8.83,
+      "bh_return_pct": -24.16
+    },
+    {
+      "start": "2010-05-06",
+      "end": "2010-06-17",
+      "duration_days": 42,
+      "spy_return_pct": -0.71,
+      "avg_vix": 32.3,
+      "avg_equity_weight_pct": 38.0,
+      "vt_return_pct": -0.9,
+      "bh_return_pct": -0.71
+    },
+    {
+      "start": "2011-08-04",
+      "end": "2011-10-27",
+      "duration_days": 84,
+      "spy_return_pct": 7.51,
+      "avg_vix": 35.6,
+      "avg_equity_weight_pct": 34.3,
+      "vt_return_pct": 1.01,
+      "bh_return_pct": 7.51
+    },
+    {
+      "start": "2011-10-31",
+      "end": "2011-12-15",
+      "duration_days": 45,
+      "spy_return_pct": -2.65,
+      "avg_vix": 30.3,
+      "avg_equity_weight_pct": 40.0,
+      "vt_return_pct": -1.55,
+      "bh_return_pct": -2.65
+    },
+    {
+      "start": "2020-02-24",
+      "end": "2020-06-04",
+      "duration_days": 101,
+      "spy_return_pct": -2.86,
+      "avg_vix": 42.0,
+      "avg_equity_weight_pct": 31.9,
+      "vt_return_pct": -1.43,
+      "bh_return_pct": -2.86
+    },
+    {
+      "start": "2020-06-08",
+      "end": "2020-07-17",
+      "duration_days": 39,
+      "spy_return_pct": -0.02,
+      "avg_vix": 30.9,
+      "avg_equity_weight_pct": 39.4,
+      "vt_return_pct": -0.58,
+      "bh_return_pct": -0.02
+    },
+    {
+      "start": "2020-08-31",
+      "end": "2020-10-08",
+      "duration_days": 38,
+      "spy_return_pct": -1.19,
+      "avg_vix": 27.6,
+      "avg_equity_weight_pct": 43.9,
+      "vt_return_pct": -0.47,
+      "bh_return_pct": -1.19
+    },
+    {
+      "start": "2022-02-17",
+      "end": "2022-03-17",
+      "duration_days": 28,
+      "spy_return_pct": 0.92,
+      "avg_vix": 30.5,
+      "avg_equity_weight_pct": 39.8,
+      "vt_return_pct": 0.26,
+      "bh_return_pct": 0.92
+    },
+    {
+      "start": "2022-04-22",
+      "end": "2022-06-01",
+      "duration_days": 40,
+      "spy_return_pct": -3.86,
+      "avg_vix": 29.6,
+      "avg_equity_weight_pct": 41.1,
+      "vt_return_pct": -1.97,
+      "bh_return_pct": -3.86
+    },
+    {
+      "start": "2022-09-13",
+      "end": "2022-11-03",
+      "duration_days": 51,
+      "spy_return_pct": -5.23,
+      "avg_vix": 29.2,
+      "avg_equity_weight_pct": 41.5,
+      "vt_return_pct": -2.69,
+      "bh_return_pct": -5.23
+    }
+  ],
+  "insurance_framing": {
+    "Bear months (B&H < -2%)": {
+      "n_months": 49,
+      "avg_monthly_excess_pct": 2.444,
+      "pct_vt_wins": 95.9
+    },
+    "Flat months (-2% to +2%)": {
+      "n_months": 80,
+      "avg_monthly_excess_pct": -0.313,
+      "pct_vt_wins": 17.5
+    },
+    "Bull months (B&H > +2%)": {
+      "n_months": 102,
+      "avg_monthly_excess_pct": -1.774,
+      "pct_vt_wins": 2.0
+    }
+  },
+  "insurance_pricing": {
+    "monthly_premium_pct": -1.132,
+    "monthly_benefit_pct": 2.444,
+    "annual_premium_pct": -13.58,
+    "expected_annual_benefit_pct": 6.22
+  },
+  "key_findings": [
+    "VT 在 80.3% 的滾動季度中落後 B&H，平均落後 -2.52%",
+    "最糟糕的季度落後幅度: -26.33%",
+    "COVID V 型反彈期間 VT 報酬 13.64% vs B&H 52.56%（VT 因高 VIX 持低倉位，錯過反彈）",
+    "VT 相對劣勢的中位恢復時間: 32 天，最長 97 天",
+    "任何 3 年滾動期: VT 最差報酬 -16.47% vs B&H -28.37%（改善 11.9pp）",
+    "VT 的年度「保險費」: 13.58%/yr（非熊市期間的報酬拖累）",
+    "核心失效機制: VIX 高位 + 市場反彈 = VT 持低倉位卻市場上漲（如 COVID 後、2022 Q4 後）",
+    "任何 1 年滾動期: VT 落後 B&H 84.8% 的時間"
+  ]
+}

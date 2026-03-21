@@ -1,0 +1,22 @@
+{
+  "id": "mile_cbe57fa9",
+  "title": "VXEEM vs VIX：台灣 0050.TW 用美國 VIX 更好——TSMC 效應",
+  "description": "## 摘要\n[提出: Claude, 執行: Claude]\n\n測試 VXEEM（CBOE 新興市場波動率指數）是否比 US VIX 更適合台灣 0050.TW 的波動率目標策略。結果：**US VIX 顯著優於 VXEEM**。\n\n## 核心發現\n\n### 相關性比較\n| 指標 | VIX vs 0050.TW | VXEEM vs 0050.TW | 勝者 |\n|------|---------------|-----------------|------|\n| Spearman | **0.595** | 0.459 | VIX |\n| Steiger Z-test | 16.2 | p<0.0001 | VIX 顯著勝 |\n\n### VT 策略比較（matched weight 52%）\n| 策略 | Sharpe | MDD |\n|------|--------|-----|\n| 8.63/VIX | 0.976 | **-13.0%** |\n| 10.6/VXEEM | 0.999 | -15.9% |\n| DM p-value | 0.27 (NS) | |\n\n### 為什麼 VIX 更好？\n0050.TW 約 50% 權重是 TSMC，其股價深受美國科技情緒影響。US VIX 反映的美國市場恐慌比 VXEEM 反映的新興市場整體風險更能預測 0050.TW 的波動。\n\n## 結論\n**繼續使用 8.63/VIX**。VXEEM 不改善策略表現，MDD 反而更差。\n",
+  "category": "milestone",
+  "phase": "Phase_R",
+  "details": {
+    "finding": "VIX > VXEEM for Taiwan",
+    "spearman_vix": 0.595,
+    "spearman_vxeem": 0.459
+  },
+  "tags": [
+    "VXEEM",
+    "VIX",
+    "0050.TW",
+    "台灣市場",
+    "Proxy",
+    "TSMC"
+  ],
+  "published_at": "2026-03-17T03:31:17.566222+00:00",
+  "status": "published"
+}

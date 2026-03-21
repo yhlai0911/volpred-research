@@ -1,0 +1,2259 @@
+{
+  "experiment": "Leveraged VT — Can Modest Leverage Improve VT?",
+  "experiment_id": "K_leveraged_vt",
+  "description": "測試適度槓桿（1.0x-1.5x cap + uncapped）是否能在低波動期增加報酬，以抵消 VT 的保險成本。涵蓋 12/VIX、15/VIX、18/VIX 三種目標波動度，月度與日度再平衡，SPY 單資產與 50/50 SPY/GLD 組合。包含危機期分析、VIX 制度分析、whipsaw 分析。",
+  "proposed_by": "用戶（研究任務）",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T10:11:24.033968+00:00",
+  "config": {
+    "target_vols_tested": [
+      12,
+      15,
+      18
+    ],
+    "caps_tested": [
+      "1.0",
+      "1.2",
+      "1.3",
+      "1.5",
+      "Uncapped"
+    ],
+    "tx_cost": 0.0005,
+    "margin_rate": 0.05,
+    "rf_annual": 0.045,
+    "oos_start": "2023-01-01",
+    "data_range": "2006-12-01 to 2026-03-20",
+    "n_days": 4854,
+    "rebalance_frequencies": [
+      "monthly (lagged)",
+      "daily (lagged 1d)"
+    ],
+    "portfolios_tested": [
+      "SPY-only",
+      "50/50 SPY/GLD"
+    ]
+  },
+  "results": {
+    "full_sample": {
+      "A_monthly_12vix_spy": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=1.0",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.06796,
+            "annual_vol": 0.10393,
+            "sharpe": 0.221,
+            "sharpe_t": 0.97,
+            "mdd": -0.2573,
+            "calmar": 0.264,
+            "sortino": 0.283,
+            "worst_month": -0.0684,
+            "best_month": 0.0597,
+            "worst_year": -0.1663,
+            "best_year": 0.2375
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6752,
+            "max_weight": 1.0,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=1.2",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.06873,
+            "annual_vol": 0.10438,
+            "sharpe": 0.227,
+            "sharpe_t": 1.0,
+            "mdd": -0.2573,
+            "calmar": 0.267,
+            "sortino": 0.291,
+            "worst_month": -0.0684,
+            "best_month": 0.061,
+            "worst_year": -0.1663,
+            "best_year": 0.2375
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0652,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6816,
+            "max_weight": 1.2,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 1.098,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=1.3",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.0688,
+            "annual_vol": 0.10439,
+            "sharpe": 0.228,
+            "sharpe_t": 1.0,
+            "mdd": -0.2573,
+            "calmar": 0.267,
+            "sortino": 0.292,
+            "worst_month": -0.0684,
+            "best_month": 0.061,
+            "worst_year": -0.1663,
+            "best_year": 0.2375
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0652,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6819,
+            "max_weight": 1.2618,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 1.1023,
+            "max_leverage_excess": 0.2618
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=1.5",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.0688,
+            "annual_vol": 0.10439,
+            "sharpe": 0.228,
+            "sharpe_t": 1.0,
+            "mdd": -0.2573,
+            "calmar": 0.267,
+            "sortino": 0.292,
+            "worst_month": -0.0684,
+            "best_month": 0.061,
+            "worst_year": -0.1663,
+            "best_year": 0.2375
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0652,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6819,
+            "max_weight": 1.2618,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 1.1023,
+            "max_leverage_excess": 0.2618
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=Uncapped",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.0688,
+            "annual_vol": 0.10439,
+            "sharpe": 0.228,
+            "sharpe_t": 1.0,
+            "mdd": -0.2573,
+            "calmar": 0.267,
+            "sortino": 0.292,
+            "worst_month": -0.0684,
+            "best_month": 0.061,
+            "worst_year": -0.1663,
+            "best_year": 0.2375
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0652,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6819,
+            "max_weight": 1.2618,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 1.1023,
+            "max_leverage_excess": 0.2618
+          }
+        }
+      },
+      "B_monthly_12vix_5050": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=1.0",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.06842,
+            "annual_vol": 0.07851,
+            "sharpe": 0.298,
+            "sharpe_t": 1.31,
+            "mdd": -0.1257,
+            "calmar": 0.544,
+            "sortino": 0.386,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": -0.0676,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6752,
+            "max_weight": 1.0,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=1.2",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.06892,
+            "annual_vol": 0.07901,
+            "sharpe": 0.303,
+            "sharpe_t": 1.33,
+            "mdd": -0.1257,
+            "calmar": 0.548,
+            "sortino": 0.391,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": -0.0676,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0652,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6816,
+            "max_weight": 1.2,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 1.098,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=1.3",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.06893,
+            "annual_vol": 0.07902,
+            "sharpe": 0.303,
+            "sharpe_t": 1.33,
+            "mdd": -0.1257,
+            "calmar": 0.548,
+            "sortino": 0.391,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": -0.0676,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0652,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6819,
+            "max_weight": 1.2618,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 1.1023,
+            "max_leverage_excess": 0.2618
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=1.5",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.06893,
+            "annual_vol": 0.07902,
+            "sharpe": 0.303,
+            "sharpe_t": 1.33,
+            "mdd": -0.1257,
+            "calmar": 0.548,
+            "sortino": 0.391,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": -0.0676,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0652,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6819,
+            "max_weight": 1.2618,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 1.1023,
+            "max_leverage_excess": 0.2618
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=Uncapped",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.06893,
+            "annual_vol": 0.07902,
+            "sharpe": 0.303,
+            "sharpe_t": 1.33,
+            "mdd": -0.1257,
+            "calmar": 0.548,
+            "sortino": 0.391,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": -0.0676,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0652,
+            "pct_full_invested": 0.0786,
+            "avg_weight": 0.6819,
+            "max_weight": 1.2618,
+            "min_weight": 0.2004,
+            "avg_when_leveraged": 1.1023,
+            "max_leverage_excess": 0.2618
+          }
+        }
+      },
+      "C_daily_12vix_spy": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=1.0",
+            "n_days": 4853,
+            "n_years": 19.26,
+            "annual_return": 0.05891,
+            "annual_vol": 0.09482,
+            "sharpe": 0.147,
+            "sharpe_t": 0.64,
+            "mdd": -0.2903,
+            "calmar": 0.203,
+            "sortino": 0.194,
+            "worst_month": -0.0576,
+            "best_month": 0.0696,
+            "worst_year": -0.1869,
+            "best_year": 0.2266
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0845,
+            "avg_weight": 0.6836,
+            "max_weight": 1.0,
+            "min_weight": 0.1451,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=1.2",
+            "n_days": 4853,
+            "n_years": 19.26,
+            "annual_return": 0.05898,
+            "annual_vol": 0.09524,
+            "sharpe": 0.147,
+            "sharpe_t": 0.64,
+            "mdd": -0.2903,
+            "calmar": 0.203,
+            "sortino": 0.195,
+            "worst_month": -0.0576,
+            "best_month": 0.0696,
+            "worst_year": -0.1869,
+            "best_year": 0.2257
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.075,
+            "pct_full_invested": 0.0845,
+            "avg_weight": 0.6915,
+            "max_weight": 1.2,
+            "min_weight": 0.1451,
+            "avg_when_leveraged": 1.1053,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=1.3",
+            "n_days": 4853,
+            "n_years": 19.26,
+            "annual_return": 0.05907,
+            "annual_vol": 0.09525,
+            "sharpe": 0.148,
+            "sharpe_t": 0.65,
+            "mdd": -0.2903,
+            "calmar": 0.203,
+            "sortino": 0.196,
+            "worst_month": -0.0576,
+            "best_month": 0.0696,
+            "worst_year": -0.1869,
+            "best_year": 0.2257
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.075,
+            "pct_full_invested": 0.0845,
+            "avg_weight": 0.692,
+            "max_weight": 1.3,
+            "min_weight": 0.1451,
+            "avg_when_leveraged": 1.1119,
+            "max_leverage_excess": 0.3
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=1.5",
+            "n_days": 4853,
+            "n_years": 19.26,
+            "annual_return": 0.05908,
+            "annual_vol": 0.09525,
+            "sharpe": 0.148,
+            "sharpe_t": 0.65,
+            "mdd": -0.2903,
+            "calmar": 0.203,
+            "sortino": 0.196,
+            "worst_month": -0.0576,
+            "best_month": 0.0696,
+            "worst_year": -0.1869,
+            "best_year": 0.2257
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.075,
+            "pct_full_invested": 0.0845,
+            "avg_weight": 0.692,
+            "max_weight": 1.3129,
+            "min_weight": 0.1451,
+            "avg_when_leveraged": 1.112,
+            "max_leverage_excess": 0.3129
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=Uncapped",
+            "n_days": 4853,
+            "n_years": 19.26,
+            "annual_return": 0.05908,
+            "annual_vol": 0.09525,
+            "sharpe": 0.148,
+            "sharpe_t": 0.65,
+            "mdd": -0.2903,
+            "calmar": 0.203,
+            "sortino": 0.196,
+            "worst_month": -0.0576,
+            "best_month": 0.0696,
+            "worst_year": -0.1869,
+            "best_year": 0.2257
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.075,
+            "pct_full_invested": 0.0845,
+            "avg_weight": 0.692,
+            "max_weight": 1.3129,
+            "min_weight": 0.1451,
+            "avg_when_leveraged": 1.112,
+            "max_leverage_excess": 0.3129
+          }
+        }
+      },
+      "D_monthly_15vix_spy": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=1.0",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08142,
+            "annual_vol": 0.12538,
+            "sharpe": 0.29,
+            "sharpe_t": 1.27,
+            "mdd": -0.3138,
+            "calmar": 0.259,
+            "sortino": 0.374,
+            "worst_month": -0.0733,
+            "best_month": 0.075,
+            "worst_year": -0.2062,
+            "best_year": 0.294
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.8019,
+            "max_weight": 1.0,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=1.2",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08147,
+            "annual_vol": 0.12951,
+            "sharpe": 0.282,
+            "sharpe_t": 1.23,
+            "mdd": -0.3138,
+            "calmar": 0.26,
+            "sortino": 0.361,
+            "worst_month": -0.0837,
+            "best_month": 0.075,
+            "worst_year": -0.2062,
+            "best_year": 0.3001
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.2859,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.8401,
+            "max_weight": 1.2,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 1.1337,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=1.3",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.0819,
+            "annual_vol": 0.1301,
+            "sharpe": 0.284,
+            "sharpe_t": 1.24,
+            "mdd": -0.3138,
+            "calmar": 0.261,
+            "sortino": 0.363,
+            "worst_month": -0.0865,
+            "best_month": 0.075,
+            "worst_year": -0.2062,
+            "best_year": 0.3001
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.2859,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.8469,
+            "max_weight": 1.3,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 1.1573,
+            "max_leverage_excess": 0.3
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=1.5",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08251,
+            "annual_vol": 0.13048,
+            "sharpe": 0.287,
+            "sharpe_t": 1.26,
+            "mdd": -0.3138,
+            "calmar": 0.263,
+            "sortino": 0.368,
+            "worst_month": -0.0865,
+            "best_month": 0.0755,
+            "worst_year": -0.2062,
+            "best_year": 0.3001
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.2859,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.852,
+            "max_weight": 1.5,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 1.1752,
+            "max_leverage_excess": 0.5
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=Uncapped",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08259,
+            "annual_vol": 0.13049,
+            "sharpe": 0.288,
+            "sharpe_t": 1.26,
+            "mdd": -0.3138,
+            "calmar": 0.263,
+            "sortino": 0.369,
+            "worst_month": -0.0865,
+            "best_month": 0.0755,
+            "worst_year": -0.2062,
+            "best_year": 0.3001
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.2859,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.8523,
+            "max_weight": 1.5773,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 1.1764,
+            "max_leverage_excess": 0.5773
+          }
+        }
+      },
+      "D_monthly_18vix_spy": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=1.0",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08956,
+            "annual_vol": 0.14226,
+            "sharpe": 0.313,
+            "sharpe_t": 1.37,
+            "mdd": -0.3639,
+            "calmar": 0.246,
+            "sortino": 0.403,
+            "worst_month": -0.0878,
+            "best_month": 0.0906,
+            "worst_year": -0.2446,
+            "best_year": 0.323
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.5426,
+            "avg_weight": 0.8813,
+            "max_weight": 1.0,
+            "min_weight": 0.3006,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=1.2",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.09197,
+            "annual_vol": 0.15046,
+            "sharpe": 0.312,
+            "sharpe_t": 1.37,
+            "mdd": -0.3675,
+            "calmar": 0.25,
+            "sortino": 0.403,
+            "worst_month": -0.0878,
+            "best_month": 0.0906,
+            "worst_year": -0.2453,
+            "best_year": 0.3511
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.5252,
+            "pct_full_invested": 0.5426,
+            "avg_weight": 0.9623,
+            "max_weight": 1.2,
+            "min_weight": 0.3006,
+            "avg_when_leveraged": 1.1542,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=1.3",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.09188,
+            "annual_vol": 0.15324,
+            "sharpe": 0.306,
+            "sharpe_t": 1.34,
+            "mdd": -0.3675,
+            "calmar": 0.25,
+            "sortino": 0.394,
+            "worst_month": -0.0909,
+            "best_month": 0.0906,
+            "worst_year": -0.2453,
+            "best_year": 0.357
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.5252,
+            "pct_full_invested": 0.5426,
+            "avg_weight": 0.9883,
+            "max_weight": 1.3,
+            "min_weight": 0.3006,
+            "avg_when_leveraged": 1.2038,
+            "max_leverage_excess": 0.3
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=1.5",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.09198,
+            "annual_vol": 0.1559,
+            "sharpe": 0.301,
+            "sharpe_t": 1.32,
+            "mdd": -0.3675,
+            "calmar": 0.25,
+            "sortino": 0.386,
+            "worst_month": -0.1044,
+            "best_month": 0.0906,
+            "worst_year": -0.2453,
+            "best_year": 0.3585
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.5252,
+            "pct_full_invested": 0.5426,
+            "avg_weight": 1.0128,
+            "max_weight": 1.5,
+            "min_weight": 0.3006,
+            "avg_when_leveraged": 1.2504,
+            "max_leverage_excess": 0.5
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=Uncapped",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.09321,
+            "annual_vol": 0.15659,
+            "sharpe": 0.308,
+            "sharpe_t": 1.35,
+            "mdd": -0.3675,
+            "calmar": 0.254,
+            "sortino": 0.394,
+            "worst_month": -0.1044,
+            "best_month": 0.0906,
+            "worst_year": -0.2453,
+            "best_year": 0.3585
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.5252,
+            "pct_full_invested": 0.5426,
+            "avg_weight": 1.0228,
+            "max_weight": 1.8927,
+            "min_weight": 0.3006,
+            "avg_when_leveraged": 1.2694,
+            "max_leverage_excess": 0.8927
+          }
+        }
+      },
+      "E_monthly_15vix_5050": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=1.0",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08319,
+            "annual_vol": 0.09413,
+            "sharpe": 0.406,
+            "sharpe_t": 1.78,
+            "mdd": -0.1552,
+            "calmar": 0.536,
+            "sortino": 0.532,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": -0.085,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.8019,
+            "max_weight": 1.0,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=1.2",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08277,
+            "annual_vol": 0.09784,
+            "sharpe": 0.386,
+            "sharpe_t": 1.69,
+            "mdd": -0.1552,
+            "calmar": 0.533,
+            "sortino": 0.5,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": -0.085,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.2859,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.8401,
+            "max_weight": 1.2,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 1.1337,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=1.3",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.0832,
+            "annual_vol": 0.09836,
+            "sharpe": 0.388,
+            "sharpe_t": 1.7,
+            "mdd": -0.1552,
+            "calmar": 0.536,
+            "sortino": 0.503,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": -0.085,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.2859,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.8469,
+            "max_weight": 1.3,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 1.1573,
+            "max_leverage_excess": 0.3
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=1.5",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08354,
+            "annual_vol": 0.09876,
+            "sharpe": 0.39,
+            "sharpe_t": 1.71,
+            "mdd": -0.1552,
+            "calmar": 0.538,
+            "sortino": 0.504,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": -0.085,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.2859,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.852,
+            "max_weight": 1.5,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 1.1752,
+            "max_leverage_excess": 0.5
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=Uncapped",
+            "n_days": 4834,
+            "n_years": 19.18,
+            "annual_return": 0.08355,
+            "annual_vol": 0.09877,
+            "sharpe": 0.39,
+            "sharpe_t": 1.71,
+            "mdd": -0.1552,
+            "calmar": 0.538,
+            "sortino": 0.504,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": -0.085,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.2859,
+            "pct_full_invested": 0.2987,
+            "avg_weight": 0.8523,
+            "max_weight": 1.5773,
+            "min_weight": 0.2505,
+            "avg_when_leveraged": 1.1764,
+            "max_leverage_excess": 0.5773
+          }
+        }
+      },
+      "benchmarks": {
+        "spy_bh": {
+          "metrics": {
+            "label": "SPY Buy & Hold",
+            "n_days": 4853,
+            "n_years": 19.26,
+            "annual_return": 0.10324,
+            "annual_vol": 0.19658,
+            "sharpe": 0.296,
+            "sharpe_t": 1.3,
+            "mdd": -0.5519,
+            "calmar": 0.187,
+            "sortino": 0.362,
+            "worst_month": -0.1652,
+            "best_month": 0.127,
+            "worst_year": -0.3679,
+            "best_year": 0.3231
+          }
+        },
+        "port_bh": {
+          "metrics": {
+            "label": "50/50 Buy & Hold",
+            "n_days": 4853,
+            "n_years": 19.26,
+            "annual_return": 0.11169,
+            "annual_vol": 0.13666,
+            "sharpe": 0.488,
+            "sharpe_t": 2.14,
+            "mdd": -0.3249,
+            "calmar": 0.344,
+            "sortino": 0.621,
+            "worst_month": -0.1539,
+            "best_month": 0.1012,
+            "worst_year": -0.157,
+            "best_year": 0.4011
+          }
+        }
+      }
+    },
+    "oos": {
+      "A_monthly_12vix_spy": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=1.0",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.12351,
+            "annual_vol": 0.10304,
+            "sharpe": 0.762,
+            "sharpe_t": 1.35,
+            "mdd": -0.1138,
+            "calmar": 1.086,
+            "sortino": 1.044,
+            "worst_month": -0.042,
+            "best_month": 0.0597,
+            "worst_year": -0.0259,
+            "best_year": 0.1807
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=1.2",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.12351,
+            "annual_vol": 0.10304,
+            "sharpe": 0.762,
+            "sharpe_t": 1.35,
+            "mdd": -0.1138,
+            "calmar": 1.086,
+            "sortino": 1.044,
+            "worst_month": -0.042,
+            "best_month": 0.0597,
+            "worst_year": -0.0259,
+            "best_year": 0.1807
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=1.3",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.12351,
+            "annual_vol": 0.10304,
+            "sharpe": 0.762,
+            "sharpe_t": 1.35,
+            "mdd": -0.1138,
+            "calmar": 1.086,
+            "sortino": 1.044,
+            "worst_month": -0.042,
+            "best_month": 0.0597,
+            "worst_year": -0.0259,
+            "best_year": 0.1807
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=1.5",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.12351,
+            "annual_vol": 0.10304,
+            "sharpe": 0.762,
+            "sharpe_t": 1.35,
+            "mdd": -0.1138,
+            "calmar": 1.086,
+            "sortino": 1.044,
+            "worst_month": -0.042,
+            "best_month": 0.0597,
+            "worst_year": -0.0259,
+            "best_year": 0.1807
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 12/VIX cap=Uncapped",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.12351,
+            "annual_vol": 0.10304,
+            "sharpe": 0.762,
+            "sharpe_t": 1.35,
+            "mdd": -0.1138,
+            "calmar": 1.086,
+            "sortino": 1.044,
+            "worst_month": -0.042,
+            "best_month": 0.0597,
+            "worst_year": -0.0259,
+            "best_year": 0.1807
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        }
+      },
+      "B_monthly_12vix_5050": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=1.0",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17802,
+            "annual_vol": 0.09182,
+            "sharpe": 1.449,
+            "sharpe_t": 2.56,
+            "mdd": -0.076,
+            "calmar": 2.343,
+            "sortino": 1.814,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": 0.019,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=1.2",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17802,
+            "annual_vol": 0.09182,
+            "sharpe": 1.449,
+            "sharpe_t": 2.56,
+            "mdd": -0.076,
+            "calmar": 2.343,
+            "sortino": 1.814,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": 0.019,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=1.3",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17802,
+            "annual_vol": 0.09182,
+            "sharpe": 1.449,
+            "sharpe_t": 2.56,
+            "mdd": -0.076,
+            "calmar": 2.343,
+            "sortino": 1.814,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": 0.019,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=1.5",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17802,
+            "annual_vol": 0.09182,
+            "sharpe": 1.449,
+            "sharpe_t": 2.56,
+            "mdd": -0.076,
+            "calmar": 2.343,
+            "sortino": 1.814,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": 0.019,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 12/VIX 50/50 cap=Uncapped",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17802,
+            "annual_vol": 0.09182,
+            "sharpe": 1.449,
+            "sharpe_t": 2.56,
+            "mdd": -0.076,
+            "calmar": 2.343,
+            "sortino": 1.814,
+            "worst_month": -0.061,
+            "best_month": 0.059,
+            "worst_year": 0.019,
+            "best_year": 0.2607
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0,
+            "avg_weight": 0.746,
+            "max_weight": 0.9646,
+            "min_weight": 0.4858,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        }
+      },
+      "C_daily_12vix_spy": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=1.0",
+            "n_days": 805,
+            "n_years": 3.19,
+            "annual_return": 0.11734,
+            "annual_vol": 0.09224,
+            "sharpe": 0.784,
+            "sharpe_t": 1.4,
+            "mdd": -0.1086,
+            "calmar": 1.08,
+            "sortino": 1.079,
+            "worst_month": -0.0398,
+            "best_month": 0.0696,
+            "worst_year": -0.0297,
+            "best_year": 0.17
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.0099,
+            "avg_weight": 0.7264,
+            "max_weight": 1.0,
+            "min_weight": 0.2293,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=1.2",
+            "n_days": 805,
+            "n_years": 3.19,
+            "annual_return": 0.11732,
+            "annual_vol": 0.09224,
+            "sharpe": 0.784,
+            "sharpe_t": 1.4,
+            "mdd": -0.1086,
+            "calmar": 1.08,
+            "sortino": 1.079,
+            "worst_month": -0.0398,
+            "best_month": 0.0696,
+            "worst_year": -0.0297,
+            "best_year": 0.1699
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.005,
+            "pct_full_invested": 0.0099,
+            "avg_weight": 0.7264,
+            "max_weight": 1.0118,
+            "min_weight": 0.2293,
+            "avg_when_leveraged": 1.0059,
+            "max_leverage_excess": 0.0118
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=1.3",
+            "n_days": 805,
+            "n_years": 3.19,
+            "annual_return": 0.11732,
+            "annual_vol": 0.09224,
+            "sharpe": 0.784,
+            "sharpe_t": 1.4,
+            "mdd": -0.1086,
+            "calmar": 1.08,
+            "sortino": 1.079,
+            "worst_month": -0.0398,
+            "best_month": 0.0696,
+            "worst_year": -0.0297,
+            "best_year": 0.1699
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.005,
+            "pct_full_invested": 0.0099,
+            "avg_weight": 0.7264,
+            "max_weight": 1.0118,
+            "min_weight": 0.2293,
+            "avg_when_leveraged": 1.0059,
+            "max_leverage_excess": 0.0118
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=1.5",
+            "n_days": 805,
+            "n_years": 3.19,
+            "annual_return": 0.11732,
+            "annual_vol": 0.09224,
+            "sharpe": 0.784,
+            "sharpe_t": 1.4,
+            "mdd": -0.1086,
+            "calmar": 1.08,
+            "sortino": 1.079,
+            "worst_month": -0.0398,
+            "best_month": 0.0696,
+            "worst_year": -0.0297,
+            "best_year": 0.1699
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.005,
+            "pct_full_invested": 0.0099,
+            "avg_weight": 0.7264,
+            "max_weight": 1.0118,
+            "min_weight": 0.2293,
+            "avg_when_leveraged": 1.0059,
+            "max_leverage_excess": 0.0118
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Daily 12/VIX cap=Uncapped",
+            "n_days": 805,
+            "n_years": 3.19,
+            "annual_return": 0.11732,
+            "annual_vol": 0.09224,
+            "sharpe": 0.784,
+            "sharpe_t": 1.4,
+            "mdd": -0.1086,
+            "calmar": 1.08,
+            "sortino": 1.079,
+            "worst_month": -0.0398,
+            "best_month": 0.0696,
+            "worst_year": -0.0297,
+            "best_year": 0.1699
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.005,
+            "pct_full_invested": 0.0099,
+            "avg_weight": 0.7264,
+            "max_weight": 1.0118,
+            "min_weight": 0.2293,
+            "avg_when_leveraged": 1.0059,
+            "max_leverage_excess": 0.0118
+          }
+        }
+      },
+      "D_monthly_15vix_spy": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=1.0",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.15086,
+            "annual_vol": 0.12444,
+            "sharpe": 0.851,
+            "sharpe_t": 1.5,
+            "mdd": -0.1406,
+            "calmar": 1.073,
+            "sortino": 1.169,
+            "worst_month": -0.0474,
+            "best_month": 0.075,
+            "worst_year": -0.0326,
+            "best_year": 0.2197
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.8935,
+            "max_weight": 1.0,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=1.2",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.1525,
+            "annual_vol": 0.12876,
+            "sharpe": 0.835,
+            "sharpe_t": 1.47,
+            "mdd": -0.1406,
+            "calmar": 1.085,
+            "sortino": 1.144,
+            "worst_month": -0.0528,
+            "best_month": 0.075,
+            "worst_year": -0.0325,
+            "best_year": 0.2235
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.3155,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.9322,
+            "max_weight": 1.2,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 1.1226,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=1.3",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.15253,
+            "annual_vol": 0.1288,
+            "sharpe": 0.835,
+            "sharpe_t": 1.47,
+            "mdd": -0.1406,
+            "calmar": 1.085,
+            "sortino": 1.144,
+            "worst_month": -0.0528,
+            "best_month": 0.075,
+            "worst_year": -0.0325,
+            "best_year": 0.2236
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.3155,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.9325,
+            "max_weight": 1.2058,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 1.1236,
+            "max_leverage_excess": 0.2058
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=1.5",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.15253,
+            "annual_vol": 0.1288,
+            "sharpe": 0.835,
+            "sharpe_t": 1.47,
+            "mdd": -0.1406,
+            "calmar": 1.085,
+            "sortino": 1.144,
+            "worst_month": -0.0528,
+            "best_month": 0.075,
+            "worst_year": -0.0325,
+            "best_year": 0.2236
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.3155,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.9325,
+            "max_weight": 1.2058,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 1.1236,
+            "max_leverage_excess": 0.2058
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 15/VIX cap=Uncapped",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.15253,
+            "annual_vol": 0.1288,
+            "sharpe": 0.835,
+            "sharpe_t": 1.47,
+            "mdd": -0.1406,
+            "calmar": 1.085,
+            "sortino": 1.144,
+            "worst_month": -0.0528,
+            "best_month": 0.075,
+            "worst_year": -0.0325,
+            "best_year": 0.2236
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.3155,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.9325,
+            "max_weight": 1.2058,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 1.1236,
+            "max_leverage_excess": 0.2058
+          }
+        }
+      },
+      "D_monthly_18vix_spy": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=1.0",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.16552,
+            "annual_vol": 0.13901,
+            "sharpe": 0.867,
+            "sharpe_t": 1.53,
+            "mdd": -0.1643,
+            "calmar": 1.007,
+            "sortino": 1.186,
+            "worst_month": -0.0511,
+            "best_month": 0.0906,
+            "worst_year": -0.0415,
+            "best_year": 0.2327
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.7723,
+            "avg_weight": 0.9705,
+            "max_weight": 1.0,
+            "min_weight": 0.7287,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=1.2",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17548,
+            "annual_vol": 0.14932,
+            "sharpe": 0.874,
+            "sharpe_t": 1.54,
+            "mdd": -0.167,
+            "calmar": 1.051,
+            "sortino": 1.201,
+            "worst_month": -0.0575,
+            "best_month": 0.0906,
+            "worst_year": -0.0401,
+            "best_year": 0.2569
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.7455,
+            "pct_full_invested": 0.7723,
+            "avg_weight": 1.0722,
+            "max_weight": 1.2,
+            "min_weight": 0.7287,
+            "avg_when_leveraged": 1.1364,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=1.3",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17596,
+            "annual_vol": 0.15235,
+            "sharpe": 0.86,
+            "sharpe_t": 1.52,
+            "mdd": -0.167,
+            "calmar": 1.054,
+            "sortino": 1.18,
+            "worst_month": -0.0625,
+            "best_month": 0.0906,
+            "worst_year": -0.0401,
+            "best_year": 0.2596
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.7455,
+            "pct_full_invested": 0.7723,
+            "avg_weight": 1.1002,
+            "max_weight": 1.3,
+            "min_weight": 0.7287,
+            "avg_when_leveraged": 1.1739,
+            "max_leverage_excess": 0.3
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=1.5",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17737,
+            "annual_vol": 0.15456,
+            "sharpe": 0.856,
+            "sharpe_t": 1.51,
+            "mdd": -0.167,
+            "calmar": 1.062,
+            "sortino": 1.173,
+            "worst_month": -0.0639,
+            "best_month": 0.0906,
+            "worst_year": -0.0401,
+            "best_year": 0.2612
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.7455,
+            "pct_full_invested": 0.7723,
+            "avg_weight": 1.119,
+            "max_weight": 1.4469,
+            "min_weight": 0.7287,
+            "avg_when_leveraged": 1.1992,
+            "max_leverage_excess": 0.4469
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 18/VIX cap=Uncapped",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.17737,
+            "annual_vol": 0.15456,
+            "sharpe": 0.856,
+            "sharpe_t": 1.51,
+            "mdd": -0.167,
+            "calmar": 1.062,
+            "sortino": 1.173,
+            "worst_month": -0.0639,
+            "best_month": 0.0906,
+            "worst_year": -0.0401,
+            "best_year": 0.2612
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.7455,
+            "pct_full_invested": 0.7723,
+            "avg_weight": 1.119,
+            "max_weight": 1.4469,
+            "min_weight": 0.7287,
+            "avg_when_leveraged": 1.1992,
+            "max_leverage_excess": 0.4469
+          }
+        }
+      },
+      "E_monthly_15vix_5050": {
+        "cap_1.0": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=1.0",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.21996,
+            "annual_vol": 0.11062,
+            "sharpe": 1.582,
+            "sharpe_t": 2.79,
+            "mdd": -0.0946,
+            "calmar": 2.326,
+            "sortino": 1.975,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": 0.0226,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.0,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.8935,
+            "max_weight": 1.0,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 0,
+            "max_leverage_excess": 0.0
+          }
+        },
+        "cap_1.2": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=1.2",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.2232,
+            "annual_vol": 0.11474,
+            "sharpe": 1.553,
+            "sharpe_t": 2.74,
+            "mdd": -0.0948,
+            "calmar": 2.356,
+            "sortino": 1.944,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": 0.0228,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.3155,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.9322,
+            "max_weight": 1.2,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 1.1226,
+            "max_leverage_excess": 0.2
+          }
+        },
+        "cap_1.3": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=1.3",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.22325,
+            "annual_vol": 0.11478,
+            "sharpe": 1.553,
+            "sharpe_t": 2.74,
+            "mdd": -0.0948,
+            "calmar": 2.356,
+            "sortino": 1.944,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": 0.0228,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.3155,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.9325,
+            "max_weight": 1.2058,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 1.1236,
+            "max_leverage_excess": 0.2058
+          }
+        },
+        "cap_1.5": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=1.5",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.22325,
+            "annual_vol": 0.11478,
+            "sharpe": 1.553,
+            "sharpe_t": 2.74,
+            "mdd": -0.0948,
+            "calmar": 2.356,
+            "sortino": 1.944,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": 0.0228,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.3155,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.9325,
+            "max_weight": 1.2058,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 1.1236,
+            "max_leverage_excess": 0.2058
+          }
+        },
+        "cap_Uncapped": {
+          "metrics": {
+            "label": "Monthly 15/VIX 50/50 cap=Uncapped",
+            "n_days": 786,
+            "n_years": 3.12,
+            "annual_return": 0.22325,
+            "annual_vol": 0.11478,
+            "sharpe": 1.553,
+            "sharpe_t": 2.74,
+            "mdd": -0.0948,
+            "calmar": 2.356,
+            "sortino": 1.944,
+            "worst_month": -0.0758,
+            "best_month": 0.0743,
+            "worst_year": 0.0228,
+            "best_year": 0.3342
+          },
+          "leverage_stats": {
+            "pct_leveraged": 0.3155,
+            "pct_full_invested": 0.341,
+            "avg_weight": 0.9325,
+            "max_weight": 1.2058,
+            "min_weight": 0.6073,
+            "avg_when_leveraged": 1.1236,
+            "max_leverage_excess": 0.2058
+          }
+        }
+      },
+      "benchmarks": {
+        "spy_bh": {
+          "metrics": {
+            "label": "SPY Buy & Hold",
+            "n_days": 806,
+            "n_years": 3.2,
+            "annual_return": 0.19525,
+            "annual_vol": 0.15173,
+            "sharpe": 0.99,
+            "sharpe_t": 1.77,
+            "mdd": -0.1876,
+            "calmar": 1.041,
+            "sortino": 1.34,
+            "worst_month": -0.0557,
+            "best_month": 0.0913,
+            "worst_year": -0.0463,
+            "best_year": 0.2618
+          }
+        },
+        "port_bh": {
+          "metrics": {
+            "label": "50/50 Buy & Hold",
+            "n_days": 806,
+            "n_years": 3.2,
+            "annual_return": 0.26516,
+            "annual_vol": 0.12714,
+            "sharpe": 1.732,
+            "sharpe_t": 3.1,
+            "mdd": -0.113,
+            "calmar": 2.347,
+            "sortino": 2.195,
+            "worst_month": -0.0994,
+            "best_month": 0.0761,
+            "worst_year": 0.0019,
+            "best_year": 0.4011
+          }
+        }
+      }
+    },
+    "breakeven_margin": {
+      "12vix": {
+        "margin_0%": {
+          "sharpe": 0.231,
+          "annual_return": 0.06915
+        },
+        "baseline_cap1.0": {
+          "sharpe": 0.221,
+          "annual_return": 0.06796
+        },
+        "margin_1%": {
+          "sharpe": 0.231,
+          "annual_return": 0.06908
+        },
+        "margin_2%": {
+          "sharpe": 0.23,
+          "annual_return": 0.06901
+        },
+        "margin_3%": {
+          "sharpe": 0.229,
+          "annual_return": 0.06894
+        },
+        "margin_4%": {
+          "sharpe": 0.229,
+          "annual_return": 0.06887
+        },
+        "margin_5%": {
+          "sharpe": 0.228,
+          "annual_return": 0.0688
+        },
+        "margin_6%": {
+          "sharpe": 0.227,
+          "annual_return": 0.06872
+        },
+        "margin_8%": {
+          "sharpe": 0.226,
+          "annual_return": 0.06858
+        },
+        "margin_10%": {
+          "sharpe": 0.225,
+          "annual_return": 0.06844
+        }
+      },
+      "15vix": {
+        "margin_0%": {
+          "sharpe": 0.302,
+          "annual_return": 0.08434
+        },
+        "baseline_cap1.0": {
+          "sharpe": 0.29,
+          "annual_return": 0.08142
+        },
+        "margin_1%": {
+          "sharpe": 0.299,
+          "annual_return": 0.08385
+        },
+        "margin_2%": {
+          "sharpe": 0.295,
+          "annual_return": 0.08336
+        },
+        "margin_3%": {
+          "sharpe": 0.291,
+          "annual_return": 0.08288
+        },
+        "margin_4%": {
+          "sharpe": 0.287,
+          "annual_return": 0.08239
+        },
+        "margin_5%": {
+          "sharpe": 0.284,
+          "annual_return": 0.0819
+        },
+        "margin_6%": {
+          "sharpe": 0.28,
+          "annual_return": 0.08142
+        },
+        "margin_8%": {
+          "sharpe": 0.272,
+          "annual_return": 0.08045
+        },
+        "margin_10%": {
+          "sharpe": 0.265,
+          "annual_return": 0.07948
+        }
+      },
+      "18vix": {
+        "margin_0%": {
+          "sharpe": 0.344,
+          "annual_return": 0.09774
+        },
+        "baseline_cap1.0": {
+          "sharpe": 0.313,
+          "annual_return": 0.08956
+        },
+        "margin_1%": {
+          "sharpe": 0.336,
+          "annual_return": 0.09656
+        },
+        "margin_2%": {
+          "sharpe": 0.329,
+          "annual_return": 0.09539
+        },
+        "margin_3%": {
+          "sharpe": 0.321,
+          "annual_return": 0.09422
+        },
+        "margin_4%": {
+          "sharpe": 0.314,
+          "annual_return": 0.09305
+        },
+        "margin_5%": {
+          "sharpe": 0.306,
+          "annual_return": 0.09188
+        },
+        "margin_6%": {
+          "sharpe": 0.298,
+          "annual_return": 0.09071
+        },
+        "margin_8%": {
+          "sharpe": 0.283,
+          "annual_return": 0.08838
+        },
+        "margin_10%": {
+          "sharpe": 0.268,
+          "annual_return": 0.08606
+        }
+      }
+    },
+    "sub_periods": {
+      "pre_GFC": {
+        "cap_1.0": {
+          "sharpe": -0.249,
+          "mdd": -0.0673,
+          "annual_return": 0.01666,
+          "pct_leveraged": 0.0
+        },
+        "cap_1.3": {
+          "sharpe": -0.288,
+          "mdd": -0.0673,
+          "annual_return": 0.01147,
+          "pct_leveraged": 0.0823
+        },
+        "cap_Uncapped": {
+          "sharpe": -0.288,
+          "mdd": -0.0673,
+          "annual_return": 0.01147,
+          "pct_leveraged": 0.0823
+        },
+        "15vix_cap_1.0": {
+          "sharpe": -0.14,
+          "mdd": -0.0841,
+          "annual_return": 0.02605,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.3": {
+          "sharpe": -0.21,
+          "mdd": -0.0841,
+          "annual_return": 0.01501,
+          "pct_leveraged": 0.355
+        }
+      },
+      "GFC": {
+        "cap_1.0": {
+          "sharpe": -0.579,
+          "mdd": -0.2218,
+          "annual_return": -0.02635,
+          "pct_leveraged": 0.0
+        },
+        "cap_1.3": {
+          "sharpe": -0.579,
+          "mdd": -0.2218,
+          "annual_return": -0.02635,
+          "pct_leveraged": 0.0
+        },
+        "cap_Uncapped": {
+          "sharpe": -0.579,
+          "mdd": -0.2218,
+          "annual_return": -0.02635,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.0": {
+          "sharpe": -0.52,
+          "mdd": -0.2715,
+          "annual_return": -0.03512,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.3": {
+          "sharpe": -0.52,
+          "mdd": -0.2715,
+          "annual_return": -0.03512,
+          "pct_leveraged": 0.0
+        }
+      },
+      "recovery_2010_2013": {
+        "cap_1.0": {
+          "sharpe": 0.599,
+          "mdd": -0.098,
+          "annual_return": 0.10151,
+          "pct_leveraged": 0.0
+        },
+        "cap_1.3": {
+          "sharpe": 0.599,
+          "mdd": -0.098,
+          "annual_return": 0.10151,
+          "pct_leveraged": 0.0
+        },
+        "cap_Uncapped": {
+          "sharpe": 0.599,
+          "mdd": -0.098,
+          "annual_return": 0.10151,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.0": {
+          "sharpe": 0.687,
+          "mdd": -0.1215,
+          "annual_return": 0.12482,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.3": {
+          "sharpe": 0.688,
+          "mdd": -0.1217,
+          "annual_return": 0.12608,
+          "pct_leveraged": 0.1489
+        }
+      },
+      "low_vol_2014_2017": {
+        "cap_1.0": {
+          "sharpe": 0.6,
+          "mdd": -0.1202,
+          "annual_return": 0.10212,
+          "pct_leveraged": 0.0
+        },
+        "cap_1.3": {
+          "sharpe": 0.633,
+          "mdd": -0.1202,
+          "annual_return": 0.10607,
+          "pct_leveraged": 0.2586
+        },
+        "cap_Uncapped": {
+          "sharpe": 0.633,
+          "mdd": -0.1202,
+          "annual_return": 0.10607,
+          "pct_leveraged": 0.2586
+        },
+        "15vix_cap_1.0": {
+          "sharpe": 0.689,
+          "mdd": -0.1278,
+          "annual_return": 0.11967,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.3": {
+          "sharpe": 0.65,
+          "mdd": -0.1497,
+          "annual_return": 0.12273,
+          "pct_leveraged": 0.642
+        }
+      },
+      "vol_return_2018_2019": {
+        "cap_1.0": {
+          "sharpe": 0.07,
+          "mdd": -0.1553,
+          "annual_return": 0.05304,
+          "pct_leveraged": 0.0
+        },
+        "cap_1.3": {
+          "sharpe": 0.07,
+          "mdd": -0.1553,
+          "annual_return": 0.05304,
+          "pct_leveraged": 0.0
+        },
+        "cap_Uncapped": {
+          "sharpe": 0.07,
+          "mdd": -0.1553,
+          "annual_return": 0.05304,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.0": {
+          "sharpe": 0.194,
+          "mdd": -0.1759,
+          "annual_return": 0.07105,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.3": {
+          "sharpe": 0.116,
+          "mdd": -0.1922,
+          "annual_return": 0.0616,
+          "pct_leveraged": 0.3921
+        }
+      },
+      "covid_era_2020_2021": {
+        "cap_1.0": {
+          "sharpe": 0.507,
+          "mdd": -0.1493,
+          "annual_return": 0.09507,
+          "pct_leveraged": 0.0
+        },
+        "cap_1.3": {
+          "sharpe": 0.507,
+          "mdd": -0.1493,
+          "annual_return": 0.09507,
+          "pct_leveraged": 0.0
+        },
+        "cap_Uncapped": {
+          "sharpe": 0.507,
+          "mdd": -0.1493,
+          "annual_return": 0.09507,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.0": {
+          "sharpe": 0.596,
+          "mdd": -0.1839,
+          "annual_return": 0.1185,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.3": {
+          "sharpe": 0.596,
+          "mdd": -0.1839,
+          "annual_return": 0.1185,
+          "pct_leveraged": 0.0
+        }
+      },
+      "rate_hike_2022": {
+        "cap_1.0": {
+          "sharpe": -1.31,
+          "mdd": -0.1214,
+          "annual_return": -0.10393,
+          "pct_leveraged": 0.0
+        },
+        "cap_1.3": {
+          "sharpe": -1.31,
+          "mdd": -0.1214,
+          "annual_return": -0.10393,
+          "pct_leveraged": 0.0
+        },
+        "cap_Uncapped": {
+          "sharpe": -1.31,
+          "mdd": -0.1214,
+          "annual_return": -0.10393,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.0": {
+          "sharpe": -1.231,
+          "mdd": -0.1503,
+          "annual_return": -0.12993,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.3": {
+          "sharpe": -1.231,
+          "mdd": -0.1503,
+          "annual_return": -0.12993,
+          "pct_leveraged": 0.0
+        }
+      },
+      "recent_2023_present": {
+        "cap_1.0": {
+          "sharpe": 0.762,
+          "mdd": -0.1138,
+          "annual_return": 0.12351,
+          "pct_leveraged": 0.0
+        },
+        "cap_1.3": {
+          "sharpe": 0.762,
+          "mdd": -0.1138,
+          "annual_return": 0.12351,
+          "pct_leveraged": 0.0
+        },
+        "cap_Uncapped": {
+          "sharpe": 0.762,
+          "mdd": -0.1138,
+          "annual_return": 0.12351,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.0": {
+          "sharpe": 0.851,
+          "mdd": -0.1406,
+          "annual_return": 0.15086,
+          "pct_leveraged": 0.0
+        },
+        "15vix_cap_1.3": {
+          "sharpe": 0.835,
+          "mdd": -0.1406,
+          "annual_return": 0.15253,
+          "pct_leveraged": 0.3155
+        }
+      }
+    },
+    "whipsaw": {
+      "n_spike_events": 11,
+      "events": [
+        {
+          "date": "2015-08-21",
+          "vix_before": 12.8,
+          "vix_after": 28.0,
+          "cap_1.0_return": -0.0477,
+          "cap_1.3_return": -0.0477,
+          "cap_1.5_return": -0.0477
+        },
+        {
+          "date": "2015-08-24",
+          "vix_before": 13.0,
+          "vix_after": 40.7,
+          "cap_1.0_return": -0.048,
+          "cap_1.3_return": -0.048,
+          "cap_1.5_return": -0.048
+        },
+        {
+          "date": "2015-08-25",
+          "vix_before": 13.8,
+          "vix_after": 36.0,
+          "cap_1.0_return": -0.0432,
+          "cap_1.3_return": -0.0432,
+          "cap_1.5_return": -0.0432
+        },
+        {
+          "date": "2018-02-05",
+          "vix_before": 13.8,
+          "vix_after": 37.3,
+          "cap_1.0_return": -0.0307,
+          "cap_1.3_return": -0.0307,
+          "cap_1.5_return": -0.0307
+        },
+        {
+          "date": "2018-02-06",
+          "vix_before": 14.8,
+          "vix_after": 30.0,
+          "cap_1.0_return": -0.0229,
+          "cap_1.3_return": -0.0229,
+          "cap_1.5_return": -0.0229
+        },
+        {
+          "date": "2018-02-07",
+          "vix_before": 13.5,
+          "vix_after": 27.7,
+          "cap_1.0_return": -0.0312,
+          "cap_1.3_return": -0.0312,
+          "cap_1.5_return": -0.0312
+        },
+        {
+          "date": "2018-02-08",
+          "vix_before": 13.5,
+          "vix_after": 33.5,
+          "cap_1.0_return": -0.0185,
+          "cap_1.3_return": -0.0185,
+          "cap_1.5_return": -0.0185
+        },
+        {
+          "date": "2020-02-24",
+          "vix_before": 13.7,
+          "vix_after": 25.0,
+          "cap_1.0_return": -0.097,
+          "cap_1.3_return": -0.097,
+          "cap_1.5_return": -0.097
+        },
+        {
+          "date": "2020-02-25",
+          "vix_before": 14.8,
+          "vix_after": 27.9,
+          "cap_1.0_return": -0.1209,
+          "cap_1.3_return": -0.1209,
+          "cap_1.5_return": -0.1209
+        },
+        {
+          "date": "2020-02-26",
+          "vix_before": 14.4,
+          "vix_after": 27.6,
+          "cap_1.0_return": -0.111,
+          "cap_1.3_return": -0.111,
+          "cap_1.5_return": -0.111
+        },
+        {
+          "date": "2024-12-18",
+          "vix_before": 13.6,
+          "vix_after": 27.6,
+          "cap_1.0_return": -0.0226,
+          "cap_1.3_return": -0.0226,
+          "cap_1.5_return": -0.0226
+        }
+      ]
+    }
+  },
+  "conclusions": {
+    "headline": "槓桿對 12/VIX VT 幾乎無影響：Sharpe 差異僅 +0.0070。月底 VIX<12 只佔 6.5% 的時間，槓桿機會太少。即使用 15/VIX 擴大權重，槓桿帶來的邊際收益仍被融資成本抵消。結論：不建議在 12/VIX VT 中使用槓桿——保險費無法用槓桿抵消。",
+    "details": {
+      "12vix_sharpe_diff": 0.007,
+      "12vix_mdd_diff": 0.0,
+      "15vix_sharpe_diff": -0.006,
+      "15vix_mdd_diff": 0.0,
+      "5050_sharpe_diff": 0.005,
+      "12vix_pct_leveraged": 0.0652,
+      "15vix_pct_leveraged": 0.2859,
+      "risk_factors": [
+        "VIX 突然飆升時（如 2018 Feb Volmageddon）槓桿放大損失",
+        "低 VIX 環境常是風暴前的寧靜",
+        "融資成本在升息環境中大幅增加（2023: margin ~6-8%）",
+        "月度再平衡時 VIX<12 僅 6.1% 月份，槓桿機會稀少"
+      ]
+    }
+  }
+}

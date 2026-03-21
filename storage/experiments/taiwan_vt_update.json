@@ -1,0 +1,77 @@
+{
+  "experiment_id": "taiwan_vt_update_20260321",
+  "date": "2026-03-21",
+  "title": "台灣 0050.TW VT 績效更新與數據進度",
+  "sections": {
+    "5min_data_progress": {
+      "tw50_days": 34,
+      "tw50_range": "2026-01-20~2026-03-19",
+      "tw50_days_to_har_rv": 26,
+      "tw50_estimated_date": "2026-04-26",
+      "spy_days": 46,
+      "spy_range": "2026-01-14~2026-03-20",
+      "spy_days_to_har_rv": 14,
+      "spy_estimated_date": "2026-04-09",
+      "tw50_latest_annualized_rv_pct": 25.5
+    },
+    "vt_full_period": {
+      "buy_hold": {
+        "name": "B&H",
+        "years": 16.7,
+        "ann_ret%": 7.47,
+        "ann_vol%": 28.03,
+        "sharpe": 0.267,
+        "net_sharpe": 0.267,
+        "mdd%": -77.34,
+        "calmar": 0.097,
+        "sortino": 0.236
+      },
+      "vt_daily": {
+        "name": "VT日度",
+        "years": 16.7,
+        "ann_ret%": 6.78,
+        "ann_vol%": 14.31,
+        "sharpe": 0.473,
+        "net_sharpe": 0.369,
+        "mdd%": -48.4,
+        "calmar": 0.14,
+        "sortino": 0.374
+      },
+      "vt_monthly": {
+        "name": "VT月度",
+        "years": 16.7,
+        "ann_ret%": 4.04,
+        "ann_vol%": 14.57,
+        "sharpe": 0.277,
+        "net_sharpe": 0.237,
+        "mdd%": -48.62,
+        "calmar": 0.083,
+        "sortino": 0.22
+      }
+    },
+    "vt_2026_ytd": {
+      "bh_return_pct": 17.33,
+      "vt_return_pct": 9.7,
+      "avg_weight": 0.521,
+      "current_vix": 26.78,
+      "current_weight": 0.322
+    },
+    "vixtwn": {
+      "n_records": 69,
+      "mean": 25.29,
+      "corr_with_us_vix": 0.903,
+      "ratio_mean": 1.39
+    },
+    "tsmom_exposure": {
+      "note": "VT 與 TSMOM 的相關性"
+    }
+  },
+  "conclusions": [
+    "0050.TW 5-min: 34天, 距 HAR-RV 門檻還需 26 天 (~2026-04-26)",
+    "SPY 5-min: 46天, 距 HAR-RV 門檻還需 14 天 (~2026-04-09)",
+    "8.63/VIX 月度 VT 全期: Sharpe=0.277, MDD=-48.62%",
+    "2026 YTD: VT=+9.70% vs B&H=+17.33%",
+    "當前 VIX=26.78, VT 權重=32.2%",
+    "VIXTWN 資料僅 69 天，長期結論需累積至少 252 天"
+  ]
+}

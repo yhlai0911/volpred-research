@@ -1,0 +1,23 @@
+{
+  "id": "mile_3c598796",
+  "title": "Proxy Sensitivity 測試：GJR 優勢在充足樣本下對所有 Vol Proxy 穩健",
+  "description": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\nR9 pilot (42 天) 發現用 5-min RV 作為 truth 時 GARCH > GJR（ranking reversal）。這引發了核心發現是否 proxy-dependent 的擔憂。R11 正式測試顯示：**GJR > GARCH 在充足樣本下對所有 proxy 穩健。**\n\n## 核心發現\n\n### 1. 42 天 overlap（R9 reversal 的來源）\n\n| Proxy | Winner | DM p |\n|-------|--------|------|\n| r² | GJR | 0.71 (NS) |\n| Parkinson | GARCH | 0.29 (NS) |\n| RV 5-min | GJR | 0.095 (marginal) |\n| Garman-Klass | GARCH | NS |\n\n**結果：2/4 reverse，但全部統計不顯著。** N=42 太小。\n\n### 2. 充足樣本（N=563, 2024-2026）\n\n| Proxy | Winner | DM t | DM p |\n|-------|--------|------|------|\n| r² | **GJR** | 3.52 | 0.0005 |\n| Parkinson | **GJR** | 6.39 | <0.0001 |\n\n**GJR 在所有 proxy 下都顯著勝出。核心發現不需修正。**\n\n### 3. Reversal 的機制\n\n42 天 reversal 由三個因素交互作用：\n1. GJR 在 turbulent period 預測 +11% 更高的 variance（gamma activation）\n2. Range-based proxies 系統性低於 true variance\n3. N=42 不足以克服 noise\n\n### 4. Patton (2011) 條件\n\nConditional unbiasedness 在 full sample 的 r² proxy 下成立。HMSE（scale-invariant loss）在 N=42 下也支持 GJR——確認 reversal 是 scale/level 問題。\n\n## 實務意義\n\n- **GJR-GARCH 作為 equity vol forecasting 的首選不需改變**\n- 但使用非 r² proxy（如 Parkinson, Garman-Klass）評估 GARCH 時要注意 scale mismatch\n- 小樣本結論不可靠（至少需 200+ 天）\n",
+  "category": "milestone",
+  "phase": "Phase_R",
+  "details": {
+    "finding": "GJR proxy-robust",
+    "dm_r2": 3.52,
+    "dm_parkinson": 6.39
+  },
+  "tags": [
+    "Proxy Sensitivity",
+    "GJR-GARCH",
+    "QLIKE",
+    "Patton",
+    "Robustness",
+    "SPY",
+    "方法論"
+  ],
+  "published_at": "2026-03-17T02:49:37.438359+00:00",
+  "status": "published"
+}

@@ -1,0 +1,72 @@
+{
+  "experiment_id": "garch_midas_20260321",
+  "model": "GARCH-MIDAS (Engle, Ghysels & Sohn, 2013)",
+  "description": "Tests whether adding low-frequency macro variables to a GARCH model improves daily volatility forecasting for SPY. Variants: VIX (daily), yield curve TNX (daily), monthly realized variance. Benchmark: GJR-GARCH(1,1).",
+  "specification": {
+    "long_run": "\u03c4_t = m + \u03b8 \u00d7 \u03a3 \u03c6_k(w1,w2) \u00d7 X_{t-k}",
+    "short_run": "g_t = (1-\u03b1-\u03b2-\u03b3/2) + (\u03b1+\u03b3\u00b7I_{r<0})\u00b7(r\u00b2/\u03c4) + \u03b2\u00b7g_{t-1}",
+    "total": "\u03c3\u00b2_t = \u03c4_t \u00d7 g_t",
+    "phi_weights": "Beta polynomial: \u03c6_k = k^{w1-1}\u00b7(K-k)^{w2-1} / \u03a3"
+  },
+  "benchmark": "GJR-GARCH(1,1)",
+  "oos_period": "2023-01-01 to 2026-03-20",
+  "window": 2000,
+  "refit_frequency": 63,
+  "n_oos_days": 806,
+  "created_at": "2026-03-21",
+  "hypothesis": "VIX already incorporates macro information \u2192 GARCH-MIDAS with true macro variables should be null",
+  "conclusion": "nuanced_null",
+  "conclusion_detail": "True macro variables (yield curve, monthly RV) are NULL or significantly WORSE than GJR-GARCH. VIX as MIDAS driver shows significant improvement (DM t=-3.87, p=0.0001), but VIX is itself a volatility measure — not an external macro variable. This confirms VIX sufficient statistic hypothesis: VIX contains incremental vol information beyond GARCH, but no true macro variable does.",
+  "assets": {
+    "SPY": {
+      "n_oos": 806,
+      "data_range": "2005-01-04 to 2026-03-20 (5336 obs)",
+      "results": {
+        "gjr_baseline": {
+          "qlike": -8.2557,
+          "mse": 2.532e-07,
+          "mae": 1.794e-04,
+          "mz_r2": 0.0228,
+          "n_oos": 806
+        },
+        "midas_vix_daily": {
+          "qlike": -8.3041,
+          "mse": 1.756e-07,
+          "mae": 1.329e-04,
+          "mz_r2": 0.0236,
+          "dm_t": -3.868,
+          "dm_p": 0.0001,
+          "better_than_gjr": true,
+          "caveat": "VIX is a volatility measure, not a true macro variable. This result confirms VIX contains incremental info beyond GARCH, consistent with 12/VIX VT outperforming GARCH-VT (J3/J13)."
+        },
+        "midas_yield_curve_daily": {
+          "qlike": -8.2436,
+          "mse": 2.381e-07,
+          "mae": 1.715e-04,
+          "mz_r2": 0.0229,
+          "dm_t": 2.344,
+          "dm_p": 0.0191,
+          "better_than_gjr": false,
+          "note": "Significantly WORSE than GJR (positive DM-t = GJR better). Yield curve adds noise, not signal."
+        },
+        "midas_monthly_rv": {
+          "qlike": -8.1951,
+          "mse": 2.680e-07,
+          "mae": 1.861e-04,
+          "mz_r2": 0.0224,
+          "dm_t": 3.387,
+          "dm_p": 0.0007,
+          "better_than_gjr": false,
+          "note": "Significantly WORSE than GJR (positive DM-t = GJR better). Monthly RV is too low-frequency; GARCH persistence already captures this. Confirms K51 MF2-GARCH null."
+        }
+      }
+    }
+  },
+  "interpretation": {
+    "main_finding": "For true macro variables (yield curve, monthly RV), GARCH-MIDAS is NULL or even harmful — they are significantly WORSE than standard GJR-GARCH. Only VIX as MIDAS driver improves forecasting, but VIX is a market-derived volatility measure, not an external macro variable.",
+    "vix_sufficient_statistic": "MIDAS-VIX improvement (QLIKE -8.304 vs -8.256, DM p=0.0001) confirms VIX contains incremental volatility information beyond what GARCH captures from returns alone. This is consistent with J3/J4/J8/J13: VIX is a sufficient statistic. The GARCH-MIDAS framework with VIX is effectively another way to incorporate VIX into vol forecasting — similar to 12/VIX VT but through model structure rather than trading rule.",
+    "macro_null_confirmed": "Yield curve (TNX) and monthly realized variance both significantly WORSEN forecasting. This confirms: (1) K51 MF2-GARCH null extends to external macro variables, (2) GARCH persistence (alpha+beta+gamma/2 ~ 0.97, half-life ~23 days) already captures slow-moving vol, (3) monthly data is too low-frequency to add signal at daily horizon.",
+    "why_macro_hurts": "Adding macro variables actually HURTS by introducing estimation noise. The MIDAS Beta polynomial weights (w1, w2) add 4 extra parameters that need estimation. When the signal is weak (macro variables), the noise from estimating these parameters dominates any marginal information gain.",
+    "practical_implication": "For practitioners: (1) VIX is sufficient for daily vol forecasting — no need to look at macro fundamentals, (2) If using VIX in a model, simple rules (12/VIX) work as well as complex MIDAS structures, (3) The only remaining frontier for improvement is intraday data (HAR-RV, Realized GARCH)."
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "mile_9ecefbe7",
+  "title": "VaR 違反群聚分析：辨識不可預測的外部衝擊",
+  "description": "對 GJR-GARCH 的 10 次 VaR 1% 違反進行群聚分析。\n\n關鍵發現：\n- 7/24 和 8/05 違反相隔僅 7 天 → 2024 日圓套利交易平倉衝擊\n- 12/18 違反最嚴重（實際跌 3.03% vs VaR 1.45%）→ Fed 鷹派降息\n- 8/10 次違反發生在「前 5 天正報酬」之後 → 突發性下跌\n- 30% 的違反來自不可預測的外部事件，非模型可控\n\n結論：追求 VaR 1% 完美通過不切實際。\n研究轉向：改善 QLIKE（可控精度）+ 設計更好的 ES 指標 + 嘗試多尺度波動率結構。\n    ",
+  "category": "milestone",
+  "phase": "var_analysis",
+  "details": {
+    "violations_from_events": 3,
+    "total_violations": 10,
+    "event_pct": 0.3,
+    "key_events": [
+      "2024-08-05 yen carry unwind",
+      "2024-12-18 fed hawkish cut"
+    ]
+  },
+  "published_at": "2026-03-14T12:01:52.349223+00:00",
+  "status": "published",
+  "tags": [
+    "VaR",
+    "危機分析",
+    "波動率預測",
+    "GJR-GARCH"
+  ]
+}

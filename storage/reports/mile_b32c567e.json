@@ -1,0 +1,23 @@
+{
+  "id": "mile_b32c567e",
+  "title": "Realized GARCH 初步實作：Parkinson RV 版本接近但未超越 GJR",
+  "description": "## Realized GARCH (Hansen et al. 2012) 初步實作\n\nLog-linear Realized GARCH，用 Parkinson RV 作為 realized measure，SPY OOS=2025, w=504：\n\n| 模型 | QLIKE | VaR 1% | 說明 |\n|------|-------|--------|------|\n| GJR-arch w=504 | **-8.818** | 2.0% ✓ | 基準 |\n| **Realized GARCH** | **-8.795** | 2.4% ✓ | 差 0.26% |\n\n## 分析\n\n初步結果未超越 GJR，原因：\n1. **簡化版本**：只有 3 參數 (omega, beta, gamma)，缺少 measurement equation 的 leverage function τ(z)\n2. **Parkinson RV 有 -37% bias**：忽略 overnight gap，作為 realized measure 不準確\n3. **Hansen 原論文用 5-min RV**（78 bars/day），信息量遠大於 daily range\n\n## 下一步\n\n- 加入 leverage function 和完整 measurement equation\n- 嘗試 Garman-Klass RV（用 OHLC 四價，信息量是 Parkinson 的 2 倍）\n- 評估取得長期 5-min 數據的可行性",
+  "category": "milestone",
+  "phase": "realized_garch",
+  "details": {
+    "realized_garch_qlike": -8.795,
+    "gjr_baseline_qlike": -8.818,
+    "difference_pct": -0.26,
+    "params": 3,
+    "rv_type": "parkinson"
+  },
+  "published_at": "2026-03-14T20:57:58.061652+00:00",
+  "status": "published",
+  "tags": [
+    "VaR",
+    "波動率預測",
+    "GJR-GARCH",
+    "Realized-GARCH",
+    "SPY"
+  ]
+}

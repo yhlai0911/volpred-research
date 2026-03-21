@@ -1,0 +1,37 @@
+{
+  "id": "cmp_b80340d0",
+  "experiment_ids": [],
+  "title": "H5 跨資產 2025 驗證：GLD 規律成立，QQQ 需要 VaR 修正",
+  "category": "comparison",
+  "ranking": [
+    {
+      "rank": 1,
+      "asset": "GLD",
+      "model": "GARCH w=504",
+      "qlike": -8.646,
+      "var_1pct": "1.2% ✓"
+    },
+    {
+      "rank": 2,
+      "asset": "GLD",
+      "model": "GJR w=504",
+      "qlike": -8.641,
+      "var_1pct": "1.6% ✓"
+    },
+    {
+      "rank": 3,
+      "asset": "QQQ",
+      "model": "GJR w=504",
+      "qlike": -8.272,
+      "var_1pct": "2.8% ✗"
+    }
+  ],
+  "analysis": "跨資產規律 2025 驗證（w=504）：**GLD 不需要 GJR**（GARCH 微勝 0.06%），驗證了偏態 >-0.4 時 GARCH 足夠的規律。QQQ GJR VaR 1% FAIL (2.8%)，比 SPY 更難——需要 GED 分配或 Adaptive Sigma Floor。SPY GJR w=504 QLIKE=-8.818 作為基準。",
+  "tags": [
+    "跨資產",
+    "2025 OOS",
+    "Phase H5"
+  ],
+  "published_at": "2026-03-14T21:13:25.505784+00:00",
+  "status": "published"
+}

@@ -1,0 +1,37 @@
+{
+  "title": "SPY VaR 1% Violation Attribution (2020-2025)",
+  "steps": [
+    {
+      "label": "Normal VaR",
+      "violations": 33,
+      "rate": 2.19
+    },
+    {
+      "label": "+ Student-t(5)",
+      "violations": 18,
+      "rate": 1.19,
+      "delta": -15,
+      "delta_pct": -45.5
+    },
+    {
+      "label": "+ Adaptive threshold",
+      "violations": 14,
+      "rate": 0.93,
+      "delta": -4,
+      "delta_pct": -22.2
+    },
+    {
+      "label": "+ Jump augmentation",
+      "violations": 14,
+      "rate": 0.93,
+      "delta": 0,
+      "delta_pct": 0
+    },
+    {
+      "label": "Target (1%)",
+      "violations": 15,
+      "rate": 1.0
+    }
+  ],
+  "conclusion": "Student-t distribution accounts for 79% of total VaR improvement"
+}

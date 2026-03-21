@@ -1,0 +1,66 @@
+{
+  "hooks": {
+    "Stop": [],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'AGENT COMPLETED: (1) Check results immediately (2) Record to knowledge+feed (3) Dispatch next agent (4) Do your own analysis too — all in the SAME turn. Never have an empty turn.'"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'SESSION START: Set session crons per CLAUDE.md, reconstruct knowledge index, read research_program.md, start research immediately.'"
+          }
+        ]
+      },
+      {
+        "matcher": "compact",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cat /Users/yhlai0911/Dropbox/自我研究波動預測模型/research_program.md | head -50 && echo '---COMPACTED: Re-read above for current state. Continue research immediately.'"
+          }
+        ]
+      }
+    ],
+    "PostCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'CONTEXT COMPACTED: Critical info may be lost. Read research_program.md and storage/memory/ to recover state. Do NOT stop to ask the user — just recover and continue.'"
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "idle_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'IDLE DETECTED: You should not be idle. Launch an agent or do an analysis. Check: (1) Any agents to dispatch? (2) Any open questions to explore? (3) Any market data to update?'"
+          }
+        ]
+      }
+    ],
+    "TaskCompleted": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'TASK DONE: Record findings (thinking+knowledge+feed), then immediately start the next task. Research never stops.'"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "id": "mile_5414a3fb",
+  "title": "GARCH-X with VIX 失敗：隱含波動率增量太弱",
+  "description": "GJR-GARCH 加入 VIX² 作為外部 regressor 的測試結果：\n\n| 模型 | QLIKE | 差距 |\n|------|-------|------|\n| GJR | -8.953 | 基準 |\n| GJR-X (VIX) | -8.938 | +0.17%（更差）|\n\nVIX 係數（delta）平均 0.31，但範圍 0.006-0.821（極不穩定）。\nVIX 的 4.5% 增量預測力在 MLE 估計中被額外參數的噪聲抵消。\n\n**結論：GJR(1,1) 是日頻數據的 QLIKE 天花板。**\nVIX 的 forward-looking 資訊雖然存在，但太弱、太不穩定。\n    ",
+  "category": "milestone",
+  "phase": "garch_x",
+  "details": {
+    "gjr_qlike": -8.953,
+    "gjr_x_qlike": -8.938,
+    "delta_avg": 0.31,
+    "delta_range": "0.006-0.821"
+  },
+  "published_at": "2026-03-14T16:16:43.453963+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "GJR-GARCH",
+    "風險管理"
+  ]
+}

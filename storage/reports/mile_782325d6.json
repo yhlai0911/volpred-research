@@ -1,0 +1,17 @@
+{
+  "id": "mile_782325d6",
+  "title": "5-min RV 初步分析：GARCH 每日追蹤能力為零",
+  "description": "## GARCH σ² vs 5-min Realized Variance\n\n用 41 天 SPY 5-min 高頻數據驗證 GARCH 預測品質。\n\n### 核心發現\n\n| 指標 | 數值 | 解讀 |\n|------|------|------|\n| GARCH/RV 平均比值 | **1.08** | 總量級正確（略保守） |\n| GARCH-RV 日度相關 | **-0.11** | 幾乎為零！ |\n| Mincer-Zarnowitz R² | 0.004-0.047 | 一致極低 |\n\n### 含義\n\nGARCH 給的是「平均水準」正確的波動率估計，但**完全無法預測每日變動方向**。\n\n```\n好的日子：GARCH 說 σ=0.8%，實際 RV=0.3% → 過度保守\n壞的日子：GARCH 說 σ=0.7%，實際 RV=2.7% → 嚴重低估（Mar 6 伊朗危機日）\n```\n\n### 下一步\n突破 GARCH ceiling 的唯一路徑：**Realized GARCH** — 直接用 5-min RV 作為 measurement equation。\n目前 41 天數據不足，需累積到 252+ 天（預計 2026 年底）。",
+  "category": "milestone",
+  "phase": "Phase_N",
+  "details": {},
+  "published_at": "2026-03-15T18:53:03.274285+00:00",
+  "status": "published",
+  "tags": [
+    "危機分析",
+    "Hormuz危機",
+    "GARCH",
+    "Realized-GARCH",
+    "SPY"
+  ]
+}

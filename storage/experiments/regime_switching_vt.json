@@ -1,0 +1,460 @@
+{
+  "experiment": "K48: Markov Regime-Switching for VT Enhancement",
+  "description": "Test whether HMM (Hidden Markov Model) regime detection adds value over raw 12/VIX VT. Fit 2-state and 3-state HMM on SPY daily returns with rolling window=2000, refit every 21 days. Compare 4 regime-conditional VT variants with base 12/VIX. No look-ahead bias: regime detected at t, weight applied to t+1.",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T15:52:14.909835",
+  "config": {
+    "start": "2005-01-01",
+    "oos_start": "2023-01-01",
+    "rolling_window": 2000,
+    "refit_every": 21,
+    "vix_base_threshold": 12.0,
+    "hmm_n_states_list": [
+      2,
+      3
+    ],
+    "calm_threshold": 15.0,
+    "crisis_threshold": 10.0,
+    "transition_threshold": 12.0,
+    "crisis_prob_cutoff": 0.5,
+    "cash_proxy": "SHY",
+    "n_bootstrap": 5000,
+    "random_seed": 42,
+    "ann_factor": 252
+  },
+  "regime_characteristics_full_sample": {
+    "2_state": {
+      "states": {
+        "Calm": {
+          "name": "Calm",
+          "pct_time": 77.7,
+          "mean_return_ann_pct": 22.6,
+          "vol_ann_pct": 11.22,
+          "skewness": -0.208,
+          "mean_vix": 15.94,
+          "median_vix": 15.24,
+          "avg_duration_days": 148.1,
+          "median_duration_days": 77.0,
+          "n_episodes": 28
+        },
+        "Crisis": {
+          "name": "Crisis",
+          "pct_time": 22.3,
+          "mean_return_ann_pct": -26.72,
+          "vol_ann_pct": 34.25,
+          "skewness": 0.215,
+          "mean_vix": 30.35,
+          "median_vix": 27.31,
+          "avg_duration_days": 44.0,
+          "median_duration_days": 16.0,
+          "n_episodes": 27
+        }
+      },
+      "transition_matrix": [
+        [
+          0.987,
+          0.013
+        ],
+        [
+          0.0452,
+          0.9548
+        ]
+      ],
+      "log_likelihood": 17306.95
+    },
+    "3_state": {
+      "states": {
+        "Calm": {
+          "name": "Calm",
+          "pct_time": 61.9,
+          "mean_return_ann_pct": 27.86,
+          "vol_ann_pct": 9.36,
+          "skewness": -0.148,
+          "mean_vix": 14.84,
+          "median_vix": 14.18,
+          "avg_duration_days": 80.6,
+          "median_duration_days": 55.0,
+          "n_episodes": 41
+        },
+        "Transition": {
+          "name": "Transition",
+          "pct_time": 34.6,
+          "mean_return_ann_pct": -9.87,
+          "vol_ann_pct": 21.77,
+          "skewness": -0.082,
+          "mean_vix": 23.83,
+          "median_vix": 23.01,
+          "avg_duration_days": 39.3,
+          "median_duration_days": 20.0,
+          "n_episodes": 47
+        },
+        "Crisis": {
+          "name": "Crisis",
+          "pct_time": 3.5,
+          "mean_return_ann_pct": -64.19,
+          "vol_ann_pct": 63.68,
+          "skewness": 0.323,
+          "mean_vix": 49.39,
+          "median_vix": 46.35,
+          "avg_duration_days": 37.0,
+          "median_duration_days": 42.0,
+          "n_episodes": 5
+        }
+      },
+      "transition_matrix": [
+        [
+          0.9752,
+          0.0248,
+          0.0
+        ],
+        [
+          0.0402,
+          0.9559,
+          0.0038
+        ],
+        [
+          0.0,
+          0.0373,
+          0.9627
+        ]
+      ],
+      "log_likelihood": 17572.69
+    }
+  },
+  "overlap_analysis": {
+    "corr_vix_state_2s": 0.6249,
+    "p_value_corr": 0.0,
+    "calm_vix_mean": 15.9,
+    "calm_vix_median": 14.98,
+    "crisis_vix_mean": 27.42,
+    "crisis_vix_median": 25.61,
+    "vix20_hmm_agreement_pct": 85.2,
+    "weight_corr_discrete": 0.9364,
+    "weight_corr_prob": 0.9878
+  },
+  "oos_regime_transitions": [
+    {
+      "date": "2023-01-04",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 22.0
+    },
+    {
+      "date": "2023-01-05",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 22.5
+    },
+    {
+      "date": "2023-01-12",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 18.8
+    },
+    {
+      "date": "2023-01-20",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 19.9
+    },
+    {
+      "date": "2023-01-24",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 19.2
+    },
+    {
+      "date": "2023-02-08",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 19.6
+    },
+    {
+      "date": "2023-02-09",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 20.7
+    },
+    {
+      "date": "2023-02-21",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 22.9
+    },
+    {
+      "date": "2023-02-22",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 22.3
+    },
+    {
+      "date": "2023-03-09",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 22.6
+    },
+    {
+      "date": "2023-03-27",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 20.6
+    },
+    {
+      "date": "2024-07-24",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 18.0
+    },
+    {
+      "date": "2024-07-25",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 18.5
+    },
+    {
+      "date": "2024-08-02",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 23.4
+    },
+    {
+      "date": "2024-08-19",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 14.6
+    },
+    {
+      "date": "2024-11-06",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 16.3
+    },
+    {
+      "date": "2024-11-08",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 14.9
+    },
+    {
+      "date": "2024-12-18",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 27.6
+    },
+    {
+      "date": "2024-12-24",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 14.3
+    },
+    {
+      "date": "2025-03-03",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 22.8
+    },
+    {
+      "date": "2025-03-20",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 19.8
+    },
+    {
+      "date": "2025-03-28",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 21.6
+    },
+    {
+      "date": "2025-03-31",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 22.3
+    },
+    {
+      "date": "2025-04-03",
+      "from": "Calm",
+      "to": "Crisis",
+      "vix": 30.0
+    },
+    {
+      "date": "2025-04-29",
+      "from": "Crisis",
+      "to": "Calm",
+      "vix": 24.2
+    }
+  ],
+  "results": {
+    "Full Sample": {
+      "Buy & Hold": {
+        "sharpe": 0.6111,
+        "ann_return": 0.1161,
+        "ann_vol": 0.19,
+        "mdd": -0.5519,
+        "calmar": 0.2104,
+        "sortino": 0.746,
+        "n_obs": 5336
+      },
+      "12/VIX (Base)": {
+        "sharpe": 0.7908,
+        "ann_return": 0.0738,
+        "ann_vol": 0.0933,
+        "mdd": -0.2466,
+        "calmar": 0.2991,
+        "sortino": 1.0633,
+        "n_obs": 5335
+      },
+      "Regime 2S Discrete": {
+        "sharpe": 0.7973,
+        "ann_return": 0.0798,
+        "ann_vol": 0.1001,
+        "mdd": -0.2466,
+        "calmar": 0.3238,
+        "sortino": 1.0673,
+        "n_obs": 5335,
+        "vs_base_delta_sharpe": 0.0065,
+        "vs_base_harvey_t": 0.03,
+        "mdd_bootstrap": {
+          "mean_diff": -0.0132,
+          "p_value": 0.843
+        }
+      },
+      "Regime 2S Prob (p=0.3)": {
+        "sharpe": 0.8052,
+        "ann_return": 0.0719,
+        "ann_vol": 0.0893,
+        "mdd": -0.2466,
+        "calmar": 0.2917,
+        "sortino": 1.087,
+        "n_obs": 5335,
+        "vs_base_delta_sharpe": 0.0144,
+        "vs_base_harvey_t": 0.07,
+        "mdd_bootstrap": {
+          "mean_diff": 0.0098,
+          "p_value": 0.1358
+        }
+      },
+      "Regime 3S Discrete": {
+        "sharpe": 0.8102,
+        "ann_return": 0.0792,
+        "ann_vol": 0.0977,
+        "mdd": -0.2466,
+        "calmar": 0.321,
+        "sortino": 1.0838,
+        "n_obs": 5335,
+        "vs_base_delta_sharpe": 0.0194,
+        "vs_base_harvey_t": 0.09,
+        "mdd_bootstrap": {
+          "mean_diff": -0.0065,
+          "p_value": 0.7252
+        }
+      },
+      "Regime 2S Prob (p=0.5)": {
+        "sharpe": 0.8106,
+        "ann_return": 0.0707,
+        "ann_vol": 0.0872,
+        "mdd": -0.2466,
+        "calmar": 0.2867,
+        "sortino": 1.0898,
+        "n_obs": 5335,
+        "vs_base_delta_sharpe": 0.0198,
+        "vs_base_harvey_t": 0.09,
+        "mdd_bootstrap": {
+          "mean_diff": 0.0148,
+          "p_value": 0.1582
+        }
+      }
+    },
+    "OOS (2023+)": {
+      "Buy & Hold": {
+        "sharpe": 1.2512,
+        "ann_return": 0.1899,
+        "ann_vol": 0.1517,
+        "mdd": -0.1876,
+        "calmar": 1.0123,
+        "sortino": 1.6933,
+        "n_obs": 806
+      },
+      "12/VIX (Base)": {
+        "sharpe": 1.4243,
+        "ann_return": 0.1309,
+        "ann_vol": 0.0919,
+        "mdd": -0.1014,
+        "calmar": 1.2912,
+        "sortino": 1.9835,
+        "n_obs": 806
+      },
+      "Regime 2S Discrete": {
+        "sharpe": 1.2894,
+        "ann_return": 0.1384,
+        "ann_vol": 0.1073,
+        "mdd": -0.1169,
+        "calmar": 1.1835,
+        "sortino": 1.7675,
+        "n_obs": 806,
+        "vs_base_delta_sharpe": -0.1349,
+        "vs_base_harvey_t": -0.24,
+        "mdd_bootstrap": {
+          "mean_diff": -0.0211,
+          "p_value": 0.995
+        }
+      },
+      "Regime 2S Prob (p=0.3)": {
+        "sharpe": 1.4222,
+        "ann_return": 0.1248,
+        "ann_vol": 0.0877,
+        "mdd": -0.0918,
+        "calmar": 1.359,
+        "sortino": 1.9932,
+        "n_obs": 806,
+        "vs_base_delta_sharpe": -0.0021,
+        "vs_base_harvey_t": -0.0,
+        "mdd_bootstrap": {
+          "mean_diff": 0.004,
+          "p_value": 0.1946
+        }
+      },
+      "Regime 3S Discrete": {
+        "sharpe": 1.3404,
+        "ann_return": 0.1367,
+        "ann_vol": 0.102,
+        "mdd": -0.1172,
+        "calmar": 1.1669,
+        "sortino": 1.824,
+        "n_obs": 806,
+        "vs_base_delta_sharpe": -0.0839,
+        "vs_base_harvey_t": -0.15,
+        "mdd_bootstrap": {
+          "mean_diff": -0.0134,
+          "p_value": 0.9578
+        }
+      },
+      "Regime 2S Prob (p=0.5)": {
+        "sharpe": 1.4124,
+        "ann_return": 0.1207,
+        "ann_vol": 0.0855,
+        "mdd": -0.0861,
+        "calmar": 1.4012,
+        "sortino": 1.9747,
+        "n_obs": 806,
+        "vs_base_delta_sharpe": -0.0119,
+        "vs_base_harvey_t": -0.02,
+        "mdd_bootstrap": {
+          "mean_diff": 0.0063,
+          "p_value": 0.2054
+        }
+      }
+    }
+  },
+  "conclusion": "NULL RESULT: Regime-switching 無法顯著改善 12/VIX VT",
+  "verdict": "null",
+  "implications": [
+    "VIX 與 HMM regime 狀態高度相關 (r=0.625) — VIX 已包含 regime 資訊",
+    "12/VIX 權重與 Regime VT 權重相關 0.936 — 幾乎等效",
+    "HMM 增加計算複雜度（rolling fit + state prediction）但不增加預測能力",
+    "12/VIX 的 1/VIX 函數形式已隱含 regime-adaptive 配置",
+    "支持 VIX sufficient statistic 假說（J3/J4/J8/J13 之後的又一次確認）",
+    "Ang & Bekaert (2002) regime-switching portfolio choice 在 VT overlay 場景下無增量"
+  ]
+}

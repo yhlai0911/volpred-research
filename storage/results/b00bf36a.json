@@ -1,0 +1,91 @@
+{
+  "experiment_id": "b00bf36a",
+  "model_name": "gjr_arch",
+  "asset": "QQQ",
+  "config": {
+    "model_params": {
+      "dist": "normal"
+    },
+    "window_size": 504,
+    "oos_start": "2025-01-01",
+    "oos_end": "2025-12-31"
+  },
+  "metrics": {
+    "mse": 1.261313548219519e-07,
+    "mae": 0.004773385689016803,
+    "qlike": -8.272092893588237,
+    "hmse": 0.9622957751859033,
+    "r2_log": -0.20976427508800044,
+    "n_forecasts": 249,
+    "mean_actual_var": 0.00013422345075233893,
+    "mean_forecast_var": 0.000173220738578429,
+    "var_es": {
+      "alpha_0.01": {
+        "alpha": 0.01,
+        "n_violations": 7,
+        "violation_rate": 0.028112449799196786,
+        "expected_rate": 0.01,
+        "kupiec": {
+          "statistic": 5.533804264114174,
+          "p_value": 0.018652507192101098,
+          "observed_rate": 0.028112449799196786,
+          "expected_rate": 0.01,
+          "n_violations": 7,
+          "total": 249,
+          "conclusion": "reject"
+        },
+        "christoffersen": {
+          "independence_stat": 1.8383489485189823,
+          "independence_pval": 0.17514458391102672,
+          "n00": 235,
+          "n01": 6,
+          "n10": 6,
+          "n11": 1,
+          "pi01": 0.024896265560165973,
+          "pi11": 0.14285714285714285,
+          "conclusion": "independent"
+        },
+        "avg_loss_given_violation": 0.03880088134267031,
+        "avg_es_forecast": 0.03397818351214436,
+        "es_ratio": 1.141935128133093,
+        "var_mean": 0.028573946108458936,
+        "es_mean": 0.032736156251376936
+      },
+      "alpha_0.05": {
+        "alpha": 0.05,
+        "n_violations": 15,
+        "violation_rate": 0.060240963855421686,
+        "expected_rate": 0.05,
+        "kupiec": {
+          "statistic": 0.5174755610395891,
+          "p_value": 0.4719205268183777,
+          "observed_rate": 0.060240963855421686,
+          "expected_rate": 0.05,
+          "n_violations": 15,
+          "total": 249,
+          "conclusion": "fail_to_reject"
+        },
+        "christoffersen": {
+          "independence_stat": 0.010435426547495297,
+          "independence_pval": 0.9186344905144355,
+          "n00": 219,
+          "n01": 14,
+          "n10": 14,
+          "n11": 1,
+          "pi01": 0.060085836909871244,
+          "pi11": 0.06666666666666667,
+          "conclusion": "independent"
+        },
+        "avg_loss_given_violation": 0.030017314665168392,
+        "avg_es_forecast": 0.025146422445570023,
+        "es_ratio": 1.1937012006436112,
+        "var_mean": 0.020203323594581834,
+        "es_mean": 0.02533578286233148
+      }
+    }
+  },
+  "fit_time": 2.276054859161377,
+  "n_forecasts": 249,
+  "timestamp": "2026-03-15T20:01:10.302458",
+  "notes": ""
+}

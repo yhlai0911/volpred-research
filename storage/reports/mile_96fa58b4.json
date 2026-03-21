@@ -1,0 +1,22 @@
+{
+  "id": "mile_96fa58b4",
+  "title": "Phase T 深度報告：25 個實驗、6 大主題、QLIKE 天花板的裂縫",
+  "description": "Phase T 完整報告：GBM ceiling crack, SPY Taiwan momentum, TLT structural break",
+  "content": "## 摘要\n\n[提出: 用戶（跳出舒適圈）, 執行: Claude]\n\n經過 25 個實驗，Phase T 的最重要發現是：**GBM（梯度提升機）用 VIX 一個變數就能改善 GARCH 的波動率預測 10-16%**。但改善幅度不到學術嚴格門檻。本文整合了 Phase T 全部核心發現。\n\n## 研究方法\n\nPhase T 共執行 25 個實驗，覆蓋 6 個主題：\n\n| 主題 | 實驗數 | 核心發現 |\n|------|--------|---------|\n| 自我修正（T1-T4） | 4 | |Skewness| predictor 崩潰，GLD/TLT failure 雙重機制 |\n| 台股研究（T5-T12） | 8 | SPY 5d Momentum net Sharpe 1.62，4/10 台股通過 Harvey |\n| 前沿模型（T3,T8,T22） | 4 | Rough Vol 不破 ceiling，但 GBM 改善 10-16% |\n| VIX 充分統計量（T9,T11,T13,T14） | 4 | MOVE/credit/yield/VRP/TS 全部被 VIX 吸收 |\n| 風險管理（T6,T15,T19,T21） | 5 | Master VaR Panel + TLT 結構性轉變 + multi-step GJR |\n| 市場動態（T18,T20） | 2 | Regime tail correlation + VIX 均值回歸穩定 |\n\n## 核心發現\n\n### 1. QLIKE Ceiling Crack（T22 系列）\n\nGBM 用 VIX 一個變數，通過非線性建模，在 3 個 OOS 期間都勝過 GJR-GARCH：\n\n| OOS | ΔQLIKE | p-value |\n|-----|--------|---------|\n| 2020-2022 | -16.3% | 0.041* |\n| 2023-2024 | -12.1% | 0.071 |\n| 2018-2019 | -11.2% | 0.130 |\n\nFeature ablation 確認不是 data snooping：VIX-only 最強（加 features 反而更差）。\n\n**解讀**：GARCH 的 ceiling 有 ~10-16% 的非線性成分。VIX 包含的信息比 GARCH 能利用的更多（VRP、投資人情緒等），GBM 能捕獲這些非線性。\n\n### 2. SPY 5d Momentum for Taiwan（T5d-T12）\n\n| 項目 | 結果 |\n|------|------|\n| 信號 | SPY 5 日平均報酬 > 0 |\n| Net Sharpe | 1.62（扣 0.3% TX，42 switches/yr）|\n| Harvey t | 3.25 PASS |\n| 機制 | 時區差（SPY 收盤→台股開盤）|\n| 適用 | 0050/0056 ETF（個股不穩定）|\n| 跨亞洲 | 只有台灣本地股有效（EWT 失敗）|\n\n### 3. TLT 避險結構性轉變（T19）\n\nSPY-TLT 相關：Pre-2022 = -0.42 → Post-2022 = +0.09（Fisher z=-13.58, p<0.0001）。\n\n結合 T18：GLD 是唯一在所有 VIX regime 下保持 corr≈0 的避險工具。\n\n### 4. Multi-step GJR 優勢放大（T15）\n\n| Horizon | DM t-stat |\n|---------|----------|\n| 1 天 | -2.68 |\n| 5 天 | -3.48*** |\n| 22 天 | **-4.51***！** |\n\nGJR 的 leverage effect 在月度預測中遠勝 GARCH(1,1)。\n\n### 5. VIX 是 Sufficient Statistic（T9/T11/T13/T14）\n\n測試 6 種額外指標（MOVE、VRP、期限結構、信用利差、殖利率曲線、VIX/GARCH ratio），沒有一個能在 VIX 之上增加經濟顯著的增量信息。\n\n### 6. Master VaR Panel（T21）\n\n7 assets × 5 methods × 3 alphas × 3 tests = 105 cells 統一比較。Skewed-t #1（76.2% Trinity 通過率）。\n\n## 失敗的嘗試（null results）\n\n| 方法/假說 | 結果 | 教訓 |\n|----------|------|------|\n| |Skewness| 預測 VaR | N=21 崩潰 (rho=-0.086) | 尊重 N≥15 門檻 |\n| Rough Volatility | QLIKE 不改善 | 粗糙是統計特性非預測工具 |\n| FIGARCH (GLD) | 更差 (+0.44%) | 長記憶不改善 OOS |\n| VRP regime switching | 全部 NS | VIX 已含 VRP |\n| MOVE overlay | NS (t=-0.68) | 債市 vol 不預測股市 |\n| Credit spread overlay | 更差 (Sharpe 0.79 vs 0.88) | 引入噪音 |\n\n## 實務建議更新\n\n基於 Phase T 研究，更新投資策略推薦：\n\n**美股投資人**：\n- 波動率目標：12/VIX + SHY\n- 避險：50/50 SPY/GLD（不要用 TLT）\n- VaR：Skewed-t + EWMA(0.94) 窗口\n\n**台灣投資人**：\n- 最佳策略：5d SPY Momentum（0050 或 0056）\n- 次佳：8.63/VIX（零切換成本）\n- 避險：GLD（不受 regime 影響）\n\n## 結論\n\nPhase T 的最大 insight：GARCH 的 ceiling 不是不可逾越的牆，而是一道**有裂縫的牆**。GBM 找到了裂縫（VIX→vol 非線性），但裂縫只有 10-16%。真正打破可能需要高頻數據（5-min RV），等 60 天數據累積後的 HAR-RV 將是下一個關鍵測試。\n",
+  "phase": "Phase_T",
+  "category": "milestone",
+  "audience": "research",
+  "proposer": "用戶 + Claude",
+  "status": "published",
+  "tags": [
+    "Phase-T",
+    "summary",
+    "GBM",
+    "QLIKE-ceiling",
+    "Taiwan",
+    "TLT",
+    "VIX",
+    "research-report"
+  ],
+  "published_at": "2026-03-17T08:09:44.677437+00:00"
+}

@@ -1,0 +1,622 @@
+{
+  "experiment": "K54: GLD Contrarian VT — Inverse GLD Weight When VIX High",
+  "description": "K53 showed GLD has negative TSMOM loading in VT (contrarian behavior). This tests whether inverting GLD's VT weight (increase GLD when VIX high, decrease when VIX low) improves the 50/50 SPY/GLD portfolio.",
+  "proposed_by": "用戶 (inspired by K53)",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T15:07:50.946243",
+  "config": {
+    "start": "2007-01-03",
+    "oos_start": "2023-01-03",
+    "rebalance": "monthly",
+    "tc_per_trade": 0.0005,
+    "spy_allocation": 0.5,
+    "gld_allocation": 0.5,
+    "cash_proxy": "SHY",
+    "rf_annual": 0.02
+  },
+  "strategies": {
+    "S0: Buy&Hold 50/50": "No VT, static 50/50 SPY/GLD",
+    "S1: Baseline 12/VIX": "Current: both SPY and GLD use 12/VIX",
+    "S2: Inverse GLD (VIX/12)": "SPY 12/VIX + GLD VIX/12 (capped 1.0)",
+    "S3: Static GLD 50%": "SPY 12/VIX + GLD always 50%",
+    "S4: VIX Step GLD": "SPY 12/VIX + GLD step: VIX>25→100%, >20→80%, >15→50%, ≤15→30%",
+    "S5: Hybrid Contrarian": "SPY 12/VIX + GLD (2 - 12/VIX): mirror of SPY weight",
+    "S6: Mild Contrarian": "SPY 12/VIX + GLD: 50% base + 3% per VIX point above 15",
+    "S7: Anti-corr Switch": "SPY 12/VIX + GLD: when VIX>20 go full GLD, else follow 12/VIX"
+  },
+  "results": {
+    "full": {
+      "S0: Buy&Hold 50/50": {
+        "name": "S0: Buy&Hold 50/50",
+        "ann_return": 11.51,
+        "ann_vol": 13.67,
+        "sharpe": 0.696,
+        "sharpe_t": 3.05,
+        "mdd": -32.49,
+        "calmar": 0.354,
+        "sortino": 0.885,
+        "n_days": 4834,
+        "n_years": 19.2
+      },
+      "S1: Baseline 12/VIX": {
+        "name": "S1: Baseline 12/VIX",
+        "ann_return": 7.48,
+        "ann_vol": 7.83,
+        "sharpe": 0.699,
+        "sharpe_t": 3.06,
+        "mdd": -13.13,
+        "calmar": 0.569,
+        "sortino": 0.91,
+        "n_days": 4834,
+        "n_years": 19.2
+      },
+      "S2: Inverse GLD (VIX/12)": {
+        "name": "S2: Inverse GLD (VIX/12)",
+        "ann_return": 9.5,
+        "ann_vol": 10.52,
+        "sharpe": 0.713,
+        "sharpe_t": 3.12,
+        "mdd": -19.7,
+        "calmar": 0.482,
+        "sortino": 0.936,
+        "n_days": 4834,
+        "n_years": 19.2
+      },
+      "S3: Static GLD 50%": {
+        "name": "S3: Static GLD 50%",
+        "ann_return": 7.18,
+        "ann_vol": 6.99,
+        "sharpe": 0.74,
+        "sharpe_t": 3.24,
+        "mdd": -13.28,
+        "calmar": 0.54,
+        "sortino": 0.984,
+        "n_days": 4834,
+        "n_years": 19.2
+      },
+      "S4: VIX Step GLD": {
+        "name": "S4: VIX Step GLD",
+        "ann_return": 8.06,
+        "ann_vol": 8.47,
+        "sharpe": 0.716,
+        "sharpe_t": 3.13,
+        "mdd": -20.02,
+        "calmar": 0.403,
+        "sortino": 0.929,
+        "n_days": 4834,
+        "n_years": 19.2
+      },
+      "S5: Hybrid Contrarian": {
+        "name": "S5: Hybrid Contrarian",
+        "ann_return": 9.5,
+        "ann_vol": 10.52,
+        "sharpe": 0.713,
+        "sharpe_t": 3.12,
+        "mdd": -19.7,
+        "calmar": 0.482,
+        "sortino": 0.936,
+        "n_days": 4834,
+        "n_years": 19.2
+      },
+      "S6: Mild Contrarian": {
+        "name": "S6: Mild Contrarian",
+        "ann_return": 8.01,
+        "ann_vol": 8.45,
+        "sharpe": 0.712,
+        "sharpe_t": 3.12,
+        "mdd": -19.12,
+        "calmar": 0.419,
+        "sortino": 0.923,
+        "n_days": 4834,
+        "n_years": 19.2
+      },
+      "S7: Anti-corr Switch": {
+        "name": "S7: Anti-corr Switch",
+        "ann_return": 8.93,
+        "ann_vol": 9.78,
+        "sharpe": 0.709,
+        "sharpe_t": 3.11,
+        "mdd": -20.28,
+        "calmar": 0.441,
+        "sortino": 0.927,
+        "n_days": 4834,
+        "n_years": 19.2
+      }
+    },
+    "oos": {
+      "S0: Buy&Hold 50/50": {
+        "name": "S0: Buy&Hold 50/50",
+        "ann_return": 23.53,
+        "ann_vol": 12.61,
+        "sharpe": 1.707,
+        "sharpe_t": 3.05,
+        "mdd": -11.3,
+        "calmar": 2.083,
+        "sortino": 2.149,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S1: Baseline 12/VIX": {
+        "name": "S1: Baseline 12/VIX",
+        "ann_return": 18.56,
+        "ann_vol": 9.22,
+        "sharpe": 1.795,
+        "sharpe_t": 3.21,
+        "mdd": -7.72,
+        "calmar": 2.404,
+        "sortino": 2.276,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S2: Inverse GLD (VIX/12)": {
+        "name": "S2: Inverse GLD (VIX/12)",
+        "ann_return": 21.49,
+        "ann_vol": 11.35,
+        "sharpe": 1.717,
+        "sharpe_t": 3.07,
+        "mdd": -10.25,
+        "calmar": 2.096,
+        "sortino": 2.161,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S3: Static GLD 50%": {
+        "name": "S3: Static GLD 50%",
+        "ann_return": 15.45,
+        "ann_vol": 7.56,
+        "sharpe": 1.778,
+        "sharpe_t": 3.18,
+        "mdd": -6.19,
+        "calmar": 2.496,
+        "sortino": 2.359,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S4: VIX Step GLD": {
+        "name": "S4: VIX Step GLD",
+        "ann_return": 15.02,
+        "ann_vol": 7.58,
+        "sharpe": 1.718,
+        "sharpe_t": 3.07,
+        "mdd": -5.91,
+        "calmar": 2.542,
+        "sortino": 2.379,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S5: Hybrid Contrarian": {
+        "name": "S5: Hybrid Contrarian",
+        "ann_return": 21.49,
+        "ann_vol": 11.35,
+        "sharpe": 1.717,
+        "sharpe_t": 3.07,
+        "mdd": -10.25,
+        "calmar": 2.096,
+        "sortino": 2.161,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S6: Mild Contrarian": {
+        "name": "S6: Mild Contrarian",
+        "ann_return": 15.78,
+        "ann_vol": 8.04,
+        "sharpe": 1.714,
+        "sharpe_t": 3.07,
+        "mdd": -7.02,
+        "calmar": 2.249,
+        "sortino": 2.281,
+        "n_days": 806,
+        "n_years": 3.2
+      },
+      "S7: Anti-corr Switch": {
+        "name": "S7: Anti-corr Switch",
+        "ann_return": 19.09,
+        "ann_vol": 9.8,
+        "sharpe": 1.745,
+        "sharpe_t": 3.12,
+        "mdd": -7.72,
+        "calmar": 2.474,
+        "sortino": 2.27,
+        "n_days": 806,
+        "n_years": 3.2
+      }
+    },
+    "gfc": {
+      "S0: Buy&Hold 50/50": {
+        "name": "S0: Buy&Hold 50/50",
+        "ann_return": 10.91,
+        "ann_vol": 19.61,
+        "sharpe": 0.454,
+        "sharpe_t": 0.79,
+        "mdd": -32.49,
+        "calmar": 0.336,
+        "sortino": 0.61,
+        "n_days": 757,
+        "n_years": 3.0
+      },
+      "S1: Baseline 12/VIX": {
+        "name": "S1: Baseline 12/VIX",
+        "ann_return": 6.53,
+        "ann_vol": 7.31,
+        "sharpe": 0.621,
+        "sharpe_t": 1.08,
+        "mdd": -11.45,
+        "calmar": 0.571,
+        "sortino": 0.913,
+        "n_days": 757,
+        "n_years": 3.0
+      },
+      "S2: Inverse GLD (VIX/12)": {
+        "name": "S2: Inverse GLD (VIX/12)",
+        "ann_return": 10.53,
+        "ann_vol": 13.15,
+        "sharpe": 0.649,
+        "sharpe_t": 1.12,
+        "mdd": -19.7,
+        "calmar": 0.534,
+        "sortino": 0.899,
+        "n_days": 757,
+        "n_years": 3.0
+      },
+      "S3: Static GLD 50%": {
+        "name": "S3: Static GLD 50%",
+        "ann_return": 6.95,
+        "ann_vol": 7.99,
+        "sharpe": 0.62,
+        "sharpe_t": 1.07,
+        "mdd": -13.28,
+        "calmar": 0.523,
+        "sortino": 0.877,
+        "n_days": 757,
+        "n_years": 3.0
+      },
+      "S4: VIX Step GLD": {
+        "name": "S4: VIX Step GLD",
+        "ann_return": 9.49,
+        "ann_vol": 12.29,
+        "sharpe": 0.609,
+        "sharpe_t": 1.06,
+        "mdd": -20.02,
+        "calmar": 0.474,
+        "sortino": 0.831,
+        "n_days": 757,
+        "n_years": 3.0
+      },
+      "S5: Hybrid Contrarian": {
+        "name": "S5: Hybrid Contrarian",
+        "ann_return": 10.53,
+        "ann_vol": 13.15,
+        "sharpe": 0.649,
+        "sharpe_t": 1.12,
+        "mdd": -19.7,
+        "calmar": 0.534,
+        "sortino": 0.899,
+        "n_days": 757,
+        "n_years": 3.0
+      },
+      "S6: Mild Contrarian": {
+        "name": "S6: Mild Contrarian",
+        "ann_return": 9.17,
+        "ann_vol": 11.77,
+        "sharpe": 0.609,
+        "sharpe_t": 1.06,
+        "mdd": -19.12,
+        "calmar": 0.48,
+        "sortino": 0.818,
+        "n_days": 757,
+        "n_years": 3.0
+      },
+      "S7: Anti-corr Switch": {
+        "name": "S7: Anti-corr Switch",
+        "ann_return": 9.99,
+        "ann_vol": 13.02,
+        "sharpe": 0.613,
+        "sharpe_t": 1.06,
+        "mdd": -20.28,
+        "calmar": 0.493,
+        "sortino": 0.847,
+        "n_days": 757,
+        "n_years": 3.0
+      }
+    },
+    "covid": {
+      "S0: Buy&Hold 50/50": {
+        "name": "S0: Buy&Hold 50/50",
+        "ann_return": 17.61,
+        "ann_vol": 18.1,
+        "sharpe": 0.863,
+        "sharpe_t": 1.06,
+        "mdd": -20.32,
+        "calmar": 0.867,
+        "sortino": 0.983,
+        "n_days": 377,
+        "n_years": 1.5
+      },
+      "S1: Baseline 12/VIX": {
+        "name": "S1: Baseline 12/VIX",
+        "ann_return": 8.04,
+        "ann_vol": 7.0,
+        "sharpe": 0.862,
+        "sharpe_t": 1.05,
+        "mdd": -7.94,
+        "calmar": 1.012,
+        "sortino": 1.0,
+        "n_days": 377,
+        "n_years": 1.5
+      },
+      "S2: Inverse GLD (VIX/12)": {
+        "name": "S2: Inverse GLD (VIX/12)",
+        "ann_return": 10.17,
+        "ann_vol": 11.19,
+        "sharpe": 0.729,
+        "sharpe_t": 0.89,
+        "mdd": -11.06,
+        "calmar": 0.919,
+        "sortino": 0.899,
+        "n_days": 377,
+        "n_years": 1.5
+      },
+      "S3: Static GLD 50%": {
+        "name": "S3: Static GLD 50%",
+        "ann_return": 8.41,
+        "ann_vol": 7.4,
+        "sharpe": 0.866,
+        "sharpe_t": 1.06,
+        "mdd": -8.23,
+        "calmar": 1.021,
+        "sortino": 1.023,
+        "n_days": 377,
+        "n_years": 1.5
+      },
+      "S4: VIX Step GLD": {
+        "name": "S4: VIX Step GLD",
+        "ann_return": 9.49,
+        "ann_vol": 10.37,
+        "sharpe": 0.723,
+        "sharpe_t": 0.88,
+        "mdd": -9.95,
+        "calmar": 0.953,
+        "sortino": 0.886,
+        "n_days": 377,
+        "n_years": 1.5
+      },
+      "S5: Hybrid Contrarian": {
+        "name": "S5: Hybrid Contrarian",
+        "ann_return": 10.17,
+        "ann_vol": 11.19,
+        "sharpe": 0.729,
+        "sharpe_t": 0.89,
+        "mdd": -11.06,
+        "calmar": 0.919,
+        "sortino": 0.899,
+        "n_days": 377,
+        "n_years": 1.5
+      },
+      "S6: Mild Contrarian": {
+        "name": "S6: Mild Contrarian",
+        "ann_return": 9.53,
+        "ann_vol": 10.2,
+        "sharpe": 0.739,
+        "sharpe_t": 0.9,
+        "mdd": -10.21,
+        "calmar": 0.934,
+        "sortino": 0.903,
+        "n_days": 377,
+        "n_years": 1.5
+      },
+      "S7: Anti-corr Switch": {
+        "name": "S7: Anti-corr Switch",
+        "ann_return": 9.67,
+        "ann_vol": 10.84,
+        "sharpe": 0.708,
+        "sharpe_t": 0.87,
+        "mdd": -10.26,
+        "calmar": 0.943,
+        "sortino": 0.867,
+        "n_days": 377,
+        "n_years": 1.5
+      }
+    },
+    "post_covid": {
+      "S0: Buy&Hold 50/50": {
+        "name": "S0: Buy&Hold 50/50",
+        "ann_return": 6.58,
+        "ann_vol": 12.07,
+        "sharpe": 0.38,
+        "sharpe_t": 0.6,
+        "mdd": -18.03,
+        "calmar": 0.365,
+        "sortino": 0.559,
+        "n_days": 629,
+        "n_years": 2.5
+      },
+      "S1: Baseline 12/VIX": {
+        "name": "S1: Baseline 12/VIX",
+        "ann_return": 2.7,
+        "ann_vol": 7.25,
+        "sharpe": 0.096,
+        "sharpe_t": 0.15,
+        "mdd": -13.13,
+        "calmar": 0.205,
+        "sortino": 0.145,
+        "n_days": 629,
+        "n_years": 2.5
+      },
+      "S2: Inverse GLD (VIX/12)": {
+        "name": "S2: Inverse GLD (VIX/12)",
+        "ann_return": 4.43,
+        "ann_vol": 9.2,
+        "sharpe": 0.264,
+        "sharpe_t": 0.42,
+        "mdd": -15.08,
+        "calmar": 0.294,
+        "sortino": 0.409,
+        "n_days": 629,
+        "n_years": 2.5
+      },
+      "S3: Static GLD 50%": {
+        "name": "S3: Static GLD 50%",
+        "ann_return": 2.95,
+        "ann_vol": 6.84,
+        "sharpe": 0.139,
+        "sharpe_t": 0.22,
+        "mdd": -12.54,
+        "calmar": 0.235,
+        "sortino": 0.211,
+        "n_days": 629,
+        "n_years": 2.5
+      },
+      "S4: VIX Step GLD": {
+        "name": "S4: VIX Step GLD",
+        "ann_return": 4.5,
+        "ann_vol": 8.05,
+        "sharpe": 0.31,
+        "sharpe_t": 0.49,
+        "mdd": -14.77,
+        "calmar": 0.304,
+        "sortino": 0.465,
+        "n_days": 629,
+        "n_years": 2.5
+      },
+      "S5: Hybrid Contrarian": {
+        "name": "S5: Hybrid Contrarian",
+        "ann_return": 4.43,
+        "ann_vol": 9.2,
+        "sharpe": 0.264,
+        "sharpe_t": 0.42,
+        "mdd": -15.08,
+        "calmar": 0.294,
+        "sortino": 0.409,
+        "n_days": 629,
+        "n_years": 2.5
+      },
+      "S6: Mild Contrarian": {
+        "name": "S6: Mild Contrarian",
+        "ann_return": 3.8,
+        "ann_vol": 7.84,
+        "sharpe": 0.23,
+        "sharpe_t": 0.36,
+        "mdd": -14.18,
+        "calmar": 0.268,
+        "sortino": 0.348,
+        "n_days": 629,
+        "n_years": 2.5
+      },
+      "S7: Anti-corr Switch": {
+        "name": "S7: Anti-corr Switch",
+        "ann_return": 4.67,
+        "ann_vol": 8.74,
+        "sharpe": 0.306,
+        "sharpe_t": 0.48,
+        "mdd": -15.08,
+        "calmar": 0.31,
+        "sortino": 0.469,
+        "n_days": 629,
+        "n_years": 2.5
+      }
+    }
+  },
+  "statistical_tests": {
+    "S0: Buy&Hold 50/50": {
+      "sharpe_diff_z": -1.179,
+      "sharpe_diff_p": 0.2382,
+      "significant_0.05": "False"
+    },
+    "S2: Inverse GLD (VIX/12)": {
+      "sharpe_diff_z": -0.684,
+      "sharpe_diff_p": 0.4942,
+      "significant_0.05": "False"
+    },
+    "S3: Static GLD 50%": {
+      "sharpe_diff_z": 1.235,
+      "sharpe_diff_p": 0.2167,
+      "significant_0.05": "False"
+    },
+    "S4: VIX Step GLD": {
+      "sharpe_diff_z": -0.026,
+      "sharpe_diff_p": 0.9792,
+      "significant_0.05": "False"
+    },
+    "S5: Hybrid Contrarian": {
+      "sharpe_diff_z": -0.683,
+      "sharpe_diff_p": 0.4945,
+      "significant_0.05": "False"
+    },
+    "S6: Mild Contrarian": {
+      "sharpe_diff_z": -0.063,
+      "sharpe_diff_p": 0.9501,
+      "significant_0.05": "False"
+    },
+    "S7: Anti-corr Switch": {
+      "sharpe_diff_z": -0.502,
+      "sharpe_diff_p": 0.6157,
+      "significant_0.05": "False"
+    }
+  },
+  "crisis_analysis": {
+    "crisis_threshold": "VIX > 25",
+    "crisis_days_pct": 18.0,
+    "gld_crisis_ann_return_pct": 10.6,
+    "gld_normal_ann_return_pct": 11.6,
+    "spy_gld_corr_crisis": 0.058,
+    "spy_gld_corr_normal": 0.059
+  },
+  "gld_forward_returns_after_vix_spike": {
+    "5d": {
+      "mean": 0.75,
+      "median": 0.53,
+      "win_rate": 56.57,
+      "t": 2.46,
+      "n": 99
+    },
+    "10d": {
+      "mean": 1.71,
+      "median": 1.38,
+      "win_rate": 64.29,
+      "t": 4.14,
+      "n": 98
+    },
+    "21d": {
+      "mean": 2.33,
+      "median": 2.61,
+      "win_rate": 65.98,
+      "t": 4.43,
+      "n": 97
+    },
+    "63d": {
+      "mean": 4.79,
+      "median": 5.35,
+      "win_rate": 67.01,
+      "t": 5.3,
+      "n": 97
+    }
+  },
+  "vix_distribution": {
+    "mean": 19.8,
+    "median": 17.5,
+    "pct_above_20": 36.2,
+    "pct_above_25": 18.0
+  },
+  "conclusion": [
+    "Best contrarian: S3: Static GLD 50% (Sharpe=0.740)",
+    "Baseline: S1 (Sharpe=0.699)",
+    "Any significant improvement over baseline? NO",
+    "CONCLUSION: No contrarian VT variant significantly beats the simple 12/VIX baseline.",
+    "K53's negative TSMOM loading does NOT translate to a tradeable contrarian signal.",
+    "The 12/VIX rule remains the best simple VT for the 50/50 portfolio."
+  ],
+  "best_by_period": {
+    "full": {
+      "best_sharpe": "S3: Static GLD 50%",
+      "best_sharpe_val": 0.74,
+      "best_mdd": "S1: Baseline 12/VIX",
+      "best_mdd_val": -13.13
+    },
+    "oos": {
+      "best_sharpe": "S1: Baseline 12/VIX",
+      "best_sharpe_val": 1.795,
+      "best_mdd": "S4: VIX Step GLD",
+      "best_mdd_val": -5.91
+    }
+  }
+}

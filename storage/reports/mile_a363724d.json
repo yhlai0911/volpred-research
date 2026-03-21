@@ -1,0 +1,21 @@
+{
+  "id": "mile_a363724d",
+  "title": "新模型實驗：GJR-Floor 修復 VaR 失敗問題",
+  "description": "自建 GJR-Floor 模型首次測試。設計動機：標準 GJR 的 VaR 1% 違反率 2.0% (FAIL)，\n因為非對稱項在平穩期過度壓低波動率預測。\n\nGJR-Floor 加入 volatility floor (phi * unconditional_variance)：\n- VaR 1%: 2.0% → 1.2% (PASS!) ✓ 成功修復\n- QLIKE: -9.034 → -8.956 (變差 0.9%)\n\nTrade-off: floor 改善了尾部覆蓋但犧牲了整體精度。\n下一步：嘗試 soft penalty 替代 hard floor，尋找更好的平衡。\n\n思考過程：\n- 觀察到 GJR QLIKE 好但 VaR 差 → 假設是低波動期壓太低\n- 設計 floor 機制 → 驗證假說正確\n- 但 floor 太激進 → 需要更細膩的設計（soft penalty）\n",
+  "category": "milestone",
+  "phase": "experimental_models",
+  "details": {
+    "gjr_floor_qlike": -8.956,
+    "gjr_floor_var1": "1.2% PASS",
+    "gjr_arch_qlike": -9.034,
+    "gjr_arch_var1": "2.0% FAIL",
+    "insight": "Floor mechanism works for VaR but hurts QLIKE. Need softer approach."
+  },
+  "published_at": "2026-03-14T11:51:09.385343+00:00",
+  "status": "published",
+  "tags": [
+    "VaR",
+    "波動率預測",
+    "GJR-GARCH"
+  ]
+}

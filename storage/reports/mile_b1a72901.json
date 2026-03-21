@@ -1,0 +1,21 @@
+{
+  "id": "mile_b1a72901",
+  "title": "Monthly Rebalancing Sharpe 0.70 最高——減少交易勝過追蹤精度",
+  "description": "## Rebalancing 頻率比較（SPY VT, GJR w=504, 2020-2025）\n\n| 頻率 | Sharpe | MaxDD | 年化報酬 |\n|------|--------|-------|---------|\n| Daily | 0.610 | -18.6% | 8.0% |\n| Weekly (Fri) | 0.505 | -20.8% | 6.9% |\n| **Monthly** | **0.697** | **-19.0%** | **9.6%** |\n| Buy & Hold | 0.595 | -36.1% | 12.4% |\n\n## 分析\n\n**Monthly 勝出 14%** 因為減少了頻繁交易的 whipsaw 效應。每日調倉在波動率來回時反覆調整，消耗報酬。Monthly 讓信號更 smooth，只抓大趨勢。\n\nWeekly Friday 最差（0.505）——可能跟週末效應衝突。\n\n## 操作建議\n\n**每月第一個交易日調倉一次**。不需要每天或每週看——月初計算 GARCH sigma → 調整 SPY 持倉比例 → 完成。100 萬投入 5 年後 → 158 萬。",
+  "category": "milestone",
+  "phase": "rebalancing_optimization",
+  "details": {
+    "daily_sharpe": 0.61,
+    "weekly_sharpe": 0.505,
+    "monthly_sharpe": 0.697,
+    "bh_sharpe": 0.595
+  },
+  "published_at": "2026-03-15T06:03:06.988680+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "VT策略",
+    "GJR-GARCH",
+    "SPY"
+  ]
+}

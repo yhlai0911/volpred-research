@@ -1,0 +1,20 @@
+{
+  "id": "mile_a4704aeb",
+  "title": "研究長文：VT 策略的 Jump 困境——為什麼波動率越高越該買？",
+  "description": "## VT 策略的 Jump 困境：為什麼波動率越高越該買？\n\n*2026-03-15 研究心路歷程*\n\n---\n\n### 一個反直覺的發現\n\n2025 年 4 月，Trump 突然宣布對中國加徵關稅。SPY 在兩天內暴跌 11%。我們的 VT 策略表現如何？\n\n答案是：**比 Buy & Hold 還差**。\n\n| 指標 | VT 策略 | Buy & Hold |\n|------|---------|-----------|\n| 4 月報酬 | -2.6% | -1.9% |\n\n等等，VT 不是應該在高波動時保護投資人嗎？為什麼反而虧更多？\n\n### 追蹤 GARCH 的每日行為\n\n讓我們逐日看 VT 策略在關稅戰中做了什麼：\n\n**4/3（關稅宣布）**：SPY -5.05%，GARCH sigma 16%，VT 持倉 **75%**\n→ VT 幾乎滿倉吃下暴跌（sigma 還沒反應）\n\n**4/4（恐慌蔓延）**：SPY -6.03%，sigma 飆到 36%，VT 持倉降到 34%\n→ 這時才開始減碼——但最大的跌已經發生了\n\n**4/9（暫緩關稅）**：SPY **+9.99%**（史詩級反彈），sigma 48%，VT 持倉僅 **25%**\n→ VT 已經離場，只吃到 2.52% 的反彈（BH 吃到全部 9.99%）\n\n### GARCH Sigma 是滯後指標\n\n這就是問題的核心：**GARCH 的 sigma 是滯後的**。\n\n它用昨天的 r² 來更新今天的 sigma。所以：\n- 暴跌**之前**：sigma 低 → VT 滿倉 → **被暴跌擊中**\n- 暴跌**之後**：sigma 高 → VT 減碼 → **錯過反彈**\n\n這是最差的組合：暴跌照吃，反彈錯過。\n\n### 為什麼 VT 整體還是有效？\n\n如果 VT 在 jump 時這麼差，為什麼長期 Sharpe (0.70) 還是比 BH (0.60) 好？\n\n因為 **jump 只佔波動率的 23%**。剩下 77% 是 volatility clustering——漸進式的波動率上升和下降。在 clustering 中，VT 運作完美：sigma 逐漸上升 → VT 逐漸減碼 → 避開了慢慢的下跌。\n\nVT 的優勢在**漸進式熊市**（如 2022 年加息，SPY 跌 25%），而非**突發 jump**（如 4 月關稅戰）。\n\n### 有沒有解決方案？\n\n我測試了多種修正：\n- VIX Recovery Boost：IS +5.9%，OOS -11.3%（過擬合）\n- Overnight Gap Alert：Sharpe -2.6%（被 sigma 吸收）\n- Fast Re-Entry：+4.2% 但只觸發 5 天（統計不顯著）\n\n**結論：在日頻框架中，jump 後的反彈不可被系統性捕捉。** 任何「看到 sigma 下降就加碼」的規則，都會在 sigma 假下降時受傷。\n\n### 投資人該怎麼辦？\n\n1. **接受 trade-off**：VT 在 jump 月份會跑輸 BH，這是用報酬換安全的代價\n2. **用 monthly rebalancing**：減少 whipsaw（Sharpe 從 0.61 提升到 0.70）\n3. **不要在暴跌時恐慌離場**——VT 的 sigma 已經自動幫你減碼了\n4. **不要在反彈時急著加碼**——VT 的 sigma 會自動幫你恢復\n\n簡單就是最好的。",
+  "category": "milestone",
+  "phase": "research_article",
+  "details": {
+    "type": "research_article",
+    "subtype": "research_journey",
+    "topic": "VT jump paradox"
+  },
+  "published_at": "2026-03-15T06:13:44.497172+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "VT策略",
+    "GARCH",
+    "SPY"
+  ]
+}

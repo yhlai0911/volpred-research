@@ -1,0 +1,21 @@
+{
+  "id": "mile_c075bd3e",
+  "title": "16 年 Ultimate Backtest：Monthly VT Sharpe 0.61，$1M→$3.31M",
+  "description": "## 最終配置 16 年回測（2010-2025）\n\nGJR-GARCH(1,1) w=504, target 12%, monthly rebalancing, MA=5\n\n| 指標 | Monthly VT | Buy & Hold |\n|------|-----------|-----------|\n| 年化報酬 | 8.5% | 11.2% |\n| 年化波動 | 13.9% | 17.3% |\n| Sharpe | 0.608 | 0.650 |\n| MaxDD | **-22.3%** | -36.1% |\n| 16 年累計 | 230.7% | 373.2% |\n| **$1M →** | **$3.31M** | $4.73M |\n\nVT 少賺 3pp/年但 MaxDD 改善 38%（-22% vs -36%）。16 年後 $1M→$3.31M。",
+  "category": "milestone",
+  "phase": "ultimate_backtest",
+  "details": {
+    "sharpe": 0.608,
+    "maxdd": -0.223,
+    "total_return": 2.307,
+    "final_value": 3.31
+  },
+  "published_at": "2026-03-15T07:04:14.091639+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "VT策略",
+    "GARCH",
+    "GJR-GARCH"
+  ]
+}

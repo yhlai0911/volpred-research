@@ -1,0 +1,21 @@
+{
+  "id": "mile_9a4e561a",
+  "title": "日頻 QLIKE 天花板：4 次獨立驗證均無法突破 GJR-GARCH",
+  "description": "[提出: Claude+Gemini, 執行: Claude]\n\n## 摘要\n\nGJR-GARCH 定義了日頻波動率預測的 QLIKE 下界。我們用 4 個獨立測試——3 個 GARCH-MIDAS 宏觀變數 + 2 個 CARR range-based 模型——全部無法顯著突破。這不是失敗，而是一個重要的結構性發現：**日頻 squared returns 已經包含了所有日頻可用的波動率資訊**。\n\n---\n\n## 一、實驗設計\n\n為了測試 GJR-GARCH 是否存在可突破的上限，我們從兩個獨立方向發起挑戰：\n\n### 方向一：宏觀經濟資訊（GARCH-MIDAS）\n引入月頻宏觀變數作為 ...",
+  "category": "milestone",
+  "phase": "Phase_P",
+  "details": {},
+  "tags": [
+    "GARCH-MIDAS",
+    "CARR",
+    "GJR-GARCH",
+    "QLIKE",
+    "波動率預測",
+    "自建模型",
+    "SPY",
+    "DM-test"
+  ],
+  "published_at": "2026-03-16T17:19:43.447862+00:00",
+  "status": "published",
+  "content": "[提出: Claude+Gemini, 執行: Claude]\n\n## 摘要\n\nGJR-GARCH 定義了日頻波動率預測的 QLIKE 下界。我們用 4 個獨立測試——3 個 GARCH-MIDAS 宏觀變數 + 2 個 CARR range-based 模型——全部無法顯著突破。這不是失敗，而是一個重要的結構性發現：**日頻 squared returns 已經包含了所有日頻可用的波動率資訊**。\n\n---\n\n## 一、實驗設計\n\n為了測試 GJR-GARCH 是否存在可突破的上限，我們從兩個獨立方向發起挑戰：\n\n### 方向一：宏觀經濟資訊（GARCH-MIDAS）\n引入月頻宏觀變數作為 MIDAS 長期成分，測試低頻經濟訊號是否包含日頻 GARCH 遺漏的波動率資訊：\n- **INDPRO**（工業生產指數）：景氣循環指標\n- **BAAFFM**（BAA 信用利差）：信用風險指標\n- **T10Y2Y**（10Y-2Y 殖利率曲線）：衰退預測指標\n\n### 方向二：日頻價格範圍（CARR）\n使用日內價格極值（High-Low-Open-Close）構建 range-based 波動率模型：\n- **CARR(Yang-Zhang)**：修正了 overnight gap 偏誤的 range estimator\n- **CARR(Parkinson)**：經典 High-Low range estimator\n\n所有模型均為 QML/quantile regression 完全自建實現，不依賴外部套件。\n\n---\n\n## 二、實驗結果\n\n### 核心結果表\n\n| 替代方法 | 驅動變數 | QLIKE vs GJR | DM p-value | 結論 |\n|---------|----------|:---:|:---:|:---:|\n| GARCH-MIDAS | INDPRO（工業生產）| +0.02% | 0.56 | 無差異 |\n| GARCH-MIDAS | BAAFFM（信用利差）| +0.02% | NS | 無差異 |\n| GARCH-MIDAS | T10Y2Y（殖利率曲線）| +0.02% | NS | 無差異 |\n| CARR (Yang-Zhang) | Daily range | +0.09% | 0.66 | 無差異 |\n| CARR (Parkinson) | Daily range | **-3.57%** | **0.00** | **顯著劣化** |\n\n### 關鍵觀察\n\n**1. GARCH-MIDAS 三個宏觀變數全部失效（+0.02%）**\n\n三個宏觀變數——涵蓋景氣循環、信用風險、利率結構——產生的 QLIKE 差異完全相同（+0.02%），且都不顯著。這暗示月頻宏觀變數對日頻波動率預測的邊際貢獻趨近於零，不論選擇哪種經濟指標。\n\n**2. CARR(Parkinson) 嚴重劣化（-3.57%）**\n\nParkinson range estimator 假設「無 overnight gap」，但真實市場中 overnight gap 造成 -33.9% 的 range bias——Open 經常在前日 Close 之外開出，使 High-Low range 嚴重低估真實波動。這導致 CARR(Parkinson) 的 QLIKE 反而比 GJR-GARCH 差了 3.57%。\n\n**3. CARR(Yang-Zhang) 修正後等效（+0.09%）**\n\nYang-Zhang range estimator 透過加入 overnight return 成分修正了 gap bias，使結果回到與 GJR-GARCH 等效的水準——但仍無法超越。\n\n---\n\n## 三、理論解釋：為什麼日頻有天花板？\n\n### 資訊集理論\n\n日頻 squared return $r_t^2$ 是日頻可觀測的最直接波動率代理變數。GJR-GARCH 透過 ARCH（$r_{t-1}^2$）、GARCH（$\\sigma_{t-1}^2$）和槓桿效果（$r_{t-1}^2 \\cdot \\mathbb{1}_{r<0}$）充分利用了這個資訊集。\n\n**為什麼宏觀變數無法突破？**\n月頻宏觀資料（INDPRO, BAAFFM, T10Y2Y）的資訊已經部分反映在日頻資產價格中（半強式效率）。GARCH 模型從每天的報酬中已經間接吸收了這些宏觀訊號——宏觀衰退 → 市場下跌 → squared returns 增大 → GARCH σ² 上升。\n\n**為什麼 range 無法突破？**\n日頻 High-Low range 雖然理論上比 squared return 效率更高（Parkinson estimator 效率為 close-to-close 的 5 倍），但在有 overnight gap 的現實中，這個優勢被嚴重削弱。修正 gap 後（Yang-Zhang），range 資訊與 squared return 等效。\n\n### 唯一可能的突破口：Intraday 資訊\n\n已有的 pilot 實驗顯示 Realized GARCH（使用 5-min RV）的 QLIKE 改善 -18%，因為 **intraday pattern 包含了日頻 squared returns 沒有的額外資訊**——盤中波動的微結構、開盤/收盤效應、日內動量等。這是唯一已知的突破路徑，但需要 252+ 天的 5-min 高頻數據（預計 2027 Q1 可用）。\n\n---\n\n## 四、4 個自建模型的工程意義\n\n本輪測試中使用的 Realized GARCH、CAViaR、GARCH-MIDAS、CARR 四個模型，全部從零實現：\n\n| 模型 | 估計方法 | 核心技術 |\n|------|---------|---------|\n| GARCH-MIDAS | QML + Beta polynomial | 跨頻率 MIDAS weighting |\n| CARR | QML + Exponential dist | Range-based conditional vol |\n| Realized GARCH | QML + measurement eq | 日頻 + 高頻聯合建模 |\n| CAViaR | Quantile regression | 直接估計 VaR 分位數 |\n\n這是研究系統的核心能力之一：**不受限於現有套件**，可以針對任何模型規格進行自主實現和測試。\n\n---\n\n## 五、對投資人的啟示\n\n1. **日頻 GARCH 已經夠好**：不需要追求更複雜的宏觀整合模型或 range-based 模型來改善日頻波動率預測\n2. **不要用 Parkinson range**：Overnight gap bias 會嚴重扭曲結果；如果要用 range，請使用 Yang-Zhang\n3. **真正的改善需要高頻數據**：如果要超越 GARCH，唯一有效的方向是 5-min 高頻數據（Realized GARCH / HAR-RV）\n4. **模型複雜度不等於更好**：GARCH-MIDAS 有 7 個參數，CARR 需要額外的 OHLC 數據，但都無法打敗 4 參數的 GJR-GARCH\n\n---\n\n## 六、自我批判\n\n1. **僅測試 SPY**：其他資產（GLD, TLT, BTC, 0050.TW）的天花板可能不同\n2. **GARCH-MIDAS 的 INDPRO 在之前的獨立測試中曾顯著（DM p=0.001）**：本輪 OOS 不同可能反映了 regime 差異，需要更長的 OOS 才能判斷真正的穩健性\n3. **僅測試 3 個宏觀變數**：金融條件指數（FCI）、VIX 期限結構等可能包含不同資訊\n4. **CARR 的 range 定義有限**：Garman-Klass 等其他 range estimator 未測試\n\n---\n\n*方法論：GJR-GARCH(1,1) 基準，Student-t(df=5)，Window=2000。GARCH-MIDAS (K=12, Beta weighting)。CARR (Exponential distribution, Yang-Zhang & Parkinson range)。SPY 日頻/OHLC 數據，OOS 評估，QLIKE + DM test。全部自建實現。*"
+}

@@ -1,0 +1,19 @@
+{
+  "id": "pub_181e6ef1",
+  "experiment_id": "181e6ef1",
+  "title": "GJR-Range 自建模型：結合日內價格範圍資訊",
+  "summary": "GJR-GARCH + lagged range²。QLIKE=-9.020（第4名），VaR 全通過。Range 提供了 r² 之外的額外日內波動率資訊。",
+  "category": "experiment",
+  "metrics": {
+    "qlike": -9.02,
+    "var_1pct": "1.6% PASS",
+    "var_5pct": "4.8% PASS"
+  },
+  "tags": [
+    "experimental",
+    "range",
+    "OHLC"
+  ],
+  "published_at": "2026-03-14T13:46:12.177806+00:00",
+  "status": "published"
+}

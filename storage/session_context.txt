@@ -1,0 +1,476 @@
+[ai_collaboration] [提出: Gemini, 執行: Claude] Gemini 審查台灣 VT 論文 3 個關鍵問題：(1) Sharpe 不一致：Abstract 0.999 vs Table 0.690 vs Sec6 0.334（不同期間/設定但讀者會混淆）(2) t-stat：1.473×√13=5.31 但報告 3.76（需解釋 NW 調整或修正計算）(3) 4.6x amplification 比較不對等（TAIEX 900 stocks vs 10 stocks，但 0050 只有 50 stocks vs 10 stocks = 1.45x）。另：缺 fi
+
+---
+
+[peer_review] [提出: Codex/GPT, 執行: Claude 記錄] Phase O 嚴厲審查：(1) N=12 偏態規則太弱，endogeneity 問題（殘差偏態是模型產物）(2) Kupiec 太弱作主要標準 (3) FZ vs Kupiec 矛盾是結構性問題 (4) 多重比較 32 實驗未校正 (5) BTC 結論可能 sample-specific (6) 建議拆 3 篇論文。關鍵修正：降級偏態規則、加入 conditional coverage 矩陣、定義評估層級。
+
+---
+
+[peer_review] 第三輪審查（Codex+Gemini, 2026-03-16）: 12+6 issues。最嚴重: Table 2 符號、QLIKE 不一致、範圍太大。前瞻偏誤和融資成本已排除。VIX[t-1] delta=-0.008（穩健）。權重從未>100%（avg 59%）。需加引用: Zakamulin (2014), Zhu-Kuan (2016), Charalampopoulos (2025)。
+
+---
+
+[review] [提出: Gemini, Phase Q+整體審查] 5大建議: (1) 新方向: Copula-GARCH tail dependence, VVIX, Physics-informed NN (2) 統一框架: Estimation Risk/Overfitting Duality — complexity ↑, estimation variance ↑ faster than bias ↓ (3) Pivot to writing: 110+ experiments = saturation (4) 最大風險: multiple testing bias, need 
+
+---
+
+[research_methodology] 論文大綱(paper_outline.md)完成。Working title: Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection, VaR Compliance, and Volatility Targeting。4 contributions: inverted leverage in gold, gamma>skewness for model selection, Student-t VaR attribution, VT across leve
+
+---
+
+[research_methodology] FRL 短版論文完成 (paper_frl_short.md)：840 字 body text（2500 字限制內）。Focus on single contribution: leverage direction taxonomy + model selection rule。包含 3 main results: (1) taxonomy 20 assets, (2) model selection rule 95% Monte Carlo + 100% OOS, (3) Student-t VaR -48%。8 references。可以擴展到
+
+---
+
+[ai_collaboration] [提出: Codex/GPT, 執行: Claude] Codex 第4次審查(2026-03-17)。7 項批評：(1) 混用 alpha/test criterion 做 ranking (2) BTC Normal vs Skewed-t 矛盾 (3) |Skewness| N=12 不夠需 N>=20 (4) Portfolio VaR copula 只測 GLD-diluted (5) 12/VIX 2x 已過時 (6) 105 tests 無多重檢定 (7) FZ/Kupiec 需經濟解釋。建議：master VaR panel 統一比較。
+
+---
+
+[review] [提出: Codex, Phase Q審查] 5大批評: (1) Taiwan 1.39 ratio可能有calibration leakage (2) DCC VaR需Trinity test不只Kupiec (3) 2-asset RP result需明確scope (4) 3-asset DCC效果大小太小,foreground effect size (5) 新方向: realized measures, VRP modeling, tail-specific models, recovery paradox. 學術定位: complexity ceilings pa
+
+---
+
+[review] [提出: Codex] Paper review 44/100 for JBF submission. Top 5 issues: (1) Too many stories (6+ contributions) → desk reject risk (2) Proposition N94 partly mechanical (3) Data mining concerns — too many tuned decisions (4) AI authorship is submission liability (5) Too long/dense. Fix: structura
+
+---
+
+[peer_review] [提出: Gemini, 執行: Claude 記錄] Phase O VaR 審查建議：(1) CAViaR (Engle-Manganelli 2004) 直接建模 quantile，不需分配假設——全新方向 (2) Fissler-Ziegel (2016) joint loss 同時評估 VaR+ES (3) Acerbi-Szekely ES backtest 用於 Basel III compliance (4) Time-varying shape via GAS (score-driven) model (5) Johnson SU 替代 CF-Va
+
+---
+
+[paper_planning] [提出: Codex, 執行: Claude 記錄] 論文整合計畫：(1) Section 4.4 加 criterion-dependent VaR ranking + |skew| predictor (2) Section 4.7 擴展 QLIKE ceiling 到 4 模型 (3) Section 4.6 加 dist→VaR not QLIKE bridge (4) Section 5.5 加 12/VIX vs VaR sizing 2x (5) Introduction/Conclusion 重新 frame 為 criterion-depen
+
+---
+
+[peer_review] [提出: Gemini 審查, 執行: Claude 記錄] P34-P43 backwardation 審查：(1) subsample decay 是 red flag——策略是 tranquil-regime early warning 不是 all-weather (2) P36 的 low VIX 5.1x lift 是反 tautology 的最強證據 (3) 需要：T-1 execution lag test + 5bps transaction cost + non-equity cross-asset (4) 理論基礎：options demand
+
+---
+
+[peer_review] [提出: Gemini, 執行: Claude 記錄] Phase P 審查建議：(1) MSGARCH 解決 GLD violation clustering (2) Financial Stress Index 替代 INDPRO（更高頻）(3) CARR range model 作為 Realized GARCH bridge（不需 5-min）(4) Bootstrap gamma-skewness stability test (5) DCC-GARCH/Copula for portfolio (6) FZ loss scoring 不是 pass/fa
+
+---
+
+[peer_review_synthesis] Gemini+Codex consultation synthesis: (1) Paper too broad — cut to 2 contributions (gamma model selection + gamma VT mechanism), (2) OOS prediction (rho=0.821) > in-sample correlation (1.000) as main test, (3) EGARCH verification passed (rho=-0.857), (4) Taiwan should be separ
+
+---
+
+[ai_collaboration] [提出: Gemini, 執行: Claude] Gemini Phase O 審查(2026-03-17)。關鍵：(1) VIX vs VaR 是 latency 差異(forward vs backward) (2) CF-VaR 高階矩不穩定 (3) 41天 Realized GARCH overfitting。新方向：RGARCH-X(VIX augmented)、First-hour RV VT、VRP-regime switching。
+
+---
+
+[model_behavior] [提出: Codex+Claude, 執行: Claude] VaR Trinity Test (5% VaR, 7 assets × 5 methods × 3 tests): FHS 7/7 all-3-pass (100%), CF-VaR 6/7 (95.2%), Skewed-t 6/7 (90.5%), Normal 5/7 (85.7%), Student-t(5) 2/7 (66.7%). GLD violation clustering for ALL parametric methods (Christoffersen p<0.02), o
+
+---
+
+[research_methodology] Research convergence status (2026-03-16): Phase A-M complete. 287 knowledge, 389 thinking, 96 experiments. Daily GARCH fully converged: GJR w=504/2000 final answer, Student-t df=5 VaR, Hybrid VT 10/10 crisis protection. Paper 9692 words, 5 contributions. Next: monitor Iran cri
+
+---
+
+[vol_models] [提出: Claude(cross-validation), 執行: Claude(agent)] T15 cross-asset CORRECTION: Multi-step GJR amplification NOT robust across assets。Cleaner re-run: SPY h=1 t=-1.65 → h=22 t=-0.32 (WEAKENS not amplifies!)。EEM: delayed emergence at h=22 only (t=-2.62)。TLT: GARCH significantly better at h=
+
+---
+
+[ai_collaboration] [提出: Gemini(第5次審查), 執行: Claude] Gemini Phase T 審查 (34 experiments)。6 個新方向：(1) Realized Higher Moments from 5-min data (skewness/kurtosis) (2) Dynamic Hedge Efficiency Score — monitor GLD stability (3) Time-Zone Arbitrage expansion: US→Japan, Europe→US, Asia→Crypto (4) VIX velocity
+
+---
+
+[reference] Finance Research Letters (FRL): 2500 字 limit, APC $3,540。適合 focused short paper（如只寫 leverage direction taxonomy + model selection rule）。但 APC 太高。全文 7,930 字更適合 JBF(40-50頁ok) / EJFE。FRL 可作為 backup plan：把 Section 4.2+4.3 精簡成 2500 字 note。
+
+---
+
+論文修正計劃（根據 review_v1.0）：
+
+E1: 結構分散 → 保持 5 contributions 但重組為更緊湊的結構
+E2: 100% accuracy 循環 → 弱化為 "consistent with" 而非 "100%"
+E3: ceiling 過度宣稱 → "upper bound in our tests on SPY"
+E4: 參考文獻 → 已修（26條）✓
+E5: 符號不一致 → 需要統一 body.tex 中的 Unicode
+E6: 樣本定義 → 已修（7 primary, 2017-2025）✓
+E7: 數字不一致 → 需要交叉比對
+E8: 多重檢定 → 加入
+
+---
+
+論文初稿完成！12 個 sections，5,833 字：
+- Abstract + Keywords + JEL
+- Section 1: Introduction (4 contributions)
+- Section 2: Literature Review (5 streams)
+- Section 3: Methodology (models, evaluation, VT)
+- Section 4.1: Data Characteristics
+- Section 4.2: Leverage Direction (core contribution)
+- Section 4.3: 
+
+---
+
+Codex 第四輪審查 32/100 — 最嚴格的一次。三大退件理由：
+
+1. **Claims too broad for evidence**: 7 資產不足以支撐 "cross-asset" 宣稱。96 experiments = data mining risk。
+2. **In-sample narrative fitting**: thresholds (γ>0.08, VIX/GARCH>1.3, df=5) 看起來像 calibrated，不是理論推導。
+3. **Academic vs practitioner**: 12/VIX section 太實務，不夠學術。
+
+具體批
+
+---
+
+三方審查結果總結（Codex、Gemini、本地分析）：
+
+CODEX (GPT) — 12 項問題：
+最嚴重：
+1. Table 2 可能有符號錯誤 — 需要檢查
+2. 範圍太大（5 篇論文塞 1 篇）→ 需要聚焦
+3. QLIKE 指標在不同表格不一致
+4. 2026 僅 49 天不能做 Basel 推論
+5. 「預測天花板」宣稱過強 — 需要 MCS/SPA
+次要：
+6. 樣本定義不一致（多個日期範圍）
+7. DM 測試 12 個但只報告 9 個
+8. VaR 方法不穩定（df 切換）
+9. ρ=0.983 僅 5 個資產
+10. 新穎性宣稱過度
+11. 寫作風格低於 top-tier 
+
+---
+
+Phase A-M 全部完成。287 knowledge, 389 thinking, 96 experiments, 9692-word paper。日頻 GARCH 研究已收斂：GJR w=504/2000 是最終答案，Student-t df=5 VaR，Hybrid VT 10/10 危機保護。下一步：(1) 持續監控 2026 Iran crisis via daily_update，(2) 等 5-min 數據突破 ceiling，(3) 論文 LaTeX 排版投稿。研究不停——但方向從『新發現』轉向『監控+驗證+投稿』。
+
+---
+
+Peer review issues 全部處理完畢：
+- Critical #1: 重新定位 vs C&I 2017 ✓ (Section 4.2 updated)
+- Critical #2: Parkinson RV robustness ✓ (ranking preserved, Section 4.6.1 updated)
+- Critical #3: df per-year sensitivity ✓ (All-Green df≤6, rolling df discussion, Section 4.6.3 updated)
+- Important #1: HAC SE ✓ (t=-
+
+---
+
+Session 產出回顧：本次 session 已完成 30+ 項研究和修改。最重要的發現是 VRP threshold 1.3 = 長期 VRP 中位數（principled justification）+ MCS 確認 GJR superior。論文已加入 3 個方程式、3 張圖表、修正 section numbering、QLIKE 統一。三方審查（Codex+Gemini+Academic）的大部分 critical issues 已處理。剩餘待辦：Zeabur 部署（API timeout）、論文 scope 重構（Codex 建議聚焦）、加入 Ang-Chen 2002 和 Cha
+
+---
+
+論文 rewrite 規劃:
+
+Current state: 58 pages, 7 figures, 11 tables, 44/100 score
+Target: JBF submission, 35-45 pages, 65+/100
+
+Core narrative (ONE story):
+"Leverage direction — the sign of the GJR asymmetry parameter — determines which GARCH specification optimally forecasts volatility, which VaR distrib
+
+---
+
+2025 review 完成。研究持續推進中。當前 session 已做了 30+ 個分析，94 個實驗，185+ knowledge items。論文 7,255 字，14 sections。研究進入 mature phase——大部分方向已收斂。繼續持續做分析和驗證。
+
+---
+
+論文品質審核完成。
+- 7,930 字，13 sections，37 subsections
+- 12 bullet points（需轉 prose）
+- 46 bold emphases（需減少）
+- 13 inline citations（需增加——建議 25-30 for JBF）
+- 5 display equations
+- 5 tables（需增加——建議 6-8 for empirical paper）
+
+缺失的引用（至少需要加入）：
+- Patton (2011) - QLIKE loss function properties
+- Hansen & Lunde (2005) 
+
+---
+
+Experiment :  on  w= dist= OOS - QLIKE= VaR1%= Notes: 
+
+---
+
+Experiment :  on  w= dist= OOS - QLIKE= VaR1%= Notes: 
+
+---
+
+Experiment :  on  w= dist= OOS - QLIKE= VaR1%= Notes: 
+
+---
+
+Experiment :  on  w= dist= OOS - QLIKE= VaR1%= Notes: 
+
+---
+
+Experiment :  on  w= dist= OOS - QLIKE= VaR1%= Notes: 
+
+---
+
+Experiment :  on  w= dist= OOS - QLIKE= VaR1%= Notes: 
+
+---
+
+Experiment :  on  w= dist= OOS - QLIKE= VaR1%= Notes: 
+
+---
+
+Experiment :  on  w= dist= OOS - QLIKE= VaR1%= Notes: 
+
+---
+
+Experiment e034c66c: gjr_arch on TLT w= dist= OOS 2025-01-01-2025-12-31 QLIKE=-9.176227168088069 VaR1%= Notes: 
+
+---
+
+Experiment 4c67d2ff: gjr_arch on QQQ w= dist= OOS 2023-01-01-2024-12-31 QLIKE=-8.37473550705374 VaR1%= Notes: 
+
+---
+
+[high] 論文如何從 32/100 提升到 70+/100？Codex 指出的結構性問題如何解決？
+
+---
+
+[medium] 台灣 VT 論文（paper/taiwan-vt/）的核心 contribution 是什麼？目標投稿哪個期刊？
+
+---
+
+[high] Gamma-mechanism proposition 在什麼條件下會失敗？邊界條件是什麼？
+
+---
+
+[medium] 5-min 高頻數據累積後，Realized GARCH 能否突破 QLIKE ceiling（-9.034）？
+
+---
+
+[high] 2026 Hormuz 危機如果持續 6 個月，投資組合該如何調整？12/VIX 自動調整是否足夠？
+
+---
+
+[high] 多資產同時輸入 ML 模型（panel data approach）是否優於單一資產 GARCH？我們有 12 資產的完整數據可以測試
+
+---
+
+[high] BTC 半減期前後的波動率是否有可預測的 pattern？GARCH 能否捕捉？
+
+---
+
+[low] 網站架構從研究工具到公開產品的路徑是什麼？需要哪些功能？
+
+---
+
+[high] Rough Volatility (fBm H≈0.1) 能否打破我們的 QLIKE ceiling？Gatheral 2014 的 RFSV model 在日頻和 5-min 頻率上是否勝過 GJR-GARCH？
+
+---
+
+[medium] 12/VIX 的 drawdown recovery paradox 有解嗎？能否在保持 MDD 保護的同時加速反彈參與？
+
+---
+
+[Phase N] 前端樣式修正 + 論文全面修訂: research/article badge 加入、section numbering 修正、QLIKE 統一、HM/TM equations 加入、factor model R²=0.26 → 下一步：Zeabur deploy 成功後確認同步、繼續探索新研究方向
+
+---
+
+[Phase N] 所有 agents 結果整合: VIX Momentum FAIL, VIX-Zone PASS, Multi-asset ρ=-0.830, 三方審查完成 → 更新論文：修正 ρ 值、加入 null results、處理審查 action items
+
+---
+
+[VaR_Trinity_Review] Published: VaR 三重檢驗 + Codex 同儕審查：無單一最佳方法，評估準則決定結論: Content length: 4732 chars → Feed article published
+
+---
+
+[Phase N] All agents completed: VIX Momentum null. Multi-asset rho=0.830 (still sig). 3 reviews received (73/100). → Focus on paper revision per reviewer comments
+
+---
+
+[paper] appendix_plan: Plan: move 5 sections to online appendix to reduce paper from 62 to 45-50 pages → Execute section moves
+
+---
+
+[Phase_R] Published: Extended OOS 驗證：15 個月新數據確認所有核心發現: Content length: 3323 chars → Feed article published
+
+---
+
+[Phase N] Session 產出回顧: 30+ 研究項目完成、論文大幅修訂、3 張圖表、3 方程式 → 繼續處理 Zeabur 部署和剩餘論文修改
+
+---
+
+[Phase_T] Published: 自我修正：偏態不能預測 VaR 方法——小樣本膨脹的教訓: Content length: 81 chars → Feed article published
+
+---
+
+[Phase_P] Published: MS-GARCH 的教訓：8 個參數的誘惑與 Occam's Razor 的勝利: Content length: 5379 chars → Feed article published
+
+---
+
+[Phase N] 第三輪 peer review 結果: 12 Codex + 6 Gemini issues。前瞻偏誤和融資成本已排除。 → Table 2 符號和 QLIKE 一致性是最優先修正
+
+---
+
+[Paper §Abstract/Abstract] # Abstract
+
+We conduct a comprehensive cross-asset analysis of GARCH-family volatility forecasting and its applications to risk management and portfolio construction. Using daily data from fifteen assets spanning equities (SPY, QQQ, EEM), precious metals (GLD, SLV), agricu
+
+---
+
+[Paper §6. Conclusion/6. Conclusion] 6. Conclusion
+
+This paper provides a systematic cross-asset analysis of GARCH-family volatility forecasting with applications to model selection, VaR compliance, and volatility targeting. Our analysis of seven assets across five asset classes yields five principa
+
+---
+
+[Paper §4. Empirical Results/4.6.2 Cross-OOS Period Robustness] 4.6.2 Cross-OOS Period Robustness
+
+All key findings are tested on at least two non-overlapping out-of-sample periods: a primary period (2023–2024) and a validation period (2025). For SPY, we additionally test on 2022–2023 (high-volatili
+
+---
+
+[Paper §4. Empirical Results/4.6.4 The GARCH Forecasting Ceiling] 4.6.4 The GARCH Forecasting Ceiling
+
+We investigate whether more complex models can improve upon the GJR-GARCH(1,1) baseline for SPY. The standardized residuals z_t = ε_t / σ̂_t from the optimal GJR model show no significant autocorre
+
+---
+
+[Paper §5. Discussion/5.6 Limitations] 5.6 Limitations
+
+Several limitations of our analysis should be acknowledged.
+
+First, our rolling estimation window of 504 observations is at the lower bound recommended by the GARCH small-sample literature. Hwang and Valls Pereira (2006) document substantial ne
+
+---
+
+[Paper §4. Empirical Results/4.2.4 Robustness] 4.2.4 Robustness
+
+The γ sign classification is robust to window size (results qualitatively identical with w = 252 and w = 756), estimation period (2007–2026 for SPY shows the same pattern), and model specification (EGARCH leverage parameter shows consi
+
+---
+
+[Paper §4. Empirical Results/4.6.1 Window Size and Proxy Sensitivity] 4.6.1 Window Size and Proxy Sensitivity
+
+We verify that our leverage direction findings are robust to the estimation window. Re-estimating all models with w = 252 and w = 756 produces qualitatively identical gamma sign classificat
+
+---
+
+[Paper §5. Discussion/5.7 Future Research Directions] 5.7 Future Research Directions
+
+Our leverage direction taxonomy invites extension to other asset classes. Foreign exchange markets, where "carry trade" currencies may exhibit leverage patterns similar to equities while "safe-haven" currencies (CH
+
+---
+
+[Paper §3. Data and Methodology/3.4 Evaluation Criteria] 3.4 Evaluation Criteria
+
+### 3.4.1 Statistical Loss Functions
+
+The primary evaluation metric is the QLIKE loss function (Patton, 2011):
+$$\text{QLIKE} = \frac{1}{T} \sum_{t=1}^{T} \left( \frac{r^2_t}{\hat{\sigma}^2_t} + \ln \hat{\sigma}^2_t \r
+
+---
+
+[Paper §4. Empirical Results/4.3.3 Practical Model Selection Rule] 4.3.3 Practical Model Selection Rule
+
+Based on the combined evidence of Tables 2 and 3, we propose the following model selection rule:
+
+1. **Estimate GJR-GARCH on the current estimation window**
+2. **If γ is statistically significant
+
+---
+
+[add-strategy-guide] 前置條件（缺一不可）
+1. 策略已完成研究（有回測結果、Harvey t>3 統計顯著性）
+2. 已發佈至少一篇 feed 文章描述策略
+3. 確認 data-timing.md 中的時間規則已遵循
+
+
+---
+
+[publishing-guide] 研究長文（Research Reports）
+累積足夠發現時，彙整寫出有深度的長文。類型包括：
+- **研究報告**：Phase 完成後的完整實證分析
+- **研究教學**：方法論解說（如 GARCH 為什麼需要 500+ 樣本、EMD 如何分解波動率）
+- **研究心路歷程**：假說→矛盾→修正的推理過程，展示真實研究如何推進
+
+網頁分頁是**分類系統**——一旦建立某個分頁，以後同類型的內容都要放在該分頁。**不要濫增分頁**，只在確實有必要且有足夠內容支撐時才新增。
+
+
+---
+
+[publishing-guide] Description Format
+Supports Markdown + LaTeX (`$\sigma^2_t$`). Keep under 400 chars. Use tables for data.
+
+
+---
+
+[publishing-guide] Language
+All publications: **繁體中文**. Technical terms in English.
+
+
+---
+
+[publishing-guide] Signal Card (Investment Recommendations)
+
+Front-end auto-detects `phase === 'daily_update'` as pinned signal.
+
+Required `details` fields:
+```python
+details={
+    'date': '2026-03-15',
+    'spy_close': 662.29,
+    'gld_close': 460.84,
+    'sigma_annual': 15.5,
+    'slow_vt_weight':
+
+---
+
+J5 論文初稿完成！12 Sections, 5,833 字: ## 論文初稿完成
+
+**Title**: "Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection, VaR Compliance, and Volatility Targeting"
+
+### 完成的 Sections
+1. Abstract + Keywords + JEL codes
+2. Introduction（4 核心貢獻）
+3. Literature Review（5 文獻流）
+4. Methodology（模型、評估、VT
+
+---
+
+5 Agent 團隊結果整合：7/8 審查問題修正 + 3 個新發現: ## 背景 Agent 團隊執行成果
+
+### 論文修正（3 agent）
+| 問題 | Agent | 狀態 |
+|------|-------|------|
+| E5 Unicode/符號 | 62 處修正 | ✅ |
+| E7 數字不一致 | 17→18, 1507→1508, QLIKE footnote | ✅ |
+| E2/E3 Overclaiming | "100%" → "consistent", "cannot" → "is not improved" | ✅ (earlier) |
+
+### 研究分
+
+---
+
+研究狀態：日頻 GARCH 完全收斂，Phase A-M 完成: Research convergence status (2026-03-16): Phase A-M complete. 287 knowledge, 389 thinking, 96 experiments. Daily GARCH fully converged: GJR w=504/2000 final answer, Student-t df=5 VaR, Hybrid VT 10/10 crisis protection. Paper 9692 words, 5 contributions. Next: monito
+
+---
+
+論文突破 10,000 字：加入 Diversification Amplification 新發現: ## 論文里程碑：10,002 字
+
+### 新增 Section 5.2: Diversification Amplifies Leverage
+- SPY γ = 0.211 > 20 隻個股平均 0.079（2.7 倍）
+- 機制：Correlation asymmetry (Longin & Solnik 2001)
+- 保守放在 Discussion，不宣稱為第六個 contribution
+
+### 當前論文結構
+- 5 contributions + honest caveat
+
+---
+
+論文撰寫進度：Abstract + 3 核心 Sections 完成: ## 論文撰寫進度
+
+已完成：
+- Abstract（含 3 main findings, keywords, JEL codes）
+- Section 4.2: Leverage Direction（跨資產 gamma 分析 + 經濟解釋）
+- Section 4.4: VaR Attribution（Student-t 歸因分析）
+- Section 4.5: VT Across Regimes（跨 leverage regime 穩健性）
+- Tables 1-5 數據 + DM test + Figure 1 數據
+
+---
+
+[research_program] # Research Program: Autonomous Volatility Prediction
+
+## 目標（持續推進，永不完成）
+1. 持續找出選定資產的最佳 1-step ahead 波動率、VaR/ES、報酬率預測模型
+2. 持續建立一般非專業投資人可運用的各種交易策略
+3. 持續找出利用研究成果獲利的模式
+4. 持續找出並優化本網站的風格、經營模式、發展方向，持續修正朝之前進
+
+## 約束
+
+### 統計有效性（最重要，違反即無效）
+| 項目 | 最低要求 | 建議 | 依據 |
+|------|---------|------|----

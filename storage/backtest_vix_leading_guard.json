@@ -1,0 +1,7037 @@
+{
+  "strategy": "vix_leading_guard",
+  "asset": "0050.TW",
+  "period": "2022-01-01 to 2024-12-31",
+  "parameters": {
+    "k_expansion": 10,
+    "k_contraction": 6,
+    "signal": "DGBAS BCI Leading Indicator MoM",
+    "lag_months": 2,
+    "rebalance": "monthly",
+    "tx_cost_pct": 0.585
+  },
+  "metrics": {
+    "annualized_return": 0.086404,
+    "annualized_vol": 0.106903,
+    "sharpe_ratio": 0.8082,
+    "sortino_ratio": 1.0157,
+    "max_drawdown": -0.14715,
+    "calmar_ratio": 0.5872,
+    "total_return": 0.258857,
+    "monthly_win_rate": 0.5556,
+    "avg_daily_weight": 0.4532,
+    "total_tx_cost": 0.022174,
+    "n_rebalances": 36
+  },
+  "benchmark": {
+    "buy_hold_ann_return": 0.111279,
+    "buy_hold_ann_vol": 0.212118,
+    "buy_hold_sharpe": 0.5246,
+    "buy_hold_sortino": 0.7148,
+    "buy_hold_mdd": -0.330171,
+    "buy_hold_calmar": 0.337,
+    "buy_hold_total_return": 0.340561
+  },
+  "daily_entries": [
+    {
+      "date": "2022-01-03",
+      "weight": 0.60241,
+      "portfolio_return": 0.00020211,
+      "asset_return": 0.00618551,
+      "vix": 16.6,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0035241
+    },
+    {
+      "date": "2022-01-04",
+      "weight": 0.60241,
+      "portfolio_return": 0.01316758,
+      "asset_return": 0.02185819,
+      "vix": 16.91,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-05",
+      "weight": 0.60241,
+      "portfolio_return": -0.00120805,
+      "asset_return": -0.00200537,
+      "vix": 19.73,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-06",
+      "weight": 0.60241,
+      "portfolio_return": -0.00564912,
+      "asset_return": -0.00937753,
+      "vix": 19.61,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-07",
+      "weight": 0.60241,
+      "portfolio_return": -0.00529485,
+      "asset_return": -0.00878945,
+      "vix": 18.76,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-10",
+      "weight": 0.60241,
+      "portfolio_return": 0.00390367,
+      "asset_return": 0.0064801,
+      "vix": 19.4,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-11",
+      "weight": 0.60241,
+      "portfolio_return": 0.0030622,
+      "asset_return": 0.00508325,
+      "vix": 18.41,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-12",
+      "weight": 0.60241,
+      "portfolio_return": 0.00507764,
+      "asset_return": 0.00842888,
+      "vix": 17.62,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-13",
+      "weight": 0.60241,
+      "portfolio_return": 0.0030211,
+      "asset_return": 0.00501503,
+      "vix": 20.31,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-14",
+      "weight": 0.60241,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 19.19,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-18",
+      "weight": 0.60241,
+      "portfolio_return": -0.00673733,
+      "asset_return": -0.01118397,
+      "vix": 22.79,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-19",
+      "weight": 0.60241,
+      "portfolio_return": -0.00721462,
+      "asset_return": -0.01197628,
+      "vix": 23.85,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-20",
+      "weight": 0.60241,
+      "portfolio_return": 0.00243407,
+      "asset_return": 0.00404056,
+      "vix": 25.59,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-21",
+      "weight": 0.60241,
+      "portfolio_return": -0.01341907,
+      "asset_return": -0.02227566,
+      "vix": 28.85,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-24",
+      "weight": 0.60241,
+      "portfolio_return": 0.00570108,
+      "asset_return": 0.0094638,
+      "vix": 29.9,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-25",
+      "weight": 0.60241,
+      "portfolio_return": -0.00983105,
+      "asset_return": -0.01631955,
+      "vix": 31.16,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-01-26",
+      "weight": 0.60241,
+      "portfolio_return": -0.00042513,
+      "asset_return": -0.00070572,
+      "vix": 31.96,
+      "k": 10,
+      "bci_mom": 0.19,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-07",
+      "weight": 0.262467,
+      "portfolio_return": -0.00059799,
+      "asset_return": 0.00529846,
+      "vix": 22.86,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.00198866
+    },
+    {
+      "date": "2022-02-08",
+      "weight": 0.262467,
+      "portfolio_return": 0.00110667,
+      "asset_return": 0.00421642,
+      "vix": 21.44,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-09",
+      "weight": 0.262467,
+      "portfolio_return": 0.00091831,
+      "asset_return": 0.00349875,
+      "vix": 19.96,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-10",
+      "weight": 0.262467,
+      "portfolio_return": 0.00302007,
+      "asset_return": 0.01150646,
+      "vix": 23.91,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-11",
+      "weight": 0.262467,
+      "portfolio_return": -0.00018098,
+      "asset_return": -0.00068953,
+      "vix": 27.36,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-14",
+      "weight": 0.262467,
+      "portfolio_return": -0.00407418,
+      "asset_return": -0.01552264,
+      "vix": 28.33,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-15",
+      "weight": 0.262467,
+      "portfolio_return": -0.00119552,
+      "asset_return": -0.00455493,
+      "vix": 25.7,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-16",
+      "weight": 0.262467,
+      "portfolio_return": 0.00434211,
+      "asset_return": 0.01654345,
+      "vix": 24.29,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-17",
+      "weight": 0.262467,
+      "portfolio_return": 0.00018176,
+      "asset_return": 0.00069252,
+      "vix": 28.11,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-18",
+      "weight": 0.262467,
+      "portfolio_return": -0.00072649,
+      "asset_return": -0.00276792,
+      "vix": 27.75,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-22",
+      "weight": 0.262467,
+      "portfolio_return": -0.00355922,
+      "asset_return": -0.01356061,
+      "vix": 28.81,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-23",
+      "weight": 0.262467,
+      "portfolio_return": 0.00074014,
+      "asset_return": 0.00281993,
+      "vix": 31.02,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-24",
+      "weight": 0.262467,
+      "portfolio_return": -0.00636567,
+      "asset_return": -0.0242532,
+      "vix": 30.32,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-02-25",
+      "weight": 0.262467,
+      "portfolio_return": -0.00056729,
+      "asset_return": -0.00216137,
+      "vix": 27.59,
+      "k": 6,
+      "bci_mom": -0.1,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-01",
+      "weight": 0.180072,
+      "portfolio_return": 0.00205332,
+      "asset_return": 0.01407954,
+      "vix": 33.32,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.00048201
+    },
+    {
+      "date": "2022-03-02",
+      "weight": 0.180072,
+      "portfolio_return": -0.00102571,
+      "asset_return": -0.00569613,
+      "vix": 30.74,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-03",
+      "weight": 0.180072,
+      "portfolio_return": 0.00038684,
+      "asset_return": 0.00214828,
+      "vix": 30.48,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-04",
+      "weight": 0.180072,
+      "portfolio_return": -0.00193007,
+      "asset_return": -0.01071831,
+      "vix": 31.98,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-07",
+      "weight": 0.180072,
+      "portfolio_return": -0.00578777,
+      "asset_return": -0.03214142,
+      "vix": 36.45,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-08",
+      "weight": 0.180072,
+      "portfolio_return": -0.00382988,
+      "asset_return": -0.02126862,
+      "vix": 35.13,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-09",
+      "weight": 0.180072,
+      "portfolio_return": 0.00185358,
+      "asset_return": 0.01029357,
+      "vix": 32.45,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-10",
+      "weight": 0.180072,
+      "portfolio_return": 0.00523229,
+      "asset_return": 0.02905666,
+      "vix": 30.23,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-11",
+      "weight": 0.180072,
+      "portfolio_return": -0.0025753,
+      "asset_return": -0.01430149,
+      "vix": 30.75,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-14",
+      "weight": 0.180072,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 31.77,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-15",
+      "weight": 0.180072,
+      "portfolio_return": -0.00368452,
+      "asset_return": -0.02046134,
+      "vix": 29.83,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-16",
+      "weight": 0.180072,
+      "portfolio_return": 0.0007523,
+      "asset_return": 0.00417779,
+      "vix": 26.67,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-17",
+      "weight": 0.180072,
+      "portfolio_return": 0.00572088,
+      "asset_return": 0.03176996,
+      "vix": 25.67,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-18",
+      "weight": 0.180072,
+      "portfolio_return": -0.00039602,
+      "asset_return": -0.00219921,
+      "vix": 23.87,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-21",
+      "weight": 0.180072,
+      "portfolio_return": 0.00119076,
+      "asset_return": 0.00661269,
+      "vix": 23.53,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-22",
+      "weight": 0.180072,
+      "portfolio_return": -0.00026288,
+      "asset_return": -0.00145985,
+      "vix": 22.94,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-23",
+      "weight": 0.180072,
+      "portfolio_return": 0.0017112,
+      "asset_return": 0.00950288,
+      "vix": 23.57,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-24",
+      "weight": 0.180072,
+      "portfolio_return": -0.00013036,
+      "asset_return": -0.00072392,
+      "vix": 21.67,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-25",
+      "weight": 0.180072,
+      "portfolio_return": 0.00026093,
+      "asset_return": 0.00144902,
+      "vix": 20.81,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-28",
+      "weight": 0.180072,
+      "portfolio_return": -0.00195445,
+      "asset_return": -0.01085372,
+      "vix": 19.63,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-29",
+      "weight": 0.180072,
+      "portfolio_return": 0.0001976,
+      "asset_return": 0.00109735,
+      "vix": 18.9,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-30",
+      "weight": 0.180072,
+      "portfolio_return": 0.0022369,
+      "asset_return": 0.01242224,
+      "vix": 19.33,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-03-31",
+      "weight": 0.180072,
+      "portfolio_return": -0.00058486,
+      "asset_return": -0.00324791,
+      "vix": 20.56,
+      "k": 6,
+      "bci_mom": -0.29,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-01",
+      "weight": 0.305655,
+      "portfolio_return": -0.00327992,
+      "asset_return": -0.00832726,
+      "vix": 19.63,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.00073466
+    },
+    {
+      "date": "2022-04-06",
+      "weight": 0.305655,
+      "portfolio_return": -0.0015623,
+      "asset_return": -0.00511133,
+      "vix": 22.1,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-07",
+      "weight": 0.305655,
+      "portfolio_return": -0.00549617,
+      "asset_return": -0.01798163,
+      "vix": 21.55,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-08",
+      "weight": 0.305655,
+      "portfolio_return": 0.0017133,
+      "asset_return": 0.00560535,
+      "vix": 21.16,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-11",
+      "weight": 0.305655,
+      "portfolio_return": -0.00477053,
+      "asset_return": -0.01560757,
+      "vix": 24.37,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-12",
+      "weight": 0.305655,
+      "portfolio_return": 0.00023079,
+      "asset_return": 0.00075506,
+      "vix": 24.26,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-13",
+      "weight": 0.305655,
+      "portfolio_return": 0.00576485,
+      "asset_return": 0.01886065,
+      "vix": 21.82,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-14",
+      "weight": 0.305655,
+      "portfolio_return": -0.00113161,
+      "asset_return": -0.00370225,
+      "vix": 22.7,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-18",
+      "weight": 0.305655,
+      "portfolio_return": -0.00161782,
+      "asset_return": -0.00529298,
+      "vix": 22.17,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-19",
+      "weight": 0.305655,
+      "portfolio_return": 0.00104554,
+      "asset_return": 0.00342067,
+      "vix": 21.37,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-20",
+      "weight": 0.305655,
+      "portfolio_return": 0.00150513,
+      "asset_return": 0.00492428,
+      "vix": 20.32,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-21",
+      "weight": 0.305655,
+      "portfolio_return": 0.00023042,
+      "asset_return": 0.00075386,
+      "vix": 22.68,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-22",
+      "weight": 0.305655,
+      "portfolio_return": -0.0026478,
+      "asset_return": -0.00866273,
+      "vix": 28.21,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-25",
+      "weight": 0.305655,
+      "portfolio_return": -0.00545815,
+      "asset_return": -0.01785725,
+      "vix": 27.02,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-26",
+      "weight": 0.305655,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 33.52,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-27",
+      "weight": 0.305655,
+      "portfolio_return": -0.00638506,
+      "asset_return": -0.02088978,
+      "vix": 31.6,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-28",
+      "weight": 0.305655,
+      "portfolio_return": 0.0013284,
+      "asset_return": 0.00434609,
+      "vix": 29.99,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-04-29",
+      "weight": 0.305655,
+      "portfolio_return": 0.003968,
+      "asset_return": 0.01298198,
+      "vix": 33.4,
+      "k": 6,
+      "bci_mom": -0.44,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-03",
+      "weight": 0.205128,
+      "portfolio_return": -0.00210164,
+      "asset_return": -0.00737861,
+      "vix": 29.25,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.00058808
+    },
+    {
+      "date": "2022-05-04",
+      "weight": 0.205128,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 25.42,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-05",
+      "weight": 0.205128,
+      "portfolio_return": 0.00232734,
+      "asset_return": 0.0113458,
+      "vix": 31.2,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-06",
+      "weight": 0.205128,
+      "portfolio_return": -0.00412638,
+      "asset_return": -0.02011609,
+      "vix": 30.19,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-09",
+      "weight": 0.205128,
+      "portfolio_return": -0.00340126,
+      "asset_return": -0.01658112,
+      "vix": 34.75,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-10",
+      "weight": 0.205128,
+      "portfolio_return": -0.00090582,
+      "asset_return": -0.00441588,
+      "vix": 32.99,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-11",
+      "weight": 0.205128,
+      "portfolio_return": 0.00033084,
+      "asset_return": 0.00161283,
+      "vix": 32.56,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-12",
+      "weight": 0.205128,
+      "portfolio_return": -0.00487217,
+      "asset_return": -0.02375183,
+      "vix": 31.77,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-13",
+      "weight": 0.205128,
+      "portfolio_return": 0.00186092,
+      "asset_return": 0.00907198,
+      "vix": 28.87,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-16",
+      "weight": 0.205128,
+      "portfolio_return": 0.00108978,
+      "asset_return": 0.00531267,
+      "vix": 27.47,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-17",
+      "weight": 0.205128,
+      "portfolio_return": 0.00225143,
+      "asset_return": 0.0109757,
+      "vix": 26.1,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-18",
+      "weight": 0.205128,
+      "portfolio_return": 0.00222695,
+      "asset_return": 0.0108564,
+      "vix": 30.96,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-19",
+      "weight": 0.205128,
+      "portfolio_return": -0.00391654,
+      "asset_return": -0.01909312,
+      "vix": 29.35,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-20",
+      "weight": 0.205128,
+      "portfolio_return": 0.00224593,
+      "asset_return": 0.01094892,
+      "vix": 29.43,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-23",
+      "weight": 0.205128,
+      "portfolio_return": 0.00041139,
+      "asset_return": 0.00200554,
+      "vix": 28.48,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-24",
+      "weight": 0.205128,
+      "portfolio_return": -0.00229925,
+      "asset_return": -0.01120885,
+      "vix": 29.45,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-25",
+      "weight": 0.205128,
+      "portfolio_return": 0.00157789,
+      "asset_return": 0.0076922,
+      "vix": 28.37,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-26",
+      "weight": 0.205128,
+      "portfolio_return": -0.00255482,
+      "asset_return": -0.01245474,
+      "vix": 27.5,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-27",
+      "weight": 0.205128,
+      "portfolio_return": 0.00433958,
+      "asset_return": 0.02115545,
+      "vix": 25.72,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-05-31",
+      "weight": 0.205128,
+      "portfolio_return": 0.00199462,
+      "asset_return": 0.0097238,
+      "vix": 26.19,
+      "k": 6,
+      "bci_mom": -0.57,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-01",
+      "weight": 0.233554,
+      "portfolio_return": -0.00133587,
+      "asset_return": -0.00500775,
+      "vix": 25.69,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.00016629
+    },
+    {
+      "date": "2022-06-02",
+      "weight": 0.233554,
+      "portfolio_return": -0.0024413,
+      "asset_return": -0.01045285,
+      "vix": 24.72,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-06",
+      "weight": 0.233554,
+      "portfolio_return": 0.00164472,
+      "asset_return": 0.00704215,
+      "vix": 25.07,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-07",
+      "weight": 0.233554,
+      "portfolio_return": -0.00235912,
+      "asset_return": -0.01010096,
+      "vix": 24.02,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-08",
+      "weight": 0.233554,
+      "portfolio_return": 0.00256653,
+      "asset_return": 0.01098903,
+      "vix": 23.96,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-09",
+      "weight": 0.233554,
+      "portfolio_return": -0.00072535,
+      "asset_return": -0.00310571,
+      "vix": 26.09,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-10",
+      "weight": 0.233554,
+      "portfolio_return": -0.00236463,
+      "asset_return": -0.01012456,
+      "vix": 27.75,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-13",
+      "weight": 0.233554,
+      "portfolio_return": -0.00652332,
+      "asset_return": -0.0279307,
+      "vix": 34.02,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-14",
+      "weight": 0.233554,
+      "portfolio_return": -0.00037807,
+      "asset_return": -0.00161877,
+      "vix": 32.69,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-15",
+      "weight": 0.233554,
+      "portfolio_return": -0.00113605,
+      "asset_return": -0.00486418,
+      "vix": 29.62,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-16",
+      "weight": 0.233554,
+      "portfolio_return": -0.0004757,
+      "asset_return": -0.00203679,
+      "vix": 32.95,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-17",
+      "weight": 0.233554,
+      "portfolio_return": -0.00314585,
+      "asset_return": -0.01346946,
+      "vix": 31.13,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-21",
+      "weight": 0.233554,
+      "portfolio_return": 0.00477832,
+      "asset_return": 0.02045919,
+      "vix": 30.19,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-22",
+      "weight": 0.233554,
+      "portfolio_return": -0.00516035,
+      "asset_return": -0.02209489,
+      "vix": 28.95,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-23",
+      "weight": 0.233554,
+      "portfolio_return": -0.00312708,
+      "asset_return": -0.01338913,
+      "vix": 29.05,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-24",
+      "weight": 0.233554,
+      "portfolio_return": 0.00049525,
+      "asset_return": 0.0021205,
+      "vix": 27.23,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-27",
+      "weight": 0.233554,
+      "portfolio_return": 0.00553493,
+      "asset_return": 0.02369872,
+      "vix": 26.95,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-28",
+      "weight": 0.233554,
+      "portfolio_return": -0.00222067,
+      "asset_return": -0.00950816,
+      "vix": 28.36,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-29",
+      "weight": 0.233554,
+      "portfolio_return": -0.00194951,
+      "asset_return": -0.00834713,
+      "vix": 28.16,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-06-30",
+      "weight": 0.233554,
+      "portfolio_return": -0.00589783,
+      "asset_return": -0.02525255,
+      "vix": 28.71,
+      "k": 6,
+      "bci_mom": -0.81,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-01",
+      "weight": 0.224719,
+      "portfolio_return": -0.00829916,
+      "asset_return": -0.03670125,
+      "vix": 26.7,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 5.168e-05
+    },
+    {
+      "date": "2022-07-05",
+      "weight": 0.224719,
+      "portfolio_return": 0.00111903,
+      "asset_return": 0.00497968,
+      "vix": 27.54,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-06",
+      "weight": 0.224719,
+      "portfolio_return": -0.00435265,
+      "asset_return": -0.01936928,
+      "vix": 26.73,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-07",
+      "weight": 0.224719,
+      "portfolio_return": 0.00670956,
+      "asset_return": 0.02985754,
+      "vix": 26.08,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-08",
+      "weight": 0.224719,
+      "portfolio_return": 0.00230535,
+      "asset_return": 0.0102588,
+      "vix": 24.64,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-11",
+      "weight": 0.224719,
+      "portfolio_return": -0.0019843,
+      "asset_return": -0.00883013,
+      "vix": 26.17,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-12",
+      "weight": 0.224719,
+      "portfolio_return": -0.00540526,
+      "asset_return": -0.02405341,
+      "vix": 27.29,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-13",
+      "weight": 0.224719,
+      "portfolio_return": 0.00800002,
+      "asset_return": 0.03560009,
+      "vix": 26.82,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-14",
+      "weight": 0.224719,
+      "portfolio_return": 0.00108946,
+      "asset_return": 0.00484808,
+      "vix": 26.4,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-15",
+      "weight": 0.224719,
+      "portfolio_return": 0.00295683,
+      "asset_return": 0.01315791,
+      "vix": 24.23,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-18",
+      "weight": 0.224719,
+      "portfolio_return": 0.0009882,
+      "asset_return": 0.00439747,
+      "vix": 25.3,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-19",
+      "weight": 0.224719,
+      "portfolio_return": 0.00019678,
+      "asset_return": 0.00087569,
+      "vix": 24.5,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-20",
+      "weight": 0.224719,
+      "portfolio_return": 0.00147453,
+      "asset_return": 0.00656165,
+      "vix": 23.88,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-21",
+      "weight": 0.224719,
+      "portfolio_return": 0.00253919,
+      "asset_return": 0.01129939,
+      "vix": 23.11,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-22",
+      "weight": 0.224719,
+      "portfolio_return": 0.00086914,
+      "asset_return": 0.00386767,
+      "vix": 23.03,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-25",
+      "weight": 0.224719,
+      "portfolio_return": -0.0001924,
+      "asset_return": -0.00085619,
+      "vix": 23.36,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-26",
+      "weight": 0.224719,
+      "portfolio_return": -0.00202188,
+      "asset_return": -0.00899735,
+      "vix": 24.69,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-27",
+      "weight": 0.224719,
+      "portfolio_return": 0.00204023,
+      "asset_return": 0.00907903,
+      "vix": 23.24,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-28",
+      "weight": 0.224719,
+      "portfolio_return": 0.0003851,
+      "asset_return": 0.00171371,
+      "vix": 22.33,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-07-29",
+      "weight": 0.224719,
+      "portfolio_return": 0.00211458,
+      "asset_return": 0.00940987,
+      "vix": 21.33,
+      "k": 6,
+      "bci_mom": -1.02,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-01",
+      "weight": 0.262697,
+      "portfolio_return": -0.00100136,
+      "asset_return": -0.0029661,
+      "vix": 22.84,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.00022217
+    },
+    {
+      "date": "2022-08-02",
+      "weight": 0.262697,
+      "portfolio_return": -0.00418363,
+      "asset_return": -0.01592569,
+      "vix": 23.93,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-03",
+      "weight": 0.262697,
+      "portfolio_return": 0.00159141,
+      "asset_return": 0.00605795,
+      "vix": 21.95,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-04",
+      "weight": 0.262697,
+      "portfolio_return": 0.00067794,
+      "asset_return": 0.00258069,
+      "vix": 21.44,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-05",
+      "weight": 0.262697,
+      "portfolio_return": 0.00664912,
+      "asset_return": 0.02531099,
+      "vix": 21.15,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-08",
+      "weight": 0.262697,
+      "portfolio_return": -0.00054959,
+      "asset_return": -0.00209209,
+      "vix": 21.29,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-09",
+      "weight": 0.262697,
+      "portfolio_return": -0.00022026,
+      "asset_return": -0.00083845,
+      "vix": 21.77,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-10",
+      "weight": 0.262697,
+      "portfolio_return": -0.00275596,
+      "asset_return": -0.01049103,
+      "vix": 19.74,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-11",
+      "weight": 0.262697,
+      "portfolio_return": 0.00479048,
+      "asset_return": 0.01823578,
+      "vix": 20.2,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-12",
+      "weight": 0.262697,
+      "portfolio_return": 0.0016412,
+      "asset_return": 0.00624751,
+      "vix": 19.53,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-15",
+      "weight": 0.262697,
+      "portfolio_return": 0.00239206,
+      "asset_return": 0.00910578,
+      "vix": 19.95,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-16",
+      "weight": 0.262697,
+      "portfolio_return": 0.00043103,
+      "asset_return": 0.00164079,
+      "vix": 19.69,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-17",
+      "weight": 0.262697,
+      "portfolio_return": 0.00010756,
+      "asset_return": 0.00040944,
+      "vix": 19.9,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-18",
+      "weight": 0.262697,
+      "portfolio_return": -0.0017205,
+      "asset_return": -0.00654938,
+      "vix": 19.56,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-19",
+      "weight": 0.262697,
+      "portfolio_return": 0.00043298,
+      "asset_return": 0.00164823,
+      "vix": 20.6,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-22",
+      "weight": 0.262697,
+      "portfolio_return": -0.00324185,
+      "asset_return": -0.01234062,
+      "vix": 23.8,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-23",
+      "weight": 0.262697,
+      "portfolio_return": -0.00404823,
+      "asset_return": -0.01541025,
+      "vix": 24.11,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-24",
+      "weight": 0.262697,
+      "portfolio_return": -0.00066674,
+      "asset_return": -0.00253805,
+      "vix": 22.82,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-25",
+      "weight": 0.262697,
+      "portfolio_return": 0.00245096,
+      "asset_return": 0.00932997,
+      "vix": 21.78,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-26",
+      "weight": 0.262697,
+      "portfolio_return": 0.00132451,
+      "asset_return": 0.00504197,
+      "vix": 25.56,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-29",
+      "weight": 0.262697,
+      "portfolio_return": -0.00669921,
+      "asset_return": -0.02550166,
+      "vix": 26.21,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-30",
+      "weight": 0.262697,
+      "portfolio_return": 0.00045078,
+      "asset_return": 0.00171596,
+      "vix": 26.21,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-08-31",
+      "weight": 0.262697,
+      "portfolio_return": 0.00191261,
+      "asset_return": 0.00728065,
+      "vix": 25.87,
+      "k": 6,
+      "bci_mom": -1.06,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-01",
+      "weight": 0.234742,
+      "portfolio_return": -0.00505402,
+      "asset_return": -0.02083343,
+      "vix": 25.56,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.00016354
+    },
+    {
+      "date": "2022-09-02",
+      "weight": 0.234742,
+      "portfolio_return": -0.00254825,
+      "asset_return": -0.01085554,
+      "vix": 25.47,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-06",
+      "weight": 0.234742,
+      "portfolio_return": 0.00154232,
+      "asset_return": 0.00657028,
+      "vix": 26.91,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-07",
+      "weight": 0.234742,
+      "portfolio_return": -0.00551613,
+      "asset_return": -0.0234987,
+      "vix": 24.64,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-08",
+      "weight": 0.234742,
+      "portfolio_return": 0.00167375,
+      "asset_return": 0.00713018,
+      "vix": 23.61,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-12",
+      "weight": 0.234742,
+      "portfolio_return": 0.00498565,
+      "asset_return": 0.02123889,
+      "vix": 23.87,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-13",
+      "weight": 0.234742,
+      "portfolio_return": 0.0012205,
+      "asset_return": 0.00519933,
+      "vix": 27.27,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-14",
+      "weight": 0.234742,
+      "portfolio_return": -0.00475553,
+      "asset_return": -0.02025856,
+      "vix": 26.16,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-15",
+      "weight": 0.234742,
+      "portfolio_return": 0.00041309,
+      "asset_return": 0.00175975,
+      "vix": 26.27,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-16",
+      "weight": 0.234742,
+      "portfolio_return": -0.00268042,
+      "asset_return": -0.0114186,
+      "vix": 26.3,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-19",
+      "weight": 0.234742,
+      "portfolio_return": -0.00104282,
+      "asset_return": -0.0044424,
+      "vix": 25.76,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-20",
+      "weight": 0.234742,
+      "portfolio_return": 0.00209498,
+      "asset_return": 0.0089246,
+      "vix": 27.16,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-21",
+      "weight": 0.234742,
+      "portfolio_return": -0.00197262,
+      "asset_return": -0.00840337,
+      "vix": 27.99,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-22",
+      "weight": 0.234742,
+      "portfolio_return": -0.00282699,
+      "asset_return": -0.01204297,
+      "vix": 27.35,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-23",
+      "weight": 0.234742,
+      "portfolio_return": -0.00222553,
+      "asset_return": -0.00948076,
+      "vix": 29.92,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-26",
+      "weight": 0.234742,
+      "portfolio_return": -0.00438669,
+      "asset_return": -0.0186873,
+      "vix": 32.26,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-27",
+      "weight": 0.234742,
+      "portfolio_return": -0.00032708,
+      "asset_return": -0.00139335,
+      "vix": 32.6,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-28",
+      "weight": 0.234742,
+      "portfolio_return": -0.0049132,
+      "asset_return": -0.02093023,
+      "vix": 30.18,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-29",
+      "weight": 0.234742,
+      "portfolio_return": -0.00078061,
+      "asset_return": -0.0033254,
+      "vix": 31.84,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-09-30",
+      "weight": 0.234742,
+      "portfolio_return": -0.00324477,
+      "asset_return": -0.01382271,
+      "vix": 31.62,
+      "k": 6,
+      "bci_mom": -0.92,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-03",
+      "weight": 0.199336,
+      "portfolio_return": -0.00261575,
+      "asset_return": -0.01208328,
+      "vix": 30.1,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.00020713
+    },
+    {
+      "date": "2022-10-04",
+      "weight": 0.199336,
+      "portfolio_return": 0.00507119,
+      "asset_return": 0.02544046,
+      "vix": 29.07,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-05",
+      "weight": 0.199336,
+      "portfolio_return": 0.00466003,
+      "asset_return": 0.02337782,
+      "vix": 28.55,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-06",
+      "weight": 0.199336,
+      "portfolio_return": 0.00139397,
+      "asset_return": 0.00699306,
+      "vix": 30.52,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-07",
+      "weight": 0.199336,
+      "portfolio_return": -0.00332229,
+      "asset_return": -0.01666682,
+      "vix": 31.36,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-11",
+      "weight": 0.199336,
+      "portfolio_return": -0.01032339,
+      "asset_return": -0.05178902,
+      "vix": 33.63,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-12",
+      "weight": 0.199336,
+      "portfolio_return": -0.00098973,
+      "asset_return": -0.00496517,
+      "vix": 33.57,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-13",
+      "weight": 0.199336,
+      "portfolio_return": -0.00238726,
+      "asset_return": -0.0119761,
+      "vix": 31.94,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-14",
+      "weight": 0.199336,
+      "portfolio_return": 0.00573847,
+      "asset_return": 0.02878799,
+      "vix": 32.02,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-17",
+      "weight": 0.199336,
+      "portfolio_return": -0.0037186,
+      "asset_return": -0.01865499,
+      "vix": 31.37,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-18",
+      "weight": 0.199336,
+      "portfolio_return": 0.0022935,
+      "asset_return": 0.01150572,
+      "vix": 30.5,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-19",
+      "weight": 0.199336,
+      "portfolio_return": -0.00266172,
+      "asset_return": -0.01335295,
+      "vix": 30.76,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-20",
+      "weight": 0.199336,
+      "portfolio_return": -0.00109911,
+      "asset_return": -0.00551389,
+      "vix": 29.98,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-21",
+      "weight": 0.199336,
+      "portfolio_return": -0.00060282,
+      "asset_return": -0.00302417,
+      "vix": 29.69,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-24",
+      "weight": 0.199336,
+      "portfolio_return": -0.00060465,
+      "asset_return": -0.00303334,
+      "vix": 29.85,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-25",
+      "weight": 0.199336,
+      "portfolio_return": -0.00384116,
+      "asset_return": -0.0192698,
+      "vix": 28.46,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-26",
+      "weight": 0.199336,
+      "portfolio_return": 0.00185521,
+      "asset_return": 0.00930696,
+      "vix": 27.28,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-27",
+      "weight": 0.199336,
+      "portfolio_return": 0.00285934,
+      "asset_return": 0.01434436,
+      "vix": 27.39,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-28",
+      "weight": 0.199336,
+      "portfolio_return": -0.00251686,
+      "asset_return": -0.01262624,
+      "vix": 25.75,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-10-31",
+      "weight": 0.199336,
+      "portfolio_return": 0.00265101,
+      "asset_return": 0.01329922,
+      "vix": 25.88,
+      "k": 6,
+      "bci_mom": -0.7,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-01",
+      "weight": 0.232468,
+      "portfolio_return": 0.00109704,
+      "asset_return": 0.00555286,
+      "vix": 25.81,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.00019383
+    },
+    {
+      "date": "2022-11-02",
+      "weight": 0.232468,
+      "portfolio_return": 0.00093358,
+      "asset_return": 0.00401597,
+      "vix": 25.86,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-03",
+      "weight": 0.232468,
+      "portfolio_return": -0.00302208,
+      "asset_return": -0.01299999,
+      "vix": 25.3,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-04",
+      "weight": 0.232468,
+      "portfolio_return": 0.0003533,
+      "asset_return": 0.00151979,
+      "vix": 24.55,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-07",
+      "weight": 0.232468,
+      "portfolio_return": 0.00399795,
+      "asset_return": 0.01719784,
+      "vix": 24.35,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-08",
+      "weight": 0.232468,
+      "portfolio_return": 0.00242755,
+      "asset_return": 0.01044251,
+      "vix": 25.54,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-09",
+      "weight": 0.232468,
+      "portfolio_return": 0.00663542,
+      "asset_return": 0.02854334,
+      "vix": 26.09,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-10",
+      "weight": 0.232468,
+      "portfolio_return": -0.0022246,
+      "asset_return": -0.00956948,
+      "vix": 23.53,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-11",
+      "weight": 0.232468,
+      "portfolio_return": 0.01235338,
+      "asset_return": 0.05314012,
+      "vix": 22.52,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-14",
+      "weight": 0.232468,
+      "portfolio_return": 0.00213274,
+      "asset_return": 0.00917433,
+      "vix": 23.73,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-15",
+      "weight": 0.232468,
+      "portfolio_return": 0.00993272,
+      "asset_return": 0.04272723,
+      "vix": 24.54,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-16",
+      "weight": 0.232468,
+      "portfolio_return": -0.00040534,
+      "asset_return": -0.00174364,
+      "vix": 24.11,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-17",
+      "weight": 0.232468,
+      "portfolio_return": 0.00010153,
+      "asset_return": 0.00043676,
+      "vix": 23.93,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-18",
+      "weight": 0.232468,
+      "portfolio_return": -0.00060883,
+      "asset_return": -0.00261899,
+      "vix": 23.12,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-21",
+      "weight": 0.232468,
+      "portfolio_return": -0.00081389,
+      "asset_return": -0.00350109,
+      "vix": 22.36,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-22",
+      "weight": 0.232468,
+      "portfolio_return": 0.00193977,
+      "asset_return": 0.00834425,
+      "vix": 21.29,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-23",
+      "weight": 0.232468,
+      "portfolio_return": 0.00161998,
+      "asset_return": 0.00696863,
+      "vix": 20.35,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-25",
+      "weight": 0.232468,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 20.5,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-28",
+      "weight": 0.232468,
+      "portfolio_return": -0.00468122,
+      "asset_return": -0.02013705,
+      "vix": 22.21,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-29",
+      "weight": 0.232468,
+      "portfolio_return": 0.00213459,
+      "asset_return": 0.00918229,
+      "vix": 21.89,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-11-30",
+      "weight": 0.232468,
+      "portfolio_return": 0.00191372,
+      "asset_return": 0.00823217,
+      "vix": 20.58,
+      "k": 6,
+      "bci_mom": -0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-01",
+      "weight": 0.302419,
+      "portfolio_return": 0.00478924,
+      "asset_return": 0.01718955,
+      "vix": 19.84,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.00040922
+    },
+    {
+      "date": "2022-12-02",
+      "weight": 0.302419,
+      "portfolio_return": -0.00268305,
+      "asset_return": -0.00887194,
+      "vix": 19.06,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-05",
+      "weight": 0.302419,
+      "portfolio_return": 0.00038673,
+      "asset_return": 0.0012788,
+      "vix": 20.75,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-06",
+      "weight": 0.302419,
+      "portfolio_return": -0.00553598,
+      "asset_return": -0.01830565,
+      "vix": 22.17,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-07",
+      "weight": 0.302419,
+      "portfolio_return": -0.00183604,
+      "asset_return": -0.00607116,
+      "vix": 22.68,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-08",
+      "weight": 0.302419,
+      "portfolio_return": -0.00356253,
+      "asset_return": -0.01178011,
+      "vix": 22.29,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-09",
+      "weight": 0.302419,
+      "portfolio_return": 0.00467317,
+      "asset_return": 0.01545261,
+      "vix": 22.83,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-12",
+      "weight": 0.302419,
+      "portfolio_return": -0.00289276,
+      "asset_return": -0.0095654,
+      "vix": 25.0,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-13",
+      "weight": 0.302419,
+      "portfolio_return": -0.0013275,
+      "asset_return": -0.0043896,
+      "vix": 22.55,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-14",
+      "weight": 0.302419,
+      "portfolio_return": 0.00373353,
+      "asset_return": 0.01234554,
+      "vix": 21.14,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-15",
+      "weight": 0.302419,
+      "portfolio_return": 0.00026344,
+      "asset_return": 0.0008711,
+      "vix": 22.83,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-16",
+      "weight": 0.302419,
+      "portfolio_return": -0.00500083,
+      "asset_return": -0.01653606,
+      "vix": 22.62,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-19",
+      "weight": 0.302419,
+      "portfolio_return": -0.00173959,
+      "asset_return": -0.00575225,
+      "vix": 22.42,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-20",
+      "weight": 0.302419,
+      "portfolio_return": -0.00551812,
+      "asset_return": -0.01824659,
+      "vix": 21.48,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-21",
+      "weight": 0.302419,
+      "portfolio_return": 0.00123378,
+      "asset_return": 0.00407971,
+      "vix": 20.07,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-22",
+      "weight": 0.302419,
+      "portfolio_return": 0.00505175,
+      "asset_return": 0.01670445,
+      "vix": 21.97,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-23",
+      "weight": 0.302419,
+      "portfolio_return": -0.00510302,
+      "asset_return": -0.01687398,
+      "vix": 20.87,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-27",
+      "weight": 0.302419,
+      "portfolio_return": 0.00136105,
+      "asset_return": 0.00450053,
+      "vix": 21.65,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-28",
+      "weight": 0.302419,
+      "portfolio_return": -0.00433577,
+      "asset_return": -0.01433696,
+      "vix": 22.14,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-29",
+      "weight": 0.302419,
+      "portfolio_return": -0.00137464,
+      "asset_return": -0.00454546,
+      "vix": 21.44,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2022-12-30",
+      "weight": 0.302419,
+      "portfolio_return": 0.00193329,
+      "asset_return": 0.00639274,
+      "vix": 21.67,
+      "k": 6,
+      "bci_mom": -0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-03",
+      "weight": 0.436681,
+      "portfolio_return": 0.00139395,
+      "asset_return": 0.00499079,
+      "vix": 22.9,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.00078543
+    },
+    {
+      "date": "2023-01-04",
+      "weight": 0.436681,
+      "portfolio_return": -0.00098566,
+      "asset_return": -0.00225715,
+      "vix": 22.01,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-05",
+      "weight": 0.436681,
+      "portfolio_return": 0.00316152,
+      "asset_return": 0.00723988,
+      "vix": 22.46,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-06",
+      "weight": 0.436681,
+      "portfolio_return": 0.00196167,
+      "asset_return": 0.00449222,
+      "vix": 21.13,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-09",
+      "weight": 0.436681,
+      "portfolio_return": 0.01562369,
+      "asset_return": 0.03577824,
+      "vix": 21.97,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-10",
+      "weight": 0.436681,
+      "portfolio_return": 0.00169692,
+      "asset_return": 0.00388594,
+      "vix": 20.58,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-11",
+      "weight": 0.436681,
+      "portfolio_return": 0.00037562,
+      "asset_return": 0.00086016,
+      "vix": 21.09,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-12",
+      "weight": 0.436681,
+      "portfolio_return": -0.00187659,
+      "asset_return": -0.00429739,
+      "vix": 18.83,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-13",
+      "weight": 0.436681,
+      "portfolio_return": 0.00508865,
+      "asset_return": 0.011653,
+      "vix": 18.35,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-17",
+      "weight": 0.436681,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 19.36,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-30",
+      "weight": 0.436681,
+      "portfolio_return": 0.01966012,
+      "asset_return": 0.04502167,
+      "vix": 19.94,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-01-31",
+      "weight": 0.436681,
+      "portfolio_return": -0.00868294,
+      "asset_return": -0.01988393,
+      "vix": 19.4,
+      "k": 10,
+      "bci_mom": 0.05,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-01",
+      "weight": 0.559597,
+      "portfolio_return": 0.00259213,
+      "asset_return": 0.0059171,
+      "vix": 17.87,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.00071906
+    },
+    {
+      "date": "2023-02-02",
+      "weight": 0.559597,
+      "portfolio_return": 0.00940496,
+      "asset_return": 0.01680667,
+      "vix": 18.73,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-03",
+      "weight": 0.559597,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 18.33,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-06",
+      "weight": 0.559597,
+      "portfolio_return": -0.00809332,
+      "asset_return": -0.01446276,
+      "vix": 19.43,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-07",
+      "weight": 0.559597,
+      "portfolio_return": -0.00117316,
+      "asset_return": -0.00209643,
+      "vix": 18.66,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-08",
+      "weight": 0.559597,
+      "portfolio_return": 0.00869964,
+      "asset_return": 0.01554625,
+      "vix": 19.63,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-09",
+      "weight": 0.559597,
+      "portfolio_return": 0.00023151,
+      "asset_return": 0.00041371,
+      "vix": 20.71,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-10",
+      "weight": 0.559597,
+      "portfolio_return": 0.00046283,
+      "asset_return": 0.00082707,
+      "vix": 20.53,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-13",
+      "weight": 0.559597,
+      "portfolio_return": -0.00115615,
+      "asset_return": -0.00206604,
+      "vix": 20.34,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-14",
+      "weight": 0.559597,
+      "portfolio_return": 0.00417089,
+      "asset_return": 0.00745338,
+      "vix": 18.91,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-15",
+      "weight": 0.559597,
+      "portfolio_return": -0.01288014,
+      "asset_return": -0.02301682,
+      "vix": 18.23,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-16",
+      "weight": 0.559597,
+      "portfolio_return": 0.00682722,
+      "asset_return": 0.01220024,
+      "vix": 20.17,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-17",
+      "weight": 0.559597,
+      "portfolio_return": -0.00721006,
+      "asset_return": -0.01288439,
+      "vix": 20.02,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-21",
+      "weight": 0.559597,
+      "portfolio_return": -0.00023511,
+      "asset_return": -0.00042014,
+      "vix": 22.87,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-22",
+      "weight": 0.559597,
+      "portfolio_return": -0.00611582,
+      "asset_return": -0.01092897,
+      "vix": 22.29,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-23",
+      "weight": 0.559597,
+      "portfolio_return": 0.00832381,
+      "asset_return": 0.01487465,
+      "vix": 21.14,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-02-24",
+      "weight": 0.559597,
+      "portfolio_return": -0.00281204,
+      "asset_return": -0.00502512,
+      "vix": 21.67,
+      "k": 10,
+      "bci_mom": 0.3,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-01",
+      "weight": 0.485909,
+      "portfolio_return": 0.00181851,
+      "asset_return": 0.00462966,
+      "vix": 20.58,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.00043108
+    },
+    {
+      "date": "2023-03-02",
+      "weight": 0.485909,
+      "portfolio_return": -0.00040717,
+      "asset_return": -0.00083795,
+      "vix": 19.59,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-03",
+      "weight": 0.485909,
+      "portfolio_return": 0.00040751,
+      "asset_return": 0.00083865,
+      "vix": 18.49,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-06",
+      "weight": 0.485909,
+      "portfolio_return": 0.00468196,
+      "asset_return": 0.00963548,
+      "vix": 18.61,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-07",
+      "weight": 0.485909,
+      "portfolio_return": 0.00322593,
+      "asset_return": 0.00663895,
+      "vix": 19.59,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-08",
+      "weight": 0.485909,
+      "portfolio_return": -0.00400583,
+      "asset_return": -0.008244,
+      "vix": 19.11,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-09",
+      "weight": 0.485909,
+      "portfolio_return": -0.00040392,
+      "asset_return": -0.00083127,
+      "vix": 22.61,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-10",
+      "weight": 0.485909,
+      "portfolio_return": -0.00768072,
+      "asset_return": -0.01580692,
+      "vix": 24.8,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-13",
+      "weight": 0.485909,
+      "portfolio_return": 0.00205371,
+      "asset_return": 0.00422653,
+      "vix": 26.52,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-14",
+      "weight": 0.485909,
+      "portfolio_return": -0.00531718,
+      "asset_return": -0.01094277,
+      "vix": 23.73,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-15",
+      "weight": 0.485909,
+      "portfolio_return": 0.00041354,
+      "asset_return": 0.00085107,
+      "vix": 26.14,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-16",
+      "weight": 0.485909,
+      "portfolio_return": -0.00227254,
+      "asset_return": -0.0046769,
+      "vix": 22.99,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-17",
+      "weight": 0.485909,
+      "portfolio_return": 0.00788745,
+      "asset_return": 0.01623238,
+      "vix": 25.51,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-20",
+      "weight": 0.485909,
+      "portfolio_return": -0.00347226,
+      "asset_return": -0.00714592,
+      "vix": 24.15,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-21",
+      "weight": 0.485909,
+      "portfolio_return": 0.00226289,
+      "asset_return": 0.00465703,
+      "vix": 21.38,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-22",
+      "weight": 0.485909,
+      "portfolio_return": 0.00921449,
+      "asset_return": 0.01896341,
+      "vix": 22.26,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-23",
+      "weight": 0.485909,
+      "portfolio_return": 0.00381811,
+      "asset_return": 0.00785767,
+      "vix": 22.61,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-24",
+      "weight": 0.485909,
+      "portfolio_return": 0.00139575,
+      "asset_return": 0.00287246,
+      "vix": 21.74,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-27",
+      "weight": 0.485909,
+      "portfolio_return": -0.00298228,
+      "asset_return": -0.00613753,
+      "vix": 20.6,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-28",
+      "weight": 0.485909,
+      "portfolio_return": -0.00420091,
+      "asset_return": -0.00864548,
+      "vix": 19.97,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-29",
+      "weight": 0.485909,
+      "portfolio_return": 0.00080717,
+      "asset_return": 0.00166115,
+      "vix": 19.12,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-30",
+      "weight": 0.485909,
+      "portfolio_return": 0.00241742,
+      "asset_return": 0.00497505,
+      "vix": 19.02,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-03-31",
+      "weight": 0.485909,
+      "portfolio_return": 0.00160365,
+      "asset_return": 0.00330031,
+      "vix": 18.7,
+      "k": 10,
+      "bci_mom": 0.43,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-06",
+      "weight": 0.543478,
+      "portfolio_return": -0.00301842,
+      "asset_return": -0.00493421,
+      "vix": 18.4,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.00033678
+    },
+    {
+      "date": "2023-04-10",
+      "weight": 0.543478,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 18.97,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-11",
+      "weight": 0.543478,
+      "portfolio_return": -0.00067369,
+      "asset_return": -0.00123958,
+      "vix": 19.1,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-12",
+      "weight": 0.543478,
+      "portfolio_return": -0.00134912,
+      "asset_return": -0.00248238,
+      "vix": 19.09,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-13",
+      "weight": 0.543478,
+      "portfolio_return": -0.00473378,
+      "asset_return": -0.00871016,
+      "vix": 17.8,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-14",
+      "weight": 0.543478,
+      "portfolio_return": 0.00523018,
+      "asset_return": 0.00962352,
+      "vix": 17.07,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-17",
+      "weight": 0.543478,
+      "portfolio_return": -0.00135139,
+      "asset_return": -0.00248656,
+      "vix": 16.95,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-18",
+      "weight": 0.543478,
+      "portfolio_return": -0.00180639,
+      "asset_return": -0.00332375,
+      "vix": 16.83,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-19",
+      "weight": 0.543478,
+      "portfolio_return": -0.00407769,
+      "asset_return": -0.00750295,
+      "vix": 16.46,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-20",
+      "weight": 0.543478,
+      "portfolio_return": -0.0006848,
+      "asset_return": -0.00126003,
+      "vix": 17.17,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-21",
+      "weight": 0.543478,
+      "portfolio_return": -0.00137132,
+      "asset_return": -0.00252323,
+      "vix": 16.77,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-24",
+      "weight": 0.543478,
+      "portfolio_return": -0.00206211,
+      "asset_return": -0.00379428,
+      "vix": 16.89,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-25",
+      "weight": 0.543478,
+      "portfolio_return": -0.00712981,
+      "asset_return": -0.01311885,
+      "vix": 18.76,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-26",
+      "weight": 0.543478,
+      "portfolio_return": -0.00233052,
+      "asset_return": -0.00428815,
+      "vix": 18.84,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-27",
+      "weight": 0.543478,
+      "portfolio_return": -0.00046808,
+      "asset_return": -0.00086127,
+      "vix": 17.03,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-04-28",
+      "weight": 0.543478,
+      "portfolio_return": 0.00655919,
+      "asset_return": 0.01206891,
+      "vix": 15.78,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-02",
+      "weight": 0.337458,
+      "portfolio_return": -0.00034288,
+      "asset_return": 0.0025554,
+      "vix": 17.78,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.00120522
+    },
+    {
+      "date": "2023-05-03",
+      "weight": 0.337458,
+      "portfolio_return": -0.00143357,
+      "asset_return": -0.00424814,
+      "vix": 18.34,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-04",
+      "weight": 0.337458,
+      "portfolio_return": 0.00086381,
+      "asset_return": 0.00255976,
+      "vix": 20.09,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-05",
+      "weight": 0.337458,
+      "portfolio_return": 0.00086161,
+      "asset_return": 0.00255322,
+      "vix": 17.19,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-08",
+      "weight": 0.337458,
+      "portfolio_return": 0.00214849,
+      "asset_return": 0.0063667,
+      "vix": 16.98,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-09",
+      "weight": 0.337458,
+      "portfolio_return": 0.00099629,
+      "asset_return": 0.00295234,
+      "vix": 17.71,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-10",
+      "weight": 0.337458,
+      "portfolio_return": -0.00312198,
+      "asset_return": -0.00925145,
+      "vix": 16.94,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-11",
+      "weight": 0.337458,
+      "portfolio_return": -0.00071616,
+      "asset_return": -0.00212223,
+      "vix": 16.93,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-12",
+      "weight": 0.337458,
+      "portfolio_return": -0.00100479,
+      "asset_return": -0.00297753,
+      "vix": 17.03,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-15",
+      "weight": 0.337458,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 17.12,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-16",
+      "weight": 0.337458,
+      "portfolio_return": 0.00403105,
+      "asset_return": 0.01194534,
+      "vix": 17.99,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-17",
+      "weight": 0.337458,
+      "portfolio_return": 0.00554846,
+      "asset_return": 0.01644193,
+      "vix": 16.87,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-18",
+      "weight": 0.337458,
+      "portfolio_return": 0.00447888,
+      "asset_return": 0.0132724,
+      "vix": 16.05,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-19",
+      "weight": 0.337458,
+      "portfolio_return": 0.00096693,
+      "asset_return": 0.00286533,
+      "vix": 16.81,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-22",
+      "weight": 0.337458,
+      "portfolio_return": -0.00055091,
+      "asset_return": -0.00163254,
+      "vix": 17.21,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-23",
+      "weight": 0.337458,
+      "portfolio_return": -0.00027595,
+      "asset_return": -0.00081774,
+      "vix": 18.53,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-24",
+      "weight": 0.337458,
+      "portfolio_return": -0.00165693,
+      "asset_return": -0.00491005,
+      "vix": 20.03,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-25",
+      "weight": 0.337458,
+      "portfolio_return": 0.00402398,
+      "asset_return": 0.0119244,
+      "vix": 19.14,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-26",
+      "weight": 0.337458,
+      "portfolio_return": 0.00795308,
+      "asset_return": 0.02356763,
+      "vix": 17.95,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-30",
+      "weight": 0.337458,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 17.46,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-05-31",
+      "weight": 0.337458,
+      "portfolio_return": -0.00159745,
+      "asset_return": -0.00473379,
+      "vix": 17.94,
+      "k": 6,
+      "bci_mom": -0.11,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-01",
+      "weight": 0.383387,
+      "portfolio_return": -0.00330778,
+      "asset_return": -0.00792698,
+      "vix": 15.65,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.00026868
+    },
+    {
+      "date": "2023-06-02",
+      "weight": 0.383387,
+      "portfolio_return": 0.00490145,
+      "asset_return": 0.01278463,
+      "vix": 14.6,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-05",
+      "weight": 0.383387,
+      "portfolio_return": -0.00120994,
+      "asset_return": -0.00315592,
+      "vix": 14.73,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-06",
+      "weight": 0.383387,
+      "portfolio_return": 0.00106206,
+      "asset_return": 0.00277022,
+      "vix": 13.96,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-07",
+      "weight": 0.383387,
+      "portfolio_return": 0.0042363,
+      "asset_return": 0.01104967,
+      "vix": 13.94,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-08",
+      "weight": 0.383387,
+      "portfolio_return": -0.00374107,
+      "asset_return": -0.00975797,
+      "vix": 13.65,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-09",
+      "weight": 0.383387,
+      "portfolio_return": 0.00287119,
+      "asset_return": 0.00748903,
+      "vix": 13.83,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-12",
+      "weight": 0.383387,
+      "portfolio_return": 0.0035999,
+      "asset_return": 0.00938973,
+      "vix": 15.01,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-13",
+      "weight": 0.383387,
+      "portfolio_return": 0.00757859,
+      "asset_return": 0.01976748,
+      "vix": 14.61,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-14",
+      "weight": 0.383387,
+      "portfolio_return": -0.00014568,
+      "asset_return": -0.00037999,
+      "vix": 13.88,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-15",
+      "weight": 0.383387,
+      "portfolio_return": 0.00116614,
+      "asset_return": 0.00304168,
+      "vix": 14.5,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-16",
+      "weight": 0.383387,
+      "portfolio_return": -0.0010173,
+      "asset_return": -0.00265347,
+      "vix": 13.54,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-20",
+      "weight": 0.383387,
+      "portfolio_return": -0.00204473,
+      "asset_return": -0.00533334,
+      "vix": 13.88,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-21",
+      "weight": 0.383387,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 13.2,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-26",
+      "weight": 0.383387,
+      "portfolio_return": -0.00234937,
+      "asset_return": -0.00612794,
+      "vix": 14.25,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-27",
+      "weight": 0.383387,
+      "portfolio_return": -0.00251161,
+      "asset_return": -0.00655111,
+      "vix": 13.74,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-28",
+      "weight": 0.383387,
+      "portfolio_return": 0.00059489,
+      "asset_return": 0.00155167,
+      "vix": 13.43,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-29",
+      "weight": 0.383387,
+      "portfolio_return": -0.0001485,
+      "asset_return": -0.00038733,
+      "vix": 13.54,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-06-30",
+      "weight": 0.383387,
+      "portfolio_return": 0.00014856,
+      "asset_return": 0.00038748,
+      "vix": 13.59,
+      "k": 6,
+      "bci_mom": -0.4,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-03",
+      "weight": 0.442152,
+      "portfolio_return": 0.00513602,
+      "asset_return": 0.01239346,
+      "vix": 13.57,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.00034378
+    },
+    {
+      "date": "2023-07-05",
+      "weight": 0.442152,
+      "portfolio_return": -0.00067508,
+      "asset_return": -0.0015268,
+      "vix": 14.18,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-06",
+      "weight": 0.442152,
+      "portfolio_return": -0.00980305,
+      "asset_return": -0.02217123,
+      "vix": 15.44,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-07",
+      "weight": 0.442152,
+      "portfolio_return": -0.00069141,
+      "asset_return": -0.00156374,
+      "vix": 14.83,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-10",
+      "weight": 0.442152,
+      "portfolio_return": -0.0008656,
+      "asset_return": -0.00195771,
+      "vix": 15.07,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-11",
+      "weight": 0.442152,
+      "portfolio_return": 0.00607114,
+      "asset_return": 0.01373089,
+      "vix": 14.84,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-12",
+      "weight": 0.442152,
+      "portfolio_return": 0.00085553,
+      "asset_return": 0.00193491,
+      "vix": 13.54,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-13",
+      "weight": 0.442152,
+      "portfolio_return": 0.00495267,
+      "asset_return": 0.01120129,
+      "vix": 13.61,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-14",
+      "weight": 0.442152,
+      "portfolio_return": 0.00456,
+      "asset_return": 0.01031319,
+      "vix": 13.34,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-17",
+      "weight": 0.442152,
+      "portfolio_return": -0.00083585,
+      "asset_return": -0.00189042,
+      "vix": 13.48,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-18",
+      "weight": 0.442152,
+      "portfolio_return": -0.00084958,
+      "asset_return": -0.00192147,
+      "vix": 13.3,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-19",
+      "weight": 0.442152,
+      "portfolio_return": -0.00374561,
+      "asset_return": -0.00847131,
+      "vix": 13.76,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-20",
+      "weight": 0.442152,
+      "portfolio_return": 0.00206051,
+      "asset_return": 0.00466019,
+      "vix": 13.99,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-21",
+      "weight": 0.442152,
+      "portfolio_return": -0.00734926,
+      "asset_return": -0.01662157,
+      "vix": 13.6,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-24",
+      "weight": 0.442152,
+      "portfolio_return": 0.00017377,
+      "asset_return": 0.00039302,
+      "vix": 13.91,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-25",
+      "weight": 0.442152,
+      "portfolio_return": 0.0055595,
+      "asset_return": 0.01257374,
+      "vix": 13.86,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-26",
+      "weight": 0.442152,
+      "portfolio_return": -0.00120103,
+      "asset_return": -0.00271634,
+      "vix": 13.19,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-27",
+      "weight": 0.442152,
+      "portfolio_return": 0.00344084,
+      "asset_return": 0.00778204,
+      "vix": 14.41,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-28",
+      "weight": 0.442152,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 13.33,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-07-31",
+      "weight": 0.442152,
+      "portfolio_return": -0.00239001,
+      "asset_return": -0.00540541,
+      "vix": 13.63,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-01",
+      "weight": 0.430725,
+      "portfolio_return": 0.00210682,
+      "asset_return": 0.00504652,
+      "vix": 13.93,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 6.685e-05
+    },
+    {
+      "date": "2023-08-02",
+      "weight": 0.430725,
+      "portfolio_return": -0.00532373,
+      "asset_return": -0.01235992,
+      "vix": 16.09,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-04",
+      "weight": 0.430725,
+      "portfolio_return": -0.00202139,
+      "asset_return": -0.004693,
+      "vix": 17.1,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-07",
+      "weight": 0.430725,
+      "portfolio_return": 0.00423112,
+      "asset_return": 0.00982325,
+      "vix": 15.77,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-08",
+      "weight": 0.430725,
+      "portfolio_return": -0.00502795,
+      "asset_return": -0.01167321,
+      "vix": 15.99,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-09",
+      "weight": 0.430725,
+      "portfolio_return": 0.00067833,
+      "asset_return": 0.00157487,
+      "vix": 15.96,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-10",
+      "weight": 0.430725,
+      "portfolio_return": -0.00270899,
+      "asset_return": -0.00628937,
+      "vix": 15.85,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-11",
+      "weight": 0.430725,
+      "portfolio_return": -0.00034074,
+      "asset_return": -0.00079107,
+      "vix": 14.84,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-14",
+      "weight": 0.430725,
+      "portfolio_return": -0.00613863,
+      "asset_return": -0.01425184,
+      "vix": 14.82,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-15",
+      "weight": 0.430725,
+      "portfolio_return": 0.00069193,
+      "asset_return": 0.00160643,
+      "vix": 16.46,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-16",
+      "weight": 0.430725,
+      "portfolio_return": -0.00224516,
+      "asset_return": -0.00521251,
+      "vix": 16.78,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-17",
+      "weight": 0.430725,
+      "portfolio_return": 0.0019097,
+      "asset_return": 0.0044337,
+      "vix": 17.89,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-18",
+      "weight": 0.430725,
+      "portfolio_return": -0.00259265,
+      "asset_return": -0.00601926,
+      "vix": 17.3,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-21",
+      "weight": 0.430725,
+      "portfolio_return": -0.00295615,
+      "asset_return": -0.00686321,
+      "vix": 17.13,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-22",
+      "weight": 0.430725,
+      "portfolio_return": 0.00350186,
+      "asset_return": 0.00813015,
+      "vix": 16.97,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-23",
+      "weight": 0.430725,
+      "portfolio_return": 0.00295252,
+      "asset_return": 0.00685477,
+      "vix": 15.98,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-24",
+      "weight": 0.430725,
+      "portfolio_return": 0.0074174,
+      "asset_return": 0.01722073,
+      "vix": 17.2,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-25",
+      "weight": 0.430725,
+      "portfolio_return": -0.00830926,
+      "asset_return": -0.01929134,
+      "vix": 15.68,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-28",
+      "weight": 0.430725,
+      "portfolio_return": 0.0027666,
+      "asset_return": 0.00642312,
+      "vix": 15.08,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-29",
+      "weight": 0.430725,
+      "portfolio_return": 0.00240533,
+      "asset_return": 0.00558436,
+      "vix": 14.45,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-30",
+      "weight": 0.430725,
+      "portfolio_return": 0.0018794,
+      "asset_return": 0.00436335,
+      "vix": 13.88,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-08-31",
+      "weight": 0.430725,
+      "portfolio_return": -0.00306203,
+      "asset_return": -0.007109,
+      "vix": 13.57,
+      "k": 6,
+      "bci_mom": -0.54,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-01",
+      "weight": 0.458365,
+      "portfolio_return": 0.00056758,
+      "asset_return": 0.00159103,
+      "vix": 13.09,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.00016169
+    },
+    {
+      "date": "2023-09-05",
+      "weight": 0.458365,
+      "portfolio_return": -0.00108492,
+      "asset_return": -0.00236693,
+      "vix": 14.01,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-06",
+      "weight": 0.458365,
+      "portfolio_return": -0.00163119,
+      "asset_return": -0.00355872,
+      "vix": 14.45,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-07",
+      "weight": 0.458365,
+      "portfolio_return": -0.00418352,
+      "asset_return": -0.00912705,
+      "vix": 14.4,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-08",
+      "weight": 0.458365,
+      "portfolio_return": -0.00201923,
+      "asset_return": -0.00440529,
+      "vix": 13.84,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-11",
+      "weight": 0.458365,
+      "portfolio_return": -0.00184376,
+      "asset_return": -0.00402246,
+      "vix": 13.8,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-12",
+      "weight": 0.458365,
+      "portfolio_return": 0.00462808,
+      "asset_return": 0.01009693,
+      "vix": 14.23,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-13",
+      "weight": 0.458365,
+      "portfolio_return": 0.00054982,
+      "asset_return": 0.00119952,
+      "vix": 13.48,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-14",
+      "weight": 0.458365,
+      "portfolio_return": 0.00640686,
+      "asset_return": 0.01397763,
+      "vix": 12.82,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-15",
+      "weight": 0.458365,
+      "portfolio_return": 0.00144424,
+      "asset_return": 0.00315085,
+      "vix": 13.79,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-18",
+      "weight": 0.458365,
+      "portfolio_return": -0.00485899,
+      "asset_return": -0.01060071,
+      "vix": 14.0,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-19",
+      "weight": 0.458365,
+      "portfolio_return": -0.00200077,
+      "asset_return": -0.00436501,
+      "vix": 14.11,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-20",
+      "weight": 0.458365,
+      "portfolio_return": -0.0025577,
+      "asset_return": -0.00558004,
+      "vix": 15.14,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-21",
+      "weight": 0.458365,
+      "portfolio_return": -0.00734854,
+      "asset_return": -0.01603206,
+      "vix": 17.54,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-22",
+      "weight": 0.458365,
+      "portfolio_return": -0.00037338,
+      "asset_return": -0.0008146,
+      "vix": 17.2,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-25",
+      "weight": 0.458365,
+      "portfolio_return": 0.00336349,
+      "asset_return": 0.00733802,
+      "vix": 16.9,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-26",
+      "weight": 0.458365,
+      "portfolio_return": -0.00537944,
+      "asset_return": -0.01173614,
+      "vix": 18.94,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-27",
+      "weight": 0.458365,
+      "portfolio_return": 0.00018767,
+      "asset_return": 0.00040943,
+      "vix": 18.22,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-09-28",
+      "weight": 0.458365,
+      "portfolio_return": 0.00187624,
+      "asset_return": 0.00409333,
+      "vix": 17.34,
+      "k": 6,
+      "bci_mom": -0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-02",
+      "weight": 0.340715,
+      "portfolio_return": 0.00375647,
+      "asset_return": 0.01304525,
+      "vix": 17.61,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.00068825
+    },
+    {
+      "date": "2023-10-03",
+      "weight": 0.340715,
+      "portfolio_return": -0.00205663,
+      "asset_return": -0.00603622,
+      "vix": 19.78,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-04",
+      "weight": 0.340715,
+      "portfolio_return": -0.00441413,
+      "asset_return": -0.01295546,
+      "vix": 18.58,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-05",
+      "weight": 0.340715,
+      "portfolio_return": 0.00489132,
+      "asset_return": 0.01435603,
+      "vix": 18.49,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-06",
+      "weight": 0.340715,
+      "portfolio_return": 0.00123997,
+      "asset_return": 0.0036393,
+      "vix": 17.45,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-11",
+      "weight": 0.340715,
+      "portfolio_return": 0.00590281,
+      "asset_return": 0.01732474,
+      "vix": 16.09,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-12",
+      "weight": 0.340715,
+      "portfolio_return": 0.0028337,
+      "asset_return": 0.0083169,
+      "vix": 16.69,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-13",
+      "weight": 0.340715,
+      "portfolio_return": -0.00093679,
+      "asset_return": -0.00274947,
+      "vix": 19.32,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-16",
+      "weight": 0.340715,
+      "portfolio_return": -0.0018787,
+      "asset_return": -0.00551398,
+      "vix": 17.21,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-17",
+      "weight": 0.340715,
+      "portfolio_return": 0.0008096,
+      "asset_return": 0.00237617,
+      "vix": 17.88,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-18",
+      "weight": 0.340715,
+      "portfolio_return": -0.00471157,
+      "asset_return": -0.01382846,
+      "vix": 19.22,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-19",
+      "weight": 0.340715,
+      "portfolio_return": 0.00013648,
+      "asset_return": 0.00040058,
+      "vix": 21.4,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-20",
+      "weight": 0.340715,
+      "portfolio_return": 0.00150099,
+      "asset_return": 0.00440542,
+      "vix": 21.71,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-23",
+      "weight": 0.340715,
+      "portfolio_return": -0.00421142,
+      "asset_return": -0.01236051,
+      "vix": 20.37,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-24",
+      "weight": 0.340715,
+      "portfolio_return": 0.00027513,
+      "asset_return": 0.00080749,
+      "vix": 18.97,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-25",
+      "weight": 0.340715,
+      "portfolio_return": 0.00068718,
+      "asset_return": 0.00201688,
+      "vix": 20.19,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-26",
+      "weight": 0.340715,
+      "portfolio_return": -0.00672106,
+      "asset_return": -0.01972631,
+      "vix": 20.68,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-27",
+      "weight": 0.340715,
+      "portfolio_return": 0.00153921,
+      "asset_return": 0.00451759,
+      "vix": 21.27,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-30",
+      "weight": 0.340715,
+      "portfolio_return": -0.00083579,
+      "asset_return": -0.00245305,
+      "vix": 19.75,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-10-31",
+      "weight": 0.340715,
+      "portfolio_return": -0.00237386,
+      "asset_return": -0.00696728,
+      "vix": 18.14,
+      "k": 6,
+      "bci_mom": -0.45,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-01",
+      "weight": 0.355661,
+      "portfolio_return": 0.00167399,
+      "asset_return": 0.00495254,
+      "vix": 16.87,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 8.743e-05
+    },
+    {
+      "date": "2023-11-02",
+      "weight": 0.355661,
+      "portfolio_return": 0.00803343,
+      "asset_return": 0.02258734,
+      "vix": 15.66,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-03",
+      "weight": 0.355661,
+      "portfolio_return": 0.0027139,
+      "asset_return": 0.00763059,
+      "vix": 14.91,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-06",
+      "weight": 0.355661,
+      "portfolio_return": 0.00311854,
+      "asset_return": 0.0087683,
+      "vix": 14.89,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-07",
+      "weight": 0.355661,
+      "portfolio_return": -0.0001405,
+      "asset_return": -0.00039504,
+      "vix": 14.81,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-08",
+      "weight": 0.355661,
+      "portfolio_return": 0.00196811,
+      "asset_return": 0.00553366,
+      "vix": 14.45,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-09",
+      "weight": 0.355661,
+      "portfolio_return": 0.00013978,
+      "asset_return": 0.00039302,
+      "vix": 15.29,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-10",
+      "weight": 0.355661,
+      "portfolio_return": -0.00139747,
+      "asset_return": -0.00392921,
+      "vix": 14.17,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-13",
+      "weight": 0.355661,
+      "portfolio_return": 0.00547168,
+      "asset_return": 0.01538455,
+      "vix": 14.76,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-14",
+      "weight": 0.355661,
+      "portfolio_return": 0.00082905,
+      "asset_return": 0.002331,
+      "vix": 14.16,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-15",
+      "weight": 0.355661,
+      "portfolio_return": 0.00427347,
+      "asset_return": 0.01201557,
+      "vix": 14.18,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-16",
+      "weight": 0.355661,
+      "portfolio_return": 0.00013622,
+      "asset_return": 0.00038299,
+      "vix": 14.32,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-17",
+      "weight": 0.355661,
+      "portfolio_return": 0.00108931,
+      "asset_return": 0.00306279,
+      "vix": 13.8,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-20",
+      "weight": 0.355661,
+      "portfolio_return": -0.00013581,
+      "asset_return": -0.00038187,
+      "vix": 13.41,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-21",
+      "weight": 0.355661,
+      "portfolio_return": 0.00434572,
+      "asset_return": 0.01221871,
+      "vix": 13.35,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-22",
+      "weight": 0.355661,
+      "portfolio_return": -0.00321991,
+      "asset_return": -0.00905331,
+      "vix": 12.85,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-24",
+      "weight": 0.355661,
+      "portfolio_return": -0.00027092,
+      "asset_return": -0.00076174,
+      "vix": 12.46,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-27",
+      "weight": 0.355661,
+      "portfolio_return": -0.00230418,
+      "asset_return": -0.0064786,
+      "vix": 12.69,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-28",
+      "weight": 0.355661,
+      "portfolio_return": 0.00245563,
+      "asset_return": 0.00690443,
+      "vix": 12.69,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-29",
+      "weight": 0.355661,
+      "portfolio_return": -0.00027098,
+      "asset_return": -0.0007619,
+      "vix": 12.98,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-11-30",
+      "weight": 0.355661,
+      "portfolio_return": 0.00054242,
+      "asset_return": 0.0015251,
+      "vix": 12.92,
+      "k": 6,
+      "bci_mom": -0.36,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-01",
+      "weight": 0.475059,
+      "portfolio_return": 0.00092902,
+      "asset_return": 0.0034259,
+      "vix": 12.63,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.00069848
+    },
+    {
+      "date": "2023-12-04",
+      "weight": 0.475059,
+      "portfolio_return": -0.00180217,
+      "asset_return": -0.00379356,
+      "vix": 13.08,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-05",
+      "weight": 0.475059,
+      "portfolio_return": -0.00343724,
+      "asset_return": -0.0072354,
+      "vix": 12.85,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-06",
+      "weight": 0.475059,
+      "portfolio_return": 0.00163999,
+      "asset_return": 0.00345218,
+      "vix": 12.97,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-07",
+      "weight": 0.475059,
+      "portfolio_return": -0.0029055,
+      "asset_return": -0.00611608,
+      "vix": 13.06,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-08",
+      "weight": 0.475059,
+      "portfolio_return": 0.00383699,
+      "asset_return": 0.00807686,
+      "vix": 12.35,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-11",
+      "weight": 0.475059,
+      "portfolio_return": 0.00054372,
+      "asset_return": 0.00114454,
+      "vix": 12.63,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-12",
+      "weight": 0.475059,
+      "portfolio_return": 0.00108632,
+      "asset_return": 0.00228671,
+      "vix": 12.07,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-13",
+      "weight": 0.475059,
+      "portfolio_return": 0.0001806,
+      "asset_return": 0.00038017,
+      "vix": 12.19,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-14",
+      "weight": 0.475059,
+      "portfolio_return": 0.00577799,
+      "asset_return": 0.01216268,
+      "vix": 12.48,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-15",
+      "weight": 0.475059,
+      "portfolio_return": 0.00196232,
+      "asset_return": 0.00413068,
+      "vix": 12.28,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-18",
+      "weight": 0.475059,
+      "portfolio_return": 0.00071061,
+      "asset_return": 0.00149583,
+      "vix": 12.56,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-19",
+      "weight": 0.475059,
+      "portfolio_return": -0.0017739,
+      "asset_return": -0.00373407,
+      "vix": 12.53,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-20",
+      "weight": 0.475059,
+      "portfolio_return": 0.00124641,
+      "asset_return": 0.00262369,
+      "vix": 13.67,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-21",
+      "weight": 0.475059,
+      "portfolio_return": -0.00408462,
+      "asset_return": -0.00859813,
+      "vix": 13.65,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-22",
+      "weight": 0.475059,
+      "portfolio_return": 0.0012539,
+      "asset_return": 0.00263946,
+      "vix": 13.03,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-26",
+      "weight": 0.475059,
+      "portfolio_return": 0.00266887,
+      "asset_return": 0.00561798,
+      "vix": 12.99,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-27",
+      "weight": 0.475059,
+      "portfolio_return": 0.00530795,
+      "asset_return": 0.01117324,
+      "vix": 12.43,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-28",
+      "weight": 0.475059,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 12.47,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2023-12-29",
+      "weight": 0.475059,
+      "portfolio_return": -0.00104991,
+      "asset_return": -0.00221006,
+      "vix": 12.45,
+      "k": 6,
+      "bci_mom": -0.13,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-02",
+      "weight": 0.757576,
+      "portfolio_return": -0.00472898,
+      "asset_return": -0.00406066,
+      "vix": 13.2,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.00165272
+    },
+    {
+      "date": "2024-01-03",
+      "weight": 0.757576,
+      "portfolio_return": -0.01319693,
+      "asset_return": -0.01741995,
+      "vix": 14.04,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-04",
+      "weight": 0.757576,
+      "portfolio_return": -0.00028591,
+      "asset_return": -0.0003774,
+      "vix": 14.13,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-05",
+      "weight": 0.757576,
+      "portfolio_return": -0.00200124,
+      "asset_return": -0.00264163,
+      "vix": 13.35,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-08",
+      "weight": 0.757576,
+      "portfolio_return": 0.00343971,
+      "asset_return": 0.00454042,
+      "vix": 13.08,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-09",
+      "weight": 0.757576,
+      "portfolio_return": 0.00142674,
+      "asset_return": 0.0018833,
+      "vix": 12.76,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-10",
+      "weight": 0.757576,
+      "portfolio_return": -0.00398724,
+      "asset_return": -0.00526316,
+      "vix": 12.69,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-11",
+      "weight": 0.757576,
+      "portfolio_return": 0.00314945,
+      "asset_return": 0.00415728,
+      "vix": 12.44,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-12",
+      "weight": 0.757576,
+      "portfolio_return": -0.00114064,
+      "asset_return": -0.00150564,
+      "vix": 12.7,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-16",
+      "weight": 0.757576,
+      "portfolio_return": -0.00571109,
+      "asset_return": -0.00753864,
+      "vix": 13.84,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-17",
+      "weight": 0.757576,
+      "portfolio_return": -0.00706634,
+      "asset_return": -0.00932756,
+      "vix": 14.79,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-18",
+      "weight": 0.757576,
+      "portfolio_return": 0.00505251,
+      "asset_return": 0.00666931,
+      "vix": 14.13,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-19",
+      "weight": 0.757576,
+      "portfolio_return": 0.02716174,
+      "asset_return": 0.03585349,
+      "vix": 13.3,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-22",
+      "weight": 0.757576,
+      "portfolio_return": 0.00513026,
+      "asset_return": 0.00677194,
+      "vix": 13.19,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-23",
+      "weight": 0.757576,
+      "portfolio_return": 0.00141561,
+      "asset_return": 0.00186861,
+      "vix": 12.55,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-24",
+      "weight": 0.757576,
+      "portfolio_return": -0.00028268,
+      "asset_return": -0.00037314,
+      "vix": 13.14,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-25",
+      "weight": 0.757576,
+      "portfolio_return": 0.00932837,
+      "asset_return": 0.01231345,
+      "vix": 13.45,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-26",
+      "weight": 0.757576,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 13.26,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-29",
+      "weight": 0.757576,
+      "portfolio_return": 0.00474708,
+      "asset_return": 0.00626615,
+      "vix": 13.6,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-30",
+      "weight": 0.757576,
+      "portfolio_return": -0.00194257,
+      "asset_return": -0.00256419,
+      "vix": 13.31,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-01-31",
+      "weight": 0.757576,
+      "portfolio_return": -0.01001559,
+      "asset_return": -0.01322058,
+      "vix": 14.35,
+      "k": 10,
+      "bci_mom": 0.08,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-01",
+      "weight": 0.720461,
+      "portfolio_return": -0.00021712,
+      "asset_return": 0.0,
+      "vix": 13.88,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.00021712
+    },
+    {
+      "date": "2024-02-02",
+      "weight": 0.720461,
+      "portfolio_return": 0.0040219,
+      "asset_return": 0.0055824,
+      "vix": 13.85,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-05",
+      "weight": 0.720461,
+      "portfolio_return": 0.00453281,
+      "asset_return": 0.00629154,
+      "vix": 13.67,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-15",
+      "weight": 0.720461,
+      "portfolio_return": 0.03391666,
+      "asset_return": 0.04707632,
+      "vix": 14.01,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-16",
+      "weight": 0.720461,
+      "portfolio_return": -0.00531435,
+      "asset_return": -0.00737632,
+      "vix": 14.24,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-20",
+      "weight": 0.720461,
+      "portfolio_return": 0.00280821,
+      "asset_return": 0.0038978,
+      "vix": 15.42,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-21",
+      "weight": 0.720461,
+      "portfolio_return": -0.00228865,
+      "asset_return": -0.00317665,
+      "vix": 15.34,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-22",
+      "weight": 0.720461,
+      "portfolio_return": 0.00816386,
+      "asset_return": 0.01133143,
+      "vix": 14.54,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-23",
+      "weight": 0.720461,
+      "portfolio_return": 0.00479288,
+      "asset_return": 0.00665252,
+      "vix": 13.75,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-26",
+      "weight": 0.720461,
+      "portfolio_return": 0.00100246,
+      "asset_return": 0.00139141,
+      "vix": 13.74,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-27",
+      "weight": 0.720461,
+      "portfolio_return": -0.00300288,
+      "asset_return": -0.004168,
+      "vix": 13.43,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-02-29",
+      "weight": 0.720461,
+      "portfolio_return": -0.00025139,
+      "asset_return": -0.00034893,
+      "vix": 13.4,
+      "k": 10,
+      "bci_mom": 0.24,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-01",
+      "weight": 0.762777,
+      "portfolio_return": -0.00290897,
+      "asset_return": -0.00348912,
+      "vix": 13.11,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.00024755
+    },
+    {
+      "date": "2024-03-04",
+      "weight": 0.762777,
+      "portfolio_return": 0.02216748,
+      "asset_return": 0.02906157,
+      "vix": 13.49,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-05",
+      "weight": 0.762777,
+      "portfolio_return": 0.00622878,
+      "asset_return": 0.00816593,
+      "vix": 14.46,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-06",
+      "weight": 0.762777,
+      "portfolio_return": 0.00360428,
+      "asset_return": 0.0047252,
+      "vix": 14.5,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-07",
+      "weight": 0.762777,
+      "portfolio_return": 0.01767932,
+      "asset_return": 0.02317759,
+      "vix": 14.44,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-08",
+      "weight": 0.762777,
+      "portfolio_return": 0.01076791,
+      "asset_return": 0.01411673,
+      "vix": 14.74,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-11",
+      "weight": 0.762777,
+      "portfolio_return": -0.0076549,
+      "asset_return": -0.01003558,
+      "vix": 15.22,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-12",
+      "weight": 0.762777,
+      "portfolio_return": 0.00798204,
+      "asset_return": 0.01046445,
+      "vix": 13.84,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-13",
+      "weight": 0.762777,
+      "portfolio_return": 0.00370285,
+      "asset_return": 0.00485444,
+      "vix": 13.75,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-14",
+      "weight": 0.762777,
+      "portfolio_return": -0.00073696,
+      "asset_return": -0.00096616,
+      "vix": 14.4,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-15",
+      "weight": 0.762777,
+      "portfolio_return": -0.01032776,
+      "asset_return": -0.01353969,
+      "vix": 14.41,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-18",
+      "weight": 0.762777,
+      "portfolio_return": 0.00697949,
+      "asset_return": 0.00915011,
+      "vix": 14.33,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-19",
+      "weight": 0.762777,
+      "portfolio_return": -0.00172899,
+      "asset_return": -0.00226671,
+      "vix": 13.82,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-20",
+      "weight": 0.762777,
+      "portfolio_return": -0.00420886,
+      "asset_return": -0.00551781,
+      "vix": 13.04,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-21",
+      "weight": 0.762777,
+      "portfolio_return": 0.02091169,
+      "asset_return": 0.02741522,
+      "vix": 12.92,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-22",
+      "weight": 0.762777,
+      "portfolio_return": -0.0009693,
+      "asset_return": -0.00127075,
+      "vix": 13.06,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-25",
+      "weight": 0.762777,
+      "portfolio_return": 0.00145579,
+      "asset_return": 0.00190855,
+      "vix": 13.19,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-26",
+      "weight": 0.762777,
+      "portfolio_return": 0.00048434,
+      "asset_return": 0.00063497,
+      "vix": 13.24,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-27",
+      "weight": 0.762777,
+      "portfolio_return": 0.00024186,
+      "asset_return": 0.00031708,
+      "vix": 12.78,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-03-28",
+      "weight": 0.762777,
+      "portfolio_return": -0.00362879,
+      "asset_return": -0.00475734,
+      "vix": 13.01,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-01",
+      "weight": 0.732601,
+      "portfolio_return": -0.00203364,
+      "asset_return": -0.00253495,
+      "vix": 13.65,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.00017653
+    },
+    {
+      "date": "2024-04-02",
+      "weight": 0.732601,
+      "portfolio_return": 0.01047238,
+      "asset_return": 0.0142948,
+      "vix": 14.61,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-03",
+      "weight": 0.732601,
+      "portfolio_return": -0.00504763,
+      "asset_return": -0.00689002,
+      "vix": 14.33,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-08",
+      "weight": 0.732601,
+      "portfolio_return": 0.00415853,
+      "asset_return": 0.00567639,
+      "vix": 15.19,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-09",
+      "weight": 0.732601,
+      "portfolio_return": 0.01745927,
+      "asset_return": 0.0238319,
+      "vix": 14.98,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-10",
+      "weight": 0.732601,
+      "portfolio_return": -0.00112192,
+      "asset_return": -0.00153142,
+      "vix": 15.8,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-11",
+      "weight": 0.732601,
+      "portfolio_return": -0.0022472,
+      "asset_return": -0.00306743,
+      "vix": 14.91,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-12",
+      "weight": 0.732601,
+      "portfolio_return": -0.00180325,
+      "asset_return": -0.00246144,
+      "vix": 17.31,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-15",
+      "weight": 0.732601,
+      "portfolio_return": -0.00949092,
+      "asset_return": -0.0129551,
+      "vix": 19.23,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-16",
+      "weight": 0.732601,
+      "portfolio_return": -0.01991755,
+      "asset_return": -0.02718745,
+      "vix": 18.4,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-17",
+      "weight": 0.732601,
+      "portfolio_return": 0.00823673,
+      "asset_return": 0.01124314,
+      "vix": 18.21,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-18",
+      "weight": 0.732601,
+      "portfolio_return": 0.00721435,
+      "asset_return": 0.00984759,
+      "vix": 18.0,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-19",
+      "weight": 0.732601,
+      "portfolio_return": -0.03710252,
+      "asset_return": -0.05064493,
+      "vix": 18.71,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-22",
+      "weight": 0.732601,
+      "portfolio_return": -0.00218471,
+      "asset_return": -0.00298213,
+      "vix": 16.94,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-23",
+      "weight": 0.732601,
+      "portfolio_return": 0.00706072,
+      "asset_return": 0.00963788,
+      "vix": 15.69,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-24",
+      "weight": 0.732601,
+      "portfolio_return": 0.02146197,
+      "asset_return": 0.02929559,
+      "vix": 15.97,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-25",
+      "weight": 0.732601,
+      "portfolio_return": -0.0133541,
+      "asset_return": -0.01822834,
+      "vix": 15.37,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-26",
+      "weight": 0.732601,
+      "portfolio_return": 0.01193163,
+      "asset_return": 0.01628668,
+      "vix": 15.03,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-29",
+      "weight": 0.732601,
+      "portfolio_return": 0.01314923,
+      "asset_return": 0.0179487,
+      "vix": 14.67,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-04-30",
+      "weight": 0.732601,
+      "portfolio_return": -0.0025374,
+      "asset_return": -0.00346355,
+      "vix": 15.65,
+      "k": 10,
+      "bci_mom": 0.35,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-02",
+      "weight": 0.681199,
+      "portfolio_return": -0.00934026,
+      "asset_return": -0.01327008,
+      "vix": 14.68,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0003007
+    },
+    {
+      "date": "2024-05-03",
+      "weight": 0.681199,
+      "portfolio_return": 0.00348997,
+      "asset_return": 0.00512327,
+      "vix": 13.49,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-06",
+      "weight": 0.681199,
+      "portfolio_return": 0.00976552,
+      "asset_return": 0.01433579,
+      "vix": 13.49,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-07",
+      "weight": 0.681199,
+      "portfolio_return": 0.00385096,
+      "asset_return": 0.00565321,
+      "vix": 13.23,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-08",
+      "weight": 0.681199,
+      "portfolio_return": 0.00255283,
+      "asset_return": 0.00374755,
+      "vix": 13.0,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-09",
+      "weight": 0.681199,
+      "portfolio_return": -0.00084779,
+      "asset_return": -0.00124455,
+      "vix": 12.69,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-10",
+      "weight": 0.681199,
+      "portfolio_return": 0.00488098,
+      "asset_return": 0.00716528,
+      "vix": 12.55,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-13",
+      "weight": 0.681199,
+      "portfolio_return": 0.0069531,
+      "asset_return": 0.01020715,
+      "vix": 13.6,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-14",
+      "weight": 0.681199,
+      "portfolio_return": 0.00458863,
+      "asset_return": 0.00673611,
+      "vix": 13.42,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-15",
+      "weight": 0.681199,
+      "portfolio_return": 0.00932285,
+      "asset_return": 0.01368595,
+      "vix": 12.45,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-16",
+      "weight": 0.681199,
+      "portfolio_return": 0.00327027,
+      "asset_return": 0.00480076,
+      "vix": 12.42,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-17",
+      "weight": 0.681199,
+      "portfolio_return": -0.00081374,
+      "asset_return": -0.00119457,
+      "vix": 11.99,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-20",
+      "weight": 0.681199,
+      "portfolio_return": -0.00020366,
+      "asset_return": -0.00029898,
+      "vix": 12.15,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-21",
+      "weight": 0.681199,
+      "portfolio_return": -0.00081477,
+      "asset_return": -0.00119608,
+      "vix": 11.86,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-22",
+      "weight": 0.681199,
+      "portfolio_return": 0.01223703,
+      "asset_return": 0.01796396,
+      "vix": 12.29,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-23",
+      "weight": 0.681199,
+      "portfolio_return": 0.00520926,
+      "asset_return": 0.00764719,
+      "vix": 12.77,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-24",
+      "weight": 0.681199,
+      "portfolio_return": -0.00278362,
+      "asset_return": -0.00408635,
+      "vix": 11.93,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-28",
+      "weight": 0.681199,
+      "portfolio_return": 0.00098463,
+      "asset_return": 0.00144543,
+      "vix": 12.92,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-29",
+      "weight": 0.681199,
+      "portfolio_return": -0.00924251,
+      "asset_return": -0.013568,
+      "vix": 14.28,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-30",
+      "weight": 0.681199,
+      "portfolio_return": -0.01176203,
+      "asset_return": -0.01726666,
+      "vix": 14.47,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-05-31",
+      "weight": 0.681199,
+      "portfolio_return": -0.00770871,
+      "asset_return": -0.01131639,
+      "vix": 12.92,
+      "k": 10,
+      "bci_mom": 0.47,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-03",
+      "weight": 0.762777,
+      "portfolio_return": 0.0158352,
+      "asset_return": 0.0213856,
+      "vix": 13.11,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.00047723
+    },
+    {
+      "date": "2024-06-04",
+      "weight": 0.762777,
+      "portfolio_return": -0.01214679,
+      "asset_return": -0.01592444,
+      "vix": 13.16,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-05",
+      "weight": 0.762777,
+      "portfolio_return": 0.0073146,
+      "asset_return": 0.00958944,
+      "vix": 12.63,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-06",
+      "weight": 0.762777,
+      "portfolio_return": 0.02603722,
+      "asset_return": 0.0341348,
+      "vix": 12.58,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-07",
+      "weight": 0.762777,
+      "portfolio_return": -0.00591135,
+      "asset_return": -0.00774977,
+      "vix": 12.22,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-11",
+      "weight": 0.762777,
+      "portfolio_return": 0.00198577,
+      "asset_return": 0.00260334,
+      "vix": 12.85,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-12",
+      "weight": 0.762777,
+      "portfolio_return": 0.01364461,
+      "asset_return": 0.01788809,
+      "vix": 12.04,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-13",
+      "weight": 0.762777,
+      "portfolio_return": 0.0110265,
+      "asset_return": 0.01445575,
+      "vix": 11.94,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-14",
+      "weight": 0.762777,
+      "portfolio_return": 0.00447565,
+      "asset_return": 0.00586758,
+      "vix": 12.66,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-17",
+      "weight": 0.762777,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 12.75,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-18",
+      "weight": 0.762777,
+      "portfolio_return": 0.012713,
+      "asset_return": 0.01666674,
+      "vix": 12.3,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-20",
+      "weight": 0.762777,
+      "portfolio_return": 0.00730524,
+      "asset_return": 0.00957718,
+      "vix": 13.28,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-21",
+      "weight": 0.762777,
+      "portfolio_return": -0.00462299,
+      "asset_return": -0.00606075,
+      "vix": 13.2,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-24",
+      "weight": 0.762777,
+      "portfolio_return": -0.01860429,
+      "asset_return": -0.02439022,
+      "vix": 13.33,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-25",
+      "weight": 0.762777,
+      "portfolio_return": -0.00041458,
+      "asset_return": -0.00054352,
+      "vix": 12.84,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-26",
+      "weight": 0.762777,
+      "portfolio_return": 0.00601436,
+      "asset_return": 0.00788482,
+      "vix": 12.55,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-27",
+      "weight": 0.762777,
+      "portfolio_return": -0.00020578,
+      "asset_return": -0.00026978,
+      "vix": 12.24,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-06-28",
+      "weight": 0.762777,
+      "portfolio_return": 0.00473389,
+      "asset_return": 0.00620612,
+      "vix": 12.44,
+      "k": 10,
+      "bci_mom": 0.55,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-01",
+      "weight": 0.818331,
+      "portfolio_return": 0.00033341,
+      "asset_return": 0.00080457,
+      "vix": 12.22,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.00032499
+    },
+    {
+      "date": "2024-07-02",
+      "weight": 0.818331,
+      "portfolio_return": -0.00548186,
+      "asset_return": -0.00669884,
+      "vix": 12.03,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-03",
+      "weight": 0.818331,
+      "portfolio_return": 0.00993388,
+      "asset_return": 0.01213921,
+      "vix": 12.09,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-05",
+      "weight": 0.818331,
+      "portfolio_return": -0.00297578,
+      "asset_return": -0.0036364,
+      "vix": 12.48,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-08",
+      "weight": 0.818331,
+      "portfolio_return": 0.02581289,
+      "asset_return": 0.03154335,
+      "vix": 12.37,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-09",
+      "weight": 0.818331,
+      "portfolio_return": -0.00082722,
+      "asset_return": -0.00101087,
+      "vix": 12.51,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-10",
+      "weight": 0.818331,
+      "portfolio_return": 0.00289824,
+      "asset_return": 0.00354165,
+      "vix": 12.85,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-11",
+      "weight": 0.818331,
+      "portfolio_return": 0.01815302,
+      "asset_return": 0.02218299,
+      "vix": 12.92,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-12",
+      "weight": 0.818331,
+      "portfolio_return": -0.02583137,
+      "asset_return": -0.03156594,
+      "vix": 12.46,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-15",
+      "weight": 0.818331,
+      "portfolio_return": 0.00145862,
+      "asset_return": 0.00178243,
+      "vix": 13.12,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-16",
+      "weight": 0.818331,
+      "portfolio_return": 0.00480883,
+      "asset_return": 0.00587639,
+      "vix": 13.19,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-17",
+      "weight": 0.818331,
+      "portfolio_return": -0.01143214,
+      "asset_return": -0.01397008,
+      "vix": 14.48,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-18",
+      "weight": 0.818331,
+      "portfolio_return": -0.01475609,
+      "asset_return": -0.01803194,
+      "vix": 15.93,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-19",
+      "weight": 0.818331,
+      "portfolio_return": -0.01867646,
+      "asset_return": -0.02282264,
+      "vix": 16.52,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-22",
+      "weight": 0.818331,
+      "portfolio_return": -0.02438519,
+      "asset_return": -0.0297987,
+      "vix": 14.91,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-23",
+      "weight": 0.818331,
+      "portfolio_return": 0.02536052,
+      "asset_return": 0.03099056,
+      "vix": 14.72,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-26",
+      "weight": 0.818331,
+      "portfolio_return": -0.03206556,
+      "asset_return": -0.03918411,
+      "vix": 16.39,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-29",
+      "weight": 0.818331,
+      "portfolio_return": 0.00731483,
+      "asset_return": 0.00893873,
+      "vix": 16.6,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-30",
+      "weight": 0.818331,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 17.69,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-07-31",
+      "weight": 0.818331,
+      "portfolio_return": 0.00113271,
+      "asset_return": 0.00138417,
+      "vix": 16.36,
+      "k": 10,
+      "bci_mom": 0.56,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-01",
+      "weight": 0.537924,
+      "portfolio_return": 0.00772903,
+      "asset_return": 0.01741774,
+      "vix": 18.59,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.00164038
+    },
+    {
+      "date": "2024-08-02",
+      "weight": 0.537924,
+      "portfolio_return": -0.02718854,
+      "asset_return": -0.0505435,
+      "vix": 23.39,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-05",
+      "weight": 0.537924,
+      "portfolio_return": -0.04911205,
+      "asset_return": -0.0912993,
+      "vix": 38.57,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-06",
+      "weight": 0.537924,
+      "portfolio_return": 0.02964931,
+      "asset_return": 0.05511806,
+      "vix": 27.71,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-07",
+      "weight": 0.537924,
+      "portfolio_return": 0.02135637,
+      "asset_return": 0.03970149,
+      "vix": 27.85,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-08",
+      "weight": 0.537924,
+      "portfolio_return": -0.01111984,
+      "asset_return": -0.02067177,
+      "vix": 23.79,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-09",
+      "weight": 0.537924,
+      "portfolio_return": 0.01671646,
+      "asset_return": 0.0310759,
+      "vix": 20.37,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-12",
+      "weight": 0.537924,
+      "portfolio_return": 0.00672978,
+      "asset_return": 0.01251066,
+      "vix": 20.71,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-13",
+      "weight": 0.537924,
+      "portfolio_return": 0.00135951,
+      "asset_return": 0.00252733,
+      "vix": 18.12,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-14",
+      "weight": 0.537924,
+      "portfolio_return": 0.0067806,
+      "asset_return": 0.01260514,
+      "vix": 16.19,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-15",
+      "weight": 0.537924,
+      "portfolio_return": -0.00416651,
+      "asset_return": -0.00774554,
+      "vix": 15.23,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-16",
+      "weight": 0.537924,
+      "portfolio_return": 0.01214713,
+      "asset_return": 0.02258152,
+      "vix": 14.8,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-19",
+      "weight": 0.537924,
+      "portfolio_return": 0.00073326,
+      "asset_return": 0.00136312,
+      "vix": 14.65,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-20",
+      "weight": 0.537924,
+      "portfolio_return": 0.00029292,
+      "asset_return": 0.00054454,
+      "vix": 15.88,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-21",
+      "weight": 0.537924,
+      "portfolio_return": -0.00570858,
+      "asset_return": -0.01061226,
+      "vix": 16.27,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-22",
+      "weight": 0.537924,
+      "portfolio_return": -0.00281093,
+      "asset_return": -0.00522552,
+      "vix": 17.55,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-23",
+      "weight": 0.537924,
+      "portfolio_return": 0.00029741,
+      "asset_return": 0.00055288,
+      "vix": 15.86,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-26",
+      "weight": 0.537924,
+      "portfolio_return": 0.00089188,
+      "asset_return": 0.001658,
+      "vix": 16.15,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-27",
+      "weight": 0.537924,
+      "portfolio_return": -0.00237431,
+      "asset_return": -0.00441384,
+      "vix": 15.43,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-28",
+      "weight": 0.537924,
+      "portfolio_return": 0.00760158,
+      "asset_return": 0.01413134,
+      "vix": 17.11,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-29",
+      "weight": 0.537924,
+      "portfolio_return": -0.00734868,
+      "asset_return": -0.01366119,
+      "vix": 15.65,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-08-30",
+      "weight": 0.537924,
+      "portfolio_return": 0.00253319,
+      "asset_return": 0.0047092,
+      "vix": 15.0,
+      "k": 10,
+      "bci_mom": 0.5,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-03",
+      "weight": 0.482625,
+      "portfolio_return": -0.00245844,
+      "asset_return": -0.0044236,
+      "vix": 20.72,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.00032349
+    },
+    {
+      "date": "2024-09-04",
+      "weight": 0.482625,
+      "portfolio_return": -0.02358846,
+      "asset_return": -0.04887529,
+      "vix": 21.32,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-05",
+      "weight": 0.482625,
+      "portfolio_return": 0.00295913,
+      "asset_return": 0.00613132,
+      "vix": 19.9,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-06",
+      "weight": 0.482625,
+      "portfolio_return": 0.00686267,
+      "asset_return": 0.01421945,
+      "vix": 22.38,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-09",
+      "weight": 0.482625,
+      "portfolio_return": -0.00745685,
+      "asset_return": -0.0154506,
+      "vix": 19.45,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-10",
+      "weight": 0.482625,
+      "portfolio_return": 0.00084154,
+      "asset_return": 0.00174367,
+      "vix": 19.08,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-11",
+      "weight": 0.482625,
+      "portfolio_return": -0.00140016,
+      "asset_return": -0.00290113,
+      "vix": 17.69,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-12",
+      "weight": 0.482625,
+      "portfolio_return": 0.01811427,
+      "asset_return": 0.03753276,
+      "vix": 17.07,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-13",
+      "weight": 0.482625,
+      "portfolio_return": 0.00027065,
+      "asset_return": 0.00056079,
+      "vix": 16.56,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-16",
+      "weight": 0.482625,
+      "portfolio_return": 0.0009469,
+      "asset_return": 0.00196198,
+      "vix": 17.14,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-18",
+      "weight": 0.482625,
+      "portfolio_return": -0.00243,
+      "asset_return": -0.00503495,
+      "vix": 18.23,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-19",
+      "weight": 0.482625,
+      "portfolio_return": 0.0062414,
+      "asset_return": 0.01293218,
+      "vix": 16.33,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-20",
+      "weight": 0.482625,
+      "portfolio_return": 0.00616171,
+      "asset_return": 0.01276707,
+      "vix": 16.15,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-23",
+      "weight": 0.482625,
+      "portfolio_return": 0.00211622,
+      "asset_return": 0.00438481,
+      "vix": 15.89,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-24",
+      "weight": 0.482625,
+      "portfolio_return": 0.004609,
+      "asset_return": 0.00954984,
+      "vix": 15.39,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-25",
+      "weight": 0.482625,
+      "portfolio_return": 0.00717419,
+      "asset_return": 0.01486492,
+      "vix": 15.41,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-26",
+      "weight": 0.482625,
+      "portfolio_return": 0.00398435,
+      "asset_return": 0.00825556,
+      "vix": 15.37,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-27",
+      "weight": 0.482625,
+      "portfolio_return": -0.00101982,
+      "asset_return": -0.00211307,
+      "vix": 16.96,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-09-30",
+      "weight": 0.482625,
+      "portfolio_return": -0.01264687,
+      "asset_return": -0.02620431,
+      "vix": 16.73,
+      "k": 10,
+      "bci_mom": 0.42,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-01",
+      "weight": 0.519211,
+      "portfolio_return": -0.00120188,
+      "asset_return": -0.00190261,
+      "vix": 19.26,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.00021402
+    },
+    {
+      "date": "2024-10-04",
+      "weight": 0.519211,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 19.21,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-07",
+      "weight": 0.519211,
+      "portfolio_return": 0.01286708,
+      "asset_return": 0.02478199,
+      "vix": 22.64,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-08",
+      "weight": 0.519211,
+      "portfolio_return": -0.00248355,
+      "asset_return": -0.00478332,
+      "vix": 21.42,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-09",
+      "weight": 0.519211,
+      "portfolio_return": 0.00485242,
+      "asset_return": 0.00934575,
+      "vix": 20.86,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-11",
+      "weight": 0.519211,
+      "portfolio_return": 0.00865347,
+      "asset_return": 0.01666658,
+      "vix": 20.46,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-14",
+      "weight": 0.519211,
+      "portfolio_return": 0.00040534,
+      "asset_return": 0.00078068,
+      "vix": 19.7,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-15",
+      "weight": 0.519211,
+      "portfolio_return": 0.01107006,
+      "asset_return": 0.02132093,
+      "vix": 20.64,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-16",
+      "weight": 0.519211,
+      "portfolio_return": -0.00898836,
+      "asset_return": -0.01731158,
+      "vix": 19.58,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-17",
+      "weight": 0.519211,
+      "portfolio_return": 0.00080706,
+      "asset_return": 0.0015544,
+      "vix": 19.11,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-18",
+      "weight": 0.519211,
+      "portfolio_return": 0.01289294,
+      "asset_return": 0.02483179,
+      "vix": 18.03,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-21",
+      "weight": 0.519211,
+      "portfolio_return": -0.00013101,
+      "asset_return": -0.00025233,
+      "vix": 18.37,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-22",
+      "weight": 0.519211,
+      "portfolio_return": -0.00196623,
+      "asset_return": -0.00378695,
+      "vix": 18.2,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-23",
+      "weight": 0.519211,
+      "portfolio_return": -0.00342106,
+      "asset_return": -0.00658896,
+      "vix": 19.24,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-24",
+      "weight": 0.519211,
+      "portfolio_return": -0.00317883,
+      "asset_return": -0.00612243,
+      "vix": 19.08,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-25",
+      "weight": 0.519211,
+      "portfolio_return": 0.00426457,
+      "asset_return": 0.00821356,
+      "vix": 20.33,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-28",
+      "weight": 0.519211,
+      "portfolio_return": -0.00092524,
+      "asset_return": -0.00178201,
+      "vix": 19.8,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-29",
+      "weight": 0.519211,
+      "portfolio_return": -0.01205009,
+      "asset_return": -0.02320847,
+      "vix": 19.34,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-10-30",
+      "weight": 0.519211,
+      "portfolio_return": 0.00081338,
+      "asset_return": 0.00156658,
+      "vix": 20.35,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-01",
+      "weight": 0.457038,
+      "portfolio_return": -0.00346143,
+      "asset_return": -0.00677782,
+      "vix": 21.88,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.00036371
+    },
+    {
+      "date": "2024-11-04",
+      "weight": 0.457038,
+      "portfolio_return": 0.00587791,
+      "asset_return": 0.01286087,
+      "vix": 21.98,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-05",
+      "weight": 0.457038,
+      "portfolio_return": 0.00165805,
+      "asset_return": 0.00362782,
+      "vix": 20.49,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-06",
+      "weight": 0.457038,
+      "portfolio_return": 0.00365819,
+      "asset_return": 0.00800412,
+      "vix": 16.27,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-07",
+      "weight": 0.457038,
+      "portfolio_return": 0.00526812,
+      "asset_return": 0.01152665,
+      "vix": 15.2,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-08",
+      "weight": 0.457038,
+      "portfolio_return": 0.00358779,
+      "asset_return": 0.00785008,
+      "vix": 14.94,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-11",
+      "weight": 0.457038,
+      "portfolio_return": 0.00022968,
+      "asset_return": 0.00050254,
+      "vix": 14.97,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-12",
+      "weight": 0.457038,
+      "portfolio_return": -0.01170713,
+      "asset_return": -0.02561519,
+      "vix": 14.71,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-13",
+      "weight": 0.457038,
+      "portfolio_return": -0.00294491,
+      "asset_return": -0.00644346,
+      "vix": 14.02,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-14",
+      "weight": 0.457038,
+      "portfolio_return": -0.00414945,
+      "asset_return": -0.009079,
+      "vix": 14.31,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-15",
+      "weight": 0.457038,
+      "portfolio_return": 0.00323039,
+      "asset_return": 0.00706808,
+      "vix": 16.14,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-18",
+      "weight": 0.457038,
+      "portfolio_return": -0.00641543,
+      "asset_return": -0.01403695,
+      "vix": 15.58,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-19",
+      "weight": 0.457038,
+      "portfolio_return": 0.00626572,
+      "asset_return": 0.0137094,
+      "vix": 16.35,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-20",
+      "weight": 0.457038,
+      "portfolio_return": -0.00190183,
+      "asset_return": -0.00416121,
+      "vix": 17.16,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-21",
+      "weight": 0.457038,
+      "portfolio_return": -0.0050132,
+      "asset_return": -0.01096889,
+      "vix": 16.87,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-22",
+      "weight": 0.457038,
+      "portfolio_return": 0.0089308,
+      "asset_return": 0.01954059,
+      "vix": 15.24,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-25",
+      "weight": 0.457038,
+      "portfolio_return": -0.00165723,
+      "asset_return": -0.00362602,
+      "vix": 14.6,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-26",
+      "weight": 0.457038,
+      "portfolio_return": -0.00594019,
+      "asset_return": -0.01299713,
+      "vix": 14.1,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-27",
+      "weight": 0.457038,
+      "portfolio_return": -0.00662028,
+      "asset_return": -0.01448517,
+      "vix": 14.1,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-11-29",
+      "weight": 0.457038,
+      "portfolio_return": 0.00110102,
+      "asset_return": 0.00240903,
+      "vix": 13.51,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-02",
+      "weight": 0.749625,
+      "portfolio_return": 0.01610322,
+      "asset_return": 0.02376502,
+      "vix": 13.34,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.00171163
+    },
+    {
+      "date": "2024-12-03",
+      "weight": 0.749625,
+      "portfolio_return": 0.01016707,
+      "asset_return": 0.01356287,
+      "vix": 13.3,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-04",
+      "weight": 0.749625,
+      "portfolio_return": 0.00443671,
+      "asset_return": 0.00591857,
+      "vix": 13.45,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-05",
+      "weight": 0.749625,
+      "portfolio_return": 0.00402723,
+      "asset_return": 0.00537232,
+      "vix": 13.54,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-06",
+      "weight": 0.749625,
+      "portfolio_return": -0.00286125,
+      "asset_return": -0.0038169,
+      "vix": 12.77,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-09",
+      "weight": 0.749625,
+      "portfolio_return": 0.00095742,
+      "asset_return": 0.0012772,
+      "vix": 14.19,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-10",
+      "weight": 0.749625,
+      "portfolio_return": -0.00535443,
+      "asset_return": -0.00714281,
+      "vix": 14.18,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-11",
+      "weight": 0.749625,
+      "portfolio_return": -0.00654865,
+      "asset_return": -0.0087359,
+      "vix": 13.58,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-12",
+      "weight": 0.749625,
+      "portfolio_return": 0.00874363,
+      "asset_return": 0.011664,
+      "vix": 13.92,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-13",
+      "weight": 0.749625,
+      "portfolio_return": 0.00057622,
+      "asset_return": 0.00076868,
+      "vix": 13.81,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-16",
+      "weight": 0.749625,
+      "portfolio_return": 0.00307069,
+      "asset_return": 0.0040963,
+      "vix": 14.69,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-17",
+      "weight": 0.749625,
+      "portfolio_return": 0.00382268,
+      "asset_return": 0.00509945,
+      "vix": 15.87,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-18",
+      "weight": 0.749625,
+      "portfolio_return": 0.0,
+      "asset_return": 0.0,
+      "vix": 27.62,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-19",
+      "weight": 0.749625,
+      "portfolio_return": -0.01026887,
+      "asset_return": -0.01369867,
+      "vix": 24.09,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-20",
+      "weight": 0.749625,
+      "portfolio_return": -0.00694101,
+      "asset_return": -0.00925931,
+      "vix": 18.36,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-23",
+      "weight": 0.749625,
+      "portfolio_return": 0.01809847,
+      "asset_return": 0.02414336,
+      "vix": 16.78,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-24",
+      "weight": 0.749625,
+      "portfolio_return": 0.00209025,
+      "asset_return": 0.0027884,
+      "vix": 14.27,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-26",
+      "weight": 0.749625,
+      "portfolio_return": -0.00056672,
+      "asset_return": -0.00075601,
+      "vix": 14.73,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-27",
+      "weight": 0.749625,
+      "portfolio_return": 0.00245779,
+      "asset_return": 0.00327869,
+      "vix": 15.95,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-30",
+      "weight": 0.749625,
+      "portfolio_return": -0.00414565,
+      "asset_return": -0.0055303,
+      "vix": 17.4,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    },
+    {
+      "date": "2024-12-31",
+      "weight": 0.749625,
+      "portfolio_return": -0.0077692,
+      "asset_return": -0.01036412,
+      "vix": 17.35,
+      "k": 10,
+      "bci_mom": 0.31,
+      "tx_cost": 0.0
+    }
+  ]
+}

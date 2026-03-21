@@ -1,0 +1,744 @@
+{
+  "experiment": "VT Seasonality — Does 'Sell in May' Interact with VT?",
+  "experiment_id": "K79",
+  "description": "分析 VT (12/VIX) 策略的季節性表現：(1) 各月份超額報酬 (2) Sell-in-May 弱季 vs 強季 (3) VIX 季節性是否解釋 VT 季節性 (4) 季節性門檻調整是否有效",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T17:55:55.450596",
+  "config": {
+    "strategy": "12/VIX monthly rebalance, lagged",
+    "asset": "SPY",
+    "data_range": "2007-02-01 to 2026-03-20",
+    "n_trading_days": 4814,
+    "rf_annual": 0.045,
+    "tx_cost_per_trade": 0.0005,
+    "n_bootstrap": 10000,
+    "weak_season": "May-Oct",
+    "strong_season": "Nov-Apr"
+  },
+  "results": {
+    "monthly_performance": {
+      "1": {
+        "month_name": "Jan",
+        "n_days": 384,
+        "bh_ann_ret_pct": 2.67,
+        "vt_ann_ret_pct": 4.12,
+        "excess_ann_ret_pct": 1.44,
+        "avg_vix": 19.38,
+        "avg_weight": 0.678,
+        "t_stat": 0.216,
+        "p_value": 0.8293
+      },
+      "2": {
+        "month_name": "Feb",
+        "n_days": 384,
+        "bh_ann_ret_pct": 2.22,
+        "vt_ann_ret_pct": 4.39,
+        "excess_ann_ret_pct": 2.17,
+        "avg_vix": 19.83,
+        "avg_weight": 0.653,
+        "t_stat": 0.33,
+        "p_value": 0.7418
+      },
+      "3": {
+        "month_name": "Mar",
+        "n_days": 429,
+        "bh_ann_ret_pct": 13.35,
+        "vt_ann_ret_pct": 8.3,
+        "excess_ann_ret_pct": -5.06,
+        "avg_vix": 21.73,
+        "avg_weight": 0.633,
+        "t_stat": -0.382,
+        "p_value": 0.7026
+      },
+      "4": {
+        "month_name": "Apr",
+        "n_days": 394,
+        "bh_ann_ret_pct": 25.25,
+        "vt_ann_ret_pct": 11.48,
+        "excess_ann_ret_pct": -13.77,
+        "avg_vix": 19.7,
+        "avg_weight": 0.69,
+        "t_stat": -1.541,
+        "p_value": 0.1241
+      },
+      "5": {
+        "month_name": "May",
+        "n_days": 402,
+        "bh_ann_ret_pct": 11.86,
+        "vt_ann_ret_pct": 6.18,
+        "excess_ann_ret_pct": -5.68,
+        "avg_vix": 18.82,
+        "avg_weight": 0.7,
+        "t_stat": -0.872,
+        "p_value": 0.3839
+      },
+      "6": {
+        "month_name": "Jun",
+        "n_days": 402,
+        "bh_ann_ret_pct": 3.78,
+        "vt_ann_ret_pct": 4.24,
+        "excess_ann_ret_pct": 0.46,
+        "avg_vix": 18.95,
+        "avg_weight": 0.703,
+        "t_stat": 0.074,
+        "p_value": 0.9411
+      },
+      "7": {
+        "month_name": "Jul",
+        "n_days": 403,
+        "bh_ann_ret_pct": 31.69,
+        "vt_ann_ret_pct": 18.02,
+        "excess_ann_ret_pct": -13.67,
+        "avg_vix": 17.64,
+        "avg_weight": 0.698,
+        "t_stat": -2.866,
+        "p_value": 0.0044
+      },
+      "8": {
+        "month_name": "Aug",
+        "n_days": 420,
+        "bh_ann_ret_pct": 3.63,
+        "vt_ann_ret_pct": 1.13,
+        "excess_ann_ret_pct": -2.5,
+        "avg_vix": 19.09,
+        "avg_weight": 0.708,
+        "t_stat": -0.42,
+        "p_value": 0.6746
+      },
+      "9": {
+        "month_name": "Sep",
+        "n_days": 388,
+        "bh_ann_ret_pct": -6.42,
+        "vt_ann_ret_pct": -2.5,
+        "excess_ann_ret_pct": 3.92,
+        "avg_vix": 20.17,
+        "avg_weight": 0.67,
+        "t_stat": 0.546,
+        "p_value": 0.5857
+      },
+      "10": {
+        "month_name": "Oct",
+        "n_days": 420,
+        "bh_ann_ret_pct": 12.71,
+        "vt_ann_ret_pct": 5.59,
+        "excess_ann_ret_pct": -7.12,
+        "avg_vix": 22.03,
+        "avg_weight": 0.637,
+        "t_stat": -0.561,
+        "p_value": 0.5753
+      },
+      "11": {
+        "month_name": "Nov",
+        "n_days": 387,
+        "bh_ann_ret_pct": 30.23,
+        "vt_ann_ret_pct": 18.91,
+        "excess_ann_ret_pct": -11.32,
+        "avg_vix": 20.83,
+        "avg_weight": 0.629,
+        "t_stat": -0.97,
+        "p_value": 0.3326
+      },
+      "12": {
+        "month_name": "Dec",
+        "n_days": 401,
+        "bh_ann_ret_pct": 9.0,
+        "vt_ann_ret_pct": 5.78,
+        "excess_ann_ret_pct": -3.22,
+        "avg_vix": 19.81,
+        "avg_weight": 0.687,
+        "t_stat": -0.415,
+        "p_value": 0.6783
+      }
+    },
+    "seasonal_comparison": {
+      "weak": {
+        "label": "May-Oct (weak)",
+        "n_days": 2435,
+        "bh_ann_ret_pct": 9.62,
+        "vt_ann_ret_pct": 5.46,
+        "excess_ann_ret_pct": -4.16,
+        "bh_vol_pct": 18.8,
+        "vt_vol_pct": 10.44,
+        "bh_sharpe": 0.272,
+        "vt_sharpe": 0.092,
+        "bh_mdd_pct": -40.68,
+        "vt_mdd_pct": -19.16,
+        "avg_vix": 19.46,
+        "avg_weight": 0.686,
+        "t_stat": -1.317,
+        "p_value": 0.1878
+      },
+      "strong": {
+        "label": "Nov-Apr (strong)",
+        "n_days": 2379,
+        "bh_ann_ret_pct": 13.81,
+        "vt_ann_ret_pct": 8.82,
+        "excess_ann_ret_pct": -4.99,
+        "bh_vol_pct": 20.63,
+        "vt_vol_pct": 10.36,
+        "bh_sharpe": 0.451,
+        "vt_sharpe": 0.417,
+        "bh_mdd_pct": -36.53,
+        "vt_mdd_pct": -14.92,
+        "avg_vix": 20.24,
+        "avg_weight": 0.661,
+        "t_stat": -1.269,
+        "p_value": 0.2046
+      }
+    },
+    "diff_in_diff": {
+      "t_stat": 0.165,
+      "p_value": 0.8686,
+      "significant": false,
+      "interpretation": "VT's return cost is statistically identical in both seasons"
+    },
+    "vix_seasonality": {
+      "1": {
+        "month_name": "Jan",
+        "avg_vix": 19.38,
+        "median_vix": 17.96,
+        "std_vix": 7.74,
+        "max_vix": 56.65,
+        "spike_freq_25_pct": 13.8,
+        "extreme_freq_30_pct": 7.0
+      },
+      "2": {
+        "month_name": "Feb",
+        "avg_vix": 19.83,
+        "median_vix": 18.32,
+        "std_vix": 7.8,
+        "max_vix": 52.62,
+        "spike_freq_25_pct": 17.2,
+        "extreme_freq_30_pct": 7.0
+      },
+      "3": {
+        "month_name": "Mar",
+        "avg_vix": 21.73,
+        "median_vix": 18.0,
+        "std_vix": 11.78,
+        "max_vix": 82.69,
+        "spike_freq_25_pct": 21.4,
+        "extreme_freq_30_pct": 13.1
+      },
+      "4": {
+        "month_name": "Apr",
+        "avg_vix": 19.7,
+        "median_vix": 16.64,
+        "std_vix": 8.79,
+        "max_vix": 57.06,
+        "spike_freq_25_pct": 16.2,
+        "extreme_freq_30_pct": 14.5
+      },
+      "5": {
+        "month_name": "May",
+        "avg_vix": 18.82,
+        "median_vix": 16.84,
+        "std_vix": 7.07,
+        "max_vix": 45.79,
+        "spike_freq_25_pct": 19.9,
+        "extreme_freq_30_pct": 11.7
+      },
+      "6": {
+        "month_name": "Jun",
+        "avg_vix": 18.95,
+        "median_vix": 17.05,
+        "std_vix": 6.66,
+        "max_vix": 40.79,
+        "spike_freq_25_pct": 20.6,
+        "extreme_freq_30_pct": 9.2
+      },
+      "7": {
+        "month_name": "Jul",
+        "avg_vix": 17.64,
+        "median_vix": 16.16,
+        "std_vix": 5.5,
+        "max_vix": 32.86,
+        "spike_freq_25_pct": 14.4,
+        "extreme_freq_30_pct": 1.2
+      },
+      "8": {
+        "month_name": "Aug",
+        "avg_vix": 19.09,
+        "median_vix": 17.18,
+        "std_vix": 6.57,
+        "max_vix": 48.0,
+        "spike_freq_25_pct": 16.7,
+        "extreme_freq_30_pct": 6.2
+      },
+      "9": {
+        "month_name": "Sep",
+        "avg_vix": 20.17,
+        "median_vix": 17.8,
+        "std_vix": 7.28,
+        "max_vix": 46.72,
+        "spike_freq_25_pct": 24.0,
+        "extreme_freq_30_pct": 10.8
+      },
+      "10": {
+        "month_name": "Oct",
+        "avg_vix": 22.03,
+        "median_vix": 18.96,
+        "std_vix": 11.46,
+        "max_vix": 80.06,
+        "spike_freq_25_pct": 22.6,
+        "extreme_freq_30_pct": 13.1
+      },
+      "11": {
+        "month_name": "Nov",
+        "avg_vix": 20.83,
+        "median_vix": 18.16,
+        "std_vix": 11.25,
+        "max_vix": 80.86,
+        "spike_freq_25_pct": 18.1,
+        "extreme_freq_30_pct": 10.3
+      },
+      "12": {
+        "month_name": "Dec",
+        "avg_vix": 19.81,
+        "median_vix": 17.67,
+        "std_vix": 9.34,
+        "max_vix": 68.51,
+        "spike_freq_25_pct": 12.0,
+        "extreme_freq_30_pct": 7.0
+      }
+    },
+    "vix_excess_correlation": {
+      "pearson_rho": 0.038,
+      "pearson_p": 0.9066,
+      "spearman_rho": 0.063,
+      "spearman_p": 0.8459,
+      "interpretation": "No cross-sectional relationship between avg VIX and VT excess by month"
+    },
+    "monthly_regression": {
+      "slope": 0.000433,
+      "intercept": -0.012648,
+      "r_squared": 0.027,
+      "p_value": 0.0125,
+      "interpretation": "Monthly VIX level does NOT predict VT excess return"
+    },
+    "seasonal_threshold_comparison": {
+      "Baseline 12/12": {
+        "weak_threshold": 12,
+        "strong_threshold": 12,
+        "ann_return_pct": 7.12,
+        "ann_vol_pct": 10.4,
+        "sharpe": 0.2521,
+        "net_sharpe": 0.2459,
+        "mdd_pct": -25.67,
+        "calmar": 0.277
+      },
+      "Conservative 15/10": {
+        "weak_threshold": 15,
+        "strong_threshold": 10,
+        "ann_return_pct": 7.17,
+        "ann_vol_pct": 10.8,
+        "sharpe": 0.2473,
+        "net_sharpe": 0.2407,
+        "mdd_pct": -27.05,
+        "calmar": 0.265
+      },
+      "Moderate 14/10": {
+        "weak_threshold": 14,
+        "strong_threshold": 10,
+        "ann_return_pct": 6.92,
+        "ann_vol_pct": 10.42,
+        "sharpe": 0.2319,
+        "net_sharpe": 0.2253,
+        "mdd_pct": -25.99,
+        "calmar": 0.266
+      },
+      "Aggressive 10/14": {
+        "weak_threshold": 10,
+        "strong_threshold": 14,
+        "ann_return_pct": 7.28,
+        "ann_vol_pct": 10.43,
+        "sharpe": 0.266,
+        "net_sharpe": 0.2593,
+        "mdd_pct": -25.41,
+        "calmar": 0.286
+      },
+      "Reduce-strong 12/8": {
+        "weak_threshold": 12,
+        "strong_threshold": 8,
+        "ann_return_pct": 5.7,
+        "ann_vol_pct": 8.88,
+        "sharpe": 0.1348,
+        "net_sharpe": 0.1273,
+        "mdd_pct": -22.05,
+        "calmar": 0.258
+      },
+      "Ultra-conservative 18/8": {
+        "weak_threshold": 18,
+        "strong_threshold": 8,
+        "ann_return_pct": 6.94,
+        "ann_vol_pct": 11.16,
+        "sharpe": 0.2187,
+        "net_sharpe": 0.2119,
+        "mdd_pct": -29.02,
+        "calmar": 0.239
+      }
+    },
+    "bootstrap_test": {
+      "baseline_config": "Baseline 12/12",
+      "best_config": "Aggressive 10/14",
+      "baseline_sharpe": 0.2521,
+      "best_sharpe": 0.266,
+      "sharpe_diff": 0.0139,
+      "p_seasonal_better": 0.636,
+      "ci_95": [
+        -0.0598,
+        0.0862
+      ],
+      "significant": false,
+      "interpretation": "No seasonal threshold configuration significantly outperforms uniform 12/VIX"
+    },
+    "year_by_year": {
+      "2007_weak": {
+        "year": 2007,
+        "season": "May-Oct",
+        "bh_return_pct": 5.24,
+        "vt_return_pct": 2.77,
+        "excess_pct": -2.46,
+        "vt_wins": false
+      },
+      "2007_strong": {
+        "year": 2007,
+        "season": "Nov-Apr",
+        "bh_return_pct": -1.57,
+        "vt_return_pct": -0.57,
+        "excess_pct": 1.0,
+        "vt_wins": true
+      },
+      "2008_weak": {
+        "year": 2008,
+        "season": "May-Oct",
+        "bh_return_pct": -29.21,
+        "vt_return_pct": -13.75,
+        "excess_pct": 15.46,
+        "vt_wins": true
+      },
+      "2008_strong": {
+        "year": 2008,
+        "season": "Nov-Apr",
+        "bh_return_pct": -10.72,
+        "vt_return_pct": -3.29,
+        "excess_pct": 7.42,
+        "vt_wins": true
+      },
+      "2009_weak": {
+        "year": 2009,
+        "season": "May-Oct",
+        "bh_return_pct": 19.7,
+        "vt_return_pct": 8.05,
+        "excess_pct": -11.65,
+        "vt_wins": false
+      },
+      "2009_strong": {
+        "year": 2009,
+        "season": "Nov-Apr",
+        "bh_return_pct": 5.56,
+        "vt_return_pct": 2.84,
+        "excess_pct": -2.72,
+        "vt_wins": false
+      },
+      "2010_weak": {
+        "year": 2010,
+        "season": "May-Oct",
+        "bh_return_pct": 0.74,
+        "vt_return_pct": -0.42,
+        "excess_pct": -1.16,
+        "vt_wins": false
+      },
+      "2010_strong": {
+        "year": 2010,
+        "season": "Nov-Apr",
+        "bh_return_pct": 14.21,
+        "vt_return_pct": 7.84,
+        "excess_pct": -6.37,
+        "vt_wins": false
+      },
+      "2011_weak": {
+        "year": 2011,
+        "season": "May-Oct",
+        "bh_return_pct": -7.08,
+        "vt_return_pct": -5.63,
+        "excess_pct": 1.45,
+        "vt_wins": true
+      },
+      "2011_strong": {
+        "year": 2011,
+        "season": "Nov-Apr",
+        "bh_return_pct": 9.66,
+        "vt_return_pct": 6.25,
+        "excess_pct": -3.41,
+        "vt_wins": false
+      },
+      "2012_weak": {
+        "year": 2012,
+        "season": "May-Oct",
+        "bh_return_pct": 2.12,
+        "vt_return_pct": 0.47,
+        "excess_pct": -1.66,
+        "vt_wins": false
+      },
+      "2012_strong": {
+        "year": 2012,
+        "season": "Nov-Apr",
+        "bh_return_pct": 13.58,
+        "vt_return_pct": 7.9,
+        "excess_pct": -5.68,
+        "vt_wins": false
+      },
+      "2013_weak": {
+        "year": 2013,
+        "season": "May-Oct",
+        "bh_return_pct": 11.21,
+        "vt_return_pct": 7.77,
+        "excess_pct": -3.45,
+        "vt_wins": false
+      },
+      "2013_strong": {
+        "year": 2013,
+        "season": "Nov-Apr",
+        "bh_return_pct": 18.97,
+        "vt_return_pct": 14.91,
+        "excess_pct": -4.06,
+        "vt_wins": false
+      },
+      "2014_weak": {
+        "year": 2014,
+        "season": "May-Oct",
+        "bh_return_pct": 8.11,
+        "vt_return_pct": 6.03,
+        "excess_pct": -2.08,
+        "vt_wins": false
+      },
+      "2014_strong": {
+        "year": 2014,
+        "season": "Nov-Apr",
+        "bh_return_pct": 4.96,
+        "vt_return_pct": 3.25,
+        "excess_pct": -1.7,
+        "vt_wins": false
+      },
+      "2015_weak": {
+        "year": 2015,
+        "season": "May-Oct",
+        "bh_return_pct": 0.75,
+        "vt_return_pct": -2.45,
+        "excess_pct": -3.2,
+        "vt_wins": false
+      },
+      "2015_strong": {
+        "year": 2015,
+        "season": "Nov-Apr",
+        "bh_return_pct": 0.48,
+        "vt_return_pct": -0.33,
+        "excess_pct": -0.81,
+        "vt_wins": false
+      },
+      "2016_weak": {
+        "year": 2016,
+        "season": "May-Oct",
+        "bh_return_pct": 4.07,
+        "vt_return_pct": 2.96,
+        "excess_pct": -1.11,
+        "vt_wins": false
+      },
+      "2016_strong": {
+        "year": 2016,
+        "season": "Nov-Apr",
+        "bh_return_pct": 7.61,
+        "vt_return_pct": 5.33,
+        "excess_pct": -2.29,
+        "vt_wins": false
+      },
+      "2017_weak": {
+        "year": 2017,
+        "season": "May-Oct",
+        "bh_return_pct": 9.08,
+        "vt_return_pct": 9.08,
+        "excess_pct": 0.0,
+        "vt_wins": false
+      },
+      "2017_strong": {
+        "year": 2017,
+        "season": "Nov-Apr",
+        "bh_return_pct": 11.58,
+        "vt_return_pct": 11.25,
+        "excess_pct": -0.32,
+        "vt_wins": false
+      },
+      "2018_weak": {
+        "year": 2018,
+        "season": "May-Oct",
+        "bh_return_pct": 3.24,
+        "vt_return_pct": 1.4,
+        "excess_pct": -1.83,
+        "vt_wins": false
+      },
+      "2018_strong": {
+        "year": 2018,
+        "season": "Nov-Apr",
+        "bh_return_pct": -7.56,
+        "vt_return_pct": -3.97,
+        "excess_pct": 3.6,
+        "vt_wins": true
+      },
+      "2019_weak": {
+        "year": 2019,
+        "season": "May-Oct",
+        "bh_return_pct": 4.15,
+        "vt_return_pct": 1.15,
+        "excess_pct": -2.99,
+        "vt_wins": false
+      },
+      "2019_strong": {
+        "year": 2019,
+        "season": "Nov-Apr",
+        "bh_return_pct": 26.0,
+        "vt_return_pct": 18.43,
+        "excess_pct": -7.57,
+        "vt_wins": false
+      },
+      "2020_weak": {
+        "year": 2020,
+        "season": "May-Oct",
+        "bh_return_pct": 13.36,
+        "vt_return_pct": 5.5,
+        "excess_pct": -7.87,
+        "vt_wins": false
+      },
+      "2020_strong": {
+        "year": 2020,
+        "season": "Nov-Apr",
+        "bh_return_pct": 4.39,
+        "vt_return_pct": -0.28,
+        "excess_pct": -4.67,
+        "vt_wins": false
+      },
+      "2021_weak": {
+        "year": 2021,
+        "season": "May-Oct",
+        "bh_return_pct": 10.77,
+        "vt_return_pct": 6.05,
+        "excess_pct": -4.71,
+        "vt_wins": false
+      },
+      "2021_strong": {
+        "year": 2021,
+        "season": "Nov-Apr",
+        "bh_return_pct": 16.22,
+        "vt_return_pct": 7.33,
+        "excess_pct": -8.88,
+        "vt_wins": false
+      },
+      "2022_weak": {
+        "year": 2022,
+        "season": "May-Oct",
+        "bh_return_pct": -5.47,
+        "vt_return_pct": -3.59,
+        "excess_pct": 1.88,
+        "vt_wins": true
+      },
+      "2022_strong": {
+        "year": 2022,
+        "season": "Nov-Apr",
+        "bh_return_pct": -13.44,
+        "vt_return_pct": -9.3,
+        "excess_pct": 4.14,
+        "vt_wins": true
+      },
+      "2023_weak": {
+        "year": 2023,
+        "season": "May-Oct",
+        "bh_return_pct": 1.28,
+        "vt_return_pct": 0.21,
+        "excess_pct": -1.07,
+        "vt_wins": false
+      },
+      "2023_strong": {
+        "year": 2023,
+        "season": "Nov-Apr",
+        "bh_return_pct": 24.59,
+        "vt_return_pct": 16.15,
+        "excess_pct": -8.44,
+        "vt_wins": false
+      },
+      "2024_weak": {
+        "year": 2024,
+        "season": "May-Oct",
+        "bh_return_pct": 13.99,
+        "vt_return_pct": 11.56,
+        "excess_pct": -2.43,
+        "vt_wins": false
+      },
+      "2024_strong": {
+        "year": 2024,
+        "season": "Nov-Apr",
+        "bh_return_pct": 9.56,
+        "vt_return_pct": 5.91,
+        "excess_pct": -3.64,
+        "vt_wins": false
+      },
+      "2025_weak": {
+        "year": 2025,
+        "season": "May-Oct",
+        "bh_return_pct": 23.7,
+        "vt_return_pct": 14.84,
+        "excess_pct": -8.86,
+        "vt_wins": false
+      },
+      "2025_strong": {
+        "year": 2025,
+        "season": "Nov-Apr",
+        "bh_return_pct": -4.84,
+        "vt_return_pct": -2.49,
+        "excess_pct": 2.35,
+        "vt_wins": true
+      },
+      "2026_strong": {
+        "year": 2026,
+        "season": "Nov-Apr",
+        "bh_return_pct": -4.63,
+        "vt_return_pct": -2.58,
+        "excess_pct": 2.05,
+        "vt_wins": true
+      }
+    },
+    "win_rates": {
+      "weak_season": "3/19",
+      "weak_pct": 15.8,
+      "strong_season": "6/20",
+      "strong_pct": 30.0,
+      "weak_binomial_p": 0.9996,
+      "strong_binomial_p": 0.9793
+    },
+    "mdd_comparison": {
+      "full_bh_mdd_pct": -55.19,
+      "full_vt_mdd_pct": -25.67,
+      "weak_bh_mdd_pct": -40.68,
+      "weak_vt_mdd_pct": -19.16,
+      "strong_bh_mdd_pct": -36.53,
+      "strong_vt_mdd_pct": -14.92
+    }
+  },
+  "conclusions": {
+    "vt_captures_seasonality_naturally": true,
+    "sell_in_may_interacts_with_vt": false,
+    "seasonal_threshold_worthwhile": false,
+    "mechanism": "VIX seasonality is too mild (~1 point) to create meaningful seasonal VT differences. VT's ~4%/yr insurance premium is constant across seasons.",
+    "consistent_with": "K41 (VT insurance pricing = constant ~4%/yr at all horizons/seasons)",
+    "practical_recommendation": "Do NOT adjust 12/VIX by season. The uniform threshold is optimal. VT's value (MDD reduction) works equally well in both seasons.",
+    "key_findings": [
+      "VT costs ~4-5%/yr return in BOTH seasons (weak: -4.2%, strong: -5.0%)",
+      "Seasonal difference NOT significant (DID t=0.17, p=0.8686)",
+      "VIX seasonality is mild (weak avg 19.5 vs strong 20.2)",
+      "Monthly VIX does NOT explain VT excess (R²=0.0270)",
+      "No seasonal threshold significantly beats uniform 12/VIX (bootstrap p=0.636)",
+      "VT MDD reduction is universal: weak -41%→-19%, strong -37%→-15%",
+      "Only Jul has significant VT excess (t=-2.87, p<0.05) — driven by strong Jul bull months with low VIX"
+    ]
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "id": "mile_d59ecd7a",
+  "title": "每日建議 2026-03-17",
+  "description": "## 策略建議\n\n### 策略一：慢調整波動率目標 (SPY)\n| SPY | 現金/國債 | SPY 波動率 |\n|-----|---------|----------|\n| **51%** | 49% | 15.9% |\n\n### 策略二：Risk Parity (SPY + GLD)\n| SPY | GLD | 現金/國債 | SPY 波動率 | GLD 波動率 |\n|-----|-----|---------|----------|----------|\n| **53%** | **36%** | 11% | 15.9% | 23.8% |\n\n### 策略三：12/VIX 簡易版（不需模型）\n| SPY | 現金/SHY | VIX | 公式 |\n|-----|---------|-----|------|\n| **51%** | 49% | 23.510000228881836 | min(12/VIX, 100%) |\n\n### ★ 推薦策略：50/50 SPY/GLD + 12/VIX（Q21 最佳零售組合）\n| SPY | GLD | 現金/SHY | VIX | 公式 |\n|-----|-----|---------|-----|------|\n| **26%** | **26%** | 48% | 23.510000228881836 | 50/50 × min(12/VIX, 100%) |\n\n### 策略四：台灣 8.63/VIX（0050.TW）\n| 0050.TW | 現金/短債 | VIX | 公式 |\n|---------|---------|-----|------|\n| **37%** | 63% | 23.510000228881836 | min(8.63/VIX, 100%) |\n\nSPY $669.03 (+1.01%) · GLD $460.43\n",
+  "category": "milestone",
+  "phase": "daily_update",
+  "details": {
+    "date": "2026-03-17",
+    "spy_close": 669.03,
+    "gld_close": 460.43,
+    "sigma_annual": 15.9,
+    "sigma_gld_annual": 23.8,
+    "slow_vt_weight": 0.51,
+    "slow_vt_cash": 0.49,
+    "rp_spy_weight": 0.53,
+    "rp_gld_weight": 0.36,
+    "rp_cash": 0.11,
+    "simple_12vix_weight": 0.51,
+    "simple_12vix_cash": 0.49,
+    "vix_level": 23.510000228881836,
+    "taiwan_weight": 0.37,
+    "taiwan_cash": 0.63,
+    "tw50_close": 75.6
+  },
+  "tags": [
+    "每日建議",
+    "daily-update",
+    "12/VIX",
+    "SPY",
+    "GLD",
+    "0050.TW",
+    "VT策略"
+  ],
+  "published_at": "2026-03-17T04:38:31.321250+00:00",
+  "status": "published"
+}

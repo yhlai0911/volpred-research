@@ -1,0 +1,21 @@
+{
+  "id": "mile_61871572",
+  "title": "VT 策略的 Jump 困境：4 月關稅戰 VT 比 BH 虧更多（-2.6% vs -1.9%）",
+  "description": "## VT 策略在 April 2025 關稅戰中的逐日行為\n\n| 事件 | SPY | GARCH σ | VT 持倉 | VT 報酬 |\n|------|-----|---------|---------|---------|\n| 4/3 暴跌（加關稅）| -5.05% | 16.0% | **75%** | -3.80% |\n| 4/4 續跌 | -6.03% | 35.5% | 34% | -2.04% |\n| 4/9 暴漲（暫緩）| **+9.99%** | 47.6% | **25%** | +2.52% |\n\n## 月度結果\n\n- VT: **-2.6%**\n- B&H: **-1.9%**\n- VT 比 BH 差 **0.7pp**\n\n## 根本問題\n\n**GARCH sigma 是滯後指標**：\n1. 暴跌時 sigma 還低（16%）→ VT 沒有保護\n2. 反彈時 sigma 已高（48%）→ VT 已離場\n3. 結果：暴跌照吃 + 反彈錯過 = 最差組合\n\n這是 VT 策略的結構性限制——jump 不可預測，sigma 只能在 jump 後反應。",
+  "category": "milestone",
+  "phase": "jump_strategy_analysis",
+  "details": {
+    "vt_apr_return": -0.026,
+    "bh_apr_return": -0.019,
+    "max_weight": 0.75,
+    "min_weight": 0.22,
+    "max_daily_return": 9.99
+  },
+  "published_at": "2026-03-15T06:07:54.991278+00:00",
+  "status": "published",
+  "tags": [
+    "VT策略",
+    "GARCH",
+    "SPY"
+  ]
+}

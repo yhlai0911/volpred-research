@@ -1,0 +1,21 @@
+{
+  "id": "mile_ade1c762",
+  "title": "粗糙波動率：一個美麗理論的 QLIKE 天花板挑戰",
+  "description": "Rough Volatility (H=0.105) 確認 vol is rough，但 QLIKE 天花板第 12 次確認不可打破",
+  "content": "## 摘要\n\n[提出: Claude（文獻搜索 arXiv/SSRN）, 執行: Claude]\n\n我們測試了近年金融計量學的前沿方法——Rough Volatility（粗糙波動率），看它能否打破我們一路走來確認了 11 次的「QLIKE 天花板」。結果：**不能**。但 Rough Vol 的故事遠比「能不能贏 GARCH」更有趣。\n\n## 什麼是 Rough Volatility？\n\n2018 年，Gatheral, Jaisson & Rosenbaum 在一篇被引用超過 1000 次的論文中提出：波動率的走勢不像我們想像的那麼平滑。如果用 Hurst 指數 H 來衡量路徑的粗糙程度，標準布朗運動 H=0.5，而實際波動率的 H 約為 0.1——**比隨機漫步粗糙 5 倍**。\n\n這意味著波動率的突然跳升和快速回落不是偶然——它是波動率路徑的本質特徵。\n\n## 我們的測試\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY |\n| Hurst 估計方法 | R/S、DFA、Variogram（3 種）|\n| 預測模型 | RFSV（分數差分）vs GJR-GARCH |\n| OOS | 2023-01-01 至 2024-12-31（N=502）|\n| 窗口 | w=2000 |\n| 評估 | QLIKE（主）+ MSE（輔）|\n\n## 核心發現\n\n### 1. 波動率確實是「粗糙的」——但估計結果高度方法依賴\n\n| 估計方法 | Hurst H | 解讀 |\n|---------|---------|------|\n| **Variogram** | **0.105** | 確認粗糙（H << 0.5）|\n| R/S Analysis | 0.884 | 接近長記憶！|\n| DFA | 0.992 | 接近單位根！|\n\n三種方法給出完全不同的 H 值！這不是 bug——這正是 Cont & Das (2022) 所警告的：**粗糙性可能是測量方法的 artifact，而非真實過程的特性**。Variogram 方法支持 rough vol，但 R/S 和 DFA 完全不支持。\n\n### 2. QLIKE 天花板再次確認\n\n| 模型 | QLIKE | DM p-value |\n|------|-------|-----------|\n| **GJR-GARCH** | **0.461** | baseline |\n| RFSV | 0.483 (+4.8%) | 0.80 NS |\n\nGJR-GARCH 在 QLIKE 上仍然贏，雖然差異不顯著。**這是 QLIKE 天花板的第 12 次確認**。\n\n### 3. MSE 上 RFSV 大幅勝出\n\n| 模型 | MSE (log-vol) | DM p-value |\n|------|--------------|-----------|\n| GJR-GARCH | 1.384 | baseline |\n| **RFSV** | **0.689 (-50%)** | **<0.001***！** |\n\n在 log-vol 的 MSE 指標上，RFSV 比 GJR 好了一半！但為什麼 QLIKE 和 MSE 結論相反？\n\n**原因**：QLIKE 衡量的是「相對誤差」（高 vol 時的誤差被懲罰較少），MSE 衡量的是「絕對誤差」。RFSV 在低波動率時期（佔多數時間）預測更精確，但在高波動率時期表現較差——而 QLIKE 更重視後者。\n\n## 意義與限制\n\n1. **波動率的粗糙性是學術事實**：H≈0.1 被大量文獻支持\n2. **但對日頻交易策略沒用**：如果你的決策基於 QLIKE（或 VaR），GARCH 仍然足夠\n3. **可能對衍生品定價有用**：Rough vol 最初就是為了解釋 options smile 而提出的\n4. **方法依賴性是紅旗**：不同估計方法差異如此之大，說明我們對 vol 的微觀結構理解仍然不足\n\n## 結論\n\nRough Volatility 是一個美麗的理論框架，它正確描述了波動率的統計特性。但對於我們的核心任務（1-step daily vol forecasting + VT 策略），它**不增加價值**。QLIKE 天花板牢不可破——從 MS-GARCH、FIGARCH、GARCH-MIDAS、到 RFSV，已經有 12 個挑戰者嘗試並失敗。\n\nGJR-GARCH 之所以是天花板，可能不是因為它是最好的模型，而是因為**日頻數據的信噪比就只有這麼高**。要打破天花板，可能需要更高頻的數據（5-min RV），而不是更複雜的模型。\n",
+  "phase": "Phase_T",
+  "category": "milestone",
+  "audience": "research",
+  "proposer": "Claude（文獻搜索）",
+  "status": "published",
+  "tags": [
+    "rough-volatility",
+    "Hurst",
+    "RFSV",
+    "QLIKE",
+    "SPY",
+    "GARCH",
+    "forecast-comparison"
+  ],
+  "published_at": "2026-03-17T07:34:05.623309+00:00"
+}

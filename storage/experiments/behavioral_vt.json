@@ -1,0 +1,397 @@
+{
+  "experiment_id": "behavioral_vt",
+  "title": "行為金融實驗：投資人無法維持 VT 紀律的成本",
+  "timestamp": "2026-03-21T13:44:17.993552+00:00",
+  "data_range": "2007-01-05 to 2026-03-20",
+  "n_trading_days": 4832,
+  "strategy": "12/VIX SPY (lagged weights, no leverage)",
+  "monte_carlo_sims": 1000,
+  "benchmark_buy_hold": {
+    "ann_return_pct": 11.73,
+    "ann_vol_pct": 19.7,
+    "sharpe": 0.595,
+    "mdd_pct": -55.19,
+    "calmar": 0.213,
+    "sortino": 0.727,
+    "total_return_pct": 552.91
+  },
+  "profiles": {
+    "A_perfect_discipline": {
+      "description": "完美紀律：始終遵循 12/VIX 策略",
+      "metrics": {
+        "ann_return_pct": 6.57,
+        "ann_vol_pct": 9.49,
+        "sharpe": 0.692,
+        "mdd_pct": -28.6,
+        "calmar": 0.23,
+        "sortino": 0.916,
+        "total_return_pct": 223.03
+      }
+    },
+    "B_impatient": {
+      "description": "沒耐心：連續 3 季落後 B&H 即放棄 VT，VIX>30 才回來",
+      "metrics": {
+        "ann_return_pct": 7.57,
+        "ann_vol_pct": 11.05,
+        "sharpe": 0.685,
+        "mdd_pct": -30.58,
+        "calmar": 0.248,
+        "sortino": 0.875,
+        "total_return_pct": 279.42
+      },
+      "abandonment_count": 10,
+      "abandonment_periods": [
+        {
+          "start": "2007-10-04",
+          "end": "2007-11-12"
+        },
+        {
+          "start": "2009-11-11",
+          "end": "2010-05-06"
+        },
+        {
+          "start": "2011-02-03",
+          "end": "2011-08-04"
+        },
+        {
+          "start": "2012-05-04",
+          "end": "2015-08-24"
+        },
+        {
+          "start": "2016-11-21",
+          "end": "2018-02-05"
+        },
+        {
+          "start": "2019-08-07",
+          "end": "2020-02-27"
+        },
+        {
+          "start": "2020-11-24",
+          "end": "2021-01-27"
+        },
+        {
+          "start": "2021-10-26",
+          "end": "2021-12-01"
+        },
+        {
+          "start": "2023-06-05",
+          "end": "2024-08-05"
+        },
+        {
+          "start": "2025-05-07",
+          "end": "2026-03-20"
+        }
+      ]
+    },
+    "C_procrastinator": {
+      "description": "拖延症：每月再平衡延遲 1-3 個月（Monte Carlo 1000次）",
+      "metrics_mc": {
+        "sharpe_mean": 0.582,
+        "sharpe_std": 0.035,
+        "sharpe_5th": 0.523,
+        "sharpe_95th": 0.637,
+        "mdd_mean_pct": -31.04,
+        "mdd_worst_pct": -37.09,
+        "mdd_best_pct": -25.58
+      }
+    },
+    "D_fomo": {
+      "description": "FOMO：SPY 近 6 月報酬 >15% 時 override 到 100%",
+      "metrics": {
+        "ann_return_pct": 8.8,
+        "ann_vol_pct": 10.33,
+        "sharpe": 0.852,
+        "mdd_pct": -28.6,
+        "calmar": 0.308,
+        "sortino": 1.142,
+        "total_return_pct": 387.71
+      },
+      "fomo_override_days": 807,
+      "fomo_override_pct": 16.7
+    },
+    "E_panic": {
+      "description": "恐慌：VIX>35 全砍到 0%，VIX<20 才重新進場",
+      "metrics": {
+        "ann_return_pct": 5.27,
+        "ann_vol_pct": 8.31,
+        "sharpe": 0.634,
+        "mdd_pct": -18.04,
+        "calmar": 0.292,
+        "sortino": 0.76,
+        "total_return_pct": 156.97
+      },
+      "panic_cash_days": 885,
+      "panic_cash_pct": 18.3,
+      "panic_episodes": 10
+    }
+  },
+  "combined_worst_case": {
+    "description": "全部偏誤合併：同時擁有 B+C+D+E 所有行為偏誤",
+    "metrics_mc": {
+      "sharpe_mean": 0.761,
+      "sharpe_std": 0.025,
+      "sharpe_5th": 0.722,
+      "sharpe_95th": 0.803,
+      "mdd_mean_pct": -17.52,
+      "mdd_worst_pct": -20.81,
+      "behavior_cost_sharpe": -0.069
+    },
+    "vs_buy_hold_sharpe": 0.166
+  },
+  "behavior_cost_ranking": [
+    {
+      "rank": 1,
+      "profile": "C_procrastinator",
+      "name": "拖延症（延遲1-3月再平衡）",
+      "sharpe_cost": 0.11,
+      "mdd_cost_pp": -2.44
+    },
+    {
+      "rank": 2,
+      "profile": "E_panic",
+      "name": "恐慌（VIX>35全砍，<20才回來）",
+      "sharpe_cost": 0.058,
+      "mdd_cost_pp": 10.56
+    },
+    {
+      "rank": 3,
+      "profile": "B_impatient",
+      "name": "沒耐心（3季落後即放棄）",
+      "sharpe_cost": 0.007,
+      "mdd_cost_pp": -1.98
+    },
+    {
+      "rank": 4,
+      "profile": "A_perfect",
+      "name": "完美紀律",
+      "sharpe_cost": 0.0,
+      "mdd_cost_pp": 0.0
+    },
+    {
+      "rank": 5,
+      "profile": "D_fomo",
+      "name": "FOMO（上漲時override到100%）",
+      "sharpe_cost": -0.16,
+      "mdd_cost_pp": 0.0
+    }
+  ],
+  "vt_benefit_sharpe": 0.097,
+  "behavior_cost_as_pct_of_vt_benefit": {
+    "B_impatient": 7.2,
+    "C_procrastinator": 113.4,
+    "D_fomo": -164.9,
+    "E_panic": 59.8
+  },
+  "combined_cost_as_pct_of_vt_benefit": -71.1,
+  "sensitivity": {
+    "impatient_patience_quarters": {
+      "1": {
+        "sharpe": 0.605,
+        "mdd_pct": -38.14,
+        "behavior_cost": 0.087
+      },
+      "2": {
+        "sharpe": 0.655,
+        "mdd_pct": -30.96,
+        "behavior_cost": 0.037
+      },
+      "3": {
+        "sharpe": 0.685,
+        "mdd_pct": -30.58,
+        "behavior_cost": 0.007
+      },
+      "4": {
+        "sharpe": 0.676,
+        "mdd_pct": -28.6,
+        "behavior_cost": 0.016
+      },
+      "6": {
+        "sharpe": 0.666,
+        "mdd_pct": -28.6,
+        "behavior_cost": 0.026
+      },
+      "8": {
+        "sharpe": 0.662,
+        "mdd_pct": -28.6,
+        "behavior_cost": 0.03
+      }
+    },
+    "fomo_threshold_pct": {
+      "5": {
+        "sharpe": 1.027,
+        "mdd_pct": -28.25,
+        "behavior_cost": -0.335,
+        "fomo_days_pct": 59.3
+      },
+      "10": {
+        "sharpe": 0.897,
+        "mdd_pct": -28.6,
+        "behavior_cost": -0.205,
+        "fomo_days_pct": 33.9
+      },
+      "15": {
+        "sharpe": 0.852,
+        "mdd_pct": -28.6,
+        "behavior_cost": -0.16,
+        "fomo_days_pct": 16.7
+      },
+      "20": {
+        "sharpe": 0.793,
+        "mdd_pct": -28.6,
+        "behavior_cost": -0.101,
+        "fomo_days_pct": 6.4
+      },
+      "25": {
+        "sharpe": 0.722,
+        "mdd_pct": -28.6,
+        "behavior_cost": -0.03,
+        "fomo_days_pct": 2.4
+      },
+      "30": {
+        "sharpe": 0.706,
+        "mdd_pct": -28.6,
+        "behavior_cost": -0.014,
+        "fomo_days_pct": 1.1
+      }
+    },
+    "panic_vix_thresholds": {
+      "sell_25_reenter_18": {
+        "sharpe": 0.822,
+        "mdd_pct": -11.64,
+        "behavior_cost": -0.13,
+        "cash_days_pct": 35.0
+      },
+      "sell_30_reenter_20": {
+        "sharpe": 0.645,
+        "mdd_pct": -21.33,
+        "behavior_cost": 0.047,
+        "cash_days_pct": 24.1
+      },
+      "sell_35_reenter_20": {
+        "sharpe": 0.634,
+        "mdd_pct": -18.04,
+        "behavior_cost": 0.058,
+        "cash_days_pct": 18.3
+      },
+      "sell_35_reenter_25": {
+        "sharpe": 0.802,
+        "mdd_pct": -15.94,
+        "behavior_cost": -0.11,
+        "cash_days_pct": 10.1
+      },
+      "sell_40_reenter_20": {
+        "sharpe": 0.635,
+        "mdd_pct": -18.36,
+        "behavior_cost": 0.057,
+        "cash_days_pct": 17.3
+      },
+      "sell_40_reenter_25": {
+        "sharpe": 0.755,
+        "mdd_pct": -16.91,
+        "behavior_cost": -0.063,
+        "cash_days_pct": 8.7
+      }
+    }
+  },
+  "crisis_analysis": {
+    "GFC (2008-09)": {
+      "A_perfect": {
+        "total_ret_pct": -9.87,
+        "mdd_pct": -24.18
+      },
+      "B_impatient": {
+        "total_ret_pct": -8.92,
+        "mdd_pct": -24.18
+      },
+      "D_fomo": {
+        "total_ret_pct": -0.16,
+        "mdd_pct": -24.18
+      },
+      "E_panic": {
+        "total_ret_pct": -10.71,
+        "mdd_pct": -10.73
+      },
+      "BH": {
+        "total_ret_pct": -20.14,
+        "mdd_pct": -51.87
+      }
+    },
+    "COVID (2020-03)": {
+      "A_perfect": {
+        "total_ret_pct": 7.9,
+        "mdd_pct": -13.08
+      },
+      "B_impatient": {
+        "total_ret_pct": 4.91,
+        "mdd_pct": -17.94
+      },
+      "D_fomo": {
+        "total_ret_pct": 15.84,
+        "mdd_pct": -13.34
+      },
+      "E_panic": {
+        "total_ret_pct": -1.51,
+        "mdd_pct": -4.99
+      },
+      "BH": {
+        "total_ret_pct": 18.33,
+        "mdd_pct": -33.72
+      }
+    },
+    "2022 Bear": {
+      "A_perfect": {
+        "total_ret_pct": -11.98,
+        "mdd_pct": -14.35
+      },
+      "B_impatient": {
+        "total_ret_pct": -11.98,
+        "mdd_pct": -14.35
+      },
+      "D_fomo": {
+        "total_ret_pct": -11.98,
+        "mdd_pct": -14.35
+      },
+      "E_panic": {
+        "total_ret_pct": -14.34,
+        "mdd_pct": -16.65
+      },
+      "BH": {
+        "total_ret_pct": -18.18,
+        "mdd_pct": -24.5
+      }
+    }
+  },
+  "recommendations": {
+    "auto_rebalancing": {
+      "target_bias": "Procrastinator (C)",
+      "mechanism": "定期定額 + 自動再平衡（券商 auto-rebalance / robo-advisor）",
+      "expected_improvement": "消除 Sharpe 損失 0.11",
+      "difficulty": "低（多數券商已支援）"
+    },
+    "lock_in_period": {
+      "target_bias": "Impatient (B)",
+      "mechanism": "承諾裝置：最低 2 年持有期（behavioral commitment device）",
+      "expected_improvement": "消除 Sharpe 損失 0.007",
+      "difficulty": "中（需要心理承諾或產品設計）"
+    },
+    "traffic_light_dashboard": {
+      "target_bias": "Panic (E)",
+      "mechanism": "VIX 交通燈 + 歷史比較，告訴投資人 VT 正在「正常工作」而非失效",
+      "expected_improvement": "消除 Sharpe 損失 0.058",
+      "difficulty": "低（UI/UX 設計）"
+    },
+    "fomo_guard": {
+      "target_bias": "FOMO (D)",
+      "mechanism": "設定 VT 權重上限 = VT 建議值，禁止 override 超過。或用帳戶分離（VT 帳戶 + 自主帳戶）",
+      "expected_improvement": "消除 Sharpe 損失 -0.16",
+      "difficulty": "中（需要帳戶設計或心理紀律）"
+    }
+  },
+  "key_findings": [
+    "VT Sharpe 利益（vs B&H）: +0.097",
+    "最昂貴的行為偏誤: 恐慌（VIX>35全砍，<20才回來）（Sharpe cost: +0.058）",
+    "全部偏誤合併仍優於 B&H（差距: +0.166 Sharpe）",
+    "拖延症影響最小（Sharpe 標準差僅 0.035）",
+    "恐慌賣出是最危險的偏誤——錯過 VT 最有價值的保護期間"
+  ]
+}

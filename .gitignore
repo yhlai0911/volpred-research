@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environment
+.venv/
+venv/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Data cache
+data/cache/*.db
+
+# Storage — large binary files
+storage/reports/*.pdf
+storage/knowledge_index/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node / Frontend build artifacts
+node_modules/
+.next/
+.next.stale.*/
+out/
+
+# Frontend repos (separate git repos)
+frontend-v2/
+frontend-v2-fix/
+
+# Legacy frontend
+frontend/
+
+# Env / Secrets — NEVER commit
+.env
+.env.*
+!.env.example
+frontend-v2-fix/.env.local
+frontend-v2/.env.local
+
+# Claude worktrees (temporary)
+.claude/worktrees/
+.claude/scheduled_tasks.lock
+
+# Supabase local
+supabase/.temp/
+
+# Backups (large, not needed in repo)
+backups/
+
+# Compiled PDFs (regenerable from LaTeX)
+paper/*/main.pdf
+paper/*/main.aux
+paper/*/main.log
+paper/*/main.out
+paper/*/main.toc
+paper/*/main.bbl
+paper/*/main.blg
+paper/*/main.synctex.gz
+
+# Large data files
+data/intraday/*.csv
+
+# Temp files
+/tmp/
+*.tmp

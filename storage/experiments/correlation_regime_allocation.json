@@ -1,0 +1,616 @@
+{
+  "experiment": "K65: Dynamic Correlation Regime Detection for 50/50 SPY/GLD Allocation",
+  "description": "Tests whether predicting SPY-GLD correlation regimes can improve the 50/50 allocation. Uses rolling correlation, AR(1) persistence model, DCC-GARCH, and regime-based allocation rules. Compares 8+ strategies including static 50/50, VIX-based, correlation-based, and combined approaches.",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T23:24:48.575635",
+  "data_range": "2007-01-04 to 2026-03-20",
+  "n_daily_observations": 4833,
+  "n_monthly_observations": 228,
+  "section_1_correlation_persistence": {
+    "ar1_21d_rolling": {
+      "intercept": 0.0321,
+      "slope": 0.451,
+      "r2": 0.2041,
+      "t_stat": 35.04,
+      "persistent": true
+    },
+    "ar1_63d_rolling": {
+      "intercept": 0.0082,
+      "slope": 0.8063,
+      "r2": 0.66,
+      "t_stat": 96.01
+    },
+    "multi_horizon_persistence": {
+      "5d": {
+        "slope": 0.9658,
+        "r2": 0.936,
+        "t_stat": 263.86
+      },
+      "10d": {
+        "slope": 0.9231,
+        "r2": 0.8581,
+        "t_stat": 169.65
+      },
+      "21d": {
+        "slope": 0.8063,
+        "r2": 0.66,
+        "t_stat": 96.01
+      },
+      "42d": {
+        "slope": 0.538,
+        "r2": 0.2989,
+        "t_stat": 44.89
+      },
+      "63d": {
+        "slope": 0.2893,
+        "r2": 0.087,
+        "t_stat": 21.18
+      }
+    }
+  },
+  "section_2_regime_distribution": {
+    "thresholds": {
+      "high_positive": 0.3,
+      "negative": -0.1
+    },
+    "counts": {
+      "normal": 2129,
+      "negative": 1576,
+      "high_pos": 1066
+    },
+    "percentages": {
+      "normal": 44.6,
+      "negative": 33.0,
+      "high_pos": 22.3
+    }
+  },
+  "section_3_strategy_metrics": {
+    "static_5050": {
+      "name": "Static 50/50 SPY/GLD",
+      "ann_return": 0.1093,
+      "ann_vol": 0.1217,
+      "sharpe": 0.8977,
+      "sharpe_t": 3.3,
+      "mdd": -0.256,
+      "calmar": 0.4268,
+      "sortino": 1.3058,
+      "n_months": 228,
+      "n_years": 19.0
+    },
+    "static_5050_vix": {
+      "name": "50/50 + 12/VIX",
+      "ann_return": 0.0721,
+      "ann_vol": 0.0726,
+      "sharpe": 0.9941,
+      "sharpe_t": 3.54,
+      "mdd": -0.1169,
+      "calmar": 0.6171,
+      "sortino": 1.7351,
+      "n_months": 227,
+      "n_years": 18.9
+    },
+    "corr_regime": {
+      "name": "Correlation Regime (30/70 | 50/50 | 60/40)",
+      "ann_return": 0.1132,
+      "ann_vol": 0.1266,
+      "sharpe": 0.8942,
+      "sharpe_t": 3.29,
+      "mdd": -0.2674,
+      "calmar": 0.4235,
+      "sortino": 1.2771,
+      "n_months": 228,
+      "n_years": 19.0
+    },
+    "corr_regime_vix": {
+      "name": "Corr Regime + 12/VIX",
+      "ann_return": 0.0751,
+      "ann_vol": 0.0755,
+      "sharpe": 0.9948,
+      "sharpe_t": 3.54,
+      "mdd": -0.134,
+      "calmar": 0.5606,
+      "sortino": 1.6408,
+      "n_months": 227,
+      "n_years": 18.9
+    },
+    "cont_corr": {
+      "name": "Continuous Corr Scaling",
+      "ann_return": 0.1156,
+      "ann_vol": 0.1328,
+      "sharpe": 0.8706,
+      "sharpe_t": 3.22,
+      "mdd": -0.2771,
+      "calmar": 0.4172,
+      "sortino": 1.2275,
+      "n_months": 227,
+      "n_years": 18.9
+    },
+    "cont_corr_vix": {
+      "name": "Continuous Corr + 12/VIX",
+      "ann_return": 0.0776,
+      "ann_vol": 0.0798,
+      "sharpe": 0.972,
+      "sharpe_t": 3.48,
+      "mdd": -0.1585,
+      "calmar": 0.4894,
+      "sortino": 1.551,
+      "n_months": 227,
+      "n_years": 18.9
+    },
+    "aggressive": {
+      "name": "Aggressive Thresholds",
+      "ann_return": 0.1162,
+      "ann_vol": 0.1316,
+      "sharpe": 0.8833,
+      "sharpe_t": 3.27,
+      "mdd": -0.274,
+      "calmar": 0.4242,
+      "sortino": 1.2562,
+      "n_months": 228,
+      "n_years": 19.0
+    },
+    "vix_corr_proxy": {
+      "name": "VIX as Corr Proxy",
+      "ann_return": 0.1084,
+      "ann_vol": 0.1217,
+      "sharpe": 0.8905,
+      "sharpe_t": 3.28,
+      "mdd": -0.2713,
+      "calmar": 0.3995,
+      "sortino": 1.2948,
+      "n_months": 228,
+      "n_years": 19.0
+    },
+    "dcc_regime": {
+      "name": "DCC Regime",
+      "ann_return": 0.1047,
+      "ann_vol": 0.1237,
+      "sharpe": 0.8462,
+      "sharpe_t": 3.17,
+      "mdd": -0.275,
+      "calmar": 0.3805,
+      "sortino": 1.2181,
+      "n_months": 228,
+      "n_years": 19.0
+    },
+    "dcc_vix": {
+      "name": "DCC + VIX",
+      "ann_return": 0.0705,
+      "ann_vol": 0.0734,
+      "sharpe": 0.9599,
+      "sharpe_t": 3.45,
+      "mdd": -0.1193,
+      "calmar": 0.5905,
+      "sortino": 1.6326,
+      "n_months": 227,
+      "n_years": 18.9
+    }
+  },
+  "section_4_dm_tests": {
+    "static_5050_vix": {
+      "mean_diff_monthly": -0.003159,
+      "mean_diff_annual": -0.0379,
+      "t_stat": -2.713,
+      "p_value": 0.9964,
+      "significant": false
+    },
+    "corr_regime": {
+      "mean_diff_monthly": 0.000348,
+      "mean_diff_annual": 0.0042,
+      "t_stat": 0.697,
+      "p_value": 0.2433,
+      "significant": false
+    },
+    "corr_regime_vix": {
+      "mean_diff_monthly": -0.002906,
+      "mean_diff_annual": -0.0349,
+      "t_stat": -2.455,
+      "p_value": 0.9926,
+      "significant": false
+    },
+    "cont_corr": {
+      "mean_diff_monthly": 0.000696,
+      "mean_diff_annual": 0.0084,
+      "t_stat": 0.876,
+      "p_value": 0.1911,
+      "significant": false
+    },
+    "cont_corr_vix": {
+      "mean_diff_monthly": -0.002687,
+      "mean_diff_annual": -0.0322,
+      "t_stat": -2.192,
+      "p_value": 0.9853,
+      "significant": false
+    },
+    "aggressive": {
+      "mean_diff_monthly": 0.000628,
+      "mean_diff_annual": 0.0075,
+      "t_stat": 0.836,
+      "p_value": 0.2021,
+      "significant": false
+    },
+    "vix_corr_proxy": {
+      "mean_diff_monthly": -6.8e-05,
+      "mean_diff_annual": -0.0008,
+      "t_stat": -0.181,
+      "p_value": 0.5718,
+      "significant": false
+    }
+  },
+  "section_5_subperiod_analysis": {
+    "2008-2010 GFC": {
+      "static_5050": {
+        "name": "static",
+        "ann_return": 0.0737,
+        "ann_vol": 0.1567,
+        "sharpe": 0.4705,
+        "sharpe_t": 0.76,
+        "mdd": -0.256,
+        "calmar": 0.2879,
+        "sortino": 0.5387,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "corr_regime": {
+        "name": "corr_regime",
+        "ann_return": 0.1011,
+        "ann_vol": 0.1617,
+        "sharpe": 0.6252,
+        "sharpe_t": 0.98,
+        "mdd": -0.2674,
+        "calmar": 0.378,
+        "sortino": 0.7174,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "static_vix": {
+        "name": "vix",
+        "ann_return": 0.0547,
+        "ann_vol": 0.0601,
+        "sharpe": 0.909,
+        "sharpe_t": 1.31,
+        "mdd": -0.0962,
+        "calmar": 0.5687,
+        "sortino": 1.6208,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "combined": {
+        "name": "combined",
+        "ann_return": 0.0658,
+        "ann_vol": 0.0653,
+        "sharpe": 1.0077,
+        "sharpe_t": 1.4,
+        "mdd": -0.1056,
+        "calmar": 0.6228,
+        "sortino": 1.6723,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "corr_beats_static": true,
+      "combined_beats_vix": true
+    },
+    "2011-2013 Recovery": {
+      "static_5050": {
+        "name": "static",
+        "ann_return": 0.0561,
+        "ann_vol": 0.135,
+        "sharpe": 0.4158,
+        "sharpe_t": 0.68,
+        "mdd": -0.1098,
+        "calmar": 0.5113,
+        "sortino": 0.6537,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "corr_regime": {
+        "name": "corr_regime",
+        "ann_return": 0.0278,
+        "ann_vol": 0.145,
+        "sharpe": 0.192,
+        "sharpe_t": 0.32,
+        "mdd": -0.1622,
+        "calmar": 0.1716,
+        "sortino": 0.3105,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "static_vix": {
+        "name": "vix",
+        "ann_return": 0.0261,
+        "ann_vol": 0.0797,
+        "sharpe": 0.328,
+        "sharpe_t": 0.55,
+        "mdd": -0.093,
+        "calmar": 0.281,
+        "sortino": 0.5734,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "combined": {
+        "name": "combined",
+        "ann_return": 0.0046,
+        "ann_vol": 0.0873,
+        "sharpe": 0.0532,
+        "sharpe_t": 0.09,
+        "mdd": -0.134,
+        "calmar": 0.0347,
+        "sortino": 0.0841,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "corr_beats_static": false,
+      "combined_beats_vix": false
+    },
+    "2014-2018 Bull+VolShock": {
+      "static_5050": {
+        "name": "static",
+        "ann_return": 0.0553,
+        "ann_vol": 0.0798,
+        "sharpe": 0.6935,
+        "sharpe_t": 1.38,
+        "mdd": -0.0787,
+        "calmar": 0.7027,
+        "sortino": 1.5208,
+        "n_months": 59,
+        "n_years": 4.9
+      },
+      "corr_regime": {
+        "name": "corr_regime",
+        "ann_return": 0.0716,
+        "ann_vol": 0.0753,
+        "sharpe": 0.95,
+        "sharpe_t": 1.75,
+        "mdd": -0.0755,
+        "calmar": 0.9474,
+        "sortino": 2.1626,
+        "n_months": 59,
+        "n_years": 4.9
+      },
+      "static_vix": {
+        "name": "vix",
+        "ann_return": 0.043,
+        "ann_vol": 0.0652,
+        "sharpe": 0.6589,
+        "sharpe_t": 1.32,
+        "mdd": -0.0785,
+        "calmar": 0.5478,
+        "sortino": 1.2893,
+        "n_months": 59,
+        "n_years": 4.9
+      },
+      "combined": {
+        "name": "combined",
+        "ann_return": 0.0563,
+        "ann_vol": 0.0605,
+        "sharpe": 0.9307,
+        "sharpe_t": 1.72,
+        "mdd": -0.053,
+        "calmar": 1.0629,
+        "sortino": 1.8988,
+        "n_months": 59,
+        "n_years": 4.9
+      },
+      "corr_beats_static": true,
+      "combined_beats_vix": true
+    },
+    "2019-2021 COVID+Recovery": {
+      "static_5050": {
+        "name": "static",
+        "ann_return": 0.1848,
+        "ann_vol": 0.1271,
+        "sharpe": 1.4535,
+        "sharpe_t": 1.73,
+        "mdd": -0.1036,
+        "calmar": 1.7837,
+        "sortino": 3.1022,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "corr_regime": {
+        "name": "corr_regime",
+        "ann_return": 0.1692,
+        "ann_vol": 0.1347,
+        "sharpe": 1.2559,
+        "sharpe_t": 1.6,
+        "mdd": -0.1221,
+        "calmar": 1.3862,
+        "sortino": 2.2129,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "static_vix": {
+        "name": "vix",
+        "ann_return": 0.1051,
+        "ann_vol": 0.065,
+        "sharpe": 1.6166,
+        "sharpe_t": 1.82,
+        "mdd": -0.0341,
+        "calmar": 3.081,
+        "sortino": 3.6981,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "combined": {
+        "name": "combined",
+        "ann_return": 0.1014,
+        "ann_vol": 0.0695,
+        "sharpe": 1.4593,
+        "sharpe_t": 1.73,
+        "mdd": -0.0423,
+        "calmar": 2.3993,
+        "sortino": 2.6748,
+        "n_months": 35,
+        "n_years": 2.9
+      },
+      "corr_beats_static": false,
+      "combined_beats_vix": false
+    },
+    "2022-2025 Inflation+Rates": {
+      "static_5050": {
+        "name": "static",
+        "ann_return": 0.1765,
+        "ann_vol": 0.1153,
+        "sharpe": 1.531,
+        "sharpe_t": 2.06,
+        "mdd": -0.1707,
+        "calmar": 1.0344,
+        "sortino": 2.6511,
+        "n_months": 47,
+        "n_years": 3.9
+      },
+      "corr_regime": {
+        "name": "corr_regime",
+        "ann_return": 0.1912,
+        "ann_vol": 0.1215,
+        "sharpe": 1.5731,
+        "sharpe_t": 2.08,
+        "mdd": -0.1794,
+        "calmar": 1.0654,
+        "sortino": 2.4933,
+        "n_months": 47,
+        "n_years": 3.9
+      },
+      "static_vix": {
+        "name": "vix",
+        "ann_return": 0.1269,
+        "ann_vol": 0.0813,
+        "sharpe": 1.5597,
+        "sharpe_t": 2.07,
+        "mdd": -0.0993,
+        "calmar": 1.2774,
+        "sortino": 2.7996,
+        "n_months": 47,
+        "n_years": 3.9
+      },
+      "combined": {
+        "name": "combined",
+        "ann_return": 0.1387,
+        "ann_vol": 0.0853,
+        "sharpe": 1.6253,
+        "sharpe_t": 2.11,
+        "mdd": -0.1047,
+        "calmar": 1.3251,
+        "sortino": 2.7175,
+        "n_months": 47,
+        "n_years": 3.9
+      },
+      "corr_beats_static": true,
+      "combined_beats_vix": true
+    }
+  },
+  "section_6_dcc_garch": {
+    "a": 0.02,
+    "b": 0.97,
+    "persistence": 0.99,
+    "qbar": 0.0634,
+    "dcc_vs_21d_realized_corr": 0.4182,
+    "rolling63_vs_21d_realized_corr": 0.3892,
+    "dcc_better_than_rolling": true,
+    "dcc_regime_metrics": {
+      "name": "DCC Regime",
+      "ann_return": 0.1047,
+      "ann_vol": 0.1237,
+      "sharpe": 0.8462,
+      "sharpe_t": 3.17,
+      "mdd": -0.275,
+      "calmar": 0.3805,
+      "sortino": 1.2181,
+      "n_months": 228,
+      "n_years": 19.0
+    },
+    "dcc_vix_metrics": {
+      "name": "DCC + VIX",
+      "ann_return": 0.0705,
+      "ann_vol": 0.0734,
+      "sharpe": 0.9599,
+      "sharpe_t": 3.45,
+      "mdd": -0.1193,
+      "calmar": 0.5905,
+      "sortino": 1.6326,
+      "n_months": 227,
+      "n_years": 18.9
+    }
+  },
+  "section_7_regime_characteristics": {
+    "high_corr": {
+      "avg_vix": 20.1,
+      "ann_return": 0.1546,
+      "ann_vol": 0.1402,
+      "n_days": 1066
+    },
+    "normal": {
+      "avg_vix": 20.0,
+      "ann_return": 0.1154,
+      "ann_vol": 0.141,
+      "n_days": 2191
+    },
+    "negative_corr": {
+      "avg_vix": 19.3,
+      "ann_return": 0.0911,
+      "ann_vol": 0.1285,
+      "n_days": 1576
+    }
+  },
+  "section_8_redundancy_test": {
+    "vix_explains_correlation_r2": 0.0021,
+    "vix_corr_pearson_rho": 0.0459,
+    "regression_vix_only_r2": 0.0084,
+    "regression_vix_plus_corr_r2": 0.0154,
+    "incremental_r2": 0.0071,
+    "f_stat_corr_incremental": 1.609,
+    "f_p_value": 0.206,
+    "t_stat_corr_coeff": 1.268,
+    "corr_adds_value_beyond_vix": false
+  },
+  "section_9_bootstrap": {
+    "return_diff_annual": 0.0042,
+    "bootstrap_ci_95": [
+      -0.0076,
+      0.0161
+    ],
+    "p_dynamic_worse": 0.2407,
+    "significant": false,
+    "mdd_static": -0.256,
+    "mdd_dynamic": -0.2674,
+    "mdd_diff": -0.0113
+  },
+  "section_10_turnover": {
+    "static_5050": {
+      "total_turnover": 0.0,
+      "avg_monthly_turnover": 0.0,
+      "annual_turnover": 0.0,
+      "estimated_tx_cost_bps": 0.0
+    },
+    "corr_regime": {
+      "total_turnover": 9.8,
+      "avg_monthly_turnover": 0.0432,
+      "annual_turnover": 0.5181,
+      "estimated_tx_cost_bps": 5.2
+    },
+    "aggressive": {
+      "total_turnover": 15.2,
+      "avg_monthly_turnover": 0.067,
+      "annual_turnover": 0.8035,
+      "estimated_tx_cost_bps": 8.0
+    },
+    "continuous": {
+      "total_turnover": 18.0325,
+      "avg_monthly_turnover": 0.0798,
+      "annual_turnover": 0.9575,
+      "estimated_tx_cost_bps": 9.6
+    }
+  },
+  "conclusions": {
+    "verdict": "FAIL: Correlation regime detection DOES NOT beat static 50/50. The 50/50 allocation remains the irreducible kernel.",
+    "corr_beats_static_5050": false,
+    "corr_beats_vix": false,
+    "correlation_is_persistent": true,
+    "ar1_r2": 0.2041,
+    "vix_already_captures_correlation": true,
+    "best_strategy": "corr_regime_vix",
+    "best_sharpe": 0.9948,
+    "key_insight": "SPY-GLD correlation is persistent (AR(1) significant) but the persistence is already largely captured by VIX level. Dynamic correlation allocation does not improve upon static 50/50 and cannot beat VIX-based VT. This reinforces the VIX sufficient statistic finding from J3/J4/J8."
+  }
+}

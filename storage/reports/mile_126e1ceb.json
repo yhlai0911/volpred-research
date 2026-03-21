@@ -1,0 +1,19 @@
+{
+  "id": "mile_126e1ceb",
+  "title": "11 個行業全部受益 VT——但 Gamma 機制在行業內不適用",
+  "description": "## 摘要\n\n[提出: Claude] 測試 11 個 SPDR 行業 ETF 的 VT 效果。結果：所有行業 100% 受益（Sharpe + MDD 都改善），但 leverage effect (gamma) 不預測行業間的 VT 效果差異。\n\n## 核心發現\n\n### 發現一：VT 對所有行業普遍有效\n11/11 行業 Sharpe 改善（平均 +0.193），11/11 MDD 改善（平均 -26.1 pp）。OOS (2023-2026) 10/11 正改善。\n\n### 發現二：Gamma 不預測行業 VT 效果\ncorr(gamma, Δ-Sharpe) = 0.163 (p=0.632)。XLU（utilities，最低 gamma 0.073）反而改善最大（+0.288）。\n\n### 為什麼跨資產有效但行業內無效？\nK53 顯示跨資產類別（equity vs commodity vs bond）gamma 變異大（0 到 0.16+）。但 equity 行業間 gamma 變異太窄（0.07-0.16），且所有行業的 VIX sensitivity 接近（corr -0.40 ~ -0.65）。\n\n## 實務意義\nSector rotation 投資人用統一 12/VIX overlay 即可，不需要按行業調整 VT 強度。\n",
+  "category": "milestone",
+  "phase": "research",
+  "details": {},
+  "tags": [
+    "sector",
+    "gamma效應",
+    "VT策略",
+    "XLU",
+    "XLF",
+    "跨資產"
+  ],
+  "created_at": "2026-03-21T07:48:41.034866+00:00",
+  "published_at": "2026-03-21T08:19:03.302663+00:00",
+  "status": "published"
+}

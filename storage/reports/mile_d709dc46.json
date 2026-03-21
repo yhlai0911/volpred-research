@@ -1,0 +1,23 @@
+{
+  "id": "mile_d709dc46",
+  "title": "8 種風控策略大比拼——VT 是回撤冠軍，但不是報酬冠軍",
+  "description": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\n12/VIX VT 與 7 種常見風控方法正面比較：VT 是 **MDD 冠軍**（-10.9%, bootstrap p=0.004），但不是 Sharpe 冠軍（Risk Parity 0.931 > VT 0.845）。SMA200 趨勢追蹤表現最差。CPPI 是唯一在 MDD 上與 VT 不相上下的方法。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 基礎投組 | 50/50 SPY/GLD |\n| 比較方法 | B&H、12/VIX VT、Stop-Loss 10%、Trailing Stop 15%、SMA200、CPPI、60/40、Risk Parity |\n| 期間 | 2010-2024（15 年）|\n| 再平衡 | 月度 |\n\n## 核心發現\n\n### 完整比較表\n\n| 策略 | Sharpe | MDD | Calmar | 終值 (K) |\n|------|--------|-----|--------|-------------|\n| Risk Parity | **0.931** | -19.1% | 0.562 | **$451K** |\n| 60/40 SPY/SHY | 0.900 | -20.1% | 0.449 | $359K |\n| Buy & Hold | 0.891 | -20.4% | 0.513 | $431K |\n| CPPI | 0.846 | -11.3% | 0.476 | $217K |\n| **12/VIX VT** | **0.845** | **-10.9%** | **0.571** | **$244K** |\n| Trailing Stop | 0.813 | -17.4% | 0.513 | $348K |\n| Stop-Loss | 0.772 | -17.2% | 0.476 | $314K |\n| SMA200 | 0.665 | -16.2% | 0.376 | $233K |\n\n### VT 的獨特優勢：前瞻性\n\nVT 用 VIX（forward-looking option-implied vol）預先減碼。COVID 崩盤開始時，VT 已在 64% equity——而 stop-loss 和 SMA200 要等到已經跌夠了才反應。\n\n### 等波幅比較\n\n調整到相同波動率後，VT 的 adjusted MDD -17.1% 仍是全場最佳（CPPI -20.2%, SMA200 -20.4%）。\n\n## 實務推薦\n\n| 目標 | 推薦策略 |\n|------|---------|\n| 最簡單（什麼都不想做）| Buy & Hold 50/50 SPY/GLD |\n| **在意回撤（多數人）** | **12/VIX VT** |\n| 追求最高 Sharpe | Risk Parity（接受 -19% MDD）|\n| 避免 | SMA200（whipsaw）、固定 Stop-Loss |\n\n## 結論\n\nVT 贏得 MDD 王冠，不是 Sharpe 王冠。這與我們所有研究一致：**VT 是風險管理工具，不是 alpha 生成器。**\n",
+  "category": "milestone",
+  "phase": "Phase_K",
+  "details": {
+    "experiment": "K29",
+    "audience": "research"
+  },
+  "tags": [
+    "VT策略",
+    "風險管理",
+    "stop-loss",
+    "CPPI",
+    "SMA200",
+    "Risk Parity",
+    "策略比較",
+    "MDD"
+  ],
+  "published_at": "2026-03-18T05:37:01.000693+00:00",
+  "status": "published"
+}

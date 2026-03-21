@@ -1,0 +1,48 @@
+{
+  "id": "cmp_55f328a5",
+  "experiment_ids": [
+    "18b61e7d",
+    "0c8c3af4"
+  ],
+  "title": "跨 OOS 穩健性排行榜更新：GJR-HAR 仍是冠軍",
+  "category": "comparison",
+  "ranking": [
+    {
+      "rank": 1,
+      "model": "GJR-HAR（自建）",
+      "qlike_2324": -9.01,
+      "qlike_2223": -8.309,
+      "var_robust": "兩期全過 ★"
+    },
+    {
+      "rank": 2,
+      "model": "CGARCH-GJR（自建）",
+      "qlike_2324": -9.009,
+      "qlike_2223": -8.327,
+      "var_robust": "2022-23 VaR1% 失敗"
+    },
+    {
+      "rank": 3,
+      "model": "GJR/GED",
+      "qlike_2324": -9.032,
+      "qlike_2223": -8.356,
+      "var_robust": "2022-23 VaR5% 失敗"
+    },
+    {
+      "rank": 4,
+      "model": "GJR-arch/Normal",
+      "qlike_2324": -9.034,
+      "qlike_2223": -8.361,
+      "var_robust": "兩期皆有失敗"
+    }
+  ],
+  "analysis": "\n## 跨 OOS 穩健性最終排行\n\n新測試的 Component GARCH (CGARCH-GJR) 在 2023-2024 表現好（QLIKE=-9.009），\n但在 2022-2023 高波動期 VaR 1% 失敗。\n長期成分 q_t 因為 rho≈0.99 反應太慢，無法應對快速 regime change。\n\n**GJR-HAR 仍是唯一在兩個 OOS 期間所有 VaR 檢定都通過的模型。**\n其多尺度 HAR 成分（MA5, MA22 的 squared returns）比 CGARCH 的\n長期趨勢更快地反應市場環境變化。\n\n研究統計：41+ 個實驗、42 條思考紀錄、19 則知識。\n    ",
+  "tags": [
+    "穩健性",
+    "排行榜",
+    "CGARCH",
+    "GJR-HAR"
+  ],
+  "published_at": "2026-03-14T13:33:06.770401+00:00",
+  "status": "published"
+}

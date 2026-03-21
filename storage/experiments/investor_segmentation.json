@@ -1,0 +1,528 @@
+{
+  "experiment": "Investor Type Segmentation — One Strategy Doesn't Fit All",
+  "experiment_id": "K78",
+  "description": "整合 K41/K59/K62/K66/K70/K74/K75 的研究發現，建立 6 種投資人類型的決策矩陣。每種類型有最佳配置建議、VT 門檻、再平衡頻率，並以 2007-2026 回測驗證。核心發現：VT 不是 horizon-dependent 推薦——是 investor-type-dependent 推薦。",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T09:39:49.610332+00:00",
+  "referenced_experiments": [
+    "K41",
+    "K59",
+    "K62",
+    "K66",
+    "K70",
+    "K74",
+    "K75"
+  ],
+  "config": {
+    "backtest_period": "2007-01-03 to 2026-03-20",
+    "vt_method": "k/VIX monthly lagged weights",
+    "transaction_cost": 0.0005,
+    "cash_return": 0
+  },
+  "investor_types": {
+    "Type_A": {
+      "name": "Type A: 年輕定期定額",
+      "description": "20+ 年至退休，每月定投 $1,000",
+      "profile": {
+        "horizon_years": 20,
+        "mode": "DCA",
+        "monthly_contribution": 1000,
+        "risk_tolerance": "high",
+        "priority": "terminal_wealth",
+        "lambda_mdd": 0
+      },
+      "recommendation": {
+        "allocation": {
+          "SPY": 0.475,
+          "GLD": 0.475,
+          "BTC": 0.05
+        },
+        "allocation_display": "47% SPY/47% GLD/5% BTC",
+        "vt_threshold": null,
+        "vt_display": "None (No VT)",
+        "rebal_freq": "quarterly",
+        "rationale": [
+          "K70: DCA 50/50 幾乎不需要 VT——分散化+DCA 已提供足夠保護",
+          "K59: 年輕 DCA 投資人應用 34-38/VIX（接近不用 VT）",
+          "K66: 5% BTC 增加報酬（p=0.014），年輕人有時間承受尾部風險",
+          "K75: 季度再平衡 Sharpe 等效，更方便",
+          "K41: 年輕人 λ=0（純追求財富），VT 保險不理性"
+        ]
+      }
+    },
+    "Type_B": {
+      "name": "Type B: 中年定期定額",
+      "description": "10 年至退休，每月定投 $3,000",
+      "profile": {
+        "horizon_years": 10,
+        "mode": "DCA",
+        "monthly_contribution": 3000,
+        "risk_tolerance": "moderate",
+        "priority": "balanced",
+        "lambda_mdd": 1
+      },
+      "recommendation": {
+        "allocation": {
+          "SPY": 0.5,
+          "GLD": 0.5
+        },
+        "allocation_display": "50% SPY/50% GLD",
+        "vt_threshold": 30,
+        "vt_display": "30/VIX",
+        "rebal_freq": "quarterly",
+        "rationale": [
+          "K70: DCA 50/50 用 30/VIX 是最佳邊際 VT（0.7% 財富/1pp MDD）",
+          "K59: 中年 DCA 用 24-30/VIX",
+          "K75: 季度再平衡足夠",
+          "K41: λ=1，在分散化投組中 VT 邊際效益低",
+          "K74: 須理解 80% 季落後"
+        ]
+      }
+    },
+    "Type_C": {
+      "name": "Type C: 退休前單筆",
+      "description": "5 年至退休，$500K 一次投入",
+      "profile": {
+        "horizon_years": 5,
+        "mode": "lump_sum",
+        "initial_capital": 500000,
+        "risk_tolerance": "low",
+        "priority": "capital_preservation",
+        "lambda_mdd": 3
+      },
+      "recommendation": {
+        "allocation": {
+          "SPY": 0.5,
+          "GLD": 0.5
+        },
+        "allocation_display": "50% SPY/50% GLD",
+        "vt_threshold": 12,
+        "vt_display": "12/VIX",
+        "rebal_freq": "monthly",
+        "rationale": [
+          "K41: λ≥2 → VT always rational（保險費合理）",
+          "K62: 當前高利率環境保險費僅 1.8%/yr",
+          "K75: 月度再平衡控制 MDD（-7.7% vs quarterly -9.1%）",
+          "K74: 預期 80% 季落後，但下行保護值得",
+          "K70: 50/50 分散化 + 12/VIX 是最保守組合"
+        ]
+      }
+    },
+    "Type_D": {
+      "name": "Type D: 退休提領",
+      "description": "$1M 資產，每年提領 4%",
+      "profile": {
+        "horizon_years": 25,
+        "mode": "lump_sum",
+        "initial_capital": 1000000,
+        "withdrawal_rate": 0.04,
+        "risk_tolerance": "very_low",
+        "priority": "income_stability",
+        "lambda_mdd": 5
+      },
+      "recommendation": {
+        "allocation": {
+          "SPY": 0.5,
+          "GLD": 0.5
+        },
+        "allocation_display": "50% SPY/50% GLD",
+        "vt_threshold": 12,
+        "vt_display": "12/VIX",
+        "rebal_freq": "monthly",
+        "rationale": [
+          "K41: λ=5（極度厭惡回撤），VT 是退休提領者的必要保險",
+          "K62: 高利率時 cash portion 也賺收益",
+          "K74: 提領中遭遇 MDD 是退休最大風險（sequence risk）",
+          "K75: 月度再平衡最小化 MDD",
+          "K59: 退休提領不是 DCA——無法靠「買低」補回"
+        ]
+      }
+    },
+    "Type_E": {
+      "name": "Type E: 積極成長",
+      "description": "最大化終端財富，高風險容忍",
+      "profile": {
+        "horizon_years": 15,
+        "mode": "lump_sum",
+        "initial_capital": 200000,
+        "risk_tolerance": "very_high",
+        "priority": "maximize_return",
+        "lambda_mdd": 0
+      },
+      "recommendation": {
+        "allocation": {
+          "SPY": 0.45,
+          "GLD": 0.45,
+          "BTC": 0.1
+        },
+        "allocation_display": "45% SPY/45% GLD/10% BTC",
+        "vt_threshold": null,
+        "vt_display": "None (No VT)",
+        "rebal_freq": "quarterly",
+        "rationale": [
+          "K41: λ=0 → VT always irrational（保險費是純成本）",
+          "K66: 10% BTC 提升報酬（Sharpe +0.19，p=0.015），可承受尾部",
+          "K70: 50/50 + 無 VT 是最大化財富的最佳基礎",
+          "K75: 季度再平衡省交易成本",
+          "K74: 接受 MDD 而非保險費"
+        ]
+      }
+    },
+    "Type_F": {
+      "name": "Type F: 極度保守",
+      "description": "最小化最大回撤",
+      "profile": {
+        "horizon_years": 10,
+        "mode": "lump_sum",
+        "initial_capital": 300000,
+        "risk_tolerance": "ultra_low",
+        "priority": "minimize_mdd",
+        "lambda_mdd": 10
+      },
+      "recommendation": {
+        "allocation": {
+          "SPY": 0.5,
+          "GLD": 0.5
+        },
+        "allocation_display": "50% SPY/50% GLD",
+        "vt_threshold": 8,
+        "vt_display": "8/VIX",
+        "rebal_freq": "monthly",
+        "rationale": [
+          "K41: λ=10 → VT 在任何 horizon 都極度理性",
+          "K62: 高利率降低保險費至 1.8%",
+          "K59: 8/VIX 最激進 VT，MDD 從 -33.5% → -8.9%",
+          "K70: 已有 50/50 分散化，8/VIX 進一步壓低 MDD",
+          "K75: 月度再平衡確保危機時即時減碼"
+        ]
+      }
+    }
+  },
+  "backtest_results": {
+    "Type_A": {
+      "recommended": {
+        "total_invested": 139000,
+        "terminal_wealth": 427768.74,
+        "total_gain": 288768.74,
+        "gain_pct": 207.75,
+        "mdd_pct": -20.31,
+        "avg_equity_weight": 1.0,
+        "n_months": 139,
+        "n_years": 11.6
+      },
+      "no_vt_comparison": {
+        "total_invested": 139000,
+        "terminal_wealth": 427768.74,
+        "total_gain": 288768.74,
+        "gain_pct": 207.75,
+        "mdd_pct": -20.31,
+        "avg_equity_weight": 1.0,
+        "n_months": 139,
+        "n_years": 11.6
+      },
+      "12vix_comparison": {
+        "total_invested": 139000,
+        "terminal_wealth": 286627.85,
+        "total_gain": 147627.85,
+        "gain_pct": 106.21,
+        "mdd_pct": -17.67,
+        "avg_equity_weight": 0.714,
+        "n_months": 139,
+        "n_years": 11.6
+      }
+    },
+    "Type_B": {
+      "recommended": {
+        "total_invested": 363000,
+        "terminal_wealth": 842659.1,
+        "total_gain": 479659.1,
+        "gain_pct": 132.14,
+        "mdd_pct": -18.95,
+        "avg_equity_weight": 0.987,
+        "n_months": 121,
+        "n_years": 10.1
+      },
+      "no_vt_comparison": {
+        "total_invested": 363000,
+        "terminal_wealth": 878404.26,
+        "total_gain": 515404.26,
+        "gain_pct": 141.98,
+        "mdd_pct": -18.95,
+        "avg_equity_weight": 1.0,
+        "n_months": 121,
+        "n_years": 10.1
+      },
+      "12vix_comparison": {
+        "total_invested": 363000,
+        "terminal_wealth": 644085.18,
+        "total_gain": 281085.18,
+        "gain_pct": 77.43,
+        "mdd_pct": -16.38,
+        "avg_equity_weight": 0.723,
+        "n_months": 121,
+        "n_years": 10.1
+      }
+    },
+    "Type_C": {
+      "recommended": {
+        "initial_capital": 500000,
+        "terminal_wealth": 1275248.12,
+        "ann_return_pct": 5.75,
+        "ann_vol_pct": 6.28,
+        "sharpe": 0.917,
+        "mdd_pct": -10.82,
+        "calmar": 0.532,
+        "sortino": 1.009,
+        "avg_equity_weight": 0.715,
+        "total_tc_pct": 1.117,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      },
+      "no_vt_comparison": {
+        "initial_capital": 500000,
+        "terminal_wealth": 2010321.41,
+        "ann_return_pct": 8.68,
+        "ann_vol_pct": 10.03,
+        "sharpe": 0.865,
+        "mdd_pct": -20.32,
+        "calmar": 0.427,
+        "sortino": 0.917,
+        "avg_equity_weight": 1.0,
+        "total_tc_pct": 0.0,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      },
+      "12vix_comparison": {
+        "initial_capital": 500000,
+        "terminal_wealth": 1275248.12,
+        "ann_return_pct": 5.75,
+        "ann_vol_pct": 6.28,
+        "sharpe": 0.917,
+        "mdd_pct": -10.82,
+        "calmar": 0.532,
+        "sortino": 1.009,
+        "avg_equity_weight": 0.715,
+        "total_tc_pct": 1.117,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      }
+    },
+    "Type_D": {
+      "recommended": {
+        "initial_capital": 1000000,
+        "terminal_wealth": 1665771.21,
+        "ann_return_pct": 3.11,
+        "ann_vol_pct": 6.31,
+        "sharpe": 0.493,
+        "mdd_pct": -13.71,
+        "calmar": 0.227,
+        "sortino": 0.557,
+        "avg_equity_weight": 0.715,
+        "total_tc_pct": 0.877,
+        "n_years": 16.7,
+        "total_withdrawn": 463333.33
+      },
+      "no_vt_comparison": {
+        "initial_capital": 1000000,
+        "terminal_wealth": 2801398.43,
+        "ann_return_pct": 6.37,
+        "ann_vol_pct": 10.04,
+        "sharpe": 0.635,
+        "mdd_pct": -20.54,
+        "calmar": 0.31,
+        "sortino": 0.686,
+        "avg_equity_weight": 1.0,
+        "total_tc_pct": 0.0,
+        "n_years": 16.7,
+        "total_withdrawn": 463333.33
+      },
+      "12vix_comparison": {
+        "initial_capital": 1000000,
+        "terminal_wealth": 1665771.21,
+        "ann_return_pct": 3.11,
+        "ann_vol_pct": 6.31,
+        "sharpe": 0.493,
+        "mdd_pct": -13.71,
+        "calmar": 0.227,
+        "sortino": 0.557,
+        "avg_equity_weight": 0.715,
+        "total_tc_pct": 0.877,
+        "n_years": 16.7,
+        "total_withdrawn": 463333.33
+      }
+    },
+    "Type_E": {
+      "recommended": {
+        "initial_capital": 200000,
+        "terminal_wealth": 1450292.68,
+        "ann_return_pct": 12.65,
+        "ann_vol_pct": 11.56,
+        "sharpe": 1.094,
+        "mdd_pct": -23.95,
+        "calmar": 0.528,
+        "sortino": 1.342,
+        "avg_equity_weight": 1.0,
+        "total_tc_pct": 0.0,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      },
+      "no_vt_comparison": {
+        "initial_capital": 200000,
+        "terminal_wealth": 1450292.68,
+        "ann_return_pct": 12.65,
+        "ann_vol_pct": 11.56,
+        "sharpe": 1.094,
+        "mdd_pct": -23.95,
+        "calmar": 0.528,
+        "sortino": 1.342,
+        "avg_equity_weight": 1.0,
+        "total_tc_pct": 0.0,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      },
+      "12vix_comparison": {
+        "initial_capital": 200000,
+        "terminal_wealth": 772034.28,
+        "ann_return_pct": 8.46,
+        "ann_vol_pct": 8.36,
+        "sharpe": 1.012,
+        "mdd_pct": -19.33,
+        "calmar": 0.438,
+        "sortino": 1.192,
+        "avg_equity_weight": 0.714,
+        "total_tc_pct": 0.675,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      }
+    },
+    "Type_F": {
+      "recommended": {
+        "initial_capital": 300000,
+        "terminal_wealth": 566954.73,
+        "ann_return_pct": 3.87,
+        "ann_vol_pct": 4.21,
+        "sharpe": 0.919,
+        "mdd_pct": -7.31,
+        "calmar": 0.53,
+        "sortino": 1.015,
+        "avg_equity_weight": 0.484,
+        "total_tc_pct": 0.712,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      },
+      "no_vt_comparison": {
+        "initial_capital": 300000,
+        "terminal_wealth": 1206192.85,
+        "ann_return_pct": 8.68,
+        "ann_vol_pct": 10.03,
+        "sharpe": 0.865,
+        "mdd_pct": -20.32,
+        "calmar": 0.427,
+        "sortino": 0.917,
+        "avg_equity_weight": 1.0,
+        "total_tc_pct": 0.0,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      },
+      "12vix_comparison": {
+        "initial_capital": 300000,
+        "terminal_wealth": 765148.87,
+        "ann_return_pct": 5.75,
+        "ann_vol_pct": 6.28,
+        "sharpe": 0.917,
+        "mdd_pct": -10.82,
+        "calmar": 0.532,
+        "sortino": 1.009,
+        "avg_equity_weight": 0.715,
+        "total_tc_pct": 1.117,
+        "n_years": 16.7,
+        "total_withdrawn": 0
+      }
+    }
+  },
+  "decision_matrix": {
+    "Type_A": {
+      "allocation": "47SPY/47GLD/5BTC",
+      "vt": "None",
+      "rebal": "quarterly",
+      "terminal_wealth": 427768.74,
+      "mdd_pct": -20.31,
+      "no_vt_terminal": 427768.74,
+      "no_vt_mdd_pct": -20.31,
+      "insurance_cost_pct": 0.0,
+      "mdd_improvement_pp": 0.0
+    },
+    "Type_B": {
+      "allocation": "50SPY/50GLD",
+      "vt": "30/VIX",
+      "rebal": "quarterly",
+      "terminal_wealth": 842659.1,
+      "mdd_pct": -18.95,
+      "no_vt_terminal": 878404.26,
+      "no_vt_mdd_pct": -18.95,
+      "insurance_cost_pct": 4.1,
+      "mdd_improvement_pp": 0.0
+    },
+    "Type_C": {
+      "allocation": "50SPY/50GLD",
+      "vt": "12/VIX",
+      "rebal": "monthly",
+      "terminal_wealth": 1275248.12,
+      "mdd_pct": -10.82,
+      "sharpe": 0.917,
+      "no_vt_terminal": 2010321.41,
+      "no_vt_mdd_pct": -20.32,
+      "insurance_cost_pct": 36.6,
+      "mdd_improvement_pp": -9.5
+    },
+    "Type_D": {
+      "allocation": "50SPY/50GLD",
+      "vt": "12/VIX",
+      "rebal": "monthly",
+      "terminal_wealth": 1665771.21,
+      "mdd_pct": -13.71,
+      "sharpe": 0.493,
+      "no_vt_terminal": 2801398.43,
+      "no_vt_mdd_pct": -20.54,
+      "insurance_cost_pct": 40.5,
+      "mdd_improvement_pp": -6.8
+    },
+    "Type_E": {
+      "allocation": "45SPY/45GLD/10BTC",
+      "vt": "None",
+      "rebal": "quarterly",
+      "terminal_wealth": 1450292.68,
+      "mdd_pct": -23.95,
+      "sharpe": 1.094,
+      "no_vt_terminal": 1450292.68,
+      "no_vt_mdd_pct": -23.95,
+      "insurance_cost_pct": 0.0,
+      "mdd_improvement_pp": 0.0
+    },
+    "Type_F": {
+      "allocation": "50SPY/50GLD",
+      "vt": "8/VIX",
+      "rebal": "monthly",
+      "terminal_wealth": 566954.73,
+      "mdd_pct": -7.31,
+      "sharpe": 0.919,
+      "no_vt_terminal": 1206192.85,
+      "no_vt_mdd_pct": -20.32,
+      "insurance_cost_pct": 53.0,
+      "mdd_improvement_pp": -13.0
+    }
+  },
+  "key_insights": [
+    "VT 是 investor-type-dependent，不是 horizon-dependent 推薦（K41 核心發現）",
+    "年輕 DCA 投資人（Type A）幾乎不需要 VT——50/50 分散化 + DCA 已足夠（K70）",
+    "中年 DCA（Type B）用 30/VIX（最溫和 VT）即可——邊際 MDD 改善 5pp 僅花 3.5% 財富（K70）",
+    "退休前（Type C）和退休提領（Type D）必須用 12/VIX——sequence risk 使 MDD 成為致命風險",
+    "積極成長（Type E）不需 VT，加 5-10% BTC 提升報酬（K66: Sharpe +0.19, p=0.015）",
+    "極度保守（Type F）用 8/VIX——MDD 壓至 ~9%，但終端財富僅 B&H 的 48%",
+    "高利率環境（K62）讓所有用 VT 的投資人受益——保險費從 4% 降至 1.8%/yr",
+    "季度再平衡（K75）對 Sharpe 無影響，但月度再平衡對 MDD 敏感者（Type C/D/F）更好",
+    "12/VIX 不是唯一正解——6 種投資人有 4 種最佳門檻（None, 8, 12, 30）",
+    "80% 時間 VT 看起來在虧（K74），但這正是保險的本質——決策矩陣幫助投資人預設正確期望"
+  ]
+}

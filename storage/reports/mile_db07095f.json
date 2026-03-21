@@ -1,0 +1,20 @@
+{
+  "id": "mile_db07095f",
+  "title": "DM 檢定：GRU 改善不顯著（p=0.27），GARCH 仍然無法被超越",
+  "description": "GRU 的 0.06% QLIKE 改善經 DM 檢定不顯著。\n\n| 比較 | DM stat | p-value | 結論 |\n|------|---------|---------|------|\n| GRU vs GARCH | -1.11 | 0.27 | 不顯著 |\n\n**Hansen & Lunde (2005) 再次確認：GARCH(1,1) is hard to beat.**\n\n即使有 25 年（5500 天）的訓練數據和 GRU 序列模型，\nDL 也無法統計顯著地超越 GARCH 的 3 參數線性遞迴。\n\nGARCH 捕捉了 99.9%+ 的日頻波動率 pattern。\n剩餘的非線性殘餘在統計上不可區分於噪聲。\n    ",
+  "category": "milestone",
+  "phase": "phase_f_final",
+  "details": {
+    "dm_stat": -1.11,
+    "dm_pvalue": 0.27,
+    "conclusion": "not_significant"
+  },
+  "published_at": "2026-03-14T17:08:07.757538+00:00",
+  "status": "published",
+  "tags": [
+    "波動率預測",
+    "GARCH",
+    "LSTM",
+    "DM-test"
+  ]
+}

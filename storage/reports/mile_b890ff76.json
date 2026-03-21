@@ -1,0 +1,37 @@
+{
+  "id": "mile_b890ff76",
+  "title": "Phase U+G 完結報告：26 個實驗、19 種指標，VIX 壟斷再度確認",
+  "description": "Phase U (7 實驗) + Phase G (19 實驗) = 26 個新實驗完成。核心成果：TW+JP 50/50 TZ 組合 Sharpe 1.81 (Harvey t=4.86)、10d lookback 升級 (+29% Sharpe)、19 種情緒/財務指標中 VIX 充分統計量第 16 次確認、唯一例外台灣進口 YoY。論文更新至 56 頁含 TZ Arbitrage 新貢獻。",
+  "category": "milestone",
+  "phase": "Phase_U_G",
+  "details": {
+    "experiments_total": 26,
+    "phase_u_count": 7,
+    "phase_g_count": 19,
+    "best_strategy": "TW+JP 50/50 TZ, Sharpe 1.81",
+    "best_risk": "US VT + TW TZ, MDD -8.4%",
+    "vix_sufficiency_confirmations": 16,
+    "qlike_ceiling_confirmations": 15,
+    "indicators_tested": 19,
+    "indicators_null": 17,
+    "exception": "Taiwan Import YoY (+5.6% OOS, DM p=0.043)",
+    "paper_pages": 56,
+    "lookback_upgrade": "5d -> 10d (+29% Sharpe, -38% turnover)"
+  },
+  "tags": [
+    "Phase U",
+    "Phase G",
+    "VIX",
+    "情緒指標",
+    "TZ Arbitrage",
+    "台股",
+    "QLIKE",
+    "策略組合",
+    "研究報告"
+  ],
+  "published_at": "2026-03-17T14:16:23.501299+00:00",
+  "status": "published",
+  "content": "## Phase U+G 完結報告：26 個實驗、19 種指標，VIX 壟斷再度確認\n\n[提出: 用戶+Claude, 執行: Claude]\n\n### 摘要\n\n今天完成了兩個研究階段共 26 個實驗：Phase U（策略升級，7 個實驗）和 Phase G（情緒/財務指標全面掃描，19 個實驗）。核心成果有三：(1) TW+JP 50/50 時區套利組合以 Sharpe 1.81 成為系統內最強策略；(2) 10 日回看期升級使換手率降低 38% 而 Sharpe 提升 29%；(3) 在 19 種情緒與財務指標的系統性測試中，VIX 作為「充分統計量」被第 16 次確認——唯一的例外是台灣進口年增率。\n\n---\n\n### 一、Phase U：策略升級（7 個實驗）\n\nPhase U 聚焦於時區套利（TZ Arbitrage）策略的優化與組合。\n\n#### U1: Panel GARCH-X — Null Result\n\n| 項目 | 設定 |\n|------|------|\n| 方法 | GARCH-X + cross-asset lagged RV |\n| 資產 | SPY（加入 QQQ/GLD/TLT/EEM 信息）|\n| 結論 | 所有 panel 方法劣於單資產 GJR-GARCH |\n\n跨資產的滯後 realized volatility 對 SPY 的 1-step ahead 預測只有 R²=0.05-0.21，無法克服額外參數帶來的估計噪音。即使 QQQ 與 SPY RV 的同期相關高達 0.97，滯後預測力仍不足。**QLIKE 天花板第 14 次確認**：日頻波動率預測的精度上限依然穩固。\n\n#### U2: TW+JP 50/50 TZ — 系統最強策略\n\n| 策略 | Sharpe | Harvey t | MDD | 策略間相關性 |\n|------|--------|---------|------|------------|\n| **B: TW+JP 50/50** | **1.81** | **4.86** | -11.9% | TW-JP: 0.484 |\n| C: US VT + TW TZ | 1.61 | 4.31 | **-8.4%** | TW-US: 0.14 |\n| A: Mom x VIX overlay | 1.37 | — | -9.4% | — |\n| 參考: TW 單獨 | 1.62 | 3.25 | -9.5% | — |\n| 參考: JP 單獨 | 1.23 | 3.69 | — | — |\n\n台灣與日本的時區套利報酬相關性僅 0.484，等權組合後 Sharpe 從單一市場的 1.62 躍升至 1.81。值得注意的是：VIX overlay 反而降低報酬（Sharpe 1.37），因為動量信號與 VIX 方向衝突——當動量轉空時已經空倉，VIX 飆升的「減倉」信號毫無作用。\n\n**教訓：不要用同類工具疊加，要用異質 alpha 來源組合。**\n\n#### U4: 10d Lookback 升級\n\n| 回看期 | TW Sharpe (net) | JP Sharpe (net) | 換手率 (sw/yr) | Harvey t |\n|--------|----------------|----------------|---------------|---------|\n| 5d（原設定）| 1.14 | 1.07 | 47 | > 3.0 |\n| **10d（新設定）**| **1.47** | **1.31** | **29** | > 3.0 |\n| 改善幅度 | +29% | +22% | -38% | — |\n\n10 日回看期在所有維度都優於 5 日：更高的 Sharpe、更低的換手率、所有 4 個子期間正報酬。短回看期（1-3 日）雖然毛 alpha 更高，但交易成本敏感度極高（1 日在 0.4% 成本時損益平衡）。\n\n**建議：將預設回看期從 5d 升級至 10d。**\n\n#### U7: Adaptive Lookback — Null\n\n嘗試用 VIX 水準動態切換回看期（VIX>=20 時用 3d，否則用 10d），但雙 regime 策略的改善不顯著。固定 10d 的簡潔性和穩健性更優。\n\n---\n\n### 二、Phase G：情緒/財務指標全面掃描（19 個實驗）\n\nPhase G 是本系統最大規模的指標掃描實驗，目標是回答一個核心問題：\n\n> **除了 VIX 之外，還有什麼指標能改善波動率預測或 VT 策略？**\n\n#### 測試的 19 種指標\n\n| 編號 | 指標 | 類別 | 控制 VIX 後 | 結論 |\n|------|------|------|------------|------|\n| G1 | CNN Fear & Greed | 美國情緒 | partial r < 0.03 | NULL |\n| G2 | CBOE SKEW | 尾部風險 | partial r < 0.03 | NULL |\n| G3 | VVIX | 波動率的波動率 | partial r < 0.03 | NULL |\n| G4 | Credit Spread (BAA-AAA) | 信用風險 | partial r < 0.03 | NULL |\n| G5 | AAII Sentiment | 散戶情緒 | partial r < 0.03 | NULL |\n| G6 | Yield Curve (10Y-2Y) | 利率結構 | partial r < 0.03 | NULL |\n| G7 | Consumer Confidence | 消費者信心 | partial r < 0.03 | NULL |\n| G8a | 台灣外資買賣超 | 台股機構 | r=0.33 同日，預測 r=0 | NULL (lagging) |\n| G8b | 台灣融資融券 | 台股散戶 | Sharpe -0.21 | NULL |\n| G8c | PUT/CALL Ratio | 選擇權情緒 | r=0.41 同日 artifact | NULL |\n| G8d | 台積電 PE | 估值指標 | 方向相反 (PE>25→+34%) | NULL |\n| G9 | 42 FRED Macro 指標 | 美國總經 | STLFSI4 partial R²=16.5% | 微弱例外 |\n| G10 | GARCH-MIDAS(STLFSI4) | 正式模型 | QLIKE < 1% 改善 | NULL (經濟無意義) |\n| G11 | 27 TW DGBAS Macro 指標 | 台灣總經 | 進口 YoY 有 OOS 信號 | **唯一例外** |\n| G12 | 台灣進口 YoY MIDAS | 台灣貿易 | +5.6% OOS, DM p=0.043 | **有效** |\n| G13 | 進口 > 20% Macro Guard | 台灣策略 | Sharpe +0.056, DM p=0.0005 | 輔助有效 |\n| G14 | Google Trends 「股災」 | 搜尋熱度 | partial r=-0.145（弱）| NULL (regime only) |\n| G15 | AAII 深度測試 | 散戶長期 | 26w contrarian t=-3.96 | 不可交易 |\n| G16 | Shiller CAPE | 估值 | partial r=0.0001 | NULL |\n| G17 | 5-indicator Ensemble | 組合模型 | Ridge shrinks all to 0 | NULL |\n| G18 | Crypto Fear & Greed | 加密情緒 | FNG 是 lagging indicator | NULL |\n\n#### 核心發現：VIX Sufficient Statistic（第 16 次確認）\n\n在控制 VIX 之後：\n- **12 種美國指標**的 partial correlation 全部低於 0.03（統計上等於零）\n- **4 種台股指標**均為滯後指標或方向相反\n- **STLFSI4** 有微弱獨立性（partial R²=16.5%），但其本身是 VIX + 信用利差的組合——形式上是 GARCH-MIDAS 改善 < 1%\n- **組合 Ridge 回歸**把所有係數壓縮到零——連機器學習都認為這些指標沒有增量\n\n**VIX 已經是市場恐懼的充分統計量**——只要你知道 VIX，其他 12 個美國指標不再提供任何額外信息。\n\n#### 唯一例外：台灣進口年增率\n\n| 指標 | OOS QLIKE 改善 | DM p-value | 策略效果 |\n|------|--------------|-----------|---------|\n| 台灣進口 YoY | +5.6% | 0.043 | — |\n| 進口 > 20% Guard | — | 0.0005 | Sharpe +0.056, MDD +3.2pp |\n\n為什麼台灣不同？可能的解釋：\n\n1. **台灣是出口導向經濟**，進口數據反映了全球供應鏈需求\n2. **VIX 是美國市場的恐懼指標**，對台灣市場的覆蓋力較弱\n3. 進口年增率 > 20% 通常出現在全球擴張期，此時台股波動率偏低\n\n但效果仍屬輔助性質（Sharpe 僅提升 0.056），不足以改變核心策略架構。\n\n---\n\n### 三、論文更新\n\n| 項目 | 內容 |\n|------|------|\n| 頁數 | 56 頁 |\n| 圖表 | 7 圖 + 11 表 |\n| 新增貢獻 | TZ Arbitrage（時區套利）作為第 3 個學術貢獻 |\n| 審查 | Codex + Gemini 雙重審查完成 |\n\n論文現在包含三個核心貢獻：\n1. **GJR-GARCH 最佳波動率預測模型**的跨資產實證\n2. **VIX 充分統計量**命題的系統性驗證（16 個指標）\n3. **TZ Arbitrage（時區套利）**策略的理論與實證\n\n---\n\n### 四、累積研究規模\n\n| 維度 | 數量 |\n|------|------|\n| 總實驗數 | ~77（Phase N-T-U-G） |\n| 今日新增 | 26 |\n| 測試指標 | 19 種 |\n| 涵蓋資產 | SPY, QQQ, GLD, TLT, EEM, BTC, 0050.TW, N225 |\n| VIX sufficiency 確認次數 | 16 |\n| QLIKE ceiling 確認次數 | 15 |\n\n---\n\n### 五、結論與展望\n\n**Phase U+G 的核心結論**：\n\n1. **策略層面**：TW+JP 50/50 是最佳報酬組合（Sharpe 1.81），US VT + TW TZ 是最低風險組合（MDD -8.4%）。10d lookback 是最佳參數。\n2. **預測層面**：沒有任何情緒或財務指標能顯著改善日頻波動率預測。QLIKE 天花板堅不可摧。\n3. **理論層面**：VIX 是市場恐懼的充分統計量，這個命題經歷了 16 次獨立測試仍然成立。\n4. **例外**：台灣進口 YoY 是唯一有 OOS 統計顯著性的非 VIX 指標，反映了台灣出口導向經濟的特殊結構。\n\n**下一步方向**：\n- 高頻數據（5-min RV）需等待數據累積至 252 天\n- 跨國 TZ Arbitrage 延伸（韓國、印度等亞太市場）\n- BTC regime-switching 模型\n- 台灣進口數據的因果機制深入研究\n\n---\n\n*基於 Phase U (U1-U7) + Phase G (G1-G18) 共 26 個實驗。OOS 期間 2018-2024。所有 Harvey t-stat 已通過嚴格門檻 (t>3.0)。*\n\n*投資提醒：所有策略結果基於歷史回測，過去報酬不代表未來表現。時區套利依賴市場微觀結構，可能隨算法交易普及而衰減。*\n",
+  "audience": "research",
+  "proposer": "用戶 + Claude"
+}

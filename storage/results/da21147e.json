@@ -1,0 +1,91 @@
+{
+  "experiment_id": "da21147e",
+  "model_name": "garch_arch",
+  "asset": "BTC-USD",
+  "config": {
+    "model_params": {
+      "dist": "normal"
+    },
+    "window_size": 252,
+    "oos_start": "2023-01-01",
+    "oos_end": "2024-12-31"
+  },
+  "metrics": {
+    "mse": 9.898295345434057e-07,
+    "mae": 0.011078513564681886,
+    "qlike": -6.37493784284369,
+    "hmse": 2.857986046309451,
+    "r2_log": -0.18458903124490855,
+    "n_forecasts": 730,
+    "mean_actual_var": 0.0006379917626085709,
+    "mean_forecast_var": 0.000688151531529366,
+    "var_es": {
+      "alpha_0.01": {
+        "alpha": 0.01,
+        "n_violations": 15,
+        "violation_rate": 0.02054794520547945,
+        "expected_rate": 0.01,
+        "kupiec": {
+          "statistic": 6.287608087689335,
+          "p_value": 0.012158502540921767,
+          "observed_rate": 0.02054794520547945,
+          "expected_rate": 0.01,
+          "n_violations": 15,
+          "total": 730,
+          "conclusion": "reject"
+        },
+        "christoffersen": {
+          "independence_stat": 0.0,
+          "independence_pval": 1.0,
+          "n00": 699,
+          "n01": 15,
+          "n10": 15,
+          "n11": 0,
+          "pi01": 0.02100840336134454,
+          "pi11": 0.0,
+          "conclusion": "independent"
+        },
+        "avg_loss_given_violation": 0.06136183400582012,
+        "avg_es_forecast": 0.059211560762846636,
+        "es_ratio": 1.0363150914326635,
+        "var_mean": 0.05893625387234522,
+        "es_mean": 0.06752117500021304
+      },
+      "alpha_0.05": {
+        "alpha": 0.05,
+        "n_violations": 30,
+        "violation_rate": 0.0410958904109589,
+        "expected_rate": 0.05,
+        "kupiec": {
+          "statistic": 1.29384066834848,
+          "p_value": 0.255341369000634,
+          "observed_rate": 0.0410958904109589,
+          "expected_rate": 0.05,
+          "n_violations": 30,
+          "total": 730,
+          "conclusion": "fail_to_reject"
+        },
+        "christoffersen": {
+          "independence_stat": 0.05159105777820372,
+          "independence_pval": 0.8203174861312783,
+          "n00": 670,
+          "n01": 29,
+          "n10": 29,
+          "n11": 1,
+          "pi01": 0.04148783977110158,
+          "pi11": 0.03333333333333333,
+          "conclusion": "independent"
+        },
+        "avg_loss_given_violation": 0.0552127771202077,
+        "avg_es_forecast": 0.048780149764837334,
+        "es_ratio": 1.131869774619004,
+        "var_mean": 0.041671115495067156,
+        "es_mean": 0.05225725999346449
+      }
+    }
+  },
+  "fit_time": 4.439825057983398,
+  "n_forecasts": 730,
+  "timestamp": "2026-03-14T20:45:10.836984",
+  "notes": ""
+}

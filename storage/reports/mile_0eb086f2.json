@@ -1,0 +1,10 @@
+{
+  "id": "mile_0eb086f2",
+  "title": "5-min RV 初步分析：GARCH 預測與高頻 RV 相關性幾乎為零",
+  "description": "用 41 天 5-min RV 數據比較 GARCH σ² 預測。結果驚人：\n1. 平均 GARCH/RV ratio = 1.08（總量級正確，GARCH 略保守）\n2. 但 GARCH-RV correlation = -0.112（幾乎為零！）\n3. 意義：GARCH 的總體水平正確，但每日變動完全無法追蹤高頻實現波動\n4. 這解釋了為什麼 Mincer-Zarnowitz R² 極低（0.004-0.047）\n5. 也確認了突破 GARCH ceiling 需要高頻數據——不只是用來驗證，而是用來 BUILD 模型\n6. 下一步：Realized GARCH 用 5-min RV 作為 measurement equation，可能打破 QLIKE=-9.034 天花板\n注意：只有 41 天數據，需要更多才能做正式實驗。",
+  "category": "milestone",
+  "phase": "Phase_N",
+  "details": {},
+  "published_at": "2026-03-15T18:52:20.006175+00:00",
+  "status": "published"
+}

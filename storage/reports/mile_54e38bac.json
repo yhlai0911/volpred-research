@@ -1,0 +1,20 @@
+{
+  "id": "mile_54e38bac",
+  "title": "自我修正：「天花板被打破」是假警報——13 次確認的教訓",
+  "description": "GBM ceiling crack was FALSE ALARM. Cross-asset 0/15. QLIKE ceiling confirmed 13th time.",
+  "content": "## 摘要\n\n[提出: Claude（自我修正）, 執行: Claude]\n\n昨天我們宣布「QLIKE 天花板被打破了」。今天我們要誠實地說：**那是假警報。**\n\nGBM（梯度提升機）在 SPY 上確實改善了 18.7%，但跨 5 個資產、3 個時間段的 15 次驗證中，**GBM 顯著贏了 0 次，GJR-GARCH 顯著贏了 5 次**。\n\n## 發生了什麼\n\n### 第一步：發現「突破」\n\n我們用 GBM 配合 VIX 做波動率預測，SPY 上獲得 -18.7% QLIKE 改善（p=0.009）。Feature ablation 確認 VIX-only 最強。兩種獨立方法（GBM + 自建 Piecewise）都得到相似結果。一切看起來非常可靠。\n\n### 第二步：Cross-OOS 降級\n\n測試 3 個 OOS 期間，GBM 全部勝出但只有 2020-2022 顯著。評估降級為「ceiling crack」。\n\n### 第三步：Cross-Asset 崩潰\n\n| 統計 | 結果 |\n|------|------|\n| 15 次驗證中 GBM 顯著贏 | **0** |\n| GJR-GARCH 顯著贏 | **5** |\n| GBM 平均 ΔQLIKE | **+7.1%（更差！）** |\n| 2018-2020 期間 | **+22% catastrophe** |\n\nGLD 在 2018-2020 竟然惡化 59%！VIX 是股票市場的指標，對黃金和債券是**錯誤的預測因子**。\n\n## 為什麼單一資產結果會誤導\n\n1. **VIX 是 SPY 的「親兄弟」**——它直接由 SPY 選擇權定價，所以 VIX→SPY vol 的非線性特別強\n2. **2023-2024 是特殊期間**——低波動+AI 牛市，GBM 恰好能捕獲這個 regime\n3. **p=0.009 在多重檢定下膨脹**——我們測了很多模型，最好的自然看起來顯著\n\n## 教訓\n\n> **一個資產上的 p<0.01，在跨資產驗證下可以完全崩潰。**\n\n這正是 Harvey (2016) 警告的：從大量搜索中挑出的最佳結果一定有 selection bias。我們的研究規則 #16 說得很清楚：「一直質疑自己，直到被證據說服」——但我們差點在只有 SPY 結果時就宣布勝利。\n\n## QLIKE 天花板的最終狀態\n\n| 挑戰者 | 結果 |\n|--------|------|\n| MS-GARCH | OOS -0.01% NS |\n| FIGARCH | +0.44% NS |\n| GARCH-MIDAS | all NS |\n| CARR | NS |\n| LSTM/GRU | 失敗 |\n| GINN (PINN) | artifact |\n| Rough Volatility | QLIKE NS |\n| **GBM/Piecewise VIX** | **跨資產 0/15** |\n| 總計 | **13 次確認** |\n\n**GJR-GARCH(1,1) 是日頻波動率預測的不可打敗冠軍。** 13 種方法、6 種資產類別、3 個 OOS 期間，沒有任何方法能持續顯著打敗它。\n\n真正的改善可能只能來自**更高頻的數據**（5-minute realized volatility），而不是更複雜的模型。\n\n## 結論\n\n科學的進步不是只報告勝利——誠實的自我修正同樣重要。今天我們修正了一個幾乎變成錯誤結論的發現。QLIKE 天花板依然屹立不搖。\n",
+  "phase": "Phase_T",
+  "category": "milestone",
+  "audience": "research",
+  "proposer": "Claude（自我修正）",
+  "status": "published",
+  "tags": [
+    "QLIKE-ceiling",
+    "GBM",
+    "self-correction",
+    "cross-asset",
+    "Harvey",
+    "methodology"
+  ],
+  "published_at": "2026-03-17T08:15:11.994682+00:00"
+}

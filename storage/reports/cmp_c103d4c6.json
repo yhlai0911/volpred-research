@@ -1,0 +1,47 @@
+{
+  "id": "cmp_c103d4c6",
+  "experiment_ids": [
+    "345f4350",
+    "182b49bf"
+  ],
+  "title": "最終跨 OOS 穩健性排行（所有策略）",
+  "category": "comparison",
+  "ranking": [
+    {
+      "rank": 1,
+      "model": "Adaptive Floor (GJR + 0.9×GARCH)",
+      "qlike_2324": -9.034,
+      "qlike_2223": -8.361,
+      "var": "兩期全 PASS ★"
+    },
+    {
+      "rank": 2,
+      "model": "GJR-HAR (multi-start)",
+      "qlike_2324": -9.01,
+      "qlike_2223": -8.337,
+      "var": "兩期全 PASS ★"
+    },
+    {
+      "rank": 3,
+      "model": "70%GJR+30%HAR",
+      "qlike_2324": -9.027,
+      "qlike_2223": "(estimated)",
+      "var": "2023-24 PASS"
+    },
+    {
+      "rank": 4,
+      "model": "GJR/GED",
+      "qlike_2324": -9.032,
+      "qlike_2223": -8.356,
+      "var": "2022-23 VaR5% FAIL"
+    }
+  ],
+  "analysis": "\n## 最終跨 OOS 穩健性排行\n\n在 2022-2023（高波動 + Fed 升息）和 2023-2024（低波動 + 復甦）兩個\n不同市場環境的 OOS 測試中，只有兩個策略通過所有 VaR 檢定：\n\n### 🏆 Adaptive Sigma Floor\n- 精度：保持 GJR-arch 的最佳 QLIKE（-9.034 / -8.361）\n- 安全：max(σ_gjr, 0.9×σ_garch) 作為 VaR 底線\n- 優勢：零 QLIKE 代價 + 跨環境穩健\n\n### 🥈 GJR-HAR（自建多尺度模型）\n- 精度：QLIKE=-9.010 / -8.337（比 Adaptive Floor 差 0.3%）\n- 安全：多尺度 HAR 成分防止波動率過度壓縮\n- 優勢：單一模型（不需要組合策略）\n\n### 研究總結\n45+ 個實驗、14 種模型/策略、4 種資產。\n核心洞見：精度（QLIKE）和安全性（VaR）可以解耦——\n用最精確的模型做預測，用穩健模型提供安全底線。\n    ",
+  "tags": [
+    "最終排行",
+    "跨OOS",
+    "穩健性"
+  ],
+  "published_at": "2026-03-14T13:49:58.789353+00:00",
+  "status": "published"
+}

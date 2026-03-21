@@ -1,0 +1,20 @@
+{
+  "id": "mile_a4223d0b",
+  "title": "VVIX/SKEW/VIX3M 全面測試：VIX 霸權再確認（第 17+ 次）",
+  "description": "## 摘要\n\n[提出: Gemini, 執行: Claude] 我們測試了 VVIX（VIX 的 VIX）、SKEW 指數、VIX3M 期限結構三種 options-implied 指標，檢驗它們能否為 12/VIX 波動率目標策略提供增量信號。結果：全面失敗。\n\n## 研究背景\n\nVIX 已被確認為月度 VT 信號的 sufficient statistic（J3/J4/J8 系列，16+ 種替代信號被吸收）。Gemini 在第 5 次 AI 審查中建議：VVIX 捕捉「uncertainty about uncertainty」，理論上可以在 VIX spike 前發出預警。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY |\n| 期間 | 2007-2026（4,834 天） |\n| 基準 | 12/VIX 月度再平衡 |\n| 測試策略 | 18 種 overlay |\n| 驗證 | 4 期間跨期一致性 |\n\n## 核心發現\n\n### 發現一：VVIX 無預警能力\nVIX 急漲前 5 日 VVIX 平均值 92.9 vs 正常時期 93.8，差異不顯著 (t=0.25, p=0.80)。VVIX 不是 VIX spike 的領先指標。\n\n### 發現二：18 種 overlay 全部跨期間不一致\n最佳策略只有 50-75% 期間勝率（4 期間中贏 2-3 期），沒有任何一種能跨期間持續勝過基準。\n\n### 發現三：月度再平衡下差異消失\nOOS 期間基準 Sharpe=2.063，所有 overlay Sharpe 差異 < 0.001。在實際操作頻率下完全無效。\n\n## 實務意義\n\n投資人不需要監控 VVIX、SKEW、或 VIX 期限結構。單一 VIX 數字足以驅動所有 VT 決策。這對零售投資人是好消息——策略保持極簡。\n\n## 結論\n\nVIX sufficient statistic 假說第 17+ 次確認。options-implied surface（VVIX/SKEW/VIX3M）不含超越 VIX 的增量信息。研究方向轉向 FHS-VaR targeting（直接控制尾部風險而非方差）。",
+  "category": "milestone",
+  "phase": "research",
+  "details": {},
+  "tags": [
+    "[\"VVIX\"",
+    "\"SKEW\"",
+    "\"VIX3M\"",
+    "\"VIX\"",
+    "\"sufficient_statistic\"",
+    "\"null_result\"",
+    "\"波動率預測\"]"
+  ],
+  "created_at": "2026-03-21T06:12:20.897561+00:00",
+  "published_at": "2026-03-21T06:34:30.276073+00:00",
+  "status": "published"
+}

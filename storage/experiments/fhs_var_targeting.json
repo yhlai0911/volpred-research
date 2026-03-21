@@ -1,0 +1,944 @@
+{
+  "experiment": "FHS-VaR Targeting",
+  "description": "Compare sigma-targeting vs VaR-targeting VT strategies. VaR-targeting uses GJR-GARCH(1,1) + Skewed-t to compute 1-day 1% VaR, then sets weight = target_VaR_loss / predicted_VaR_loss.",
+  "proposed_by": "Gemini",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T14:15:12.524089",
+  "config": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "EEM"
+    ],
+    "window": 2000,
+    "oos_start": "2023-01-01",
+    "oos_end": "2026-03-21",
+    "var_targets": [
+      0.015,
+      0.02,
+      0.025
+    ],
+    "var_alpha": 0.01,
+    "sigma_target": 0.12,
+    "tx_cost": 0.0005,
+    "rf_annual": 0.04,
+    "weight_bounds": [
+      0.0,
+      1.5
+    ],
+    "refit_every": 5,
+    "garch_model": "GJR-GARCH(1,1)",
+    "distribution": "Skewed Student-t"
+  },
+  "results": {
+    "SPY": {
+      "buy_hold": {
+        "name": "Buy & Hold",
+        "metrics": {
+          "n_days": 806,
+          "n_years": 3.2,
+          "total_return": 69.59,
+          "ann_return": 17.96,
+          "ann_vol": 15.21,
+          "sharpe": 0.899,
+          "sortino": 1.244,
+          "mdd": -19.0,
+          "calmar": 0.945,
+          "net_sharpe": 0.899,
+          "harvey_t": 1.61,
+          "ann_turnover": 0.0,
+          "ann_tc_pct": 0.0,
+          "avg_weight": 1.0,
+          "std_weight": 0.0,
+          "ret_skew": 0.87,
+          "ret_kurtosis": 20.076,
+          "win_rate": 56.5
+        }
+      },
+      "12_vix": {
+        "name": "12/VIX σ-targeting",
+        "metrics": {
+          "n_days": 806,
+          "n_years": 3.2,
+          "total_return": 40.4,
+          "ann_return": 11.19,
+          "ann_vol": 9.26,
+          "sharpe": 0.761,
+          "sortino": 1.071,
+          "mdd": -10.99,
+          "calmar": 1.019,
+          "net_sharpe": 0.665,
+          "harvey_t": 1.36,
+          "ann_turnover": 8.81,
+          "ann_tc_pct": 0.881,
+          "avg_weight": 0.726,
+          "std_weight": 0.142,
+          "ret_skew": -0.462,
+          "ret_kurtosis": 1.48,
+          "win_rate": 56.5
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.646,
+          "p_value": 0.1001
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 8.01,
+          "p_value": 0.9988
+        }
+      },
+      "garch_sigma": {
+        "name": "GARCH σ-targeting (12%)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 42.42,
+          "ann_return": 11.71,
+          "ann_vol": 12.04,
+          "sharpe": 0.648,
+          "sortino": 0.837,
+          "mdd": -12.98,
+          "calmar": 0.901,
+          "net_sharpe": 0.499,
+          "harvey_t": 1.16,
+          "ann_turnover": 17.84,
+          "ann_tc_pct": 1.784,
+          "avg_weight": 0.961,
+          "std_weight": 0.293,
+          "ret_skew": -0.7,
+          "ret_kurtosis": 2.124,
+          "win_rate": 56.5
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.495,
+          "p_value": 0.1352
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 6.01,
+          "p_value": 0.6914
+        }
+      },
+      "var_15": {
+        "name": "VaR-targeting (1.5% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 29.9,
+          "ann_return": 8.53,
+          "ann_vol": 8.79,
+          "sharpe": 0.521,
+          "sortino": 0.673,
+          "mdd": -9.54,
+          "calmar": 0.894,
+          "net_sharpe": 0.365,
+          "harvey_t": 0.93,
+          "ann_turnover": 13.69,
+          "ann_tc_pct": 1.369,
+          "avg_weight": 0.702,
+          "std_weight": 0.224,
+          "ret_skew": -0.705,
+          "ret_kurtosis": 2.189,
+          "win_rate": 56.5
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.931,
+          "p_value": 0.0538
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 9.45,
+          "p_value": 0.9698
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": -1.765,
+          "p_value": 0.078
+        },
+        "dm_vs_12vix": {
+          "t_stat": -2.079,
+          "p_value": 0.0379
+        }
+      },
+      "var_20": {
+        "name": "VaR-targeting (2.0% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 40.75,
+          "ann_return": 11.29,
+          "ann_vol": 11.69,
+          "sharpe": 0.632,
+          "sortino": 0.814,
+          "mdd": -12.58,
+          "calmar": 0.897,
+          "net_sharpe": 0.48,
+          "harvey_t": 1.13,
+          "ann_turnover": 17.81,
+          "ann_tc_pct": 1.781,
+          "avg_weight": 0.933,
+          "std_weight": 0.294,
+          "ret_skew": -0.712,
+          "ret_kurtosis": 2.19,
+          "win_rate": 56.5
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.559,
+          "p_value": 0.1194
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 6.41,
+          "p_value": 0.7298
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": -1.857,
+          "p_value": 0.0637
+        },
+        "dm_vs_12vix": {
+          "t_stat": 0.135,
+          "p_value": 0.8925
+        }
+      },
+      "var_25": {
+        "name": "VaR-targeting (2.5% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 53.55,
+          "ann_return": 14.37,
+          "ann_vol": 14.14,
+          "sharpe": 0.738,
+          "sortino": 0.97,
+          "mdd": -15.08,
+          "calmar": 0.953,
+          "net_sharpe": 0.611,
+          "harvey_t": 1.32,
+          "ann_turnover": 17.9,
+          "ann_tc_pct": 1.79,
+          "avg_weight": 1.127,
+          "std_weight": 0.311,
+          "ret_skew": -0.65,
+          "ret_kurtosis": 1.864,
+          "win_rate": 56.5
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -0.879,
+          "p_value": 0.3799
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 3.92,
+          "p_value": 0.433
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": 2.128,
+          "p_value": 0.0336
+        },
+        "dm_vs_12vix": {
+          "t_stat": 1.085,
+          "p_value": 0.2781
+        }
+      },
+      "diagnostics": {
+        "skewt_1pct_quantile_mean": -2.7971,
+        "skewt_1pct_quantile_std": 0.0266,
+        "skewt_1pct_quantile_min": -2.8555,
+        "skewt_1pct_quantile_max": -2.7578,
+        "normal_1pct_quantile": -2.326,
+        "avg_eta_df": 6.79,
+        "avg_lambda_skew": -0.17,
+        "avg_sigma_pct": 0.8932,
+        "n_valid_fits": 806
+      }
+    },
+    "QQQ": {
+      "buy_hold": {
+        "name": "Buy & Hold",
+        "metrics": {
+          "n_days": 806,
+          "n_years": 3.2,
+          "total_return": 118.59,
+          "ann_return": 27.7,
+          "ann_vol": 19.76,
+          "sharpe": 1.134,
+          "sortino": 1.696,
+          "mdd": -22.88,
+          "calmar": 1.21,
+          "net_sharpe": 1.134,
+          "harvey_t": 2.03,
+          "ann_turnover": 0.0,
+          "ann_tc_pct": 0.0,
+          "avg_weight": 1.0,
+          "std_weight": 0.0,
+          "ret_skew": 0.601,
+          "ret_kurtosis": 11.362,
+          "win_rate": 56.9
+        }
+      },
+      "12_vix": {
+        "name": "12/VIX σ-targeting",
+        "metrics": {
+          "n_days": 806,
+          "n_years": 3.2,
+          "total_return": 63.04,
+          "ann_return": 16.51,
+          "ann_vol": 12.69,
+          "sharpe": 0.953,
+          "sortino": 1.373,
+          "mdd": -14.15,
+          "calmar": 1.167,
+          "net_sharpe": 0.883,
+          "harvey_t": 1.7,
+          "ann_turnover": 8.81,
+          "ann_tc_pct": 0.881,
+          "avg_weight": 0.726,
+          "std_weight": 0.142,
+          "ret_skew": -0.403,
+          "ret_kurtosis": 0.896,
+          "win_rate": 56.9
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -2.135,
+          "p_value": 0.033
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 8.73,
+          "p_value": 0.997
+        }
+      },
+      "garch_sigma": {
+        "name": "GARCH σ-targeting (12%)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 55.86,
+          "ann_return": 14.9,
+          "ann_vol": 12.16,
+          "sharpe": 0.875,
+          "sortino": 1.226,
+          "mdd": -12.51,
+          "calmar": 1.192,
+          "net_sharpe": 0.78,
+          "harvey_t": 1.56,
+          "ann_turnover": 11.58,
+          "ann_tc_pct": 1.158,
+          "avg_weight": 0.701,
+          "std_weight": 0.198,
+          "ret_skew": -0.467,
+          "ret_kurtosis": 1.343,
+          "win_rate": 57.0
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -2.193,
+          "p_value": 0.0286
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 10.38,
+          "p_value": 0.9824
+        }
+      },
+      "var_15": {
+        "name": "VaR-targeting (1.5% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 37.95,
+          "ann_return": 10.6,
+          "ann_vol": 8.79,
+          "sharpe": 0.735,
+          "sortino": 1.019,
+          "mdd": -9.18,
+          "calmar": 1.154,
+          "net_sharpe": 0.637,
+          "harvey_t": 1.31,
+          "ann_turnover": 8.59,
+          "ann_tc_pct": 0.859,
+          "avg_weight": 0.508,
+          "std_weight": 0.148,
+          "ret_skew": -0.496,
+          "ret_kurtosis": 1.428,
+          "win_rate": 57.0
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -2.371,
+          "p_value": 0.018
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 13.7,
+          "p_value": 1.0
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": -2.218,
+          "p_value": 0.0268
+        },
+        "dm_vs_12vix": {
+          "t_stat": -2.258,
+          "p_value": 0.0242
+        }
+      },
+      "var_20": {
+        "name": "VaR-targeting (2.0% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 52.72,
+          "ann_return": 14.17,
+          "ann_vol": 11.73,
+          "sharpe": 0.848,
+          "sortino": 1.178,
+          "mdd": -12.11,
+          "calmar": 1.17,
+          "net_sharpe": 0.751,
+          "harvey_t": 1.52,
+          "ann_turnover": 11.46,
+          "ann_tc_pct": 1.146,
+          "avg_weight": 0.677,
+          "std_weight": 0.197,
+          "ret_skew": -0.496,
+          "ret_kurtosis": 1.428,
+          "win_rate": 57.0
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -2.242,
+          "p_value": 0.0252
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 10.77,
+          "p_value": 0.9848
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": -2.698,
+          "p_value": 0.0071
+        },
+        "dm_vs_12vix": {
+          "t_stat": -1.406,
+          "p_value": 0.1601
+        }
+      },
+      "var_25": {
+        "name": "VaR-targeting (2.5% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 68.6,
+          "ann_return": 17.77,
+          "ann_vol": 14.66,
+          "sharpe": 0.917,
+          "sortino": 1.275,
+          "mdd": -14.97,
+          "calmar": 1.187,
+          "net_sharpe": 0.819,
+          "harvey_t": 1.64,
+          "ann_turnover": 14.32,
+          "ann_tc_pct": 1.432,
+          "avg_weight": 0.847,
+          "std_weight": 0.246,
+          "ret_skew": -0.496,
+          "ret_kurtosis": 1.428,
+          "win_rate": 57.0
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.922,
+          "p_value": 0.0549
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 7.91,
+          "p_value": 0.8696
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": 1.995,
+          "p_value": 0.0464
+        },
+        "dm_vs_12vix": {
+          "t_stat": 0.592,
+          "p_value": 0.5538
+        }
+      },
+      "diagnostics": {
+        "skewt_1pct_quantile_mean": -2.8127,
+        "skewt_1pct_quantile_std": 0.0168,
+        "skewt_1pct_quantile_min": -2.8711,
+        "skewt_1pct_quantile_max": -2.7807,
+        "normal_1pct_quantile": -2.326,
+        "avg_eta_df": 7.0,
+        "avg_lambda_skew": -0.1863,
+        "avg_sigma_pct": 1.1896,
+        "n_valid_fits": 806
+      }
+    },
+    "GLD": {
+      "buy_hold": {
+        "name": "Buy & Hold",
+        "metrics": {
+          "n_days": 806,
+          "n_years": 3.2,
+          "total_return": 143.68,
+          "ann_return": 32.11,
+          "ann_vol": 19.05,
+          "sharpe": 1.348,
+          "sortino": 1.829,
+          "mdd": -16.64,
+          "calmar": 1.93,
+          "net_sharpe": 1.348,
+          "harvey_t": 2.41,
+          "ann_turnover": 0.0,
+          "ann_tc_pct": 0.0,
+          "avg_weight": 1.0,
+          "std_weight": 0.0,
+          "ret_skew": -0.991,
+          "ret_kurtosis": 9.422,
+          "win_rate": 55.8
+        }
+      },
+      "12_vix": {
+        "name": "12/VIX σ-targeting",
+        "metrics": {
+          "n_days": 806,
+          "n_years": 3.2,
+          "total_return": 91.46,
+          "ann_return": 22.52,
+          "ann_vol": 13.22,
+          "sharpe": 1.301,
+          "sortino": 1.737,
+          "mdd": -9.86,
+          "calmar": 2.284,
+          "net_sharpe": 1.234,
+          "harvey_t": 2.33,
+          "ann_turnover": 8.81,
+          "ann_tc_pct": 0.881,
+          "avg_weight": 0.726,
+          "std_weight": 0.142,
+          "ret_skew": -1.07,
+          "ret_kurtosis": 10.292,
+          "win_rate": 55.8
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -2.245,
+          "p_value": 0.025
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 6.78,
+          "p_value": 0.9992
+        }
+      },
+      "garch_sigma": {
+        "name": "GARCH σ-targeting (12%)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 107.86,
+          "ann_return": 25.74,
+          "ann_vol": 12.31,
+          "sharpe": 1.598,
+          "sortino": 2.604,
+          "mdd": -11.22,
+          "calmar": 2.293,
+          "net_sharpe": 1.556,
+          "harvey_t": 2.86,
+          "ann_turnover": 5.1,
+          "ann_tc_pct": 0.51,
+          "avg_weight": 0.772,
+          "std_weight": 0.198,
+          "ret_skew": -0.243,
+          "ret_kurtosis": 1.743,
+          "win_rate": 55.8
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.189,
+          "p_value": 0.2349
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 5.42,
+          "p_value": 0.999
+        }
+      },
+      "var_15": {
+        "name": "VaR-targeting (1.5% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 73.61,
+          "ann_return": 18.85,
+          "ann_vol": 9.19,
+          "sharpe": 1.49,
+          "sortino": 2.38,
+          "mdd": -8.42,
+          "calmar": 2.238,
+          "net_sharpe": 1.448,
+          "harvey_t": 2.66,
+          "ann_turnover": 3.84,
+          "ann_tc_pct": 0.384,
+          "avg_weight": 0.576,
+          "std_weight": 0.147,
+          "ret_skew": -0.248,
+          "ret_kurtosis": 1.776,
+          "win_rate": 55.8
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.922,
+          "p_value": 0.055
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 8.22,
+          "p_value": 1.0
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": -3.42,
+          "p_value": 0.0007
+        },
+        "dm_vs_12vix": {
+          "t_stat": -1.077,
+          "p_value": 0.2819
+        }
+      },
+      "var_20": {
+        "name": "VaR-targeting (2.0% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 107.39,
+          "ann_return": 25.65,
+          "ann_vol": 12.25,
+          "sharpe": 1.599,
+          "sortino": 2.603,
+          "mdd": -11.12,
+          "calmar": 2.307,
+          "net_sharpe": 1.557,
+          "harvey_t": 2.86,
+          "ann_turnover": 5.12,
+          "ann_tc_pct": 0.512,
+          "avg_weight": 0.768,
+          "std_weight": 0.196,
+          "ret_skew": -0.248,
+          "ret_kurtosis": 1.776,
+          "win_rate": 55.8
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.202,
+          "p_value": 0.2298
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 5.52,
+          "p_value": 0.999
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": -1.113,
+          "p_value": 0.2659
+        },
+        "dm_vs_12vix": {
+          "t_stat": 0.979,
+          "p_value": 0.3279
+        }
+      },
+      "var_25": {
+        "name": "VaR-targeting (2.5% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 147.24,
+          "ann_return": 32.76,
+          "ann_vol": 15.31,
+          "sharpe": 1.667,
+          "sortino": 2.768,
+          "mdd": -13.67,
+          "calmar": 2.396,
+          "net_sharpe": 1.626,
+          "harvey_t": 2.98,
+          "ann_turnover": 6.28,
+          "ann_tc_pct": 0.628,
+          "avg_weight": 0.959,
+          "std_weight": 0.243,
+          "ret_skew": -0.247,
+          "ret_kurtosis": 1.783,
+          "win_rate": 55.8
+        },
+        "dm_vs_buyhold": {
+          "t_stat": 0.015,
+          "p_value": 0.9883
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 2.97,
+          "p_value": 0.9712
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": 3.486,
+          "p_value": 0.0005
+        },
+        "dm_vs_12vix": {
+          "t_stat": 2.78,
+          "p_value": 0.0056
+        }
+      },
+      "diagnostics": {
+        "skewt_1pct_quantile_mean": -2.6881,
+        "skewt_1pct_quantile_std": 0.0175,
+        "skewt_1pct_quantile_min": -2.7247,
+        "skewt_1pct_quantile_max": -2.6557,
+        "normal_1pct_quantile": -2.326,
+        "avg_eta_df": 5.58,
+        "avg_lambda_skew": -0.0615,
+        "avg_sigma_pct": 1.0714,
+        "n_valid_fits": 806
+      }
+    },
+    "EEM": {
+      "buy_hold": {
+        "name": "Buy & Hold",
+        "metrics": {
+          "n_days": 806,
+          "n_years": 3.2,
+          "total_return": 46.81,
+          "ann_return": 12.75,
+          "ann_vol": 17.06,
+          "sharpe": 0.555,
+          "sortino": 0.731,
+          "mdd": -18.67,
+          "calmar": 0.683,
+          "net_sharpe": 0.555,
+          "harvey_t": 0.99,
+          "ann_turnover": 0.0,
+          "ann_tc_pct": 0.0,
+          "avg_weight": 1.0,
+          "std_weight": 0.0,
+          "ret_skew": -0.069,
+          "ret_kurtosis": 3.921,
+          "win_rate": 53.7
+        }
+      },
+      "12_vix": {
+        "name": "12/VIX σ-targeting",
+        "metrics": {
+          "n_days": 806,
+          "n_years": 3.2,
+          "total_return": 24.97,
+          "ann_return": 7.22,
+          "ann_vol": 11.52,
+          "sharpe": 0.315,
+          "sortino": 0.405,
+          "mdd": -11.02,
+          "calmar": 0.655,
+          "net_sharpe": 0.239,
+          "harvey_t": 0.56,
+          "ann_turnover": 8.81,
+          "ann_tc_pct": 0.881,
+          "avg_weight": 0.726,
+          "std_weight": 0.142,
+          "ret_skew": -0.248,
+          "ret_kurtosis": 1.504,
+          "win_rate": 53.7
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.537,
+          "p_value": 0.1247
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 7.64,
+          "p_value": 0.9876
+        }
+      },
+      "garch_sigma": {
+        "name": "GARCH σ-targeting (12%)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 27.24,
+          "ann_return": 7.83,
+          "ann_vol": 11.8,
+          "sharpe": 0.359,
+          "sortino": 0.463,
+          "mdd": -11.75,
+          "calmar": 0.667,
+          "net_sharpe": 0.297,
+          "harvey_t": 0.64,
+          "ann_turnover": 7.37,
+          "ann_tc_pct": 0.737,
+          "avg_weight": 0.732,
+          "std_weight": 0.127,
+          "ret_skew": -0.302,
+          "ret_kurtosis": 1.799,
+          "win_rate": 53.7
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.41,
+          "p_value": 0.1588
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 6.92,
+          "p_value": 0.9942
+        }
+      },
+      "var_15": {
+        "name": "VaR-targeting (1.5% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 19.98,
+          "ann_return": 5.87,
+          "ann_vol": 8.81,
+          "sharpe": 0.237,
+          "sortino": 0.302,
+          "mdd": -8.85,
+          "calmar": 0.663,
+          "net_sharpe": 0.175,
+          "harvey_t": 0.42,
+          "ann_turnover": 5.5,
+          "ann_tc_pct": 0.55,
+          "avg_weight": 0.546,
+          "std_weight": 0.095,
+          "ret_skew": -0.307,
+          "ret_kurtosis": 1.814,
+          "win_rate": 53.7
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.449,
+          "p_value": 0.1478
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 9.81,
+          "p_value": 1.0
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": -1.282,
+          "p_value": 0.2004
+        },
+        "dm_vs_12vix": {
+          "t_stat": -0.783,
+          "p_value": 0.4341
+        }
+      },
+      "var_20": {
+        "name": "VaR-targeting (2.0% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 26.79,
+          "ann_return": 7.71,
+          "ann_vol": 11.74,
+          "sharpe": 0.351,
+          "sortino": 0.45,
+          "mdd": -11.73,
+          "calmar": 0.658,
+          "net_sharpe": 0.289,
+          "harvey_t": 0.63,
+          "ann_turnover": 7.33,
+          "ann_tc_pct": 0.733,
+          "avg_weight": 0.728,
+          "std_weight": 0.126,
+          "ret_skew": -0.307,
+          "ret_kurtosis": 1.814,
+          "win_rate": 53.7
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.432,
+          "p_value": 0.1525
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 6.94,
+          "p_value": 0.9946
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": -2.517,
+          "p_value": 0.012
+        },
+        "dm_vs_12vix": {
+          "t_stat": 0.559,
+          "p_value": 0.5764
+        }
+      },
+      "var_25": {
+        "name": "VaR-targeting (2.5% daily 1%VaR)",
+        "metrics": {
+          "n_days": 805,
+          "n_years": 3.19,
+          "total_return": 33.61,
+          "ann_return": 9.5,
+          "ann_vol": 14.68,
+          "sharpe": 0.419,
+          "sortino": 0.533,
+          "mdd": -14.56,
+          "calmar": 0.652,
+          "net_sharpe": 0.357,
+          "harvey_t": 0.75,
+          "ann_turnover": 9.16,
+          "ann_tc_pct": 0.916,
+          "avg_weight": 0.91,
+          "std_weight": 0.158,
+          "ret_skew": -0.307,
+          "ret_kurtosis": 1.814,
+          "win_rate": 53.7
+        },
+        "dm_vs_buyhold": {
+          "t_stat": -1.2,
+          "p_value": 0.2304
+        },
+        "mdd_bootstrap_vs_buyhold": {
+          "obs_mdd_diff_pct": 4.1,
+          "p_value": 0.8358
+        },
+        "dm_vs_garch_sigma": {
+          "t_stat": 1.188,
+          "p_value": 0.2351
+        },
+        "dm_vs_12vix": {
+          "t_stat": 1.231,
+          "p_value": 0.2186
+        }
+      },
+      "diagnostics": {
+        "skewt_1pct_quantile_mean": -2.6578,
+        "skewt_1pct_quantile_std": 0.0126,
+        "skewt_1pct_quantile_min": -2.6863,
+        "skewt_1pct_quantile_max": -2.6385,
+        "normal_1pct_quantile": -2.326,
+        "avg_eta_df": 10.64,
+        "avg_lambda_skew": -0.143,
+        "avg_sigma_pct": 1.0756,
+        "n_valid_fits": 806
+      }
+    }
+  },
+  "elapsed_seconds": 40.7,
+  "cross_asset_summary": {
+    "buy_hold": {
+      "avg_sharpe": 0.984,
+      "avg_net_sharpe": 0.984,
+      "avg_mdd": -19.3,
+      "n_assets": 4
+    },
+    "12_vix": {
+      "avg_sharpe": 0.832,
+      "avg_net_sharpe": 0.755,
+      "avg_mdd": -11.5,
+      "n_assets": 4
+    },
+    "garch_sigma": {
+      "avg_sharpe": 0.87,
+      "avg_net_sharpe": 0.783,
+      "avg_mdd": -12.12,
+      "n_assets": 4
+    },
+    "var_15": {
+      "avg_sharpe": 0.746,
+      "avg_net_sharpe": 0.656,
+      "avg_mdd": -9.0,
+      "n_assets": 4
+    },
+    "var_20": {
+      "avg_sharpe": 0.857,
+      "avg_net_sharpe": 0.769,
+      "avg_mdd": -11.88,
+      "n_assets": 4
+    },
+    "var_25": {
+      "avg_sharpe": 0.935,
+      "avg_net_sharpe": 0.853,
+      "avg_mdd": -14.57,
+      "n_assets": 4
+    }
+  },
+  "conclusions": [
+    "VaR-targeting 改善 Sharpe: best=0.935 vs σ=0.870 (Δ=+0.065)",
+    "VaR-targeting MDD 惡化 -2.45%",
+    "VaR-targeting vs 12/VIX: Δ Sharpe = +0.103",
+    "SPY: Skewed-t 1% quantile (-2.797) 顯著偏離 Normal (-2.326), Δ=-0.471 → VaR-targeting 確實考慮了尾部特徵",
+    "QQQ: Skewed-t 1% quantile (-2.813) 顯著偏離 Normal (-2.326), Δ=-0.487 → VaR-targeting 確實考慮了尾部特徵",
+    "GLD: Skewed-t 1% quantile (-2.688) 顯著偏離 Normal (-2.326), Δ=-0.362 → VaR-targeting 確實考慮了尾部特徵",
+    "EEM: Skewed-t 1% quantile (-2.658) 顯著偏離 Normal (-2.326), Δ=-0.332 → VaR-targeting 確實考慮了尾部特徵"
+  ]
+}

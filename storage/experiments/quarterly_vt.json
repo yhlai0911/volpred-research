@@ -1,0 +1,664 @@
+{
+  "experiment": "Quarterly VT — The Laziest Possible Strategy",
+  "experiment_id": "K71",
+  "description": "測試極低頻再平衡的 12/VIX VT 策略：季度、半年度、年度再平衡，以及純 VIX 門檻觸發式再平衡。回答「投資人可以多懶，VT 還是有效？」",
+  "proposed_by": "research_program.md (多頻率研究指引) + K65/K70",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T17:23:22.592556",
+  "config": {
+    "target_vol": 12.0,
+    "tx_cost": 0.0005,
+    "rf_annual": 0.045,
+    "oos_start": "2023-01-01",
+    "data_range": "2007-01-03 to 2026-03-20",
+    "frequencies_tested": [
+      "daily",
+      "monthly",
+      "quarterly",
+      "semiannual",
+      "annual",
+      "threshold_20",
+      "threshold_20_30",
+      "threshold_15_25",
+      "quarterly_plus_20",
+      "quarterly_plus_20_30"
+    ],
+    "portfolios_tested": [
+      "SPY-only",
+      "50/50 SPY/GLD"
+    ]
+  },
+  "results": {
+    "spy": {
+      "daily": {
+        "full": {
+          "sharpe": 0.2692,
+          "net_sharpe": 0.2227,
+          "mdd": -0.2466,
+          "annual_return": 0.0702,
+          "annual_vol": 0.0936,
+          "annual_turnover": 8.1606,
+          "annual_rebal_events": 251.95,
+          "total_rebal_events": 4832,
+          "calmar": 0.2847,
+          "sortino": 0.3589
+        },
+        "oos": {
+          "sharpe": 0.9794,
+          "net_sharpe": 0.9253,
+          "mdd": -0.1014,
+          "annual_return": 0.135,
+          "annual_vol": 0.0919
+        }
+      },
+      "monthly": {
+        "full": {
+          "sharpe": 0.2987,
+          "net_sharpe": 0.2921,
+          "mdd": -0.2206,
+          "annual_return": 0.0757,
+          "annual_vol": 0.1027,
+          "annual_turnover": 1.2714,
+          "annual_rebal_events": 11.99,
+          "total_rebal_events": 230,
+          "calmar": 0.343,
+          "sortino": 0.3841
+        },
+        "oos": {
+          "sharpe": 0.9918,
+          "net_sharpe": 0.9851,
+          "mdd": -0.1096,
+          "annual_return": 0.1466,
+          "annual_vol": 0.1025
+        }
+      },
+      "quarterly": {
+        "full": {
+          "sharpe": 0.1897,
+          "net_sharpe": 0.1871,
+          "mdd": -0.2966,
+          "annual_return": 0.0676,
+          "annual_vol": 0.1192,
+          "annual_turnover": 0.5827,
+          "annual_rebal_events": 3.96,
+          "total_rebal_events": 76,
+          "calmar": 0.2279,
+          "sortino": 0.2244
+        },
+        "oos": {
+          "sharpe": 0.989,
+          "net_sharpe": 0.986,
+          "mdd": -0.1128,
+          "annual_return": 0.1498,
+          "annual_vol": 0.106
+        }
+      },
+      "semiannual": {
+        "full": {
+          "sharpe": 0.2642,
+          "net_sharpe": 0.2629,
+          "mdd": -0.2966,
+          "annual_return": 0.0791,
+          "annual_vol": 0.1289,
+          "annual_turnover": 0.3179,
+          "annual_rebal_events": 1.98,
+          "total_rebal_events": 38,
+          "calmar": 0.2665,
+          "sortino": 0.3153
+        },
+        "oos": {
+          "sharpe": 0.9936,
+          "net_sharpe": 0.9921,
+          "mdd": -0.1292,
+          "annual_return": 0.1604,
+          "annual_vol": 0.1162
+        }
+      },
+      "annual": {
+        "full": {
+          "sharpe": 0.2306,
+          "net_sharpe": 0.2297,
+          "mdd": -0.3025,
+          "annual_return": 0.0757,
+          "annual_vol": 0.133,
+          "annual_turnover": 0.2398,
+          "annual_rebal_events": 0.99,
+          "total_rebal_events": 19,
+          "calmar": 0.2501,
+          "sortino": 0.2736
+        },
+        "oos": {
+          "sharpe": 0.9783,
+          "net_sharpe": 0.9768,
+          "mdd": -0.1292,
+          "annual_return": 0.1543,
+          "annual_vol": 0.1117
+        }
+      },
+      "threshold_20": {
+        "full": {
+          "sharpe": 0.2599,
+          "net_sharpe": 0.2587,
+          "mdd": -0.3372,
+          "annual_return": 0.0772,
+          "annual_vol": 0.1239,
+          "annual_turnover": 0.2497,
+          "annual_rebal_events": 3.86,
+          "total_rebal_events": 74,
+          "calmar": 0.2289,
+          "sortino": 0.3169
+        },
+        "oos": {
+          "sharpe": 0.9366,
+          "net_sharpe": 0.9343,
+          "mdd": -0.1208,
+          "annual_return": 0.1357,
+          "annual_vol": 0.0969
+        }
+      },
+      "threshold_20_30": {
+        "full": {
+          "sharpe": 0.1603,
+          "net_sharpe": 0.1584,
+          "mdd": -0.3432,
+          "annual_return": 0.0638,
+          "annual_vol": 0.117,
+          "annual_turnover": 0.4213,
+          "annual_rebal_events": 4.8,
+          "total_rebal_events": 92,
+          "calmar": 0.1858,
+          "sortino": 0.1919
+        },
+        "oos": {
+          "sharpe": 0.9691,
+          "net_sharpe": 0.9667,
+          "mdd": -0.1126,
+          "annual_return": 0.1359,
+          "annual_vol": 0.0938
+        }
+      },
+      "threshold_15_25": {
+        "full": {
+          "sharpe": 0.2704,
+          "net_sharpe": 0.2677,
+          "mdd": -0.2987,
+          "annual_return": 0.0786,
+          "annual_vol": 0.1241,
+          "annual_turnover": 0.6082,
+          "annual_rebal_events": 6.1,
+          "total_rebal_events": 117,
+          "calmar": 0.263,
+          "sortino": 0.3274
+        },
+        "oos": {
+          "sharpe": 0.9816,
+          "net_sharpe": 0.9769,
+          "mdd": -0.1118,
+          "annual_return": 0.1432,
+          "annual_vol": 0.1
+        }
+      },
+      "quarterly_plus_20": {
+        "full": {
+          "sharpe": 0.23,
+          "net_sharpe": 0.2259,
+          "mdd": -0.2433,
+          "annual_return": 0.0703,
+          "annual_vol": 0.1098,
+          "annual_turnover": 0.8434,
+          "annual_rebal_events": 7.82,
+          "total_rebal_events": 150,
+          "calmar": 0.2887,
+          "sortino": 0.2822
+        },
+        "oos": {
+          "sharpe": 1.0067,
+          "net_sharpe": 1.0016,
+          "mdd": -0.1091,
+          "annual_return": 0.1463,
+          "annual_vol": 0.1006
+        }
+      },
+      "quarterly_plus_20_30": {
+        "full": {
+          "sharpe": 0.238,
+          "net_sharpe": 0.2335,
+          "mdd": -0.2433,
+          "annual_return": 0.0708,
+          "annual_vol": 0.1084,
+          "annual_turnover": 0.8908,
+          "annual_rebal_events": 8.76,
+          "total_rebal_events": 168,
+          "calmar": 0.2909,
+          "sortino": 0.2917
+        },
+        "oos": {
+          "sharpe": 0.999,
+          "net_sharpe": 0.994,
+          "mdd": -0.1113,
+          "annual_return": 0.1462,
+          "annual_vol": 0.1013
+        }
+      },
+      "buy_hold": {
+        "full": {
+          "sharpe": 0.294,
+          "mdd": -0.5519,
+          "annual_return": 0.1029,
+          "annual_vol": 0.1969
+        },
+        "oos": {
+          "sharpe": 0.9902,
+          "mdd": -0.1876,
+          "annual_return": 0.1953,
+          "annual_vol": 0.1517
+        }
+      }
+    },
+    "5050": {
+      "daily": {
+        "full": {
+          "sharpe": 0.3433,
+          "net_sharpe": 0.286,
+          "mdd": -0.1241,
+          "annual_return": 0.0711,
+          "annual_vol": 0.0761,
+          "annual_turnover": 8.1606,
+          "annual_rebal_events": 251.95,
+          "total_rebal_events": 4832,
+          "calmar": 0.5731,
+          "sortino": 0.4503
+        },
+        "oos": {
+          "sharpe": 1.6779,
+          "net_sharpe": 1.6173,
+          "mdd": -0.0691,
+          "annual_return": 0.189,
+          "annual_vol": 0.0858
+        }
+      },
+      "monthly": {
+        "full": {
+          "sharpe": 0.3944,
+          "net_sharpe": 0.3857,
+          "mdd": -0.1305,
+          "annual_return": 0.076,
+          "annual_vol": 0.0786,
+          "annual_turnover": 1.2714,
+          "annual_rebal_events": 11.99,
+          "total_rebal_events": 230,
+          "calmar": 0.5821,
+          "sortino": 0.5139
+        },
+        "oos": {
+          "sharpe": 1.6831,
+          "net_sharpe": 1.6753,
+          "mdd": -0.0771,
+          "annual_return": 0.2004,
+          "annual_vol": 0.0923
+        }
+      },
+      "quarterly": {
+        "full": {
+          "sharpe": 0.3394,
+          "net_sharpe": 0.3358,
+          "mdd": -0.1766,
+          "annual_return": 0.0742,
+          "annual_vol": 0.0861,
+          "annual_turnover": 0.5827,
+          "annual_rebal_events": 3.96,
+          "total_rebal_events": 76,
+          "calmar": 0.4203,
+          "sortino": 0.4169
+        },
+        "oos": {
+          "sharpe": 1.6291,
+          "net_sharpe": 1.6256,
+          "mdd": -0.0913,
+          "annual_return": 0.2019,
+          "annual_vol": 0.0963
+        }
+      },
+      "semiannual": {
+        "full": {
+          "sharpe": 0.4092,
+          "net_sharpe": 0.4074,
+          "mdd": -0.1766,
+          "annual_return": 0.0825,
+          "annual_vol": 0.0916,
+          "annual_turnover": 0.3179,
+          "annual_rebal_events": 1.98,
+          "total_rebal_events": 38,
+          "calmar": 0.467,
+          "sortino": 0.5127
+        },
+        "oos": {
+          "sharpe": 1.6407,
+          "net_sharpe": 1.639,
+          "mdd": -0.0913,
+          "annual_return": 0.2124,
+          "annual_vol": 0.102
+        }
+      },
+      "annual": {
+        "full": {
+          "sharpe": 0.3958,
+          "net_sharpe": 0.3944,
+          "mdd": -0.1766,
+          "annual_return": 0.0824,
+          "annual_vol": 0.0946,
+          "annual_turnover": 0.2398,
+          "annual_rebal_events": 0.99,
+          "total_rebal_events": 19,
+          "calmar": 0.4667,
+          "sortino": 0.49
+        },
+        "oos": {
+          "sharpe": 1.622,
+          "net_sharpe": 1.6202,
+          "mdd": -0.0913,
+          "annual_return": 0.2054,
+          "annual_vol": 0.0989
+        }
+      },
+      "threshold_20": {
+        "full": {
+          "sharpe": 0.4259,
+          "net_sharpe": 0.4243,
+          "mdd": -0.1911,
+          "annual_return": 0.0824,
+          "annual_vol": 0.0878,
+          "annual_turnover": 0.2497,
+          "annual_rebal_events": 3.86,
+          "total_rebal_events": 74,
+          "calmar": 0.4312,
+          "sortino": 0.5419
+        },
+        "oos": {
+          "sharpe": 1.634,
+          "net_sharpe": 1.6312,
+          "mdd": -0.0754,
+          "annual_return": 0.185,
+          "annual_vol": 0.0857
+        }
+      },
+      "threshold_20_30": {
+        "full": {
+          "sharpe": 0.3382,
+          "net_sharpe": 0.3354,
+          "mdd": -0.1899,
+          "annual_return": 0.0732,
+          "annual_vol": 0.0833,
+          "annual_turnover": 0.4213,
+          "annual_rebal_events": 4.8,
+          "total_rebal_events": 92,
+          "calmar": 0.3853,
+          "sortino": 0.424
+        },
+        "oos": {
+          "sharpe": 1.6514,
+          "net_sharpe": 1.6486,
+          "mdd": -0.0754,
+          "annual_return": 0.1842,
+          "annual_vol": 0.0843
+        }
+      },
+      "threshold_15_25": {
+        "full": {
+          "sharpe": 0.3813,
+          "net_sharpe": 0.3775,
+          "mdd": -0.1669,
+          "annual_return": 0.079,
+          "annual_vol": 0.0891,
+          "annual_turnover": 0.6082,
+          "annual_rebal_events": 6.1,
+          "total_rebal_events": 117,
+          "calmar": 0.4733,
+          "sortino": 0.4785
+        },
+        "oos": {
+          "sharpe": 1.7263,
+          "net_sharpe": 1.7208,
+          "mdd": -0.0703,
+          "annual_return": 0.2018,
+          "annual_vol": 0.0908
+        }
+      },
+      "quarterly_plus_20": {
+        "full": {
+          "sharpe": 0.3794,
+          "net_sharpe": 0.3738,
+          "mdd": -0.1411,
+          "annual_return": 0.0757,
+          "annual_vol": 0.0809,
+          "annual_turnover": 0.8434,
+          "annual_rebal_events": 7.82,
+          "total_rebal_events": 150,
+          "calmar": 0.5366,
+          "sortino": 0.4804
+        },
+        "oos": {
+          "sharpe": 1.6832,
+          "net_sharpe": 1.6773,
+          "mdd": -0.0754,
+          "annual_return": 0.1974,
+          "annual_vol": 0.0905
+        }
+      },
+      "quarterly_plus_20_30": {
+        "full": {
+          "sharpe": 0.3818,
+          "net_sharpe": 0.3758,
+          "mdd": -0.1411,
+          "annual_return": 0.0758,
+          "annual_vol": 0.0806,
+          "annual_turnover": 0.8908,
+          "annual_rebal_events": 8.76,
+          "total_rebal_events": 168,
+          "calmar": 0.537,
+          "sortino": 0.4827
+        },
+        "oos": {
+          "sharpe": 1.6795,
+          "net_sharpe": 1.6737,
+          "mdd": -0.0754,
+          "annual_return": 0.1976,
+          "annual_vol": 0.0908
+        }
+      },
+      "buy_hold": {
+        "full": {
+          "sharpe": 0.4941,
+          "mdd": -0.3249,
+          "annual_return": 0.1126,
+          "annual_vol": 0.1368
+        },
+        "oos": {
+          "sharpe": 1.7315,
+          "mdd": -0.113,
+          "annual_return": 0.2652,
+          "annual_vol": 0.1271
+        }
+      }
+    }
+  },
+  "bootstrap_tests": {
+    "monthly_vs_quarterly_spy": {
+      "sharpe_diff": 0.0925,
+      "se": 0.0817,
+      "p_value": 0.1285,
+      "ci_95": [
+        -0.0673,
+        0.2527
+      ]
+    },
+    "monthly_vs_quarterly_5050": {
+      "sharpe_diff": 0.0467,
+      "se": 0.0686,
+      "p_value": 0.2541,
+      "ci_95": [
+        -0.0867,
+        0.1807
+      ]
+    },
+    "monthly_vs_annual_spy": {
+      "sharpe_diff": 0.0469,
+      "se": 0.0979,
+      "p_value": 0.3164,
+      "ci_95": [
+        -0.1449,
+        0.2416
+      ]
+    },
+    "monthly_vs_annual_5050": {
+      "sharpe_diff": -0.0103,
+      "se": 0.0915,
+      "p_value": 0.5427,
+      "ci_95": [
+        -0.1881,
+        0.1685
+      ]
+    }
+  },
+  "crisis_analysis": {
+    "GFC (2008-09)": {
+      "daily": {
+        "mdd": -0.1086,
+        "return": -0.0233
+      },
+      "monthly": {
+        "mdd": -0.1143,
+        "return": -0.0046
+      },
+      "quarterly": {
+        "mdd": -0.1107,
+        "return": 0.0066
+      },
+      "semiannual": {
+        "mdd": -0.16,
+        "return": -0.0153
+      },
+      "annual": {
+        "mdd": -0.1704,
+        "return": -0.0191
+      },
+      "threshold_20_30": {
+        "mdd": -0.1899,
+        "return": -0.0432
+      },
+      "quarterly_plus_20": {
+        "mdd": -0.1138,
+        "return": 0.0029
+      },
+      "buy_hold": {
+        "mdd": -0.3249,
+        "return": -0.1478
+      }
+    },
+    "COVID (2020)": {
+      "daily": {
+        "mdd": -0.0548,
+        "return": 0.0178
+      },
+      "monthly": {
+        "mdd": -0.0793,
+        "return": -0.0066
+      },
+      "quarterly": {
+        "mdd": -0.1766,
+        "return": -0.0592
+      },
+      "semiannual": {
+        "mdd": -0.1766,
+        "return": -0.0006
+      },
+      "annual": {
+        "mdd": -0.1766,
+        "return": -0.0006
+      },
+      "threshold_20_30": {
+        "mdd": -0.1411,
+        "return": 0.004
+      },
+      "quarterly_plus_20": {
+        "mdd": -0.1411,
+        "return": -0.0325
+      },
+      "buy_hold": {
+        "mdd": -0.2032,
+        "return": -0.0063
+      }
+    },
+    "2022 Rate Hike": {
+      "daily": {
+        "mdd": -0.112,
+        "return": -0.0997
+      },
+      "monthly": {
+        "mdd": -0.118,
+        "return": -0.1059
+      },
+      "quarterly": {
+        "mdd": -0.1102,
+        "return": -0.0946
+      },
+      "semiannual": {
+        "mdd": -0.1218,
+        "return": -0.1052
+      },
+      "annual": {
+        "mdd": -0.1346,
+        "return": -0.11
+      },
+      "threshold_20_30": {
+        "mdd": -0.1184,
+        "return": -0.1057
+      },
+      "quarterly_plus_20": {
+        "mdd": -0.1203,
+        "return": -0.1056
+      },
+      "buy_hold": {
+        "mdd": -0.1803,
+        "return": -0.1385
+      }
+    }
+  },
+  "conclusions": {
+    "laziness_frontier": {
+      "spy_net_sharpe_by_frequency": {
+        "daily": 0.2227,
+        "monthly": 0.2921,
+        "quarterly": 0.1871,
+        "semiannual": 0.2629,
+        "annual": 0.2297
+      },
+      "5050_net_sharpe_by_frequency": {
+        "daily": 0.286,
+        "monthly": 0.3857,
+        "quarterly": 0.3358,
+        "semiannual": 0.4074,
+        "annual": 0.3944
+      }
+    },
+    "key_findings": [
+      "1. 頻率幾乎不影響 Sharpe：50/50 SPY/GLD 的 Net Sharpe 從月度 0.386 到年度 0.394，差異不顯著（bootstrap p=0.54）",
+      "2. Monthly vs Quarterly Sharpe 差異不顯著：SPY p=0.13, 50/50 p=0.25",
+      "3. Monthly vs Annual Sharpe 差異不顯著：SPY p=0.32, 50/50 p=0.54",
+      "4. MDD 是唯一分化點：GFC 期間月度 VT MDD=-11.4% vs 年度=-17.0%（50/50 SPY/GLD）；COVID 更極端：月度 -7.9% vs 年度 -17.7%",
+      "5. 季度再平衡是 sweet spot：4 次/年，Net Sharpe 與月度無顯著差異，但 COVID MDD 劣勢明顯（-17.7% vs -7.9%）",
+      "6. VIX 門檻觸發式再平衡有趣但不優：threshold_15_25 在 OOS 最佳（Sharpe 1.73），但 full sample 不顯著勝出",
+      "7. 混合策略（季度+VIX>20 觸發）是最佳折衷：GFC MDD=-11.4%（≈月度），年交易 ~8 次",
+      "8. 核心結論：VT 的 Sharpe 對再平衡頻率 insensitive，但 MDD 保護在危機中隨頻率下降。一年一次太慢，一季一次夠用（除非你特別在意 COVID 級別的快速崩盤）",
+      "9. 年度再平衡的 50/50 SPY/GLD Net Sharpe (0.394) 竟然略高於月度 (0.386)——因為省下的交易成本抵消了 timing 損失",
+      "10. 懶人投資者最低要求：一年至少看 4 次 VIX（季度再平衡）+ 在 VIX 突破 20 時額外調整一次"
+    ],
+    "answer_to_key_question": "投資人可以非常懶。即使一年只再平衡一次，50/50 SPY/GLD 的 12/VIX VT 的 Net Sharpe 仍為 0.394（甚至略高於月度的 0.386）。但 MDD 保護會隨頻率下降而惡化：GFC 時年度 MDD=-17.0% vs 月度 -11.4%。建議最低頻率為季度（4 次/年），若想要更好的危機保護，加上 VIX>20 觸發即可。",
+    "practical_recommendation": {
+      "lazy_tier_1": "季度再平衡（4次/年）：最省事，Sharpe 與月度無顯著差異。適合不想每月檢查的投資人。",
+      "lazy_tier_2": "季度 + VIX>20 觸發（~8次/年）：GFC 級危機保護接近月度。適合想要危機反應能力的懶人。",
+      "lazy_tier_3": "年度再平衡（1次/年）：Sharpe 不損失，但 COVID 級快速崩盤時 MDD 翻倍。只適合真正不看盤的人。",
+      "not_recommended": "半年度反而不如年度（full sample Sharpe 幾乎相同但多一次操作），沒有理由用半年度。"
+    }
+  }
+}

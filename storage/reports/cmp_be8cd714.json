@@ -1,0 +1,45 @@
+{
+  "id": "cmp_be8cd714",
+  "experiment_ids": [],
+  "title": "多資產 Risk Parity：2 資產 (SPY+GLD) 仍是最佳",
+  "category": "comparison",
+  "ranking": [
+    {
+      "rank": 1,
+      "model": "RP 2 (SPY+GLD)",
+      "sharpe": 1.18,
+      "ann_ret": "15.5%",
+      "maxdd": "21.0%"
+    },
+    {
+      "rank": 2,
+      "model": "SPY B&H",
+      "sharpe": 0.65,
+      "ann_ret": "11.0%",
+      "maxdd": "29.3%"
+    },
+    {
+      "rank": 3,
+      "model": "RP 4 (SPY+QQQ+GLD+TLT)",
+      "sharpe": 0.64,
+      "ann_ret": "10.3%",
+      "maxdd": "39.0%"
+    },
+    {
+      "rank": 4,
+      "model": "SPY Slow VT",
+      "sharpe": 0.62,
+      "ann_ret": "7.5%",
+      "maxdd": "18.9%"
+    }
+  ],
+  "analysis": "## 為什麼 4 資產不如 2 資產？\n\n**TLT（長期美國國債）是問題的根源。**\n\nRisk Parity 按波動率反比分配權重 → TLT 波動率低 → 權重高達 40%。\n但 2022 年 Fed 暴力升息 → TLT 暴跌 30%+ → 同時 SPY 也在跌。\n**股債同跌打破了 Risk Parity 的核心假設（資產間低相關性）。**\n\n| 資產 | 2022 報酬 | 2024-25 報酬 | RP 平均權重 |\n|------|----------|-------------|-----------|\n| SPY | -19% | +48% | 43% |\n| QQQ | -33% | +55% | 31% |\n| GLD | -1% | +45% | 40% |\n| TLT | -31% | -8% | 40% |\n\n**GLD 是真正的分散化工具**——2022 只跌 1%，2024-25 大漲 45%。\n**QQQ 和 SPY 太像了**——加入不增加分散化效果。\n\n注意：此結論高度依賴 2022-2025 的利率環境。在降息週期中 TLT 表現可能完全不同。\n    ",
+  "tags": [
+    "多資產",
+    "Risk Parity",
+    "TLT",
+    "分散化"
+  ],
+  "published_at": "2026-03-14T15:30:32.079656+00:00",
+  "status": "published"
+}
