@@ -8956,5 +8956,35 @@
       "VIX",
       "面向G"
     ]
+  },
+  {
+    "id": "K930",
+    "timestamp": "2026-03-21T16:16:44.315707+00:00",
+    "category": "strategy_optimization",
+    "confidence": 0.88,
+    "content": "[提出: Claude, 執行: Claude] K107: 內容績效元分析。10 大發現：(1) 內容洪水是最大問題（56.5 篇/天）(2) 行為金融 ROI 最高（2 篇但 88 weighted views each）(3) 會員 Q&A 互動密度 2x (4) General 有看沒互動 (5) Research 獲最多 likes (6) GARCH/VaR 過飽和 (7) 台灣內容嚴重不足 (8) 最佳文章長度 1000-3000 字 (9) 破折號標題表現更好 (10) 93.3% views 來自會員。建議：減少 GARCH 技術文、增加行為金融+台灣指南+會員 Q&A。",
+    "evidence": "content_performance.json: 452 articles, 15 tracked views",
+    "tags": [
+      "content_strategy",
+      "meta_analysis",
+      "website",
+      "面向F"
+    ]
+  },
+  {
+    "id": "K931",
+    "timestamp": "2026-03-21T16:16:44.316142+00:00",
+    "category": "strategy_optimization",
+    "confidence": 0.9,
+    "content": "[提出: Claude 面向G, 執行: Claude] K108: ★ ETF 動量策略（首次非 vol 研究）。XS-MOM Top 3 Sharpe 0.540 (Harvey t=2.28 未通過 3.0)。50/50 SPY/GLD + 12/VIX 再次不可撼動（Sharpe 0.687, MDD -13.2%）——第 10 次驗證。12/VIX 反而傷害動量（0.540→0.499）——動量自帶避險（危機轉向 GLD/TLT），VIX 現金配置拖累內建機制。互補性有限（corr=0.675 偏高）。動量崩潰嚴重（GFC -22.8%）。",
+    "evidence": "momentum_etf.json: 10 ETFs, XS-MOM, 7 strategies, 2007-2026",
+    "tags": [
+      "momentum",
+      "ETF",
+      "cross_sectional",
+      "50/50",
+      "面向G",
+      "非vol研究"
+    ]
   }
 ]

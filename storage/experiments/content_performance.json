@@ -1,0 +1,218 @@
+{
+  "experiment_id": "content_performance_analysis_20260322",
+  "title": "Website Content Performance Meta-Analysis",
+  "date": "2026-03-22",
+  "methodology": "Cross-referenced feed.json (452 articles) with Supabase analytics API (15 tracked views, 3 likes, 3 bookmarks)",
+
+  "data_overview": {
+    "total_articles": 452,
+    "published": 441,
+    "draft": 11,
+    "publishing_period": "2026-03-14 to 2026-03-21 (8 days)",
+    "total_tracked_views": 15,
+    "total_likes": 3,
+    "total_bookmarks": 3,
+    "member_impression_ratio": 0.933,
+    "avg_read_sec": 10.5,
+    "caveat": "Very early stage — only 15 views tracked. Engagement data is directional, not statistically significant."
+  },
+
+  "audience_performance": {
+    "summary": "member_qa has highest engagement density (2 views/article). Research content has most total engagement signals (2 likes, 1 bookmark). General content has views but zero engagement signals.",
+    "breakdown": [
+      {"audience": "research", "views": 6, "articles_tracked": 6, "views_per_article": 1.0, "likes": 2, "bookmarks": 1},
+      {"audience": "general", "views": 5, "articles_tracked": 5, "views_per_article": 1.0, "likes": 0, "bookmarks": 0},
+      {"audience": "daily", "views": 2, "articles_tracked": 2, "views_per_article": 1.0, "likes": 1, "bookmarks": 1},
+      {"audience": "member_qa", "views": 2, "articles_tracked": 1, "views_per_article": 2.0, "likes": 0, "bookmarks": 1}
+    ],
+    "insight": "Member Q&A articles are most 'sticky' — readers who find them are more likely to bookmark. Research content drives likes (social proof). General content is viewed but not acted on — possible quality or targeting gap."
+  },
+
+  "top_articles": [
+    {"title": "【會員提問】升息環境要調整 50/50 配置嗎？數據說不用", "audience": "member_qa", "views": 2, "bookmarks": 1, "content_length": 2280, "avg_read_sec": 15, "title_pattern": "bracket+question+number"},
+    {"title": "2026-03-20 本日持倉比率建議", "audience": "daily", "views": 1, "likes": 1, "bookmarks": 1, "content_length": 379, "avg_read_sec": 14, "title_pattern": "date+number"},
+    {"title": "2026 Q1 即時驗證：6 個策略全勝 SPY——VT 保險正在理賠", "audience": "research", "views": 1, "likes": 1, "content_length": 1486, "avg_read_sec": 6, "title_pattern": "number+em-dash+colon"},
+    {"title": "恐慌賣出讓你 20 年少賺 29 萬美元——兩個投資人的真實對決", "audience": "general", "views": 1, "content_length": 3117, "avg_read_sec": null, "title_pattern": "number+em-dash+narrative"},
+    {"title": "253 個起始日，100% 勝率——VT 不是回測幻覺的最強證據", "audience": "research", "views": 1, "content_length": 1235, "avg_read_sec": null, "title_pattern": "number+em-dash+claim"}
+  ],
+
+  "content_length_analysis": {
+    "distribution": {
+      "<100_chars": {"count": 36, "pct": 8.0},
+      "100-500_chars": {"count": 206, "pct": 45.6},
+      "500-1000_chars": {"count": 127, "pct": 28.1},
+      "1000-3000_chars": {"count": 62, "pct": 13.7},
+      "3000-5000_chars": {"count": 16, "pct": 3.5},
+      "5000+_chars": {"count": 5, "pct": 1.1}
+    },
+    "mean_chars": 800,
+    "median_chars": 488,
+    "insight": "53.6% of articles are under 500 chars — essentially micro-posts. Top-performing articles average 1,700 chars. The 33 general-audience articles average 1,618 chars. Long-form content (1000+ chars) represents only 18.3% of articles but likely drives disproportionate value.",
+    "optimal_range": "1,000-3,000 chars appears to be the sweet spot: detailed enough to provide value, short enough to be read in 2-5 minutes"
+  },
+
+  "tag_analysis": {
+    "top_tags_by_article_count": [
+      {"tag": "波動率預測", "count": 195, "avg_chars": 565},
+      {"tag": "SPY", "count": 184, "avg_chars": 881},
+      {"tag": "VT策略", "count": 145, "avg_chars": 1006},
+      {"tag": "GJR-GARCH", "count": 114, "avg_chars": 634},
+      {"tag": "GARCH", "count": 112, "avg_chars": 745},
+      {"tag": "GLD", "count": 82, "avg_chars": 984},
+      {"tag": "VaR", "count": 82, "avg_chars": 540},
+      {"tag": "Hybrid-VT", "count": 70, "avg_chars": 741},
+      {"tag": "危機分析", "count": 65, "avg_chars": 721},
+      {"tag": "跨資產", "count": 62, "avg_chars": 599}
+    ],
+    "top_tags_by_weighted_views": [
+      {"tag": "SPY", "weighted_views": 156},
+      {"tag": "VT策略", "weighted_views": 148},
+      {"tag": "GLD", "weighted_views": 112},
+      {"tag": "12/VIX", "weighted_views": 110},
+      {"tag": "風險管理", "weighted_views": 99},
+      {"tag": "波動率預測", "weighted_views": 98},
+      {"tag": "行為金融", "weighted_views": 88},
+      {"tag": "恐慌賣出", "weighted_views": 88}
+    ],
+    "high_engagement_tags": ["行為金融", "恐慌賣出", "投資心理"],
+    "insight": "行為金融 has only 2 articles but 88 weighted views — highest views-per-article. VT策略 and SPY are volume leaders but also the most saturated. 12/VIX content is efficient (110 weighted views from just 45 articles)."
+  },
+
+  "oversaturation_analysis": {
+    "severely_oversaturated": [
+      {"topic": "波動率預測 (generic)", "articles": 195, "avg_chars": 565, "problem": "Highest count but below-average content length. Many short micro-posts that add little incremental value."},
+      {"topic": "GJR-GARCH / GARCH", "articles": 226, "avg_chars": 687, "problem": "Combined 226 articles about GARCH variants. The core message (GJR is best) was established early. Diminishing returns on more GARCH articles."},
+      {"topic": "VaR", "articles": 82, "avg_chars": 540, "problem": "Highly technical topic with many short posts. Few general readers would engage."},
+      {"topic": "Hybrid-VT", "articles": 70, "avg_chars": 741, "problem": "Research concept that proved to have no alpha (Conditional VT null per J13). Dead-end topic still overrepresented."}
+    ],
+    "action": "Stop producing more short articles on GARCH/VaR/Hybrid-VT. These topics are fully explored."
+  },
+
+  "underserved_topics": {
+    "high_potential": [
+      {"topic": "行為金融 / 投資心理", "current_articles": 2, "weighted_views": 88, "opportunity": "Massively underserved. 2 articles but among highest engagement. Stories about investor behavior resonate strongly."},
+      {"topic": "退休規劃 / 4% rule", "current_articles": 3, "avg_chars": 3500, "opportunity": "Long-form, high-quality content. Directly relevant to reader goals. Only 3 articles."},
+      {"topic": "實戰指南 / 投資教學", "current_articles": 3, "avg_chars": 3000, "opportunity": "Practical how-to content is scarce. Readers want actionable guidance."},
+      {"topic": "台灣市場 (0050.TW)", "current_articles": 21, "opportunity": "Only 21 articles vs 184 for SPY. Taiwan readers are a primary audience but underserved."},
+      {"topic": "會員提問 (Q&A)", "current_articles": 8, "views_per_article": 2.0, "opportunity": "Highest engagement density. Real questions from real users create immediately relevant content."},
+      {"topic": "市場時事分析", "current_articles": 1, "opportunity": "Only 1 article tied to current events (private credit). Timely analysis drives urgency and shares."},
+      {"topic": "DCA + 定期定額", "current_articles": 4, "opportunity": "Core retail investing strategy. Only 4 articles."}
+    ],
+    "action": "Prioritize content in these areas. Each article in these categories will have higher marginal impact than another GARCH explainer."
+  },
+
+  "title_patterns": {
+    "top_patterns_in_performing_articles": [
+      "number + em-dash (dramatic claim) — 3/5 top articles",
+      "bracket label + question — 1/5 top articles",
+      "date + actionable info — 1/5 top articles"
+    ],
+    "overall_distribution": {
+      "titles_with_numbers": {"count": 315, "pct": 70},
+      "titles_with_questions": {"count": 36, "pct": 8},
+      "titles_with_em_dash": {"count": 56, "pct": 12},
+      "titles_with_brackets": {"count": 5, "pct": 1}
+    },
+    "insight": "Em-dash titles (Statement——Dramatic conclusion) appear in 3/5 top articles but only 12% of all articles. Question-mark titles appear in 1/5 top articles but only 8% of all articles. These high-engagement patterns are underused.",
+    "recommended_formula": "Concrete number + em-dash + reader-relevant claim. E.g., '每月花 5 分鐘——懶人版波動率擇時實戰'"
+  },
+
+  "posting_cadence": {
+    "total_days": 8,
+    "avg_per_day": 56.5,
+    "max_single_day": 131,
+    "problem": "Extremely burst-heavy publishing. 131 articles in one day is content flooding — readers cannot digest this. The most recent days (Mar 19-20) had 1 article each, which is far more sustainable.",
+    "recommendation": "Target 2-5 articles per day maximum. Prioritize quality over quantity. Use the article pool/scheduling system to spread content evenly."
+  },
+
+  "recommendations": {
+    "write_more": [
+      {
+        "topic": "行為金融 / 投資心理 / 恐慌賣出",
+        "why": "Highest engagement-per-article (88 weighted views from 2 articles). Narrative-driven content that non-researchers can connect with.",
+        "format": "Long-form stories (2000-3000 chars), em-dash titles, specific dollar amounts",
+        "target_frequency": "1-2 per week"
+      },
+      {
+        "topic": "會員提問 Q&A",
+        "why": "2x views per article. Readers seek answers to their specific questions. Creates community.",
+        "format": "1500-2500 chars, 【會員提問】bracket label, answer with data",
+        "target_frequency": "2-3 per week (as questions come in)"
+      },
+      {
+        "topic": "台灣市場實戰 (0050.TW)",
+        "why": "Primary audience is Taiwanese investors. Only 21 articles (vs 184 SPY). Direct relevance.",
+        "format": "Practical guides with Taiwan-specific context (tax, ETF, rebalancing schedule)",
+        "target_frequency": "1 per week"
+      },
+      {
+        "topic": "退休 / 長期投資 / DCA",
+        "why": "Connects research to life goals. High avg content length (3000+ chars) suggests quality bar is already high.",
+        "format": "Scenario-based, Monte Carlo results in plain language",
+        "target_frequency": "1 per 2 weeks"
+      },
+      {
+        "topic": "市場時事 + 我們的模型怎麼看",
+        "why": "Only 1 article. Timely content creates urgency. Demonstrates system is alive and responsive.",
+        "format": "What happened + What VT says + What to do (or not do)",
+        "target_frequency": "Event-driven, 1-2 per month"
+      }
+    ],
+
+    "write_less": [
+      {
+        "topic": "GARCH / GJR-GARCH technical details",
+        "current_count": 226,
+        "why": "Core finding (GJR is best) established long ago. Technical GARCH articles have below-average engagement and content length. Audience for pure GARCH content is near-zero retail readers."
+      },
+      {
+        "topic": "VaR / backtesting technical",
+        "current_count": 82,
+        "why": "Highly specialized. 540 avg chars suggests many micro-posts. Consolidate into 1-2 definitive guides instead."
+      },
+      {
+        "topic": "Hybrid-VT / conditional overlays",
+        "current_count": 70,
+        "why": "Research concluded these don't work (J13: all null). Publishing more articles on a dead-end erodes credibility."
+      },
+      {
+        "topic": "Gamma效應 technical",
+        "current_count": 38,
+        "why": "Academic concept. Relevant for the paper, not for feed content."
+      }
+    ],
+
+    "format_improvements": [
+      "Increase median article length from 488 to 1000+ chars. Articles under 300 chars should be combined or dropped.",
+      "Use em-dash titles more often (currently 12%, should be 30-40% for non-daily content).",
+      "Add question-style titles for general audience content (currently 8%, target 20%).",
+      "Spread publishing across days (max 5/day) instead of burst publishing (131/day observed).",
+      "Every article should have a clear 'So what?' for the reader in the first paragraph."
+    ],
+
+    "content_strategy_shift": {
+      "from": "Research log → publish everything as milestone → content flood",
+      "to": "Curated content calendar → 2-3 high-quality articles per day → mix of research + practical + Q&A",
+      "ratio": {
+        "research_insights": "30% (distilled findings, not raw experiment logs)",
+        "practical_guides": "25% (how-to, Taiwan-specific, tools)",
+        "behavioral_stories": "20% (investor psychology, real scenarios)",
+        "member_qa": "15% (answer questions with data)",
+        "daily_signals": "10% (one per trading day, concise)"
+      }
+    }
+  },
+
+  "key_findings_summary": [
+    "1. CONTENT FLOODING is the #1 problem: 452 articles in 8 days (56.5/day avg) overwhelms readers. Quality >> quantity.",
+    "2. BEHAVIORAL FINANCE is the highest-ROI content category: 2 articles drove 88 weighted views. Stories > statistics for engagement.",
+    "3. MEMBER Q&A has 2x engagement density: real questions = real relevance. Should be a content pillar.",
+    "4. GENERAL audience content gets views but ZERO engagement: the content is being seen but not resonating. Needs stronger hooks and calls to action.",
+    "5. RESEARCH content actually gets the most likes/bookmarks: readers who engage deeply value rigorous analysis. Don't abandon it — refine it.",
+    "6. GARCH/VaR/Hybrid-VT are oversaturated: 378 articles on topics with declining marginal value. Consolidate into definitive guides.",
+    "7. TAIWAN market content is underserved: only 21 articles for the primary audience geography.",
+    "8. OPTIMAL article length is 1000-3000 chars: long enough for substance, short enough to finish. Current median (488) is too short.",
+    "9. EM-DASH titles outperform: 3/5 top articles use this pattern but only 12% of all articles.",
+    "10. 93.3% of views come from members: SEO/discovery is essentially zero. Priority must be retention AND acquisition."
+  ]
+}

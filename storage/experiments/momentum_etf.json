@@ -1,0 +1,540 @@
+{
+  "experiment": "L1: Cross-Sectional Momentum in ETFs",
+  "description": "跨資產動量策略：每月按過去12個月報酬（跳1個月）排名，做多前3/5名。測試動量能否補充 VT 的不同 alpha 來源。",
+  "proposed_by": "用戶",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T16:14:43.034624+00:00",
+  "config": {
+    "universe": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "EFA",
+      "EEM",
+      "GLD",
+      "TLT",
+      "HYG",
+      "VNQ",
+      "USO"
+    ],
+    "start": "2007-01-01",
+    "lookback_days": 252,
+    "skip_days": 21,
+    "rebalance": "monthly",
+    "tc_per_trade": 0.0005,
+    "rf_annual": 0.02,
+    "cash_proxy": "SHY"
+  },
+  "strategies": {
+    "XS-MOM Top 3": "12-1 momentum, long top 3, equal weight",
+    "XS-MOM Top 3 + 12/VIX": "12-1 momentum, long top 3, scaled by 12/VIX",
+    "XS-MOM Top 5": "12-1 momentum, long top 5, equal weight",
+    "XS-MOM Top 5 + 12/VIX": "12-1 momentum, long top 5, scaled by 12/VIX",
+    "50/50 SPY/GLD + 12/VIX": "Static allocation baseline with VT",
+    "Equal Weight 10 ETFs": "Naive diversification benchmark",
+    "50/50 MOM+VT Blend": "Equal blend of MOM Top 3 and VT baseline"
+  },
+  "results": {
+    "metrics": {
+      "XS-MOM Top 3 (no VIX)": {
+        "name": "XS-MOM Top 3 (no VIX)",
+        "total_return": 417.86,
+        "ann_return": 9.65,
+        "ann_vol": 15.68,
+        "sharpe": 0.54,
+        "harvey_t": 2.28,
+        "mdd": -34.35,
+        "calmar": 0.281,
+        "sortino": 0.647,
+        "win_rate": 54.8,
+        "n_days": 4500,
+        "n_years": 17.9,
+        "start_date": "2008-05-01",
+        "end_date": "2026-03-20"
+      },
+      "XS-MOM Top 3 + 12/VIX": {
+        "name": "XS-MOM Top 3 + 12/VIX",
+        "total_return": 215.92,
+        "ann_return": 6.65,
+        "ann_vol": 9.94,
+        "sharpe": 0.499,
+        "harvey_t": 2.11,
+        "mdd": -21.7,
+        "calmar": 0.307,
+        "sortino": 0.61,
+        "win_rate": 55.0,
+        "n_days": 4500,
+        "n_years": 17.9,
+        "start_date": "2008-05-01",
+        "end_date": "2026-03-20"
+      },
+      "XS-MOM Top 5 (no VIX)": {
+        "name": "XS-MOM Top 5 (no VIX)",
+        "total_return": 330.66,
+        "ann_return": 8.52,
+        "ann_vol": 14.98,
+        "sharpe": 0.489,
+        "harvey_t": 2.07,
+        "mdd": -40.11,
+        "calmar": 0.212,
+        "sortino": 0.558,
+        "win_rate": 55.2,
+        "n_days": 4500,
+        "n_years": 17.9,
+        "start_date": "2008-05-01",
+        "end_date": "2026-03-20"
+      },
+      "XS-MOM Top 5 + 12/VIX": {
+        "name": "XS-MOM Top 5 + 12/VIX",
+        "total_return": 171.82,
+        "ann_return": 5.76,
+        "ann_vol": 8.85,
+        "sharpe": 0.454,
+        "harvey_t": 1.92,
+        "mdd": -17.85,
+        "calmar": 0.323,
+        "sortino": 0.552,
+        "win_rate": 55.4,
+        "n_days": 4500,
+        "n_years": 17.9,
+        "start_date": "2008-05-01",
+        "end_date": "2026-03-20"
+      },
+      "50/50 SPY/GLD + 12/VIX": {
+        "name": "50/50 SPY/GLD + 12/VIX",
+        "total_return": 272.83,
+        "ann_return": 7.26,
+        "ann_vol": 7.76,
+        "sharpe": 0.687,
+        "harvey_t": 2.98,
+        "mdd": -13.2,
+        "calmar": 0.55,
+        "sortino": 0.893,
+        "win_rate": 56.4,
+        "n_days": 4731,
+        "n_years": 18.8,
+        "start_date": "2007-06-01",
+        "end_date": "2026-03-20"
+      },
+      "Equal Weight 10 ETFs": {
+        "name": "Equal Weight 10 ETFs",
+        "total_return": 275.35,
+        "ann_return": 7.3,
+        "ann_vol": 15.72,
+        "sharpe": 0.401,
+        "harvey_t": 1.74,
+        "mdd": -44.42,
+        "calmar": 0.164,
+        "sortino": 0.415,
+        "win_rate": 54.4,
+        "n_days": 4731,
+        "n_years": 18.8,
+        "start_date": "2007-06-01",
+        "end_date": "2026-03-20"
+      },
+      "50/50 MOM+VT Blend": {
+        "name": "50/50 MOM+VT Blend",
+        "total_return": 335.27,
+        "ann_return": 8.59,
+        "ann_vol": 10.83,
+        "sharpe": 0.632,
+        "harvey_t": 2.67,
+        "mdd": -22.66,
+        "calmar": 0.379,
+        "sortino": 0.814,
+        "win_rate": 55.3,
+        "n_days": 4500,
+        "n_years": 17.9,
+        "start_date": "2008-05-01",
+        "end_date": "2026-03-20"
+      }
+    },
+    "crash_analysis": {
+      "GFC_2008": {
+        "return": -22.75,
+        "n_days": 146,
+        "worst_day": -4.2,
+        "holdings": [
+          [
+            "USO",
+            "GLD",
+            "TLT"
+          ],
+          [
+            "TLT",
+            "GLD",
+            "USO"
+          ],
+          [
+            "TLT",
+            "GLD",
+            "USO"
+          ],
+          [
+            "TLT",
+            "GLD",
+            "HYG"
+          ],
+          [
+            "TLT",
+            "GLD",
+            "HYG"
+          ],
+          [
+            "TLT",
+            "GLD",
+            "HYG"
+          ],
+          [
+            "TLT",
+            "GLD",
+            "HYG"
+          ]
+        ]
+      },
+      "COVID_2020": {
+        "return": -5.19,
+        "n_days": 41,
+        "worst_day": -4.94,
+        "holdings": [
+          [
+            "QQQ",
+            "TLT",
+            "GLD"
+          ],
+          [
+            "TLT",
+            "GLD",
+            "QQQ"
+          ]
+        ]
+      },
+      "Rate_Hike_2022": {
+        "return": -5.42,
+        "n_days": 209,
+        "worst_day": -4.79,
+        "holdings": [
+          [
+            "USO",
+            "VNQ",
+            "SPY"
+          ],
+          [
+            "USO",
+            "VNQ",
+            "SPY"
+          ],
+          [
+            "USO",
+            "VNQ",
+            "GLD"
+          ],
+          [
+            "USO",
+            "VNQ",
+            "SPY"
+          ],
+          [
+            "USO",
+            "VNQ",
+            "SPY"
+          ],
+          [
+            "USO",
+            "GLD",
+            "VNQ"
+          ],
+          [
+            "USO",
+            "GLD",
+            "VNQ"
+          ],
+          [
+            "USO",
+            "GLD",
+            "HYG"
+          ],
+          [
+            "USO",
+            "GLD",
+            "VNQ"
+          ],
+          [
+            "USO",
+            "GLD",
+            "HYG"
+          ]
+        ]
+      },
+      "Taper_Tantrum_2013": {
+        "return": 6.86,
+        "n_days": 106,
+        "worst_day": -3.43,
+        "holdings": [
+          [
+            "EFA",
+            "VNQ",
+            "SPY"
+          ],
+          [
+            "IWM",
+            "EFA",
+            "SPY"
+          ],
+          [
+            "IWM",
+            "SPY",
+            "EFA"
+          ],
+          [
+            "IWM",
+            "SPY",
+            "EFA"
+          ],
+          [
+            "IWM",
+            "SPY",
+            "USO"
+          ]
+        ]
+      },
+      "China_Deval_2015": {
+        "return": -4.51,
+        "n_days": 64,
+        "worst_day": -3.99,
+        "holdings": [
+          [
+            "QQQ",
+            "IWM",
+            "SPY"
+          ],
+          [
+            "TLT",
+            "IWM",
+            "QQQ"
+          ],
+          [
+            "TLT",
+            "QQQ",
+            "VNQ"
+          ]
+        ]
+      },
+      "Volmageddon_2018": {
+        "return": -4.79,
+        "n_days": 65,
+        "worst_day": -3.88,
+        "holdings": [
+          [
+            "EEM",
+            "QQQ",
+            "EFA"
+          ],
+          [
+            "EEM",
+            "QQQ",
+            "EFA"
+          ],
+          [
+            "QQQ",
+            "EEM",
+            "USO"
+          ],
+          [
+            "USO",
+            "EEM",
+            "QQQ"
+          ]
+        ]
+      }
+    },
+    "oos_subperiods": {
+      "XS-MOM Top 3": [
+        {
+          "period": "2008-2010",
+          "ann_return": 4.67,
+          "ann_vol": 19.74,
+          "sharpe": 0.229,
+          "mdd": -34.35,
+          "n_days": 674
+        },
+        {
+          "period": "2011-2013",
+          "ann_return": 11.78,
+          "ann_vol": 13.57,
+          "sharpe": 0.743,
+          "mdd": -15.79,
+          "n_days": 754
+        },
+        {
+          "period": "2014-2016",
+          "ann_return": 0.73,
+          "ann_vol": 12.99,
+          "sharpe": -0.032,
+          "mdd": -20.46,
+          "n_days": 756
+        },
+        {
+          "period": "2017-2019",
+          "ann_return": 9.95,
+          "ann_vol": 13.89,
+          "sharpe": 0.61,
+          "mdd": -28.42,
+          "n_days": 754
+        },
+        {
+          "period": "2020-2022",
+          "ann_return": 10.63,
+          "ann_vol": 18.4,
+          "sharpe": 0.534,
+          "mdd": -19.2,
+          "n_days": 756
+        },
+        {
+          "period": "2023-now",
+          "ann_return": 19.92,
+          "ann_vol": 14.78,
+          "sharpe": 1.169,
+          "mdd": -13.8,
+          "n_days": 806
+        }
+      ],
+      "XS-MOM+VIX Top 3": [
+        {
+          "period": "2008-2010",
+          "ann_return": 6.13,
+          "ann_vol": 9.05,
+          "sharpe": 0.484,
+          "mdd": -11.98,
+          "n_days": 674
+        },
+        {
+          "period": "2011-2013",
+          "ann_return": 7.62,
+          "ann_vol": 8.67,
+          "sharpe": 0.662,
+          "mdd": -8.29,
+          "n_days": 754
+        },
+        {
+          "period": "2014-2016",
+          "ann_return": -0.89,
+          "ann_vol": 10.2,
+          "sharpe": -0.23,
+          "mdd": -16.62,
+          "n_days": 756
+        },
+        {
+          "period": "2017-2019",
+          "ann_return": 9.2,
+          "ann_vol": 11.14,
+          "sharpe": 0.668,
+          "mdd": -21.7,
+          "n_days": 754
+        },
+        {
+          "period": "2020-2022",
+          "ann_return": 2.59,
+          "ann_vol": 9.5,
+          "sharpe": 0.108,
+          "mdd": -12.47,
+          "n_days": 756
+        },
+        {
+          "period": "2023-now",
+          "ann_return": 15.39,
+          "ann_vol": 10.65,
+          "sharpe": 1.212,
+          "mdd": -8.38,
+          "n_days": 806
+        }
+      ],
+      "50/50 SPY/GLD+VIX": [
+        {
+          "period": "2008-2010",
+          "ann_return": 6.43,
+          "ann_vol": 7.32,
+          "sharpe": 0.617,
+          "mdd": -11.48,
+          "n_days": 757
+        },
+        {
+          "period": "2011-2013",
+          "ann_return": 2.26,
+          "ann_vol": 8.56,
+          "sharpe": 0.073,
+          "mdd": -11.01,
+          "n_days": 754
+        },
+        {
+          "period": "2014-2016",
+          "ann_return": 1.72,
+          "ann_vol": 7.24,
+          "sharpe": -0.002,
+          "mdd": -10.03,
+          "n_days": 756
+        },
+        {
+          "period": "2017-2019",
+          "ann_return": 10.46,
+          "ann_vol": 6.16,
+          "sharpe": 1.324,
+          "mdd": -8.85,
+          "n_days": 754
+        },
+        {
+          "period": "2020-2022",
+          "ann_return": 2.19,
+          "ann_vol": 7.21,
+          "sharpe": 0.062,
+          "mdd": -13.2,
+          "n_days": 756
+        },
+        {
+          "period": "2023-now",
+          "ann_return": 19.9,
+          "ann_vol": 9.23,
+          "sharpe": 1.799,
+          "mdd": -7.73,
+          "n_days": 806
+        }
+      ]
+    },
+    "correlations": {
+      "XS-MOM3_vs_XS-MOM3+VIX": 0.942,
+      "5050+VIX_vs_XS-MOM3": 0.675,
+      "5050+VIX_vs_XS-MOM3+VIX": 0.683,
+      "5050+VIX_vs_EW10": 0.69,
+      "EW10_vs_XS-MOM3": 0.673,
+      "EW10_vs_XS-MOM3+VIX": 0.579
+    },
+    "daily_corr_mom_vs_vt": 0.675,
+    "momentum_persistence": 0.81,
+    "asset_selection_frequency": {
+      "QQQ": 129,
+      "GLD": 96,
+      "VNQ": 84,
+      "TLT": 67,
+      "SPY": 65,
+      "IWM": 55,
+      "USO": 48,
+      "EEM": 44,
+      "EFA": 34,
+      "HYG": 23
+    },
+    "avg_monthly_turnover": {
+      "XS-MOM Top 3": 0.3843,
+      "XS-MOM+VIX Top 3": 0.4593,
+      "50/50+VIX": 0.2174,
+      "EW 10": 0.0044
+    }
+  },
+  "conclusions": [
+    "Cross-sectional momentum 有效：Top 3 Sharpe=0.540，高於 0.5 門檻",
+    "12/VIX 未改善動量策略（Sharpe 0.540 → 0.499）",
+    "動量未勝過 VT 基準：0.540 < 0.687。50/50 SPY/GLD+VIX 依然堅挺",
+    "MOM+VT 混合未超越最佳單一策略",
+    "MOM 與 VT 相關性高（0.675），分散化有限",
+    "動量 MDD 劣於基準：-34.4% vs -13.2%"
+  ]
+}
