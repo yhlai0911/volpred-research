@@ -9197,5 +9197,97 @@
     ],
     "confidence": 0.9,
     "timestamp": "2026-03-22T02:21:50.593756"
+  },
+  {
+    "id": "K945",
+    "title": "K131: TDA persistent homology — marginal dR2=2.3%, early warning 1/4",
+    "content": "[提出: Gemini G2, 執行: Claude] K131: TDA Vol Regimes。VIX-only R2=0.496, +TDA R2=0.519 (dR2=0.023)。Partial r=-0.224 controlling VIX (mean-reversion signal)。Early warning: GFC only (1/4)。VIX captures 96% of TDA info。",
+    "category": "experiment",
+    "tags": [
+      "TDA",
+      "topology",
+      "Gemini-suggested"
+    ],
+    "confidence": 0.85,
+    "timestamp": "2026-03-22T03:11:54.010333"
+  },
+  {
+    "id": "K946",
+    "title": "K129: ★★★ VIX sufficiency boundary map — economic vs statistical sufficiency",
+    "content": "[提出: Codex C1, 執行: Claude] K129: VIX Sufficient Statistic Boundary Map。數據: yfinance SPY+VIX+VIX3M+VVIX 2007-2024 (empirical)。方法: forecast encompassing (HLN 1998) + DM test + regime-conditional analysis。3 維度分析: (1) Horizon: VIX sufficient at 1d/22d/66d, 5d boundary (VIX3M encompassing p=0.017 但 QLIKE 無改善) (2) Decision: VT allocation/VaR/direction 全 sufficient, regime identification 邊界 (+0.14 AUC) (3) Regime: High VIX>25 VIX3M +11.7% R² 但 DM NS。★★★ 核心理論升級: VIX sufficiency = economic sufficiency (統計上可改善但經濟上不可約)。所有 VIX3M/VVIX-adjusted VT 策略 OOS Sharpe 更低。精確定義了「sufficient statistic」的含義。",
+    "category": "experiment",
+    "tags": [
+      "VIX-sufficient",
+      "boundary-map",
+      "encompassing-test",
+      "economic-sufficiency",
+      "Codex-suggested",
+      "theoretical-upgrade"
+    ],
+    "confidence": 0.92,
+    "timestamp": "2026-03-22T03:14:55.540989"
+  },
+  {
+    "id": "K947",
+    "title": "K130: ★★★ Decision-conditioned model router — best model is objective-dependent",
+    "content": "[提出: Codex C3, 執行: Claude] K130: Decision-Conditioned Model Selection Framework。數據: yfinance SPY+GLD+TLT 2007-2024 (empirical)。90-cell loss tensor (6 models × 3 assets × 5 objectives)。核心: 無 Pareto-dominant model。RV22 贏 QLIKE+MDD (7/15 cells)，GARCH 贏 VaR，EWMA 贏 Net Sharpe，ConstVol 贏 Turnover。GJR 贏 0 cells 但 avg rank 3.8（最均衡）。12/VIX 對 GLD/TLT VaR 全失敗 (Kupiec p=0)——VIX 是 equity-specific gauge。Single-model regret: RV22 在 VaR 上 42% regret，Turnover 上 11084% regret。Router 平均優 1.33 rank。★★★ 方法論貢獻: 把 120+ 實驗的碎片化 finding 整合為統一 decision framework。可寫入論文。",
+    "category": "experiment",
+    "tags": [
+      "model-selection",
+      "loss-tensor",
+      "decision-framework",
+      "Pareto",
+      "Codex-suggested",
+      "methodology-paper"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T03:16:44.125001"
+  },
+  {
+    "id": "K948",
+    "title": "K134: Cross-asset info topology — coupling and TE are orthogonal (r=-0.027)",
+    "content": "[提出: Gemini R2#2, 執行: Claude] K134: Cross-Asset TDA+TE Combined。數據: yfinance 5 資產 2010-2024 (empirical)。方法: eigenvalue ratio (coupling proxy) + binned TE。核心: eigenvalue ratio 和 TE 完全獨立 (r=-0.027, p=0.71)，無 lead-lag。市場耦合 (eigenvalue ratio mean=0.658) 和 VIX 資訊流是正交通道。危機時耦合上升但 TE 不一定上升 (3/5 concordant)。無早期警訊 (all z<1 pre-crisis)。VIX level 已捕捉耦合 (r=0.44)。結論: 拓撲早期警訊假說不支持，VIX sufficiency 從 info theory + topology 再次確認。",
+    "category": "experiment",
+    "tags": [
+      "topology",
+      "transfer-entropy",
+      "eigenvalue",
+      "coupling",
+      "orthogonal",
+      "Gemini-suggested"
+    ],
+    "confidence": 0.85,
+    "timestamp": "2026-03-22T04:11:53.524034"
+  },
+  {
+    "id": "K949",
+    "title": "K132: ★★★ QLIKE error decomposition — SPY 63% captured, GLD/BTC 80%+ uncaptured",
+    "content": "[提出: Gemini R2#1, 執行: Claude] K132: QLIKE Prediction Error Decomposition。數據: yfinance SPY+GLD+BTC 2007-2024 (empirical + bootstrap 5000)。Capture Rate: SPY 62.7% [56.9,67.9], GLD 19.4% [14.6,24.3], BTC 14.8% [9.8,19.9]。Bias 可忽略 (<0.01)，問題在 conditional dynamics。Noise floor = Euler-Mascheroni 0.5772 (佔 excess QLIKE 30-38%)。★★★ Regime: SPY low-VIX capture 僅 9.2% vs high-VIX 50.1% → leverage effect 在高 vol 最有效。GJR vs EWMA: SPY GJR 勝 (62.7 vs 54.5)，但 GLD/BTC EWMA 勝 (23.0/22.4 vs 19.4/14.8)。★★★ 結論: SPY 改善需更好 proxy (5-min RV)，GLD/BTC 有 80%+ 未捕捉的可解釋結構 → 巨大模型改善空間。",
+    "category": "experiment",
+    "tags": [
+      "QLIKE",
+      "decomposition",
+      "capture-rate",
+      "noise-floor",
+      "Gemini-suggested",
+      "theoretical"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T04:19:44.098012"
+  },
+  {
+    "id": "K950",
+    "title": "K133: VIX info decay router — no true decay regime, VIX always wins",
+    "content": "[提出: Gemini R2#3, 執行: Claude] K133: VIX Information Decay & Dynamic Router。數據: yfinance SPY+VIX 2005-2024 (empirical)。方法: rolling 252d VIX predictive gain = QLIKE(const) - QLIKE(VIX)。結果: VIX gain 正 68% 時間。Low-gain 年份: 2013/2014/2017/2021/2024（低 vol 環境）。但即使在最差 quartile，VIX QLIKE=-8.875 仍贏 EWMA -8.774 和 ConstVol -8.380。★ 結論: 不存在「VIX uninformative」的真正 regime → dynamic router 不需要切換模型。VIX 在所有條件下都是最佳或並列最佳。Economic sufficiency (K129) 的另一面: VIX 不只是經濟上充分，資訊上也從不完全失效。",
+    "category": "experiment",
+    "tags": [
+      "VIX-decay",
+      "model-router",
+      "rolling-gain",
+      "VIX-sufficient",
+      "Gemini-suggested"
+    ],
+    "confidence": 0.88,
+    "timestamp": "2026-03-22T04:21:52.308542"
   }
 ]
