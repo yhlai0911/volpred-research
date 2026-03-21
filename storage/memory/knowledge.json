@@ -9278,7 +9278,7 @@
   {
     "id": "K950",
     "title": "K133: VIX info decay router — no true decay regime, VIX always wins",
-    "content": "[提出: Gemini R2#3, 執行: Claude] K133: VIX Information Decay & Dynamic Router。數據: yfinance SPY+VIX 2005-2024 (empirical)。方法: rolling 252d VIX predictive gain = QLIKE(const) - QLIKE(VIX)。結果: VIX gain 正 68% 時間。Low-gain 年份: 2013/2014/2017/2021/2024（低 vol 環境）。但即使在最差 quartile，VIX QLIKE=-8.875 仍贏 EWMA -8.774 和 ConstVol -8.380。★ 結論: 不存在「VIX uninformative」的真正 regime → dynamic router 不需要切換模型。VIX 在所有條件下都是最佳或並列最佳。Economic sufficiency (K129) 的另一面: VIX 不只是經濟上充分，資訊上也從不完全失效。",
+    "content": "[提出: Gemini R2#3, 執行: Claude] K133: VIX Information Decay & Dynamic Router。數據: yfinance SPY+VIX 2005-2024 (empirical)。方法: rolling 252d VIX predictive gain = QLIKE(const) - QLIKE(VIX)。結果: VIX gain 正 68% 時間。Low-gain 年份: 2013/2014/2017/2021/2024（低 vol 環境）。但即使在最差 quartile，VIX QLIKE=-8.875 仍贏 EWMA -8.774 和 ConstVol -8.380。★ 結論: 不存在「VIX uninformative」的真正 regime → dynamic router 不需要切換模型。VIX 在所有條件下都是最佳或並列最佳。Economic sufficiency (K129) 的另一面: VIX 不只是經濟上充分，資訊上也從不完全失效。 ★ Agent 版補充: GLD/TLT 上 VIX 比 EWMA/GARCH 更差 (QLIKE gain 負)，與 K128 Transfer Entropy 一致 (VIX 對非 equity 是 receiver)。Markov switching 可偵測 decay 但 dynamic router OOS 全 NS (p>0.10)。VIX 對 SPY informative regime mean VIX=30.9 vs uninformative=17.8。",
     "category": "experiment",
     "tags": [
       "VIX-decay",
@@ -9289,5 +9289,106 @@
     ],
     "confidence": 0.88,
     "timestamp": "2026-03-22T04:21:52.308542"
+  },
+  {
+    "id": "K951",
+    "title": "K135: GLD inventory-conditioned vol — null OOS, vol is exogenous",
+    "content": "[提出: Codex R2#1, 執行: Claude] K135: GLD Inventory-Conditioned Vol。數據: yfinance GLD+TNX+VIX 2005-2024 (empirical)。代理: TNX 代替 DFII10 real yield (FRED API 失敗)。8 predictors 中 5 個 IS 顯著 (Volume Ratio t=6.81 最強)，但 OOS 全部 null 或更差。Real yield level OOS 顯著惡化 (DM t=-3.25)。Kitchen sink QLIKE 爆炸 (23.66)。GLD capture rate ~1% across all models (vs K132 的 19% 可能用不同 metric)。GJR 對 GLD 幾乎無用 (+0.3%)。★ 結論: GLD vol 衝擊本質外生 (FOMC/geopolitical/央行 surprises)，backward-looking 模型無法預測。EWMA/GARCH 作為 reactive filter 已是最佳。Codex 假說部分驗證: GLD 確實非 leverage-conditioned，但 inventory predictors OOS 也失敗。",
+    "category": "experiment",
+    "tags": [
+      "GLD",
+      "inventory",
+      "real-yield",
+      "exogenous",
+      "null-OOS",
+      "Codex-suggested"
+    ],
+    "confidence": 0.88,
+    "timestamp": "2026-03-22T05:20:19.305698"
+  },
+  {
+    "id": "K952",
+    "title": "K137: ★★★ Economic sufficiency frontier — no global optimum, objective-dependent",
+    "content": "[提出: Codex R2#4, 執行: Claude] K137: Economic Sufficiency Frontier Formal Framework。數據: yfinance SPY+GLD+TLT 2007-2024 (empirical + theoretical)。AIR tensor: 6 models × 3 assets × 4 objectives。核心定理: 不存在全域最佳模型（5 evidence lines）。(1) Blackwell sufficiency 僅 2/30 trivial pairs (2) Statistical→RV22, Economic→12/VIX (完全不同) (3) Discordance 51.1% (4) 每個模型有反例 6/6 (5) Kendall tau=0.363 (ranking 不穩)。★★★ 新洞見: Specialist vs Generalist — EWMA std=0.259 (best generalist, 最安全 default), 12/VIX std=0.832 (economic specialist, 最高變異)。Bootstrap CI 廣泛重疊。Corollary: model selection = f*(asset, objective)→model。可直接寫入論文作為核心理論框架。",
+    "category": "experiment",
+    "tags": [
+      "economic-sufficiency",
+      "AIR",
+      "Blackwell",
+      "objective-dependent",
+      "Codex-suggested",
+      "paper-ready",
+      "theorem"
+    ],
+    "confidence": 0.92,
+    "timestamp": "2026-03-22T05:23:37.831054"
+  },
+  {
+    "id": "K953",
+    "title": "K136: ★★ BTC leverage-crowding confirmed — regime-dependent gamma, volume-conditioned",
+    "content": "[提出: Codex R2#2, 執行: Claude] K136: BTC Derivatives-Conditioned Vol。數據: yfinance BTC-USD 2017-2024 (empirical)。★★ 3 個獨立證據確認 Codex 假說「BTC vol is leverage-crowding-conditioned」: (1) Regime-switching gamma: bull gamma=-0.093 (anti-leverage, t=-3.05), bear gamma=+0.127 (normal, t=2.24)——兩者抵消導致全樣本 gamma≈0 (2) Volume-conditioned gamma: 高 volume Q4 gamma=+0.274 (sig), 低 volume Q1 gamma=-0.059 (NS)——leverage effect 只在機構交易者活躍時存在 (3) Weekend vol 僅 weekday 69% (t=-5.82)——機構缺席時 vol 下降。但 GARCH-X OOS 全 null。Student-t df=3.25 (極厚尾), IGARCH persistence=1.000。實用建議: BTC 用 GARCH(1,1) 非 GJR (regime-switching gamma 讓 fixed gamma 反效果)。真正改善需 Binance funding/OI/liquidation data。",
+    "category": "experiment",
+    "tags": [
+      "BTC",
+      "leverage-crowding",
+      "regime-switching",
+      "anti-leverage",
+      "volume-conditioned",
+      "weekend-effect",
+      "Codex-suggested"
+    ],
+    "confidence": 0.9,
+    "timestamp": "2026-03-22T05:29:10.237313"
+  },
+  {
+    "id": "K954",
+    "title": "K138: ★★ Hurst fingerprint — all assets rough (H~0.01), but doesnt explain capture rate",
+    "content": "[提出: Gemini R3#3, 執行: Claude] K138: Cross-Asset Hurst Fingerprint。數據: yfinance 6 資產 2010-2024 (empirical)。3 方法: variogram H=0.006-0.020 (rough), DFA H=0.73-0.84 (persistent), R/S H=0.74-0.82。★ 方法論發現: variogram 測局部粗糙, DFA/R/S 測全域持續——vol 同時具有兩性質 (rough volatility hallmark)。跨資產 ranking 一致 (Spearman 1.000): TLT < GLD < EEM < QQQ < SPY < BTC。但 H vs capture rate rho=0.086 (p=0.87)——主假說否決。BTC volume-conditioned: 高 volume 更 rough (H=0.005 vs low 0.029)。BTC 成熟: H 0.033→0.007。Bootstrap 100% H<0.5。結論: rough vol 是普遍性質但不解釋 GARCH 跨資產差異。",
+    "category": "experiment",
+    "tags": [
+      "Hurst",
+      "rough-volatility",
+      "fractal",
+      "variogram",
+      "DFA",
+      "cross-asset",
+      "Gemini-suggested"
+    ],
+    "confidence": 0.88,
+    "timestamp": "2026-03-22T06:12:28.470254"
+  },
+  {
+    "id": "K955",
+    "title": "K140: ★★ Vol cartography decision matrix — negative recommendations > positive",
+    "content": "[提出: Gemini R3#5, 執行: Claude] K140: Vol Model Cartography。數據: yfinance SPY+GLD+TLT+BTC 2007-2024 (empirical meta-analysis)。108-cell 4D matrix (7 models × 4 assets × 3 VIX regimes × 5 objectives)。No Pareto-dominant model (wins uniform 8-21%)。69% cells 低 confidence。OOS validation 謙卑: 推薦樹 0/4 完美匹配, EWMA(0.97) 贏 all 4 assets in 2023-24。★★ 核心洞見: cartography 主要價值是 negative recommendations (what NOT to use), 如 12/VIX 不用於 BTC VaR (gap=0.18)。Universal safe default: EWMA(0.97)。Equity high-VIX: 12/VIX dominates。Non-equity: VIX irrelevant。可寫入論文 + 網站互動工具。",
+    "category": "experiment",
+    "tags": [
+      "cartography",
+      "decision-matrix",
+      "model-selection",
+      "negative-recommendations",
+      "EWMA-default",
+      "Gemini-suggested",
+      "paper-ready"
+    ],
+    "confidence": 0.88,
+    "timestamp": "2026-03-22T06:13:44.281010"
+  },
+  {
+    "id": "K956",
+    "title": "K139: ★★★ BTC liquidation ABM — 6/7 stylized facts reproduced, mechanism confirmed",
+    "content": "[提出: Gemini R3#4, 執行: Claude] K139: BTC Liquidation-Driven Vol ABM。方法: theoretical/simulation (ABM with 3 agent types: spot 50%, leveraged long 30%, leveraged short 20%)。6/7 K136 stylized facts 重現: (1) regime-dependent gamma flip (bull=-0.063, bear=+0.0003) ✅ (2) weekend vol 61% of weekday ✅ (3) fat tails df=1.92 ✅ (4) vol persistence ✅ (5) vol level 74% ✅ (6) bear>bull gamma ✅。唯一失敗: volume-conditioned gamma (需要 position-level data)。★★★ 機制解釋: BTC gamma 翻轉是 leveraged position accumulation + forced liquidation 的自然結果。Bull=做多累積→下跌清算=negative gamma。Bear=做空累積→軋空=positive gamma。實用含義: BTC 不應用 fixed-gamma GJR，需 regime-conditional 估計。",
+    "category": "experiment",
+    "tags": [
+      "BTC",
+      "ABM",
+      "liquidation",
+      "mechanism",
+      "gamma-flip",
+      "theoretical",
+      "Gemini-suggested"
+    ],
+    "confidence": 0.88,
+    "timestamp": "2026-03-22T06:19:43.360210"
   }
 ]
