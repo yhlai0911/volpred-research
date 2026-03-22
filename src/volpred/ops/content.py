@@ -70,7 +70,7 @@ def _normalize_release_settings(row: dict | None = None) -> dict:
     preferred_audiences = data.get("preferred_audiences") or []
 
     return {
-        "mode": "scheduled" if mode == "scheduled" else "manual",
+        "mode": mode if mode in ("scheduled", "auto") else "manual",
         "interval_minutes": max(5, min(int(interval_minutes or 1440), 24 * 60 * 14)),
         "max_articles_per_run": max(1, min(int(max_articles_per_run or 1), 20)),
         "due_only": bool(data.get("due_only", True)),
@@ -249,7 +249,7 @@ def release_pool_by_settings(
         next_release_at = last_released_at + timedelta(minutes=int(settings["interval_minutes"]))
 
     if not force:
-        if settings["mode"] != "scheduled":
+        if settings["mode"] not in ("scheduled", "auto"):
             return {
                 "mode": settings["mode"],
                 "released_count": 0,
