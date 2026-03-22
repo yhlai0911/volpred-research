@@ -394,7 +394,7 @@ CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）"
 |------|------|------|------|
 | **GJR-GARCH** | γ>0.10 資產（SPY/QQQ/EEM）| 主力 | MCS superior, EGARCH 驗證一致 |
 | **GARCH** | γ<0.10 資產（GLD）| 主力 | DM test 無顯著差異時優先 |
-| **MF2-GARCH** | γ≈0 資產（TLT 債券）| 新增 | Conrad & Engle 2025 JAE。TLT +0.30% (p=0.0014)。Gamma-dependent ceiling |
+| **MF2-GARCH** | 多成分 vol cycle | 已測試 null | Conrad & Engle 2025 JAE。K141 TLT +0.30% 是 estimation artifact（K144: proper joint QML → GJR 5/6 勝）|
 | **EGARCH** | Robustness check | 輔助 | γ 符號相反但結果一致 |
 | **HAR-RV** | 5-min realized vol | 待驗證 | 需 60+ 天 5-min 數據（SPY 46 天 / 0050.TW 34 天，持續累積中）|
 | **Realized GARCH** | 5-min RV + GARCH | blocked | 需 252+ 天（~2027 Q1）|

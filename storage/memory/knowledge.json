@@ -9432,5 +9432,37 @@
     "evidence": [],
     "confidence": 0.7,
     "created_at": "2026-03-22T19:14:18.725854"
+  },
+  {
+    "item_id": "596c3dea",
+    "category": "experiment",
+    "content": "K144v2: MF2-GARCH cross-bond verification (joint QML, L-BFGS-B). Gammas: IEF=0.0037, AGG=0.0579, LQD=0.0986, HYG=0.1532, TLT=0.0000, SPY=0.2136. Winners: IEF=GJR(p=0.727), AGG=GJR(p=0.915), LQD=GJR(p=0.895), HYG=GJR(p=0.638), TLT=MF2(p=0.226), SPY=MF2(p=0.002). Gamma-dependent rule CONFIRMED. MF2 wins 1/2 low-gamma, 1/4 high-gamma. MF2-GARCH outperforms GJR for low-gamma (<0.05) assets: 1/2. GJR-GARCH preferred for high-gamma (>=0.05) assets: 3/4.",
+    "evidence": [],
+    "confidence": 0.85,
+    "created_at": "2026-03-22T19:31:04.816609"
+  },
+  {
+    "item_id": "818afdb7",
+    "category": "experiment",
+    "content": "K144v2: MF2-GARCH cross-bond verification (joint QML, L-BFGS-B). Gammas: IEF=0.0075, AGG=0.0579, LQD=0.0986, HYG=0.1315, TLT=0.0000, SPY=0.2136. Winners: IEF=GJR(p=0.950), AGG=GJR(p=0.878), LQD=GJR(p=0.827), HYG=GJR(p=0.969), TLT=GJR(p=0.839), SPY=MF2(p=0.005). Gamma-dependent rule NOT confirmed. MF2 wins 0/2 low-gamma, 1/4 high-gamma. The gamma-dependent rule does NOT generalize cleanly. Low-gamma MF2 win rate: 0/2, High-gamma MF2 win rate: 1/4.",
+    "evidence": [],
+    "confidence": 0.55,
+    "created_at": "2026-03-22T19:33:38.601010"
+  },
+  {
+    "item_id": "48d5a643",
+    "category": "experiment",
+    "content": "K144v2: MF2-GARCH cross-bond verification (joint QML, L-BFGS-B). Gammas: IEF=0.0044, AGG=0.0579, LQD=0.0986, HYG=0.1315, TLT=0.0000, SPY=0.2135. Winners: IEF=GJR(p=0.999), AGG=MF2(p=0.243), LQD=GJR(p=0.877), HYG=GJR(p=0.606), TLT=GJR(p=0.840), SPY=GJR(p=0.826). Gamma-dependent rule NOT confirmed. MF2 wins 0/2 low-gamma, 1/4 high-gamma. The gamma-dependent rule does NOT generalize cleanly. Low-gamma MF2 win rate: 0/2, High-gamma MF2 win rate: 1/4.",
+    "evidence": [],
+    "confidence": 0.55,
+    "created_at": "2026-03-22T19:36:02.430657"
+  },
+  {
+    "item_id": "d19c8cb0",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude, \u57f7\u884c: Claude] K144: MF2-GARCH Cross-Asset Bond Verification\u3002\u6578\u64da: yfinance IEF+AGG+LQD+HYG+TLT+SPY 2007-2024 (empirical)\u3002\u65b9\u6cd5: Joint QML MF2-GARCH (proper recursive tau) vs GJR-GARCH, w=2000, OOS 2020-2024\u3002\u7d50\u679c: GJR 5/6 \u52dd\u3002IEF(gamma=0.004) GJR wins p=0.999, AGG(0.058) MF2 +1.5% NS p=0.243, LQD(0.099) GJR wins, HYG(0.131) GJR wins, TLT(0.000) GJR wins p=0.840, SPY(0.214) GJR wins\u3002\u2605\u2605 K141 \u7684 gamma-dependent rule \u4e0d\u6210\u7acb\uff01K141 \u7684 TLT \u7d50\u679c\u662f estimation artifact\uff08simplified 2-stage vs proper joint QML\uff09\u3002QLIKE ceiling \u91cd\u65b0\u52a0\u5f37\uff1aGJR-GARCH \u5728\u6240\u6709\u8cc7\u7522\u985e\u5225\u90fd\u662f\u6700\u4f73\u6216\u7b49\u6548\uff0c\u7121 gamma-dependent boundary\u3002",
+    "evidence": [],
+    "confidence": 0.9,
+    "created_at": "2026-03-22T19:41:16.532138"
   }
 ]

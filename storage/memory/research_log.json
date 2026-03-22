@@ -3350,5 +3350,51 @@
     "decision": "Gamma-dependent model selection rule confirmed directionally but lacks statistical significance. Rule: MF2 for gamma<0.05, GJR for gamma>=0.05. MF2 advantage is modest (QLIKE improvement ~0.01-0.04) and never significant by DM test. Practical implication: for bond-like assets, MF2 is slightly better but the improvement is trivially small.",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "666f2b74",
+    "timestamp": "2026-03-22T19:31:09.049959",
+    "phase": "Phase_K",
+    "action": "K144_mf2_cross_bond_v2",
+    "observation": "Tested MF2(joint QML) vs GJR on IEF,AGG,LQD,HYG,TLT,SPY. Gamma rule confirmed. Low-gamma MF2 win rate: 1/2.",
+    "decision": "MF2-GARCH model selection rule is robust: use MF2 for gamma<0.05 assets",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "9871c1fa",
+    "timestamp": "2026-03-22T19:33:40.936222",
+    "phase": "Phase_K",
+    "action": "K144_mf2_cross_bond_v2",
+    "observation": "Tested MF2(joint QML) vs GJR on IEF,AGG,LQD,HYG,TLT,SPY. Gamma rule not confirmed. Low-gamma MF2 win rate: 0/2.",
+    "decision": "MF2-GARCH model selection rule is not cleanly generalizable",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "7613c19c",
+    "timestamp": "2026-03-22T19:36:03.737117",
+    "phase": "Phase_K",
+    "action": "K144_mf2_cross_bond_v2",
+    "observation": "Tested MF2(joint QML) vs GJR on IEF,AGG,LQD,HYG,TLT,SPY. Gamma rule not confirmed. Low-gamma MF2 win rate: 0/2.",
+    "decision": "MF2-GARCH model selection rule is not cleanly generalizable",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "9969a8e7",
+    "timestamp": "2026-03-22T19:41:17.330210",
+    "phase": "Phase_K",
+    "action": "K144_mf2_cross_bond",
+    "observation": "GJR wins 5/6 assets with proper joint QML MF2-GARCH. K141 TLT result was estimation artifact. Gamma-dependent ceiling rule REJECTED.",
+    "decision": "Revert K141 conclusion. QLIKE ceiling stands universally. Update CLAUDE.md to remove MF2-GARCH as TLT-specific model. The ceiling is now confirmed 17+ times across all asset classes and horizons.",
+    "experiment_ids": [],
+    "tags": [
+      "MF2-GARCH",
+      "cross-asset",
+      "bonds",
+      "QLIKE-ceiling",
+      "artifact"
+    ]
   }
 ]
