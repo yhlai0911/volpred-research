@@ -2,7 +2,7 @@
   "experiment": "K154",
   "title": "Order Flow Imbalance \u2192 Volatility Prediction",
   "attribution": "[\u63d0\u51fa: Claude \u8df3\u8e8d\u5f0f\u63a2\u7d22 (\u9762\u5411 G: \u5e02\u5834\u5fae\u7d50\u69cb), \u57f7\u884c: Claude]",
-  "timestamp": "2026-03-22T20:48:45.407777",
+  "timestamp": "2026-03-22T20:56:13.534151",
   "config": {
     "window": 2000,
     "oos_start": "2020-01-01",
@@ -109,50 +109,50 @@
       "granger_causality": {
         "abs_ofi_lr": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 1,
+            "F": 223.234,
+            "p": 0.0
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 10,
+            "F": 4.287,
+            "p": 6e-06
           }
         },
         "abs_ofi_dvi": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 2,
+            "F": 0.265,
+            "p": 0.767188
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 2,
+            "F": 0.631,
+            "p": 0.531999
           }
         },
         "ofi_amihud": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 6,
+            "F": 8.798,
+            "p": 0.0
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 2,
+            "F": 47.814,
+            "p": 0.0
           }
         },
         "ofi_lr_roll5": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 1,
+            "F": 224.843,
+            "p": 0.0
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 10,
+            "F": 6.876,
+            "p": 0.0
           }
         }
       },
@@ -211,8 +211,30 @@
         }
       },
       "walk_forward": {
-        "status": "insufficient valid forecasts",
-        "n_valid": 0
+        "OFI_LR": {
+          "n_forecasts": 1257,
+          "gjr_qlike": -8.080086,
+          "adjusted_qlike": -8.068452,
+          "qlike_improvement_pct": -0.144,
+          "gjr_mse": 7.68414e-05,
+          "adjusted_mse": 9.74312e-05,
+          "dm_t": 1.731,
+          "dm_p": 0.083645,
+          "gjr_failures": 0,
+          "adjustment_failures": 0
+        },
+        "OFI_Roll5": {
+          "n_forecasts": 1257,
+          "gjr_qlike": -8.080086,
+          "adjusted_qlike": -8.084579,
+          "qlike_improvement_pct": 0.056,
+          "gjr_mse": 7.68414e-05,
+          "adjusted_mse": 7.96647e-05,
+          "dm_t": -1.952,
+          "dm_p": 0.05114,
+          "gjr_failures": 0,
+          "adjustment_failures": 0
+        }
       },
       "vix_sufficiency": {
         "abs_ofi_lr": {
@@ -326,50 +348,50 @@
       "granger_causality": {
         "abs_ofi_lr": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 1,
+            "F": 143.067,
+            "p": 0.0
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 2,
+            "F": 16.386,
+            "p": 0.0
           }
         },
         "abs_ofi_dvi": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 4,
+            "F": 1.736,
+            "p": 0.1391
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 8,
+            "F": 1.929,
+            "p": 0.051589
           }
         },
         "ofi_amihud": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 9,
+            "F": 7.654,
+            "p": 0.0
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 2,
+            "F": 47.636,
+            "p": 0.0
           }
         },
         "ofi_lr_roll5": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 1,
+            "F": 171.983,
+            "p": 0.0
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 5,
+            "F": 11.469,
+            "p": 0.0
           }
         }
       },
@@ -428,8 +450,30 @@
         }
       },
       "walk_forward": {
-        "status": "insufficient valid forecasts",
-        "n_valid": 0
+        "OFI_LR": {
+          "n_forecasts": 1257,
+          "gjr_qlike": -7.491491,
+          "adjusted_qlike": -7.50569,
+          "qlike_improvement_pct": 0.19,
+          "gjr_mse": 0.0001168777,
+          "adjusted_mse": 0.0001414112,
+          "dm_t": -0.878,
+          "dm_p": 0.380156,
+          "gjr_failures": 0,
+          "adjustment_failures": 0
+        },
+        "OFI_Roll5": {
+          "n_forecasts": 1257,
+          "gjr_qlike": -7.491491,
+          "adjusted_qlike": -7.497043,
+          "qlike_improvement_pct": 0.074,
+          "gjr_mse": 0.0001168777,
+          "adjusted_mse": 0.0001227194,
+          "dm_t": -1.209,
+          "dm_p": 0.22682,
+          "gjr_failures": 0,
+          "adjustment_failures": 0
+        }
       },
       "vix_sufficiency": {
         "abs_ofi_lr": {
@@ -543,50 +587,50 @@
       "granger_causality": {
         "abs_ofi_lr": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 1,
+            "F": 167.601,
+            "p": 0.0
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 2,
+            "F": 55.05,
+            "p": 0.0
           }
         },
         "abs_ofi_dvi": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 2,
+            "F": 0.864,
+            "p": 0.421523
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 2,
+            "F": 1.309,
+            "p": 0.270073
           }
         },
         "ofi_amihud": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 1,
+            "F": 19.25,
+            "p": 1.2e-05
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 3,
+            "F": 1.108,
+            "p": 0.344445
           }
         },
         "ofi_lr_roll5": {
           "OFI_to_RV": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 1,
+            "F": 217.65,
+            "p": 0.0
           },
           "RV_to_OFI": {
-            "best_lag": null,
-            "F": null,
-            "p": null
+            "best_lag": 5,
+            "F": 121.934,
+            "p": 0.0
           }
         }
       },
@@ -645,8 +689,30 @@
         }
       },
       "walk_forward": {
-        "status": "insufficient valid forecasts",
-        "n_valid": 0
+        "OFI_LR": {
+          "n_forecasts": 1257,
+          "gjr_qlike": -8.294527,
+          "adjusted_qlike": -8.312888,
+          "qlike_improvement_pct": 0.221,
+          "gjr_mse": 4.79587e-05,
+          "adjusted_mse": 4.73944e-05,
+          "dm_t": -1.425,
+          "dm_p": 0.154414,
+          "gjr_failures": 0,
+          "adjustment_failures": 0
+        },
+        "OFI_Roll5": {
+          "n_forecasts": 1257,
+          "gjr_qlike": -8.294527,
+          "adjusted_qlike": -8.303901,
+          "qlike_improvement_pct": 0.113,
+          "gjr_mse": 4.79587e-05,
+          "adjusted_mse": 4.74923e-05,
+          "dm_t": -0.852,
+          "dm_p": 0.394211,
+          "gjr_failures": 0,
+          "adjustment_failures": 0
+        }
       },
       "vix_sufficiency": {
         "abs_ofi_lr": {
@@ -716,7 +782,7 @@
       }
     },
     "garchx_wins": 0,
-    "garchx_total": 0,
+    "garchx_total": 6,
     "total_pcorr_significant": "8",
     "total_pcorr_tests": 12
   },
@@ -724,7 +790,7 @@
   "verdict_details": [
     "1. Partial correlations r(OFI, RV | VIX): 8/12 significant at 5%",
     "   \u2192 OFI may contain independent information (investigate further)",
-    "2. GARCH-X(OFI) wins DM test: 0/0 assets",
+    "2. GARCH-X(OFI) wins DM test: 0/6 assets",
     "   \u2192 OFI does NOT improve GARCH forecasts",
     "3. Daily OFI proxies from OHLCV are VERY noisy approximations",
     "   \u2192 Real test requires tick-level trade data (Lee-Ready actual classification)",

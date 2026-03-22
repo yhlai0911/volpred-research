@@ -352,10 +352,10 @@ for asset_name, ticker in ASSETS.items():
         label = ofi_col.replace("z_", "")
         try:
             gc_fwd = grangercausalitytests(gc_df_fwd, maxlag=GRANGER_MAXLAG, verbose=False)
-            # Get best lag (lowest p-value for ssr_ftest)
-            best_lag_fwd = min(gc_fwd, key=lambda k: gc_fwd[k][0]["ssr_ftest"][0][1])
-            p_fwd = gc_fwd[best_lag_fwd][0]["ssr_ftest"][0][1]
-            f_fwd = gc_fwd[best_lag_fwd][0]["ssr_ftest"][0][0]
+            # ssr_ftest returns (F, p, dfn, dfd) — index directly
+            best_lag_fwd = min(gc_fwd, key=lambda k: float(gc_fwd[k][0]["ssr_ftest"][1]))
+            p_fwd = float(gc_fwd[best_lag_fwd][0]["ssr_ftest"][1])
+            f_fwd = float(gc_fwd[best_lag_fwd][0]["ssr_ftest"][0])
         except Exception as e:
             best_lag_fwd, p_fwd, f_fwd = np.nan, np.nan, np.nan
 
@@ -366,9 +366,9 @@ for asset_name, ticker in ASSETS.items():
 
         try:
             gc_rev = grangercausalitytests(gc_df_rev, maxlag=GRANGER_MAXLAG, verbose=False)
-            best_lag_rev = min(gc_rev, key=lambda k: gc_rev[k][0]["ssr_ftest"][0][1])
-            p_rev = gc_rev[best_lag_rev][0]["ssr_ftest"][0][1]
-            f_rev = gc_rev[best_lag_rev][0]["ssr_ftest"][0][0]
+            best_lag_rev = min(gc_rev, key=lambda k: float(gc_rev[k][0]["ssr_ftest"][1]))
+            p_rev = float(gc_rev[best_lag_rev][0]["ssr_ftest"][1])
+            f_rev = float(gc_rev[best_lag_rev][0]["ssr_ftest"][0])
         except Exception as e:
             best_lag_rev, p_rev, f_rev = np.nan, np.nan, np.nan
 
@@ -443,9 +443,16 @@ for asset_name, ticker in ASSETS.items():
     asset_results["extreme_ofi_events"] = extreme_results
 
     # ---------------------------------------------------------------
-    # 6. Walk-forward GARCH-X with OFI
+    # 6. Walk-forward GARCH + OFI adjustment vs plain GJR-GARCH
     # ---------------------------------------------------------------
-    print(f"\n  [6/7] Walk-forward GJR-GARCH vs GARCH-X(OFI) (w={WINDOW}, OOS from {OOS_START})...")
+    # NOTE: The `arch` library does not support exogenous variables in the
+    # variance equation (GARCH-X). Instead we use a two-step approach:
+    #   Step 1: Fit GJR-GARCH → get sigma2_gjr forecast
+    #   Step 2: On the training window, regress realized r^2 / sigma2_gjr
+    #           on |OFI| to get an adjustment factor
+    #   Step 3: adjusted_sigma2 = sigma2_gjr * (1 + delta * |OFI_t|)
+    # This is a linear multiplicative GARCH-X approximation.
+    print(f"\n  [6/7] Walk-forward GJR + OFI-adjustment vs plain GJR (w={WINDOW}, OOS from {OOS_START})...")
 
     # Prepare data for walk-forward
     oos_mask = df_clean.index >= OOS_START
@@ -456,19 +463,22 @@ for asset_name, ticker in ASSETS.items():
         asset_results["walk_forward"] = {"status": "skipped", "reason": "insufficient OOS data"}
     else:
         returns_pct = df_clean["returns"].values * 100  # arch library scale
+        returns_dec = df_clean["returns"].values          # decimal scale
         all_dates = df_clean.index
 
-        # Best OFI proxy: use Lee-Ready (most intuitive)
-        ofi_series = df_clean["z_abs_ofi_lr"].values
+        # Best OFI proxy: use Lee-Ready (most intuitive) + rolling (most persistent)
+        ofi_lr = df_clean["z_abs_ofi_lr"].values
+        ofi_roll = df_clean["z_ofi_lr_roll5"].values
 
         # Storage for forecasts
         gjr_forecasts = []
-        garchx_forecasts = []
+        garchx_lr_forecasts = []
+        garchx_roll_forecasts = []
         actual_rv = []
         forecast_dates = []
 
         n_gjr_fail = 0
-        n_garchx_fail = 0
+        n_adj_fail = 0
 
         # Find first OOS index
         oos_start_idx = np.searchsorted(all_dates, pd.Timestamp(OOS_START))
@@ -481,7 +491,6 @@ for asset_name, ticker in ASSETS.items():
                 continue
 
             window_ret = returns_pct[i - WINDOW:i]
-            window_ofi = ofi_series[i - WINDOW:i]
 
             # --- GJR-GARCH baseline ---
             try:
@@ -494,29 +503,61 @@ for asset_name, ticker in ASSETS.items():
                 sigma_gjr = np.nan
                 n_gjr_fail += 1
 
-            # --- GARCH-X with OFI ---
+            # --- Two-step OFI adjustment ---
             try:
-                # Use OFI as exogenous variable in the variance equation
-                ofi_exog = window_ofi.reshape(-1, 1)
-                am_gx = arch_model(window_ret, vol="GARCH", p=1, o=1, q=1, dist="t", x=ofi_exog)
-                res_gx = am_gx.fit(disp="off", show_warning=False)
-                # For forecast, use last OFI value
-                last_ofi = ofi_exog[-1:, :]
-                fc_gx = res_gx.forecast(horizon=1, x=last_ofi)
-                sigma2_gx = fc_gx.variance.values[-1, 0]
-                sigma_gx = np.sqrt(sigma2_gx) / 100.0
+                if np.isnan(sigma_gjr) or sigma_gjr <= 0:
+                    raise ValueError("GJR failed")
+
+                # Get in-sample conditional variances from the fitted model
+                cond_vol = res_gjr.conditional_volatility  # numpy array, in pct scale (sigma)
+                cond_var = cond_vol ** 2  # sigma^2 in pct^2 scale
+                # Actual squared returns in-sample (pct scale)
+                actual_r2_window = window_ret ** 2
+                # Ratio: realized / forecast (should be ~1 on average)
+                # align: sigma2(t) predicts r2(t+1)
+                ratio_window = actual_r2_window[1:] / np.maximum(cond_var[:-1], 1e-10)
+                ratio_window = np.clip(ratio_window, 0, 20)  # clip outliers
+
+                # OFI for the window (lagged by 1 to match)
+                ofi_lr_window = ofi_lr[i - WINDOW:i][:-1]
+                ofi_roll_window = ofi_roll[i - WINDOW:i][:-1]
+
+                # Clean
+                valid_mask = np.isfinite(ratio_window) & np.isfinite(ofi_lr_window) & np.isfinite(ofi_roll_window)
+                if valid_mask.sum() < 100:
+                    raise ValueError("Insufficient valid observations")
+
+                ratio_v = ratio_window[valid_mask]
+                ofi_lr_v = ofi_lr_window[valid_mask]
+                ofi_roll_v = ofi_roll_window[valid_mask]
+
+                # Regress ratio on OFI: ratio = a + b * |OFI|
+                X_lr = np.column_stack([np.ones(len(ofi_lr_v)), ofi_lr_v])
+                beta_lr = np.linalg.lstsq(X_lr, ratio_v, rcond=None)[0]
+
+                X_roll = np.column_stack([np.ones(len(ofi_roll_v)), ofi_roll_v])
+                beta_roll = np.linalg.lstsq(X_roll, ratio_v, rcond=None)[0]
+
+                # Adjusted forecast: sigma2_adj = sigma2_gjr * (a + b * OFI_today)
+                adj_lr = max(0.5, min(2.0, beta_lr[0] + beta_lr[1] * ofi_lr[i - 1]))
+                adj_roll = max(0.5, min(2.0, beta_roll[0] + beta_roll[1] * ofi_roll[i - 1]))
+
+                sigma_gx_lr = sigma_gjr * np.sqrt(adj_lr)
+                sigma_gx_roll = sigma_gjr * np.sqrt(adj_roll)
             except Exception:
-                sigma_gx = np.nan
-                n_garchx_fail += 1
+                sigma_gx_lr = np.nan
+                sigma_gx_roll = np.nan
+                n_adj_fail += 1
 
             # Actual next-day |return|
-            if i < len(returns_pct):
-                actual = abs(returns_pct[i] / 100.0)
+            if i < len(returns_dec):
+                actual = abs(returns_dec[i])
             else:
                 actual = np.nan
 
             gjr_forecasts.append(sigma_gjr)
-            garchx_forecasts.append(sigma_gx)
+            garchx_lr_forecasts.append(sigma_gx_lr)
+            garchx_roll_forecasts.append(sigma_gx_roll)
             actual_rv.append(actual)
             forecast_dates.append(all_dates[i])
 
@@ -525,60 +566,63 @@ for asset_name, ticker in ASSETS.items():
                 print(f"      Progress: {pct:.0f}% ({i - oos_start_idx}/{n_total})")
 
         gjr_fc = np.array(gjr_forecasts)
-        garchx_fc = np.array(garchx_forecasts)
+        garchx_lr_fc = np.array(garchx_lr_forecasts)
+        garchx_roll_fc = np.array(garchx_roll_forecasts)
         actual_arr = np.array(actual_rv)
 
-        # Remove NaN
-        valid = np.isfinite(gjr_fc) & np.isfinite(garchx_fc) & np.isfinite(actual_arr) & (gjr_fc > 0) & (garchx_fc > 0)
-        gjr_fc_v = gjr_fc[valid]
-        garchx_fc_v = garchx_fc[valid]
-        actual_v = actual_arr[valid]
+        # Evaluate both OFI adjustments
+        wf_results = {}
+        for adj_name, adj_fc in [("OFI_LR", garchx_lr_fc), ("OFI_Roll5", garchx_roll_fc)]:
+            valid = (np.isfinite(gjr_fc) & np.isfinite(adj_fc) &
+                     np.isfinite(actual_arr) & (gjr_fc > 0) & (adj_fc > 0))
+            gjr_fc_v = gjr_fc[valid]
+            adj_fc_v = adj_fc[valid]
+            actual_v = actual_arr[valid]
 
-        print(f"\n    Walk-forward results:")
-        print(f"      Total forecasts: {len(forecast_dates)}")
-        print(f"      Valid forecasts: {valid.sum()}")
-        print(f"      GJR failures: {n_gjr_fail}")
-        print(f"      GARCH-X failures: {n_garchx_fail}")
+            print(f"\n    --- {adj_name} adjustment ---")
+            print(f"      Total forecasts: {len(forecast_dates)}")
+            print(f"      Valid forecasts: {valid.sum()}")
+            print(f"      GJR failures: {n_gjr_fail},  Adjustment failures: {n_adj_fail}")
 
-        if len(gjr_fc_v) > 50:
-            # QLIKE
-            ql_gjr = qlike_loss(actual_v, gjr_fc_v)
-            ql_garchx = qlike_loss(actual_v, garchx_fc_v)
+            if len(gjr_fc_v) > 50:
+                # QLIKE
+                ql_gjr = qlike_loss(actual_v, gjr_fc_v)
+                ql_adj = qlike_loss(actual_v, adj_fc_v)
 
-            # DM test
-            loss_gjr = np.log(gjr_fc_v ** 2) + actual_v ** 2 / gjr_fc_v ** 2
-            loss_garchx = np.log(garchx_fc_v ** 2) + actual_v ** 2 / garchx_fc_v ** 2
-            dm_t, dm_p = dm_test(loss_garchx, loss_gjr)  # negative = GARCH-X better
+                # DM test
+                loss_gjr = np.log(gjr_fc_v ** 2) + actual_v ** 2 / gjr_fc_v ** 2
+                loss_adj = np.log(adj_fc_v ** 2) + actual_v ** 2 / adj_fc_v ** 2
+                dm_t, dm_p = dm_test(loss_adj, loss_gjr)  # negative = adjusted better
 
-            # MSE
-            mse_gjr = np.mean((actual_v - gjr_fc_v) ** 2)
-            mse_garchx = np.mean((actual_v - garchx_fc_v) ** 2)
+                # MSE
+                mse_gjr = np.mean((actual_v - gjr_fc_v) ** 2)
+                mse_adj = np.mean((actual_v - adj_fc_v) ** 2)
 
-            improvement_pct = (ql_gjr - ql_garchx) / abs(ql_gjr) * 100
+                improvement_pct = (ql_gjr - ql_adj) / abs(ql_gjr) * 100
 
-            wf_results = {
-                "n_forecasts": int(valid.sum()),
-                "gjr_qlike": round(float(ql_gjr), 6),
-                "garchx_qlike": round(float(ql_garchx), 6),
-                "qlike_improvement_pct": round(float(improvement_pct), 3),
-                "gjr_mse": round(float(mse_gjr), 10),
-                "garchx_mse": round(float(mse_garchx), 10),
-                "dm_t": round(float(dm_t), 3),
-                "dm_p": round(float(dm_p), 6),
-                "gjr_failures": n_gjr_fail,
-                "garchx_failures": n_garchx_fail,
-            }
+                wf_results[adj_name] = {
+                    "n_forecasts": int(valid.sum()),
+                    "gjr_qlike": round(float(ql_gjr), 6),
+                    "adjusted_qlike": round(float(ql_adj), 6),
+                    "qlike_improvement_pct": round(float(improvement_pct), 3),
+                    "gjr_mse": round(float(mse_gjr), 10),
+                    "adjusted_mse": round(float(mse_adj), 10),
+                    "dm_t": round(float(dm_t), 3),
+                    "dm_p": round(float(dm_p), 6),
+                    "gjr_failures": n_gjr_fail,
+                    "adjustment_failures": n_adj_fail,
+                }
 
-            sig = "***" if dm_p < 0.001 else "**" if dm_p < 0.01 else "*" if dm_p < 0.05 else "NS"
-            winner = "GARCH-X" if ql_garchx < ql_gjr else "GJR"
-            print(f"\n      GJR     QLIKE: {ql_gjr:.6f}   MSE: {mse_gjr:.2e}")
-            print(f"      GARCH-X QLIKE: {ql_garchx:.6f}   MSE: {mse_garchx:.2e}")
-            print(f"      QLIKE improvement: {improvement_pct:+.3f}%")
-            print(f"      DM test: t={dm_t:+.3f}  p={dm_p:.4e} {sig}")
-            print(f"      Winner: {winner}")
-        else:
-            wf_results = {"status": "insufficient valid forecasts", "n_valid": int(valid.sum())}
-            print(f"    WARNING: Only {valid.sum()} valid forecasts, cannot compute metrics")
+                sig = "***" if dm_p < 0.001 else "**" if dm_p < 0.01 else "*" if dm_p < 0.05 else "NS"
+                winner = f"GJR+{adj_name}" if ql_adj < ql_gjr else "GJR"
+                print(f"      GJR          QLIKE: {ql_gjr:.6f}   MSE: {mse_gjr:.2e}")
+                print(f"      GJR+{adj_name:8s} QLIKE: {ql_adj:.6f}   MSE: {mse_adj:.2e}")
+                print(f"      QLIKE improvement: {improvement_pct:+.3f}%")
+                print(f"      DM test: t={dm_t:+.3f}  p={dm_p:.4e} {sig}")
+                print(f"      Winner: {winner}")
+            else:
+                wf_results[adj_name] = {"status": "insufficient valid forecasts", "n_valid": int(valid.sum())}
+                print(f"    WARNING: Only {valid.sum()} valid forecasts, cannot compute metrics")
 
         asset_results["walk_forward"] = wf_results
 
@@ -663,18 +707,20 @@ for ofi_key in ["abs_ofi_lr", "abs_ofi_dvi", "ofi_amihud", "ofi_lr_roll5"]:
     }
     print(f"  {ofi_key:20s}  {vals[0]:+10.4f}  {vals[1]:+10.4f}  {vals[2]:+10.4f}  {sig_str:>15s}")
 
-# Summary: GARCH-X improvement
-print(f"\n  --- GARCH-X(OFI) vs GJR: QLIKE Improvement ---")
+# Summary: GJR + OFI adjustment improvement
+print(f"\n  --- GJR + OFI Adjustment vs Plain GJR: QLIKE Improvement ---")
 for asset in ASSETS:
     wf = all_results.get(asset, {}).get("walk_forward", {})
-    if "qlike_improvement_pct" in wf:
-        imp = wf["qlike_improvement_pct"]
-        dm = wf.get("dm_t", np.nan)
-        dm_p = wf.get("dm_p", np.nan)
-        sig = "***" if dm_p < 0.001 else "**" if dm_p < 0.01 else "*" if dm_p < 0.05 else "NS"
-        print(f"      {asset:5s}: QLIKE change={imp:+.3f}%  DM t={dm:+.3f} {sig}")
-    else:
-        print(f"      {asset:5s}: walk-forward skipped or failed")
+    for adj_name in ["OFI_LR", "OFI_Roll5"]:
+        adj_wf = wf.get(adj_name, {})
+        if "qlike_improvement_pct" in adj_wf:
+            imp = adj_wf["qlike_improvement_pct"]
+            dm = adj_wf.get("dm_t", np.nan)
+            dm_p = adj_wf.get("dm_p", np.nan)
+            sig = "***" if dm_p < 0.001 else "**" if dm_p < 0.01 else "*" if dm_p < 0.05 else "NS"
+            print(f"      {asset:5s} {adj_name:10s}: QLIKE change={imp:+.3f}%  DM t={dm:+.3f} {sig}")
+        else:
+            print(f"      {asset:5s} {adj_name:10s}: walk-forward skipped or failed")
 
 # Summary: Extreme OFI
 print(f"\n  --- Extreme OFI (>{EXTREME_PCT}th pct): Next-day RV Ratio ---")
@@ -704,15 +750,17 @@ for ofi_key in summary_pcorr:
     total_pcorr_tests += 3
     total_pcorr_sig += summary_pcorr[ofi_key]["n_significant"]
 
-# Assess GARCH-X
+# Assess GJR + OFI adjustment (best of two adjustments per asset)
 garchx_wins = 0
 garchx_total = 0
 for asset in ASSETS:
     wf = all_results.get(asset, {}).get("walk_forward", {})
-    if "dm_p" in wf:
-        garchx_total += 1
-        if wf.get("qlike_improvement_pct", 0) > 0 and wf.get("dm_p", 1) < 0.05:
-            garchx_wins += 1
+    for adj_name in ["OFI_LR", "OFI_Roll5"]:
+        adj_wf = wf.get(adj_name, {})
+        if "dm_p" in adj_wf:
+            garchx_total += 1
+            if adj_wf.get("qlike_improvement_pct", 0) > 0 and adj_wf.get("dm_p", 1) < 0.05:
+                garchx_wins += 1
 
 verdict_lines = []
 verdict_lines.append(f"1. Partial correlations r(OFI, RV | VIX): {total_pcorr_sig}/{total_pcorr_tests} significant at 5%")
@@ -807,7 +855,7 @@ m = MemorySystem()
 
 # Build summary string from results
 pcorr_summary = f"{total_pcorr_sig}/{total_pcorr_tests} partial corr sig"
-garchx_summary = f"GARCH-X wins {garchx_wins}/{garchx_total}"
+garchx_summary = f"GJR+OFI adjustment DM-significant wins {garchx_wins}/{garchx_total}"
 
 m.add_knowledge(
     category="experiment",
