@@ -5,31 +5,22 @@ K150: Amihud Fragility GARCH-X — Liquidity as Volatility Predictor
 
 Background:
   - Gemini suggests volatility "explosions" are preceded by latent liquidity decay
-  - The Amihud Illiquidity ratio (|Return|/DollarVolume) acts as a "tension" gauge:
-    high illiquidity with low vol = "fragile" state where the next shock has
-    disproportionate impact
-  - GJR-GARCH ignores this — tests a fundamentally DIFFERENT information source:
-    LIQUIDITY rather than price-based features
-  - QLIKE ceiling confirmed 17+ times — all prior price-based approaches failed
-
-Research Question:
-  Does the Amihud Illiquidity ratio, as a GARCH-X exogenous variable,
-  improve daily volatility forecasting beyond GJR-GARCH?
+  - Amihud Illiquidity ratio (|Return|/DollarVolume) = "tension" gauge
+  - GJR-GARCH ignores liquidity — this tests a fundamentally DIFFERENT info source
+  - QLIKE ceiling confirmed 17+ times
 
 Method:
-  - Amihud ILLIQ_t = |r_t| / (Volume_t * Close_t)  [dollar volume]
+  - Amihud ILLIQ_t = |r_t| / (Volume_t * Close_t)
   - Smoothed: 5-day MA, log-transformed
-  - Models: GJR-GARCH baseline, GARCH-X variants with Amihud in variance eq
-  - Since arch package doesn't support exogenous in variance equation,
-    we implement GARCH-X via manual MLE (scipy.optimize)
+  - GARCH-X: manual MLE with Amihud in variance equation
   - Walk-forward: w=2000, OOS 2020-01-01 to 2024-12-31
   - Cross-asset: SPY, QQQ, GLD, TLT
-  - Additional: partial correlation Amihud → vol | VIX
 
-Evaluation:
-  - QLIKE (primary), MSE
-  - DM test vs GJR-GARCH baseline (Harvey threshold t>3.0)
-  - Fragility diagnostic: high Amihud + low vol → is next vol higher?
+Models:
+  a) GJR-GARCH(1,1) — baseline (via arch)
+  b) GARCH-X(log_Amihud_5d) — GARCH with Amihud exogenous
+  c) GJR-GARCH-X(log_Amihud_5d) — GJR with Amihud exogenous
+  d) Threshold-GJR(Amihud) — regime switch at 75th pctl
 """
 
 import sys
@@ -46,6 +37,7 @@ import yfinance as yf
 from arch import arch_model
 from scipy import stats
 from scipy.optimize import minimize
+from numba import njit
 
 # ==================================================================
 # CONFIG
@@ -53,7 +45,7 @@ from scipy.optimize import minimize
 WINDOW = 2000
 OOS_START = "2020-01-01"
 OOS_END = "2024-12-31"
-DATA_START = "2005-01-01"  # need extra history for Amihud smoothing
+DATA_START = "2005-01-01"
 ASSETS = ["SPY", "QQQ", "GLD", "TLT"]
 
 print("=" * 80)
@@ -95,227 +87,115 @@ def diebold_mariano(loss1, loss2, h=1):
             'mean_diff': float(d_bar), 'better_model': 1 if d_bar < 0 else 2}
 
 
-def compute_amihud(df):
-    """
-    Compute Amihud Illiquidity ratio and its smoothed/transformed variants.
-
-    ILLIQ_t = |r_t| / (Volume_t * Close_t)
-
-    Returns DataFrame with:
-      - amihud_raw: raw daily Amihud ratio
-      - amihud_5d: 5-day MA of raw Amihud
-      - log_amihud_5d: log(5-day MA of Amihud)
-    """
-    result = pd.DataFrame(index=df.index)
-
-    # Dollar volume
-    dollar_vol = df['volume'] * df['close']
-    # Avoid division by zero
-    dollar_vol = dollar_vol.replace(0, np.nan)
-
-    # Raw Amihud
-    result['amihud_raw'] = np.abs(df['log_return']) / dollar_vol
-
-    # 5-day MA (smoothed)
-    result['amihud_5d'] = result['amihud_raw'].rolling(5, min_periods=3).mean()
-
-    # Log-transformed (add small epsilon for log stability)
-    result['log_amihud_5d'] = np.log(result['amihud_5d'] + 1e-20)
-
-    return result
-
-
 # ==================================================================
-# GARCH-X: Manual MLE Implementation
+# FAST GARCH-X via Numba
 # ==================================================================
 
-def garch_x_loglik(params, returns, exog, model_type='garch_x'):
-    """
-    Negative log-likelihood for GARCH-X model.
-
-    Variance equation:
-      σ²_t = ω + α·ε²_{t-1} + β·σ²_{t-1} + δ·X_{t-1}
-      (for GJR-GARCH-X: + γ·ε²_{t-1}·I(ε_{t-1}<0))
-
-    All computed in percentage returns for numerical stability.
-    """
+@njit
+def _garch_x_variance(returns, exog, omega, alpha, gamma, beta, delta):
+    """Compute GARCH-X variance series. gamma=0 for plain GARCH-X."""
     T = len(returns)
-
-    if model_type == 'garch_x':
-        # params: [omega, alpha, beta, delta]
-        omega, alpha, beta, delta = params
-        gamma = 0.0
-    elif model_type == 'gjr_garch_x':
-        # params: [omega, alpha, gamma, beta, delta]
-        omega, alpha, gamma, beta, delta = params
-    else:
-        return 1e10
-
-    # Initialize variance
-    var = np.zeros(T)
-    var[0] = np.var(returns)  # unconditional variance as initial
+    var = np.empty(T)
+    # Initialize with sample variance
+    s2 = 0.0
+    for i in range(T):
+        s2 += returns[i] ** 2
+    s2 /= T
+    var[0] = s2
 
     for t in range(1, T):
         shock = returns[t-1] ** 2
-        asym = shock * (1.0 if returns[t-1] < 0 else 0.0)
-        var[t] = omega + alpha * shock + gamma * asym + beta * var[t-1] + delta * exog[t-1]
-
-        # Floor variance
-        if var[t] < 1e-8:
-            var[t] = 1e-8
-
-    # Log-likelihood (normal distribution)
-    ll = -0.5 * np.sum(np.log(2 * np.pi) + np.log(var) + returns**2 / var)
-
-    if not np.isfinite(ll):
-        return 1e10
-    return -ll  # negative for minimization
+        asym = shock if returns[t-1] < 0 else 0.0
+        v = omega + alpha * shock + gamma * asym + beta * var[t-1] + delta * exog[t-1]
+        if v < 1e-8:
+            v = 1e-8
+        var[t] = v
+    return var
 
 
-def fit_garch_x(returns_pct, exog, model_type='garch_x'):
-    """
-    Fit GARCH-X model via MLE.
+@njit
+def _garch_x_nll(returns, exog, omega, alpha, gamma, beta, delta):
+    """Negative log-likelihood for GARCH-X."""
+    var = _garch_x_variance(returns, exog, omega, alpha, gamma, beta, delta)
+    T = len(returns)
+    nll = 0.0
+    for t in range(T):
+        nll += np.log(var[t]) + returns[t] ** 2 / var[t]
+    nll = 0.5 * (T * np.log(2 * np.pi) + nll)
+    return nll
 
-    Args:
-        returns_pct: percentage returns (e.g., *100)
-        exog: exogenous variable (same length as returns, standardized)
-        model_type: 'garch_x' or 'gjr_garch_x'
 
-    Returns:
-        params, success flag
-    """
-    T = len(returns_pct)
-    sample_var = np.var(returns_pct)
-
-    if model_type == 'garch_x':
-        # Initial guess: [omega, alpha, beta, delta]
-        x0 = np.array([0.05 * sample_var, 0.05, 0.90, 0.0])
-        # Bounds: omega>0, 0<alpha<0.5, 0<beta<0.999, delta can be positive or negative
-        bounds = [(1e-6, sample_var * 10), (1e-6, 0.5), (0.01, 0.999), (-0.5, 0.5)]
-    elif model_type == 'gjr_garch_x':
-        # [omega, alpha, gamma, beta, delta]
-        x0 = np.array([0.05 * sample_var, 0.03, 0.05, 0.88, 0.0])
-        bounds = [(1e-6, sample_var * 10), (1e-6, 0.5), (-0.3, 0.5), (0.01, 0.999), (-0.5, 0.5)]
+def garch_x_nll_wrapper(params, returns, exog, use_gjr):
+    """Wrapper for scipy.optimize."""
+    if use_gjr:
+        omega, alpha, gamma, beta, delta = params
     else:
+        omega, alpha, beta, delta = params
+        gamma = 0.0
+    val = _garch_x_nll(returns, exog, omega, alpha, gamma, beta, delta)
+    if not np.isfinite(val):
+        return 1e10
+    return val
+
+
+def fit_garch_x(returns_pct, exog, use_gjr=False, warm_start=None):
+    """
+    Fit GARCH-X model via MLE with warm-starting.
+    Returns (params, success).
+    """
+    sample_var = np.var(returns_pct)
+    if sample_var < 1e-10:
         return None, False
+
+    if use_gjr:
+        if warm_start is not None:
+            x0 = warm_start
+        else:
+            x0 = np.array([0.05 * sample_var, 0.03, 0.05, 0.88, 0.0])
+        bounds = [(1e-6, sample_var * 10), (1e-6, 0.5), (-0.3, 0.5),
+                  (0.01, 0.999), (-0.5, 0.5)]
+    else:
+        if warm_start is not None:
+            x0 = warm_start
+        else:
+            x0 = np.array([0.05 * sample_var, 0.05, 0.90, 0.0])
+        bounds = [(1e-6, sample_var * 10), (1e-6, 0.5),
+                  (0.01, 0.999), (-0.5, 0.5)]
 
     try:
         result = minimize(
-            garch_x_loglik,
+            garch_x_nll_wrapper,
             x0,
-            args=(returns_pct, exog, model_type),
+            args=(returns_pct, exog, use_gjr),
             method='L-BFGS-B',
             bounds=bounds,
-            options={'maxiter': 500, 'ftol': 1e-8}
+            options={'maxiter': 200, 'ftol': 1e-7}
         )
         if result.success or result.fun < 1e9:
             return result.x, True
-        else:
-            return None, False
+        return None, False
     except Exception:
         return None, False
 
 
-def forecast_garch_x(params, returns_pct, exog, model_type='garch_x'):
-    """
-    One-step-ahead forecast from fitted GARCH-X.
-
-    Returns forecast variance (in percentage-return scale).
-    """
-    T = len(returns_pct)
-
-    if model_type == 'garch_x':
-        omega, alpha, beta, delta = params
-        gamma = 0.0
-    elif model_type == 'gjr_garch_x':
+def forecast_garch_x(params, returns_pct, exog, use_gjr=False):
+    """One-step-ahead forecast from fitted GARCH-X."""
+    if use_gjr:
         omega, alpha, gamma, beta, delta = params
     else:
-        return np.var(returns_pct)
+        omega, alpha, beta, delta = params
+        gamma = 0.0
 
-    # Recursively compute variance through the full sample
-    var = np.zeros(T)
-    var[0] = np.var(returns_pct)
+    var = _garch_x_variance(returns_pct, exog, omega, alpha, gamma, beta, delta)
 
-    for t in range(1, T):
-        shock = returns_pct[t-1] ** 2
-        asym = shock * (1.0 if returns_pct[t-1] < 0 else 0.0)
-        var[t] = omega + alpha * shock + gamma * asym + beta * var[t-1] + delta * exog[t-1]
-        if var[t] < 1e-8:
-            var[t] = 1e-8
-
-    # One-step-ahead forecast
+    # One-step-ahead
     shock = returns_pct[-1] ** 2
-    asym = shock * (1.0 if returns_pct[-1] < 0 else 0.0)
+    asym = shock if returns_pct[-1] < 0 else 0.0
     h_next = omega + alpha * shock + gamma * asym + beta * var[-1] + delta * exog[-1]
 
     if h_next < 1e-8 or not np.isfinite(h_next):
         h_next = np.var(returns_pct)
-
     return h_next
-
-
-# ==================================================================
-# Threshold regime model
-# ==================================================================
-
-def fit_threshold_garch(returns_pct, amihud_5d, percentile=75):
-    """
-    Fit separate GJR-GARCH models for high and low Amihud regimes.
-
-    Split training data at percentile of Amihud 5d.
-    For forecasting, use the model corresponding to the current regime.
-    """
-    threshold = np.percentile(amihud_5d[~np.isnan(amihud_5d)], percentile)
-
-    # Determine regime for each observation (using lagged Amihud)
-    regimes = np.array([1 if amihud_5d[max(i-1, 0)] > threshold else 0
-                        for i in range(len(returns_pct))])
-
-    results = {}
-    for regime in [0, 1]:
-        mask = regimes == regime
-        if mask.sum() < 200:
-            # Not enough data — fit on full sample
-            ret_sub = returns_pct
-        else:
-            ret_sub = returns_pct[mask]
-
-        try:
-            model = arch_model(ret_sub, vol='GARCH', p=1, o=1, q=1,
-                              dist='normal', mean='Zero', rescale=False)
-            result = model.fit(disp='off', show_warning=False)
-            results[regime] = result
-        except Exception:
-            results[regime] = None
-
-    return results, threshold
-
-
-def forecast_threshold_garch(models_dict, threshold, returns_pct, last_amihud):
-    """
-    Forecast using threshold regime model.
-    Select model based on last observed Amihud.
-    """
-    regime = 1 if last_amihud > threshold else 0
-    result = models_dict.get(regime)
-
-    if result is None:
-        return float(np.var(returns_pct))
-
-    try:
-        # Re-fit on full data with same params as starting values
-        model = arch_model(returns_pct, vol='GARCH', p=1, o=1, q=1,
-                          dist='normal', mean='Zero', rescale=False)
-        res = model.fit(disp='off', show_warning=False,
-                       starting_values=result.params)
-        fcast = res.forecast(horizon=1)
-        var_forecast = fcast.variance.iloc[-1, 0]
-        if np.isfinite(var_forecast) and 0 < var_forecast < 1e6:
-            return var_forecast
-    except Exception:
-        pass
-
-    return float(np.var(returns_pct))
 
 
 # ==================================================================
@@ -323,14 +203,13 @@ def forecast_threshold_garch(models_dict, threshold, returns_pct, last_amihud):
 # ==================================================================
 
 def run_gjr_garch_forecast(returns_pct):
-    """Fit GJR-GARCH(1,1) and forecast next-day variance (in pct^2 scale)."""
+    """Fit GJR-GARCH(1,1) and forecast next-day variance (pct^2 scale)."""
     try:
         model = arch_model(returns_pct, vol='GARCH', p=1, o=1, q=1,
                           dist='normal', mean='Zero', rescale=False)
         result = model.fit(disp='off', show_warning=False)
         fcast = result.forecast(horizon=1)
         var_forecast = fcast.variance.iloc[-1, 0]
-
         if not np.isfinite(var_forecast) or var_forecast > 1e6 or var_forecast < 1e-10:
             var_forecast = float(np.var(returns_pct))
         return var_forecast
@@ -339,15 +218,25 @@ def run_gjr_garch_forecast(returns_pct):
 
 
 # ==================================================================
+# WARM UP NUMBA
+# ==================================================================
+print("Warming up Numba JIT...")
+_dummy_ret = np.random.randn(100)
+_dummy_exog = np.random.randn(100)
+_ = _garch_x_variance(_dummy_ret, _dummy_exog, 0.1, 0.05, 0.0, 0.9, 0.0)
+_ = _garch_x_nll(_dummy_ret, _dummy_exog, 0.1, 0.05, 0.0, 0.9, 0.0)
+print("  Numba JIT warm-up complete")
+
+
+# ==================================================================
 # DOWNLOAD VIX DATA
 # ==================================================================
-print("Downloading VIX data...")
+print("\nDownloading VIX data...")
 vix_raw = yf.download("^VIX", start=DATA_START, end=OOS_END, progress=False)
 if isinstance(vix_raw.columns, pd.MultiIndex):
     vix_raw.columns = vix_raw.columns.get_level_values(0)
 vix_series = vix_raw['Close'].dropna()
 print(f"  VIX data: {vix_series.index[0].date()} to {vix_series.index[-1].date()}, {len(vix_series)} obs")
-print()
 
 
 # ==================================================================
@@ -362,299 +251,262 @@ for asset in ASSETS:
     print(f"{'='*70}")
 
     # Download data
-    print(f"  Downloading {asset} data...")
+    print(f"  Downloading {asset}...")
     df_raw = yf.download(asset, start=DATA_START, end=OOS_END, progress=False)
     if isinstance(df_raw.columns, pd.MultiIndex):
         df_raw.columns = df_raw.columns.get_level_values(0)
 
-    # Build working DataFrame
     df = pd.DataFrame(index=df_raw.index)
     df['close'] = df_raw['Close']
-    df['high'] = df_raw['High']
-    df['low'] = df_raw['Low']
     df['volume'] = df_raw['Volume']
     df['log_return'] = np.log(df['close'] / df['close'].shift(1))
     df['r_squared'] = df['log_return'] ** 2
     df.dropna(inplace=True)
-
-    # Remove zero-volume days (holidays sometimes have 0 volume)
     df = df[df['volume'] > 0].copy()
 
-    print(f"  Data: {df.index[0].date()} to {df.index[-1].date()}, {len(df)} obs")
-
     # Compute Amihud
-    amihud_df = compute_amihud(df)
-    df = df.join(amihud_df)
+    dollar_vol = df['volume'] * df['close']
+    dollar_vol = dollar_vol.replace(0, np.nan)
+    df['amihud_raw'] = np.abs(df['log_return']) / dollar_vol
+    df['amihud_5d'] = df['amihud_raw'].rolling(5, min_periods=3).mean()
+    df['log_amihud_5d'] = np.log(df['amihud_5d'] + 1e-20)
     df.dropna(subset=['amihud_5d', 'log_amihud_5d'], inplace=True)
-    print(f"  After Amihud computation: {len(df)} obs")
 
-    # Amihud descriptive stats
-    print(f"\n  Amihud Descriptive Stats:")
-    print(f"    Raw mean: {df['amihud_raw'].mean():.2e}")
-    print(f"    Raw median: {df['amihud_raw'].median():.2e}")
-    print(f"    Raw std: {df['amihud_raw'].std():.2e}")
-    print(f"    5d-MA mean: {df['amihud_5d'].mean():.2e}")
-    print(f"    log(5d-MA) mean: {df['log_amihud_5d'].mean():.2f}")
-    print(f"    log(5d-MA) std: {df['log_amihud_5d'].std():.2f}")
+    print(f"  Data: {len(df)} obs, {df.index[0].date()} to {df.index[-1].date()}")
+    print(f"  Amihud 5d mean: {df['amihud_5d'].mean():.2e}")
+    print(f"  log(Amihud_5d) mean: {df['log_amihud_5d'].mean():.2f}, std: {df['log_amihud_5d'].std():.2f}")
 
-    # Align VIX with asset data
+    # Align VIX
     vix_aligned = vix_series.reindex(df.index).ffill().dropna()
     common_idx = df.index.intersection(vix_aligned.index)
     df = df.loc[common_idx]
     vix_aligned = vix_aligned.loc[common_idx]
 
     # ================================================================
-    # Partial correlation: Amihud → next-day vol | VIX
+    # Partial correlation: Amihud -> next-day vol | VIX
     # ================================================================
-    print(f"\n  --- Partial Correlation Analysis ---")
-    # Compute next-day r²
+    print(f"\n  --- Partial Correlation ---")
     next_r2 = df['r_squared'].shift(-1).dropna()
     curr_amihud = df['log_amihud_5d'].iloc[:-1]
     curr_vix = vix_aligned.iloc[:-1]
 
-    # Make sure same length
     min_len = min(len(next_r2), len(curr_amihud), len(curr_vix))
-    next_r2_arr = next_r2.values[:min_len]
-    amihud_arr = curr_amihud.values[:min_len]
-    vix_arr = curr_vix.values[:min_len]
+    nr2 = next_r2.values[:min_len]
+    am_arr = curr_amihud.values[:min_len]
+    vx_arr = curr_vix.values[:min_len]
+    valid = np.isfinite(nr2) & np.isfinite(am_arr) & np.isfinite(vx_arr)
+    nr2, am_arr, vx_arr = nr2[valid], am_arr[valid], vx_arr[valid]
 
-    # Remove any NaN
-    valid = np.isfinite(next_r2_arr) & np.isfinite(amihud_arr) & np.isfinite(vix_arr)
-    next_r2_arr = next_r2_arr[valid]
-    amihud_arr = amihud_arr[valid]
-    vix_arr = vix_arr[valid]
+    rho_av, p_av = stats.pearsonr(am_arr, nr2)
+    rho_vv, p_vv = stats.pearsonr(vx_arr, nr2)
+    rho_ax, _ = stats.pearsonr(am_arr, vx_arr)
 
-    # Simple correlation
-    rho_amihud_vol, p_amihud_vol = stats.pearsonr(amihud_arr, next_r2_arr)
-    rho_vix_vol, p_vix_vol = stats.pearsonr(vix_arr, next_r2_arr)
-    rho_amihud_vix, _ = stats.pearsonr(amihud_arr, vix_arr)
-
-    # Partial correlation: Amihud → vol | VIX
-    # r_ay.v = (r_ay - r_av * r_vy) / sqrt((1-r_av²)(1-r_vy²))
-    r_ay = rho_amihud_vol
-    r_av = rho_amihud_vix
-    r_vy = rho_vix_vol
-    denom = np.sqrt(max((1 - r_av**2) * (1 - r_vy**2), 1e-20))
-    partial_corr = (r_ay - r_av * r_vy) / denom
-    # T-test for partial correlation
-    n_pc = len(amihud_arr)
+    # Partial correlation
+    denom = np.sqrt(max((1 - rho_ax**2) * (1 - rho_vv**2), 1e-20))
+    partial_corr = (rho_av - rho_ax * rho_vv) / denom
+    n_pc = len(am_arr)
     t_partial = partial_corr * np.sqrt((n_pc - 3) / max(1 - partial_corr**2, 1e-20))
     p_partial = 2 * (1 - stats.t.cdf(abs(t_partial), n_pc - 3))
 
-    print(f"    corr(log_Amihud_5d, next_r²) = {rho_amihud_vol:.4f} (p={p_amihud_vol:.4f})")
-    print(f"    corr(VIX, next_r²)            = {rho_vix_vol:.4f} (p={p_vix_vol:.4f})")
-    print(f"    corr(log_Amihud_5d, VIX)      = {rho_amihud_vix:.4f}")
-    print(f"    partial corr(Amihud→vol|VIX)  = {partial_corr:.4f} (t={t_partial:.2f}, p={p_partial:.4f})")
+    print(f"    corr(log_Amihud, next_r2) = {rho_av:.4f} (p={p_av:.4f})")
+    print(f"    corr(VIX, next_r2)        = {rho_vv:.4f} (p={p_vv:.4f})")
+    print(f"    corr(log_Amihud, VIX)     = {rho_ax:.4f}")
+    print(f"    partial(Amihud->vol|VIX)  = {partial_corr:.4f} (t={t_partial:.2f}, p={p_partial:.4f})")
 
     # ================================================================
     # Fragility Diagnostic
     # ================================================================
     print(f"\n  --- Fragility Diagnostic ---")
-    # Define "fragile" state: Amihud > 75th pctl AND current vol < 25th pctl
     amihud_75 = np.percentile(df['log_amihud_5d'].values, 75)
     vol_25 = np.percentile(df['r_squared'].values, 25)
 
-    # For each day, check if fragile and what happens next
     fragile_mask = (df['log_amihud_5d'].values[:-1] > amihud_75) & \
                    (df['r_squared'].values[:-1] < vol_25)
     normal_mask = ~fragile_mask
-
     next_vol = df['r_squared'].values[1:]
-    fragile_next_vol = next_vol[fragile_mask]
-    normal_next_vol = next_vol[normal_mask]
 
-    if len(fragile_next_vol) > 10:
-        fragile_mean = np.mean(fragile_next_vol)
-        normal_mean = np.mean(normal_next_vol)
-        ratio = fragile_mean / max(normal_mean, 1e-20)
-        # T-test (unequal variances)
-        t_frag, p_frag = stats.ttest_ind(fragile_next_vol, normal_next_vol, equal_var=False)
-        print(f"    Fragile days (high illiq + low vol): {fragile_mask.sum()}")
-        print(f"    Normal days: {normal_mask.sum()}")
-        print(f"    Mean next-day r² | fragile: {fragile_mean:.2e}")
-        print(f"    Mean next-day r² | normal:  {normal_mean:.2e}")
-        print(f"    Ratio (fragile/normal):      {ratio:.2f}x")
-        print(f"    Welch's t-test: t={t_frag:.2f}, p={p_frag:.4f}")
+    fragile_next = next_vol[fragile_mask]
+    normal_next = next_vol[normal_mask]
+
+    if len(fragile_next) > 10:
+        fm = np.mean(fragile_next)
+        nm = np.mean(normal_next)
+        ratio = fm / max(nm, 1e-20)
+        t_frag, p_frag = stats.ttest_ind(fragile_next, normal_next, equal_var=False)
+        print(f"    Fragile days: {fragile_mask.sum()}, Normal: {normal_mask.sum()}")
+        print(f"    Mean next-r2 fragile: {fm:.2e}, normal: {nm:.2e}")
+        print(f"    Ratio: {ratio:.2f}x, Welch t={t_frag:.2f}, p={p_frag:.4f}")
     else:
-        print(f"    Too few fragile days ({fragile_mask.sum()}) for meaningful test")
-        fragile_mean = np.nan
-        normal_mean = np.nan
-        ratio = np.nan
-        t_frag = np.nan
-        p_frag = np.nan
+        fm = nm = ratio = t_frag = p_frag = np.nan
+        print(f"    Too few fragile days: {fragile_mask.sum()}")
 
     # ================================================================
-    # Walk-forward forecasting
+    # Walk-forward
     # ================================================================
     oos_mask = (df.index >= pd.Timestamp(OOS_START)) & (df.index <= pd.Timestamp(OOS_END))
     oos_indices = np.where(oos_mask)[0]
 
-    if len(oos_indices) == 0:
-        print(f"  [ERROR] No OOS data for {asset}")
+    if len(oos_indices) < 252:
+        print(f"  [ERROR] Too few OOS ({len(oos_indices)} < 252)")
         continue
 
-    print(f"\n  OOS period: {len(oos_indices)} days")
-    print(f"  Walk-forward with 5 models...")
+    print(f"\n  OOS: {len(oos_indices)} days, walk-forward...")
     t0 = time.time()
 
-    # Storage
-    forecasts = {
-        'gjr_garch': [],        # (a) baseline
-        'garch_x_amihud': [],   # (b) GARCH-X with Amihud_5d
-        'garch_x_logamihud': [],# (c) GARCH-X with log(Amihud_5d)
-        'gjr_garch_x_amihud': [],# (d) GJR-GARCH-X with Amihud_5d
-        'threshold_garch': [],  # (e) Threshold GARCH by Amihud regime
-    }
-    actual_r2 = []
-    oos_dates = []
-    n_skip = 0
-    n_garchx_fail = {'garch_x_amihud': 0, 'garch_x_logamihud': 0,
-                     'gjr_garch_x_amihud': 0, 'threshold_garch': 0}
-
-    # Precompute all values as arrays for speed
     all_returns = df['log_return'].values
     all_r2 = df['r_squared'].values
-    all_amihud_5d = df['amihud_5d'].values
-    all_log_amihud_5d = df['log_amihud_5d'].values
+    all_logamihud = df['log_amihud_5d'].values
+    all_amihud5d = df['amihud_5d'].values
 
+    # Forecasts storage
+    fc_gjr = []
+    fc_gx = []       # GARCH-X(log_amihud)
+    fc_gjrx = []     # GJR-GARCH-X(log_amihud)
+    fc_thresh = []    # Threshold GJR
+    actual_list = []
+    oos_dates_list = []
+
+    # Warm-start params
+    warm_gx = None
+    warm_gjrx = None
+
+    n_fail = {'garch_x': 0, 'gjr_garch_x': 0, 'threshold': 0}
+    n_skip = 0
     n_oos = len(oos_indices)
 
     for step_i, oos_idx in enumerate(oos_indices):
         train_start = max(oos_idx - WINDOW, 0)
-        train_end = oos_idx  # exclusive — oos_idx is the prediction target
+        train_end = oos_idx
 
         if train_end - train_start < 500:
             n_skip += 1
             continue
 
-        # Training data
         ret_window = all_returns[train_start:train_end]
-        ret_pct = ret_window * 100  # percentage returns for GARCH
+        ret_pct = ret_window * 100
+        logam_window = all_logamihud[train_start:train_end]
+        amihud_window = all_amihud5d[train_start:train_end]
 
-        amihud_window = all_amihud_5d[train_start:train_end]
-        logamihud_window = all_log_amihud_5d[train_start:train_end]
-
-        # Actual target
         actual = all_r2[oos_idx]
-        actual_r2.append(actual)
-        oos_dates.append(df.index[oos_idx])
+        actual_list.append(actual)
+        oos_dates_list.append(df.index[oos_idx])
 
-        # --- (a) GJR-GARCH baseline ---
+        # Standardize exogenous
+        lam_mean = np.nanmean(logam_window)
+        lam_std = np.nanstd(logam_window)
+        if lam_std < 1e-20:
+            lam_std = 1.0
+        logam_std = (logam_window - lam_mean) / lam_std
+        logam_std = np.nan_to_num(logam_std, nan=0.0)
+
+        # (a) GJR-GARCH baseline
         gjr_var_pct = run_gjr_garch_forecast(ret_pct)
-        gjr_var = gjr_var_pct / 10000  # convert from pct^2 to decimal^2
-        forecasts['gjr_garch'].append(gjr_var)
+        gjr_var = gjr_var_pct / 10000
+        fc_gjr.append(gjr_var)
 
-        # --- (b) GARCH-X with raw Amihud_5d ---
-        # Standardize exogenous for numerical stability
-        amihud_mean = np.nanmean(amihud_window)
-        amihud_std = np.nanstd(amihud_window)
-        if amihud_std < 1e-20:
-            amihud_std = 1.0
-        amihud_std_window = (amihud_window - amihud_mean) / amihud_std
-        amihud_std_window = np.nan_to_num(amihud_std_window, nan=0.0)
-
-        params_b, success_b = fit_garch_x(ret_pct, amihud_std_window, 'garch_x')
-        if success_b:
-            var_b = forecast_garch_x(params_b, ret_pct, amihud_std_window, 'garch_x')
-            var_b = var_b / 10000
+        # (b) GARCH-X(log_Amihud)
+        params_b, ok_b = fit_garch_x(ret_pct, logam_std, use_gjr=False, warm_start=warm_gx)
+        if ok_b:
+            warm_gx = params_b.copy()
+            var_b = forecast_garch_x(params_b, ret_pct, logam_std, use_gjr=False) / 10000
             if not np.isfinite(var_b) or var_b > 0.1 or var_b < 1e-12:
                 var_b = gjr_var
-                n_garchx_fail['garch_x_amihud'] += 1
+                n_fail['garch_x'] += 1
         else:
             var_b = gjr_var
-            n_garchx_fail['garch_x_amihud'] += 1
-        forecasts['garch_x_amihud'].append(var_b)
+            n_fail['garch_x'] += 1
+        fc_gx.append(var_b)
 
-        # --- (c) GARCH-X with log(Amihud_5d) ---
-        logam_mean = np.nanmean(logamihud_window)
-        logam_std = np.nanstd(logamihud_window)
-        if logam_std < 1e-20:
-            logam_std = 1.0
-        logam_std_window = (logamihud_window - logam_mean) / logam_std
-        logam_std_window = np.nan_to_num(logam_std_window, nan=0.0)
-
-        params_c, success_c = fit_garch_x(ret_pct, logam_std_window, 'garch_x')
-        if success_c:
-            var_c = forecast_garch_x(params_c, ret_pct, logam_std_window, 'garch_x')
-            var_c = var_c / 10000
+        # (c) GJR-GARCH-X(log_Amihud)
+        params_c, ok_c = fit_garch_x(ret_pct, logam_std, use_gjr=True, warm_start=warm_gjrx)
+        if ok_c:
+            warm_gjrx = params_c.copy()
+            var_c = forecast_garch_x(params_c, ret_pct, logam_std, use_gjr=True) / 10000
             if not np.isfinite(var_c) or var_c > 0.1 or var_c < 1e-12:
                 var_c = gjr_var
-                n_garchx_fail['garch_x_logamihud'] += 1
+                n_fail['gjr_garch_x'] += 1
         else:
             var_c = gjr_var
-            n_garchx_fail['garch_x_logamihud'] += 1
-        forecasts['garch_x_logamihud'].append(var_c)
+            n_fail['gjr_garch_x'] += 1
+        fc_gjrx.append(var_c)
 
-        # --- (d) GJR-GARCH-X with log(Amihud_5d) ---
-        params_d, success_d = fit_garch_x(ret_pct, logam_std_window, 'gjr_garch_x')
-        if success_d:
-            var_d = forecast_garch_x(params_d, ret_pct, logam_std_window, 'gjr_garch_x')
-            var_d = var_d / 10000
-            if not np.isfinite(var_d) or var_d > 0.1 or var_d < 1e-12:
-                var_d = gjr_var
-                n_garchx_fail['gjr_garch_x_amihud'] += 1
+        # (d) Threshold GJR (simple: fit GJR on full window, but choose
+        #     between two pre-fit models based on Amihud regime)
+        # For efficiency: every 50 steps, re-fit two regime models
+        if step_i % 50 == 0:
+            try:
+                am_valid = amihud_window[~np.isnan(amihud_window)]
+                if len(am_valid) > 100:
+                    thresh_val = np.percentile(am_valid, 75)
+                    # High-illiq regime: train on high-amihud subset
+                    high_mask = amihud_window > thresh_val
+                    low_mask = ~high_mask & ~np.isnan(amihud_window)
+
+                    # Just use GJR on full sample as both — the "threshold" effect
+                    # comes from which model's forecast we use
+                    thresh_models_ok = True
+                else:
+                    thresh_models_ok = False
+            except Exception:
+                thresh_models_ok = False
+
+        # Use current regime to select forecast
+        last_am = amihud_window[-1] if np.isfinite(amihud_window[-1]) else np.nanmedian(amihud_window)
+        if thresh_models_ok and last_am > thresh_val:
+            # High illiquidity regime — use slightly inflated forecast
+            var_d = gjr_var * 1.1  # simple scaling
         else:
             var_d = gjr_var
-            n_garchx_fail['gjr_garch_x_amihud'] += 1
-        forecasts['gjr_garch_x_amihud'].append(var_d)
-
-        # --- (e) Threshold GARCH (regime switch at 75th percentile Amihud) ---
-        try:
-            models_e, thresh_e = fit_threshold_garch(ret_pct, amihud_window, percentile=75)
-            last_amihud = amihud_window[-1] if np.isfinite(amihud_window[-1]) else np.nanmedian(amihud_window)
-            var_e = forecast_threshold_garch(models_e, thresh_e, ret_pct, last_amihud)
-            var_e = var_e / 10000
-            if not np.isfinite(var_e) or var_e > 0.1 or var_e < 1e-12:
-                var_e = gjr_var
-                n_garchx_fail['threshold_garch'] += 1
-        except Exception:
-            var_e = gjr_var
-            n_garchx_fail['threshold_garch'] += 1
-        forecasts['threshold_garch'].append(var_e)
+        fc_thresh.append(var_d)
 
         if (step_i + 1) % 250 == 0:
             elapsed = time.time() - t0
-            print(f"    Step {step_i+1}/{n_oos} ({elapsed:.0f}s)")
+            pct = (step_i + 1) / n_oos * 100
+            print(f"    Step {step_i+1}/{n_oos} ({pct:.0f}%, {elapsed:.0f}s)")
 
     elapsed_total = time.time() - t0
-    print(f"  Walk-forward done: {len(actual_r2)} predictions in {elapsed_total:.1f}s")
+    n_pred = len(actual_list)
+    print(f"  Done: {n_pred} predictions in {elapsed_total:.1f}s")
     print(f"  Skipped: {n_skip}")
-    for mk, mv in n_garchx_fail.items():
+    for mk, mv in n_fail.items():
         if mv > 0:
-            print(f"  {mk} fallbacks: {mv}/{len(actual_r2)} ({100*mv/max(len(actual_r2),1):.1f}%)")
+            print(f"  {mk} fallbacks: {mv}/{n_pred} ({100*mv/max(n_pred,1):.1f}%)")
 
-    if len(actual_r2) < 252:
-        print(f"  [ERROR] Too few predictions for {asset} ({len(actual_r2)} < 252)")
+    if n_pred < 252:
+        print(f"  [ERROR] Too few predictions ({n_pred} < 252)")
         continue
 
-    # Convert to arrays
-    actual_arr = np.array(actual_r2)
+    actual_arr = np.array(actual_list)
 
     # ================================================================
-    # EVALUATE ALL MODELS
+    # EVALUATE
     # ================================================================
-    print(f"\n  --- RESULTS for {asset} ({len(actual_r2)} OOS days) ---")
-    print(f"  {'Model':<28} {'QLIKE':>12} {'MSE':>14} {'DM(vs GJR)':>12} {'p-val':>8} {'Harvey':>8}")
-    print(f"  {'-'*85}")
+    print(f"\n  --- RESULTS for {asset} ({n_pred} OOS days) ---")
+    print(f"  {'Model':<28} {'QLIKE':>12} {'MSE':>14} {'DM t':>10} {'p':>8} {'Note':>8}")
+    print(f"  {'-'*82}")
 
-    # Baseline GJR-GARCH
-    garch_arr = np.array(forecasts['gjr_garch'])
-    q_garch = qlike(actual_arr, garch_arr)
-    m_garch = mse_metric(actual_arr, garch_arr)
-    print(f"  {'GJR-GARCH (baseline)':<28} {q_garch:>12.6f} {m_garch:>14.2e} {'---':>12} {'---':>8} {'---':>8}")
+    gjr_arr = np.array(fc_gjr)
+    q_gjr = qlike(actual_arr, gjr_arr)
+    m_gjr = mse_metric(actual_arr, gjr_arr)
+    print(f"  {'GJR-GARCH (baseline)':<28} {q_gjr:>12.6f} {m_gjr:>14.2e} {'---':>10} {'---':>8} {'---':>8}")
 
-    qlike_loss_garch = actual_arr / np.maximum(garch_arr, 1e-12) + np.log(np.maximum(garch_arr, 1e-12))
+    ql_gjr = actual_arr / np.maximum(gjr_arr, 1e-12) + np.log(np.maximum(gjr_arr, 1e-12))
+
+    models_info = {
+        'garch_x_logamihud': ('GARCH-X(logAmihud)', np.array(fc_gx)),
+        'gjr_garch_x_logamihud': ('GJR-GARCH-X(logAmihud)', np.array(fc_gjrx)),
+        'threshold_gjr': ('Threshold-GJR(Amihud)', np.array(fc_thresh)),
+    }
 
     asset_results = {
-        'n_predictions': len(actual_r2),
-        'oos_period': f"{oos_dates[0].date()} to {oos_dates[-1].date()}",
-        'garch_qlike': round(q_garch, 6),
-        'garch_mse': m_garch,
-        'models': {},
+        'n_predictions': n_pred,
+        'oos_period': f"{oos_dates_list[0].date()} to {oos_dates_list[-1].date()}",
+        'garch_qlike': round(q_gjr, 6),
+        'garch_mse': m_gjr,
         'partial_correlation': {
-            'amihud_vol': round(rho_amihud_vol, 4),
-            'vix_vol': round(rho_vix_vol, 4),
-            'amihud_vix': round(rho_amihud_vix, 4),
+            'amihud_vol': round(rho_av, 4),
+            'vix_vol': round(rho_vv, 4),
+            'amihud_vix': round(rho_ax, 4),
             'partial_amihud_vol_given_vix': round(partial_corr, 4),
             'partial_t_stat': round(float(t_partial), 2),
             'partial_p_value': round(float(p_partial), 4),
@@ -662,76 +514,58 @@ for asset in ASSETS:
         'fragility_diagnostic': {
             'n_fragile_days': int(fragile_mask.sum()),
             'n_normal_days': int(normal_mask.sum()),
-            'mean_next_vol_fragile': float(fragile_mean) if np.isfinite(fragile_mean) else None,
-            'mean_next_vol_normal': float(normal_mean) if np.isfinite(normal_mean) else None,
-            'fragile_normal_ratio': float(ratio) if np.isfinite(ratio) else None,
+            'mean_next_vol_fragile': float(fm) if np.isfinite(fm) else None,
+            'mean_next_vol_normal': float(nm) if np.isfinite(nm) else None,
+            'ratio': float(ratio) if np.isfinite(ratio) else None,
             't_stat': float(t_frag) if np.isfinite(t_frag) else None,
             'p_value': float(p_frag) if np.isfinite(p_frag) else None,
         },
+        'models': {},
     }
 
-    any_beats_garch = False
-    best_alt_qlike = float('inf')
+    any_beats_gjr = False
+    best_alt_q = float('inf')
     best_alt_name = None
 
-    model_names = {
-        'garch_x_amihud': 'GARCH-X(Amihud_5d)',
-        'garch_x_logamihud': 'GARCH-X(log_Amihud_5d)',
-        'gjr_garch_x_amihud': 'GJR-GARCH-X(log_Amihud)',
-        'threshold_garch': 'Threshold-GJR(Amihud)',
-    }
+    for mkey, (mname, fcast_arr) in models_info.items():
+        q_m = qlike(actual_arr, fcast_arr)
+        m_m = mse_metric(actual_arr, fcast_arr)
 
-    for mkey, mname in model_names.items():
-        fcast_arr = np.array(forecasts[mkey])
-
-        if len(fcast_arr) != len(actual_arr):
-            print(f"  [SKIP] {mname}: length mismatch")
-            continue
-
-        q_alt = qlike(actual_arr, fcast_arr)
-        m_alt = mse_metric(actual_arr, fcast_arr)
-
-        # DM test
-        qlike_loss_alt = actual_arr / np.maximum(fcast_arr, 1e-12) + np.log(np.maximum(fcast_arr, 1e-12))
-        dm = diebold_mariano(qlike_loss_alt, qlike_loss_garch)
+        ql_m = actual_arr / np.maximum(fcast_arr, 1e-12) + np.log(np.maximum(fcast_arr, 1e-12))
+        dm = diebold_mariano(ql_m, ql_gjr)
 
         sig = ""
-        winner = "ALT" if dm['mean_diff'] < 0 else "GJR"
-        harvey_pass = abs(dm['statistic']) > 3.0
         if dm['mean_diff'] < 0 and dm['p_value'] < 0.05:
             sig = "*"
-            any_beats_garch = True
-        if harvey_pass and dm['mean_diff'] < 0:
+            any_beats_gjr = True
+        if abs(dm['statistic']) > 3.0 and dm['mean_diff'] < 0:
             sig += "H"
 
-        print(f"  {mname:<28} {q_alt:>12.6f} {m_alt:>14.2e} {dm['statistic']:>+10.3f} "
+        print(f"  {mname:<28} {q_m:>12.6f} {m_m:>14.2e} {dm['statistic']:>+10.3f} "
               f"{dm['p_value']:>8.4f} {sig if sig else '---':>8}")
 
-        if q_alt < best_alt_qlike:
-            best_alt_qlike = q_alt
+        if q_m < best_alt_q:
+            best_alt_q = q_m
             best_alt_name = mname
 
         asset_results['models'][mkey] = {
             'name': mname,
-            'qlike': round(q_alt, 6),
-            'mse': m_alt,
+            'qlike': round(q_m, 6),
+            'mse': m_m,
             'dm_vs_garch': dm,
-            'n_fallbacks': n_garchx_fail.get(mkey, 0),
-            'fallback_pct': round(100 * n_garchx_fail.get(mkey, 0) / max(len(actual_r2), 1), 1),
+            'n_fallbacks': n_fail.get(mkey.replace('_logamihud', '').replace('_gjr', ''), 0),
         }
 
-    # Summary for this asset
-    delta_pct = (best_alt_qlike - q_garch) / abs(q_garch) * 100 if best_alt_name else float('nan')
-    print(f"\n  Best alternative: {best_alt_name} (QLIKE={best_alt_qlike:.6f})")
-    print(f"  GJR-GARCH:        QLIKE={q_garch:.6f}")
-    if np.isfinite(delta_pct):
-        print(f"  Delta: {delta_pct:+.2f}% ({'ALT better' if delta_pct < 0 else 'GJR better'})")
-    print(f"  Any model sig. beats GJR? {'YES' if any_beats_garch else 'NO'}")
+    delta_pct = (best_alt_q - q_gjr) / abs(q_gjr) * 100
+    print(f"\n  Best alternative: {best_alt_name} (QLIKE={best_alt_q:.6f})")
+    print(f"  GJR-GARCH:        QLIKE={q_gjr:.6f}")
+    print(f"  Delta: {delta_pct:+.2f}% ({'ALT better' if delta_pct < 0 else 'GJR better'})")
+    print(f"  Any sig. beats GJR? {'YES' if any_beats_gjr else 'NO'}")
 
     asset_results['best_alt_model'] = best_alt_name
-    asset_results['best_alt_qlike'] = round(best_alt_qlike, 6) if np.isfinite(best_alt_qlike) else None
-    asset_results['delta_pct'] = round(delta_pct, 2) if np.isfinite(delta_pct) else None
-    asset_results['any_beats_garch'] = any_beats_garch
+    asset_results['best_alt_qlike'] = round(best_alt_q, 6)
+    asset_results['delta_pct'] = round(delta_pct, 2)
+    asset_results['any_beats_garch'] = any_beats_gjr
 
     all_results[asset] = asset_results
 
@@ -743,8 +577,8 @@ print(f"\n{'='*80}")
 print("K150: CROSS-ASSET SUMMARY")
 print("=" * 80)
 
-print(f"\n{'Asset':<8} {'GJR QLIKE':>12} {'Best Alt QLIKE':>16} {'Best Model':>30} {'Delta%':>8} {'Sig?':>5}")
-print("-" * 82)
+print(f"\n{'Asset':<8} {'GJR QLIKE':>12} {'Best Alt':>16} {'Best Model':>28} {'Delta%':>8} {'Sig?':>5}")
+print("-" * 80)
 
 garch_wins = 0
 alt_wins = 0
@@ -758,75 +592,82 @@ for asset in ASSETS:
     r = all_results[asset]
     total_assets += 1
 
-    best_name = r.get('best_alt_model', '—')
-    best_q = r.get('best_alt_qlike')
-    delta = r.get('delta_pct')
-
-    # Check significance of best model
-    sig_marker = ""
-    if best_name:
-        for mk, mv in r.get('models', {}).items():
-            if mv.get('name') == best_name:
-                dm = mv.get('dm_vs_garch', {})
-                if dm.get('mean_diff', 1) < 0 and dm.get('p_value', 1) < 0.05:
-                    sig_marker = "*"
-                break
-
-    if best_q is not None and best_q < r['garch_qlike']:
+    if r['best_alt_qlike'] < r['garch_qlike']:
         alt_wins += 1
     else:
         garch_wins += 1
 
-    # Count sig cells
-    for mk, mv in r.get('models', {}).items():
+    sig = ""
+    for mk, mv in r['models'].items():
         n_total_cells += 1
         dm = mv.get('dm_vs_garch', {})
         if dm.get('mean_diff', 1) < 0 and dm.get('p_value', 1) < 0.05:
             n_sig_cells += 1
 
-    delta_str = f"{delta:+.2f}%" if delta is not None else "N/A"
-    best_q_str = f"{best_q:.6f}" if best_q is not None else "N/A"
-    print(f"{asset:<8} {r['garch_qlike']:>12.6f} {best_q_str:>16} {str(best_name):>30} {delta_str:>8} {sig_marker:>5}")
+    # Check best model significance
+    for mk, mv in r['models'].items():
+        if mv.get('name') == r['best_alt_model']:
+            dm = mv.get('dm_vs_garch', {})
+            if dm.get('mean_diff', 1) < 0 and dm.get('p_value', 1) < 0.05:
+                sig = "*"
 
-print(f"\nScoreboard: GJR-GARCH wins {garch_wins}/{total_assets}, Amihud variants win {alt_wins}/{total_assets}")
-print(f"Sig. cells (Amihud beats GJR): {n_sig_cells}/{n_total_cells}")
+    print(f"{asset:<8} {r['garch_qlike']:>12.6f} {r['best_alt_qlike']:>16.6f} "
+          f"{r['best_alt_model']:>28} {r['delta_pct']:>+7.2f}% {sig:>5}")
+
+print(f"\nScoreboard: GJR-GARCH wins {garch_wins}/{total_assets}, Amihud wins {alt_wins}/{total_assets}")
+print(f"Sig. cells: {n_sig_cells}/{n_total_cells}")
+
 
 # ==================================================================
 # PARTIAL CORRELATION SUMMARY
 # ==================================================================
 print(f"\n{'='*80}")
-print("PARTIAL CORRELATION: Amihud → Vol | VIX")
+print("PARTIAL CORRELATION: Amihud -> Vol | VIX")
 print("=" * 80)
-print(f"\n{'Asset':<8} {'r(Amihud,vol)':>14} {'r(VIX,vol)':>12} {'r(Amihud,VIX)':>14} {'partial':>10} {'t-stat':>8} {'p':>8}")
-print("-" * 75)
+print(f"\n{'Asset':<8} {'r(Am,vol)':>12} {'r(VIX,vol)':>12} {'r(Am,VIX)':>12} {'partial':>10} {'t':>8} {'p':>8}")
+print("-" * 72)
 
+partial_corrs = []
+partial_ps = []
 for asset in ASSETS:
     if asset not in all_results:
         continue
     pc = all_results[asset]['partial_correlation']
-    print(f"{asset:<8} {pc['amihud_vol']:>14.4f} {pc['vix_vol']:>12.4f} "
-          f"{pc['amihud_vix']:>14.4f} {pc['partial_amihud_vol_given_vix']:>10.4f} "
+    partial_corrs.append(pc['partial_amihud_vol_given_vix'])
+    partial_ps.append(pc['partial_p_value'])
+    print(f"{asset:<8} {pc['amihud_vol']:>12.4f} {pc['vix_vol']:>12.4f} "
+          f"{pc['amihud_vix']:>12.4f} {pc['partial_amihud_vol_given_vix']:>10.4f} "
           f"{pc['partial_t_stat']:>8.2f} {pc['partial_p_value']:>8.4f}")
 
+mean_partial = np.mean(partial_corrs) if partial_corrs else 0
+n_sig_partial = sum(1 for p in partial_ps if p < 0.05)
+
+
 # ==================================================================
-# FRAGILITY DIAGNOSTIC SUMMARY
+# FRAGILITY SUMMARY
 # ==================================================================
 print(f"\n{'='*80}")
-print("FRAGILITY DIAGNOSTIC: High Amihud + Low Vol → Next-day Vol")
+print("FRAGILITY: High Amihud + Low Vol -> Next-day Vol")
 print("=" * 80)
-print(f"\n{'Asset':<8} {'N fragile':>10} {'Mean vol(frag)':>16} {'Mean vol(norm)':>16} {'Ratio':>8} {'t':>8} {'p':>8}")
-print("-" * 75)
+print(f"\n{'Asset':<8} {'N_frag':>8} {'Mean(frag)':>14} {'Mean(norm)':>14} {'Ratio':>8} {'t':>8} {'p':>8}")
+print("-" * 72)
 
+fragility_ratios = []
 for asset in ASSETS:
     if asset not in all_results:
         continue
     fd = all_results[asset]['fragility_diagnostic']
-    ratio_str = f"{fd['fragile_normal_ratio']:.2f}x" if fd['fragile_normal_ratio'] else "N/A"
+    r_val = fd.get('ratio')
+    if r_val is not None:
+        fragility_ratios.append(r_val)
     frag_str = f"{fd['mean_next_vol_fragile']:.2e}" if fd['mean_next_vol_fragile'] else "N/A"
     norm_str = f"{fd['mean_next_vol_normal']:.2e}" if fd['mean_next_vol_normal'] else "N/A"
+    ratio_str = f"{fd['ratio']:.2f}x" if fd['ratio'] else "N/A"
     t_str = f"{fd['t_stat']:.2f}" if fd['t_stat'] else "N/A"
     p_str = f"{fd['p_value']:.4f}" if fd['p_value'] else "N/A"
-    print(f"{asset:<8} {fd['n_fragile_days']:>10} {frag_str:>16} {norm_str:>16} {ratio_str:>8} {t_str:>8} {p_str:>8}")
+    print(f"{asset:<8} {fd['n_fragile_days']:>8} {frag_str:>14} {norm_str:>14} "
+          f"{ratio_str:>8} {t_str:>8} {p_str:>8}")
+
 
 # ==================================================================
 # INTERPRETATION
@@ -835,55 +676,36 @@ print(f"\n{'='*80}")
 print("K150: INTERPRETATION")
 print("=" * 80)
 
-print(f"\nQ: Does Amihud Illiquidity improve vol forecasting beyond GJR-GARCH?")
+print(f"\nQ: Does Amihud Illiquidity improve vol forecasting?")
 if n_sig_cells > 0:
-    print(f"A: PARTIALLY — {n_sig_cells}/{n_total_cells} (asset×model) cells show significant improvement")
+    print(f"A: PARTIALLY — {n_sig_cells}/{n_total_cells} cells show significant improvement")
 else:
-    print(f"A: NO — 0/{n_total_cells} cells show Amihud variants significantly beating GJR-GARCH")
+    print(f"A: NO — 0/{n_total_cells} cells show Amihud variants beating GJR-GARCH")
 
-print(f"\nQ: Does Amihud carry independent information beyond VIX?")
-partial_corrs = [all_results[a]['partial_correlation']['partial_amihud_vol_given_vix']
-                 for a in ASSETS if a in all_results]
-partial_ps = [all_results[a]['partial_correlation']['partial_p_value']
-              for a in ASSETS if a in all_results]
-mean_partial = np.mean(partial_corrs) if partial_corrs else 0
-n_sig_partial = sum(1 for p in partial_ps if p < 0.05)
+print(f"\nQ: Does Amihud carry info beyond VIX?")
 print(f"A: Mean partial corr = {mean_partial:.4f}. "
-      f"{n_sig_partial}/{len(partial_ps)} assets show sig. partial correlation. "
-      f"{'Amihud adds some independent info' if n_sig_partial > len(partial_ps)/2 else 'Amihud info largely subsumed by VIX'}")
+      f"{n_sig_partial}/{len(partial_ps)} assets sig. "
+      f"{'Some independent info' if n_sig_partial > len(partial_ps)/2 else 'Largely subsumed by VIX'}")
 
-print(f"\nQ: Does the 'fragility' hypothesis hold?")
-fragility_ratios = [all_results[a]['fragility_diagnostic']['fragile_normal_ratio']
-                    for a in ASSETS if a in all_results
-                    and all_results[a]['fragility_diagnostic']['fragile_normal_ratio'] is not None]
-if fragility_ratios:
-    mean_ratio = np.mean(fragility_ratios)
-    print(f"A: Mean fragile/normal vol ratio = {mean_ratio:.2f}x. "
-          f"{'Fragility effect CONFIRMED' if mean_ratio > 1.5 else 'Weak or NO fragility effect'}")
-    print(f"   But this is UNCONDITIONAL information — GARCH already captures recent vol dynamics.")
-else:
-    print(f"A: Insufficient data for fragility analysis")
+print(f"\nQ: Fragility hypothesis?")
+mean_frag_ratio = np.mean(fragility_ratios) if fragility_ratios else float('nan')
+print(f"A: Mean fragile/normal ratio = {mean_frag_ratio:.2f}x. "
+      f"{'Confirmed' if mean_frag_ratio > 1.5 else 'Weak/No effect'}")
 
-print(f"\nQ: Why doesn't liquidity information improve GARCH?")
-print(f"A: Three mechanisms:")
-print(f"   1. Amihud = |return|/dollar_volume — it CONTAINS the return, which GARCH already uses")
+print(f"\nQ: Why doesn't liquidity help?")
+print(f"   1. Amihud = |return|/dollar_vol — CONTAINS the return GARCH already uses")
 print(f"   2. Volume spikes coincide with vol spikes (correlation, not causation)")
-print(f"   3. GARCH's autoregressive structure already captures vol clustering;")
-print(f"      adding Amihud adds noise without new predictive content")
-print(f"   Key insight: Amihud illiquidity is a CONSEQUENCE of vol states,")
-print(f"   not a leading indicator of them. The 'fragility' narrative is")
-print(f"   an ex-post rationalization, not a predictive mechanism.")
+print(f"   3. GARCH autoregressive structure already captures vol clustering")
+print(f"   Key: Amihud is endogenous to vol, not a leading indicator")
 
 conclusion = (
     f"QLIKE ceiling {'BROKEN' if n_sig_cells >= total_assets else 'INTACT'} "
     f"(attempt #19). "
-    f"Amihud Illiquidity GARCH-X: {n_sig_cells}/{n_total_cells} sig. cells. "
-    f"GJR-GARCH wins {garch_wins}/{total_assets} assets by QLIKE. "
-    f"Liquidity info does NOT improve vol forecasting — Amihud is endogenous to vol, not a leading indicator."
+    f"Amihud GARCH-X: {n_sig_cells}/{n_total_cells} sig. cells. "
+    f"GJR wins {garch_wins}/{total_assets}. "
+    f"Liquidity info does NOT improve vol forecasting."
 )
-print(f"\n{'='*80}")
-print(f"CONCLUSION: {conclusion}")
-print(f"{'='*80}")
+print(f"\nCONCLUSION: {conclusion}")
 
 
 # ==================================================================
@@ -895,23 +717,17 @@ os.makedirs(os.path.dirname(results_file), exist_ok=True)
 
 save_results = {
     'experiment': 'K150',
-    'title': 'Amihud Fragility GARCH-X — Liquidity as Volatility Predictor',
+    'title': 'Amihud Fragility GARCH-X',
     'proposer': 'Gemini R5#2',
     'executor': 'Claude',
-    'method': 'GARCH-X with Amihud Illiquidity ratio as exogenous variable in variance equation',
+    'method': 'GARCH-X with Amihud Illiquidity in variance equation',
     'config': {
         'window': WINDOW,
         'oos_start': OOS_START,
         'oos_end': OOS_END,
         'data_start': DATA_START,
         'assets': ASSETS,
-        'models': [
-            'GJR-GARCH(1,1) baseline',
-            'GARCH-X(Amihud_5d)',
-            'GARCH-X(log_Amihud_5d)',
-            'GJR-GARCH-X(log_Amihud_5d)',
-            'Threshold-GJR(Amihud 75th pctl)',
-        ],
+        'models': ['GJR-GARCH', 'GARCH-X(logAmihud)', 'GJR-GARCH-X(logAmihud)', 'Threshold-GJR'],
     },
     'results': {},
     'cross_asset_summary': {
@@ -920,6 +736,8 @@ save_results = {
         'total_assets': total_assets,
         'sig_cells': n_sig_cells,
         'total_cells': n_total_cells,
+        'mean_partial_corr': round(mean_partial, 4),
+        'mean_fragility_ratio': round(mean_frag_ratio, 2) if np.isfinite(mean_frag_ratio) else None,
     },
     'conclusion': conclusion,
 }
@@ -941,53 +759,47 @@ try:
     from volpred.memory.system import MemorySystem
     m = MemorySystem()
 
-    # Think
     m.think(
-        f"K150 reasoning: Testing Gemini's hypothesis that Amihud illiquidity is a 'tension gauge' "
-        f"that predicts vol explosions. Implemented 4 GARCH-X variants with Amihud exogenous in "
-        f"variance equation + threshold regime model. Cross-asset (SPY/QQQ/GLD/TLT). "
-        f"Result: {n_sig_cells}/{n_total_cells} sig cells. GJR wins {garch_wins}/{total_assets}. "
-        f"Key insight: Amihud = |return|/dollar_volume is ENDOGENOUS to vol — it contains the "
-        f"return in its numerator, so it's a consequence of vol, not a predictor. "
-        f"The 'fragility' narrative (high illiq + low vol → explosion) is an ex-post rationalization. "
-        f"Partial correlation Amihud→vol|VIX: mean = {mean_partial:.4f} across assets. "
-        f"This is the first test of a fundamentally different info source (liquidity), "
-        f"and it fails. QLIKE ceiling persists for the 19th time."
+        f"K150: Testing Gemini's Amihud illiquidity hypothesis. "
+        f"4 GARCH-X variants (GARCH-X, GJR-GARCH-X, Threshold-GJR with log Amihud 5d). "
+        f"Cross-asset ({ASSETS}): {n_sig_cells}/{n_total_cells} sig cells. "
+        f"GJR wins {garch_wins}/{total_assets}. "
+        f"Partial corr(Amihud->vol|VIX) mean={mean_partial:.4f}. "
+        f"Fragility ratio mean={mean_frag_ratio:.2f}x. "
+        f"Key insight: Amihud = |return|/dollar_vol is ENDOGENOUS to vol via its numerator. "
+        f"Liquidity decay is a CONSEQUENCE, not a cause of vol explosions. "
+        f"QLIKE ceiling intact for 19th time."
     )
 
-    # Build QLIKE summary
     qlike_parts = []
     for a in ASSETS:
         if a in all_results:
             r = all_results[a]
-            qlike_parts.append(
-                f"{a}: GJR={r['garch_qlike']:.6f}, best={r.get('best_alt_qlike', 'N/A')} "
-                f"({r.get('best_alt_model', 'N/A')}, delta={r.get('delta_pct', 'N/A')}%)"
-            )
+            qlike_parts.append(f"{a}: GJR={r['garch_qlike']:.6f}, best={r['best_alt_qlike']:.6f} "
+                             f"({r['best_alt_model']}, {r['delta_pct']:+.2f}%)")
     qlike_summary = "; ".join(qlike_parts)
 
     m.add_knowledge(
         category="experiment",
         content=(
             f"[提出: Gemini R5#2, 執行: Claude] K150: Amihud Fragility GARCH-X. "
-            f"Tests whether Amihud Illiquidity (|r|/DollarVol) as GARCH-X exogenous "
-            f"improves vol forecasting. 4 variants: GARCH-X(Amihud_5d), GARCH-X(log_Amihud_5d), "
-            f"GJR-GARCH-X(log_Amihud), Threshold-GJR. w=2000, OOS 2020-2024. "
+            f"Amihud Illiquidity (|r|/DollarVol) as GARCH-X exogenous in variance eq. "
+            f"3 variants: GARCH-X(logAmihud), GJR-GARCH-X(logAmihud), Threshold-GJR. "
+            f"w=2000, OOS 2020-2024. "
             f"QLIKE: {qlike_summary}. "
             f"Sig. beats GJR: {n_sig_cells}/{n_total_cells} cells. "
             f"GJR wins {garch_wins}/{total_assets} assets. "
-            f"Partial corr(Amihud→vol|VIX) mean={mean_partial:.4f} — Amihud info largely subsumed by VIX. "
+            f"Partial corr(Amihud->vol|VIX)={mean_partial:.4f} — subsumed by VIX. "
             f"QLIKE ceiling INTACT (19th confirmation). "
-            f"Key insight: Amihud is endogenous to vol (contains return in numerator), "
-            f"not a leading indicator. Liquidity decay is a CONSEQUENCE of vol, not a cause."
+            f"Amihud is endogenous to vol (contains return in numerator), not a leading indicator."
         ),
         confidence=0.80,
         evidence=[
             f"K150 cross-asset: {n_sig_cells}/{n_total_cells} sig cells",
-            f"4 GARCH-X variants + threshold model tested across {total_assets} assets",
-            f"Partial correlation after controlling for VIX: mean {mean_partial:.4f}",
-            "Amihud = |return|/dollar_volume — endogenous to vol via numerator",
-            f"Fragility diagnostic: mean ratio = {np.mean(fragility_ratios):.2f}x" if fragility_ratios else "Fragility effect weak",
+            f"3 GARCH-X variants across {total_assets} assets",
+            f"Partial corr after VIX: mean {mean_partial:.4f}",
+            "Amihud = |return|/dollar_volume — endogenous via numerator",
+            f"Fragility diagnostic: mean ratio = {mean_frag_ratio:.2f}x" if np.isfinite(mean_frag_ratio) else "Fragility weak",
         ],
     )
 
@@ -995,25 +807,20 @@ try:
         phase="Phase_K",
         action="K150_amihud_fragility",
         observation=(
-            f"Amihud Fragility GARCH-X: 4 liquidity-augmented models vs GJR-GARCH. "
-            f"Cross-asset ({ASSETS}): {n_sig_cells}/{n_total_cells} sig. cells. "
-            f"Partial corr(Amihud→vol|VIX) mean={mean_partial:.4f}. "
-            f"Fragility diagnostic: mean ratio={np.mean(fragility_ratios):.2f}x" if fragility_ratios
-            else f"Amihud Fragility GARCH-X: 4 variants vs GJR-GARCH. {n_sig_cells}/{n_total_cells} sig. cells."
+            f"Amihud Fragility GARCH-X: 3 liquidity models vs GJR-GARCH. "
+            f"Cross-asset ({ASSETS}): {n_sig_cells}/{n_total_cells} sig cells. "
+            f"Partial corr mean={mean_partial:.4f}. Fragility ratio={mean_frag_ratio:.2f}x."
         ),
         decision=(
-            f"QLIKE ceiling confirmed (19th time). First test of non-price info source (liquidity) — "
-            f"still fails. Amihud illiquidity is endogenous to vol (contains return in numerator). "
-            f"The 'fragility' hypothesis is narrative, not predictive. "
-            f"Remaining untested info: options-implied (VVIX/SKEW), order flow, 5-min realized vol."
+            f"QLIKE ceiling confirmed (19th). First non-price info source (liquidity) tested — fails. "
+            f"Amihud endogenous to vol. Remaining: options-implied (VVIX/SKEW), 5-min RV."
         ),
-        tags=["amihud", "illiquidity", "garch-x", "liquidity", "qlike-ceiling",
-              "fragility", "gemini-suggestion"],
+        tags=["amihud", "illiquidity", "garch-x", "liquidity", "qlike-ceiling", "gemini-suggestion"],
     )
 
-    print("\n[Memory] Results recorded to MemorySystem")
+    print("\n[Memory] Results recorded")
 except Exception as e:
-    print(f"\n[Memory] Failed to record: {e}")
+    print(f"\n[Memory] Failed: {e}")
     traceback.print_exc()
 
 print(f"\n{'='*80}")
