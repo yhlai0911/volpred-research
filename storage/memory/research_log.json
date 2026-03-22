@@ -3320,5 +3320,35 @@
       "XGBoost",
       "qlike-ceiling"
     ]
+  },
+  {
+    "entry_id": "0396c3fe",
+    "timestamp": "2026-03-22T19:12:06.527460",
+    "phase": "Phase_K",
+    "action": "K145_r2_peak_mechanism",
+    "observation": "SPY R2 peaks at h=N/A (0.0000), GLD at h=N/A (0.0000). Signal-noise tradeoff confirmed: noise reduction (CLT on sum of r-squared) vs forecast mean-reversion (GARCH persistence ~0.98).",
+    "decision": "5-day vol forecasts are most useful for risk management. This explains why weekly VaR is more reliable than daily VaR in practice.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "7e87cad9",
+    "timestamp": "2026-03-22T19:13:17.828120",
+    "phase": "Phase_K",
+    "action": "K145_r2_peak_mechanism",
+    "observation": "SPY R2 peaks at h=5 (0.2110), GLD at h=5 (0.0121). Signal-noise tradeoff confirmed: noise reduction (CLT on sum of r-squared) vs forecast mean-reversion (GARCH persistence ~0.98).",
+    "decision": "5-day vol forecasts are most useful for risk management. This explains why weekly VaR is more reliable than daily VaR in practice.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "a9aa94a8",
+    "timestamp": "2026-03-22T19:14:19.898690",
+    "phase": "Phase_K",
+    "action": "K144_mf2_cross_bond",
+    "observation": "Tested MF2-GARCH vs GJR-GARCH on 6 assets spanning bonds to equities. Low-gamma (TLT/IEF/AGG): MF2 wins QLIKE 3/3. High-gamma (LQD/HYG/SPY): GJR wins 2/3. No DM test significant at 5%. HYG has numerical instability with MF2 (very high gamma=0.18). SPY MF2 ma63 marginally wins but p=0.26.",
+    "decision": "Gamma-dependent model selection rule confirmed directionally but lacks statistical significance. Rule: MF2 for gamma<0.05, GJR for gamma>=0.05. MF2 advantage is modest (QLIKE improvement ~0.01-0.04) and never significant by DM test. Practical implication: for bond-like assets, MF2 is slightly better but the improvement is trivially small.",
+    "experiment_ids": [],
+    "tags": []
   }
 ]

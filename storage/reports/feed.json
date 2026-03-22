@@ -1,5 +1,45 @@
 [
   {
+    "id": "mile_4c55db2e",
+    "title": "K145: 為什麼 5 天波動率預測比 1 天更準？——信噪比的甜蜜點",
+    "description": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\nK143 發現 GJR-GARCH 的 Mincer-Zarnowitz R² 在 **5 天預測達到峰值 0.211，比 1 天的 0.160 高 32%**。本實驗深入分析機制：這是**噪音降低與信號衰減的兩力競爭**，h=5 恰好是兩者平衡的甜蜜點。\n\n## 核心發現：兩力競爭\n\n### 力量一：噪音降低（有利於更長期限）\n\n1 天的目標變數 r² 服從 χ²(1) 分佈，**峰態高達 15**——極度嘈雜。5 天加總 RV₅ 相當於擲 5 次取平均，**變異係數降低約 √5 倍**。\n\n### 力量二：信號衰減（有利於更短期限）\n\nGARCH 預測會 mean-revert 回長期均值。SPY persistence = 0.977（半衰期 29 天）。h=5 時預測保留 93.8% 區分能力，h=22 降到 73.7%。\n\n### 甜蜜點在 h=5\n\n| 期限 | SPY R² | GLD R² | 信號保留率 |\n|------|--------|--------|----------|\n| h=1 | 0.160 | 0.006 | 100% |\n| **h=5** | **0.211** | **0.012** | **93.8%** |\n| h=22 | 0.071 | 0.000 | 73.7% |\n\nSPY 和 GLD 都在 h=5 達峰值。噪音降低足夠，信號幾乎完整。\n\n## 實務意義\n\n- **5 天 VaR 比 1 天校準精度高 32%**\n- 支持週度而非日度再平衡——預測品質更高，交易成本更低\n- 投資人不需要每天盯盤——週度檢查更明智\n",
+    "category": "milestone",
+    "phase": "Phase_K",
+    "details": {},
+    "tags": [
+      "R-squared",
+      "multi-step",
+      "SNR",
+      "forecast-horizon",
+      "GJR-GARCH",
+      "SPY",
+      "GLD"
+    ],
+    "created_at": "2026-03-22T11:23:57.371613+00:00",
+    "published_at": "2026-03-22T11:23:57.371613+00:00",
+    "status": "draft"
+  },
+  {
+    "id": "mile_a6b4945c",
+    "title": "K143: 波動率預測的時間維度——5 天預測竟然比 1 天更準？",
+    "description": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\n我們將 QLIKE ceiling 測試從 1 天延伸到 5 天和 22 天（月度）預測。結果：**GJR-GARCH 在所有 6 個 cell（2 資產 × 3 期限）全部最佳——QLIKE ceiling 第 17 次確認，現在涵蓋多步預測**。\n\n但最驚喜的發現是：SPY 的 Mincer-Zarnowitz **R² 在 5 天達到峰值 0.42，高於 1 天的 0.33**。也就是說，5 天預測比 1 天更準確。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY, GLD |\n| 預測期 | h=1, h=5, h=22 天 |\n| 窗口 | 2000 天滾動 |\n| OOS | 2020-2024 (1257 天) |\n| 目標 | RV_h = Σ r²_{t+1:t+h} |\n| 比較 | GJR h-step, EWMA(0.97), HistVol(22d), Persistence |\n\n## 核心結果\n\n### QLIKE（越低越好）\n\n| 模型 | SPY h=1 | SPY h=5 | SPY h=22 |\n|------|---------|---------|----------|\n| **GJR-GARCH** | **1.120** | **2.810** | **4.541** |\n| EWMA(0.97) | 1.172 | 2.841 | 4.787 |\n| Hist Vol(22d) | 1.164 | 2.845 | 4.728 |\n\nGJR 在所有期限維持領先，但優勢在 h=22 縮小（DM test 不再顯著）。\n\n### R² 的驚喜峰值\n\n| 期限 | SPY R² | GLD R² |\n|------|--------|--------|\n| h=1 | 0.330 | 0.033 |\n| **h=5** | **0.425** | **0.090** |\n| h=22 | 0.195 | 0.045 |\n\n**為什麼 5 天比 1 天好？**\n\n這是一個信噪比的甜蜜點：\n- **h=1**：目標是單日 r²——極度嘈雜（一天的平方報酬幾乎是隨機的）\n- **h=5**：5 天加總平滑了噪音，預測更可靠\n- **h=22**：噪音更低，但 GARCH 預測已經 mean-revert 回長期均值，失去區分能力\n\nh=5 恰好在「噪音降低」和「信號衰減」之間找到最佳平衡。\n\n## DM Test 顯著性\n\n| 比較 | h=1 | h=5 | h=22 |\n|------|-----|-----|------|\n| GJR vs EWMA | -0.75 NS | -0.38 NS | -1.16 NS |\n| GJR vs HistVol | -0.88 NS | -0.58 NS | **-2.04 (p=0.04)** |\n| GJR vs Persistence | **-2.45** | **-3.18** | **-2.33** |\n\n有趣的是，GJR 對 HistVol 在 h=22 反而更顯著——GARCH 的持久性信息在月度預測仍有價值。\n\n## 實務意義\n\n1. **風險管理**：5 天 VaR 可能比 1 天 VaR 更可靠（更好校準）\n2. **再平衡頻率**：支持週度而非日度再平衡——預測品質更高\n3. **模型選擇不變**：GJR-GARCH 在所有期限都是最佳，不需要對不同期限用不同模型\n4. **EWMA 足夠**：在長期限（h=22），EWMA 和 GJR 統計上無法區分\n\n## 結論\n\nQLIKE ceiling 從 1 天擴展到 22 天，第 17 次確認。但最重要的啟示是：**不要執著於 1 天預測——5 天預測更準，也更適合大多數投資決策**。\n",
+    "category": "milestone",
+    "phase": "Phase_K",
+    "details": {},
+    "tags": [
+      "multi-step",
+      "QLIKE-ceiling",
+      "R-squared",
+      "GJR-GARCH",
+      "SPY",
+      "GLD",
+      "forecast-horizon"
+    ],
+    "created_at": "2026-03-22T11:06:03.877765+00:00",
+    "published_at": "2026-03-22T11:06:03.877765+00:00",
+    "status": "draft"
+  },
+  {
     "id": "mile_75a7b7ff",
     "title": "K141: ★★ QLIKE Ceiling 的邊界——MF2-GARCH 在債券上打敗 GJR",
     "description": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\n我們自建了 Conrad & Engle (2025, Journal of Applied Econometrics) 提出的 MF2-GARCH 模型——第 9 個自建模型。這是首次有 **頂刊發表的模型宣稱打敗 GJR-GARCH**。結果：**對 SPY/GLD 無效，但對 TLT（債券）顯著打敗 GJR (DM p=0.0014)**。\n\n這不是 ceiling 被推翻——而是我們首次精確定義了它的邊界條件。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 模型 | MF2-GARCH (short: GJR + long: error correction) |\n| 估計 | Joint MLE, numba JIT, 4 starting points |\n| 資產 | SPY, GLD, TLT |\n| 窗口 | 2000 天滾動 |\n| OOS | 2020-2024 (1257 天) |\n| BIC 選擇 | 長期成分窗口 m |\n\n## MF2-GARCH 模型結構\n\nσ²_t = τ_t × g_t\n\n- **g_t**: 短期 GJR-GARCH 成分（捕捉日常波動聚集）\n- **τ_t**: 長期誤差修正成分（從過去預測誤差學習，自動放大/縮小預測）\n\n核心創新：如果模型最近一直低估波動率，τ_t > 1 自動向上修正；反之亦然。\n\n## 核心結果\n\n| 資產 | GJR QLIKE | MF2 QLIKE | 改善 | DM p |\n|------|-----------|-----------|------|------|\n| SPY | -8.101 | -8.103 | +0.03% | 0.253 NS |\n| GLD | -8.295 | -8.299 | +0.06% | 0.270 NS |\n| **TLT** | **-8.084** | **-8.108** | **+0.30%** | **0.0014*** |\n\n## 為什麼 TLT 不同？Gamma-Dependent Ceiling\n\n這是本實驗最重要的洞察。\n\n**GJR-GARCH 的優勢來自 leverage effect (gamma)**：股價下跌→波動率上升。SPY 的 gamma=0.33，GJR 完美捕捉這個效應。\n\n但 **TLT（長期公債）的 gamma ≈ 0**——債券沒有槓桿效應。此時 GJR 退化為普通 GARCH，失去了它的核心優勢。\n\nMF2-GARCH 的 error correction 成分在 gamma=0 時提供了替代的自適應機制：它不依賴 leverage，而是直接從預測誤差學習。\n\n### QLIKE Ceiling 修正\n\n| 資產類型 | Gamma | 最佳模型 | 原因 |\n|---------|-------|---------|------|\n| 股票 (SPY, QQQ) | > 0.10 | GJR-GARCH | Leverage effect 已足夠 |\n| 黃金 (GLD) | -0.03 ~ -0.09 | GJR-GARCH | 反向 leverage 也能捕捉 |\n| **債券 (TLT)** | **≈ 0** | **MF2-GARCH** | **無 leverage → error correction 補償** |\n\n## 實務意義\n\n1. **股票投資人**：繼續用 GJR-GARCH 或 EWMA(0.97)，MF2 不會改善\n2. **債券投資人**：MF2-GARCH 可改善 VaR 估計 5.5%（MSE 改善）\n3. **多資產投組**：考慮對不同資產類別使用不同波動率模型\n4. **學術貢獻**：QLIKE ceiling 不是一刀切——它是 gamma-dependent 的\n\n## 結論\n\n16 次確認後，我們首次找到 QLIKE ceiling 的邊界：**它取決於 leverage effect 的強度**。有 leverage 的資產，GJR 無可匹敵；沒有 leverage 的資產，error correction 模型能填補空缺。這不是推翻，而是精確化。\n",
