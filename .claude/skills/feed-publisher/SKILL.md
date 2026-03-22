@@ -93,7 +93,7 @@ pub = Publisher()
 pub.publish_milestone(title='...', description='[content]', phase='research',
                       tags=[...], status='draft')  # ← 永遠 draft！
 
-Working directory: /Users/yhlai0911/Dropbox/自我研究波動預測模型
+Working directory: /Users/yhlai0911/Desktop/volpred-research
 ")
 ```
 

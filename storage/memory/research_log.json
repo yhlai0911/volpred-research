@@ -3396,5 +3396,31 @@
       "QLIKE-ceiling",
       "artifact"
     ]
+  },
+  {
+    "entry_id": "938eb654",
+    "timestamp": "2026-03-22T19:44:24.543642",
+    "phase": "Phase_K",
+    "action": "gemini_r4_review",
+    "observation": "Gemini R4 suggests 5 new directions: VPIN, TW-US intraday, Hurst-VIX, execution alpha, LZ entropy. Selected #2 VPIN and #4 execution alpha as genuinely new application domains.",
+    "decision": "Launch K146 (VPIN) and K147 (execution alpha) as parallel agents. Both shift from vol forecasting accuracy to vol application value.",
+    "experiment_ids": [],
+    "tags": [
+      "gemini",
+      "AI-collaboration",
+      "research-direction",
+      "VPIN",
+      "execution-alpha"
+    ]
+  },
+  {
+    "entry_id": "25420b09",
+    "timestamp": "2026-03-22T19:49:36.158723",
+    "phase": "Phase_K",
+    "action": "K147_execution_alpha",
+    "observation": "GJR-GARCH best vol estimator (corr=0.75 vs oracle, MAE=0.065) but Almgren-Chriss execution advantage is negligible (0.0002 bps/trade vs RV20, p=0.085). The AC framework dampens vol differences through the sinh function, making the economic payoff trivially small (~$1K/yr at $100M scale).",
+    "decision": "K147 answers Gemini R4#4 question definitively: GJR-GARCH vol IS more accurate, but AC optimal execution is NOT the right economic channel to monetize this advantage. The execution alpha direction needs a different mechanism (e.g., VaR-based position sizing, intraday vol timing, or options pricing) to translate better vol forecasts into economic value.",
+    "experiment_ids": [],
+    "tags": []
   }
 ]

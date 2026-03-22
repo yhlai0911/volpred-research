@@ -9464,5 +9464,13 @@
     "evidence": [],
     "confidence": 0.9,
     "created_at": "2026-03-22T19:41:16.532138"
+  },
+  {
+    "item_id": "fa3c528c",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Gemini R4#4, \u57f7\u884c: Claude] K147: Execution Alpha - GJR-GARCH for Almgren-Chriss optimal liquidation of $100M position. Part A (daily proxy, 1562d): GARCH expected cost advantage over RV20 = 0.0002 bps/trade (marginally significant, t=1.72, p=0.085). Over EWMA = 0.0009 bps (highly significant, t=6.55, p<1e-10). Vol MAE: GARCH=0.0653, RV20=0.0692, EWMA=0.0802. Oracle correlation: GARCH=0.751, RV20=0.647, EWMA=0.550. Directional accuracy: GARCH=73.8%, RV20=70.7%, EWMA=68.4%. Part B (5-min sim, PRELIMINARY 46d): GARCH vs RV20 IS diff = -0.002 bps (NS, p=0.757), win rate 52%. KEY FINDING: GJR-GARCH is clearly the best vol estimator (highest oracle corr, lowest MAE, best directional accuracy), but the ECONOMIC advantage in Almgren-Chriss execution is negligible (~0.0002 bps/trade vs RV20). The kappa parameter is extremely insensitive to vol estimate differences because sinh(kappa*T) dampens vol differences. At institutional scale ($100M/day for 252 days), the annual advantage is only $1K vs RV20. The Almgren-Chriss framework is a poor amplifier of vol forecast quality differences. Regime analysis shows GARCH advantage concentrates in Normal vol regimes (t=4.17, p<0.001) but vanishes in High Vol when it matters most. New application domain validated but economically insignificant for AC specifically.",
+    "evidence": [],
+    "confidence": 0.7,
+    "created_at": "2026-03-22T19:49:33.402272"
   }
 ]

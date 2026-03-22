@@ -37,8 +37,14 @@ HEADERS = {
     "apikey": SUPABASE_KEY,
     "Authorization": f"Bearer {SUPABASE_KEY}",
     "Content-Type": "application/json",
-    "Prefer": "resolution=merge-duplicates",
+    "Prefer": "resolution=merge-duplicates,return=minimal",
 }
+
+_ARTICLE_ID_CACHE: dict[str, str] = {}
+_TAG_ID_CACHE: dict[str, str] = {}
+_STRATEGY_SIGNAL_CACHE_BY_KEY: dict[str, dict] = {}
+_STRATEGY_SIGNAL_CACHE_BY_NAME: dict[str, dict] = {}
+_STRATEGY_SIGNAL_CACHE_LOADED = False
 
 
 CONFLICT_KEYS = {
@@ -132,6 +138,19 @@ def _select_rows(table: str, *, select: str = "*", **filters: object) -> list[di
     return data if isinstance(data, list) else []
 
 
+def _select_rows_in(table: str, column: str, values: list[str], *, select: str = "*") -> list[dict]:
+    if not values:
+        return []
+    encoded_values = ",".join(quote(str(value), safe='') for value in values)
+    url = (
+        f"{SUPABASE_URL}/rest/v1/{table}"
+        f"?select={quote(select, safe=',*')}"
+        f"&{column}=in.({encoded_values})"
+    )
+    data = _request_json(url, method="GET")
+    return data if isinstance(data, list) else []
+
+
 def _patch_where(table: str, filters: dict[str, object], row: dict) -> bool:
     query = _build_filter_query(filters)
     if not query:
@@ -167,7 +186,70 @@ def _slugify_strategy_key(value: str) -> str:
     return slug or "strategy"
 
 
+def _cache_strategy_signal(row: dict) -> dict:
+    strategy_key = row.get("strategy_key")
+    strategy_name = row.get("strategy_name")
+    if isinstance(strategy_key, str) and strategy_key:
+        _STRATEGY_SIGNAL_CACHE_BY_KEY[strategy_key] = row
+    if isinstance(strategy_name, str) and strategy_name:
+        _STRATEGY_SIGNAL_CACHE_BY_NAME[strategy_name] = row
+    return row
+
+
+def _load_strategy_signal_cache() -> None:
+    global _STRATEGY_SIGNAL_CACHE_LOADED
+    if _STRATEGY_SIGNAL_CACHE_LOADED:
+        return
+    try:
+        rows = _select_rows(
+            "strategy_signals",
+            select="id,strategy_key,strategy_name,howto,description,color,articles,display_order,is_active",
+        )
+    except Exception:
+        return
+    for row in rows:
+        _cache_strategy_signal(row)
+    _STRATEGY_SIGNAL_CACHE_LOADED = True
+
+
+def _get_article_id(slug: str) -> str | None:
+    if slug in _ARTICLE_ID_CACHE:
+        return _ARTICLE_ID_CACHE[slug]
+    rows = _select_rows("articles", select="id", slug=slug)
+    if not rows:
+        return None
+    article_id = rows[0].get("id")
+    if isinstance(article_id, str) and article_id:
+        _ARTICLE_ID_CACHE[slug] = article_id
+        return article_id
+    return None
+
+
+def _get_tag_ids(tag_names: list[str]) -> dict[str, str]:
+    normalized = [name.strip() for name in tag_names if isinstance(name, str) and name.strip()]
+    missing = [name for name in normalized if name not in _TAG_ID_CACHE]
+    if missing:
+        try:
+            rows = _select_rows_in("tags", "name", missing, select="id,name")
+            for row in rows:
+                name = row.get("name")
+                tag_id = row.get("id")
+                if isinstance(name, str) and name and isinstance(tag_id, str) and tag_id:
+                    _TAG_ID_CACHE[name] = tag_id
+        except Exception:
+            pass
+    return {name: _TAG_ID_CACHE[name] for name in normalized if name in _TAG_ID_CACHE}
+
+
 def _find_strategy_signal(strategy_key: str | None, strategy_name: str | None) -> dict | None:
+    _load_strategy_signal_cache()
+
+    if strategy_key and strategy_key in _STRATEGY_SIGNAL_CACHE_BY_KEY:
+        return _STRATEGY_SIGNAL_CACHE_BY_KEY[strategy_key]
+
+    if strategy_name and strategy_name in _STRATEGY_SIGNAL_CACHE_BY_NAME:
+        return _STRATEGY_SIGNAL_CACHE_BY_NAME[strategy_name]
+
     if strategy_key:
         rows = _select_rows(
             "strategy_signals",
@@ -175,7 +257,7 @@ def _find_strategy_signal(strategy_key: str | None, strategy_name: str | None) -
             strategy_key=strategy_key,
         )
         if rows:
-            return rows[0]
+            return _cache_strategy_signal(rows[0])
 
     if strategy_name:
         rows = _select_rows(
@@ -184,7 +266,7 @@ def _find_strategy_signal(strategy_key: str | None, strategy_name: str | None) -
             strategy_name=strategy_name,
         )
         if rows:
-            return rows[0]
+            return _cache_strategy_signal(rows[0])
 
     return None
 
@@ -256,30 +338,23 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
 
 def _sync_article_tags(slug: str, tags: list[str]) -> None:
     """Sync tags for an article."""
+    tag_names = list(dict.fromkeys(tag.strip() for tag in tags if isinstance(tag, str) and tag.strip()))
+    if not tag_names:
+        return
+
     # Upsert tags
-    tag_rows = [{"name": t} for t in tags]
+    tag_rows = [{"name": tag_name} for tag_name in tag_names]
     _post("tags", tag_rows)
 
-    # Get article UUID and tag IDs
     try:
-        # Get article id
-        url = f"{SUPABASE_URL}/rest/v1/articles?select=id&slug=eq.{slug}"
-        req = Request(url, headers={**HEADERS, "Prefer": ""})
-        resp = urlopen(req, timeout=10)
-        articles = json.loads(resp.read())
-        if not articles:
+        article_id = _get_article_id(slug)
+        if not article_id:
             return
-        article_id = articles[0]["id"]
-
-        # Get tag ids
-        url = f"{SUPABASE_URL}/rest/v1/tags?select=id,name"
-        req = Request(url, headers={**HEADERS, "Prefer": ""})
-        resp = urlopen(req, timeout=10)
-        tag_map = {t["name"]: t["id"] for t in json.loads(resp.read())}
+        tag_map = _get_tag_ids(tag_names)
 
         # Upsert article_tags
         at_rows = []
-        for tag_name in tags:
+        for tag_name in tag_names:
             tag_id = tag_map.get(tag_name)
             if tag_id:
                 at_rows.append({"article_id": article_id, "tag_id": tag_id})
@@ -330,9 +405,16 @@ def sync_strategy_signal(
     }
 
     if existing.get("id") is not None:
-        return _patch_where("strategy_signals", {"id": existing["id"]}, row)
+        ok = _patch_where("strategy_signals", {"id": existing["id"]}, row)
+        if ok:
+            _cache_strategy_signal({**existing, **row, "id": existing["id"]})
+        return ok
 
-    return _post("strategy_signals", row)
+    ok = _post("strategy_signals", row)
+    if ok:
+        _STRATEGY_SIGNAL_CACHE_BY_KEY.pop(resolved_key, None)
+        _STRATEGY_SIGNAL_CACHE_BY_NAME.pop(strategy_name, None)
+    return ok
 
 
 def set_strategy_active(identifier: str, active: bool) -> bool:

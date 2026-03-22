@@ -1,0 +1,65 @@
+{
+  "experiment": "K147",
+  "title": "Execution Alpha: GJR-GARCH for Almgren-Chriss Optimal Liquidation",
+  "proposed_by": "Gemini R4#4",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-22T19:49:01.457605",
+  "config": {
+    "position_value": 100000000,
+    "n_intraday_periods": 78,
+    "risk_aversion": 1e-06,
+    "temp_impact_scale": 0.1,
+    "garch_window": 2000,
+    "rv_window": 20,
+    "ewma_lambda": 0.97,
+    "oos_start": "2020-01-01",
+    "oos_end": "2026-03-21"
+  },
+  "part_a_daily_proxy": {
+    "n_days": 1562,
+    "garch_advantage_vs_rv20_bps": 0.00019920452571845182,
+    "garch_advantage_vs_ewma_bps": 0.0009403793382425682,
+    "garch_t_stat_vs_rv20": 1.7208277796787983,
+    "garch_p_value_vs_rv20": 0.08548023982346371,
+    "garch_t_stat_vs_ewma": 6.5477459853028055,
+    "garch_p_value_vs_ewma": 7.904593020205315e-11,
+    "vol_mae": {
+      "garch": 0.06526090822442787,
+      "rv20": 0.06921140819165016,
+      "ewma": 0.08019149318673695
+    },
+    "vol_corr_with_oracle": {
+      "garch": 0.7504519987569399,
+      "rv20": 0.6465982647614918,
+      "ewma": 0.5499274850971624
+    },
+    "directional_accuracy": {
+      "garch": 0.737516005121639,
+      "rv20": 0.706786171574904,
+      "ewma": 0.6837387964148528
+    }
+  },
+  "part_b_intraday": {
+    "n_days": 46,
+    "preliminary": true,
+    "gjr_garch": {
+      "mean_is_bps": 5.86641979036879,
+      "std_is_bps": 49.15017860531773,
+      "mean_ac_vs_twap_bps": 0.0029936513027080535
+    },
+    "rv20": {
+      "mean_is_bps": 5.864880938844061,
+      "std_is_bps": 49.164327842747284,
+      "mean_ac_vs_twap_bps": 0.004532502827436844
+    },
+    "ewma": {
+      "mean_is_bps": 5.862616411288567,
+      "std_is_bps": 49.17222748777447,
+      "mean_ac_vs_twap_bps": 0.006797030382927638
+    },
+    "garch_vs_rv20_is_diff_bps": -0.0015388515247291158,
+    "garch_vs_rv20_t_stat": -0.31067140052909753,
+    "garch_vs_rv20_p_value": 0.757484915625795,
+    "garch_win_rate": 0.5217391304347826
+  }
+}
