@@ -596,6 +596,22 @@
 3. 報酬預測（情緒反轉信號）
 4. 台股特有指標（融資融券、三大法人）
 
+### ★★★ 戰略轉向（Codex R6 2026-03-22 diagnosis）
+**核心診斷：日頻 close-to-close variance + QLIKE 這條路已飽和。153+ 實驗確認 GARCH(1,1) 是這個目標的近最優解。**
+
+突破方向（按 expected payoff 排序）：
+1. **分解 risk target**：用 intraday data 把 daily variance 分解為 continuous var + jump intensity + overnight gap。各成分用不同模型。**需要 60+ 天 5-min data（SPY ETA 2026-04-11）**
+2. **Option surface features**：完整短天期 options 的 left-tail slope, convexity, corridor variance, jump proxy——不只是 VIX 這個 scalar。Target 改為 overnight downside semivar / gap probability。**需要 options 數據**
+3. **Covariance/correlation forecasting**：停止 squeeze univariate variance，轉向 dispersion trading / hedge optimization。我們有 DCC-GARCH (Q3-Q4) 基礎
+4. **微結構 alpha**：TAQ/order book level data。Daily OFI proxy 可能不夠（K154 測試中）
+5. **Heterogeneous-agent regime model**：ETF creation/redemption, option customer-dealer imbalance → crash regime prediction
+
+**研究方向重新定位**：
+- ✅ 繼續：5-min data 累積 + HAR-RV + risk decomposition pipeline
+- ✅ 繼續：correlation/covariance modeling（擴展 DCC 到 dispersion trading）
+- ⏸ 暫停：在 daily QLIKE 上堆積更多 null results（除非有全新信息源）
+- ✅ 繼續：一般讀者文章、策略、論文、跳躍式探索
+
 ### 待探索方向（2025-2026 文獻前沿）
 **來源：arXiv + JFE + ScienceDirect 2025-2026 文獻搜索**
 - [ ] Rough Volatility (fBm H≈0.1) — Gatheral 2014 "Volatility is Rough" 的最新 multivariate extension (arXiv:2504.15985)。我們的 QLIKE ceiling 是否被 rough vol 打破？

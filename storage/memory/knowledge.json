@@ -9532,5 +9532,21 @@
     "evidence": [],
     "confidence": 0.8,
     "created_at": "2026-03-22T20:35:08.101341"
+  },
+  {
+    "item_id": "66ec1d47",
+    "category": "research_direction",
+    "content": "[\u63d0\u51fa: Codex R6 (GPT-5.4+web), 2026-03-22] \u2605\u2605\u2605 Codex \u7b2c 6 \u6b21\u5be9\u67e5\u2014\u2014\u6700\u91cd\u8981\u7684 meta-diagnosis: \"If you stay on daily close-to-close variance with public daily covariates, you are probably done.\" 5 \u500b\u7a81\u7834\u65b9\u5411: (1) \u8cb7\u9577\u671f intraday futures data + \u5206\u89e3 risk (continuous var, semivariance, jump intensity, overnight gap)\u2014\u2014\u552f\u4e00\u6709\u53ef\u80fd\u6253\u6557 QLIKE ceiling \u7684\u65b9\u5411 (2) \u5b8c\u6574\u77ed\u5929\u671f options surface (\u4e0d\u53ea VIX scalar)\u2014\u2014target \u6539\u70ba overnight downside semivar / gap prob / delta-hedged PnL (3) \u5fae\u7d50\u69cb alpha (TAQ/order book)\u2014\u2014daily OFI proxy \u5f88\u53ef\u80fd fail (4) \u9810\u6e2c covariance/correlation \u800c\u975e univariate variance\u2014\u201450/50 SPY/GLD \u6697\u793a covariance management \u6bd4 variance squeezing \u91cd\u8981 (5) Heterogeneous-agent regime model from actual flow data (ETF creation/redemption, option customer-dealer imbalance)\u3002Ranked: intraday decomposed > option surface > correlation/dispersion\u3002\u6838\u5fc3\u6d1e\u5bdf: VIX \u58d3\u7e2e\u4e86 option surface \u7684\u9ad8\u968e\u77e9\u4fe1\u606f\uff0cdaily r\u00b2 \u6df7\u5408\u4e86 continuous/jump/overnight \u4e09\u7a2e\u4e0d\u540c\u904e\u7a0b\u3002",
+    "evidence": [],
+    "confidence": 0.95,
+    "created_at": "2026-03-22T20:46:34.941994"
+  },
+  {
+    "item_id": "227d3130",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude \u5fae\u7d50\u69cb\u63a2\u7d22, \u57f7\u884c: Claude] K154: Order Flow Imbalance vol prediction. Daily OFI proxies (Lee-Ready, DVI, Amihud, Rolling) from OHLCV. Partial corr r(OFI,RV|VIX): 8/12 partial corr sig. GARCH-X wins 0/0. Verdict: MIXED: Some OFI signal exists but not robust enough with daily proxies. Limitation: daily proxies very noisy, need tick data for real test.",
+    "evidence": [],
+    "confidence": 0.8,
+    "created_at": "2026-03-22T20:48:45.413835"
   }
 ]

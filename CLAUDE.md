@@ -512,7 +512,7 @@ CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）"
   - J5→J6→J7→J9 完整弧：EWMA(0.97) Sharpe ≈ GARCH，但 GJR 在危機中贏 MDD (4-5/5 periods)。Smoothness 假說被推翻（ρ=-0.007），真正機制 = crisis reactivity + signal quality
   - 12/VIX 是 VT 的 irreducible kernel（J13: 6 種 conditional VT 全 null）
   - 50/50 SPY/GLD static 是最難打敗的月度基準（J1: Sharpe 0.810）
-  - VIX 是月度以下的 sufficient statistic（J3/J4/J8: Google Trends/CAPE/AAII 全 null, 12+ 次確認）
+  - VIX 是月度以下的 sufficient statistic（21 次確認：J3/J4/J8/J14/J17/J18/K1/G3/G5/T11/T13/T14 + K148 Climate/K149 ICL/K151 CSVD/K152 Liquidity/K153 MOVE-VECM）
   - 月度再平衡優於日度（J10: net Sharpe 0.792 > 0.679，TC 省 0.72%/yr）
   - EWMA(0.97) 是零售最安全 default（J12: best MDD 4/7 assets, never worst）
   - VIX sufficient statistic 需限定範圍：「relative to tested alternatives at this horizon」（Codex 建議）

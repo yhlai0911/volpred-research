@@ -1,0 +1,734 @@
+{
+  "experiment": "K154",
+  "title": "Order Flow Imbalance \u2192 Volatility Prediction",
+  "attribution": "[\u63d0\u51fa: Claude \u8df3\u8e8d\u5f0f\u63a2\u7d22 (\u9762\u5411 G: \u5e02\u5834\u5fae\u7d50\u69cb), \u57f7\u884c: Claude]",
+  "timestamp": "2026-03-22T20:48:45.407777",
+  "config": {
+    "window": 2000,
+    "oos_start": "2020-01-01",
+    "oos_end": "2024-12-31",
+    "ofi_proxies": [
+      "Lee-Ready",
+      "Dollar Volume Imbalance",
+      "Amihud Flow",
+      "Rolling OFI_5d"
+    ],
+    "granger_maxlag": 10,
+    "extreme_percentile": 95,
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD"
+    ]
+  },
+  "limitations": [
+    "Daily OFI proxies from OHLCV are very noisy. Real test needs tick data.",
+    "Lee-Ready proxy uses midprice (H+L)/2 instead of actual bid-ask midpoint.",
+    "Dollar volume imbalance uses open-to-close direction, not intraday tick classification.",
+    "Amihud measure captures illiquidity, not directional flow per se."
+  ],
+  "results_by_asset": {
+    "SPY": {
+      "asset": "SPY",
+      "n_obs": 4827,
+      "data_range": "2005-10-25 to 2024-12-30",
+      "raw_correlations": {
+        "abs_ofi_lr": {
+          "r": 0.2803,
+          "p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "r": 0.0008,
+          "p": 0.95587
+        },
+        "ofi_amihud": {
+          "r": 0.1814,
+          "p": 0.0
+        },
+        "ofi_lr_roll5": {
+          "r": 0.2744,
+          "p": 0.0
+        }
+      },
+      "partial_correlations_given_vix": {
+        "abs_ofi_lr": {
+          "r": 0.1175,
+          "p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "r": -0.01,
+          "p": 0.488611
+        },
+        "ofi_amihud": {
+          "r": 0.0338,
+          "p": 0.01885
+        },
+        "ofi_lr_roll5": {
+          "r": 0.1091,
+          "p": 0.0
+        }
+      },
+      "predictive_regressions": {
+        "abs_ofi_lr": {
+          "beta_ofi": 7.1e-05,
+          "t_ofi": 2.953,
+          "p_ofi": 0.003167,
+          "beta_vix": 0.000498,
+          "t_vix": 9.573,
+          "p_vix": 0.0,
+          "R2": 0.150628
+        },
+        "abs_ofi_dvi": {
+          "beta_ofi": -6e-06,
+          "t_ofi": -1.303,
+          "p_ofi": 0.19268,
+          "beta_vix": 0.0006,
+          "t_vix": 9.081,
+          "p_vix": 0.0,
+          "R2": 0.138818
+        },
+        "ofi_amihud": {
+          "beta_ofi": 1.8e-05,
+          "t_ofi": 0.938,
+          "p_ofi": 0.348176,
+          "beta_vix": 0.000577,
+          "t_vix": 8.869,
+          "p_vix": 0.0,
+          "R2": 0.139717
+        },
+        "ofi_lr_roll5": {
+          "beta_ofi": 6.4e-05,
+          "t_ofi": 3.576,
+          "p_ofi": 0.000353,
+          "beta_vix": 0.000505,
+          "t_vix": 10.019,
+          "p_vix": 0.0,
+          "R2": 0.148981
+        }
+      },
+      "granger_causality": {
+        "abs_ofi_lr": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "abs_ofi_dvi": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "ofi_amihud": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "ofi_lr_roll5": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        }
+      },
+      "extreme_ofi_events": {
+        "abs_ofi_lr": {
+          "n_extreme": 242,
+          "n_normal": 4585,
+          "threshold_z": 1.982,
+          "mean_rv_extreme": 0.00069726,
+          "mean_rv_normal": 0.00012013,
+          "ratio": 5.804,
+          "t_stat": 4.9,
+          "p_val": 2e-06,
+          "rv5_ratio": 2.417,
+          "rv5_t": 11.92,
+          "rv5_p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "n_extreme": 242,
+          "n_normal": 4585,
+          "threshold_z": 0.1,
+          "mean_rv_extreme": 0.00012485,
+          "mean_rv_normal": 0.00015035,
+          "ratio": 0.83,
+          "t_stat": -1.359,
+          "p_val": 0.175061,
+          "rv5_ratio": 1.03,
+          "rv5_t": 0.755,
+          "rv5_p": 0.450671
+        },
+        "ofi_amihud": {
+          "n_extreme": 242,
+          "n_normal": 4585,
+          "threshold_z": 2.141,
+          "mean_rv_extreme": 0.00051227,
+          "mean_rv_normal": 0.0001299,
+          "ratio": 3.944,
+          "t_stat": 4.333,
+          "p_val": 2.1e-05,
+          "rv5_ratio": 2.21,
+          "rv5_t": 10.215,
+          "rv5_p": 0.0
+        },
+        "ofi_lr_roll5": {
+          "n_extreme": 242,
+          "n_normal": 4585,
+          "threshold_z": 2.202,
+          "mean_rv_extreme": 0.00068839,
+          "mean_rv_normal": 0.0001206,
+          "ratio": 5.708,
+          "t_stat": 4.74,
+          "p_val": 4e-06,
+          "rv5_ratio": 2.292,
+          "rv5_t": 10.971,
+          "rv5_p": 0.0
+        }
+      },
+      "walk_forward": {
+        "status": "insufficient valid forecasts",
+        "n_valid": 0
+      },
+      "vix_sufficiency": {
+        "abs_ofi_lr": {
+          "R2_vix_only": 0.138733,
+          "R2_vix_plus_ofi": 0.150628,
+          "delta_R2": 0.011895,
+          "F_incremental": 67.559,
+          "p_F": 0.0
+        },
+        "abs_ofi_dvi": {
+          "R2_vix_only": 0.138733,
+          "R2_vix_plus_ofi": 0.138818,
+          "delta_R2": 8.6e-05,
+          "F_incremental": 0.48,
+          "p_F": 0.488656
+        },
+        "ofi_amihud": {
+          "R2_vix_only": 0.138733,
+          "R2_vix_plus_ofi": 0.139717,
+          "delta_R2": 0.000984,
+          "F_incremental": 5.518,
+          "p_F": 0.018862
+        },
+        "ofi_lr_roll5": {
+          "R2_vix_only": 0.138733,
+          "R2_vix_plus_ofi": 0.148981,
+          "delta_R2": 0.010248,
+          "F_incremental": 58.091,
+          "p_F": 0.0
+        }
+      }
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "n_obs": 4794,
+      "data_range": "2005-12-12 to 2024-12-30",
+      "raw_correlations": {
+        "abs_ofi_lr": {
+          "r": 0.2485,
+          "p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "r": 0.0141,
+          "p": 0.330368
+        },
+        "ofi_amihud": {
+          "r": 0.1659,
+          "p": 0.0
+        },
+        "ofi_lr_roll5": {
+          "r": 0.254,
+          "p": 0.0
+        }
+      },
+      "partial_correlations_given_vix": {
+        "abs_ofi_lr": {
+          "r": 0.121,
+          "p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "r": -0.0005,
+          "p": 0.970491
+        },
+        "ofi_amihud": {
+          "r": 0.0486,
+          "p": 0.000772
+        },
+        "ofi_lr_roll5": {
+          "r": 0.1266,
+          "p": 0.0
+        }
+      },
+      "predictive_regressions": {
+        "abs_ofi_lr": {
+          "beta_ofi": 7.9e-05,
+          "t_ofi": 3.477,
+          "p_ofi": 0.000512,
+          "beta_vix": 0.000496,
+          "t_vix": 10.016,
+          "p_vix": 0.0,
+          "R2": 0.14905
+        },
+        "abs_ofi_dvi": {
+          "beta_ofi": -0.0,
+          "t_ofi": -0.112,
+          "p_ofi": 0.910569,
+          "beta_vix": 0.00057,
+          "t_vix": 9.82,
+          "p_vix": 0.0,
+          "R2": 0.136407
+        },
+        "ofi_amihud": {
+          "beta_ofi": 2.3e-05,
+          "t_ofi": 1.346,
+          "p_ofi": 0.178302,
+          "beta_vix": 0.000545,
+          "t_vix": 10.088,
+          "p_vix": 0.0,
+          "R2": 0.138442
+        },
+        "ofi_lr_roll5": {
+          "beta_ofi": 7.6e-05,
+          "t_ofi": 3.77,
+          "p_ofi": 0.000165,
+          "beta_vix": 0.000492,
+          "t_vix": 10.157,
+          "p_vix": 0.0,
+          "R2": 0.15024
+        }
+      },
+      "granger_causality": {
+        "abs_ofi_lr": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "abs_ofi_dvi": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "ofi_amihud": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "ofi_lr_roll5": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        }
+      },
+      "extreme_ofi_events": {
+        "abs_ofi_lr": {
+          "n_extreme": 240,
+          "n_normal": 4554,
+          "threshold_z": 1.198,
+          "mean_rv_extreme": 0.00056395,
+          "mean_rv_normal": 0.0001709,
+          "ratio": 3.3,
+          "t_stat": 4.35,
+          "p_val": 2e-05,
+          "rv5_ratio": 1.717,
+          "rv5_t": 9.452,
+          "rv5_p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "n_extreme": 240,
+          "n_normal": 4554,
+          "threshold_z": 0.137,
+          "mean_rv_extreme": 0.0001839,
+          "mean_rv_normal": 0.00019093,
+          "ratio": 0.963,
+          "t_stat": -0.324,
+          "p_val": 0.746189,
+          "rv5_ratio": 1.078,
+          "rv5_t": 2.406,
+          "rv5_p": 0.016756
+        },
+        "ofi_amihud": {
+          "n_extreme": 240,
+          "n_normal": 4554,
+          "threshold_z": 2.554,
+          "mean_rv_extreme": 0.00048171,
+          "mean_rv_normal": 0.00017523,
+          "ratio": 2.749,
+          "t_stat": 3.321,
+          "p_val": 0.001034,
+          "rv5_ratio": 1.738,
+          "rv5_t": 8.908,
+          "rv5_p": 0.0
+        },
+        "ofi_lr_roll5": {
+          "n_extreme": 240,
+          "n_normal": 4554,
+          "threshold_z": 1.328,
+          "mean_rv_extreme": 0.00051168,
+          "mean_rv_normal": 0.00017365,
+          "ratio": 2.947,
+          "t_stat": 3.824,
+          "p_val": 0.000167,
+          "rv5_ratio": 1.735,
+          "rv5_t": 9.588,
+          "rv5_p": 0.0
+        }
+      },
+      "walk_forward": {
+        "status": "insufficient valid forecasts",
+        "n_valid": 0
+      },
+      "vix_sufficiency": {
+        "abs_ofi_lr": {
+          "R2_vix_only": 0.136407,
+          "R2_vix_plus_ofi": 0.14905,
+          "delta_R2": 0.012644,
+          "F_incremental": 71.187,
+          "p_F": 0.0
+        },
+        "abs_ofi_dvi": {
+          "R2_vix_only": 0.136407,
+          "R2_vix_plus_ofi": 0.136407,
+          "delta_R2": 0.0,
+          "F_incremental": 0.001,
+          "p_F": 0.970494
+        },
+        "ofi_amihud": {
+          "R2_vix_only": 0.136407,
+          "R2_vix_plus_ofi": 0.138442,
+          "delta_R2": 0.002036,
+          "F_incremental": 11.32,
+          "p_F": 0.000773
+        },
+        "ofi_lr_roll5": {
+          "R2_vix_only": 0.136407,
+          "R2_vix_plus_ofi": 0.15024,
+          "delta_R2": 0.013834,
+          "F_incremental": 77.995,
+          "p_F": 0.0
+        }
+      }
+    },
+    "GLD": {
+      "asset": "GLD",
+      "n_obs": 4968,
+      "data_range": "2005-04-06 to 2024-12-30",
+      "raw_correlations": {
+        "abs_ofi_lr": {
+          "r": 0.2135,
+          "p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "r": 0.0087,
+          "p": 0.540079
+        },
+        "ofi_amihud": {
+          "r": 0.0154,
+          "p": 0.278244
+        },
+        "ofi_lr_roll5": {
+          "r": 0.2295,
+          "p": 0.0
+        }
+      },
+      "partial_correlations_given_vix": {
+        "abs_ofi_lr": {
+          "r": 0.1637,
+          "p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "r": 0.0069,
+          "p": 0.627916
+        },
+        "ofi_amihud": {
+          "r": 0.0068,
+          "p": 0.631488
+        },
+        "ofi_lr_roll5": {
+          "r": 0.176,
+          "p": 0.0
+        }
+      },
+      "predictive_regressions": {
+        "abs_ofi_lr": {
+          "beta_ofi": 5.7e-05,
+          "t_ofi": 4.811,
+          "p_ofi": 2e-06,
+          "beta_vix": 0.000113,
+          "t_vix": 4.146,
+          "p_vix": 3.4e-05,
+          "R2": 0.058167
+        },
+        "abs_ofi_dvi": {
+          "beta_ofi": 3e-06,
+          "t_ofi": 0.64,
+          "p_ofi": 0.5221,
+          "beta_vix": 0.00017,
+          "t_vix": 6.982,
+          "p_vix": 0.0,
+          "R2": 0.032283
+        },
+        "ofi_amihud": {
+          "beta_ofi": 3e-06,
+          "t_ofi": 0.406,
+          "p_ofi": 0.685045,
+          "beta_vix": 0.000169,
+          "t_vix": 6.917,
+          "p_vix": 0.0,
+          "R2": 0.032282
+        },
+        "ofi_lr_roll5": {
+          "beta_ofi": 6.2e-05,
+          "t_ofi": 6.871,
+          "p_ofi": 0.0,
+          "beta_vix": 0.0001,
+          "t_vix": 4.298,
+          "p_vix": 1.8e-05,
+          "R2": 0.062206
+        }
+      },
+      "granger_causality": {
+        "abs_ofi_lr": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "abs_ofi_dvi": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "ofi_amihud": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        },
+        "ofi_lr_roll5": {
+          "OFI_to_RV": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          },
+          "RV_to_OFI": {
+            "best_lag": null,
+            "F": null,
+            "p": null
+          }
+        }
+      },
+      "extreme_ofi_events": {
+        "abs_ofi_lr": {
+          "n_extreme": 249,
+          "n_normal": 4719,
+          "threshold_z": 2.194,
+          "mean_rv_extreme": 0.00040583,
+          "mean_rv_normal": 0.00010857,
+          "ratio": 3.738,
+          "t_stat": 4.414,
+          "p_val": 1.5e-05,
+          "rv5_ratio": 1.803,
+          "rv5_t": 13.094,
+          "rv5_p": 0.0
+        },
+        "abs_ofi_dvi": {
+          "n_extreme": 249,
+          "n_normal": 4719,
+          "threshold_z": 0.146,
+          "mean_rv_extreme": 0.00021476,
+          "mean_rv_normal": 0.00011866,
+          "ratio": 1.81,
+          "t_stat": 3.277,
+          "p_val": 0.001191,
+          "rv5_ratio": 1.4,
+          "rv5_t": 9.139,
+          "rv5_p": 0.0
+        },
+        "ofi_amihud": {
+          "n_extreme": 249,
+          "n_normal": 4719,
+          "threshold_z": 1.249,
+          "mean_rv_extreme": 0.00020146,
+          "mean_rv_normal": 0.00011936,
+          "ratio": 1.688,
+          "t_stat": 2.024,
+          "p_val": 0.044031,
+          "rv5_ratio": 1.234,
+          "rv5_t": 5.227,
+          "rv5_p": 0.0
+        },
+        "ofi_lr_roll5": {
+          "n_extreme": 249,
+          "n_normal": 4719,
+          "threshold_z": 2.372,
+          "mean_rv_extreme": 0.00039179,
+          "mean_rv_normal": 0.00010931,
+          "ratio": 3.584,
+          "t_stat": 4.898,
+          "p_val": 2e-06,
+          "rv5_ratio": 1.898,
+          "rv5_t": 14.864,
+          "rv5_p": 0.0
+        }
+      },
+      "walk_forward": {
+        "status": "insufficient valid forecasts",
+        "n_valid": 0
+      },
+      "vix_sufficiency": {
+        "abs_ofi_lr": {
+          "R2_vix_only": 0.032237,
+          "R2_vix_plus_ofi": 0.058167,
+          "delta_R2": 0.02593,
+          "F_incremental": 136.692,
+          "p_F": 0.0
+        },
+        "abs_ofi_dvi": {
+          "R2_vix_only": 0.032237,
+          "R2_vix_plus_ofi": 0.032283,
+          "delta_R2": 4.6e-05,
+          "F_incremental": 0.235,
+          "p_F": 0.627951
+        },
+        "ofi_amihud": {
+          "R2_vix_only": 0.032237,
+          "R2_vix_plus_ofi": 0.032282,
+          "delta_R2": 4.5e-05,
+          "F_incremental": 0.23,
+          "p_F": 0.631522
+        },
+        "ofi_lr_roll5": {
+          "R2_vix_only": 0.032237,
+          "R2_vix_plus_ofi": 0.062206,
+          "delta_R2": 0.029968,
+          "F_incremental": 158.663,
+          "p_F": 0.0
+        }
+      }
+    }
+  },
+  "cross_asset_summary": {
+    "partial_correlations": {
+      "abs_ofi_lr": {
+        "values": {
+          "SPY": 0.1175,
+          "QQQ": 0.121,
+          "GLD": 0.1637
+        },
+        "n_significant": "3"
+      },
+      "abs_ofi_dvi": {
+        "values": {
+          "SPY": -0.01,
+          "QQQ": -0.0005,
+          "GLD": 0.0069
+        },
+        "n_significant": "0"
+      },
+      "ofi_amihud": {
+        "values": {
+          "SPY": 0.0338,
+          "QQQ": 0.0486,
+          "GLD": 0.0068
+        },
+        "n_significant": "2"
+      },
+      "ofi_lr_roll5": {
+        "values": {
+          "SPY": 0.1091,
+          "QQQ": 0.1266,
+          "GLD": 0.176
+        },
+        "n_significant": "3"
+      }
+    },
+    "garchx_wins": 0,
+    "garchx_total": 0,
+    "total_pcorr_significant": "8",
+    "total_pcorr_tests": 12
+  },
+  "verdict": "MIXED: Some OFI signal exists but not robust enough with daily proxies",
+  "verdict_details": [
+    "1. Partial correlations r(OFI, RV | VIX): 8/12 significant at 5%",
+    "   \u2192 OFI may contain independent information (investigate further)",
+    "2. GARCH-X(OFI) wins DM test: 0/0 assets",
+    "   \u2192 OFI does NOT improve GARCH forecasts",
+    "3. Daily OFI proxies from OHLCV are VERY noisy approximations",
+    "   \u2192 Real test requires tick-level trade data (Lee-Ready actual classification)",
+    "   \u2192 Our proxies likely underestimate true OFI predictive power",
+    "\n   OVERALL: MIXED: Some OFI signal exists but not robust enough with daily proxies"
+  ]
+}
