@@ -566,7 +566,8 @@
 - [x] K150: Amihud Fragility GARCH-X (Gemini R5#2) — GARCH-X(logAmihud) raw QLIKE 4/4 微幅改善 (-0.03~-0.32%) 但 0/4 DM 顯著 (max t=1.12)。"Fragility" 假說被推翻：高 Amihud + 低 vol → next-day vol 0.88x（更低，非更高）。Partial r|VIX mixed (-0.088 to +0.078)，mean -0.019。Amihud ratio 含 |return| 在分子 → 與 vol 內生。QLIKE ceiling #19
 - [x] K154: Order Flow Imbalance (微結構探索) — MIXED。Lee-Ready OFI partial r|VIX = 0.11-0.18 (8/12 顯著)——挑戰 VIX sufficient，增量 R² 1-3%。但 GARCH-X walk-forward 0/6 DM 顯著 (best: SPY DM=-1.95, p=0.051 borderline)。Granger 雙向（vol 驅動 volume）。Extreme OFI 3-6x next-day vol（但是 vol clustering artifact）。Daily OFI proxy 太粗糙，與 Codex R6 預測一致
 - [x] K155: ★ Information Entropy vol forecast (跨學科) — MIXED-POSITIVE。Shannon/ApEn 有統計顯著信號 beyond VIX：BTC partial r=0.114 (p<1e-11), SPY partial r=-0.070 (p=0.0002)。但 R² 增量 <1%。BTC 最受益（非高斯+多 regime）。SPY 負相關（高 entropy=有序市場=集中交易=更大波動，反直覺但合理）。VIX sufficient 有微小裂縫但經濟上仍成立
-- **Phase K 統合（55+ 實驗）**：(1) ★★★ QLIKE ceiling 18x (2) ★★ 50/50 beats ALL (3) ★★ VIX sufficient 21x (entropy 有微裂縫但 <1% R²) (4) ★ Codex R6 diagnosis: daily QLIKE 飽和，需分解 risk target (5) ML 5 次失敗 (6) ★ Entropy 對 BTC 最有效（非高斯資產）
+- [x] K156: ★★★ RV Decomposition Pilot (Codex R6#1, 46d PRELIMINARY) — Overnight gap 佔 47.4% daily var！BPV(continuous) ACF(1)=0.398 最可預測，jump 僅 2.3%（0/45 sig）。c2c r² vs 5-min RV corr=0.242（目標極嘈雜=QLIKE ceiling 根因）。GARCH 預測 BPV 最好(QLIKE -8.890)。**完美驗證 Codex R6 diagnosis：分解 risk target 是突破方向**。需 252+ 天正式驗證
+- **Phase K 統合（57+ 實驗）**：(1) ★★★ QLIKE ceiling 19x (2) ★★★ RV decomposition 確認 ceiling 根因=noisy c2c target (3) ★★ VIX sufficient 21x (4) ★ Codex R6 戰略轉向驗證 (5) ML 5 次失敗 (6) ★ Entropy 對 BTC 有效
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking
 
