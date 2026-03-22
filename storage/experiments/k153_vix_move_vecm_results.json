@@ -1,0 +1,124 @@
+{
+  "experiment": "K153",
+  "title": "VIX-MOVE Vol-Spread VECM",
+  "attribution": "[\u63d0\u51fa: Gemini R5#3, \u57f7\u884c: Claude]",
+  "timestamp": "2026-03-22T20:34:17.723295",
+  "config": {
+    "data_start": "2005-01-01",
+    "data_end": "2026-03-22",
+    "oos_start": "2020-01-01",
+    "oos_end": "2024-12-31",
+    "window": 2000,
+    "refit_freq": 22,
+    "n_oos_days": 1249,
+    "n_refits": 57,
+    "elapsed_seconds": 29.8
+  },
+  "cointegration": {
+    "engle_granger": {
+      "t_stat": -5.479874833847515,
+      "p_value": 1.9667372830890245e-05,
+      "cointegrated": true
+    },
+    "johansen": {
+      "trace_stat_r0": 56.50400686268772,
+      "crit_95_r0": 15.4943,
+      "cointegrated": true
+    },
+    "cointegrating_beta": 0.5968120262213319,
+    "cointegrating_const": 0.263270289485776,
+    "cointegrating_R2": 0.3053505129026475,
+    "ect_stationary": true,
+    "ect_adf_p": 2.303024574528381e-06
+  },
+  "unit_roots": {
+    "log_vix_adf_p": 5.1930579646067336e-05,
+    "log_move_adf_p": 0.011227518542132414,
+    "d_log_vix_adf_p": 0.0,
+    "d_log_move_adf_p": 9.277690813387853e-30,
+    "vix_is_I1": false,
+    "move_is_I1": false
+  },
+  "error_correction": {
+    "alpha_ecm": -0.020369265042774524,
+    "alpha_t_stat": -5.736686604447108,
+    "alpha_p_value": 9.654666712546359e-09,
+    "significant": true,
+    "half_life_days": 34.02907169720498
+  },
+  "partial_correlation": {
+    "partial_r_ect_rv_given_vix": -0.04192005241434874,
+    "partial_p": 0.0023952386705443263,
+    "ect_adds_info_beyond_vix": true,
+    "corr_ect_log_vix": 0.8334563498452405,
+    "corr_ect_log_move": -4.3062398802722287e-16,
+    "corr_vix_move": 0.5525852992096759,
+    "ect_redundant_with_vix": true
+  },
+  "forecast_evaluation": {
+    "gjr_base": {
+      "qlike": 1.119527934119955,
+      "mse": 32.51046256827312,
+      "dm_t_vs_base": 0.0,
+      "dm_p_vs_base": 0.5
+    },
+    "gjr_ect": {
+      "qlike": 1.2313069079794714,
+      "mse": 83.92751686355322,
+      "dm_t_vs_base": 2.4704562387531537,
+      "dm_p_vs_base": 0.9931865276857368
+    },
+    "gjr_threshold": {
+      "qlike": 1.1262872219078541,
+      "mse": 31.678919712257137,
+      "dm_t_vs_base": 1.7820734667195814,
+      "dm_p_vs_base": 0.9625098368709757
+    }
+  },
+  "strategy": {
+    "Buy&Hold": {
+      "ann_return": 0.13619040870260718,
+      "ann_vol": 0.21133541678211068,
+      "sharpe": 0.6444277574308385,
+      "sharpe_t": 1.434680473039465,
+      "mdd": -0.33717276298387255,
+      "n_days": 1249
+    },
+    "12/VIX_base": {
+      "ann_return": 0.0775034112439187,
+      "ann_vol": 0.09676933020637013,
+      "sharpe": 0.8009088321541034,
+      "sharpe_t": 1.7830520937789571,
+      "mdd": -0.14833375601557897,
+      "n_days": 1249
+    },
+    "12/VIX+MOVE_overlay": {
+      "ann_return": 0.07188442719346586,
+      "ann_vol": 0.09877708029469445,
+      "sharpe": 0.7277439966741651,
+      "sharpe_t": 1.620166247280519,
+      "mdd": -0.1610538172196636,
+      "n_days": 1249
+    },
+    "12/VIX+MOVE_thresh": {
+      "ann_return": 0.07703574567673363,
+      "ann_vol": 0.09711805696942916,
+      "sharpe": 0.7932175342118197,
+      "sharpe_t": 1.7659290651029196,
+      "mdd": -0.14944353875852434,
+      "n_days": 1249
+    }
+  },
+  "strategy_sharpe_diffs": {
+    "overlay_vs_base": -0.07316483547993824,
+    "threshold_vs_base": -0.007691297942283626
+  },
+  "verdict": "PARTIAL: Co-integration exists and ECT has some info, but no OOS forecast improvement.",
+  "conclusions": {
+    "q1_cointegrated": "COINTEGRATED",
+    "q2_forecast_improvement": false,
+    "q3_ect_adds_info_beyond_vix": true,
+    "ect_redundant_with_vix_level": true,
+    "consistent_with_T11": true
+  }
+}

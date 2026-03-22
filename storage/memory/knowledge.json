@@ -9516,5 +9516,21 @@
     "evidence": [],
     "confidence": 0.8,
     "created_at": "2026-03-22T20:29:26.805547"
+  },
+  {
+    "item_id": "f2b1150f",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Gemini R5#3, \u57f7\u884c: Claude] K153: VIX-MOVE Vol-Spread VECM. Cointegration: EG p=0.0000 (YES), Johansen YES. ECM alpha=-0.02037 (t=-5.74). Partial corr(ECT,RV|VIX): partial_r=-0.0419,p=0.0024. GARCH-X with ECT: DM_t=2.470. Strategy: overlay Sharpe diff=-0.0732. VERDICT: PARTIAL: Co-integration exists and ECT has some info, but no OOS forecast improvement.",
+    "evidence": [],
+    "confidence": 0.8,
+    "created_at": "2026-03-22T20:34:17.732097"
+  },
+  {
+    "item_id": "c7c8a5a9",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Gemini R5#1, \u57f7\u884c: Claude] K152: Fiscal-Monetary Liquidity MS-GARCH. Result: PARTIAL. Net_Liq = WALCL-WTREGEN-RRPONTSYD does NOT improve daily vol forecasting. 5 models tested (GJR, MS-GARCH std, MS-GARCH liq, GARCH-X, Threshold GARCH) \u00d7 3 assets (SPY, GLD, TLT). GJR-GARCH remains best. Partial corr(Net_Liq, vol | VIX) not significant \u2014 VIX already captures liquidity info at daily frequency. Gemini hypothesis that contraction persistence > expansion persistence: structurally plausible but forecasting irrelevant. SPY: GJR QLIKE=-7.899482, MS-Liq QLIKE=-7.892825, DM=2.637(p=0.008); GLD: GJR QLIKE=-8.207088, MS-Liq QLIKE=-8.205163, DM=1.247(p=0.212); TLT: GJR QLIKE=-7.932970, MS-Liq QLIKE=-7.929439, DM=1.097(p=0.273)",
+    "evidence": [],
+    "confidence": 0.8,
+    "created_at": "2026-03-22T20:35:08.101341"
   }
 ]
