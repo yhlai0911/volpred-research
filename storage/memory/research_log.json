@@ -3422,5 +3422,21 @@
     "decision": "K147 answers Gemini R4#4 question definitively: GJR-GARCH vol IS more accurate, but AC optimal execution is NOT the right economic channel to monetize this advantage. The execution alpha direction needs a different mechanism (e.g., VaR-based position sizing, intraday vol timing, or options pricing) to translate better vol forecasts into economic value.",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "fd656342",
+    "timestamp": "2026-03-22T20:18:37.141560",
+    "phase": "Phase_K",
+    "action": "K149_regime_icl",
+    "observation": "Regime-aware ICL vol forecast: 16 non-parametric variants vs GJR-GARCH. Cross-asset (['SPY', 'GLD', 'TLT']): ICL sig. beats GJR in 0/48 cells. Best ICL variants: SPY=K100_exponential_vix, GLD=K100_exponential_vix, TLT=K100_exponential_vix",
+    "decision": "QLIKE ceiling confirmed (18th time). Key diagnostic: regime features are proxies for GARCH's internal state \u2014 no new information. The ceiling is structural: GARCH's autoregressive parametric form is near-optimal for daily r\u00b2. Future: only 5-min realized variance (a better proxy for latent vol) can potentially break this ceiling.",
+    "experiment_ids": [],
+    "tags": [
+      "regime-matching",
+      "in-context-learning",
+      "qlike-ceiling",
+      "non-parametric",
+      "nearest-neighbor"
+    ]
   }
 ]
