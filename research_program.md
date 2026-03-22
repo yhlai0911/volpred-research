@@ -552,7 +552,10 @@
 - [x] K39: ★★★ VT Lifecycle Paradox——DCA+VT -55.9%。VT for lump sum only
 - [x] K40: ★★ VT hurts endowments (0.44x B&H at 50yr)
 - [x] K41: ★★★ NO crossover! VT = constant ~4%/yr insurance at ALL horizons。Investor-type-dependent not horizon-dependent。K39/K40 were framing errors
-- **Phase K 統合（41 實驗）**：(1) ★★★ QLIKE ceiling: CC-RV 22d 才是真正 ceiling (2) ★★ 50/50 beats ALL optimization (3) ★★ Options surface 被 VIX 吸收 (4) ★★ Dynamic target 數學上不改變 Sharpe (5) BTC→SPY vol spillover 新發現 (6) Lead-lag static, drawdown backward-looking fails
+- [x] K141: ★★ MF2-GARCH (Conrad & Engle 2025 JAE, 第 9 自建模型) — SPY +0.03% NS, GLD +0.06% NS, **TLT +0.30% (p=0.0014)**。首次 ceiling crack for bonds。QLIKE ceiling 是 gamma-dependent：gamma>0.10→GJR 最優, gamma≈0→MF2 error correction 有增量
+- [x] K142: XGBoost+HAR vs GJR — GJR 3/3 全勝 (SPY p=0.0001, TLT p=0.002)。第 4 次 ML 失敗。QLIKE ceiling #16。日頻 r² 信噪比太低
+- [x] K143: ★ Multi-step vol forecast (h=1,5,22) — GJR 6/6 cells 最佳。QLIKE ceiling #17 擴展到多步。R² 在 h=5 達峰值 0.42（>h=1 的 0.33），多日加總平滑噪音
+- **Phase K 統合（44+ 實驗）**：(1) ★★★ QLIKE ceiling: gamma-dependent（股票 GJR，債券 MF2）(2) ★★ 50/50 beats ALL optimization (3) ★★ Options surface 被 VIX 吸收 (4) ★★ Dynamic target 數學上不改變 Sharpe (5) ★ Multi-step ceiling holds (h=1,5,22) (6) ML 4 次失敗 (LSTM/GBM/GARCH-LSTM/XGBoost)
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking
 

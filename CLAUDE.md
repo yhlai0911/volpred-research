@@ -393,12 +393,14 @@ CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）"
 | 模型 | 用途 | 狀態 | 備註 |
 |------|------|------|------|
 | **GJR-GARCH** | γ>0.10 資產（SPY/QQQ/EEM）| 主力 | MCS superior, EGARCH 驗證一致 |
-| **GARCH** | γ<0.10 資產（GLD/TLT）| 主力 | DM test 無顯著差異時優先 |
+| **GARCH** | γ<0.10 資產（GLD）| 主力 | DM test 無顯著差異時優先 |
+| **MF2-GARCH** | γ≈0 資產（TLT 債券）| 新增 | Conrad & Engle 2025 JAE。TLT +0.30% (p=0.0014)。Gamma-dependent ceiling |
 | **EGARCH** | Robustness check | 輔助 | γ 符號相反但結果一致 |
 | **HAR-RV** | 5-min realized vol | 待驗證 | 需 60+ 天 5-min 數據（SPY 46 天 / 0050.TW 34 天，持續累積中）|
 | **Realized GARCH** | 5-min RV + GARCH | blocked | 需 252+ 天（~2027 Q1）|
 | **LSTM/GRU** | Deep learning | 已測試失敗 | 日頻殘差 iid，DL 無增量（但數據增加後可重試）|
 | **GARCH-LSTM Hybrid** | 結合統計+DL | 已測試失敗 | LSTM factor 不穩定（std=1.16）|
+| **XGBoost+HAR** | ML vol forecast | 已測試失敗 | K142: GJR 3/3 勝。日頻 r² 信噪比太低，第 4 次 ML 失敗 |
 | **組合預測** | 70/30 GJR+HAR | 已測試 | 約束條件下最佳，但改善微小 |
 | **EWMA(λ=0.97)** | 零售簡易 VT | 輔助 | J6/J9: Sharpe 等效但 GJR 贏 crisis MDD。一行 Excel，TX 省 150bps/yr |
 | **EWMA(λ=0.94)** | RiskMetrics 標準 | 輔助 | HL=11d，比 0.97 略差 |

@@ -1,5 +1,27 @@
 [
   {
+    "id": "mile_75a7b7ff",
+    "title": "K141: ★★ QLIKE Ceiling 的邊界——MF2-GARCH 在債券上打敗 GJR",
+    "description": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\n我們自建了 Conrad & Engle (2025, Journal of Applied Econometrics) 提出的 MF2-GARCH 模型——第 9 個自建模型。這是首次有 **頂刊發表的模型宣稱打敗 GJR-GARCH**。結果：**對 SPY/GLD 無效，但對 TLT（債券）顯著打敗 GJR (DM p=0.0014)**。\n\n這不是 ceiling 被推翻——而是我們首次精確定義了它的邊界條件。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 模型 | MF2-GARCH (short: GJR + long: error correction) |\n| 估計 | Joint MLE, numba JIT, 4 starting points |\n| 資產 | SPY, GLD, TLT |\n| 窗口 | 2000 天滾動 |\n| OOS | 2020-2024 (1257 天) |\n| BIC 選擇 | 長期成分窗口 m |\n\n## MF2-GARCH 模型結構\n\nσ²_t = τ_t × g_t\n\n- **g_t**: 短期 GJR-GARCH 成分（捕捉日常波動聚集）\n- **τ_t**: 長期誤差修正成分（從過去預測誤差學習，自動放大/縮小預測）\n\n核心創新：如果模型最近一直低估波動率，τ_t > 1 自動向上修正；反之亦然。\n\n## 核心結果\n\n| 資產 | GJR QLIKE | MF2 QLIKE | 改善 | DM p |\n|------|-----------|-----------|------|------|\n| SPY | -8.101 | -8.103 | +0.03% | 0.253 NS |\n| GLD | -8.295 | -8.299 | +0.06% | 0.270 NS |\n| **TLT** | **-8.084** | **-8.108** | **+0.30%** | **0.0014*** |\n\n## 為什麼 TLT 不同？Gamma-Dependent Ceiling\n\n這是本實驗最重要的洞察。\n\n**GJR-GARCH 的優勢來自 leverage effect (gamma)**：股價下跌→波動率上升。SPY 的 gamma=0.33，GJR 完美捕捉這個效應。\n\n但 **TLT（長期公債）的 gamma ≈ 0**——債券沒有槓桿效應。此時 GJR 退化為普通 GARCH，失去了它的核心優勢。\n\nMF2-GARCH 的 error correction 成分在 gamma=0 時提供了替代的自適應機制：它不依賴 leverage，而是直接從預測誤差學習。\n\n### QLIKE Ceiling 修正\n\n| 資產類型 | Gamma | 最佳模型 | 原因 |\n|---------|-------|---------|------|\n| 股票 (SPY, QQQ) | > 0.10 | GJR-GARCH | Leverage effect 已足夠 |\n| 黃金 (GLD) | -0.03 ~ -0.09 | GJR-GARCH | 反向 leverage 也能捕捉 |\n| **債券 (TLT)** | **≈ 0** | **MF2-GARCH** | **無 leverage → error correction 補償** |\n\n## 實務意義\n\n1. **股票投資人**：繼續用 GJR-GARCH 或 EWMA(0.97)，MF2 不會改善\n2. **債券投資人**：MF2-GARCH 可改善 VaR 估計 5.5%（MSE 改善）\n3. **多資產投組**：考慮對不同資產類別使用不同波動率模型\n4. **學術貢獻**：QLIKE ceiling 不是一刀切——它是 gamma-dependent 的\n\n## 結論\n\n16 次確認後，我們首次找到 QLIKE ceiling 的邊界：**它取決於 leverage effect 的強度**。有 leverage 的資產，GJR 無可匹敵；沒有 leverage 的資產，error correction 模型能填補空缺。這不是推翻，而是精確化。\n",
+    "category": "milestone",
+    "phase": "Phase_K",
+    "details": {},
+    "tags": [
+      "MF2-GARCH",
+      "Conrad-Engle-2025",
+      "QLIKE-ceiling",
+      "gamma-dependent",
+      "TLT",
+      "SPY",
+      "GLD",
+      "債券",
+      "自建模型"
+    ],
+    "created_at": "2026-03-22T11:03:33.436599+00:00",
+    "published_at": "2026-03-22T11:03:33.436599+00:00",
+    "status": "draft"
+  },
+  {
     "id": "mile_33237750",
     "title": "K142: 第四次 ML 挑戰 GARCH——XGBoost + HAR 特徵仍然敗北",
     "description": "## 摘要\n\n[提出: Claude 跳躍式探索, 執行: Claude]\n\n基於 2026 年最新文獻（arXiv:2601.13014），我們用 XGBoost + HAR-like 特徵工程第四次挑戰 GARCH 的波動率預測霸權。結果：**GJR-GARCH 3/3 資產全勝，QLIKE ceiling 第 16 次確認**。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY, GLD, TLT |\n| 期間 | 2007-2024（OOS: 2020-2024, 1257 天） |\n| 訓練窗口 | 2000 天滾動 |\n| ML 模型 | XGBoost (100 trees, depth=4), Ridge-HAR |\n| 特徵 | lagged r², &#124;r&#124;, 5d/22d/63d rolling RV, log-RV, leverage, calendar |\n| 基準 | GJR-GARCH(1,1) w=2000 |\n\n## 核心結果\n\n| 資產 | GJR-GARCH | XGBoost | DM test p |\n|------|-----------|---------|-----------|\n| SPY | **-8.101** | -7.311 | 0.0001** |\n| GLD | **-8.295** | -8.245 | 0.073 |\n| TLT | **-8.084** | -7.793 | 0.002** |\n\nRidge-HAR 完全崩壞——產生負方差預測，QLIKE 暴漲到數百萬。\n\n## 為什麼 ML 又失敗了？\n\n1. **日頻 r² 是極度嘈雜的目標變數**：信噪比太低，ML 的彈性反而變成負擔\n2. **GARCH 的參數約束是優勢**：保證正方差、自回歸結構完美匹配波動率聚集\n3. **XGBoost 特徵重要性確認 HAR 結構**：rv_5d 佔 24-32% 最重要，這就是 HAR-RV 的已知分解\n4. **Ridge 的教訓**：無約束線性模型連正方差都保證不了\n\n## 四次 ML 失敗總結\n\n| 實驗 | 方法 | 結果 | 原因 |\n|------|------|------|------|\n| R10 | LSTM/GRU | 0/3 | 殘差 iid，DL 無增量 |\n| T22 | GBM (VIX) | 0/15 | SPY-specific，不可推廣 |\n| P-hybrid | GARCH-LSTM | 失敗 | LSTM factor 不穩定 (std=1.16) |\n| **K142** | **XGBoost+HAR** | **0/3** | **日頻 r² 信噪比太低** |\n\n## 實務意義\n\n對散戶來說，這是好消息：**你不需要學 ML**。一個簡單的 GJR-GARCH 模型（甚至 EWMA）就是日頻波動率預測的最佳工具。\n\n未來的 ML 機會在**高頻數據**：用 5 分鐘 realized variance 做 target，信噪比大幅提升。但這需要 252+ 天的 5-min 數據（目前 SPY 只有 46 天）。\n\n## 結論\n\nQLIKE ceiling 第 16 次確認。日頻波動率預測是 GARCH 的主場——不是因為 ML 不夠強，而是因為**目標變數太嘈雜、GARCH 的結構約束恰好是正確的歸納偏差**。\n",
