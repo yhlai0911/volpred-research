@@ -3438,5 +3438,22 @@
       "non-parametric",
       "nearest-neighbor"
     ]
+  },
+  {
+    "entry_id": "f9fad864",
+    "timestamp": "2026-03-22T21:07:36.259310",
+    "phase": "Phase_K",
+    "action": "K150_amihud_fragility",
+    "observation": "Amihud Fragility GARCH-X: 3 liquidity models vs GJR-GARCH. Cross-asset (['SPY', 'QQQ', 'GLD', 'TLT']): 0/12 sig cells. Partial corr mean=-0.0186. Fragility ratio=0.88x.",
+    "decision": "QLIKE ceiling confirmed (19th). First non-price info source (liquidity) tested \u2014 fails. Amihud endogenous to vol. Remaining: options-implied (VVIX/SKEW), 5-min RV.",
+    "experiment_ids": [],
+    "tags": [
+      "amihud",
+      "illiquidity",
+      "garch-x",
+      "liquidity",
+      "qlike-ceiling",
+      "gemini-suggestion"
+    ]
   }
 ]

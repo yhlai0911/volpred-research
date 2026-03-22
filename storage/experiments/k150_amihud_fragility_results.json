@@ -1,0 +1,297 @@
+{
+  "experiment": "K150",
+  "title": "Amihud Fragility GARCH-X",
+  "proposer": "Gemini R5#2",
+  "executor": "Claude",
+  "method": "GARCH-X with Amihud Illiquidity in variance equation",
+  "config": {
+    "window": 2000,
+    "oos_start": "2020-01-01",
+    "oos_end": "2024-12-31",
+    "data_start": "2005-01-01",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "TLT"
+    ],
+    "models": [
+      "GJR-GARCH",
+      "GARCH-X(logAmihud)",
+      "GJR-GARCH-X(logAmihud)",
+      "Threshold-GJR"
+    ]
+  },
+  "results": {
+    "SPY": {
+      "n_predictions": 1257,
+      "oos_period": "2020-01-02 to 2024-12-30",
+      "garch_qlike": -8.100587,
+      "garch_mse": 3.1239088377955934e-07,
+      "partial_correlation": {
+        "amihud_vol": 0.1648,
+        "vix_vol": 0.4604,
+        "amihud_vix": 0.3791,
+        "partial_amihud_vol_given_vix": -0.0119,
+        "partial_t_stat": -0.84,
+        "partial_p_value": 0.3986
+      },
+      "fragility_diagnostic": {
+        "n_fragile_days": 196,
+        "n_normal_days": 4832,
+        "mean_next_vol_fragile": 0.00012764364527508186,
+        "mean_next_vol_normal": 0.000144980059284744,
+        "ratio": 0.8804220794556784,
+        "t_stat": -0.4396027968743367,
+        "p_value": 0.6606684272041925
+      },
+      "models": {
+        "garch_x_logamihud": {
+          "name": "GARCH-X(logAmihud)",
+          "qlike": -8.116324,
+          "mse": 2.973812975065739e-07,
+          "dm_vs_garch": {
+            "statistic": -0.4493363686372343,
+            "p_value": 0.653189025996948,
+            "mean_diff": -0.015737455088578975,
+            "better_model": 1
+          },
+          "n_fallbacks": 0
+        },
+        "gjr_garch_x_logamihud": {
+          "name": "GJR-GARCH-X(logAmihud)",
+          "qlike": -8.100471,
+          "mse": 3.152945203319518e-07,
+          "dm_vs_garch": {
+            "statistic": 0.018454992733543677,
+            "p_value": 0.9852758820395175,
+            "mean_diff": 0.00011618092234929822,
+            "better_model": 2
+          },
+          "n_fallbacks": 0
+        },
+        "threshold_gjr": {
+          "name": "Threshold-GJR(Amihud)",
+          "qlike": -8.099046,
+          "mse": 3.2823445453144984e-07,
+          "dm_vs_garch": {
+            "statistic": 0.7806152282516321,
+            "p_value": 0.435028832531565,
+            "mean_diff": 0.0015405053097001058,
+            "better_model": 2
+          },
+          "n_fallbacks": 0
+        }
+      },
+      "best_alt_model": "GARCH-X(logAmihud)",
+      "best_alt_qlike": -8.116324,
+      "delta_pct": -0.19,
+      "any_beats_garch": false
+    },
+    "QQQ": {
+      "n_predictions": 1257,
+      "oos_period": "2020-01-02 to 2024-12-30",
+      "garch_qlike": -7.507208,
+      "garch_mse": 4.200619470212237e-07,
+      "partial_correlation": {
+        "amihud_vol": 0.0716,
+        "vix_vol": 0.4369,
+        "amihud_vix": 0.2674,
+        "partial_amihud_vol_given_vix": -0.0521,
+        "partial_t_stat": -3.7,
+        "partial_p_value": 0.0002
+      },
+      "fragility_diagnostic": {
+        "n_fragile_days": 181,
+        "n_normal_days": 4847,
+        "mean_next_vol_fragile": 0.00015462873784984275,
+        "mean_next_vol_normal": 0.00018598468908397262,
+        "ratio": 0.8314057388886857,
+        "t_stat": -1.2965185905588579,
+        "p_value": 0.19610571859211473
+      },
+      "models": {
+        "garch_x_logamihud": {
+          "name": "GARCH-X(logAmihud)",
+          "qlike": -7.531383,
+          "mse": 4.2001384065563174e-07,
+          "dm_vs_garch": {
+            "statistic": -0.5976851592499555,
+            "p_value": 0.5500500297444506,
+            "mean_diff": -0.024175004831223666,
+            "better_model": 1
+          },
+          "n_fallbacks": 0
+        },
+        "gjr_garch_x_logamihud": {
+          "name": "GJR-GARCH-X(logAmihud)",
+          "qlike": -7.523121,
+          "mse": 4.227062730338581e-07,
+          "dm_vs_garch": {
+            "statistic": -1.2159274150241899,
+            "p_value": 0.22401257358653215,
+            "mean_diff": -0.01591349828393927,
+            "better_model": 1
+          },
+          "n_fallbacks": 0
+        },
+        "threshold_gjr": {
+          "name": "Threshold-GJR(Amihud)",
+          "qlike": -7.507212,
+          "mse": 4.2838536100357924e-07,
+          "dm_vs_garch": {
+            "statistic": -0.00995367147955032,
+            "p_value": 0.992058250342283,
+            "mean_diff": -4.3130303429515e-06,
+            "better_model": 1
+          },
+          "n_fallbacks": 0
+        }
+      },
+      "best_alt_model": "GARCH-X(logAmihud)",
+      "best_alt_qlike": -7.531383,
+      "delta_pct": -0.32,
+      "any_beats_garch": false
+    },
+    "GLD": {
+      "n_predictions": 1257,
+      "oos_period": "2020-01-02 to 2024-12-30",
+      "garch_qlike": -8.294589,
+      "garch_mse": 4.041300457358616e-08,
+      "partial_correlation": {
+        "amihud_vol": 0.0498,
+        "vix_vol": 0.2157,
+        "amihud_vix": -0.1178,
+        "partial_amihud_vol_given_vix": 0.0775,
+        "partial_t_stat": 5.51,
+        "partial_p_value": 0.0
+      },
+      "fragility_diagnostic": {
+        "n_fragile_days": 225,
+        "n_normal_days": 4803,
+        "mean_next_vol_fragile": 0.0001591810262025226,
+        "mean_next_vol_normal": 0.00012084947829106103,
+        "ratio": 1.3171842233289712,
+        "t_stat": 1.526847200847996,
+        "p_value": 0.12810086863748715
+      },
+      "models": {
+        "garch_x_logamihud": {
+          "name": "GARCH-X(logAmihud)",
+          "qlike": -8.296965,
+          "mse": 4.055586926314552e-08,
+          "dm_vs_garch": {
+            "statistic": -0.4879976404527071,
+            "p_value": 0.6255515123801596,
+            "mean_diff": -0.002375997275072395,
+            "better_model": 1
+          },
+          "n_fallbacks": 0
+        },
+        "gjr_garch_x_logamihud": {
+          "name": "GJR-GARCH-X(logAmihud)",
+          "qlike": -8.294083,
+          "mse": 4.044879970825448e-08,
+          "dm_vs_garch": {
+            "statistic": 0.2851556030868714,
+            "p_value": 0.7755249324285107,
+            "mean_diff": 0.0005056906214918131,
+            "better_model": 2
+          },
+          "n_fallbacks": 0
+        },
+        "threshold_gjr": {
+          "name": "Threshold-GJR(Amihud)",
+          "qlike": -8.29264,
+          "mse": 4.055883649544005e-08,
+          "dm_vs_garch": {
+            "statistic": 1.0925608038687398,
+            "p_value": 0.2745866801326402,
+            "mean_diff": 0.0019482439347315189,
+            "better_model": 2
+          },
+          "n_fallbacks": 0
+        }
+      },
+      "best_alt_model": "GARCH-X(logAmihud)",
+      "best_alt_qlike": -8.296965,
+      "delta_pct": -0.03,
+      "any_beats_garch": false
+    },
+    "TLT": {
+      "n_predictions": 1257,
+      "oos_period": "2020-01-02 to 2024-12-30",
+      "garch_qlike": -8.083859,
+      "garch_mse": 9.032077478590375e-08,
+      "partial_correlation": {
+        "amihud_vol": -0.0336,
+        "vix_vol": 0.3305,
+        "amihud_vix": 0.1468,
+        "partial_amihud_vol_given_vix": -0.0879,
+        "partial_t_stat": -6.26,
+        "partial_p_value": 0.0
+      },
+      "fragility_diagnostic": {
+        "n_fragile_days": 365,
+        "n_normal_days": 4663,
+        "mean_next_vol_fragile": 4.2587495443058484e-05,
+        "mean_next_vol_normal": 9.037005169904595e-05,
+        "ratio": 0.4712567343093385,
+        "t_stat": -8.693231963305214,
+        "p_value": 2.2105271065258906e-17
+      },
+      "models": {
+        "garch_x_logamihud": {
+          "name": "GARCH-X(logAmihud)",
+          "qlike": -8.092433,
+          "mse": 8.718723407771635e-08,
+          "dm_vs_garch": {
+            "statistic": -1.1221386717962984,
+            "p_value": 0.2618034834661249,
+            "mean_diff": -0.008574417899964607,
+            "better_model": 1
+          },
+          "n_fallbacks": 0
+        },
+        "gjr_garch_x_logamihud": {
+          "name": "GJR-GARCH-X(logAmihud)",
+          "qlike": -8.085866,
+          "mse": 9.109001970063059e-08,
+          "dm_vs_garch": {
+            "statistic": -0.38172423446525466,
+            "p_value": 0.7026659223777807,
+            "mean_diff": -0.0020074248481669666,
+            "better_model": 1
+          },
+          "n_fallbacks": 0
+        },
+        "threshold_gjr": {
+          "name": "Threshold-GJR(Amihud)",
+          "qlike": -8.083954,
+          "mse": 9.017515956976962e-08,
+          "dm_vs_garch": {
+            "statistic": -0.14327906561280374,
+            "p_value": 0.886069788459616,
+            "mean_diff": -9.565370668344549e-05,
+            "better_model": 1
+          },
+          "n_fallbacks": 0
+        }
+      },
+      "best_alt_model": "GARCH-X(logAmihud)",
+      "best_alt_qlike": -8.092433,
+      "delta_pct": -0.11,
+      "any_beats_garch": false
+    }
+  },
+  "cross_asset_summary": {
+    "garch_wins": 0,
+    "alt_wins": 4,
+    "total_assets": 4,
+    "sig_cells": 0,
+    "total_cells": 12,
+    "mean_partial_corr": -0.0186,
+    "mean_fragility_ratio": 0.88
+  },
+  "conclusion": "QLIKE ceiling INTACT (attempt #19). Amihud GARCH-X: 0/12 sig. cells. GJR wins 0/4. Liquidity info does NOT improve vol forecasting."
+}

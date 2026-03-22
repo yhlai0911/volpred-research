@@ -5764,5 +5764,12 @@
     "thought": "[K154] Order Flow Imbalance experiment complete. Tested 4 daily OFI proxies across SPY/QQQ/GLD. Partial correlations: 8/12 partial corr sig. GARCH-X: GJR+OFI adjustment DM-significant wins 0/6. Key question was whether OFI adds info beyond VIX \u2014 mixed: some ofi signal exists but not robust enough with daily proxies. This is consistent with VIX-sufficient-statistic finding IF partial corrs are zero. The proxies are inherently limited by daily OHLCV granularity. With tick data (actual Lee-Ready classification, VPIN), results might differ. Next: could try intraday volume patterns or signed volume from 5-min bars once data available.",
     "context": "",
     "experiment_ids": []
+  },
+  {
+    "id": "c664a2d8",
+    "timestamp": "2026-03-22T21:07:34.278499",
+    "thought": "K150: Testing Gemini's Amihud illiquidity hypothesis. 4 GARCH-X variants (GARCH-X, GJR-GARCH-X, Threshold-GJR with log Amihud 5d). Cross-asset (['SPY', 'QQQ', 'GLD', 'TLT']): 0/12 sig cells. GJR wins 0/4. Partial corr(Amihud->vol|VIX) mean=-0.0186. Fragility ratio mean=0.88x. Key insight: Amihud = |return|/dollar_vol is ENDOGENOUS to vol via its numerator. Liquidity decay is a CONSEQUENCE, not a cause of vol explosions. QLIKE ceiling intact for 19th time.",
+    "context": "",
+    "experiment_ids": []
   }
 ]

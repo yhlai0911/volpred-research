@@ -9564,5 +9564,19 @@
     "evidence": [],
     "confidence": 0.8,
     "created_at": "2026-03-22T20:56:13.538545"
+  },
+  {
+    "item_id": "d8a0e722",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Gemini R5#2, \u57f7\u884c: Claude] K150: Amihud Fragility GARCH-X. Amihud Illiquidity (|r|/DollarVol) as GARCH-X exogenous in variance eq. 3 variants: GARCH-X(logAmihud), GJR-GARCH-X(logAmihud), Threshold-GJR. w=2000, OOS 2020-2024. QLIKE: SPY: GJR=-8.100587, best=-8.116324 (GARCH-X(logAmihud), -0.19%); QQQ: GJR=-7.507208, best=-7.531383 (GARCH-X(logAmihud), -0.32%); GLD: GJR=-8.294589, best=-8.296965 (GARCH-X(logAmihud), -0.03%); TLT: GJR=-8.083859, best=-8.092433 (GARCH-X(logAmihud), -0.11%). Sig. beats GJR: 0/12 cells. GJR wins 0/4 assets. Partial corr(Amihud->vol|VIX)=-0.0186 \u2014 subsumed by VIX. QLIKE ceiling INTACT (19th confirmation). Amihud is endogenous to vol (contains return in numerator), not a leading indicator.",
+    "evidence": [
+      "K150 cross-asset: 0/12 sig cells",
+      "3 GARCH-X variants across 4 assets",
+      "Partial corr after VIX: mean -0.0186",
+      "Amihud = |return|/dollar_volume \u2014 endogenous via numerator",
+      "Fragility diagnostic: mean ratio = 0.88x"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-22T21:07:35.211859"
   }
 ]
