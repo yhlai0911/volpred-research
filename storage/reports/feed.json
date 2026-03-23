@@ -1,5 +1,65 @@
 [
   {
+    "id": "mile_a9e625dd",
+    "title": "K169: 誰是波動率傳染的超級傳播者？動態網路揭示市場壓力傳導路徑",
+    "description": "## 摘要\n[提出: Gemini R7#2, 執行: Claude]\n用 Minimum Spanning Tree 動態追蹤 12 個資產的波動率傳導網路。SPY 在 82% 時間是樞紐（hub），但危機時小型股（IWM）和金融股（XLF）接管——Hub 轉移完美對應宏觀事件。\n\n## 核心發現\n\n### Hub 分佈\n| 資產 | Hub 頻率 | 角色 |\n|------|---------|------|\n| SPY | 82% | 常態樞紐 |\n| IWM | 13% | **危機樞紐** |\n| XLF | 2% | 金融危機專用 |\n| QQQ | 1% | 科技泡沫期 |\n\n### Hub 轉移時間線（2020-2026）\n- **2020-03 COVID**: SPY→IWM→XLF（流動性危機→金融壓力）\n- **2022-06 Fed 升息**: SPY→QQQ→IWM（利率衝擊→小型股承壓）\n- **2024-2025**: IWM 持續 hub（高利率環境下小型股主導 vol）\n\n### 預測力\n| 指標 | Partial\\|VIX | 含義 |\n|------|-------------|------|\n| TLT centrality | r=+0.159★ | 債券在網路越中心 → 未來股市 vol 越高 |\n| avg correlation | r=-0.163★ | 反直覺：高相關 → 低 future vol |\n\n### 為什麼高相關不等於高風險？\n高相關意味著市場已經同步——所有壞消息已反映在價格中。真正危險的是**低相關期突然變高**（regime shift），不是高相關本身。\n\n## 實務意義\n1. **觀察 IWM 和 XLF**：當它們成為 hub，系統性風險正在累積\n2. **TLT 中心性是預警信號**：債券壓力傳導到股市\n3. **高相關不必恐慌**：恐慌已定價，真正的風險在「平靜」期",
+    "category": "milestone",
+    "phase": "Phase_K",
+    "details": {},
+    "tags": [
+      "網路分析",
+      "MST",
+      "SPY",
+      "IWM",
+      "XLF",
+      "TLT",
+      "系統性風險",
+      "傳染"
+    ],
+    "created_at": "2026-03-23T04:15:35.807871+00:00",
+    "published_at": "2026-03-23T04:15:35.807871+00:00",
+    "status": "draft"
+  },
+  {
+    "id": "mile_b9a0658e",
+    "title": "K168: GARCH 什麼時候最危險？答案可能跟你想的相反",
+    "description": "## 摘要\n[提出: Claude, 執行: Claude]\n量化 GARCH 自身預測的不確定性（Vol-of-Vol）。反直覺發現：高 VoV（預測不穩定）時 VaR violation 只有 4.8%，低 VoV（預測穩定）時反而 5.1%。GARCH 在不確定期反而保守——真正的危險是自滿期。\n\n## 核心發現\n### 反直覺：不穩定 ≠ 不可靠\n| VoV 分組 | VaR Violation Rate | N |\n|----------|-------------------|---|\n| 低 VoV（穩定） | 5.1% | 739 |\n| 中 VoV | 5.9% | 1,190 |\n| 高 VoV（不穩定） | **4.8%** | 631 |\n\n高 VoV 出現在 regime transition（進入危機期），此時 GARCH σ² 正快速上升，自動提供 VaR buffer。\n\n### 跨資產 VoV\nSPY 的 VoV（0.48）是 GLD（0.13）的 3.7 倍——股票 GARCH 預測波動大，商品穩定。\n\n## 實務意義\n1. **不要在 GARCH 穩定期放鬆警惕**——那才是黑天鵝出現的時候\n2. **VoV-adjusted VaR 微調有效**：從 5.2%→5.0%，但改善很小\n3. **GLD 的 GARCH 最穩定**——另一個支持 50/50 SPY/GLD 的理由",
+    "category": "milestone",
+    "phase": "Phase_K",
+    "details": {},
+    "tags": [
+      "GARCH",
+      "Vol-of-Vol",
+      "VaR",
+      "SPY",
+      "GLD",
+      "風險管理",
+      "方法論"
+    ],
+    "created_at": "2026-03-23T04:11:03.934233+00:00",
+    "published_at": "2026-03-23T04:11:03.934233+00:00",
+    "status": "draft"
+  },
+  {
+    "id": "mile_3ada915a",
+    "title": "K167: VIX 恐慌溢價跨資產地圖——比特幣 VRP 竟然是 -31.8%",
+    "description": "## 摘要\n[提出: Q10/T9 延伸, 執行: Claude]\nVRP（VIX - Realized Vol）跨 7 個資產的結構分析。SPY VRP +3.7%（恐慌溢價正常），但 BTC VRP **-31.8%**——加密市場的實際波動遠超 VIX 隱含。GLD VRP→未來報酬 r=0.084★ 最強——黃金在恐慌過度定價時表現特別好。所有 VRP 擇時策略都輸 B&H（Sharpe 0.40 vs 1.18），跨資產排名 L/S 也不顯著 (t=-0.36)。結論：VRP 是量化恐慌溢價的好工具，但不是交易信號。\n\n## 核心發現\n| 資產 | VRP | 含義 |\n|------|-----|------|\n| TLT | +4.3% | 債券恐慌溢價最高 |\n| SPY | +3.7% | 股市標準恐慌溢價 |\n| GLD | +3.3% | 黃金也有恐慌溢價 |\n| QQQ | +0.1% | 科技幾乎無溢價 |\n| EEM | -1.1% | 新興市場 realized > implied |\n| IWM | -1.6% | 小型股 realized > implied |\n| BTC | **-31.8%** | 加密市場完全反轉 |\n\n## 實務意義\nBTC VRP=-31.8% 意味 VIX 完全無法代表 BTC 風險。用 VIX 管理 BTC 部位就像用溫度計量血壓。",
+    "category": "milestone",
+    "phase": "Phase_K",
+    "details": {},
+    "tags": [
+      "VRP",
+      "BTC",
+      "SPY",
+      "GLD",
+      "跨資產",
+      "風險溢價"
+    ],
+    "created_at": "2026-03-23T04:10:43.656411+00:00",
+    "published_at": "2026-03-23T04:10:43.656411+00:00",
+    "status": "draft"
+  },
+  {
     "id": "mile_52b3f3a3",
     "title": "K166: 用物理學的 Hurst 指數偵測市場趨勢——75% 時間有趨勢，但你仍然賺不到",
     "description": "## 摘要\n\n[提出: Claude（跨學科探索：物理→金融）, 執行: Claude]\n\n用物理學的 Hurst exponent 偵測市場 regime：H<0.5 反轉、H=0.5 隨機、H>0.5 趨勢。SPY 75% 的時間處於 trending regime (H>0.55)，且 trending 期間月均報酬+1.15%（Sharpe 0.90）。但 H 的預測力不顯著（r=0.098, p=0.16），OOS 策略無法打敗 B&H。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY, QQQ, GLD, TLT, EEM |\n| 期間 | 2007-2026 (4,833 筆) |\n| 方法 | R/S 分析, rolling 252 天 |\n| OOS | 2023-2026 |\n\n## 核心發現\n\n### 全樣本 Hurst\n| 資產 | H | Regime |\n|------|---|--------|\n| SPY | 0.539 | 隨機遊走 |\n| QQQ | 0.548 | 隨機遊走 |\n| GLD | 0.577 | 趨勢 |\n| TLT | 0.564 | 趨勢 |\n| EEM | 0.528 | 隨機遊走 |\n\n### Rolling Hurst Regime\n市場 75% 時間 H>0.55（trending），只有 2% 時間 H<0.5（mean-reverting）。Trending 期間報酬更好：\n\n| Regime | 月均報酬 | Sharpe | t-stat |\n|--------|---------|--------|--------|\n| Trending (H>0.55) | +1.15% | 0.90 | 3.23 |\n| Random (0.45-0.55) | +0.18% | 0.14 | 0.29 |\n\n但 H 與未來報酬的相關 r=0.098（p=0.16 NS），控制 VIX 後也 NS。\n\n### OOS 策略\nH>0.55 策略 Sharpe 1.72 ≈ B&H 1.66（t=-0.13 NS），83% 時間持倉——幾乎等於 B&H。\n\n## 實務意義\n\n1. **市場多數時間是有趨勢的**（H>0.5），這解釋了為什麼動量策略長期有效\n2. **但這個趨勢性已被價格反映**——你知道市場是 trending 不代表你能從中獲利\n3. **GLD 和 TLT 的 H 最高**——黃金和債券的趨勢性比股票更強（適合趨勢追蹤策略）\n\n## 結論\n\nHurst exponent 提供了有趣的描述性框架：股市 75% 時間有趨勢、2% 時間反轉。但這個資訊沒有預測增量——市場的趨勢性是結構性的，不是可交易的 alpha。\n",

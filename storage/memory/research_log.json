@@ -3575,5 +3575,35 @@
     "decision": "VRP timing null extends across assets (Q10 confirmed cross-asset). BTC VRP=-31.8% shows crypto realized vol massively exceeds implied.",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "62d65864",
+    "timestamp": "2026-03-23T12:10:04.587283",
+    "phase": "Phase_K",
+    "action": "K168_vol_of_vol",
+    "observation": "K168: Vol-of-Vol counterintuitive: high VoV = fewer violations (4.8% vs 5.1%). GARCH is conservative when uncertain. Partial|VIX r=-0.105\u2605. VoV-adj VaR improves to 5.0% but marginal.",
+    "decision": "VoV insight: GARCH danger is complacency (low VoV) not instability (high VoV). Publishable as methodology insight.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "86a824e0",
+    "timestamp": "2026-03-23T12:13:21.298183",
+    "phase": "Phase_K",
+    "action": "gemini_r7_review",
+    "observation": "Gemini R7: 5 directions after K159-K168 review. Top: GEX (needs options), Dynamic Network (doable now), LLM Text Vol (needs NLP), VPIN (needs tick data), Rough Vol HF (ETA April).",
+    "decision": "Prioritize Dynamic Network (K169) as extension of K163 CoVaR. GEX needs options data. VPIN needs tick data. Save Rough Vol for April.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "14817d9e",
+    "timestamp": "2026-03-23T12:15:03.495343",
+    "phase": "Phase_K",
+    "action": "K169_dynamic_network",
+    "observation": "K169: Dynamic MST network. SPY hub 82%. Crisis hub transfer: IWM/XLF. TLT centrality weakly predicts SPY vol (r=0.159\u2605). High corr = less future vol (counterintuitive). Hub timeline tracks macro events perfectly.",
+    "decision": "Network descriptive value high (paper material). Predictive value weak. Next: commit session results.",
+    "experiment_ids": [],
+    "tags": []
   }
 ]
