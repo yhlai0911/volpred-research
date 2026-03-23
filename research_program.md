@@ -617,6 +617,7 @@
 - [x] K176: ★★ 台灣 CoVaR 傳染結構（7 資產）— **TSMC→0050 ΔCoVaR=-1.599，是 SPY→0050(-0.345) 的 4.6 倍**。0050-TSMC corr=0.893。0050 = TSMC 集中風險。中華電是淨傳染源（flight-to-cash）。鴻海是淨受害者（供應鏈）。台灣投資人必知
 - [x] K177: ★★★ 台灣最佳避險組合 — **0050+GLD 50/50+VT(8.63/VIX)** 冠軍。COVID MDD -2.9%（B&H -28.6%），Fed升息 -6.6%（B&H -34.2%）。OOS Sharpe 2.370。三層保護：GLD零傳染+VT降曝險+月度再平衡。⚠️ 0050.TW 2014 年 1:4 分割需手動修正（yfinance Adj Close bug）
 - [x] K178: ★ 台灣 VT 月頻最佳化 — Sharpe 對 K 完全不敏感（6~15 all ≈0.65）。Harvey t=-3.06★：VT Sharpe 顯著低於 B&H（保險費 ~4%/yr）。MDD 改善 7.0pp（-22.9%→-15.9%）。TX 敏感度低（月度 turnover 1.0x/yr）。K=6 最保守（MDD -11.2%, 持倉 36%）
+- [x] K179: ★★ Regime 地圖（170+ 實驗 meta-synthesis）— Sharpe 最佳：50/50 B&H（3/5 regime 勝）。MDD 最佳：50/50+VT（4/5 regime 勝，恐慌期 MDD -6.6% vs SPY -30.9%）。**全天候最安全：50/50+VT**。目前 VIX 26.8 = 恐慌 regime
 - **Phase K 統合（61+ 實驗）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking
