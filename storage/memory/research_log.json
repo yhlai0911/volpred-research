@@ -3635,5 +3635,35 @@
     "decision": "Timely finding for current market. GLD surge = SPY weakness signal. 50/50 automatically benefits. Publish as both research + general article.",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "c0d2ef8c",
+    "timestamp": "2026-03-23T12:55:02.287507",
+    "phase": "Phase_K",
+    "action": "K173_tail_index",
+    "observation": "K173: Hill tail index. Partial|VIX r=-0.083\u2605 (first indicator with sig tail prediction beyond VIX). But small effect. Cross-asset: EEM thickest (2.46), TLT thinnest (4.17). Current \u03b1=2.14.",
+    "decision": "Tail index has academic value but small practical impact. VIX still dominant for vol, but tail index adds marginal tail info.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "728f6829",
+    "timestamp": "2026-03-23T13:07:15.575115",
+    "phase": "Phase_K",
+    "action": "K174_cdb",
+    "observation": "K174: CDB partial|VIX r=0.210\u2605 strongest signal this session. But CDB=f(correlation), may reflect correlation mean reversion. Need non-overlapping monthly validation.",
+    "decision": "CDB is promising but must validate with non-overlapping sampling before claiming breakthrough. Learned from K164/K165 mistake.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "e1d7e6d6",
+    "timestamp": "2026-03-23T13:08:21.086272",
+    "phase": "Phase_K",
+    "action": "K175_cdb_monthly",
+    "observation": "K175: CDB monthly validation. K174 r=0.210 shrinks to 0.110 NS with non-overlapping. OOS worse. CDB=f(corr) confirmed (partial|corr r=0.045 NS). Third overlapping artifact caught.",
+    "decision": "RULE: ALWAYS validate with non-overlapping monthly before claiming any signal from daily rolling windows. This is now a confirmed research pattern (K164\u2192K165, K174\u2192K175).",
+    "experiment_ids": [],
+    "tags": []
   }
 ]

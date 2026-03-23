@@ -9810,5 +9810,42 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-03-23T12:37:18.494828"
+  },
+  {
+    "item_id": "a6761f54",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude(EVT\u8de8\u5b78\u79d1), \u57f7\u884c: Claude] K173: Tail Index (Hill estimator) \u52d5\u614b\u8ffd\u8e64\u3002\u5168\u6a23\u672c \u03b1: SPY 2.71(\u539a\u5c3e), EEM 2.46(\u6700\u539a), TLT 4.17(\u6700\u8584)\u3002Rolling 500d: range [1.24,3.07], mean 2.01\u3002\u2605 corr(\u03b1,future_tail)=-0.136\u2605, partial|VIX r=-0.083\u2605(p=0.014)\u2014\u2014\u63a7\u5236 VIX \u5f8c\u4ecd\u6709\u5fae\u5f31\u4f46\u986f\u8457\u7684\u5c3e\u90e8\u9810\u6e2c\u529b\u3002\u6975\u539a\u5c3e\u671f(\u03b1<2.5)\u6708\u5747 1.01 \u6b21\u5c3e\u90e8\u4e8b\u4ef6 vs \u539a\u5c3e\u671f 0.36 \u6b21(2.8x)\u3002\u76ee\u524d \u03b1=2.14(61th pctl)\u3002COVID \u03b1=1.45 \u6700\u539a\u3002",
+    "evidence": [
+      "partial|VIX r=-0.083 p=0.014",
+      "tail event ratio 2.8x",
+      "current alpha 2.14 61th pctl"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-03-23T12:54:57.135053"
+  },
+  {
+    "item_id": "b94bde74",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude, \u57f7\u884c: Claude] K174: Conditional Diversification Benefit (CDB=port_vol/weighted_vol)\u3002CDB mean 0.730\uff08\u5206\u6563\u524a\u6e1b 27% \u98a8\u96aa\uff09\uff0c71% \u6642\u9593 CDB<0.8\u3002\u2605\u2605 corr(CDB, future_63d_ret)=0.217\u2605, partial|VIX r=0.210\u2605\u2014\u2014\u63a7\u5236 VIX \u5f8c\u6700\u5f37\u4fe1\u865f\u3002\u5206\u7d44\uff1a\u9ad8\u5206\u6563\u671f 50/50=+1.85%\uff0c\u4e2d\u5206\u6563=+3.48%\uff0c\u4f4e\u5206\u6563=+2.89%\u3002\u4f46 CDB=sqrt((1+\u03c1)/2) \u672c\u8cea\u662f correlation \u51fd\u6578\uff0c\u53ef\u80fd\u53cd\u6620 correlation mean reversion\u3002\u9700\u975e\u91cd\u758a\u6708\u983b\u9a57\u8b49\u907f\u514d K164 \u91cd\u8e48\u8986\u8f4d\u3002",
+    "evidence": [
+      "partial|VIX r=0.210 p<0.001",
+      "CDB mean 0.730",
+      "high div +1.85% vs mid div +3.48%"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-03-23T13:07:10.329125"
+  },
+  {
+    "item_id": "a703096a",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: K174 \u9a57\u8b49, \u57f7\u884c: Claude] K175: CDB \u975e\u91cd\u758a\u6708\u983b\u9a57\u8b49\uff08229\u6708\uff09\u3002K174 \u7684 partial|VIX r=0.210\u2605 \u5728\u975e\u91cd\u758a\u6708\u983b\u7e2e\u5230 r=0.110 (p=0.096 NS)\u3002F-test p=0.097 NS\u3002OOS \u0394R\u00b2=-0.016\uff08\u66f4\u5dee\uff09\u3002Partial|corr r=0.045 NS\u2014\u2014CDB = correlation \u51fd\u6578\uff0c\u7121\u7368\u7acb\u8cc7\u8a0a\u3002\u7d50\u8ad6\uff1a\u540c K165\uff0coverlapping window artifact \u518d\u6b21\u78ba\u8a8d\u3002VIX sufficient \u5728\u6240\u6709\u6b63\u78ba\u53d6\u6a23\u4e0b\u90fd\u6210\u7acb\u3002",
+    "evidence": [
+      "partial|VIX r=0.110 p=0.096 NS",
+      "F p=0.097 NS",
+      "OOS \u0394R\u00b2=-0.016",
+      "partial|corr r=0.045 NS"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-03-23T13:08:15.997925"
   }
 ]

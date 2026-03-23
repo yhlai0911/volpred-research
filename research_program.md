@@ -612,6 +612,8 @@
 - [x] K170: 財報季波動率效應 — SPY 財報季 RV ratio 0.89 NS (t=-0.88)。控制 VIX 後 t=-0.11。GARCH 殘差無差異。VT 調整 Harvey FAIL。結論：個股財報衝擊被 index 分散化完全吸收
 - [x] K171: VPIN 近似（Gemini R7#4）— Simple r=0.128★ 但 partial|VIX r=-0.011 NS。跨 5 資產全部 NS。尾部 lift 2.8x 但可能 VIX 驅動。日頻 OHLCV proxy 無法捕捉微結構信號，需 tick data
 - [x] K172: ★★ GLD 創新高後 50/50 穩定性 — GLD>40% 後 SPY 未來僅+2.9%。GLD 新高期 50/50 Sharpe 11.84 vs SPY -0.54。50/50 在 6/8 條件下勝 SPY。目前 GLD +40.8% 新高，歷史類似期 50/50 未來+8.3%（74%正）。**50/50 第 9 次驗證**
+- [x] K173: ★ Tail Index（Hill estimator）— SPY α=2.71(厚尾), EEM 2.46(最厚), TLT 4.17(最薄)。★ Partial|VIX r=-0.083★ (p=0.014)——**控制 VIX 後仍有顯著尾部預測力**（微弱但真實）。極厚尾期 2.8x 尾部事件頻率。目前 α=2.14 (61th pctl)
+- [x] K174-K175: CDB（Conditional Diversification Benefit）— K174 daily overlapping partial|VIX r=0.210★ 但 K175 非重疊月頻 r=0.110 (p=0.096 NS), OOS ΔR²=-0.016。Partial|corr r=0.045 NS（CDB=correlation 函數，無獨立資訊）。**第 3 次 overlapping artifact 教訓（K164/K174）**
 - **Phase K 統合（61+ 實驗）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking
