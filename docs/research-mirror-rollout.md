@@ -51,8 +51,16 @@ Useful endpoints:
 - `GET /api/health`
 - `GET /api/mirror/health`
 - `GET /api/mirror/manifest`
-- `PUT /api/mirror/memory/{filename}`
+- `PUT /api/mirror/memory/{filename}` — full file replace
+- `POST /api/mirror/memory/{filename}/append` — incremental append (deduplicated by entry ID)
+- `GET /api/mirror/memory/{filename}/count` — entry count for reconciliation
 - `GET /api/research/{thinking|knowledge|experiments|log|summary}`
+
+### Sync modes
+
+- **Incremental (default)**: `MemorySystem._append_to_index()` sends only the new entry via `POST /append`. ~200 bytes per operation.
+- **Full sync**: `MemorySystem.reconcile_remote()` or direct `PUT` sends the entire file. Used for initial population, recovery, or when entry counts diverge.
+- **Frontend dual-write**: `/api/sync/{file}` accepts both POST (append) and PUT (full). Supabase failure does not block mirror write.
 
 ### 2. `frontend-v2-fix`
 

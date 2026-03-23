@@ -4,12 +4,13 @@
 ## 專案簡介
 Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波動率預測模型，並建立一般投資人可用的交易策略。
 
-## 網站架構（v4 Supabase + Admin CMS）
+## 網站架構（v4 Supabase + Admin CMS + Mirror API）
 - **前端（開發中）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，正在優化中）
 - **前端（線上版）**：`frontend-v2/`（目前部署版本）
+- **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
 - **資料庫**：Supabase（PostgreSQL + Auth + REST API + RPC）
 - **Zeabur Dashboard**：https://zeabur.com/projects/69b5b264800a475a1f82b073
-- **線上網址**：https://volpred.zeabur.app
+- **線上網址**：https://volpred.zeabur.app / https://volpred-v3.zeabur.app
 - **舊版**：https://volpred-old.zeabur.app（過渡期保留）
 
 ### 前端 v4 架構（frontend-v2-fix/）
@@ -27,10 +28,16 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 ### 資料流
 - `storage/` → 本地唯一源頭（JSON）
 - `scripts/supabase_sync.py` → Supabase 同步工具（由 daily_update.py 呼叫，不需獨立 cron）
-- `scripts/daily_update.py` → 每日 06:03 計算策略權重 + 同步 Supabase + 重算績效指標
+- `scripts/daily_update.py` → 每日 06:03 計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
 - `scripts/recalc_metrics.py` → 從 paper_trading.json 重算 Sharpe/MDD 等（daily_update 自動呼叫）
 - `src/volpred/ops/` + `uv run volpred ops ...` → agent-first 操作層（真人與本機 agent 共用）
 - 前端從 Supabase 讀取策略 metadata，不需靜態檔案同步
+- **Mirror 資料流**：`MemorySystem._sync_to_remote()` → 前端 `/api/sync/{file}` → 雙寫 Supabase + Mirror API
+  - 平時：增量 append（POST，只送新 entry）
+  - 初始/復原：整檔覆蓋（PUT，`reconcile_remote()`）
+  - Mirror 存：thinking_journal / knowledge / experiments / research_log（4 個大型記憶檔案）
+  - Supabase 存：articles / questions / papers / paper_trades / strategy_signals（產品面向資料）
+  - Rollout 文件：`docs/research-mirror-rollout.md`
 
 ### 策略管理（DB 驅動，無需重新部署）
 - 策略 metadata 唯一來源：`daily_update.py` 頂部的 `STRATEGY_REGISTRY`（display_name, is_active, order）
