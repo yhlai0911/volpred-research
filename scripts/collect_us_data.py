@@ -21,6 +21,15 @@ def main():
     print(f"=== 美股數據收集: {now.strftime('%Y-%m-%d %H:%M')} ===")
 
     sys.path.insert(0, str(PROJECT / "src"))
+    sys.path.insert(0, str(PROJECT / "scripts"))
+
+    # 0. Supabase heartbeat (prevent free-tier auto-pause)
+    try:
+        from supabase_sync import _request_json, SUPABASE_URL
+        _request_json(f"{SUPABASE_URL}/rest/v1/articles?select=count&limit=1")
+        print("  Supabase heartbeat OK")
+    except Exception:
+        print("  Supabase heartbeat failed (DB may be paused)")
 
     # 1. 日線數據（force_refresh=True 強制從 yfinance 拉最新）
     print("\n--- 日線數據 ---")

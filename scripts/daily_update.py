@@ -540,6 +540,15 @@ def main():
     # --- Sync to Supabase (v2 website) ---
     try:
         from supabase_sync import sync_article, sync_risk_forecast, sync_strategy_signal, sync_paper_trade
+        # Heartbeat: prevent Supabase free-tier from auto-pausing the DB
+        # A simple SELECT keeps the DB alive (free tier pauses after 7 days of inactivity)
+        from supabase_sync import _request_json, SUPABASE_URL
+        try:
+            _request_json(f"{SUPABASE_URL}/rest/v1/articles?select=count&limit=1")
+            print("  Supabase: heartbeat OK")
+        except Exception as hb_err:
+            print(f"  Supabase: heartbeat FAILED ({hb_err})")
+            # DB might be paused — continue anyway, syncs will fail gracefully
         # Retry any failed syncs from publish_milestone
         failed_path = Path("storage/.failed_supabase_syncs.json")
         if failed_path.exists():
