@@ -140,15 +140,16 @@ class Publisher:
         # Sync to Supabase DB (so website shows article immediately)
         try:
             import sys
-            sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+            sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
             from supabase_sync import sync_article
             sync_article(item, storage_dir=self.reports_dir.parent)
-        except Exception:
-            # Record failed sync for later retry
+        except Exception as e:
+            # Record failed sync with error for later diagnosis
             failed_path = self.reports_dir.parent / ".failed_supabase_syncs.json"
             failed = json.loads(failed_path.read_text()) if failed_path.exists() else []
             failed.append(pub_id)
             failed_path.write_text(json.dumps(failed))
+            print(f"  Supabase sync failed for {pub_id}: {e}")
 
         if normalized_status == 'published':
             try:
@@ -198,7 +199,7 @@ class Publisher:
             self._sync_report_to_remote(pub_id, target_item)
         try:
             import sys
-            sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent / "scripts"))
+            sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
             from supabase_sync import sync_article
             sync_article(target_item, storage_dir=self.reports_dir.parent)
         except Exception:
