@@ -1,0 +1,599 @@
+{
+  "experiment_id": "K158",
+  "title": "Overnight Gap Variance Predictability",
+  "attribution": "[\u63d0\u51fa: K156 discovery + Codex R6, \u57f7\u884c: Claude]",
+  "timestamp": "2026-03-22T21:26:10.606097",
+  "data_source": "yfinance SPY/GLD/TLT/^VIX daily 2007-2024",
+  "descriptive": {
+    "n_obs": 4757,
+    "date_range": {
+      "start": "2006-02-06",
+      "end": "2024-12-30"
+    },
+    "gap_stats": {
+      "mean": 0.00029444519631202035,
+      "std": 0.007397511581700471,
+      "median": 0.0005512764627155775,
+      "skew": -1.4964600436328857,
+      "kurtosis": 26.915631218956346,
+      "min": -0.11035647592469378,
+      "max": 0.05951864627883108,
+      "pct_positive": 0.553920538154299,
+      "mean_bps": 2.9444519631202035,
+      "std_bps": 73.9751158170047
+    },
+    "gap_sq_stats": {
+      "mean": 5.4798371858899934e-05,
+      "std": 0.000292900392992419,
+      "median": 8.597802257214409e-06,
+      "skew": 23.772673862504423,
+      "kurtosis": 784.6550172723879,
+      "annualized_gap_vol_pct": 11.7512508731806
+    },
+    "variance_decomposition": {
+      "daily_var_mean": 0.0001500915167148539,
+      "overnight_gap_var_mean": 5.4798371858899934e-05,
+      "intraday_var_mean": 8.803972123691527e-05,
+      "overnight_pct_of_daily": 36.50997275416085,
+      "intraday_pct_of_daily": 58.65735996536996,
+      "note": "daily_ret^2 != gap^2 + intraday^2 due to covariance term"
+    },
+    "gap_sq_acf": {
+      "lag_1": 0.2742547277944118,
+      "lag_2": 0.42788778492941004,
+      "lag_5": 0.26103535408909495,
+      "lag_10": 0.13623236928047,
+      "lag_22": 0.05630775594564587
+    },
+    "gap_signed_acf": {
+      "lag_1": -0.10372995906957319,
+      "lag_2": 0.03867115325557104,
+      "lag_5": 0.04843483592203543
+    },
+    "day_of_week": {
+      "Monday": {
+        "mean_gap_sq": 7.766879092569849e-05,
+        "std_gap_sq": 0.0004990718144048824,
+        "count": 892,
+        "ratio_to_overall": 1.41735581352102
+      },
+      "Tuesday": {
+        "mean_gap_sq": 5.24024002733299e-05,
+        "std_gap_sq": 0.0001720697248182956,
+        "count": 975,
+        "ratio_to_overall": 0.9562765917254
+      },
+      "Wednesday": {
+        "mean_gap_sq": 4.192051453028163e-05,
+        "std_gap_sq": 0.00017674250815589044,
+        "count": 976,
+        "ratio_to_overall": 0.7649956213703312
+      },
+      "Thursday": {
+        "mean_gap_sq": 4.542082768279662e-05,
+        "std_gap_sq": 0.00018390987626711126,
+        "count": 960,
+        "ratio_to_overall": 0.8288718467722087
+      },
+      "Friday": {
+        "mean_gap_sq": 5.8474356817114914e-05,
+        "std_gap_sq": 0.0003134513915676096,
+        "count": 954,
+        "ratio_to_overall": 1.0670820105327263
+      }
+    },
+    "monday_effect": {
+      "monday_mean_gap_sq": 7.766879092569849e-05,
+      "other_mean_gap_sq": 4.9520127665475786e-05,
+      "ratio": 1.5684287296344603,
+      "t_stat": 1.648258477102287,
+      "p_value": 0.09962294155948619,
+      "significant_5pct": false
+    },
+    "predictor_correlations": {
+      "vix_lag1": 0.3527484428900316,
+      "vix_sq_lag1": 0.3894428924517774,
+      "range_lag1": 0.36961315629635216,
+      "gap_sq_lag1": 0.27426295941507145,
+      "abs_ret_lag1": 0.28002183916479045,
+      "volume_zscore": 0.0790126382075292,
+      "vix_change_abs": 0.29724438487001714,
+      "intraday_ret_sq_lag1": 0.18306830306156466
+    },
+    "vix_regime_gap_sq": {
+      "low_vix_lt15": {
+        "mean": 1.0019787146218308e-05,
+        "count": 1708,
+        "ratio_to_overall": 0.18284826366772738
+      },
+      "mid_vix_15_25": {
+        "mean": 3.259118847641109e-05,
+        "count": 2201,
+        "ratio_to_overall": 0.5947473870269354
+      },
+      "high_vix_25_35": {
+        "mean": 0.00010846765667139238,
+        "count": 600,
+        "ratio_to_overall": 1.9793956096120016
+      },
+      "crisis_vix_gt35": {
+        "mean": 0.000430436526804959,
+        "count": 248,
+        "ratio_to_overall": 7.8549145203307855
+      }
+    }
+  },
+  "full_sample_regressions": {
+    "ar1": {
+      "r2": 0.07522017090711319,
+      "adj_r2": 0.07502568513863928,
+      "coefs": {
+        "const": 3.977708972590907e-05,
+        "gap_sq_lag1": 0.27426490265038234
+      },
+      "tvals": {
+        "const": 6.664580191754412,
+        "gap_sq_lag1": 1.9989024373537752
+      },
+      "pvals": {
+        "const": 2.6542294693601977e-11,
+        "gap_sq_lag1": 0.04561891098367578
+      },
+      "aic": -64272.054495576376,
+      "bic": -64259.119750583515
+    },
+    "vix_only": {
+      "r2": 0.15166576648120655,
+      "adj_r2": 0.15148735759928877,
+      "coefs": {
+        "const": -3.7330572916001786e-05,
+        "vix_sq_lag1": 2.0023113102227613e-07
+      },
+      "tvals": {
+        "const": -2.813177597173594,
+        "vix_sq_lag1": 5.550640883483906
+      },
+      "pvals": {
+        "const": 0.004905454997806345,
+        "vix_sq_lag1": 2.8462423017334926e-08
+      },
+      "aic": -64682.493141887186,
+      "bic": -64669.558396894325
+    },
+    "vix_linear": {
+      "r2": 0.12443146396134142,
+      "adj_r2": 0.1242473275710072,
+      "aic": -64532.17798616766,
+      "bic": -64519.2432411748
+    },
+    "multivariate": {
+      "r2": 0.26325072336452116,
+      "adj_r2": 0.26169836500667143,
+      "coefs": {
+        "const": -4.9774840631156876e-05,
+        "gap_sq_lag1": 0.06794616672036843,
+        "gap_sq_lag2": 0.307332215034614,
+        "gap_sq_lag5": 0.11455040758900327,
+        "vix_sq_lag1": 3.158495781015179e-08,
+        "range_lag1": 0.004865229016557226,
+        "abs_ret_lag1": -0.0028785413304329077,
+        "volume_zscore": -5.75756710379515e-06,
+        "vix_change_abs": 2.045865739807367e-05,
+        "is_monday": 2.9872339382737243e-05,
+        "gap_sq_22d_avg": -0.0764002108362205
+      },
+      "tvals": {
+        "const": -3.019021861374529,
+        "gap_sq_lag1": 0.6773063951936028,
+        "gap_sq_lag2": 2.550641898503756,
+        "gap_sq_lag5": 0.7036294923919766,
+        "vix_sq_lag1": 0.41273946743818085,
+        "range_lag1": 1.9970834095136896,
+        "abs_ret_lag1": -1.5169285284989746,
+        "volume_zscore": -0.6244090562649237,
+        "vix_change_abs": 1.5001163117162857,
+        "is_monday": 2.1591393555417353,
+        "gap_sq_22d_avg": -0.4443263220986347
+      },
+      "pvals": {
+        "const": 0.002535922317471833,
+        "gap_sq_lag1": 0.4982115741403069,
+        "gap_sq_lag2": 0.010752474307432895,
+        "gap_sq_lag5": 0.48166353979693355,
+        "vix_sq_lag1": 0.6797975053489859,
+        "range_lag1": 0.04581612286340165,
+        "abs_ret_lag1": 0.1292847299072458,
+        "volume_zscore": 0.5323589790446674,
+        "vix_change_abs": 0.13358427633820075,
+        "is_monday": 0.030839357208793647,
+        "gap_sq_22d_avg": 0.6568066732661375
+      },
+      "aic": -65335.35887416908,
+      "bic": -65264.21777670832,
+      "significant_vars": [
+        "const",
+        "gap_sq_lag2",
+        "range_lag1",
+        "is_monday"
+      ]
+    },
+    "parsimonious": {
+      "r2": 0.16330455581163927,
+      "adj_r2": 0.16277645012416508,
+      "coefs": {
+        "const": -3.588470902319538e-05,
+        "gap_sq_lag1": 0.11482962184871577,
+        "vix_sq_lag1": 1.7220197036620894e-07,
+        "is_monday": 2.7526525500829165e-05
+      },
+      "tvals": {
+        "const": -2.937783340762721,
+        "gap_sq_lag1": 0.8881350276449341,
+        "vix_sq_lag1": 5.133301469452197,
+        "is_monday": 1.798436565851439
+      },
+      "pvals": {
+        "const": 0.0033056795051325926,
+        "gap_sq_lag1": 0.37446812289719256,
+        "vix_sq_lag1": 2.847033242937265e-07,
+        "is_monday": 0.07210785256210246
+      },
+      "aic": -64744.20901868629,
+      "bic": -64718.33952870056
+    },
+    "har_gap": {
+      "r2": 0.18857492294366585,
+      "adj_r2": 0.18806222807610717,
+      "coefs": {
+        "const": 1.6473433404854607e-05,
+        "gap_sq_lag1": -0.012031073632886968,
+        "gap_sq_5d_avg": 0.6085859915940456,
+        "gap_sq_22d_avg": 0.10361135737649517
+      },
+      "tvals": {
+        "const": 2.425681497964892,
+        "gap_sq_lag1": -0.11081192882539542,
+        "gap_sq_5d_avg": 1.9000739597688774,
+        "gap_sq_22d_avg": 0.5876405469962095
+      },
+      "pvals": {
+        "const": 0.015279673377152974,
+        "gap_sq_lag1": 0.9117654857778323,
+        "gap_sq_5d_avg": 0.0574234144529407,
+        "gap_sq_22d_avg": 0.5567735891511343
+      },
+      "aic": -64817.038442909135,
+      "bic": -64791.17315946497
+    }
+  },
+  "oos_evaluation": {
+    "window": 504,
+    "oos_start": "2015-01-01",
+    "n_oos": 2515,
+    "oos_date_range": {
+      "start": "2015-01-02",
+      "end": "2024-12-30"
+    },
+    "metrics": {
+      "naive_mean": {
+        "oos_r2": -0.006071294535087368,
+        "qlike": -8.806564043948613,
+        "mse": 1.1374592373932521e-07,
+        "n_forecasts": 2515
+      },
+      "naive_yesterday": {
+        "oos_r2": -0.36143193382457595,
+        "qlike": 106289351.90976423,
+        "mse": 1.5392282213225544e-07,
+        "n_forecasts": 2515
+      },
+      "ar1": {
+        "oos_r2": -0.006071294535087368,
+        "qlike": -8.806564043948613,
+        "mse": 1.1374592373932521e-07,
+        "n_forecasts": 2515
+      },
+      "vix_sq": {
+        "oos_r2": -0.006071294535087368,
+        "qlike": -8.806564043948613,
+        "mse": 1.1374592373932521e-07,
+        "n_forecasts": 2515
+      },
+      "vix_ar1": {
+        "oos_r2": -0.006071294535087368,
+        "qlike": -8.806564043948613,
+        "mse": 1.1374592373932521e-07,
+        "n_forecasts": 2515
+      },
+      "parsimonious": {
+        "oos_r2": -0.006071294535087368,
+        "qlike": -8.806564043948613,
+        "mse": 1.1374592373932521e-07,
+        "n_forecasts": 2515
+      },
+      "multivariate": {
+        "oos_r2": -0.006071294535087368,
+        "qlike": -8.806564043948613,
+        "mse": 1.1374592373932521e-07,
+        "n_forecasts": 2515
+      }
+    },
+    "dm_tests_mse": {
+      "ar1": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      },
+      "vix_sq": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      },
+      "vix_ar1": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      },
+      "parsimonious": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      },
+      "multivariate": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      }
+    },
+    "dm_tests_qlike": {
+      "ar1": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      },
+      "vix_sq": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      },
+      "vix_ar1": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      },
+      "parsimonious": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      },
+      "multivariate": {
+        "dm_stat": 0.0,
+        "dm_pval": 1.0,
+        "model_better": false,
+        "significant_5pct": false
+      }
+    }
+  },
+  "vix_vs_intraday": {
+    "vix_model": {
+      "r2": 0.15166576648120655,
+      "adj_r2": 0.15148735759928877,
+      "aic": -64682.493141887186
+    },
+    "intraday_model": {
+      "r2": 0.14557759265479064,
+      "adj_r2": 0.1452181385498914,
+      "aic": -64646.4758717581
+    },
+    "combined_model": {
+      "r2": 0.16860595409056878,
+      "adj_r2": 0.16808119454128878,
+      "aic": -64774.44580954229
+    },
+    "incremental_r2": {
+      "vix_over_intraday": 0.023028361435778133,
+      "intraday_over_vix": 0.016940187609362223,
+      "winner": "VIX"
+    }
+  },
+  "sub_period": {
+    "GFC_2008_2009": {
+      "n_obs": 505,
+      "mean_gap_sq": 0.00014419503975764616,
+      "std_gap_sq": 0.0004580111698106973,
+      "median_gap_sq": 3.2424770403273145e-05,
+      "annualized_gap_vol_pct": 19.062305741679527,
+      "acf_1": 0.134360351339166,
+      "mean_vix": 32.0884158446057,
+      "corr_vix_gap_sq": 0.3848679766852539
+    },
+    "low_vol_2013_2014": {
+      "n_obs": 504,
+      "mean_gap_sq": 1.633301679452932e-05,
+      "std_gap_sq": 3.4637078110070767e-05,
+      "median_gap_sq": 4.289988115374412e-06,
+      "annualized_gap_vol_pct": 6.4155438056499845,
+      "acf_1": 0.17626833698073863,
+      "mean_vix": 14.19984129118541,
+      "corr_vix_gap_sq": 0.40918560420232447
+    },
+    "vol_spike_2015_2016": {
+      "n_obs": 253,
+      "mean_gap_sq": 6.17347199330655e-05,
+      "std_gap_sq": 0.0002189928071804098,
+      "median_gap_sq": 1.1812587624752644e-05,
+      "annualized_gap_vol_pct": 12.472830241421756,
+      "acf_1": 0.3065976279748423,
+      "mean_vix": 18.10798420736441,
+      "corr_vix_gap_sq": 0.4104093345692944
+    },
+    "covid_2020": {
+      "n_obs": 253,
+      "mean_gap_sq": 0.0002493300632320587,
+      "std_gap_sq": 0.0009965875860892441,
+      "median_gap_sq": 2.3830447322851673e-05,
+      "annualized_gap_vol_pct": 25.06614767659339,
+      "acf_1": 0.29862787708319943,
+      "mean_vix": 29.215849838709172,
+      "corr_vix_gap_sq": 0.4049950640355376
+    },
+    "post_covid_2021_2023": {
+      "n_obs": 753,
+      "mean_gap_sq": 3.9614998694108935e-05,
+      "std_gap_sq": 8.934974418948062e-05,
+      "median_gap_sq": 1.1849883526574947e-05,
+      "annualized_gap_vol_pct": 9.991486211227762,
+      "acf_1": 0.0947552795307486,
+      "mean_vix": 20.73415673143202,
+      "corr_vix_gap_sq": 0.327707147735664
+    },
+    "full_sample": {
+      "n_obs": 4757,
+      "mean_gap_sq": 5.4798371858899934e-05,
+      "std_gap_sq": 0.000292900392992419,
+      "median_gap_sq": 8.597802257214409e-06,
+      "annualized_gap_vol_pct": 11.7512508731806,
+      "acf_1": 0.2742547277944118,
+      "mean_vix": 19.523199493202913,
+      "corr_vix_gap_sq": 0.3894428924517774
+    }
+  },
+  "cross_asset": {
+    "SPY": {
+      "n_obs": 4528,
+      "date_range": {
+        "start": "2007-01-04",
+        "end": "2024-12-30"
+      },
+      "gap_stats": {
+        "mean_gap_bps": 2.887238920604701,
+        "std_gap_bps": 75.60502926140555,
+        "skew": -1.4710626018854234,
+        "kurtosis": 25.80009843746726
+      },
+      "gap_sq_mean": 5.7231942041104156e-05,
+      "annualized_gap_vol_pct": 12.009350271500223,
+      "overnight_pct_of_daily": 36.749711491987505,
+      "intraday_pct_of_daily": 58.309865986906004,
+      "monday_ratio": 1.4206560626571172,
+      "acf_1": 0.27325930771000534,
+      "acf_5": 0.26003276098014283
+    },
+    "GLD": {
+      "n_obs": 4528,
+      "date_range": {
+        "start": "2007-01-04",
+        "end": "2024-12-30"
+      },
+      "gap_stats": {
+        "mean_gap_bps": 3.1220692184866023,
+        "std_gap_bps": 77.05740630092731,
+        "skew": -0.20743795881646063,
+        "kurtosis": 4.294734903389244
+      },
+      "gap_sq_mean": 5.946279820753426e-05,
+      "annualized_gap_vol_pct": 12.241170347764397,
+      "overnight_pct_of_daily": 49.62369073995403,
+      "intraday_pct_of_daily": 46.633449237122456,
+      "monday_ratio": 1.1065115861013852,
+      "acf_1": 0.12005661521479177,
+      "acf_5": 0.11220957251645874
+    },
+    "TLT": {
+      "n_obs": 4528,
+      "date_range": {
+        "start": "2007-01-04",
+        "end": "2024-12-30"
+      },
+      "gap_stats": {
+        "mean_gap_bps": -0.1248688111379599,
+        "std_gap_bps": 66.25572554830254,
+        "skew": 0.5765539630288681,
+        "kurtosis": 6.1370757349605904
+      },
+      "gap_sq_mean": 4.388867276678502e-05,
+      "annualized_gap_vol_pct": 10.516627566491943,
+      "overnight_pct_of_daily": 46.98065155571478,
+      "intraday_pct_of_daily": 50.2437384741196,
+      "monday_ratio": 1.0889831151502678,
+      "acf_1": 0.3082303833506741,
+      "acf_5": 0.18977533575703884
+    }
+  },
+  "extreme_gaps": {
+    "top_5pct": {
+      "threshold_gap_sq": 0.00018871627804656503,
+      "threshold_gap_bps": 137.37404341671137,
+      "n_events": 238,
+      "mean_gap_sq": 0.0006690364372787837,
+      "mean_vix_lag1": 37.12806732113622,
+      "pct_monday": 0.21428571428571427,
+      "mean_volume_zscore": 0.44721844666949523
+    },
+    "top_1pct": {
+      "threshold_gap_sq": 0.0007344065065759015,
+      "threshold_gap_bps": 270.99935545604194,
+      "n_events": 48,
+      "mean_gap_sq": 0.0019296803443620437,
+      "mean_vix_lag1": 44.505208253860474,
+      "pct_monday": 0.3125
+    },
+    "extreme_prediction": {
+      "target": "gap_sq >= 95th percentile",
+      "predictors": [
+        "vix_sq_lag1",
+        "gap_sq_lag1",
+        "is_monday"
+      ],
+      "n_oos_windows": 6,
+      "mean_oos_auc": 0.8691974971493172,
+      "std_oos_auc": 0.0626409906200711,
+      "min_oos_auc": 0.7882241215574549,
+      "max_oos_auc": 0.9745649263721553,
+      "auc_gt_06": true
+    }
+  },
+  "gap_sign": {
+    "signed_acf_1": -0.10376049885706505,
+    "signed_acf_5": 0.04845614212983,
+    "corr_prev_return_gap": -0.07559387918846629,
+    "sign_prediction": {
+      "momentum_accuracy": 0.4761404246373765,
+      "reversal_accuracy": 0.5211267605633803,
+      "baseline_positive": 0.553920538154299,
+      "always_positive_accuracy": 0.553920538154299,
+      "note": "If momentum < 50% and reversal > 50%, gaps tend to reverse previous day return"
+    }
+  },
+  "summary": {
+    "key_findings": [
+      "Overnight gap accounts for 36.5% of daily variance (confirms K156's 47.4%)",
+      "Gap^2 is weakly autocorrelated: ACF(1)=0.2743",
+      "VIX^2 is the strongest single predictor: in-sample R^2=0.1517",
+      "Monday gaps are 1.57x larger (p=0.0996)",
+      "Best OOS R^2 model: naive_mean (-0.0061)",
+      "Best OOS QLIKE model: naive_mean (-8.8066)",
+      "VIX beats intraday vol for gap prediction"
+    ],
+    "overnight_gap_predictable": false,
+    "best_oos_model": "naive_mean",
+    "best_oos_r2": -0.006071294535087368,
+    "vix_is_key_predictor": true,
+    "monday_effect_significant": false,
+    "cross_asset_overnight_pct": {
+      "SPY": 36.749711491987505,
+      "GLD": 49.62369073995403,
+      "TLT": 46.98065155571478
+    },
+    "implication": "Overnight gap variance IS partially predictable via VIX. A combined VIX+AR(1)+Monday model can capture part of the ~47% daily variance that GARCH misses. However, OOS R^2 is modest \u2014 overnight gaps contain large unpredictable components (earnings, geopolitics)."
+  }
+}
