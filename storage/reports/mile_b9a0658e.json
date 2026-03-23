@@ -1,7 +1,7 @@
 {
   "id": "mile_b9a0658e",
-  "title": "K168: GARCH \u4ec0\u9ebc\u6642\u5019\u6700\u5371\u96aa\uff1f\u7b54\u6848\u53ef\u80fd\u8ddf\u4f60\u60f3\u7684\u76f8\u53cd",
-  "description": "## \u6458\u8981\n[\u63d0\u51fa: Claude, \u57f7\u884c: Claude]\n\u91cf\u5316 GARCH \u81ea\u8eab\u9810\u6e2c\u7684\u4e0d\u78ba\u5b9a\u6027\uff08Vol-of-Vol\uff09\u3002\u53cd\u76f4\u89ba\u767c\u73fe\uff1a\u9ad8 VoV\uff08\u9810\u6e2c\u4e0d\u7a69\u5b9a\uff09\u6642 VaR violation \u53ea\u6709 4.8%\uff0c\u4f4e VoV\uff08\u9810\u6e2c\u7a69\u5b9a\uff09\u6642\u53cd\u800c 5.1%\u3002GARCH \u5728\u4e0d\u78ba\u5b9a\u671f\u53cd\u800c\u4fdd\u5b88\u2014\u2014\u771f\u6b63\u7684\u5371\u96aa\u662f\u81ea\u6eff\u671f\u3002\n\n## \u6838\u5fc3\u767c\u73fe\n### \u53cd\u76f4\u89ba\uff1a\u4e0d\u7a69\u5b9a \u2260 \u4e0d\u53ef\u9760\n| VoV \u5206\u7d44 | VaR Violation Rate | N |\n|----------|-------------------|---|\n| \u4f4e VoV\uff08\u7a69\u5b9a\uff09 | 5.1% | 739 |\n| \u4e2d VoV | 5.9% | 1,190 |\n| \u9ad8 VoV\uff08\u4e0d\u7a69\u5b9a\uff09 | **4.8%** | 631 |\n\n\u9ad8 VoV \u51fa\u73fe\u5728 regime transition\uff08\u9032\u5165\u5371\u6a5f\u671f\uff09\uff0c\u6b64\u6642 GARCH \u03c3\u00b2 \u6b63\u5feb\u901f\u4e0a\u5347\uff0c\u81ea\u52d5\u63d0\u4f9b VaR buffer\u3002\n\n### \u8de8\u8cc7\u7522 VoV\nSPY \u7684 VoV\uff080.48\uff09\u662f GLD\uff080.13\uff09\u7684 3.7 \u500d\u2014\u2014\u80a1\u7968 GARCH \u9810\u6e2c\u6ce2\u52d5\u5927\uff0c\u5546\u54c1\u7a69\u5b9a\u3002\n\n## \u5be6\u52d9\u610f\u7fa9\n1. **\u4e0d\u8981\u5728 GARCH \u7a69\u5b9a\u671f\u653e\u9b06\u8b66\u60d5**\u2014\u2014\u90a3\u624d\u662f\u9ed1\u5929\u9d5d\u51fa\u73fe\u7684\u6642\u5019\n2. **VoV-adjusted VaR \u5fae\u8abf\u6709\u6548**\uff1a\u5f9e 5.2%\u21925.0%\uff0c\u4f46\u6539\u5584\u5f88\u5c0f\n3. **GLD \u7684 GARCH \u6700\u7a69\u5b9a**\u2014\u2014\u53e6\u4e00\u500b\u652f\u6301 50/50 SPY/GLD \u7684\u7406\u7531",
+  "title": "K168: GARCH 什麼時候最危險？答案可能跟你想的相反",
+  "description": "## 摘要\n[提出: Claude, 執行: Claude]\n量化 GARCH 自身預測的不確定性（Vol-of-Vol）。反直覺發現：高 VoV（預測不穩定）時 VaR violation 只有 4.8%，低 VoV（預測穩定）時反而 5.1%。GARCH 在不確定期反而保守——真正的危險是自滿期。\n\n## 核心發現\n### 反直覺：不穩定 ≠ 不可靠\n| VoV 分組 | VaR Violation Rate | N |\n|----------|-------------------|---|\n| 低 VoV（穩定） | 5.1% | 739 |\n| 中 VoV | 5.9% | 1,190 |\n| 高 VoV（不穩定） | **4.8%** | 631 |\n\n高 VoV 出現在 regime transition（進入危機期），此時 GARCH σ² 正快速上升，自動提供 VaR buffer。\n\n### 跨資產 VoV\nSPY 的 VoV（0.48）是 GLD（0.13）的 3.7 倍——股票 GARCH 預測波動大，商品穩定。\n\n## 實務意義\n1. **不要在 GARCH 穩定期放鬆警惕**——那才是黑天鵝出現的時候\n2. **VoV-adjusted VaR 微調有效**：從 5.2%→5.0%，但改善很小\n3. **GLD 的 GARCH 最穩定**——另一個支持 50/50 SPY/GLD 的理由",
   "category": "milestone",
   "phase": "Phase_K",
   "details": {},
@@ -11,10 +11,10 @@
     "VaR",
     "SPY",
     "GLD",
-    "\u98a8\u96aa\u7ba1\u7406",
-    "\u65b9\u6cd5\u8ad6"
+    "風險管理",
+    "方法論"
   ],
   "created_at": "2026-03-23T04:11:03.934233+00:00",
-  "published_at": "2026-03-23T04:11:03.934233+00:00",
-  "status": "draft"
+  "published_at": "2026-03-23T05:48:01.241486+00:00",
+  "status": "published"
 }

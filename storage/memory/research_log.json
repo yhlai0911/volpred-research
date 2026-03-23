@@ -3685,5 +3685,25 @@
     "decision": "Actionable for Taiwan investors. Publish as flagship general article. Update Taiwan roadmap.",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "a58cf371",
+    "timestamp": "2026-03-23T13:52:27.941822",
+    "phase": "Phase_K",
+    "action": "K177_data_fix",
+    "observation": "K177 data fix: 0050.TW 2014 1:4 split not handled by yfinance. Corrected manually. MDD -299%\u2192-36.8% (B&H). K177 conclusion unchanged: 0050+GLD+VT MDD -13.7% still best.",
+    "decision": "Add 0050.TW split correction to DataManager or data pipeline. This is a known yfinance issue for TW stocks.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "c0549439",
+    "timestamp": "2026-03-23T13:53:30.064235",
+    "phase": "Phase_K",
+    "action": "K178_taiwan_vt_monthly",
+    "observation": "K178: Taiwan VT monthly. Sharpe invariant to K (all \u22480.65). Harvey t=-3.06 confirms VT insurance cost. MDD -22.9%\u2192-15.9% (7pp). K=6 most conservative (-11.2%). TX sensitivity low.",
+    "decision": "Taiwan VT guide complete: K177(portfolio)+K178(optimization). Ready for general article synthesis.",
+    "experiment_ids": [],
+    "tags": []
   }
 ]

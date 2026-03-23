@@ -9872,5 +9872,29 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-03-23T13:37:01.373087"
+  },
+  {
+    "item_id": "39184194",
+    "category": "data_quality",
+    "content": "0050.TW yfinance \u6578\u64da\u54c1\u8cea\u554f\u984c\uff1a2014-01-02 \u6709 1:4 \u80a1\u7968\u5206\u5272\uff0858.7\u219214.67\uff09\uff0c\u4f46 yfinance \u7684 Adj Close \u6c92\u6709\u6b63\u78ba\u8655\u7406\uff0836.87\u21929.33 \u4e5f\u662f\u9664\u4ee5 4\uff09\u3002\u5c0e\u81f4 log return = -138.9%\u3002\u4fee\u6b63\u65b9\u6cd5\uff1a\u7528 auto_adjust=False \u53d6 raw Close\uff0c\u624b\u52d5\u5c07 2014-01-02 \u4e4b\u524d\u7684\u50f9\u683c\u9664\u4ee5 4\u3002\u4fee\u6b63\u5f8c 0050 B&H: Sharpe 0.504, MDD -36.8%, \u5e74\u5316 +9.2%\u3002K177 \u7d50\u8ad6\u4e0d\u53d7\u5f71\u97ff\uff080050+GLD+VT \u4ecd\u662f MDD \u51a0\u8ecd -13.7%\uff09\u3002",
+    "evidence": [
+      "2014-01-02 split: 58.7\u219214.67 (1:4)",
+      "yfinance Adj Close bug"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-03-23T13:52:22.140042"
+  },
+  {
+    "item_id": "fe58465b",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: K177 \u5ef6\u4f38, \u57f7\u884c: Claude] K178: \u53f0\u7063 VT \u6708\u983b\u6700\u4f73\u5316+TX\u654f\u611f\u5ea6\u3002Sharpe \u5c0d K \u5b8c\u5168\u4e0d\u654f\u611f(6~15 all \u22480.65)\u2014\u2014K=risk preference confirmed\u3002TX 0\u21921%: Sharpe 0.75\u21920.58\uff08\u6708\u5ea6 turnover 1.0x/\u5e74 \u5f88\u4f4e\uff09\u3002\u2605 Harvey t=-3.06 PASS\uff1aVT Sharpe \u986f\u8457\u4f4e\u65bc B&H\uff08\u4fdd\u96aa\u8cbb\uff09\u3002MDD \u6539\u5584 7.0pp\uff08-22.9%\u2192-15.9%\uff09\u3002K=6 \u6700\u4fdd\u5b88(MDD -11.2%, \u6301\u5009 36%)\u30020050.TW \u5206\u5272\u4fee\u6b63\u5f8c\u6578\u64da\u6b63\u78ba\u3002",
+    "evidence": [
+      "Harvey t=-3.06 p=0.0025",
+      "MDD improvement 7.0pp",
+      "Sharpe invariant to K",
+      "TX 0.585%/yr"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-03-23T13:53:24.546785"
   }
 ]
