@@ -171,6 +171,28 @@
 - **行為金融**：投資人對 VT 的心理接受度實驗、為什麼知道 VT 有效卻不用？
 - **跨學科方法**：物理學的相變模型、生態學的 regime shift detection、複雜系統理論
 
+### 面向 TW: 台灣市場專線
+**核心結論：8.63/VIX + 月度再平衡是台灣投資人的最佳 VT 策略**
+
+**已確立的結論：**
+- 8.63/VIX = 12/(VIX×1.39)，修正後 Sharpe 0.69，MDD -15.3%（Q1/R15）
+- VIX 優於 VXEEM（R12: Spearman 0.595 vs 0.459，因 0050.TW≈50% TSMC→美國科技情緒）
+- SPY→台股 spillover 真實存在（T5b: r=0.376, Granger F=58.8）
+- SPY Momentum 5d/10d → 0050.TW c2c Harvey PASS，但 **o2o FAIL**（I8 timing bias）→ 學術發現非交易策略
+- 台灣 0% 資本利得稅 = VT 結構優勢（K26/K86）
+- TAIEX gamma 0.153 > 0050 0.087 > TSMC 0.039（T5a），ETF 分散化放大 gamma
+- 台灣 MIDAS: 進口 YoY 唯一有增量（G12），其餘景氣燈號/M2 全 null
+- 本土指標（外資買賣超/融資融券/PUT-CALL）全 null（G8）
+
+**開放議題：**
+- [ ] VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）
+- [ ] 台灣 5-min 數據 HAR-RV（0050.TW 35 天，ETA 2026 Q2）
+- [ ] 台灣公債殖利率曲線 → vol 預測
+- [ ] 台灣 CoVaR 傳染結構（0050→TSMC→金融股）
+- [ ] 台灣月頻 VT 最佳實務完整指南（整合所有發現）
+
+**論文**：第二篇 `paper/taiwan-vt/main.tex`（34 頁）涵蓋台灣 VT + TZ 資訊傳遞
+
 ### 面向 F: 網站與系統
 - 前端功能（12/VIX 計算器, Feed 品質, Paper 下載）
 - 部署架構（v2 Supabase + Zeabur）
@@ -182,7 +204,7 @@
 
 ### 面向 H: 論文撰寫與投稿
 **第一篇：Leverage Direction Matters**
-- `paper/leverage-direction/main.tex`（56 頁，3 contributions）
+- `paper/leverage-direction/main.tex`（60 頁，3 contributions）
 - 目標：Journal of Banking and Finance (JBF)
 - 狀態：H3-H9 完成 Codex+Gemini 審查修正
 - [ ] 最終校稿 + `/latex-academic-reviewer` 全面審查
@@ -190,9 +212,8 @@
 - [ ] 投稿準備（cover letter, highlights, graphical abstract）
 
 **第二篇：Taiwan VT + TZ Information Transmission**
-- `paper/taiwan-vt/main.tex`（撰寫中）
+- `paper/taiwan-vt/main.tex`（34 頁）
 - 目標：Pacific-Basin Finance Journal 或 Emerging Markets Review
-- 狀態：H10 撰寫 body.tex 中
 - [x] 完成初稿（H10, 26→28 頁）
 - [x] Codex 審查 + 修正（H11, 5 issues fixed）
 - [x] 加入 G20 景氣燈號結果（G22）
@@ -201,8 +222,16 @@
 - [ ] Gemini 審查
 - [ ] `/latex-academic-reviewer` 全面審查
 
-**未來可能的第三篇：VIX Sufficient Statistic**
-- 16+ 指標全被 VIX 吸收的 comprehensive study
+**第三篇：Is Volatility Targeting Just Trend Following?**
+- `paper/vt-trend-following/main.tex`（24 頁）
+- 目標：待定（可考慮 Journal of Portfolio Management 或 Financial Analysts Journal）
+- 核心貢獻：分解 VT 的 alpha 來源（K46→K53→K79: r=0.564, VT alpha = trend following）
+- [ ] Codex/Gemini 審查
+- [ ] `/latex-academic-reviewer` 全面審查
+- [ ] `/citation-verifier` 引用驗證
+
+**未來可能的第四篇：VIX Sufficient Statistic**
+- 23+ 個指標全被 VIX 吸收的 comprehensive study
 - 適合 Journal of Financial Economics 或 Review of Financial Studies
 - 需要更多跨市場驗證（目前只有 US + Taiwan）
 

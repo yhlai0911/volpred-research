@@ -103,8 +103,9 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **frontend-v2-fix 開發中**：前端代碼修改需同時考慮 `frontend-v2/`（線上）和 `frontend-v2-fix/`（開發），待穩定後統一切換
 
 ## 論文
-- **第一篇**：`paper/leverage-direction/main.tex`（56 頁，7 圖，12 表，3 contributions）
-- **第二篇**：`paper/taiwan-vt/main.tex`（26 頁，TZ Information Transmission + Taiwan VT）
+- **第一篇**：`paper/leverage-direction/main.tex`（60 頁，Leverage Direction Matters，目標 JBF）
+- **第二篇**：`paper/taiwan-vt/main.tex`（34 頁，Taiwan VT + TZ Information Transmission，目標 PBFJ）
+- **第三篇**：`paper/vt-trend-following/main.tex`（24 頁，Is VT Just Trend Following?，目標待定）
 - 編譯：`cd paper/<name> && /Library/TeX/texbin/xelatex -interaction=nonstopmode main.tex`（跑兩次解引用）
 - 作者：Yi-Hao Lai (Da-Yeh University) + VolPred Research System
 - 論文頁 `/paper` 現在讀 Supabase `papers` table；PDF 交付優先走 Supabase Storage `papers` bucket
