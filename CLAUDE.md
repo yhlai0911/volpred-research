@@ -115,7 +115,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **第三篇**：`paper/vt-trend-following/main.tex`（24 頁，Is VT Just Trend Following?，目標待定）
 - 編譯：`cd paper/<name> && /Library/TeX/texbin/xelatex -interaction=nonstopmode main.tex`（跑兩次解引用）
 - 作者：Yi-Hao Lai (Da-Yeh University) + VolPred Research System
-- 論文頁 `/paper` 現在讀 Supabase `papers` table；PDF 交付優先走 Supabase Storage `papers` bucket
+- 論文頁 `/paper` 讀 Supabase `papers` table（metadata）；**PDF 放前端 `frontend-v2-fix/public/paper/`**（由 Zeabur CDN serve，不走 Supabase Storage）
 
 ### 新策略上線標準程序（發現有效策略後執行）
 1. **Cross-OOS 驗證**：至少 5 個 OOS 期間（J9 教訓：單期 OOS 不可靠）
@@ -129,17 +129,13 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 
 ### 論文更新標準程序（每次編譯新版都要做）
 1. **編譯 PDF**：`cd paper/<name> && xelatex main.tex && xelatex main.tex`
-2. **更新論文 metadata**：優先走 `/admin/papers` 或 `uv run python -m volpred.cli ops paper-upsert ...`
-3. **上傳新版 PDF 到 Storage**：
-   - `/admin/papers`
-   - 或 `uv run python -m volpred.cli ops paper-upload-pdf --paper-id <id> --file paper/<name>/main.pdf`
-4. **既有靜態 PDF 首次搬遷**：
-   - `uv run python -m volpred.cli ops paper-migrate-storage --paper-id <id>`
-5. **驗證 `/paper`**：確認 `pdf_url` 已改成 Supabase Storage 公開網址
-6. **只有前端邏輯變更才 redeploy**：
-   - 若只是 PDF / metadata 更新，**不需要 Zeabur redeploy**
-   - 若論文頁邏輯、樣式、欄位結構有改，才部署前端
-7. **審查流程**：Codex 審查 → Gemini 審查 → 修正 → 重新編譯 → 重複 1-6
+2. **複製 PDF 到前端**：`cp paper/<name>/main.pdf frontend-v2-fix/public/paper/<slug>.pdf`
+   - leverage-direction → `leverage-direction-matters.pdf`
+   - taiwan-vt → `taiwan-vt-tz-arbitrage.pdf`
+   - vt-trend-following → `vt-trend-following.pdf`
+3. **更新論文 metadata**（Supabase `papers` table 的 `pdf_url` 指向 `/paper/<slug>.pdf`）
+4. **部署前端**（因為 PDF 在 `public/` 裡，需要 redeploy 才會更新）
+5. **審查流程**：Codex 審查 → Gemini 審查 → 修正 → 重新編譯 → 重複 1-4
 
 ## 快速指令
 ```bash
