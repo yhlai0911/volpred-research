@@ -3725,5 +3725,25 @@
     "decision": "Real-time validation of all recommendations. 50/50+VT and 0050+GLD+VT both protected. Publish as validation article.",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "364f13ca",
+    "timestamp": "2026-03-23T14:39:32.554192",
+    "phase": "Phase_K",
+    "action": "supabase_db_paused",
+    "observation": "Supabase DB paused (free tier auto-pause). REST returns 502/timeout with auth. Base URL returns 401 (API gateway alive, DB dead). Need manual resume from Dashboard.",
+    "decision": "Add Supabase heartbeat to daily_update.py to prevent future pauses. Or upgrade to paid plan.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "c5f318fc",
+    "timestamp": "2026-03-23T14:40:32.444433",
+    "phase": "Phase_K",
+    "action": "K181_entry_timing",
+    "observation": "K181: 50/50 entry timing. Any entry: avg +9.5%, 81% positive. VIX\u226535 best (99% positive). GLD>40% slightly weaker (64%). No need for timing.",
+    "decision": "Final piece of 50/50 narrative: no timing needed. Combined with K172 (GLD high stable), K177 (Taiwan version), K179 (regime map), K180 (live test).",
+    "experiment_ids": [],
+    "tags": []
   }
 ]
