@@ -3455,5 +3455,55 @@
       "qlike-ceiling",
       "gemini-suggestion"
     ]
+  },
+  {
+    "entry_id": "cf664f34",
+    "timestamp": "2026-03-23T10:40:51.832090",
+    "phase": "Phase_K",
+    "action": "K158_planning",
+    "observation": "Session start. 15 consecutive research articles, 0 general. Choosing Wavelet-GARCH as novel direction.",
+    "decision": "Plan: K158 Wavelet-GARCH + 2 general articles + lit search + 5-min data diagnostic",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "588835e7",
+    "timestamp": "2026-03-23T10:45:51.623511",
+    "phase": "Phase_K",
+    "action": "K158_wavelet_garch",
+    "observation": "MODWT Wavelet-GARCH: GJR wins 1/3. Decomposition adds estimation error > SNR benefit. 3rd frequency-decomposition failure (K111 DWT, K112 EMD, K158 MODWT).",
+    "decision": "Frequency decomposition is a dead end for daily volatility forecasting. Stop exploring wavelet/EMD/Fourier approaches. Next: focus on 5-min data pipeline (HAR-RV), options-implied info (VVIX/term structure), or FHS-VaR targeting per Codex/Gemini recommendations.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "d73b1ef8",
+    "timestamp": "2026-03-23T11:01:27.070536",
+    "phase": "Phase_K",
+    "action": "K159_wavelet_garch",
+    "observation": "K159: Wavelet-GARCH FAILED. Initial -22% was look-ahead bias (SWT non-causal). Haar NS, causal +52% worse. QLIKE ceiling #20.",
+    "decision": "Wavelet/EMD/SSA methods all have look-ahead risk. Focus remains on causal methods. Record as important methodological lesson.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "53de2028",
+    "timestamp": "2026-03-23T11:08:16.695305",
+    "phase": "Phase_K",
+    "action": "K160_volume_volatility",
+    "observation": "K160: Volume-Volatility MDH test. Contemporaneous r=0.31-0.43 confirms MDH. Lagged prediction weak (partial|VIX <0.08). GLD only OOS significant (-0.81%). BTC volume useless. GARCH absorbs volume info.",
+    "decision": "Volume does not break QLIKE ceiling. GARCH autoregressive = volume-volatility proxy. Next: try something not in variance domain.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "5b99a0fb",
+    "timestamp": "2026-03-23T11:10:25.343351",
+    "phase": "Phase_K",
+    "action": "K160_literature_search",
+    "observation": "Lit review 2024-2026: Branco+FI confirm QLIKE ceiling globally. Zhang overnight decomp most actionable.",
+    "decision": "Top 3 next: (1) overnight decomp ETA April (2) VIX term structure (3) 2-regime GJR",
+    "experiment_ids": [],
+    "tags": []
   }
 ]

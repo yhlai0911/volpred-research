@@ -48,7 +48,7 @@
 - OOS 期間（高波動）: 2022-01-01 ~ 2023-12-31
 - 評估獲利期間：2025-01-01 ~ 2026-03-21（隨時間延伸）
 - Rolling window 預設 2000（w=504 僅在特殊情況使用，gamma sign invariant to window）
-- 5-min 數據：SPY 46 天 / 0050.TW 34 天（需 60+ 天 HAR-RV，預計 2026 Q2）
+- 5-min 數據：SPY 46 天 / 0050.TW 35 天（需 60+ 天 HAR-RV，ETA 2026-04-11）。收集正常（collect_us_data.py 自動調用 collect_5min_data.py）
 
 ### 評估指標（完整框架見 CLAUDE.md）
 - **統計性**：QLIKE (主), MSE, MAE, HMSE, Mincer-Zarnowitz R², DM test, MCS, GW test
@@ -567,7 +567,11 @@
 - [x] K154: Order Flow Imbalance (微結構探索) — MIXED。Lee-Ready OFI partial r|VIX = 0.11-0.18 (8/12 顯著)——挑戰 VIX sufficient，增量 R² 1-3%。但 GARCH-X walk-forward 0/6 DM 顯著 (best: SPY DM=-1.95, p=0.051 borderline)。Granger 雙向（vol 驅動 volume）。Extreme OFI 3-6x next-day vol（但是 vol clustering artifact）。Daily OFI proxy 太粗糙，與 Codex R6 預測一致
 - [x] K155: ★ Information Entropy vol forecast (跨學科) — MIXED-POSITIVE。Shannon/ApEn 有統計顯著信號 beyond VIX：BTC partial r=0.114 (p<1e-11), SPY partial r=-0.070 (p=0.0002)。但 R² 增量 <1%。BTC 最受益（非高斯+多 regime）。SPY 負相關（高 entropy=有序市場=集中交易=更大波動，反直覺但合理）。VIX sufficient 有微小裂縫但經濟上仍成立
 - [x] K156: ★★★ RV Decomposition Pilot (Codex R6#1, 46d PRELIMINARY) — Overnight gap 佔 47.4% daily var！BPV(continuous) ACF(1)=0.398 最可預測，jump 僅 2.3%（0/45 sig）。c2c r² vs 5-min RV corr=0.242（目標極嘈雜=QLIKE ceiling 根因）。GARCH 預測 BPV 最好(QLIKE -8.890)。**完美驗證 Codex R6 diagnosis：分解 risk target 是突破方向**。需 252+ 天正式驗證
-- **Phase K 統合（57+ 實驗）**：(1) ★★★ QLIKE ceiling 19x (2) ★★★ RV decomposition 確認 ceiling 根因=noisy c2c target (3) ★★ VIX sufficient 21x (4) ★ Codex R6 戰略轉向驗證 (5) ML 5 次失敗 (6) ★ Entropy 對 BTC 有效
+- [x] K157: ★ Correlation Forecasting (Codex R6#4) — EWMA/DCC 顯著勝 Rolling 22d (MSE 改善 23-31%, DM p<0.01)。但 MinVar Sharpe 1.014 < 50/50 Sharpe 1.042。機制：equal-vol 資產 min-var weight ≈ 0.45 不隨 corr 變。Post-2022 SPY-TLT break: EWMA 3 步適應最快。**50/50 對 variance+correlation 模型選擇雙重 robust**。Codex R6#4 結論：correlation forecasting 也飽和
+- [x] K158: Overnight Gap Variance Predictability (K156 延伸) — Overnight gap = 36.5% daily var (confirms K156)。Gap² ACF(1)=0.274。VIX² best predictor (in-sample R²=0.152)。Best OOS: naive_mean (R²=-0.006)。Monday gaps 1.57x larger (p=0.10)。結論：overnight gaps 透過 VIX 部分可預測但大部分不可預測成分仍在
+- [x] K159: ★ Wavelet-GARCH Frequency Decomposition — **LOOK-AHEAD BIAS TRAP**。Full-series MODWT(db4): SPY -22.21% (DM p=0.0001) 看似突破 ceiling，但 Haar(NS p=0.63) 和 causal(+52.51% WORSE p=0.0009) 確認完全是前瞻偏誤。SWT/MODWT 非因果轉換在 OOS 使用未來數據。**重要方法論教訓：全序列轉換方法（wavelet/EMD/SSA）天然有 look-ahead bias。** QLIKE CEILING #20
+- [x] K160: Volume-Volatility 關係（MDH 假說）— 同時期 r=0.31-0.43 確認 MDH。滯後 partial|VIX r<0.08。OOS: GLD -0.81% ★ (唯一顯著但極小), SPY/TLT NS。BTC volume 無預測力（p=0.53）。GARCH 自迴歸已吸收 volume 資訊。QLIKE ceiling #21
+- **Phase K 統合（61+ 實驗）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking
 

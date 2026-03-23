@@ -9578,5 +9578,81 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-03-22T21:07:35.211859"
+  },
+  {
+    "item_id": "61ee2703",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Codex R6#4, \u57f7\u884c: Claude] K157: Correlation Forecasting for Portfolio Risk. 5 models (Rolling-22d, Rolling-63d, EWMA-0.97, DCC-GARCH, Regime-Switch) x 3 pairs (SPY-GLD, SPY-TLT, GLD-TLT). Walk-forward OOS 2015-2024, monthly step. KEY RESULTS: (1) EWMA(0.97) and DCC-GARCH significantly beat Rolling-22d baseline (DM p<0.01 for all 3 pairs). (2) DCC best for SPY-TLT (MSE=0.091), EWMA best for SPY-GLD (MSE=0.104) and GLD-TLT (MSE=0.061). (3) BUT portfolio impact negligible: MinVar reduces SPY-GLD vol by only 1.8-3.5% vs 50/50 \u2014 and LOSES Sharpe (best MinVar Sharpe=1.014 vs 50/50 Sharpe=1.042). MinVar trades vol reduction for return reduction. (4) SPY-TLT structural break (post-2022 corr flip from -0.33 to +0.11): all models adapt in ~3 steps except Regime-Switch (13 steps). EWMA best post-break (MSE=0.085). (5) Min-var weights barely move: w(SPY) ranges 0.43-0.47 across all corr levels for SPY-GLD because var1~var2. CONCLUSION: Correlation forecasting CAN be improved (EWMA/DCC significantly beat rolling) but this does NOT improve portfolio performance for 2-asset equal-vol portfolios. 50/50 is doubly robust: to both variance AND correlation model choice.",
+    "evidence": [],
+    "confidence": 0.85,
+    "created_at": "2026-03-22T21:25:37.673034"
+  },
+  {
+    "item_id": "836c8cdb",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: K156+Codex R6, \u57f7\u884c: Claude] K158: Overnight Gap Variance Predictability. Overnight gap = 36.5% of daily var (confirms K156). Gap^2 ACF(1)=0.2743. VIX^2 is best single predictor (in-sample R^2=0.1517). Best OOS model: naive_mean (R^2=-0.0061). Monday gaps 1.57x larger (p=0.0996). Overnight gaps partially predictable via VIX but large unpredictable component remains.",
+    "evidence": [],
+    "confidence": 0.8,
+    "created_at": "2026-03-22T21:26:10.619439"
+  },
+  {
+    "item_id": "0c4b36c0",
+    "category": "literature_review",
+    "content": "Literature search 2025-2026 on overnight/intraday decomposition: (1) Chen 2025 J Futures Markets: Chinese stock vol decomposed into intraday+overnight oil components, confirms separate modeling. (2) Volume-driven intraday 2025: volume explains 33-45% of intraday log-var. (3) Zhao IJFE: bidirectional nonlinear Granger between overnight/intraday. (4) HAR + augmented GARCH: separate measures for intraday vs overnight, combined total forecast. (5) Graph-ETF H-ETE-GNN with Hurst regime. Implication: K156 approach on the frontier. HAR-intraday + GARCH-overnight model is the next step when 60d data available.",
+    "evidence": [
+      "Chen 2025 J Futures Markets",
+      "Orebro WP 2025",
+      "Zhao IJFE 2025"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-03-23T10:44:25.278947"
+  },
+  {
+    "item_id": "f1a3e943",
+    "category": "wavelet_garch",
+    "content": "[\u63d0\u51fa: User (K158 task), \u57f7\u884c: Claude] K158 MODWT Wavelet-GARCH: MODWT decomposition of returns into 4 frequency bands + per-component GJR-GARCH does NOT break QLIKE ceiling. GJR wins 1/3, Wavelet wins 0/3. SPY: QLIKE GJR=-8.6930 vs Wavelet=-8.6249 (DM t=2.158, p=0.0310); GLD: QLIKE GJR=-7.8162 vs Wavelet=-7.7966 (DM t=0.333, p=0.7388); TLT: QLIKE GJR=-8.2737 vs Wavelet=-8.2251 (DM t=1.835, p=0.0665). Key insight: additional estimation error from fitting 4 separate GARCH models > SNR benefit. This is the same conclusion as K111 (DWT) and K112 (EMD). Frequency decomposition approaches consistently fail to beat GJR-GARCH.",
+    "evidence": [
+      "K158",
+      "K111_wavelet_DWT",
+      "K112_EMD_GARCH"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-03-23T10:45:47.270344"
+  },
+  {
+    "item_id": "e82b6be7",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude, \u57f7\u884c: Claude] K159: Wavelet-GARCH Frequency Decomposition\u3002MODWT(db4,level=3) \u5206\u89e3\u65e5\u5831\u916c\u70ba D1(2-4d)/D2(4-8d)/D3(8-16d)/S3(>16d)\u3002Full-series: SPY -22.21% (DM p=0.0001) \u770b\u4f3c\u7a81\u7834 ceiling\uff0c\u4f46 Haar(NS p=0.63) \u548c causal(+52.51% WORSE p=0.0009) \u9a57\u8b49\u78ba\u8a8d\u5b8c\u5168\u662f look-ahead bias\u3002SWT/MODWT \u975e\u56e0\u679c\u8f49\u63db\u5728 OOS \u671f\u9593\u4f7f\u7528\u672a\u4f86\u6578\u64da\u3002QLIKE CEILING #20 confirmed\u3002\u6559\u8a13\uff1a\u5168\u5e8f\u5217\u8f49\u63db\u65b9\u6cd5\uff08wavelet/EMD/SSA\uff09\u5929\u7136\u6709\u524d\u77bb\u504f\u8aa4\uff0c\u53ea\u80fd\u7528 causal \u7248\u672c\u3002",
+    "evidence": [
+      "SPY full-series -22.21% DM p=0.0001",
+      "Haar -2.60% DM p=0.63 NS",
+      "Causal +52.51% DM p=0.0009"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-03-23T11:01:24.905993"
+  },
+  {
+    "item_id": "f4849f60",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude, \u57f7\u884c: Claude] K160: Volume-Volatility \u95dc\u4fc2\uff08MDH \u5047\u8aaa\uff09\u3002\u540c\u6642\u671f r=0.31-0.43 \u78ba\u8a8d MDH\u3002\u4f46\u6eef\u5f8c\u9810\u6e2c\u529b\u5fae\u5f31\uff08partial|VIX r<0.08\uff09\u3002OOS QLIKE: SPY -0.10% NS, GLD -0.81% \u2605 (p=0.016), TLT -0.62% NS\u3002GLD \u552f\u4e00\u986f\u8457\u4f46\u6539\u5584\u6975\u5c0f\u3002BTC volume \u5b8c\u5168\u7121\u9810\u6e2c\u529b\uff08p=0.53\uff0cwash trading\uff09\u3002\u7d50\u8ad6\uff1aGARCH \u81ea\u8ff4\u6b78\u7d50\u69cb\u5df2\u5438\u6536 volume-volatility \u95dc\u4fc2\u3002QLIKE ceiling \u6301\u7e8c\u3002",
+    "evidence": [
+      "SPY: partial|VIX r=0.039",
+      "GLD: QLIKE -0.81% DM p=0.016",
+      "BTC: r=0.012 p=0.535"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-03-23T11:08:15.824220"
+  },
+  {
+    "item_id": "2d5aae9c",
+    "category": "literature_review",
+    "content": "\u6587\u737b\u641c\u5c0b 2024-2026\uff0810\u7bc7\u8ad6\u6587\uff09\uff1a1.Branco 2024(J Emp Finance):ML\u7121\u6cd5\u8d85\u8d8a\u7dda\u6027\u6a21\u578b,\u9a57\u8b49QLIKE ceiling. 2.FI 2025\u7d9c\u8ff0:25\u5e74\u6f14\u9032\u908a\u969b\u6539\u5584\u6975\u5c0f. 3.Zhang 2025(J Forecasting):Overnight vol\u5206\u89e3\u986f\u8457\u6539\u5584\u9810\u6e2c,\u6700\u53ef\u884c\u65b9\u5411. 4.arXiv:2510.03236:Regime-switching\u5728\u5371\u6a5f\u671f\u6709\u6548. 5.Applied Economics 2025:VIX\u671f\u9650\u7d50\u69cb\u6539\u5584HAR-RV. 6.Nature 2025:CEEMDAN-GARCH\u6709end-point bias\u98a8\u96aa. 7.Bai&Cai 2024(QF):AdaBoost\u9810\u6e2cVIX\u65b9\u5411,jobless claims\u95dc\u9375. 8.Gatheral:Rough vol H~0.1\u57285-20\u5929\u512a\u65bcHAR. 9.Mutinda 2025:VMD-GARCH-LSTM\u5728\u50f9\u683c\u975e\u6ce2\u52d5\u7387. 10.ScienceDirect 2026:Wavelet\u4f4e\u983b\u5c0dportfolio timing\u6700\u6709\u7528. \u6700\u53ef\u884c:(1)Overnight\u5206\u89e3(ETA April)(2)VIX term structure(3)2-regime GJR",
+    "evidence": [
+      "Branco 2024 J Emp Finance",
+      "Zhang 2025 J Forecasting",
+      "FI 2025 survey"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-03-23T11:10:21.088597"
   }
 ]
