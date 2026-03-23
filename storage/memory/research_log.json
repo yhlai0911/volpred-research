@@ -3605,5 +3605,25 @@
     "decision": "Network descriptive value high (paper material). Predictive value weak. Next: commit session results.",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "872cdb3b",
+    "timestamp": "2026-03-23T12:22:48.372904",
+    "phase": "Phase_K",
+    "action": "K170_earnings_season",
+    "observation": "K170: Earnings season vol effect NULL for SPY index. RV ratio 0.89 NS. Diversification absorbs individual earnings shocks. Q1 exception (ratio 0.56) likely January effect.",
+    "decision": "Event-driven vol patterns dont exist at index level due to diversification. Individual stock earnings vol is real but cancels out in SPY.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "7556e1be",
+    "timestamp": "2026-03-23T12:24:37.143837",
+    "phase": "Phase_K",
+    "action": "K171_vpin_proxy",
+    "observation": "K171: VPIN proxy (daily) fully absorbed by VIX. Partial r \u2248 0 across 5 assets. Tail lift 2.8x but likely VIX-driven. True VPIN needs tick data.",
+    "decision": "Daily OHLCV proxies cannot capture microstructure signals. Need TAQ/tick data for genuine VPIN test. VIX sufficient continues.",
+    "experiment_ids": [],
+    "tags": []
   }
 ]

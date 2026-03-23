@@ -580,6 +580,8 @@
 - [x] K167: VRP 跨資產結構 — SPY +3.7%, BTC -31.8%（crypto realized >> implied）。GLD VRP→ret r=0.084★ 最強。VRP 擇時全輸 B&H。跨資產排名 L/S NS (t=-0.36)。VRP = 恐慌溢價量化，非交易信號。Q10 cross-asset 確認
 - [x] K168: ★ GARCH Vol-of-Vol — 反直覺：高 VoV violation 4.8% < 低 VoV 5.1%（GARCH 不穩定期反而保守）。Partial|VIX r=-0.105★。VoV-adjusted VaR 5.2%→5.0%（精確但微小）。SPY VoV 0.48 >> GLD 0.13。GARCH 的危險是自滿（低 VoV）而非不穩定
 - [x] K169: ★★ Dynamic Volatility Network（12 assets, MST）— SPY hub 82% 時間，crisis 時 IWM(13%)/XLF 接管。★ TLT centrality partial|VIX r=0.159★（債券壓力→股市信號）。avg_corr partial|VIX r=-0.163★（反直覺：高相關→低 future vol）。Hub 轉移完美對應事件（COVID→XLF, Fed hike→IWM）。描述性框架有學術價值
+- [x] K170: 財報季波動率效應 — SPY 財報季 RV ratio 0.89 NS (t=-0.88)。控制 VIX 後 t=-0.11。GARCH 殘差無差異。VT 調整 Harvey FAIL。結論：個股財報衝擊被 index 分散化完全吸收
+- [x] K171: VPIN 近似（Gemini R7#4）— Simple r=0.128★ 但 partial|VIX r=-0.011 NS。跨 5 資產全部 NS。尾部 lift 2.8x 但可能 VIX 驅動。日頻 OHLCV proxy 無法捕捉微結構信號，需 tick data
 - **Phase K 統合（61+ 實驗）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking
