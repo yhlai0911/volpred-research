@@ -20,8 +20,8 @@ class MemorySystem:
         for d in [self.memory_dir, self.results_dir]:
             d.mkdir(parents=True, exist_ok=True)
 
-    def _sync_to_remote(self, filename: str) -> None:
-        """Sync a memory file to Zeabur via PUT."""
+    def _sync_to_remote(self, filename: str, new_entries: list[dict] | None = None) -> None:
+        """Sync memory to remote. Append new entries if given, else full push."""
         if not self.REMOTE_URL:
             return
         filepath = self.memory_dir / filename
@@ -29,16 +29,38 @@ class MemorySystem:
             return
         try:
             import urllib.request
-            data = filepath.read_bytes()
-            req = urllib.request.Request(
-                f"{self.REMOTE_URL}/api/sync/{filename}",
-                data=data,
-                headers={"Content-Type": "application/json"},
-                method="PUT",
-            )
-            urllib.request.urlopen(req, timeout=5)
+            if new_entries:
+                # Incremental: only send new entries
+                data = json.dumps(new_entries, ensure_ascii=False, default=str).encode("utf-8")
+                req = urllib.request.Request(
+                    f"{self.REMOTE_URL}/api/sync/{filename}",
+                    data=data,
+                    headers={"Content-Type": "application/json", "X-Sync-Mode": "append"},
+                    method="POST",
+                )
+            else:
+                # Full: send entire file (for reconciliation)
+                data = filepath.read_bytes()
+                req = urllib.request.Request(
+                    f"{self.REMOTE_URL}/api/sync/{filename}",
+                    data=data,
+                    headers={"Content-Type": "application/json"},
+                    method="PUT",
+                )
+            urllib.request.urlopen(req, timeout=10)
         except Exception:
             pass  # Don't fail research for sync issues
+
+    def reconcile_remote(self) -> dict[str, str]:
+        """Full sync all memory files to remote (for initial population or recovery)."""
+        results = {}
+        for filename in ["thinking_journal.json", "knowledge.json", "experiments.json", "research_log.json"]:
+            try:
+                self._sync_to_remote(filename, new_entries=None)  # full push
+                results[filename] = "ok"
+            except Exception as e:
+                results[filename] = str(e)
+        return results
 
     # --- Experiment Records ---
     def save_experiment(self, result: ExperimentResult, metrics: dict, notes: str = "") -> str:
@@ -67,7 +89,6 @@ class MemorySystem:
 
         # Append to experiment index
         self._append_to_index("experiments.json", record)
-        self._sync_to_remote("experiments.json")
 
         return result.experiment_id
 
@@ -105,7 +126,6 @@ class MemorySystem:
             "tags": tags or [],
         }
         self._append_to_index("research_log.json", entry)
-        self._sync_to_remote("research_log.json")
         return entry["entry_id"]
 
     def get_research_log(self) -> list[dict]:
@@ -128,7 +148,6 @@ class MemorySystem:
             "experiment_ids": experiment_ids or [],
         }
         self._append_to_index("thinking_journal.json", entry)
-        self._sync_to_remote("thinking_journal.json")
         return entry["id"]
 
     def get_thinking_journal(self) -> list[dict]:
@@ -148,7 +167,6 @@ class MemorySystem:
             "related_experiments": related_experiments or [],
         }
         self._append_to_index("open_questions.json", entry)
-        self._sync_to_remote("open_questions.json")
         return entry["id"]
 
     def answer_question(self, question_id: str, answer: str) -> None:
@@ -221,6 +239,8 @@ class MemorySystem:
         data.append(record)
         with open(filepath, "w") as f:
             json.dump(data, f, indent=2, default=str)
+        # Incremental sync: only send the new entry
+        self._sync_to_remote(filename, new_entries=[record])
 
     def _load_index(self, filename: str) -> list[dict]:
         filepath = self.memory_dir / filename

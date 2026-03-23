@@ -8,17 +8,18 @@ RUN pip install uv
 # Copy project files
 COPY pyproject.toml uv.lock ./
 COPY src/ src/
-COPY storage/ storage/
-COPY research_program.md ./
-COPY data/ data/
+COPY research_program.md idea.md ./
+
+# Create empty dirs (runtime data comes from volume mount)
+RUN mkdir -p storage data
 
 # Install dependencies
 RUN uv sync --no-dev
 
-# Expose port
-EXPOSE 8787
+# Expose port (Zeabur uses 8080 by default via $PORT)
+EXPOSE 8080
 
-# Run API
-CMD ["uv", "run", "uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8787"]
+# Run API — use $PORT env var (Zeabur sets this), fallback to 8080
+CMD ["sh", "-c", "uv run uvicorn api.main:app --host 0.0.0.0 --port ${PORT:-8080}"]
 
 ENV PYTHONPATH=/app/src

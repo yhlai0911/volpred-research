@@ -74,6 +74,64 @@ async def put_memory_file(filename: str, request: Request):
     }
 
 
+@router.post("/memory/{filename}/append")
+async def append_memory_file(filename: str, request: Request):
+    """Append entries to a memory file (incremental sync)."""
+    path = _memory_file_path(filename)
+    new_entries = await request.json()
+    if not isinstance(new_entries, list):
+        raise HTTPException(status_code=400, detail="payload must be a JSON array")
+
+    # Load existing
+    existing: list = []
+    if path.exists():
+        existing = json.loads(path.read_bytes())
+
+    # Deduplicate by id/item_id/entry_id
+    existing_ids: set[str] = set()
+    for e in existing:
+        for key in ("id", "item_id", "entry_id", "experiment_id"):
+            if key in e:
+                existing_ids.add(str(e[key]))
+                break
+
+    added = 0
+    for entry in new_entries:
+        entry_id = None
+        for key in ("id", "item_id", "entry_id", "experiment_id"):
+            if key in entry:
+                entry_id = str(entry[key])
+                break
+        if entry_id and entry_id in existing_ids:
+            continue  # skip duplicate
+        existing.append(entry)
+        added += 1
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    data = _json_bytes(existing)
+    tmp_path = path.with_name(f".{path.name}.tmp")
+    tmp_path.write_bytes(data)
+    tmp_path.replace(path)
+
+    return {
+        "status": "ok",
+        "file": filename,
+        "added": added,
+        "skipped": len(new_entries) - added,
+        "total": len(existing),
+    }
+
+
+@router.get("/memory/{filename}/count")
+def get_memory_count(filename: str):
+    """Get entry count for a memory file (for reconciliation)."""
+    path = _memory_file_path(filename)
+    if not path.exists():
+        return {"file": filename, "count": 0}
+    entries = json.loads(path.read_bytes())
+    return {"file": filename, "count": len(entries)}
+
+
 @router.get("/health")
 def get_mirror_health():
     files = {name: _file_meta(_memory_file_path(name)) for name in sorted(ALLOWED_MEMORY_FILES)}
