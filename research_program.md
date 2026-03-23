@@ -571,6 +571,13 @@
 - [x] K158: Overnight Gap Variance Predictability (K156 延伸) — Overnight gap = 36.5% daily var (confirms K156)。Gap² ACF(1)=0.274。VIX² best predictor (in-sample R²=0.152)。Best OOS: naive_mean (R²=-0.006)。Monday gaps 1.57x larger (p=0.10)。結論：overnight gaps 透過 VIX 部分可預測但大部分不可預測成分仍在
 - [x] K159: ★ Wavelet-GARCH Frequency Decomposition — **LOOK-AHEAD BIAS TRAP**。Full-series MODWT(db4): SPY -22.21% (DM p=0.0001) 看似突破 ceiling，但 Haar(NS p=0.63) 和 causal(+52.51% WORSE p=0.0009) 確認完全是前瞻偏誤。SWT/MODWT 非因果轉換在 OOS 使用未來數據。**重要方法論教訓：全序列轉換方法（wavelet/EMD/SSA）天然有 look-ahead bias。** QLIKE CEILING #20
 - [x] K160: Volume-Volatility 關係（MDH 假說）— 同時期 r=0.31-0.43 確認 MDH。滯後 partial|VIX r<0.08。OOS: GLD -0.81% ★ (唯一顯著但極小), SPY/TLT NS。BTC volume 無預測力（p=0.53）。GARCH 自迴歸已吸收 volume 資訊。QLIKE ceiling #21
+- [x] K161: VIX Term Structure Ratio — Simple r=-0.327 但 partial|VIX r=-0.040。OOS QLIKE -0.082% DM p=0.45 NS。倒掛期間反而更差。期限結構完全被 VIX level 吸收。VIX sufficient #22
+- [x] K162: ★ VIX Regime → Return Prediction — VIX spike>15% 次日 +0.274% (t=2.30)，mean reversion 真實。但所有 timing 策略 vs B&H Harvey FAIL (max t=-2.38)。VIX>25 Sharpe 0.448 vs B&H 1.226。持倉太短(4-18%)錯過牛市。**VIX 價值在 risk sizing（VT）而非 return timing**
+- [x] K163: ★★ CoVaR 系統性風險傳染 — QQQ/SPY 淨傳染源, EEM 淨受害者。★★ TLT CoVaR structural break（pre-2022 +0.548→post-2022 -0.281）**第三種方法驗證 T19**。GLD ΔCoVaR≈0（不受 SPY 傳染=全天候避險）。尾部事件 lift=4.5x 但 r=-0.057(p=0.09) 邊際
+- [x] K164: Realized Dispersion（11 sector ETF）— 日頻 partial|VIX r=0.56 看似突破 VIX sufficient，但 K165 修正為 overlapping window artifact
+- [x] K165: ★ 月頻 Dispersion（修正 K164）— **方法論教訓**：非重疊月頻 F p=0.49 NS, OOS DM p=0.66 NS。K164 的 r=0.56 是 rolling window 自相關膨脹。Dispersion 也被 VIX 吸收。VIX sufficient #23（日頻+月頻）
+- [x] K166: Hurst Exponent Regime — SPY H=0.54（random walk），rolling 75% 時間 H>0.55（trending）。Trending regime 報酬+1.15%/月(t=3.23)但 r=0.098 p=0.16 NS。OOS 策略 ≈ B&H (t=-0.13)。描述性：市場多數時間 trending，但已反映在價格中
+- [x] K167: VRP 跨資產結構 — SPY +3.7%, BTC -31.8%（crypto realized >> implied）。GLD VRP→ret r=0.084★ 最強。VRP 擇時全輸 B&H。跨資產排名 L/S NS (t=-0.36)。VRP = 恐慌溢價量化，非交易信號。Q10 cross-asset 確認
 - **Phase K 統合（61+ 實驗）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking

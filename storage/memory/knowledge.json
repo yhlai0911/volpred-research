@@ -9654,5 +9654,90 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-03-23T11:10:21.088597"
+  },
+  {
+    "item_id": "40ddcbb2",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: \u6587\u737b Applied Economics 2025, \u57f7\u884c: Claude] K161: VIX Term Structure Ratio \u589e\u5f37 GARCH\u3002VIX3M/VIX ratio: mean 1.109, \u5012\u639b 11% \u6642\u9593\u3002Simple r=-0.327 \u4f46 partial|VIX r=-0.040\u3002OOS QLIKE -0.082% DM p=0.45 NS\u3002\u5012\u639b\u671f\u9593\u53cd\u800c\u66f4\u5dee(+0.14%)\u3002\u7d50\u8ad6\uff1a\u671f\u9650\u7d50\u69cb\u8cc7\u8a0a\u5b8c\u5168\u88ab VIX level \u5438\u6536\u3002VIX sufficient #22\u3002",
+    "evidence": [
+      "simple r=-0.327 p<0.001",
+      "partial|VIX r=-0.040 p=0.005",
+      "OOS QLIKE -0.082% DM p=0.452"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-03-23T11:17:30.065038"
+  },
+  {
+    "item_id": "612154ac",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude+Bai&Cai 2024, \u57f7\u884c: Claude] K162: VIX Regime \u2192 Return Prediction\u3002VIX level r=0.031 \u5fae\u5f31\uff0cVIX spike r=0.051 \u7a0d\u5f37\u3002\u5206\u7d44\u5831\u916c\uff1a\u6975\u9ad8VIX(>30)\u5e74\u5316+25.9%\u4f46 t=0.76 NS\u3002VIX spike>15% \u6b21\u65e5+0.274% t=2.30\u3002\u6240\u6709 timing \u7b56\u7565 vs B&H Harvey FAIL\uff08max t=-2.38\uff09\u3002B&H OOS Sharpe 1.226\u3002\u7d50\u8ad6\uff1aVIX mean reversion \u771f\u5be6\u4f46\u4e0d\u53ef\u4ea4\u6613\uff0c\u6301\u5009\u592a\u77ed\u932f\u904e\u725b\u5e02\u3002VIX \u7684\u50f9\u503c\u5728 risk sizing\uff08VT\uff09\u800c\u975e return timing\u3002",
+    "evidence": [
+      "VIX spike>15% next-day +0.274% t=2.30",
+      "VIX>25 Sharpe 0.448 vs B&H 1.226",
+      "All Harvey FAIL"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-03-23T11:22:26.766368"
+  },
+  {
+    "item_id": "d70179d1",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude(\u8df3\u8e8d\u5f0f\u63a2\u7d22), \u57f7\u884c: Claude] K163: CoVaR \u7cfb\u7d71\u6027\u98a8\u96aa\u50b3\u67d3\u91cf\u5316\u30026 \u8cc7\u7522 \u0394CoVaR \u77e9\u9663\uff1aQQQ(-1.34)/SPY(-1.28) \u662f\u6de8\u50b3\u67d3\u6e90\uff0cEEM(0.77) \u552f\u4e00\u6de8\u53d7\u5bb3\u8005\u3002TLT \u53cd\u5411\u50b3\u67d3(+0.594)\u3002\u2605\u2605 \u6642\u8b8a CoVaR \u63ed\u793a TLT structural break\uff08pre-2022 +0.548\u2192post-2022 -0.281\uff09\uff0c\u7528\u4e0d\u540c\u65b9\u6cd5\u9a57\u8b49 T19\u3002GLD \u0394CoVaR\u22480\uff08\u4e0d\u53d7 SPY \u50b3\u67d3\uff09\u3002\u5c3e\u90e8\u4e8b\u4ef6 lift=4.5x\uff08\u9ad8CoVaR 10.4% vs \u4f4e 2.3%\uff09\uff0c\u4f46 r=-0.057(p=0.09) \u908a\u969b\u3002",
+    "evidence": [
+      "TLT CoVaR pre/post 2022: +0.548/-0.281",
+      "GLD CoVaR: -0.151 stable",
+      "Tail lift 4.5x p=0.09"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-03-23T11:25:09.910780"
+  },
+  {
+    "item_id": "d979af4e",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Codex R6#3, \u57f7\u884c: Claude] K164: Realized Dispersion\uff0811 sector ETF vs SPY\uff09\u3002\u2605\u2605 Partial corr|VIX = 0.560\uff08\u7b2c\u4e00\u500b\u63a7\u5236VIX\u5f8c\u4ecd\u5f37\u7684\u6307\u6a19\uff01\uff09\u3002\u4f46\u65e5\u983b GARCH \u6b98\u5dee r=-0.024 NS\uff0cOOS QLIKE +0.051% NS\u3002\u6708\u983b r=0.724 vs \u65e5\u983b r=-0.024\u3002\u7d50\u8ad6\uff1aDispersion \u5305\u542b VIX \u4ee5\u5916\u7684\u76f8\u95dc\u6027\u8cc7\u8a0a\uff0c\u4f46\u53ea\u5728\u6708\u983b\u6709\u6548\u3002VIX sufficient \u53ef\u80fd\u53ea\u5c0d\u65e5\u983b\u6210\u7acb\u3002\u6708\u983b vol \u9810\u6e2c\u53ef\u80fd\u662f\u7a81\u7834\u65b9\u5411\u3002",
+    "evidence": [
+      "partial|VIX r=0.560 p<0.001",
+      "GARCH residual r=-0.024 p=0.29",
+      "OOS QLIKE +0.051% DM p=0.63"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-03-23T11:38:21.654738"
+  },
+  {
+    "item_id": "2be6f6a9",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: K164 \u5ef6\u4f38, \u57f7\u884c: Claude] K165: \u6708\u983b Dispersion \u589e\u5f37 Vol \u9810\u6e2c\u3002\u2605 \u65b9\u6cd5\u8ad6\u4fee\u6b63\uff1aK164 \u7684 partial|VIX r=0.56 \u662f overlapping window artifact\uff01\u975e\u91cd\u758a\u6708\u983b\uff1ain-sample F p=0.49 NS\uff0c\u0394R\u00b2=+0.005\u3002OOS \u0394R\u00b2=+0.024 \u4f46 DM p=0.66 NS\u3002\u5168\u90e8\u6a21\u578b OOS R\u00b2 \u70ba\u8ca0\u3002\u7d50\u8ad6\uff1aDispersion \u4e5f\u88ab VIX \u5438\u6536\u3002VIX sufficient \u5728\u65e5\u983b\u548c\u6708\u983b\u90fd\u6210\u7acb\u3002\u6559\u8a13\uff1arolling windows \u81a8\u8139\u76f8\u95dc\u6027\u3002",
+    "evidence": [
+      "F-test p=0.49",
+      "OOS DM p=0.66",
+      "All OOS R2 negative"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-03-23T11:40:15.930739"
+  },
+  {
+    "item_id": "123f7037",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude(\u8de8\u5b78\u79d1\u63a2\u7d22), \u57f7\u884c: Claude] K166: Hurst Exponent Regime Detection\u3002\u5168\u6a23\u672c H: SPY 0.539, GLD 0.577(trending), TLT 0.564\u3002Rolling 252d: H range [0.48,0.76], 75% \u6642\u9593 H>0.55\u3002H\u2192\u672a\u4f8622d\u5831\u916c: trending(H>0.55) \u6708\u5747+1.15% Sharpe 0.90 t=3.23, random(0.45-0.55) \u6708\u5747+0.18% t=0.29\u3002\u4f46 corr(H,ret)=0.098 p=0.16 NS\uff0cpartial|VIX \u4e5f NS\u3002OOS H>0.55 \u7b56\u7565 Sharpe 1.72 \u2248 B&H 1.66\uff08t=-0.13 NS\uff09\u3002H \u4e0d\u9810\u6e2c\u6ce2\u52d5\u7387(partial|VIX r=0.051 NS)\u3002\u7d50\u8ad6\uff1aHurst \u6709\u63cf\u8ff0\u6027\u50f9\u503c\uff08\u5e02\u5834 75% \u6642\u9593 trending\uff09\u4f46\u7121\u9810\u6e2c\u589e\u91cf\u3002",
+    "evidence": [
+      "H\u2192ret r=0.098 p=0.16 NS",
+      "trending Sharpe 0.90 vs random 0.14",
+      "OOS t=-0.13 NS vs B&H"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-03-23T11:54:16.215575"
+  },
+  {
+    "item_id": "f36d42ba",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Q10/T9 \u5ef6\u4f38, \u57f7\u884c: Claude] K167: VRP \u8de8\u8cc7\u7522\u7d50\u69cb\u3002SPY VRP +3.7%, QQQ +0.1%, BTC -31.8%\u3002GLD VRP\u2192ret r=0.084\u2605 \u6700\u5f37\u3002VRP \u64c7\u6642\u5168\u90e8\u8f38 B&H\uff08VRP>75th Sharpe 0.40 vs B&H 1.18\uff09\u3002\u8de8\u8cc7\u7522\u6392\u540d L/S \u6708\u5747-0.20% NS (t=-0.36)\u3002\u7d50\u8ad6\uff1aVRP \u662f\u6050\u614c\u6ea2\u50f9\u91cf\u5316\u5de5\u5177\uff0c\u975e\u4ea4\u6613\u4fe1\u865f\u3002Q10 VRP timing null \u8de8\u8cc7\u7522\u78ba\u8a8d\u3002",
+    "evidence": [
+      "SPY VRP +3.7%",
+      "BTC VRP -31.8%",
+      "L/S t=-0.36 NS",
+      "VRP timing Sharpe 0.40 vs B&H 1.18"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-03-23T11:56:56.824034"
   }
 ]

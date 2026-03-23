@@ -246,7 +246,10 @@ def release_pool_by_settings(
     next_release_at = None
 
     if last_released_at is not None:
-        next_release_at = last_released_at + timedelta(minutes=int(settings["interval_minutes"]))
+        # Truncate last_released_at to minute precision to avoid sub-second
+        # timing mismatches with cron (which fires at :00 seconds).
+        last_minute = last_released_at.replace(second=0, microsecond=0)
+        next_release_at = last_minute + timedelta(minutes=int(settings["interval_minutes"]))
 
     if not force:
         if settings["mode"] not in ("scheduled", "auto"):
@@ -295,7 +298,8 @@ def preview_release_pool_by_settings(
     last_released_at = _parse_datetime(settings.get("last_released_at"))
     next_release_at = None
     if last_released_at is not None:
-        next_release_at = last_released_at + timedelta(minutes=int(settings["interval_minutes"]))
+        last_minute = last_released_at.replace(second=0, microsecond=0)
+        next_release_at = last_minute + timedelta(minutes=int(settings["interval_minutes"]))
 
     feed = load_feed(storage_dir)
     include_drafts = bool(settings["include_drafts"])

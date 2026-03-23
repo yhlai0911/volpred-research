@@ -3505,5 +3505,75 @@
     "decision": "Top 3 next: (1) overnight decomp ETA April (2) VIX term structure (3) 2-regime GJR",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "5d2fb011",
+    "timestamp": "2026-03-23T11:17:30.624208",
+    "phase": "Phase_K",
+    "action": "K161_vix_term_structure",
+    "observation": "K161: VIX3M/VIX ratio NS for GARCH improvement. Partial|VIX r=-0.040. OOS -0.082% NS. VIX sufficient #22.",
+    "decision": "VIX term structure fully absorbed by VIX level. All 22+ indicators tested are absorbed. VIX is the sufficient statistic for daily equity vol.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "efa83c3d",
+    "timestamp": "2026-03-23T11:22:27.895228",
+    "phase": "Phase_K",
+    "action": "K162_vix_return_prediction",
+    "observation": "K162: VIX\u2192return prediction. Mean reversion real (spike t=2.30) but not tradeable (Harvey FAIL). VIX timing loses to B&H because of low invested time (4-18%). VIX value = risk sizing not return timing.",
+    "decision": "Return prediction via VIX is a dead end. Confirms VT continuous proportional > binary timing. Next: try tail risk / contagion direction or cross-asset return prediction.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "a8e804cd",
+    "timestamp": "2026-03-23T11:25:11.258796",
+    "phase": "Phase_K",
+    "action": "K163_covar_contagion",
+    "observation": "K163: CoVaR contagion. TLT structural break confirmed (3rd method). GLD \u2248 0 contagion. Tail lift 4.5x but marginal (p=0.09). QQQ is top contagion source.",
+    "decision": "CoVaR provides useful descriptive framework. TLT break validated 3 ways (corr, tail dep, CoVaR). Next: test if CoVaR signal can improve VT or portfolio allocation.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "93259d47",
+    "timestamp": "2026-03-23T11:38:26.767506",
+    "phase": "Phase_K",
+    "action": "K164_realized_dispersion",
+    "observation": "K164: Dispersion partial|VIX=0.560 FIRST indicator surviving VIX control! But daily GARCH cannot use it (r=-0.024). Monthly signal only.",
+    "decision": "CRITICAL: VIX sufficient may only hold at daily freq. Dispersion=new info at monthly level. Next: test monthly vol prediction with dispersion as predictor.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "8a5880b0",
+    "timestamp": "2026-03-23T11:40:16.584856",
+    "phase": "Phase_K",
+    "action": "K165_monthly_dispersion",
+    "observation": "K165: Monthly dispersion CORRECTS K164 optimism. Overlapping windows inflated partial r=0.56 to F p=0.49 NS when properly sampled. VIX sufficient holds at monthly too.",
+    "decision": "CRITICAL methodological lesson: overlapping rolling windows inflate correlations. Always verify with non-overlapping or HAC. VIX sufficient #23 (including monthly freq).",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "4cad2a5e",
+    "timestamp": "2026-03-23T11:54:19.150575",
+    "phase": "Phase_K",
+    "action": "K166_hurst_regime",
+    "observation": "K166: Hurst regime detection. Trending(H>0.55)=75% time, higher returns but not predictable (r=0.098 NS). OOS Hurst strategy \u2248 B&H. Descriptive value only.",
+    "decision": "Hurst confirms market is mostly trending (H=0.58 avg), but this is already priced in. No trading edge.",
+    "experiment_ids": [],
+    "tags": []
+  },
+  {
+    "entry_id": "4a265a83",
+    "timestamp": "2026-03-23T11:57:01.914242",
+    "phase": "Phase_K",
+    "action": "K167_vrp_cross_asset",
+    "observation": "K167: VRP cross-asset. SPY +3.7%, BTC -31.8%. GLD VRP\u2192ret strongest (r=0.084). All timing strategies lose to B&H. L/S NS. VRP = descriptive not tradeable.",
+    "decision": "VRP timing null extends across assets (Q10 confirmed cross-asset). BTC VRP=-31.8% shows crypto realized vol massively exceeds implied.",
+    "experiment_ids": [],
+    "tags": []
   }
 ]
