@@ -67,6 +67,7 @@ class MemorySystem:
 
         # Append to experiment index
         self._append_to_index("experiments.json", record)
+        self._sync_to_remote("experiments.json")
 
         return result.experiment_id
 
@@ -104,6 +105,7 @@ class MemorySystem:
             "tags": tags or [],
         }
         self._append_to_index("research_log.json", entry)
+        self._sync_to_remote("research_log.json")
         return entry["entry_id"]
 
     def get_research_log(self) -> list[dict]:

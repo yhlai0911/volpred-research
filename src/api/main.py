@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from api.routers import publications, program, research
+from api.routers import mirror, publications, program, research
 
 app = FastAPI(
     title="Volpred Research API",
@@ -24,6 +24,7 @@ app.add_middleware(
 
 # API routes (must be before static mount)
 app.include_router(research.router, prefix="/api/research", tags=["research"])
+app.include_router(mirror.router, prefix="/api/mirror", tags=["mirror"])
 app.include_router(publications.router, prefix="/api/publications", tags=["publications"])
 app.include_router(program.router, prefix="/api/program", tags=["program"])
 

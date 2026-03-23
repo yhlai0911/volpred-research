@@ -3,13 +3,15 @@ from __future__ import annotations
 from fastapi import APIRouter
 from pydantic import BaseModel
 
+from .common import get_storage_dir
+
 router = APIRouter()
 
 
 def _get_publisher():
     from volpred.publisher.publisher import Publisher
 
-    return Publisher()
+    return Publisher(storage_dir=get_storage_dir())
 
 
 @router.get("/feed")

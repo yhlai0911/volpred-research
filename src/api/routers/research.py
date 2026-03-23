@@ -3,17 +3,19 @@ from __future__ import annotations
 import os
 import sys
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
-router = APIRouter()
+from .common import get_storage_dir, require_research_mirror_token
+
+router = APIRouter(dependencies=[Depends(require_research_mirror_token)])
 
 
 def _get_memory():
     from volpred.memory.system import MemorySystem
 
-    return MemorySystem()
+    return MemorySystem(storage_dir=get_storage_dir())
 
 
 @router.get("/experiments")
@@ -73,7 +75,7 @@ def get_paper_trading():
     """Get paper trading log."""
     import json
     from pathlib import Path
-    pt_file = Path("storage/paper_trading.json")
+    pt_file = Path(get_storage_dir()) / "paper_trading.json"
     if pt_file.exists():
         return json.loads(pt_file.read_text())
     return []
