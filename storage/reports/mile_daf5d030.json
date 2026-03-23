@@ -1,19 +1,19 @@
 {
   "id": "mile_daf5d030",
-  "title": "K178: \u53f0\u7063 VT \u6708\u983b\u6700\u4f73\u5316\u2014\u2014\u4ea4\u6613\u6210\u672c\u53ea\u5403\u6389 0.6%\uff0c\u4f46 VIX \u76ee\u6a19\u5b8c\u5168\u4e0d\u5f71\u97ff Sharpe",
-  "description": "## \u6458\u8981\n[\u63d0\u51fa: K177 \u5ef6\u4f38, \u57f7\u884c: Claude]\n\u53f0\u7063 0050+GLD+VT \u6708\u983b\u6700\u4f73\u5316\u3002\u4e09\u5927\u767c\u73fe\uff1a(1) Sharpe \u5c0d K \u503c\uff08VIX \u76ee\u6a19\uff09\u5b8c\u5168\u4e0d\u654f\u611f\u2014\u2014K=6 \u548c K=15 Sharpe \u90fd\u662f 0.65\uff0cK \u53ea\u6c7a\u5b9a\u4f60\u627f\u53d7\u591a\u5c11\u98a8\u96aa (2) \u6708\u5ea6\u518d\u5e73\u8861\u4ea4\u6613\u6210\u672c\u6975\u4f4e\uff08turnover 1.0x/\u5e74\uff0c\u5e74 TX 0.59%\uff09(3) Harvey t=-3.06 \u78ba\u8a8d VT \u7684 Sharpe \u986f\u8457\u4f4e\u65bc B&H\u2014\u2014VT \u662f\u4fdd\u96aa\uff0c\u4fdd\u96aa\u6709\u4fdd\u8cbb\u3002\n\n## \u6838\u5fc3\u7d50\u8ad6\n**K \u4e0d\u5f71\u97ff Sharpe\uff0c\u53ea\u5f71\u97ff MDD\uff1a**\n| K | \u5e73\u5747\u6301\u5009 | MDD | Sharpe |\n|---|---------|-----|--------|\n| 6 | 36% | **-11.2%** | 0.650 |\n| 8.63 | 51% | -15.9% | 0.650 |\n| 12 | 70% | -21.9% | 0.648 |\n| 15 | 83% | -23.9% | 0.684 |\n\n**\u5be6\u52d9\u5efa\u8b70\uff1a**\n- \u4fdd\u5b88\u578b \u2192 K=6\uff08MDD -11.2%\uff0c\u4f46\u6301\u5009\u53ea\u6709 36%\uff09\n- \u6a19\u6e96\u578b \u2192 K=8.63\uff08MDD -15.9%\uff0c\u6301\u5009 51%\uff09\n- \u7a4d\u6975\u578b \u2192 K=12\uff08MDD -21.9%\uff0c\u6301\u5009 70%\uff09",
+  "title": "K178: 台灣 VT 月頻最佳化——交易成本只吃掉 0.6%，但 VIX 目標完全不影響 Sharpe",
+  "description": "## 摘要\n[提出: K177 延伸, 執行: Claude]\n台灣 0050+GLD+VT 月頻最佳化。三大發現：(1) Sharpe 對 K 值（VIX 目標）完全不敏感——K=6 和 K=15 Sharpe 都是 0.65，K 只決定你承受多少風險 (2) 月度再平衡交易成本極低（turnover 1.0x/年，年 TX 0.59%）(3) Harvey t=-3.06 確認 VT 的 Sharpe 顯著低於 B&H——VT 是保險，保險有保費。\n\n## 核心結論\n**K 不影響 Sharpe，只影響 MDD：**\n| K | 平均持倉 | MDD | Sharpe |\n|---|---------|-----|--------|\n| 6 | 36% | **-11.2%** | 0.650 |\n| 8.63 | 51% | -15.9% | 0.650 |\n| 12 | 70% | -21.9% | 0.648 |\n| 15 | 83% | -23.9% | 0.684 |\n\n**實務建議：**\n- 保守型 → K=6（MDD -11.2%，但持倉只有 36%）\n- 標準型 → K=8.63（MDD -15.9%，持倉 51%）\n- 積極型 → K=12（MDD -21.9%，持倉 70%）",
   "category": "milestone",
   "phase": "Phase_K",
   "details": {},
   "tags": [
-    "\u53f0\u7063",
+    "台灣",
     "0050",
     "VT",
-    "\u4ea4\u6613\u6210\u672c",
-    "\u6708\u983b",
-    "\u6700\u4f73\u5316"
+    "交易成本",
+    "月頻",
+    "最佳化"
   ],
   "created_at": "2026-03-23T05:54:00.667038+00:00",
-  "published_at": "2026-03-23T05:54:00.667038+00:00",
-  "status": "draft"
+  "published_at": "2026-03-23T08:33:00.970083+00:00",
+  "status": "published"
 }
