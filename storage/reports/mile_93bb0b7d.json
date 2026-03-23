@@ -1,20 +1,20 @@
 {
   "id": "mile_93bb0b7d",
-  "title": "K176: 0050 \u7684\u771f\u6b63\u98a8\u96aa\u2014\u2014\u53f0\u7a4d\u96fb\u50b3\u67d3\u529b\u662f\u7f8e\u80a1\u7684 4.6 \u500d",
-  "description": "## \u6458\u8981\n[\u63d0\u51fa: Claude\uff08\u53f0\u7063\u5c08\u7dda\uff09, \u57f7\u884c: Claude]\n\n\u7528 CoVaR \u6846\u67b6\u91cf\u5316\u53f0\u7063 7 \u500b\u8cc7\u7522\u7684\u7cfb\u7d71\u6027\u50b3\u67d3\u7d50\u69cb\u3002\u6700\u91cd\u8981\u767c\u73fe\uff1a**TSMC \u5c0d 0050 \u7684\u5c3e\u90e8\u98a8\u96aa\u5f71\u97ff\u529b\u662f SPY \u7684 4.6 \u500d**\uff08\u0394CoVaR -1.599 vs -0.345\uff09\u30020050-TSMC \u76f8\u95dc\u9ad8\u9054 0.893\u2014\u2014\u6295\u8cc7 0050 \u672c\u8cea\u4e0a\u5c31\u662f\u6295\u8cc7 TSMC\u3002\n\n## \u65b9\u6cd5\u8207\u6578\u64da\n| \u9805\u76ee | \u8a2d\u5b9a |\n|------|------|\n| \u8cc7\u7522 | 0050, TSMC, \u570b\u6cf0\u91d1, \u4e2d\u83ef\u96fb, \u9d3b\u6d77, \u5bcc\u90a6\u91d1, SPY |\n| \u671f\u9593 | 2015-01 ~ 2026-03 (2,635 \u7b46) |\n| \u65b9\u6cd5 | Quantile Regression CoVaR (5th percentile) |\n\n## \u6838\u5fc3\u767c\u73fe\n\n### TSMC \u96c6\u4e2d\u5ea6\u98a8\u96aa\u91cf\u5316\n| \u6307\u6a19 | \u6578\u503c |\n|------|------|\n| TSMC\u21920050 \u0394CoVaR | **-1.599** |\n| SPY\u21920050 \u0394CoVaR | -0.345 |\n| **TSMC/SPY \u5f71\u97ff\u529b\u6bd4** | **4.6 \u500d** |\n| 0050-TSMC \u76f8\u95dc | 0.893 |\n| 0050-SPY \u76f8\u95dc | 0.144 |\n\n### \u50b3\u67d3\u65b9\u5411\n| \u8cc7\u7522 | \u89d2\u8272 | \u6bd4\u7387 |\n|------|------|------|\n| 0050 | **\u6de8\u50b3\u67d3\u6e90** | 1.36 |\n| \u4e2d\u83ef\u96fb | **\u6de8\u50b3\u67d3\u6e90** | 2.25\uff08flight-to-cash\uff09 |\n| \u9d3b\u6d77 | **\u6de8\u53d7\u5bb3\u8005** | 0.79\uff08\u4f9b\u61c9\u93c8\u98a8\u96aa\uff09 |\n| TSMC | \u4e2d\u6027 | 0.91 |\n| SPY | \u4e2d\u6027 | 0.87 |\n\n### TSMC \u5d29\u76e4\u7684\u9023\u9396\u6548\u61c9\nTSMC \u5d29\u76e4\u4e0d\u53ea\u5f71\u97ff\u96fb\u5b50\u80a1\uff1a\n- 0050: -1.599\uff08\u6700\u5927\uff09\n- \u9d3b\u6d77: -1.385\uff08\u4f9b\u61c9\u93c8\uff09\n- \u5bcc\u90a6\u91d1: -1.128\uff08\u91d1\u878d\u696d\u4e5f\u906d\u6b83\uff09\n- \u570b\u6cf0\u91d1: -1.116\n- \u4e2d\u83ef\u96fb: -0.245\uff08\u9632\u79a6\u80a1\u76f8\u5c0d\u9694\u96e2\uff09\n\n## \u5be6\u52d9\u610f\u7fa9\n1. **0050 \u4e0d\u662f\u300c\u5206\u6563\u6295\u8cc7\u53f0\u7063\u300d\uff0c\u662f\u300c\u96c6\u4e2d\u6295\u8cc7 TSMC\u300d**\n2. **TSMC \u5730\u7de3\u653f\u6cbb\u98a8\u96aa = 0050 \u6295\u8cc7\u4eba\u7684\u6700\u5927\u98a8\u96aa**\n3. **\u60f3\u771f\u6b63\u5206\u6563\uff1f\u52a0\u5165 GLD\uff08K163 \u78ba\u8a8d\u96f6\u50b3\u67d3\uff09\u6216 SPY\uff08\u5f31\u50b3\u67d3 0.345\uff09**",
+  "title": "K176: 0050 的真正風險——台積電傳染力是美股的 4.6 倍",
+  "description": "## 摘要\n[提出: Claude（台灣專線）, 執行: Claude]\n\n用 CoVaR 框架量化台灣 7 個資產的系統性傳染結構。最重要發現：**TSMC 對 0050 的尾部風險影響力是 SPY 的 4.6 倍**（ΔCoVaR -1.599 vs -0.345）。0050-TSMC 相關高達 0.893——投資 0050 本質上就是投資 TSMC。\n\n## 方法與數據\n| 項目 | 設定 |\n|------|------|\n| 資產 | 0050, TSMC, 國泰金, 中華電, 鴻海, 富邦金, SPY |\n| 期間 | 2015-01 ~ 2026-03 (2,635 筆) |\n| 方法 | Quantile Regression CoVaR (5th percentile) |\n\n## 核心發現\n\n### TSMC 集中度風險量化\n| 指標 | 數值 |\n|------|------|\n| TSMC→0050 ΔCoVaR | **-1.599** |\n| SPY→0050 ΔCoVaR | -0.345 |\n| **TSMC/SPY 影響力比** | **4.6 倍** |\n| 0050-TSMC 相關 | 0.893 |\n| 0050-SPY 相關 | 0.144 |\n\n### 傳染方向\n| 資產 | 角色 | 比率 |\n|------|------|------|\n| 0050 | **淨傳染源** | 1.36 |\n| 中華電 | **淨傳染源** | 2.25（flight-to-cash） |\n| 鴻海 | **淨受害者** | 0.79（供應鏈風險） |\n| TSMC | 中性 | 0.91 |\n| SPY | 中性 | 0.87 |\n\n### TSMC 崩盤的連鎖效應\nTSMC 崩盤不只影響電子股：\n- 0050: -1.599（最大）\n- 鴻海: -1.385（供應鏈）\n- 富邦金: -1.128（金融業也遭殃）\n- 國泰金: -1.116\n- 中華電: -0.245（防禦股相對隔離）\n\n## 實務意義\n1. **0050 不是「分散投資台灣」，是「集中投資 TSMC」**\n2. **TSMC 地緣政治風險 = 0050 投資人的最大風險**\n3. **想真正分散？加入 GLD（K163 確認零傳染）或 SPY（弱傳染 0.345）**",
   "category": "milestone",
   "phase": "Phase_K",
   "details": {},
   "tags": [
-    "\u53f0\u7063",
+    "台灣",
     "0050",
     "TSMC",
     "CoVaR",
-    "\u50b3\u67d3",
-    "\u96c6\u4e2d\u5ea6\u98a8\u96aa",
-    "\u7cfb\u7d71\u6027\u98a8\u96aa"
+    "傳染",
+    "集中度風險",
+    "系統性風險"
   ],
   "created_at": "2026-03-23T05:23:38.014752+00:00",
-  "published_at": "2026-03-23T05:23:38.014752+00:00",
-  "status": "draft"
+  "published_at": "2026-03-23T07:33:01.347467+00:00",
+  "status": "published"
 }

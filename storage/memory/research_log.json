@@ -3775,5 +3775,15 @@
     "decision": "International applicability confirmed for EUR/GBP investors. JPY investors need caution. TWD data had yfinance issues (R14 results still valid).",
     "experiment_ids": [],
     "tags": []
+  },
+  {
+    "entry_id": "e6e0f4b3",
+    "timestamp": "2026-03-23T15:37:09.640988",
+    "phase": "Phase_K",
+    "action": "K185_sector_rotation",
+    "observation": "K185: GARCH sector rotation FAIL. Low vol sectors (XLP/XLV/XLU) underperform equal-weight. GARCH predicts stability correctly but stability \u2260 returns. Equal weight best.",
+    "decision": "GARCH is accurate for vol ranking but vol ranking is NOT a trading signal. Low vol anomaly does not exist at sector level.",
+    "experiment_ids": [],
+    "tags": []
   }
 ]
