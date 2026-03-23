@@ -1,7 +1,7 @@
 {
   "id": "mile_96d5ed98",
-  "title": "K173: \u7528\u6975\u503c\u7406\u8ad6\u8ffd\u8e64\u5e02\u5834\u5c3e\u90e8\u539a\u5ea6\u2014\u2014VIX \u4e4b\u5916\u7684\u5fae\u5f31\u4f46\u771f\u5be6\u7684\u9810\u8b66\u4fe1\u865f",
-  "description": "## \u6458\u8981\n[\u63d0\u51fa: Claude\uff08EVT \u8de8\u5b78\u79d1\uff09, \u57f7\u884c: Claude]\n\u7528 Hill estimator \u52d5\u614b\u8ffd\u8e64\u5e02\u5834\u5c3e\u90e8\u6307\u6578 \u03b1\u3002\u03b1 \u8d8a\u4f4e = \u5c3e\u90e8\u8d8a\u539a = \u6975\u7aef\u4e8b\u4ef6\u8d8a\u53ef\u80fd\u3002SPY \u03b1=2.71\uff08\u539a\u5c3e\uff09\uff0cTLT 4.17\uff08\u6700\u8584\uff09\uff0cEEM 2.46\uff08\u6700\u539a\uff09\u3002\u95dc\u9375\u767c\u73fe\uff1a\u63a7\u5236 VIX \u5f8c\uff0ctail index \u4ecd\u6709\u986f\u8457\u7684\u5c3e\u90e8\u4e8b\u4ef6\u9810\u6e2c\u529b\uff08partial r=-0.083, p=0.014\uff09\u2014\u2014\u662f 23+ \u500b\u6307\u6a19\u4e2d\u5c11\u6578\u7a81\u7834 VIX \u58df\u65b7\u7684\u3002\u4f46\u6548\u679c\u5fae\u5f31\uff08r\u00b2<1%\uff09\uff0c\u5b78\u8853\u50f9\u503c\u5927\u65bc\u5be6\u52d9\u3002\n\n## \u6838\u5fc3\u767c\u73fe\n### \u8de8\u8cc7\u7522\u5c3e\u90e8\u5dee\u7570\n| \u8cc7\u7522 | \u03b1\uff08\u5168\u6a23\u672c\uff09 | \u89e3\u8b80 |\n|------|-----------|------|\n| EEM | 2.46 | \u6700\u539a\u5c3e\u2014\u2014\u65b0\u8208\u5e02\u5834\u6975\u7aef\u8dcc\u5e45\u6700\u5371\u96aa |\n| SPY | 2.71 | \u539a\u5c3e |\n| GLD | 3.07 | \u4e2d\u7b49 |\n| QQQ | 3.20 | \u4e2d\u7b49 |\n| TLT | 4.17 | \u6700\u8584\u5c3e\u2014\u2014\u50b5\u5238\u6975\u7aef\u8dcc\u5e45\u8f03\u6eab\u548c |\n\n### \u9810\u6e2c\u529b\n| \u6e2c\u8a66 | r | p |\n|------|---|---|\n| Simple | -0.136 | 0.0001 |\n| **Partial\\|VIX** | **-0.083** | **0.014** |\n\n### \u5371\u6a5f\u4e8b\u4ef6 \u03b1 \u503c\nCOVID (2020-03): \u03b1=1.45\uff08\u6700\u539a\uff09, Volmageddon (2018-02): 1.61, Fed Hike (2022-06): 2.05\n\n## \u5be6\u52d9\u610f\u7fa9\n\u76ee\u524d \u03b1=2.14\uff0861th \u767e\u5206\u4f4d\uff09\uff0c\u4e2d\u7b49\u6c34\u5e73\u3002\u4e0d\u9700\u8981\u7279\u5225\u8b66\u6212\uff0c\u4f46\u503c\u5f97\u6301\u7e8c\u76e3\u63a7\u3002",
+  "title": "K173: 用極值理論追蹤市場尾部厚度——VIX 之外的微弱但真實的預警信號",
+  "description": "## 摘要\n[提出: Claude（EVT 跨學科）, 執行: Claude]\n用 Hill estimator 動態追蹤市場尾部指數 α。α 越低 = 尾部越厚 = 極端事件越可能。SPY α=2.71（厚尾），TLT 4.17（最薄），EEM 2.46（最厚）。關鍵發現：控制 VIX 後，tail index 仍有顯著的尾部事件預測力（partial r=-0.083, p=0.014）——是 23+ 個指標中少數突破 VIX 壟斷的。但效果微弱（r²<1%），學術價值大於實務。\n\n## 核心發現\n### 跨資產尾部差異\n| 資產 | α（全樣本） | 解讀 |\n|------|-----------|------|\n| EEM | 2.46 | 最厚尾——新興市場極端跌幅最危險 |\n| SPY | 2.71 | 厚尾 |\n| GLD | 3.07 | 中等 |\n| QQQ | 3.20 | 中等 |\n| TLT | 4.17 | 最薄尾——債券極端跌幅較溫和 |\n\n### 預測力\n| 測試 | r | p |\n|------|---|---|\n| Simple | -0.136 | 0.0001 |\n| **Partial\\|VIX** | **-0.083** | **0.014** |\n\n### 危機事件 α 值\nCOVID (2020-03): α=1.45（最厚）, Volmageddon (2018-02): 1.61, Fed Hike (2022-06): 2.05\n\n## 實務意義\n目前 α=2.14（61th 百分位），中等水平。不需要特別警戒，但值得持續監控。",
   "category": "milestone",
   "phase": "Phase_K",
   "details": {},
@@ -12,10 +12,10 @@
     "SPY",
     "EEM",
     "TLT",
-    "\u5c3e\u90e8\u98a8\u96aa",
-    "\u8de8\u5b78\u79d1"
+    "尾部風險",
+    "跨學科"
   ],
   "created_at": "2026-03-23T04:55:32.819387+00:00",
-  "published_at": "2026-03-23T04:55:32.819387+00:00",
-  "status": "draft"
+  "published_at": "2026-03-23T07:03:00.814287+00:00",
+  "status": "published"
 }
