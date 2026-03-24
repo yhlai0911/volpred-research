@@ -10346,5 +10346,40 @@
       "adaptive-GARCH",
       "gamma-trend"
     ]
+  },
+  {
+    "id": "K1040",
+    "title": "K198: Realized GARCH on daily — NULL. Measurement eq feedback exists but too noisy",
+    "content": "[提出: Claude (Hansen 2012), 執行: Claude] Data: SPY/QQQ/GLD/TLT/BTC daily OHLC, OOS 2023-2024. R-GARCH 0/15 DM sig. phi≈1.0, lambda=0.245, sigma_u too noisy. Need 5-min RV.",
+    "timestamp": "2026-03-24T14:23:39.871625",
+    "tags": [
+      "Realized-GARCH",
+      "null-result"
+    ]
+  },
+  {
+    "id": "K1041",
+    "title": "K199: VIX Futures Basis — IS passes Harvey (t=3.52) but OOS overfits. GARCH-X NS",
+    "content": "[提出: Claude, 執行: Claude] Data: VIX(^VIX)+VIX3M(^VIX3M)+SPY daily yfinance. Method: contango ratio=VIX3M/VIX, manual MLE GJR-GARCH-X (basis in variance eq), 5-period cross-OOS VT overlay. Results: Contango 89% of time. Backwardation: RV 5-7x higher. IS: basis partial r|VIX=-0.22, t=-3.52 PASSES Harvey, ΔR²=+3.6%. OOS: R² drops from -3.88 to -8.29 (overfits). GARCH-X(ratio) DM t=+0.68 NS. GARCH-X(change) significantly WORSE (DM t=+2.64). VT overlays: none sig vs 12/VIX. Verdict: IS signal real but OOS fragile. VIX sufficient for practical purposes.",
+    "timestamp": "2026-03-24T14:31:20.716506",
+    "tags": [
+      "VIX-futures",
+      "contango",
+      "basis",
+      "overfitting",
+      "Harvey-pass-IS"
+    ]
+  },
+  {
+    "id": "K1042",
+    "title": "K200: ★★★ 200-Experiment Meta-Analysis — VIX sufficient 31x, QLIKE ceiling 36x, 50/50 8x validated",
+    "content": "[提出: Claude, 執行: Claude] Descriptive meta-analysis of 978 knowledge entries + 114 experiment records. Results: 736 research entries, 33 breakthroughs, 33 strong, 81 positive, 129 null. TOP 10 findings: (1) VIX sufficient 31x (2) VT Sharpe NS but MDD sig (3) 50/50 unbeatable 8x (4) Gamma taxonomy rho=0.874 (5) QLIKE ceiling 36x (6) Asia-Pacific TZ arbitrage (7) Diversification amplifies leverage 2.8-4.6x (8) VT insurance 1-4%/yr (9) Skewed-t best VaR (10) GJR-GARCH MCS superior. TOP 5 methodology lessons: timing bias, cross-OOS mandatory, measurement tautology, small N inflation, TZ c2c/o2o gap. AI hit rates: Gemini 19%, Codex 18%, Claude 16%, User 16%.",
+    "timestamp": "2026-03-24T14:31:20.716506",
+    "tags": [
+      "meta-analysis",
+      "summary",
+      "milestone",
+      "important"
+    ]
   }
 ]

@@ -434,9 +434,10 @@ CLAUDE.md 不重複研究內容。需要查閱研究結論時直接讀 `research
 - [ ] V0.10: Supabase heartbeat cron 防 pause
 
 ### 最高優先（SEO — 目前 Google 完全找不到）
-- [ ] W1.1: robots.txt + sitemap.xml + favicon + manifest.json
-- [ ] W1.2: OG tags（全站預設 + 文章動態 generateMetadata）
-- [ ] W1.3: JSON-LD 結構化資料（Article, FAQPage, WebSite）
+- [x] W1.1: robots.txt + sitemap.xml + favicon + manifest.json
+- [x] W1.2: OG tags（全站預設 + 文章動態 generateMetadata）
+- [x] W1.3: JSON-LD 結構化資料（Article, WebSite）
+- [ ] W1.4: Google Search Console 註冊 + 提交 sitemap（需手動）
 
 ### 高優先（產品化 + 留存）
 - [ ] W2.1: 首頁 Hero Section（價值主張 + CTA）
@@ -446,10 +447,10 @@ CLAUDE.md 不重複研究內容。需要查閱研究結論時直接讀 `research
 - [ ] W5.1: 加入 Plausible/Umami Analytics
 
 ### 中優先（信任 + 體驗）
-- [ ] W4.1: 「關於」頁面（研究背景、團隊）
+- [x] W4.1: 「關於」頁面（研究背景、團隊）
 - [ ] W3.1: Email/LINE 訂閱系統
 - [ ] W3.3: 新手指南頁面（`/guide`）
-- [ ] W4.3: 免責聲明頁面
+- [x] W4.3: 免責聲明頁面
 - [ ] W5.3: 亮色模式修復 + 手機導覽優化
 
 ## Error Log

@@ -636,6 +636,9 @@
 - [x] K195: ★★★ Copula TDA Multi-Pair — **26/66 pairs pass Bonferroni OOS**！Genuine VIX crack。Top: EEM_XLK (t=-12.27), SPY_EEM (t=-9.65)。但 SPY-GLD FLIPS sign OOS。GARCH-X FAILS (DM NS)。Statistical detection ≠ forecasting improvement
 - [x] K196: 5-min RV Pilot（47 天 PRELIMINARY）— RV AC(1)=0.414 vs c2c AC(1)=-0.118。c2c 本質不可預測=GARCH ceiling 根因。BPV 最可預測。需 252+ 天
 - [x] K197: ★ Persistence Break — 4/5 CUSUM 顯著但 0/5 adaptive GARCH 改善。TLT/BTC partial r★（無 IV proxy 資產）。Gamma trending UP（leverage 增強中）
+- [x] K198: Realized GARCH on daily — NULL。Measurement eq lambda=0.245 但 sigma_u 太大。R-GARCH wins 8/15 但 0/15 DM sig。Daily OHLC range ≈ |r_t|，GARCH 已處理。需 5-min RV
+- [x] K199: VIX Futures Basis — IS passes Harvey (t=-3.52, ΔR²=+3.6%) 但 OOS overfits (R²: -3.88→-8.29)。GARCH-X NS。Contango 89% of time。Backwardation RV 5-7x higher
+- [x] K200: ★★★ 200-Experiment Meta-Analysis — VIX sufficient 31x, QLIKE ceiling 36x, 50/50 8x validated。33 breakthroughs, 129 null。AI hit rates: Gemini≈Codex≈Claude≈16-19%
 
 ### Session 2026-03-24 進度
 **13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness

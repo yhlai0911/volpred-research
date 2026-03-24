@@ -1,0 +1,277 @@
+{
+  "meta": {
+    "experiment_id": "K200",
+    "title": "200-Experiment Meta-Analysis",
+    "date": "2026-03-24T14:24:59.353347",
+    "total_knowledge_entries": 978,
+    "total_experiment_records": 114
+  },
+  "category_distribution": {
+    "vol_prediction": 295,
+    "var_methods": 34,
+    "param_sensitivity": 15,
+    "descriptive": 99,
+    "methodology": 63,
+    "literature": 39,
+    "leverage_gamma": 36,
+    "reference": 3,
+    "strategy": 163,
+    "portfolio": 14,
+    "other": 13,
+    "platform": 10,
+    "mechanism": 33,
+    "null_result": 3,
+    "peer_review": 18,
+    "cross_asset": 47,
+    "content": 9,
+    "behavioral": 4,
+    "taiwan": 10,
+    "crisis": 6,
+    "alt_data": 11,
+    "research_direction": 4,
+    "network": 2,
+    "live_perf": 1,
+    "experiment_record": 46
+  },
+  "result_distribution": {
+    "null": 129,
+    "descriptive": 649,
+    "positive": 81,
+    "correction": 53,
+    "strong_positive": 33,
+    "breakthrough": 33
+  },
+  "source_distribution": {
+    "Claude": 613,
+    "User": 58,
+    "Gemini": 43,
+    "Codex": 22
+  },
+  "research_entry_count": 736,
+  "vix_sufficient_confirmations": 31,
+  "qlike_ceiling_mentions": 36,
+  "null_result_count": 108,
+  "confidence_stats": {
+    "mean": 0.876,
+    "high_conf_count": 550,
+    "low_conf_count": 18
+  },
+  "success_rates_by_category": {
+    "alt_data": {
+      "total": 11,
+      "positive": 2,
+      "null": 5,
+      "rate": 18.2
+    },
+    "behavioral": {
+      "total": 4,
+      "positive": 1,
+      "null": 0,
+      "rate": 25.0
+    },
+    "crisis": {
+      "total": 6,
+      "positive": 2,
+      "null": 2,
+      "rate": 33.3
+    },
+    "cross_asset": {
+      "total": 47,
+      "positive": 9,
+      "null": 12,
+      "rate": 19.1
+    },
+    "leverage_gamma": {
+      "total": 36,
+      "positive": 1,
+      "null": 1,
+      "rate": 2.8
+    },
+    "mechanism": {
+      "total": 33,
+      "positive": 13,
+      "null": 3,
+      "rate": 39.4
+    },
+    "methodology": {
+      "total": 63,
+      "positive": 4,
+      "null": 7,
+      "rate": 6.3
+    },
+    "network": {
+      "total": 2,
+      "positive": 0,
+      "null": 0,
+      "rate": 0.0
+    },
+    "null_result": {
+      "total": 3,
+      "positive": 0,
+      "null": 2,
+      "rate": 0.0
+    },
+    "param_sensitivity": {
+      "total": 15,
+      "positive": 3,
+      "null": 1,
+      "rate": 20.0
+    },
+    "portfolio": {
+      "total": 14,
+      "positive": 3,
+      "null": 0,
+      "rate": 21.4
+    },
+    "strategy": {
+      "total": 163,
+      "positive": 42,
+      "null": 30,
+      "rate": 25.8
+    },
+    "taiwan": {
+      "total": 10,
+      "positive": 2,
+      "null": 3,
+      "rate": 20.0
+    },
+    "var_methods": {
+      "total": 34,
+      "positive": 4,
+      "null": 4,
+      "rate": 11.8
+    },
+    "vol_prediction": {
+      "total": 295,
+      "positive": 33,
+      "null": 38,
+      "rate": 11.2
+    }
+  },
+  "source_hit_rates": {
+    "Claude": {
+      "total": 613,
+      "positive": 98,
+      "rate": 16.0
+    },
+    "User": {
+      "total": 58,
+      "positive": 9,
+      "rate": 15.5
+    },
+    "Codex": {
+      "total": 22,
+      "positive": 4,
+      "rate": 18.2
+    },
+    "Gemini": {
+      "total": 43,
+      "positive": 8,
+      "rate": 18.6
+    }
+  },
+  "top_10_findings": [
+    {
+      "rank": 1,
+      "title": "VIX is the sufficient statistic for VT",
+      "detail": "21+ confirmations across VIX term structure, VVIX, SKEW, credit spreads, yield curves, AAII, CNN Fear&Greed, Google Trends, CAPE, MOVE, macro, and more. No additional indicator adds value once VIX is included.",
+      "phases": "J3/J4/J8/J14/J17/J18/K1/G3/G5/T11/T13/T14/K148-K153",
+      "impact": "Simplifies the entire VT framework to a single variable"
+    },
+    {
+      "rank": 2,
+      "title": "VT Sharpe improvement NOT significant; MDD improvement IS",
+      "detail": "VT Sharpe t=0.33 (NS). MDD bootstrap p=0.0004 (highly significant). MDD improvement is mechanical (99% under null). VT value = risk management, not alpha generation.",
+      "phases": "N105/N106/N107/K9/K12/K41",
+      "impact": "Correctly frames VT as insurance, not alpha"
+    },
+    {
+      "rank": 3,
+      "title": "50/50 SPY/GLD is the unbeatable retail portfolio",
+      "detail": "8 independent validations. Sharpe 0.83, MDD -16%. Cannot be beaten by optimization, dynamic allocation, or adding assets. QQQ tail dep lambda_L=0.82; TLT structural break post-2022.",
+      "phases": "K2/K16/K19/K24/K54/K63/K64/K89/Q21",
+      "impact": "Definitive retail investment recommendation"
+    },
+    {
+      "rank": 4,
+      "title": "Leverage direction taxonomy predicts VT mechanism",
+      "detail": "Gamma sign predicts VT behavior: trend follower (gamma>0, equities), contrarian (gamma<0, gold), pure variance mgmt (gamma~0, bonds). 17-asset Spearman rho=0.874 (p=4e-6). EGARCH cross-verified.",
+      "phases": "N94-N98/N135-N142/N171",
+      "impact": "Novel theoretical contribution for Paper 1"
+    },
+    {
+      "rank": 5,
+      "title": "QLIKE ceiling is universal across GARCH variants",
+      "detail": "15+ confirmations. 31 models scored: 52% provide zero/negative value. 14 models x 3 assets: top 7 statistically indistinguishable. Only 5-min RV can potentially break it.",
+      "phases": "K6/Q22/K34/T22-T23/U1",
+      "impact": "Stops futile model complexity search"
+    },
+    {
+      "rank": 6,
+      "title": "Asia-Pacific Time-Zone Arbitrage is structural",
+      "detail": "6/8 local markets pass Harvey (HK/AU/SG/KR/TW/JP). All US-listed ETF controls fail. 13-year rolling: NO decay. Alpha is structural (timezone gap) not statistical.",
+      "phases": "T32-T35/T43/U2/U4",
+      "impact": "Actionable trading strategy for Asia-Pacific investors"
+    },
+    {
+      "rank": 7,
+      "title": "Diversification amplifies leverage effect",
+      "detail": "SPY gamma 2.8x individual stock gamma (50-stock, t=-16.92). Taiwan 4.6x. Japan 0.7x (attenuation). Mechanism: correlation asymmetry.",
+      "phases": "N138/N146/N155-N162",
+      "impact": "Novel finding for Paper 1; explains ETF vs stock VT"
+    },
+    {
+      "rank": 8,
+      "title": "VT insurance pricing: ~1-4%/yr, MDD protection 8/8 decades",
+      "detail": "76-year analysis: mean ~1%/yr (not 4%/yr). VIX era 2-4%/yr, std=2.54%. K36/K39/K40 trilogy: 'insurance compounds' not 'VT hurts long-term'.",
+      "phases": "K36/K39/K40/K41/K85-K87",
+      "impact": "Honest cost-benefit analysis for VT"
+    },
+    {
+      "rank": 9,
+      "title": "Skewed Student-t is the best VaR distribution (6/6 Kupiec)",
+      "detail": "Only method passing all 6 assets. CF-VaR 5/6 (QQQ over-conservative). Master VaR Panel T21: 7x5x3x3=315 cells tested. MLE auto-adapts df+skewness per asset.",
+      "phases": "O11/O14/T21/J20",
+      "impact": "Definitive VaR methodology recommendation"
+    },
+    {
+      "rank": 10,
+      "title": "GJR-GARCH is MCS superior for equity volatility",
+      "detail": "MCS p=0.044 excludes symmetric GARCH. Advantage proportional to skewness (equities only; breaks for BTC). w=2000 recommended. Multi-step advantage amplifies at longer horizons.",
+      "phases": "Phase A-C/K6/R8/T15",
+      "impact": "Core model selection for the research system"
+    }
+  ],
+  "top_5_methodology_lessons": [
+    {
+      "rank": 1,
+      "title": "Same-day timing bias inflates VIX backtest Sharpe by ~1.0",
+      "detail": "VIX_t for r_t: Sharpe 1.98. VIX_t for r_{t+1}: Sharpe 0.81. Mechanism: corr(VIX, SPY)=-0.65. All VIX studies must use lagged weights.",
+      "discovered": "Q10"
+    },
+    {
+      "rank": 2,
+      "title": "Single-period OOS is unreliable; need 5+ cross-OOS periods",
+      "detail": "J9: EWMA beats GARCH in 2023-24 but GARCH wins crisis. T22 GBM ceiling break: 0/15 cross-asset cells significant. |Skewness| N=12 rho=-0.87 collapsed to N=21 rho=-0.086.",
+      "discovered": "J9/T22/T2"
+    },
+    {
+      "rank": 3,
+      "title": "Measurement tautology: proxy choice determines conclusion",
+      "detail": "Rolling Parkinson predicting Parkinson = self-referential (G28). Forward r^2 target: GARCH wins 7/7 assets. Evaluation target matters more than model choice.",
+      "discovered": "I2/R11"
+    },
+    {
+      "rank": 4,
+      "title": "Small cross-sectional samples produce inflated correlations",
+      "detail": "|Skewness|: N=12 rho=-0.87 -> N=21 rho=-0.086. Gamma-mechanism: N=7 rho=1.000 -> N=12(all) rho=-0.448 (NS). Rule: N>=15 for cross-sectional claims.",
+      "discovered": "T2/Q19"
+    },
+    {
+      "rank": 5,
+      "title": "TZ momentum c2c Sharpe includes uncapturable overnight gap",
+      "detail": "c2c Sharpe 3.09 but o2o only 0.87 (-72%). 78% of alpha in gap (R^2=0.35). Requires position before signal exists.",
+      "discovered": "I8"
+    }
+  ]
+}
