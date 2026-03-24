@@ -654,6 +654,39 @@
 3. 報酬預測（情緒反轉信號）
 4. 台股特有指標（融資融券、三大法人）
 
+### Session 2026-03-23: 31 Experiments (K109-K140) — 理論框架建立
+
+**主題分佈**：vol prediction (9 null), 跳躍式探索 (6), 理論/方法論 (8), 策略/應用 (8)
+**AI 建議品質**：Codex/Gemini 提出 15 方向 → 12 個 ★+ (80%)。Claude 自選 16 個 → 7 個 ★+ (44%)
+
+**★★★ 核心發現（8 個）：**
+- [x] K110: VT Crowding 安全 — tipping point ~40% adoption, VT 是穩定力量 (dampening, non-amplifying)
+- [x] K118: 行為金融 VT 採用障礙 — regret aversion dominant (67% 月份落後, 159 月累計落後), 理論模擬非實證
+- [x] K128: Transfer Entropy (Gemini) — ★★★ VIX 資訊流 asset-dependent: QQQ sender, SPY bidirectional, GLD/EEM receiver → 精煉 VIX sufficient statistic
+- [x] K129: VIX Sufficiency Boundary Map (Codex) — ★★★ economic vs statistical sufficiency 正式定義。VIX3M 統計上可改善但經濟上不可約
+- [x] K130: Decision-Conditioned Model Router (Codex) — ★★★ 90-cell loss tensor, no Pareto-dominant model, 最佳模型是 objective-dependent
+- [x] K132: QLIKE Error Decomposition (Gemini) — ★★★ Capture Rate: SPY 63%, GLD 19%, BTC 15%。SPY 改善需更好 proxy, GLD/BTC 有 80%+ 未捕捉
+- [x] K137: Economic Sufficiency Frontier (Codex) — ★★★ 正式定理: 不存在全域最佳模型。AIR tensor + Blackwell test。EWMA = best generalist, 12/VIX = economic specialist
+- [x] K139: BTC Liquidation ABM (Gemini) — ★★★ 6/7 stylized facts 重現。Bull anti-leverage + Bear normal leverage 由清算機制自然產生
+
+**★★ 重要發現（5 個）：**
+- [x] K124: GJR vs EWMA Crisis — gamma premium 1.23%/crisis avg, GJR 6/6 wins MDD, COVID 最大差異 4.51%
+- [x] K126: QLIKE Ceiling Surrogate Proof (Gemini) — 87% irreducible noise, GJR 接近理論下界
+- [x] K127: VT Insurance Pricing (Codex) — 0.125%/1%MDD, 分散化免費, VT 最深保護但非最便宜
+- [x] K136: BTC Leverage-Crowding (Codex) — regime-dependent gamma (bull -0.09, bear +0.13), volume-conditioned, weekend -31%
+- [x] K138: Hurst Fingerprint (Gemini) — 所有資產 rough (H~0.01), 但不解釋 capture rate 差異。BTC 在成熟 (H 0.033→0.007)
+- [x] K140: Vol Cartography (Gemini) — 108-cell decision matrix, negative recommendations > positive, EWMA universal safe default
+
+**★ 有用發現（4 個）：**
+- [x] K119: Regime Survival Weibull — most persist (shape<1), sideways mean-reverts (1.22) but direction unpredictable
+- [x] K122: DCA Frequency — 頻率不影響終值 (p=0.505), 月度最佳實務, VT 對 DCA 無用
+- [x] K123: VRP Regime — 危機中 VRP 變負 (GFC -2.8%, COVID -12.3%), Jump Compensation 預測最高報酬但 OOS null
+- [x] K125: Retail Implementation — 10yr $100K→$179K, 成本 $49/yr, 每月 5 分鐘
+
+**Null/Descriptive（14 個）：**
+- [x] K109 Hawkes (null), K111 Wavelet (#17), K112 EMD (#18), K113 Order Flow (0/12), K114 Entropy, K115 Pairs (0/7 cointegrated), K116 Tail Risk Parity (50/50 #9), K117 Climate (VIX absorbs), K120 Lead-Lag Network (effective N=2%), K121 VIX Term Structure (redundant)
+- [x] K131 TDA (marginal ΔR²=2.3%), K133 VIX Info Decay (no true decay), K134 Info Topology (coupling ⊥ TE), K135 GLD Inventory (OOS null, vol exogenous)
+
 ### ★★★ 戰略轉向（Codex R6 2026-03-22 diagnosis）
 **核心診斷：日頻 close-to-close variance + QLIKE 這條路已飽和。153+ 實驗確認 GARCH(1,1) 是這個目標的近最優解。**
 

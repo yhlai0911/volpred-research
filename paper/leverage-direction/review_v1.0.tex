@@ -1,0 +1,186 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{enumitem}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries 學術審查報告}\\[0.5em]
+{\large Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection, VaR Compliance, and Volatility Targeting}\\[0.5em]
+{\normalsize 文件類型：期刊論文（目標：Journal of Banking and Finance）}\\
+{\normalsize 審查日期：2026-03-16}\\
+{\normalsize 審查標準：嚴格（結合 Codex/GPT + Gemini + Claude 三方審查）}
+\end{center}
+
+\section*{審查摘要}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{嚴重問題（須修正）} & 8 項 \\
+\textcolor{warncolor}{中度問題（建議修正）} & 9 項 \\
+輕微問題（可選修正） & 6 項 \\
+整體評估 & \textbf{待大幅改進（Major Revision）} \\
+\end{tabular}
+
+\bigskip
+本文嘗試跨資產分析 GARCH 波動率預測，涵蓋模型選擇、VaR 合規與波動率目標策略。研究範圍廣泛、數據量大。但存在嚴重的內部不一致、過度宣稱、引用缺漏等問題，距離 JBF 投稿標準仍有顯著差距。
+
+%═══════════════════════════════════════════════
+\section*{一、邏輯結構審查}
+
+\textcolor{errorred}{\textbf{[E1] 論文結構分散，缺乏統一核心問題。}} 宣稱 5 個 contribution，涵蓋模型選擇、VaR、策略、DL 天花板、diversification amplification——這實質上是 4--5 篇獨立論文。建議：聚焦 2--3 個緊密相關的 contribution（如 leverage taxonomy + model selection + VaR），其餘移至附錄或另文發表。
+
+\textcolor{warncolor}{\textbf{[W1] 第5個 contribution (Hybrid VT) 與第3個 (VT) 高度重疊。}} 讀者無法區分 ``volatility targeting across leverage regimes'' 和 ``Hybrid VT strategy'' 是否為同一件事。建議合併為單一 contribution。
+
+%═══════════════════════════════════════════════
+\section*{二、研究動機與貢獻審查}
+
+\textcolor{warncolor}{\textbf{[W2] 動機充分但 scope 過大。}} 研究動機（leverage direction 在非股票資產的行為）是合理的。但把 VaR、VT、DL、ETF amplification 全部塞入一篇論文，使得每個 topic 都只能淺嘗輒止。
+
+\textcolor{errorred}{\textbf{[E2] ``100\% classification accuracy'' 是循環論證。}} body.tex L231：model selection rule 從同一 rolling-GARCH 框架估計又用來評估自己。12 個 DM comparisons 是極小的 test set。需要真正的 pre-specified out-of-sample test with many more assets。
+
+\textcolor{errorred}{\textbf{[E3] ``forecasting ceiling'' claim 過度宣稱。}} body.tex L17：``cannot be improved by deep learning approaches'' 基於單一資產(SPY)的未詳細報告的 ablation study。應弱化為：``we find no evidence of improvement in our implementation on SPY''。
+
+%═══════════════════════════════════════════════
+\section*{三、文獻回顧審查}
+
+\textcolor{errorred}{\textbf{[E4] 參考文獻嚴重缺漏。}} Bibliography 僅 14 條，但正文引用 30+ 文獻。以下關鍵文獻未收錄在 bibliography 中：
+
+\begin{itemize}[nosep]
+\item Christoffersen (1998) — VaR independence test
+\item Diebold \& Mariano (1995) — forecast comparison
+\item Baur \& McDermott (2010), Baur \& Lucey (2010) — gold safe-haven
+\item BCBS (2006, 2019) — Basel III framework
+\item McNeil, Frey \& Embrechts (2015) — risk management textbook
+\item Bollerslev (1987), Hansen (1994) — Student-t GARCH
+\item Kuester, Mittnik \& Paolella (2006) — VaR comparison
+\item Harvey et al. (2018), Fleming et al. (2001, 2003) — vol targeting
+\item Engle \& Siriwardane (2014) — structural GARCH
+\item Sheppard (2023) — arch package
+\item Kim \& Won (2018), Araya et al. (2024), Bucci (2020) — DL
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{[W3] VIX-managed portfolios 引用不完整。}} body.tex L53：``(2024, International Review of Financial Analysis)'' 缺作者名。
+
+\textcolor{warncolor}{\textbf{[W4] 缺 Harvey (2016) 多重檢定文獻。}} 96 個實驗沒有做 multiple testing correction，應引用 Harvey, Liu \& Zhu (2016) ``...and the Cross-Section of Expected Returns'' 並討論 data mining 風險。
+
+%═══════════════════════════════════════════════
+\section*{四、模型設定與方程式審查}
+
+\textcolor{warncolor}{\textbf{[W5] 方程式中 escaped underscore 問題。}} body.tex L75, L80：\verb|\sigma^2\_t| 應為 \verb|\sigma^2_t|。在 LaTeX math mode 中 \verb|\_| 是錯誤的。
+
+\textcolor{warncolor}{\textbf{[W6] VT weight 方程式未用 equation 環境。}} body.tex L136：用 \verb|$$...$$| 而非 \verb|\begin{equation}|，導致方程式沒有編號。
+
+\textcolor{errorred}{\textbf{[E5] 符號 $\gamma$ 使用不一致。}} 部分位置用 Unicode $\gamma$，部分用 \verb|$\gamma$|。在 Latin Modern 字型中 Unicode 版無法渲染。
+
+%═══════════════════════════════════════════════
+\section*{五、資料與樣本設計審查}
+
+\textcolor{errorred}{\textbf{[E6] 樣本定義嚴重不一致。}}
+
+\begin{itemize}[nosep]
+\item Abstract (main.tex L34): ``fifteen assets'' over ``2005--2026''
+\item Data Section (body.tex L65): ``seven assets'' over ``January 2017 through December 2025''
+\item VT Section (body.tex L305): ``7--16 year periods''
+\item Crisis Analysis (body.tex L382): episodes from ``2008 to 2026''
+\end{itemize}
+
+讀者無法確定實際使用了多少資產和什麼時間範圍。這是 desk reject 級別的問題。
+
+\textcolor{errorred}{\textbf{[E7] 報告數字內部不一致。}}
+
+\begin{itemize}[nosep]
+\item Student-t violations: Table 4 = 18, body.tex cross-asset text = 17
+\item QLIKE scale: Table 3 使用負值 ($-9.034$), Table 6 使用正值 ($0.540$)
+\item Table 4 title: 1507 days, 但其他地方提到 1508 days
+\item Table 2 HAC $t$: SPY = $-8.30$, GLD = $+5.79$ — 符號邏輯需要明確說明
+\end{itemize}
+
+%═══════════════════════════════════════════════
+\section*{六、研究方法審查}
+
+\textcolor{errorred}{\textbf{[E8] 缺乏多重檢定校正。}} 96 個實驗中選出最佳結果，沒有 Bonferroni、FDR、或 Hansen's SPA test。Harvey (2016) 指出新因子需要 $t > 3.0$ 而非 1.96。報告的 Sharpe ratio 需要 50--75\% haircut。
+
+\textcolor{warncolor}{\textbf{[W7] Hybrid VT 大部分是 in-sample。}} body.tex L382：承認 threshold 1.3 是 calibrated on data through 2025，只有 2026 Iran 是 true OOS。``10/10 crisis protection'' 基於回顧性選擇的危機定義。
+
+\textcolor{warncolor}{\textbf{[W8] 機制是 asserted 不是 tested。}} Gold 的 ``fear-driven buying'' 和 ETF 的 ``correlation asymmetry'' 是合理的經濟解釋，但沒有用 flow data、event study、或 structural model 正式檢驗。
+
+\textcolor{warncolor}{\textbf{[W9] $\rho = 0.983$ 基於 N=5。}} body.tex L307：5 個資產的 MaxDD-volatility correlation 被稱為 ``near-perfect''，但 N=5 的相關係數幾乎沒有統計意義。
+
+%═══════════════════════════════════════════════
+\section*{七、版面與格式審查}
+
+\begin{itemize}[nosep]
+\item 作者署名為 ``VolPred Research System'' + ``Autonomous research conducted by Claude Code'' — 這在任何期刊都會被 desk reject
+\item Sub-section 仍有手動編號殘留（如 \verb|\subsection{4.2.1 Rolling Gamma Estimates}|）
+\item \verb|\bigskip\hrule\bigskip| 作為 section 分隔符不符學術規範
+\item 表格全部放在文末而非嵌入對應 section
+\item Appendix B 讀起來像交易手冊而非學術論文
+\end{itemize}
+
+%═══════════════════════════════════════════════
+\section*{具體問題清單}
+
+\subsection*{\textcolor{errorred}{嚴重問題（8 項）}}
+\begin{enumerate}[label=E\arabic*]
+\item 論文結構分散，5 個 contribution 過多
+\item ``100\% classification accuracy'' 循環論證
+\item ``forecasting ceiling'' 過度宣稱
+\item 參考文獻缺漏 15+ 條
+\item 符號 $\gamma$ 使用不一致
+\item 樣本定義不一致（15 vs 7 assets, 2005 vs 2017）
+\item 報告數字內部不一致（violations, QLIKE scale）
+\item 缺乏多重檢定校正
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{中度問題（9 項）}}
+\begin{enumerate}[label=W\arabic*]
+\item Contribution 3 和 5 重疊
+\item Scope 過大
+\item VIX-managed portfolios 引用缺作者
+\item 缺 Harvey (2016) data mining 討論
+\item 方程式 escaped underscore
+\item VT weight 未用 equation 環境
+\item Hybrid VT 大部分 in-sample
+\item 機制 asserted not tested
+\item $\rho = 0.983$ from N=5
+\end{enumerate}
+
+\subsection*{輕微問題（6 項）}
+\begin{enumerate}
+\item 作者署名需要改為真人
+\item Sub-section 手動編號殘留
+\item \verb|\hrule| 分隔符
+\item 表格位置
+\item Appendix B 風格不學術
+\item 部分 Unicode 字元未完全轉換
+\end{enumerate}
+
+%═══════════════════════════════════════════════
+\section*{總結與建議}
+
+\textbf{整體評估}：Major Revision。研究量龐大（96 實驗、7+ 資產、多種模型），但論文需要根本性重組和嚴格化。
+
+\textbf{修訂優先順序}：
+\begin{enumerate}
+\item \textbf{統一樣本定義}：固定資產清單和時間範圍，全文一致
+\item \textbf{修正所有數字不一致}：交叉比對 body.tex 和 tables.tex
+\item \textbf{補齊參考文獻}：至少 30 條 bibliography entries
+\item \textbf{聚焦 contribution}：3 個核心 contribution，其餘移至 appendix
+\item \textbf{弱化過度宣稱}：``ceiling'' → ``upper bound in our tests''，``100\%'' → ``consistent with''
+\item \textbf{加入 multiple testing 討論}：引用 Harvey (2016)，報告 adjusted t-stats
+\item \textbf{修正方程式格式}：統一符號、加編號、修 underscore
+\item \textbf{修正作者署名}：需要真人作者
+\end{enumerate}
+
+\end{document}

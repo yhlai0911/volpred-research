@@ -11,6 +11,7 @@ from rich.table import Table
 
 console = Console()
 OPS_ACTION_CHOICES = (
+    "article_local_backups",
     "cleanup_test_post",
     "daily_update",
     "health_check",
@@ -720,6 +721,36 @@ def ops_cleanup_post(pub_id: str, hard_delete: bool, storage_dir: str) -> None:
         raise click.ClickException(f"Publication not found: {pub_id}")
     console.print(f"[green]Cleaned up[/green] {pub_id}")
     _print_json(result)
+
+
+@ops.command("article-backups")
+@click.option("--repair", is_flag=True, help="Create missing local report JSON files from feed.json when recoverable")
+@click.option("--include-non-published", is_flag=True, help="Also audit drafts/scheduled/unpublished items")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_article_backups(repair: bool, include_non_published: bool, storage_dir: str) -> None:
+    """Audit or repair local article backups for disaster recovery."""
+    from volpred.ops import ensure_article_local_backups
+
+    result = ensure_article_local_backups(
+        repair=repair,
+        include_non_published=include_non_published,
+        storage_dir=storage_dir,
+    )
+    targeted_label = "tracked items" if include_non_published else "published articles"
+    if result["recoverable"] and result["fully_materialized"]:
+        console.print(f"[green]Healthy[/green] all {targeted_label} have standalone local backups")
+    elif result["recoverable"]:
+        console.print(f"[yellow]Recoverable[/yellow] all {targeted_label} exist locally, but some were feed-only")
+    else:
+        console.print(f"[red]Incomplete[/red] some {targeted_label} are missing local body content")
+    console.print(f"  Tracked: {result['tracked_items']}")
+    console.print(f"  Missing report files: {len(result['missing_report_ids'])}")
+    console.print(f"  Bodyless: {len(result['bodyless_ids'])}")
+    if repair:
+        console.print(f"  Repaired this run: {result.get('created_count', 0)}")
+    _print_json({"action": "article_local_backups", **result})
+    if result["bodyless_ids"]:
+        raise click.ClickException("Some tracked articles are missing local body content")
 
 
 @ops.command("strategy-upsert")

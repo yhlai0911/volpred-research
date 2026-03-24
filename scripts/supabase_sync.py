@@ -14,6 +14,8 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from urllib.parse import quote
 
+from scripts.article_backups import ensure_local_article_backups
+
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
 
@@ -475,6 +477,9 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
     Falls back to full sync on first run or if state file is missing."""
     storage = Path(storage_dir)
     counts = {}
+    backup_audit = ensure_local_article_backups(storage, repair=True)
+    counts["article_backup_repairs"] = backup_audit.get("created_count", 0)
+    counts["article_backup_bodyless"] = len(backup_audit.get("bodyless_ids", []))
     state = _load_sync_state(storage)
     from datetime import datetime, timezone
     now = datetime.now(timezone.utc).isoformat()

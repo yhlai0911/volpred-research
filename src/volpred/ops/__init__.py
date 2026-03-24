@@ -1,6 +1,7 @@
 from .content import (
     build_platform_cycle_summary,
     cleanup_test_post,
+    ensure_article_local_backups,
     get_content_release_settings,
     publish_milestone_article,
     preview_release_pool_by_settings,
@@ -29,6 +30,7 @@ __all__ = [
     "build_platform_cycle_summary",
     "cleanup_test_post",
     "deactivate_strategy",
+    "ensure_article_local_backups",
     "enqueue_job",
     "get_member_question_ranking_summary",
     "get_content_release_settings",

@@ -1,7 +1,7 @@
 {
   "id": "mile_689dc27e",
-  "title": "K187: 50/50 SPY/GLD \u7684\u57fa\u77f3\u7a69\u56fa\u55ce\uff1f20 \u5e74\u76f8\u95dc\u6027\u7a69\u5b9a\u5ea6\u6aa2\u9a57",
-  "description": "## \u6458\u8981\n[\u63d0\u51fa: Claude, \u57f7\u884c: Claude]\n50/50 SPY/GLD \u5047\u8a2d\u5169\u8005\u4f4e\u76f8\u95dc\u300220 \u5e74\u6578\u64da\u9a57\u8b49\uff1a\u5168\u6a23\u672c corr=0.058\uff0cFisher z-test \u7121\u7d50\u69cb\u8f49\u8b8a\uff08p=0.75\uff09\u3002\u5e74\u5ea6\u6ce2\u52d5\u5927\uff08-0.35~+0.37\uff09\u4f46\u9577\u671f\u5747\u503c\u7a69\u5b9a\u22480\u3002\u4e0d\u50cf TLT-SPY \u90a3\u6a23\u7d50\u69cb\u5d29\u58de\u3002\u57fa\u77f3\u7a69\u56fa\u3002\n\n## \u6838\u5fc3\u6578\u64da\n- \u5168\u6a23\u672c corr: +0.058\n- \u5e74\u5ea6 corr std: 0.188\uff08\u5927\u5e45\u6ce2\u52d5\uff09\n- \u7d50\u69cb\u8f49\u8b8a: **\u5426**\uff08p=0.75\uff09\n- VIX \u5404 regime: \u5168\u90e8 +0.04~+0.08\n- SPY \u5927\u8dcc\u65e5: GLD \u5e73\u5747 -0.04%\uff08\u4e2d\u6027\uff09\n- \u76ee\u524d 63d: +0.244\uff08\u26a0\ufe0f \u504f\u9ad8\u4f46\u6b77\u53f2\u7bc4\u570d\u5167\uff09\n\n## vs TLT\n| | SPY-GLD | SPY-TLT |\n|---|---------|---------|\n| \u7d50\u69cb\u8f49\u8b8a | **\u5426** (p=0.75) | **\u662f** (p<0.0001) |\n| \u5371\u6a5f\u6642 | \u4e2d\u6027\uff08\u22480\uff09 | 2022\u5f8c\u53cd\u8f49\uff08+0.09\uff09 |\n| \u7a69\u5b9a\u5ea6 | \u6ce2\u52d5\u4f46\u5747\u503c\u56de\u6b78 | \u7d50\u69cb\u6027\u5d29\u58de |",
+  "title": "K187: 50/50 SPY/GLD 的基石穩固嗎？20 年相關性穩定度檢驗",
+  "description": "## 摘要\n[提出: Claude, 執行: Claude]\n50/50 SPY/GLD 假設兩者低相關。20 年數據驗證：全樣本 corr=0.058，Fisher z-test 無結構轉變（p=0.75）。年度波動大（-0.35~+0.37）但長期均值穩定≈0。不像 TLT-SPY 那樣結構崩壞。基石穩固。\n\n## 核心數據\n- 全樣本 corr: +0.058\n- 年度 corr std: 0.188（大幅波動）\n- 結構轉變: **否**（p=0.75）\n- VIX 各 regime: 全部 +0.04~+0.08\n- SPY 大跌日: GLD 平均 -0.04%（中性）\n- 目前 63d: +0.244（⚠️ 偏高但歷史範圍內）\n\n## vs TLT\n| | SPY-GLD | SPY-TLT |\n|---|---------|---------|\n| 結構轉變 | **否** (p=0.75) | **是** (p<0.0001) |\n| 危機時 | 中性（≈0） | 2022後反轉（+0.09） |\n| 穩定度 | 波動但均值回歸 | 結構性崩壞 |",
   "category": "milestone",
   "phase": "Phase_K",
   "details": {},
@@ -9,11 +9,11 @@
     "50/50",
     "SPY",
     "GLD",
-    "\u76f8\u95dc\u6027",
-    "\u7a69\u5b9a\u5ea6",
-    "\u7d50\u69cb\u8f49\u8b8a"
+    "相關性",
+    "穩定度",
+    "結構轉變"
   ],
   "created_at": "2026-03-23T08:07:13.477302+00:00",
-  "published_at": "2026-03-23T08:07:13.477302+00:00",
-  "status": "draft"
+  "published_at": "2026-03-23T11:33:00.884298+00:00",
+  "status": "published"
 }

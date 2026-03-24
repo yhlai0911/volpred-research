@@ -539,7 +539,13 @@ def main():
 
     # --- Sync to Supabase (v2 website) ---
     try:
+        from article_backups import ensure_local_article_backups
         from supabase_sync import sync_article, sync_risk_forecast, sync_strategy_signal, sync_paper_trade
+        backup_audit = ensure_local_article_backups("storage", repair=True)
+        if backup_audit.get("created_count"):
+            print(f"  Local article backups: repaired {backup_audit['created_count']} missing report files")
+        if backup_audit.get("bodyless_ids"):
+            print(f"  Local article backups: WARNING {len(backup_audit['bodyless_ids'])} article(s) still missing body content")
         # Heartbeat is in collect_us_data.py (runs 30min earlier at 05:30)
         # Retry any failed syncs from publish_milestone
         failed_path = Path("storage/.failed_supabase_syncs.json")

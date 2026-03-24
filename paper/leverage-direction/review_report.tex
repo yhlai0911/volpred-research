@@ -1,0 +1,203 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{enumitem}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries LaTeX 學術審查報告}\\[0.5em]
+{\large Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection and Volatility Targeting}\\[0.5em]
+{\normalsize 文件類型：期刊論文（目標：Journal of Banking \& Finance）}\\
+{\normalsize 審查日期：2026-03-17}\\
+{\normalsize 審查標準：嚴格（JBF submission ready）}
+\end{center}
+
+\section*{審查摘要}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{嚴重問題（須修正）} & 7 項 \\
+\textcolor{warncolor}{中度問題（建議修正）} & 8 項 \\
+輕微問題（可選修正） & 6 項 \\
+整體評估 & 待改進（estimated 44/100 per Codex review） \\
+\end{tabular}
+
+\bigskip
+\noindent\textbf{核心問題}：論文有genuinely novel 的核心發現（leverage direction taxonomy + regime-dependent gold），但被過多的 side results 稀釋，且 abstract/introduction 與 body 之間存在不一致。需要 structural rewrite 聚焦於 1--2 個 contributions。
+
+\section*{一、邏輯結構審查}
+
+\textcolor{warncolor}{【中度】Abstract 與 Introduction contributions 數量不一致}
+
+Abstract 宣稱 ``two contributions''，但 Introduction (lines 9--17) 列出三個主要 contributions + 兩個 supporting findings = 5 個 claims。這會讓審查委員質疑作者是否清楚自己的核心貢獻。
+
+\textbf{建議}：統一為 2 個 contributions（leverage taxonomy + gamma-mechanism），VaR 和 complexity ceiling 降為 supporting evidence。
+
+\bigskip
+\textcolor{warncolor}{【中度】Contribution 3（MDD vs Sharpe）與 Contribution 2 重疊}
+
+第三個 contribution（VT 效果因 leverage regime 而異）可能被視為 Contribution 2 (gamma-mechanism) 的 corollary，而非獨立貢獻。
+
+\textbf{建議}：將 MDD/Sharpe 區分整合進 Contribution 2 的討論中。
+
+\section*{二、研究動機與貢獻審查}
+
+\textcolor{okgreen}{【良好】} 研究動機清晰：leverage effect 的跨資產方向差異是一個真實的 gap。Chevallier and Ielpo (2017) 文獻支持足夠。
+
+\textcolor{warncolor}{【中度】Proposition N94 部分 mechanical}
+
+論文自己在 line 518 承認 gamma-to-trend-beta mapping 接近 tautological。雖然提供了 out-of-sample predictive test ($\rho = 0.821$)，但 Q19 的 12-asset test 顯示跨資產失敗 ($\rho = -0.448$, $p = 0.14$)。Proposition 的 scope 已在 body 中修正但 Introduction 未完全反映。
+
+\textbf{建議}：在 Introduction 即明確 state proposition 的 domain（equity-type assets only）。
+
+\section*{三、文獻回顧審查}
+
+\textcolor{errorred}{【嚴重】Line 39：不完整引用}
+
+``research using Markov-switching GJR-GARCH models has linked gold's inverted asymmetry to high-volatility regimes (Journal of International Financial Markets, Institutions and Money)''——缺少作者、年份、卷期。這是嚴重的引用格式錯誤，會導致 desk reject。
+
+\textbf{修正}：查找具體論文（可能是 Arouri et al., 2012 或 Bahloul et al., 2021），補充完整引用。
+
+\bigskip
+\textcolor{warncolor}{【中度】Deep Learning 子節太薄弱}
+
+Section 2.5（lines 57--59）僅 3 句，引用 3 篇論文。如果 DL 不是核心貢獻，應刪除此子節並將 null result 移至 appendix。如果保留，需要更完整的文獻覆蓋。
+
+\bigskip
+\textcolor{warncolor}{【中度】缺少 DCC 和 Copula 文獻}
+
+Body 中使用了 DCC-GARCH 和 Copula 結果（complexity ceiling table），但文獻回顧未引用 Engle (2002) DCC 原始文獻或 Patton (2006) copula 文獻。
+
+\section*{四、模型設定審查}
+
+\textcolor{okgreen}{【良好】} GARCH 和 GJR-GARCH 方程式正確（Eq 1--2）。QLIKE 和 DM test 公式正確。
+
+\textcolor{errorred}{【嚴重】$\sigma_{\text{target}}$ 不一致}
+
+Methodology (line 142) 設定 $\sigma_{\text{target}} = 10\%$，但 Section 5 的 12/VIX 策略使用 $\sigma_{\text{target}} = 12\%$。未解釋此差異。
+
+\textbf{修正}：統一使用一個 target 或明確解釋何時用 10\% 何時用 12\%。
+
+\bigskip
+\textcolor{errorred}{【嚴重】Window size 不一致}
+
+Methodology 使用 $w = 504$（line 91），但 complexity ceiling 和 Phase Q 結果使用 $w = 2000$。未說明何時切換及原因。
+
+\textbf{修正}：在 methodology 中定義所有使用的 window sizes 及其 rationale。
+
+\bigskip
+\textcolor{warncolor}{【中度】缺少 Skewed-t VaR 公式}
+
+Body（line 309）提到 skewed-$t$ 是 best VaR method，但 methodology 只列出 Normal 和 Student-t 公式。
+
+\section*{五、研究方法審查}
+
+\textcolor{errorred}{【嚴重】Yahoo Finance 作為唯一資料來源}
+
+Line 67：``Data are sourced from Yahoo Finance.'' 對於目標 JBF 的論文，Yahoo Finance 可能被視為不夠 reliable。建議補充 Bloomberg/CRSP 交叉驗證或解釋為何 Yahoo Finance 對 ETF 日頻數據足夠。
+
+\bigskip
+\textcolor{errorred}{【嚴重】Transaction costs 處理不當}
+
+Line 142：``Transaction costs are not deducted as we focus on the risk-return tradeoff.'' 但 VT 策略的 turnover 很高（~756\% annually per line 575）。雖然 line 575--576 有事後分析，但應在 methodology 即定義 cost framework。
+
+\bigskip
+\textcolor{warncolor}{【中度】OOS 期間偏少}
+
+主要 OOS 只有 2 個（2023-2024 + 2025）。雖然 line 379 提到額外測試，但 formal OOS design 應更明確。
+
+\section*{六、方程式與符號審查}
+
+\textcolor{okgreen}{【良好】} 5 個方程式全部正確。$\gamma$ 符號全文一致。
+
+\textcolor{warncolor}{【中度】VT alpha decomposition（line 476 附近）未編號}
+
+Section 5.2 的 alpha decomposition equation 應該有正式編號以便引用。
+
+\section*{七、引用規範審查}
+
+\textcolor{errorred}{【嚴重】Line 39 不完整引用}（同第三節）
+
+\textcolor{errorred}{【嚴重】DOI 全部缺失}
+
+32 個 bibitem 沒有任何 DOI。JBF 通常要求 DOI。
+
+\bigskip
+\textcolor{warncolor}{【中度】3 個 forthcoming/working paper 引用}
+
+\begin{itemize}[nosep]
+\item Hood and Raughtigan (2025) -- forthcoming in JPM
+\item Nelson (2025) -- SSRN Working Paper
+\item Xu (2024) -- forthcoming in Critical Finance Review
+\end{itemize}
+
+核心論證不應過度依賴未正式發表的文獻。Hood and Raughtigan 是 Contribution 2 的主要對話對象——如果撤回或大幅修改，會影響論文定位。
+
+\bigskip
+\textcolor{warncolor}{【中度】Citation 格式不一致}
+
+Body 大部分用 inline ``(Author, Year)'' 但 lines 535/546 用 \texttt{\textbackslash citet}。應統一。
+
+\section*{八、具體問題清單}
+
+\subsection*{\textcolor{errorred}{嚴重問題（7 項，須修正）}}
+\begin{enumerate}[nosep]
+\item Line 39：不完整引用（缺作者、年份）
+\item Abstract vs Introduction contribution 數量不一致（2 vs 3+2）
+\item $\sigma_{\text{target}}$ 10\% vs 12\% 不一致
+\item Window size $w = 504$ vs $w = 2000$ 未統一說明
+\item Yahoo Finance 作為唯一資料來源
+\item Transaction costs 未在 methodology 處理
+\item DOI 全部缺失
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{中度問題（8 項，建議修正）}}
+\begin{enumerate}[nosep]
+\item Proposition N94 scope 在 intro 未反映 Q19 boundary conditions
+\item Contribution 3 與 Contribution 2 重疊
+\item DL 文獻子節太薄弱（3 句）
+\item 缺少 DCC/Copula 文獻（Engle 2002, Patton 2006）
+\item 缺少 Skewed-t VaR 公式
+\item 3 個 forthcoming/working paper 引用
+\item Citation 格式不一致（inline vs \texttt{\textbackslash citet}）
+\item OOS 期間偏少（形式上只有 2 個）
+\end{enumerate}
+
+\subsection*{輕微問題（6 項，可選修正）}
+\begin{enumerate}[nosep]
+\item VT alpha decomposition equation 未編號
+\item BTC 早期數據品質未討論
+\item ``Proposition N94'' 命名過於 internal（用 ``Proposition 1'' 更標準）
+\item ``complexity ceiling'' 一詞偏 colloquial，可改用 ``diminishing marginal improvement''
+\item Appendix 的 implementation guide 太 practitioner-oriented
+\item Keywords 包含 ``regime-dependent'' 但此詞過於 generic
+\end{enumerate}
+
+\section*{總結與建議}
+
+\textbf{整體評估}：論文有 publishable 的核心 idea（leverage direction taxonomy + gold regime-dependent leverage），但需要 structural rewrite 才能達到 JBF submission 標準。目前最大風險是 scope creep（太多 stories）和 methodology inconsistencies（window sizes, target vol, transaction costs）。
+
+\textbf{修訂優先順序}：
+\begin{enumerate}
+\item 統一 Abstract/Introduction contributions（2 個，not 5）
+\item 修復 line 39 不完整引用
+\item 統一 $\sigma_{\text{target}}$ 和 window size
+\item 在 methodology 加入 transaction cost framework
+\item 補充 Yahoo Finance 資料品質 justification
+\item 補全 DOI
+\item 將 DL, implementation guide, crisis commentary 移至 online appendix
+\end{enumerate}
+
+\end{document}

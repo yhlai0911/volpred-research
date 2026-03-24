@@ -1,0 +1,17 @@
+{
+  "id": "timing_alpha_20260316",
+  "type": "milestone",
+  "timestamp": "2026-03-16T00:39:57.155868",
+  "title": "Hybrid VT 時序 Alpha：5.77% 年化 (t=3.99)",
+  "description": "## Henriksson-Merton 市場擇時檢定\n\n### 結果\nHybrid VT alpha = 5.77% 年化（t-stat = 3.99, p < 0.001）。\n\n### 機制\n**不是方向擇時，而是波動率管理。**\n- 下跌 β = 0.432（下跌時暴露 43.2%）\n- 上漲 β = 0.390（上漲時暴露 39.0%）\n- γ = -0.043（t = -4.06）：負值代表策略在上漲日暴露更少\n\n### 為什麼有效？\nVT 在所有高波動期間都減少暴露，包括大漲日和大跌日。Alpha 來自波動率縮減的報酬溢價，而非預測市場方向。\n\n### 學術意義\n支持 Moreira & Muir (2017)：VT alpha 不同於傳統市場擇時，是波動率管理的自然結果。",
+  "phase": "L_timing_alpha",
+  "published_at": "2026-03-15T16:39:57.155868+00:00",
+  "category": "milestone",
+  "status": "published",
+  "created_at": "2026-03-15T16:39:57.155868+00:00",
+  "tags": [
+    "Hybrid-VT",
+    "VT策略",
+    "投資策略"
+  ]
+}

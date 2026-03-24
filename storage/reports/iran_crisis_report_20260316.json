@@ -1,0 +1,28 @@
+{
+  "id": "iran_crisis_report_20260316",
+  "type": "milestone",
+  "timestamp": "2026-03-16T00:30:36.502127",
+  "title": "2026 伊朗危機：模型全面驗證報告",
+  "description": "## 2026 伊朗危機即時驗證\n\n### 事件背景\n2/28 美以聯合打擊伊朗（Operation Epic Fury），荷姆茲海峽封鎖。全球 20% 石油供應中斷。\n\n### 市場影響 (截至 3/13)\n| 資產 | YTD 報酬 | 年化波動率 | 波動倍數 |\n|------|---------|----------|---------|\n| USO | +73.4% | 80.5% | 2.52x |\n| EEM | +1.0% | 36.8% | 2.34x |\n| GLD | +15.7% | 25.1% | 1.12x |\n| SPY | -3.1% | 16.2% | 1.14x |\n| TLT | +0.1% | ~10% | 0.99x |\n\n### VaR 模型驗證 (Student-t df=5)\n| 資產 | 模型 | VaR 1% | VaR 5% | 狀態 |\n|------|------|--------|--------|------|\n| SPY | GJR w=504 | 0/49 | 1/49 | ✅ Green |\n| QQQ | GJR w=504 | 0/49 | 1/49 | ✅ Green |\n| GLD | GARCH w=504 | 1/49 | 2/49 | ✅ Green |\n| EEM | GJR w=504 | 1/49 | 3/49 | ✅ Green |\n| USO | GARCH w=504 | 0/49 | 1/49 | ✅ Green |\n\n### γ-based 模型選擇驗證\n- USO γ = -0.14 (inverted, 供應衝擊) → GARCH ✅\n- GLD γ = -0.22 (inverted, 牛市避險) → GARCH ✅\n- EEM γ = +0.34 (standard) → GJR ✅\n- SPY γ > 0 → GJR ✅\n\n### Hybrid VT 策略驗證\n- 2026 YTD: Hybrid VT -1.3% vs BH -3.1%（保護 +1.8pp）\n- VIX/GARCH ratio = 1.68 → VIX 模式啟動，權重 0.38-0.42\n- **歷史 10/10 危機全部提供保護，平均 +8.7pp**\n\n### 核心結論\n1. GARCH 模型體系在重大地緣政治危機中完整有效\n2. γ-based 模型選擇規則跨資產全部正確\n3. Hybrid VT 是類型無關的通用危機保護機制\n4. 油-股傳導是即時的（無 Granger 因果），只能被動反應",
+  "phase": "L_crisis_validation",
+  "details": {
+    "event": "Iran Crisis (Operation Epic Fury)",
+    "date": "2026-02-28",
+    "assets_validated": 6,
+    "all_green_zone": true,
+    "hybrid_vt_protection": "+1.8pp (2026 YTD)",
+    "historical_protection": "10/10 crises, avg +8.7pp"
+  },
+  "published_at": "2026-03-15T16:30:36.502127+00:00",
+  "category": "milestone",
+  "status": "published",
+  "created_at": "2026-03-15T16:30:36.502127+00:00",
+  "tags": [
+    "Hormuz危機",
+    "VaR",
+    "危機分析",
+    "波動率預測",
+    "Hybrid-VT",
+    "GJR-GARCH"
+  ]
+}

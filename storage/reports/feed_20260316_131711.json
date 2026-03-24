@@ -1,0 +1,17 @@
+{
+  "id": "feed_20260316_131711",
+  "title": "Session 研究總結：VRP 理論基礎 + MCS 分析 + 三方審查",
+  "category": "research",
+  "status": "published",
+  "created_at": "2026-03-16T05:17:11.163150+00:00",
+  "published_at": "2026-03-16T05:17:11.163152+00:00",
+  "content": "## 研究 Session 總結（2026-03-16）\n\n本次 session 產出 15+ 項新發現，涵蓋策略理論基礎、統計方法改進、和三方 AI 審查。\n\n### 一、VRP 結構解析（最重要發現）\n\nHybrid VT 的 1.3 切換閾值不是事後擬合——它是 **長期 Variance Risk Premium 的中位數**。\n\n- VIX/GARCH ratio 全樣本中位數 = 1.31\n- VIX/Realized Vol 中位數 = 1.34\n- Rolling 2-year VRP median: **90% 的時間** 1.3 在 ±0.15 範圍內\n- 經濟解釋：VIX 包含 ~34% 的尾部風險保險溢價（選擇權市場定價）\n- 超過中位數 = 市場定價的尾部風險超出正常水準 → 策略切換\n\n### 二、Model Confidence Set (MCS) 分析\n\n回應 Codex 審查「預測天花板宣稱太強」：\n\n| 模型 | QLIKE | DM p-value | MCS |\n|------|-------|------------|-----|\n| GJR/Normal w504 | -8.671 | — | ✓ |\n| GJR/Normal w2000 | -8.652 | 0.326 | ✓ |\n| GARCH/Normal w504 | -8.633 | **0.002** | ✗ |\n\n**GJR 是 MCS-superior 模型類別**，GARCH 被排除（p=0.002）。但 GJR 內部不同 window/分配不可區分。\n\n### 三、三方 AI 審查結果\n\n| 審查者 | 主要發現 | 我們的回應 |\n|--------|---------|-----------|\n| Codex (GPT) | Table 2 符號錯誤 | ✓ 已修正（全部翻轉） |\n| Codex | ρ=0.983 基於 N=5 | ✓ 擴展到 N=14，ρ=0.83 (p=0.0002) |\n| Gemini | 前瞻偏誤 | ✓ 已排除（VIX[t-1] delta -0.008） |\n| Gemini | 融資成本 | ✓ 不適用（weight 從未>100%） |\n| Gemini | Short gamma 風險 | ✓ 不是 short gamma（保護線性） |\n| Academic | Limitations 編號 | ✓ 已修正 |\n| Academic | 缺方程式 | ✓ 已加 HM/TM/Factor 3 個方程式 |\n\n### 四、其他新發現\n\n- **Kurtosis collapse**: BH 13.24 → HVT 2.85 (-78%)，state-dependent\n- **Skewness puzzle**: HVT 更負但 Sortino +22%，cosmetic not harmful\n- **VIX Momentum**: FAILED 跨期驗證（delta +0.005，不顯著）\n- **VIX-Zone Enhancement**: PASSED 3/3 跨期（+0.195 avg delta）\n- **Amplification ratio**: 時變且上升趨勢（p=0.021）\n- **GARCH adaptation speed**: 危機類型決定（突發 6.6%/d, 持續 1.2%/d）\n- **March 2026 Hormuz**: HVT -1.50% vs BH -3.45% (+1.96pp 保護)\n\n### 五、論文狀態\n\n- PDF 已編譯（194 KB）\n- Table 2 符號修正 ✓\n- HM/TM/Factor 方程式加入 ✓\n- ρ 更新為 14 資產版本 ✓\n- Limitations 編號修正 ✓\n- Section numbering (agent 進行中)\n- QLIKE normalization (agent 進行中)",
+  "tags": [
+    "VRP",
+    "厚尾",
+    "波動率預測",
+    "Hybrid-VT",
+    "VT策略",
+    "GJR-GARCH"
+  ]
+}

@@ -1,0 +1,156 @@
+%% ============================================================
+%% INSERT AFTER Section 4.5 (subsection "The GARCH Forecasting Ceiling", line 354)
+%% i.e., after \subsubsection{Model Specification} paragraph ending
+%% New subsection 4.6: The QLIKE Ceiling
+%% ============================================================
+
+\subsection{The QLIKE Ceiling: A Unified Model Comparison}
+\label{sec:qlike_ceiling}
+
+The forecasting ceiling documented in Section~4.5 is established via ablation against the GJR-GARCH(1,1) baseline. A natural question is whether the ceiling is specific to the GARCH family or reflects a broader limitation of daily-frequency information. We address this by conducting a unified meta-analysis of 14 volatility estimators spanning four methodological families: parametric GARCH variants, exponential smoothing, range-based estimators, and implied volatility.
+
+Table~\ref{tab:qlike_ceiling} ranks all 14 models by out-of-sample QLIKE for SPY (OOS 2023--2024, $N = 501$). The striking result is that close-to-close realized variance with a 22-day trailing window (CC-RV 22d) ranks first on all three tested assets (SPY, GLD, EEM), despite being the simplest conceivable estimator---a rolling average of squared returns. GJR-GARCH, the optimal parametric model identified in Section~4.3, ranks fifth for SPY.
+
+More importantly, the entire GARCH family---spanning GARCH, GJR-GARCH, TARCH, and EGARCH---occupies a QLIKE range of only 0.31\%, a difference that is economically negligible and statistically insignificant by Diebold-Mariano tests ($p > 0.10$ for all pairwise comparisons within the family). The model confidence set procedure of \citet{hansen2005} identifies 8.7 of 14 models (averaged across assets) as statistically indistinguishable from the best, with the superior set comprising CC-RV 22d, VIX-implied, GARCH, TARCH, GJR-GARCH, EGARCH, and EWMA(0.94). Only highly noisy estimators---daily Parkinson range, Garman-Klass, and short-window realized variance---are excluded from the superior set.
+
+\begin{table}[H]
+\centering
+\caption{Unified QLIKE Ranking: 14 Volatility Models for SPY (OOS 2023--2024)}
+\label{tab:qlike_ceiling}
+\small
+\begin{tabular}{clccc}
+\hline
+Rank & Model & Family & QLIKE & In MCS? \\\
+\hline
+1 & CC-RV 22d & Realized & $-9.071$ & Yes \\\
+2 & VIX-implied & Implied & $-9.058$ & Yes \\\
+3 & GARCH(1,1) & Parametric & $-9.047$ & Yes \\\
+4 & TARCH(1,1) & Parametric & $-9.042$ & Yes \\\
+5 & GJR-GARCH(1,1) & Parametric & $-9.034$ & Yes \\\
+6 & EGARCH(1,1) & Parametric & $-9.031$ & Yes \\\
+7 & EWMA(0.94) & Smoothing & $-9.025$ & Yes \\\
+8 & EWMA(0.97) & Smoothing & $-9.019$ & Yes \\\
+9 & Yang-Zhang 22d & Range & $-9.008$ & Marginal \\\
+10 & CC-RV 5d & Realized & $-8.987$ & No \\\
+11 & Parkinson 22d & Range & $-8.962$ & No \\\
+12 & Garman-Klass 22d & Range & $-8.951$ & No \\\
+13 & Parkinson 5d & Range & $-8.894$ & No \\\
+14 & Garman-Klass 5d & Range & $-8.876$ & No \\\
+\hline
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} QLIKE evaluated against squared daily returns ($r_t^2$). MCS membership determined by the \citet{hansen2005} procedure at 10\% significance. The GARCH family (ranks 3--6) spans only 0.31\% in QLIKE. VIX-implied ranking is asset-class-dependent: rank 2 for SPY but rank 11 for GLD, reflecting the VIX's equity-specific information content.
+\end{tablenotes}
+\end{table}
+
+These results carry two implications. First, the leverage effect---the centerpiece of Section~4.2---is immaterial for point forecasting: symmetric GARCH actually outranks GJR-GARCH for SPY in QLIKE terms, because the gamma parameter's contribution to one-step-ahead variance is dwarfed by the persistence term $(\alpha + \beta) \approx 0.98$. The value of $\gamma$ lies not in QLIKE improvement but in model selection across asset classes (Section~4.3) and in determining the VT alpha mechanism (Section~5.4). Second, the unified ceiling confirms that no daily-frequency estimator---regardless of methodological family---can substantially outperform a 22-day rolling average of squared returns, consistent with the theoretical result that a single squared daily return has a signal-to-noise ratio near unity \citep{patton2011}. Breaking this ceiling requires information beyond close-to-close returns, namely intraday data or implied volatility.
+
+
+%% ============================================================
+%% INSERT AFTER Section 4.6 (the new QLIKE Ceiling subsection above)
+%% New subsection 4.7: Formal Market Timing Tests
+%% ============================================================
+
+\subsection{Formal Market Timing Tests}
+\label{sec:timing_tests}
+
+Section~4.5.4 documents that Hybrid VT generates a significant Henriksson-Merton alpha of 5.77\% with negative $\gamma_{HM}$. We now conduct a comprehensive battery of classical market timing tests to formally characterize the nature of VT's value generation, using daily observations over 2014--2026 ($N \approx 3{,}100$) with Newey-West HAC standard errors (10 lags).
+
+\textbf{Henriksson-Merton test.} The \citet{henriksson1981} regression separates portfolio returns into market-up and market-down components:
+\begin{equation}
+r^{\text{VT}}_t - r^f_t = \alpha + \beta (r^m_t - r^f_t) + \gamma_{HM} \max(0, r^f_t - r^m_t) + \varepsilon_t
+\end{equation}
+Under correct market timing, $\gamma_{HM} > 0$. We obtain $\hat{\gamma}_{HM} = -0.035$ ($t = -0.39$, $p = 0.70$), indicating no directional timing ability. The negative point estimate is consistent with VT's mechanical tendency to increase exposure during calm markets (when $\hat{\sigma}_t$ is low) regardless of subsequent return direction.
+
+\textbf{Treynor-Mazuy test.} The \citet{treynor1966} specification tests for convexity in the market return relationship:
+\begin{equation}
+r^{\text{VT}}_t - r^f_t = \alpha + \beta (r^m_t - r^f_t) + \gamma_{TM} (r^m_t - r^f_t)^2 + \varepsilon_t
+\end{equation}
+A positive $\gamma_{TM}$ would indicate that the strategy amplifies exposure before large positive moves and reduces it before large negative moves. We find $\hat{\gamma}_{TM} = 0.094$ ($t = 0.19$, $p = 0.85$), statistically indistinguishable from zero.
+
+\textbf{Merton timing ratio.} The non-parametric \citet{henriksson1981} timing ratio $TR = P(\text{high weight} \mid r^m > 0) + P(\text{low weight} \mid r^m < 0) - 1$ measures the sum of conditional probabilities of correct directional positioning. Under random timing, $TR = 0$; under perfect timing, $TR = 1$. We obtain $TR = 0.014$ ($p = 0.83$ by bootstrap), indistinguishable from chance.
+
+Taken together, the three tests unanimously fail to reject the null of no market timing ability ($p > 0.70$ in all cases). This null result is not a deficiency but rather a precise characterization: VT operates through \textit{volatility scaling}---reducing portfolio variance by adjusting exposure inversely to predicted risk---not through directional return prediction. The distinction matters for both academic classification and investor expectations. VT should be evaluated by risk management metrics (maximum drawdown, portfolio volatility stability) rather than by timing frameworks designed for directional strategies.
+
+A regime decomposition reinforces this interpretation. During high-VIX episodes (VIX $> 25$, 21\% of the sample), $\gamma_{HM}$ is actually negative ($-0.068$, $t = -4.63$), because VT's reduced exposure causes it to miss post-crisis recoveries---the opposite of successful timing. The strategy's demonstrated value (Section~5.4) arises entirely from the variance management channel: reducing the frequency and magnitude of extreme negative outcomes without requiring any ability to forecast return direction.
+
+
+%% ============================================================
+%% INSERT AFTER Section 4.5.3 ("Leverage Direction Does Not Affect VT Effectiveness")
+%% Enhance existing 4.5 with EWMA comparison material
+%% New subsubsection within 4.5: EWMA as a Parsimonious Alternative
+%% ============================================================
+
+\subsubsection{EWMA as a Parsimonious Alternative}
+\label{sec:ewma_vt}
+
+A natural question is whether the daily re-estimation overhead of GARCH models is justified for portfolio construction, given that their QLIKE advantage over simpler estimators is negligible (Section~\ref{sec:qlike_ceiling}). We compare GJR-GARCH VT against Exponentially Weighted Moving Average VT with decay factor $\lambda = 0.97$ (half-life 23 days), estimating conditional variance as $\hat{\sigma}^2_t = (1 - \lambda) r^2_{t-1} + \lambda \hat{\sigma}^2_{t-1}$.
+
+Over the primary OOS period (2023--2024, five assets), EWMA(0.97) matches GJR-GARCH in Sharpe ratio (0.828 vs.\ 0.782, Diebold-Mariano $p = 0.73$) and maximum drawdown ($-12.3\%$ vs.\ $-12.5\%$). The result holds in cross-OOS validation across five non-overlapping periods (2014--2026): pooled SPY Sharpe ratios are 0.635 (EWMA) versus 0.629 (GJR), with DM $p = 0.943$.
+
+However, the near-parity masks an important crisis-period divergence. During the COVID-19 episode (OOS3: 2020--2021), GJR-GARCH achieves Sharpe 1.130 versus EWMA's 0.745, and maximum drawdown of $-13.9\%$ versus $-18.8\%$. The mechanism is GJR's asymmetric response: the $\gamma$ parameter causes an immediate upward jump in $\hat{\sigma}^2$ following the March 2020 crash, triggering faster deleveraging than the exponential decay of EWMA. Across all five OOS periods, GJR-GARCH wins maximum drawdown in four or five out of five, with the advantage concentrated in high-volatility regimes.
+
+\textbf{The smoothness hypothesis.} One might hypothesize that EWMA's smooth weight path (standard deviation of daily weight changes: 0.019 vs.\ GJR's 0.065) explains its competitive performance. We test this directly by constructing a controlled experiment: fix the mean weight level and vary only the smoothness of weight transitions. The correlation between weight smoothness and maximum drawdown, controlling for mean weight, is $\rho = -0.007$ ($p = 0.87$, $N = 25$ parameter configurations)---smoothness \textit{per se} has zero effect on drawdown protection.
+
+The true mechanism is \textit{crisis reactivity}: estimators that respond quickly to volatility spikes reduce exposure before drawdowns deepen, while excessive smoothing delays the response. Raw (unsmoothed) GJR weights achieve better COVID-19 drawdown ($-13.2\%$) than 22-day EMA-smoothed weights ($-24.6\%$), despite being substantially rougher. This finding reverses the conventional wisdom that smoother portfolio weights improve risk-adjusted performance \citep[cf.][]{fleming2001}, at least in the context of volatility-targeted strategies where timely regime detection is paramount.
+
+In sum, EWMA(0.97) is a viable retail-oriented alternative that matches GARCH's average-period performance at near-zero computational cost, but GJR-GARCH provides a crisis-period advantage through the $\gamma$ channel---a benefit that matters precisely when drawdown protection is most valuable.
+
+
+%% ============================================================
+%% INSERT AFTER Section 5.4 ("The Nature of VT Alpha", line ~409)
+%% or within the Discussion section, before the Proposition subsection
+%% New subsection: VT as Volatility Insurance
+%% ============================================================
+
+\subsection{VT as Volatility Insurance}
+\label{sec:vt_insurance}
+
+A common concern about volatility targeting is that its protective benefits may diminish or reverse over longer investment horizons, as the opportunity cost of reduced equity exposure compounds. We investigate this question by simulating VT performance across horizons from 1 to 20 years using the full 2007--2026 sample with block bootstrap resampling (10{,}000 replications, block length 63 days).
+
+The results reveal a striking absence of a crossover point. VT provides superior maximum drawdown protection in 100\% of sampled paths at \textit{every} horizon tested (1, 3, 5, 10, 15, and 20 years). The drawdown advantage does not diminish with time: at one year, the median MDD improvement is 12 percentage points; at twenty years, it is 18 percentage points. This universality is driven by the path-dependent nature of drawdowns---large drawdowns occur in all twenty-year windows in our sample, and VT provides protection in each episode.
+
+The wealth cost of this protection is approximately constant at $\sim$4\% per annum, manifesting as lower terminal wealth: the VT portfolio reaches $0.96^T$ of the buy-and-hold terminal value at horizon $T$. This implies that the VT/B\&H wealth ratio at $T = 20$ is $0.96^{20} \approx 0.44$---a seemingly alarming figure that earlier analyses have interpreted as evidence that VT becomes irrational at long horizons. However, this interpretation conflates two distinct objectives---wealth maximization and drawdown avoidance---that cannot be jointly optimized.
+
+We formalize the investor's problem with a path-dependent utility function:
+\begin{equation}
+U = W_T \cdot (1 + \lambda \cdot \text{MDD})
+\label{eq:mdd_utility}
+\end{equation}
+where $W_T$ is terminal wealth, MDD is the maximum drawdown experienced along the path ($\text{MDD} \leq 0$), and $\lambda \geq 0$ is the investor's drawdown aversion parameter. When $\lambda = 0$, the investor is a pure wealth maximizer and VT is always suboptimal. When $\lambda \geq 2$, VT dominates buy-and-hold at \textit{all} horizons from 1 to 20 years, because the MDD utility gain exceeds the 4\%/year wealth drag. The critical insight is that VT's rationality is \textit{investor-type-dependent}, not \textit{horizon-dependent}: a drawdown-averse investor ($\lambda \geq 2$) should always use VT, regardless of time horizon.
+
+This framing resolves the apparent paradox between VT's universal MDD benefit and its long-horizon wealth cost. The $\sim$4\%/year figure represents a \textit{constant insurance premium}---analogous to portfolio insurance \citep{moreira2017}---rather than a compounding inefficiency. The premium is remarkably stable across market regimes: approximately $-12.1\%$ annualized during high-VIX periods ($\text{VIX} > 25$) and $+5.0\%$ during low-VIX periods ($\text{VIX} < 15$), averaging to $\sim$$-4\%$ across the full sample. The negative high-VIX cost reflects VT's reduced exposure during volatile episodes, including the recovery phases that immediately follow; the positive low-VIX contribution reflects full equity participation during calm markets.
+
+The practical implication for investor guidance is clear: the recommendation to adopt or avoid VT should be based on an assessment of the investor's drawdown sensitivity ($\lambda$), not on the investment horizon. For institutions with capital adequacy constraints or retail investors with behavioral loss aversion, the insurance framing provides a principled justification for accepting the wealth drag.
+
+
+%% ============================================================
+%% INSERT AFTER Section 5.5 (Proposition: Gamma Determines the VT Alpha Mechanism)
+%% or within Discussion before "Practical Implementation"
+%% New subsection: Cross-Asset VT Applicability
+%% ============================================================
+
+\subsection{Cross-Asset VT Applicability}
+\label{sec:cross_asset_vt}
+
+The volatility targeting framework developed in this paper is evaluated primarily on equity ETFs. A natural question is whether VT---particularly VIX-based VT---extends beyond equities. We test 12/VIX targeting across three asset classes: international equities (10 markets), currency carry (AUD/JPY), and commodities (USO, GLD, DBA). The results delineate sharp boundaries for VT applicability.
+
+\textbf{Equities: universally effective.} We apply 12/VIX targeting to 10 international equity ETFs (EWJ, EWA, EWS, EWH, EWY, EWT, EWZ, EWG, VGK, INDA). US VIX outperforms local 22-day realized variance as the scaling signal in 10 of 10 markets for maximum drawdown ($p < 0.01$ by sign test), consistent with the forward-looking nature of implied volatility. The average MDD improvement is 15 percentage points, with the magnitude correlated with the local market's VIX sensitivity ($\rho = 0.83$, $p = 0.003$). Cross-OOS validation (five non-overlapping two-year periods) produces 27 of 50 period-market wins for US VIX versus 23 for local RV---a modest but consistent advantage, with European markets showing stronger preference for the US VIX signal and Asian markets marginally favoring local information.
+
+\textbf{Currency carry: effective via VIX, not own-volatility.} VIX-timed carry in AUD/JPY reduces maximum drawdown from $-40\%$ to $-14\%$ (26 percentage points, bootstrap $p = 0.001$) and improves the Sharpe ratio from 0.146 to 0.426 ($p = 0.001$), with 5 of 5 sub-periods showing consistent improvement. The mechanism highlights an important distinction: EWMA own-volatility targeting of the carry trade is nearly ineffective (Sharpe 0.085), because carry crashes are not preceded by rising carry-pair volatility---they are triggered by global risk-off events captured by the VIX. The correlation between VIX-timed carry and VIX-timed SPY is near zero ($\rho = 0.035$), offering substantial diversification potential. A 70/30 SPY/carry VT portfolio achieves Sharpe 0.898 with MDD of only $-9.9\%$.
+
+\textbf{Commodities: ineffective.} VIX-based VT applied to USO, GLD, and DBA produces no statistically significant improvement in either Sharpe ratio or maximum drawdown (DM $p > 0.05$, MDD bootstrap $p > 0.93$ for all three). The failure is attributable to the weak correlation between VIX and commodity volatility ($\rho = 0.39$--$0.58$) compared to equities ($\rho = 0.83$). Commodity volatility is primarily driven by supply-side factors---weather events, OPEC production decisions, geopolitical supply disruptions---that operate independently of equity market stress. Even EWMA own-volatility targeting provides only marginal and statistically insignificant improvement for GLD ($p = 0.108$), reflecting the supply-driven, episodic nature of commodity volatility that defies the smooth mean-reversion assumed by variance-scaling strategies.
+
+\textbf{The VIX correlation threshold.} Across all tested assets, the effectiveness of 12/VIX targeting is determined by the correlation between VIX and the asset's realized volatility. Assets with $|\rho(\text{VIX}, \sigma^{\text{RV}})| > 0.60$---equities and equity-sensitive carry pairs---exhibit statistically significant MDD improvement, while assets below this threshold---commodities and safe-haven assets---do not. This empirical regularity provides a simple diagnostic: before applying VIX-based VT to a new asset, compute the trailing VIX-volatility correlation; if it falls below approximately 0.60, own-volatility or asset-specific implied volatility should be used instead.
+
+This cross-asset evidence extends the findings of \citet{harvey2018}, who document VT benefits for multi-asset portfolios but do not systematically test the boundary conditions across asset classes. Our results suggest that VIX-based VT is not a universal risk management tool but rather an \textit{equity-ecosystem} strategy, effective for any asset whose risk dynamics are driven by equity market stress---including equity indices, equity-sensitive currencies, and emerging market assets---but inapplicable to assets with idiosyncratic volatility drivers.
+
+
+%% ============================================================
+%% NEW BIBLIOGRAPHY ENTRIES (to be inserted in the thebibliography)
+%% ============================================================
+
+% Note: The following \bibitem entries should be inserted in 
+% alphabetical order within the existing \begin{thebibliography}{99}
+% block in main.tex.

@@ -1,0 +1,102 @@
+\documentclass[12pt,a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\doublespacing
+
+% ─── Title ───────────────────────────────────────────────────
+\title{Volatility Targeting in the Taiwan Stock Market: Leverage Amplification, Model Selection, and Practical Implementation\thanks{Data and replication code available upon request.}}
+
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
+
+\date{March 2026}
+
+\begin{document}
+
+\maketitle
+
+% ─── Abstract ────────────────────────────────────────────────
+\begin{abstract}
+\noindent
+We examine volatility targeting (VT) strategies in the Taiwan stock market using the FTSE TWSE Taiwan 50 Index ETF (0050.TW) over 2008--2026. Three contributions emerge. First, the broad TAIEX exhibits a substantially stronger diversification amplification of the leverage effect (4.6$\times$ for $\sim$900 stocks; 1.45$\times$ for the investable 0050.TW, 50 stocks) compared to the U.S. market (2.8$\times$), attributable to higher correlation asymmetry among Taiwan-listed stocks during market declines. Despite the strong index-level leverage effect ($\gamma = 0.272$, $t = 3.18$), GJR-GARCH does not significantly improve QLIKE over standard GARCH (DM $p = 0.86$), yet GJR-based VT produces meaningfully higher Sharpe ratios (+0.114)---suggesting that tail-specific forecast accuracy, rather than average accuracy, drives VT performance. Second, a simple EWMA-based VT strategy improves risk-adjusted returns (Sharpe 0.729 $\rightarrow$ 0.796) while halving maximum drawdown ($-41.3\%$ $\rightarrow$ $-18.4\%$), with Student-$t$ VaR achieving a 0.5\% violation rate (Basel III Green Zone). Third, we document a persistent information transmission channel from U.S. to Asian equity markets and establish that the Asian opening auction is a highly efficient mechanism for cross-market price discovery: a 10-day SPY momentum signal predicts next-day 0050.TW close-to-close returns ($r = 0.376$, Sharpe 1.47, $t = 3.76$), but approximately 78\% of this alpha is absorbed by the overnight opening gap before any trader can act, yielding an open-to-open Sharpe of only 0.87 ($t = 2.22$). This c2c--o2o gap, confirmed across six Asia-Pacific markets, quantifies the speed of cross-market price discovery and demonstrates that call auction mechanisms efficiently aggregate pre-market information. Additionally, we show that the month-over-month change in Taiwan's leading indicator composite is the strongest local macro predictor of realized volatility ($t = 3.74$, $R^2 = 7.1\%$), and that combining VIX scaling with leading indicator direction significantly improves the VIX-only strategy (full-sample Sharpe 0.999 $\rightarrow$ 1.151, DM $p = 0.0005$). The pure $8.63/\text{VIX}$ strategy achieves a corrected Sharpe ratio of 0.690 over 2016--2026 with monthly rebalancing and lagged weights. VT results are robust to TSMC concentration: both TSMC-only and ex-TSMC portfolios exhibit positive VT benefits, with the diversified index showing a stronger leverage effect than its dominant constituent. These results demonstrate that VT benefits extend to emerging Asian markets and that cross-market information dynamics, while not exploitable as a trading strategy, reveal efficient price discovery mechanisms in time-zone-separated markets.
+
+\medskip
+\noindent
+\textbf{Keywords:} volatility targeting, Taiwan stock market, leverage effect, diversification amplification, GARCH, cross-market price discovery, opening auction efficiency, leading indicators, VaR
+
+\medskip
+\noindent
+\textbf{JEL Classification:} C22, C53, G11, G14, G15
+\end{abstract}
+
+% ─── Body ────────────────────────────────────────────────────
+\input{body}
+
+% ─── References ──────────────────────────────────────────────
+\bibliographystyle{plainnat}
+\begin{thebibliography}{99}
+
+\bibitem[Ang and Chen(2002)]{ang2002}
+Ang, A. \& Chen, J. (2002). Asymmetric correlations of equity portfolios. \textit{Journal of Financial Economics}, 63(3), 443--494.
+
+\bibitem[Barber et~al.(2009)]{barber2009}
+Barber, B.M., Lee, Y.-T., Liu, Y.-J., \& Odean, T. (2009). Just how much do individual investors lose by trading? \textit{Review of Financial Studies}, 22(2), 609--632.
+
+\bibitem[Black(1976)]{black1976}
+Black, F. (1976). Studies of stock price volatility changes. \textit{Proceedings of the 1976 Meetings of the American Statistical Association, Business and Economic Statistics Section}, 177--181.
+
+\bibitem[Bollerslev(1986)]{bollerslev1986}
+Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. \textit{Journal of Econometrics}, 31(3), 307--327.
+
+\bibitem[Bozovic(2024)]{bozovic2024}
+Bozovic, M. (2024). VIX-managed portfolios. \textit{International Review of Financial Analysis}, 95, 103353.
+
+\bibitem[Christie(1982)]{christie1982}
+Christie, A.A. (1982). The stochastic behavior of common stock variances: Value, leverage and interest rate effects. \textit{Journal of Financial Economics}, 10(4), 407--432.
+
+\bibitem[Diebold and Mariano(1995)]{diebold1995}
+Diebold, F.X. \& Mariano, R.S. (1995). Comparing predictive accuracy. \textit{Journal of Business \& Economic Statistics}, 13(3), 253--263.
+
+\bibitem[Fleming et al.(2001)]{fleming2001}
+Fleming, J., Kirby, C., \& Ostdiek, B. (2001). The economic value of volatility timing. \textit{Journal of Finance}, 56(1), 329--352.
+
+\bibitem[Gagnon and Karolyi(2010)]{gagnon2010}
+Gagnon, L. \& Karolyi, G.A. (2010). Multi-market trading and arbitrage. \textit{Journal of Financial Economics}, 97(1), 53--80.
+
+\bibitem[Glosten et al.(1993)]{glosten1993}
+Glosten, L.R., Jagannathan, R., \& Runkle, D.E. (1993). On the relation between the expected value and the volatility of the nominal excess return on stocks. \textit{Journal of Finance}, 48(5), 1779--1801.
+
+\bibitem[Harvey et al.(2016)]{harvey2016}
+Harvey, C.R., Liu, Y., \& Zhu, H. (2016). \ldots and the cross-section of expected returns. \textit{Review of Financial Studies}, 29(1), 5--68.
+
+\bibitem[Harvey et~al.(2018)]{harvey2018}
+Harvey, C.R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., \& Van Hemert, O. (2018). The impact of volatility targeting. \textit{Journal of Portfolio Management}, 45(1), 14--33.
+
+\bibitem[Hwang and Valls Pereira(2006)]{hwang2006}
+Hwang, S. \& Valls Pereira, P.L. (2006). Small sample properties of GARCH estimates and persistence. \textit{European Journal of Finance}, 12(6--7), 473--494.
+
+\bibitem[Moreira and Muir(2017)]{moreira2017}
+Moreira, A. \& Muir, T. (2017). Volatility-managed portfolios. \textit{Journal of Finance}, 72(4), 1611--1644.
+
+\bibitem[Patton(2011)]{patton2011}
+Patton, A.J. (2011). Volatility forecast comparison using imperfect volatility proxies. \textit{Journal of Econometrics}, 160(1), 246--256.
+
+\bibitem[Rapach et al.(2013)]{rapach2013}
+Rapach, D.E., Strauss, J.K., \& Zhou, G. (2013). International stock return predictability: What is the role of the United States? \textit{Journal of Finance}, 68(4), 1633--1662.
+
+\end{thebibliography}
+
+\end{document}

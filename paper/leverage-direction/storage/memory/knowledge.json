@@ -1,0 +1,26 @@
+[
+  {
+    "item_id": "8f630748",
+    "category": "crisis_dynamics",
+    "content": "N151: Hormuz crisis oil-SPY dynamics. Pre-crisis SPY-USO corr=0.098 (nearly uncorrelated). During crisis: corr increased to 0.188 but still low. Oil (+46.5%) and equity (+13.6%) moved somewhat independently. VIX avg rose from 16.8 to 19.3. Oil shocks transmit to equity via inflation/recession expectations, not direct correlation.",
+    "evidence": "SPY/USO/VIX daily, pre vs during Hormuz crisis (Feb 28 split)",
+    "confidence": 0.8,
+    "created_at": "2026-03-16T17:22:16.865268"
+  },
+  {
+    "item_id": "affcc131",
+    "category": "strategy",
+    "content": "[\u63d0\u51fa: Claude] R6: Cross-asset straddle timing. CRITICAL: naive VIX-as-IV for QQQ/GLD is flawed (IV mismatch +/-4pp). With corrected simulated IV: all 3 assets pass Harvey t>3 (SPY 4.44, QQQ 4.20, GLD 4.41). Timing signal: SPY genuine (p=0.014), GLD genuine (p=0.008), QQQ NS (p=0.10). WARNING: 2024-2025 subsample degradation. GARCH overestimates vol ~30% creating structural short-straddle advantage.",
+    "evidence": "SPY/QQQ/GLD weekly straddle simulation, OOS 2018-2025, corrected IV = VIX*vol_ratio",
+    "confidence": 0.7,
+    "created_at": "2026-03-17T09:08:17.904223"
+  },
+  {
+    "item_id": "c9a95f6c",
+    "category": "review",
+    "content": "[\u63d0\u51fa: Codex] Paper re-review: 44/100 \u2192 69/100 (+25). Structure 68, Methodology 64, Novelty 78, Writing 71, Tables 77, Length 58. Remaining issues: (1) scope creep still (VaR, Hybrid VT, DCC/copula, crisis, FDR competing for center) (2) window choice looks ex-post (3) Proposition N94 naming too internal, need DCC/copula canonical citations (Engle 2002, Patton 2006).",
+    "evidence": "Codex re-review 2026-03-17 after 16 revisions",
+    "confidence": 0.95,
+    "created_at": "2026-03-17T10:08:15.483552"
+  }
+]

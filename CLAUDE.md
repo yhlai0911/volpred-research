@@ -10,7 +10,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
 - **資料庫**：Supabase（PostgreSQL + Auth + REST API + RPC）
 - **Zeabur Dashboard**：https://zeabur.com/projects/69b5b264800a475a1f82b073
-- **線上網址**：https://volpred.zeabur.app / https://volpred-v3.zeabur.app
+- **線上網址**：https://volpred.zeabur.app
 - **舊版**：https://volpred-old.zeabur.app（過渡期保留）
 
 ### 前端 v4 架構（frontend-v2-fix/）
@@ -151,6 +151,7 @@ uv run python scripts/recalc_metrics.py              # 手動重算績效指標
 uv run python scripts/supabase_sync.py full          # 手動 incremental sync
 uv run python scripts/supabase_sync.py force-full    # 強制全量同步（慎用，IO 大）
 uv run volpred ops health                            # 本地營運健康檢查
+uv run volpred ops article-backups --repair          # 確保每篇已發布文章都有本地單篇 JSON，可用於 DB 災難復原
 uv run volpred ops sync-all                          # 統一入口：手動 Supabase sync
 uv run volpred ops daily-update                      # 統一入口：每日更新
 uv run volpred ops recalc-metrics                    # 統一入口：重算績效指標
@@ -180,8 +181,9 @@ npx zeabur@latest domain list --id <service_id> -i=false --json              # �
 npx zeabur@latest domain create --id <service_id> --domain <subdomain> --env-id 69b5b2646853f6f4f5f6a16d -g -y -i=false  # 綁定 *.zeabur.app 域名（-g 時只寫子域名如 'volpred'，不要寫完整 'volpred.zeabur.app'）
 npx zeabur@latest domain delete --id <domain_id> -i=false -y                 # 刪除域名
 npx zeabur@latest service redeploy --id <service_id> -i=false -y             # 重新部署
-# 部署前端代碼到 volpred-v3:
-cd frontend-v2-fix && npx zeabur@latest deploy --project-id 69b5b264800a475a1f82b073 --service-id 69be521a1066986b9a1692be --json
+# 安全部署前端代碼到 live service（volpred.zeabur.app -> volpred-v3 service）:
+cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh
+# 文件：docs/zeabur-safe-deploy.md
 # 注意：所有 CLI 命令加 -i=false 避免互動式 prompt
 
 # 發佈
@@ -428,6 +430,26 @@ CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）"
 
 ⚠️ **Same-day timing bias warning (Q10)**: VIX_t→r_t 的回測 Sharpe 會被 ρ(VIX,SPY)=+0.65 膨脹 ~1.0。
 正確做法：VIX_t 決定 r_{t+1} 的權重。上表已使用 lagged weights。
+
+### 模型選擇理論框架（K129/K130/K137）
+- **Economic Sufficiency**（K129）：VIX 是 economic sufficient statistic（統計上可改善但經濟上不可約）
+- **Decision-Conditioned Router**（K130）：最佳模型是 objective-dependent，no Pareto-dominant model
+- **Attainable Improvement Ratio (AIR)**（K137）：ceiling-normalized metric，EWMA = best generalist (std=0.259)，12/VIX = economic specialist (std=0.832)
+- **Vol Cartography**（K140）：108-cell decision matrix，negative recommendations > positive，EWMA(0.97) = universal safe default
+- **QLIKE Ceiling**（K126）：87% irreducible noise，GJR 接近理論下界
+- **Capture Rate**（K132）：SPY 63%，GLD 19%，BTC 15%——SPY 改善需更好 proxy，GLD/BTC 有 80%+ 未捕捉
+
+### BTC 特殊機制（K136/K139）
+- **BTC ≠ equity**：gamma 是 regime-dependent（bull γ=-0.09 anti-leverage，bear γ=+0.13 normal）
+- 機制：leveraged position accumulation → forced liquidation → gamma sign flip
+- Weekend vol 僅 weekday 69%（機構缺席）
+- **BTC 用 GARCH(1,1) 不用 GJR**（fixed gamma 反效果）
+- BTC 在成熟：Hurst H 從 0.033（2015-19）降到 0.007（2020-24）（K138）
+
+### 跨資產 Roughness（K138）
+- 所有 6 資產都是 rough volatility（variogram H=0.006-0.020，全 << 0.5）
+- 但 roughness 不解釋 capture rate 差異（rho=0.086, p=0.87）
+- Vol 同時具有局部粗糙（variogram H~0.01）和全域持續（DFA H~0.80）兩種性質
 
 ### 報酬預測信號
 | 信號 | In-sample t | OOS t | 狀態 |

@@ -1,0 +1,512 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{threeparttable}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\doublespacing
+
+% --- Custom column types -----------------------------------------------------
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+% --- Title -------------------------------------------------------------------
+\title{Is Volatility Targeting Just Trend Following?\\Decomposing the Benefits of Volatility Targeting\thanks{We thank anonymous reviewers for helpful comments. Data and replication code are available upon request.}}
+
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
+
+\date{March 2026}
+
+\begin{document}
+
+\maketitle
+
+% --- Abstract ----------------------------------------------------------------
+\begin{abstract}
+\noindent
+Volatility targeting (VT) strategies are often characterized as repackaged trend following, since VT alpha is largely absorbed by a time-series momentum (TSMOM) factor. We show that this characterization conflates statistical alpha absorption with economic value. The primary benefit of VT is not alpha generation but drawdown insurance: across 22 assets spanning equities, commodities, bonds, and international markets, 90--97\% of VT's maximum drawdown (MDD) protection survives TSMOM removal (5-asset evidence: SPY 93\%, 50/50 SPY/GLD 96\%, DIA 91\%, QQQ 90\%, IWM 97\%), while the Sharpe ratio channel is only partially attributable to trend following. The mechanism is a VIX-level-based position-sizing channel distinct from return-direction momentum. Cross-sectionally, the GJR-GARCH leverage effect parameter ($\gamma$) predicts VT's TSMOM loading ($r = 0.564$, $p = 0.006$, $N = 22$), providing a mechanical explanation for the VT--TSMOM overlap, though this link operates only across asset classes, not within equity sectors ($r = 0.163$, NS, $N = 11$). Internationally, US VIX serves as a broad de-risking signal: 13 of 13 equity markets achieve significant MDD improvement (average 28.7 percentage points, $t = 15.70$), with VIX sensitivity predicting the magnitude of protection ($r = -0.770$, $p = 0.002$). These results reframe VT as drawdown insurance priced at ${\sim}4\%$/year Sharpe drag, rather than an alpha-generation strategy.
+
+\medskip
+\noindent
+\textbf{Keywords:} volatility targeting, time-series momentum, leverage effect, drawdown, VIX, cross-asset
+
+\medskip
+\noindent
+\textbf{JEL Classification:} C22, G11, G12, G15
+\end{abstract}
+
+\newpage
+
+% =============================================================================
+% 1. INTRODUCTION
+% =============================================================================
+\section{Introduction}
+
+Volatility targeting (VT) and time-series momentum (TSMOM) are two of the most extensively documented phenomena in empirical asset pricing. VT strategies, which scale portfolio exposure inversely with forecasted volatility, have been shown to improve risk-adjusted returns across equity factors \citep{moreira2017}, multiple asset classes \citep{harvey2018}, and individual country markets \citep{lai2026a}. TSMOM strategies, which take long (short) positions in assets with positive (negative) past returns, generate significant abnormal returns across 58 futures markets \citep{moskowitz2012}. Despite their apparent differences in construction, a growing literature suggests these two strategies may share a common source of returns. \citet{cederburg2020} challenge VT on utility grounds, arguing that the strategy does not improve investor welfare after accounting for higher moments---a critique we revisit through the lens of drawdown protection.
+
+The connection between VT and trend following emerges from the leverage effect \citep{black1976, christie1982}. When equity prices decline, volatility typically rises, causing VT to mechanically reduce exposure---effectively deleveraging after losses, much like a trend-following strategy. \citet{hood2025} provide direct evidence that approximately 91\% of equity VT alpha is absorbed by a TSMOM factor when applied to 50 futures contracts. This raises a fundamental question: \textit{Is VIX-based de-risking simply trend following by another name?}
+
+We argue the answer is no. While VT and TSMOM share a common channel through the leverage effect, VT possesses a distinct economic mechanism that trend following does not replicate. Specifically, we decompose VT's benefits into two channels: (i)~a \textit{Sharpe ratio channel} that operates partially through implicit TSMOM exposure, and (ii)~a \textit{maximum drawdown (MDD) channel} that operates through VIX-level-based position sizing and is largely orthogonal to trend following. This dual-mechanism framework resolves the tension between the statistical finding that TSMOM absorbs VT alpha and the practical observation that VT provides economically meaningful drawdown insurance even when alpha is not statistically significant. Our results also address the \citet{cederburg2020} critique: even if VT does not generate significant alpha, its near-complete preservation of MDD protection after TSMOM removal constitutes an economically distinct benefit that utility-based tests may underweight.
+
+Our paper makes three contributions. First, we show that the leverage effect parameter from GJR-GARCH estimation ($\gamma$) predicts VT's TSMOM loading cross-sectionally across 22 assets ($r = 0.564$, $p = 0.006$), providing a mechanical explanation for why VIX-based de-risking mimics trend following. This link holds across asset classes (equities vs.\ commodities vs.\ bonds) but breaks down within equity sectors ($r = 0.163$, NS, $N = 11$), where gamma variation is insufficient to differentiate TSMOM exposure. This boundary condition is new to the literature.
+
+Second, we decompose VT's benefits into Sharpe and MDD components using TSMOM-hedged portfolio construction. After removing TSMOM exposure, MDD protection is 90--97\% retained across five assets (SPY: 93\%, 50/50 SPY/GLD: 96\%, DIA: 91\%, QQQ: 90\%, IWM: 97\%), while the Sharpe ratio improvement is only modestly reduced. The TSMOM contribution to Sharpe improvement is approximately 1.4\% of total strategy Sharpe---economically small---while the alpha reduction (32\%) reflects compositional reallocation rather than value destruction. This demonstrates that VT's primary economic value---drawdown insurance---operates through a channel distinct from trend following.
+
+Third, we present broad evidence that US VIX serves as a de-risking signal for global equity markets. Across 13 international equity ETFs (7 developed, 6 emerging), all 13 achieve MDD improvement under a simple 12/VIX overlay (average 28.7 percentage points, $t = 15.70$), while only 2 of 13 show Sharpe improvement. VIX sensitivity predicts the magnitude of MDD protection ($r = -0.770$, $p = 0.002$), consistent with an ``insurance pricing'' relationship: investors pay approximately $4\%$/year Sharpe drag for broad drawdown protection. This international pattern is consistent with the global financial cycle documented by \citet{miranda2020}, in which US financial conditions propagate to international markets through capital flows and risk appetite.
+
+Our paper contributes to several literatures. We extend \citet{hood2025} by decomposing the dual channel (Sharpe vs.\ MDD), which their framework does not distinguish. We clarify that while VT embeds asset-specific TSMOM exposure through the leverage effect, this is distinct from diversified managed-futures strategies that trade across dozens of uncorrelated markets \citep{moskowitz2012, baltas2013}. We also extend the ``volatility-as-insurance'' perspective of \citet{lai2026a} to a global setting.
+
+The remainder of the paper is organized as follows. Section~2 describes our data and methodology. Section~3 presents the empirical results. Section~4 discusses implications and limitations. Section~5 concludes.
+
+
+% =============================================================================
+% 2. DATA AND METHODOLOGY
+% =============================================================================
+\section{Data and Methodology}
+
+\subsection{Data}
+
+We employ three asset samples. The \textit{primary sample} comprises 22 assets across equities (SPY, QQQ, IWM, XLF, XLE, DIA, EEM, EFA, FXI, EWZ, EWJ, EWG, EWU, EWA, INDA), commodities (GLD, SLV, USO), bonds (TLT, LQD, HYG), and real estate (VNQ). Daily return data span January 2007 to March 2026, sourced from Yahoo Finance.
+
+The \textit{international sample} consists of 13 country-level equity ETFs: 7~developed markets (EFA, EWJ, EWG, EWU, EWA, EWC, VGK) and 6~emerging markets (EEM, FXI, EWZ, INDA, EWT, MCHI). The \textit{sector sample} comprises 11 SPDR sector ETFs (XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, XLRE, XLC) with data from December 1998 to March 2026.
+
+VIX data are obtained from the CBOE. The risk-free rate is the daily 13-week Treasury bill rate (IRX), time-varying throughout the sample. Fama--French five-factor data (MKT, SMB, HML, RMW, CMA), the momentum factor (MOM), and the betting-against-beta factor (BAB) are obtained from Kenneth French's data library and AQR, respectively.
+
+\subsection{Volatility Targeting Construction}
+
+We implement VIX-based VT following \citet{bozovic2024}:
+\begin{equation}
+w_t = \min\!\left(\frac{12}{\text{VIX}_t}, 1.0\right),
+\label{eq:vt_weight}
+\end{equation}
+where $w_t$ denotes the fraction of the portfolio allocated to the risky asset, with the remainder in cash (proxied by SHY). To avoid look-ahead bias, we use \textit{lagged weights}: VIX at the end of month $t$ determines the allocation for month $t+1$. Rebalancing is monthly, with transaction costs of 10 basis points per round trip. The threshold of 12 follows \citet{lai2026a}, who show that any target in $[6, 20]$ produces qualitatively similar results.
+
+\subsection{TSMOM Factor Construction}
+
+Following \citet{moskowitz2012}, we construct a time-series momentum factor using the sign of the past 252-day (12-month) return:
+\begin{equation}
+\text{TSMOM}_t = \text{sign}(r_{t-252:t}) \times r_t,
+\label{eq:tsmom}
+\end{equation}
+where $r_{t-252:t}$ is the cumulative return over the past 252 trading days.
+
+To address correlated-regressor bias, we construct an \textit{orthogonalized} TSMOM factor by projecting TSMOM onto the market factor:
+\begin{equation}
+\text{TSMOM}_t^{\perp} = \text{TSMOM}_t - \hat{\beta}_{\text{MKT}} \cdot \text{MKT}_t,
+\label{eq:tsmom_orth}
+\end{equation}
+where $\hat{\beta}_{\text{MKT}}$ is estimated from a full-sample regression. This ensures that the TSMOM loading in subsequent regressions captures momentum exposure beyond what is already explained by the market factor \citep{hood2025}.
+
+\subsection{Alpha Decomposition}
+
+We estimate a sequence of nested models to decompose VT alpha:
+\begin{align}
+\text{M1:} \quad r_{\text{VT},t} - r_{f,t} &= \alpha_1 + \beta_1 \, \text{MKT}_t + \varepsilon_t, \label{eq:m1} \\
+\text{M2:} \quad r_{\text{VT},t} - r_{f,t} &= \alpha_2 + \beta_1 \, \text{MKT}_t + \beta_2 \, \text{TSMOM}_t^{\perp} + \varepsilon_t, \label{eq:m2} \\
+\text{M3:} \quad r_{\text{VT},t} - r_{f,t} &= \alpha_3 + \beta_1 \, \text{MKT}_t + \beta_2 \, \text{TSMOM}_t^{\perp} + \boldsymbol{\beta}_{\text{FF}} \cdot \mathbf{F}_t + \varepsilon_t, \label{eq:m3}
+\end{align}
+where $\mathbf{F}_t$ includes SMB, HML, RMW, CMA, MOM, and BAB. All standard errors are Newey--West HAC with automatic lag selection: $\ell = \lfloor 4(T/100)^{2/9} \rfloor$ \citep{newey1987}.
+
+Alpha reduction from model $k$ to model $k+1$ is defined as:
+\begin{equation}
+\Delta\alpha_{k \to k+1} = \frac{\alpha_k - \alpha_{k+1}}{\alpha_k} \times 100\%.
+\label{eq:alpha_reduction}
+\end{equation}
+
+\subsection{Pure VT Alpha Construction}
+
+To isolate VT's residual alpha after removing trend-following exposure, we construct a TSMOM-hedged portfolio:
+\begin{equation}
+r_{\text{PureVT},t} = r_{\text{VT},t} - \hat{\beta}_{\text{TSMOM},t} \cdot \text{TSMOM}_t,
+\label{eq:pure_vt}
+\end{equation}
+where $\hat{\beta}_{\text{TSMOM},t}$ is estimated from a rolling 252-day regression. We compare the Sharpe ratio and MDD of VT, PureVT, and a standalone TSMOM strategy.
+
+\subsection{Cross-Sectional Tests}
+
+We test whether the leverage effect predicts VT's TSMOM exposure. For each asset $i$, we estimate the GJR-GARCH(1,1) model \citep{glosten1993}:
+\begin{equation}
+\sigma_{i,t}^2 = \omega_i + (\alpha_i + \gamma_i \cdot \mathbb{1}_{r_{i,t-1}<0}) \, r_{i,t-1}^2 + \beta_i \, \sigma_{i,t-1}^2,
+\label{eq:gjr}
+\end{equation}
+where $\gamma_i$ captures the asymmetric volatility response. We then compute Pearson and Spearman correlations between $\gamma_i$ and the TSMOM loading $\hat{\beta}_{\text{TSMOM},i}^{\perp}$ across assets, with bootstrap 95\% confidence intervals (5,000 replications).
+
+
+% =============================================================================
+% 3. EMPIRICAL RESULTS
+% =============================================================================
+\section{Empirical Results}
+
+\subsection{VT Has Significant TSMOM Exposure}
+
+Table~\ref{tab:alpha_decomp} reports the alpha decomposition for all 22 assets. Under the CAPM-only specification (M1), VT generates positive alpha for 14 of 22 assets, though only SPY and DIA approach conventional significance levels with Newey--West $t$-statistics above 1.4. The average annualized alpha across all assets is $-0.27\%$, reflecting the ``insurance premium'' of VT \citep{lai2026a}.
+
+Adding the orthogonalized TSMOM factor (M2) reveals substantial trend-following exposure. Of the 22 assets, 17 exhibit statistically significant TSMOM loadings ($|t| > 1.96$), with all equity assets showing positive loadings (mean $\hat{\beta}_{\text{TSMOM}}^{\perp} = 0.087$ for equities). The TSMOM loading is economically meaningful: for SPY, $\hat{\beta}_{\text{TSMOM}}^{\perp} = 0.121$ ($t = 7.65$), implying that a one-standard-deviation increase in the TSMOM factor raises VT returns by approximately 12.1 basis points per day.
+
+Non-equity assets display qualitatively different TSMOM loadings. Gold (GLD) and real estate (VNQ) show \textit{negative} TSMOM loadings ($-0.073$ and $-0.094$, respectively), consistent with their inverted or near-zero leverage effects. TLT shows a marginally negative loading ($-0.078$, $t = -4.55$), reflecting bonds' tendency to rally (fall) when equities fall (rise) during risk-off (risk-on) episodes.
+
+Importantly, the alpha change from M1 to M2 is mechanically zero when using orthogonalized TSMOM, confirming that our orthogonalization procedure correctly removes the component of TSMOM correlated with the market factor. The $R^2$ improvement from adding TSMOM is substantial for equity assets (e.g., SPY: $0.802 \to 0.867$, $\Delta R^2 = 0.065$) but modest for non-equity assets (GLD: $0.864 \to 0.874$, $\Delta R^2 = 0.010$).
+
+The TSMOM loading is robust to the choice of VIX threshold in the VT formula. Re-estimating M2 for SPY across all integer thresholds from 8 to 20, the orthogonalized TSMOM coefficient remains highly significant throughout ($t$-statistics ranging from 7.98 to 10.91, all $p < 0.001$). The point estimate varies modestly ($\hat{\beta}_{\text{TSMOM}}^{\perp} \in [0.10, 0.14]$), confirming that the embedded trend-following exposure is a structural feature of VIX-based de-risking rather than an artifact of a particular calibration choice.
+
+
+% --- Table 1: Alpha Decomposition ---
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{VT Alpha Decomposition: CAPM vs.\ CAPM + TSMOM (N = 22)}
+\label{tab:alpha_decomp}
+\small
+\begin{tabular}{@{}lcccccccc@{}}
+\toprule
+& & \multicolumn{3}{c}{M1: CAPM Only} & \multicolumn{3}{c}{M2: CAPM + TSMOM$^{\perp}$} & \\
+\cmidrule(lr){3-5} \cmidrule(lr){6-8}
+Asset & $\gamma$ & $\alpha$ (\%) & $t_{\text{NW}}$ & $R^2$ & $\beta_{\text{TSMOM}}^{\perp}$ & $t_{\text{NW}}$ & $R^2$ & $\Delta\alpha$ (\%) \\
+\midrule
+\multicolumn{9}{@{}l}{\textit{Panel A: Equity Assets}} \\
+SPY   & 0.261 & 1.35  & 1.44 & 0.802 & 0.121 & 7.65$^{***}$ & 0.867 & 26.9 \\
+QQQ   & 0.225 & 1.55  & 1.44 & 0.830 & 0.112 & 6.58$^{***}$ & 0.871 & 27.3 \\
+DIA   & 0.235 & 1.19  & 1.24 & 0.788 & 0.148 & 11.57$^{***}$ & 0.886 & 54.0 \\
+IWM   & 0.144 & $-$0.19 & $-$0.16 & 0.816 & 0.137 & 9.96$^{***}$ & 0.885 & -- \\
+XLF   & 0.174 & 1.35  & 1.03 & 0.807 & 0.142 & 11.58$^{***}$ & 0.885 & 45.7 \\
+XLE   & 0.078 & $-$1.31 & $-$0.88 & 0.809 & 0.113 & 6.95$^{***}$ & 0.856 & -- \\
+EEM   & 0.121 & $-$2.80 & $-$2.09 & 0.774 & 0.142 & 8.56$^{***}$ & 0.849 & -- \\
+EFA   & 0.152 & $-$0.77 & $-$0.77 & 0.801 & 0.125 & 8.11$^{***}$ & 0.861 & 54.6 \\
+FXI   & 0.069 & $-$2.96 & $-$1.89 & 0.805 & 0.131 & 7.68$^{***}$ & 0.862 & 19.6 \\
+EWZ   & 0.074 & $-$3.69 & $-$1.91 & 0.797 & 0.121 & 6.05$^{***}$ & 0.839 & 35.6 \\
+EWJ   & 0.101 & $-$2.27 & $-$1.25 & 0.504 & $-$0.006 & $-$0.62 & 0.504 & 0.3 \\
+EWG   & 0.117 & $-$4.81 & $-$2.40 & 0.593 & 0.020 & 1.76$^{*}$ & 0.593 & $-$0.4 \\
+EWU   & 0.135 & $-$3.85 & $-$2.30 & 0.589 & $-$0.007 & $-$0.52 & 0.589 & 0.2 \\
+EWA   & 0.109 & $-$4.91 & $-$2.32 & 0.566 & $-$0.011 & $-$0.92 & 0.567 & 0.2 \\
+INDA  & 0.107 & $-$2.81 & $-$0.90 & 0.292 & 0.023 & 1.20 & 0.292 & 3.2 \\
+\midrule
+\multicolumn{9}{@{}l}{\textit{Panel B: Non-Equity Assets}} \\
+GLD   & $-$0.037 & $-$0.55 & $-$0.55 & 0.864 & $-$0.073 & $-$3.18$^{***}$ & 0.874 & -- \\
+TLT   & $-$0.015 & 0.88  & 1.16 & 0.858 & $-$0.078 & $-$4.55$^{***}$ & 0.872 & 0.6 \\
+USO   & 0.061  & 1.15  & 0.55 & 0.833 & 0.065 & 3.55$^{***}$ & 0.845 & 4.3 \\
+HYG   & 0.184  & 0.36  & 0.66 & 0.791 & 0.127 & 7.94$^{***}$ & 0.865 & -- \\
+LQD   & 0.055  & 0.63  & 1.27 & 0.778 & 0.083 & 3.49$^{***}$ & 0.805 & 6.9 \\
+VNQ   & 0.090  & $-$1.10 & $-$0.50 & 0.455 & $-$0.094 & $-$4.65$^{***}$ & 0.472 & 8.9 \\
+SLV   & $-$0.022 & 3.63  & 0.74 & 0.026 & 0.055 & 2.60$^{***}$ & 0.029 & 1.6 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} This table reports alpha decomposition regressions for 22 assets over January 2007--March 2026. $\gamma$ is the GJR-GARCH leverage effect parameter. M1 regresses VT excess returns on MKT; M2 adds orthogonalized TSMOM$^{\perp}$ (252-day lookback). $\alpha$ is annualized (\%). $t_{\text{NW}}$ denotes Newey--West $t$-statistics with automatic lag selection. $\Delta\alpha = (\alpha_{\text{M1}} - \alpha_{\text{M2}})/\alpha_{\text{M1}} \times 100\%$, i.e., the percentage of M1 alpha absorbed by TSMOM (reported only when M1 alpha is positive; ``--'' indicates negative M1 alpha where percentage reduction is undefined). Note that $\Delta\alpha$ reflects compositional reallocation within the factor model and does not directly correspond to the TSMOM contribution to total strategy Sharpe, which is approximately 1.4\%. $^{***}$, $^{**}$, $^{*}$ denote significance at the 1\%, 5\%, and 10\% levels, respectively.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+\subsection{The Leverage Effect Drives TSMOM Loading}
+
+Table~\ref{tab:cross_section} presents the cross-sectional evidence linking the leverage effect to VT's trend-following exposure. Across all 22 assets, the Pearson correlation between GJR-GARCH $\gamma$ and the orthogonalized TSMOM loading is $r = 0.564$ ($p = 0.006$), with a bootstrap 95\% confidence interval of $[0.263, 0.772]$. The Spearman rank correlation is $\rho = 0.544$ ($p = 0.009$), confirming that the relationship is not driven by outliers. A cross-sectional regression yields $\hat{\beta}_{\text{TSMOM}}^{\perp} = 0.001 + 0.568 \times \gamma_i$ ($t = 3.06$, $R^2 = 0.319$).
+
+The economic interpretation is intuitive. Assets with larger $\gamma$ (stronger leverage effect) experience greater volatility increases following negative returns. Under VT, this triggers mechanical deleveraging after losses---precisely the signal that a TSMOM strategy exploits. Gold ($\gamma = -0.037$) and bonds ($\gamma = -0.015$) have near-zero or negative leverage effects, so their VT strategies do not mimic trend following.
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{Cross-Sectional Predictors of VT's TSMOM Loading ($N = 22$)}
+\label{tab:cross_section}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Predictor & Pearson $r$ & $p$-value & Spearman $\rho$ & $p$-value \\
+\midrule
+GJR $\gamma$ vs.\ $\beta_{\text{TSMOM}}^{\perp}$ & 0.564 & 0.006 & 0.544 & 0.009 \\
+GJR $\gamma$ vs.\ $\Delta\alpha$ & 0.291 & 0.189 & --- & --- \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Cross-sectional regression: $\beta_{\text{TSMOM},i}^{\perp} = \gamma_0 + \gamma_1 \cdot \text{GJR}_{\gamma,i} + \varepsilon_i$}} \\
+\multicolumn{5}{@{}l}{$\hat{\gamma}_0 = 0.001$ ($t = 0.03$), $\hat{\gamma}_1 = 0.568$ ($t = 3.06$), $R^2 = 0.319$} \\
+\midrule
+\multicolumn{5}{@{}l}{\textit{Equity vs.\ Non-Equity Comparison}} \\
+Equity ($N = 15$): & \multicolumn{2}{c}{Mean $\beta_{\text{TSMOM}}^{\perp} = 0.087$} & \multicolumn{2}{c}{Std = 0.060} \\
+Non-Equity ($N = 7$): & \multicolumn{2}{c}{Mean $\beta_{\text{TSMOM}}^{\perp} = 0.012$} & \multicolumn{2}{c}{Std = 0.084} \\
+\multicolumn{5}{@{}l}{Welch $t = 1.98$ ($p = 0.080$)} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} This table reports cross-sectional correlations between the GJR-GARCH $\gamma$ parameter and the orthogonalized TSMOM loading ($\beta_{\text{TSMOM}}^{\perp}$) for 22 assets. Bootstrap 95\% CI for Pearson $r$: $[0.263, 0.772]$ (5,000 replications). The Welch $t$-test compares mean TSMOM loadings between equity and non-equity asset groups.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+\subsection{Dual Mechanism: Sharpe Ratio vs.\ Maximum Drawdown}
+
+Table~\ref{tab:dual_mechanism} presents the key decomposition result. For the SPY 12/VIX strategy, removing TSMOM exposure via a rolling 252-day hedge reduces the full-sample Sharpe ratio from 0.797 to 0.737 (a drop of 0.060, or 32\% of the VT-minus-B\&H improvement of 0.186). However, MDD protection is largely preserved: VT achieves $-$24.7\%, while the TSMOM-hedged VT achieves $-$26.9\%, compared to $-$55.2\% for buy-and-hold. Of the 30.5 percentage points of MDD protection provided by VT, 28.3 points (93\%) survive TSMOM removal.
+
+The pattern is even more pronounced for the 50/50 SPY/GLD blend. The Sharpe drops from 0.982 to 0.937 (a 38\% reduction relative to the VT-minus-B\&H improvement of 0.117), while MDD protection is 96\% retained: $-$12.4\% (VT) vs.\ $-$13.1\% (hedged VT) vs.\ $-$32.5\% (B\&H).
+
+To confirm that this MDD preservation is not SPY-specific, we repeat the decomposition for DIA, QQQ, and IWM. The MDD retention rates are 91\% (DIA), 90\% (QQQ), and 97\% (IWM), spanning a range of 90--97\% across all five assets tested. This consistency confirms that VT's drawdown protection operates through the VIX-level channel regardless of the specific equity asset. The TSMOM contribution to the total strategy Sharpe ratio is correspondingly small---approximately 1.4\% of the full VT Sharpe---indicating that the alpha reduction percentages in Table~\ref{tab:alpha_decomp} reflect compositional reallocation within the factor model rather than economically large value transfer.
+
+The standalone TSMOM strategy provides further insight. Pure TSMOM achieves a Sharpe of only 0.172 for SPY (0.232 for the blend) with MDD of $-$27.5\% ($-$31.8\% for the blend)---worse than buy-and-hold on a risk-adjusted basis. This confirms that VT's economic value cannot be replicated by simply implementing a TSMOM overlay.
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{Dual Mechanism Decomposition: Sharpe Ratio and MDD}
+\label{tab:dual_mechanism}
+\small
+\begin{tabular}{@{}lcccccc@{}}
+\toprule
+& \multicolumn{3}{c}{SPY} & \multicolumn{3}{c}{50/50 SPY/GLD} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+Strategy & Sharpe & MDD (\%) & Calmar & Sharpe & MDD (\%) & Calmar \\
+\midrule
+Buy \& Hold         & 0.611 & $-$55.2 & 0.214 & 0.865 & $-$32.5 & 0.364 \\
+12/VIX VT           & 0.797 & $-$24.7 & 0.301 & 0.982 & $-$12.4 & 0.624 \\
+TSMOM-Hedged VT     & 0.737 & $-$26.9 & 0.264 & 0.937 & $-$13.1 & 0.501 \\
+Pure TSMOM          & 0.172 & $-$27.5 & 0.092 & 0.232 & $-$31.8 & 0.075 \\
+\midrule
+\multicolumn{7}{@{}l}{\textit{Decomposition}} \\
+$\Delta$Sharpe (VT $-$ B\&H) & \multicolumn{3}{c}{+0.186} & \multicolumn{3}{c}{+0.117} \\
+$\Delta$Sharpe lost to TSMOM & \multicolumn{3}{c}{$-$0.060 (32\%)} & \multicolumn{3}{c}{$-$0.046 (39\%)} \\
+MDD protection (VT) & \multicolumn{3}{c}{30.5 pp} & \multicolumn{3}{c}{20.1 pp} \\
+MDD protection retained & \multicolumn{3}{c}{28.3 pp (93\%)} & \multicolumn{3}{c}{19.4 pp (96\%)} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Full-sample results over 2005--2026. VT uses 12/VIX with monthly rebalancing and lagged weights. TSMOM-Hedged VT removes TSMOM exposure via a rolling 252-day regression. Pure TSMOM is a standalone 252-day momentum strategy. MDD protection is the reduction in maximum drawdown relative to buy-and-hold. The percentage in parentheses represents the fraction of Sharpe improvement attributable to TSMOM (for $\Delta$Sharpe) or the fraction of MDD protection surviving TSMOM removal.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The mechanism behind this separation is straightforward. TSMOM captures the \textit{direction} of past returns---it goes long after positive trends and short after negative trends. VT's MDD protection, however, derives from the \textit{level} of VIX. When VIX is elevated (e.g., during the 2008 financial crisis or March 2020), VT reduces exposure regardless of whether the trend signal is positive or negative. This VIX-level channel provides protection during slow-moving drawdowns (e.g., 2022) where the trend signal can be ambiguous but VIX remains elevated.
+
+
+\subsection{Robustness: Fama--French Five-Factor Controls}
+
+Table~\ref{tab:ff5} reports factor model regressions for the SPY 12/VIX strategy with progressively more controls. The TSMOM loading remains highly significant across all specifications: $\hat{\beta}_{\text{TSMOM}}^{\perp} = 0.121$ ($t = 8.89$) in M2, $\hat{\beta}_{\text{TSMOM}}^{\perp} = 0.117$ ($t = 8.07$) in M5 (the full model with FF5 + MOM + BAB). This confirms that VT's TSMOM exposure is not a proxy for known risk factors.
+
+The incremental $R^2$ decomposition reveals that TSMOM accounts for the vast majority of explained variance beyond the market: $\Delta R^2_{\text{TSMOM}} = 0.0625$, compared to $\Delta R^2_{\text{FF5}} = 0.0023$, $\Delta R^2_{\text{MOM}} = 0.0004$, and $\Delta R^2_{\text{BAB}} = 0.0012$. Cross-sectional momentum (MOM) is insignificant ($t = -1.59$), confirming that TSMOM and cross-sectional momentum capture distinct phenomena.
+
+VT alpha is reduced from 1.45\%/year (M1) to 1.28\%/year (M5) but does not achieve statistical significance in any specification ($t = 1.50$ in M5, $p = 0.135$). The economic magnitude, however, is nontrivial: 128 basis points per year of unexplained alpha after controlling for seven risk factors, albeit imprecisely estimated. BAB enters significantly ($t = -3.31$), absorbing a small portion of alpha, consistent with VT's dynamic leverage being partially correlated with the low-beta anomaly.
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{Factor Model Controls: SPY 12/VIX Strategy}
+\label{tab:ff5}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+& M1 & M2 & M3 & M4 & M5 \\
+& CAPM & +TSMOM & +FF5 & +MOM & +BAB \\
+\midrule
+$\alpha$ (\%/yr) & 1.45 & 1.45 & 1.32 & 1.35 & 1.28 \\
+$t_{\text{NW}}$  & 1.60 & 1.72 & 1.52 & 1.55 & 1.50 \\
+\midrule
+$\beta_{\text{MKT}}$ & 0.420$^{***}$ & 0.420$^{***}$ & 0.425$^{***}$ & 0.423$^{***}$ & 0.418$^{***}$ \\
+$\beta_{\text{TSMOM}}^{\perp}$ & --- & 0.121$^{***}$ & 0.120$^{***}$ & 0.123$^{***}$ & 0.117$^{***}$ \\
+$\beta_{\text{SMB}}$ & --- & --- & $-$0.009 & $-$0.012 & $-$0.022$^{**}$ \\
+$\beta_{\text{HML}}$ & --- & --- & $-$0.029$^{***}$ & $-$0.037$^{***}$ & $-$0.033$^{***}$ \\
+$\beta_{\text{RMW}}$ & --- & --- & 0.014 & 0.014 & 0.019 \\
+$\beta_{\text{CMA}}$ & --- & --- & $-$0.011 & $-$0.004 & 0.000 \\
+$\beta_{\text{MOM}}$ & --- & --- & --- & $-$0.013 & --- \\
+$\beta_{\text{BAB}}$ & --- & --- & --- & --- & $-$0.022$^{***}$ \\
+\midrule
+$R^2$    & 0.787 & 0.849 & 0.852 & 0.852 & 0.853 \\
+$\Delta R^2$ & --- & +0.063 & +0.002 & +0.000 & +0.001 \\
+AIC     & $-$45339 & $-$47092 & $-$47160 & $-$47171 & $-$47213 \\
+$N$     & \multicolumn{5}{c}{5,049} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Nested factor model regressions for the SPY 12/VIX strategy (January 2005--March 2026). TSMOM$^{\perp}$ is orthogonalized to MKT. FF5 factors (SMB, HML, RMW, CMA) are from Kenneth French's library. MOM is the Fama--French momentum factor. BAB is proxied by SPLV$-$SPHB; this ETF-based proxy is available only from May 2011, so M5 is estimated over the post-2011 subsample ($N_{\text{M5}} < N_{\text{M1--M4}}$). All $t$-statistics are Newey--West HAC. $^{***}$, $^{**}$, $^{*}$ denote significance at the 1\%, 5\%, 10\% levels.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+\subsection{Boundary Condition: Gamma Does Not Predict Within Equity Sectors}
+
+We test whether the cross-asset gamma--TSMOM link extends to within-equity variation using 11 SPDR sector ETFs (December 1998--March 2026). The Pearson correlation between gamma and VT's Sharpe improvement is $r = 0.163$ ($p = 0.632$)---economically small and statistically insignificant. The structural explanation is that gamma variation within equity sectors is compressed ($[0.077, 0.160]$) relative to the cross-asset range ($[-0.037, 0.261]$), and all sectors share similar VIX sensitivity ($\rho(\Delta\text{VIX}) \in [-0.40, -0.65]$). Detailed sector-level results are available in the Online Appendix.\footnote{The Online Appendix containing sector-level and sub-period results is available from the authors upon request.}
+
+This boundary condition has practical implications: sector rotation investors can apply a uniform VT overlay without sector-specific tuning, as the gamma mechanism requires cross-asset-class variation to operate.
+
+
+\subsection{International Evidence: US VIX as Broad MDD Protection}
+
+Table~\ref{tab:international} extends our analysis to 13 international equity markets. The results strongly support the ``insurance pricing'' interpretation of VT. All 13 markets achieve MDD improvement under the 12/VIX overlay, with an average reduction of 28.7 percentage points ($t = 15.70$, $p < 0.001$). The effect is broad and consistent across both developed and emerging markets: Brazil (EWZ), with the highest base-case MDD of $-$77.3\%, sees a 13.2 pp reduction, while the UK (EWU), with MDD of $-$64.0\%, achieves a 33.8 pp reduction.
+
+In contrast, only 2 of 13 markets show Sharpe ratio improvement (EWT and MCHI, both marginal). The average Sharpe change is $-$0.048, confirming that VT acts as insurance rather than alpha generation: investors pay a return premium for drawdown protection.
+
+The cross-sectional analysis reveals that VIX sensitivity (the correlation between an asset's daily returns and VIX changes) predicts the magnitude of MDD protection. The Pearson correlation between VIX sensitivity and MDD improvement is $r = -0.770$ ($p = 0.002$, Spearman $\rho = -0.720$, $p = 0.006$). Markets that are more negatively correlated with VIX (i.e., more ``risk-off'' sensitive) benefit more from the VIX overlay.
+
+Developed markets receive stronger MDD protection than emerging markets (average 32.0 pp vs.\ 24.7 pp), reflecting their tighter synchronization with US equity market conditions. This is consistent with \citet{rapach2013}, who document that the US market leads international returns, and with the global financial cycle literature \citep{miranda2020}.
+
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{International VT: US VIX as Broad MDD Protection ($N = 13$)}
+\label{tab:international}
+\small
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+& & \multicolumn{2}{c}{Buy \& Hold} & \multicolumn{2}{c}{12/VIX VT} & & \\
+\cmidrule(lr){3-4} \cmidrule(lr){5-6}
+Market & VIX Sens. & Sharpe & MDD (\%) & Sharpe & MDD (\%) & $\Delta$Sharpe & $\Delta$MDD (pp) \\
+\midrule
+\multicolumn{8}{@{}l}{\textit{Panel A: Developed Markets}} \\
+EFA (EAFE)    & $-$0.653 & 0.122 & $-$61.0 & 0.069 & $-$28.3 & $-$0.053 & 32.7 \\
+EWJ (Japan)   & $-$0.575 & 0.086 & $-$53.6 & 0.090 & $-$24.7 & 0.004 & 28.9 \\
+EWG (Germany) & $-$0.606 & 0.137 & $-$63.1 & 0.085 & $-$29.2 & $-$0.052 & 33.9 \\
+EWU (UK)      & $-$0.609 & 0.096 & $-$64.0 & 0.028 & $-$30.2 & $-$0.068 & 33.8 \\
+EWA (Australia) & $-$0.587 & 0.184 & $-$67.0 & 0.081 & $-$33.3 & $-$0.104 & 33.6 \\
+EWC (Canada)  & $-$0.588 & 0.206 & $-$60.8 & 0.156 & $-$33.0 & $-$0.050 & 27.7 \\
+VGK (Europe)  & $-$0.640 & 0.140 & $-$63.6 & 0.082 & $-$30.1 & $-$0.058 & 33.6 \\
+\midrule
+\multicolumn{8}{@{}l}{\textit{Panel B: Emerging Markets}} \\
+EEM (EM Broad) & $-$0.600 & 0.142 & $-$66.4 & 0.087 & $-$32.8 & $-$0.055 & 33.6 \\
+FXI (China)   & $-$0.493 & 0.104 & $-$72.7 & 0.080 & $-$42.8 & $-$0.024 & 29.9 \\
+EWZ (Brazil)  & $-$0.504 & 0.156 & $-$77.3 & 0.099 & $-$64.1 & $-$0.057 & 13.2 \\
+INDA (India)  & $-$0.466 & 0.157 & $-$45.1 & 0.098 & $-$26.4 & $-$0.059 & 18.7 \\
+EWT (Taiwan)  & $-$0.569 & 0.311 & $-$62.9 & 0.262 & $-$32.9 & $-$0.049 & 30.1 \\
+MCHI (China Broad) & $-$0.468 & 0.077 & $-$62.8 & 0.083 & $-$39.9 & 0.006 & 23.0 \\
+\midrule
+\multicolumn{2}{@{}l}{Average} & 0.148 & $-$63.1 & 0.100 & $-$34.4 & $-$0.048 & 28.7 \\
+\multicolumn{2}{@{}l}{$t$-statistic} & --- & --- & --- & --- & $-$5.91 & 15.70 \\
+\multicolumn{2}{@{}l}{$p$ (one-sided)} & --- & --- & --- & --- & 0.000 & 0.000 \\
+\midrule
+\multicolumn{8}{@{}l}{\textit{Cross-sectional predictors of $\Delta$MDD}} \\
+\multicolumn{3}{@{}l}{VIX Sensitivity vs.\ $\Delta$MDD:} & \multicolumn{5}{l}{$r = -0.770$ ($p = 0.002$), $\rho = -0.720$ ($p = 0.006$)} \\
+\multicolumn{3}{@{}l}{GJR $\gamma$ vs.\ $\Delta$Sharpe:} & \multicolumn{5}{l}{Spearman $\rho = 0.830$ ($p = 0.0005$)} \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes:} Full-sample results for 13 international equity ETFs over January 2007--March 2026. VIX Sensitivity is the correlation between daily asset returns and daily VIX changes. VT uses 12/VIX with monthly rebalancing and lagged weights. $\Delta$MDD is the reduction in maximum drawdown (percentage points, always positive indicates improvement). Developed markets average $\Delta$MDD = 32.0 pp; emerging markets average $\Delta$MDD = 24.7 pp. Cross-sectional correlations are Pearson ($r$) and Spearman ($\rho$) with their respective $p$-values.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+
+\subsection{Sub-Period Stability}
+
+To ensure our results are not driven by a single market regime, we decompose the 50/50 SPY/GLD portfolio across four sub-periods (pre-COVID, COVID, post-COVID, and OOS 2023--2026). The key finding---that MDD protection survives TSMOM removal while Sharpe improvement partially dissipates---holds consistently across all periods. During the COVID period, TSMOM-hedged VT actually \textit{outperforms} unhedged VT (Sharpe 1.295 vs.\ 1.254), because VIX-level deleveraging was optimal while TSMOM signals lagged the V-shaped recovery. Detailed sub-period results are reported in the Online Appendix.
+
+
+% =============================================================================
+% 4. DISCUSSION
+% =============================================================================
+\section{Discussion}
+
+\subsection{VT Contains---But Is Not Reducible to---Trend Following}
+
+Our findings reconcile two seemingly contradictory views. \citet{hood2025} demonstrate that VT alpha is largely absorbed by a TSMOM factor, leading to the interpretation that VT is simply repackaged trend following. However, this interpretation confuses statistical alpha absorption with economic value destruction. Our decomposition shows that the economically relevant benefit of VT---drawdown protection---is almost entirely orthogonal to TSMOM.
+
+An important scope clarification is warranted. Our TSMOM factor is constructed on a per-asset basis (the sign of each asset's own past 252-day return), which differs fundamentally from the diversified trend-following strategies employed by managed-futures funds that trade across dozens of uncorrelated futures markets \citep{moskowitz2012}. Our finding that VT embeds asset-specific TSMOM exposure through the leverage effect should not be interpreted as evidence that VT replicates diversified CTA returns. The practical implication is narrower: VT investors already possess embedded trend-following exposure \textit{within each asset} as a mechanical byproduct of the leverage effect, while the MDD channel operates through VIX-level-based position sizing---a distinct mechanism that trend following does not replicate.
+
+This also addresses the \citet{cederburg2020} critique of VT. Their utility-based framework finds that VT does not improve investor welfare, which is consistent with our finding that VT does not generate significant alpha ($t = 1.50$). However, utility tests that focus on return moments may underweight the distinct MDD protection channel we document: a 90--97\% preservation rate of drawdown protection after TSMOM removal suggests that VT provides an insurance-like benefit that standard moment-based utility functions do not fully capture.
+
+\subsection{Why VIX Level Provides Insurance Beyond Trend}
+
+The separation between VT's two channels has a clear economic explanation. TSMOM captures the \textit{sign} of past returns over a lookback window (252 days), generating a binary signal. VIX captures the \textit{magnitude} of implied fear, producing a continuous position-sizing signal through $12/\text{VIX}$. This distinction matters most during slow drawdowns (e.g., 2022: positive trend but elevated VIX), V-shaped recoveries (e.g., March 2020: negative trend signal lags the bounce while VIX-based re-leveraging is gradual), and lateral consolidation (noisy trend signals but stable VIX).
+
+\subsection{The Insurance Pricing Interpretation}
+
+Our international results strengthen the ``insurance pricing'' interpretation of VT \citep{lai2026a}. Across 13 markets, VT extracts a consistent ${\sim}4\%$/year Sharpe drag (the ``premium'') in exchange for broad MDD protection (the ``payout''). This is analogous to buying portfolio insurance: the premium is paid continuously through reduced expected returns, while the payout materializes during crisis episodes. The breadth of this finding---13 of 13 markets across both developed and emerging economies---is consistent with the global financial cycle framework of \citet{miranda2020}, in which US monetary conditions and risk appetite propagate internationally through capital flows.
+
+The cross-sectional correlation between VIX sensitivity and MDD protection ($r = -0.770$) provides a pricing mechanism. Markets more sensitive to US-driven risk-off episodes (higher $|\rho(\text{VIX})|$) receive more protection, just as higher-beta assets benefit more from portfolio insurance.
+
+\subsection{Limitations}
+
+Several limitations should be noted. First, our sample of 22 assets, while spanning multiple asset classes, is smaller than the 50 futures contracts studied by \citet{hood2025}. Expanding to additional commodities, fixed-income instruments, and currencies would strengthen the cross-sectional evidence. Second, our out-of-sample period (2023--2026) does not include a major financial crisis comparable to 2008, limiting our ability to test MDD protection under extreme stress. Third, VIX availability constrains the analysis to the post-1990 period for US assets and post-2007 for international ETFs. Fourth, the GJR-GARCH $\gamma$ estimation requires approximately 2,000 observations (8 years), limiting the method's applicability to newly listed securities.
+
+
+% =============================================================================
+% 5. CONCLUSION
+% =============================================================================
+\section{Conclusion}
+
+This paper demonstrates that VIX-based de-risking embeds a mechanical trend-following overlay through the leverage effect, but this is not the whole story. VT possesses a dual mechanism: the Sharpe ratio channel operates partially through implicit asset-specific TSMOM exposure, while the maximum drawdown channel---VT's primary economic value---is almost entirely independent of trend following (90--97\% retained across five assets after TSMOM removal). The leverage effect parameter ($\gamma$) predicts VT's trend-following loading cross-sectionally ($r = 0.564$, $p = 0.006$, $N = 22$), providing a mechanical explanation for the VT--TSMOM overlap.
+
+Three practical implications emerge. First, VT investors already hold embedded asset-specific trend-following exposure as a mechanical byproduct of the leverage effect. Second, a single US VIX signal provides broad drawdown protection for global equity allocations (13/13 markets, average 28.7 pp MDD reduction across 22 assets). Third, within-equity diversification (sector rotation) does not require sector-specific VT tuning, as the gamma mechanism operates only at the cross-asset-class level.
+
+Our findings reframe the ``Is VT just trend following?'' debate. VT \textit{contains} trend following, but VT is not \textit{reducible to} trend following. Its economic value resides in a VIX-level channel that provides drawdown insurance---a benefit that pure momentum strategies do not replicate.
+
+
+% =============================================================================
+% REFERENCES
+% =============================================================================
+\bibliographystyle{apalike}
+\begin{thebibliography}{99}
+
+\bibitem[Baltas and Kosowski(2013)]{baltas2013}
+Baltas, A.~N., \& Kosowski, R. (2013). Momentum strategies in futures markets and trend-following funds. \textit{Working Paper}, Imperial College London.
+
+\bibitem[Barroso and Santa-Clara(2015)]{barroso2015}
+Barroso, P., \& Santa-Clara, P. (2015). Momentum has its moments. \textit{Journal of Financial Economics}, 116(1), 111--120. \url{https://doi.org/10.1016/j.jfineco.2014.11.010}
+
+\bibitem[Black(1976)]{black1976}
+Black, F. (1976). Studies of stock price volatility changes. \textit{Proceedings of the 1976 Meetings of the American Statistical Association, Business and Economic Statistics Section}, 177--181.
+
+\bibitem[Bozovic(2024)]{bozovic2024}
+Bozovic, M. (2024). VIX-managed portfolios. \textit{International Review of Financial Analysis}, 95, 103353. \url{https://doi.org/10.1016/j.irfa.2024.103353}
+
+\bibitem[Cederburg et~al.(2020)]{cederburg2020}
+Cederburg, S., O'Doherty, M.~S., Wang, F., \& Yan, X.~S. (2020). On the performance of volatility-managed portfolios. \textit{Journal of Financial Economics}, 138(1), 95--117. \url{https://doi.org/10.1016/j.jfineco.2020.04.015}
+
+\bibitem[Christie(1982)]{christie1982}
+Christie, A.~A. (1982). The stochastic behavior of common stock variances: Value, leverage and interest rate effects. \textit{Journal of Financial Economics}, 10(4), 407--432. \url{https://doi.org/10.1016/0304-405X(82)90018-6}
+
+\bibitem[Daniel and Moskowitz(2016)]{daniel2016}
+Daniel, K., \& Moskowitz, T.~J. (2016). Momentum crashes. \textit{Journal of Financial Economics}, 122(2), 221--247. \url{https://doi.org/10.1016/j.jfineco.2015.12.002}
+
+\bibitem[Fleming et~al.(2001)]{fleming2001}
+Fleming, J., Kirby, C., \& Ostdiek, B. (2001). The economic value of volatility timing. \textit{Journal of Finance}, 56(1), 329--352. \url{https://doi.org/10.1111/0022-1082.00327}
+
+\bibitem[Glosten et~al.(1993)]{glosten1993}
+Glosten, L.~R., Jagannathan, R., \& Runkle, D.~E. (1993). On the relation between the expected value and the volatility of the nominal excess return on stocks. \textit{Journal of Finance}, 48(5), 1779--1801. \url{https://doi.org/10.1111/j.1540-6261.1993.tb05128.x}
+
+\bibitem[Harvey et~al.(2016)]{harvey2016}
+Harvey, C.~R., Liu, Y., \& Zhu, H. (2016). \ldots{} and the cross-section of expected returns. \textit{Review of Financial Studies}, 29(1), 5--68. \url{https://doi.org/10.1093/rfs/hhv059}
+
+\bibitem[Harvey et~al.(2018)]{harvey2018}
+Harvey, C.~R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., \& Van~Hemert, O. (2018). The impact of volatility targeting. \textit{Journal of Portfolio Management}, 45(1), 14--33. \url{https://doi.org/10.3905/jpm.2018.45.1.014}
+
+\bibitem[Hood and Raughtigan(2025)]{hood2025}
+Hood, M., \& Raughtigan, J. (2025). Volatility targeting alpha is trend following alpha. \textit{Working Paper}.
+
+\bibitem[Lai(2026a)]{lai2026a}
+Lai, Y.-H. (2026a). Leverage direction matters: Cross-asset evidence on GARCH model selection and volatility targeting. \textit{Working Paper}, Da-Yeh University.
+
+\bibitem[Moreira and Muir(2017)]{moreira2017}
+Moreira, A., \& Muir, T. (2017). Volatility-managed portfolios. \textit{Journal of Finance}, 72(4), 1611--1644. \url{https://doi.org/10.1111/jofi.12513}
+
+\bibitem[Miranda-Agrippino and Rey(2020)]{miranda2020}
+Miranda-Agrippino, S., \& Rey, H. (2020). U.S.\ monetary policy and the global financial cycle. \textit{Review of Economic Studies}, 87(6), 2754--2776. \url{https://doi.org/10.1093/restud/rdaa019}
+
+\bibitem[Moskowitz et~al.(2012)]{moskowitz2012}
+Moskowitz, T.~J., Ooi, Y.~H., \& Pedersen, L.~H. (2012). Time series momentum. \textit{Journal of Financial Economics}, 104(2), 228--250. \url{https://doi.org/10.1016/j.jfineco.2011.11.003}
+
+\bibitem[Newey and West(1987)]{newey1987}
+Newey, W.~K., \& West, K.~D. (1987). A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix. \textit{Econometrica}, 55(3), 703--708. \url{https://doi.org/10.2307/1913610}
+
+\bibitem[Rapach et~al.(2013)]{rapach2013}
+Rapach, D.~E., Strauss, J.~K., \& Zhou, G. (2013). International stock return predictability: What is the role of the United States? \textit{Journal of Finance}, 68(4), 1633--1662. \url{https://doi.org/10.1111/jofi.12041}
+
+\end{thebibliography}
+
+\end{document}

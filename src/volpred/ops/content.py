@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
 
+from scripts.article_backups import ensure_local_article_backups
 from volpred.publisher.publisher import Publisher
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
@@ -478,4 +479,19 @@ def cleanup_test_post(pub_id: str, *, hard_delete: bool = False, storage_dir: st
         result["local_report_deleted"] = True
 
     result["supabase_deleted"] = delete_article(pub_id)
+    return result
+
+
+def ensure_article_local_backups(
+    *,
+    repair: bool = False,
+    include_non_published: bool = False,
+    storage_dir: str = "storage",
+) -> dict:
+    result = ensure_local_article_backups(
+        storage_dir=storage_dir,
+        repair=repair,
+        include_non_published=include_non_published,
+    )
+    write_ops_snapshot("article-backups", result, storage_dir=storage_dir)
     return result
