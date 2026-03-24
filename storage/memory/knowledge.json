@@ -10111,5 +10111,20 @@
     ],
     "confidence": 0.92,
     "timestamp": "2026-03-24T11:51:47.788061"
+  },
+  {
+    "id": "K1022",
+    "title": "K145: CV(gamma) model selection — null (diagnostic ≠ selection tool)",
+    "content": "[提出: Gemini R5a, 執行: Claude] K145: Predictive Model Selection via CV(gamma)。17 assets, rolling 504d。Adaptive wins 8/17 (47% = chance, binomial p=0.69)。No threshold helps (0.5-2.0 all ~50%)。EWMA wins 8/17 (most frequent)。Oracle gap 1-18% (ceiling too low)。★ 核心區分: CV(gamma) 是 diagnostic tool (K143 validated) 但不是 selection tool。理解 WHY ≠ 知道 WHICH。JBF 論文: 把 CV 框架為 diagnostic/explanatory，非 practical criterion。",
+    "category": "experiment",
+    "tags": [
+      "CV-gamma",
+      "model-selection",
+      "diagnostic",
+      "null",
+      "Gemini-suggested"
+    ],
+    "confidence": 0.88,
+    "timestamp": "2026-03-24T12:02:39.559083"
   }
 ]
