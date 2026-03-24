@@ -119,7 +119,7 @@ def main():
             overnight_gap = None  # no alert — clear the value
 
     # TLT momentum monitor (J2: add TLT to portfolio when 66d momentum turns positive)
-    tlt = dm.get_model_data("TLT", "2024-01-01", "2026-12-31")
+    tlt = dm.get_model_data("TLT", "2024-01-01", "2026-12-31", force_refresh=True)
     tlt_mom_66 = float(tlt.iloc[-66:]["returns"].sum()) if len(tlt) >= 66 else 0
     if tlt_mom_66 > 0:
         print(f"  📈 TLT 66d momentum POSITIVE ({tlt_mom_66*100:+.1f}%) — consider adding TLT to portfolio")
@@ -134,7 +134,7 @@ def main():
 
     # VIX/GARCH ratio alert (94% VaR violations occur when ratio > 1.5)
     try:
-        vix_data = dm.get_model_data("^VIX", "2025-01-01", "2026-12-31")
+        vix_data = dm.get_model_data("^VIX", "2025-01-01", "2026-12-31", force_refresh=True)
         if len(vix_data) > 0:
             vix_level = float(vix_data.iloc[-1]["close"])
             # Will compute ratio after GARCH fit below
@@ -167,7 +167,7 @@ def main():
 
     # VIX term structure backwardation check (P37: Harvey-significant signal)
     try:
-        vix3m_data = dm.get_model_data("^VIX3M", "2025-01-01", "2026-12-31")
+        vix3m_data = dm.get_model_data("^VIX3M", "2025-01-01", "2026-12-31", force_refresh=True)
         if len(vix3m_data) > 0:
             vix3m_level = float(vix3m_data.iloc[-1]["close"])
             ts_ratio = vix_level / vix3m_level if vix3m_level > 0 else 1.0
@@ -222,7 +222,7 @@ def main():
 
     # --- Strategy 4: Taiwan 0050.TW 8.63/VIX (Q1 finding: adjusted for VIXTWN ratio 1.39) ---
     try:
-        tw50 = dm.get_model_data("0050.TW", "2024-01-01", "2026-12-31")
+        tw50 = dm.get_model_data("0050.TW", "2024-01-01", "2026-12-31", force_refresh=True)
         tw50_close = round(float(tw50.iloc[-1]["close"]), 2)
         tw50_open = round(float(tw50.iloc[-1]["open"]), 2)
         tw50_date = str(tw50.index[-1].date())
@@ -280,7 +280,7 @@ def main():
     # --- Strategy 7: TW+JP 50/50 TZ Arbitrage (U2) ---
     # ⚠️ I8: Based on biased c2c Sharpe. o2o FAILS Harvey. Kept for tracking.
     try:
-        nk225 = dm.get_model_data("^N225", "2016-01-01", "2026-12-31")
+        nk225 = dm.get_model_data("^N225", "2016-01-01", "2026-12-31", force_refresh=True)
         spy_10d_mean_jp = float(spy["simple_return"].iloc[-10:].mean())
         jp_signal = 1.0 if spy_10d_mean_jp > 0 else 0.0
         # 50/50 split between TW and JP (reuse spy_10d_signal from Strategy 6)

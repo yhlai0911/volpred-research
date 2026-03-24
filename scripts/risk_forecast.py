@@ -196,7 +196,7 @@ def main():
     forecasts = {}
     for ticker, cfg in assets_config.items():
         try:
-            data = dm.get_model_data(ticker, "2016-01-01", "2026-12-31")
+            data = dm.get_model_data(ticker, "2016-01-01", "2026-12-31", force_refresh=True)
             if len(data) < cfg["window"] + 10:
                 print(f"  {ticker}: insufficient data ({len(data)} < {cfg['window']})")
                 continue
