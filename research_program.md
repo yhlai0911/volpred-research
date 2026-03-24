@@ -662,17 +662,119 @@
 - [x] K221: ★★ Drawdown Anatomy — VT helped **11/11 episodes (100%)**。Max DD capped -12.1%。Longest underwater 716d（gold bear）。VIX NOT predictive of DD severity
 - [x] K222: ★★★ Retirement SWR — **50/50+VT HELPS retirees (REVERSES K36)**。$1M→$5.42M at 5% withdrawal vs B&H $4.13M。GFC min wealth $972K。GLD offsets VT cash drag
 
-### Session 2026-03-24 進度
-**13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness
-**重要發現**：
-- ★★ K188 HAR Ceiling: 預測天花板在 DATA 不在 MODEL
-- ★★ K193 Copula TDA: SPY-GLD 尾部依賴 PASSES Harvey — VIX sufficient 的第一個 pair-specific 裂縫
-- ★★ K149 JBF Robustness: VT = MDD reduction tool (54%)，非 Sharpe improvement
-- K192 Google Trends: 經典 IS/OOS 過擬合案例（教學價值）
-- **Phase K 統合（73+ 實驗）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
-- [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
-- [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking
+### Session 2026-03-24: 107 Experiments (K183-K289)
 
+**統計**：107 experiments, 1131 knowledge entries (cumulative), 7 self-corrections, 0/25 alternative strategies beat 50/50+VT
+**分佈**：★★★ 20 (19%), ★★ 30 (28%), ★ 10 (9%), NULL/Descriptive 46 (43%)。Hit rate ~56% (★+)
+**主題**：vol prediction (25), VT strategy deep-dive (30), alternative strategies (20), investor guides (12), cross-asset (10), self-correction & meta (10)
+
+**★★★ 核心發現（20 個）：**
+- [x] K195: Copula TDA Deep Dive — 26/66 pairs pass Bonferroni OOS! But GARCH-X still NULL（統計顯著不等於經濟可用）
+- [x] K200: 200-Experiment Meta-Analysis — VIX sufficient 31x, QLIKE ceiling 36x, 50/50 8x validated
+- [x] K207: VIX Boundary Panel — VIX sufficient 3/4 equities, NOT for bonds/commodity/crypto (F=3114, p<0.0001)
+- [x] K222: Retirement SWR — 50/50+VT HELPS retirees (REVERSES K36)。$1M→$5.42M at 5% withdrawal vs B&H $4.13M
+- [x] K227: VT Implementation Guide — exact formula, 60-month weight table, edge cases, TX cost
+- [x] K228: Leverage Effect Dynamics — gamma doubled in 25yr (0.159→0.266), VT will work BETTER going forward
+- [x] K232: GLD Role Deep Dive — NOT irreplaceable but uniquely regime-robust。IEF best Sharpe but fails 2022
+- [x] K240: Cross-Asset TSMOM — PASSES Harvey (t=3.07)! Sharpe 0.979, but BTC-driven and MDD -33.6%
+- [x] K241: TSMOM Without BTC — ALL 4 variants pass Harvey! 6_1 best (Sharpe 0.792, t=4.37)
+- [x] K255: TSMOM Final Validation — FAILS Harvey on full 21yr (t=2.34)。Launch BLOCKED。But 6/6 crisis protection
+- [x] K262: Tail Risk Cost Menu — L1 diversification is FREE (+0.39% CAGR)。L2 VT is sweet spot (0.64%/yr for 35pp MDD)
+- [x] K263: Complete Investor Guide — 5 profiles, 10 findings, decision tree, 10 FAQ, 8 limitations
+- [x] K267: Session Summary (interim) — 85 experiments, 9 breakthroughs, 3 self-corrections
+- [x] K269: SPY-GLD Correlation Regime — NOT stable! 2022 rate hike: corr=0.44 (GLD hedge FAILS)。Range -0.61 to +0.69
+- [x] K271: GLD Self-Healing — 100% recovery rate (5/5)。Dollar is primary mechanism (r=-0.42)。GLD leads rate cuts by 303d
+- [x] K273: Crash Taxonomy — VT wins 6/6 crash types (100%)。VT strongest when GLD fails (+41.3% liquidity crisis)
+- [x] K275: Complete Proof for 50/50+VT — Evidence 9/10。12 validations, 166 failed alternatives, 76yr robust
+- [x] K277: BTC Deep Structure — NO leverage effect (ratio=0.98, p=0.90)。VIX R²=0.0005。Vol clustering 3x weaker
+- [x] K280: Definitive Portfolio Guide — 9 sections, step-by-step, FAQ, honest limitations
+- [x] K288: ★★★ Cross-Period Stability — 3/8 findings time-invariant, F1(VIX sufficient) FAILS 0/4 periods for statistical prediction
+
+**★★ 重要發現（30 個）：**
+- [x] K188: HAR Ceiling — HAR ≈ GARCH on daily data。Ceiling is in DATA not MODEL
+- [x] K193: Dynamic Copula TDA — SPY-GLD TDA passes Harvey (t=12.93), GARCH-X +12.1%
+- [x] K202: BTC Features — FIRST asset where VIX is NOT sufficient! Range ratio partial r=0.353
+- [x] K203: Momentum Crash Vol — VIX sufficient for equities but NOT for GLD/TLT
+- [x] K205: BTC Microstructure VT — range r=0.483 (10x VIX), MDD -7.2% vs BH -31.5%
+- [x] K212: Conditional VIX Sufficiency — VIX breaks down when VIX>25 but economic impact negligible
+- [x] K217: Non-Equity Best Predictor — GLD:Range Ratio, TLT/BTC:EWMA(0.94)。VIX useless for non-equities
+- [x] K220: Rebalance Frequency — monthly optimal at US ETF costs (2-5bps)。>10bps→annual
+- [x] K221: Drawdown Anatomy — VT helped 11/11 episodes (100%)。Max DD capped -12.1%
+- [x] K225: Maximum Loss — VT loss cap ~-12% regardless of horizon。GFC: -7.8% vs SPY -56.5%
+- [x] K226: Factor Exposure — VT is conditional beta strategy。Alpha +3.36%/yr (t=5.00)
+- [x] K229: VT Insurance Pricing — 3.05%/yr expected cost。VIX<12 FREE, Normal best ratio 2.24x
+- [x] K230: Optimal VT Parameter — K=12 NOT optimal but does NOT matter (flat Sharpe curve)
+- [x] K231: VT vs Puts — VT best MDD (-10.8%) but Collar cheapest per unit (0.091%/1%MDD)
+- [x] K233: Three-Asset SPY/GLD/IEF — SIGNIFICANTLY HURTS Sharpe (DM p=0.004)。50/50 #11
+- [x] K234: VT Behavioral — 85% easy, 15% critical。Skipping extremes doubles MDD
+- [x] K235: Tax Efficiency — annual rebalance saves 180bps vs daily。Taiwan 0% tax = VT strictly dominant
+- [x] K237: International VT — MDD protection universal 5/5 markets。VIX predicts vol 5/5 (Harvey pass)
+- [x] K261: Vol Forecasting Contest — 70/30 GJR+EWMA is BEST, not pure GJR
+- [x] K265: Liquidity Proxy — Amihud OOS sig 3/4 assets (Harvey PASS)
+- [x] K266: Amihud Validation FAILS — K265 was look-ahead artifact。QQQ/TLT REVERSED in pure rolling
+- [x] K268: Overnight vs Intraday — GLD return 94% overnight (9.57% vs 0.54%)。Not tradable at retail
+- [x] K272: VT as Synthetic Put — implied strike 85.5%, cost 3.31%/yr
+- [x] K274: Paper Contribution Map — 9/20 NOVEL findings。Paper 1(JBF) 70% NOVEL, priority #1
+- [x] K278: VIX Regime Transition — escalation 3-4x faster than de-escalation。50% crisis episodes ≤2 days
+- [x] K279: Weekly VT NOT sweet spot — Daily dominates ALL TX costs。Whipsaw >> TX cost
+- [x] K282: VIX Alert System — 5-color system designed。VIX>30 best SNR (t=3.35)
+- [x] K284: Current Market (2026-03-23) — VIX 26.7 HIGH regime。Excess fear (VIX/RV=1.95)
+- [x] K285: Publication Audit — JBF 85%, PBFJ 70%, VT-Trend 80%。Total 16.5h to submission-ready
+- [x] K289: Stress Test — 50/50+VT survives ALL empirical + simulated scenarios。Breaking requires 4 simultaneous conditions (<0.1%/decade)
+
+**★ 有用發現（10 個）：**
+- [x] K184: CBOE SKEW — statistically detectable but economically negligible beyond VIX
+- [x] K190: Realized Semivariance — RS- more persistent, asymmetric EWMA > symmetric but < GJR
+- [x] K197: Persistence Break — breaks detectable (4/5 CUSUM) but NOT exploitable
+- [x] K211: Mean Reversion Speed — QQQ/GLD pass Harvey but SPY FAILS
+- [x] K219: Risk Parity vs 50/50 — RP NOT sig better (DM p=0.64)。50/50 #9
+- [x] K243: Sector Rotation — Harvey PASS (t=3.99) but DM NS。MDD -37% vs 50/50+VT -10.8%
+- [x] K256: Fed Communication — FOMC CREATES uncertainty (+25% vol), NOT resolves it
+- [x] K258: SKEW Dynamics — SKEW vol partial r=-0.275 OOS (t=-6.21)。High VIX only
+- [x] K260: Vol Clustering — predicting duration has zero value。Naive ≈ Oracle
+- [x] K281: VIX Trigger — NO trigger beats Monthly VT on NET Sharpe
+
+**Null/Descriptive（46 個）：**
+- [x] K183 Directional Change (0/25), K185 FOMC (VIX prices it), K186 Volume Displacement (0/25), K187 Overnight Gap (noise), K189 Attention-Weighted (noise), K191 Put-Call (Harvey FAIL), K192 Google Trends (textbook overfitting), K194 Frac Diff (solves non-problem), K196 5-min RV Pilot (preliminary), K198 Realized GARCH (noisy), K199 VIX Futures Basis (OOS overfit)
+- [x] K201 TDA VT (0/12), K204 GLD Momentum (prediction≠alpha), K206 Asset-Specific VT (paradox), K208 Implied-Realized GAP (VIX captures), K209 Two-Tier VT (paradox), K210 VIX-SKEW Ratio (hurts OOS), K213 Signature Path (OOS null), K214 Wasserstein (R²=0.46%), K215 Seasonality (hurts), K216 Ensemble (0/16 DM sig)
+- [x] K218 Contagion Timing (strategy null), K223 Inflation Regime (sign flips), K224 Dollar Strength (50/50 #10), K236 Starting Capital (no impact), K238 TZ Arbitrage (o2o null), K239 VIX Mean Reversion (0/16), K242 VRP Harvesting (MDD -90%), K244 TSMOM+Sector (absorbed), K245 GLD Breakout (50/50 wins), K246 Pairs SPY-QQQ (failure), K247 Dual Momentum (degraded 53%)
+- [x] K248 Carry Trade (NS), K249 Risk-On/Off (dilutes), K250 TSMOM+VT (conflicts), K251 GLD-TLT Rotation (weak), K252 Adaptive K (hurts), K253 Value Timing (no variation), K254 Vol Dispersion (VIX proxy), K257 5-Min Status (data report), K259 Macro Surprise (VIX absorbs), K264 Geopolitical (opposite sign), K270 Rate Hike Detector (acting hurts)
+- [x] K276 JBF Paper Updates (mapping), K283 Rebalance Day (pure noise), K286 Session Summary (meta)
+
+**Major Findings Top 10：**
+1. **K288 ★★★ VIX Sufficiency Refined** — VIX is sufficient for VT STRATEGY decisions but NOT for vol PREDICTION (lagged |r| always helps, fails 0/4 periods statistically)
+2. **K275 ★★★ Complete Proof** — 50/50+VT validated 12 times, 166 failed alternatives, 76-year robust
+3. **K269+K271+K273 ★★★ GLD Trilogy** — Correlation NOT stable (range -0.61 to +0.69) but GLD self-heals (100%, 5/5) and VT wins 6/6 crash types
+4. **K228 ★★★ Leverage Dynamics** — Gamma doubled over 25yr → VT will strengthen going forward
+5. **K255 ★★★ TSMOM Blocked** — Passes Harvey on subperiods but FAILS full 21yr (t=2.34)。Strategy launch blocked by own standards
+6. **K262 ★★★ Tail Risk Cost Menu** — L1 diversification FREE, L2 VT sweet spot (0.64%/yr for 35pp MDD reduction)
+7. **K207 ★★★ VIX Boundary Panel** — VIX sufficient for equities only; bonds/commodity/crypto need own-asset predictors
+8. **K277 ★★★ BTC Anomaly** — No leverage effect, no VIX link, weaker clustering — fundamentally different vol structure
+9. **K265→K266 ★★ Self-Correction** — Amihud look-ahead bias caught and corrected within same session
+10. **K222 ★★★ Retirement Reversal** — 50/50+VT helps retirees (reverses earlier K36 conclusion)
+
+**Self-Correction Chain（7 corrections）：**
+1. K220→K279→K281: Monthly rebalance → Weekly NOT sweet spot → NO trigger beats Monthly NET Sharpe
+2. K241→K255: TSMOM passes Harvey (subperiods) → FAILS full 21yr (launch blocked)
+3. K265→K266: Amihud sig (look-ahead) → Pure rolling REVERSES result
+4. K36→K222: VT hurts retirees (old) → VT HELPS retirees with GLD (corrected)
+5. K267→K286→K288: Interim summary → Final count → Cross-period stability audit
+
+**Updated VIX Sufficiency Claim（K288 refinement）：**
+> VIX 充分性必須區分兩個層次：
+> - **策略充分性（VT decisions）**：VIX 足夠。Adding features does not improve Sharpe/MDD。Validated 12+ times。
+> - **統計預測充分性（QLIKE/MSE）**：VIX 不夠。Lagged absolute returns always help (0/4 periods pure VIX wins)。
+> 實務結論：對投資人而言 VIX 充分；對學術預測而言 VIX 不充分。這不矛盾——策略決策的 loss function 比統計預測更粗粒度。
+
+**研究方向重申**：
+- ✅ 5-min data 持續累積（SPY 47d, 0050.TW 36d → HAR-RV ETA 2026-04-18）
+- ✅ 論文推進（JBF 85%, PBFJ 70%, VT-Trend 80% → 16.5h to submission）
+- ✅ 跳躍式探索（BTC deep structure, crash taxonomy, GLD self-healing 等新方向）
+- ⏸ 日頻 QLIKE 改善已飽和（除非有全新信息源或 5-min data 解鎖）
+- ⏸ 替代策略探索已收斂（0/25 beat 50/50+VT after 166 attempts）
+
+**Prior session summaries（preserved）：**
+- **Phase K 統合（73+ 實驗，pre-session）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
 - **Phase J 統合（20 實驗）**：(1) ★★★ EWMA(0.97) 零售最佳 default (2) ★★★ Smoothness 假說推翻 → crisis reactivity + signal quality (3) VIX sufficient statistic 13+ 次確認 (4) 50/50 static 最難打敗 (5) 12/VIX continuous = irreducible kernel (6) 月度再平衡 net Sharpe 最佳 (7) 無單一估計器跨資產稱霸
 
 ### 面向 G: 情緒與財務指標（2026-03-17 啟動）
