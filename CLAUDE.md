@@ -60,6 +60,23 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **績效指標**：每日由 `daily_update.py` 自動重算 → `strategy_metrics.json`
 - 詳細流程見 `.claude/skills/autonomous-research/references/add-strategy-guide.md`
 
+### 每日文章產出要求（不可缺少任何一種）
+
+每天必須產出以下三種類型的文章，面向不同讀者群：
+
+| 類型 | 目標讀者 | 每日數量 | 內容要求 | tags 必含 |
+|------|---------|---------|---------|----------|
+| **一般讀者** (general) | 非專業投資人 | 4 篇 | 800-1200 字、爆款標題、具體場景、一個核心 takeaway、CTA。基於研究數據但用類比解釋 | `一般讀者` |
+| **研究發現** (research) | 有金融背景的讀者 | 2-4 篇 | 實驗結果報告，含統計數據、表格、方法論。每個重要實驗（★+）都應有對應文章 | `研究` |
+| **每日建議** (daily) | 所有讀者 | 1 篇 | 當日策略權重、VIX regime、持倉建議。由 `daily_update.py` 自動產生 | `每日建議` |
+
+**執行規則**：
+- 所有文章一律 `status=draft` 進文章池，由每小時 cron 按節奏釋出
+- 一般讀者文章的主題**不可重疊**——每篇必須有獨立的核心 insight
+- 用 LanceDB 搜尋確認主題未被寫過同類型文章
+- 研究文章在實驗完成後**立刻撰寫**，不要累積
+- 每個 session 開始時檢查今日各類型文章產出是否達標
+
 ### 發佈流程
 1. 研究系統優先寫入 `storage/`，再依需求選擇：
    - `立即發布`
@@ -383,7 +400,7 @@ Claude Code 的 Agent 工具可啟動獨立子程序（subagent），有自己�
 0 15 * * 1-5   collect_tw_data.py      # 台股收盤後 15:00（0050.TW + VIXTWN + 5min，留 1.5h 給 yfinance 更新）
 30 5 * * 2-6   collect_us_data.py      # 美股收盤後 05:30（SPY/GLD/VIX + 5min）
 3 6 * * 2-6    daily_update.py         # 所有數據就緒 06:03（6 策略 + Supabase sync）
-3,18,33,48 * * * *  release-pool-by-settings  # 文章池定時釋出：每 15 分鐘 1 篇（不受 session 影響）
+3 * * * *            release-pool-by-settings  # 文章池定時釋出：每 1 小時 1 篇（不受 session 影響）
 ```
 注意：美股 cron 用 `2-6`（週二至六），因為美股週五收盤 = 台北週六 04:00。
 注意：文章釋出用 system crontab 而非 session cron，確保不受 Claude 工作狀態干擾。
