@@ -658,6 +658,9 @@
 - [x] K217: ★★ Non-Equity Best Predictor — GLD:Range Ratio (DM t=3.51★), TLT:EWMA (t=11.03★), BTC:EWMA (t=14.79★)。VIX 對非股票完全無用。Each needs own-asset vol
 - [x] K218: Contagion Timing — SPY→GLD/TLT Granger sig (p<0.001) 但 strategy NULL。50/50 static 已 capture decorrelation benefit
 - [x] K219: ★ Risk Parity vs 50/50 — RP NOT sig better (DM p=0.64, bootstrap CI includes zero)。**50/50 第 9 次驗證**。RP weight range 6.8-75.1%（estimation risk）
+- [x] K220: ★★ Rebalance Frequency — 月度最佳（US ETF 2-5bps）。Monthly-quarterly crossover at 47.9bps。>10bps→annual/never。月度 = daily benefit 的 95% 但 turnover 1/6
+- [x] K221: ★★ Drawdown Anatomy — VT helped **11/11 episodes (100%)**。Max DD capped -12.1%。Longest underwater 716d（gold bear）。VIX NOT predictive of DD severity
+- [x] K222: ★★★ Retirement SWR — **50/50+VT HELPS retirees (REVERSES K36)**。$1M→$5.42M at 5% withdrawal vs B&H $4.13M。GFC min wealth $972K。GLD offsets VT cash drag
 
 ### Session 2026-03-24 進度
 **13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness
