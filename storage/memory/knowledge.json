@@ -10077,5 +10077,39 @@
     ],
     "confidence": 0.92,
     "timestamp": "2026-03-24T11:14:20.111962"
+  },
+  {
+    "id": "K1020",
+    "title": "K144: ★★★ VT vs TSMOM cross-asset — VT wins 5/5 equity in spiky-vol, TSMOM Sharpe -2.46",
+    "content": "[提出: Codex R5#2, 執行: Claude] K144: VT vs TSMOM Cross-Asset Panel。數據: yfinance 7 assets 2007-2024 (empirical)。6/7 VT-TSMOM corr < 0.3，equity mean r=0.10 (NS)。★★★ Spiky-vol/No-trend: VT wins Sharpe 5/5 equity (advantage +1.23 to +3.48), TSMOM mean Sharpe=-2.46 (p=0.0007)。TSMOM 只在 Spiky+Trend 勝（需方向一致）。Frequency: 22-60d coherence peak（月度共振）。Negative controls: GLD/TLT VT 無效（VIX 非其 vol driver）。結論: VT ≠ TSMOM，robust across 5 equity assets。VT = vol-reactive risk mgmt, TSMOM = directional bet。可直接寫入第三篇論文。",
+    "category": "experiment",
+    "tags": [
+      "VT",
+      "TSMOM",
+      "cross-asset",
+      "panel",
+      "robustness",
+      "paper-ready",
+      "Codex-suggested"
+    ],
+    "confidence": 0.92,
+    "timestamp": "2026-03-24T11:48:23.500144"
+  },
+  {
+    "id": "K1021",
+    "title": "K143: ★★★ 25-asset CV(gamma) panel — mechanism classifier validated (KW p=0.0004)",
+    "content": "[提出: Codex R5#1, 執行: Claude] K143: Structural Leverage Panel 25 Assets。數據: yfinance 25 assets 2014-2024 (empirical)。CV(gamma) 跨類別顯著差異 (KW H=18.22, p=0.0004)。Equity mean CV=0.79 (11/12 sign consistent), Safe Haven 2.45 (0/5), Commodity 4.58 (0/5), Crypto 8.51 (0/3)。Cross-sectional: CV vs sign-flip rho=0.790, |gamma| vs CV rho=-0.775。K-means k=3 ARI=0.517。BTC bear gamma=-0.047 (p=0.008) 確認 liquidation 機制。★★★ 論文貢獻: CV(gamma) 是 validated mechanism classifier，擴展 Black/Christie leverage 到 mechanism heterogeneity across 25 assets 4 categories。",
+    "category": "experiment",
+    "tags": [
+      "structural-leverage",
+      "panel",
+      "25-assets",
+      "CV-gamma",
+      "mechanism",
+      "paper-ready",
+      "Codex-suggested"
+    ],
+    "confidence": 0.92,
+    "timestamp": "2026-03-24T11:51:47.788061"
   }
 ]

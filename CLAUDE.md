@@ -5,8 +5,8 @@
 Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波動率預測模型，並建立一般投資人可用的交易策略。
 
 ## 網站架構（v4 Supabase + Admin CMS + Mirror API）
-- **前端（開發中）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，正在優化中）
-- **前端（線上版）**：`frontend-v2/`（目前部署版本）
+- **前端（線上版）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，部署於 volpred-v3 服務）
+- **前端（舊版）**：`frontend-v2/`（已停用，保留參考）
 - **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
 - **資料庫**：Supabase（PostgreSQL + Auth + REST API + RPC）
 - **Zeabur Dashboard**：https://zeabur.com/projects/69b5b264800a475a1f82b073
@@ -107,7 +107,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - 跨市場策略注意 VIX lag（台股用前一天 VIX）
 - **5-min 數據回補**：收集腳本自動偵測 gap 並回補（上限 59 天 = yfinance 免費版限制）。macOS 休眠時 cron 不執行，醒來後自動回補
 - **Paper trading 多日回補**：daily_update.py 自動回填所有 `portfolio_return=None` 的歷史條目（利用相鄰條目價差）
-- **frontend-v2-fix 開發中**：前端代碼修改需同時考慮 `frontend-v2/`（線上）和 `frontend-v2-fix/`（開發），待穩定後統一切換
+- **frontend-v2-fix 已部署**：`volpred.zeabur.app` 綁定到 volpred-v3 服務（frontend-v2-fix），前端修改只需改 `frontend-v2-fix/`
 
 ## 論文
 - **第一篇**：`paper/leverage-direction/main.tex`（60 頁，Leverage Direction Matters，目標 JBF）
@@ -264,9 +264,9 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 ## 架構
 - **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）
 - **storage/**：唯一資料源頭（JSON），跨 session 保存
-- **frontend-v2-fix/**：Next.js 15 前端（開發優化中，Admin CMS + 用戶專區 + SSR）
-- **frontend-v2/**：目前線上部署版本
-- **frontend/**：舊版前端（已棄用）
+- **frontend-v2-fix/**：Next.js 15 前端（線上版，volpred-v3 服務）
+- **frontend-v2/**：舊版前端（已停用）
+- **frontend/**：最舊版前端（已棄用）
 - **scripts/supabase_sync.py**：資料同步到 Supabase
 - **src/volpred/ops/jobs.py**：Supabase-backed job queue（agent + human 共用）
 - **research_program.md**：研究策略文件（北極星）
@@ -393,168 +393,18 @@ CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）"
 ```
 注意：一次性 cron（如 FOMC 提醒）必須先確認事件的確切時間再換算台灣時間（UTC+8）。
 
-## 模型體系（持續探索，非線性階段）
+## 研究方法論與模型
 
-### 波動率預測模型
-| 模型 | 用途 | 狀態 | 備註 |
-|------|------|------|------|
-| **GJR-GARCH** | γ>0.10 資產（SPY/QQQ/EEM）| 主力 | MCS superior, EGARCH 驗證一致 |
-| **GARCH** | γ<0.10 資產（GLD）| 主力 | DM test 無顯著差異時優先 |
-| **MF2-GARCH** | 多成分 vol cycle | 已測試 null | Conrad & Engle 2025 JAE。K141 TLT +0.30% 是 estimation artifact（K144: proper joint QML 6 assets → GJR 5/6 勝）。QLIKE ceiling 全面確認 |
-| **EGARCH** | Robustness check | 輔助 | γ 符號相反但結果一致 |
-| **HAR-RV** | 5-min realized vol | 待驗證 | 需 60+ 天 5-min 數據（SPY 46 天 / 0050.TW 34 天，持續累積中）|
-| **Realized GARCH** | 5-min RV + GARCH | blocked | 需 252+ 天（~2027 Q1）|
-| **LSTM/GRU** | Deep learning | 已測試失敗 | 日頻殘差 iid，DL 無增量（但數據增加後可重試）|
-| **GARCH-LSTM Hybrid** | 結合統計+DL | 已測試失敗 | LSTM factor 不穩定（std=1.16）|
-| **XGBoost+HAR** | ML vol forecast | 已測試失敗 | K142: GJR 3/3 勝。日頻 r² 信噪比太低，第 4 次 ML 失敗 |
-| **組合預測** | 70/30 GJR+HAR | 已測試 | 約束條件下最佳，但改善微小 |
-| **EWMA(λ=0.97)** | 零售簡易 VT | 輔助 | J6/J9: Sharpe 等效但 GJR 贏 crisis MDD。一行 Excel，TX 省 150bps/yr |
-| **EWMA(λ=0.94)** | RiskMetrics 標準 | 輔助 | HL=11d，比 0.97 略差 |
-| **BTC RV-VT** | BTC 自身 realized vol VT | 已測試 | 用 22d RV，非 VIX。MDD 顯著改善(p=0.003)，Sharpe 不顯著 |
+**所有模型清單、策略績效數字、參數估計結果、評估指標定義 → 見 `research_program.md`**
 
-### VT 策略模型
-| 策略 | Sharpe | MDD | 適用 |
-|------|--------|-----|------|
-| **12/VIX + SHY** | 0.68 | -27% | 美股單資產（最簡單）|
-| **★ 50/50 SPY/GLD 12/VIX** | 0.83 | -16% | 美股最佳零售組合（Q21 推薦）|
-| **40/30/30 SPY/QQQ/GLD** | 0.82 | -18% | 美股多資產（QQQ 增加 tail risk）|
-| **Conditional TLT** | 1.08 | -19% | 利率下降時加 TLT（5/5 穩健）|
-| **~~10d SPY Mom (台股)~~** | ~~1.47 (net)~~ | ~~-10.0%~~ | ⚠️ c2c Sharpe 含 timing bias，可實施 o2o Sharpe=0.87 (FAIL Harvey) |
-| **~~10d SPY Mom (日經)~~** | ~~1.31 (net)~~ | ~~-14.0%~~ | ⚠️ 同上，需用 o2o 重新驗證 |
-| **~~TW+JP 50/50 TZ~~** | ~~1.81 (net)~~ | ~~-11.9%~~ | ⚠️ 基於 biased c2c，需重新計算 |
-| **~~Global US VT + TW TZ~~** | ~~1.61 (net)~~ | ~~-8.4%~~ | ⚠️ 同上 |
-| **8.63/VIX (0050.TW)** | 0.69 | -15% | 台灣市場（VIX proxy, monthly rebal, lagged, TX 0.585%）|
-| **VIX Step Rule** | 0.69 | -21% | 零計算（VIX<15→100%, 15-25→70%）|
-| **BTC RV VT(15%)** | 0.50 | -42% | 加密貨幣（用自身 RV，非 VIX）|
-| **BTC Asym VT(25/10)** | 0.68 | -53% | 加密動量+VT（t=2.0, fails Harvey）|
+CLAUDE.md 不放具體的 Sharpe/MDD 數字或模型參數值——這些會隨數據更新而過時。
+研究約束（統計門檻、OOS 規範、Harvey threshold）見 `research_program.md` 約束區。
 
-⚠️ **Same-day timing bias warning (Q10)**: VIX_t→r_t 的回測 Sharpe 會被 ρ(VIX,SPY)=+0.65 膨脹 ~1.0。
-正確做法：VIX_t 決定 r_{t+1} 的權重。上表已使用 lagged weights。
+## 研究成果
+**所有研究發現、實驗結果、Phase 進度、AI 協作建議 → 見 `research_program.md`（北極星文件）。**
 
-### 模型選擇理論框架（K129/K130/K137）
-- **Economic Sufficiency**（K129）：VIX 是 economic sufficient statistic（統計上可改善但經濟上不可約）
-- **Decision-Conditioned Router**（K130）：最佳模型是 objective-dependent，no Pareto-dominant model
-- **Attainable Improvement Ratio (AIR)**（K137）：ceiling-normalized metric，EWMA = best generalist (std=0.259)，12/VIX = economic specialist (std=0.832)
-- **Vol Cartography**（K140）：108-cell decision matrix，negative recommendations > positive，EWMA(0.97) = universal safe default
-- **QLIKE Ceiling**（K126）：87% irreducible noise，GJR 接近理論下界
-- **Capture Rate**（K132）：SPY 63%，GLD 19%，BTC 15%——SPY 改善需更好 proxy，GLD/BTC 有 80%+ 未捕捉
-
-### BTC 特殊機制（K136/K139）
-- **BTC ≠ equity**：gamma 是 regime-dependent（bull γ=-0.09 anti-leverage，bear γ=+0.13 normal）
-- 機制：leveraged position accumulation → forced liquidation → gamma sign flip
-- Weekend vol 僅 weekday 69%（機構缺席）
-- **BTC 用 GARCH(1,1) 不用 GJR**（fixed gamma 反效果）
-- BTC 在成熟：Hurst H 從 0.033（2015-19）降到 0.007（2020-24）（K138）
-
-### 跨資產 Roughness（K138）
-- 所有 6 資產都是 rough volatility（variogram H=0.006-0.020，全 << 0.5）
-- 但 roughness 不解釋 capture rate 差異（rho=0.086, p=0.87）
-- Vol 同時具有局部粗糙（variogram H~0.01）和全域持續（DFA H~0.80）兩種性質
-
-### 報酬預測信號
-| 信號 | In-sample t | OOS t | 狀態 |
-|------|------------|-------|------|
-| **Excess Fear (VIX/GARCH Z>1.5)** [Gemini] | 4.48 | 2.61 | 有前景但 OOS 衰減 |
-| **SPY(t)→tw50(t+1)** [用戶] | — | r=0.376 | ⚠️ 信息傳遞有效 (gap R²=0.35) 但不可交易 (o2o Sharpe=0.87) |
-| Vol→Return 直接預測 | -0.002 | — | 失敗（r≈0）|
-| VRP timing | — | — | 失敗（N90, Q10, T9 reconfirmed）|
-
-### 參數設定
-- Window=2000 預設（w=504 有 persistence bias -3%）
-- Student-t 固定 df：**df=4 優於 df=5**（J20: 9/11 vs 7/11 Kupiec pass）。但 Skewed-t MLE 最佳 (10/11)
-- **★ Skewed Student-t 是最佳 VaR 方法**——6/6 資產通過 Kupiec（唯一全通過），優於 CF-VaR (5/6)。通過 MLE 同時估計 df + skewness，自動適應所有資產
-- CF-VaR（Cornish-Fisher）是次佳——5/6 通過，但 QQQ 過度保守。在 0050.TW w=2000 時會發散，需 winsorization
-- 12/VIX threshold=12（不是 cherry-pick，target 6-20 全部有效）
-- **多頻率研究**：不限日頻——週/月/季/年都要探索。低頻模型注意樣本數（月頻≥60 obs, GARCH 可能不穩定）
-- **資料時效**：OOS 延伸到最新。cache/存檔不到最近日期時用 `force_refresh=True` 重抓
-- **跨資產假日**：多資產投組中某資產無當日價格 → forward-fill 前一交易日價格，return=0
-
-## 評估體系
-
-### A. 統計性評估（預測準確性）
-| 指標 | 公式/說明 | 用途 | 備註 |
-|------|----------|------|------|
-| **QLIKE** | Σ(log(σ²) + r²/σ²) | **主要 loss function** | 對低估波動率懲罰更重（asymmetric），proxy-robust（Patton 2011）|
-| **MSE** | Σ(σ² - r²)² | 輔助 loss function | Symmetric，對極值敏感 |
-| **MAE** | Σ|σ² - r²| | 輔助 | 比 MSE 更 robust to outliers |
-| **HMSE** | Σ(1 - r²/σ²)² | Scale-invariant | 消除 proxy 尺度差異（R11 驗證）|
-| **Mincer-Zarnowitz R²** | 回歸 r² = a + b·σ² 的 R² | 校準檢定 | b=1, a=0 為完美校準 |
-| **DM test** | Diebold-Mariano t-stat | 兩模型比較 | 單邊 p<0.05 為顯著 |
-| **MCS** | Model Confidence Set | 多模型比較 | Hansen et al. (2011)，控制 data snooping |
-| **GW test** | Giacomini-White | 條件預測能力 | 比 DM 更 general（允許 estimation uncertainty）|
-
-### B. 風險管理評估（VaR/ES）
-| 指標 | 說明 | 門檻 | 備註 |
-|------|------|------|------|
-| **Kupiec LR_uc** | 違反次數 vs 期望次數 | p>0.05 通過 | Unconditional coverage |
-| **Christoffersen LR_cc** | 違反的獨立性 | p>0.05 通過 | Conditional coverage（含 clustering）|
-| **DQ test** | Dynamic Quantile | p>0.05 通過 | Engle & Manganelli (2004)，最嚴格 |
-| **Trinity test** | Kupiec + CC + DQ 三重 | 3/3 通過 | 我們的標準（T21 Master Panel）|
-| **Fissler-Ziegel** | Joint VaR+ES loss | 越低越好 | O16: coverage vs efficiency trade-off |
-| **Acerbi-Szekely** | ES backtest (Z1/Z2) | p>0.05 通過 | O14: 三種分配全 pass |
-| **Basel traffic light** | 250天違反次數 | GREEN ≤4 | 實務監管標準 |
-
-### C. 經濟性評估（策略績效）
-| 指標 | 說明 | 門檻 | 備註 |
-|------|------|------|------|
-| **Sharpe ratio** | (E[r]-rf)/σ | Harvey 2016: t>3.0 | SE ≈ 1/√N_years，多重檢定要 Bonferroni |
-| **MDD** | 最大回撤 | bootstrap p<0.001 | Mechanical effect（Q20: 100% sims positive）|
-| **Calmar** | return/|MDD| | — | 結合報酬與風險 |
-| **Sortino** | (E[r]-rf)/σ_downside | — | 只懲罰下行風險 |
-| **CRRA utility** | E[W^(1-γ)]/(1-γ) | γ=3,5,10 | 考慮投資人風險偏好 |
-| **Certainty Equivalent** | CE return | — | 投資人願意接受的確定報酬 |
-| **Information Ratio** | α/TE | — | 相對 benchmark 的超額報酬 |
-| **Win Rate** | % positive return days | — | 輔助 |
-| **Turnover** | Σ|Δw| / N_years | — | 交易頻率，影響 TX cost |
-| **Net Sharpe** | Sharpe after TX cost | — | J10: monthly 12/VIX net 0.792 最佳 |
-
-### D. 跨資產 / 跨模型比較
-| 指標 | 說明 | 備註 |
-|------|------|------|
-| **Gamma-mechanism** | γ → VT Sharpe (equity only) | Q19: pure equity ρ=0.886 (p=0.019) |
-| **VIX correlation** | corr(asset, ΔVIX) → VT effectiveness | Q16: best cross-asset predictor (r=0.54) |
-| **CCS Score** | Complexity Ceiling Score | Q22: 31 模型評分，52% 零/負價值 |
-| **FDR audit** | Benjamini-Hochberg correction | Q12: 30/32 findings survive q=0.05 |
-| **Cross-OOS** | 多期間 OOS 一致性 | J9: 5 periods mandatory for strategy claims |
-| **Weight path StdΔw** | 權重路徑波動度 | J7: 不是 MDD 的因果因子 |
-
-## 核心研究發現（details in `storage/memory/knowledge.json`）
-- GJR-GARCH 是最佳 realized vol 模型（MCS superior, p=0.044）
-- 12/VIX 打敗 GARCH VT（5/7 OOS periods）
-- Gamma-mechanism proposition 已修正：全樣本(N=12) rho=-0.45 (n.s.)，但純股票(N=6) rho=+0.886 (p=0.019)。跨資產類別時 VIX correlation 才是真正驅動因子
-- VT Sharpe 不顯著（t=0.33）但 MDD 顯著（bootstrap p=0.0004）
-- MDD improvement 是 mechanical（99% under null）
-- 台灣 amplification 4.6x（vs US 2.8x）
-- CASH 是唯一通用避險（6 場危機 4 種類型）
-- 12/VIX+SHY 全面勝 60/40
-- Excess Fear Signal t=4.48 in-sample（Gemini 提出）
-- FHS 是唯一通過 Kupiec+Christoffersen+DQ 三重 VaR 檢驗的方法（7/7 資產全通，Codex 提出）
-- BTC 正偏態不穩定（regime-dependent, 55% 時間正），coskewness=-0.61（惡化組合尾部）
-- BTC VT(15% target) MDD: -84%→-42% (p=0.003)，Sharpe 改善不顯著 (t=1.45)
-- |Skewness|→VaR method 宣稱已推翻（N=12 rho=-0.87 → N=21 rho=-0.086, p=0.71）
-- ~~SPY Overnight Momentum for Taiwan: 5d SPY Mom net Sharpe 1.62, Harvey t=3.25~~ → **I8 降級**: c2c Sharpe 含 timing bias，o2o 僅 0.87 (FAIL Harvey)。信息傳遞通道有效但不可交易
-- **⚠️ TZ Momentum Timing Bias (I8)**：c2c Sharpe 包含不可捕獲的隔夜跳空（78% alpha）。所有可實施策略 FAIL Harvey。TZ 是學術發現，非可交易策略。3 策略 inactive
-- **★★★ Phase J 核心發現**：
-  - J5→J6→J7→J9 完整弧：EWMA(0.97) Sharpe ≈ GARCH，但 GJR 在危機中贏 MDD (4-5/5 periods)。Smoothness 假說被推翻（ρ=-0.007），真正機制 = crisis reactivity + signal quality
-  - 12/VIX 是 VT 的 irreducible kernel（J13: 6 種 conditional VT 全 null）
-  - 50/50 SPY/GLD static 是最難打敗的月度基準（J1: Sharpe 0.810）
-  - VIX 是月度以下的 sufficient statistic（21 次確認：J3/J4/J8/J14/J17/J18/K1/G3/G5/T11/T13/T14 + K148 Climate/K149 ICL/K151 CSVD/K152 Liquidity/K153 MOVE-VECM）
-  - 月度再平衡優於日度（J10: net Sharpe 0.792 > 0.679，TC 省 0.72%/yr）
-  - EWMA(0.97) 是零售最安全 default（J12: best MDD 4/7 assets, never worst）
-  - VIX sufficient statistic 需限定範圍：「relative to tested alternatives at this horizon」（Codex 建議）
-  - 253 起始日 100% MDD win rate（K14）——VT 不是 backtest fishing
-  - **跨資產 VT 地圖**：equity ✓(10 markets), carry ✓(K18), commodity ✗(K21), HY bond ✗(K24), intl equity US VIX universal(K25)
-  - Multi-period VT 數學上等價（K23: sqrt(h) 相消）
-  - 50/50 SPY/GLD 經 8 次獨立驗證不可動搖（K2/K16/K19/K24/K54/K63/K64/K89）
-  - ★★★ K41→K91 VT Insurance Pricing 修正: 76 年均值 ~1%/yr（非 4%/yr），VIX 時代 2-4%/yr，高度不穩定 (std=2.54%)。MDD 保護 8/8 十年全勝
-  - K36/K39/K40 trilogy reframed: 不是「VT 長期有害」，而是「保險費會複合」
-  - K85→K87 退休修正: VT 不翻倍提領率，只提供更穩定的 4% 存活率
-  - K102 Vol→Return: VIX 預測報酬 R²<2%，VT 是風險管理不是報酬增強
-  - 0DTE 沒有破壞 VT（K38: VIX-SPY corr 不變 -0.729）
-- **AI 協作建議（Codex+Gemini 第 5 次審查）**：
-  - **Codex**：論文 framing 改為 criterion-dependent model selection；pre-register primary claims；停止 VT overlay search
-  - **Gemini**：VVIX tail-guard overlay、correlation breakdown penalty、FHS-VaR targeting 取代 σ-targeting
-  - **共識下一步**：(1) 5-min data pipeline 優先 (2) options-implied surface (VVIX/SKEW/VIX term structure) (3) FHS-VaR targeting (4) 驗證 df=5 跨資產 robustness
+CLAUDE.md 不重複研究內容。需要查閱研究結論時直接讀 `research_program.md`。
+知識細節在 `storage/memory/knowledge.json`（1000+ 筆，含完整實驗條件和數據）。
 
 ## 網站優化待辦（詳見 `docs/website-optimization-plan.md` + `docs/execution_backlog_2026-03-20.md`）
 
