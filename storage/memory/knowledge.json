@@ -11723,5 +11723,27 @@
       "publishable",
       "important"
     ]
+  },
+  {
+    "id": "K1149",
+    "title": "K308: Academic Contribution Statement — agent hit rate limit, shelved for next session",
+    "content": "K308 agent ran 56 tool uses over 15 minutes then hit API rate limit. Will retry after 1am reset. Content: formal academic contribution statement mapping 307 experiments to publishable claims.",
+    "timestamp": "2026-03-25T01:09:47.228298",
+    "tags": [
+      "shelved",
+      "rate-limit"
+    ]
+  },
+  {
+    "id": "K1150",
+    "title": "K309: ★ Correlation Forecasting — OOS R²=0.183 vs naive (DM t=8.09). Forecastable but NOT actionable (K270)",
+    "content": "Rolling OLS with corr_66/VIX/VIX_chg/corr_mom. RMSE 0.154 vs naive 0.171. DM t=8.09 (highly significant). BUT K270 showed acting on correlation predictions HURTS portfolio. Diagnostic value only: we can forecast when diversification will weaken, but switching away from GLD is counterproductive.",
+    "timestamp": "2026-03-25T01:09:47.228298",
+    "tags": [
+      "correlation",
+      "forecasting",
+      "OOS-R2",
+      "diagnostic-only"
+    ]
   }
 ]
