@@ -11683,5 +11683,18 @@
       "shelved",
       "quantile-regression"
     ]
+  },
+  {
+    "id": "K1146",
+    "title": "K305: ★★ Overnight Gap Forecastable — OOS R²=0.31 vs mean. VIX dominant. DM t=6.02 vs naive",
+    "content": "Target: |Open_t/Close_{t-1}-1|, mean 44bps. VIX r=0.559 (strongest). Partial r: only range(0.12) and prev gap(0.16) survive VIX control. OOS R²=0.309 vs expanding mean. Model RMSE 49.8bps vs naive 67.8bps (DM t=6.02). Gap scales with VIX: low 24.6bps, crisis 148.7bps. Strategy hint: skip large-gap nights Sharpe 1.52 but needs proper OOS validation.",
+    "timestamp": "2026-03-24T23:45:52.879062",
+    "tags": [
+      "overnight",
+      "gap",
+      "forecastable",
+      "VIX-dominant",
+      "OOS-R2"
+    ]
   }
 ]
