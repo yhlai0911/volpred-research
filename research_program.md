@@ -647,6 +647,9 @@
 - [x] K206: Asset-Specific VT — NULL in portfolio。Better predictor→lower exposure→miss bull market（悖論）。Uniform VIX wins (Sharpe 2.01 vs 1.86)
 - [x] K207: ★★★ VIX Boundary Panel — **VIX sufficient 3/4 equities, NOT for bonds/commodity/crypto**。Panel F=3114 p<0.0001。Two-tier framework: equities→VIX, non-equities→OwnVol
 - [x] K208: Implied-Realized GAP — NULL。VRP=+2.9%/yr real 但 OOS incr R²=0.0001。GAP VT WORSE (1.12 vs 1.22)
+- [x] K209: Two-Tier VT — NULL。Predictor paradox confirmed for SPY/GLD/TLT。Two-tier sig WORSE MDD (t=-7.57)。Own-vol→higher leverage→deeper DD
+- [x] K210: VIX-SKEW Ratio — NULL。SKEW hurts OOS (DM t=-2.55~-6.42)。GARCH-X coeff→0。VIX sufficient #26
+- [x] K211: ★ Mean Reversion HL — QQQ partial r=-0.252 (t=-5.68★), GLD r=-0.332 (t=-7.68★)。但 SPY FAILS (t=-1.68)。HL-adaptive rebalancing 0/3 sig
 
 ### Session 2026-03-24 進度
 **13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness

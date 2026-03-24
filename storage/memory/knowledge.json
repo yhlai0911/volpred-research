@@ -10480,5 +10480,41 @@
       "gap",
       "null-result"
     ]
+  },
+  {
+    "id": "K1051",
+    "title": "K209: Two-Tier VT — NULL. Predictor paradox confirmed for SPY/GLD/TLT (not just BTC)",
+    "content": "Two-tier (VIX for SPY, own-vol for GLD) NOT sig better than uniform VIX (t=1.38). Two-tier has sig WORSE MDD (t=-7.57 p=0.002) due to higher leverage. Hybrid ≈ uniform VIX.",
+    "timestamp": "2026-03-24T15:15:47.445700",
+    "tags": [
+      "two-tier",
+      "VT",
+      "null-result",
+      "paradox"
+    ]
+  },
+  {
+    "id": "K1052",
+    "title": "K210: VIX-SKEW Ratio — NULL. SKEW hurts OOS (DM t=-2.55 to -6.42). GARCH-X coeff→0",
+    "content": "SKEW features partial r=0.14-0.19 IS but OOS ALL worse. GARCH-X optimizer drives SKEW coeff to zero. VT overlay dSharpe=-0.001. VIX sufficient #26.",
+    "timestamp": "2026-03-24T15:15:47.445700",
+    "tags": [
+      "SKEW",
+      "VIX-sufficient",
+      "null-result"
+    ]
+  },
+  {
+    "id": "K1053",
+    "title": "K211: ★ Mean Reversion Speed — QQQ/GLD pass Harvey (HL partial r=-0.25/-0.33) but SPY FAILS",
+    "content": "Shorter HL→higher future vol. QQQ t=-5.68, GLD t=-7.68 PASS Harvey. BUT SPY t=-1.68 FAIL. HL-adaptive rebalancing 0/3 DM sig. Monthly remains optimal. BTC IGARCH-like (HL undefined). Cross-asset: TLT fastest (51d), SPY slowest (70d).",
+    "timestamp": "2026-03-24T15:15:47.445700",
+    "tags": [
+      "half-life",
+      "mean-reversion",
+      "Harvey-pass",
+      "QQQ",
+      "GLD"
+    ]
   }
 ]

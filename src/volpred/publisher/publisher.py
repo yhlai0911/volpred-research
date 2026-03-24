@@ -101,6 +101,20 @@ class Publisher:
                          publish_at: str | None = None) -> str:
         """Publish a research milestone."""
         import uuid
+        # --- Dedupe check: reject if same title published/drafted in last 24h ---
+        feed = self._load_feed()
+        from datetime import timedelta
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+        for existing in feed:
+            if existing.get('title') == title:
+                existing_time = existing.get('published_at') or existing.get('created_at', '')
+                try:
+                    from dateutil.parser import parse as dtparse
+                    if dtparse(existing_time) > cutoff:
+                        print(f"  ⚠️ Duplicate title within 24h: '{title[:50]}' (existing: {existing['id']}). Skipping.")
+                        return existing['id']
+                except Exception:
+                    pass
         # Sanitize description
         if isinstance(description, str):
             # Fix double-escaped newlines from various input sources
