@@ -639,6 +639,9 @@
 - [x] K198: Realized GARCH on daily — NULL。Measurement eq lambda=0.245 但 sigma_u 太大。R-GARCH wins 8/15 但 0/15 DM sig。Daily OHLC range ≈ |r_t|，GARCH 已處理。需 5-min RV
 - [x] K199: VIX Futures Basis — IS passes Harvey (t=-3.52, ΔR²=+3.6%) 但 OOS overfits (R²: -3.88→-8.29)。GARCH-X NS。Contango 89% of time。Backwardation RV 5-7x higher
 - [x] K200: ★★★ 200-Experiment Meta-Analysis — VIX sufficient 31x, QLIKE ceiling 36x, 50/50 8x validated。33 breakthroughs, 129 null。AI hit rates: Gemini≈Codex≈Claude≈16-19%
+- [x] K201: TDA VT Strategy — NULL。0/12 cross-OOS positive。TDA-VIX redundancy (r=0.44)。12/VIX irreducible kernel confirmed
+- [x] K202: ★★ BTC Features — **VIX NOT sufficient for BTC！** Range ratio partial r=0.353, BTC-SPY corr DM t=+4.54 PASSES Harvey。24/7 microstructure provides genuine incremental info。First exception in 200+ experiments
+- [x] K203: ★★ Momentum Crash Vol — VIX sufficient for equities (partial r≈0) but **NOT for GLD** (r=0.39 t=6.5) or **TLT** (r=0.22 t=3.4)。Equity losers→high vol, GLD winners→high vol (reversed)
 
 ### Session 2026-03-24 進度
 **13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness

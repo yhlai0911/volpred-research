@@ -10381,5 +10381,44 @@
       "milestone",
       "important"
     ]
+  },
+  {
+    "id": "K1043",
+    "title": "K201: TDA VT Strategy — NULL. 0/12 cross-OOS positive. TDA-VIX redundancy r=0.44",
+    "content": "[提出: Claude (K195延伸), 執行: Claude] Data: SPY/GLD/TLT/QQQ/EEM/XLK daily yfinance 2005-2024. Method: rolling 252d TDA (3 pairs) × 4 overlays × 3 signals = 12 combos, 5-period cross-OOS. Results: All 12 negative dSharpe (mean -0.02 to -0.07). Bootstrap full-period t=-1.58 Harvey FAIL. MDD overlays WORSE. TDA partial r|VIX=-0.19 (no incremental info). 12/VIX is irreducible kernel confirmed.",
+    "timestamp": "2026-03-24T14:44:53.772721",
+    "tags": [
+      "TDA",
+      "VT-strategy",
+      "null-result",
+      "cross-OOS"
+    ]
+  },
+  {
+    "id": "K1044",
+    "title": "K202: ★★ BTC Features — FIRST asset where VIX is NOT sufficient! Range ratio partial r=0.353",
+    "content": "[提出: Gemini R8 (跳躍式), 執行: Claude] Data: BTC-USD/SPY/VIX daily yfinance 2015-2024. Method: 6 BTC-specific features (weekend vol, BTC-SPY corr, skewness, kurtosis, volume surprise, range ratio). Results: ALL 6 partial r|VIX significant (p<0.001)! Range ratio r=0.353 (strongest), BTC-SPY corr r=-0.237. DM OOS: BTC-SPY corr t=+4.54 PASSES Harvey, weekend vol t=+2.93. BTC decoupling from SPY = strong vol signal. VIX is NOT sufficient for BTC — 24/7 trading microstructure provides genuine incremental info. First exception to VIX sufficiency in 200+ experiments.",
+    "timestamp": "2026-03-24T14:44:53.772721",
+    "tags": [
+      "BTC",
+      "VIX-NOT-sufficient",
+      "microstructure",
+      "important",
+      "Harvey-pass"
+    ]
+  },
+  {
+    "id": "K1045",
+    "title": "K203: ★★ Momentum Crash Vol — VIX sufficient for equities but NOT for GLD/TLT",
+    "content": "[提出: Claude (Daniel&Moskowitz 2016), 執行: Claude] Data: SPY/QQQ/GLD/TLT/EEM monthly returns yfinance. Method: MOM_12_1, MOM_6_1, MOM_1, partial r|VIX, crash indicator. Results: Equity (SPY/QQQ): momentum adds ZERO beyond VIX (partial r≈0). BUT GLD: partial r=0.39 t=6.5 PASSES Harvey! TLT: partial r=0.22 t=3.4 PASSES Harvey! Momentum crash asymmetry: equity losers→high vol (3.3x risk), GLD winners→high vol (reversed). VIX sufficient for equities, NOT for non-equity assets where asset-specific momentum matters.",
+    "timestamp": "2026-03-24T14:44:53.772721",
+    "tags": [
+      "momentum",
+      "crash-risk",
+      "GLD",
+      "TLT",
+      "VIX-NOT-sufficient",
+      "Harvey-pass"
+    ]
   }
 ]
