@@ -653,6 +653,11 @@
 - [x] K212: ★★ Conditional VIX Sufficiency — High VIX regime 100% Harvey pass（VIX>25 時 non-VIX features 全顯著）。但經濟影響微小（ΔR²=0.1-2.4%）。Regime-switching VT +0.09 Sharpe (bootstrap P=99%)。實務結論：VIX 充分性是有用的近似
 - [x] K213: Signature Path Features（Gemini R9#1）— IS: qv_path r=0.144, area r=0.114（incr R²=3%）。OOS: NOT sig + sign flips。Two-stage DM NS。需 tick 數據做真正 signatures
 - [x] K215: Seasonality 5 Assets — 5/15 Bonferroni pass 但 NOT actionable。Seasonal VT hurts -0.047 Sharpe。BTC weekday/weekend 唯一穩健（institutional trading）。Calendar effects 不可用
+- [x] K214: Wasserstein Distance（Gemini R9#2）— sig (partial r=0.095) 但 incr R²=0.46%。W1-VIX r=0.78。VIX 已 capture distributional shape
+- [x] K216: Ensemble Forecast — 11/16 directional improvement 但 0/16 DM sig。InvQLIKE 最佳。Parkinson sig WORSE。QLIKE ceiling unbroken by combinations
+- [x] K217: ★★ Non-Equity Best Predictor — GLD:Range Ratio (DM t=3.51★), TLT:EWMA (t=11.03★), BTC:EWMA (t=14.79★)。VIX 對非股票完全無用。Each needs own-asset vol
+- [x] K218: Contagion Timing — SPY→GLD/TLT Granger sig (p<0.001) 但 strategy NULL。50/50 static 已 capture decorrelation benefit
+- [x] K219: ★ Risk Parity vs 50/50 — RP NOT sig better (DM p=0.64, bootstrap CI includes zero)。**50/50 第 9 次驗證**。RP weight range 6.8-75.1%（estimation risk）
 
 ### Session 2026-03-24 進度
 **13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness

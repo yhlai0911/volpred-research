@@ -10574,5 +10574,43 @@
       "QLIKE-ceiling",
       "null-result"
     ]
+  },
+  {
+    "id": "K1059",
+    "title": "K217: ★★ Non-Equity Best Predictor — GLD:Range Ratio, TLT/BTC:EWMA(0.94). VIX useless for all",
+    "content": "VIX DM: GLD t=3.51, TLT t=11.03, BTC t=14.79 — all sig WORSE than own-asset predictors. BTC VIX rank rho=0.069 NS. Each non-equity needs own vol measure. VT: BTC EWMA Sharpe 2.10 MDD -10%.",
+    "timestamp": "2026-03-24T15:55:52.618593",
+    "tags": [
+      "non-equity",
+      "best-predictor",
+      "GLD",
+      "TLT",
+      "BTC",
+      "Harvey-pass"
+    ]
+  },
+  {
+    "id": "K1060",
+    "title": "K218: Cross-Asset Contagion Timing — SPY→GLD/TLT Granger sig but strategy NULL",
+    "content": "SPY vol Granger-causes GLD/TLT (all p<0.001). Partial r: QQQ 0.60, TLT 0.26, GLD 0.14. But overlays: best t=1.27 NS. 50/50 static already captures GLD decorrelation during stress. Confirms K163.",
+    "timestamp": "2026-03-24T15:55:52.618593",
+    "tags": [
+      "contagion",
+      "Granger",
+      "null-result",
+      "50/50"
+    ]
+  },
+  {
+    "id": "K1061",
+    "title": "K219: ★ Risk Parity vs 50/50 — RP NOT sig better (DM p=0.64, bootstrap CI includes zero). 50/50 #9 validated",
+    "content": "2-asset: RP Sharpe 1.018 vs 50/50 0.989, DM p=0.636. Bootstrap diff +0.030 CI[-0.064,+0.125]. 3-asset MinVar best but still NS. RP weight range 6.8-75.1% (estimation risk). 50/50 simpler, no params, stat equivalent. 9th validation.",
+    "timestamp": "2026-03-24T15:55:52.618593",
+    "tags": [
+      "risk-parity",
+      "50/50",
+      "validated",
+      "null-result"
+    ]
   }
 ]
