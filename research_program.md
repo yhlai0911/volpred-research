@@ -642,6 +642,11 @@
 - [x] K201: TDA VT Strategy — NULL。0/12 cross-OOS positive。TDA-VIX redundancy (r=0.44)。12/VIX irreducible kernel confirmed
 - [x] K202: ★★ BTC Features — **VIX NOT sufficient for BTC！** Range ratio partial r=0.353, BTC-SPY corr DM t=+4.54 PASSES Harvey。24/7 microstructure provides genuine incremental info。First exception in 200+ experiments
 - [x] K203: ★★ Momentum Crash Vol — VIX sufficient for equities (partial r≈0) but **NOT for GLD** (r=0.39 t=6.5) or **TLT** (r=0.22 t=3.4)。Equity losers→high vol, GLD winners→high vol (reversed)
+- [x] K204: GLD Momentum VT — NULL。prediction r=0.39 NOT→alpha（VIX already prices in at monthly VT）。Overlay triggers 0% in 3/5 periods
+- [x] K205: ★★ BTC Microstructure VT — range r=0.483 (10x VIX)，MDD -7.2% vs BH -31.5%。5/5 MDD robust, 3/5 Sharpe。No Harvey pass yet (t=2.6)
+- [x] K206: Asset-Specific VT — NULL in portfolio。Better predictor→lower exposure→miss bull market（悖論）。Uniform VIX wins (Sharpe 2.01 vs 1.86)
+- [x] K207: ★★★ VIX Boundary Panel — **VIX sufficient 3/4 equities, NOT for bonds/commodity/crypto**。Panel F=3114 p<0.0001。Two-tier framework: equities→VIX, non-equities→OwnVol
+- [x] K208: Implied-Realized GAP — NULL。VRP=+2.9%/yr real 但 OOS incr R²=0.0001。GAP VT WORSE (1.12 vs 1.22)
 
 ### Session 2026-03-24 進度
 **13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness

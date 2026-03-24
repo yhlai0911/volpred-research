@@ -10443,5 +10443,42 @@
       "microstructure",
       "MDD"
     ]
+  },
+  {
+    "id": "K1048",
+    "title": "K206: Asset-Specific VT — NULL in portfolio. Better predictor→lower exposure→miss bull market paradox",
+    "content": "Asset-specific (BTC range, GLD own-vol) underperforms uniform VIX in 4-asset portfolio (Sharpe 1.86 vs 2.01). BTC range correctly identifies high vol but over-penalizes. 50/50 SPY/GLD marginal (DM t=1.83, Harvey FAIL).",
+    "timestamp": "2026-03-24T15:01:37.343421",
+    "tags": [
+      "asset-specific",
+      "VT",
+      "paradox",
+      "null-result"
+    ]
+  },
+  {
+    "id": "K1050",
+    "title": "K207: ★★★ VIX Boundary Panel — VIX sufficient 3/4 equities, NOT for bonds/commodity/crypto (F=3114, p<0.0001)",
+    "content": "Panel 8 assets: SPY/EEM/IWM VIX sufficient. QQQ/GLD/TLT/IEF/BTC reject. OwnVol incr R²: TLT+12.3%, IEF+18.7%, GLD+8.1%, BTC+7.1%. Panel F(2,3843)=3114, Wald chi²=213. Two-tier framework: equities→VIX, non-equities→asset-specific.",
+    "timestamp": "2026-03-24T15:01:37.343421",
+    "tags": [
+      "panel",
+      "VIX-boundary",
+      "two-tier",
+      "important",
+      "Harvey-pass"
+    ]
+  },
+  {
+    "id": "K1052",
+    "title": "K208: Implied-Realized GAP — NULL. VRP=+2.9% real but no incremental info beyond VIX",
+    "content": "GAP=VIX-GARCH mean +2.92% ann (VIX>GARCH 83%). Partial r|VIX=-0.137. OOS incr R²=0.0001 (F p=0.77). Regime returns: t=-0.047 (no diff). GAP VT Sharpe WORSE (1.12 vs 1.22). VIX already incorporates fear premium. VIX sufficient confirmed.",
+    "timestamp": "2026-03-24T15:01:37.343421",
+    "tags": [
+      "VRP",
+      "implied-realized",
+      "gap",
+      "null-result"
+    ]
   }
 ]
