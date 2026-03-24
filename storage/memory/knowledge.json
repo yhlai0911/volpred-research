@@ -10760,5 +10760,17 @@
       "50/50",
       "important"
     ]
+  },
+  {
+    "id": "K1074",
+    "title": "K230: ★★ Optimal VT Parameter — K=12 NOT optimal but does NOT matter. Flat Sharpe curve (0.587-0.617)",
+    "content": "Grid K=6-20: best K=20 (Sharpe 0.617 vs K=12 0.592) but DM NS. All K values produce nearly identical returns. sqrt/log forms degenerate to B&H (VIX never exceeds K²). Threshold (binary VIX<12) best Sharpe 0.697 but NS vs linear. 12/VIX confirmed as irreducible kernel — parameter choice not critical.",
+    "timestamp": "2026-03-24T16:52:54.149892",
+    "tags": [
+      "VT-parameter",
+      "K-optimization",
+      "robustness",
+      "irreducible-kernel"
+    ]
   }
 ]
