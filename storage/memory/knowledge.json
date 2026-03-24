@@ -11004,5 +11004,29 @@
       "conflict",
       "null-result"
     ]
+  },
+  {
+    "id": "K1094",
+    "title": "K251: GLD-TLT Rotation — spread stationary (HL=32d) but r=-0.084 too weak. DM all NS. 50/50 wins",
+    "content": "GLD-TLT mean reverts but signal too weak. Z-score reversion best (Sharpe 0.697, 80% cross-OOS win rate) but DM p=0.84 and fails 2020-2024 period. Macro insight: TLT dominates high-vol, GLD dominates inflation. Static 50/50 simpler and robust.",
+    "timestamp": "2026-03-24T18:04:22.100404",
+    "tags": [
+      "GLD-TLT",
+      "rotation",
+      "mean-reversion",
+      "null-result"
+    ]
+  },
+  {
+    "id": "K1095",
+    "title": "K252: Adaptive VT K — ALL variants HURT performance. 1/VIX already has built-in regime adaptation",
+    "content": "Step(18/12/6) Sharpe 0.399 vs fixed K=12 0.504. Linear/Convex also worse. Bootstrap p=0.94-0.97 (strongly NS in wrong direction). K/VIX hyperbolic shape already adapts: VIX=30→weight 0.40, VIX=12→weight 1.00. Changing K is 2nd-order noise. Confirms K230.",
+    "timestamp": "2026-03-24T18:04:22.100404",
+    "tags": [
+      "adaptive-K",
+      "VT-parameter",
+      "null-result",
+      "confirms-K230"
+    ]
   }
 ]
