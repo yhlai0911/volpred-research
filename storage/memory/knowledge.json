@@ -11118,5 +11118,17 @@
       "CPI",
       "VIX-sufficient"
     ]
+  },
+  {
+    "id": "K1103",
+    "title": "K260: ★ Vol Clustering — predicting duration has zero value. Naive always-reduce Sharpe 0.975 ≈ Oracle 0.995",
+    "content": "72 clusters identified. Duration: mean 19.5d, median 11d, heavy-tail. Drawdown at start predicts duration (rho=-0.369). Fast VIX rise = LONGER cluster (contradicts intuition). BUT OOS classifier AUC=0.475 (worse than coin flip). Naive strategy (always reduce 50%) captures 98% of oracle value. Gap naive-oracle = 0.02 Sharpe. Prediction unnecessary.",
+    "timestamp": "2026-03-24T18:36:02.775587",
+    "tags": [
+      "clustering",
+      "duration",
+      "naive-wins",
+      "practical"
+    ]
   }
 ]
