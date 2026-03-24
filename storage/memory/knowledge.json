@@ -11395,5 +11395,30 @@
       "FAQ",
       "important"
     ]
+  },
+  {
+    "id": "K1124",
+    "title": "K281: ★ VIX Trigger — NO trigger beats Monthly VT on NET Sharpe. Monthly wins composite (0.983 vs 0.714)",
+    "content": "Monthly VT net Sharpe 0.239 > Daily 0.192 > all triggers (0.20-0.23). TX drag kills daily (225 trades/yr). Triggers discretize weights → stale allocations. Asymmetric (up:20/25/30 down:15) is best trigger but still loses to monthly. REVISES K279: monthly VT is optimal on NET basis (K279 was gross Sharpe).",
+    "timestamp": "2026-03-24T20:19:35.436572",
+    "tags": [
+      "trigger",
+      "monthly-wins",
+      "K279-revision",
+      "net-Sharpe"
+    ]
+  },
+  {
+    "id": "K1125",
+    "title": "K282: ★★ VIX Alert System — 5-color system designed. VIX>30 best SNR (t=3.35). Cry wolf rate 54-66%",
+    "content": "GREEN<15, YELLOW 15-20, ORANGE 20-25, RED 25-35, DARK-RED>35. VIX>30 crossing: 5d SPY +1.43% (t=3.35, mean reversion). VIX>25 practical sweet spot (4.25x/yr). Aggressive profile Sharpe 0.904 MDD -24.5%. All profiles high cry-wolf rate (>50%) — must size actions, not go all-in.",
+    "timestamp": "2026-03-24T20:19:35.436572",
+    "tags": [
+      "alert-system",
+      "VIX-color",
+      "practical",
+      "cry-wolf",
+      "mean-reversion"
+    ]
   }
 ]
