@@ -11696,5 +11696,32 @@
       "VIX-dominant",
       "OOS-R2"
     ]
+  },
+  {
+    "id": "K1147",
+    "title": "K306: VIX Speed Trigger — NULL after lag fix. K300 MDD improvement was same-day look-ahead bias",
+    "content": "Same-day Sharpe 1.20 → lagged(t-1) Sharpe 0.40 (collapses). 5-period cross-OOS: 2/5 wins only. VT+Trigger: negative Sharpe. Another timing bias caught. K300 MDD -40% was look-ahead. Null result honestly reported.",
+    "timestamp": "2026-03-24T23:54:44.769887",
+    "tags": [
+      "VIX-speed",
+      "trigger",
+      "null-result",
+      "timing-bias",
+      "K300-revision"
+    ]
+  },
+  {
+    "id": "K1148",
+    "title": "K307: ★★★ EMH Test — 0/25 strategies passing is 96.7% likely under EMH. Markets are efficient. 148x false positive inflation caught",
+    "content": "P(0 passes in 25 | EMH) = 96.7% — most likely outcome. 5/25 initially passed Harvey = 148x inflation over expected 0.135%. Our 4-layer validation (OOS+lag+cross+subsample) killed 100%. Power: 2%/yr alpha only 11% detectable. Bayes Factor 1.79 favoring EMH. Conclusion: markets efficient, 12/VIX captures available risk premium.",
+    "timestamp": "2026-03-24T23:54:44.769887",
+    "tags": [
+      "EMH",
+      "market-efficiency",
+      "false-positive",
+      "validation",
+      "publishable",
+      "important"
+    ]
   }
 ]
