@@ -59,6 +59,7 @@ CONFLICT_KEYS = {
     "memory_entries": "id",
     "feature_flags": "feature",
     "strategy_signals": "strategy_name",
+    "paper_trades": "strategy,trade_date",
 }
 
 

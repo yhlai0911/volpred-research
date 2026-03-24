@@ -592,12 +592,17 @@ def main():
                                  strategy_key=sid)
             synced_count += 1
         print(f"  Supabase: {synced_count} strategy signals synced")
-        # Sync paper trades (latest entry per strategy)
+        # Sync paper trades (last 30 entries per strategy, covers backfill + today)
+        pt_synced = 0
         for strat_id, _ in strat_list:
             if strat_id in pt and pt[strat_id]["entries"]:
-                latest = pt[strat_id]["entries"][-1]
-                sync_paper_trade(strat_id, latest, latest["data_date"])
-        print("  Supabase: paper trades synced")
+                recent_entries = pt[strat_id]["entries"][-30:]
+                for entry in recent_entries:
+                    trade_date = entry.get("data_date") or entry.get("trade_date") or entry.get("date", "")
+                    if trade_date:
+                        sync_paper_trade(strat_id, entry, trade_date)
+                        pt_synced += 1
+        print(f"  Supabase: {pt_synced} paper trades synced (last 30d × {len(strat_list)} strategies)")
     except Exception as e:
         print(f"  Supabase sync skipped: {e}")
 
