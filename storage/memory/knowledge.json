@@ -11616,5 +11616,18 @@
       "Harvey-pass",
       "simplicity-wins"
     ]
+  },
+  {
+    "id": "K1141",
+    "title": "K300: ★★ VIX Speed Validation — survives rolling (5/5 consistent, pooled DM=5.20) but +0.01% QLIKE (economically zero)",
+    "content": "3/4 criteria PASS: 5/5 QLIKE improvement, consistent positive delta, pooled DM=5.198. FAILS: effect size 0.01% (trivial). K299 t=6.54 inflated ~3x by full-sample. Individual period DMs 2.27-3.98 (only P2 passes Harvey alone). Signal is real but not actionable for forecasting. Binary threshold=1.0 reduces MDD 40% — better as risk trigger than GARCH-X.",
+    "timestamp": "2026-03-24T22:12:44.815774",
+    "tags": [
+      "VIX-speed",
+      "validation",
+      "rolling",
+      "economically-zero",
+      "risk-trigger"
+    ]
   }
 ]
