@@ -10810,5 +10810,40 @@
       "regret-paradox",
       "practical"
     ]
+  },
+  {
+    "item_id": "f585d584",
+    "category": "international_vt",
+    "content": "[提出: 用戶, 執行: Claude] K237 International VT: 50/50+VT across 5 markets.\nUS (S&P 500): VT Sharpe=0.358 vs B&H=0.385 (diff=-0.027), MDD VT=-22.5% vs B&H=-35.1%, VIX→Vol t=50.57, OOS win=2/5\nJapan (MSCI Japan): VT Sharpe=0.222 vs B&H=0.195 (diff=+0.027), MDD VT=-22.6% vs B&H=-32.2%, VIX→Vol t=33.14, OOS win=2/5\nEurope (FTSE Europe): VT Sharpe=0.190 vs B&H=0.171 (diff=+0.019), MDD VT=-28.5% vs B&H=-40.1%, VIX→Vol t=43.43, OOS win=2/5\nEmerging Markets: VT Sharpe=0.208 vs B&H=0.197 (diff=+0.012), MDD VT=-37.7% vs B&H=-46.3%, VIX→Vol t=40.91, OOS win=2/5\nTaiwan (台灣50): VT Sharpe=0.055 vs B&H=0.149 (diff=-0.095), MDD VT=-58.9% vs B&H=-62.0%, VIX→Vol t=10.15, OOS win=1/5\nSummary: VT improves Sharpe 3/5, MDD 5/5. VIX passes Harvey for 5/5 markets. Avg OOS win rate: 36.0%. Best: Japan (MSCI Japan) (+0.027), Worst: Taiwan (台灣50) (-0.095).",
+    "evidence": [
+      "k237_international_vt"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-03-24T17:08:27.636677"
+  },
+  {
+    "id": "K1079",
+    "title": "K236: Starting Capital — NO impact. VT equally effective K-M. TX cost immaterial at 5bps",
+    "content": "Sharpe improvement +0.046 uniform across all capital levels (spread 0.0008). TX 2.4% of initial over 20yr.  min trade filter negligible. DCA vs lump sum: terminal wealth similar. Capital size irrelevant, regime matters.",
+    "timestamp": "2026-03-24T17:09:25.881485",
+    "tags": [
+      "starting-capital",
+      "practical",
+      "DCA"
+    ]
+  },
+  {
+    "id": "K1080",
+    "title": "K237: ★★ International VT — MDD protection universal 5/5 markets. VIX predicts vol 5/5 (Harvey pass)",
+    "content": "VT MDD improvement: SPY +12.6pp, Japan +9.6pp, Europe +11.7pp, EEM +8.6pp, Taiwan +3.1pp (weakest). VIX-market corr drives effectiveness: SPY -0.819, Taiwan -0.079 (weak). MDD bootstrap sig for Japan/Europe/EEM. Sharpe NOT sig improved. Taiwan weakest (VIX barely correlates).",
+    "timestamp": "2026-03-24T17:09:25.881485",
+    "tags": [
+      "international",
+      "Japan",
+      "Europe",
+      "EEM",
+      "Taiwan",
+      "universal"
+    ]
   }
 ]
