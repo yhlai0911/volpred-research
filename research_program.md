@@ -621,6 +621,14 @@
 - [x] K180: ★★ 2025 Q1 即時壓力測試 — 關稅+地緣政治期: SPY -7.7%, 60/40 -3.3%。**我們建議的三策略全部近零**（50/50 +0.5%, 50/50+VT +0.2%, 0050+GLD+VT -0.4%）。2025-04 VIX 飆到 52.3，VT 自動減碼到 23%。**即時驗證所有建議**
 - [x] K181: ★★ 50/50 進場時機 — 任意時點 avg +9.5%, 81% 正報酬, <-10% 僅 6%。VIX≥35 進場 avg +23.2% (99%正)。GLD>40% 稍弱(64%正)但仍可。**不需要擇時——隨時都是好時機。50/50 第 10 次驗證**
 - [x] K182: ★★ $100K Walk-Forward 19 年 — $100K→$382,275（CAGR 7.2%, MDD -14.4%）。GFC 最低只虧 4%。TX 19 年 $4,405。保險費 ~3%/年換 MDD -55%→-14.4%
+- [x] K183: Directional Change 框架（Gemini R8#1）— NULL。5 資產 × 5 閾值 = 0/25 QLIKE 改善。23/25 DC overlay 反而加噪音。Partial r|VIX: 僅 GLD θ=2% r=0.165, BTC θ=2% r=0.105。Calendar→intrinsic time 不解鎖隱藏預測力。VIX sufficient re-confirmed
+- [x] K184: ★ CBOE SKEW 指數（Gemini R8#2）— partial r|VIX 統計顯著(-0.03~-0.07, all p<0.05)但經濟上可忽略。OOS forecast encompassing: SKEW NS (t=-1.41)。QLIKE 反而更差(+0.069)。VT overlay +0.039 Sharpe Harvey FAIL。SKEW 僅在 VIX>15 時有效。VIX sufficient #24（有微弱裂縫但實務無用）
+- [x] K185: FOMC Vol Effect（Gemini R8#4）— FOMC vol premium 真實(post 16.9% vs pre 13.9%, t=2.60)但 OOS NS。VIX 解釋 77% FOMC day |return|。Pre-FOMC drift +0.31% 確認 Lucca&Moench。FOMC-aware VT Harvey FAIL (t=0.30)。VIX sufficient #25
+- [x] K187: Overnight Gap Structure（K156 延伸）— Gaps=50% daily var（跨 5 資產 universal）。Gap ratio partial r 弱且負。Component-aware EWMA+GJR LOSES to GJR 4/5 資產。Parkinson-targeted: mixed。描述性有價值但預測無效
+- [x] K188: ★★ HAR Ceiling Test — HAR ≈ GARCH on daily data（GARCH wins 52%, HAR 2%, ties 47%）。OHLC proxies 反而 hurt。AHAR 無效。**Ceiling 在 DATA 不在 MODEL**——HAR（HF workhorse）在日頻等同 GARCH。突破需要 intraday RV
+- [x] K189: Attention-Weighted Vol — NULL。Cross-asset attention adds noise，optimal α=0.9（幾乎忽略 cross-asset）。0/6 QLIKE improved。Attention weights 近 uniform。Own-EWMA 已足夠
+- [x] K190: ★ Realized Semivariance — RS- 對股票更持久，asymmetric EWMA beats symmetric (SPY DM t=-4.42)。但 GJR wins 4/5。SJV partial r|VIX 全 NS。GJR gamma 已捕獲不對稱性
+- [x] K191: Put-Call Ratio proxies — MIXED but NULL。PCR 不可取得，用 VIX 衍生指標。VIX Z-score partial r=0.145★ 但 GARCH-X Harvey FAIL (t=-2.74)。VT overlay 無顯著改善
 - **Phase K 統合（73+ 實驗）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking

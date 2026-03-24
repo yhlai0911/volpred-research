@@ -1,0 +1,668 @@
+{
+  "experiment": "K188",
+  "title": "HAR Ceiling Test \u2014 Does HAR-RV Beat GARCH on Daily Data?",
+  "attribution": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude]",
+  "timestamp": "2026-03-24T13:11:48.672545",
+  "config": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "TLT",
+      "BTC-USD"
+    ],
+    "har_window": 500,
+    "garch_window": 2000,
+    "oos_start": "2023-01-01",
+    "oos_end": "2024-12-31",
+    "rv_proxies": [
+      "c2c",
+      "parkinson",
+      "garman_klass",
+      "rogers_satchell"
+    ],
+    "models": [
+      "HAR",
+      "HAR-X (with VIX)",
+      "AHAR (asymmetric)",
+      "GJR-GARCH(1,1,1)"
+    ]
+  },
+  "cross_asset_summary": {
+    "total_comparisons": 60,
+    "garch_wins": 31,
+    "har_wins": 1,
+    "ties": 28,
+    "ceiling_confirmed": true
+  },
+  "model_wins": {
+    "har(c2c)": {
+      "garch_wins": 1,
+      "har_wins": 0,
+      "ties": 4
+    },
+    "har_x(c2c)": {
+      "garch_wins": 0,
+      "har_wins": 1,
+      "ties": 4
+    },
+    "ahar(c2c)": {
+      "garch_wins": 1,
+      "har_wins": 0,
+      "ties": 4
+    },
+    "har(parkinson)": {
+      "garch_wins": 3,
+      "har_wins": 0,
+      "ties": 2
+    },
+    "har_x(parkinson)": {
+      "garch_wins": 4,
+      "har_wins": 0,
+      "ties": 1
+    },
+    "ahar(parkinson)": {
+      "garch_wins": 3,
+      "har_wins": 0,
+      "ties": 2
+    },
+    "har(garman_klass)": {
+      "garch_wins": 3,
+      "har_wins": 0,
+      "ties": 2
+    },
+    "har_x(garman_klass)": {
+      "garch_wins": 4,
+      "har_wins": 0,
+      "ties": 1
+    },
+    "ahar(garman_klass)": {
+      "garch_wins": 3,
+      "har_wins": 0,
+      "ties": 2
+    },
+    "har(rogers_satchell)": {
+      "garch_wins": 3,
+      "har_wins": 0,
+      "ties": 2
+    },
+    "har_x(rogers_satchell)": {
+      "garch_wins": 3,
+      "har_wins": 0,
+      "ties": 2
+    },
+    "ahar(rogers_satchell)": {
+      "garch_wins": 3,
+      "har_wins": 0,
+      "ties": 2
+    }
+  },
+  "per_asset": {
+    "SPY": {
+      "garch_qlike": -8.647816553824352,
+      "garch_mse": 1.1682997351319905e-08,
+      "comparisons": [
+        {
+          "model": "har(c2c)",
+          "qlike_diff_pct": -0.8144889578157501,
+          "dm_qlike_t": 1.875465967446664,
+          "dm_qlike_p": 0.9693438380220213,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(c2c)",
+          "qlike_diff_pct": 0.6978486887330295,
+          "dm_qlike_t": -1.734330274026021,
+          "dm_qlike_p": 0.041738524481117735,
+          "winner": "HAR"
+        },
+        {
+          "model": "ahar(c2c)",
+          "qlike_diff_pct": -0.8494329272694393,
+          "dm_qlike_t": 2.0026885541210286,
+          "dm_qlike_p": 0.9771243915626661,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har(parkinson)",
+          "qlike_diff_pct": -0.8776533832571243,
+          "dm_qlike_t": 1.4766899252618204,
+          "dm_qlike_p": 0.9298052201099932,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(parkinson)",
+          "qlike_diff_pct": -3.14765227795158,
+          "dm_qlike_t": 3.5998743975014267,
+          "dm_qlike_p": 0.9998249111646847,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(parkinson)",
+          "qlike_diff_pct": -0.8090240682497949,
+          "dm_qlike_t": 1.4269491321582441,
+          "dm_qlike_p": 0.9228900179271889,
+          "winner": "TIE"
+        },
+        {
+          "model": "har(garman_klass)",
+          "qlike_diff_pct": -0.8514373914229336,
+          "dm_qlike_t": 1.4508416758367741,
+          "dm_qlike_p": 0.9262738669142292,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(garman_klass)",
+          "qlike_diff_pct": -4.075177489786874,
+          "dm_qlike_t": 3.6894142269374983,
+          "dm_qlike_p": 0.9998752574129519,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(garman_klass)",
+          "qlike_diff_pct": -0.7936671794947385,
+          "dm_qlike_t": 1.4428962536077288,
+          "dm_qlike_p": 0.925161443775855,
+          "winner": "TIE"
+        },
+        {
+          "model": "har(rogers_satchell)",
+          "qlike_diff_pct": -0.7624696758534654,
+          "dm_qlike_t": 1.4239466958788125,
+          "dm_qlike_p": 0.9224565489117256,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(rogers_satchell)",
+          "qlike_diff_pct": -13323.313789222459,
+          "dm_qlike_t": 1.0085353853776284,
+          "dm_qlike_p": 0.8431568525111361,
+          "winner": "TIE"
+        },
+        {
+          "model": "ahar(rogers_satchell)",
+          "qlike_diff_pct": -0.7253783989501691,
+          "dm_qlike_t": 1.443569675003645,
+          "dm_qlike_p": 0.9252562235389118,
+          "winner": "TIE"
+        }
+      ],
+      "same_proxy": {
+        "har_same(c2c)": {
+          "mean_qlike": -8.57738104290129,
+          "mean_mse": 1.203158069283711e-08,
+          "n": 501
+        },
+        "har_same(parkinson)": {
+          "mean_qlike": -9.095928901261923,
+          "mean_mse": 2.2056583334803478e-09,
+          "n": 501
+        },
+        "har_same(garman_klass)": {
+          "mean_qlike": -9.121836321987715,
+          "mean_mse": 1.950937191582435e-09,
+          "n": 501
+        },
+        "har_same(rogers_satchell)": {
+          "mean_qlike": -9.108698078785247,
+          "mean_mse": 2.3072690986641382e-09,
+          "n": 501
+        }
+      },
+      "n_oos": 501
+    },
+    "QQQ": {
+      "garch_qlike": -7.964132133873325,
+      "garch_mse": 3.894530824643833e-08,
+      "comparisons": [
+        {
+          "model": "har(c2c)",
+          "qlike_diff_pct": -0.4837600398013904,
+          "dm_qlike_t": 1.2223030679315503,
+          "dm_qlike_p": 0.8889155397272608,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(c2c)",
+          "qlike_diff_pct": 0.18606436627484593,
+          "dm_qlike_t": -0.3920264133156418,
+          "dm_qlike_p": 0.3476028681825495,
+          "winner": "TIE"
+        },
+        {
+          "model": "ahar(c2c)",
+          "qlike_diff_pct": -0.5015488618199835,
+          "dm_qlike_t": 1.2663777004128212,
+          "dm_qlike_p": 0.8970162304948196,
+          "winner": "TIE"
+        },
+        {
+          "model": "har(parkinson)",
+          "qlike_diff_pct": -1.1764561985762327,
+          "dm_qlike_t": 2.127495377009398,
+          "dm_qlike_p": 0.9830661685253265,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(parkinson)",
+          "qlike_diff_pct": -2.404762619332433,
+          "dm_qlike_t": 3.1815654612310986,
+          "dm_qlike_p": 0.9992220695135116,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(parkinson)",
+          "qlike_diff_pct": -1.1679667944154621,
+          "dm_qlike_t": 2.1046456664460758,
+          "dm_qlike_p": 0.982089682261114,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har(garman_klass)",
+          "qlike_diff_pct": -1.2580967647432093,
+          "dm_qlike_t": 2.104480550071431,
+          "dm_qlike_p": 0.9820824542733886,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(garman_klass)",
+          "qlike_diff_pct": -2.6668491222521884,
+          "dm_qlike_t": 3.325543296789538,
+          "dm_qlike_p": 0.9995263384198202,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(garman_klass)",
+          "qlike_diff_pct": -1.187024804446225,
+          "dm_qlike_t": 2.091734606369143,
+          "dm_qlike_p": 0.9815169178674592,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har(rogers_satchell)",
+          "qlike_diff_pct": -1.2198233361247086,
+          "dm_qlike_t": 1.9773678558000982,
+          "dm_qlike_p": 0.9757255770359232,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(rogers_satchell)",
+          "qlike_diff_pct": -2.872114369146042,
+          "dm_qlike_t": 3.493257246913276,
+          "dm_qlike_p": 0.9997402436470024,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(rogers_satchell)",
+          "qlike_diff_pct": -1.1582920906309568,
+          "dm_qlike_t": 2.015104979667627,
+          "dm_qlike_p": 0.9777858331848003,
+          "winner": "GARCH"
+        }
+      ],
+      "same_proxy": {
+        "har_same(c2c)": {
+          "mean_qlike": -7.925604845092664,
+          "mean_mse": 4.0782764331313827e-08,
+          "n": 501
+        },
+        "har_same(parkinson)": {
+          "mean_qlike": -8.459519848859149,
+          "mean_mse": 6.942237460293382e-09,
+          "n": 501
+        },
+        "har_same(garman_klass)": {
+          "mean_qlike": -8.488311715548093,
+          "mean_mse": 6.017551517958582e-09,
+          "n": 501
+        },
+        "har_same(rogers_satchell)": {
+          "mean_qlike": -8.481415779760882,
+          "mean_mse": 7.004552247048702e-09,
+          "n": 501
+        }
+      },
+      "n_oos": 501
+    },
+    "GLD": {
+      "garch_qlike": -8.447531635723163,
+      "garch_mse": 1.9696811511197374e-08,
+      "comparisons": [
+        {
+          "model": "har(c2c)",
+          "qlike_diff_pct": -0.19377685229929664,
+          "dm_qlike_t": 0.8421896622379168,
+          "dm_qlike_p": 0.7999573735479971,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(c2c)",
+          "qlike_diff_pct": -0.43181227934178434,
+          "dm_qlike_t": 1.3891302281593139,
+          "dm_qlike_p": 0.9172936277411916,
+          "winner": "TIE"
+        },
+        {
+          "model": "ahar(c2c)",
+          "qlike_diff_pct": -0.20059068058140317,
+          "dm_qlike_t": 0.8630462083080244,
+          "dm_qlike_p": 0.8057366666984058,
+          "winner": "TIE"
+        },
+        {
+          "model": "har(parkinson)",
+          "qlike_diff_pct": -7.736282550666833,
+          "dm_qlike_t": 4.685103947721302,
+          "dm_qlike_p": 0.9999981932756462,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(parkinson)",
+          "qlike_diff_pct": -10.841868666636877,
+          "dm_qlike_t": 5.28354781703107,
+          "dm_qlike_p": 0.9999999051779672,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(parkinson)",
+          "qlike_diff_pct": -7.726016421655417,
+          "dm_qlike_t": 4.668307324397718,
+          "dm_qlike_p": 0.9999980458799846,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har(garman_klass)",
+          "qlike_diff_pct": -7.906847470312226,
+          "dm_qlike_t": 4.660691996265986,
+          "dm_qlike_p": 0.9999979753063669,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(garman_klass)",
+          "qlike_diff_pct": -10.91239421273012,
+          "dm_qlike_t": 5.272082291489629,
+          "dm_qlike_p": 0.9999998993912048,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(garman_klass)",
+          "qlike_diff_pct": -7.917683626860793,
+          "dm_qlike_t": 4.664342396155642,
+          "dm_qlike_p": 0.9999980094361773,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har(rogers_satchell)",
+          "qlike_diff_pct": -8.096218968778729,
+          "dm_qlike_t": 4.624613892593606,
+          "dm_qlike_p": 0.999997606306769,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(rogers_satchell)",
+          "qlike_diff_pct": -11.28847739261979,
+          "dm_qlike_t": 5.2746415802073745,
+          "dm_qlike_p": 0.9999999007118596,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(rogers_satchell)",
+          "qlike_diff_pct": -8.215529286912888,
+          "dm_qlike_t": 4.639303044656692,
+          "dm_qlike_p": 0.9999977637394932,
+          "winner": "GARCH"
+        }
+      ],
+      "same_proxy": {
+        "har_same(c2c)": {
+          "mean_qlike": -8.431162274822471,
+          "mean_mse": 1.9808232870943684e-08,
+          "n": 501
+        },
+        "har_same(parkinson)": {
+          "mean_qlike": -9.382290466864417,
+          "mean_mse": 1.545376617329498e-09,
+          "n": 501
+        },
+        "har_same(garman_klass)": {
+          "mean_qlike": -9.397303959661379,
+          "mean_mse": 1.4800890752319256e-09,
+          "n": 501
+        },
+        "har_same(rogers_satchell)": {
+          "mean_qlike": -9.402412324799121,
+          "mean_mse": 1.6045652174338872e-09,
+          "n": 501
+        }
+      },
+      "n_oos": 501
+    },
+    "TLT": {
+      "garch_qlike": -8.14389021060556,
+      "garch_mse": 2.369661918463034e-08,
+      "comparisons": [
+        {
+          "model": "har(c2c)",
+          "qlike_diff_pct": -0.006011947661647261,
+          "dm_qlike_t": 0.024403565378856226,
+          "dm_qlike_p": 0.5097297602132116,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(c2c)",
+          "qlike_diff_pct": -0.08728802939052178,
+          "dm_qlike_t": 0.2833274878742375,
+          "dm_qlike_p": 0.6114782257723086,
+          "winner": "TIE"
+        },
+        {
+          "model": "ahar(c2c)",
+          "qlike_diff_pct": -0.03843424242949964,
+          "dm_qlike_t": 0.15612443205802284,
+          "dm_qlike_p": 0.5620008963090184,
+          "winner": "TIE"
+        },
+        {
+          "model": "har(parkinson)",
+          "qlike_diff_pct": -5.451776715301732,
+          "dm_qlike_t": 5.16679620912322,
+          "dm_qlike_p": 0.9999998274116496,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(parkinson)",
+          "qlike_diff_pct": -6.6516322731106925,
+          "dm_qlike_t": 5.527380599980451,
+          "dm_qlike_p": 0.9999999737445849,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(parkinson)",
+          "qlike_diff_pct": -5.398211751319563,
+          "dm_qlike_t": 5.2215089122403775,
+          "dm_qlike_p": 0.9999998694182044,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har(garman_klass)",
+          "qlike_diff_pct": -6.28415574474013,
+          "dm_qlike_t": 5.415945646651606,
+          "dm_qlike_p": 0.9999999524840937,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(garman_klass)",
+          "qlike_diff_pct": -7.339799314835369,
+          "dm_qlike_t": 5.6709187645004135,
+          "dm_qlike_p": 0.9999999879497536,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(garman_klass)",
+          "qlike_diff_pct": -6.206114094810091,
+          "dm_qlike_t": 5.417203267686635,
+          "dm_qlike_p": 0.9999999527984906,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har(rogers_satchell)",
+          "qlike_diff_pct": -6.536063041335398,
+          "dm_qlike_t": 5.455164801235747,
+          "dm_qlike_p": 0.9999999613929473,
+          "winner": "GARCH"
+        },
+        {
+          "model": "har_x(rogers_satchell)",
+          "qlike_diff_pct": -7.634035572002815,
+          "dm_qlike_t": 5.627105731790053,
+          "dm_qlike_p": 0.9999999846893722,
+          "winner": "GARCH"
+        },
+        {
+          "model": "ahar(rogers_satchell)",
+          "qlike_diff_pct": -6.463374518297416,
+          "dm_qlike_t": 5.429948717012092,
+          "dm_qlike_p": 0.9999999558729149,
+          "winner": "GARCH"
+        }
+      ],
+      "same_proxy": {
+        "har_same(c2c)": {
+          "mean_qlike": -8.143400604188477,
+          "mean_mse": 2.4021553274310076e-08,
+          "n": 501
+        },
+        "har_same(parkinson)": {
+          "mean_qlike": -9.115401825716756,
+          "mean_mse": 2.0407724641628737e-09,
+          "n": 501
+        },
+        "har_same(garman_klass)": {
+          "mean_qlike": -9.146000348868368,
+          "mean_mse": 1.7333407833573597e-09,
+          "n": 501
+        },
+        "har_same(rogers_satchell)": {
+          "mean_qlike": -9.157529909983168,
+          "mean_mse": 1.7706450586353807e-09,
+          "n": 501
+        }
+      },
+      "n_oos": 501
+    },
+    "BTC-USD": {
+      "garch_qlike": -6.31044997974337,
+      "garch_mse": 1.9158968859568543e-06,
+      "comparisons": [
+        {
+          "model": "har(c2c)",
+          "qlike_diff_pct": -0.14810631584525807,
+          "dm_qlike_t": 0.27088080979820633,
+          "dm_qlike_p": 0.6067203085338233,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(c2c)",
+          "qlike_diff_pct": -0.11017816931145903,
+          "dm_qlike_t": 0.14572545270726125,
+          "dm_qlike_p": 0.5579107945078923,
+          "winner": "TIE"
+        },
+        {
+          "model": "ahar(c2c)",
+          "qlike_diff_pct": -0.2412863854551144,
+          "dm_qlike_t": 0.46079473342812655,
+          "dm_qlike_p": 0.6774583441354562,
+          "winner": "TIE"
+        },
+        {
+          "model": "har(parkinson)",
+          "qlike_diff_pct": 0.7654642976327614,
+          "dm_qlike_t": -1.3841780114540403,
+          "dm_qlike_p": 0.08336376706514266,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(parkinson)",
+          "qlike_diff_pct": 0.6299146688622036,
+          "dm_qlike_t": -0.856182824176913,
+          "dm_qlike_p": 0.1960889963450043,
+          "winner": "TIE"
+        },
+        {
+          "model": "ahar(parkinson)",
+          "qlike_diff_pct": 0.6467178462598641,
+          "dm_qlike_t": -1.1506796055357713,
+          "dm_qlike_p": 0.12512068138158716,
+          "winner": "TIE"
+        },
+        {
+          "model": "har(garman_klass)",
+          "qlike_diff_pct": 0.8308646880216988,
+          "dm_qlike_t": -1.4068342824197966,
+          "dm_qlike_p": 0.07995134893970873,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(garman_klass)",
+          "qlike_diff_pct": 0.2696011634376378,
+          "dm_qlike_t": -0.2929309648466147,
+          "dm_qlike_p": 0.38482914004294577,
+          "winner": "TIE"
+        },
+        {
+          "model": "ahar(garman_klass)",
+          "qlike_diff_pct": 0.687588306688424,
+          "dm_qlike_t": -1.1383534219021345,
+          "dm_qlike_p": 0.12767344703775774,
+          "winner": "TIE"
+        },
+        {
+          "model": "har(rogers_satchell)",
+          "qlike_diff_pct": 0.8357725015562695,
+          "dm_qlike_t": -1.4194733321687465,
+          "dm_qlike_p": 0.07809425685146756,
+          "winner": "TIE"
+        },
+        {
+          "model": "har_x(rogers_satchell)",
+          "qlike_diff_pct": -0.8485931913858855,
+          "dm_qlike_t": 0.6486344507740562,
+          "dm_qlike_p": 0.7416105258024932,
+          "winner": "TIE"
+        },
+        {
+          "model": "ahar(rogers_satchell)",
+          "qlike_diff_pct": 0.7322325218128983,
+          "dm_qlike_t": -1.2592407520044064,
+          "dm_qlike_p": 0.10417321420745103,
+          "winner": "TIE"
+        }
+      ],
+      "same_proxy": {
+        "har_same(c2c)": {
+          "mean_qlike": -6.3011038047651144,
+          "mean_mse": 1.928241231443097e-06,
+          "n": 730
+        },
+        "har_same(parkinson)": {
+          "mean_qlike": -6.403269135288968,
+          "mean_mse": 8.817463695467525e-07,
+          "n": 730
+        },
+        "har_same(garman_klass)": {
+          "mean_qlike": -6.4180939239087,
+          "mean_mse": 8.766597019362597e-07,
+          "n": 730
+        },
+        "har_same(rogers_satchell)": {
+          "mean_qlike": -6.414723800917018,
+          "mean_mse": 1.0911476263624877e-06,
+          "n": 730
+        }
+      },
+      "n_oos": 730
+    }
+  },
+  "conclusion": "GARCH beats HAR in majority of comparisons. HAR on daily data underperforms \u2014 needs intraday RV for its advantage."
+}

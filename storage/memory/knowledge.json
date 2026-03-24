@@ -10126,5 +10126,122 @@
     ],
     "confidence": 0.88,
     "timestamp": "2026-03-24T12:02:39.559083"
+  },
+  {
+    "id": "K1023",
+    "title": "Gemini R6 Taiwan paper review: 6 issues, K=8.63 lookahead bias most critical",
+    "content": "[提出: Gemini R6#2, 執行: Gemini] Taiwan VT 論文審查。6 問題: (1) 極嚴重: K=8.63 用 2020+ VIXTWN/VIX 校準但回測從 2016 → lookahead bias。需 rolling/expanding window 校準 K。(2) 嚴重: 台灣 ±10% 漲跌幅限制，跌停時 VT 無法減倉，MDD 被低估。需壓力測試。(3) 中高: Harvey t>3 用在 total Sharpe 非 Alpha，且需 bootstrap MTC。(4) 中: diversification amplification 僅 10 股太少，應改 descriptive。(5) 中: ETF 證交稅 0.1% 非 0.3%，需重算。(6) 輕: 缺新興市場 VT 文獻。修正優先序: rolling K → Alpha t-test → 跌停壓力測試 → 稅率修正。",
+    "category": "review",
+    "tags": [
+      "paper-review",
+      "taiwan-vt",
+      "Gemini",
+      "lookahead-bias",
+      "price-limit"
+    ],
+    "confidence": 0.95,
+    "timestamp": "2026-03-24T12:30:15.192214"
+  },
+  {
+    "id": "K1024",
+    "title": "K183: Directional Change framework — NULL. 0/25 QLIKE improvements across 5 assets × 5 thresholds",
+    "content": "[提出: Gemini R8#1, 執行: Claude] Data: SPY/QQQ/GLD/TLT/BTC daily c2c, OOS 2023-2024, w=2000. Method: Causal DC event detection (θ=0.5-5%), rolling 22d features (frequency, overshoot, duration, intensity), two-stage GJR+OLS overlay. Results: 0/25 DM significant, 23/25 DC overlay WORSENED QLIKE (added noise). Partial r|VIX: only 2/25 significant (GLD θ=2% r=0.165, BTC θ=2% r=0.105). Harvey: 0/25 pass. Descriptive: BTC has highest DC activity (104 events/yr vs SPY 70), largest overshoots (OS/θ=5.24). Conclusion: calendar→intrinsic time transformation does NOT unlock hidden predictive power on daily data. VIX sufficient #22 re-confirmed. QLIKE ceiling holds.",
+    "timestamp": "2026-03-24T13:04:45.127616",
+    "tags": [
+      "directional-change",
+      "intrinsic-time",
+      "null-result",
+      "VIX-sufficient",
+      "QLIKE-ceiling"
+    ]
+  },
+  {
+    "id": "K1025",
+    "title": "K184: ★ CBOE SKEW index — statistically detectable but economically negligible signal beyond VIX",
+    "content": "[提出: Gemini R8#2, 執行: Claude] Data: CBOE SKEW (^SKEW, 5008 obs 2005-2025) + SPY + VIX. OOS 2023-2024. Method: partial correlation, forecast encompassing, GARCH-X, VT overlay. Results: Raw r(SKEW,future_RV)=-0.17 to -0.23 (all sig). Partial r|VIX: -0.03 to -0.07 (all p<0.05, statistically significant!). BUT OOS forecast encompassing: SKEW coeff NS (t=-1.41, p=0.16), ΔR²=0.4%. QLIKE: SKEW-adjusted WORSE (+0.069). DM NS (t=-1.20). VT overlay: best +0.039 Sharpe, Harvey FAIL (t=-2.08). Key finding: SKEW predicts only when VIX>15 (r=-0.15 to -0.24), useless when VIX<15. SKEW-VIX inversely correlated (confound). Verdict: VIX sufficient #24 with asterisk — SKEW has statistically real but economically useless incremental info.",
+    "timestamp": "2026-03-24T13:04:45.127616",
+    "tags": [
+      "SKEW",
+      "options",
+      "IV-surface",
+      "VIX-sufficient",
+      "partial-correlation"
+    ]
+  },
+  {
+    "id": "K1026",
+    "title": "K185: FOMC Vol Effect — calendar effect real but VIX already prices it in (R²=0.77)",
+    "content": "[提出: Gemini R8#4, 執行: Claude] Data: 72 FOMC meetings 2016-2024, SPY+VIX daily. OOS: 16 meetings 2023-2024. Method: event study, paired t-tests, regression. Results: Post-FOMC 5d RV (16.9%) > pre-FOMC (13.9%), paired t=2.60 p=0.011 (IS sig). OOS: t=0.69 NS. FOMC day variance higher (Levene F=7.94 p=0.005). Pre-FOMC drift +0.31% day-1 (t=1.96 p=0.054, confirms Lucca&Moench 2015). Critical: VIX explains 77% of FOMC |return| (R²=0.766). VIX uncertainty resolution weak (55.6% drop, barely above chance). FOMC-aware VT: +0.053 Sharpe IS but t=0.30 Harvey FAIL. OOS: -0.009 Sharpe. High VIX amplifies (VIX>25: |ret|=2.54% vs 0.60%). Verdict: VIX sufficient #25. FOMC calendar adds nothing to 12/VIX VT.",
+    "timestamp": "2026-03-24T13:04:45.127616",
+    "tags": [
+      "FOMC",
+      "event-study",
+      "calendar-effect",
+      "VIX-sufficient",
+      "monetary-policy"
+    ]
+  },
+  {
+    "id": "K1027",
+    "title": "K187: Overnight Gap Structure — NULL for forecasting. Gaps=50% variance (universal) but decomposition adds noise",
+    "content": "[提出: Claude (K156延伸), 執行: Claude] Data: SPY/QQQ/GLD/TLT/EEM daily OHLC, OOS 2023-2024. Method: variance decomposition (gap²+intraday²+Parkinson), ACF structure, gap ratio prediction, component-aware EWMA+GJR, Parkinson-targeted GARCH. Results: Gap=50% daily var across all 5 assets (universal). Gap ratio partial r|past_RV: 4/5 significant but weak(r=-0.045~-0.132) and NEGATIVE. OOS R²: uniformly negative. Component-aware model LOSES to GJR 4/5 assets. Parkinson-targeted: mixed (GLD/TLT/EEM +3% but SPY -0.8%). Conclusion: descriptive insight only, no forecasting improvement. c2c GARCH dominates.",
+    "timestamp": "2026-03-24T13:25:50.612044",
+    "tags": [
+      "overnight-gap",
+      "variance-decomposition",
+      "null-result",
+      "Parkinson"
+    ]
+  },
+  {
+    "id": "K1028",
+    "title": "K188: ★★ HAR Ceiling Test — HAR ≈ GARCH on daily data. Ceiling is in DATA not MODEL",
+    "content": "[提出: Claude (文獻前沿), 執行: Claude] Data: SPY/QQQ/GLD/TLT/BTC daily OHLC, OOS 2023-2024. Method: 12 HAR variants (HAR/HAR-X/AHAR × 4 RV proxies) vs GJR-GARCH, 60 DM tests with Newey-West HAC. Results: GARCH wins 31/60 (52%), HAR wins 1/60 (2%), ties 28/60 (47%). HAR(c2c) vs GARCH: dead heat (4/5 ties). OHLC proxies HURT when predicting c2c (GARCH wins 3/5). HAR-X(VIX) mostly hurts. AHAR adds nothing. BTC outlier: HAR slightly better (24h trading). Same-proxy eval: Parkinson QLIKE -9.1 >> c2c -8.6 (proxies more predictable but irrelevant for c2c). ★★ CONCLUSION: predictive ceiling is in the DATA not the MODEL. HAR—the HF workhorse—performs equivalently to GARCH on daily. Breaking through requires intraday RV as input+target.",
+    "timestamp": "2026-03-24T13:25:50.612044",
+    "tags": [
+      "HAR",
+      "ceiling",
+      "model-comparison",
+      "daily-vs-HF",
+      "important"
+    ]
+  },
+  {
+    "id": "K1029",
+    "title": "K189: Attention-Weighted Vol — NULL. Cross-asset attention adds noise, optimal α=0.9 (ignore cross-asset)",
+    "content": "[提出: Claude, 執行: Claude] Data: SPY/QQQ/GLD/TLT/EEM/IWM daily yfinance, OOS 2023-2024. Method: rolling 252d attention weights (corr of j lagged RV with i future RV), softmax normalization, weighted EWMA blend. Results: 0/6 QLIKE improved. 4/6 significantly WORSE than EWMA (p<0.05). Best alpha=0.9 universally (90% own, 10% cross). Attention weights near-uniform (0.14-0.27). Cross-asset daily vol has negligible marginal predictive power. Confirms VIX/own-EWMA sufficient.",
+    "timestamp": "2026-03-24T13:42:35.014177",
+    "tags": [
+      "cross-asset",
+      "attention",
+      "null-result",
+      "EWMA"
+    ]
+  },
+  {
+    "id": "K1030",
+    "title": "K190: ★ Realized Semivariance — RS- more persistent for equities, asymmetric EWMA beats symmetric EWMA but not GJR",
+    "content": "[提出: Claude (Barndorff-Nielsen 2010), 執行: Claude] Data: SPY/QQQ/GLD/TLT/BTC daily yfinance, OOS 2023-2024. Method: RS+/RS- decomposition, asymmetric EWMA (separate λ for up/down), SJV regime, semivariance HAR. Results: GJR wins 4/5 by QLIKE. Asymmetric EWMA sig beats symmetric for SPY (DM t=-4.42) and QQQ (t=-3.02) — only positive finding. SJV regime: equity downside days predict 32-54% higher next-day vol (p<0.05). BUT partial r(SJV,futureRV|VIX) NS for ALL 5 assets (p>0.43). HAR RS- coefficients significant but captured by GJR gamma. Conclusion: semivariance confirms asymmetric vol literature but adds nothing beyond GJR-GARCH. VIX sufficient re-confirmed.",
+    "timestamp": "2026-03-24T13:42:35.014177",
+    "tags": [
+      "semivariance",
+      "asymmetry",
+      "leverage-effect",
+      "EWMA",
+      "partial-positive"
+    ]
+  },
+  {
+    "id": "K1031",
+    "title": "K191: Put-Call Ratio proxies — MIXED but practically NULL. VIX Z-score partial r=0.145 but Harvey FAIL",
+    "content": "[提出: Gemini R8 (options sentiment), 執行: Claude] Data: SPY daily + VIX + SKEW from yfinance, OOS 2023-2024. CBOE PCR not available via yfinance — used VIX-derived proxies (Excess Fear=VIX/RV22d, Delta-VIX, VIX Z-score, VIX/SKEW, composite). Results: Raw r strong (VIX 0.57, Z-score 0.29). Partial r|VIX: Excess Fear drops to 0.0002 NS, but VIX Z-score 0.145★ and composite 0.113★ survive. GARCH-X: Excess Fear DM t=-2.04, Delta-VIX t=-2.74 — both significant but FAIL Harvey (t>3.0). VT overlay: none significant. Sub-period robust null. Conclusion: some statistical signal survives VIX control but too weak for Harvey threshold. VIX sufficient for practical purposes.",
+    "timestamp": "2026-03-24T13:42:35.014177",
+    "tags": [
+      "put-call-ratio",
+      "sentiment",
+      "options",
+      "VIX-sufficient",
+      "Harvey-fail"
+    ]
   }
 ]
