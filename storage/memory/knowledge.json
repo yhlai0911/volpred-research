@@ -10243,5 +10243,68 @@
       "VIX-sufficient",
       "Harvey-fail"
     ]
+  },
+  {
+    "id": "K1032",
+    "title": "K149: ★★ JBF Robustness Suite — gamma stable for equities, VT is MDD reduction not Sharpe improvement",
+    "content": "[提出: Gemini R6, 執行: Claude] Data: SPY/QQQ/GLD/EEM daily, 3 sub-periods, w=2000. 5 robustness checks: (R1) Sub-sample gamma stability: 3/4 stable (SPY/QQQ/EEM all positive), GLD sign-unstable (negative control). (R2) Parkinson proxy: GJR sig beats GARCH 4/4 (DM p<0.05). (R3) TX cost: VT never beats B&H on Sharpe, but MDD reduction 52-54% for equities. (R4) Alternative VT: GJR ranks best for equities. (R5) Bootstrap 5000: gamma CI excludes zero for equities (100% P>0). CRITICAL PAPER FRAMING: VT = risk management tool (MDD -54%), NOT alpha source.",
+    "timestamp": "2026-03-24T14:03:04.460734",
+    "tags": [
+      "JBF",
+      "robustness",
+      "paper",
+      "gamma-stability",
+      "MDD-reduction"
+    ]
+  },
+  {
+    "id": "K1033",
+    "title": "K186: Volume Displacement proxies — NULL. 0/25 Harvey pass. VRATIO partial r=0.052 tiny",
+    "content": "[提出: Gemini R8#5, 執行: Claude] Data: SPY/QQQ/IWM/GLD/TLT daily OHLCV yfinance, OOS 2023-2024. Method: 5 volume features (VRATIO=V/MA20, VACF=vol ACF, AMIHUD=|r|/V, VPDIV=sign divergence, PIMPACT=range/vol). Results: VRATIO and VACF partial r|VIX sig 5/5 but tiny (~0.05). All GARCH-X WORSE than GJR. 0/25 DM pass Harvey. Severe IS→OOS decay (VACF: IS r=0.107→OOS 0.006). IWM extreme volume 1.61x vol (risk alert use only). VIX sufficient re-confirmed.",
+    "timestamp": "2026-03-24T14:03:04.460734",
+    "tags": [
+      "volume",
+      "dark-pool",
+      "null-result",
+      "VIX-sufficient"
+    ]
+  },
+  {
+    "id": "K1034",
+    "title": "K192: Google Trends — strong IS fit (composite r=0.576) but COMPLETE OOS FAILURE. Textbook overfitting",
+    "content": "[提出: Gemini R8 (跳躍式探索), 執行: Claude] Data: REAL Google Trends (pytrends) for 5 search terms (\"stock market crash\", \"VIX\", \"recession\", \"bear market\", \"market volatility\"), SPY+VIX, 5005 obs 2005-2024. Method: weekly→daily ffill, partial r|VIX, GARCH-X, Granger. Results: IS: all terms sig (t=10.6-23.2), composite partial r|VIX=0.279. Granger bidirectional (search→vol F=145-495, vol→search F=10-17). OOS: ALL WORSE (-1.5% to -97.7% MSE). \"VIX\" search DM=-5.59, composite DM=-3.71 (both sig WORSE). Conclusion: Google search = noisy VIX proxy, not independent signal. IS overfitting textbook case. VIX sufficient confirmed.",
+    "timestamp": "2026-03-24T14:03:04.460734",
+    "tags": [
+      "Google-Trends",
+      "NLP",
+      "overfitting",
+      "null-result",
+      "VIX-sufficient"
+    ]
+  },
+  {
+    "id": "K1035",
+    "title": "K193: ★★ Dynamic Copula Tail Dependence — SPY-GLD TDA passes Harvey (t=12.93), GARCH-X +12.1%",
+    "content": "[提出: Claude (K160 延伸), 執行: Claude] Data: SPY/TLT/GLD/QQQ daily yfinance, OOS 2023-2024. Method: rolling 252d empirical copula, lower/upper tail dep at q=0.05/0.10, TDA=λ_L-λ_U, GARCH-X. Results: TDA real for all pairs (crash co-movement > rally). ★★ SPY-GLD partial r|VIX=0.179 (t=12.93, PASSES Harvey!). GARCH-X: SPY-GLD DM=+2.64(p=0.008), SPY-QQQ DM=+2.35. BUT: SPY-TLT NS (DM=+1.11). No 2022 structural break in TDA (unlike correlation). TDA is pair-dependent — works for SPY-GLD but not focal SPY-TLT. First partial crack in VIX sufficient (pair-specific, not universal).",
+    "timestamp": "2026-03-24T14:03:04.460734",
+    "tags": [
+      "copula",
+      "tail-dependence",
+      "Harvey-pass",
+      "SPY-GLD",
+      "partial-positive"
+    ]
+  },
+  {
+    "id": "K1036",
+    "title": "K194: Fractional Differentiation (de Prado 2018) — NULL. log(RV) already stationary, FFD solves non-problem",
+    "content": "[提出: Claude (de Prado 2018), 執行: Claude] Data: SPY/QQQ/GLD/TLT/BTC daily yfinance, OOS 2023-2024. Method: Fixed-Width Window FFD with d=0.1-0.9, ADF stationarity test, rolling OLS, vs GJR-GARCH and EWMA. Results: log(RV) already stationary for all 5 assets (ADF p<0.001) — fractional diff solves a non-existent problem. 0/5 DM significant vs GJR. FFD beats raw log(RV) OLS for SPY (t=4.14) and QQQ (t=3.94) — confirms FFD>naive OLS, but GARCH already subsumes this. FFD actually DESTROYS autocorrelation (ACF(1) goes negative). de Prado designed FFD for ML classifiers (direction), not variance forecasting.",
+    "timestamp": "2026-03-24T14:03:04.460734",
+    "tags": [
+      "fractional-diff",
+      "de-Prado",
+      "null-result",
+      "stationarity"
+    ]
   }
 ]

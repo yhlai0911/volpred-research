@@ -629,6 +629,18 @@
 - [x] K189: Attention-Weighted Vol — NULL。Cross-asset attention adds noise，optimal α=0.9（幾乎忽略 cross-asset）。0/6 QLIKE improved。Attention weights 近 uniform。Own-EWMA 已足夠
 - [x] K190: ★ Realized Semivariance — RS- 對股票更持久，asymmetric EWMA beats symmetric (SPY DM t=-4.42)。但 GJR wins 4/5。SJV partial r|VIX 全 NS。GJR gamma 已捕獲不對稱性
 - [x] K191: Put-Call Ratio proxies — MIXED but NULL。PCR 不可取得，用 VIX 衍生指標。VIX Z-score partial r=0.145★ 但 GARCH-X Harvey FAIL (t=-2.74)。VT overlay 無顯著改善
+- [x] K186: Volume Displacement — NULL。5 個 volume proxy × 5 資產 = 0/25 Harvey pass。VRATIO partial r|VIX=0.052（tiny）。IS→OOS 嚴重衰減。Volume 被 VIX 吸收
+- [x] K192: Google Trends（跳躍式探索）— IS composite r=0.576 但 OOS **完全失敗**（-1.5% to -97.7% MSE）。教科書級 overfitting。Search = noisy VIX proxy
+- [x] K193: ★★ Dynamic Copula Tail Dependence — **SPY-GLD TDA partial r|VIX=0.179 (t=12.93, PASSES Harvey!)**。GARCH-X +12.1%。但 pair-dependent（SPY-TLT NS）。First partial crack in VIX sufficient
+- [x] K194: Fractional Differentiation (de Prado 2018) — NULL。log(RV) 已 stationary（ADF p<0.001），FFD 解決不存在的問題。0/5 DM sig vs GJR
+
+### Session 2026-03-24 進度
+**13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness
+**重要發現**：
+- ★★ K188 HAR Ceiling: 預測天花板在 DATA 不在 MODEL
+- ★★ K193 Copula TDA: SPY-GLD 尾部依賴 PASSES Harvey — VIX sufficient 的第一個 pair-specific 裂縫
+- ★★ K149 JBF Robustness: VT = MDD reduction tool (54%)，非 Sharpe improvement
+- K192 Google Trends: 經典 IS/OOS 過擬合案例（教學價值）
 - **Phase K 統合（73+ 實驗）**：(1) ★★★ QLIKE ceiling 21x (2) ★★★ RV decomposition 確認 ceiling 根因 (3) ★★ VIX sufficient 21x (4) ★ Codex R6 驗證：variance+correlation+volume 都飽和 (5) 50/50 triple-robust (6) ★ Entropy 對 BTC 有效 (7) Overnight gap 大部分不可預測 (8) ★ Wavelet look-ahead bias trap (9) Volume = MDH，GARCH 已吸收
 - [x] K4: ★★ Dynamic target vol — 所有固定 target Sharpe 完全相同 (0.855，數學必然：target 在 Sharpe 相消)。6 dynamic targets 全 underperform。VIX double-dipping harmful。Target = pure risk preference
 - [x] K5: Drawdown-based sizing — Pure DD worse (-14.3% vs -13.0%)。VIX+DD marginal。Recovery-aware 更慢 (122d vs 82d)。Kelly terrible (-30.5%)。Forward-looking > backward-looking
