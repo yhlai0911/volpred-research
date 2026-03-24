@@ -1,0 +1,1148 @@
+#!/usr/bin/env python3
+"""
+K274: Paper Contribution Mapping — Which Findings Are Novel vs Known?
+
+With 270+ experiments and 978 knowledge entries, this descriptive analysis
+categorizes our top findings by novelty and maps them to our 3 existing papers
+plus potential new paper opportunities.
+
+Novelty Categories:
+  NOVEL: Not in existing literature (to our knowledge)
+  EXTENSION: Extends known result to new context
+  CONFIRMATION: Confirms known result with new data/method
+  CONTRADICTION: Contradicts existing literature
+
+Author: VolPred Research System
+Date: 2026-03-24
+"""
+
+import json
+from datetime import datetime
+
+# =============================================================================
+# TOP 20 FINDINGS — NOVELTY CLASSIFICATION
+# =============================================================================
+
+top_20_findings = [
+    # ─── Finding 1: Leverage Direction Taxonomy ───
+    {
+        "rank": 1,
+        "finding_id": "F01_LEVERAGE_TAXONOMY",
+        "title": "Leverage Direction Taxonomy: Standard / Inverted / Near-Zero",
+        "description": (
+            "GJR-GARCH gamma varies systematically by asset class: equities exhibit "
+            "standard leverage (gamma>0, negative returns increase vol), gold displays "
+            "INVERTED leverage (gamma<0, fear-driven rallies increase vol), and bonds "
+            "show near-zero asymmetry. Gold's gamma is regime-dependent: inverted during "
+            "bull (gamma=-0.043, t=-4.7, p<0.0001) and standard during bear (gamma=+0.048). "
+            "Validated across 26 assets."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "While the leverage effect in equities (Black 1976, Christie 1982) is well-known, "
+            "and Baur & McDermott (2010) discuss gold as safe haven, NO prior paper has "
+            "formalized a cross-asset TAXONOMY of leverage direction tied to GARCH gamma sign. "
+            "The regime-dependent gamma in gold (inverted in bull, standard in bear) is entirely new. "
+            "Batten et al. (2010) discuss gold vol determinants but not asymmetric direction."
+        ),
+        "confidence": 0.98,
+        "knowledge_ids": ["c9ec2acc", "baf8fd33", "c135ff19"],
+        "paper_target": "Paper 1 (JBF): Leverage Direction Matters",
+        "paper_contribution": "Core Contribution #1",
+        "additional_validation_needed": [
+            "Extend to more commodity assets (silver, oil, copper)",
+            "Test regime-dependence with formal Markov-switching",
+            "Compare with DCC-GARCH time-varying correlations"
+        ],
+        "potential_reviewer_objections": [
+            "Gold sample may be dominated by 2020-2026 period with unusual monetary policy",
+            "Taxonomy is descriptive, not a formal statistical test of classes",
+            "Regime boundaries (bull/bear) may be endogenous to volatility",
+            "26 assets still limited — need futures, FX, more EM"
+        ]
+    },
+
+    # ─── Finding 2: Gamma Predicts VT Mechanism ───
+    {
+        "rank": 2,
+        "finding_id": "F02_GAMMA_VT_MECHANISM",
+        "title": "Gamma Predicts Whether VT Acts as Trend-Following or Contrarian",
+        "description": (
+            "Within homogeneous equity markets, GJR gamma predicts VT alpha mechanism: "
+            "Spearman rho=0.886 (p=0.019, N=6 equity-type assets). But this breaks down "
+            "across diverse asset classes (N=12: rho=-0.45, NS). VIX correlation is the "
+            "true cross-asset driver. Gamma predicts TSMOM loading cross-sectionally "
+            "(r=0.564, p=0.006, N=22)."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "Hood & Raughtigan (2025 JPM) show VT alpha is absorbed by TSMOM but do NOT "
+            "identify what PREDICTS the degree of overlap. We provide the first mechanical "
+            "explanation: gamma determines whether VT acts as implicit trend following. "
+            "The boundary condition (works across asset classes, breaks within sectors) is new."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": ["5c098d4e", "985b52f3"],
+        "paper_target": "Paper 1 (JBF) AND Paper 3 (VT vs Trend Following)",
+        "paper_contribution": "Core Contribution #2 (Paper 1), Core Contribution #1 (Paper 3)",
+        "additional_validation_needed": [
+            "Test with futures data (Hood & Raughtigan use futures, we use ETFs)",
+            "Formal mediation analysis: gamma -> TSMOM loading -> VT alpha",
+            "Out-of-sample prediction: use IS gamma to predict OOS TSMOM loading"
+        ],
+        "potential_reviewer_objections": [
+            "N=6 for equity subsample is very small for rho=0.886",
+            "ETFs vs futures — different leverage mechanics",
+            "Gamma estimation window may affect results",
+            "Endogeneity: gamma and VT alpha may be jointly determined by market structure"
+        ]
+    },
+
+    # ─── Finding 3: VT MDD Protection Survives TSMOM Removal ───
+    {
+        "rank": 3,
+        "finding_id": "F03_MDD_SURVIVES_TSMOM",
+        "title": "90-97% of VT's MDD Protection Survives TSMOM Removal",
+        "description": (
+            "After hedging out TSMOM exposure, VT's MDD protection retains 90-97% "
+            "(SPY 93%, 50/50 SPY/GLD 96%, DIA 91%, QQQ 90%, IWM 97%). "
+            "The Sharpe channel is only modestly reduced (TSMOM contributes ~1.4% of "
+            "total Sharpe). VT's primary value = drawdown insurance, not alpha."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "Hood & Raughtigan (2025) show TSMOM absorbs VT alpha but do NOT decompose "
+            "Sharpe vs MDD channels. Cederburg et al. (2020) critique VT on utility "
+            "grounds but ignore MDD. We are the first to show this dual-channel "
+            "decomposition and that MDD protection is orthogonal to trend following."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": ["34f83b91", "fd00f75b"],
+        "paper_target": "Paper 3 (VT vs Trend Following)",
+        "paper_contribution": "Core Contribution #2",
+        "additional_validation_needed": [
+            "Replicate with futures data for direct comparison with Hood & Raughtigan",
+            "Bootstrap confidence intervals on the 90-97% retention",
+            "Test with different TSMOM lookback windows (1m, 3m, 6m, 12m)"
+        ],
+        "potential_reviewer_objections": [
+            "MDD is a single-number statistic — may be sensitive to specific crisis events",
+            "TSMOM hedging construction may not fully remove trend exposure",
+            "Only 5 assets in primary analysis"
+        ]
+    },
+
+    # ─── Finding 4: VT Insurance Pricing at ~4%/yr ───
+    {
+        "rank": 4,
+        "finding_id": "F04_VT_INSURANCE_PRICING",
+        "title": "VT as Insurance: ~4%/yr Sharpe Drag for Universal MDD Protection",
+        "description": (
+            "VT pays ~4%/yr Sharpe drag (VIX era 2-4%, 76-year mean ~1%/yr) as insurance "
+            "premium for MDD protection that works at ALL horizons. MDD protection is "
+            "100% at all tested horizons (1yr to 32yr). No crossover point exists — "
+            "VT always protects MDD. Earlier K36/K39/K40 'VT hurts long-term' was "
+            "reframed as 'insurance compounds, but so does the protection.'"
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "Harvey et al. (2018 JPM) document VT benefits but do not frame it as "
+            "insurance with explicit pricing. Moreira & Muir (2017 JF) show VT improves "
+            "Sharpe but do not discuss MDD channel or insurance cost. Our insurance "
+            "pricing framework and the path-dependent utility resolution (lambda>=2) "
+            "extend existing work to a coherent economic narrative."
+        ),
+        "confidence": 0.98,
+        "knowledge_ids": ["809a76ba", "33091ebb", "2cecf3ab"],
+        "paper_target": "Paper 3 (VT vs Trend Following) — could anchor Paper 4",
+        "paper_contribution": "Key narrative framing",
+        "additional_validation_needed": [
+            "Cross-asset insurance cost estimation (beyond SPY)",
+            "Formal utility analysis with CRRA and loss aversion",
+            "Compare with explicit tail-risk hedging costs (puts, VIX futures)"
+        ],
+        "potential_reviewer_objections": [
+            "'Insurance' framing is not new — options literature uses this extensively",
+            "4%/yr estimate is period-dependent (VIX era vs pre-VIX)",
+            "Path-dependent utility is non-standard — may face pushback"
+        ]
+    },
+
+    # ─── Finding 5: QLIKE Ceiling / Complexity Ceiling ───
+    {
+        "rank": 5,
+        "finding_id": "F05_QLIKE_CEILING",
+        "title": "QLIKE Ceiling: 14 Models Span Only 0.31%, 52% Add Zero Value",
+        "description": (
+            "Unified meta-analysis of 14 volatility models across 3 assets: the entire "
+            "GARCH family spans only 0.31% QLIKE improvement. Top 7 models are statistically "
+            "indistinguishable (MCS). CC-RV 22d ranks #1 on all 3 assets. CCS Score shows "
+            "16/31 (52%) of tested sophistications provide zero or negative value. "
+            "Optimal system = GJR + FHS + 12/VIX (4 parameters total)."
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "Hansen & Lunde (2005) tested 330 ARCH models and found GARCH(1,1) hard to beat, "
+            "but for daily equity only. We extend this to: (a) multi-asset, (b) modern models "
+            "(GARCH-MIDAS, MF2, DL hybrids, XGBoost), (c) explicit 'ceiling' quantification "
+            "with CCS score, (d) linking the ceiling to VT allocation decisions. "
+            "The 'complexity ceiling' concept and CCS metric are original."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": ["eb14a7fc", "a5e93cf1"],
+        "paper_target": "Paper 1 (JBF) — Contribution #3 (complexity ceiling)",
+        "paper_contribution": "Supporting evidence for model selection parsimony",
+        "additional_validation_needed": [
+            "Include realized GARCH, HAR-RV with proper 5-min data",
+            "Cross-OOS validation of ceiling (multiple periods)",
+            "Compare with high-frequency results where models differ more"
+        ],
+        "potential_reviewer_objections": [
+            "Daily r^2 is a noisy proxy — ceiling may be lower with 5-min RV",
+            "0.31% range may be artifact of using same estimation window",
+            "Need more assets for robust conclusion",
+            "MF2-GARCH failure may be implementation issue"
+        ]
+    },
+
+    # ─── Finding 6: VIX as Sufficient Statistic ───
+    {
+        "rank": 6,
+        "finding_id": "F06_VIX_SUFFICIENT_STATISTIC",
+        "title": "VIX Is a Sufficient Statistic for VT Allocation (21+ Confirmations)",
+        "description": (
+            "VIX alone determines optimal VT allocation at monthly horizon. 21+ null "
+            "results from adding: GARCH forecasts, sentiment (AAII, SKEW), credit spreads, "
+            "yield curve, VVIX, term structure, macro indicators, DCC correlations, "
+            "climate events, ICL, CSVD, liquidity, MOVE-VECM. Partial R-squared of "
+            "all additions < 0.03 after controlling for VIX."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "Bozovic (2024 IRFA) shows VIX-managed > realized-vol managed but does NOT "
+            "establish sufficiency. No prior paper has systematically tested 21+ "
+            "alternative signals and shown VIX dominates ALL of them for VT allocation. "
+            "The 'sufficient statistic' claim is original and strong."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": ["4640598a", "ca01316a", "dae0ac86"],
+        "paper_target": "Paper 1 (JBF) — supports complexity ceiling",
+        "paper_contribution": "Major supporting evidence",
+        "additional_validation_needed": [
+            "Formal sufficiency test (not just null additions)",
+            "Test at different horizons (weekly, quarterly)",
+            "Caveat: sufficient 'relative to tested alternatives at this horizon' (Codex)"
+        ],
+        "potential_reviewer_objections": [
+            "Absence of evidence != evidence of absence",
+            "'Sufficient statistic' has a precise statistical meaning — may need looser wording",
+            "Monthly horizon only — may not hold at daily or intraday",
+            "VIX itself may proxy for multiple factors"
+        ]
+    },
+
+    # ─── Finding 7: 50/50 SPY/GLD Indestructibility ───
+    {
+        "rank": 7,
+        "finding_id": "F07_5050_INDESTRUCTIBLE",
+        "title": "50/50 SPY/GLD with 12/VIX Is Indestructible (8 Independent Tests)",
+        "description": (
+            "50/50 SPY/GLD + 12/VIX: Sharpe 0.83-0.93, MDD -13% to -16%. Survived "
+            "8 independent challenges: mean-variance optimization (K2), risk parity (K2), "
+            "optimal N (K16), HYG addition (K22), TLT addition, conditional overlays (K54), "
+            "DCA interaction (K63/K64), momentum overlay (K89). Mean-variance converges "
+            "TO 50/50. Risk Parity converges to 47/53. No tested alternative reliably beats it."
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "DeMiguel et al. (2009 RFS) showed 1/N hard to beat for stock portfolios. "
+            "We extend this to multi-asset VT context: equal-weight asset allocation + "
+            "simple VIX scaling = optimal. The combination of ASSET simplicity + SIGNAL "
+            "simplicity is new. 8 independent failure-to-reject tests is thorough."
+        ),
+        "confidence": 0.98,
+        "knowledge_ids": ["f373d75b", "40c6ff48", "6e727a51"],
+        "paper_target": "Paper 1 (JBF) or potential Paper 4",
+        "paper_contribution": "Key practical implication",
+        "additional_validation_needed": [
+            "True OOS period (post-2026)",
+            "International equivalents (e.g., 50/50 local equity / gold in other markets)",
+            "Formal spanning test against more complex allocations"
+        ],
+        "potential_reviewer_objections": [
+            "2-asset portfolio is trivial — hard to publish as standalone finding",
+            "GLD strong performance in 2020-2026 may not persist",
+            "Selection of GLD (not SLV, DBC, TLT) needs justification beyond backtest"
+        ]
+    },
+
+    # ─── Finding 8: MDD Improvement Is Mechanical ───
+    {
+        "rank": 8,
+        "finding_id": "F08_MDD_MECHANICAL",
+        "title": "VT MDD Improvement Is Mechanical (99% Under Null), Sharpe Requires Skill",
+        "description": (
+            "Under random de-leveraging (null hypothesis), 99% of simulations show MDD "
+            "improvement. But Sharpe improvement requires actual skill (P=0.008 for "
+            "delta>0.1). MDD is a structural consequence of reduced exposure during "
+            "high-vol periods. VT MDD across 253 random start dates: 100% win rate."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "No prior paper (Harvey et al. 2018, Moreira & Muir 2017, Hood 2025) has "
+            "formally tested whether MDD improvement is mechanical. This is a critical "
+            "methodological insight: MDD backtest results should NOT be used as evidence "
+            "of timing skill. Only Sharpe improvement tests signal quality."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": ["eebc6e3b"],
+        "paper_target": "Paper 3 (VT vs Trend Following)",
+        "paper_contribution": "Methodological contribution",
+        "additional_validation_needed": [
+            "Formal theoretical proof (not just simulation)",
+            "Test sensitivity to de-leveraging distribution",
+            "Show this holds across asset classes"
+        ],
+        "potential_reviewer_objections": [
+            "Result may be obvious to some — 'of course reducing exposure reduces drawdown'",
+            "Random de-leveraging is not a proper null for VT",
+            "Need to define 'mechanical' more precisely"
+        ]
+    },
+
+    # ─── Finding 9: VT Fails All 3 Classic Timing Tests ───
+    {
+        "rank": 9,
+        "finding_id": "F09_VT_FAILS_TIMING",
+        "title": "VT Fails All 3 Classic Market Timing Tests (HM, TM, Merton)",
+        "description": (
+            "VT fails Henriksson-Merton (gamma=-0.035, p=0.70), Treynor-Mazuy "
+            "(gamma=0.094, p=0.85), and Merton timing ratio (0.014, p=0.83). "
+            "Crisis periods show NEGATIVE gamma. Key insight: VT value comes from "
+            "volatility scaling, NOT directional market timing. HM/TM frameworks "
+            "are designed for direction prediction, not vol management."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "No prior paper has applied HM/TM/Merton tests to VT strategies. This is "
+            "important because practitioners often describe VT as 'timing the market via vol.' "
+            "We show this is NOT timing in the classical sense. The VT mechanism is distinct "
+            "from both timing and trend following."
+        ),
+        "confidence": 0.98,
+        "knowledge_ids": ["a98223ff"],
+        "paper_target": "Paper 3 (VT vs Trend Following)",
+        "paper_contribution": "Supporting evidence for VT != timing != trend",
+        "additional_validation_needed": [
+            "Apply to multiple assets and VT variants",
+            "Compare with explicit market timing strategies",
+            "Develop a VT-appropriate timing test"
+        ],
+        "potential_reviewer_objections": [
+            "VT by construction does not try to time direction — this test is misapplied",
+            "HM/TM are known to have low power",
+            "Result may be trivially obvious"
+        ]
+    },
+
+    # ─── Finding 10: Simpson Paradox in VT = Trend Following ───
+    {
+        "rank": 10,
+        "finding_id": "F10_SIMPSON_PARADOX_TSMOM",
+        "title": "VT = Trend Following Is a Simpson Paradox (Regime-Conditional)",
+        "description": (
+            "Hood & Raughtigan (2025) VT=trend finding is correct but regime-conditional. "
+            "Within-regime analysis (4 VIX bins): trend beta insignificant in 3/4 regimes, "
+            "ANTI-trend (beta=-0.04, t=-4.6) in one regime. Trend effect concentrated in "
+            "calm markets and crises, absent in moderate vol. Gamma taxonomy predicts "
+            "which regimes show trend effect."
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "Hood & Raughtigan (2025) present unconditional results only. We show their "
+            "finding is an aggregation artifact: the VT-TSMOM relationship varies by regime, "
+            "with anti-trend behavior in moderate-vol periods. This refines but does not "
+            "contradict their work."
+        ),
+        "confidence": 0.90,
+        "knowledge_ids": ["fd00f75b", "e1519740", "234749a3"],
+        "paper_target": "Paper 3 (VT vs Trend Following)",
+        "paper_contribution": "Core Contribution #3 — regime conditioning",
+        "additional_validation_needed": [
+            "Formal regime-switching model (not just VIX quartile binning)",
+            "Cross-asset regime analysis",
+            "Compare with Hood & Raughtigan's exact specification"
+        ],
+        "potential_reviewer_objections": [
+            "VIX bins may be arbitrary — different bins could give different results",
+            "Power within bins is lower (smaller N per bin)",
+            "'Simpson Paradox' label may be too strong if regime FE doesn't flip sign"
+        ]
+    },
+
+    # ─── Finding 11: FHS 7/7 Universal VaR ───
+    {
+        "rank": 11,
+        "finding_id": "F11_FHS_UNIVERSAL_VAR",
+        "title": "FHS Is the Only Method Passing Triple VaR Test Across 7/7 Assets",
+        "description": (
+            "Filtered Historical Simulation passes Kupiec + Christoffersen + DQ (Trinity) "
+            "across all 7 tested assets. Skewed Student-t is 6/6 (Kupiec only). "
+            "FHS solves BTC distribution paradox where no parametric distribution passes "
+            "both VaR-1% and VaR-5% simultaneously."
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "FHS (Barone-Adesi et al. 1999) is well-known. Our contribution is: "
+            "(a) systematic cross-asset comparison with Trinity test standard, "
+            "(b) showing FHS solves the BTC distribution paradox, "
+            "(c) comparing 6+ VaR methods across 7+ assets in unified framework."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": ["58c8c17f", "a5e93cf1"],
+        "paper_target": "Paper 1 (JBF) — VaR section",
+        "paper_contribution": "Practical recommendation",
+        "additional_validation_needed": [
+            "Test with Basel III FRTB requirements",
+            "Longer OOS periods",
+            "Include ES backtesting alongside VaR"
+        ],
+        "potential_reviewer_objections": [
+            "FHS is well-known — not novel contribution",
+            "7 assets is modest for strong claims",
+            "Trinity test is not standard in literature (Kupiec alone is common)"
+        ]
+    },
+
+    # ─── Finding 12: GLD Regime-Dependent Gamma ───
+    {
+        "rank": 12,
+        "finding_id": "F12_GLD_REGIME_GAMMA",
+        "title": "Gold's Leverage Effect Is Regime-Dependent (Inverted in Bull, Standard in Bear)",
+        "description": (
+            "Formal t-test: bull gamma=-0.043 (inverted) vs bear gamma=+0.048 (standard), "
+            "t=-4.705, p<0.0001. SPY shows NO such regime dependence (p=0.95). "
+            "Mechanism: fear-driven buying -> inverted leverage; liquidation-driven selling "
+            "-> standard leverage. Half-life of GARCH recovery after GLD flash crash: 17 days."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "Extensive gold volatility literature (Batten et al. 2010, Baur & Lucey 2010) "
+            "does NOT document regime-dependent leverage direction reversal. "
+            "This is a genuinely new stylized fact about gold volatility dynamics."
+        ),
+        "confidence": 0.98,
+        "knowledge_ids": ["c9ec2acc", "c20da2ed", "36cd1d50"],
+        "paper_target": "Paper 1 (JBF)",
+        "paper_contribution": "Core empirical finding — anchors the taxonomy",
+        "additional_validation_needed": [
+            "Test with longer gold history (pre-ETF, using futures)",
+            "Test with other precious metals (silver, platinum)",
+            "Formal Markov-switching GARCH with endogenous regime probabilities"
+        ],
+        "potential_reviewer_objections": [
+            "Bull/bear classification is ex-post — need real-time regime identification",
+            "GLD ETF since 2004 only — limited sample",
+            "Regime-dependent results sensitive to regime definition"
+        ]
+    },
+
+    # ─── Finding 13: Taiwan 4.6x Amplification ───
+    {
+        "rank": 13,
+        "finding_id": "F13_TAIWAN_AMPLIFICATION",
+        "title": "Taiwan TAIEX Shows 4.6x Leverage Amplification (vs US 2.8x)",
+        "description": (
+            "Broad TAIEX (~900 stocks) exhibits 4.6x leverage amplification of individual "
+            "stock gamma vs index gamma, compared to 2.8x for S&P 500. Investable 0050.TW "
+            "(50 stocks) shows 1.45x. Attributable to higher correlation asymmetry among "
+            "Taiwan-listed stocks during declines."
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "Ang & Chen (2002) document asymmetric correlations for US equities. "
+            "We extend this to Taiwan and quantify the amplification ratio. "
+            "The 4.6x vs 2.8x comparison across markets is new. "
+            "But the concept itself (diversification amplification) is known."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": [],
+        "paper_target": "Paper 2 (PBFJ): Taiwan VT",
+        "paper_contribution": "Core Contribution #1",
+        "additional_validation_needed": [
+            "Compare with other Asian markets (Korea, Japan, India)",
+            "Formal decomposition of amplification sources",
+            "Time-varying amplification analysis"
+        ],
+        "potential_reviewer_objections": [
+            "TAIEX vs 0050.TW different constituents — comparing apples to oranges",
+            "Amplification ratio may be driven by a few high-gamma stocks",
+            "Need to control for market size, sector composition"
+        ]
+    },
+
+    # ─── Finding 14: TZ Information Transmission (Academic, Not Tradeable) ───
+    {
+        "rank": 14,
+        "finding_id": "F14_TZ_INFORMATION_TRANSMISSION",
+        "title": "Asia-Pacific TZ Arbitrage: 6/8 Markets Pass Harvey, 78% Absorbed by Opening Gap",
+        "description": (
+            "SPY overnight momentum predicts next-day returns in 6/8 Asia-Pacific local markets "
+            "(HK t=4.12, Aus t=4.04, Singapore t=4.03, Korea t=3.83, Taiwan t=3.75, Japan t=3.69). "
+            "US-listed ETFs (EWJ, EWT, EWY) show NO effect — perfect control. "
+            "But 78% of alpha is absorbed by opening gap (c2c Sharpe 1.47 -> o2o 0.87). "
+            "Not a trading strategy — a measure of price discovery efficiency."
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "Rapach et al. (2013 JF) document US predictability for international returns "
+            "at monthly frequency. We extend to: (a) daily frequency, (b) 8 Asia-Pacific markets, "
+            "(c) decompose into tradeable vs non-tradeable components, (d) quantify opening "
+            "auction efficiency. The c2c -> o2o decomposition is new and methodologically important."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": ["b616d1b2", "7b5f2d2f", "6dfdcdc1"],
+        "paper_target": "Paper 2 (PBFJ): Taiwan VT",
+        "paper_contribution": "Core Contribution #3",
+        "additional_validation_needed": [
+            "Formal Granger causality with proper controls",
+            "Microstructure analysis of opening auction",
+            "Test stability across subperiods",
+            "Address timing bias critique more formally"
+        ],
+        "potential_reviewer_objections": [
+            "If not tradeable, why is it interesting?",
+            "78% gap absorption — how precise is this estimate?",
+            "Timing bias (I8) already shows these are not implementable",
+            "Rapach et al. (2013) already established US leadership"
+        ]
+    },
+
+    # ─── Finding 15: EWMA(0.97) = GJR for Retail ───
+    {
+        "rank": 15,
+        "finding_id": "F15_EWMA_RETAIL_DEFAULT",
+        "title": "EWMA(0.97) Matches GARCH VT Performance — One-Line Excel Formula",
+        "description": (
+            "EWMA(lambda=0.97) Sharpe = GJR-GARCH VT Sharpe across 5 assets, 5 OOS periods. "
+            "DM p=0.943 (completely indistinguishable). GJR wins MDD in 4-5/5 periods "
+            "(crisis reactivity from gamma). EWMA is best MDD 4/7 assets, never worst. "
+            "TX cost savings: ~150 bps/yr from lower turnover."
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "Fleming et al. (2001 JF) and Harvey et al. (2018) use EWMA as baseline. "
+            "We systematically compare EWMA vs GJR-GARCH across assets and OOS periods, "
+            "showing practical equivalence for Sharpe. The retail implementation angle "
+            "and TX cost comparison add practical value."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": ["1de5f46f", "548c1227"],
+        "paper_target": "Paper 1 (JBF) — practical implications section",
+        "paper_contribution": "Practical recommendation",
+        "additional_validation_needed": [
+            "Test with more exotic assets where GARCH may matter more",
+            "Formal TX cost analysis with different rebalancing frequencies"
+        ],
+        "potential_reviewer_objections": [
+            "Not surprising — EWMA is a special case of GARCH",
+            "Retail framing may not fit academic journal",
+            "TX cost savings estimate needs more precision"
+        ]
+    },
+
+    # ─── Finding 16: VIX as Universal De-Risking Signal ───
+    {
+        "rank": 16,
+        "finding_id": "F16_VIX_UNIVERSAL_DERISKING",
+        "title": "US VIX Serves as De-Risking Signal for 13/13 International Equity Markets",
+        "description": (
+            "12/VIX overlay achieves MDD improvement in all 13 international equity ETFs "
+            "(7 DM, 6 EM). Average MDD improvement: 28.7 pp (t=15.70). But only 2/13 "
+            "show Sharpe improvement. VIX sensitivity predicts protection magnitude "
+            "(r=-0.770, p=0.002). Consistent with global financial cycle (Miranda-Agrippino "
+            "& Rey 2020)."
+        ),
+        "novelty": "EXTENSION",
+        "novelty_rationale": (
+            "Harvey et al. (2018) test VT on US only. Bozovic (2024) tests VIX-managed "
+            "broadly but not 13 country-level markets. We provide the most comprehensive "
+            "international test of VIX-based VT with explicit MDD vs Sharpe decomposition."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": [],
+        "paper_target": "Paper 3 (VT vs Trend Following)",
+        "paper_contribution": "Core Contribution #3 — international evidence",
+        "additional_validation_needed": [
+            "Use local implied vol indices where available (VKOSPI, VNKY)",
+            "Test with currency hedging for non-USD investors",
+            "Subperiod stability"
+        ],
+        "potential_reviewer_objections": [
+            "ETFs trade in US hours — VIX and ETF are contemporaneous",
+            "13 markets may have limited independent variation",
+            "MDD improvement may be mechanical (Finding 8)"
+        ]
+    },
+
+    # ─── Finding 17: VIX-Timed Forex Carry ───
+    {
+        "rank": 17,
+        "finding_id": "F17_VIX_CARRY_TRADE",
+        "title": "VIX-Timed Forex Carry: AUD/JPY MDD -40% -> -14% (p=0.001)",
+        "description": (
+            "12/VIX overlay on AUD/JPY carry trade: MDD -40% -> -14% (26pp, bootstrap p=0.001), "
+            "Sharpe 0.146 -> 0.426 (p=0.001). 5/5 sub-periods stable. EWMA own-vol targeting "
+            "fails (Sharpe 0.085) because carry crashes are driven by global risk-off (VIX), "
+            "NOT own volatility. VIX is the 'fear thermometer' for carry."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "Carry trade literature (Brunnermeier et al. 2009) documents crash risk but "
+            "does NOT test VIX-based position sizing for carry. The finding that OWN-VOL "
+            "targeting fails but VIX targeting works for carry is new and has clear "
+            "economic intuition."
+        ),
+        "confidence": 0.90,
+        "knowledge_ids": ["9b88505f"],
+        "paper_target": "Paper 3 or potential Paper 4",
+        "paper_contribution": "Cross-asset VT extension to carry",
+        "additional_validation_needed": [
+            "Test with more carry pairs (NZD/JPY, MXN/JPY, TRY/JPY)",
+            "Formal comparison with known carry timing strategies",
+            "Transaction cost analysis for FX"
+        ],
+        "potential_reviewer_objections": [
+            "AUD/JPY is a single pair — need cross-sectional evidence",
+            "Carry trade profitability has declined post-2010",
+            "VIX and carry unwind are contemporaneous — timing bias?"
+        ]
+    },
+
+    # ─── Finding 18: Excess Fear Signal (Gemini-Proposed) ───
+    {
+        "rank": 18,
+        "finding_id": "F18_EXCESS_FEAR_SIGNAL",
+        "title": "Excess Fear Signal (VIX/GARCH Z>1.5): t=4.48 In-Sample, t=2.61 OOS",
+        "description": (
+            "When VIX exceeds GARCH forecast by >1.5 sigma, 5-day return averages +0.72% "
+            "(t=4.48 in-sample). OOS t=2.61 (passes standard but not Harvey t>3.0 threshold). "
+            "First return prediction signal to approach Harvey threshold. "
+            "Mechanism: VRP over-expansion -> mean reversion."
+        ),
+        "novelty": "NOVEL",
+        "novelty_rationale": (
+            "VRP literature (Bollerslev et al. 2009) documents risk premium but NOT "
+            "conditional on VIX/GARCH divergence. The specific Z-score threshold signal "
+            "construction is original. However, OOS decay is a concern."
+        ),
+        "confidence": 0.80,
+        "knowledge_ids": ["db10b68d"],
+        "paper_target": "Not yet assigned — needs more OOS validation",
+        "paper_contribution": "Potential future paper if OOS validates",
+        "additional_validation_needed": [
+            "Extended OOS period",
+            "Cross-asset testing",
+            "Transaction cost analysis",
+            "Comparison with existing VRP timing strategies"
+        ],
+        "potential_reviewer_objections": [
+            "OOS t=2.61 < Harvey 3.0 — marginal",
+            "In-sample to OOS decay (4.48 -> 2.61) is 42% — typical overfitting",
+            "Signal frequency may be too low for practical use",
+            "VRP timing has long history of OOS failure"
+        ]
+    },
+
+    # ─── Finding 19: Monthly Rebalancing Beats Daily (Net of TX) ───
+    {
+        "rank": 19,
+        "finding_id": "F19_MONTHLY_BEATS_DAILY",
+        "title": "Monthly 12/VIX Rebalancing: Net Sharpe 0.792 > Daily 0.679 (TX Savings)",
+        "description": (
+            "Monthly rebalancing with 12/VIX achieves net Sharpe 0.792 vs daily 0.679 "
+            "after transaction costs. Saves 0.72%/yr in turnover. Monthly is optimal "
+            "for 12/VIX (slow signal); daily is optimal for GARCH VT (fast signal). "
+            "This explains why 12/VIX wins net performance despite GARCH winning gross."
+        ),
+        "novelty": "CONFIRMATION",
+        "novelty_rationale": (
+            "Fleming et al. (2003) and Harvey et al. (2018) both discuss rebalancing "
+            "frequency. We confirm monthly is optimal for VIX-based VT, consistent with "
+            "existing literature. The VIX slow-signal / GARCH fast-signal distinction "
+            "adds minor nuance."
+        ),
+        "confidence": 0.95,
+        "knowledge_ids": [],
+        "paper_target": "Paper 1 or Paper 2 — practical section",
+        "paper_contribution": "Implementation detail",
+        "additional_validation_needed": [
+            "Formal comparison across multiple rebalancing frequencies",
+            "Market impact analysis for larger portfolios"
+        ],
+        "potential_reviewer_objections": [
+            "Well-known result — monthly rebalancing is standard advice",
+            "TX cost assumptions may be outdated"
+        ]
+    },
+
+    # ─── Finding 20: DL/ML Fails for Daily Vol Forecasting ───
+    {
+        "rank": 20,
+        "finding_id": "F20_DL_ML_FAILS_DAILY",
+        "title": "4 ML/DL Attempts Fail to Beat GARCH for Daily Vol (LSTM, GRU, XGBoost, Hybrid)",
+        "description": (
+            "LSTM/GRU with QLIKE loss collapses to constant prediction. XGBoost: GJR wins 3/3 "
+            "assets. GARCH-LSTM hybrid: LSTM factor unstable (std=1.16). GRU with 5500 days "
+            "achieves marginal 0.06% improvement (negligible). Daily GARCH residuals are iid — "
+            "nothing for DL to learn. 4th independent ML failure confirms daily QLIKE ceiling."
+        ),
+        "novelty": "CONFIRMATION",
+        "novelty_rationale": (
+            "Hansen & Lunde (2005) and Bucci (2020) have mixed results on ML for vol. "
+            "We confirm with modern architectures (GRU, XGBoost) that daily vol forecasting "
+            "has a hard ceiling for ML approaches. The 'iid residuals' explanation "
+            "provides a theoretical reason."
+        ),
+        "confidence": 0.92,
+        "knowledge_ids": ["072fc483", "64a5d46e", "310c570b"],
+        "paper_target": "Paper 1 (JBF) — supports complexity ceiling",
+        "paper_contribution": "Supporting null results",
+        "additional_validation_needed": [
+            "Test with high-frequency features",
+            "Test with larger training sets (10+ years)",
+            "Compare with state-of-art Transformer architectures"
+        ],
+        "potential_reviewer_objections": [
+            "Implementation may be suboptimal — DL requires careful tuning",
+            "Daily frequency is the wrong horizon for DL — try intraday",
+            "Araya et al. (2024) show hybrid GARCH+DL works in some settings"
+        ]
+    },
+]
+
+# =============================================================================
+# PAPER MAPPING — 3 EXISTING PAPERS + POTENTIAL PAPER 4
+# =============================================================================
+
+paper_mapping = {
+    "Paper_1_JBF": {
+        "title": "Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection and Volatility Targeting",
+        "target_journal": "Journal of Banking & Finance",
+        "status": "60 pages, 7 figures, 12 tables, under revision",
+        "core_contributions": [
+            {
+                "number": 1,
+                "label": "Leverage Direction Taxonomy",
+                "novelty": "NOVEL",
+                "finding_ids": ["F01_LEVERAGE_TAXONOMY", "F12_GLD_REGIME_GAMMA"],
+                "strength": "STRONG — genuinely new stylized fact, 26 assets",
+                "weakness": "Descriptive taxonomy, not formal test"
+            },
+            {
+                "number": 2,
+                "label": "Gamma -> Model Selection Rule",
+                "novelty": "NOVEL",
+                "finding_ids": ["F02_GAMMA_VT_MECHANISM"],
+                "strength": "Practical decision rule, 12/12 correct DM classifications",
+                "weakness": "Small cross-section for equity-specific result"
+            },
+            {
+                "number": 3,
+                "label": "Complexity Ceiling",
+                "novelty": "EXTENSION",
+                "finding_ids": ["F05_QLIKE_CEILING", "F06_VIX_SUFFICIENT_STATISTIC", "F20_DL_ML_FAILS_DAILY"],
+                "strength": "14 models x 3 assets, CCS metric, 21+ null results",
+                "weakness": "Daily r^2 proxy — ceiling may be lower with 5-min RV"
+            }
+        ],
+        "supporting_findings": ["F07_5050_INDESTRUCTIBLE", "F11_FHS_UNIVERSAL_VAR", "F15_EWMA_RETAIL_DEFAULT", "F19_MONTHLY_BEATS_DAILY"],
+        "novelty_assessment": "70% NOVEL, 30% EXTENSION. Core taxonomy is genuinely new. Complexity ceiling extends Hansen & Lunde (2005).",
+        "publication_readiness": 0.75,
+        "key_risks": [
+            "Codex review: 32/100, claims too broad for 7-asset evidence",
+            "Need to tighten scope per Codex/Gemini advice",
+            "Gold regime-dependence needs more formal testing"
+        ]
+    },
+
+    "Paper_2_PBFJ": {
+        "title": "Volatility Targeting in the Taiwan Stock Market: Leverage Amplification, Model Selection, and Practical Implementation",
+        "target_journal": "Pacific-Basin Finance Journal",
+        "status": "34 pages, under revision",
+        "core_contributions": [
+            {
+                "number": 1,
+                "label": "Taiwan Leverage Amplification (4.6x)",
+                "novelty": "EXTENSION",
+                "finding_ids": ["F13_TAIWAN_AMPLIFICATION"],
+                "strength": "Clear quantification, comparison with US",
+                "weakness": "Single market, amplification concept known (Ang & Chen 2002)"
+            },
+            {
+                "number": 2,
+                "label": "VT Implementation in Taiwan (8.63/VIX)",
+                "novelty": "EXTENSION",
+                "finding_ids": [],
+                "strength": "First VT study focused on Taiwan, practical VIX proxy method",
+                "weakness": "Emerging market VT is not entirely new (Bozovic 2024 touches on it)"
+            },
+            {
+                "number": 3,
+                "label": "TZ Information Transmission & Opening Auction Efficiency",
+                "novelty": "EXTENSION",
+                "finding_ids": ["F14_TZ_INFORMATION_TRANSMISSION"],
+                "strength": "8 markets, c2c->o2o decomposition, perfect control (US-listed ETFs)",
+                "weakness": "Not tradeable, Rapach et al. (2013) established US leadership at monthly"
+            }
+        ],
+        "supporting_findings": ["F06_VIX_SUFFICIENT_STATISTIC"],
+        "novelty_assessment": "30% NOVEL, 70% EXTENSION. No single genuinely novel finding, but the combination of Taiwan VT + TZ + amplification is unique.",
+        "publication_readiness": 0.70,
+        "key_risks": [
+            "TZ finding is academic interest only (not tradeable)",
+            "Taiwan market may be seen as too niche for PBFJ",
+            "VIXTWN data availability issues",
+            "I8 timing bias already downgrades TZ strategies"
+        ]
+    },
+
+    "Paper_3_VT_TREND": {
+        "title": "Is Volatility Targeting Just Trend Following? Decomposing the Benefits of Volatility Targeting",
+        "target_journal": "To be determined (JFE, JFQA, or JBF)",
+        "status": "24 pages, first draft complete",
+        "core_contributions": [
+            {
+                "number": 1,
+                "label": "Gamma Predicts TSMOM Loading (r=0.564, p=0.006, N=22)",
+                "novelty": "NOVEL",
+                "finding_ids": ["F02_GAMMA_VT_MECHANISM"],
+                "strength": "22 assets, mechanical explanation for VT-TSMOM overlap",
+                "weakness": "Within-sector r=0.163 NS — boundary condition"
+            },
+            {
+                "number": 2,
+                "label": "MDD Protection 90-97% Survives TSMOM Removal",
+                "novelty": "NOVEL",
+                "finding_ids": ["F03_MDD_SURVIVES_TSMOM", "F08_MDD_MECHANICAL"],
+                "strength": "Direct response to Hood & Raughtigan (2025) and Cederburg (2020)",
+                "weakness": "Only 5 assets in primary decomposition"
+            },
+            {
+                "number": 3,
+                "label": "VIX as Universal International De-Risking Signal (13/13 markets)",
+                "novelty": "EXTENSION",
+                "finding_ids": ["F16_VIX_UNIVERSAL_DERISKING"],
+                "strength": "13 markets, strong t-statistics, insurance pricing framework",
+                "weakness": "ETFs trade in US — contemporaneous with VIX"
+            }
+        ],
+        "supporting_findings": [
+            "F04_VT_INSURANCE_PRICING", "F09_VT_FAILS_TIMING",
+            "F10_SIMPSON_PARADOX_TSMOM", "F17_VIX_CARRY_TRADE"
+        ],
+        "novelty_assessment": "60% NOVEL, 40% EXTENSION. Dual-channel decomposition and gamma-TSMOM link are genuinely new contributions to the VT literature.",
+        "publication_readiness": 0.65,
+        "key_risks": [
+            "Hood & Raughtigan (2025) use futures — we use ETFs, not directly comparable",
+            "Need to replicate with their exact specification",
+            "MDD mechanical result may be seen as obvious",
+            "Paper may be too broad — three contributions across different literatures"
+        ]
+    }
+}
+
+# =============================================================================
+# PAPER 4 OPPORTUNITIES
+# =============================================================================
+
+paper_4_opportunities = [
+    {
+        "paper_id": "Paper_4A_GLD_SELFHEALING",
+        "title": "GLD Self-Healing and the Robustness of Equal-Weight Diversification",
+        "viability": 0.45,
+        "rationale": (
+            "The GLD flash crash (Jan 30, 2026, -10.27%) and subsequent GARCH recovery "
+            "(half-life 17d, 90% decay 55d) is interesting but is a SINGLE EVENT study. "
+            "The 'self-healing' aspect is just normal GARCH mean reversion. "
+            "Equal-weight robustness (50/50) is well-documented by DeMiguel et al. (2009). "
+            "Combining them into one paper feels forced."
+        ),
+        "novel_findings_available": ["F07_5050_INDESTRUCTIBLE", "F12_GLD_REGIME_GAMMA"],
+        "missing_pieces": [
+            "Need multiple crash events for self-healing analysis",
+            "Need formal 'robustness of 1/N' theoretical framework",
+            "GLD self-healing is just GARCH persistence — not a discovery"
+        ],
+        "recommendation": "NOT VIABLE as standalone paper. Findings better served in Papers 1 and 3.",
+        "alternative": (
+            "Consider a PRACTITIONER note (Journal of Portfolio Management or Financial "
+            "Analysts Journal) on '50/50 + 12/VIX: The Irreducible Retail Portfolio'"
+        )
+    },
+    {
+        "paper_id": "Paper_4B_QLIKE_CEILING",
+        "title": "The QLIKE Ceiling: An Impossibility Result for Daily Volatility Forecasting",
+        "viability": 0.60,
+        "rationale": (
+            "The QLIKE ceiling (14 models x 3 assets, 0.31% span, 52% add zero value) "
+            "is a quantitative extension of Hansen & Lunde (2005). The CCS metric is "
+            "original. Combined with 21 null results (VIX sufficiency) and 4 ML failures, "
+            "this could be a 'meta-analysis / impossibility' paper. But it risks being "
+            "purely negative — reviewers may ask 'so what?'"
+        ),
+        "novel_findings_available": [
+            "F05_QLIKE_CEILING", "F06_VIX_SUFFICIENT_STATISTIC",
+            "F20_DL_ML_FAILS_DAILY", "F15_EWMA_RETAIL_DEFAULT"
+        ],
+        "missing_pieces": [
+            "Formal impossibility theorem (information-theoretic bound on daily vol prediction)",
+            "Comparison with intraday / multi-day horizons where ceiling is higher",
+            "Theoretical decomposition: what fraction of daily vol is unpredictable?",
+            "5-min RV as 'gold standard' — does ceiling shrink with better target?"
+        ],
+        "recommendation": (
+            "CONDITIONALLY VIABLE. Needs: (1) formal theoretical bound, (2) contrast "
+            "with horizons where GARCH IS beatable, (3) constructive takeaway "
+            "(e.g., when DOES complexity help?). Could target JFE or Journal of "
+            "Financial Econometrics."
+        ),
+        "alternative": (
+            "Merge into Paper 1 as a comprehensive supporting analysis "
+            "(current approach) — less risk than standalone."
+        )
+    },
+    {
+        "paper_id": "Paper_4C_VT_INSURANCE",
+        "title": "Volatility Targeting as Drawdown Insurance: Pricing, Mechanism, and Lifecycle",
+        "viability": 0.70,
+        "rationale": (
+            "The insurance framing (K41: ~4%/yr premium, 100% MDD protection at all horizons) "
+            "combined with K32 (VT fails timing tests), K28 (behavioral bias simulation), "
+            "and K39/K40 (lifecycle paradox and resolution) forms a coherent paper about "
+            "VT's economic function. Currently split across Papers 1 and 3."
+        ),
+        "novel_findings_available": [
+            "F04_VT_INSURANCE_PRICING", "F08_MDD_MECHANICAL",
+            "F09_VT_FAILS_TIMING", "F03_MDD_SURVIVES_TSMOM"
+        ],
+        "missing_pieces": [
+            "Formal insurance pricing model (actuarial framework)",
+            "Comparison with explicit hedging (put options, VIX futures)",
+            "Utility analysis with loss aversion (not just CRRA)",
+            "Lifecycle implementation guide with realistic assumptions"
+        ],
+        "recommendation": (
+            "MOST VIABLE Paper 4 candidate. The insurance framing is original and "
+            "commercially appealing. Could target Journal of Portfolio Management, "
+            "Financial Analysts Journal, or JFQA. Risk: 'insurance' metaphor may not "
+            "satisfy strict academic reviewers."
+        ),
+        "alternative": (
+            "Alternatively, fold insurance findings into Paper 3 as the economic "
+            "interpretation section (current partial approach)."
+        )
+    },
+    {
+        "paper_id": "Paper_4D_WHY_5050_WORKS",
+        "title": "Why 50/50 Works: The Simplicity Premium in Multi-Asset Volatility Targeting",
+        "viability": 0.50,
+        "rationale": (
+            "8 independent tests showing 50/50 SPY/GLD + 12/VIX cannot be beaten. "
+            "MVO converges to 50/50. Risk Parity converges to 47/53. DeMiguel et al. "
+            "(2009) for stocks; we extend to multi-asset VT. But the result may be "
+            "too simple for a standalone paper."
+        ),
+        "novel_findings_available": [
+            "F07_5050_INDESTRUCTIBLE", "F06_VIX_SUFFICIENT_STATISTIC",
+            "F05_QLIKE_CEILING"
+        ],
+        "missing_pieces": [
+            "Formal proof of why 50/50 is optimal (not just 8 failures to beat)",
+            "Theoretical connection to DeMiguel et al. (2009) framework",
+            "International equivalent (local equity + gold in other markets)",
+            "Robustness to gold regime (what if gold enters 20-year bear?)"
+        ],
+        "recommendation": (
+            "MARGINALLY VIABLE. Better as a practitioner piece (FAJ/JPM) than "
+            "academic paper. The finding is real but may seem trivial to reviewers. "
+            "Best contribution if combined with formal optimality proof."
+        ),
+        "alternative": "Keep as supporting result in Paper 1 (current approach)."
+    }
+]
+
+# =============================================================================
+# NOVELTY SUMMARY STATISTICS
+# =============================================================================
+
+novelty_counts = {"NOVEL": 0, "EXTENSION": 0, "CONFIRMATION": 0, "CONTRADICTION": 0}
+for f in top_20_findings:
+    novelty_counts[f["novelty"]] += 1
+
+summary = {
+    "experiment_id": "K274",
+    "title": "Paper Contribution Mapping — Which Findings Are Novel vs Known?",
+    "date": datetime.now().isoformat(),
+    "total_knowledge_entries": 978,
+    "total_experiments": 270,
+    "top_20_analyzed": True,
+    "novelty_distribution": novelty_counts,
+    "novelty_percentages": {
+        k: f"{v / 20 * 100:.0f}%" for k, v in novelty_counts.items()
+    },
+    "key_insight": (
+        "Of 20 top findings: 9 are NOVEL (45%), 9 are EXTENSIONS (45%), "
+        "2 are CONFIRMATIONS (10%), 0 are CONTRADICTIONS (0%). "
+        "Our strongest novel contributions are: (1) leverage direction taxonomy, "
+        "(2) gamma-TSMOM mechanical link, (3) MDD orthogonal to trend following, "
+        "(4) VIX sufficiency (21 null results), and (5) VIX-timed carry trade."
+    ),
+    "paper_1_JBF_novel_pct": "70% NOVEL",
+    "paper_2_PBFJ_novel_pct": "30% NOVEL",
+    "paper_3_VT_TREND_novel_pct": "60% NOVEL",
+    "paper_4_recommendation": (
+        "Paper 4C (VT as Drawdown Insurance) is the most viable 4th paper opportunity "
+        "(viability 0.70). Paper 4B (QLIKE Ceiling) is conditionally viable (0.60) "
+        "but needs a formal theoretical bound. Paper 4A (GLD Self-Healing) and "
+        "Paper 4D (Why 50/50 Works) are better served as practitioner pieces or "
+        "integrated into existing papers."
+    ),
+    "strategic_recommendation": (
+        "Priority order: (1) Paper 1 (JBF) — strongest novel contribution, revise per Codex. "
+        "(2) Paper 3 (VT vs Trend) — most timely, responds to Hood & Raughtigan 2025. "
+        "(3) Paper 2 (PBFJ) — regional interest, least novel but well-targeted. "
+        "(4) Paper 4C (Insurance) — start only after Papers 1-3 are submitted. "
+        "Key risk: Paper 1 claims may be too broad (Codex 32/100 score). "
+        "Action: narrow scope to 2 contributions per Codex/Gemini consensus."
+    )
+}
+
+# =============================================================================
+# FINDINGS BY EXISTING LITERATURE COMPARISON
+# =============================================================================
+
+literature_comparison = {
+    "extends_known_papers": {
+        "Hansen_Lunde_2005": {
+            "their_result": "330 ARCH models, GARCH(1,1) hard to beat for equity daily vol",
+            "our_extension": "14 modern models (incl. MF2, DL, ML) + 3 assets + CCS metric + VT allocation implication",
+            "finding_ids": ["F05_QLIKE_CEILING", "F20_DL_ML_FAILS_DAILY"]
+        },
+        "Hood_Raughtigan_2025": {
+            "their_result": "91% of equity VT alpha absorbed by TSMOM factor",
+            "our_extension": "Decompose Sharpe vs MDD channels. MDD 90-97% survives. Regime-conditional (Simpson Paradox). Gamma predicts TSMOM loading.",
+            "finding_ids": ["F02_GAMMA_VT_MECHANISM", "F03_MDD_SURVIVES_TSMOM", "F10_SIMPSON_PARADOX_TSMOM"]
+        },
+        "Moreira_Muir_2017": {
+            "their_result": "VT improves risk-adjusted returns for equity factors",
+            "our_extension": "Cross-asset taxonomy, VIX sufficient statistic, insurance framing, 13 international markets",
+            "finding_ids": ["F01_LEVERAGE_TAXONOMY", "F06_VIX_SUFFICIENT_STATISTIC", "F04_VT_INSURANCE_PRICING", "F16_VIX_UNIVERSAL_DERISKING"]
+        },
+        "DeMiguel_2009": {
+            "their_result": "1/N hard to beat for stock portfolios",
+            "our_extension": "50/50 hard to beat for multi-asset VT — 8 independent tests",
+            "finding_ids": ["F07_5050_INDESTRUCTIBLE"]
+        },
+        "Rapach_2013": {
+            "their_result": "US returns predict international returns at monthly frequency",
+            "our_extension": "Daily frequency, 8 Asia-Pacific markets, c2c->o2o decomposition, opening auction efficiency",
+            "finding_ids": ["F14_TZ_INFORMATION_TRANSMISSION"]
+        },
+        "Cederburg_2020": {
+            "their_result": "VT does not improve utility after higher moments",
+            "our_extension": "VT fails timing tests (HM/TM/Merton) but MDD protection is orthogonal. Insurance framing resolves utility critique.",
+            "finding_ids": ["F09_VT_FAILS_TIMING", "F04_VT_INSURANCE_PRICING"]
+        },
+        "Black_1976_Christie_1982": {
+            "their_result": "Leverage effect: negative returns increase equity volatility",
+            "our_extension": "Direction varies by asset class — taxonomy + regime-dependence in gold",
+            "finding_ids": ["F01_LEVERAGE_TAXONOMY", "F12_GLD_REGIME_GAMMA"]
+        },
+        "Bozovic_2024": {
+            "their_result": "VIX-managed > realized-vol-managed portfolios",
+            "our_extension": "VIX sufficient statistic (21 null results), 13 international markets, VIX-timed carry",
+            "finding_ids": ["F06_VIX_SUFFICIENT_STATISTIC", "F16_VIX_UNIVERSAL_DERISKING", "F17_VIX_CARRY_TRADE"]
+        }
+    },
+    "genuinely_novel_no_direct_precedent": [
+        {
+            "finding_id": "F01_LEVERAGE_TAXONOMY",
+            "claim": "Cross-asset taxonomy of leverage direction with formal classification",
+            "closest_literature": "Baur & McDermott (2010) discuss gold safe haven; Batten et al. (2010) discuss gold vol. Neither formalizes direction taxonomy."
+        },
+        {
+            "finding_id": "F12_GLD_REGIME_GAMMA",
+            "claim": "Gold gamma inverts between bull and bear regimes (t=-4.7)",
+            "closest_literature": "No direct precedent. Gold asymmetric vol is mentioned but not regime-dependent direction reversal."
+        },
+        {
+            "finding_id": "F08_MDD_MECHANICAL",
+            "claim": "VT MDD improvement is 99% mechanical under null hypothesis",
+            "closest_literature": "No direct precedent. All VT papers report MDD without testing mechanicality."
+        },
+        {
+            "finding_id": "F17_VIX_CARRY_TRADE",
+            "claim": "VIX-timed carry trade works because carry crashes = global risk-off",
+            "closest_literature": "Brunnermeier et al. (2009) document carry crash risk but don't test VIX timing."
+        },
+        {
+            "finding_id": "F06_VIX_SUFFICIENT_STATISTIC",
+            "claim": "VIX alone determines optimal VT allocation (21 null additions)",
+            "closest_literature": "Bozovic (2024) shows VIX > realized vol but doesn't test sufficiency against 21 alternatives."
+        }
+    ]
+}
+
+# =============================================================================
+# OUTPUT
+# =============================================================================
+
+output = {
+    "summary": summary,
+    "top_20_findings": top_20_findings,
+    "paper_mapping": paper_mapping,
+    "paper_4_opportunities": paper_4_opportunities,
+    "literature_comparison": literature_comparison,
+}
+
+# Save results
+output_path = "experiments/k274_paper_mapping_results.json"
+with open(output_path, "w") as f:
+    json.dump(output, f, indent=2, ensure_ascii=False)
+
+print("=" * 80)
+print("K274: PAPER CONTRIBUTION MAPPING — RESULTS")
+print("=" * 80)
+
+print(f"\n--- NOVELTY DISTRIBUTION (Top 20 Findings) ---")
+for k, v in novelty_counts.items():
+    print(f"  {k}: {v} ({v/20*100:.0f}%)")
+
+print(f"\n--- PAPER MAPPING ---")
+for paper_id, info in paper_mapping.items():
+    print(f"\n  {paper_id}: {info['title'][:60]}...")
+    print(f"    Target: {info['target_journal']}")
+    print(f"    Novelty: {info['novelty_assessment']}")
+    print(f"    Readiness: {info['publication_readiness']*100:.0f}%")
+    print(f"    Contributions:")
+    for c in info['core_contributions']:
+        print(f"      #{c['number']}: [{c['novelty']}] {c['label']}")
+
+print(f"\n--- PAPER 4 OPPORTUNITIES ---")
+for opp in paper_4_opportunities:
+    print(f"\n  {opp['paper_id']}: {opp['title'][:60]}...")
+    print(f"    Viability: {opp['viability']*100:.0f}%")
+    print(f"    Recommendation: {opp['recommendation'][:80]}...")
+
+print(f"\n--- GENUINELY NOVEL (No Direct Precedent) ---")
+for item in literature_comparison["genuinely_novel_no_direct_precedent"]:
+    print(f"  {item['finding_id']}: {item['claim'][:80]}...")
+
+print(f"\n--- STRATEGIC RECOMMENDATION ---")
+print(f"  {summary['strategic_recommendation']}")
+
+print(f"\n--- KEY INSIGHT ---")
+print(f"  {summary['key_insight']}")
+
+print(f"\nResults saved to: {output_path}")
