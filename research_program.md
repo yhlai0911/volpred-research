@@ -650,6 +650,9 @@
 - [x] K209: Two-Tier VT — NULL。Predictor paradox confirmed for SPY/GLD/TLT。Two-tier sig WORSE MDD (t=-7.57)。Own-vol→higher leverage→deeper DD
 - [x] K210: VIX-SKEW Ratio — NULL。SKEW hurts OOS (DM t=-2.55~-6.42)。GARCH-X coeff→0。VIX sufficient #26
 - [x] K211: ★ Mean Reversion HL — QQQ partial r=-0.252 (t=-5.68★), GLD r=-0.332 (t=-7.68★)。但 SPY FAILS (t=-1.68)。HL-adaptive rebalancing 0/3 sig
+- [x] K212: ★★ Conditional VIX Sufficiency — High VIX regime 100% Harvey pass（VIX>25 時 non-VIX features 全顯著）。但經濟影響微小（ΔR²=0.1-2.4%）。Regime-switching VT +0.09 Sharpe (bootstrap P=99%)。實務結論：VIX 充分性是有用的近似
+- [x] K213: Signature Path Features（Gemini R9#1）— IS: qv_path r=0.144, area r=0.114（incr R²=3%）。OOS: NOT sig + sign flips。Two-stage DM NS。需 tick 數據做真正 signatures
+- [x] K215: Seasonality 5 Assets — 5/15 Bonferroni pass 但 NOT actionable。Seasonal VT hurts -0.047 Sharpe。BTC weekday/weekend 唯一穩健（institutional trading）。Calendar effects 不可用
 
 ### Session 2026-03-24 進度
 **13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness

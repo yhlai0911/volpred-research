@@ -10516,5 +10516,40 @@
       "QQQ",
       "GLD"
     ]
+  },
+  {
+    "id": "K1054",
+    "title": "K212: ★★ Conditional VIX Sufficiency — VIX breaks down when VIX>25 (100% Harvey pass) but economic impact negligible",
+    "content": "IS: High VIX regime 100% Harvey pass rate for non-VIX features (Range Ratio, OwnVol). Low VIX 42%, Medium 58%. Interaction model t=3.24 PASS but ΔR²=0.001-0.024. Regime-switching VT +0.09 Sharpe (bootstrap P=98.9%). BUT 2019-2020 COVID (ample high VIX) shows 0/8 Harvey pass. Conclusion: statistical pattern clear, economic impact negligible. VIX sufficiency holds as practical approximation.",
+    "timestamp": "2026-03-24T15:24:39.908656",
+    "tags": [
+      "VIX-conditional",
+      "regime",
+      "Harvey-pass",
+      "economic-negligible"
+    ]
+  },
+  {
+    "id": "K1055",
+    "title": "K213: Signature Path Features — IS sig (qv_path r=0.144, area r=0.114) but OOS NULL. Sign flips in OOS",
+    "content": "[Gemini R9#1] Simplified signature proxies on daily SPY. IS: qv_path t=10.29, area t=8.10, incr R²=3%. OOS: qv_path/area NOT sig. cross_var OOS sig (t=-5.46) but SIGN FLIPPED vs IS. Two-stage GARCH augmented DM t=-0.71 NS. True signatures need tick data. VIX sufficient #27.",
+    "timestamp": "2026-03-24T15:31:33.385744",
+    "tags": [
+      "signature",
+      "path-features",
+      "null-result"
+    ]
+  },
+  {
+    "id": "K1056",
+    "title": "K215: Seasonality 5 assets — 5/15 Bonferroni pass but NOT actionable. Seasonal VT hurts -0.047 Sharpe",
+    "content": "DOW: BTC weekday/weekend sig (institutional hours). MOY: SPY March-high/July-low sig IS but OOS p=0.27. TLT DOW survives VIX control. ALL seasonal VT overlays HURT performance. IS→OOS rank rho≈0 for traditional. Calendar effects NOT viable standalone signal.",
+    "timestamp": "2026-03-24T15:31:33.385744",
+    "tags": [
+      "seasonality",
+      "calendar",
+      "null-result",
+      "BTC-weekend"
+    ]
   }
 ]
