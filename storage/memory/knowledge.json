@@ -10697,5 +10697,18 @@
       "50/50-validated",
       "VIX-sufficient"
     ]
+  },
+  {
+    "id": "K1069",
+    "title": "K227: ★★★ VT Implementation Guide — exact formula, 60-month weight table, edge cases, TX cost",
+    "content": "Formula: SPY weight = min(1, 12/VIX) × 50%. GLD always 50%. Cash = remainder. Monthly turnover 6.48% (50.8%/yr). TX at 3bps: 0.015%/yr negligible. VIX<12: 8.8% of months. VIX>30: 10%. Complete 2020-2024 weight table. GFC saved 33pp, COVID 14pp. Tax: use IRA. Sharpe 0.800, MDD -21.5%, CAGR 8.9%.",
+    "timestamp": "2026-03-24T16:23:12.182921",
+    "tags": [
+      "implementation",
+      "guide",
+      "practical",
+      "retail",
+      "important"
+    ]
   }
 ]
