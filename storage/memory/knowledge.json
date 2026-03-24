@@ -11092,5 +11092,31 @@
       "BPV",
       "timeline"
     ]
+  },
+  {
+    "id": "K1101",
+    "title": "K258: ★ SKEW Dynamics — SKEW vol partial r=-0.275 OOS (t=-6.21). High VIX regime: DM t=3.72 PASS. But multi-period FAIL",
+    "content": "SKEW volatility (not level) contains info beyond VIX. OOS 4 features pass Harvey. High VIX regime: SKEW vol DM t=3.72 PASS (regime-conditional improvement). BUT 0/6 features pass Harvey in 3+ out of 5 sub-periods — time-varying and unstable. SKEW/VIX ratio useful as spike warning (AUC=0.72). Confirms K212: VIX sufficiency is conditional.",
+    "timestamp": "2026-03-24T18:30:49.430135",
+    "tags": [
+      "SKEW",
+      "dynamics",
+      "regime-conditional",
+      "unstable",
+      "AUC"
+    ]
+  },
+  {
+    "id": "K1102",
+    "title": "K259: Macro Surprise — NULL. Surprise frequency partial r=-0.014 (p=0.28). VIX absorbs all macro info",
+    "content": "721 macro events (FOMC/NFP/CPI). Macro days 1.13x larger |DVIX| (t=2.06). But partial r|VIX = -0.014 NS. GARCH-X DM=0.000. VIX already forward-looking, incorporates scheduled macro risk. Asymmetry: VIX tends to FALL on FOMC (36.6% rise only) — uncertainty resolution net. VIX sufficient confirmed.",
+    "timestamp": "2026-03-24T18:30:49.430135",
+    "tags": [
+      "macro",
+      "surprise",
+      "NFP",
+      "CPI",
+      "VIX-sufficient"
+    ]
   }
 ]
