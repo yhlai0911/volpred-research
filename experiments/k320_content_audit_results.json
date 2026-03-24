@@ -1,0 +1,655 @@
+{
+  "summary": {
+    "experiment": "K320",
+    "title": "Website Content Quality Audit — Are Our Published Articles Accurate?",
+    "date": "2026-03-25T07:37:05.077895",
+    "total_published_articles": 525,
+    "total_empty_articles_0_chars": 17,
+    "total_stub_articles_lt100_chars": 19,
+    "total_content_deficient": 36,
+    "total_findings": 42,
+    "severity_breakdown": {
+      "MISLEADING": 4,
+      "OUTDATED": 25,
+      "STILL_VALID": 13
+    },
+    "issue_breakdown": {
+      "TSMOM_passes_Harvey": {
+        "description": "Articles claiming TSMOM passes Harvey t>3.0 (K255 showed it FAILS on full sample)",
+        "count": 1,
+        "correction_knowledge": "K255"
+      },
+      "VT_91pct_trend_following": {
+        "description": "Articles claiming 91% of VT alpha is trend following (K53 showed only 5.2%)",
+        "count": 1,
+        "correction_knowledge": "K53"
+      },
+      "withdrawal_rate_doubles": {
+        "description": "Articles claiming VT doubles safe withdrawal rate from 4% to 8% (K87 showed 8% fails stress test)",
+        "count": 2,
+        "correction_knowledge": "K87/K222"
+      },
+      "Amihud_look_ahead_artifact": {
+        "description": "Articles claiming Amihud illiquidity predicts vol (K266: was look-ahead artifact)",
+        "count": 0,
+        "correction_knowledge": "K266"
+      },
+      "daily_rebalancing_best": {
+        "description": "Articles claiming daily rebalancing best without TX context (K281: monthly wins net)",
+        "count": 0,
+        "correction_knowledge": "K279/K281"
+      },
+      "stub_content": {
+        "description": "Articles with <100 chars that cannot support their title claims",
+        "count": 19,
+        "correction_knowledge": "K262"
+      },
+      "hybrid_vt_sharpe_2": {
+        "description": "Articles claiming Hybrid VT Sharpe ~2.0 without net-of-TX context",
+        "count": 4,
+        "correction_knowledge": "K281"
+      }
+    },
+    "urgent_corrections_needed": [
+      {
+        "article_id": "mile_d368b4da",
+        "title": "我們測試了 12 個交易策略，只有 1 個通過嚴格檢驗",
+        "issue": "TSMOM doesn't actually pass Harvey on full sample",
+        "action": "Change to '0 passed full-sample' or add K255 correction note"
+      },
+      {
+        "article_id": "mile_281af193",
+        "title": "你以為你在做風控，其實你在做趨勢交易",
+        "issue": "91% figure is methodologically flawed (K53: 5.2%)",
+        "action": "Replace 91% with 32% (Sharpe) or 5.2% (alpha reduction)"
+      },
+      {
+        "article_id": "mile_e8aefbf1",
+        "title": "【已修正】VT 退休模擬",
+        "issue": "Body contradicts '已修正' title — still argues for 8% doubling",
+        "action": "Rewrite body to match corrected title"
+      },
+      {
+        "article_id": "mile_5302df53",
+        "title": "【已修正】退休金策略",
+        "issue": "Opening line says '翻倍到 8%' but title says '不會翻倍'",
+        "action": "Rewrite opening paragraph to match corrected title"
+      }
+    ],
+    "positive_findings": [
+      "mile_ee473d5a (VT Complete Guide): Correctly handles ALL corrections — model article",
+      "mile_9071e562 (K46→K53): IS the correction article, properly documents evolution",
+      "mile_c738dd9d (VT Dual Mechanism): Correctly uses 32% figure, not 91%",
+      "mile_a777ed5b (Retirement 5%): Correctly uses K222 correction, claims 5% not 8%",
+      "mile_5823d219 (12/VIX Formula): Correctly recommends monthly over daily",
+      "mile_02592b29 (VT Self-Correction): Honest about VT not being for most people"
+    ],
+    "methodology_notes": [
+      "Automated regex scan of 525 published articles for 7 claim patterns",
+      "Manual deep-read of 14 most-flagged articles",
+      "Cross-referenced against knowledge.json corrections (K255, K266, K281, K222, K53)",
+      "Severity: MISLEADING = active misinformation; OUTDATED = stale data/context; STILL_VALID = correctly handles corrections"
+    ],
+    "conclusion": "Of 525 published articles, 4 contain MISLEADING content that directly contradicts corrected findings (TSMOM passes, 91% trend, withdrawal doubling). 17 articles have completely empty content, 19 have stub content (<100 chars) — total 36 content-deficient articles that cannot support their title claims. 6 articles are positively identified as correctly handling self-corrections. The '已修正' title prefix is inconsistently applied — some articles have it in the title but the body still contains the original uncorrected claims."
+  },
+  "misleading_articles": [
+    {
+      "article_id": "mile_281af193",
+      "article_title": "你以為你在做風控，其實你在做趨勢交易——而且做對了",
+      "article_created": "2026-03-21T06:52:15.859147+00:00",
+      "article_content_length": 1983,
+      "issue": "VT_91pct_trend_following",
+      "claim_in_article": "Claims VT alpha is 91% explained by trend following (K46 result)",
+      "correction": "K53 (N=15 cross-asset, Newey-West HAC): Equity alpha reduction only 5.2%, not 91%. The 91% was from flawed 4-asset analysis.",
+      "severity": "MISLEADING",
+      "has_disclaimer": false,
+      "recommendation": "Must update: 91% figure is methodologically flawed. Correct figure is 5.2% (K53) or 32% for Sharpe contribution (K49)."
+    },
+    {
+      "article_id": "mile_d368b4da",
+      "article_title": "我們測試了 12 個交易策略，只有 1 個通過嚴格檢驗",
+      "issue": "TSMOM_passes_Harvey",
+      "severity": "MISLEADING",
+      "detail": "Claims 'only TSMOM passed Harvey t>3.0 among 12 strategies'. K255 showed TSMOM FAILS on full 21yr (t=2.34). Article has NO disclaimer.",
+      "recommendation": "URGENT: Update to say '0 out of 12 passed full-sample Harvey' or add K255 correction note.",
+      "content_accurate_at_time": true,
+      "now_incorrect": true
+    },
+    {
+      "article_id": "mile_e8aefbf1",
+      "article_title": "【已修正】VT 退休模擬：提供更穩定的存活率，但 max safe WR 仍為 4%",
+      "severity": "MISLEADING",
+      "issue": "withdrawal_rate_doubles",
+      "detail": "Title says '已修正' but content STILL claims '12/VIX VT 將最大安全提領率從 4% 提升至 8%' in headline and conclusion. The '已修正' title contradicts the body which fully argues for 8%.",
+      "recommendation": "URGENT: Body text still actively argues for 8% doubling. Must rewrite body to match the corrected title.",
+      "content_accurate_at_time": false,
+      "now_incorrect": true
+    },
+    {
+      "article_id": "mile_5302df53",
+      "article_title": "【已修正】退休金策略：VT 提供更穩定的 4% 存活率，但不會翻倍",
+      "severity": "MISLEADING",
+      "issue": "withdrawal_rate_doubles",
+      "detail": "Title says '不會翻倍' but FIRST LINE of body says '波動率目標（VT）策略把退休安全提領率從 4% 翻倍到 8%'. Title and body directly contradict each other.",
+      "recommendation": "URGENT: First paragraph must be rewritten to match the corrected title. Currently the opening line says the opposite of the title.",
+      "content_accurate_at_time": false,
+      "now_incorrect": true
+    }
+  ],
+  "outdated_articles": [
+    {
+      "article_id": "mile_8aacc552",
+      "article_title": "我們測了 13 種恐懼指標，發現你只需要看一個數字",
+      "article_created": "2026-03-17T12:08:00.947243+00:00",
+      "article_content_length": 93,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 93 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_2b0b2d4c",
+      "article_title": "Time-Zone Information Asymmetry：亞太 6 國驗證的深度研究報告",
+      "article_created": "",
+      "article_content_length": 96,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 96 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_b4180ec5",
+      "article_title": "亞太時區套利：SPY 隔夜信號在 6 個市場全部有效",
+      "article_created": "",
+      "article_content_length": 66,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 66 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_231f0b23",
+      "article_title": "2025 年黃金漲了 61.5%——你的投資組合有跟上嗎？",
+      "article_created": "",
+      "article_content_length": 41,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 41 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_d7be5250",
+      "article_title": "台灣投資人完整策略決策樹——基於 30 個實驗的科學化建議",
+      "article_created": "",
+      "article_content_length": 52,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 52 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_218c5587",
+      "article_title": "比特幣不是避險工具——恐慌時它跟股票一起跌",
+      "article_created": "",
+      "article_content_length": 59,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 59 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_54e38bac",
+      "article_title": "自我修正：「天花板被打破」是假警報——13 次確認的教訓",
+      "article_created": "",
+      "article_content_length": 87,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 87 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_96fa58b4",
+      "article_title": "Phase T 深度報告：25 個實驗、6 大主題、QLIKE 天花板的裂縫",
+      "article_created": "",
+      "article_content_length": 73,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 73 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_5732487b",
+      "article_title": "你的債券避險可能已經失效了——2022 後的殘酷真相",
+      "article_created": "",
+      "article_content_length": 44,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 44 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_ab209264",
+      "article_title": "GJR-GARCH 的隱藏優勢：預測天數越長，優勢越大",
+      "article_created": "",
+      "article_content_length": 82,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 82 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_4f4784d1",
+      "article_title": "VIX：你唯一需要看的恐慌指標——6 種指標大 PK",
+      "article_created": "",
+      "article_content_length": 39,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 39 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_b232cdec",
+      "article_title": "台灣投資人的懶人策略：每天花 10 秒看美股，年化多賺 18%",
+      "article_created": "",
+      "article_content_length": 41,
+      "issue": "taiwan_sharpe_stub",
+      "claim_in_article": "Claims Sharpe 1.62 but article is a stub (41 chars, no full content)",
+      "correction": "Article has no substantive content to support the claim. Reader cannot verify.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Either expand with full methodology/caveats or mark as superseded."
+    },
+    {
+      "article_id": "mile_b232cdec",
+      "article_title": "台灣投資人的懶人策略：每天花 10 秒看美股，年化多賺 18%",
+      "article_created": "",
+      "article_content_length": 41,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 41 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_ade1c762",
+      "article_title": "粗糙波動率：一個美麗理論的 QLIKE 天花板挑戰",
+      "article_created": "",
+      "article_content_length": 66,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 66 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_505a4c62",
+      "article_title": "台股隔夜信號策略：美股 5 天動量如何創造 Sharpe 1.62",
+      "article_created": "",
+      "article_content_length": 60,
+      "issue": "taiwan_sharpe_stub",
+      "claim_in_article": "Claims Sharpe 1.62 but article is a stub (60 chars, no full content)",
+      "correction": "Article has no substantive content to support the claim. Reader cannot verify.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Either expand with full methodology/caveats or mark as superseded."
+    },
+    {
+      "article_id": "mile_505a4c62",
+      "article_title": "台股隔夜信號策略：美股 5 天動量如何創造 Sharpe 1.62",
+      "article_created": "",
+      "article_content_length": 60,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 60 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_cc6ea154",
+      "article_title": "★★★ 發現：美股隔夜信號交易台股——Sharpe 1.82, Harvey t=8.07",
+      "article_created": "2026-03-17T07:15:37.581284+00:00",
+      "article_content_length": 86,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 86 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_d4f484a6",
+      "article_title": "自我修正：偏態不能預測 VaR 方法——小樣本膨脹的教訓",
+      "article_created": "2026-03-17T07:06:59.951761+00:00",
+      "article_content_length": 81,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 81 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_30abbe03",
+      "article_title": "N62: Fine-grained threshold sensitivity — peak at 1.4 (Sharpe 0.914), robust [1.0, 1.6]",
+      "article_created": "2026-03-16T06:07:27.659044+00:00",
+      "article_content_length": 500,
+      "issue": "hybrid_vt_sharpe_2",
+      "claim_in_article": "Claims Hybrid VT Sharpe ~2.0, $1M→$17.4M",
+      "correction": "K281: Gross Sharpe inflated by daily rebalancing. Monthly wins net. CI [1.2, 2.8] is wide. Position as ceiling, not expected.",
+      "severity": "OUTDATED",
+      "has_disclaimer": true,
+      "recommendation": "Add prominent caveats: (1) this is GROSS of TX costs, (2) daily rebalancing, (3) CI is wide. Monthly VT is recommended path."
+    },
+    {
+      "article_id": "mile_8ae303ee",
+      "article_title": "系統測試：research_helper.py 一行記錄功能正常",
+      "article_created": "2026-03-16T04:20:29.091487+00:00",
+      "article_content_length": 95,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 95 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_40ca6953",
+      "article_title": "Hybrid VT 逐年 Sharpe 穩定性分析 (2015-2026)",
+      "article_created": "2026-03-16T03:35:32.683687+00:00",
+      "article_content_length": 1446,
+      "issue": "hybrid_vt_sharpe_2",
+      "claim_in_article": "Claims Hybrid VT Sharpe ~2.0, $1M→$17.4M",
+      "correction": "K281: Gross Sharpe inflated by daily rebalancing. Monthly wins net. CI [1.2, 2.8] is wide. Position as ceiling, not expected.",
+      "severity": "OUTDATED",
+      "has_disclaimer": true,
+      "recommendation": "Add prominent caveats: (1) this is GROSS of TX costs, (2) daily rebalancing, (3) CI is wide. Monthly VT is recommended path."
+    },
+    {
+      "article_id": "self_correction_20260316",
+      "article_title": "自我修正：快速取樣 ≠ 完整分析（U-shape 結論被推翻）",
+      "article_created": "2026-03-15T18:23:16.376814+00:00",
+      "article_content_length": 88,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 88 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "cross_period_validation_20260316",
+      "article_title": "完整 6 期 QLIKE 驗證：w=5000 贏 3/6，w=504 只贏 1/6",
+      "article_created": "2026-03-15T18:23:16.376798+00:00",
+      "article_content_length": 83,
+      "issue": "stub_content",
+      "claim_in_article": "Article has only 83 chars of content — reader cannot verify any claim from title",
+      "correction": "K262 identified 388 empty articles. Some were fixed but this one still has minimal content.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Expand content or add link to full research article."
+    },
+    {
+      "article_id": "mile_20632f25",
+      "article_title": "Hybrid VT 策略操作手冊：$1M → $17.4M，Sharpe ~2.0",
+      "article_created": "2026-03-15T15:59:23.571283+00:00",
+      "article_content_length": 1588,
+      "issue": "hybrid_vt_sharpe_2",
+      "claim_in_article": "Claims Hybrid VT Sharpe ~2.0, $1M→$17.4M",
+      "correction": "K281: Gross Sharpe inflated by daily rebalancing. Monthly wins net. CI [1.2, 2.8] is wide. Position as ceiling, not expected.",
+      "severity": "OUTDATED",
+      "has_disclaimer": true,
+      "recommendation": "Add prominent caveats: (1) this is GROSS of TX costs, (2) daily rebalancing, (3) CI is wide. Monthly VT is recommended path."
+    },
+    {
+      "article_id": "mile_fae0606d",
+      "article_title": "Hybrid VT 16 年完整回測：$1M→$17.4M，MaxDD 僅 -9.2%",
+      "article_created": "2026-03-15T15:58:13.070600+00:00",
+      "article_content_length": 577,
+      "issue": "hybrid_vt_sharpe_2",
+      "claim_in_article": "Claims Hybrid VT Sharpe ~2.0, $1M→$17.4M",
+      "correction": "K281: Gross Sharpe inflated by daily rebalancing. Monthly wins net. CI [1.2, 2.8] is wide. Position as ceiling, not expected.",
+      "severity": "OUTDATED",
+      "has_disclaimer": false,
+      "recommendation": "Add prominent caveats: (1) this is GROSS of TX costs, (2) daily rebalancing, (3) CI is wide. Monthly VT is recommended path."
+    }
+  ],
+  "valid_articles": [
+    {
+      "article_id": "mile_ee473d5a",
+      "article_title": "波動率擇時（VT）完全指南：15 個問題，48 個研究發現，一次講清楚",
+      "severity": "STILL_VALID",
+      "issue": "withdrawal_and_tsmom_corrected",
+      "detail": "This comprehensive FAQ correctly handles both corrections: (1) Mentions K85 8% claim then explicitly says K87 overturned it — 'VT 不能把安全提領率翻倍到 8%'; (2) Says VT alpha 32% from TSMOM (K49 figure, not K46's 91%). Properly cites corrections.",
+      "recommendation": "No action needed. This is the gold standard for self-correcting articles.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_ea84b5cf",
+      "article_title": "【已修正】VT 與 Trend Following 的初步發現（完整修正見 K53 文章）",
+      "severity": "STILL_VALID",
+      "issue": "VT_91pct_trend_following",
+      "detail": "Title clearly says '已修正' and '完整修正見 K53 文章'. Reader is directed to K53.",
+      "recommendation": "Adequate disclaimer. Consider adding a one-line summary of K53 correction in the body.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_c738dd9d",
+      "article_title": "VT 的雙重機制：Trend Following 只是配角，VIX 風控才是主角",
+      "severity": "STILL_VALID",
+      "issue": "VT_91pct_trend_following",
+      "detail": "Title frames TF as '配角' and VIX as '主角'. Content correctly says 32% Sharpe from TF, 96% MDD from VIX. Consistent with K49/K53.",
+      "recommendation": "No action needed. Conclusions align with corrected findings.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_9071e562",
+      "article_title": "K46->K53 方法論修正：VT 不是純 Trend Following，但 Leverage Effect 驅動 TSMOM 暴露（N=15 驗證）",
+      "severity": "STILL_VALID",
+      "issue": "VT_91pct_trend_following",
+      "detail": "This IS the correction article itself. Properly documents K46→K53 evolution with N=15 cross-asset validation.",
+      "recommendation": "No action needed. This is the authoritative correction.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_a777ed5b",
+      "article_title": "退休族的好消息：50/50+VT 讓你安心提領 5%",
+      "severity": "STILL_VALID",
+      "issue": "withdrawal_rate",
+      "detail": "Claims 5% withdrawal with 50/50+VT based on K222 (which correctly reverses K36). Uses 50/50 not SPY-only. Does NOT claim 8% doubling. Consistent with corrected findings.",
+      "recommendation": "No action needed. Correctly reflects K222 correction.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_5823d219",
+      "article_title": "我花了兩年研究投資策略，結論只有一行公式",
+      "severity": "STILL_VALID",
+      "issue": "daily_vs_monthly",
+      "detail": "Actually correctly recommends monthly rebalancing and explicitly states '每月調整一次比每天調整賺更多'. Monthly net Sharpe 0.792 > Daily 0.679.",
+      "recommendation": "No action needed. Correctly recommends monthly.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_02592b29",
+      "article_title": "我們花了 60 個實驗推薦波動率擇時，然後發現大多數人不該用",
+      "severity": "STILL_VALID",
+      "issue": "vt_self_correction",
+      "detail": "Excellent self-correction article. Honestly states VT is NOT for most retail investors (DCA beats VT for young investors). Consistent with K78/K222.",
+      "recommendation": "No action needed. Model self-correction article.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    }
+  ],
+  "manual_audit_detail": [
+    {
+      "article_id": "mile_d368b4da",
+      "article_title": "我們測試了 12 個交易策略，只有 1 個通過嚴格檢驗",
+      "issue": "TSMOM_passes_Harvey",
+      "severity": "MISLEADING",
+      "detail": "Claims 'only TSMOM passed Harvey t>3.0 among 12 strategies'. K255 showed TSMOM FAILS on full 21yr (t=2.34). Article has NO disclaimer.",
+      "recommendation": "URGENT: Update to say '0 out of 12 passed full-sample Harvey' or add K255 correction note.",
+      "content_accurate_at_time": true,
+      "now_incorrect": true
+    },
+    {
+      "article_id": "mile_281af193",
+      "article_title": "你以為你在做風控，其實你在做趨勢交易——而且做對了",
+      "severity": "MISLEADING",
+      "issue": "VT_91pct_trend_following",
+      "detail": "Says '91% of VT excess return explained by trend factor'. K53 showed only 5.2% alpha reduction (N=15). Article has NO K53 correction, still cites K46/K49.",
+      "recommendation": "URGENT: Replace 91% with corrected K53 figure (5.2% equity alpha reduction, 32% Sharpe contribution).",
+      "content_accurate_at_time": true,
+      "now_incorrect": true
+    },
+    {
+      "article_id": "mile_e8aefbf1",
+      "article_title": "【已修正】VT 退休模擬：提供更穩定的存活率，但 max safe WR 仍為 4%",
+      "severity": "MISLEADING",
+      "issue": "withdrawal_rate_doubles",
+      "detail": "Title says '已修正' but content STILL claims '12/VIX VT 將最大安全提領率從 4% 提升至 8%' in headline and conclusion. The '已修正' title contradicts the body which fully argues for 8%.",
+      "recommendation": "URGENT: Body text still actively argues for 8% doubling. Must rewrite body to match the corrected title.",
+      "content_accurate_at_time": false,
+      "now_incorrect": true
+    },
+    {
+      "article_id": "mile_5302df53",
+      "article_title": "【已修正】退休金策略：VT 提供更穩定的 4% 存活率，但不會翻倍",
+      "severity": "MISLEADING",
+      "issue": "withdrawal_rate_doubles",
+      "detail": "Title says '不會翻倍' but FIRST LINE of body says '波動率目標（VT）策略把退休安全提領率從 4% 翻倍到 8%'. Title and body directly contradict each other.",
+      "recommendation": "URGENT: First paragraph must be rewritten to match the corrected title. Currently the opening line says the opposite of the title.",
+      "content_accurate_at_time": false,
+      "now_incorrect": true
+    },
+    {
+      "article_id": "mile_ee473d5a",
+      "article_title": "波動率擇時（VT）完全指南：15 個問題，48 個研究發現，一次講清楚",
+      "severity": "STILL_VALID",
+      "issue": "withdrawal_and_tsmom_corrected",
+      "detail": "This comprehensive FAQ correctly handles both corrections: (1) Mentions K85 8% claim then explicitly says K87 overturned it — 'VT 不能把安全提領率翻倍到 8%'; (2) Says VT alpha 32% from TSMOM (K49 figure, not K46's 91%). Properly cites corrections.",
+      "recommendation": "No action needed. This is the gold standard for self-correcting articles.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_ea84b5cf",
+      "article_title": "【已修正】VT 與 Trend Following 的初步發現（完整修正見 K53 文章）",
+      "severity": "STILL_VALID",
+      "issue": "VT_91pct_trend_following",
+      "detail": "Title clearly says '已修正' and '完整修正見 K53 文章'. Reader is directed to K53.",
+      "recommendation": "Adequate disclaimer. Consider adding a one-line summary of K53 correction in the body.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_c738dd9d",
+      "article_title": "VT 的雙重機制：Trend Following 只是配角，VIX 風控才是主角",
+      "severity": "STILL_VALID",
+      "issue": "VT_91pct_trend_following",
+      "detail": "Title frames TF as '配角' and VIX as '主角'. Content correctly says 32% Sharpe from TF, 96% MDD from VIX. Consistent with K49/K53.",
+      "recommendation": "No action needed. Conclusions align with corrected findings.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_9071e562",
+      "article_title": "K46->K53 方法論修正：VT 不是純 Trend Following，但 Leverage Effect 驅動 TSMOM 暴露（N=15 驗證）",
+      "severity": "STILL_VALID",
+      "issue": "VT_91pct_trend_following",
+      "detail": "This IS the correction article itself. Properly documents K46→K53 evolution with N=15 cross-asset validation.",
+      "recommendation": "No action needed. This is the authoritative correction.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_a777ed5b",
+      "article_title": "退休族的好消息：50/50+VT 讓你安心提領 5%",
+      "severity": "STILL_VALID",
+      "issue": "withdrawal_rate",
+      "detail": "Claims 5% withdrawal with 50/50+VT based on K222 (which correctly reverses K36). Uses 50/50 not SPY-only. Does NOT claim 8% doubling. Consistent with corrected findings.",
+      "recommendation": "No action needed. Correctly reflects K222 correction.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_b232cdec",
+      "article_title": "台灣投資人的懶人策略：每天花 10 秒看美股，年化多賺 18%",
+      "severity": "OUTDATED",
+      "issue": "taiwan_sharpe_stub",
+      "detail": "Only 41 chars of content. Claims Sharpe 1.62 and '年化多賺 18%' in title but provides no methodology, caveats, or data source. Reader has no way to verify.",
+      "recommendation": "Expand with full methodology or mark as superseded by comprehensive Taiwan article.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_505a4c62",
+      "article_title": "台股隔夜信號策略：美股 5 天動量如何創造 Sharpe 1.62",
+      "severity": "OUTDATED",
+      "issue": "taiwan_sharpe_stub",
+      "detail": "Only 60 chars of content. Claims Sharpe 1.62 but no substantive article body.",
+      "recommendation": "Expand or merge into comprehensive Taiwan strategy article.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_20632f25",
+      "article_title": "Hybrid VT 策略操作手冊：$1M → $17.4M，Sharpe ~2.0",
+      "severity": "OUTDATED",
+      "issue": "hybrid_vt_sharpe_2",
+      "detail": "Claims Sharpe ~2.0 and $1M→$17.4M from daily Hybrid VT. K281 showed monthly wins net. CI [1.2, 2.8] is wide. Article mentions CI but headlines are misleading.",
+      "recommendation": "Add prominent note: this is GROSS of TX. Monthly VT is the recommended approach (K281). Sharpe 2.0 is ceiling not expectation.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_5823d219",
+      "article_title": "我花了兩年研究投資策略，結論只有一行公式",
+      "severity": "STILL_VALID",
+      "issue": "daily_vs_monthly",
+      "detail": "Actually correctly recommends monthly rebalancing and explicitly states '每月調整一次比每天調整賺更多'. Monthly net Sharpe 0.792 > Daily 0.679.",
+      "recommendation": "No action needed. Correctly recommends monthly.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    },
+    {
+      "article_id": "mile_02592b29",
+      "article_title": "我們花了 60 個實驗推薦波動率擇時，然後發現大多數人不該用",
+      "severity": "STILL_VALID",
+      "issue": "vt_self_correction",
+      "detail": "Excellent self-correction article. Honestly states VT is NOT for most retail investors (DCA beats VT for young investors). Consistent with K78/K222.",
+      "recommendation": "No action needed. Model self-correction article.",
+      "content_accurate_at_time": true,
+      "now_incorrect": false
+    }
+  ]
+}
