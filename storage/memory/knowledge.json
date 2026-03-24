@@ -11196,5 +11196,19 @@
       "Harvey-pass",
       "marginal-signal"
     ]
+  },
+  {
+    "id": "K1109",
+    "title": "K266: ★★ Amihud Validation FAILS — K265 was look-ahead artifact. QQQ/TLT REVERSED in pure rolling",
+    "content": "CRITICAL: K265 QQQ DM t=-3.66 was artifact of full-sample GARCH. Pure rolling: QQQ GARCH-X significantly WORSE (0-1/3 wins). TLT also reversed (1/3 wins). GLD best case but single-period artifact (P3 only). SPY 22d 3/3 wins but sign flips. QLIKE ceiling holds. Methodological lesson: always validate with pure rolling, not full-sample GARCH.",
+    "timestamp": "2026-03-24T19:12:57.113909",
+    "tags": [
+      "Amihud",
+      "validation",
+      "look-ahead-bias",
+      "QLIKE-ceiling",
+      "methodological-lesson",
+      "important"
+    ]
   }
 ]
