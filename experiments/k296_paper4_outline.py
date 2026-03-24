@@ -1,0 +1,632 @@
+"""
+K296: Paper 4 Feasibility — "VT as Retirement Insurance: A Bootstrap Analysis"
+================================================================================
+[提出: 用戶 (K274 延伸), 執行: Claude]
+
+SYNTHESIS experiment: No new data computation.
+Assembles paper outline from existing knowledge entries and assesses
+publication feasibility for a 4th standalone paper.
+
+Output: Structured JSON with paper outline, evidence inventory, gap analysis,
+target journals, and estimated effort.
+"""
+
+import json
+from datetime import datetime
+
+# ============================================================
+# PAPER 4 OUTLINE
+# ============================================================
+
+paper4_outline = {
+    "experiment_id": "K296",
+    "title": "Volatility Targeting as Retirement Insurance: Evidence from Bootstrap Analysis",
+    "attribution": "[提出: 用戶 (K274 延伸), 執行: Claude]",
+    "date": datetime.now().strftime("%Y-%m-%d"),
+    "type": "SYNTHESIS — paper feasibility assessment",
+
+    # ----------------------------------------------------------
+    # 1. ABSTRACT (draft ~200 words)
+    # ----------------------------------------------------------
+    "abstract_draft": (
+        "Sequence-of-returns risk is the dominant threat to retirement portfolio sustainability, "
+        "yet practical mitigation tools remain scarce. We show that a simple volatility-targeting "
+        "(VT) rule — allocating min(12/VIX, 1) to equities with the remainder in short-term "
+        "Treasuries — functions as effective drawdown insurance for retirement portfolios. "
+        "Using block-bootstrap Monte Carlo (10,000 paths, 1993–2024), we find that VT achieves "
+        "near-100% survival at the standard 4% withdrawal rate, compared to 96% for buy-and-hold. "
+        "However, contrary to initial claims, VT does not double the safe withdrawal rate; "
+        "cross-validated stress tests confirm the maximum safe rate remains approximately 4% "
+        "under adverse conditions. The value of VT is phase-dependent: in accumulation, VT "
+        "imposes a compounding insurance premium of ~1–4%/yr (K41/K91); in decumulation, VT "
+        "generates a 'sequencing bonus' by preventing forced selling at depressed prices. "
+        "We characterize VT as a synthetic protective put whose premium varies with the interest "
+        "rate regime (1.8%/yr in high-rate vs. 6.1%/yr in zero-rate environments). A behavioral "
+        "simulation shows VT reduces panic-selling probability by limiting drawdowns to ~15%, "
+        "providing protection even against the investor's own behavioral biases. We conclude "
+        "with a lifecycle decision matrix mapping six investor archetypes to optimal VT thresholds."
+    ),
+
+    # ----------------------------------------------------------
+    # 2. PAPER STRUCTURE
+    # ----------------------------------------------------------
+    "sections": {
+        "1_introduction": {
+            "title": "Introduction",
+            "pages_est": 3,
+            "content_outline": [
+                "Problem statement: sequence-of-returns risk as #1 retirement threat",
+                "The 4% rule (Bengen 1994) and its fragility under tail events",
+                "Gap in literature: VT studied for accumulation (Moreira & Muir 2017) "
+                "but NOT systematically for decumulation",
+                "Contribution 1: Bootstrap evidence that VT stabilizes (not doubles) SWR",
+                "Contribution 2: Phase-dependent VT value (accumulation vs decumulation)",
+                "Contribution 3: Insurance pricing framework with interest-rate sensitivity",
+                "Contribution 4: Behavioral protection quantification",
+                "Contribution 5: Lifecycle decision matrix for practitioner use",
+            ],
+            "key_references": [
+                "Bengen (1994) — 4% rule",
+                "Moreira & Muir (2017) — Volatility-managed portfolios",
+                "Cederburg et al. (2020 JFE) — VT skepticism",
+                "Pfau (2012) — Retirement withdrawal research",
+                "Kitces & Pfau (2015) — Rising equity glide path",
+                "Hood & Raughtigan (2024) — VT = trend following",
+            ],
+        },
+
+        "2_literature": {
+            "title": "Literature Review",
+            "pages_est": 3,
+            "content_outline": [
+                "2.1 Retirement portfolio theory: safe withdrawal rates, sequence risk",
+                "2.2 Volatility targeting: Moreira & Muir (2017), Bozovic (2024 IRFA) "
+                "VIX-managed > realized-vol-managed",
+                "2.3 VT mechanism: trend-following decomposition (Hood & Raughtigan 2024) — "
+                "our K46 confirms 91% of equity VT alpha = TSMOM exposure",
+                "2.4 VT insurance pricing: the ~1-4%/yr premium (our K41/K91)",
+                "2.5 Behavioral finance and retirement: panic selling, regret aversion "
+                "(Kunreuther 1996 low-probability insurance adoption)",
+                "2.6 Gap: no systematic study of VT in decumulation phase "
+                "with interest-rate-conditioned insurance pricing",
+            ],
+        },
+
+        "3_methodology": {
+            "title": "Methodology",
+            "pages_est": 4,
+            "content_outline": [
+                "3.1 VT Rule: w_t = min(K/VIX_t, 1), equity + SHY cash",
+                "  - Lagged implementation: VIX_t determines weight for r_{t+1}",
+                "  - Same-day bias correction (our K239/Q10: inflates Sharpe by ~1.0)",
+                "  - Threshold K=12 not cherry-picked (K89: all K=6-20 effective)",
+                "3.2 Portfolio: 50/50 SPY/GLD + 12/VIX (our Q21 optimal retail)",
+                "  - GLD diversification value: corr=0.058, tail dep=0.0 (Q21)",
+                "3.3 Bootstrap design:",
+                "  - Block bootstrap, block=12 months (preserve annual structure)",
+                "  - 10,000 paths, 30-year retirement horizon",
+                "  - Inflation-adjusted withdrawals",
+                "  - Multiple block sizes for robustness (K87 lesson)",
+                "3.4 Metrics: survival rate, terminal wealth distribution, max SWR",
+                "3.5 Cross-validation: 5 block sizes, 7 stress tests, "
+                "historical rolling windows (K87 protocol)",
+                "3.6 Interest-rate conditioning: IRX regime stratification",
+            ],
+        },
+
+        "4_results": {
+            "title": "Results",
+            "pages_est": 8,
+            "content_outline": [
+                "4.1 Baseline retirement simulation (K85 corrected by K87)",
+                "  - 4% SWR: B&H SPY 96.3% survival, VT ~100%",
+                "  - BUT max safe SWR = 4% (not 8%) under stress tests",
+                "  - VT provides stability, not higher withdrawal capacity",
+                "",
+                "4.2 Phase-dependent VT value (K39 lifecycle paradox + K85 reversal)",
+                "  - Accumulation: VT harmful for DCA (-55.9% terminal wealth)",
+                "  - DCA + VT interaction: DCA converts drawdowns to buying opportunities",
+                "  - Decumulation: VT beneficial — sequencing bonus",
+                "  - Optimal VT threshold by phase: young=34/VIX, pre-retirement=12/VIX (K59/K78)",
+                "",
+                "4.3 Insurance pricing framework (K41, K62, K91)",
+                "  - 76-year average: ~1%/yr (not 4%/yr — K91 corrects K41)",
+                "  - VIX era (post-1990): 2-4%/yr, highly variable (std=2.54%)",
+                "  - Interest-rate sensitivity: high-rate 1.8%/yr, zero-rate 6.1%/yr (K62)",
+                "  - Current high-rate environment = VT historically cheapest",
+                "  - Cost per 1pp MDD reduction: 12/VIX 2.5%, 24/VIX 1.2%, 30/VIX 0.7% (K70)",
+                "",
+                "4.4 Crisis protection evidence (K9, K10, K134, K166)",
+                "  - 32-year evidence: 12/VIX wins 5/6 eras Sharpe, 6/6 eras MDD",
+                "  - GFC deep dive: $1M → B&H bottomed $459K, 50/50+VT $912K (K10)",
+                "  - 8/10 crises protected, avg +9.2pp (K144)",
+                "  - Crisis-type-agnostic protection by design (K166)",
+                "",
+                "4.5 Behavioral protection (K28, K97, K118)",
+                "  - Panic seller loses 40% wealth vs B&H (K28)",
+                "  - VT limits drawdowns to ~15% → reduces panic trigger",
+                "  - VT robust to human imperfection: all biases combined still +0.166 Sharpe (K97)",
+                "  - Procrastination is worst enemy (-0.110 Sharpe, K97) → automate",
+                "  - VT structurally equivalent to disaster insurance (Kunreuther 1996) → "
+                "same low-adoption mechanism (K118)",
+                "",
+                "4.6 Lifecycle decision matrix (K78)",
+                "  - 6 investor types, 4 optimal VT thresholds",
+                "  - Type A (young DCA): no VT needed",
+                "  - Type B (mid-career DCA): 30/VIX mild VT",
+                "  - Type C (pre-retirement lump): 12/VIX full VT",
+                "  - Type D (retiree withdrawing 4%): 12/VIX, $1.67M 30yr terminal",
+                "  - Type E (aggressive growth): no VT, accept MDD",
+                "  - Type F (ultra-conservative): 8/VIX, MDD -7.3%",
+            ],
+        },
+
+        "5_discussion": {
+            "title": "Discussion",
+            "pages_est": 3,
+            "content_outline": [
+                "5.1 VT as synthetic put: symmetric capture ratios (K168) contradict "
+                "classical put asymmetry — VT prevents compounding of small losses, "
+                "not tail truncation",
+                "5.2 Why VT looks bad 80% of the time (K74 drawdown anatomy)",
+                "  - VT underperforms in 80.3% of rolling quarters",
+                "  - Insurance fee = feature, not bug",
+                "  - Recovery paradox: shallower but slower recovery (K85b/N85)",
+                "5.3 VT crowding risk (K94 agent-based simulation)",
+                "  - VT never self-destructs — monthly rebalancing is natural circuit breaker",
+                "  - Individual protection persists even at 80% adoption",
+                "  - But market quality degrades at high adoption",
+                "5.4 Interest rate regime as insurance price driver",
+                "  - 2023-2026 high-rate = historically cheapest VT",
+                "  - Policy implication: VT more attractive when rates high",
+                "5.5 Limitations",
+                "  - US-centric (VIX = equity-specific gauge, K170)",
+                "  - Bootstrap preserves in-sample structure",
+                "  - Transaction costs assumed 0.05%/trade",
+                "  - No taxes modeled (though K86 shows MDD unaffected)",
+                "  - VIX data only from 1990; pre-1990 uses realized vol proxy",
+            ],
+        },
+
+        "6_conclusion": {
+            "title": "Conclusion",
+            "pages_est": 2,
+            "content_outline": [
+                "VT is effective retirement insurance — stabilizes 4% rule survival",
+                "Phase-dependent recommendation: no VT for young DCA, full VT for retirees",
+                "Insurance pricing varies 1.8-6.1%/yr with interest rate regime",
+                "Behavioral protection may be VT's most important value",
+                "Practical implementation: 10 seconds to check VIX, 1 monthly trade",
+                "The pension industry should consider VT as standard risk management",
+            ],
+        },
+    },
+
+    # ----------------------------------------------------------
+    # 3. EVIDENCE INVENTORY
+    # ----------------------------------------------------------
+    "evidence_inventory": {
+        "retirement_simulation": {
+            "primary": "K85 — 10,000 MC bootstrap retirement simulation",
+            "validation": "K87 — Cross-validated stress test (overturned K85 SWR claim)",
+            "status": "COMPLETE — corrected result is robust",
+            "key_numbers": {
+                "bh_4pct_survival": "96.3%",
+                "vt_4pct_survival": "~100%",
+                "vt_max_safe_swr": "4% (NOT 8% — K87 correction)",
+                "vt_median_30yr_terminal": "$25.27M (2.1x B&H)",
+                "worst_case_2000_retire": "B&H $500K vs VT $5.67M (11.2x)",
+            },
+            "gap": "Need to re-run with 50/50 SPY/GLD (original was SPY-only)",
+        },
+
+        "lifecycle_paradox": {
+            "primary": "K39 — DCA+VT accumulation penalty (-55.9%)",
+            "extensions": ["K59 — DCA optimal threshold (24/VIX)", "K70 — Defense layers"],
+            "status": "COMPLETE",
+            "key_insight": "Accumulation needs vol (DCA buys cheap); "
+                          "Decumulation needs protection (avoid forced selling at lows)",
+        },
+
+        "insurance_pricing": {
+            "primary": "K41 — No crossover point, ~4%/yr premium",
+            "revision": "K91 — 76-year avg only ~1%/yr; 4%/yr is modern era specific",
+            "interest_rate": "K62 — High-rate 1.8%/yr vs zero-rate 6.1%/yr",
+            "defense_layers": "K70 — Cost per 1pp MDD by threshold",
+            "international": "K68 — 13/13 markets MDD protected, confirms K41",
+            "status": "COMPLETE — highly robust with K91 76-year revision",
+        },
+
+        "crisis_protection": {
+            "primary": "K9 — 32-year ultra-long-term (first significant Sharpe p=0.027)",
+            "gfc_deep": "K10 — $1M to $459K (B&H) vs $912K (50/50+VT)",
+            "crisis_ranking": "K144 — 8/10 crises protected, avg +9.2pp",
+            "crisis_taxonomy": "K166 — Crisis-type-agnostic by design",
+            "real_time": "K134/K148 — 2026 Hormuz crisis validation",
+            "status": "COMPLETE — very strong evidence base",
+        },
+
+        "behavioral_protection": {
+            "primary": "K28 — 6 archetype simulation (panic seller -40%)",
+            "discipline": "K97 — All biases combined still +0.166 Sharpe vs B&H",
+            "adoption_barrier": "K118 — Why investors reject VT (= disaster insurance problem)",
+            "crra_utility": "N115 — gamma>=4 VT dominates; gamma=10 BH CE=-3.21%",
+            "status": "COMPLETE — novel contribution for financial planning audience",
+        },
+
+        "investor_typology": {
+            "primary": "K78 — 6 investor types × 4 optimal VT thresholds",
+            "dca_threshold": "K59 — Young = 34/VIX, retiring = 6-8/VIX",
+            "status": "COMPLETE — strong practical contribution",
+        },
+
+        "mechanism_understanding": {
+            "trend_following": "K46 — 91% of equity VT alpha = TSMOM",
+            "capture_ratios": "K168 — Symmetric 57.5%/57.2%, NOT asymmetric protection",
+            "drawdown_anatomy": "K74 — VT underperforms 80.3% of quarters (insurance fee)",
+            "crowding": "K94 — Agent-based: VT never self-destructs",
+            "sufficient_statistic": "VIX confirmed 24+ times as sufficient statistic",
+            "status": "COMPLETE",
+        },
+
+        "robustness": {
+            "ultra_long": "K9 — 32 years, first significant Sharpe (p=0.027)",
+            "76_year": "K91 — 8/8 decades MDD protected",
+            "cross_market": "K68 — 13/13 international markets",
+            "threshold_robust": "K89 — All K=6-20 effective (not cherry-picked)",
+            "timing_bias_corrected": "Q10 — Lagged weights throughout",
+            "0dte_safe": "K38 — 0DTE not breaking VT",
+            "status": "COMPLETE — very thorough robustness",
+        },
+    },
+
+    # ----------------------------------------------------------
+    # 4. GAP ANALYSIS
+    # ----------------------------------------------------------
+    "gaps_to_fill": [
+        {
+            "id": "GAP1",
+            "description": "Re-run retirement MC with 50/50 SPY/GLD (K85 was SPY-only)",
+            "priority": "HIGH",
+            "effort": "2 hours — modify existing bootstrap code",
+            "impact": "Core result. 50/50 is our recommended portfolio.",
+        },
+        {
+            "id": "GAP2",
+            "description": "Formal comparison with existing retirement strategies "
+                          "(target-date funds, rising equity glide path a la Kitces & Pfau 2015)",
+            "priority": "HIGH",
+            "effort": "4 hours — implement 3-4 benchmark strategies + bootstrap",
+            "impact": "Reviewers will ask 'why not just use a target-date fund?'",
+        },
+        {
+            "id": "GAP3",
+            "description": "Inflation-regime conditioning of retirement results",
+            "priority": "MEDIUM",
+            "effort": "3 hours — stratify by CPI regime",
+            "impact": "2022-style stagflation is a relevant concern for retirees",
+        },
+        {
+            "id": "GAP4",
+            "description": "Sensitivity to bootstrap block size (K87 showed this matters)",
+            "priority": "HIGH",
+            "effort": "2 hours — already done in K87, need formal table",
+            "impact": "K87 lesson: block=12m too generous; need 3-5 block sizes",
+        },
+        {
+            "id": "GAP5",
+            "description": "Formal 'synthetic put' payoff diagram with VT vs actual put costs "
+                          "(extend K127 insurance pricing comparison)",
+            "priority": "MEDIUM",
+            "effort": "3 hours — extract from K127 vt_insurance_pricing.py",
+            "impact": "Compelling figure for practitioner audience",
+        },
+        {
+            "id": "GAP6",
+            "description": "Tax-adjusted retirement simulation (K86 shows taxes costly "
+                          "but MDD unaffected; formal table needed)",
+            "priority": "LOW",
+            "effort": "2 hours — extend MC with tax drag parameter",
+            "impact": "Nice to have; K86 already covers the key point",
+        },
+        {
+            "id": "GAP7",
+            "description": "International retirement application (Japan GPIF, Australia Super)",
+            "priority": "LOW",
+            "effort": "6 hours — new data + bootstrap for 2-3 markets",
+            "impact": "Broadens appeal but not essential for first submission",
+        },
+    ],
+
+    # ----------------------------------------------------------
+    # 5. TARGET JOURNALS
+    # ----------------------------------------------------------
+    "target_journals": [
+        {
+            "name": "Financial Planning Review",
+            "tier": "A-/B+",
+            "fit": "EXCELLENT — practitioner-oriented, lifecycle focus, "
+                  "accepts simulation-based evidence",
+            "word_limit": "8,000-10,000",
+            "review_time": "3-4 months",
+            "notes": "Wiley journal, relatively new (est. 2018), growing impact. "
+                    "Perfect audience for lifecycle VT decision matrix.",
+        },
+        {
+            "name": "Journal of Financial Planning",
+            "tier": "B+",
+            "fit": "VERY GOOD — CFP audience, safe withdrawal rate is core topic",
+            "word_limit": "5,000-7,000 (shorter)",
+            "review_time": "2-3 months",
+            "notes": "FPA journal. Highly read by practitioners. "
+                    "Less rigorous statistics expected, more practical advice.",
+        },
+        {
+            "name": "Journal of Retirement",
+            "tier": "B+",
+            "fit": "VERY GOOD — exact topic match (retirement + portfolio strategy)",
+            "word_limit": "6,000-8,000",
+            "review_time": "3-4 months",
+            "notes": "PM-Research (CFA Institute). Accepts both academic and practitioner "
+                    "perspectives. Sequence-of-returns risk is hot topic.",
+        },
+        {
+            "name": "Financial Analysts Journal",
+            "tier": "A",
+            "fit": "GOOD — if framed as investment management innovation",
+            "word_limit": "6,000-8,000",
+            "review_time": "4-6 months",
+            "notes": "CFA Institute flagship. Higher bar but higher impact. "
+                    "Would need more formal statistical framework.",
+        },
+        {
+            "name": "Journal of Portfolio Management",
+            "tier": "A-",
+            "fit": "GOOD — portfolio management focus, accepts practitioner innovation",
+            "word_limit": "6,000-8,000",
+            "review_time": "3-5 months",
+            "notes": "PM-Research. Strong for the insurance pricing angle.",
+        },
+    ],
+
+    # ----------------------------------------------------------
+    # 6. DIFFERENTIATION FROM EXISTING PAPERS
+    # ----------------------------------------------------------
+    "differentiation": {
+        "vs_paper1_leverage_direction": (
+            "Paper 1 focuses on vol model selection (GARCH variants, leverage effect). "
+            "Paper 4 uses VT as a given and studies its lifecycle retirement application. "
+            "Zero overlap in methodology or contribution."
+        ),
+        "vs_paper2_taiwan_vt": (
+            "Paper 2 is about Taiwan-specific VT (cross-market, timezone arbitrage). "
+            "Paper 4 is US-focused retirement. Complementary not overlapping."
+        ),
+        "vs_paper3_vt_trend_following": (
+            "Paper 3 decomposes VT alpha into TSMOM + MDD channels. "
+            "Paper 4 USES that decomposition as motivation (Section 2.3) but contributes "
+            "the retirement/lifecycle/behavioral dimensions. Builds on Paper 3."
+        ),
+        "vs_moreira_muir_2017": (
+            "M&M study VT for accumulation-phase wealth maximization. "
+            "We study VT for decumulation-phase ruin prevention — fundamentally different "
+            "objective. Our K39 lifecycle paradox shows accumulation VT is suboptimal."
+        ),
+        "vs_cederburg_2020": (
+            "Cederburg et al. find VT does not improve long-run wealth. We AGREE for "
+            "accumulation (K39). But we show decumulation is different: sequencing bonus "
+            "reverses the sign of VT value. This resolves their critique."
+        ),
+    },
+
+    # ----------------------------------------------------------
+    # 7. ESTIMATED EFFORT
+    # ----------------------------------------------------------
+    "effort_estimate": {
+        "gap_filling_experiments": "15-20 hours (GAP1-GAP5)",
+        "writing_first_draft": "20-25 hours",
+        "tables_and_figures": "8-10 hours (est. 4-5 tables, 3-4 figures)",
+        "latex_formatting": "5 hours",
+        "ai_review_rounds": "10 hours (2 rounds Codex + Gemini)",
+        "revision_after_review": "10-15 hours",
+        "total_to_submission": "70-85 hours (~2-3 weeks at research pace)",
+        "estimated_pages": "25-30 pages (double-spaced)",
+        "estimated_tables": 5,
+        "estimated_figures": 4,
+    },
+
+    # ----------------------------------------------------------
+    # 8. PROPOSED TABLES AND FIGURES
+    # ----------------------------------------------------------
+    "tables": [
+        {
+            "id": "T1",
+            "title": "Retirement Simulation Results: Survival Rates by Strategy and Withdrawal Rate",
+            "content": "4 strategies (B&H SPY, 12/VIX SPY, 50/50 B&H, 50/50+VT) × "
+                      "5 withdrawal rates (3-7%) × survival rate + median terminal wealth",
+            "source": "K85/K87 (needs GAP1 for 50/50 version)",
+        },
+        {
+            "id": "T2",
+            "title": "VT Insurance Pricing Across Interest Rate Regimes",
+            "content": "3 rate regimes × premium cost × MDD benefit × cost per 1pp MDD",
+            "source": "K62 + K70",
+        },
+        {
+            "id": "T3",
+            "title": "Lifecycle Decision Matrix: Optimal VT Threshold by Investor Type",
+            "content": "6 investor types × allocation × VT threshold × terminal wealth × MDD",
+            "source": "K78",
+        },
+        {
+            "id": "T4",
+            "title": "Behavioral Bias Impact on VT Performance",
+            "content": "5 behavioral archetypes × Sharpe × MDD × wealth loss vs perfect",
+            "source": "K28/K97",
+        },
+        {
+            "id": "T5",
+            "title": "Crisis Protection Track Record (8+ Events, 32 Years)",
+            "content": "10 crises × B&H return × VT return × protection magnitude",
+            "source": "K9/K10/K144",
+        },
+    ],
+
+    "figures": [
+        {
+            "id": "F1",
+            "title": "Terminal Wealth Distribution: B&H vs VT at 4% Withdrawal",
+            "type": "Dual histogram / violin plot",
+            "source": "K85/K87 bootstrap output",
+        },
+        {
+            "id": "F2",
+            "title": "VT Insurance Premium by Interest Rate Environment",
+            "type": "Scatter plot with regression: IRX vs VT cost",
+            "source": "K62",
+        },
+        {
+            "id": "F3",
+            "title": "Lifecycle VT Value: Accumulation vs Decumulation Phase",
+            "type": "Side-by-side: wealth path accumulation (VT hurts) vs "
+                   "decumulation (VT helps)",
+            "source": "K39 + K85",
+        },
+        {
+            "id": "F4",
+            "title": "Defense Layer Decomposition for DCA + 50/50 + VT",
+            "type": "Stacked bar: MDD reduction by source",
+            "source": "K70",
+        },
+    ],
+
+    # ----------------------------------------------------------
+    # 9. FEASIBILITY ASSESSMENT
+    # ----------------------------------------------------------
+    "feasibility": {
+        "overall_viability": "75-80%",
+        "reasoning": [
+            "STRONG evidence base: 15+ directly relevant experiments already completed",
+            "STRONG practical contribution: lifecycle decision matrix is novel",
+            "STRONG self-correction: K87 overturning K85 shows intellectual honesty",
+            "STRONG differentiation: resolves Cederburg (2020) critique for decumulation",
+            "MODERATE novelty: VT for retirement is not entirely new, but the lifecycle "
+            "paradox + insurance pricing + behavioral integration is novel packaging",
+            "MODERATE gap-filling needed: 15-20 hours of additional experiments (GAP1-5)",
+            "RISK: behavioral simulation is model-dependent (archetype assumptions)",
+            "RISK: bootstrap may not capture true tail risk (as K87 demonstrated)",
+        ],
+        "key_selling_points": [
+            "1. Lifecycle Paradox: VT harmful in accumulation, beneficial in decumulation — "
+            "this is a counterintuitive, publishable insight",
+            "2. Insurance Pricing: interest-rate-conditioned premium is novel",
+            "3. K87 Self-Correction: honest reporting of overturned results builds credibility",
+            "4. Behavioral Angle: connects VT to disaster insurance literature",
+            "5. Practitioner Utility: decision matrix is directly actionable",
+        ],
+        "weaknesses": [
+            "1. VT for retirement is not virgin territory (Pfau, Estrada have touched it)",
+            "2. 12/VIX is specific to US — limits generalizability",
+            "3. Bootstrap preserves in-sample distributions — no out-of-distribution stress",
+            "4. No formal comparison with target-date fund industry standard (GAP2)",
+            "5. The 'VT doesn't double SWR' finding (K87) weakens the headline result",
+        ],
+        "recommendation": (
+            "PROCEED. The paper has sufficient evidence for a practitioner-oriented journal "
+            "(Financial Planning Review or Journal of Retirement). The lifecycle paradox "
+            "and interest-rate-conditioned insurance pricing are genuinely novel angles. "
+            "Fill GAP1 and GAP2 before writing. Frame around 'VT as retirement insurance' "
+            "not 'VT doubles your withdrawal rate' (the corrected, honest framing). "
+            "The K87 self-correction is actually a strength — shows methodological rigor."
+        ),
+    },
+
+    # ----------------------------------------------------------
+    # 10. WRITING SEQUENCE
+    # ----------------------------------------------------------
+    "writing_sequence": [
+        "1. Fill GAP1: 50/50 SPY/GLD retirement bootstrap (2 hours)",
+        "2. Fill GAP2: Target-date fund benchmark comparison (4 hours)",
+        "3. Fill GAP4: Block-size sensitivity table (2 hours)",
+        "4. Write Section 3 (Methodology) — cleanest, most self-contained",
+        "5. Write Section 4 (Results) — largest section, build around 5 tables",
+        "6. Write Section 2 (Literature) — need literature search for retirement VT",
+        "7. Write Section 5 (Discussion) — synthesize and frame limitations",
+        "8. Write Section 1 (Introduction) — write last for sharpest framing",
+        "9. Write Abstract — absolutely last",
+        "10. Codex review → Gemini review → revise → compile",
+    ],
+}
+
+# ============================================================
+# OUTPUT
+# ============================================================
+
+def main():
+    print("=" * 70)
+    print("K296: Paper 4 Feasibility Assessment")
+    print("=" * 70)
+    print()
+
+    print(f"Title: {paper4_outline['title']}")
+    print(f"Overall Viability: {paper4_outline['feasibility']['overall_viability']}")
+    print()
+
+    print("--- PAPER STRUCTURE ---")
+    total_pages = 0
+    for sec_key, sec in paper4_outline["sections"].items():
+        pages = sec["pages_est"]
+        total_pages += pages
+        print(f"  {sec['title']}: ~{pages} pages")
+    print(f"  TOTAL: ~{total_pages} pages (body) + references/appendix = ~{total_pages + 5} pages")
+    print()
+
+    print("--- EVIDENCE STATUS ---")
+    for area, info in paper4_outline["evidence_inventory"].items():
+        status = info["status"]
+        marker = "OK" if "COMPLETE" in status else "INCOMPLETE"
+        print(f"  [{marker}] {area}: {status}")
+    print()
+
+    print("--- GAPS TO FILL ---")
+    total_gap_hours = 0
+    for gap in paper4_outline["gaps_to_fill"]:
+        print(f"  [{gap['priority']}] {gap['id']}: {gap['description']}")
+        print(f"         Effort: {gap['effort']}")
+    print()
+
+    print("--- TARGET JOURNALS ---")
+    for j in paper4_outline["target_journals"]:
+        print(f"  {j['name']} [{j['tier']}] — Fit: {j['fit'][:50]}...")
+    print()
+
+    print("--- EFFORT ESTIMATE ---")
+    for k, v in paper4_outline["effort_estimate"].items():
+        print(f"  {k}: {v}")
+    print()
+
+    print("--- KEY SELLING POINTS ---")
+    for pt in paper4_outline["feasibility"]["key_selling_points"]:
+        print(f"  {pt}")
+    print()
+
+    print("--- WEAKNESSES ---")
+    for w in paper4_outline["feasibility"]["weaknesses"]:
+        print(f"  {w}")
+    print()
+
+    print("--- RECOMMENDATION ---")
+    print(f"  {paper4_outline['feasibility']['recommendation']}")
+    print()
+
+    # Save structured JSON
+    output_path = "experiments/k296_paper4_outline.json"
+    with open(output_path, "w") as f:
+        json.dump(paper4_outline, f, indent=2, ensure_ascii=False, default=str)
+    print(f"Structured output saved to: {output_path}")
+
+    return paper4_outline
+
+
+if __name__ == "__main__":
+    main()
