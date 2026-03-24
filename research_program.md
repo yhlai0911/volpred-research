@@ -633,6 +633,9 @@
 - [x] K192: Google Trends（跳躍式探索）— IS composite r=0.576 但 OOS **完全失敗**（-1.5% to -97.7% MSE）。教科書級 overfitting。Search = noisy VIX proxy
 - [x] K193: ★★ Dynamic Copula Tail Dependence — **SPY-GLD TDA partial r|VIX=0.179 (t=12.93, PASSES Harvey!)**。GARCH-X +12.1%。但 pair-dependent（SPY-TLT NS）。First partial crack in VIX sufficient
 - [x] K194: Fractional Differentiation (de Prado 2018) — NULL。log(RV) 已 stationary（ADF p<0.001），FFD 解決不存在的問題。0/5 DM sig vs GJR
+- [x] K195: ★★★ Copula TDA Multi-Pair — **26/66 pairs pass Bonferroni OOS**！Genuine VIX crack。Top: EEM_XLK (t=-12.27), SPY_EEM (t=-9.65)。但 SPY-GLD FLIPS sign OOS。GARCH-X FAILS (DM NS)。Statistical detection ≠ forecasting improvement
+- [x] K196: 5-min RV Pilot（47 天 PRELIMINARY）— RV AC(1)=0.414 vs c2c AC(1)=-0.118。c2c 本質不可預測=GARCH ceiling 根因。BPV 最可預測。需 252+ 天
+- [x] K197: ★ Persistence Break — 4/5 CUSUM 顯著但 0/5 adaptive GARCH 改善。TLT/BTC partial r★（無 IV proxy 資產）。Gamma trending UP（leverage 增強中）
 
 ### Session 2026-03-24 進度
 **13 experiments (K183-K194 + K149)**：5 null, 3 partial-positive (★), 3 ★★, 1 overfitting, 1 paper robustness

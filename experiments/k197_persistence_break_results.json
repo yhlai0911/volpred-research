@@ -1,0 +1,709 @@
+{
+  "experiment": "K197",
+  "title": "GARCH Persistence Break Detection and Volatility Regime Change",
+  "timestamp": "2026-03-24T14:08:12.728826",
+  "data_source": "yfinance (Yahoo Finance)",
+  "assets": [
+    "SPY",
+    "QQQ",
+    "GLD",
+    "TLT",
+    "BTC-USD"
+  ],
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "methodology": {
+    "rolling_window": 500,
+    "rolling_step": 22,
+    "fixed_window": 2000,
+    "adaptive_short_window": 252,
+    "adaptive_trigger": "persistence break within last 252 trading days",
+    "break_detection": [
+      "CUSUM test",
+      "Binary segmentation (t-test, threshold=2.0)"
+    ]
+  },
+  "cusum_results": {
+    "SPY": {
+      "max_cusum": 3.4593779405269465,
+      "p_value": 8.060630124536029e-11,
+      "break_date": "2018-11-19",
+      "significant": "True"
+    },
+    "QQQ": {
+      "max_cusum": 3.122500446320843,
+      "p_value": 6.796412795792516e-09,
+      "break_date": "2011-03-14",
+      "significant": "True"
+    },
+    "GLD": {
+      "max_cusum": 2.566812544531661,
+      "p_value": 3.787114793565406e-06,
+      "break_date": "2019-01-10",
+      "significant": "True"
+    },
+    "TLT": {
+      "max_cusum": 1.2507454842680483,
+      "p_value": 0.08754683669848173,
+      "break_date": "2006-07-26",
+      "significant": "False"
+    },
+    "BTC-USD": {
+      "max_cusum": 3.9883605392999484,
+      "p_value": 3.050479830090106e-14,
+      "break_date": "2022-10-08",
+      "significant": "True"
+    }
+  },
+  "changepoint_results": {
+    "SPY": [
+      {
+        "date": "2007-12-18",
+        "index": 34,
+        "t_stat": -9.05,
+        "p_value": 0.0,
+        "mean_before": 0.9291,
+        "mean_after": 0.9645,
+        "delta": 0.0354
+      },
+      {
+        "date": "2011-04-13",
+        "index": 72,
+        "t_stat": 6.147,
+        "p_value": 0.0,
+        "mean_before": 0.9578,
+        "mean_after": 0.96,
+        "delta": 0.0022
+      },
+      {
+        "date": "2011-12-22",
+        "index": 80,
+        "t_stat": -4.079,
+        "p_value": 0.0012,
+        "mean_before": 0.9584,
+        "mean_after": 0.9598,
+        "delta": 0.0013
+      },
+      {
+        "date": "2013-11-26",
+        "index": 102,
+        "t_stat": 7.907,
+        "p_value": 0.0,
+        "mean_before": 0.9619,
+        "mean_after": 0.9572,
+        "delta": -0.0047
+      },
+      {
+        "date": "2019-03-29",
+        "index": 163,
+        "t_stat": -11.561,
+        "p_value": 0.0,
+        "mean_before": 0.9484,
+        "mean_after": 0.9862,
+        "delta": 0.0378
+      }
+    ],
+    "QQQ": [
+      {
+        "date": "2005-11-10",
+        "index": 10,
+        "t_stat": 16.547,
+        "p_value": 0.0,
+        "mean_before": 0.9962,
+        "mean_after": 0.9632,
+        "delta": -0.033
+      },
+      {
+        "date": "2011-03-14",
+        "index": 71,
+        "t_stat": 12.151,
+        "p_value": 0.0,
+        "mean_before": 0.9831,
+        "mean_after": 0.9563,
+        "delta": -0.0268
+      },
+      {
+        "date": "2013-10-25",
+        "index": 101,
+        "t_stat": 11.355,
+        "p_value": 0.0,
+        "mean_before": 0.9774,
+        "mean_after": 0.9545,
+        "delta": -0.023
+      },
+      {
+        "date": "2020-03-16",
+        "index": 174,
+        "t_stat": -11.223,
+        "p_value": 0.0,
+        "mean_before": 0.9581,
+        "mean_after": 0.9852,
+        "delta": 0.0271
+      },
+      {
+        "date": "2022-03-17",
+        "index": 197,
+        "t_stat": -12.735,
+        "p_value": 0.0,
+        "mean_before": 0.9604,
+        "mean_after": 0.9903,
+        "delta": 0.0299
+      }
+    ],
+    "GLD": [
+      {
+        "date": "2009-04-29",
+        "index": 28,
+        "t_stat": 7.214,
+        "p_value": 0.0,
+        "mean_before": 0.9994,
+        "mean_after": 0.9297,
+        "delta": -0.0697
+      },
+      {
+        "date": "2013-05-07",
+        "index": 74,
+        "t_stat": 6.765,
+        "p_value": 0.0,
+        "mean_before": 0.9952,
+        "mean_after": 0.9082,
+        "delta": -0.087
+      },
+      {
+        "date": "2014-02-19",
+        "index": 83,
+        "t_stat": -4.455,
+        "p_value": 0.0001,
+        "mean_before": 0.9793,
+        "mean_after": 0.9124,
+        "delta": -0.0669
+      },
+      {
+        "date": "2022-08-10",
+        "index": 180,
+        "t_stat": 4.615,
+        "p_value": 0.0,
+        "mean_before": 0.9592,
+        "mean_after": 0.8099,
+        "delta": -0.1493
+      },
+      {
+        "date": "2024-04-10",
+        "index": 199,
+        "t_stat": -4.399,
+        "p_value": 0.0002,
+        "mean_before": 0.9404,
+        "mean_after": 0.9108,
+        "delta": -0.0296
+      }
+    ],
+    "TLT": [
+      {
+        "date": "2005-10-11",
+        "index": 9,
+        "t_stat": 5.162,
+        "p_value": 0.0,
+        "mean_before": 0.9865,
+        "mean_after": 0.912,
+        "delta": -0.0745
+      },
+      {
+        "date": "2017-06-28",
+        "index": 143,
+        "t_stat": 3.224,
+        "p_value": 0.0019,
+        "mean_before": 0.9424,
+        "mean_after": 0.8693,
+        "delta": -0.0731
+      },
+      {
+        "date": "2022-06-22",
+        "index": 200,
+        "t_stat": -5.758,
+        "p_value": 0.0,
+        "mean_before": 0.9031,
+        "mean_after": 0.9961,
+        "delta": 0.0929
+      },
+      {
+        "date": "2023-05-08",
+        "index": 210,
+        "t_stat": 3.544,
+        "p_value": 0.0023,
+        "mean_before": 0.9077,
+        "mean_after": 0.9951,
+        "delta": 0.0874
+      },
+      {
+        "date": "2024-03-22",
+        "index": 220,
+        "t_stat": -5.791,
+        "p_value": 0.0,
+        "mean_before": 0.9116,
+        "mean_after": 0.9969,
+        "delta": 0.0853
+      }
+    ],
+    "BTC-USD": [
+      {
+        "date": "2016-09-29",
+        "index": 11,
+        "t_stat": -4.253,
+        "p_value": 0.0013,
+        "mean_before": 0.9422,
+        "mean_after": 0.885,
+        "delta": -0.0573
+      },
+      {
+        "date": "2019-05-25",
+        "index": 55,
+        "t_stat": 3.932,
+        "p_value": 0.0002,
+        "mean_before": 0.9781,
+        "mean_after": 0.8371,
+        "delta": -0.141
+      },
+      {
+        "date": "2020-03-28",
+        "index": 69,
+        "t_stat": -6.826,
+        "p_value": 0.0,
+        "mean_before": 0.9592,
+        "mean_after": 0.8288,
+        "delta": -0.1304
+      },
+      {
+        "date": "2022-11-21",
+        "index": 113,
+        "t_stat": 8.517,
+        "p_value": 0.0,
+        "mean_before": 0.9628,
+        "mean_after": 0.6581,
+        "delta": -0.3047
+      },
+      {
+        "date": "2024-04-10",
+        "index": 136,
+        "t_stat": -7.272,
+        "p_value": 0.0,
+        "mean_before": 0.8929,
+        "mean_after": 0.8507,
+        "delta": -0.0422
+      }
+    ]
+  },
+  "regime_summary": {
+    "SPY": {
+      "overall_mean": 0.9593,
+      "overall_std": 0.0343,
+      "low_persistence": {
+        "threshold": 0.9312,
+        "mean": 0.9091,
+        "count": 58
+      },
+      "high_persistence": {
+        "threshold": 0.9868,
+        "mean": 0.9946,
+        "count": 58
+      },
+      "range": 0.1337,
+      "cv": 3.58
+    },
+    "QQQ": {
+      "overall_mean": 0.9646,
+      "overall_std": 0.0279,
+      "low_persistence": {
+        "threshold": 0.9478,
+        "mean": 0.9247,
+        "count": 58
+      },
+      "high_persistence": {
+        "threshold": 0.9883,
+        "mean": 0.9933,
+        "count": 58
+      },
+      "range": 0.1261,
+      "cv": 2.89
+    },
+    "GLD": {
+      "overall_mean": 0.9391,
+      "overall_std": 0.1228,
+      "low_persistence": {
+        "threshold": 0.9381,
+        "mean": 0.8041,
+        "count": 52
+      },
+      "high_persistence": {
+        "threshold": 0.9952,
+        "mean": 0.9987,
+        "count": 52
+      },
+      "range": 1.0,
+      "cv": 13.08
+    },
+    "TLT": {
+      "overall_mean": 0.9149,
+      "overall_std": 0.2144,
+      "low_persistence": {
+        "threshold": 0.9544,
+        "mean": 0.7026,
+        "count": 58
+      },
+      "high_persistence": {
+        "threshold": 0.9962,
+        "mean": 0.9987,
+        "count": 58
+      },
+      "range": 1.0,
+      "cv": 23.43
+    },
+    "BTC-USD": {
+      "overall_mean": 0.8892,
+      "overall_std": 0.1712,
+      "low_persistence": {
+        "threshold": 0.8577,
+        "mean": 0.663,
+        "count": 38
+      },
+      "high_persistence": {
+        "threshold": 0.9873,
+        "mean": 0.9977,
+        "count": 38
+      },
+      "range": 0.726,
+      "cv": 19.25
+    }
+  },
+  "adaptive_vs_fixed": {
+    "SPY": {
+      "n_forecasts": 502,
+      "qlike_fixed": -8.574137,
+      "qlike_adaptive": -8.574137,
+      "qlike_diff_pct": 0.0,
+      "mse_fixed": 1e-08,
+      "mse_adaptive": 1e-08,
+      "dm_t": null,
+      "dm_p": null,
+      "adaptive_better": "False",
+      "n_breaks_in_oos_vicinity": 0
+    },
+    "QQQ": {
+      "n_forecasts": 502,
+      "qlike_fixed": -7.93045,
+      "qlike_adaptive": -7.918503,
+      "qlike_diff_pct": 0.151,
+      "mse_fixed": 4e-08,
+      "mse_adaptive": 4e-08,
+      "dm_t": 1.905,
+      "dm_p": 0.0573,
+      "adaptive_better": "False",
+      "n_breaks_in_oos_vicinity": 1
+    },
+    "GLD": {
+      "n_forecasts": 502,
+      "qlike_fixed": -8.37637,
+      "qlike_adaptive": -8.368962,
+      "qlike_diff_pct": 0.088,
+      "mse_fixed": 2e-08,
+      "mse_adaptive": 2e-08,
+      "dm_t": 0.634,
+      "dm_p": 0.5261,
+      "adaptive_better": "False",
+      "n_breaks_in_oos_vicinity": 2
+    },
+    "TLT": {
+      "n_forecasts": 502,
+      "qlike_fixed": -8.105867,
+      "qlike_adaptive": -8.124675,
+      "qlike_diff_pct": -0.232,
+      "mse_fixed": 2e-08,
+      "mse_adaptive": 2e-08,
+      "dm_t": -0.902,
+      "dm_p": 0.3673,
+      "adaptive_better": "True",
+      "n_breaks_in_oos_vicinity": 3
+    },
+    "BTC-USD": {
+      "n_forecasts": 731,
+      "qlike_fixed": -6.267144,
+      "qlike_adaptive": -6.303703,
+      "qlike_diff_pct": -0.583,
+      "mse_fixed": 1.98e-06,
+      "mse_adaptive": 1.91e-06,
+      "dm_t": -1.135,
+      "dm_p": 0.2565,
+      "adaptive_better": "True",
+      "n_breaks_in_oos_vicinity": 2
+    }
+  },
+  "persistence_predictor": {
+    "SPY": {
+      "n_obs": 228,
+      "corr_persistence_fwd_rv": 0.2372,
+      "partial_corr_persistence_rv_given_vix": -0.0021,
+      "partial_t": -0.032,
+      "partial_p": 0.9744,
+      "r2_vix_only": 0.4643,
+      "r2_vix_plus_persistence": 0.4643,
+      "r2_increment": 0.0,
+      "beta_persistence": -0.0053,
+      "beta_vix": 0.8193
+    },
+    "QQQ": {
+      "n_obs": 228,
+      "corr_persistence_fwd_rv": 0.1564,
+      "partial_corr_persistence_rv_given_vix": 0.0238,
+      "partial_t": 0.358,
+      "partial_p": 0.7208,
+      "r2_vix_only": 0.3979,
+      "r2_vix_plus_persistence": 0.3982,
+      "r2_increment": 0.0003,
+      "beta_persistence": 0.0704,
+      "beta_vix": 0.7143
+    },
+    "GLD": {
+      "n_obs": 207,
+      "corr_persistence_fwd_rv": 0.0868,
+      "partial_corr_persistence_rv_given_vix": 0.002,
+      "partial_t": 0.029,
+      "partial_p": 0.9768,
+      "r2_vix_only": 0.2969,
+      "r2_vix_plus_persistence": 0.2969,
+      "r2_increment": 0.0,
+      "beta_persistence": 0.001,
+      "beta_vix": 0.4226
+    },
+    "TLT": {
+      "n_obs": 228,
+      "corr_persistence_fwd_rv": 0.2372,
+      "partial_corr_persistence_rv_given_vix": 0.2319,
+      "partial_t": 3.576,
+      "partial_p": 0.0004,
+      "r2_vix_only": 0.3708,
+      "r2_vix_plus_persistence": 0.4046,
+      "r2_increment": 0.0338,
+      "beta_persistence": 0.0483,
+      "beta_vix": 0.3654
+    },
+    "BTC-USD": {
+      "n_obs": 148,
+      "corr_persistence_fwd_rv": 0.2139,
+      "partial_corr_persistence_rv_given_vix": 0.211,
+      "partial_t": 2.599,
+      "partial_p": 0.0103,
+      "r2_vix_only": 0.005,
+      "r2_vix_plus_persistence": 0.0493,
+      "r2_increment": 0.0443,
+      "beta_persistence": 0.3212,
+      "beta_vix": 0.2116
+    }
+  },
+  "vt_by_persistence_regime": {
+    "Low Persistence (<P33)": {
+      "n": 1672,
+      "vt_ann_ret": 0.0624,
+      "vt_sharpe": 0.688,
+      "bh_sharpe": 0.665,
+      "vt_minus_bh": 0.023,
+      "mean_vix": 14.23,
+      "mean_weight": 0.864
+    },
+    "Mid Persistence (P33-P67)": {
+      "n": 1714,
+      "vt_ann_ret": 0.0167,
+      "vt_sharpe": 0.169,
+      "bh_sharpe": 0.087,
+      "vt_minus_bh": 0.082,
+      "mean_vix": 20.48,
+      "mean_weight": 0.651
+    },
+    "High Persistence (>P67)": {
+      "n": 1650,
+      "vt_ann_ret": 0.1032,
+      "vt_sharpe": 1.091,
+      "bh_sharpe": 0.848,
+      "vt_minus_bh": 0.242,
+      "mean_vix": 22.75,
+      "mean_weight": 0.61
+    }
+  },
+  "parameter_trajectories": {
+    "SPY": {
+      "omega": {
+        "mean": 0.040435,
+        "std": 0.018896,
+        "cv_pct": 46.7,
+        "kendall_tau": 0.1204,
+        "trend_p": 0.0067,
+        "has_trend": "True"
+      },
+      "alpha": {
+        "mean": 0.021068,
+        "std": 0.049182,
+        "cv_pct": 233.4,
+        "kendall_tau": 0.2418,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "beta": {
+        "mean": 0.827517,
+        "std": 0.084134,
+        "cv_pct": 10.2,
+        "kendall_tau": -0.2403,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "gamma": {
+        "mean": 0.221417,
+        "std": 0.104289,
+        "cv_pct": 47.1,
+        "kendall_tau": 0.2682,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      }
+    },
+    "QQQ": {
+      "omega": {
+        "mean": 0.050795,
+        "std": 0.027699,
+        "cv_pct": 54.5,
+        "kendall_tau": 0.2881,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "alpha": {
+        "mean": 0.011366,
+        "std": 0.034751,
+        "cv_pct": 305.8,
+        "kendall_tau": 0.1457,
+        "trend_p": 0.002,
+        "has_trend": "True"
+      },
+      "beta": {
+        "mean": 0.870513,
+        "std": 0.069685,
+        "cv_pct": 8.0,
+        "kendall_tau": -0.3812,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "gamma": {
+        "mean": 0.165448,
+        "std": 0.086618,
+        "cv_pct": 52.4,
+        "kendall_tau": 0.2278,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      }
+    },
+    "GLD": {
+      "omega": {
+        "mean": 0.054399,
+        "std": 0.08142,
+        "cv_pct": 149.7,
+        "kendall_tau": 0.3495,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "alpha": {
+        "mean": 0.060979,
+        "std": 0.051507,
+        "cv_pct": 84.5,
+        "kendall_tau": 0.1366,
+        "trend_p": 0.0035,
+        "has_trend": "True"
+      },
+      "beta": {
+        "mean": 0.885224,
+        "std": 0.137308,
+        "cv_pct": 15.5,
+        "kendall_tau": -0.3281,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "gamma": {
+        "mean": -0.014152,
+        "std": 0.094371,
+        "cv_pct": -666.8,
+        "kendall_tau": -0.2245,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      }
+    },
+    "TLT": {
+      "omega": {
+        "mean": 0.045607,
+        "std": 0.08882,
+        "cv_pct": 194.7,
+        "kendall_tau": 0.0948,
+        "trend_p": 0.0326,
+        "has_trend": "True"
+      },
+      "alpha": {
+        "mean": 0.054365,
+        "std": 0.066858,
+        "cv_pct": 123.0,
+        "kendall_tau": 0.0859,
+        "trend_p": 0.0551,
+        "has_trend": "False"
+      },
+      "beta": {
+        "mean": 0.867361,
+        "std": 0.224244,
+        "cv_pct": 25.9,
+        "kendall_tau": -0.0575,
+        "trend_p": 0.1955,
+        "has_trend": "False"
+      },
+      "gamma": {
+        "mean": -0.013624,
+        "std": 0.037767,
+        "cv_pct": -277.2,
+        "kendall_tau": 0.0857,
+        "trend_p": 0.0537,
+        "has_trend": "False"
+      }
+    },
+    "BTC-USD": {
+      "omega": {
+        "mean": 1.378532,
+        "std": 1.46763,
+        "cv_pct": 106.5,
+        "kendall_tau": 0.3321,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "alpha": {
+        "mean": 0.100883,
+        "std": 0.081782,
+        "cv_pct": 81.1,
+        "kendall_tau": -0.2259,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "beta": {
+        "mean": 0.742419,
+        "std": 0.22503,
+        "cv_pct": 30.3,
+        "kendall_tau": -0.2364,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      },
+      "gamma": {
+        "mean": 0.091754,
+        "std": 0.182903,
+        "cv_pct": 199.3,
+        "kendall_tau": 0.3018,
+        "trend_p": 0.0,
+        "has_trend": "True"
+      }
+    }
+  },
+  "conclusions": {
+    "cusum_breaks_significant": 4,
+    "adaptive_better_count": 2,
+    "adaptive_significant_count": 0,
+    "persistence_predicts_vol_count": 2,
+    "avg_r2_increment": 0.0157,
+    "verdict": "Persistence breaks detectable but not exploitable"
+  }
+}

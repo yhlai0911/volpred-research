@@ -10306,5 +10306,45 @@
       "null-result",
       "stationarity"
     ]
+  },
+  {
+    "id": "K1037",
+    "title": "K195: ★★★ Copula TDA Deep Dive — 26/66 pairs pass Bonferroni OOS! But GARCH-X still NULL",
+    "content": "[提出: Claude (K193延伸), 執行: Claude] Data: 12 assets × 66 pairs, daily yfinance, OOS 2023-2024. Method: rolling 252d empirical copula TDA(q=0.10), partial r|VIX, Bonferroni correction, GARCH-X top-3. Results: 26/66 pairs pass Bonferroni OOS — GENUINE crack in VIX sufficient. Top: EEM_XLK (OOS t=-12.27), SPY_EEM (t=-9.65). BUT SPY_GLD from K193 FLIPS sign OOS (train r=+0.150→OOS r=-0.005). GARCH-X with top-3 TDA: FAILS (DM t=-0.60 NS). Cross-period rank stability WEAK (rho=0.122 p=0.33). Verdict: TDA is statistical detection phenomenon, not forecasting improvement. VIX misses tail co-movement info but too noisy to exploit.",
+    "timestamp": "2026-03-24T14:12:07.135488",
+    "tags": [
+      "copula",
+      "TDA",
+      "Bonferroni",
+      "multi-pair",
+      "VIX-crack",
+      "important"
+    ]
+  },
+  {
+    "id": "K1038",
+    "title": "K196: 5-min RV Pilot (47 days, PRELIMINARY) — RV AC(1)=0.414 vs c2c AC(1)=-0.118. Key data quality gap",
+    "content": "[提出: Claude (K188延伸), 執行: Claude] Data: SPY 5-min, 47 trading days (2026-01-14~03-23), 17 pseudo-OOS. PRELIMINARY. Results: RV decomposition: BPV 57.4%, gap 41.7%, jumps 2.6%. Critical: RV AC(1)=+0.414 vs c2c r² AC(1)=-0.118 — c2c 本質上不可預測而 RV 有強自相關。HAR-RV vs GJR: GJR wins but HAR severely undertrained (8 training obs). BPV most predictable (AC=0.418). corr(RV, c2c)=0.299 surprisingly low. Need 252+ days for proper test. Next: Realized GARCH (Hansen 2016) when data sufficient.",
+    "timestamp": "2026-03-24T14:12:07.135488",
+    "tags": [
+      "5-min",
+      "realized-variance",
+      "HAR",
+      "preliminary",
+      "data-quality"
+    ]
+  },
+  {
+    "id": "K1039",
+    "title": "K197: ★ Persistence Break — breaks detectable (4/5 CUSUM sig) but NOT exploitable. Gamma trending UP",
+    "content": "[提出: Claude, 執行: Claude] Data: SPY/QQQ/GLD/TLT/BTC daily yfinance 2005-2024, OOS 2023-2024. Method: rolling GJR w=500 step=22, CUSUM, binary segmentation, adaptive window. Results: Breaks detected 4/5 assets (CUSUM sig). Adaptive GARCH 0/5 DM sig improvement. Persistence partial r|VIX: SPY -0.002 NS, but TLT 0.232★ and BTC 0.211★ (assets without good IV proxy). Gamma trending UP for equities (leverage intensifying). VT works better in high-persistence regimes (+0.242 vs +0.023 Sharpe diff). Verdict: breaks real but not exploitable — VIX already absorbs for equity assets.",
+    "timestamp": "2026-03-24T14:12:07.135488",
+    "tags": [
+      "persistence",
+      "structural-break",
+      "CUSUM",
+      "adaptive-GARCH",
+      "gamma-trend"
+    ]
   }
 ]
