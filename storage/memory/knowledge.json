@@ -12773,5 +12773,18 @@
       "Harvey-FAIL",
       "K310-gap"
     ]
+  },
+  {
+    "id": "K1229",
+    "title": "K388: ★★ Minimax Portfolio — wants 85% GLD (vs Sharpe-optimal 50/50). VT SOLVES minimax better than static weights",
+    "content": "[跳躍式探索] Pure minimax: SPY 15%/GLD 85% (worst 22d=-20%). Max-Sharpe: 50/50 (Sharpe 0.81). Gap: 35pp. Trade-off unfavorable: 0.19x worst-case per Sharpe lost. VT overlay: minimax shifts to SPY 60% (VT handles downside). VT worst 22d=-19.7% AND Sharpe 1.15 — beats both pure criteria. Rolling minimax std=24pp (unstable). Bootstrap CI [0%,60%]. Minimax Regret picks 40% (closer to Sharpe). VT > static minimax.",
+    "timestamp": "2026-03-25T18:08:10.984058",
+    "tags": [
+      "minimax",
+      "robust",
+      "worst-case",
+      "跳躍式探索",
+      "VT-solves-minimax"
+    ]
   }
 ]
