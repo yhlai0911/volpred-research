@@ -11872,5 +11872,28 @@
       "integrity",
       "urgent-fix"
     ]
+  },
+  {
+    "id": "K1161",
+    "title": "K321: ★★ Content Correction Scanner — automated tool to find outdated claims in published articles",
+    "content": "scripts/content_correction_scanner.py: scans 610 articles against 76 self-corrections. Uses rarity-weighted keyword matching with anchor/context distinction. Document frequency filtering (>5% → demoted). 4 severity tiers. Usage: --top N --published-only --min-severity. Outputs structured JSON report. Part of CLAUDE.md rule #9 enforcement.",
+    "timestamp": "2026-03-25T08:23:48.596571",
+    "tags": [
+      "tool",
+      "scanner",
+      "content-integrity",
+      "automation"
+    ]
+  },
+  {
+    "id": "K1162",
+    "title": "K322: Empty Article Cleanup — 6 archive + 15 regenerate needed. No files modified (report only)",
+    "content": "462 articles scanned. 6 archive targets (empty/test/duplicate). 15 regeneration targets (empty with matching knowledge). 21 borderline (100-200 chars). All actions documented in k322_cleanup_actions.json. No files modified per project rules.",
+    "timestamp": "2026-03-25T08:23:48.596571",
+    "tags": [
+      "cleanup",
+      "content-quality",
+      "empty-articles"
+    ]
   }
 ]
