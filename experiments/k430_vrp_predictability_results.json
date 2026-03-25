@@ -1,0 +1,369 @@
+{
+  "experiment_id": "k430",
+  "title": "Volatility Risk Premium Predictability (Behavioral Finance)",
+  "timestamp": "2026-03-25T17:49:13.852776+00:00",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2005-05-03 to 2026-02-23",
+  "n_observations": 5235,
+  "is_period": "2005-05-03 to 2022-12-30",
+  "oos_period": "2023-01-03 to 2026-02-23",
+  "is_n": 4448,
+  "oos_n": 787,
+  "descriptive_statistics": {
+    "vix": {
+      "mean": 19.226802294165495,
+      "std": 8.657435966318252,
+      "skew": 2.5381363495878055,
+      "kurtosis": 9.60154902702108,
+      "min": 9.140000343322754,
+      "p10": 11.979999542236328,
+      "p25": 13.520000457763672,
+      "median": 16.860000610351562,
+      "p75": 22.1850004196167,
+      "p90": 28.561999511718756,
+      "max": 82.69000244140625,
+      "N": 5235
+    },
+    "rv_21": {
+      "mean": 15.726946186823772,
+      "std": 11.11566686105719,
+      "skew": 3.4269858281853,
+      "kurtosis": 16.522142493101324,
+      "min": 3.4206204870806682,
+      "p10": 7.228910793421773,
+      "p25": 9.261325526383363,
+      "median": 12.975483824745279,
+      "p75": 18.401609672546506,
+      "p90": 26.67788112719316,
+      "max": 94.49534911949681,
+      "N": 5235
+    },
+    "vrp": {
+      "mean": 3.4998561073417207,
+      "std": 5.518212899142429,
+      "skew": -2.6076312116090357,
+      "kurtosis": 16.49459627269919,
+      "min": -47.728604903385616,
+      "p10": -1.3890681079935865,
+      "p25": 1.6304933967488724,
+      "median": 3.9665506181075614,
+      "p75": 6.182584511242817,
+      "p90": 8.666842145155789,
+      "max": 25.593734857880616,
+      "N": 5235
+    },
+    "vrp_zscore": {
+      "mean": -0.001710429611819117,
+      "std": 1.1857402980891507,
+      "skew": -0.2671207308523205,
+      "kurtosis": 0.4044027541751354,
+      "min": -4.7794019929400715,
+      "p10": -1.6402931883879779,
+      "p25": -0.752673538290324,
+      "median": 0.13510272792507305,
+      "p75": 0.8067586192307321,
+      "p90": 1.3614466576544575,
+      "max": 6.595610630800536,
+      "N": 5235
+    },
+    "rv_21_future": {
+      "mean": 15.723726493968213,
+      "std": 11.115686648106426,
+      "skew": 3.427882044734449,
+      "kurtosis": 16.52594050673194,
+      "min": 3.4206204870806682,
+      "p10": 7.228910793421773,
+      "p25": 9.261325526383363,
+      "median": 12.949730293476442,
+      "p75": 18.401609672546506,
+      "p90": 26.67788112719316,
+      "max": 94.49534911949681,
+      "N": 5235
+    }
+  },
+  "vrp_positive_pct": 84.83285577841451,
+  "adf_test": {
+    "statistic": -10.029507173539512,
+    "p_value": 1.5988396643255307e-17,
+    "stationary": true
+  },
+  "model_results_oos": {
+    "M1_baseline_RV": {
+      "qlike": 0.06972238449355717,
+      "mse": 53.79372199981231,
+      "mae": 4.393929153720344,
+      "correlation": 0.30104749593641467,
+      "coefficients": {
+        "const": 5.431637140024772,
+        "rv_21_lag": 0.6637952974066983
+      }
+    },
+    "M2_VRP_only": {
+      "qlike": 0.09881530068832263,
+      "mse": 61.16677801738522,
+      "mae": 5.371673725004638,
+      "correlation": 0.05049890873685698,
+      "coefficients": {
+        "const": 17.600510503591533,
+        "vrp": -0.4245591287191374
+      }
+    },
+    "M3_Ridge_full": {
+      "qlike": 0.05766380467107109,
+      "mse": 40.91327521203862,
+      "mae": 3.655221497338013,
+      "correlation": 0.4501004643646793,
+      "coefficients": {
+        "const": 16.11503758164085,
+        "rv_21_lag": 10.84469125105608,
+        "vrp": 5.120841867695328,
+        "vrp_zscore": 0.023871928866903907,
+        "vrp_momentum": 0.067799498858139,
+        "vrp_mean_revert": -0.40637029725635637,
+        "vrp_extreme_high": -0.6848362335562918,
+        "vrp_extreme_low": -0.0956512781702731
+      }
+    },
+    "M4_RV_plus_VRP": {
+      "qlike": 0.05809234694195091,
+      "mse": 41.43635951243611,
+      "mae": 3.654508205532522,
+      "correlation": 0.44253149328710406,
+      "coefficients": {
+        "const": -1.1039575085901645,
+        "rv_21_lag": 0.8998619798472676,
+        "vrp": 0.782037098990086
+      }
+    }
+  },
+  "dm_tests": {
+    "M2_VRP_only": {
+      "dm_stat": -0.9208983656842371,
+      "p_value": 0.3571034919488487,
+      "significant_5pct": false,
+      "direction": "baseline better",
+      "mean_loss_diff": -7.373056017572902
+    },
+    "M3_Ridge_full": {
+      "dm_stat": 1.3911594473564257,
+      "p_value": 0.1641770813527823,
+      "significant_5pct": false,
+      "direction": "alternative better",
+      "mean_loss_diff": 12.880446787773694
+    },
+    "M4_RV_plus_VRP": {
+      "dm_stat": 1.3950388518246444,
+      "p_value": 0.16300412393006214,
+      "significant_5pct": false,
+      "direction": "alternative better",
+      "mean_loss_diff": 12.35736248737621
+    }
+  },
+  "quintile_analysis": {
+    "Q1_low": {
+      "n": 97,
+      "mean_vrp": -6.163398874029091,
+      "mean_future_rv": 16.24075709688584,
+      "mse_baseline": 213.39170324130427,
+      "mse_vrp_augmented": 132.33045535363468,
+      "improvement_pct": 37.98706634625114,
+      "direction_accuracy": 87.62886597938144
+    },
+    "Q2": {
+      "n": 217,
+      "mean_vrp": 2.074248687825041,
+      "mean_future_rv": 12.75905076530125,
+      "mse_baseline": 44.79154619836911,
+      "mse_vrp_augmented": 39.5504763328705,
+      "improvement_pct": 11.70102465828572,
+      "direction_accuracy": 71.88940092165899
+    },
+    "Q3": {
+      "n": 168,
+      "mean_vrp": 3.9469733579131296,
+      "mean_future_rv": 12.329090175937825,
+      "mse_baseline": 14.752489295918819,
+      "mse_vrp_augmented": 12.86977230259175,
+      "improvement_pct": 12.762029211218683,
+      "direction_accuracy": 54.761904761904766
+    },
+    "Q4": {
+      "n": 152,
+      "mean_vrp": 5.7874164873163645,
+      "mean_future_rv": 12.781844934061656,
+      "mse_baseline": 23.718121931718883,
+      "mse_vrp_augmented": 25.42551724133341,
+      "improvement_pct": -7.198695219334295,
+      "direction_accuracy": 67.76315789473685
+    },
+    "Q5_high": {
+      "n": 153,
+      "mean_vrp": 8.913572965399762,
+      "mean_future_rv": 14.874679730600397,
+      "mse_baseline": 38.12631202002641,
+      "mse_vrp_augmented": 33.758869511331106,
+      "improvement_pct": 11.455192693175364,
+      "direction_accuracy": 77.77777777777779
+    }
+  },
+  "regime_analysis": {
+    "vix_high": {
+      "n": 349,
+      "vrp_coefficient": 0.694177901230489,
+      "vrp_t_stat": 5.070965887723927,
+      "vrp_p_value": 6.46491115974257e-07,
+      "corr_vrp_future_rv": -0.10203965009317917,
+      "all_coefficients": {
+        "const": 0.9228903389160373,
+        "rv_21_lag": 0.7525610418249139,
+        "vrp": 0.694177901230489
+      }
+    },
+    "vix_low": {
+      "n": 438,
+      "vrp_coefficient": 0.4743875259986367,
+      "vrp_t_stat": 4.216949914761297,
+      "vrp_p_value": 3.0141949208362107e-05,
+      "corr_vrp_future_rv": 0.21758843242954365,
+      "all_coefficients": {
+        "const": 6.995720474980974,
+        "rv_21_lag": 0.2562884493370675,
+        "vrp": 0.4743875259986367
+      }
+    }
+  },
+  "extreme_vrp_analysis": {
+    "extreme_low_p10": {
+      "n": 53,
+      "mean_vrp": -11.075097457818671,
+      "mean_current_rv": 32.15679556958671,
+      "mean_future_rv": 17.604295620359714,
+      "mean_rv_change": -14.552499949226998,
+      "vol_decline_pct": 92.45283018867924,
+      "mean_future_21d_return_pct": 4.4536688282030905
+    },
+    "low_p10_p25": {
+      "n": 89,
+      "mean_vrp": 0.4543771875286864,
+      "mean_current_rv": 15.048656600487986,
+      "mean_future_rv": 13.07588055831495,
+      "mean_rv_change": -1.9727760421730363,
+      "vol_decline_pct": 88.76404494382022,
+      "mean_future_21d_return_pct": 1.894007871918819
+    },
+    "normal_p25_p75": {
+      "n": 449,
+      "mean_vrp": 3.7008435702927494,
+      "mean_current_rv": 12.304212135502029,
+      "mean_future_rv": 12.710805541318651,
+      "mean_rv_change": 0.40659340581662207,
+      "vol_decline_pct": 51.67037861915368,
+      "mean_future_21d_return_pct": 1.285771739854692
+    },
+    "high_p75_p90": {
+      "n": 129,
+      "mean_vrp": 7.206705868149888,
+      "mean_current_rv": 10.941046058301804,
+      "mean_future_rv": 13.609292266207392,
+      "mean_rv_change": 2.6682462079055878,
+      "vol_decline_pct": 31.007751937984494,
+      "mean_future_21d_return_pct": 1.030220538891861
+    },
+    "extreme_high_p90": {
+      "n": 67,
+      "mean_vrp": 10.656933491140684,
+      "mean_current_rv": 11.387394871053775,
+      "mean_future_rv": 16.03715828094272,
+      "mean_rv_change": 4.649763409888944,
+      "vol_decline_pct": 16.417910447761194,
+      "mean_future_21d_return_pct": 2.4146646402644283
+    }
+  },
+  "is_regression_diagnostics": {
+    "r_squared": 0.5229915016761209,
+    "adj_r_squared": 0.5224545718040768,
+    "n_obs": 4448,
+    "coefficients": {
+      "const": {
+        "coef": -1.3825678305430076,
+        "t_stat": -0.985596996592658,
+        "p_value": 0.3243309124435412
+      },
+      "rv_21_lag": {
+        "coef": 0.9047479108214405,
+        "t_stat": 11.328318536651071,
+        "p_value": 9.501115912200226e-30
+      },
+      "vrp": {
+        "coef": 0.8381992400116133,
+        "t_stat": 4.375903793984043,
+        "p_value": 1.2093034703365394e-05
+      },
+      "vrp_zscore": {
+        "coef": -0.14719086231202003,
+        "t_stat": -0.22931951531940223,
+        "p_value": 0.8186205865576139
+      },
+      "vrp_momentum": {
+        "coef": 0.01720549666295774,
+        "t_stat": 0.23174943227041014,
+        "p_value": 0.8167326349745437
+      },
+      "vrp_mean_revert": {
+        "coef": -0.04097480939755534,
+        "t_stat": -0.2611711421125276,
+        "p_value": 0.7939605312556953
+      }
+    },
+    "vif": [
+      {
+        "feature": "rv_21_lag",
+        "VIF": 1.7837969076120512
+      },
+      {
+        "feature": "vrp",
+        "VIF": 4.764644267474031
+      },
+      {
+        "feature": "vrp_zscore",
+        "VIF": 3.1430500923480893
+      },
+      {
+        "feature": "vrp_momentum",
+        "VIF": 1.3936465781909941
+      },
+      {
+        "feature": "vrp_mean_revert",
+        "VIF": 5.076545381877589
+      }
+    ],
+    "residual_arch_lm_pvalue": 0.0
+  },
+  "return_prediction_secondary": {
+    "oos_correlation": -0.20997422471249416,
+    "is_vrp_coefficient": 0.05374752663233199,
+    "is_vrp_t_stat": 0.8115203889147128,
+    "is_vrp_p_value": 0.417066888952178,
+    "is_r_squared": 0.003911668617250896
+  },
+  "qlike_improvement_pct": 16.680493124386697,
+  "conclusions": [
+    "VRP provides 16.7% QLIKE improvement over lagged RV baseline",
+    "DM test: VRP improvement NOT statistically significant (p=0.1630)",
+    "VRP significant in vix_high regime (t=5.071)",
+    "VRP significant in vix_low regime (t=4.217)",
+    "Consistent with prior findings: VRP is better at predicting vol dynamics than return direction"
+  ],
+  "limitations": [
+    "Overlapping 21-day windows create serial correlation (mitigated by HAC standard errors)",
+    "VRP proxy uses VIX (30d implied) vs 21d realized \u2014 maturity mismatch",
+    "OOS period (2023-2025) may not be representative of all market conditions",
+    "No transaction cost consideration for any trading implications",
+    "RV uses close-to-close returns only (no intraday data)"
+  ],
+  "prior_knowledge": [
+    "K-series: VRP is NOT a directional signal for SPY returns (null result)",
+    "K-series: VIX has ~4.5% incremental power for next-day vol",
+    "K-series: GARCH-X with VIX gives unstable coefficient"
+  ]
+}

@@ -1,0 +1,199 @@
+{
+  "experiment_id": "K432",
+  "title": "Bayesian MCMC GJR-GARCH Volatility Prediction",
+  "date": "2026-03-25T17:50:48.019759+00:00",
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "data_period": {
+    "total": "2005-01-01 ~ 2024-12-31",
+    "in_sample": "2005-01-01 ~ 2022-12-31",
+    "out_of_sample": "2023-01-01 ~ 2024-12-31",
+    "is_n": 4530,
+    "oos_n": 502
+  },
+  "methodology": {
+    "model": "GJR-GARCH(1,1) with Normal innovations",
+    "bayesian_method": "Random Walk Metropolis-Hastings",
+    "n_iterations": 5000,
+    "burn_in": 1000,
+    "n_chains": 2,
+    "n_posterior_samples": 8000,
+    "bma_samples": 200,
+    "var_samples": 500,
+    "priors": {
+      "mu": "N(0.05, 0.1)",
+      "omega": "HalfNormal(0.1)",
+      "alpha": "Beta(2,10) * 0.5",
+      "gamma": "HalfNormal(0.1)",
+      "beta": "Beta(10,2) * 0.999"
+    },
+    "rv_proxy": "squared returns"
+  },
+  "diagnostics": {
+    "descriptive_stats": {
+      "mean": 0.04086486776022207,
+      "std": 1.2347051738264367,
+      "skew": -0.0664115924593522,
+      "kurtosis": 14.63753784031147,
+      "min": -10.942365187046367,
+      "max": 14.5197454291222,
+      "n": 4530
+    },
+    "adf_test": {
+      "stat": -16.698348747746238,
+      "p_value": 1.4684360162991372e-29,
+      "stationary": true
+    },
+    "arch_lm_test": {
+      "stat": 1312.6504697730138,
+      "p_value": 7.1201341683552154e-276,
+      "arch_effects": true
+    },
+    "ljung_box_sq": {
+      "stat": 3890.790968376899,
+      "p_value": 0.0
+    },
+    "residual_arch_lm": {
+      "stat": 9.01151362885276,
+      "p_value": 0.5310112397094447,
+      "clean": true
+    },
+    "mle_convergence": 0,
+    "mle_persistence": 0.9761304632371682
+  },
+  "mcmc_diagnostics": {
+    "chain1_acceptance_rate": 0.31,
+    "chain2_acceptance_rate": 0.3054,
+    "gelman_rubin_rhat": {
+      "mu": 1.001561891130965,
+      "omega": 0.9999542963655236,
+      "alpha": 0.9999932596174591,
+      "gamma": 1.0074854133625293,
+      "beta": 1.0016595247113476
+    },
+    "effective_sample_size": {
+      "mu": 107,
+      "omega": 163,
+      "alpha": 128,
+      "gamma": 102,
+      "beta": 97
+    },
+    "mcmc_time_seconds": 28.9,
+    "convergence_ok": true
+  },
+  "posterior_summary": {
+    "mu": {
+      "mean": 0.04133892094109507,
+      "median": 0.0413809931193197,
+      "std": 0.010996215772942783,
+      "ci_2.5": 0.017674943643037403,
+      "ci_97.5": 0.06192729905280552,
+      "mle": 0.04091313708473388
+    },
+    "omega": {
+      "mean": 0.028134971333304754,
+      "median": 0.02803833503833736,
+      "std": 0.003031392520341727,
+      "ci_2.5": 0.022314281662445538,
+      "ci_97.5": 0.03432894273031435,
+      "mle": 0.027327176351436798
+    },
+    "alpha": {
+      "mean": 0.02319639246084401,
+      "median": 0.02232148967736425,
+      "std": 0.008815204873309977,
+      "ci_2.5": 0.007613300100625686,
+      "ci_97.5": 0.04243331423077254,
+      "mle": 0.016869740725456744
+    },
+    "gamma": {
+      "mean": 0.2088175645981663,
+      "median": 0.2068879853801181,
+      "std": 0.01715818006521829,
+      "ci_2.5": 0.1801761379575819,
+      "ci_97.5": 0.24453564425389487,
+      "mle": 0.2104042758752217
+    },
+    "beta": {
+      "mean": 0.8485716730442551,
+      "median": 0.8488479159770899,
+      "std": 0.010981304344010845,
+      "ci_2.5": 0.8277836072356409,
+      "ci_97.5": 0.8681784701154415,
+      "mle": 0.8540585845741007
+    }
+  },
+  "persistence_posterior": {
+    "mean": 0.9761768478041822,
+    "std": 0.005157955223744124,
+    "ci_2.5": 0.9661519541958502,
+    "ci_97.5": 0.9870757797880206,
+    "mle": 0.9761304632371682
+  },
+  "oos_metrics": {
+    "MLE": {
+      "qlike": 1.4629019438382294,
+      "mse": 1.102276212333624,
+      "mae": 0.6857094927787917
+    },
+    "Bayes_Mean": {
+      "qlike": 1.4649694793409727,
+      "mse": 1.1059954391467053,
+      "mae": 0.6880564366797252
+    },
+    "Bayes_Median": {
+      "qlike": 1.4646790629452533,
+      "mse": 1.1029559455987359,
+      "mae": 0.6851212583216657
+    },
+    "Bayes_BMA": {
+      "qlike": 1.4647640710246375,
+      "mse": 1.1058977772053418,
+      "mae": 0.688108284237288
+    }
+  },
+  "dm_tests": {
+    "Bayes_Mean_vs_MLE": {
+      "dm_stat": 2.6728864403357924,
+      "p_value": 0.007520170285151728,
+      "better": "MLE"
+    },
+    "Bayes_Median_vs_MLE": {
+      "dm_stat": 2.041652495464177,
+      "p_value": 0.041186014079142685,
+      "better": "MLE"
+    },
+    "Bayes_BMA_vs_MLE": {
+      "dm_stat": 2.7731474634273208,
+      "p_value": 0.005551695697021408,
+      "better": "MLE"
+    }
+  },
+  "var_analysis": {
+    "alpha": 0.05,
+    "expected_violations": 25,
+    "mle": {
+      "violations": 29,
+      "violation_rate": 0.05776892430278884,
+      "kupiec_lr": 0.6088038388423049,
+      "kupiec_p": 0.435238541721912,
+      "kupiec_pass": true
+    },
+    "bayesian": {
+      "violations": 28,
+      "violation_rate": 0.055776892430278883,
+      "kupiec_lr": 0.3405237646693591,
+      "kupiec_p": 0.5595270509551367,
+      "kupiec_pass": true
+    }
+  },
+  "conclusion": {
+    "best_method_by_qlike": "MLE",
+    "best_bayesian_method": "Bayes_Median",
+    "bayesian_qlike_improvement_pct": -0.121,
+    "dm_significant_at_10pct": true,
+    "bayesian_improves_prediction": false,
+    "bayesian_significantly_better": false,
+    "summary": "Bayesian GJR-GARCH does NOT improve over MLE point forecasts (QLIKE -0.12% worse). With weakly informative priors, posterior concentrates near MLE. Bayesian value is in uncertainty quantification (posterior intervals), not point prediction."
+  }
+}
