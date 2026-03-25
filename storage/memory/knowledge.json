@@ -12376,5 +12376,31 @@
       "forward-backward",
       "跳躍式探索"
     ]
+  },
+  {
+    "id": "K1200",
+    "title": "K359: Quantile Regression — VIX beta UNIFORM across quantiles (p=0.95). QR(0.90) VT +0.069 Sharpe but NS (p=0.44)",
+    "content": "[跳躍式探索] VIX predicts mean vol equally well as extreme vol — beta at tau=0.10 (0.354) ≈ tau=0.90 (0.358). QR calibration excellent (all within 2%). QR VT Sharpe 0.902 vs 12/VIX 0.833 but p=0.44. IQR useful as uncertainty proxy (corr 0.236 with error). VIX sufficient across ALL quantile levels.",
+    "timestamp": "2026-03-25T13:44:35.269758",
+    "tags": [
+      "quantile-regression",
+      "跳躍式探索",
+      "tau-uniform",
+      "calibration"
+    ]
+  },
+  {
+    "id": "K1201",
+    "title": "K360: ★★★ Multi-Frequency Puzzle — WEEKLY is predictability sweet spot (R²=0.50). Daily 0.33, monthly 0.24. Non-monotonic",
+    "content": "[跳躍式探索] OOS R²: daily 0.33, WEEKLY 0.50 (peak!), monthly 0.24, quarterly 0.16. ACF(1) peaks at weekly (0.66 vs daily 0.32). Lagged RV useless at monthly (R²<0). VIX dominates at ALL frequencies. GARCH fails at monthly (R²=-0.24). HAR+VIX best for 22d-ahead (R²=0.35). Hump-shaped, not monotonic. Weekly aggregation removes noise→reveals structure.",
+    "timestamp": "2026-03-25T13:44:35.269758",
+    "tags": [
+      "multi-frequency",
+      "weekly-peak",
+      "跳躍式探索",
+      "R2-0.50",
+      "non-monotonic",
+      "important"
+    ]
   }
 ]
