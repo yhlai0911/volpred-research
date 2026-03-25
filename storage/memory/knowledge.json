@@ -12523,5 +12523,19 @@
       "needs-validation",
       "跳躍式探索"
     ]
+  },
+  {
+    "id": "K1211",
+    "title": "K370: VIX TS Validation FAILS — K369 was artifact. 1/5 QLIKE, pooled DM t=-1.50. Self-correction #14",
+    "content": "Self-correction #14. K369 DM t=3.94 collapses in rolling validation: 1/5 QLIKE improvement, pooled t=-1.50. TS ratio HURTS prediction in 4/5 periods (worst: P4 -315.81% during COVID). Coefficient consistently negative but unstable (CV=2.60). The 4th time this pattern: full-sample Harvey pass → rolling validation fail (K265→K266, K335→K339, K369→K370).",
+    "timestamp": "2026-03-25T15:14:55.352917",
+    "tags": [
+      "VIX-TS",
+      "validation",
+      "FAIL",
+      "artifact",
+      "self-correction",
+      "K369-revision"
+    ]
   }
 ]
