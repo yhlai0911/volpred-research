@@ -12608,5 +12608,18 @@
       "publishable",
       "important"
     ]
+  },
+  {
+    "id": "K1217",
+    "title": "K376: ★★ Smoothness Theorem — GJR weights change 4.18x more than EWMA. TX drag difference 48.4bps = 94% of EWMA advantage",
+    "content": "EWMA beats GARCH net Sharpe because: GJR turnover 12.7x/yr vs EWMA 3.0x. TX drag difference 48.4bps/yr accounts for 94% of gap. Gross returns nearly identical (+0.03%). Smoothing GJR weights (EMA α=0.15) closes most gap (0.255 vs 0.258). Adding noise does NOT help. Bootstrap p=0.585 (NS). For daily VT: smoothness > accuracy. Monthly rebalance makes this moot.",
+    "timestamp": "2026-03-25T16:23:56.580386",
+    "tags": [
+      "smoothness",
+      "EWMA-wins",
+      "turnover",
+      "TX-drag",
+      "theorem"
+    ]
   }
 ]
