@@ -1,7 +1,7 @@
 {
   "scan_metadata": {
-    "knowledge_entries_scanned": 1171,
-    "corrections_found": 77,
+    "knowledge_entries_scanned": 1204,
+    "corrections_found": 82,
     "articles_scanned": 613,
     "articles_flagged": 3,
     "severity_breakdown": {
@@ -1716,6 +1716,117 @@
         "K330"
       ],
       "claim_summary": "Self-correction #10: K330 reported CAGR 13.0% but this used daily rebalance (implicit). Monthly VT CAGR = 8.8% (consiste"
+    },
+    {
+      "knowledge_id": "unknown",
+      "severity": "MEDIUM",
+      "patterns": [
+        "FAIL Harvey"
+      ],
+      "anchor_keywords": [
+        "Cu/Au",
+        "USO",
+        "USO/SPY",
+        "t=2.06"
+      ],
+      "context_keywords": [
+        "50/50",
+        "Harvey",
+        "SPY",
+        "VIX",
+        "momentum"
+      ],
+      "knowledge_refs": [],
+      "claim_summary": "FAIL Harvey. Q1 commodities worst→highest vol (crisis driven). G"
+    },
+    {
+      "knowledge_id": "unknown",
+      "severity": "LOW",
+      "patterns": [
+        "selfcorrection"
+      ],
+      "anchor_keywords": [
+        "K265",
+        "K265-K266",
+        "K266",
+        "K335",
+        "Self-correction",
+        "t=10.17"
+      ],
+      "context_keywords": [
+        "VIX"
+      ],
+      "knowledge_refs": [
+        "K335",
+        "K265",
+        "K266"
+      ],
+      "claim_summary": "Self-correction #11. K335 t=10.17 does NOT survive pure rolling. ESG spread corr with VIX=0.678 (noisy VIX proxy). Delta"
+    },
+    {
+      "knowledge_id": "unknown",
+      "severity": "LOW",
+      "patterns": [
+        "REVERSES?"
+      ],
+      "anchor_keywords": [
+        "EUR/JPY",
+        "t=4.91"
+      ],
+      "context_keywords": [
+        "GARCH",
+        "GLD",
+        "SPY",
+        "VIX"
+      ],
+      "knowledge_refs": [],
+      "claim_summary": "[跳躍式探索, 0 prior experiments] FX kurtosis 108 (10x equity). ACF(1)=0.44 (2x SPY but decays fast). Leverage REVERSES betwe"
+    },
+    {
+      "knowledge_id": "unknown",
+      "severity": "LOW",
+      "patterns": [
+        "selfcorrection"
+      ],
+      "anchor_keywords": [
+        "12/VIX",
+        "K281",
+        "K360",
+        "Self-correction"
+      ],
+      "context_keywords": [
+        "Sharpe",
+        "VIX"
+      ],
+      "knowledge_refs": [
+        "K281",
+        "K281",
+        "K360"
+      ],
+      "claim_summary": "Self-correction #12: K281 concluded monthly wins NET Sharpe — but K281 used 60d realized vol (poor signal). With 12/VIX "
+    },
+    {
+      "knowledge_id": "unknown",
+      "severity": "LOW",
+      "patterns": [
+        "selfcorrection"
+      ],
+      "anchor_keywords": [
+        "AGG",
+        "I8/Q10",
+        "K361",
+        "Self-correction",
+        "Sharpe 1.264"
+      ],
+      "context_keywords": [
+        "SPY",
+        "Sharpe",
+        "VIX"
+      ],
+      "knowledge_refs": [
+        "K361"
+      ],
+      "claim_summary": "Self-correction #13 (CRITICAL). K361 daily Sharpe 1.264 used same-day VIX (timing bias — VIX contains same-day SPY info)"
     }
   ],
   "flagged_articles": [
@@ -1765,6 +1876,7 @@
         "VaR",
         "XLE",
         "bootstrap",
+        "momentum",
         "overnight",
         "straddle"
       ],
@@ -1869,158 +1981,13 @@
         }
       ],
       "max_severity": "HIGH",
-      "relevance_score": 2726.9,
+      "relevance_score": 2798.0,
       "text_snippets": [
         "[Conditional Autoregressive Range] ...onditional Autoregressive VaR 4. **GARCH-MIDAS**：混頻模型，結合日頻波動與月頻總經變數 5. **CARR**：Conditional Autoregressive Range，使用 Yang-Zhang range 6. **DCC-GARCH**：動態條件相關模型 7. **Copula-GARCH**：Gaussian/Stud...",
         "[Engle-Manganelli] ...2. **Realized GARCH**：Hansen-Huang-Shek（2012）log-linear 模型，8 個參數 3. **CAViaR**：Engle-Manganelli（2004）Conditional Autoregressive VaR 4. **GARCH-MIDAS**：混頻模型，結合日頻波動與月頻總經變數 5. **...",
         "[Acerbi-Szekely] ...VaR 可靠性指標**（K11）：94% 的 VaR violations 發生在 ratio > 1.5 時（p<0.0001），AUC=0.929 - **Acerbi-Szekely ES backtest**（O14）：三種分配全部通過（p>0.45），Skewed-t 的 Z1/Z2 統計量最小（最佳 ES）  ---  ## 十、未來...",
-        "[Moreira-Muir] ...> -18.4%（+1.9pp）。  12/VIX 的理論基礎在 N87 中被正式確立：w = 12/VIX = σ_target / σ_implied = Moreira-Muir（2017）VT 框架 + 隱含波動率。Bozovic（2024, IRFA）已獨立證明 VIX-managed 優於 realized-vol-managed...",
-        "[SPY-specific] ...ay bias + subsample instability → 判定 FALSE POSITIVE）、Momentum Overlay（跨資產 0/4 → SPY-SPECIFIC）、Excess Fear Signal（OOS t=2.61 < Harvey 3 → IN-SAMPLE ONLY）等。  ### 7.2 最穩健的七項發現..."
-      ]
-    },
-    {
-      "article_id": "mile_ee473d5a",
-      "title": "波動率擇時（VT）完全指南：15 個問題，48 個研究發現，一次講清楚",
-      "status": "published",
-      "source_file": "storage/reports/mile_ee473d5a.json",
-      "matched_keywords": [
-        "12/VIX",
-        "50/50",
-        "GARCH",
-        "GLD",
-        "Google Trends",
-        "IEF",
-        "K24",
-        "K4",
-        "K41",
-        "K85",
-        "K87",
-        "MDD",
-        "Monte Carlo",
-        "SPY",
-        "SPY-GLD",
-        "SPY/GLD",
-        "Sharpe",
-        "TLT",
-        "TSMOM",
-        "VIX",
-        "VT",
-        "bootstrap",
-        "leverage"
-      ],
-      "correction_sources": [
-        {
-          "knowledge_id": "unknown",
-          "severity": "HIGH",
-          "summary": "★★★ VT 把退休安全提領率從 4% 翻倍到 8%。12/VIX VT 在 4-5% 提領率下 10,000 次 Monte Carlo 零破產（B&H 96.3%）",
-          "matched_anchors": [
-            "K41",
-            "K85",
-            "Monte Carlo"
-          ],
-          "matched_context": [
-            "50/50",
-            "VIX",
-            "VT",
-            "12/VIX"
-          ],
-          "anchor_count": 3,
-          "context_count": 4,
-          "knowledge_refs": [
-            "K85",
-            "K41"
-          ]
-        },
-        {
-          "knowledge_id": "unknown",
-          "severity": "HIGH",
-          "summary": "結論：VT 在退休情境中提供更穩定的存活率（4% 下接近 100%），但不能翻倍提領率。教訓：extraordinary claims require extraordinary validation。",
-          "matched_anchors": [
-            "K85",
-            "K87"
-          ],
-          "matched_context": [
-            "VT",
-            "bootstrap"
-          ],
-          "anchor_count": 2,
-          "context_count": 2,
-          "knowledge_refs": [
-            "K87",
-            "K85",
-            "K85"
-          ]
-        },
-        {
-          "knowledge_id": "2febf0df",
-          "severity": "MEDIUM",
-          "summary": "結論：50/50 有效不是因為「平均負相關」，而是因為「危機時負相關」。",
-          "matched_anchors": [
-            "SPY-GLD"
-          ],
-          "matched_context": [
-            "50/50",
-            "GLD",
-            "SPY",
-            "Sharpe",
-            "VIX",
-            "VT"
-          ],
-          "anchor_count": 1,
-          "context_count": 6,
-          "knowledge_refs": []
-        },
-        {
-          "knowledge_id": "83cf488a",
-          "severity": "MEDIUM",
-          "summary": "★ 60/20/20 FAILS cross-OOS。50/50 wins 3/5 periods（GFC + COVID+Rate Hikes 兩個最重要壓力測試",
-          "matched_anchors": [
-            "K24"
-          ],
-          "matched_context": [
-            "50/50",
-            "GLD",
-            "MDD",
-            "SPY",
-            "Sharpe",
-            "SPY/GLD"
-          ],
-          "anchor_count": 1,
-          "context_count": 6,
-          "knowledge_refs": [
-            "K24",
-            "K22"
-          ]
-        },
-        {
-          "knowledge_id": "9be956b8",
-          "severity": "LOW",
-          "summary": "結論：w = target/σ_VIX 已最優利用 VIX 信息，疊加 dynamic target 是 double-counting。12/VIX irreducible kernel 再確認。",
-          "matched_anchors": [
-            "K4"
-          ],
-          "matched_context": [
-            "MDD",
-            "Sharpe",
-            "VIX",
-            "leverage",
-            "12/VIX"
-          ],
-          "anchor_count": 1,
-          "context_count": 5,
-          "knowledge_refs": [
-            "K4"
-          ]
-        }
-      ],
-      "max_severity": "HIGH",
-      "relevance_score": 2138.8,
-      "text_snippets": [
-        "[Google Trends] ...是的——經過 23 次獨立驗證（K90）。**  這是我們研究中被反覆確認最多次的結論。每次我們嘗試加入新指標來改善 12/VIX，結果都是 NULL：  - Google Trends（K3/K4）→ NULL - CAPE（K8）→ NULL - AAII 投資人情緒（K8）→ NULL - VRP 波動風險溢價（K52）→ NULL -...",
-        "[Monte Carlo] ...前歸零。  VT 在這裡的價值是獨特的：**市場下跌時自動減碼，避免你在低點被迫賣出。** 這是 VT 的「sequencing bonus」。  我們最初的 Monte Carlo 模擬（K85）顯示 VT 能把安全提領率從 4% 翻倍到 8%。但自我質疑後的交叉驗證（K87）推翻了這個過度樂觀的結論：  **修正後的結論：** - VT...",
-        "[bootstrap] ...文基於 VolPred 研究系統 48 項實證研究（K 系列知識庫），所有結論均經過樣本外驗證。研究方法包括 GARCH 模型族、Monte Carlo 模擬、Bootstrap 統計檢定、跨市場/跨時期驗證等。完整研究紀錄可在本站「研究思考」分類中查閱。*  *免責聲明：本文僅供教育參考，不構成投資建議。投資有風險，過去績效不代表未來...",
-        "[leverage] ...性來自兩個不同的機制，各自負責不同的績效面向：  **通道一：趨勢跟隨（TSMOM exposure）→ 貢獻 Sharpe**  當市場下跌，波動率通常上升（leverage effect）。VT 因此自動減碼——但這本質上就是一種趨勢跟隨策略。SPY 的 VT alpha 有 32% 被 12 個月趨勢動量解釋（K46/K49）。...",
-        "[SPY-GLD] ...）→ 不顯著 4. **K24**：加 TLT/IEF/TIP/VNQ → 不顯著 5. **K54**：GLD 反向策略 → 反而更差 6. **K63**：SPY-GLD 相關性分析 → 穩定有效 7. **K64**：加入第三、四資產 → 0/6 顯著 8. **K89**：Factor tilts（MTUM/VLUE/QUA..."
+        "[SPY-specific] ...ay bias + subsample instability → 判定 FALSE POSITIVE）、Momentum Overlay（跨資產 0/4 → SPY-SPECIFIC）、Excess Fear Signal（OOS t=2.61 < Harvey 3 → IN-SAMPLE ONLY）等。  ### 7.2 最穩健的七項發現...",
+        "[Moreira-Muir] ...> -18.4%（+1.9pp）。  12/VIX 的理論基礎在 N87 中被正式確立：w = 12/VIX = σ_target / σ_implied = Moreira-Muir（2017）VT 框架 + 隱含波動率。Bozovic（2024, IRFA）已獨立證明 VIX-managed 優於 realized-vol-managed..."
       ]
     },
     {
@@ -2168,13 +2135,158 @@
         }
       ],
       "max_severity": "HIGH",
-      "relevance_score": 2129.6,
+      "relevance_score": 2213.7,
       "text_snippets": [
         "[Conditional Autoregressive Range] ...ecific significant results 是金融計量學中最常見的陷阱之一。  ### 1.4 CARR（Chou, 2005）  **設計動機**：Conditional Autoregressive Range model，用 log(High/Low) 替代 r² 作為波動率代理。理論上，range estimator 比 squared return 有 5-8...",
         "[Engle-Manganelli] ...率檢定——violation 比例是否正確？ 2. **Christoffersen (1998)**：獨立性檢定——violation 是否群聚？ 3. **Engle-Manganelli DQ**：動態分位數檢定——violation 是否與過去資訊相關？  ### 3.2 核心結果：7 資產 × 5 方法 × 3 測試 = 105 項回測...",
         "[Fissler-Ziegel] ...覆蓋率（Kupiec） | Skewed-t | 6/6 資產通過 | | 條件校準（Trinity） | FHS | 7/7 全通過，含群聚 | | 效率（Fissler-Ziegel） | Normal | 最小 joint loss |  這不是缺點——這是 VaR 方法論的本質特徵：coverage、independence、effic...",
-        "[GARCH-MIDAS] ...底層波動率預測的精度。GARCH σ² 的 QLIKE 天花板通過 VaR 分位數傳導到了 CAViaR——它們在不同的語言中說著同一件事。  ### 1.3 GARCH-MIDAS（Engle, Ghysels & Sohn, 2013）  **設計動機**：混頻模型，用低頻宏觀變數影響長期波動率水平。理論上，GARCH 只看過去的收益率...",
-        "[Full-sample] ...6 | 理論 | | P14 | GARCH-MIDAS (INDPRO) 自建 | OOS DM p=0.001 | 模型 | | P15 | INDPRO full-sample check | Period-specific 降級 | 驗證 | | P16-P17 | FRED macro variables survey | 5 變..."
+        "[Full-sample] ...6 | 理論 | | P14 | GARCH-MIDAS (INDPRO) 自建 | OOS DM p=0.001 | 模型 | | P15 | INDPRO full-sample check | Period-specific 降級 | 驗證 | | P16-P17 | FRED macro variables survey | 5 變...",
+        "[GARCH-MIDAS] ...底層波動率預測的精度。GARCH σ² 的 QLIKE 天花板通過 VaR 分位數傳導到了 CAViaR——它們在不同的語言中說著同一件事。  ### 1.3 GARCH-MIDAS（Engle, Ghysels & Sohn, 2013）  **設計動機**：混頻模型，用低頻宏觀變數影響長期波動率水平。理論上，GARCH 只看過去的收益率..."
+      ]
+    },
+    {
+      "article_id": "mile_ee473d5a",
+      "title": "波動率擇時（VT）完全指南：15 個問題，48 個研究發現，一次講清楚",
+      "status": "published",
+      "source_file": "storage/reports/mile_ee473d5a.json",
+      "matched_keywords": [
+        "12/VIX",
+        "50/50",
+        "GARCH",
+        "GLD",
+        "Google Trends",
+        "IEF",
+        "K24",
+        "K4",
+        "K41",
+        "K85",
+        "K87",
+        "MDD",
+        "Monte Carlo",
+        "SPY",
+        "SPY-GLD",
+        "SPY/GLD",
+        "Sharpe",
+        "TLT",
+        "TSMOM",
+        "VIX",
+        "VT",
+        "bootstrap",
+        "leverage"
+      ],
+      "correction_sources": [
+        {
+          "knowledge_id": "unknown",
+          "severity": "HIGH",
+          "summary": "★★★ VT 把退休安全提領率從 4% 翻倍到 8%。12/VIX VT 在 4-5% 提領率下 10,000 次 Monte Carlo 零破產（B&H 96.3%）",
+          "matched_anchors": [
+            "K41",
+            "K85",
+            "Monte Carlo"
+          ],
+          "matched_context": [
+            "50/50",
+            "VIX",
+            "VT",
+            "12/VIX"
+          ],
+          "anchor_count": 3,
+          "context_count": 4,
+          "knowledge_refs": [
+            "K85",
+            "K41"
+          ]
+        },
+        {
+          "knowledge_id": "unknown",
+          "severity": "HIGH",
+          "summary": "結論：VT 在退休情境中提供更穩定的存活率（4% 下接近 100%），但不能翻倍提領率。教訓：extraordinary claims require extraordinary validation。",
+          "matched_anchors": [
+            "K85",
+            "K87"
+          ],
+          "matched_context": [
+            "VT",
+            "bootstrap"
+          ],
+          "anchor_count": 2,
+          "context_count": 2,
+          "knowledge_refs": [
+            "K87",
+            "K85",
+            "K85"
+          ]
+        },
+        {
+          "knowledge_id": "2febf0df",
+          "severity": "MEDIUM",
+          "summary": "結論：50/50 有效不是因為「平均負相關」，而是因為「危機時負相關」。",
+          "matched_anchors": [
+            "SPY-GLD"
+          ],
+          "matched_context": [
+            "50/50",
+            "GLD",
+            "SPY",
+            "Sharpe",
+            "VIX",
+            "VT"
+          ],
+          "anchor_count": 1,
+          "context_count": 6,
+          "knowledge_refs": []
+        },
+        {
+          "knowledge_id": "83cf488a",
+          "severity": "MEDIUM",
+          "summary": "★ 60/20/20 FAILS cross-OOS。50/50 wins 3/5 periods（GFC + COVID+Rate Hikes 兩個最重要壓力測試",
+          "matched_anchors": [
+            "K24"
+          ],
+          "matched_context": [
+            "50/50",
+            "GLD",
+            "MDD",
+            "SPY",
+            "Sharpe",
+            "SPY/GLD"
+          ],
+          "anchor_count": 1,
+          "context_count": 6,
+          "knowledge_refs": [
+            "K24",
+            "K22"
+          ]
+        },
+        {
+          "knowledge_id": "9be956b8",
+          "severity": "LOW",
+          "summary": "結論：w = target/σ_VIX 已最優利用 VIX 信息，疊加 dynamic target 是 double-counting。12/VIX irreducible kernel 再確認。",
+          "matched_anchors": [
+            "K4"
+          ],
+          "matched_context": [
+            "MDD",
+            "Sharpe",
+            "VIX",
+            "leverage",
+            "12/VIX"
+          ],
+          "anchor_count": 1,
+          "context_count": 5,
+          "knowledge_refs": [
+            "K4"
+          ]
+        }
+      ],
+      "max_severity": "HIGH",
+      "relevance_score": 2136.9,
+      "text_snippets": [
+        "[Google Trends] ...是的——經過 23 次獨立驗證（K90）。**  這是我們研究中被反覆確認最多次的結論。每次我們嘗試加入新指標來改善 12/VIX，結果都是 NULL：  - Google Trends（K3/K4）→ NULL - CAPE（K8）→ NULL - AAII 投資人情緒（K8）→ NULL - VRP 波動風險溢價（K52）→ NULL -...",
+        "[Monte Carlo] ...前歸零。  VT 在這裡的價值是獨特的：**市場下跌時自動減碼，避免你在低點被迫賣出。** 這是 VT 的「sequencing bonus」。  我們最初的 Monte Carlo 模擬（K85）顯示 VT 能把安全提領率從 4% 翻倍到 8%。但自我質疑後的交叉驗證（K87）推翻了這個過度樂觀的結論：  **修正後的結論：** - VT...",
+        "[bootstrap] ...文基於 VolPred 研究系統 48 項實證研究（K 系列知識庫），所有結論均經過樣本外驗證。研究方法包括 GARCH 模型族、Monte Carlo 模擬、Bootstrap 統計檢定、跨市場/跨時期驗證等。完整研究紀錄可在本站「研究思考」分類中查閱。*  *免責聲明：本文僅供教育參考，不構成投資建議。投資有風險，過去績效不代表未來...",
+        "[leverage] ...性來自兩個不同的機制，各自負責不同的績效面向：  **通道一：趨勢跟隨（TSMOM exposure）→ 貢獻 Sharpe**  當市場下跌，波動率通常上升（leverage effect）。VT 因此自動減碼——但這本質上就是一種趨勢跟隨策略。SPY 的 VT alpha 有 32% 被 12 個月趨勢動量解釋（K46/K49）。...",
+        "[SPY-GLD] ...）→ 不顯著 4. **K24**：加 TLT/IEF/TIP/VNQ → 不顯著 5. **K54**：GLD 反向策略 → 反而更差 6. **K63**：SPY-GLD 相關性分析 → 穩定有效 7. **K64**：加入第三、四資產 → 0/6 顯著 8. **K89**：Factor tilts（MTUM/VLUE/QUA..."
       ]
     }
   ]
