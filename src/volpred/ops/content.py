@@ -49,6 +49,8 @@ def publish_milestone_article(
     tags: list[str] | None = None,
     status: str = "published",
     publish_at: str | None = None,
+    audience: str | None = None,
+    category: str | None = None,
     storage_dir: str = "storage",
 ) -> str:
     publisher = Publisher(storage_dir=storage_dir)
@@ -60,6 +62,8 @@ def publish_milestone_article(
         tags=tags,
         status=status,
         publish_at=publish_at,
+        audience=audience,
+        category=category,
     )
 
 

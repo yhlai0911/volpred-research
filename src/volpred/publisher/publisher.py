@@ -98,8 +98,15 @@ class Publisher:
                          phase: str, details: dict | None = None,
                          tags: list[str] | None = None,
                          status: str = 'published',
-                         publish_at: str | None = None) -> str:
-        """Publish a research milestone."""
+                         publish_at: str | None = None,
+                         audience: str | None = None,
+                         category: str | None = None) -> str:
+        """Publish a research milestone.
+
+        audience: 'general' (一般讀者), 'research' (研究), 'daily' (每日建議), 'member_qa'
+        category: 'general', 'milestone', 'experiment', 'comparison', 'qa'
+        If not provided, auto-detected from tags.
+        """
         import uuid
         # --- Dedupe check: reject if same title published/drafted in last 24h ---
         feed = self._load_feed()
@@ -130,14 +137,31 @@ class Publisher:
         pub_id = f"mile_{uuid.uuid4().hex[:8]}"
         now = datetime.now(timezone.utc).isoformat()
         normalized_status = status if status in {'published', 'draft', 'scheduled', 'unpublished', 'archived'} else 'published'
+        # Determine audience and category — explicit params take priority
+        tag_list = tags or []
+        if audience is None:
+            if '一般讀者' in tag_list:
+                audience = 'general'
+            elif '每日建議' in tag_list or 'daily-update' in tag_list:
+                audience = 'daily'
+            else:
+                audience = 'research'
+        if category is None:
+            if audience == 'general':
+                category = 'general'
+            else:
+                category = 'milestone'
+
         item = {
             'id': pub_id,
             'title': title,
             'description': description,
-            'category': 'milestone',
+            'content': description,
+            'category': category,
+            'audience': audience,
             'phase': phase,
             'details': details or {},
-            'tags': tags or [],
+            'tags': tag_list,
             'created_at': now,
             'published_at': publish_at or now,
             'status': normalized_status,
