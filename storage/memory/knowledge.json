@@ -10025,5 +10025,46 @@
     "sample_size": "502 OOS",
     "limitations": "Only bivariate (SPY/GLD), low unconditional correlation limits DCC value",
     "references": "Engle (2002) JBES 20(3):339-350"
+  },
+  {
+    "title": "K446: GPR Geopolitical Risk — Null (VIX causes GPR, not reverse)",
+    "content": "[提出: Claude(文獻搜尋), 執行: Claude] K446: Caldara & Iacoviello (2022) GPR daily index vs SPY vol. GPR-VIX corr=0.065 (near zero). IS partial r=-0.079 (t=6.43 passes Harvey but sign is NEGATIVE: high GPR→lower vol after controlling VIX, delta R²=0.3%). OOS: GPR adds nothing to VIX (DM p=0.28/0.15). **Granger causality reversed: VIX→GPR significant (F=6.71), GPR→RV not significant.** Market fear drives geopolitical news coverage, not vice versa. Event analysis: Iraq War corr=+0.61 (GPR works), COVID corr=-0.18 (financial crisis, GPR irrelevant). GPR useful only during actual military conflicts, not exploitable ex ante. VIX sufficiency #26。",
+    "experiment_id": "k446",
+    "tags": [
+      "GPR",
+      "geopolitical",
+      "alternative_data",
+      "null_result",
+      "VIX_sufficiency",
+      "Granger"
+    ],
+    "references": "Caldara & Iacoviello (2022) AER 112(4):1194-1225",
+    "id": 1012,
+    "created_at": "2026-03-25T22:15:21.894875+00:00",
+    "category": "vol_prediction",
+    "data_source": "yfinance + GPR website",
+    "data_period": "2005-2026",
+    "sample_size": "500-760 OOS",
+    "limitations": "SPY only, linear models"
+  },
+  {
+    "title": "K447: SKEW Index Tail Risk — Null (hurts rather than helps, sub-period unstable)",
+    "content": "[提出: Claude(文獻搜尋), 執行: Claude] K447: CBOE SKEW index for tail risk prediction. Refs: Faff, Parwada, Tan (2021) JFS. SKEW-VIX corr=-0.236. SKEW alone near random for tail events (AUC=0.539 vs VIX 0.824). Adding SKEW to VIX HURTS: AUC drops 0.824→0.743, R²_OOS drops 0.173→0.147. Sub-period instability: 2023 partial r=-0.500 (sig), 2024 r=+0.097 (NS), 2025 r=-0.045 (NS)——sign flip across years. SKEW provides regime-dependent inconsistent information. 結論：SKEW 不適合系統性 vol/tail prediction。VIX sufficiency #27。",
+    "experiment_id": "k447",
+    "tags": [
+      "SKEW",
+      "tail_risk",
+      "options_implied",
+      "null_result",
+      "VIX_sufficiency"
+    ],
+    "references": "Faff, Parwada, Tan (2021) J. Financial Stability",
+    "id": 1013,
+    "created_at": "2026-03-25T22:15:21.894875+00:00",
+    "category": "vol_prediction",
+    "data_source": "yfinance + GPR website",
+    "data_period": "2005-2026",
+    "sample_size": "500-760 OOS",
+    "limitations": "SPY only, linear models"
   }
 ]

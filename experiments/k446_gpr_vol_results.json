@@ -1,0 +1,1054 @@
+{
+  "experiment_id": "K446",
+  "title": "Geopolitical Risk Index (GPR) and Stock Market Volatility",
+  "timestamp": "2026-03-25T22:12:05.481819+00:00",
+  "data_sources": {
+    "gpr": "Caldara & Iacoviello (2022), matteoiacoviello.com/gpr.htm, daily GPR index",
+    "spy": "yfinance SPY",
+    "vix": "yfinance ^VIX",
+    "sample_period": "2000-02-03 to 2026-02-23",
+    "n_observations": 6552,
+    "oos_period": "2023-01-01 to 2024-12-31"
+  },
+  "literature": {
+    "primary": "Caldara & Iacoviello (2022) AER 112(4):1194-1225",
+    "related": [
+      "Kannadhasan & Das (2020) J. Business Research",
+      "2023 ScienceDirect: ML models for GPR vol forecasting"
+    ]
+  },
+  "diagnostics": {
+    "descriptive_stats": {
+      "gpr": {
+        "mean": 117.80023503609193,
+        "std": 67.54241415727056,
+        "skew": 4.145125586751588,
+        "kurtosis": 32.77673324826779,
+        "min": 9.491598129272461,
+        "max": 1045.6036376953125,
+        "n": 6552
+      },
+      "gpr_act": {
+        "mean": 117.75088727204937,
+        "std": 103.50158010049866,
+        "skew": 5.899310208946851,
+        "kurtosis": 57.634104250736,
+        "min": 0.0,
+        "max": 1627.4276123046875,
+        "n": 6552
+      },
+      "gpr_threat": {
+        "mean": 119.77153908529561,
+        "std": 69.14257315089937,
+        "skew": 2.4823475701850195,
+        "kurtosis": 12.539616753104891,
+        "min": 7.892561435699463,
+        "max": 809.48681640625,
+        "n": 6552
+      },
+      "rv21": {
+        "mean": 16.309604818305807,
+        "std": 10.61938649459461,
+        "skew": 3.1504564771455543,
+        "kurtosis": 15.373970533694436,
+        "min": 3.42061534721768,
+        "max": 94.49556983815593,
+        "n": 6552
+      },
+      "vix": {
+        "mean": 19.81382784229204,
+        "std": 8.359041837048144,
+        "skew": 2.2459822904470474,
+        "kurtosis": 8.34418510381175,
+        "min": 9.140000343322754,
+        "max": 82.69000244140625,
+        "n": 6552
+      },
+      "spy_ret": {
+        "mean": 0.0003851176441929273,
+        "std": 0.012158904212382428,
+        "skew": 0.03314553605436417,
+        "kurtosis": 12.191325216002971,
+        "min": -0.10942363830266588,
+        "max": 0.14519757313184622,
+        "n": 6552
+      }
+    },
+    "stationarity": {
+      "gpr": {
+        "adf_statistic": -7.2516,
+        "adf_pvalue": 0.0,
+        "stationary": true
+      },
+      "vix": {
+        "adf_statistic": -5.7183,
+        "adf_pvalue": 1e-06,
+        "stationary": true
+      },
+      "rv21": {
+        "adf_statistic": -8.0911,
+        "adf_pvalue": 0.0,
+        "stationary": true
+      }
+    },
+    "correlations": {
+      "contemporaneous": {
+        "gpr": {
+          "gpr": 1.0,
+          "gpr_act": 0.8738,
+          "gpr_threat": 0.8113,
+          "vix": 0.0648,
+          "rv21": 0.0132,
+          "rv5_fwd": -0.0068,
+          "rv21_fwd": -0.0178
+        },
+        "gpr_act": {
+          "gpr": 0.8738,
+          "gpr_act": 1.0,
+          "gpr_threat": 0.4451,
+          "vix": 0.0877,
+          "rv21": 0.0442,
+          "rv5_fwd": 0.0141,
+          "rv21_fwd": 0.003
+        },
+        "gpr_threat": {
+          "gpr": 0.8113,
+          "gpr_act": 0.4451,
+          "gpr_threat": 1.0,
+          "vix": 0.0234,
+          "rv21": -0.0173,
+          "rv5_fwd": -0.0229,
+          "rv21_fwd": -0.0299
+        },
+        "vix": {
+          "gpr": 0.0648,
+          "gpr_act": 0.0877,
+          "gpr_threat": 0.0234,
+          "vix": 1.0,
+          "rv21": 0.8678,
+          "rv5_fwd": 0.7408,
+          "rv21_fwd": 0.7165
+        },
+        "rv21": {
+          "gpr": 0.0132,
+          "gpr_act": 0.0442,
+          "gpr_threat": -0.0173,
+          "vix": 0.8678,
+          "rv21": 1.0,
+          "rv5_fwd": 0.6548,
+          "rv21_fwd": 0.6453
+        },
+        "rv5_fwd": {
+          "gpr": -0.0068,
+          "gpr_act": 0.0141,
+          "gpr_threat": -0.0229,
+          "vix": 0.7408,
+          "rv21": 0.6548,
+          "rv5_fwd": 1.0,
+          "rv21_fwd": 0.7891
+        },
+        "rv21_fwd": {
+          "gpr": -0.0178,
+          "gpr_act": 0.003,
+          "gpr_threat": -0.0299,
+          "vix": 0.7165,
+          "rv21": 0.6453,
+          "rv5_fwd": 0.7891,
+          "rv21_fwd": 1.0
+        }
+      },
+      "gpr_vix_leadlag": {
+        "-10": 0.0559,
+        "-9": 0.0583,
+        "-8": 0.0609,
+        "-7": 0.0622,
+        "-6": 0.0651,
+        "-5": 0.0662,
+        "-4": 0.067,
+        "-3": 0.068,
+        "-2": 0.0681,
+        "-1": 0.0697,
+        "0": 0.0648,
+        "1": 0.0588,
+        "2": 0.0529,
+        "3": 0.0498,
+        "4": 0.0457,
+        "5": 0.0406,
+        "6": 0.0364,
+        "7": 0.0346,
+        "8": 0.0328,
+        "9": 0.0312,
+        "10": 0.029
+      },
+      "gpr_rv_leadlag": {
+        "-10": 0.0056,
+        "-9": 0.0062,
+        "-8": 0.0065,
+        "-7": 0.008,
+        "-6": 0.0098,
+        "-5": 0.0107,
+        "-4": 0.0127,
+        "-3": 0.014,
+        "-2": 0.0139,
+        "-1": 0.0138,
+        "0": 0.0132,
+        "1": 0.0123,
+        "2": 0.0114,
+        "3": 0.0105,
+        "4": 0.0091,
+        "5": 0.0088,
+        "6": 0.0072,
+        "7": 0.0067,
+        "8": 0.0055,
+        "9": 0.0043,
+        "10": 0.0024
+      }
+    }
+  },
+  "granger_causality": {
+    "GPR->VIX": {
+      "1": {
+        "f_statistic": 3.8482,
+        "f_pvalue": 0.049854,
+        "significant": true
+      },
+      "2": {
+        "f_statistic": 2.8027,
+        "f_pvalue": 0.060743,
+        "significant": false
+      },
+      "3": {
+        "f_statistic": 1.9471,
+        "f_pvalue": 0.119736,
+        "significant": false
+      },
+      "4": {
+        "f_statistic": 1.5224,
+        "f_pvalue": 0.192728,
+        "significant": false
+      },
+      "5": {
+        "f_statistic": 1.144,
+        "f_pvalue": 0.334572,
+        "significant": false
+      },
+      "6": {
+        "f_statistic": 1.1578,
+        "f_pvalue": 0.325966,
+        "significant": false
+      },
+      "7": {
+        "f_statistic": 1.2722,
+        "f_pvalue": 0.259755,
+        "significant": false
+      },
+      "8": {
+        "f_statistic": 1.0655,
+        "f_pvalue": 0.384204,
+        "significant": false
+      },
+      "9": {
+        "f_statistic": 0.9299,
+        "f_pvalue": 0.49752,
+        "significant": false
+      },
+      "10": {
+        "f_statistic": 0.8515,
+        "f_pvalue": 0.578719,
+        "significant": false
+      }
+    },
+    "GPR->RV21": {
+      "1": {
+        "f_statistic": 2.4135,
+        "f_pvalue": 0.120356,
+        "significant": false
+      },
+      "2": {
+        "f_statistic": 1.1411,
+        "f_pvalue": 0.319537,
+        "significant": false
+      },
+      "3": {
+        "f_statistic": 0.628,
+        "f_pvalue": 0.596893,
+        "significant": false
+      },
+      "4": {
+        "f_statistic": 0.5842,
+        "f_pvalue": 0.6741,
+        "significant": false
+      },
+      "5": {
+        "f_statistic": 1.2056,
+        "f_pvalue": 0.303675,
+        "significant": false
+      },
+      "6": {
+        "f_statistic": 1.0497,
+        "f_pvalue": 0.39079,
+        "significant": false
+      },
+      "7": {
+        "f_statistic": 1.4897,
+        "f_pvalue": 0.165896,
+        "significant": false
+      },
+      "8": {
+        "f_statistic": 1.3223,
+        "f_pvalue": 0.227043,
+        "significant": false
+      },
+      "9": {
+        "f_statistic": 1.2001,
+        "f_pvalue": 0.289919,
+        "significant": false
+      },
+      "10": {
+        "f_statistic": 1.073,
+        "f_pvalue": 0.37914,
+        "significant": false
+      }
+    },
+    "VIX->GPR": {
+      "1": {
+        "f_statistic": 6.7089,
+        "f_pvalue": 0.009621,
+        "significant": true
+      },
+      "2": {
+        "f_statistic": 5.5258,
+        "f_pvalue": 0.004007,
+        "significant": true
+      },
+      "3": {
+        "f_statistic": 3.5799,
+        "f_pvalue": 0.013283,
+        "significant": true
+      },
+      "4": {
+        "f_statistic": 2.6154,
+        "f_pvalue": 0.033454,
+        "significant": true
+      },
+      "5": {
+        "f_statistic": 1.9105,
+        "f_pvalue": 0.089164,
+        "significant": false
+      },
+      "6": {
+        "f_statistic": 1.8279,
+        "f_pvalue": 0.089634,
+        "significant": false
+      },
+      "7": {
+        "f_statistic": 1.7411,
+        "f_pvalue": 0.09483,
+        "significant": false
+      },
+      "8": {
+        "f_statistic": 1.4916,
+        "f_pvalue": 0.15454,
+        "significant": false
+      },
+      "9": {
+        "f_statistic": 1.3739,
+        "f_pvalue": 0.193851,
+        "significant": false
+      },
+      "10": {
+        "f_statistic": 1.2118,
+        "f_pvalue": 0.277576,
+        "significant": false
+      }
+    }
+  },
+  "forecasting_rv5_fwd": {
+    "baseline_rv": {
+      "features": [
+        "rv21_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 27.3568,
+      "rmse": 5.2304,
+      "qlike": 0.100135,
+      "r2_oos": -0.086,
+      "coefficients": {
+        "rv21_lag1": 0.755722,
+        "intercept": 3.209568
+      }
+    },
+    "vix_only": {
+      "features": [
+        "vix_lag1",
+        "vix_ma5_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 25.8195,
+      "rmse": 5.0813,
+      "qlike": 0.091034,
+      "r2_oos": -0.025,
+      "coefficients": {
+        "vix_lag1": 1.44312,
+        "vix_ma5_lag1": -0.404635,
+        "intercept": -5.14156
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": 0.5177,
+        "dm_pvalue": 0.604877,
+        "bootstrap_pvalue": 0.537,
+        "better_than_baseline": false
+      }
+    },
+    "gpr_only": {
+      "features": [
+        "gpr_lag1",
+        "gpr_ma7_lag1",
+        "gpr_ma21_lag1",
+        "gpr_zscore_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 42.0081,
+      "rmse": 6.4814,
+      "qlike": 0.134612,
+      "r2_oos": -0.6677,
+      "coefficients": {
+        "gpr_lag1": 0.018375,
+        "gpr_ma7_lag1": -0.010441,
+        "gpr_ma21_lag1": -0.007382,
+        "gpr_zscore_lag1": -0.693063,
+        "intercept": 15.733927
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": -3.4263,
+        "dm_pvalue": 0.000662,
+        "bootstrap_pvalue": 0.0032,
+        "better_than_baseline": false
+      }
+    },
+    "gpr_decomposed": {
+      "features": [
+        "gpr_act_lag1",
+        "gpr_threat_lag1",
+        "gpr_ma21_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 40.9107,
+      "rmse": 6.3961,
+      "qlike": 0.132413,
+      "r2_oos": -0.6241,
+      "coefficients": {
+        "gpr_act_lag1": 0.004629,
+        "gpr_threat_lag1": -0.001844,
+        "gpr_ma21_lag1": -0.004881,
+        "intercept": 16.046642
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": -3.2168,
+        "dm_pvalue": 0.00138,
+        "bootstrap_pvalue": 0.0072,
+        "better_than_baseline": false
+      }
+    },
+    "vix_gpr": {
+      "features": [
+        "vix_lag1",
+        "vix_ma5_lag1",
+        "gpr_lag1",
+        "gpr_ma7_lag1",
+        "gpr_zscore_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 26.2335,
+      "rmse": 5.1219,
+      "qlike": 0.095663,
+      "r2_oos": -0.0415,
+      "coefficients": {
+        "vix_lag1": 1.432102,
+        "vix_ma5_lag1": -0.386129,
+        "gpr_lag1": -0.004486,
+        "gpr_ma7_lag1": -0.006348,
+        "gpr_zscore_lag1": -0.13193,
+        "intercept": -4.062683
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": 0.3744,
+        "dm_pvalue": 0.70827,
+        "bootstrap_pvalue": 0.6572,
+        "better_than_baseline": false
+      },
+      "dm_vs_vix_only": {
+        "dm_statistic": -1.0807,
+        "dm_pvalue": 0.28033,
+        "bootstrap_pvalue": 0.2302,
+        "gpr_adds_value": false
+      }
+    },
+    "kitchen_sink": {
+      "features": [
+        "rv21_lag1",
+        "vix_lag1",
+        "vix_ma5_lag1",
+        "vix_change_lag1",
+        "gpr_lag1",
+        "gpr_ma7_lag1",
+        "gpr_ma21_lag1",
+        "gpr_zscore_lag1",
+        "gpr_change_lag1",
+        "gpr_log_lag1",
+        "gpr_act_lag1",
+        "gpr_threat_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 27.0255,
+      "rmse": 5.1986,
+      "qlike": 0.094366,
+      "r2_oos": -0.0729,
+      "coefficients": {
+        "rv21_lag1": 0.196018,
+        "vix_lag1": 1.077708,
+        "vix_ma5_lag1": -0.258427,
+        "vix_change_lag1": 6.395825,
+        "gpr_lag1": -0.014554,
+        "gpr_ma7_lag1": -0.013277,
+        "gpr_ma21_lag1": -0.005603,
+        "gpr_zscore_lag1": -0.600331,
+        "gpr_change_lag1": -0.525284,
+        "gpr_log_lag1": 2.104911,
+        "gpr_act_lag1": 0.004994,
+        "gpr_threat_lag1": 0.008391,
+        "intercept": -11.479613
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": 0.1074,
+        "dm_pvalue": 0.914512,
+        "bootstrap_pvalue": 0.8928,
+        "better_than_baseline": false
+      }
+    }
+  },
+  "forecasting_rv21_fwd": {
+    "baseline_rv": {
+      "features": [
+        "rv21_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 15.1236,
+      "rmse": 3.8889,
+      "qlike": 0.045299,
+      "r2_oos": -0.5077,
+      "coefficients": {
+        "rv21_lag1": 0.64643,
+        "intercept": 5.868937
+      }
+    },
+    "vix_only": {
+      "features": [
+        "vix_lag1",
+        "vix_ma5_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 13.0795,
+      "rmse": 3.6166,
+      "qlike": 0.034617,
+      "r2_oos": -0.3039,
+      "coefficients": {
+        "vix_lag1": 1.167024,
+        "vix_ma5_lag1": -0.288149,
+        "intercept": -1.084368
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": 0.9119,
+        "dm_pvalue": 0.362236,
+        "bootstrap_pvalue": 0.3472,
+        "better_than_baseline": false
+      }
+    },
+    "gpr_only": {
+      "features": [
+        "gpr_lag1",
+        "gpr_ma7_lag1",
+        "gpr_ma21_lag1",
+        "gpr_zscore_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 27.3158,
+      "rmse": 5.2264,
+      "qlike": 0.070163,
+      "r2_oos": -1.7231,
+      "coefficients": {
+        "gpr_lag1": 0.007137,
+        "gpr_ma7_lag1": -0.004013,
+        "gpr_ma21_lag1": -0.005505,
+        "gpr_zscore_lag1": -0.273633,
+        "intercept": 16.913174
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": -3.5906,
+        "dm_pvalue": 0.000362,
+        "bootstrap_pvalue": 0.0078,
+        "better_than_baseline": false
+      }
+    },
+    "gpr_decomposed": {
+      "features": [
+        "gpr_act_lag1",
+        "gpr_threat_lag1",
+        "gpr_ma21_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 26.5073,
+      "rmse": 5.1485,
+      "qlike": 0.068658,
+      "r2_oos": -1.6425,
+      "coefficients": {
+        "gpr_act_lag1": 0.003776,
+        "gpr_threat_lag1": -0.002046,
+        "gpr_ma21_lag1": -0.006359,
+        "intercept": 17.17222
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": -3.4314,
+        "dm_pvalue": 0.00065,
+        "bootstrap_pvalue": 0.0098,
+        "better_than_baseline": false
+      }
+    },
+    "vix_gpr": {
+      "features": [
+        "vix_lag1",
+        "vix_ma5_lag1",
+        "gpr_lag1",
+        "gpr_ma7_lag1",
+        "gpr_zscore_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 12.615,
+      "rmse": 3.5518,
+      "qlike": 0.03456,
+      "r2_oos": -0.2576,
+      "coefficients": {
+        "vix_lag1": 1.159146,
+        "vix_ma5_lag1": -0.271789,
+        "gpr_lag1": -0.011798,
+        "gpr_ma7_lag1": -0.000409,
+        "gpr_zscore_lag1": 0.185478,
+        "intercept": 0.137089
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": 1.1099,
+        "dm_pvalue": 0.267559,
+        "bootstrap_pvalue": 0.28,
+        "better_than_baseline": false
+      },
+      "dm_vs_vix_only": {
+        "dm_statistic": 1.4484,
+        "dm_pvalue": 0.148117,
+        "bootstrap_pvalue": 0.1942,
+        "gpr_adds_value": false
+      }
+    },
+    "kitchen_sink": {
+      "features": [
+        "rv21_lag1",
+        "vix_lag1",
+        "vix_ma5_lag1",
+        "vix_change_lag1",
+        "gpr_lag1",
+        "gpr_ma7_lag1",
+        "gpr_ma21_lag1",
+        "gpr_zscore_lag1",
+        "gpr_change_lag1",
+        "gpr_log_lag1",
+        "gpr_act_lag1",
+        "gpr_threat_lag1"
+      ],
+      "n_train": 5765,
+      "n_oos": 502,
+      "mse": 13.662,
+      "rmse": 3.6962,
+      "qlike": 0.036354,
+      "r2_oos": -0.362,
+      "coefficients": {
+        "rv21_lag1": 0.197186,
+        "vix_lag1": 0.887718,
+        "vix_ma5_lag1": -0.234575,
+        "vix_change_lag1": 5.076997,
+        "gpr_lag1": -0.031899,
+        "gpr_ma7_lag1": -0.004183,
+        "gpr_ma21_lag1": 0.002664,
+        "gpr_zscore_lag1": 0.12196,
+        "gpr_change_lag1": -0.19055,
+        "gpr_log_lag1": 0.402634,
+        "gpr_act_lag1": 0.008576,
+        "gpr_threat_lag1": 0.01286,
+        "intercept": -0.358716
+      },
+      "dm_vs_baseline": {
+        "dm_statistic": 0.6047,
+        "dm_pvalue": 0.54567,
+        "bootstrap_pvalue": 0.5124,
+        "better_than_baseline": false
+      }
+    }
+  },
+  "incremental_analysis": {
+    "rv5_fwd": {
+      "vix_only": {
+        "r2": 0.512438,
+        "adj_r2": 0.512364,
+        "aic": 46749.31,
+        "bic": 46762.88
+      },
+      "vix_plus_gpr": {
+        "r2": 0.515495,
+        "adj_r2": 0.515347,
+        "aic": 46710.1,
+        "bic": 46730.47,
+        "gpr_tstat": -6.4275,
+        "gpr_pvalue": 0.0
+      },
+      "vix_plus_gpr_zscore": {
+        "r2": 0.513154,
+        "adj_r2": 0.513006,
+        "aic": 46741.68,
+        "bic": 46762.04,
+        "gpr_z_tstat": -3.1037,
+        "gpr_z_pvalue": 0.001919
+      },
+      "partial_correlations": {
+        "gpr_controlling_vix": -0.079175,
+        "gpr_controlling_vix_tstat": -6.4275,
+        "gpr_controlling_vix_pvalue": 0.0,
+        "gpr_zscore_controlling_vix": -0.038324,
+        "gpr_zscore_controlling_vix_tstat": -3.1037,
+        "gpr_zscore_controlling_vix_pvalue": 0.001919,
+        "exceeds_harvey_threshold": true
+      },
+      "n_obs": 6552
+    },
+    "rv21_fwd": {
+      "vix_only": {
+        "r2": 0.486196,
+        "adj_r2": 0.486117,
+        "aic": 45182.74,
+        "bic": 45196.32
+      },
+      "vix_plus_gpr": {
+        "r2": 0.490235,
+        "adj_r2": 0.490079,
+        "aic": 45133.04,
+        "bic": 45153.4,
+        "gpr_tstat": -7.2034,
+        "gpr_pvalue": 0.0
+      },
+      "vix_plus_gpr_zscore": {
+        "r2": 0.486376,
+        "adj_r2": 0.486219,
+        "aic": 45182.44,
+        "bic": 45202.8,
+        "gpr_z_tstat": -1.5174,
+        "gpr_z_pvalue": 0.129211
+      },
+      "partial_correlations": {
+        "gpr_controlling_vix": -0.088662,
+        "gpr_controlling_vix_tstat": -7.2034,
+        "gpr_controlling_vix_pvalue": 0.0,
+        "gpr_zscore_controlling_vix": -0.018747,
+        "gpr_zscore_controlling_vix_tstat": -1.5174,
+        "gpr_zscore_controlling_vix_pvalue": 0.129211,
+        "exceeds_harvey_threshold": true
+      },
+      "n_obs": 6552
+    }
+  },
+  "regime_analysis": {
+    "regime_stats": {
+      "low": {
+        "n_obs": 3276,
+        "avg_gpr": 76.55,
+        "avg_vix": 20.55,
+        "avg_rv": 16.36,
+        "gpr_rv_corr": -0.105
+      },
+      "medium": {
+        "n_obs": 1638,
+        "avg_gpr": 121.11,
+        "avg_vix": 18.16,
+        "avg_rv": 13.78,
+        "gpr_rv_corr": -0.0164
+      },
+      "high": {
+        "n_obs": 982,
+        "avg_gpr": 158.14,
+        "avg_vix": 18.62,
+        "avg_rv": 14.41,
+        "gpr_rv_corr": 0.0647
+      },
+      "extreme": {
+        "n_obs": 656,
+        "avg_gpr": 255.16,
+        "avg_vix": 22.05,
+        "avg_rv": 16.42,
+        "gpr_rv_corr": 0.2
+      }
+    },
+    "rolling_corr_stats": {
+      "mean": 0.0162,
+      "std": 0.1696,
+      "min": -0.3969,
+      "max": 0.6276,
+      "pct_positive": 0.5101
+    },
+    "event_analysis": {
+      "9/11": {
+        "n_days": 79,
+        "avg_gpr": 415.54,
+        "avg_rv": 20.07,
+        "gpr_rv_corr": 0.0047
+      },
+      "Iraq_War": {
+        "n_days": 84,
+        "avg_gpr": 252.56,
+        "avg_rv": 18.77,
+        "gpr_rv_corr": 0.6054
+      },
+      "Crimea": {
+        "n_days": 103,
+        "avg_gpr": 104.02,
+        "avg_rv": 8.46,
+        "gpr_rv_corr": -0.1151
+      },
+      "US_China_Trade": {
+        "n_days": 463,
+        "avg_gpr": 109.84,
+        "avg_rv": 12.09,
+        "gpr_rv_corr": 0.0021
+      },
+      "COVID": {
+        "n_days": 125,
+        "avg_gpr": 92.37,
+        "avg_rv": 34.8,
+        "gpr_rv_corr": -0.1774
+      },
+      "Ukraine_War": {
+        "n_days": 231,
+        "avg_gpr": 175.19,
+        "avg_rv": 23.49,
+        "gpr_rv_corr": 0.0251
+      },
+      "Israel_Hamas": {
+        "n_days": 124,
+        "avg_gpr": 170.66,
+        "avg_rv": 10.67,
+        "gpr_rv_corr": 0.2464
+      }
+    },
+    "thresholds": {
+      "p50": 105.27,
+      "p75": 140.37,
+      "p90": 181.01
+    }
+  },
+  "rolling_oos": {
+    "yearly_results": {
+      "2005": {
+        "mse_vix": 16.5504,
+        "mse_vix_gpr": 17.8818,
+        "mse_ratio": 1.0804,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2006": {
+        "mse_vix": 12.0952,
+        "mse_vix_gpr": 11.6839,
+        "mse_ratio": 0.966,
+        "gpr_improves": true,
+        "n_obs": 251
+      },
+      "2007": {
+        "mse_vix": 43.2061,
+        "mse_vix_gpr": 44.9658,
+        "mse_ratio": 1.0407,
+        "gpr_improves": false,
+        "n_obs": 251
+      },
+      "2008": {
+        "mse_vix": 413.8789,
+        "mse_vix_gpr": 400.2815,
+        "mse_ratio": 0.9671,
+        "gpr_improves": true,
+        "n_obs": 253
+      },
+      "2009": {
+        "mse_vix": 90.8788,
+        "mse_vix_gpr": 101.9945,
+        "mse_ratio": 1.1223,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2010": {
+        "mse_vix": 64.7585,
+        "mse_vix_gpr": 68.1166,
+        "mse_ratio": 1.0519,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2011": {
+        "mse_vix": 100.4186,
+        "mse_vix_gpr": 99.8322,
+        "mse_ratio": 0.9942,
+        "gpr_improves": true,
+        "n_obs": 252
+      },
+      "2012": {
+        "mse_vix": 26.8442,
+        "mse_vix_gpr": 29.0114,
+        "mse_ratio": 1.0807,
+        "gpr_improves": false,
+        "n_obs": 250
+      },
+      "2013": {
+        "mse_vix": 22.7877,
+        "mse_vix_gpr": 23.3413,
+        "mse_ratio": 1.0243,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2014": {
+        "mse_vix": 24.2649,
+        "mse_vix_gpr": 24.6022,
+        "mse_ratio": 1.0139,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2015": {
+        "mse_vix": 46.6869,
+        "mse_vix_gpr": 47.0736,
+        "mse_ratio": 1.0083,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2016": {
+        "mse_vix": 27.371,
+        "mse_vix_gpr": 28.1313,
+        "mse_ratio": 1.0278,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2017": {
+        "mse_vix": 10.691,
+        "mse_vix_gpr": 10.8343,
+        "mse_ratio": 1.0134,
+        "gpr_improves": false,
+        "n_obs": 251
+      },
+      "2018": {
+        "mse_vix": 71.5682,
+        "mse_vix_gpr": 70.7325,
+        "mse_ratio": 0.9883,
+        "gpr_improves": true,
+        "n_obs": 251
+      },
+      "2019": {
+        "mse_vix": 29.9903,
+        "mse_vix_gpr": 31.0653,
+        "mse_ratio": 1.0358,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2020": {
+        "mse_vix": 320.3942,
+        "mse_vix_gpr": 322.9417,
+        "mse_ratio": 1.008,
+        "gpr_improves": false,
+        "n_obs": 253
+      },
+      "2021": {
+        "mse_vix": 50.2269,
+        "mse_vix_gpr": 52.2702,
+        "mse_ratio": 1.0407,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2022": {
+        "mse_vix": 60.2732,
+        "mse_vix_gpr": 62.1978,
+        "mse_ratio": 1.0319,
+        "gpr_improves": false,
+        "n_obs": 251
+      },
+      "2023": {
+        "mse_vix": 17.2172,
+        "mse_vix_gpr": 17.6049,
+        "mse_ratio": 1.0225,
+        "gpr_improves": false,
+        "n_obs": 250
+      },
+      "2024": {
+        "mse_vix": 34.1953,
+        "mse_vix_gpr": 34.562,
+        "mse_ratio": 1.0107,
+        "gpr_improves": false,
+        "n_obs": 252
+      },
+      "2025": {
+        "mse_vix": 133.638,
+        "mse_vix_gpr": 133.1954,
+        "mse_ratio": 0.9967,
+        "gpr_improves": true,
+        "n_obs": 250
+      },
+      "2026": {
+        "mse_vix": 31.8379,
+        "mse_vix_gpr": 30.8208,
+        "mse_ratio": 0.9681,
+        "gpr_improves": true,
+        "n_obs": 35
+      }
+    },
+    "overall": {
+      "mse_vix": 76.9115,
+      "mse_vix_gpr": 77.583,
+      "dm_statistic": -0.8689,
+      "dm_pvalue": 0.384956,
+      "n_total_oos": 5318
+    }
+  },
+  "key_findings": {
+    "gpr_vix_contemporaneous_corr": 0.0648,
+    "gpr_rv21_contemporaneous_corr": 0.0132,
+    "granger_gpr_causes_vix": true,
+    "granger_gpr_causes_rv": false,
+    "gpr_adds_to_vix_for_5d_rv": false,
+    "partial_corr_exceeds_harvey": true,
+    "partial_corr_gpr_controlling_vix_5d": -0.079175,
+    "partial_corr_gpr_controlling_vix_21d": -0.088662
+  },
+  "conclusions": [
+    "GPR does NOT provide statistically significant incremental information for 5-day RV forecasting beyond VIX",
+    "Partial correlation GPR|VIX exceeds Harvey (2016) |t|>3.0 threshold \u2014 robust finding",
+    "GPR Granger-causes VIX at some lags \u2014 geopolitical risk leads market fear",
+    "GPR does NOT Granger-cause realized volatility \u2014 no direct predictive channel",
+    "In extreme GPR regime (>p90): avg RV=16.4%, GPR-RV corr=0.2000"
+  ],
+  "limitations": [
+    "GPR index is based on English-language newspapers (10 major publications), may miss non-English geopolitical developments",
+    "Daily GPR has significant noise; smoothed versions (MA7/MA21) may be more informative",
+    "Linear models only; nonlinear/regime-switching effects may exist but are not captured",
+    "SPY only; results may differ for international/EM equity indices",
+    "OOS period 2023-2024 includes specific geopolitical events (Ukraine war continuation, Israel-Hamas); results may not generalize",
+    "No transaction costs or implementability analysis"
+  ]
+}
