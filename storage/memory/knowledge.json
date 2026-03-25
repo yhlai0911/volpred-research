@@ -12256,5 +12256,18 @@
       "leveraged-equity",
       "NOT-diversifier"
     ]
+  },
+  {
+    "id": "K1191",
+    "title": "K350: ★★ Heston SV from daily returns = EWMA (r=1.000). Continuous-time needs options data to add value",
+    "content": "[跳躍式探索] Heston QML from daily returns correlates 1.000000 with EWMA(λ=0.933). OOS QLIKE: GJR -8.10 vs Heston -8.09 (DM NS). Heston kappa→half-life 10d vs GARCH 41d (Heston reverts 4x faster, lacks leverage). Feller condition violated (negative variance possible). Heston rho≈0 vs GJR gamma=0.17. Core: from returns alone, Heston ⊂ GARCH.",
+    "timestamp": "2026-03-25T12:35:19.398016",
+    "tags": [
+      "Heston",
+      "stochastic-vol",
+      "continuous-time",
+      "equals-EWMA",
+      "跳躍式探索"
+    ]
   }
 ]
