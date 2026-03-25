@@ -268,6 +268,13 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **研究永不停止。** 完成任何任務後**立刻執行下一個任務**，不需要回報等待、不需要徵求同意。在同一個 turn 中連續做多個實驗（用 agent team 並行 + 主線串行）。不要做完一個實驗就停下來——連續鏈式執行直到使用者主動中斷。
 **透過 session cron 每 15 分鐘自動觸發 autonomous-research 繼續研究。**
 
+### 實驗前必做：查詢知識庫（不可跳過）
+**每個實驗開始前，必須先查詢知識庫確認該主題的過去成果：**
+1. `grep -i '關鍵詞' storage/memory/knowledge.json | grep title | head -10`
+2. 確認：是否已有相關成果？過去結論是什麼？有無自我修正？
+3. 在 agent prompt 中**引用相關 K 編號**，讓 agent 建立在已有基礎上
+4. 避免重複實驗、避免被已推翻的結論誤導
+
 ### 研究多元化（必須遵守）
 **不要停留在模型舒適區。** 已收斂的結論不需要繼續堆積 null results。
 

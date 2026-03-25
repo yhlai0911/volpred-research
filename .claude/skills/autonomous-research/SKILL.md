@@ -52,10 +52,38 @@ You are not a script runner. You are a thinking researcher with these abilities:
 9. **Agent Teams** — Independent tasks can run in parallel with `isolation: "worktree"`
 10. **Stay on track** — 不要做和 research_program.md 無關的分析
 
+## 實驗前必做：查詢知識庫（不可跳過）
+
+**每個實驗開始前，必須先查詢知識庫確認：**
+
+1. **該主題是否已有相關成果？** — 用 LanceDB 搜尋關鍵詞
+   ```bash
+   uv run python -c "
+   from storage.knowledge_index import search  # or use LanceDB directly
+   # 搜尋相關主題
+   "
+   ```
+   或直接 grep knowledge.json：
+   ```bash
+   grep -i '關鍵詞' storage/memory/knowledge.json | head -10
+   ```
+
+2. **過去的結論是什麼？** — 避免重複實驗、避免被已推翻的結論誤導
+3. **有沒有相關的自我修正？** — 如果之前做過類似實驗但被修正，新實驗應建立在修正後的基礎上
+4. **在 agent prompt 中引用相關 K 編號** — 讓 agent 知道前因後果
+
+**範例**：要做「BTC 波動率預測」實驗前，先查：
+```bash
+grep -i 'BTC\|bitcoin\|加密' storage/memory/knowledge.json | grep 'title' | head -10
+```
+發現 K202(VIX不充分)、K205(微結構VT)、K277(深層結構)、K334(DeFi pilot) → agent prompt 引用這些。
+
+**違反此規則 = 浪費計算資源和 context window。**
+
 ## Research Loop
 
 ```
-Read research_program.md → Check resume state → Data analysis
+查詢知識庫 → Read research_program.md → Check resume state → Data analysis
 → Model experiments → Evaluate (QLIKE + VaR/ES) → Record thinking
 → Publish findings → Reflect → Decide next step → Repeat
 ```
