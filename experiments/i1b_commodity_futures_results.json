@@ -1,0 +1,108 @@
+{
+  "experiment": "I1b",
+  "title": "Commodity Futures Dynamic Hedging",
+  "timestamp": "2026-03-25T15:53:35.233260+00:00",
+  "data": {
+    "source": "yfinance",
+    "period": "2010-2025"
+  },
+  "pairs": {
+    "Gold": {
+      "spot": "GLD",
+      "futures": "GC=F",
+      "n": 4077,
+      "correlation": 0.905,
+      "var_reduction": {
+        "static": 0.8198,
+        "rolling_60d": 0.8141,
+        "ewma_094": 0.8101
+      },
+      "best_method": "Static",
+      "dm_ewma_vs_static": {
+        "t": -3.8,
+        "sig": "★"
+      }
+    },
+    "Crude Oil": {
+      "spot": "USO",
+      "futures": "CL=F",
+      "n": 4078,
+      "correlation": 0.51,
+      "var_reduction": {
+        "static": 0.2598,
+        "rolling_60d": -2.1859,
+        "ewma_094": -1.5808
+      },
+      "best_method": "Static",
+      "dm_ewma_vs_static": {
+        "t": -0.8,
+        "sig": "NS"
+      }
+    },
+    "Silver": {
+      "spot": "SLV",
+      "futures": "SI=F",
+      "n": 4077,
+      "correlation": 0.901,
+      "var_reduction": {
+        "static": 0.8115,
+        "rolling_60d": 0.8014,
+        "ewma_094": 0.7979
+      },
+      "best_method": "Static",
+      "dm_ewma_vs_static": {
+        "t": -1.23,
+        "sig": "NS"
+      }
+    },
+    "Natural Gas": {
+      "spot": "UNG",
+      "futures": "NG=F",
+      "n": 4078,
+      "correlation": 0.848,
+      "var_reduction": {
+        "static": 0.7194,
+        "rolling_60d": 0.6905,
+        "ewma_094": 0.7181
+      },
+      "best_method": "Static",
+      "dm_ewma_vs_static": {
+        "t": -0.05,
+        "sig": "NS"
+      }
+    },
+    "10yr Bond": {
+      "spot": "TLT",
+      "futures": "ZN=F",
+      "n": 4076,
+      "correlation": 0.809,
+      "var_reduction": {
+        "static": 0.6549,
+        "rolling_60d": 0.6636,
+        "ewma_094": 0.6687
+      },
+      "best_method": "EWMA",
+      "dm_ewma_vs_static": {
+        "t": 1.56,
+        "sig": "NS"
+      }
+    },
+    "Japanese Yen": {
+      "spot": "FXY",
+      "futures": "6J=F",
+      "n": 4078,
+      "correlation": 0.968,
+      "var_reduction": {
+        "static": 0.9366,
+        "rolling_60d": 0.9348,
+        "ewma_094": 0.9351
+      },
+      "best_method": "Static",
+      "dm_ewma_vs_static": {
+        "t": -1.08,
+        "sig": "NS"
+      }
+    }
+  },
+  "conclusion": "Best: Static 5, Roll60 0, EWMA 1. DM sig: 1/6."
+}

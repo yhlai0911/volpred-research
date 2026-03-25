@@ -1,0 +1,54 @@
+{
+  "experiment": "K418",
+  "title": "Taiwan Volume-Based Institutional Sentiment",
+  "reference": "Wang et al. (2024) JFM",
+  "timestamp": "2026-03-25T16:21:38.857981+00:00",
+  "data": {
+    "source": "yfinance",
+    "tickers": [
+      "0050.TW",
+      "^TWII",
+      "SPY",
+      "^VIX"
+    ],
+    "period": "2010-01-05 to 2026-03-25",
+    "n_obs": 3829
+  },
+  "predictors": {
+    "Vol Ratio (20d)": {
+      "n": 3788,
+      "simple_r": 0.008,
+      "partial_r": -0.0,
+      "t": -0.02,
+      "harvey": "False"
+    },
+    "Vol Change": {
+      "n": 3806,
+      "simple_r": 0.004,
+      "partial_r": 0.003,
+      "t": 0.17,
+      "harvey": "False"
+    },
+    "TWII Vol Ratio": {
+      "n": 3788,
+      "simple_r": -0.006,
+      "partial_r": -0.006,
+      "t": -0.39,
+      "harvey": "False"
+    },
+    "Amihud": {
+      "n": 3807,
+      "simple_r": 0.0,
+      "partial_r": -0.027,
+      "t": -1.66,
+      "harvey": "False"
+    },
+    "SPY Ret (lag)": {
+      "n": 3807,
+      "simple_r": -0.032,
+      "partial_r": -0.012,
+      "t": -0.77,
+      "harvey": "False"
+    }
+  }
+}

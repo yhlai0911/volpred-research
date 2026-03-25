@@ -1,0 +1,41 @@
+{
+  "experiment": "K421",
+  "title": "VIX ETP Market Impact",
+  "reference": "Bangsgaard & Kokholm (2025) JBF",
+  "timestamp": "2026-03-25T16:29:00.481407+00:00",
+  "data": {
+    "source": "yfinance",
+    "tickers": [
+      "SPY",
+      "UVXY",
+      "^VIX"
+    ],
+    "n": 2067
+  },
+  "predictors": {
+    "UVXY Vol Ratio": {
+      "r_next_ret": -0.001,
+      "r_next_abs": 0.06,
+      "partial_r_rv22": -0.001,
+      "t_partial": -0.04
+    },
+    "UVXY/SPY Vol Ratio": {
+      "r_next_ret": 0.022,
+      "r_next_abs": -0.099,
+      "partial_r_rv22": -0.101,
+      "t_partial": -4.57
+    },
+    "UVXY |Return|": {
+      "r_next_ret": 0.037,
+      "r_next_abs": 0.259,
+      "partial_r_rv22": 0.03,
+      "t_partial": 1.36
+    },
+    "Tracking Error": {
+      "r_next_ret": -0.014,
+      "r_next_abs": 0.11,
+      "partial_r_rv22": 0.025,
+      "t_partial": 1.13
+    }
+  }
+}

@@ -1,0 +1,1256 @@
+{
+  "experiment": "I0",
+  "title": "Futures-Spot Data Diagnostics & GARCH Convergence",
+  "timestamp": "2026-03-25T16:18:52.745537+00:00",
+  "data": {
+    "source": "yfinance",
+    "period": "2010-2025"
+  },
+  "pairs": {
+    "SPY-ES": {
+      "pair": "SPY-ES",
+      "spot": "SPY",
+      "futures": "ES=F",
+      "spot_stats": {
+        "n": 4077,
+        "mean_ann": 14.1,
+        "vol_ann": 17.16,
+        "skewness": -0.332,
+        "kurtosis": 12.116,
+        "jb_stat": 24946.7,
+        "jb_pval": 0.0,
+        "adf_stat": -17.718,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "futures_stats": {
+        "n": 4077,
+        "mean_ann": 12.44,
+        "vol_ann": 17.37,
+        "skewness": -0.429,
+        "kurtosis": 12.192,
+        "jb_stat": 25308.1,
+        "jb_pval": 0.0,
+        "adf_stat": -17.799,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "spot_arch_lm": {
+        "stat": 1075.83,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9745,
+        "mean_rolling": 0.9761,
+        "min_rolling": 0.8771,
+        "max_rolling": 0.9998,
+        "std_rolling": 0.0184,
+        "pct_below_080": 0.0,
+        "pct_below_090": 1.1
+      },
+      "cointegration": {
+        "eg_adf_stat": 2.742,
+        "eg_adf_pval": 1.0,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.038713,
+          "alpha": 0.0133,
+          "gamma": 0.2543,
+          "beta": 0.8302,
+          "persistence": 0.9707,
+          "params_valid": true,
+          "loglik": -5155.7,
+          "aic": 10319.4,
+          "bic": 10344.6,
+          "resid_lb_sq_p10": 0.5116,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.043242,
+          "alpha": 0.0177,
+          "gamma": 0.2656,
+          "beta": 0.8178,
+          "persistence": 0.9683,
+          "params_valid": true,
+          "loglik": -5224.1,
+          "aic": 10456.2,
+          "bic": 10481.5,
+          "resid_lb_sq_p10": 0.8557,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    },
+    "QQQ-NQ": {
+      "pair": "QQQ-NQ",
+      "spot": "QQQ",
+      "futures": "NQ=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": 18.68,
+        "vol_ann": 20.59,
+        "skewness": -0.207,
+        "kurtosis": 7.293,
+        "jb_stat": 9040.3,
+        "jb_pval": 0.0,
+        "adf_stat": -21.97,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": 17.95,
+        "vol_ann": 20.65,
+        "skewness": -0.193,
+        "kurtosis": 7.028,
+        "jb_stat": 8394.1,
+        "jb_pval": 0.0,
+        "adf_stat": -22.114,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "spot_arch_lm": {
+        "stat": 765.12,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9753,
+        "mean_rolling": 0.9749,
+        "min_rolling": 0.889,
+        "max_rolling": 0.9997,
+        "std_rolling": 0.0182,
+        "pct_below_080": 0.0,
+        "pct_below_090": 0.1
+      },
+      "cointegration": {
+        "eg_adf_stat": -0.109,
+        "eg_adf_pval": 0.9485,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.050739,
+          "alpha": 0.0064,
+          "gamma": 0.1992,
+          "beta": 0.8653,
+          "persistence": 0.9713,
+          "params_valid": true,
+          "loglik": -6134.2,
+          "aic": 12276.3,
+          "bic": 12301.6,
+          "resid_lb_sq_p10": 0.6671,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.056205,
+          "alpha": 0.0075,
+          "gamma": 0.2064,
+          "beta": 0.8574,
+          "persistence": 0.9682,
+          "params_valid": true,
+          "loglik": -6161.2,
+          "aic": 12330.4,
+          "bic": 12355.6,
+          "resid_lb_sq_p10": 0.7544,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    },
+    "DIA-YM": {
+      "pair": "DIA-YM",
+      "spot": "DIA",
+      "futures": "YM=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": 12.65,
+        "vol_ann": 16.49,
+        "skewness": -0.469,
+        "kurtosis": 17.738,
+        "jb_stat": 53471.4,
+        "jb_pval": 0.0,
+        "adf_stat": -21.438,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": 10.58,
+        "vol_ann": 16.54,
+        "skewness": -0.48,
+        "kurtosis": 16.703,
+        "jb_stat": 47436.6,
+        "jb_pval": 0.0,
+        "adf_stat": -15.943,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "spot_arch_lm": {
+        "stat": 1310.47,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9736,
+        "mean_rolling": 0.9748,
+        "min_rolling": 0.8664,
+        "max_rolling": 0.9998,
+        "std_rolling": 0.0223,
+        "pct_below_080": 0.0,
+        "pct_below_090": 1.5
+      },
+      "cointegration": {
+        "eg_adf_stat": 3.001,
+        "eg_adf_pval": 1.0,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.034412,
+          "alpha": 0.0201,
+          "gamma": 0.2488,
+          "beta": 0.8278,
+          "persistence": 0.9722,
+          "params_valid": true,
+          "loglik": -4931.1,
+          "aic": 9870.1,
+          "bic": 9895.4,
+          "resid_lb_sq_p10": 0.2616,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.038412,
+          "alpha": 0.0281,
+          "gamma": 0.2435,
+          "beta": 0.8173,
+          "persistence": 0.9671,
+          "params_valid": true,
+          "loglik": -4986.7,
+          "aic": 9981.5,
+          "bic": 10006.7,
+          "resid_lb_sq_p10": 0.5342,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    },
+    "GLD-GC": {
+      "pair": "GLD-GC",
+      "spot": "GLD",
+      "futures": "GC=F",
+      "spot_stats": {
+        "n": 4077,
+        "mean_ann": 9.62,
+        "vol_ann": 16.45,
+        "skewness": -0.586,
+        "kurtosis": 6.494,
+        "jb_stat": 7375.8,
+        "jb_pval": 0.0,
+        "adf_stat": -64.137,
+        "adf_pval": 0.0,
+        "lb_q10": 0.9578
+      },
+      "futures_stats": {
+        "n": 4077,
+        "mean_ann": 10.12,
+        "vol_ann": 16.88,
+        "skewness": -0.702,
+        "kurtosis": 7.91,
+        "jb_stat": 10933.8,
+        "jb_pval": 0.0,
+        "adf_stat": -65.79,
+        "adf_pval": 0.0,
+        "lb_q10": 0.1881
+      },
+      "spot_arch_lm": {
+        "stat": 274.43,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9054,
+        "mean_rolling": 0.8972,
+        "min_rolling": 0.6857,
+        "max_rolling": 0.9818,
+        "std_rolling": 0.0536,
+        "pct_below_080": 6.0,
+        "pct_below_090": 41.1
+      },
+      "cointegration": {
+        "eg_adf_stat": 3.491,
+        "eg_adf_pval": 1.0,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.021534,
+          "alpha": 0.083,
+          "gamma": -0.0315,
+          "beta": 0.9134,
+          "persistence": 0.9807,
+          "params_valid": true,
+          "loglik": -5606.5,
+          "aic": 11221.1,
+          "bic": 11246.4,
+          "resid_lb_sq_p10": 0.7625,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.018293,
+          "alpha": 0.0659,
+          "gamma": -0.0264,
+          "beta": 0.9319,
+          "persistence": 0.9846,
+          "params_valid": true,
+          "loglik": -5745.7,
+          "aic": 11499.5,
+          "bic": 11524.7,
+          "resid_lb_sq_p10": 0.6872,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    },
+    "SLV-SI": {
+      "pair": "SLV-SI",
+      "spot": "SLV",
+      "futures": "SI=F",
+      "spot_stats": {
+        "n": 4077,
+        "mean_ann": 13.24,
+        "vol_ann": 31.24,
+        "skewness": -1.222,
+        "kurtosis": 16.334,
+        "jb_stat": 46215.0,
+        "jb_pval": 0.0,
+        "adf_stat": -16.486,
+        "adf_pval": 0.0,
+        "lb_q10": 0.3477
+      },
+      "futures_stats": {
+        "n": 4077,
+        "mean_ann": 14.5,
+        "vol_ann": 33.29,
+        "skewness": -1.148,
+        "kurtosis": 16.967,
+        "jb_stat": 49667.2,
+        "jb_pval": 0.0,
+        "adf_stat": -17.384,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0008
+      },
+      "spot_arch_lm": {
+        "stat": 353.82,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9008,
+        "mean_rolling": 0.9012,
+        "min_rolling": 0.5451,
+        "max_rolling": 0.9802,
+        "std_rolling": 0.0626,
+        "pct_below_080": 6.8,
+        "pct_below_090": 34.8
+      },
+      "cointegration": {
+        "eg_adf_stat": 1.38,
+        "eg_adf_pval": 0.997,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.032973,
+          "alpha": 0.0714,
+          "gamma": -0.0257,
+          "beta": 0.9342,
+          "persistence": 0.9928,
+          "params_valid": true,
+          "loglik": -7976.3,
+          "aic": 15960.6,
+          "bic": 15985.8,
+          "resid_lb_sq_p10": 0.043,
+          "resid_arch_free": false
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.040668,
+          "alpha": 0.0624,
+          "gamma": -0.0233,
+          "beta": 0.9406,
+          "persistence": 0.9913,
+          "params_valid": true,
+          "loglik": -8289.6,
+          "aic": 16587.2,
+          "bic": 16612.5,
+          "resid_lb_sq_p10": 0.0007,
+          "resid_arch_free": false
+        }
+      },
+      "quality_grade": "C",
+      "issues": [
+        "spot GARCH residuals still have ARCH effects",
+        "futures GARCH residuals still have ARCH effects"
+      ]
+    },
+    "USO-CL": {
+      "pair": "USO-CL",
+      "spot": "USO",
+      "futures": "CL=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": -0.07,
+        "vol_ann": 35.59,
+        "skewness": -0.772,
+        "kurtosis": 12.72,
+        "jb_stat": 27824.3,
+        "jb_pval": 0.0,
+        "adf_stat": -13.235,
+        "adf_pval": 0.0,
+        "lb_q10": 0.1277
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": -14.06,
+        "vol_ann": 91.98,
+        "skewness": -38.571,
+        "kurtosis": 1962.906,
+        "jb_stat": 654094252.1,
+        "jb_pval": 0.0,
+        "adf_stat": -16.177,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "spot_arch_lm": {
+        "stat": 566.01,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.5097,
+        "mean_rolling": 0.9488,
+        "min_rolling": 0.3574,
+        "max_rolling": 0.9902,
+        "std_rolling": 0.0651,
+        "pct_below_080": 1.9,
+        "pct_below_090": 5.9
+      },
+      "cointegration": {
+        "eg_adf_stat": -1.94,
+        "eg_adf_pval": 0.3137,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.101721,
+          "alpha": 0.0721,
+          "gamma": 0.0692,
+          "beta": 0.8748,
+          "persistence": 0.9815,
+          "params_valid": true,
+          "loglik": -8450.9,
+          "aic": 16909.9,
+          "bic": 16935.1,
+          "resid_lb_sq_p10": 0.92,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": false,
+          "convergence_flag": 8,
+          "omega": 0.057153,
+          "alpha": 0.0557,
+          "gamma": 0.0845,
+          "beta": 0.9021,
+          "persistence": 1.0,
+          "params_valid": false,
+          "loglik": -9378.1,
+          "aic": 18764.1,
+          "bic": 18789.4,
+          "resid_lb_sq_p10": 1.0,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "C",
+      "issues": [
+        "LOW correlation (0.510)",
+        "futures GARCH did NOT converge"
+      ]
+    },
+    "UNG-NG": {
+      "pair": "UNG-NG",
+      "spot": "UNG",
+      "futures": "NG=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": -17.19,
+        "vol_ann": 49.23,
+        "skewness": 0.083,
+        "kurtosis": 3.663,
+        "jb_stat": 2277.3,
+        "jb_pval": 0.0,
+        "adf_stat": -66.14,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0713
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": 14.17,
+        "vol_ann": 60.71,
+        "skewness": 0.37,
+        "kurtosis": 15.935,
+        "jb_stat": 43127.4,
+        "jb_pval": 0.0,
+        "adf_stat": -20.914,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "spot_arch_lm": {
+        "stat": 265.2,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.8482,
+        "mean_rolling": 0.9006,
+        "min_rolling": 0.4187,
+        "max_rolling": 0.9879,
+        "std_rolling": 0.0914,
+        "pct_below_080": 9.2,
+        "pct_below_090": 33.0
+      },
+      "cointegration": {
+        "eg_adf_stat": -4.864,
+        "eg_adf_pval": 0.0,
+        "cointegrated": true
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.067998,
+          "alpha": 0.0873,
+          "gamma": -0.0219,
+          "beta": 0.9192,
+          "persistence": 0.9956,
+          "params_valid": true,
+          "loglik": -9932.2,
+          "aic": 19872.3,
+          "bic": 19897.6,
+          "resid_lb_sq_p10": 0.0467,
+          "resid_arch_free": false
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.107846,
+          "alpha": 0.0782,
+          "gamma": 0.0311,
+          "beta": 0.9062,
+          "persistence": 1.0,
+          "params_valid": false,
+          "loglik": -10629.3,
+          "aic": 21266.7,
+          "bic": 21291.9,
+          "resid_lb_sq_p10": 0.7485,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "C",
+      "issues": [
+        "spot GARCH residuals still have ARCH effects",
+        "futures GARCH params INVALID (persistence≥1)"
+      ]
+    },
+    "TLT-ZN": {
+      "pair": "TLT-ZN",
+      "spot": "TLT",
+      "futures": "ZN=F",
+      "spot_stats": {
+        "n": 4076,
+        "mean_ann": 3.8,
+        "vol_ann": 15.05,
+        "skewness": 0.046,
+        "kurtosis": 3.521,
+        "jb_stat": 2100.4,
+        "jb_pval": 0.0,
+        "adf_stat": -20.471,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "futures_stats": {
+        "n": 4076,
+        "mean_ann": -0.1,
+        "vol_ann": 5.47,
+        "skewness": -0.001,
+        "kurtosis": 2.229,
+        "jb_stat": 840.9,
+        "jb_pval": 0.0,
+        "adf_stat": -29.618,
+        "adf_pval": 0.0,
+        "lb_q10": 0.1243
+      },
+      "spot_arch_lm": {
+        "stat": 966.59,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.8093,
+        "mean_rolling": 0.8209,
+        "min_rolling": 0.4673,
+        "max_rolling": 0.9416,
+        "std_rolling": 0.0767,
+        "pct_below_080": 32.0,
+        "pct_below_090": 90.4
+      },
+      "cointegration": {
+        "eg_adf_stat": -1.869,
+        "eg_adf_pval": 0.347,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.014538,
+          "alpha": 0.0724,
+          "gamma": -0.0151,
+          "beta": 0.9183,
+          "persistence": 0.9832,
+          "params_valid": true,
+          "loglik": -5232.3,
+          "aic": 10472.7,
+          "bic": 10497.9,
+          "resid_lb_sq_p10": 0.8064,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.001273,
+          "alpha": 0.0462,
+          "gamma": 0.0024,
+          "beta": 0.9421,
+          "persistence": 0.9895,
+          "params_valid": true,
+          "loglik": -1180.3,
+          "aic": 2368.5,
+          "bic": 2393.8,
+          "resid_lb_sq_p10": 0.8581,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "B",
+      "issues": [
+        "UNSTABLE correlation (32% below 0.80)"
+      ]
+    },
+    "TLT-ZB": {
+      "pair": "TLT-ZB",
+      "spot": "TLT",
+      "futures": "ZB=F",
+      "spot_stats": {
+        "n": 4076,
+        "mean_ann": 3.8,
+        "vol_ann": 15.05,
+        "skewness": 0.046,
+        "kurtosis": 3.521,
+        "jb_stat": 2100.4,
+        "jb_pval": 0.0,
+        "adf_stat": -20.471,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "futures_stats": {
+        "n": 4076,
+        "mean_ann": 0.5,
+        "vol_ann": 10.76,
+        "skewness": 0.794,
+        "kurtosis": 14.892,
+        "jb_stat": 37990.1,
+        "jb_pval": 0.0,
+        "adf_stat": -47.205,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0291
+      },
+      "spot_arch_lm": {
+        "stat": 966.59,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.8855,
+        "mean_rolling": 0.9113,
+        "min_rolling": 0.3327,
+        "max_rolling": 0.9763,
+        "std_rolling": 0.069,
+        "pct_below_080": 1.5,
+        "pct_below_090": 28.3
+      },
+      "cointegration": {
+        "eg_adf_stat": -1.317,
+        "eg_adf_pval": 0.6215,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.014538,
+          "alpha": 0.0724,
+          "gamma": -0.0151,
+          "beta": 0.9183,
+          "persistence": 0.9832,
+          "params_valid": true,
+          "loglik": -5232.3,
+          "aic": 10472.7,
+          "bic": 10497.9,
+          "resid_lb_sq_p10": 0.8064,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.006534,
+          "alpha": 0.0509,
+          "gamma": -0.0124,
+          "beta": 0.9431,
+          "persistence": 0.9878,
+          "params_valid": true,
+          "loglik": -4014.5,
+          "aic": 8036.9,
+          "bic": 8062.2,
+          "resid_lb_sq_p10": 1.0,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    },
+    "SHY-ZT": {
+      "pair": "SHY-ZT",
+      "spot": "SHY",
+      "futures": "ZT=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": 1.36,
+        "vol_ann": 1.34,
+        "skewness": 0.764,
+        "kurtosis": 11.39,
+        "jb_stat": 22379.1,
+        "jb_pval": 0.0,
+        "adf_stat": -12.17,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": -0.26,
+        "vol_ann": 1.35,
+        "skewness": 0.175,
+        "kurtosis": 13.767,
+        "jb_stat": 32137.3,
+        "jb_pval": 0.0,
+        "adf_stat": -32.281,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0837
+      },
+      "spot_arch_lm": {
+        "stat": 698.55,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.8718,
+        "mean_rolling": 0.7833,
+        "min_rolling": 0.2813,
+        "max_rolling": 0.9858,
+        "std_rolling": 0.1449,
+        "pct_below_080": 46.7,
+        "pct_below_090": 72.3
+      },
+      "cointegration": {
+        "eg_adf_stat": 8.895,
+        "eg_adf_pval": 1.0,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.000136,
+          "alpha": 0.1376,
+          "gamma": 0.0484,
+          "beta": 0.8193,
+          "persistence": 0.9811,
+          "params_valid": true,
+          "loglik": 5379.7,
+          "aic": -10751.4,
+          "bic": -10726.2,
+          "resid_lb_sq_p10": 0.6469,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.000144,
+          "alpha": 0.1,
+          "gamma": 0.01,
+          "beta": 0.875,
+          "persistence": 0.98,
+          "params_valid": true,
+          "loglik": 5261.2,
+          "aic": -10514.3,
+          "bic": -10489.1,
+          "resid_lb_sq_p10": 0.9801,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "B",
+      "issues": [
+        "UNSTABLE correlation (47% below 0.80)"
+      ]
+    },
+    "IEF-ZF": {
+      "pair": "IEF-ZF",
+      "spot": "IEF",
+      "futures": "ZF=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": 2.88,
+        "vol_ann": 6.61,
+        "skewness": 0.049,
+        "kurtosis": 2.327,
+        "jb_stat": 918.7,
+        "jb_pval": 0.0,
+        "adf_stat": -32.359,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0116
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": -0.3,
+        "vol_ann": 3.54,
+        "skewness": -0.047,
+        "kurtosis": 3.22,
+        "jb_stat": 1757.8,
+        "jb_pval": 0.0,
+        "adf_stat": -38.723,
+        "adf_pval": 0.0,
+        "lb_q10": 0.1501
+      },
+      "spot_arch_lm": {
+        "stat": 553.54,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.8689,
+        "mean_rolling": 0.869,
+        "min_rolling": 0.569,
+        "max_rolling": 0.972,
+        "std_rolling": 0.0701,
+        "pct_below_080": 14.8,
+        "pct_below_090": 58.7
+      },
+      "cointegration": {
+        "eg_adf_stat": -1.612,
+        "eg_adf_pval": 0.4771,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.002114,
+          "alpha": 0.0577,
+          "gamma": 0.0118,
+          "beta": 0.9245,
+          "persistence": 0.9882,
+          "params_valid": true,
+          "loglik": -1874.5,
+          "aic": 3757.0,
+          "bic": 3782.2,
+          "resid_lb_sq_p10": 0.4314,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.000704,
+          "alpha": 0.0539,
+          "gamma": 0.0031,
+          "beta": 0.9304,
+          "persistence": 0.9857,
+          "params_valid": true,
+          "loglik": 742.0,
+          "aic": -1475.9,
+          "bic": -1450.7,
+          "resid_lb_sq_p10": 0.9826,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "B",
+      "issues": [
+        "UNSTABLE correlation (15% below 0.80)"
+      ]
+    },
+    "FXE-EUR": {
+      "pair": "FXE-EUR",
+      "spot": "FXE",
+      "futures": "6E=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": -1.18,
+        "vol_ann": 8.38,
+        "skewness": 0.018,
+        "kurtosis": 1.771,
+        "jb_stat": 531.1,
+        "jb_pval": 0.0,
+        "adf_stat": -63.494,
+        "adf_pval": 0.0,
+        "lb_q10": 0.4169
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": -0.99,
+        "vol_ann": 8.39,
+        "skewness": 0.019,
+        "kurtosis": 1.708,
+        "jb_stat": 494.1,
+        "jb_pval": 0.0,
+        "adf_stat": -37.863,
+        "adf_pval": 0.0,
+        "lb_q10": 0.3007
+      },
+      "spot_arch_lm": {
+        "stat": 144.92,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9664,
+        "mean_rolling": 0.9661,
+        "min_rolling": 0.8966,
+        "max_rolling": 0.9914,
+        "std_rolling": 0.0157,
+        "pct_below_080": 0.0,
+        "pct_below_090": 0.0
+      },
+      "cointegration": {
+        "eg_adf_stat": -2.128,
+        "eg_adf_pval": 0.2333,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.001288,
+          "alpha": 0.0277,
+          "gamma": 0.0128,
+          "beta": 0.9613,
+          "persistence": 0.9954,
+          "params_valid": true,
+          "loglik": -2927.9,
+          "aic": 5863.8,
+          "bic": 5889.0,
+          "resid_lb_sq_p10": 0.9666,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.001322,
+          "alpha": 0.0259,
+          "gamma": 0.0139,
+          "beta": 0.9623,
+          "persistence": 0.9952,
+          "params_valid": true,
+          "loglik": -2937.0,
+          "aic": 5882.0,
+          "bic": 5907.3,
+          "resid_lb_sq_p10": 0.8955,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    },
+    "FXY-JPY": {
+      "pair": "FXY-JPY",
+      "spot": "FXY",
+      "futures": "6J=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": -3.38,
+        "vol_ann": 9.46,
+        "skewness": 0.356,
+        "kurtosis": 4.556,
+        "jb_stat": 3602.0,
+        "jb_pval": 0.0,
+        "adf_stat": -64.889,
+        "adf_pval": 0.0,
+        "lb_q10": 0.7361
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": -2.86,
+        "vol_ann": 9.45,
+        "skewness": 0.379,
+        "kurtosis": 5.347,
+        "jb_stat": 4940.8,
+        "jb_pval": 0.0,
+        "adf_stat": -64.867,
+        "adf_pval": 0.0,
+        "lb_q10": 0.6913
+      },
+      "spot_arch_lm": {
+        "stat": 117.62,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9678,
+        "mean_rolling": 0.9667,
+        "min_rolling": 0.8854,
+        "max_rolling": 0.9933,
+        "std_rolling": 0.0178,
+        "pct_below_080": 0.0,
+        "pct_below_090": 0.5
+      },
+      "cointegration": {
+        "eg_adf_stat": -1.406,
+        "eg_adf_pval": 0.5796,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.006536,
+          "alpha": 0.0845,
+          "gamma": -0.0308,
+          "beta": 0.9154,
+          "persistence": 0.9844,
+          "params_valid": true,
+          "loglik": -3413.0,
+          "aic": 6834.0,
+          "bic": 6859.2,
+          "resid_lb_sq_p10": 0.8032,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.008008,
+          "alpha": 0.0962,
+          "gamma": -0.0395,
+          "beta": 0.9047,
+          "persistence": 0.9811,
+          "params_valid": true,
+          "loglik": -3410.8,
+          "aic": 6829.5,
+          "bic": 6854.8,
+          "resid_lb_sq_p10": 0.5883,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    },
+    "FXB-GBP": {
+      "pair": "FXB-GBP",
+      "spot": "FXB",
+      "futures": "6B=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": -0.42,
+        "vol_ann": 8.89,
+        "skewness": -0.928,
+        "kurtosis": 14.369,
+        "jb_stat": 35574.5,
+        "jb_pval": 0.0,
+        "adf_stat": -62.938,
+        "adf_pval": 0.0,
+        "lb_q10": 0.2268
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": -0.75,
+        "vol_ann": 8.92,
+        "skewness": -0.844,
+        "kurtosis": 11.593,
+        "jb_stat": 23257.7,
+        "jb_pval": 0.0,
+        "adf_stat": -21.708,
+        "adf_pval": 0.0,
+        "lb_q10": 0.0448
+      },
+      "spot_arch_lm": {
+        "stat": 126.67,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9736,
+        "mean_rolling": 0.9718,
+        "min_rolling": 0.9162,
+        "max_rolling": 0.9934,
+        "std_rolling": 0.0125,
+        "pct_below_080": 0.0,
+        "pct_below_090": 0.0
+      },
+      "cointegration": {
+        "eg_adf_stat": 7.149,
+        "eg_adf_pval": 1.0,
+        "cointegrated": false
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.006602,
+          "alpha": 0.0727,
+          "gamma": 0.0039,
+          "beta": 0.9063,
+          "persistence": 0.981,
+          "params_valid": true,
+          "loglik": -3154.3,
+          "aic": 6316.6,
+          "bic": 6341.8,
+          "resid_lb_sq_p10": 0.1908,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.004962,
+          "alpha": 0.0568,
+          "gamma": 0.0085,
+          "beta": 0.9246,
+          "persistence": 0.9856,
+          "params_valid": true,
+          "loglik": -3176.4,
+          "aic": 6360.9,
+          "bic": 6386.1,
+          "resid_lb_sq_p10": 0.1457,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    },
+    "FXA-AUD": {
+      "pair": "FXA-AUD",
+      "spot": "FXA",
+      "futures": "6A=F",
+      "spot_stats": {
+        "n": 4078,
+        "mean_ann": 0.22,
+        "vol_ann": 10.67,
+        "skewness": -0.1,
+        "kurtosis": 1.994,
+        "jb_stat": 679.7,
+        "jb_pval": 0.0,
+        "adf_stat": -17.221,
+        "adf_pval": 0.0,
+        "lb_q10": 0.1156
+      },
+      "futures_stats": {
+        "n": 4078,
+        "mean_ann": -1.05,
+        "vol_ann": 10.77,
+        "skewness": -0.228,
+        "kurtosis": 2.45,
+        "jb_stat": 1051.2,
+        "jb_pval": 0.0,
+        "adf_stat": -17.495,
+        "adf_pval": 0.0,
+        "lb_q10": 0.2586
+      },
+      "spot_arch_lm": {
+        "stat": 225.32,
+        "pval": 0.0,
+        "has_arch": true
+      },
+      "correlation": {
+        "full_sample": 0.9481,
+        "mean_rolling": 0.9543,
+        "min_rolling": 0.7043,
+        "max_rolling": 0.9868,
+        "std_rolling": 0.0313,
+        "pct_below_080": 1.1,
+        "pct_below_090": 4.6
+      },
+      "cointegration": {
+        "eg_adf_stat": -4.124,
+        "eg_adf_pval": 0.0009,
+        "cointegrated": true
+      },
+      "garch": {
+        "spot": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.004417,
+          "alpha": 0.0241,
+          "gamma": 0.0294,
+          "beta": 0.9509,
+          "persistence": 0.9897,
+          "params_valid": true,
+          "loglik": -3936.6,
+          "aic": 7881.1,
+          "bic": 7906.4,
+          "resid_lb_sq_p10": 0.5895,
+          "resid_arch_free": true
+        },
+        "futures": {
+          "converged": true,
+          "convergence_flag": 0,
+          "omega": 0.004035,
+          "alpha": 0.0208,
+          "gamma": 0.029,
+          "beta": 0.9551,
+          "persistence": 0.9904,
+          "params_valid": true,
+          "loglik": -3974.0,
+          "aic": 7956.1,
+          "bic": 7981.3,
+          "resid_lb_sq_p10": 0.6117,
+          "resid_arch_free": true
+        }
+      },
+      "quality_grade": "A",
+      "issues": []
+    }
+  }
+}

@@ -1,0 +1,221 @@
+{
+  "experiment": "I9",
+  "title": "Proper Hedging Effectiveness (Academic Standard)",
+  "methodology": "Ederington (1979) HE + VaR/ES reduction + utility-based + DM test",
+  "timestamp": "2026-03-25T16:04:43.033833+00:00",
+  "data": {
+    "source": "yfinance",
+    "period": "2010-2025",
+    "is": "2010-2019",
+    "oos": "2020-2025"
+  },
+  "pairs": {
+    "Equity": {
+      "spot": "SPY",
+      "futures": "ES=F",
+      "n_is": 2513,
+      "n_oos": 1565,
+      "spot_futures_corr": 0.9721,
+      "methods": {
+        "Naive": {
+          "HE": 0.9439,
+          "VaR1_reduction": 0.744,
+          "VaR5_reduction": 0.918,
+          "ES1_reduction": 0.6927,
+          "utility_lambda2": 0.010763,
+          "utility_lambda5": 0.007224,
+          "utility_lambda10": 0.001327,
+          "annual_turnover": 0.0,
+          "avg_h": 1.0
+        },
+        "OLS": {
+          "HE": 0.9447,
+          "VaR1_reduction": 0.7441,
+          "VaR5_reduction": 0.9048,
+          "ES1_reduction": 0.6981,
+          "utility_lambda2": 0.016898,
+          "utility_lambda5": 0.013414,
+          "utility_lambda10": 0.007608,
+          "annual_turnover": 0.0,
+          "avg_h": 0.9556
+        },
+        "Roll-OLS": {
+          "HE": 0.9395,
+          "VaR1_reduction": 0.7386,
+          "VaR5_reduction": 0.8935,
+          "ES1_reduction": 0.697,
+          "utility_lambda2": 0.013544,
+          "utility_lambda5": 0.00973,
+          "utility_lambda10": 0.003375,
+          "annual_turnover": 0.7713,
+          "avg_h": 0.969
+        },
+        "EWMA": {
+          "HE": 0.9406,
+          "VaR1_reduction": 0.7438,
+          "VaR5_reduction": 0.8977,
+          "ES1_reduction": 0.6982,
+          "utility_lambda2": 0.017712,
+          "utility_lambda5": 0.013969,
+          "utility_lambda10": 0.007732,
+          "annual_turnover": 1.3315,
+          "avg_h": 0.9697
+        },
+        "GJR-GARCH": {
+          "HE": 0.9376,
+          "VaR1_reduction": 0.7288,
+          "VaR5_reduction": 0.8903,
+          "ES1_reduction": 0.6979,
+          "utility_lambda2": 0.015692,
+          "utility_lambda5": 0.011759,
+          "utility_lambda10": 0.005205,
+          "annual_turnover": 1.485,
+          "avg_h": 0.9675
+        }
+      },
+      "dm_best_vs_naive": {
+        "method": "EWMA",
+        "t": -2.71,
+        "harvey": "FAIL"
+      }
+    },
+    "Gold": {
+      "spot": "GLD",
+      "futures": "GC=F",
+      "n_is": 2512,
+      "n_oos": 1565,
+      "spot_futures_corr": 0.9238,
+      "methods": {
+        "Naive": {
+          "HE": 0.8409,
+          "VaR1_reduction": 0.5832,
+          "VaR5_reduction": 0.6087,
+          "ES1_reduction": 0.6202,
+          "utility_lambda2": -0.010062,
+          "utility_lambda5": -0.017675,
+          "utility_lambda10": -0.030362,
+          "annual_turnover": 0.0,
+          "avg_h": 1.0
+        },
+        "OLS": {
+          "HE": 0.8531,
+          "VaR1_reduction": 0.5775,
+          "VaR5_reduction": 0.6441,
+          "ES1_reduction": 0.6287,
+          "utility_lambda2": 0.014762,
+          "utility_lambda5": 0.007732,
+          "utility_lambda10": -0.003986,
+          "annual_turnover": 0.0,
+          "avg_h": 0.8741
+        },
+        "Roll-OLS": {
+          "HE": 0.85,
+          "VaR1_reduction": 0.5883,
+          "VaR5_reduction": 0.6452,
+          "ES1_reduction": 0.6213,
+          "utility_lambda2": 0.017332,
+          "utility_lambda5": 0.010157,
+          "utility_lambda10": -0.001802,
+          "annual_turnover": 1.76,
+          "avg_h": 0.8866
+        },
+        "EWMA": {
+          "HE": 0.8479,
+          "VaR1_reduction": 0.5807,
+          "VaR5_reduction": 0.6374,
+          "ES1_reduction": 0.623,
+          "utility_lambda2": 0.021281,
+          "utility_lambda5": 0.014004,
+          "utility_lambda10": 0.001874,
+          "annual_turnover": 3.5428,
+          "avg_h": 0.8839
+        },
+        "GJR-GARCH": {
+          "HE": 0.849,
+          "VaR1_reduction": 0.582,
+          "VaR5_reduction": 0.6475,
+          "ES1_reduction": 0.6292,
+          "utility_lambda2": 0.018003,
+          "utility_lambda5": 0.010777,
+          "utility_lambda10": -0.001266,
+          "annual_turnover": 2.4563,
+          "avg_h": 0.8808
+        }
+      },
+      "dm_best_vs_naive": {
+        "method": "GJR-GARCH",
+        "t": 2.19,
+        "harvey": "FAIL"
+      }
+    },
+    "Bond": {
+      "spot": "TLT",
+      "futures": "ZN=F",
+      "n_is": 2511,
+      "n_oos": 1565,
+      "spot_futures_corr": 0.8045,
+      "methods": {
+        "Naive": {
+          "HE": 0.4518,
+          "VaR1_reduction": 0.2759,
+          "VaR5_reduction": 0.2901,
+          "ES1_reduction": 0.2141,
+          "utility_lambda2": -0.022552,
+          "utility_lambda5": -0.046059,
+          "utility_lambda10": -0.085238,
+          "annual_turnover": 0.0,
+          "avg_h": 1.0
+        },
+        "OLS": {
+          "HE": 0.6471,
+          "VaR1_reduction": 0.3592,
+          "VaR5_reduction": 0.446,
+          "ES1_reduction": 0.2749,
+          "utility_lambda2": 0.00983,
+          "utility_lambda5": -0.005302,
+          "utility_lambda10": -0.030523,
+          "annual_turnover": 0.0,
+          "avg_h": 2.2343
+        },
+        "Roll-OLS": {
+          "HE": 0.6765,
+          "VaR1_reduction": 0.3982,
+          "VaR5_reduction": 0.4616,
+          "ES1_reduction": 0.3441,
+          "utility_lambda2": 0.003877,
+          "utility_lambda5": -0.009995,
+          "utility_lambda10": -0.033115,
+          "annual_turnover": 7.8896,
+          "avg_h": 2.3617
+        },
+        "EWMA": {
+          "HE": 0.679,
+          "VaR1_reduction": 0.3782,
+          "VaR5_reduction": 0.4588,
+          "ES1_reduction": 0.3662,
+          "utility_lambda2": -0.000612,
+          "utility_lambda5": -0.014375,
+          "utility_lambda10": -0.037314,
+          "annual_turnover": 15.923,
+          "avg_h": 2.3709
+        },
+        "GJR-GARCH": {
+          "HE": 0.6563,
+          "VaR1_reduction": 0.3743,
+          "VaR5_reduction": 0.4656,
+          "ES1_reduction": 0.2632,
+          "utility_lambda2": -0.007433,
+          "utility_lambda5": -0.022172,
+          "utility_lambda10": -0.046736,
+          "annual_turnover": 10.9875,
+          "avg_h": 2.2688
+        }
+      },
+      "dm_best_vs_naive": {
+        "method": "EWMA",
+        "t": 6.91,
+        "harvey": "★ PASS"
+      }
+    }
+  }
+}

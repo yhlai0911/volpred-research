@@ -1,0 +1,27 @@
+{
+  "experiment": "K420b",
+  "title": "Taiwan Vol Prediction (Clean Data)",
+  "timestamp": "2026-03-25T16:26:42.128956+00:00",
+  "data_cleaning": {
+    "removed": 1,
+    "n_after": 3833
+  },
+  "diagnostics": {
+    "skew": -0.13,
+    "kurt": 7.04,
+    "adf_p": 0.0,
+    "arch_lm_p": 0.0,
+    "has_arch": true
+  },
+  "garch_convergence": {
+    "converged": true,
+    "persistence": 0.9745,
+    "resid_arch_free": true
+  },
+  "qlike": {
+    "GJR-GARCH": -7.5956,
+    "EWMA(0.94)": -7.5873,
+    "GARCH-X(SPY)": -7.5956,
+    "VIX-based": -7.592
+  }
+}

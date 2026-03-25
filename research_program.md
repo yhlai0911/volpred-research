@@ -80,6 +80,26 @@
 - [ ] 預期結果是否又是一個 null result？→ 如果連續 3 個 null，換方向
 - [ ] 這個問題能否用完全不同的方法回答？→ 嘗試不同方法論
 
+### 研究主題來源（必須多元，不能只靠既有面向自選）
+
+研究主題的發掘應來自多個管道，**定期檢索學術前沿論文是核心做法之一**：
+
+| 來源 | 頻率 | 做法 | 寫入位置 |
+|------|------|------|---------|
+| **學術前沿文獻檢索** | 每 session 至少 1 次 | WebSearch arXiv/SSRN/JFE/JFM 搜尋最新 vol forecasting、futures hedging、risk management 論文 → 提取可測試的假說 → 寫入「待探索方向」 | 待探索方向區 + 對應面向 |
+| **Codex/Gemini 建議** | 每 5-10 個實驗 | 主動詢問「接下來該研究什麼方向？」→ 標注 `[提出: Codex/Gemini]` | 對應面向 |
+| **用戶指定** | 隨時（最高優先） | 用戶提出的方向立刻寫入 research_program.md | 對應面向 |
+| **會員問題** | 每 6 小時 cron | 評估排名會員提問 → 高分問題轉為研究方向 | 對應面向 |
+| **實驗過程中衍生** | 每個實驗後 | A 的結果暗示 B → 記錄 B 為新待辦 | 對應面向 |
+| **跨 AI 交叉驗證** | 不定期 | 一個 AI 提出假說 → 另一個設計實驗 → Claude 執行 | 對應面向 |
+
+**學術文獻檢索的標準流程：**
+1. 搜尋關鍵詞：volatility forecasting, optimal hedge ratio, realized variance, VIX, GARCH extensions, risk management + 年份 2024-2026
+2. 對每篇論文提取：標題、作者、期刊、方法、核心發現、與我們研究的關聯
+3. 判斷可行性：數據是否可得（yfinance/FRED）？方法是否可複製？
+4. 寫入 research_program.md「待探索方向」區，標注來源論文和 BLOCKED 狀態
+5. 優先執行與現有研究路線互補的方向（而非重複已飽和的方向）
+
 ## 研究面向（螺旋式推進，非線性完成）
 
 研究不是線性階段，而是持續探索的多個面向。每個面向可以隨時回訪：
@@ -156,6 +176,52 @@
 - 危機類型分類（financial/pandemic/monetary/oil）
 - 即時 VaR/ES 預報
 - Paper trading 績效追蹤
+
+### 面向 I: 期貨避險（Futures Hedging）
+**動機**：K341 建立框架（ES=F r=0.978, VIX>25 tail hedge 資本效率最高），需深化為完整研究路線。
+**核心問題**：期貨避險能否系統性改善 50/50+VT？台灣投資人如何用台指期？
+
+**⚠️ 方法論原則：避險效果用避險指標評估，不跟交易策略比 Sharpe/CAGR**
+避險的目標是降低風險，不是最大化報酬。正確的避險評估框架：
+| 指標 | 定義 | 用途 |
+|------|------|------|
+| Hedging Effectiveness (HE) | 1 - Var(hedged)/Var(unhedged) | 主要指標，Ederington (1979) |
+| Basis Risk | Var(spot - h×futures) 的穩定性 | 殘差風險 |
+| VaR/ES Reduction | hedged vs unhedged 的尾部風險改善 | 極端保護 |
+| Utility (mean-variance) | E[R] - λ/2 × Var(R) | 風險偏好依賴 |
+| 避險成本 | margin + roll + basis cost | 實際成本（非 vs B&H 機會成本）|
+| OHR 穩定性 | 不同 regime 下 h 的波動 | 實務可行性 |
+
+**已完成實驗（按正確順序排列）：**
+- [x] I0: ★★★ Data Diagnostics (15 pairs) — A=9, B=3, C=3。USO-CL/UNG-NG 不適合 GARCH。Bond corr 不穩定。experiments/i0_futures_data_diagnostics.py
+
+**已有基礎：**
+- [x] K341: ★★ Futures Hedging Framework — VIX>25 tail hedge 效率 7.71 MDD/cost, 12/VIX VT 勝固定避險
+- [x] K199: VIX Futures Basis — IS Harvey pass 但 OOS overfit
+- [x] K340: ES Futures Basis — null（VIX 吸收）
+
+**研究方向：**
+- [x] I1: ★ GARCH-based OHR — GARCH 不勝 EWMA（DM 全 NS）。Correlation 決定複雜度：SPY-ES corr>0.95→h=1 足夠，TLT-ZN corr<0.90→dynamic 必要（Harvey t=3.88）。EWMA(0.94) 是最佳實務。experiments/I1_garch_ohr.py
+- [x] I1b: ★★ Commodity Futures Dynamic Hedging — Static OHR wins 5/6 pairs！GLD DM t=-3.8★（dynamic HURTS）。USO-CL catastrophic（corr 0.510）。Static 對所有資產類別都夠用。experiments/i1b_commodity_futures_hedge.py
+- [x] I2: ★★ 台指期避險 — GARCH OHR~0.74（非 1.0），50/50 0050+GLD 仍是 Sharpe 冠軍（0.940）。GARCH hedge only MDD -14.0%（equity-only 最佳）。Futures on top of VT: 統計顯著但經濟邊際。SPY NOT viable cross-hedge（corr=0.15）。experiments/i2_taiwan_futures_hedge.py
+- [x] I3: 跨資產期貨避險組合 — Multi-futures (ES+ZN+GC) var red 95%+ 但 CAGR 2.2%（純避險犧牲全部上漲）。ZN+GC 增量可忽略。50/50+VT 全面勝出。Script: experiments/i3_cross_asset_futures_portfolio.py
+- [ ] I4: VIX futures roll yield 策略 — contango 環境下的 roll yield 收割 vs 尾部風險保護 ⚠️ **BLOCKED: 需要 VIX futures 歷史數據（yfinance 無）**
+- [x] I5: Regime-Switching Hedge Ratio — NULL。OHR 跨 VIX regime 穩定。experiments/i5_regime_hedge_ratio.py
+- [x] I12: ★★ Window Sensitivity — 最佳窗口取決於 corr + structural stability。High corr→Naive 最好。Medium corr→長窗口(500d+)。Low corr + shift→短窗口(60-120d)。experiments/i12_window_sensitivity_hedge.py
+- [x] K417: ★★★ Naive Hedge Superiority (Cao & Conlon 2025 JFM) — PARTIALLY REJECTED。Complex beats Naive 10/15 pairs (67%)。Correlation r=-0.899 是決定性 moderator。Equity: Naive 3/3。Commodity: Complex 4/4。Bond: Complex 3/4。FX: marginal 3/4
+- [x] I11: ★★★ Full Panel 15 Pairs — Naive wins 8/15, Complex wins 7/15。Correlation threshold refined: >0.96→Naive, 0.89-0.96→mixed, <0.89→Complex。USO-CL disaster (HE=-817%)。Bond pairs 全需 dynamic (TLT-ZN t=9.2★★★)。experiments/i11_full_panel_daily_garch_hedge.py
+- [x] I10: ★ VOV State-Dependent Hedging (Li & Chen 2025 JFM) — 方向確認但幅度微小（HE 差 1.9pp）。Partial r(VVIX,HE|VIX)=0.003 FAIL。SPY-ES corr>0.96 壓縮了所有差異。VIX sufficient for hedging decisions
+- [x] I9: ★★★ Proper Hedging Effectiveness (Academic Standard) — Ederington HE + VaR/ES + Utility。SPY-ES corr>0.95: h=1 足夠（HE 94%）。TLT-ZN corr=0.81: EWMA t=6.91★（HE 45%→68%）。GLD-GC: OLS→85% 略勝 Naive。避險價值取決於 corr + h 偏離度 + unhedged 風險。experiments/i9_proper_hedging_effectiveness.py
+- [x] I6: 期貨避險 vs VT 成本結構比較 — ⚠️ 框架修正：避險和交易策略不應用 Sharpe 比。正確框架：50% ES hedge HE=95.7%（優秀），VT 是曝險管理（非避險）。期貨避險 TX 0.12%/yr（margin-based），VT 保險費 ~3%/yr（cash drag）。兩者目標不同：避險=降低特定風險，VT=動態曝險調整。experiments/i6_futures_vs_vt_cost.py
+- [ ] I7: 台灣投資人跨境避險實務 — 用台指期避台股、用 ES mini 避美股，匯率風險、保證金需求、稅務影響
+- [x] I8: 期貨基差波動率預測 — NULL（confirms K340）。SPY-ES r=-0.045 FAIL, GLD-GC null, TLT-ZN IS t=5.11★ BUT OOS collapses (ΔR²=-0.074)。Sixth Law confirmed。VIX sufficient re-confirmed
+
+**學術參考（待查）：**
+- Baillie & Myers (1991): Bivariate GARCH OHR
+- Kroner & Sultan (1993): Time-varying OHR with error correction
+- Lien & Tse (2002): Some recent developments in futures hedging
+- Alexander & Barbosa (2007): Minimum variance hedge ratios
+- 台灣：Chen et al. 台指期最適避險比率系列研究
 
 ### 面向 G: 跳躍式探索（全新方向線）
 **這些方向與現有 VT/GARCH 研究顯著不同，目的是打破舒適區。**
@@ -842,7 +908,7 @@
 
 突破方向（按 expected payoff 排序）：
 1. **分解 risk target**：用 intraday data 把 daily variance 分解為 continuous var + jump intensity + overnight gap。各成分用不同模型。**需要 60+ 天 5-min data（SPY ETA 2026-04-11）**
-2. **Option surface features**：完整短天期 options 的 left-tail slope, convexity, corridor variance, jump proxy——不只是 VIX 這個 scalar。Target 改為 overnight downside semivar / gap probability。**需要 options 數據**
+2. **Option surface features**：完整短天期 options 的 left-tail slope, convexity, corridor variance, jump proxy——不只是 VIX 這個 scalar。Target 改為 overnight downside semivar / gap probability。⚠️ **BLOCKED: 需要 options 歷史數據（yfinance 僅有當前快照，無歷史 IV surface）**
 3. **Covariance/correlation forecasting**：停止 squeeze univariate variance，轉向 dispersion trading / hedge optimization。我們有 DCC-GARCH (Q3-Q4) 基礎
 4. **微結構 alpha**：TAQ/order book level data。Daily OFI proxy 可能不夠（K154 測試中）
 5. **Heterogeneous-agent regime model**：ETF creation/redemption, option customer-dealer imbalance → crash regime prediction
@@ -850,6 +916,7 @@
 **研究方向重新定位**：
 - ✅ 繼續：5-min data 累積 + HAR-RV + risk decomposition pipeline
 - ✅ 繼續：correlation/covariance modeling（擴展 DCC 到 dispersion trading）
+- ✅ 新增：期貨避險（面向 I）— GARCH-based OHR、台指期、跨資產、regime switching
 - ⏸ 暫停：在 daily QLIKE 上堆積更多 null results（除非有全新信息源）
 - ✅ 繼續：一般讀者文章、策略、論文、跳躍式探索
 
@@ -867,3 +934,23 @@
 - [ ] Graph Signal Processing HAR (arXiv:2410.22706) — 跨資產 vol spillover 整合。等 5-min 數據
 - [ ] Regime-aware In-Context Learning (arXiv:2603.10299) — LLM 做 vol forecasting，全新前沿
 - [ ] 「HAR ceiling」驗證 — Los Flamingos 2025 報告 well-tuned HAR 也打不敗（HAR = 高頻版的 GARCH ceiling？）
+
+**2026-03 文獻搜索更新：**
+- [ ] HAR-PD (Path-Dependent) — arXiv:2503.00851, 結合 HAR + 路徑依賴波動率模型，利用 long/short-term memory 捕捉趨勢特徵。等 5-min 數據
+- [ ] Adaptive Multi-Factor HAR (FoFI 2026, Cinquetti et al.) — 287 個高頻因子的 adaptive selection，動態更新 forecasting structure 以適應 regime shift。等 5-min 數據
+- [ ] Options-Driven Vol Forecasting (Quantitative Finance 2025) — 用 option price data 提取新型 vol estimator 增強 HAR。⚠️ **BLOCKED: 需 options 歷史數據**
+- [ ] 期貨避險最新方法：Partial Cointegration Hedging (RQFA 2023) — VIX 期貨 vs 股指期貨的 partial cointegration 避險策略，tail risk reduction 優於 OLS/VAR/VECM
+- [ ] Regime-Switching Correlation Hedging — 多狀態 regime switching 相關性模型在期貨避險中優於靜態 OLS，但 TX costs 高。與我們 K341 框架銜接
+- [ ] Financial Innovation 2025 review — realized volatility forecasting 方法論綜述，含 rough vol + ML + HAR extensions 最新進展
+
+**2026-03-25 新增文獻方向（期貨避險 + Transformer vol）：**
+- [ ] Quadratic Hedging under GARCH (J. Futures Markets 2026, Ma) — LRM/GRM 動態規劃 + willow tree 結構計算避險比率。方法論可借鑑但需 options 數據
+- [ ] Copula-based GARCH Hedge (Hsu et al.) — 用 copula 捕捉 spot-futures 非線性相依結構。我們 I1b 發現 static 已足夠，copula 是否改變結論？
+- [ ] Wild Bootstrap OHR (JRFM 2024) — bootstrap 估計 OHR 信賴區間，比 DCC-GARCH 更穩健？
+- [ ] Multi-Transformer Vol Forecast (Engineering App AI 2024) — Transformer 組合架構勝 GARCH 和單一 DL 模型。但我們 K142/T22/R10 已 3 次確認 ML 在日頻不勝 GARCH
+- [ ] PatchTST-lite vs HAR-RV (MDPI 2025) — Transformer 在 RV 預測上的首次系統比較。等 5-min 數據可做
+- [ ] CNN-Transformer Hybrid (European J. Finance 2025) — 結合 CNN 局部特徵 + Transformer 長距依賴。ML + GARCH 互補可能性
+- [ ] GARCH-to-Neural (AAAI 2024) — 用 GARCH 結構初始化 NN，保持可解釋性。與 K142 XGBoost 失敗對比
+- [ ] Neural Heteroscedasticity (Eng App AI 2025) — 高頻 NN-based GARCH，替代傳統 MLE。等 5-min 數據
+- [x] I5: Regime-Switching Hedge Ratio — NULL。OHR 跨 regime 穩定。文獻預測 regime-switching 有效但我們實證否定
+- [x] I1b: Static OHR 跨 6 資產類別勝出。文獻推薦 DCC/copula 的增量價值可疑
