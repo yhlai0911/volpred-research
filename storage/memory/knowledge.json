@@ -12186,5 +12186,20 @@
       "optimizer",
       "new-line"
     ]
+  },
+  {
+    "id": "K1186",
+    "title": "K345: ★★★ FX Vol — JPY is sig daily tail hedge (t=4.91, +0.46% when SPY drops >2%). GLD is NOT (t=-0.41). FX needs own models",
+    "content": "[跳躍式探索, 0 prior experiments] FX kurtosis 108 (10x equity). ACF(1)=0.44 (2x SPY but decays fast). Leverage REVERSES between EUR/JPY. JPY tail hedge: SPY drop >2% → JPY +0.46% (71% positive, t=4.91). GLD: -0.06% (45% positive, NS). BUT 2022 broke JPY safe-haven (both fell). VIX→FX Granger unidirectional. FX GARCH OOS R²=0.04 (vs SPY 0.25) — needs different models.",
+    "timestamp": "2026-03-25T12:05:23.854444",
+    "tags": [
+      "FX",
+      "JPY",
+      "tail-hedge",
+      "跳躍式探索",
+      "kurtosis",
+      "new-domain",
+      "important"
+    ]
   }
 ]
