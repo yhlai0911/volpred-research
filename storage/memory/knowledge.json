@@ -12321,5 +12321,32 @@
       "跳躍式探索",
       "slope-change"
     ]
+  },
+  {
+    "id": "K1196",
+    "title": "K355: Transfer Learning Vol — direct transfer ALWAYS fails. Blending helps BTC (DM t=-1.98). Vol dynamics are asset-specific",
+    "content": "[跳躍式探索] SPY params→other assets: direct fails (omega/gamma fundamentally different). Fine-tune converges to same as target-only. Blend 80/20 helps BTC QLIKE 2.788 vs 2.814. Not true transfer — forecast combination effect. Core: vol dynamics are asset-specific, not transferable.",
+    "timestamp": "2026-03-25T13:16:21.799144",
+    "tags": [
+      "transfer-learning",
+      "跳躍式探索",
+      "asset-specific",
+      "blend"
+    ]
+  },
+  {
+    "id": "K1197",
+    "title": "K356: ★★★ Causal DAG — SPY+TLT are vol exporters, OIL is terminal importer. Low VIX: 5 edges. High VIX: 14 edges (contagion)",
+    "content": "[跳躍式探索] 6-asset Granger DAG: density 1.0 (all connected). Hierarchy: SPY/TLT→EEM→OIL (hub→relay→leaf). Regime shift: calm 5 edges (loose), stress 14 edges + 8 bidirectional (tight contagion). 100% edges survive VIX control (genuine direct transmission). SPY leads OIL by 4 days. Non-linear: GLD→SPY and EURUSD→SPY Granger misses but TE catches.",
+    "timestamp": "2026-03-25T13:16:21.799144",
+    "tags": [
+      "causal-DAG",
+      "Granger",
+      "hierarchy",
+      "contagion",
+      "regime-shift",
+      "跳躍式探索",
+      "publishable"
+    ]
   }
 ]
