@@ -10004,5 +10004,26 @@
     "data_period": "2005-2026",
     "sample_size": "502 OOS",
     "limitations": "SPY only, single OOS period"
+  },
+  {
+    "id": 1011,
+    "title": "K444: DCC-GARCH Portfolio Vol — DCC works but EWMA equally good for low-corr pair",
+    "content": "[提出: Claude(文獻搜尋), 執行: Claude] K444: DCC-GARCH multivariate portfolio vol for 50/50 SPY/GLD. Ref: Engle (2002) JBES. DCC persistence=0.98 (a=0.04, b=0.94), corr range -0.21 to +0.39. QLIKE: EWMA(1.467) > DCC(1.479) > CCC(1.481). DCC vs CCC: DM p=0.87 (NS). DCC vs EWMA: DM p=0.56 (NS). DCC 顯著勝 Naive (DM p=0.001). EWMA corr tracking r=0.89 vs DCC r=0.59。All methods pass Kupiec VaR test. 結論：DCC 成功捕捉 time-varying correlation 但對 50/50 SPY/GLD 經濟意義微小——unconditional corr 只有 0.05，cross-term 對 portfolio var 貢獻極小。EWMA covariance 同樣好且實作簡單。DCC 對高相關資產對（如 SPY-QQQ）可能更有價值。",
+    "category": "methodology",
+    "tags": [
+      "DCC",
+      "multivariate",
+      "portfolio",
+      "EWMA",
+      "correlation",
+      "SPY_GLD"
+    ],
+    "created_at": "2026-03-25T21:15:20.624814+00:00",
+    "experiment_id": "k444",
+    "data_source": "yfinance (SPY, GLD)",
+    "data_period": "2005-2026",
+    "sample_size": "502 OOS",
+    "limitations": "Only bivariate (SPY/GLD), low unconditional correlation limits DCC value",
+    "references": "Engle (2002) JBES 20(3):339-350"
   }
 ]
