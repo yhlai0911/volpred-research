@@ -12581,5 +12581,18 @@
       "publishable",
       "important"
     ]
+  },
+  {
+    "id": "K1215",
+    "title": "K374: ★★ Parkinson GARCH — MZ R² +73% (0.344→0.596) but EVALUATION artifact. Fitting on PK is WORSE. Use PK as eval target",
+    "content": "Same GARCH forecast: MZ R² 0.344 (r² target) vs 0.596 (PK target) — +73%. But PK-fitted GARCH significantly worse (DM t=+17.58). The improvement is proxy noise reduction, not model improvement. High-VIX: R² 0.306→0.594. Practical: use Parkinson as EVALUATION target in papers to avoid understating model quality. Do NOT refit on PK innovations.",
+    "timestamp": "2026-03-25T15:56:30.408384",
+    "tags": [
+      "Parkinson",
+      "GARCH",
+      "evaluation-artifact",
+      "proxy-noise",
+      "MZ-R2"
+    ]
   }
 ]
