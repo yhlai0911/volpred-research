@@ -12108,5 +12108,30 @@
       "VIX-sufficient",
       "跳躍式探索"
     ]
+  },
+  {
+    "id": "K1180",
+    "title": "K339: ESG Vol Spread FAILS rolling validation — 0/4 QLIKE improvement, sign flips. K335 was artifact",
+    "content": "Self-correction #11. K335 t=10.17 does NOT survive pure rolling. ESG spread corr with VIX=0.678 (noisy VIX proxy). Delta flips sign across periods. Baseline BETTER in all 4 periods. Confirms K265-K266 lesson.",
+    "timestamp": "2026-03-25T10:55:17.307318",
+    "tags": [
+      "ESG",
+      "validation",
+      "FAIL",
+      "artifact",
+      "self-correction"
+    ]
+  },
+  {
+    "id": "K1181",
+    "title": "K340: Futures Basis — NULL. ES basis partial r=-0.076 but NW t=-1.46 NS. VIX sufficient #23",
+    "content": "[跳躍式探索] ES=F/SPY basis. Strongest: basis_cum22 r=-0.076. OOS DM all NS. Rolling corr highly unstable (43% sign consistency). Futures basis = interest rate + dividend, not pure risk premium. Roll artifacts in yfinance continuous contracts.",
+    "timestamp": "2026-03-25T10:55:17.307318",
+    "tags": [
+      "futures",
+      "basis",
+      "跳躍式探索",
+      "null-result"
+    ]
   }
 ]
