@@ -11996,5 +11996,18 @@
       "dominates",
       "all-metrics"
     ]
+  },
+  {
+    "id": "K1171",
+    "title": "K330 CORRECTION: CAGR 13.0% was DAILY VT, monthly VT = 8.8%. K330 used implicit daily rebalance",
+    "content": "Self-correction #10: K330 reported CAGR 13.0% but this used daily rebalance (implicit). Monthly VT CAGR = 8.8% (consistent with K262 7-9%). Difference: 4.2%/yr. K281 confirmed monthly is recommended (daily TX cost exceeds benefit). K330 Sharpe 1.285 is also daily — monthly Sharpe is ~0.6-0.9 as previously reported. Must always specify rebalance frequency.",
+    "timestamp": "2026-03-25T09:51:52.730515",
+    "tags": [
+      "self-correction",
+      "K330-fix",
+      "daily-vs-monthly",
+      "CAGR",
+      "important"
+    ]
   }
 ]
