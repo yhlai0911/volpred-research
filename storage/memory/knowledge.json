@@ -12269,5 +12269,31 @@
       "equals-EWMA",
       "跳躍式探索"
     ]
+  },
+  {
+    "id": "K1192",
+    "title": "K351: ★★ Conformal Prediction — valid 90% coverage (p=0.43), 1.36x narrower than Normal PI. BUT regime breakdown (Q5: 74%)",
+    "content": "[跳躍式探索, 0 prior] GJR-GARCH + split-conformal. 90% PI: 90.4% coverage (valid). Width 32.4% ann vol vs Normal 37.7% (1.36x narrower). ACI adaptive: 90.0% exact. BUT Q5 high-vol: coverage drops to 74.2% (stationarity fails). Normal over-covers (93.5% at target 90%). Historical simulation most regime-uniform. Distribution-free, valid, but regime-conditional.",
+    "timestamp": "2026-03-25T12:41:32.752066",
+    "tags": [
+      "conformal",
+      "prediction-interval",
+      "distribution-free",
+      "跳躍式探索",
+      "regime-breakdown"
+    ]
+  },
+  {
+    "id": "K1193",
+    "title": "K352: ★ Bayesian GARCH — helps SPY (DM t=3.48★) but HURTS GLD (t=-2.24). Asset-conditional, not universal",
+    "content": "[跳躍式探索] James-Stein shrinkage on GARCH params. SPY: shrinkage stabilizes gamma (leverage), QLIKE +0.18% (sig). GLD: shrinkage toward positive-gamma prior is wrong for no-leverage asset, QLIKE -0.46% (sig worse). TLT: NS. Conclusion: Bayesian helps assets with unstable leverage, hurts assets without. Estimation method < model specification. QLIKE ceiling stands.",
+    "timestamp": "2026-03-25T12:41:32.752066",
+    "tags": [
+      "Bayesian",
+      "shrinkage",
+      "James-Stein",
+      "跳躍式探索",
+      "asset-conditional"
+    ]
   }
 ]
