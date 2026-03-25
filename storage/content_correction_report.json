@@ -1,12 +1,12 @@
 {
   "scan_metadata": {
-    "knowledge_entries_scanned": 1160,
-    "corrections_found": 76,
-    "articles_scanned": 610,
-    "articles_flagged": 5,
+    "knowledge_entries_scanned": 1171,
+    "corrections_found": 77,
+    "articles_scanned": 613,
+    "articles_flagged": 3,
     "severity_breakdown": {
-      "HIGH": 4,
-      "MEDIUM": 1,
+      "HIGH": 3,
+      "MEDIUM": 0,
       "LOW": 0
     }
   },
@@ -1691,6 +1691,31 @@
         "K53"
       ],
       "claim_summary": "4 urgent: (1) mile_d368b4da claims TSMOM passes Harvey (K255 disproved), (2) mile_281af193 claims 91% trend following (K"
+    },
+    {
+      "knowledge_id": "unknown",
+      "severity": "LOW",
+      "patterns": [
+        "selfcorrection"
+      ],
+      "anchor_keywords": [
+        "K262",
+        "K281",
+        "K330",
+        "Self-correction",
+        "Sharpe 1.285"
+      ],
+      "context_keywords": [
+        "Sharpe",
+        "VT"
+      ],
+      "knowledge_refs": [
+        "K330",
+        "K262",
+        "K281",
+        "K330"
+      ],
+      "claim_summary": "Self-correction #10: K330 reported CAGR 13.0% but this used daily rebalance (implicit). Monthly VT CAGR = 8.8% (consiste"
     }
   ],
   "flagged_articles": [
@@ -1844,7 +1869,7 @@
         }
       ],
       "max_severity": "HIGH",
-      "relevance_score": 2711.8,
+      "relevance_score": 2726.9,
       "text_snippets": [
         "[Conditional Autoregressive Range] ...onditional Autoregressive VaR 4. **GARCH-MIDAS**：混頻模型，結合日頻波動與月頻總經變數 5. **CARR**：Conditional Autoregressive Range，使用 Yang-Zhang range 6. **DCC-GARCH**：動態條件相關模型 7. **Copula-GARCH**：Gaussian/Stud...",
         "[Engle-Manganelli] ...2. **Realized GARCH**：Hansen-Huang-Shek（2012）log-linear 模型，8 個參數 3. **CAViaR**：Engle-Manganelli（2004）Conditional Autoregressive VaR 4. **GARCH-MIDAS**：混頻模型，結合日頻波動與月頻總經變數 5. **...",
@@ -1989,13 +2014,13 @@
         }
       ],
       "max_severity": "HIGH",
-      "relevance_score": 2133.5,
+      "relevance_score": 2138.8,
       "text_snippets": [
         "[Google Trends] ...是的——經過 23 次獨立驗證（K90）。**  這是我們研究中被反覆確認最多次的結論。每次我們嘗試加入新指標來改善 12/VIX，結果都是 NULL：  - Google Trends（K3/K4）→ NULL - CAPE（K8）→ NULL - AAII 投資人情緒（K8）→ NULL - VRP 波動風險溢價（K52）→ NULL -...",
         "[Monte Carlo] ...前歸零。  VT 在這裡的價值是獨特的：**市場下跌時自動減碼，避免你在低點被迫賣出。** 這是 VT 的「sequencing bonus」。  我們最初的 Monte Carlo 模擬（K85）顯示 VT 能把安全提領率從 4% 翻倍到 8%。但自我質疑後的交叉驗證（K87）推翻了這個過度樂觀的結論：  **修正後的結論：** - VT...",
         "[bootstrap] ...文基於 VolPred 研究系統 48 項實證研究（K 系列知識庫），所有結論均經過樣本外驗證。研究方法包括 GARCH 模型族、Monte Carlo 模擬、Bootstrap 統計檢定、跨市場/跨時期驗證等。完整研究紀錄可在本站「研究思考」分類中查閱。*  *免責聲明：本文僅供教育參考，不構成投資建議。投資有風險，過去績效不代表未來...",
         "[leverage] ...性來自兩個不同的機制，各自負責不同的績效面向：  **通道一：趨勢跟隨（TSMOM exposure）→ 貢獻 Sharpe**  當市場下跌，波動率通常上升（leverage effect）。VT 因此自動減碼——但這本質上就是一種趨勢跟隨策略。SPY 的 VT alpha 有 32% 被 12 個月趨勢動量解釋（K46/K49）。...",
-        "[SPY/GLD] ...**  2026 年第一季的即時審計（K42）給了最直接的答案：我們追蹤的 6 個 VT 策略，**全部擊敗**單純持有 SPY（買進持有）。其中 50/50 SPY/GLD 組合報酬率 +5.65%，同期 SPY 報酬率 -2.18%，差距 7.83 個百分點。  但更重要的是長期數據。VT 的價值不在於「多賺」，而在於**保護下..."
+        "[SPY-GLD] ...）→ 不顯著 4. **K24**：加 TLT/IEF/TIP/VNQ → 不顯著 5. **K54**：GLD 反向策略 → 反而更差 6. **K63**：SPY-GLD 相關性分析 → 穩定有效 7. **K64**：加入第三、四資產 → 0/6 顯著 8. **K89**：Factor tilts（MTUM/VLUE/QUA..."
       ]
     },
     {
@@ -2143,292 +2168,13 @@
         }
       ],
       "max_severity": "HIGH",
-      "relevance_score": 2133.4,
+      "relevance_score": 2129.6,
       "text_snippets": [
         "[Conditional Autoregressive Range] ...ecific significant results 是金融計量學中最常見的陷阱之一。  ### 1.4 CARR（Chou, 2005）  **設計動機**：Conditional Autoregressive Range model，用 log(High/Low) 替代 r² 作為波動率代理。理論上，range estimator 比 squared return 有 5-8...",
         "[Engle-Manganelli] ...率檢定——violation 比例是否正確？ 2. **Christoffersen (1998)**：獨立性檢定——violation 是否群聚？ 3. **Engle-Manganelli DQ**：動態分位數檢定——violation 是否與過去資訊相關？  ### 3.2 核心結果：7 資產 × 5 方法 × 3 測試 = 105 項回測...",
         "[Fissler-Ziegel] ...覆蓋率（Kupiec） | Skewed-t | 6/6 資產通過 | | 條件校準（Trinity） | FHS | 7/7 全通過，含群聚 | | 效率（Fissler-Ziegel） | Normal | 最小 joint loss |  這不是缺點——這是 VaR 方法論的本質特徵：coverage、independence、effic...",
         "[GARCH-MIDAS] ...底層波動率預測的精度。GARCH σ² 的 QLIKE 天花板通過 VaR 分位數傳導到了 CAViaR——它們在不同的語言中說著同一件事。  ### 1.3 GARCH-MIDAS（Engle, Ghysels & Sohn, 2013）  **設計動機**：混頻模型，用低頻宏觀變數影響長期波動率水平。理論上，GARCH 只看過去的收益率...",
         "[Full-sample] ...6 | 理論 | | P14 | GARCH-MIDAS (INDPRO) 自建 | OOS DM p=0.001 | 模型 | | P15 | INDPRO full-sample check | Period-specific 降級 | 驗證 | | P16-P17 | FRED macro variables survey | 5 變..."
-      ]
-    },
-    {
-      "article_id": "mile_fb97b369",
-      "title": "日頻 QLIKE 天花板：四次獨立驗證、四個自建模型、與唯一的突破希望",
-      "status": "published",
-      "source_file": "storage/reports/mile_fb97b369.json",
-      "matched_keywords": [
-        "12/VIX",
-        "CARR",
-        "Conditional Autoregressive Range",
-        "EEM",
-        "GARCH",
-        "GARCH-MIDAS",
-        "GARCH-X",
-        "GJR",
-        "GJR-GARCH",
-        "GLD",
-        "GLD/TLT",
-        "HAR-RV",
-        "In-sample",
-        "MF2",
-        "MF2-GARCH",
-        "Parkinson",
-        "QLIKE",
-        "QQQ",
-        "SPY",
-        "SPY/QQQ",
-        "SPY/QQQ/GLD/TLT/EEM",
-        "Sharpe",
-        "TLT",
-        "VIX",
-        "VT",
-        "VaR",
-        "overnight"
-      ],
-      "correction_sources": [
-        {
-          "knowledge_id": "d19c8cb0",
-          "severity": "MEDIUM",
-          "summary": "★★ K141 的 gamma-dependent rule 不成立！K141 的 TLT 結果是 estimation artifact（simplified 2-",
-          "matched_anchors": [
-            "MF2",
-            "MF2-GARCH"
-          ],
-          "matched_context": [
-            "GARCH",
-            "GJR",
-            "QLIKE",
-            "SPY",
-            "TLT",
-            "GJR-GARCH"
-          ],
-          "anchor_count": 2,
-          "context_count": 6,
-          "knowledge_refs": [
-            "K144",
-            "K141",
-            "K141"
-          ]
-        },
-        {
-          "knowledge_id": "unknown",
-          "severity": "MEDIUM",
-          "summary": "[提出: Claude (Daniel&Moskowitz 2016), 執行: Claude] Data: SPY/QQQ/GLD/TLT/EEM monthly returns yfinance. Method: MOM_12_1, M",
-          "matched_anchors": [
-            "SPY/QQQ",
-            "SPY/QQQ/GLD/TLT/EEM"
-          ],
-          "matched_context": [
-            "EEM",
-            "GLD",
-            "QQQ",
-            "SPY",
-            "TLT",
-            "VIX"
-          ],
-          "anchor_count": 2,
-          "context_count": 6,
-          "knowledge_refs": []
-        },
-        {
-          "knowledge_id": "4e28d188",
-          "severity": "MEDIUM",
-          "summary": "Chou (2005) CARR model: Conditional Autoregressive Range. Uses log(H/L) range instead of r². More efficient estimator (5",
-          "matched_anchors": [
-            "CARR",
-            "Conditional Autoregressive Range"
-          ],
-          "matched_context": [
-            "Parkinson",
-            "QLIKE",
-            "VaR",
-            "overnight"
-          ],
-          "anchor_count": 2,
-          "context_count": 4,
-          "knowledge_refs": []
-        },
-        {
-          "knowledge_id": "1eda7b8d",
-          "severity": "HIGH",
-          "summary": "★★★ Weight smoothness 假說被推翻。Controlled test: mean_w fixed → ρ(StdΔw, MDD)=-0.007 (p=",
-          "matched_anchors": [
-            "SPY/QQQ"
-          ],
-          "matched_context": [
-            "GARCH",
-            "GLD",
-            "QQQ",
-            "SPY",
-            "VIX",
-            "12/VIX"
-          ],
-          "anchor_count": 1,
-          "context_count": 6,
-          "knowledge_refs": []
-        },
-        {
-          "knowledge_id": "unknown",
-          "severity": "MEDIUM",
-          "summary": "CRITICAL: K265 QQQ DM t=-3.66 was artifact of full-sample GARCH. Pure rolling: QQQ GARCH-X significantly WORSE",
-          "matched_anchors": [
-            "GARCH-X"
-          ],
-          "matched_context": [
-            "GARCH",
-            "GLD",
-            "QLIKE",
-            "QQQ",
-            "SPY",
-            "TLT"
-          ],
-          "anchor_count": 1,
-          "context_count": 6,
-          "knowledge_refs": [
-            "K265"
-          ]
-        }
-      ],
-      "max_severity": "HIGH",
-      "relevance_score": 1841.3,
-      "text_snippets": [
-        "[Conditional Autoregressive Range] ...大突破，但經仔細檢驗後降級為 period-specific anomaly（見第五節）。  ### 模型 4：CARR（Chou 2005）  **動機**：Conditional Autoregressive Range model，用 log(High/Low) 替代 r² 作為波動率代理。理論上，range estimator 有 5-8 倍的統計效率。  **實作**：C...",
-        "[SPY/QQQ/GLD/TLT/EEM] ...jung-Box 結果（p > 0.30）從統計上排除了任何遺漏的日頻結構。  2. **SPY 的結果能推廣嗎？** QLIKE 天花板在 5 個資產上成立（SPY/QQQ/GLD/TLT/EEM），但 GARCH-MIDAS 的 period-specific 結果只在 SPY 上測試。跨資產驗證仍是待辦事項。  3. **Realized GARCH...",
-        "[GARCH-MIDAS] ...在日頻資訊的約束下，已經是最優的。  ---  ## 二、四次獨立驗證  天花板假說的說服力不在於任何單一實驗，而在於多個獨立方向的收斂。  ### 驗證 1：GARCH-MIDAS + INDPRO（工業生產指數）  **假說**：宏觀經濟資訊（月頻工業生產指數）可以補充日頻收益率的資訊不足。  GARCH-MIDAS（Engle, Gh...",
-        "[Parkinson] ...ight) - 1$$  QLIKE 的核心優勢在於它對 volatility proxy 的選擇具有 **robustness**：不同 proxy（r², Parkinson RV, 5-min RV）會改變 QLIKE 的絕對值，但不會改變模型之間的排名。我們在 SPY 2023-2024 OOS 上驗證了這一點——無論用 r²...",
-        "[In-sample] ..._t$$  其中 $g_t$ 是標準 GJR-GARCH，$\\tau_t$ 由外部低頻變數（如 INDPRO）的 Beta 加權移動平均決定。  **結果**：In-sample 差異 < 0.02%，DM 不顯著 (p=0.36)。INDPRO 的 MIDAS 權重集中在 lag 1（45%），θ 為負值（-0.005 至 -0.00..."
-      ]
-    },
-    {
-      "article_id": "mile_6552518e",
-      "title": "K144: MF2-GARCH 的「債券突破」是估計偽影——QLIKE 天花板全面重新確認",
-      "status": "published",
-      "source_file": "storage/reports/mile_6552518e.json",
-      "matched_keywords": [
-        "AGG",
-        "GARCH",
-        "GJR",
-        "GJR-GARCH",
-        "HYG",
-        "IEF",
-        "In-sample",
-        "K141",
-        "K144",
-        "LQD",
-        "MF2",
-        "MF2-GARCH",
-        "QLIKE",
-        "SPY",
-        "TLT"
-      ],
-      "correction_sources": [
-        {
-          "knowledge_id": "d19c8cb0",
-          "severity": "MEDIUM",
-          "summary": "★★ K141 的 gamma-dependent rule 不成立！K141 的 TLT 結果是 estimation artifact（simplified 2-",
-          "matched_anchors": [
-            "AGG",
-            "HYG",
-            "IEF",
-            "K141",
-            "K144",
-            "LQD",
-            "MF2",
-            "MF2-GARCH"
-          ],
-          "matched_context": [
-            "GARCH",
-            "GJR",
-            "QLIKE",
-            "SPY",
-            "TLT",
-            "GJR-GARCH"
-          ],
-          "anchor_count": 8,
-          "context_count": 6,
-          "knowledge_refs": [
-            "K144",
-            "K141",
-            "K141"
-          ]
-        },
-        {
-          "knowledge_id": "6c10f1a4",
-          "severity": "LOW",
-          "summary": "Phase U1 null result: Panel data methods do NOT improve single-asset GARCH vol forecasts. GJR-GARCH baseline QLIKE=1.521",
-          "matched_anchors": [
-            "AGG"
-          ],
-          "matched_context": [
-            "GARCH",
-            "GJR",
-            "QLIKE",
-            "SPY",
-            "GJR-GARCH"
-          ],
-          "anchor_count": 1,
-          "context_count": 5,
-          "knowledge_refs": []
-        },
-        {
-          "knowledge_id": "9dc240aa",
-          "severity": "LOW",
-          "summary": "APARCH(δ=1) vs GJR(δ=2) OOS (SPY 2023-2024): QLIKE diff -0.11%, DM p=0.34 not significant。Null result #15。In-sample BIC ",
-          "matched_anchors": [
-            "In-sample"
-          ],
-          "matched_context": [
-            "GJR",
-            "QLIKE",
-            "SPY"
-          ],
-          "anchor_count": 1,
-          "context_count": 3,
-          "knowledge_refs": []
-        },
-        {
-          "knowledge_id": "ffa55697",
-          "severity": "LOW",
-          "summary": "結論: NULL RESULT(preliminary)——氣候事件與同期高波動相關, 但VIX已充分吸收此資訊, 氣候dummy無增量預測力。VIX sufficient statistic假說第14次確認",
-          "matched_anchors": [
-            "AGG"
-          ],
-          "matched_context": [
-            "GARCH",
-            "GJR",
-            "SPY"
-          ],
-          "anchor_count": 1,
-          "context_count": 3,
-          "knowledge_refs": [
-            "K148"
-          ]
-        },
-        {
-          "knowledge_id": "90b6fe45",
-          "severity": "LOW",
-          "summary": "[提出: Claude(情緒指標延伸), 執行: Claude] T11: MOVE Index (Bond Vol) as risk indicator — null result。MOVE→SPY/TLT/HYG 全部 r<0.015 ",
-          "matched_anchors": [
-            "HYG"
-          ],
-          "matched_context": [
-            "SPY",
-            "TLT"
-          ],
-          "anchor_count": 1,
-          "context_count": 2,
-          "knowledge_refs": []
-        }
-      ],
-      "max_severity": "MEDIUM",
-      "relevance_score": 1834.3,
-      "text_snippets": [
-        "[GJR-GARCH] ...: Claude 延伸驗證, 執行: Claude]  K141 報告 MF2-GARCH (Conrad & Engle 2025) 在 TLT 上顯著打敗 GJR-GARCH (+0.30%, p=0.0014)，看似首次打破 QLIKE 天花板。K144 用正確的 Joint QML 方法在 6 個資產上重新驗證，**推翻了這個結...",
-        "[MF2-GARCH] K144: MF2-GARCH 的「債券突破」是估計偽影——QLIKE 天花板全面重新確認  ## 摘要  [提出: Claude 延伸驗證, 執行: Claude]  K141 報告 MF...",
-        "[In-sample] ...的偽影來源  K141 使用分步估計（先估 GJR，再估乘法修正），這會導致： - 短期參數鎖定後，長期修正項「強制」配適殘差 - 類似於過度配適的效果，在 in-sample 看起來好，但 OOS 無增量  ### 發現三：QLIKE 天花板與 Gamma 無關  原假說「gamma ≈ 0 的資產可能受益於 MF2」被推翻。IEF...",
-        "[QLIKE] K144: MF2-GARCH 的「債券突破」是估計偽影——QLIKE 天花板全面重新確認  ## 摘要  [提出: Claude 延伸驗證, 執行: Claude]  K141 報告 MF2-GARCH (Conrad & En...",
-        "[GARCH] K144: MF2-GARCH 的「債券突破」是估計偽影——QLIKE 天花板全面重新確認  ## 摘要  [提出: Claude 延伸驗證, 執行: Claude]  K141 報告 MF..."
       ]
     }
   ]
