@@ -6,6 +6,10 @@
 
 ---
 
+[experiment] [提出: K174 驗證, 執行: Claude] K175: CDB 非重疊月頻驗證（229月）。K174 的 partial|VIX r=0.210★ 在非重疊月頻縮到 r=0.110 (p=0.096 NS)。F-test p=0.097 NS。OOS ΔR²=-0.016（更差）。Partial|corr r=0.045 NS——CDB = correlation 函數，無獨立資訊。結論：同 K165，overlapping window artifact 再次確認。VIX sufficient 在所有正確取樣下都成立。
+
+---
+
 [mechanism_discovery] [提出: Claude, 執行: Claude] K92: VT Regime 價值地圖。VT 在所有 5 個 VIX regime 都有成本（0.2-23.9%/yr）。Sharpe 改善 3/5 regime（ultra-low +0.047, normal +0.099, crisis +0.222）。Low vol (13-17) 是 VT 唯一顯著虧損區（p=0.007）。危機不對稱比 0.62x——V 型反彈損失 > 崩盤保護（每事件 -1.15% vs +0.71%）。最佳保險價值 = Normal regime (VIX 17-22)
 
 ---
@@ -34,6 +38,10 @@
 
 ---
 
+[experiment] [提出: Codex R5#2, 執行: Claude] K144: VT vs TSMOM Cross-Asset Panel。數據: yfinance 7 assets 2007-2024 (empirical)。6/7 VT-TSMOM corr < 0.3，equity mean r=0.10 (NS)。★★★ Spiky-vol/No-trend: VT wins Sharpe 5/5 equity (advantage +1.23 to +3.48), TSMOM mean Sharpe=-2.46 (p=0.0007)。TSMOM 只在 Spiky+Tr
+
+---
+
 [model_behavior] Adaptive VT（低波動 target=10%, 高波動 target=12%）: Sharpe 0.705 vs standard 0.697 (+1.1%), MaxDD -18.5% vs -19.0%。改善太小不值得增加複雜度。Monthly VT target=12% 仍然是最佳簡單配置。所有嘗試的「聰明」調整（VoV, VIX boost, gap alert, adaptive target）都沒有顯著改善 standard VT。
 
 ---
@@ -58,23 +66,15 @@
 
 ---
 
+[] Top 5: (1) K273 crash taxonomy table (HIGH/LOW effort), (2) VT insurance premium correction 4%→1%/yr, (3) K269 correlation regime expansion, (4) K228 gamma secular decline, (5) K149 ICL null result. Paper 70% novel, ~60 pages. 2-3 hours to integrate top 5.
+
+---
+
 [strategy] [提出: 用戶/研究過程, 執行: Claude] Recovery Paradox 解法：Q8 Momentum Overlay (SPY>50MA during DD>15% → 18/VIX) 在 SPY 上 Harvey t=4.00。但 Q9 跨資產 0/4 失敗。SPY V-shaped recovery 是特例（Fed支持+被動投資+避風港）。Recovery lag 是 VT 的固有成本。
 
 ---
 
 [market_structure] [提出: Claude, 執行: Claude] K38: ★ 0DTE 對 VT 影響。VIX-SPY corr 完全不變 (-0.724→-0.729)。兩個真實變化：(1) VIX mean reversion 快 2.6x (half-life 31d→12d) (2) VIX pinning at low levels (std when VIX<15: 0.730→0.594, p=0.011)。VIX structural floor 從 ~11 升到 ~13。VT Sharpe 0DTE era 0.872 vs pre 0.517（bul
-
----
-
-[cross_asset] [提出: Gemini K56, 執行: Claude] K82: ★ TSMC 集中度測試（Paper 2）。0050 VT Sharpe 0.936，TSMC VT 1.121，ex-TSMC VT 0.193-0.637（依假設權重）。VT 在 ex-TSMC 也有效但較弱。意外發現：0050 leverage effect (-0.124) > TSMC (-0.054)——分散化讓系統性 leverage 更乾淨。TSMC 解釋 0050 52.5% variance，rolling beta 從 0.38 升至 0.72（集中度上升中）。Paper 2 
-
----
-
-[cross_asset] [提出: Claude, 執行: Claude] K21: Commodity VT null。USO/GLD/DBA 全部 VIX VT NS（DM p>>0.05, MDD bootstrap p>0.93）。VIX 對商品 vol 預測弱 (rho 0.39-0.58 vs equity 0.83)。商品 vol 由 supply-side 驅動（天氣/OPEC/地緣）非 equity stress。GLD EWMA 略優於 VIX 但 NS (p=0.108)。跨資產 VT 適用性圖譜：Equities ✓, Forex carry ✓ (K18), Com
-
----
-
-[model_behavior] VoV-enhanced VT 策略（SPY 2020-2025, VoV>2σ 時減碼 50%, 5d 恢復）：Sharpe 0.57 vs base VT 0.61——VoV hedge 反而降低了績效。原因：VT 的 sigma-based 調整已包含 VoV 信息（VoV 是 sigma 的衍生指標），不提供增量價值。VoV hedge 149/1500 天觸發（10%），太頻繁且錯過反彈。
 
 ---
 
@@ -391,31 +391,27 @@ VRP 結構解析：Hybrid VT 的理論基礎:
 
 ---
 
-如果所有人都用 12/VIX？— VT 採用率反饋迴路模擬 (K93): ## 摘要
-
-[提出: 用戶, 執行: Claude]
-
-如果 12/VIX 波動率目標（VT）策略被大量投資人採用，反饋迴路是否會讓策略本身失效？我們建立 agent-based 反饋模型，模擬不同採用率（0%-80%）下的市場穩定性。核心發現：**VT 的月度再平衡是天然斷路器**——即使 50% 的市場資金使用 VT，個人用戶仍然獲得 MDD 保護，但市場整體波動率上升 15%，所有人都受害。
-
-## 研究背景
-
-波動率目標策略（Volatility Targeting, VT）的邏輯很簡單：VIX 高時減碼、VI
+你以為你在做風控，其實你在做趨勢交易——而且做對了: **⚠️ 更正聲明（2026-03-25）：原文稱「91% 和趨勢交易重疊」，此數據來自 K46 的初步分析（N=22, 單一資產）。K53 跨資產驗證後修正為僅 5.2%（N=15），即 VT 與趨勢交易的重疊度遠低於最初報告。VT 的核心機制是波動率縮放，不是趨勢追蹤。**
 
 ---
 
-槓桿 VT 實驗：適度槓桿能否改善波動率目標策略？: ## 摘要
+## 風控策略竟然是趨勢交易？
+
+如果有人告訴你：「你每天根據市場恐慌程度調整持倉比例，其實就是在做趨勢交易」，你會不會覺得荒謬？
+
+我也覺得。但數據說的是另一個故事。
+
+我們的研究發現，當你用 VIX（恐慌指數）來決定股票持倉比例——也就是所謂的「波動
+
+---
+
+【已修正】VT 退休模擬：提供更穩定的存活率，但 max safe WR 仍為 4%: ## 摘要
 
 [提出: 用戶, 執行: Claude]
 
-測試在低波動環境中允許適度槓桿（最高 1.3x-1.5x）是否能抵消 VT 的保險成本。標準 12/VIX VT 將權重上限設為 1.0，但當 VIX=10 時，12/VIX=1.2——多出來的 20% 曝險被白白丟掉了。如果允許適度槓桿，是否能在低波動期多賺一些，補償長期持有 VT 的保費？
+退休投資最怕的不是平均報酬太低，而是「序列風險」——退休初期碰上大跌，即使長期市場回升，提領已經把本金吃光了。我們用 10,000 次 block bootstrap Monte Carlo 模擬，測試波動率目標化（VT）能否延長退休投資組合在 4% 法則下的存活期。
 
-## 實驗設計
-
-**五種權重上限**：1.0（標準）、1.2（溫和）、1.3（適中）、1.5（積極）、無上限
-
-**三種目標波動度**：12/VIX、15/VIX、18/VIX
-
-**兩種
+**核心發現（已修正）：50/50 SPY/GLD + 12/VIX VT 在 10,000 次 bootstrap 中實現 0% 破產率（K294），穩定了 4% 法則的安全性。注
 
 ---
 
