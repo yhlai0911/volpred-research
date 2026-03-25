@@ -12920,5 +12920,19 @@
       "correlation-rising",
       "跳躍式探索"
     ]
+  },
+  {
+    "id": "K1240",
+    "title": "K399: Markov Regime — IS partial r=0.174 (Harvey pass) but OOS SIGN FLIPS to -0.142. VIX already captures regime. Look-ahead in smoothed probs",
+    "content": "[跳躍式探索] Hamilton 2-state: calm (vol 10.6%, 74% time, 66d duration) vs turbulent (vol 32.3%, 24d duration). Transition asymmetric: enter slowly (1.5%/d), exit fast (4.2%/d). IS partial r|VIX=0.174 (t=12.50). OOS: r=-0.142 (SIGN FLIP — 5th instance of IS→OOS failure). Regime-adaptive VT Sharpe 1.061 uses look-ahead. VIX>22.5 = 89.1% accuracy for regime. VIX sufficient #27.",
+    "timestamp": "2026-03-25T20:30:23.760324",
+    "tags": [
+      "Markov",
+      "regime-switching",
+      "Hamilton",
+      "OOS-sign-flip",
+      "跳躍式探索",
+      "VIX-sufficient"
+    ]
   }
 ]

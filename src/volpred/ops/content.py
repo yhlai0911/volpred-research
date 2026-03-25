@@ -178,7 +178,8 @@ def release_pool_articles(
         audience = _article_audience(item)
         preferred_rank = audience_priority.get(audience, len(audience_priority))
         status = str(item.get("status") or "")
-        return (preferred_rank, 0 if status == "scheduled" else 1, published_at, created_at)
+        # Sort: scheduled first, then audience priority, then FIFO (oldest created_at first)
+        return (preferred_rank, 0 if status == "scheduled" else 1, created_at)
 
     candidates = [
         item for item in feed
@@ -334,7 +335,8 @@ def preview_release_pool_by_settings(
         audience = _article_audience(item)
         preferred_rank = audience_priority.get(audience, len(audience_priority))
         status = str(item.get("status") or "")
-        return (preferred_rank, 0 if status == "scheduled" else 1, published_at, created_at)
+        # Sort: scheduled first, then audience priority, then FIFO (oldest created_at first)
+        return (preferred_rank, 0 if status == "scheduled" else 1, created_at)
 
     eligible_statuses = {"scheduled", "draft"} if include_drafts else {"scheduled"}
     pool_items = [item for item in feed if item.get("status") in {"draft", "scheduled"}]
