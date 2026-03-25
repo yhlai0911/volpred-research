@@ -12430,5 +12430,17 @@
       "daily-monthly-equal",
       "K361-revision"
     ]
+  },
+  {
+    "id": "K1204",
+    "title": "K363: Same-Day Bias Audit — 2 fixed (K330/K361), 7 OK, 1 needs check (K279). Monthly rebalance mostly safe",
+    "content": "Systematic audit of all experiments for I8/Q10/K362 timing bias. Only daily-frequency VT sims using VIX_t (not VIX_{t-1}) are affected. Monthly rebalance has minimal bias (VIX at month-start known before month returns). K306 correctly used lag. K238 caught by I8. K279 likely biased but already superseded by K281/K362. Overall: research integrity intact for monthly-based conclusions.",
+    "timestamp": "2026-03-25T14:20:46.285544",
+    "tags": [
+      "bias-audit",
+      "timing-bias",
+      "systematic-check",
+      "integrity"
+    ]
   }
 ]
