@@ -1,0 +1,535 @@
+{
+  "experiment_id": "K437",
+  "title": "GAS-t(1,1) Score-Driven Volatility Model",
+  "date": "2026-03-25T19:02:18.375945+00:00",
+  "author": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude]",
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "data_period": {
+    "total": "2005-01-04 ~ 2026-03-25",
+    "in_sample": "2005-01-04 ~ 2022-12-31",
+    "out_of_sample": "2023-01-01 ~ 2024-12-31",
+    "is_n": 4530,
+    "oos_n": 502,
+    "window": 2000,
+    "refit_every": 63,
+    "n_refits": 8
+  },
+  "literature": [
+    "Creal, Koopman, Lucas (2013) \"Generalized Autoregressive Score Models\" JASA 108(501):214-232",
+    "Harvey (2013) \"Dynamic Models for Volatility and Heavy Tails\" Cambridge UP"
+  ],
+  "methodology": {
+    "models_compared": [
+      "GARCH(1,1)-Normal",
+      "GARCH(1,1)-t",
+      "GJR-GARCH(1,1)-Normal",
+      "GJR-GARCH(1,1)-t",
+      "GAS-Gaussian(1,1)",
+      "GAS-t(1,1)"
+    ],
+    "gas_t_description": "f_{t+1} = omega + alpha * s_t + beta * f_t, f_t = log(sigma^2_t), s_t = (nu+1)/(nu-2+u) * u - 1, u = y^2/sigma^2. Student-t score automatically downweights outliers.",
+    "rv_proxy": "squared returns",
+    "loss_functions": [
+      "QLIKE",
+      "MSE",
+      "MAE"
+    ],
+    "statistical_test": "Diebold-Mariano (HAC variance)",
+    "optimization": "5-start L-BFGS-B + Nelder-Mead fallback"
+  },
+  "diagnostics": {
+    "descriptive_stats": {
+      "mean": 0.04086486214414682,
+      "std": 1.2347047136929246,
+      "skew": -0.06640946709923545,
+      "kurtosis": 14.637509916662943,
+      "min": -10.942359665771084,
+      "max": 14.519696167342788,
+      "n_is": 4530,
+      "n_oos": 502
+    },
+    "adf_test": {
+      "stat": -16.698354498124342,
+      "p_value": 1.4684204267157374e-29,
+      "stationary": true
+    },
+    "arch_lm_test": {
+      "stat": 1312.6481983510316,
+      "p_value": 7.128175913198069e-276,
+      "arch_effects": true
+    },
+    "ljung_box_r2": {
+      "stat": 3890.79736182895,
+      "p_value": 0.0,
+      "serial_dependence": true
+    }
+  },
+  "convergence": {
+    "garch_n": {
+      "converged": 8,
+      "total": 8,
+      "rate": 100.0
+    },
+    "garch_t": {
+      "converged": 8,
+      "total": 8,
+      "rate": 100.0
+    },
+    "gjr_n": {
+      "converged": 8,
+      "total": 8,
+      "rate": 100.0
+    },
+    "gjr_t": {
+      "converged": 8,
+      "total": 8,
+      "rate": 100.0
+    },
+    "gas_gaussian": {
+      "converged": 8,
+      "total": 8,
+      "rate": 100.0
+    },
+    "gas_t": {
+      "converged": 8,
+      "total": 8,
+      "rate": 100.0
+    }
+  },
+  "gas_t_parameters": {
+    "nu_mean": 6.844116970028699,
+    "nu_std": 0.1771791112716604,
+    "nu_min": 6.6496533452461595,
+    "nu_max": 7.22760599899146,
+    "alpha_mean": 0.18249118248302712,
+    "alpha_std": 0.011965957991620117,
+    "beta_mean": 0.9706731551480224,
+    "beta_std": 0.002399055090700142,
+    "persistence_mean": 0.9706731551480224,
+    "n_estimates": 8
+  },
+  "gas_t_parameter_history": [
+    {
+      "date": "2023-01-03",
+      "omega": -0.005815423764445671,
+      "alpha": 0.19885072226802966,
+      "beta": 0.9670412944485711,
+      "nu": 6.660599836271915,
+      "persistence": 0.9670412944485711,
+      "nll": 2551.459172475452,
+      "converged": true
+    },
+    {
+      "date": "2023-04-04",
+      "omega": -0.004493419216255468,
+      "alpha": 0.19249360425458387,
+      "beta": 0.9693705696065736,
+      "nu": 6.72413009895687,
+      "persistence": 0.9693705696065736,
+      "nll": 2577.1171670459958,
+      "converged": true
+    },
+    {
+      "date": "2023-07-06",
+      "omega": -0.004978110976386708,
+      "alpha": 0.19317684797601198,
+      "beta": 0.968785251838179,
+      "nu": 6.805720160468494,
+      "persistence": 0.968785251838179,
+      "nll": 2583.1704168639353,
+      "converged": true
+    },
+    {
+      "date": "2023-10-04",
+      "omega": -0.0056652663267294685,
+      "alpha": 0.1818909263968582,
+      "beta": 0.9709612080621162,
+      "nu": 6.9424372768268565,
+      "persistence": 0.9709612080621162,
+      "nll": 2550.695587400849,
+      "converged": true
+    },
+    {
+      "date": "2024-01-04",
+      "omega": -0.006980242025438898,
+      "alpha": 0.18490411398173345,
+      "beta": 0.9697682484945084,
+      "nu": 6.818693249972715,
+      "persistence": 0.9697682484945084,
+      "nll": 2529.2735648740563,
+      "converged": true
+    },
+    {
+      "date": "2024-04-05",
+      "omega": -0.006316549285003124,
+      "alpha": 0.17966559323313905,
+      "beta": 0.9708539777721187,
+      "nu": 6.6496533452461595,
+      "persistence": 0.9708539777721187,
+      "nll": 2513.8360296246738,
+      "converged": true
+    },
+    {
+      "date": "2024-07-08",
+      "omega": -0.005559630166942521,
+      "alpha": 0.16478204367212243,
+      "beta": 0.974699730800574,
+      "nu": 6.9240957934951215,
+      "persistence": 0.974699730800574,
+      "nll": 2502.4759616130004,
+      "converged": true
+    },
+    {
+      "date": "2024-10-04",
+      "omega": -0.005286434364748589,
+      "alpha": 0.1641656080817383,
+      "beta": 0.9739049601615385,
+      "nu": 7.22760599899146,
+      "persistence": 0.9739049601615385,
+      "nll": 2539.9201596256667,
+      "converged": true
+    }
+  ],
+  "gas_gaussian_parameter_history": [
+    {
+      "date": "2023-01-03",
+      "omega": -0.009819065953526053,
+      "alpha": 0.10537108697779793,
+      "beta": 0.9530683126007835,
+      "persistence": 0.9530683126007835,
+      "nll": 2625.72879348535,
+      "converged": true
+    },
+    {
+      "date": "2023-04-04",
+      "omega": -0.00818415288984273,
+      "alpha": 0.10314289885888185,
+      "beta": 0.9551880255507519,
+      "persistence": 0.9551880255507519,
+      "nll": 2650.1261394171174,
+      "converged": true
+    },
+    {
+      "date": "2023-07-06",
+      "omega": -0.008481960732764365,
+      "alpha": 0.10397528170100949,
+      "beta": 0.9546832497708319,
+      "persistence": 0.9546832497708319,
+      "nll": 2654.9677647401095,
+      "converged": true
+    },
+    {
+      "date": "2023-10-04",
+      "omega": -0.008744700398571692,
+      "alpha": 0.09477006621942116,
+      "beta": 0.9602334457952039,
+      "persistence": 0.9602334457952039,
+      "nll": 2620.531258578717,
+      "converged": true
+    },
+    {
+      "date": "2024-01-04",
+      "omega": -0.01027109627714283,
+      "alpha": 0.09612128918288794,
+      "beta": 0.9585686473415856,
+      "persistence": 0.9585686473415856,
+      "nll": 2600.8317199396356,
+      "converged": true
+    },
+    {
+      "date": "2024-04-05",
+      "omega": -0.00961242734042511,
+      "alpha": 0.09181000084001614,
+      "beta": 0.9610930019472729,
+      "persistence": 0.9610930019472729,
+      "nll": 2585.274119184101,
+      "converged": true
+    },
+    {
+      "date": "2024-07-08",
+      "omega": -0.008516557637040768,
+      "alpha": 0.08426176142882505,
+      "beta": 0.9676696109206177,
+      "persistence": 0.9676696109206177,
+      "nll": 2563.8158312210194,
+      "converged": true
+    },
+    {
+      "date": "2024-10-04",
+      "omega": -0.008133430885012541,
+      "alpha": 0.09313441216003998,
+      "beta": 0.9663184343321504,
+      "persistence": 0.9663184343321504,
+      "nll": 2593.9641019966753,
+      "converged": true
+    }
+  ],
+  "forecast_metrics": {
+    "garch_n": {
+      "qlike": 0.3118817856127779,
+      "mse": 0.7471064404563884,
+      "mae": 0.5854819877190113,
+      "n_valid": 502
+    },
+    "garch_t": {
+      "qlike": 0.3285510092477189,
+      "mse": 0.7853081129376858,
+      "mae": 0.6003771817864559,
+      "n_valid": 502
+    },
+    "gjr_n": {
+      "qlike": 0.3111660512890108,
+      "mse": 0.7516259946832112,
+      "mae": 0.5869052702744698,
+      "n_valid": 502
+    },
+    "gjr_t": {
+      "qlike": 0.337724656454088,
+      "mse": 0.8009941981985229,
+      "mae": 0.6041398296829273,
+      "n_valid": 502
+    },
+    "gas_gaussian": {
+      "qlike": 0.40459190357391883,
+      "mse": 0.8706238208166278,
+      "mae": 0.6528210061705064,
+      "n_valid": 502
+    },
+    "gas_t": {
+      "qlike": 0.36874355980846973,
+      "mse": 0.8325362725963847,
+      "mae": 0.6189584234320763,
+      "n_valid": 502
+    }
+  },
+  "rankings": {
+    "by_qlike": [
+      [
+        "gjr_n",
+        0.3111660512890108
+      ],
+      [
+        "garch_n",
+        0.3118817856127779
+      ],
+      [
+        "garch_t",
+        0.3285510092477189
+      ],
+      [
+        "gjr_t",
+        0.337724656454088
+      ],
+      [
+        "gas_t",
+        0.36874355980846973
+      ],
+      [
+        "gas_gaussian",
+        0.40459190357391883
+      ]
+    ],
+    "by_mse": [
+      [
+        "garch_n",
+        0.7471064404563884
+      ],
+      [
+        "gjr_n",
+        0.7516259946832112
+      ],
+      [
+        "garch_t",
+        0.7853081129376858
+      ],
+      [
+        "gjr_t",
+        0.8009941981985229
+      ],
+      [
+        "gas_t",
+        0.8325362725963847
+      ],
+      [
+        "gas_gaussian",
+        0.8706238208166278
+      ]
+    ],
+    "by_mae": [
+      [
+        "garch_n",
+        0.5854819877190113
+      ],
+      [
+        "gjr_n",
+        0.5869052702744698
+      ],
+      [
+        "garch_t",
+        0.6003771817864559
+      ],
+      [
+        "gjr_t",
+        0.6041398296829273
+      ],
+      [
+        "gas_t",
+        0.6189584234320763
+      ],
+      [
+        "gas_gaussian",
+        0.6528210061705064
+      ]
+    ],
+    "gas_t_qlike_rank": 5,
+    "gas_t_mse_rank": 5
+  },
+  "dm_tests": {
+    "gas_t_vs_garch_n": {
+      "qlike_dm_stat": -4.879006703055753,
+      "qlike_dm_p": 1.0662144092066228e-06,
+      "qlike_diff": -0.056861774195691904,
+      "qlike_gas_t_better": false,
+      "mse_dm_stat": -2.2923477812681052,
+      "mse_dm_p": 0.02188558269544094,
+      "mse_diff": -0.08542983213999641,
+      "mse_gas_t_better": false
+    },
+    "gas_t_vs_garch_t": {
+      "qlike_dm_stat": -3.6345390646054536,
+      "qlike_dm_p": 0.0002784780618763083,
+      "qlike_diff": -0.0401925505607508,
+      "qlike_gas_t_better": false,
+      "mse_dm_stat": -1.450612123861255,
+      "mse_dm_p": 0.14688789740795594,
+      "mse_diff": -0.047228159658699,
+      "mse_gas_t_better": false
+    },
+    "gas_t_vs_gjr_n": {
+      "qlike_dm_stat": -3.161321296566635,
+      "qlike_dm_p": 0.0015705515498343203,
+      "qlike_diff": -0.05757750851945901,
+      "qlike_gas_t_better": false,
+      "mse_dm_stat": -1.1475551891754794,
+      "mse_dm_p": 0.2511522375713897,
+      "mse_diff": -0.08091027791317366,
+      "mse_gas_t_better": false
+    },
+    "gas_t_vs_gjr_t": {
+      "qlike_dm_stat": -1.3642669555137954,
+      "qlike_dm_p": 0.1724835619896301,
+      "qlike_diff": -0.031018903354381712,
+      "qlike_gas_t_better": false,
+      "mse_dm_stat": -0.41774581433984803,
+      "mse_dm_p": 0.6761329718365943,
+      "mse_diff": -0.03154207439786179,
+      "mse_gas_t_better": false
+    },
+    "gas_t_vs_gas_gaussian": {
+      "qlike_dm_stat": 2.409522059320012,
+      "qlike_dm_p": 0.015973430389609078,
+      "qlike_diff": 0.03584834376544905,
+      "qlike_gas_t_better": true,
+      "mse_dm_stat": 0.5033004806963702,
+      "mse_dm_p": 0.6147530285361404,
+      "mse_diff": 0.03808754822024306,
+      "mse_gas_t_better": true
+    }
+  },
+  "regime_analysis": {
+    "n_high_vix": 1,
+    "n_normal": 501,
+    "metrics_by_regime": {
+      "normal": {
+        "garch_n": {
+          "qlike": 0.3048460472567652,
+          "mse": 0.6933728477828901
+        },
+        "garch_t": {
+          "qlike": 0.32147140503819005,
+          "mse": 0.7302473889602722
+        },
+        "gjr_n": {
+          "qlike": 0.30493171424451915,
+          "mse": 0.7195975877728589
+        },
+        "gjr_t": {
+          "qlike": 0.33163814312503176,
+          "mse": 0.7729121601420291
+        },
+        "gas_gaussian": {
+          "qlike": 0.39569332359783893,
+          "mse": 0.791017706478997
+        },
+        "gas_t": {
+          "qlike": 0.36149766124921584,
+          "mse": 0.7731375002378763
+        }
+      }
+    }
+  },
+  "score_downweighting": {
+    "estimated_nu": 6.844116970028699,
+    "comparison": [
+      {
+        "shock_sigma": 1.0,
+        "gaussian_score": 0.0,
+        "t_score": 0.3422244986294616,
+        "downweight_ratio": null
+      },
+      {
+        "shock_sigma": 2.0,
+        "gaussian_score": 3.0,
+        "t_score": 2.547721947419357,
+        "downweight_ratio": 0.8492406491397856
+      },
+      {
+        "shock_sigma": 3.0,
+        "gaussian_score": 8.0,
+        "t_score": 4.0994261954803415,
+        "downweight_ratio": 0.5124282744350427
+      },
+      {
+        "shock_sigma": 5.0,
+        "gaussian_score": 24.0,
+        "t_score": 5.5709072393616506,
+        "downweight_ratio": 0.23212113497340212
+      },
+      {
+        "shock_sigma": 7.0,
+        "gaussian_score": 48.0,
+        "t_score": 6.138416472599112,
+        "downweight_ratio": 0.1278836765124815
+      },
+      {
+        "shock_sigma": 10.0,
+        "gaussian_score": 99.0,
+        "t_score": 6.481694916912754,
+        "downweight_ratio": 0.06547166582740155
+      }
+    ],
+    "interpretation": "With \u03bd\u22486.8, a 5\u03c3 shock receives 23% of the Gaussian update weight"
+  },
+  "residual_diagnostics": {
+    "mean": 0.09923905071751901,
+    "std": 0.83014997860974,
+    "skew": -0.3294513098084935,
+    "kurtosis": -0.13697052497342588,
+    "arch_lm_stat": 5.513583804243614,
+    "arch_lm_p": 0.3564586665160297,
+    "remaining_arch": false,
+    "ljung_box_sq_stat": 7.756826196120293,
+    "ljung_box_sq_p": 0.6525761309309415
+  },
+  "conclusion": "GAS-t underperforms standard GARCH. Possible implementation issue or model misspecification.",
+  "limitations": [
+    "RV proxy is squared returns (noisy); realized variance from 5-min data would be better",
+    "GAS-t self-implemented (no established Python package for validation)",
+    "Single asset (SPY) \u2014 generalizability to other assets unknown",
+    "OOS period 2023-2024 is relatively calm \u2014 no extreme crisis like COVID",
+    "Student-t score assumes symmetric tails; skewed-t extension not tested",
+    "L-BFGS-B optimization may find local optima despite multiple starts"
+  ],
+  "elapsed_seconds": 627.0
+}
