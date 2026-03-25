@@ -12635,5 +12635,18 @@
       "definitive",
       "important"
     ]
+  },
+  {
+    "id": "K1219",
+    "title": "K378: ★★ Cash Frontier — Sharpe is scale-invariant (can NOT rank cash allocations). Optimal cash% has ZERO decade stability",
+    "content": "Sharpe((1-c)R+c*rf)=Sharpe(R) for all c — mathematical identity. Used CRRA(γ=5) instead. 12/VIX allocates too little cash at moderate VIX. Best c/VIX: c=7.8 but all functional forms R²<0.10 (poor fit). 0/8 VIX levels have stable optimal across decades. 12/VIX works because it is simple+robust, NOT because it is close to optimal. Data-mined lookup tables unreliable OOS.",
+    "timestamp": "2026-03-25T16:38:55.816389",
+    "tags": [
+      "cash-allocation",
+      "scale-invariant",
+      "CRRA",
+      "decade-unstable",
+      "12VIX-robust"
+    ]
   }
 ]
