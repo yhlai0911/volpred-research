@@ -45,6 +45,7 @@ Window: 2000 trading days (rolling), refit every 21 days
 RV proxy: squared returns (standard in GARCH literature)
 """
 
+import sys
 import numpy as np
 import pandas as pd
 import json
@@ -53,6 +54,9 @@ import warnings
 from datetime import datetime, timezone
 from scipy import stats
 from scipy.optimize import minimize
+
+# Force unbuffered output
+sys.stdout.reconfigure(line_buffering=True)
 
 warnings.filterwarnings('ignore')
 
@@ -63,6 +67,7 @@ print("=" * 70)
 print("K437: Generalized Autoregressive Score (GAS) Model for Volatility")
 print("Literature: Creal, Koopman, Lucas (2013) JASA; Harvey (2013)")
 print("=" * 70)
+sys.stdout.flush()
 
 import yfinance as yf
 
@@ -89,6 +94,7 @@ if isinstance(vix.columns, pd.MultiIndex):
     vix.columns = vix.columns.get_level_values(0)
 vix_close = vix['Close'].dropna()
 print(f"  VIX observations: {len(vix_close)}")
+sys.stdout.flush()
 
 # ============================================================
 # STEP 1: Descriptive Statistics (diagnostics first — CLAUDE.md rule 4)
@@ -135,6 +141,7 @@ lb_stat = float(lb_result['lb_stat'].iloc[-1])
 lb_p = float(lb_result['lb_pvalue'].iloc[-1])
 print(f"  Ljung-Box Q(10) on r²: stat={lb_stat:.4f}, p={lb_p:.6f} "
       f"({'serial dependence' if lb_p < 0.05 else 'no dependence'})")
+sys.stdout.flush()
 
 diagnostics = {
     'descriptive_stats': desc_stats,
@@ -150,126 +157,91 @@ diagnostics = {
 # STEP 2: GAS Model Implementation
 # ============================================================
 print("\n[2] GAS Model Implementation (Creal et al. 2013)")
+sys.stdout.flush()
 
 
-def gas_gaussian_loglik(params, returns):
+def gas_gaussian_filter(params, returns, f0=None):
     """
-    GAS-Gaussian(1,1) negative log-likelihood.
-    f_t = log(σ²_t), updated by Gaussian score.
-    Gaussian score: s_t = y²/σ² - 1
-    This is equivalent to an EGARCH-like model.
+    Filter GAS-Gaussian(1,1): run through data, return log-variance path.
+    Returns f array of length T+1 (last element is 1-step-ahead forecast).
     """
     omega, alpha, beta = params
     T = len(returns)
-    f = np.zeros(T)
-    f[0] = np.log(np.var(returns[:min(252, T)]))  # initialize with sample var
+    f = np.zeros(T + 1)
+    if f0 is not None:
+        f[0] = f0
+    else:
+        f[0] = np.log(np.var(returns[:min(252, T)]) + 1e-10)
 
+    for t in range(T):
+        sigma2 = np.exp(f[t])
+        sigma2 = max(sigma2, 1e-10)
+        sigma2 = min(sigma2, 1e6)
+        u = returns[t]**2 / sigma2
+        score = u - 1  # Gaussian score for log-variance
+        f[t + 1] = omega + alpha * score + beta * f[t]
+        f[t + 1] = np.clip(f[t + 1], -20, 20)
+
+    return f
+
+
+def gas_t_filter(params, returns, f0=None):
+    """
+    Filter GAS-t(1,1): run through data, return log-variance path.
+    Returns f array of length T+1 (last element is 1-step-ahead forecast).
+    """
+    omega, alpha, beta, nu = params
+    T = len(returns)
+    f = np.zeros(T + 1)
+    if f0 is not None:
+        f[0] = f0
+    else:
+        f[0] = np.log(np.var(returns[:min(252, T)]) + 1e-10)
+
+    for t in range(T):
+        sigma2 = np.exp(f[t])
+        sigma2 = max(sigma2, 1e-10)
+        sigma2 = min(sigma2, 1e6)
+        u = returns[t]**2 / sigma2
+        # Student-t score: downweights large u
+        score = (nu + 1) / (nu - 2 + u) * u - 1
+        f[t + 1] = omega + alpha * score + beta * f[t]
+        f[t + 1] = np.clip(f[t + 1], -20, 20)
+
+    return f
+
+
+def gas_gaussian_loglik(params, returns):
+    """GAS-Gaussian(1,1) negative log-likelihood."""
+    omega, alpha, beta = params
+    f = gas_gaussian_filter(params, returns)
+    T = len(returns)
     ll = 0.0
     for t in range(T):
         sigma2 = np.exp(f[t])
-        # Prevent numerical issues
-        if sigma2 < 1e-10:
-            sigma2 = 1e-10
-        if sigma2 > 1e6:
-            sigma2 = 1e6
-
-        # Gaussian log-likelihood
+        sigma2 = max(sigma2, 1e-10)
         ll += -0.5 * np.log(2 * np.pi) - 0.5 * np.log(sigma2) - 0.5 * returns[t]**2 / sigma2
-
-        if t < T - 1:
-            u = returns[t]**2 / sigma2
-            score = u - 1  # Gaussian score for log-variance
-            f[t + 1] = omega + alpha * score + beta * f[t]
-            # Clamp to prevent explosion
-            f[t + 1] = np.clip(f[t + 1], -20, 20)
-
     if np.isnan(ll) or np.isinf(ll):
         return 1e10
     return -ll
 
 
 def gas_t_loglik(params, returns):
-    """
-    GAS-t(1,1) negative log-likelihood.
-    f_t = log(σ²_t), updated by Student-t score.
-    Student-t score: s_t = ((ν+1)/(ν-2+u)) · u - 1
-    where u = y²/σ²
-
-    Key insight: when u is large (outlier), (ν+1)/(ν-2+u) < 1,
-    so the score is downweighted. This is the robustness advantage.
-    """
+    """GAS-t(1,1) negative log-likelihood."""
     omega, alpha, beta, nu = params
+    f = gas_t_filter(params, returns)
     T = len(returns)
-    f = np.zeros(T)
-    f[0] = np.log(np.var(returns[:min(252, T)]))
-
     ll = 0.0
-    # Scale factor for Student-t: σ² · (ν-2)/ν
     for t in range(T):
         sigma2 = np.exp(f[t])
-        if sigma2 < 1e-10:
-            sigma2 = 1e-10
-        if sigma2 > 1e6:
-            sigma2 = 1e6
-
-        # Student-t log-likelihood (scaled by sqrt(sigma2 * (nu-2)/nu) for variance = sigma2)
-        # Using scipy's t distribution with scale = sqrt(sigma2 * (nu-2)/nu)
+        sigma2 = max(sigma2, 1e-10)
+        # Student-t log-likelihood with variance = sigma2
+        # scale = sqrt(sigma2 * (nu-2)/nu) so that Var = sigma2
         scale = np.sqrt(sigma2 * (nu - 2) / nu) if nu > 2 else np.sqrt(sigma2)
         ll += stats.t.logpdf(returns[t], df=nu, scale=scale)
-
-        if t < T - 1:
-            u = returns[t]**2 / sigma2
-            # Student-t score for log-variance
-            # s_t = (ν+1)/(ν-2+u) · u - 1
-            score = (nu + 1) / (nu - 2 + u) * u - 1
-            f[t + 1] = omega + alpha * score + beta * f[t]
-            f[t + 1] = np.clip(f[t + 1], -20, 20)
-
     if np.isnan(ll) or np.isinf(ll):
         return 1e10
     return -ll
-
-
-def gas_t_forecast(params, returns):
-    """Generate 1-step-ahead variance forecasts from GAS-t model."""
-    omega, alpha, beta, nu = params
-    T = len(returns)
-    f = np.zeros(T + 1)
-    f[0] = np.log(np.var(returns[:min(252, T)]))
-
-    for t in range(T):
-        sigma2 = np.exp(f[t])
-        if sigma2 < 1e-10:
-            sigma2 = 1e-10
-        if sigma2 > 1e6:
-            sigma2 = 1e6
-        u = returns[t]**2 / sigma2
-        score = (nu + 1) / (nu - 2 + u) * u - 1
-        f[t + 1] = omega + alpha * score + beta * f[t]
-        f[t + 1] = np.clip(f[t + 1], -20, 20)
-
-    return np.exp(f)  # variance forecasts (T+1 values, last is 1-step-ahead)
-
-
-def gas_gaussian_forecast(params, returns):
-    """Generate 1-step-ahead variance forecasts from GAS-Gaussian model."""
-    omega, alpha, beta = params
-    T = len(returns)
-    f = np.zeros(T + 1)
-    f[0] = np.log(np.var(returns[:min(252, T)]))
-
-    for t in range(T):
-        sigma2 = np.exp(f[t])
-        if sigma2 < 1e-10:
-            sigma2 = 1e-10
-        if sigma2 > 1e6:
-            sigma2 = 1e6
-        u = returns[t]**2 / sigma2
-        score = u - 1
-        f[t + 1] = omega + alpha * score + beta * f[t]
-        f[t + 1] = np.clip(f[t + 1], -20, 20)
-
-    return np.exp(f)
 
 
 def fit_gas_t(returns, n_starts=5):
@@ -280,11 +252,8 @@ def fit_gas_t(returns, n_starts=5):
         (0.001, 0.999),  # beta
         (2.1, 100.0),    # nu (degrees of freedom)
     ]
-
     best_result = None
     best_nll = np.inf
-
-    np.random.seed(42)
     starts = [
         [0.01, 0.05, 0.95, 8.0],
         [0.05, 0.10, 0.90, 5.0],
@@ -292,8 +261,7 @@ def fit_gas_t(returns, n_starts=5):
         [0.1, 0.15, 0.85, 6.0],
         [0.0, 0.08, 0.92, 10.0],
     ]
-
-    for i, x0 in enumerate(starts[:n_starts]):
+    for x0 in starts[:n_starts]:
         try:
             result = minimize(gas_t_loglik, x0, args=(returns,),
                             method='L-BFGS-B', bounds=bounds,
@@ -303,19 +271,18 @@ def fit_gas_t(returns, n_starts=5):
                 best_result = result
         except Exception:
             continue
-
-    # Fallback: try Nelder-Mead if L-BFGS-B fails
     if best_result is None:
-        try:
-            result = minimize(gas_t_loglik, [0.01, 0.05, 0.95, 8.0],
-                            args=(returns,), method='Nelder-Mead',
-                            options={'maxiter': 2000})
-            if np.isfinite(result.fun):
-                best_result = result
-                best_nll = result.fun
-        except Exception:
-            pass
-
+        # Accept non-converged if finite
+        for x0 in starts[:n_starts]:
+            try:
+                result = minimize(gas_t_loglik, x0, args=(returns,),
+                                method='L-BFGS-B', bounds=bounds,
+                                options={'maxiter': 500})
+                if result.fun < best_nll and np.isfinite(result.fun):
+                    best_nll = result.fun
+                    best_result = result
+            except Exception:
+                continue
     return best_result
 
 
@@ -326,10 +293,8 @@ def fit_gas_gaussian(returns, n_starts=5):
         (0.001, 2.0),    # alpha
         (0.001, 0.999),  # beta
     ]
-
     best_result = None
     best_nll = np.inf
-
     starts = [
         [0.01, 0.05, 0.95],
         [0.05, 0.10, 0.90],
@@ -337,8 +302,7 @@ def fit_gas_gaussian(returns, n_starts=5):
         [0.1, 0.15, 0.85],
         [0.0, 0.08, 0.92],
     ]
-
-    for i, x0 in enumerate(starts[:n_starts]):
+    for x0 in starts[:n_starts]:
         try:
             result = minimize(gas_gaussian_loglik, x0, args=(returns,),
                             method='L-BFGS-B', bounds=bounds,
@@ -348,217 +312,187 @@ def fit_gas_gaussian(returns, n_starts=5):
                 best_result = result
         except Exception:
             continue
-
     if best_result is None:
-        try:
-            result = minimize(gas_gaussian_loglik, [0.01, 0.05, 0.95],
-                            args=(returns,), method='Nelder-Mead',
-                            options={'maxiter': 2000})
-            if np.isfinite(result.fun):
-                best_result = result
-        except Exception:
-            pass
-
+        for x0 in starts[:n_starts]:
+            try:
+                result = minimize(gas_gaussian_loglik, x0, args=(returns,),
+                                method='L-BFGS-B', bounds=bounds,
+                                options={'maxiter': 500})
+                if result.fun < best_nll and np.isfinite(result.fun):
+                    best_nll = result.fun
+                    best_result = result
+            except Exception:
+                continue
     return best_result
 
 
 # ============================================================
-# STEP 3: GARCH/GJR Benchmarks (arch package)
+# STEP 3: Setup OOS Framework
 # ============================================================
-print("\n[3] Fitting benchmark GARCH models (arch package)...")
+print("\n[3] Setting up OOS rolling forecast framework...")
+sys.stdout.flush()
+
 from arch import arch_model
 
-# Setup
 all_returns = returns_pct.values
 all_dates = returns_pct.index
 
-# Define OOS period
 oos_start_idx = np.where(returns_pct.index >= '2023-01-01')[0][0]
 oos_end_idx = np.where(returns_pct.index < '2025-01-01')[0][-1] + 1
 n_oos = oos_end_idx - oos_start_idx
 window = 2000
-refit_every = 63  # quarterly refit for efficiency
+refit_every = 21
 
 print(f"  OOS: index {oos_start_idx} to {oos_end_idx-1} ({n_oos} days)")
 print(f"  Window: {window}, Refit every: {refit_every} days")
+print(f"  Expected refits: {n_oos // refit_every + 1}")
 
-# Align VIX with returns for regime analysis
+# Align VIX
 vix_aligned = vix_close.reindex(returns_pct.index).ffill()
 
-# Storage for forecasts
+# Storage
 forecasts = {
-    'garch_n': np.zeros(n_oos),
-    'garch_t': np.zeros(n_oos),
-    'gjr_n': np.zeros(n_oos),
-    'gjr_t': np.zeros(n_oos),
-    'gas_gaussian': np.zeros(n_oos),
-    'gas_t': np.zeros(n_oos),
+    'garch_n': np.full(n_oos, np.nan),
+    'garch_t': np.full(n_oos, np.nan),
+    'gjr_n': np.full(n_oos, np.nan),
+    'gjr_t': np.full(n_oos, np.nan),
+    'gas_gaussian': np.full(n_oos, np.nan),
+    'gas_t': np.full(n_oos, np.nan),
 }
-realized_var = np.zeros(n_oos)  # squared returns as proxy
+realized_var = np.zeros(n_oos)
 
-# Track GAS-t parameters
 gas_t_params_history = []
 gas_gaussian_params_history = []
-convergence_log = {
-    'garch_n': [], 'garch_t': [], 'gjr_n': [], 'gjr_t': [],
-    'gas_gaussian': [], 'gas_t': []
-}
+convergence_log = {k: [] for k in forecasts.keys()}
+
+# ============================================================
+# STEP 4: Rolling OOS — refit every 21 days, filter in batch
+# ============================================================
+print("\n[4] Rolling OOS forecasting (efficient batch approach)...")
+sys.stdout.flush()
 
 start_time = time.time()
 
-# ============================================================
-# STEP 4: Rolling OOS Forecasting
-# ============================================================
-print("\n[4] Rolling OOS forecasting...")
+# Identify refit points
+refit_days = list(range(0, n_oos, refit_every))
+n_refits = len(refit_days)
+print(f"  Total refits: {n_refits}")
 
-n_refits = 0
-last_params = {
-    'garch_n': None, 'garch_t': None, 'gjr_n': None, 'gjr_t': None,
-    'gas_gaussian': None, 'gas_t': None
-}
+for ri, refit_i in enumerate(refit_days):
+    t_refit = oos_start_idx + refit_i
+    train_start = t_refit - window
+    train_data = all_returns[train_start:t_refit]
 
-for i in range(n_oos):
-    t = oos_start_idx + i
-    realized_var[i] = all_returns[t]**2  # squared return as RV proxy
+    # How many days until next refit (or end of OOS)
+    if ri + 1 < len(refit_days):
+        next_refit_i = refit_days[ri + 1]
+    else:
+        next_refit_i = n_oos
+    n_forecast_days = next_refit_i - refit_i
 
-    need_refit = (i % refit_every == 0) or (i == 0)
+    # The data we need to filter through: training + forecast period
+    # For 1-step-ahead: filter train_data, then extend day by day
+    filter_data = all_returns[train_start:t_refit + n_forecast_days]
 
-    if need_refit:
-        n_refits += 1
-        train_start = t - window
-        train_end = t
-        train_data = all_returns[train_start:train_end]
+    if ri % 4 == 0:
+        elapsed_so_far = time.time() - start_time
+        print(f"  Refit #{ri+1}/{n_refits} at day {refit_i}/{n_oos} "
+              f"(date: {all_dates[t_refit].strftime('%Y-%m-%d')}) "
+              f"[{elapsed_so_far:.1f}s elapsed]")
+        sys.stdout.flush()
 
-        if i % (refit_every * 4) == 0:
-            print(f"  Refit #{n_refits} at OOS day {i}/{n_oos} "
-                  f"(date: {all_dates[t].strftime('%Y-%m-%d')})")
-
-        # --- GARCH(1,1) Normal ---
-        try:
-            am = arch_model(train_data, vol='Garch', p=1, q=1, dist='Normal')
-            res = am.fit(disp='off')
-            last_params['garch_n'] = res
-            convergence_log['garch_n'].append(int(res.convergence_flag))
-        except Exception:
-            convergence_log['garch_n'].append(-1)
-
-        # --- GARCH(1,1) Student-t ---
-        try:
-            am = arch_model(train_data, vol='Garch', p=1, q=1, dist='StudentsT')
-            res = am.fit(disp='off')
-            last_params['garch_t'] = res
-            convergence_log['garch_t'].append(int(res.convergence_flag))
-        except Exception:
-            convergence_log['garch_t'].append(-1)
-
-        # --- GJR-GARCH(1,1) Normal ---
-        try:
-            am = arch_model(train_data, vol='Garch', p=1, o=1, q=1, dist='Normal')
-            res = am.fit(disp='off')
-            last_params['gjr_n'] = res
-            convergence_log['gjr_n'].append(int(res.convergence_flag))
-        except Exception:
-            convergence_log['gjr_n'].append(-1)
-
-        # --- GJR-GARCH(1,1) Student-t ---
-        try:
-            am = arch_model(train_data, vol='Garch', p=1, o=1, q=1, dist='StudentsT')
-            res = am.fit(disp='off')
-            last_params['gjr_t'] = res
-            convergence_log['gjr_t'].append(int(res.convergence_flag))
-        except Exception:
-            convergence_log['gjr_t'].append(-1)
-
-        # --- GAS-Gaussian(1,1) ---
-        try:
-            gas_g_res = fit_gas_gaussian(train_data, n_starts=5)
-            if gas_g_res is not None:
-                last_params['gas_gaussian'] = gas_g_res.x
-                convergence_log['gas_gaussian'].append(0 if gas_g_res.success else 1)
-                gas_gaussian_params_history.append({
-                    'date': all_dates[t].strftime('%Y-%m-%d'),
-                    'omega': float(gas_g_res.x[0]),
-                    'alpha': float(gas_g_res.x[1]),
-                    'beta': float(gas_g_res.x[2]),
-                    'persistence': float(gas_g_res.x[2]),  # beta only for GAS
-                    'nll': float(gas_g_res.fun),
-                    'converged': bool(gas_g_res.success)
-                })
-            else:
-                convergence_log['gas_gaussian'].append(-1)
-        except Exception:
-            convergence_log['gas_gaussian'].append(-1)
-
-        # --- GAS-t(1,1) ---
-        try:
-            gas_t_res = fit_gas_t(train_data, n_starts=5)
-            if gas_t_res is not None:
-                last_params['gas_t'] = gas_t_res.x
-                convergence_log['gas_t'].append(0 if gas_t_res.success else 1)
-                gas_t_params_history.append({
-                    'date': all_dates[t].strftime('%Y-%m-%d'),
-                    'omega': float(gas_t_res.x[0]),
-                    'alpha': float(gas_t_res.x[1]),
-                    'beta': float(gas_t_res.x[2]),
-                    'nu': float(gas_t_res.x[3]),
-                    'persistence': float(gas_t_res.x[2]),
-                    'nll': float(gas_t_res.fun),
-                    'converged': bool(gas_t_res.success)
-                })
-            else:
-                convergence_log['gas_t'].append(-1)
-        except Exception:
-            convergence_log['gas_t'].append(-1)
-
-    # Generate 1-step-ahead forecasts using last fitted params
-    # For GARCH models: use recursive forecast from arch
-    train_start = t - window
-    train_data_full = all_returns[train_start:t+1]  # include current obs for filtering
-
-    # GARCH/GJR forecasts via arch filtering
+    # --- GARCH benchmarks (arch package) ---
+    # Fit on training data, then manually implement GARCH recursion for OOS
     for model_name, dist, vol_o in [
         ('garch_n', 'Normal', 0), ('garch_t', 'StudentsT', 0),
         ('gjr_n', 'Normal', 1), ('gjr_t', 'StudentsT', 1)
     ]:
         try:
-            res = last_params[model_name]
-            if res is not None:
-                # Use the fitted parameters to filter the full data up to t
-                # and get 1-step forecast
-                am = arch_model(train_data_full, vol='Garch', p=1, o=vol_o, q=1, dist=dist)
-                filtered = am.fit(disp='off', starting_values=res.params)
-                fc = filtered.forecast(horizon=1)
-                forecasts[model_name][i] = fc.variance.iloc[-1, 0]
-            else:
-                forecasts[model_name][i] = np.nan
-        except Exception:
-            # Fallback: use unconditional variance
-            forecasts[model_name][i] = np.var(train_data_full[-252:])
+            am = arch_model(train_data, vol='Garch', p=1, o=vol_o, q=1, dist=dist)
+            res = am.fit(disp='off')
+            convergence_log[model_name].append(int(res.convergence_flag))
 
-    # GAS-Gaussian forecast
-    try:
-        if last_params['gas_gaussian'] is not None:
-            gp = last_params['gas_gaussian']
-            var_path = gas_gaussian_forecast(gp, train_data_full)
-            forecasts['gas_gaussian'][i] = var_path[-1]  # 1-step-ahead
-        else:
-            forecasts['gas_gaussian'][i] = np.nan
-    except Exception:
-        forecasts['gas_gaussian'][i] = np.var(train_data_full[-252:])
+            # Extract fitted parameters
+            p = res.params
+            mu = p['mu'] if 'mu' in p.index else 0
+            omega_g = p['omega']
+            alpha_g = p['alpha[1]']
+            beta_g = p['beta[1]']
+            gamma_g = p.get('gamma[1]', 0)  # 0 for GARCH, >0 for GJR
 
-    # GAS-t forecast
+            # Get the last conditional variance from training fit
+            cv = np.asarray(res.conditional_volatility)
+            last_h = cv[-1]**2
+            last_resid = (train_data[-1] - mu)
+
+            # Now extend the GARCH filter into the OOS period
+            h_prev = last_h
+            e_prev = last_resid
+            for d in range(n_forecast_days):
+                # 1-step-ahead forecast: h_{t+1} = omega + alpha*e_t^2 + gamma*e_t^2*I(e_t<0) + beta*h_t
+                indicator = 1.0 if e_prev < 0 else 0.0
+                h_next = omega_g + alpha_g * e_prev**2 + gamma_g * e_prev**2 * indicator + beta_g * h_prev
+                forecasts[model_name][refit_i + d] = h_next
+
+                # Update for next step using the actual observed return
+                actual_return = filter_data[window + d]
+                e_prev = actual_return - mu
+                h_prev = h_next
+        except Exception as e:
+            convergence_log[model_name].append(-1)
+
+    # --- GAS-Gaussian(1,1) ---
     try:
-        if last_params['gas_t'] is not None:
-            gp = last_params['gas_t']
-            var_path = gas_t_forecast(gp, train_data_full)
-            forecasts['gas_t'][i] = var_path[-1]  # 1-step-ahead
+        gas_g_res = fit_gas_gaussian(train_data, n_starts=5)
+        if gas_g_res is not None:
+            convergence_log['gas_gaussian'].append(0 if gas_g_res.success else 1)
+            gp = gas_g_res.x
+            gas_gaussian_params_history.append({
+                'date': all_dates[t_refit].strftime('%Y-%m-%d'),
+                'omega': float(gp[0]), 'alpha': float(gp[1]), 'beta': float(gp[2]),
+                'persistence': float(gp[2]),
+                'nll': float(gas_g_res.fun), 'converged': bool(gas_g_res.success)
+            })
+            # Filter through the extended data
+            f_path = gas_gaussian_filter(gp, filter_data)
+            for d in range(n_forecast_days):
+                # f_path[window + d] is the forecast for day (window + d),
+                # made using info up to day (window + d - 1)
+                forecasts['gas_gaussian'][refit_i + d] = np.exp(f_path[window + d])
         else:
-            forecasts['gas_t'][i] = np.nan
+            convergence_log['gas_gaussian'].append(-1)
     except Exception:
-        forecasts['gas_t'][i] = np.var(train_data_full[-252:])
+        convergence_log['gas_gaussian'].append(-1)
+
+    # --- GAS-t(1,1) ---
+    try:
+        gas_t_res = fit_gas_t(train_data, n_starts=5)
+        if gas_t_res is not None:
+            convergence_log['gas_t'].append(0 if gas_t_res.success else 1)
+            gp = gas_t_res.x
+            gas_t_params_history.append({
+                'date': all_dates[t_refit].strftime('%Y-%m-%d'),
+                'omega': float(gp[0]), 'alpha': float(gp[1]),
+                'beta': float(gp[2]), 'nu': float(gp[3]),
+                'persistence': float(gp[2]),
+                'nll': float(gas_t_res.fun), 'converged': bool(gas_t_res.success)
+            })
+            # Filter through the extended data
+            f_path = gas_t_filter(gp, filter_data)
+            for d in range(n_forecast_days):
+                forecasts['gas_t'][refit_i + d] = np.exp(f_path[window + d])
+        else:
+            convergence_log['gas_t'].append(-1)
+    except Exception:
+        convergence_log['gas_t'].append(-1)
+
+# Realized variance
+for i in range(n_oos):
+    realized_var[i] = all_returns[oos_start_idx + i]**2
 
 elapsed = time.time() - start_time
 print(f"\n  Forecasting complete: {elapsed:.1f}s ({n_refits} refits)")
+sys.stdout.flush()
 
 # ============================================================
 # STEP 5: Convergence & Parameter Diagnostics
@@ -575,7 +509,8 @@ for model_name, flags in convergence_log.items():
             'total': n_total,
             'rate': round(n_success / n_total * 100, 1)
         }
-        print(f"  {model_name}: {n_success}/{n_total} converged ({convergence_summary[model_name]['rate']}%)")
+        print(f"  {model_name}: {n_success}/{n_total} converged "
+              f"({convergence_summary[model_name]['rate']}%)")
 
 # GAS-t parameter summary
 if gas_t_params_history:
@@ -597,25 +532,28 @@ if gas_t_params_history:
     }
 
     print(f"\n  GAS-t parameter summary:")
-    print(f"    ν (degrees of freedom): mean={gas_t_param_summary['nu_mean']:.2f}, "
+    print(f"    nu (degrees of freedom): mean={gas_t_param_summary['nu_mean']:.2f}, "
           f"std={gas_t_param_summary['nu_std']:.2f}, "
           f"range=[{gas_t_param_summary['nu_min']:.2f}, {gas_t_param_summary['nu_max']:.2f}]")
-    print(f"    α (score weight): mean={gas_t_param_summary['alpha_mean']:.4f}, "
+    print(f"    alpha (score weight): mean={gas_t_param_summary['alpha_mean']:.4f}, "
           f"std={gas_t_param_summary['alpha_std']:.4f}")
-    print(f"    β (persistence): mean={gas_t_param_summary['beta_mean']:.4f}, "
+    print(f"    beta (persistence): mean={gas_t_param_summary['beta_mean']:.4f}, "
           f"std={gas_t_param_summary['beta_std']:.4f}")
 
     # Check persistence < 1
     if gas_t_param_summary['beta_mean'] >= 0.999:
-        print("  ⚠ WARNING: GAS-t persistence at boundary! Results may be unreliable.")
+        print("  WARNING: GAS-t persistence at boundary! Results may be unreliable.")
 else:
     gas_t_param_summary = {}
-    print("  ⚠ WARNING: No GAS-t parameters estimated!")
+    print("  WARNING: No GAS-t parameters estimated!")
+
+sys.stdout.flush()
 
 # ============================================================
 # STEP 6: Forecast Evaluation (QLIKE, MSE, MAE)
 # ============================================================
 print("\n[6] Forecast Evaluation Metrics")
+
 
 def qlike(realized, forecast):
     """QLIKE loss: L = log(h) + r²/h. Lower is better."""
@@ -624,15 +562,18 @@ def qlike(realized, forecast):
     h = forecast[valid]
     return float(np.mean(np.log(h) + r / h))
 
-def mse(realized, forecast):
+
+def mse_fn(realized, forecast):
     """MSE loss: (r² - h)². Lower is better."""
     valid = np.isfinite(realized) & np.isfinite(forecast)
     return float(np.mean((realized[valid] - forecast[valid])**2))
 
-def mae(realized, forecast):
+
+def mae_fn(realized, forecast):
     """MAE loss: |r² - h|. Lower is better."""
     valid = np.isfinite(realized) & np.isfinite(forecast)
     return float(np.mean(np.abs(realized[valid] - forecast[valid])))
+
 
 metrics = {}
 for name, fc in forecasts.items():
@@ -643,12 +584,15 @@ for name, fc in forecasts.items():
 
     m = {
         'qlike': qlike(realized_var, fc),
-        'mse': mse(realized_var, fc),
-        'mae': mae(realized_var, fc),
+        'mse': mse_fn(realized_var, fc),
+        'mae': mae_fn(realized_var, fc),
         'n_valid': int(valid_mask.sum())
     }
     metrics[name] = m
-    print(f"  {name:15s}: QLIKE={m['qlike']:.6f}  MSE={m['mse']:.6f}  MAE={m['mae']:.6f} (n={m['n_valid']})")
+    print(f"  {name:15s}: QLIKE={m['qlike']:.6f}  MSE={m['mse']:.6f}  "
+          f"MAE={m['mae']:.6f} (n={m['n_valid']})")
+
+sys.stdout.flush()
 
 # ============================================================
 # STEP 7: Diebold-Mariano Tests
@@ -674,15 +618,16 @@ def dm_test(loss1, loss2, h=1):
     # HAC variance (Newey-West with h-1 lags)
     gamma0 = np.var(d, ddof=1)
     gamma_sum = 0
-    for k in range(1, h):
-        gamma_k = np.cov(d[k:], d[:-k])[0, 1]
-        gamma_sum += 2 * gamma_k
+    for k in range(1, max(h, 2)):
+        if k < n:
+            gamma_k = np.mean((d[k:] - d_mean) * (d[:-k] - d_mean))
+            gamma_sum += 2 * gamma_k
 
     var_d = (gamma0 + gamma_sum) / n
     if var_d <= 0:
         var_d = gamma0 / n
 
-    dm_stat = d_mean / np.sqrt(var_d)
+    dm_stat = d_mean / np.sqrt(max(var_d, 1e-20))
     p_value = 2 * (1 - stats.norm.cdf(abs(dm_stat)))
 
     return float(dm_stat), float(p_value), float(d_mean)
@@ -735,6 +680,8 @@ for benchmark in ['garch_n', 'garch_t', 'gjr_n', 'gjr_t', 'gas_gaussian']:
     print(f"    QLIKE: DM={dm_stat_q:+.3f}, p={dm_p_q:.4f}{q_sig} ({q_dir})")
     print(f"    MSE:   DM={dm_stat_m:+.3f}, p={dm_p_m:.4f}{m_sig} ({m_dir})")
 
+sys.stdout.flush()
+
 # ============================================================
 # STEP 8: Regime Analysis (VIX>30 vs normal)
 # ============================================================
@@ -748,8 +695,18 @@ n_high = int(np.sum(high_vix_mask))
 n_normal = int(np.sum(normal_mask))
 print(f"  High VIX (>30) days: {n_high}, Normal days: {n_normal}")
 
+# Also check VIX > 20 as a milder stress regime
+mid_vix_mask = (vix_oos > 20) & (vix_oos <= 30)
+low_vix_mask = vix_oos <= 20
+n_mid = int(np.sum(mid_vix_mask))
+n_low = int(np.sum(low_vix_mask))
+print(f"  Mid VIX (20-30) days: {n_mid}, Low VIX (<=20) days: {n_low}")
+
 regime_metrics = {}
-for regime_name, mask in [('high_vix', high_vix_mask), ('normal', normal_mask)]:
+for regime_name, mask in [('high_vix_gt30', high_vix_mask),
+                           ('mid_vix_20_30', mid_vix_mask),
+                           ('low_vix_le20', low_vix_mask),
+                           ('normal_le30', normal_mask)]:
     if np.sum(mask) < 5:
         print(f"  {regime_name}: insufficient data ({np.sum(mask)} days)")
         continue
@@ -769,59 +726,60 @@ for regime_name, mask in [('high_vix', high_vix_mask), ('normal', normal_mask)]:
 
     # Print comparison
     if regime_metrics[regime_name]:
-        sorted_models = sorted(regime_metrics[regime_name].items(), key=lambda x: x[1]['qlike'])
+        sorted_models = sorted(regime_metrics[regime_name].items(),
+                             key=lambda x: x[1]['qlike'])
         for rank, (name, m) in enumerate(sorted_models, 1):
-            print(f"    #{rank} {name:15s}: QLIKE={m['qlike']:.6f}  MSE={m['mse']:.6f}")
+            marker = " <--" if name in ('gas_t', 'gas_gaussian') else ""
+            print(f"    #{rank} {name:15s}: QLIKE={m['qlike']:.6f}  MSE={m['mse']:.6f}{marker}")
+
+sys.stdout.flush()
 
 # ============================================================
 # STEP 9: Score Downweighting Analysis
 # ============================================================
 print("\n[9] Score Downweighting Analysis (key GAS-t advantage)")
 
-# Demonstrate how GAS-t downweights outliers
-if last_params['gas_t'] is not None and gas_t_params_history:
+score_comparison = []
+if gas_t_param_summary:
     nu_est = gas_t_param_summary['nu_mean']
 
-    # Compare Gaussian vs t-score for different shock sizes
-    print(f"\n  Using estimated ν = {nu_est:.2f}")
-    print(f"  {'|return/σ|':>12s} {'Gaussian score':>16s} {'t-score':>12s} {'Downweight':>12s}")
-    print(f"  {'-'*54}")
+    print(f"\n  Using estimated nu = {nu_est:.2f}")
+    print(f"  {'|return/sigma|':>14s} {'Gaussian score':>16s} {'t-score':>12s} {'Downweight':>12s}")
+    print(f"  {'-'*56}")
 
-    score_comparison = []
     for shock in [1.0, 2.0, 3.0, 5.0, 7.0, 10.0]:
         u = shock**2
         gaussian_score = u - 1
         t_score = (nu_est + 1) / (nu_est - 2 + u) * u - 1
         downweight = t_score / gaussian_score if gaussian_score > 0 else np.nan
         score_comparison.append({
-            'shock_sigma': shock,
+            'shock_sigma': float(shock),
             'gaussian_score': float(gaussian_score),
             't_score': float(t_score),
             'downweight_ratio': float(downweight) if np.isfinite(downweight) else None
         })
-        print(f"  {shock:12.1f}σ {gaussian_score:16.2f} {t_score:12.2f} {downweight:12.2%}")
+        dw_str = f"{downweight:.2%}" if np.isfinite(downweight) else "N/A"
+        print(f"  {shock:14.1f}sigma {gaussian_score:16.2f} {t_score:12.2f} {dw_str:>12s}")
 
-    print(f"\n  Interpretation: At {shock:.0f}σ, GAS-t score is only "
-          f"{downweight:.0%} of Gaussian score → outliers are heavily downweighted.")
-else:
-    score_comparison = []
+    if len(score_comparison) > 3 and score_comparison[3]['downweight_ratio'] is not None:
+        print(f"\n  Interpretation: At 5sigma shock, GAS-t score is only "
+              f"{score_comparison[3]['downweight_ratio']:.0%} of Gaussian score")
+        print(f"  → outliers are heavily downweighted in variance update.")
+
+sys.stdout.flush()
 
 # ============================================================
 # STEP 10: Residual Diagnostics on GAS-t
 # ============================================================
 print("\n[10] GAS-t Residual Diagnostics")
 
-if last_params['gas_t'] is not None:
-    # Get standardized residuals from the last fitted GAS-t
-    gp = last_params['gas_t']
-    nu_final = gp[3]
-
+resid_diag = {}
+if gas_t_params_history:
     # Use OOS forecasts to compute standardized residuals
     valid_mask = np.isfinite(forecasts['gas_t']) & (forecasts['gas_t'] > 0)
-    std_resid = np.zeros(n_oos)
-    std_resid[valid_mask] = (all_returns[oos_start_idx:oos_end_idx][valid_mask] /
-                              np.sqrt(forecasts['gas_t'][valid_mask]))
-    std_resid[~valid_mask] = np.nan
+    oos_returns = all_returns[oos_start_idx:oos_end_idx]
+    std_resid = np.full(n_oos, np.nan)
+    std_resid[valid_mask] = oos_returns[valid_mask] / np.sqrt(forecasts['gas_t'][valid_mask])
 
     sr = std_resid[np.isfinite(std_resid)]
 
@@ -850,9 +808,9 @@ if last_params['gas_t'] is not None:
         lb_sq_p = float(lb_sq['lb_pvalue'].iloc[-1])
         resid_diag['ljung_box_sq_stat'] = lb_sq_stat
         resid_diag['ljung_box_sq_p'] = lb_sq_p
-        print(f"  Ljung-Box Q(10) on r²_std: stat={lb_sq_stat:.4f}, p={lb_sq_p:.4f}")
-else:
-    resid_diag = {}
+        print(f"  Ljung-Box Q(10) on r^2_std: stat={lb_sq_stat:.4f}, p={lb_sq_p:.4f}")
+
+sys.stdout.flush()
 
 # ============================================================
 # STEP 11: Summary & Rankings
@@ -861,60 +819,101 @@ print("\n" + "=" * 70)
 print("[11] FINAL RANKINGS")
 print("=" * 70)
 
-# QLIKE ranking
+gas_t_qlike_rank = None
+gas_t_mse_rank = None
+
 if metrics:
     qlike_ranking = sorted(metrics.items(), key=lambda x: x[1]['qlike'])
     print("\n  QLIKE Ranking (lower is better — preferred loss for volatility):")
     for rank, (name, m) in enumerate(qlike_ranking, 1):
-        marker = " ← GAS-t" if name == 'gas_t' else ""
-        marker = " ← GAS-Gaussian" if name == 'gas_gaussian' else marker
+        marker = ""
+        if name == 'gas_t':
+            marker = " <-- GAS-t"
+        elif name == 'gas_gaussian':
+            marker = " <-- GAS-Gaussian"
         print(f"    #{rank} {name:15s}: QLIKE={m['qlike']:.6f}{marker}")
 
-    # MSE ranking
     mse_ranking = sorted(metrics.items(), key=lambda x: x[1]['mse'])
     print("\n  MSE Ranking (lower is better):")
     for rank, (name, m) in enumerate(mse_ranking, 1):
-        marker = " ← GAS-t" if name == 'gas_t' else ""
-        marker = " ← GAS-Gaussian" if name == 'gas_gaussian' else marker
+        marker = ""
+        if name == 'gas_t':
+            marker = " <-- GAS-t"
+        elif name == 'gas_gaussian':
+            marker = " <-- GAS-Gaussian"
         print(f"    #{rank} {name:15s}: MSE={m['mse']:.6f}{marker}")
 
-    # Best model
+    mae_ranking = sorted(metrics.items(), key=lambda x: x[1]['mae'])
+    print("\n  MAE Ranking (lower is better):")
+    for rank, (name, m) in enumerate(mae_ranking, 1):
+        marker = ""
+        if name == 'gas_t':
+            marker = " <-- GAS-t"
+        elif name == 'gas_gaussian':
+            marker = " <-- GAS-Gaussian"
+        print(f"    #{rank} {name:15s}: MAE={m['mae']:.6f}{marker}")
+
     best_qlike = qlike_ranking[0][0]
     best_mse = mse_ranking[0][0]
     print(f"\n  Best by QLIKE: {best_qlike}")
     print(f"  Best by MSE: {best_mse}")
 
-    # GAS-t rank
-    gas_t_qlike_rank = next((i+1 for i, (n, _) in enumerate(qlike_ranking) if n == 'gas_t'), None)
-    gas_t_mse_rank = next((i+1 for i, (n, _) in enumerate(mse_ranking) if n == 'gas_t'), None)
-    print(f"  GAS-t rank: QLIKE #{gas_t_qlike_rank}, MSE #{gas_t_mse_rank}")
+    gas_t_qlike_rank = next((i+1 for i, (n, _) in enumerate(qlike_ranking)
+                            if n == 'gas_t'), None)
+    gas_t_mse_rank = next((i+1 for i, (n, _) in enumerate(mse_ranking)
+                          if n == 'gas_t'), None)
+    gas_g_qlike_rank = next((i+1 for i, (n, _) in enumerate(qlike_ranking)
+                            if n == 'gas_gaussian'), None)
+    print(f"\n  GAS-t rank: QLIKE #{gas_t_qlike_rank}, MSE #{gas_t_mse_rank}")
+    print(f"  GAS-Gaussian rank: QLIKE #{gas_g_qlike_rank}")
+
+sys.stdout.flush()
 
 # ============================================================
 # STEP 12: Conclusions
 # ============================================================
 print("\n[12] Conclusions")
 
-# Determine if GAS-t is significantly better than GJR-t (the typical best)
 gas_vs_gjr_t = dm_results.get('gas_t_vs_gjr_t', {})
 gas_vs_gjr_n = dm_results.get('gas_t_vs_gjr_n', {})
+gas_vs_garch_n = dm_results.get('gas_t_vs_garch_n', {})
 
-gas_t_significant_vs_gjr_t = (gas_vs_gjr_t.get('qlike_dm_p', 1) < 0.05 and
-                               gas_vs_gjr_t.get('qlike_gas_t_better', False))
-gas_t_significant_vs_gjr_n = (gas_vs_gjr_n.get('qlike_dm_p', 1) < 0.05 and
-                               gas_vs_gjr_n.get('qlike_gas_t_better', False))
+gas_t_sig_vs_gjr_t = (gas_vs_gjr_t.get('qlike_dm_p', 1) < 0.05 and
+                       gas_vs_gjr_t.get('qlike_gas_t_better', False))
+gas_t_sig_vs_gjr_n = (gas_vs_gjr_n.get('qlike_dm_p', 1) < 0.05 and
+                       gas_vs_gjr_n.get('qlike_gas_t_better', False))
 
-if gas_t_significant_vs_gjr_t:
-    conclusion = "★★ GAS-t SIGNIFICANTLY outperforms GJR-t! Score-driven volatility is superior."
-elif gas_t_significant_vs_gjr_n:
-    conclusion = "★ GAS-t significantly outperforms GJR-N, but not GJR-t. Heavy tails matter more than score function."
+if gas_t_sig_vs_gjr_t:
+    conclusion = ("SIGNIFICANT: GAS-t outperforms GJR-GARCH-t by QLIKE DM test. "
+                  "Score-driven volatility with heavy tails is superior for SPY.")
+elif gas_t_sig_vs_gjr_n:
+    conclusion = ("PARTIAL: GAS-t significantly outperforms GJR-N but not GJR-t. "
+                  "Heavy tails (Student-t) matter more than score function.")
 elif gas_t_qlike_rank == 1:
-    conclusion = "GAS-t has best QLIKE but NOT significantly better (DM p>0.05). Practically equivalent to GARCH family."
-elif gas_t_qlike_rank <= 3:
-    conclusion = "GAS-t competitive but does not beat GARCH family. Score-driven approach adds complexity without clear gain."
+    conclusion = ("GAS-t has best QLIKE but NOT significantly better than GJR (DM p>0.05). "
+                  "Practically equivalent to GARCH family — added complexity not justified.")
+elif gas_t_qlike_rank is not None and gas_t_qlike_rank <= 3:
+    conclusion = ("GAS-t competitive (rank #{}) but does not beat GARCH family. "
+                  "Score-driven approach adds complexity without clear OOS gain for SPY.".format(
+                      gas_t_qlike_rank))
 else:
-    conclusion = "GAS-t underperforms standard GARCH. Possible implementation issue or model misspecification."
+    conclusion = ("GAS-t underperforms standard GARCH family. "
+                  "The score-driven approach does not help for SPY OOS 2023-2024.")
 
-print(f"  {conclusion}")
+print(f"\n  {conclusion}")
+
+# Additional interpretation
+if gas_t_param_summary:
+    nu_mean = gas_t_param_summary['nu_mean']
+    if nu_mean < 5:
+        print(f"\n  Heavy tail finding: nu={nu_mean:.1f} confirms very heavy tails in SPY")
+        print(f"  (Gaussian would be nu -> infinity; nu<5 means infinite 4th moment)")
+    elif nu_mean < 10:
+        print(f"\n  Moderate tail finding: nu={nu_mean:.1f} indicates moderate heavy tails")
+    else:
+        print(f"\n  Near-Gaussian: nu={nu_mean:.1f} suggests tails are not extremely heavy")
+
+sys.stdout.flush()
 
 # ============================================================
 # STEP 13: Save Results
@@ -929,7 +928,8 @@ results = {
     'asset': 'SPY',
     'data_source': 'yfinance',
     'data_period': {
-        'total': f"{returns_pct.index[0].strftime('%Y-%m-%d')} ~ {returns_pct.index[-1].strftime('%Y-%m-%d')}",
+        'total': (f"{returns_pct.index[0].strftime('%Y-%m-%d')} ~ "
+                  f"{returns_pct.index[-1].strftime('%Y-%m-%d')}"),
         'in_sample': f"{returns_pct.index[0].strftime('%Y-%m-%d')} ~ 2022-12-31",
         'out_of_sample': '2023-01-01 ~ 2024-12-31',
         'is_n': int(is_mask.sum()),
@@ -957,7 +957,7 @@ results = {
         'rv_proxy': 'squared returns',
         'loss_functions': ['QLIKE', 'MSE', 'MAE'],
         'statistical_test': 'Diebold-Mariano (HAC variance)',
-        'optimization': '5-start L-BFGS-B + Nelder-Mead fallback'
+        'optimization': '5-start L-BFGS-B + fallback to non-converged if needed'
     },
     'diagnostics': diagnostics,
     'convergence': convergence_summary,
@@ -966,35 +966,40 @@ results = {
     'gas_gaussian_parameter_history': gas_gaussian_params_history,
     'forecast_metrics': metrics,
     'rankings': {
-        'by_qlike': [(name, m['qlike']) for name, m in sorted(metrics.items(), key=lambda x: x[1]['qlike'])],
-        'by_mse': [(name, m['mse']) for name, m in sorted(metrics.items(), key=lambda x: x[1]['mse'])],
-        'by_mae': [(name, m['mae']) for name, m in sorted(metrics.items(), key=lambda x: x[1]['mae'])],
+        'by_qlike': [(name, m['qlike']) for name, m in sorted(
+            metrics.items(), key=lambda x: x[1]['qlike'])],
+        'by_mse': [(name, m['mse']) for name, m in sorted(
+            metrics.items(), key=lambda x: x[1]['mse'])],
+        'by_mae': [(name, m['mae']) for name, m in sorted(
+            metrics.items(), key=lambda x: x[1]['mae'])],
         'gas_t_qlike_rank': gas_t_qlike_rank,
         'gas_t_mse_rank': gas_t_mse_rank,
     },
     'dm_tests': dm_results,
     'regime_analysis': {
-        'n_high_vix': n_high,
-        'n_normal': n_normal,
+        'n_high_vix_gt30': n_high,
+        'n_mid_vix_20_30': n_mid,
+        'n_low_vix_le20': n_low,
         'metrics_by_regime': regime_metrics
     },
     'score_downweighting': {
         'estimated_nu': gas_t_param_summary.get('nu_mean', None),
         'comparison': score_comparison,
         'interpretation': (
-            f"With ν≈{gas_t_param_summary.get('nu_mean', 'N/A'):.1f}, "
-            f"a 5σ shock receives {score_comparison[3]['downweight_ratio']:.0%} "
+            f"With nu={gas_t_param_summary.get('nu_mean', 0):.1f}, "
+            f"a 5sigma shock receives {score_comparison[3]['downweight_ratio']:.0%} "
             f"of the Gaussian update weight"
-        ) if score_comparison and len(score_comparison) > 3 else 'N/A'
+        ) if (score_comparison and len(score_comparison) > 3
+              and score_comparison[3]['downweight_ratio'] is not None) else 'N/A'
     },
     'residual_diagnostics': resid_diag,
     'conclusion': conclusion,
     'limitations': [
         'RV proxy is squared returns (noisy); realized variance from 5-min data would be better',
-        'GAS-t self-implemented (no established Python package for validation)',
+        'GAS-t self-implemented (no established Python package for cross-validation)',
         'Single asset (SPY) — generalizability to other assets unknown',
         'OOS period 2023-2024 is relatively calm — no extreme crisis like COVID',
-        'Student-t score assumes symmetric tails; skewed-t extension not tested',
+        'Student-t score assumes symmetric tails; skewed-t GAS extension not tested',
         'L-BFGS-B optimization may find local optima despite multiple starts',
     ],
     'elapsed_seconds': round(elapsed, 1)
@@ -1007,3 +1012,4 @@ with open(output_path, 'w') as f:
 print(f"  Results saved to {output_path}")
 print(f"\n  CONCLUSION: {conclusion}")
 print(f"  Elapsed: {elapsed:.1f}s")
+print("=" * 70)
