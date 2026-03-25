@@ -142,6 +142,8 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **Zeabur reverse proxy 陷阱**：詳見 `docs/zeabur-oauth-gotcha.md`
 - Paper trading 用 `portfolio_return`（加權後組合報酬），不是單一資產 return
 - 時間處理：`published_at` 存 UTC，前端用 `timeZone: 'Asia/Taipei'` 顯示。詳見 `.claude/skills/autonomous-research/references/data-timing.md`
+  - **⚠️ 比較時間必須用 UTC**：`datetime.now(timezone.utc)` 不是 `datetime.now()`。後者是本地台灣時間（UTC+8），會差 8 小時
+  - 檢查「多久沒發文」的正確寫法：`(datetime.now(timezone.utc) - datetime.fromisoformat(pub_at).replace(tzinfo=timezone.utc))`
 - 跨市場策略注意 VIX lag（台股用前一天 VIX）
 - **5-min 數據回補**：收集腳本自動偵測 gap 並回補（上限 59 天 = yfinance 免費版限制）。macOS 休眠時 cron 不執行，醒來後自動回補
 - **Paper trading 多日回補**：daily_update.py 自動回填所有 `portfolio_return=None` 的歷史條目（利用相鄰條目價差）
