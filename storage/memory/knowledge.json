@@ -9941,5 +9941,68 @@
     "limitations": "Weakly informative priors, single asset, ESS=97-163 (adequate but not large)",
     "id": 1007,
     "created_at": "2026-03-25T17:56:10.855520+00:00"
+  },
+  {
+    "title": "K441: Range-Based Vol Estimators — Better proxy (5-7x efficiency), cross-proxy GJR consistent",
+    "content": "[提出: Claude(文獻搜尋), 執行: Claude] K441: Range-based vol estimators (Parkinson/GK/RS/YZ). Refs: Parkinson (1980), Garman & Klass (1980), Chou (2005) CARR. Parkinson 效率 6.81x, GK 5.52x vs close-to-close. YZ proxy QLIKE=0.283 vs CC proxy 1.318 (-78.5%). **Cross-proxy consistency: 5/5 proxies 一致選 GJR-GARCH 為最佳。** 關鍵發現：range proxy 讓 DM test 從不顯著(p=0.79 with CC)變成高度顯著(p<0.001 with Parkinson)——更精確的 proxy 降低 evaluation noise。Log range 確認更接近 Gaussian (skew降76%, kurt降93%)。CARR-Weibull 有競爭力但 proxy-dependent。Range estimators 不能替代 5-min RV (效率5-7x vs ~78x)，但是目前最佳替代。",
+    "experiment_id": "k441",
+    "tags": [
+      "range_vol",
+      "Parkinson",
+      "Garman_Klass",
+      "proxy",
+      "CARR",
+      "evaluation"
+    ],
+    "references": "Parkinson (1980); Garman & Klass (1980); Chou (2005) JME",
+    "id": 1008,
+    "created_at": "2026-03-25T20:16:11.615304+00:00",
+    "category": "methodology",
+    "data_source": "yfinance (SPY)",
+    "data_period": "2005-2026",
+    "sample_size": "502 OOS",
+    "limitations": "SPY only, single OOS period"
+  },
+  {
+    "title": "K442: FIGARCH Long Memory — d=0.61 confirmed but no OOS improvement over GARCH",
+    "content": "[提出: Claude(文獻搜尋), 執行: Claude] K442: FIGARCH(1,d,1) long memory volatility. Ref: Baillie, Bollerslev, Mikkelsen (1996) J.Econometrics. GPH test: d=0.41 on |r| (t=6.62), d=0.36 on r² (t=3.40)——長記憶確認。FIGARCH d=0.610 (>0.5, near non-stationary). But OOS QLIKE: FIGARCH 0.713 vs GARCH 0.716 vs GJR 0.763. FIGARCH vs GARCH DM p=0.67 (NS)。2023-2024 OOS 出現異常：symmetric models (GARCH/FIGARCH) 勝 asymmetric (GJR/EGARCH)——period-specific (low-vol bull market, leverage effect 不重要)。Hillebrand 效應再確認：GARCH persistence=0.975 是近似長記憶的假象。結論：長記憶存在但不改善 1-step OOS forecasting。",
+    "experiment_id": "k442",
+    "tags": [
+      "FIGARCH",
+      "long_memory",
+      "fractional",
+      "Hillebrand",
+      "null_result"
+    ],
+    "references": "Baillie, Bollerslev, Mikkelsen (1996) J.Econometrics 74:3-30",
+    "id": 1009,
+    "created_at": "2026-03-25T20:16:11.615304+00:00",
+    "category": "methodology",
+    "data_source": "yfinance (SPY)",
+    "data_period": "2005-2026",
+    "sample_size": "502 OOS",
+    "limitations": "SPY only, single OOS period"
+  },
+  {
+    "title": "K443: Copula Tail Dependence — Student-t best, post-2020 SPY-TLT doubly broken",
+    "content": "[提出: Claude(跳躍式), 執行: Claude] K443: Copula-based tail dependence for SPY-TLT/SPY-GLD. Refs: Patton (2006) IER, Hsu et al. (2008) JFM. Student-t copula 最佳 (AIC far better than Gaussian, Clayton, Gumbel, Frank)。SPY-TLT nu=3.3, SPY-GLD nu=3.8 (very fat tails)。Tail dependence symmetric (not asymmetric)。**關鍵發現：Post-2020 SPY-TLT doubly broken——失去負線性相關 (corr: -0.42→+0.05) 且增加尾部共動 (tail dep: 0.018→0.066, t=-9.06)。** 避險最壞情況：正常時不反向，危機時同步。Copula HR vs OLS HR: DM p>0.05 (null for practical hedging)。SPY-GLD tail dep 穩定跨斷裂。TLT 仍是 crash hedge (bottom 5%: +0.82%, 78% positive), GLD 不是 (p=0.26 NS)。",
+    "experiment_id": "k443",
+    "tags": [
+      "copula",
+      "tail_dependence",
+      "Student_t",
+      "structural_break",
+      "TLT",
+      "GLD",
+      "hedging"
+    ],
+    "references": "Patton (2006) IER; Hsu, Tseng, Wang (2008) JFM",
+    "id": 1010,
+    "created_at": "2026-03-25T20:16:11.615304+00:00",
+    "category": "methodology",
+    "data_source": "yfinance (SPY)",
+    "data_period": "2005-2026",
+    "sample_size": "502 OOS",
+    "limitations": "SPY only, single OOS period"
   }
 ]
