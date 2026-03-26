@@ -10125,5 +10125,26 @@
     "data_period": "2005-2026",
     "sample_size": "481 OOS",
     "references": "Patton & Sheppard (2015); K454 comparison"
+  },
+  {
+    "id": 1017,
+    "title": "K461: SSVS Taiwan — SPY_ret PIP=1.000 (mean eq) but QLIKE not improved (var eq self-driven)",
+    "content": "[提出: 用戶(台股建議+Chen CWS方法), 執行: Claude] K461: SSVS on 0050.TW (So, Chen, Liu 2006). **SPY_ret_L1 PIP=1.000**（幾乎永遠被選入）——確認 US→Taiwan lead-lag 是最強外生信號。與 K433 SPY 空模型勝形成完美對比：同一方法，SPY 選空模型（外生變數冗餘），台股選 SPY return（真正外生）。BUT: 加入外生變數反而讓 QLIKE 更差 (-1.7%)！原因：SPY_ret 預測台股 returns (t=10.81)，不是 conditional variance。GARCH variance 是自驅動的 (persistence=0.942)，mean equation 的外生信息不傳遞到 variance。結論：SSVS 方法在台股**部分確認**——成功識別 US lead-lag 但對 vol forecasting 無幫助（mean vs variance disconnect）。",
+    "category": "vol_prediction",
+    "tags": [
+      "SSVS",
+      "Taiwan",
+      "0050.TW",
+      "Chen_CWS",
+      "lead_lag",
+      "SPY",
+      "mean_variance_disconnect"
+    ],
+    "created_at": "2026-03-26T03:16:39.395104+00:00",
+    "experiment_id": "k461",
+    "data_source": "yfinance (0050.TW, SPY, ^VIX, TWD=X)",
+    "data_period": "2009-2026",
+    "sample_size": "4204 obs",
+    "references": "So, Chen, Liu (2006) JRSS-C 55(2):201-224"
   }
 ]
