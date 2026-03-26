@@ -1011,19 +1011,33 @@
 - [x] K473: Attention/Google Trends — IS R²+6.2% but OOS 全 null。⚠️ K474 修正：weekly RV>VIX 是 artifact
 - [x] K474: **Weekly RV vs VIX Cross-OOS** — VIX wins **6/6**。K473 retracted (level-OLS artifact)。**VIX sufficiency #31（含週頻）**
 
-### 跨兩 session 50 實驗總結（K426-K474）
-**經過 cross-OOS 驗證的正面發現（2/50 = 4%）：**
+- [x] K475: **★★ Validated Ensemble** — GJR+HAR forecasting 5/5 top rank。⚠️ K476 修正：VaR 0/5 at 1%（HAR contaminates）
+- [x] K476: **Ensemble VaR Cross-OOS** — 0/5 at 1%。GJR alone 3/5 (best)。K475 VaR claim overturned
+
+### 跨兩 session 52 實驗總結（K426-K476）
+**經過 cross-OOS 驗證的正面發現（3/52 = 6%）：**
 1. ★★★ HAR log-range vol forecasting: 8/10 cross-OOS with r² proxy (K469)
 2. ★★ Daily semivariance (RS⁻) for equity: 4/5 cross-OOS (K460), gamma-driven (K453 r=0.812)
+3. ★★ GJR+HAR ensemble forecasting: 5/5 cross-OOS top rank (K475), but NOT for VaR (K476: 0/5)
 
-**被 cross-OOS 推翻的 false positives（2/50 = 4%）：**
+**被 cross-OOS 推翻的 false positives（3/52 = 6%）：**
 1. K436 VRP daily → K459: 0/5 QLIKE wins (VIX contains VRP)
 2. K473 Weekly RV>VIX → K474: 0/6 (level-OLS artifact)
+3. K475 Ensemble VaR 3/3 → K476: 0/5 (HAR contaminates tail estimation)
+
+**最終工具指南（經過 cross-OOS 驗證）：**
+| 任務 | 最佳方法 | 驗證 |
+|------|---------|------|
+| Vol forecasting | GJR+HAR ensemble | K475: 5/5 top rank |
+| VaR estimation | GJR-GARCH alone | K476: 3/5 (best across periods) |
+| VT strategy | 12/VIX | K440/K470: irreducible kernel (3x) |
+| Equity vol prediction | + Semivariance RS⁻ | K460: 4/5 cross-OOS |
 
 **方法論貢獻：**
-- Prediction ≠ Application (K440/K467/K470, 3x)
-- Significance ≠ Forecasting (K459)
+- Prediction ≠ Application (K440/K467/K470, 3x confirmed)
+- Significance ≠ Forecasting (K459 VRP, K473 RV)
 - Information decomposition > Model complexity (K458: corr=-0.259)
 - Proxy tautology awareness (K468/K469)
-- GARCH ceiling cross-market universal (K472)
+- GARCH ceiling cross-market universal (K472 Taiwan)
 - VIX sufficiency #31 (日頻+週頻)
+- Cross-OOS is essential quality control (3/3 false positives caught)
