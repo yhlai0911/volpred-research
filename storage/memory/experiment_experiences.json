@@ -196,5 +196,17 @@
     "source_experiments": [
       "backfill_2026-03"
     ]
+  },
+  {
+    "id": "E016",
+    "title": "Volume-GARCH: IS fit ≠ OOS forecasting",
+    "category": "methodology",
+    "lesson": "L&L (1990) persistence drop is IS-only. Volume is contemporaneous info proxy (MDH), lagged volume does not predict future vol.",
+    "examples": "K510, K113, K160, K186",
+    "recommendation": "Do not assume IS AIC/persistence improvement means OOS improvement.",
+    "source_experiments": [
+      "k510",
+      "k113"
+    ]
   }
 ]
