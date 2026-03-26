@@ -996,5 +996,12 @@
 - [x] K458: **★ Meta-Analysis** — Information decomposition > complexity。corr(params, success)=-0.259
 - [x] K459: **★ VRP Cross-OOS FAIL** — 0/5 QLIKE wins（significance ≠ forecasting）。VIX sufficiency #30
 - [x] K460: **★★ Semivariance Cross-OOS PASS** — SPY 4/5 significant, 5/5 directional。Publication ready
-- [ ] K461: SSVS on Taiwan 0050 — **進行中**（SPY 空模型勝但台股外生變數可能有效）
-- [ ] K462: STGARCH + GARCH-X on Taiwan — **進行中**（美股 null 的方法在台股可能有效）
+- [x] K461: **★ SSVS Taiwan** — SPY_ret PIP=1.000（台股選出 SPY，美股選空模型——完美對比）。但 QLIKE 不改善（mean≠variance disconnect）
+- [x] K462: Taiwan GARCH-X/STGARCH — Null。VIX IS t=3.58 但 OOS +7.1% worse（overfitting）。GARCH ceiling 延伸到台股
+- [x] K463: TVP GARCH-X Taiwan — EWMA delta -1.71% 但 DM p=0.264 NS。方向正確但太小
+- [x] K464: **★ Threshold SV Asian Markets** — HAR log-range 6/6 markets 最佳。Ref: Chen, Liu, So (2013)
+- [x] K465: **★★★ HAR Log-Range Cross-OOS** — 10/10 (Parkinson), **8/10 (r² proxy, K469 驗證)**。Publication ready
+- [x] K466: HAR+Semi Combined — 無協同。HAR encompasses semivariance (lambda=1.94)
+- [x] K467: HAR VaR — 0/6 Trinity pass！Best forecaster ≠ best VaR（Parkinson misses jumps/overnight）
+- [x] K468: **⚠️ Yang-Zhang Tautology Test** — Range proxy 偏好 range model。但 K469 證明影響極小
+- [x] K469: **HAR r² Proxy Validation** — 8/10 cross-OOS。Tautology 只降 2/10。K465 結論 validated
