@@ -673,3 +673,10 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] K510: **Volume-GARCH (Lamoureux & Lastrapes 1990 replication)** [提出: 用戶] — 用 volume 替代/補充 GARCH 的 ARCH term，看 persistence 是否下降 + OOS 是否改善
 - [ ] MDH 框架：volume 不只是 GARCH-X 的外生變數，而是信息流的 proxy → 可能需要不同的建模方式
 - [ ] Volume detrending：Lamoureux & Lastrapes 用 detrended volume（去除長期趨勢），這跟 K113 用 raw volume surprise 不同
+
+#### 台指期貨 Overnight Gap Strategy（K515 延伸，高優先）
+- [ ] K515 發現 overnight gap alpha 真實（SPY-conditioned 10.73bp/day, t=4.06）但 ETF TX 38.5bp 致命
+- [ ] **台指期貨（TX futures）TX cost 只有 ~2-3bp** → 可能可行！
+- [ ] 需要：台指期貨歷史日頻數據（TAIFEX 或 yfinance TWF=F?）
+- [ ] 測試：buy TX futures at close, sell at open, SPY-conditioned
+- [ ] 如果 Net Sharpe > 0.5 + cross-OOS 4/5 → 第一個可能上架的新策略
