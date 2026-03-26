@@ -1143,16 +1143,37 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 #### SEC Filings 研究與文章方向（用戶提出）
 美股的 10-K（年報）、10-Q（季報）、8-K（重大事件即時揭露）是重要的資訊來源和內容題材：
 
-**研究方向：**
-- [ ] 10-K/10-Q filing 前後 SPY vol 是否有系統性模式？（類似 earnings 但更廣泛）
+**研究方向（多角度，用戶指定）：**
+
+*文字探勘 (Text Mining)*
+- [ ] SEC filing 語調分析：用 Loughran-McDonald 金融情緒詞典對 10-K/10-Q MD&A 段落做正負情緒打分，看情緒變化是否預測後續 vol/return
+- [ ] 10-K 可讀性（Fog Index / 文件長度）與後續 vol 的關係——文件越長越晦澀 = 公司在隱藏什麼？
+- [ ] 8-K filing 文字 surprise：用 TF-IDF 或 embedding 計算 8-K 與前次 filing 的文字差異度，差異越大 = surprise 越大 → vol spike？
+- [ ] Risk factor section 的年度變化：新增風險因子 vs 刪除風險因子 → 對 vol 的預測力
+
+*情緒 (Sentiment)*
+- [ ] Management tone（管理層語調）：法說會逐字稿 vs 10-K 書面語調的差異——口語更樂觀但書面更保守？
+- [ ] Forward-looking statements 的情緒：MD&A 中「expect」「believe」「risk」的頻率變化趨勢
+- [ ] 跨公司情緒傳染：SPY 前 10 大成分股的 filing sentiment 彙總 → 是否預測 index vol？
+
+*財務 (Financial)*
+- [ ] 10-K/10-Q filing 前後 SPY vol 是否有系統性模式？（類似 K498 earnings 但更廣泛）
 - [ ] 8-K filing（unexpected events）對個股和 index vol 的 surprise 效果
-- [ ] SEC filing 語調分析（文字情緒 vs 後續 vol/return）——NLP 跳躍式探索
+- [ ] Accruals quality（應計品質）vs 後續 vol：低品質 earnings → 高未來 vol？
+- [ ] 財務比率的年度變化（debt/equity, current ratio）vs 後續 vol
+
+*管理 (Governance & Management)*
+- [ ] CEO/CFO turnover 的 8-K 揭露 → 對 vol 的即時和延遲影響
+- [ ] 審計意見變更（going concern, material weakness）→ vol spike 預測
+- [ ] 內部人交易揭露（Form 4）與後續 vol/return 的關係
 - [ ] TSMC 20-F（外國公司年報）filing 對 TSM/0050.TW 的影響
 
 **文章方向（一般讀者）：**
 - [ ] 「10-K、10-Q、8-K 是什麼？散戶為什麼該關心美股年報」(general 教育文)
 - [ ] 「財報季前後的波動規律——數據告訴你什麼時候最危險」(general)
 - [ ] 「如何從 SEC filing 讀出公司的真實風險」(general 教學文)
+- [ ] 「CEO 換人了——股價會怎樣？8-K 告訴你的事」(general)
+- [ ] 「年報越厚越危險？文件可讀性與股價波動的關係」(general)
 
 **執行原則：**
 - 事件前 2-3 天發佈「預告」文章（一般讀者 + 研究各 1 篇）
