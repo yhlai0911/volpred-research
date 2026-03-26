@@ -655,3 +655,21 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - 研究實驗在事件前 1 週完成，結果寫入文章
 - 用 CronCreate 設定 one-shot reminder 確保不遺漏
 - **每月 1 日更新此日曆，覆蓋而非累積**
+
+#### 成交量作為波動率預測因子（用戶提出，理論支持強）
+**文獻基礎**：
+- Lamoureux & Lastrapes (1990) "Heteroskedasticity in Stock Return Data: Volume versus GARCH" JoF — volume 加入 variance eq 後 ARCH 效應消失，persistence 大幅下降
+- Clark (1973) MDH (Mixture of Distributions Hypothesis) — volume 和 vol 都由信息流驅動
+- Tauchen & Pitts (1983) — MDH 的正式推導
+- K435/K491: persistence 膨脹 +0.073（Hillebrand）→ volume 可能是消除假 persistence 的關鍵
+
+**過去研究（知識庫）**：
+- K113: volume GARCH-X null — 但用的是 microstructure proxy 不是 MDH 框架
+- K135: GLD volume ratio IS sig 但 OOS null
+- K136: BTC volume-conditioned gamma 有效（唯一正面）
+- K418: Taiwan volume null（yfinance proxy 太粗糙）
+
+**新研究方向**：
+- [ ] K510: **Volume-GARCH (Lamoureux & Lastrapes 1990 replication)** [提出: 用戶] — 用 volume 替代/補充 GARCH 的 ARCH term，看 persistence 是否下降 + OOS 是否改善
+- [ ] MDH 框架：volume 不只是 GARCH-X 的外生變數，而是信息流的 proxy → 可能需要不同的建模方式
+- [ ] Volume detrending：Lamoureux & Lastrapes 用 detrended volume（去除長期趨勢），這跟 K113 用 raw volume surprise 不同
