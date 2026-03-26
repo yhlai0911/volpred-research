@@ -1181,6 +1181,21 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] 「CEO 換人了——股價會怎樣？8-K 告訴你的事」(general)
 - [ ] 「年報越厚越危險？文件可讀性與股價波動的關係」(general)
 
+#### 經濟政治不確定性 & 搜尋趨勢 — 持續議題（用戶提出，需定期更新）
+過去研究：G14 Google Trends (partial r sig but 反轉)、J3 (IS r=0.634 but VT null)、K446 GPR (reversed causality)、K473 (OOS null)。
+這些主題作為**vol research** 已被 VIX sufficiency 限制，但作為**讀者內容和市場解讀**仍然非常重要：
+
+**定期文章（每月至少 1 篇）：**
+- [ ] 「本月 Google 搜尋趨勢告訴你什麼？」—— 用 pytrends 抓當月熱門金融搜尋詞，解讀散戶情緒
+- [ ] 「經濟政策不確定性指數（EPU）最新動態」—— FRED EPU + 台灣 EPU，搭配時事解讀
+- [ ] 「地緣政治風險現在有多高？」—— GPR index 最新值 + 歷史比較 + 對 VIX 的影響
+- [ ] 「恐懼與貪婪指數解讀」—— CNN Fear & Greed + VIX + put-call ratio 綜合判讀
+
+**研究更新（當重大事件發生時）：**
+- [ ] 特定事件的 Google Trends spike → VIX 反應速度和幅度分析（event study）
+- [ ] EPU/GPR 在 tariff/sanction/election 期間的特殊行為
+- [ ] 台灣選舉/兩岸關係事件 → VIXTWN/0050 vol 反應（需更長 VIXTWN 數據）
+
 **執行原則：**
 - 事件前 2-3 天發佈「預告」文章（一般讀者 + 研究各 1 篇）
 - 事件後 1 天發佈「解讀」文章
