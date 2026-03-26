@@ -10253,5 +10253,1255 @@
     "created_at": "2026-03-26T15:03:51.152670+00:00",
     "category": "strategy",
     "data_source": "yfinance"
+  },
+  {
+    "item_id": "kb_k157",
+    "category": "experiment_result",
+    "title": "K157: Correlation Forecasting for Portfolio Risk",
+    "content": "Q1 (Better correlation forecast?): Yes — some models improve over Rolling 22d Q2 (DCC-GARCH best?): DCC among best Q3 (Better corr -> better portfolio?): Yes — MinVar with model corr beats 50/50 Q1 (Better correlation forecast?): Yes — some models improve over Rolling 22d | Q2 (DCC-GARCH best?): DCC among best | Q3 (Better corr -> better portfolio?): Yes — MinVar with model corr beats 50/50",
+    "experiment_id": "K157",
+    "tags": [
+      "garch"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k159",
+    "category": "experiment_result",
+    "title": "K159: EVT-VaR: Extreme Value Theory for Tail Risk",
+    "content": "EVT-GPD best-calibrated VaR (mean abs error 0.0007 at 1%, 0.0005 at 2.5%), 12/12 Kupiec pass, but DQ/Trinity same as Student-t EVT-GPD Kupiec pass rate: 12/12 vs Normal 9/12, Student-t 12/12 EVT-GPD Trinity (Kupiec+CC+DQ) pass rate: 3/12 At 1.0%: EVT mean violation rate = 0.0107 (expected 0.0100) At 2.5%: EVT mean violation rate = 0.0245 (expected 0.0250) Mean GPD shape parameter xi = 0.014 (>0 = heavy tails)",
+    "experiment_id": "K159",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k180",
+    "category": "experiment_result",
+    "title": "K180: Directional Change (DC) Framework for Volatility Prediction",
+    "content": "title: Directional Change (DC) Framework for Volatility Prediction hypothesis: DC intrinsic-time features break GJR-GARCH QLIKE ceiling",
+    "experiment_id": "K180",
+    "tags": [
+      "garch",
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k181",
+    "category": "experiment_result",
+    "title": "K181: CBOE SKEW Index as Volatility Predictor",
+    "content": "Mixed results — partial corr sig in 4/4 horizons, GARCH-X no help, VT overlay Harvey FAIL",
+    "experiment_id": "K181",
+    "tags": [
+      "garch",
+      "har"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k182",
+    "category": "experiment_result",
+    "title": "K182: FOMC Semantic Entropy and Volatility — Event Study",
+    "content": "title: FOMC Semantic Entropy and Volatility — Event Study",
+    "experiment_id": "K182",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k186",
+    "category": "experiment_result",
+    "title": "K186: Dark Pool Volume Displacement and Volatility Prediction",
+    "content": "verdict: NULL - Volume displacement proxies show statistically significant partial correlations but FAIL to improve GARCH-X forecasts beyond GJR baseline (0/25 DM tests pass Harvey t>3.0) vix_sufficient_statistic: Confirmed (22nd confirmation)",
+    "experiment_id": "K186",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k188",
+    "category": "experiment_result",
+    "title": "K188: HAR Ceiling Test — Does HAR-RV Beat GARCH on Daily Data?",
+    "content": "GARCH beats HAR in majority of comparisons. HAR on daily data underperforms — needs intraday RV for its advantage.",
+    "experiment_id": "K188",
+    "tags": [
+      "garch",
+      "har"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k189",
+    "category": "experiment_result",
+    "title": "K189: Attention-Weighted Volatility (Cross-Asset Information Aggregation)",
+    "content": "title: Attention-Weighted Volatility (Cross-Asset Information Aggregation) data_source: yfinance daily (SPY/QQQ/GLD/TLT/EEM/IWM)",
+    "experiment_id": "K189",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance daily (SPY/QQQ/GLD/TLT/EEM/IWM)",
+    "data_period": "2023-01-01 to 2025-01-01"
+  },
+  {
+    "item_id": "kb_k190",
+    "category": "experiment_result",
+    "title": "K190: Realized Semivariance Decomposition for Volatility Prediction",
+    "content": "title: Realized Semivariance Decomposition for Volatility Prediction",
+    "experiment_id": "K190",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k191",
+    "category": "experiment_result",
+    "title": "K191: CBOE Put-Call Ratio as Volatility Predictor",
+    "content": "MIXED title: CBOE Put-Call Ratio as Volatility Predictor data_limitation: PCR not available via yfinance; used VIX-derived proxies",
+    "experiment_id": "K191",
+    "tags": [
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_period": "2023-01-01 to 2024-12-31"
+  },
+  {
+    "item_id": "kb_k193",
+    "category": "experiment_result",
+    "title": "K193: Dynamic Copula Tail Dependence and Volatility Prediction",
+    "content": "POSITIVE title: Dynamic Copula Tail Dependence and Volatility Prediction",
+    "experiment_id": "K193",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k194",
+    "category": "experiment_result",
+    "title": "K194: Fractional Differentiation for Volatility Features (de Prado 2018)",
+    "content": "Fractional differentiation does NOT improve vol forecasting over GJR-GARCH. The GARCH family already captures vol clustering via its recursive structure. FFD preserves long memory but daily RV proxy (squared returns) is too noisy for the memory structure to help in linear OLS forecasting.",
+    "experiment_id": "K194",
+    "tags": [
+      "garch",
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k195",
+    "category": "experiment_result",
+    "title": "K195: Copula Tail Dependence Asymmetry — Multi-Pair Deep Dive",
+    "content": "GENUINE title: Copula Tail Dependence Asymmetry — Multi-Pair Deep Dive verdict_detail: 26 pair(s) pass Bonferroni after 66-pair correction in OOS",
+    "experiment_id": "K195",
+    "tags": [
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k197",
+    "category": "experiment_result",
+    "title": "K197: GARCH Persistence Break Detection and Volatility Regime Change",
+    "content": "Assets: SPY, QQQ, GLD, TLT, BTC-USD title: GARCH Persistence Break Detection and Volatility Regime Change",
+    "experiment_id": "K197",
+    "tags": [
+      "garch"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (Yahoo Finance)",
+    "data_period": "2023-01-01 to 2024-12-31"
+  },
+  {
+    "item_id": "kb_k199",
+    "category": "experiment_result",
+    "title": "K199: VIX Futures Basis (Contango/Backwardation) as Vol Predictor",
+    "content": "MIXED -- Some statistical significance in GARCH-X or regression but no robust improvement",
+    "experiment_id": "K199",
+    "tags": [
+      "garch",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k200",
+    "category": "experiment_result",
+    "title": "K200 Meta Analysis",
+    "content": "",
+    "experiment_id": "K200",
+    "tags": [
+      "meta-analysis"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k202",
+    "category": "experiment_result",
+    "title": "K202 Btc Features",
+    "content": "",
+    "experiment_id": "K202",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k203",
+    "category": "experiment_result",
+    "title": "K203: Momentum Crash Risk and Volatility",
+    "content": "title: Momentum Crash Risk and Volatility",
+    "experiment_id": "K203",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k204",
+    "category": "experiment_result",
+    "title": "K204: GLD Momentum-Based VT",
+    "content": "verdict: NULL: GLD momentum does NOT significantly improve 12/VIX VT",
+    "experiment_id": "K204",
+    "tags": [
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k205",
+    "category": "experiment_result",
+    "title": "K205: BTC Weekend Volatility and Microstructure-Based VT",
+    "content": "best_microstructure_vt: weekend_vt title: BTC Weekend Volatility and Microstructure-Based VT",
+    "experiment_id": "K205",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (BTC-USD, SPY, ^VIX)",
+    "data_period": "2023-01-01 to 2024-12-31"
+  },
+  {
+    "item_id": "kb_k206",
+    "category": "experiment_result",
+    "title": "K206: Asset-Specific VT Design Framework",
+    "content": "title: Asset-Specific VT Design Framework",
+    "experiment_id": "K206",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k207",
+    "category": "experiment_result",
+    "title": "K207: Formal Test of VIX Sufficiency Boundary — Cross-Asset Panel Evidence",
+    "content": "title: Formal Test of VIX Sufficiency Boundary — Cross-Asset Panel Evidence",
+    "experiment_id": "K207",
+    "tags": [
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k208",
+    "category": "experiment_result",
+    "title": "K208: Implied-Realized Volatility Gap as Dynamic Risk Indicator",
+    "content": "title: Implied-Realized Volatility Gap as Dynamic Risk Indicator",
+    "experiment_id": "K208",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k237",
+    "category": "experiment_result",
+    "title": "k237_international_vt",
+    "content": "vt_better_sharpe: 3/5 vt_better_mdd: 5/5 harvey_pass_count: 5/5",
+    "experiment_id": "K237",
+    "tags": [
+      "har",
+      "strategy"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k263",
+    "category": "experiment_result",
+    "title": "K263: The Complete VolPred Investor Guide — Everything in One Place",
+    "content": "one_sentence: 50/50 SPY/GLD with monthly 12/VIX vol-targeting gives Sharpe ~0.83 and MDD ~-15.5%, costing ~3% annual return vs pure SPY for a 60% MDD improvement. biggest_surprise: Timing does NOT work (14/17 strategies fail Harvey t>3), but the 3 that DO work are all structural information-gap trades (TZ arbitrage, VIX velocity), not predictive models.",
+    "experiment_id": "K263",
+    "tags": [
+      "har",
+      "strategy",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "Synthesis of 260+ experiments, 1100+ knowledge entries, all from real market data (yfinance)"
+  },
+  {
+    "item_id": "kb_k267",
+    "category": "experiment_result",
+    "title": "K267: Session Impact Summary: 84 Experiments (K183-K266)",
+    "content": "Method: Descriptive categorization of knowledge entries K183-K266",
+    "experiment_id": "K267",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "storage/memory/knowledge.json"
+  },
+  {
+    "item_id": "kb_k274",
+    "category": "experiment_result",
+    "title": "K274 Paper Mapping",
+    "content": "experiment_id: K274 title: Paper Contribution Mapping — Which Findings Are Novel vs Known? date: 2026-03-24T19:44:08.819103",
+    "experiment_id": "K274",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k275",
+    "category": "experiment_result",
+    "title": "K275: The Complete Case for 50/50 SPY/GLD + 12/VIX — Synthesizing All Evidence",
+    "content": "title: The Complete Case for 50/50 SPY/GLD + 12/VIX — Synthesizing All Evidence type: SYNTHESIS (no new data analysis) data_sources: All prior experiments (K1-K274, J1-J18, N1-N176, Phases P/Q/R/T/U/G/I). Original data from yfinance, FRED, CBOE. Periods: 1948-2026.",
+    "experiment_id": "K275",
+    "tags": [
+      "meta-analysis",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "All prior experiments (K1-K274, J1-J18, N1-N176, Phases P/Q/R/T/U/G/I). Original data from yfinance, FRED, CBOE. Periods: 1948-2026."
+  },
+  {
+    "item_id": "kb_k280",
+    "category": "experiment_result",
+    "title": "K280: Putting It All Together — The Definitive Portfolio Construction from 280 Experiments",
+    "content": "title: Putting It All Together — The Definitive Portfolio Construction from 280 Experiments data_sources: yfinance (SPY, GLD, VIX, QQQ, TLT, EEM, 0050.TW, BTC-USD, etc.), FRED, CBOE data_period: 1948-2026 (various subsets, longest 76 years)",
+    "experiment_id": "K280",
+    "tags": [
+      "taiwan",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, GLD, VIX, QQQ, TLT, EEM, 0050.TW, BTC-USD, etc.), FRED, CBOE",
+    "data_period": "1948-2026 (various subsets, longest 76 years)"
+  },
+  {
+    "item_id": "kb_k286",
+    "category": "experiment_result",
+    "title": "K286: Research System Cumulative Summary (2026-03-14 to 2026-03-22)",
+    "content": "title: Research System Cumulative Summary (2026-03-14 to 2026-03-22)",
+    "experiment_id": "K286",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k288",
+    "category": "experiment_result",
+    "title": "K288: Cross-Period Stability of Major Findings",
+    "content": "title: Cross-Period Stability of Major Findings",
+    "experiment_id": "K288",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, GLD, ^VIX)"
+  },
+  {
+    "item_id": "kb_k301",
+    "category": "experiment_result",
+    "title": "K301: The Robustness Mega-Table: Every Claim, Every Test, One Table",
+    "content": "Method: Synthesis of 1141 knowledge entries and 300+ experiments. No new data computation.",
+    "experiment_id": "K301",
+    "tags": [
+      "meta-analysis"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k302",
+    "category": "experiment_result",
+    "title": "K302: What We Still Don't Know — The Open Questions After 300 Experiments",
+    "content": "Method: Synthesis of 1142 knowledge entries across 300+ experiments 24 genuinely open questions identified across 5 categories. The single most important direction is 5-min realized volatility data accumulation (OQ-B1), which could unlock HAR-RV and Realized GARCH — the only approaches with strong theoretical and empirical reasons to break the daily QLIKE ceiling. For near-term actionable research, CAViaR (OQ-A5) and behavioral VT (OQ-D5) offer the best reward-to-effort ratio with currently a...",
+    "experiment_id": "K302",
+    "tags": [
+      "garch",
+      "har",
+      "meta-analysis"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "storage/memory/knowledge.json (no new computation)"
+  },
+  {
+    "item_id": "kb_k319",
+    "category": "experiment_result",
+    "title": "K319: Decade-by-Decade Performance — The Complete Historical Record",
+    "content": "title: Decade-by-Decade Performance — The Complete Historical Record",
+    "experiment_id": "K319",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, GLD, ^VIX)",
+    "data_period": "2004-11-18 to 2026-03-24"
+  },
+  {
+    "item_id": "kb_k320",
+    "category": "experiment_result",
+    "title": "K320 Content Audit",
+    "content": "experiment: K320 title: Website Content Quality Audit — Are Our Published Articles Accurate? date: 2026-03-25T07:37:05.077895",
+    "experiment_id": "K320",
+    "tags": [
+      "meta-analysis"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k431",
+    "category": "experiment_result",
+    "title": "K431: Smooth Transition GARCH (STGARCH) Volatility Forecasting",
+    "content": "Asset: SPY STGARCH does NOT beat GJR. Best ST: STGARCH-lagvol diff=9.362%. QLIKE ceiling confirmed.",
+    "experiment_id": "K431",
+    "tags": [
+      "garch",
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "data_period": "2005-01-04 to 2026-03-24"
+  },
+  {
+    "item_id": "kb_k434",
+    "category": "experiment_result",
+    "title": "K434: Bayesian Model Averaging (BMA) across GARCH Family",
+    "content": "Asset: SPY BMA does NOT beat the best single model (EGARCH(1,1)-N). BMA QLIKE=0.548005 vs best single QLIKE=0.542960. BMA weights outperform equal weights, suggesting BIC-based model selection adds value. The highest average BMA weight goes to EGARCH(1,1)-t (0.998), indicating the data strongly favor this specification. Consistent with Liu & Maheu (2009): BMA provides modest improvement in point forecasts. The real value of BMA may lie in density forecasting and model uncertainty quantificati...",
+    "experiment_id": "K434",
+    "tags": [
+      "garch"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance"
+  },
+  {
+    "item_id": "kb_k435",
+    "category": "experiment_result",
+    "title": "K435: Structural Break Detection + Adaptive GARCH",
+    "content": "Asset: SPY ICSS detected 20 structural break(s) in SPY volatility at: 2007-07-23, 2008-09-03, 2009-04-21, 2010-09-07, 2011-06-20, 2011-12-20, 2013-06-26, 2014-09-23, 2015-08-19, 2016-07-08, 2017-01-06, 2018-02-01, 2019-01-04, 2020-02-21, 2020-09-10, 2021-03-12, 2022-01-27, 2023-01-06, 2025-02-26, 2025-08-27. Hillebrand effect: full-sample persistence (0.9704) vs avg regime persistence (0.8974), difference = 0.0730 (confirms spurious IGARCH). OOS forecasting: best = Adaptive (QLIKE=1.489379), ...",
+    "experiment_id": "K435",
+    "tags": [
+      "garch"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "data_period": "2005-01-04 to 2026-03-25",
+    "limitations": [
+      "Squared returns as RV proxy (noisy)",
+      "Single asset (SPY only)",
+      "ICSS assumes IID within segments (violated by ARCH effects)"
+    ]
+  },
+  {
+    "item_id": "kb_k437",
+    "category": "experiment_result",
+    "title": "K437: GAS-t(1,1) Score-Driven Volatility Model",
+    "content": "Asset: SPY GAS-t underperforms standard GARCH family. The score-driven approach does not help for SPY OOS 2023-2024.",
+    "experiment_id": "K437",
+    "tags": [
+      "garch"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "limitations": [
+      "RV proxy is squared returns (noisy); realized variance from 5-min data would be better",
+      "GAS-t self-implemented (no established Python package for cross-validation)",
+      "Single asset (SPY) — generalizability to other assets unknown"
+    ]
+  },
+  {
+    "item_id": "kb_k438",
+    "category": "experiment_result",
+    "title": "K438: GARCH-X with VRP in Variance Equation",
+    "content": "OOS QLIKE: GJR baseline = 0.556796   GARCH_X_VRP: 0.551332 (-0.981%, better)   GARCH_X_VIX: 0.521894 (-6.268%, better)   GARCH_X_VRP_VIX: 0.524374 (-5.823%, better) DM test GARCH_X_VRP vs baseline (QLIKE): stat=0.380, p=0.7037 (NS) PARTIAL POSITIVE: GARCH-X(VIX) improves OOS QLIKE by 6.3% (DM p=0.050, bootstrap p=0.027), but FAILS Harvey t>3.0 threshold. VRP alone adds nothing in GARCH-X framework despite K436 regression evidence. VIX model has boundary params (omega=alpha=0).",
+    "experiment_id": "K438",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, ^VIX)",
+    "data_period": "2005-02-03 to 2026-03-25",
+    "limitations": [
+      "Custom MLE implementation — no BHHH or OPG standard errors (only numerical Hessian)",
+      "VRP proxy uses VIX (30d implied) vs 21d realized — maturity mismatch",
+      "OOS period 2023-2025 is relatively calm; high-VIX regime sample may be small"
+    ]
+  },
+  {
+    "item_id": "kb_k439",
+    "category": "experiment_result",
+    "title": "K439: Cross-Asset VRP Predictability Test",
+    "content": "Cross-asset VRP test: 2/5 assets show significant VRP predictability Equity assets: 2/3 significant EQUITY-SPECIFIC: VRP predicts equity vol but not commodity/bond   SPY: DM p=0.0526, Bootstrap p=0.0813, MSE improvement +15.0%, Corr(VIX,RV)=0.872   QQQ: DM p=0.0523, Bootstrap p=0.0860, MSE improvement +8.7%, Corr(VIX,RV)=0.820",
+    "experiment_id": "K439",
+    "tags": [
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, QQQ, EEM, GLD, TLT, ^VIX)",
+    "limitations": [
+      "All assets use VIX (SPY implied vol) as proxy — not true asset-specific VRP",
+      "Ideal: use GVZ for GLD, MOVE for TLT, but not freely available via yfinance",
+      "OOS period (2023-2025) is relatively calm, limiting crisis-period inference"
+    ]
+  },
+  {
+    "item_id": "kb_k440",
+    "category": "experiment_result",
+    "title": "K440: VRP-Enhanced Volatility Targeting Strategy",
+    "content": "VRP enhancement does NOT improve Sharpe (diff=-0.0960); Does NOT pass Harvey (2016) |t|>3.0 threshold; Best cross-OOS win rate: 20%",
+    "experiment_id": "K440",
+    "tags": [
+      "cross-oos",
+      "har",
+      "strategy",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, ^VIX, GLD)",
+    "data_period": "2006-02-02 to 2025-12-31",
+    "limitations": [
+      "VRP percentile uses rolling 252-day window — lookback dependency",
+      "Transaction costs estimated at 10bps monthly — may underestimate daily VT",
+      "GLD available only from 2004 — shorter history for blend strategies"
+    ]
+  },
+  {
+    "item_id": "kb_k445",
+    "category": "experiment_result",
+    "title": "K445: Bitcoin Inverse Leverage Effect",
+    "content": "Method: empirical q1_gjr_gamma: Gamma NOT significant (p=0.1191) — no clear asymmetry in full sample q2_best_in_sample: EGARCH_t q3_best_oos: GARCH_SkewT Reference: Baur & Dimpfl (2018) Economics Letters Reference: Katsiampa (2017) Economics Letters",
+    "experiment_id": "K445",
+    "tags": [
+      "garch",
+      "leverage-effect",
+      "taiwan"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance BTC-USD",
+    "data_period": "2023-01-01 to 2024-12-31"
+  },
+  {
+    "item_id": "kb_k453",
+    "category": "experiment_result",
+    "title": "K453: Daily Semivariance Cross-Asset Validation",
+    "content": "Reference: Patton & Sheppard (2015) JFQA Reference: K449: SPY RS⁻ DM p=0.007, QQQ p=0.003, GLD FAIL",
+    "experiment_id": "K453",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "limitations": [
+      "Daily close-to-close data only (no intraday semivariance)",
+      "Linear OLS models (nonlinear relationships not captured)",
+      "Single OOS window (2023-2025) — could differ in other periods"
+    ]
+  },
+  {
+    "item_id": "kb_k455",
+    "category": "experiment_result",
+    "title": "K455: Volatility Spillover Network US → Asia (Diebold-Yilmaz)",
+    "content": "Method: Diebold-Yilmaz (2009, 2012) Spillover Index based on generalized FEVD q1_us_vol_spillover_strength: Total vol spillover index = 74.0%. SPY is net transmitter with net spillover = +1.9%. q2_time_variation: Rolling spillover ranges from 36.6% to 80.4% (mean 65.3%, CV=0.166). Peak on 2020-04-08. q3_most_affected_asian_market: EWA receives 19.3% of its FEV from US shocks. Least affected: FXI (10.0%). Reference: Diebold & Yilmaz (2009) \"Measuring Financial Asset Return and Volatility Spill...",
+    "experiment_id": "K455",
+    "tags": [
+      "spillover"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (US-listed ETFs)",
+    "data_period": "2007-01-04 to 2026-03-25"
+  },
+  {
+    "item_id": "kb_k457",
+    "category": "experiment_result",
+    "title": "K457: Weekly Frequency Volatility Prediction",
+    "content": "title: Weekly Frequency Volatility Prediction",
+    "experiment_id": "K457",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, ^VIX)",
+    "data_period": "2005-01-01 to 2026-03-27"
+  },
+  {
+    "item_id": "kb_k458",
+    "category": "experiment_result",
+    "title": "K458: Meta-Analysis of 30+ GARCH Extension Experiments (K414-K456)",
+    "content": "title: Meta-Analysis of 30+ GARCH Extension Experiments (K414-K456) data_source: experiments/k4*_results.json (all yfinance empirical data)",
+    "experiment_id": "K458",
+    "tags": [
+      "garch",
+      "meta-analysis"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "experiments/k4*_results.json (all yfinance empirical data)"
+  },
+  {
+    "item_id": "kb_k459",
+    "category": "experiment_result",
+    "title": "K459: Weekly VRP Cross-OOS Validation (5 Periods)",
+    "content": "title: Weekly VRP Cross-OOS Validation (5 Periods)",
+    "experiment_id": "K459",
+    "tags": [
+      "cross-oos",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, ^VIX)",
+    "data_period": "2005-01-01 to 2026-03-27"
+  },
+  {
+    "item_id": "kb_k460",
+    "category": "experiment_result",
+    "title": "K460: Semivariance Cross-OOS Validation (5 Periods × 2 Assets)",
+    "content": "title: Semivariance Cross-OOS Validation (5 Periods × 2 Assets) publication_verdict: PUBLICATION READY: Semivariance finding is robust across periods and assets",
+    "experiment_id": "K460",
+    "tags": [
+      "cross-oos"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "limitations": [
+      "Only 2 assets tested (SPY, QQQ) — both US large-cap equities",
+      "Daily frequency — may differ at weekly/monthly horizons",
+      "Parkinson proxy assumes no overnight gaps (approximation for daily data)"
+    ]
+  },
+  {
+    "item_id": "kb_k462",
+    "category": "experiment_result",
+    "title": "K462: STGARCH + GARCH-X Methods on Taiwan 0050.TW",
+    "content": "Asset: 0050.TW NULL: No model beats GJR baseline on Taiwan. Best alt: GARCH-X(SPY r²) (diff=2.519%). GARCH ceiling extends to Taiwan market. NULL",
+    "experiment_id": "K462",
+    "tags": [
+      "garch",
+      "leverage-effect",
+      "taiwan"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (0050.TW, SPY, ^VIX)",
+    "data_period": "2009-01-05 to 2026-03-24"
+  },
+  {
+    "item_id": "kb_k463",
+    "category": "experiment_result",
+    "title": "K463: Time-Varying Parameter GARCH-X for Taiwan (TVP Approaches)",
+    "content": "Asset: 0050.TW Best TVP variant: EWMA GARCH-X(λ=0.95) (ΔQLIKE=-1.71%). Time-varying delta marginally helps over fixed GARCH-X. TVP_PARTIAL",
+    "experiment_id": "K463",
+    "tags": [
+      "garch",
+      "taiwan"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (0050.TW, SPY, ^VIX)",
+    "data_period": "2009-01-05 to 2026-03-24",
+    "limitations": [
+      "Simple TVP methods (not full Kalman filter or GAS)",
+      "OOS only 2023-2024 (481 obs, mostly low-VIX regime)",
+      "Delta estimation on subsamples may be noisy"
+    ]
+  },
+  {
+    "item_id": "kb_k465",
+    "category": "experiment_result",
+    "title": "K465: HAR Log-Range Cross-OOS Validation (5 Periods)",
+    "content": "Assets: SPY, EWT Method: 5-period cross-OOS with IS=2000d, QLIKE evaluation, DM test PUBLICATION READY — HAR log-range robust across both assets and all regimes Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference: Alizadeh, Brandt & Diebold (2002) JFE — Range-based vol estimation",
+    "experiment_id": "K465",
+    "tags": [
+      "cross-oos",
+      "har",
+      "taiwan"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, EWT, ^VIX)"
+  },
+  {
+    "item_id": "kb_k467",
+    "category": "experiment_result",
+    "title": "K467: HAR Log-Range Based VaR Estimation",
+    "content": "Assets: SPY, QQQ, EEM Method: Rolling window VaR backtest with Trinity test (Kupiec + Christoffersen + DQ) best_score: 6/6 HAR-Range VaR FAILS — does not pass Trinity test IMPORTANT: Best vol forecaster (HAR, K465) does NOT automatically produce best VaR. Semivariance captures downside risk directly, while HAR measures total range. For tail risk, downside-specific information matters more than overall forecast accuracy. Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference...",
+    "experiment_id": "K467",
+    "tags": [
+      "har",
+      "strategy"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (OHLC for range-based, Close for returns)",
+    "data_period": "2023-01-01 to 2024-12-31",
+    "limitations": [
+      "OOS limited to 2023-2024 (2 years, ~502 days) — single regime",
+      "HAR log-range uses Parkinson estimator which assumes no jumps",
+      "RS⁻ scaling factor (×2) assumes approximate symmetry baseline"
+    ]
+  },
+  {
+    "item_id": "kb_k468",
+    "category": "experiment_result",
+    "title": "K468: Yang-Zhang Estimator as Realized Kernel Proxy + GARCH Evaluation",
+    "content": "Assets: SPY, QQQ, EEM Method: Compare 5 vol proxies (r², Parkinson, GK, YZ-1d, YZ-5d) for evaluating GJR-GARCH and HAR models. HAR-YZ model uses Yang-Zhang as target. VaR Trinity test for HAR-YZ vs HAR-Parkinson. HAR-YZ PARTIALLY FIXES K467 — Yang-Zhang overnight component improves VaR Yang-Zhang estimator combines overnight + intraday + Rogers-Satchell. Proxy choice DOES affect model ranking in some assets. VaR: HAR-YZ 1/6 vs HAR-Parkinson 0/6 vs GJR 5/6. Reference: Yang & Zhang (2000) J. Bu...",
+    "experiment_id": "K468",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (OHLC daily)",
+    "data_period": "2023-01-01 to 2024-12-31",
+    "limitations": [
+      "OOS limited to 2023-2024 (2 years, ~502 days)",
+      "Yang-Zhang single-day version uses squared terms as variance proxy (vs rolling window)",
+      "HAR log-transform may affect YZ differently than Parkinson"
+    ]
+  },
+  {
+    "item_id": "kb_k469",
+    "category": "experiment_result",
+    "title": "K469: HAR Log-Range Cross-OOS with r² Proxy (Correcting K465 Tautology)",
+    "content": "Assets: SPY, EWT Method: 5-period cross-OOS with r² proxy. HAR forecasts scaled from Parkinson to r² level using IS calibration ratio. DM test for statistical significance. HAR log-range is ROBUST: wins persist with r² evaluation Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference: Alizadeh, Brandt & Diebold (2002) JFE — Range-based vol estimation",
+    "experiment_id": "K469",
+    "tags": [
+      "cross-oos",
+      "har",
+      "taiwan"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, EWT)"
+  },
+  {
+    "item_id": "kb_k470",
+    "category": "experiment_result",
+    "title": "K470: HAR Log-Range Based Volatility Targeting Strategy",
+    "content": "HAR-VT shows significant improvement at 5% level but does NOT pass Harvey t>3.0 threshold Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference: Alizadeh, Brandt & Diebold (2002) JFE — Range-based vol estimation",
+    "experiment_id": "K470",
+    "tags": [
+      "har",
+      "strategy"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, GLD, ^VIX)"
+  },
+  {
+    "item_id": "kb_k471",
+    "category": "experiment_result",
+    "title": "K471: Time-Varying Higher Moments (Conditional Skewness/Kurtosis) for Vol Prediction",
+    "content": "Assets: SPY, QQQ, BTC-USD Method: Rolling skewness/kurtosis (5d, 21d, 63d) as predictors of 21-day forward RV. Ridge regression. Expanding window monthly refit. Higher moments (rolling skewness/kurtosis) do NOT significantly improve OOS vol prediction over lagged RV21 for any of the 3 assets tested. Average Δ R² = +0.0634. This confirms the prior finding (r=-0.073, Δ R² +2.7pp) that higher moments provide minimal incremental information for volatility forecasting. The predictive content of hi...",
+    "experiment_id": "K471",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "data_period": "2023-01-01 to 2025-12-31"
+  },
+  {
+    "item_id": "kb_k472",
+    "category": "experiment_result",
+    "title": "K472: Taiwan 0050.TW Comprehensive Vol Prediction — Integrating All Positive Findings",
+    "content": "Asset: 0050.TW   ≈ EWMA (λ=0.94): QLIKE +1.85%, DM p=0.3659 → not significant   ≈ HAR log-range: QLIKE +16.23%, DM p=0.0611 → not significant   ≈ Semivariance RS⁻: QLIKE +1.20%, DM p=0.5925 → not significant   ≈ Rolling kurtosis: QLIKE +5.92%, DM p=0.1005 → not significant   ✗ HAR + kurtosis: QLIKE +40.87%, DM p=0.0201 → significantly WORSE Reference: Corsi (2009) J Financial Econometrics — HAR-RV model Reference: Barndorff-Nielsen et al. (2010) — Realized semivariance",
+    "experiment_id": "K472",
+    "tags": [
+      "har",
+      "taiwan"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (0050.TW, SPY, ^VIX)",
+    "data_period": "2009-02-11 to 2026-03-26"
+  },
+  {
+    "item_id": "kb_k473",
+    "category": "experiment_result",
+    "title": "K473: Investor Attention (Google Trends) as Vol Signal — Revisit",
+    "content": "main_finding: No attention proxy provides statistically significant OOS improvement over VIX + Lagged RV baseline. VIX remains sufficient statistic for attention/fear information. Consistent with K192/J3. Google Trends IS incremental R²=6.2% (F=125.6, p<0.001) but OOS QLIKE worsens. Best non-attention model: Lagged RV (HAR) beats VIX+RV (DM p=0.044) due to pure momentum. best_model: Lagged RV (HAR) Reference: Da, Engelberg, Gao (2011) \"In Search of Attention\" JoF Reference: Vlastakis & Markel...",
+    "experiment_id": "K473",
+    "tags": [
+      "har",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, ^VIX)"
+  },
+  {
+    "item_id": "kb_k474",
+    "category": "experiment_result",
+    "title": "K474: Weekly Lagged RV vs VIX — 6-Period Cross-OOS Validation",
+    "content": "main_finding: K473 is PERIOD-SPECIFIC — VIX sufficiency holds at weekly frequency (0/6) implication: K473's finding is period-specific. VIX sufficiency likely holds at weekly frequency as well, consistent with the 27+ daily confirmations. The 2023-2025 result was driven by specific market conditions. vix_sufficiency_status: MAINTAINED at weekly frequency Reference: Corsi (2009) 'A Simple Approximate Long-Memory Model of Realized Volatility' JFE Reference: Patton (2011) 'Volatility Forecast Co...",
+    "experiment_id": "K474",
+    "tags": [
+      "cross-oos",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY + ^VIX)"
+  },
+  {
+    "item_id": "kb_k475",
+    "category": "experiment_result",
+    "title": "K475: Simple Ensemble of Validated Methods (Equal Weight)",
+    "content": "Asset: SPY CONFIRMED: Equal-weight ensemble of 3 validated methods achieves good forecasting (avg rank 2.0/7) AND good VaR. Timmermann (2006) forecast combination puzzle applies — simple 1/N beats complex BMA (K434). This is the first method to perform well on BOTH tasks simultaneously. Reference: Timmermann (2006) 'Forecast Combinations' Handbook of Economic Forecasting — equal weight puzzle Reference: Corsi (2009) J Financial Econometrics — HAR-RV model",
+    "experiment_id": "K475",
+    "tags": [
+      "har"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance"
+  },
+  {
+    "item_id": "kb_k476",
+    "category": "experiment_result",
+    "title": "K476: Ensemble VaR Cross-OOS Validation (GJR + HAR)",
+    "content": "Asset: SPY NEGATIVE: Ens_GJR_HAR (3/10) WORSE than GJR (7/10). Ensemble does not help VaR. Reference: Kupiec (1995) 'Techniques for Verifying the Accuracy of Risk Measurement Models' Reference: Christoffersen (1998) 'Evaluating Interval Forecasts' International Economic Review",
+    "experiment_id": "K476",
+    "tags": [
+      "cross-oos",
+      "har",
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance"
+  },
+  {
+    "item_id": "kb_k478",
+    "category": "experiment_result",
+    "title": "K478: Entropy-Based Volatility Prediction",
+    "content": "Asset: SPY NULL RESULT: Entropy features do NOT significantly improve OOS vol prediction beyond lagged RV Reference: Pincus (1991) \"Approximate entropy\" PNAS Reference: Richman & Moorman (2000) \"Sample entropy\" Am J Physiol",
+    "experiment_id": "K478",
+    "tags": [
+      "jump_exploration"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance"
+  },
+  {
+    "item_id": "kb_k479",
+    "category": "experiment_result",
+    "title": "K479: Wavelet Decomposition for Volatility Prediction",
+    "content": "Asset: SPY Method: DWT (db4, 4 levels) on |returns|, rolling 252-day window. Energy at each scale as predictors for next-day r². OLS regression, static + rolling (quarterly re-estimation). Mixed results: wavelet helps in one estimation method but not the other. No clear advantage. Reference: Gençay et al. (2002) Physica A — wavelet multi-scaling Reference: In & Kim (2006) JBFA — wavelet hedging",
+    "experiment_id": "K479",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "data_period": "2023-01-01 to 2025-12-31"
+  },
+  {
+    "item_id": "kb_k480",
+    "category": "experiment_result",
+    "title": "K480: Regime-Switching Tool Selection (Adaptive Model Selection)",
+    "content": "Asset: SPY NEGATIVE: No regime-switching model matches GJR's VaR performance (best: RS_Ternary 0.500 vs GJR 0.700). HAR contamination persists even with regime selection. For risk management, GJR remains the only reliable tool. GJR: QLIKE rank 4.2, VaR 7/10 (0.700) HAR: QLIKE rank 4.4, VaR 3/10 (0.300) Ens 50/50: QLIKE rank 1.8, VaR 3/10 (0.300) RS Binary: QLIKE rank 4.0, VaR 4/10 (0.400) RS Ternary: QLIKE rank 2.0, VaR 5/10 (0.500) Reference: Hamilton (1989) 'A New Approach to the Economic A...",
+    "experiment_id": "K480",
+    "tags": [
+      "har",
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY OHLC + ^VIX close)",
+    "limitations": [
+      "VIX thresholds (15, 20, 25) are ad-hoc — could be optimized but risks overfitting",
+      "Adaptive lookback (63d) not optimized — could try 21d or 126d",
+      "Uses same-day VIX — in practice need previous-day VIX for true out-of-sample"
+    ]
+  },
+  {
+    "item_id": "kb_k481",
+    "category": "experiment_result",
+    "title": "K481: Model Confidence Set (MCS) — Formal Multi-Model Comparison",
+    "content": "Asset: SPY MCS (r² proxy, α=0.1): 5 of 8 models in superior set. | Included: ['EGARCH', 'GJR+HAR_Ens', 'GJR-GARCH', 'HAR_logrange', 'Semivar_RS-'] | Excluded: ['EWMA', 'GARCH', 'Rolling_21d'] | Cross-period: most robust model(s) = [('GJR+HAR_Ens', 5), ('EGARCH', 4), ('GJR-GARCH', 4)] Reference: Hansen, Lunde, Nason (2011) \"The Model Confidence Set\" Econometrica 79(2):453-497 Reference: Corsi (2009) J Financial Econometrics — HAR-RV model",
+    "experiment_id": "K481",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "limitations": [
+      "QLIKE loss only — other loss functions (MSE, MAE) may give different rankings",
+      "r² is a noisy proxy for true latent variance",
+      "Quarterly refit for GARCH models — daily refit would be more accurate but prohibitively slow"
+    ]
+  },
+  {
+    "item_id": "kb_k483",
+    "category": "experiment_result",
+    "title": "K483: Commodity Volatility — Oil and Gold Vol Forecasting",
+    "content": "Assets: GLD, USO q1_qlike_ceiling: GJR-GARCH QLIKE ceiling does NOT hold for commodities. GARCH(1,1) wins USO; GJR marginally wins GLD (DM p=0.068, not significant). Symmetric GARCH is sufficient. q2_leverage_direction: GLD: standard negative gamma (-0.029, 46% significant, weak). USO: INVERTED positive gamma (+0.078, 100% significant, strong). Oil price UP = vol UP, consistent with supply shock dynamics. q3_har_log_range: HAR log-range FAILS for both commodities. Excluded from MCS. GLD: HAR ...",
+    "experiment_id": "K483",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (empirical)",
+    "data_period": "2023-01-01 to 2025-12-31"
+  },
+  {
+    "item_id": "kb_k485",
+    "category": "experiment_result",
+    "title": "K485: SSVS Variance Equation Cross-OOS Validation (5 periods)",
+    "content": "Asset: SPY Method: Cross-OOS validation of K484 SSVS median model (GJR+VIX+Range+|ε|) vs baselines verdict: PROMISING — SSVS better in most periods but not always significant PROMISING — SSVS better in most periods but not always significant Reference: So, Chen, Liu (2006) Best Subset Selection of ARX-GARCH, JRSS-C 55(2):201-224 Reference: Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies, JoE 160(1):246-256",
+    "experiment_id": "K485",
+    "tags": [
+      "cross-oos",
+      "garch",
+      "leverage-effect",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (empirical)",
+    "data_period": "2005-01-03 to 2026-03-25"
+  },
+  {
+    "item_id": "kb_k486",
+    "category": "experiment_result",
+    "title": "K486: GJR-GARCH-X(VIX) Final Cross-OOS Validation + VaR Trinity Test",
+    "content": "Asset: SPY Method: GJR-GARCH-X with VIX exogenous regressor, custom MLE, 5 cross-OOS periods Does GJR-GARCH-X(VIX) beat QLIKE AND pass VaR Trinity? QLIKE: GJR-X better in 5/5 periods (avg -17.43%). VaR: see var_trinity_summary for pass counts. Reference: Kupiec (1995) Techniques for Verifying the Accuracy of Risk Measurement Models Reference: Christoffersen (1998) Evaluating Interval Forecasts, IER 39(4):841-862",
+    "experiment_id": "K486",
+    "tags": [
+      "cross-oos",
+      "garch",
+      "leverage-effect",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, ^VIX) — empirical data",
+    "data_period": "2005-01-04 to 2026-03-25"
+  },
+  {
+    "item_id": "kb_k487",
+    "category": "experiment_result",
+    "title": "K487: GJR-GARCH-X(VIX) Cross-Asset Validation",
+    "content": "Method: GJR-GARCH-X with VIX exogenous regressor, 6 assets, OOS 2023-2024 EQUITY-SPECIFIC Reference: Kupiec (1995) Techniques for Verifying the Accuracy of Risk Measurement Models Reference: Christoffersen (1998) Evaluating Interval Forecasts, International Economic Review",
+    "experiment_id": "K487",
+    "tags": [
+      "garch",
+      "leverage-effect",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance -- empirical data"
+  },
+  {
+    "item_id": "kb_k488",
+    "category": "experiment_result",
+    "title": "K488: GJR-GARCH-X(VIX) Based Volatility Targeting Strategy",
+    "content": "GJR-X(VIX) VT shows promise: GJR avg Sharpe=0.6516 vs VIX 0.6512, but check Harvey threshold Reference: Moreira & Muir (2017) JoF 72(4):1611-1644 — Volatility-Managed Portfolios Reference: Bollerslev, Tauchen, Zhou (2009) RFS — VRP and returns",
+    "experiment_id": "K488",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect",
+      "strategy",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, GLD, ^VIX) — empirical data",
+    "data_period": "2005-01-04 to 2026-03-25",
+    "limitations": [
+      "Rolling GARCH refitting every 63 days (quarterly) may miss short-term regime changes",
+      "Transaction costs assumed at 3 bps; actual costs may vary",
+      "GLD available only from Nov 2004; limits pre-GFC analysis"
+    ]
+  },
+  {
+    "item_id": "kb_k489",
+    "category": "experiment_result",
+    "title": "K489: VIX Term Structure for Multi-Horizon Volatility Forecasting",
+    "content": "Reference: Carr & Wu (2006) - A Tale of Two Indices Reference: Mixon (2007) - Implied Volatility Term Structure, JFE",
+    "experiment_id": "K489",
+    "tags": [
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance: ^VIX (30d), ^VIX3M (90d), ^VIX9D (9d), SPY",
+    "data_period": "2011-01-03 ~ 2026-03-25"
+  },
+  {
+    "item_id": "kb_k490",
+    "category": "experiment_result",
+    "title": "K490: GJR-GARCH-X(VIX9D) vs GJR-X(VIX) Comparison",
+    "content": "VIX9D BETTER (SIGNIFICANT) Reference: Kupiec (1995) Techniques for Verifying the Accuracy of Risk Measurement Models Reference: Christoffersen (1998) Evaluating Interval Forecasts, International Economic Review",
+    "experiment_id": "K490",
+    "tags": [
+      "garch",
+      "leverage-effect",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance: SPY, ^VIX, ^VIX9D",
+    "data_period": "2017-01-04 to 2026-03-25"
+  },
+  {
+    "item_id": "kb_k491",
+    "category": "experiment_result",
+    "title": "K491: Universal Volatility Persistence Law — Cross-Asset Analysis",
+    "content": "Persistence range: [0.9522, 1.0000], mean=0.9802 ± 0.0141 Very tight clustering — suggestive of a universal persistence law Hillebrand inflation CONFIRMED: mean gap=+0.0336 (t=5.03, p=0.0002) Persistence co-movement: mean rho=0.170, 28/78 pairs significantly positive Persistence vs Gamma: rho=-0.433, p=0.1220 Reference: Hillebrand (2005) \"Neglecting parameter changes in GARCH models\" J Econometrics Reference: Glosten, Jagannathan, Runkle (1993) \"On the Relation between...\" JF",
+    "experiment_id": "K491",
+    "tags": [
+      "garch"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "data_period": "2010-01-01 to 2026-03-25"
+  },
+  {
+    "item_id": "kb_k492",
+    "category": "experiment_result",
+    "title": "K492: Research Efficiency Meta-Study — 67 Experiments Retrospective",
+    "content": "Method: Manual classification + statistical analysis of all K414-K491 results Reference: Harvey, Liu, Zhu (2016) ...and the Cross-Section of Expected Returns, RFS Reference: Timmermann (2006) Forecast Combinations, Handbook of Economic Forecasting",
+    "experiment_id": "K492",
+    "tags": [
+      "har",
+      "meta-analysis"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "experiments/k4*_results.json (68 files)"
+  },
+  {
+    "item_id": "kb_k493",
+    "category": "experiment_result",
+    "title": "K493: GJR-X(VIX9D) Real-Time Signal Analysis",
+    "content": "best_qlike_model: GJR-X(VIX9D) mz_r2_best: GJR-X(VIX9D) Reference: Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies, JoE Reference: Mincer & Zarnowitz (1969) The Evaluation of Economic Forecasts",
+    "experiment_id": "K493",
+    "tags": [
+      "leverage-effect",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance: SPY, ^VIX, ^VIX9D",
+    "data_period": "2022-01-04 to 2026-03-25"
+  },
+  {
+    "item_id": "kb_k494",
+    "category": "experiment_result",
+    "title": "K494: Forex Volatility Forecasting — EUR/USD and USD/JPY",
+    "content": "EUR/USD: No leverage effect (gamma NS) — symmetric GARCH may suffice USD/JPY: No leverage effect (gamma NS) — symmetric GARCH may suffice EUR/USD: GARCH >= GJR (asymmetry not needed OOS) EUR/USD: HAR log-range underperforms GARCH-family USD/JPY: GARCH >= GJR (asymmetry not needed OOS) EUR/USD: best=GJR_X_VIX QLIKE=-0.5964, persistence=0.9938, gamma=NS(0.0012); USD/JPY: best=EWMA QLIKE=0.0823, persistence=0.9862, gamma=NS(0.0245) Reference: Andersen, Bollerslev, Diebold, Labys (2003) Econometr...",
+    "experiment_id": "K494",
+    "tags": [
+      "garch",
+      "har",
+      "leverage-effect",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00"
+  },
+  {
+    "item_id": "kb_k495",
+    "category": "experiment_result",
+    "title": "K495: Grand Unified Cross-Asset Vol Model Selection Guide",
+    "content": "c1_gamma_sufficient: Gamma-based selection within 5% of oracle for 15/15 assets c2_exact_match_rate: 5/15 exact matches (33%) c3_vix_equity_only: VIX as exogenous variable primarily benefits equity assets CONFIRMED Reference: Glosten, Jagannathan, Runkle (1993) On the Relation between the Expected Value and the Volatility of the Nominal Excess Return on Stocks, JF Reference: Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies, JoE",
+    "experiment_id": "K495",
+    "tags": [
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (empirical data)",
+    "data_period": "2005-01-01 to 2024-12-31",
+    "limitations": [
+      "Single OOS period (2023-2024) — results may differ in other regimes",
+      "r^2 proxy for realized variance (noisy, but unbiased under Patton 2011)",
+      "EGARCH forecasts use scaling approximation between refits"
+    ]
+  },
+  {
+    "item_id": "kb_k497",
+    "category": "experiment_result",
+    "title": "K497: Loss Function Sensitivity — Model Ranking Stability Across 5 Loss Functions",
+    "content": "Asset: SPY ranking_stability: MODERATELY STABLE Reference: Patton (2011) \"Volatility Forecast Comparison Using Imperfect Volatility Proxies\" J Econometrics 160:99-109 Reference: Hansen, Lunde, Nason (2011) \"The Model Confidence Set\" Econometrica 79(2):453-497",
+    "experiment_id": "K497",
+    "tags": [
+      "experiment"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance"
+  },
+  {
+    "item_id": "kb_k498",
+    "category": "experiment_result",
+    "title": "K498: Earnings Season Volatility Patterns — GARCH-X Extension",
+    "content": "Assets: SPY, ^VIX NULL RESULT — Earnings season has no systematic effect on SPY vol. Consistent with K412. Index diversification absorbs individual stock earnings effects. GARCH-X with earnings dummy does not improve forecasts. Reference: K412/K923: Earnings Season Effect on Index Volatility (null at index level) Reference: Savor & Wilson (2016) Earnings Announcements and Systematic Risk, JFE",
+    "experiment_id": "K498",
+    "tags": [
+      "garch",
+      "seasonality",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance",
+    "data_period": "2023-01-03 to 2026-03-25"
+  },
+  {
+    "item_id": "kb_k499",
+    "category": "experiment_result",
+    "title": "K499: Optimal VT Rebalancing Frequency — SPY 12/VIX Strategy",
+    "content": "Best frequency at TX=0bp: threshold_5pct (Sharpe=0.2926) Best frequency at TX=5bp: monthly (Sharpe=0.2534) Best frequency at TX=20bp: monthly (Sharpe=0.2152) Best frequency at TX=58.5bp: monthly (Sharpe=0.1170) Threshold-5% vs Monthly: gross Sharpe 0.2926 vs 0.2661, turnover 1140% vs 265% Reference: Fleming, Kirby, Ostdiek (2003) 'The Economic Value of Volatility Timing Using Realized Volatility' JFE Reference: Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
+    "experiment_id": "K499",
+    "tags": [
+      "har",
+      "strategy",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, ^VIX)",
+    "data_period": "2008-01-02 to 2025-12-31"
+  },
+  {
+    "item_id": "kb_k504",
+    "category": "experiment_result",
+    "title": "K504: FRED STLFSI4 Macro Stress Regime Strategy",
+    "content": "STLFSI4 macro stress adjustment does NOT meaningfully improve 12/VIX strategy. Sharpe difference (Step): +0.0334, t-stat: -0.4271. Cross-OOS: STLFSI wins 4/10 periods. MDD diff: +0.0724. 12/VIX remains the irreducible kernel — macro regime overlay adds complexity without benefit. NULL RESULT — no meaningful difference Reference: Kliesen, Owyang, Vermann (2012) 'Disentangling Diverse Measures' Fed StL Review Reference: Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
+    "experiment_id": "K504",
+    "tags": [
+      "cross-oos",
+      "har",
+      "strategy",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (SPY, GLD, ^VIX) + FRED (STLFSI4)",
+    "data_period": "1999-01-05 to 2025-12-31"
+  },
+  {
+    "item_id": "kb_k506",
+    "category": "experiment_result",
+    "title": "K506: EWT-0050 Vol Spread Strategy — Cross-OOS Validation",
+    "content": "Reference: Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF Reference: Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
+    "experiment_id": "K506",
+    "tags": [
+      "cross-oos",
+      "har",
+      "strategy",
+      "taiwan"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance (EWT, 0050.TW, ^VIX)",
+    "data_period": "2010-02-02 to 2021-12-30"
+  },
+  {
+    "item_id": "kb_k507",
+    "category": "experiment_result",
+    "title": "K507: Dynamic SPY/GLD Allocation Strategy",
+    "content": "No dynamic allocation strategy passes all criteria (Sharpe improvement + 4/5 cross-OOS + Harvey t>3.0). Best candidate: inv_vol (Sharpe 0.991 vs benchmark 0.947). Static 50/50 + 12/VIX remains the optimal retail strategy. The lack of improvement is consistent with DCC-GARCH finding that 2-asset RP weights are independent of correlation — the diversification benefit from 50/50 is already near-optimal analytically. Reference: Asness, Moskowitz, Pedersen (2013) \"Value and Momentum Everywhere\", J...",
+    "experiment_id": "K507",
+    "tags": [
+      "cross-oos",
+      "garch",
+      "har",
+      "strategy",
+      "vix"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-03-26T16:10:26.282574+00:00",
+    "data_source": "yfinance"
   }
 ]
