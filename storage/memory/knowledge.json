@@ -10066,5 +10066,44 @@
     "data_period": "2005-2026",
     "sample_size": "500-760 OOS",
     "limitations": "SPY only, linear models"
+  },
+  {
+    "id": 1014,
+    "title": "K451: Overnight vs Intraday Vol — Rich descriptives but no forecasting improvement",
+    "content": "[提出: Claude(文獻搜尋), 執行: Claude] K451: Overnight/intraday vol decomposition using OHLC. Refs: Hansen & Lunde (2005), Tsiakas (2008). Overnight var = 36.3% of total (surges to 56.4% during COVID). ON returns more left-skewed (-1.47 vs -0.23). Strong Granger: ON→ID F=181.0 (p<1e-40). BUT: **OOS forecasting null** — all DM p>0.33. Best MSE model (ON+ID+GJR) R²=0.283 but not sig vs baseline. HAR ON/ID overfits badly (negative coefficients). Close-to-close models sufficient. Consistent with Hansen & Lunde: hard to beat GARCH(1,1) at daily frequency.",
+    "category": "vol_prediction",
+    "tags": [
+      "overnight",
+      "intraday",
+      "decomposition",
+      "null_result",
+      "descriptive"
+    ],
+    "created_at": "2026-03-26T00:15:25.330928+00:00",
+    "experiment_id": "k451",
+    "data_source": "yfinance (SPY OHLC)",
+    "data_period": "2005-2026",
+    "sample_size": "809 OOS",
+    "references": "Hansen & Lunde (2005) JBES; Tsiakas (2008) JFM"
+  },
+  {
+    "id": 1015,
+    "title": "K450: VRP + Semivariance Combined — No synergy (encompassing confirms unique info but DM null)",
+    "content": "[提出: Claude(K436+K449結合), 執行: Claude] K450: Combined VRP + semivariance model. Both contain unique info (encompassing: Semi beyond VRP t=3.88 p=0.0001, VRP beyond Semi t=2.65 p=0.008 for SPY). BUT combined model NOT significantly better than individuals (all DM p>0.7, all fail Harvey). The paradox: unique information exists but combining adds estimation noise that offsets gains (curse of dimensionality at daily frequency). SPY combined R²=0.158 vs VRP 0.143 vs Semi 0.149 — numerical improvement but insignificant. QQQ: Semi encompasses VRP (lambda=1.12, t=4.46) but not reverse. GJR-GARCH worst for daily |return| (R²<0). Kitchen sink/Ridge best numerically but also fail DM.",
+    "category": "vol_prediction",
+    "tags": [
+      "VRP",
+      "semivariance",
+      "combined",
+      "no_synergy",
+      "encompassing",
+      "curse_of_dimensionality"
+    ],
+    "created_at": "2026-03-26T00:16:09.867062+00:00",
+    "experiment_id": "k450",
+    "data_source": "yfinance (SPY, QQQ, ^VIX)",
+    "data_period": "2005-2026",
+    "sample_size": "808 OOS",
+    "references": "Bollerslev et al. (2009); Patton & Sheppard (2015)"
   }
 ]
