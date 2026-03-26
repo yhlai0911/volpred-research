@@ -963,3 +963,38 @@
 - [ ] Threshold Variable Selection for Asymmetric SV — Chen, Liu, So (2013) Computational Statistics, 28, 2415-2447. Combined threshold variable Z_t = Σω_i Z_i，同時選 threshold 變數和模型結構。五個亞洲市場實證
 - [ ] SSVS for Variance Equation — 將 SSVS 擴展到 variance equation（GARCH-X 的 variance side 加外生變數），目前 K433 只處理 mean equation
 - [ ] Threshold GARCH with Bayesian Model Selection — 結合 2006+2013 方法：threshold GARCH + SSVS 同時選 regime 結構和變數子集
+
+**2026-03-26 本 session 完成實驗（K426-K460, 36 experiments）：**
+- [x] K426: 高效 GINN — ML 仍無法打破 QLIKE ceiling（1.5s runtime，K419 效率修正）
+- [x] K431: STGARCH — GJR 顯著勝（DM p<0.001），9 參數過擬合
+- [x] K432: Bayesian MCMC — MLE 勝（大樣本後驗集中於 MLE 附近）
+- [x] K433: **★ SSVS Definitive Null (SPY)** — 空模型勝 524K 子集。Mean equation 不需要外生變數
+- [x] K434: BMA — BIC 權重退化（EGARCH-t 佔 99.8%）
+- [x] K435: **★ Hillebrand Effect** — Persistence 膨脹 +0.073。ICSS 偵測 20 個斷裂
+- [x] K436: VRP Daily — IS t=4.38 pass Harvey，bootstrap p=0.000。**⚠️ K459 修正：cross-OOS 0/5 QLIKE wins**
+- [x] K437: GAS-t — Rank 6/6。Outlier downweighting 在日頻有害
+- [x] K438: GARCH-X(VRP) — Null。GARCH-X(VIX) borderline -6.3%
+- [x] K439: VRP Cross-Asset — Equity-specific (SPY/QQQ only)
+- [x] K440: VRP-VT Strategy — **預測≠交易能力**。12/VIX irreducible kernel 第 7 次確認
+- [x] K441: **★ Range-Based Vol** — Parkinson 6.8x, GK 5.5x 效率。Cross-proxy GJR consistent
+- [x] K442: FIGARCH — d=0.61 長記憶確認但 OOS 不改善
+- [x] K443: **★ Copula Tail Dependence** — Post-2020 SPY-TLT doubly broken（失去負相關+增加尾部共動）
+- [x] K444: DCC-GARCH Portfolio — EWMA equally good for low-corr pair
+- [x] K445: **★ BTC Inverse Leverage** — Regime-dependent 非永久（gamma 翻轉）
+- [x] K446: GPR — Null。**Granger 因果反轉**：VIX→GPR 不是 GPR→VIX
+- [x] K447: SKEW — Null（反而降低預測力）
+- [x] K448: VVIX — Null（2.3% improvement, NS）
+- [x] K449: **★★ Daily Semivariance** — RS⁻ 5.5x R² improvement (SPY)。Equity-specific (K453: gamma mechanism r=0.812)
+- [x] K450: VRP+Semi Combined — 無協同（維度詛咒）
+- [x] K451: Overnight/Intraday — 描述性豐富但預測 null
+- [x] K452: Yield Curve — Null。Inverted = lower vol（反直覺）
+- [x] K453: **★ Semivariance Cross-Asset** — 4/5 equity sig, gamma mechanism (r=0.812)
+- [x] K454: **★★ Semivariance VaR** — Trinity 3/3 at 1%，勝 GARCH Skewed-t 1/3
+- [x] K455: **★ Vol Spillover Network** — 74% total, SPY net +1.9%。COVID +13.2%
+- [x] K456: Taiwan Semivar VaR — RS⁻ FAILS（gamma 低）。GJR-SkewT 勝
+- [x] K457: Weekly Vol — QLIKE ceiling diffuse。GJR gamma 2.36x 放大
+- [x] K458: **★ Meta-Analysis** — Information decomposition > complexity。corr(params, success)=-0.259
+- [x] K459: **★ VRP Cross-OOS FAIL** — 0/5 QLIKE wins（significance ≠ forecasting）。VIX sufficiency #30
+- [x] K460: **★★ Semivariance Cross-OOS PASS** — SPY 4/5 significant, 5/5 directional。Publication ready
+- [ ] K461: SSVS on Taiwan 0050 — **進行中**（SPY 空模型勝但台股外生變數可能有效）
+- [ ] K462: STGARCH + GARCH-X on Taiwan — **進行中**（美股 null 的方法在台股可能有效）
