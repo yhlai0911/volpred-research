@@ -1107,3 +1107,10 @@
 - [ ] **Event-surprise strategies** [提出: Codex] — 不是 calendar dummy（K498 null），而是用 surprise component（fed funds futures surprise, CPI surprise vs option-implied move）。條件預測比無條件預測更可行
 
 Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decomposition (3) Dispersion trading
+
+**2026-03-26 Gemini 建議的 5 個新方向（台灣特色 + 免費數據）：**
+- [ ] **Taiwan Price Limit Latent Volatility** [提出: Gemini] — 台股 ±10% 漲跌幅限制壓抑觀察波動率，limit-hit 日隱含更高真實 vol。GARCH-X 加 LimitHit dummy。Data: yfinance
+- [ ] **FRED STLFSI4 Macro Stress Regime** [提出: Gemini] — 用聖路易金融壓力指數做 regime switching，壓力期降低 target vol (12%→8%)。Data: FRED STLFSI4
+- [ ] **VIX→Taiwan Vol Spillover Strategy** [提出: Gemini] — VIX 在美股時段 spike > 15% → 次日台股開盤自動減倉。比 return lead-lag 更直接。Data: yfinance
+- [ ] **TXO Put-Call Ratio Mean-Reversion** [提出: Gemini] — 台指選擇權 P/C ratio 作為散戶恐慌指標，極端值做反向操作。Data: TAIFEX 網站
+- [ ] **EWT vs 0050.TW Vol Arbitrage Spread** [提出: Gemini] — 同一標的不同市場的 vol 差異信號。EWT vol >> 0050 vol → 預警台股 vol 將追趕。Data: yfinance
