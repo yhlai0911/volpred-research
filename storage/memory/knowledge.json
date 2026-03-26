@@ -10105,5 +10105,25 @@
     "data_period": "2005-2026",
     "sample_size": "808 OOS",
     "references": "Bollerslev et al. (2009); Patton & Sheppard (2015)"
+  },
+  {
+    "id": 1016,
+    "title": "K456: Taiwan 0050 Semivar VaR — RS⁻ FAILS but GJR-SkewT wins (opposite of K454)",
+    "content": "[提出: Claude(K454台灣驗證), 執行: Claude] K456: 0050.TW semivariance VaR. **結果與 K454 相反**: RS⁻ Normal FAILS Trinity at 1% (violation 2.7%, Red Zone, Kupiec p=0.002). GJR-SkewT PASSES 2/2 (1.2% violation, Green Zone). Hybrid 也 PASS 2/2。原因: 0050.TW GJR gamma=0.088 (低於 SPY 0.15)——asymmetry 較弱，RS⁻ 優勢不大。GJR-SkewT 的參數化彈性（skew+fat tails+conditional var dynamics）在台灣更適合。Data cleaning: 2 extreme returns Winsorized (含 -138.89% artifact)。結論：semivariance VaR 的效果是 market-dependent——強 leverage effect 的美股有效，弱 leverage 的台股需要 GJR-SkewT 或 Hybrid。",
+    "category": "risk_management",
+    "tags": [
+      "VaR",
+      "semivariance",
+      "Taiwan",
+      "0050.TW",
+      "GJR_SkewT",
+      "market_dependent"
+    ],
+    "created_at": "2026-03-26T01:15:15.387255+00:00",
+    "experiment_id": "k456",
+    "data_source": "yfinance (0050.TW)",
+    "data_period": "2005-2026",
+    "sample_size": "481 OOS",
+    "references": "Patton & Sheppard (2015); K454 comparison"
   }
 ]

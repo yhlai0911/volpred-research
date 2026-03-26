@@ -551,7 +551,7 @@
 - [x] T18: ★ VIX Regime Tail Correlation — SPY-QQQ 0.85→0.96 (crisis: 完全相關), SPY-GLD ≈0 (全 regime 穩定！), SPY-TLT -0.10→-0.48 (crisis 避險更強)。Portfolio vol ratio 1.07→0.60 in crisis
 - [x] T19: ★★ TLT Hedge Structural Break — Pre-2022 corr=-0.42 → Post-2022 +0.09 (Fisher z=-13.58, p<0.0001)。Bond-equity 負相關已死。GLD 是唯一全天候避險
 - [x] T20: VIX Mean Reversion Speed — 正常 half-life 10-15d, 危機 25-33d。長期趨勢微弱 (-0.21d/yr)。VT 策略穩健
-- [x] T21: ★ Master VaR Panel — 7 assets × 5 methods × 3 alphas × 3 tests (105 cells)。Skewed-t #1 (76.2% Trinity 3/3)。Student-t/CF-VaR/FHS 並列 66.7%。Normal 57.1%。Codex 要求的統一框架完成
+- [x] T21: ★ Master VaR Panel — 7 assets × 5 methods × 3 alphas × 3 tests (105 cells)。Skewed-t #1 (76.2% Trinity 3/3)。Student-t/CF-VaR/FHS 並列 66.7%。Normal 57.1%。Codex 要求的統一框架完成。**⚠️ K454 更新**：RS⁻-based Normal VaR 3/3 Trinity pass at 1% (SPY/QQQ/EEM)，勝 GARCH Skewed-t 1/3。Semivariance σ 校準 > 分布複雜度
 - [x] T22: GBM Vol — SPY-only 看似 crack (-13~21%) 但 **cross-asset 5×3=15 cells: 0/15 GBM 顯著贏, 5/15 GJR 贏, mean +7.1% worse**。2018-20 catastrophe +22%。FALSE ALARM。VIX non-linearity 是 SPY+period specific
 - [x] T23: 自建 Piecewise VIX→Vol（第 8 個自建模型）— SPY -13.7% 但同 T22 不 generalizable。QLIKE CEILING 第 13 次確認，比之前更強
 - [x] T31: VIX Velocity/Acceleration — level (AUC=0.867) >> velocity (0.490)。VIX level 已是最佳 predictor。第 8 種 VIX challenger 失敗
