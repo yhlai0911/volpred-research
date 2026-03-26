@@ -10185,5 +10185,25 @@
     "data_period": "2005-2026",
     "sample_size": "5 OOS periods",
     "references": "Timmermann (2006); Hansen, Lunde, Nason (2011)"
+  },
+  {
+    "id": 1020,
+    "title": "K484: ★★★ SSVS Variance Eq — 4/5 components PIP=1.000, QLIKE -7.43% (vs K433 mean eq all null)",
+    "content": "[提出: 用戶(創意), 執行: Claude] K484: SSVS for variance equation component selection (Chen CWS method extended). **4/5 components PIP=1.000**: GJR(1.000), VIX(1.000), Parkinson range(1.000), |ε|(1.000). Only semivariance excluded (PIP=0.094). SSVS median model QLIKE -7.43% vs base GARCH (DM p<0.001, BIC 1383 vs 1570). **與 K433 完美對比**: mean eq ALL PIP<0.25 (empty model wins), variance eq 4/5 PIP=1.000 (rich structure)。信息在 variance equation 結構中，不在 mean equation 的外生變數。Semivariance redundant given GJR+|ε| already capture asymmetry。|ε| lambda negative (-0.154) = dampening/normalization role。需要 cross-OOS 驗證。",
+    "category": "vol_prediction",
+    "tags": [
+      "SSVS",
+      "variance_equation",
+      "Chen_CWS",
+      "user_idea",
+      "breakthrough",
+      "model_selection"
+    ],
+    "created_at": "2026-03-26T08:53:46.335407+00:00",
+    "experiment_id": "k484",
+    "data_source": "yfinance (SPY, ^VIX)",
+    "data_period": "2005-2026",
+    "sample_size": "751 OOS",
+    "references": "So, Chen, Liu (2006) JRSS-C; K433 contrast"
   }
 ]
