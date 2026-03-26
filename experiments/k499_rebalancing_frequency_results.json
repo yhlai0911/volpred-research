@@ -1,0 +1,509 @@
+{
+  "experiment": "K499",
+  "title": "Optimal VT Rebalancing Frequency \u2014 SPY 12/VIX Strategy",
+  "date": "2026-03-26T22:09:19.225277",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_range": "2008-01-02 to 2025-12-31",
+  "n_trading_days": 4529,
+  "strategy": "weight = min(12/VIX, 1.5), equity in SPY, rest in cash @4% rf",
+  "frequencies_tested": [
+    "daily",
+    "weekly",
+    "biweekly",
+    "monthly",
+    "quarterly",
+    "threshold_5pct"
+  ],
+  "tx_cost_scenarios": {
+    "0bp": "0.000% round-trip",
+    "5bp": "0.050% round-trip",
+    "20bp": "0.200% round-trip",
+    "58.5bp": "0.585% round-trip"
+  },
+  "benchmark": {
+    "type": "buy_and_hold_SPY",
+    "sharpe": 0.2283,
+    "ann_ret_pct": 8.57,
+    "ann_vol_pct": 20.01,
+    "max_dd_pct": -53.0,
+    "total_return_pct": 366.4
+  },
+  "results": {
+    "daily": {
+      "0bp": {
+        "sharpe": 0.2882,
+        "ann_ret": 0.06749,
+        "ann_vol": 0.09539,
+        "max_dd": -0.22741,
+        "calmar": 0.297,
+        "sortino": 0.385,
+        "ann_turnover_pct": 1692.95,
+        "n_rebals": 4528,
+        "rebals_per_year": 251.9,
+        "total_return_pct": 236.34,
+        "rebal_count_total": 4528
+      },
+      "5bp": {
+        "sharpe": 0.1992,
+        "ann_ret": 0.05903,
+        "ann_vol": 0.09551,
+        "max_dd": -0.23162,
+        "calmar": 0.255,
+        "sortino": 0.265,
+        "ann_turnover_pct": 1692.95,
+        "n_rebals": 4528,
+        "rebals_per_year": 251.9,
+        "total_return_pct": 188.88,
+        "rebal_count_total": 4528
+      },
+      "20bp": {
+        "sharpe": -0.0665,
+        "ann_ret": 0.03363,
+        "ann_vol": 0.09589,
+        "max_dd": -0.24411,
+        "calmar": 0.138,
+        "sortino": -0.087,
+        "ann_turnover_pct": 1692.95,
+        "n_rebals": 4528,
+        "rebals_per_year": 251.9,
+        "total_return_pct": 83.01,
+        "rebal_count_total": 4528
+      },
+      "58.5bp": {
+        "sharpe": -0.7383,
+        "ann_ret": -0.03159,
+        "ann_vol": 0.09696,
+        "max_dd": -0.50472,
+        "calmar": -0.063,
+        "sortino": -0.939,
+        "ann_turnover_pct": 1692.95,
+        "n_rebals": 4528,
+        "rebals_per_year": 251.9,
+        "total_return_pct": -43.32,
+        "rebal_count_total": 4528
+      }
+    },
+    "weekly": {
+      "0bp": {
+        "sharpe": 0.2843,
+        "ann_ret": 0.06785,
+        "ann_vol": 0.09797,
+        "max_dd": -0.21215,
+        "calmar": 0.32,
+        "sortino": 0.375,
+        "ann_turnover_pct": 716.21,
+        "n_rebals": 907,
+        "rebals_per_year": 50.5,
+        "total_return_pct": 238.53,
+        "rebal_count_total": 907
+      },
+      "5bp": {
+        "sharpe": 0.2476,
+        "ann_ret": 0.06427,
+        "ann_vol": 0.09803,
+        "max_dd": -0.21391,
+        "calmar": 0.3,
+        "sortino": 0.326,
+        "ann_turnover_pct": 716.21,
+        "n_rebals": 907,
+        "rebals_per_year": 50.5,
+        "total_return_pct": 217.42,
+        "rebal_count_total": 907
+      },
+      "20bp": {
+        "sharpe": 0.1377,
+        "ann_ret": 0.05352,
+        "ann_vol": 0.09824,
+        "max_dd": -0.21916,
+        "calmar": 0.244,
+        "sortino": 0.181,
+        "ann_turnover_pct": 716.21,
+        "n_rebals": 907,
+        "rebals_per_year": 50.5,
+        "total_return_pct": 161.67,
+        "rebal_count_total": 907
+      },
+      "58.5bp": {
+        "sharpe": -0.1423,
+        "ann_ret": 0.02592,
+        "ann_vol": 0.09896,
+        "max_dd": -0.23246,
+        "calmar": 0.111,
+        "sortino": -0.185,
+        "ann_turnover_pct": 716.21,
+        "n_rebals": 907,
+        "rebals_per_year": 50.5,
+        "total_return_pct": 59.33,
+        "rebal_count_total": 907
+      }
+    },
+    "biweekly": {
+      "0bp": {
+        "sharpe": 0.2617,
+        "ann_ret": 0.06673,
+        "ann_vol": 0.10213,
+        "max_dd": -0.22316,
+        "calmar": 0.299,
+        "sortino": 0.334,
+        "ann_turnover_pct": 460.88,
+        "n_rebals": 454,
+        "rebals_per_year": 25.3,
+        "total_return_pct": 231.75,
+        "rebal_count_total": 454
+      },
+      "5bp": {
+        "sharpe": 0.2391,
+        "ann_ret": 0.06442,
+        "ann_vol": 0.10215,
+        "max_dd": -0.22427,
+        "calmar": 0.287,
+        "sortino": 0.305,
+        "ann_turnover_pct": 460.88,
+        "n_rebals": 454,
+        "rebals_per_year": 25.3,
+        "total_return_pct": 218.29,
+        "rebal_count_total": 454
+      },
+      "20bp": {
+        "sharpe": 0.1712,
+        "ann_ret": 0.0575,
+        "ann_vol": 0.10222,
+        "max_dd": -0.22761,
+        "calmar": 0.253,
+        "sortino": 0.218,
+        "ann_turnover_pct": 460.88,
+        "n_rebals": 454,
+        "rebals_per_year": 25.3,
+        "total_return_pct": 181.09,
+        "rebal_count_total": 454
+      },
+      "58.5bp": {
+        "sharpe": -0.0026,
+        "ann_ret": 0.03974,
+        "ann_vol": 0.10254,
+        "max_dd": -0.23612,
+        "calmar": 0.168,
+        "sortino": -0.003,
+        "ann_turnover_pct": 460.88,
+        "n_rebals": 454,
+        "rebals_per_year": 25.3,
+        "total_return_pct": 104.25,
+        "rebal_count_total": 454
+      }
+    },
+    "monthly": {
+      "0bp": {
+        "sharpe": 0.2661,
+        "ann_ret": 0.06772,
+        "ann_vol": 0.10418,
+        "max_dd": -0.2162,
+        "calmar": 0.313,
+        "sortino": 0.338,
+        "ann_turnover_pct": 264.67,
+        "n_rebals": 215,
+        "rebals_per_year": 12.0,
+        "total_return_pct": 237.73,
+        "rebal_count_total": 215
+      },
+      "5bp": {
+        "sharpe": 0.2534,
+        "ann_ret": 0.0664,
+        "ann_vol": 0.10419,
+        "max_dd": -0.21664,
+        "calmar": 0.306,
+        "sortino": 0.322,
+        "ann_turnover_pct": 264.67,
+        "n_rebals": 215,
+        "rebals_per_year": 12.0,
+        "total_return_pct": 229.79,
+        "rebal_count_total": 215
+      },
+      "20bp": {
+        "sharpe": 0.2152,
+        "ann_ret": 0.06242,
+        "ann_vol": 0.10422,
+        "max_dd": -0.21795,
+        "calmar": 0.286,
+        "sortino": 0.273,
+        "ann_turnover_pct": 264.67,
+        "n_rebals": 215,
+        "rebals_per_year": 12.0,
+        "total_return_pct": 207.07,
+        "rebal_count_total": 215
+      },
+      "58.5bp": {
+        "sharpe": 0.117,
+        "ann_ret": 0.05222,
+        "ann_vol": 0.10441,
+        "max_dd": -0.22133,
+        "calmar": 0.236,
+        "sortino": 0.148,
+        "ann_turnover_pct": 264.67,
+        "n_rebals": 215,
+        "rebals_per_year": 12.0,
+        "total_return_pct": 155.62,
+        "rebal_count_total": 215
+      }
+    },
+    "quarterly": {
+      "0bp": {
+        "sharpe": 0.1383,
+        "ann_ret": 0.05734,
+        "ann_vol": 0.1254,
+        "max_dd": -0.32849,
+        "calmar": 0.175,
+        "sortino": 0.156,
+        "ann_turnover_pct": 119.15,
+        "n_rebals": 71,
+        "rebals_per_year": 4.0,
+        "total_return_pct": 180.25,
+        "rebal_count_total": 71
+      },
+      "5bp": {
+        "sharpe": 0.1335,
+        "ann_ret": 0.05674,
+        "ann_vol": 0.12542,
+        "max_dd": -0.32849,
+        "calmar": 0.173,
+        "sortino": 0.151,
+        "ann_turnover_pct": 119.15,
+        "n_rebals": 71,
+        "rebals_per_year": 4.0,
+        "total_return_pct": 177.27,
+        "rebal_count_total": 71
+      },
+      "20bp": {
+        "sharpe": 0.1192,
+        "ann_ret": 0.05495,
+        "ann_vol": 0.1255,
+        "max_dd": -0.32849,
+        "calmar": 0.167,
+        "sortino": 0.134,
+        "ann_turnover_pct": 119.15,
+        "n_rebals": 71,
+        "rebals_per_year": 4.0,
+        "total_return_pct": 168.49,
+        "rebal_count_total": 71
+      },
+      "58.5bp": {
+        "sharpe": 0.0824,
+        "ann_ret": 0.05036,
+        "ann_vol": 0.12577,
+        "max_dd": -0.33904,
+        "calmar": 0.149,
+        "sortino": 0.093,
+        "ann_turnover_pct": 119.15,
+        "n_rebals": 71,
+        "rebals_per_year": 4.0,
+        "total_return_pct": 147.2,
+        "rebal_count_total": 71
+      }
+    },
+    "threshold_5pct": {
+      "0bp": {
+        "sharpe": 0.2926,
+        "ann_ret": 0.06794,
+        "ann_vol": 0.09548,
+        "max_dd": -0.21645,
+        "calmar": 0.314,
+        "sortino": 0.39,
+        "ann_turnover_pct": 1140.03,
+        "n_rebals": 1244,
+        "rebals_per_year": 69.2,
+        "total_return_pct": 239.07,
+        "rebal_count_total": 1244
+      },
+      "5bp": {
+        "sharpe": 0.2326,
+        "ann_ret": 0.06224,
+        "ann_vol": 0.0956,
+        "max_dd": -0.21835,
+        "calmar": 0.285,
+        "sortino": 0.309,
+        "ann_turnover_pct": 1140.03,
+        "n_rebals": 1244,
+        "rebals_per_year": 69.2,
+        "total_return_pct": 206.05,
+        "rebal_count_total": 1244
+      },
+      "20bp": {
+        "sharpe": 0.0535,
+        "ann_ret": 0.04514,
+        "ann_vol": 0.09601,
+        "max_dd": -0.22401,
+        "calmar": 0.201,
+        "sortino": 0.07,
+        "ann_turnover_pct": 1140.03,
+        "n_rebals": 1244,
+        "rebals_per_year": 69.2,
+        "total_return_pct": 125.06,
+        "rebal_count_total": 1244
+      },
+      "58.5bp": {
+        "sharpe": -0.399,
+        "ann_ret": 0.00121,
+        "ann_vol": 0.09723,
+        "max_dd": -0.25463,
+        "calmar": 0.005,
+        "sortino": -0.505,
+        "ann_turnover_pct": 1140.03,
+        "n_rebals": 1244,
+        "rebals_per_year": 69.2,
+        "total_return_pct": 2.2,
+        "rebal_count_total": 1244
+      }
+    }
+  },
+  "rankings": {
+    "0bp": [
+      {
+        "frequency": "threshold_5pct",
+        "sharpe": 0.2926
+      },
+      {
+        "frequency": "daily",
+        "sharpe": 0.2882
+      },
+      {
+        "frequency": "weekly",
+        "sharpe": 0.2843
+      },
+      {
+        "frequency": "monthly",
+        "sharpe": 0.2661
+      },
+      {
+        "frequency": "biweekly",
+        "sharpe": 0.2617
+      },
+      {
+        "frequency": "quarterly",
+        "sharpe": 0.1383
+      }
+    ],
+    "5bp": [
+      {
+        "frequency": "monthly",
+        "sharpe": 0.2534
+      },
+      {
+        "frequency": "weekly",
+        "sharpe": 0.2476
+      },
+      {
+        "frequency": "biweekly",
+        "sharpe": 0.2391
+      },
+      {
+        "frequency": "threshold_5pct",
+        "sharpe": 0.2326
+      },
+      {
+        "frequency": "daily",
+        "sharpe": 0.1992
+      },
+      {
+        "frequency": "quarterly",
+        "sharpe": 0.1335
+      }
+    ],
+    "20bp": [
+      {
+        "frequency": "monthly",
+        "sharpe": 0.2152
+      },
+      {
+        "frequency": "biweekly",
+        "sharpe": 0.1712
+      },
+      {
+        "frequency": "weekly",
+        "sharpe": 0.1377
+      },
+      {
+        "frequency": "quarterly",
+        "sharpe": 0.1192
+      },
+      {
+        "frequency": "threshold_5pct",
+        "sharpe": 0.0535
+      },
+      {
+        "frequency": "daily",
+        "sharpe": -0.0665
+      }
+    ],
+    "58.5bp": [
+      {
+        "frequency": "monthly",
+        "sharpe": 0.117
+      },
+      {
+        "frequency": "quarterly",
+        "sharpe": 0.0824
+      },
+      {
+        "frequency": "biweekly",
+        "sharpe": -0.0026
+      },
+      {
+        "frequency": "weekly",
+        "sharpe": -0.1423
+      },
+      {
+        "frequency": "threshold_5pct",
+        "sharpe": -0.399
+      },
+      {
+        "frequency": "daily",
+        "sharpe": -0.7383
+      }
+    ]
+  },
+  "breakeven_analysis": {
+    "daily": {
+      "breakeven_bps": 3.4,
+      "beats_bh_at_all_levels": false,
+      "loses_to_bh_at_all_levels": false
+    },
+    "weekly": {
+      "breakeven_bps": 7.6,
+      "beats_bh_at_all_levels": false,
+      "loses_to_bh_at_all_levels": false
+    },
+    "biweekly": {
+      "breakeven_bps": 7.4,
+      "beats_bh_at_all_levels": false,
+      "loses_to_bh_at_all_levels": false
+    },
+    "monthly": {
+      "breakeven_bps": 14.9,
+      "beats_bh_at_all_levels": false,
+      "loses_to_bh_at_all_levels": false
+    },
+    "quarterly": {
+      "breakeven_bps": null,
+      "beats_bh_at_all_levels": false,
+      "loses_to_bh_at_all_levels": true
+    },
+    "threshold_5pct": {
+      "breakeven_bps": 5.4,
+      "beats_bh_at_all_levels": false,
+      "loses_to_bh_at_all_levels": false
+    }
+  },
+  "key_findings": [
+    "Best frequency at TX=0bp: threshold_5pct (Sharpe=0.2926)",
+    "Best frequency at TX=5bp: monthly (Sharpe=0.2534)",
+    "Best frequency at TX=20bp: monthly (Sharpe=0.2152)",
+    "Best frequency at TX=58.5bp: monthly (Sharpe=0.1170)",
+    "Threshold-5% vs Monthly: gross Sharpe 0.2926 vs 0.2661, turnover 1140% vs 265%",
+    "Taiwan (58.5bp): VT NOT VIABLE \u2014 best (monthly) Sharpe=0.1170 < B&H=0.2283",
+    "Daily rebalancing annual turnover: 1693%"
+  ],
+  "references": [
+    "Fleming, Kirby, Ostdiek (2003) 'The Economic Value of Volatility Timing Using Realized Volatility' JFE",
+    "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
+    "Harvey, Liechty, Liechty, Mueller (2010) 'Portfolio Selection with Higher Moments'"
+  ]
+}
