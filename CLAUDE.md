@@ -94,6 +94,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **每篇文章必須附圖表**：用 matplotlib 生成 → 上傳 Supabase Storage → content 中用 `![desc](url)` 嵌入。一般讀者至少 1 張，研究文章 2-3 張。不附圖的文章閱讀價值大幅降低
 - 一般讀者文章的主題**不可重疊**——每篇必須有獨立的核心 insight
 - 用 LanceDB 搜尋確認主題未被寫過同類型文章
+- **research_program.md 每月初存檔瘦身**：將已完成 Phase/Session 記錄移至 `docs/research_archive/completed_phases_YYYY-MM.md`，只保留活躍內容（目標 < 500 行）。查詢追蹤表指向存檔位置
 - **重要事件前後必須安排研究與文章**：每月初用 WebSearch 查詢未來一個月的重要政治/經濟/金融事件（FOMC、CPI、NFP、GDP、央行決議、大型法說會），事前 2-3 天發佈預告文章，事後 1 天發佈解讀文章。具體事件日曆記在 `research_program.md`，**每次查詢新月份時覆蓋更新（不累積），只保留當月和下月**
 - 研究文章在實驗完成後**立刻撰寫**，不要累積
 - **每 5 個實驗後必須補充文章池**——檢查池中草稿數量，若 <3 篇則立刻寫 2 篇（1 general + 1 research）
