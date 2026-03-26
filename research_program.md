@@ -1041,3 +1041,12 @@
 - GARCH ceiling cross-market universal (K472 Taiwan)
 - VIX sufficiency #31 (日頻+週頻)
 - Cross-OOS is essential quality control (3/3 false positives caught)
+
+**後續實驗（K478-K484）：**
+- [x] K478: Entropy — Null（Complexity Ceiling）
+- [x] K479: Wavelet — Null（Decomposition Ceiling，HAR ad-hoc 已最優）
+- [x] K480: Regime-switching tool selection — Forecasting/VaR tradeoff is fundamental
+- [x] K481: **★★★ MCS Capstone** — 5-model superior set, ensemble 5/5 最穩健。Econometrica 級確認
+- [x] K482: MCS-weighted ensemble — Equal weight wins（Timmermann combination puzzle）
+- [ ] K483: Commodity vol（oil/gold）— **進行中**
+- [ ] K484: **SSVS Variance Equation Component Selection**（用戶創意）— **進行中**。用陳婉淑方法選 GARCH 模型成分（不是選變數）
