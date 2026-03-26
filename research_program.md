@@ -1098,3 +1098,12 @@
 
 ### 文章品質（用戶提出）
 - [x] Feed 文章必須附圖表——已修正 3 篇文章、已寫入 feedback memory
+
+**2026-03-26 Codex 建議的 5 個新方向（第5次審查）：**
+- [ ] **Decision-focused policy learning** [提出: Codex] — 不預測 return/vol 再映射到交易，而是直接學習最優行動（contextual bandit / dynamic treatment）。回應核心發現「prediction ≠ trading」
+- [ ] **Two-clock decomposition: overnight + intraday + jump** [提出: Codex] — 分開建模 close-to-open / open-to-close / jump probability，只交易有信號的 segment。K451 已做描述性分析但未做策略
+- [ ] **Options surface state variables** [提出: Codex] — 超越 VIX/SKEW 的 scalar summary，用完整 IV surface（left-tail slope, corridor variance, GEX/vanna, 0DTE share）。⚠️ BLOCKED: 需 options 歷史數據
+- [ ] **Dispersion / correlation-regime trading** [提出: Codex] — 將 DCC/copula/network 分析（K443/K444/K455）轉化為策略：sector dispersion, correlation breakdown trades, network-hub rotation
+- [ ] **Event-surprise strategies** [提出: Codex] — 不是 calendar dummy（K498 null），而是用 surprise component（fed funds futures surprise, CPI surprise vs option-implied move）。條件預測比無條件預測更可行
+
+Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decomposition (3) Dispersion trading
