@@ -10205,5 +10205,53 @@
     "data_period": "2005-2026",
     "sample_size": "751 OOS",
     "references": "So, Chen, Liu (2006) JRSS-C; K433 contrast"
+  },
+  {
+    "title": "K501: Return Prediction — Taiwan R²=15.6% (Harvey pass!) but I8 timing bias caveat",
+    "content": "[提出: 用戶, 執行: Claude] K501: SSVS return prediction. Taiwan: SPY_ret PIP=0.95, OOS R²=15.6%, hit rate 67.5%, DM t=5.70 (Harvey PASS!). BUT: c2c includes non-tradable overnight gap (I8: gap captures 93%). SPY/QQQ: R²=1-2% (EMH). Signal is real but not implementable without o2o verification.",
+    "experiment_id": "k501",
+    "tags": [
+      "return_prediction",
+      "SSVS",
+      "Taiwan",
+      "timing_bias",
+      "Chen_CWS"
+    ],
+    "id": 1021,
+    "created_at": "2026-03-26T15:03:51.152670+00:00",
+    "category": "strategy",
+    "data_source": "yfinance"
+  },
+  {
+    "title": "K502: Taiwan Lead-Lag Strategy — 77-93% alpha in overnight gap, NOT tradable",
+    "content": "[提出: 用戶, 執行: Claude] K502: 4 US→Taiwan lead-lag strategies. All fail: 77-93% of c2c alpha in overnight gap. Best o2o t_NW=1.649 (fail Harvey). Taiwan TX 58.5bp vs breakeven 1-8bp. Win rates ~49%. Lead-lag is academic finding, not tradable.",
+    "experiment_id": "k502",
+    "tags": [
+      "lead_lag",
+      "Taiwan",
+      "overnight_gap",
+      "strategy_null",
+      "TX_cost"
+    ],
+    "id": 1022,
+    "created_at": "2026-03-26T15:03:51.152670+00:00",
+    "category": "strategy",
+    "data_source": "yfinance"
+  },
+  {
+    "title": "K503: VIX Mean-Reversion Strategy — All fail, 12/VIX IS the mean-reversion trade",
+    "content": "[提出: 用戶, 執行: Claude] K503: 4 VIX mean-reversion strategies all significantly WORSE than 12/VIX (DM t=-4 to -20). Key insight: 12/VIX formula IS already a continuous proportional mean-reversion trade. weight=12/VIX automatically reduces in spikes and increases as VIX reverts. Explicit MR signals are binary/crude → lose the continuous scaling. 15th VIX sufficiency confirmation.",
+    "experiment_id": "k503",
+    "tags": [
+      "VIX",
+      "mean_reversion",
+      "strategy_null",
+      "irreducible_kernel",
+      "12_VIX"
+    ],
+    "id": 1023,
+    "created_at": "2026-03-26T15:03:51.152670+00:00",
+    "category": "strategy",
+    "data_source": "yfinance"
   }
 ]
