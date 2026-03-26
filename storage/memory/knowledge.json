@@ -11503,5 +11503,2344 @@
     "confidence": 0.8,
     "created_at": "2026-03-26T16:10:26.282574+00:00",
     "data_source": "yfinance"
+  },
+  {
+    "item_id": "kb_k1",
+    "category": "options_strategy",
+    "title": "K1: Options surface (SKEW/VVIX/VIX3M)",
+    "content": "[Backfilled from research archive] K1: ★★ Options surface (SKEW/VVIX/VIX3M) — 整個 options surface 被 VIX 吸收。SKEW ΔR²=0。VIX sufficient #15",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k2",
+    "category": "portfolio_strategy",
+    "title": "K2: Mean-variance optimization",
+    "content": "[Backfilled from research archive] K2: ★★ Mean-variance optimization — 50/50 SPY/GLD net Sharpe #1 (0.893)，beats ALL optimizers (RP 0.889, MinVar 0.855, MaxSharpe 0.722, BL 0.693)。DeMiguel 1/N confirmed。60/40 SPY/TLT 崩壞 (2022-24 Sharpe=-0.098)。VT additive to all allocation methods (+7-10% MDD)。2 assets > 3 assets",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k3",
+    "category": "taiwan_market",
+    "title": "K3: 台灣特有指標深度",
+    "content": "[Backfilled from research archive] K3: 台灣特有指標深度 — SPY magnitude 1.84x (t=8.08) 但 VT NS。TW50 leads TSMC vol。8.63/VIX 仍最佳",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k4",
+    "category": "research_finding",
+    "title": "K4: Dynamic target vol",
+    "content": "[Backfilled from research archive] K4: ★★ Dynamic target vol — 固定 target Sharpe 數學上相同 (0.855)。6 dynamic 全 worse。Target = risk preference",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k5",
+    "category": "vt_strategy",
+    "title": "K5: Drawdown sizing",
+    "content": "[Backfilled from research archive] K5: Drawdown sizing — Pure DD worse。Recovery-aware 更慢。Forward-looking > backward-looking",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k6",
+    "category": "vol_prediction",
+    "title": "K6: QLIKE ceiling meta-analysis (14 models × 3 assets)",
+    "content": "[Backfilled from research archive] K6: ★★★ QLIKE ceiling meta-analysis (14 models × 3 assets) — CC-RV 22d #1 ALL assets。GARCH family spans 0.31%。8.7/14 in superior set。論文表格 ready",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k7",
+    "category": "crypto",
+    "title": "K7: Vol spillover Granger network",
+    "content": "[Backfilled from research archive] K7: ★★ Vol spillover Granger network — SPY hub (5/10yr)，TW50 in-degree=5 最受影響。BTC→SPY 新發現。高度不對稱 (10/14 one-way)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k8",
+    "category": "cross_market",
+    "title": "K8: DeltaLag null",
+    "content": "[Backfilled from research archive] K8: DeltaLag null — Lead-lag 是 STATIC (lag=1, 93% stable)。Granger F=418 單向。DeltaLag 概念不適用",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k17",
+    "category": "vt_strategy",
+    "title": "K17: BTC Halving Momentum VT",
+    "content": "[Backfilled from research archive] K17: ★★ BTC Halving Momentum VT — Sharpe +19% (t=4.39 PASS Harvey)。但只 2 full cycles，declining returns。需 2028 確認",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "harvey_pass",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k18",
+    "category": "vol_prediction",
+    "title": "K18: VIX-timed forex carry",
+    "content": "[Backfilled from research archive] K18: ★★★ VIX-timed forex carry — AUD/JPY MDD -40%→-14% (p=0.001)。Own-vol 無效，VIX 是 universal risk appetite indicator",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k19",
+    "category": "vol_prediction",
+    "title": "K19: 50/50 SPY/GLD confirmed vs carry combo。Carry 分散 marginal NS",
+    "content": "[Backfilled from research archive] K19: 50/50 SPY/GLD confirmed vs carry combo。Carry 分散 marginal NS",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k20",
+    "category": "research_finding",
+    "title": "K20: 實務實施 $100K 11yr: Sharpe 1.186, MDD -10.5%, TX trivial $641",
+    "content": "[Backfilled from research archive] K20: ★ 實務實施 $100K 11yr: Sharpe 1.186, MDD -10.5%, TX trivial $641",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k21",
+    "category": "vol_prediction",
+    "title": "K21: Commodity VT null。Supply-driven vol orthogonal to VIX。Cross-asset map: equity ✓, carry ✓, commodity ✗",
+    "content": "[Backfilled from research archive] K21: Commodity VT null。Supply-driven vol orthogonal to VIX。Cross-asset map: equity ✓, carry ✓, commodity ✗",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k22",
+    "category": "portfolio_strategy",
+    "title": "K22: →K24: HYG portfolio Sharpe 0.972 (t=3.51) BUT FAILS cross-OOS (2/5)。GFC critical failure。50/50 confirmed 4th time",
+    "content": "[Backfilled from research archive] K22: →K24: HYG portfolio Sharpe 0.972 (t=3.51) BUT FAILS cross-OOS (2/5)。GFC critical failure。50/50 confirmed 4th time",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k23",
+    "category": "vt_strategy",
+    "title": "K23: Multi-period VT = mathematical non-issue（sqrt(h) cancels）。VIX = perfect 30d forward match",
+    "content": "[Backfilled from research archive] K23: Multi-period VT = mathematical non-issue（sqrt(h) cancels）。VIX = perfect 30d forward match",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k25",
+    "category": "research_finding",
+    "title": "K25: US VIX wins MDD 10/10 intl markets (universal signal). Local 22d RV marginal Sharpe +0.031 but worse MDD everywhere",
+    "content": "[Backfilled from research archive] K25: ★ US VIX wins MDD 10/10 intl markets (universal signal). Local 22d RV marginal Sharpe +0.031 but worse MDD everywhere",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k26",
+    "category": "investor_guide",
+    "title": "K26: 稅務影響",
+    "content": "[Backfilled from research archive] K26: ★ 稅務影響——MDD 保護 tax-proof，Sharpe breakeven ~6%。Taiwan best jurisdiction",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k27",
+    "category": "vt_strategy",
+    "title": "K27: Leverage null。Cap=1.0 correct, cap=0.8 better。VIX<12 rare (7%)",
+    "content": "[Backfilled from research archive] K27: Leverage null。Cap=1.0 correct, cap=0.8 better。VIX<12 rare (7%)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k28",
+    "category": "vt_strategy",
+    "title": "K28: Behavioral bias",
+    "content": "[Backfilled from research archive] K28: ★★★ Behavioral bias——恐慌賣出損失 40% 財富。VT = behavioral protection system",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "methodology_lesson",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k29",
+    "category": "vt_strategy",
+    "title": "K29: VT = MDD champion vs 7 alternatives (p=0.004)。Not Sharpe champion (RP 0.931 > VT 0.845)",
+    "content": "[Backfilled from research archive] K29: ★★ VT = MDD champion vs 7 alternatives (p=0.004)。Not Sharpe champion (RP 0.931 > VT 0.845)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k30",
+    "category": "vt_strategy",
+    "title": "K30: Leveraged ETF VT",
+    "content": "[Backfilled from research archive] K30: ★ Leveraged ETF VT——Sharpe invariant, vol decay cut 64%, MDD halved",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k31",
+    "category": "portfolio_strategy",
+    "title": "K31: DCA+VT",
+    "content": "[Backfilled from research archive] K31: ★★ DCA+VT——MDD -5.4% (改善 62.5%)。VT+DCA 機制獨立",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k32",
+    "category": "vt_strategy",
+    "title": "K32: VT FAILS 全部 3 個 timing test (HM/TM/Merton)。VT ≠ market timing = volatility scaling",
+    "content": "[Backfilled from research archive] K32: ★★★ VT FAILS 全部 3 個 timing test (HM/TM/Merton)。VT ≠ market timing = volatility scaling",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k33",
+    "category": "vt_strategy",
+    "title": "K33: MOVE bond VT mixed。Post-2022 MOVE > VIX for bonds (R²: 0.454 vs 0.285)",
+    "content": "[Backfilled from research archive] K33: MOVE bond VT mixed。Post-2022 MOVE > VIX for bonds (R²: 0.454 vs 0.285)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k34",
+    "category": "vol_prediction",
+    "title": "K34: Rough Vol multivariate NEGATIVE on daily (H~0.01 too noisy)。Need 5-min data",
+    "content": "[Backfilled from research archive] K34: Rough Vol multivariate NEGATIVE on daily (H~0.01 too noisy)。Need 5-min data",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k35",
+    "category": "vt_strategy",
+    "title": "K35: VT seasonality null (ANOVA p=0.69, ρ=-0.957 = pure mechanical)",
+    "content": "[Backfilled from research archive] K35: VT seasonality null (ANOVA p=0.69, ρ=-0.957 = pure mechanical)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k36",
+    "category": "vt_strategy",
+    "title": "K36: VT hurts retirement (SWR 5.5%→4.0%)。50/50 B&H best for withdrawal",
+    "content": "[Backfilled from research archive] K36: ★★ VT hurts retirement (SWR 5.5%→4.0%)。50/50 B&H best for withdrawal",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k37",
+    "category": "vt_strategy",
+    "title": "K37: Inflation amplifies VT Sharpe penalty (46.5%)。MDD advantage preserved",
+    "content": "[Backfilled from research archive] K37: ★ Inflation amplifies VT Sharpe penalty (46.5%)。MDD advantage preserved",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k38",
+    "category": "options_strategy",
+    "title": "K38: 0DTE hasn't broken VT。VIX-SPY corr unchanged。VIX floor ~11→~13",
+    "content": "[Backfilled from research archive] K38: ★ 0DTE hasn't broken VT。VIX-SPY corr unchanged。VIX floor ~11→~13",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k39",
+    "category": "vt_strategy",
+    "title": "K39: VT Lifecycle Paradox",
+    "content": "[Backfilled from research archive] K39: ★★★ VT Lifecycle Paradox——DCA+VT -55.9%。VT for lump sum only",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k40",
+    "category": "vt_strategy",
+    "title": "K40: VT hurts endowments (0.44x B&H at 50yr)",
+    "content": "[Backfilled from research archive] K40: ★★ VT hurts endowments (0.44x B&H at 50yr)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k41",
+    "category": "vt_strategy",
+    "title": "K41: NO crossover! VT = constant ~4%/yr insurance at ALL horizons。Investor-type-dependent not horizon-dependent。K39/K40 we...",
+    "content": "[Backfilled from research archive] K41: ★★★ NO crossover! VT = constant ~4%/yr insurance at ALL horizons。Investor-type-dependent not horizon-dependent。K39/K40 were framing errors",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k109",
+    "category": "vol_prediction",
+    "title": "K109: Hawkes (null), K111 Wavelet (#17), K112 EMD (#18), K113 Order Flow (0/12), K114 Entropy, K115 Pairs (0/7 cointegrated...",
+    "content": "[Backfilled from research archive] K109: Hawkes (null), K111 Wavelet (#17), K112 EMD (#18), K113 Order Flow (0/12), K114 Entropy, K115 Pairs (0/7 cointegrated), K116 Tail Risk Parity (50/50 #9), K117 Climate (VIX absorbs), K120 Lead-Lag Network (effective N=2%), K121 VIX Term Structure (redundant)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k110",
+    "category": "vt_strategy",
+    "title": "K110: VT Crowding 安全",
+    "content": "[Backfilled from research archive] K110: VT Crowding 安全 — tipping point ~40% adoption, VT 是穩定力量 (dampening, non-amplifying)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k111",
+    "category": "vol_prediction",
+    "title": "K111: Wavelet (#17)",
+    "content": "[Backfilled from research archive] K111: Wavelet (#17)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k112",
+    "category": "research_finding",
+    "title": "K112: EMD (#18)",
+    "content": "[Backfilled from research archive] K112: EMD (#18)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k113",
+    "category": "research_finding",
+    "title": "K113: Order Flow (0/12)",
+    "content": "[Backfilled from research archive] K113: Order Flow (0/12)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k114",
+    "category": "cross_disciplinary",
+    "title": "K114: Entropy",
+    "content": "[Backfilled from research archive] K114: Entropy",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k115",
+    "category": "alternative_strategy",
+    "title": "K115: Pairs (0/7 cointegrated)",
+    "content": "[Backfilled from research archive] K115: Pairs (0/7 cointegrated)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k116",
+    "category": "portfolio_strategy",
+    "title": "K116: Tail Risk Parity (50/50 #9)",
+    "content": "[Backfilled from research archive] K116: Tail Risk Parity (50/50 #9)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k117",
+    "category": "research_finding",
+    "title": "K117: Climate (VIX absorbs)",
+    "content": "[Backfilled from research archive] K117: Climate (VIX absorbs)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k118",
+    "category": "vt_strategy",
+    "title": "K118: 行為金融 VT 採用障礙",
+    "content": "[Backfilled from research archive] K118: 行為金融 VT 採用障礙 — regret aversion dominant (67% 月份落後, 159 月累計落後), 理論模擬非實證",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k119",
+    "category": "vol_dynamics",
+    "title": "K119: Regime Survival Weibull",
+    "content": "[Backfilled from research archive] K119: Regime Survival Weibull — most persist (shape<1), sideways mean-reverts (1.22) but direction unpredictable",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k120",
+    "category": "multivariate",
+    "title": "K120: Lead-Lag Network (effective N=2%)",
+    "content": "[Backfilled from research archive] K120: Lead-Lag Network (effective N=2%)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k121",
+    "category": "research_finding",
+    "title": "K121: VIX Term Structure (redundant)",
+    "content": "[Backfilled from research archive] K121: VIX Term Structure (redundant)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k122",
+    "category": "vt_strategy",
+    "title": "K122: DCA Frequency",
+    "content": "[Backfilled from research archive] K122: DCA Frequency — 頻率不影響終值 (p=0.505), 月度最佳實務, VT 對 DCA 無用",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k123",
+    "category": "options_strategy",
+    "title": "K123: VRP Regime",
+    "content": "[Backfilled from research archive] K123: VRP Regime — 危機中 VRP 變負 (GFC -2.8%, COVID -12.3%), Jump Compensation 預測最高報酬但 OOS null",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k124",
+    "category": "vol_prediction",
+    "title": "K124: GJR vs EWMA Crisis",
+    "content": "[Backfilled from research archive] K124: GJR vs EWMA Crisis — gamma premium 1.23%/crisis avg, GJR 6/6 wins MDD, COVID 最大差異 4.51%",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k125",
+    "category": "investor_guide",
+    "title": "K125: Retail Implementation",
+    "content": "[Backfilled from research archive] K125: Retail Implementation — 10yr $100K→$179K, 成本 $49/yr, 每月 5 分鐘",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k126",
+    "category": "vol_prediction",
+    "title": "K126: QLIKE Ceiling Surrogate Proof (Gemini)",
+    "content": "[Backfilled from research archive] K126: QLIKE Ceiling Surrogate Proof (Gemini) — 87% irreducible noise, GJR 接近理論下界",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k127",
+    "category": "vt_strategy",
+    "title": "K127: VT Insurance Pricing (Codex)",
+    "content": "[Backfilled from research archive] K127: VT Insurance Pricing (Codex) — 0.125%/1%MDD, 分散化免費, VT 最深保護但非最便宜",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k128",
+    "category": "cross_disciplinary",
+    "title": "K128: Transfer Entropy (Gemini)",
+    "content": "[Backfilled from research archive] K128: Transfer Entropy (Gemini) — ★★★ VIX 資訊流 asset-dependent: QQQ sender, SPY bidirectional, GLD/EEM receiver → 精煉 VIX sufficient statistic",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k129",
+    "category": "research_finding",
+    "title": "K129: VIX Sufficiency Boundary Map (Codex)",
+    "content": "[Backfilled from research archive] K129: VIX Sufficiency Boundary Map (Codex) — ★★★ economic vs statistical sufficiency 正式定義。VIX3M 統計上可改善但經濟上不可約",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k130",
+    "category": "research_finding",
+    "title": "K130: Decision-Conditioned Model Router (Codex)",
+    "content": "[Backfilled from research archive] K130: Decision-Conditioned Model Router (Codex) — ★★★ 90-cell loss tensor, no Pareto-dominant model, 最佳模型是 objective-dependent",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k131",
+    "category": "asset_analysis",
+    "title": "K131: TDA (marginal ΔR²=2.3%), K133 VIX Info Decay (no true decay), K134 Info Topology (coupling ⊥ TE), K135 GLD Inventory ...",
+    "content": "[Backfilled from research archive] K131: TDA (marginal ΔR²=2.3%), K133 VIX Info Decay (no true decay), K134 Info Topology (coupling ⊥ TE), K135 GLD Inventory (OOS null, vol exogenous)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k132",
+    "category": "vol_prediction",
+    "title": "K132: QLIKE Error Decomposition (Gemini)",
+    "content": "[Backfilled from research archive] K132: QLIKE Error Decomposition (Gemini) — ★★★ Capture Rate: SPY 63%, GLD 19%, BTC 15%。SPY 改善需更好 proxy, GLD/BTC 有 80%+ 未捕捉",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k133",
+    "category": "research_finding",
+    "title": "K133: VIX Info Decay (no true decay)",
+    "content": "[Backfilled from research archive] K133: VIX Info Decay (no true decay)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k134",
+    "category": "research_finding",
+    "title": "K134: Info Topology (coupling ⊥ TE)",
+    "content": "[Backfilled from research archive] K134: Info Topology (coupling ⊥ TE)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k135",
+    "category": "asset_analysis",
+    "title": "K135: GLD Inventory (OOS null",
+    "content": "[Backfilled from research archive] K135: GLD Inventory (OOS null",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k136",
+    "category": "investor_guide",
+    "title": "K136: BTC Leverage-Crowding (Codex)",
+    "content": "[Backfilled from research archive] K136: BTC Leverage-Crowding (Codex) — regime-dependent gamma (bull -0.09, bear +0.13), volume-conditioned, weekend -31%",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k137",
+    "category": "vt_strategy",
+    "title": "K137: Economic Sufficiency Frontier (Codex)",
+    "content": "[Backfilled from research archive] K137: Economic Sufficiency Frontier (Codex) — ★★★ 正式定理: 不存在全域最佳模型。AIR tensor + Blackwell test。EWMA = best generalist, 12/VIX = economic specialist",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k138",
+    "category": "crypto",
+    "title": "K138: Hurst Fingerprint (Gemini)",
+    "content": "[Backfilled from research archive] K138: Hurst Fingerprint (Gemini) — 所有資產 rough (H~0.01), 但不解釋 capture rate 差異。BTC 在成熟 (H 0.033→0.007)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k139",
+    "category": "crypto",
+    "title": "K139: BTC Liquidation ABM (Gemini)",
+    "content": "[Backfilled from research archive] K139: BTC Liquidation ABM (Gemini) — ★★★ 6/7 stylized facts 重現。Bull anti-leverage + Bear normal leverage 由清算機制自然產生",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k140",
+    "category": "research_finding",
+    "title": "K140: Vol Cartography (Gemini)",
+    "content": "[Backfilled from research archive] K140: Vol Cartography (Gemini) — 108-cell decision matrix, negative recommendations > positive, EWMA universal safe default",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k141",
+    "category": "vol_prediction",
+    "title": "K141: MF2-GARCH (Conrad & Engle 2025 JAE, 第 9 自建模型)",
+    "content": "[Backfilled from research archive] K141: ★★ MF2-GARCH (Conrad & Engle 2025 JAE, 第 9 自建模型) — SPY +0.03% NS, GLD +0.06% NS, **TLT +0.30% (p=0.0014)**。首次 ceiling crack for bonds。QLIKE ceiling 是 gamma-dependent：gamma>0.10→GJR 最優, gamma≈0→MF2 error correction 有增量",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k142",
+    "category": "vol_prediction",
+    "title": "K142: XGBoost+HAR vs GJR",
+    "content": "[Backfilled from research archive] K142: XGBoost+HAR vs GJR — GJR 3/3 全勝 (SPY p=0.0001, TLT p=0.002)。第 4 次 ML 失敗。QLIKE ceiling #16。日頻 r² 信噪比太低",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k143",
+    "category": "vol_prediction",
+    "title": "K143: Multi-step vol forecast (h=1,5,22)",
+    "content": "[Backfilled from research archive] K143: ★ Multi-step vol forecast (h=1,5,22) — GJR 6/6 cells 最佳。QLIKE ceiling #17 擴展到多步。R² 在 h=5 達峰值 0.42（>h=1 的 0.33），多日加總平滑噪音",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k144",
+    "category": "vol_prediction",
+    "title": "K144: MF2-GARCH cross-bond verification（修正 K141）",
+    "content": "[Backfilled from research archive] K144: MF2-GARCH cross-bond verification（修正 K141）— Joint QML 重估 6 債券/股票：GJR 5/6 勝，K141 的 TLT +0.30% 是 estimation artifact。Proper joint QML 下 MF2 無優勢。QLIKE ceiling 重新全面確認",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "qlike_ceiling",
+      "self_correction",
+      "methodology_lesson",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k145",
+    "category": "asset_analysis",
+    "title": "K145: R² peak mechanism（延伸 K143）",
+    "content": "[Backfilled from research archive] K145: R² peak mechanism（延伸 K143）— SPY R² 在 h=5 達峰 0.211（h=1 為 0.160）。機制：信號方差 ∝ h¹（累積），噪音方差 ∝ h²（擴散更快）。SNR 在 h=5 最優。GLD R² 極低（peak 0.012），預測性幾乎為零。h>22 時 R² 歸零",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k147",
+    "category": "vol_prediction",
+    "title": "K147: Execution Alpha (Almgren-Chriss, Gemini R4#4 提出)",
+    "content": "[Backfilled from research archive] K147: Execution Alpha (Almgren-Chriss, Gemini R4#4 提出) — $100M 最優清算。Daily proxy(1562d): GARCH vs RV20 僅 +0.0002 bps/trade (t=1.72 NS), vs EWMA +0.0009 bps (t=6.55)。Intraday(46d, preliminary): 差異 -0.0015 bps NS。GARCH execution alpha 存在但經濟意義微乎其微（$100M → $0.20/trade）。Vol forecast accuracy matters but execution is NOT a profitable application",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k148",
+    "category": "vol_prediction",
+    "title": "K148: Climate Volatility (跳躍式探索)",
+    "content": "[Backfilled from research archive] K148: Climate Volatility (跳躍式探索) — 氣候事件 vs 金融波動率。Event study 53% 顯著（同期相關），但 GARCH-X 0/5 assets 改善 QLIKE。Partial r|VIX: SPY 0.031, XLE 0.034 (FAIL Harvey)。唯一例外 USO t=3.73 PASS Harvey 但 ΔR²=0.0018（颶風→Gulf oil production 不完全被 VIX 捕獲）。32 事件小樣本。VIX sufficient #17",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "harvey_pass",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k149",
+    "category": "vol_prediction",
+    "title": "K149: Regime-aware ICL (arXiv:2603.10299 啟發)",
+    "content": "[Backfilled from research archive] K149: Regime-aware ICL (arXiv:2603.10299 啟發) — 0/48 cells 勝 GJR。K=100+uniform+VIX 最佳但仍 +0.36-0.55% 差於 GARCH。歷史類比存在(cosine sim 0.96)但 next-day r² 太嘈雜。**QLIKE ceiling #18 確認**。結論：GARCH autoregressive 結構 ≈ optimal E[r²|F_t] estimator，非參數方法無法超越",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k150",
+    "category": "vol_prediction",
+    "title": "K150: Amihud Fragility GARCH-X (Gemini R5#2)",
+    "content": "[Backfilled from research archive] K150: Amihud Fragility GARCH-X (Gemini R5#2) — GARCH-X(logAmihud) raw QLIKE 4/4 微幅改善 (-0.03~-0.32%) 但 0/4 DM 顯著 (max t=1.12)。\"Fragility\" 假說被推翻：高 Amihud + 低 vol → next-day vol 0.88x（更低，非更高）。Partial r|VIX mixed (-0.088 to +0.078)，mean -0.019。Amihud ratio 含 |return| 在分子 → 與 vol 內生。QLIKE ceiling #19",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k151",
+    "category": "vol_prediction",
+    "title": "K151: Sectoral Vol-Dispersion (Gemini R5#4 Behavioral)",
+    "content": "[Backfilled from research archive] K151: Sectoral Vol-Dispersion (Gemini R5#4 Behavioral) — CSVD(speculative vs defensive ETF vol) = null。Partial r|VIX = 0.065，placebo 1000 random pairings 39th pctl (p=0.607)——不可區分於隨機。VT overlay Sharpe -0.056 (Harvey fail)。\"Fragile calm\" 方向相反（低 vol 持續非 spike）。GARCH-X +0.00% QLIKE。VIX sufficient statistic #18",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k152",
+    "category": "vol_prediction",
+    "title": "K152: Fiscal-Monetary Liquidity MS-GARCH (Gemini R5#1)",
+    "content": "[Backfilled from research archive] K152: ★ Fiscal-Monetary Liquidity MS-GARCH (Gemini R5#1) — 結構假說確認：contraction persistence > expansion (3/3 assets, p<0.001)。但預測無效：0/3 QLIKE 改善，MS-GARCH SPY 顯著更差 (DM +2.64)。GARCH-X Net_Liq slope 0/58 fits 顯著。Partial r|VIX = -0.053 NS。「理論正確但實證無用」。VIX sufficient #20",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k153",
+    "category": "vol_prediction",
+    "title": "K153: VIX-MOVE Vol-Spread VECM (Gemini R5#3)",
+    "content": "[Backfilled from research archive] K153: VIX-MOVE Vol-Spread VECM (Gemini R5#3) — VIX-MOVE 共整合確認 (EG p=0.0000, HL=34d)。但 ECT 與 VIX 83% 冗餘。GARCH-X with ECT 顯著更差 (DM t=2.47)。VIX Granger-causes MOVE (F=31.2) 但非反向 (F=0.017)——信息流: equity→bond vol。Post-2022 共整合崩壞 (p=0.177)。VT overlay Sharpe -0.073。VIX sufficient #21。與 T11 (MOVE null) 和 T19 (TLT break) 一致",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k154",
+    "category": "vol_prediction",
+    "title": "K154: Order Flow Imbalance (微結構探索)",
+    "content": "[Backfilled from research archive] K154: Order Flow Imbalance (微結構探索) — MIXED。Lee-Ready OFI partial r|VIX = 0.11-0.18 (8/12 顯著)——挑戰 VIX sufficient，增量 R² 1-3%。但 GARCH-X walk-forward 0/6 DM 顯著 (best: SPY DM=-1.95, p=0.051 borderline)。Granger 雙向（vol 驅動 volume）。Extreme OFI 3-6x next-day vol（但是 vol clustering artifact）。Daily OFI proxy 太粗糙，與 Codex R6 預測一致",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "vix_sufficient",
+      "methodology_lesson",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k155",
+    "category": "vol_prediction",
+    "title": "K155: Information Entropy vol forecast (跨學科)",
+    "content": "[Backfilled from research archive] K155: ★ Information Entropy vol forecast (跨學科) — MIXED-POSITIVE。Shannon/ApEn 有統計顯著信號 beyond VIX：BTC partial r=0.114 (p<1e-11), SPY partial r=-0.070 (p=0.0002)。但 R² 增量 <1%。BTC 最受益（非高斯+多 regime）。SPY 負相關（高 entropy=有序市場=集中交易=更大波動，反直覺但合理）。VIX sufficient 有微小裂縫但經濟上仍成立",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k156",
+    "category": "vol_prediction",
+    "title": "K156: RV Decomposition Pilot (Codex R6#1, 46d PRELIMINARY)",
+    "content": "[Backfilled from research archive] K156: ★★★ RV Decomposition Pilot (Codex R6#1, 46d PRELIMINARY) — Overnight gap 佔 47.4% daily var！BPV(continuous) ACF(1)=0.398 最可預測，jump 僅 2.3%（0/45 sig）。c2c r² vs 5-min RV corr=0.242（目標極嘈雜=QLIKE ceiling 根因）。GARCH 預測 BPV 最好(QLIKE -8.890)。**完美驗證 Codex R6 diagnosis：分解 risk target 是突破方向**。需 252+ 天正式驗證",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k158",
+    "category": "var_methodology",
+    "title": "K158: Overnight Gap Variance Predictability (K156 延伸)",
+    "content": "[Backfilled from research archive] K158: Overnight Gap Variance Predictability (K156 延伸) — Overnight gap = 36.5% daily var (confirms K156)。Gap² ACF(1)=0.274。VIX² best predictor (in-sample R²=0.152)。Best OOS: naive_mean (R²=-0.006)。Monday gaps 1.57x larger (p=0.10)。結論：overnight gaps 透過 VIX 部分可預測但大部分不可預測成分仍在",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k160",
+    "category": "vol_prediction",
+    "title": "K160: Volume-Volatility 關係（MDH 假說）",
+    "content": "[Backfilled from research archive] K160: Volume-Volatility 關係（MDH 假說）— 同時期 r=0.31-0.43 確認 MDH。滯後 partial|VIX r<0.08。OOS: GLD -0.81% ★ (唯一顯著但極小), SPY/TLT NS。BTC volume 無預測力（p=0.53）。GARCH 自迴歸已吸收 volume 資訊。QLIKE ceiling #21",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k161",
+    "category": "vol_prediction",
+    "title": "K161: VIX Term Structure Ratio",
+    "content": "[Backfilled from research archive] K161: VIX Term Structure Ratio — Simple r=-0.327 但 partial|VIX r=-0.040。OOS QLIKE -0.082% DM p=0.45 NS。倒掛期間反而更差。期限結構完全被 VIX level 吸收。VIX sufficient #22",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k162",
+    "category": "vol_dynamics",
+    "title": "K162: VIX Regime → Return Prediction",
+    "content": "[Backfilled from research archive] K162: ★ VIX Regime → Return Prediction — VIX spike>15% 次日 +0.274% (t=2.30)，mean reversion 真實。但所有 timing 策略 vs B&H Harvey FAIL (max t=-2.38)。VIX>25 Sharpe 0.448 vs B&H 1.226。持倉太短(4-18%)錯過牛市。**VIX 價值在 risk sizing（VT）而非 return timing**",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k163",
+    "category": "var_methodology",
+    "title": "K163: CoVaR 系統性風險傳染",
+    "content": "[Backfilled from research archive] K163: ★★ CoVaR 系統性風險傳染 — QQQ/SPY 淨傳染源, EEM 淨受害者。★★ TLT CoVaR structural break（pre-2022 +0.548→post-2022 -0.281）**第三種方法驗證 T19**。GLD ΔCoVaR≈0（不受 SPY 傳染=全天候避險）。尾部事件 lift=4.5x 但 r=-0.057(p=0.09) 邊際",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k164",
+    "category": "research_finding",
+    "title": "K164: Realized Dispersion（11 sector ETF）",
+    "content": "[Backfilled from research archive] K164: Realized Dispersion（11 sector ETF）— 日頻 partial|VIX r=0.56 看似突破 VIX sufficient，但 K165 修正為 overlapping window artifact",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "vix_sufficient",
+      "self_correction",
+      "methodology_lesson",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k165",
+    "category": "research_finding",
+    "title": "K165: 月頻 Dispersion（修正 K164）",
+    "content": "[Backfilled from research archive] K165: ★ 月頻 Dispersion（修正 K164）— **方法論教訓**：非重疊月頻 F p=0.49 NS, OOS DM p=0.66 NS。K164 的 r=0.56 是 rolling window 自相關膨脹。Dispersion 也被 VIX 吸收。VIX sufficient #23（日頻+月頻）",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "vix_sufficient",
+      "self_correction",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k166",
+    "category": "cross_disciplinary",
+    "title": "K166: Hurst Exponent Regime",
+    "content": "[Backfilled from research archive] K166: Hurst Exponent Regime — SPY H=0.54（random walk），rolling 75% 時間 H>0.55（trending）。Trending regime 報酬+1.15%/月(t=3.23)但 r=0.098 p=0.16 NS。OOS 策略 ≈ B&H (t=-0.13)。描述性：市場多數時間 trending，但已反映在價格中",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k167",
+    "category": "crypto",
+    "title": "K167: VRP 跨資產結構",
+    "content": "[Backfilled from research archive] K167: VRP 跨資產結構 — SPY +3.7%, BTC -31.8%（crypto realized >> implied）。GLD VRP→ret r=0.084★ 最強。VRP 擇時全輸 B&H。跨資產排名 L/S NS (t=-0.36)。VRP = 恐慌溢價量化，非交易信號。Q10 cross-asset 確認",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k168",
+    "category": "var_methodology",
+    "title": "K168: GARCH Vol-of-Vol",
+    "content": "[Backfilled from research archive] K168: ★ GARCH Vol-of-Vol — 反直覺：高 VoV violation 4.8% < 低 VoV 5.1%（GARCH 不穩定期反而保守）。Partial|VIX r=-0.105★。VoV-adjusted VaR 5.2%→5.0%（精確但微小）。SPY VoV 0.48 >> GLD 0.13。GARCH 的危險是自滿（低 VoV）而非不穩定",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k169",
+    "category": "multivariate",
+    "title": "K169: Dynamic Volatility Network（12 assets, MST）",
+    "content": "[Backfilled from research archive] K169: ★★ Dynamic Volatility Network（12 assets, MST）— SPY hub 82% 時間，crisis 時 IWM(13%)/XLF 接管。★ TLT centrality partial|VIX r=0.159★（債券壓力→股市信號）。avg_corr partial|VIX r=-0.163★（反直覺：高相關→低 future vol）。Hub 轉移完美對應事件（COVID→XLF, Fed hike→IWM）。描述性框架有學術價值",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k170",
+    "category": "vt_strategy",
+    "title": "K170: 財報季波動率效應",
+    "content": "[Backfilled from research archive] K170: 財報季波動率效應 — SPY 財報季 RV ratio 0.89 NS (t=-0.88)。控制 VIX 後 t=-0.11。GARCH 殘差無差異。VT 調整 Harvey FAIL。結論：個股財報衝擊被 index 分散化完全吸收",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k171",
+    "category": "vol_prediction",
+    "title": "K171: VPIN 近似（Gemini R7#4）",
+    "content": "[Backfilled from research archive] K171: VPIN 近似（Gemini R7#4）— Simple r=0.128★ 但 partial|VIX r=-0.011 NS。跨 5 資產全部 NS。尾部 lift 2.8x 但可能 VIX 驅動。日頻 OHLCV proxy 無法捕捉微結構信號，需 tick data",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k172",
+    "category": "portfolio_strategy",
+    "title": "K172: GLD 創新高後 50/50 穩定性",
+    "content": "[Backfilled from research archive] K172: ★★ GLD 創新高後 50/50 穩定性 — GLD>40% 後 SPY 未來僅+2.9%。GLD 新高期 50/50 Sharpe 11.84 vs SPY -0.54。50/50 在 6/8 條件下勝 SPY。目前 GLD +40.8% 新高，歷史類似期 50/50 未來+8.3%（74%正）。**50/50 第 9 次驗證**",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k173",
+    "category": "asset_analysis",
+    "title": "K173: Tail Index（Hill estimator）",
+    "content": "[Backfilled from research archive] K173: ★ Tail Index（Hill estimator）— SPY α=2.71(厚尾), EEM 2.46(最厚), TLT 4.17(最薄)。★ Partial|VIX r=-0.083★ (p=0.014)——**控制 VIX 後仍有顯著尾部預測力**（微弱但真實）。極厚尾期 2.8x 尾部事件頻率。目前 α=2.14 (61th pctl)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k174",
+    "category": "multivariate",
+    "title": "K174: CDB（Conditional Diversification Benefit）",
+    "content": "[Backfilled from research archive] K174: -K175: CDB（Conditional Diversification Benefit）— K174 daily overlapping partial|VIX r=0.210★ 但 K175 非重疊月頻 r=0.110 (p=0.096 NS), OOS ΔR²=-0.016。Partial|corr r=0.045 NS（CDB=correlation 函數，無獨立資訊）。**第 3 次 overlapping artifact 教訓（K164/K174）**",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "methodology_lesson",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k176",
+    "category": "var_methodology",
+    "title": "K176: 台灣 CoVaR 傳染結構（7 資產）",
+    "content": "[Backfilled from research archive] K176: ★★ 台灣 CoVaR 傳染結構（7 資產）— **TSMC→0050 ΔCoVaR=-1.599，是 SPY→0050(-0.345) 的 4.6 倍**。0050-TSMC corr=0.893。0050 = TSMC 集中風險。中華電是淨傳染源（flight-to-cash）。鴻海是淨受害者（供應鏈）。台灣投資人必知",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k177",
+    "category": "vt_strategy",
+    "title": "K177: 台灣最佳避險組合",
+    "content": "[Backfilled from research archive] K177: ★★★ 台灣最佳避險組合 — **0050+GLD 50/50+VT(8.63/VIX)** 冠軍。COVID MDD -2.9%（B&H -28.6%），Fed升息 -6.6%（B&H -34.2%）。OOS Sharpe 2.370。三層保護：GLD零傳染+VT降曝險+月度再平衡。⚠️ 0050.TW 2014 年 1:4 分割需手動修正（yfinance Adj Close bug）",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "50_50_portfolio",
+      "self_correction",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k178",
+    "category": "vt_strategy",
+    "title": "K178: 台灣 VT 月頻最佳化",
+    "content": "[Backfilled from research archive] K178: ★ 台灣 VT 月頻最佳化 — Sharpe 對 K 完全不敏感（6~15 all ≈0.65）。Harvey t=-3.06★：VT Sharpe 顯著低於 B&H（保險費 ~4%/yr）。MDD 改善 7.0pp（-22.9%→-15.9%）。TX 敏感度低（月度 turnover 1.0x/yr）。K=6 最保守（MDD -11.2%, 持倉 36%）",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k179",
+    "category": "portfolio_strategy",
+    "title": "K179: Regime 地圖（170+ 實驗 meta-synthesis）",
+    "content": "[Backfilled from research archive] K179: ★★ Regime 地圖（170+ 實驗 meta-synthesis）— Sharpe 最佳：50/50 B&H（3/5 regime 勝）。MDD 最佳：50/50+VT（4/5 regime 勝，恐慌期 MDD -6.6% vs SPY -30.9%）。**全天候最安全：50/50+VT**。目前 VIX 26.8 = 恐慌 regime",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k183",
+    "category": "vol_prediction",
+    "title": "K183: Directional Change (0/25), K185 FOMC (VIX prices it), K186 Volume Displacement (0/25), K187 Overnight Gap (noise), K1...",
+    "content": "[Backfilled from research archive] K183: Directional Change (0/25), K185 FOMC (VIX prices it), K186 Volume Displacement (0/25), K187 Overnight Gap (noise), K189 Attention-Weighted (noise), K191 Put-Call (Harvey FAIL), K192 Google Trends (textbook overfitting), K194 Frac Diff (solves non-problem), K196 5-min RV Pilot (preliminary), K198 Realized GARCH (noisy), K199 VIX Futures Basis (OOS overfit)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "methodology_lesson",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k184",
+    "category": "research_finding",
+    "title": "K184: CBOE SKEW",
+    "content": "[Backfilled from research archive] K184: CBOE SKEW — statistically detectable but economically negligible beyond VIX",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k185",
+    "category": "vt_strategy",
+    "title": "K185: FOMC Vol Effect（Gemini R8#4）",
+    "content": "[Backfilled from research archive] K185: FOMC Vol Effect（Gemini R8#4）— FOMC vol premium 真實(post 16.9% vs pre 13.9%, t=2.60)但 OOS NS。VIX 解釋 77% FOMC day |return|。Pre-FOMC drift +0.31% 確認 Lucca&Moench。FOMC-aware VT Harvey FAIL (t=0.30)。VIX sufficient #25",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k187",
+    "category": "market_microstructure",
+    "title": "K187: Overnight Gap Structure（K156 延伸）",
+    "content": "[Backfilled from research archive] K187: Overnight Gap Structure（K156 延伸）— Gaps=50% daily var（跨 5 資產 universal）。Gap ratio partial r 弱且負。Component-aware EWMA+GJR LOSES to GJR 4/5 資產。Parkinson-targeted: mixed。描述性有價值但預測無效",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k192",
+    "category": "vol_prediction",
+    "title": "K192: Google Trends（跳躍式探索）",
+    "content": "[Backfilled from research archive] K192: Google Trends（跳躍式探索）— IS composite r=0.576 但 OOS **完全失敗**（-1.5% to -97.7% MSE）。教科書級 overfitting。Search = noisy VIX proxy",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "methodology_lesson",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k196",
+    "category": "vol_prediction",
+    "title": "K196: 5-min RV Pilot（47 天 PRELIMINARY）",
+    "content": "[Backfilled from research archive] K196: 5-min RV Pilot（47 天 PRELIMINARY）— RV AC(1)=0.414 vs c2c AC(1)=-0.118。c2c 本質不可預測=GARCH ceiling 根因。BPV 最可預測。需 252+ 天",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k198",
+    "category": "vol_prediction",
+    "title": "K198: Realized GARCH on daily",
+    "content": "[Backfilled from research archive] K198: Realized GARCH on daily — NULL。Measurement eq lambda=0.245 但 sigma_u 太大。R-GARCH wins 8/15 但 0/15 DM sig。Daily OHLC range ≈ |r_t|，GARCH 已處理。需 5-min RV",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k201",
+    "category": "vol_prediction",
+    "title": "K201: TDA VT (0/12), K204 GLD Momentum (prediction≠alpha), K206 Asset-Specific VT (paradox), K208 Implied-Realized GAP (VIX...",
+    "content": "[Backfilled from research archive] K201: TDA VT (0/12), K204 GLD Momentum (prediction≠alpha), K206 Asset-Specific VT (paradox), K208 Implied-Realized GAP (VIX captures), K209 Two-Tier VT (paradox), K210 VIX-SKEW Ratio (hurts OOS), K213 Signature Path (OOS null), K214 Wasserstein (R²=0.46%), K215 Seasonality (hurts), K216 Ensemble (0/16 DM sig)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k209",
+    "category": "vt_strategy",
+    "title": "K209: Two-Tier VT",
+    "content": "[Backfilled from research archive] K209: Two-Tier VT — NULL。Predictor paradox confirmed for SPY/GLD/TLT。Two-tier sig WORSE MDD (t=-7.57)。Own-vol→higher leverage→deeper DD",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k210",
+    "category": "vol_prediction",
+    "title": "K210: VIX-SKEW Ratio",
+    "content": "[Backfilled from research archive] K210: VIX-SKEW Ratio — NULL。SKEW hurts OOS (DM t=-2.55~-6.42)。GARCH-X coeff→0。VIX sufficient #26",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "vix_sufficient",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k211",
+    "category": "asset_analysis",
+    "title": "K211: Mean Reversion Speed",
+    "content": "[Backfilled from research archive] K211: Mean Reversion Speed — QQQ/GLD pass Harvey but SPY FAILS",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "null_result",
+      "harvey_pass",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k212",
+    "category": "research_finding",
+    "title": "K212: Conditional VIX Sufficiency",
+    "content": "[Backfilled from research archive] K212: Conditional VIX Sufficiency — VIX breaks down when VIX>25 but economic impact negligible",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k213",
+    "category": "cross_disciplinary",
+    "title": "K213: Signature Path Features（Gemini R9#1）",
+    "content": "[Backfilled from research archive] K213: Signature Path Features（Gemini R9#1）— IS: qv_path r=0.144, area r=0.114（incr R²=3%）。OOS: NOT sig + sign flips。Two-stage DM NS。需 tick 數據做真正 signatures",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k214",
+    "category": "cross_disciplinary",
+    "title": "K214: Wasserstein Distance（Gemini R9#2）",
+    "content": "[Backfilled from research archive] K214: Wasserstein Distance（Gemini R9#2）— sig (partial r=0.095) 但 incr R²=0.46%。W1-VIX r=0.78。VIX 已 capture distributional shape",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k215",
+    "category": "vt_strategy",
+    "title": "K215: Seasonality 5 Assets",
+    "content": "[Backfilled from research archive] K215: Seasonality 5 Assets — 5/15 Bonferroni pass 但 NOT actionable。Seasonal VT hurts -0.047 Sharpe。BTC weekday/weekend 唯一穩健（institutional trading）。Calendar effects 不可用",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k216",
+    "category": "vol_prediction",
+    "title": "K216: Ensemble Forecast",
+    "content": "[Backfilled from research archive] K216: Ensemble Forecast — 11/16 directional improvement 但 0/16 DM sig。InvQLIKE 最佳。Parkinson sig WORSE。QLIKE ceiling unbroken by combinations",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "qlike_ceiling",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k217",
+    "category": "vol_prediction",
+    "title": "K217: Non-Equity Best Predictor",
+    "content": "[Backfilled from research archive] K217: Non-Equity Best Predictor — GLD:Range Ratio, TLT/BTC:EWMA(0.94)。VIX useless for non-equities",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k218",
+    "category": "portfolio_strategy",
+    "title": "K218: Contagion Timing (strategy null), K223 Inflation Regime (sign flips), K224 Dollar Strength (50/50 #10), K236 Starting...",
+    "content": "[Backfilled from research archive] K218: Contagion Timing (strategy null), K223 Inflation Regime (sign flips), K224 Dollar Strength (50/50 #10), K236 Starting Capital (no impact), K238 TZ Arbitrage (o2o null), K239 VIX Mean Reversion (0/16), K242 VRP Harvesting (MDD -90%), K244 TSMOM+Sector (absorbed), K245 GLD Breakout (50/50 wins), K246 Pairs SPY-QQQ (failure), K247 Dual Momentum (degraded 53%)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k219",
+    "category": "portfolio_strategy",
+    "title": "K219: Risk Parity vs 50/50",
+    "content": "[Backfilled from research archive] K219: Risk Parity vs 50/50 — RP NOT sig better (DM p=0.64)。50/50 #9",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k220",
+    "category": "vt_strategy",
+    "title": "K220: Rebalance Frequency",
+    "content": "[Backfilled from research archive] K220: Rebalance Frequency — monthly optimal at US ETF costs (2-5bps)。>10bps→annual",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k221",
+    "category": "vt_strategy",
+    "title": "K221: Drawdown Anatomy",
+    "content": "[Backfilled from research archive] K221: Drawdown Anatomy — VT helped 11/11 episodes (100%)。Max DD capped -12.1%",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k222",
+    "category": "vt_strategy",
+    "title": "K222: Retirement SWR",
+    "content": "[Backfilled from research archive] K222: Retirement SWR — 50/50+VT HELPS retirees (REVERSES K36)。$1M→$5.42M at 5% withdrawal vs B&H $4.13M",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "50_50_portfolio",
+      "self_correction",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k223",
+    "category": "vol_dynamics",
+    "title": "K223: Inflation Regime (sign flips)",
+    "content": "[Backfilled from research archive] K223: Inflation Regime (sign flips)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k224",
+    "category": "portfolio_strategy",
+    "title": "K224: Dollar Strength (50/50 #10)",
+    "content": "[Backfilled from research archive] K224: Dollar Strength (50/50 #10)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k225",
+    "category": "vt_strategy",
+    "title": "K225: Maximum Loss",
+    "content": "[Backfilled from research archive] K225: Maximum Loss — VT loss cap ~-12% regardless of horizon。GFC: -7.8% vs SPY -56.5%",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k226",
+    "category": "vt_strategy",
+    "title": "K226: Factor Exposure",
+    "content": "[Backfilled from research archive] K226: Factor Exposure — VT is conditional beta strategy。Alpha +3.36%/yr (t=5.00)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k227",
+    "category": "vt_strategy",
+    "title": "K227: VT Implementation Guide",
+    "content": "[Backfilled from research archive] K227: VT Implementation Guide — exact formula, 60-month weight table, edge cases, TX cost",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k228",
+    "category": "vt_strategy",
+    "title": "K228: Leverage Effect Dynamics",
+    "content": "[Backfilled from research archive] K228: Leverage Effect Dynamics — gamma doubled in 25yr (0.159→0.266), VT will work BETTER going forward",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k229",
+    "category": "vt_strategy",
+    "title": "K229: VT Insurance Pricing",
+    "content": "[Backfilled from research archive] K229: VT Insurance Pricing — 3.05%/yr expected cost。VIX<12 FREE, Normal best ratio 2.24x",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k230",
+    "category": "vt_strategy",
+    "title": "K230: Optimal VT Parameter",
+    "content": "[Backfilled from research archive] K230: Optimal VT Parameter — K=12 NOT optimal but does NOT matter (flat Sharpe curve)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k231",
+    "category": "vt_strategy",
+    "title": "K231: VT vs Puts",
+    "content": "[Backfilled from research archive] K231: VT vs Puts — VT best MDD (-10.8%) but Collar cheapest per unit (0.091%/1%MDD)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k232",
+    "category": "asset_analysis",
+    "title": "K232: GLD Role Deep Dive",
+    "content": "[Backfilled from research archive] K232: GLD Role Deep Dive — NOT irreplaceable but uniquely regime-robust。IEF best Sharpe but fails 2022",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k233",
+    "category": "portfolio_strategy",
+    "title": "K233: Three-Asset SPY/GLD/IEF",
+    "content": "[Backfilled from research archive] K233: Three-Asset SPY/GLD/IEF — SIGNIFICANTLY HURTS Sharpe (DM p=0.004)。50/50 #11",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k234",
+    "category": "vt_strategy",
+    "title": "K234: VT Behavioral",
+    "content": "[Backfilled from research archive] K234: VT Behavioral — 85% easy, 15% critical。Skipping extremes doubles MDD",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k235",
+    "category": "vt_strategy",
+    "title": "K235: Tax Efficiency",
+    "content": "[Backfilled from research archive] K235: Tax Efficiency — annual rebalance saves 180bps vs daily。Taiwan 0% tax = VT strictly dominant",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k236",
+    "category": "research_finding",
+    "title": "K236: Starting Capital (no impact)",
+    "content": "[Backfilled from research archive] K236: Starting Capital (no impact)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k238",
+    "category": "cross_market",
+    "title": "K238: TZ Arbitrage (o2o null)",
+    "content": "[Backfilled from research archive] K238: TZ Arbitrage (o2o null)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k239",
+    "category": "vol_dynamics",
+    "title": "K239: VIX Mean Reversion (0/16)",
+    "content": "[Backfilled from research archive] K239: VIX Mean Reversion (0/16)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k240",
+    "category": "crypto",
+    "title": "K240: Cross-Asset TSMOM",
+    "content": "[Backfilled from research archive] K240: Cross-Asset TSMOM — PASSES Harvey (t=3.07)! Sharpe 0.979, but BTC-driven and MDD -33.6%",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "harvey_pass",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k241",
+    "category": "crypto",
+    "title": "K241: TSMOM Without BTC",
+    "content": "[Backfilled from research archive] K241: TSMOM Without BTC — ALL 4 variants pass Harvey! 6_1 best (Sharpe 0.792, t=4.37)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "harvey_pass",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k242",
+    "category": "options_strategy",
+    "title": "K242: VRP Harvesting (MDD -90%)",
+    "content": "[Backfilled from research archive] K242: VRP Harvesting (MDD -90%)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k243",
+    "category": "vt_strategy",
+    "title": "K243: Sector Rotation",
+    "content": "[Backfilled from research archive] K243: Sector Rotation — Harvey PASS (t=3.99) but DM NS。MDD -37% vs 50/50+VT -10.8%",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k244",
+    "category": "alternative_strategy",
+    "title": "K244: TSMOM+Sector (absorbed)",
+    "content": "[Backfilled from research archive] K244: TSMOM+Sector (absorbed)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k245",
+    "category": "portfolio_strategy",
+    "title": "K245: GLD Breakout (50/50 wins)",
+    "content": "[Backfilled from research archive] K245: GLD Breakout (50/50 wins)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k246",
+    "category": "alternative_strategy",
+    "title": "K246: Pairs SPY-QQQ (failure)",
+    "content": "[Backfilled from research archive] K246: Pairs SPY-QQQ (failure)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k247",
+    "category": "alternative_strategy",
+    "title": "K247: Dual Momentum (degraded 53%)",
+    "content": "[Backfilled from research archive] K247: Dual Momentum (degraded 53%)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k248",
+    "category": "vol_prediction",
+    "title": "K248: Carry Trade (NS), K249 Risk-On/Off (dilutes), K250 TSMOM+VT (conflicts), K251 GLD-TLT Rotation (weak), K252 Adaptive ...",
+    "content": "[Backfilled from research archive] K248: Carry Trade (NS), K249 Risk-On/Off (dilutes), K250 TSMOM+VT (conflicts), K251 GLD-TLT Rotation (weak), K252 Adaptive K (hurts), K253 Value Timing (no variation), K254 Vol Dispersion (VIX proxy), K257 5-Min Status (data report), K259 Macro Surprise (VIX absorbs), K264 Geopolitical (opposite sign), K270 Rate Hike Detector (acting hurts)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k249",
+    "category": "research_finding",
+    "title": "K249: Risk-On/Off (dilutes)",
+    "content": "[Backfilled from research archive] K249: Risk-On/Off (dilutes)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k250",
+    "category": "vt_strategy",
+    "title": "K250: TSMOM+VT (conflicts)",
+    "content": "[Backfilled from research archive] K250: TSMOM+VT (conflicts)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k251",
+    "category": "asset_analysis",
+    "title": "K251: GLD-TLT Rotation (weak)",
+    "content": "[Backfilled from research archive] K251: GLD-TLT Rotation (weak)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k252",
+    "category": "research_finding",
+    "title": "K252: Adaptive K (hurts)",
+    "content": "[Backfilled from research archive] K252: Adaptive K (hurts)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k253",
+    "category": "research_finding",
+    "title": "K253: Value Timing (no variation)",
+    "content": "[Backfilled from research archive] K253: Value Timing (no variation)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k254",
+    "category": "vol_prediction",
+    "title": "K254: Vol Dispersion (VIX proxy)",
+    "content": "[Backfilled from research archive] K254: Vol Dispersion (VIX proxy)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k255",
+    "category": "alternative_strategy",
+    "title": "K255: TSMOM Final Validation",
+    "content": "[Backfilled from research archive] K255: TSMOM Final Validation — FAILS Harvey on full 21yr (t=2.34)。Launch BLOCKED。But 6/6 crisis protection",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k256",
+    "category": "sentiment_macro",
+    "title": "K256: Fed Communication",
+    "content": "[Backfilled from research archive] K256: Fed Communication — FOMC CREATES uncertainty (+25% vol), NOT resolves it",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k257",
+    "category": "research_finding",
+    "title": "K257: 5-Min Status (data report)",
+    "content": "[Backfilled from research archive] K257: 5-Min Status (data report)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k258",
+    "category": "research_finding",
+    "title": "K258: SKEW Dynamics",
+    "content": "[Backfilled from research archive] K258: SKEW Dynamics — SKEW vol partial r=-0.275 OOS (t=-6.21)。High VIX only",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k259",
+    "category": "sentiment_macro",
+    "title": "K259: Macro Surprise (VIX absorbs)",
+    "content": "[Backfilled from research archive] K259: Macro Surprise (VIX absorbs)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k260",
+    "category": "vol_dynamics",
+    "title": "K260: Vol Clustering",
+    "content": "[Backfilled from research archive] K260: Vol Clustering — predicting duration has zero value。Naive ≈ Oracle",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k261",
+    "category": "vol_prediction",
+    "title": "K261: Vol Forecasting Contest",
+    "content": "[Backfilled from research archive] K261: Vol Forecasting Contest — 70/30 GJR+EWMA is BEST, not pure GJR",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k262",
+    "category": "vt_strategy",
+    "title": "K262: Tail Risk Cost Menu",
+    "content": "[Backfilled from research archive] K262: Tail Risk Cost Menu — L1 diversification is FREE (+0.39% CAGR)。L2 VT is sweet spot (0.64%/yr for 35pp MDD)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k264",
+    "category": "research_finding",
+    "title": "K264: Geopolitical (opposite sign)",
+    "content": "[Backfilled from research archive] K264: Geopolitical (opposite sign)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k265",
+    "category": "vol_prediction",
+    "title": "K265: Liquidity Proxy",
+    "content": "[Backfilled from research archive] K265: Liquidity Proxy — Amihud OOS sig 3/4 assets (Harvey PASS)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k266",
+    "category": "asset_analysis",
+    "title": "K266: Amihud Validation FAILS",
+    "content": "[Backfilled from research archive] K266: Amihud Validation FAILS — K265 was look-ahead artifact。QQQ/TLT REVERSED in pure rolling",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "null_result",
+      "methodology_lesson",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k268",
+    "category": "asset_analysis",
+    "title": "K268: Overnight vs Intraday",
+    "content": "[Backfilled from research archive] K268: Overnight vs Intraday — GLD return 94% overnight (9.57% vs 0.54%)。Not tradable at retail",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k269",
+    "category": "multivariate",
+    "title": "K269: SPY-GLD Correlation Regime",
+    "content": "[Backfilled from research archive] K269: SPY-GLD Correlation Regime — NOT stable! 2022 rate hike: corr=0.44 (GLD hedge FAILS)。Range -0.61 to +0.69",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k270",
+    "category": "research_finding",
+    "title": "K270: Rate Hike Detector (acting hurts)",
+    "content": "[Backfilled from research archive] K270: Rate Hike Detector (acting hurts)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k271",
+    "category": "asset_analysis",
+    "title": "K271: GLD Self-Healing",
+    "content": "[Backfilled from research archive] K271: GLD Self-Healing — 100% recovery rate (5/5)。Dollar is primary mechanism (r=-0.42)。GLD leads rate cuts by 303d",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k272",
+    "category": "vt_strategy",
+    "title": "K272: VT as Synthetic Put",
+    "content": "[Backfilled from research archive] K272: VT as Synthetic Put — implied strike 85.5%, cost 3.31%/yr",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k273",
+    "category": "vt_strategy",
+    "title": "K273: Crash Taxonomy",
+    "content": "[Backfilled from research archive] K273: Crash Taxonomy — VT wins 6/6 crash types (100%)。VT strongest when GLD fails (+41.3% liquidity crisis)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "null_result",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k276",
+    "category": "meta_analysis",
+    "title": "K276: JBF Paper Updates (mapping), K283 Rebalance Day (pure noise), K286 Session Summary (meta)",
+    "content": "[Backfilled from research archive] K276: JBF Paper Updates (mapping), K283 Rebalance Day (pure noise), K286 Session Summary (meta)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k277",
+    "category": "crypto",
+    "title": "K277: BTC Deep Structure",
+    "content": "[Backfilled from research archive] K277: BTC Deep Structure — NO leverage effect (ratio=0.98, p=0.90)。VIX R²=0.0005。Vol clustering 3x weaker",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "breakthrough",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k278",
+    "category": "vol_dynamics",
+    "title": "K278: VIX Regime Transition",
+    "content": "[Backfilled from research archive] K278: VIX Regime Transition — escalation 3-4x faster than de-escalation。50% crisis episodes ≤2 days",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k279",
+    "category": "vt_strategy",
+    "title": "K279: Weekly VT NOT sweet spot",
+    "content": "[Backfilled from research archive] K279: Weekly VT NOT sweet spot — Daily dominates ALL TX costs。Whipsaw >> TX cost",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k281",
+    "category": "vt_strategy",
+    "title": "K281: VIX Trigger",
+    "content": "[Backfilled from research archive] K281: VIX Trigger — NO trigger beats Monthly VT on NET Sharpe",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "notable",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k282",
+    "category": "research_finding",
+    "title": "K282: VIX Alert System",
+    "content": "[Backfilled from research archive] K282: VIX Alert System — 5-color system designed。VIX>30 best SNR (t=3.35)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k283",
+    "category": "research_finding",
+    "title": "K283: Rebalance Day (pure noise)",
+    "content": "[Backfilled from research archive] K283: Rebalance Day (pure noise)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k284",
+    "category": "vol_dynamics",
+    "title": "K284: Current Market (2026-03-23)",
+    "content": "[Backfilled from research archive] K284: Current Market (2026-03-23) — VIX 26.7 HIGH regime。Excess fear (VIX/RV=1.95)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k285",
+    "category": "meta_analysis",
+    "title": "K285: Publication Audit",
+    "content": "[Backfilled from research archive] K285: Publication Audit — JBF 85%, PBFJ 70%, VT-Trend 80%。Total 16.5h to submission-ready",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
+  },
+  {
+    "item_id": "kb_k289",
+    "category": "vt_strategy",
+    "title": "K289: Stress Test",
+    "content": "[Backfilled from research archive] K289: Stress Test — 50/50+VT survives ALL empirical + simulated scenarios。Breaking requires 4 simultaneous conditions (<0.1%/decade)",
+    "evidence": [],
+    "confidence": 0.85,
+    "tags": [
+      "important",
+      "50_50_portfolio",
+      "backfill"
+    ],
+    "created_at": "2026-03-27T00:00:00.000000"
   }
 ]
