@@ -1,0 +1,707 @@
+{
+  "experiment_id": "K476",
+  "title": "Ensemble VaR Cross-OOS Validation (GJR + HAR)",
+  "date": "2026-03-26T06:26:41.973625+00:00",
+  "background": "K475 showed GJR+HAR ensemble VaR passes 3/3 Trinity on 2021-2024 (single period). K467 showed HAR VaR fails 0/6 (systematic tail underestimation). This experiment tests whether ensemble VaR is robust across ALL 5 OOS periods.",
+  "hypothesis": "Ens_GJR_HAR VaR should pass across all 5 periods, demonstrating that the ensemble inherits GJR's tail coverage while retaining HAR's forecasting superiority.",
+  "references": [
+    "Kupiec (1995) 'Techniques for Verifying the Accuracy of Risk Measurement Models'",
+    "Christoffersen (1998) 'Evaluating Interval Forecasts' International Economic Review",
+    "Timmermann (2006) 'Forecast Combinations' Handbook of Economic Forecasting",
+    "K475 \u2014 Ensemble Trinity 3/3 pass on 2021-2024",
+    "K467 \u2014 HAR VaR 0/6 failure",
+    "K469 \u2014 HAR log-range cross-OOS validation"
+  ],
+  "method": {
+    "models": {
+      "GJR": "GJR-GARCH(1,1) Student-t, Normal VaR",
+      "HAR": "HAR log-range (1d+5d+21d), Parkinson \u03c3\u00b2 scaled to r\u00b2 level, Normal VaR",
+      "Ens_GJR_HAR": "\u03c3\u00b2 = 0.5*\u03c3\u00b2_GJR + 0.5*\u03c3\u00b2_HAR, Normal VaR"
+    },
+    "is_window": 2000,
+    "var_levels": [
+      0.01,
+      0.05
+    ],
+    "var_formula": "VaR_\u03b1 = \u03bc + z_\u03b1 \u00d7 \u03c3 (Normal, left tail)",
+    "tests": [
+      "Kupiec unconditional coverage",
+      "Christoffersen conditional coverage"
+    ],
+    "pass_criterion": "Both Kupiec and Christoffersen p > 0.05"
+  },
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "diagnostics": {
+    "n_obs": 5319,
+    "date_range": "2005-02-02 to 2026-03-25",
+    "return_mean_pct": 0.03947840765718603,
+    "return_std_pct": 1.1989783423600378,
+    "return_skew": -0.3041485934582955,
+    "return_kurt": 14.698758698224218,
+    "log_range_mean": 0.012354426508104503,
+    "log_range_std": 0.0102758098928128,
+    "r2_proxy_mean": 0.00014391076101195706,
+    "parkinson_var_mean": 9.313466552975928e-05,
+    "r2_over_parkinson_ratio": 1.545190077114448,
+    "adf_stat": -16.365527088259523,
+    "adf_p": 2.84321535334206e-29,
+    "is_stationary": true,
+    "arch_lm_stat": 1456.7143361951794,
+    "arch_lm_p": 5.624134890465794e-307,
+    "has_arch_effects": true,
+    "ljung_box_sq_p10": 0.0
+  },
+  "cross_oos_results": [
+    {
+      "period": "2015-2016",
+      "oos_start": "2015-01-02",
+      "oos_end": "2016-12-30",
+      "n_is": 2000,
+      "n_oos": 504,
+      "is_scale_ratio": 1.455,
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 504,
+            "n_violations": 6,
+            "violation_rate": 0.0119,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.1741,
+              "p_value": 0.6765,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 3.7264,
+              "p_value": 0.0536,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 504,
+            "n_violations": 15,
+            "violation_rate": 0.0298,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 12.9995,
+              "p_value": 0.0003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 3.2341,
+              "p_value": 0.0721,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 504,
+            "n_violations": 7,
+            "violation_rate": 0.0139,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.6868,
+              "p_value": 0.4073,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 9.4511,
+              "p_value": 0.0021,
+              "pass": false
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 504,
+            "n_violations": 26,
+            "violation_rate": 0.0516,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.0265,
+              "p_value": 0.8708,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.3143,
+              "p_value": 0.575,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 504,
+            "n_violations": 34,
+            "violation_rate": 0.0675,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.9299,
+              "p_value": 0.087,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.8605,
+              "p_value": 0.0908,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 504,
+            "n_violations": 27,
+            "violation_rate": 0.0536,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.1324,
+              "p_value": 0.716,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.4614,
+              "p_value": 0.2267,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          }
+        }
+      },
+      "elapsed_s": 9.2
+    },
+    {
+      "period": "2017-2018 (Volmageddon)",
+      "oos_start": "2017-01-03",
+      "oos_end": "2018-12-31",
+      "n_is": 2000,
+      "n_oos": 502,
+      "is_scale_ratio": 1.4947,
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 502,
+            "n_violations": 9,
+            "violation_rate": 0.0179,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 2.5803,
+              "p_value": 0.1082,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.1335,
+              "p_value": 0.1441,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 502,
+            "n_violations": 12,
+            "violation_rate": 0.0239,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 7.0539,
+              "p_value": 0.0079,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 1.1581,
+              "p_value": 0.2819,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 1.4355,
+              "p_value": 0.2309,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 502,
+            "n_violations": 18,
+            "violation_rate": 0.0359,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.3353,
+              "p_value": 0.1265,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.0302,
+              "p_value": 0.1542,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 502,
+            "n_violations": 28,
+            "violation_rate": 0.0558,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.3405,
+              "p_value": 0.5595,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.198,
+              "p_value": 0.2737,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 502,
+            "n_violations": 19,
+            "violation_rate": 0.0378,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.6974,
+              "p_value": 0.1926,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.1054,
+              "p_value": 0.7454,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          }
+        }
+      },
+      "elapsed_s": 8.1
+    },
+    {
+      "period": "2019-2020 (COVID)",
+      "oos_start": "2019-01-02",
+      "oos_end": "2020-12-31",
+      "n_is": 2000,
+      "n_oos": 505,
+      "is_scale_ratio": 1.5494,
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 505,
+            "n_violations": 12,
+            "violation_rate": 0.0238,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 6.9695,
+              "p_value": 0.0083,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "HAR": {
+            "n_obs": 505,
+            "n_violations": 15,
+            "violation_rate": 0.0297,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 12.9592,
+              "p_value": 0.0003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 505,
+            "n_violations": 13,
+            "violation_rate": 0.0257,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.8117,
+              "p_value": 0.003,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 505,
+            "n_violations": 38,
+            "violation_rate": 0.0752,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.9077,
+              "p_value": 0.0151,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0075,
+              "p_value": 0.931,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "HAR": {
+            "n_obs": 505,
+            "n_violations": 39,
+            "violation_rate": 0.0772,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 6.8073,
+              "p_value": 0.0091,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.3462,
+              "p_value": 0.5563,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 505,
+            "n_violations": 38,
+            "violation_rate": 0.0752,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.9077,
+              "p_value": 0.0151,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0075,
+              "p_value": 0.931,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        }
+      },
+      "elapsed_s": 8.4
+    },
+    {
+      "period": "2021-2022 (rate hikes)",
+      "oos_start": "2021-01-04",
+      "oos_end": "2022-12-30",
+      "n_is": 2000,
+      "n_oos": 503,
+      "is_scale_ratio": 1.761,
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 503,
+            "n_violations": 13,
+            "violation_rate": 0.0258,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.876,
+              "p_value": 0.0029,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "HAR": {
+            "n_obs": 503,
+            "n_violations": 13,
+            "violation_rate": 0.0258,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.876,
+              "p_value": 0.0029,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 503,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3463,
+              "p_value": 0.0208,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 503,
+            "n_violations": 34,
+            "violation_rate": 0.0676,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.9671,
+              "p_value": 0.085,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.9616,
+              "p_value": 0.3268,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 503,
+            "n_violations": 40,
+            "violation_rate": 0.0795,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 7.8881,
+              "p_value": 0.005,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.2809,
+              "p_value": 0.5961,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 503,
+            "n_violations": 37,
+            "violation_rate": 0.0736,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 5.1648,
+              "p_value": 0.023,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.051,
+              "p_value": 0.8214,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        }
+      },
+      "elapsed_s": 8.4
+    },
+    {
+      "period": "2023-2024",
+      "oos_start": "2023-01-03",
+      "oos_end": "2024-12-31",
+      "n_is": 2000,
+      "n_oos": 502,
+      "is_scale_ratio": 1.7393,
+      "var_results": {
+        "1%": {
+          "GJR": {
+            "n_obs": 502,
+            "n_violations": 9,
+            "violation_rate": 0.0179,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 2.5803,
+              "p_value": 0.1082,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 502,
+            "n_violations": 13,
+            "violation_rate": 0.0259,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 8.9083,
+              "p_value": 0.0028,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 502,
+            "n_violations": 11,
+            "violation_rate": 0.0219,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 5.3705,
+              "p_value": 0.0205,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": false,
+            "tests_passed": 1
+          }
+        },
+        "5%": {
+          "GJR": {
+            "n_obs": 502,
+            "n_violations": 31,
+            "violation_rate": 0.0618,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.3627,
+              "p_value": 0.2431,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "HAR": {
+            "n_obs": 502,
+            "n_violations": 31,
+            "violation_rate": 0.0618,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.3627,
+              "p_value": 0.2431,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          },
+          "Ens_GJR_HAR": {
+            "n_obs": 502,
+            "n_violations": 32,
+            "violation_rate": 0.0637,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 1.8439,
+              "p_value": 0.1745,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "both_pass": true,
+            "tests_passed": 2
+          }
+        }
+      },
+      "elapsed_s": 8.2
+    }
+  ],
+  "summary": {
+    "pass_rates": {
+      "GJR": {
+        "var_1pct": "3/5",
+        "var_5pct": "4/5",
+        "total": "7/10"
+      },
+      "HAR": {
+        "var_1pct": "0/5",
+        "var_5pct": "3/5",
+        "total": "3/10"
+      },
+      "Ens_GJR_HAR": {
+        "var_1pct": "0/5",
+        "var_5pct": "3/5",
+        "total": "3/10"
+      }
+    },
+    "pass_counts": {
+      "GJR": {
+        "pass": 7,
+        "total": 10
+      },
+      "HAR": {
+        "pass": 3,
+        "total": 10
+      },
+      "Ens_GJR_HAR": {
+        "pass": 3,
+        "total": 10
+      }
+    }
+  },
+  "conclusion": "NEGATIVE: Ens_GJR_HAR (3/10) WORSE than GJR (7/10). Ensemble does not help VaR.",
+  "runtime_seconds": 42.2
+}
