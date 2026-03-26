@@ -7,7 +7,7 @@
 
 1. **不可造假、不可虛構**：所有數據、統計量、圖表必須來自實際計算，不可編造數字或偽造結果
 2. **數據來源透明**：每個實驗必須標明數據來源（yfinance、FRED、CBOE 等）、資料期間、樣本數量。不可用模擬數據冒充實證數據
-3. **實驗必須有對應檔案**：每個實驗必須有可執行的程式檔案（`experiments/<experiment_id>.py`）和結果檔案（`experiments/<experiment_id>_results.json`）。不可只用 inline code 跑完就丟——無法指出檔案和資料存檔位置的研究等同虛假研究。Agent worktree 的實驗完成後也必須把腳本和結果複製到主分支
+3. **實驗必須有對應檔案 + 知識庫記錄**：每個實驗必須有可執行的程式檔案（`experiments/<experiment_id>.py`）和結果檔案（`experiments/<experiment_id>_results.json`）。不可只用 inline code 跑完就丟——無法指出檔案和資料存檔位置的研究等同虛假研究。Agent worktree 的實驗完成後也必須把腳本和結果複製到主分支。**每個實驗完成後必須立即寫入 `storage/memory/knowledge.json`**（含 experiment_id、title、content 摘要、tags），不能只存 results JSON 而不進知識庫——2026-03 曾發現 85/124 實驗只有 results 但不在知識庫中
 4. **文獻先於實驗，理解先於動手**：每個特定主題的研究開始前，**必須先搜尋並分析相關學術文獻**，不可直接憑直覺設計實驗。具體要求：
    - **搜尋**：用 WebSearch 搜尋 arXiv/SSRN/Google Scholar 該主題的關鍵論文（至少 3-5 篇）
    - **分析**：閱讀方法論、數據來源、核心發現、局限性。用 sci-hub skill 取得全文
