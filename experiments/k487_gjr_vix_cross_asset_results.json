@@ -1,0 +1,775 @@
+{
+  "experiment_id": "K487",
+  "title": "GJR-GARCH-X(VIX) Cross-Asset Validation",
+  "method": "GJR-GARCH-X with VIX exogenous regressor, 6 assets, OOS 2023-2024",
+  "proposed_by": "User (publication-critical)",
+  "data_source": "yfinance -- empirical data",
+  "timestamp": "2026-03-26T09:59:09.228713+00:00",
+  "configuration": {
+    "IS_window": 2000,
+    "refit_interval": 21,
+    "OOS_period": "2023-01-01 to 2024-12-31",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "EEM",
+      "TLT",
+      "GLD",
+      "0050.TW"
+    ],
+    "n_assets": 6,
+    "models": [
+      "GJR-GARCH(1,1)",
+      "GJR-GARCH-X(VIX)"
+    ],
+    "variance_equation_GJRX": "h_t = omega + alpha*eps^2_{t-1} + gamma*I(eps<0)*eps^2_{t-1} + beta*h_{t-1} + delta*VIX^2_{t-1}/252",
+    "loss_function": "QLIKE (Patton 2011)",
+    "VaR_level": 0.01,
+    "VaR_tests": [
+      "Kupiec (1995)",
+      "Christoffersen (1998)",
+      "DQ (Engle-Manganelli 2004)"
+    ]
+  },
+  "asset_results": {
+    "SPY": {
+      "status": "completed",
+      "asset_info": {
+        "name": "S&P 500 ETF",
+        "class": "US equity",
+        "vix_lag": 0,
+        "note": "Control (K486 validated). VIX is SPY implied vol."
+      },
+      "diagnostics": {
+        "n_obs": 5339,
+        "date_range": "2005-01-04 to 2026-03-25",
+        "return_mean_pct": 0.03911285140632743,
+        "return_std_pct": 1.1973621191855324,
+        "return_skew": -0.3037180199426661,
+        "return_kurt": 14.728121728212432,
+        "adf_stat": -16.39807962076317,
+        "adf_p": 2.6544745810406074e-29,
+        "is_stationary": true,
+        "arch_lm_stat": 1462.6773543665445,
+        "arch_lm_p": 2.8992763143325757e-308,
+        "has_arch_effects": true,
+        "ljung_box_sq_p10": 0.0,
+        "vix_daily_var_mean": 1.7501789777678638,
+        "return_var_pct2": 1.433676044460469,
+        "corr_vix_var_r2": 0.5586399386508143
+      },
+      "oos": {
+        "start": "2023-01-01",
+        "end": "2024-12-31",
+        "n_oos": 502,
+        "n_valid": 501,
+        "n_refits": 24
+      },
+      "qlike": {
+        "GJR": -8.651670460451308,
+        "GJR-X(VIX)": -8.682907657126544,
+        "relative_pct": -0.361,
+        "DM_stat": 2.0286,
+        "DM_pval": 0.0425,
+        "GJR-X_better": true,
+        "significant_10pct": true,
+        "significant_5pct": true
+      },
+      "delta_stats": {
+        "mean": 0.08444190371622379,
+        "std": 0.0025369164347010227,
+        "min": 0.07757859255536287,
+        "max": 0.08897897180346082,
+        "n_refits": 24,
+        "all_positive": true
+      },
+      "var_trinity_1pct": {
+        "GJR": {
+          "n_obs": 502,
+          "n_violations": 7,
+          "violation_rate": 0.0139,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 0.7026,
+            "p_value": 0.4019,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 4.4503,
+            "p_value": 0.616,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        },
+        "GJR-X(VIX)": {
+          "n_obs": 502,
+          "n_violations": 7,
+          "violation_rate": 0.0139,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 0.7026,
+            "p_value": 0.4019,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 2.961,
+            "p_value": 0.8137,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        }
+      },
+      "nu_estimates": {
+        "GJR_median": 5.69,
+        "GJR-X_median": 6.89
+      },
+      "elapsed_sec": 15.7
+    },
+    "QQQ": {
+      "status": "completed",
+      "asset_info": {
+        "name": "Nasdaq 100 ETF",
+        "class": "US equity",
+        "vix_lag": 0,
+        "note": "High SPY correlation. VIX relevant via market-wide fear."
+      },
+      "diagnostics": {
+        "n_obs": 5339,
+        "date_range": "2005-01-04 to 2026-03-25",
+        "return_mean_pct": 0.05355046739941869,
+        "return_std_pct": 1.3607197158824378,
+        "return_skew": -0.25046480390231307,
+        "return_kurt": 7.664773440361545,
+        "adf_stat": -18.365542534843698,
+        "adf_p": 2.223110198438224e-30,
+        "is_stationary": true,
+        "arch_lm_stat": 1055.4456563588096,
+        "arch_lm_p": 2.1164016828510566e-220,
+        "has_arch_effects": true,
+        "ljung_box_sq_p10": 0.0,
+        "vix_daily_var_mean": 1.7501789777678638,
+        "return_var_pct2": 1.851558145191182,
+        "corr_vix_var_r2": 0.5032446284683205
+      },
+      "oos": {
+        "start": "2023-01-01",
+        "end": "2024-12-31",
+        "n_oos": 502,
+        "n_valid": 502,
+        "n_refits": 24
+      },
+      "qlike": {
+        "GJR": -7.945833098052455,
+        "GJR-X(VIX)": -7.959428466489158,
+        "relative_pct": -0.171,
+        "DM_stat": 1.0628,
+        "DM_pval": 0.2879,
+        "GJR-X_better": true,
+        "significant_10pct": false,
+        "significant_5pct": false
+      },
+      "delta_stats": {
+        "mean": 0.12685003999301894,
+        "std": 0.005809421030232191,
+        "min": 0.11318256868679749,
+        "max": 0.13692923056272283,
+        "n_refits": 24,
+        "all_positive": true
+      },
+      "var_trinity_1pct": {
+        "GJR": {
+          "n_obs": 502,
+          "n_violations": 5,
+          "violation_rate": 0.01,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 0.0001,
+            "p_value": 0.9928,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 23.8479,
+            "p_value": 0.0006,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "tests_passed": "2/3"
+        },
+        "GJR-X(VIX)": {
+          "n_obs": 502,
+          "n_violations": 7,
+          "violation_rate": 0.0139,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 0.7026,
+            "p_value": 0.4019,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 12.5438,
+            "p_value": 0.0509,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        }
+      },
+      "nu_estimates": {
+        "GJR_median": 5.72,
+        "GJR-X_median": 6.66
+      },
+      "elapsed_sec": 16.2
+    },
+    "EEM": {
+      "status": "completed",
+      "asset_info": {
+        "name": "Emerging Markets ETF",
+        "class": "EM equity",
+        "vix_lag": 0,
+        "note": "VIX as cross-market fear proxy, not native IV."
+      },
+      "diagnostics": {
+        "n_obs": 5339,
+        "date_range": "2005-01-04 to 2026-03-25",
+        "return_mean_pct": 0.02569640245699956,
+        "return_std_pct": 1.7335144062701908,
+        "return_skew": 0.03380398423920643,
+        "return_kurt": 15.9493320281452,
+        "adf_stat": -16.03401747480736,
+        "adf_p": 6.013782810709262e-29,
+        "is_stationary": true,
+        "arch_lm_stat": 2174.1362980590047,
+        "arch_lm_p": 0.0,
+        "has_arch_effects": true,
+        "ljung_box_sq_p10": 0.0,
+        "vix_daily_var_mean": 1.7501789777678638,
+        "return_var_pct2": 3.005072196746292,
+        "corr_vix_var_r2": 0.5090427668144776
+      },
+      "oos": {
+        "start": "2023-01-01",
+        "end": "2024-12-31",
+        "n_oos": 502,
+        "n_valid": 499,
+        "n_refits": 24
+      },
+      "qlike": {
+        "GJR": -8.237196927580875,
+        "GJR-X(VIX)": -8.244548732608354,
+        "relative_pct": -0.089,
+        "DM_stat": 0.9529,
+        "DM_pval": 0.3407,
+        "GJR-X_better": true,
+        "significant_10pct": false,
+        "significant_5pct": false
+      },
+      "delta_stats": {
+        "mean": 0.09854600887150378,
+        "std": 0.006637960832386485,
+        "min": 0.08628045067613739,
+        "max": 0.1139636988554485,
+        "n_refits": 24,
+        "all_positive": true
+      },
+      "var_trinity_1pct": {
+        "GJR": {
+          "n_obs": 502,
+          "n_violations": 3,
+          "violation_rate": 0.006,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 0.9593,
+            "p_value": 0.3274,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 1.7315,
+            "p_value": 0.9427,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        },
+        "GJR-X(VIX)": {
+          "n_obs": 502,
+          "n_violations": 2,
+          "violation_rate": 0.004,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 2.3772,
+            "p_value": 0.1231,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 1.6301,
+            "p_value": 0.9504,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        }
+      },
+      "nu_estimates": {
+        "GJR_median": 10.95,
+        "GJR-X_median": 12.67
+      },
+      "elapsed_sec": 17.4
+    },
+    "TLT": {
+      "status": "completed",
+      "asset_info": {
+        "name": "US 20+ Year Treasury ETF",
+        "class": "US bonds",
+        "vix_lag": 0,
+        "note": "Bonds. VIX measures equity fear, not bond vol. Flight-to-quality link."
+      },
+      "diagnostics": {
+        "n_obs": 5339,
+        "date_range": "2005-01-04 to 2026-03-25",
+        "return_mean_pct": 0.01242243569298885,
+        "return_std_pct": 0.9216288107789687,
+        "return_skew": 0.0030045167078187308,
+        "return_kurt": 3.418149201382926,
+        "adf_stat": -23.17156905025285,
+        "adf_p": 0.0,
+        "is_stationary": true,
+        "arch_lm_stat": 1185.8612586022443,
+        "arch_lm_p": 1.6152457069387644e-248,
+        "has_arch_effects": true,
+        "ljung_box_sq_p10": 0.0,
+        "vix_daily_var_mean": 1.7501789777678638,
+        "return_var_pct2": 0.8493996648578561,
+        "corr_vix_var_r2": 0.3847534800210515
+      },
+      "oos": {
+        "start": "2023-01-01",
+        "end": "2024-12-31",
+        "n_oos": 502,
+        "n_valid": 500,
+        "n_refits": 24
+      },
+      "qlike": {
+        "GJR": -8.147350050287152,
+        "GJR-X(VIX)": -8.145831169525591,
+        "relative_pct": 0.019,
+        "DM_stat": -0.3565,
+        "DM_pval": 0.7214,
+        "GJR-X_better": false,
+        "significant_10pct": false,
+        "significant_5pct": false
+      },
+      "delta_stats": {
+        "mean": 0.005182427277438399,
+        "std": 0.0014802109816177773,
+        "min": 0.003041038356389085,
+        "max": 0.008643230364073039,
+        "n_refits": 24,
+        "all_positive": true
+      },
+      "var_trinity_1pct": {
+        "GJR": {
+          "n_obs": 502,
+          "n_violations": 8,
+          "violation_rate": 0.0159,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 1.5141,
+            "p_value": 0.2185,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 11.369,
+            "p_value": 0.0776,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        },
+        "GJR-X(VIX)": {
+          "n_obs": 502,
+          "n_violations": 9,
+          "violation_rate": 0.0179,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 2.5803,
+            "p_value": 0.1082,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 11.0072,
+            "p_value": 0.0882,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        }
+      },
+      "nu_estimates": {
+        "GJR_median": 13.32,
+        "GJR-X_median": 13.82
+      },
+      "elapsed_sec": 20.8
+    },
+    "GLD": {
+      "status": "completed",
+      "asset_info": {
+        "name": "Gold ETF",
+        "class": "commodity",
+        "vix_lag": 0,
+        "note": "Gold. VIX as risk-off indicator. K483: commodity leverage inverted."
+      },
+      "diagnostics": {
+        "n_obs": 5339,
+        "date_range": "2005-01-04 to 2026-03-25",
+        "return_mean_pct": 0.042512025076229344,
+        "return_std_pct": 1.1406777433864737,
+        "return_skew": -0.46464396832126853,
+        "return_kurt": 6.97293480089461,
+        "adf_stat": -73.51199074544587,
+        "adf_p": 0.0,
+        "is_stationary": true,
+        "arch_lm_stat": 368.9521557149119,
+        "arch_lm_p": 3.767679941683812e-73,
+        "has_arch_effects": true,
+        "ljung_box_sq_p10": 2.268690902649198e-148,
+        "vix_daily_var_mean": 1.7501789777678638,
+        "return_var_pct2": 1.301145714257258,
+        "corr_vix_var_r2": 0.21991980617716192
+      },
+      "oos": {
+        "start": "2023-01-01",
+        "end": "2024-12-31",
+        "n_oos": 502,
+        "n_valid": 501,
+        "n_refits": 24
+      },
+      "qlike": {
+        "GJR": -8.447749061924554,
+        "GJR-X(VIX)": -8.436588467698643,
+        "relative_pct": 0.132,
+        "DM_stat": -0.6489,
+        "DM_pval": 0.5164,
+        "GJR-X_better": false,
+        "significant_10pct": false,
+        "significant_5pct": false
+      },
+      "delta_stats": {
+        "mean": 0.013014069527397767,
+        "std": 0.0018993385601246131,
+        "min": 0.010911143627762009,
+        "max": 0.018261383713599203,
+        "n_refits": 24,
+        "all_positive": true
+      },
+      "var_trinity_1pct": {
+        "GJR": {
+          "n_obs": 502,
+          "n_violations": 3,
+          "violation_rate": 0.006,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 0.9593,
+            "p_value": 0.3274,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 0.4474,
+            "p_value": 0.9984,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        },
+        "GJR-X(VIX)": {
+          "n_obs": 502,
+          "n_violations": 6,
+          "violation_rate": 0.012,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 0.1819,
+            "p_value": 0.6698,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.0,
+            "p_value": 1.0,
+            "pass": true
+          },
+          "dq": {
+            "stat": 1.3078,
+            "p_value": 0.9712,
+            "pass": true
+          },
+          "trinity_pass": true,
+          "tests_passed": "3/3"
+        }
+      },
+      "nu_estimates": {
+        "GJR_median": 5.38,
+        "GJR-X_median": 5.73
+      },
+      "elapsed_sec": 18.8
+    },
+    "0050.TW": {
+      "status": "completed",
+      "asset_info": {
+        "name": "Taiwan 50 ETF",
+        "class": "Taiwan equity",
+        "vix_lag": 1,
+        "note": "Taiwan. VIX lagged 1 day for timezone (US close -> TW next day)."
+      },
+      "diagnostics": {
+        "n_obs": 4076,
+        "date_range": "2009-01-05 to 2026-03-26",
+        "return_mean_pct": 0.020147475531278772,
+        "return_std_pct": 2.5547830526084465,
+        "return_skew": -39.437383706825486,
+        "return_kurt": 2142.5503913487214,
+        "adf_stat": -64.34889694395584,
+        "adf_p": 0.0,
+        "is_stationary": true,
+        "arch_lm_stat": 0.00270352437126542,
+        "arch_lm_p": 1.0,
+        "has_arch_effects": false,
+        "ljung_box_sq_p10": 1.0,
+        "vix_daily_var_mean": 1.6893084873565591,
+        "return_var_pct2": 6.526916445895333,
+        "corr_vix_var_r2": 0.0004763756871155803
+      },
+      "oos": {
+        "start": "2023-01-01",
+        "end": "2024-12-31",
+        "n_oos": 463,
+        "n_valid": 449,
+        "n_refits": 23
+      },
+      "qlike": {
+        "GJR": -7.803129602002798,
+        "GJR-X(VIX)": -7.679034022963742,
+        "relative_pct": 1.59,
+        "DM_stat": -2.1227,
+        "DM_pval": 0.0338,
+        "GJR-X_better": false,
+        "significant_10pct": true,
+        "significant_5pct": true
+      },
+      "delta_stats": {
+        "mean": 0.17652371623797536,
+        "std": 0.031681922370149544,
+        "min": 0.12346435086008481,
+        "max": 0.257024357233041,
+        "n_refits": 23,
+        "all_positive": true
+      },
+      "var_trinity_1pct": {
+        "GJR": {
+          "n_obs": 463,
+          "n_violations": 7,
+          "violation_rate": 0.0151,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 1.0592,
+            "p_value": 0.3034,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 2.944,
+            "p_value": 0.0862,
+            "pass": true
+          },
+          "dq": {
+            "stat": 18.5677,
+            "p_value": 0.005,
+            "pass": false
+          },
+          "trinity_pass": false,
+          "tests_passed": "2/3"
+        },
+        "GJR-X(VIX)": {
+          "n_obs": 463,
+          "n_violations": 11,
+          "violation_rate": 0.0238,
+          "expected_rate": 0.01,
+          "kupiec": {
+            "stat": 6.3864,
+            "p_value": 0.0115,
+            "pass": false
+          },
+          "christoffersen": {
+            "stat": 1.3085,
+            "p_value": 0.2527,
+            "pass": true
+          },
+          "dq": {
+            "stat": 5.9269,
+            "p_value": 0.4314,
+            "pass": true
+          },
+          "trinity_pass": false,
+          "tests_passed": "2/3"
+        }
+      },
+      "nu_estimates": {
+        "GJR_median": 5.21,
+        "GJR-X_median": 5.64
+      },
+      "elapsed_sec": 16.5
+    }
+  },
+  "summary_table": [
+    {
+      "asset": "SPY",
+      "class": "US equity",
+      "qlike_pct": -0.36,
+      "dm_stat": 2.029,
+      "dm_pval": 0.0425,
+      "gjrx_better": true,
+      "sig_10pct": true,
+      "gjr_var_pass": "3/3",
+      "gjrx_var_pass": "3/3",
+      "gjrx_trinity": true,
+      "delta_mean": 0.0844,
+      "corr_vix_r2": 0.5586
+    },
+    {
+      "asset": "QQQ",
+      "class": "US equity",
+      "qlike_pct": -0.17,
+      "dm_stat": 1.063,
+      "dm_pval": 0.2879,
+      "gjrx_better": true,
+      "sig_10pct": false,
+      "gjr_var_pass": "2/3",
+      "gjrx_var_pass": "3/3",
+      "gjrx_trinity": true,
+      "delta_mean": 0.1269,
+      "corr_vix_r2": 0.5032
+    },
+    {
+      "asset": "EEM",
+      "class": "EM equity",
+      "qlike_pct": -0.09,
+      "dm_stat": 0.953,
+      "dm_pval": 0.3407,
+      "gjrx_better": true,
+      "sig_10pct": false,
+      "gjr_var_pass": "3/3",
+      "gjrx_var_pass": "3/3",
+      "gjrx_trinity": true,
+      "delta_mean": 0.0985,
+      "corr_vix_r2": 0.509
+    },
+    {
+      "asset": "TLT",
+      "class": "US bonds",
+      "qlike_pct": 0.02,
+      "dm_stat": -0.357,
+      "dm_pval": 0.7214,
+      "gjrx_better": false,
+      "sig_10pct": false,
+      "gjr_var_pass": "3/3",
+      "gjrx_var_pass": "3/3",
+      "gjrx_trinity": true,
+      "delta_mean": 0.0052,
+      "corr_vix_r2": 0.3848
+    },
+    {
+      "asset": "GLD",
+      "class": "commodity",
+      "qlike_pct": 0.13,
+      "dm_stat": -0.649,
+      "dm_pval": 0.5164,
+      "gjrx_better": false,
+      "sig_10pct": false,
+      "gjr_var_pass": "3/3",
+      "gjrx_var_pass": "3/3",
+      "gjrx_trinity": true,
+      "delta_mean": 0.013,
+      "corr_vix_r2": 0.2199
+    },
+    {
+      "asset": "0050.TW",
+      "class": "Taiwan equity",
+      "qlike_pct": 1.59,
+      "dm_stat": -2.123,
+      "dm_pval": 0.0338,
+      "gjrx_better": false,
+      "sig_10pct": true,
+      "gjr_var_pass": "2/3",
+      "gjrx_var_pass": "2/3",
+      "gjrx_trinity": false,
+      "delta_mean": 0.1765,
+      "corr_vix_r2": 0.0005
+    }
+  ],
+  "cross_asset_summary": {
+    "n_completed": 6,
+    "n_qlike_better": 3,
+    "n_significant_10pct": 1,
+    "n_trinity_pass": 5,
+    "equity_qlike_better": 3,
+    "equity_count": 4,
+    "non_equity_qlike_better": 0,
+    "non_equity_count": 2
+  },
+  "verdict": "EQUITY-SPECIFIC",
+  "verdict_detail": "GJR-X(VIX) works for equities (3/4 better) but not other classes (0/2).",
+  "total_elapsed_sec": 108.3,
+  "references": [
+    "Kupiec (1995) Techniques for Verifying the Accuracy of Risk Measurement Models",
+    "Christoffersen (1998) Evaluating Interval Forecasts, International Economic Review",
+    "Engle & Manganelli (2004) CAViaR, JBES",
+    "Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies, JoE",
+    "Diebold & Mariano (1995) Comparing Predictive Accuracy, JBES",
+    "K486: GJR-X(VIX) SPY final validation -- broke impossible triangle",
+    "K462: GARCH-X(VIX) on Taiwan 0050.TW -- IS sig but OOS worse",
+    "K483: Commodity volatility -- inverted leverage"
+  ]
+}
