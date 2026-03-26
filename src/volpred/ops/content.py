@@ -205,7 +205,10 @@ def release_pool_articles(
             report["status"] = "published"
             report["published_at"] = released_at
             dump_json(report_path, report)
-            item = report
+            # CRITICAL: update in-place so feed list reflects report content
+            # Previously `item = report` only reassigned the local variable,
+            # leaving the feed list entry unchanged (missing content/audience)
+            item.update(report)
         released.append({
             "id": item.get("id"),
             "title": item.get("title"),
