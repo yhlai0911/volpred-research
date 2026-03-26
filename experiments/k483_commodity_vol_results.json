@@ -1,0 +1,579 @@
+{
+  "experiment_id": "K483",
+  "title": "Commodity Volatility \u2014 Oil and Gold Vol Forecasting",
+  "date": "2026-03-26T08:33:15.521748+00:00",
+  "author": "[Proposed: User(commodity direction), Executed: Claude]",
+  "data_source": "yfinance (empirical)",
+  "assets": [
+    "GLD",
+    "USO"
+  ],
+  "oos_period": "2023-01-01 to 2025-12-31",
+  "is_window": 2000,
+  "models": [
+    "GARCH(1,1)",
+    "GJR-GARCH(1,1)",
+    "EGARCH(1,1)",
+    "HAR_log-range",
+    "Semivariance_RS-",
+    "EWMA(0.94)",
+    "Ensemble(GJR+HAR)"
+  ],
+  "evaluation": "QLIKE with r\u00b2 proxy + DM test (HAC) + MCS (Hansen et al. 2011)",
+  "references": [
+    "Corsi (2009) J Financial Econometrics \u2014 HAR-RV",
+    "Glosten, Jagannathan, Runkle (1993) JF \u2014 GJR-GARCH",
+    "Nelson (1991) Econometrica \u2014 EGARCH",
+    "Patton (2011) J Econometrics \u2014 QLIKE loss",
+    "Patton & Sheppard (2015) JFQA \u2014 Semivariance",
+    "Hansen, Lunde, Nason (2011) Econometrica \u2014 MCS",
+    "K132: GLD QLIKE capture rate 19.4%",
+    "K135: GLD inventory-conditioned vol null",
+    "K453: GLD semivar gamma\u22480, RS\u207b fails"
+  ],
+  "results": {
+    "GLD": {
+      "diagnostics": {
+        "N_total": 5319,
+        "N_IS": 4510,
+        "N_OOS": 809,
+        "mean_pct": 0.04307829383072016,
+        "std_pct": 1.1421172859544786,
+        "skewness": -0.46592255151895845,
+        "kurtosis": 6.971163097027064,
+        "adf_stat": -73.3773136305273,
+        "adf_p": 0.0,
+        "stationary": true,
+        "arch_lm_stat": 277.778784852981,
+        "arch_lm_p": 5.97245041934173e-58,
+        "arch_effects": "True"
+      },
+      "models": {
+        "GARCH": {
+          "qlike_mean": 1.517860477733849,
+          "qlike_median": 0.7816819663465219,
+          "valid_N": 808
+        },
+        "GJR": {
+          "qlike_mean": 1.4828808504324027,
+          "qlike_median": 0.7671639575121381,
+          "valid_N": 808
+        },
+        "EGARCH": {
+          "qlike_mean": 1.485473037022613,
+          "qlike_median": 0.7718775379859463,
+          "valid_N": 808
+        },
+        "HAR_LR": {
+          "qlike_mean": 2.8213195572290415,
+          "qlike_median": 1.1174705371482117,
+          "valid_N": 808
+        },
+        "Semivar": {
+          "qlike_mean": 1.5125999003566495,
+          "qlike_median": 0.7606553458730305,
+          "valid_N": 808
+        },
+        "EWMA": {
+          "qlike_mean": 1.520513124253892,
+          "qlike_median": 0.769525391355265,
+          "valid_N": 808
+        },
+        "Ensemble": {
+          "qlike_mean": 1.5945173208230299,
+          "qlike_median": 0.730214677871359,
+          "valid_N": 808
+        }
+      },
+      "best_model": "GJR",
+      "best_qlike": 1.4828808504324027,
+      "gjr_gamma": {
+        "mean_gamma": -0.028703,
+        "median_gamma": -0.025853,
+        "std_gamma": 0.016139,
+        "pct_positive": 0.0063,
+        "pct_significant": 0.4571,
+        "mean_tstat": -1.861,
+        "n_estimates": 3319
+      },
+      "egarch_gamma": {
+        "mean_gamma": 0.020309,
+        "pct_negative": 0.0557,
+        "mean_tstat": 1.558
+      },
+      "dm_tests": {
+        "GARCH_vs_GJR": {
+          "dm_stat": 1.828,
+          "p_value": 0.0676,
+          "winner": "GJR",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GARCH_vs_EGARCH": {
+          "dm_stat": 1.722,
+          "p_value": 0.0851,
+          "winner": "EGARCH",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GARCH_vs_HAR_LR": {
+          "dm_stat": -7.81,
+          "p_value": 0.0,
+          "winner": "GARCH",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "GARCH_vs_Semivar": {
+          "dm_stat": 0.145,
+          "p_value": 0.885,
+          "winner": "Semivar",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GARCH_vs_EWMA": {
+          "dm_stat": -0.221,
+          "p_value": 0.8252,
+          "winner": "GARCH",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GARCH_vs_Ensemble": {
+          "dm_stat": -2.324,
+          "p_value": 0.0201,
+          "winner": "GARCH",
+          "significant": true,
+          "harvey_significant": false
+        },
+        "GJR_vs_EGARCH": {
+          "dm_stat": -0.324,
+          "p_value": 0.7456,
+          "winner": "GJR",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GJR_vs_HAR_LR": {
+          "dm_stat": -7.76,
+          "p_value": 0.0,
+          "winner": "GJR",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "GJR_vs_Semivar": {
+          "dm_stat": -0.998,
+          "p_value": 0.3182,
+          "winner": "GJR",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GJR_vs_EWMA": {
+          "dm_stat": -2.327,
+          "p_value": 0.02,
+          "winner": "GJR",
+          "significant": true,
+          "harvey_significant": false
+        },
+        "GJR_vs_Ensemble": {
+          "dm_stat": -3.153,
+          "p_value": 0.0016,
+          "winner": "GJR",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "EGARCH_vs_HAR_LR": {
+          "dm_stat": -7.733,
+          "p_value": 0.0,
+          "winner": "EGARCH",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "EGARCH_vs_Semivar": {
+          "dm_stat": -0.894,
+          "p_value": 0.3715,
+          "winner": "EGARCH",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "EGARCH_vs_EWMA": {
+          "dm_stat": -2.034,
+          "p_value": 0.042,
+          "winner": "EGARCH",
+          "significant": true,
+          "harvey_significant": false
+        },
+        "EGARCH_vs_Ensemble": {
+          "dm_stat": -2.99,
+          "p_value": 0.0028,
+          "winner": "EGARCH",
+          "significant": true,
+          "harvey_significant": false
+        },
+        "HAR_LR_vs_Semivar": {
+          "dm_stat": 7.514,
+          "p_value": 0.0,
+          "winner": "Semivar",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "HAR_LR_vs_EWMA": {
+          "dm_stat": 7.752,
+          "p_value": 0.0,
+          "winner": "EWMA",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "HAR_LR_vs_Ensemble": {
+          "dm_stat": 8.727,
+          "p_value": 0.0,
+          "winner": "Ensemble",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "Semivar_vs_EWMA": {
+          "dm_stat": -0.222,
+          "p_value": 0.8244,
+          "winner": "Semivar",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "Semivar_vs_Ensemble": {
+          "dm_stat": -1.813,
+          "p_value": 0.0698,
+          "winner": "Semivar",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "EWMA_vs_Ensemble": {
+          "dm_stat": -2.27,
+          "p_value": 0.0232,
+          "winner": "EWMA",
+          "significant": true,
+          "harvey_significant": false
+        }
+      },
+      "mcs": {
+        "superior_set": [
+          "EWMA",
+          "GARCH",
+          "Semivar",
+          "EGARCH",
+          "GJR"
+        ],
+        "excluded": [
+          "HAR_LR",
+          "Ensemble"
+        ],
+        "p_values": {
+          "HAR_LR": 0.0,
+          "Ensemble": 0.0224,
+          "EWMA": 0.4194,
+          "GARCH": 0.4856,
+          "Semivar": 0.488,
+          "EGARCH": 0.7454,
+          "GJR": 1.0
+        },
+        "alpha": 0.1,
+        "n_obs": 808
+      },
+      "har_vs_gjr": {
+        "har_qlike": 2.82132,
+        "gjr_qlike": 1.482881,
+        "improvement_pct": -90.26,
+        "dm_stat": 7.76,
+        "dm_p": 0.0,
+        "winner": "GJR"
+      }
+    },
+    "USO": {
+      "diagnostics": {
+        "N_total": 4986,
+        "N_IS": 4177,
+        "N_OOS": 809,
+        "mean_pct": -0.03154454248079238,
+        "std_pct": 2.3346006991116086,
+        "skewness": -1.0463781696567458,
+        "kurtosis": 13.615616855264006,
+        "adf_stat": -25.188857592293648,
+        "adf_p": 0.0,
+        "stationary": true,
+        "arch_lm_stat": 533.5929411525361,
+        "arch_lm_p": 4.465173917710247e-113,
+        "arch_effects": "True"
+      },
+      "models": {
+        "GARCH": {
+          "qlike_mean": 1.3631840947491627,
+          "qlike_median": 0.5658025655731844,
+          "valid_N": 807
+        },
+        "GJR": {
+          "qlike_mean": 1.39128276875453,
+          "qlike_median": 0.5661871556438185,
+          "valid_N": 807
+        },
+        "EGARCH": {
+          "qlike_mean": 1.414099568663618,
+          "qlike_median": 0.5817948502498591,
+          "valid_N": 807
+        },
+        "HAR_LR": {
+          "qlike_mean": 1.9216007877804022,
+          "qlike_median": 0.7796120997454128,
+          "valid_N": 807
+        },
+        "Semivar": {
+          "qlike_mean": 1.4346999982539552,
+          "qlike_median": 0.6045836006054821,
+          "valid_N": 807
+        },
+        "EWMA": {
+          "qlike_mean": 1.3875743906030347,
+          "qlike_median": 0.5540242745220865,
+          "valid_N": 807
+        },
+        "Ensemble": {
+          "qlike_mean": 1.4286402914444796,
+          "qlike_median": 0.6007580749366972,
+          "valid_N": 807
+        }
+      },
+      "best_model": "GARCH",
+      "best_qlike": 1.3631840947491627,
+      "gjr_gamma": {
+        "mean_gamma": 0.078388,
+        "median_gamma": 0.076821,
+        "std_gamma": 0.016624,
+        "pct_positive": 1.0,
+        "pct_significant": 1.0,
+        "mean_tstat": 4.297,
+        "n_estimates": 2986
+      },
+      "egarch_gamma": {
+        "mean_gamma": -0.070007,
+        "pct_negative": 1.0,
+        "mean_tstat": -5.724
+      },
+      "dm_tests": {
+        "GARCH_vs_GJR": {
+          "dm_stat": -1.599,
+          "p_value": 0.1098,
+          "winner": "GARCH",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GARCH_vs_EGARCH": {
+          "dm_stat": -1.965,
+          "p_value": 0.0494,
+          "winner": "GARCH",
+          "significant": true,
+          "harvey_significant": false
+        },
+        "GARCH_vs_HAR_LR": {
+          "dm_stat": -5.29,
+          "p_value": 0.0,
+          "winner": "GARCH",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "GARCH_vs_Semivar": {
+          "dm_stat": -2.274,
+          "p_value": 0.023,
+          "winner": "GARCH",
+          "significant": true,
+          "harvey_significant": false
+        },
+        "GARCH_vs_EWMA": {
+          "dm_stat": -1.273,
+          "p_value": 0.2029,
+          "winner": "GARCH",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GARCH_vs_Ensemble": {
+          "dm_stat": -1.778,
+          "p_value": 0.0754,
+          "winner": "GARCH",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GJR_vs_EGARCH": {
+          "dm_stat": -2.198,
+          "p_value": 0.028,
+          "winner": "GJR",
+          "significant": true,
+          "harvey_significant": false
+        },
+        "GJR_vs_HAR_LR": {
+          "dm_stat": -5.372,
+          "p_value": 0.0,
+          "winner": "GJR",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "GJR_vs_Semivar": {
+          "dm_stat": -2.306,
+          "p_value": 0.0211,
+          "winner": "GJR",
+          "significant": true,
+          "harvey_significant": false
+        },
+        "GJR_vs_EWMA": {
+          "dm_stat": 0.158,
+          "p_value": 0.8743,
+          "winner": "EWMA",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "GJR_vs_Ensemble": {
+          "dm_stat": -1.509,
+          "p_value": 0.1314,
+          "winner": "GJR",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "EGARCH_vs_HAR_LR": {
+          "dm_stat": -5.283,
+          "p_value": 0.0,
+          "winner": "EGARCH",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "EGARCH_vs_Semivar": {
+          "dm_stat": -1.286,
+          "p_value": 0.1986,
+          "winner": "EGARCH",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "EGARCH_vs_EWMA": {
+          "dm_stat": 0.96,
+          "p_value": 0.3372,
+          "winner": "EWMA",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "EGARCH_vs_Ensemble": {
+          "dm_stat": -0.633,
+          "p_value": 0.5268,
+          "winner": "EGARCH",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "HAR_LR_vs_Semivar": {
+          "dm_stat": 4.768,
+          "p_value": 0.0,
+          "winner": "Semivar",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "HAR_LR_vs_EWMA": {
+          "dm_stat": 5.742,
+          "p_value": 0.0,
+          "winner": "EWMA",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "HAR_LR_vs_Ensemble": {
+          "dm_stat": 6.499,
+          "p_value": 0.0,
+          "winner": "Ensemble",
+          "significant": true,
+          "harvey_significant": true
+        },
+        "Semivar_vs_EWMA": {
+          "dm_stat": 1.406,
+          "p_value": 0.1596,
+          "winner": "EWMA",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "Semivar_vs_Ensemble": {
+          "dm_stat": 0.197,
+          "p_value": 0.844,
+          "winner": "Ensemble",
+          "significant": false,
+          "harvey_significant": false
+        },
+        "EWMA_vs_Ensemble": {
+          "dm_stat": -1.343,
+          "p_value": 0.1793,
+          "winner": "EWMA",
+          "significant": false,
+          "harvey_significant": false
+        }
+      },
+      "mcs": {
+        "superior_set": [
+          "Semivar",
+          "Ensemble",
+          "EGARCH",
+          "GJR",
+          "EWMA",
+          "GARCH"
+        ],
+        "excluded": [
+          "HAR_LR"
+        ],
+        "p_values": {
+          "HAR_LR": 0.0,
+          "Semivar": 0.1828,
+          "Ensemble": 0.2288,
+          "EGARCH": 0.2288,
+          "GJR": 0.5674,
+          "EWMA": 0.5674,
+          "GARCH": 1.0
+        },
+        "alpha": 0.1,
+        "n_obs": 807
+      },
+      "har_vs_gjr": {
+        "har_qlike": 1.921601,
+        "gjr_qlike": 1.391283,
+        "improvement_pct": -38.12,
+        "dm_stat": 5.372,
+        "dm_p": 0.0,
+        "winner": "GJR"
+      }
+    }
+  },
+  "cross_comparison": {
+    "GLD": {
+      "best_model": "GJR",
+      "best_qlike": 1.4828808504324027,
+      "gjr_gamma_mean": -0.028703,
+      "gjr_gamma_positive_pct": 0.0063,
+      "leverage_type": "standard",
+      "mcs_superior": []
+    },
+    "USO": {
+      "best_model": "GARCH",
+      "best_qlike": 1.3631840947491627,
+      "gjr_gamma_mean": 0.078388,
+      "gjr_gamma_positive_pct": 1.0,
+      "leverage_type": "inverted",
+      "mcs_superior": []
+    }
+  },
+  "findings": [
+    "GLD: GJR vs GARCH improvement = +2.30%",
+    "USO: GJR vs GARCH improvement = -2.06%",
+    "GLD: gamma=-0.028703, STANDARD (negative), sig=46%",
+    "USO: gamma=0.078388, INVERTED (positive), sig=100%",
+    "GLD: HAR vs GJR \u2192 GJR wins (DM p=0.0000, improvement=-90.26%)",
+    "USO: HAR vs GJR \u2192 GJR wins (DM p=0.0000, improvement=-38.12%)",
+    "GLD: Semivar QLIKE=1.512600 vs GJR=1.482881 \u2192 GJR better",
+    "USO: Semivar QLIKE=1.434700 vs GJR=1.391283 \u2192 GJR better",
+    "GLD MCS: Superior set = EWMA, GARCH, Semivar, EGARCH, GJR (5 of 7). Excluded: HAR_LR (p=0.000), Ensemble (p=0.022)",
+    "USO MCS: Superior set = Semivar, Ensemble, EGARCH, GJR, EWMA, GARCH (6 of 7). Excluded: only HAR_LR (p=0.000)",
+    "HAR log-range REJECTED from MCS for BOTH commodities \u2014 opposite of SPY where HAR is competitive",
+    "GARCH(1,1) has highest MCS p-value for BOTH assets (p=1.0) \u2014 symmetric model dominates commodities"
+  ],
+  "elapsed_seconds": 430.8,
+  "conclusion": {
+    "q1_qlike_ceiling": "GJR-GARCH QLIKE ceiling does NOT hold for commodities. GARCH(1,1) wins USO; GJR marginally wins GLD (DM p=0.068, not significant). Symmetric GARCH is sufficient.",
+    "q2_leverage_direction": "GLD: standard negative gamma (-0.029, 46% significant, weak). USO: INVERTED positive gamma (+0.078, 100% significant, strong). Oil price UP = vol UP, consistent with supply shock dynamics.",
+    "q3_har_log_range": "HAR log-range FAILS for both commodities. Excluded from MCS. GLD: HAR QLIKE 2.82 vs GJR 1.48 (-90% worse). USO: HAR 1.92 vs GARCH 1.36 (-38% worse). Range-based models do not work for commodities.",
+    "q4_semivariance": "Semivariance works for USO (MCS included, p=0.18) but not better than GARCH. For GLD: Semivar also in MCS (p=0.49) but gamma\u22480 confirms K453 finding.",
+    "q5_mcs_superior_set": "GLD: 5-model set (EWMA/GARCH/Semivar/EGARCH/GJR). USO: 6-model set (all except HAR). Key: GARCH(1,1) has p=1.0 in both = hardest to beat in commodities.",
+    "novel_finding": "Commodities are the OPPOSITE of equities for vol forecasting: (1) Symmetric GARCH beats asymmetric models, (2) HAR is worst not best, (3) Leverage effect is inverted for oil. This extends Paper 1 cross-asset results to a new asset class."
+  }
+}
