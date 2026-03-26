@@ -1050,3 +1050,16 @@
 - [x] K482: MCS-weighted ensemble — Equal weight wins（Timmermann combination puzzle）
 - [ ] K483: Commodity vol（oil/gold）— **進行中**
 - [ ] K484: **SSVS Variance Equation Component Selection**（用戶創意）— **進行中**。用陳婉淑方法選 GARCH 模型成分（不是選變數）
+
+- [x] K483: **★ Commodity Vol** — Opposite of equity: GARCH(1,1) symmetric wins, HAR worst, oil inverted leverage
+- [x] K484: **★★★ SSVS Variance Eq** — 4/5 components PIP=1.000, QLIKE -7.43%（用戶創意）
+- [x] K485: SSVS Variance Eq Cross-OOS — 4/5 directional, 2/5 sig（promising, GJR+VIX better alone）
+- [x] K486: **★★★ GJR-X(VIX) Breaks Impossible Triangle** — SPY forecasting -17% + VaR 5/5 pass
+- [x] K487: GJR-X(VIX) Cross-Asset — Equity-specific forecasting, broader VaR (5/6 pass)
+
+### 最終工具指南（63 experiments, cross-OOS validated）
+| 任務 | SPY | Other equity | Non-equity | Taiwan |
+|------|-----|-------------|------------|--------|
+| **Forecasting** | **GJR-X(VIX) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
+| **VaR** | **GJR-X(VIX)** | GJR-X(VIX) | GJR alone | GJR-SkewT |
+| **VT Strategy** | 12/VIX | 12/VIX adapted | Asset-specific | 8.63/VIX |
