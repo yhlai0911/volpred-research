@@ -336,7 +336,8 @@
 | 類型 | 位置 | 說明 |
 |------|------|------|
 | 完成 Phase 詳細記錄 | docs/research_archive/completed_phases_2026Q1.md | 590 行，含所有 Phase O~K 逐實驗結果 |
-| 知識庫 | storage/memory/knowledge.json | 3,189+ 筆，grep 搜尋：grep -i '關鍵詞' storage/memory/knowledge.json |
+| 知識庫（發現） | storage/memory/knowledge.json | 3,189+ 筆，記錄**發現了什麼**。grep 搜尋：grep -i '關鍵詞' storage/memory/knowledge.json |
+| 經驗庫（教訓） | storage/memory/experiment_experiences.json | Exxx 編號，記錄**學到了什麼**（成功/失敗原因、方法論教訓、避坑指南） |
 | 知識索引（向量搜尋） | storage/knowledge_index/ | LanceDB，用 build_knowledge_index.py 重建 |
 | 實驗腳本 | experiments/k*.py | 119+ 個 Python 腳本，每個可獨立執行 |
 | 實驗結果 | experiments/k*_results.json | 每個實驗的完整 JSON 結果 |
