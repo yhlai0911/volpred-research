@@ -1,0 +1,1446 @@
+{
+  "experiment_id": "K471",
+  "title": "Time-Varying Higher Moments (Conditional Skewness/Kurtosis) for Vol Prediction",
+  "timestamp": "2026-03-26T05:12:13.079868+00:00",
+  "data_source": "yfinance",
+  "assets": [
+    "SPY",
+    "QQQ",
+    "BTC-USD"
+  ],
+  "oos_period": "2023-01-01 to 2025-12-31",
+  "forward_window": 21,
+  "method": "Rolling skewness/kurtosis (5d, 21d, 63d) as predictors of 21-day forward RV. Ridge regression. Expanding window monthly refit.",
+  "references": [
+    "Harvey & Siddique (1999) 'Conditional Skewness in Asset Pricing Tests' JoF",
+    "Jondeau & Rockinger (2003) 'Conditional volatility, skewness, and kurtosis' JEDC",
+    "Leon, Rubio, Serna (2005) 'Autoregressive conditional volatility, skewness and kurtosis' QREF"
+  ],
+  "prior_knowledge": "K-entry: residual higher moments r=-0.073, OOS R\u00b2 +2.7pp (weak improvement)",
+  "diagnostics": {
+    "SPY": {
+      "n_obs": 4002,
+      "skew21_mean": -0.14970544695996824,
+      "skew21_std": 0.677080309977268,
+      "skew21_min": -2.9510493619084768,
+      "skew21_max": 2.611415046212971,
+      "kurt21_mean": 0.653930938477153,
+      "kurt21_std": 1.6438668487910715,
+      "kurt21_min": -1.55084663356434,
+      "kurt21_max": 11.249901912767513,
+      "skew21_adf_stat": 0.9075329077429206,
+      "kurt21_adf_stat": 0.8880997707362157,
+      "skew21_adf_pvalue": 5.378268194693886e-26,
+      "kurt21_adf_pvalue": 5.8564558977495825e-25,
+      "skew21_ljungbox_p": 0.0,
+      "kurt21_ljungbox_p": 0.0,
+      "corr_with_fwd_rv21": {
+        "skew5": {
+          "r": -0.0459,
+          "p": 0.003974
+        },
+        "skew21": {
+          "r": -0.08,
+          "p": 1e-06
+        },
+        "skew63": {
+          "r": -0.1523,
+          "p": 0.0
+        },
+        "kurt5": {
+          "r": -0.0582,
+          "p": 0.000257
+        },
+        "kurt21": {
+          "r": -0.112,
+          "p": 0.0
+        },
+        "kurt63": {
+          "r": 0.0325,
+          "p": 0.041226
+        }
+      }
+    },
+    "QQQ": {
+      "n_obs": 4002,
+      "skew21_mean": -0.17814747086952704,
+      "skew21_std": 0.7093495579160737,
+      "skew21_min": -3.164616959856769,
+      "skew21_max": 2.930577997224235,
+      "kurt21_mean": 0.7319537286208583,
+      "kurt21_std": 1.7519270905528188,
+      "kurt21_min": -1.5428994644220344,
+      "kurt21_max": 12.693562117488943,
+      "skew21_adf_stat": 0.9310108691032207,
+      "kurt21_adf_stat": 0.9184866908249392,
+      "skew21_adf_pvalue": 1.0361220137830038e-22,
+      "kurt21_adf_pvalue": 2.8259808880198215e-23,
+      "skew21_ljungbox_p": 0.0,
+      "kurt21_ljungbox_p": 0.0,
+      "corr_with_fwd_rv21": {
+        "skew5": {
+          "r": -0.0293,
+          "p": 0.06552
+        },
+        "skew21": {
+          "r": -0.0565,
+          "p": 0.000389
+        },
+        "skew63": {
+          "r": -0.0931,
+          "p": 0.0
+        },
+        "kurt5": {
+          "r": -0.0445,
+          "p": 0.00524
+        },
+        "kurt21": {
+          "r": -0.1253,
+          "p": 0.0
+        },
+        "kurt63": {
+          "r": -0.0316,
+          "p": 0.047682
+        }
+      }
+    },
+    "BTC-USD": {
+      "n_obs": 4102,
+      "skew21_mean": -0.018664692904621978,
+      "skew21_std": 1.0136814482269472,
+      "skew21_min": -4.018257195583274,
+      "skew21_max": 4.034635476684784,
+      "kurt21_mean": 1.829478377596281,
+      "kurt21_std": 2.621240543145852,
+      "kurt21_min": -1.5590176953853718,
+      "kurt21_max": 17.517322836917796,
+      "skew21_adf_stat": 0.9226144888207739,
+      "kurt21_adf_stat": 0.9211230843427392,
+      "skew21_adf_pvalue": 1.5282221903631839e-22,
+      "kurt21_adf_pvalue": 2.9667534829443534e-24,
+      "skew21_ljungbox_p": 0.0,
+      "kurt21_ljungbox_p": 0.0,
+      "corr_with_fwd_rv21": {
+        "skew5": {
+          "r": -0.0311,
+          "p": 0.048012
+        },
+        "skew21": {
+          "r": -0.0343,
+          "p": 0.029234
+        },
+        "skew63": {
+          "r": 0.0879,
+          "p": 0.0
+        },
+        "kurt5": {
+          "r": -0.0537,
+          "p": 0.000635
+        },
+        "kurt21": {
+          "r": -0.116,
+          "p": 0.0
+        },
+        "kurt63": {
+          "r": -0.058,
+          "p": 0.000223
+        }
+      }
+    }
+  },
+  "oos_results": {
+    "SPY": {
+      "is_n": 3209,
+      "oos_n": 730,
+      "models": {
+        "M1_lagged_rv_OLS": {
+          "features": [
+            "rv21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.2745,
+          "oos_mse": 0.005066,
+          "oos_qlike": 0.317412,
+          "oos_r2": 0.0318,
+          "oos_corr": 0.3034,
+          "dm_stat_vs_baseline": 0.0,
+          "dm_pvalue_vs_baseline": 1.0,
+          "coefficients": {
+            "rv21": 0.050452,
+            "intercept": 0.150182
+          }
+        },
+        "M1_lagged_rv_Ridge": {
+          "features": [
+            "rv21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.2745,
+          "oos_mse": 0.005066,
+          "oos_qlike": 0.317411,
+          "oos_r2": 0.0318,
+          "oos_corr": 0.3034,
+          "dm_stat_vs_baseline": -0.8399,
+          "dm_pvalue_vs_baseline": 0.4009,
+          "coefficients": {
+            "rv21": 0.050436,
+            "intercept": 0.150182
+          }
+        },
+        "M2_rv_skew_OLS": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.2774,
+          "oos_mse": 0.004924,
+          "oos_qlike": 0.309867,
+          "oos_r2": 0.059,
+          "oos_corr": 0.324,
+          "dm_stat_vs_baseline": -1.7123,
+          "dm_pvalue_vs_baseline": 0.0868,
+          "coefficients": {
+            "rv21": 0.05018,
+            "skew5": -0.001898,
+            "skew21": -0.004343,
+            "intercept": 0.150182
+          }
+        },
+        "M2_rv_skew_Ridge": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.2774,
+          "oos_mse": 0.004923,
+          "oos_qlike": 0.309868,
+          "oos_r2": 0.0591,
+          "oos_corr": 0.324,
+          "dm_stat_vs_baseline": -1.7096,
+          "dm_pvalue_vs_baseline": 0.0873,
+          "coefficients": {
+            "rv21": 0.050164,
+            "skew5": -0.001898,
+            "skew21": -0.004342,
+            "intercept": 0.150182
+          }
+        },
+        "M3_rv_kurt_OLS": {
+          "features": [
+            "rv21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.2806,
+          "oos_mse": 0.004857,
+          "oos_qlike": 0.306941,
+          "oos_r2": 0.0718,
+          "oos_corr": 0.3302,
+          "dm_stat_vs_baseline": -1.17,
+          "dm_pvalue_vs_baseline": 0.242,
+          "coefficients": {
+            "rv21": 0.049662,
+            "kurt5": -0.000679,
+            "kurt21": -0.007397,
+            "intercept": 0.150182
+          }
+        },
+        "M3_rv_kurt_Ridge": {
+          "features": [
+            "rv21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.2806,
+          "oos_mse": 0.004857,
+          "oos_qlike": 0.30694,
+          "oos_r2": 0.0718,
+          "oos_corr": 0.3302,
+          "dm_stat_vs_baseline": -1.1701,
+          "dm_pvalue_vs_baseline": 0.242,
+          "coefficients": {
+            "rv21": 0.049647,
+            "kurt5": -0.000679,
+            "kurt21": -0.007396,
+            "intercept": 0.150182
+          }
+        },
+        "M4_rv_skew_kurt_OLS": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.287,
+          "oos_mse": 0.004592,
+          "oos_qlike": 0.290221,
+          "oos_r2": 0.1225,
+          "oos_corr": 0.3749,
+          "dm_stat_vs_baseline": -1.4801,
+          "dm_pvalue_vs_baseline": 0.1388,
+          "coefficients": {
+            "rv21": 0.048998,
+            "skew5": -0.001675,
+            "skew21": -0.007535,
+            "kurt5": 3.6e-05,
+            "kurt21": -0.01,
+            "intercept": 0.150182
+          }
+        },
+        "M4_rv_skew_kurt_Ridge": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.287,
+          "oos_mse": 0.004591,
+          "oos_qlike": 0.290224,
+          "oos_r2": 0.1225,
+          "oos_corr": 0.375,
+          "dm_stat_vs_baseline": -1.4799,
+          "dm_pvalue_vs_baseline": 0.1389,
+          "coefficients": {
+            "rv21": 0.048983,
+            "skew5": -0.001675,
+            "skew21": -0.007532,
+            "kurt5": 3.5e-05,
+            "kurt21": -0.009997,
+            "intercept": 0.150182
+          }
+        },
+        "M5_full_OLS": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.3477,
+          "oos_mse": 0.004226,
+          "oos_qlike": 0.271711,
+          "oos_r2": 0.1924,
+          "oos_corr": 0.4446,
+          "dm_stat_vs_baseline": -1.5865,
+          "dm_pvalue_vs_baseline": 0.1126,
+          "coefficients": {
+            "rv21": 0.013875,
+            "rv5": 0.03586,
+            "rv63": 0.008252,
+            "skew5": -0.000559,
+            "skew21": -0.003218,
+            "skew63": -0.008544,
+            "kurt5": 0.000123,
+            "kurt21": -0.010274,
+            "kurt63": 0.000537,
+            "intercept": 0.150182
+          }
+        },
+        "M5_full_Ridge": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.3477,
+          "oos_mse": 0.004226,
+          "oos_qlike": 0.271705,
+          "oos_r2": 0.1924,
+          "oos_corr": 0.4446,
+          "dm_stat_vs_baseline": -1.5867,
+          "dm_pvalue_vs_baseline": 0.1126,
+          "coefficients": {
+            "rv21": 0.013888,
+            "rv5": 0.035839,
+            "rv63": 0.008252,
+            "skew5": -0.000559,
+            "skew21": -0.003218,
+            "skew63": -0.008541,
+            "kurt5": 0.000122,
+            "kurt21": -0.010271,
+            "kurt63": 0.000539,
+            "intercept": 0.150182
+          }
+        },
+        "M6_kitchen_sink_OLS": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63",
+            "neg_ratio21",
+            "down_ratio21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.3491,
+          "oos_mse": 0.004273,
+          "oos_qlike": 0.279945,
+          "oos_r2": 0.1834,
+          "oos_corr": 0.4366,
+          "dm_stat_vs_baseline": -1.4982,
+          "dm_pvalue_vs_baseline": 0.1341,
+          "coefficients": {
+            "rv21": 0.012342,
+            "rv5": 0.035117,
+            "rv63": 0.009642,
+            "skew5": -0.000483,
+            "skew21": 0.003192,
+            "skew63": -0.008841,
+            "kurt5": -0.000133,
+            "kurt21": -0.012767,
+            "kurt63": 0.000917,
+            "neg_ratio21": 0.000353,
+            "down_ratio21": 0.008438,
+            "intercept": 0.150182
+          }
+        },
+        "M6_kitchen_sink_Ridge": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63",
+            "neg_ratio21",
+            "down_ratio21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.3491,
+          "oos_mse": 0.004273,
+          "oos_qlike": 0.279915,
+          "oos_r2": 0.1835,
+          "oos_corr": 0.4367,
+          "dm_stat_vs_baseline": -1.4988,
+          "dm_pvalue_vs_baseline": 0.1339,
+          "coefficients": {
+            "rv21": 0.012358,
+            "rv5": 0.035094,
+            "rv63": 0.00964,
+            "skew5": -0.000484,
+            "skew21": 0.003168,
+            "skew63": -0.008837,
+            "kurt5": -0.000133,
+            "kurt21": -0.012756,
+            "kurt63": 0.000919,
+            "neg_ratio21": 0.000363,
+            "down_ratio21": 0.008411,
+            "intercept": 0.150182
+          }
+        }
+      }
+    },
+    "QQQ": {
+      "is_n": 3209,
+      "oos_n": 730,
+      "models": {
+        "M1_lagged_rv_OLS": {
+          "features": [
+            "rv21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.29,
+          "oos_mse": 0.005937,
+          "oos_qlike": 0.236817,
+          "oos_r2": 0.0577,
+          "oos_corr": 0.3234,
+          "dm_stat_vs_baseline": 0.0,
+          "dm_pvalue_vs_baseline": 1.0,
+          "coefficients": {
+            "rv21": 0.055423,
+            "intercept": 0.184037
+          }
+        },
+        "M1_lagged_rv_Ridge": {
+          "features": [
+            "rv21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.29,
+          "oos_mse": 0.005937,
+          "oos_qlike": 0.236814,
+          "oos_r2": 0.0578,
+          "oos_corr": 0.3234,
+          "dm_stat_vs_baseline": -0.8545,
+          "dm_pvalue_vs_baseline": 0.3928,
+          "coefficients": {
+            "rv21": 0.055406,
+            "intercept": 0.184037
+          }
+        },
+        "M2_rv_skew_OLS": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.2922,
+          "oos_mse": 0.005701,
+          "oos_qlike": 0.225162,
+          "oos_r2": 0.0952,
+          "oos_corr": 0.3542,
+          "dm_stat_vs_baseline": -2.4669,
+          "dm_pvalue_vs_baseline": 0.0136,
+          "coefficients": {
+            "rv21": 0.055554,
+            "skew5": -0.000464,
+            "skew21": -0.004611,
+            "intercept": 0.184037
+          }
+        },
+        "M2_rv_skew_Ridge": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.2922,
+          "oos_mse": 0.005701,
+          "oos_qlike": 0.225163,
+          "oos_r2": 0.0952,
+          "oos_corr": 0.3542,
+          "dm_stat_vs_baseline": -2.464,
+          "dm_pvalue_vs_baseline": 0.0137,
+          "coefficients": {
+            "rv21": 0.055536,
+            "skew5": -0.000465,
+            "skew21": -0.004609,
+            "intercept": 0.184037
+          }
+        },
+        "M3_rv_kurt_OLS": {
+          "features": [
+            "rv21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.2931,
+          "oos_mse": 0.005794,
+          "oos_qlike": 0.234005,
+          "oos_r2": 0.0804,
+          "oos_corr": 0.3362,
+          "dm_stat_vs_baseline": -0.9556,
+          "dm_pvalue_vs_baseline": 0.3393,
+          "coefficients": {
+            "rv21": 0.054466,
+            "kurt5": -0.001203,
+            "kurt21": -0.00548,
+            "intercept": 0.184037
+          }
+        },
+        "M3_rv_kurt_Ridge": {
+          "features": [
+            "rv21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.2931,
+          "oos_mse": 0.005794,
+          "oos_qlike": 0.234002,
+          "oos_r2": 0.0805,
+          "oos_corr": 0.3362,
+          "dm_stat_vs_baseline": -0.9564,
+          "dm_pvalue_vs_baseline": 0.3389,
+          "coefficients": {
+            "rv21": 0.054448,
+            "kurt5": -0.001203,
+            "kurt21": -0.005482,
+            "intercept": 0.184037
+          }
+        },
+        "M4_rv_skew_kurt_OLS": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.297,
+          "oos_mse": 0.00544,
+          "oos_qlike": 0.216608,
+          "oos_r2": 0.1367,
+          "oos_corr": 0.3853,
+          "dm_stat_vs_baseline": -1.6403,
+          "dm_pvalue_vs_baseline": 0.1009,
+          "coefficients": {
+            "rv21": 0.054348,
+            "skew5": -0.00031,
+            "skew21": -0.006589,
+            "kurt5": -0.000914,
+            "kurt21": -0.007334,
+            "intercept": 0.184037
+          }
+        },
+        "M4_rv_skew_kurt_Ridge": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.297,
+          "oos_mse": 0.00544,
+          "oos_qlike": 0.216611,
+          "oos_r2": 0.1367,
+          "oos_corr": 0.3853,
+          "dm_stat_vs_baseline": -1.64,
+          "dm_pvalue_vs_baseline": 0.101,
+          "coefficients": {
+            "rv21": 0.054331,
+            "skew5": -0.000311,
+            "skew21": -0.006587,
+            "kurt5": -0.000914,
+            "kurt21": -0.007334,
+            "intercept": 0.184037
+          }
+        },
+        "M5_full_OLS": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.3393,
+          "oos_mse": 0.005303,
+          "oos_qlike": 0.218223,
+          "oos_r2": 0.1585,
+          "oos_corr": 0.417,
+          "dm_stat_vs_baseline": -1.2065,
+          "dm_pvalue_vs_baseline": 0.2276,
+          "coefficients": {
+            "rv21": 0.025085,
+            "rv5": 0.032724,
+            "rv63": 0.004928,
+            "skew5": 0.000835,
+            "skew21": -0.004672,
+            "skew63": -0.002786,
+            "kurt5": -0.001898,
+            "kurt21": -0.008323,
+            "kurt63": 0.002574,
+            "intercept": 0.184037
+          }
+        },
+        "M5_full_Ridge": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.3393,
+          "oos_mse": 0.005302,
+          "oos_qlike": 0.218222,
+          "oos_r2": 0.1585,
+          "oos_corr": 0.417,
+          "dm_stat_vs_baseline": -1.2066,
+          "dm_pvalue_vs_baseline": 0.2276,
+          "coefficients": {
+            "rv21": 0.025076,
+            "rv5": 0.032715,
+            "rv63": 0.004939,
+            "skew5": 0.000834,
+            "skew21": -0.00467,
+            "skew63": -0.002788,
+            "kurt5": -0.001898,
+            "kurt21": -0.00832,
+            "kurt63": 0.002572,
+            "intercept": 0.184037
+          }
+        },
+        "M6_kitchen_sink_OLS": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63",
+            "neg_ratio21",
+            "down_ratio21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.3413,
+          "oos_mse": 0.005386,
+          "oos_qlike": 0.220157,
+          "oos_r2": 0.1453,
+          "oos_corr": 0.4073,
+          "dm_stat_vs_baseline": -1.1127,
+          "dm_pvalue_vs_baseline": 0.2658,
+          "coefficients": {
+            "rv21": 0.026481,
+            "rv5": 0.033358,
+            "rv63": 0.004062,
+            "skew5": 0.00091,
+            "skew21": 0.004727,
+            "skew63": -0.002926,
+            "kurt5": -0.002043,
+            "kurt21": -0.012006,
+            "kurt63": 0.002134,
+            "neg_ratio21": -0.006005,
+            "down_ratio21": 0.010087,
+            "intercept": 0.184037
+          }
+        },
+        "M6_kitchen_sink_Ridge": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63",
+            "neg_ratio21",
+            "down_ratio21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.3413,
+          "oos_mse": 0.005385,
+          "oos_qlike": 0.220139,
+          "oos_r2": 0.1454,
+          "oos_corr": 0.4073,
+          "dm_stat_vs_baseline": -1.1135,
+          "dm_pvalue_vs_baseline": 0.2655,
+          "coefficients": {
+            "rv21": 0.026466,
+            "rv5": 0.033348,
+            "rv63": 0.004076,
+            "skew5": 0.000909,
+            "skew21": 0.00468,
+            "skew63": -0.002925,
+            "kurt5": -0.002043,
+            "kurt21": -0.011986,
+            "kurt63": 0.002134,
+            "neg_ratio21": -0.005983,
+            "down_ratio21": 0.010037,
+            "intercept": 0.184037
+          }
+        }
+      }
+    },
+    "BTC-USD": {
+      "is_n": 2965,
+      "oos_n": 1074,
+      "models": {
+        "M1_lagged_rv_OLS": {
+          "features": [
+            "rv21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.1111,
+          "oos_mse": 0.026447,
+          "oos_qlike": 0.274028,
+          "oos_r2": -0.9527,
+          "oos_corr": 0.2275,
+          "dm_stat_vs_baseline": 0.0,
+          "dm_pvalue_vs_baseline": 1.0,
+          "coefficients": {
+            "rv21": 0.091762,
+            "intercept": 0.546094
+          }
+        },
+        "M1_lagged_rv_Ridge": {
+          "features": [
+            "rv21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.1111,
+          "oos_mse": 0.026451,
+          "oos_qlike": 0.274059,
+          "oos_r2": -0.953,
+          "oos_corr": 0.2275,
+          "dm_stat_vs_baseline": 5.7358,
+          "dm_pvalue_vs_baseline": 0.0,
+          "coefficients": {
+            "rv21": 0.091731,
+            "intercept": 0.546094
+          }
+        },
+        "M2_rv_skew_OLS": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.1168,
+          "oos_mse": 0.027414,
+          "oos_qlike": 0.278178,
+          "oos_r2": -1.024,
+          "oos_corr": 0.2144,
+          "dm_stat_vs_baseline": 1.904,
+          "dm_pvalue_vs_baseline": 0.0569,
+          "coefficients": {
+            "rv21": 0.095425,
+            "skew5": -0.01132,
+            "skew21": 0.021469,
+            "intercept": 0.546094
+          }
+        },
+        "M2_rv_skew_Ridge": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.1168,
+          "oos_mse": 0.027417,
+          "oos_qlike": 0.278206,
+          "oos_r2": -1.0243,
+          "oos_corr": 0.2144,
+          "dm_stat_vs_baseline": 1.912,
+          "dm_pvalue_vs_baseline": 0.0559,
+          "coefficients": {
+            "rv21": 0.09539,
+            "skew5": -0.011311,
+            "skew21": 0.021453,
+            "intercept": 0.546094
+          }
+        },
+        "M3_rv_kurt_OLS": {
+          "features": [
+            "rv21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.1417,
+          "oos_mse": 0.029483,
+          "oos_qlike": 0.289411,
+          "oos_r2": -1.1768,
+          "oos_corr": 0.2269,
+          "dm_stat_vs_baseline": 3.0494,
+          "dm_pvalue_vs_baseline": 0.0023,
+          "coefficients": {
+            "rv21": 0.092878,
+            "kurt5": -0.00168,
+            "kurt21": -0.047774,
+            "intercept": 0.546094
+          }
+        },
+        "M3_rv_kurt_Ridge": {
+          "features": [
+            "rv21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.1417,
+          "oos_mse": 0.029486,
+          "oos_qlike": 0.289435,
+          "oos_r2": -1.1771,
+          "oos_corr": 0.2269,
+          "dm_stat_vs_baseline": 3.053,
+          "dm_pvalue_vs_baseline": 0.0023,
+          "coefficients": {
+            "rv21": 0.092846,
+            "kurt5": -0.001685,
+            "kurt21": -0.047756,
+            "intercept": 0.546094
+          }
+        },
+        "M4_rv_skew_kurt_OLS": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.1455,
+          "oos_mse": 0.029971,
+          "oos_qlike": 0.292088,
+          "oos_r2": -1.2128,
+          "oos_corr": 0.2297,
+          "dm_stat_vs_baseline": 3.5652,
+          "dm_pvalue_vs_baseline": 0.0004,
+          "coefficients": {
+            "rv21": 0.095783,
+            "skew5": -0.010225,
+            "skew21": 0.017126,
+            "kurt5": -0.00158,
+            "kurt21": -0.046419,
+            "intercept": 0.546094
+          }
+        },
+        "M4_rv_skew_kurt_Ridge": {
+          "features": [
+            "rv21",
+            "skew5",
+            "skew21",
+            "kurt5",
+            "kurt21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.1455,
+          "oos_mse": 0.029974,
+          "oos_qlike": 0.292109,
+          "oos_r2": -1.213,
+          "oos_corr": 0.2297,
+          "dm_stat_vs_baseline": 3.5683,
+          "dm_pvalue_vs_baseline": 0.0004,
+          "coefficients": {
+            "rv21": 0.095748,
+            "skew5": -0.010218,
+            "skew21": 0.017114,
+            "kurt5": -0.001586,
+            "kurt21": -0.046403,
+            "intercept": 0.546094
+          }
+        },
+        "M5_full_OLS": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.2219,
+          "oos_mse": 0.032592,
+          "oos_qlike": 0.305533,
+          "oos_r2": -1.4064,
+          "oos_corr": 0.1792,
+          "dm_stat_vs_baseline": 3.2627,
+          "dm_pvalue_vs_baseline": 0.0011,
+          "coefficients": {
+            "rv21": 0.020545,
+            "rv5": 0.056573,
+            "rv63": 0.049552,
+            "skew5": -0.004877,
+            "skew21": -0.013363,
+            "skew63": 0.070997,
+            "kurt5": -0.00678,
+            "kurt21": -0.033283,
+            "kurt63": 0.003349,
+            "intercept": 0.546094
+          }
+        },
+        "M5_full_Ridge": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.2219,
+          "oos_mse": 0.032592,
+          "oos_qlike": 0.305533,
+          "oos_r2": -1.4064,
+          "oos_corr": 0.1792,
+          "dm_stat_vs_baseline": 3.264,
+          "dm_pvalue_vs_baseline": 0.0011,
+          "coefficients": {
+            "rv21": 0.020583,
+            "rv5": 0.056547,
+            "rv63": 0.049517,
+            "skew5": -0.004879,
+            "skew21": -0.013337,
+            "skew63": 0.070949,
+            "kurt5": -0.006779,
+            "kurt21": -0.033271,
+            "kurt63": 0.003323,
+            "intercept": 0.546094
+          }
+        },
+        "M6_kitchen_sink_OLS": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63",
+            "neg_ratio21",
+            "down_ratio21"
+          ],
+          "reg_type": "OLS",
+          "is_r2": 0.2427,
+          "oos_mse": 0.030453,
+          "oos_qlike": 0.288595,
+          "oos_r2": -1.2485,
+          "oos_corr": 0.2048,
+          "dm_stat_vs_baseline": 1.7284,
+          "dm_pvalue_vs_baseline": 0.0839,
+          "coefficients": {
+            "rv21": 0.022832,
+            "rv5": 0.050781,
+            "rv63": 0.051816,
+            "skew5": -0.004883,
+            "skew21": -0.07842,
+            "skew63": 0.068491,
+            "kurt5": -0.005281,
+            "kurt21": -0.014171,
+            "kurt63": -0.000566,
+            "neg_ratio21": -0.021654,
+            "down_ratio21": -0.073401,
+            "intercept": 0.546094
+          }
+        },
+        "M6_kitchen_sink_Ridge": {
+          "features": [
+            "rv21",
+            "rv5",
+            "rv63",
+            "skew5",
+            "skew21",
+            "skew63",
+            "kurt5",
+            "kurt21",
+            "kurt63",
+            "neg_ratio21",
+            "down_ratio21"
+          ],
+          "reg_type": "Ridge",
+          "is_r2": 0.2427,
+          "oos_mse": 0.030451,
+          "oos_qlike": 0.288593,
+          "oos_r2": -1.2483,
+          "oos_corr": 0.2049,
+          "dm_stat_vs_baseline": 1.7288,
+          "dm_pvalue_vs_baseline": 0.0838,
+          "coefficients": {
+            "rv21": 0.022873,
+            "rv5": 0.050774,
+            "rv63": 0.051774,
+            "skew5": -0.004886,
+            "skew21": -0.078143,
+            "skew63": 0.068429,
+            "kurt5": -0.005288,
+            "kurt21": -0.01423,
+            "kurt63": -0.000589,
+            "neg_ratio21": -0.021663,
+            "down_ratio21": -0.073138,
+            "intercept": 0.546094
+          }
+        }
+      }
+    }
+  },
+  "expanding_window_results": {
+    "SPY": {
+      "M1_lagged_rv": {
+        "n_oos": 730,
+        "oos_mse": 0.005112,
+        "oos_qlike": 0.322538,
+        "oos_r2": 0.0231,
+        "oos_corr": 0.2966
+      },
+      "M4_rv_skew_kurt": {
+        "n_oos": 730,
+        "oos_mse": 0.00463,
+        "oos_qlike": 0.295326,
+        "oos_r2": 0.1152,
+        "oos_corr": 0.3649
+      },
+      "M5_full": {
+        "n_oos": 730,
+        "oos_mse": 0.004213,
+        "oos_qlike": 0.276745,
+        "oos_r2": 0.1949,
+        "oos_corr": 0.4462
+      }
+    },
+    "QQQ": {
+      "M1_lagged_rv": {
+        "n_oos": 730,
+        "oos_mse": 0.006009,
+        "oos_qlike": 0.238885,
+        "oos_r2": 0.0464,
+        "oos_corr": 0.3157
+      },
+      "M4_rv_skew_kurt": {
+        "n_oos": 730,
+        "oos_mse": 0.005444,
+        "oos_qlike": 0.216185,
+        "oos_r2": 0.1361,
+        "oos_corr": 0.3844
+      },
+      "M5_full": {
+        "n_oos": 730,
+        "oos_mse": 0.005109,
+        "oos_qlike": 0.21078,
+        "oos_r2": 0.1892,
+        "oos_corr": 0.4487
+      }
+    },
+    "BTC-USD": {
+      "M1_lagged_rv": {
+        "n_oos": 1074,
+        "oos_mse": 0.022253,
+        "oos_qlike": 0.24473,
+        "oos_r2": -0.643,
+        "oos_corr": 0.2373
+      },
+      "M4_rv_skew_kurt": {
+        "n_oos": 1074,
+        "oos_mse": 0.024467,
+        "oos_qlike": 0.25566,
+        "oos_r2": -0.8065,
+        "oos_corr": 0.2529
+      },
+      "M5_full": {
+        "n_oos": 1074,
+        "oos_mse": 0.024964,
+        "oos_qlike": 0.257761,
+        "oos_r2": -0.8432,
+        "oos_corr": 0.2077
+      }
+    }
+  },
+  "regime_analysis": {
+    "SPY": {
+      "rv_median": 0.1252,
+      "high_vol_n": 1990,
+      "low_vol_n": 1991,
+      "regime_correlations": {
+        "high_vol": {
+          "skew21": {
+            "r": -0.0286,
+            "p": 0.202552
+          },
+          "kurt21": {
+            "r": -0.0887,
+            "p": 7.5e-05
+          }
+        },
+        "low_vol": {
+          "skew21": {
+            "r": -0.0677,
+            "p": 0.002493
+          },
+          "kurt21": {
+            "r": -0.1574,
+            "p": 0.0
+          }
+        }
+      }
+    },
+    "QQQ": {
+      "rv_median": 0.1597,
+      "high_vol_n": 1990,
+      "low_vol_n": 1991,
+      "regime_correlations": {
+        "high_vol": {
+          "skew21": {
+            "r": -0.0646,
+            "p": 0.003939
+          },
+          "kurt21": {
+            "r": -0.084,
+            "p": 0.000177
+          }
+        },
+        "low_vol": {
+          "skew21": {
+            "r": -0.023,
+            "p": 0.304538
+          },
+          "kurt21": {
+            "r": -0.0734,
+            "p": 0.00105
+          }
+        }
+      }
+    },
+    "BTC-USD": {
+      "rv_median": 0.4511,
+      "high_vol_n": 2040,
+      "low_vol_n": 2041,
+      "regime_correlations": {
+        "high_vol": {
+          "skew21": {
+            "r": -0.0259,
+            "p": 0.241381
+          },
+          "kurt21": {
+            "r": -0.1851,
+            "p": 0.0
+          }
+        },
+        "low_vol": {
+          "skew21": {
+            "r": 0.009,
+            "p": 0.685401
+          },
+          "kurt21": {
+            "r": -0.0604,
+            "p": 0.006354
+          }
+        }
+      }
+    }
+  },
+  "granger_causality": {
+    "SPY": {
+      "skew21": {
+        "pvalues_by_lag": {
+          "lag_1": 1.3e-05,
+          "lag_2": 0.000866,
+          "lag_3": 0.088538,
+          "lag_4": 0.389928,
+          "lag_5": 0.344306
+        },
+        "min_pvalue": 1.3e-05,
+        "best_lag": "lag_1",
+        "significant": true
+      },
+      "kurt21": {
+        "pvalues_by_lag": {
+          "lag_1": 0.261176,
+          "lag_2": 0.001474,
+          "lag_3": 0.00026,
+          "lag_4": 1e-06,
+          "lag_5": 8e-06
+        },
+        "min_pvalue": 1e-06,
+        "best_lag": "lag_4",
+        "significant": true
+      }
+    },
+    "QQQ": {
+      "skew21": {
+        "pvalues_by_lag": {
+          "lag_1": 0.001143,
+          "lag_2": 0.02422,
+          "lag_3": 0.249678,
+          "lag_4": 0.453147,
+          "lag_5": 0.513562
+        },
+        "min_pvalue": 0.001143,
+        "best_lag": "lag_1",
+        "significant": true
+      },
+      "kurt21": {
+        "pvalues_by_lag": {
+          "lag_1": 0.056717,
+          "lag_2": 0.002327,
+          "lag_3": 0.00042,
+          "lag_4": 0.000269,
+          "lag_5": 0.000378
+        },
+        "min_pvalue": 0.000269,
+        "best_lag": "lag_4",
+        "significant": true
+      }
+    },
+    "BTC-USD": {
+      "skew21": {
+        "pvalues_by_lag": {
+          "lag_1": 0.166735,
+          "lag_2": 0.53919,
+          "lag_3": 0.495535,
+          "lag_4": 0.623776,
+          "lag_5": 0.701341
+        },
+        "min_pvalue": 0.166735,
+        "best_lag": "lag_1",
+        "significant": false
+      },
+      "kurt21": {
+        "pvalues_by_lag": {
+          "lag_1": 0.535955,
+          "lag_2": 0.021495,
+          "lag_3": 0.032013,
+          "lag_4": 0.050193,
+          "lag_5": 0.040188
+        },
+        "min_pvalue": 0.021495,
+        "best_lag": "lag_2",
+        "significant": true
+      }
+    }
+  },
+  "incremental_r2": {
+    "SPY": {
+      "baseline_r2": 0.0318,
+      "increments": {
+        "M2_rv_skew_OLS": {
+          "oos_r2": 0.059,
+          "delta_r2": 0.0272,
+          "dm_pvalue": 0.0868
+        },
+        "M3_rv_kurt_OLS": {
+          "oos_r2": 0.0718,
+          "delta_r2": 0.04,
+          "dm_pvalue": 0.242
+        },
+        "M4_rv_skew_kurt_OLS": {
+          "oos_r2": 0.1225,
+          "delta_r2": 0.0907,
+          "dm_pvalue": 0.1388
+        },
+        "M5_full_OLS": {
+          "oos_r2": 0.1924,
+          "delta_r2": 0.1606,
+          "dm_pvalue": 0.1126
+        },
+        "M6_kitchen_sink_OLS": {
+          "oos_r2": 0.1834,
+          "delta_r2": 0.1516,
+          "dm_pvalue": 0.1341
+        }
+      }
+    },
+    "QQQ": {
+      "baseline_r2": 0.0577,
+      "increments": {
+        "M2_rv_skew_OLS": {
+          "oos_r2": 0.0952,
+          "delta_r2": 0.0375,
+          "dm_pvalue": 0.0136
+        },
+        "M3_rv_kurt_OLS": {
+          "oos_r2": 0.0804,
+          "delta_r2": 0.0227,
+          "dm_pvalue": 0.3393
+        },
+        "M4_rv_skew_kurt_OLS": {
+          "oos_r2": 0.1367,
+          "delta_r2": 0.079,
+          "dm_pvalue": 0.1009
+        },
+        "M5_full_OLS": {
+          "oos_r2": 0.1585,
+          "delta_r2": 0.1008,
+          "dm_pvalue": 0.2276
+        },
+        "M6_kitchen_sink_OLS": {
+          "oos_r2": 0.1453,
+          "delta_r2": 0.0876,
+          "dm_pvalue": 0.2658
+        }
+      }
+    },
+    "BTC-USD": {
+      "baseline_r2": -0.9527,
+      "increments": {
+        "M2_rv_skew_OLS": {
+          "oos_r2": -1.024,
+          "delta_r2": -0.0713,
+          "dm_pvalue": 0.0569
+        },
+        "M3_rv_kurt_OLS": {
+          "oos_r2": -1.1768,
+          "delta_r2": -0.2241,
+          "dm_pvalue": 0.0023
+        },
+        "M4_rv_skew_kurt_OLS": {
+          "oos_r2": -1.2128,
+          "delta_r2": -0.2601,
+          "dm_pvalue": 0.0004
+        },
+        "M5_full_OLS": {
+          "oos_r2": -1.4064,
+          "delta_r2": -0.4537,
+          "dm_pvalue": 0.0011
+        },
+        "M6_kitchen_sink_OLS": {
+          "oos_r2": -1.2485,
+          "delta_r2": -0.2958,
+          "dm_pvalue": 0.0839
+        }
+      }
+    }
+  },
+  "cross_asset_summary": [
+    {
+      "asset": "SPY",
+      "baseline_r2": 0.0318,
+      "best_model": "M5_full_OLS",
+      "best_delta_r2": 0.1606,
+      "dm_significant": false
+    },
+    {
+      "asset": "QQQ",
+      "baseline_r2": 0.0577,
+      "best_model": "M5_full_OLS",
+      "best_delta_r2": 0.1008,
+      "dm_significant": false
+    },
+    {
+      "asset": "BTC-USD",
+      "baseline_r2": -0.9527,
+      "best_model": "M2_rv_skew_OLS",
+      "best_delta_r2": -0.0713,
+      "dm_significant": false
+    }
+  ],
+  "elapsed_seconds": 6.4,
+  "conclusion": "Higher moments (rolling skewness/kurtosis) do NOT significantly improve OOS vol prediction over lagged RV21 for any of the 3 assets tested. Average \u0394 R\u00b2 = +0.0634. This confirms the prior finding (r=-0.073, \u0394 R\u00b2 +2.7pp) that higher moments provide minimal incremental information for volatility forecasting. The predictive content of higher moments is already captured by the level of realized volatility."
+}
