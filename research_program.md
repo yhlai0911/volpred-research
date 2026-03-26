@@ -1063,3 +1063,13 @@
 | **Forecasting** | **GJR-X(VIX) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
 | **VaR** | **GJR-X(VIX)** | GJR-X(VIX) | GJR alone | GJR-SkewT |
 | **VT Strategy** | 12/VIX | 12/VIX adapted | Asset-specific | 8.63/VIX |
+- [x] K488: GJR-X(VIX) VT — Cannot beat 12/VIX（4th prediction≠trading, risk premium is feature not bug）
+- [x] K489: **★ VIX Term Structure** — VIX9D R²=0.41 for 5d vol, direction accuracy 58-61%
+- [x] K490: **★★ GJR-X(VIX9D) beats GJR-X(VIX)** — 3/3 OOS (DM t=6.63), delta CV=0.08 (10x more stable), VIX9D subsumes VIX
+
+### 最終最佳模型（66 experiments validated）
+**GJR-GARCH-X(VIX9D)**: h_t = ω + α·ε² + γ·I(ε<0)·ε² + β·h + δ·VIX9D²/252
+- Forecasting: best (QLIKE -17.7% vs GJR, DM t=6.63 vs VIX version)
+- VaR 1%: Trinity 3/3 pass
+- Delta: ultra-stable CV=0.08
+- Limitation: VIX9D data only from 2018 (3 OOS periods vs 5 for VIX)

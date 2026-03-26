@@ -1,0 +1,1112 @@
+{
+  "experiment_id": "K490",
+  "title": "GJR-GARCH-X(VIX9D) vs GJR-X(VIX) Comparison",
+  "hypothesis": "VIX9D (9-day implied vol) may outperform VIX (30-day) as exogenous regressor in GARCH-X variance equation, since VIX9D has higher R\u00b2 for 5d realized vol",
+  "builds_on": "K486 (GJR-X(VIX) breaks impossible triangle), K489 (VIX9D R\u00b2=0.41 for 5d vol)",
+  "data_source": "yfinance: SPY, ^VIX, ^VIX9D",
+  "data_period": "2017-01-04 to 2026-03-25",
+  "n_total": 2318,
+  "is_window": 500,
+  "refit_interval": 21,
+  "methodology": {
+    "models": [
+      "GJR",
+      "GJR-X(VIX)",
+      "GJR-X(VIX9D)",
+      "GJR-X(VIX+VIX9D)"
+    ],
+    "variance_equation": "h_t = \u03c9 + \u03b1\u00b7\u03b5\u00b2_{t-1} + \u03b3\u00b7I(\u03b5<0)\u00b7\u03b5\u00b2_{t-1} + \u03b2\u00b7h_{t-1} + \u03b4\u00b7X\u00b2_{t-1}/252",
+    "distribution": "Student-t (MLE estimated df)",
+    "estimation": "Custom MLE via scipy L-BFGS-B (arch package for baseline GJR)",
+    "evaluation": "QLIKE (Patton 2011), DM test (HAC), VaR Trinity (Kupiec + Christoffersen + DQ)",
+    "oos_periods": [
+      {
+        "name": "2019-2020 (COVID)",
+        "start": "2019-01-01",
+        "end": "2020-12-31"
+      },
+      {
+        "name": "2021-2022 (rate hikes)",
+        "start": "2021-01-01",
+        "end": "2022-12-31"
+      },
+      {
+        "name": "2023-2024",
+        "start": "2023-01-01",
+        "end": "2024-12-31"
+      }
+    ]
+  },
+  "references": [
+    "Kupiec (1995) Techniques for Verifying the Accuracy of Risk Measurement Models",
+    "Christoffersen (1998) Evaluating Interval Forecasts, International Economic Review",
+    "Engle & Manganelli (2004) CAViaR: Conditional Autoregressive VaR, JBES",
+    "Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies, JoE",
+    "Diebold & Mariano (1995) Comparing Predictive Accuracy, JBES",
+    "K486: GJR-X(VIX) breaks impossible triangle",
+    "K489: VIX term structure \u2014 VIX9D R\u00b2=0.41 for 5d vol"
+  ],
+  "diagnostics": {
+    "n_obs": 2318,
+    "date_range": "2017-01-04 to 2026-03-25",
+    "return_mean_pct": 0.05250832658248624,
+    "return_std_pct": 1.1588728075302195,
+    "return_skew": -0.5993969214470752,
+    "return_kurt": 15.046384643302865,
+    "vix_mean": 18.8252286585988,
+    "vix_std": 7.491975190365572,
+    "vix9d_mean": 18.024292512429593,
+    "vix9d_std": 9.156253400354851,
+    "corr_vix_vix9d": 0.9724716968285793,
+    "corr_vix_var_vix9d_var": 0.9689759581017607,
+    "vix_daily_var_mean": 1.6289472682300288,
+    "vix9d_daily_var_mean": 1.6217298773740572,
+    "adf_stat": -15.27930274308297,
+    "adf_p": 4.601342717710461e-28,
+    "is_stationary": true,
+    "arch_lm_stat": 695.9384365174968,
+    "arch_lm_p": 4.6757077421465755e-143,
+    "has_arch_effects": true,
+    "ljung_box_sq_p10": 0.0
+  },
+  "period_results": {
+    "2019-2020 (COVID)": {
+      "name": "2019-2020 (COVID)",
+      "n_oos": 505,
+      "n_refits": 25,
+      "models": {
+        "GJR": {
+          "qlike": -7.594827196585952,
+          "var_1pct": {
+            "n_obs": 505,
+            "n_violations": 14,
+            "violation_rate": 0.0277,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 10.8119,
+              "p_value": 0.001,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 21.8997,
+              "p_value": 0.0013,
+              "pass": false
+            },
+            "trinity_pass": false,
+            "tests_passed": "1/3"
+          },
+          "var_5pct": {
+            "n_obs": 505,
+            "n_violations": 26,
+            "violation_rate": 0.0515,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.0232,
+              "p_value": 0.8789,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.1051,
+              "p_value": 0.7458,
+              "pass": true
+            },
+            "dq": {
+              "stat": 23.0684,
+              "p_value": 0.0008,
+              "pass": false
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "params_last": {
+            "mu": 0.1365428185102973,
+            "omega": 0.038750298288966555,
+            "alpha[1]": 0.10627234742478692,
+            "gamma[1]": 0.25979570456603734,
+            "beta[1]": 0.7535245977205671,
+            "nu": 5.7464904128200684
+          }
+        },
+        "GJR-X(VIX)": {
+          "qlike": -8.255734008685419,
+          "var_1pct": {
+            "n_obs": 505,
+            "n_violations": 3,
+            "violation_rate": 0.0059,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.9837,
+              "p_value": 0.3213,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.1862,
+              "p_value": 0.9999,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 505,
+            "n_violations": 14,
+            "violation_rate": 0.0277,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 6.2482,
+              "p_value": 0.0124,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 9.2129,
+              "p_value": 0.162,
+              "pass": true
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "params_last": {
+            "mu": 0.11358097994684194,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.43805851758190645,
+            "beta": 0.6662826178955206,
+            "nu": 6.6006116838665525,
+            "persistence": 0.8853128766864737,
+            "delta_VIX": 0.08754448706441838
+          }
+        },
+        "GJR-X(VIX9D)": {
+          "qlike": -8.32818644773206,
+          "var_1pct": {
+            "n_obs": 505,
+            "n_violations": 3,
+            "violation_rate": 0.0059,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.9837,
+              "p_value": 0.3213,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.0757,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 505,
+            "n_violations": 12,
+            "violation_rate": 0.0238,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 9.0086,
+              "p_value": 0.0027,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 4.5193,
+              "p_value": 0.6068,
+              "pass": true
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "params_last": {
+            "mu": 0.11206480771114935,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.39937963958225786,
+            "beta": 0.5817503233452521,
+            "nu": 7.173814202590153,
+            "persistence": 0.781441143136381,
+            "delta_VIX9D": 0.16370788542348697
+          }
+        },
+        "GJR-X(VIX+VIX9D)": {
+          "qlike": -8.328188513615057,
+          "var_1pct": {
+            "n_obs": 505,
+            "n_violations": 3,
+            "violation_rate": 0.0059,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.9837,
+              "p_value": 0.3213,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.0757,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 505,
+            "n_violations": 12,
+            "violation_rate": 0.0238,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 9.0086,
+              "p_value": 0.0027,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 4.5193,
+              "p_value": 0.6068,
+              "pass": true
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "params_last": {
+            "mu": 0.11206253500939423,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.3993963005738645,
+            "beta": 0.5817379710708246,
+            "nu": 7.174126807820305,
+            "persistence": 0.7814371213577569,
+            "delta_VIX": 0.0,
+            "delta_VIX9D": 0.16371284207959863
+          }
+        }
+      },
+      "dm_tests": {
+        "GJR_vs_GJR-X(VIX)": {
+          "dm_stat": 4.592,
+          "dm_p": 0.0,
+          "delta_qlike_pct": 8.7021,
+          "significant_5pct": true
+        },
+        "GJR_vs_GJR-X(VIX9D)": {
+          "dm_stat": 4.6469,
+          "dm_p": 0.0,
+          "delta_qlike_pct": 9.656,
+          "significant_5pct": true
+        },
+        "GJR_vs_GJR-X(VIX+VIX9D)": {
+          "dm_stat": 4.6469,
+          "dm_p": 0.0,
+          "delta_qlike_pct": 9.6561,
+          "significant_5pct": true
+        },
+        "VIX_vs_VIX9D": {
+          "dm_stat": 3.4402,
+          "dm_p": 0.0006,
+          "delta_qlike_pct": 0.8776,
+          "significant_5pct": true
+        }
+      }
+    },
+    "2021-2022 (rate hikes)": {
+      "name": "2021-2022 (rate hikes)",
+      "n_oos": 503,
+      "n_refits": 24,
+      "models": {
+        "GJR": {
+          "qlike": -7.759302041291018,
+          "var_1pct": {
+            "n_obs": 503,
+            "n_violations": 8,
+            "violation_rate": 0.0159,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 1.5021,
+              "p_value": 0.2203,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 35.2458,
+              "p_value": 0.0,
+              "pass": false
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "var_5pct": {
+            "n_obs": 503,
+            "n_violations": 29,
+            "violation_rate": 0.0577,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.5925,
+              "p_value": 0.4415,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.0905,
+              "p_value": 0.2964,
+              "pass": true
+            },
+            "dq": {
+              "stat": 19.187,
+              "p_value": 0.0039,
+              "pass": false
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "params_last": {
+            "mu": 0.058226119645800496,
+            "omega": 0.015369282766380986,
+            "alpha[1]": 4.802871498310735e-11,
+            "gamma[1]": 0.18575008190788983,
+            "beta[1]": 0.9003700968345548,
+            "nu": 8.642794694546176
+          }
+        },
+        "GJR-X(VIX)": {
+          "qlike": -8.036300985018048,
+          "var_1pct": {
+            "n_obs": 503,
+            "n_violations": 5,
+            "violation_rate": 0.0099,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.0002,
+              "p_value": 0.9893,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.9871,
+              "p_value": 0.9861,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 503,
+            "n_violations": 24,
+            "violation_rate": 0.0477,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.0562,
+              "p_value": 0.8127,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0219,
+              "p_value": 0.8825,
+              "pass": true
+            },
+            "dq": {
+              "stat": 3.7546,
+              "p_value": 0.7098,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "params_last": {
+            "mu": 0.052091436962708265,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.2780805214496069,
+            "beta": 0.8017717933294574,
+            "nu": 9.448495588811666,
+            "persistence": 0.9408130540542607,
+            "delta_VIX": 0.0458167381980008
+          }
+        },
+        "GJR-X(VIX9D)": {
+          "qlike": -8.102897590611288,
+          "var_1pct": {
+            "n_obs": 503,
+            "n_violations": 4,
+            "violation_rate": 0.008,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.2291,
+              "p_value": 0.6322,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.2524,
+              "p_value": 0.9997,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 503,
+            "n_violations": 23,
+            "violation_rate": 0.0457,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.1989,
+              "p_value": 0.6556,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 3.8674,
+              "p_value": 0.6946,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "params_last": {
+            "mu": 0.03841084247751346,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.12873335598508506,
+            "beta": 0.44515029729430683,
+            "nu": 12.331052684387998,
+            "persistence": 0.5095179752868494,
+            "delta_VIX9D": 0.3343719497173459
+          }
+        },
+        "GJR-X(VIX+VIX9D)": {
+          "qlike": -8.101973490430463,
+          "var_1pct": {
+            "n_obs": 503,
+            "n_violations": 4,
+            "violation_rate": 0.008,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.2291,
+              "p_value": 0.6322,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.2484,
+              "p_value": 0.9997,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 503,
+            "n_violations": 23,
+            "violation_rate": 0.0457,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.1989,
+              "p_value": 0.6556,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 3.9168,
+              "p_value": 0.6879,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "params_last": {
+            "mu": 0.03840990212447192,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.12937002842755188,
+            "beta": 0.4460905779646998,
+            "nu": 12.32644359274801,
+            "persistence": 0.5107765921784757,
+            "delta_VIX": 0.0,
+            "delta_VIX9D": 0.33356987742984157
+          }
+        }
+      },
+      "dm_tests": {
+        "GJR_vs_GJR-X(VIX)": {
+          "dm_stat": 3.7774,
+          "dm_p": 0.0002,
+          "delta_qlike_pct": 3.5699,
+          "significant_5pct": true
+        },
+        "GJR_vs_GJR-X(VIX9D)": {
+          "dm_stat": 4.5741,
+          "dm_p": 0.0,
+          "delta_qlike_pct": 4.4282,
+          "significant_5pct": true
+        },
+        "GJR_vs_GJR-X(VIX+VIX9D)": {
+          "dm_stat": 4.5616,
+          "dm_p": 0.0,
+          "delta_qlike_pct": 4.4163,
+          "significant_5pct": true
+        },
+        "VIX_vs_VIX9D": {
+          "dm_stat": 4.9697,
+          "dm_p": 0.0,
+          "delta_qlike_pct": 0.8287,
+          "significant_5pct": true
+        }
+      }
+    },
+    "2023-2024": {
+      "name": "2023-2024",
+      "n_oos": 502,
+      "n_refits": 24,
+      "models": {
+        "GJR": {
+          "qlike": -8.513225191494607,
+          "var_1pct": {
+            "n_obs": 502,
+            "n_violations": 8,
+            "violation_rate": 0.0159,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 1.5141,
+              "p_value": 0.2185,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 8.2372,
+              "p_value": 0.0041,
+              "pass": false
+            },
+            "dq": {
+              "stat": 39.3642,
+              "p_value": 0.0,
+              "pass": false
+            },
+            "trinity_pass": false,
+            "tests_passed": "1/3"
+          },
+          "var_5pct": {
+            "n_obs": 502,
+            "n_violations": 22,
+            "violation_rate": 0.0438,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 0.4198,
+              "p_value": 0.517,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 3.1467,
+              "p_value": 0.0761,
+              "pass": true
+            },
+            "dq": {
+              "stat": 16.1585,
+              "p_value": 0.0129,
+              "pass": false
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "params_last": {
+            "mu": 0.08802429487483376,
+            "omega": 0.03438993299013992,
+            "alpha[1]": 0.0,
+            "gamma[1]": 0.14901458595751224,
+            "beta[1]": 0.8690368836972063,
+            "nu": 20.33007524910939
+          }
+        },
+        "GJR-X(VIX)": {
+          "qlike": -8.73863731518932,
+          "var_1pct": {
+            "n_obs": 502,
+            "n_violations": 3,
+            "violation_rate": 0.006,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.9593,
+              "p_value": 0.3274,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.4645,
+              "p_value": 0.9982,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 502,
+            "n_violations": 18,
+            "violation_rate": 0.0359,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 2.3353,
+              "p_value": 0.1265,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 2.4158,
+              "p_value": 0.8778,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "params_last": {
+            "mu": 0.09100152716109892,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.08076351617249064,
+            "beta": 0.3,
+            "nu": 27.705716689784726,
+            "persistence": 0.3403827580862453,
+            "delta_VIX": 0.3860060746676195
+          }
+        },
+        "GJR-X(VIX9D)": {
+          "qlike": -8.78403195211507,
+          "var_1pct": {
+            "n_obs": 502,
+            "n_violations": 0,
+            "violation_rate": 0.0,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 502,
+            "n_violations": 14,
+            "violation_rate": 0.0279,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 6.1097,
+              "p_value": 0.0134,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 3.4102,
+              "p_value": 0.7559,
+              "pass": true
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "params_last": {
+            "mu": 0.08340008304274105,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.04538052136884513,
+            "beta": 0.3,
+            "nu": 37.6954028151909,
+            "persistence": 0.32269126068442255,
+            "delta_VIX9D": 0.42739771730315984
+          }
+        },
+        "GJR-X(VIX+VIX9D)": {
+          "qlike": -8.782465210810495,
+          "var_1pct": {
+            "n_obs": 502,
+            "n_violations": 0,
+            "violation_rate": 0.0,
+            "expected_rate": 0.01,
+            "kupiec": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "trinity_pass": true,
+            "tests_passed": "3/3"
+          },
+          "var_5pct": {
+            "n_obs": 502,
+            "n_violations": 13,
+            "violation_rate": 0.0259,
+            "expected_rate": 0.05,
+            "kupiec": {
+              "stat": 7.3986,
+              "p_value": 0.0065,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "dq": {
+              "stat": 3.5475,
+              "p_value": 0.7376,
+              "pass": true
+            },
+            "trinity_pass": false,
+            "tests_passed": "2/3"
+          },
+          "params_last": {
+            "mu": 0.08343026058273707,
+            "omega": 1e-06,
+            "alpha": 1e-06,
+            "gamma": 0.045407641183531605,
+            "beta": 0.3,
+            "nu": 37.54939144706969,
+            "persistence": 0.3227048205917658,
+            "delta_VIX": 0.0,
+            "delta_VIX9D": 0.42735993341764533
+          }
+        }
+      },
+      "dm_tests": {
+        "GJR_vs_GJR-X(VIX)": {
+          "dm_stat": 2.9421,
+          "dm_p": 0.0033,
+          "delta_qlike_pct": 2.6478,
+          "significant_5pct": true
+        },
+        "GJR_vs_GJR-X(VIX9D)": {
+          "dm_stat": 3.395,
+          "dm_p": 0.0007,
+          "delta_qlike_pct": 3.181,
+          "significant_5pct": true
+        },
+        "GJR_vs_GJR-X(VIX+VIX9D)": {
+          "dm_stat": 3.374,
+          "dm_p": 0.0007,
+          "delta_qlike_pct": 3.1626,
+          "significant_5pct": true
+        },
+        "VIX_vs_VIX9D": {
+          "dm_stat": 3.7103,
+          "dm_p": 0.0002,
+          "delta_qlike_pct": 0.5195,
+          "significant_5pct": true
+        }
+      }
+    }
+  },
+  "summary": {
+    "GJR": {
+      "mean_qlike": -7.955784809790526,
+      "qlikes_by_period": {
+        "2019-2020 (COVID)": -7.594827196585952,
+        "2021-2022 (rate hikes)": -7.759302041291018,
+        "2023-2024": -8.513225191494607
+      },
+      "var1_trinity_pass": "0/3",
+      "var5_trinity_pass": "0/3",
+      "n_periods": 3
+    },
+    "GJR-X(VIX)": {
+      "mean_qlike": -8.343557436297596,
+      "qlikes_by_period": {
+        "2019-2020 (COVID)": -8.255734008685419,
+        "2021-2022 (rate hikes)": -8.036300985018048,
+        "2023-2024": -8.73863731518932
+      },
+      "var1_trinity_pass": "3/3",
+      "var5_trinity_pass": "2/3",
+      "n_periods": 3
+    },
+    "GJR-X(VIX9D)": {
+      "mean_qlike": -8.40503866348614,
+      "qlikes_by_period": {
+        "2019-2020 (COVID)": -8.32818644773206,
+        "2021-2022 (rate hikes)": -8.102897590611288,
+        "2023-2024": -8.78403195211507
+      },
+      "var1_trinity_pass": "3/3",
+      "var5_trinity_pass": "1/3",
+      "n_periods": 3
+    },
+    "GJR-X(VIX+VIX9D)": {
+      "mean_qlike": -8.404209071618672,
+      "qlikes_by_period": {
+        "2019-2020 (COVID)": -8.328188513615057,
+        "2021-2022 (rate hikes)": -8.101973490430463,
+        "2023-2024": -8.782465210810495
+      },
+      "var1_trinity_pass": "3/3",
+      "var5_trinity_pass": "1/3",
+      "n_periods": 3
+    },
+    "pooled_dm_GJR_vs_GJR-X(VIX)": {
+      "dm_stat": 6.4821,
+      "dm_p": 0.0,
+      "delta_qlike_pct": 4.8805
+    },
+    "pooled_dm_GJR_vs_GJR-X(VIX9D)": {
+      "dm_stat": 6.9879,
+      "dm_p": 0.0,
+      "delta_qlike_pct": 5.6537
+    },
+    "pooled_dm_GJR_vs_GJR-X(VIX+VIX9D)": {
+      "dm_stat": 6.9743,
+      "dm_p": 0.0,
+      "delta_qlike_pct": 5.6433
+    },
+    "pooled_dm_VIX_vs_VIX9D": {
+      "dm_stat": 6.6259,
+      "dm_p": 0.0,
+      "delta_qlike_pct": 0.7372
+    }
+  },
+  "delta_stability": {
+    "GJR-X(VIX)": {
+      "values": [
+        0.04744832162945731,
+        0.04239145815208959,
+        0.032683228156802906,
+        0.03565975876700711,
+        0.045492916341394844,
+        0.04901550655624569,
+        0.05267747221015074,
+        0.0729462271088977,
+        0.0763371033390923,
+        0.08344018213094291,
+        0.39610143990392227,
+        0.3446012408035042,
+        0.16672306939626994,
+        0.10866194680559124,
+        0.10495197523067024,
+        0.09651341348418496,
+        0.4731601905002652,
+        0.4382446684499057,
+        0.43290054261165345,
+        0.4477932776658083,
+        0.44275395345262253,
+        0.4073473248397687,
+        0.3934671039107544,
+        0.3860060746676195
+      ],
+      "mean": 0.21572159983810923,
+      "std": 0.17321798997931584
+    },
+    "GJR-X(VIX9D)": {
+      "values": [
+        0.48355619925856647,
+        0.4656383012353717,
+        0.4712130959380813,
+        0.4971142059939671,
+        0.4971525313906578,
+        0.5059210464744743,
+        0.5110708917192646,
+        0.514393717719652,
+        0.4323300317687761,
+        0.4337687767250867,
+        0.4527896093221211,
+        0.3948313270224744,
+        0.3753320848143994,
+        0.4158455778117587,
+        0.4717618940233924,
+        0.5031807353086469,
+        0.5084983767084961,
+        0.4794522674058468,
+        0.47497973758581924,
+        0.4923397597582299,
+        0.48648713459942683,
+        0.4510481513983761,
+        0.4413994223451918,
+        0.42739771730315984
+      ],
+      "mean": 0.46614594140130156,
+      "std": 0.03725166268707739
+    },
+    "GJR-X(VIX+VIX9D)": {
+      "values": [
+        [
+          0.0,
+          0.48355941386136164
+        ],
+        [
+          0.0,
+          0.4656855817724338
+        ],
+        [
+          0.0,
+          0.47125050351213166
+        ],
+        [
+          0.0,
+          0.4971504069439109
+        ],
+        [
+          0.0,
+          0.49713307933742445
+        ],
+        [
+          0.0,
+          0.505943752584197
+        ],
+        [
+          0.0,
+          0.36292305541372477
+        ],
+        [
+          0.0,
+          0.5143559694555476
+        ],
+        [
+          0.0,
+          0.43274007266891407
+        ],
+        [
+          0.0,
+          0.4338116877665248
+        ],
+        [
+          0.0,
+          0.4527881887606723
+        ],
+        [
+          0.0,
+          0.3948327389184061
+        ],
+        [
+          0.0,
+          0.3753289123581398
+        ],
+        [
+          0.0,
+          0.4158487419881016
+        ],
+        [
+          0.0,
+          0.47178895763650486
+        ],
+        [
+          0.0,
+          0.5030089870073634
+        ],
+        [
+          0.0,
+          0.5084657028107823
+        ],
+        [
+          0.0,
+          0.47942969837174304
+        ],
+        [
+          0.0,
+          0.47497601624920327
+        ],
+        [
+          0.0,
+          0.49233312515565836
+        ],
+        [
+          0.0,
+          0.4864788878177815
+        ],
+        [
+          0.0,
+          0.45106848390364096
+        ],
+        [
+          0.0,
+          0.44140933703835783
+        ],
+        [
+          0.0,
+          0.42735993341764533
+        ]
+      ],
+      "mean": 0.0,
+      "std": 0.0
+    }
+  },
+  "verdict": "VIX9D BETTER (SIGNIFICANT)",
+  "detail": "VIX9D mean QLIKE improvement +0.737% vs VIX (lower QLIKE = better)",
+  "execution_time_seconds": 37.7,
+  "timestamp": "2026-03-26T10:58:29.202794+00:00"
+}
