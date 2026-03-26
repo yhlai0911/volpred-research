@@ -1168,6 +1168,12 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] 內部人交易揭露（Form 4）與後續 vol/return 的關係
 - [ ] TSMC 20-F（外國公司年報）filing 對 TSM/0050.TW 的影響
 
+*台灣重大訊息（用戶提出，MOPS 公開資訊觀測站）*
+- [ ] MOPS 重大訊息公告（https://mops.twse.com.tw）：台灣上市櫃公司的即時揭露（類似 8-K），包括營收公告、董事會決議、私募、合併、訴訟等
+- [ ] 台股重大訊息公告頻率/內容 vs 後續 vol/return：公告密度高的期間是否 vol 更高？
+- [ ] 0050 成分股重大訊息的彙總 sentiment → 是否預測 0050 vol？
+- [ ] 法說會逐字稿語調分析（台灣上市公司法說會，可從公開資訊觀測站或各公司 IR 取得）
+
 **文章方向（一般讀者）：**
 - [ ] 「10-K、10-Q、8-K 是什麼？散戶為什麼該關心美股年報」(general 教育文)
 - [ ] 「財報季前後的波動規律——數據告訴你什麼時候最危險」(general)
