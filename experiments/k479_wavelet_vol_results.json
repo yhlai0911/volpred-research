@@ -1,0 +1,412 @@
+{
+  "experiment_id": "K479",
+  "title": "Wavelet Decomposition for Volatility Prediction",
+  "background": "K111 showed wavelet < GARCH. K465/K469 showed HAR > GARCH. This tests whether wavelet frequency decomposition improves upon HAR multi-scale aggregation.",
+  "references": [
+    "Gen\u00e7ay et al. (2002) Physica A \u2014 wavelet multi-scaling",
+    "In & Kim (2006) JBFA \u2014 wavelet hedging",
+    "Barunik et al. (2016) JIMF \u2014 asymmetric volatility connectedness",
+    "Corsi (2009) J Financial Econometrics \u2014 HAR-RV model",
+    "K111 \u2014 wavelet < GARCH (0/9)",
+    "K465 \u2014 HAR cross-OOS 10/10 with Parkinson proxy",
+    "K469 \u2014 HAR 8/10 with r\u00b2 proxy (corrected for tautology)"
+  ],
+  "method": "DWT (db4, 4 levels) on |returns|, rolling 252-day window. Energy at each scale as predictors for next-day r\u00b2. OLS regression, static + rolling (quarterly re-estimation).",
+  "asset": "SPY",
+  "data_source": "yfinance",
+  "oos_period": "2023-01-01 to 2025-12-31",
+  "is_window": 2000,
+  "dwt_wavelet": "db4",
+  "dwt_level": 4,
+  "dwt_window": 252,
+  "evaluation_proxy": "r\u00b2 (close-to-close squared return)",
+  "diagnostics": {
+    "n_obs": 5339,
+    "date_range": "2005-01-04 to 2026-03-25",
+    "abs_ret_mean": 0.007668628703216616,
+    "abs_ret_std": 0.009203944659602704,
+    "abs_ret_skew": 4.0286779961515,
+    "abs_ret_kurt": 29.608191170420177,
+    "r2_mean": 0.00014352046348482694,
+    "r2_std": 0.0005857532503640808,
+    "adf_stat": -8.531193442779278,
+    "adf_p": 1.0365939452496149e-13,
+    "is_stationary": true,
+    "ljung_box_p_10": 0.0,
+    "has_autocorrelation": true
+  },
+  "models": {
+    "rv21_baseline": {
+      "description": "Lagged RV21 (rolling 21-day variance)"
+    },
+    "har": {
+      "description": "HAR (1d+5d+21d) \u2014 standard multi-scale"
+    },
+    "wavelet_har": {
+      "description": "Wavelet-HAR: D1-D4 + A4 energy as regressors"
+    },
+    "low_freq_only": {
+      "description": "Low-freq only: A4 component variance"
+    },
+    "high_freq_only": {
+      "description": "High-freq only: D1+D2 component variance"
+    },
+    "har_plus_wavelet": {
+      "description": "HAR + A4_energy (augmented HAR)"
+    }
+  },
+  "results_static": {
+    "rv21_baseline": {
+      "description": "Lagged RV21 (rolling 21-day variance)",
+      "qlike": 1.6242286102709218,
+      "qlike_log": -8.473836430587188,
+      "n_params": 2,
+      "beta": [
+        3.70850939620336e-05,
+        0.7683067795433228
+      ]
+    },
+    "har": {
+      "description": "HAR (1d+5d+21d) \u2014 standard multi-scale",
+      "qlike": 1.5809705754477963,
+      "qlike_log": -8.517094465410313,
+      "n_params": 4,
+      "beta": [
+        3.338755410214848e-05,
+        -0.07255974722462194,
+        0.5893601728131032,
+        0.27406029568826396
+      ]
+    },
+    "wavelet_har": {
+      "description": "Wavelet-HAR: D1-D4 + A4 energy as regressors",
+      "qlike": 3730.3042412902923,
+      "qlike_log": 3720.2061762494363,
+      "n_params": 6,
+      "beta": [
+        1.538435729329865e-05,
+        -2.3454888345050104,
+        3.071970022066308,
+        -1.4676177631817637,
+        2.641301212813196,
+        0.01795068874696111
+      ]
+    },
+    "low_freq_only": {
+      "description": "Low-freq only: A4 component variance",
+      "qlike": 1.85037853594448,
+      "qlike_log": -8.247686504913627,
+      "n_params": 2,
+      "beta": [
+        9.443239346890596e-05,
+        2.5103732778312966
+      ]
+    },
+    "high_freq_only": {
+      "description": "High-freq only: D1+D2 component variance",
+      "qlike": 1.9184509351182433,
+      "qlike_log": -8.179614105739864,
+      "n_params": 2,
+      "beta": [
+        7.82884486533112e-05,
+        1.8798149483861863
+      ]
+    },
+    "har_plus_wavelet": {
+      "description": "HAR + A4_energy (augmented HAR)",
+      "qlike": 1.5782504412029539,
+      "qlike_log": -8.519814599655154,
+      "n_params": 5,
+      "beta": [
+        2.8810961737324622e-05,
+        -0.0718876192083001,
+        0.5872446176926435,
+        0.2683867974101959,
+        0.003518139300021614
+      ]
+    }
+  },
+  "results_rolling": {
+    "rv21_baseline": {
+      "description": "Lagged RV21 (rolling 21-day variance)",
+      "qlike": 1.6324504080646747,
+      "qlike_log": -8.465614632793432,
+      "n_forecasts": 751
+    },
+    "har": {
+      "description": "HAR (1d+5d+21d) \u2014 standard multi-scale",
+      "qlike": 1.5932517312353922,
+      "qlike_log": -8.504813309622715,
+      "n_forecasts": 751
+    },
+    "wavelet_har": {
+      "description": "Wavelet-HAR: D1-D4 + A4 energy as regressors",
+      "qlike": 10976.28061754005,
+      "qlike_log": 10966.182552499191,
+      "n_forecasts": 751
+    },
+    "low_freq_only": {
+      "description": "Low-freq only: A4 component variance",
+      "qlike": 1.8408231372161783,
+      "qlike_log": -8.25724190364193,
+      "n_forecasts": 751
+    },
+    "high_freq_only": {
+      "description": "High-freq only: D1+D2 component variance",
+      "qlike": 1.9005211245046463,
+      "qlike_log": -8.19754391635346,
+      "n_forecasts": 751
+    },
+    "har_plus_wavelet": {
+      "description": "HAR + A4_energy (augmented HAR)",
+      "qlike": 1.5936023424627597,
+      "qlike_log": -8.504462698395349,
+      "n_forecasts": 751
+    }
+  },
+  "ranking_static": [
+    {
+      "rank": 1,
+      "model": "har_plus_wavelet",
+      "qlike_log": -8.519814599655154
+    },
+    {
+      "rank": 2,
+      "model": "har",
+      "qlike_log": -8.517094465410313
+    },
+    {
+      "rank": 3,
+      "model": "rv21_baseline",
+      "qlike_log": -8.473836430587188
+    },
+    {
+      "rank": 4,
+      "model": "low_freq_only",
+      "qlike_log": -8.247686504913627
+    },
+    {
+      "rank": 5,
+      "model": "high_freq_only",
+      "qlike_log": -8.179614105739864
+    },
+    {
+      "rank": 6,
+      "model": "wavelet_har",
+      "qlike_log": 3720.2061762494363
+    }
+  ],
+  "ranking_rolling": [
+    {
+      "rank": 1,
+      "model": "har",
+      "qlike_log": -8.504813309622715
+    },
+    {
+      "rank": 2,
+      "model": "har_plus_wavelet",
+      "qlike_log": -8.504462698395349
+    },
+    {
+      "rank": 3,
+      "model": "rv21_baseline",
+      "qlike_log": -8.465614632793432
+    },
+    {
+      "rank": 4,
+      "model": "low_freq_only",
+      "qlike_log": -8.25724190364193
+    },
+    {
+      "rank": 5,
+      "model": "high_freq_only",
+      "qlike_log": -8.19754391635346
+    },
+    {
+      "rank": 6,
+      "model": "wavelet_har",
+      "qlike_log": 10966.182552499191
+    }
+  ],
+  "dm_tests_static": {
+    "har_vs_rv21_baseline": {
+      "t_stat": -1.7054255950422423,
+      "p_value": 0.08852914724503536,
+      "significant": false,
+      "direction": "har better"
+    },
+    "har_vs_wavelet_har": {
+      "t_stat": -1.0000978961550442,
+      "p_value": 0.31758568580592783,
+      "significant": false,
+      "direction": "har better"
+    },
+    "har_vs_low_freq_only": {
+      "t_stat": -2.672025158842302,
+      "p_value": 0.007703163532932988,
+      "significant": true,
+      "direction": "har better"
+    },
+    "har_vs_high_freq_only": {
+      "t_stat": -4.003547952025212,
+      "p_value": 6.860371850914149e-05,
+      "significant": true,
+      "direction": "har better"
+    },
+    "har_vs_har_plus_wavelet": {
+      "t_stat": 1.3355616708245206,
+      "p_value": 0.1820977477741299,
+      "significant": false,
+      "direction": "har_plus_wavelet better"
+    },
+    "rv21_baseline_vs_har": {
+      "t_stat": 1.7054255950422423,
+      "p_value": 0.08852914724503536,
+      "significant": false,
+      "direction": "har better"
+    },
+    "rv21_baseline_vs_wavelet_har": {
+      "t_stat": -1.0000863996800535,
+      "p_value": 0.3175912452073384,
+      "significant": false,
+      "direction": "rv21_baseline better"
+    },
+    "rv21_baseline_vs_low_freq_only": {
+      "t_stat": -2.847924017333207,
+      "p_value": 0.0045209295192467636,
+      "significant": true,
+      "direction": "rv21_baseline better"
+    },
+    "rv21_baseline_vs_high_freq_only": {
+      "t_stat": -4.658414815763201,
+      "p_value": 3.7695875447774085e-06,
+      "significant": true,
+      "direction": "rv21_baseline better"
+    },
+    "rv21_baseline_vs_har_plus_wavelet": {
+      "t_stat": 1.7996450505827677,
+      "p_value": 0.07231850586372746,
+      "significant": false,
+      "direction": "har_plus_wavelet better"
+    }
+  },
+  "dm_tests_rolling": {
+    "har_vs_rv21_baseline": {
+      "t_stat": -1.1363589263741343,
+      "p_value": 0.2561693387566253,
+      "significant": false,
+      "direction": "har better"
+    },
+    "har_vs_wavelet_har": {
+      "t_stat": -1.9631604869107198,
+      "p_value": 0.04999668840115956,
+      "significant": true,
+      "direction": "har better"
+    },
+    "har_vs_low_freq_only": {
+      "t_stat": -2.369361319870424,
+      "p_value": 0.018071116014786393,
+      "significant": true,
+      "direction": "har better"
+    },
+    "har_vs_high_freq_only": {
+      "t_stat": -3.490769800698359,
+      "p_value": 0.00050979328816525,
+      "significant": true,
+      "direction": "har better"
+    },
+    "har_vs_har_plus_wavelet": {
+      "t_stat": -1.2038227091850198,
+      "p_value": 0.22903791514846517,
+      "significant": false,
+      "direction": "har better"
+    },
+    "rv21_baseline_vs_har": {
+      "t_stat": 1.1363589263741343,
+      "p_value": 0.2561693387566253,
+      "significant": false,
+      "direction": "har better"
+    },
+    "rv21_baseline_vs_wavelet_har": {
+      "t_stat": -1.9631534588848985,
+      "p_value": 0.0499975064444147,
+      "significant": true,
+      "direction": "rv21_baseline better"
+    },
+    "rv21_baseline_vs_low_freq_only": {
+      "t_stat": -2.6904889603181714,
+      "p_value": 0.007293511409075304,
+      "significant": true,
+      "direction": "rv21_baseline better"
+    },
+    "rv21_baseline_vs_high_freq_only": {
+      "t_stat": -4.454094712988431,
+      "p_value": 9.707733548802722e-06,
+      "significant": true,
+      "direction": "rv21_baseline better"
+    },
+    "rv21_baseline_vs_har_plus_wavelet": {
+      "t_stat": 1.1279779715769676,
+      "p_value": 0.25968992857849305,
+      "significant": false,
+      "direction": "har_plus_wavelet better"
+    }
+  },
+  "in_sample_r2": {
+    "rv21_baseline": 0.1842239727321936,
+    "har": 0.2360111428578091,
+    "wavelet_har": 0.09982946187728237,
+    "har_plus_wavelet": 0.23613048482399412,
+    "low_freq_only": 0.03159524215429299,
+    "high_freq_only": 0.02261771396260781
+  },
+  "sub_period_analysis": {
+    "2023 (low vol)": {
+      "rv21_baseline": -8.57457648907905,
+      "har": -8.581661354850873,
+      "wavelet_har": -8.425647370076012,
+      "low_freq_only": -8.472996392263296,
+      "high_freq_only": -8.306375054087551,
+      "har_plus_wavelet": -8.583404284317538
+    },
+    "2024 (mixed)": {
+      "rv21_baseline": -8.636531445345264,
+      "har": -8.660370720095768,
+      "wavelet_har": -8.650647727935741,
+      "low_freq_only": -8.574194748422077,
+      "high_freq_only": -8.534714927801,
+      "har_plus_wavelet": -8.665875663820273
+    },
+    "2025 (current)": {
+      "rv21_baseline": -8.209502757453144,
+      "har": -8.308363378804573,
+      "wavelet_har": 11192.611151143657,
+      "low_freq_only": -7.694157547656845,
+      "high_freq_only": -7.695418572547945,
+      "har_plus_wavelet": -8.30924972105298
+    }
+  },
+  "key_comparison": {
+    "static": {
+      "har_qlike_log": -8.517094465410313,
+      "best_wavelet_model": "har_plus_wavelet",
+      "best_wavelet_qlike_log": -8.519814599655154,
+      "pct_diff": -0.031937349713427585,
+      "har_wins": false
+    },
+    "rolling": {
+      "har_qlike_log": -8.504813309622715,
+      "best_wavelet_model": "har_plus_wavelet",
+      "best_wavelet_qlike_log": -8.504462698395349,
+      "pct_diff": 0.004122503511862793,
+      "har_wins": true
+    }
+  },
+  "conclusion": "Mixed results: wavelet helps in one estimation method but not the other. No clear advantage.",
+  "relation_to_prior_work": {
+    "K111": "K111 compared wavelet vs GARCH and found GARCH superior. K479 compares wavelet-HAR vs standard HAR \u2014 testing if principled frequency decomposition improves upon ad-hoc multi-scale aggregation.",
+    "K465_K469": "HAR (1d/5d/21d) is the current best for next-day vol prediction. K479 tests if replacing or augmenting the HAR scales with wavelet-derived features improves forecast quality."
+  },
+  "total_time_seconds": 2.1671788692474365,
+  "timestamp": "2026-03-26T07:11:30.266481+00:00"
+}
