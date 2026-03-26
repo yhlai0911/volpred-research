@@ -1115,18 +1115,34 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] **TXO Put-Call Ratio Mean-Reversion** [提出: Gemini] — 台指選擇權 P/C ratio 作為散戶恐慌指標，極端值做反向操作。Data: TAIFEX 網站
 - [ ] **EWT vs 0050.TW Vol Arbitrage Spread** [提出: Gemini] — 同一標的不同市場的 vol 差異信號。EWT vol >> 0050 vol → 預警台股 vol 將追趕。Data: yfinance
 
-### 未來一個月重要事件日曆與研究/文章安排（2026-03-27 ~ 04-30）
+### 重要事件日曆（當月+下月，每月更新覆蓋）
+**最後更新：2026-03-26。下次更新：2026-04-01。**
 
+#### 美股事件
 | 日期 | 事件 | 研究安排 | 文章安排 |
 |------|------|---------|---------|
-| **04/03 (五)** | **美國 NFP 非農就業** | 事前：就業數據與波動率關係分析 | 事前：「非農報告前後該怎麼操作？」(general) |
-| **04/09 (四)** | **美國 GDP 第三估 + Personal Income** | 事前：GDP surprise 對 vol 影響 | 事前：「GDP 數據出爐那天你該注意什麼」(general) |
-| **04/10 (五)** | **美國 CPI 通膨數據** | 事前：CPI surprise vs option-implied move（Codex 建議 K505 event-surprise） | 事前：「通膨數據來了——歷史告訴我們市場怎麼反應」(general) |
-| **04/16 (四)** | **TSMC 法說會（Q1 2026）** | 事前：TSMC earnings 對 0050.TW vol 影響 | 事前：「台積電法說前後台股波動怎麼走？」(general) |
-| **04/28-29** | **FOMC 利率決議 + Powell 記者會** | 事前：FOMC 對 VIX/vol regime 的影響分析 | 事前：「Fed 升息或降息——對你的投資組合意味什麼？」(general) |
+| **04/03 (五)** | **NFP 非農就業** | 就業數據與波動率關係 | 「非農報告前後該怎麼操作？」(general) |
+| **04/09 (四)** | **GDP 第三估 + Personal Income** | GDP surprise 對 vol 影響 | 「GDP 數據出爐那天該注意什麼」(general) |
+| **04/10 (五)** | **CPI 通膨數據** | CPI surprise vs option-implied（Codex event-surprise 建議） | 「通膨數據——歷史告訴我們市場怎麼反應」(general) |
+| **04/28-29** | **FOMC 利率決議 + Powell 記者會** | FOMC 對 VIX/vol regime 影響 | 「Fed 決策對投資組合意味什麼」(general) |
+
+#### 台股事件
+| 日期 | 事件 | 研究安排 | 文章安排 |
+|------|------|---------|---------|
+| **04/10 (五)** | **TSMC 3月營收公告**（每月10日前） | TSMC 營收 surprise 對 0050 vol | 「台積電營收公告前後台股怎麼走？」(general) |
+| **04/16 (四)** | **TSMC Q1 法說會** | TSMC earnings 對 0050.TW vol | 「台積電法說前後台股波動」(general+research) |
+| **04/17 (五)** | **中經院台灣經濟預測** | 經濟預測修正對台股 sentiment | 搭配法說會文章 |
+| **06月~** | **台股除權息旺季開始** | 除權息對 vol/return 的系統性影響研究 | 「除權息季節該參加還是避開？」系列文章 |
+
+#### 除權息研究方向（用戶指定）
+- [ ] 除權息前後波動率是否系統性改變？（類似 K498 earnings 但用台股個股/ETF）
+- [ ] 高股息 ETF（0056/00878/00919）除息日前後的價格行為
+- [ ] 「填息率」與波動率的關係——填息快的股票 vol 是否較低？
+- [ ] 除息日對 0050.TW 的 vol 影響（0050 成分股集中除息期間）
 
 **執行原則：**
 - 事件前 2-3 天發佈「預告」文章（一般讀者 + 研究各 1 篇）
 - 事件後 1 天發佈「解讀」文章
 - 研究實驗在事件前 1 週完成，結果寫入文章
 - 用 CronCreate 設定 one-shot reminder 確保不遺漏
+- **每月 1 日更新此日曆，覆蓋而非累積**
