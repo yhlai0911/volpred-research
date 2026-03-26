@@ -1073,3 +1073,12 @@
 - VaR 1%: Trinity 3/3 pass
 - Delta: ultra-stable CV=0.08
 - Limitation: VIX9D data only from 2018 (3 OOS periods vs 5 for VIX)
+- [x] K491: **★★ Universal Persistence Law** — mean=0.980, std=0.014 across 14 assets. Hillebrand 14/14 (p=0.0002)
+- [x] K492: Research Efficiency Meta-Study — 52.9% cross-OOS false positive rate, 8.5 experiments/finding
+- [x] K493: GJR-X(VIX9D) Real-Time Signal — R²=0.614 (best thermometer), +22% higher weight than 12/VIX (safest umbrella)
+- [x] K494: Forex Vol — No leverage (gamma≈0), EWMA wins JPY, persistence 0.994 (highest cross-asset)
+- [x] K495: **★★★ Grand Unified Model Guide** — Gamma decision tree 15/15 within 1% of oracle. Capstone
+
+### 71 Experiments Final Summary (K426-K495)
+**研究完成度**：日頻方向已完全飽和。下一個突破需 5-min data HAR-RV（ETA 2026-04-05）。
+**Decision tree for any asset**: Fit GJR → check gamma → choose model. Within 1% of oracle.
