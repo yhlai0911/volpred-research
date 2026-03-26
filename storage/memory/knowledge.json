@@ -13855,5 +13855,19 @@
     ],
     "created_at": "2026-03-26T18:38:27.718486+00:00",
     "experiment_id": "k510"
+  },
+  {
+    "id": 1288,
+    "title": "K511: Pairs Trading SPY-QQQ — All 5 strategies negative Sharpe, cointegration collapsed",
+    "content": "[提出: Claude(3-step), 執行: Claude] K511: ETF pairs trading (SPY-QQQ/IWM/GLD). All 5 strategies Sharpe -0.4 to -1.7, 0/5 positive OOS. Cointegration only 5.9% of windows. Spread half-life 51d (too slow). Beta CV=0.24 (unstable). VIX conditioning cannot fix broken cointegration. Alpha fully arbitraged away. Confirms K115.",
+    "category": "strategy",
+    "tags": [
+      "pairs_trading",
+      "cointegration",
+      "null_result",
+      "arbitraged"
+    ],
+    "created_at": "2026-03-26T19:16:50.673862+00:00",
+    "experiment_id": "k511"
   }
 ]
