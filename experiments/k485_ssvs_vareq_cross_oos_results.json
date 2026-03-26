@@ -1,0 +1,472 @@
+{
+  "experiment_id": "K485",
+  "title": "SSVS Variance Equation Cross-OOS Validation (5 periods)",
+  "method": "Cross-OOS validation of K484 SSVS median model (GJR+VIX+Range+|\u03b5|) vs baselines",
+  "proposed_by": "User (publication-critical validation)",
+  "asset": "SPY",
+  "data_source": "yfinance (empirical)",
+  "data_period": "2005-01-03 to 2026-03-25",
+  "total_observations": 5338,
+  "configuration": {
+    "IS_window": 2000,
+    "refit_interval": 21,
+    "n_oos_periods": 5,
+    "variance_proxy": "r\u00b2 (squared return)",
+    "loss_function": "QLIKE (Patton 2011)",
+    "models": [
+      "Base GARCH(1,1)",
+      "GJR-GARCH(1,1)",
+      "SSVS Median (GJR+VIX+Range+|\u03b5|)",
+      "GJR + VIX only",
+      "GJR + Range only"
+    ]
+  },
+  "ssvs_median_variance_equation": {
+    "spec": "h_t = \u03c9 + \u03b1\u00b7\u03b5\u00b2_{t-1} + \u03b2\u00b7h_{t-1} + \u03b3\u00b7I(\u03b5<0)\u00b7\u03b5\u00b2_{t-1} + \u03bb\u2081\u00b7VIX\u00b2/252 + \u03bb\u2082\u00b7Range\u00b2 + \u03bb\u2083\u00b7|\u03b5|",
+    "components": {
+      "GJR_asymmetry": "I(\u03b5_{t-1}<0)\u00b7\u03b5\u00b2_{t-1}",
+      "VIX_implied_var": "VIX\u00b2_{t-1}/252 (daily implied variance)",
+      "Parkinson_range": "(ln(H/L))\u00b2/(4ln2) (range-based estimator)",
+      "Abs_shock_TGARCH": "|\u03b5_{t-1}| (absolute shock, TGARCH/AVGARCH style)"
+    },
+    "K484_PIPs": {
+      "GJR_asymmetry": 1.0,
+      "VIX_implied_var": 1.0,
+      "Parkinson_range": 1.0,
+      "Abs_shock_TGARCH": 1.0,
+      "Neg_semivariance_excluded": 0.094
+    }
+  },
+  "cross_oos_results": {
+    "2015-2016": {
+      "period": "2015-2016",
+      "T_oos": "504",
+      "n_refits": 24,
+      "model_metrics": {
+        "Base GARCH(1,1)": {
+          "QLIKE": 1.631577376816869,
+          "MSE": 2.544842521336718,
+          "rel_QLIKE_vs_base_pct": 0.0,
+          "rel_QLIKE_vs_GJR_pct": 2.6159478162130667,
+          "DM_vs_GJR": {
+            "stat": -1.4822370373629652,
+            "p_value": 0.1382772348302126,
+            "sig": "",
+            "interpretation": "model WORSE"
+          }
+        },
+        "GJR-GARCH(1,1)": {
+          "QLIKE": 1.5899842193525828,
+          "MSE": 2.443987438380168,
+          "rel_QLIKE_vs_base_pct": -2.5492604920419137,
+          "rel_QLIKE_vs_GJR_pct": 0.0
+        },
+        "SSVS Median (GJR+VIX+Range+|\u03b5|)": {
+          "QLIKE": 1.5137383413474077,
+          "MSE": 2.2866496763562116,
+          "rel_QLIKE_vs_base_pct": -7.222399448769008,
+          "rel_QLIKE_vs_GJR_pct": -4.7953858332141985,
+          "DM_vs_GJR": {
+            "stat": 3.9808665894971176,
+            "p_value": 6.866448092912592e-05,
+            "sig": "***",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + VIX only": {
+          "QLIKE": 1.5180756653345098,
+          "MSE": 2.268240196688512,
+          "rel_QLIKE_vs_base_pct": -6.956563206569818,
+          "rel_QLIKE_vs_GJR_pct": -4.522595453642497,
+          "DM_vs_GJR": {
+            "stat": 2.7676232025540055,
+            "p_value": 0.005646669816435468,
+            "sig": "***",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + Range only": {
+          "QLIKE": 1.5678557971217268,
+          "MSE": 2.332000526527951,
+          "rel_QLIKE_vs_base_pct": -3.9055199343018634,
+          "rel_QLIKE_vs_GJR_pct": -1.391738481521932,
+          "DM_vs_GJR": {
+            "stat": 1.4482566717159386,
+            "p_value": 0.14754528043782456,
+            "sig": "",
+            "interpretation": "model BETTER"
+          }
+        }
+      }
+    },
+    "2017-2018 (Volmageddon)": {
+      "period": "2017-2018 (Volmageddon)",
+      "T_oos": "502",
+      "n_refits": 24,
+      "model_metrics": {
+        "Base GARCH(1,1)": {
+          "QLIKE": 1.7811090589663865,
+          "MSE": 3.344361706374804,
+          "rel_QLIKE_vs_base_pct": 0.0,
+          "rel_QLIKE_vs_GJR_pct": 3.5498505096589756,
+          "DM_vs_GJR": {
+            "stat": -2.0593890823291816,
+            "p_value": 0.03945698079038462,
+            "sig": "**",
+            "interpretation": "model WORSE"
+          }
+        },
+        "GJR-GARCH(1,1)": {
+          "QLIKE": 1.7200498602363963,
+          "MSE": 3.178815135048744,
+          "rel_QLIKE_vs_base_pct": -3.4281560931156063,
+          "rel_QLIKE_vs_GJR_pct": 0.0
+        },
+        "SSVS Median (GJR+VIX+Range+|\u03b5|)": {
+          "QLIKE": 1.722001206005622,
+          "MSE": 3.0392231554334455,
+          "rel_QLIKE_vs_base_pct": -3.318598188202241,
+          "rel_QLIKE_vs_GJR_pct": 0.11344704675930424,
+          "DM_vs_GJR": {
+            "stat": -0.029317978629886984,
+            "p_value": 0.9766109881922123,
+            "sig": "",
+            "interpretation": "model WORSE"
+          }
+        },
+        "GJR + VIX only": {
+          "QLIKE": 1.6578587047950843,
+          "MSE": 3.0361827392685234,
+          "rel_QLIKE_vs_base_pct": -6.919865661838069,
+          "rel_QLIKE_vs_GJR_pct": -3.6156600386435684,
+          "DM_vs_GJR": {
+            "stat": 2.7493546175541175,
+            "p_value": 0.0059712745426780955,
+            "sig": "***",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + Range only": {
+          "QLIKE": 1.680541586861678,
+          "MSE": 3.263436328870868,
+          "rel_QLIKE_vs_base_pct": -5.646339936256899,
+          "rel_QLIKE_vs_GJR_pct": -2.296926053602216,
+          "DM_vs_GJR": {
+            "stat": 2.329837219680323,
+            "p_value": 0.019814756173556436,
+            "sig": "**",
+            "interpretation": "model BETTER"
+          }
+        }
+      }
+    },
+    "2019-2020 (COVID)": {
+      "period": "2019-2020 (COVID)",
+      "T_oos": "505",
+      "n_refits": 25,
+      "model_metrics": {
+        "Base GARCH(1,1)": {
+          "QLIKE": 1.5007502010131648,
+          "MSE": 66.00048570357488,
+          "rel_QLIKE_vs_base_pct": 0.0,
+          "rel_QLIKE_vs_GJR_pct": -3.0272808890886878,
+          "DM_vs_GJR": {
+            "stat": 0.5070869487455785,
+            "p_value": 0.6120938120397099,
+            "sig": "",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR-GARCH(1,1)": {
+          "QLIKE": 1.547600412541491,
+          "MSE": 66.70216141445992,
+          "rel_QLIKE_vs_base_pct": 3.1217861238131044,
+          "rel_QLIKE_vs_GJR_pct": 0.0
+        },
+        "SSVS Median (GJR+VIX+Range+|\u03b5|)": {
+          "QLIKE": 1.3850915480469008,
+          "MSE": 66.01720699266673,
+          "rel_QLIKE_vs_base_pct": -7.706722470413943,
+          "rel_QLIKE_vs_GJR_pct": -10.500699222980685,
+          "DM_vs_GJR": {
+            "stat": 1.5500321041217784,
+            "p_value": 0.12113381062869033,
+            "sig": "",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + VIX only": {
+          "QLIKE": 1.4218760076707706,
+          "MSE": 66.230527593672,
+          "rel_QLIKE_vs_base_pct": -5.255651026343078,
+          "rel_QLIKE_vs_GJR_pct": -8.123828596314087,
+          "DM_vs_GJR": {
+            "stat": 1.3064354742398485,
+            "p_value": 0.1914045087777798,
+            "sig": "",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + Range only": {
+          "QLIKE": 1.4176861985242926,
+          "MSE": 65.56081421447557,
+          "rel_QLIKE_vs_base_pct": -5.534832008204648,
+          "rel_QLIKE_vs_GJR_pct": -8.394557985665793,
+          "DM_vs_GJR": {
+            "stat": 2.132042541312765,
+            "p_value": 0.03300334948272843,
+            "sig": "**",
+            "interpretation": "model BETTER"
+          }
+        }
+      }
+    },
+    "2021-2022 (rate hikes)": {
+      "period": "2021-2022 (rate hikes)",
+      "T_oos": "503",
+      "n_refits": 24,
+      "model_metrics": {
+        "Base GARCH(1,1)": {
+          "QLIKE": 1.4019674192524434,
+          "MSE": 7.402808240635272,
+          "rel_QLIKE_vs_base_pct": 0.0,
+          "rel_QLIKE_vs_GJR_pct": 1.1639974792566903,
+          "DM_vs_GJR": {
+            "stat": -0.7608795834693187,
+            "p_value": 0.44672899418177936,
+            "sig": "",
+            "interpretation": "model WORSE"
+          }
+        },
+        "GJR-GARCH(1,1)": {
+          "QLIKE": 1.3858363194276815,
+          "MSE": 7.92955771427818,
+          "rel_QLIKE_vs_base_pct": -1.1506044722040207,
+          "rel_QLIKE_vs_GJR_pct": 0.0
+        },
+        "SSVS Median (GJR+VIX+Range+|\u03b5|)": {
+          "QLIKE": 1.3122832499253907,
+          "MSE": 7.3729508591502855,
+          "rel_QLIKE_vs_base_pct": -6.397022362679017,
+          "rel_QLIKE_vs_GJR_pct": -5.307486062471398,
+          "DM_vs_GJR": {
+            "stat": 1.6518490506585606,
+            "p_value": 0.09856532655408712,
+            "sig": "*",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + VIX only": {
+          "QLIKE": 1.3252034657994702,
+          "MSE": 7.290738677760583,
+          "rel_QLIKE_vs_base_pct": -5.475444892571413,
+          "rel_QLIKE_vs_GJR_pct": -4.375181453842343,
+          "DM_vs_GJR": {
+            "stat": 1.6498171353441564,
+            "p_value": 0.09898034299060776,
+            "sig": "*",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + Range only": {
+          "QLIKE": 1.300040559904732,
+          "MSE": 7.370445276135423,
+          "rel_QLIKE_vs_base_pct": -7.270273042583315,
+          "rel_QLIKE_vs_GJR_pct": -6.190901358277373,
+          "DM_vs_GJR": {
+            "stat": 2.5472600102532725,
+            "p_value": 0.010857250363126347,
+            "sig": "**",
+            "interpretation": "model BETTER"
+          }
+        }
+      }
+    },
+    "2023-2024": {
+      "period": "2023-2024",
+      "T_oos": "502",
+      "n_refits": 24,
+      "model_metrics": {
+        "Base GARCH(1,1)": {
+          "QLIKE": 1.5285291714639695,
+          "MSE": 1.169311319721243,
+          "rel_QLIKE_vs_base_pct": 0.0,
+          "rel_QLIKE_vs_GJR_pct": 2.4380413142817097,
+          "DM_vs_GJR": {
+            "stat": -2.705051625503905,
+            "p_value": 0.006829377489542043,
+            "sig": "***",
+            "interpretation": "model WORSE"
+          }
+        },
+        "GJR-GARCH(1,1)": {
+          "QLIKE": 1.4921499394686932,
+          "MSE": 1.1693067946088214,
+          "rel_QLIKE_vs_base_pct": -2.3800155518414843,
+          "rel_QLIKE_vs_GJR_pct": 0.0
+        },
+        "SSVS Median (GJR+VIX+Range+|\u03b5|)": {
+          "QLIKE": 1.4638414475761452,
+          "MSE": 1.1344618352373341,
+          "rel_QLIKE_vs_base_pct": -4.2320241638482266,
+          "rel_QLIKE_vs_GJR_pct": -1.8971613471115225,
+          "DM_vs_GJR": {
+            "stat": 1.0768526699663397,
+            "p_value": 0.2815460906249754,
+            "sig": "",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + VIX only": {
+          "QLIKE": 1.4535790756191098,
+          "MSE": 1.1324949219172489,
+          "rel_QLIKE_vs_base_pct": -4.903412852309205,
+          "rel_QLIKE_vs_GJR_pct": -2.5849187691765927,
+          "DM_vs_GJR": {
+            "stat": 2.1446660609994024,
+            "p_value": 0.03197955631157412,
+            "sig": "**",
+            "interpretation": "model BETTER"
+          }
+        },
+        "GJR + Range only": {
+          "QLIKE": 1.5138299178572,
+          "MSE": 1.1801277084269384,
+          "rel_QLIKE_vs_base_pct": -0.9616599984605588,
+          "rel_QLIKE_vs_GJR_pct": 1.4529356477557613,
+          "DM_vs_GJR": {
+            "stat": -0.6242059950945312,
+            "p_value": 0.5324923102060439,
+            "sig": "",
+            "interpretation": "model WORSE"
+          }
+        }
+      }
+    }
+  },
+  "ssvs_vs_gjr_summary": [
+    {
+      "period": "2015-2016",
+      "ssvs_qlike": 1.5137383413474077,
+      "gjr_qlike": 1.5899842193525828,
+      "relative_pct": -4.7953858332141985,
+      "dm_stat": 3.9808665894971176,
+      "dm_pval": 6.866448092912592e-05,
+      "ssvs_better": true,
+      "ssvs_significant_10pct": true
+    },
+    {
+      "period": "2017-2018 (Volmageddon)",
+      "ssvs_qlike": 1.722001206005622,
+      "gjr_qlike": 1.7200498602363963,
+      "relative_pct": 0.11344704675930424,
+      "dm_stat": -0.029317978629886984,
+      "dm_pval": 0.9766109881922123,
+      "ssvs_better": false,
+      "ssvs_significant_10pct": false
+    },
+    {
+      "period": "2019-2020 (COVID)",
+      "ssvs_qlike": 1.3850915480469008,
+      "gjr_qlike": 1.547600412541491,
+      "relative_pct": -10.500699222980685,
+      "dm_stat": 1.5500321041217784,
+      "dm_pval": 0.12113381062869033,
+      "ssvs_better": true,
+      "ssvs_significant_10pct": false
+    },
+    {
+      "period": "2021-2022 (rate hikes)",
+      "ssvs_qlike": 1.3122832499253907,
+      "gjr_qlike": 1.3858363194276815,
+      "relative_pct": -5.307486062471398,
+      "dm_stat": 1.6518490506585606,
+      "dm_pval": 0.09856532655408712,
+      "ssvs_better": true,
+      "ssvs_significant_10pct": true
+    },
+    {
+      "period": "2023-2024",
+      "ssvs_qlike": 1.4638414475761452,
+      "gjr_qlike": 1.4921499394686932,
+      "relative_pct": -1.8971613471115225,
+      "dm_stat": 1.0768526699663397,
+      "dm_pval": 0.2815460906249754,
+      "ssvs_better": true,
+      "ssvs_significant_10pct": false
+    }
+  ],
+  "full_model_comparison": {
+    "Base GARCH(1,1)": {
+      "avg_QLIKE": 1.5687866455025667,
+      "qlike_per_period": [
+        1.631577376816869,
+        1.7811090589663865,
+        1.5007502010131648,
+        1.4019674192524434,
+        1.5285291714639695
+      ],
+      "avg_rel_vs_GJR_pct": 1.348111246064351
+    },
+    "GJR-GARCH(1,1)": {
+      "avg_QLIKE": 1.5471241502053688,
+      "qlike_per_period": [
+        1.5899842193525828,
+        1.7200498602363963,
+        1.547600412541491,
+        1.3858363194276815,
+        1.4921499394686932
+      ],
+      "avg_rel_vs_GJR_pct": 0.0
+    },
+    "SSVS Median (GJR+VIX+Range+|\u03b5|)": {
+      "avg_QLIKE": 1.4793911585802932,
+      "qlike_per_period": [
+        1.5137383413474077,
+        1.722001206005622,
+        1.3850915480469008,
+        1.3122832499253907,
+        1.4638414475761452
+      ],
+      "avg_rel_vs_GJR_pct": -4.4774570838037
+    },
+    "GJR + VIX only": {
+      "avg_QLIKE": 1.475318583843789,
+      "qlike_per_period": [
+        1.5180756653345098,
+        1.6578587047950843,
+        1.4218760076707706,
+        1.3252034657994702,
+        1.4535790756191098
+      ],
+      "avg_rel_vs_GJR_pct": -4.644436862323818
+    },
+    "GJR + Range only": {
+      "avg_QLIKE": 1.4959908120539258,
+      "qlike_per_period": [
+        1.5678557971217268,
+        1.680541586861678,
+        1.4176861985242926,
+        1.300040559904732,
+        1.5138299178572
+      ],
+      "avg_rel_vs_GJR_pct": -3.3642376462623105
+    }
+  },
+  "verdict": "PROMISING \u2014 SSVS better in most periods but not always significant",
+  "computation_time_seconds": 339.57970213890076,
+  "references": [
+    "So, Chen, Liu (2006) Best Subset Selection of ARX-GARCH, JRSS-C 55(2):201-224",
+    "Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies, JoE 160(1):246-256",
+    "Diebold & Mariano (1995) Comparing Predictive Accuracy, JBES 13(3):253-263",
+    "K484: SSVS variance eq -> GJR+VIX+Range+|\u03b5| selected (PIP=1.000, QLIKE -7.43%)",
+    "K459/K460/K469: Cross-OOS protocol (lesson: single-period results unreliable)"
+  ],
+  "conclusion": {
+    "n_periods_ssvs_better": 4,
+    "n_periods_ssvs_significant": 2,
+    "verdict": "PROMISING \u2014 SSVS better in most periods but not always significant",
+    "best_model_avg_qlike": "GJR + VIX only",
+    "interpretation": "SSVS Median model (GJR+VIX+Range+|\u03b5|) was better than GJR in 4/5 periods and statistically significant in 2/5 periods (DM test p<0.10). The improvement is partially regime-dependent."
+  }
+}
