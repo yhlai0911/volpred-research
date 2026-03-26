@@ -1082,3 +1082,19 @@
 ### 71 Experiments Final Summary (K426-K495)
 **研究完成度**：日頻方向已完全飽和。下一個突破需 5-min data HAR-RV（ETA 2026-04-05）。
 **Decision tree for any asset**: Fit GJR → check gamma → choose model. Within 1% of oracle.
+
+**2026-03-26 用戶指定新方向（必須記錄）：**
+
+### 報酬率預測（用戶提出，全新方向線）
+- [ ] K501: **SSVS for Return Prediction** [提出: 用戶] — 用陳婉淑方法預測報酬率（不只波動率）。K461 已發現 SPY_ret PIP=1.000 for Taiwan (t=10.81)。**進行中**
+- [ ] Return prediction → trading strategy pipeline：如果方向準確度 > 55% → 可做 long/short 策略
+- [ ] 跨資產 return prediction：SPY、0050.TW、QQQ
+
+### 新交易策略開發（用戶提出，急需上架新策略）
+- [ ] K502: **US→Taiwan Lead-Lag Strategy** [提出: 用戶] — 用 SPY return 信號交易 0050.TW。T32/T33 confirmed lead-lag (r=0.376)。**進行中**
+- [ ] K503: **VIX Mean-Reversion Strategy** [提出: 用戶] — 利用 VIX spike 後的 mean reversion 做交易。K430/K491 支持。**進行中**
+- [ ] 策略上架前必須：Cross-OOS ≥ 5 periods、3 年回測、Net Sharpe (after TX) > 0
+- [ ] **不要輕易上架**——交易策略必須多次確認（cross-OOS + out-of-sample + sensitivity），避免上架後發現是錯誤
+
+### 文章品質（用戶提出）
+- [x] Feed 文章必須附圖表——已修正 3 篇文章、已寫入 feedback memory

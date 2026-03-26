@@ -171,13 +171,16 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - 論文頁 `/paper` 讀 Supabase `papers` table（metadata）；**PDF 放前端 `frontend-v2-fix/public/paper/`**（由 Zeabur CDN serve，不走 Supabase Storage）
 
 ### 新策略上線標準程序（發現有效策略後執行）
-1. **Cross-OOS 驗證**：至少 5 個 OOS 期間（J9 教訓：單期 OOS 不可靠）
+**不要輕易上架——交易策略必須多次確認，上架後發現錯誤會損害信譽。**
+1. **Cross-OOS 驗證**：至少 5 個 OOS 期間（J9 教訓：單期 OOS 不可靠；K459/K474/K476 教訓：cross-OOS 抓到 53% false positive）
 2. **3 年回測**：計算 Sharpe/MDD/Calmar/Sortino/Net Sharpe (after TX)
-3. **加入 STRATEGY_REGISTRY**：`daily_update.py` 頂部加一行 (display_name, is_active, order)
-4. **加入計算邏輯**：`daily_update.py` 的 strat_list 區塊
-5. **寫入 DB**：`add_strategy.py --id xxx --name xxx ...`
-6. **更新 CLAUDE.md 策略表 + research_program.md**
-7. **發佈 Feed 文章**：用 `feed-publisher` skill
+3. **Sensitivity 分析**：不同 TX cost、不同 rebalancing 頻率（K499）、不同起始日期
+4. **Out-of-sample 最終確認**：在最近 6 個月的真實數據上確認（不是回測）
+5. **加入 STRATEGY_REGISTRY**：`daily_update.py` 頂部加一行 (display_name, is_active, order)
+6. **加入計算邏輯**：`daily_update.py` 的 strat_list 區塊
+7. **寫入 DB**：`add_strategy.py --id xxx --name xxx ...`
+8. **更新 CLAUDE.md 策略表 + research_program.md**
+9. **發佈 Feed 文章**：用 `feed-publisher` skill
 - 詳細流程見 `.claude/skills/autonomous-research/references/add-strategy-guide.md`
 
 ### 論文更新標準程序（每次編譯新版都要做）
@@ -380,7 +383,7 @@ Codex 和 Gemini 可以：
 ### 研究主題來源（必須多元，不能只靠 Claude 自選）
 研究主題的來源應該包括：
 1. **Codex/Gemini 建議**：每 5-10 個實驗主動問一次「接下來該研究什麼方向？」，將建議寫入 research_program.md
-2. **用戶指定**：用戶提出的方向優先執行
+2. **用戶指定**：用戶提出的方向**優先執行**，且**必須立刻寫入 research_program.md**（不能只口頭回應或只在記憶中記錄）
 3. **會員問題**：每 6 小時 cron 自動評估會員提問
 4. **文獻搜索**：WebSearch arXiv/SSRN 發現的前沿方向
 5. **Claude 自選**：基於 research_program.md 的待探索方向
