@@ -1005,3 +1005,25 @@
 - [x] K467: HAR VaR — 0/6 Trinity pass！Best forecaster ≠ best VaR（Parkinson misses jumps/overnight）
 - [x] K468: **⚠️ Yang-Zhang Tautology Test** — Range proxy 偏好 range model。但 K469 證明影響極小
 - [x] K469: **HAR r² Proxy Validation** — 8/10 cross-OOS。Tautology 只降 2/10。K465 結論 validated
+- [x] K470: HAR-VT Strategy — +0.067 Sharpe but p=0.181 NS。**3rd prediction≠application** (K440 VRP, K467 VaR, K470 VT)
+- [x] K471: Higher Moments — Rolling kurtosis +16pp R² but DM p=0.11 NS。BTC harmful。Kurtosis > skewness
+- [x] K472: **Taiwan Comprehensive** — All US-validated methods fail on 0050.TW。GARCH ceiling is cross-market universal
+- [x] K473: Attention/Google Trends — IS R²+6.2% but OOS 全 null。⚠️ K474 修正：weekly RV>VIX 是 artifact
+- [x] K474: **Weekly RV vs VIX Cross-OOS** — VIX wins **6/6**。K473 retracted (level-OLS artifact)。**VIX sufficiency #31（含週頻）**
+
+### 跨兩 session 50 實驗總結（K426-K474）
+**經過 cross-OOS 驗證的正面發現（2/50 = 4%）：**
+1. ★★★ HAR log-range vol forecasting: 8/10 cross-OOS with r² proxy (K469)
+2. ★★ Daily semivariance (RS⁻) for equity: 4/5 cross-OOS (K460), gamma-driven (K453 r=0.812)
+
+**被 cross-OOS 推翻的 false positives（2/50 = 4%）：**
+1. K436 VRP daily → K459: 0/5 QLIKE wins (VIX contains VRP)
+2. K473 Weekly RV>VIX → K474: 0/6 (level-OLS artifact)
+
+**方法論貢獻：**
+- Prediction ≠ Application (K440/K467/K470, 3x)
+- Significance ≠ Forecasting (K459)
+- Information decomposition > Model complexity (K458: corr=-0.259)
+- Proxy tautology awareness (K468/K469)
+- GARCH ceiling cross-market universal (K472)
+- VIX sufficiency #31 (日頻+週頻)

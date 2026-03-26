@@ -1,0 +1,236 @@
+{
+  "experiment_id": "K473",
+  "title": "Investor Attention (Google Trends) as Vol Signal — Revisit",
+  "timestamp": "2026-03-26T05:41:28.897832+00:00",
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance (SPY, ^VIX)",
+    "google_trends_available": true,
+    "frequency": "weekly",
+    "is_period": "2006-04-14 to 2022-12-30",
+    "oos_period": "2023-01-06 to 2026-03-27",
+    "n_is": 873,
+    "n_oos": 169
+  },
+  "descriptive_stats": {
+    "is_rv_mean": 0.040648157988881745,
+    "is_rv_std": 0.10901233001442032,
+    "is_attn_level_mean": 0.16292272663237437,
+    "is_attn_spike_pct": 15.463917525773196
+  },
+  "oos_results": {
+    "M1_LaggedRV": {
+      "name": "Lagged RV (HAR)",
+      "qlike": 0.382301129474621,
+      "mse": 0.002966290454734491,
+      "corr": 0.3764363783844231,
+      "n_valid": 169
+    },
+    "M2_VIX": {
+      "name": "VIX only",
+      "qlike": 1.3472416044632585,
+      "mse": 0.001998217491181482,
+      "corr": 0.6755820259102959,
+      "n_valid": 155
+    },
+    "M3_VIX_RV": {
+      "name": "VIX + Lagged RV",
+      "qlike": 0.5105571740862147,
+      "mse": 0.00207988676789122,
+      "corr": 0.583111733011202,
+      "n_valid": 169
+    },
+    "M4_AttnLevel": {
+      "name": "Attention Level only",
+      "qlike": 0.5470424948549354,
+      "mse": 0.0033859649898106297,
+      "corr": 0.29410904107398256,
+      "n_valid": 169
+    },
+    "M5_VIX_Attn": {
+      "name": "VIX + Attention",
+      "qlike": 0.9651596997558471,
+      "mse": 0.0025240958924994715,
+      "corr": 0.6290735176113657,
+      "n_valid": 126
+    },
+    "M6_VIX_Spike": {
+      "name": "VIX + Attention Spike",
+      "qlike": 4.711521803684742,
+      "mse": 0.002516587900593905,
+      "corr": 0.6200942825441768,
+      "n_valid": 129
+    },
+    "M7_VIX_VolAttn": {
+      "name": "VIX + Volume Attention",
+      "qlike": 0.8703701356904366,
+      "mse": 0.0024195780378654026,
+      "corr": 0.6462818580667451,
+      "n_valid": 126
+    },
+    "M8_VIX_AbsRet": {
+      "name": "VIX + AbsRet Attention",
+      "qlike": 2.0550735226534775,
+      "mse": 0.0022330483782935307,
+      "corr": 0.6599614890145246,
+      "n_valid": 136
+    },
+    "M9_VIX_RoC": {
+      "name": "VIX + RoC Attention",
+      "qlike": 8.756332810703366,
+      "mse": 0.002319547084209898,
+      "corr": 0.6355373516948588,
+      "n_valid": 136
+    },
+    "M10_KitchenSink": {
+      "name": "Kitchen Sink",
+      "qlike": 1.3010065253578516,
+      "mse": 0.0025279332698801694,
+      "corr": 0.5682400688122299,
+      "n_valid": 144
+    },
+    "M_GT1_TrendsOnly": {
+      "name": "Google Trends only",
+      "qlike": 0.5075206179998236,
+      "mse": 0.004009825376481007,
+      "corr": 0.3391725253962953,
+      "n_valid": 169
+    },
+    "M_GT2_VIX_Trends": {
+      "name": "VIX + Google Trends",
+      "qlike": 3.3252288845559628,
+      "mse": 0.003008191225816185,
+      "corr": 0.5993499781643022,
+      "n_valid": 116
+    },
+    "M_GT3_Full": {
+      "name": "RV + VIX + Google Trends",
+      "qlike": 3.0780796235735077,
+      "mse": 0.002941996635117299,
+      "corr": 0.5749871389579461,
+      "n_valid": 126
+    }
+  },
+  "dm_tests_vs_M3": {
+    "M1_LaggedRV": {
+      "dm_stat": -2.0299746591432712,
+      "dm_p": 0.04393660703049851,
+      "better": "YES"
+    },
+    "M2_VIX": {
+      "dm_stat": 2.7533643075102576,
+      "dm_p": 0.006608411765345545,
+      "better": "no"
+    },
+    "M4_AttnLevel": {
+      "dm_stat": 0.4923195701119799,
+      "dm_p": 0.6231361955596668,
+      "better": "no"
+    },
+    "M5_VIX_Attn": {
+      "dm_stat": 3.011613701899553,
+      "dm_p": 0.003145447471908147,
+      "better": "no"
+    },
+    "M6_VIX_Spike": {
+      "dm_stat": 1.090861386284298,
+      "dm_p": 0.27738308791057054,
+      "better": "no"
+    },
+    "M7_VIX_VolAttn": {
+      "dm_stat": 1.8231433387298193,
+      "dm_p": 0.07067121894916073,
+      "better": "no"
+    },
+    "M8_VIX_AbsRet": {
+      "dm_stat": 1.8797906712583008,
+      "dm_p": 0.06229175888072991,
+      "better": "no"
+    },
+    "M9_VIX_RoC": {
+      "dm_stat": 1.0586018130356538,
+      "dm_p": 0.2916716224927325,
+      "better": "no"
+    },
+    "M10_KitchenSink": {
+      "dm_stat": 1.8906057506589071,
+      "dm_p": 0.060700114948798234,
+      "better": "no"
+    },
+    "M_GT1_TrendsOnly": {
+      "dm_stat": -0.03942795820851148,
+      "dm_p": 0.9685960049268671,
+      "better": "no"
+    },
+    "M_GT2_VIX_Trends": {
+      "dm_stat": 1.46850412607415,
+      "dm_p": 0.14469737783039882,
+      "better": "no"
+    },
+    "M_GT3_Full": {
+      "dm_stat": 1.748300939488068,
+      "dm_p": 0.08286705511990333,
+      "better": "no"
+    }
+  },
+  "incremental_r2": {
+    "attn_level_lag1": {
+      "r2_full": 0.5180940346409684,
+      "incr_r2": 0.012688415581353585,
+      "f_stat": 22.906795825931233,
+      "f_p": 1.997484863514032e-06
+    },
+    "attn_roc_lag1": {
+      "r2_full": 0.513138695372179,
+      "incr_r2": 0.007733076312564258,
+      "f_stat": 13.81867141212618,
+      "f_p": 0.00021420245064984744
+    },
+    "attn_volume_lag1": {
+      "r2_full": 0.5275821225149377,
+      "incr_r2": 0.02217650345532296,
+      "f_stat": 40.84002516763592,
+      "f_p": 2.690062617105582e-10
+    },
+    "attn_absret_lag1": {
+      "r2_full": 0.5167491954659564,
+      "incr_r2": 0.011343576406341649,
+      "f_stat": 20.421924559511204,
+      "f_p": 7.0694607539056875e-06
+    },
+    "attn_spike_lag1": {
+      "r2_full": 0.5170058549683849,
+      "incr_r2": 0.011600235908770129,
+      "f_stat": 20.89508815882121,
+      "f_p": 5.553392834145576e-06
+    },
+    "gt_stock_market_crash_lag1": {
+      "r2_full": 0.5678109673577036,
+      "incr_r2": 0.06240534829808886,
+      "f_stat": 125.62246822277189,
+      "f_p": 0.0
+    },
+    "gt_VIX_lag1": {
+      "r2_full": 0.5610159400828578,
+      "incr_r2": 0.05561032102324304,
+      "f_stat": 110.21124388742803,
+      "f_p": 0.0
+    }
+  },
+  "regime_analysis": {},
+  "granger_causality": {},
+  "conclusion": {
+    "main_finding": "No attention proxy provides statistically significant OOS improvement over VIX + Lagged RV baseline. VIX remains sufficient statistic for attention/fear information. Consistent with K192/J3. Google Trends IS incremental R²=6.2% (F=125.6, p<0.001) but OOS QLIKE worsens. Best non-attention model: Lagged RV (HAR) beats VIX+RV (DM p=0.044) due to pure momentum.",
+    "attention_adds_value_oos": false,
+    "best_model": "Lagged RV (HAR)",
+    "consistent_with_prior": true
+  },
+  "references": [
+    "Da, Engelberg, Gao (2011) \"In Search of Attention\" JoF",
+    "Vlastakis & Markellos (2012) \"Information demand and stock market volatility\" JBES",
+    "K192: Google Trends composite — IS r=0.576 but OOS failed",
+    "J3: Google Trends \"recession\" partial r=0.634, VT overlay NS",
+    "G14: \"stock market crash\" spike → crash momentum, not tradeable"
+  ],
+  "elapsed_seconds": 10.7
+}
