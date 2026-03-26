@@ -13902,5 +13902,20 @@
     ],
     "created_at": "2026-03-26T21:16:39.409201+00:00",
     "experiment_id": "k513"
+  },
+  {
+    "id": 1291,
+    "title": "K514: FOMC Surprise — IS t=-8.18 but OOS significantly WORSE (DM t=+3.89)",
+    "content": "[提出: Codex(event-surprise), 執行: Claude] K514: FOMC VIX-change surprise → future vol. IS: 21d t=-8.18 (strong!), delta-R²=0.74%. BUT OOS: DM t=+3.89 p=0.0001 (significantly WORSE). VIX surprise proxy overfits IS. Large surprise magnitude (both directions) → higher vol, but direction does not matter. Strategy overlay: Sharpe -0.029 (null). Subsample: sign flips across periods. Need fed funds futures data (Bernanke-Kuttner style) for cleaner test.",
+    "category": "vol_prediction",
+    "tags": [
+      "FOMC",
+      "surprise",
+      "IS_OOS_disconnect",
+      "event_study",
+      "null_OOS"
+    ],
+    "created_at": "2026-03-26T22:19:27.043801+00:00",
+    "experiment_id": "k514"
   }
 ]
