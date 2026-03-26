@@ -251,6 +251,20 @@ class Publisher:
             item['created_at'] = item.get('published_at', now)
         if 'published_at' not in item:
             item['published_at'] = item.get('created_at', now)
+        # Ensure audience/category are set (auto-detect from tags if missing)
+        if not item.get('audience'):
+            tag_list = item.get('tags', [])
+            if '一般讀者' in tag_list:
+                item['audience'] = 'general'
+            elif '每日建議' in tag_list or 'daily-update' in tag_list:
+                item['audience'] = 'daily'
+            else:
+                item['audience'] = 'research'
+        if not item.get('category'):
+            item['category'] = 'general' if item.get('audience') == 'general' else 'milestone'
+        # Ensure content is not empty (use description as fallback)
+        if not item.get('content') and item.get('description'):
+            item['content'] = item['description']
         feed = self._load_feed()
         feed.append(item)
         # Sort newest first — use published_at (consistent with frontend display)
