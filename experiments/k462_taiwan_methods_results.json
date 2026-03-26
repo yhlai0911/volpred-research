@@ -1,0 +1,331 @@
+{
+  "experiment_id": "K462",
+  "title": "STGARCH + GARCH-X Methods on Taiwan 0050.TW",
+  "proposer": "用戶",
+  "executor": "Claude",
+  "asset": "0050.TW",
+  "data_source": "yfinance (0050.TW, SPY, ^VIX)",
+  "data_period": "2009-01-05 to 2026-03-24",
+  "total_obs": 4211,
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "window": 2000,
+  "refit_every": 21,
+  "runtime_seconds": 250.8,
+  "hypothesis": "美股無效的 GARCH-X / STGARCH 方法可能對台股有效（外部 regime shift, VIX 外生信息, lead-lag r=0.376）",
+  "descriptive": {
+    "tw_return(%)": {
+      "mean": 0.07265424283080224,
+      "std": 1.344005586405461,
+      "skew": 0.47234520610397135,
+      "kurt": 19.080707658287057,
+      "min": -11.922336170032422,
+      "max": 16.545376959651968,
+      "N": 4211
+    },
+    "spy_ret_sq": {
+      "mean": 1.2575808277169918,
+      "std": 4.489824454423039,
+      "skew": 14.547267064399657,
+      "kurt": 295.36635268226786,
+      "min": 0.0,
+      "max": 119.73531134755167,
+      "N": 4211
+    },
+    "vix_var": {
+      "mean": 1.6860696145493606,
+      "std": 1.7172005319982202,
+      "skew": 4.951248482590308,
+      "kurt": 42.621542072268326,
+      "min": 0.33150637411087325,
+      "max": 27.133478189522904,
+      "N": 4211
+    },
+    "spy_rv": {
+      "mean": 1.2818087678215762,
+      "std": 2.452415450810953,
+      "skew": 7.998765887335969,
+      "kurt": 84.77351500517527,
+      "min": 0.04643087262516342,
+      "max": 34.29818327775544,
+      "N": 4211
+    }
+  },
+  "adf_tests": {
+    "tw_return": {
+      "statistic": -15.743565820603836,
+      "p_value": 1.2474825070346527e-28
+    },
+    "spy_ret_sq": {
+      "statistic": -10.670813464697737,
+      "p_value": 4.171887200506127e-19
+    },
+    "vix_var": {
+      "statistic": -6.859862083715603,
+      "p_value": 1.6128253305751223e-09
+    }
+  },
+  "arch_lm": {
+    "lm_stat": 1144.384990262453,
+    "p_value": 1.422182950422137e-239
+  },
+  "cross_correlations": {
+    "corr_spy_r2_tw_r2": 0.22518960473163344,
+    "corr_vix_var_tw_r2": 0.34761846908456784
+  },
+  "in_sample": {
+    "GJR_baseline": {
+      "params": {
+        "omega": 0.06327834504946407,
+        "alpha": 0.035909971358158745,
+        "gamma": 0.12159988336538173,
+        "beta": 0.8534713586095406
+      },
+      "persistence": 0.9501812716503902,
+      "converged": true,
+      "loglik": -1012.1061731706961,
+      "aic": 2032.2123463413923,
+      "bic": 2054.6159561795607,
+      "n_params": 4
+    },
+    "GARCH-X(VIX²)": {
+      "params": {
+        "omega": 0.08870149369244049,
+        "alpha": 1e-08,
+        "gamma": 0.16406448533439327,
+        "beta": 0.6583389331067131,
+        "delta1": 0.13846438223685592
+      },
+      "persistence": 0.7403711857739097,
+      "converged": true,
+      "loglik": -977.5920537873449,
+      "aic": 1965.1841075746897,
+      "bic": 1993.1886198724,
+      "n_params": 5
+    },
+    "GARCH-X(SPY_r2)": {
+      "params": {
+        "omega": 0.10191805383382804,
+        "alpha": 0.020612342144920314,
+        "gamma": 0.12454129538444329,
+        "beta": 0.7901587902293946,
+        "delta1": 0.04087373527867936
+      },
+      "persistence": 0.8730417800665365,
+      "converged": true,
+      "loglik": -1001.9683226031171,
+      "aic": 2013.9366452062343,
+      "bic": 2041.9411575039446,
+      "n_params": 5
+    },
+    "GARCH-X(VIX²+SPY)": {
+      "params": {
+        "omega": 0.09297254951020936,
+        "alpha": 1e-08,
+        "gamma": 0.1624762110629472,
+        "beta": 0.6528913408378922,
+        "delta1": 0.1347195195418007,
+        "delta2": 0.007525285781590815
+      },
+      "persistence": 0.7341294563693659,
+      "converged": true,
+      "loglik": -977.4332878967024,
+      "aic": 1966.8665757934048,
+      "bic": 2000.4719905506572,
+      "n_params": 6
+    },
+    "STGARCH(VIX)": {
+      "mu": 0.05819781619375541,
+      "omega1": 0.12761076482915387,
+      "alpha1": 0.05099598903508104,
+      "beta1": 0.7879160908467768,
+      "omega2": 1.0483880211315781,
+      "alpha2": 0.2013548294307011,
+      "beta2": -0.5,
+      "gamma_st": 200.0,
+      "c": 25.226410178508115,
+      "persistence_low": 0.8389120798818579,
+      "persistence_high": 0.5402669093125589,
+      "loglik": -999.4496427216122,
+      "aic": 2016.8992854432245,
+      "bic": 2067.3074075791033,
+      "converged": 1.0
+    }
+  },
+  "in_sample_residual_arch": {
+    "GJR baseline": {
+      "lm_stat": 5.070694441438828,
+      "p_value": 0.8864057648658379
+    },
+    "GARCH-X(VIX²)": {
+      "lm_stat": 3.633426723352703,
+      "p_value": 0.9623725773885758
+    },
+    "GARCH-X(SPY r²)": {
+      "lm_stat": 4.2452607985066795,
+      "p_value": 0.9356052748798719
+    },
+    "GARCH-X(VIX²+SPY r²)": {
+      "lm_stat": 3.5138245595213036,
+      "p_value": 0.9666268889965426
+    },
+    "STGARCH(VIX)": {
+      "lm_stat": 2.2268497653289296,
+      "p_value": 0.9942872397818431
+    }
+  },
+  "delta_significance": {
+    "GARCH-X(VIX²)": {
+      "delta": 0.13846438223685592,
+      "se": 0.03868659295513298,
+      "t_stat": 3.579130951062061,
+      "p_value": 0.00034473870302931253
+    },
+    "GARCH-X(SPY_r2)": {
+      "delta": 0.04087373527867936,
+      "se": 0.014181527619600048,
+      "t_stat": 2.8821814105688066,
+      "p_value": 0.0039493228629121635
+    },
+    "GARCH-X(both)": {
+      "delta1_VIX": 0.1347195195418007,
+      "delta1_t": 3.43394971036362,
+      "delta1_p": 0.0005948545475753519,
+      "delta2_SPY": 0.007525285781590815,
+      "delta2_t": 0.5372994479037756,
+      "delta2_p": 0.591060786744463
+    }
+  },
+  "oos_metrics": [
+    {
+      "name": "GJR baseline",
+      "qlike": 1.353569214907033,
+      "mse": 23.25621419020404,
+      "mae": 1.8569452895851832,
+      "n_obs": 481,
+      "mean_forecast": 1.5194939552057394,
+      "mean_realized": 1.6745129434565253
+    },
+    {
+      "name": "GARCH-X(VIX²)",
+      "qlike": 1.4494264551206162,
+      "mse": 22.836174081752706,
+      "mae": 1.6906449460483213,
+      "n_obs": 481,
+      "mean_forecast": 1.1761660276763484,
+      "mean_realized": 1.6745129434565253
+    },
+    {
+      "name": "GARCH-X(SPY r²)",
+      "qlike": 1.387664086702195,
+      "mse": 23.0713294126259,
+      "mae": 1.7539721345915462,
+      "n_obs": 481,
+      "mean_forecast": 1.3259849673126634,
+      "mean_realized": 1.6745129434565253
+    },
+    {
+      "name": "GARCH-X(VIX²+SPY)",
+      "qlike": 1.4528306053292617,
+      "mse": 22.859061550656204,
+      "mae": 1.6900133869181457,
+      "n_obs": 481,
+      "mean_forecast": 1.1709600301577403,
+      "mean_realized": 1.6745129434565253
+    },
+    {
+      "name": "STGARCH(VIX)",
+      "qlike": 1.395309375699143,
+      "mse": 22.911587395865528,
+      "mae": 1.784639455090286,
+      "n_obs": 481,
+      "mean_forecast": 1.4044279008167322,
+      "mean_realized": 1.6745129434565253
+    },
+    {
+      "name": "SPY vol proxy",
+      "qlike": 1.6340954600565214,
+      "mse": 26.124872901377184,
+      "mae": 1.7370362489709996,
+      "n_obs": 481,
+      "mean_forecast": 1.015168013859148,
+      "mean_realized": 1.6745129434565253
+    }
+  ],
+  "dm_tests": {
+    "GARCH-X(VIX²)": {
+      "dm_stat": 2.169707186986316,
+      "dm_pvalue": 0.03002903525607481,
+      "qlike_diff_pct": 7.081812969584038,
+      "result": "GJR wins **"
+    },
+    "GARCH-X(SPY r²)": {
+      "dm_stat": 1.7530861107979165,
+      "dm_pvalue": 0.07958722724991896,
+      "qlike_diff_pct": 2.5188864684325463,
+      "result": "No diff *"
+    },
+    "GARCH-X(VIX²+SPY)": {
+      "dm_stat": 2.2218793551450324,
+      "dm_pvalue": 0.026291459952878515,
+      "qlike_diff_pct": 7.333307327697028,
+      "result": "GJR wins **"
+    },
+    "STGARCH(VIX)": {
+      "dm_stat": 1.7266531783747432,
+      "dm_pvalue": 0.0842299692608206,
+      "qlike_diff_pct": 3.0837108536763513,
+      "result": "No diff *"
+    },
+    "SPY vol proxy": {
+      "dm_stat": 1.922452741712417,
+      "dm_pvalue": 0.05454881460485406,
+      "qlike_diff_pct": 20.7249279948167,
+      "result": "No diff *"
+    }
+  },
+  "rolling_correlation_stability": {
+    "spy_tw": {
+      "mean": 0.30022383608857645,
+      "std": 0.20838696985163632,
+      "min": -0.015029780052495858,
+      "max": 0.8607692955109533
+    },
+    "vix_tw": {
+      "mean": 0.2598774865050438,
+      "std": 0.1456277185071329,
+      "min": -0.07608296102200707,
+      "max": 0.8460121400097566
+    }
+  },
+  "stgarch_transition_analysis": {
+    "gamma": 200.0,
+    "c": 25.226410178508115,
+    "speed": "abrupt",
+    "G25_VIX": 25.220917117064776,
+    "G75_VIX": 25.231903239951453,
+    "width": 0.010986122886677663,
+    "persistence_low": 0.8389120798818579,
+    "persistence_high": 0.5402669093125589,
+    "omega1": 0.12761076482915387,
+    "alpha1": 0.05099598903508104,
+    "beta1": 0.7879160908467768,
+    "omega_high": 1.175998785960732,
+    "alpha_high": 0.2523508184657821,
+    "beta_high": 0.28791609084677683
+  },
+  "cointegration_spy_tw_vol": {
+    "t_stat": -8.223739588644992,
+    "p_value": 8.248596101583446e-12,
+    "cv_1pct": -3.8990557283223497,
+    "cv_5pct": -3.337588646396409,
+    "cointegrated": true
+  },
+  "verdict": "NULL",
+  "conclusion": "NULL: No model beats GJR baseline on Taiwan. Best alt: GARCH-X(SPY r²) (diff=2.519%). GARCH ceiling extends to Taiwan market.",
+  "comparison_with_spy_results": {
+    "K431_SPY_STGARCH": "GJR wins on SPY, STGARCH does NOT beat GJR",
+    "K438_SPY_GARCHX": "GARCH-X(VRP) borderline on SPY, delta unstable",
+    "T5c_TW_GARCHX": "GARCH-X(SPY overnight) WORSE +4.7% on TW, VIX-only +11.8%",
+    "hypothesis": "Taiwan amplification (4.6x) and true exogeneity of VIX may change result"
+  }
+}
