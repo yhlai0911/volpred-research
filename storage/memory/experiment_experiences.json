@@ -6,7 +6,13 @@
     "lesson": "單期 OOS 顯著的結果有 53% 在 5-period cross-OOS 中失敗。永遠不能只靠一個 OOS 期間下結論。",
     "examples": "K459 VRP (0/5), K474 weekly RV>VIX (0/6), K476 ensemble VaR (0/5), K506 vol spread (2/5)",
     "recommendation": "任何正面結果必須 5-period cross-OOS 驗證後才能宣稱",
-    "source_experiments": ["k459", "k474", "k476", "k506", "k492"]
+    "source_experiments": [
+      "k459",
+      "k474",
+      "k476",
+      "k506",
+      "k492"
+    ]
   },
   {
     "id": "E002",
@@ -15,7 +21,12 @@
     "lesson": "更準確的 vol/return 預測不等於更好的交易策略。VIX 的 risk premium（implied > realized ~20%）在 VT 是 feature not bug。",
     "examples": "K440 VRP-VT, K467 HAR-VaR, K470 HAR-VT, K488 GJR-X(VIX)-VT",
     "recommendation": "研究和策略是不同目標，不要假設 forecasting 改善自動帶來 trading 改善",
-    "source_experiments": ["k440", "k467", "k470", "k488"]
+    "source_experiments": [
+      "k440",
+      "k467",
+      "k470",
+      "k488"
+    ]
   },
   {
     "id": "E003",
@@ -24,7 +35,11 @@
     "lesson": "K419 GINN 超時被錯誤記錄為「ML 在日頻無法打破 ceiling」。K426 用高效代碼（1.5s vs timeout）證明超時是效率問題。",
     "examples": "K419→K426 (GINN), K431 STGARCH 多次超時但最終完成",
     "recommendation": "超時時先檢查代碼效率（向量化、refit 頻率、numba），不要直接下方法論結論",
-    "source_experiments": ["k419", "k426", "k431"]
+    "source_experiments": [
+      "k419",
+      "k426",
+      "k431"
+    ]
   },
   {
     "id": "E004",
@@ -33,7 +48,11 @@
     "lesson": "用 Parkinson proxy 評估 HAR log-range 會產生 tautological advantage（range 評 range）。用 r² 或 Yang-Zhang proxy 後 HAR 優勢從 10/10 降到 8/10。",
     "examples": "K465 (10/10 Parkinson) → K468 (tautology discovered) → K469 (8/10 with r²)",
     "recommendation": "評估模型時至少用兩種不同 proxy，確認結果不是 measurement artifact",
-    "source_experiments": ["k465", "k468", "k469"]
+    "source_experiments": [
+      "k465",
+      "k468",
+      "k469"
+    ]
   },
   {
     "id": "E005",
@@ -42,7 +61,13 @@
     "lesson": "12/VIX 公式本身就是最優的連續比例 mean-reversion + risk-scaling。任何嘗試「改善」它的方法都更粗糙。VRP overlay、HAR sigma、GJR-X sigma、macro stress、VIX z-score 全部失敗。",
     "examples": "K440, K470, K488, K503, K504",
     "recommendation": "不要再嘗試在 VT weight 層面改善 12/VIX。alpha 來源必須在其他維度（asset allocation、新資產類別、完全不同的策略類型）",
-    "source_experiments": ["k440", "k470", "k488", "k503", "k504"]
+    "source_experiments": [
+      "k440",
+      "k470",
+      "k488",
+      "k503",
+      "k504"
+    ]
   },
   {
     "id": "E006",
@@ -51,7 +76,13 @@
     "lesson": "K477 Toda-Yamamoto causal discovery 顯示 VIX 是 information sink（in-degree=4, out-degree=1）。它吸收了 returns/credit/term structure 的信息。這就是為什麼加外生變數永遠冗餘。",
     "examples": "32x VIX sufficiency confirmations + K477 causal structure",
     "recommendation": "不要再測試「VIX 以外的信號能否改善 vol prediction」——因果結構說不行",
-    "source_experiments": ["k477", "k433", "k446", "k447", "k448"]
+    "source_experiments": [
+      "k477",
+      "k433",
+      "k446",
+      "k447",
+      "k448"
+    ]
   },
   {
     "id": "E007",
@@ -60,7 +91,11 @@
     "lesson": "同一方法（陳婉淑 SSVS）在不同方程式得到截然不同結果。Mean eq 外生變數全冗餘，variance eq 結構可被豐富。信息在 variance 結構中，不在 mean 的外生變數。",
     "examples": "K433 (mean eq: empty model) vs K484 (variance eq: 4/5 PIP=1.000)",
     "recommendation": "方法論的有效性取決於應用場景，不能一概而論",
-    "source_experiments": ["k433", "k484", "k485"]
+    "source_experiments": [
+      "k433",
+      "k484",
+      "k485"
+    ]
   },
   {
     "id": "E008",
@@ -69,7 +104,11 @@
     "lesson": "Equity 的最佳模型（GJR、HAR）在 commodity 最差。Oil 有反向 leverage（gamma 正）。GARCH(1,1) symmetric 在 commodity 最佳。模型選擇是 asset-class dependent。",
     "examples": "K483 commodity vol, K494 forex vol",
     "recommendation": "不要把 equity 的研究結論直接套用到其他資產類別",
-    "source_experiments": ["k483", "k494", "k495"]
+    "source_experiments": [
+      "k483",
+      "k494",
+      "k495"
+    ]
   },
   {
     "id": "E009",
@@ -78,7 +117,11 @@
     "lesson": "K503（VIX mean-reversion）如果先查知識庫就會發現 12/VIX 本身就是 MR trade。K504（STLFSI4）如果先查會發現 VIX-STLFSI corr=0.81。跳過前置搜尋浪費了至少 5-10 個實驗。",
     "examples": "K503, K504, K498 (earnings null, K412 already showed)",
     "recommendation": "嚴格遵守 3-step protocol（知識庫搜尋→文獻搜尋→概念驗證）再啟動實驗",
-    "source_experiments": ["k503", "k504", "k498"]
+    "source_experiments": [
+      "k503",
+      "k504",
+      "k498"
+    ]
   },
   {
     "id": "E010",
@@ -87,6 +130,71 @@
     "lesson": "SPY→Taiwan lead-lag 統計上很強（r=0.376, Harvey pass），但 77-93% alpha 在不可交易的 overnight gap 中。台股開盤拍賣效率地吸收了美股隔夜信息。",
     "examples": "K502 (4 strategies all fail), K501 (R²=15.6% c2c but timing bias)",
     "recommendation": "台股策略不能依賴 US lead-lag 的 c2c return。必須驗證 o2o（open-to-open）表現",
-    "source_experiments": ["k501", "k502"]
+    "source_experiments": [
+      "k501",
+      "k502"
+    ]
+  },
+  {
+    "id": "E011",
+    "title": "Phase O-P: 自建模型 QLIKE 改善但 VaR 不一定跟著改善",
+    "category": "methodology",
+    "lesson": "GJR-HAR 自建模型 QLIKE 改善 0.27% 但 VaR 全通過，而標準 GJR QLIKE 更好但 VaR 1% 有一項失敗。QLIKE 最優 ≠ VaR 最優。",
+    "examples": "Phase P GJR-HAR, Phase O Trinity test framework",
+    "recommendation": "評估模型時必須同時看 QLIKE 和 VaR，不能只看一個指標",
+    "source_experiments": [
+      "Phase O",
+      "Phase P"
+    ]
+  },
+  {
+    "id": "E012",
+    "title": "Phase Q: Asia-Pacific lead-lag c2c 顯著但 o2o 失敗",
+    "category": "taiwan",
+    "lesson": "6/8 亞太市場 close-to-close lead-lag passes Harvey，但 78% alpha 在 overnight gap（I8 教訓）。c2c 統計顯著不代表可交易。",
+    "examples": "T32/T33 Asia-Pacific, I8 timing bias",
+    "recommendation": "台股/亞股策略必須用 o2o return 驗證，不能只看 c2c",
+    "source_experiments": [
+      "Phase Q",
+      "T32",
+      "T33",
+      "I8"
+    ]
+  },
+  {
+    "id": "E013",
+    "title": "Phase R-S: 模型複雜度有 diminishing returns",
+    "category": "methodology",
+    "lesson": "Narrative-GARCH、Rough Vol、Panel 方法等複雜模型在日頻都無法打破 GJR ceiling。K458 meta-analysis: corr(params, success)=-0.259。",
+    "examples": "Phase R GARCH-MIDAS, Phase S Narrative-GARCH, K458 meta-analysis",
+    "recommendation": "不要追求模型複雜度。如果 4 參數的 GJR 已經是最佳，加更多參數只會過擬合",
+    "source_experiments": [
+      "Phase R",
+      "Phase S",
+      "k458"
+    ]
+  },
+  {
+    "id": "E014",
+    "title": "Phase J: 50/50 SPY/GLD 是經過大量測試的最優配置",
+    "category": "strategy",
+    "lesson": "測試了 2/3/4 資產組合、不同比例、Risk Parity、MVO，50/50 SPY/GLD 在 net Sharpe 上最佳。更多資產 = 更多 TX cost = 更低 net return。",
+    "examples": "Phase J risk parity, K507 dynamic allocation",
+    "recommendation": "不要為了「多元化」加入更多資產。2 資產 50/50 已接近最優",
+    "source_experiments": [
+      "Phase J",
+      "k507"
+    ]
+  },
+  {
+    "id": "E015",
+    "title": "知識庫完整性：實驗結果必須同步進知識庫，不能只存 results JSON",
+    "category": "workflow",
+    "lesson": "2026-03 發現 85/124 實驗有 results 但不在知識庫，104 個 archive-only 實驗也沒進知識庫。總共 ~200 個實驗記錄不完整。",
+    "examples": "2026-03 backfill #1 (84 entries), backfill #2 (179 entries)",
+    "recommendation": "每個實驗完成後立即寫入 knowledge.json + experiment_experiences.json。存檔前必須確認 100% 覆蓋。",
+    "source_experiments": [
+      "backfill_2026-03"
+    ]
   }
 ]
