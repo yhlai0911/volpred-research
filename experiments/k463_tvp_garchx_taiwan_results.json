@@ -1,0 +1,665 @@
+{
+  "experiment_id": "K463",
+  "title": "Time-Varying Parameter GARCH-X for Taiwan (TVP Approaches)",
+  "proposer": "\u7528\u6236",
+  "executor": "Claude",
+  "asset": "0050.TW",
+  "data_source": "yfinance (0050.TW, SPY, ^VIX)",
+  "data_period": "2009-01-05 to 2026-03-24",
+  "total_obs": 4073,
+  "oos_period": "2023-01-03 to 2024-12-31",
+  "window": 2000,
+  "refit_every": 21,
+  "runtime_seconds": 152.3,
+  "hypothesis": "Fixed delta GARCH-X fails OOS because SPY-TW relationship is time-varying. TVP approaches (rolling/adaptive/EWMA) may capture regime changes better.",
+  "descriptive": {
+    "tw_return(%)": {
+      "mean": 0.06278101674680787,
+      "std": 1.3397989773925258,
+      "skew": 0.2882622126573956,
+      "kurt": 18.17000487947301,
+      "min": -11.922343547342129,
+      "max": 16.545366823739528,
+      "N": 4073
+    },
+    "vix_var": {
+      "mean": 1.6879959056710947,
+      "std": 1.7285482609933984,
+      "min": 0.33150637411087325,
+      "max": 27.133478189522904
+    }
+  },
+  "adf_tests": {
+    "tw_return": {
+      "statistic": -22.21899029229505,
+      "p_value": 0.0
+    },
+    "vix_var": {
+      "statistic": -8.189719778374457,
+      "p_value": 7.726361455061306e-13
+    }
+  },
+  "arch_lm": {
+    "lm_stat": 939.7876010599153,
+    "p_value": 1.734633716335569e-195
+  },
+  "correlation_stability": {
+    "return_corr_63d": {
+      "mean": 0.14015937757660282,
+      "std": 0.1556194671589488,
+      "min": -0.39491886606408977,
+      "max": 0.6406159231519258,
+      "pct_negative": 18.00049862877088
+    },
+    "return_corr_126d": {
+      "mean": 0.14554265553829523,
+      "std": 0.12390147715245821,
+      "min": -0.3497038148170568,
+      "max": 0.4515325787180969
+    },
+    "vol_corr_63d(r2_tw vs r2_spy)": {
+      "mean": 0.1053894967852919,
+      "std": 0.1728157532498471,
+      "min": -0.22469731315817015,
+      "max": 0.9368159326920463
+    },
+    "vix_tw_vol_corr_63d": {
+      "mean": 0.1862651252747069,
+      "std": 0.20753764919783987,
+      "min": -0.23923589582019006,
+      "max": 0.9462199891757045
+    }
+  },
+  "in_sample": {
+    "GJR baseline": {
+      "params": {
+        "omega": 0.0367813228983838,
+        "alpha": 0.03297279191870387,
+        "gamma": 0.10444089637250015,
+        "beta": 0.8900450861093679
+      },
+      "persistence": 0.9752383262143218,
+      "converged": true,
+      "loglik": -1859.8064893852497,
+      "aic": 3727.6129787704995,
+      "bic": 3752.0522838745733
+    },
+    "GARCH-X(VIX\u00b2)": {
+      "params": {
+        "omega": 0.033275492100542134,
+        "alpha": 0.024796111609456422,
+        "gamma": 0.12205950500295976,
+        "beta": 0.7716832108280522,
+        "delta1": 0.09449734896501115
+      },
+      "persistence": 0.8575090749389885,
+      "converged": true,
+      "loglik": -1821.0466657079003,
+      "aic": 3652.0933314158005,
+      "bic": 3682.642462795893,
+      "delta_se": 0.020911980088970335,
+      "delta_t_stat": 4.518814027316914
+    }
+  },
+  "oos_metrics": [
+    {
+      "name": "GJR baseline",
+      "qlike": 1.655131243557584,
+      "mse": 24.49939468241552,
+      "mae": 1.892768871437157,
+      "n_obs": 449,
+      "mean_forecast": 1.5578280173829766,
+      "mean_realized": 1.752985088295359
+    },
+    {
+      "name": "Fixed GARCH-X(VIX\u00b2)",
+      "qlike": 1.756702226181357,
+      "mse": 24.18259189358611,
+      "mae": 1.7010030454056442,
+      "n_obs": 449,
+      "mean_forecast": 1.1281966350247619,
+      "mean_realized": 1.752985088295359
+    },
+    {
+      "name": "Rolling GARCH-X(63d)",
+      "qlike": 1.6368248741233888,
+      "mse": 24.48114775439934,
+      "mae": 2.032149412849679,
+      "n_obs": 449,
+      "mean_forecast": 1.833176209982245,
+      "mean_realized": 1.752985088295359
+    },
+    {
+      "name": "Adaptive GARCH-X(VIX regime)",
+      "qlike": 1.626884298510714,
+      "mse": 24.422696991068154,
+      "mae": 1.9634111667106613,
+      "n_obs": 449,
+      "mean_forecast": 1.7125822360447391,
+      "mean_realized": 1.752985088295359
+    },
+    {
+      "name": "EWMA GARCH-X(\u03bb=0.95)",
+      "qlike": 1.6268086540552953,
+      "mse": 24.385286536861457,
+      "mae": 2.0043784215381266,
+      "n_obs": 449,
+      "mean_forecast": 1.800080665508542,
+      "mean_realized": 1.752985088295359
+    },
+    {
+      "name": "SPY vol proxy",
+      "qlike": 1.6464033448510897,
+      "mse": 26.10453437257721,
+      "mae": 1.8116250556432019,
+      "n_obs": 449,
+      "mean_forecast": 1.368223763140515,
+      "mean_realized": 1.752985088295359
+    }
+  ],
+  "dm_tests": {
+    "Fixed GARCH-X(VIX\u00b2)": {
+      "dm_stat": 2.0279256666380774,
+      "dm_pvalue": 0.04256783512313467,
+      "qlike_diff_pct": 6.136732843339573,
+      "result": "GJR wins **"
+    },
+    "Rolling GARCH-X(63d)": {
+      "dm_stat": -0.5647345160539473,
+      "dm_pvalue": 0.5722543535008147,
+      "qlike_diff_pct": -1.1060373312056488,
+      "result": "No sig diff"
+    },
+    "Adaptive GARCH-X(VIX regime)": {
+      "dm_stat": -1.3387081873291302,
+      "dm_pvalue": 0.18066568988183862,
+      "qlike_diff_pct": -1.7066287133916545,
+      "result": "No sig diff"
+    },
+    "EWMA GARCH-X(\u03bb=0.95)": {
+      "dm_stat": -1.1160199368635837,
+      "dm_pvalue": 0.2644136007615896,
+      "qlike_diff_pct": -1.7111990129200494,
+      "result": "No sig diff"
+    },
+    "SPY vol proxy": {
+      "dm_stat": -0.2415707663607909,
+      "dm_pvalue": 0.809112776324928,
+      "qlike_diff_pct": -0.5273236633328413,
+      "result": "No sig diff"
+    }
+  },
+  "residual_diagnostics": {
+    "GJR baseline": {
+      "lm_stat": 1.3755569845503075,
+      "p_value": 0.9269682865782357
+    },
+    "Fixed GARCH-X(VIX\u00b2)": {
+      "lm_stat": 0.25197240322608616,
+      "p_value": 0.9984500904394037
+    },
+    "Rolling GARCH-X(63d)": {
+      "lm_stat": 1.6072831919362187,
+      "p_value": 0.9003671896855432
+    },
+    "Adaptive GARCH-X(VIX regime)": {
+      "lm_stat": 0.788091913376427,
+      "p_value": 0.9777866528539969
+    },
+    "EWMA GARCH-X(\u03bb=0.95)": {
+      "lm_stat": 0.4636604791714931,
+      "p_value": 0.9933935448804023
+    },
+    "SPY vol proxy": {
+      "lm_stat": 0.4563196245976906,
+      "p_value": 0.9936355212966994
+    }
+  },
+  "delta_dynamics": {
+    "fixed": {
+      "mean": 0.160803643105371,
+      "std": 0.04179967790548561,
+      "min": 0.08014380343977623,
+      "max": 0.21236689735743902,
+      "n_refits": 23,
+      "trajectory": [
+        {
+          "day": 0,
+          "delta": 0.1413720678757139
+        },
+        {
+          "day": 21,
+          "delta": 0.15592429704544486
+        },
+        {
+          "day": 42,
+          "delta": 0.14819226419760909
+        },
+        {
+          "day": 63,
+          "delta": 0.1941158608616953
+        },
+        {
+          "day": 84,
+          "delta": 0.1839253534688328
+        },
+        {
+          "day": 105,
+          "delta": 0.18379120774328456
+        },
+        {
+          "day": 126,
+          "delta": 0.19175205593664682
+        },
+        {
+          "day": 147,
+          "delta": 0.20398715937947873
+        },
+        {
+          "day": 168,
+          "delta": 0.19543775181521955
+        },
+        {
+          "day": 189,
+          "delta": 0.21236689735743902
+        },
+        {
+          "day": 210,
+          "delta": 0.20219596883907331
+        },
+        {
+          "day": 231,
+          "delta": 0.18698212556109728
+        },
+        {
+          "day": 252,
+          "delta": 0.19499450732922038
+        },
+        {
+          "day": 273,
+          "delta": 0.1989916716683997
+        },
+        {
+          "day": 294,
+          "delta": 0.20493189810852347
+        },
+        {
+          "day": 315,
+          "delta": 0.1603801204037252
+        },
+        {
+          "day": 336,
+          "delta": 0.14358381949744312
+        },
+        {
+          "day": 357,
+          "delta": 0.11741838733373511
+        },
+        {
+          "day": 378,
+          "delta": 0.10538938044074819
+        },
+        {
+          "day": 399,
+          "delta": 0.1021865378307391
+        },
+        {
+          "day": 420,
+          "delta": 0.09617431653939627
+        },
+        {
+          "day": 441,
+          "delta": 0.08014380343977623
+        },
+        {
+          "day": 462,
+          "delta": 0.09424633875029052
+        }
+      ]
+    },
+    "rolling": {
+      "mean": 0.24053875462097227,
+      "std": 0.2443749397315569,
+      "min": -0.010462767527666542,
+      "max": 0.6950097357011347,
+      "n_refits": 8,
+      "trajectory": [
+        {
+          "day": 0,
+          "delta": 0.20016125099946788
+        },
+        {
+          "day": 63,
+          "delta": 0.2058165861656222
+        },
+        {
+          "day": 126,
+          "delta": 0.6950097357011347
+        },
+        {
+          "day": 189,
+          "delta": 0.12167913398332672
+        },
+        {
+          "day": 252,
+          "delta": 0.5839065512065946
+        },
+        {
+          "day": 315,
+          "delta": 0.13853363425919307
+        },
+        {
+          "day": 378,
+          "delta": -0.010462767527666542
+        },
+        {
+          "day": 441,
+          "delta": -0.010334087819894595
+        }
+      ]
+    },
+    "adaptive": {
+      "delta_low_mean": 0.1619115384197802,
+      "delta_high_mean": 0.07479714428464479,
+      "delta_low_std": 0.06070122652691996,
+      "delta_high_std": 0.024468799767790574,
+      "n_refits": 23,
+      "trajectory": [
+        {
+          "day": 0,
+          "delta_low": 0.24561484061711777,
+          "delta_high": 0.10812408462906029
+        },
+        {
+          "day": 21,
+          "delta_low": 0.26781039452873423,
+          "delta_high": 0.10985433590404621
+        },
+        {
+          "day": 42,
+          "delta_low": 0.272367906036096,
+          "delta_high": 0.11168663566999494
+        },
+        {
+          "day": 63,
+          "delta_low": 0.16010506731067273,
+          "delta_high": 0.0960251374985206
+        },
+        {
+          "day": 84,
+          "delta_low": 0.14997288711743145,
+          "delta_high": 0.09608093342262544
+        },
+        {
+          "day": 105,
+          "delta_low": 0.15416275884925937,
+          "delta_high": 0.09525595070941198
+        },
+        {
+          "day": 126,
+          "delta_low": 0.15006930155449735,
+          "delta_high": 0.0795872890202773
+        },
+        {
+          "day": 147,
+          "delta_low": 0.16511874688960754,
+          "delta_high": 0.0795872890202773
+        },
+        {
+          "day": 168,
+          "delta_low": 0.1660129819081674,
+          "delta_high": 0.0795872890202773
+        },
+        {
+          "day": 189,
+          "delta_low": 0.18616621108400494,
+          "delta_high": 0.07951208738088628
+        },
+        {
+          "day": 210,
+          "delta_low": 0.18079594025137086,
+          "delta_high": 0.07951208738088628
+        },
+        {
+          "day": 231,
+          "delta_low": 0.16295413625535218,
+          "delta_high": 0.07951208738088628
+        },
+        {
+          "day": 252,
+          "delta_low": 0.19579960521531803,
+          "delta_high": 0.07951208738088628
+        },
+        {
+          "day": 273,
+          "delta_low": 0.22079958856656812,
+          "delta_high": 0.07648807634044363
+        },
+        {
+          "day": 294,
+          "delta_low": 0.2431454724870682,
+          "delta_high": 0.07681526419318675
+        },
+        {
+          "day": 315,
+          "delta_low": 0.1808867992092154,
+          "delta_high": 0.07586911204387203
+        },
+        {
+          "day": 336,
+          "delta_low": 0.14287851405818205,
+          "delta_high": 0.07459193377992299
+        },
+        {
+          "day": 357,
+          "delta_low": 0.07039916530441674,
+          "delta_high": 0.07119211374659368
+        },
+        {
+          "day": 378,
+          "delta_low": 0.08540815284918786,
+          "delta_high": 0.05122300129269048
+        },
+        {
+          "day": 399,
+          "delta_low": 0.09570418407049348,
+          "delta_high": 0.02758412492131332
+        },
+        {
+          "day": 420,
+          "delta_low": 0.0891654596890319,
+          "delta_high": 0.028982987856477623
+        },
+        {
+          "day": 441,
+          "delta_low": 0.06638194480191872,
+          "delta_high": 0.03129102023959926
+        },
+        {
+          "day": 462,
+          "delta_low": 0.07224532500123206,
+          "delta_high": 0.032459389714694226
+        }
+      ]
+    },
+    "ewma": {
+      "ewma_mean": 0.2247043784656451,
+      "ewma_std": 0.022007475255354743,
+      "local_mean": 0.22808945435165975,
+      "local_std": 0.24451321380944202,
+      "ewma_range": [
+        0.18127346113178264,
+        0.26469537869191334
+      ],
+      "local_range": [
+        -0.058321965450856335,
+        0.9611003797604144
+      ],
+      "n_updates": 23,
+      "trajectory": [
+        {
+          "day": 0,
+          "delta_ewma": 0.2605976552509482,
+          "delta_local": 0.2605976552509482
+        },
+        {
+          "day": 21,
+          "delta_ewma": 0.25603923081965707,
+          "delta_local": 0.169429166625126
+        },
+        {
+          "day": 42,
+          "delta_ewma": 0.25041717116322615,
+          "delta_local": 0.14359803769103854
+        },
+        {
+          "day": 63,
+          "delta_ewma": 0.24388951194809405,
+          "delta_local": 0.11986398686058439
+        },
+        {
+          "day": 84,
+          "delta_ewma": 0.23679266243023434,
+          "delta_local": 0.10195252159090022
+        },
+        {
+          "day": 105,
+          "delta_ewma": 0.23190203707502235,
+          "delta_local": 0.1389801553259951
+        },
+        {
+          "day": 126,
+          "delta_ewma": 0.23350025090668702,
+          "delta_local": 0.2638663137083157
+        },
+        {
+          "day": 147,
+          "delta_ewma": 0.2266990694658572,
+          "delta_local": 0.0974766220900908
+        },
+        {
+          "day": 168,
+          "delta_ewma": 0.2196109981655913,
+          "delta_local": 0.08493764346053916
+        },
+        {
+          "day": 189,
+          "delta_ewma": 0.224083389487874,
+          "delta_local": 0.3090588246112453
+        },
+        {
+          "day": 210,
+          "delta_ewma": 0.22565036985821169,
+          "delta_local": 0.25542299689462705
+        },
+        {
+          "day": 231,
+          "delta_ewma": 0.22396168418764698,
+          "delta_local": 0.19187665644691726
+        },
+        {
+          "day": 252,
+          "delta_ewma": 0.23496254013502005,
+          "delta_local": 0.4439788031351084
+        },
+        {
+          "day": 273,
+          "delta_ewma": 0.22260950658118148,
+          "delta_local": -0.01209813094175124
+        },
+        {
+          "day": 294,
+          "delta_ewma": 0.21033497377072136,
+          "delta_local": -0.022881149628020743
+        },
+        {
+          "day": 315,
+          "delta_ewma": 0.20923781185660353,
+          "delta_local": 0.1883917354883651
+        },
+        {
+          "day": 336,
+          "delta_ewma": 0.2066918108649249,
+          "delta_local": 0.1583177920230311
+        },
+        {
+          "day": 357,
+          "delta_ewma": 0.19388374674139525,
+          "delta_local": -0.0494694716056683
+        },
+        {
+          "day": 378,
+          "delta_ewma": 0.18127346113178264,
+          "delta_local": -0.058321965450856335
+        },
+        {
+          "day": 399,
+          "delta_ewma": 0.18825537736067305,
+          "delta_local": 0.3209117857095909
+        },
+        {
+          "day": 420,
+          "delta_ewma": 0.1950695829177371,
+          "delta_local": 0.3245394885019539
+        },
+        {
+          "day": 441,
+          "delta_ewma": 0.22804248389883428,
+          "delta_local": 0.85452760253968
+        },
+        {
+          "day": 462,
+          "delta_ewma": 0.26469537869191334,
+          "delta_local": 0.9611003797604144
+        }
+      ]
+    }
+  },
+  "regime_analysis": {
+    "n_low_vix": 403,
+    "n_high_vix": 60,
+    "pct_low_vix": 87.04103671706264,
+    "mean_vix_low": 15.223771701083882,
+    "mean_vix_high": 22.38016659418742
+  },
+  "regime_qlike": {
+    "GJR baseline": {
+      "qlike_low_vix": 1.638719493087347,
+      "qlike_high_vix": 1.763615695818473
+    },
+    "Fixed GARCH-X(VIX\u00b2)": {
+      "qlike_low_vix": 1.7094977837104073,
+      "qlike_high_vix": 2.068731591667297
+    },
+    "Rolling GARCH-X(63d)": {
+      "qlike_low_vix": 1.6134838360842993,
+      "qlike_high_vix": 1.7911130916699107
+    },
+    "Adaptive GARCH-X(VIX regime)": {
+      "qlike_low_vix": 1.6066965657213585,
+      "qlike_high_vix": 1.7603286338979776
+    },
+    "EWMA GARCH-X(\u03bb=0.95)": {
+      "qlike_low_vix": 1.6092492324716368,
+      "qlike_high_vix": 1.7428794068964284
+    },
+    "SPY vol proxy": {
+      "qlike_low_vix": 1.6059219326906218,
+      "qlike_high_vix": 1.91399234048808
+    }
+  },
+  "verdict": "TVP_PARTIAL",
+  "conclusion": "Best TVP variant: EWMA GARCH-X(\u03bb=0.95) (\u0394QLIKE=-1.71%). Time-varying delta marginally helps over fixed GARCH-X.",
+  "comparison_with_prior": {
+    "K461": "SSVS SPY_ret PIP=1.000 but QLIKE not improved (mean vs variance disconnect)",
+    "K462": "GARCH-X(VIX) IS t=3.58 but OOS +7.1% worse, rolling corr -0.02 to 0.86",
+    "K463_improvement": "Best TVP: EWMA GARCH-X(\u03bb=0.95) (\u0394QLIKE=-1.71%)"
+  },
+  "limitations": [
+    "Simple TVP methods (not full Kalman filter or GAS)",
+    "OOS only 2023-2024 (481 obs, mostly low-VIX regime)",
+    "Delta estimation on subsamples may be noisy",
+    "No cross-OOS validation (single split)",
+    "EWMA lambda=0.95 is ad hoc (not optimized)"
+  ]
+}
