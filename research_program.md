@@ -1140,6 +1140,20 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] 「填息率」與波動率的關係——填息快的股票 vol 是否較低？
 - [ ] 除息日對 0050.TW 的 vol 影響（0050 成分股集中除息期間）
 
+#### SEC Filings 研究與文章方向（用戶提出）
+美股的 10-K（年報）、10-Q（季報）、8-K（重大事件即時揭露）是重要的資訊來源和內容題材：
+
+**研究方向：**
+- [ ] 10-K/10-Q filing 前後 SPY vol 是否有系統性模式？（類似 earnings 但更廣泛）
+- [ ] 8-K filing（unexpected events）對個股和 index vol 的 surprise 效果
+- [ ] SEC filing 語調分析（文字情緒 vs 後續 vol/return）——NLP 跳躍式探索
+- [ ] TSMC 20-F（外國公司年報）filing 對 TSM/0050.TW 的影響
+
+**文章方向（一般讀者）：**
+- [ ] 「10-K、10-Q、8-K 是什麼？散戶為什麼該關心美股年報」(general 教育文)
+- [ ] 「財報季前後的波動規律——數據告訴你什麼時候最危險」(general)
+- [ ] 「如何從 SEC filing 讀出公司的真實風險」(general 教學文)
+
 **執行原則：**
 - 事件前 2-3 天發佈「預告」文章（一般讀者 + 研究各 1 篇）
 - 事件後 1 天發佈「解讀」文章
