@@ -14633,5 +14633,22 @@
     "experiment_id": "k556",
     "created_at": "2026-03-27T16:16:30.353428+00:00",
     "importance": 2
+  },
+  {
+    "id": "K558",
+    "title": "K558: ★★★★★ Taiwan Hybrid Leverage FULLY VALIDATED — t=4.79, 18/18 OOS, 0056 confirmed",
+    "content": "[提出: Claude, 執行: Claude] K553 深度驗證 8 項 11 checks 全 PASS。Harvey t=4.79。Cross-OOS 18/18 (5/5+6/6+7/7)。Sensitivity 100/100 positive, 96% safe zone。TX breakeven 24bp (台灣 ETF ~5-10bp OK)。Borrowing >10% breakeven。MDD -48.4% 與 base 完全相同（零 MDD penalty）。0056.TW robustness t=5.67, 5/5 OOS。\n\nSharpe +0.162, CAGR 6.66%→9.64%。Leverage 僅 34.8% 的日子啟動。\n\n**結論：US (K551 t=7.90) + Taiwan (K558 t=4.79) 兩個市場都完整驗證。可上架。**",
+    "tags": [
+      "Taiwan",
+      "leverage",
+      "validation",
+      "Harvey_pass",
+      "listing_ready",
+      "0056_confirmed"
+    ],
+    "data_source": "yfinance 0050.TW + 0056.TW + VIX 2010-2026",
+    "experiment_id": "k558",
+    "created_at": "2026-03-27T16:23:49.326359+00:00",
+    "importance": 5
   }
 ]
