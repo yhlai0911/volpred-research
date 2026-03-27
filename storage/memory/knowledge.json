@@ -14739,5 +14739,39 @@
     "experiment_id": "k564",
     "created_at": "2026-03-27T18:16:12.678882+00:00",
     "importance": 5
+  },
+  {
+    "id": "K565",
+    "title": "K565: ★★★ BTC 5% Harvey t=3.07 PASS，但 post-ETF 效益消失（correlation 0→0.35）",
+    "content": "[提出: Claude, 執行: Claude] K66 更新。5% BTC DM t=3.074 (PASS), Sharpe 1.320 vs 1.091 (+0.23), 3/3 OOS, rolling win 97%。\n\n但 POST-ETF (2024+): 5% BTC Sharpe 1.876 vs base 1.866 (+0.010 negligible)。10%/20% BTC 反而更差。SPY-BTC corr 從 pre-2020 的 0.008 升到 post-ETF 的 0.310——結構性轉變，非週期性。\n\nMomentum-conditional BTC (60d ret>0): t=3.372 PASS, MDD -15.1% (better than unconditional -16.7%)。\n\n結論：歷史全期 BTC 有效，但現在進場的投資人應預期效益大幅縮水。Momentum filter 是最佳選擇。",
+    "tags": [
+      "BTC",
+      "bitcoin",
+      "correlation_regime",
+      "post_ETF",
+      "momentum_conditional",
+      "Harvey_pass"
+    ],
+    "data_source": "yfinance SPY+GLD+BTC-USD+VIX 2015-2026",
+    "experiment_id": "k565",
+    "created_at": "2026-03-27T19:16:46.021871+00:00",
+    "importance": 4
+  },
+  {
+    "id": "K566",
+    "title": "K566: Factor Timing VT — Null, factor ETFs corr 0.86-0.98 with SPY, daily artifact confirmed",
+    "content": "[提出: Claude, 執行: Claude] 5 factor ETFs (VLUE/MTUM/QUAL/IWM/USMV) monthly rotation + VT。全部 monthly DM negative (t=-0.18 to -2.99)。QUAL 最接近 (1.514 vs 1.545) 但 NS。Daily rebal 2.091 vs monthly 1.448——再次確認 microstructure artifact (K560/K562/K563 pattern)。Cross-OOS 0/3。Factor ETFs corr 0.86-0.98 with SPY，無法提供有意義的多元化。SPY 仍是 VT 最佳 equity vehicle。",
+    "tags": [
+      "factor",
+      "rotation",
+      "QUAL",
+      "USMV",
+      "null_result",
+      "microstructure_artifact"
+    ],
+    "data_source": "yfinance 5 factor ETFs + SPY + GLD + VIX 2014-2026",
+    "experiment_id": "k566",
+    "created_at": "2026-03-27T19:17:09.295698+00:00",
+    "importance": 2
   }
 ]
