@@ -670,6 +670,14 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - K418: Taiwan volume null（yfinance proxy 太粗糙）
 
 **新研究方向**：
+#### ⚠️ K519 上架暫停（K521 data alignment bug）
+- [x] K519 VT-Sized Overnight 原本通過全部上架標準（Sharpe 1.079, 5/5 OOS, t=4.26）
+- [x] K520 Sensitivity 確認穩健（4/4 維度 wide safe zones）
+- [x] **K521 發現 merge_asof bug**：SPY(T) 配 TW(T) 但 SPY 收盤在台股交易之後
+- [x] 修正後 Sharpe 更高（4.445）但暴露 I8 timing bias：gap 在開盤拍賣 priced in
+- [x] **上架暫停**——需要找到在 5AM-9AM 之間可執行的交易機制才能重啟
+- [x] E017: 所有台股用美股信號的策略必須手動驗證日期對齊
+
 - [ ] K510: **Volume-GARCH (Lamoureux & Lastrapes 1990 replication)** [提出: 用戶] — 用 volume 替代/補充 GARCH 的 ARCH term，看 persistence 是否下降 + OOS 是否改善
 - [ ] MDH 框架：volume 不只是 GARCH-X 的外生變數，而是信息流的 proxy → 可能需要不同的建模方式
 - [ ] Volume detrending：Lamoureux & Lastrapes 用 detrended volume（去除長期趨勢），這跟 K113 用 raw volume surprise 不同
