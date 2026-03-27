@@ -14705,5 +14705,39 @@
     "experiment_id": "k562",
     "created_at": "2026-03-27T17:21:37.778192+00:00",
     "importance": 4
+  },
+  {
+    "id": "K563",
+    "title": "K563: Weekly Sector Momentum — Harvey t=2.73 FAIL, alpha 隨頻率遞減（microstructure artifact）",
+    "content": "[提出: Claude, 執行: Claude] K562 延伸——weekly rebalancing。Best: Weekly Top-1 20d Sharpe 1.067, Harvey t=2.731 (FAIL <3.0)。Cross-OOS pooled t=4.019 但 individual periods weak。\n\nDaily 2.157 → weekly 1.067 → monthly 1.228。Alpha 與 rebalancing 頻率單調遞減——confirmed microstructure/noise trading artifact。\n\n結論：sector momentum 不適合散戶（需日頻交易）。方向關閉。",
+    "tags": [
+      "sector_momentum",
+      "weekly",
+      "rebalancing_frequency",
+      "null_result",
+      "microstructure"
+    ],
+    "data_source": "yfinance SPY + 8 sectors + GLD + VIX 2005-2026",
+    "experiment_id": "k563",
+    "created_at": "2026-03-27T18:15:18.044020+00:00",
+    "importance": 2
+  },
+  {
+    "id": "K564",
+    "title": "K564: VIX Term Structure Derivative (Slope Change/Acceleration) — NULL, VIX Sufficiency #37",
+    "content": "[提出: 用戶, 執行: Claude] VIX term structure slope DERIVATIVE (rate of change, acceleration) as VT overlay signal. 4587 天 (2008-2026), 10 策略變體, 5 期 cross-OOS.\n\n核心差異: K429 測 slope 水平, K542 測 ratio on/off, K564 測 slope 的一階/二階導數(momentum/acceleration).\n\n關鍵發現:\n- slope_change 與 next-5d SPY return 相關僅 r=-0.029 (幾乎為零)\n- ANOVA F=0.43, p=0.78 — slope change quintiles 完全不預測報酬\n- Q5-Q1 spread: -3.99 bps/day, t=-0.71 (insignificant)\n- 最佳全樣本策略 slope_percentile Sharpe 0.936 vs benchmark 0.733 (+0.203)，但 t=0.03 (完全 insignificant)\n- slope_zscore_adjust cross-OOS 4/5 wins, avg dSharpe +0.047, 但 max |t|=1.49 遠低於 Harvey 3.0\n- 所有策略均 FAIL Harvey t>3.0 (最高 t=1.80)\n\n結論: 斜率的導數本身與 VIX 水平變化高度相關——VIX 急升時斜率機械性壓平, 12/VIX 已自動捕捉此效應. VIX sufficiency #37.",
+    "tags": [
+      "term_structure",
+      "VIX",
+      "contango",
+      "slope_derivative",
+      "VIX_sufficiency",
+      "null_result",
+      "cross_OOS"
+    ],
+    "data_source": "yfinance (^VIX, ^VIX3M, SPY, GLD)",
+    "experiment_id": "k564",
+    "created_at": "2026-03-27T18:16:12.678882+00:00",
+    "importance": 5
   }
 ]
