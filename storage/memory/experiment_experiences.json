@@ -233,5 +233,86 @@
       "k524",
       "k521"
     ]
+  },
+  {
+    "id": "E019",
+    "title": "Daily rebalancing alpha is microstructure artifact — ALWAYS test monthly frequency",
+    "category": "methodology",
+    "lesson": "K560 sector momentum 展現驚人的 daily Sharpe 2.157 (Harvey t=10.87)，但月頻降至 1.228（低於 benchmark 1.345）。K563 weekly 1.067 也未通過 Harvey。K566 factor rotation 同樣模式（daily 2.091 vs monthly 1.448）。Alpha 與 rebalancing 頻率單調遞減，證實為 microstructure/noise trading artifact（高頻 rebalancing 捕捉 bid-ask bounce 和 intraday mean-reversion，非真正信號）。對散戶無效（需日頻交易），對機構也存疑（turnover 14.4%/day）。教訓：任何 daily Sharpe > 1.5 的策略，**必須**同時報告月頻結果。若月頻不如 benchmark，該 alpha 是 artifact，不可上架。",
+    "examples": "K560 daily 2.157→K562 monthly 1.228 (worse than BM 1.345), K563 weekly 1.067 (Harvey FAIL), K566 factor daily 2.091→monthly 1.448, bootstrap monthly P(win)=10.4%",
+    "recommendation": "所有策略回測必須同時報告 daily 和 monthly rebalancing 的 Sharpe。月頻 Sharpe 低於 benchmark 的策略禁止上架。新策略上線檢查清單加入「月頻確認」必要項。",
+    "source_experiments": [
+      "k560",
+      "k562",
+      "k563",
+      "k566"
+    ]
+  },
+  {
+    "id": "E020",
+    "title": "VIX sufficiency extends to ALL derivative signals — options market is informationally efficient",
+    "category": "theory",
+    "lesson": "K526-K566 期間測試了 10+ 種 VIX 衍生/替代信號，全部在控制 VIX 後為 null：(1) K535 SKEW IS t=-3.01 但 OOS 消失（教科書過擬合），(2) K537 跨資產 vol momentum（VIX 已整合），(3) K539 VRP carry（VRP 不正交於 VIX），(4) K542 VIX term structure ratio（backwardation 時 VIX 已高，timing 冗餘），(5) K564 term structure 一/二階導數 r=-0.029，(6) K554 HMM regime partial R²=0.000169，(7) K538/K541 meta-labeling AUC 0.48-0.52，(8) K556 momentum crash filter +0.03 Sharpe（邊際），(9) K543 drawdown corr=0.77 with VIX。累計 VIX sufficiency 確認次數已達 37+。結論：選擇權市場的定價效率意味著 VIX level 已經是 sufficient statistic，其衍生量（slope、change、ratio、percentile）和替代量（SKEW、VRP、HMM state）不包含增量信息。**應徹底停止測試 VIX 衍生信號。**",
+    "examples": "K535 SKEW null, K537 cross-asset vol null, K539 VRP null, K542 term structure null, K554 HMM null, K564 slope derivative null, K538/K541 meta-label null, K543 drawdown corr=0.77 with VIX",
+    "recommendation": "不再設計「用 X 替代/增強 VIX」的實驗。VIX sufficiency 已被 37+ 次確認，再測試是浪費資源。研究精力應轉向非選擇權市場的信號源（NLP、另類數據）或非信號面的改善（portfolio construction）。",
+    "source_experiments": [
+      "k535",
+      "k537",
+      "k538",
+      "k539",
+      "k541",
+      "k542",
+      "k543",
+      "k554",
+      "k556",
+      "k564"
+    ]
+  },
+  {
+    "id": "E021",
+    "title": "Portfolio construction > signal discovery for strategy improvement",
+    "category": "strategy",
+    "lesson": "在 K526-K566 的 37 個實驗中，唯一真正通過 Harvey 且有實質價值的改善來自 **portfolio construction**（如何使用信號），而非 **signal discovery**（發現新信號）。K548/K551 VIX-Conditional Leverage（t=7.90, 11/11 OOS）不是新信號——仍使用 12/VIX，只是在 VIX<15 時加槓桿 1.5x。K553/K558 台灣版（t=4.79, 18/18 OOS）用 relative percentile 替代 absolute threshold，也是 construction 層面的創新。K536 HAR-EVT 是唯一通過 Trinity Test 的 VaR 模型，改善來自分佈假設（EVT GPD）而非新預測因子。同時期的信號發現嘗試（K535 SKEW、K537 vol momentum、K539 VRP、K542 term structure...）全數失敗。教訓：12/VIX 已是最優信號（E005 確認 5 次、K540 確認第 8 次），未來策略研究應 100% 聚焦 construction 面（槓桿、配置權重、再平衡方式、風險預算、交易成本優化）。",
+    "examples": "K548/K551 leverage t=7.90 (construction win), K553/K558 Taiwan t=4.79 (construction win), K536 HAR-EVT Trinity (distribution win), vs K535/K537/K539/K542/K554/K564 全部 signal null",
+    "recommendation": "研究資源分配：0% 給「新信號搜尋」，100% 給「construction 優化」——包括動態槓桿條件、跨市場適配（absolute vs relative threshold）、分佈假設改善、成本最小化。",
+    "source_experiments": [
+      "k548",
+      "k551",
+      "k553",
+      "k558",
+      "k536",
+      "k535",
+      "k537",
+      "k539",
+      "k542",
+      "k554"
+    ]
+  },
+  {
+    "id": "E022",
+    "title": "BTC correlation regime shift makes historical backtest misleading — always verify recent data",
+    "category": "data_quality",
+    "lesson": "K565 BTC 5% 配置全期 Harvey t=3.07 PASS（Sharpe +0.23），但 post-ETF（2024+）效益消失（+0.010 Sharpe，可忽略）。SPY-BTC correlation 從 pre-2020 的 0.008 升到 post-ETF 的 0.310——這是機構化帶來的結構性轉變（ETF 資金流、相同風險模型、margin call contagion），非週期性波動。歷史回測被 pre-correlation 時期（2014-2020）的多元化效益拉高，但現在進場的投資人不會享受到這些效益。同理，K534 顯示 SPY-GLD correlation 的 VIX-beta sign 也跨年代翻轉。教訓：任何涉及跨資產配置的策略，必須檢查 (1) 相關性的時間穩定性、(2) 是否有結構性 break point、(3) 最近 1-2 年的表現是否支持歷史全期結論。Momentum filter（K565 t=3.37）是部分解決方案——只在趨勢正向時持有。",
+    "examples": "K565 BTC full-sample t=3.07 but post-ETF +0.010, SPY-BTC corr 0→0.35, K534 SPY-GLD VIX-beta sign flip across decades",
+    "recommendation": "跨資產配置策略必須報告 (1) full-sample 和 (2) 最近 2 年的分別表現。若 recent Sharpe improvement < 0.05，視為結構性失效，不可上架。使用 momentum condition 作為 fallback。",
+    "source_experiments": [
+      "k565",
+      "k534"
+    ]
+  },
+  {
+    "id": "E023",
+    "title": "HAR with absolute return proxy is universal breakthrough — but prediction ≠ trading (again)",
+    "category": "methodology",
+    "lesson": "K530/K532 確立 HAR + |r_t| proxy 是波動率預測的 universal breakthrough（7/7 資產全勝 GJR-GARCH，DM t 從 -11 到 -22）。然而 K533 立刻證明最佳預測器 ≠ 最佳策略（第 5 次確認 E002）：HAR-ABS 預測最佳但 VT Sharpe 最低，12/VIX 仍不可替代。K536 HAR-EVT 成為唯一通過完整 Trinity Test 的 VaR 模型——HAR 的價值在 risk management 而非 trading。K529 Rough Vol (H=0.1) 在理論上吸引人但 HAR-Rough 未勝 EWMA，time-varying H 反而更差。教訓：(1) proxy 選擇（|r| vs r²）的影響比模型選擇大 3 倍（K530），(2) HAR 的殺手級應用是 VaR/風控，不是 VT 策略，(3) 理論上優美的模型（rough vol）不一定實用。",
+    "examples": "K530 HAR-ABS QLIKE 0.49 vs HAR-SQ 1.57 (3x better), K532 7/7 universal, K533 prediction≠application #5, K536 HAR-EVT Trinity PASS, K529 Rough H=0.1 but TV-H worse",
+    "recommendation": "HAR 框架用於 risk management（VaR、MDD estimation）而非 trading signal。proxy 始終用 |r_t|（absolute return）不用 r²_t。rough volatility 研究限於學術論文，不投入策略開發。",
+    "source_experiments": [
+      "k529",
+      "k530",
+      "k532",
+      "k533",
+      "k536"
+    ]
   }
 ]
