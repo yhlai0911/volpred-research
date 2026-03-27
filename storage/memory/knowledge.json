@@ -14483,5 +14483,55 @@
     "experiment_id": "k547",
     "created_at": "2026-03-27T14:26:57.059789+00:00",
     "importance": 1
+  },
+  {
+    "id": "K548",
+    "title": "K548: ★★★★ VIX-Conditional Leverage — Sharpe +0.112, CAGR +5.4%, 5/5 Cross-OOS！",
+    "content": "[提出: Claude, 執行: Claude] Leveraged Risk Parity VT。5300 天，5 期 cross-OOS。\n\n固定槓桿（1.3x/1.5x）降低 Sharpe（borrowing cost）。Vol-targeting/Risk Parity 最差（pro-cyclical 放大 drawdown）。\n\n**VIX-Conditional Leverage 唯一勝出**：VIX<15 時 lever 1.5x，VIX>25 時 1.0x。Sharpe 1.497 (+0.112 vs base 1.385), CAGR 18.26% (+5.42%), MDD -12.32%（僅惡化 2.68pp）。**5/5 cross-OOS wins**，mean improvement +0.130。\n\n原理：calm markets lever up（capture equity premium），stress markets stay 1.0x（不放大 crash）。Borrowing cost 0.42%/yr，被額外收益覆蓋。\n\n注意：Sharpe 改善 modest (+0.112)，主要價值是更高 CAGR。這是 portfolio construction optimization 不是新 alpha。需要 margin/futures 帳戶。Harvey test 待確認。",
+    "tags": [
+      "leverage",
+      "risk_parity",
+      "VIX_conditional",
+      "portfolio_construction",
+      "cross_OOS_5_5"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX+IRX 2005-2026",
+    "experiment_id": "k548",
+    "created_at": "2026-03-27T14:41:31.193751+00:00",
+    "importance": 4
+  },
+  {
+    "id": "K549",
+    "title": "K549: Multi-Asset VT — 5 資產 EW Sharpe +0.20 但 Harvey NS（weak positive）",
+    "content": "[提出: Claude, 執行: Claude] 5 資產 VT（SPY/GLD/TLT/EFA/VNQ）。7 配置組合。Equal weight 5 Sharpe 1.517, Risk Parity 5 Sharpe 1.608 vs 50/50 1.318。但 0/7 通過 Harvey t>3.0，bootstrap CI 全部 overlap。\n\n2022 升息對 TLT 組合致命。EFA 最穩定。VNQ 邊際貢獻最大 (+0.064 Sharpe per 10%)。\n\n結論：多資產改善看得到但量不到——economically ~0.2 Sharpe 但 statistically NS。50/50 確認 robust #10。",
+    "tags": [
+      "multi_asset",
+      "TLT",
+      "EFA",
+      "VNQ",
+      "portfolio",
+      "weak_positive",
+      "Harvey_NS"
+    ],
+    "data_source": "yfinance 5 assets 2004-2026",
+    "experiment_id": "k549",
+    "created_at": "2026-03-27T14:41:54.450802+00:00",
+    "importance": 2
+  },
+  {
+    "id": "K550",
+    "title": "K550: Adaptive VIX Threshold — 12 無特殊意義（10-16 皆可），adaptive 更差",
+    "content": "[提出: Claude, 執行: Claude] 12/VIX 的 12 是否應動態調適。Fixed 10-16 全部 Sharpe 1.47-1.74（相似）。Adaptive 1yr median Sharpe 1.35（更差）——crisis 時 rolling median lag。\n\nPercentile-based Sharpe 3.07 但機制是極端保守（mean weight 0.53），非 alpha。0050.TW: adaptive 0.577 ≈ fixed 8.63 0.593。\n\n結論：12 沒有結構意義——任何 [10,16] 都行。N81 確認。Adaptive 因 crisis lag 反而傷害。12/VIX 的簡潔性是其最大優點。",
+    "tags": [
+      "VIX_threshold",
+      "adaptive",
+      "12VIX",
+      "robustness",
+      "null_result"
+    ],
+    "data_source": "yfinance SPY+VIX+0050.TW 2005-2026",
+    "experiment_id": "k550",
+    "created_at": "2026-03-27T14:52:56.988569+00:00",
+    "importance": 2
   }
 ]
