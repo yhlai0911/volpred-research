@@ -96,7 +96,15 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 
 **執行規則**：
 - 所有文章一律 `status=draft` 進文章池，由每小時 cron 按節奏釋出
-- **每篇文章必須附圖表**：用 matplotlib 生成 → 上傳 Supabase Storage → content 中用 `![desc](url)` 嵌入。一般讀者至少 1 張，研究文章 2-3 張。不附圖的文章閱讀價值大幅降低
+- **每篇文章必須附真正的圖表（不可用 ASCII/文字表格替代）**：
+  - 用 matplotlib 生成 PNG → 上傳 Supabase Storage `article-images` bucket → content 中用 `![desc](public_url)` 嵌入
+  - 一般讀者至少 1 張真實圖表，研究文章 2-3 張
+  - **禁止用 ASCII art、文字方框、或純 Markdown 表格冒充圖表**——這些不是圖表
+  - 圖表類型建議：bar chart（比較）、line chart（趨勢）、scatter（相關）、heatmap（矩陣）
+- **每篇文章必須標注數據來源和實驗檔案**：
+  - 研究文章：文末必須列出 `實驗腳本: experiments/kXXX.py` 和 `結果數據: experiments/kXXX_results.json`
+  - 一般讀者文章：文末用 `*本文基於實驗 KXXX 的實證結果（數據來源：yfinance，期間：YYYY-YYYY）*` 格式標注
+  - 不標注來源的文章等同「無法追溯」，違反研究誠實原則第 9 條
 - 一般讀者文章的主題**不可重疊**——每篇必須有獨立的核心 insight
 - 用 LanceDB 搜尋確認主題未被寫過同類型文章
 - **research_program.md 每月初存檔瘦身**：將已完成 Phase/Session 記錄移至 `docs/research_archive/completed_phases_YYYY-MM.md`，只保留活躍內容（目標 < 500 行）。查詢追蹤表指向存檔位置。**存檔前必須先確認所有實驗都已進入 knowledge.json + experiment_experiences.json**——不可以存檔未記錄的內容（2026-03 教訓：先存檔才發現 85 個實驗不在知識庫）
