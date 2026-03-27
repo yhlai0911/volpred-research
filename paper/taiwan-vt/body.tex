@@ -181,6 +181,29 @@ Taiwan's trading hours (9:00--13:30 local time, or 01:00--05:30 UTC) begin appro
 
 \textbf{Volatility spillover.} Granger causality tests show that lagged VIX significantly predicts 0050.TW squared returns ($F = 58.8$, $p < 0.001$). In contrast, lagged 0050.TW volatility does not Granger-cause VIX ($p = 0.43$), confirming that information flows unidirectionally from the U.S. to Taiwan at the daily frequency. The TWD/USD exchange rate does not add significant explanatory power after controlling for VIX ($p = 0.08$).
 
+% K461: SSVS variable selection confirms Taiwan as information receiver
+\textbf{Bayesian variable selection.} Using Stochastic Search Variable Selection (SSVS) applied to the GJR-GARCH mean equation for 0050.TW, the lagged SPY return achieves a posterior inclusion probability (PIP) of 1.000, confirming its dominant role as a predictor of next-day Taiwan returns. This stands in sharp contrast to SSVS results for U.S. equities, where an ``empty'' model (no exogenous regressors) wins the Bayesian model selection exercise. Table~\ref{tab:ssvs_pip} summarizes the cross-market comparison.
+
+\begin{table}[H]
+\centering
+\caption{SSVS Posterior Inclusion Probabilities: Taiwan vs.\ U.S.}
+\label{tab:ssvs_pip}
+\begin{tabular}{lcc}
+\toprule
+Variable & 0050.TW (PIP) & SPY (PIP) \\
+\midrule
+Lagged SPY return & 1.000 & --- \\
+Lagged own return & 0.312 & 0.087 \\
+Best exogenous predictor & SPY ($= 1.000$) & None selected \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\small \textit{Notes:} SSVS with Bernoulli-Normal spike-and-slab prior on GJR-GARCH(1,1) mean equation coefficients. PIP $> 0.5$ indicates inclusion. For SPY, no exogenous variable exceeds PIP $= 0.5$; the empty model is preferred.
+\end{flushleft}
+\end{table}
+
+The fact that the same Bayesian methodology produces diametrically opposite conclusions for Taiwan (SPY return is indispensable) and the U.S. (no exogenous variable is needed) provides formal statistical confirmation of Taiwan's role as an \textit{information receiver} in the global equity market. This asymmetry---unidirectional information flow from the U.S. to Taiwan with no reverse channel---reinforces the Granger causality evidence above and motivates the time-zone information transmission analysis in Section~\ref{sec:tz}.
+
 These spillover results motivate two distinct strategies: (1) using U.S. VIX as a volatility proxy for Taiwan VT (Section~\ref{sec:vt}), and (2) exploiting the lagged return transmission for time-zone arbitrage (Section~\ref{sec:tz}).
 
 
@@ -204,6 +227,9 @@ Despite the statistically significant leverage effect in the Taiwan market, GJR-
 However, when evaluated in the context of VT portfolio performance, GJR produces a meaningfully higher Sharpe ratio: 1.108 versus 0.994 for GARCH, a difference of +0.114. This disconnect between QLIKE and VT performance arises because VT rewards tail-specific forecast accuracy---the ability to correctly predict when to reduce exposure during sharp declines---rather than average forecast accuracy across all days. GJR's asymmetric response to negative shocks provides better \textit{directional} timing even when average forecast accuracy is indistinguishable.
 
 This finding has practical implications for model selection: for pure volatility forecasting (e.g., risk reporting), the simpler GARCH model is sufficient for Taiwan. For portfolio VT, GJR offers a modest but potentially meaningful advantage through improved tail-event response.
+
+% K472: Comprehensive cross-market validation — all US methods fail on Taiwan
+A comprehensive cross-market validation exercise confirms a broader pattern: all volatility forecasting enhancements validated on U.S. equities---including HAR realized volatility decomposition, signed semivariance, and return kurtosis signals---fail to improve out-of-sample QLIKE for 0050.TW.\footnote{Experiment K472 tests HAR-RV (5/22-day components), positive/negative semivariance \citep{barndorff2010}, and rolling kurtosis as GARCH-X regressors for 0050.TW. None achieves a significant DM test improvement over the base GJR-GARCH model ($p > 0.10$ for all specifications). The same methods produce significant improvements for SPY ($p < 0.05$), confirming that the null results are market-specific rather than methodological artifacts.} This suggests that the ``GARCH ceiling'' documented for U.S. equities---where GARCH(1,1) is difficult to beat with more complex specifications---extends to the Taiwan market, but for a different reason: the dominant source of incremental forecasting power for Taiwan is the \textit{cross-market} channel (lagged U.S. information) rather than \textit{within-market} higher-moment dynamics.
 
 \begin{table}[H]
 \centering
@@ -285,6 +311,14 @@ The distinction between c2c and o2o returns is critical, and its interpretation 
 
 The c2c results confirm a strong and persistent information transmission channel from U.S. to Asian markets ($r = 0.376$), with six Asia-Pacific markets exceeding the Harvey threshold on a c2c basis (Hong Kong $t = 4.12$, Australia $t = 4.04$, Singapore $t = 4.03$, Korea $t = 3.83$, Taiwan $t = 3.76$, Japan $t = 3.69$). The failure of all U.S.-listed ETF controls confirms that the information is priced with a lag in local markets. Rather than interpreting the c2c--o2o gap as a failure, we view it as evidence of a highly efficient price discovery mechanism: the Asian opening auction---a call auction that aggregates pre-market orders accumulated overnight---incorporates approximately 78\% of overnight U.S. information within the first transaction of the trading day. This finding places the Taiwan opening auction among the most efficient cross-market information aggregation mechanisms documented in the microstructure literature, and has implications for market design in emerging economies where call auction efficiency is an active policy concern.
 
+% K515/K516: Overnight gap decomposition and SPY-conditioned gap analysis
+\subsection{Overnight Gap as the Primary Channel}
+\label{sec:overnight_gap}
+
+A granular decomposition of 0050.TW returns reveals that the overnight opening gap accounts for 87\% of total close-to-close returns over the 2012--2025 sample, confirming that the bulk of daily price movement is determined before the continuous trading session begins. When conditioned on the previous day's SPY return sign, the gap is strongly asymmetric: following SPY up-days, the average 0050.TW opening gap is $+10.73$ basis points per day ($t = 6.845$), whereas following SPY down-days, the gap averages $-8.91$ bp ($t = -5.23$). The intraday (open-to-close) component shows no significant SPY-conditional pattern ($t = 0.82$), confirming that cross-market information is incorporated almost entirely through the opening auction rather than during continuous trading.
+
+This gap-dominance finding has direct implications for strategy implementability. An ETF-based strategy that attempts to trade on the SPY signal faces a fatal timing problem: by the time the Taiwan market opens and the trader can place an order, the opening gap has already absorbed the signal, imposing an estimated cost of 38.5 bp per round-trip (the average absolute gap). However, a futures-based implementation using TAIEX futures (TX), which trade in a pre-market session beginning at 8:45 (15 minutes before the equity market opens), faces a substantially smaller gap cost of approximately 5 bp, suggesting a potentially viable Sharpe ratio of 0.93 for the futures channel. We leave the full analysis of futures-based implementation---including margin requirements, roll costs, and intraday liquidity---to future work.
+
 \subsection{Source of Information Transmission: Time-Zone Gap, Not Factor Exposure}
 
 A critical question is whether the cross-market predictability reflects genuine information transmission or merely common factor exposure (e.g., global equity beta). We address this with three tests:
@@ -351,6 +385,16 @@ These null results are consistent with our broader finding that VIX serves as a 
 Beyond trade data, we examine Taiwan's composite business cycle indicators published by the National Development Council. As noted above, the business cycle score itself has no predictive power for next-month realized volatility ($t = -0.53$, $p = 0.60$), consistent with its well-documented lagging nature. However, the month-over-month change in the leading indicator composite achieves the strongest predictive signal among all Taiwan-specific variables ($t = 3.74$, $p < 0.001$, $R^2 = 7.1\%$), surpassing even trade data. A coincident indicator momentum strategy---reducing equity exposure when the coincident composite declines for three consecutive months---yields Sharpe 0.732 (OOS 2018--2024: 1.260), substantially exceeding the $8.63/\text{VIX}$ baseline of 0.334 over the same 2018--2024 sub-period (compared to 0.690 over the full 2016--2026 sample; see Table~\ref{tab:sharpe_reconciliation}).\footnote{The difference between sub-period and full-sample Sharpe ratios for the $8.63/\text{VIX}$ strategy reflects the strategy's underperformance during the prolonged low-volatility bull market of 2020--2021, when the VIX-scaled weight held substantially less than full exposure.} The key insight is that the business cycle indicator's value lies in its \textit{directional change}, not its level.
 
 This finding has broader methodological implications: macroeconomic indicators that appear uninformative in level form may contain substantial predictive content in their first differences. The leading indicator momentum captures regime shifts in the Taiwanese economy---transitions between expansion and contraction---that are orthogonal to the high-frequency volatility information embedded in VIX.
+
+% K512: Dividend ex-date volatility effect
+\subsection{Ex-Dividend Volatility and VT Implications}
+\label{sec:exdiv}
+
+Taiwan's concentrated ETF dividend calendar---0050.TW and 0056.TW typically go ex-dividend within the same two-week window each July---creates a predictable volatility spike. We examine realized volatility in the five trading days following ex-dividend dates and find an increase of $+32\%$ for 0050.TW and $+69\%$ for the high-dividend 0056.TW relative to the 20-day pre-event baseline. The larger effect for 0056.TW is consistent with its higher dividend yield ($\sim$5--7\% versus $\sim$3\% for 0050.TW) and its retail-investor-heavy shareholder base, which generates more post-ex-date selling pressure.
+
+Despite this pronounced volatility effect, the historical fill rate---the proportion of ex-dividend gaps that are fully recovered within 60 trading days---is 79\% for 0050.TW and 90\% for 0056.TW over the 2012--2025 sample. This high fill rate implies that the ex-dividend volatility spike is transient and mean-reverting, driven by mechanical price adjustment and short-term tax-motivated trading rather than fundamental information.
+
+For VT practitioners, a practical question is whether the ex-dividend volatility spike requires special treatment (e.g., temporarily reducing the target volatility or applying a dividend-adjustment filter). We find that it does not: because VT strategies mechanically reduce exposure when realized volatility rises, the EWMA and GARCH models automatically scale down the position during the post-ex-dividend period without any manual intervention. The ex-dividend effect is therefore self-correcting within the VT framework, and no dividend-specific adjustment is necessary.
 
 
 % ─── Section 7: VaR and Risk Management ─────────────────────────
