@@ -13994,7 +13994,14 @@
       "breakthrough"
     ],
     "created_at": "2026-03-27T01:02:34.884638+00:00",
-    "experiment_id": "k519"
+    "experiment_id": "k519",
+    "corrections": [
+      {
+        "date": "2026-03-27",
+        "reason": "K521: merge_asof bug — SPY(T) used instead of SPY(T-1). Sharpe 1.079 invalid.",
+        "action": "K519 results unreliable. Correct signal gives higher Sharpe but same I8 timing bias."
+      }
+    ]
   },
   {
     "id": 1297,
@@ -14010,5 +14017,20 @@
     ],
     "created_at": "2026-03-27T01:11:09.970636+00:00",
     "experiment_id": "k520"
+  },
+  {
+    "id": 1298,
+    "title": "K521: ⚠️ K519/K520 Data Alignment Bug — SPY(T) matched TW(T) but SPY closes AFTER TW trades",
+    "content": "[提出: Claude(K520異常調查), 執行: Claude] K521: merge_asof bug in K519/K520. SPY(T) matched to TW(T) on 96.7% of days, but SPY closes at 5AM TST AFTER TW session. Correct signal: SPY(T-1). Fixing bug: 1d Sharpe goes UP (1.076→4.445, binary 5.644!). Correlation SPY(T-1)→TW gap = 0.611, win rate 75.5%, all 16 years positive. BUT: this is I8 timing bias — SPY info arrives at 5AM, TW opens at 9AM, gap is already priced in. K519 Sharpe 1.079 is INVALID. K520 sensitivity needs reinterpretation.",
+    "category": "methodology",
+    "tags": [
+      "data_bug",
+      "alignment",
+      "K519_correction",
+      "I8_timing",
+      "phantom_alpha"
+    ],
+    "created_at": "2026-03-27T01:30:29.405097+00:00",
+    "experiment_id": "k521"
   }
 ]
