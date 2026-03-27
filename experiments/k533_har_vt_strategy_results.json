@@ -1,0 +1,469 @@
+{
+  "experiment_id": "K533",
+  "title": "HAR-Based Volatility Targeting Strategy",
+  "timestamp": "2026-03-27T13:10:55.631049+00:00",
+  "elapsed_seconds": 9.9,
+  "data_source": "yfinance (SPY, GLD, ^VIX) \u2014 empirical data",
+  "data_period": "2005-01-03 to 2026-03-26",
+  "references": [
+    "Corsi (2009, JFE): Original HAR-RV model",
+    "Moreira & Muir (2017, JoF 72(4)): Volatility-Managed Portfolios",
+    "K530: HAR-ABS DM=-15.45 vs GJR-GARCH",
+    "K470: HAR log-range VT \u2014 doesn't pass Harvey t>3.0",
+    "K440/K488/K503/K504/K524: 12/VIX irreducible kernel"
+  ],
+  "method": {
+    "strategies": {
+      "B&H_SPY": "Buy & Hold 100% SPY",
+      "B&H_5050": "Buy & Hold 50% SPY + 50% GLD",
+      "12/VIX_VT": "w = min(1, 12/VIX) \u2014 forward-looking baseline",
+      "HAR-ABS_VT": "w = min(1, target_vol / \u03c3_HAR_ABS) \u2014 backward-looking HAR",
+      "HAR-VIX_VT": "w = min(1, target_vol / \u03c3_HAR_VIX) \u2014 HAR + VIX regressor",
+      "Hybrid_VT": "w = 0.5 * w_VIX + 0.5 * w_HAR_ABS"
+    },
+    "target_vol": 0.12,
+    "tx_cost": 0.001,
+    "har_window": 500,
+    "portfolio": "50% SPY + 50% GLD (for VT strategies)",
+    "oos_periods": {
+      "OOS1_2020_2021": [
+        "2020-01-01",
+        "2021-12-31"
+      ],
+      "OOS2_2021_2022": [
+        "2021-01-01",
+        "2022-12-31"
+      ],
+      "OOS3_2023_2024": [
+        "2023-01-01",
+        "2024-12-31"
+      ]
+    },
+    "annualization": "\u03c3_daily \u2248 E[|r|] \u00d7 \u221a(\u03c0/2), \u03c3_annual = \u03c3_daily \u00d7 \u221a252"
+  },
+  "results_by_period": {
+    "OOS1_2020_2021": {
+      "B&H SPY": {
+        "name": "B&H SPY",
+        "sharpe": 0.8244,
+        "net_sharpe": 0.8072,
+        "cagr": 0.1937,
+        "ann_vol": 0.2547,
+        "mdd": -0.3575,
+        "calmar": 0.542,
+        "sortino": 0.8845,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 505
+      },
+      "B&H 50/50": {
+        "name": "B&H 50/50",
+        "sharpe": 0.9163,
+        "net_sharpe": 0.8923,
+        "cagr": 0.146,
+        "ann_vol": 0.1634,
+        "mdd": -0.2166,
+        "calmar": 0.6741,
+        "sortino": 1.016,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 505
+      },
+      "12/VIX VT": {
+        "name": "12/VIX VT",
+        "sharpe": 2.1078,
+        "net_sharpe": 1.9228,
+        "cagr": 0.1382,
+        "ann_vol": 0.0623,
+        "mdd": -0.0468,
+        "calmar": 2.9551,
+        "sortino": 3.0391,
+        "turnover": 0.031536,
+        "avg_weight": 0.5509,
+        "n_obs": 505
+      },
+      "HAR-ABS VT": {
+        "name": "HAR-ABS VT",
+        "sharpe": 1.5011,
+        "net_sharpe": 1.2747,
+        "cagr": 0.1294,
+        "ann_vol": 0.0834,
+        "mdd": -0.0463,
+        "calmar": 2.7932,
+        "sortino": 1.9384,
+        "turnover": 0.059217,
+        "avg_weight": 0.755,
+        "n_obs": 505
+      },
+      "HAR-VIX VT": {
+        "name": "HAR-VIX VT",
+        "sharpe": 2.1618,
+        "net_sharpe": 1.9565,
+        "cagr": 0.1675,
+        "ann_vol": 0.0729,
+        "mdd": -0.0445,
+        "calmar": 3.7688,
+        "sortino": 3.1126,
+        "turnover": 0.043542,
+        "avg_weight": 0.6805,
+        "n_obs": 505
+      },
+      "Hybrid VT": {
+        "name": "Hybrid VT",
+        "sharpe": 1.7797,
+        "net_sharpe": 1.5992,
+        "cagr": 0.1339,
+        "ann_vol": 0.0721,
+        "mdd": -0.0465,
+        "calmar": 2.8779,
+        "sortino": 2.4353,
+        "turnover": 0.036148,
+        "avg_weight": 0.6529,
+        "n_obs": 505
+      },
+      "dm_tests": {
+        "HAR-ABS VT_vs_VIX": {
+          "t_stat": -0.2938,
+          "p_value": 0.769,
+          "significant_at_5pct": false,
+          "better_model": "12/VIX VT"
+        },
+        "HAR-VIX VT_vs_VIX": {
+          "t_stat": 1.8257,
+          "p_value": 0.0685,
+          "significant_at_5pct": false,
+          "better_model": "HAR-VIX VT"
+        },
+        "Hybrid VT_vs_VIX": {
+          "t_stat": -0.2938,
+          "p_value": 0.769,
+          "significant_at_5pct": false,
+          "better_model": "12/VIX VT"
+        }
+      }
+    },
+    "OOS2_2021_2022": {
+      "B&H SPY": {
+        "name": "B&H SPY",
+        "sharpe": 0.1337,
+        "net_sharpe": 0.1694,
+        "cagr": 0.0071,
+        "ann_vol": 0.1946,
+        "mdd": -0.2622,
+        "calmar": 0.027,
+        "sortino": 0.1909,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 503
+      },
+      "B&H 50/50": {
+        "name": "B&H 50/50",
+        "sharpe": 0.0035,
+        "net_sharpe": -0.0124,
+        "cagr": -0.0081,
+        "ann_vol": 0.1313,
+        "mdd": -0.1899,
+        "calmar": -0.0428,
+        "sortino": 0.0051,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 503
+      },
+      "12/VIX VT": {
+        "name": "12/VIX VT",
+        "sharpe": 0.7103,
+        "net_sharpe": 0.579,
+        "cagr": 0.0461,
+        "ann_vol": 0.0665,
+        "mdd": -0.0669,
+        "calmar": 0.689,
+        "sortino": 1.1705,
+        "turnover": 0.031103,
+        "avg_weight": 0.5548,
+        "n_obs": 503
+      },
+      "HAR-ABS VT": {
+        "name": "HAR-ABS VT",
+        "sharpe": 0.0616,
+        "net_sharpe": -0.1215,
+        "cagr": 0.0016,
+        "ann_vol": 0.084,
+        "mdd": -0.1106,
+        "calmar": 0.0149,
+        "sortino": 0.0926,
+        "turnover": 0.053542,
+        "avg_weight": 0.7115,
+        "n_obs": 503
+      },
+      "HAR-VIX VT": {
+        "name": "HAR-VIX VT",
+        "sharpe": 0.6503,
+        "net_sharpe": 0.467,
+        "cagr": 0.0573,
+        "ann_vol": 0.0922,
+        "mdd": -0.082,
+        "calmar": 0.6985,
+        "sortino": 1.0221,
+        "turnover": 0.062816,
+        "avg_weight": 0.735,
+        "n_obs": 503
+      },
+      "Hybrid VT": {
+        "name": "Hybrid VT",
+        "sharpe": 0.3499,
+        "net_sharpe": 0.2207,
+        "cagr": 0.0237,
+        "ann_vol": 0.0749,
+        "mdd": -0.0825,
+        "calmar": 0.287,
+        "sortino": 0.5506,
+        "turnover": 0.032836,
+        "avg_weight": 0.6331,
+        "n_obs": 503
+      },
+      "dm_tests": {
+        "HAR-ABS VT_vs_VIX": {
+          "t_stat": -2.6202,
+          "p_value": 0.0091,
+          "significant_at_5pct": true,
+          "better_model": "12/VIX VT"
+        },
+        "HAR-VIX VT_vs_VIX": {
+          "t_stat": 0.6283,
+          "p_value": 0.5301,
+          "significant_at_5pct": false,
+          "better_model": "HAR-VIX VT"
+        },
+        "Hybrid VT_vs_VIX": {
+          "t_stat": -2.6202,
+          "p_value": 0.0091,
+          "significant_at_5pct": true,
+          "better_model": "12/VIX VT"
+        }
+      }
+    },
+    "OOS3_2023_2024": {
+      "B&H SPY": {
+        "name": "B&H SPY",
+        "sharpe": 1.7833,
+        "net_sharpe": 1.8024,
+        "cagr": 0.2461,
+        "ann_vol": 0.128,
+        "mdd": -0.1015,
+        "calmar": 2.4248,
+        "sortino": 2.5881,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 502
+      },
+      "B&H 50/50": {
+        "name": "B&H 50/50",
+        "sharpe": 1.9938,
+        "net_sharpe": 1.9858,
+        "cagr": 0.2192,
+        "ann_vol": 0.102,
+        "mdd": -0.0755,
+        "calmar": 2.9014,
+        "sortino": 2.8476,
+        "turnover": 0.0,
+        "avg_weight": 1.0,
+        "n_obs": 502
+      },
+      "12/VIX VT": {
+        "name": "12/VIX VT",
+        "sharpe": 2.4263,
+        "net_sharpe": 2.3069,
+        "cagr": 0.1999,
+        "ann_vol": 0.0763,
+        "mdd": -0.0509,
+        "calmar": 3.9257,
+        "sortino": 3.7337,
+        "turnover": 0.034034,
+        "avg_weight": 0.7661,
+        "n_obs": 502
+      },
+      "HAR-ABS VT": {
+        "name": "HAR-ABS VT",
+        "sharpe": 1.8063,
+        "net_sharpe": 1.6994,
+        "cagr": 0.1742,
+        "ann_vol": 0.0912,
+        "mdd": -0.0726,
+        "calmar": 2.3979,
+        "sortino": 2.4945,
+        "turnover": 0.036747,
+        "avg_weight": 0.8798,
+        "n_obs": 502
+      },
+      "HAR-VIX VT": {
+        "name": "HAR-VIX VT",
+        "sharpe": 2.255,
+        "net_sharpe": 2.135,
+        "cagr": 0.2285,
+        "ann_vol": 0.0932,
+        "mdd": -0.0695,
+        "calmar": 3.289,
+        "sortino": 3.3985,
+        "turnover": 0.043651,
+        "avg_weight": 0.9153,
+        "n_obs": 502
+      },
+      "Hybrid VT": {
+        "name": "Hybrid VT",
+        "sharpe": 2.0977,
+        "net_sharpe": 2.0102,
+        "cagr": 0.187,
+        "ann_vol": 0.0834,
+        "mdd": -0.0618,
+        "calmar": 3.0266,
+        "sortino": 3.0657,
+        "turnover": 0.027127,
+        "avg_weight": 0.8229,
+        "n_obs": 502
+      },
+      "dm_tests": {
+        "HAR-ABS VT_vs_VIX": {
+          "t_stat": -1.3405,
+          "p_value": 0.1807,
+          "significant_at_5pct": false,
+          "better_model": "12/VIX VT"
+        },
+        "HAR-VIX VT_vs_VIX": {
+          "t_stat": 1.7893,
+          "p_value": 0.0742,
+          "significant_at_5pct": false,
+          "better_model": "HAR-VIX VT"
+        },
+        "Hybrid VT_vs_VIX": {
+          "t_stat": -1.3405,
+          "p_value": 0.1807,
+          "significant_at_5pct": false,
+          "better_model": "12/VIX VT"
+        }
+      }
+    }
+  },
+  "cross_oos_summary": {
+    "B&H SPY": {
+      "sharpes": [
+        0.8244,
+        0.1337,
+        1.7833
+      ],
+      "mean_sharpe": 0.9138,
+      "std_sharpe": 0.6764
+    },
+    "B&H 50/50": {
+      "sharpes": [
+        0.9163,
+        0.0035,
+        1.9938
+      ],
+      "mean_sharpe": 0.9712,
+      "std_sharpe": 0.8135
+    },
+    "12/VIX VT": {
+      "sharpes": [
+        2.1078,
+        0.7103,
+        2.4263
+      ],
+      "mean_sharpe": 1.7481,
+      "std_sharpe": 0.7453
+    },
+    "HAR-ABS VT": {
+      "sharpes": [
+        1.5011,
+        0.0616,
+        1.8063
+      ],
+      "mean_sharpe": 1.123,
+      "std_sharpe": 0.7608,
+      "wins_vs_vix": "0/3"
+    },
+    "HAR-VIX VT": {
+      "sharpes": [
+        2.1618,
+        0.6503,
+        2.255
+      ],
+      "mean_sharpe": 1.689,
+      "std_sharpe": 0.7355,
+      "wins_vs_vix": "1/3"
+    },
+    "Hybrid VT": {
+      "sharpes": [
+        1.7797,
+        0.3499,
+        2.0977
+      ],
+      "mean_sharpe": 1.4091,
+      "std_sharpe": 0.7601,
+      "wins_vs_vix": "0/3"
+    }
+  },
+  "weight_correlations": {
+    "12/VIX_vs_12/VIX": 1.0,
+    "12/VIX_vs_HAR-ABS": 0.5063,
+    "12/VIX_vs_HAR-VIX": 0.813,
+    "12/VIX_vs_Hybrid": 0.8778,
+    "HAR-ABS_vs_12/VIX": 0.5063,
+    "HAR-ABS_vs_HAR-ABS": 1.0,
+    "HAR-ABS_vs_HAR-VIX": 0.3741,
+    "HAR-ABS_vs_Hybrid": 0.8575,
+    "HAR-VIX_vs_12/VIX": 0.813,
+    "HAR-VIX_vs_HAR-ABS": 0.3741,
+    "HAR-VIX_vs_HAR-VIX": 1.0,
+    "HAR-VIX_vs_Hybrid": 0.6928,
+    "Hybrid_vs_12/VIX": 0.8778,
+    "Hybrid_vs_HAR-ABS": 0.8575,
+    "Hybrid_vs_HAR-VIX": 0.6928,
+    "Hybrid_vs_Hybrid": 1.0
+  },
+  "harvey_significance": {
+    "OOS1_2020_2021_HAR-ABS VT_vs_VIX": {
+      "t_stat": -0.2938,
+      "passes_harvey_3_0": false
+    },
+    "OOS1_2020_2021_HAR-VIX VT_vs_VIX": {
+      "t_stat": 1.8257,
+      "passes_harvey_3_0": false
+    },
+    "OOS1_2020_2021_Hybrid VT_vs_VIX": {
+      "t_stat": -0.2938,
+      "passes_harvey_3_0": false
+    },
+    "OOS2_2021_2022_HAR-ABS VT_vs_VIX": {
+      "t_stat": -2.6202,
+      "passes_harvey_3_0": false
+    },
+    "OOS2_2021_2022_HAR-VIX VT_vs_VIX": {
+      "t_stat": 0.6283,
+      "passes_harvey_3_0": false
+    },
+    "OOS2_2021_2022_Hybrid VT_vs_VIX": {
+      "t_stat": -2.6202,
+      "passes_harvey_3_0": false
+    },
+    "OOS3_2023_2024_HAR-ABS VT_vs_VIX": {
+      "t_stat": -1.3405,
+      "passes_harvey_3_0": false
+    },
+    "OOS3_2023_2024_HAR-VIX VT_vs_VIX": {
+      "t_stat": 1.7893,
+      "passes_harvey_3_0": false
+    },
+    "OOS3_2023_2024_Hybrid VT_vs_VIX": {
+      "t_stat": -1.3405,
+      "passes_harvey_3_0": false
+    }
+  },
+  "any_passes_harvey": false,
+  "conclusions": [
+    "HAR-ABS VT LOSES to 12/VIX by 0.6251 Sharpe (mean)",
+    "HAR-VIX VT LOSES to 12/VIX by 0.0591 Sharpe (mean)",
+    "Harvey t>3.0: NONE pass",
+    "Prediction \u2260 Application: CONFIRMED again (#5)",
+    "12/VIX irreducible kernel: CONFIRMED (#7)"
+  ]
+}

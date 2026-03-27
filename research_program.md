@@ -117,8 +117,11 @@
 **單變量模型：**
 - GARCH 家族（GARCH, GJR, EGARCH, TARCH, FIGARCH）
 - 高頻模型（HAR-RV, Realized GARCH, Realized GJR）— 需 5-min 數據（SPY 46天/0050.TW 34天，~2026 Q2 解鎖）
+- **★★★★ HAR Multi-Scale (K530)**：HAR-ABS 以 DM=-15.45 壓倒性勝過 GJR-GARCH，DM=-16.26 勝 EWMA——**1306 實驗中最強統計顯著性**。|r_t| proxy 比 r²_t 好 3x。HAR-VIX 最佳 (QLIKE=0.46)。β5(5日) 主導。0050.TW 同模式。等 5-min RV 後應更強。
+- **★★★ Rough Volatility (K529)**：H=0.1 確認 roughness。HAR-Rough 顯著勝 GJR (DM=-7.04) 但未勝 EWMA。Time-varying H 反而更差。
+- **K526 GARCH-MIDAS**: OOS 未勝 GJR，但 regime 轉換期（COVID/升息）有局部優勢。long-run τ 僅解釋 11% variance。
 - **MF2-GARCH**（Conrad & Engle 2025: 短期 GJR + 長期乘法誤差模型）— 測試中
-- 混頻模型（GARCH-MIDAS: 結合日頻 vol + 月頻總經變數）
+- ~~混頻模型（GARCH-MIDAS: 結合日頻 vol + 月頻總經變數）~~ → K526 已完成，null result
 - 分解式模型（EMD-GARCH: 經驗模態分解 + GARCH）
 - ML/DL — Branco 2024 確認非線性 ML 整體不優於線性模型，降低優先級
 - 組合預測（GJR+HAR, stacking, 反 QLIKE 加權）

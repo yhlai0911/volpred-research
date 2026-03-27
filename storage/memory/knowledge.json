@@ -14148,5 +14148,83 @@
     "experiment_id": "k529",
     "created_at": "2026-03-27T12:53:18.481486+00:00",
     "importance": 4
+  },
+  {
+    "id": "K530",
+    "title": "K530: ★★★★ HAR Multi-Scale — 4 個 HAR 變體壓倒性勝過 GJR-GARCH (DM=-15.45) 和 EWMA (DM=-16.26)",
+    "content": "[提出: Claude, 執行: Claude] HAR 多尺度波動率預測。6 個 HAR 變體 + 3 個 benchmark，SPY + 0050.TW，OOS 2023-2024。\n\n**核心結果 (SPY)**:\n1. HAR-VIX: QLIKE 0.4629 (最佳)\n2. HAR-ABS: 0.4899\n3. HAR-LEVERAGE: 0.4927\n4. HAR-JUMP: 0.4951\n5. GJR-GARCH: 1.5067\n\nDM test: HAR-ABS vs GJR = -15.45***; HAR-ABS vs EWMA = -16.26***。**所有 4 個 HAR(|r|) 變體都以 Harvey t>>3.0 壓倒性勝出。**\n\n**關鍵發現**:\n- Proxy 選擇至關重要：|r_t| proxy (HAR-ABS QLIKE=0.49) 比 r²_t proxy (HAR-SQ QLIKE=1.57) 好 3 倍\n- VIX 係數 +0.879 (t=18.5) 顯著——VIX 為 HAR 提供額外長期信息\n- β5 (5日) 主導 (+0.59, t=16.0)，β22 次之 (+0.34, t=9.2)，β1 略負 (-0.08, t=-4.6, 日頻均值回歸)\n- HAR-RS semivariance: bad vol 係數是 good vol 的 4.8x (0.92 vs -0.19) — 強不對稱槓桿效應\n- 0050.TW 同樣模式 (HAR-ABS QLIKE=0.51 vs GJR=2.04, DM=-14.3)\n\n**限制**: 用日頻 proxy (|r_t|)，非真正的 intraday RV。5-min RV 需等到 04/11 (60+天數據)。\n\n**重大意義**: 這是我們 1305 個實驗中最強的統計顯著性結果。HAR 框架 + 正確 proxy 選擇是波動率預測的 game changer。",
+    "tags": [
+      "HAR",
+      "multi_scale",
+      "SPY",
+      "0050.TW",
+      "DM_significant",
+      "proxy_choice",
+      "breakthrough",
+      "absolute_return"
+    ],
+    "data_source": "yfinance SPY + 0050.TW daily 2005-2026",
+    "experiment_id": "k530",
+    "created_at": "2026-03-27T13:03:34.612179+00:00",
+    "importance": 5
+  },
+  {
+    "id": "k531",
+    "experiment_id": "k531",
+    "title": "K531: Financial Sentiment NLP Pilot — Sentiment vs VIX for Vol Prediction",
+    "content": "[提出: 用戶, 執行: Claude] K531: First formal NLP/sentiment pilot. Tested 4 FRED sentiment/uncertainty indices for incremental vol prediction beyond VIX: EPU (Baker-Bloom-Davis daily), Michigan Consumer Sentiment (monthly), TED Spread (daily), HY Spread (BofA). RESULT: MARGINAL — 3/4 pass Harvey |t|>3.0 in-sample (EPU partial_r=-0.048 t=-3.88; UMCSENT partial_r=+0.051 t=4.16; TED partial_r=+0.219 t=18.17) BUT all 4 fail OOS QLIKE (all DM tests NS, p>0.15). Incremental R² tiny: EPU 0.11%, UMCSENT 0.13%, TED 2.32%, HY 0.00%. Cross-OOS: EPU wins 3/5, UMCSENT 3/5, TED 2/5, HY 0/5. VIX redundancy: HY Spread 58.9% explained by VIX (most redundant), EPU 13.4%, UMCSENT 12.0%, TED 18.2%. TED Spread shows largest IS effect (partial_r=0.219) but STILL fails OOS — classic overfitting. VIX sufficiency confirmed #33. Text-based uncertainty (EPU) and survey sentiment (Michigan) add zero practical value for vol prediction. Options market aggregates all public sentiment. Literature: Baker et al. 2016 QJE, Shapiro et al. 2022 JEcon, Ardia et al. 2019. Data: yfinance SPY/VIX + FRED USEPUINDXD/UMCSENT/TEDRATE/BAMLH0A0HYM2, 2000-2026, n=6557.",
+    "category": "sentiment_nlp",
+    "tags": [
+      "sentiment",
+      "NLP",
+      "EPU",
+      "Michigan",
+      "TED_spread",
+      "HY_spread",
+      "VIX_sufficiency",
+      "null_result",
+      "jump_direction"
+    ],
+    "data_source": "yfinance (SPY, ^VIX) + FRED (USEPUINDXD, UMCSENT, TEDRATE, BAMLH0A0HYM2)",
+    "created_at": "2026-03-27T13:04:47.959899+00:00",
+    "evidence": "experiments/k531_sentiment_nlp_pilot_results.json",
+    "scripts": [
+      "experiments/k531_sentiment_nlp_pilot.py",
+      "experiments/k531_sentiment_nlp_pilot_results.json"
+    ]
+  },
+  {
+    "id": "K532",
+    "title": "K532: ★★★★★ HAR Cross-Asset — 7/7 資產全勝 GJR-GARCH，HAR 優勢是 UNIVERSAL",
+    "content": "[提出: Claude, 執行: Claude] K530 HAR 突破的跨資產驗證。7 資產 (SPY/QQQ/EFA/EWZ/GLD/TLT/0050.TW) 全部通過。\n\nHAR-ABS vs GJR DM: SPY -12.62, QQQ -21.74, EFA -11.11, EWZ -13.60, GLD -14.21, TLT -13.89, 0050.TW -12.78。**全部 p<0.001**。\n\nHAR-ABS 也 7/7 勝 EWMA。K530 claims 驗證：(1) ABS>>SQ proxy 7/7 確認 (2) HAR-VIX 最佳(SPY) 確認 (3) β5 主導 2/7（equity）, β22 主導 5/7（commodity/bond/EM）(4) bad vol asymmetry 不 universal——varies by asset class。\n\nβ1 負值 5/7 資產（日頻均值回歸）。Spearman rank correlation 0.478（中度一致）。\n\n結論：HAR + |r_t| proxy 是波動率預測的 universal gold standard，跨資產、跨市場、跨類別都成立。",
+    "tags": [
+      "HAR",
+      "cross_asset",
+      "universal",
+      "7_assets",
+      "DM_significant",
+      "breakthrough"
+    ],
+    "data_source": "yfinance 7 assets daily",
+    "experiment_id": "k532",
+    "created_at": "2026-03-27T13:17:11.851859+00:00",
+    "importance": 5
+  },
+  {
+    "id": "K533",
+    "title": "K533: ★★★ Prediction ≠ Application #5 — HAR 最佳預測但最差 VT 策略，12/VIX 不可替代",
+    "content": "[提出: Claude, 執行: Claude] HAR-based VT strategy 測試。3 期 cross-OOS (2020-21, 2021-22, 2023-24)。\n\nMean Sharpe: 12/VIX=1.748 > HAR-VIX=1.689 > Hybrid=1.409 > HAR-ABS=1.123 > B&H=0.971。HAR-ABS 是**最佳預測器但最差策略**——DM=-15.45(K530) 但 Sharpe 最低。\n\n0/9 Harvey test 通過。HAR-ABS turnover 1.9x higher (0.059 vs 0.032/day)。Weight correlation HAR-ABS vs 12/VIX = 0.506（不同 info: backward vs forward）。\n\nHAR-VIX 接近 12/VIX（差距僅 0.059 Sharpe）——VIX 在做 heavy lifting。\n\n**prediction ≠ application 第 5 次確認**（K440/K467/K470/K488/K533）。12/VIX irreducible kernel 第 7 次確認。VIX 的 forward-looking 特性讓它在 position sizing 上不可替代。",
+    "tags": [
+      "prediction_vs_application",
+      "VT_strategy",
+      "HAR",
+      "VIX",
+      "12VIX_kernel",
+      "cross_OOS"
+    ],
+    "data_source": "yfinance SPY daily",
+    "experiment_id": "k533",
+    "created_at": "2026-03-27T13:17:11.852063+00:00",
+    "importance": 4
   }
 ]

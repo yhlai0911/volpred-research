@@ -1,4 +1,4 @@
-"""Build and query the research knowledge index using LanceDB + Gemini Embedding.
+"""Build and query the research knowledge index using LanceDB + OpenAI/Gemini Embedding.
 
 This script indexes ALL research artifacts into a single searchable vector database,
 enabling semantic retrieval of knowledge, thinking patterns, experiments, and more.
@@ -28,53 +28,96 @@ from datetime import datetime
 from pathlib import Path
 
 import lancedb
-from google import genai
 
 # ── Config ────────────────────────────────────────────────────────────
 STORAGE = Path(__file__).parent.parent / "storage"
 LANCE_DIR = STORAGE / "knowledge_index"
-EMBED_MODEL = "gemini-embedding-001"  # stable; switch to gemini-embedding-2-preview when GA
-EMBED_DIM = 768
-BATCH_SIZE = 20  # Gemini free tier friendly
+
+# Embedding provider: "openai" (default, cheap + stable) or "gemini"
+EMBED_PROVIDER = os.environ.get("EMBED_PROVIDER", "openai")
+EMBED_DIM = 768  # both providers output 768 when configured
+BATCH_SIZE = 100 if EMBED_PROVIDER == "openai" else 20
 TABLE_NAME = "research_memory"
+
+# Provider-specific config
+_OPENAI_MODEL = "text-embedding-3-small"  # $0.02/1M tokens
+_GEMINI_MODEL = "gemini-embedding-001"    # $0.15/1M tokens
 
 
 # ── Embedding ─────────────────────────────────────────────────────────
-def get_client():
-    # Try multiple env var names, also load from .env file
-    env_path = Path(__file__).parent.parent / ".env"
-    if env_path.exists():
-        for line in env_path.read_text().splitlines():
-            line = line.strip()
-            if line and not line.startswith("#") and "=" in line:
-                key, _, val = line.partition("=")
-                os.environ.setdefault(key.strip(), val.strip())
+def _load_env():
+    """Load API keys from .env and .env.local files."""
+    for env_name in [".env.local", ".env"]:
+        env_path = Path(__file__).parent.parent / env_name
+        if env_path.exists():
+            for line in env_path.read_text().splitlines():
+                line = line.strip()
+                if line and not line.startswith("#") and "=" in line:
+                    key, _, val = line.partition("=")
+                    os.environ.setdefault(key.strip(), val.strip())
 
-    api_key = (
-        os.environ.get("GEMINI_API_KEY")
-        or os.environ.get("GOOGLE_API_KEY")
-        or os.environ.get("GOOGLE_CLOUD_API_KEY")
-    )
-    if not api_key:
-        print("ERROR: No Google/Gemini API key found in environment or .env file.")
-        sys.exit(1)
-    return genai.Client(api_key=api_key)
+
+def get_client():
+    _load_env()
+    if EMBED_PROVIDER == "openai":
+        import openai
+        api_key = os.environ.get("OPENAI_API_KEY")
+        if not api_key:
+            print("ERROR: OPENAI_API_KEY not found. Set it in .env.local or environment.")
+            sys.exit(1)
+        return openai.OpenAI(api_key=api_key)
+    else:
+        from google import genai
+        api_key = (
+            os.environ.get("GEMINI_API_KEY")
+            or os.environ.get("GOOGLE_API_KEY")
+            or os.environ.get("GOOGLE_CLOUD_API_KEY")
+        )
+        if not api_key:
+            print("ERROR: No Google/Gemini API key found in environment or .env file.")
+            sys.exit(1)
+        return genai.Client(api_key=api_key)
 
 
 def embed_texts(client, texts: list[str]) -> list[list[float]]:
-    """Embed a batch of texts using Gemini Embedding API."""
+    """Embed a batch of texts. Works with both OpenAI and Gemini clients."""
+    # OpenAI has 8192 token limit per input; truncate by token count
+    if EMBED_PROVIDER == "openai":
+        try:
+            import tiktoken
+            enc = tiktoken.encoding_for_model(_OPENAI_MODEL)
+            truncated = []
+            for t in texts:
+                tokens = enc.encode(t)
+                if len(tokens) > 8000:
+                    truncated.append(enc.decode(tokens[:8000]))
+                else:
+                    truncated.append(t)
+            texts = truncated
+        except ImportError:
+            # Fallback: aggressive char truncation for CJK safety
+            texts = [t[:6000] if len(t) > 6000 else t for t in texts]
     vectors = []
     for i in range(0, len(texts), BATCH_SIZE):
         batch = texts[i : i + BATCH_SIZE]
-        result = client.models.embed_content(
-            model=EMBED_MODEL,
-            contents=batch,
-            config={"output_dimensionality": EMBED_DIM},
-        )
-        for emb in result.embeddings:
-            vectors.append(emb.values)
+        if EMBED_PROVIDER == "openai":
+            resp = client.embeddings.create(
+                input=batch,
+                model=_OPENAI_MODEL,
+                dimensions=EMBED_DIM,
+            )
+            for item in resp.data:
+                vectors.append(item.embedding)
+        else:
+            result = client.models.embed_content(
+                model=_GEMINI_MODEL,
+                contents=batch,
+                config={"output_dimensionality": EMBED_DIM},
+            )
+            for emb in result.embeddings:
+                vectors.append(emb.values)
         if i + BATCH_SIZE < len(texts):
-            time.sleep(1)  # respect rate limits
+            time.sleep(0.5)
     return vectors
 
 
@@ -152,6 +195,107 @@ def load_experiments() -> list[dict]:
             "timestamp": e.get("timestamp", ""),
             "confidence": 0,
             "evidence": e.get("experiment_id", ""),
+        })
+    return docs
+
+
+def load_storage_experiments() -> list[dict]:
+    """Load storage/experiments/*.json (early experiment results not in memory/experiments.json)."""
+    exp_dir = STORAGE / "experiments"
+    if not exp_dir.exists():
+        return []
+    docs = []
+    for f in sorted(exp_dir.glob("*.json")):
+        try:
+            data = json.loads(f.read_text())
+            # Different formats: some are dicts with 'title', some are raw results
+            if isinstance(data, dict):
+                title = data.get("title", data.get("experiment_id", f.stem))
+                content = data.get("content", data.get("summary", data.get("description", "")))
+                tags = data.get("tags", [])
+                text = f"[storage_experiment] {title}. {content}. Tags: {', '.join(tags) if isinstance(tags, list) else tags}"
+                docs.append({
+                    "source": "experiment",
+                    "category": "storage_experiment",
+                    "text": text[:20000],
+                    "timestamp": data.get("created_at", data.get("timestamp", "")),
+                    "confidence": 0,
+                    "evidence": f.stem,
+                })
+        except (json.JSONDecodeError, Exception):
+            pass
+    return docs
+
+
+def load_strategy_data() -> list[dict]:
+    """Load strategy metrics and backtest summaries."""
+    docs = []
+    for fname in ["strategy_metrics.json", "risk_forecast.json"]:
+        path = STORAGE / fname
+        if not path.exists():
+            continue
+        try:
+            data = json.loads(path.read_text())
+            if isinstance(data, dict):
+                text = f"[{fname}] {json.dumps(data, ensure_ascii=False)}"
+                docs.append({
+                    "source": "strategy",
+                    "category": fname.replace(".json", ""),
+                    "text": text[:20000],
+                    "timestamp": "",
+                    "confidence": 0,
+                    "evidence": fname,
+                })
+        except Exception:
+            pass
+    return docs
+
+
+def load_research_archive() -> list[dict]:
+    """Load archived completed research phases from docs/research_archive/."""
+    archive_dir = Path(__file__).resolve().parent.parent / "docs" / "research_archive"
+    if not archive_dir.exists():
+        return []
+    docs = []
+    for f in sorted(archive_dir.glob("*.md")):
+        text = f.read_text()
+        # Split into chunks of ~2000 chars for better retrieval
+        chunks = [text[i:i+2000] for i in range(0, len(text), 1800)]
+        for j, chunk in enumerate(chunks):
+            docs.append({
+                "source": "archive",
+                "category": "completed_research",
+                "text": f"[research_archive/{f.name}#chunk{j}] {chunk}",
+                "timestamp": "",
+                "confidence": 0,
+                "evidence": f.name,
+            })
+    return docs
+
+
+def load_experiences() -> list[dict]:
+    """Load experiment_experiences.json (Exxx lessons learned)."""
+    path = STORAGE / "memory" / "experiment_experiences.json"
+    if not path.exists():
+        return []
+    data = json.loads(path.read_text())
+    entries = data if isinstance(data, list) else data.get("experiences", data.get("entries", []))
+    docs = []
+    for e in entries:
+        eid = e.get("id", "")
+        text = (
+            f"[experience] {eid}: {e.get('title', '')}. "
+            f"{e.get('lesson', e.get('content', ''))} "
+            f"Related experiments: {e.get('related_experiments', '')}. "
+            f"Tags: {', '.join(e.get('tags', []))}"
+        )
+        docs.append({
+            "source": "experience",
+            "category": "lesson",
+            "text": text[:20000],
+            "timestamp": e.get("created_at", ""),
+            "confidence": 0,
+            "evidence": eid,
         })
     return docs
 
@@ -326,7 +470,8 @@ def build_index():
     print(f"\nTotal: {len(all_docs)} documents to index")
 
     # Generate embeddings
-    print(f"Generating embeddings with {EMBED_MODEL} (dim={EMBED_DIM})...")
+    model_name = _OPENAI_MODEL if EMBED_PROVIDER == "openai" else _GEMINI_MODEL
+    print(f"Generating embeddings with {model_name} (dim={EMBED_DIM}, provider={EMBED_PROVIDER})...")
     client = get_client()
     texts = [d["text"] for d in all_docs]
     vectors = embed_texts(client, texts)
@@ -365,6 +510,8 @@ def _load_all_docs() -> list[dict]:
         ("knowledge", load_knowledge),
         ("thinking", load_thinking),
         ("experiments", load_experiments),
+        ("storage_experiments", load_storage_experiments),
+        ("experiences", load_experiences),
         ("questions", load_questions),
         ("research_log", load_research_log),
         ("feed", load_feed),
@@ -372,6 +519,8 @@ def _load_all_docs() -> list[dict]:
         ("paper", load_paper),
         ("notifications", load_notifications),
         ("research_program", load_research_program),
+        ("strategy_data", load_strategy_data),
+        ("research_archive", load_research_archive),
     ]
     for name, loader in loaders:
         docs = loader()
@@ -482,12 +631,7 @@ def search(query: str, n: int = 10, source_filter: str = None):
     table = db.open_table(TABLE_NAME)
 
     # Embed query
-    result = client.models.embed_content(
-        model=EMBED_MODEL,
-        contents=query,
-        config={"output_dimensionality": EMBED_DIM},
-    )
-    query_vec = result.embeddings[0].values
+    query_vec = embed_texts(client, [query])[0]
 
     # Search
     results = table.search(query_vec).limit(n)
@@ -523,12 +667,7 @@ def load_context(topic: str, n_per_source: int = 8):
     db = lancedb.connect(str(LANCE_DIR))
     table = db.open_table(TABLE_NAME)
 
-    result = client.models.embed_content(
-        model=EMBED_MODEL,
-        contents=topic,
-        config={"output_dimensionality": EMBED_DIM},
-    )
-    query_vec = result.embeddings[0].values
+    query_vec = embed_texts(client, [topic])[0]
 
     # Memory reconstruction layers — each with a specific purpose
     layers = [

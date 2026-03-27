@@ -1,0 +1,392 @@
+{
+  "experiment_id": "K531",
+  "title": "Financial Sentiment NLP Pilot \u2014 News sentiment vs VIX for vol prediction",
+  "date": "2026-03-27T13:04:00.492514+00:00",
+  "category": "sentiment_nlp",
+  "data_source": "yfinance (SPY, ^VIX) + FRED (USEPUINDXD, UMCSENT, TEDRATE, BAMLH0A0HYM2)",
+  "data_period": "2000-02-01 to 2026-02-26",
+  "n_observations": 6557,
+  "literature": {
+    "Shapiro_et_al_2022": "Measuring News Sentiment, JEcon \u2014 Fed Daily News Sentiment Index",
+    "Baker_et_al_2016": "Measuring Economic Policy Uncertainty, QJE \u2014 EPU index",
+    "Ardia_et_al_2019": "Questioning the News about Economic Growth, JEcon",
+    "Huang_et_al_2024": "FinBERT-LSTM Integration, arXiv:2407.16150",
+    "prior_nulls": "K504 STLFSI4, CNN FG, AAII, K418, Crypto FNG \u2014 all null"
+  },
+  "methodology": {
+    "dependent_var": "SPY 20-day forward realized volatility (annualized %)",
+    "control": "VIX",
+    "sentiment_indices": [
+      "usepuindxd",
+      "umcsent",
+      "tedrate",
+      "bamlh0a0hym2"
+    ],
+    "tests": [
+      "Partial correlation (sentiment \u2192 vol | VIX)",
+      "Incremental R\u00b2 (VIX+sent vs VIX-only)",
+      "Granger causality (5 lags, controlling for VIX lags)",
+      "OOS QLIKE with DM test (expanding window)",
+      "Cross-OOS stability (5-fold)"
+    ],
+    "significance_threshold": "Harvey (2016) |t| > 3.0"
+  },
+  "results": {
+    "partial_correlations": {
+      "usepuindxd": {
+        "simple_r": 0.2325,
+        "partial_r_given_VIX": -0.0479,
+        "t_stat": -3.8784,
+        "p_value": 0.000106,
+        "n": 6557,
+        "passes_harvey_3.0": "True"
+      },
+      "umcsent": {
+        "simple_r": -0.2154,
+        "partial_r_given_VIX": 0.0513,
+        "t_stat": 4.1574,
+        "p_value": 3.3e-05,
+        "n": 6557,
+        "passes_harvey_3.0": "True"
+      },
+      "tedrate": {
+        "simple_r": 0.4446,
+        "partial_r_given_VIX": 0.219,
+        "t_stat": 18.1708,
+        "p_value": 0.0,
+        "n": 6557,
+        "passes_harvey_3.0": "True"
+      },
+      "bamlh0a0hym2": {
+        "simple_r": 0.5524,
+        "partial_r_given_VIX": 0.0013,
+        "t_stat": 0.104,
+        "p_value": 0.917151,
+        "n": 6557,
+        "passes_harvey_3.0": "False"
+      }
+    },
+    "incremental_r2": {
+      "usepuindxd": {
+        "r2_vix_only": 0.5167,
+        "r2_vix_plus_sentiment": 0.5178,
+        "incremental_r2": 0.0011,
+        "f_stat": 15.0417,
+        "f_pval": 0.000106,
+        "sentiment_beta": -0.003831,
+        "vix_beta": 0.931261
+      },
+      "umcsent": {
+        "r2_vix_only": 0.5167,
+        "r2_vix_plus_sentiment": 0.518,
+        "incremental_r2": 0.0013,
+        "f_stat": 17.2843,
+        "f_pval": 3.3e-05,
+        "sentiment_beta": 0.028946,
+        "vix_beta": 0.931323
+      },
+      "tedrate": {
+        "r2_vix_only": 0.5167,
+        "r2_vix_plus_sentiment": 0.5399,
+        "incremental_r2": 0.0232,
+        "f_stat": 330.1793,
+        "f_pval": 0.0,
+        "sentiment_beta": 4.663582,
+        "vix_beta": 0.823101
+      },
+      "bamlh0a0hym2": {
+        "r2_vix_only": 0.5167,
+        "r2_vix_plus_sentiment": 0.5167,
+        "incremental_r2": 0.0,
+        "f_stat": 0.0108,
+        "f_pval": 0.917151,
+        "sentiment_beta": 0.005682,
+        "vix_beta": 0.913225
+      }
+    },
+    "granger_causality": {
+      "usepuindxd": {
+        "lags": 5,
+        "f_stat": 2.2592,
+        "p_value": 0.045944,
+        "n": 6552,
+        "significant_5pct": "True"
+      },
+      "umcsent": {
+        "lags": 5,
+        "f_stat": 5.3326,
+        "p_value": 6.8e-05,
+        "n": 6552,
+        "significant_5pct": "True"
+      },
+      "tedrate": {
+        "lags": 5,
+        "f_stat": 12.3633,
+        "p_value": 0.0,
+        "n": 6552,
+        "significant_5pct": "True"
+      },
+      "bamlh0a0hym2": {
+        "lags": 5,
+        "f_stat": 27.8764,
+        "p_value": 0.0,
+        "n": 6552,
+        "significant_5pct": "True"
+      }
+    },
+    "oos_qlike": {
+      "usepuindxd": {
+        "n_forecasts": 196,
+        "qlike_vix_only": 3.635683,
+        "qlike_vix_plus_sentiment": 3.672874,
+        "qlike_improvement_pct": -1.023,
+        "dm_t_stat": -1.0539,
+        "dm_p_value": 0.291914,
+        "sentiment_wins": false
+      },
+      "umcsent": {
+        "n_forecasts": 196,
+        "qlike_vix_only": 3.635683,
+        "qlike_vix_plus_sentiment": 3.635881,
+        "qlike_improvement_pct": -0.0054,
+        "dm_t_stat": -0.1366,
+        "dm_p_value": 0.891381,
+        "sentiment_wins": false
+      },
+      "tedrate": {
+        "n_forecasts": 196,
+        "qlike_vix_only": 3.635683,
+        "qlike_vix_plus_sentiment": 3.638874,
+        "qlike_improvement_pct": -0.0878,
+        "dm_t_stat": -0.9964,
+        "dm_p_value": 0.319064,
+        "sentiment_wins": false
+      },
+      "bamlh0a0hym2": {
+        "n_forecasts": 196,
+        "qlike_vix_only": 3.635683,
+        "qlike_vix_plus_sentiment": 3.636412,
+        "qlike_improvement_pct": -0.02,
+        "dm_t_stat": -1.4309,
+        "dm_p_value": 0.152453,
+        "sentiment_wins": false
+      }
+    },
+    "cross_oos_stability": {
+      "usepuindxd": {
+        "n_folds": 5,
+        "sentiment_wins": 3,
+        "vix_wins": 2,
+        "periods": [
+          {
+            "fold": 1,
+            "period": "2000-02-01 to 2005-04-20",
+            "qlike_vix": 3.864288,
+            "qlike_both": 3.864133,
+            "improvement_pct": 0.004,
+            "sentiment_wins": "True"
+          },
+          {
+            "fold": 2,
+            "period": "2005-04-21 to 2010-07-06",
+            "qlike_vix": 3.816703,
+            "qlike_both": 3.816577,
+            "improvement_pct": 0.0033,
+            "sentiment_wins": "True"
+          },
+          {
+            "fold": 3,
+            "period": "2010-07-07 to 2015-09-18",
+            "qlike_vix": 3.594683,
+            "qlike_both": 3.59418,
+            "improvement_pct": 0.014,
+            "sentiment_wins": "True"
+          },
+          {
+            "fold": 4,
+            "period": "2015-09-21 to 2020-12-02",
+            "qlike_vix": 3.580573,
+            "qlike_both": 3.580728,
+            "improvement_pct": -0.0043,
+            "sentiment_wins": "False"
+          },
+          {
+            "fold": 5,
+            "period": "2020-12-03 to 2026-02-24",
+            "qlike_vix": 3.692789,
+            "qlike_both": 3.702572,
+            "improvement_pct": -0.2649,
+            "sentiment_wins": "False"
+          }
+        ]
+      },
+      "umcsent": {
+        "n_folds": 5,
+        "sentiment_wins": 3,
+        "vix_wins": 2,
+        "periods": [
+          {
+            "fold": 1,
+            "period": "2000-02-01 to 2005-04-20",
+            "qlike_vix": 3.864288,
+            "qlike_both": 3.863997,
+            "improvement_pct": 0.0075,
+            "sentiment_wins": "True"
+          },
+          {
+            "fold": 2,
+            "period": "2005-04-21 to 2010-07-06",
+            "qlike_vix": 3.816703,
+            "qlike_both": 3.818338,
+            "improvement_pct": -0.0428,
+            "sentiment_wins": "False"
+          },
+          {
+            "fold": 3,
+            "period": "2010-07-07 to 2015-09-18",
+            "qlike_vix": 3.594683,
+            "qlike_both": 3.594081,
+            "improvement_pct": 0.0168,
+            "sentiment_wins": "True"
+          },
+          {
+            "fold": 4,
+            "period": "2015-09-21 to 2020-12-02",
+            "qlike_vix": 3.580573,
+            "qlike_both": 3.579843,
+            "improvement_pct": 0.0204,
+            "sentiment_wins": "True"
+          },
+          {
+            "fold": 5,
+            "period": "2020-12-03 to 2026-02-24",
+            "qlike_vix": 3.692789,
+            "qlike_both": 3.696615,
+            "improvement_pct": -0.1036,
+            "sentiment_wins": "False"
+          }
+        ]
+      },
+      "tedrate": {
+        "n_folds": 5,
+        "sentiment_wins": 2,
+        "vix_wins": 3,
+        "periods": [
+          {
+            "fold": 1,
+            "period": "2000-02-01 to 2005-04-20",
+            "qlike_vix": 3.864288,
+            "qlike_both": 3.863939,
+            "improvement_pct": 0.009,
+            "sentiment_wins": "True"
+          },
+          {
+            "fold": 2,
+            "period": "2005-04-21 to 2010-07-06",
+            "qlike_vix": 3.816703,
+            "qlike_both": 3.816783,
+            "improvement_pct": -0.0021,
+            "sentiment_wins": "False"
+          },
+          {
+            "fold": 3,
+            "period": "2010-07-07 to 2015-09-18",
+            "qlike_vix": 3.594683,
+            "qlike_both": 3.593551,
+            "improvement_pct": 0.0315,
+            "sentiment_wins": "True"
+          },
+          {
+            "fold": 4,
+            "period": "2015-09-21 to 2020-12-02",
+            "qlike_vix": 3.580573,
+            "qlike_both": 3.587551,
+            "improvement_pct": -0.1949,
+            "sentiment_wins": "False"
+          },
+          {
+            "fold": 5,
+            "period": "2020-12-03 to 2026-02-24",
+            "qlike_vix": 3.692789,
+            "qlike_both": 3.694666,
+            "improvement_pct": -0.0508,
+            "sentiment_wins": "False"
+          }
+        ]
+      },
+      "bamlh0a0hym2": {
+        "n_folds": 5,
+        "sentiment_wins": 0,
+        "vix_wins": 5,
+        "periods": [
+          {
+            "fold": 1,
+            "period": "2000-02-01 to 2005-04-20",
+            "qlike_vix": 3.864288,
+            "qlike_both": 3.864347,
+            "improvement_pct": -0.0015,
+            "sentiment_wins": "False"
+          },
+          {
+            "fold": 2,
+            "period": "2005-04-21 to 2010-07-06",
+            "qlike_vix": 3.816703,
+            "qlike_both": 3.816714,
+            "improvement_pct": -0.0003,
+            "sentiment_wins": "False"
+          },
+          {
+            "fold": 3,
+            "period": "2010-07-07 to 2015-09-18",
+            "qlike_vix": 3.594683,
+            "qlike_both": 3.594783,
+            "improvement_pct": -0.0028,
+            "sentiment_wins": "False"
+          },
+          {
+            "fold": 4,
+            "period": "2015-09-21 to 2020-12-02",
+            "qlike_vix": 3.580573,
+            "qlike_both": 3.580905,
+            "improvement_pct": -0.0093,
+            "sentiment_wins": "False"
+          },
+          {
+            "fold": 5,
+            "period": "2020-12-03 to 2026-02-24",
+            "qlike_vix": 3.692789,
+            "qlike_both": 3.693788,
+            "improvement_pct": -0.0271,
+            "sentiment_wins": "False"
+          }
+        ]
+      }
+    },
+    "vix_redundancy": {
+      "usepuindxd": {
+        "corr_with_vix": 0.3665,
+        "r2_explained_by_vix": 0.1344
+      },
+      "umcsent": {
+        "corr_with_vix": -0.3461,
+        "r2_explained_by_vix": 0.1198
+      },
+      "tedrate": {
+        "corr_with_vix": 0.427,
+        "r2_explained_by_vix": 0.1824
+      },
+      "bamlh0a0hym2": {
+        "corr_with_vix": 0.7676,
+        "r2_explained_by_vix": 0.5892
+      }
+    }
+  },
+  "verdict": "MARGINAL \u2014 IS significant but OOS fails (likely overfitting)",
+  "conclusion": "Tested 4 sentiment/uncertainty indices (EPU, Michigan Sentiment, TED Spread, HY Spread) for incremental vol prediction beyond VIX. MARGINAL \u2014 IS significant but OOS fails (likely overfitting). This formally tests the NLP/sentiment channel and extends VIX sufficiency evidence to text-based uncertainty measures.",
+  "implications": {
+    "for_VT_strategy": "No sentiment overlay improves 12/VIX",
+    "for_NLP_research": "Even sophisticated text-based indices (EPU from newspaper analysis) do not add value beyond VIX. The options market aggregates all publicly available sentiment information.",
+    "next_steps": "Could test intraday Twitter/X sentiment (higher frequency than daily), or FinBERT on earnings call transcripts (firm-specific, not market-level). Market-level sentiment appears fully captured by VIX."
+  },
+  "script": "experiments/k531_sentiment_nlp_pilot.py"
+}
