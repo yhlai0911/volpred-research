@@ -1,0 +1,1182 @@
+{
+  "experiment_id": "K518",
+  "title": "Trend Following / Moving Average Strategy",
+  "date": "2026-03-27",
+  "data_source": "yfinance (SPY, GLD, AGG, ^VIX)",
+  "backtest_period": "1999-01-04 to 2025-12-30",
+  "tx_cost": 0.0005,
+  "references": [
+    "Moskowitz, Ooi, Pedersen (2012) Time Series Momentum, JFE",
+    "Faber (2007) A Quantitative Approach to Tactical Asset Allocation",
+    "Glabadanidis (2015) MA timing after TX",
+    "Antonacci (2014) Dual Momentum Investing"
+  ],
+  "full_period_SPY": {
+    "SMA200": {
+      "strategy_metrics": {
+        "ann_return": 0.0673,
+        "ann_vol": 0.1135,
+        "sharpe": 0.4167,
+        "max_drawdown": -0.2846,
+        "calmar": 0.2365,
+        "sortino": 0.4512,
+        "win_rate": 0.3965,
+        "skew": -0.6308,
+        "kurtosis": 5.9591,
+        "n_days": 6789
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1001,
+        "ann_vol": 0.1935,
+        "sharpe": 0.4141,
+        "max_drawdown": -0.5519,
+        "calmar": 0.1814,
+        "sortino": 0.5307,
+        "win_rate": 0.5438,
+        "skew": 0.0414,
+        "kurtosis": 11.7084,
+        "n_days": 6789
+      },
+      "sharpe_diff": 0.0026,
+      "harvey_t": 0.4291,
+      "harvey_p": 0.3339,
+      "trade_stats": {
+        "n_trades": 184,
+        "pct_invested": 0.717
+      }
+    },
+    "Faber_10M": {
+      "strategy_metrics": {
+        "ann_return": 0.0641,
+        "ann_vol": 0.1131,
+        "sharpe": 0.3901,
+        "max_drawdown": -0.2616,
+        "calmar": 0.2451,
+        "sortino": 0.4217,
+        "win_rate": 0.3958,
+        "skew": -0.6427,
+        "kurtosis": 6.0012,
+        "n_days": 6789
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1001,
+        "ann_vol": 0.1935,
+        "sharpe": 0.4141,
+        "max_drawdown": -0.5519,
+        "calmar": 0.1814,
+        "sortino": 0.5307,
+        "win_rate": 0.5438,
+        "skew": 0.0414,
+        "kurtosis": 11.7084,
+        "n_days": 6789
+      },
+      "sharpe_diff": -0.024,
+      "harvey_t": 0.2804,
+      "harvey_p": 0.3896,
+      "trade_stats": {
+        "n_trades": 180,
+        "pct_invested": 0.7163
+      }
+    },
+    "Golden_Cross": {
+      "strategy_metrics": {
+        "ann_return": 0.0875,
+        "ann_vol": 0.1322,
+        "sharpe": 0.5104,
+        "max_drawdown": -0.3372,
+        "calmar": 0.2595,
+        "sortino": 0.5319,
+        "win_rate": 0.3961,
+        "skew": -0.3913,
+        "kurtosis": 21.17,
+        "n_days": 6789
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1001,
+        "ann_vol": 0.1935,
+        "sharpe": 0.4141,
+        "max_drawdown": -0.5519,
+        "calmar": 0.1814,
+        "sortino": 0.5307,
+        "win_rate": 0.5438,
+        "skew": 0.0414,
+        "kurtosis": 11.7084,
+        "n_days": 6789
+      },
+      "sharpe_diff": 0.0963,
+      "harvey_t": 0.9402,
+      "harvey_p": 0.1735,
+      "trade_stats": {
+        "n_trades": 28,
+        "pct_invested": 0.7117
+      }
+    },
+    "Dual_Momentum": {
+      "strategy_metrics": {
+        "ann_return": 0.0635,
+        "ann_vol": 0.1189,
+        "sharpe": 0.3653,
+        "max_drawdown": -0.2901,
+        "calmar": 0.2187,
+        "sortino": 0.3975,
+        "win_rate": 0.4662,
+        "skew": -0.9445,
+        "kurtosis": 6.8041,
+        "n_days": 5599
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1224,
+        "ann_vol": 0.1869,
+        "sharpe": 0.5476,
+        "max_drawdown": -0.5519,
+        "calmar": 0.2217,
+        "sortino": 0.6681,
+        "win_rate": 0.553,
+        "skew": -0.0049,
+        "kurtosis": 15.7415,
+        "n_days": 5599
+      },
+      "sharpe_diff": -0.1823,
+      "harvey_t": -0.6535,
+      "harvey_p": 0.7433,
+      "trade_stats": {
+        "n_trades": 214,
+        "pct_invested": 0.5938
+      }
+    },
+    "MA_VT_Overlay": {
+      "strategy_metrics": {
+        "ann_return": -0.043,
+        "ann_vol": 0.0758,
+        "sharpe": -0.8323,
+        "max_drawdown": -0.7413,
+        "calmar": -0.0581,
+        "sortino": -0.9345,
+        "win_rate": 0.3628,
+        "skew": -0.7519,
+        "kurtosis": 3.6832,
+        "n_days": 6789
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1001,
+        "ann_vol": 0.1935,
+        "sharpe": 0.4141,
+        "max_drawdown": -0.5519,
+        "calmar": 0.1814,
+        "sortino": 0.5307,
+        "win_rate": 0.5438,
+        "skew": 0.0414,
+        "kurtosis": 11.7084,
+        "n_days": 6789
+      },
+      "sharpe_diff": -1.2464,
+      "harvey_t": -6.0212,
+      "harvey_p": 1.0,
+      "trade_stats": {
+        "n_trades": 4931,
+        "pct_invested": 0.717
+      }
+    }
+  },
+  "full_period_blend": {
+    "SMA200": {
+      "strategy_metrics": {
+        "ann_return": 0.0849,
+        "ann_vol": 0.0953,
+        "sharpe": 0.6808,
+        "max_drawdown": -0.1795,
+        "calmar": 0.473,
+        "sortino": 0.8548,
+        "win_rate": 0.5176,
+        "skew": -0.5472,
+        "kurtosis": 3.3383,
+        "n_days": 5311
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1199,
+        "ann_vol": 0.1332,
+        "sharpe": 0.7502,
+        "max_drawdown": -0.3249,
+        "calmar": 0.3691,
+        "sortino": 0.9694,
+        "win_rate": 0.5605,
+        "skew": -0.1456,
+        "kurtosis": 9.693,
+        "n_days": 5311
+      },
+      "sharpe_diff": -0.0694,
+      "harvey_t": -0.0589,
+      "harvey_p": 0.5235
+    },
+    "Faber_10M": {
+      "strategy_metrics": {
+        "ann_return": 0.0821,
+        "ann_vol": 0.0953,
+        "sharpe": 0.6518,
+        "max_drawdown": -0.1775,
+        "calmar": 0.4627,
+        "sortino": 0.8177,
+        "win_rate": 0.5174,
+        "skew": -0.5516,
+        "kurtosis": 3.3296,
+        "n_days": 5311
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1199,
+        "ann_vol": 0.1332,
+        "sharpe": 0.7502,
+        "max_drawdown": -0.3249,
+        "calmar": 0.3691,
+        "sortino": 0.9694,
+        "win_rate": 0.5605,
+        "skew": -0.1456,
+        "kurtosis": 9.693,
+        "n_days": 5311
+      },
+      "sharpe_diff": -0.0984,
+      "harvey_t": -0.2357,
+      "harvey_p": 0.5932
+    },
+    "Golden_Cross": {
+      "strategy_metrics": {
+        "ann_return": 0.0942,
+        "ann_vol": 0.1028,
+        "sharpe": 0.7226,
+        "max_drawdown": -0.2032,
+        "calmar": 0.4639,
+        "sortino": 0.8863,
+        "win_rate": 0.5217,
+        "skew": -0.3372,
+        "kurtosis": 11.8995,
+        "n_days": 5311
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1199,
+        "ann_vol": 0.1332,
+        "sharpe": 0.7502,
+        "max_drawdown": -0.3249,
+        "calmar": 0.3691,
+        "sortino": 0.9694,
+        "win_rate": 0.5605,
+        "skew": -0.1456,
+        "kurtosis": 9.693,
+        "n_days": 5311
+      },
+      "sharpe_diff": -0.0276,
+      "harvey_t": 0.1126,
+      "harvey_p": 0.4552
+    },
+    "MA_VT_Overlay": {
+      "strategy_metrics": {
+        "ann_return": -0.03,
+        "ann_vol": 0.0642,
+        "sharpe": -0.7791,
+        "max_drawdown": -0.6306,
+        "calmar": -0.0476,
+        "sortino": -0.9877,
+        "win_rate": 0.472,
+        "skew": -0.5874,
+        "kurtosis": 5.1792,
+        "n_days": 5311
+      },
+      "buyhold_metrics": {
+        "ann_return": 0.1199,
+        "ann_vol": 0.1332,
+        "sharpe": 0.7502,
+        "max_drawdown": -0.3249,
+        "calmar": 0.3691,
+        "sortino": 0.9694,
+        "win_rate": 0.5605,
+        "skew": -0.1456,
+        "kurtosis": 9.693,
+        "n_days": 5311
+      },
+      "sharpe_diff": -1.5293,
+      "harvey_t": -7.8013,
+      "harvey_p": 1.0
+    }
+  },
+  "cross_oos": {
+    "SMA200": [
+      {
+        "period": "2000-06-01 to 2005-05-31",
+        "period_idx": 1,
+        "strategy_metrics": {
+          "ann_return": 0.0119,
+          "ann_vol": 0.0873,
+          "sharpe": -0.093,
+          "max_drawdown": -0.1915,
+          "calmar": 0.0621,
+          "sortino": -0.0954,
+          "win_rate": 0.2584,
+          "skew": -0.3758,
+          "kurtosis": 4.1349,
+          "n_days": 1254
+        },
+        "buyhold_metrics": {
+          "ann_return": -0.0054,
+          "ann_vol": 0.1939,
+          "sharpe": -0.131,
+          "max_drawdown": -0.4727,
+          "calmar": -0.0114,
+          "sortino": -0.1993,
+          "win_rate": 0.5239,
+          "skew": 0.1688,
+          "kurtosis": 1.8528,
+          "n_days": 1254
+        },
+        "sharpe_diff": 0.038,
+        "harvey_t": 0.348,
+        "harvey_p": 0.3639,
+        "beats_buyhold": "True"
+      },
+      {
+        "period": "2005-06-01 to 2010-05-31",
+        "period_idx": 2,
+        "strategy_metrics": {
+          "ann_return": 0.0347,
+          "ann_vol": 0.1125,
+          "sharpe": 0.1311,
+          "max_drawdown": -0.2155,
+          "calmar": 0.1612,
+          "sortino": 0.1322,
+          "win_rate": 0.3763,
+          "skew": -0.6842,
+          "kurtosis": 5.8131,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.0305,
+          "ann_vol": 0.2442,
+          "sharpe": 0.0431,
+          "max_drawdown": -0.5519,
+          "calmar": 0.0553,
+          "sortino": 0.0531,
+          "win_rate": 0.5473,
+          "skew": 0.3998,
+          "kurtosis": 13.9493,
+          "n_days": 1257
+        },
+        "sharpe_diff": 0.088,
+        "harvey_t": 0.3946,
+        "harvey_p": 0.3466,
+        "beats_buyhold": "True"
+      },
+      {
+        "period": "2010-06-01 to 2015-05-31",
+        "period_idx": 3,
+        "strategy_metrics": {
+          "ann_return": 0.1026,
+          "ann_vol": 0.1162,
+          "sharpe": 0.7108,
+          "max_drawdown": -0.1754,
+          "calmar": 0.5851,
+          "sortino": 0.8947,
+          "win_rate": 0.4893,
+          "skew": -0.4535,
+          "kurtosis": 2.2496,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1675,
+          "ann_vol": 0.153,
+          "sharpe": 0.9637,
+          "max_drawdown": -0.1861,
+          "calmar": 0.9,
+          "sortino": 1.2441,
+          "win_rate": 0.5585,
+          "skew": -0.4024,
+          "kurtosis": 4.5196,
+          "n_days": 1257
+        },
+        "sharpe_diff": -0.2529,
+        "harvey_t": -0.6762,
+        "harvey_p": 0.7505,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2015-06-01 to 2020-05-31",
+        "period_idx": 4,
+        "strategy_metrics": {
+          "ann_return": 0.0513,
+          "ann_vol": 0.109,
+          "sharpe": 0.287,
+          "max_drawdown": -0.1768,
+          "calmar": 0.2901,
+          "sortino": 0.2918,
+          "win_rate": 0.4412,
+          "skew": -1.4036,
+          "kurtosis": 7.3382,
+          "n_days": 1258
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1105,
+          "ann_vol": 0.1872,
+          "sharpe": 0.4833,
+          "max_drawdown": -0.3372,
+          "calmar": 0.3276,
+          "sortino": 0.5402,
+          "win_rate": 0.5477,
+          "skew": -0.658,
+          "kurtosis": 18.5763,
+          "n_days": 1258
+        },
+        "sharpe_diff": -0.1963,
+        "harvey_t": -0.291,
+        "harvey_p": 0.6145,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2020-06-01 to 2025-03-25",
+        "period_idx": 5,
+        "strategy_metrics": {
+          "ann_return": 0.1348,
+          "ann_vol": 0.1283,
+          "sharpe": 0.8942,
+          "max_drawdown": -0.2069,
+          "calmar": 0.6514,
+          "sortino": 1.0629,
+          "win_rate": 0.4595,
+          "skew": -0.7147,
+          "kurtosis": 3.487,
+          "n_days": 1210
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1611,
+          "ann_vol": 0.1674,
+          "sharpe": 0.8427,
+          "max_drawdown": -0.245,
+          "calmar": 0.6576,
+          "sortino": 1.1513,
+          "win_rate": 0.5479,
+          "skew": -0.3916,
+          "kurtosis": 2.2232,
+          "n_days": 1210
+        },
+        "sharpe_diff": 0.0515,
+        "harvey_t": 0.2804,
+        "harvey_p": 0.3896,
+        "beats_buyhold": "True"
+      }
+    ],
+    "Faber_10M": [
+      {
+        "period": "2000-06-01 to 2005-05-31",
+        "period_idx": 1,
+        "strategy_metrics": {
+          "ann_return": 0.0135,
+          "ann_vol": 0.0863,
+          "sharpe": -0.0752,
+          "max_drawdown": -0.1717,
+          "calmar": 0.0787,
+          "sortino": -0.0779,
+          "win_rate": 0.2584,
+          "skew": -0.3339,
+          "kurtosis": 4.0253,
+          "n_days": 1254
+        },
+        "buyhold_metrics": {
+          "ann_return": -0.0054,
+          "ann_vol": 0.1939,
+          "sharpe": -0.131,
+          "max_drawdown": -0.4727,
+          "calmar": -0.0114,
+          "sortino": -0.1993,
+          "win_rate": 0.5239,
+          "skew": 0.1688,
+          "kurtosis": 1.8528,
+          "n_days": 1254
+        },
+        "sharpe_diff": 0.0558,
+        "harvey_t": 0.3898,
+        "harvey_p": 0.3483,
+        "beats_buyhold": "True"
+      },
+      {
+        "period": "2005-06-01 to 2010-05-31",
+        "period_idx": 2,
+        "strategy_metrics": {
+          "ann_return": 0.0199,
+          "ann_vol": 0.1111,
+          "sharpe": -0.0008,
+          "max_drawdown": -0.2368,
+          "calmar": 0.0841,
+          "sortino": -0.0008,
+          "win_rate": 0.3731,
+          "skew": -0.7554,
+          "kurtosis": 5.9391,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.0305,
+          "ann_vol": 0.2442,
+          "sharpe": 0.0431,
+          "max_drawdown": -0.5519,
+          "calmar": 0.0553,
+          "sortino": 0.0531,
+          "win_rate": 0.5473,
+          "skew": 0.3998,
+          "kurtosis": 13.9493,
+          "n_days": 1257
+        },
+        "sharpe_diff": -0.0439,
+        "harvey_t": 0.1158,
+        "harvey_p": 0.4539,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2010-06-01 to 2015-05-31",
+        "period_idx": 3,
+        "strategy_metrics": {
+          "ann_return": 0.1024,
+          "ann_vol": 0.1163,
+          "sharpe": 0.7091,
+          "max_drawdown": -0.1803,
+          "calmar": 0.5683,
+          "sortino": 0.8926,
+          "win_rate": 0.4893,
+          "skew": -0.4536,
+          "kurtosis": 2.2484,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1675,
+          "ann_vol": 0.153,
+          "sharpe": 0.9637,
+          "max_drawdown": -0.1861,
+          "calmar": 0.9,
+          "sortino": 1.2441,
+          "win_rate": 0.5585,
+          "skew": -0.4024,
+          "kurtosis": 4.5196,
+          "n_days": 1257
+        },
+        "sharpe_diff": -0.2546,
+        "harvey_t": -0.6815,
+        "harvey_p": 0.7522,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2015-06-01 to 2020-05-31",
+        "period_idx": 4,
+        "strategy_metrics": {
+          "ann_return": 0.0464,
+          "ann_vol": 0.1094,
+          "sharpe": 0.2416,
+          "max_drawdown": -0.1904,
+          "calmar": 0.2438,
+          "sortino": 0.2461,
+          "win_rate": 0.4412,
+          "skew": -1.3917,
+          "kurtosis": 7.1855,
+          "n_days": 1258
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1105,
+          "ann_vol": 0.1872,
+          "sharpe": 0.4833,
+          "max_drawdown": -0.3372,
+          "calmar": 0.3276,
+          "sortino": 0.5402,
+          "win_rate": 0.5477,
+          "skew": -0.658,
+          "kurtosis": 18.5763,
+          "n_days": 1258
+        },
+        "sharpe_diff": -0.2417,
+        "harvey_t": -0.4042,
+        "harvey_p": 0.657,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2020-06-01 to 2025-03-25",
+        "period_idx": 5,
+        "strategy_metrics": {
+          "ann_return": 0.138,
+          "ann_vol": 0.1282,
+          "sharpe": 0.9199,
+          "max_drawdown": -0.1946,
+          "calmar": 0.709,
+          "sortino": 1.0904,
+          "win_rate": 0.4595,
+          "skew": -0.7187,
+          "kurtosis": 3.5092,
+          "n_days": 1210
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1611,
+          "ann_vol": 0.1674,
+          "sharpe": 0.8427,
+          "max_drawdown": -0.245,
+          "calmar": 0.6576,
+          "sortino": 1.1513,
+          "win_rate": 0.5479,
+          "skew": -0.3916,
+          "kurtosis": 2.2232,
+          "n_days": 1210
+        },
+        "sharpe_diff": 0.0772,
+        "harvey_t": 0.3626,
+        "harvey_p": 0.3585,
+        "beats_buyhold": "True"
+      }
+    ],
+    "Golden_Cross": [
+      {
+        "period": "2000-06-01 to 2005-05-31",
+        "period_idx": 1,
+        "strategy_metrics": {
+          "ann_return": 0.0434,
+          "ann_vol": 0.0942,
+          "sharpe": 0.2483,
+          "max_drawdown": -0.1274,
+          "calmar": 0.3404,
+          "sortino": 0.268,
+          "win_rate": 0.2632,
+          "skew": 0.2166,
+          "kurtosis": 5.856,
+          "n_days": 1254
+        },
+        "buyhold_metrics": {
+          "ann_return": -0.0054,
+          "ann_vol": 0.1939,
+          "sharpe": -0.131,
+          "max_drawdown": -0.4727,
+          "calmar": -0.0114,
+          "sortino": -0.1993,
+          "win_rate": 0.5239,
+          "skew": 0.1688,
+          "kurtosis": 1.8528,
+          "n_days": 1254
+        },
+        "sharpe_diff": 0.3793,
+        "harvey_t": 1.0752,
+        "harvey_p": 0.1411,
+        "beats_buyhold": "True"
+      },
+      {
+        "period": "2005-06-01 to 2010-05-31",
+        "period_idx": 2,
+        "strategy_metrics": {
+          "ann_return": 0.0885,
+          "ann_vol": 0.1188,
+          "sharpe": 0.5766,
+          "max_drawdown": -0.1202,
+          "calmar": 0.7366,
+          "sortino": 0.6132,
+          "win_rate": 0.3874,
+          "skew": -0.38,
+          "kurtosis": 5.1188,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.0305,
+          "ann_vol": 0.2442,
+          "sharpe": 0.0431,
+          "max_drawdown": -0.5519,
+          "calmar": 0.0553,
+          "sortino": 0.0531,
+          "win_rate": 0.5473,
+          "skew": 0.3998,
+          "kurtosis": 13.9493,
+          "n_days": 1257
+        },
+        "sharpe_diff": 0.5335,
+        "harvey_t": 1.3677,
+        "harvey_p": 0.0857,
+        "beats_buyhold": "True"
+      },
+      {
+        "period": "2010-06-01 to 2015-05-31",
+        "period_idx": 3,
+        "strategy_metrics": {
+          "ann_return": 0.1144,
+          "ann_vol": 0.1258,
+          "sharpe": 0.7504,
+          "max_drawdown": -0.1731,
+          "calmar": 0.6609,
+          "sortino": 0.8855,
+          "win_rate": 0.4797,
+          "skew": -0.625,
+          "kurtosis": 7.942,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1675,
+          "ann_vol": 0.153,
+          "sharpe": 0.9637,
+          "max_drawdown": -0.1861,
+          "calmar": 0.9,
+          "sortino": 1.2441,
+          "win_rate": 0.5585,
+          "skew": -0.4024,
+          "kurtosis": 4.5196,
+          "n_days": 1257
+        },
+        "sharpe_diff": -0.2133,
+        "harvey_t": -0.6905,
+        "harvey_p": 0.7551,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2015-06-01 to 2020-05-31",
+        "period_idx": 4,
+        "strategy_metrics": {
+          "ann_return": 0.0248,
+          "ann_vol": 0.1646,
+          "sharpe": 0.029,
+          "max_drawdown": -0.3372,
+          "calmar": 0.0735,
+          "sortino": 0.0273,
+          "win_rate": 0.4404,
+          "skew": -1.1849,
+          "kurtosis": 29.9386,
+          "n_days": 1258
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1105,
+          "ann_vol": 0.1872,
+          "sharpe": 0.4833,
+          "max_drawdown": -0.3372,
+          "calmar": 0.3276,
+          "sortino": 0.5402,
+          "win_rate": 0.5477,
+          "skew": -0.658,
+          "kurtosis": 18.5763,
+          "n_days": 1258
+        },
+        "sharpe_diff": -0.4543,
+        "harvey_t": -1.9951,
+        "harvey_p": 0.977,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2020-06-01 to 2025-03-25",
+        "period_idx": 5,
+        "strategy_metrics": {
+          "ann_return": 0.1581,
+          "ann_vol": 0.1266,
+          "sharpe": 1.0909,
+          "max_drawdown": -0.1327,
+          "calmar": 1.1919,
+          "sortino": 1.386,
+          "win_rate": 0.4529,
+          "skew": -0.345,
+          "kurtosis": 1.7217,
+          "n_days": 1210
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1611,
+          "ann_vol": 0.1674,
+          "sharpe": 0.8427,
+          "max_drawdown": -0.245,
+          "calmar": 0.6576,
+          "sortino": 1.1513,
+          "win_rate": 0.5479,
+          "skew": -0.3916,
+          "kurtosis": 2.2232,
+          "n_days": 1210
+        },
+        "sharpe_diff": 0.2482,
+        "harvey_t": 0.8999,
+        "harvey_p": 0.1841,
+        "beats_buyhold": "True"
+      }
+    ],
+    "Dual_Momentum": [
+      {
+        "period": "2000-06-01 to 2005-05-31",
+        "period_idx": 1,
+        "strategy_metrics": {
+          "ann_return": 0.0526,
+          "ann_vol": 0.0735,
+          "sharpe": 0.4436,
+          "max_drawdown": -0.0758,
+          "calmar": 0.6936,
+          "sortino": 0.6407,
+          "win_rate": 0.519,
+          "skew": -0.0338,
+          "kurtosis": 1.3599,
+          "n_days": 420
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.124,
+          "ann_vol": 0.1111,
+          "sharpe": 0.936,
+          "max_drawdown": -0.0753,
+          "calmar": 1.6464,
+          "sortino": 1.4609,
+          "win_rate": 0.569,
+          "skew": -0.1682,
+          "kurtosis": -0.1035,
+          "n_days": 420
+        },
+        "sharpe_diff": -0.4924,
+        "harvey_t": -0.4953,
+        "harvey_p": 0.6898,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2005-06-01 to 2010-05-31",
+        "period_idx": 2,
+        "strategy_metrics": {
+          "ann_return": 0.0227,
+          "ann_vol": 0.0974,
+          "sharpe": 0.0272,
+          "max_drawdown": -0.1553,
+          "calmar": 0.1459,
+          "sortino": 0.0227,
+          "win_rate": 0.2546,
+          "skew": -0.6263,
+          "kurtosis": 10.3873,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.0305,
+          "ann_vol": 0.2442,
+          "sharpe": 0.0431,
+          "max_drawdown": -0.5519,
+          "calmar": 0.0553,
+          "sortino": 0.0531,
+          "win_rate": 0.5473,
+          "skew": 0.3998,
+          "kurtosis": 13.9493,
+          "n_days": 1257
+        },
+        "sharpe_diff": -0.0159,
+        "harvey_t": 0.2168,
+        "harvey_p": 0.4142,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2010-06-01 to 2015-05-31",
+        "period_idx": 3,
+        "strategy_metrics": {
+          "ann_return": 0.0391,
+          "ann_vol": 0.1174,
+          "sharpe": 0.1628,
+          "max_drawdown": -0.2881,
+          "calmar": 0.1358,
+          "sortino": 0.1657,
+          "win_rate": 0.432,
+          "skew": -1.2641,
+          "kurtosis": 10.525,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1675,
+          "ann_vol": 0.153,
+          "sharpe": 0.9637,
+          "max_drawdown": -0.1861,
+          "calmar": 0.9,
+          "sortino": 1.2441,
+          "win_rate": 0.5585,
+          "skew": -0.4024,
+          "kurtosis": 4.5196,
+          "n_days": 1257
+        },
+        "sharpe_diff": -0.8009,
+        "harvey_t": -2.3362,
+        "harvey_p": 0.9903,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2015-06-01 to 2020-05-31",
+        "period_idx": 4,
+        "strategy_metrics": {
+          "ann_return": 0.0271,
+          "ann_vol": 0.0974,
+          "sharpe": 0.0727,
+          "max_drawdown": -0.227,
+          "calmar": 0.1193,
+          "sortino": 0.0646,
+          "win_rate": 0.411,
+          "skew": -1.9243,
+          "kurtosis": 12.0691,
+          "n_days": 1258
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1105,
+          "ann_vol": 0.1872,
+          "sharpe": 0.4833,
+          "max_drawdown": -0.3372,
+          "calmar": 0.3276,
+          "sortino": 0.5402,
+          "win_rate": 0.5477,
+          "skew": -0.658,
+          "kurtosis": 18.5763,
+          "n_days": 1258
+        },
+        "sharpe_diff": -0.4106,
+        "harvey_t": -0.7113,
+        "harvey_p": 0.7615,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2020-06-01 to 2025-03-25",
+        "period_idx": 5,
+        "strategy_metrics": {
+          "ann_return": 0.0647,
+          "ann_vol": 0.1113,
+          "sharpe": 0.4017,
+          "max_drawdown": -0.1999,
+          "calmar": 0.3238,
+          "sortino": 0.4097,
+          "win_rate": 0.3306,
+          "skew": -0.5888,
+          "kurtosis": 4.8447,
+          "n_days": 1210
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1611,
+          "ann_vol": 0.1674,
+          "sharpe": 0.8427,
+          "max_drawdown": -0.245,
+          "calmar": 0.6576,
+          "sortino": 1.1513,
+          "win_rate": 0.5479,
+          "skew": -0.3916,
+          "kurtosis": 2.2232,
+          "n_days": 1210
+        },
+        "sharpe_diff": -0.441,
+        "harvey_t": -1.0168,
+        "harvey_p": 0.8454,
+        "beats_buyhold": "False"
+      }
+    ],
+    "MA_VT_Overlay": [
+      {
+        "period": "2000-06-01 to 2005-05-31",
+        "period_idx": 1,
+        "strategy_metrics": {
+          "ann_return": -0.0566,
+          "ann_vol": 0.061,
+          "sharpe": -1.2573,
+          "max_drawdown": -0.2676,
+          "calmar": -0.2117,
+          "sortino": -1.2729,
+          "win_rate": 0.24,
+          "skew": -0.566,
+          "kurtosis": 3.0745,
+          "n_days": 1254
+        },
+        "buyhold_metrics": {
+          "ann_return": -0.0054,
+          "ann_vol": 0.1939,
+          "sharpe": -0.131,
+          "max_drawdown": -0.4727,
+          "calmar": -0.0114,
+          "sortino": -0.1993,
+          "win_rate": 0.5239,
+          "skew": 0.1688,
+          "kurtosis": 1.8528,
+          "n_days": 1254
+        },
+        "sharpe_diff": -1.1263,
+        "harvey_t": -1.8947,
+        "harvey_p": 0.9709,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2005-06-01 to 2010-05-31",
+        "period_idx": 2,
+        "strategy_metrics": {
+          "ann_return": -0.0615,
+          "ann_vol": 0.0762,
+          "sharpe": -1.0687,
+          "max_drawdown": -0.2858,
+          "calmar": -0.2151,
+          "sortino": -1.0928,
+          "win_rate": 0.3469,
+          "skew": -1.1809,
+          "kurtosis": 6.6183,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.0305,
+          "ann_vol": 0.2442,
+          "sharpe": 0.0431,
+          "max_drawdown": -0.5519,
+          "calmar": 0.0553,
+          "sortino": 0.0531,
+          "win_rate": 0.5473,
+          "skew": 0.3998,
+          "kurtosis": 13.9493,
+          "n_days": 1257
+        },
+        "sharpe_diff": -1.1118,
+        "harvey_t": -1.9512,
+        "harvey_p": 0.9745,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2010-06-01 to 2015-05-31",
+        "period_idx": 3,
+        "strategy_metrics": {
+          "ann_return": -0.0394,
+          "ann_vol": 0.0818,
+          "sharpe": -0.7263,
+          "max_drawdown": -0.1989,
+          "calmar": -0.1983,
+          "sortino": -0.9253,
+          "win_rate": 0.4375,
+          "skew": -0.513,
+          "kurtosis": 1.3175,
+          "n_days": 1257
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1675,
+          "ann_vol": 0.153,
+          "sharpe": 0.9637,
+          "max_drawdown": -0.1861,
+          "calmar": 0.9,
+          "sortino": 1.2441,
+          "win_rate": 0.5585,
+          "skew": -0.4024,
+          "kurtosis": 4.5196,
+          "n_days": 1257
+        },
+        "sharpe_diff": -1.69,
+        "harvey_t": -4.8897,
+        "harvey_p": 1.0,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2015-06-01 to 2020-05-31",
+        "period_idx": 4,
+        "strategy_metrics": {
+          "ann_return": -0.047,
+          "ann_vol": 0.0813,
+          "sharpe": -0.8237,
+          "max_drawdown": -0.2275,
+          "calmar": -0.2064,
+          "sortino": -0.9235,
+          "win_rate": 0.4022,
+          "skew": -1.0624,
+          "kurtosis": 3.8974,
+          "n_days": 1258
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1105,
+          "ann_vol": 0.1872,
+          "sharpe": 0.4833,
+          "max_drawdown": -0.3372,
+          "calmar": 0.3276,
+          "sortino": 0.5402,
+          "win_rate": 0.5477,
+          "skew": -0.658,
+          "kurtosis": 18.5763,
+          "n_days": 1258
+        },
+        "sharpe_diff": -1.307,
+        "harvey_t": -2.7828,
+        "harvey_p": 0.9973,
+        "beats_buyhold": "False"
+      },
+      {
+        "period": "2020-06-01 to 2025-03-25",
+        "period_idx": 5,
+        "strategy_metrics": {
+          "ann_return": -0.0194,
+          "ann_vol": 0.0783,
+          "sharpe": -0.5035,
+          "max_drawdown": -0.2032,
+          "calmar": -0.0957,
+          "sortino": -0.6231,
+          "win_rate": 0.4223,
+          "skew": -0.557,
+          "kurtosis": 1.6686,
+          "n_days": 1210
+        },
+        "buyhold_metrics": {
+          "ann_return": 0.1611,
+          "ann_vol": 0.1674,
+          "sharpe": 0.8427,
+          "max_drawdown": -0.245,
+          "calmar": 0.6576,
+          "sortino": 1.1513,
+          "win_rate": 0.5479,
+          "skew": -0.3916,
+          "kurtosis": 2.2232,
+          "n_days": 1210
+        },
+        "sharpe_diff": -1.3462,
+        "harvey_t": -3.6658,
+        "harvey_p": 0.9999,
+        "beats_buyhold": "False"
+      }
+    ]
+  },
+  "listing_candidates": [],
+  "conclusion": "Tested 5 trend following strategies. 0 passed all listing criteria (Net Sharpe > B&H, Cross-OOS >= 4/5, Harvey t > 3.0). No strategy meets listing standards.",
+  "regime_analysis": {
+    "Low VIX (<15)": {
+      "SMA200": {
+        "strategy_sharpe": 4.1041,
+        "bh_sharpe": 4.3002,
+        "diff": -0.1961
+      },
+      "Faber_10M": {
+        "strategy_sharpe": 4.1176,
+        "bh_sharpe": 4.3002,
+        "diff": -0.1826
+      },
+      "Golden_Cross": {
+        "strategy_sharpe": 3.9838,
+        "bh_sharpe": 4.3002,
+        "diff": -0.3164
+      },
+      "MA_VT": {
+        "strategy_sharpe": 2.1145,
+        "bh_sharpe": 4.3002,
+        "diff": -2.1857
+      }
+    },
+    "Normal (15-25)": {
+      "SMA200": {
+        "strategy_sharpe": -0.0296,
+        "bh_sharpe": 0.9167,
+        "diff": -0.9463
+      },
+      "Faber_10M": {
+        "strategy_sharpe": -0.0316,
+        "bh_sharpe": 0.9167,
+        "diff": -0.9483
+      },
+      "Golden_Cross": {
+        "strategy_sharpe": 0.3594,
+        "bh_sharpe": 0.9167,
+        "diff": -0.5573
+      },
+      "MA_VT": {
+        "strategy_sharpe": -1.8968,
+        "bh_sharpe": 0.9167,
+        "diff": -2.8135
+      }
+    },
+    "High VIX (>=25)": {
+      "SMA200": {
+        "strategy_sharpe": -2.2837,
+        "bh_sharpe": -1.509,
+        "diff": -0.7747
+      },
+      "Faber_10M": {
+        "strategy_sharpe": -2.4491,
+        "bh_sharpe": -1.509,
+        "diff": -0.9401
+      },
+      "Golden_Cross": {
+        "strategy_sharpe": -1.4646,
+        "bh_sharpe": -1.509,
+        "diff": 0.0444
+      },
+      "MA_VT": {
+        "strategy_sharpe": -3.1918,
+        "bh_sharpe": -1.509,
+        "diff": -1.6828
+      }
+    }
+  },
+  "elapsed_seconds": 1.9
+}

@@ -13963,5 +13963,20 @@
     ],
     "created_at": "2026-03-27T00:29:57.835987+00:00",
     "experiment_id": "k517"
+  },
+  {
+    "id": 1295,
+    "title": "K518: Trend Following / MA — All 5 fail Harvey. Golden Cross best but 3/5 cross-OOS.",
+    "content": "[提出: Claude(3-step), 執行: Claude] K518: 5 MA/trend strategies (SMA200, Faber10M, Golden Cross, Dual Momentum, MA+VT). Refs: Moskowitz et al. (2012) JFE; Faber (2007). Best: Golden Cross Sharpe 0.51 vs B&H 0.41, but Harvey t=0.94 (fail), cross-OOS 3/5 (fail). Works in bear but underperforms in bull. MA+VT catastrophic (4931 trades → Sharpe -0.83). Price-based timing offers no sig edge over B&H.",
+    "category": "strategy",
+    "tags": [
+      "trend_following",
+      "moving_average",
+      "SMA",
+      "golden_cross",
+      "null_result"
+    ],
+    "created_at": "2026-03-27T00:46:41.655194+00:00",
+    "experiment_id": "k518"
   }
 ]
