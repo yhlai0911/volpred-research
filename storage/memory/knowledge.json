@@ -14297,5 +14297,56 @@
     "experiment_id": "k536",
     "created_at": "2026-03-27T13:37:26.403086+00:00",
     "importance": 4
+  },
+  {
+    "item_id": "k537_cross_asset_vol_momentum",
+    "category": "strategy_evaluation",
+    "content": "[提出: Codex GPT-5.4, 執行: Claude] K537 Cross-Asset Volatility Momentum: NULL RESULT. Tested whether vol shocks in rates (TLT), credit (HYG-IEF), FX (UUP), commodities (GLD), and vol-of-vol (VVIX) can lead equity vol and improve timing over 12/VIX. 5 stress assets tracked, breadth = count above 75th pctile (w=500). Key findings: (1) Lead-lag analysis shows stress index predicts VIX DECREASES (negative slopes, all p<0.01), not increases -- counter-intuitive mean-reversion pattern, R2 tiny (0.2-3.7%). (2) Event study: 76 complacent stress events (breadth>=3, VIX<20) followed by POSITIVE SPY returns (+1.0% at 20d, t=2.48) -- cross-asset stress when VIX calm is actually bullish. (3) Strategy: cross-asset overlay HURTS avg OOS Sharpe by -0.037 vs 12/VIX. COVID period worst: -0.197 Sharpe. Only 2022-2023 showed marginal gain (+0.08). Full sample: 12/VIX Sharpe=1.064 vs CrossAsset 1.025. DM test significant (p=0.018) but in WRONG direction (12/VIX wins). VIX sufficiency confirmed for the 32nd time.",
+    "tags": [
+      "cross_asset",
+      "vol_momentum",
+      "vix_sufficiency",
+      "null_result",
+      "strategy",
+      "lead_lag",
+      "event_study"
+    ],
+    "data_source": "yfinance (SPY, TLT, HYG, IEF, UUP, GLD, ^VIX, ^VVIX), 2012-2026",
+    "experiment_id": "k537",
+    "created_at": "2026-03-27T13:42:41.306326+00:00",
+    "importance": 3
+  },
+  {
+    "id": "K537",
+    "title": "K537: Cross-Asset Vol Momentum — Null, 跨資產壓力是看漲信號不是風險警告",
+    "content": "[提出: Codex GPT-5.4 #1, 執行: Claude] 跨資產波動率動量。5 維壓力（rates/FX/commodity/credit/vol-of-vol）→ equity vol timing。8 tickers, 3577 天。\n\n反直覺發現：breadth≥3 + VIX<20 時 SPY 5d return +0.34% (t=1.74), 20d +1.0% (t=2.48)——是看漲信號！Cross-asset stress → VIX decrease (negative slope, p<0.01 but R²<4%)。\n\nCross-OOS: 12/VIX Sharpe 1.064 vs CrossAsset 1.025, DM p=0.018 (12/VIX 顯著更好)。COVID 期差距最大 (-0.197)。\n\nVIX 已高效整合跨資產信息，extra breadth signal 只增加 noise。VIX sufficiency #35。",
+    "tags": [
+      "cross_asset",
+      "vol_momentum",
+      "VIX_sufficiency",
+      "null_result",
+      "Codex_suggestion"
+    ],
+    "data_source": "yfinance 8 tickers daily 2012-2026",
+    "experiment_id": "k537",
+    "created_at": "2026-03-27T13:43:35.648252+00:00",
+    "importance": 2
+  },
+  {
+    "id": "K539",
+    "title": "K539: VRP Carry — 4 策略全 null, VRP<0 實為看漲反轉信號",
+    "content": "[提出: Codex #3 延伸, 執行: Claude] Variance Risk Premium timing。4 策略 (VRP timing/percentile/combined/crash filter) vs 12/VIX，5 期 cross-OOS。\n\nVRP Timing Sharpe 0.40 vs 12/VIX 0.64——更差！VRP Crash Filter 4/5 OOS wins 但 Sharpe diff 僅 +0.008 (NS)。\n\n反直覺發現：VRP<0 (realized>implied) 的次日 annualized return +99.2% vs VRP≥0 的 -4.8% (t=8.79)。VRP<0 集中在 COVID/GFC/Volmageddon——是 contrarian BUY signal 不是 SELL signal。\n\nWhy fail：VRP high = market calm = VIX low = VT 已高配置。VRP 不提供 VIX 以外的正交信息。確認 K430/K459。",
+    "tags": [
+      "VRP",
+      "carry",
+      "VIX_sufficiency",
+      "null_result",
+      "contrarian",
+      "Codex_suggestion"
+    ],
+    "data_source": "yfinance SPY + VIX 2005-2026",
+    "experiment_id": "k539",
+    "created_at": "2026-03-27T13:43:57.042900+00:00",
+    "importance": 2
   }
 ]
