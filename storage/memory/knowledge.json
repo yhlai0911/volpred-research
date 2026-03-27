@@ -14401,5 +14401,54 @@
     "experiment_id": "k541",
     "created_at": "2026-03-27T13:58:34.750430+00:00",
     "importance": 3
+  },
+  {
+    "id": "K542",
+    "title": "K542: VIX Term Structure Timing — Null, VIX Sufficiency #36",
+    "content": "[提出: Claude, 執行: Claude] VIX/VIX3M ratio timing。contango/backwardation 作 VT on/off 信號。4529 天, 5 期 cross-OOS。\n\n最佳策略 backwardation_deleverage Sharpe 0.819 vs 12/VIX 0.759 (+0.060)，但 Harvey t=2.34 未通過 3.0。Cross-OOS 只 3/5 wins。\n\n反直覺：VT 在 deep contango (+0.193 Sharpe delta) 比 backwardation (-0.179) 更好——因為 backwardation 時 VIX 已高，12/VIX 已自動減碼，timing 冗餘。VIX sufficiency #36。",
+    "tags": [
+      "term_structure",
+      "VIX",
+      "contango",
+      "backwardation",
+      "VIX_sufficiency",
+      "null_result"
+    ],
+    "data_source": "yfinance SPY+VIX+VIX3M 2008-2025",
+    "experiment_id": "k542",
+    "created_at": "2026-03-27T14:09:35.623374+00:00",
+    "importance": 2
+  },
+  {
+    "id": "K543",
+    "title": "K543: Drawdown-Conditional VT — Sharpe Null 但 MDD -28.6%→-15.4%（risk-return tradeoff）",
+    "content": "[提出: Claude, 執行: Claude] Drawdown 深度作 VT 調節信號。5090 天，5 期 cross-OOS。VIX-drawdown corr=-0.77（高度冗餘）。\n\nSharpe: 最佳 DD-Enhanced +0.012 (t=1.79, NS)。Harvey 全未通過。\n\n但 MDD 顯著改善：DD-Conditional -15.4% vs baseline -28.6%（幾乎減半）。Combined -17.4%。代價是 return 從 6.76% 降到 5.00%。\n\n結論：drawdown 調節不產生 alpha（VIX 已含 77% drawdown 信息），但如果目標是 MDD 而非 Sharpe，DD-Conditional 有實用價值。",
+    "tags": [
+      "drawdown",
+      "VT_strategy",
+      "MDD",
+      "risk_return_tradeoff",
+      "null_sharpe"
+    ],
+    "data_source": "yfinance SPY+VIX 2006-2026",
+    "experiment_id": "k543",
+    "created_at": "2026-03-27T14:10:27.913480+00:00",
+    "importance": 2
+  },
+  {
+    "id": "K544",
+    "title": "K544: Tail Hedge Efficiency — 12/VIX VT 本身就是 tail hedge，雙重保險無效",
+    "content": "[提出: Codex #3 延伸, 執行: Claude] Tail hedge overlay on VT。5 策略（always/VIX-cheap/contango/momentum/combined），4896 天。\n\nIsraelov (2017) 確認：unconditional hedge NPV=-0.089%。所有 conditional 策略也虧（-0.12% to -1.22%）。MDD 改善 negligible（VT 已從 -55% 降到 -29%，overlay 僅再降 0.37pp）。\n\n唯一顯著：Always Hedge 改善 worst 10% months (t=3.45)，但全樣本 return 差異為零。Cross-OOS 0/5 consistent。\n\n**核心洞見：12/VIX VT 本身就是 tail hedge**——VIX 40+ 時自動降到 30% equity，等同 put protection。在已投保組合上再買保險 = 邊際價值趨零。VT insurance premium ~4%/yr 已經是最佳保費。",
+    "tags": [
+      "tail_hedge",
+      "put_protection",
+      "VT_is_hedge",
+      "Israelov",
+      "null_result"
+    ],
+    "data_source": "yfinance SPY+VIX+VIX3M 2006-2025",
+    "experiment_id": "k544",
+    "created_at": "2026-03-27T14:11:11.843988+00:00",
+    "importance": 3
   }
 ]
