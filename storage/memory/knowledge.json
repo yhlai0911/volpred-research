@@ -14450,5 +14450,38 @@
     "experiment_id": "k544",
     "created_at": "2026-03-27T14:11:11.843988+00:00",
     "importance": 3
+  },
+  {
+    "id": "K545",
+    "title": "K545: Intraday Seasonality VT — Overnight Premium 真實但 VT Insurance 正確定價",
+    "content": "[提出: Claude, 執行: Claude] 日內拆解 VT。5088 天。Overnight premium 3.13bp/day (t=3.05)，佔總回報 66% 但只佔 variance 36%。VT drag 63.9% 在 overnight。\n\nVT-Split (full overnight + VT intraday) Sharpe 0.665 vs VT-Close 0.766——更差。因為 overnight crashes fat-tailed (kurtosis=23.4, skew=-1.17)，VIX≥25 時 overnight avg -6.06bp。MDD 從 -25% 惡化到 -38%。\n\nCross-OOS 1/3。Bootstrap t=-0.90。\n\n結論：VT 的 overnight insurance 是正確定價的——犧牲的 premium 精確補償了 overnight tail risk。Component-based rebalancing 不值得。",
+    "tags": [
+      "overnight",
+      "intraday",
+      "VT_strategy",
+      "premium",
+      "fat_tail",
+      "null_result"
+    ],
+    "data_source": "yfinance SPY 2006-2026",
+    "experiment_id": "k545",
+    "created_at": "2026-03-27T14:26:11.816231+00:00",
+    "importance": 3
+  },
+  {
+    "id": "K547",
+    "title": "K547: Turn-of-Month VT — 效應在現代數據中消失，日曆 overlay 顯著傷害 VT",
+    "content": "[提出: Claude, 執行: Claude] Ariel (1987) ToM + VT。ToM anomaly 在 SPY 2005-2026 不存在 (t=0.031, p=0.976)。ToM return 11.83% vs mid-month 11.52%——完全按比例。\n\nToM Enhanced Sharpe 1.655 vs Daily VT 1.666 (worse)。Bootstrap t=-7.60（顯著更差）。Cross-OOS 1/5。Low/High VIX 都無效。\n\n結論：日曆 overlay 無法改善 VT——VIX 的 reactive mechanism 已 subsume 任何弱日曆效應。",
+    "tags": [
+      "calendar",
+      "turn_of_month",
+      "VT_strategy",
+      "null_result",
+      "Ariel_1987"
+    ],
+    "data_source": "yfinance SPY+VIX 2005-2026",
+    "experiment_id": "k547",
+    "created_at": "2026-03-27T14:26:57.059789+00:00",
+    "importance": 1
   }
 ]
