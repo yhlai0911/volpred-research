@@ -1,0 +1,741 @@
+{
+  "experiment_id": "K517",
+  "title": "Monthly Overnight Gap Strategy \u2014 General Investor Version",
+  "timestamp": "2026-03-27T00:29:05.171523+00:00",
+  "attribution": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude]",
+  "data_source": "yfinance: 0050.TW, SPY, ^VIX",
+  "data_period": "2010-03 to 2025-12",
+  "n_months": 190,
+  "tx_cost_pct": 0.585,
+  "tx_cost_description": "0.585% round-trip ETF (bid-ask + commission)",
+  "references": [
+    "K515: Taiwan Overnight Gap \u2014 alpha real but ETF TX fatal",
+    "K516: Futures 5bp TX Sharpe 0.93, 5/5 cross-OOS",
+    "K502: 77-93% alpha in overnight gap",
+    "Lou, Polk, Skouras (2019): A Tug of War: Overnight vs Intraday Returns, JFE",
+    "8.63/VIX Taiwan VT: existing strategy benchmark"
+  ],
+  "diagnostics": {
+    "tw_monthly_ret_mean_pct": 1.223,
+    "tw_monthly_ret_std_pct": 4.894,
+    "tw_monthly_ret_skew": 0.01,
+    "tw_monthly_ret_kurt": 1.122,
+    "spy_monthly_ret_mean_pct": 1.2,
+    "vix_mean": 18.5,
+    "corr_tw_vs_prior_spy": 0.0139,
+    "corr_tw_vs_prior_vix": 0.0413,
+    "spy_up_tw_ret_pct": 1.24,
+    "spy_dn_tw_ret_pct": 1.19,
+    "spy_conditioning_t": 0.062,
+    "spy_conditioning_p": 0.9506,
+    "vix_low_tw_ret_pct": 1.22,
+    "vix_high_tw_ret_pct": 1.23,
+    "vix_conditioning_t": -0.014,
+    "vix_conditioning_p": 0.9891
+  },
+  "strategies": {
+    "spy_signal": {
+      "name": "Strategy 1: Monthly SPY Signal (SPY>0 \u2192 hold)",
+      "n_months": 190,
+      "n_hold_months": 131,
+      "n_cash_months": 59,
+      "exposure_pct": 68.9,
+      "n_round_trips": 40,
+      "tx_per_month_pct": 0.179,
+      "total_tx_pct": 23.4,
+      "avg_ret_hold_pct": 1.24,
+      "avg_ret_cash_pct": 1.19,
+      "win_rate_gross_pct": 63.4,
+      "win_rate_net_pct": 61.8,
+      "ann_return_gross_pct": 10.24,
+      "ann_vol_gross_pct": 13.58,
+      "sharpe_gross": 0.754,
+      "total_return_gross_pct": 336.31,
+      "cagr_gross_pct": 9.75,
+      "mdd_gross_pct": -20.5,
+      "t_stat_gross": 3.028,
+      "p_val_gross": 0.003,
+      "ann_return_net_pct": 8.76,
+      "ann_vol_net_pct": 13.54,
+      "sharpe_net": 0.647,
+      "total_return_net_pct": 246.03,
+      "cagr_net_pct": 8.16,
+      "mdd_net_pct": -23.24,
+      "t_stat_net": 2.591,
+      "p_val_net": 0.0107,
+      "calmar_net": 0.377,
+      "sortino_net": 0.913
+    },
+    "vix_signal": {
+      "name": "Strategy 2: Monthly VIX Signal (VIX<20 \u2192 hold)",
+      "n_months": 190,
+      "n_hold_months": 137,
+      "n_cash_months": 53,
+      "exposure_pct": 72.1,
+      "n_round_trips": 16,
+      "tx_per_month_pct": 0.068,
+      "total_tx_pct": 9.36,
+      "avg_ret_hold_pct": 1.22,
+      "avg_ret_cash_pct": 1.23,
+      "win_rate_gross_pct": 65.0,
+      "win_rate_net_pct": 65.0,
+      "ann_return_gross_pct": 10.55,
+      "ann_vol_gross_pct": 12.17,
+      "sharpe_gross": 0.867,
+      "total_return_gross_pct": 370.78,
+      "cagr_gross_pct": 10.28,
+      "mdd_gross_pct": -22.44,
+      "t_stat_gross": 3.489,
+      "p_val_gross": 0.0007,
+      "ann_return_net_pct": 9.96,
+      "ann_vol_net_pct": 12.15,
+      "sharpe_net": 0.82,
+      "total_return_net_pct": 329.12,
+      "cagr_net_pct": 9.64,
+      "mdd_net_pct": -22.88,
+      "t_stat_net": 3.294,
+      "p_val_net": 0.0013,
+      "calmar_net": 0.435,
+      "sortino_net": 1.187
+    },
+    "spy_vix_signal": {
+      "name": "Strategy 3: Monthly SPY+VIX (SPY>0 & VIX<25 \u2192 hold)",
+      "n_months": 190,
+      "n_hold_months": 123,
+      "n_cash_months": 67,
+      "exposure_pct": 64.7,
+      "n_round_trips": 38,
+      "tx_per_month_pct": 0.181,
+      "total_tx_pct": 22.23,
+      "avg_ret_hold_pct": 1.13,
+      "avg_ret_cash_pct": 1.38,
+      "win_rate_gross_pct": 63.4,
+      "win_rate_net_pct": 61.8,
+      "ann_return_gross_pct": 8.82,
+      "ann_vol_gross_pct": 11.67,
+      "sharpe_gross": 0.755,
+      "total_return_gross_pct": 261.67,
+      "cagr_gross_pct": 8.46,
+      "mdd_gross_pct": -20.5,
+      "t_stat_gross": 3.041,
+      "p_val_gross": 0.0029,
+      "ann_return_net_pct": 7.41,
+      "ann_vol_net_pct": 11.63,
+      "sharpe_net": 0.637,
+      "total_return_net_pct": 190.14,
+      "cagr_net_pct": 6.96,
+      "mdd_net_pct": -21.96,
+      "t_stat_net": 2.557,
+      "p_val_net": 0.0118,
+      "calmar_net": 0.338,
+      "sortino_net": 0.854
+    },
+    "spy_vix_vt": {
+      "name": "Strategy 4: SPY+VIX + 8.63/VIX VT",
+      "n_months": 190,
+      "n_hold_months": 123,
+      "exposure_pct": 64.7,
+      "avg_weight_active": 0.58,
+      "total_tx_pct": 26.5,
+      "win_rate_net_pct": 61.0,
+      "ann_return_gross_pct": 5.18,
+      "ann_vol_gross_pct": 6.8,
+      "sharpe_gross": 0.762,
+      "total_return_gross_pct": 118.72,
+      "cagr_gross_pct": 5.07,
+      "mdd_gross_pct": -13.97,
+      "ann_return_net_pct": 3.51,
+      "ann_vol_net_pct": 6.86,
+      "sharpe_net": 0.512,
+      "total_return_net_pct": 67.85,
+      "cagr_net_pct": 3.32,
+      "mdd_net_pct": -18.53,
+      "t_stat_net": 2.515,
+      "p_val_net": 0.0132,
+      "calmar_net": 0.189,
+      "sortino_net": 0.751
+    },
+    "vt_863": {
+      "name": "8.63/VIX Monthly VT",
+      "n_months": 190,
+      "avg_weight": 0.511,
+      "total_tx_pct": 9.62,
+      "ann_return_gross_pct": 7.34,
+      "ann_vol_gross_pct": 8.0,
+      "sharpe_gross": 0.917,
+      "total_return_gross_pct": 203.0,
+      "cagr_gross_pct": 7.25,
+      "mdd_gross_pct": -11.03,
+      "ann_return_net_pct": 6.73,
+      "ann_vol_net_pct": 8.01,
+      "sharpe_net": 0.84,
+      "total_return_net_pct": 175.33,
+      "cagr_net_pct": 6.61,
+      "mdd_net_pct": -11.57,
+      "t_stat_net": 3.343,
+      "p_val_net": 0.001,
+      "calmar_net": 0.582,
+      "sortino_net": 1.361
+    }
+  },
+  "benchmarks": {
+    "buy_and_hold": {
+      "name": "Buy & Hold 0050.TW",
+      "n_months": 190,
+      "ann_return_pct": 14.67,
+      "ann_vol_pct": 16.95,
+      "sharpe": 0.865,
+      "total_return_pct": 706.07,
+      "cagr_pct": 14.09,
+      "mdd_pct": -29.19,
+      "t_stat": 3.444,
+      "p_val": 0.0007
+    }
+  },
+  "cross_oos": {
+    "periods": [
+      "2011-06 to 2014-05",
+      "2014-06 to 2017-05",
+      "2017-06 to 2019-12",
+      "2020-01 to 2022-06",
+      "2022-07 to 2025-12"
+    ],
+    "results": {
+      "spy_signal": [
+        {
+          "period": "2011-06 to 2014-05",
+          "n_months": 36,
+          "sharpe_net": 0.208,
+          "ann_return_net_pct": 2.26,
+          "mdd_net_pct": -8.78
+        },
+        {
+          "period": "2014-06 to 2017-05",
+          "n_months": 36,
+          "sharpe_net": 0.192,
+          "ann_return_net_pct": 1.68,
+          "mdd_net_pct": -22.27
+        },
+        {
+          "period": "2017-06 to 2019-12",
+          "n_months": 31,
+          "sharpe_net": 0.798,
+          "ann_return_net_pct": 10.29,
+          "mdd_net_pct": -12.65
+        },
+        {
+          "period": "2020-01 to 2022-06",
+          "n_months": 30,
+          "sharpe_net": 0.334,
+          "ann_return_net_pct": 5.45,
+          "mdd_net_pct": -19.73
+        },
+        {
+          "period": "2022-07 to 2025-12",
+          "n_months": 42,
+          "sharpe_net": 1.539,
+          "ann_return_net_pct": 25.84,
+          "mdd_net_pct": -8.7
+        }
+      ],
+      "vix_signal": [
+        {
+          "period": "2011-06 to 2014-05",
+          "n_months": 36,
+          "sharpe_net": 0.555,
+          "ann_return_net_pct": 6.1,
+          "mdd_net_pct": -10.62
+        },
+        {
+          "period": "2014-06 to 2017-05",
+          "n_months": 36,
+          "sharpe_net": 0.538,
+          "ann_return_net_pct": 6.19,
+          "mdd_net_pct": -22.92
+        },
+        {
+          "period": "2017-06 to 2019-12",
+          "n_months": 31,
+          "sharpe_net": 0.93,
+          "ann_return_net_pct": 12.39,
+          "mdd_net_pct": -12.43
+        },
+        {
+          "period": "2020-01 to 2022-06",
+          "n_months": 30,
+          "sharpe_net": -0.357,
+          "ann_return_net_pct": -1.91,
+          "mdd_net_pct": -3.68
+        },
+        {
+          "period": "2022-07 to 2025-12",
+          "n_months": 42,
+          "sharpe_net": 1.495,
+          "ann_return_net_pct": 24.28,
+          "mdd_net_pct": -14.32
+        }
+      ],
+      "spy_vix_signal": [
+        {
+          "period": "2011-06 to 2014-05",
+          "n_months": 36,
+          "sharpe_net": 0.524,
+          "ann_return_net_pct": 5.09,
+          "mdd_net_pct": -8.77
+        },
+        {
+          "period": "2014-06 to 2017-05",
+          "n_months": 36,
+          "sharpe_net": 0.192,
+          "ann_return_net_pct": 1.68,
+          "mdd_net_pct": -22.27
+        },
+        {
+          "period": "2017-06 to 2019-12",
+          "n_months": 31,
+          "sharpe_net": 0.798,
+          "ann_return_net_pct": 10.29,
+          "mdd_net_pct": -12.65
+        },
+        {
+          "period": "2020-01 to 2022-06",
+          "n_months": 30,
+          "sharpe_net": 0.052,
+          "ann_return_net_pct": 0.51,
+          "mdd_net_pct": -10.27
+        },
+        {
+          "period": "2022-07 to 2025-12",
+          "n_months": 42,
+          "sharpe_net": 1.424,
+          "ann_return_net_pct": 20.85,
+          "mdd_net_pct": -9.03
+        }
+      ],
+      "spy_vix_vt": [
+        {
+          "period": "2011-06 to 2014-05",
+          "n_months": 36,
+          "sharpe_net": 0.319,
+          "ann_return_net_pct": 1.62,
+          "mdd_net_pct": -5.58
+        },
+        {
+          "period": "2014-06 to 2017-05",
+          "n_months": 36,
+          "sharpe_net": -0.021,
+          "ann_return_net_pct": -0.13,
+          "mdd_net_pct": -18.53
+        },
+        {
+          "period": "2017-06 to 2019-12",
+          "n_months": 31,
+          "sharpe_net": 0.647,
+          "ann_return_net_pct": 5.82,
+          "mdd_net_pct": -9.33
+        },
+        {
+          "period": "2020-01 to 2022-06",
+          "n_months": 30,
+          "sharpe_net": -0.261,
+          "ann_return_net_pct": -1.14,
+          "mdd_net_pct": -5.53
+        },
+        {
+          "period": "2022-07 to 2025-12",
+          "n_months": 42,
+          "sharpe_net": 1.359,
+          "ann_return_net_pct": 11.52,
+          "mdd_net_pct": -5.34
+        }
+      ],
+      "vt_863": [
+        {
+          "period": "2011-06 to 2014-05",
+          "n_months": 36,
+          "sharpe_net": 0.208,
+          "ann_return_net_pct": 1.34,
+          "mdd_net_pct": -6.93
+        },
+        {
+          "period": "2014-06 to 2017-05",
+          "n_months": 36,
+          "sharpe_net": 0.794,
+          "ann_return_net_pct": 5.63,
+          "mdd_net_pct": -10.41
+        },
+        {
+          "period": "2017-06 to 2019-12",
+          "n_months": 31,
+          "sharpe_net": 0.823,
+          "ann_return_net_pct": 7.48,
+          "mdd_net_pct": -9.03
+        },
+        {
+          "period": "2020-01 to 2022-06",
+          "n_months": 30,
+          "sharpe_net": 0.298,
+          "ann_return_net_pct": 1.99,
+          "mdd_net_pct": -7.57
+        },
+        {
+          "period": "2022-07 to 2025-12",
+          "n_months": 42,
+          "sharpe_net": 1.516,
+          "ann_return_net_pct": 15.27,
+          "mdd_net_pct": -7.66
+        }
+      ]
+    }
+  },
+  "dm_tests_vs_bh": {
+    "spy_signal": {
+      "mean_excess_return_pct": -0.493,
+      "dm_t": -2.248,
+      "dm_p": 0.0257,
+      "beats_bh": "False",
+      "significant_5pct": "True",
+      "harvey_pass": "False"
+    },
+    "vix_signal": {
+      "mean_excess_return_pct": -0.392,
+      "dm_t": -1.55,
+      "dm_p": 0.1227,
+      "beats_bh": "False",
+      "significant_5pct": "False",
+      "harvey_pass": "False"
+    },
+    "spy_vix_signal": {
+      "mean_excess_return_pct": -0.605,
+      "dm_t": -2.294,
+      "dm_p": 0.0229,
+      "beats_bh": "False",
+      "significant_5pct": "True",
+      "harvey_pass": "False"
+    },
+    "spy_vix_vt": {
+      "mean_excess_return_pct": -0.93,
+      "dm_t": -3.281,
+      "dm_p": 0.0012,
+      "beats_bh": "False",
+      "significant_5pct": "True",
+      "harvey_pass": "True"
+    },
+    "vt_863": {
+      "mean_excess_return_pct": -0.662,
+      "dm_t": -3.216,
+      "dm_p": 0.0015,
+      "beats_bh": "False",
+      "significant_5pct": "True",
+      "harvey_pass": "True"
+    }
+  },
+  "vix_threshold_sensitivity": [
+    {
+      "vix_threshold": 15,
+      "exposure_pct": 31.1,
+      "sharpe_net": 0.381,
+      "ann_return_net_pct": 2.85,
+      "mdd_net_pct": -18.76,
+      "cagr_net_pct": 2.6,
+      "t_stat_net": 1.529
+    },
+    {
+      "vix_threshold": 17.5,
+      "exposure_pct": 49.5,
+      "sharpe_net": 0.617,
+      "ann_return_net_pct": 6.19,
+      "mdd_net_pct": -22.11,
+      "cagr_net_pct": 5.85,
+      "t_stat_net": 2.488
+    },
+    {
+      "vix_threshold": 20,
+      "exposure_pct": 58.9,
+      "sharpe_net": 0.745,
+      "ann_return_net_pct": 8.02,
+      "mdd_net_pct": -21.81,
+      "cagr_net_pct": 7.71,
+      "t_stat_net": 3.008
+    },
+    {
+      "vix_threshold": 22.5,
+      "exposure_pct": 62.1,
+      "sharpe_net": 0.625,
+      "ann_return_net_pct": 7.14,
+      "mdd_net_pct": -21.94,
+      "cagr_net_pct": 6.7,
+      "t_stat_net": 2.509
+    },
+    {
+      "vix_threshold": 25,
+      "exposure_pct": 64.7,
+      "sharpe_net": 0.637,
+      "ann_return_net_pct": 7.41,
+      "mdd_net_pct": -21.96,
+      "cagr_net_pct": 6.96,
+      "t_stat_net": 2.557
+    },
+    {
+      "vix_threshold": 27.5,
+      "exposure_pct": 66.3,
+      "sharpe_net": 0.62,
+      "ann_return_net_pct": 7.87,
+      "mdd_net_pct": -21.96,
+      "cagr_net_pct": 7.32,
+      "t_stat_net": 2.483
+    },
+    {
+      "vix_threshold": 30,
+      "exposure_pct": 67.9,
+      "sharpe_net": 0.599,
+      "ann_return_net_pct": 7.77,
+      "mdd_net_pct": -23.49,
+      "cagr_net_pct": 7.17,
+      "t_stat_net": 2.4
+    }
+  ],
+  "spy_threshold_sensitivity": [
+    {
+      "spy_threshold": -0.02,
+      "exposure_pct": 80.5,
+      "sharpe_net": 0.787,
+      "ann_return_net_pct": 11.54,
+      "mdd_net_pct": -17.8
+    },
+    {
+      "spy_threshold": -0.01,
+      "exposure_pct": 73.7,
+      "sharpe_net": 0.745,
+      "ann_return_net_pct": 10.36,
+      "mdd_net_pct": -17.95
+    },
+    {
+      "spy_threshold": 0,
+      "exposure_pct": 68.9,
+      "sharpe_net": 0.647,
+      "ann_return_net_pct": 8.76,
+      "mdd_net_pct": -23.24
+    },
+    {
+      "spy_threshold": 0.01,
+      "exposure_pct": 57.4,
+      "sharpe_net": 0.568,
+      "ann_return_net_pct": 7.16,
+      "mdd_net_pct": -31.66
+    },
+    {
+      "spy_threshold": 0.02,
+      "exposure_pct": 47.9,
+      "sharpe_net": 0.326,
+      "ann_return_net_pct": 3.62,
+      "mdd_net_pct": -30.22
+    },
+    {
+      "spy_threshold": 0.03,
+      "exposure_pct": 32.6,
+      "sharpe_net": 0.386,
+      "ann_return_net_pct": 3.73,
+      "mdd_net_pct": -21.89
+    }
+  ],
+  "tx_cost_sensitivity": [
+    {
+      "tx_cost_pct": 0.1,
+      "sharpe_net": 0.859,
+      "ann_return_net_pct": 10.45,
+      "mdd_net_pct": -22.52
+    },
+    {
+      "tx_cost_pct": 0.2,
+      "sharpe_net": 0.851,
+      "ann_return_net_pct": 10.35,
+      "mdd_net_pct": -22.59
+    },
+    {
+      "tx_cost_pct": 0.3,
+      "sharpe_net": 0.843,
+      "ann_return_net_pct": 10.25,
+      "mdd_net_pct": -22.67
+    },
+    {
+      "tx_cost_pct": 0.4,
+      "sharpe_net": 0.835,
+      "ann_return_net_pct": 10.15,
+      "mdd_net_pct": -22.74
+    },
+    {
+      "tx_cost_pct": 0.58,
+      "sharpe_net": 0.82,
+      "ann_return_net_pct": 9.96,
+      "mdd_net_pct": -22.88
+    },
+    {
+      "tx_cost_pct": 0.8,
+      "sharpe_net": 0.802,
+      "ann_return_net_pct": 9.74,
+      "mdd_net_pct": -23.04
+    },
+    {
+      "tx_cost_pct": 1.0,
+      "sharpe_net": 0.786,
+      "ann_return_net_pct": 9.54,
+      "mdd_net_pct": -23.19
+    },
+    {
+      "tx_cost_pct": 1.5,
+      "sharpe_net": 0.745,
+      "ann_return_net_pct": 9.04,
+      "mdd_net_pct": -23.56
+    },
+    {
+      "tx_cost_pct": 2.0,
+      "sharpe_net": 0.704,
+      "ann_return_net_pct": 8.53,
+      "mdd_net_pct": -23.92
+    }
+  ],
+  "yearly_breakdown": [
+    {
+      "year": "2010",
+      "best_net_return_pct": 6.8,
+      "vt_net_return_pct": 6.7,
+      "bh_return_pct": 19.11,
+      "n_months": 10,
+      "best_n_hold": 2
+    },
+    {
+      "year": "2011",
+      "best_net_return_pct": -2.63,
+      "vt_net_return_pct": -7.18,
+      "bh_return_pct": -18.88,
+      "n_months": 12,
+      "best_n_hold": 7
+    },
+    {
+      "year": "2012",
+      "best_net_return_pct": 3.5,
+      "vt_net_return_pct": 1.78,
+      "bh_return_pct": 8.01,
+      "n_months": 12,
+      "best_n_hold": 10
+    },
+    {
+      "year": "2013",
+      "best_net_return_pct": 10.72,
+      "vt_net_return_pct": 5.53,
+      "bh_return_pct": 11.68,
+      "n_months": 12,
+      "best_n_hold": 12
+    },
+    {
+      "year": "2014",
+      "best_net_return_pct": 23.49,
+      "vt_net_return_pct": 12.56,
+      "bh_return_pct": 25.88,
+      "n_months": 12,
+      "best_n_hold": 12
+    },
+    {
+      "year": "2015",
+      "best_net_return_pct": -15.62,
+      "vt_net_return_pct": -6.91,
+      "bh_return_pct": -6.28,
+      "n_months": 12,
+      "best_n_hold": 9
+    },
+    {
+      "year": "2016",
+      "best_net_return_pct": 8.12,
+      "vt_net_return_pct": 9.06,
+      "bh_return_pct": 19.65,
+      "n_months": 12,
+      "best_n_hold": 10
+    },
+    {
+      "year": "2017",
+      "best_net_return_pct": 16.59,
+      "vt_net_return_pct": 12.76,
+      "bh_return_pct": 18.14,
+      "n_months": 12,
+      "best_n_hold": 12
+    },
+    {
+      "year": "2018",
+      "best_net_return_pct": -4.11,
+      "vt_net_return_pct": -3.21,
+      "bh_return_pct": -4.94,
+      "n_months": 12,
+      "best_n_hold": 11
+    },
+    {
+      "year": "2019",
+      "best_net_return_pct": 27.71,
+      "vt_net_return_pct": 15.38,
+      "bh_return_pct": 33.52,
+      "n_months": 12,
+      "best_n_hold": 11
+    },
+    {
+      "year": "2020",
+      "best_net_return_pct": -6.24,
+      "vt_net_return_pct": 6.3,
+      "bh_return_pct": 31.14,
+      "n_months": 12,
+      "best_n_hold": 2
+    },
+    {
+      "year": "2021",
+      "best_net_return_pct": 2.62,
+      "vt_net_return_pct": 6.23,
+      "bh_return_pct": 21.92,
+      "n_months": 12,
+      "best_n_hold": 7
+    },
+    {
+      "year": "2022",
+      "best_net_return_pct": -1.17,
+      "vt_net_return_pct": -8.75,
+      "bh_return_pct": -21.22,
+      "n_months": 12,
+      "best_n_hold": 1
+    },
+    {
+      "year": "2023",
+      "best_net_return_pct": 12.3,
+      "vt_net_return_pct": 11.18,
+      "bh_return_pct": 27.52,
+      "n_months": 12,
+      "best_n_hold": 10
+    },
+    {
+      "year": "2024",
+      "best_net_return_pct": 42.62,
+      "vt_net_return_pct": 25.09,
+      "bh_return_pct": 48.64,
+      "n_months": 12,
+      "best_n_hold": 11
+    },
+    {
+      "year": "2025",
+      "best_net_return_pct": 28.89,
+      "vt_net_return_pct": 17.34,
+      "bh_return_pct": 36.86,
+      "n_months": 12,
+      "best_n_hold": 10
+    }
+  ],
+  "listing_criteria": {
+    "net_sharpe_gt_vt": false,
+    "net_sharpe_value": 0.82,
+    "vt_sharpe_value": 0.84,
+    "cross_oos_positive": 4,
+    "cross_oos_total": 5,
+    "cross_oos_pass": true,
+    "harvey_t": 3.294,
+    "harvey_pass": true
+  },
+  "listing_decision": "DO NOT LIST",
+  "conclusion": "Monthly SPY signal strategies DO NOT meet listing criteria. Best strategy (Strategy 2: Monthly VIX Signal (VIX<20 \u2192 hold)): Net Sharpe=0.820 (vs VT 0.840), Cross-OOS 4/5, Harvey t=3.294. Monthly SPY conditioning is not a significant improvement over simple 8.63/VIX VT. The overnight gap alpha (K515/K516) does not translate to monthly timing improvement because: (1) monthly aggregation dilutes the daily signal, (2) SPY\u2192Taiwan lead-lag is mostly in overnight gap (K502: 77-93%), (3) simple VIX-based VT already captures the relevant risk-off signal.",
+  "execution_time_seconds": 1.5
+}
