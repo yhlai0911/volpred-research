@@ -14789,5 +14789,22 @@
     "data_source": "knowledge.json K526-K566 entries",
     "created_at": "2026-03-27T20:13:26.172358+00:00",
     "experiment_id": "k957"
+  },
+  {
+    "id": "K567",
+    "title": "K567: International VT Leverage — VIX-Conditional Leverage has LIMITED Generalizability",
+    "content": "[提出: 用戶, 執行: Claude] K567: 國際市場 VIX-conditional leverage overlay 測試。6 市場（SPY/EFA/EWZ/EWJ/EWU/FXI）× 4 variants（Base VT、US-style VIX thresholds、VIX percentile、Local RV22）。50/50 Market/GLD + 12/VIX monthly rebalancing。\n\n**核心發現：leverage overlay 不具普遍性。** 0/6 市場通過 Harvey t>3.0，0/6 OOS majority wins。只有 3/6 市場有微小改善（SPY +0.036、EWJ +0.028、FXI +0.011），但改善幅度非常小且統計不顯著。EFA/EWZ/EWU 三個市場 leverage 反而降低 Sharpe 或增加 MDD。\n\nCross-market meta-analysis：US-style mean improvement +0.006 (t=0.82)、Percentile -0.002 (t=-0.23)、Local RV +0.005 (t=0.53)——全部遠低於 Harvey 門檻。\n\n重要發現：Spearman(市場波動率, leverage benefit) = -0.829 (p=0.042)——高波動市場（EWZ 37.5%、FXI 32.8%）leverage 反而有害或無效。低波動市場（SPY 19.1%、EWJ 20.4%）才有微小好處。\n\nMDD 分析：leverage 在多數國際市場反而增加 MDD（EWZ -56%→-65%、EFA -28%→-31%）。只有 Local RV 變體在部分市場保持 MDD 不惡化。\n\n結論：K551(US t=7.90) 和 K558(Taiwan t=4.79) 的 leverage 成功是特定市場現象，不是普遍原則。US VIX 絕對門檻對非美市場無效（VIX 不是局部風險的好指標），percentile 方法也無法自適應。Local RV 是最不差的方法但仍未通過嚴格檢定。\n\n局限：(1) 使用 US VIX 而非 local implied vol (2) 只測 5 年 rolling percentile (3) ETF 有 tracking error (4) GLD 在所有組合中佔 50% 會稀釋差異",
+    "tags": [
+      "international",
+      "VT",
+      "leverage",
+      "VIX",
+      "cross_market",
+      "null_result",
+      "portfolio_construction"
+    ],
+    "data_source": "yfinance (SPY/EFA/EWZ/EWJ/EWU/FXI/GLD/VIX, 2005-2026)",
+    "created_at": "2026-03-27T20:15:31.075039+00:00",
+    "experiment_id": "k567"
   }
 ]
