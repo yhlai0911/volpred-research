@@ -13932,5 +13932,21 @@
     ],
     "created_at": "2026-03-26T23:25:53.554606+00:00",
     "experiment_id": "k515"
+  },
+  {
+    "id": 1293,
+    "title": "K516: ★★ Overnight Gap Futures — 5bp TX: Sharpe 0.93, 5/5 cross-OOS! 10bp: borderline fail",
+    "content": "[提出: Claude(K515延伸), 執行: Claude] K516: Overnight gap with futures TX. At 5bp TX: SPY+VIX combined Sharpe=0.926, cross-OOS **5/5 positive** (mean 1.039). At 10bp: Sharpe=0.118, 3/5 (FAIL listing). Breakeven TX=10.73bp for Sharpe>0, 8.55bp for Sharpe>0.5. Monthly rebalancing: Sharpe=0.876 at 10bp (dramatically better). Signal: SPY>0 & VIX<25 gap=10.73bp (t=6.845 Harvey PASS). **最接近上架的策略**——但只有大戶/法人能達到 5bp TX。一般投資人需月度版本。",
+    "category": "strategy",
+    "tags": [
+      "Taiwan",
+      "overnight_gap",
+      "futures",
+      "TX_sensitive",
+      "near_listing",
+      "monthly_viable"
+    ],
+    "created_at": "2026-03-27T00:12:26.125515+00:00",
+    "experiment_id": "k516"
   }
 ]
