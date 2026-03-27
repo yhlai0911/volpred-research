@@ -1,0 +1,874 @@
+{
+  "experiment_id": "K557",
+  "title": "Gold Regime Allocation \u2014 Is gold always 50%?",
+  "timestamp": "2026-03-28T00:14:46.637050",
+  "data_source": "yfinance (SPY, GLD, TIP, ^VIX)",
+  "data_period": "2004-11-18 to 2026-03-26",
+  "analysis_period": "2005-11-18 to 2026-03-26",
+  "n_trading_days": 5118,
+  "methodology": {
+    "regime_indicators": [
+      "GLD 200-day MA",
+      "GLD 12-month return",
+      "GLD/TIP ratio",
+      "Inverse vol"
+    ],
+    "strategies": [
+      "Static 50/50",
+      "Gold Trend (MA200)",
+      "Gold Momentum (12m)",
+      "Counter-cyclical",
+      "Risk Budget (inv-vol)",
+      "Real Gold Trend (GLD/TIP)"
+    ],
+    "benchmark": "Static 50/50 SPY/GLD + 12/VIX",
+    "oos_periods": [
+      "2008-01-01 to 2010-12-31: OOS1: GFC + Recovery",
+      "2011-01-01 to 2013-12-31: OOS2: Gold Peak + Bear",
+      "2014-01-01 to 2016-12-31: OOS3: Gold Bear Bottom",
+      "2017-01-01 to 2019-12-31: OOS4: Gold Recovery",
+      "2020-01-01 to 2022-12-31: OOS5: COVID + Inflation"
+    ],
+    "harvey_threshold": 3.0,
+    "bootstrap_reps": 10000
+  },
+  "full_sample_results": {
+    "Static 50/50": {
+      "name": "Static 50/50",
+      "ann_return": 0.1149,
+      "ann_vol": 0.0863,
+      "sharpe": 1.3308,
+      "max_dd": -0.177,
+      "calmar": 0.6491,
+      "sortino": 1.8637,
+      "cagr": 0.1176,
+      "n_days": 5118,
+      "n_years": 20.31
+    },
+    "Gold Trend (MA200)": {
+      "name": "Gold Trend (MA200)",
+      "ann_return": 0.116,
+      "ann_vol": 0.0867,
+      "sharpe": 1.3389,
+      "max_dd": -0.1578,
+      "calmar": 0.7355,
+      "sortino": 1.87,
+      "cagr": 0.1188,
+      "n_days": 5117,
+      "n_years": 20.31,
+      "dm_t_vs_50_50": 0.3319,
+      "dm_p_vs_50_50": 0.74
+    },
+    "Gold Momentum (12m)": {
+      "name": "Gold Momentum (12m)",
+      "ann_return": 0.1055,
+      "ann_vol": 0.0878,
+      "sharpe": 1.2008,
+      "max_dd": -0.2061,
+      "calmar": 0.5118,
+      "sortino": 1.6547,
+      "cagr": 0.1069,
+      "n_days": 4866,
+      "n_years": 19.31,
+      "dm_t_vs_50_50": -0.0757,
+      "dm_p_vs_50_50": 0.9397
+    },
+    "Counter-cyclical": {
+      "name": "Counter-cyclical",
+      "ann_return": 0.116,
+      "ann_vol": 0.0867,
+      "sharpe": 1.3389,
+      "max_dd": -0.1578,
+      "calmar": 0.7355,
+      "sortino": 1.87,
+      "cagr": 0.1188,
+      "n_days": 5117,
+      "n_years": 20.31,
+      "dm_t_vs_50_50": 0.3319,
+      "dm_p_vs_50_50": 0.74
+    },
+    "Risk Budget (inv-vol)": {
+      "name": "Risk Budget (inv-vol)",
+      "ann_return": 0.1154,
+      "ann_vol": 0.0809,
+      "sharpe": 1.4272,
+      "max_dd": -0.1783,
+      "calmar": 0.6474,
+      "sortino": 2.0494,
+      "cagr": 0.1186,
+      "n_days": 5117,
+      "n_years": 20.31,
+      "dm_t_vs_50_50": 0.1416,
+      "dm_p_vs_50_50": 0.8874
+    },
+    "Real Gold Trend (GLD/TIP)": {
+      "name": "Real Gold Trend (GLD/TIP)",
+      "ann_return": 0.1162,
+      "ann_vol": 0.0875,
+      "sharpe": 1.3271,
+      "max_dd": -0.1454,
+      "calmar": 0.7988,
+      "sortino": 1.8588,
+      "cagr": 0.1188,
+      "n_days": 5117,
+      "n_years": 20.31,
+      "dm_t_vs_50_50": 0.3656,
+      "dm_p_vs_50_50": 0.7147
+    }
+  },
+  "cross_oos_summary": {
+    "Gold Trend (MA200)": {
+      "mean_sharpe_diff": 0.0112,
+      "wins": 3,
+      "total": 5,
+      "t_stat": 0.1728,
+      "p_value": 0.8712,
+      "passes_harvey": "False",
+      "individual_diffs": [
+        0.0864,
+        -0.1922,
+        0.0536,
+        0.1803,
+        -0.072
+      ]
+    },
+    "Gold Momentum (12m)": {
+      "mean_sharpe_diff": -0.027,
+      "wins": 2,
+      "total": 5,
+      "t_stat": -0.0789,
+      "p_value": 0.9409,
+      "passes_harvey": "False",
+      "individual_diffs": [
+        0.9332,
+        0.5868,
+        -0.7214,
+        -0.7583,
+        -0.1752
+      ]
+    },
+    "Counter-cyclical": {
+      "mean_sharpe_diff": 0.0112,
+      "wins": 3,
+      "total": 5,
+      "t_stat": 0.1728,
+      "p_value": 0.8712,
+      "passes_harvey": "False",
+      "individual_diffs": [
+        0.0864,
+        -0.1922,
+        0.0536,
+        0.1803,
+        -0.072
+      ]
+    },
+    "Risk Budget (inv-vol)": {
+      "mean_sharpe_diff": 0.0767,
+      "wins": 3,
+      "total": 5,
+      "t_stat": 1.2983,
+      "p_value": 0.264,
+      "passes_harvey": "False",
+      "individual_diffs": [
+        -0.0028,
+        0.3011,
+        0.0326,
+        -0.0291,
+        0.0818
+      ]
+    },
+    "Real Gold Trend (GLD/TIP)": {
+      "mean_sharpe_diff": -0.0036,
+      "wins": 2,
+      "total": 5,
+      "t_stat": -0.0368,
+      "p_value": 0.9724,
+      "passes_harvey": "False",
+      "individual_diffs": [
+        0.1823,
+        -0.2587,
+        -0.0402,
+        0.2521,
+        -0.1534
+      ]
+    }
+  },
+  "cross_oos_details": {
+    "OOS1: GFC + Recovery": {
+      "Static 50/50": {
+        "name": "Static 50/50",
+        "ann_return": 0.0707,
+        "ann_vol": 0.1019,
+        "sharpe": 0.6944,
+        "max_dd": -0.177,
+        "calmar": 0.3996,
+        "sortino": 0.9586,
+        "cagr": 0.0677,
+        "n_days": 757,
+        "n_years": 3.0
+      },
+      "Gold Trend (MA200)": {
+        "name": "Gold Trend (MA200)",
+        "ann_return": 0.0792,
+        "ann_vol": 0.1014,
+        "sharpe": 0.7808,
+        "max_dd": -0.1578,
+        "calmar": 0.5019,
+        "sortino": 1.1061,
+        "cagr": 0.0768,
+        "n_days": 756,
+        "n_years": 3.0
+      },
+      "Gold Momentum (12m)": {
+        "name": "Gold Momentum (12m)",
+        "ann_return": 0.1393,
+        "ann_vol": 0.0856,
+        "sharpe": 1.6276,
+        "max_dd": -0.0842,
+        "calmar": 1.6544,
+        "sortino": 2.3175,
+        "cagr": 0.1452,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "Counter-cyclical": {
+        "name": "Counter-cyclical",
+        "ann_return": 0.0792,
+        "ann_vol": 0.1014,
+        "sharpe": 0.7808,
+        "max_dd": -0.1578,
+        "calmar": 0.5019,
+        "sortino": 1.1061,
+        "cagr": 0.0768,
+        "n_days": 756,
+        "n_years": 3.0
+      },
+      "Risk Budget (inv-vol)": {
+        "name": "Risk Budget (inv-vol)",
+        "ann_return": 0.069,
+        "ann_vol": 0.0998,
+        "sharpe": 0.6916,
+        "max_dd": -0.1783,
+        "calmar": 0.3872,
+        "sortino": 0.9531,
+        "cagr": 0.0661,
+        "n_days": 756,
+        "n_years": 3.0
+      },
+      "Real Gold Trend (GLD/TIP)": {
+        "name": "Real Gold Trend (GLD/TIP)",
+        "ann_return": 0.091,
+        "ann_vol": 0.1038,
+        "sharpe": 0.8767,
+        "max_dd": -0.1454,
+        "calmar": 0.6258,
+        "sortino": 1.2557,
+        "cagr": 0.0894,
+        "n_days": 756,
+        "n_years": 3.0
+      }
+    },
+    "OOS2: Gold Peak + Bear": {
+      "Static 50/50": {
+        "name": "Static 50/50",
+        "ann_return": 0.0657,
+        "ann_vol": 0.0879,
+        "sharpe": 0.7478,
+        "max_dd": -0.0792,
+        "calmar": 0.8297,
+        "sortino": 0.9984,
+        "cagr": 0.0638,
+        "n_days": 754,
+        "n_years": 2.99
+      },
+      "Gold Trend (MA200)": {
+        "name": "Gold Trend (MA200)",
+        "ann_return": 0.0521,
+        "ann_vol": 0.0937,
+        "sharpe": 0.5556,
+        "max_dd": -0.1089,
+        "calmar": 0.4779,
+        "sortino": 0.7245,
+        "cagr": 0.0488,
+        "n_days": 753,
+        "n_years": 2.99
+      },
+      "Gold Momentum (12m)": {
+        "name": "Gold Momentum (12m)",
+        "ann_return": 0.1092,
+        "ann_vol": 0.0819,
+        "sharpe": 1.3346,
+        "max_dd": -0.0469,
+        "calmar": 2.3276,
+        "sortino": 1.8896,
+        "cagr": 0.1117,
+        "n_days": 502,
+        "n_years": 1.99
+      },
+      "Counter-cyclical": {
+        "name": "Counter-cyclical",
+        "ann_return": 0.0521,
+        "ann_vol": 0.0937,
+        "sharpe": 0.5556,
+        "max_dd": -0.1089,
+        "calmar": 0.4779,
+        "sortino": 0.7245,
+        "cagr": 0.0488,
+        "n_days": 753,
+        "n_years": 2.99
+      },
+      "Risk Budget (inv-vol)": {
+        "name": "Risk Budget (inv-vol)",
+        "ann_return": 0.0866,
+        "ann_vol": 0.0825,
+        "sharpe": 1.0489,
+        "max_dd": -0.0607,
+        "calmar": 1.427,
+        "sortino": 1.4404,
+        "cagr": 0.0867,
+        "n_days": 753,
+        "n_years": 2.99
+      },
+      "Real Gold Trend (GLD/TIP)": {
+        "name": "Real Gold Trend (GLD/TIP)",
+        "ann_return": 0.0459,
+        "ann_vol": 0.0939,
+        "sharpe": 0.4891,
+        "max_dd": -0.1108,
+        "calmar": 0.4145,
+        "sortino": 0.6383,
+        "cagr": 0.0424,
+        "n_days": 753,
+        "n_years": 2.99
+      }
+    },
+    "OOS3: Gold Bear Bottom": {
+      "Static 50/50": {
+        "name": "Static 50/50",
+        "ann_return": 0.0477,
+        "ann_vol": 0.0707,
+        "sharpe": 0.6744,
+        "max_dd": -0.0657,
+        "calmar": 0.7256,
+        "sortino": 1.0616,
+        "cagr": 0.0462,
+        "n_days": 756,
+        "n_years": 3.0
+      },
+      "Gold Trend (MA200)": {
+        "name": "Gold Trend (MA200)",
+        "ann_return": 0.0528,
+        "ann_vol": 0.0725,
+        "sharpe": 0.728,
+        "max_dd": -0.0674,
+        "calmar": 0.7834,
+        "sortino": 1.1275,
+        "cagr": 0.0515,
+        "n_days": 755,
+        "n_years": 3.0
+      },
+      "Gold Momentum (12m)": {
+        "name": "Gold Momentum (12m)",
+        "ann_return": -0.0037,
+        "ann_vol": 0.0782,
+        "sharpe": -0.047,
+        "max_dd": -0.0876,
+        "calmar": -0.042,
+        "sortino": -0.073,
+        "cagr": -0.0067,
+        "n_days": 504,
+        "n_years": 2.0
+      },
+      "Counter-cyclical": {
+        "name": "Counter-cyclical",
+        "ann_return": 0.0528,
+        "ann_vol": 0.0725,
+        "sharpe": 0.728,
+        "max_dd": -0.0674,
+        "calmar": 0.7834,
+        "sortino": 1.1275,
+        "cagr": 0.0515,
+        "n_days": 755,
+        "n_years": 3.0
+      },
+      "Risk Budget (inv-vol)": {
+        "name": "Risk Budget (inv-vol)",
+        "ann_return": 0.0487,
+        "ann_vol": 0.0689,
+        "sharpe": 0.707,
+        "max_dd": -0.0749,
+        "calmar": 0.6507,
+        "sortino": 1.1163,
+        "cagr": 0.0475,
+        "n_days": 755,
+        "n_years": 3.0
+      },
+      "Real Gold Trend (GLD/TIP)": {
+        "name": "Real Gold Trend (GLD/TIP)",
+        "ann_return": 0.0463,
+        "ann_vol": 0.073,
+        "sharpe": 0.6342,
+        "max_dd": -0.0645,
+        "calmar": 0.7181,
+        "sortino": 0.9794,
+        "cagr": 0.0446,
+        "n_days": 755,
+        "n_years": 3.0
+      }
+    },
+    "OOS4: Gold Recovery": {
+      "Static 50/50": {
+        "name": "Static 50/50",
+        "ann_return": 0.1391,
+        "ann_vol": 0.0607,
+        "sharpe": 2.291,
+        "max_dd": -0.0416,
+        "calmar": 3.3479,
+        "sortino": 3.8909,
+        "cagr": 0.1471,
+        "n_days": 754,
+        "n_years": 2.99
+      },
+      "Gold Trend (MA200)": {
+        "name": "Gold Trend (MA200)",
+        "ann_return": 0.1523,
+        "ann_vol": 0.0616,
+        "sharpe": 2.4713,
+        "max_dd": -0.0453,
+        "calmar": 3.3615,
+        "sortino": 4.1172,
+        "cagr": 0.1622,
+        "n_days": 753,
+        "n_years": 2.99
+      },
+      "Gold Momentum (12m)": {
+        "name": "Gold Momentum (12m)",
+        "ann_return": 0.1005,
+        "ann_vol": 0.0655,
+        "sharpe": 1.5327,
+        "max_dd": -0.0491,
+        "calmar": 2.0452,
+        "sortino": 2.502,
+        "cagr": 0.1033,
+        "n_days": 502,
+        "n_years": 1.99
+      },
+      "Counter-cyclical": {
+        "name": "Counter-cyclical",
+        "ann_return": 0.1523,
+        "ann_vol": 0.0616,
+        "sharpe": 2.4713,
+        "max_dd": -0.0453,
+        "calmar": 3.3615,
+        "sortino": 4.1172,
+        "cagr": 0.1622,
+        "n_days": 753,
+        "n_years": 2.99
+      },
+      "Risk Budget (inv-vol)": {
+        "name": "Risk Budget (inv-vol)",
+        "ann_return": 0.1323,
+        "ann_vol": 0.0585,
+        "sharpe": 2.2619,
+        "max_dd": -0.055,
+        "calmar": 2.4026,
+        "sortino": 3.6595,
+        "cagr": 0.1394,
+        "n_days": 753,
+        "n_years": 2.99
+      },
+      "Real Gold Trend (GLD/TIP)": {
+        "name": "Real Gold Trend (GLD/TIP)",
+        "ann_return": 0.1567,
+        "ann_vol": 0.0616,
+        "sharpe": 2.5431,
+        "max_dd": -0.0468,
+        "calmar": 3.348,
+        "sortino": 4.1954,
+        "cagr": 0.1674,
+        "n_days": 753,
+        "n_years": 2.99
+      }
+    },
+    "OOS5: COVID + Inflation": {
+      "Static 50/50": {
+        "name": "Static 50/50",
+        "ann_return": 0.0716,
+        "ann_vol": 0.084,
+        "sharpe": 0.852,
+        "max_dd": -0.1054,
+        "calmar": 0.6793,
+        "sortino": 1.1238,
+        "cagr": 0.0704,
+        "n_days": 756,
+        "n_years": 3.0
+      },
+      "Gold Trend (MA200)": {
+        "name": "Gold Trend (MA200)",
+        "ann_return": 0.0689,
+        "ann_vol": 0.0884,
+        "sharpe": 0.78,
+        "max_dd": -0.1143,
+        "calmar": 0.6029,
+        "sortino": 0.9983,
+        "cagr": 0.0672,
+        "n_days": 755,
+        "n_years": 3.0
+      },
+      "Gold Momentum (12m)": {
+        "name": "Gold Momentum (12m)",
+        "ann_return": 0.0505,
+        "ann_vol": 0.0746,
+        "sharpe": 0.6768,
+        "max_dd": -0.0936,
+        "calmar": 0.5395,
+        "sortino": 1.083,
+        "cagr": 0.0489,
+        "n_days": 504,
+        "n_years": 2.0
+      },
+      "Counter-cyclical": {
+        "name": "Counter-cyclical",
+        "ann_return": 0.0689,
+        "ann_vol": 0.0884,
+        "sharpe": 0.78,
+        "max_dd": -0.1143,
+        "calmar": 0.6029,
+        "sortino": 0.9983,
+        "cagr": 0.0672,
+        "n_days": 755,
+        "n_years": 3.0
+      },
+      "Risk Budget (inv-vol)": {
+        "name": "Risk Budget (inv-vol)",
+        "ann_return": 0.0724,
+        "ann_vol": 0.0776,
+        "sharpe": 0.9338,
+        "max_dd": -0.092,
+        "calmar": 0.7872,
+        "sortino": 1.2812,
+        "cagr": 0.0719,
+        "n_days": 755,
+        "n_years": 3.0
+      },
+      "Real Gold Trend (GLD/TIP)": {
+        "name": "Real Gold Trend (GLD/TIP)",
+        "ann_return": 0.0627,
+        "ann_vol": 0.0897,
+        "sharpe": 0.6986,
+        "max_dd": -0.1176,
+        "calmar": 0.5328,
+        "sortino": 0.9055,
+        "cagr": 0.0604,
+        "n_days": 755,
+        "n_years": 3.0
+      }
+    }
+  },
+  "regime_analysis": {
+    "Gold Bull": {
+      "Static 50/50": {
+        "name": "Static 50/50",
+        "ann_return": 0.125,
+        "ann_vol": 0.0848,
+        "sharpe": 1.4738,
+        "max_dd": -0.1289,
+        "calmar": 0.9697,
+        "sortino": 2.0666,
+        "cagr": 0.129,
+        "n_days": 3513,
+        "n_years": 13.94
+      },
+      "Gold Trend (MA200)": {
+        "name": "Gold Trend (MA200)",
+        "ann_return": 0.1297,
+        "ann_vol": 0.0838,
+        "sharpe": 1.548,
+        "max_dd": -0.1285,
+        "calmar": 1.0091,
+        "sortino": 2.1821,
+        "cagr": 0.1345,
+        "n_days": 3513,
+        "n_years": 13.94
+      },
+      "Gold Momentum (12m)": {
+        "name": "Gold Momentum (12m)",
+        "ann_return": 0.1134,
+        "ann_vol": 0.0858,
+        "sharpe": 1.3215,
+        "max_dd": -0.1353,
+        "calmar": 0.838,
+        "sortino": 1.792,
+        "cagr": 0.1159,
+        "n_days": 3295,
+        "n_years": 13.08
+      },
+      "Counter-cyclical": {
+        "name": "Counter-cyclical",
+        "ann_return": 0.1297,
+        "ann_vol": 0.0838,
+        "sharpe": 1.548,
+        "max_dd": -0.1285,
+        "calmar": 1.0091,
+        "sortino": 2.1821,
+        "cagr": 0.1345,
+        "n_days": 3513,
+        "n_years": 13.94
+      },
+      "Risk Budget (inv-vol)": {
+        "name": "Risk Budget (inv-vol)",
+        "ann_return": 0.1223,
+        "ann_vol": 0.079,
+        "sharpe": 1.5492,
+        "max_dd": -0.119,
+        "calmar": 1.0281,
+        "sortino": 2.2407,
+        "cagr": 0.1266,
+        "n_days": 3513,
+        "n_years": 13.94
+      },
+      "Real Gold Trend (GLD/TIP)": {
+        "name": "Real Gold Trend (GLD/TIP)",
+        "ann_return": 0.1284,
+        "ann_vol": 0.0841,
+        "sharpe": 1.5267,
+        "max_dd": -0.1407,
+        "calmar": 0.9127,
+        "sortino": 2.1497,
+        "cagr": 0.133,
+        "n_days": 3513,
+        "n_years": 13.94
+      }
+    },
+    "Gold Bear": {
+      "Static 50/50": {
+        "name": "Static 50/50",
+        "ann_return": 0.0927,
+        "ann_vol": 0.0897,
+        "sharpe": 1.0331,
+        "max_dd": -0.0988,
+        "calmar": 0.9382,
+        "sortino": 1.4459,
+        "cagr": 0.0927,
+        "n_days": 1604,
+        "n_years": 6.37
+      },
+      "Gold Trend (MA200)": {
+        "name": "Gold Trend (MA200)",
+        "ann_return": 0.0861,
+        "ann_vol": 0.0927,
+        "sharpe": 0.9293,
+        "max_dd": -0.1062,
+        "calmar": 0.8111,
+        "sortino": 1.2819,
+        "cagr": 0.0852,
+        "n_days": 1604,
+        "n_years": 6.37
+      },
+      "Gold Momentum (12m)": {
+        "name": "Gold Momentum (12m)",
+        "ann_return": 0.0889,
+        "ann_vol": 0.092,
+        "sharpe": 0.9664,
+        "max_dd": -0.1298,
+        "calmar": 0.6852,
+        "sortino": 1.3746,
+        "cagr": 0.0884,
+        "n_days": 1571,
+        "n_years": 6.23
+      },
+      "Counter-cyclical": {
+        "name": "Counter-cyclical",
+        "ann_return": 0.0861,
+        "ann_vol": 0.0927,
+        "sharpe": 0.9293,
+        "max_dd": -0.1062,
+        "calmar": 0.8111,
+        "sortino": 1.2819,
+        "cagr": 0.0852,
+        "n_days": 1604,
+        "n_years": 6.37
+      },
+      "Risk Budget (inv-vol)": {
+        "name": "Risk Budget (inv-vol)",
+        "ann_return": 0.1002,
+        "ann_vol": 0.0849,
+        "sharpe": 1.1807,
+        "max_dd": -0.098,
+        "calmar": 1.0232,
+        "sortino": 1.6759,
+        "cagr": 0.1014,
+        "n_days": 1604,
+        "n_years": 6.37
+      },
+      "Real Gold Trend (GLD/TIP)": {
+        "name": "Real Gold Trend (GLD/TIP)",
+        "ann_return": 0.0892,
+        "ann_vol": 0.0945,
+        "sharpe": 0.944,
+        "max_dd": -0.1062,
+        "calmar": 0.8405,
+        "sortino": 1.3157,
+        "cagr": 0.0884,
+        "n_days": 1604,
+        "n_years": 6.37
+      }
+    }
+  },
+  "transaction_cost_sensitivity": {
+    "Static 50/50": {
+      "sharpe_tc0bps": 1.3298,
+      "sharpe_tc5bps": 1.3298,
+      "sharpe_tc10bps": 1.3298,
+      "sharpe_tc20bps": 1.3298,
+      "sharpe_tc50bps": 1.3298,
+      "avg_daily_turnover": 0.0
+    },
+    "Gold Trend (MA200)": {
+      "sharpe_tc0bps": 1.3346,
+      "sharpe_tc5bps": 1.3166,
+      "sharpe_tc10bps": 1.2985,
+      "sharpe_tc20bps": 1.2623,
+      "sharpe_tc50bps": 1.1525,
+      "avg_daily_turnover": 0.006177
+    },
+    "Counter-cyclical": {
+      "sharpe_tc0bps": 1.3346,
+      "sharpe_tc5bps": 1.3166,
+      "sharpe_tc10bps": 1.2985,
+      "sharpe_tc20bps": 1.2623,
+      "sharpe_tc50bps": 1.1525,
+      "avg_daily_turnover": 0.006177
+    },
+    "Risk Budget (inv-vol)": {
+      "sharpe_tc0bps": 1.4225,
+      "sharpe_tc5bps": 1.4084,
+      "sharpe_tc10bps": 1.3944,
+      "sharpe_tc20bps": 1.3662,
+      "sharpe_tc50bps": 1.2818,
+      "avg_daily_turnover": 0.004507
+    }
+  },
+  "bootstrap_results": {
+    "Gold Trend (MA200)": {
+      "mean_sharpe_diff": 0.0742,
+      "ci_95_low": -0.3591,
+      "ci_95_high": 0.5136,
+      "zero_in_ci": "True"
+    },
+    "Gold Momentum (12m)": {
+      "mean_sharpe_diff": -0.014,
+      "ci_95_low": -0.4593,
+      "ci_95_high": 0.4324,
+      "zero_in_ci": "True"
+    },
+    "Counter-cyclical": {
+      "mean_sharpe_diff": 0.074,
+      "ci_95_low": -0.3623,
+      "ci_95_high": 0.5069,
+      "zero_in_ci": "True"
+    },
+    "Risk Budget (inv-vol)": {
+      "mean_sharpe_diff": 0.032,
+      "ci_95_low": -0.4082,
+      "ci_95_high": 0.4697,
+      "zero_in_ci": "True"
+    },
+    "Real Gold Trend (GLD/TIP)": {
+      "mean_sharpe_diff": 0.0811,
+      "ci_95_low": -0.3537,
+      "ci_95_high": 0.5089,
+      "zero_in_ci": "True"
+    }
+  },
+  "recent_oos_2023_2026": {
+    "Static 50/50": {
+      "name": "Static 50/50",
+      "ann_return": 0.203,
+      "ann_vol": 0.0861,
+      "sharpe": 2.3559,
+      "max_dd": -0.0685,
+      "calmar": 2.963,
+      "sortino": 3.1714,
+      "cagr": 0.2204,
+      "n_days": 810,
+      "n_years": 3.21
+    },
+    "Gold Trend (MA200)": {
+      "name": "Gold Trend (MA200)",
+      "ann_return": 0.203,
+      "ann_vol": 0.0827,
+      "sharpe": 2.4546,
+      "max_dd": -0.0614,
+      "calmar": 3.3067,
+      "sortino": 3.4446,
+      "cagr": 0.2208,
+      "n_days": 809,
+      "n_years": 3.21
+    },
+    "Gold Momentum (12m)": {
+      "name": "Gold Momentum (12m)",
+      "ann_return": 0.2477,
+      "ann_vol": 0.1086,
+      "sharpe": 2.2809,
+      "max_dd": -0.0819,
+      "calmar": 3.0258,
+      "sortino": 2.7555,
+      "cagr": 0.2733,
+      "n_days": 558,
+      "n_years": 2.21
+    },
+    "Counter-cyclical": {
+      "name": "Counter-cyclical",
+      "ann_return": 0.203,
+      "ann_vol": 0.0827,
+      "sharpe": 2.4546,
+      "max_dd": -0.0614,
+      "calmar": 3.3067,
+      "sortino": 3.4446,
+      "cagr": 0.2208,
+      "n_days": 809,
+      "n_years": 3.21
+    },
+    "Risk Budget (inv-vol)": {
+      "name": "Risk Budget (inv-vol)",
+      "ann_return": 0.1975,
+      "ann_vol": 0.0805,
+      "sharpe": 2.4537,
+      "max_dd": -0.0581,
+      "calmar": 3.3988,
+      "sortino": 3.586,
+      "cagr": 0.2143,
+      "n_days": 809,
+      "n_years": 3.21
+    },
+    "Real Gold Trend (GLD/TIP)": {
+      "name": "Real Gold Trend (GLD/TIP)",
+      "ann_return": 0.2021,
+      "ann_vol": 0.0828,
+      "sharpe": 2.4412,
+      "max_dd": -0.0614,
+      "calmar": 3.292,
+      "sortino": 3.4331,
+      "cagr": 0.2197,
+      "n_days": 809,
+      "n_years": 3.21
+    }
+  },
+  "verdict": "NULL \u2014 No gold regime strategy significantly beats static 50/50",
+  "conclusion": "Gold regime-based allocation strategies (trend, momentum, counter-cyclical, risk budget) were tested against the static 50/50 SPY/GLD + 12/VIX benchmark. Cross-OOS validation across 5 distinct periods (2008-2022) determines robustness. Transaction cost sensitivity and bootstrap CIs provide additional rigor.",
+  "references": [
+    "K275: Complete Case for 50/50 SPY/GLD + 12/VIX",
+    "K507: Dynamic SPY/GLD Allocation (correlation regime)",
+    "K204: GLD Momentum-Based VT",
+    "Baur & McDermott (2010): Is gold a safe haven? JBF",
+    "Reboredo (2013): Is gold a hedge or safe haven against oil? RIBAF"
+  ],
+  "limitations": [
+    "GLD data starts 2004, limiting pre-2005 analysis",
+    "TIP used as inflation proxy (imperfect)",
+    "Transaction costs estimated, not exact",
+    "Gold regime classification is binary (MA200), real regimes are fuzzy",
+    "VIX leverage 12/VIX has its own regime dependency not decomposed here"
+  ]
+}

@@ -14602,5 +14602,36 @@
     "experiment_id": "k553",
     "created_at": "2026-03-27T16:11:54.872385+00:00",
     "importance": 5
+  },
+  {
+    "id": "K557",
+    "title": "K557: Gold Regime Allocation — Null, 50/50 Immovable #11",
+    "content": "[提出: Claude, 執行: Claude] Gold trend/momentum/counter-cyclical/risk-budget/real-gold 5 策略。全部 DM t<0.37。Bootstrap CI 含零。Risk Budget Sharpe 1.427 (+0.096) 但 NS (t=1.30)——lucky accident not robust signal。50/50 #11。",
+    "tags": [
+      "gold",
+      "regime",
+      "50_50_immovable",
+      "null_result"
+    ],
+    "data_source": "yfinance SPY+GLD+TIP+VIX 2005-2026",
+    "experiment_id": "k557",
+    "created_at": "2026-03-27T16:15:42.491140+00:00",
+    "importance": 1
+  },
+  {
+    "id": "K556",
+    "title": "K556: Momentum Crash Filter — CrashDetector t=3.14 5/5 OOS 但改善僅 +0.03 Sharpe（實質 null）",
+    "content": "[提出: Claude, 執行: Claude] 4 momentum strategies。CrashDetector 唯一 pass (DM t=3.14, boot CI [+0.017,+0.044], 5/5 OOS) 但 +0.03 Sharpe 太小。MomFilter t=4.42 是 trap（更多 equity exposure 不是更好 risk-adj）。TrendScaled 災難性 (Sharpe 0.75)。DualMom 確認 K247 degradation。\n\nMomentum break event (39 events): 5d forward -1.11% (t=-3.12)，真實信號但太稀有。",
+    "tags": [
+      "momentum",
+      "crash_filter",
+      "VT_strategy",
+      "marginal_positive",
+      "12VIX_kernel"
+    ],
+    "data_source": "yfinance SPY+VIX+GLD 2005-2026",
+    "experiment_id": "k556",
+    "created_at": "2026-03-27T16:16:30.353428+00:00",
+    "importance": 2
   }
 ]
