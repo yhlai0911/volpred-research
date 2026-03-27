@@ -14032,5 +14032,20 @@
     ],
     "created_at": "2026-03-27T01:30:29.405097+00:00",
     "experiment_id": "k521"
+  },
+  {
+    "id": 1299,
+    "title": "K522: HAR-RV Pilot (50d) — PRELIMINARY: data insufficient (17 IS obs), EWMA wins",
+    "content": "[提出: Claude, 執行: Claude] K522: HAR-RV pilot with 50 days 5-min SPY data. PRELIMINARY: only 17 IS obs after 22d warmup → 4 params overfits. Monthly beta=3.54 (pathological). HAR-RV worst (QLIKE 0.178). EWMA wins (0.067, zero params immune to overfitting). Daily-only HAR(d) QLIKE=0.056 (best nested). Need 60+ days (ETA 04/05). RV-r² corr only 0.137 (surprisingly low). Annualized 5-min RV vol = 11.6%.",
+    "category": "vol_prediction",
+    "tags": [
+      "HAR_RV",
+      "5min",
+      "pilot",
+      "preliminary",
+      "insufficient_data"
+    ],
+    "created_at": "2026-03-27T02:42:57.680743+00:00",
+    "experiment_id": "k522"
   }
 ]
