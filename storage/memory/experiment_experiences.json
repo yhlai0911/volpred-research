@@ -208,5 +208,18 @@
       "k510",
       "k113"
     ]
+  },
+  {
+    "id": "E017",
+    "title": "Taiwan-US 時區對齊必須用 T-1（SPY 收盤 = 台灣次日 5AM）",
+    "category": "data_quality",
+    "lesson": "K519/K520 用 merge_asof 把 SPY(T) 配 TW(T)，但 SPY 收盤在台股交易之後。必須用 SPY(T-1)。Bug 導致 Sharpe 被低估（1.079 vs 正確 4.445），但修正後暴露 I8 timing bias。",
+    "examples": "K519 (invalid), K520 (invalid), K521 (bug found)",
+    "recommendation": "所有台股策略用美股信號時，必須手動驗證日期對齊：print 前 20 天的 SPY date, TW date, signal, gap。不要依賴 merge_asof。",
+    "source_experiments": [
+      "k519",
+      "k520",
+      "k521"
+    ]
   }
 ]
