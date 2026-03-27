@@ -14650,5 +14650,44 @@
     "experiment_id": "k558",
     "created_at": "2026-03-27T16:23:49.326359+00:00",
     "importance": 5
+  },
+  {
+    "id": "K560",
+    "timestamp": "2026-03-28T00:00:00.000000+00:00",
+    "category": "vt_strategy",
+    "confidence": 0.92,
+    "title": "K560: Sector Rotation with VT — Momentum sector selection dramatically improves VT",
+    "content": "[提出: User, 執行: Claude] Sector SELECTION with VT (different from K58 which applied VT uniformly). 8 sector ETFs (XLK/XLF/XLV/XLE/XLI/XLY/XLP/XLU) + GLD, 2005-2026, N=5283 days. 50% equity (VT-scaled) + 50% GLD structure.\n\nMomentum top-1 (best 60d return sector): Sharpe 2.157 vs benchmark SPY VT+GLD 1.345 (+0.81). DM t=10.36, Harvey PASS. CAGR 27.4%, MDD -15.1%. Net-of-costs (5bp): Sharpe 2.000, still dominant. Turnover 14.4%/day.\n\nMomentum top-3: Sharpe 1.932, DM t=11.63 PASS. Lower turnover, more diversified.\nRelative Strength: Sharpe 1.876, DM t=11.91 PASS.\nMom+LowVol combo: Sharpe 1.789, DM t=5.80 PASS.\nLow-vol top-1: Sharpe 1.247, DM NS (picks XLP 59% of time).\nMean-reversion: Sharpe 0.238, strongly negative — contrarian sector rotation FAILS.\n\nCross-OOS 3/3 periods: Momentum top-1 OOS Sharpes 1.56/2.46/2.80 (all beat benchmark 0.51/1.72/1.72). Sub-period: positive in ALL 5 eras (GFC 1.69, Recovery 1.68, LowVol 2.66, COVID+ 2.34, Recent 3.57).\n\n**Key insight**: WHERE to apply VT matters enormously. Sector momentum + VT is synergistic — momentum selects sectors with positive drift, VT scales exposure inversely to fear. Energy selected 25% (momentum leader), XLK 17%. During crisis: Utilities 28% (defensive momentum).",
+    "evidence": "k560_sector_rotation_vt_results.json",
+    "tags": [
+      "sector_rotation",
+      "momentum",
+      "VT策略",
+      "Harvey_pass",
+      "cross_OOS",
+      "high_impact",
+      "strategy_candidate"
+    ],
+    "data_source": "yfinance SPY+8sectors+GLD+VIX 2005-2026",
+    "experiment_id": "k560",
+    "created_at": "2026-03-28T00:00:00.000000+00:00",
+    "importance": 9
+  },
+  {
+    "id": "K561",
+    "title": "K561: Bond-Equity Switch — Static GLD wins, TLT significantly worse (t=-4.60)",
+    "content": "[提出: Claude, 執行: Claude] Safe side 動態切換 GLD/TLT/cash。6 策略 vs static GLD。TLT Harvey t=-4.60 (顯著更差)。Vol-Adjusted full-sample best (0.897) 但 OOS 失敗（2022 TLT drag）。Static GLD cross-OOS avg Sharpe 1.118 最佳。\n\nRegime insight: TLT 低利率好 (1.24) 但升息崩潰 (0.19)。GLD 是 all-weather asset。\n\n結論：safe side 應維持 GLD。50/50 SPY/GLD 框架確認。",
+    "tags": [
+      "GLD",
+      "TLT",
+      "safe_allocation",
+      "bond",
+      "null_result",
+      "50_50_confirmed"
+    ],
+    "data_source": "yfinance SPY+GLD+TLT+VIX+TNX 2004-2026",
+    "experiment_id": "k561",
+    "created_at": "2026-03-27T17:17:09.199594+00:00",
+    "importance": 2
   }
 ]
