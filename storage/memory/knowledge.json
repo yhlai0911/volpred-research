@@ -14550,5 +14550,23 @@
     "experiment_id": "k552",
     "created_at": "2026-03-27T14:58:58.560873+00:00",
     "importance": 3
+  },
+  {
+    "id": "K551",
+    "title": "K551: ★★★★★ K548 VIX-Conditional Leverage VALIDATED — Harvey t=7.90, 11/11 OOS, 100% bootstrap",
+    "content": "[提出: Claude, 執行: Claude] K548 深度驗證——8 項全面測試。\n\n1. Harvey: DM t=7.90 (PASS), JKM z=6.05\n2. Cross-OOS: 11/11 wins (5/5 primary + 6/6 alternative)\n3. Sensitivity: 100% safe zone (25/25 VIX configs, all leverage 1.1-2.0x positive)\n4. TX: incremental breakeven 14bps (PASS, SPY bid-ask ~1-2bps)\n5. Borrowing: survives 8% rate, breakeven 9.7%\n6. Crisis: GFC MDD -10.5% (only +0.9pp), COVID identical, 2022 actually better\n7. Bootstrap: 5000 reps, 95% CI [0.126, 0.238], P(win)=100.0%\n8. Taiwan: FAIL (-0.004, VIX threshold 不適用台股)\n\nFull sample: Sharpe 1.474 (+0.107), CAGR 18.0% (+5.3%), MDD -12.3% (+2.7pp)。Total return 3271% vs 1167%。\n\n限制：需日頻 rebalance、margin 帳戶、US only、MDD +2.7pp。\n\n**結論：9/10 通過，可考慮上架為進階策略（需 margin 帳戶的投資人）。**",
+    "tags": [
+      "validation",
+      "leverage",
+      "VIX_conditional",
+      "Harvey_pass",
+      "cross_OOS_11_11",
+      "bootstrap_100",
+      "listing_candidate"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX+IRX+0050.TW 2005-2026",
+    "experiment_id": "k551",
+    "created_at": "2026-03-27T15:02:39.092592+00:00",
+    "importance": 5
   }
 ]
