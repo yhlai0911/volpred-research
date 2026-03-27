@@ -97,10 +97,11 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 **執行規則**：
 - 所有文章一律 `status=draft` 進文章池，由每小時 cron 按節奏釋出
 - **每篇文章必須附真正的圖表（不可用 ASCII/文字表格替代）**：
-  - 用 matplotlib 生成 PNG → 上傳 Supabase Storage `article-images` bucket → content 中用 `![desc](public_url)` 嵌入
+  - 使用共用模組 `from volpred.charts import generate_bar_chart, upload_chart, embed_chart`
+  - 可用函式：`generate_bar_chart`、`generate_grouped_bar_chart`、`generate_line_chart`、`generate_heatmap`
+  - 流程：`path = generate_bar_chart(...) → url = upload_chart(path) → content = embed_chart(content, url, '描述')`
   - 一般讀者至少 1 張真實圖表，研究文章 2-3 張
   - **禁止用 ASCII art、文字方框、或純 Markdown 表格冒充圖表**——這些不是圖表
-  - 圖表類型建議：bar chart（比較）、line chart（趨勢）、scatter（相關）、heatmap（矩陣）
 - **每篇文章必須標注數據來源和實驗檔案**：
   - 研究文章：文末必須列出 `實驗腳本: experiments/kXXX.py` 和 `結果數據: experiments/kXXX_results.json`
   - 一般讀者文章：文末用 `*本文基於實驗 KXXX 的實證結果（數據來源：yfinance，期間：YYYY-YYYY）*` 格式標注
