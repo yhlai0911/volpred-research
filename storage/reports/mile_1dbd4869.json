@@ -1,0 +1,18 @@
+{
+  "id": "mile_1dbd4869",
+  "title": "為什麼 50/50 配置真的動不了——21 年數據揭示相關性的不可預測本質",
+  "description": "SPY-GLD 相關性確實受 VIX 影響，但 VIX-correlation 關係的方向每幾年就會翻轉一次。任何動態調整規則都無法穩定獲利。",
+  "content": "## 為什麼 50/50 配置真的動不了？K534 給出了理論解釋\n\n你可能聽過「危機時所有資產相關性會趨向 1」。如果這是真的，是否能在 VIX 升高時動態調整 SPY 和 GLD 的比例？\n\n我們用 21 年（5340 天）的數據測試了這個想法。\n\n### 相關性確實受 VIX 影響\n\n| VIX 區間 | SPY-GLD 相關性 |\n|---------|---------------|\n| <15（低波動）| -0.009 |\n| 15-25（正常）| +0.115 |\n| 25-35（高波動）| +0.076 |\n| >35（危機）| -0.032 |\n\n統計上確實有差異（Kruskal-Wallis p<0.001）。\n\n### 但問題在於：**這個關係一直在變**\n\n![Beta 翻轉](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k534_beta_flip_b3a8bc.png)\n\n2005-2014 年，高 VIX 會**降低**相關性（β 為負）。但 2015 年之後完全**反轉**——高 VIX 反而**提高**相關性。這不是小幅波動，而是**方向性翻轉**。\n\n### Cross-OOS 驗證：失敗\n\n即使用最完美的樣本內規則，在樣本外也不管用。第三個測試期甚至反向顯著（p=0.001）。\n\n### 結論\n\n**50/50 不可動搖不是因為相關性穩定，而是因為相關性動態不可預測。** 任何試圖「聰明調整」配置比例的做法，都在賭一個不穩定的統計關係。\n\n---\n*實驗腳本: experiments/k534_copula_dcc.py | 數據: yfinance SPY+GLD+VIX 2005-2026*\n",
+  "tags": [
+    "一般讀者",
+    "配置",
+    "SPY",
+    "GLD"
+  ],
+  "status": "draft",
+  "audience": "general",
+  "category": "general",
+  "created_at": "2026-03-27T13:27:56.124970+00:00",
+  "published_at": null,
+  "proposer": "Claude"
+}

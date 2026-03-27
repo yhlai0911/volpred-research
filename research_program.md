@@ -157,7 +157,15 @@
 - **利率 regime**（K62: 高利率保險費僅 1.8%/yr vs 低利率 6.10%）
 - **退休情境**（K85→K87: VT 不翻倍提領率，只提供更穩定的 4% 存活）
 - **稅務**（K86: 保險費佔 71-80% 成本，稅佔 20-29%。台灣 0% 資本利得稅 = 結構優勢）
-- **50/50 SPY/GLD 不可動搖**（K2/K16/K19/K24/K54/K63/K64/K89 — 8 次獨立驗證）
+- **50/50 SPY/GLD 不可動搖**（K2/K16/K19/K24/K54/K63/K64/K89 — 8 次驗證 + K534 理論解釋：correlation dynamics 不可預測）
+
+#### Codex 第 7 次建議：從預測轉向策略（2026-03-27）[提出: Codex GPT-5.4]
+**核心洞見**：瓶頸不是預測 RV，而是判斷何時 forecast 值得交易。
+- [ ] **Cross-Asset Vol Momentum**：跨資產（rates/FX/credit/commodity）vol lead-lag → equity vol timing。可用 MOVE/CVIX/CDX + VIX 日頻。
+- [ ] **Conditional Dispersion Trade**：預測 correlation risk premium mispricing → index vs sector options。需 sector ETF options data。
+- [ ] **Regime-Switched Options Carry + Crash Filter**：不預測 vol，建 carry admission filter（term structure + skew + dealer gamma + liquidity）。只在結構有利時賣 premium。
+- [ ] **Alt Risk Premia Rotation**：variance carry / skew premium / correlation premium / convexity 四 sleeve 輪動，用 macro/liquidity regime 選擇。
+- [ ] **Action-First ML (Meta-Model)**：用 1300+ 實驗作 features，學 trading policy（long/short/flat/dispersion/carry）而非 vol forecast。Meta-labeling + contextual bandits。
 - **5% BTC 唯一統計顯著改善但尾部風險代價**（K66: p=0.014, 但 coskewness -0.50）
 - **Sector VT uniform**（K58: gamma 不預測行業 VT 效果）
 - **International VT universal**（K68: 13/13 市場 MDD 改善，US VIX 通用）

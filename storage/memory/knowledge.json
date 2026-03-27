@@ -14226,5 +14226,76 @@
     "experiment_id": "k533",
     "created_at": "2026-03-27T13:17:11.852063+00:00",
     "importance": 4
+  },
+  {
+    "item_id": "k534_corr_regime",
+    "category": "research",
+    "content": "[提出: 用戶, 執行: Claude] K534: Cross-Asset Correlation Regime Dependence (SPY-GLD, 2005-2026, N=5340). 60d rolling corr: mean=0.058, range [-0.63, 0.70]. VIX regime: KW H=242 (p<0.001) — corr IS regime-dependent. BUT: (1) NW HAC regression: t=0.87, p=0.39 — NOT significant after serial correlation correction. (2) Sub-period beta sign FLIPS: 2005-2014 negative, 2015-2026 positive — structurally unstable. (3) Quadratic R²=2.4% >> linear 0.1%: inverted-U shape. (4) Full-sample DM: regime beats fixed 60/40 (p=0.002), BUT cross-OOS inconsistent — OOS3 regime WORSE (p=0.001). Classic overfitting. (5) GLD on worst SPY days: positive only 43.8% — not crash hedge. Conclusion: 50/50 robustness explained — correlation dynamics exist but are UNPREDICTABLE (sign flips, too weak, OOS fails). Builds on K443 (copula) and K444 (DCC). Refs: Engle(2002), Patton(2006), Baur&Lucey(2010).",
+    "evidence": "experiments/k534_copula_dcc.py + k534_copula_dcc_results.json",
+    "confidence": 0.92,
+    "created_at": "2026-03-27T13:25:53.727762+00:00",
+    "tags": [
+      "cross-asset",
+      "correlation",
+      "VIX-regime",
+      "SPY-GLD",
+      "portfolio",
+      "DCC",
+      "copula",
+      "null-result-for-strategy"
+    ],
+    "data_source": "yfinance daily (SPY, GLD, ^VIX), 2005-2026"
+  },
+  {
+    "id": "K534",
+    "title": "K534: ★★★ SPY-GLD 相關性 VIX-regime 依賴——解釋 50/50 不可動搖的理論基礎",
+    "content": "[提出: Claude, 執行: Claude] SPY-GLD 跨資產相關性 regime 分析。5340 日數據。\n\n核心發現：(1) 相關性確實 VIX-regime 依賴 (Kruskal-Wallis H=242, p<0.001)：low VIX corr=-0.009, medium +0.115, high +0.076, crisis -0.032。(2) 但 Newey-West HAC 後不顯著 (t=0.87, p=0.39)——serial correlation 膨脹了 OLS t 值。\n\n最重要發現：**VIX-correlation beta sign 跨年代翻轉**：2005-2014 負值（高VIX→低相關）、2015-2026 正值（高VIX→高相關）。關係結構不穩定。\n\nQuadratic fit (R²=2.4%) 20x better than linear——inverted-U shape。GLD 在 SPY 最差 5% 日只有 43.8% 正報酬，不是可靠 crash hedge。\n\nCross-OOS portfolio backtest 失敗：OOS3 regime 反而更差 (p=0.001)。\n\n**理論貢獻**：50/50 不可動搖不是因為相關性穩定，而是因為相關性動態不可預測。beta sign flip + R²<3% + cross-OOS 失敗 → 任何 regime-switching 規則都無法 exploit。",
+    "tags": [
+      "correlation",
+      "regime",
+      "SPY_GLD",
+      "50_50_immovable",
+      "VIX",
+      "cross_OOS_fail",
+      "theoretical"
+    ],
+    "data_source": "yfinance SPY + GLD + VIX daily 2005-2026",
+    "experiment_id": "k534",
+    "created_at": "2026-03-27T13:26:36.298302+00:00",
+    "importance": 4
+  },
+  {
+    "id": "K535",
+    "title": "K535: SKEW Index in HAR Framework — Null, VIX Sufficiency #34",
+    "content": "[提出: Claude, 執行: Claude] CBOE SKEW + Realized Skewness 在 HAR 框架中測試。HAR-VIX-SKEW vs HAR-VIX: DM=+1.11 (NS)。SKEW IS 顯著 (t=-3.01) 但 OOS 完全消失——sub-period t-stat 在 -0.63 到 -1.81 之間，從未在任何子期間顯著。Textbook IS overfitting。確認 K43/K447。HAR-VIX vs HAR-ABS: DM=-3.72 (p=0.0002) 再次確認 VIX 是關鍵 regressor。VIX sufficiency #34。",
+    "tags": [
+      "SKEW",
+      "HAR",
+      "VIX_sufficiency",
+      "null_result",
+      "IS_overfitting"
+    ],
+    "data_source": "yfinance SPY + VIX + SKEW 2010-2026",
+    "experiment_id": "k535",
+    "created_at": "2026-03-27T13:26:58.628626+00:00",
+    "importance": 2
+  },
+  {
+    "id": "K536",
+    "title": "K536: ★★★★ HAR-EVT 是唯一通過完整 Trinity Test 的 VaR 模型（1% + 2.5%）",
+    "content": "[提出: Claude, 執行: Claude] EVT (Extreme Value Theory) VaR 實驗。GPD Peaks-over-Threshold + HAR/GJR vol models。OOS 2023-2024。\n\n**HAR-EVT score=10, 唯一雙 alpha PASS**: 1% viol=0.60% (PASS), 2.5% viol=1.79% (PASS)。GJR-Normal/GJR-EVT/GJR-t 都只 score=6（單 alpha pass）。HAR-Normal 災難性 4.58% viol。\n\n**關鍵洞見**: EVT 對 HAR 至關重要但對 GJR 不重要——因為 GJR 的 asymmetric dynamics 已讓殘差接近 Normal，HAR 的線性 predictor 殘差仍有顯著非常態性，EVT GPD 正好修正這個 distributional mismatch。\n\nGPD shape ξ=0.056（正值=heavy tail Frechet domain），QQ r=0.970。\n\n**組合: K530 HAR 預測 + K536 EVT 尾部 = 最佳 vol prediction + 最佳 VaR**。",
+    "tags": [
+      "EVT",
+      "VaR",
+      "HAR",
+      "GPD",
+      "Trinity_test",
+      "risk_management",
+      "breakthrough"
+    ],
+    "data_source": "yfinance SPY daily 2005-2026",
+    "experiment_id": "k536",
+    "created_at": "2026-03-27T13:37:26.403086+00:00",
+    "importance": 4
   }
 ]
