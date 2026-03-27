@@ -76,6 +76,15 @@ description: >
 
 ## 結論
 重申核心發現，指出限制和未來方向。
+
+## 圖表（必須，不可省略）
+![核心發現的視覺化圖表](supabase_storage_url)
+用 matplotlib 生成 PNG，上傳 Supabase Storage article-images bucket。
+禁止用 ASCII art 或純文字表格替代真正的圖表。
+
+## 數據來源
+*本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
+數據來源：yfinance 實證數據，期間：YYYY-YYYY，樣本：N 個觀測值。*
 ```
 
 ## 發佈流程
@@ -86,6 +95,18 @@ description: >
 Agent(description="Publish article", prompt="
 Write a complete research article in 繁體中文 Markdown about [topic].
 Include: summary, method table, key findings with interpretation, practical implications.
+
+MANDATORY — 每篇文章必須包含：
+1. 真正的圖表（matplotlib PNG → Supabase Storage → markdown image link）：
+   import matplotlib; matplotlib.use('Agg')
+   fig.savefig('/tmp/chart_xxx.png', dpi=150, bbox_inches='tight')
+   上傳到 Supabase Storage article-images bucket，取得 public URL
+   在 content 中嵌入 ![描述](public_url)
+   禁止用 ASCII art 或純文字表格替代。
+2. 數據來源標注（文末）：
+   *本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
+   數據來源：yfinance，期間：YYYY-YYYY。*
+
 Then save as DRAFT (not published) via Publisher:
 
 from src.volpred.publisher.publisher import Publisher
