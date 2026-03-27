@@ -221,5 +221,17 @@
       "k520",
       "k521"
     ]
+  },
+  {
+    "id": "E018",
+    "title": "Look-ahead bias inflates Sharpe ~10x (K524 lesson)",
+    "category": "data_quality",
+    "lesson": "K524 初版用 same-day VIX/momentum 決定 same-day weight → Sharpe 4.85。修正為 t-1 signals → Sharpe 0.57。93% alpha 是 look-ahead bias。",
+    "examples": "K524 (policy learning), K521 (Taiwan date alignment)",
+    "recommendation": "所有策略回測必須用 t-1（前一天）的信號決定 t 的倉位。用 shift(1) 明確 lag。",
+    "source_experiments": [
+      "k524",
+      "k521"
+    ]
   }
 ]

@@ -14062,5 +14062,20 @@
     ],
     "created_at": "2026-03-27T04:13:03.655384+00:00",
     "experiment_id": "k523"
+  },
+  {
+    "id": 1301,
+    "title": "K524: Decision-Focused Policy — 384 rules grid search, 0 survive BH correction. 12/VIX irreducible #6.",
+    "content": "[提出: Codex, 執行: Claude] K524: Decision-focused policy learning (384 IF-THEN rules). Look-ahead bug found+fixed (Sharpe 4.85→0.57, 93% was bias!). SPY: best rule Sharpe 0.64 vs 12/VIX 0.68 (DM p=0.95 NS). 0/384 survive BH correction. Blend: DM t=2.68 sig but driven by leverage not timing. Dominant parameter is bear weight (leverage) not VIX threshold (timing). 12/VIX irreducible #6 (K440/K470/K488/K503/K504/K524). E018: look-ahead bias inflates Sharpe ~10x.",
+    "category": "strategy",
+    "tags": [
+      "policy_learning",
+      "decision_focused",
+      "grid_search",
+      "look_ahead_bias",
+      "irreducible_kernel"
+    ],
+    "created_at": "2026-03-27T04:36:17.379514+00:00",
+    "experiment_id": "k524"
   }
 ]
