@@ -14365,5 +14365,41 @@
     "experiment_id": "k538",
     "created_at": "2026-03-27T13:46:32.129429+00:00",
     "importance": 3
+  },
+  {
+    "id": "K540",
+    "title": "K540: HAR-VIX Ensemble VT — 5 strategies all fail to beat 12/VIX (8th confirmation)",
+    "content": "[提出: User, 執行: Claude] HAR-VIX Ensemble VT Strategy。5 種組合方式利用 HAR prediction power + VIX forward-looking nature 的互補。5 期 cross-OOS (2015-2024)。\n\n**核心結果**: 12/VIX mean Sharpe=1.593。最佳 ensemble (HARReality) mean Sharpe=1.597 (delta +0.004)。Harvey t=0.596 << 3.0。\n\n策略排名: HARReality 1.597 > 12/VIX 1.593 > DisagreeMom 1.572 > DisagreeFilter 1.554 > RegimeCond 1.479 > DynBlend 1.422。\n\nBootstrap CI: HARReality vs VIX diff=+0.001 [-0.014, +0.017] P(>0)=0.500。DisagreeMom diff=-0.016 [-0.086, +0.052] P(>0)=0.321。所有 ensemble 策略 0/5 或最多 2/5 win vs VIX。\n\n**關鍵發現**: (1) Weight corr VIX vs HAR=0.806（比 K533 的 0.506 更高，因為用了完整樣本而非 OOS only）; (2) HAR/VIX vol ratio mean=0.78（HAR 通常低估 vol vs VIX）且 ratio>1.5 僅 0.7% 時間 → Reality Check 幾乎不觸發; (3) Sensitivity: 所有策略的 Sharpe monotonically approach 12/VIX as parameters → VIX-only; (4) Regime: High VIX 時所有策略都虧，HAR blend 更差（-2.32 vs VIX -1.86）。\n\n**結論**: 12/VIX irreducible kernel 第 8 次確認。HAR 的 backward-looking prediction 無法在 economic 層面改善 VIX 的 forward-looking position sizing。即使用「互補」而非「取代」的方式，HAR 也無法提供有意義的增量 alpha。Prediction ≠ application 第 6 次確認。",
+    "tags": [
+      "volatility-targeting",
+      "HAR",
+      "VIX",
+      "ensemble",
+      "null-result",
+      "cross-OOS",
+      "12/VIX-kernel"
+    ],
+    "data_source": "yfinance (SPY, GLD, ^VIX)",
+    "experiment_file": "experiments/k540_har_ensemble_vt.py",
+    "results_file": "experiments/k540_har_ensemble_vt_results.json",
+    "timestamp": "2026-03-27T13:58:21.778099+00:00",
+    "importance": 3
+  },
+  {
+    "id": "K541",
+    "title": "K541: Weekly Meta-Labeling — Practically Null, VT Edge 純粹是長期複利效應",
+    "content": "[提出: Claude(K538延伸), 執行: Claude] 週頻 meta-labeling。Feature r 比日頻好 4x (max 0.084 vs 0.02) 但仍太弱。XGBoost AUC=0.558（略好於 coin flip），regime-dependent（COVID 0.675, Bear 0.439）。\n\n最重要發現：VT 在所有 VIX regime 的週頻勝率都 <44%，weekly excess 全部為負（-0.2 到 -35.3 bps/wk）。VT edge 不在於「贏更多週」而是「贏的時候複利效果更大」——純粹的長期統計特性。\n\n簡單 VIX>25 規則 (Sharpe 0.804) 勝過所有 ML 模型。強化 K538 結論。",
+    "tags": [
+      "meta_labeling",
+      "weekly",
+      "ML",
+      "VT_strategy",
+      "null_result",
+      "compounding_effect"
+    ],
+    "data_source": "yfinance SPY+VIX weekly 2007-2026",
+    "experiment_id": "k541",
+    "created_at": "2026-03-27T13:58:34.750430+00:00",
+    "importance": 3
   }
 ]
