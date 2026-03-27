@@ -161,7 +161,7 @@ Adding the orthogonalized TSMOM factor (M2) reveals substantial trend-following 
 
 Non-equity assets display qualitatively different TSMOM loadings. Gold (GLD) and real estate (VNQ) show \textit{negative} TSMOM loadings ($-0.073$ and $-0.094$, respectively), consistent with their inverted or near-zero leverage effects. TLT shows a marginally negative loading ($-0.078$, $t = -4.55$), reflecting bonds' tendency to rally (fall) when equities fall (rise) during risk-off (risk-on) episodes.
 
-Importantly, the alpha change from M1 to M2 is mechanically zero when using orthogonalized TSMOM, confirming that our orthogonalization procedure correctly removes the component of TSMOM correlated with the market factor. The $R^2$ improvement from adding TSMOM is substantial for equity assets (e.g., SPY: $0.802 \to 0.867$, $\Delta R^2 = 0.065$) but modest for non-equity assets (GLD: $0.864 \to 0.874$, $\Delta R^2 = 0.010$).
+Importantly, the alpha change from M1 to M2 is economically negligible when using orthogonalized TSMOM, confirming that our orthogonalization procedure largely removes the component of TSMOM correlated with the market factor. The $R^2$ improvement from adding TSMOM is substantial for equity assets (e.g., SPY: $0.802 \to 0.867$, $\Delta R^2 = 0.065$) but modest for non-equity assets (GLD: $0.864 \to 0.874$, $\Delta R^2 = 0.010$).
 
 The TSMOM loading is robust to the choice of VIX threshold in the VT formula. Re-estimating M2 for SPY across all integer thresholds from 8 to 20, the orthogonalized TSMOM coefficient remains highly significant throughout ($t$-statistics ranging from 7.98 to 10.91, all $p < 0.001$). The point estimate varies modestly ($\hat{\beta}_{\text{TSMOM}}^{\perp} \in [0.10, 0.14]$), confirming that the embedded trend-following exposure is a structural feature of VIX-based de-risking rather than an artifact of a particular calibration choice.
 
@@ -321,7 +321,7 @@ $\beta_{\text{SMB}}$ & --- & --- & $-$0.009 & $-$0.012 & $-$0.022$^{**}$ \\
 $\beta_{\text{HML}}$ & --- & --- & $-$0.029$^{***}$ & $-$0.037$^{***}$ & $-$0.033$^{***}$ \\
 $\beta_{\text{RMW}}$ & --- & --- & 0.014 & 0.014 & 0.019 \\
 $\beta_{\text{CMA}}$ & --- & --- & $-$0.011 & $-$0.004 & 0.000 \\
-$\beta_{\text{MOM}}$ & --- & --- & --- & $-$0.013 & --- \\
+$\beta_{\text{MOM}}$ & --- & --- & --- & $-$0.013 & $-$0.010 \\
 $\beta_{\text{BAB}}$ & --- & --- & --- & --- & $-$0.022$^{***}$ \\
 \midrule
 $R^2$    & 0.787 & 0.849 & 0.852 & 0.852 & 0.853 \\
@@ -349,7 +349,7 @@ This boundary condition has practical implications: sector rotation investors ca
 
 Table~\ref{tab:international} extends our analysis to 13 international equity markets. The results strongly support the ``insurance pricing'' interpretation of VT. All 13 markets achieve MDD improvement under the 12/VIX overlay, with an average reduction of 28.7 percentage points ($t = 15.70$, $p < 0.001$). The effect is broad and consistent across both developed and emerging markets: Brazil (EWZ), with the highest base-case MDD of $-$77.3\%, sees a 13.2 pp reduction, while the UK (EWU), with MDD of $-$64.0\%, achieves a 33.8 pp reduction.
 
-In contrast, only 2 of 13 markets show Sharpe ratio improvement (EWT and MCHI, both marginal). The average Sharpe change is $-$0.048, confirming that VT acts as insurance rather than alpha generation: investors pay a return premium for drawdown protection.
+In contrast, only 2 of 13 markets show Sharpe ratio improvement (EWJ and MCHI, both marginal). The average Sharpe change is $-$0.048, confirming that VT acts as insurance rather than alpha generation: investors pay a return premium for drawdown protection.
 
 The cross-sectional analysis reveals that VIX sensitivity (the correlation between an asset's daily returns and VIX changes) predicts the magnitude of MDD protection. The Pearson correlation between VIX sensitivity and MDD improvement is $r = -0.770$ ($p = 0.002$, Spearman $\rho = -0.720$, $p = 0.006$). Markets that are more negatively correlated with VIX (i.e., more ``risk-off'' sensitive) benefit more from the VIX overlay.
 

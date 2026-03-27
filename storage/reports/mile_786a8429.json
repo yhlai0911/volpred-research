@@ -1,0 +1,18 @@
+{
+  "id": "mile_786a8429",
+  "title": "K528: NFP 非農數據真的會讓市場大幅波動嗎？254 次事件告訴你真相",
+  "description": "254 次 NFP 事件分析：t-test 說不顯著但 Wilcoxon 說顯著（肥尾效應）。VIX regime 才是真正決定因子——高 VIX 的 NFP 日波動是低 VIX 的 2.17 倍。4/3 NFP 前瞻分析。",
+  "content": "## K528: NFP 非農數據對市場波動率的真實影響——254 次事件的完整分析\n\n### 研究動機\n\n非農就業數據（NFP）是美國最重要的經濟指標之一，每月第一個週五發布。下週五（4/3）即將公布最新數據。我們用 254 次歷史 NFP 事件（2005-2026）做了全面的事件研究。\n\n### 核心發現：NFP 本身影響有限，VIX 才是關鍵\n\n![NFP 波動率倍數](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k528_nfp_vol_ratio_52909c.png)\n\n| 統計檢定 | 結果 | 顯著？ |\n|---------|------|--------|\n| t-test: NFP vs 全部交易日 | 1.10x, p=0.128 | **否** |\n| t-test: NFP vs 其他週五 | 1.17x, p=0.034 | 邊際 |\n| Wilcoxon 無母數檢定 | p=0.004 | **是** |\n| Vol crush（事後壓縮）| 無模式, p=0.736 | **否** |\n| VIX 預測事件波動 | r=0.451, p<0.001 | **是** |\n\n**有趣的矛盾**：t-test 說不顯著，但 Wilcoxon 說顯著。原因是**肥尾分布**——少數幾次 NFP 造成的極端波動拉高了中位數，但平均值被大量正常 NFP 日稀釋。\n\n### VIX Regime 才是真正的預測因子\n\n![VIX Regime 影響](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k528_vix_regime_f51c7f.png)\n\n高 VIX 環境下的 NFP 日，波動率是低 VIX 環境的 **2.17 倍**（t=6.70, p<0.001）。換言之：\n\n- **VIX 低的時候**：NFP 就是個普通日子\n- **VIX 高的時候**：NFP 可能放大既有的不穩定性\n\n### 與 FOMC 的差異\n\n| 特徵 | NFP | FOMC |\n|------|-----|------|\n| Vol 倍數 | 1.10x（NS） | 1.28x（顯著） |\n| Vol crush | 無 | 有（事後波動下降） |\n| VIX 預測力 | r=0.451 | r=0.52 |\n\nFOMC 有明確的 vol crush 效應（不確定性解除），NFP 則完全沒有。\n\n### 4/3 NFP 實戰建議\n\n當前 VIX = 29.71（高波動區間），這意味著：\n1. **不需要因為 NFP 特別減碼**——NFP 本身影響不顯著\n2. **但要注意 VIX 已經在高位**——高 VIX + NFP 的組合可能放大波動\n3. **57.1% 正報酬偏向**——NFP 日略偏正面（Savor & Wilson 2013 macro premium）\n4. **維持現有策略不變**——12/VIX 已經自動將持倉降至 40%\n\n---\n*實驗腳本: experiments/k528_nfp_event_study.py*\n*結果數據: experiments/k528_nfp_event_study_results.json*\n*數據來源: yfinance (SPY daily), 254 個 NFP 事件 (2005-2026)*\n*延伸自: K513 (Fed events analysis)*\n",
+  "tags": [
+    "研究",
+    "NFP",
+    "事件研究",
+    "VIX"
+  ],
+  "status": "draft",
+  "audience": "research",
+  "category": "research",
+  "created_at": "2026-03-27T12:46:52.841957+00:00",
+  "published_at": null,
+  "proposer": "Claude"
+}

@@ -1,0 +1,384 @@
+{
+  "experiment_id": "K527",
+  "title": "Volume-GARCH \u2014 Lamoureux & Lastrapes (1990) Framework",
+  "date": "2026-03-27T12:30:23.315087+00:00",
+  "status": "completed",
+  "attribution": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude]",
+  "literature": {
+    "primary": "Lamoureux & Lastrapes (1990) \"Heteroskedasticity in Stock Return Data: Volume versus GARCH Effects\" JoF 45(1):221-229",
+    "theory": "Clark (1973) MDH; Tauchen & Pitts (1983) Econometrica",
+    "related": "Hillebrand (2005) persistence inflation; Patton (2011) imperfect proxies",
+    "prior_work": "K113 (vol surprise null), K135 (GLD vol ratio OOS null), K136 (BTC vol-conditioned gamma), K418 (TW vol null), K510 (L&L replication null)"
+  },
+  "data": {
+    "source": "yfinance (daily OHLCV)",
+    "assets": [
+      "SPY",
+      "0050.TW"
+    ],
+    "period": "2005-01-01 to 2026-03-27",
+    "oos_period": "2023-01-01 to 2024-12-31",
+    "proxy_variance": "r\u00b2_t (squared return, raw scale)",
+    "proxy_volatility": "|r_t| (absolute return, raw scale)"
+  },
+  "methodology": {
+    "models": {
+      "garch11": "GARCH(1,1) baseline",
+      "vol_garch": "Volume-GARCH (GARCH-X)",
+      "vol_replacing": "Volume-replacing (no ARCH term)",
+      "gjr_vol": "GJR-GARCH + Volume"
+    },
+    "key_differences_from_k510": {
+      "detrending": "V_t / MA(V,252) ratio (not linear detrend of log volume)",
+      "proxy": "|r_t| and r\u00b2_t (K510 used only r\u00b2_t)",
+      "new_spec": "Volume-replacing model (ARCH term removed)",
+      "cross_market": "0050.TW (not QQQ)",
+      "no_lookahead": "Volume uses V_{t-1} (lagged), not V_t (contemporaneous)"
+    },
+    "estimation": "Custom MLE with L-BFGS-B",
+    "window": {
+      "SPY": 2000,
+      "0050.TW": 1500
+    },
+    "refit_every": 21,
+    "evaluation": "QLIKE (var + vol scales), MSE, DM test (Newey-West HAC)",
+    "harvey_threshold": 3.0,
+    "units_note": "Returns in %, h in %\u00b2, converted to raw for QLIKE: var=h/10000, vol=sqrt(h)/100"
+  },
+  "results": {
+    "SPY": {
+      "diagnostics": {
+        "n_obs": 5242,
+        "ljungbox_stat": 4482.514861909867,
+        "ljungbox_pval": 0.0,
+        "adf_stat": -18.31817684127439,
+        "adf_pval": 2.2687235958664946e-30,
+        "arch_lm_raw_stat": 1434.6190421437514,
+        "arch_lm_raw_pval": 3.3225650436936807e-302
+      },
+      "in_sample": {
+        "garch11": {
+          "success": true,
+          "params": {
+            "mu": 0.07776135992966861,
+            "omega": 0.030560189467781138,
+            "alpha": 0.1389799748422148,
+            "beta": 0.8366020111561246
+          },
+          "persistence": 0.9755819859983395,
+          "loglik": -2151.806969001099,
+          "aic": 4311.613938002198,
+          "bic": 4337.871771537732,
+          "arch_lm_stat": 15.285148210620589,
+          "arch_lm_pval": 0.12200652841702432
+        },
+        "vol_garch": {
+          "success": true,
+          "params": {
+            "mu": 0.07823125576351611,
+            "omega": 1e-08,
+            "alpha": 0.1655032428959323,
+            "beta": 0.7708024826071241,
+            "delta": 0.06592213643043751
+          },
+          "persistence": 0.9363057255030565,
+          "loglik": -2081.8864332774497,
+          "aic": 4173.772866554899,
+          "bic": 4206.595158474316,
+          "arch_lm_stat": 28.00489363500339,
+          "arch_lm_pval": 0.0018019949786704566
+        },
+        "vol_replacing": {
+          "success": true,
+          "params": {
+            "mu": 0.10348775768745516,
+            "omega": 1e-08,
+            "delta": 1.045671489392676,
+            "beta": 1e-08
+          },
+          "persistence": 1e-08,
+          "loglik": -2552.893341501215,
+          "aic": 5113.78668300243,
+          "bic": 5140.044516537964,
+          "arch_lm_stat": 1275.7194197695862,
+          "arch_lm_pval": 6.644540063707579e-268
+        },
+        "gjr_vol": {
+          "success": true,
+          "params": {
+            "mu": 0.04066915840961852,
+            "omega": 1e-08,
+            "alpha": 0.025178133307904728,
+            "gamma": 0.2428259219229437,
+            "beta": 0.8007992558610406,
+            "delta": 0.05580895125182479
+          },
+          "persistence": 0.9473903501304172,
+          "loglik": -2004.2167063032482,
+          "aic": 4020.4334126064964,
+          "bic": 4059.8201629097966,
+          "arch_lm_stat": 18.529165340214572,
+          "arch_lm_pval": 0.046666955772673546
+        },
+        "persistence_drop_pct": 4.025931296290852
+      },
+      "oos": {
+        "garch11": {
+          "qlike_var": -8.621598055022194,
+          "qlike_vol": -4.052592283123474,
+          "mse_vol": 3.383375435581822e-05,
+          "n_valid": 502,
+          "mean_h_pct2": 0.7546059939075356,
+          "mean_forecast_vol": 0.008407628857600625,
+          "mean_actual_vol": 0.006177277677033828
+        },
+        "vol_garch": {
+          "qlike_var": -8.611973661168514,
+          "qlike_vol": -4.0558702038404,
+          "mse_vol": 3.357288568470557e-05,
+          "n_valid": 502,
+          "mean_h_pct2": 0.7298996943936041,
+          "mean_forecast_vol": 0.00824734597227432,
+          "mean_actual_vol": 0.006177277677033828,
+          "dm_var_stat": -1.231210734881902,
+          "dm_var_pval": 0.21882170459789618,
+          "dm_vol_stat": 1.4279151819962925,
+          "dm_vol_pval": 0.15393931310329356,
+          "qlike_var_change_pct": 0.11163120563330768,
+          "qlike_vol_change_pct": -0.08088454223675431,
+          "harvey_var_pass": false,
+          "harvey_vol_pass": false
+        },
+        "vol_replacing": {
+          "qlike_var": -8.610499480374399,
+          "qlike_vol": -4.031194945914854,
+          "mse_vol": 3.5766097380016725e-05,
+          "n_valid": 502,
+          "mean_h_pct2": 0.8192542422444954,
+          "mean_forecast_vol": 0.008947984505322658,
+          "mean_actual_vol": 0.006177277677033828,
+          "dm_var_stat": -0.2723693765643993,
+          "dm_var_pval": 0.785450233110526,
+          "dm_vol_stat": -2.2872955854369623,
+          "dm_vol_pval": 0.02259460277990244,
+          "qlike_var_change_pct": 0.1287299010805737,
+          "qlike_vol_change_pct": 0.5279913624108248,
+          "harvey_var_pass": false,
+          "harvey_vol_pass": false
+        },
+        "gjr_vol": {
+          "qlike_var": -8.636241298879836,
+          "qlike_vol": -4.066702610123807,
+          "mse_vol": 3.2987584729954216e-05,
+          "n_valid": 502,
+          "mean_h_pct2": 0.7382014321465786,
+          "mean_forecast_vol": 0.008195671428908487,
+          "mean_actual_vol": 0.006177277677033828,
+          "dm_var_stat": 1.0513470712425552,
+          "dm_var_pval": 0.29360604938380996,
+          "dm_vol_stat": 2.865651289117071,
+          "dm_vol_pval": 0.004336456861395499,
+          "qlike_var_change_pct": -0.16984373157030963,
+          "qlike_vol_change_pct": -0.34818027609374463,
+          "harvey_var_pass": false,
+          "harvey_vol_pass": false
+        }
+      },
+      "trajectory_summary": {
+        "mean_baseline_persistence": 0.9707145644248754,
+        "mean_vol_persistence": 0.800210309011692,
+        "mean_drop_pct": 17.564818914013408,
+        "mean_delta": 0.15084845732347116,
+        "delta_positive_frac": 1.0,
+        "n_windows": 26
+      }
+    },
+    "0050.TW": {
+      "diagnostics": {
+        "n_obs": 4116,
+        "ljungbox_stat": 52.87785364062759,
+        "ljungbox_pval": 7.845094046403707e-08,
+        "adf_stat": -63.55415968377459,
+        "adf_pval": 0.0,
+        "arch_lm_raw_stat": 44.3804941215658,
+        "arch_lm_raw_pval": 2.812002528409187e-06
+      },
+      "in_sample": {
+        "garch11": {
+          "success": true,
+          "params": {
+            "mu": 0.06015721004594331,
+            "omega": 0.16721968088863798,
+            "alpha": 0.08290769696928528,
+            "beta": 0.798284401518401
+          },
+          "persistence": 0.8811920984876862,
+          "loglik": -2577.721363183733,
+          "aic": 5163.442726367466,
+          "bic": 5188.733274755282,
+          "arch_lm_stat": 0.26809625985297303,
+          "arch_lm_pval": 0.9999996773832484
+        },
+        "vol_garch": {
+          "success": true,
+          "params": {
+            "mu": 0.08039560565744011,
+            "omega": 0.37604122754338837,
+            "alpha": 0.06589433849719027,
+            "beta": 0.003825109550064919,
+            "delta": 0.7118741382722289
+          },
+          "persistence": 0.06971944804725519,
+          "loglik": -2233.1585849953444,
+          "aic": 4476.317169990689,
+          "bic": 4507.930355475459,
+          "arch_lm_stat": 88.03359274660001,
+          "arch_lm_pval": 1.3132825719589258e-14
+        },
+        "vol_replacing": {
+          "success": true,
+          "params": {
+            "mu": 0.07700848834118097,
+            "omega": 0.41255344988604,
+            "delta": 0.7559992058187318,
+            "beta": 0.015122455262721006
+          },
+          "persistence": 0.015122455262721006,
+          "loglik": -2269.2741497517027,
+          "aic": 4546.548299503405,
+          "bic": 4571.838847891221,
+          "arch_lm_stat": 170.65199829606468,
+          "arch_lm_pval": 2.032823211612803e-31
+        },
+        "gjr_vol": {
+          "success": true,
+          "params": {
+            "mu": 0.06775342433322246,
+            "omega": 0.3728452502022252,
+            "alpha": 1e-08,
+            "gamma": 0.13549122485213078,
+            "beta": 0.0035776327716164876,
+            "delta": 0.7123591635687191
+          },
+          "persistence": 0.07132325519768187,
+          "loglik": -2214.5488709764236,
+          "aic": 4441.097741952847,
+          "bic": 4479.033564534571,
+          "arch_lm_stat": 70.3392566087138,
+          "arch_lm_pval": 3.8128704447296905e-11
+        },
+        "persistence_drop_pct": 92.08805342593192
+      },
+      "oos": {
+        "garch11": {
+          "qlike_var": -7.863196769207305,
+          "qlike_vol": -3.7408151732908004,
+          "mse_vol": 9.571103043123397e-05,
+          "n_valid": 481,
+          "mean_h_pct2": 1.5200496337476563,
+          "mean_forecast_vol": 0.01171418565874278,
+          "mean_actual_vol": 0.00867002814401434
+        },
+        "vol_garch": {
+          "qlike_var": 26.46381725960811,
+          "qlike_vol": -3.472044123645815,
+          "mse_vol": 9.531435882965654e-05,
+          "n_valid": 481,
+          "mean_h_pct2": 1.048545753536699,
+          "mean_forecast_vol": 0.009739953815799176,
+          "mean_actual_vol": 0.00867002814401434,
+          "dm_var_stat": -1.023425400742995,
+          "dm_var_pval": 0.30662225386297415,
+          "dm_vol_stat": -1.0669830587944218,
+          "dm_vol_pval": 0.2865158367948666,
+          "qlike_var_change_pct": 436.5529063604489,
+          "qlike_vol_change_pct": 7.184825691576398,
+          "harvey_var_pass": false,
+          "harvey_vol_pass": false
+        },
+        "vol_replacing": {
+          "qlike_var": 70390.98941655889,
+          "qlike_vol": 8.353936645011942,
+          "mse_vol": 9.559146343446775e-05,
+          "n_valid": 481,
+          "mean_h_pct2": 1.0464796785682202,
+          "mean_forecast_vol": 0.009743919156315005,
+          "mean_actual_vol": 0.00867002814401434,
+          "dm_var_stat": -1.0085226461129995,
+          "dm_var_pval": 0.3137117387225481,
+          "dm_vol_stat": -1.0099233703622563,
+          "dm_vol_pval": 0.313040820882607,
+          "qlike_var_change_pct": 895295.5735384077,
+          "qlike_vol_change_pct": 323.3186152755837,
+          "harvey_var_pass": false,
+          "harvey_vol_pass": false
+        },
+        "gjr_vol": {
+          "qlike_var": 1.4448239646094356,
+          "qlike_vol": -3.6033167640916863,
+          "mse_vol": 9.459168310354963e-05,
+          "n_valid": 481,
+          "mean_h_pct2": 1.0537945170578278,
+          "mean_forecast_vol": 0.009738518692362001,
+          "mean_actual_vol": 0.00867002814401434,
+          "dm_var_stat": -1.0579002684569527,
+          "dm_var_pval": 0.29063300964116,
+          "dm_vol_stat": -1.0945498120668458,
+          "dm_vol_pval": 0.27426284802311396,
+          "qlike_var_change_pct": 118.37451111826991,
+          "qlike_vol_change_pct": 3.6756269109696884,
+          "harvey_var_pass": false,
+          "harvey_vol_pass": false
+        }
+      },
+      "trajectory_summary": {
+        "mean_baseline_persistence": 0.7436996241483095,
+        "mean_vol_persistence": 0.10877264997252192,
+        "mean_drop_pct": 85.37411524214643,
+        "mean_delta": 0.80645046564595,
+        "delta_positive_frac": 0.9047619047619048,
+        "n_windows": 21
+      }
+    }
+  },
+  "hypotheses": {
+    "H1_persistence_drop": {
+      "SPY": {
+        "base_persistence": 0.9755819859983395,
+        "vol_persistence": 0.9363057255030565,
+        "drop_pct": 4.025931296290852,
+        "confirmed": false,
+        "trajectory_mean_drop": 17.564818914013408,
+        "delta_positive_frac": 1.0
+      },
+      "0050.TW": {
+        "base_persistence": 0.8811920984876862,
+        "vol_persistence": 0.06971944804725519,
+        "drop_pct": 92.08805342593192,
+        "confirmed": true,
+        "trajectory_mean_drop": 85.37411524214643,
+        "delta_positive_frac": 0.9047619047619048
+      }
+    },
+    "H2_oos_improvement": {
+      "SPY": {
+        "best_model": "gjr_vol",
+        "best_qlike_var_change_pct": -0.16984373157030963,
+        "any_harvey_pass": false
+      },
+      "0050.TW": {
+        "best_model": "gjr_vol",
+        "best_qlike_var_change_pct": 118.37451111826991,
+        "any_harvey_pass": false
+      }
+    },
+    "H3_taiwan_stronger": {
+      "spy_drop": 4.025931296290852,
+      "tw_drop": 92.08805342593192,
+      "taiwan_stronger": true
+    }
+  },
+  "verdict": "NEGATIVE \u2014 Volume-GARCH fails OOS. Persistence drop is in-sample artifact. Confirms K510: MDH volume information is contemporaneous, not predictive.",
+  "any_harvey_pass": false,
+  "total_time_s": 53.7
+}

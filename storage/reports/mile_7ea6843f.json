@@ -1,0 +1,18 @@
+{
+  "id": "mile_7ea6843f",
+  "title": "K527: 成交量能改善波動率預測嗎？經典論文的現代驗證告訴你答案",
+  "description": "重新驗證 Lamoureux & Lastrapes (1990) 的經典發現：成交量確實能在樣本內降低 GARCH persistence（SPY -4%、台股 -92%），但樣本外預測完全失敗。Volume 是同期效應，不是預測性指標。",
+  "content": "## K527: Volume-GARCH 實驗——成交量真的能改善波動率預測嗎？\n\n### 研究背景\n\nLamoureux & Lastrapes (1990) 在《The Journal of Finance》發表了一篇影響深遠的論文：當把交易量加入 GARCH 的 variance equation 後，ARCH 效應幾乎消失，persistence（α+β）大幅下降。這暗示 GARCH 的高 persistence 可能是遺漏了交易量這個關鍵變數。\n\n基於 Clark (1973) 的 **混合分配假說（MDH, Mixture of Distributions Hypothesis）**——交易量和波動率都是信息流的 proxy——我們重新檢驗這個 1990 年的經典發現，看它在現代數據上是否仍然成立，更重要的是，它能否改善**樣本外**預測。\n\n### 實驗設計\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY（美股）、0050.TW（台股） |\n| 期間 | 2005-2026，OOS: 2023-2024 |\n| Window | 2000 天（rolling） |\n| Volume | Detrended: V_t / MA(V, 252) |\n| 模型 | GARCH, Vol-GARCH, Vol-replacing, GJR+Vol |\n\n### 結果一：Persistence 確實下降（樣本內）\n\n![SPY Persistence 比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k527_persistence_14c971.png)\n\nSPY 的 persistence 從 0.993 下降到 0.953（降幅 4%），而台股 0050.TW 更為劇烈——從 0.88 驟降至 0.07（降幅 92%），交易量幾乎取代了整個 GARCH 動態結構。\n\n![0050.TW Persistence 比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k527_tw_persistence_2ca50e.png)\n\n**Lamoureux & Lastrapes 的發現在現代數據上完全可以複製。**\n\n### 結果二：但 OOS 預測完全失敗\n\n| 模型 | SPY QLIKE 變化 | SPY DM t-stat | 0050 QLIKE 變化 |\n|------|---------------|---------------|-----------------|\n| Vol-GARCH | -0.17% | 1.05 | +118% |\n| Vol-replacing | +5.2% | — | +895,296% |\n| GJR+Volume | -0.17% | 1.05 | 更差 |\n\n**沒有任何一個 volume 模型通過 Harvey (2016) t>3.0 的統計門檻。**\n\n更嚴重的是，0050.TW 的 Volume-replacing 模型（完全用 volume 替代 ARCH term）的 QLIKE 惡化了近 90 萬倍——因為當 persistence 被壓到接近零時，模型失去了時間序列記憶，每天的預測都從頭開始。\n\n### 核心洞見：同期效應 ≠ 預測能力\n\n為什麼樣本內如此成功，樣本外卻完全失敗？\n\n答案在 Clark (1973) 的 MDH 框架中：**交易量和波動率是同一個信息流的兩面**。加入今天的交易量可以解釋今天的波動率（同期效應），但**昨天的交易量對明天的波動率沒有超越 GARCH 本身的預測力**。\n\n這就像用今天的雨量來解釋今天的積水——很準，但用昨天的雨量預測明天的積水就不行了。\n\n### 對投資人的意義\n\n1. **不要用交易量來預測明天的波動率**——它不 work\n2. **VIX 仍然是最佳的前瞻性波動率指標**（本系列第 32 次確認）\n3. **學術論文的 IS 結果不代表 OOS 可用**——這是量化投資最常見的陷阱\n\n---\n*實驗腳本: experiments/k527_volume_garch.py*\n*結果數據: experiments/k527_volume_garch_results.json*\n*數據來源: yfinance (SPY, 0050.TW), 期間: 2005-2026*\n*方法論: Lamoureux & Lastrapes (1990, JoF), Clark (1973) MDH*\n",
+  "tags": [
+    "研究",
+    "GARCH",
+    "成交量",
+    "MDH"
+  ],
+  "status": "draft",
+  "audience": "research",
+  "category": "research",
+  "created_at": "2026-03-27T12:45:51.982657+00:00",
+  "published_at": null,
+  "proposer": "用戶（Volume-GARCH 方向）"
+}

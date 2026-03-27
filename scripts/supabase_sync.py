@@ -495,7 +495,7 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             last_sync_ts = state.get("articles_last_ts", "")
             # Only sync articles published/updated after last sync
             to_sync = [item for item in feed
-                       if item.get("published_at", "") > last_sync_ts
+                       if (item.get("published_at") or "") > last_sync_ts
                        or not last_sync_ts]
             ok = 0
             for item in to_sync:

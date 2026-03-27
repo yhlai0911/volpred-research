@@ -14077,5 +14077,76 @@
     ],
     "created_at": "2026-03-27T04:36:17.379514+00:00",
     "experiment_id": "k524"
+  },
+  {
+    "id": "K528",
+    "title": "K528: NFP Event Study — Parametric/Non-parametric Disagreement, VIX Is Real Predictor",
+    "content": "[提出: Claude, 執行: Claude] NFP (Non-Farm Payrolls) 對 SPY 波動率的事件研究。254 個 NFP 事件 (2005-2026)。核心發現：(1) t-test 說不顯著 (1.10x, p=0.128) 但 Wilcoxon 說顯著 (p=0.004)——fat tails 驅動 median 而非 mean；(2) vs Friday control 邊際顯著 (1.17x, p=0.034)；(3) VIX 才是真正預測因子 (r=0.451, p<0.001)，高 VIX 的 NFP 日 vol 是低 VIX 的 2.17x (t=6.70)；(4) 無 vol crush（不同於 FOMC）；(5) 57.1% 正報酬 (p=0.028，Savor & Wilson 2013 macro premium)。結論：NFP 本身不需要減碼，VIX regime 才是關鍵。確認並延伸 K513。",
+    "tags": [
+      "NFP",
+      "event_study",
+      "VIX",
+      "SPY",
+      "parametric_vs_nonparametric",
+      "fat_tails"
+    ],
+    "data_source": "yfinance SPY daily 2005-2026",
+    "experiment_id": "k528",
+    "created_at": "2026-03-27T12:28:11.309520+00:00",
+    "importance": 2
+  },
+  {
+    "id": "K527",
+    "title": "K527: ★★ Volume-GARCH (Lamoureux & Lastrapes 1990) — IS Persistence Drop but OOS NEGATIVE",
+    "content": "[提出: 用戶, 執行: Claude] Volume-GARCH 實驗，基於 Lamoureux & Lastrapes (1990, JoF) MDH 框架。4 個 specifications: GARCH(1,1)、Volume-GARCH、Volume-replacing、GJR+Volume。detrended volume (V_t/MA252)。w=2000, OOS 2023-2024。\n\nH1 (persistence drop): SPY IS 下降 4.03% (trajectory mean 17.56%)；0050.TW 下降 92.09%（volume 幾乎取代整個 GARCH dynamics）。volume coefficient 100% 正值。\n\nH2 (OOS improvement): **SPY 全部失敗**——最佳 GJR+Volume QLIKE 僅改善 0.17%，DM t=1.05 遠低於 Harvey 3.0。0050.TW 更差——Volume-replacing QLIKE 惡化 895,296%（因 beta≈0 失去時序記憶）。\n\nH3 (Taiwan stronger): IS 確認（92% vs 4%）但 OOS 反而更差。經典 overfitting：volume 是同期效應不是預測性的。\n\n**核心洞見**：L&L 1990 persistence drop 是 contemporaneous effect（Clark 1973 MDH——volume 和 vol 同源於 info flow），不是 predictive。昨天的 volume 對明天的 vol 沒有超越 GARCH dynamics 的預測力。確認並延伸 K113 結論。",
+    "tags": [
+      "volume",
+      "GARCH",
+      "MDH",
+      "persistence",
+      "null_result",
+      "SPY",
+      "0050.TW",
+      "Lamoureux_Lastrapes"
+    ],
+    "data_source": "yfinance SPY + 0050.TW daily 2005-2026",
+    "experiment_id": "k527",
+    "created_at": "2026-03-27T12:44:07.484313+00:00",
+    "importance": 3
+  },
+  {
+    "id": "K526",
+    "title": "K526: GARCH-MIDAS (Engle, Ghysels & Sohn 2013) — OOS 未勝 GJR-GARCH，但 regime 轉換期有優勢",
+    "content": "[提出: Claude, 執行: Claude] GARCH-MIDAS 實驗。K=12 月 MIDAS lags，w=2000，OOS 2017-2024 (1773天，7年)。兩個 specs: MIDAS-RV (22日 realized variance) 和 MIDAS-VIX (22日平均 VIX)。Numba 加速，11 秒完成。\n\n結果: GJR-GARCH QLIKE=1.5172 最佳；MIDAS-VIX 1.5265 (-0.6%)、MIDAS-RV 1.5290 (-0.8%)。所有 DM t<0.5，遠低於 Harvey 3.0。\n\n有趣子期間發現: MIDAS 在 2020 COVID (1.41 vs 1.60) 和 2022 升息期 (1.41 vs 1.46) 勝出——long-run component 在 regime 轉換時有優勢，但穩定期增加 noise。\n\n成分分解: short-run g 解釋 90.8% 總 variance，long-run τ 僅 11.1%。SPY 日頻 GARCH dynamics 主導。theta 100% 正值（higher past RV → higher long-run vol）。\n\n結論: GARCH-MIDAS 理論優美（decomposition），但 OOS 未勝 GJR-GARCH。GJR 仍是最 parsimonious + accurate 選擇。",
+    "tags": [
+      "GARCH-MIDAS",
+      "mixed_frequency",
+      "SPY",
+      "null_result",
+      "regime_transition",
+      "Engle_Ghysels"
+    ],
+    "data_source": "yfinance SPY + VIX daily 2010-2024",
+    "experiment_id": "k526",
+    "created_at": "2026-03-27T12:53:18.481288+00:00",
+    "importance": 3
+  },
+  {
+    "id": "K529",
+    "title": "K529: ★★★ Rough Volatility (H=0.1) — HAR-Rough 顯著勝 GJR-GARCH (DM=-7.04) 但未勝 EWMA",
+    "content": "[提出: Claude, 執行: Claude] Rough volatility 實驗（跳躍式探索）。Gatheral variogram 確認 SPY log-vol H=0.1004 (R²=0.995)，100% 觀測期都是 'rough' (H<0.5)。但 DFA 給 H=1.01（long memory！）、wavelet 給 H=-0.07——三個 estimator 測量不同東西。\n\n5 個模型 OOS 2023-2024 (502天):\n1. HAR-Rough: QLIKE 0.3788 **最佳**\n2. EWMA(0.94): 0.3937\n3. RoughVol-Const: 0.4656\n4. RoughVol-TV: 0.4841\n5. GJR-GARCH: 0.6157\n\nDM test: HAR-Rough vs GJR = -7.04***（顯著！）。但 HAR-Rough vs EWMA = -1.56（不顯著）。\n\n**關鍵發現**: Time-varying H 反而更差 (DM=+5.83 vs constant H)——rolling estimation 引入 noise。Roughness 是事實 (H~0.1)，但利用它需要 multi-scale 結構 (HAR) 而非 pure fBm mean-reversion。\n\n文獻確認: Gatheral et al. (2018) roughness 完全可複製。但 Frontiers (2025) 12.3% improvement claim 可能依賴 intraday RV，日頻 proxy 不足。",
+    "tags": [
+      "rough_volatility",
+      "Hurst_exponent",
+      "HAR",
+      "fBm",
+      "SPY",
+      "jump_direction",
+      "DM_significant"
+    ],
+    "data_source": "yfinance SPY daily 2005-2026",
+    "experiment_id": "k529",
+    "created_at": "2026-03-27T12:53:18.481486+00:00",
+    "importance": 4
   }
 ]
