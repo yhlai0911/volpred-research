@@ -327,6 +327,14 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 **反面教材**：K503（VIX mean-reversion）如果先查知識庫就會發現 12/VIX 本身就是 MR trade；K504（STLFSI4）如果先查會發現 VIX 已被確認 31 次 sufficient。這些 null results 本可避免。
 
+**Step 4: 跨市場驗證（美股無效 ≠ 其他市場無效）**
+12. 在美股測完的方法，如果有潛力也要在**台股（0050.TW）**測試——特別是使用外生變數的方法（K461 SSVS 在台股選出 SPY PIP=1.000，美股選空模型）
+13. 台股特性：高波動（amplification 4.6x）、US lead-lag、不同 gamma、外部驅動
+
+**Step 5: 效率檢查（超時 ≠ 方法無效）**
+14. Agent 超時（exit 144）時，先檢查**代碼效率**（向量化、refit 頻率、numba），不要直接下「方法無效」結論（K419→K426 教訓：1.5s vs timeout）
+15. 設計實驗時預估運行時間，控制在合理範圍（< 3-5 分鐘）
+
 ### 研究多元化（必須遵守）
 **不要停留在模型舒適區。** 已收斂的結論不需要繼續堆積 null results。
 
