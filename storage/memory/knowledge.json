@@ -14823,5 +14823,57 @@
     "experiment_id": "k568",
     "created_at": "2026-03-27T21:17:15.682530+00:00",
     "importance": 4
+  },
+  {
+    "id": "K570",
+    "title": "K570: Earnings Season Volatility Pattern — VT should NOT adjust during earnings season",
+    "content": "[提出: User, 執行: Claude] NULL RESULT — Earnings season (weeks 3-5 of Jan/Apr/Jul/Oct, 18.5% of days) has NO systematic effect on SPY vol, VIX, or VT performance. RV t=-0.22 (p=0.82), VIX t=-0.68 (p=0.50), abs return t=-0.36 (p=0.72), Levene F=0.12 (p=0.73). All NS.\n\n3 strategies tested: (1) Earnings-Enhanced 10/14 VIX → Sharpe 1.338 vs baseline 1.425, DM t=1.51. (2) Earnings-Only VT → Sharpe 0.472, DM t=-1.61. (3) Anti-Earnings → Sharpe 1.084, DM t=-0.45. ALL fail Harvey t>3.0.\n\nCross-OOS (3 periods): max DM t=2.30 (Period 3 enhanced), still <3.0. Year-by-year: Enhanced wins only 7/21 years (33%, binomial p=0.19). VT excess return during earnings (+0.50%/yr) vs non-earnings (+3.47%/yr) is NOT significantly different (t=-0.46, p=0.65).\n\n**Confirms K498/K412/K80: index diversification absorbs individual stock earnings effects. VIX sufficient statistic reconfirmed.**",
+    "tags": [
+      "earnings_season",
+      "seasonality",
+      "VT策略",
+      "null_result",
+      "vix_sufficient"
+    ],
+    "data_source": "yfinance (SPY, ^VIX) 2005-2026",
+    "experiment_id": "k570",
+    "created_at": "2026-03-27T22:15:50.849620+00:00",
+    "importance": 2
+  },
+  {
+    "id": "K569",
+    "title": "K569: Piecewise VT Validation — 6/8 checks pass, deployment ready as conservative tier",
+    "content": "[提出: User, 執行: Claude] 8-check validation of Piecewise VT (w=1 if VIX<12, ramp to 0 at VIX=20, w=0 if VIX>20). From K568 IS optimization.\n\nFULL SAMPLE (2005-2026): Sharpe 1.327 vs 12/VIX 1.178 vs B&H 0.729. MDD -5.4% vs -10.2% vs -32.5%. CAGR 9.1% vs 11.4% vs 11.5%. Vol 5.2% vs 7.7% vs 13.5%.\n\nT1 Harvey (FAIL): DM t=-1.30 vs B&H (return lower), JKM z=+2.84 (Sharpe higher but t<3). Piecewise LOWERS return but improves risk-adjusted ratio.\nT2 Cross-OOS (PASS): Primary 4/5 wins vs B&H, 4/5 vs 12/VIX Sharpe, 5/5 MDD better. Alt 5/6, 5/6, 6/6. Only loses in 2009-2013 bull recovery.\nT3 Sensitivity (PASS): c1=[10-14], c2=[18-26] grid. Sharpe std 0.046 = LOW/robust.\nT4 TX Cost (PASS): Advantage vanishes at ~19bp. PW turnover 14.1 vs 12/VIX 7.9 = 1.8x higher.\nT5 Crisis MDD (PASS): GFC -0.56% vs -10.2% (94.5% reduction). COVID -0.27% vs -4.4% (93.9%). 2022 -0.11% vs -6.6% (98.3%). Trump tariff -0.49% vs -2.95% (83.3%).\nT6 Bootstrap (PASS): P(PW > B&H)=99.8%. P(PW > 12/VIX)=83.4%. PW Sharpe CI [0.947, 1.733].\nT7 Taiwan: PW_12_25 best but marginal vs 8.63/VIX (DM t=1.82, not significant).\nT8 Comparison: PW gives up ~2.2% annual return for ~4.8% less MDD. Vol reduction vs B&H: 61.8% vs 42.8%.\n\nDEPLOYMENT: 6/8 pass. Ready as conservative tier. NOT replacement for 12/VIX — COMPLEMENT for risk-averse investors. Harvey fails because piecewise has LOWER return than B&H (it earns less but with far less risk). VIX 12-20 ramp zone covers 57% of trading days.",
+    "tags": [
+      "piecewise",
+      "VT",
+      "conservative",
+      "validation",
+      "deployment",
+      "risk_averse",
+      "MDD",
+      "cross_OOS"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX+0050.TW 2005-2026",
+    "experiment_id": "k569",
+    "created_at": "2026-03-27T22:19:14.988553+00:00",
+    "importance": 4
+  },
+  {
+    "id": "K569",
+    "title": "K569: ★★★ Piecewise VT — 6/8 PASS, Harvey z=2.84 (just miss), GFC MDD -0.56% extraordinary",
+    "content": "[提出: Claude, 執行: Claude] K568 Piecewise (c1=12,c2=20) 深度驗證。Sharpe 1.327, MDD -5.4%, CAGR 9.1%。vs 12/VIX: Sharpe +0.149, MDD -4.8pp better, return -2.3pp worse。\n\nHarvey DM vs B&H: t=-1.30 FAIL (less return)。JKM Sharpe z=2.84 (just miss 3.0)。Cross-OOS: 4/5 vs B&H, 5/5 MDD better。Sensitivity robust (std=0.046)。Bootstrap P(>B&H)=99.8%, P(>12/VIX)=83.4%。\n\nCrisis MDD: GFC -0.56% (94.5% reduction), COVID -0.27%, 2022 -0.11%。VIX>20 完全出場（32.8% of days）。Taiwan 不推薦（太保守）。\n\n結論：6/8 pass。Harvey 差一點但 crisis protection 無與倫比。適合保守型投資人作為 12/VIX 的替代方案。",
+    "tags": [
+      "piecewise",
+      "conservative",
+      "risk_averse",
+      "MDD",
+      "crisis_protection",
+      "near_Harvey"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX 2005-2026",
+    "experiment_id": "k569",
+    "created_at": "2026-03-27T22:20:06.927755+00:00",
+    "importance": 4
   }
 ]
