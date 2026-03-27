@@ -216,7 +216,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 uv run volpred summary                              # 研究摘要
 uv run volpred analyze-data --asset SPY              # 資料特性
 uv run volpred run-experiment --asset SPY --model gjr_arch --window 2000
-uv run python scripts/build_knowledge_index.py build # 知識索引重建
+uv run python scripts/build_knowledge_index.py auto  # 知識索引（增量，偵測變化才重建，省 API）
 
 # 每日運營
 uv run python scripts/daily_update.py                # 每日更新（策略計算 + 績效重算 + Supabase 同步）
