@@ -14348,5 +14348,22 @@
     "experiment_id": "k539",
     "created_at": "2026-03-27T13:43:57.042900+00:00",
     "importance": 2
+  },
+  {
+    "id": "K538",
+    "title": "K538: Meta-Labeling ML — Null, VT 日頻 outperformance 不可預測",
+    "content": "[提出: Codex #5, 執行: Claude] Meta-labeling (López de Prado 2018) for VT on/off。16 features (VIX/momentum/HAR/cross-asset/term structure)，3 models (Logistic/XGBoost/RF)。\n\nAll 16 features |r|<0.02 with next-day VT-vs-BH outcome。AUC 0.48-0.52（coin flip）。Walk-forward: Logistic Sharpe 0.89 (0% VT = pure B&H), RF 0.51 (82% VT), XGBoost 0.79 (6.5% VT)。全部不如 pure VT (0.97)。\n\n核心洞見：VT edge 來自長期 VIX mean-reversion (~4%/yr insurance premium)，不來自 day-to-day predictable patterns。Daily VT outperformance 本質上是隨機的——meta-model 無法改善 \"always VT\"。\n\n限制：日頻可能太 noisy，週/月頻聚合可能有信號。",
+    "tags": [
+      "meta_labeling",
+      "ML",
+      "VT_strategy",
+      "null_result",
+      "Codex_suggestion",
+      "action_first"
+    ],
+    "data_source": "yfinance SPY + VIX + multiple 2012-2026",
+    "experiment_id": "k538",
+    "created_at": "2026-03-27T13:46:32.129429+00:00",
+    "importance": 3
   }
 ]
