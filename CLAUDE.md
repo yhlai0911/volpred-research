@@ -335,6 +335,11 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 14. Agent 超時（exit 144）時，先檢查**代碼效率**（向量化、refit 頻率、numba），不要直接下「方法無效」結論（K419→K426 教訓：1.5s vs timeout）
 15. 設計實驗時預估運行時間，控制在合理範圍（< 3-5 分鐘）
 
+**Step 6: 錯誤處理與 AI 協作規則**
+16. 程式跑不出結果或產生錯誤時，**必須用 Codex CLI 檢查並修正**——不要自己猜、不要反覆重試同一個錯
+17. Gemini API 額度用完時，**轉由 Codex CLI 協助**（embedding 除外的分析任務）
+18. 為避免 Gemini API 額度快速用完：知識索引用 `auto`（增量）不用 `build`（全量），每 session 論文修訂任務**不可過於集中**（分散在不同時段執行）
+
 ### 研究多元化（必須遵守）
 **不要停留在模型舒適區。** 已收斂的結論不需要繼續堆積 null results。
 

@@ -706,3 +706,12 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 4. 🔴 日期不一致：data section 說 2017-2025 但引用 2026-03 驗證
 5. 🔴 gamma window 先說 "non-overlapping" 後說 "504-day stepped by 63 days"（矛盾）
 6. 裁判最可能批評：heavily searched design overstates OOS results，Asian arbitrage 不 survive implementability
+
+#### Codex 審查：VT-Trend-Following 論文（2026-03-27）
+**3 個最弱聲明 + 3 個錯誤：**
+1. ⚠️ "almost entirely independent of trend following" 語氣過強（只 5 assets + MDD 是單一路徑統計）
+2. ⚠️ gamma "mechanical explanation" 過於因果（N=22 mixed cross-section，是 correlation 非 mechanism）
+3. ⚠️ "irreducible" / "VT≠TF" 的 trend strategy 比較缺少表格/specification 細節
+4. 🔴 L164 "mechanically zero" vs Table 1 報非零 Δalpha（矛盾）
+5. 🔴 Table 3 M5 描述含 MOM+BAB 但 β_MOM 空白、N 常數但 note 說 post-2011
+6. 🔴 L352 說 EWT 改善但表格是 EWJ（text/table mismatch）
