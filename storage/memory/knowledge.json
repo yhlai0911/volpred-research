@@ -13995,5 +13995,20 @@
     ],
     "created_at": "2026-03-27T01:02:34.884638+00:00",
     "experiment_id": "k519"
+  },
+  {
+    "id": 1297,
+    "title": "K520: ★★★ K519 Sensitivity — ROBUST: 4/4 dimensions wide safe zones. OK to list.",
+    "content": "[提出: Claude(上架驗證), 執行: Claude] K520: K519 sensitivity analysis. **全部穩健**: TX safe 1-7bp (breakeven 10bp). VIX threshold ALL work (15-∞). SPY signal ALL work (1d/2d/5d/none). VT sizing ALL 25 combos 5/5 OOS. Start date stable (all t>3.6). Gap autocorr weak (|ACF|<0.04). ⚠️ SPY 2-day momentum Sharpe=3.549 可疑（可能 data artifact，需獨立調查）。結論：K519 策略在寬參數範圍內穩健，不是參數過擬合。",
+    "category": "strategy",
+    "tags": [
+      "sensitivity",
+      "robustness",
+      "listing_ready",
+      "K519_validation",
+      "wide_safe_zone"
+    ],
+    "created_at": "2026-03-27T01:11:09.970636+00:00",
+    "experiment_id": "k520"
   }
 ]
