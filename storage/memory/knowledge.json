@@ -14047,5 +14047,20 @@
     ],
     "created_at": "2026-03-27T02:42:57.680743+00:00",
     "experiment_id": "k522"
+  },
+  {
+    "id": 1300,
+    "title": "K523: Put-Call / VIX Percentile — Null strategy, but VIX extreme+momentum t=3.17 (academic)",
+    "content": "[提出: Gemini, 執行: Claude] K523: VIX percentile rank as P/C ratio proxy (CBOE data blocked). All contrarian strategies < B&H in 2023-2025 OOS. VIX 90th pctile annual return 33% vs 10th 8.2% (IS sig) but 1d t=0.94 (NS). Interesting: VIX>=80 AND momentum<0 → t=3.17 (Harvey pass!) but only 43/752 days (too rare). Taiwan 0050: all NS. Consistent with G8/K418.",
+    "category": "strategy",
+    "tags": [
+      "put_call_ratio",
+      "VIX_percentile",
+      "sentiment",
+      "null_result",
+      "academic_only"
+    ],
+    "created_at": "2026-03-27T04:13:03.655384+00:00",
+    "experiment_id": "k523"
   }
 ]
