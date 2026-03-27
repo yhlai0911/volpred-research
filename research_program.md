@@ -697,3 +697,12 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 4. ⚠️ Table 3 策略比較混用 2010-2026/2016-2026/2020-2026 不同期間——not apples-to-apples
 5. ⚠️ 29 switches/year × 0.3%/switch ≠ 1.7% annual cost（算術錯誤需修正）
 6. 語氣過於 promotional（"formal statistical confirmation", "fatal timing problem"）→ 需 tone down
+
+#### Codex 第6次審查：Leverage-Direction 論文（2026-03-27）
+**3 個最弱聲明 + 邏輯錯誤：**
+1. ⚠️ TZ arbitrage 在 intro/conclusion 說 "tradable alpha" Sharpe 1.61，但 appendix 承認 78% 不可捕捉、o2o fails Harvey
+2. ⚠️ gamma>0.10 model selection rule 看似 post-hoc（12 cases 太少），且同一 SPY 數據後面說 symmetric GARCH outranks GJR
+3. ⚠️ Proposition 1 的 rank correlation 接近 mechanical（beta_trend 由 GJR gamma 生成，非獨立驗證）
+4. 🔴 日期不一致：data section 說 2017-2025 但引用 2026-03 驗證
+5. 🔴 gamma window 先說 "non-overlapping" 後說 "504-day stepped by 63 days"（矛盾）
+6. 裁判最可能批評：heavily searched design overstates OOS results，Asian arbitrage 不 survive implementability
