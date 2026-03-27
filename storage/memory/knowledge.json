@@ -14806,5 +14806,22 @@
     "data_source": "yfinance (SPY/EFA/EWZ/EWJ/EWU/FXI/GLD/VIX, 2005-2026)",
     "created_at": "2026-03-27T20:15:31.075039+00:00",
     "experiment_id": "k567"
+  },
+  {
+    "id": "K568",
+    "title": "K568: ★★★★ Optimal Weight Function — 12/VIX 是 return-optimal，非線性只改善 risk（preference not dominance）",
+    "content": "[提出: Claude, 執行: Claude] 7 函數族 427 configs。12/VIX return 12.5%/yr = 所有函數中最高。Piecewise Sharpe 1.803 (best) 但 return 只 9.4%——靠 vol 從 7.3% 降到 4.1%。MDD -7.2% → -3.0%。\n\n3 nonlinear (piecewise/power/sigmoid) 3/3 cross-OOS，但 DM t 全為負（return 更低）。Linear c=10-14 Sharpe flat curve。\n\n**結論：12/VIX 不是 suboptimal——它最大化 return extraction。非線性形式用保守 truncate 換更高 Sharpe，但犧牲 3-5% annual return。是 return vs risk 的偏好選擇。**",
+    "tags": [
+      "weight_function",
+      "optimal",
+      "12VIX",
+      "nonlinear",
+      "piecewise",
+      "return_vs_risk"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX 2004-2026",
+    "experiment_id": "k568",
+    "created_at": "2026-03-27T21:17:15.682530+00:00",
+    "importance": 4
   }
 ]
