@@ -64,7 +64,7 @@ Recent work has explored neural network approaches to volatility forecasting. Hy
 
 \subsection{Data}
 
-We use daily adjusted closing prices for seven exchange-traded assets: SPDR S\&P 500 ETF Trust (SPY), Invesco QQQ Trust (QQQ), iShares MSCI Emerging Markets ETF (EEM), SPDR Gold Shares (GLD), iShares Silver Trust (SLV), iShares 20+ Year Treasury Bond ETF (TLT), and Bitcoin (BTC-USD). Data are sourced from Yahoo Finance for the period January 2017 through December 2025. For U.S.-listed ETFs, Yahoo Finance prices reflect official exchange data with corporate action adjustments; we verify price accuracy against Bloomberg terminal data for key crisis dates (COVID crash, March 2020; Iran crisis, March 2026) and find no discrepancies. Daily returns are computed as simple percentage changes $r_t = (P_t - P_{t-1})/P_{t-1}$.
+We use daily adjusted closing prices for seven exchange-traded assets: SPDR S\&P 500 ETF Trust (SPY), Invesco QQQ Trust (QQQ), iShares MSCI Emerging Markets ETF (EEM), SPDR Gold Shares (GLD), iShares Silver Trust (SLV), iShares 20+ Year Treasury Bond ETF (TLT), and Bitcoin (BTC-USD). Data are sourced from Yahoo Finance for the period January 2017 through March 2026. % Codex-R6-fix: date range unified to match extended OOS (was "December 2025") For U.S.-listed ETFs, Yahoo Finance prices reflect official exchange data with corporate action adjustments; we verify price accuracy against Bloomberg terminal data for key crisis dates (COVID crash, March 2020; Iran crisis, March 2026) and find no discrepancies. Daily returns are computed as simple percentage changes $r_t = (P_t - P_{t-1})/P_{t-1}$.
 
 Table 1 reports descriptive statistics. All return series reject normality (Jarque-Bera p < 0.001), exhibit significant ARCH effects (Engle's LM test p < 0.001), and are stationary (ADF p < 0.001). Excess kurtosis ranges from 3.52 (GLD) to 14.61 (SPY), motivating the consideration of fat-tailed distributions for VaR estimation.
 
@@ -125,7 +125,7 @@ We apply Kupiec's (1995) unconditional coverage test (LR statistic, $\chi^{2}$ w
 
 \subsubsection{Leverage Direction Analysis}
 
-To analyze the temporal stability of the leverage direction, we estimate GJR-GARCH on non-overlapping quarterly windows (63 trading days apart, each using 504 days of data) and collect the gamma estimates. We test:
+To analyze the temporal stability of the leverage direction, we estimate GJR-GARCH on semi-overlapping quarterly windows (504-day windows advanced by 63 trading days) and collect the gamma estimates. % Codex-R6-fix: "non-overlapping" corrected to "semi-overlapping" to match Section 4 description We test:
 \begin{itemize}
 \item \textbf{H0:} $E[\gamma] \geq 0$ vs. \textbf{H1:} $E[\gamma] < 0$ (inverted leverage)
 \end{itemize}
