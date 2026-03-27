@@ -410,16 +410,38 @@ def update_index():
     all_docs = _load_all_docs()
     print(f"  Total current docs: {len(all_docs)}")
 
-    # Find new documents by comparing hashes
-    new_docs = []
+    # Compute current hashes for all docs
+    current_hashes = {}
     for doc in all_docs:
         h = compute_doc_hash(doc["text"])
+        current_hashes[h] = doc
+
+    # Delete stale rows (docs that were edited/removed — old hash no longer exists)
+    stale_hashes = existing_hashes - set(current_hashes.keys())
+    if stale_hashes:
+        print(f"\n  Removing {len(stale_hashes)} stale entries (edited/deleted docs)...")
+        # LanceDB delete uses SQL-like filter; delete in batches to avoid overly long expressions
+        stale_list = list(stale_hashes)
+        for i in range(0, len(stale_list), 50):
+            batch = stale_list[i : i + 50]
+            filter_expr = "doc_hash IN (" + ", ".join(f"'{h}'" for h in batch) + ")"
+            table.delete(filter_expr)
+        print(f"  Removed {len(stale_hashes)} stale entries")
+
+    # Find new documents by comparing hashes
+    new_docs = []
+    for h, doc in current_hashes.items():
         if h not in existing_hashes:
             doc["_hash"] = h
             new_docs.append(doc)
 
-    if not new_docs:
+    if not new_docs and not stale_hashes:
         print("\nNo new documents found. Index is up to date.")
+        return
+
+    if not new_docs:
+        total = len(existing_hashes) - len(stale_hashes)
+        print(f"\nIndex cleaned: -{len(stale_hashes)} stale entries (total: {total})")
         return
 
     print(f"\n  New documents to index: {len(new_docs)}")
@@ -448,8 +470,8 @@ def update_index():
 
     # Add to existing table
     table.add(new_data)
-    total = len(existing_hashes) + len(new_data)
-    print(f"Index updated: +{len(new_data)} new entries (total: {total})")
+    total = len(existing_hashes) - len(stale_hashes) + len(new_data)
+    print(f"Index updated: +{len(new_data)} new, -{len(stale_hashes)} stale (total: {total})")
 
 
 # ── Search ────────────────────────────────────────────────────────────
@@ -611,12 +633,24 @@ if __name__ == "__main__":
 
     cmd = sys.argv[1]
     if cmd == "auto":
-        # Detect changes in memory files, only rebuild if changed
+        # Detect changes in memory files + other indexed sources
         memory_dir = Path(__file__).resolve().parent.parent / "storage" / "memory"
         state_file = memory_dir.parent / ".knowledge_index_state.json"
         current = {}
-        for f in sorted(memory_dir.glob("*.json")):
-            current[f.name] = f.stat().st_mtime
+        # Core memory files
+        watch_files = list(sorted(memory_dir.glob("*.json")))
+        # Additional indexed sources outside memory/
+        watch_files.append(memory_dir.parent / "reports" / "feed.json")
+        watch_files.append(Path(__file__).resolve().parent.parent / "research_program.md")
+        ref_dir = Path(__file__).resolve().parent.parent / ".claude" / "skills" / "autonomous-research" / "references"
+        if ref_dir.exists():
+            watch_files.extend(sorted(ref_dir.glob("*.md")))
+        paper_complete = Path(__file__).resolve().parent.parent / "paper_complete.md"
+        if paper_complete.exists():
+            watch_files.append(paper_complete)
+        for f in watch_files:
+            if f.exists():
+                current[str(f.name)] = f.stat().st_mtime
         prev = {}
         if state_file.exists():
             prev = json.loads(state_file.read_text())
