@@ -97,12 +97,13 @@ Write a complete research article in 繁體中文 Markdown about [topic].
 Include: summary, method table, key findings with interpretation, practical implications.
 
 MANDATORY — 每篇文章必須包含：
-1. 真正的圖表（matplotlib PNG → Supabase Storage → markdown image link）：
-   import matplotlib; matplotlib.use('Agg')
-   fig.savefig('/tmp/chart_xxx.png', dpi=150, bbox_inches='tight')
-   上傳到 Supabase Storage article-images bucket，取得 public URL
-   在 content 中嵌入 ![描述](public_url)
-   禁止用 ASCII art 或純文字表格替代。
+1. 真正的圖表（使用 volpred.charts 模組）：
+   from volpred.charts import generate_bar_chart, upload_chart, embed_chart
+   path = generate_bar_chart(labels=[...], values=[...], title='...', ylabel='...')
+   url = upload_chart(path)
+   content = embed_chart(content, url, '圖表描述')
+   可用函式：generate_bar_chart, generate_grouped_bar_chart, generate_line_chart, generate_heatmap
+   禁止用 ASCII art 或純文字表格替代真正的圖表。
 2. 數據來源標注（文末）：
    *本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
    數據來源：yfinance，期間：YYYY-YYYY。*
