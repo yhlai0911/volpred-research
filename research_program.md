@@ -688,3 +688,12 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] 需要：台指期貨歷史日頻數據（TAIFEX 或 yfinance TWF=F?）
 - [ ] 測試：buy TX futures at close, sell at open, SPY-conditioned
 - [ ] 如果 Net Sharpe > 0.5 + cross-OOS 4/5 → 第一個可能上架的新策略
+
+#### Codex 第6次審查：Taiwan VT 論文（2026-03-27）
+**5 個需修正的問題：**
+1. ⚠️ 4.6x amplification 用 10 個股票樣本太小，機制解釋（correlation asymmetry/retail herding）過強
+2. ⚠️ Opening auction "remarkably efficient" 語氣太強——只有 c2c-o2o gap 不算直接的 auction efficiency test
+3. ⚠️ TZ alpha 用不可交易的 c2c headline，o2o Sharpe 低於 Harvey——混淆了
+4. ⚠️ Table 3 策略比較混用 2010-2026/2016-2026/2020-2026 不同期間——not apples-to-apples
+5. ⚠️ 29 switches/year × 0.3%/switch ≠ 1.7% annual cost（算術錯誤需修正）
+6. 語氣過於 promotional（"formal statistical confirmation", "fatal timing problem"）→ 需 tone down
