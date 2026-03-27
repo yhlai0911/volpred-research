@@ -48,25 +48,40 @@ class YFinanceProvider:
         DataError
             If the download fails or returns no data.
         """
-        try:
-            df = yf.download(
-                ticker,
-                start=start,
-                end=end,
-                interval=interval,
-                progress=False,
-                auto_adjust=False,
-            )
-        except Exception as exc:
-            raise DataError(
-                f"Failed to download data for '{ticker}': {exc}"
-            ) from exc
+        import time
 
-        if df is None or df.empty:
-            raise DataError(
-                f"No data returned for '{ticker}' "
-                f"(start={start}, end={end}, interval={interval})."
-            )
+        max_retries = 3
+        last_exc = None
+
+        for attempt in range(1, max_retries + 1):
+            try:
+                df = yf.download(
+                    ticker,
+                    start=start,
+                    end=end,
+                    interval=interval,
+                    progress=False,
+                    auto_adjust=False,
+                )
+            except Exception as exc:
+                last_exc = exc
+                if attempt < max_retries:
+                    time.sleep(5 * attempt)
+                    continue
+                raise DataError(
+                    f"Failed to download data for '{ticker}' after {max_retries} attempts: {exc}"
+                ) from exc
+
+            if df is not None and not df.empty:
+                break
+
+            if attempt < max_retries:
+                time.sleep(5 * attempt)
+            else:
+                raise DataError(
+                    f"No data returned for '{ticker}' after {max_retries} attempts "
+                    f"(start={start}, end={end}, interval={interval})."
+                )
 
         # yfinance may return MultiIndex columns when downloading a single
         # ticker — flatten if needed.
