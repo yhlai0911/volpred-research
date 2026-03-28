@@ -15377,5 +15377,24 @@
     "experiment_id": "k627",
     "created_at": "2026-03-29T01:42:49.686460",
     "importance": 2
+  },
+  {
+    "id": "K628b",
+    "title": "K628b: ★★ Cross-Asset Vol Spillover Network — SPY dominant transmitter, 0050.TW pure receiver",
+    "content": "[提出: 跳躍探索/網絡模型, 執行: Claude] Diebold-Yilmaz spillover index + Granger causality + Forbes-Rigobon contagion test，5 資產（SPY/GLD/TLT/0050.TW/USO），2010-2026。SPY 是主要傳播者（net +43.7%），0050.TW 是純接收者（OUT=0, IN=2）。高波動 regime 網絡密度翻倍（11 vs 4 Granger links）。Forbes-Rigobon：無傳染（p>0.20），只是相互依存——危機時相關性上升完全由方差增加解釋。Total spillover 均值 25.8%（9.5%-51.6%），COVID 和 2022 bear market 峰值。Spillover-informed 配置 NULL（Sharpe 1.15 vs equal weight 1.21）。論文引用價值：支持 Taiwan VT 論文的 'US lead-lag' narrative。",
+    "tags": [
+      "spillover",
+      "network",
+      "Granger-causality",
+      "contagion",
+      "cross-asset",
+      "SPY",
+      "0050.TW",
+      "Forbes-Rigobon"
+    ],
+    "data_source": "yfinance SPY/GLD/TLT/0050.TW/USO 2010-2026",
+    "experiment_id": "k628b",
+    "created_at": "2026-03-29T01:49:31.554015",
+    "importance": 3
   }
 ]
