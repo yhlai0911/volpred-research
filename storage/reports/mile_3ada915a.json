@@ -15,5 +15,6 @@
   ],
   "created_at": "2026-03-23T04:10:43.656411+00:00",
   "published_at": "2026-03-23T05:33:00.977106+00:00",
-  "status": "published"
+  "status": "published",
+  "content": "## 摘要\n[提出: Q10/T9 延伸, 執行: Claude]\nVRP（VIX - Realized Vol）跨 7 個資產的結構分析。SPY VRP +3.7%（恐慌溢價正常），但 BTC VRP **-31.8%**——加密市場的實際波動遠超 VIX 隱含。GLD VRP→未來報酬 r=0.084★ 最強——黃金在恐慌過度定價時表現特別好。所有 VRP 擇時策略都輸 B&H（Sharpe 0.40 vs 1.18），跨資產排名 L/S 也不顯著 (t=-0.36)。結論：VRP 是量化恐慌溢價的好工具，但不是交易信號。\n\n## 核心發現\n\n| 資產 | VRP | 含義 |\n|------|-----|------|\n| TLT | +4.3% | 債券恐慌溢價最高 |\n| SPY | +3.7% | 股市標準恐慌溢價 |\n| GLD | +3.3% | 黃金也有恐慌溢價 |\n| QQQ | +0.1% | 科技幾乎無溢價 |\n| EEM | -1.1% | 新興市場 realized > implied |\n| IWM | -1.6% | 小型股 realized > implied |\n| BTC | **-31.8%** | 加密市場完全反轉 |\n\n## 實務意義\nBTC VRP=-31.8% 意味 VIX 完全無法代表 BTC 風險。用 VIX 管理 BTC 部位就像用溫度計量血壓。"
 }

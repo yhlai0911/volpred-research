@@ -19,5 +19,6 @@
     "GARCH",
     "DM-test",
     "GJR-GARCH"
-  ]
+  ],
+  "content": "Diebold-Mariano 檢定結果建立了明確的 QLIKE 層級：\n\nGJR-arch > GJR-HAR > GARCH（每一級都在 1% 顯著水準下統計顯著）\n\n- GJR-HAR vs GJR-arch: DM=6.54, p<0.001 → GJR-arch 的 QLIKE 統計顯著更好\n- GJR-HAR vs GARCH: DM=-3.00, p=0.003 → GJR-HAR 統計顯著優於 GARCH\n\n但加上 VaR 必須通過的約束：\n\n| 模型 | QLIKE | VaR 1% | 約束下排名 |\n|------|-------|--------|-----------|\n| GJR-arch | -9.034 ★ | 2.0% ✗ | 不合格 |\n| **GJR-HAR** | **-9.010** | **1.6% ✓** | **第一** |\n| GARCH | -8.988 | 1.6% ✓ | 第二 |\n\n結論：GJR-HAR 是 VaR 約束下的 QLIKE 最佳模型，且統計顯著優於 GARCH。\n這對應金融監管現實——Basel III 要求 VaR 模型通過 backtesting。\n    "
 }

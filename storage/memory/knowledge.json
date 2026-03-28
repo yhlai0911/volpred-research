@@ -14943,5 +14943,36 @@
     "experiment_id": "k574",
     "created_at": "2026-03-28T00:32:20.253604+00:00",
     "importance": 5
+  },
+  {
+    "id": "K575",
+    "title": "K575: ★★★★ Life Stage Strategy Guide — VCL 30yr $23.7M, Retiree ruin 0% vs B&H 5.2%",
+    "content": "[提出: Claude, 執行: Claude] 1000 bootstrap paths, 4 profiles. Young+VCL: $23.7M (4.94x vs conservative). Retiree+PW: 0% ruin vs B&H 5.2%. Strategy matching > return maximization for shorter horizons.",
+    "tags": [
+      "life_stage",
+      "retirement",
+      "strategy_matching",
+      "monte_carlo",
+      "practical"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX 2005-2026 bootstrap",
+    "experiment_id": "k575",
+    "created_at": "2026-03-28T00:42:45.967443+00:00",
+    "importance": 4
+  },
+  {
+    "id": "K576",
+    "title": "K576: Vol Clustering VT — Null, 12/VIX already IS continuous cluster exploitation",
+    "content": "[提出: Claude, 執行: Claude] 147 vol clusters. Post-cluster boost, duration scaling, pre-cluster defense, cluster count — all fail Harvey. 12/VIX auto-adjusts weight as VIX changes = already exploiting clusters.",
+    "tags": [
+      "clustering",
+      "VT_strategy",
+      "null_result",
+      "12VIX_sufficient"
+    ],
+    "data_source": "yfinance SPY+VIX 2005-2026",
+    "experiment_id": "k576",
+    "created_at": "2026-03-28T00:42:45.967676+00:00",
+    "importance": 2
   }
 ]

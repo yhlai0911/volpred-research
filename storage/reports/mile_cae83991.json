@@ -19,5 +19,6 @@
     "GARCH",
     "GLD",
     "USO"
-  ]
+  ],
+  "content": "## Iran/Strait of Hormuz 危機對原油波動率的衝擊\n\n### GARCH 追蹤\n\n| 日期 | 報酬 | σ_ann | 事件 |\n|------|------|-------|------|\n| 03-02 | +6.4% | 31% | 危機升級 |\n| 03-06 | +12.9% | 53% | Strait of Hormuz？ |\n| 03-09 | -4.1% | **107%** | 峰值（GARCH 追上） |\n| 03-12 | +9.6% | 76% | 繼續波動 |\n| 03-13 | +1.3% | 97% | 目前 |\n\n### Leverage 翻轉\n- Pre-crisis: γ = +0.10（Standard，需求驅動的價格變動）\n- During crisis: γ = -0.13（Inverted，供給衝擊驅動）\n\n### 理論驗證\nSupply-shock → inverted leverage 的理論在 real-time crisis 中被驗證：\n- 油價飆漲不是因為需求好（standard），而是因為供給中斷（inverted）\n- 跟 GLD 在恐慌性牛市中的行為完全一致\n\nUSO 2026 YTD: +73.9%, Vol 49.6%"
 }

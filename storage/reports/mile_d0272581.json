@@ -16,5 +16,6 @@
   ],
   "created_at": "2026-03-23T03:18:08.347831+00:00",
   "published_at": "2026-03-23T03:51:33.774916+00:00",
-  "status": "published"
+  "status": "published",
+  "content": "## 摘要\n\n[提出: Applied Economics 2025 文獻啟發, 執行: Claude]\n\nVIX 期限結構斜率（VIX3M/VIX ratio）看似能預測波動率（r=-0.327），但控制 VIX level 後 partial r 僅 -0.040，OOS 改善 -0.082%（NS）。期限結構的全部資訊已被 VIX level 吸收。VIX sufficient statistic 第 22 次確認。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY |\n| VIX3M 數據 | 2006-07 起 |\n| 期間 | 2006-07 ~ 2026-03 (4,950 筆) |\n| 指標 | VIX3M/VIX ratio |\n| OOS | 2023-01-01 ~ 2026-03 (N=806) |\n\n## 核心發現\n\n### 基本統計\n- VIX3M/VIX ratio 平均 1.109（正常結構，3 個月 > 1 個月）\n- 倒掛（ratio<1）頻率 11%——危機時 VIX 短端飆升\n\n### 預測力遞減\n\n| 相關 | 數值 | 含義 |\n|------|------|------|\n| Simple r | -0.327★ | 看似很強——ratio 低 → 下一天波動大 |\n| Partial\\|VIX | -0.040★ | 控制 VIX 後幾乎消失 |\n| GARCH 殘差 | -0.071★ | GARCH 已學會大部分 |\n| OOS QLIKE Δ | -0.082% NS | 經濟上完全無意義 |\n\n### 倒掛期間反而更差\n期限結構倒掛期間的 ratio-adjusted 預測反而 +0.14%（更差），正常期間 -0.17%。倒掛時 VIX 本身已經極高，ratio 的額外資訊等於雜訊。\n\n## 實務意義\n\nVIX 期限結構常被市場評論引用（「VIX 倒掛是危機信號」），但對波動率「預測」沒有增量。投資人只需看 VIX level 就夠了。VIX sufficient statistic 現已測試 22+ 個競爭指標——全部被吸收。\n\n## 結論\n\n從 VVIX 到 SKEW、VIX3M slope、credit spread、yield curve、MOVE、Google Trends、成交量、OFI、entropy⋯⋯22 個指標全部被 VIX 吸收。VIX 是日頻股票波動率的 sufficient statistic，這個結論已經非常堅固。\n"
 }

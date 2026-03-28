@@ -17,5 +17,6 @@
     "FHS",
     "BTC",
     "Normal-VaR"
-  ]
+  ],
+  "content": "Filtered Historical Simulation (FHS) 完美解決了 BTC-USD 的分配問題。\n\n之前的困境（無參數分配能同時通過）：\n\n| 分配 | VaR 1% | VaR 5% |\n|------|--------|--------|\n| Normal | 2.1% ✗ | 4.1% ✓ |\n| Student-t | 1.0% ✓ | 2.3% ✗ |\n| **FHS** | **1.4% ✓** | **5.9% ✓** |\n\nFHS 用歷史殘差的經驗分配取代參數假設。\n因為經驗分配精確反映了真實尾部形狀。\n\n**這啟發了一個統一架構：**\n- GARCH/GJR 只負責預測 sigma_t（QLIKE 評估）\n- FHS 負責 VaR 計算（避免分配選擇問題）\n- 完全解耦波動率預測和風險量化\n    "
 }

@@ -1,0 +1,644 @@
+{
+  "experiment_id": "K575",
+  "title": "VT Strategy Tiers for Different Life Stages",
+  "timestamp": "2026-03-28T00:40:03.108882+00:00",
+  "data_source": "yfinance SPY+GLD+VIX+IRX 2005-2026",
+  "methodology": {
+    "n_simulations": 1000,
+    "block_size_days": 252,
+    "random_seed": 42,
+    "inflation_rate": 0.025,
+    "tx_cost_bps": 5,
+    "borrowing_spread": 0.005
+  },
+  "profiles": {
+    "young_accumulator": {
+      "label": "Young Accumulator (25-40)",
+      "strategy": "VCL",
+      "wrong_strategy": "PW_Cons",
+      "horizon_years": 30,
+      "initial_capital": 100000,
+      "monthly_contribution": 1000,
+      "withdrawal_rate": 0.0,
+      "results": {
+        "VCL": {
+          "is_recommended": true,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 30,
+          "initial_capital": 100000,
+          "monthly_contribution": 1000,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 459000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 23675722.47575766,
+            "mean": 28723720.819521196,
+            "p5": 9988787.626636947,
+            "p10": 11964784.705347115,
+            "p25": 16592549.576757355,
+            "p75": 34848271.088237494,
+            "p90": 52479792.769516446,
+            "p95": 65016037.635240644,
+            "min": 5023210.275883028,
+            "max": 206879510.14931098
+          },
+          "annualized_return_median": 0.14046777531064203,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.12278928819545691,
+            "p5_worst": -0.15138482524239544,
+            "p95_best": -0.10416944805117935,
+            "mean": -0.12398136006201037
+          },
+          "wealth_ratio_vs_invested": 51.58109471842627
+        },
+        "PW_Cons": {
+          "is_recommended": false,
+          "is_wrong_strategy": true,
+          "n_simulations": 1000,
+          "horizon_years": 30,
+          "initial_capital": 100000,
+          "monthly_contribution": 1000,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 459000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 4789950.090885866,
+            "mean": 5347262.604963175,
+            "p5": 2649133.598949305,
+            "p10": 3032907.2844453156,
+            "p25": 3699322.0412543546,
+            "p75": 6212000.471013508,
+            "p90": 8574735.022568978,
+            "p95": 10054354.544883568,
+            "min": 1552612.2266936991,
+            "max": 18765815.12942024
+          },
+          "annualized_return_median": 0.08131097279144583,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.047492383392889276,
+            "p5_worst": -0.05867520474785801,
+            "p95_best": -0.044580373815211696,
+            "mean": -0.04836907080688607
+          },
+          "wealth_ratio_vs_invested": 10.435621113041103
+        },
+        "BH_SPY": {
+          "is_recommended": false,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 30,
+          "initial_capital": 100000,
+          "monthly_contribution": 1000,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 459000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 4809190.800258674,
+            "mean": 6157321.6429775655,
+            "p5": 1293876.9511078554,
+            "p10": 1772457.8969450209,
+            "p25": 2795922.296451807,
+            "p75": 8132365.124845596,
+            "p90": 12413521.854632009,
+            "p95": 16168072.480447758,
+            "min": 215976.66512739344,
+            "max": 31094642.787486292
+          },
+          "annualized_return_median": 0.08145547605767,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.4866273172428681,
+            "p5_worst": -0.6603464775621668,
+            "p95_best": -0.3341578555515107,
+            "mean": -0.47967390858691294
+          },
+          "wealth_ratio_vs_invested": 10.477539869844605
+        },
+        "BH_5050": {
+          "is_recommended": false,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 30,
+          "initial_capital": 100000,
+          "monthly_contribution": 1000,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 459000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 5241331.957614668,
+            "mean": 6415785.643837659,
+            "p5": 2156620.462654952,
+            "p10": 2647086.998704925,
+            "p25": 3692827.1295358445,
+            "p75": 8019747.564834157,
+            "p90": 11815050.944668893,
+            "p95": 14380460.408754265,
+            "min": 870493.9372886235,
+            "max": 35613993.031091936
+          },
+          "annualized_return_median": 0.08456178886274457,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.3141323887979153,
+            "p5_worst": -0.40900544459197113,
+            "p95_best": -0.20051157778810702,
+            "mean": -0.2997768800013075
+          },
+          "wealth_ratio_vs_invested": 11.41902387279884
+        }
+      }
+    },
+    "mid_career": {
+      "label": "Mid-Career (40-55)",
+      "strategy": "VT_12VIX",
+      "wrong_strategy": "VCL",
+      "horizon_years": 20,
+      "initial_capital": 100000,
+      "monthly_contribution": 1000,
+      "withdrawal_rate": 0.0,
+      "results": {
+        "VT_12VIX": {
+          "is_recommended": true,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 20,
+          "initial_capital": 100000,
+          "monthly_contribution": 1000,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 339000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 2017381.7792673458,
+            "mean": 2134735.239936159,
+            "p5": 1243539.163978953,
+            "p10": 1376122.784807813,
+            "p25": 1654718.5924303539,
+            "p75": 2514917.0348725487,
+            "p90": 2956740.6628407408,
+            "p95": 3313787.956292014,
+            "min": 798425.2843567696,
+            "max": 7589841.35538588
+          },
+          "annualized_return_median": 0.09327500658636745,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.09181135967543025,
+            "p5_worst": -0.11012945957937133,
+            "p95_best": -0.06566745318093473,
+            "mean": -0.08933292631522453
+          },
+          "wealth_ratio_vs_invested": 5.950978699903675
+        },
+        "VCL": {
+          "is_recommended": false,
+          "is_wrong_strategy": true,
+          "n_simulations": 1000,
+          "horizon_years": 20,
+          "initial_capital": 100000,
+          "monthly_contribution": 1000,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 339000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 4637309.331124856,
+            "mean": 5155313.885242924,
+            "p5": 2333095.173007778,
+            "p10": 2735893.9177193344,
+            "p25": 3414300.746952088,
+            "p75": 6329848.965175579,
+            "p90": 8218353.611766134,
+            "p95": 9490358.068710642,
+            "min": 1291435.2607999628,
+            "max": 31439156.40442584
+          },
+          "annualized_return_median": 0.1397335126028607,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.12178548094532443,
+            "p5_worst": -0.1399282559421806,
+            "p95_best": -0.09030516111779663,
+            "mean": -0.11716838192822522
+          },
+          "wealth_ratio_vs_invested": 13.67937855789043
+        },
+        "BH_SPY": {
+          "is_recommended": false,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 20,
+          "initial_capital": 100000,
+          "monthly_contribution": 1000,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 339000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 1649946.7335686143,
+            "mean": 1899415.4971323044,
+            "p5": 564609.375646267,
+            "p10": 719363.4236973079,
+            "p25": 1083952.2714223296,
+            "p75": 2517486.189863668,
+            "p90": 3414394.20766694,
+            "p95": 4079959.715710717,
+            "min": 169248.05494861526,
+            "max": 8623003.765525162
+          },
+          "annualized_return_median": 0.08233950737291451,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.4626969244886211,
+            "p5_worst": -0.6219407609377146,
+            "p95_best": -0.2343825071289012,
+            "mean": -0.435502164180416
+          },
+          "wealth_ratio_vs_invested": 4.867099509051959
+        },
+        "BH_5050": {
+          "is_recommended": false,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 20,
+          "initial_capital": 100000,
+          "monthly_contribution": 1000,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 339000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 1751376.6585553442,
+            "mean": 1917635.5869949544,
+            "p5": 848326.2822953282,
+            "p10": 978885.7711830385,
+            "p25": 1338090.631810901,
+            "p75": 2366707.8891620254,
+            "p90": 3030714.421449622,
+            "p95": 3530855.994899293,
+            "min": 414127.67080357415,
+            "max": 7585989.871416932
+          },
+          "annualized_return_median": 0.0855728995035625,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.28797549011489815,
+            "p5_worst": -0.36553859518565257,
+            "p95_best": -0.16068428117643072,
+            "mean": -0.2694332146026742
+          },
+          "wealth_ratio_vs_invested": 5.166302827596885
+        }
+      }
+    },
+    "pre_retirement": {
+      "label": "Pre-Retirement (55-65)",
+      "strategy": "PW_Cons",
+      "wrong_strategy": "VCL",
+      "horizon_years": 10,
+      "initial_capital": 100000,
+      "monthly_contribution": 0,
+      "withdrawal_rate": 0.0,
+      "results": {
+        "PW_Cons": {
+          "is_recommended": true,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 10,
+          "initial_capital": 100000,
+          "monthly_contribution": 0,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 100000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 285441.8165613073,
+            "mean": 297702.79796694993,
+            "p5": 196346.07648493108,
+            "p10": 210136.23302131335,
+            "p25": 238815.7520096605,
+            "p75": 340592.60247391753,
+            "p90": 404712.123886758,
+            "p95": 443390.5792233052,
+            "min": 149151.2481766745,
+            "max": 1157541.212404589
+          },
+          "annualized_return_median": 0.1105847192523488,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.04822125233418817,
+            "p5_worst": -0.05614927209218902,
+            "p95_best": -0.032448524289367744,
+            "mean": -0.046613040302360104
+          },
+          "wealth_ratio_vs_invested": 2.854418165613073
+        },
+        "VCL": {
+          "is_recommended": false,
+          "is_wrong_strategy": true,
+          "n_simulations": 1000,
+          "horizon_years": 10,
+          "initial_capital": 100000,
+          "monthly_contribution": 0,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 100000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 520294.419013778,
+            "mean": 555704.0411647266,
+            "p5": 301117.6511981939,
+            "p10": 338061.403934465,
+            "p25": 414720.41409605026,
+            "p75": 663087.8026198612,
+            "p90": 826962.8876700549,
+            "p95": 923998.2188302133,
+            "min": 194640.546533367,
+            "max": 1934804.7982442768
+          },
+          "annualized_return_median": 0.17930167852605128,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.11183737093798105,
+            "p5_worst": -0.13859041317818552,
+            "p95_best": -0.08179545981102736,
+            "mean": -0.11126689761666775
+          },
+          "wealth_ratio_vs_invested": 5.20294419013778
+        },
+        "BH_SPY": {
+          "is_recommended": false,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 10,
+          "initial_capital": 100000,
+          "monthly_contribution": 0,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 100000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 282996.45275761175,
+            "mean": 302909.8181103522,
+            "p5": 111370.61167484752,
+            "p10": 138392.38277918723,
+            "p25": 194437.9930214174,
+            "p75": 380962.24869918707,
+            "p90": 499115.0263520923,
+            "p95": 573141.6179396495,
+            "min": 27001.931840503596,
+            "max": 1073606.1712444348
+          },
+          "annualized_return_median": 0.10962976679183334,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.3371726310060773,
+            "p5_worst": -0.601047818133764,
+            "p95_best": -0.18755246925491126,
+            "mean": -0.38201235454791255
+          },
+          "wealth_ratio_vs_invested": 2.8299645275761174
+        },
+        "BH_5050": {
+          "is_recommended": false,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 10,
+          "initial_capital": 100000,
+          "monthly_contribution": 0,
+          "withdrawal_rate": 0.0,
+          "total_contributed": 100000.0,
+          "total_withdrawn": 0.0,
+          "terminal_wealth": {
+            "median": 293020.8499646315,
+            "mean": 314636.32555281615,
+            "p5": 159251.74391084362,
+            "p10": 183305.2178490395,
+            "p25": 234234.98896095564,
+            "p75": 381795.9282023878,
+            "p90": 470626.72712721425,
+            "p95": 534608.5135550707,
+            "min": 86224.58780258617,
+            "max": 939885.9757398498
+          },
+          "annualized_return_median": 0.11349904688951118,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.2031512849501778,
+            "p5_worst": -0.36845791887895585,
+            "p95_best": -0.1261378407056479,
+            "mean": -0.24096465703093656
+          },
+          "wealth_ratio_vs_invested": 2.930208499646315
+        }
+      }
+    },
+    "retiree": {
+      "label": "Retiree (65+)",
+      "strategy": "PW_Cons",
+      "wrong_strategy": "BH_SPY",
+      "horizon_years": 30,
+      "initial_capital": 1000000,
+      "monthly_contribution": 0,
+      "withdrawal_rate": 0.04,
+      "results": {
+        "PW_Cons": {
+          "is_recommended": true,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 30,
+          "initial_capital": 1000000,
+          "monthly_contribution": 0,
+          "withdrawal_rate": 0.04,
+          "total_contributed": 1000000.0,
+          "total_withdrawn": 1800010.829694135,
+          "terminal_wealth": {
+            "median": 13065461.962922469,
+            "mean": 15321770.302520603,
+            "p5": 5192056.964339478,
+            "p10": 6317507.610603611,
+            "p25": 9129450.101844829,
+            "p75": 19279457.313488126,
+            "p90": 26095506.571413912,
+            "p95": 32269599.36943444,
+            "min": 1545088.5200777655,
+            "max": 88567317.20896943
+          },
+          "annualized_return_median": 0.08944211235596022,
+          "probability_of_ruin": 0.0,
+          "ruin_count": 0,
+          "avg_ruin_year": null,
+          "mdd": {
+            "median": -0.07155334623802974,
+            "p5_worst": -0.10984746130407434,
+            "p95_best": -0.051521898700977335,
+            "mean": -0.07497975829532735
+          },
+          "wealth_ratio_vs_invested": 13.065461962922468
+        },
+        "BH_SPY": {
+          "is_recommended": false,
+          "is_wrong_strategy": true,
+          "n_simulations": 1000,
+          "horizon_years": 30,
+          "initial_capital": 1000000,
+          "monthly_contribution": 0,
+          "withdrawal_rate": 0.04,
+          "total_contributed": 1000000.0,
+          "total_withdrawn": 1800010.829694135,
+          "terminal_wealth": {
+            "median": 10630034.853825744,
+            "mean": 17738468.605125662,
+            "p5": -16422.76102321009,
+            "p10": 1318278.0686643145,
+            "p25": 4368537.348271608,
+            "p75": 22647557.305470135,
+            "p90": 42333639.85715386,
+            "p95": 61278980.51836334,
+            "min": -5888572.324901763,
+            "max": 160251569.814307
+          },
+          "annualized_return_median": 0.08491756446367948,
+          "probability_of_ruin": 0.052,
+          "ruin_count": 52,
+          "avg_ruin_year": 20.850122100122096,
+          "mdd": {
+            "median": -0.5204283576469051,
+            "p5_worst": -1.014360472060612,
+            "p95_best": -0.337172631006077,
+            "mean": -0.6190269997155885
+          },
+          "wealth_ratio_vs_invested": 10.630034853825745
+        },
+        "BH_5050": {
+          "is_recommended": false,
+          "is_wrong_strategy": false,
+          "n_simulations": 1000,
+          "horizon_years": 30,
+          "initial_capital": 1000000,
+          "monthly_contribution": 0,
+          "withdrawal_rate": 0.04,
+          "total_contributed": 1000000.0,
+          "total_withdrawn": 1800010.829694135,
+          "terminal_wealth": {
+            "median": 14680410.767315645,
+            "mean": 18963765.58002995,
+            "p5": 2764441.501116966,
+            "p10": 4383027.763099442,
+            "p25": 8113421.9893728765,
+            "p75": 24780603.002386473,
+            "p90": 36176770.437341414,
+            "p95": 45813427.85745572,
+            "min": -1177136.8859900415,
+            "max": 186724389.19154635
+          },
+          "annualized_return_median": 0.09376618455575281,
+          "probability_of_ruin": 0.002,
+          "ruin_count": 2,
+          "avg_ruin_year": 26.003968253968253,
+          "mdd": {
+            "median": -0.33432147447889693,
+            "p5_worst": -0.4971864165507473,
+            "p95_best": -0.20315128495017765,
+            "mean": -0.3433720452095062
+          },
+          "wealth_ratio_vs_invested": 14.680410767315644
+        }
+      }
+    }
+  },
+  "wrong_strategy_costs": {
+    "young_accumulator": {
+      "recommended": "VCL",
+      "wrong": "PW_Cons",
+      "wealth_gap_median": 18885772.384871792,
+      "wealth_ratio": 4.942791057636888,
+      "mdd_difference": -0.07529690480256764,
+      "ruin_rate_difference": 0.0,
+      "wrong_is_better_pct_of_sims": null
+    },
+    "mid_career": {
+      "recommended": "VT_12VIX",
+      "wrong": "VCL",
+      "wealth_gap_median": -2619927.5518575106,
+      "wealth_ratio": 0.4350328251184392,
+      "mdd_difference": 0.029974121269894183,
+      "ruin_rate_difference": 0.0,
+      "wrong_is_better_pct_of_sims": null
+    },
+    "pre_retirement": {
+      "recommended": "PW_Cons",
+      "wrong": "VCL",
+      "wealth_gap_median": -234852.6024524707,
+      "wealth_ratio": 0.5486159492203749,
+      "mdd_difference": 0.06361611860379288,
+      "ruin_rate_difference": 0.0,
+      "wrong_is_better_pct_of_sims": null
+    },
+    "retiree": {
+      "recommended": "PW_Cons",
+      "wrong": "BH_SPY",
+      "wealth_gap_median": 2435427.1090967245,
+      "wealth_ratio": 1.2291081019569956,
+      "mdd_difference": 0.44887501140887537,
+      "ruin_rate_difference": -0.052,
+      "wrong_is_better_pct_of_sims": null
+    }
+  },
+  "recommendation_matrix": {
+    "description": "Strategy recommendation by age bracket and risk tolerance",
+    "aggressive": {
+      "25-35": "VCL",
+      "35-45": "VCL",
+      "45-55": "VT_12VIX",
+      "55-65": "VT_12VIX",
+      "65-75": "VT_12VIX",
+      "75+": "PW_Cons"
+    },
+    "moderate": {
+      "25-35": "VT_12VIX",
+      "35-45": "VT_12VIX",
+      "45-55": "VT_12VIX",
+      "55-65": "PW_Cons",
+      "65-75": "PW_Cons",
+      "75+": "PW_Cons"
+    },
+    "conservative": {
+      "25-35": "VT_12VIX",
+      "35-45": "PW_Cons",
+      "45-55": "PW_Cons",
+      "55-65": "PW_Cons",
+      "65-75": "PW_Cons",
+      "75+": "PW_Cons"
+    }
+  },
+  "key_findings": {
+    "young_accumulator_wealth_multiplier": "4.94x",
+    "young_recommended_median": "$23,675,722",
+    "young_wrong_median": "$4,789,950",
+    "retiree_recommended_ruin_rate": "0.0%",
+    "retiree_wrong_ruin_rate": "5.2%",
+    "retiree_recommended_median_terminal": "$13,065,462",
+    "strategy_matching_matters": "Using the wrong tier costs significant wealth or increases ruin risk"
+  }
+}

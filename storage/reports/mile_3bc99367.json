@@ -17,5 +17,6 @@
   ],
   "created_at": "2026-03-21T07:56:58.436895+00:00",
   "published_at": "2026-03-21T09:18:01.311603+00:00",
-  "status": "published"
+  "status": "published",
+  "content": "## 摘要\n\n[提出: Claude] 測試 15 種 3-4 資產組合（TLT/IEF/TIP/BTC/VNQ），看能否打敗 50/50 SPY/GLD + 12/VIX。結論：傳統資產全部不顯著改善。\n\n## 核心發現\n\n### 傳統資產全部失敗\nTLT、IEF、TIP、VNQ 加入 50/50 後，Sharpe 不顯著改善。債券在 2022 利率上升期 hedge 失效（SPY-TLT corr 翻正 +0.099）。\n\n### 唯二統計顯著但有條件\n\n| 組合 | p 值 | 問題 |\n|------|------|------|\n| 47/47/5 SPY/GLD/BTC | 0.027 | 被 2024-25 BTC 牛市驅動，coskewness=-0.61 |\n| 40/40/20 SPY/GLD/TIP | 0.047 | Sharpe 僅 +0.002，MDD 微幅改善 |\n\n### 利率上升期是 Bond 殺手\n2022-23 年 SPY-TLT 相關從 -0.304 翻轉為 +0.099，債券完全失去 hedge 功能。\n\n## 結論\n50/50 SPY/GLD 在傳統資產中第 7 次不可動搖。5% BTC 是唯一候選但不夠穩健。\n"
 }
