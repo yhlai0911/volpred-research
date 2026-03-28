@@ -446,21 +446,11 @@ def delete_article(slug: str) -> bool:
 def sync_paper_trade(strategy: str, entry: dict, trade_date: str) -> bool:
     """Sync a paper trade entry to Supabase paper_trades table.
 
-    Uses DELETE+INSERT to prevent duplicates (no unique constraint on table).
-    This is idempotent: calling multiple times with the same (strategy, trade_date)
-    will always result in exactly one row.
+    Uses upsert via on_conflict=strategy,trade_date (migration 018 added
+    the unique constraint). Idempotent: same (strategy, trade_date) → one row.
     """
     if not SUPABASE_KEY or not trade_date:
         return False
-    # Step 1: Delete existing row for this (strategy, trade_date)
-    del_url = f"{SUPABASE_URL}/rest/v1/paper_trades?strategy=eq.{strategy}&trade_date=eq.{trade_date}"
-    del_req = Request(del_url, headers=HEADERS, method="DELETE")
-    try:
-        urlopen(del_req, timeout=10)
-    except HTTPError:
-        pass  # OK if nothing to delete
-
-    # Step 2: Insert fresh row
     row = {
         "strategy": strategy,
         "entry": entry,
