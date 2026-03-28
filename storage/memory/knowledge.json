@@ -15834,5 +15834,22 @@
     "experiment_id": "k653",
     "created_at": "2026-03-29T05:40:46.446812",
     "importance": 4
+  },
+  {
+    "id": "K654",
+    "title": "K654: ★★★ Piecewise Decomposition — NOT alpha, it's risk tolerance choice (19% win rate over 21 years)",
+    "content": "[提出: K640/K643 深究, 執行: Claude] Piecewise Conservative 分解。假說翻轉：VIX≥20 zone 有正 return（+16-25%/yr）——被退出的區間其實賺錢。20 年 CAGR 3.1% vs 50/50 11.4%。Gains missed 788% > Losses avoided 661%（net cost -127%）。只在 4/21 年勝出（2006/2008/2022/2026，全是危機年）。Threshold sensitivity：越高（越少退出）Sharpe 越好。K640 Sharpe 3.98 是 2025 crisis-heavy 期間特定效果。結論：Piecewise 不是 alpha 策略——是風險容忍度選擇。適合低 MDD 容忍 + 短期投資人。長期應選 50/50 或 80/20。",
+    "tags": [
+      "Piecewise",
+      "decomposition",
+      "alpha-vs-protection",
+      "risk-tolerance",
+      "paradigm-shift",
+      "overturned"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k654",
+    "created_at": "2026-03-29T05:46:56.415909",
+    "importance": 5
   }
 ]
