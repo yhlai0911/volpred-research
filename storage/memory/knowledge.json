@@ -14892,5 +14892,39 @@
     "experiment_id": "k571",
     "created_at": "2026-03-27T23:25:05.227749+00:00",
     "importance": 3
+  },
+  {
+    "id": "K572",
+    "title": "K572: ★★★ VIX Regime Map — Crisis 252d +28% (91% positive), tri-diagonal transitions, post-2020 shift",
+    "content": "[提出: Claude, 執行: Claude] 5 regime VIX map (5341 天)。Low 34.1%最常見。Persistence 高（Crisis 88.4%=9 天，Normal 74.5%=4 天是 transition zone）。Transition 有序——不會從 Low 直接跳到 Crisis。\n\nCrisis 252d +28.0% (91%, t=19.7)。Elevated→Crisis transition 72.5% 5d positive。Ultra-Low 252d 最差 (+10.5%)——complacency 有代價。\n\nSeasonal: Mar/Apr/Oct crisis 最多，Jul 最少。Post-2020: Ultra-Low 從 20.8%→0.3%，baseline VIX 升高。\n\n6 張圖表產出——article/paper 素材。",
+    "tags": [
+      "VIX",
+      "regime",
+      "transition_matrix",
+      "forward_returns",
+      "contrarian",
+      "content"
+    ],
+    "data_source": "yfinance VIX+SPY 2005-2026",
+    "experiment_id": "k572",
+    "created_at": "2026-03-28T00:10:14.838986+00:00",
+    "importance": 3
+  },
+  {
+    "id": "K573",
+    "title": "K573: ★★★★ Insurance Pricing — Breakeven VIX=26.6, Leverage 5.7x more efficient than standard VT",
+    "content": "[提出: Claude, 執行: Claude] VT 保險成本精確分解。12/VIX: equity reduction -4.50%/yr (92% of cost), cash +0.40%, TX -0.40%. Net -4.27%/yr → 19.8pp MDD improvement。\n\nRegime: Low VIX costs -3.47%/yr (win 29.2%), Medium -8.94% (44.2%), High VIX earns +8.17% (51.9%)。**Breakeven VIX = 26.6**。\n\nEfficiency ratio: VIX-Cond Leverage **26.2pp** (最高效) vs 12/VIX 4.6pp vs Piecewise 1.4pp (最低效!)。Leverage 用 low-VIX 期的額外收益 offset high-VIX insurance cost。\n\nConvexity: low-weight days earn 15.0%/yr vs high-weight 8.7%——VT miss V-shaped recovery (main cost mechanism, K74 confirmed)。\n\n論文級素材。",
+    "tags": [
+      "insurance",
+      "pricing",
+      "breakeven",
+      "efficiency",
+      "decomposition",
+      "paper_material"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX+IRX 2005-2026",
+    "experiment_id": "k573",
+    "created_at": "2026-03-28T00:11:25.002195+00:00",
+    "importance": 4
   }
 ]
