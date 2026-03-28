@@ -476,18 +476,23 @@ def main():
             # Try to compute return from the NEXT entry's prices
             if i + 1 < len(entries):
                 next_ent = entries[i + 1]
-                # Compute return between this entry and next entry using price data
+                # Compute return using market data (from entry or _market_daily)
+                market = pt.get("_market_daily", {})
+                td0 = ent.get("trade_date", "")
+                td1 = next_ent.get("trade_date", "")
+                md0 = market.get(td0, ent)  # fallback to entry for backward compat
+                md1 = market.get(td1, next_ent)
                 ent_ret = {}
                 for asset in ent_weights:
                     if asset == "SPY":
-                        p0 = ent.get("spy_close")
-                        p1 = next_ent.get("spy_close")
+                        p0 = md0.get("spy_close") or ent.get("spy_close")
+                        p1 = md1.get("spy_close") or next_ent.get("spy_close")
                     elif asset == "GLD":
-                        p0 = ent.get("gld_close")
-                        p1 = next_ent.get("gld_close")
+                        p0 = md0.get("gld_close") or ent.get("gld_close")
+                        p1 = md1.get("gld_close") or next_ent.get("gld_close")
                     elif asset == "0050.TW":
-                        p0 = ent.get("tw50_close")
-                        p1 = next_ent.get("tw50_close")
+                        p0 = md0.get("tw50_close") or ent.get("tw50_close")
+                        p1 = md1.get("tw50_close") or next_ent.get("tw50_close")
                     else:
                         p0 = p1 = None
                     if p0 and p1 and p0 > 0:
@@ -503,27 +508,32 @@ def main():
                 ent["actual_returns"] = prev_actual
                 ent["portfolio_return"] = round(port_ret, 6)
 
-        # Today's entry
+        # Today's entry — strategy-specific only (market data in _market_daily)
         total_w = sum(w_info.values())
         entry = {
             "trade_date": today,
             "data_date": spy_date,
             "weights": w_info,
             "cash_weight": round(max(0, 1 - total_w), 2),
-            "spy_close": spy_close,
-            "spy_open": spy_open,
-            "gld_close": gld_close,
-            "gld_open": gld_open,
-            "tw50_close": tw50_close if locals().get('tw50_close') is not None else None,
-            "tw50_open": tw50_open if locals().get('tw50_open') is not None else None,
-            "sigma_spy_ann": sigma_gjr_ann,
-            "sigma_gld_ann": sigma_gld_ann,
-            "actual_returns": None,
             "portfolio_return": None,
-            "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
-            "gap_alert_level": gap_alert_level,
         }
         entries.append(entry)
+
+    # Store shared market data in _market_daily (once, not per strategy)
+    if "_market_daily" not in pt:
+        pt["_market_daily"] = {}
+    pt["_market_daily"][today] = {
+        "spy_close": spy_close,
+        "spy_open": spy_open,
+        "gld_close": gld_close,
+        "gld_open": gld_open,
+        "tw50_close": tw50_close if locals().get('tw50_close') is not None else None,
+        "tw50_open": tw50_open if locals().get('tw50_open') is not None else None,
+        "sigma_spy_ann": sigma_gjr_ann,
+        "sigma_gld_ann": sigma_gld_ann,
+        "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
+        "gap_alert_level": gap_alert_level,
+    }
 
     pt_file.write_text(json.dumps(pt, indent=2, ensure_ascii=False))
 
@@ -710,14 +720,18 @@ def main():
             synced_count += 1
         print(f"  Supabase: {synced_count} strategy signals synced")
         # Sync paper trades (last 30 entries per strategy, covers backfill + today)
+        # Merge _market_daily into entry for Supabase (frontend expects market data in entry)
+        market = pt.get("_market_daily", {})
         pt_synced = 0
         for strat_id, _ in strat_list:
             if strat_id in pt and pt[strat_id]["entries"]:
                 recent_entries = pt[strat_id]["entries"][-30:]
                 for entry in recent_entries:
-                    trade_date = entry.get("data_date") or entry.get("trade_date") or entry.get("date", "")
+                    trade_date = entry.get("trade_date") or entry.get("data_date") or entry.get("date", "")
                     if trade_date:
-                        sync_paper_trade(strat_id, entry, trade_date)
+                        # Merge market data for backward compatibility with frontend
+                        enriched = {**market.get(trade_date, {}), **entry}
+                        sync_paper_trade(strat_id, enriched, trade_date)
                         pt_synced += 1
         print(f"  Supabase: {pt_synced} paper trades synced (last 30d × {len(strat_list)} strategies)")
     except Exception as e:
