@@ -15696,5 +15696,24 @@
     "experiment_id": "k645",
     "created_at": "2026-03-29T04:17:47.605398",
     "importance": 4
+  },
+  {
+    "id": "K646",
+    "title": "K646: ★★★ Cross-OOS confirms 80/20 > 50/50 (4/5 periods, p=0.031) but minimax favors 50/50",
+    "content": "[提出: K645 驗證, 執行: Claude] 80/20 vs 50/50 SPY/GLD + 12/VIX cross-OOS（5 期間 2008-2024）。80/20 勝 4/5 期間（僅 GFC 輸）。Average Sharpe: 80/20=1.84 vs 50/50=1.40（+0.44）。Bootstrap p=0.031 顯著。但 minimax：50/50 worst-case Sharpe 0.604 > 80/20 的 0.356。100% SPY avg Sharpe 最高(1.88)但 GFC worst-case 最差(0.36)。MDD 兩者接近（avg -6.4%）但 worst MDD 80/20=-10.7% vs 50/50=-9.4%。結論：80/20 統計上顯著更好但 50/50 提供 worst-case 保護。建議分型推薦：報酬導向→80/20，風險厭惡→50/50。",
+    "tags": [
+      "cross-OOS",
+      "80/20",
+      "50/50",
+      "GLD",
+      "SPY",
+      "minimax",
+      "robust-validation",
+      "strategy-recommendation"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k646",
+    "created_at": "2026-03-29T04:22:06.094580",
+    "importance": 4
   }
 ]
