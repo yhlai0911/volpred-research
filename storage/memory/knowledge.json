@@ -15715,5 +15715,22 @@
     "experiment_id": "k646",
     "created_at": "2026-03-29T04:22:06.094580",
     "importance": 4
+  },
+  {
+    "id": "K647",
+    "title": "K647: ★★ Strategy Matcher Algorithm — Piecewise Pareto dominant, profile-dependent #2/#3",
+    "content": "[提出: 產品化需求, 執行: Claude] 投資人 profile→策略推薦評分系統。4 維度（Sharpe, MDD safety, simplicity, capital eligible）× profile-specific weights + 硬性過濾（市場、資金）+ 軟性懲罰（MDD excess, complexity, negative net Sharpe）。結果：Piecewise Conservative 所有 profile #1（Sharpe 3.98 + MDD -2.5% Pareto dominant）。保守型: Piecewise→50/50→VIX Cond。青年: Piecewise→50/50→Risk Parity。積極型: Piecewise→Adaptive Tier→Taiwan Hybrid。Negative net Sharpe 懲罰有效淘汰 slow_vt/12vix（TX 成本關鍵）。5/5 validation tests pass。框架可直接用於網站 StrategySelector。",
+    "tags": [
+      "strategy-matcher",
+      "investor-profile",
+      "recommendation",
+      "Piecewise",
+      "product",
+      "algorithm"
+    ],
+    "data_source": "paper_trading.json + strategy_metrics",
+    "experiment_id": "k647",
+    "created_at": "2026-03-29T04:27:23.282676",
+    "importance": 3
   }
 ]
