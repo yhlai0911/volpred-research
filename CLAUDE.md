@@ -84,6 +84,21 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **績效指標**：每日由 `daily_update.py` 自動重算 → `strategy_metrics.json`
 - 詳細流程見 `.claude/skills/autonomous-research/references/add-strategy-guide.md`
 
+#### 目前 STRATEGY_REGISTRY（11 筆，8 個 active）
+| key | display_name | is_active | order |
+|-----|-------------|-----------|-------|
+| `slow_vt` | GARCH VT (SPY) | True | 0 |
+| `risk_parity` | Risk Parity (SPY+GLD) | True | 1 |
+| `simple_12vix` | 12/VIX (SPY) | True | 2 |
+| `recommended_5050` | 50/50 SPY/GLD | True | 3 |
+| `taiwan_8.63vix` | 台灣 VT (0050.TW) | True | 4 |
+| `taiwan_spy_momentum` | 台股動量 (0050.TW) | False | 5 |
+| `tz_tw_jp_5050` | TW+JP 50/50 TZ | False | 6 |
+| `global_vt_tz` | Global US VT + TW TZ | False | 7 |
+| `vix_leading_guard` | VIX+景氣領先 (0050.TW) | True | 8 |
+| `vix_cond_leverage` | VIX 條件槓桿（月頻） | True | 9 |
+| `taiwan_hybrid_leverage` | 台股混合槓桿 | True | 10 |
+
 ### 每日文章產出要求（不可缺少任何一種）
 
 每天必須產出以下三種類型的文章，面向不同讀者群：
@@ -496,7 +511,7 @@ Claude Code 的 Agent 工具可啟動獨立子程序（subagent），有自己�
 ```
 0 15 * * 1-5   collect_tw_data.py      # 台股收盤後 15:00（0050.TW + VIXTWN + 5min，留 1.5h 給 yfinance 更新）
 30 5 * * 2-6   collect_us_data.py      # 美股收盤後 05:30（SPY/GLD/VIX + 5min）
-3 6 * * 2-6    daily_update.py         # 所有數據就緒 06:03（6 策略 + Supabase sync）
+3 6 * * 2-6    daily_update.py         # 所有數據就緒 06:03（11 策略 + Supabase sync）
 3 * * * *            release-pool-by-settings  # 文章池定時釋出：每 1 小時 1 篇（不受 session 影響）
 ```
 注意：美股 cron 用 `2-6`（週二至六），因為美股週五收盤 = 台北週六 04:00。
