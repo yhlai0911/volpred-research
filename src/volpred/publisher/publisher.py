@@ -268,7 +268,7 @@ class Publisher:
         feed = self._load_feed()
         feed.append(item)
         # Sort newest first — use published_at (consistent with frontend display)
-        feed.sort(key=lambda x: x.get('published_at', x.get('created_at', '')), reverse=True)
+        feed.sort(key=lambda x: x.get('published_at') or x.get('created_at') or '', reverse=True)
         with open(self._feed_file, 'w') as f:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
         self._sync_feed_to_remote()
