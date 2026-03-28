@@ -15430,5 +15430,24 @@
     "experiment_id": "k630",
     "created_at": "2026-03-29T02:04:34.907250",
     "importance": 2
+  },
+  {
+    "id": "K631",
+    "title": "K631: Calendar Vol Patterns — OpEx/pre-holiday effects real but too weak for forecasting",
+    "content": "[提出: K626 day_of_week importance, 執行: Claude] 8 種日曆效應（weekday/month/FOMC/OpEx/holiday/TOM/QE）× 3 資產。SPY OpEx vol 低 32.8%(p=0.01)，假期前低 23.1%(p=0.011)，Friday 低 22%(p=0.019)。Monthly KW p=0.023。但 weekday pattern 跨子期不穩定（所有 p>0.10）。OOS：HAR+calendar vs HAR QLIKE -4.4% 但 DM p=0.196（NS）。GJR+calScale -0.3% NS。GLD 無顯著效應。0050.TW weekday KW p=0.012 但 OOS 也無改善。結論：日曆效應太弱太不穩定，GJR-GARCH 已捕捉足夠。K626 的 day_of_week importance 是相關性而非因果。",
+    "tags": [
+      "calendar-effect",
+      "day-of-week",
+      "OpEx",
+      "pre-holiday",
+      "null-result",
+      "SPY",
+      "GLD",
+      "0050.TW"
+    ],
+    "data_source": "yfinance SPY/GLD/0050.TW 2006-2026",
+    "experiment_id": "k631",
+    "created_at": "2026-03-29T02:17:00.236465",
+    "importance": 2
   }
 ]
