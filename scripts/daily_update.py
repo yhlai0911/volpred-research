@@ -55,6 +55,224 @@ def fit_garch(returns_pct, vol_type="GARCH", p=1, o=0, q=1):
     return sigma
 
 
+def _vix_regime(vix_level):
+    """Classify VIX into regime and return (regime_name, emoji, advice)."""
+    if vix_level is None:
+        return ("無法取得", "❓", "VIX 數據暫時無法取得，建議維持保守配置。")
+    if vix_level < 15:
+        return ("低波動", "🟢",
+                "市場處於低波動狀態（VIX<15），歷史上此區間延續時間較長。"
+                "VT 策略建議較高權重，條件槓桿策略啟動 1.5 倍槓桿。"
+                "但須留意均值回歸風險——低 VIX 不代表零風險。")
+    if vix_level < 20:
+        return ("正常", "🟡",
+                "市場波動處於正常範圍（15-20），VT 策略以 12/VIX 標準模式運作。"
+                "維持紀律性配置即可，不需特別加碼或減碼。")
+    if vix_level < 25:
+        return ("偏高", "🟠",
+                "波動率偏高（20-25），市場不確定性增加。"
+                "保守型策略（Piecewise）已開始降低曝險，建議減少非必要部位。"
+                "定期定額投資人可正常投入。")
+    if vix_level < 30:
+        return ("高波動", "🔴",
+                "市場處於高波動狀態（25-30），風險顯著上升。"
+                "保守型策略已進入全現金模式。恐慌加碼 DCA 建議增加投入至 1.5 倍——"
+                "歷史上高 VIX 買入的長期報酬優於低 VIX 買入。")
+    return ("極端恐慌", "🔴🔴",
+            "市場處於極端恐慌（VIX≥30），短期波動劇烈。"
+            "所有保守型策略已降至最低曝險或全現金。"
+            "恐慌加碼 DCA 建議 1.5 倍投入——歷史上 VIX>30 後 12 個月平均報酬 +22%。"
+            "但要做好短期帳面虧損的心理準備。")
+
+
+def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
+                           gld_close, spy_date, today, gap_alert_level=None,
+                           gap_alert_text=None, overnight_gap=None,
+                           tw50_close=None, spy_ret=None, gld_ret=None):
+    """Generate a rich 每日建議 article with chart, VIX interpretation, and advice.
+
+    This runs as part of daily_update.py (system crontab) and requires zero
+    Claude session dependency.  It creates a draft article that the hourly
+    release-pool cron will publish.
+
+    Returns the pub_id of the created article, or None if skipped.
+    """
+    # --- Build active strategy data for chart + table ---
+    active_strats = []
+    for sid, w_info in strat_list:
+        display_name, is_active, _ = STRATEGY_REGISTRY.get(sid, (sid, True, 99))
+        if not is_active:
+            continue
+        total_equity = sum(w_info.values())
+        cash = max(0, 1 - total_equity)
+        active_strats.append({
+            "id": sid,
+            "name": display_name,
+            "weights": w_info,
+            "total_equity": round(total_equity * 100, 1),
+            "cash": round(cash * 100, 1),
+        })
+
+    # --- Generate bar chart of equity exposure ---
+    chart_url = None
+    try:
+        from volpred.charts import generate_bar_chart, upload_chart
+
+        labels = [s["name"] for s in active_strats]
+        values = [s["total_equity"] for s in active_strats]
+        chart_path = generate_bar_chart(
+            labels=labels,
+            values=values,
+            title=f"各策略股票曝險比例（{spy_date}）",
+            ylabel="股票曝險 (%)",
+            filename=f"daily_equity_{today}",
+            figsize=(12, 6),
+            highlight_best=False,
+        )
+        chart_url = upload_chart(chart_path)
+        print(f"  Daily article chart uploaded: {chart_url[:60]}...")
+    except Exception as e:
+        print(f"  Daily article chart failed (will publish without chart): {e}")
+
+    # --- VIX regime analysis ---
+    regime_name, regime_emoji, regime_advice = _vix_regime(vix_level)
+    vix_display = round(vix_level, 2) if vix_level is not None else "N/A"
+
+    # --- Build strategy table ---
+    table_rows = []
+    for s in active_strats:
+        assets_parts = []
+        for asset, w in s["weights"].items():
+            if w > 0:
+                assets_parts.append(f"{asset} {w*100:.0f}%")
+        assets_str = " + ".join(assets_parts) if assets_parts else "CASH 100%"
+        table_rows.append(
+            f"| {s['name']} | {assets_str} | {s['total_equity']:.0f}% | {s['cash']:.0f}% |"
+        )
+    strat_table = "\n".join(table_rows)
+
+    # --- Build market snapshot ---
+    spy_chg = f" ({spy_ret*100:+.2f}%)" if spy_ret is not None else ""
+    gld_chg = f" ({gld_ret*100:+.2f}%)" if gld_ret is not None else ""
+    tw_line = ""
+    if tw50_close is not None:
+        tw_line = f"\n- **0050.TW**: NT${tw50_close}"
+
+    # --- Gap alert section ---
+    gap_section = ""
+    if gap_alert_level:
+        gap_section = f"""
+
+---
+
+### Overnight Gap 警報
+
+{gap_alert_text}
+
+建議根據警報等級調整風險預算。詳見 Phase I4 研究成果。
+"""
+
+    # --- Compose full article ---
+    content = f"""# {today} 每日策略建議
+
+> 基於 {spy_date} 收盤數據，預測下一交易日最佳持倉配置。
+
+## 市場快照
+
+- **SPY**: ${spy_close}{spy_chg}
+- **GLD**: ${gld_close}{gld_chg}{tw_line}
+- **VIX**: {vix_display} {regime_emoji}（{regime_name}）
+- **GARCH 年化波動率**: {sigma_gjr_ann}%
+
+"""
+
+    # Insert chart if available
+    if chart_url:
+        content += f"![各策略股票曝險比例]({chart_url})\n\n"
+
+    content += f"""## 今日策略配置
+
+| 策略 | 資產配置 | 總曝險 | 現金 |
+|------|---------|--------|------|
+{strat_table}
+
+## VIX 情境分析 {regime_emoji}
+
+**當前 VIX 區間：{regime_name}（{vix_display}）**
+
+{regime_advice}
+{gap_section}
+## 操作建議
+
+"""
+
+    # Generate regime-specific actionable advice
+    if vix_level is None:
+        content += "VIX 數據暫時無法取得，建議維持上一交易日的配置不變。\n"
+    elif vix_level < 15:
+        content += (
+            "1. **VT 策略投資人**：依建議權重配置，條件槓桿策略可啟動 1.5x。\n"
+            "2. **定期定額投資人**：本月建議投入正常金額的 50%（低 VIX 時保留現金）。\n"
+            "3. **台股投資人**：0050.TW 權重較高，可正常持有。\n"
+        )
+    elif vix_level < 20:
+        content += (
+            "1. **VT 策略投資人**：依建議權重配置，標準 12/VIX 模式。\n"
+            "2. **定期定額投資人**：正常投入，無需調整。\n"
+            "3. **台股投資人**：0050.TW 維持正常配置。\n"
+        )
+    elif vix_level < 25:
+        content += (
+            "1. **VT 策略投資人**：波動偏高，保守型策略已開始降低曝險。\n"
+            "2. **定期定額投資人**：正常投入即可，不建議恐慌停扣。\n"
+            "3. **風險控管**：檢查部位大小，確保單一策略虧損不超過總資產 2%。\n"
+        )
+    else:
+        content += (
+            "1. **VT 策略投資人**：高波動環境，保守型策略已降至低曝險或全現金。\n"
+            "2. **定期定額投資人**：恐慌加碼策略建議增加投入至 1.5 倍——歷史上這是長期報酬最佳的買點。\n"
+            "3. **風險控管**：不建議使用槓桿，保持充足現金緩衝。\n"
+        )
+
+    content += f"""
+---
+
+*本文由 VolPred 研究系統自動產生。策略權重基於 GJR-GARCH(1,1) 波動率預測與 VIX 情境分析。*
+*數據來源：yfinance（SPY/GLD/VIX/0050.TW），更新頻率：每個交易日。*
+*免責聲明：本文僅供研究參考，不構成投資建議。*
+"""
+
+    # --- Publish as draft (hourly cron will release) ---
+    title = f"每日策略建議：VIX {vix_display}（{regime_name}）— {today}"
+    pub_id = pub.publish_milestone(
+        title=title,
+        tags=["每日建議", "VIX", "策略配置"],
+        description=content,
+        phase="daily_recommendation",
+        status="draft",
+        audience="daily",
+        category="general",
+        details={
+            "date": today,
+            "spy_date": spy_date,
+            "spy_close": spy_close,
+            "gld_close": gld_close,
+            "tw50_close": tw50_close,
+            "sigma_annual": sigma_gjr_ann,
+            "vix_level": round(vix_level, 2) if vix_level is not None else None,
+            "vix_regime": regime_name,
+            "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
+            "gap_alert_level": gap_alert_level,
+            "chart_url": chart_url,
+            "strategies": {s["id"]: s["weights"] for s in active_strats},
+            "auto_generated": True,
+        },
+    )
+
+    print(f"  Daily recommendation article created: {pub_id} (status=draft)")
+    return pub_id
+
+
 def main():
     today = datetime.now().strftime("%Y-%m-%d")
     print(f"=== Daily Update: {today} ===")
@@ -643,6 +861,27 @@ def main():
                 "strategies": {sid: dict(w_info) for sid, w_info in strat_list},
             },
         )
+
+        # --- Auto-generate 每日建議 article (rich content + chart) ---
+        try:
+            generate_daily_article(
+                pub=pub,
+                strat_list=strat_list,
+                vix_level=vix_level,
+                sigma_gjr_ann=sigma_gjr_ann,
+                spy_close=spy_close,
+                gld_close=gld_close,
+                spy_date=spy_date,
+                today=today,
+                gap_alert_level=gap_alert_level,
+                gap_alert_text=gap_alert_text if gap_alert_level else None,
+                overnight_gap=overnight_gap,
+                tw50_close=tw50_close if locals().get('tw50_close') is not None else None,
+                spy_ret=spy_ret,
+                gld_ret=gld_ret,
+            )
+        except Exception as e:
+            print(f"  Daily recommendation article failed: {e}")
 
     # --- Sync static data ---
     storage = Path("storage")
