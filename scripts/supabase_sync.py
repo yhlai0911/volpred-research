@@ -14,7 +14,10 @@ from urllib.request import Request, urlopen
 from urllib.error import HTTPError
 from urllib.parse import quote
 
-from scripts.article_backups import ensure_local_article_backups
+try:
+    from scripts.article_backups import ensure_local_article_backups
+except ImportError:
+    from article_backups import ensure_local_article_backups
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_ROLE_KEY")
@@ -59,7 +62,9 @@ CONFLICT_KEYS = {
     "memory_entries": "id",
     "feature_flags": "feature",
     "strategy_signals": "strategy_name",
-    "paper_trades": "strategy,trade_date",
+    # paper_trades has no unique constraint on (strategy,trade_date)
+    # Use plain INSERT; daily_update handles dedup by only syncing recent entries
+
 }
 
 
