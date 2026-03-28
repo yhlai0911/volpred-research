@@ -120,7 +120,7 @@ def recalc_all():
             continue
 
         # Trim to common start date for fair cross-strategy comparison
-        trimmed = [e for e in entries if (e.get("data_date") or e.get("date", "")) >= COMMON_START_DATE]
+        trimmed = [e for e in entries if (e.get("data_date") or e.get("trade_date") or e.get("date", "")) >= COMMON_START_DATE]
         if not trimmed:
             continue
 

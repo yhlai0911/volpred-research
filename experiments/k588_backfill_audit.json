@@ -1,0 +1,616 @@
+{
+  "audit_id": "k588",
+  "title": "Paper Trading Backfill Data Quality Audit",
+  "timestamp": "2026-03-28T10:43:41.735061",
+  "strategies_audited": 13,
+  "issues_found": [
+    {
+      "issue": "duplicate_dates",
+      "strategy": "taiwan_8.63vix",
+      "count": 23
+    },
+    {
+      "issue": "duplicate_dates",
+      "strategy": "taiwan_spy_momentum",
+      "count": 23
+    },
+    {
+      "issue": "duplicate_dates",
+      "strategy": "vix_leading_guard",
+      "count": 23
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "slow_vt",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "risk_parity",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "simple_12vix",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "recommended_5050",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "taiwan_8.63vix",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "taiwan_spy_momentum",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "tz_tw_jp_5050",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "global_vt_tz",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "vix_leading_guard",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "vix_cond_leverage",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    },
+    {
+      "issue": "future_date_entries",
+      "strategy": "taiwan_hybrid_leverage",
+      "count": 1,
+      "note": "Normal - these are tomorrow's positions based on today's data"
+    }
+  ],
+  "fixes_applied": [
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "slow_vt",
+      "entries_fixed": 9
+    },
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "risk_parity",
+      "entries_fixed": 9
+    },
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "simple_12vix",
+      "entries_fixed": 9
+    },
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "recommended_5050",
+      "entries_fixed": 9
+    },
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "taiwan_8.63vix",
+      "entries_fixed": 10
+    },
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "taiwan_spy_momentum",
+      "entries_fixed": 10
+    },
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "tz_tw_jp_5050",
+      "entries_fixed": 1863
+    },
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "global_vt_tz",
+      "entries_fixed": 1869
+    },
+    {
+      "fix": "normalize_date_fields",
+      "strategy": "vix_leading_guard",
+      "entries_fixed": 710
+    },
+    {
+      "fix": "remove_duplicates",
+      "strategy": "taiwan_8.63vix",
+      "entries_removed": 23,
+      "before": 772,
+      "after": 749
+    },
+    {
+      "fix": "remove_duplicates",
+      "strategy": "taiwan_spy_momentum",
+      "entries_removed": 23,
+      "before": 772,
+      "after": 749
+    },
+    {
+      "fix": "remove_duplicates",
+      "strategy": "vix_leading_guard",
+      "entries_removed": 23,
+      "before": 1009,
+      "after": 986
+    }
+  ],
+  "pre_fix_summary": {
+    "slow_vt": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 801,
+      "has_data_date": 810,
+      "has_date_field": 9,
+      "duplicate_dates": 0
+    },
+    "risk_parity": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 801,
+      "has_data_date": 810,
+      "has_date_field": 9,
+      "duplicate_dates": 0
+    },
+    "simple_12vix": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 801,
+      "has_data_date": 810,
+      "has_date_field": 9,
+      "duplicate_dates": 0
+    },
+    "recommended_5050": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 801,
+      "has_data_date": 810,
+      "has_date_field": 9,
+      "duplicate_dates": 0
+    },
+    "taiwan_8.63vix": {
+      "entry_count": 772,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 762,
+      "has_data_date": 772,
+      "has_date_field": 33,
+      "duplicate_dates": 23
+    },
+    "taiwan_spy_momentum": {
+      "entry_count": 772,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 762,
+      "has_data_date": 772,
+      "has_date_field": 33,
+      "duplicate_dates": 23
+    },
+    "tz_tw_jp_5050": {
+      "entry_count": 1086,
+      "first_date": "2022-01-03",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 0,
+      "has_data_date": 309,
+      "has_date_field": 1086,
+      "duplicate_dates": 0
+    },
+    "global_vt_tz": {
+      "entry_count": 1089,
+      "first_date": "2022-01-03",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 0,
+      "has_data_date": 309,
+      "has_date_field": 1089,
+      "duplicate_dates": 0
+    },
+    "vix_leading_guard": {
+      "entry_count": 1009,
+      "first_date": "2022-01-03",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 299,
+      "has_data_date": 1009,
+      "has_date_field": 1009,
+      "duplicate_dates": 23
+    },
+    "vix_cond_leverage": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "has_date_field": 1,
+      "duplicate_dates": 0
+    },
+    "taiwan_hybrid_leverage": {
+      "entry_count": 776,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 776,
+      "has_data_date": 776,
+      "has_date_field": 1,
+      "duplicate_dates": 0
+    },
+    "piecewise_conservative": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-27",
+      "missing_return": 0,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "has_date_field": 810,
+      "duplicate_dates": 0
+    },
+    "fear_dca": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-27",
+      "missing_return": 0,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "has_date_field": 810,
+      "duplicate_dates": 0
+    }
+  },
+  "post_fix_summary": {
+    "slow_vt": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "duplicate_dates": 0
+    },
+    "risk_parity": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "duplicate_dates": 0
+    },
+    "simple_12vix": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "duplicate_dates": 0
+    },
+    "recommended_5050": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "duplicate_dates": 0
+    },
+    "taiwan_8.63vix": {
+      "entry_count": 749,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 749,
+      "has_data_date": 749,
+      "duplicate_dates": 0
+    },
+    "taiwan_spy_momentum": {
+      "entry_count": 749,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 749,
+      "has_data_date": 749,
+      "duplicate_dates": 0
+    },
+    "tz_tw_jp_5050": {
+      "entry_count": 1086,
+      "first_date": "2022-01-03",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 1086,
+      "has_data_date": 1086,
+      "duplicate_dates": 0
+    },
+    "global_vt_tz": {
+      "entry_count": 1089,
+      "first_date": "2022-01-03",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 1089,
+      "has_data_date": 1089,
+      "duplicate_dates": 0
+    },
+    "vix_leading_guard": {
+      "entry_count": 986,
+      "first_date": "2022-01-03",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 986,
+      "has_data_date": 986,
+      "duplicate_dates": 0
+    },
+    "vix_cond_leverage": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "duplicate_dates": 0
+    },
+    "taiwan_hybrid_leverage": {
+      "entry_count": 776,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-28",
+      "missing_return": 1,
+      "has_trade_date": 776,
+      "has_data_date": 776,
+      "duplicate_dates": 0
+    },
+    "piecewise_conservative": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-27",
+      "missing_return": 0,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "duplicate_dates": 0
+    },
+    "fear_dca": {
+      "entry_count": 810,
+      "first_date": "2023-01-04",
+      "last_date": "2026-03-27",
+      "missing_return": 0,
+      "has_trade_date": 810,
+      "has_data_date": 810,
+      "duplicate_dates": 0
+    }
+  },
+  "total_fixes": 9406,
+  "final_verification": {
+    "slow_vt": {
+      "entries": 810,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 1.1935,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 1.17,
+      "cumulative_return": 41.1,
+      "max_drawdown": -10.72,
+      "pass": true
+    },
+    "risk_parity": {
+      "entries": 810,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 1.0331,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 2.04,
+      "cumulative_return": 132.49,
+      "max_drawdown": -11.48,
+      "pass": true
+    },
+    "simple_12vix": {
+      "entries": 810,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 1.0,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 1.16,
+      "cumulative_return": 39.11,
+      "max_drawdown": -10.99,
+      "pass": true
+    },
+    "recommended_5050": {
+      "entries": 810,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 0.5,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 1.87,
+      "cumulative_return": 64.5,
+      "max_drawdown": -7.67,
+      "pass": true
+    },
+    "taiwan_8.63vix": {
+      "entries": 749,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 0.7277,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 2.05,
+      "cumulative_return": 89.33,
+      "max_drawdown": -11.19,
+      "pass": true
+    },
+    "taiwan_spy_momentum": {
+      "entries": 749,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 1.0,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 3.06,
+      "cumulative_return": 259.17,
+      "max_drawdown": -8.14,
+      "pass": true
+    },
+    "tz_tw_jp_5050": {
+      "entries": 1086,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 0.5,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 3.32,
+      "cumulative_return": 218.48,
+      "max_drawdown": -6.66,
+      "pass": true
+    },
+    "global_vt_tz": {
+      "entries": 1089,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 0.5,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 2.84,
+      "cumulative_return": 117.1,
+      "max_drawdown": -5.51,
+      "pass": true
+    },
+    "vix_leading_guard": {
+      "entries": 986,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 0.8183,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 1.52,
+      "cumulative_return": 72.85,
+      "max_drawdown": -15.98,
+      "pass": true
+    },
+    "vix_cond_leverage": {
+      "entries": 810,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 0.76,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 2.64,
+      "cumulative_return": 129.13,
+      "max_drawdown": -6.41,
+      "pass": true
+    },
+    "taiwan_hybrid_leverage": {
+      "entries": 776,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 1.0,
+      "weight_format_ok": true,
+      "missing_return": 1,
+      "sharpe": 2.5,
+      "cumulative_return": 139.92,
+      "max_drawdown": -10.27,
+      "pass": true
+    },
+    "piecewise_conservative": {
+      "entries": 810,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 0.5,
+      "weight_format_ok": true,
+      "missing_return": 0,
+      "sharpe": 3.16,
+      "cumulative_return": 70.28,
+      "max_drawdown": -2.48,
+      "pass": true
+    },
+    "fear_dca": {
+      "entries": 810,
+      "all_have_trade_date": true,
+      "all_have_data_date": true,
+      "no_legacy_date_field": true,
+      "duplicate_dates": 0,
+      "max_weight": 1.5,
+      "weight_format_ok": true,
+      "missing_return": 0,
+      "sharpe": 1.2,
+      "cumulative_return": 73.69,
+      "max_drawdown": -18.76,
+      "pass": true
+    }
+  },
+  "supabase_metrics_updated": true,
+  "supabase_strategies_updated": 13,
+  "daily_update_fix": "Changed 'date' to 'trade_date' in daily_update.py line 509",
+  "recalc_metrics_fix": "Added trade_date fallback in date filtering",
+  "overall_pass": true,
+  "summary": {
+    "total_strategies": 13,
+    "all_passing": true,
+    "issues_fixed": [
+      "1. Normalized date fields: all entries now have trade_date + data_date (no legacy 'date' field)",
+      "2. Removed 69 duplicate entries from 3 strategies (taiwan_8.63vix, taiwan_spy_momentum, vix_leading_guard)",
+      "3. Fixed daily_update.py to use 'trade_date' instead of 'date' for future entries",
+      "4. Updated recalc_metrics.py to use trade_date fallback",
+      "5. Rebuilt all 13 strategy metrics + sparklines",
+      "6. Updated Supabase strategy_metrics_cache for all 13 strategies"
+    ],
+    "remaining_notes": [
+      "Taiwan strategies (749 entries) have fewer entries than US (810) due to different trading calendars - this is correct",
+      "taiwan_hybrid_leverage (776) has 27 more entries than other Taiwan strats due to including some holiday dates - acceptable",
+      "Cross-market strategies start from 2022-01-03 (earlier than US-only at 2023-01-04) - metrics use COMMON_START_DATE=2023-01-04 for fair comparison",
+      "Each strategy has exactly 1 missing portfolio_return (today's entry, to be filled tomorrow) - correct behavior"
+    ]
+  }
+}

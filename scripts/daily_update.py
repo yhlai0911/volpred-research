@@ -506,7 +506,7 @@ def main():
         # Today's entry
         total_w = sum(w_info.values())
         entry = {
-            "date": today,
+            "trade_date": today,
             "data_date": spy_date,
             "weights": w_info,
             "cash_weight": round(max(0, 1 - total_w), 2),
