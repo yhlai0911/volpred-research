@@ -1,0 +1,121 @@
+{
+  "experiment_id": "K592",
+  "title": "MF2-GARCH (Conrad & Engle 2025) \u2014 Two-Component Volatility",
+  "timestamp": "2026-03-28T03:14:48.858364+00:00",
+  "methodology": {
+    "model": "MF2-GARCH (2-step)",
+    "short_run": "GJR on z_t = r_t / sqrt(\u03c4_t), E[g_t]=1 constraint",
+    "long_run": "\u03c4_t = exp(\u03c9 + \u03b4*log(RV22_{t-1}))",
+    "benchmarks": [
+      "GJR-GARCH(1,1)",
+      "HAR-ABS"
+    ],
+    "estimation": "2-step: (1) log-linear \u03c4 by OLS, (2) GJR by MLE on standardized z_t",
+    "refit_interval": 22,
+    "rolling_window": 2000,
+    "oos_period": "2023-01-03 to 2024-12-31",
+    "oos_days": 502,
+    "proxy": "r\u00b2_t (daily squared log return)",
+    "reference": "Conrad & Engle (2025, Journal of Applied Econometrics)"
+  },
+  "data": {
+    "source": "yfinance",
+    "asset": "SPY",
+    "period": "2005-01-04 to 2026-03-26",
+    "total_days": 5340
+  },
+  "results": {
+    "qlike": {
+      "MF2_GARCH": 1.669694,
+      "GJR_GARCH": 1.56553,
+      "HAR_ABS": 1.834839
+    },
+    "qlike_ratio_pct": {
+      "MF2_vs_GJR": 6.6536,
+      "MF2_vs_HAR": -9.0005,
+      "HAR_vs_GJR": 17.2024
+    },
+    "dm_tests": {
+      "MF2_vs_GJR": {
+        "t_stat": 2.5347,
+        "p_value": 0.0113,
+        "significant_5pct": true,
+        "harvey_pass": false
+      },
+      "MF2_vs_HAR": {
+        "t_stat": -2.9989,
+        "p_value": 0.0027,
+        "significant_5pct": true,
+        "harvey_pass": false
+      },
+      "HAR_vs_GJR": {
+        "t_stat": 4.4713,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "harvey_pass": true
+      }
+    },
+    "winner": "GJR-GARCH",
+    "mf2_beats_gjr_significant": true,
+    "mf2_beats_gjr_harvey": false
+  },
+  "diagnostics": {
+    "mf2_params_samples": {
+      "2023-01-03": {
+        "omega": -0.9736951543420989,
+        "delta": 0.9217988011471429,
+        "alpha": 0.04077395970064986,
+        "gamma": 0.1375841948519501,
+        "beta": 0.6433255870524202,
+        "persistence": 0.7528916441790451,
+        "tau_last": 0.00012560320549272506,
+        "g_last": 1.0597552027234023,
+        "tau_next": 0.00012572808341687925,
+        "g_next": 0.9387530683339738
+      }
+    },
+    "forecast_correlations": {
+      "MF2_GJR": 0.9094,
+      "MF2_HAR": 0.7603,
+      "GJR_HAR": 0.8541
+    },
+    "forecast_stats": {
+      "MF2_GARCH": {
+        "mean_ann_vol_pct": 11.71,
+        "std_ann_vol_pct": 3.57
+      },
+      "GJR_GARCH": {
+        "mean_ann_vol_pct": 13.11,
+        "std_ann_vol_pct": 3.55
+      },
+      "HAR_ABS": {
+        "mean_ann_vol_pct": 10.23,
+        "std_ann_vol_pct": 2.9
+      }
+    }
+  },
+  "sub_period": {
+    "2023": {
+      "MF2_GARCH": 1.560265,
+      "GJR_GARCH": 1.508061,
+      "HAR_ABS": 1.721594,
+      "MF2_vs_GJR_pct": 3.4617,
+      "MF2_vs_HAR_pct": -9.3709,
+      "n_days": 250
+    },
+    "2024": {
+      "MF2_GARCH": 1.778255,
+      "GJR_GARCH": 1.622544,
+      "HAR_ABS": 1.947186,
+      "MF2_vs_GJR_pct": 9.5967,
+      "MF2_vs_HAR_pct": -8.6757,
+      "n_days": 252
+    }
+  },
+  "comparison_with_prior": {
+    "K144_mf2_joint_qml": "K144 used joint QML with linear MEM (\u03bb1+\u03bb2*V^m+\u03bb3*\u03c4). K592 uses 2-step log-linear.",
+    "K530_har_abs": "K530 established HAR-ABS as gold standard (DM=-15.45 vs GJR).",
+    "K591_post_hoc": "K591 post-hoc MF2 correction failed (+0.3-2.4% QLIKE). K592 tests proper 2-step."
+  },
+  "elapsed_seconds": 17.0
+}

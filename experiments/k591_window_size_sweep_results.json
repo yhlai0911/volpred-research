@@ -1,0 +1,279 @@
+{
+  "experiment_id": "K591",
+  "title": "Window Size Sensitivity Sweep \u2014 Validating W=2000",
+  "timestamp": "2026-03-28T03:13:17.548019+00:00",
+  "elapsed_seconds": 9.4,
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "n_oos_days": 502,
+  "refit_every": 21,
+  "model": "GJR-GARCH(1,1)-t + HAR-ABS",
+  "garch_windows_tested": [
+    252,
+    504,
+    756,
+    1000,
+    1260,
+    1500,
+    1750,
+    2000,
+    2500,
+    3000
+  ],
+  "har_windows_tested": [
+    100,
+    200,
+    300,
+    500,
+    756,
+    1000
+  ],
+  "garch_results": {
+    "252": {
+      "window": 252,
+      "n_forecasts": 502,
+      "QLIKE": 1.6201684070164855,
+      "MSE": 1.4581667325290446,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9609374450670419,
+      "std_persistence": 0.027225874516734853
+    },
+    "504": {
+      "window": 504,
+      "n_forecasts": 502,
+      "QLIKE": 1.6138911546599413,
+      "MSE": 1.2780240749467306,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9907096109974121,
+      "std_persistence": 0.010912584306615129
+    },
+    "756": {
+      "window": 756,
+      "n_forecasts": 502,
+      "QLIKE": 1.6367461165354598,
+      "MSE": 1.3332021009415893,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9892567625002666,
+      "std_persistence": 0.004105945923720113
+    },
+    "1000": {
+      "window": 1000,
+      "n_forecasts": 502,
+      "QLIKE": 1.6267634997898504,
+      "MSE": 1.4096019675782088,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9891961395428771,
+      "std_persistence": 0.007204625281865842
+    },
+    "1260": {
+      "window": 1260,
+      "n_forecasts": 502,
+      "QLIKE": 1.6513730557201987,
+      "MSE": 1.755443153177177,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9902346444983413,
+      "std_persistence": 0.005760888470058475
+    },
+    "1500": {
+      "window": 1500,
+      "n_forecasts": 502,
+      "QLIKE": 1.6670396467594453,
+      "MSE": 1.7574955351213268,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9919912691005625,
+      "std_persistence": 0.006711886832647195
+    },
+    "1750": {
+      "window": 1750,
+      "n_forecasts": 502,
+      "QLIKE": 1.701371218543526,
+      "MSE": 1.8234801045459563,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9972766217721188,
+      "std_persistence": 0.0052172346284152
+    },
+    "2000": {
+      "window": 2000,
+      "n_forecasts": 502,
+      "QLIKE": 1.7284294158704123,
+      "MSE": 1.8218126005822342,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9994488117960953,
+      "std_persistence": 0.0011129897119310911
+    },
+    "2500": {
+      "window": 2500,
+      "n_forecasts": 502,
+      "QLIKE": 1.7402236533305577,
+      "MSE": 1.99738774698635,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9978059844609254,
+      "std_persistence": 0.0017050666404455942
+    },
+    "3000": {
+      "window": 3000,
+      "n_forecasts": 502,
+      "QLIKE": 1.7348749375346233,
+      "MSE": 1.9705689308281078,
+      "convergence_rate": 1.0,
+      "total_fits": 24,
+      "avg_persistence": 0.9919750420468256,
+      "std_persistence": 0.002898393050018628
+    }
+  },
+  "har_results": {
+    "100": {
+      "window": 100,
+      "n_forecasts": 502,
+      "QLIKE": 1.7889952043685144,
+      "MSE": 1.226137331083026
+    },
+    "200": {
+      "window": 200,
+      "n_forecasts": 502,
+      "QLIKE": 1.6581648218239307,
+      "MSE": 1.1683200688932118
+    },
+    "300": {
+      "window": 300,
+      "n_forecasts": 502,
+      "QLIKE": 1.6571885719504154,
+      "MSE": 1.1605333485940923
+    },
+    "500": {
+      "window": 500,
+      "n_forecasts": 502,
+      "QLIKE": 1.6160995100480702,
+      "MSE": 1.1502146172833558
+    },
+    "756": {
+      "window": 756,
+      "n_forecasts": 502,
+      "QLIKE": 1.6155972223249235,
+      "MSE": 1.150114496171758
+    },
+    "1000": {
+      "window": 1000,
+      "n_forecasts": 502,
+      "QLIKE": 1.6576841069565627,
+      "MSE": 1.155375008468917
+    }
+  },
+  "dm_tests_vs_2000": {
+    "252": {
+      "dm_stat": 3.060668556284254,
+      "p_value": 0.002327143288036959,
+      "better": "W=252",
+      "significant": "***"
+    },
+    "504": {
+      "dm_stat": 3.6773696809767022,
+      "p_value": 0.0002611796249230025,
+      "better": "W=504",
+      "significant": "***"
+    },
+    "756": {
+      "dm_stat": 3.3403201351495917,
+      "p_value": 0.0008993707286715225,
+      "better": "W=756",
+      "significant": "***"
+    },
+    "1000": {
+      "dm_stat": 3.0759749234152514,
+      "p_value": 0.0022130570063363386,
+      "better": "W=1000",
+      "significant": "***"
+    },
+    "1260": {
+      "dm_stat": 2.550290585327325,
+      "p_value": 0.011060370318140667,
+      "better": "W=1260",
+      "significant": "**"
+    },
+    "1500": {
+      "dm_stat": 2.6504437147669297,
+      "p_value": 0.008293399833593229,
+      "better": "W=1500",
+      "significant": "***"
+    },
+    "1750": {
+      "dm_stat": 2.408534606941645,
+      "p_value": 0.016377485722661067,
+      "better": "W=1750",
+      "significant": "**"
+    },
+    "2500": {
+      "dm_stat": -2.97429742524123,
+      "p_value": 0.0030785085850806304,
+      "better": "W=2000",
+      "significant": "***"
+    },
+    "3000": {
+      "dm_stat": -1.0365130740105297,
+      "p_value": 0.30046386021252647,
+      "better": "W=2000",
+      "significant": ""
+    }
+  },
+  "best_garch_window": 504,
+  "best_har_window": 756,
+  "persistence_analysis": {
+    "252": {
+      "avg": 0.9609374450670419,
+      "std": 0.027225874516734853
+    },
+    "504": {
+      "avg": 0.9907096109974121,
+      "std": 0.010912584306615129
+    },
+    "756": {
+      "avg": 0.9892567625002666,
+      "std": 0.004105945923720113
+    },
+    "1000": {
+      "avg": 0.9891961395428771,
+      "std": 0.007204625281865842
+    },
+    "1260": {
+      "avg": 0.9902346444983413,
+      "std": 0.005760888470058475
+    },
+    "1500": {
+      "avg": 0.9919912691005625,
+      "std": 0.006711886832647195
+    },
+    "1750": {
+      "avg": 0.9972766217721188,
+      "std": 0.0052172346284152
+    },
+    "2000": {
+      "avg": 0.9994488117960953,
+      "std": 0.0011129897119310911
+    },
+    "2500": {
+      "avg": 0.9978059844609254,
+      "std": 0.0017050666404455942
+    },
+    "3000": {
+      "avg": 0.9919750420468256,
+      "std": 0.002898393050018628
+    }
+  },
+  "references": [
+    "Feng & Zhang (2025) J.Forecasting \u2014 U-shape W=1000-2000 optimal",
+    "Hillebrand (2005) \u2014 persistence bias in short windows",
+    "Hansen & Lunde (2005) J.Applied Econometrics \u2014 QLIKE",
+    "Patton (2011) JoE \u2014 imperfect proxy",
+    "K041/K042/K153/K406/K408/K419 \u2014 prior window experiments"
+  ]
+}

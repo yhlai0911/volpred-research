@@ -15048,5 +15048,24 @@
     "created_at": "2026-03-28T03:01:21.119949+00:00",
     "experiment_file": null,
     "results_file": null
+  },
+  {
+    "item_id": "K592",
+    "category": "model_comparison",
+    "content": "[提出: User (K590 literature), 執行: Claude] K592: MF2-GARCH (Conrad & Engle JAE 2025) 2-step estimation — NULL RESULT. MF2-GARCH decomposes sigma^2_t = g_t * tau_t where g_t is short-run GJR on standardized returns z_t=r_t/sqrt(tau_t), tau_t=exp(omega+delta*log(RV22_{t-1})) is log-linear long-run component. 2-step: (1) OLS for tau, (2) MLE for GJR on z_t. SPY OOS 2023-2024 (502 days), w=2000, refit every 22 days. QLIKE: MF2=1.6697, GJR=1.5655, HAR-ABS=1.8348. MF2 WORSE than GJR by +6.65% (DM t=+2.53, p=0.011, fails Harvey t>3). MF2 beats HAR-ABS (DM t=-3.00). GJR persistence=0.75 in MF2 short-run (lower than standard ~0.97 because tau absorbs long-run). Sub-period: 2023 MF2 +3.5% vs GJR, 2024 MF2 +9.6% vs GJR — worsens over time. Key finding: 2-step estimation introduces efficiency loss — tau estimated by OLS on noisy log(r^2) is suboptimal. Confirms K144 (joint QML, also null for SPY) and QLIKE ceiling. Different from K591 post-hoc (which used simple multiplication). 6th independent null for MF2/MIDAS class models.",
+    "tags": [
+      "MF2-GARCH",
+      "Conrad-Engle",
+      "two-component",
+      "QLIKE-ceiling",
+      "null-result",
+      "GJR-GARCH",
+      "HAR-ABS",
+      "SPY"
+    ],
+    "data_source": "yfinance SPY 2005-2026",
+    "evidence": "experiments/k592_mf2_garch_results.json: SPY w=2000, OOS 502 days (2023-01 to 2024-12)",
+    "experiment_id": "K592",
+    "title": "MF2-GARCH 2-Step (Conrad & Engle 2025) — Null vs GJR"
   }
 ]
