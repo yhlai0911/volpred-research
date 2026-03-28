@@ -1,0 +1,296 @@
+{
+  "experiment_id": "K621",
+  "title": "Paper Submission Readiness Checklist — All 3 Papers",
+  "date": "2026-03-27",
+  "summary": "Comprehensive submission readiness evaluation for three papers: leverage-direction (JBF target), taiwan-vt (PBFJ target), vt-trend-following (target TBD).",
+
+  "papers": [
+    {
+      "paper_id": "paper_1",
+      "title": "Leverage Direction Matters: Cross-Asset Evidence on GARCH Model Selection and Volatility Targeting",
+      "directory": "paper/leverage-direction/",
+      "main_file": "main.tex (includes body.tex, tables.tex, table_nulls.tex)",
+      "target_journal": "Journal of Banking & Finance (JBF)",
+      "journal_page_limit": "~50-60 pages (double-spaced, JBF has no strict limit but 40-50 main text + appendices is typical)",
+
+      "page_count": 64,
+      "page_assessment": "At 64 pages, slightly above typical JBF length. Could benefit from trimming appendices or moving some robustness to supplementary material. The appendices (Commodity Extension, TZ Arbitrage, Practical Summary) add ~10 pages that could be online-only.",
+
+      "tables_count": 14,
+      "figures_count": 6,
+      "tables_figures_assessment": "14 tables and 6 figures is substantial but within JBF norms for a comprehensive empirical paper. All 6 figure PDFs exist on disk.",
+
+      "references_count": 47,
+      "references_assessment": "47 references is reasonable for JBF. All bibitems in main.tex are referenced in body.tex via inline author-year citation style (e.g., 'Bollerslev (1986)' rather than \\citet{}). No missing citation keys detected.",
+
+      "k_numbers_referenced": ["K486", "K490", "K477"],
+      "k_numbers_in_knowledge": {
+        "K486": true,
+        "K490": true,
+        "K477": "referenced in comment only, not formal K-number in text"
+      },
+      "k_numbers_assessment": "All K-numbers are used only in LaTeX comments (% K486/K490: ...) for internal tracking, not visible in compiled PDF. All exist in knowledge.json.",
+
+      "correction_notices": "None found. No warning/correction notices in the paper.",
+
+      "abstract": {
+        "present": true,
+        "current": true,
+        "word_count_approx": 280,
+        "assessment": "Abstract is well-structured with three clear contributions, specific statistics (gamma values, Spearman rho, DM results), and appropriate scope. Mentions extended OOS (2026 Iran crisis). Keywords and JEL codes present."
+      },
+
+      "conclusion": {
+        "present": true,
+        "reflects_latest_findings": true,
+        "includes_har_k530": true,
+        "includes_leverage_k548": true,
+        "assessment": "Conclusion properly reflects all three contributions. HAR paradox (K530) is discussed in Section 5.8 and referenced in the complexity ceiling table. VIX-conditional leverage (K548) is covered in Section 5.6. The conclusion accurately summarizes: (1) leverage direction taxonomy, (2) gamma-mechanism proposition with domain boundaries, (3) TZ information transmission with c2c/o2o distinction."
+      },
+
+      "codex_review_status": "Completed (Codex R6 — 6 issues fixed, all noted with '% Codex-R6-fix' comments)",
+      "codex_fixes_applied": [
+        "R6-1: Date range unified (was Dec 2025, now Mar 2026)",
+        "R6-2: Semi-overlapping windows corrected",
+        "R6-3: c2c reframed from 'tradable alpha' to 'information transmission'",
+        "R6-4: Threshold caveat (in-sample, small cross-section)",
+        "R6-5: Gamma-mechanism mechanical caveat added",
+        "R6-6: Multiple-testing disclosure strengthened"
+      ],
+
+      "known_issues": [
+        "Inline citation style (author-year) inconsistent with \\citet{} used elsewhere — JBF may prefer uniform natbib style",
+        "body.tex uses mixed citation styles: some 'Bollerslev (1986)' inline, some \\citet{} macro — should standardize",
+        "64 pages may be long; consider moving Appendix B (TZ Arbitrage) to Taiwan VT paper or online appendix",
+        "Cover letter exists (cover_letter.tex/pdf) — review before submission"
+      ],
+
+      "readiness_rating": "NEEDS MINOR REVISION",
+      "readiness_detail": "Paper is substantively complete with all key results, figures, and robustness. The main issues are: (1) page length (64p, trim to ~55p by moving some appendix material online), (2) citation style inconsistency (inline vs \\citet), (3) 3 uncited bibitems (barroso2015 etc.) — cleanup only. No substantive content gaps."
+    },
+
+    {
+      "paper_id": "paper_2",
+      "title": "Volatility Targeting in the Taiwan Stock Market: Leverage Amplification, Model Selection, and Practical Implementation",
+      "directory": "paper/taiwan-vt/",
+      "main_file": "main.tex (includes body.tex)",
+      "target_journal": "Pacific-Basin Finance Journal (PBFJ)",
+      "journal_page_limit": "~30-40 pages (double-spaced, PBFJ typical)",
+
+      "page_count": 38,
+      "page_assessment": "38 pages is within PBFJ norms. The paper covers three substantial topics (leverage amplification, VT strategies, TZ info transmission) which justifies the length.",
+
+      "tables_count": 6,
+      "tables_figures_assessment": "6 tables and 0 figures. The absence of figures is a notable gap — PBFJ papers typically include at least 2-3 figures. Missing: rolling gamma chart, VT cumulative returns chart, overnight gap visualization. This should be addressed before submission.",
+      "figures_count": 0,
+
+      "references_count": 16,
+      "references_assessment": "Only 16 references — this is THIN for PBFJ. Missing several key citations that should be added: Chevallier & Ielpo (2017) for commodity leverage, Corsi (2009) for HAR, Hansen & Lunde (2005) for GARCH comparison, Moskowitz et al. (2012) for TSMOM. Also missing: barndorff2010 (cited in text but no bibitem).",
+
+      "citation_issues": {
+        "missing_bibitem": ["barndorff2010 — cited in footnote at line 235 but no corresponding \\bibitem in main.tex"],
+        "uncited_bibitems": []
+      },
+
+      "k_numbers_referenced": ["K461", "K472", "K512", "K515", "K516"],
+      "k_numbers_in_knowledge": {
+        "K461": true,
+        "K472": true,
+        "K512": true,
+        "K515": true,
+        "K516": true
+      },
+      "k_numbers_assessment": "All K-numbers are used in LaTeX comments only (not visible in compiled output). All exist in knowledge.json with matching content.",
+
+      "correction_notices": "None found.",
+
+      "abstract": {
+        "present": true,
+        "current": true,
+        "word_count_approx": 420,
+        "assessment": "Abstract is comprehensive but LONG (~420 words). PBFJ typically expects ~150-250 words. Should be condensed significantly — currently tries to cover all findings including macro indicators, TSMC decomposition, and conditional leverage. Focus on the 3 core contributions."
+      },
+
+      "conclusion": {
+        "present": true,
+        "reflects_latest_findings": true,
+        "assessment": "Conclusion properly covers: (1) leverage amplification with TAIEX vs 0050.TW distinction, (2) VT strategy comparison with QLIKE-VT disconnect, (3) TZ info transmission with c2c/o2o gap. Limitations are well-stated including VIXTWN data limitation, TSMC concentration risk, and single-market scope."
+      },
+
+      "codex_review_status": "Completed (Codex R6 fixes applied, marked with '% Codex-R6-fix' comments)",
+      "codex_fixes_applied": [
+        "Weaken 'remarkably efficient' auction claim",
+        "Tone down 'highly efficient' to 'efficient'",
+        "Corrected arithmetic: 29 × 0.3% = 8.7%, not 1.7%",
+        "Weaken amplification claim with limited sample caveat",
+        "Tone down 'formal statistical confirmation' to 'statistical evidence'"
+      ],
+
+      "known_issues": [
+        "CRITICAL: 0 figures — must add at least 2-3 (rolling gamma, VT cumulative returns, overnight gap)",
+        "CRITICAL: Only 16 references — expand to 25-30 (add Chevallier & Ielpo, Corsi, Hansen & Lunde, Moskowitz, etc.)",
+        "CRITICAL: Missing bibitem for barndorff2010 (cited in footnote)",
+        "Abstract too long (~420 words) — condense to ~200 words",
+        "No separate tables.tex — all tables inline in body.tex (fine for PBFJ)",
+        "Paper self-cites 'lai2026a' — ensure it exists as working paper / update if published"
+      ],
+
+      "readiness_rating": "NEEDS MAJOR REVISION",
+      "readiness_detail": "The content is strong and well-organized, but three critical gaps must be addressed: (1) ZERO figures — must add at least 2-3 visualizations, (2) only 16 references is insufficient for a 38-page paper — expand to 25-30, (3) missing barndorff2010 bibitem. The abstract also needs significant condensation. These are all mechanical fixes, not substantive content issues."
+    },
+
+    {
+      "paper_id": "paper_3",
+      "title": "Is Volatility Targeting Just Trend Following? Decomposing the Benefits of Volatility Targeting",
+      "directory": "paper/vt-trend-following/",
+      "main_file": "main.tex (self-contained, no \\input files)",
+      "target_journal": "TBD (per CLAUDE.md)",
+      "journal_suggestions": "Journal of Portfolio Management (JPM — most natural fit given VT/TSMOM content and Hood & Raughtigan 2025 reference), Journal of Financial Economics (JFE — stretch target), Financial Analysts Journal (FAJ)",
+
+      "page_count": 26,
+      "page_assessment": "26 pages is compact for the scope covered (22-asset analysis, international evidence, 5 factor models). Appropriate for JPM or FAJ. If targeting JFE, would need expansion.",
+
+      "tables_count": 5,
+      "tables_figures_assessment": "5 tables (alpha decomposition, cross-section, dual mechanism, FF5, international) and 0 figures. The absence of figures is a gap — at minimum should include: gamma vs TSMOM loading scatter plot, MDD decomposition bar chart, international VT protection heatmap.",
+      "figures_count": 0,
+
+      "references_count": 18,
+      "references_assessment": "18 references is adequate for a focused 26-page paper. 3 bibitems are uncited: barroso2015, daniel2016, fleming2001 — should either cite them in text or remove from bibliography. Key references are present (Moreira & Muir, Hood & Raughtigan, Moskowitz et al., Harvey et al.).",
+
+      "citation_issues": {
+        "missing_bibitem": [],
+        "uncited_bibitems": ["barroso2015", "daniel2016", "fleming2001"]
+      },
+
+      "k_numbers_referenced": ["K518", "K533", "K499", "K488", "K503", "K568", "K507"],
+      "k_numbers_in_knowledge": {
+        "K518": true,
+        "K533": true,
+        "K499": true,
+        "K488": true,
+        "K503": true,
+        "K568": true,
+        "K507": true
+      },
+      "k_numbers_assessment": "All K-numbers are in LaTeX comments only. All exist in knowledge.json.",
+
+      "correction_notices": "None found.",
+
+      "abstract": {
+        "present": true,
+        "current": true,
+        "word_count_approx": 260,
+        "assessment": "Abstract is excellent — clear 3-contribution structure, specific numbers (90-97% MDD retention, r=0.564, 13/13 markets), and precise conclusion (VT as drawdown insurance priced at ~4%/year). Length appropriate for most journals."
+      },
+
+      "conclusion": {
+        "present": true,
+        "reflects_latest_findings": true,
+        "assessment": "Conclusion covers: (1) gamma predicts TSMOM loading, (2) dual mechanism (Sharpe vs MDD), (3) 12/VIX irreducibility, (4) international evidence. References K568 findings (12/VIX return-optimal) and K518 (trend-following strategies fail Harvey). Well-structured with 4 practical implications."
+      },
+
+      "codex_review_status": "Not explicitly marked (no Codex-R6-fix comments found)",
+
+      "known_issues": [
+        "0 figures — must add at least 2-3 (scatter plot, decomposition chart, international heatmap)",
+        "3 uncited bibitems: barroso2015, daniel2016, fleming2001 — either cite or remove",
+        "No target journal specified yet — decide before submission",
+        "Uses xeCJK/PingFang TC font — ensure journal accepts XeLaTeX or convert to pdfLaTeX",
+        "Self-cite 'lai2026a' — ensure it exists / is accessible",
+        "Hood & Raughtigan (2025) listed as 'Working Paper' — check if published / update citation",
+        "No Codex/Gemini review documented — should undergo formal review before submission"
+      ],
+
+      "readiness_rating": "NEEDS MINOR REVISION",
+      "readiness_detail": "Content is strong and well-focused. The paper makes a clear, testable argument with comprehensive evidence. Main gaps: (1) no figures (add 2-3), (2) cleanup 3 uncited bibitems, (3) select target journal, (4) undergo Codex/Gemini review. The content itself is submission-ready — these are presentation and process issues."
+    }
+  ],
+
+  "cross_paper_issues": {
+    "self_citation_consistency": "Paper 3 cites 'lai2026a' (Paper 1). Paper 2 also cites 'lai2026a'. Ensure Paper 1 is available as a working paper (SSRN/arXiv) before submitting Papers 2 and 3.",
+    "content_overlap": "The TZ information transmission / arbitrage analysis appears in both Paper 1 (Appendix B) and Paper 2 (Section 5). Consider removing from Paper 1's appendix and directing readers to Paper 2 to avoid self-plagiarism concerns.",
+    "hood2025_citation": "Hood & Raughtigan (2025) is cited in Papers 1 and 3 with slightly different author names (Raughtigan vs Raughtigan) and different publication status — standardize across papers.",
+    "xelatex_dependency": "All 3 papers use xeCJK/PingFang TC — journals that require pdfLaTeX will need font conversion."
+  },
+
+  "priority_action_items": [
+    {
+      "priority": "P0",
+      "action": "Add figures to Papers 2 and 3 (both have 0 figures — critical for submission)",
+      "effort": "Medium — generate from existing experiment data"
+    },
+    {
+      "priority": "P0",
+      "action": "Fix missing barndorff2010 bibitem in Paper 2",
+      "effort": "Low — add one reference entry"
+    },
+    {
+      "priority": "P1",
+      "action": "Expand Paper 2 references from 16 to 25-30",
+      "effort": "Low-Medium — add standard citations"
+    },
+    {
+      "priority": "P1",
+      "action": "Condense Paper 2 abstract from ~420 to ~200 words",
+      "effort": "Low"
+    },
+    {
+      "priority": "P1",
+      "action": "Remove or cite 3 uncited bibitems in Paper 3",
+      "effort": "Low"
+    },
+    {
+      "priority": "P1",
+      "action": "Standardize citation style in Paper 1 (inline vs \\citet)",
+      "effort": "Medium — systematic find-replace"
+    },
+    {
+      "priority": "P1",
+      "action": "Trim Paper 1 from 64p to ~55p (move appendix material online)",
+      "effort": "Medium"
+    },
+    {
+      "priority": "P1",
+      "action": "Select target journal for Paper 3",
+      "effort": "Low — decision only"
+    },
+    {
+      "priority": "P2",
+      "action": "Run Codex/Gemini review on Paper 3",
+      "effort": "Medium"
+    },
+    {
+      "priority": "P2",
+      "action": "Upload Paper 1 to SSRN/arXiv so Papers 2 and 3 can properly cite it",
+      "effort": "Low"
+    },
+    {
+      "priority": "P2",
+      "action": "Resolve TZ arbitrage content overlap between Papers 1 and 2",
+      "effort": "Medium"
+    },
+    {
+      "priority": "P2",
+      "action": "Verify Hood & Raughtigan (2025) publication status and update citation",
+      "effort": "Low"
+    }
+  ],
+
+  "overall_assessment": {
+    "paper_1_leverage_direction": {
+      "rating": "NEEDS MINOR REVISION",
+      "completion_pct": 90,
+      "estimated_effort_to_ready": "1-2 days (citation cleanup, page trimming)"
+    },
+    "paper_2_taiwan_vt": {
+      "rating": "NEEDS MAJOR REVISION",
+      "completion_pct": 70,
+      "estimated_effort_to_ready": "3-5 days (add figures, expand references, condense abstract)"
+    },
+    "paper_3_vt_trend_following": {
+      "rating": "NEEDS MINOR REVISION",
+      "completion_pct": 85,
+      "estimated_effort_to_ready": "2-3 days (add figures, cleanup bibitems, Codex review, select journal)"
+    }
+  }
+}
