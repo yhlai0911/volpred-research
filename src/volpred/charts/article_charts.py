@@ -32,7 +32,7 @@ import numpy as np
 
 
 # ─── Style defaults ─────────────────────────────────────────
-_FONT_CANDIDATES = ["PingFang TC", "Heiti TC", "Arial Unicode MS", "sans-serif"]
+_FONT_CANDIDATES = ["PingFang HK", "PingFang TC", "Heiti TC", "Arial Unicode MS", "Noto Sans CJK SC", "STHeiti", "sans-serif"]
 _COLORS = ["#2196F3", "#FF9800", "#4CAF50", "#F44336", "#9C27B0", "#00BCD4", "#795548", "#607D8B"]
 _DPI = 150
 _CHART_DIR = Path("/tmp/volpred_charts")
