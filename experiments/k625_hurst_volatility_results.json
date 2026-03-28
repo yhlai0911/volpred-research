@@ -1,0 +1,223 @@
+{
+  "experiment_id": "K625",
+  "title": "Time-Varying Hurst Exponent (DFA) for Volatility Forecasting",
+  "timestamp": "2026-03-29 01:31:40",
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "period": "2006-01-04 to 2026-03-26",
+  "total_obs": 5088,
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "oos_obs": 501,
+  "n_refits": 24,
+  "window": 2000,
+  "refit_every": 21,
+  "hurst_window": 252,
+  "dfa_scales": [
+    10,
+    20,
+    50,
+    100
+  ],
+  "references": [
+    "arXiv:2509.05820 (2025): EWMA-driven dynamic Hurst parameter",
+    "Frontiers Applied Math (2025): Wavelet-based time-varying Hurst",
+    "Gatheral, Jaisson, Rosenbaum (2018): Volatility is rough, QF 18(6)",
+    "Peng et al. (1994): DFA method, Physical Review E"
+  ],
+  "prior_knowledge": [
+    "K138: Hurst fingerprint — all assets rough (H~0.01 for log-var)",
+    "K166: Hurst Exponent Regime — SPY H=0.54, OOS no improvement",
+    "Prior Hurst-GARCH OOS: +1.28% QLIKE, no improvement"
+  ],
+  "hurst_descriptive": {
+    "method": "DFA (Detrended Fluctuation Analysis)",
+    "input_series": "|r_t| (absolute returns)",
+    "n_valid": 4836,
+    "mean": 0.7713893910872055,
+    "std": 0.13841213851460016,
+    "min": 0.4015042809193977,
+    "max": 1.2443000988229844,
+    "median": 0.7629014663434595,
+    "pct_above_0.5": 97.18775847808105,
+    "pct_below_0.5": 2.8122415219189416,
+    "mean_r_squared": 0.9769269883510936
+  },
+  "returns_diagnostics": {
+    "mean_pct": 0.04674729353193619,
+    "std_pct": 1.2171872088881688,
+    "skewness": -0.000588033589968583,
+    "kurtosis": 15.014584652867057,
+    "adf_stat": -17.808586043660743,
+    "adf_pvalue": 3.1961601190442284e-30,
+    "arch_lm_stat": 1289.0326120810203,
+    "arch_lm_pvalue": 8.903252359543325e-271
+  },
+  "correlations": {
+    "pearson_h_vix": 0.4498947403746773,
+    "pearson_h_future_rv20": 0.2370686184054501,
+    "pearson_vix_future_rv20": 0.7072743731216434,
+    "spearman_h_vix": 0.38946514202158117,
+    "spearman_h_vix_pvalue": 3.229158368696103e-174,
+    "spearman_h_future_rv20": 0.23876627543211157,
+    "spearman_h_future_rv20_pvalue": 2.0917484229372435e-63
+  },
+  "period_analysis": {
+    "2007-2009 (GFC)": {
+      "mean": 0.8037494065511995,
+      "std": 0.11767516167193169,
+      "pct_above_0.5": 100.0,
+      "n": 754
+    },
+    "2010-2014 (Recovery)": {
+      "mean": 0.751562720254477,
+      "std": 0.08911245663026844,
+      "pct_above_0.5": 100.0,
+      "n": 1258
+    },
+    "2015-2019 (Bull)": {
+      "mean": 0.7600929523109569,
+      "std": 0.1282928057429024,
+      "pct_above_0.5": 89.7456279809221,
+      "n": 1258
+    },
+    "2020 (COVID)": {
+      "mean": 1.096453319562234,
+      "std": 0.13227324030495785,
+      "pct_above_0.5": 100.0,
+      "n": 253
+    },
+    "2021-2022 (Post-COVID)": {
+      "mean": 0.7425289368406408,
+      "std": 0.10434722057519147,
+      "pct_above_0.5": 100.0,
+      "n": 503
+    },
+    "2023-2024 (OOS)": {
+      "mean": 0.6402610488607791,
+      "std": 0.07015364251691612,
+      "pct_above_0.5": 98.60557768924303,
+      "n": 502
+    }
+  },
+  "oos_metrics": {
+    "GJR-GARCH": {
+      "QLIKE": 1.490639415933638,
+      "MSE": 1.1539103228638812,
+      "MAE": 0.7065666803002653,
+      "n_valid": 500,
+      "pct_diff_vs_gjr_qlike": 0.0
+    },
+    "HAR": {
+      "QLIKE": 1.5316787482240115,
+      "MSE": 1.2272247332445951,
+      "MAE": 0.7710792280399383,
+      "n_valid": 500,
+      "pct_diff_vs_gjr_qlike": 2.7531361274697788
+    },
+    "HAR-H (Hurst)": {
+      "QLIKE": 1.5275512927526402,
+      "MSE": 1.211370400287618,
+      "MAE": 0.7476516897911651,
+      "n_valid": 500,
+      "pct_diff_vs_gjr_qlike": 2.4762445179193824
+    },
+    "EWMA-H (Hurst-scaled)": {
+      "QLIKE": 1.515034452900421,
+      "MSE": 1.1301587971623284,
+      "MAE": 0.7047093075379431,
+      "n_valid": 500,
+      "pct_diff_vs_gjr_qlike": 1.6365484976461242
+    },
+    "Regime-Hurst GJR": {
+      "QLIKE": 1.493185176250186,
+      "MSE": 1.1734987663224488,
+      "MAE": 0.7210750745431467,
+      "n_valid": 500,
+      "pct_diff_vs_gjr_qlike": 0.17078310752660908
+    }
+  },
+  "dm_tests_qlike_vs_gjr": {
+    "HAR": {
+      "DM_stat": -1.835493705745823,
+      "p_value": 0.06643257085180188,
+      "n": 500,
+      "interpretation": "HAR worse than GJR (not significant)"
+    },
+    "HAR-H (Hurst)": {
+      "DM_stat": -1.7132967223279718,
+      "p_value": 0.08665796509043888,
+      "n": 500,
+      "interpretation": "HAR-H (Hurst) worse than GJR (not significant)"
+    },
+    "EWMA-H (Hurst-scaled)": {
+      "DM_stat": -0.9180489846389857,
+      "p_value": 0.3585932213135008,
+      "n": 500,
+      "interpretation": "EWMA-H (Hurst-scaled) worse than GJR (not significant)"
+    },
+    "Regime-Hurst GJR": {
+      "DM_stat": -0.2870175421716179,
+      "p_value": 0.7740988883750162,
+      "n": 500,
+      "interpretation": "Regime-Hurst GJR worse than GJR (not significant)"
+    }
+  },
+  "dm_tests_mse_vs_gjr": {
+    "HAR": {
+      "DM_stat": -2.6460869338536477,
+      "p_value": 0.008142888678687621,
+      "n": 500
+    },
+    "HAR-H (Hurst)": {
+      "DM_stat": -2.0793953800450904,
+      "p_value": 0.03758102479650338,
+      "n": 500
+    },
+    "EWMA-H (Hurst-scaled)": {
+      "DM_stat": 0.5761313720107464,
+      "p_value": 0.5645263878768076,
+      "n": 500
+    },
+    "Regime-Hurst GJR": {
+      "DM_stat": -2.968791103133568,
+      "p_value": 0.0029897376769107975,
+      "n": 500
+    }
+  },
+  "dm_test_har_vs_har_h": {
+    "QLIKE": {
+      "DM_stat": 0.6784555066840026,
+      "p_value": 0.49748292550688333,
+      "n": 500
+    },
+    "MSE": {
+      "DM_stat": 4.151190459855176,
+      "p_value": 3.307503742755458e-05,
+      "n": 500
+    }
+  },
+  "conclusion": {
+    "any_improvement": false,
+    "any_significant_improvement": false,
+    "best_model": "GJR-GARCH",
+    "best_qlike": 1.490639415933638,
+    "summary": "Time-varying Hurst exponent (DFA) on |returns| shows persistent behavior (mean H=0.771, 97% above 0.5). However, incorporating H_t into volatility forecasting models (HAR-H, EWMA-H, Regime-Hurst) does NOT improve over GJR-GARCH baseline in OOS (2023-2024). No statistically significant improvement (DM test). This confirms prior findings (K138, K166) that Hurst information, while describing vol dynamics, does not translate to better OOS forecasts. The DFA method gives different H values than R/S (prior work: H=0.73 via R/S), but the forecasting conclusion is consistent."
+  },
+  "limitations": [
+    "Squared returns as vol proxy (noisy); 5-min RV would be better",
+    "DFA with only 4 scales (10,20,50,100) — more scales could give more precise H",
+    "Single asset (SPY) — generalizability unknown",
+    "HAR-H uses OLS (no heteroskedasticity correction)",
+    "Regime-Hurst uses crude variance scaling rather than true regime-switching model",
+    "Hurst on absolute returns vs log-variance may give different H values"
+  ],
+  "runtime_seconds": {
+    "hurst_computation": 8.9,
+    "oos_evaluation": 12.1,
+    "total": 21.0
+  },
+  "plots": [
+    "experiments/k625_hurst_evolution.png",
+    "experiments/k625_hurst_oos_comparison.png"
+  ]
+}
