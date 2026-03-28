@@ -15556,5 +15556,23 @@
     "experiment_id": "k637",
     "created_at": "2026-03-29T03:22:00.457708",
     "importance": 3
+  },
+  {
+    "id": "K638",
+    "title": "K638: VIX Term Structure Slope — Significant partial corr but no OOS value (VIX sufficiency #40)",
+    "content": "[提出: 策略增強探索, 執行: Claude] VIX3M/VIX slope 分析。Slope 與 future 22d RV 相關 -0.58，partial(|VIX) -0.19（p<1e-38）——有統計增量但效果溫和。Slope Granger-causes VIX changes（p<0.001 all lags）。Backwardation(slope<0) 發生 9.6% 時間，年化 return -167% vs contango +30%（t=12.6）。OOS 2023-2024：GARCH-X(slope) QLIKE 與 baseline 相同(0.416)。HAR+slope 更差(0.573)。Strategy: slope-adjusted VT Sharpe 0.939 vs baseline 0.924（NS, p=0.584）。結論：slope 有描述/統計價值但無 OOS 預測增量。VIX sufficiency #40。",
+    "tags": [
+      "VIX-term-structure",
+      "slope",
+      "VIX3M",
+      "backwardation",
+      "contango",
+      "VIX-sufficiency",
+      "null-result"
+    ],
+    "data_source": "yfinance SPY/VIX/VIX3M 2008-2026",
+    "experiment_id": "k638",
+    "created_at": "2026-03-29T03:28:33.371593",
+    "importance": 2
   }
 ]
