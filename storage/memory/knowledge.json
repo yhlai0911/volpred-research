@@ -15609,5 +15609,22 @@
     "experiment_id": "k640",
     "created_at": "2026-03-29T03:45:51.912011",
     "importance": 5
+  },
+  {
+    "id": "K641",
+    "title": "K641: ★★★ VT Regime Decomposition — Conditional architecture best, continuous scaling worst in Elevated",
+    "content": "[提出: K640 follow-up, 執行: Claude] VT 策略在 4 VIX regime 的表現分解（810 days, 2023-2026）。Calm(31%) Normal(47%) Elevated(20%) Crisis(2%)。核心發現：(1) 連續 scaling（GARCH/12VIX）在 Elevated Sharpe -5.2——持有太多但不夠少。(2) Piecewise 危機零損失但 rebound 只捕 0.53/12.44%。(3) VIX Conditional Leverage 最平衡——crisis Sharpe +0.36 + rebound capture。(4) All VT 淨 regime value vs BH 為負——opportunity cost > protection benefit。(5) 2025 tariff shock：Risk Parity +7.83%, Adaptive +4.61%, GARCH VT -4.39%。結論：discrete-bracket + conditional 架構優於 continuous scaling。",
+    "tags": [
+      "regime-decomposition",
+      "VT-architecture",
+      "conditional",
+      "piecewise",
+      "continuous-scaling",
+      "rebound-capture"
+    ],
+    "data_source": "paper_trading.json + yfinance 2023-2026",
+    "experiment_id": "k641",
+    "created_at": "2026-03-29T03:51:18.339894",
+    "importance": 4
   }
 ]
