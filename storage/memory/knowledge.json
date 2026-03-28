@@ -15134,5 +15134,21 @@
     "data_source": "yfinance (SPY, GLD, ^VIX), 2005-2026",
     "experiment_id": "K597",
     "timestamp": "2026-03-28T12:25:06.361760"
+  },
+  {
+    "id": "K598",
+    "title": "K598: ★★★ Adaptive Tier Debounce — 77% false exits is a FEATURE not bug. Keep original.",
+    "content": "[提出: Claude, 執行: Claude] 5 debounce variants 全部顯著更差 (JKM z=-8 to -10)。77% 假退出實為保護性——只有 27.9% 的假退出期間有正報酬。Debounce 降 Sharpe 0.42-0.55, 降 CAGR 4.4-5.2%, 增 MDD 2.3-4.5%。\n\nHysteresis 最佳但仍虧 0.42 Sharpe。\n\n結論：快速 regime switching IS the value。年 20.4 次 turnover @ 10bp 是小代價 for -8.7% MDD。不修改已上架策略。",
+    "tags": [
+      "adaptive_tier",
+      "debounce",
+      "false_exits",
+      "keep_original",
+      "feature_not_bug"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX 2005-2026",
+    "experiment_id": "k598",
+    "created_at": "2026-03-28T04:44:32.361925+00:00",
+    "importance": 4
   }
 ]
