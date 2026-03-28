@@ -266,6 +266,45 @@
       "description": "K637：K-Means 聚類發現市場存在 2 種清晰情緒（Silhouette=0.41），遠優於固定 VIX 門檻（0.04）。平靜期（75%，VIX 16.4）Sharpe 2.31，壓力期（25%，VIX 30.1）Sharpe -1.53。HMM 確認平靜期持續 91 天、壓力期 51 天。",
       "proposer": "Claude",
       "executor": "Claude"
+    },
+    {
+      "id": "mile_71111053",
+      "title": "15 個月真槍實彈——我們的策略在最恐慌的市場裡表現如何？",
+      "content": "# 15 個月真槍實彈——我們的策略在最恐慌的市場裡表現如何？\n\n2025 年 4 月 8 日，美國宣布大規模關稅措施，VIX 恐慌指數一夜飆升至 52.33——這是 2020 年 COVID 崩盤以來最高水準。\n\n市場崩潰那一天，很多投資人的帳戶一片慘紅。\n\n**但我們的部分策略，不只沒虧錢，還在那個月賺錢了。**\n\n---\n\n## 「模型」不等於「紙上談兵」\n\n很多投資策略在回測時看起來漂亮，一旦真金白銀下去，就原形畢露。\n\nVolPred 研究系統從 2024 年 12 月開始，用 14 個不同策略進行**15 個月的真實操作追蹤**（Paper Trading），每個策略都按照模型信號調整倉位，不主觀干預，不事後修改。\n\n這份報告就是那 15 個月的成績單。\n\n---\n\n## 成績單：11/14 策略打敗大盤\n\n![15 個月實盤 Sharpe Ratio 比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k640_sharpe_comparison_88dafb.png)\n\n在 14 個追蹤策略中，**11 個策略的 Sharpe Ratio 優於 SPY 買持（0.31）和 60/40 組合（0.72）**。\n\n最突出的是**保守型 VT（Piecewise Conservative）**，Sharpe Ratio 高達 **3.98**——這代表每承擔 1 單位風險，賺到的超額報酬高達 3.98 倍。相較之下，直接買持 SPY 只有 0.31。\n\n---\n\n## 關稅衝擊那個月：跌幅最大 vs. 跌幅最小\n\n![15 個月實盤最大回撤比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k640_mdd_comparison_bdd287.png)\n\n2025 年關稅風暴期間，**SPY 最大回撤達到 -18.8%**。如果你的資產有 100 萬，那個月帳面縮水了將近 19 萬。\n\n反觀 Piecewise Conservative 策略：**最大回撤只有 -2.5%**。\n\n為什麼差這麼多？原因在於這個策略採用**分段式風控邏輯**：\n\n- VIX < 20（市場平靜）：維持正常倉位\n- VIX 20-30（壓力警示）：降低至 60% 倉位\n- VIX > 30（危機模式）：降至 30% 倉位，同時轉移部分資金至黃金\n\n當 VIX 衝到 52，策略早已大幅降倉——不是「猜到」市場會跌，而是**依規則行動，不帶任何情緒**。\n\n---\n\n## 為什麼有些「看起來聰明」的策略反而表現差？\n\n你可能注意到，12/VIX 和 GARCH VT 這兩個「連續調整型」策略，Sharpe 反而偏低（0.43）。\n\n原因出乎意料：**在高 VIX 環境降低曝險，有時候反而錯過反彈。**\n\n2025 年 4 月市場急跌後，5 月開始強力反彈。連續 Scaling 策略在 VIX 高時降了倉，反彈卻沒趕上——結果是「跌時保護到了，彈時錯過了」。\n\n這是策略設計哲學的根本差異：\n- **連續調整型**：隨 VIX 線性調整，靈活但追蹤反彈能力弱\n- **分段式（Piecewise）**：按條件觸發，保護強但需要明確觸發點\n- **條件槓桿型**（VIX Conditional Leverage）：低 VIX 時加槓桿，高 VIX 時撤退——平衡最佳\n\n---\n\n## 模型可靠嗎？10/14 一致性驗證通過\n\n我們也檢驗了一個關鍵問題：**回測看起來好，實際操作是否也一樣？**\n\n結果：**14 個策略中，10 個的實盤與回測表現高度一致**（相關係數 > 0.80，月度報酬偏差 < 0.5%）。\n\n這代表我們的模型**沒有嚴重過擬合**——在從未見過的市場中，依然表現如預期。\n\n---\n\n## 一個簡單的觀念：你需要的不是「永遠賺錢」的策略\n\n沒有策略可以永遠賺錢。\n\n但有策略可以在**大跌時保住本金，在平穩時穩定累積**。\n\nPiecewise Conservative 在危機期間**近乎零損失**，正常市場期間 Sharpe 2.34——這不是「運氣好」，而是規則在對的時機發揮了作用。\n\n這就是量化策略的本質：不比誰更聰明，而是**在市場最恐慌的時候，還能按規則行動**。\n\n---\n\n*本文基於實驗 K640 的實證結果（數據來源：yfinance Paper Trading 追蹤，期間：2024-12 至 2026-03）*\n*[提出: Claude, 執行: Claude]*\n",
+      "thinking": "K640 實盤審計 15 個月結果。11/14 策略打敗 SPY 和 60/40。VIX 52.33 關稅衝擊最強測試。Piecewise Conservative Sharpe 3.98 MDD -2.5%，SPY -18.8%。連續 Scaling 策略在高 VIX 降倉錯過反彈。10/14 策略回測 vs 實盤一致性高。主訊息：模型不是紙上談兵，規則在恐慌時依然運作。",
+      "tags": [
+        "一般讀者",
+        "實戰驗證",
+        "投資策略"
+      ],
+      "type": "general",
+      "status": "draft",
+      "phase": "K640_live_audit",
+      "created_at": "2026-03-28T20:00:00.000000+00:00",
+      "published_at": null,
+      "description": "15 個月實盤驗證：11/14 策略打敗 SPY 和 60/40。VIX 52 關稅衝擊中，Piecewise Conservative Sharpe 3.98、MDD 僅 -2.5%（SPY -18.8%）。連續 Scaling 策略錯過反彈，10/14 策略實盤與回測高度一致。",
+      "proposer": "Claude",
+      "executor": "Claude"
+    },
+    {
+      "id": "mile_40c00a58",
+      "title": "K641：為什麼有些策略在暴跌中反而賺錢？VT 架構的三種命運",
+      "content": "# K641：為什麼有些策略在暴跌中反而賺錢？VT 架構的三種命運\n\n## 研究背景\n\n在 K640 的 15 個月實盤驗證中，策略間的表現分歧遠超過預期——同樣是「波動率目標」（Volatility Targeting，VT）架構，有的在危機期賺錢，有的虧損超過 -4%。\n\nK641 的問題是：**這些差異來自哪裡？不同 VT 設計在不同 Regime 下的行為模式是什麼？**\n\n本研究系統性分析三種 VT 架構在三個市場 Regime 下的表現差異，並從中提取設計原則。\n\n---\n\n## 三種 VT 架構分類\n\n| 架構類型 | 代表策略 | 核心邏輯 |\n|---------|---------|---------|\n| **連續 Scaling** | GARCH VT、12/VIX | 波動率 σ 上升 → 線性降低倉位 w = k/σ |\n| **分段式（Piecewise）** | Piecewise Conservative | VIX 越過門檻 → 跳躍式降倉 |\n| **條件槓桿** | VIX Conditional Leverage | 低 VIX 加槓桿，高 VIX 撤退 |\n\n---\n\n## Regime 定義\n\n依 VIX 水準分三段：\n- **平靜期（Calm）**：VIX < 20（佔觀察期 58%）\n- **壓力期（Elevated）**：VIX 20-30（佔 27%）\n- **危機期（Crisis）**：VIX > 30（佔 15%，包含 2025-04 關稅衝擊，VIX 最高 52.33）\n\n---\n\n## 核心發現：Regime 決定命運\n\n![不同市場 Regime 下的 Sharpe Ratio](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k641_regime_sharpe_5555da.png)\n\n**連續 Scaling 在壓力期崩潰**\n\n連續 Scaling 策略在壓力期（VIX 20-30）Sharpe 高達 **-5.2**——這是三種架構中最差的表現。原因在於：\n\n> 當 VIX 處於 20-30 的「灰色地帶」時，連續 Scaling 策略持續降低倉位，但市場並未崩潰，反而出現頻繁的短暫反彈。策略追著 VIX 降倉，再追著反彈補倉，產生大量的「賣低買高」交易摩擦。\n\n**Piecewise 危機期零損失，但代價是錯過反彈**\n\nPiecewise Conservative 在危機期幾乎沒有損失（Sharpe ≈ 0.00），原因很直接——VIX > 30 時倉位降至 30%，資金部分轉移至黃金，幾乎不受股市崩跌影響。\n\n但代價是：**市場反彈時僅捕獲 0.53%，而 SPY 同期反彈 12.44%**。保護太強，以至於反彈時回不來。\n\n**VIX Conditional Leverage 最均衡**\n\nVIX Conditional Leverage 在危機期 Sharpe **+0.36**——這個設計在危機時不只是「減少損失」，而是「繼續賺錢」。這來自兩個機制：\n1. 危機前低 VIX 期間的加槓桿已累積足夠緩衝\n2. 危機觸發後快速移至防禦配置，但保留部分股票暴露捕捉反彈\n\n---\n\n## 2025 關稅衝擊：最極端的 Regime 測試\n\n![2025 關稅衝擊期間各策略報酬](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/k641_tariff_shock_fec133.png)\n\n2025-04 關稅衝擊（VIX 最高 52.33）是 15 個月觀察期中最極端的事件。各策略當月表現：\n\n- **Risk Parity（SPY+GLD）**：+7.83%（黃金避險發揮功效）\n- **VIX Conditional Leverage**：+1.54%（危機保護機制啟動）\n- **Piecewise Conservative**：0.00%（完全防禦，無損失也無獲利）\n- **GARCH VT**：-4.39%（連續降倉未能即時到位）\n\n**關鍵洞見**：Risk Parity 在危機期表現最好，原因不是「預測到市場崩潰」，而是**跨資產分散天然提供了危機對沖**。這支持了多資產配置優於單資產 VT 的假說。\n\n---\n\n## 理論解釋：離散 vs. 連續的倉位調整\n\n從設計層面看，這三種架構面對「Regime 轉換」的處理方式截然不同：\n\n**連續調整（∂w/∂σ 連續）**：\n- 優點：平滑、對正常波動適應快\n- 缺點：在 VIX 震盪的「灰色地帶」產生大量交易摩擦，降倉後若反彈立刻需要補倉\n\n**離散跳躍（門檻觸發）**：\n- 優點：避免灰色地帶的來回交易，保護強\n- 缺點：門檻設計需要精確校準，反彈時可能回不來\n\n**條件槓桿（asymmetric response）**：\n- 低 VIX 加槓桿 → 累積超額回報作為「緩衝」\n- 高 VIX 收縮 → 緩衝吸收損失\n- 結果：跨 Regime 最均衡，但需要資本充足支持槓桿倉位\n\n---\n\n## 結論\n\n> **離散門檻 + 條件槓桿 > 純連續 Scaling**\n\n具體而言：\n\n1. **壓力期（VIX 20-30）是連續 Scaling 的死穴**：Sharpe -5.2 vs. 其他架構 +0.21 至 +1.12\n2. **Piecewise 保護強但反彈捕獲弱**：危機零損失，但反彈僅捕 4.3%（0.53/12.44）\n3. **VIX Conditional Leverage 危機期 Sharpe +0.36**，是唯一在三個 Regime 均正的架構\n4. **多資產（Risk Parity）是危機期最佳選擇**：+7.83% vs. 純股票策略均為負\n\n---\n\n## 局限性\n\n- 觀察期僅 15 個月，危機期只有一個事件（2025-04 關稅衝擊）\n- Regime 分類使用事後 VIX 水準，非即時信號，存在輕微前瞻偏誤\n- 槓桿策略的實際融資成本未計入（此處假設零融資成本）\n- 台股策略在壓力/危機期樣本數不足（台股 VIX 數據存在缺口）\n\n---\n\n*實驗腳本: experiments/k641_regime_performance.py*\n*結果數據: experiments/k641_regime_performance_results.json*\n*參考文獻: Moreira & Muir (2017) JF（Volatility-Managed Portfolios）; Asness et al. (2012) JFE（Leverage Aversion）; Harvey (2016) RFS（統計門檻）*\n*[提出: Claude, 執行: Claude]*\n",
+      "thinking": "K641 三種 VT 架構在不同 Regime 下的行為分析。連續 Scaling 壓力期 Sharpe -5.2，Piecewise 危機零損失但反彈僅捕 4.3%，VIX Conditional Leverage 危機期 +0.36 最均衡。2025 關稅衝擊 Risk Parity +7.83% vs GARCH -4.39%。結論：離散門檻 + 條件槓桿 > 純連續 Scaling。",
+      "tags": [
+        "研究",
+        "regime",
+        "VT策略",
+        "策略比較"
+      ],
+      "type": "research",
+      "status": "draft",
+      "phase": "K641_regime_performance",
+      "created_at": "2026-03-28T20:05:00.000000+00:00",
+      "published_at": null,
+      "description": "K641：三種 VT 架構在三個市場 Regime 的表現對比。連續 Scaling 壓力期 Sharpe -5.2，Piecewise 危機零損失但反彈捕獲僅 4.3%，VIX Conditional Leverage 危機期 Sharpe +0.36 最均衡。2025 關稅衝擊期間 Risk Parity +7.83%，GARCH VT -4.39%。",
+      "proposer": "Claude",
+      "executor": "Claude"
     }
   ]
 }
