@@ -292,6 +292,15 @@ MDD protection retained & \multicolumn{3}{c}{28.3 pp (93\%)} & \multicolumn{3}{c
 
 The mechanism behind this separation is straightforward. TSMOM captures the \textit{direction} of past returns---it goes long after positive trends and short after negative trends. VT's MDD protection, however, derives from the \textit{level} of VIX. When VIX is elevated (e.g., during the 2008 financial crisis or March 2020), VT reduces exposure regardless of whether the trend signal is positive or negative. This VIX-level channel provides protection during slow-moving drawdowns (e.g., 2022) where the trend signal can be ambiguous but VIX remains elevated.
 
+Figure~\ref{fig:return_decomp} visualizes this dual-channel decomposition. Panel~(a) shows the Sharpe ratio improvement from VT over buy-and-hold, decomposed into the TSMOM-attributable portion (32--39\%) and the VIX-level residual (61--68\%). Panel~(b) shows the MDD protection channel, where 90--97\% of the total drawdown reduction survives TSMOM removal across all five assets tested. The stark asymmetry between the two panels---moderate TSMOM contribution to Sharpe but near-zero contribution to MDD protection---confirms that VT's primary economic value operates through a channel distinct from trend following.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/fig1_return_decomposition.pdf}
+\caption{VT Return Decomposition: Sharpe Ratio vs.\ Maximum Drawdown Channels. Panel~(a) decomposes the Sharpe ratio improvement (VT minus buy-and-hold) into the TSMOM-attributable portion and the VIX-level residual for SPY and 50/50 SPY/GLD. Panel~(b) decomposes the maximum drawdown protection (percentage points) into TSMOM-attributable and VIX-level components for five assets. Percentages indicate the share attributable to each channel. Data from Table~\ref{tab:dual_mechanism} and Section~3.3. The key finding is the asymmetry: TSMOM explains 32--39\% of Sharpe improvement but only 3--10\% of MDD protection.}
+\label{fig:return_decomp}
+\end{figure}
+
 
 \subsection{Robustness: Fama--French Five-Factor Controls}
 
@@ -400,6 +409,15 @@ MCHI (China Broad) & $-$0.468 & 0.077 & $-$62.8 & 0.083 & $-$39.9 & 0.006 & 23.0
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
+
+Figure~\ref{fig:cross_asset} presents the cross-sectional relationship between Sharpe ratio change and MDD improvement. Nearly all 13 markets fall in the ``insurance quadrant'' (negative $\Delta$Sharpe, positive $\Delta$MDD), confirming that VT functions as drawdown insurance rather than alpha generation. The developed markets (blue circles) cluster at higher MDD improvement values (average 32.0~pp) than emerging markets (red squares, average 24.7~pp), reflecting tighter synchronization with US equity conditions. Brazil (EWZ) is a notable outlier with the smallest MDD improvement (13.2~pp), consistent with its idiosyncratic risk sources that are less responsive to the US VIX signal. The cross-sectional correlation between VIX sensitivity and MDD protection ($r = -0.770$, $p = 0.002$) provides a pricing mechanism for VT insurance.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.85\textwidth]{figures/fig2_cross_asset_scatter.pdf}
+\caption{Cross-Asset VT: Sharpe Ratio Change vs.\ MDD Improvement for 13 International Markets. Each point represents a country ETF. The $x$-axis shows the change in Sharpe ratio from applying 12/VIX VT relative to buy-and-hold; the $y$-axis shows the improvement in maximum drawdown (percentage points). Blue circles denote developed markets ($N = 7$); red squares denote emerging markets ($N = 6$). Dotted lines indicate cross-sectional averages ($\Delta$Sharpe $= -0.048$; $\Delta$MDD $= 28.7$~pp). All 13 markets achieve MDD improvement ($t = 15.70$), while only 2 of 13 show Sharpe improvement, consistent with the insurance pricing interpretation. Data from Table~\ref{tab:international}.}
+\label{fig:cross_asset}
+\end{figure}
 
 
 \subsection{Sub-Period Stability}
