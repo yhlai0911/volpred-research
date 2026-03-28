@@ -555,6 +555,7 @@
 - [ ] 跨資產 return prediction：SPY、0050.TW、QQQ
 
 ### 新交易策略開發（用戶提出，急需上架新策略）
+- [x] **VIX 條件槓桿（月頻）** `vix_cond_leverage` [提出: 用戶] — 50/50 SPY/GLD + 12/VIX sizing + VIX<15 時 1.5x 槓桿。K548/K551 (t=7.90), K577 monthly hybrid (t=5.16)。**已上架 2026-03-27**
 - [ ] K502: **US→Taiwan Lead-Lag Strategy** [提出: 用戶] — 用 SPY return 信號交易 0050.TW。T32/T33 confirmed lead-lag (r=0.376)。**進行中**
 - [ ] K503: **VIX Mean-Reversion Strategy** [提出: 用戶] — 利用 VIX spike 後的 mean reversion 做交易。K430/K491 支持。**進行中**
 - [ ] 策略上架前必須：Cross-OOS ≥ 5 periods、3 年回測、Net Sharpe (after TX) > 0

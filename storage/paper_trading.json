@@ -155028,5 +155028,56 @@
     "assets": [
       "0050.TW"
     ]
+  },
+  "vix_cond_leverage": {
+    "entries": [
+      {
+        "date": "2026-03-28",
+        "data_date": "2026-03-27",
+        "weights": {
+          "SPY": 0.19,
+          "GLD": 0.19
+        },
+        "cash_weight": 0.62,
+        "spy_close": 634.09,
+        "spy_open": 642.5,
+        "gld_close": 414.7,
+        "gld_open": 406.2,
+        "tw50_close": 75.8,
+        "tw50_open": 76.3,
+        "sigma_spy_ann": 23.4,
+        "sigma_gld_ann": 39.6,
+        "actual_returns": null,
+        "portfolio_return": null,
+        "overnight_gap": null,
+        "gap_alert_level": null
+      }
+    ],
+    "initial_capital": 1000000
+  },
+  "taiwan_hybrid_leverage": {
+    "entries": [
+      {
+        "date": "2026-03-28",
+        "data_date": "2026-03-27",
+        "weights": {
+          "0050.TW": 0.28
+        },
+        "cash_weight": 0.72,
+        "spy_close": 634.09,
+        "spy_open": 642.5,
+        "gld_close": 414.7,
+        "gld_open": 406.2,
+        "tw50_close": 75.8,
+        "tw50_open": 76.3,
+        "sigma_spy_ann": 23.4,
+        "sigma_gld_ann": 39.6,
+        "actual_returns": null,
+        "portfolio_return": null,
+        "overnight_gap": null,
+        "gap_alert_level": null
+      }
+    ],
+    "initial_capital": 1000000
   }
 }

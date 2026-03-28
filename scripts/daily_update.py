@@ -37,6 +37,8 @@ STRATEGY_REGISTRY = {
     "tz_tw_jp_5050":       ("TW+JP 50/50 TZ",             False, 6),
     "global_vt_tz":        ("Global US VT + TW TZ",       False, 7),
     "vix_leading_guard":   ("VIX+景氣領先 (0050.TW)",     True,  8),
+    "vix_cond_leverage":   ("VIX 條件槓桿（月頻）",        True,  9),
+    "taiwan_hybrid_leverage": ("台股混合槓桿",              True, 10),
 }
 
 
@@ -334,6 +336,61 @@ def main():
         print(f"  VIX+景氣領先: {w_vix_lead*100:.0f}% 0050.TW ({lead_dir}, MoM={latest_mom:+.1f})")
     except Exception as e:
         print(f"  VIX+景氣領先: error ({e})")
+
+    # --- Strategy 10: VIX 條件槓桿（月頻）(K548/K551 t=7.90, K577 monthly hybrid t=5.16) ---
+    # 50/50 SPY/GLD base, 12/VIX sizing, VIX<15 → 1.5x leverage, VIX>=15 → 1.0x
+    # Monthly rebalance with daily VIX monitoring for leverage switch
+    try:
+        if vix_level is not None:
+            vcl_base_weight = 12.0 / vix_level / 2  # 50% equity allocation via 12/VIX
+            vcl_leverage = 1.5 if vix_level < 15 else 1.0
+            vcl_spy = round(min(vcl_base_weight * vcl_leverage, 1.0), 2)
+            vcl_gld = round(min(vcl_base_weight * vcl_leverage, 1.0), 2)
+        else:
+            # Fallback: conservative 50/50 at half weight
+            vcl_spy = 0.25
+            vcl_gld = 0.25
+            vcl_leverage = 1.0
+        vcl_cash = round(max(0, 1 - vcl_spy - vcl_gld), 2)
+        strat_list.append(("vix_cond_leverage", {"SPY": vcl_spy, "GLD": vcl_gld}))
+        lev_label = "1.5x 槓桿" if vix_level is not None and vix_level < 15 else "1.0x 標準"
+        print(f"  VIX條件槓桿: SPY {vcl_spy*100:.0f}%, GLD {vcl_gld*100:.0f}%, cash {vcl_cash*100:.0f}% ({lev_label}, VIX={vix_level:.1f})")
+    except Exception as e:
+        print(f"  VIX條件槓桿: error ({e})")
+
+    # --- Strategy 11: 台股混合槓桿 (K553/K558 t=4.79, 18/18 OOS) ---
+    # 0050.TW with 8.63/VIX base sizing + conditional 1.5x leverage
+    # Leverage ON when: RV22_TW < 20% AND VIX 252d percentile < 0.30
+    # Monthly rebalance with daily condition monitoring
+    try:
+        if tw50_close is not None and vix_level is not None:
+            # Compute 0050.TW 22-day realized volatility (annualized)
+            tw50_rets = tw50["returns"].dropna()
+            rv22_tw = float(tw50_rets.iloc[-22:].std() * np.sqrt(252)) if len(tw50_rets) >= 22 else 0.25
+
+            # Compute VIX 252-day rolling percentile
+            vix_hist = vix_data["close"].dropna()
+            if len(vix_hist) >= 252:
+                vix_252 = vix_hist.iloc[-252:]
+                vix_percentile = float((vix_252 < vix_level).sum() / len(vix_252))
+            else:
+                vix_percentile = 0.5  # conservative fallback
+
+            # Base weight: 8.63/VIX (same as taiwan_8.63vix)
+            thl_base = 8.63 / vix_level
+
+            # Conditional leverage
+            thl_leverage = 1.5 if rv22_tw < 0.20 and vix_percentile < 0.30 else 1.0
+            w_thl = round(min(thl_base * thl_leverage, 1.0), 2)
+            cash_thl = round(max(0, 1 - w_thl), 2)
+
+            strat_list.append(("taiwan_hybrid_leverage", {"0050.TW": w_thl}))
+            lev_label_tw = "1.5x 槓桿" if thl_leverage > 1.0 else "1.0x 標準"
+            print(f"  台股混合槓桿: {w_thl*100:.0f}% 0050.TW, {cash_thl*100:.0f}% cash ({lev_label_tw}, RV22={rv22_tw*100:.1f}%, VIX pctl={vix_percentile:.2f})")
+        else:
+            print(f"  台股混合槓桿: skipped (tw50 or VIX unavailable)")
+    except Exception as e:
+        print(f"  台股混合槓桿: error ({e})")
 
     for strat_id, w_info in strat_list:
         if strat_id not in pt:
