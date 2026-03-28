@@ -1,0 +1,406 @@
+{
+  "experiment_id": "K661",
+  "title": "NFP Pre-Event Volatility Analysis",
+  "date": "2026-03-29",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2010-01-01 to 2026-03-27",
+  "n_trading_days": 4081,
+  "n_nfp_dates": 195,
+  "references": [
+    "Ederington & Lee (1993) 'How Markets Process Information: News Releases and Volatility' JF",
+    "Flannery & Protopapadakis (2002) 'Macroeconomic Factors Do Influence Aggregate Stock Returns' RFS",
+    "Andersen et al. (2003) 'Micro Effects of Macro Announcements' AER"
+  ],
+  "pre_nfp_vix_pattern": {
+    "T-5": {
+      "mean_vix_change": -0.0409,
+      "t_stat": -0.34,
+      "p_value": 0.7379,
+      "n": 194
+    },
+    "T-4": {
+      "mean_vix_change": 0.1497,
+      "t_stat": 1.26,
+      "p_value": 0.2082,
+      "n": 194
+    },
+    "T-3": {
+      "mean_vix_change": 0.0541,
+      "t_stat": 0.46,
+      "p_value": 0.6442,
+      "n": 194
+    },
+    "T-2": {
+      "mean_vix_change": -0.3028,
+      "t_stat": -2.92,
+      "p_value": 0.0039,
+      "n": 194
+    },
+    "T-1": {
+      "mean_vix_change": 0.2275,
+      "t_stat": 1.72,
+      "p_value": 0.0862,
+      "n": 194
+    }
+  },
+  "cumulative_vix_change_T5_to_T1": {
+    "mean": 0.1285,
+    "t_stat": 0.57,
+    "n": 194
+  },
+  "nfp_day_volatility": {
+    "nfp_mean_abs_return_pct": 0.832,
+    "non_nfp_mean_abs_return_pct": 0.713,
+    "vol_ratio": 1.17,
+    "variance_ratio": 1.11,
+    "welch_t_stat": 2.1,
+    "welch_p_value": 0.0372,
+    "mann_whitney_p": 0.0028,
+    "n_nfp": 195,
+    "n_non_nfp": 3886
+  },
+  "post_nfp_drift": {
+    "1d": {
+      "mean_return_pct": -0.042,
+      "unconditional_mean_pct": 0.056,
+      "excess_return_pct": -0.097,
+      "t_stat": -0.44,
+      "p_value": 0.6589,
+      "n": 195
+    },
+    "5d": {
+      "mean_return_pct": 0.341,
+      "unconditional_mean_pct": 0.275,
+      "excess_return_pct": 0.066,
+      "t_stat": 2.09,
+      "p_value": 0.0381,
+      "n": 195
+    },
+    "20d": {
+      "mean_return_pct": 0.975,
+      "unconditional_mean_pct": 1.116,
+      "excess_return_pct": -0.141,
+      "t_stat": 3.21,
+      "p_value": 0.0016,
+      "n": 194
+    }
+  },
+  "vix_resolution": {
+    "on_nfp_day": {
+      "mean_change_pts": -0.158,
+      "t_stat": -1.12,
+      "p_value": 0.265,
+      "pct_drops": 65.5,
+      "n": 194
+    },
+    "1d_after_nfp": {
+      "mean_change_pts": 0.559,
+      "t_stat": 2.78,
+      "p_value": 0.006,
+      "pct_drops": 36.1,
+      "n": 194
+    },
+    "5d_after_nfp": {
+      "mean_change_pts": -0.082,
+      "t_stat": -0.33,
+      "p_value": 0.7433,
+      "pct_drops": 57.2,
+      "n": 194
+    }
+  },
+  "regime_dependence": {
+    "Low (VIX<15)": {
+      "n_nfp": 63,
+      "n_non_nfp": 1365,
+      "nfp_abs_return_pct": 0.499,
+      "non_nfp_abs_return_pct": 0.401,
+      "ratio": 1.24,
+      "t_stat": 1.85,
+      "p_value": 0.0694
+    },
+    "Medium (15<=VIX<20)": {
+      "n_nfp": 76,
+      "n_non_nfp": 1375,
+      "nfp_abs_return_pct": 0.784,
+      "non_nfp_abs_return_pct": 0.605,
+      "ratio": 1.3,
+      "t_stat": 2.69,
+      "p_value": 0.0088
+    },
+    "Elevated (20<=VIX<25)": {
+      "n_nfp": 27,
+      "n_non_nfp": 619,
+      "nfp_abs_return_pct": 1.053,
+      "non_nfp_abs_return_pct": 0.89,
+      "ratio": 1.18,
+      "t_stat": 1.1,
+      "p_value": 0.2793
+    },
+    "High (VIX>=25)": {
+      "n_nfp": 28,
+      "n_non_nfp": 527,
+      "nfp_abs_return_pct": 1.523,
+      "non_nfp_abs_return_pct": 1.595,
+      "ratio": 0.95,
+      "t_stat": -0.29,
+      "p_value": 0.7769
+    }
+  },
+  "surprise_analysis": {
+    "total_nfp_days": 195,
+    "pct_good_nfp": 58.5,
+    "pct_bad_nfp": 41.5,
+    "mean_good_return_pct": 0.772,
+    "mean_bad_return_pct": -0.917,
+    "large_move_pct": 33.3,
+    "vix_on_good_nfp_pts": -0.946,
+    "vix_on_bad_nfp_pts": 0.941,
+    "post_drift_by_direction": {
+      "good": {
+        "1d": 0.016,
+        "5d": 0.302,
+        "20d": 1.313
+      },
+      "bad": {
+        "1d": -0.122,
+        "5d": 0.397,
+        "20d": 0.493
+      }
+    }
+  },
+  "yearly_summary": {
+    "2010": {
+      "mean_abs_return_pct": 0.919,
+      "n": 12
+    },
+    "2011": {
+      "mean_abs_return_pct": 0.72,
+      "n": 12
+    },
+    "2012": {
+      "mean_abs_return_pct": 0.979,
+      "n": 12
+    },
+    "2013": {
+      "mean_abs_return_pct": 0.662,
+      "n": 12
+    },
+    "2014": {
+      "mean_abs_return_pct": 0.464,
+      "n": 12
+    },
+    "2015": {
+      "mean_abs_return_pct": 0.763,
+      "n": 12
+    },
+    "2016": {
+      "mean_abs_return_pct": 0.58,
+      "n": 12
+    },
+    "2017": {
+      "mean_abs_return_pct": 0.297,
+      "n": 12
+    },
+    "2018": {
+      "mean_abs_return_pct": 1.067,
+      "n": 12
+    },
+    "2019": {
+      "mean_abs_return_pct": 0.885,
+      "n": 12
+    },
+    "2020": {
+      "mean_abs_return_pct": 1.155,
+      "n": 12
+    },
+    "2021": {
+      "mean_abs_return_pct": 0.836,
+      "n": 12
+    },
+    "2022": {
+      "mean_abs_return_pct": 0.902,
+      "n": 12
+    },
+    "2023": {
+      "mean_abs_return_pct": 0.995,
+      "n": 12
+    },
+    "2024": {
+      "mean_abs_return_pct": 0.848,
+      "n": 12
+    },
+    "2025": {
+      "mean_abs_return_pct": 1.171,
+      "n": 12
+    },
+    "2026": {
+      "mean_abs_return_pct": 1.137,
+      "n": 3
+    }
+  },
+  "current_context": {
+    "latest_vix": 27.44,
+    "latest_date": "2026-03-26",
+    "high_vix_nfp_events": [
+      {
+        "date": "2010-02-05",
+        "spy_return": 0.0020667288837574738,
+        "abs_return": 0.0020667288837574738,
+        "vix_prev": 26.079999923706055
+      },
+      {
+        "date": "2010-05-07",
+        "spy_return": -0.01487485244058262,
+        "abs_return": 0.01487485244058262,
+        "vix_prev": 32.79999923706055
+      },
+      {
+        "date": "2010-06-04",
+        "spy_return": -0.03513678394796349,
+        "abs_return": 0.03513678394796349,
+        "vix_prev": 29.459999084472656
+      },
+      {
+        "date": "2010-07-02",
+        "spy_return": -0.0054495425061463765,
+        "abs_return": 0.0054495425061463765,
+        "vix_prev": 32.86000061035156
+      },
+      {
+        "date": "2011-08-05",
+        "spy_return": -0.0014966576896865424,
+        "abs_return": 0.0014966576896865424,
+        "vix_prev": 31.65999984741211
+      },
+      {
+        "date": "2011-09-02",
+        "spy_return": -0.02554974691848766,
+        "abs_return": 0.02554974691848766,
+        "vix_prev": 31.81999969482422
+      },
+      {
+        "date": "2011-11-04",
+        "spy_return": -0.0060992957636514245,
+        "abs_return": 0.0060992957636514245,
+        "vix_prev": 30.5
+      },
+      {
+        "date": "2011-12-02",
+        "spy_return": -0.0008799257820936157,
+        "abs_return": 0.0008799257820936157,
+        "vix_prev": 27.40999984741211
+      },
+      {
+        "date": "2015-09-04",
+        "spy_return": -0.01513667950452946,
+        "abs_return": 0.01513667950452946,
+        "vix_prev": 25.610000610351562
+      },
+      {
+        "date": "2019-01-04",
+        "spy_return": 0.03349591493182347,
+        "abs_return": 0.03349591493182347,
+        "vix_prev": 25.450000762939453
+      },
+      {
+        "date": "2020-05-01",
+        "spy_return": -0.026473429995860442,
+        "abs_return": 0.026473429995860442,
+        "vix_prev": 34.150001525878906
+      },
+      {
+        "date": "2020-06-05",
+        "spy_return": 0.025629258654855436,
+        "abs_return": 0.025629258654855436,
+        "vix_prev": 25.809999465942383
+      },
+      {
+        "date": "2020-07-06",
+        "spy_return": 0.015437282394659357,
+        "abs_return": 0.015437282394659357,
+        "vix_prev": 27.68000030517578
+      },
+      {
+        "date": "2020-09-04",
+        "spy_return": -0.008164587113013266,
+        "abs_return": 0.008164587113013266,
+        "vix_prev": 33.599998474121094
+      },
+      {
+        "date": "2020-10-02",
+        "spy_return": -0.00949460099145194,
+        "abs_return": 0.00949460099145194,
+        "vix_prev": 26.700000762939453
+      },
+      {
+        "date": "2020-11-06",
+        "spy_return": -0.00022850600685986322,
+        "abs_return": 0.00022850600685986322,
+        "vix_prev": 27.579999923706055
+      },
+      {
+        "date": "2021-03-05",
+        "spy_return": 0.0183965521367484,
+        "abs_return": 0.0183965521367484,
+        "vix_prev": 28.56999969482422
+      },
+      {
+        "date": "2021-12-03",
+        "spy_return": -0.008701148132231329,
+        "abs_return": 0.008701148132231329,
+        "vix_prev": 27.950000762939453
+      },
+      {
+        "date": "2022-03-04",
+        "spy_return": -0.008124773498216609,
+        "abs_return": 0.008124773498216609,
+        "vix_prev": 30.479999542236328
+      },
+      {
+        "date": "2022-05-06",
+        "spy_return": -0.005968804817502837,
+        "abs_return": 0.005968804817502837,
+        "vix_prev": 31.200000762939453
+      },
+      {
+        "date": "2022-07-01",
+        "spy_return": 0.010576680893920942,
+        "abs_return": 0.010576680893920942,
+        "vix_prev": 28.709999084472656
+      },
+      {
+        "date": "2022-09-02",
+        "spy_return": -0.010544435074997471,
+        "abs_return": 0.010544435074997471,
+        "vix_prev": 25.559999465942383
+      },
+      {
+        "date": "2022-10-07",
+        "spy_return": -0.027893883035995604,
+        "abs_return": 0.027893883035995604,
+        "vix_prev": 30.520000457763672
+      },
+      {
+        "date": "2022-11-04",
+        "spy_return": 0.014393106672661471,
+        "abs_return": 0.014393106672661471,
+        "vix_prev": 25.299999237060547
+      },
+      {
+        "date": "2025-04-04",
+        "spy_return": -0.058542793161707296,
+        "abs_return": 0.058542793161707296,
+        "vix_prev": 30.020000457763672
+      }
+    ],
+    "high_vix_nfp_mean_abs_return_pct": 1.555
+  },
+  "investor_summary": {
+    "nfp_vol_multiplier": 1.17,
+    "nfp_variance_multiplier": 1.11,
+    "vix_drops_on_nfp_pct": 65.5,
+    "vix_mean_change_on_nfp": -0.158,
+    "current_vix": 27.44,
+    "recommendation": "High VIX environment: NFP will be a high-volatility event. Consider (1) reducing position size by 20-30% before NFP, (2) avoiding limit orders near current price, (3) waiting 30-60 min after release for price discovery."
+  }
+}

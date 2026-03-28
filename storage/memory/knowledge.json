@@ -15954,5 +15954,38 @@
     "experiment_id": "k660",
     "created_at": "2026-03-29T06:35:31.312578",
     "importance": 4
+  },
+  {
+    "id": "K661",
+    "title": "K661: ★★ NFP Pre-Event — Vol 1.17x normal, VIX>25 effect vanishes, 04/03 high-risk",
+    "content": "[提出: P0 事件準備, 執行: Claude] 195 NFP 事件分析。NFP 日|r_SPY|=0.83% vs 正常 0.71%（1.17x, p=0.037）。VIX NFP 日下降 65.5%（不確定性消除）。VIX 15-20 時 NFP +30% vol(p=0.009)，VIX≥25 時差異消失(0.95x)——已經很 volatile。VIX 25-35 時 NFP |move|=1.56%，mean return -0.60%（偏空）。Pre-NFP: T-2 VIX 顯著下降-0.30(p=0.004)。Post-NFP: 5d drift +0.34%(p=0.038)。04/03 specific: VIX~27，歷史同級 NFP 偏空。",
+    "tags": [
+      "NFP",
+      "event-study",
+      "VIX",
+      "pre-event",
+      "regime-dependent"
+    ],
+    "data_source": "yfinance SPY/VIX 2010-2026",
+    "experiment_id": "k661",
+    "created_at": "2026-03-29T07:25:36.745530",
+    "importance": 3
+  },
+  {
+    "id": "K662",
+    "title": "K662: ★ Commodity VT — VIX irrelevant for GLD/USO, framework doesn't transfer",
+    "content": "[提出: 跳躍探索/商品, 執行: Claude] VT 框架應用於 GLD/USO。VIX 對商品 vol R²：SPY 0.681 >> USO 0.315 >> GLD 0.133。12/VIX 反而傷害 GLD（Sharpe 0.43 vs BH 0.52）。GLD 自身 vol VT 微幅改善(+0.058)但 NS(p>0.18)——因為 target vol=20%≈base vol 16.5%，weights 幾乎不變。USO VT 大幅減 MDD(95%→60%)但無法拯救結構性虧損(-61.4%)。GLD gamma=-0.04（inverted），USO gamma=+0.06。結論：VT 為股票設計，不轉移到商品。GLD 不需要 VT（VIX 與 GLD 幾乎不相關），USO 需要但拯救不了 contango。",
+    "tags": [
+      "commodity",
+      "GLD",
+      "USO",
+      "VT-transferability",
+      "null-result",
+      "VIX-irrelevant"
+    ],
+    "data_source": "yfinance GLD/USO/SPY/VIX 2010-2026",
+    "experiment_id": "k662",
+    "created_at": "2026-03-29T07:25:36.745539",
+    "importance": 2
   }
 ]
