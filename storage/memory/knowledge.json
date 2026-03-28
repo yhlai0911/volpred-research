@@ -14974,5 +14974,22 @@
     "experiment_id": "k576",
     "created_at": "2026-03-28T00:42:45.967676+00:00",
     "importance": 2
+  },
+  {
+    "id": "K577",
+    "title": "K577: ★★★★ Monthly Hybrid Leverage PASS — t=5.16, 5/5 OOS, deployable for retail",
+    "content": "[提出: Claude, 執行: Claude] VIX-Cond Leverage rebalancing frequency 分析。Pure monthly FAIL (Sharpe -0.065 vs base)。但 HYBRID (monthly rebal + daily VIX check): Sharpe 0.947 vs base 0.776, Harvey t=5.16 PASS, 5/5 OOS。\n\nBottleneck 是 leverage signal 不是 rebalancing——VIX spike 快速，stale leverage 會在 crash 時放大虧損。Daily VIX check 解決此問題。\n\n月頻 hybrid 保留 daily 64% 的 benefit (0.947 vs 1.471)。操作：每天看 VIX (30s)，VIX 跨越 15/25 時調整槓桿，月頻 rebalance。\n\n**結論：Monthly hybrid 可上架——散戶可操作。**",
+    "tags": [
+      "rebalancing",
+      "frequency",
+      "hybrid",
+      "monthly",
+      "Harvey_pass",
+      "deployable"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX+IRX 2005-2026",
+    "experiment_id": "k577",
+    "created_at": "2026-03-28T01:02:04.390258+00:00",
+    "importance": 5
   }
 ]
