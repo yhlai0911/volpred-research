@@ -1,0 +1,259 @@
+{
+  "experiment_id": "k608",
+  "title": "VolPred SEO Audit",
+  "type": "operational_audit",
+  "date": "2026-03-27",
+  "audited_url": "https://volpred.zeabur.app",
+  "frontend_path": "frontend-v2-fix/",
+
+  "summary": {
+    "working": [
+      "layout.tsx has correct global metadata (title, description, metadataBase, OG, Twitter, robots, manifest)",
+      "robots.txt exists with correct Allow/Disallow rules and Sitemap URL reference",
+      "manifest.json exists with correct PWA metadata",
+      "sitemap.ts is a Next.js dynamic sitemap route (generates /sitemap.xml at runtime)",
+      "reports/[id]/page.tsx has full dynamic generateMetadata with per-article title/description/OG/Twitter",
+      "reports/[id]/ReportDetail.tsx injects Article JSON-LD structured data per article",
+      "layout.tsx injects WebSite JSON-LD structured data globally",
+      "strategy-selector/page.tsx has metadata export with title, description, OG",
+      "about/page.tsx has metadata export",
+      "disclaimer/page.tsx has metadata export",
+      "favicon.svg exists in /public",
+      "app/icon.svg exists for PWA icon",
+      "lang='zh-Hant' is set on html element",
+      "OG type is 'article' on report pages (correct for articles)",
+      "OG locale zh_TW is set globally and on article pages"
+    ],
+    "missing_or_broken": [
+      "MISSING: No OG image (og:image) anywhere — neither global default nor per-page. Social shares will show no preview image.",
+      "MISSING: strategy-selector page is NOT in sitemap.ts (only home, vix-calculator, risk-forecast, paper, questions are listed)",
+      "MISSING: about page is NOT in sitemap.ts",
+      "MISSING: disclaimer page is NOT in sitemap.ts",
+      "MISSING: paper/page.tsx is 'use client' with no metadata export — page title falls back to layout default only",
+      "MISSING: vix-calculator/page.tsx is 'use client' with no metadata export — needs separate server wrapper",
+      "MISSING: questions/page.tsx appears to be client-only with no metadata export",
+      "MISSING: risk-forecast/page.tsx has no metadata export (server component but skipped)",
+      "MISSING: home page (app/page.tsx) has no metadata export — relies on layout default only, no page-specific OG",
+      "MISSING: No canonical URL tag on any page",
+      "MISSING: No keywords metadata on any page",
+      "INCONSISTENCY: layout.tsx description says '200+ 實驗' but JSON-LD in same file says '120+ 實驗'",
+      "INCONSISTENCY: manifest.json references /icon.svg but public/ only has /favicon.svg (icon.svg lives in src/app/ not public/)",
+      "WEAK: twitter:card is 'summary' on article pages — should be 'summary_large_image' once OG image is added",
+      "WEAK: about/page.tsx has no OG tags (only title/description, no openGraph block)",
+      "WEAK: disclaimer/page.tsx has no OG tags",
+      "WEAK: sitemap.ts is static (hardcoded 5 pages) — does not dynamically include published article URLs"
+    ]
+  },
+
+  "findings_detail": {
+    "layout_tsx": {
+      "file": "frontend-v2-fix/src/app/layout.tsx",
+      "title": "VolPred - 波動率預測研究系統",
+      "description": "AI 驅動的波動率預測研究系統 — 即時更新的投資策略、風險管理與市場分析。基於 200+ 實驗的科學投資方法。",
+      "metadataBase": "https://volpred.zeabur.app",
+      "og_type": "website",
+      "og_locale": "zh_TW",
+      "og_image": null,
+      "twitter_card": "summary_large_image",
+      "twitter_image": null,
+      "json_ld": "WebSite schema — present but description says '120+' (inconsistent with meta description '200+')",
+      "robots": "index: true, follow: true",
+      "manifest": "/manifest.json",
+      "issues": [
+        "JSON-LD description says '120+ 實驗' but <meta name='description'> says '200+ 實驗'",
+        "No OG image defined",
+        "No canonical tag"
+      ]
+    },
+    "robots_txt": {
+      "file": "frontend-v2-fix/public/robots.txt",
+      "status": "OK",
+      "content": "User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/\nDisallow: /auth/\nSitemap: https://volpred.zeabur.app/sitemap.xml",
+      "issues": []
+    },
+    "sitemap": {
+      "file": "frontend-v2-fix/src/app/sitemap.ts",
+      "type": "Next.js dynamic route (generates /sitemap.xml at runtime)",
+      "pages_included": [
+        "/ (priority 1.0, daily)",
+        "/vix-calculator (priority 0.8, monthly)",
+        "/risk-forecast (priority 0.8, daily)",
+        "/paper (priority 0.7, monthly)",
+        "/questions (priority 0.6, weekly)"
+      ],
+      "pages_missing": [
+        "/strategy-selector",
+        "/about",
+        "/disclaimer",
+        "/reports/* (dynamic article pages — not included at all)"
+      ],
+      "issues": [
+        "strategy-selector page absent from sitemap",
+        "about and disclaimer pages absent from sitemap",
+        "No dynamic inclusion of published article URLs (/reports/[id])"
+      ]
+    },
+    "manifest_json": {
+      "file": "frontend-v2-fix/public/manifest.json",
+      "name": "VolPred - 波動率預測研究系統",
+      "short_name": "VolPred",
+      "icon_src": "/icon.svg",
+      "issues": [
+        "/icon.svg is in src/app/icon.svg (Next.js serves it as /icon.svg), not in public/ — this is fine for Next.js but may confuse static file servers",
+        "No PNG fallback icons (some browsers/OS don't support SVG icons in manifests)"
+      ]
+    },
+    "og_image_audit": {
+      "global_og_image": null,
+      "article_og_image": null,
+      "public_og_image_file": null,
+      "verdict": "CRITICAL: No OG image anywhere. Social media shares (LINE, Facebook, Twitter/X) will not show preview images. This significantly hurts click-through rates from social shares.",
+      "recommendation": "Create a default OG image (1200x630px PNG) at public/og-image.png and add images: [{ url: '/og-image.png', width: 1200, height: 630 }] to the layout.tsx metadata openGraph block"
+    },
+    "per_page_metadata": {
+      "home (app/page.tsx)": {
+        "has_metadata": false,
+        "is_server_component": true,
+        "fallback": "Uses layout.tsx global metadata",
+        "issue": "No page-specific OG or title override for homepage"
+      },
+      "reports/[id]": {
+        "has_metadata": true,
+        "type": "generateMetadata (dynamic, fetches article data)",
+        "og_title": "dynamic from article.title",
+        "og_description": "dynamic, stripped markdown, 150 char max",
+        "og_image": null,
+        "twitter_card": "summary (should be summary_large_image)",
+        "json_ld": "Article schema — present",
+        "issue": "No OG image; Twitter card is 'summary' not 'summary_large_image'"
+      },
+      "strategy-selector": {
+        "has_metadata": true,
+        "og_title": "策略選擇器 | VolPred",
+        "og_description": "回答 3 個問題，找到最適合你的投資策略。基於 200+ 實驗的科學投資方法。",
+        "og_image": null,
+        "in_sitemap": false,
+        "issue": "Not in sitemap; no OG image"
+      },
+      "about": {
+        "has_metadata": true,
+        "og_block": false,
+        "in_sitemap": false,
+        "issue": "No OG block (only title/description); not in sitemap"
+      },
+      "disclaimer": {
+        "has_metadata": true,
+        "og_block": false,
+        "in_sitemap": false,
+        "issue": "No OG block; not in sitemap"
+      },
+      "paper (use client)": {
+        "has_metadata": false,
+        "is_client_component": true,
+        "issue": "Client component cannot export metadata; needs a server wrapper page.tsx that exports metadata and renders a client child component"
+      },
+      "vix-calculator (use client)": {
+        "has_metadata": false,
+        "is_client_component": true,
+        "issue": "Same as paper — needs server wrapper"
+      },
+      "questions (use client)": {
+        "has_metadata": false,
+        "is_client_component": true,
+        "issue": "Same as paper — needs server wrapper"
+      },
+      "risk-forecast": {
+        "has_metadata": false,
+        "is_server_component": true,
+        "issue": "Server component but no metadata export — easy to add"
+      }
+    }
+  },
+
+  "prioritized_fixes": [
+    {
+      "priority": 1,
+      "severity": "CRITICAL",
+      "issue": "No OG image anywhere",
+      "fix": "Create public/og-image.png (1200x630) and add to layout.tsx openGraph.images. Also add per-article images when available.",
+      "files": ["frontend-v2-fix/public/og-image.png (new file)", "frontend-v2-fix/src/app/layout.tsx"]
+    },
+    {
+      "priority": 2,
+      "severity": "HIGH",
+      "issue": "sitemap.ts missing strategy-selector, about, disclaimer, and all article URLs",
+      "fix": "Add missing static pages to sitemap.ts. Add dynamic article URL generation by calling the Supabase feed API.",
+      "files": ["frontend-v2-fix/src/app/sitemap.ts"]
+    },
+    {
+      "priority": 3,
+      "severity": "HIGH",
+      "issue": "JSON-LD in layout.tsx says '120+ 實驗' but meta description says '200+'",
+      "fix": "Update JSON-LD description to match: '200+ 實驗'",
+      "files": ["frontend-v2-fix/src/app/layout.tsx", "line 60"]
+    },
+    {
+      "priority": 4,
+      "severity": "MEDIUM",
+      "issue": "paper, vix-calculator, questions pages are 'use client' with no metadata",
+      "fix": "Refactor each to have a server component page.tsx (with metadata export) that imports the current client component as a child",
+      "files": [
+        "frontend-v2-fix/src/app/paper/page.tsx",
+        "frontend-v2-fix/src/app/vix-calculator/page.tsx",
+        "frontend-v2-fix/src/app/questions/page.tsx"
+      ]
+    },
+    {
+      "priority": 5,
+      "severity": "MEDIUM",
+      "issue": "risk-forecast page missing metadata export",
+      "fix": "Add metadata export to risk-forecast/page.tsx (already a server component)",
+      "files": ["frontend-v2-fix/src/app/risk-forecast/page.tsx"]
+    },
+    {
+      "priority": 6,
+      "severity": "MEDIUM",
+      "issue": "about and disclaimer pages have no openGraph block",
+      "fix": "Add openGraph block to both pages' metadata exports",
+      "files": [
+        "frontend-v2-fix/src/app/about/page.tsx",
+        "frontend-v2-fix/src/app/disclaimer/page.tsx"
+      ]
+    },
+    {
+      "priority": 7,
+      "severity": "LOW",
+      "issue": "twitter:card is 'summary' on article pages — should be 'summary_large_image' once OG image exists",
+      "fix": "Change twitter.card to 'summary_large_image' in reports/[id]/page.tsx after OG image is added",
+      "files": ["frontend-v2-fix/src/app/reports/[id]/page.tsx"]
+    },
+    {
+      "priority": 8,
+      "severity": "LOW",
+      "issue": "No canonical URL tags",
+      "fix": "Add alternates.canonical to layout.tsx and per-page metadata where relevant",
+      "files": ["frontend-v2-fix/src/app/layout.tsx"]
+    },
+    {
+      "priority": 9,
+      "severity": "LOW",
+      "issue": "manifest.json references /icon.svg but no PNG fallback icons",
+      "fix": "Add PNG icons (192x192, 512x512) to public/ and reference in manifest.json for better OS compatibility",
+      "files": ["frontend-v2-fix/public/manifest.json"]
+    },
+    {
+      "priority": 10,
+      "severity": "LOW",
+      "issue": "Google Search Console not yet registered (W1.4 from CLAUDE.md backlog)",
+      "fix": "Register site on Google Search Console, submit sitemap URL: https://volpred.zeabur.app/sitemap.xml — manual step required",
+      "files": []
+    }
+  ],
+
+  "google_indexing_status": {
+    "robots_txt": "PASS — correctly allows crawling, disallows admin/api/auth",
+    "sitemap_reachable": "Should be OK — Next.js generates /sitemap.xml from sitemap.ts at runtime",
+    "search_console_registered": "UNKNOWN — W1.4 is still open in CLAUDE.md backlog",
+    "main_blocker": "No OG image and missing metadata on 5+ pages reduces click-through from search results"
+  }
+}
