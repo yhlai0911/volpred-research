@@ -314,5 +314,67 @@
       "k533",
       "k536"
     ]
+  },
+  {
+    "id": "E024",
+    "title": "Strategy listing SOP must be 12 steps — missing any causes visible platform bugs",
+    "lesson": "上架策略時漏掉 metrics_cache、paper_trades 全量上傳、articles 連結、description 填寫，導致 portfolio 頁面空白、SPY 15000%、undefined% 等多個用戶可見 bug。SOP 必須 12 步全做（含寫專文），用 list_new_strategy.py --verify-only 驗證。",
+    "related_experiments": "K548-K598, K584 (SOP automation)",
+    "tags": [
+      "SOP",
+      "strategy_listing",
+      "platform_quality"
+    ],
+    "created_at": "2026-03-28T04:54:41.353055+00:00"
+  },
+  {
+    "id": "E025",
+    "title": "False exits in regime-switching are protective, not wasteful",
+    "lesson": "K598 發現 Adaptive Tier 77% 假退出看似浪費，但只有 27.9% 假退出期間有正報酬——大部分假退出其實在避開負報酬。5 種 debounce 全部更差 (z=-8 to -10)。快速 regime switching IS the value，不要試圖「修復」它。",
+    "related_experiments": "K595, K597, K598",
+    "tags": [
+      "regime_switching",
+      "false_exits",
+      "counterintuitive"
+    ],
+    "created_at": "2026-03-28T04:54:41.353256+00:00"
+  },
+  {
+    "id": "E026",
+    "title": "Window size is regime-dependent — no universal optimal, keep W=2000 + robustness check",
+    "lesson": "K591 發現 W=504 在 2023-2024 勝 W=2000 (DM=3.68)，但 K593 cross-OOS 5 期顯示沒有 universal winner (pooled p=0.46)。W=504 在 COVID 好，W=2000 在 calm 好。K594 adaptive window 也 null。結論：不改論文 W=2000，加 robustness check。",
+    "related_experiments": "K591, K593, K594",
+    "tags": [
+      "window_size",
+      "regime_dependent",
+      "robustness"
+    ],
+    "created_at": "2026-03-28T04:54:41.353259+00:00"
+  },
+  {
+    "id": "E027",
+    "title": "Combining validated strategies creates intermediate profiles, NOT alpha",
+    "lesson": "K595 測試 5 種混合策略。最佳 H2 Adaptive Tier (Sharpe 1.455, CAGR 14.7%, MDD -8.7%) 不超越 Piecewise Sharpe (1.543)。但提供有價值的中間 risk-return profile。個別策略已是各自目標的最優解。混合是 menu options，不是 alpha。",
+    "related_experiments": "K595, K597, K598",
+    "tags": [
+      "hybrid",
+      "multi_strategy",
+      "no_alpha",
+      "menu_options"
+    ],
+    "created_at": "2026-03-28T04:54:41.353261+00:00"
+  },
+  {
+    "id": "E028",
+    "title": "Paper trades DB needs unique constraint from day 1 — duplicates cause cascading platform bugs",
+    "lesson": "paper_trades 表沒有 unique(strategy, trade_date) constraint → 每次 sync INSERT 新行 → 重複累積 → API 回應膨脹 2.7MB → 前端 5s timeout AbortError。修正需要 5 層（DB constraint + sync 邏輯 + timeout + dedup + index）。教訓：DB schema 設計時就要加正確的 constraint。",
+    "related_experiments": "K588 audit",
+    "tags": [
+      "database",
+      "constraint",
+      "platform",
+      "cascading_bug"
+    ],
+    "created_at": "2026-03-28T04:54:41.353262+00:00"
   }
 ]
