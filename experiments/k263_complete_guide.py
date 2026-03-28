@@ -190,7 +190,7 @@ INVESTOR_PROFILES = {
                 "name": "5d SPY Momentum for 0050.TW",
                 "rule": "If SPY 5-day return > 0 → long 0050.TW, else cash",
                 "performance": "Net Sharpe 1.62, Harvey t=3.25 PASS, MDD -9.5%",
-                "caveat": "Requires daily monitoring + ~42 switches/yr at 0.3% TX cost",
+                "caveat": "Requires daily monitoring + ~42 switches/yr at 0.1855% TX cost (corrected K625)",
                 "source": "T5f, T10",
             },
             "btc_allocation": "0% — Taiwan crypto tax uncertain, VT not validated for BTC",
@@ -211,8 +211,8 @@ INVESTOR_PROFILES = {
         "cost_breakdown": {
             "vt_drag": "~2-3% CAGR vs 0050 B&H",
             "diversification_cost": "0% (single asset, no diversification needed due to VT)",
-            "tx_costs": "~0.585%/yr (f114ad23: 0.1425% per round-trip, ~4x/yr significant rebalance)",
-            "tax_taiwan": "0% capital gains + 0.3% securities transaction tax (売り only)",
+            "tx_costs": "~0.1855%/round-trip (0.04275%x2 broker + 0.1% ETF tax) [corrected K625]",
+            "tax_taiwan": "0% capital gains + 0.1% ETF securities transaction tax (sell-side only) [corrected K625: was 0.3% stock rate]",
             "total_annual_cost": "~3-4% vs 0050 B&H (virtually all from VT drag, minimal TX/tax)",
         },
     },
@@ -231,7 +231,7 @@ INVESTOR_PROFILES = {
                 "rule": "SPY 10d momentum > 0 → long local Asian market next day",
                 "markets": "0050.TW (t=3.75), N225 (t=3.69), HSI (t=4.12), ASX (t=4.04)",
                 "performance": "TW+JP 50/50 Sharpe ~1.81 (T33, T35 robustness pass)",
-                "caveat": "Requires opening trades at Asian market open. TX costs matter (0.3%/switch).",
+                "caveat": "Requires opening trades at Asian market open. TX costs matter (0.1855%/switch, corrected K625).",
                 "source": "T5d-T5f, T32-T35, K238",
             },
             "optional_alpha_2": {

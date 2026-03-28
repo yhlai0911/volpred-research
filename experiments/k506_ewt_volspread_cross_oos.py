@@ -64,7 +64,8 @@ RESULTS_PATH = Path(__file__).parent / "k506_ewt_volspread_cross_oos_results.jso
 # ============================================================
 # Configuration
 # ============================================================
-TX_ROUNDTRIP = 0.00585       # 0.585% round-trip (Taiwan)
+# ⚠️ CORRECTED (K625): ETF tax=0.1%, commission=0.04275%/side (3折)
+TX_ROUNDTRIP = 0.001855      # 0.1855% round-trip (was 0.585% — WRONG)
 CASH_RATE_ANNUAL = 0.015     # 1.5% Taiwan short-term deposit
 VT_SCALAR = 8.63             # 12/(1.39) adjusted for VIXTWN
 MAX_WEIGHT = 1.0             # cap at 100% equity

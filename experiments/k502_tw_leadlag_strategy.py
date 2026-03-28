@@ -24,7 +24,7 @@ Return measures:
 
 Data source: yfinance (real market data, 0050.TW + SPY + VIX)
 Period: 2010-2025
-Transaction cost: 0.585% round-trip (Taiwan: 0.3% securities tax + 0.285% broker)
+Transaction cost: 0.1855% round-trip (Taiwan ETF: 0.1% securities tax + 0.04275%x2 broker at 3折)
 Author: [提出: User, 執行: Claude]
 References:
 - Harvey (2016) "...and the Cross-Section of Expected Returns" RFS - t>3.0 threshold
@@ -45,8 +45,9 @@ from scipy import stats
 warnings.filterwarnings("ignore")
 
 RESULTS_PATH = Path(__file__).parent / "k502_tw_leadlag_strategy_results.json"
-TW_TX_ONEWAY_BPS = 29.25  # 0.2925% one-way (0.15% tax/2 + 0.1425% broker)
-TW_TX_ROUNDTRIP = 0.00585  # 0.585% round-trip
+# ⚠️ CORRECTED (K625): ETF tax=0.1% not 0.3%, commission=0.04275%/side (3折)
+TW_TX_ONEWAY_BPS = 14.275  # 0.14275% one-way sell (0.1% ETF tax + 0.04275% broker)
+TW_TX_ROUNDTRIP = 0.001855  # 0.1855% round-trip (buy 0.04275% + sell 0.14275%)
 TRADING_DAYS = 252
 
 
@@ -742,7 +743,7 @@ def main():
         "timestamp": datetime.now().isoformat(),
         "data_source": "yfinance (0050.TW, SPY, ^VIX)",
         "data_period": f"{all_results['spy_1d_mom']['metrics_o2o']['n_obs']} trading days",
-        "tx_cost": "0.585% round-trip (0.3% securities tax + 0.285% broker)",
+        "tx_cost": "0.1855% round-trip (0.1% ETF securities tax + 0.04275%x2 broker at 3折) [CORRECTED K625]",
         "methodology": {
             "return_measures": {
                 "c2c": "Close-to-close (BIASED, includes overnight gap)",

@@ -5,15 +5,16 @@ K516: Taiwan Overnight Gap Strategy with Futures-Level TX Cost
 [提出: 用戶, 執行: Claude]
 
 K515 found overnight gap alpha is real (SPY-conditioned 10.73bp/day, t=4.06)
-but ETF TX 38.5bp is fatal. Taiwan index futures (TX/MTX) have drastically
-lower TX: ~2-5bp round-trip vs ETF 38.5bp.
+but ETF TX costs are fatal for daily trading. Taiwan index futures (TX/MTX)
+have drastically lower TX: ~2-5bp round-trip vs ETF 18.55bp (corrected K625).
+Note: K515 originally used 18.55bp (corrected K625) for ETF — this was corrected to 18.55bp in K625.
 
 This experiment re-runs K515's strategies with futures-level TX costs:
   Scenario 1: TX = 2bp  (institutional/大戶)
   Scenario 2: TX = 5bp  (general futures trader)
   Scenario 3: TX = 10bp (with slippage)
   Scenario 4: TX = 15bp (conservative)
-  Reference:  TX = 38.5bp (K515 ETF baseline)
+  Reference:  TX = 18.55bp (K625 corrected ETF baseline; was 18.55bp (corrected K625) in K515)
 
 Strategies (same as K515):
   1. Always Overnight
@@ -169,7 +170,7 @@ TX_SCENARIOS = {
     'tx_5bp':  0.0005,   # 5bp general futures
     'tx_10bp': 0.0010,   # 10bp with slippage
     'tx_15bp': 0.0015,   # 15bp conservative
-    'etf_38bp': 0.00385, # 38.5bp ETF baseline (K515)
+    'etf_18.55bp': 0.001855, # 18.55bp ETF baseline (K625 corrected)
 }
 
 for name, cost in TX_SCENARIOS.items():
@@ -420,7 +421,7 @@ for strat_name, sig_series in signals.items():
             'feasible_at_5bp': breakeven_tx_bps > 5.0,
             'feasible_at_10bp': breakeven_tx_bps > 10.0,
             'feasible_at_15bp': breakeven_tx_bps > 15.0,
-            'feasible_at_38bp': breakeven_tx_bps > 38.5,
+            'feasible_at_38bp': breakeven_tx_bps > 18.55,
         }
 
         print(f"\n  {strat_name}:")
@@ -431,7 +432,7 @@ for strat_name, sig_series in signals.items():
         print(f"    Feasible @ 5bp:  {'YES' if breakeven_tx_bps > 5 else 'NO'}")
         print(f"    Feasible @ 10bp: {'YES' if breakeven_tx_bps > 10 else 'NO'}")
         print(f"    Feasible @ 15bp: {'YES' if breakeven_tx_bps > 15 else 'NO'}")
-        print(f"    Feasible @ 38bp: {'YES' if breakeven_tx_bps > 38.5 else 'NO'}")
+        print(f"    Feasible @ 38bp: {'YES' if breakeven_tx_bps > 18.55 else 'NO'}")
 
 # ============================================================
 # 10. Monthly Rebalancing Variant
@@ -670,7 +671,7 @@ results = {
     "data_period": f"{df.index[0].strftime('%Y-%m-%d')} to {df.index[-1].strftime('%Y-%m-%d')}",
     "n_trading_days": int(len(df)),
     "references": [
-        "K515: Taiwan Overnight Gap Trading — gap alpha real but ETF TX 38.5bp fatal",
+        "K515: Taiwan Overnight Gap Trading — gap alpha real but ETF TX 18.55bp (corrected K625) fatal",
         "K502: Alpha concentration in overnight gap (77-93%)",
         "K451: Overnight vol decomposition (36-44% of total)",
         "Lou, Polk, Skouras (2019): A Tug of War: Overnight vs Intraday Returns, JFE",
@@ -760,7 +761,7 @@ results['key_findings'] = [
     f"At futures TX 5bp: best Sharpe = {max(s['tx_scenarios']['tx_5bp']['sharpe_net'] for s in strategies.values()):.3f}",
     f"At futures TX 10bp: best Sharpe = {max(s['tx_scenarios']['tx_10bp']['sharpe_net'] for s in strategies.values()):.3f}",
     f"At futures TX 15bp: best Sharpe = {max(s['tx_scenarios']['tx_15bp']['sharpe_net'] for s in strategies.values()):.3f}",
-    f"At ETF TX 38.5bp: all strategies negative Sharpe — confirms K515",
+    f"At ETF TX 18.55bp (corrected K625): all strategies negative Sharpe — confirms K515",
     f"SPY-conditioned gap (SPY>0): {gap_spy_up.mean()*10000:.2f} bps vs {gap_spy_dn.mean()*10000:.2f} bps (t={t_diff:.3f})",
     f"Breakeven TX for best strategy: {breakeven_results[best_name]['breakeven_tx_bps']:.2f} bps",
     f"Monthly rebalancing barely changes Sharpe (TX savings minimal vs daily gap capture)",

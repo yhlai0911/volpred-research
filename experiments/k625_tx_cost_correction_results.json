@@ -1,0 +1,1387 @@
+{
+  "experiment_id": "K625",
+  "title": "Taiwan TX Cost Correction (Self-Correction of K604)",
+  "date": "2026-03-28",
+  "data_source": "paper_trading.json (actual weight histories)",
+  "corrects": "K604",
+  "corrections": [
+    "ETF securities transaction tax: 0.1% not 0.3% (stock rate was wrongly applied to ETF)",
+    "Brokerage commission: 0.1425% x 3折 = 0.04275%/side (not fixed $20/trade)",
+    "Round-trip cost: 18.55bp (not 38.5bp or 58.5bp)"
+  ],
+  "cost_assumptions": {
+    "spread_bps": {
+      "SPY": 1.0,
+      "GLD": 2.0,
+      "0050.TW": 5.0,
+      "^N225": 3.0
+    },
+    "commission_per_trade": {
+      "US": 0.0,
+      "TW": 0.0
+    },
+    "tw_commission_rate": 0.001425,
+    "tw_commission_discount": 0.3,
+    "tw_effective_commission": 0.0004275,
+    "tw_etf_tax_rate": 0.001,
+    "tw_stock_tax_rate": 0.003,
+    "tw_securities_tax_rate": 0.001,
+    "tw_round_trip_cost": 0.001855,
+    "us_short_term_cg_rate": 0.22,
+    "us_long_term_cg_rate": 0.15,
+    "margin_rate": 0.055,
+    "risk_free_rate": 0.045
+  },
+  "methodology": "Computed actual turnover from paper_trading.json weight changes. Applied CORRECTED cost parameters: SPY spread 1bp, GLD 2bp, 0050.TW 5bp; $0 US commissions, TW 0.04275%/side (0.1425% x 3折); 5.5% margin rate; US tax: 22% short-term / 15% long-term; TW: 0.1% ETF securities TX (sell-side). Net Sharpe computed against 4.5% risk-free rate.",
+  "strategies": {
+    "slow_vt": {
+      "display_name": "GARCH VT (SPY)",
+      "description": "Daily VT sizing via GJR-GARCH(1,1) on SPY",
+      "market": "US",
+      "assets": [
+        "SPY"
+      ],
+      "rebalance_frequency": "daily",
+      "uses_leverage": false,
+      "uses_garch": true,
+      "complexity_score": 4,
+      "complexity_reason": "Requires daily GARCH estimation (Python/R), monitoring convergence",
+      "performance": {
+        "annualized_return_pct": 11.32,
+        "annualized_vol_pct": 9.59,
+        "sharpe": 1.17,
+        "max_drawdown_pct": -10.72,
+        "calmar": 1.06
+      },
+      "turnover": {
+        "total_days": 809,
+        "years": 3.21,
+        "trade_days": 475,
+        "trade_days_pct": 58.7,
+        "annual_trade_days": 148.0,
+        "meaningful_trades": 403,
+        "annual_meaningful_trades": 125.5,
+        "total_weight_turnover": 34.2272,
+        "annual_turnover": 10.6616,
+        "avg_daily_weight_change": 0.042308,
+        "median_daily_weight_change": 0.0098
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.1066,
+        "commission_pct": 0.0,
+        "commission_pct_at_100k": 0.0,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.0,
+        "us_tax_drag_pct": 2.41,
+        "total_pct_at_100k": 2.5166
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 2.5166,
+        "$25,000": 2.5166,
+        "$50,000": 2.5166,
+        "$100,000": 2.5166,
+        "$250,000": 2.5166,
+        "$500,000": 2.5166,
+        "$1,000,000": 2.5166
+      },
+      "operational_cost_pct": 0.1066,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.3423,
+        "annual_spread_cost_pct": 0.1066,
+        "annual_spread_cost_bps": 10.66
+      },
+      "commission_detail": {
+        "market": "US",
+        "commission_type": "fixed_zero",
+        "commission_per_trade": 0.0,
+        "annual_trades": 148.0,
+        "annual_commission_usd": 0,
+        "annual_commission_pct": 0.0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0,
+          "$25,000": 0.0,
+          "$50,000": 0.0,
+          "$100,000": 0.0,
+          "$250,000": 0.0,
+          "$500,000": 0.0,
+          "$1,000,000": 0.0
+        }
+      },
+      "tw_tax_detail": {
+        "applies": false,
+        "annual_tax_cost_pct": 0.0
+      },
+      "us_tax_detail": {
+        "applies": true,
+        "short_term_fraction": 0.9,
+        "long_term_fraction": 0.1,
+        "estimated_annual_tax_drag_pct": 2.41,
+        "effective_tax_rate": 21.3
+      },
+      "margin_detail": {
+        "applies": false,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 0.711,
+        "net_sharpe_vs_rf": 0.449,
+        "sharpe_reduction": 0.262,
+        "sharpe_reduction_pct": 36.9
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 5000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 0,
+        "reason": "minimum practical size"
+      }
+    },
+    "risk_parity": {
+      "display_name": "Risk Parity (SPY+GLD)",
+      "description": "Daily risk-parity weighted SPY+GLD via GARCH",
+      "market": "US",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "rebalance_frequency": "daily",
+      "uses_leverage": false,
+      "uses_garch": true,
+      "complexity_score": 5,
+      "complexity_reason": "Two GARCH fits daily, risk parity calculation, two ETFs to manage",
+      "performance": {
+        "annualized_return_pct": 30.06,
+        "annualized_vol_pct": 13.31,
+        "sharpe": 2.04,
+        "max_drawdown_pct": -11.48,
+        "calmar": 2.62
+      },
+      "turnover": {
+        "total_days": 809,
+        "years": 3.21,
+        "trade_days": 169,
+        "trade_days_pct": 20.9,
+        "annual_trade_days": 52.6,
+        "meaningful_trades": 169,
+        "annual_meaningful_trades": 52.6,
+        "total_weight_turnover": 27.4129,
+        "annual_turnover": 8.539,
+        "avg_daily_weight_change": 0.033885,
+        "median_daily_weight_change": 0.0
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.1086,
+        "commission_pct": 0.0,
+        "commission_pct_at_100k": 0.0,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.0,
+        "us_tax_drag_pct": 6.4,
+        "total_pct_at_100k": 6.5086
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 6.5086,
+        "$25,000": 6.5086,
+        "$50,000": 6.5086,
+        "$100,000": 6.5086,
+        "$250,000": 6.5086,
+        "$500,000": 6.5086,
+        "$1,000,000": 6.5086
+      },
+      "operational_cost_pct": 0.1086,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.3487,
+        "annual_spread_cost_pct": 0.1086,
+        "annual_spread_cost_bps": 10.86
+      },
+      "commission_detail": {
+        "market": "US",
+        "commission_type": "fixed_zero",
+        "commission_per_trade": 0.0,
+        "annual_trades": 104.7,
+        "annual_commission_usd": 0,
+        "annual_commission_pct": 0.0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0,
+          "$25,000": 0.0,
+          "$50,000": 0.0,
+          "$100,000": 0.0,
+          "$250,000": 0.0,
+          "$500,000": 0.0,
+          "$1,000,000": 0.0
+        }
+      },
+      "tw_tax_detail": {
+        "applies": false,
+        "annual_tax_cost_pct": 0.0
+      },
+      "us_tax_detail": {
+        "applies": true,
+        "short_term_fraction": 0.9,
+        "long_term_fraction": 0.1,
+        "estimated_annual_tax_drag_pct": 6.4,
+        "effective_tax_rate": 21.3
+      },
+      "margin_detail": {
+        "applies": false,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 1.92,
+        "net_sharpe_vs_rf": 1.431,
+        "sharpe_reduction": 0.489,
+        "sharpe_reduction_pct": 25.5
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 5000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 0,
+        "reason": "minimum practical size"
+      }
+    },
+    "simple_12vix": {
+      "display_name": "12/VIX (SPY)",
+      "description": "12/VIX simple sizing on SPY",
+      "market": "US",
+      "assets": [
+        "SPY"
+      ],
+      "rebalance_frequency": "daily",
+      "uses_leverage": false,
+      "uses_garch": false,
+      "complexity_score": 1,
+      "complexity_reason": "Just look up VIX, divide 12/VIX, rebalance SPY",
+      "performance": {
+        "annualized_return_pct": 10.83,
+        "annualized_vol_pct": 9.27,
+        "sharpe": 1.16,
+        "max_drawdown_pct": -10.99,
+        "calmar": 0.99
+      },
+      "turnover": {
+        "total_days": 809,
+        "years": 3.21,
+        "trade_days": 795,
+        "trade_days_pct": 98.3,
+        "annual_trade_days": 247.6,
+        "meaningful_trades": 636,
+        "annual_meaningful_trades": 198.1,
+        "total_weight_turnover": 28.2142,
+        "annual_turnover": 8.7886,
+        "avg_daily_weight_change": 0.034875,
+        "median_daily_weight_change": 0.0268
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.0879,
+        "commission_pct": 0.0,
+        "commission_pct_at_100k": 0.0,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.0,
+        "us_tax_drag_pct": 2.31,
+        "total_pct_at_100k": 2.3979
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 2.3979,
+        "$25,000": 2.3979,
+        "$50,000": 2.3979,
+        "$100,000": 2.3979,
+        "$250,000": 2.3979,
+        "$500,000": 2.3979,
+        "$1,000,000": 2.3979
+      },
+      "operational_cost_pct": 0.0879,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.2821,
+        "annual_spread_cost_pct": 0.0879,
+        "annual_spread_cost_bps": 8.79
+      },
+      "commission_detail": {
+        "market": "US",
+        "commission_type": "fixed_zero",
+        "commission_per_trade": 0.0,
+        "annual_trades": 247.6,
+        "annual_commission_usd": 0,
+        "annual_commission_pct": 0.0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0,
+          "$25,000": 0.0,
+          "$50,000": 0.0,
+          "$100,000": 0.0,
+          "$250,000": 0.0,
+          "$500,000": 0.0,
+          "$1,000,000": 0.0
+        }
+      },
+      "tw_tax_detail": {
+        "applies": false,
+        "annual_tax_cost_pct": 0.0
+      },
+      "us_tax_detail": {
+        "applies": true,
+        "short_term_fraction": 0.9,
+        "long_term_fraction": 0.1,
+        "estimated_annual_tax_drag_pct": 2.31,
+        "effective_tax_rate": 21.3
+      },
+      "margin_detail": {
+        "applies": false,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 0.683,
+        "net_sharpe_vs_rf": 0.424,
+        "sharpe_reduction": 0.259,
+        "sharpe_reduction_pct": 37.9
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 5000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 0,
+        "reason": "minimum practical size"
+      }
+    },
+    "recommended_5050": {
+      "display_name": "50/50 SPY/GLD",
+      "description": "50/50 SPY/GLD with 12/VIX sizing",
+      "market": "US",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "rebalance_frequency": "daily",
+      "uses_leverage": false,
+      "uses_garch": false,
+      "complexity_score": 2,
+      "complexity_reason": "Look up VIX, compute 12/VIX, split 50/50 between SPY and GLD",
+      "performance": {
+        "annualized_return_pct": 16.77,
+        "annualized_vol_pct": 8.51,
+        "sharpe": 1.87,
+        "max_drawdown_pct": -7.67,
+        "calmar": 2.19
+      },
+      "turnover": {
+        "total_days": 809,
+        "years": 3.21,
+        "trade_days": 794,
+        "trade_days_pct": 98.1,
+        "annual_trade_days": 247.3,
+        "meaningful_trades": 634,
+        "annual_meaningful_trades": 197.5,
+        "total_weight_turnover": 28.1632,
+        "annual_turnover": 8.7727,
+        "avg_daily_weight_change": 0.034812,
+        "median_daily_weight_change": 0.0268
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.1316,
+        "commission_pct": 0.0,
+        "commission_pct_at_100k": 0.0,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.0,
+        "us_tax_drag_pct": 3.57,
+        "total_pct_at_100k": 3.7016
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 3.7016,
+        "$25,000": 3.7016,
+        "$50,000": 3.7016,
+        "$100,000": 3.7016,
+        "$250,000": 3.7016,
+        "$500,000": 3.7016,
+        "$1,000,000": 3.7016
+      },
+      "operational_cost_pct": 0.1316,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.4224,
+        "annual_spread_cost_pct": 0.1316,
+        "annual_spread_cost_bps": 13.16
+      },
+      "commission_detail": {
+        "market": "US",
+        "commission_type": "fixed_zero",
+        "commission_per_trade": 0.0,
+        "annual_trades": 482.8,
+        "annual_commission_usd": 0,
+        "annual_commission_pct": 0.0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0,
+          "$25,000": 0.0,
+          "$50,000": 0.0,
+          "$100,000": 0.0,
+          "$250,000": 0.0,
+          "$500,000": 0.0,
+          "$1,000,000": 0.0
+        }
+      },
+      "tw_tax_detail": {
+        "applies": false,
+        "annual_tax_cost_pct": 0.0
+      },
+      "us_tax_detail": {
+        "applies": true,
+        "short_term_fraction": 0.9,
+        "long_term_fraction": 0.1,
+        "estimated_annual_tax_drag_pct": 3.57,
+        "effective_tax_rate": 21.3
+      },
+      "margin_detail": {
+        "applies": false,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 1.442,
+        "net_sharpe_vs_rf": 1.007,
+        "sharpe_reduction": 0.435,
+        "sharpe_reduction_pct": 30.2
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 5000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 0,
+        "reason": "minimum practical size"
+      }
+    },
+    "taiwan_8.63vix": {
+      "display_name": "Taiwan VT (0050.TW)",
+      "description": "8.63/VIX sizing on Taiwan 0050.TW",
+      "market": "TW",
+      "assets": [
+        "0050.TW"
+      ],
+      "rebalance_frequency": "daily",
+      "uses_leverage": false,
+      "uses_garch": false,
+      "complexity_score": 2,
+      "complexity_reason": "Look up VIX (US), compute 8.63/VIX, trade 0050.TW. Cross-market monitoring.",
+      "performance": {
+        "annualized_return_pct": 24.03,
+        "annualized_vol_pct": 10.77,
+        "sharpe": 2.05,
+        "max_drawdown_pct": -11.19,
+        "calmar": 2.15
+      },
+      "turnover": {
+        "total_days": 748,
+        "years": 2.97,
+        "trade_days": 725,
+        "trade_days_pct": 96.9,
+        "annual_trade_days": 244.3,
+        "meaningful_trades": 540,
+        "annual_meaningful_trades": 181.9,
+        "total_weight_turnover": 19.1577,
+        "annual_turnover": 6.4542,
+        "avg_daily_weight_change": 0.025612,
+        "median_daily_weight_change": 0.02045
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.3227,
+        "commission_pct": 0.2759,
+        "commission_pct_at_100k": 0.2759,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.3243,
+        "us_tax_drag_pct": 0,
+        "total_pct_at_100k": 0.9229
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 0.9229,
+        "$25,000": 0.9229,
+        "$50,000": 0.9229,
+        "$100,000": 0.9229,
+        "$250,000": 0.9229,
+        "$500,000": 0.9229,
+        "$1,000,000": 0.9229
+      },
+      "operational_cost_pct": 0.9229,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.9579,
+        "annual_spread_cost_pct": 0.3227,
+        "annual_spread_cost_bps": 32.27
+      },
+      "commission_detail": {
+        "market": "TW",
+        "commission_type": "percentage",
+        "commission_rate_per_side": 0.0004275,
+        "annual_trades": 244.3,
+        "annual_turnover": 6.4542,
+        "annual_commission_pct": 0.2759,
+        "annual_commission_usd": 0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.2759,
+          "$25,000": 0.2759,
+          "$50,000": 0.2759,
+          "$100,000": 0.2759,
+          "$250,000": 0.2759,
+          "$500,000": 0.2759,
+          "$1,000,000": 0.2759
+        }
+      },
+      "tw_tax_detail": {
+        "applies": true,
+        "annual_sell_turnover_pct": 324.34,
+        "annual_tax_cost_pct": 0.3243,
+        "annual_tax_cost_bps": 32.43
+      },
+      "us_tax_detail": {
+        "applies": false,
+        "annual_tax_drag_pct": 0.0
+      },
+      "margin_detail": {
+        "applies": false,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 1.813,
+        "net_sharpe_vs_rf": 1.728,
+        "sharpe_reduction": 0.086,
+        "sharpe_reduction_pct": 4.7
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 5000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 0,
+        "reason": "minimum lot size (0050.TW)"
+      }
+    },
+    "vix_leading_guard": {
+      "display_name": "VIX+Leading (0050.TW)",
+      "description": "VIX + Taiwan business cycle leading indicator for 0050.TW",
+      "market": "TW",
+      "assets": [
+        "0050.TW"
+      ],
+      "rebalance_frequency": "daily",
+      "uses_leverage": false,
+      "uses_garch": false,
+      "complexity_score": 3,
+      "complexity_reason": "VIX + Taiwan leading indicator (monthly data, regime switch k=10/6)",
+      "performance": {
+        "annualized_return_pct": 20.28,
+        "annualized_vol_pct": 12.7,
+        "sharpe": 1.52,
+        "max_drawdown_pct": -15.98,
+        "calmar": 1.27
+      },
+      "turnover": {
+        "total_days": 985,
+        "years": 3.91,
+        "trade_days": 59,
+        "trade_days_pct": 6.0,
+        "annual_trade_days": 15.1,
+        "meaningful_trades": 57,
+        "annual_meaningful_trades": 14.6,
+        "total_weight_turnover": 4.7084,
+        "annual_turnover": 1.2046,
+        "avg_daily_weight_change": 0.00478,
+        "median_daily_weight_change": 0.0
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.0602,
+        "commission_pct": 0.0515,
+        "commission_pct_at_100k": 0.0515,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.0655,
+        "us_tax_drag_pct": 0,
+        "total_pct_at_100k": 0.1772
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 0.1772,
+        "$25,000": 0.1772,
+        "$50,000": 0.1772,
+        "$100,000": 0.1772,
+        "$250,000": 0.1772,
+        "$500,000": 0.1772,
+        "$1,000,000": 0.1772
+      },
+      "operational_cost_pct": 0.1772,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.2354,
+        "annual_spread_cost_pct": 0.0602,
+        "annual_spread_cost_bps": 6.02
+      },
+      "commission_detail": {
+        "market": "TW",
+        "commission_type": "percentage",
+        "commission_rate_per_side": 0.0004275,
+        "annual_trades": 15.1,
+        "annual_turnover": 1.2046,
+        "annual_commission_pct": 0.0515,
+        "annual_commission_usd": 0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0515,
+          "$25,000": 0.0515,
+          "$50,000": 0.0515,
+          "$100,000": 0.0515,
+          "$250,000": 0.0515,
+          "$500,000": 0.0515,
+          "$1,000,000": 0.0515
+        }
+      },
+      "tw_tax_detail": {
+        "applies": true,
+        "annual_sell_turnover_pct": 65.5,
+        "annual_tax_cost_pct": 0.0655,
+        "annual_tax_cost_bps": 6.55
+      },
+      "us_tax_detail": {
+        "applies": false,
+        "annual_tax_drag_pct": 0.0
+      },
+      "margin_detail": {
+        "applies": false,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 1.243,
+        "net_sharpe_vs_rf": 1.229,
+        "sharpe_reduction": 0.014,
+        "sharpe_reduction_pct": 1.1
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 5000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 0,
+        "reason": "minimum lot size (0050.TW)"
+      }
+    },
+    "vix_cond_leverage": {
+      "display_name": "VIX Conditional Leverage",
+      "description": "50/50 SPY/GLD, 12/VIX sizing, 1.5x leverage when VIX<15",
+      "market": "US",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "rebalance_frequency": "monthly_with_daily_monitor",
+      "uses_leverage": true,
+      "uses_garch": false,
+      "complexity_score": 3,
+      "complexity_reason": "Monthly rebalance, but daily VIX check for leverage switch. Margin required.",
+      "performance": {
+        "annualized_return_pct": 29.47,
+        "annualized_vol_pct": 9.96,
+        "sharpe": 2.64,
+        "max_drawdown_pct": -6.41,
+        "calmar": 4.6
+      },
+      "turnover": {
+        "total_days": 809,
+        "years": 3.21,
+        "trade_days": 657,
+        "trade_days_pct": 81.2,
+        "annual_trade_days": 204.7,
+        "meaningful_trades": 657,
+        "annual_meaningful_trades": 204.7,
+        "total_weight_turnover": 55.76,
+        "annual_turnover": 17.369,
+        "avg_daily_weight_change": 0.068925,
+        "median_daily_weight_change": 0.04
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.2605,
+        "commission_pct": 0.0,
+        "commission_pct_at_100k": 0.0,
+        "margin_pct": 0.5787,
+        "tw_tax_pct": 0.0,
+        "us_tax_drag_pct": 6.28,
+        "total_pct_at_100k": 7.1192
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 7.1192,
+        "$25,000": 7.1192,
+        "$50,000": 7.1192,
+        "$100,000": 7.1192,
+        "$250,000": 7.1192,
+        "$500,000": 7.1192,
+        "$1,000,000": 7.1192
+      },
+      "operational_cost_pct": 0.8392,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.8364,
+        "annual_spread_cost_pct": 0.2605,
+        "annual_spread_cost_bps": 26.05
+      },
+      "commission_detail": {
+        "market": "US",
+        "commission_type": "fixed_zero",
+        "commission_per_trade": 0.0,
+        "annual_trades": 409.3,
+        "annual_commission_usd": 0,
+        "annual_commission_pct": 0.0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0,
+          "$25,000": 0.0,
+          "$50,000": 0.0,
+          "$100,000": 0.0,
+          "$250,000": 0.0,
+          "$500,000": 0.0,
+          "$1,000,000": 0.0
+        }
+      },
+      "tw_tax_detail": {
+        "applies": false,
+        "annual_tax_cost_pct": 0.0
+      },
+      "us_tax_detail": {
+        "applies": true,
+        "short_term_fraction": 0.9,
+        "long_term_fraction": 0.1,
+        "estimated_annual_tax_drag_pct": 6.28,
+        "effective_tax_rate": 21.3
+      },
+      "margin_detail": {
+        "applies": true,
+        "avg_leveraged_portion": 0.1052,
+        "max_leveraged_portion": 0.52,
+        "pct_days_leveraged": 32.2,
+        "annual_margin_cost_pct": 0.5787
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 2.507,
+        "net_sharpe_vs_rf": 1.792,
+        "sharpe_reduction": 0.715,
+        "sharpe_reduction_pct": 28.5
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 25000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 25000,
+        "reason": "margin requirement (US PDT)"
+      }
+    },
+    "taiwan_hybrid_leverage": {
+      "display_name": "Taiwan Hybrid Leverage",
+      "description": "0050.TW with 8.63/VIX + conditional 1.5x leverage",
+      "market": "TW",
+      "assets": [
+        "0050.TW"
+      ],
+      "rebalance_frequency": "monthly_with_daily_monitor",
+      "uses_leverage": true,
+      "uses_garch": false,
+      "complexity_score": 4,
+      "complexity_reason": "Cross-market VIX + local RV22 + VIX percentile. Leverage + Taiwan broker margin.",
+      "performance": {
+        "annualized_return_pct": 32.92,
+        "annualized_vol_pct": 11.64,
+        "sharpe": 2.5,
+        "max_drawdown_pct": -10.27,
+        "calmar": 3.21
+      },
+      "turnover": {
+        "total_days": 775,
+        "years": 3.08,
+        "trade_days": 633,
+        "trade_days_pct": 81.7,
+        "annual_trade_days": 205.8,
+        "meaningful_trades": 614,
+        "annual_meaningful_trades": 199.6,
+        "total_weight_turnover": 33.04,
+        "annual_turnover": 10.7433,
+        "avg_daily_weight_change": 0.042632,
+        "median_daily_weight_change": 0.02
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.5372,
+        "commission_pct": 0.4593,
+        "commission_pct_at_100k": 0.4593,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.5388,
+        "us_tax_drag_pct": 0,
+        "total_pct_at_100k": 1.5353
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 1.5353,
+        "$25,000": 1.5353,
+        "$50,000": 1.5353,
+        "$100,000": 1.5353,
+        "$250,000": 1.5353,
+        "$500,000": 1.5353,
+        "$1,000,000": 1.5353
+      },
+      "operational_cost_pct": 1.5353,
+      "spread_detail": {
+        "total_spread_cost_pct": 1.652,
+        "annual_spread_cost_pct": 0.5372,
+        "annual_spread_cost_bps": 53.72
+      },
+      "commission_detail": {
+        "market": "TW",
+        "commission_type": "percentage",
+        "commission_rate_per_side": 0.0004275,
+        "annual_trades": 205.8,
+        "annual_turnover": 10.7433,
+        "annual_commission_pct": 0.4593,
+        "annual_commission_usd": 0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.4593,
+          "$25,000": 0.4593,
+          "$50,000": 0.4593,
+          "$100,000": 0.4593,
+          "$250,000": 0.4593,
+          "$500,000": 0.4593,
+          "$1,000,000": 0.4593
+        }
+      },
+      "tw_tax_detail": {
+        "applies": true,
+        "annual_sell_turnover_pct": 538.79,
+        "annual_tax_cost_pct": 0.5388,
+        "annual_tax_cost_bps": 53.88
+      },
+      "us_tax_detail": {
+        "applies": false,
+        "annual_tax_drag_pct": 0.0
+      },
+      "margin_detail": {
+        "applies": true,
+        "avg_leveraged_portion": 0.0,
+        "max_leveraged_portion": 0,
+        "pct_days_leveraged": 0.0,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 2.442,
+        "net_sharpe_vs_rf": 2.31,
+        "sharpe_reduction": 0.132,
+        "sharpe_reduction_pct": 5.4
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 50000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 50000,
+        "reason": "margin requirement (Taiwan)"
+      }
+    },
+    "piecewise_conservative": {
+      "display_name": "Piecewise Conservative",
+      "description": "50/50 SPY/GLD with piecewise VIX zones (full/ramp/exit)",
+      "market": "US",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "rebalance_frequency": "daily",
+      "uses_leverage": false,
+      "uses_garch": false,
+      "complexity_score": 1,
+      "complexity_reason": "Simple piecewise VIX rule (3 zones). No computation required.",
+      "performance": {
+        "annualized_return_pct": 18.01,
+        "annualized_vol_pct": 5.29,
+        "sharpe": 3.16,
+        "max_drawdown_pct": -2.48,
+        "calmar": 7.26
+      },
+      "turnover": {
+        "total_days": 809,
+        "years": 3.21,
+        "trade_days": 619,
+        "trade_days_pct": 76.5,
+        "annual_trade_days": 192.8,
+        "meaningful_trades": 619,
+        "annual_meaningful_trades": 192.8,
+        "total_weight_turnover": 59.28,
+        "annual_turnover": 18.4655,
+        "avg_daily_weight_change": 0.073276,
+        "median_daily_weight_change": 0.04
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.277,
+        "commission_pct": 0.0,
+        "commission_pct_at_100k": 0.0,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.0,
+        "us_tax_drag_pct": 3.84,
+        "total_pct_at_100k": 4.117
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 4.117,
+        "$25,000": 4.117,
+        "$50,000": 4.117,
+        "$100,000": 4.117,
+        "$250,000": 4.117,
+        "$500,000": 4.117,
+        "$1,000,000": 4.117
+      },
+      "operational_cost_pct": 0.277,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.8892,
+        "annual_spread_cost_pct": 0.277,
+        "annual_spread_cost_bps": 27.7
+      },
+      "commission_detail": {
+        "market": "US",
+        "commission_type": "fixed_zero",
+        "commission_per_trade": 0.0,
+        "annual_trades": 385.6,
+        "annual_commission_usd": 0,
+        "annual_commission_pct": 0.0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0,
+          "$25,000": 0.0,
+          "$50,000": 0.0,
+          "$100,000": 0.0,
+          "$250,000": 0.0,
+          "$500,000": 0.0,
+          "$1,000,000": 0.0
+        }
+      },
+      "tw_tax_detail": {
+        "applies": false,
+        "annual_tax_cost_pct": 0.0
+      },
+      "us_tax_detail": {
+        "applies": true,
+        "short_term_fraction": 0.9,
+        "long_term_fraction": 0.1,
+        "estimated_annual_tax_drag_pct": 3.84,
+        "effective_tax_rate": 21.3
+      },
+      "margin_detail": {
+        "applies": false,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 2.554,
+        "net_sharpe_vs_rf": 1.776,
+        "sharpe_reduction": 0.778,
+        "sharpe_reduction_pct": 30.5
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 5000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 0,
+        "reason": "minimum practical size"
+      }
+    },
+    "fear_dca": {
+      "display_name": "Fear DCA",
+      "description": "Monthly DCA multiplier based on VIX regime",
+      "market": "US",
+      "assets": [
+        "SPY"
+      ],
+      "rebalance_frequency": "monthly",
+      "uses_leverage": false,
+      "uses_garch": false,
+      "complexity_score": 1,
+      "complexity_reason": "Monthly check VIX zone → adjust DCA contribution. Minimal effort.",
+      "performance": {
+        "annualized_return_pct": 18.74,
+        "annualized_vol_pct": 15.22,
+        "sharpe": 1.2,
+        "max_drawdown_pct": -18.76,
+        "calmar": 1.0
+      },
+      "turnover": {
+        "total_days": 809,
+        "years": 3.21,
+        "trade_days": 87,
+        "trade_days_pct": 10.8,
+        "annual_trade_days": 27.1,
+        "meaningful_trades": 87,
+        "annual_meaningful_trades": 27.1,
+        "total_weight_turnover": 43.5,
+        "annual_turnover": 13.5501,
+        "avg_daily_weight_change": 0.05377,
+        "median_daily_weight_change": 0.0
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.1355,
+        "commission_pct": 0.0,
+        "commission_pct_at_100k": 0.0,
+        "margin_pct": 0.0,
+        "tw_tax_pct": 0.0,
+        "us_tax_drag_pct": 3.34,
+        "total_pct_at_100k": 3.4755
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 3.4755,
+        "$25,000": 3.4755,
+        "$50,000": 3.4755,
+        "$100,000": 3.4755,
+        "$250,000": 3.4755,
+        "$500,000": 3.4755,
+        "$1,000,000": 3.4755
+      },
+      "operational_cost_pct": 0.1355,
+      "spread_detail": {
+        "total_spread_cost_pct": 0.435,
+        "annual_spread_cost_pct": 0.1355,
+        "annual_spread_cost_bps": 13.55
+      },
+      "commission_detail": {
+        "market": "US",
+        "commission_type": "fixed_zero",
+        "commission_per_trade": 0.0,
+        "annual_trades": 27.1,
+        "annual_commission_usd": 0,
+        "annual_commission_pct": 0.0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0,
+          "$25,000": 0.0,
+          "$50,000": 0.0,
+          "$100,000": 0.0,
+          "$250,000": 0.0,
+          "$500,000": 0.0,
+          "$1,000,000": 0.0
+        }
+      },
+      "tw_tax_detail": {
+        "applies": false,
+        "annual_tax_cost_pct": 0.0
+      },
+      "us_tax_detail": {
+        "applies": true,
+        "short_term_fraction": 0.4,
+        "long_term_fraction": 0.6,
+        "estimated_annual_tax_drag_pct": 3.34,
+        "effective_tax_rate": 17.8
+      },
+      "margin_detail": {
+        "applies": false,
+        "annual_margin_cost_pct": 0.0
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 0.936,
+        "net_sharpe_vs_rf": 0.707,
+        "sharpe_reduction": 0.228,
+        "sharpe_reduction_pct": 24.4
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 5000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 0,
+        "reason": "minimum practical size"
+      }
+    },
+    "adaptive_tier": {
+      "display_name": "Adaptive Tier VT",
+      "description": "3-regime VIX switching: leverage/standard/exit on 50/50 SPY/GLD",
+      "market": "US",
+      "assets": [
+        "SPY",
+        "GLD"
+      ],
+      "rebalance_frequency": "monthly_with_daily_monitor",
+      "uses_leverage": true,
+      "uses_garch": false,
+      "complexity_score": 2,
+      "complexity_reason": "Monthly rebalance, daily VIX check for regime switch. 3 clear zones.",
+      "performance": {
+        "annualized_return_pct": 31.53,
+        "annualized_vol_pct": 9.22,
+        "sharpe": 3.02,
+        "max_drawdown_pct": -5.06,
+        "calmar": 6.24
+      },
+      "turnover": {
+        "total_days": 809,
+        "years": 3.21,
+        "trade_days": 562,
+        "trade_days_pct": 69.5,
+        "annual_trade_days": 175.1,
+        "meaningful_trades": 562,
+        "annual_meaningful_trades": 175.1,
+        "total_weight_turnover": 89.04,
+        "annual_turnover": 27.7356,
+        "avg_daily_weight_change": 0.110062,
+        "median_daily_weight_change": 0.02
+      },
+      "cost_breakdown": {
+        "spread_pct": 0.416,
+        "commission_pct": 0.0,
+        "commission_pct_at_100k": 0.0,
+        "margin_pct": 0.5787,
+        "tw_tax_pct": 0.0,
+        "us_tax_drag_pct": 6.72,
+        "total_pct_at_100k": 7.7147
+      },
+      "cost_at_portfolio_sizes": {
+        "$10,000": 7.7147,
+        "$25,000": 7.7147,
+        "$50,000": 7.7147,
+        "$100,000": 7.7147,
+        "$250,000": 7.7147,
+        "$500,000": 7.7147,
+        "$1,000,000": 7.7147
+      },
+      "operational_cost_pct": 0.9947,
+      "spread_detail": {
+        "total_spread_cost_pct": 1.3356,
+        "annual_spread_cost_pct": 0.416,
+        "annual_spread_cost_bps": 41.6
+      },
+      "commission_detail": {
+        "market": "US",
+        "commission_type": "fixed_zero",
+        "commission_per_trade": 0.0,
+        "annual_trades": 350.1,
+        "annual_commission_usd": 0,
+        "annual_commission_pct": 0.0,
+        "cost_pct_by_portfolio_size": {
+          "$10,000": 0.0,
+          "$25,000": 0.0,
+          "$50,000": 0.0,
+          "$100,000": 0.0,
+          "$250,000": 0.0,
+          "$500,000": 0.0,
+          "$1,000,000": 0.0
+        }
+      },
+      "tw_tax_detail": {
+        "applies": false,
+        "annual_tax_cost_pct": 0.0
+      },
+      "us_tax_detail": {
+        "applies": true,
+        "short_term_fraction": 0.9,
+        "long_term_fraction": 0.1,
+        "estimated_annual_tax_drag_pct": 6.72,
+        "effective_tax_rate": 21.3
+      },
+      "margin_detail": {
+        "applies": true,
+        "avg_leveraged_portion": 0.1052,
+        "max_leveraged_portion": 0.52,
+        "pct_days_leveraged": 32.2,
+        "annual_margin_cost_pct": 0.5787
+      },
+      "net_sharpe": {
+        "gross_sharpe_vs_rf": 2.932,
+        "net_sharpe_vs_rf": 2.095,
+        "sharpe_reduction": 0.837,
+        "sharpe_reduction_pct": 28.5
+      },
+      "minimum_portfolio": {
+        "minimum_portfolio_usd": 25000,
+        "min_for_commission_threshold": 0,
+        "min_for_margin_requirement": 25000,
+        "reason": "margin requirement (US PDT)"
+      }
+    }
+  },
+  "summary": {
+    "key_findings": [
+      "Best net Sharpe: Taiwan Hybrid Leverage (2.310)",
+      "Lowest operational cost: 12/VIX (SPY) (0.09%/yr)",
+      "Easiest to implement: 12/VIX (SPY) (complexity 1/5)",
+      "Best value (Sharpe/Complexity): Piecewise Conservative (1.776)",
+      "Average Sharpe reduction from costs: 23.1%",
+      "TW strategies avg operational cost: 0.88% vs US: 0.34% (TW more expensive)",
+      "Highest US tax drag: Adaptive Tier VT (6.72%/yr)"
+    ],
+    "avg_sharpe_reduction_pct": 23.1,
+    "recommendations": {
+      "beginner_low_effort": {
+        "recommended": "piecewise_conservative",
+        "reason": "Lowest complexity (1/5), very low cost, good Sharpe. Just check VIX zone."
+      },
+      "beginner_passive": {
+        "recommended": "fear_dca",
+        "reason": "Monthly check only (1/5 complexity), enhances existing DCA habit."
+      },
+      "intermediate_us": {
+        "recommended": "recommended_5050",
+        "reason": "Good Sharpe, moderate complexity (2/5), $0 commissions, diversified SPY+GLD."
+      },
+      "intermediate_tw": {
+        "recommended": "taiwan_8.63vix",
+        "reason": "Simple VIX rule for Taiwan market. Higher commissions but no capital gains tax."
+      },
+      "advanced_us": {
+        "recommended": "adaptive_tier",
+        "reason": "Best value ratio (Sharpe/complexity). 3-regime system with leverage in calm markets."
+      },
+      "quantitative": {
+        "recommended": "risk_parity",
+        "reason": "Highest gross Sharpe, but requires daily GARCH computation. For quant-oriented investors."
+      }
+    }
+  },
+  "ranking": {
+    "by_net_sharpe": [
+      {
+        "strategy": "taiwan_hybrid_leverage",
+        "net_sharpe": 2.31
+      },
+      {
+        "strategy": "adaptive_tier",
+        "net_sharpe": 2.095
+      },
+      {
+        "strategy": "vix_cond_leverage",
+        "net_sharpe": 1.792
+      },
+      {
+        "strategy": "piecewise_conservative",
+        "net_sharpe": 1.776
+      },
+      {
+        "strategy": "taiwan_8.63vix",
+        "net_sharpe": 1.728
+      },
+      {
+        "strategy": "risk_parity",
+        "net_sharpe": 1.431
+      },
+      {
+        "strategy": "vix_leading_guard",
+        "net_sharpe": 1.229
+      },
+      {
+        "strategy": "recommended_5050",
+        "net_sharpe": 1.007
+      },
+      {
+        "strategy": "fear_dca",
+        "net_sharpe": 0.707
+      },
+      {
+        "strategy": "slow_vt",
+        "net_sharpe": 0.449
+      },
+      {
+        "strategy": "simple_12vix",
+        "net_sharpe": 0.424
+      }
+    ],
+    "by_operational_cost": [
+      {
+        "strategy": "simple_12vix",
+        "oper_cost_pct": 0.0879
+      },
+      {
+        "strategy": "slow_vt",
+        "oper_cost_pct": 0.1066
+      },
+      {
+        "strategy": "risk_parity",
+        "oper_cost_pct": 0.1086
+      },
+      {
+        "strategy": "recommended_5050",
+        "oper_cost_pct": 0.1316
+      },
+      {
+        "strategy": "fear_dca",
+        "oper_cost_pct": 0.1355
+      },
+      {
+        "strategy": "vix_leading_guard",
+        "oper_cost_pct": 0.1772
+      },
+      {
+        "strategy": "piecewise_conservative",
+        "oper_cost_pct": 0.277
+      },
+      {
+        "strategy": "vix_cond_leverage",
+        "oper_cost_pct": 0.8392
+      },
+      {
+        "strategy": "taiwan_8.63vix",
+        "oper_cost_pct": 0.9229
+      },
+      {
+        "strategy": "adaptive_tier",
+        "oper_cost_pct": 0.9947
+      },
+      {
+        "strategy": "taiwan_hybrid_leverage",
+        "oper_cost_pct": 1.5353
+      }
+    ],
+    "by_complexity": [
+      {
+        "strategy": "simple_12vix",
+        "complexity": 1
+      },
+      {
+        "strategy": "piecewise_conservative",
+        "complexity": 1
+      },
+      {
+        "strategy": "fear_dca",
+        "complexity": 1
+      },
+      {
+        "strategy": "recommended_5050",
+        "complexity": 2
+      },
+      {
+        "strategy": "taiwan_8.63vix",
+        "complexity": 2
+      },
+      {
+        "strategy": "adaptive_tier",
+        "complexity": 2
+      },
+      {
+        "strategy": "vix_leading_guard",
+        "complexity": 3
+      },
+      {
+        "strategy": "vix_cond_leverage",
+        "complexity": 3
+      },
+      {
+        "strategy": "slow_vt",
+        "complexity": 4
+      },
+      {
+        "strategy": "taiwan_hybrid_leverage",
+        "complexity": 4
+      },
+      {
+        "strategy": "risk_parity",
+        "complexity": 5
+      }
+    ],
+    "by_value": [
+      {
+        "strategy": "piecewise_conservative",
+        "value_ratio": 1.776
+      },
+      {
+        "strategy": "adaptive_tier",
+        "value_ratio": 1.048
+      },
+      {
+        "strategy": "taiwan_8.63vix",
+        "value_ratio": 0.864
+      },
+      {
+        "strategy": "fear_dca",
+        "value_ratio": 0.707
+      },
+      {
+        "strategy": "vix_cond_leverage",
+        "value_ratio": 0.597
+      },
+      {
+        "strategy": "taiwan_hybrid_leverage",
+        "value_ratio": 0.578
+      },
+      {
+        "strategy": "recommended_5050",
+        "value_ratio": 0.503
+      },
+      {
+        "strategy": "simple_12vix",
+        "value_ratio": 0.424
+      },
+      {
+        "strategy": "vix_leading_guard",
+        "value_ratio": 0.41
+      },
+      {
+        "strategy": "risk_parity",
+        "value_ratio": 0.286
+      },
+      {
+        "strategy": "slow_vt",
+        "value_ratio": 0.112
+      }
+    ]
+  }
+}

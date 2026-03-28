@@ -121,7 +121,7 @@ The VIXTWN-to-VIX ratio averages 1.393 with a coefficient of variation of 10\%, 
 
 \subsection{Transaction Costs and Rebalancing}
 
-For 0050.TW, we apply a round-trip transaction cost of 0.585\%, reflecting the Taiwan Securities Transaction Tax (0.30\% on sell) plus estimated brokerage commissions (0.1425\% per side, discounted). Unless otherwise stated, all VT strategies use monthly rebalancing. We have verified that daily rebalancing improves the Sharpe ratio marginally but increases turnover and transaction costs substantially. Monthly rebalancing represents a practical specification for individual investors.
+For 0050.TW, we apply a round-trip transaction cost of 0.186\%, reflecting the Taiwan Securities Transaction Tax (0.10\% on sell, the reduced ETF rate) plus brokerage commissions at the typical online discount (0.1425\% official rate $\times$ 0.3 = 0.04275\% per side).\footnote{Taiwan levies a securities transaction tax of 0.3\% for common stocks but only 0.1\% for ETFs; online brokerages typically offer a 70\% discount (``3折'') on the statutory 0.1425\% commission rate.} Unless otherwise stated, all VT strategies use monthly rebalancing. We have verified that daily rebalancing improves the Sharpe ratio marginally but increases turnover and transaction costs substantially. Monthly rebalancing represents a practical specification for individual investors.
 
 
 % ─── Section 3: Leverage Effect ──────────────────────────────────
@@ -261,7 +261,7 @@ Student-$t$ VaR & --- & --- & --- & --- & --- & 0.5\% \\
 \end{tabular}
 \begin{flushleft}
 % Codex-R6-fix: clarify per-strategy periods and add comparability caveat
-\small \textit{Notes:} Evaluation periods differ across strategies: Buy \& Hold and EWMA VT cover 2010--2026; GARCH VT and GJR VT cover 2020--2026 (the 2000-day rolling window, starting from 2008 data, first produces forecasts in 2016, with an additional burn-in to 2020); 8.63/VIX covers 2016--2026; Student-$t$ VaR covers 2020--2026. Because evaluation periods are not identical, cross-strategy Sharpe ratio comparisons should be interpreted with caution. 8.63/VIX uses monthly rebalancing with 0.585\% round-trip transaction cost. VaR violations are the empirical 1\% VaR exceedance rate using Student-$t$(df$= 5$) distribution. MDD: maximum drawdown.
+\small \textit{Notes:} Evaluation periods differ across strategies: Buy \& Hold and EWMA VT cover 2010--2026; GARCH VT and GJR VT cover 2020--2026 (the 2000-day rolling window, starting from 2008 data, first produces forecasts in 2016, with an additional burn-in to 2020); 8.63/VIX covers 2016--2026; Student-$t$ VaR covers 2020--2026. Because evaluation periods are not identical, cross-strategy Sharpe ratio comparisons should be interpreted with caution. 8.63/VIX uses monthly rebalancing with 0.186\% round-trip transaction cost. VaR violations are the empirical 1\% VaR exceedance rate using Student-$t$(df$= 5$) distribution. MDD: maximum drawdown.
 \end{flushleft}
 \end{table}
 
@@ -270,7 +270,7 @@ Figure~\ref{fig:cumulative_returns} plots the cumulative wealth paths for buy-an
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{figures/fig2_cumulative_returns.pdf}
-\caption{Cumulative wealth for 0050.TW volatility targeting strategies, 2010--2026 (log scale). Buy \& Hold: unmanaged 0050.TW. 8.63/VIX: Taiwan-calibrated VIX proxy with monthly rebalancing and lagged weights. 12/VIX: U.S.\ calibration applied to Taiwan (systematically overexposed). Hybrid Leverage: $8.63/\text{VIX}$ base with $1.5\times$ leverage when both local RV$_{22} < 20\%$ and VIX $<$ rolling 30th percentile. All strategies include 0.585\% round-trip transaction costs.}
+\caption{Cumulative wealth for 0050.TW volatility targeting strategies, 2010--2026 (log scale). Buy \& Hold: unmanaged 0050.TW. 8.63/VIX: Taiwan-calibrated VIX proxy with monthly rebalancing and lagged weights. 12/VIX: U.S.\ calibration applied to Taiwan (systematically overexposed). Hybrid Leverage: $8.63/\text{VIX}$ base with $1.5\times$ leverage when both local RV$_{22} < 20\%$ and VIX $<$ rolling 30th percentile. All strategies include 0.186\% round-trip transaction costs (ETF tax 0.10\% + commission 0.04275\%$\times$2).}
 \label{fig:cumulative_returns}
 \end{figure}
 
@@ -280,7 +280,7 @@ The VIX-proxy approach sets $w_t = \min(8.63/\text{VIX}_{t-1}, \, 1)$, where $\t
 
 Over 2016--2026, the $8.63/\text{VIX}$ strategy produces a Sharpe ratio of 0.690 and a maximum drawdown of $-15.3\%$, compared to buy-and-hold values of 0.729 and $-37.6\%$. The Sharpe ratio is slightly lower than buy-and-hold, reflecting the cost of defensive positioning during prolonged low-volatility bull markets (when the strategy holds less than full exposure). The maximum drawdown improvement of 22.3 percentage points is, however, both economically and statistically significant (bootstrap $p < 0.001$; see Section~\ref{sec:var}).
 
-An important methodological consideration is the following. We initially reported Sharpe ratios of 1.16 (daily rebalancing without full transaction costs) and 1.32 (same-day VIX timing), both of which proved upwardly biased. The daily rebalancing version incurs excessive transaction costs at Taiwan's 0.585\% round-trip rate, and the same-day timing version suffers from a contemporaneous correlation bias documented by \citet{moreira2017}: since VIX and SPY returns are positively correlated contemporaneously ($\rho \approx 0.65$), using $\text{VIX}_t$ to size $r_t$ (rather than $r_{t+1}$) artificially inflates the Sharpe ratio by approximately 1.0 units. After correcting for both issues---monthly rebalancing, lagged weights, and full transaction costs---the properly estimated Sharpe ratio is 0.690. This reconciliation underscores the importance of strict adherence to lagged-weight protocols in VT backtesting.
+An important methodological consideration is the following. We initially reported Sharpe ratios of 1.16 (daily rebalancing without full transaction costs) and 1.32 (same-day VIX timing), both of which proved upwardly biased. The daily rebalancing version incurs excessive transaction costs at Taiwan's 0.186\% round-trip rate, and the same-day timing version suffers from a contemporaneous correlation bias documented by \citet{moreira2017}: since VIX and SPY returns are positively correlated contemporaneously ($\rho \approx 0.65$), using $\text{VIX}_t$ to size $r_t$ (rather than $r_{t+1}$) artificially inflates the Sharpe ratio by approximately 1.0 units. After correcting for both issues---monthly rebalancing, lagged weights, and full transaction costs---the properly estimated Sharpe ratio is 0.690. This reconciliation underscores the importance of strict adherence to lagged-weight protocols in VT backtesting.
 
 Importantly, the Sharpe ratio of the VIX-proxy strategy is independent of the calibration constant $K$: mathematically, $\text{Sharpe}(K \cdot r) = \text{Sharpe}(r)$ for any positive constant $K$. The constant $K = 8.63$ affects only the risk level (and hence maximum drawdown), not the risk-adjusted return. This eliminates any concern about calibration leakage from the VIXTWN-to-VIX ratio.
 
@@ -335,7 +335,7 @@ Indonesia (JCI) & --- & --- & $< 1.96$ & --- & --- & 2012--2025 & No \\
 \bottomrule
 \end{tabular}
 \begin{flushleft}
-\small \textit{Notes:} ``c2c'' denotes close-to-close returns (including overnight gaps); ``o2o'' denotes open-to-open returns (implementable portion only). The c2c Sharpe ratios are inflated because the overnight opening gap---which mechanically reflects the previous U.S. session---is captured in c2c returns but cannot be traded upon, as it is realized before the signal can be acted on. All $t$-statistics in the ``$t$-stat (o2o)'' column use Newey-West HAC standard errors with automatic bandwidth selection. The \citet{harvey2016} threshold is $t > 3.0$. Panel B combinations were originally computed using c2c returns; o2o-based combination results would be substantially lower. Transaction costs of 0.3\% per switch are applied throughout.
+\small \textit{Notes:} ``c2c'' denotes close-to-close returns (including overnight gaps); ``o2o'' denotes open-to-open returns (implementable portion only). The c2c Sharpe ratios are inflated because the overnight opening gap---which mechanically reflects the previous U.S. session---is captured in c2c returns but cannot be traded upon, as it is realized before the signal can be acted on. All $t$-statistics in the ``$t$-stat (o2o)'' column use Newey-West HAC standard errors with automatic bandwidth selection. The \citet{harvey2016} threshold is $t > 3.0$. Panel B combinations were originally computed using c2c returns; o2o-based combination results would be substantially lower. Transaction costs of 0.186\% per switch (ETF round-trip: 0.10\% tax + 0.04275\%$\times$2 commission) are applied throughout.
 \end{flushleft}
 \end{table}
 
@@ -383,8 +383,8 @@ We subject the time-zone momentum result to five robustness tests. We note that 
 
 \textbf{Bonferroni correction.} With six markets tested, the Bonferroni-adjusted significance threshold is $t > 3.3$ (assuming $\alpha = 0.05$ and six independent tests). On a c2c basis, Taiwan ($t = 3.76$), Japan ($t = 3.34$ for the 10-day lookback; $t = 3.69$ for the 5-day lookback), Hong Kong, Australia, Singapore, and South Korea all pass this adjusted threshold. On an o2o basis, none of the individual markets pass, underscoring the gap between information content and implementable alpha.
 
-% Codex-R6-fix: corrected arithmetic (29 × 0.3% = 8.7%, not 1.7%)
-\textbf{Transaction cost sensitivity.} At the observed 29 switches per year and a conservative 0.3\% per switch, annual transaction costs are approximately 8.7\%. For the c2c strategy the breakeven cost is over 3\% per switch; for the o2o strategy the margin is substantially narrower.
+% Corrected: ETF round-trip = 0.186% (0.1% ETF tax + 0.04275%×2 commission at 3折)
+\textbf{Transaction cost sensitivity.} At the observed 29 switches per year and a round-trip cost of 0.186\% per switch (the ETF-specific securities tax of 0.1\% plus discounted brokerage commissions), annual transaction costs are approximately 5.4\%. For the c2c strategy the breakeven cost is over 3\% per switch; for the o2o strategy the margin is substantially narrower.
 
 \textbf{Lookback sensitivity.} The 5-day lookback produces a Taiwan c2c Sharpe of 1.141 (NW-adjusted $t = 3.25$); the 10-day lookback produces 1.473 (NW-adjusted $t = 3.76$). Both exceed the \citet{harvey2016} threshold on a c2c basis. The 20-day lookback deteriorates, suggesting that the optimal information horizon is 1--2 trading weeks.
 
@@ -498,8 +498,8 @@ Our results suggest several practical implications for individual investors in T
 
 \textbf{$8.63/\text{VIX}$ strategy.} Compute $w = 8.63 / \text{VIX}$ at each month-end, allocating $w\%$ to 0050.TW and $(1-w)\%$ to a short-term bond fund. Transaction cost: approximately 0.15\% per rebalancing.
 
-% Codex-R6-fix: corrected arithmetic (29 × 0.3% = 8.7%, not 1.7%)
-\textbf{Time-zone momentum.} Check whether the trailing 10-day SPY cumulative return is positive. If yes, hold 0050.TW; if no, hold cash. This requires daily monitoring and generates approximately 29 switches per year (transaction cost approximately 8.7\% per year at 0.3\% per switch). \textit{Caveat:} The c2c Sharpe of 1.47 overstates implementable returns; the o2o Sharpe is 0.87 (see Section~\ref{sec:tz}). The efficient incorporation of overnight U.S. information by Taiwan's opening auction means that most of the signal value is already priced in before trading begins. This strategy is best viewed as an information-transmission indicator rather than a standalone trading strategy.
+% Corrected: ETF round-trip = 0.186% (0.1% ETF tax + 0.04275%×2 commission at 3折)
+\textbf{Time-zone momentum.} Check whether the trailing 10-day SPY cumulative return is positive. If yes, hold 0050.TW; if no, hold cash. This requires daily monitoring and generates approximately 29 switches per year (transaction cost approximately 5.4\% per year at 0.186\% per switch). \textit{Caveat:} The c2c Sharpe of 1.47 overstates implementable returns; the o2o Sharpe is 0.87 (see Section~\ref{sec:tz}). The efficient incorporation of overnight U.S. information by Taiwan's opening auction means that most of the signal value is already priced in before trading begins. This strategy is best viewed as an information-transmission indicator rather than a standalone trading strategy.
 
 \textbf{Combined strategy.} Overlaying VIX-based position sizing with momentum switching reduces drawdown, but the combination Sharpe ratios reported in Section~\ref{sec:tz} are based on c2c returns and therefore overstate implementable performance.
 
@@ -549,7 +549,7 @@ VIX + Leading indicator combo & 2012--2026 (full) & 1.151 & Section~\ref{sec:dis
 \bottomrule
 \end{tabular}
 \begin{flushleft}
-\small \textit{Notes:} All strategies use monthly rebalancing with lagged weights (VIX$_{t-1}$ determines the weight for period $t$) and include transaction costs of 0.585\% round-trip. The 2018--2024 sub-period Sharpe is lower because this window captures the prolonged low-volatility bull market of 2020--2021, during which the VIX-scaled strategy was underinvested relative to buy-and-hold. The VIX + Leading indicator combination uses $k = 10$ when the leading indicator rises and $k = 6$ when it declines; its longer sample (2012--2026) reflects the availability of leading indicator data from 2012.
+\small \textit{Notes:} All strategies use monthly rebalancing with lagged weights (VIX$_{t-1}$ determines the weight for period $t$) and include transaction costs of 0.186\% round-trip. The 2018--2024 sub-period Sharpe is lower because this window captures the prolonged low-volatility bull market of 2020--2021, during which the VIX-scaled strategy was underinvested relative to buy-and-hold. The VIX + Leading indicator combination uses $k = 10$ when the leading indicator rises and $k = 6$ when it declines; its longer sample (2012--2026) reflects the availability of leading indicator data from 2012.
 \end{flushleft}
 \end{table}
 

@@ -37,8 +37,9 @@ BACKTEST_END = "2026-03-20"
 VIXTWN_START = "2020-11-01"  # VIXTWN available from Nov 2020
 FIXED_K = 8.63
 DEFAULT_K = 12.0  # K when no VIXTWN data available (ratio=1.0 assumption)
-TX_ORIGINAL = 0.00585  # Original: 0.3% tax + 0.1425%×2 commission
-TX_CORRECTED = 0.00385  # Corrected: 0.1% ETF tax + 0.1425%×2 commission
+TX_ORIGINAL = 0.00585  # Original (WRONG): 0.3% tax + 0.1425%×2 commission
+# ⚠️ CORRECTED AGAIN (K625): commission should also use 3折 discount
+TX_CORRECTED = 0.001855  # Correct: 0.1% ETF tax + 0.04275%×2 commission (3折)
 LIMIT_DOWN_THRESHOLD = -0.09  # ≈ approaching -10% limit
 
 

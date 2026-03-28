@@ -2,6 +2,12 @@
 Write two general-reader articles based on K604, K597, K598 findings.
 Article 1: Implementation costs (K604)
 Article 2: Stress test + debounce (K597 + K598)
+
+⚠️ OUTDATED: K604's Taiwan cost assumptions were wrong. See K625 correction:
+  - ETF tax: 0.1% (not 0.3%)
+  - Commission: 0.04275%/side (not $20/trade)
+  - Round-trip: 18.55bp (not 38.5bp)
+  - Min portfolio: $5,000 (not $977K/$823K)
 """
 
 import json

@@ -9,7 +9,7 @@
     "vix_source": "CBOE VIX (1-day lag)",
     "k_param": 8.63,
     "risk_free": "1.5% (台灣銀行定存)",
-    "stt_rate": "0.3% (賣出時)",
+    "stt_rate": "0.1% (ETF 賣出時) [K625 更正：原誤用 0.3% 個股稅率]",
     "data_range": "2009-01-02 ~ 2026-03-20",
     "initial_capital": "NT$1,000,000",
     "rebalancing": "monthly (last trading day)"
@@ -428,7 +428,7 @@
   ],
   "taiwan_advantages": {
     "capital_gains_tax": "0%（完全免稅，美國最高 37%）",
-    "stt_sell_only": "0.3%（僅賣出時收取，買入不收）",
+    "stt_sell_only": "0.1%（ETF 僅賣出時收取，買入不收）[K625 更正：原誤用 0.3% 個股稅率]",
     "etf_dividend_tax": "分離課稅 28% 或併入綜所稅（二擇一）",
     "annual_stt_drag": "月度 VT 約 1,646 TWD/年（100萬本金）",
     "monthly_rebal_advantage": "月度 vs 日度省 STT，且 Sharpe 更好",

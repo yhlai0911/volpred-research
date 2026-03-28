@@ -28,7 +28,8 @@ STORAGE = Path(__file__).parent.parent / "storage"
 # ── Config ──────────────────────────────────────────────────
 VT_CONSTANT = 8.63      # 12/(1.39 amplification) for Taiwan
 BACKTEST_START = "2009-01-05"   # Post-GFC, data availability
-TX_COST_MONTHLY = 0.00585 / 12  # 0.585% annual → monthly (round trip)
+# ⚠️ CORRECTED (K625): ETF round-trip = 0.1855% (was 0.585%)
+TX_COST_MONTHLY = 0.001855 / 12  # 0.1855% annual → monthly (ETF round trip)
 
 
 # ── Data Download ───────────────────────────────────────────

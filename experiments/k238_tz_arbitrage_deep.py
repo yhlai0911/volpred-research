@@ -339,9 +339,10 @@ def tx_cost_sensitivity(merged_df, return_col, positions, costs_bps):
     Sweep transaction costs and report net Sharpe.
 
     costs_bps: list of one-way costs in basis points.
-    Taiwan: securities tax 0.3% sell-side → ~0.15% round-trip
-            Broker fee: 0.1425% each way → 0.285% round-trip
-            Total: ~0.2% one-way effective
+    Taiwan ETF (corrected K625):
+        Securities tax: 0.1% sell-side (ETF rate, not 0.3% stock rate)
+        Broker fee: 0.04275% each way (0.1425% x 3折)
+        Round-trip: 0.04275% + 0.04275% + 0.1% = 0.1855% = 18.55bp
     """
     results = []
     trades = positions.diff().abs().fillna(positions)

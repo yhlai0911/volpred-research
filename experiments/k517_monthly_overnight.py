@@ -5,7 +5,7 @@ K517: Monthly Overnight Gap Strategy — 一般投資人版本
 [提出: 用戶, 執行: Claude]
 
 Background:
-  K515: Overnight gap alpha 10.73bp/day (t=6.845) but ETF TX fatal (38.5bp/day).
+  K515: Overnight gap alpha 10.73bp/day (t=6.845) but ETF TX fatal (18.55bp/day, corrected K625).
   K516: Futures 5bp daily TX → Sharpe 0.93, 5/5 cross-OOS. But requires futures account.
   K516 also found monthly rebalancing Sharpe=0.876 at 10bp.
 
@@ -172,7 +172,8 @@ print(f"  Difference t-test: t={t_vix:.3f}, p={p_vix:.4f}")
 # 4. Strategy Backtesting Functions
 # ============================================================
 
-TX_COST = 0.00585  # 0.585% round-trip for Taiwan ETF
+# ⚠️ CORRECTED (K625): ETF tax=0.1%, commission=0.04275%/side (3折)
+TX_COST = 0.001855  # 0.1855% round-trip (was 0.585% — WRONG)
 
 def backtest_monthly(signal, tw_ret, name, tx_cost=TX_COST):
     """
@@ -926,7 +927,8 @@ for key in ['spy_signal', 'vix_signal', 'spy_vix_signal', 'spy_vix_vt']:
 print("\n\n[12] Transaction Cost Sensitivity for Best Strategy")
 print("=" * 70)
 
-tx_costs = [0.001, 0.002, 0.003, 0.004, 0.00585, 0.008, 0.01, 0.015, 0.02]
+# Sensitivity sweep (K625 corrected ETF round-trip = 0.001855)
+tx_costs = [0.001, 0.001855, 0.002, 0.003, 0.004, 0.005, 0.008, 0.01, 0.015, 0.02]
 tx_sens_results = []
 
 for tx in tx_costs:

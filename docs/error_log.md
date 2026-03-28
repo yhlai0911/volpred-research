@@ -173,7 +173,17 @@
 - 實際台灣 ETF 來回成本 ~18.5bp vs 美股 ~2bp = 約 9x（不是 13x）
 - 台股最低資金門檻可能低於我們估計的 $80 萬
 
-**修正行動**：
-- 更新 K604 實驗的成本假設
-- 更新受影響文章
-- 更新策略說明中的「建議帳戶 80 萬以上」
+**修正行動（已完成 2026-03-27）**：
+- [x] 建立 K625 更正實驗（`experiments/k625_tx_cost_correction.py`），使用正確成本參數重新計算
+- [x] 修正 12 個 Python 實驗檔案中的台股成本常數：
+  - k502, k506, k515, k516, k517, k499, k238, k263, taiwan_paper_fixes, tsmc_concentration_test
+- [x] 在 25 篇已發佈文章頂部加入「⚠️ 更正聲明（2026-03-27）」
+- [x] 更新 research_program.md 中的成本引用
+- [x] 更新 storage/experiments/taiwan_vt_guide.json 中的稅率
+- [x] 標注 write_k604_k597_k598_articles.py 和 publish_98_experiments_guide.py 為過時
+
+**K625 更正後結果**：
+- 台灣 VT (0050.TW)：Sharpe 減少僅 4.7%（K604 因錯誤成本高估了衰減）
+- 台灣 Hybrid Leverage：淨 Sharpe **2.310**（升為全策略第一）
+- 最低資金門檻：從 $977K/$823K 降至 **$5,000**（0050.TW 零股）
+- 台股策略平均營運成本：0.88%/年（仍高於美股 0.34%/年，但差距從 13x 縮小至 ~2.6x）

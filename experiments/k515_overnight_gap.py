@@ -213,11 +213,12 @@ print(f"  Period: {df.index[0].strftime('%Y-%m-%d')} to {df.index[-1].strftime('
 print("\n[5] Strategy Backtests")
 print("=" * 70)
 
-TX_COST = 0.00585  # 0.585% round-trip (買 0.1425% 手續費 + 賣 0.1425% + 0.3% 交易稅)
-# Note: actually for ETF, 證交稅 = 0.1%, so total = 0.1425%*2 + 0.1% = 0.385%
-# But for stocks: 0.1425%*2 + 0.3% = 0.585%
-# For 0050 ETF: TX = 0.385%
-TX_COST_ETF = 0.00385  # ETF lower tax rate
+# ⚠️ CORRECTED (K625): ETF tax=0.1%, commission=0.04275%/side (3折 discount)
+# Old (WRONG): 0.585% stock / 0.385% ETF (used full commission, stock tax rate)
+# Correct ETF: buy 0.04275% + sell (0.04275% + 0.1%) = 0.1855% round-trip
+TX_COST = 0.001855  # 0.1855% round-trip for ETF (corrected)
+TX_COST_ETF = 0.001855  # Same — ETF is the only relevant rate for 0050.TW
+TX_COST_STOCK = 0.002855  # Stock rate for reference: 0.04275%*2 + 0.2% = 0.2855%
 
 strategies = {}
 
@@ -670,9 +671,8 @@ results = {
         "Lou, Polk, Skouras (2019): A Tug of War: Overnight Versus Intraday Expected Returns, JFE"
     ],
     "tx_assumptions": {
-        "stock_round_trip_pct": 0.585,
-        "etf_round_trip_pct": 0.385,
-        "note": "Stock: 0.1425%*2 commission + 0.3% tax; ETF: 0.1425%*2 + 0.1% tax"
+        "etf_round_trip_pct": 0.1855,
+        "note": "CORRECTED (K625): ETF: 0.04275%*2 commission (3折) + 0.1% ETF tax = 0.1855%"
     },
     "gap_return_diagnostics": {
         "mean_bps_per_day": round(df['gap_ret'].mean() * 10000, 2),
@@ -734,7 +734,7 @@ results = {
         f"Always overnight gross Sharpe = {res1['sharpe_gross']:.3f}, but TX destroys it",
         f"SPY-conditioned gap (SPY>0) = {gap_spy_up.mean()*10000:.2f} bps vs SPY≤0 = {gap_spy_dn.mean()*10000:.2f} bps (t={t_diff:.3f})",
         f"SPY→TW gap correlation = {corr_spy_gap:.4f}, R²={corr_spy_gap**2:.4f}",
-        "Daily overnight trading requires ~2-4 bps avg gap to cover ETF TX of 38.5 bps → impossible",
+        "Daily overnight trading requires ~2-4 bps avg gap to cover ETF TX of 18.55 bps (corrected K625) → still impossible at daily freq",
         "Even with SPY/VIX conditioning, gap returns cannot cover daily round-trip TX costs",
         "Validates T5e finding: alpha exists in theory but TX costs are prohibitive for daily frequency"
     ],

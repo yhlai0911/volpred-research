@@ -89,7 +89,7 @@ TX_COSTS = {
     "0bp": 0.0,
     "5bp": 0.0005,
     "20bp": 0.002,
-    "58.5bp": 0.00585,
+    "18.55bp": 0.001855,  # CORRECTED K625: ETF round-trip (was 58.5bp — WRONG)
 }
 RF_ANNUAL = 0.04
 RF_DAILY = RF_ANNUAL / 252
