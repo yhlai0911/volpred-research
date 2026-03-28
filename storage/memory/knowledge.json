@@ -15817,5 +15817,22 @@
     "experiment_id": "k652",
     "created_at": "2026-03-29T05:18:59.997870",
     "importance": 4
+  },
+  {
+    "id": "K653",
+    "title": "K653: ★★★ Behavior Simulation — Lazy rebalancing costs 40%, VIX-reactive deviations HELP",
+    "content": "[提出: 行為金融/實務, 執行: Claude] 5 種行為偏差模擬（50/50 12/VIX，2010-2026）。最大代價：Lazy rebalancer -40% 財富（$240K, t=3.60 p<0.001）。Panic seller -11.2%（NS）。驚人：News reactor（VIX spike 時減半）Sharpe 1.97 > perfect 1.56，Terminal +$305K。Overrider（VIX>25 全現金）也更好 Sharpe 1.88。Performance chaser +$92K。結論：(1)最重要行為紀律=按時 rebalance (2)12/VIX 策略可能 under-hedge——額外 VIX-reactive 減碼有正面效果——這解釋為什麼 Piecewise Conservative 比 12/VIX 更好。",
+    "tags": [
+      "behavioral-finance",
+      "simulation",
+      "rebalancing",
+      "investor-behavior",
+      "Piecewise",
+      "practical"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2010-2026",
+    "experiment_id": "k653",
+    "created_at": "2026-03-29T05:40:46.446812",
+    "importance": 4
   }
 ]
