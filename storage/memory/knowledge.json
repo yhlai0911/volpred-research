@@ -15574,5 +15574,22 @@
     "experiment_id": "k638",
     "created_at": "2026-03-29T03:28:33.371593",
     "importance": 2
+  },
+  {
+    "id": "K639",
+    "title": "K639: ★★ Crypto-Equity Vol — BTC→SPY Granger, inverse leverage, NOT crisis hedge",
+    "content": "[提出: 跳躍探索/加密資產, 執行: Claude] BTC-SPY vol linkage 2015-2026。Correlation regime shift：pre-2020 r=0.03 → post-2020 r=0.40（Fisher z=10.28）。BTC vol unidirectional Granger-causes SPY vol（lag 2-10 p<0.05）。BTC inverse leverage gamma=-0.038（漲比跌更 volatile，與股票相反）。BTC persistence=1.000（IGARCH）。Tail dependence 4.25x independence（joint extreme p=0.011）——BTC 不是危機避險。OOS：BTC vol 不改善 SPY vol 預測（null）。90/10 SPY/BTC Sharpe 0.83 > SPY-only 0.70 但 MDD 惡化。BTC vol ratio 從 2017 的 12.5x 降至 2025 的 2.0x（市場成熟化）。",
+    "tags": [
+      "crypto",
+      "BTC",
+      "Granger-causality",
+      "inverse-leverage",
+      "tail-dependence",
+      "diversification"
+    ],
+    "data_source": "yfinance SPY/BTC-USD 2015-2026",
+    "experiment_id": "k639",
+    "created_at": "2026-03-29T03:35:34.946734",
+    "importance": 3
   }
 ]
