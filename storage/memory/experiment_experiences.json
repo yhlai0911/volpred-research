@@ -402,5 +402,18 @@
       "critical_thinking"
     ],
     "created_at": "2026-03-28T10:06:07.102737+00:00"
+  },
+  {
+    "id": "E031",
+    "title": "Transaction costs must be centralized and asset-type-specific — ETF vs stock rates differ",
+    "lesson": "K625 發現台股 ETF 證交稅用了個股稅率（0.3% vs 正確的 0.1%），手續費用了固定金額（$20 vs 正確的 0.1425%×折扣）。44 個文件需要修正。教訓：(1) 交易成本必須集中在 references/transaction-costs.md，不可 hardcode (2) ETF 和個股稅率不同，必須查證 (3) 手續費是按成交金額百分比，不是固定金額 (4) 引用真實數據前要 WebSearch 驗證。",
+    "related_experiments": "K604, K625",
+    "tags": [
+      "transaction_costs",
+      "ETF_vs_stock",
+      "centralize",
+      "verify_data"
+    ],
+    "created_at": "2026-03-28T11:35:50.990233+00:00"
   }
 ]
