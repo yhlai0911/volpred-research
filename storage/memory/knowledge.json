@@ -15342,5 +15342,22 @@
     "experiment_id": "k625",
     "created_at": "2026-03-29T01:32:39.697081",
     "importance": 2
+  },
+  {
+    "id": "K626",
+    "title": "K626: ★★ VIX Direction Predictability — NO economic value, confirms level-based strategy optimal",
+    "content": "[提出: 策略應用探索, 執行: Claude] VIX 方向二元預測（up/down）。RF accuracy=60%（naive 'always down' 56.4%，lift 僅 3.6pp）。VIX direction autocorrelation 幾乎為零（lag-1 = -0.048）。經濟價值測試：direction-informed 12/VIX Sharpe=1.72 < 標準 12/VIX 1.81。即使 direction 可預測，調整曝險反而增加波動和回撤。Perfect foresight upper bound Sharpe=3.64。結論：VIX 近似 martingale，我們的策略正確使用 VIX level 而非 direction——設計原則經驗證。Feature importance: day_of_week(0.15), spy_5d_ret(0.12)。",
+    "tags": [
+      "VIX",
+      "direction-prediction",
+      "strategy-validation",
+      "martingale",
+      "12/VIX",
+      "important-negative"
+    ],
+    "data_source": "yfinance SPY/VIX 2006-2026",
+    "experiment_id": "k626",
+    "created_at": "2026-03-29T01:38:40.800112",
+    "importance": 3
   }
 ]
