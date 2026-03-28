@@ -15359,5 +15359,23 @@
     "experiment_id": "k626",
     "created_at": "2026-03-29T01:38:40.800112",
     "importance": 3
+  },
+  {
+    "id": "K627",
+    "title": "K627: ★ Momentum+VT Hybrid — No overlay improves 12/VIX (irreducible kernel #10)",
+    "content": "[提出: 策略應用探索, 執行: Claude] 測試 SMA/Dual Momentum/MACD overlay 加在 12/VIX 上。OOS 2023-2024：Baseline 12/VIX Sharpe=1.80。SMA filter Sharpe=1.56（降 MDD 0.9% 但 Sharpe -0.25）。Dual Momentum 0.99（大幅退化）。MACD Boost 1.78（幾乎相同）。Combined 1.08。50/50 SPY/GLD 2.07 仍最佳。所有 bootstrap p>0.05 不顯著。注意：OOS 期間 SMA bullish 97% 時間，動量信號幾乎沒機會觸發防禦。需 cross-OOS（含熊市）驗證。結論：12/VIX irreducible kernel 第 10 次確認。動量不能改善 VIX-based 策略。",
+    "tags": [
+      "momentum",
+      "VT-strategy",
+      "12/VIX",
+      "irreducible-kernel",
+      "null-result",
+      "SPY",
+      "GLD"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k627",
+    "created_at": "2026-03-29T01:42:49.686460",
+    "importance": 2
   }
 ]
