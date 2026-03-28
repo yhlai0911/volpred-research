@@ -129,3 +129,20 @@
 - 一般讀者文章：白話解說策略邏輯、適用對象、操作方式、風險提醒
 - 兩篇都要有真實 matplotlib 圖表
 - 發佈為 draft 進入文章池
+
+### 策略面板 Badge 問題（2026-03-28）
+
+**問題**：策略面板的適用標的和交易頻率 badge 是前端 hardcode（`stratMeta` 物件），不是 DB-driven。
+- 新增策略要改前端代碼 → 違反「不需重新部署就能管理策略」原則
+- 50/50 SPY/GLD 被標錯為「月頻」（實際日頻）
+
+**正確做法**：
+1. `strategy_signals` 表加入 `assets` (jsonb) 和 `rebalance_freq` (text) 欄位
+2. 前端從 API 讀取，不 hardcode
+3. 策略上架 SOP 第 7 步加入：填寫 assets + rebalance_freq
+
+**暫時解法**：前端 hardcode `stratMeta`（已修正 50/50 頻率）
+**永久解法**：DB migration 加欄位 + 前端改讀 API
+
+**加入 SOP**：
+- 第 7 步更新為：填寫 description + howto + **assets + rebalance_freq** + articles
