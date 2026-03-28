@@ -1,0 +1,413 @@
+{
+  "experiment_id": "K633",
+  "title": "Taiwan 0050 Strategy Optimization",
+  "timestamp": "2026-03-28T18:28:58.083741+00:00",
+  "data_source": "yfinance",
+  "data_period": {
+    "full": "2009-01-06 to 2026-03-27",
+    "oos": "2015-01-01 to 2026-03-27",
+    "oos_years": 11.2
+  },
+  "transaction_costs": {
+    "tw_etf_round_trip_bp": 18.5,
+    "tw_commission_effective": "0.0427%",
+    "tw_etf_tax": "0.1%",
+    "us_etf_round_trip_bp": 2.0,
+    "reference": ".claude/skills/autonomous-research/references/transaction-costs.md"
+  },
+  "descriptive_stats": {
+    "tw50_ann_vol_oos": 18.3,
+    "spy_ann_vol_oos": 17.44,
+    "vix_mean_oos": 18.35,
+    "amplification_actual": 1.0,
+    "vix_regime_distribution": {
+      "VIX < 15": "33.3%",
+      "15 ≤ VIX < 20": "33.3%",
+      "20 ≤ VIX < 25": "16.7%",
+      "25 ≤ VIX < 30": "8.2%",
+      "VIX ≥ 30": "8.4%"
+    }
+  },
+  "strategy_rankings": [
+    {
+      "rank": 1,
+      "name": "5050_0050GLD_k10",
+      "gross_sharpe": 1.3073,
+      "net_sharpe": 1.2881,
+      "gross_cagr": 9.05,
+      "net_cagr": 8.92,
+      "gross_mdd": -10.39,
+      "net_mdd": -10.56,
+      "net_calmar": 0.8443,
+      "avg_weight": 0.5994,
+      "trades": 135
+    },
+    {
+      "rank": 2,
+      "name": "5050_0050GLD_k12",
+      "gross_sharpe": 1.3046,
+      "net_sharpe": 1.2857,
+      "gross_cagr": 10.78,
+      "net_cagr": 10.62,
+      "gross_mdd": -12.38,
+      "net_mdd": -12.58,
+      "net_calmar": 0.8443,
+      "avg_weight": 0.7106,
+      "trades": 135
+    },
+    {
+      "rank": 3,
+      "name": "5050_0050GLD_k8",
+      "gross_sharpe": 1.3047,
+      "net_sharpe": 1.2856,
+      "gross_cagr": 7.23,
+      "net_cagr": 7.12,
+      "gross_mdd": -8.38,
+      "net_mdd": -8.51,
+      "net_calmar": 0.8365,
+      "avg_weight": 0.4798,
+      "trades": 135
+    },
+    {
+      "rank": 4,
+      "name": "5050_0050GLD_PW12_20",
+      "gross_sharpe": 1.1152,
+      "net_sharpe": 1.0686,
+      "gross_cagr": 6.39,
+      "net_cagr": 6.12,
+      "gross_mdd": -9.14,
+      "net_mdd": -9.58,
+      "net_calmar": 0.6389,
+      "avg_weight": 0.4248,
+      "trades": 135
+    },
+    {
+      "rank": 5,
+      "name": "SimpleVT_k16",
+      "gross_sharpe": 1.0027,
+      "net_sharpe": 0.9863,
+      "gross_cagr": 15.28,
+      "net_cagr": 15.03,
+      "gross_mdd": -23.9,
+      "net_mdd": -24.12,
+      "net_calmar": 0.6233,
+      "avg_weight": 0.8669,
+      "trades": 94
+    },
+    {
+      "rank": 6,
+      "name": "TW_k4.00",
+      "gross_sharpe": 0.9978,
+      "net_sharpe": 0.9755,
+      "gross_cagr": 4.16,
+      "net_cagr": 4.07,
+      "gross_mdd": -6.67,
+      "net_mdd": -6.7,
+      "net_calmar": 0.6073,
+      "avg_weight": 0.2399,
+      "trades": 131
+    },
+    {
+      "rank": 7,
+      "name": "TW_k6.00",
+      "gross_sharpe": 0.9969,
+      "net_sharpe": 0.9742,
+      "gross_cagr": 6.24,
+      "net_cagr": 6.1,
+      "gross_mdd": -9.85,
+      "net_mdd": -9.91,
+      "net_calmar": 0.6155,
+      "avg_weight": 0.3599,
+      "trades": 133
+    },
+    {
+      "rank": 8,
+      "name": "SimpleVT_k14",
+      "gross_sharpe": 0.9935,
+      "net_sharpe": 0.973,
+      "gross_cagr": 13.95,
+      "net_cagr": 13.66,
+      "gross_mdd": -21.2,
+      "net_mdd": -21.4,
+      "net_calmar": 0.6384,
+      "avg_weight": 0.8014,
+      "trades": 109
+    },
+    {
+      "rank": 9,
+      "name": "SimpleVT_k8",
+      "gross_sharpe": 0.9958,
+      "net_sharpe": 0.9726,
+      "gross_cagr": 8.31,
+      "net_cagr": 8.12,
+      "gross_mdd": -12.95,
+      "net_mdd": -13.02,
+      "net_calmar": 0.6236,
+      "avg_weight": 0.4798,
+      "trades": 133
+    },
+    {
+      "rank": 10,
+      "name": "TW_k8.00",
+      "gross_sharpe": 0.9958,
+      "net_sharpe": 0.9726,
+      "gross_cagr": 8.31,
+      "net_cagr": 8.12,
+      "gross_mdd": -12.95,
+      "net_mdd": -13.02,
+      "net_calmar": 0.6236,
+      "avg_weight": 0.4798,
+      "trades": 133
+    },
+    {
+      "rank": 11,
+      "name": "TW_k8.63",
+      "gross_sharpe": 0.9954,
+      "net_sharpe": 0.9721,
+      "gross_cagr": 8.96,
+      "net_cagr": 8.75,
+      "gross_mdd": -13.9,
+      "net_mdd": -13.98,
+      "net_calmar": 0.6262,
+      "avg_weight": 0.5176,
+      "trades": 133
+    },
+    {
+      "rank": 12,
+      "name": "SimpleVT_k10",
+      "gross_sharpe": 0.992,
+      "net_sharpe": 0.9686,
+      "gross_cagr": 10.35,
+      "net_cagr": 10.1,
+      "gross_mdd": -15.95,
+      "net_mdd": -16.03,
+      "net_calmar": 0.6301,
+      "avg_weight": 0.5994,
+      "trades": 133
+    },
+    {
+      "rank": 13,
+      "name": "TW_k10.00",
+      "gross_sharpe": 0.992,
+      "net_sharpe": 0.9686,
+      "gross_cagr": 10.35,
+      "net_cagr": 10.1,
+      "gross_mdd": -15.95,
+      "net_mdd": -16.03,
+      "net_calmar": 0.6301,
+      "avg_weight": 0.5994,
+      "trades": 133
+    },
+    {
+      "rank": 14,
+      "name": "SimpleVT_k12",
+      "gross_sharpe": 0.9798,
+      "net_sharpe": 0.9569,
+      "gross_cagr": 12.19,
+      "net_cagr": 11.91,
+      "gross_mdd": -18.86,
+      "net_mdd": -18.96,
+      "net_calmar": 0.6281,
+      "avg_weight": 0.7106,
+      "trades": 125
+    },
+    {
+      "rank": 15,
+      "name": "TW_k12.00",
+      "gross_sharpe": 0.9798,
+      "net_sharpe": 0.9569,
+      "gross_cagr": 12.19,
+      "net_cagr": 11.91,
+      "gross_mdd": -18.86,
+      "net_mdd": -18.96,
+      "net_calmar": 0.6281,
+      "avg_weight": 0.7106,
+      "trades": 125
+    },
+    {
+      "rank": 16,
+      "name": "BuyHold_0050",
+      "gross_sharpe": 0.9494,
+      "net_sharpe": 0.9494,
+      "gross_cagr": 17.37,
+      "net_cagr": 17.37,
+      "gross_mdd": -33.83,
+      "net_mdd": -33.83,
+      "net_calmar": 0.5136,
+      "avg_weight": 1.0,
+      "trades": 1
+    },
+    {
+      "rank": 17,
+      "name": "Piecewise_PW_15_30",
+      "gross_sharpe": 0.9625,
+      "net_sharpe": 0.9302,
+      "gross_cagr": 13.04,
+      "net_cagr": 12.6,
+      "gross_mdd": -20.79,
+      "net_mdd": -21.15,
+      "net_calmar": 0.5957,
+      "avg_weight": 0.7488,
+      "trades": 102
+    },
+    {
+      "rank": 18,
+      "name": "Piecewise_PW_15_25",
+      "gross_sharpe": 0.9628,
+      "net_sharpe": 0.9237,
+      "gross_cagr": 12.12,
+      "net_cagr": 11.62,
+      "gross_mdd": -21.2,
+      "net_mdd": -21.76,
+      "net_calmar": 0.5342,
+      "avg_weight": 0.672,
+      "trades": 94
+    },
+    {
+      "rank": 19,
+      "name": "Piecewise_PW_10_25",
+      "gross_sharpe": 0.9306,
+      "net_sharpe": 0.8877,
+      "gross_cagr": 8.67,
+      "net_cagr": 8.27,
+      "gross_mdd": -16.0,
+      "net_mdd": -16.48,
+      "net_calmar": 0.5017,
+      "avg_weight": 0.4977,
+      "trades": 123
+    },
+    {
+      "rank": 20,
+      "name": "Piecewise_PW_12_25",
+      "gross_sharpe": 0.9197,
+      "net_sharpe": 0.877,
+      "gross_cagr": 9.82,
+      "net_cagr": 9.37,
+      "gross_mdd": -18.27,
+      "net_mdd": -18.83,
+      "net_calmar": 0.4973,
+      "avg_weight": 0.5673,
+      "trades": 115
+    },
+    {
+      "rank": 21,
+      "name": "Piecewise_PW_10_20",
+      "gross_sharpe": 0.8678,
+      "net_sharpe": 0.813,
+      "gross_cagr": 6.25,
+      "net_cagr": 5.85,
+      "gross_mdd": -13.96,
+      "net_mdd": -14.55,
+      "net_calmar": 0.4022,
+      "avg_weight": 0.349,
+      "trades": 109
+    },
+    {
+      "rank": 22,
+      "name": "Piecewise_PW_12_20",
+      "gross_sharpe": 0.8495,
+      "net_sharpe": 0.7949,
+      "gross_cagr": 7.54,
+      "net_cagr": 7.05,
+      "gross_mdd": -17.22,
+      "net_mdd": -17.93,
+      "net_calmar": 0.3931,
+      "avg_weight": 0.4248,
+      "trades": 101
+    }
+  ],
+  "dca_results": [
+    {
+      "name": "Plain_DCA_0050",
+      "terminal_wealth": 5080757.87,
+      "total_invested": 1350000.0,
+      "gain_pct": 276.35,
+      "mdd": -0.298,
+      "sharpe": 1.5706,
+      "n_months": 135
+    },
+    {
+      "name": "Fear_DCA_0050",
+      "terminal_wealth": 4615190.56,
+      "total_invested": 1270000.0,
+      "gain_pct": 263.4,
+      "mdd": -0.2691,
+      "sharpe": 1.5683,
+      "n_months": 135
+    },
+    {
+      "name": "Fear_DCA_0050_Aggressive",
+      "terminal_wealth": 5126617.6,
+      "total_invested": 1415000.0,
+      "gain_pct": 262.31,
+      "mdd": -0.2676,
+      "sharpe": 1.5745,
+      "n_months": 135
+    },
+    {
+      "name": "InverseVIX_DCA_0050",
+      "terminal_wealth": 3759972.76,
+      "total_invested": 971685.04,
+      "gain_pct": 286.95,
+      "mdd": -0.3142,
+      "sharpe": 1.566,
+      "n_months": 135
+    }
+  ],
+  "bootstrap_vs_buyhold": {
+    "best_strategy": "5050_0050GLD_k10",
+    "mean_excess_bp_per_day": -3.49,
+    "p_value": 0.9851,
+    "ci_95_lo_bp": -6.7,
+    "ci_95_hi_bp": -0.27,
+    "top5_results": [
+      {
+        "name": "5050_0050GLD_k10",
+        "excess_bp": -3.49,
+        "p_value": 0.9828
+      },
+      {
+        "name": "5050_0050GLD_k12",
+        "excess_bp": -2.83,
+        "p_value": 0.9641
+      },
+      {
+        "name": "5050_0050GLD_k8",
+        "excess_bp": -4.19,
+        "p_value": 0.9929
+      },
+      {
+        "name": "5050_0050GLD_PW12_20",
+        "excess_bp": -4.5,
+        "p_value": 0.9937
+      },
+      {
+        "name": "SimpleVT_k16",
+        "excess_bp": -0.92,
+        "p_value": 0.938
+      }
+    ]
+  },
+  "best_for_retail": {
+    "name": "5050_0050GLD_k10",
+    "criteria": "Net Sharpe > 0.5, MDD < -20%",
+    "net_sharpe": 1.2881,
+    "net_mdd": -10.56,
+    "net_cagr": 8.92
+  },
+  "key_findings": [
+    "Best retail strategy: 5050_0050GLD_k10 (Net Sharpe=1.2881, MDD=-10.6%)",
+    "Existing taiwan_8.63vix: rank #11, Net Sharpe=0.9721",
+    "TX cost drag on top strategy: 0.13% CAGR (18.5bp round-trip × monthly rebal)",
+    "Piecewise best (Piecewise_PW_15_30) vs Simple best (SimpleVT_k16): Net Sharpe 0.930 vs 0.986",
+    "Fear DCA vs Plain DCA (0050): gain 263.4% vs 276.4% (+-13.0pp)"
+  ],
+  "notes": [
+    "All Taiwan strategies use VIX_{t-1} (timezone lag: US closes after Taiwan opens)",
+    "ETF tax rate 0.1% (NOT 0.3% stock rate)",
+    "Monthly rebalancing on 1st trading day",
+    "OOS period ~11 years provides robust evaluation for monthly strategies",
+    "0050 prices forward-filled on US holidays",
+    "DCA simulation uses TWD 10,000/month base"
+  ]
+}

@@ -15466,5 +15466,23 @@
     "experiment_id": "k632",
     "created_at": "2026-03-29T02:22:27.601423",
     "importance": 3
+  },
+  {
+    "id": "K633",
+    "title": "K633: ★★★ Taiwan 0050 Strategy Optimization — 50/50 0050+GLD best (Net Sharpe 1.29)",
+    "content": "[提出: 台灣投資人需求, 執行: Claude] 0050.TW 策略系統優化（6 類 × 多參數），OOS 2015-2026 月頻。最佳：50/50 0050+GLD k=10/VIX Net Sharpe=1.288 MDD=-10.6% CAGR=8.92%。現有 taiwan_8.63vix 排 #11（Net Sharpe 0.972）。交易成本（ETF 18.5bp round-trip）影響小（0.09-0.29%/年月頻）。Piecewise 不如 Simple VT（binary exit 在高波動市場有害）。重要發現：OOS amplification=1.00x（非 K530 的 4.6x），0050 年化 vol 18.3% ≈ SPY 17.4%——amplification 可能是期間特定。Fear DCA 對 0050 平手。結論：台灣投資人最佳策略是 50/50 0050+GLD（月頻調倉，k=10/VIX）。",
+    "tags": [
+      "0050.TW",
+      "Taiwan",
+      "strategy-optimization",
+      "50/50",
+      "GLD",
+      "transaction-costs",
+      "practical"
+    ],
+    "data_source": "yfinance 0050.TW/SPY/GLD/VIX 2010-2026",
+    "experiment_id": "k633",
+    "created_at": "2026-03-29T02:29:45.403644",
+    "importance": 4
   }
 ]
