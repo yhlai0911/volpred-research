@@ -15886,5 +15886,22 @@
     "experiment_id": "k656",
     "created_at": "2026-03-29T06:06:31.265910",
     "importance": 5
+  },
+  {
+    "id": "K657",
+    "title": "K657: ★★ Synthetic Tail Hedge — Put-like payoff retains 85.6% CAGR, MDD halved",
+    "content": "[提出: 跳躍探索/tail risk, 執行: Claude] 5 種 synthetic tail hedge（VIX-triggered bond rotation, dynamic safe haven, crash buffer, momentum hedge, synthetic put）。Synthetic Put（linear VIX→GLD/TLT allocation）最佳：CAGR 8.92%（BH SPY 85.6%）, Sharpe 0.815, MDD -27%（vs SPY -55%）。GFC 只虧 -2.7%（vs SPY -37%）。限制：2022 升息 TLT 拖累(-23.5% vs SPY -17.7%)。CVaR5% -1.70%（vs SPY -2.97%）。Dynamic Safe Haven 保留最多 CAGR(97.5%)但 MDD 改善最少。結論：可用 long-only ETF 近似 put payoff，但 bond-equity 正相關環境會失效。",
+    "tags": [
+      "tail-risk",
+      "synthetic-put",
+      "GLD",
+      "TLT",
+      "crisis-protection",
+      "practical"
+    ],
+    "data_source": "yfinance SPY/GLD/TLT/VIX 2006-2026",
+    "experiment_id": "k657",
+    "created_at": "2026-03-29T06:15:18.144983",
+    "importance": 3
   }
 ]
