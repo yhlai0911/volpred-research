@@ -1,0 +1,620 @@
+{
+  "experiment_id": "k656",
+  "title": "K656: The True Value of Volatility Targeting \u2014 A Final Reconciliation",
+  "motivation": "Reconcile K640 (VT beats in 2025), K654 (Piecewise not alpha), K655 (BH 60/40 dominates Sharpe), K641 (VT protects in crisis)",
+  "data_source": "yfinance SPY/GLD/VIX daily",
+  "data_period": "2006-01-04 to 2026-03-26",
+  "n_trading_days": 5088,
+  "n_years": 20.2,
+  "references": [
+    "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF",
+    "Harvey et al. (2018) 'Impact of Volatility Targeting' JIGB",
+    "Fleming, Kirby & Ostdiek (2003) JFE",
+    "N115: CRRA breakeven at gamma~4",
+    "K15: VT insurance premium framework",
+    "K640: Live audit 11/14 beat benchmarks",
+    "K641: VT regime decomposition",
+    "K654: Piecewise not alpha",
+    "K655: BH 60/40 dominates all horizons"
+  ],
+  "full_sample_metrics": {
+    "BH_SPY": {
+      "cagr": 0.10418,
+      "ann_vol": 0.19324,
+      "sharpe": 0.506,
+      "mdd": -0.5519,
+      "sortino": 0.531,
+      "calmar": 0.189
+    },
+    "BH_60/40": {
+      "cagr": 0.11351,
+      "ann_vol": 0.14071,
+      "sharpe": 0.693,
+      "mdd": -0.3506,
+      "sortino": 0.842,
+      "calmar": 0.324
+    },
+    "BH_50/50": {
+      "cagr": 0.11399,
+      "ann_vol": 0.13693,
+      "sharpe": 0.711,
+      "mdd": -0.3249,
+      "sortino": 0.877,
+      "calmar": 0.351
+    },
+    "BH_80/20": {
+      "cagr": 0.11032,
+      "ann_vol": 0.16093,
+      "sharpe": 0.607,
+      "mdd": -0.4386,
+      "sortino": 0.696,
+      "calmar": 0.252
+    },
+    "12/VIX_SPY": {
+      "cagr": 0.17056,
+      "ann_vol": 0.09161,
+      "sharpe": 1.547,
+      "mdd": -0.1302,
+      "sortino": 2.59,
+      "calmar": 1.31
+    },
+    "12/VIX_50/50": {
+      "cagr": 0.12792,
+      "ann_vol": 0.077,
+      "sharpe": 1.342,
+      "mdd": -0.0939,
+      "sortino": 2.044,
+      "calmar": 1.362
+    },
+    "Piecewise": {
+      "cagr": 0.15346,
+      "ann_vol": 0.08024,
+      "sharpe": 1.571,
+      "mdd": -0.0975,
+      "sortino": 1.83,
+      "calmar": 1.574
+    },
+    "GARCH_VT": {
+      "cagr": 0.13487,
+      "ann_vol": 0.14361,
+      "sharpe": 0.814,
+      "mdd": -0.3349,
+      "sortino": 1.122,
+      "calmar": 0.403
+    }
+  },
+  "yearly_vt_value": [
+    {
+      "year": 2006,
+      "avg_vix": 12.8,
+      "bh_6040_sharpe": 1.197,
+      "12vix_spy_value": 0.523,
+      "12vix_5050_value": 0.57,
+      "piecewise_value": 0.34,
+      "garch_value": 0.115
+    },
+    {
+      "year": 2007,
+      "avg_vix": 17.5,
+      "bh_6040_sharpe": 0.949,
+      "12vix_spy_value": 0.219,
+      "12vix_5050_value": 0.859,
+      "piecewise_value": 0.654,
+      "garch_value": -0.557
+    },
+    {
+      "year": 2008,
+      "avg_vix": 32.7,
+      "bh_6040_sharpe": -0.724,
+      "12vix_spy_value": 0.098,
+      "12vix_5050_value": 0.272,
+      "piecewise_value": 1.867,
+      "garch_value": -0.758
+    },
+    {
+      "year": 2009,
+      "avg_vix": 31.5,
+      "bh_6040_sharpe": 1.293,
+      "12vix_spy_value": 0.471,
+      "12vix_5050_value": 0.624,
+      "piecewise_value": -0.389,
+      "garch_value": -0.149
+    },
+    {
+      "year": 2010,
+      "avg_vix": 22.5,
+      "bh_6040_sharpe": 1.328,
+      "12vix_spy_value": 0.43,
+      "12vix_5050_value": 0.8,
+      "piecewise_value": 1.39,
+      "garch_value": -0.024
+    },
+    {
+      "year": 2011,
+      "avg_vix": 24.2,
+      "bh_6040_sharpe": 0.328,
+      "12vix_spy_value": 0.526,
+      "12vix_5050_value": 0.792,
+      "piecewise_value": 1.786,
+      "garch_value": -0.178
+    },
+    {
+      "year": 2012,
+      "avg_vix": 17.8,
+      "bh_6040_sharpe": 0.963,
+      "12vix_spy_value": 0.629,
+      "12vix_5050_value": 0.159,
+      "piecewise_value": 0.097,
+      "garch_value": -0.033
+    },
+    {
+      "year": 2013,
+      "avg_vix": 14.2,
+      "bh_6040_sharpe": 0.239,
+      "12vix_spy_value": 2.876,
+      "12vix_5050_value": -0.155,
+      "piecewise_value": -0.031,
+      "garch_value": 1.923
+    },
+    {
+      "year": 2014,
+      "avg_vix": 14.2,
+      "bh_6040_sharpe": 0.668,
+      "12vix_spy_value": 1.108,
+      "12vix_5050_value": 0.162,
+      "piecewise_value": 0.283,
+      "garch_value": 0.004
+    },
+    {
+      "year": 2015,
+      "avg_vix": 16.7,
+      "bh_6040_sharpe": -0.439,
+      "12vix_spy_value": 1.169,
+      "12vix_5050_value": 0.159,
+      "piecewise_value": 0.116,
+      "garch_value": 0.26
+    },
+    {
+      "year": 2016,
+      "avg_vix": 15.8,
+      "bh_6040_sharpe": 1.085,
+      "12vix_spy_value": 0.615,
+      "12vix_5050_value": -0.149,
+      "piecewise_value": -0.552,
+      "garch_value": -0.319
+    },
+    {
+      "year": 2017,
+      "avg_vix": 11.1,
+      "bh_6040_sharpe": 3.056,
+      "12vix_spy_value": -0.034,
+      "12vix_5050_value": -0.293,
+      "piecewise_value": -0.34,
+      "garch_value": -0.391
+    },
+    {
+      "year": 2018,
+      "avg_vix": 16.6,
+      "bh_6040_sharpe": -0.42,
+      "12vix_spy_value": 1.308,
+      "12vix_5050_value": 0.745,
+      "piecewise_value": 1.874,
+      "garch_value": 0.477
+    },
+    {
+      "year": 2019,
+      "avg_vix": 15.4,
+      "bh_6040_sharpe": 2.807,
+      "12vix_spy_value": 0.258,
+      "12vix_5050_value": 0.26,
+      "piecewise_value": 0.312,
+      "garch_value": -0.938
+    },
+    {
+      "year": 2020,
+      "avg_vix": 29.3,
+      "bh_6040_sharpe": 0.929,
+      "12vix_spy_value": 0.961,
+      "12vix_5050_value": 1.501,
+      "piecewise_value": 1.864,
+      "garch_value": 0.478
+    },
+    {
+      "year": 2021,
+      "avg_vix": 19.7,
+      "bh_6040_sharpe": 1.204,
+      "12vix_spy_value": 1.732,
+      "12vix_5050_value": 0.472,
+      "piecewise_value": 1.859,
+      "garch_value": 0.496
+    },
+    {
+      "year": 2022,
+      "avg_vix": 25.6,
+      "bh_6040_sharpe": -0.723,
+      "12vix_spy_value": 0.367,
+      "12vix_5050_value": 0.521,
+      "piecewise_value": 1.581,
+      "garch_value": -0.379
+    },
+    {
+      "year": 2023,
+      "avg_vix": 16.9,
+      "bh_6040_sharpe": 1.867,
+      "12vix_spy_value": 0.448,
+      "12vix_5050_value": 0.066,
+      "piecewise_value": -0.053,
+      "garch_value": -0.356
+    },
+    {
+      "year": 2024,
+      "avg_vix": 15.6,
+      "bh_6040_sharpe": 2.008,
+      "12vix_spy_value": 0.622,
+      "12vix_5050_value": 0.631,
+      "piecewise_value": 0.837,
+      "garch_value": -0.38
+    },
+    {
+      "year": 2025,
+      "avg_vix": 19.0,
+      "bh_6040_sharpe": 2.073,
+      "12vix_spy_value": -0.185,
+      "12vix_5050_value": 1.027,
+      "piecewise_value": 1.234,
+      "garch_value": -1.018
+    },
+    {
+      "year": 2026,
+      "avg_vix": 20.0,
+      "bh_6040_sharpe": -0.493,
+      "12vix_spy_value": -0.375,
+      "12vix_5050_value": 1.243,
+      "piecewise_value": 3.513,
+      "garch_value": -1.201
+    }
+  ],
+  "vt_win_rate_vs_bh6040": {
+    "12/VIX_SPY": 0.857,
+    "12/VIX_50/50": 0.857,
+    "Piecewise": 0.762,
+    "GARCH_VT": 0.333
+  },
+  "regime_analysis": {
+    "Calm": {
+      "pct_time": 34.5,
+      "n_days": 1756,
+      "bh_6040_ann_ret": 0.287,
+      "12vix_spy_ann_ret": 0.3819,
+      "piecewise_ann_ret": 0.2566
+    },
+    "Normal": {
+      "pct_time": 30.9,
+      "n_days": 1571,
+      "bh_6040_ann_ret": 0.1816,
+      "12vix_spy_ann_ret": 0.1896,
+      "piecewise_ann_ret": 0.1638
+    },
+    "Elevated": {
+      "pct_time": 25.8,
+      "n_days": 1314,
+      "bh_6040_ann_ret": 0.0008,
+      "12vix_spy_ann_ret": -0.0482,
+      "piecewise_ann_ret": 0.02
+    },
+    "Crisis": {
+      "pct_time": 8.8,
+      "n_days": 447,
+      "bh_6040_ann_ret": -0.4313,
+      "12vix_spy_ann_ret": -0.1843,
+      "piecewise_ann_ret": 0.02
+    }
+  },
+  "insurance_premium": {
+    "12/VIX_SPY": {
+      "annual_cagr_sacrifice": -0.057,
+      "mdd_improvement": -0.2203,
+      "cost_per_pct_mdd": -25.9
+    },
+    "12/VIX_50/50": {
+      "annual_cagr_sacrifice": -0.0144,
+      "mdd_improvement": -0.2566,
+      "cost_per_pct_mdd": -5.6
+    },
+    "Piecewise": {
+      "annual_cagr_sacrifice": -0.04,
+      "mdd_improvement": -0.2531,
+      "cost_per_pct_mdd": -15.8
+    },
+    "GARCH_VT": {
+      "annual_cagr_sacrifice": -0.0214,
+      "mdd_improvement": -0.0156,
+      "cost_per_pct_mdd": -136.7
+    }
+  },
+  "crra_certainty_equivalents": {
+    "1": {
+      "BH_SPY": 0.10418,
+      "BH_60/40": 0.11351,
+      "BH_50/50": 0.11399,
+      "12/VIX_SPY": 0.17056,
+      "12/VIX_50/50": 0.12792,
+      "Piecewise": 0.15346,
+      "GARCH_VT": 0.13487
+    },
+    "2": {
+      "BH_SPY": 0.08213,
+      "BH_60/40": 0.09963,
+      "BH_50/50": 0.10059,
+      "12/VIX_SPY": 0.15843,
+      "12/VIX_50/50": 0.11902,
+      "Piecewise": 0.1429,
+      "GARCH_VT": 0.11748
+    },
+    "3": {
+      "BH_SPY": 0.06097,
+      "BH_60/40": 0.08984,
+      "BH_50/50": 0.09165,
+      "12/VIX_SPY": 0.15318,
+      "12/VIX_50/50": 0.11535,
+      "Piecewise": 0.13877,
+      "GARCH_VT": 0.10487
+    },
+    "4": {
+      "BH_SPY": 0.03629,
+      "BH_60/40": 0.07956,
+      "BH_50/50": 0.08262,
+      "12/VIX_SPY": 0.14772,
+      "12/VIX_50/50": 0.11172,
+      "Piecewise": 0.13477,
+      "GARCH_VT": 0.09163
+    },
+    "5": {
+      "BH_SPY": 0.00845,
+      "BH_60/40": 0.06888,
+      "BH_50/50": 0.07355,
+      "12/VIX_SPY": 0.14209,
+      "12/VIX_50/50": 0.10814,
+      "Piecewise": 0.13089,
+      "GARCH_VT": 0.07794
+    },
+    "7": {
+      "BH_SPY": -0.05215,
+      "BH_60/40": 0.04669,
+      "BH_50/50": 0.0556,
+      "12/VIX_SPY": 0.13037,
+      "12/VIX_50/50": 0.10114,
+      "Piecewise": 0.12352,
+      "GARCH_VT": 0.05003
+    },
+    "10": {
+      "BH_SPY": -0.13383,
+      "BH_60/40": 0.01326,
+      "BH_50/50": 0.03012,
+      "12/VIX_SPY": 0.11225,
+      "12/VIX_50/50": 0.09125,
+      "Piecewise": 0.11343,
+      "GARCH_VT": 0.01018
+    },
+    "15": {
+      "BH_SPY": -0.21655,
+      "BH_60/40": -0.03532,
+      "BH_50/50": -0.0059,
+      "12/VIX_SPY": 0.08341,
+      "12/VIX_50/50": 0.07675,
+      "Piecewise": 0.09902,
+      "GARCH_VT": -0.04218
+    },
+    "20": {
+      "BH_SPY": -0.25844,
+      "BH_60/40": -0.07077,
+      "BH_50/50": -0.03326,
+      "12/VIX_SPY": 0.05939,
+      "12/VIX_50/50": 0.06486,
+      "Piecewise": 0.08718,
+      "GARCH_VT": -0.07694
+    }
+  },
+  "crra_winners": {
+    "1": {
+      "winner": "12/VIX_SPY",
+      "is_vt": true,
+      "ce": 0.17055657744521735
+    },
+    "2": {
+      "winner": "12/VIX_SPY",
+      "is_vt": true,
+      "ce": 0.15843246102436948
+    },
+    "3": {
+      "winner": "12/VIX_SPY",
+      "is_vt": true,
+      "ce": 0.15317934400575361
+    },
+    "4": {
+      "winner": "12/VIX_SPY",
+      "is_vt": true,
+      "ce": 0.14772438087926942
+    },
+    "5": {
+      "winner": "12/VIX_SPY",
+      "is_vt": true,
+      "ce": 0.14208612779727336
+    },
+    "7": {
+      "winner": "12/VIX_SPY",
+      "is_vt": true,
+      "ce": 0.13036892229895636
+    },
+    "10": {
+      "winner": "Piecewise",
+      "is_vt": true,
+      "ce": 0.11343243167096562
+    },
+    "15": {
+      "winner": "Piecewise",
+      "is_vt": true,
+      "ce": 0.09902295069057576
+    },
+    "20": {
+      "winner": "Piecewise",
+      "is_vt": true,
+      "ce": 0.08718395224282238
+    }
+  },
+  "net_value_decomposition": {
+    "12/VIX_SPY": {
+      "crisis_benefit_annual": 0.1355,
+      "bull_cost_annual": 0.0252,
+      "p_crisis": 0.173,
+      "expected_value_annual": 0.0443
+    },
+    "12/VIX_50/50": {
+      "crisis_benefit_annual": 0.2318,
+      "bull_cost_annual": -0.0412,
+      "p_crisis": 0.173,
+      "expected_value_annual": 0.0059
+    },
+    "Piecewise": {
+      "crisis_benefit_annual": 0.298,
+      "bull_cost_annual": -0.0276,
+      "p_crisis": 0.173,
+      "expected_value_annual": 0.0286
+    },
+    "GARCH_VT": {
+      "crisis_benefit_annual": -0.1542,
+      "bull_cost_annual": 0.0556,
+      "p_crisis": 0.173,
+      "expected_value_annual": 0.0194
+    }
+  },
+  "crisis_returns": [
+    {
+      "crisis": "GFC (2008-09 to 2009-03)",
+      "n_days": 146,
+      "BH_SPY_return": -0.36946427956876393,
+      "BH_SPY_mdd": -0.4604239590826862,
+      "BH_60/40_return": -0.18573947478834196,
+      "BH_60/40_mdd": -0.29269875220375874,
+      "BH_50/50_return": -0.13766802409064338,
+      "BH_50/50_mdd": -0.2720653713377834,
+      "BH_80/20_return": -0.2796745245351733,
+      "BH_80/20_mdd": -0.36066428910696524,
+      "12/VIX_SPY_return": -0.05167596474271752,
+      "12/VIX_SPY_mdd": -0.0944004639328816,
+      "12/VIX_50/50_return": -0.005708551060265243,
+      "12/VIX_50/50_mdd": -0.050517148234727416,
+      "Piecewise_return": 0.011654229267319627,
+      "Piecewise_mdd": 0.0,
+      "GARCH_VT_return": -0.14897611936101895,
+      "GARCH_VT_mdd": -0.19174904057808184
+    },
+    {
+      "crisis": "EU Crisis (2011-07 to 2011-10)",
+      "n_days": 85,
+      "BH_SPY_return": -0.04410601558351546,
+      "BH_SPY_mdd": -0.1836675075554095,
+      "BH_60/40_return": 0.037136095781370226,
+      "BH_60/40_mdd": -0.0936590560961802,
+      "BH_50/50_return": 0.0565212623620972,
+      "BH_50/50_mdd": -0.09431835484222251,
+      "BH_80/20_return": -0.002814714913214833,
+      "BH_80/20_mdd": -0.13622808048393154,
+      "12/VIX_SPY_return": 0.01343732842552492,
+      "12/VIX_SPY_mdd": -0.06801811276841807,
+      "12/VIX_50/50_return": 0.050758593883660996,
+      "12/VIX_50/50_mdd": -0.026458901745535668,
+      "Piecewise_return": 0.053783442309174534,
+      "Piecewise_mdd": -0.004580946555694743,
+      "GARCH_VT_return": -0.05526701395822309,
+      "GARCH_VT_mdd": -0.13685528563942106
+    },
+    {
+      "crisis": "COVID (2020-02 to 2020-03)",
+      "n_days": 24,
+      "BH_SPY_return": -0.33400356440619805,
+      "BH_SPY_mdd": -0.3371728938248104,
+      "BH_60/40_return": -0.21969028322138873,
+      "BH_60/40_mdd": -0.2255331143618483,
+      "BH_50/50_return": -0.1895670623254876,
+      "BH_50/50_mdd": -0.2031511386090813,
+      "BH_80/20_return": -0.278110143816369,
+      "BH_80/20_mdd": -0.2816955392258468,
+      "12/VIX_SPY_return": -0.08166220347115816,
+      "12/VIX_SPY_mdd": -0.0853239151536227,
+      "12/VIX_50/50_return": -0.03458334588431233,
+      "12/VIX_50/50_mdd": -0.0422741838424624,
+      "Piecewise_return": 0.00935105636978939,
+      "Piecewise_mdd": -1.1994058608189029e-05,
+      "GARCH_VT_return": -0.1413128416343854,
+      "GARCH_VT_mdd": -0.14586865996684162
+    },
+    {
+      "crisis": "Rate Hike (2022-01 to 2022-10)",
+      "n_days": 209,
+      "BH_SPY_return": -0.17744315886909667,
+      "BH_SPY_mdd": -0.24496397913199175,
+      "BH_60/40_return": -0.1453738311140459,
+      "BH_60/40_mdd": -0.1869468699239295,
+      "BH_50/50_return": -0.13848734668311524,
+      "BH_50/50_mdd": -0.18031479760769076,
+      "BH_80/20_return": -0.1605303423970219,
+      "BH_80/20_mdd": -0.21183239310521196,
+      "12/VIX_SPY_return": -0.028069850815394926,
+      "12/VIX_SPY_mdd": -0.07823764713724357,
+      "12/VIX_50/50_return": -0.02888225419691326,
+      "12/VIX_50/50_mdd": -0.057871796414538657,
+      "Piecewise_return": 0.03654882986338914,
+      "Piecewise_mdd": -0.01762351373143134,
+      "GARCH_VT_return": -0.13846984921693517,
+      "GARCH_VT_mdd": -0.1786109742343971
+    },
+    {
+      "crisis": "Tariff (2025-02 to 2025-04)",
+      "n_days": 61,
+      "BH_SPY_return": -0.07578975657431242,
+      "BH_SPY_mdd": -0.1875523871783359,
+      "BH_60/40_return": 0.021134911642093357,
+      "BH_60/40_mdd": -0.11032806477840751,
+      "BH_50/50_return": 0.046093224353050966,
+      "BH_50/50_mdd": -0.09015831784052852,
+      "BH_80/20_return": -0.027923253036855167,
+      "BH_80/20_mdd": -0.14962359164473038,
+      "12/VIX_SPY_return": -0.010487343100510915,
+      "12/VIX_SPY_mdd": -0.07301185728241244,
+      "12/VIX_50/50_return": 0.03957353737071356,
+      "12/VIX_50/50_mdd": -0.02733708465710294,
+      "Piecewise_return": 0.03253718062200783,
+      "Piecewise_mdd": -0.019370321349038155,
+      "GARCH_VT_return": -0.09135338623493283,
+      "GARCH_VT_mdd": -0.1441653594936234
+    }
+  ],
+  "conclusions": {
+    "main": "VIX-based VT is BOTH alpha AND insurance. It improves CAGR, Sharpe, AND MDD simultaneously. GARCH VT (vol-scaling without VIX) is inferior.",
+    "reconciliation": {
+      "k640_explained": "VT beats in 2025 AND across full 20yr sample \u2014 not just crisis-driven",
+      "k654_refined": "Piecewise is extreme risk tolerance choice but still beats BH 60/40 on CAGR AND Sharpe",
+      "k655_contradicted": "Full-sample 20yr: 12/VIX strategies dominate BH 60/40 on ALL metrics (CAGR, Sharpe, MDD). K655 finding may reflect specific rolling-window or implementation differences",
+      "k641_confirmed": "VT provides massive crisis protection (5-7x MDD reduction) \u2014 this is the dominant driver"
+    },
+    "key_insight": "VIX-based position sizing exploits mean-reversion in volatility: reduce exposure at high VIX (high future vol), increase at low VIX (low future vol). This is not just insurance \u2014 it is a profitable timing signal.",
+    "who_should_use_vt": {
+      "everyone": "VIX-based VT wins at ALL gamma levels (gamma 1 to 20)",
+      "risk_tolerant": "gamma < 4: 12/VIX on SPY for maximum CAGR",
+      "risk_averse": "gamma >= 10: Piecewise for near-zero crisis loss",
+      "avoid": "GARCH VT (rolling-vol scaling) \u2014 loses to BH in crisis"
+    },
+    "best_vt_strategy": "12/VIX on SPY \u2014 highest CAGR (17.1%), highest Sharpe (1.55), MDD only -13%",
+    "vt_value_positive": "Expected value of VT is positive (+0.6% to +4.4%/year) across all VIX-based strategies"
+  },
+  "limitations": [
+    "VIX as sole regime indicator (could use realized vol or other measures)",
+    "US-centric analysis (SPY/GLD), may differ for international markets",
+    "12/VIX target is fixed \u2014 optimal target may be regime-dependent",
+    "CRRA utility assumes constant risk aversion (real investors may be loss-averse)",
+    "Transaction costs simplified (5bps one-way), does not model market impact",
+    "Survivorship bias: only successful VT implementations analyzed"
+  ],
+  "created_at": "2026-03-28T22:05:30.555143+00:00"
+}
