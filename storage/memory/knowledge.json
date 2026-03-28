@@ -15921,5 +15921,22 @@
     "experiment_id": "k658",
     "created_at": "2026-03-29T06:21:26.350083",
     "importance": 4
+  },
+  {
+    "id": "K659",
+    "title": "K659: ★★ Vol Clustering Duration — Median high-vol only 2 days, monthly rebalance misses 89%",
+    "content": "[提出: K637/K658 延伸, 執行: Claude] VIX 1993-2026 vol regime 持續時間分析（8366 天）。High vol(VIX≥20) median 只有 2 天（mean 13.9，被 GFC 331 天拉高）。88.6% high-vol episodes ≤21 天→月頻 rebalance 幾乎全部錯過。VIX 永遠漸進下降：High→Normal→Low（不跳級）。Entry VIX 弱預測 duration(rho=0.33 p<0.001)。Longest low: 205d(1994-95)，longest high: 331d(2008-09 GFC)。2010s 最短 mean high duration(7d)，2000s 最長(26d)。結論：daily/weekly VT 是必要的，staged re-entry 比 binary switch 更合理。",
+    "tags": [
+      "vol-clustering",
+      "duration",
+      "regime",
+      "transition-matrix",
+      "daily-vs-monthly",
+      "VIX"
+    ],
+    "data_source": "yfinance VIX 1993-2026",
+    "experiment_id": "k659",
+    "created_at": "2026-03-29T06:25:45.949552",
+    "importance": 3
   }
 ]
