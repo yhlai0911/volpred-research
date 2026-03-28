@@ -10,10 +10,13 @@ Usage:
   uv run python scripts/list_new_strategy.py \
     --key vix_cond_leverage \
     --name "VIX 條件槓桿（月頻）" \
-    --howto "50/50 SPY/GLD, 12/VIX sizing, VIX<15 → 1.5x" \
+    --howto "【交易標的】SPY/GLD ..." \
     --description "VIX 條件槓桿策略完整說明..." \
     --assets '{"SPY": 50, "GLD": 50}' \
-    --order 9
+    --order 9 \
+    --freq monthly \
+    --type 動態配置 \
+    --type-color "#3B82F6"
 
   # Verify-only mode (check if strategy is properly listed)
   uv run python scripts/list_new_strategy.py \
@@ -24,9 +27,10 @@ Usage:
   uv run python scripts/list_new_strategy.py \
     --key vix_cond_leverage \
     --name "VIX 條件槓桿（月頻）" \
-    --howto "..." --description "..." \
+    --howto "【交易標的】..." --description "..." \
     --assets '{"SPY": 50, "GLD": 50}' \
     --order 9 \
+    --freq monthly --type 動態配置 --type-color "#3B82F6" \
     --skip-backfill
 
   # List all strategies with their status
@@ -176,7 +180,9 @@ class StrategyLister:
     def __init__(self, key: str, name: str = "", howto: str = "",
                  description: str = "", assets_json: str = "{}",
                  order: int = 99, color: str = "#6B7280",
-                 articles_json: str = "[]"):
+                 articles_json: str = "[]",
+                 rebalance_freq: str = "", strategy_type: str = "",
+                 strategy_type_color: str = ""):
         self.key = key
         self.name = name
         self.howto = howto
@@ -185,6 +191,9 @@ class StrategyLister:
         self.order = order
         self.color = color
         self.articles = json.loads(articles_json) if isinstance(articles_json, str) else articles_json
+        self.rebalance_freq = rebalance_freq
+        self.strategy_type = strategy_type
+        self.strategy_type_color = strategy_type_color
         self.results: dict[str, str] = {}  # step -> status
 
     # -- Step A: Check STRATEGY_REGISTRY in daily_update.py --
@@ -232,6 +241,15 @@ class StrategyLister:
                 "articles": self.articles,
                 "updated_at": datetime.now(timezone.utc).isoformat(),
             }
+            # Badge fields (migration 020) — only include if provided
+            if self.assets:
+                row["assets"] = self.assets
+            if self.rebalance_freq:
+                row["rebalance_freq"] = self.rebalance_freq
+            if self.strategy_type:
+                row["strategy_type"] = self.strategy_type
+            if self.strategy_type_color:
+                row["strategy_type_color"] = self.strategy_type_color
             if existing:
                 # PATCH existing
                 ok = _sb_patch("strategy_signals", {"strategy_key": self.key}, row)
@@ -537,6 +555,105 @@ class StrategyLister:
             self.results["G_paper_trades"] = f"ERROR: {e}"
             return False
 
+    # -- Step 8: Verify strategy has linked articles --
+    def step_8_check_articles(self) -> bool:
+        """Step 8: Check that the strategy has at least one article linked.
+
+        Checks both the local articles list passed via --articles and
+        the strategy_signals.articles column in Supabase.
+        """
+        print("\n--- Step 8: Check linked articles ---")
+        passed = False
+
+        # Check in-memory articles (from --articles arg)
+        if self.articles:
+            print(f"  OK: {len(self.articles)} article(s) provided via --articles")
+            self.results["8_articles"] = f"OK ({len(self.articles)} articles)"
+            passed = True
+        else:
+            # Fall back to querying Supabase
+            try:
+                rows = _sb_select("strategy_signals",
+                                  select="strategy_key,articles",
+                                  strategy_key=self.key)
+                if rows:
+                    sb_articles = rows[0].get("articles") or []
+                    if sb_articles:
+                        print(f"  OK: {len(sb_articles)} article(s) in Supabase strategy_signals.articles")
+                        self.results["8_articles"] = f"OK ({len(sb_articles)} articles in Supabase)"
+                        passed = True
+                    else:
+                        print(f"  MISSING: strategy_signals.articles is empty")
+                        print(f"  ACTION: Add at least one feed article about this strategy,")
+                        print(f"          then pass --articles '[\"article_id\"]' when listing.")
+                        self.results["8_articles"] = "MISSING (articles empty)"
+                else:
+                    print(f"  SKIP: strategy not yet in Supabase (run Step B first)")
+                    self.results["8_articles"] = "SKIP (not in Supabase yet)"
+                    passed = True  # non-fatal until after Step B
+            except Exception as e:
+                print(f"  ERROR: {e}")
+                self.results["8_articles"] = f"ERROR: {e}"
+
+        return passed
+
+    # -- Step 9: Verify howto quality --
+    def step_9_check_howto(self) -> bool:
+        """Step 9: Check howto meets the quality standard.
+
+        Standard: starts with 【 and contains 交易標的 OR 操作.
+        Format: 【交易標的】... 【查詢工具】... 【操作】... 【範例】...
+        """
+        print("\n--- Step 9: Check howto quality ---")
+        howto = self.howto
+
+        # If no howto locally, try to fetch from Supabase
+        if not howto:
+            try:
+                rows = _sb_select("strategy_signals",
+                                  select="strategy_key,howto",
+                                  strategy_key=self.key)
+                if rows:
+                    howto = rows[0].get("howto") or ""
+            except Exception:
+                pass
+
+        if not howto:
+            print(f"  MISSING: howto is empty")
+            print(f"  ACTION: Provide --howto with format: 【交易標的】...【查詢工具】...【操作】...【範例】...")
+            self.results["9_howto"] = "MISSING"
+            return False
+
+        starts_with_bracket = howto.strip().startswith("【")
+        has_target = "交易標的" in howto
+        has_operation = "操作" in howto
+        has_tool = "查詢工具" in howto
+        has_example = "範例" in howto
+
+        issues = []
+        if not starts_with_bracket:
+            issues.append("must start with 【")
+        if not has_target:
+            issues.append("missing 交易標的")
+        if not has_operation:
+            issues.append("missing 操作")
+
+        if not issues:
+            sections = sum([has_target, has_tool, has_operation, has_example])
+            print(f"  OK: howto quality check passed ({sections}/4 sections present)")
+            if not has_tool:
+                print(f"  HINT: consider adding 【查詢工具】section")
+            if not has_example:
+                print(f"  HINT: consider adding 【範例】section")
+            self.results["9_howto"] = f"OK ({sections}/4 sections)"
+            return True
+        else:
+            print(f"  FAIL: howto quality issues: {'; '.join(issues)}")
+            print(f"  Current howto: {howto[:120]}{'...' if len(howto) > 120 else ''}")
+            print(f"  Expected format: 【交易標的】...【查詢工具】...【操作】...【範例】...")
+            self.results["9_howto"] = f"FAIL ({', '.join(issues)})"
+            return False
+
     # -- Step H: Verification --
     def step_h_verify(self) -> dict:
         """Step H: Verify all Supabase tables have the strategy."""
@@ -635,6 +752,96 @@ class StrategyLister:
         else:
             checks["strategy_metrics_json"] = {"status": "FILE NOT FOUND"}
 
+        # 7. Badge fields (migration 020)
+        try:
+            rows = _sb_select(
+                "strategy_signals",
+                select="strategy_key,assets,rebalance_freq,strategy_type,strategy_type_color",
+                strategy_key=self.key,
+            )
+            if rows:
+                r = rows[0]
+                badge_issues = []
+                if not r.get("assets"):
+                    badge_issues.append("assets empty")
+                if not r.get("rebalance_freq"):
+                    badge_issues.append("rebalance_freq empty")
+                if not r.get("strategy_type"):
+                    badge_issues.append("strategy_type empty")
+                if not r.get("strategy_type_color"):
+                    badge_issues.append("strategy_type_color empty")
+                if badge_issues:
+                    checks["badge_fields"] = {
+                        "status": "INCOMPLETE",
+                        "missing": ", ".join(badge_issues),
+                    }
+                else:
+                    checks["badge_fields"] = {
+                        "status": "OK",
+                        "type": r.get("strategy_type"),
+                        "freq": r.get("rebalance_freq"),
+                    }
+            else:
+                checks["badge_fields"] = {"status": "SKIP (not in Supabase yet)"}
+        except Exception as e:
+            checks["badge_fields"] = {"status": f"ERROR: {e}"}
+
+        # 8. Articles linked
+        try:
+            rows = _sb_select("strategy_signals",
+                              select="strategy_key,articles",
+                              strategy_key=self.key)
+            if rows:
+                sb_articles = rows[0].get("articles") or []
+                local_articles = self.articles or []
+                articles = sb_articles or local_articles
+                if articles:
+                    checks["articles_linked"] = {
+                        "status": "OK",
+                        "count": len(articles),
+                    }
+                else:
+                    checks["articles_linked"] = {
+                        "status": "MISSING",
+                        "note": "Add articles via --articles or feed-publisher",
+                    }
+            else:
+                checks["articles_linked"] = {"status": "SKIP (not in Supabase yet)"}
+        except Exception as e:
+            checks["articles_linked"] = {"status": f"ERROR: {e}"}
+
+        # 9. Howto quality
+        howto_to_check = self.howto
+        if not howto_to_check:
+            try:
+                rows = _sb_select("strategy_signals",
+                                  select="strategy_key,howto",
+                                  strategy_key=self.key)
+                if rows:
+                    howto_to_check = rows[0].get("howto") or ""
+            except Exception:
+                pass
+        if howto_to_check:
+            starts_bracket = howto_to_check.strip().startswith("【")
+            has_target = "交易標的" in howto_to_check
+            has_op = "操作" in howto_to_check
+            issues = []
+            if not starts_bracket:
+                issues.append("must start with 【")
+            if not has_target:
+                issues.append("missing 交易標的")
+            if not has_op:
+                issues.append("missing 操作")
+            if issues:
+                checks["howto_quality"] = {
+                    "status": "FAIL",
+                    "issues": ", ".join(issues),
+                }
+            else:
+                checks["howto_quality"] = {"status": "OK"}
+        else:
+            checks["howto_quality"] = {"status": "MISSING (no howto)"}
+
         # Print summary
         print()
         all_ok = True
@@ -690,8 +897,11 @@ def list_all_strategies():
     # Read Supabase
     try:
         _init_supabase()
-        sb_signals = _sb_select("strategy_signals",
-                                select="strategy_key,strategy_name,display_order,is_active")
+        sb_signals = _sb_select(
+            "strategy_signals",
+            select="strategy_key,strategy_name,display_order,is_active,"
+                   "strategy_type,rebalance_freq,articles",
+        )
         sb_signals_map = {r["strategy_key"]: r for r in sb_signals if r.get("strategy_key")}
     except Exception as e:
         print(f"  Supabase connection error: {e}")
@@ -706,8 +916,8 @@ def list_all_strategies():
     # All known keys
     all_keys = sorted(set(list(registry.keys()) + list(pt.keys()) + list(met.keys()) + list(sb_signals_map.keys())))
 
-    print(f"\n{'Key':30s} {'Registry':10s} {'PT.json':10s} {'Metrics':10s} {'SB Signal':10s} {'SB Cache':10s}")
-    print("-" * 80)
+    print(f"\n{'Key':30s} {'Registry':10s} {'PT':6s} {'Metrics':12s} {'SB':4s} {'Cache':6s} {'Type':14s} {'Freq':10s} {'Art':4s}")
+    print("-" * 100)
 
     for key in all_keys:
         reg_status = "OK" if key in registry else "--"
@@ -722,14 +932,27 @@ def list_all_strategies():
         sb_status = "OK" if key in sb_signals_map else "--"
         cache_status = "OK" if key in sb_cache_map else "--"
 
-        # Overall health
+        # Badge fields
+        sig = sb_signals_map.get(key, {})
+        strat_type = sig.get("strategy_type") or "--"
+        freq = sig.get("rebalance_freq") or "--"
+        articles = sig.get("articles") or []
+        art_count = str(len(articles)) if articles else "--"
+
+        # Truncate type label for display
+        if len(strat_type) > 12:
+            strat_type = strat_type[:11] + "…"
+
+        # Overall health (core checks only)
         all_ok = (key in registry and pt_count > 0 and key in met
                   and key in sb_signals_map and key in sb_cache_map)
         icon = "[OK]" if all_ok else "[!!]"
 
-        print(f"  {icon} {key:27s} {reg_status:10s} {pt_status:10s} {met_status:10s} {sb_status:10s} {cache_status:10s}")
+        print(f"  {icon} {key:27s} {reg_status:10s} {pt_status:6s} {met_status:12s} "
+              f"{sb_status:4s} {cache_status:6s} {strat_type:14s} {freq:10s} {art_count:4s}")
 
     print(f"\nTotal: {len(all_keys)} strategies")
+    print("\nBadge legend: Type = strategy_type, Freq = rebalance_freq, Art = #articles linked")
 
 
 def run_full_listing(args):
@@ -743,12 +966,19 @@ def run_full_listing(args):
         order=args.order,
         color=args.color or "#6B7280",
         articles_json=args.articles or "[]",
+        rebalance_freq=args.freq or "",
+        strategy_type=args.type or "",
+        strategy_type_color=args.type_color or "",
     )
 
     print("=" * 60)
     print(f"LISTING STRATEGY: {args.key}")
     print(f"  Name: {args.name}")
     print(f"  Order: {args.order}")
+    if args.freq:
+        print(f"  Freq: {args.freq}")
+    if args.type:
+        print(f"  Type: {args.type}  Color: {args.type_color or '(default)'}")
     print("=" * 60)
 
     # Step A: Check STRATEGY_REGISTRY
@@ -788,7 +1018,13 @@ def run_full_listing(args):
         print(f"\n--- Step G: SKIP (no backfill or --skip-sync) ---")
         lister.results["G_paper_trades"] = "SKIP"
 
-    # Step H: Verification
+    # Step 8: Check linked articles (SOP requirement)
+    lister.step_8_check_articles()
+
+    # Step 9: Check howto quality (SOP requirement)
+    lister.step_9_check_howto()
+
+    # Step H: Verification (comprehensive check of all components)
     checks = lister.step_h_verify()
 
     # Final summary
@@ -829,19 +1065,27 @@ Examples:
   # Fix specific components (skip backfill/metrics)
   uv run python scripts/list_new_strategy.py \\
     --key my_strategy --name "My Strategy" \\
-    --howto "..." --description "..." \\
+    --howto "【交易標的】..." --description "..." \\
     --assets '{"SPY": 50}' --order 15 \\
+    --freq monthly --type 動態配置 --type-color "#3B82F6" \\
     --skip-backfill --skip-metrics
         """
     )
     parser.add_argument("--key", help="Strategy key (snake_case)")
     parser.add_argument("--name", help="Display name")
-    parser.add_argument("--howto", help="One-line operation instruction")
+    parser.add_argument("--howto", help="Operation instruction (start with 【交易標的】...)")
     parser.add_argument("--description", help="Full operation description")
     parser.add_argument("--assets", help="Asset weights as JSON, e.g. '{\"SPY\": 50}'")
     parser.add_argument("--order", type=int, default=99, help="Display order")
     parser.add_argument("--color", default="#6B7280", help="Chart color (hex)")
     parser.add_argument("--articles", default="[]", help="Related articles JSON array")
+    # Badge fields (migration 020)
+    parser.add_argument("--freq", dest="freq", default="",
+                        help="Rebalance frequency badge, e.g. daily / weekly / monthly")
+    parser.add_argument("--type", dest="type", default="",
+                        help="Strategy type badge label, e.g. 動態配置 / 動量 / 避險")
+    parser.add_argument("--type-color", dest="type_color", default="",
+                        help="Strategy type badge color (hex), e.g. #3B82F6")
     parser.add_argument("--verify-only", action="store_true",
                         help="Only verify, do not modify anything")
     parser.add_argument("--list-all", action="store_true",
@@ -865,7 +1109,15 @@ Examples:
         parser.error("--key is required (or use --list-all)")
 
     if args.verify_only:
-        lister = StrategyLister(key=args.key, name=args.name or args.key)
+        lister = StrategyLister(
+            key=args.key,
+            name=args.name or args.key,
+            howto=args.howto or "",
+            articles_json=args.articles or "[]",
+            rebalance_freq=args.freq or "",
+            strategy_type=args.type or "",
+            strategy_type_color=args.type_color or "",
+        )
         checks = lister.step_h_verify()
         failed = [k for k, v in checks.items() if v.get("status") != "OK"]
         sys.exit(0 if not failed else 1)
