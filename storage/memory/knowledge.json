@@ -15851,5 +15851,22 @@
     "experiment_id": "k654",
     "created_at": "2026-03-29T05:46:56.415909",
     "importance": 5
+  },
+  {
+    "id": "K655",
+    "title": "K655: ★★★ Horizon Analysis — BH 60/40 SPY/GLD dominates ALL horizons on Sharpe!",
+    "content": "[提出: K654 延伸, 執行: Claude] 5 策略 × 8 投資期限（1-20 年）rolling analysis。BH 60/40 SPY/GLD 在所有期限 mean Sharpe #1（0.63-0.89）。VIX overlay 策略很少超越 BH SPY（只 13-31%）。Piecewise 幾乎全部期限 Sharpe 為負。Minimax：1yr Piecewise best(-10% vs SPY -46%)，3yr 80/20+12/VIX best(-2.2%)，5yr+ BH 60/40 best。Safety：5yr+ BH 60/40 和 50/50+12/VIX 都達 100% positive return。結論：簡單 BH 60/40 是 universal winner。VIX overlay 犧牲 CAGR 換 lower vol，但 Sharpe 改善有限。Short-term minimax 是 VT 唯一優勢場景。",
+    "tags": [
+      "horizon",
+      "60/40",
+      "buy-and-hold",
+      "simplicity",
+      "paradigm-shift",
+      "all-horizons"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k655",
+    "created_at": "2026-03-29T05:58:05.627535",
+    "importance": 4
   }
 ]
