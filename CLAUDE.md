@@ -206,15 +206,32 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 
 ### 新策略上線標準程序（發現有效策略後執行）
 **不要輕易上架——交易策略必須多次確認，上架後發現錯誤會損害信譽。**
+
+**研究驗證階段（手動）：**
 1. **Cross-OOS 驗證**：至少 5 個 OOS 期間（J9 教訓：單期 OOS 不可靠；K459/K474/K476 教訓：cross-OOS 抓到 53% false positive）
 2. **3 年回測**：計算 Sharpe/MDD/Calmar/Sortino/Net Sharpe (after TX)
 3. **Sensitivity 分析**：不同 TX cost、不同 rebalancing 頻率（K499）、不同起始日期
 4. **Out-of-sample 最終確認**：在最近 6 個月的真實數據上確認（不是回測）
 5. **加入 STRATEGY_REGISTRY**：`daily_update.py` 頂部加一行 (display_name, is_active, order)
 6. **加入計算邏輯**：`daily_update.py` 的 strat_list 區塊
-7. **寫入 DB**：`add_strategy.py --id xxx --name xxx ...`
-8. **更新 CLAUDE.md 策略表 + research_program.md**
-9. **發佈 Feed 文章**：用 `feed-publisher` skill
+
+**平台上架階段（自動化腳本）：**
+7. **執行 `list_new_strategy.py`**（一鍵完成 DB 寫入 + 指標計算 + Supabase 同步 + 驗證）：
+```bash
+uv run python scripts/list_new_strategy.py \
+  --key strategy_key \
+  --name "顯示名稱" \
+  --howto "一行操作說明" \
+  --description "完整操作說明" \
+  --assets '{"SPY": 50, "GLD": 50}' \
+  --order N
+```
+腳本自動執行：strategy_signals upsert → display_order 設定 → 回測資料檢查 → strategy_metrics 重算 → strategy_metrics_cache upsert（含 sparkline）→ paper_trades sync → 全面驗證
+
+8. **驗證已上線策略**：`uv run python scripts/list_new_strategy.py --key xxx --verify-only`
+9. **查看所有策略狀態**：`uv run python scripts/list_new_strategy.py --list-all`
+10. **更新 CLAUDE.md 策略表 + research_program.md**
+11. **發佈 Feed 文章**：用 `feed-publisher` skill
 - 詳細流程見 `.claude/skills/autonomous-research/references/add-strategy-guide.md`
 
 ### 論文更新標準程序（每次編譯新版都要做）
@@ -251,6 +268,9 @@ uv run volpred ops paper-upload-pdf --paper-id xxx --file paper/<name>/main.pdf
 uv run volpred ops paper-migrate-storage --paper-id xxx
 
 # 策略管理（只寫 DB，不需部署）
+uv run python scripts/list_new_strategy.py --list-all                          # 查看所有策略上線狀態
+uv run python scripts/list_new_strategy.py --key xxx --verify-only             # 驗證單一策略
+uv run python scripts/list_new_strategy.py --key xxx --name "名稱" --howto "說明" --description "完整說明" --assets '{"SPY":50}' --order N  # 一鍵上架
 uv run python scripts/add_strategy.py --id xxx --name "名稱" --howto "說明" --description "完整說明" --assets '{"SPY":50}' --order N
 uv run volpred ops strategy-upsert --strategy-key xxx --strategy-name "名稱" --weights-json '{"SPY":0.5}'
 uv run volpred ops strategy-set-active xxx --inactive

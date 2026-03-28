@@ -15007,5 +15007,23 @@
     "experiment_id": "k583",
     "created_at": "2026-03-28T01:57:05.459630+00:00",
     "importance": 2
+  },
+  {
+    "id": "K585",
+    "title": "K585: ★★★★ Session Meta-Analysis — K526-K583 Contributions to 3 Papers (35 relevant findings)",
+    "content": "[提出: 用戶, 執行: Claude] READ-ONLY synthesis mapping 50 knowledge entries (K526-K583) to 3 papers. 35 findings relevant.\n\n**Paper 1 (Leverage Direction, 62p, JBF):** 6 strengthen, 7 add new sections, 4 require caveats. HIGHEST PRIORITY: (1) Add K530/K532/K533 HAR to Complexity Ceiling table — HAR dominates GARCH for prediction (DM=-15.45) but produces WORST VT strategy, the strongest evidence FOR the ceiling. (2) Add K548/K551 VIX-Conditional Leverage section (Harvey t=7.90, 11/11 OOS) with K567 international caveat (0/6 pass). (3) Add K573/K574 insurance pricing decomposition (breakeven VIX=26.6, 3-tier backtest table). 8 null results confirm VIX sufficiency (#34-#37+).\n\n**Paper 2 (Taiwan VT, 34p, PBFJ):** K553/K558 are potential 4th contribution — Taiwan Hybrid Leverage fully validated (t=4.79, 18/18 OOS, 0056 confirmed). US-style absolute VIX thresholds FAIL; rolling percentile needed. Methodological contribution for all emerging markets.\n\n**Paper 3 (VT ≠ Trend, 24p):** K533 strengthens core argument (best predictor = worst strategy). K568 shows 12/VIX is return-OPTIMAL (not just parsimonious). K573 provides precise insurance cost (breakeven VIX=26.6). 3 null results confirm 12/VIX irreducibility.\n\n**4 cross-paper themes:** (1) Complexity Ceiling strengthened by HAR evidence, (2) Conditional leverage US+Taiwan validated with international boundary, (3) Insurance pricing quantified precisely, (4) VIX sufficiency count raised to ~37.",
+    "tags": [
+      "meta_analysis",
+      "paper_contribution",
+      "synthesis",
+      "leverage_direction",
+      "taiwan_vt",
+      "vt_trend",
+      "session_review"
+    ],
+    "data_source": "knowledge.json K526-K583 + paper/*.tex",
+    "created_at": "2026-03-28T10:11:15.534894",
+    "experiment_file": "experiments/k585.py",
+    "results_file": "experiments/k585_paper_contribution_analysis.json"
   }
 ]
