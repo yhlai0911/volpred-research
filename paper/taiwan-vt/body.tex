@@ -172,6 +172,15 @@ The mechanism underlying this amplification is correlation asymmetry \citep{ang2
 To verify this mechanism, we compute the average pairwise correlation among the ten Taiwanese stocks separately for down days ($r_{\text{market}} < 0$) and up days ($r_{\text{market}} > 0$). The down-day correlation exceeds the up-day correlation by an average of 0.042 for U.S. stocks and 0.071 for Japanese stocks \citep{ang2002}. For our Taiwan sample, the difference is 0.058, intermediate between the U.S. and Japanese values and consistent with the Taiwan amplification ratio falling between these markets. While we do not have access to full intraday correlation data for all ten stocks, % Codex-R6-fix: weaken amplification claim; limited sample caveat
 the observed amplification pattern is consistent with the correlation asymmetry hypothesis. Based on a limited sample of ten individual stocks, these results should be interpreted as suggestive rather than definitive; a broader cross-section would be needed to establish the amplification ratio with greater precision.
 
+Figure~\ref{fig:rolling_gamma} plots the rolling 252-day GJR $\gamma$ estimates for 0050.TW and SPY over the 2010--2026 period. Two features are apparent. First, Taiwan's gamma is more variable: its coefficient of variation is substantially higher than that of SPY, reflecting the Taiwan market's greater sensitivity to regime shifts in the global semiconductor cycle. Second, during crisis periods (the 2020 COVID crash, the 2022 rate-hiking cycle), both markets exhibit sharp gamma increases, but Taiwan's response is often more pronounced and more persistent. The SPY gamma fluctuates around a higher mean level with less dispersion, consistent with the deeper and more liquid U.S.\ market exhibiting a more stable asymmetric volatility structure.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig1_rolling_gamma.pdf}
+\caption{Rolling 252-day GJR-GARCH asymmetry parameter ($\gamma$) for 0050.TW (Taiwan) and SPY (U.S.), 2010--2026. The $\gamma$ coefficient is estimated via OLS on the Engle-Ng specification $r_t^2 = c + \alpha r_{t-1}^2 + \gamma \mathbb{1}_{r_{t-1}<0} r_{t-1}^2 + \varepsilon_t$. Dashed lines indicate sample means. Taiwan's gamma exhibits greater variability, consistent with higher sensitivity to regime shifts.}
+\label{fig:rolling_gamma}
+\end{figure}
+
 The broad TAIEX amplification ratio of 4.6$\times$ exceeds that of the U.S. (2.8$\times$), which we attribute to two factors: (1) the Taiwan market is more concentrated (TSMC alone accounts for $\sim$50\% of 0050.TW), creating a ``dominant stock'' effect where TSMC's price moves mechanically drive the index, and (2) the retail-investor-heavy structure of the Taiwanese market---where individual investors account for over 60\% of trading volume \citep{barber2009}---may generate stronger asymmetric correlation dynamics during market declines, as retail investors are documented to exhibit stronger herding behavior during downturns, consistent with the downside correlation literature \citep{ang2002}. However, for the investable 0050.TW ETF, the amplification is only 1.45$\times$, suggesting that the broad TAIEX figure is driven substantially by small- and mid-cap stocks not included in the top-50 index. This finding has direct implications for model selection: while broad-index VT strategies should account for the leverage effect, practitioners using 0050.TW face a weaker leverage asymmetry, consistent with the insignificant DM test between GJR-GARCH and GARCH reported in Section~\ref{sec:vt}.
 
 \subsection{Cross-Market Volatility Spillover}
@@ -256,6 +265,15 @@ Student-$t$ VaR & --- & --- & --- & --- & --- & 0.5\% \\
 \end{flushleft}
 \end{table}
 
+Figure~\ref{fig:cumulative_returns} plots the cumulative wealth paths for buy-and-hold, the Taiwan-calibrated $8.63/\text{VIX}$, the na\"ive U.S.-calibrated $12/\text{VIX}$, and the hybrid conditional leverage strategy. Three patterns are evident. First, all VT variants substantially reduce drawdowns during the 2020 COVID crash and the 2022 rate-hiking cycle. Second, the $8.63/\text{VIX}$ strategy outperforms the $12/\text{VIX}$ strategy: applying the U.S. calibration constant to Taiwan results in chronic overexposure, as the higher baseline volatility of the Taiwanese market (VIXTWN/VIX ratio $= 1.39$) implies that a VIX level of 20 represents calmer conditions in the U.S.\ than in Taiwan. Third, the hybrid leverage strategy achieves the highest terminal wealth by selectively applying leverage during dual low-volatility regimes.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig2_cumulative_returns.pdf}
+\caption{Cumulative wealth for 0050.TW volatility targeting strategies, 2010--2026 (log scale). Buy \& Hold: unmanaged 0050.TW. 8.63/VIX: Taiwan-calibrated VIX proxy with monthly rebalancing and lagged weights. 12/VIX: U.S.\ calibration applied to Taiwan (systematically overexposed). Hybrid Leverage: $8.63/\text{VIX}$ base with $1.5\times$ leverage when both local RV$_{22} < 20\%$ and VIX $<$ rolling 30th percentile. All strategies include 0.585\% round-trip transaction costs.}
+\label{fig:cumulative_returns}
+\end{figure}
+
 \subsection{VIX-Proxy Strategy: $8.63/\text{VIX}$}
 
 The VIX-proxy approach sets $w_t = \min(8.63/\text{VIX}_{t-1}, \, 1)$, where $\text{VIX}_{t-1}$ is the U.S. VIX observed at the prior day's close. This ensures that the weight is determined before the Taiwan market opens, eliminating any contemporaneous timing bias \citep{moreira2017}.
@@ -335,6 +353,15 @@ A granular decomposition of 0050.TW returns reveals that the overnight opening g
 
 This gap-dominance finding has direct implications for strategy implementability. % Codex-R6-fix: tone down "fatal timing problem" → "significant timing constraint"
 An ETF-based strategy that attempts to trade on the SPY signal faces a significant timing constraint: by the time the Taiwan market opens and the trader can place an order, the opening gap has already absorbed the signal, imposing an estimated cost of 38.5 bp per round-trip (the average absolute gap). However, a futures-based implementation using TAIEX futures (TX), which trade in a pre-market session beginning at 8:45 (15 minutes before the equity market opens), faces a substantially smaller gap cost of approximately 5 bp, suggesting a potentially viable Sharpe ratio of 0.93 for the futures channel. We leave the full analysis of futures-based implementation---including margin requirements, roll costs, and intraday liquidity---to future work.
+
+Figure~\ref{fig:overnight_vix} visualizes the two key mechanisms underlying the time-zone information transmission channel. Panel~(a) shows the distribution of 0050.TW overnight gaps conditioned on the previous day's SPY return direction. The distributions are clearly separated: following SPY up-days, the gap distribution shifts rightward (mean $\approx +0.11\%$), while following SPY down-days it shifts leftward (mean $\approx -0.09\%$). The asymmetry confirms that cross-market information is incorporated into Taiwan prices primarily through the opening auction, before continuous trading begins. Panel~(b) documents the positive relationship between VIX levels and next-day 0050.TW absolute returns, with the binned means (red circles) showing a monotonically increasing pattern. The Spearman correlation of approximately 0.60 confirms the VIX-to-Taiwan volatility transmission channel that underpins the $8.63/\text{VIX}$ strategy.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig3_overnight_vix.pdf}
+\caption{Information transmission from U.S.\ to Taiwan equity markets, 2010--2026. Panel~(a): Distribution of 0050.TW overnight gaps (log open$_t$ $-$ log close$_{t-1}$) conditioned on the sign of the previous day's SPY close-to-close return. Dashed vertical lines indicate conditional means. Panel~(b): Scatter plot of VIX level (previous U.S.\ close) versus next-day 0050.TW absolute return. Red circles show binned means (4-point VIX bins). The positive relationship confirms VIX as a valid volatility proxy for Taiwan.}
+\label{fig:overnight_vix}
+\end{figure}
 
 \subsection{Source of Information Transmission: Time-Zone Gap, Not Factor Exposure}
 
