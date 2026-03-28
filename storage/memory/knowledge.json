@@ -15025,5 +15025,28 @@
     "created_at": "2026-03-28T10:11:15.534894",
     "experiment_file": "experiments/k585.py",
     "results_file": "experiments/k585_paper_contribution_analysis.json"
+  },
+  {
+    "id": "K958",
+    "timestamp": "2026-03-28T03:01:21.119949+00:00",
+    "category": "literature",
+    "confidence": 0.9,
+    "title": "K958: 2025-2026 學術前沿文獻掃描 — 4方向16篇（ML-GARCH混合, HAR-RV新方法, VIX策略, Rough Vol）",
+    "content": "[提出: 用戶, 執行: Claude] 系統性文獻搜索覆蓋 4 大方向 16 篇 2025-2026 新論文。\n\n**方向1 ML-GARCH混合 (5篇)**：KAN-GARCH-MIDAS (J.Applied Economics 2025) 用 Kolmogorov-Arnold Network 處理宏觀成分，MAE優8%。MF2-GARCH (Conrad&Engle, JAE 2025) 短期GJR+長期MEM顯著優於單GJR。Sentiment-GARCH-LSTM (Comp.Econ 2025)。GINN (arXiv:2410.00288)。KAN for VIX (Expert Systems 2025)。\n\n**方向2 HAR-RV新方法 (4篇)**：★★ Bespoke RV (Patton&Zhang, JoE 2026) ML最優化RV加重日末數據，886美股OOS顯著改善。Volatility Forecasting Factors (Cinquetti et al. SSRN 2025) 287高頻因子動態選擇。HAR-PD Path-Dependent (arXiv:2503.00851)。Window Size 1000-2000最優U-shape (Feng&Zhang, J.Forecasting 2025)——★直接確認我們W=2000合理。\n\n**方向3 VIX策略 (2篇)**：VIX-Managed Portfolios (IRFA 2024) 8431日alpha顯著，確認12/VIX有效。ML Risk-Based Allocation (Sci.Reports 2025) LSTM+regime Sharpe 1.38。\n\n**方向4 Rough Vol (3篇)**：Multivariate fBm (arXiv:2504.15985) 不同Hurst OOS改善。Time-Varying Hurst EWMA (arXiv:2509.05820)。Adaptive Fractal (Frontiers 2025) RMSE-12.3%。\n\n**即刻可行動**: (1) Window Size Sensitivity驗證W=2000, (2) MF2-GARCH實作, (3) KAN-GARCH-MIDAS測試, (4) VIX-Managed文獻引用支持Paper 3。",
+    "tags": [
+      "文獻回顧",
+      "literature_survey_2025_2026",
+      "ML_GARCH",
+      "HAR_RV",
+      "rough_volatility",
+      "VIX_strategy",
+      "KAN",
+      "bespoke_RV",
+      "MF2_GARCH"
+    ],
+    "data_source": "WebSearch: arXiv, SSRN, JoE, JAE, J.Forecasting, IRFA, Sci.Reports, Expert Systems, Comp.Econ, Frontiers, MDPI (2025-2026)",
+    "created_at": "2026-03-28T03:01:21.119949+00:00",
+    "experiment_file": null,
+    "results_file": null
   }
 ]

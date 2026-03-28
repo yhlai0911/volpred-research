@@ -419,6 +419,40 @@
 - [x] I5: Regime-Switching Hedge Ratio — NULL。OHR 跨 regime 穩定。文獻預測 regime-switching 有效但我們實證否定
 - [x] I1b: Static OHR 跨 6 資產類別勝出。文獻推薦 DCC/copula 的增量價值可疑
 
+**2026-03-27 學術前沿文獻掃描（4 方向 × 12 篇）：**
+
+**方向 1: ML-GARCH 混合模型（5 篇）**
+- [ ] **KAN-GARCH-MIDAS** (J. Applied Economics 2025, 作者未標) — Kolmogorov-Arnold Network 取代 MLP 處理 GARCH-MIDAS 的長期宏觀成分，MAE 優於傳統 GARCH 8%（SP500 0.2532 vs 0.2743），COVID 前後穩健。**與我們關係**：K862 已記錄 ML 整體無法勝 GARCH（Branco 2024 支持），但 KAN 是結構化 NN（可學習 activation），非黑箱——值得測試是否打破 QLIKE ceiling
+- [ ] **GARCH-Informed NN (GINN)** (arXiv:2410.00288, 2024) — GARCH 初始化 LSTM calibration。**與我們關係**：K426 已測 GINN null。但該論文用 5-min RV 做 target，我們用 daily proxy——proxy 差異可能解釋結果差異
+- [ ] **Sentiment-Augmented GARCH-LSTM** (Computational Economics 2025) — VaR 場景加入情緒指標。**與我們關係**：K473 Attention/Google Trends OOS null，但該論文用 NLP 情緒（不同信號）
+- [ ] **KAN for VIX Forecasting** (Expert Systems with Applications 2025) — 直接用 KAN 預測 VIX，可解釋。**與我們關係**：VIX 預測是 VT 策略上游——如果 VIX 可預測，12/VIX 策略可增強
+- [ ] **MF2-GARCH** (J. Applied Econometrics 2025, Conrad & Engle) — 短期 GJR + 長期乘法誤差模型，顯著優於單組件 GJR 和 HAR。**與我們關係**：K862 已記錄，K475 GJR+HAR ensemble 5/5 是否等價？MF2 用 MEM 不是 HAR——可能是更優替代
+
+**方向 2: HAR-RV 新方法（4 篇）**
+- [ ] **Bespoke Realized Volatility** (J. Econometrics 2026, Patton & Zhang) — ML 估計最優「客製化」RV（加重日末數據），886 隻美股 OOS 顯著改善 HAR 和 GARCH-X。**與我們關係**：★★ 我們 K465 HAR log-range 8/10 用標準 Parkinson——bespoke 可能進一步改善。但需要 tick data（目前無）
+- [ ] **Volatility Forecasting Factors** (SSRN 2025, Cinquetti, Hong, Nolte) — 287 個高頻因子動態選擇，擴展 HAR。**與我們關係**：等 5-min 數據 60+ 天（已在待探索）
+- [ ] **HAR-PD Path-Dependent** (arXiv:2503.00851, 2025) — HAR + 路徑依賴波動率模型，用 price memory 捕捉趨勢。**與我們關係**：已在待探索。可用日頻近似測試
+- [ ] **Window Size Selection** (J. Forecasting 2025, Feng & Zhang) — 最優滾動窗口 1000-2000，U-shape loss。**與我們關係**：★ 直接確認我們的 W=2000 選擇合理（非 ad hoc）。可做 sensitivity sweep 驗證
+
+**方向 3: VIX / Vol Targeting 策略（2 篇）**
+- [ ] **VIX-Managed Portfolios** (Int. Rev. Financial Analysis 2024) — VIX 水平直接調整槓桿，1990-2023 alpha 顯著。**與我們關係**：★ 我們的 12/VIX 本質相同（inverse VIX scaling）。該論文 8431 日觀察確認策略有效——可引用支持我們的 VT 結論
+- [ ] **ML Risk-Based Allocation** (Scientific Reports 2025) — LSTM + differentiable risk budgeting + regime switching，Sharpe 1.38（+55% vs risk parity）。**與我們關係**：用 VIX/TED/yield curve 做 regime indicator。我們 K503 VIX mean-reversion null，但該方法是 regime-adaptive 不是 mean-reversion
+
+**方向 4: Rough Volatility 與 Hurst（3 篇）**
+- [ ] **Multivariate fBm for RV** (arXiv:2504.15985, 2025) — 不同 Hurst 指數 + 非零相關的多變量 fBm，OOS 改善單變量。**與我們關係**：K862 記錄 rough vol 實務不如 GARCH（Abi Jaber 2025）。但多變量版本可能不同——需測試
+- [ ] **Time-Varying Hurst via EWMA** (arXiv:2509.05820, 2025) — EWMA 驅動動態 Hurst 參數，勝傳統 rough Bergomi。**與我們關係**：Hurst 隨 regime 變化的 idea 可用在 GJR gamma 上（gamma 也非恆常）
+- [ ] **Adaptive Fractal Dynamics** (Frontiers Applied Math 2025) — 小波分析估計時變 Hurst，RMSE -12.3%, R²>0.72。**與我們關係**：如果 Hurst 真的時變且可預測，這是突破——但需驗證是否只是 in-sample fitting
+
+**方向 5: Transformer 與深度學習（2 篇補充）**
+- [ ] **Vision Transformer for RV** (arXiv:2511.03046, 2025) — 從 IV surface 圖像預測 30-day RV。**與我們關係**：完全新範式（image→vol），但需 options data
+- [ ] **PatchTST-lite vs HAR-RV** (MDPI 2025) — 首次系統比較 Transformer 與 HAR-RV，2000-2025 美股。**與我們關係**：已在待探索。K142/T22/R10 三次確認 ML 日頻不勝 GARCH，但 Transformer 在 RV（高頻 proxy）上可能不同
+
+**即刻可行動項目（不需新數據，可用現有日頻數據）：**
+1. ★ Window Size Sensitivity（確認 W=2000 最優）— 對應 Feng & Zhang 2025
+2. ★ MF2-GARCH 實作（短期 GJR + 長期 MEM）— 對應 Conrad & Engle 2025
+3. KAN-GARCH-MIDAS（如果 KAN 套件可用）— 結構化 NN 可能突破 ML ceiling
+4. VIX-Managed Portfolio 文獻引用整理 — 支持 Paper 3 (VT-Trend)
+
 **2026-03-26 新增：Bayesian Subset Selection + Smooth Transition 方法論（用戶指定）：**
 - [ ] K433: **Bayesian SSVS for ARX-GARCH** — So, Chen, Liu (2006) JRSS-C, 55(2), 201-224. Latent binary indicator δ_i + MCMC 從 2^(p+q) 子集空間搜索最優外生變數組合。比 K113 逐一測試更有力。**進行中**
 - [ ] K431: **Smooth Transition GARCH (STGARCH)** — González-Rivera (1998), Hagerud (1997). 允許 GARCH 參數漸進轉換（VIX 作為 transition variable）。K427 發現結構性斷裂，ST 可能比 abrupt switch 更合適。**進行中**

@@ -69,3 +69,40 @@
 2. DB 表如果有 (A, B) 需要唯一的情境，一開始就要加 unique constraint，不能靠應用層 dedup
 3. Weight 格式要統一：portfolio weight 用小數（0~1.0），前端 ×100 顯示百分比
 4. API timeout 要設定合理值，考慮最壞情況（多策略 × 3 年 × pagination）
+
+---
+
+## 策略上架品質問題總覽（2026-03-28）
+
+**問題清單**（5 個新策略上架時一次性爆發）：
+
+| # | 問題 | 根因 | 解法 | 狀態 |
+|---|------|------|------|------|
+| 1 | SPY 15000% | weight 格式 150 vs 1.50 | daily_update.py 改用小數 | ✅ |
+| 2 | +undefined% | metrics 缺 best_day | 補完所有 13 策略 | ✅ |
+| 3 | 只有 32 天數據 | 回填不足 | 統一 3 年回填 | ✅ |
+| 4 | date vs trade_date | 欄位名不一致 | K588 全面統一 | ✅ |
+| 5 | paper_trades 重複 | 無 unique constraint | DELETE+INSERT + migration 018 | ✅(程式) ⏳(DB) |
+| 6 | AbortError timeout | fetch 5s 太短 | 改為 15s | ✅ |
+| 7 | strategy_metrics_cache 缺新策略 | 沒有自動寫入流程 | list_new_strategy.py 自動化 | ✅ |
+| 8 | portfolio 看不到新策略 | metrics_cache 空 + paper_trades 不足 | 回填 + cache upsert | ✅ |
+| 9 | 台股篩選不到 | TW_TAGS case-sensitive | 加 'taiwan' + normalizeTag | ✅ |
+| 10 | 策略無連結文章 | articles 欄位空 | 手動連結 | ✅ |
+| 11 | 市場數據冗餘 | 每策略重複 spy_close 等 | _market_daily 正規化 | ✅(local) ⏳(DB) |
+
+**⏳ 需要 Supabase Dashboard 操作**：
+- Migration 018: unique constraint + index
+- Migration 019: market_daily 表
+
+**策略上架完整 SOP（更新版）**：
+1. STRATEGY_REGISTRY + 計算邏輯
+2. `list_new_strategy.py --key xxx --name xxx --order N`
+3. 3 年歷史回填（backfill_new_strategies.py 或新腳本）
+4. recalc_metrics.py
+5. strategy_metrics_cache upsert（含 best_day/worst_day/sparkline）
+6. paper_trades 全量上傳到 Supabase（非只 30 天）
+7. strategy_signals 填入 description + howto + articles
+8. articles 欄位連結對應的 feed 文章
+9. `list_new_strategy.py --key xxx --verify-only` 驗證所有表
+10. 部署前端
+11. 手動確認 portfolio 頁面顯示正確
