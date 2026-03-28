@@ -14991,5 +14991,21 @@
     "experiment_id": "k577",
     "created_at": "2026-03-28T01:02:04.390258+00:00",
     "importance": 5
+  },
+  {
+    "id": "K583",
+    "title": "K583: IV Surface Beyond VIX — Null, IS significant but OOS fails, VIX sufficiency confirmed",
+    "content": "[提出: Claude, 執行: Claude] IV surface (slope/curvature/dynamics) in HAR framework。HAR-Slope QLIKE 1.60 (best) but DM p=0.29 NS。HAR-VIX QLIKE significantly WORSE (t=+2.73)。All IS t>2 but 0 OOS improvement。Slope z-score VT interesting (Sharpe 3.05, t=3.10) but 2yr OOS only — needs cross-OOS.",
+    "tags": [
+      "IV_surface",
+      "options",
+      "HAR",
+      "VIX_sufficiency",
+      "null_result"
+    ],
+    "data_source": "yfinance VIX+VIX3M+VIX9D+SPY 2008-2026",
+    "experiment_id": "k583",
+    "created_at": "2026-03-28T01:57:05.459630+00:00",
+    "importance": 2
   }
 ]
