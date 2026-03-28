@@ -15067,5 +15067,20 @@
     "evidence": "experiments/k592_mf2_garch_results.json: SPY w=2000, OOS 502 days (2023-01 to 2024-12)",
     "experiment_id": "K592",
     "title": "MF2-GARCH 2-Step (Conrad & Engle 2025) — Null vs GJR"
+  },
+  {
+    "id": "K593",
+    "title": "K593: ★★★ Window Cross-OOS — No universal winner, regime-dependent. Keep W=2000 + add robustness.",
+    "content": "[提出: Claude, 執行: Claude] K591 follow-up。4 windows × 5 OOS periods。W=504 wins 2/5 (COVID+recent)，W=252 wins 2/5，W=2000 wins 1/5。Mean rank: W=2000 worst (3.0/4)。但 pooled DM p=0.46 不顯著——沒有 universal winner。VIX>=20 時 W=504 顯著更好 (DM=-3.61)。\n\n結論：Window 是 regime-dependent。不改論文 W=2000，但加 robustness check (W=504)。",
+    "tags": [
+      "window_size",
+      "cross_OOS",
+      "regime_dependent",
+      "robustness"
+    ],
+    "data_source": "yfinance SPY 2005-2026",
+    "experiment_id": "k593",
+    "created_at": "2026-03-28T03:35:45.224066+00:00",
+    "importance": 3
   }
 ]
