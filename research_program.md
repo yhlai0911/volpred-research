@@ -765,3 +765,67 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 4. 🔴 L164 "mechanically zero" vs Table 1 報非零 Δalpha（矛盾）
 5. 🔴 Table 3 M5 描述含 MOM+BAB 但 β_MOM 空白、N 常數但 note 說 post-2011
 6. 🔴 L352 說 EWT 改善但表格是 EWJ（text/table mismatch）
+
+---
+
+## Next Session Priorities（2026-03-28 起）
+
+基於本 session K526-K612 成果（87 實驗、5 策略上架、3 論文 Codex 審查、K600 meta-analysis、K590 文獻掃描、K608 SEO 稽核），依優先級排序。
+
+### P0: 時間敏感，必須立即處理
+
+| 項目 | 說明 | 依據 | 截止日 |
+|------|------|------|--------|
+| **HAR-RV 正式實驗** | 5-min 數據累積中（SPY 46d / 0050 35d），ETA 04/11 達 60 天門檻 → 立刻跑 K525 HAR-RV formal | K530 HAR-ABS DM=-15.45 史上最強，5-min RV 應更強 | 04/11 |
+| **NFP 04/03 事後文章** | 非農數據發布後 1 天內發「非農報告後市場怎麼走」解讀文 | 事件日曆 | 04/04 |
+| **TSMC 營收 04/10** | 3 月營收公告前 2 天發預告文，公告後 1 天發解讀文 | 事件日曆 | 04/08 預告, 04/11 解讀 |
+| **TSMC 法說 04/16** | Q1 法說前發「台積電法說前後台股波動」預告 + 事後解讀 | 事件日曆 | 04/14 預告, 04/17 解讀 |
+
+### P1: 高價值，本週內完成
+
+**平台與策略維護：**
+- [ ] **Inactive 策略 howto 更新**：`taiwan_spy_momentum`、`tz_tw_jp_5050`、`global_vt_tz` 缺少操作說明 → 用 `ops strategy-upsert` 補齊 howto 欄位
+- [ ] **Badge DB 驅動遷移**：策略卡片的 assets/rebalance_freq 目前前端 hardcode → 移入 Supabase `strategy_signals` 或 `strategy_metrics_cache` 表，前端改讀 DB
+- [ ] **SEO 修正**（K608 稽核剩餘 7 項）：canonical URL（防重複索引）、`/guide` `/paper` `/me` 頁面缺 metadata、sitemap 動態化（含文章 URL）
+- [ ] **Google Search Console 註冊**：提交 sitemap.xml（手動操作，W1.4）
+
+**論文修正（3 篇 Codex 審查）：**
+- [ ] **Leverage-Direction**（K585）：修正日期不一致（2017-2025 vs 2026-03）、gamma window "non-overlapping" 矛盾、TZ alpha 可交易性語氣
+- [ ] **Taiwan VT**（K585）：修正 4.6x amplification 樣本量問題、Table 3 期間不一致、TX cost 算術錯誤
+- [ ] **VT-Trend**（K585）：修正 L164/Table 1 矛盾、Table 3 M5 空白、L352 EWT/EWJ text-table mismatch
+
+### P2: 研究新方向（本 session 文獻掃描 K590 的可行動項目）
+
+| 項目 | 來源論文 | 可行性 | 備註 |
+|------|---------|--------|------|
+| **KAN-GARCH-MIDAS** | J. Applied Economics 2025 | ★★ 可用日頻，結構化 NN 可能突破 ML ceiling | 需確認 KAN 套件可用性 |
+| **MF2-GARCH** | Conrad & Engle, JAE 2025 | ★★ 短期 GJR + 長期 MEM，與 K475 ensemble 比較 | 可立即實作 |
+| **Bespoke RV** | Patton & Zhang, JoE 2026 | ★ 886 股 OOS 顯著改善 HAR/GARCH-X | BLOCKED: 需 tick data |
+| **Window Size Sensitivity** | Feng & Zhang, J.Forecasting 2025 | ★ 確認 W=2000 非 ad hoc，U-shape loss | 可立即做 sweep |
+| **月頻 VT 最佳化** | 內部需求 | 所有 9 策略的月度 rebalancing 頻率 sensitivity | K499 + K548 延伸 |
+
+**K600 Meta-Analysis 五大教訓（指導未來實驗設計）：**
+1. Cross-OOS 是必要品質控制（53% false positive rate without it）
+2. Information decomposition > model complexity（corr=-0.259）
+3. Prediction ≠ Application（4 次確認）
+4. VIX sufficiency 是真正的 ceiling（32 次確認）
+5. Gamma decision tree 是最終工具（15/15 within 1% of oracle）
+
+### P3: 長期待辦（不急但要追蹤）
+
+**前端效能：**
+- [ ] Portfolio 頁面 lazy-load `paper_trades`（目前一次載入全部，大量數據）
+- [ ] `market_daily` Phase 2：從 `paper_trades.entry` 剝離 market data 到獨立表
+
+**研究長期：**
+- [ ] Rough Volatility multivariate extension（arXiv:2504.15985，需更多理論準備）
+- [ ] Decision-focused policy learning（Codex 建議，contextual bandit，需框架設計）
+- [ ] Options surface state variables（BLOCKED: 需 options 歷史數據）
+- [ ] 除權息季節研究（06 月開始，04 月可先做文獻調查）
+- [ ] SEC filing 文字探勘系列（需 EDGAR API 整合）
+
+**平台長期：**
+- [ ] Feature gating 前端 enforce（V0.7）
+- [ ] API rate limiting（V0.9）
+- [ ] Supabase heartbeat cron 防 pause（V0.10）
+- [ ] Email/LINE 訂閱系統（W3.1）
