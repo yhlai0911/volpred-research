@@ -15678,5 +15678,23 @@
     "experiment_id": "k644",
     "created_at": "2026-03-29T04:12:00.458273",
     "importance": 3
+  },
+  {
+    "id": "K645",
+    "title": "K645: ★★★ GLD Role Analysis — Optimal weight 20% WITH VT (not 50%), return parity not crisis hedge",
+    "content": "[提出: 策略理解, 執行: Claude] GLD 在 VT 投組的角色分解。SPY-GLD corr=0.058（穩定跨 regime）。Vol reduction 27%。GLD CAGR=10.53%≈SPY 10.42%（回報貢獻而非死weight）。危機 hedge rate 僅 50%（GFC +29% 但 COVID -2.6%）。關鍵：With 12/VIX overlay，最佳 GLD 權重從 50%→20%（Sharpe 1.71 vs 50/50 的 1.40）——VT 已處理危機風險，不需要那麼多 GLD。100% SPY + 12/VIX Sharpe 1.64 > 50/50 + 12/VIX 1.40。50/50 vs 100% SPY Sharpe 差異 bootstrap p=0.101 不顯著。結論：GLD 的價值是 return + diversification，不是 crisis hedge。With VT，最佳配置是 80/20 SPY/GLD。",
+    "tags": [
+      "GLD",
+      "gold",
+      "portfolio",
+      "optimal-weight",
+      "diversification",
+      "crisis-hedge",
+      "VT-interaction"
+    ],
+    "data_source": "yfinance SPY/GLD/TLT/VIX 2006-2026",
+    "experiment_id": "k645",
+    "created_at": "2026-03-29T04:17:47.605398",
+    "importance": 4
   }
 ]
