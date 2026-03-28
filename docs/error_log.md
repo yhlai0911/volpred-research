@@ -106,3 +106,26 @@
 9. `list_new_strategy.py --key xxx --verify-only` 驗證所有表
 10. 部署前端
 11. 手動確認 portfolio 頁面顯示正確
+
+### 策略上架 SOP v2（2026-03-28 更新，加入專文步驟）
+
+**完整 12 步（缺一不可）**：
+
+1. STRATEGY_REGISTRY + 計算邏輯（daily_update.py）
+2. `list_new_strategy.py` 或 `ops strategy-upsert`
+3. 3 年歷史回填（backfill script）
+4. recalc_metrics.py
+5. strategy_metrics_cache upsert（含 sparkline + best_day/worst_day）
+6. paper_trades 全量上傳到 Supabase
+7. strategy_signals 填入 description + howto
+8. **寫策略專文（至少 1 篇研究 + 1 篇一般讀者）**
+9. articles 欄位連結對應文章
+10. `list_new_strategy.py --verify-only` 驗證
+11. 部署前端
+12. 手動確認 portfolio 頁面顯示正確
+
+**第 8 步：策略專文要求**：
+- 研究文章：完整驗證數據（Harvey t-stat、cross-OOS、sensitivity、bootstrap）
+- 一般讀者文章：白話解說策略邏輯、適用對象、操作方式、風險提醒
+- 兩篇都要有真實 matplotlib 圖表
+- 發佈為 draft 進入文章池
