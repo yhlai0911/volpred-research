@@ -593,6 +593,7 @@
 - [x] **台股混合槓桿** `taiwan_hybrid_leverage` [提出: 用戶] — 0050.TW + RV22 sizing + VIX percentile 條件槓桿。K553/K558 驗證。**已上架 2026-03-27**
 - [x] **保守型 VT（Piecewise）** `piecewise_conservative` [提出: 用戶] — 50/50 SPY/GLD + piecewise VIX mapping: w=1.0 if VIX<12, w=(20-VIX)/8 if 12≤VIX≤20, w=0.0 if VIX>20。K569 驗證 (6/8 pass, JKM z=2.84), K574 確認最高 Sharpe 1.875 + 最低 MDD -4.9%。Harvey near-miss 因保守設計（低 return vs B&H），非可靠性問題。**已上架 2026-03-27**
 - [x] **恐慌加碼定期定額** `fear_dca` [提出: 用戶] — VIX>25 月投 1.5x, VIX<15 月投 0.5x, 否則 1x。K552 驗證 (3/3 cross-OOS, MDD -9pp improvement vs plain DCA)。Signal-only 策略（告訴投資人這個月投多少），非 portfolio weight。Budget neutral，零額外成本。**已上架 2026-03-27**
+- [x] **自適應三階 VT** `adaptive_tier` [提出: 用戶] — VIX<15 用 VIX 條件槓桿（1.5x），VIX 15-20 用標準 12/VIX，VIX>20 用 Piecewise（退出市場）。50/50 SPY/GLD。K595 驗證 (Harvey pass vs B&H, 5/5 OOS, CAGR 14.7%, MDD -8.7%)。回測 Sharpe 3.02, 累計報酬 141.3%, MDD -5.1%。**已上架 2026-03-28**
 - [ ] K502: **US→Taiwan Lead-Lag Strategy** [提出: 用戶] — 用 SPY return 信號交易 0050.TW。T32/T33 confirmed lead-lag (r=0.376)。**進行中**
 - [ ] K503: **VIX Mean-Reversion Strategy** [提出: 用戶] — 利用 VIX spike 後的 mean reversion 做交易。K430/K491 支持。**進行中**
 - [ ] 策略上架前必須：Cross-OOS ≥ 5 periods、3 年回測、Net Sharpe (after TX) > 0

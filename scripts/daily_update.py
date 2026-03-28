@@ -42,6 +42,8 @@ STRATEGY_REGISTRY = {
     "piecewise_conservative": ("保守型 VT（Piecewise）",    True, 11),
     # K552: Fear DCA — signal-only strategy (recommended monthly contribution multiplier)
     "fear_dca":               ("恐慌加碼定期定額",            True, 12),
+    # K595: Adaptive Tier — VIX regime switching (leverage / standard / piecewise exit)
+    "adaptive_tier":          ("自適應三階 VT",               True, 13),
 }
 
 
@@ -451,6 +453,41 @@ def main():
             print(f"  恐慌加碼DCA: VIX 無法取得，預設正常投入 100%")
     except Exception as e:
         print(f"  恐慌加碼DCA: error ({e})")
+
+    # --- Strategy 14: 自適應三階 VT (K595: Harvey pass, 5/5 OOS, CAGR 14.7%, MDD -8.7%) ---
+    # VIX regime switching on 50/50 SPY/GLD:
+    #   VIX < 15  → VIX-Conditional Leverage mode (1.5x on 12/VIX base)
+    #   15 ≤ VIX ≤ 20 → Standard 12/VIX mode
+    #   VIX > 20  → Piecewise exit (fully cash)
+    # Monthly rebalance
+    try:
+        if vix_level is not None:
+            if vix_level < 15:
+                # VIX-Conditional Leverage mode
+                at_base = 12.0 / vix_level / 2  # 50% equity via 12/VIX
+                at_leverage = 1.5
+                at_w = min(at_base * at_leverage, 1.0)
+                at_regime = f"槓桿 1.5x (VIX={vix_level:.1f}<15)"
+            elif vix_level <= 20:
+                # Standard 12/VIX mode
+                at_w = 12.0 / vix_level / 2
+                at_regime = f"標準 12/VIX (15≤VIX={vix_level:.1f}≤20)"
+            else:
+                # Piecewise exit mode
+                at_w = 0.0
+                at_regime = f"退出 (VIX={vix_level:.1f}>20)"
+            at_spy = round(at_w, 2)
+            at_gld = round(at_w, 2)
+        else:
+            # Fallback: conservative
+            at_spy = 0.25
+            at_gld = 0.25
+            at_regime = "VIX 無法取得，保守配置"
+        at_cash = round(max(0, 1 - at_spy - at_gld), 2)
+        strat_list.append(("adaptive_tier", {"SPY": at_spy, "GLD": at_gld}))
+        print(f"  自適應三階VT: SPY {at_spy*100:.0f}%, GLD {at_gld*100:.0f}%, cash {at_cash*100:.0f}% ({at_regime})")
+    except Exception as e:
+        print(f"  自適應三階VT: error ({e})")
 
     for strat_id, w_info in strat_list:
         if strat_id not in pt:
