@@ -520,7 +520,7 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             state["feed_mtime"] = feed_mtime
             if feed:
                 state["articles_last_ts"] = max(
-                    item.get("published_at", "") for item in feed
+                    (item.get("published_at") or item.get("created_at") or "") for item in feed
                 )
         else:
             counts["articles"] = 0  # skipped, unchanged
