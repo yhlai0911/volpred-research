@@ -1,7 +1,7 @@
 {
   "id": "mile_448ae11e",
   "title": "台灣市場波動率管理：0050.TW EWMA VT 策略實測",
-  "description": "⚠️ 更正聲明（2026-03-27）：本文中台股交易成本數據有誤。ETF 證交稅應為 0.1%（非 0.3% 個股稅率），手續費為 0.04275%/次（3折）。正確 round-trip 成本：18.55bp。詳見 K625 更正實驗。\n\nN118-N119 測試了 VT 策略在台灣市場的適用性。US VIX 直接使用無效（EWT Sharpe 下降 0.056），但 EWMA 自身波動率 VT 有效：0050.TW Sharpe 從 0.729 提升到 0.796，MDD 從 -41.3% 降到 -18.4%（target 8%）。所有 target 8-18% 的 Sharpe 幾乎相同（0.78-0.80），只影響 MDD。台灣投資人建議：使用 0050.TW + 短期國債基金，月度再平衡，不需要 VIXTWN。未來如能取得 VIXTWN 歷史數據，可測試 12/VIXTWN 策略。",
+  "description": "ETF 證交稅應為 0.1%（非 0.3% 個股稅率），手續費為 0.04275%/次（3折）。正確 round-trip 成本：18.55bp。詳見 K625 更正實驗。\n\nN118-N119 測試了 VT 策略在台灣市場的適用性。US VIX 直接使用無效（EWT Sharpe 下降 0.056），但 EWMA 自身波動率 VT 有效：0050.TW Sharpe 從 0.729 提升到 0.796，MDD 從 -41.3% 降到 -18.4%（target 8%）。所有 target 8-18% 的 Sharpe 幾乎相同（0.78-0.80），只影響 MDD。台灣投資人建議：使用 0050.TW + 短期國債基金，月度再平衡，不需要 VIXTWN。未來如能取得 VIXTWN 歷史數據，可測試 12/VIXTWN 策略。",
   "category": "milestone",
   "phase": "Phase_N",
   "details": {},

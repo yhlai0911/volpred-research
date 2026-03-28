@@ -15259,5 +15259,53 @@
     "experiment_id": "k620",
     "created_at": "2026-03-28T09:56:16.412566+00:00",
     "importance": 2
+  },
+  {
+    "id": "K621",
+    "title": "K621: ⚠️ MF2-GARCH — FLAWED (Codex found 3 major bugs: wrong decomposition)",
+    "content": "[提出: 文獻掃描 K590, 執行: Claude, 審查: Codex] ⚠️ FLAWED: Codex 發現 3 個 HIGH bug: (1) 短期分量應是 unit-mean 無因次 GJR（r²/τ），實際寫成獨立方差過程；(2) V_m 輸入因 bug#1 也錯；(3) BIC 比較 m 值時不同 m 用不同樣本量。結果不可信。需要用正確 Conrad-Engle MF2 規格重做。",
+    "tags": [
+      "volatility-forecasting",
+      "MF2-GARCH",
+      "FLAWED",
+      "complexity-ceiling",
+      "SPY"
+    ],
+    "data_source": "yfinance SPY 2006-2026",
+    "experiment_id": "k621",
+    "created_at": "2026-03-29T00:48:14.132602",
+    "importance": 1
+  },
+  {
+    "id": "K622",
+    "title": "K622: ★★ Window Size Sensitivity — w=1000-1500 sweet spot, NOT clean U-shape",
+    "content": "[提出: 文獻掃描 K590 (Feng & Zhang 2025), 執行: Claude] GJR-GARCH window sweep w∈{252-3000}，OOS 2023-2024。SPY QLIKE range 僅 1.86%。GLD 弱 U 形 min@1500。0050.TW U 形 min@1500，w≥2500 崩潰。w=1000-1500 三資產最平衡。結論：window 對 QLIKE 影響有限(<2% SPY)但對短歷史資產影響巨大。",
+    "tags": [
+      "window-size",
+      "sensitivity-analysis",
+      "GJR-GARCH",
+      "methodology"
+    ],
+    "data_source": "yfinance SPY/GLD/0050.TW 2000-2026",
+    "experiment_id": "k622",
+    "created_at": "2026-03-29T00:48:14.132616",
+    "importance": 3
+  },
+  {
+    "id": "K623",
+    "title": "K623: ★ MF2-GARCH Corrected — Significant QLIKE improvement (DM t=-2.03, p=0.042) but below Harvey threshold",
+    "content": "[提出: K621 Codex 審查, 執行: Claude] 修正 K621 三個 bug 後重做。MF2-GARCH(m=66) QLIKE=1.503 vs GJR 1.530，DM t=-2.03 p=0.042 顯著。但：(1) Harvey threshold t>3.0 未達；(2) 收斂率僅 25%（6/24 refits）；(3) mean g=1.37（應為 1.0，unit-mean 未完全實現）。與 K621 FLAWED 結果（QLIKE 差距 0.3%，DM p=0.64）截然不同——修正 bug 後差距擴大到 1.8%，p 值從 0.64 降到 0.042。教訓：ML/complex model 的實作 bug 可以完全改變結論（K618/K619 KAN 也是）。",
+    "tags": [
+      "volatility-forecasting",
+      "MF2-GARCH",
+      "significant",
+      "Harvey-borderline",
+      "SPY",
+      "Codex-corrected"
+    ],
+    "data_source": "yfinance SPY 2006-2026",
+    "experiment_id": "k623",
+    "created_at": "2026-03-29T01:04:03.434868",
+    "importance": 3
   }
 ]
