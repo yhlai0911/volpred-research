@@ -15732,5 +15732,23 @@
     "experiment_id": "k647",
     "created_at": "2026-03-29T04:27:23.282676",
     "importance": 3
+  },
+  {
+    "id": "K648",
+    "title": "K648: ★★ Drawdown Recovery — Piecewise 7.7% monthly loss rate, Risk Parity fastest recovery",
+    "content": "[提出: K641 延伸, 執行: Claude] Drawdown 恢復速度分析（11 策略，2023-2026）。Piecewise Conservative: Ulcer 0.007（SPY 的 1/5）、月虧損率 7.7%（1月/年）、Pain-adjusted Sharpe 343.4。Risk Parity 恢復最快 avg 13 天。VIX Cond Leverage 全面 #2。SPY BH: Ulcer 0.035, 月虧損 30.8%（3月/年）。Piecewise max underwater 68 天 vs SPY 143 天。結論：檢查頻率月頻→Piecewise（最少看到虧損），快速恢復重要→Risk Parity。",
+    "tags": [
+      "drawdown",
+      "recovery",
+      "Ulcer-index",
+      "Piecewise",
+      "Risk-Parity",
+      "monthly-loss-rate",
+      "practical"
+    ],
+    "data_source": "paper_trading.json 2023-2026",
+    "experiment_id": "k648",
+    "created_at": "2026-03-29T04:35:06.074021",
+    "importance": 3
   }
 ]
