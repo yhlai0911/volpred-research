@@ -1,0 +1,790 @@
+{
+  "experiment_id": "K597",
+  "title": "Stress Test All Listed Strategies \u2014 Extreme Scenario Analysis",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "data_period": "2005-01-03 to 2026-03-27",
+  "n_trading_days": 5342,
+  "strategies_tested": [
+    "simple_12vix",
+    "vix_cond_leverage",
+    "piecewise_conservative",
+    "fear_dca",
+    "adaptive_tier",
+    "buy_and_hold"
+  ],
+  "full_period_stats": {
+    "simple_12vix": {
+      "cagr": 0.0641,
+      "sharpe": 0.705,
+      "mdd": -0.286,
+      "max_dd_days": 1416
+    },
+    "vix_cond_leverage": {
+      "cagr": 0.0911,
+      "sharpe": 0.928,
+      "mdd": -0.1691,
+      "max_dd_days": 788
+    },
+    "piecewise_conservative": {
+      "cagr": 0.0361,
+      "sharpe": 0.683,
+      "mdd": -0.173,
+      "max_dd_days": 1691
+    },
+    "fear_dca": {
+      "cagr": 0.0637,
+      "sharpe": 0.49,
+      "mdd": -0.454,
+      "max_dd_days": 847
+    },
+    "adaptive_tier": {
+      "cagr": 0.0647,
+      "sharpe": 0.739,
+      "mdd": -0.2137,
+      "max_dd_days": 1465
+    },
+    "buy_and_hold": {
+      "cagr": 0.1163,
+      "sharpe": 0.883,
+      "mdd": -0.3249,
+      "max_dd_days": 427
+    }
+  },
+  "scenarios": {
+    "A_flash_crash_2018": {
+      "description": "Feb 2018 Volmageddon \u2014 VIX spike from ~11 to 37",
+      "period": "2018-01-26 to 2018-03-30",
+      "results": {
+        "simple_12vix": {
+          "n_days": 44,
+          "total_return": -0.0618,
+          "max_1d_loss": -0.029,
+          "max_5d_loss": -0.0605,
+          "max_drawdown": -0.0804,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0205,
+          "vs_bh_verdict": "HURT"
+        },
+        "vix_cond_leverage": {
+          "n_days": 44,
+          "total_return": -0.0484,
+          "max_1d_loss": -0.0233,
+          "max_5d_loss": -0.0453,
+          "max_drawdown": -0.0607,
+          "recovery_days": -1,
+          "vs_bh_return": -0.007,
+          "vs_bh_verdict": "HURT"
+        },
+        "piecewise_conservative": {
+          "n_days": 44,
+          "total_return": -0.0309,
+          "max_1d_loss": -0.0142,
+          "max_5d_loss": -0.0232,
+          "max_drawdown": -0.0368,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0105,
+          "vs_bh_verdict": "HELPED"
+        },
+        "fear_dca": {
+          "n_days": 44,
+          "total_return": -0.0294,
+          "max_1d_loss": -0.0338,
+          "max_5d_loss": -0.0525,
+          "max_drawdown": -0.0572,
+          "recovery_days": -1,
+          "vs_bh_return": 0.012,
+          "vs_bh_verdict": "HELPED"
+        },
+        "adaptive_tier": {
+          "n_days": 44,
+          "total_return": -0.0552,
+          "max_1d_loss": -0.0233,
+          "max_5d_loss": -0.0406,
+          "max_drawdown": -0.0642,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0139,
+          "vs_bh_verdict": "HURT"
+        },
+        "buy_and_hold": {
+          "n_days": 44,
+          "total_return": -0.0414,
+          "max_1d_loss": -0.0196,
+          "max_5d_loss": -0.0555,
+          "max_drawdown": -0.0628,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0,
+          "vs_bh_verdict": "HURT"
+        }
+      }
+    },
+    "B_gfc_2008_2009": {
+      "description": "Global Financial Crisis \u2014 Sep 2008 to Mar 2009",
+      "period": "2008-09-01 to 2009-03-31",
+      "results": {
+        "simple_12vix": {
+          "n_days": 146,
+          "total_return": -0.1452,
+          "max_1d_loss": -0.0271,
+          "max_5d_loss": -0.0486,
+          "max_drawdown": -0.1776,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0075,
+          "vs_bh_verdict": "HURT"
+        },
+        "vix_cond_leverage": {
+          "n_days": 146,
+          "total_return": -0.0577,
+          "max_1d_loss": -0.0159,
+          "max_5d_loss": -0.025,
+          "max_drawdown": -0.0769,
+          "recovery_days": -1,
+          "vs_bh_return": 0.08,
+          "vs_bh_verdict": "HELPED"
+        },
+        "piecewise_conservative": {
+          "n_days": 146,
+          "total_return": 0.0,
+          "max_1d_loss": 0.0,
+          "max_5d_loss": 0.0,
+          "max_drawdown": 0.0,
+          "recovery_days": 0,
+          "vs_bh_return": 0.1377,
+          "vs_bh_verdict": "HELPED"
+        },
+        "fear_dca": {
+          "n_days": 146,
+          "total_return": -0.3291,
+          "max_1d_loss": -0.0886,
+          "max_5d_loss": -0.1935,
+          "max_drawdown": -0.4183,
+          "recovery_days": -1,
+          "vs_bh_return": -0.1914,
+          "vs_bh_verdict": "HURT"
+        },
+        "adaptive_tier": {
+          "n_days": 146,
+          "total_return": 0.0,
+          "max_1d_loss": 0.0,
+          "max_5d_loss": 0.0,
+          "max_drawdown": 0.0,
+          "recovery_days": 0,
+          "vs_bh_return": 0.1377,
+          "vs_bh_verdict": "HELPED"
+        },
+        "buy_and_hold": {
+          "n_days": 146,
+          "total_return": -0.1377,
+          "max_1d_loss": -0.0733,
+          "max_5d_loss": -0.1202,
+          "max_drawdown": -0.2721,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0,
+          "vs_bh_verdict": "HURT"
+        }
+      }
+    },
+    "C_whipsaw_2018q4": {
+      "description": "Whipsaw \u2014 Oct-Dec 2018 rapid VIX oscillations",
+      "period": "2018-10-01 to 2018-12-31",
+      "results": {
+        "simple_12vix": {
+          "n_days": 63,
+          "total_return": -0.1011,
+          "max_1d_loss": -0.0238,
+          "max_5d_loss": -0.0412,
+          "max_drawdown": -0.1245,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0678,
+          "vs_bh_verdict": "HURT"
+        },
+        "vix_cond_leverage": {
+          "n_days": 63,
+          "total_return": -0.0351,
+          "max_1d_loss": -0.011,
+          "max_5d_loss": -0.0255,
+          "max_drawdown": -0.0572,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0017,
+          "vs_bh_verdict": "HURT"
+        },
+        "piecewise_conservative": {
+          "n_days": 63,
+          "total_return": -0.026,
+          "max_1d_loss": -0.0074,
+          "max_5d_loss": -0.0159,
+          "max_drawdown": -0.0322,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0074,
+          "vs_bh_verdict": "HELPED"
+        },
+        "fear_dca": {
+          "n_days": 63,
+          "total_return": -0.0787,
+          "max_1d_loss": -0.0238,
+          "max_5d_loss": -0.071,
+          "max_drawdown": -0.1315,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0453,
+          "vs_bh_verdict": "HURT"
+        },
+        "adaptive_tier": {
+          "n_days": 63,
+          "total_return": -0.0319,
+          "max_1d_loss": -0.011,
+          "max_5d_loss": -0.0255,
+          "max_drawdown": -0.048,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0015,
+          "vs_bh_verdict": "HELPED"
+        },
+        "buy_and_hold": {
+          "n_days": 63,
+          "total_return": -0.0334,
+          "max_1d_loss": -0.0146,
+          "max_5d_loss": -0.0305,
+          "max_drawdown": -0.075,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0,
+          "vs_bh_verdict": "HURT"
+        }
+      }
+    },
+    "D_slow_grind_2022": {
+      "description": "2022 Slow Bear \u2014 elevated VIX, gradual decline",
+      "period": "2022-01-03 to 2022-10-31",
+      "results": {
+        "simple_12vix": {
+          "n_days": 209,
+          "total_return": -0.1127,
+          "max_1d_loss": -0.0219,
+          "max_5d_loss": -0.0482,
+          "max_drawdown": -0.1435,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0257,
+          "vs_bh_verdict": "HELPED"
+        },
+        "vix_cond_leverage": {
+          "n_days": 209,
+          "total_return": -0.0791,
+          "max_1d_loss": -0.0142,
+          "max_5d_loss": -0.0291,
+          "max_drawdown": -0.0927,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0594,
+          "vs_bh_verdict": "HELPED"
+        },
+        "piecewise_conservative": {
+          "n_days": 209,
+          "total_return": -0.0095,
+          "max_1d_loss": -0.0043,
+          "max_5d_loss": -0.0047,
+          "max_drawdown": -0.0093,
+          "recovery_days": -1,
+          "vs_bh_return": 0.129,
+          "vs_bh_verdict": "HELPED"
+        },
+        "fear_dca": {
+          "n_days": 209,
+          "total_return": -0.108,
+          "max_1d_loss": -0.0363,
+          "max_5d_loss": -0.0838,
+          "max_drawdown": -0.1729,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0305,
+          "vs_bh_verdict": "HELPED"
+        },
+        "adaptive_tier": {
+          "n_days": 209,
+          "total_return": -0.0376,
+          "max_1d_loss": -0.0079,
+          "max_5d_loss": -0.013,
+          "max_drawdown": -0.0368,
+          "recovery_days": -1,
+          "vs_bh_return": 0.1009,
+          "vs_bh_verdict": "HELPED"
+        },
+        "buy_and_hold": {
+          "n_days": 209,
+          "total_return": -0.1385,
+          "max_1d_loss": -0.0322,
+          "max_5d_loss": -0.0649,
+          "max_drawdown": -0.1803,
+          "recovery_days": -1,
+          "vs_bh_return": 0.0,
+          "vs_bh_verdict": "HURT"
+        }
+      }
+    },
+    "E_covid_v_recovery": {
+      "description": "COVID V-shaped recovery \u2014 Feb-Jun 2020",
+      "period": "2020-02-19 to 2020-06-30",
+      "results": {
+        "simple_12vix": {
+          "n_days": 93,
+          "total_return": -0.049,
+          "max_1d_loss": -0.0251,
+          "max_5d_loss": -0.0669,
+          "max_drawdown": -0.1308,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0751,
+          "vs_bh_verdict": "HURT"
+        },
+        "vix_cond_leverage": {
+          "n_days": 93,
+          "total_return": 0.0033,
+          "max_1d_loss": -0.0151,
+          "max_5d_loss": -0.0359,
+          "max_drawdown": -0.0656,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0228,
+          "vs_bh_verdict": "HURT"
+        },
+        "piecewise_conservative": {
+          "n_days": 93,
+          "total_return": 0.0003,
+          "max_1d_loss": -0.0044,
+          "max_5d_loss": -0.0044,
+          "max_drawdown": -0.0044,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0258,
+          "vs_bh_verdict": "HURT"
+        },
+        "fear_dca": {
+          "n_days": 93,
+          "total_return": -0.0547,
+          "max_1d_loss": -0.0985,
+          "max_5d_loss": -0.1686,
+          "max_drawdown": -0.2964,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0808,
+          "vs_bh_verdict": "HURT"
+        },
+        "adaptive_tier": {
+          "n_days": 93,
+          "total_return": -0.0003,
+          "max_1d_loss": -0.0085,
+          "max_5d_loss": -0.0085,
+          "max_drawdown": -0.0085,
+          "recovery_days": -1,
+          "vs_bh_return": -0.0264,
+          "vs_bh_verdict": "HURT"
+        },
+        "buy_and_hold": {
+          "n_days": 93,
+          "total_return": 0.0261,
+          "max_1d_loss": -0.0678,
+          "max_5d_loss": -0.1249,
+          "max_drawdown": -0.2032,
+          "recovery_days": 76,
+          "vs_bh_return": 0.0,
+          "vs_bh_verdict": "HURT"
+        }
+      }
+    }
+  },
+  "synthetic_flash_crash": {
+    "simple_12vix": {
+      "weight_vix15": 0.8,
+      "weight_vix80": 0.15,
+      "weight_delta": -0.65,
+      "exposure_cut_pct": -81.2
+    },
+    "vix_cond_leverage": {
+      "weight_vix15": 0.8,
+      "weight_vix80": 0.15,
+      "weight_delta": -0.65,
+      "exposure_cut_pct": -81.2
+    },
+    "piecewise_conservative": {
+      "weight_vix15": 0.625,
+      "weight_vix80": 0.0,
+      "weight_delta": -0.625,
+      "exposure_cut_pct": -100.0
+    },
+    "fear_dca": {
+      "weight_vix15": 0.6,
+      "weight_vix80": 0.9,
+      "weight_delta": 0.3,
+      "exposure_cut_pct": 50.0
+    },
+    "adaptive_tier": {
+      "weight_vix15": 0.8,
+      "weight_vix80": 0.0,
+      "weight_delta": -0.8,
+      "exposure_cut_pct": -100.0
+    }
+  },
+  "synthetic_whipsaw": {
+    "simple_12vix": {
+      "daily_returns": [
+        -0.0257,
+        0.0092,
+        -0.0185,
+        0.0043
+      ],
+      "total_return": -0.0307
+    },
+    "vix_cond_leverage": {
+      "daily_returns": [
+        -0.0129,
+        0.0035,
+        -0.0104,
+        0.0026
+      ],
+      "total_return": -0.0172
+    },
+    "piecewise_conservative": {
+      "daily_returns": [
+        -0.0075,
+        0.0,
+        -0.0066,
+        0.0
+      ],
+      "total_return": -0.0141
+    },
+    "fear_dca": {
+      "daily_returns": [
+        -0.009,
+        0.018,
+        -0.006,
+        0.009
+      ],
+      "total_return": 0.012
+    },
+    "adaptive_tier": {
+      "daily_returns": [
+        -0.0129,
+        0.0,
+        -0.0104,
+        0.0
+      ],
+      "total_return": -0.0232
+    }
+  },
+  "vix_sensitivity": {
+    "10": {
+      "simple_12vix": 1.0,
+      "vix_cond_leverage": 1.8,
+      "piecewise_conservative": 1.0,
+      "fear_dca": 0.3,
+      "adaptive_tier": 1.8
+    },
+    "12": {
+      "simple_12vix": 1.0,
+      "vix_cond_leverage": 1.5,
+      "piecewise_conservative": 1.0,
+      "fear_dca": 0.3,
+      "adaptive_tier": 1.5
+    },
+    "14": {
+      "simple_12vix": 0.857,
+      "vix_cond_leverage": 1.286,
+      "piecewise_conservative": 0.75,
+      "fear_dca": 0.3,
+      "adaptive_tier": 1.286
+    },
+    "15": {
+      "simple_12vix": 0.8,
+      "vix_cond_leverage": 0.8,
+      "piecewise_conservative": 0.625,
+      "fear_dca": 0.6,
+      "adaptive_tier": 0.8
+    },
+    "16": {
+      "simple_12vix": 0.75,
+      "vix_cond_leverage": 0.75,
+      "piecewise_conservative": 0.5,
+      "fear_dca": 0.6,
+      "adaptive_tier": 0.75
+    },
+    "18": {
+      "simple_12vix": 0.667,
+      "vix_cond_leverage": 0.667,
+      "piecewise_conservative": 0.25,
+      "fear_dca": 0.6,
+      "adaptive_tier": 0.667
+    },
+    "20": {
+      "simple_12vix": 0.6,
+      "vix_cond_leverage": 0.6,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.6,
+      "adaptive_tier": 0.6
+    },
+    "22": {
+      "simple_12vix": 0.545,
+      "vix_cond_leverage": 0.545,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.6,
+      "adaptive_tier": 0.0
+    },
+    "25": {
+      "simple_12vix": 0.48,
+      "vix_cond_leverage": 0.48,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.6,
+      "adaptive_tier": 0.0
+    },
+    "30": {
+      "simple_12vix": 0.4,
+      "vix_cond_leverage": 0.4,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.9,
+      "adaptive_tier": 0.0
+    },
+    "35": {
+      "simple_12vix": 0.343,
+      "vix_cond_leverage": 0.343,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.9,
+      "adaptive_tier": 0.0
+    },
+    "40": {
+      "simple_12vix": 0.3,
+      "vix_cond_leverage": 0.3,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.9,
+      "adaptive_tier": 0.0
+    },
+    "50": {
+      "simple_12vix": 0.24,
+      "vix_cond_leverage": 0.24,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.9,
+      "adaptive_tier": 0.0
+    },
+    "60": {
+      "simple_12vix": 0.2,
+      "vix_cond_leverage": 0.2,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.9,
+      "adaptive_tier": 0.0
+    },
+    "80": {
+      "simple_12vix": 0.15,
+      "vix_cond_leverage": 0.15,
+      "piecewise_conservative": 0.0,
+      "fear_dca": 0.9,
+      "adaptive_tier": 0.0
+    }
+  },
+  "adaptive_tier_regime_analysis": {
+    "total_switches": 578,
+    "avg_switches_per_year": 27.3,
+    "yearly_switches": {
+      "2005": 20,
+      "2006": 14,
+      "2007": 26,
+      "2008": 12,
+      "2009": 4,
+      "2010": 19,
+      "2011": 23,
+      "2012": 37,
+      "2013": 31,
+      "2014": 35,
+      "2015": 50,
+      "2016": 43,
+      "2017": 8,
+      "2018": 34,
+      "2019": 42,
+      "2020": 6,
+      "2021": 33,
+      "2022": 15,
+      "2023": 32,
+      "2024": 43,
+      "2025": 37,
+      "2026": 14
+    },
+    "holding_periods": {
+      "leverage": {
+        "mean_days": 13.7,
+        "median_days": 3.0,
+        "min_days": 1,
+        "max_days": 136,
+        "n_episodes": 145
+      },
+      "standard": {
+        "mean_days": 5.5,
+        "median_days": 3.0,
+        "min_days": 1,
+        "max_days": 55,
+        "n_episodes": 289
+      },
+      "exit": {
+        "mean_days": 12.1,
+        "median_days": 2.0,
+        "min_days": 1,
+        "max_days": 331,
+        "n_episodes": 145
+      }
+    },
+    "false_exit_episodes": 111,
+    "total_exit_episodes": 145,
+    "missed_return_from_false_exits": -0.355
+  },
+  "worst_10_days": [
+    {
+      "date": "2020-03-16",
+      "spy_ret": -0.1094,
+      "gld_ret": -0.0114,
+      "vix": 82.7,
+      "vix_signal": 57.8,
+      "simple_12vix": -0.0227,
+      "vix_cond_leverage": -0.0125,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0985,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2008-10-15",
+      "spy_ret": -0.0984,
+      "gld_ret": 0.0135,
+      "vix": 69.2,
+      "vix_signal": 55.1,
+      "simple_12vix": -0.0214,
+      "vix_cond_leverage": -0.0092,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0886,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2020-03-12",
+      "spy_ret": -0.0957,
+      "gld_ret": -0.0399,
+      "vix": 75.5,
+      "vix_signal": 53.9,
+      "simple_12vix": -0.0213,
+      "vix_cond_leverage": -0.0151,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0861,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2008-12-01",
+      "spy_ret": -0.0886,
+      "gld_ret": -0.058,
+      "vix": 68.5,
+      "vix_signal": 55.3,
+      "simple_12vix": -0.0192,
+      "vix_cond_leverage": -0.0159,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0797,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2008-09-29",
+      "spy_ret": -0.0784,
+      "gld_ret": 0.0338,
+      "vix": 46.7,
+      "vix_signal": 34.7,
+      "simple_12vix": -0.0271,
+      "vix_cond_leverage": -0.0077,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0705,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2020-03-09",
+      "spy_ret": -0.0781,
+      "gld_ret": 0.0017,
+      "vix": 54.5,
+      "vix_signal": 41.9,
+      "simple_12vix": -0.0223,
+      "vix_cond_leverage": -0.0109,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0703,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2008-11-20",
+      "spy_ret": -0.0742,
+      "gld_ret": 0.0165,
+      "vix": 80.9,
+      "vix_signal": 74.3,
+      "simple_12vix": -0.012,
+      "vix_cond_leverage": -0.0047,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0668,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2008-10-09",
+      "spy_ret": -0.0698,
+      "gld_ret": 0.0054,
+      "vix": 63.9,
+      "vix_signal": 57.5,
+      "simple_12vix": -0.0146,
+      "vix_cond_leverage": -0.0067,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0629,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2011-08-08",
+      "spy_ret": -0.0651,
+      "gld_ret": 0.0332,
+      "vix": 48.0,
+      "vix_signal": 32.0,
+      "simple_12vix": -0.0244,
+      "vix_cond_leverage": -0.006,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0586,
+      "adaptive_tier": 0.0
+    },
+    {
+      "date": "2008-11-19",
+      "spy_ret": -0.0641,
+      "gld_ret": -0.0034,
+      "vix": 74.3,
+      "vix_signal": 67.6,
+      "simple_12vix": -0.0114,
+      "vix_cond_leverage": -0.006,
+      "piecewise_conservative": 0.0,
+      "fear_dca": -0.0577,
+      "adaptive_tier": 0.0
+    }
+  ],
+  "strategy_verdicts": {
+    "simple_12vix": {
+      "helped": 1,
+      "hurt": 4,
+      "verdict": "FAIL"
+    },
+    "vix_cond_leverage": {
+      "helped": 2,
+      "hurt": 3,
+      "verdict": "CAUTION"
+    },
+    "piecewise_conservative": {
+      "helped": 4,
+      "hurt": 1,
+      "verdict": "PASS"
+    },
+    "fear_dca": {
+      "helped": 2,
+      "hurt": 3,
+      "verdict": "CAUTION"
+    },
+    "adaptive_tier": {
+      "helped": 3,
+      "hurt": 2,
+      "verdict": "PASS"
+    }
+  },
+  "overall_conclusion": "2/5 strategies PASS stress test (helped in \u22653/5 scenarios vs B&H). 2 strategies CAUTION (helped in 2/5). 1 strategies FAIL (helped in \u22641/5). Adaptive Tier: 27.3 regime switches/year, 111 false exits out of 145 total exits.",
+  "limitations": [
+    "Stress test uses historical data \u2014 future crises may be structurally different",
+    "VIX signal uses previous day close \u2014 intraday crashes not captured",
+    "Fear DCA modeled as daily weight adjustment, actual is monthly contribution",
+    "Transaction costs not included in scenario analysis",
+    "GLD data starts Nov 2004 \u2014 pre-GLD era not tested"
+  ],
+  "references": [
+    "K289: Prior stress test (50/50+VT survives all)",
+    "K569/K574: Piecewise conservative design",
+    "K548/K551: VIX conditional leverage",
+    "K552: Fear DCA",
+    "K595: Adaptive tier"
+  ],
+  "timestamp": "2026-03-28T12:24:30.083930"
+}

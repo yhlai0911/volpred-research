@@ -15113,5 +15113,26 @@
     "experiment_id": "k595",
     "created_at": "2026-03-28T03:56:37.435713+00:00",
     "importance": 4
+  },
+  {
+    "item_id": "kb_k597",
+    "category": "strategy_validation",
+    "title": "K597: Stress Test All Listed Strategies — Extreme Scenario Analysis",
+    "content": "[提出: 用戶, 執行: Claude] 5 個核心美股策略在 5 個極端情境的壓力測試（2005-2026, yfinance SPY+GLD+VIX, 5342 交易日）。結果：保守型VT(Piecewise) PASS 4/5 情境——GFC 全現金(MDD=0%)、2022慢熊 MDD僅-0.9%、閃崩保護最佳，但犧牲 V 型反彈上行（COVID 期 return=0%）。自適應三階VT PASS 3/5——GFC 退出（return=0%）、2022 大幅勝出(+10.1% vs B&H)，但年均 27.3 次 regime switch、77% exit 為 false exit（≤5天）。12/VIX FAIL 1/5——暴露過高（GFC -14.5%、COVID -4.9%）。VIX條件槓桿 CAUTION 2/5——GFC +8% vs B&H 但閃崩/COVID 受傷。恐慌DCA CAUTION 2/5——GFC -32.9%（VIX>25 時加碼反而虧更多）、最差10天max1d=-9.85%。結論：Piecewise 最穩健（激進退場保護下行），Adaptive Tier 可用但 whipsaw 成本 ~1.67%/年需監控。",
+    "tags": [
+      "stress_test",
+      "strategy",
+      "production_readiness",
+      "extreme_scenario",
+      "VIX",
+      "piecewise",
+      "adaptive_tier",
+      "12_vix",
+      "fear_dca",
+      "vix_cond_leverage"
+    ],
+    "data_source": "yfinance (SPY, GLD, ^VIX), 2005-2026",
+    "experiment_id": "K597",
+    "timestamp": "2026-03-28T12:25:06.361760"
   }
 ]
