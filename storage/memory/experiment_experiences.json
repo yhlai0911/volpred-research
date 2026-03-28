@@ -376,5 +376,31 @@
       "cascading_bug"
     ],
     "created_at": "2026-03-28T04:54:41.353262+00:00"
+  },
+  {
+    "id": "E029",
+    "title": "ML experiments MUST get Codex code review — K618 bug caused false 113% conclusion",
+    "lesson": "K618 KAN 報告 '比 GARCH 差 113%'，直接下了 'ML cannot beat GARCH' 結論並發佈文章。Codex GPT-5.4 審查發現 2 個 bug（estimand 不同 + refit 不公平）。K619 修正後 KAN 與 GARCH 幾乎相同（0.3%）。教訓：所有 ML 實驗必須用 Codex 審查代碼，不論結果好壞。",
+    "related_experiments": "K618, K619",
+    "tags": [
+      "ML",
+      "code_review",
+      "Codex",
+      "false_conclusion"
+    ],
+    "created_at": "2026-03-28T10:06:07.102498+00:00"
+  },
+  {
+    "id": "E030",
+    "title": "Harvey PASS can be bull market artifact — distinguish genuine alpha from mechanical leverage",
+    "lesson": "K620 Post-Revenue Boost 'passed' Harvey (NW t=3.70)，但其實是在 30% 的交易日機械性加碼 20%——任何牛市加碼策略都會 PASS。Vol crush 是統計現象不是交易機會。教訓：Harvey PASS 不等於 genuine alpha，要區分 (1) 策略是否只是變相加碼 (2) 效果是否在 bear market 也成立 (3) 加碼天數佔比是否太高。",
+    "related_experiments": "K617, K620",
+    "tags": [
+      "Harvey",
+      "bull_market_artifact",
+      "false_positive",
+      "critical_thinking"
+    ],
+    "created_at": "2026-03-28T10:06:07.102737+00:00"
   }
 ]
