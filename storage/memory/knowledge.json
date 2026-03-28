@@ -15520,5 +15520,23 @@
     "experiment_id": "k635",
     "created_at": "2026-03-29T03:01:16.963647",
     "importance": 3
+  },
+  {
+    "id": "K636",
+    "title": "K636: ★★ Taiwan Amplification Resolved — 4.6x=gamma, 1.0x=vol level, no paper correction needed",
+    "content": "[提出: K633 矛盾, 執行: Claude] N121 的 4.6x = TAIEX GJR gamma / 個股 gamma（leverage 放大），K633 的 1.0x = σ(0050)/σ(SPY)（vol 水平比）。量測不同東西，論文正確。Full sample vol ratio=1.16x，rolling [0.56x-2.01x] 高度時變。0050 gamma=0.411(t=14.85) > SPY 0.173(t=7.02)。Downside beta 0.23 = 6.5x upside beta 0.04（bootstrap p=0.033）。VIX 平靜時 vol ratio 更高（~1.6x vs crisis ~1.1x）。yfinance 0050 有 2014-01-02 stock split artifact（-139% return），需過濾。",
+    "tags": [
+      "amplification",
+      "Taiwan",
+      "0050.TW",
+      "gamma",
+      "leverage-effect",
+      "beta-asymmetry",
+      "data-quality"
+    ],
+    "data_source": "yfinance 0050.TW/SPY/TWII/VIX 2003-2026",
+    "experiment_id": "k636",
+    "created_at": "2026-03-29T03:16:54.491584",
+    "importance": 3
   }
 ]
