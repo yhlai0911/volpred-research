@@ -442,12 +442,12 @@ def main():
             else:
                 dca_multiplier = 1.0
                 dca_regime = "正常投入 1.0x"
-            # Display as percentage of normal monthly amount (100 = normal)
-            dca_display = round(dca_multiplier * 100)
-            strat_list.append(("fear_dca", {"SPY": dca_display}))
-            print(f"  恐慌加碼DCA: {dca_regime} (VIX={vix_level:.1f}, 本月建議投入 {dca_display}% 正常金額)")
+            # Display as multiplier (1.50 = invest 150% of normal amount)
+            # Frontend shows weight×100 as percentage, so 1.50 → "150%"
+            strat_list.append(("fear_dca", {"SPY": round(dca_multiplier, 2)}))
+            print(f"  恐慌加碼DCA: {dca_regime} (VIX={vix_level:.1f}, 本月建議投入 {dca_multiplier:.0%} 正常金額)")
         else:
-            strat_list.append(("fear_dca", {"SPY": 100}))
+            strat_list.append(("fear_dca", {"SPY": 1.0}))
             print(f"  恐慌加碼DCA: VIX 無法取得，預設正常投入 100%")
     except Exception as e:
         print(f"  恐慌加碼DCA: error ({e})")
