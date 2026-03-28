@@ -15484,5 +15484,24 @@
     "experiment_id": "k633",
     "created_at": "2026-03-29T02:29:45.403644",
     "importance": 4
+  },
+  {
+    "id": "K634",
+    "title": "K634: ★★★ GARCH Param Stability — Fixed params BEAT rolling re-estimation for SPY!",
+    "content": "[提出: 方法論驗證, 執行: Claude] GJR-GARCH 參數穩定性分析（148 滾動估計 w=2000 step=21）。SPY: gamma 148/148 正（leverage 結構穩定），beta CV=0.06 最穩，alpha CV=1.12 最不穩。Persistence 0.975±0.010 極穩。CUSUM 全部 reject（參數確實漂移但緩慢）。驚人發現：固定參數 QLIKE=1.464 顯著優於滾動重估 1.492（DM p<0.001）——頻繁重估增加噪音。GLD: gamma 均值-0.013（52% 為負），無 leverage effect→應用 GARCH(1,1) 非 GJR。0050.TW: 收斂率 67%，gamma 正 79%，參數不穩定性遠高於 SPY。結論：SPY 的 21-day refit 是過度的；固定大窗口估計更好。這改變了我們的方法論假設。",
+    "tags": [
+      "GARCH",
+      "parameter-stability",
+      "fixed-vs-rolling",
+      "leverage-effect",
+      "methodology",
+      "SPY",
+      "GLD",
+      "0050.TW"
+    ],
+    "data_source": "yfinance SPY/GLD/0050.TW 2006-2026",
+    "experiment_id": "k634",
+    "created_at": "2026-03-29T02:54:46.005273",
+    "importance": 4
   }
 ]
