@@ -15227,5 +15227,21 @@
     "experiment_id": "k618",
     "created_at": "2026-03-28T09:05:27.156889+00:00",
     "importance": 2
+  },
+  {
+    "id": "K619",
+    "title": "K619: ★★★ KAN Corrected — Nearly identical to GJR (DM t=0.23 NS). K618 was bug, not finding.",
+    "content": "[提出: Codex review, 執行: Claude] K618 修正版。統一 estimand (E|r_t|)、統一 refit (22d)、QLIKE training。KAN QLIKE 0.478 vs GJR 0.476 (+0.3%, DM t=0.23 NS)。所有 4 模型在 4% 內。\n\nK618 bug 造成 KAN 1.096 (+113%) 的虛假結論。修正後 KAN 與 GJR 幾乎相同。ML CAN match GARCH but cannot beat it。HAR 反而最差 (0.495)——estimand correction 讓 GJR 得到公平比較。\n\n教訓：異常結果必須立刻求 Codex 第二意見。K618 的 113% 差距是 bug 不是 finding。",
+    "tags": [
+      "KAN",
+      "corrected",
+      "Codex_review",
+      "fair_comparison",
+      "ML_matches_GARCH"
+    ],
+    "data_source": "yfinance SPY 2004-2026",
+    "experiment_id": "k619",
+    "created_at": "2026-03-28T09:34:44.593012+00:00",
+    "importance": 4
   }
 ]
