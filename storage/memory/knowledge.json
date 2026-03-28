@@ -15212,14 +15212,16 @@
   },
   {
     "id": "K618",
-    "title": "K618: KAN Volatility — Comprehensive null, 113% worse than GARCH (t=+14.38)",
-    "content": "[提出: K590 文獻, 執行: Claude] KAN (B-spline activations) vs MLP vs GJR vs HAR-ABS。KAN QLIKE 1.096 vs GJR 0.515 (+113%)。DM t=+14.38 GJR wins。KAN 366 params (92x GJR) but far worse。HAR-ABS 仍是 champion (0.495)。ML cannot beat GARCH 再次確認（Branco 2024 + K600）。",
+    "title": "K618: ⚠️ KAN Volatility — FLAWED (Codex found 2 major bugs: different estimand + unfair refit frequency)",
+    "content": "[提出: K590 文獻, 執行: Claude] KAN (B-spline activations) vs MLP vs GJR vs HAR-ABS。KAN QLIKE 1.096 vs GJR 0.515 (+113%)。DM t=+14.38 GJR wins。KAN 366 params (92x GJR) but far worse。HAR-ABS 仍是 champion (0.495)。ML cannot beat GARCH 再次確認（Branco 2024 + K600）。\n\n⚠️ CODEX REVIEW (GPT-5.4): 發現 2 個重大 bug：(1) GJR 輸出 σ 但 KAN 輸出 |r_t|（不同 estimand），QLIKE 比較無效。(2) GJR 每天 refit 但 KAN 每 63 天（不公平）。113% 差距不可信，需修正後重跑。",
     "tags": [
       "KAN",
       "neural_network",
       "ML",
       "null_result",
-      "GARCH_ceiling"
+      "GARCH_ceiling",
+      "flawed",
+      "codex_review"
     ],
     "data_source": "yfinance SPY 2004-2026",
     "experiment_id": "k618",
