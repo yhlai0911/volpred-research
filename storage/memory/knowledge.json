@@ -14926,5 +14926,22 @@
     "experiment_id": "k573",
     "created_at": "2026-03-28T00:11:25.002195+00:00",
     "importance": 4
+  },
+  {
+    "id": "K574",
+    "title": "K574: ★★★★★ Complete 3-Tier Backtest — VCL $1M→$36.9M, PW worst year +0.2%, all VT dominate B&H",
+    "content": "[提出: Claude, 執行: Claude] 5 策略 21 年完整比較。\n\nVIX-Cond Leverage: CAGR 19.0%, Sharpe 1.553, MDD -12.3%, $1M→$36.9M。Piecewise: Sharpe 1.875 (最高!), MDD -4.9%, worst year +0.2%, Calmar 2.405。12/VIX: CAGR 13.1%, Sharpe 1.414, MDD -9.6%。\n\n所有 VT 策略 DOMINATE B&H SPY (higher CAGR + lower MDD)。Insurance efficiency = infinite (負 return cost)。\n\nCrisis: Piecewise GFC -0.5%, COVID -0.0%。DM: VCL vs VT t=-8.055, VCL vs PW t=4.601。\n\n5 張圖表：cumulative growth, drawdown, risk-return scatter, rolling Sharpe, yearly heatmap。",
+    "tags": [
+      "backtest",
+      "strategy_comparison",
+      "paper_table",
+      "VCL",
+      "piecewise",
+      "definitive"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX 2005-2026",
+    "experiment_id": "k574",
+    "created_at": "2026-03-28T00:32:20.253604+00:00",
+    "importance": 5
   }
 ]
