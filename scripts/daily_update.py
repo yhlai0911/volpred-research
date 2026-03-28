@@ -39,6 +39,9 @@ STRATEGY_REGISTRY = {
     "vix_leading_guard":   ("VIX+景氣領先 (0050.TW)",     True,  8),
     "vix_cond_leverage":   ("VIX 條件槓桿（月頻）",        True,  9),
     "taiwan_hybrid_leverage": ("台股混合槓桿",              True, 10),
+    "piecewise_conservative": ("保守型 VT（Piecewise）",    True, 11),
+    # K552: Fear DCA — signal-only strategy (recommended monthly contribution multiplier)
+    "fear_dca":               ("恐慌加碼定期定額",            True, 12),
 }
 
 
@@ -391,6 +394,63 @@ def main():
             print(f"  台股混合槓桿: skipped (tw50 or VIX unavailable)")
     except Exception as e:
         print(f"  台股混合槓桿: error ({e})")
+
+    # --- Strategy 12: 保守型 VT（Piecewise）(K569/K574: Sharpe 1.875, MDD -4.9%) ---
+    # Piecewise linear VIX → weight mapping on 50/50 SPY/GLD:
+    #   VIX < 12  → w = 1.0  (fully invested)
+    #   12 ≤ VIX ≤ 20 → w = (20 - VIX) / 8  (linear ramp-down)
+    #   VIX > 20  → w = 0.0  (fully cash — conservative by design)
+    try:
+        if vix_level is not None:
+            if vix_level < 12:
+                pw_w = 1.0
+            elif vix_level <= 20:
+                pw_w = (20 - vix_level) / 8
+            else:
+                pw_w = 0.0
+            pw_spy = round(0.5 * pw_w, 2)
+            pw_gld = round(0.5 * pw_w, 2)
+        else:
+            # Fallback: conservative 25/25 when VIX unavailable
+            pw_spy = 0.25
+            pw_gld = 0.25
+            pw_w = 0.5
+        pw_cash = round(max(0, 1 - pw_spy - pw_gld), 2)
+        strat_list.append(("piecewise_conservative", {"SPY": pw_spy, "GLD": pw_gld}))
+        if vix_level is not None:
+            vix_zone = "全倉" if vix_level < 12 else ("漸退" if vix_level <= 20 else "全現金")
+            print(f"  保守型VT(Piecewise): SPY {pw_spy*100:.0f}%, GLD {pw_gld*100:.0f}%, cash {pw_cash*100:.0f}% (VIX={vix_level:.1f}, {vix_zone})")
+        else:
+            print(f"  保守型VT(Piecewise): SPY {pw_spy*100:.0f}%, GLD {pw_gld*100:.0f}%, cash {pw_cash*100:.0f}% (VIX unavailable, fallback)")
+    except Exception as e:
+        print(f"  保守型VT(Piecewise): error ({e})")
+
+    # --- Strategy 13: 恐慌加碼定期定額 (K552: Fear DCA, 3/3 cross-OOS, MDD -9pp) ---
+    # Signal-only strategy: tells retail DCA investors how much to invest THIS MONTH.
+    # VIX > 25 → 1.5x normal contribution (buy the fear)
+    # VIX 15-25 → 1.0x normal contribution
+    # VIX < 15 → 0.5x normal contribution (market complacent, save cash)
+    # Budget neutral over time. Weights display as % of normal monthly amount.
+    try:
+        if vix_level is not None:
+            if vix_level > 25:
+                dca_multiplier = 1.5
+                dca_regime = "恐慌加碼 1.5x"
+            elif vix_level < 15:
+                dca_multiplier = 0.5
+                dca_regime = "低波減碼 0.5x"
+            else:
+                dca_multiplier = 1.0
+                dca_regime = "正常投入 1.0x"
+            # Display as percentage of normal monthly amount (100 = normal)
+            dca_display = round(dca_multiplier * 100)
+            strat_list.append(("fear_dca", {"SPY": dca_display}))
+            print(f"  恐慌加碼DCA: {dca_regime} (VIX={vix_level:.1f}, 本月建議投入 {dca_display}% 正常金額)")
+        else:
+            strat_list.append(("fear_dca", {"SPY": 100}))
+            print(f"  恐慌加碼DCA: VIX 無法取得，預設正常投入 100%")
+    except Exception as e:
+        print(f"  恐慌加碼DCA: error ({e})")
 
     for strat_id, w_info in strat_list:
         if strat_id not in pt:

@@ -84,7 +84,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **績效指標**：每日由 `daily_update.py` 自動重算 → `strategy_metrics.json`
 - 詳細流程見 `.claude/skills/autonomous-research/references/add-strategy-guide.md`
 
-#### 目前 STRATEGY_REGISTRY（11 筆，8 個 active）
+#### 目前 STRATEGY_REGISTRY（12 筆，9 個 active）
 | key | display_name | is_active | order |
 |-----|-------------|-----------|-------|
 | `slow_vt` | GARCH VT (SPY) | True | 0 |
@@ -98,6 +98,8 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 | `vix_leading_guard` | VIX+景氣領先 (0050.TW) | True | 8 |
 | `vix_cond_leverage` | VIX 條件槓桿（月頻） | True | 9 |
 | `taiwan_hybrid_leverage` | 台股混合槓桿 | True | 10 |
+| `piecewise_conservative` | 保守型 VT（Piecewise） | True | 11 |
+| `fear_dca` | 恐慌加碼定期定額 | True | 12 |
 
 ### 每日文章產出要求（不可缺少任何一種）
 
