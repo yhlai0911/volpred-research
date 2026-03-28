@@ -15097,5 +15097,21 @@
     "experiment_id": "k594",
     "created_at": "2026-03-28T03:41:36.463052+00:00",
     "importance": 2
+  },
+  {
+    "id": "K595",
+    "title": "K595: ★★★ Hybrid Multi-Strategy — 不產生 alpha 但提供有價值的中間 profile",
+    "content": "[提出: 用戶, 執行: Claude] 5 種混合策略。H2 Adaptive Tier 最平衡 (CAGR 14.7%, MDD -8.7%, GFC -2.0%)。H4 Max of Two 最佳 Sortino (2.074)。H5 Conviction 最佳 return-to-risk ($15M, MDD -8.1%)。但沒有 hybrid 超越 Piecewise Sharpe 1.543。\n\n結論：個別策略已是各自目標的最優解（PW=MDD最小, VCL=CAGR最高）。混合提供中間選項，不是 alpha。5/5 hybrids 全部 Harvey pass vs B&H。",
+    "tags": [
+      "hybrid",
+      "multi_strategy",
+      "portfolio",
+      "adaptive_tier",
+      "user_suggested"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX+IRX 2004-2026",
+    "experiment_id": "k595",
+    "created_at": "2026-03-28T03:56:37.435713+00:00",
+    "importance": 4
   }
 ]
