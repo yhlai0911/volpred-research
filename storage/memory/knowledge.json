@@ -15209,5 +15209,21 @@
     "data_source": "yfinance (0050.TW, 2330.TW)",
     "experiment_id": "k617",
     "created_at": "2026-03-28T08:25:34.680100+00:00"
+  },
+  {
+    "id": "K618",
+    "title": "K618: KAN Volatility — Comprehensive null, 113% worse than GARCH (t=+14.38)",
+    "content": "[提出: K590 文獻, 執行: Claude] KAN (B-spline activations) vs MLP vs GJR vs HAR-ABS。KAN QLIKE 1.096 vs GJR 0.515 (+113%)。DM t=+14.38 GJR wins。KAN 366 params (92x GJR) but far worse。HAR-ABS 仍是 champion (0.495)。ML cannot beat GARCH 再次確認（Branco 2024 + K600）。",
+    "tags": [
+      "KAN",
+      "neural_network",
+      "ML",
+      "null_result",
+      "GARCH_ceiling"
+    ],
+    "data_source": "yfinance SPY 2004-2026",
+    "experiment_id": "k618",
+    "created_at": "2026-03-28T09:05:27.156889+00:00",
+    "importance": 2
   }
 ]
