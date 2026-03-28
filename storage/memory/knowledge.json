@@ -15158,5 +15158,20 @@
     "evidence": "experiments/k600_session_meta_analysis.json, experiments/k526-k598 result files",
     "confidence": 0.95,
     "created_at": "2026-03-28T05:01:28.840017+00:00"
+  },
+  {
+    "id": "K603",
+    "title": "K603: Dynamic Target Vol — Null, 12% fixed is mathematically optimal (target cancels in Sharpe)",
+    "content": "[提出: Claude, 執行: Claude] 5 dynamic target strategies。Rate-Adjusted best (+0.035 Sharpe) but DM t=1.32 (NS)。VIX-Regime/Rolling Sharpe/Inv Pctile 全部更差。原因：target vol 在 Sharpe ratio 分子分母抵消，動態調整只增加 noise + turnover。VIX double-dipping（K4 確認）。",
+    "tags": [
+      "target_vol",
+      "dynamic",
+      "null_result",
+      "12_percent_optimal"
+    ],
+    "data_source": "yfinance SPY+GLD+VIX+IRX 2004-2026",
+    "experiment_id": "k603",
+    "created_at": "2026-03-28T05:45:37.452684+00:00",
+    "importance": 2
   }
 ]
