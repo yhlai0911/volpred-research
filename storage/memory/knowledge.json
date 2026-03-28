@@ -15150,5 +15150,13 @@
     "experiment_id": "k598",
     "created_at": "2026-03-28T04:44:32.361925+00:00",
     "importance": 4
+  },
+  {
+    "item_id": "K600",
+    "category": "meta_analysis",
+    "content": "[提出: 用戶, 執行: Claude] K600: Session Meta-Analysis Milestone — 59 experiments (K526-K598), 第 600 個實驗。\n\n**統計**：59 experiments w/ results, 29 null (49.2%), 19 positive (32.2%), 3 breakthroughs (5.1%), 6 marginal, 2 mixed. 5 strategies listed (vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier). 3 papers updated. 197 articles published. 10 experience records (E019-E028). ~68 knowledge entries.\n\n**3 大突破**：(1) HAR 預測革命 (K530, DM=-15.45 vs GARCH, 7/7 assets universal) (2) VIX 條件槓桿 (K548, t=7.90, 11/11 OOS) (3) 台股混合槓桿 (K553, t=4.79, 18/18 OOS)\n\n**5 大 meta-lessons**：\nL1: Prediction ≠ Trading — HAR best predictor but worst strategy (K533/K540/K594)\nL2: VIX Sufficiency Wall — 15+ confirmations this session, 40+ total, NO signal breaks through\nL3: Daily Rebalancing Artifact — Sharpe 2.157→1.228 at monthly (K560/K562/K563/K566)\nL4: Portfolio Construction > Signal Discovery — ALL 5 listed strategies modify HOW not WHEN\nL5: Conservative Design Is Robust — Piecewise 2 params, Adaptive 3 thresholds, debounce HURTS (K598)\n\n**最有效方向**：Strategy Validation + Portfolio Construction。22 signal searches = 0 listed, 11 validations = 5 listed\n**最大浪費**：VIX Overlay Signal Search (22 experiments, ALL null at Harvey t>3.0)\n\n**下一步建議**：(1) 停止找 VIX 替代品 (2) 追蹤 live paper trading (3) 深化跨市場 (4) 高頻/5min 研究 (5) 理論論文獨立發表 (6) SEO/平台產品化\n\n**里程碑意義**：K600 標記從「模型探索」到「投資組合建構」的轉折。預測問題已解（HAR），交易問題需要不同思維（槓桿、風險配置、保守設計）。",
+    "evidence": "experiments/k600_session_meta_analysis.json, experiments/k526-k598 result files",
+    "confidence": 0.95,
+    "created_at": "2026-03-28T05:01:28.840017+00:00"
   }
 ]
