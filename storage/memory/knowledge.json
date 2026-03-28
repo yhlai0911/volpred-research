@@ -15645,5 +15645,22 @@
     "experiment_id": "k642",
     "created_at": "2026-03-29T03:57:51.752323",
     "importance": 3
+  },
+  {
+    "id": "K643",
+    "title": "K643: ★★ Multi-Strategy Portfolio — Single best (Piecewise) beats all combinations",
+    "content": "[提出: 策略組合探索, 執行: Claude] 6 種策略組合方法 × 8 individual strategies（809 days）。Piecewise Conservative Sharpe 3.16 獨自打敗所有組合——最佳組合 Regime Conditional 2.69（-14.7%）。原因：策略平均相關 0.72（太高），共享 SPY 曝險→無分散效益。Markowitz 自動集中 57.5% 到 Piecewise（HHI 0.82）。Best-2 momentum 64.2% 時間選 Piecewise。唯一亮點：Regime Conditional 在 H2 改善（delta +0.25），是最穩定的組合方法。結論：不需要策略組合——找到一個最佳策略即可。但如果想分散，Regime Conditional 最好。",
+    "tags": [
+      "multi-strategy",
+      "portfolio",
+      "diversification",
+      "Piecewise",
+      "correlation",
+      "Markowitz"
+    ],
+    "data_source": "paper_trading.json + yfinance VIX 2023-2026",
+    "experiment_id": "k643",
+    "created_at": "2026-03-29T04:06:34.014489",
+    "importance": 3
   }
 ]

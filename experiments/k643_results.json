@@ -1,0 +1,412 @@
+{
+  "experiment_id": "K643",
+  "title": "Optimal Multi-Strategy Portfolio",
+  "timestamp": "2026-03-28T20:05:51.754411+00:00",
+  "data_source": "paper_trading.json + yfinance (VIX)",
+  "data_period": "2023-01-04 to 2026-03-26",
+  "n_common_days": 809,
+  "n_strategies": 8,
+  "strategies_used": {
+    "slow_vt": "GARCH VT",
+    "risk_parity": "Risk Parity",
+    "simple_12vix": "12/VIX",
+    "recommended_5050": "50/50 SPY/GLD",
+    "vix_cond_leverage": "VIX Cond Lev",
+    "piecewise_conservative": "Piecewise Cons",
+    "fear_dca": "Fear DCA",
+    "adaptive_tier": "Adaptive Tier"
+  },
+  "rolling_window": 60,
+  "methodology": {
+    "equal_weight": "1/N across all strategies",
+    "inverse_vol": "Weight ~ 1/sigma_i, rolling 60-day",
+    "risk_parity_meta": "Each strategy contributes equal risk (iterative)",
+    "max_sharpe": "Rolling Markowitz mean-variance, long-only constrained",
+    "best_2": "Hold 2 strategies with highest rolling 60-day Sharpe, equal weight",
+    "regime_conditional": "Calm (VIX<20): Adaptive Tier + 50/50; Stress: Piecewise + VIX Cond Lev"
+  },
+  "references": [
+    "DeMiguel et al. (2009) Optimal vs Naive Diversification, RFS",
+    "Maillard et al. (2010) ERC Portfolios, JPM"
+  ],
+  "individual_metrics": {
+    "slow_vt": {
+      "name": "GARCH VT",
+      "n_days": 809,
+      "ann_return_pct": 11.19,
+      "ann_vol_pct": 9.59,
+      "sharpe": 1.167,
+      "sortino": 1.613,
+      "max_drawdown_pct": -10.72,
+      "calmar": 1.043,
+      "win_rate_pct": 56.4,
+      "cumulative_return_pct": 40.53
+    },
+    "risk_parity": {
+      "name": "Risk Parity",
+      "n_days": 809,
+      "ann_return_pct": 27.18,
+      "ann_vol_pct": 13.31,
+      "sharpe": 2.042,
+      "sortino": 2.747,
+      "max_drawdown_pct": -11.48,
+      "calmar": 2.367,
+      "win_rate_pct": 59.1,
+      "cumulative_return_pct": 130.36
+    },
+    "simple_12vix": {
+      "name": "12/VIX",
+      "n_days": 809,
+      "ann_return_pct": 10.71,
+      "ann_vol_pct": 9.27,
+      "sharpe": 1.156,
+      "sortino": 1.597,
+      "max_drawdown_pct": -10.99,
+      "calmar": 0.975,
+      "win_rate_pct": 56.4,
+      "cumulative_return_pct": 38.55
+    },
+    "recommended_5050": {
+      "name": "50/50 SPY/GLD",
+      "n_days": 809,
+      "ann_return_pct": 15.87,
+      "ann_vol_pct": 8.51,
+      "sharpe": 1.865,
+      "sortino": 2.355,
+      "max_drawdown_pct": -7.67,
+      "calmar": 2.07,
+      "win_rate_pct": 60.1,
+      "cumulative_return_pct": 63.76
+    },
+    "vix_cond_leverage": {
+      "name": "VIX Cond Lev",
+      "n_days": 809,
+      "ann_return_pct": 26.34,
+      "ann_vol_pct": 9.96,
+      "sharpe": 2.644,
+      "sortino": 3.656,
+      "max_drawdown_pct": -6.41,
+      "calmar": 4.109,
+      "win_rate_pct": 60.1,
+      "cumulative_return_pct": 128.08
+    },
+    "piecewise_conservative": {
+      "name": "Piecewise Cons",
+      "n_days": 809,
+      "ann_return_pct": 16.73,
+      "ann_vol_pct": 5.29,
+      "sharpe": 3.16,
+      "sortino": 3.808,
+      "max_drawdown_pct": -2.48,
+      "calmar": 6.743,
+      "win_rate_pct": 49.9,
+      "cumulative_return_pct": 70.28
+    },
+    "fear_dca": {
+      "name": "Fear DCA",
+      "n_days": 809,
+      "ann_return_pct": 18.89,
+      "ann_vol_pct": 15.19,
+      "sharpe": 1.243,
+      "sortino": 1.681,
+      "max_drawdown_pct": -18.76,
+      "calmar": 1.007,
+      "win_rate_pct": 56.6,
+      "cumulative_return_pct": 75.35
+    },
+    "adaptive_tier": {
+      "name": "Adaptive Tier",
+      "n_days": 809,
+      "ann_return_pct": 27.88,
+      "ann_vol_pct": 9.22,
+      "sharpe": 3.023,
+      "sortino": 3.683,
+      "max_drawdown_pct": -5.06,
+      "calmar": 5.515,
+      "win_rate_pct": 49.9,
+      "cumulative_return_pct": 141.33
+    }
+  },
+  "combination_metrics": {
+    "equal_weight": {
+      "name": "Equal Weight (1/N)",
+      "n_days": 809,
+      "ann_return_pct": 19.35,
+      "ann_vol_pct": 8.71,
+      "sharpe": 2.22,
+      "sortino": 3.275,
+      "max_drawdown_pct": -7.02,
+      "calmar": 2.758,
+      "win_rate_pct": 57.5,
+      "cumulative_return_pct": 83.03,
+      "avg_daily_turnover": 0.0,
+      "ann_turnover_pct": 0.0,
+      "net_sharpe": 2.22,
+      "net_ann_return_pct": 19.35
+    },
+    "inverse_vol": {
+      "name": "Inverse Volatility",
+      "n_days": 750,
+      "ann_return_pct": 17.99,
+      "ann_vol_pct": 7.84,
+      "sharpe": 2.293,
+      "sortino": 3.405,
+      "max_drawdown_pct": -5.7,
+      "calmar": 3.154,
+      "win_rate_pct": 57.5,
+      "cumulative_return_pct": 68.74,
+      "avg_daily_turnover": 0.005076,
+      "ann_turnover_pct": 127.93,
+      "net_sharpe": 2.277,
+      "net_ann_return_pct": 17.86
+    },
+    "risk_parity_meta": {
+      "name": "Risk Parity",
+      "n_days": 749,
+      "ann_return_pct": 17.32,
+      "ann_vol_pct": 7.87,
+      "sharpe": 2.201,
+      "sortino": 3.227,
+      "max_drawdown_pct": -5.74,
+      "calmar": 3.016,
+      "win_rate_pct": 57.0,
+      "cumulative_return_pct": 65.29,
+      "avg_daily_turnover": 0.005668,
+      "ann_turnover_pct": 142.84,
+      "net_sharpe": 2.183,
+      "net_ann_return_pct": 17.18
+    },
+    "max_sharpe": {
+      "name": "Max Sharpe (Markowitz)",
+      "n_days": 749,
+      "ann_return_pct": 16.82,
+      "ann_vol_pct": 7.71,
+      "sharpe": 2.181,
+      "sortino": 2.616,
+      "max_drawdown_pct": -4.71,
+      "calmar": 3.57,
+      "win_rate_pct": 56.9,
+      "cumulative_return_pct": 63.16,
+      "avg_daily_turnover": 0.104612,
+      "ann_turnover_pct": 2636.23,
+      "net_sharpe": 1.841,
+      "net_ann_return_pct": 14.19
+    },
+    "best_2": {
+      "name": "Best-2 Momentum",
+      "n_days": 749,
+      "ann_return_pct": 19.59,
+      "ann_vol_pct": 8.54,
+      "sharpe": 2.295,
+      "sortino": 2.799,
+      "max_drawdown_pct": -4.74,
+      "calmar": 4.135,
+      "win_rate_pct": 51.9,
+      "cumulative_return_pct": 76.3,
+      "avg_daily_turnover": 0.097463,
+      "ann_turnover_pct": 2456.07,
+      "net_sharpe": 2.007,
+      "net_ann_return_pct": 17.14
+    },
+    "regime_conditional": {
+      "name": "Regime Conditional",
+      "n_days": 809,
+      "ann_return_pct": 22.95,
+      "ann_vol_pct": 8.52,
+      "sharpe": 2.694,
+      "sortino": 3.584,
+      "max_drawdown_pct": -5.54,
+      "calmar": 4.142,
+      "win_rate_pct": 60.1,
+      "cumulative_return_pct": 105.96,
+      "avg_daily_turnover": 0.084054,
+      "ann_turnover_pct": 2118.17,
+      "net_sharpe": 2.442,
+      "net_ann_return_pct": 20.83
+    }
+  },
+  "correlation": {
+    "avg_pairwise": 0.7166,
+    "min_pairwise": 0.3587,
+    "max_pairwise": 0.9914,
+    "pairs": {
+      "GARCH VT vs VIX Cond Lev": 0.6002,
+      "Risk Parity vs GARCH VT": 0.7058,
+      "Risk Parity vs 12/VIX": 0.7039,
+      "Risk Parity vs VIX Cond Lev": 0.9092,
+      "12/VIX vs GARCH VT": 0.9914,
+      "12/VIX vs VIX Cond Lev": 0.6011,
+      "50/50 SPY/GLD vs GARCH VT": 0.6289,
+      "50/50 SPY/GLD vs Risk Parity": 0.9511,
+      "50/50 SPY/GLD vs 12/VIX": 0.6304,
+      "50/50 SPY/GLD vs VIX Cond Lev": 0.9538,
+      "Piecewise Cons vs GARCH VT": 0.4845,
+      "Piecewise Cons vs Risk Parity": 0.7714,
+      "Piecewise Cons vs 12/VIX": 0.4804,
+      "Piecewise Cons vs 50/50 SPY/GLD": 0.8242,
+      "Piecewise Cons vs VIX Cond Lev": 0.9024,
+      "Fear DCA vs GARCH VT": 0.9046,
+      "Fear DCA vs Risk Parity": 0.6361,
+      "Fear DCA vs 12/VIX": 0.9296,
+      "Fear DCA vs 50/50 SPY/GLD": 0.5652,
+      "Fear DCA vs VIX Cond Lev": 0.5509,
+      "Fear DCA vs Piecewise Cons": 0.3587,
+      "Adaptive Tier vs GARCH VT": 0.5095,
+      "Adaptive Tier vs Risk Parity": 0.8101,
+      "Adaptive Tier vs 12/VIX": 0.5048,
+      "Adaptive Tier vs 50/50 SPY/GLD": 0.8664,
+      "Adaptive Tier vs VIX Cond Lev": 0.928,
+      "Adaptive Tier vs Piecewise Cons": 0.9723,
+      "Adaptive Tier vs Fear DCA": 0.3893
+    }
+  },
+  "stability": {
+    "GARCH VT": {
+      "mean_rolling_sharpe": 1.472,
+      "std_rolling_sharpe": 1.904,
+      "min_rolling_sharpe": -3.432,
+      "max_rolling_sharpe": 6.292
+    },
+    "Risk Parity": {
+      "mean_rolling_sharpe": 2.539,
+      "std_rolling_sharpe": 1.823,
+      "min_rolling_sharpe": -2.171,
+      "max_rolling_sharpe": 6.736
+    },
+    "12/VIX": {
+      "mean_rolling_sharpe": 1.482,
+      "std_rolling_sharpe": 1.963,
+      "min_rolling_sharpe": -3.503,
+      "max_rolling_sharpe": 6.664
+    },
+    "50/50 SPY/GLD": {
+      "mean_rolling_sharpe": 2.226,
+      "std_rolling_sharpe": 1.685,
+      "min_rolling_sharpe": -2.924,
+      "max_rolling_sharpe": 7.252
+    },
+    "VIX Cond Lev": {
+      "mean_rolling_sharpe": 2.964,
+      "std_rolling_sharpe": 1.649,
+      "min_rolling_sharpe": -1.644,
+      "max_rolling_sharpe": 7.295
+    },
+    "Piecewise Cons": {
+      "mean_rolling_sharpe": 3.445,
+      "std_rolling_sharpe": 1.675,
+      "min_rolling_sharpe": -0.993,
+      "max_rolling_sharpe": 7.02
+    },
+    "Fear DCA": {
+      "mean_rolling_sharpe": 1.787,
+      "std_rolling_sharpe": 1.849,
+      "min_rolling_sharpe": -2.875,
+      "max_rolling_sharpe": 7.281
+    },
+    "Adaptive Tier": {
+      "mean_rolling_sharpe": 3.201,
+      "std_rolling_sharpe": 1.657,
+      "min_rolling_sharpe": -1.644,
+      "max_rolling_sharpe": 7.214
+    },
+    "Equal Weight (1/N)": {
+      "mean_rolling_sharpe": 2.54,
+      "std_rolling_sharpe": 1.794,
+      "min_rolling_sharpe": -2.247,
+      "max_rolling_sharpe": 6.724
+    },
+    "Inverse Volatility": {
+      "mean_rolling_sharpe": 2.614,
+      "std_rolling_sharpe": 1.82,
+      "min_rolling_sharpe": -2.144,
+      "max_rolling_sharpe": 6.804
+    },
+    "Max Sharpe (Markowitz)": {
+      "mean_rolling_sharpe": 2.557,
+      "std_rolling_sharpe": 1.721,
+      "min_rolling_sharpe": -1.737,
+      "max_rolling_sharpe": 6.224
+    },
+    "Best-2 Momentum": {
+      "mean_rolling_sharpe": 2.529,
+      "std_rolling_sharpe": 1.563,
+      "min_rolling_sharpe": -1.728,
+      "max_rolling_sharpe": 6.325
+    },
+    "Regime Conditional": {
+      "mean_rolling_sharpe": 2.945,
+      "std_rolling_sharpe": 1.622,
+      "min_rolling_sharpe": -2.147,
+      "max_rolling_sharpe": 7.279
+    }
+  },
+  "sub_period_robustness": {
+    "equal_weight": {
+      "H1_sharpe": 2.468,
+      "H2_sharpe": 1.959,
+      "delta": -0.509
+    },
+    "inverse_vol": {
+      "H1_sharpe": 2.728,
+      "H2_sharpe": 1.791,
+      "delta": -0.937
+    },
+    "risk_parity_meta": {
+      "H1_sharpe": 2.678,
+      "H2_sharpe": 1.649,
+      "delta": -1.029
+    },
+    "max_sharpe": {
+      "H1_sharpe": 2.33,
+      "H2_sharpe": 2.028,
+      "delta": -0.302
+    },
+    "best_2": {
+      "H1_sharpe": 2.574,
+      "H2_sharpe": 1.979,
+      "delta": -0.595
+    },
+    "regime_conditional": {
+      "H1_sharpe": 2.572,
+      "H2_sharpe": 2.82,
+      "delta": 0.248
+    }
+  },
+  "max_sharpe_concentration": {
+    "avg_hhi": 0.8215,
+    "avg_weights": {
+      "GARCH VT": 0.0082,
+      "Risk Parity": 0.0184,
+      "12/VIX": 0.0191,
+      "50/50 SPY/GLD": 0.0069,
+      "VIX Cond Lev": 0.0533,
+      "Piecewise Cons": 0.5753,
+      "Fear DCA": 0.1725,
+      "Adaptive Tier": 0.1463
+    }
+  },
+  "best_2_selection_freq": {
+    "GARCH VT": 10.5,
+    "Risk Parity": 9.7,
+    "12/VIX": 12.1,
+    "50/50 SPY/GLD": 0.7,
+    "VIX Cond Lev": 30.7,
+    "Piecewise Cons": 64.2,
+    "Fear DCA": 22.6,
+    "Adaptive Tier": 49.4
+  },
+  "regime_split": {
+    "calm_days": 653,
+    "stress_days": 156,
+    "calm_pct": 80.7
+  },
+  "key_finding": {
+    "diversification_adds_value": "False",
+    "best_combination": "Regime Conditional",
+    "best_combination_sharpe": 2.694,
+    "best_combination_net_sharpe": 2.442,
+    "best_individual": "Piecewise Cons",
+    "best_individual_sharpe": 3.16,
+    "improvement_pct": -14.7
+  }
+}
