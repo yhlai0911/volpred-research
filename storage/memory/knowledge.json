@@ -15783,5 +15783,39 @@
     "experiment_id": "k650",
     "created_at": "2026-03-29T04:47:36.121842",
     "importance": 3
+  },
+  {
+    "id": "K651",
+    "title": "K651: FRED Macro Indicators — NULL, credit spread coefficient flips sign across periods",
+    "content": "[提出: 跳躍探索/宏觀, 執行: Claude] TLT momentum, HYG/LQD credit spread, bond vol, equity-bond corr 作為 SPY vol predictor。HAR-only QLIKE=1.570 勝所有 macro-augmented 模型。HAR+all macro 2.377（-51%）。Credit spread IS t=-2.19(p=0.029) 但 OOS 不存活，係數跨期翻號（不穩定）。Regime prediction AUC: macro 0.659 vs VIX-only 0.958——VIX 遠優。結論：macro 在低頻運作，daily equity vol 已被 VIX 和 past RV 完全捕捉。VIX sufficiency 再確認。",
+    "tags": [
+      "macro",
+      "FRED",
+      "credit-spread",
+      "yield-curve",
+      "null-result",
+      "VIX-sufficiency"
+    ],
+    "data_source": "yfinance SPY/VIX/TLT/HYG/LQD/TNX 2010-2026",
+    "experiment_id": "k651",
+    "created_at": "2026-03-29T05:18:59.997860",
+    "importance": 2
+  },
+  {
+    "id": "K652",
+    "title": "K652: ★★★ VIX Action Thresholds — VIX>28 best signal, dVIX>1 optimal action threshold",
+    "content": "[提出: 實務應用, 執行: Claude] VIX 行動門檻系統性分析。Level: VIX crossing 28 up→+2.45% 20d(t=2.50, 76.5% win)。VIX>30 forward return +28%/yr 但 vol 46.6%。VIX spike 不是顯著 contrarian signal(p>0.2)。Mean-reversion 中位 6-9.5 天。Action threshold: dVIX>1 最實用（Net Sharpe 1.446 vs daily 1.451，但 trades 減 60%: 91/yr vs 227/yr）。Check frequency: daily 最佳(1.45)，weekly 成本 -34%(0.96)，monthly 仍可(0.86)。VIX Action Guide validated: Calm<15→92% equity, Normal 15-20→70%, Elevated 20-25→54%, High Alert 25-30→44%, Crisis>30→31%。",
+    "tags": [
+      "VIX-thresholds",
+      "action-guide",
+      "practical",
+      "rebalance",
+      "contrarian",
+      "mean-reversion"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k652",
+    "created_at": "2026-03-29T05:18:59.997870",
+    "importance": 4
   }
 ]
