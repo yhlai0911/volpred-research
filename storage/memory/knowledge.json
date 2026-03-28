@@ -15750,5 +15750,22 @@
     "experiment_id": "k648",
     "created_at": "2026-03-29T04:35:06.074021",
     "importance": 3
+  },
+  {
+    "id": "K649",
+    "title": "K649: Vol-of-Vol — NULL for regime prediction, calm-before-storm rejected, VoV adjustment hurts",
+    "content": "[提出: K448 延伸/regime 視角, 執行: Claude] σ_VIX/VVIX 能否預測 VIX regime 變化（crossing 20）。Best AUC=0.587（marginally above random）。σ_VIX incremental AUC bootstrap p=0.218 NS。VoV-adjusted 12/VIX Sharpe 0.527 顯著 < standard 0.680（DM p=0.005）——過度避險。Calm-before-storm 假說 rejected（storm 前 σ_VIX 不 elevated，p=0.148）。σ_VIX 是 lagging indicator。VVIX leads σ_VIX（implied>realized）。VIX sufficiency 再確認——連 vol-of-vol 都無增量。",
+    "tags": [
+      "vol-of-vol",
+      "VVIX",
+      "regime-change",
+      "calm-before-storm",
+      "null-result",
+      "VIX-sufficiency"
+    ],
+    "data_source": "yfinance SPY/VIX/VVIX 2007-2026",
+    "experiment_id": "k649",
+    "created_at": "2026-03-29T04:42:18.271291",
+    "importance": 2
   }
 ]
