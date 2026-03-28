@@ -15503,5 +15503,22 @@
     "experiment_id": "k634",
     "created_at": "2026-03-29T02:54:46.005273",
     "importance": 4
+  },
+  {
+    "id": "K635",
+    "title": "K635: ★★ Fixed vs Rolling GARCH VT — Aligned direction but economically NS (turnover -74%)",
+    "content": "[提出: K634 驗證, 執行: Claude] 固定參數 GJR-GARCH VT vs 滾動 VT。SPY OOS 2023-2024：Fixed Sharpe 1.614 vs Rolling 1.567（+0.047），QLIKE 1.464 vs 1.492（DM p<0.001）。方向一致但 Economic DM p=0.183 不顯著。主要優勢：turnover -74%（65 vs 247 次 weight change >5pp）。50/50 SPY/GLD：Fixed 1.961 vs Rolling 1.937（同向同幅度）。12/VIX 仍遠超所有 GARCH VT（Sharpe 2.65）。結論：固定參數統計上更好、實務上更穩（少交易）但經濟差異微小。Prediction≠Application 第 7 次：方向對了但幅度不夠。建議：可改為季度 refit（而非月頻），兼顧穩定性和適應性。",
+    "tags": [
+      "fixed-vs-rolling",
+      "GARCH",
+      "VT-strategy",
+      "turnover",
+      "prediction-vs-application",
+      "SPY"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k635",
+    "created_at": "2026-03-29T03:01:16.963647",
+    "importance": 3
   }
 ]
