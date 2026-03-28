@@ -15413,5 +15413,22 @@
     "experiment_id": "k629",
     "created_at": "2026-03-29T01:55:31.509157",
     "importance": 2
+  },
+  {
+    "id": "K630",
+    "title": "K630: ★ Overnight/Intraday Decomposition — Rich descriptive, null for OOS forecasting",
+    "content": "[提出: Codex 建議 #2, 執行: Claude] SPY 隔夜/日內分解。隔夜佔日方差 36.6%（COVID 期間 55.7%）。隔夜 return 強左偏(-1.44)極峰(25.9)。大幅隔夜缺口→V 形日內波動反應（負缺口 3.77x，正缺口 3.08x）。r_on 與 r_id 幾乎不相關(0.039)但 r²相關(0.206)。OOS：GJR-GARCH baseline QLIKE=1.519 最佳。HAR-OI +1.54%（NS）。GJR-X(overnight) +5.68%（marginally worse DM p=0.07）。結論：分解揭示有趣市場微結構但在 r² proxy 下無預測增量。等 5-min RV 後可能不同。",
+    "tags": [
+      "overnight-gap",
+      "intraday",
+      "decomposition",
+      "market-microstructure",
+      "null-result",
+      "SPY"
+    ],
+    "data_source": "yfinance SPY 2006-2026",
+    "experiment_id": "k630",
+    "created_at": "2026-03-29T02:04:34.907250",
+    "importance": 2
   }
 ]
