@@ -16810,5 +16810,22 @@
     "experiment_id": "k711",
     "created_at": "2026-03-29T18:36:18.168876",
     "importance": 1
+  },
+  {
+    "id": "K712",
+    "title": "K712: ETF Robustness — 50/50 holds with VTI/IAU (corr>0.99 with SPY/GLD)",
+    "content": "[提出: 穩健性, 執行: Claude] SPY/GLD Sharpe 0.860, VTI/IAU 0.856, SPY/IAU 0.865, VTI/GLD 0.852——全部在 0.01 以內。SPY-VTI corr=0.994, GLD-IAU=0.997。ETF 選擇不影響結論。投資人可用任何美股大盤+黃金 ETF 組合。",
+    "tags": [
+      "ETF-robustness",
+      "SPY",
+      "VTI",
+      "GLD",
+      "IAU",
+      "50/50"
+    ],
+    "data_source": "yfinance SPY/GLD/VTI/IAU 2006-2026",
+    "experiment_id": "k712",
+    "created_at": "2026-03-29T18:51:17.578097",
+    "importance": 2
   }
 ]
