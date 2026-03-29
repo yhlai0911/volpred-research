@@ -34,7 +34,8 @@
 12. **Lookahead Bias 檢查（最常見錯誤）**：所有策略回測必須確認信號 lag：
    - **Signal from t-1, return at t**：weight 基於昨天的 VIX，今天的 return
    - **禁止 same-day**：weight 基於今天 VIX × 今天 return = 未來資訊（lookahead）
-   - 歷史教訓：K679 VIX Percentile Sharpe 1.68→修正 lag 後 0.355（100% artifact）；K693 paper_trading 9935 筆歷史數據有同日 lookahead
+   - 歷史教訓：K679 VIX Percentile Sharpe 1.68→修正 lag 後 0.355（100% artifact）
+   - **不修改歷史數據**：K693 嘗試修改 9935 筆歷史 portfolio_return 導致更多問題（metrics 不同步、Supabase 不一致）→ 已 revert。正確做法是讓 forward tracking 自然修正
    - **Codex 審查已 3 次抓到 lookahead**（K618→K619, K621→K623, K679→K686）——任何「好得不像真的」結果必須用 Codex 檢查 lag
 12. **自我修正後回溯更新**：每次推翻或修正先前結論時，必須立即：
    - 搜尋已發佈文章中引用該結論的內容（用 grep 搜尋關鍵詞）
@@ -70,16 +71,21 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 ### 資料流
 - `storage/` → 本地唯一源頭（JSON）
 - `scripts/supabase_sync.py` → Supabase 同步工具（由 daily_update.py 呼叫，不需獨立 cron）
-  - **文章同步**：同時讀取 `storage/reports/feed.json` + `storage/feed.json`（雙源合併）
+  - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
   - **Paper trades 同步**：自動剝離市場數據（spy_close/gld_close 等），只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾（支持 draft sync）
 - `scripts/daily_update.py` → 每日 06:03 計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
 - `scripts/recalc_metrics.py` → 從 paper_trading.json 重算 Sharpe/MDD 等（daily_update 自動呼叫）
 - **Paper Trading 資料結構**：
-  - `paper_trading.json` entries 只存：`trade_date, data_date, weights, portfolio_return, cash_weight, actual_returns`
-  - 市場數據（SPY/GLD/VIX 價格）統一存在 `_market_daily`（key=日期），不在每個 entry 重複
-  - `portfolio_return` 使用 **next-day return**：weight_T × (close_{T+1}/close_T - 1)，**不是 same-day**
-  - ⚠️ 2026-03-29 K693 修正：歷史 9,935 筆條目從 same-day 改為 next-day return
+  - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
+  - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
+  - `recalc_metrics.py` 每次執行自動 sync 到 Supabase `strategy_metrics_cache`
+  - **不修改歷史數據**：歷史 entries 反映當時追蹤的結果，隨新的正確條目累積 metrics 自然收斂
+  - 市場數據統一存在 `_market_daily`（key=日期），不在每個 entry 重複
+- **新策略評估**：
+  - 必須用 `scripts/evaluate_new_strategy.py` 在 COMMON_START（2023-01-04）~ 今天的同期間比較
+  - 與已上架策略的 paper_trading actual returns 做公平比較（同期間、同 lag、同 TX cost）
+  - 通過同期間比較 + cross-OOS 才能進入上架流程
 - `src/volpred/ops/` + `uv run volpred ops ...` → agent-first 操作層（真人與本機 agent 共用）
 - 前端從 Supabase 讀取策略 metadata，不需靜態檔案同步
 - **Mirror 資料流**：`MemorySystem._sync_to_remote()` → 前端 `/api/sync/{file}` → 雙寫 Supabase + Mirror API
@@ -115,15 +121,25 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 | `fear_dca` | 恐慌加碼定期定額 | True | 12 |
 | `adaptive_tier` | 自適應三階 VT | True | 13 |
 
-### 重要研究結論（2026-03-29 K687/K693 修正後）
+### 重要研究結論（2026-03-29 K687/K697/K700）
 
 **VT 策略是 drawdown insurance，不是 alpha generator。**
-- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50
+- K697：VIX 預測 vol magnitude（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 不可能
+- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）
 - K688：但 VT 在 CRRA utility 框架 γ≥5 時勝出（風險厭惡投資人受益）
-- K690：EWMA VT 最 lag-robust（weight autocorr 0.99），Piecewise 最脆弱
-- K693：歷史 paper_trading 9935 筆修正 same-day → next-day return
-- K694：修正後 7/10 策略仍勝 SPY，但 Sharpe 平均下降 0.74
+- K702：50/50 SPY/GLD 是最佳靜態配置（grid search 確認）
+- K704：50/50 恰好等於 Risk Parity（SPY vol 19.3% ≈ GLD vol 18.3%）
+- K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
 - **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——這是最可靠的設計原則**
+
+### 策略評估 SOP（不可跳步）
+
+**新策略評估必須走完以下步驟，缺一不可：**
+1. **同期間比較**：`uv run python scripts/evaluate_new_strategy.py` — 用 COMMON_START~today 模擬，vs paper_trading 同期間
+2. **Cross-OOS 驗證**：至少 5 個非重疊期間，必須贏 ≥4/5
+3. **Codex 審查**：任何正 alpha 結果必須用 Codex 檢查 lag/lookahead/TX bug
+4. **通過後**：加入 STRATEGY_REGISTRY → paper_trading.json → recalc_metrics（自動 sync Supabase）
+5. **不修改歷史數據**：新策略從加入日起 forward tracking，歷史績效用模擬值標注為「回測」
 
 ### 每日文章產出要求（不可缺少任何一種）
 

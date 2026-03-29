@@ -499,11 +499,11 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
     from datetime import datetime, timezone
     now = datetime.now(timezone.utc).isoformat()
 
-    # Articles — sync from reports/feed.json AND storage/feed.json
-    # Merge both sources: reports/feed.json (main DB) + storage/feed.json (agent-written drafts)
+    # Articles — sync from reports/feed.json (SINGLE source of truth)
+    # storage/feed.json is DEPRECATED — do not read from it
     feed = []
     feed_mtime = 0
-    for fp in [storage / "reports" / "feed.json", storage / "feed.json"]:
+    for fp in [storage / "reports" / "feed.json"]:
         if fp.exists():
             feed_mtime = max(feed_mtime, fp.stat().st_mtime)
             items = json.loads(fp.read_text())

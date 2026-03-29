@@ -7,10 +7,26 @@
 
 ## 前置條件（缺一不可）
 1. 策略已完成研究（有回測結果、Harvey t>3 統計顯著性）
-2. 已發佈至少一篇 feed 文章描述策略
-3. 確認 data-timing.md 中的時間規則已遵循
+2. **同期間比較通過**：`uv run python scripts/evaluate_new_strategy.py` 在 COMMON_START（2023-01-04）~ 今天的同期間 vs 已上架策略，排名前 3 才可考慮上架
+3. **Cross-OOS 驗證通過**：至少 5 個非重疊期間，勝 ≥4/5
+4. **Codex 審查通過**：任何正 alpha 結果必須用 Codex 檢查 lag/lookahead/TX bug
+5. 已發佈至少一篇 feed 文章描述策略
+6. 確認 data-timing.md 中的時間規則已遵循
+
+## ⚠️ 不修改歷史數據原則
+- 新策略從加入 paper_trading.json 的日期起 forward tracking
+- **不修改已上架策略的歷史 portfolio_return**——歷史數據反映當時追蹤的結果
+- 如需比較，用 `evaluate_new_strategy.py` 在同期間模擬，不改原始數據
+- `recalc_metrics.py` 每次執行自動 sync 到 Supabase（不需手動 PATCH）
 
 ## 完整步驟
+
+### Step 0: 同期間比較（新增，不可跳過！）
+```bash
+uv run python scripts/evaluate_new_strategy.py --example  # 測試工具
+# 或 import evaluate_new_strategy 寫自訂 weights_func
+```
+新策略必須在同期間（2023-01-04~today）排名前 3 才進入 Step 1。
 
 ### Step 1: 發 Feed 文章（必須先於上線）
 ```

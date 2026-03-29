@@ -251,7 +251,7 @@ Tag 規則：
 - [ ] 回答「為什麼這個結果重要？」
 - [ ] 回答「投資人可以怎麼用？」
 - [ ] content 欄位非空且 > 300 字
-- [ ] 寫入 `storage/reports/feed.json`（**不是** `storage/feed.json`！後者是 legacy）
+- [ ] 寫入 `storage/reports/feed.json`（`storage/feed.json` 已廢除，不要使用）
 - [ ] 寫入 `storage/reports/{id}.json`，且**必須包含完整 content**（不可空白）
 - [ ] 寫完後執行 `uv run python scripts/supabase_sync.py full`（確保同步到 Supabase）
 - [ ] Badge：category=milestone, status=published

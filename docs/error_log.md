@@ -215,3 +215,29 @@
 - feed-publisher skill 已更新發文 checklist
 - `supabase_sync.py` 雙源讀取永久化
 - 未來 agent 寫文章 prompt 必須指定 `storage/reports/feed.json`
+
+## 2026-03-29: K693 不應修改歷史數據
+
+### 問題
+K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-day → next-day），導致：
+1. Supabase strategy_metrics_cache 與本地不同步
+2. 需要手動 PATCH Supabase（違反自動化原則）
+3. 評估期間前後不一致（舊 810 筆 vs 新 809 筆）
+4. 網站上策略績效數字突然大幅變化（Piecewise 3.16→1.56）
+
+### 根因
+- 認為歷史數據「有 bug」就應該修正——但正確做法是**不修改歷史數據**
+- daily_update.py 的 forward tracking 本身是正確的（K692 驗證）
+- 歷史數據的 lookahead 會隨新的正確條目累積自然稀釋
+
+### 解決
+1. Revert paper_trading.json 到 K693 前的 backup
+2. `recalc_metrics.py` 加入自動 sync 到 Supabase（底層修正）
+3. 建立 `evaluate_new_strategy.py`（新策略在同期間公平比較）
+4. CLAUDE.md 加入「不修改歷史數據」原則
+
+### 教訓
+- **不修改歷史數據**。Forward tracking 讓 metrics 自然收斂。
+- **新舊策略比較必須同期間**。不是修正舊數據，是在同一個框架下重新模擬。
+- **Metrics 必須是數據的衍生品**，不可手動 PATCH。recalc_metrics.py 是唯一寫入路徑。
+- **修流程不修資料**——改 recalc_metrics 的 sync 邏輯，不是手動改 Supabase。
