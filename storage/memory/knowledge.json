@@ -16630,5 +16630,22 @@
     "experiment_id": "k700",
     "created_at": "2026-03-29T15:35:35.709491",
     "importance": 5
+  },
+  {
+    "id": "K701",
+    "title": "K701: ★★ Weekly/Monthly Alpha — ALSO impossible, VIX direction corr ~0 at all frequencies",
+    "content": "[提出: K697 延伸, 執行: Claude] VIX-direction corr: daily 0.031, weekly 0.033, monthly 0.019——全部接近零。Direction accuracy: 50.8%/52.6%/53.9%（coin flip）。Alpha vs BH: daily -0.10, weekly -0.06, monthly +0.02(t=0.11 NS)。Lag 在低頻相對更小但 signal 也更弱——兩者抵消。VIX forward return corr 隨 horizon 微增（1d:0.031→63d:0.093）但仍極弱。結論：K697 結論在所有頻率成立。VT 在任何頻率都不產生 alpha，只產生 MDD protection。",
+    "tags": [
+      "weekly",
+      "monthly",
+      "frequency",
+      "no-alpha",
+      "VIX-direction",
+      "all-frequencies"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k701",
+    "created_at": "2026-03-29T15:39:40.731244",
+    "importance": 3
   }
 ]
