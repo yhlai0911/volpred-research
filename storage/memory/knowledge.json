@@ -16778,5 +16778,21 @@
     "experiment_id": "k709",
     "created_at": "2026-03-29T17:51:45.543484",
     "importance": 1
+  },
+  {
+    "id": "K710",
+    "title": "K710: Volume as Vol Predictor — Incremental R² only 0.0023 beyond VIX",
+    "content": "[提出: 新信號探索, 執行: Claude] SPY volume z-score(22d) 預測 next-day RV。Volume-RV corr=0.116 vs VIX 0.429。R² VIX only=0.184，VIX+Volume=0.186（增量 0.0023）。Volume 幾乎沒有 VIX 之外的預測力。VIX sufficiency 再再確認。",
+    "tags": [
+      "volume",
+      "vol-predictor",
+      "VIX-sufficiency",
+      "null-result",
+      "incremental-R2"
+    ],
+    "data_source": "yfinance SPY/VIX 2010-2026",
+    "experiment_id": "k710",
+    "created_at": "2026-03-29T18:06:16.877853",
+    "importance": 1
   }
 ]
