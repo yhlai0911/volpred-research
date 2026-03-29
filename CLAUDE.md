@@ -97,7 +97,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **績效指標**：每日由 `daily_update.py` 自動重算 → `strategy_metrics.json`
 - 詳細流程見 `.claude/skills/autonomous-research/references/add-strategy-guide.md`
 
-#### 目前 STRATEGY_REGISTRY（12 筆，9 個 active）
+#### 目前 STRATEGY_REGISTRY（14 筆，10 個 active）
 | key | display_name | is_active | order |
 |-----|-------------|-----------|-------|
 | `slow_vt` | GARCH VT (SPY) | True | 0 |
@@ -113,6 +113,17 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 | `taiwan_hybrid_leverage` | 台股混合槓桿 | True | 10 |
 | `piecewise_conservative` | 保守型 VT（Piecewise） | True | 11 |
 | `fear_dca` | 恐慌加碼定期定額 | True | 12 |
+| `adaptive_tier` | 自適應三階 VT | True | 13 |
+
+### 重要研究結論（2026-03-29 K687/K693 修正後）
+
+**VT 策略是 drawdown insurance，不是 alpha generator。**
+- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50
+- K688：但 VT 在 CRRA utility 框架 γ≥5 時勝出（風險厭惡投資人受益）
+- K690：EWMA VT 最 lag-robust（weight autocorr 0.99），Piecewise 最脆弱
+- K693：歷史 paper_trading 9935 筆修正 same-day → next-day return
+- K694：修正後 7/10 策略仍勝 SPY，但 Sharpe 平均下降 0.74
+- **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——這是最可靠的設計原則**
 
 ### 每日文章產出要求（不可缺少任何一種）
 
