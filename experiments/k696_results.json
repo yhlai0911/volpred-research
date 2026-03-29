@@ -1,0 +1,349 @@
+{
+  "experiment_id": "K696",
+  "title": "The Cost of Being Out \u2014 Minimum Exposure Floors for VT Strategies",
+  "date": "2026-03-29 14:54:24",
+  "data_source": "yfinance",
+  "data_period": "2006-01-01 to 2026-03-27",
+  "eval_period": "2007-01-03 to 2026-03-27",
+  "floors_tested": [
+    0.0,
+    10.0,
+    20.0,
+    30.0,
+    40.0,
+    50.0,
+    60.0,
+    70.0
+  ],
+  "tx_cost_bps": 5,
+  "rf_annual": 0.04,
+  "signal": "weight_t = max(floor, min(12/VIX_{t-1}, 1.0))",
+  "lag": "1 day (proper)",
+  "portfolio": "50/50 SPY/GLD",
+  "elapsed_seconds": 1.3,
+  "descriptive_stats": {
+    "n_obs": 5088,
+    "spy_mean": 0.000467,
+    "gld_mean": 0.000464,
+    "vix_mean": 19.47,
+    "vix_std": 8.7,
+    "twelve_over_vix_mean": 0.7034,
+    "twelve_over_vix_median": 0.7011
+  },
+  "floor_sweep_results": {
+    "floor_0": {
+      "floor_pct": 0.0,
+      "sharpe": 0.4316,
+      "cagr": 0.0724,
+      "mdd": -0.1223,
+      "sortino": 0.5624,
+      "calmar": 0.5923,
+      "ann_vol": 0.0761,
+      "cumulative_return": 2.8286,
+      "annual_turnover": 8.1577,
+      "mean_weight": 0.6822,
+      "median_weight": 0.6867,
+      "min_weight": 0.1451,
+      "max_weight": 1.0,
+      "frac_at_floor": 0.0,
+      "n_days": 4838
+    },
+    "floor_10": {
+      "floor_pct": 10.0,
+      "sharpe": 0.4316,
+      "cagr": 0.0724,
+      "mdd": -0.1223,
+      "sortino": 0.5624,
+      "calmar": 0.5923,
+      "ann_vol": 0.0761,
+      "cumulative_return": 2.8286,
+      "annual_turnover": 8.1577,
+      "mean_weight": 0.6822,
+      "median_weight": 0.6867,
+      "min_weight": 0.1451,
+      "max_weight": 1.0,
+      "frac_at_floor": 0.0,
+      "n_days": 4838
+    },
+    "floor_20": {
+      "floor_pct": 20.0,
+      "sharpe": 0.4386,
+      "cagr": 0.0731,
+      "mdd": -0.1223,
+      "sortino": 0.5724,
+      "calmar": 0.5975,
+      "ann_vol": 0.0762,
+      "cumulative_return": 2.8717,
+      "annual_turnover": 8.1199,
+      "mean_weight": 0.6824,
+      "median_weight": 0.6867,
+      "min_weight": 0.2,
+      "max_weight": 1.0,
+      "frac_at_floor": 0.0079,
+      "n_days": 4838
+    },
+    "floor_30": {
+      "floor_pct": 30.0,
+      "sharpe": 0.4398,
+      "cagr": 0.0737,
+      "mdd": -0.1312,
+      "sortino": 0.5744,
+      "calmar": 0.5615,
+      "ann_vol": 0.0775,
+      "cumulative_return": 2.9134,
+      "annual_turnover": 7.9951,
+      "mean_weight": 0.6844,
+      "median_weight": 0.6867,
+      "min_weight": 0.3,
+      "max_weight": 1.0,
+      "frac_at_floor": 0.037,
+      "n_days": 4838
+    },
+    "floor_40": {
+      "floor_pct": 40.0,
+      "sharpe": 0.4433,
+      "cagr": 0.075,
+      "mdd": -0.1552,
+      "sortino": 0.5778,
+      "calmar": 0.483,
+      "ann_vol": 0.0801,
+      "cumulative_return": 3.0069,
+      "annual_turnover": 7.6015,
+      "mean_weight": 0.6903,
+      "median_weight": 0.6867,
+      "min_weight": 0.4,
+      "max_weight": 1.0,
+      "frac_at_floor": 0.0924,
+      "n_days": 4838
+    },
+    "floor_50": {
+      "floor_pct": 50.0,
+      "sharpe": 0.4572,
+      "cagr": 0.078,
+      "mdd": -0.1756,
+      "sortino": 0.5942,
+      "calmar": 0.4443,
+      "ann_vol": 0.0847,
+      "cumulative_return": 3.2301,
+      "annual_turnover": 6.7898,
+      "mean_weight": 0.7047,
+      "median_weight": 0.6867,
+      "min_weight": 0.5,
+      "max_weight": 1.0,
+      "frac_at_floor": 0.2119,
+      "n_days": 4838
+    },
+    "floor_60": {
+      "floor_pct": 60.0,
+      "sharpe": 0.4803,
+      "cagr": 0.0831,
+      "mdd": -0.1994,
+      "sortino": 0.6214,
+      "calmar": 0.4169,
+      "ann_vol": 0.0917,
+      "cumulative_return": 3.6311,
+      "annual_turnover": 5.5182,
+      "mean_weight": 0.7334,
+      "median_weight": 0.6867,
+      "min_weight": 0.6,
+      "max_weight": 1.0,
+      "frac_at_floor": 0.3632,
+      "n_days": 4838
+    },
+    "floor_70": {
+      "floor_pct": 70.0,
+      "sharpe": 0.5056,
+      "cagr": 0.0897,
+      "mdd": -0.2306,
+      "sortino": 0.6505,
+      "calmar": 0.3889,
+      "ann_vol": 0.1009,
+      "cumulative_return": 4.2019,
+      "annual_turnover": 3.9409,
+      "mean_weight": 0.7774,
+      "median_weight": 0.7,
+      "min_weight": 0.7,
+      "max_weight": 1.0,
+      "frac_at_floor": 0.5203,
+      "n_days": 4838
+    },
+    "bh_5050": {
+      "floor_pct": 100.0,
+      "sharpe": 0.5448,
+      "cagr": 0.111,
+      "mdd": -0.3249,
+      "sortino": 0.6946,
+      "calmar": 0.3415,
+      "ann_vol": 0.137,
+      "cumulative_return": 6.5399,
+      "annual_turnover": 0.0,
+      "mean_weight": 1.0,
+      "median_weight": 1.0,
+      "min_weight": 1.0,
+      "max_weight": 1.0,
+      "frac_at_floor": 1.0,
+      "n_days": 4838
+    }
+  },
+  "optimal_floor_analysis": {
+    "best_sharpe_floor": 70.0,
+    "best_sharpe_value": 0.5056,
+    "best_cagr_floor": 70.0,
+    "best_cagr_value": 0.0897,
+    "best_mdd_floor": 0.0,
+    "best_mdd_value": -0.1223,
+    "bh_sharpe": 0.5448,
+    "bh_cagr": 0.111,
+    "bh_mdd": -0.3249,
+    "floors_beating_bh_sharpe": [],
+    "n_floors_beating_bh": 0,
+    "best_sortino_floor": 70.0,
+    "best_sortino_value": 0.6505,
+    "best_calmar_floor": 20.0,
+    "best_calmar_value": 0.5975
+  },
+  "marginal_analysis": {
+    "marginals": [
+      {
+        "from_floor": 0.0,
+        "to_floor": 10.0,
+        "delta_sharpe": 0.0,
+        "delta_cagr_pp": 0.0,
+        "delta_mdd_pp": 0.0,
+        "delta_vol_pp": 0.0,
+        "delta_turnover": 0.0
+      },
+      {
+        "from_floor": 10.0,
+        "to_floor": 20.0,
+        "delta_sharpe": 0.007,
+        "delta_cagr_pp": 0.07,
+        "delta_mdd_pp": 0.0,
+        "delta_vol_pp": 0.01,
+        "delta_turnover": -0.04
+      },
+      {
+        "from_floor": 20.0,
+        "to_floor": 30.0,
+        "delta_sharpe": 0.0012,
+        "delta_cagr_pp": 0.06,
+        "delta_mdd_pp": -0.89,
+        "delta_vol_pp": 0.13,
+        "delta_turnover": -0.12
+      },
+      {
+        "from_floor": 30.0,
+        "to_floor": 40.0,
+        "delta_sharpe": 0.0035,
+        "delta_cagr_pp": 0.13,
+        "delta_mdd_pp": -2.4,
+        "delta_vol_pp": 0.26,
+        "delta_turnover": -0.39
+      },
+      {
+        "from_floor": 40.0,
+        "to_floor": 50.0,
+        "delta_sharpe": 0.0139,
+        "delta_cagr_pp": 0.3,
+        "delta_mdd_pp": -2.04,
+        "delta_vol_pp": 0.46,
+        "delta_turnover": -0.81
+      },
+      {
+        "from_floor": 50.0,
+        "to_floor": 60.0,
+        "delta_sharpe": 0.0231,
+        "delta_cagr_pp": 0.51,
+        "delta_mdd_pp": -2.38,
+        "delta_vol_pp": 0.7,
+        "delta_turnover": -1.27
+      },
+      {
+        "from_floor": 60.0,
+        "to_floor": 70.0,
+        "delta_sharpe": 0.0253,
+        "delta_cagr_pp": 0.66,
+        "delta_mdd_pp": -3.12,
+        "delta_vol_pp": 0.92,
+        "delta_turnover": -1.58
+      }
+    ]
+  },
+  "crisis_period_analysis": {
+    "GFC (2008-09 to 2009-03)": {
+      "BH": -13.77,
+      "floor_0": -4.15,
+      "floor_20": -3.28,
+      "floor_40": -4.49,
+      "floor_60": -6.87
+    },
+    "COVID Crash (2020-02 to 2020-04)": {
+      "BH": -2.9,
+      "floor_0": -0.97,
+      "floor_20": -0.79,
+      "floor_40": -0.45,
+      "floor_60": -0.92
+    },
+    "2022 Bear (2022-01 to 2022-10)": {
+      "BH": -13.85,
+      "floor_0": -6.28,
+      "floor_20": -6.28,
+      "floor_40": -6.2,
+      "floor_60": -7.38
+    },
+    "GFC Recovery (2009-03 to 2009-09)": {
+      "BH": 30.05,
+      "floor_0": 11.57,
+      "floor_20": 11.57,
+      "floor_40": 13.34,
+      "floor_60": 18.37
+    },
+    "COVID Recovery (2020-03 to 2020-09)": {
+      "BH": 37.48,
+      "floor_0": 11.59,
+      "floor_20": 11.73,
+      "floor_40": 15.77,
+      "floor_60": 22.38
+    },
+    "2022 Recovery (2022-10 to 2023-04)": {
+      "BH": 18.57,
+      "floor_0": 9.08,
+      "floor_20": 9.08,
+      "floor_40": 9.12,
+      "floor_60": 11.47
+    }
+  },
+  "t_test_best_vs_bh": {
+    "floor_pct": 70.0,
+    "n_obs": 4838,
+    "mean_daily_diff_bps": -0.9382,
+    "annualized_diff_pp": -2.36,
+    "t_statistic": -2.7158,
+    "p_value": 0.0066,
+    "passes_harvey_threshold": false
+  },
+  "key_findings": {
+    "best_sharpe_floor_pct": 70.0,
+    "best_sharpe_value": 0.5056,
+    "bh_sharpe": 0.5448,
+    "does_any_floor_beat_bh": false,
+    "floors_beating_bh": []
+  },
+  "references": [
+    "K687: Definitive lag-corrected strategy ranking (BH 50/50 beats all VT on Sharpe)",
+    "K688: CRRA utility framework (VT wins for gamma>=5)",
+    "K690: Weight Smoothness and Lag Robustness",
+    "Copeland & Copeland (1999): Market Timing with VIX",
+    "Fleming, Kirby & Ostdiek (2001): The Economic Value of Volatility Timing",
+    "Kirby & Ostdiek (2012): It's All in the Timing",
+    "Harvey et al. (2016): ...and the Cross-Section of Expected Returns"
+  ],
+  "limitations": [
+    "Only tests 12/VIX signal; other VT signals may respond differently to floors",
+    "Floor values tested in 10pp increments; finer grid might find better optimum",
+    "TX cost model simplified (fixed 5bps); real costs vary",
+    "50/50 SPY/GLD only; other allocations may shift optimal floor",
+    "Sample period includes unprecedented Fed QE; floor benefit may change in future regimes",
+    "No out-of-sample split; optimal floor likely overfits in-sample"
+  ]
+}
