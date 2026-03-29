@@ -16562,5 +16562,22 @@
     "experiment_id": "k696",
     "created_at": "2026-03-29T14:55:06.405008",
     "importance": 3
+  },
+  {
+    "id": "K697",
+    "title": "K697: ★★★★★ Alpha Upper Bound — VIX predicts vol(0.57) NOT direction(0.04), daily alpha impossible",
+    "content": "[提出: 終極問題, 執行: Claude] 是否存在任何 daily alpha（lag-corrected）？SPY lag-1 autocorr=-0.105（negative = contrarian, not momentum）。VIX-direction corr=0.042（近零）。Oracle VIX(20bins ex-post) Sharpe 1.14 gross → 0.73 net（TX kills it）。Smooth oracle 0.85 < BH 0.86。No-lag oracle 5.60 >>> any lagged <1.15——1 天 lag 消滅 80% alpha。結論：(a) VT fundamentally limited at daily frequency。VIX 知道多少波動但不知道方向。Daily alpha 理論存在但被 lag 消滅。VT 唯一可靠價值 = drawdown/Calmar 改善。",
+    "tags": [
+      "alpha-upper-bound",
+      "oracle",
+      "direction-unpredictable",
+      "VIX-limitation",
+      "definitive",
+      "lag-destroys-alpha"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k697",
+    "created_at": "2026-03-29T14:59:38.176089",
+    "importance": 5
   }
 ]
