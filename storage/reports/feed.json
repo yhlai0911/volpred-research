@@ -13065,52 +13065,6 @@
     "audience": "research"
   },
   {
-    "id": "cmp_d8c2994d",
-    "experiment_ids": [],
-    "title": "4 資產 Adaptive Window 指南：Persistence Stability 決定最佳 Window",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "asset": "SPY",
-        "pers_std_2023": 0.007,
-        "optimal_window": 504,
-        "status": "stable"
-      },
-      {
-        "rank": 2,
-        "asset": "GLD",
-        "pers_std_2023": 0.071,
-        "optimal_window": "252→504",
-        "status": "stabilizing"
-      },
-      {
-        "rank": 3,
-        "asset": "BTC",
-        "pers_std_2023": 0.139,
-        "optimal_window": "252→504",
-        "status": "stabilizing"
-      },
-      {
-        "rank": 4,
-        "asset": "TLT",
-        "pers_std_2023": 0.214,
-        "optimal_window": 252,
-        "status": "unstable"
-      }
-    ],
-    "analysis": "4 資產 Persistence Stability 指南（rolling 60-day std of GJR persistence）：\n\n**SPY** (std=0.007)：極穩定 → **w=504**\n**GLD** (std 0.12→0.02)：2022 不穩但 2024-25 趨穩 → **w=252→504 轉換中**\n**BTC** (std 0.18→0.03)：2024 前不穩但 2025 突然穩定 → **w=252，觀察是否可轉 504**\n**TLT** (std=0.21)：利率政策驅動的 structural break → **w=252**\n\n**操作規則**：persistence std < 0.02 → w=504；std > 0.05 → w=252；中間 → 可用 w=378（18個月）",
-    "tags": [
-      "波動率預測",
-      "跨資產",
-      "風險管理"
-    ],
-    "published_at": "2026-03-14T21:19:16.657072+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T21:19:16.657072+00:00",
-    "audience": "research"
-  },
-  {
     "id": "mile_bf16a745",
     "title": "發現：Persistence Stability 可做 Adaptive Window 指標（SPY vs TLT 30 倍差距）",
     "description": "## Persistence 參數穩定性比較\n\nRolling 60-day std of GJR persistence（w=252 estimates）：\n\n| 資產 | 2022 | 2023 | 2024 | 2025 |\n|------|------|------|------|------|\n| SPY | 0.011 | **0.007** | 0.009 | 0.012 |\n| TLT | 0.039 | **0.214** | 0.110 | 0.064 |\n\nTLT 的參數不穩定度是 SPY 的 **30 倍**。TLT persistence 在 2023 從 0.96 暴跌到 0.67——Fed 利率政策劇變造成的 structural break。\n\n## 應用\n\n**Persistence stability 可以量化「最佳 window size」**：\n- 穩定（std < 0.02）→ 用 w=504（如 SPY）\n- 不穩定（std > 0.05）→ 用 w=252（如 TLT）\n- 極端不穩定（std > 0.1）→ 考慮 w=126 或 regime-switching\n\n這是一個從實證中衍生的 **可操作的 adaptive window selection 規則**。",
@@ -13182,46 +13136,6 @@
       "TLT"
     ],
     "content": "## TLT（長期美國國債 ETF）首次波動率預測\n\nOOS=2025, w=504：\n\n| 模型 | QLIKE | VaR 1% Rate | VaR 5% Rate |\n|------|-------|-------------|-------------|\n| GJR | -9.176 | 1.2% ✓ | **2.4% ✗ (太低)** |\n| GARCH | -9.175 | 0.8% ✓ | **2.0% ✗ (太低)** |\n\n## 發現\n\n1. **GJR ≈ GARCH**（差 0.01%）：TLT skew=+0.05，驗證了偏態規律\n2. **VaR 5% FAIL 但方向相反**：violation rate 太低（2%），模型**過度保守**\n3. **原因**：利率轉折期 regime change。w=504 包含 2023 高利率環境（債券高波動），2025 降息後波動快速下降\n\n## 啟示\n\n最佳 window size 因資產而異——TLT 在利率轉折期可能需要更短 window 來快速適應。",
-    "audience": "research"
-  },
-  {
-    "id": "cmp_b80340d0",
-    "experiment_ids": [],
-    "title": "H5 跨資產 2025 驗證：GLD 規律成立，QQQ 需要 VaR 修正",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "asset": "GLD",
-        "model": "GARCH w=504",
-        "qlike": -8.646,
-        "var_1pct": "1.2% ✓"
-      },
-      {
-        "rank": 2,
-        "asset": "GLD",
-        "model": "GJR w=504",
-        "qlike": -8.641,
-        "var_1pct": "1.6% ✓"
-      },
-      {
-        "rank": 3,
-        "asset": "QQQ",
-        "model": "GJR w=504",
-        "qlike": -8.272,
-        "var_1pct": "2.8% ✗"
-      }
-    ],
-    "analysis": "跨資產規律 2025 驗證（w=504）：**GLD 不需要 GJR**（GARCH 微勝 0.06%），驗證了偏態 >-0.4 時 GARCH 足夠的規律。QQQ GJR VaR 1% FAIL (2.8%)，比 SPY 更難——需要 GED 分配或 Adaptive Sigma Floor。SPY GJR w=504 QLIKE=-8.818 作為基準。",
-    "tags": [
-      "VaR",
-      "跨資產",
-      "GLD",
-      "QQQ"
-    ],
-    "published_at": "2026-03-14T21:13:25.505784+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T21:13:25.505784+00:00",
     "audience": "research"
   },
   {
@@ -13437,46 +13351,6 @@
     "audience": "research"
   },
   {
-    "id": "cmp_00e3dc32",
-    "experiment_ids": [
-      "5b62a223",
-      "af879698",
-      "0559dbe8"
-    ],
-    "title": "Window Size 消融：長 window (504) 在 2025 勝出——高持久性環境需要更多數據",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "GJR-arch w=504",
-        "qlike": -8.818,
-        "var_1pct": "2.0% ✓"
-      },
-      {
-        "rank": 2,
-        "model": "GJR-arch w=252",
-        "qlike": -8.798,
-        "var_1pct": "2.4% ✓"
-      },
-      {
-        "rank": 3,
-        "model": "GJR-arch w=126",
-        "qlike": -8.788,
-        "var_1pct": "2.4% ✓"
-      }
-    ],
-    "analysis": "SPY GJR-arch/Normal, OOS=2025-01-01~2025-12-31。**504 天 window QLIKE 最佳（-8.818）**，推翻了「短 window 更快適應」的假說。原因：2025 年 persistence 增加到 0.96（half-life 17天），波動率有強烈長期記憶，需要更多歷史數據來穩定估計。126 天 window 反而因 kurtosis=20.5 的極端事件導致參數被 outlier 扭曲。VaR 表現也是 504 最好（violation rate 2.0% 最接近理論 1%）。",
-    "tags": [
-      "波動率預測",
-      "跨資產",
-      "風險管理"
-    ],
-    "published_at": "2026-03-14T20:29:11.411701+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T20:29:11.411701+00:00",
-    "audience": "research"
-  },
-  {
     "id": "mile_8af3b580",
     "title": "2025 偏態翻轉之謎：GJR 為何在正偏態環境仍然有效？",
     "description": "## 發現\n\n分析 SPY 三期資料結構，2025 出現罕見的**正偏態 (+1.09)**，與 2018-2022 的負偏態 (-0.78) 完全相反。\n\n| 期間 | 年化波動率 | 偏態 | 超額峰態 |\n|------|----------|------|---------|\n| 2018-2022 | 21.6% | -0.78 | 11.2 |\n| 2023-2024 | 12.8% | -0.29 | 0.8 |\n| **2025** | **19.3%** | **+1.09** | **20.5** |\n\n## 假說與驗證\n\n**初始假說**：偏態翻正 → GJR 的「壞消息=大波動」假設失效 → QLIKE 下降\n\n**矛盾**：GJR 在 2025 相對 GARCH 優勢反而**增大**（1.27% vs 0.23%）\n\n**驗證**：提取 GJR 在 2025 的 gamma 值——**gamma 從 0.177 增加到 0.237**，沒有趨近 0。alpha=0 表示所有 ARCH 效應由負向衝擊主導。\n\n## 修正後的解讀\n\n1. 整體偏態 ≠ 條件偏態：2025 雖然整體正偏態（大漲多），但個別大跌的波動衝擊仍然比大漲更持久\n2. **persistence 從 0.891 增加到 0.960**（half-life 6→17 天）才是 QLIKE 下降的主因——模型反應速度跟不上\n3. kurtosis=20.5 的極端事件放大了預測誤差\n\n## 啟示\n\n短 window (126) 可能改善 QLIKE（更快適應）。EMD 分解可以分離慢變/快變成分。",
@@ -13504,67 +13378,6 @@
       "SPY"
     ],
     "content": "## 發現\n\n分析 SPY 三期資料結構，2025 出現罕見的**正偏態 (+1.09)**，與 2018-2022 的負偏態 (-0.78) 完全相反。\n\n| 期間 | 年化波動率 | 偏態 | 超額峰態 |\n|------|----------|------|---------|\n| 2018-2022 | 21.6% | -0.78 | 11.2 |\n| 2023-2024 | 12.8% | -0.29 | 0.8 |\n| **2025** | **19.3%** | **+1.09** | **20.5** |\n\n## 假說與驗證\n\n**初始假說**：偏態翻正 → GJR 的「壞消息=大波動」假設失效 → QLIKE 下降\n\n**矛盾**：GJR 在 2025 相對 GARCH 優勢反而**增大**（1.27% vs 0.23%）\n\n**驗證**：提取 GJR 在 2025 的 gamma 值——**gamma 從 0.177 增加到 0.237**，沒有趨近 0。alpha=0 表示所有 ARCH 效應由負向衝擊主導。\n\n## 修正後的解讀\n\n1. 整體偏態 ≠ 條件偏態：2025 雖然整體正偏態（大漲多），但個別大跌的波動衝擊仍然比大漲更持久\n2. **persistence 從 0.891 增加到 0.960**（half-life 6→17 天）才是 QLIKE 下降的主因——模型反應速度跟不上\n3. kurtosis=20.5 的極端事件放大了預測誤差\n\n## 啟示\n\n短 window (126) 可能改善 QLIKE（更快適應）。EMD 分解可以分離慢變/快變成分。",
-    "audience": "research"
-  },
-  {
-    "id": "cmp_cbfda1b3",
-    "experiment_ids": [
-      "5a3d1fff",
-      "54b6ab57",
-      "af879698",
-      "071f6271",
-      "a5ee6321",
-      "c49e3032"
-    ],
-    "title": "Phase H1：2025 OOS 前瞻驗證 — GJR 優勢跨三期穩健",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "CARR",
-        "qlike": -8.896,
-        "var_1pct": "4.4% ✗"
-      },
-      {
-        "rank": 2,
-        "model": "GJR-arch/GED",
-        "qlike": -8.802,
-        "var_1pct": "2.4% ✓"
-      },
-      {
-        "rank": 3,
-        "model": "GJR-arch/Normal",
-        "qlike": -8.798,
-        "var_1pct": "2.4% ✓"
-      },
-      {
-        "rank": 4,
-        "model": "GJR-Floor",
-        "qlike": -8.774,
-        "var_1pct": "1.6% ✓"
-      },
-      {
-        "rank": 5,
-        "model": "GJR-HAR",
-        "qlike": -8.77,
-        "var_1pct": "2.4% ✓"
-      },
-      {
-        "rank": 6,
-        "model": "GARCH-arch",
-        "qlike": -8.688,
-        "var_1pct": "2.4% ✓"
-      }
-    ],
-    "analysis": "SPY 2025 OOS（window=252，IS=滾動前252交易日）前瞻驗證結果。**GJR > GARCH 排名跨三期 OOS（2022-2023/2023-2024/2025）穩健成立。** CARR QLIKE 最佳但 VaR 災難（Parkinson bias + 隔夜跳躍）。GJR/GED 在 VaR 約束下仍是三期一致最佳。所有模型 2025 QLIKE 比 2023-2024 差 2-3%，顯示 2025 波動率更難預測。GJR-HAR 排名下滑（第5→曾是跨OOS冠軍），多尺度 HAR 特徵在 2025 效果減弱。",
-    "tags": [
-      "波動率預測",
-      "GJR-GARCH",
-      "跨資產"
-    ],
-    "published_at": "2026-03-14T20:21:12.552555+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T20:21:12.552555+00:00",
     "audience": "research"
   },
   {
@@ -13816,53 +13629,6 @@
     "audience": "research"
   },
   {
-    "id": "cmp_be8cd714",
-    "experiment_ids": [],
-    "title": "多資產 Risk Parity：2 資產 (SPY+GLD) 仍是最佳",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "RP 2 (SPY+GLD)",
-        "sharpe": 1.18,
-        "ann_ret": "15.5%",
-        "maxdd": "21.0%"
-      },
-      {
-        "rank": 2,
-        "model": "SPY B&H",
-        "sharpe": 0.65,
-        "ann_ret": "11.0%",
-        "maxdd": "29.3%"
-      },
-      {
-        "rank": 3,
-        "model": "RP 4 (SPY+QQQ+GLD+TLT)",
-        "sharpe": 0.64,
-        "ann_ret": "10.3%",
-        "maxdd": "39.0%"
-      },
-      {
-        "rank": 4,
-        "model": "SPY Slow VT",
-        "sharpe": 0.62,
-        "ann_ret": "7.5%",
-        "maxdd": "18.9%"
-      }
-    ],
-    "analysis": "## 為什麼 4 資產不如 2 資產？\n\n**TLT（長期美國國債）是問題的根源。**\n\nRisk Parity 按波動率反比分配權重 → TLT 波動率低 → 權重高達 40%。\n但 2022 年 Fed 暴力升息 → TLT 暴跌 30%+ → 同時 SPY 也在跌。\n**股債同跌打破了 Risk Parity 的核心假設（資產間低相關性）。**\n\n| 資產 | 2022 報酬 | 2024-25 報酬 | RP 平均權重 |\n|------|----------|-------------|-----------|\n| SPY | -19% | +48% | 43% |\n| QQQ | -33% | +55% | 31% |\n| GLD | -1% | +45% | 40% |\n| TLT | -31% | -8% | 40% |\n\n**GLD 是真正的分散化工具**——2022 只跌 1%，2024-25 大漲 45%。\n**QQQ 和 SPY 太像了**——加入不增加分散化效果。\n\n注意：此結論高度依賴 2022-2025 的利率環境。在降息週期中 TLT 表現可能完全不同。\n    ",
-    "tags": [
-      "跨資產",
-      "Risk-Parity",
-      "GLD",
-      "SPY"
-    ],
-    "published_at": "2026-03-14T15:30:32.079656+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T15:30:32.079656+00:00",
-    "audience": "research"
-  },
-  {
     "id": "mile_482758f4",
     "title": "Paper Trading 啟動：$1,000,000 初始投資組合",
     "description": "## Paper Trading 組合\n\n**起始日期**：2026-03-14\n**起始資金**：$1,000,000（100 萬美元）\n**策略**：慢調整波動率目標（12% 年化目標，MA=5 平滑）\n\n### 初始建倉\n\n| 資產 | 比例 | 金額 | 數量 |\n|------|------|------|------|\n| SPY | 77% | $770,000 | ≈1,163 股 @$662.29 |\n| 現金/短期國債 | 23% | $230,000 | SHV/BIL ETF or money market |\n\n### 操作規則\n- **調倉頻率**：每週五收盤後\n- **目標波動率**：12% 年化\n- **持倉公式**：weight = 12% / (GJR sigma × √252 × MA5)\n- **持倉上限**：200%（最多 2x 槓桿）\n- **持倉下限**：0%（不做空）\n- **交易成本**：0.02% 單邊（SPY spread + slippage）\n\n### 績效追蹤\n每日記錄預測 sigma 和建議持倉。\n次日回填實際報酬，累積前瞻性績效記錄。\n**此記錄不受回測偏差影響——所有預測都是事前記錄的。**\n    ",
@@ -13959,64 +13725,6 @@
       "SPY"
     ],
     "content": "首次使用 SPY 5 分鐘日內數據（60 天）作為波動率的黃金標準。\n\n### RV Proxy 偏差\n\n| Proxy | vs 5-min RV | 說明 |\n|-------|------------|------|\n| Parkinson | **-33.9%** | 嚴重低估（忽略隔夜缺口） |\n| r² | -23.5% | 低估 + 高雜訊 |\n| **GARCH 預測** | **-1.2%** | 幾乎完美！ |\n\n### 關鍵發現\nGJR-GARCH 的波動率預測精度達到 **98.8%**（vs 5-min RV）。\n之前看到的「高估 69%」完全是 Parkinson proxy 的偏差造成的假象。\n\nGARCH 是一個**極其精準**的日頻波動率預測器。\n    ",
-    "audience": "research"
-  },
-  {
-    "id": "cmp_51bfe4cb",
-    "experiment_ids": [],
-    "title": "突破！多資產 Risk Parity VT：Sharpe 0.81，報酬 +28%",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "Risk Parity VT (SPY+GLD)",
-        "sharpe": 0.81,
-        "ann_ret": "13.4%",
-        "maxdd": "27.1%",
-        "final_1m": "169.2萬"
-      },
-      {
-        "rank": 2,
-        "model": "60/40 VolTarget",
-        "sharpe": 0.77,
-        "ann_ret": "9.6%",
-        "maxdd": "19.0%",
-        "final_1m": "149.0萬"
-      },
-      {
-        "rank": 3,
-        "model": "60/40 Static",
-        "sharpe": 0.75,
-        "ann_ret": "11.2%",
-        "maxdd": "26.7%",
-        "final_1m": "157.6萬"
-      },
-      {
-        "rank": 4,
-        "model": "SPY SlowVT",
-        "sharpe": 0.59,
-        "ann_ret": "10.4%",
-        "maxdd": "29.9%",
-        "final_1m": "153.7萬"
-      },
-      {
-        "rank": 5,
-        "model": "SPY Buy & Hold",
-        "sharpe": 0.5,
-        "ann_ret": "10.5%",
-        "maxdd": "41.7%",
-        "final_1m": "154.2萬"
-      }
-    ],
-    "analysis": "## 多資產波動率目標策略突破\n\nGARCH 波動率預測 + Risk Parity 權重分配 + 動態 VolTarget = **Sharpe 0.81**\n\n### 為什麼有效？\n1. **低相關性分散化**：SPY 和 GLD 相關性低，組合波動率遠低於個別資產\n2. **Risk Parity**：按波動率反比分配權重（GLD 波動低 → 權重高）\n3. **VolTarget**：在危機時自動減倉，平穩時恢復\n\n### 100 萬元投資 5 年\n| 策略 | 最終資產 | 多賺/少賺 | 最大帳面虧損 |\n|------|---------|----------|------------|\n| SPY Buy & Hold | 154.2 萬 | — | 41.7 萬 |\n| **Risk Parity VT** | **169.2 萬** | **+15.0 萬** | **27.1 萬** |\n\nRisk Parity VT 比 Buy & Hold **多賺 15 萬**且**少虧 14.6 萬**。\n\n### 注意事項\n- 2022-2024 黃金大漲是重要貢獻因素（不可外推）\n- 需要更長的 backtest 和更多資產類別驗證\n- 交易成本已計入（SPY + GLD 皆 0.02%/次）\n    ",
-    "tags": [
-      "跨資產",
-      "Risk-Parity",
-      "VT策略"
-    ],
-    "published_at": "2026-03-14T14:28:24.475485+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T14:28:24.475485+00:00",
     "audience": "research"
   },
   {
@@ -14131,60 +13839,6 @@
       "風險管理"
     ],
     "content": "Smoothing window 敏感度分析顯示策略對參數不敏感：\n\n| MA 窗口 | Sharpe | MaxDD |\n|---------|--------|-------|\n| 1（不平滑）| 0.57 | 30.3% |\n| 3 | **0.60** | 30.5% |\n| 5 | **0.60** | 29.9% |\n| 7 | **0.60** | 29.2% |\n| 10 | **0.60** | 28.5% |\n| 15 | 0.58 | 28.0% |\n| 22 | 0.56 | 28.5% |\n\nMA=3 到 MA=10 的 Sharpe 完全一致（0.60），不依賴特定 hyperparameter。\n降低了 overfitting 風險。推薦 MA=5 作為預設值。\n    ",
-    "audience": "research"
-  },
-  {
-    "id": "cmp_f4df0140",
-    "experiment_ids": [],
-    "title": "策略最終排名：慢調整波動率目標策略勝出",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "VolTarget 慢調整",
-        "sharpe": 0.6,
-        "sortino": 0.74,
-        "ann_ret": "10.5%",
-        "maxdd": "29.9%",
-        "final_1m": "154.3萬"
-      },
-      {
-        "rank": 2,
-        "model": "Asymmetric VT",
-        "sharpe": 0.59,
-        "sortino": 0.73,
-        "ann_ret": "10.0%",
-        "maxdd": "28.5%",
-        "final_1m": "152.0萬"
-      },
-      {
-        "rank": 3,
-        "model": "VolTarget 12%",
-        "sharpe": 0.57,
-        "sortino": 0.7,
-        "ann_ret": "10.2%",
-        "maxdd": "30.3%",
-        "final_1m": "152.7萬"
-      },
-      {
-        "rank": 4,
-        "model": "Buy & Hold",
-        "sharpe": 0.5,
-        "sortino": 0.6,
-        "ann_ret": "10.5%",
-        "maxdd": "41.7%",
-        "final_1m": "154.2萬"
-      }
-    ],
-    "analysis": "## 2020-2026 完整期間策略比較\n\n測試 5 種策略橫跨 6 年（含 COVID、熊市、牛市、2025 關稅衝擊）。\n\n**冠軍：慢調整波動率目標策略**\n用 5 日移動平均平滑 GJR-GARCH 的 sigma 預測，避免過度反應。\n\n- 報酬和 Buy & Hold **完全相同**（10.5%）\n- MaxDD **降低 28%**（41.7% → 29.9%）\n- Sharpe **提升 20%**（0.50 → 0.60）\n- Sortino **提升 23%**（0.60 → 0.74）\n\n**100萬元：慢調整 154.3 萬 vs Buy&Hold 154.2 萬**\n報酬一樣多，但過程中最大虧損少了 12 萬。\n\n核心洞見：不要急於調整持倉。平滑的 sigma 避免了「高波動減倉→錯過反彈」的問題。\n    ",
-    "tags": [
-      "波動率預測",
-      "VT策略",
-      "投資策略"
-    ],
-    "published_at": "2026-03-14T14:09:37.816113+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T14:09:37.816113+00:00",
     "audience": "research"
   },
   {
@@ -14326,55 +13980,6 @@
     "audience": "research"
   },
   {
-    "id": "cmp_c103d4c6",
-    "experiment_ids": [
-      "345f4350",
-      "182b49bf"
-    ],
-    "title": "最終跨 OOS 穩健性排行（所有策略）",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "Adaptive Floor (GJR + 0.9×GARCH)",
-        "qlike_2324": -9.034,
-        "qlike_2223": -8.361,
-        "var": "兩期全 PASS ★"
-      },
-      {
-        "rank": 2,
-        "model": "GJR-HAR (multi-start)",
-        "qlike_2324": -9.01,
-        "qlike_2223": -8.337,
-        "var": "兩期全 PASS ★"
-      },
-      {
-        "rank": 3,
-        "model": "70%GJR+30%HAR",
-        "qlike_2324": -9.027,
-        "qlike_2223": "(estimated)",
-        "var": "2023-24 PASS"
-      },
-      {
-        "rank": 4,
-        "model": "GJR/GED",
-        "qlike_2324": -9.032,
-        "qlike_2223": -8.356,
-        "var": "2022-23 VaR5% FAIL"
-      }
-    ],
-    "analysis": "\n## 最終跨 OOS 穩健性排行\n\n在 2022-2023（高波動 + Fed 升息）和 2023-2024（低波動 + 復甦）兩個\n不同市場環境的 OOS 測試中，只有兩個策略通過所有 VaR 檢定：\n\n### 🏆 Adaptive Sigma Floor\n- 精度：保持 GJR-arch 的最佳 QLIKE（-9.034 / -8.361）\n- 安全：max(σ_gjr, 0.9×σ_garch) 作為 VaR 底線\n- 優勢：零 QLIKE 代價 + 跨環境穩健\n\n### 🥈 GJR-HAR（自建多尺度模型）\n- 精度：QLIKE=-9.010 / -8.337（比 Adaptive Floor 差 0.3%）\n- 安全：多尺度 HAR 成分防止波動率過度壓縮\n- 優勢：單一模型（不需要組合策略）\n\n### 研究總結\n45+ 個實驗、14 種模型/策略、4 種資產。\n核心洞見：精度（QLIKE）和安全性（VaR）可以解耦——\n用最精確的模型做預測，用穩健模型提供安全底線。\n    ",
-    "tags": [
-      "波動率預測",
-      "投資策略",
-      "跨資產"
-    ],
-    "published_at": "2026-03-14T13:49:58.789353+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T13:49:58.789353+00:00",
-    "audience": "research"
-  },
-  {
     "id": "mile_403161b0",
     "title": "ML 探索：純 XGBoost 在波動率預測上失敗",
     "description": "XGBoost 使用 14 個精心設計的特徵（squared returns, range, HAR, asymmetric 等），\nQLIKE=-8.615 — 遠差於 GJR-GARCH 的 -9.034。\n\n失敗原因：\n1. Target（r² 或 RV）極度嘈雜 — 一天可變化 1000 倍\n2. 504 天 training window 太短 — XGBoost 需要數千觀測\n3. Feature importance 全為 0 — 模型退化為常數預測\n4. GARCH 的遞迴結構是不可替代的領域知識\n\n**結論**：ML 不能「替代」GARCH，但可能作為 GARCH 的「修正器」有效。\n需要更長的歷史數據或 GARCH-informed 的 hybrid 架構。\n    ",
@@ -14395,27 +14000,6 @@
       "LSTM"
     ],
     "content": "XGBoost 使用 14 個精心設計的特徵（squared returns, range, HAR, asymmetric 等），\nQLIKE=-8.615 — 遠差於 GJR-GARCH 的 -9.034。\n\n失敗原因：\n1. Target（r² 或 RV）極度嘈雜 — 一天可變化 1000 倍\n2. 504 天 training window 太短 — XGBoost 需要數千觀測\n3. Feature importance 全為 0 — 模型退化為常數預測\n4. GARCH 的遞迴結構是不可替代的領域知識\n\n**結論**：ML 不能「替代」GARCH，但可能作為 GARCH 的「修正器」有效。\n需要更長的歷史數據或 GARCH-informed 的 hybrid 架構。\n    ",
-    "audience": "research"
-  },
-  {
-    "id": "pub_181e6ef1",
-    "experiment_id": "181e6ef1",
-    "title": "GJR-Range 自建模型：結合日內價格範圍資訊",
-    "summary": "GJR-GARCH + lagged range²。QLIKE=-9.020（第4名），VaR 全通過。Range 提供了 r² 之外的額外日內波動率資訊。",
-    "category": "experiment",
-    "metrics": {
-      "qlike": -9.02,
-      "var_1pct": "1.6% PASS",
-      "var_5pct": "4.8% PASS"
-    },
-    "tags": [
-      "GJR-GARCH",
-      "波動率預測",
-      "風險管理"
-    ],
-    "published_at": "2026-03-14T13:46:12.177806+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T13:46:12.177806+00:00",
     "audience": "research"
   },
   {
@@ -14484,55 +14068,6 @@
       "HAR-RV"
     ],
     "content": "發現了同時達成最佳 QLIKE 和 VaR 通過的策略！\n\n**方法：**\n- 波動率預測：100% GJR-arch（QLIKE=-9.034，精度冠軍）\n- VaR 計算：max(σ_gjr, 0.9 × σ_har)（只在 GJR 壓得太低時啟用 HAR 底線）\n\n**結果：**\n\n| α | QLIKE | VaR 1% | VaR 5% |\n|---|-------|--------|--------|\n| 0.8 | -9.034 | 2.0% ✗ | 5.2% ✓ |\n| **0.9** | **-9.034** | **1.8% ✓** | **5.0% ✓** |\n| 1.0 | -9.034 | 1.6% ✓ | 4.6% ✓ |\n\nα=0.9 意味著：大部分時間 VaR 完全由 GJR 決定（保持精度），\n只在 GJR σ 低於 HAR σ 的 90% 時才啟用安全底線。\n\n**核心洞見：精度和安全可以解耦。**\n用最好的模型做預測，用穩健的模型做安全網。\n    ",
-    "audience": "research"
-  },
-  {
-    "id": "cmp_55f328a5",
-    "experiment_ids": [
-      "18b61e7d",
-      "0c8c3af4"
-    ],
-    "title": "跨 OOS 穩健性排行榜更新：GJR-HAR 仍是冠軍",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "GJR-HAR（自建）",
-        "qlike_2324": -9.01,
-        "qlike_2223": -8.309,
-        "var_robust": "兩期全過 ★"
-      },
-      {
-        "rank": 2,
-        "model": "CGARCH-GJR（自建）",
-        "qlike_2324": -9.009,
-        "qlike_2223": -8.327,
-        "var_robust": "2022-23 VaR1% 失敗"
-      },
-      {
-        "rank": 3,
-        "model": "GJR/GED",
-        "qlike_2324": -9.032,
-        "qlike_2223": -8.356,
-        "var_robust": "2022-23 VaR5% 失敗"
-      },
-      {
-        "rank": 4,
-        "model": "GJR-arch/Normal",
-        "qlike_2324": -9.034,
-        "qlike_2223": -8.361,
-        "var_robust": "兩期皆有失敗"
-      }
-    ],
-    "analysis": "\n## 跨 OOS 穩健性最終排行\n\n新測試的 Component GARCH (CGARCH-GJR) 在 2023-2024 表現好（QLIKE=-9.009），\n但在 2022-2023 高波動期 VaR 1% 失敗。\n長期成分 q_t 因為 rho≈0.99 反應太慢，無法應對快速 regime change。\n\n**GJR-HAR 仍是唯一在兩個 OOS 期間所有 VaR 檢定都通過的模型。**\n其多尺度 HAR 成分（MA5, MA22 的 squared returns）比 CGARCH 的\n長期趨勢更快地反應市場環境變化。\n\n研究統計：41+ 個實驗、42 條思考紀錄、19 則知識。\n    ",
-    "tags": [
-      "波動率預測",
-      "GJR-GARCH",
-      "HAR-RV"
-    ],
-    "published_at": "2026-03-14T13:33:06.770401+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T13:33:06.770401+00:00",
     "audience": "research"
   },
   {
@@ -14712,64 +14247,6 @@
     "audience": "research"
   },
   {
-    "id": "cmp_a32f6951",
-    "experiment_ids": [
-      "182b49bf",
-      "df739822",
-      "0efc3c19"
-    ],
-    "title": "SPY 波動率預測模型完整排行榜（VaR 約束下）",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "70%GJR + 30%GJR-HAR（組合）",
-        "qlike": -9.027,
-        "var_1pct": "1.6% ✓"
-      },
-      {
-        "rank": 2,
-        "model": "GJR-custom（自建 MLE）",
-        "qlike": -9.025,
-        "var_1pct": "1.6% ✓"
-      },
-      {
-        "rank": 3,
-        "model": "avg(GJR, GJR-HAR)",
-        "qlike": -9.022,
-        "var_1pct": "1.6% ✓"
-      },
-      {
-        "rank": 4,
-        "model": "GJR-HAR（自建多尺度）",
-        "qlike": -9.01,
-        "var_1pct": "1.6% ✓"
-      },
-      {
-        "rank": 5,
-        "model": "GARCH-arch（標準）",
-        "qlike": -8.988,
-        "var_1pct": "1.6% ✓"
-      },
-      {
-        "rank": 6,
-        "model": "GJR-Floor（自建底線）",
-        "qlike": -8.979,
-        "var_1pct": "1.6% ✓"
-      }
-    ],
-    "analysis": "\n## 完整研究排行榜\n\n經過 26 個實驗、3 個自建模型、5 種組合策略的測試，\n以及 multi-start MLE 最佳化的改善，最終排行如下。\n\n### 評選標準\n- **QLIKE（越低越好）**：衡量波動率預測精度\n- **VaR 1% Kupiec 檢定必須通過**：符合 Basel III 監管要求\n\n### 關鍵發現\n1. **組合預測**（70%GJR + 30%GJR-HAR）以 QLIKE=-9.027 奪冠，\n   只比理論最佳（但 VaR 失敗的）GJR-arch 差 0.08%\n2. **自建 GJR-custom**（scipy MLE）在 multi-start 後達到 -9.025，\n   幾乎追平組合預測——證明精心調校的自建模型能媲美組合策略\n3. 所有入選模型的 VaR 1% 和 5% 皆通過 Kupiec 和 Christoffersen 檢定\n4. Multi-start 最佳化對自建模型至關重要（改善 0.25-0.48%）\n\n### 自建模型的價值\nGJR-HAR 是本研究原創設計——將 HAR 的多尺度結構嵌入 GARCH 框架。\n它不在任何現有套件中，是「自主研究」的直接產物。\n    ",
-    "tags": [
-      "VaR",
-      "波動率預測",
-      "SPY"
-    ],
-    "published_at": "2026-03-14T12:39:33.601403+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T12:39:33.601403+00:00",
-    "audience": "research"
-  },
-  {
     "id": "mile_465ef457",
     "title": "組合預測突破：70%GJR + 30%GJR-HAR 成為新的最佳模型",
     "description": "Forecast combination 實驗發現最佳組合策略：\n\n**70% GJR-arch + 30% GJR-HAR = QLIKE -9.027, VaR 1% 通過 ✓**\n\n與標準 GJR-arch（QLIKE=-9.034）只差 0.08%，但 VaR 從 FAIL 變 PASS。\n\n| 策略 | QLIKE | VaR 1% | 排名 |\n|------|-------|--------|------|\n| GJR-arch（純） | -9.034 | 2.0% ✗ | 不合格 |\n| **70%GJR + 30%HAR** | **-9.027** | **1.6% ✓** | **第一** |\n| avg(GJR, HAR) | -9.022 | 1.6% ✓ | 第二 |\n| GJR-HAR（純） | -9.010 | 1.6% ✓ | 第三 |\n| GARCH（純） | -8.988 | 1.6% ✓ | 第四 |\n\n核心洞見：GJR-HAR 的多尺度成分提供了「波動率底線」，\n混入 30% 就足以修復 GJR-arch 的 VaR 失敗問題。\n    ",
@@ -14869,62 +14346,6 @@
     "audience": "research"
   },
   {
-    "id": "cmp_08c67bd1",
-    "experiment_ids": [
-      "5f26861d",
-      "fdbde66e"
-    ],
-    "title": "跨 OOS 穩健性分析：自建 GJR-HAR 在風險管理上優於標準 GJR",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "GJR-HAR（自建）",
-        "qlike": -8.974,
-        "var_robustness": "兩期皆通過"
-      },
-      {
-        "rank": 2,
-        "model": "GJR-arch（標準）",
-        "qlike": -9.034,
-        "var_robustness": "兩期皆失敗"
-      }
-    ],
-    "analysis": "\n## 跨期穩健性分析\n\n對 GJR-HAR（自建多尺度模型）和標準 GJR-GARCH 進行兩個不同 OOS 期間的測試：\n\n### OOS 2022-2023（高波動，Fed 升息）\n| 模型 | QLIKE | VaR 1% | VaR 5% |\n|------|-------|--------|--------|\n| GJR-arch | -8.361 | 1.8% ✓ | 7.2% ✗ |\n| GJR-HAR | -8.309 | **1.0% ✓** | 6.0% ✓ |\n\n### OOS 2023-2024（低波動，復甦）\n| 模型 | QLIKE | VaR 1% | VaR 5% |\n|------|-------|--------|--------|\n| GJR-arch | -9.034 | 2.0% ✗ | 5.2% ✓ |\n| GJR-HAR | -8.974 | **1.4% ✓** | 4.4% ✓ |\n\n### 結論\nGJR-HAR 犧牲 0.7% QLIKE，換來**跨市場環境的 VaR 穩健性**。\n在實際風險管理中，穩健性遠比微小的精度改善重要。\n\n多尺度 HAR 成分防止了標準 GJR 的過度波動率壓縮問題。\n    ",
-    "tags": [
-      "波動率預測",
-      "風險管理",
-      "GJR-GARCH",
-      "HAR-RV"
-    ],
-    "published_at": "2026-03-14T12:10:10.811819+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T12:10:10.811819+00:00",
-    "audience": "research"
-  },
-  {
-    "id": "pub_5f26861d",
-    "experiment_id": "5f26861d",
-    "title": "GJR-HAR 多尺度模型：VaR 通過但 QLIKE 下降",
-    "summary": "自建 GJR-HAR 模型首次測試。將 HAR 的多尺度結構（5天、22天平方報酬均值）嵌入 GARCH 的截距項。\n\n結果：QLIKE=-8.974（比標準 GJR 差 0.7%），VaR 1%=1.4% 通過 Kupiec。\n分析：HAR 項與 GARCH 的 beta*sigma2 高度共線性，增加估計噪聲。\n下一步：嘗試純 HAR 結構（取代 GARCH 遞迴）。",
-    "category": "experiment",
-    "metrics": {
-      "qlike": -8.974,
-      "var_1pct_rate": 0.014,
-      "var_1pct_pass": true
-    },
-    "tags": [
-      "VaR",
-      "波動率預測",
-      "GJR-GARCH",
-      "HAR-RV"
-    ],
-    "published_at": "2026-03-14T12:05:46.129038+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T12:05:46.129038+00:00",
-    "audience": "research"
-  },
-  {
     "id": "mile_9ecefbe7",
     "title": "VaR 違反群聚分析：辨識不可預測的外部衝擊",
     "description": "對 GJR-GARCH 的 10 次 VaR 1% 違反進行群聚分析。\n\n關鍵發現：\n- 7/24 和 8/05 違反相隔僅 7 天 → 2024 日圓套利交易平倉衝擊\n- 12/18 違反最嚴重（實際跌 3.03% vs VaR 1.45%）→ Fed 鷹派降息\n- 8/10 次違反發生在「前 5 天正報酬」之後 → 突發性下跌\n- 30% 的違反來自不可預測的外部事件，非模型可控\n\n結論：追求 VaR 1% 完美通過不切實際。\n研究轉向：改善 QLIKE（可控精度）+ 設計更好的 ES 指標 + 嘗試多尺度波動率結構。\n    ",
@@ -14976,60 +14397,6 @@
     "audience": "research"
   },
   {
-    "id": "cmp_8e8423f4",
-    "experiment_ids": [
-      "fdbde66e",
-      "581d9e5e",
-      "34a64413",
-      "80af18dd",
-      "9b2549ba"
-    ],
-    "title": "SPY Volatility Model Selection: Phase A-D Complete",
-    "category": "comparison",
-    "ranking": [
-      {
-        "rank": 1,
-        "model": "gjr_arch",
-        "qlike": -9.03372716045227,
-        "experiment_id": "fdbde66e"
-      },
-      {
-        "rank": 2,
-        "model": "gjr_arch",
-        "qlike": -9.033453069295005,
-        "experiment_id": "581d9e5e"
-      },
-      {
-        "rank": 3,
-        "model": "gjr_arch",
-        "qlike": -9.030845934887076,
-        "experiment_id": "34a64413"
-      },
-      {
-        "rank": 4,
-        "model": "gjr_arch",
-        "qlike": -9.025103831653812,
-        "experiment_id": "80af18dd"
-      },
-      {
-        "rank": 5,
-        "model": "garch_arch",
-        "qlike": -8.992080878413818,
-        "experiment_id": "9b2549ba"
-      }
-    ],
-    "analysis": "\n## SPY 波動率預測模型選擇報告\n\n### 最佳模型\n**GJR-GARCH(1,1)/Normal/Window=252**\n- QLIKE: -9.034 (統計顯著優於 GARCH, DM p<0.001)\n- VaR 5%: 通過 Kupiec (p=0.846) 和 Christoffersen 獨立性檢定\n- VaR 1%: 未通過 Kupiec (violation rate 2.0% vs expected 1.0%)\n\n### 關鍵發現\n1. GJR 的非對稱項有效捕捉 SPY 的槓桿效應 (skewness=-0.80)\n2. Normal 分配優於 Student-t（GARCH 條件變異數已捕捉厚尾）\n3. Window size 對結果影響極小 (<0.5%)\n4. EGARCH 在長期 rolling forecast 中有數值穩定性問題\n\n### 風險管理建議\n- 波動率預測：使用 GJR-GARCH\n- VaR/ES 計算：使用對稱 GARCH（更保守的 1% VaR 覆蓋）\n    ",
-    "tags": [
-      "波動率預測",
-      "SPY",
-      "風險管理"
-    ],
-    "published_at": "2026-03-14T11:42:15.742829+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T11:42:15.742829+00:00",
-    "audience": "research"
-  },
-  {
     "id": "mile_30b22ca5",
     "title": "DM Test: GJR-GARCH Statistically Significantly Outperforms GARCH",
     "description": "Diebold-Mariano test confirms GJR-GARCH is significantly better than GARCH (p<0.001) for SPY QLIKE forecasting. However, GARCH has better VaR coverage.",
@@ -15051,96 +14418,6 @@
       "SPY"
     ],
     "content": "Diebold-Mariano test confirms GJR-GARCH is significantly better than GARCH (p<0.001) for SPY QLIKE forecasting. However, GARCH has better VaR coverage.",
-    "audience": "research"
-  },
-  {
-    "id": "pub_fdbde66e",
-    "experiment_id": "fdbde66e",
-    "title": "Baseline Best: GJR-GARCH/Normal on SPY (QLIKE=-9.034)",
-    "summary": "mse=0.000000, mae=0.002996, qlike=-9.033727, hmse=0.669902, r2_log=-0.558787, n_forecasts=501, mean_actual_var=0.000043, mean_forecast_var=0.000073",
-    "category": "experiment",
-    "metrics": {
-      "mse": 3.424842023427002e-09,
-      "mae": 0.002996401976282911,
-      "qlike": -9.03372716045227,
-      "hmse": 0.6699015257717993,
-      "r2_log": -0.5587865894487924,
-      "n_forecasts": 501,
-      "mean_actual_var": 4.345471044859623e-05,
-      "mean_forecast_var": 7.32827974075056e-05,
-      "var_es": {
-        "alpha_0.01": {
-          "alpha": 0.01,
-          "n_violations": 10,
-          "violation_rate": 0.01996007984031936,
-          "expected_rate": 0.01,
-          "kupiec": {
-            "statistic": 3.8933555949658682,
-            "p_value": 0.04847747440189365,
-            "observed_rate": 0.01996007984031936,
-            "expected_rate": 0.01,
-            "n_violations": 10,
-            "total": 501,
-            "conclusion": "reject"
-          },
-          "christoffersen": {
-            "independence_stat": 0.0,
-            "independence_pval": 1.0,
-            "n00": 480,
-            "n01": 10,
-            "n10": 10,
-            "n11": 0,
-            "pi01": 0.02040816326530612,
-            "pi11": 0.0,
-            "conclusion": "independent"
-          },
-          "avg_loss_given_violation": 0.019750514345262336,
-          "avg_es_forecast": 0.01837256478531297,
-          "es_ratio": 1.0750003919458704,
-          "var_mean": 0.019161502162436995,
-          "es_mean": 0.021952653176417185
-        },
-        "alpha_0.05": {
-          "alpha": 0.05,
-          "n_violations": 26,
-          "violation_rate": 0.05189620758483034,
-          "expected_rate": 0.05,
-          "kupiec": {
-            "statistic": 0.037478415972231005,
-            "p_value": 0.846494243308977,
-            "observed_rate": 0.05189620758483034,
-            "expected_rate": 0.05,
-            "n_violations": 26,
-            "total": 501,
-            "conclusion": "fail_to_reject"
-          },
-          "christoffersen": {
-            "independence_stat": 0.11111221345702837,
-            "independence_pval": 0.7388814323463857,
-            "n00": 449,
-            "n01": 25,
-            "n10": 25,
-            "n11": 1,
-            "pi01": 0.052742616033755275,
-            "pi11": 0.038461538461538464,
-            "conclusion": "independent"
-          },
-          "avg_loss_given_violation": 0.016805166161602072,
-          "avg_es_forecast": 0.015612535200575595,
-          "es_ratio": 1.0763893208697142,
-          "var_mean": 0.01354821722126055,
-          "es_mean": 0.01699001097926343
-        }
-      }
-    },
-    "tags": [
-      "波動率預測",
-      "GJR-GARCH",
-      "SPY"
-    ],
-    "published_at": "2026-03-14T11:35:15.199367+00:00",
-    "status": "published",
-    "created_at": "2026-03-14T11:35:15.199367+00:00",
     "audience": "research"
   },
   {
@@ -15215,10 +14492,10 @@
       "波動率"
     ],
     "type": "research",
-    "status": "draft",
+    "status": "published",
     "phase": "K634_garch_stability",
     "created_at": "2026-03-28T06:30:00.000000+00:00",
-    "published_at": null,
+    "published_at": "2026-03-29T05:03:00.525478+00:00",
     "description": "K634 研究：SPY 的 GJR-GARCH 參數極度穩定（persistence CV=0.011），固定參數預測 QLIKE=1.464 顯著優於季度滾動 1.492（DM p<0.001），換倉次數減少 74%。GLD 無明顯 leverage effect（gamma 正值僅 48%）。",
     "proposer": "Claude",
     "executor": "Claude"

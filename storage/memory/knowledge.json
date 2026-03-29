@@ -16430,5 +16430,21 @@
     "experiment_id": "k688",
     "created_at": "2026-03-29T12:56:14.973540",
     "importance": 4
+  },
+  {
+    "id": "K689",
+    "title": "K689: ★★★★★ Paper Trading Lookahead — live returns use same-day VIX×return (corr=0.9999)",
+    "content": "[提出: K687 矛盾調查, 執行: Claude] Live Sharpe(3.98) vs backtest(0.068) 差距調查。corr(live, same-day)=0.9999 確認 paper_trading.json 回填用同日 VIX×同日 return——lookahead。Piecewise 受影響最大（sharp discontinuity at VIX=12/20）：正確 lag 後 Sharpe 3.16→1.62。12/VIX 幾乎不受影響（weight 平滑，w_T≈w_{T-1}）。分解：full-sample lag 0.48 + period selection +1.14 + lookahead +1.54 = 3.16。Fix needed: daily_update.py backfill 需用 next-day return。",
+    "tags": [
+      "paper-trading",
+      "lookahead-bias",
+      "backfill",
+      "critical-bug",
+      "daily-update"
+    ],
+    "data_source": "paper_trading.json + yfinance 2023-2026",
+    "experiment_id": "k689",
+    "created_at": "2026-03-29T13:19:45.354083",
+    "importance": 5
   }
 ]
