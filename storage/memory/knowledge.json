@@ -16497,5 +16497,21 @@
     "experiment_id": "k692",
     "created_at": "2026-03-29T13:58:02.998700",
     "importance": 4
+  },
+  {
+    "id": "K693",
+    "title": "K693: ★★★★★ Historical Returns FIXED — 9,935 entries corrected, avg Sharpe -0.62",
+    "content": "[提出: K692 修正, 執行: Claude] 修正 paper_trading.json 801 筆歷史 lookahead。9,935 entries fixed（跨 12 策略）。Sharpe 變化：Piecewise 3.16→1.56(-1.60), Adaptive 3.02→1.51(-1.51), TW+JP 3.03→1.63(-1.40), VIX Cond 2.64→1.76(-0.88)。平滑策略受影響小：slow_vt -0.07, risk_parity -0.05, 12/VIX -0.04。與 K690 lag robustness ratio 完全一致——weight 不平滑的策略 lookahead inflation 最大。Backup saved。Metrics recalculated。",
+    "tags": [
+      "data-fix",
+      "lookahead-correction",
+      "paper-trading",
+      "historical",
+      "Sharpe-deflation"
+    ],
+    "data_source": "paper_trading.json + yfinance",
+    "experiment_id": "k693",
+    "created_at": "2026-03-29T14:10:21.696903",
+    "importance": 5
   }
 ]
