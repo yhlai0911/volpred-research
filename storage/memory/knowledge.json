@@ -16680,5 +16680,22 @@
     "experiment_id": "k703",
     "created_at": "2026-03-29T16:09:05.664867",
     "importance": 3
+  },
+  {
+    "id": "K704",
+    "title": "K704: ★★ Risk Parity ≈ 50/50 because SPY vol ≈ GLD vol (19.3% vs 18.3%)",
+    "content": "[提出: K702 深究, 執行: Claude] RP avg SPY weight=49.8%（與 50/50 差 0.2%）。SPY vol 19.3% ≈ GLD 18.3%（ratio 1.055）→ RP 自然收斂到 50/50。RP Sharpe 0.516 < 50/50 0.549——估計噪音有害。RP 偏離>5% 在 51% 天，但偏離時兩方向都 hurt（over-SPY -0.24%/yr, over-GLD -0.69%/yr）。Inverse variance 更差（更多噪音）。DeMiguel 1/N rule 確認。結論：50/50 SPY/GLD 恰好是 RP optimal，不需要估計。",
+    "tags": [
+      "risk-parity",
+      "equal-weight",
+      "DeMiguel",
+      "1/N",
+      "estimation-noise",
+      "vol-similarity"
+    ],
+    "data_source": "yfinance SPY/GLD 2006-2026",
+    "experiment_id": "k704",
+    "created_at": "2026-03-29T16:25:55.192636",
+    "importance": 3
   }
 ]
