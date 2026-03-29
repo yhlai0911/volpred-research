@@ -495,17 +495,27 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
     from datetime import datetime, timezone
     now = datetime.now(timezone.utc).isoformat()
 
-    # Articles — only sync if feed.json was modified since last sync
-    feed_path = storage / "reports" / "feed.json"
-    if feed_path.exists():
-        feed_mtime = feed_path.stat().st_mtime
+    # Articles — sync from reports/feed.json AND storage/feed.json
+    # Merge both sources: reports/feed.json (main DB) + storage/feed.json (agent-written drafts)
+    feed = []
+    feed_mtime = 0
+    for fp in [storage / "reports" / "feed.json", storage / "feed.json"]:
+        if fp.exists():
+            feed_mtime = max(feed_mtime, fp.stat().st_mtime)
+            items = json.loads(fp.read_text())
+            if isinstance(items, dict):
+                items = items.get("items", [])
+            seen_ids = {a.get("id") for a in feed if isinstance(a, dict)}
+            for item in items:
+                if isinstance(item, dict) and item.get("id") not in seen_ids:
+                    feed.append(item)
+    if feed:
         last_feed_sync = state.get("feed_mtime", 0)
         if feed_mtime > last_feed_sync:
-            feed = json.loads(feed_path.read_text())
             last_sync_ts = state.get("articles_last_ts", "")
-            # Only sync articles published/updated after last sync
+            # Sync articles published/updated after last sync, OR drafts with created_at after last sync
             to_sync = [item for item in feed
-                       if (item.get("published_at") or "") > last_sync_ts
+                       if (item.get("published_at") or item.get("created_at") or "") > last_sync_ts
                        or not last_sync_ts]
             ok = 0
             for item in to_sync:
