@@ -5,13 +5,17 @@
 - **前端從 DB 讀取，不需改代碼、不需重新部署**
 - 加新策略 = 寫 DB + 加計算邏輯到 daily_update.py + 跑回測
 
-## 前置條件（缺一不可）
-1. 策略已完成研究（有回測結果、Harvey t>3 統計顯著性）
-2. **同期間比較通過**：`uv run python scripts/evaluate_new_strategy.py` 在 COMMON_START（2023-01-04）~ 今天的同期間 vs 已上架策略，排名前 3 才可考慮上架
-3. **Cross-OOS 驗證通過**：至少 5 個非重疊期間，勝 ≥4/5
-4. **Codex 審查通過**：任何正 alpha 結果必須用 Codex 檢查 lag/lookahead/TX bug
-5. 已發佈至少一篇 feed 文章描述策略
-6. 確認 data-timing.md 中的時間規則已遵循
+## 上架標準（5 項全部通過才可上架，見 CLAUDE.md「策略上架標準」）
+
+| # | 檢驗 | 通過標準 |
+|---|------|---------|
+| 1 | 同期間排名 | `evaluate_new_strategy.py` 排名**前 5** |
+| 2 | Cross-OOS | 5 個非重疊 2yr 期間，勝 BH 50/50 **≥ 3/5** |
+| 3 | Codex 審查 | 無 HIGH severity bug |
+| 4 | Sensitivity | 參數 ±20% Sharpe 不降 >30% |
+| 5 | MDD | 同期間 **< -20%** |
+
+**回測期間 ≠ 顯示期間**：回測可用 2006-2026 探索，但排名和上架決定用 COMMON_START（2023-01-04）~ today。
 
 ## ⚠️ 不修改歷史數據原則
 - 新策略從加入 paper_trading.json 的日期起 forward tracking

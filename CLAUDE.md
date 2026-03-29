@@ -132,14 +132,36 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
 - **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——這是最可靠的設計原則**
 
-### 策略評估 SOP（不可跳步）
+### 策略上架標準（統一、可量化、不可跳步）
 
-**新策略評估必須走完以下步驟，缺一不可：**
-1. **同期間比較**：`uv run python scripts/evaluate_new_strategy.py` — 用 COMMON_START~today 模擬，vs paper_trading 同期間
-2. **Cross-OOS 驗證**：至少 5 個非重疊期間，必須贏 ≥4/5
-3. **Codex 審查**：任何正 alpha 結果必須用 Codex 檢查 lag/lookahead/TX bug
-4. **通過後**：加入 STRATEGY_REGISTRY → paper_trading.json → recalc_metrics（自動 sync Supabase）
-5. **不修改歷史數據**：新策略從加入日起 forward tracking，歷史績效用模擬值標注為「回測」
+**回測可以用任何期間探索，但上架決定基於以下統一標準：**
+
+#### 前端顯示期間
+- **COMMON_START = 2023-01-04 ~ 今天**（約 3 年）
+- 所有策略的績效數字、圖表、排名都基於這個期間
+- 新策略必須在這個期間模擬 returns 來做公平比較
+
+#### 上架必須通過的 5 項檢驗（ALL PASS 才可上架）
+
+| # | 檢驗 | 通過標準 | 工具 |
+|---|------|---------|------|
+| 1 | **同期間排名** | `evaluate_new_strategy.py` 排名 **前 5**（vs 所有已上架策略） | `uv run python scripts/evaluate_new_strategy.py` |
+| 2 | **Cross-OOS** | 5 個非重疊 2 年期間，勝 BH 50/50 **≥ 3/5** | 回測腳本（可用 2006-2026） |
+| 3 | **Codex 審查** | 無 HIGH severity bug（lag/lookahead/TX） | `/codex-cli -s read-only` |
+| 4 | **Sensitivity** | 參數 ±20% 變動後 Sharpe 不降 > 30% | 回測腳本 |
+| 5 | **MDD 可接受** | 同期間 MDD **< -20%** | `evaluate_new_strategy.py` 輸出 |
+
+#### 上架後流程
+1. 加入 `STRATEGY_REGISTRY`（daily_update.py）
+2. 加入計算邏輯到 strat_list
+3. 執行 `list_new_strategy.py`（寫 DB + 回填 paper_trading + recalc_metrics → 自動 sync）
+4. 發佈 Feed 文章
+5. **不修改歷史數據**：新策略從加入日起 forward tracking
+
+#### 重要原則
+- **回測期間 ≠ 顯示期間**：回測用長期（2006-2026）探索，但排名用 COMMON_START 同期間
+- **不修改歷史數據**：forward tracking 讓 metrics 自然收斂
+- **Metrics 是數據衍生品**：`recalc_metrics.py` 是唯一寫入路徑，自動 sync Supabase
 
 ### 每日文章產出要求（不可缺少任何一種）
 
