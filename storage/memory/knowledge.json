@@ -16446,5 +16446,22 @@
     "experiment_id": "k689",
     "created_at": "2026-03-29T13:19:45.354083",
     "importance": 5
+  },
+  {
+    "id": "K690",
+    "title": "K690: ★★★ Weight Smoothness — EWMA most lag-robust (0.756), Piecewise most fragile (0.046)",
+    "content": "[提出: K689 延伸, 執行: Claude] 5 策略 lag robustness ratio（Sharpe lag=1/lag=0）。EWMA VT 0.756（autocorr 0.9897，最穩健）。12/VIX 0.399。P3-AGG 0.297。Percentile 0.211。Piecewise 0.046（幾乎歸零）。相關：weight autocorr r=+0.56，mean|dw| r=-0.80。Lag=0 Sharpe 最高的策略（Piecewise 1.46, Percentile 1.68）恰好是 lookahead 最嚴重的——它們的'好表現'依賴即時 VIX 信號。Lag 後全部 cluster 在 0.35-0.53。結論：實務上 EWMA VT 最適合因為對 timing imprecision 最 forgiving。",
+    "tags": [
+      "weight-smoothness",
+      "lag-robustness",
+      "EWMA",
+      "autocorrelation",
+      "practical",
+      "timing"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k690",
+    "created_at": "2026-03-29T13:25:01.858192",
+    "importance": 3
   }
 ]
