@@ -16039,5 +16039,39 @@
     "experiment_id": "k665",
     "created_at": "2026-03-29T08:15:13.439143",
     "importance": 4
+  },
+  {
+    "id": "K666",
+    "title": "K666: VIX Seasonality — NOT significant (KW p=0.97), VIX level >> calendar month",
+    "content": "[提出: K631 延伸, 執行: Claude] 34 年 VIX 月份季節性。KW p=0.97 不顯著。October 最高 vol(24.1%)但統計不顯著。Sell in May p=0.32 NS（post-2010 更弱 p=0.66）。Seasonal VT overlay Sharpe 1.71 < plain 1.88（反而更差）。Entry month 差異僅 1.14pp（Feb 12.5% vs May 11.4%）。VIX 水平遠比月份重要：VIX≥20 entry→+15.5%/yr vs VIX<20→+10.5%。結論：不要看日曆投資——看 VIX。",
+    "tags": [
+      "seasonality",
+      "Sell-in-May",
+      "October-effect",
+      "null-result",
+      "VIX-level"
+    ],
+    "data_source": "yfinance SPY/VIX 1993-2026",
+    "experiment_id": "k666",
+    "created_at": "2026-03-29T08:28:30.650702",
+    "importance": 2
+  },
+  {
+    "id": "K667",
+    "title": "K667: ★★★ Insurance Cost — 50/50+VT costs 1.33%/yr for 43.7pp MDD reduction, 10x cheaper than puts",
+    "content": "[提出: K656 量化, 執行: Claude] VT 保險成本分析。12/VIX SPY premium=2.50%/yr（BH 8.30% vs VT 5.80%），break-even 需 crisis 每 2.2yr（實際每 5yr——偏貴）。50/50+VT premium=1.33%/yr，MDD 改善 43.7pp，break-even 每 25.5yr——基本上永遠划算。Cost per 1% MDD reduction：50/50+VT 0.030% 最低。vs Options：VT 2.50%/yr vs ATM put 26.1%（10x 便宜），≈10% OTM put 2.0%（相當）但無到期、無對手風險。Crisis 時 VT 賺 -43%/yr annualized。結論：50/50+VT 是投資人能買到的最便宜保險。",
+    "tags": [
+      "insurance-cost",
+      "premium",
+      "break-even",
+      "options-comparison",
+      "50/50",
+      "VT-value",
+      "practical"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k667",
+    "created_at": "2026-03-29T08:28:30.650712",
+    "importance": 4
   }
 ]
