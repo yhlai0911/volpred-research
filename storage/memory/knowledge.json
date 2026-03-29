@@ -16513,5 +16513,21 @@
     "experiment_id": "k693",
     "created_at": "2026-03-29T14:10:21.696903",
     "importance": 5
+  },
+  {
+    "id": "K694",
+    "title": "K694: ★★★ Corrected Live Audit — 7/10 still beat SPY, ranking reshuffled",
+    "content": "[提出: K693 驗證, 執行: Claude] K693 修正後重新 live audit。Avg Sharpe inflation +0.74。最膨脹：Adaptive +2.04(121%), Piecewise +2.01(103%), Taiwan Hybrid +1.74(86%)。最不受影響：Fear DCA -0.003, 12/VIX -0.16。排名變化：Risk Parity #9→#5(+4), Taiwan VT #8→#4(+4), Piecewise #4→#7(-3), Adaptive #6→#10(-4)。修正後 7/10 仍勝 SPY（avg Sharpe 1.49）——平台核心價值成立。Smooth weight 策略（12/VIX, Fear DCA）幾乎不受影響——與 K690 一致。",
+    "tags": [
+      "corrected-audit",
+      "live-data",
+      "ranking-change",
+      "K693-impact",
+      "validation"
+    ],
+    "data_source": "paper_trading.json (post-K693)",
+    "experiment_id": "k694",
+    "created_at": "2026-03-29T14:23:50.828935",
+    "importance": 4
   }
 ]
