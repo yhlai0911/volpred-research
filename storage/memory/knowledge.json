@@ -16073,5 +16073,23 @@
     "experiment_id": "k667",
     "created_at": "2026-03-29T08:28:30.650712",
     "importance": 4
+  },
+  {
+    "id": "K668",
+    "title": "K668: ★★★ Retirement VT — Sequence risk corr 0.96→0.31, worst-case floor +36pp",
+    "content": "[提出: 跳躍探索/退休金融, 執行: Claude] $1M 退休模擬 4% withdrawal，5 策略。100% survival（2006-2026 期間所有策略都活 20 年）。VT 核心價值：sequence-of-returns risk 相關性 BH SPY 0.961→50/50+VT 0.307（幾乎解耦）。Worst-case min portfolio：50/50+VT $776K(78%) vs BH SPY $421K(42%)——floor +36pp。GFC stress（Sep 2008 start）：VT 3yr MDD -10% vs BH -48%。BH terminal wealth 更高（$2.5-5M vs $1-1.6M）——VT 犧牲 upside 換 downside protection。Sustainable withdrawal rate VT ~10% vs BH 12%（都遠超 4% rule）。結論：VT 對風險厭惡退休人士有巨大價值——不是最大化財富，是最小化耗盡風險。",
+    "tags": [
+      "retirement",
+      "sequence-risk",
+      "4%-rule",
+      "withdrawal",
+      "survival",
+      "practical",
+      "retiree"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k668",
+    "created_at": "2026-03-29T08:42:46.654172",
+    "importance": 4
   }
 ]
