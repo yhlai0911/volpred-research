@@ -16762,5 +16762,21 @@
     "experiment_id": "k708",
     "created_at": "2026-03-29T17:41:29.392203",
     "importance": 3
+  },
+  {
+    "id": "K709",
+    "title": "K709: Rate-Conditional Allocation — Delta only +0.019 Sharpe, not actionable",
+    "content": "[提出: K663/K706 延伸, 執行: Claude] 利率條件 60/40↔40/60 SPY/GLD（rising→more SPY, falling→more GLD）。Falling regime GLD +30.8% vs SPY +13.4%（huge gap）但 lag 6m window 後 conditional Sharpe 0.869 vs BH 0.850 Δ=+0.019——太小不值得。Rate regime 佔比：rising 21%, stable 62%, falling 19%。結論：利率資訊到達太晚（6m lag），且配置差異只有 ±10pp，效果微小。",
+    "tags": [
+      "rate-conditional",
+      "interest-rate",
+      "allocation",
+      "null-result",
+      "lag-too-long"
+    ],
+    "data_source": "yfinance SPY/GLD/TNX 2006-2026",
+    "experiment_id": "k709",
+    "created_at": "2026-03-29T17:51:45.543484",
+    "importance": 1
   }
 ]
