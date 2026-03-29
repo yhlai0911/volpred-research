@@ -1,0 +1,733 @@
+{
+  "experiment_id": "K702",
+  "title": "Optimal Static Asset Allocation \u2014 Beyond 50/50 SPY/GLD",
+  "date": "2026-03-29 07:56",
+  "description": "Tests 8 static allocations (SPY/GLD/TLT/EFA) to determine if 50/50 SPY/GLD is truly optimal. Includes grid search (SPY/GLD 0-100%), risk parity, Markowitz MV-optimal, and cross-OOS validation across 5 periods.",
+  "data_source": "yfinance",
+  "data_period": "2006-01-01 to 2026-03-27",
+  "eval_period": "2007-01-03 to 2026-03-27",
+  "configuration": {
+    "tickers": [
+      "SPY",
+      "GLD",
+      "TLT",
+      "EFA"
+    ],
+    "rf_annual": 0.04,
+    "tx_cost_bps": 5,
+    "rebalance_freq": "annual",
+    "bootstrap_reps": 5000,
+    "risk_parity_estimation": "through 2007-12-31",
+    "markowitz_estimation": "through 2016-02-11"
+  },
+  "descriptive_stats": {
+    "SPY": {
+      "ann_return_pct": 10.42,
+      "ann_vol_pct": 19.32,
+      "sharpe": 0.332,
+      "skewness": -0.001,
+      "kurtosis": 15.031
+    },
+    "GLD": {
+      "ann_return_pct": 10.53,
+      "ann_vol_pct": 18.31,
+      "sharpe": 0.356,
+      "skewness": -0.322,
+      "kurtosis": 6.737
+    },
+    "TLT": {
+      "ann_return_pct": 2.89,
+      "ann_vol_pct": 14.85,
+      "sharpe": -0.075,
+      "skewness": 0.082,
+      "kurtosis": 3.403
+    },
+    "EFA": {
+      "ann_return_pct": 5.18,
+      "ann_vol_pct": 21.4,
+      "sharpe": 0.055,
+      "skewness": -0.047,
+      "kurtosis": 13.978
+    }
+  },
+  "correlation_matrix": {
+    "EFA": {
+      "EFA": 1.0,
+      "GLD": 0.1652,
+      "SPY": 0.8845,
+      "TLT": -0.2874
+    },
+    "GLD": {
+      "EFA": 0.1652,
+      "GLD": 1.0,
+      "SPY": 0.0582,
+      "TLT": 0.1586
+    },
+    "SPY": {
+      "EFA": 0.8845,
+      "GLD": 0.0582,
+      "SPY": 1.0,
+      "TLT": -0.3091
+    },
+    "TLT": {
+      "EFA": -0.2874,
+      "GLD": 0.1586,
+      "SPY": -0.3091,
+      "TLT": 1.0
+    }
+  },
+  "full_sample_ranking": [
+    {
+      "strategy": "50/50 SPY/GLD",
+      "cagr_pct": 10.94,
+      "ann_ret_pct": 10.94,
+      "ann_vol_pct": 13.46,
+      "sharpe": 0.548,
+      "sortino": 0.483,
+      "mdd_pct": -32.63,
+      "calmar": 0.335,
+      "total_return_pct": 633.67,
+      "n_days": 4837,
+      "n_years": 19.2,
+      "tickers_used": [
+        "GLD",
+        "SPY"
+      ],
+      "target_weights": {
+        "GLD": 0.5,
+        "SPY": 0.5
+      },
+      "n_rebalances": 19,
+      "total_turnover": 1.5609,
+      "avg_annual_turnover": 0.0813
+    },
+    {
+      "strategy": "60/40 SPY/GLD",
+      "cagr_pct": 10.92,
+      "ann_ret_pct": 10.92,
+      "ann_vol_pct": 13.8,
+      "sharpe": 0.536,
+      "sortino": 0.472,
+      "mdd_pct": -34.7,
+      "calmar": 0.315,
+      "total_return_pct": 630.51,
+      "n_days": 4837,
+      "n_years": 19.2,
+      "tickers_used": [
+        "GLD",
+        "SPY"
+      ],
+      "target_weights": {
+        "GLD": 0.4,
+        "SPY": 0.6
+      },
+      "n_rebalances": 19,
+      "total_turnover": 1.4981,
+      "avg_annual_turnover": 0.078
+    },
+    {
+      "strategy": "40/30/30 SPY/GLD/TLT",
+      "cagr_pct": 9.04,
+      "ann_ret_pct": 9.04,
+      "ann_vol_pct": 9.81,
+      "sharpe": 0.531,
+      "sortino": 0.489,
+      "mdd_pct": -22.86,
+      "calmar": 0.395,
+      "total_return_pct": 426.15,
+      "n_days": 4837,
+      "n_years": 19.2,
+      "tickers_used": [
+        "GLD",
+        "SPY",
+        "TLT"
+      ],
+      "target_weights": {
+        "GLD": 0.3,
+        "SPY": 0.4,
+        "TLT": 0.3
+      },
+      "n_rebalances": 19,
+      "total_turnover": 1.9554,
+      "avg_annual_turnover": 0.1018
+    },
+    {
+      "strategy": "60/40 SPY/TLT",
+      "cagr_pct": 8.21,
+      "ann_ret_pct": 8.21,
+      "ann_vol_pct": 10.85,
+      "sharpe": 0.42,
+      "sortino": 0.367,
+      "mdd_pct": -27.64,
+      "calmar": 0.297,
+      "total_return_pct": 354.63,
+      "n_days": 4837,
+      "n_years": 19.2,
+      "tickers_used": [
+        "SPY",
+        "TLT"
+      ],
+      "target_weights": {
+        "SPY": 0.6,
+        "TLT": 0.4
+      },
+      "n_rebalances": 19,
+      "total_turnover": 1.7844,
+      "avg_annual_turnover": 0.0929
+    },
+    {
+      "strategy": "Markowitz MV-Optimal",
+      "cagr_pct": 7.52,
+      "ann_ret_pct": 7.52,
+      "ann_vol_pct": 9.28,
+      "sharpe": 0.405,
+      "sortino": 0.364,
+      "mdd_pct": -26.6,
+      "calmar": 0.283,
+      "total_return_pct": 302.04,
+      "n_days": 4837,
+      "n_years": 19.2,
+      "tickers_used": [
+        "GLD",
+        "SPY",
+        "TLT"
+      ],
+      "target_weights": {
+        "GLD": 0.1998,
+        "SPY": 0.298,
+        "TLT": 0.5023
+      },
+      "n_rebalances": 19,
+      "total_turnover": 1.9192,
+      "avg_annual_turnover": 0.1
+    },
+    {
+      "strategy": "25/25/25/25 Equal Weight",
+      "cagr_pct": 7.93,
+      "ann_ret_pct": 7.93,
+      "ann_vol_pct": 10.71,
+      "sharpe": 0.4,
+      "sortino": 0.35,
+      "mdd_pct": -25.85,
+      "calmar": 0.307,
+      "total_return_pct": 332.34,
+      "n_days": 4837,
+      "n_years": 19.2,
+      "tickers_used": [
+        "EFA",
+        "GLD",
+        "SPY",
+        "TLT"
+      ],
+      "target_weights": {
+        "EFA": 0.25,
+        "GLD": 0.25,
+        "SPY": 0.25,
+        "TLT": 0.25
+      },
+      "n_rebalances": 19,
+      "total_turnover": 1.9561,
+      "avg_annual_turnover": 0.1019
+    },
+    {
+      "strategy": "SPY Only",
+      "cagr_pct": 10.25,
+      "ann_ret_pct": 10.25,
+      "ann_vol_pct": 19.69,
+      "sharpe": 0.395,
+      "sortino": 0.301,
+      "mdd_pct": -55.19,
+      "calmar": 0.186,
+      "total_return_pct": 550.79,
+      "n_days": 4837,
+      "n_years": 19.2,
+      "tickers_used": [
+        "SPY"
+      ],
+      "target_weights": {
+        "SPY": 1.0
+      },
+      "n_rebalances": 19,
+      "total_turnover": 0.0,
+      "avg_annual_turnover": 0.0
+    },
+    {
+      "strategy": "Risk Parity Static",
+      "cagr_pct": 7.26,
+      "ann_ret_pct": 7.26,
+      "ann_vol_pct": 9.63,
+      "sharpe": 0.369,
+      "sortino": 0.324,
+      "mdd_pct": -26.44,
+      "calmar": 0.275,
+      "total_return_pct": 284.14,
+      "n_days": 4837,
+      "n_years": 19.2,
+      "tickers_used": [
+        "EFA",
+        "GLD",
+        "SPY",
+        "TLT"
+      ],
+      "target_weights": {
+        "EFA": 0.202,
+        "GLD": 0.1593,
+        "SPY": 0.2528,
+        "TLT": 0.3858
+      },
+      "n_rebalances": 19,
+      "total_turnover": 2.0004,
+      "avg_annual_turnover": 0.1042
+    }
+  ],
+  "bootstrap_sharpe_ci": {
+    "50/50 SPY/GLD": {
+      "mean": 0.545,
+      "std": 0.232,
+      "ci_lower": 0.088,
+      "ci_upper": 0.995
+    },
+    "60/40 SPY/GLD": {
+      "mean": 0.533,
+      "std": 0.228,
+      "ci_lower": 0.083,
+      "ci_upper": 0.978
+    },
+    "40/30/30 SPY/GLD/TLT": {
+      "mean": 0.536,
+      "std": 0.23,
+      "ci_lower": 0.09,
+      "ci_upper": 0.989
+    },
+    "60/40 SPY/TLT": {
+      "mean": 0.417,
+      "std": 0.226,
+      "ci_lower": -0.021,
+      "ci_upper": 0.864
+    },
+    "Markowitz MV-Optimal": {
+      "mean": 0.402,
+      "std": 0.23,
+      "ci_lower": -0.043,
+      "ci_upper": 0.844
+    }
+  },
+  "dm_tests_vs_5050": [
+    {
+      "comparison": "SPY Only vs 50/50 SPY/GLD",
+      "mean_diff_daily_bps": 0.16,
+      "t_stat": 0.148,
+      "p_value": 0.8821,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "nw_lag": 16
+    },
+    {
+      "comparison": "60/40 SPY/TLT vs 50/50 SPY/GLD",
+      "mean_diff_daily_bps": -1.12,
+      "t_stat": -1.344,
+      "p_value": 0.1791,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "nw_lag": 16
+    },
+    {
+      "comparison": "60/40 SPY/GLD vs 50/50 SPY/GLD",
+      "mean_diff_daily_bps": 0.01,
+      "t_stat": 0.044,
+      "p_value": 0.9651,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "nw_lag": 16
+    },
+    {
+      "comparison": "40/30/30 SPY/GLD/TLT vs 50/50 SPY/GLD",
+      "mean_diff_daily_bps": -0.86,
+      "t_stat": -1.807,
+      "p_value": 0.0708,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "nw_lag": 16
+    },
+    {
+      "comparison": "25/25/25/25 Equal Weight vs 50/50 SPY/GLD",
+      "mean_diff_daily_bps": -1.23,
+      "t_stat": -2.769,
+      "p_value": 0.0056,
+      "significant_5pct": "True",
+      "significant_harvey": "False",
+      "nw_lag": 16
+    },
+    {
+      "comparison": "Risk Parity Static vs 50/50 SPY/GLD",
+      "mean_diff_daily_bps": -1.51,
+      "t_stat": -2.375,
+      "p_value": 0.0176,
+      "significant_5pct": "True",
+      "significant_harvey": "False",
+      "nw_lag": 16
+    },
+    {
+      "comparison": "Markowitz MV-Optimal vs 50/50 SPY/GLD",
+      "mean_diff_daily_bps": -1.43,
+      "t_stat": -1.806,
+      "p_value": 0.071,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "nw_lag": 16
+    }
+  ],
+  "grid_search_spy_gld": {
+    "best_mix": {
+      "SPY_pct": 50,
+      "GLD_pct": 50
+    },
+    "full_grid": [
+      {
+        "spy_pct": 0,
+        "gld_pct": 100,
+        "sharpe": 0.411,
+        "cagr_pct": 10.18,
+        "mdd_pct": -45.56,
+        "calmar": 0.224,
+        "ann_vol_pct": 17.98
+      },
+      {
+        "spy_pct": 5,
+        "gld_pct": 95,
+        "sharpe": 0.43,
+        "cagr_pct": 10.33,
+        "mdd_pct": -41.4,
+        "calmar": 0.25,
+        "ann_vol_pct": 17.21
+      },
+      {
+        "spy_pct": 10,
+        "gld_pct": 90,
+        "sharpe": 0.448,
+        "cagr_pct": 10.46,
+        "mdd_pct": -37.03,
+        "calmar": 0.282,
+        "ann_vol_pct": 16.48
+      },
+      {
+        "spy_pct": 15,
+        "gld_pct": 85,
+        "sharpe": 0.467,
+        "cagr_pct": 10.57,
+        "mdd_pct": -32.43,
+        "calmar": 0.326,
+        "ann_vol_pct": 15.81
+      },
+      {
+        "spy_pct": 20,
+        "gld_pct": 80,
+        "sharpe": 0.485,
+        "cagr_pct": 10.67,
+        "mdd_pct": -29.82,
+        "calmar": 0.358,
+        "ann_vol_pct": 15.21
+      },
+      {
+        "spy_pct": 25,
+        "gld_pct": 75,
+        "sharpe": 0.502,
+        "cagr_pct": 10.75,
+        "mdd_pct": -29.93,
+        "calmar": 0.359,
+        "ann_vol_pct": 14.67
+      },
+      {
+        "spy_pct": 30,
+        "gld_pct": 70,
+        "sharpe": 0.518,
+        "cagr_pct": 10.82,
+        "mdd_pct": -30.04,
+        "calmar": 0.36,
+        "ann_vol_pct": 14.23
+      },
+      {
+        "spy_pct": 35,
+        "gld_pct": 65,
+        "sharpe": 0.531,
+        "cagr_pct": 10.87,
+        "mdd_pct": -30.27,
+        "calmar": 0.359,
+        "ann_vol_pct": 13.87
+      },
+      {
+        "spy_pct": 40,
+        "gld_pct": 60,
+        "sharpe": 0.541,
+        "cagr_pct": 10.91,
+        "mdd_pct": -30.92,
+        "calmar": 0.353,
+        "ann_vol_pct": 13.62
+      },
+      {
+        "spy_pct": 45,
+        "gld_pct": 55,
+        "sharpe": 0.546,
+        "cagr_pct": 10.93,
+        "mdd_pct": -31.77,
+        "calmar": 0.344,
+        "ann_vol_pct": 13.48
+      },
+      {
+        "spy_pct": 50,
+        "gld_pct": 50,
+        "sharpe": 0.548,
+        "cagr_pct": 10.94,
+        "mdd_pct": -32.63,
+        "calmar": 0.335,
+        "ann_vol_pct": 13.46
+      },
+      {
+        "spy_pct": 55,
+        "gld_pct": 45,
+        "sharpe": 0.544,
+        "cagr_pct": 10.94,
+        "mdd_pct": -33.65,
+        "calmar": 0.325,
+        "ann_vol_pct": 13.57
+      },
+      {
+        "spy_pct": 60,
+        "gld_pct": 40,
+        "sharpe": 0.536,
+        "cagr_pct": 10.92,
+        "mdd_pct": -34.7,
+        "calmar": 0.315,
+        "ann_vol_pct": 13.8
+      },
+      {
+        "spy_pct": 65,
+        "gld_pct": 35,
+        "sharpe": 0.524,
+        "cagr_pct": 10.88,
+        "mdd_pct": -36.01,
+        "calmar": 0.302,
+        "ann_vol_pct": 14.15
+      },
+      {
+        "spy_pct": 70,
+        "gld_pct": 30,
+        "sharpe": 0.508,
+        "cagr_pct": 10.83,
+        "mdd_pct": -37.71,
+        "calmar": 0.287,
+        "ann_vol_pct": 14.63
+      },
+      {
+        "spy_pct": 75,
+        "gld_pct": 25,
+        "sharpe": 0.491,
+        "cagr_pct": 10.77,
+        "mdd_pct": -40.43,
+        "calmar": 0.266,
+        "ann_vol_pct": 15.23
+      },
+      {
+        "spy_pct": 80,
+        "gld_pct": 20,
+        "sharpe": 0.472,
+        "cagr_pct": 10.7,
+        "mdd_pct": -43.44,
+        "calmar": 0.246,
+        "ann_vol_pct": 15.93
+      },
+      {
+        "spy_pct": 85,
+        "gld_pct": 15,
+        "sharpe": 0.452,
+        "cagr_pct": 10.61,
+        "mdd_pct": -46.4,
+        "calmar": 0.229,
+        "ann_vol_pct": 16.73
+      },
+      {
+        "spy_pct": 90,
+        "gld_pct": 10,
+        "sharpe": 0.432,
+        "cagr_pct": 10.5,
+        "mdd_pct": -49.41,
+        "calmar": 0.213,
+        "ann_vol_pct": 17.63
+      },
+      {
+        "spy_pct": 95,
+        "gld_pct": 5,
+        "sharpe": 0.413,
+        "cagr_pct": 10.38,
+        "mdd_pct": -52.33,
+        "calmar": 0.198,
+        "ann_vol_pct": 18.62
+      },
+      {
+        "spy_pct": 100,
+        "gld_pct": 0,
+        "sharpe": 0.395,
+        "cagr_pct": 10.25,
+        "mdd_pct": -55.19,
+        "calmar": 0.186,
+        "ann_vol_pct": 19.69
+      }
+    ]
+  },
+  "cross_oos": {
+    "50/50 SPY/GLD": {
+      "periods": [
+        "2007-2010",
+        "2011-2014",
+        "2015-2018",
+        "2019-2022",
+        "2023-2026"
+      ],
+      "sharpes": [
+        0.462,
+        0.225,
+        0.087,
+        0.561,
+        1.496
+      ],
+      "cagrs": [
+        11.19,
+        6.07,
+        4.39,
+        11.37,
+        25.38
+      ],
+      "mdds": [
+        -32.63,
+        -11.04,
+        -11.86,
+        -19.97,
+        -13.64
+      ],
+      "mean_sharpe": 0.566,
+      "std_sharpe": 0.494,
+      "min_sharpe": 0.087,
+      "mean_mdd": -17.83,
+      "worst_mdd": -32.63
+    },
+    "60/40 SPY/GLD": {
+      "periods": [
+        "2007-2010",
+        "2011-2014",
+        "2015-2018",
+        "2019-2022",
+        "2023-2026"
+      ],
+      "sharpes": [
+        0.34,
+        0.382,
+        0.146,
+        0.556,
+        1.477
+      ],
+      "cagrs": [
+        8.88,
+        8.0,
+        4.95,
+        11.78,
+        24.27
+      ],
+      "mdds": [
+        -34.7,
+        -9.63,
+        -12.61,
+        -22.2,
+        -12.39
+      ],
+      "mean_sharpe": 0.58,
+      "std_sharpe": 0.467,
+      "min_sharpe": 0.146,
+      "mean_mdd": -18.31,
+      "worst_mdd": -34.7
+    },
+    "40/30/30 SPY/GLD/TLT": {
+      "periods": [
+        "2007-2010",
+        "2011-2014",
+        "2015-2018",
+        "2019-2022",
+        "2023-2026"
+      ],
+      "sharpes": [
+        0.518,
+        0.64,
+        0.006,
+        0.339,
+        1.156
+      ],
+      "cagrs": [
+        9.8,
+        8.97,
+        3.79,
+        7.3,
+        16.96
+      ],
+      "mdds": [
+        -20.79,
+        -8.38,
+        -8.79,
+        -22.86,
+        -9.96
+      ],
+      "mean_sharpe": 0.532,
+      "std_sharpe": 0.378,
+      "min_sharpe": 0.006,
+      "mean_mdd": -14.16,
+      "worst_mdd": -22.86
+    }
+  },
+  "cross_oos_period_winners": [
+    "40/30/30 SPY/GLD/TLT",
+    "40/30/30 SPY/GLD/TLT",
+    "60/40 SPY/GLD",
+    "50/50 SPY/GLD",
+    "50/50 SPY/GLD"
+  ],
+  "cross_oos_win_counts": {
+    "40/30/30 SPY/GLD/TLT": 2,
+    "60/40 SPY/GLD": 1,
+    "50/50 SPY/GLD": 2
+  },
+  "risk_parity_weights": {
+    "EFA": 0.202,
+    "GLD": 0.1593,
+    "SPY": 0.2528,
+    "TLT": 0.3858
+  },
+  "markowitz_weights": {
+    "EFA": 0.0,
+    "GLD": 0.1998,
+    "SPY": 0.298,
+    "TLT": 0.5023
+  },
+  "key_findings": {
+    "winner_full_sample": "50/50 SPY/GLD",
+    "winner_sharpe": 0.548,
+    "beats_5050": false,
+    "any_dm_significant_5pct": true,
+    "any_dm_harvey_significant": false,
+    "optimal_spy_gld_mix": "SPY 50% / GLD 50%"
+  },
+  "references": [
+    "K687: Post-Correction Definitive Strategy Ranking (BH 50/50 Sharpe=0.545)",
+    "K646: Cross-OOS 80/20 vs 50/50",
+    "K645: GLD Role Analysis \u2014 optimal 20% with VT",
+    "Markowitz (1952), Portfolio Selection, JoF",
+    "Maillard, Roncalli & Teiletche (2010), Equally Weighted Risk Contributions, JPM",
+    "DeMiguel, Garlappi & Uppal (2009), Optimal vs Naive Diversification, RFS",
+    "Asness, Frazzini & Pedersen (2012), Leverage Aversion and Risk Parity, FAJ"
+  ],
+  "limitations": [
+    "Risk Parity weights estimated on 2006-2007 only",
+    "Markowitz in-sample optimization overfits (well-documented)",
+    "Annual rebalance; real-world trading may differ",
+    "No inflation adjustment",
+    "EFA has unhedged currency exposure",
+    "Survivorship bias: we test assets that 'survived' to 2026"
+  ]
+}

@@ -16647,5 +16647,22 @@
     "experiment_id": "k701",
     "created_at": "2026-03-29T15:39:40.731244",
     "importance": 3
+  },
+  {
+    "id": "K702",
+    "title": "K702: ★★ Optimal Static Allocation — 50/50 SPY/GLD confirmed best, grid search validated",
+    "content": "[提出: post-alpha 新方向, 執行: Claude] 8 靜態配置+grid search。50/50 SPY/GLD Sharpe 0.548 #1（grid search confirm）。40/30/30 SPY/GLD/TLT Calmar 最佳(0.395) MDD -22.9%。Markowitz/Risk Parity 不如 naive 50/50（DeMiguel 2009 1/N rule）。TLT CAGR 2.89% 拖累。60/40 SPY/GLD Sharpe 0.536 #2。Cross-OOS 無單一配置 dominate all periods。結論：50/50 SPY/GLD 是最佳 2-asset static mix；若要更低 MDD 可加 30% TLT。",
+    "tags": [
+      "asset-allocation",
+      "static",
+      "50/50",
+      "grid-search",
+      "DeMiguel",
+      "TLT"
+    ],
+    "data_source": "yfinance SPY/GLD/TLT/EFA 2006-2026",
+    "experiment_id": "k702",
+    "created_at": "2026-03-29T15:56:43.544780",
+    "importance": 3
   }
 ]
