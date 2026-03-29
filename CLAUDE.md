@@ -145,11 +145,17 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 
 | # | 檢驗 | 通過標準 | 工具 |
 |---|------|---------|------|
-| 1 | **同期間排名** | `evaluate_new_strategy.py` 排名 **前 5**（vs 所有已上架策略） | `uv run python scripts/evaluate_new_strategy.py` |
+| 1 | **同期間比較** | `evaluate_new_strategy.py` Sharpe **≥ 已上架策略中位數**（不需要 #1，差不多就行） | `uv run python scripts/evaluate_new_strategy.py` |
 | 2 | **Cross-OOS** | 5 個非重疊 2 年期間，勝 BH 50/50 **≥ 3/5** | 回測腳本（可用 2006-2026） |
 | 3 | **Codex 審查** | 無 HIGH severity bug（lag/lookahead/TX） | `/codex-cli -s read-only` |
 | 4 | **Sensitivity** | 參數 ±20% 變動後 Sharpe 不降 > 30% | 回測腳本 |
 | 5 | **MDD 可接受** | 同期間 MDD **< -20%** | `evaluate_new_strategy.py` 輸出 |
+
+#### 策略生命週期
+- **舊策略不因新策略而下架**——持續 forward tracking，績效每天更新
+- **新策略是「加入」不是「取代」**——門檻是「跟現有差不多」不是「打敗所有」
+- **下架條件**：`is_active=False` 只在策略有結構性問題時（bug、資產停牌、邏輯錯誤），極少發生
+- **績效異常注記**：若策略近 6 個月 Sharpe 顯著偏離歷史均值（如從 2.0 降到 0.5），在前端策略卡片加 ⚠️ 注記「近期表現顯著偏離歷史」，提醒投資人注意。不下架，但要透明揭露
 
 #### 上架後流程
 1. 加入 `STRATEGY_REGISTRY`（daily_update.py）

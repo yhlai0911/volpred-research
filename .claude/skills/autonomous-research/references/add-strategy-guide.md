@@ -9,7 +9,7 @@
 
 | # | 檢驗 | 通過標準 |
 |---|------|---------|
-| 1 | 同期間排名 | `evaluate_new_strategy.py` 排名**前 5** |
+| 1 | 同期間比較 | `evaluate_new_strategy.py` Sharpe **≥ 已上架策略中位數** |
 | 2 | Cross-OOS | 5 個非重疊 2yr 期間，勝 BH 50/50 **≥ 3/5** |
 | 3 | Codex 審查 | 無 HIGH severity bug |
 | 4 | Sensitivity | 參數 ±20% Sharpe 不降 >30% |
