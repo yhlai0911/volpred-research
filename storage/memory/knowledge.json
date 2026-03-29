@@ -16263,5 +16263,22 @@
     "experiment_id": "k678",
     "created_at": "2026-03-29T10:13:01.723029",
     "importance": 2
+  },
+  {
+    "id": "K679",
+    "title": "K679: ★★★★★ VIX Percentile Strategy — Sharpe 1.68 vs 12/VIX 1.08 (t=3.375, Harvey PASS!)",
+    "content": "[提出: 策略創新, 執行: Claude] VIX percentile(rolling 252d) 取代 absolute 12/VIX。w = 1 - VIX_percentile。Sharpe 1.680 vs 12/VIX 1.079（+56%），t=3.375 p<0.01 通過 Harvey threshold！MDD -6.74% vs -9.04%。Sortino 2.24 vs 1.57。CAGR 15.4% vs 12.4%。全部 4 sub-period 都勝。機制：避免 VIX=11 全力投入（percentile 知道 11 是 normal 不是低），避免 VIX=30 完全退出（如果最近都是 30+，percentile 知道這不是極端）。Z-score 版本也顯著（t=5.61）但 MDD 較差(-13.4%)。Adaptive 12/VIX 無改善。這是本研究計畫最重要的策略創新之一——可能改變我們的預設策略。",
+    "tags": [
+      "percentile",
+      "VIX-percentile",
+      "strategy-innovation",
+      "Harvey-PASS",
+      "paradigm-shift",
+      "breakthrough"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k679",
+    "created_at": "2026-03-29T10:17:47.757417",
+    "importance": 5
   }
 ]
