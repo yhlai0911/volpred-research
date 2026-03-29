@@ -14556,10 +14556,10 @@
       "波動率預測"
     ],
     "type": "research",
-    "status": "draft",
+    "status": "published",
     "phase": "K622_window_sensitivity",
     "created_at": "2026-03-28T16:46:42.113726+00:00",
-    "published_at": null,
+    "published_at": "2026-03-29T09:03:00.635761+00:00",
     "description": "K622 實驗：GJR-GARCH 估計窗口 w=252~3000 的三資產 sweep。SPY 窗口差異 <2%，GLD 弱 U-shape，0050.TW 大窗口收斂崩潰。甜蜜點 w=1000-1500，部分支持 Feng & Zhang (2025) 假說。",
     "proposer": "Claude",
     "executor": "Claude"
@@ -14999,5 +14999,70 @@
     "published_at": null,
     "proposer": "Claude",
     "executor": "Claude"
+  },
+  {
+    "id": "mile_a068925d",
+    "experiment_id": "K697_K700",
+    "title": "86 個實驗後的終極結論：VIX 知道市場有多怕，但不知道明天漲還是跌",
+    "summary": "歷經 86 個實驗、跨越 20 年市場數據，我們得到了一個簡單卻深刻的結論：VIX 對「波動幅度」的預測相關係數高達 0.57，但對「漲跌方向」的相關係數幾乎是零（0.04）。這意味著用 VIX 做擇時不會幫你賺更多錢，但用 VIX 管理風險非常有效——可以把最大虧損從 -32% 砍到 -17%。最終，最簡單的 50/50 SPY/GLD 買入持有策略（Sharpe 0.545）成為所有策略的天花板。",
+    "thinking": "K697/K700 整合分析：VIX-direction correlation=0.04 vs VIX-vol correlation=0.57。86個實驗的終極結論：VIX是risk管理工具不是timing工具。K687確認50/50 BH Sharpe 0.545為天花板，VT策略真正價值=MDD從-32%降到-17%。文章定位：給一般讀者的終極總結，以「恐懼指數的真相」為切入點。",
+    "description": "K697/K700 終極結論文章：VIX 對漲跌方向預測力幾乎為零（correlation=0.04），對波動幅度預測力強（correlation=0.57）。用 VIX 擇時不增加報酬，但做風控有效（MDD -32% → -17%）。最簡單的 50/50 BH 是 Sharpe 天花板（0.545）。86 個實驗、20 年數據的終極總結。",
+    "category": "general",
+    "metrics": {
+      "vix_direction_correlation": 0.04,
+      "vix_vol_correlation": 0.57,
+      "bh_5050_sharpe": 0.545,
+      "12vix_vt_sharpe": 0.438,
+      "garch_vt_sharpe": 0.412,
+      "bh_spy_mdd": -0.55,
+      "vt_12vix_mdd": -0.12,
+      "vt_garch_mdd": -0.17,
+      "piecewise_mdd": -0.08
+    },
+    "tags": [
+      "一般讀者",
+      "研究結論",
+      "VIX",
+      "終極結論"
+    ],
+    "type": "general",
+    "status": "draft",
+    "phase": "K697_K700_final_conclusion",
+    "created_at": "2026-03-28T10:00:00.000000+00:00",
+    "published_at": null,
+    "proposer": "Claude",
+    "executor": "Claude",
+    "content": "# 86 個實驗後的終極結論：VIX 知道市場有多怕，但不知道明天漲還是跌\n\n如果你曾經看過財經新聞，你一定聽過「恐慌指數飆升，市場暗藏危機」這樣的標題。VIX——俗稱恐慌指數——確實是金融市場中最廣為人知的指標之一。但它真正能告訴你什麼？又有什麼是它永遠告訴不了你的？\n\n我們花了整整 86 個實驗、分析了 20 年的市場數據，得到了一個簡單卻深刻的答案。\n\n---\n\n## VIX 是什麼？一個「市場有多怕」的溫度計\n\n想像一下：你走進一棟大樓，裡面裝了一支溫度計。溫度計能告訴你「現在很熱」或「現在很冷」，但它告訴不了你「門外是陽光燦爛還是大雨滂沱」。\n\nVIX 就是市場的溫度計。它測量的是「接下來 30 天，市場預期波動有多大」。當 VIX 高，意味著投資者非常緊張，預期市場會有劇烈震盪；當 VIX 低，代表大家相對安心，覺得未來會比較平穩。\n\n但是，「波動很大」不等於「一定會跌」。波動只是告訴你「幅度」，不告訴你「方向」。\n\n---\n\n## 我們發現了什麼：兩個數字說明一切\n\n![VIX 預測力分析：方向 vs 幅度](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/vix_direction_vs_vol_de6cd6.png)\n\n我們用 2006-2026 年間，超過 5,000 個交易日的 SPY 數據，計算了兩個相關係數：\n\n**VIX 與「明天漲跌方向」的相關係數：0.04**\n\n**VIX 與「未來波動幅度」的相關係數：0.57**\n\n0.04 是什麼概念？這幾乎跟「猜硬幣正反面」一樣隨機。如果你想用「VIX 很高所以明天要跌」或「VIX 很低所以明天要漲」來做投資決策，你的勝率跟隨機猜測沒有統計上的差異。\n\n0.57 又是什麼概念？這是一個相當強的相關性。當 VIX 飆升到 30、40、甚至 80 以上（2020 年 COVID 崩盤時），你幾乎可以確定接下來幾週市場會非常動盪——但到底是先跌再漲還是先漲再跌，VIX 完全不知道。\n\n---\n\n## 為什麼「預測波動」和「預測方向」是完全不同的事？\n\n這是許多投資人容易混淆的地方。讓我用一個比喻解釋：\n\n**你能預測明天台北會有強風暴雨。** 這是「波動預測」——你知道天氣會很激烈。\n\n**但你能預測股市明天是漲 3% 還是跌 3% 嗎？** 這是「方向預測」——完全不同的問題。\n\n市場效率假說告訴我們：如果方向可以被可靠預測，所有人都會去做，結果反而讓這個預測失效。但「波動」不一樣——高 VIX 就是事實，它不會因為你知道而消失。\n\n這就是為什麼 86 個實驗都得到了相同的結論：用 VIX 做「擇時」（timing market）不會幫你賺更多錢。\n\n---\n\n## 那麼用 VIX 做「風險管理」呢？\n\n![86 個實驗後的策略績效排名](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/strategy_sharpe_ranking_007e4b.png)\n\n這裡才是真正有意思的地方。\n\n我們測試了各種 VT（波動目標）策略——用 VIX 的高低來調整持倉比例，VIX 高時減少股票曝險、VIX 低時增加。結果呢？\n\n- **50/50 買入持有（最簡單）**：Sharpe 0.545（排名第一）\n- **12/VIX VT 策略**：Sharpe 0.438\n- **GARCH VT 策略**：Sharpe 0.412\n- **Piecewise VT 策略**：Sharpe 0.401\n\n天啊，連最複雜的策略都輸給了傻瓜式的 50/50？\n\n是的。在「賺多少錢」這個指標上，VT 策略無法超越最簡單的被動配置。但是——\n\n---\n\n## VT 策略的真正價值：讓你睡得著覺\n\n![VT 策略的真正價值：最大回撤比較](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/strategy_mdd_comparison_9248fd.png)\n\n如果你只看 Sharpe Ratio，你會覺得 VT 策略一無是處。但看最大回撤（MDD）——也就是從高點到低點最慘的虧損幅度——數字完全不同：\n\n- **100% SPY 純股票**：最大回撤 -55%（2008 年金融海嘯幾乎腰斬）\n- **12/VIX VT**：最大回撤 -12%（少了 78%！）\n- **GARCH VT**：最大回撤 -17%\n- **Piecewise VT**：最大回撤 -8%\n\n當 2008 年金融海嘯來臨，持有 100% 股票的投資人眼睜睜看著資產從 100 元變成 45 元。這種時候，很多人會在恐慌中賣出，永遠鎖住虧損，再也沒有回到市場。\n\nVT 策略的價值在於：它不讓你的資產跌到那個程度，讓你有能力堅持下去。這不是賺更多錢的策略，而是**讓你不輸的策略**。\n\n心理學研究告訴我們，投資人對虧損的痛苦感受，是同等獲利喜悅的兩倍（這就是諾貝爾獎得主 Kahneman 的展望理論）。所以對很多人來說，「少虧 43% 的最大回撤」的價值，遠大於「多 0.1 個 Sharpe Ratio」。\n\n---\n\n## 86 個實驗的終極答案\n\n**用 VIX 預測「明天市場漲還是跌」？ → 不行，相關係數幾乎是零（0.04）。**\n\n**用 VIX 管理「市場波動風險」？ → 非常有效，MDD 可以從 -32% 降至 -17%。**\n\n如果你是：\n- **在意財富最大化**、能承受劇烈波動的投資人 → 50/50 買入持有，Sharpe 0.545，天花板就在這裡\n- **最怕大虧損**、有可能在恐慌時拋售的投資人 → VT 策略有意義，讓你熬過市場風暴\n\n這不是策略的失敗，而是終於搞清楚了策略的定位。20 年的數據告訴我們：VIX 是市場的溫度計，用它來管理「溫度」，而不是用它來猜「下一秒會颳東風還是西風」。\n\n---\n\n*本文基於實驗 K697 和 K700 的實證結果（數據來源：yfinance SPY/GLD/VIX，期間：2006-2026，樣本數 >5,000 交易日）*\n\n*實驗腳本：`experiments/k697_vix_final_analysis.py` / `experiments/k700_definitive_conclusion.py`*\n\n*[提出: 研究誠實原則, 執行: Claude]*\n"
+  },
+  {
+    "id": "mile_d07f147f",
+    "experiment_id": "K704",
+    "title": "為什麼最簡單的 50/50 配置打敗了所有複雜策略？",
+    "summary": "K704 對 SPY/GLD 所有比例進行了全面的 grid search，結果令人驚訝：50/50 是唯一的最優解（Sharpe 0.548）。原因並不神秘——SPY 年化波動率 19.3% 和 GLD 年化波動率 18.3% 幾乎相等，這使得最樸素的等權重配置天然等同於風險平價。Markowitz 均值方差最優化和 Risk Parity 演算法都得出了相同答案：50/50。K706 進一步確認，50/50 在 78% 的時間段都是 near-optimal。更少的假設、更少的估計誤差，讓簡單反而更強大。",
+    "thinking": "K704 grid search 全比例：50/50 Sharpe 0.548最高。原因=SPY vol 19.3% ≈ GLD vol 18.3%，自然Risk Parity=50/50。DeMiguel 2009 1/N rule勝過複雜優化。K706=78%時間near-optimal。文章定位：打破「越複雜越好」的迷思，給一般讀者的資產配置啟示。",
+    "description": "K704 grid search 發現 50/50 SPY/GLD 是 Sharpe 最高配置（0.548）。核心原因：SPY（19.3%）≈ GLD（18.3%）波動率相近，Risk Parity 自然給出 50/50。Markowitz 優化也得出相同結論。DeMiguel(2009) 1/N rule 在實踐中優於複雜策略。K706 確認 78% 時間 50/50 是 near-optimal。簡單反而更強大。",
+    "category": "general",
+    "metrics": {
+      "optimal_spy_pct": 50,
+      "optimal_sharpe": 0.548,
+      "spy_annual_vol": 0.193,
+      "gld_annual_vol": 0.183,
+      "near_optimal_pct_of_time": 0.78,
+      "spy_10_sharpe": 0.38,
+      "spy_90_sharpe": 0.47
+    },
+    "tags": [
+      "一般讀者",
+      "資產配置",
+      "簡單策略"
+    ],
+    "type": "general",
+    "status": "draft",
+    "phase": "K704_5050_optimal",
+    "created_at": "2026-03-28T11:00:00.000000+00:00",
+    "published_at": null,
+    "proposer": "Claude",
+    "executor": "Claude",
+    "content": "# 為什麼最簡單的 50/50 配置打敗了所有複雜策略？\n\n投資世界裡有一個根深柢固的迷思：越複雜越好。聘請更多分析師、建立更精密的模型、用更多參數優化——難道不應該帶來更好的結果嗎？\n\n我們的研究給出了一個令人不安的答案：不一定。事實上，在 SPY + GLD 的組合中，最笨的 50/50 等權配置，打敗了幾乎所有複雜策略。\n\n---\n\n## Grid Search：窮舉所有可能性\n\n我們在 K704 實驗中做了一件簡單但徹底的事：對 SPY 和 GLD 的所有比例組合（SPY 10% 到 90%，每 10% 一格），計算過去 20 年的 Sharpe Ratio。\n\n結果如何？\n\n![K704 Grid Search：各 SPY/GLD 比例的 Sharpe Ratio](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/grid_search_5050_a6dee7.png)\n\n從 SPY 10% 到 SPY 90%，Sharpe Ratio 的走勢呈現一個拋物線——在中間 50/50 附近達到最高點（0.548），往兩端都明顯下降。\n\n如果你從 SPY 10% 一路增加到 90%：\n- 太少股票（SPY 10-20%）：回報太低，Sharpe 只有 0.38-0.43\n- 太多股票（SPY 80-90%）：波動太大，Sharpe 掉回 0.47-0.51\n- **剛好 50/50**：Sharpe 0.548，全局最優\n\n---\n\n## 為什麼 50/50 是最優？數學告訴你\n\n這背後有一個非常優雅的數學原因。\n\n![SPY 與 GLD 波動率幾乎相等](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/spy_gld_vol_comparison_f4200d.png)\n\n**SPY（標普 500 ETF）年化波動率：19.3%**\n\n**GLD（黃金 ETF）年化波動率：18.3%**\n\n這兩個數字幾乎完全相同。\n\n這個巧合非常重要。在投資組合理論中，有一個叫做「風險平價」（Risk Parity）的概念：讓每個資產對整體組合的風險貢獻相等。計算公式很簡單——如果兩個資產的波動率相等，那麼各佔 50% 就是風險平價的最優解。\n\n**SPY 波動 ≈ GLD 波動 → 風險平價 = 50/50**\n\n不需要複雜的優化演算法。不需要估計未來報酬。不需要相關係數矩陣。波動率幾乎相等的兩個資產，天然地讓 50/50 成為最優。\n\n---\n\n## Markowitz 和 Risk Parity 也說：50/50\n\n我們沒有停在直覺層面。我們實際上跑了兩個著名的投資組合優化方法：\n\n**Markowitz 均值方差最優化**（1952 年諾貝爾獎級別的理論）\n\n輸出結果：接近 50/50\n\n**Risk Parity 演算法**（橋水基金等機構使用）\n\n輸出結果：接近 50/50\n\n更諷刺的是，在學術文獻中，DeMiguel、Garlappi 和 Uppal（2009）在《Review of Financial Studies》發表了一篇著名論文，標題幾乎是一個挑釁：「用 1/N 規則代替最優化」——他們發現，簡單的等權重策略（1/N）在 14 個資料集中的 7 個打敗了 14 種複雜最優化策略。\n\n原因？複雜策略需要估計期望報酬和協方差矩陣。這些估計本身就有誤差，而誤差會累積，最終讓「最優化」變成「最誤化」。\n\n**簡單的 50/50 不需要估計任何東西——它繞開了估計誤差的問題。**\n\n---\n\n## K706：78% 的時間都是 near-optimal\n\n有人可能會問：「這只是樣本期剛好如此吧？換個時間段會不會不同？」\n\n我們在 K706 實驗中做了滾動窗口分析：在 20 年中的任意 5 年窗口內，50/50 是「near-optimal」（Sharpe 在最優的 95% 以上）的機率是多少？\n\n答案：**78% 的時間段**\n\n只有 22% 的時間，其他比例明顯優於 50/50——而且這 22% 你事前無法預知。\n\n這意味著：如果你想嘗試「擇時調整 SPY/GLD 比例」，你只有 22% 的機會是對的，78% 的時間只是徒增摩擦成本。\n\n---\n\n## 更簡單 = 更好的真正原因\n\n為什麼投資中「簡單反而更強大」？至少有三個原因：\n\n**1. 估計誤差消失了**\n複雜策略需要估計「未來報酬」、「未來波動率」、「未來相關性」，這些估計幾乎必然有誤差。50/50 完全迴避了這個問題。\n\n**2. 交易摩擦更低**\n頻繁調整比例帶來交易成本。持有 50/50 長期不動，交易費幾乎是零。\n\n**3. 你不會在危機時做錯決定**\n當市場崩潰時，複雜策略的「模型」往往在最錯誤的時機發出錯誤信號。50/50 不需要判斷，你只需要繼續持有。\n\n---\n\n## 這對你的實際投資有什麼意義？\n\n如果你今天就想開始投資，不需要研究 VIX、不需要學 GARCH 模型、不需要計算協方差矩陣：\n\n1. **買 SPY（標普 500 ETF）50%**\n2. **買 GLD（黃金 ETF）50%**\n3. **每年一次再平衡，回到 50/50**\n4. **完成。**\n\n這個策略在過去 20 年的 Sharpe Ratio 是 0.548——打敗了我們測試的所有複雜 VT 策略。\n\n當然，有些人會問「那 100% SPY 不是賺更多嗎？」是的，如果你能承受 2008 年資產暴跌 55%、2020 年暴跌 34%、且不在恐慌中賣掉——那 100% SPY 確實長期報酬更高。但大多數人做不到。50/50 的意義在於讓你「實際上能堅持執行的策略」，而不只是「理論上最優的策略」。\n\n**最好的策略不是最複雜的策略，而是你實際上能堅持執行的策略。**\n\n---\n\n*本文基於實驗 K704（SPY/GLD Grid Search）和 K706（Near-optimal 分析）的實證結果（數據來源：yfinance SPY/GLD，期間：2006-2026）*\n\n*實驗腳本：`experiments/k704_5050_grid_search.py` / `experiments/k706_nearoptimal_analysis.py`*\n\n*參考文獻：DeMiguel, Garlappi & Uppal (2009), \"Optimal Versus Naive Diversification\", Review of Financial Studies*\n\n*[提出: 研究誠實原則, 執行: Claude]*\n"
   }
 ]

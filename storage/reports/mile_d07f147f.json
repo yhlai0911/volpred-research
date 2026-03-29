@@ -1,0 +1,27 @@
+{
+  "id": "mile_d07f147f",
+  "experiment_id": "K704",
+  "title": "為什麼最簡單的 50/50 配置打敗了所有複雜策略？",
+  "summary": "K704 對 SPY/GLD 所有比例進行了全面的 grid search，結果令人驚訝：50/50 是唯一的最優解（Sharpe 0.548）。原因並不神秘——SPY 年化波動率 19.3% 和 GLD 年化波動率 18.3% 幾乎相等，這使得最樸素的等權重配置天然等同於風險平價。Markowitz 均值方差最優化和 Risk Parity 演算法都得出了相同答案：50/50。K706 進一步確認，50/50 在 78% 的時間段都是 near-optimal。更少的假設、更少的估計誤差，讓簡單反而更強大。",
+  "thinking": "K704 grid search 全比例：50/50 Sharpe 0.548最高。原因=SPY vol 19.3% ≈ GLD vol 18.3%，自然Risk Parity=50/50。DeMiguel 2009 1/N rule勝過複雜優化。K706=78%時間near-optimal。文章定位：打破「越複雜越好」的迷思，給一般讀者的資產配置啟示。",
+  "description": "K704 grid search 發現 50/50 SPY/GLD 是 Sharpe 最高配置（0.548）。核心原因：SPY（19.3%）≈ GLD（18.3%）波動率相近，Risk Parity 自然給出 50/50。Markowitz 優化也得出相同結論。DeMiguel(2009) 1/N rule 在實踐中優於複雜策略。K706 確認 78% 時間 50/50 是 near-optimal。簡單反而更強大。",
+  "category": "general",
+  "metrics": {
+    "optimal_spy_pct": 50,
+    "optimal_sharpe": 0.548,
+    "spy_annual_vol": 0.193,
+    "gld_annual_vol": 0.183,
+    "near_optimal_pct_of_time": 0.78,
+    "spy_10_sharpe": 0.38,
+    "spy_90_sharpe": 0.47
+  },
+  "tags": ["一般讀者", "資產配置", "簡單策略"],
+  "type": "general",
+  "status": "draft",
+  "phase": "K704_5050_optimal",
+  "created_at": "2026-03-28T11:00:00.000000+00:00",
+  "published_at": null,
+  "proposer": "Claude",
+  "executor": "Claude",
+  "content": "# 為什麼最簡單的 50/50 配置打敗了所有複雜策略？\n\n投資世界裡有一個根深柢固的迷思：越複雜越好。聘請更多分析師、建立更精密的模型、用更多參數優化——難道不應該帶來更好的結果嗎？\n\n我們的研究給出了一個令人不安的答案：不一定。事實上，在 SPY + GLD 的組合中，最笨的 50/50 等權配置，打敗了幾乎所有複雜策略。\n\n---\n\n## Grid Search：窮舉所有可能性\n\n我們在 K704 實驗中做了一件簡單但徹底的事：對 SPY 和 GLD 的所有比例組合（SPY 10% 到 90%，每 10% 一格），計算過去 20 年的 Sharpe Ratio。\n\n結果如何？\n\n![K704 Grid Search：各 SPY/GLD 比例的 Sharpe Ratio](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/grid_search_5050_a6dee7.png)\n\n從 SPY 10% 到 SPY 90%，Sharpe Ratio 的走勢呈現一個拋物線——在中間 50/50 附近達到最高點（0.548），往兩端都明顯下降。\n\n如果你從 SPY 10% 一路增加到 90%：\n- 太少股票（SPY 10-20%）：回報太低，Sharpe 只有 0.38-0.43\n- 太多股票（SPY 80-90%）：波動太大，Sharpe 掉回 0.47-0.51\n- **剛好 50/50**：Sharpe 0.548，全局最優\n\n---\n\n## 為什麼 50/50 是最優？數學告訴你\n\n這背後有一個非常優雅的數學原因。\n\n![SPY 與 GLD 波動率幾乎相等](https://qxhfgdfzazwpkdgesavm.supabase.co/storage/v1/object/public/article-images/spy_gld_vol_comparison_f4200d.png)\n\n**SPY（標普 500 ETF）年化波動率：19.3%**\n\n**GLD（黃金 ETF）年化波動率：18.3%**\n\n這兩個數字幾乎完全相同。\n\n這個巧合非常重要。在投資組合理論中，有一個叫做「風險平價」（Risk Parity）的概念：讓每個資產對整體組合的風險貢獻相等。計算公式很簡單——如果兩個資產的波動率相等，那麼各佔 50% 就是風險平價的最優解。\n\n**SPY 波動 ≈ GLD 波動 → 風險平價 = 50/50**\n\n不需要複雜的優化演算法。不需要估計未來報酬。不需要相關係數矩陣。波動率幾乎相等的兩個資產，天然地讓 50/50 成為最優。\n\n---\n\n## Markowitz 和 Risk Parity 也說：50/50\n\n我們沒有停在直覺層面。我們實際上跑了兩個著名的投資組合優化方法：\n\n**Markowitz 均值方差最優化**（1952 年諾貝爾獎級別的理論）\n\n輸出結果：接近 50/50\n\n**Risk Parity 演算法**（橋水基金等機構使用）\n\n輸出結果：接近 50/50\n\n更諷刺的是，在學術文獻中，DeMiguel、Garlappi 和 Uppal（2009）在《Review of Financial Studies》發表了一篇著名論文，標題幾乎是一個挑釁：「用 1/N 規則代替最優化」——他們發現，簡單的等權重策略（1/N）在 14 個資料集中的 7 個打敗了 14 種複雜最優化策略。\n\n原因？複雜策略需要估計期望報酬和協方差矩陣。這些估計本身就有誤差，而誤差會累積，最終讓「最優化」變成「最誤化」。\n\n**簡單的 50/50 不需要估計任何東西——它繞開了估計誤差的問題。**\n\n---\n\n## K706：78% 的時間都是 near-optimal\n\n有人可能會問：「這只是樣本期剛好如此吧？換個時間段會不會不同？」\n\n我們在 K706 實驗中做了滾動窗口分析：在 20 年中的任意 5 年窗口內，50/50 是「near-optimal」（Sharpe 在最優的 95% 以上）的機率是多少？\n\n答案：**78% 的時間段**\n\n只有 22% 的時間，其他比例明顯優於 50/50——而且這 22% 你事前無法預知。\n\n這意味著：如果你想嘗試「擇時調整 SPY/GLD 比例」，你只有 22% 的機會是對的，78% 的時間只是徒增摩擦成本。\n\n---\n\n## 更簡單 = 更好的真正原因\n\n為什麼投資中「簡單反而更強大」？至少有三個原因：\n\n**1. 估計誤差消失了**\n複雜策略需要估計「未來報酬」、「未來波動率」、「未來相關性」，這些估計幾乎必然有誤差。50/50 完全迴避了這個問題。\n\n**2. 交易摩擦更低**\n頻繁調整比例帶來交易成本。持有 50/50 長期不動，交易費幾乎是零。\n\n**3. 你不會在危機時做錯決定**\n當市場崩潰時，複雜策略的「模型」往往在最錯誤的時機發出錯誤信號。50/50 不需要判斷，你只需要繼續持有。\n\n---\n\n## 這對你的實際投資有什麼意義？\n\n如果你今天就想開始投資，不需要研究 VIX、不需要學 GARCH 模型、不需要計算協方差矩陣：\n\n1. **買 SPY（標普 500 ETF）50%**\n2. **買 GLD（黃金 ETF）50%**\n3. **每年一次再平衡，回到 50/50**\n4. **完成。**\n\n這個策略在過去 20 年的 Sharpe Ratio 是 0.548——打敗了我們測試的所有複雜 VT 策略。\n\n當然，有些人會問「那 100% SPY 不是賺更多嗎？」是的，如果你能承受 2008 年資產暴跌 55%、2020 年暴跌 34%、且不在恐慌中賣掉——那 100% SPY 確實長期報酬更高。但大多數人做不到。50/50 的意義在於讓你「實際上能堅持執行的策略」，而不只是「理論上最優的策略」。\n\n**最好的策略不是最複雜的策略，而是你實際上能堅持執行的策略。**\n\n---\n\n*本文基於實驗 K704（SPY/GLD Grid Search）和 K706（Near-optimal 分析）的實證結果（數據來源：yfinance SPY/GLD，期間：2006-2026）*\n\n*實驗腳本：`experiments/k704_5050_grid_search.py` / `experiments/k706_nearoptimal_analysis.py`*\n\n*參考文獻：DeMiguel, Garlappi & Uppal (2009), \"Optimal Versus Naive Diversification\", Review of Financial Studies*\n\n*[提出: 研究誠實原則, 執行: Claude]*\n"
+}
