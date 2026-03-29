@@ -16266,8 +16266,8 @@
   },
   {
     "id": "K679",
-    "title": "K679: ★★★★★ VIX Percentile Strategy — Sharpe 1.68 vs 12/VIX 1.08 (t=3.375, Harvey PASS!)",
-    "content": "[提出: 策略創新, 執行: Claude] VIX percentile(rolling 252d) 取代 absolute 12/VIX。w = 1 - VIX_percentile。Sharpe 1.680 vs 12/VIX 1.079（+56%），t=3.375 p<0.01 通過 Harvey threshold！MDD -6.74% vs -9.04%。Sortino 2.24 vs 1.57。CAGR 15.4% vs 12.4%。全部 4 sub-period 都勝。機制：避免 VIX=11 全力投入（percentile 知道 11 是 normal 不是低），避免 VIX=30 完全退出（如果最近都是 30+，percentile 知道這不是極端）。Z-score 版本也顯著（t=5.61）但 MDD 較差(-13.4%)。Adaptive 12/VIX 無改善。這是本研究計畫最重要的策略創新之一——可能改變我們的預設策略。",
+    "title": "K679: ⚠️ VIX Percentile — Codex: same-day lookahead + t-test not DM. Needs K686 correction.",
+    "content": "[提出: 策略創新, 執行: Claude] VIX percentile(rolling 252d) 取代 absolute 12/VIX。w = 1 - VIX_percentile。Sharpe 1.680 vs 12/VIX 1.079（+56%），t=3.375 p<0.01 通過 Harvey threshold！MDD -6.74% vs -9.04%。Sortino 2.24 vs 1.57。CAGR 15.4% vs 12.4%。全部 4 sub-period 都勝。機制：避免 VIX=11 全力投入（percentile 知道 11 是 normal 不是低），避免 VIX=30 完全退出（如果最近都是 30+，percentile 知道這不是極端）。Z-score 版本也顯著（t=5.61）但 MDD 較差(-13.4%)。Adaptive 12/VIX 無改善。這是本研究計畫最重要的策略創新之一——可能改變我們的預設策略。 ⚠️ Codex審查: (1)same-day lookahead(VIX_t→同日return, 應為t+1) (2)t=3.375是paired t-test非DM test且在gross return (3)rolling window include/exclude不一致。Relative comparison可能仍有效但需K686修正驗證。",
     "tags": [
       "percentile",
       "VIX-percentile",
@@ -16279,11 +16279,11 @@
     "data_source": "yfinance SPY/GLD/VIX 2006-2026",
     "experiment_id": "k679",
     "created_at": "2026-03-29T10:17:47.757417",
-    "importance": 5
+    "importance": 3
   },
   {
     "id": "K680",
-    "title": "K680: ★★★★★ Percentile Cross-OOS VALIDATED — 5/5 wins, DM t=3.157, bootstrap p=0.000",
+    "title": "K680: ⚠️ OVERTURNED — Cross-OOS validation was on lookahead-biased results",
     "content": "[提出: K679 驗證, 執行: Claude] VIX percentile cross-OOS 5 期間全勝（GFC +0.77, Recovery +0.71, Low Vol +0.28, COVID +0.46, Post-Hike +0.15）。Avg diff +0.47。DM t=3.157 p=0.0016 Harvey PASS。Bootstrap 95% CI [+0.35, +0.83] 不含零 p=0.000。Rolling Sharpe percentile 更高 96.4% 的時間。Sensitivity: 126d/252d/504d 全部 5/5 wins。Turnover 2.11x 但 cost 只增加 ~0.45%/yr at 5bps。結論：VIX percentile 策略通過最嚴格驗證——應成為新預設策略推薦。",
     "tags": [
       "cross-OOS",
@@ -16296,7 +16296,7 @@
     "data_source": "yfinance SPY/GLD/VIX 2006-2026",
     "experiment_id": "k680",
     "created_at": "2026-03-29T10:23:16.719321",
-    "importance": 5
+    "importance": 1
   },
   {
     "id": "K681",
@@ -16349,8 +16349,8 @@
   },
   {
     "id": "K684",
-    "title": "K684: ★★★★★ Percentile Implementation — 252d+2%thresh+70/30 Sharpe 2.16 MDD -4.8% Harvey t=6.8",
-    "content": "[提出: K679 產品化, 執行: Claude] 完整實作規格。Lookback: 126d Sharpe 1.79(best) 但 252d 1.63 更穩定。Rebalance: daily+2%thresh 最佳（-31% trades, -0.02 Sharpe）。Weekly/monthly 大幅退化。Allocation: 70/30 SPY/GLD Sharpe 2.25, 50/50 1.63, 100/0 2.63（但不分散）。Floor 5% 微幅降 Sharpe 但增安全。Cash return 0-5% 都勝 12/VIX。最佳組合：252d, 2%thresh, floor 5%, 70/30→Sharpe 2.16 CAGR 18.7% MDD -4.8% DM t=6.80 Harvey PASS。策略規格：vix_percentile_5050, w=1-percentile(VIX,252d), daily+2%thresh, [0.05,1.00]。",
+    "title": "K684: ⚠️ Percentile Implementation — Codex: lookahead + DM on gross + mixed proxy. Needs correction.",
+    "content": "[提出: K679 產品化, 執行: Claude] 完整實作規格。Lookback: 126d Sharpe 1.79(best) 但 252d 1.63 更穩定。Rebalance: daily+2%thresh 最佳（-31% trades, -0.02 Sharpe）。Weekly/monthly 大幅退化。Allocation: 70/30 SPY/GLD Sharpe 2.25, 50/50 1.63, 100/0 2.63（但不分散）。Floor 5% 微幅降 Sharpe 但增安全。Cash return 0-5% 都勝 12/VIX。最佳組合：252d, 2%thresh, floor 5%, 70/30→Sharpe 2.16 CAGR 18.7% MDD -4.8% DM t=6.80 Harvey PASS。策略規格：vix_percentile_5050, w=1-percentile(VIX,252d), daily+2%thresh, [0.05,1.00]。 ⚠️ Codex審查同K679: lookahead + DM on gross + 70/30 vs 50/50 mixed proxy比較不公平。",
     "tags": [
       "implementation",
       "percentile",
@@ -16362,6 +16362,38 @@
     "data_source": "yfinance SPY/GLD/VIX 2006-2026",
     "experiment_id": "k684",
     "created_at": "2026-03-29T12:19:47.419988",
+    "importance": 3
+  },
+  {
+    "id": "K685",
+    "title": "K685: ⚠️ OVERTURNED — Live sim based on lookahead-biased strategy",
+    "content": "[提出: K684 驗證, 執行: Claude] 2025-2026 live period 模擬。Percentile 70/30 Sharpe 3.57 > Piecewise 2.79 > 12/VIX -0.16。MDD: Pct70 -2.26% < Piecewise -2.48%。VIX=52 shock: Pct50 完全退出(w=0)，Pct70 保持 5% floor。Recovery: 59d 回到 50% weight。Mar 2026 selloff: Pct -0.60% vs SPY -7.31%。DM tests NS（309d 太短）。P3-AGG Sharpe 2.20 也不錯。結論：Percentile 在 live period 也是 #1——backtest + live 一致。可以上架。",
+    "tags": [
+      "percentile",
+      "live-simulation",
+      "2025-2026",
+      "beats-Piecewise",
+      "production-validated"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX + paper_trading.json 2025-2026",
+    "experiment_id": "k685",
+    "created_at": "2026-03-29T12:30:50.118259",
+    "importance": 1
+  },
+  {
+    "id": "K686",
+    "title": "K686: ★★★★★ Percentile OVERTURNED — Advantage was 100% lookahead artifact!",
+    "content": "[提出: K679 Codex修正, 執行: Claude] K679 percentile Sharpe 1.68→修正lag後0.355（-1.325）。12/VIX也降但較少(1.08→0.43, -0.65)。修正後 Percentile LOSES to 12/VIX（0.355 vs 0.431）。DM t=-1.20 p=0.23 NS。Cross-OOS只贏1/5。Bootstrap CI [-0.32,+0.16] 含零。原因：VIX_t signal 用在同日 return = lookahead。Percentile 比 12/VIX 更依賴 same-day info（rolling window ranking vs simple division）。教訓：(1)任何策略必須 lag signal 1 天 (2)好得不像真的→通常不是真的 (3)Codex 審查又一次拯救了錯誤結論（K618/K619→K621/K623→K679/K686 三次）。",
+    "tags": [
+      "OVERTURNED",
+      "lookahead-bias",
+      "percentile",
+      "Codex-saved",
+      "critical-lesson"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k686",
+    "created_at": "2026-03-29T12:38:28.902677",
     "importance": 5
   }
 ]
