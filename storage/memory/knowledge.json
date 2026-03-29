@@ -16297,5 +16297,22 @@
     "experiment_id": "k680",
     "created_at": "2026-03-29T10:23:16.719321",
     "importance": 5
+  },
+  {
+    "id": "K681",
+    "title": "K681: ★★★ Percentile Global — 4/4 markets win, EFA t=5.419 strongest, Taiwan NS",
+    "content": "[提出: K679/K680 延伸, 執行: Claude] VIX percentile on 4 markets。US Sharpe 1.68(t=3.13), EFA 1.84(t=5.42 Harvey PASS!), 0050.TW 0.27(NS t=0.29), TW+GLD 0.36(NS)。EFA 差距最大(+1.01)——歐洲市場受益最多。台灣不顯著因 TX cost 18.5bp + 高波動稀釋信號。Sub-period: EFA 3/3 穩健。結論：percentile 優勢不限美國，是 global phenomenon。非美市場（特別是 EFA）受益甚至更大。",
+    "tags": [
+      "percentile",
+      "global",
+      "EFA",
+      "Taiwan",
+      "international",
+      "Harvey-PASS"
+    ],
+    "data_source": "yfinance SPY/GLD/0050.TW/EFA/VIX 2010-2026",
+    "experiment_id": "k681",
+    "created_at": "2026-03-29T10:28:45.293876",
+    "importance": 4
   }
 ]
