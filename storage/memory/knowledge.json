@@ -16463,5 +16463,22 @@
     "experiment_id": "k690",
     "created_at": "2026-03-29T13:25:01.858192",
     "importance": 3
+  },
+  {
+    "id": "K691",
+    "title": "K691: ★★★★★ Session Synthesis — 71 experiments, VT=insurance not alpha, EWMA most robust",
+    "content": "[提出: session 總結, 執行: Claude] 71 實驗：8 overturned(11%), 15 null(21%), 48 positive(69%)。5 surviving conclusions: (1)No VT alpha after lag (2)VT utility gamma≥5 (3)EWMA most lag-robust (4)Fear DCA +4% (5)Fixed>rolling GARCH。3 lessons: (1)lookahead #1 threat（K679 污染 7 實驗）(2)Codex 審查 3 次拯救 (3)simplicity wins。Updated framework: BH 50/50 default，gamma≥5→EWMA VT，gamma≥10→P3-AGG。Next session: fix daily_update backfill, HAR-RV 5min, NFP 04/03。",
+    "tags": [
+      "synthesis",
+      "session-summary",
+      "VT-insurance",
+      "EWMA",
+      "paradigm",
+      "lessons"
+    ],
+    "data_source": "experiments/k621-k690",
+    "experiment_id": "k691",
+    "created_at": "2026-03-29T13:41:53.177608",
+    "importance": 5
   }
 ]
