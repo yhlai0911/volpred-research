@@ -16022,5 +16022,22 @@
     "experiment_id": "k664",
     "created_at": "2026-03-29T08:10:47.822294",
     "importance": 4
+  },
+  {
+    "id": "K665",
+    "title": "K665: ★★★ Lookup Table Strategy — 3-row table retains 97.4% Sharpe, 10x fewer trades",
+    "content": "[提出: 產品化/簡化, 執行: Claude] 12/VIX 連續公式簡化為 lookup table。Table B（3 行）：VIX<15→100%, 15-25→50%, >25→20%。Sharpe 0.703 vs continuous 0.722（retention 97.4%），weight changes 23/yr vs 231/yr（10x 減少）。Table A（5 行）甚至勝過 continuous（102.8%）。反直覺：越細越差（7 行 92.9%）——粗略離散化恰好產生更好的平均配置。VIX Action Card: 3 行 table 是最簡單的實用工具——貼在螢幕上，看 VIX 查表即可。SPY-only 時 Table B 甚至 107.1% retention。",
+    "tags": [
+      "lookup-table",
+      "simplification",
+      "VIX-action-card",
+      "practical",
+      "product",
+      "retail-investor"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k665",
+    "created_at": "2026-03-29T08:15:13.439143",
+    "importance": 4
   }
 ]
