@@ -36,7 +36,10 @@
    - **禁止 same-day**：weight 基於今天 VIX × 今天 return = 未來資訊（lookahead）
    - 歷史教訓：K679 VIX Percentile Sharpe 1.68→修正 lag 後 0.355（100% artifact）
    - **不修改歷史數據**：K693 嘗試修改 9935 筆歷史 portfolio_return 導致更多問題（metrics 不同步、Supabase 不一致）→ 已 revert。正確做法是讓 forward tracking 自然修正
-   - **Codex 審查已 3 次抓到 lookahead**（K618→K619, K621→K623, K679→K686）——任何「好得不像真的」結果必須用 Codex 檢查 lag
+   - **Codex 審查已 4 次抓到 lookahead**（K618, K621, K679, K698）——同 session 犯 4 次相同錯誤
+   - **實驗代碼寫完後、執行前，必須先讓 Codex 審查代碼**。不是跑完出結果才審。流程：寫代碼 → Codex 審 → 修正 → 才跑 → 記錄 → 才發文
+   - **代碼中必須有明確的 `signal.shift(1)`**——lag 驗證靠代碼結構，不靠事後記憶
+   - **Sharpe > 2x baseline = 幾乎一定有 bug**——先停下來檢查，不要先歡呼
 12. **自我修正後回溯更新**：每次推翻或修正先前結論時，必須立即：
    - 搜尋已發佈文章中引用該結論的內容（用 grep 搜尋關鍵詞）
    - 在受影響文章頂部加入 `⚠️ 更正聲明（日期）`，說明修正內容
@@ -444,6 +447,28 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 16. 程式跑不出結果或產生錯誤時，**必須用 Codex CLI 檢查並修正**——不要自己猜、不要反覆重試同一個錯
 17. Gemini API 額度用完時，**轉由 Codex CLI 協助**（embedding 除外的分析任務）
 18. 為避免 Gemini API 額度快速用完：知識索引用 `auto`（增量）不用 `build`（全量），每 session 論文修訂任務**不可過於集中**（分散在不同時段執行）
+
+### 實驗完整流程（強制，不可跳步）
+
+```
+寫代碼 → Codex 審代碼 → 修正 → 跑實驗 → 驗證結果 → 記錄 knowledge → 才寫文章
+```
+
+**實驗中必做（寫代碼時）：**
+1. 策略回測代碼必須有 `signal = signal.shift(1)` 或等效 lag——**在代碼裡強制，不靠記憶**
+2. TX cost 必須在每次 weight 變化時扣除
+3. Baseline 用相同的 lag convention（如果新策略 lag=1，baseline 也要 lag=1）
+4. `evaluate_new_strategy.py` 已內建正確 lag——優先使用
+
+**實驗後必做（跑完後、記錄前）：**
+1. **Codex 審查代碼**（不是審結果——審代碼本身有沒有 bug）
+   - `/codex-cli -s read-only "Review experiments/kXXX.py for lag, TX, baseline bugs"`
+2. **結果合理性檢查**：Sharpe > 2x baseline → 90% 有 bug，先停下來
+3. **Codex 通過後才記錄** knowledge
+4. **Knowledge 記錄後才寫文章**
+5. **文章存 draft**，由 cron 釋出——不直接 publish
+
+**2026-03-29 教訓**：93 個實驗中 8 個被推翻（10%），全部因為跳過「Codex 先審代碼」這一步。如果每個實驗都先審再跑，推翻率應該趨近 0%。
 
 ### 研究多元化（必須遵守）
 **不要停留在模型舒適區。** 已收斂的結論不需要繼續堆積 null results。

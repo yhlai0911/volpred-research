@@ -80,13 +80,43 @@ grep -i 'BTC\|bitcoin\|加密' storage/memory/knowledge.json | grep 'title' | he
 
 **違反此規則 = 浪費計算資源和 context window。**
 
-## Research Loop
+## Research Loop（強制流程，每個實驗必須完整走完）
 
 ```
-查詢知識庫 → Read research_program.md → Check resume state → Data analysis
-→ Model experiments → Evaluate (QLIKE + VaR/ES) → Record thinking
-→ Publish findings → Reflect → Decide next step → Repeat
+1. 查知識庫 → 2. 寫代碼 → 3. Codex 審代碼 → 4. 修正 → 5. 跑實驗
+→ 6. 結果合理性檢查 → 7. 記錄 knowledge → 8. 才寫文章（draft）
 ```
+
+### ⚠️ 絕對不可跳過的步驟
+
+**Step 3: Codex 審代碼（在跑之前！）**
+```bash
+codex exec -C . -s read-only "Review experiments/kXXX.py for:
+1) Is signal lagged? (signal.shift(1) or equivalent)
+2) Is TX cost on every weight change?
+3) Is baseline using same lag?
+4) Any lookahead bias?
+Report issues." 2>/dev/null
+```
+- 不是跑完結果才審——是**代碼寫完、執行前**就審
+- 2026-03-29 教訓：同 session 被 Codex 抓了 4 次 lookahead（K618/K621/K679/K698），全部因為跳過這步
+
+**Step 2: 寫代碼時的強制規則**
+- 策略回測必須有 `weights = signal.shift(1)` 或等效——**在代碼裡強制 lag，不靠記憶**
+- 或使用 `evaluate_new_strategy.py`（已內建正確 lag）
+- TX cost 必須在每次 weight 變化時扣除
+- Baseline 必須用相同 lag convention
+
+**Step 6: 結果合理性檢查**
+- Sharpe > 2x baseline → **90% 是 bug，先停下來檢查 lag**
+- 任何「好得不像真的」結果 → 不歡呼，先懷疑
+- 與 evaluate_new_strategy.py 同期間排名交叉驗證
+
+**Step 7→8 的順序不可反**
+- Codex 通過 → 才記錄 knowledge
+- Knowledge 記錄 → 才寫文章
+- 文章存 draft → 由 cron 釋出
+- **不直接 publish，不跳過 Codex**
 
 **每一步跳躍都必須有思維邏輯**：不是「做完 A 就做 B」，而是「A 的結果顯示 X，X 意味著 Y，所以下一步應該測試 Z」。
 

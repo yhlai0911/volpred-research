@@ -61,6 +61,17 @@
           }
         ]
       }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.command // \"\"' | grep -qE 'python.*(experiments/|scripts/k)' && echo '{\"hookSpecificOutput\":{\"hookEventName\":\"PreToolUse\",\"additionalContext\":\"⚠️ 實驗代碼執行前檢查：\\n1) signal.shift(1) 確認了嗎？（lag 必須在代碼裡）\\n2) Codex 審過這份代碼了嗎？（寫完先審再跑）\\n3) baseline 用同樣 lag 嗎？\\n4) 結果好得不像真的 = 90% 有 bug\\n如果以上任何一項沒做，先停下來做完再跑。\"}}' || true"
+          }
+        ]
+      }
     ]
   }
 }
