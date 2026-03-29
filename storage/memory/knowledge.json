@@ -16412,5 +16412,23 @@
     "experiment_id": "k687",
     "created_at": "2026-03-29T12:44:52.258898",
     "importance": 5
+  },
+  {
+    "id": "K688",
+    "title": "K688: ★★★ CRRA Lag-Corrected — VT wins utility at gamma≥5, EWMA VT best",
+    "content": "[提出: K687 後驗證, 執行: Claude] 正確 lag 後 CRRA utility。EWMA VT gamma≥5 開始勝 BH 50/50（CE +0.19%@γ=5, +2.20%@γ=10）。12/VIX 和 P3-AGG gamma≥10 才勝。Bootstrap: γ=10 P(VT>BH)=91.7%，γ=20 100%（CI excludes zero）。GFC 期間 BH CE=-39.1% vs 12/VIX -11.2%——VT 在 crash 時 utility 差距巨大。Bull market BH dominates。結論：K687 的 'no alpha' 結論成立但不完整——VT 對 γ≥5 投資人有真正 utility value。VT=insurance 且這保險對風險厭惡者物有所值。",
+    "tags": [
+      "CRRA",
+      "utility",
+      "risk-aversion",
+      "gamma",
+      "EWMA",
+      "lag-corrected",
+      "nuanced"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k688",
+    "created_at": "2026-03-29T12:56:14.973540",
+    "importance": 4
   }
 ]
