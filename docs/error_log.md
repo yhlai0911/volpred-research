@@ -187,3 +187,31 @@
 - 台灣 Hybrid Leverage：淨 Sharpe **2.310**（升為全策略第一）
 - 最低資金門檻：從 $977K/$823K 降至 **$5,000**（0050.TW 零股）
 - 台股策略平均營運成本：0.88%/年（仍高於美股 0.34%/年，但差距從 13x 縮小至 ~2.6x）
+
+## 2026-03-29: 文章發佈管線故障（7 小時斷檔 + 空白內容）
+
+### 問題
+1. 新文章 7 小時沒發佈
+2. 2 篇文章以空白 content 發佈到線上
+
+### 現象
+- System crontab `release-pool-by-settings` 每小時正常執行，但 "Released 0 articles"
+- Supabase 的 draft 數量為 0（新文章沒進入 Supabase）
+- 已發佈的 `mile_1458be07` content 為空
+
+### 根因
+1. **雙 feed.json 問題**：Agent worktree 寫文章到 `storage/feed.json`，但 `supabase_sync.py` 只讀 `storage/reports/feed.json`
+2. **Draft 不被 sync**：Incremental sync 用 `published_at` 過濾，draft 沒有 `published_at` → 永遠被跳過
+3. **Report 個別檔案無 content**：Agent worktree 產生的 report JSON 只有 metadata 沒有 content body
+
+### 修正
+1. `supabase_sync.py`：改為同時讀取 `storage/feed.json` + `storage/reports/feed.json`（雙源合併）
+2. `supabase_sync.py`：Filter 改用 `published_at OR created_at`（支持 draft sync）
+3. `scripts/merge_feed_files.py`：新增自動合併腳本（作為保險）
+4. `feed-publisher SKILL.md`：明確要求寫到 `storage/reports/feed.json` + report 個別檔案必須有 content + 寫完後執行 sync
+5. 手動修復 28 篇 Supabase 文章 content + 2 篇重寫 content
+
+### 預防
+- feed-publisher skill 已更新發文 checklist
+- `supabase_sync.py` 雙源讀取永久化
+- 未來 agent 寫文章 prompt 必須指定 `storage/reports/feed.json`

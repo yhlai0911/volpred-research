@@ -251,9 +251,21 @@ Tag 規則：
 - [ ] 回答「為什麼這個結果重要？」
 - [ ] 回答「投資人可以怎麼用？」
 - [ ] content 欄位非空且 > 300 字
-- [ ] 同時寫入 feed.json 和 reports/{id}.json
+- [ ] 寫入 `storage/reports/feed.json`（**不是** `storage/feed.json`！後者是 legacy）
+- [ ] 寫入 `storage/reports/{id}.json`，且**必須包含完整 content**（不可空白）
+- [ ] 寫完後執行 `uv run python scripts/supabase_sync.py full`（確保同步到 Supabase）
 - [ ] Badge：category=milestone, status=published
 - [ ] **tags 欄位**：包含資產代碼 + 方法 + 主題分類
+
+## ⚠️ Agent Worktree 寫文章注意事項
+
+Agent 在 worktree 中寫文章時：
+1. **必須寫到 `storage/reports/feed.json`**（append to items array）
+2. **必須寫 `storage/reports/{id}.json`**，且包含完整 `content` 欄位
+3. worktree 的檔案會在 agent 完成後複製回主分支——**如果 report 檔案沒有 content，文章會以空白狀態發佈**
+4. 複製回主分支後，**必須執行 `supabase_sync.py full`** 確保 Supabase 有最新文章
+
+**2026-03-29 教訓**：27 篇文章因寫到 `storage/feed.json`（而非 `reports/feed.json`）導致 7 小時不發文；2 篇文章因 report 個別檔案沒有 content 導致空白頁面發佈到線上。
 
 ## 不該發佈的內容
 
@@ -265,9 +277,10 @@ Tag 規則：
 
 ## 資料同步
 
-發佈後自動同步到：
-1. `storage/reports/feed.json` + `reports/{id}.json`（源頭）
-2. Supabase（即時 sync / 平台層 API）
+發佈後必須同步：
+1. `storage/reports/feed.json` + `reports/{id}.json`（**唯一源頭**，不是 `storage/feed.json`）
+2. 執行 `uv run python scripts/supabase_sync.py full`（將 draft 同步到 Supabase）
+3. System crontab 每小時 `:03` 自動從 Supabase 釋出 draft → published
 3. `frontend-v2-fix` 與後台工作台讀取最新資料
 4. 依部署流程同步到線上站
 

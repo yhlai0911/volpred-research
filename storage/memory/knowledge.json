@@ -16314,5 +16314,21 @@
     "experiment_id": "k681",
     "created_at": "2026-03-29T10:28:45.293876",
     "importance": 4
+  },
+  {
+    "id": "K682",
+    "title": "K682: Percentile Lookup Table — P3-AGG (3-row) beats 12/VIX, K665 Table A still best overall",
+    "content": "[提出: K679 簡化, 執行: Claude] Percentile-inspired lookup table。VIX percentile thresholds: 25th=13.7, 50th=17.1, 75th=22.5, 90th=28.8（但 CV=16.7% 不夠穩定）。7 個 table 排名：K665 Table A(5-row) Sharpe 0.74 最佳，P3-AGG(3-row <15→80%, 15-25→45%, >25→10%) 0.73 第二。True percentile 在同框架下其實 0.64 < 12/VIX 0.69——K679 的優勢可能來自不同的 cash return 假設。P3-AGG 是最簡單能打敗 12/VIX 的 table。但統計上無 table 通過 Harvey t>3.0。",
+    "tags": [
+      "lookup-table",
+      "percentile",
+      "simplification",
+      "P3-AGG",
+      "retail"
+    ],
+    "data_source": "yfinance VIX 2006-2026",
+    "experiment_id": "k682",
+    "created_at": "2026-03-29T10:51:56.571639",
+    "importance": 2
   }
 ]
