@@ -15987,5 +15987,40 @@
     "experiment_id": "k662",
     "created_at": "2026-03-29T07:25:36.745539",
     "importance": 2
+  },
+  {
+    "id": "K663",
+    "title": "K663: ★★ Rate Environment — GLD fails in rising rates, 80/20 vs 50/50 explained by rates",
+    "content": "[提出: 利率分析, 執行: Claude] 利率環境對 VT 策略影響。升息(6m yield Δ>50bp)：GLD-based 50/50 Sharpe 0.265 << SPY-only 0.646。降息：50/50 Sharpe 1.311 大勝。TLT 60/40 在升息 Sharpe -0.040 MDD -26.5%。80/20 升息+穩定勝 50/50，但降息大輸(-0.611)——K646 80/20 wins 4/5 OOS 因為 4 期大多是升息/穩定。SPY-GLD 相關在升息轉正(+0.175)。SPY-TLT 從降息-0.534→升息+0.023。結論：GLD 不是全天候避險——只在降息環境有效。TLT 更差。",
+    "tags": [
+      "interest-rate",
+      "rate-regime",
+      "GLD",
+      "TLT",
+      "80/20",
+      "50/50",
+      "conditional"
+    ],
+    "data_source": "yfinance SPY/GLD/TLT/VIX/TNX 2006-2026",
+    "experiment_id": "k663",
+    "created_at": "2026-03-29T08:10:47.822285",
+    "importance": 3
+  },
+  {
+    "id": "K664",
+    "title": "K664: ★★★ MDD Probability — Piecewise P(>10%)=5.3%, 50/50+VT P(>20%)=0%",
+    "content": "[提出: 風險量化, 執行: Claude] 5 策略 MDD 機率表（4837 rolling 252d windows）。Piecewise P(MDD>5%)=30.9%, >10%=5.3%[CI 2.7-8.3%], >20%=0%。50/50+VT >5%=65.9%, >10%=10.2%, >20%=0%。BH SPY >10%=57%, >20%=17.6%, >30%=10.5%。12/VIX SPY alone >10%=34.8%（不比 60/40 好多少），加 GLD→10.2%。$100K：Piecewise 5.3% 機率虧>$10K, 0% 虧>$20K。BH SPY 57% 虧>$10K, 10.5% 虧>$30K。VT + 分散化的組合消除了 >20% drawdown 的可能性。",
+    "tags": [
+      "MDD",
+      "probability",
+      "risk-quantification",
+      "investor-communication",
+      "practical",
+      "Piecewise"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k664",
+    "created_at": "2026-03-29T08:10:47.822294",
+    "importance": 4
   }
 ]
