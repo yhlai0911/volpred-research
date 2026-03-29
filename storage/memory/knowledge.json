@@ -16579,5 +16579,22 @@
     "experiment_id": "k697",
     "created_at": "2026-03-29T14:59:38.176089",
     "importance": 5
+  },
+  {
+    "id": "K698",
+    "title": "K698: ★★ Contrarian VT — NET Sharpe 0.878 > BH 0.843, first lag-corrected alpha!",
+    "content": "[提出: K697 contrarian lead, 執行: Claude] SPY lag-1 autocorr=-0.107(t=-7.41)。Contrarian tilt(BH 50/50 ±20% on >1% moves) NET Sharpe 0.878 vs BH 0.843(+0.035)。Best config: threshold 2% tilt ±30% NET 0.941 turnover 10.4x。MDD -24.8% vs -32.5%。Big down days(>1%) mean next-day return +43.9%/yr(t=2.10 p=0.036)。Bull market 微輸(1.46 vs 1.50)，crisis 勝(0.86 vs 0.69)。VIX+contrarian gross 最高(1.021) 但 TX kills it。需 cross-OOS 驗證——+0.035 可能是 noise。",
+    "tags": [
+      "contrarian",
+      "mean-reversion",
+      "alpha",
+      "lag-corrected",
+      "autocorrelation",
+      "first-alpha"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k698",
+    "created_at": "2026-03-29T15:10:10.288097",
+    "importance": 3
   }
 ]
