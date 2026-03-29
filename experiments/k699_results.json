@@ -1,0 +1,357 @@
+{
+  "experiment_id": "K699",
+  "title": "Contrarian Tilt — Cross-OOS Validation",
+  "timestamp": "2026-03-29 15:29:20",
+  "data_source": "yfinance (SPY, GLD)",
+  "data_period": "2006-01-04 to 2026-03-27",
+  "n_observations_total": 5089,
+  "tx_cost_bps": 5,
+  "motivation": "K698 found contrarian tilt (BH 50/50 ±20% on >1% SPY moves) NET Sharpe 0.878 vs BH 0.843 (+0.035). Best config (2% threshold, ±30% tilt) NET 0.941. Cross-OOS validation required.",
+  "oos_periods": [
+    {
+      "name": "OOS1: 2008-2009 (GFC)",
+      "start": "2008-01-01",
+      "end": "2010-01-01"
+    },
+    {
+      "name": "OOS2: 2011-2013 (Recovery)",
+      "start": "2011-01-01",
+      "end": "2014-01-01"
+    },
+    {
+      "name": "OOS3: 2015-2017 (Low Vol)",
+      "start": "2015-01-01",
+      "end": "2018-01-01"
+    },
+    {
+      "name": "OOS4: 2020-2021 (COVID)",
+      "start": "2020-01-01",
+      "end": "2022-01-01"
+    },
+    {
+      "name": "OOS5: 2023-2024 (Tariff)",
+      "start": "2023-01-01",
+      "end": "2025-01-01"
+    }
+  ],
+  "robustness_criteria": "Must win ≥4/5 OOS periods on NET Sharpe vs BH 50/50",
+  "cross_oos_results": {
+    "Default (1%, ±20%)": {
+      "config": {
+        "threshold": 0.01,
+        "tilt": 0.2,
+        "tx_bps": 5
+      },
+      "periods": [
+        {
+          "period": "OOS1: 2008-2009 (GFC)",
+          "start": "2008-01-01",
+          "end": "2010-01-01",
+          "n_days": 505,
+          "bh_sharpe_net": 0.2399,
+          "bh_cagr_net": 0.0291,
+          "bh_max_dd_net": -0.3249,
+          "ct_sharpe_net": 0.4968,
+          "ct_cagr_net": 0.0967,
+          "ct_max_dd_net": -0.2479,
+          "ct_ann_vol": 0.247,
+          "ct_turnover_ann": 38.2,
+          "delta_sharpe": 0.2569,
+          "dm_tstat": 1.3462,
+          "dm_pvalue": 0.1782,
+          "win": true,
+          "significant_at_10pct": false
+        },
+        {
+          "period": "OOS2: 2011-2013 (Recovery)",
+          "start": "2011-01-01",
+          "end": "2014-01-01",
+          "n_days": 754,
+          "bh_sharpe_net": 0.4588,
+          "bh_cagr_net": 0.053,
+          "bh_max_dd_net": -0.1312,
+          "ct_sharpe_net": 0.4834,
+          "ct_cagr_net": 0.0577,
+          "ct_max_dd_net": -0.1484,
+          "ct_ann_vol": 0.135,
+          "ct_turnover_ann": 20.88,
+          "delta_sharpe": 0.0246,
+          "dm_tstat": 0.2888,
+          "dm_pvalue": 0.7728,
+          "win": true,
+          "significant_at_10pct": false
+        },
+        {
+          "period": "OOS3: 2015-2017 (Low Vol)",
+          "start": "2015-01-01",
+          "end": "2018-01-01",
+          "n_days": 755,
+          "bh_sharpe_net": 0.9197,
+          "bh_cagr_net": 0.075,
+          "bh_max_dd_net": -0.1156,
+          "ct_sharpe_net": 0.8354,
+          "ct_cagr_net": 0.073,
+          "ct_max_dd_net": -0.1403,
+          "ct_ann_vol": 0.0891,
+          "ct_turnover_ann": 14.04,
+          "delta_sharpe": -0.0843,
+          "dm_tstat": -0.107,
+          "dm_pvalue": 0.9148,
+          "win": false,
+          "significant_at_10pct": false
+        },
+        {
+          "period": "OOS4: 2020-2021 (COVID)",
+          "start": "2020-01-01",
+          "end": "2022-01-01",
+          "n_days": 505,
+          "bh_sharpe_net": 1.0394,
+          "bh_cagr_net": 0.1683,
+          "bh_max_dd_net": -0.2032,
+          "ct_sharpe_net": 1.2409,
+          "ct_cagr_net": 0.2218,
+          "ct_max_dd_net": -0.1453,
+          "ct_ann_vol": 0.1738,
+          "ct_turnover_ann": 26.2,
+          "delta_sharpe": 0.2015,
+          "dm_tstat": 1.416,
+          "dm_pvalue": 0.1568,
+          "win": true,
+          "significant_at_10pct": false
+        },
+        {
+          "period": "OOS5: 2023-2024 (Tariff)",
+          "start": "2023-01-01",
+          "end": "2025-01-01",
+          "n_days": 502,
+          "bh_sharpe_net": 2.0751,
+          "bh_cagr_net": 0.2292,
+          "bh_max_dd_net": -0.0745,
+          "ct_sharpe_net": 1.7406,
+          "ct_cagr_net": 0.194,
+          "ct_max_dd_net": -0.0726,
+          "ct_ann_vol": 0.1052,
+          "ct_turnover_ann": 19.01,
+          "delta_sharpe": -0.3345,
+          "dm_tstat": -2.0083,
+          "dm_pvalue": 0.0446,
+          "win": false,
+          "significant_at_10pct": false
+        }
+      ],
+      "summary": {
+        "n_periods": 5,
+        "n_wins": 3,
+        "n_significant_wins_10pct": 0,
+        "passes_4_of_5": false,
+        "mean_delta_sharpe": 0.0128,
+        "std_delta_sharpe": 0.2374,
+        "tstat_deltas": 0.121,
+        "pvalue_deltas": 0.9096,
+        "harvey_t3_pass": false
+      },
+      "acf_delta_correlation": {
+        "pearson_r": -0.7932,
+        "pvalue": 0.1093
+      },
+      "verdict": "REJECTED — fails both criteria"
+    },
+    "Optimized (2%, ±30%)": {
+      "config": {
+        "threshold": 0.02,
+        "tilt": 0.3,
+        "tx_bps": 5
+      },
+      "periods": [
+        {
+          "period": "OOS1: 2008-2009 (GFC)",
+          "start": "2008-01-01",
+          "end": "2010-01-01",
+          "n_days": 505,
+          "bh_sharpe_net": 0.2399,
+          "bh_cagr_net": 0.0291,
+          "bh_max_dd_net": -0.3249,
+          "ct_sharpe_net": 0.5949,
+          "ct_cagr_net": 0.1251,
+          "ct_max_dd_net": -0.2544,
+          "ct_ann_vol": 0.2507,
+          "ct_turnover_ann": 30.6,
+          "delta_sharpe": 0.355,
+          "dm_tstat": 1.7654,
+          "dm_pvalue": 0.0775,
+          "win": true,
+          "significant_at_10pct": true
+        },
+        {
+          "period": "OOS2: 2011-2013 (Recovery)",
+          "start": "2011-01-01",
+          "end": "2014-01-01",
+          "n_days": 754,
+          "bh_sharpe_net": 0.4588,
+          "bh_cagr_net": 0.053,
+          "bh_max_dd_net": -0.1312,
+          "ct_sharpe_net": 0.5411,
+          "ct_cagr_net": 0.0667,
+          "ct_max_dd_net": -0.1427,
+          "ct_ann_vol": 0.1369,
+          "ct_turnover_ann": 8.23,
+          "delta_sharpe": 0.0823,
+          "dm_tstat": 0.6946,
+          "dm_pvalue": 0.4873,
+          "win": true,
+          "significant_at_10pct": false
+        },
+        {
+          "period": "OOS3: 2015-2017 (Low Vol)",
+          "start": "2015-01-01",
+          "end": "2018-01-01",
+          "n_days": 755,
+          "bh_sharpe_net": 0.9197,
+          "bh_cagr_net": 0.075,
+          "bh_max_dd_net": -0.1156,
+          "ct_sharpe_net": 0.8075,
+          "ct_cagr_net": 0.068,
+          "ct_max_dd_net": -0.128,
+          "ct_ann_vol": 0.0861,
+          "ct_turnover_ann": 3.21,
+          "delta_sharpe": -0.1122,
+          "dm_tstat": -0.5648,
+          "dm_pvalue": 0.5722,
+          "win": false,
+          "significant_at_10pct": false
+        },
+        {
+          "period": "OOS4: 2020-2021 (COVID)",
+          "start": "2020-01-01",
+          "end": "2022-01-01",
+          "n_days": 505,
+          "bh_sharpe_net": 1.0394,
+          "bh_cagr_net": 0.1683,
+          "bh_max_dd_net": -0.2032,
+          "ct_sharpe_net": 1.5479,
+          "ct_cagr_net": 0.2897,
+          "ct_max_dd_net": -0.1112,
+          "ct_ann_vol": 0.1744,
+          "ct_turnover_ann": 14.1,
+          "delta_sharpe": 0.5085,
+          "dm_tstat": 1.9551,
+          "dm_pvalue": 0.0506,
+          "win": true,
+          "significant_at_10pct": true
+        },
+        {
+          "period": "OOS5: 2023-2024 (Tariff)",
+          "start": "2023-01-01",
+          "end": "2025-01-01",
+          "n_days": 502,
+          "bh_sharpe_net": 2.0751,
+          "bh_cagr_net": 0.2292,
+          "bh_max_dd_net": -0.0745,
+          "ct_sharpe_net": 2.1226,
+          "ct_cagr_net": 0.2352,
+          "ct_max_dd_net": -0.0745,
+          "ct_ann_vol": 0.1022,
+          "ct_turnover_ann": 2.72,
+          "delta_sharpe": 0.0475,
+          "dm_tstat": 1.647,
+          "dm_pvalue": 0.0996,
+          "win": true,
+          "significant_at_10pct": true
+        }
+      ],
+      "summary": {
+        "n_periods": 5,
+        "n_wins": 4,
+        "n_significant_wins_10pct": 3,
+        "passes_4_of_5": true,
+        "mean_delta_sharpe": 0.1762,
+        "std_delta_sharpe": 0.2505,
+        "tstat_deltas": 1.573,
+        "pvalue_deltas": 0.1908,
+        "harvey_t3_pass": false
+      },
+      "acf_delta_correlation": {
+        "pearson_r": -0.8732,
+        "pvalue": 0.0531
+      },
+      "verdict": "MARGINAL — wins ≥4/5 but fails Harvey t>3.0 threshold"
+    }
+  },
+  "full_period_confirmation": {
+    "Default (1%, ±20%)": {
+      "bh_sharpe_net": 0.8433,
+      "ct_sharpe_net": 0.878,
+      "delta_sharpe": 0.0347,
+      "dm_tstat": 1.487,
+      "dm_pvalue": 0.137,
+      "ct_cagr_net": 0.1242,
+      "ct_max_dd_net": -0.2479,
+      "ct_ann_vol": 0.1454,
+      "ct_turnover_ann": 22.45,
+      "n_trigger_down": 618,
+      "n_trigger_up": 681,
+      "pct_active": 26.8,
+      "n_days": 4839
+    },
+    "Optimized (2%, ±30%)": {
+      "bh_sharpe_net": 0.8433,
+      "ct_sharpe_net": 0.9405,
+      "delta_sharpe": 0.0972,
+      "dm_tstat": 2.1875,
+      "dm_pvalue": 0.0287,
+      "ct_cagr_net": 0.1347,
+      "ct_max_dd_net": -0.2544,
+      "ct_ann_vol": 0.1457,
+      "ct_turnover_ann": 10.41,
+      "n_trigger_down": 210,
+      "n_trigger_up": 159,
+      "pct_active": 7.6,
+      "n_days": 4839
+    }
+  },
+  "acf_by_period": [
+    {
+      "period": "OOS1: 2008-2009 (GFC)",
+      "acf_lag1": -0.1083,
+      "tstat": -2.43,
+      "pvalue": 0.015,
+      "is_negative": true
+    },
+    {
+      "period": "OOS2: 2011-2013 (Recovery)",
+      "acf_lag1": -0.0719,
+      "tstat": -1.97,
+      "pvalue": 0.0484,
+      "is_negative": true
+    },
+    {
+      "period": "OOS3: 2015-2017 (Low Vol)",
+      "acf_lag1": -0.0151,
+      "tstat": -0.41,
+      "pvalue": 0.6782,
+      "is_negative": true
+    },
+    {
+      "period": "OOS4: 2020-2021 (COVID)",
+      "acf_lag1": -0.2863,
+      "tstat": -6.43,
+      "pvalue": 0.0,
+      "is_negative": true
+    },
+    {
+      "period": "OOS5: 2023-2024 (Tariff)",
+      "acf_lag1": 0.0388,
+      "tstat": 0.87,
+      "pvalue": 0.3851,
+      "is_negative": false
+    }
+  ],
+  "conclusion": "Optimized config (2%, ±30%) passes but default (1%, ±20%) fails. Higher threshold with stronger tilt is more robust. Both fail Harvey (2016) t>3.0 threshold, suggesting the alpha, if any, is not statistically significant by modern standards.",
+  "references": [
+    "Jegadeesh (1990) JF — Evidence of short-term return reversals",
+    "Lehmann (1990) QJE — Fads, martingales, and market efficiency",
+    "DeMiguel, Garlappi, Uppal (2009) RFS — 1/N benchmark hard to beat",
+    "Moreira & Muir (2017) JF — Volatility managed portfolios",
+    "Harvey, Liu & Zhu (2016) RFS — t>3.0 threshold for new factors"
+  ]
+}

@@ -16582,7 +16582,7 @@
   },
   {
     "id": "K698",
-    "title": "K698: ★★ Contrarian VT — NET Sharpe 0.878 > BH 0.843, first lag-corrected alpha!",
+    "title": "K698: ⚠️ Contrarian VT — Codex: BH baseline wrong, TX undercount, optimization snooping",
     "content": "[提出: K697 contrarian lead, 執行: Claude] SPY lag-1 autocorr=-0.107(t=-7.41)。Contrarian tilt(BH 50/50 ±20% on >1% moves) NET Sharpe 0.878 vs BH 0.843(+0.035)。Best config: threshold 2% tilt ±30% NET 0.941 turnover 10.4x。MDD -24.8% vs -32.5%。Big down days(>1%) mean next-day return +43.9%/yr(t=2.10 p=0.036)。Bull market 微輸(1.46 vs 1.50)，crisis 勝(0.86 vs 0.69)。VIX+contrarian gross 最高(1.021) 但 TX kills it。需 cross-OOS 驗證——+0.035 可能是 noise。",
     "tags": [
       "contrarian",
@@ -16595,6 +16595,23 @@
     "data_source": "yfinance SPY/GLD/VIX 2006-2026",
     "experiment_id": "k698",
     "created_at": "2026-03-29T15:10:10.288097",
-    "importance": 3
+    "importance": 1
+  },
+  {
+    "id": "K699",
+    "title": "K699: Contrarian Cross-OOS — Default FAIL 3/5, Optimized MARGINAL 4/5 (Harvey FAIL t=2.19)",
+    "content": "[提出: K698 驗證, 執行: Claude] Default(1%/±20%) 3/5 FAIL。Optimized(2%/±30%) 4/5 PASS but Harvey t=2.19 FAIL。Alpha regime-dependent: corr(alpha, neg-autocorr)=-0.873。Low-vol periods 無效。Codex審查: K698 有多個 bug(BH baseline非真BH、TX undercount、NaN bug、in-sample optimization)。+0.035 alpha 不可信。結論：contrarian mean-reversion 存在但太小且不穩健——不足以成為策略推薦。",
+    "tags": [
+      "contrarian",
+      "cross-OOS",
+      "marginal",
+      "Harvey-FAIL",
+      "Codex-warned",
+      "regime-dependent"
+    ],
+    "data_source": "yfinance SPY/GLD 2006-2026",
+    "experiment_id": "k699",
+    "created_at": "2026-03-29T15:30:15.027988",
+    "importance": 2
   }
 ]
