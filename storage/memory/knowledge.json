@@ -16247,5 +16247,21 @@
     "experiment_id": "k677",
     "created_at": "2026-03-29T10:09:34.489781",
     "importance": 3
+  },
+  {
+    "id": "K678",
+    "title": "K678: ★ Strategy Correlation — Best pair TW+JP TZ + Adaptive Tier (Sharpe 4.14, r=0.13)",
+    "content": "[提出: K643 延伸, 執行: Claude] 14 策略完整相關矩陣（91 pairs）。Avg corr=0.417（比 K643 的 0.72 低因包含台灣策略）。Most corr: GARCH VT x 12/VIX r=0.991。Least corr: Taiwan VT x Taiwan Hybrid r=0.019。Most independent: Taiwan Hybrid（avg r=0.208）。Best 2-combo: TW+JP TZ + Adaptive Tier Sharpe=4.14 r=0.133——低相關不等於最佳組合，需同時有高個別 Sharpe。VIX regime effect: avg corr change 僅 -0.002，但個別 pair 大幅波動（±0.6）。",
+    "tags": [
+      "correlation",
+      "diversification",
+      "strategy-pairs",
+      "Taiwan",
+      "portfolio-construction"
+    ],
+    "data_source": "paper_trading.json 2022-2026",
+    "experiment_id": "k678",
+    "created_at": "2026-03-29T10:13:01.723029",
+    "importance": 2
   }
 ]
