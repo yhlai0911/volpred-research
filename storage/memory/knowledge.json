@@ -16280,5 +16280,22 @@
     "experiment_id": "k679",
     "created_at": "2026-03-29T10:17:47.757417",
     "importance": 5
+  },
+  {
+    "id": "K680",
+    "title": "K680: ★★★★★ Percentile Cross-OOS VALIDATED — 5/5 wins, DM t=3.157, bootstrap p=0.000",
+    "content": "[提出: K679 驗證, 執行: Claude] VIX percentile cross-OOS 5 期間全勝（GFC +0.77, Recovery +0.71, Low Vol +0.28, COVID +0.46, Post-Hike +0.15）。Avg diff +0.47。DM t=3.157 p=0.0016 Harvey PASS。Bootstrap 95% CI [+0.35, +0.83] 不含零 p=0.000。Rolling Sharpe percentile 更高 96.4% 的時間。Sensitivity: 126d/252d/504d 全部 5/5 wins。Turnover 2.11x 但 cost 只增加 ~0.45%/yr at 5bps。結論：VIX percentile 策略通過最嚴格驗證——應成為新預設策略推薦。",
+    "tags": [
+      "cross-OOS",
+      "validation",
+      "percentile",
+      "Harvey-PASS",
+      "breakthrough",
+      "new-default"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k680",
+    "created_at": "2026-03-29T10:23:16.719321",
+    "importance": 5
   }
 ]
