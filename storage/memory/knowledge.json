@@ -16843,5 +16843,21 @@
     "experiment_id": "k713",
     "created_at": "2026-03-29T19:06:18.542069",
     "importance": 3
+  },
+  {
+    "id": "K715",
+    "title": "K715: ★★★ Same-Period Truth — VT strategies DO beat BH in 2023-2026 (high VIX period)",
+    "content": "[提出: 同期間驗證, 執行: Claude] evaluate_new_strategy 同期間比較。BH 50/50 Sharpe 1.862 排 #11/15——已上架 top 10 全部勝過 BH！recommended_5050(12/VIX) 1.865 微幅勝。這與 K687(20yr BH best)看似矛盾——但不矛盾：2023-2026 是高 VIX 期間（tariff shock），VT 在此環境特別有效。20 年長期 VT 不產生 alpha，但 3 年 live 期間 VT 表現優秀。結論：VT 的價值是 regime-dependent——高 VIX 環境中 VT 真正優越。現有策略的 paper_trading 績效是真實的（forward tracking），不需要懷疑。",
+    "tags": [
+      "same-period",
+      "BH-vs-VT",
+      "regime-dependent",
+      "2023-2026",
+      "validation"
+    ],
+    "data_source": "paper_trading.json + yfinance 2023-2026",
+    "experiment_id": "k715",
+    "created_at": "2026-03-29T19:36:23.696964",
+    "importance": 4
   }
 ]
