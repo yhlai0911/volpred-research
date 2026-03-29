@@ -16480,5 +16480,22 @@
     "experiment_id": "k691",
     "created_at": "2026-03-29T13:41:53.177608",
     "importance": 5
+  },
+  {
+    "id": "K692",
+    "title": "K692: ★★★ Paper Trading Verification — daily_update.py CORRECT, historical backfill HAS lookahead",
+    "content": "[提出: K689 驗證, 執行: Claude] 驗證 paper_trading.json lag convention。結果：TWO POPULATIONS。歷史條目(801筆 2023-2026/3/16): corr(same-day)=1.000——確認 lookahead（backtest seeded 時用同日 return）。新格式條目(9筆 2026/3/17+): corr(next-day)=0.999——daily_update.py 正確。結論：(1)不要改 daily_update.py（production 正確）(2)歷史 801 筆 portfolio_return 有 lookahead（performance 指標 overstated）(3)需要重新回填歷史條目（shift return 1 天）。K689 部分正確：lookahead 存在但不在 production code，在 historical seed data。",
+    "tags": [
+      "paper-trading",
+      "verification",
+      "lookahead",
+      "historical-data",
+      "daily-update",
+      "correct"
+    ],
+    "data_source": "paper_trading.json",
+    "experiment_id": "k692",
+    "created_at": "2026-03-29T13:58:02.998700",
+    "importance": 4
   }
 ]
