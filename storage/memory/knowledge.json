@@ -16794,5 +16794,21 @@
     "experiment_id": "k710",
     "created_at": "2026-03-29T18:06:16.877853",
     "importance": 1
+  },
+  {
+    "id": "K711",
+    "title": "K711: Term Structure Slope — Does NOT predict direction (corr -0.01), contango-only worse",
+    "content": "[提出: K638 方向角度, 執行: Claude] VIX3M/VIX slope lag-1 vs next-day SPY return corr=-0.010。Quintile 無單調（Q3 +31.2% Q4 +1.2%——random）。Contango-only Sharpe 0.589 < BH 0.601（-0.011）。結論：term structure 不預測方向（K638 已知不預測 vol beyond VIX，現確認也不預測 direction）。VIX sufficiency 又一次確認。",
+    "tags": [
+      "term-structure",
+      "direction",
+      "null-result",
+      "VIX-sufficiency",
+      "contango"
+    ],
+    "data_source": "yfinance SPY/VIX/VIX3M 2008-2026",
+    "experiment_id": "k711",
+    "created_at": "2026-03-29T18:36:18.168876",
+    "importance": 1
   }
 ]
