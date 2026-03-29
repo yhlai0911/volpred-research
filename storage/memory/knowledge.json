@@ -16161,5 +16161,22 @@
     "experiment_id": "k672",
     "created_at": "2026-03-29T09:19:08.056245",
     "importance": 5
+  },
+  {
+    "id": "K673",
+    "title": "K673: ★★★ VIX Markov Chain — VIX=28→44.8% below 20 in 1 month, crisis→31d to Normal",
+    "content": "[提出: K658/K659 量化, 執行: Claude] 5-state VIX Markov chain（8366 天 1993-2026）。Calm persistence 93.1%/day, Crisis 88.2%。Calm→Crisis 164 天 vs Crisis→Calm 60 天（2.73x 不對稱）。VIX=28: 44.8% 一個月回<20。VIX=12: 79.8% 一年內 crisis。Steady-state: Calm 33.4%, Normal 28.3%, Elevated 20.0%, High 9.7%, Crisis 8.6%。Crisis expected 31 天回 Normal。Non-adjacent jumps = 0%（Calm 不直接到 Crisis）。Sub-period stable（Frobenius 0.206）。Decision tree: crisis→不要 panic sell，等 31 天。",
+    "tags": [
+      "Markov-chain",
+      "transition-probability",
+      "VIX-dynamics",
+      "decision-tree",
+      "practical",
+      "quantitative"
+    ],
+    "data_source": "yfinance VIX 1993-2026",
+    "experiment_id": "k673",
+    "created_at": "2026-03-29T09:27:51.020051",
+    "importance": 4
   }
 ]
