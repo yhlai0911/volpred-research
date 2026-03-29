@@ -1,0 +1,265 @@
+{
+  "experiment_id": "K675",
+  "title": "VT Strategies and Wealth Inequality \u2014 Who Benefits Most?",
+  "type": "Simulation study on real data (empirical simulation)",
+  "proposer": "Claude",
+  "executor": "Claude",
+  "timestamp": "2026-03-29T01:41:11.864047+00:00",
+  "data_source": "yfinance",
+  "data_period": "2006-01-04 to 2026-03-27",
+  "trading_days": 5089,
+  "total_years": 20.2,
+  "initial_wealth": 50000,
+  "rf_annual": 0.02,
+  "archetype_results": {
+    "uninformed": {
+      "label": "Uninformed (BH SPY + panic sell)",
+      "terminal_wealth": 85838.3,
+      "total_return_pct": 71.68,
+      "cagr_pct": 2.71,
+      "ann_vol_pct": 8.41,
+      "sharpe": 0.122,
+      "mdd_pct": -22.19,
+      "calmar": 0.122,
+      "sortino": 0.101,
+      "wealth_multiple": 1.72
+    },
+    "basic": {
+      "label": "Basic (60/40 annual rebalance)",
+      "terminal_wealth": 418927.52,
+      "total_return_pct": 737.86,
+      "cagr_pct": 11.1,
+      "ann_vol_pct": 13.73,
+      "sharpe": 0.69,
+      "mdd_pct": -34.89,
+      "calmar": 0.318,
+      "sortino": 0.876,
+      "wealth_multiple": 8.38
+    },
+    "vt_aware": {
+      "label": "VT-Aware (12/VIX + 50/50 SPY/GLD)",
+      "terminal_wealth": 221082.73,
+      "total_return_pct": 342.17,
+      "cagr_pct": 7.64,
+      "ann_vol_pct": 7.87,
+      "sharpe": 0.721,
+      "mdd_pct": -12.28,
+      "calmar": 0.622,
+      "sortino": 0.948,
+      "wealth_multiple": 4.42
+    },
+    "optimal": {
+      "label": "Optimal (K665 table + Fear DCA)",
+      "terminal_wealth": 189038.79,
+      "total_return_pct": 278.08,
+      "cagr_pct": 6.81,
+      "ann_vol_pct": 6.84,
+      "sharpe": 0.705,
+      "mdd_pct": -10.4,
+      "calmar": 0.654,
+      "sortino": 0.893,
+      "wealth_multiple": 3.78
+    }
+  },
+  "wealth_ratios": {
+    "relative_to_uninformed": {
+      "uninformed": 1.0,
+      "basic": 4.88,
+      "vt_aware": 2.576,
+      "optimal": 2.202
+    },
+    "optimal_vs_uninformed": 2.202,
+    "optimal_vs_vt_aware": 0.855
+  },
+  "inequality_metrics": {
+    "gini_coefficient": 0.2818,
+    "gini_if_uninformed_become_basic": 0.1778,
+    "gini_reduction_pct": 36.9,
+    "gini_if_universal_lookup_table": 0.0,
+    "terminal_wealth_spread": 333089.22,
+    "terminal_wealth_std": 120651.36
+  },
+  "behavioral_cost": {
+    "panic_sell_count": 28,
+    "pure_bh_spy_terminal": 361766.19,
+    "uninformed_with_panic_terminal": 85838.3,
+    "panic_cost_dollars": 275927.89,
+    "panic_cost_pct_of_potential": 76.27
+  },
+  "crisis_vs_calm": {
+    "GFC (2008-2009)": {
+      "returns_pct": {
+        "uninformed": -14.05,
+        "basic": -1.23,
+        "vt_aware": 2.94,
+        "optimal": -0.71
+      },
+      "gap_optimal_uninformed_pct": 13.34
+    },
+    "Post-GFC Recovery (2010-2012)": {
+      "returns_pct": {
+        "uninformed": 0.18,
+        "basic": 39.55,
+        "vt_aware": 22.67,
+        "optimal": 20.19
+      },
+      "gap_optimal_uninformed_pct": 20.01
+    },
+    "Bull Market (2013-2019)": {
+      "returns_pct": {
+        "uninformed": 2.92,
+        "basic": 72.95,
+        "vt_aware": 31.57,
+        "optimal": 30.95
+      },
+      "gap_optimal_uninformed_pct": 28.03
+    },
+    "COVID Crash (2020-02 to 2020-06)": {
+      "returns_pct": {
+        "uninformed": -3.32,
+        "basic": 2.93,
+        "vt_aware": 2.88,
+        "optimal": 3.72
+      },
+      "gap_optimal_uninformed_pct": 7.04
+    },
+    "Post-COVID Recovery (2020-07 to 2021-12)": {
+      "returns_pct": {
+        "uninformed": -0.68,
+        "basic": 33.37,
+        "vt_aware": 14.28,
+        "optimal": 10.71
+      },
+      "gap_optimal_uninformed_pct": 11.39
+    },
+    "Rate Hikes Bear (2022)": {
+      "returns_pct": {
+        "uninformed": 0.07,
+        "basic": -10.88,
+        "vt_aware": -4.5,
+        "optimal": -1.98
+      },
+      "gap_optimal_uninformed_pct": -2.05
+    },
+    "AI Bull (2023-2025)": {
+      "returns_pct": {
+        "uninformed": 81.76,
+        "basic": 106.1,
+        "vt_aware": 67.04,
+        "optimal": 52.98
+      },
+      "gap_optimal_uninformed_pct": -28.78
+    }
+  },
+  "annual_wealth_ratios": {
+    "2007": 1.061,
+    "2008": 1.118,
+    "2009": 1.219,
+    "2010": 1.304,
+    "2011": 1.417,
+    "2012": 1.519,
+    "2013": 1.576,
+    "2014": 1.553,
+    "2015": 1.643,
+    "2016": 1.52,
+    "2017": 1.553,
+    "2018": 1.815,
+    "2019": 1.803,
+    "2020": 2.003,
+    "2021": 2.372,
+    "2022": 2.43,
+    "2023": 2.383,
+    "2024": 2.17,
+    "2025": 2.019,
+    "2026": 2.009
+  },
+  "knowledge_requirements": {
+    "uninformed": {
+      "knowledge_level": "None",
+      "requirements": [
+        "Open a brokerage account",
+        "Buy SPY (any ETF)"
+      ],
+      "literacy_score": 1,
+      "complexity": "Minimal",
+      "time_per_month_minutes": 0,
+      "barrier": "Behavioral: panic selling during crashes"
+    },
+    "basic": {
+      "knowledge_level": "Basic",
+      "requirements": [
+        "Understand stock-bond diversification",
+        "Know what annual rebalancing means",
+        "Discipline to rebalance once per year"
+      ],
+      "literacy_score": 2,
+      "complexity": "Low",
+      "time_per_month_minutes": 10,
+      "barrier": "Needs basic financial education (diversification concept)"
+    },
+    "vt_aware": {
+      "knowledge_level": "Intermediate",
+      "requirements": [
+        "Understand volatility and VIX",
+        "Know the 12/VIX formula or concept",
+        "Ability to check VIX daily",
+        "Discipline to rebalance based on VIX",
+        "Understanding of risk-adjusted allocation"
+      ],
+      "literacy_score": 4,
+      "complexity": "Moderate",
+      "time_per_month_minutes": 30,
+      "barrier": "Requires VIX literacy + daily monitoring discipline"
+    },
+    "optimal": {
+      "knowledge_level": "Intermediate (with lookup table)",
+      "requirements": [
+        "Check VIX level (Google \"VIX\")",
+        "Use 3-row lookup table (memorize 3 rules)",
+        "Maintain small cash reserve (5%)",
+        "Buy more during panics (VIX > 30)"
+      ],
+      "literacy_score": 3,
+      "complexity": "Low-Moderate",
+      "time_per_month_minutes": 15,
+      "barrier": "Needs the lookup table + emotional discipline during crises"
+    }
+  },
+  "gap_closure": {
+    "total_gap_dollars": 103200.49,
+    "basic_closes_pct": 322.8,
+    "vt_aware_closes_pct": 131.1,
+    "remaining_gap_vt_to_optimal": -32043.94,
+    "lookup_table_vs_continuous": 0.855
+  },
+  "policy_implications": {
+    "uplift_uninformed_to_basic_pct": 388.0,
+    "uplift_uninformed_to_optimal_pct": 120.2,
+    "anti_panic_education_saves": 275927.89,
+    "key_insight": "The 3-row VIX lookup table (K665) requires LESS financial literacy than the continuous 12/VIX formula but captures most of the benefit. This means VT knowledge CAN be democratized \u2014 the barrier is not mathematical sophistication but emotional discipline during crises. Anti-panic education (simply not selling during drawdowns) is the single highest-ROI financial literacy intervention."
+  },
+  "conclusion": "Over 20 years, $50K grows to $85,838 for the uninformed investor (BH SPY with panic selling) vs $189,039 for the optimal investor (K665 lookup table + Fear DCA) \u2014 a 2.20x wealth ratio. The Gini coefficient across 4 archetypes is 0.2818. Crucially, panic selling alone costs $275,928 (76.3% of potential). The biggest insight: the 3-row lookup table requires LESS financial literacy (3/5) than the continuous 12/VIX formula (4/5) while capturing 85.5% of VT performance. VT knowledge CAN be democratized \u2014 the real barrier is emotional discipline, not mathematical sophistication. The single highest-ROI intervention is anti-panic education.",
+  "limitations": [
+    "Only 4 archetypes \u2014 real distribution is continuous",
+    "Panic sell threshold (-20%) is stylized; real panic varies",
+    "6-month wait after panic is based on Dalbar QAIB averages",
+    "No transaction costs for VT/Optimal rebalancing (would slightly reduce advantage)",
+    "Optimal investor's \"Fear DCA\" uses a small cash reserve, not new capital",
+    "Single-path simulation (no Monte Carlo on behavioral parameters)",
+    "Survivorship bias: SPY had a strong 20-year run; results may differ for other markets",
+    "Does not model income inequality (starting capital differences)",
+    "Risk-free rate assumed constant 2%/yr"
+  ],
+  "references": [
+    "K665: VIX lookup table simplification",
+    "K653: Investor behavior simulation",
+    "K632/K670: Fear DCA optimization",
+    "K652: VIX action thresholds",
+    "Barber & Odean (2000) \"Trading Is Hazardous to Your Wealth\" JF",
+    "Dalbar (2023) QAIB Study \u2014 avg investor underperforms by 3-4% annually",
+    "Benartzi & Thaler (1995) \"Myopic Loss Aversion\" QJE",
+    "Campbell (2006) \"Household Finance\" JF",
+    "Lusardi & Mitchell (2014) \"Financial Literacy Around the World\" JEP",
+    "Moreira & Muir (2017) \"Volatility-Managed Portfolios\" JoF"
+  ]
+}
