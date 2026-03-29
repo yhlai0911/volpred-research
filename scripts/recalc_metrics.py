@@ -143,6 +143,33 @@ def recalc_all():
     fe_path.write_text(json.dumps(metrics, indent=2, ensure_ascii=False))
 
     print(f"\n✓ {len(metrics)} strategies updated → {out_path.name}")
+
+    # Sync metrics to Supabase strategy_metrics_cache (so frontend shows correct numbers)
+    try:
+        from supabase_sync import SUPABASE_URL, SUPABASE_KEY
+        if SUPABASE_URL and SUPABASE_KEY:
+            from urllib.request import Request, urlopen
+            from urllib.error import HTTPError
+            headers = {
+                "apikey": SUPABASE_KEY,
+                "Authorization": f"Bearer {SUPABASE_KEY}",
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal",
+            }
+            synced = 0
+            for strat, m in metrics.items():
+                data = json.dumps({"metrics": m}).encode("utf-8")
+                url = f"{SUPABASE_URL}/rest/v1/strategy_metrics_cache?strategy=eq.{strat}"
+                req = Request(url, data=data, headers=headers, method="PATCH")
+                try:
+                    urlopen(req)
+                    synced += 1
+                except HTTPError:
+                    pass
+            print(f"  → Supabase strategy_metrics_cache: {synced}/{len(metrics)} synced")
+    except Exception as e:
+        print(f"  → Supabase metrics sync skipped: {e}")
+
     return metrics
 
 
