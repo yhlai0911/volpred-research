@@ -31,6 +31,11 @@
 9. **發佈內容真實不虛**：Feed 文章、研究摘要、知識記錄的每一項數據和結論都必須可追溯到具體實驗腳本和數據
 10. **承認局限**：每個發現都必須說明其局限性（樣本大小、OOS 期間、資產範圍、proxy 變數的假設）
 11. **不可過度宣稱**：結論的強度不可超過證據支持的範圍。partial r=0.08 不可宣稱為「突破性發現」
+12. **Lookahead Bias 檢查（最常見錯誤）**：所有策略回測必須確認信號 lag：
+   - **Signal from t-1, return at t**：weight 基於昨天的 VIX，今天的 return
+   - **禁止 same-day**：weight 基於今天 VIX × 今天 return = 未來資訊（lookahead）
+   - 歷史教訓：K679 VIX Percentile Sharpe 1.68→修正 lag 後 0.355（100% artifact）；K693 paper_trading 9935 筆歷史數據有同日 lookahead
+   - **Codex 審查已 3 次抓到 lookahead**（K618→K619, K621→K623, K679→K686）——任何「好得不像真的」結果必須用 Codex 檢查 lag
 12. **自我修正後回溯更新**：每次推翻或修正先前結論時，必須立即：
    - 搜尋已發佈文章中引用該結論的內容（用 grep 搜尋關鍵詞）
    - 在受影響文章頂部加入 `⚠️ 更正聲明（日期）`，說明修正內容
@@ -65,8 +70,16 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 ### 資料流
 - `storage/` → 本地唯一源頭（JSON）
 - `scripts/supabase_sync.py` → Supabase 同步工具（由 daily_update.py 呼叫，不需獨立 cron）
+  - **文章同步**：同時讀取 `storage/reports/feed.json` + `storage/feed.json`（雙源合併）
+  - **Paper trades 同步**：自動剝離市場數據（spy_close/gld_close 等），只存策略 weights + returns
+  - **Draft 同步**：用 `published_at OR created_at` 過濾（支持 draft sync）
 - `scripts/daily_update.py` → 每日 06:03 計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
 - `scripts/recalc_metrics.py` → 從 paper_trading.json 重算 Sharpe/MDD 等（daily_update 自動呼叫）
+- **Paper Trading 資料結構**：
+  - `paper_trading.json` entries 只存：`trade_date, data_date, weights, portfolio_return, cash_weight, actual_returns`
+  - 市場數據（SPY/GLD/VIX 價格）統一存在 `_market_daily`（key=日期），不在每個 entry 重複
+  - `portfolio_return` 使用 **next-day return**：weight_T × (close_{T+1}/close_T - 1)，**不是 same-day**
+  - ⚠️ 2026-03-29 K693 修正：歷史 9,935 筆條目從 same-day 改為 next-day return
 - `src/volpred/ops/` + `uv run volpred ops ...` → agent-first 操作層（真人與本機 agent 共用）
 - 前端從 Supabase 讀取策略 metadata，不需靜態檔案同步
 - **Mirror 資料流**：`MemorySystem._sync_to_remote()` → 前端 `/api/sync/{file}` → 雙寫 Supabase + Mirror API
