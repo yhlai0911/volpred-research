@@ -15871,7 +15871,7 @@
   },
   {
     "id": "K656",
-    "title": "K656: ★★★★★ VT Reconciliation — VT is BOTH alpha AND insurance (CAGR 17.1% vs BH 11.4%)",
+    "title": "K656: ⚠️ NEEDS RE-CHECK — VT alpha claim may have same lookahead as K679",
     "content": "[提出: K654/K655 矛盾統合, 執行: Claude] 12/VIX SPY: CAGR 17.1% vs BH 60/40 11.4%, Sharpe 1.55 vs 0.69, MDD -13% vs -35%——三個維度同時改善。VT 勝 86% 年（18/21），E[value]=+4.4%/yr。CRRA utility 全部 γ(1-20) VT 勝。Crisis 期間 12/VIX 50/50 +0.4% vs BH -9.9%。K655 矛盾可能源於 rolling-window 方法學或 VT 實作差異。GARCH VT 危機表現為負(-15.4%)——VIX-based fundamentally superior。Only 12/VIX SPY passes t>2.5(p=0.018)但未達 Harvey t>3.0。結論：VIX-based VT 確實同時提供 alpha + insurance，不只是風險容忍度選擇。但 GARCH-based VT 不行。",
     "tags": [
       "VT-value",
@@ -15885,7 +15885,7 @@
     "data_source": "yfinance SPY/GLD/VIX 2006-2026",
     "experiment_id": "k656",
     "created_at": "2026-03-29T06:06:31.265910",
-    "importance": 5
+    "importance": 2
   },
   {
     "id": "K657",
@@ -16394,6 +16394,23 @@
     "data_source": "yfinance SPY/GLD/VIX 2006-2026",
     "experiment_id": "k686",
     "created_at": "2026-03-29T12:38:28.902677",
+    "importance": 5
+  },
+  {
+    "id": "K687",
+    "title": "K687: ★★★★★ DEFINITIVE RANKING — No VT beats BH 50/50 on Sharpe after proper lag!",
+    "content": "[提出: K686 後清算, 執行: Claude] 7 策略全部正確 lag（signal t-1, return t），NET 5bp TX。BH 50/50 Sharpe 0.545 #1。EWMA 0.525 #2（NS diff p=0.096）。12/VIX 0.438 #3。Percentile 0.355。Piecewise 0.068（最差）。Cross-OOS：全部 FAIL（0-1/5）。VT 真正價值=drawdown control：MDD BH -32% vs 12/VIX -12% vs P3-AGG -8%。P3-AGG Calmar 0.732 最佳（drawdown-adjusted）。結論：VT 是保險（減 drawdown）不是 alpha（增 Sharpe）。K654 對了，K656 需重查。Codex 審查 → lag 修正 → 整個 paradigm shift。研究誠實：好結果被推翻也如實報告。",
+    "tags": [
+      "definitive-ranking",
+      "no-alpha",
+      "drawdown-control",
+      "paradigm-shift",
+      "lag-corrected",
+      "honest"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k687",
+    "created_at": "2026-03-29T12:44:52.258898",
     "importance": 5
   }
 ]
