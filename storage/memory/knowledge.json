@@ -16330,5 +16330,21 @@
     "experiment_id": "k682",
     "created_at": "2026-03-29T10:51:56.571639",
     "importance": 2
+  },
+  {
+    "id": "K683",
+    "title": "K683: ★★★ Percentile vs Piecewise — Percentile wins composite 11/35, DM t=3.74 Harvey PASS",
+    "content": "[提出: 策略比較, 執行: Claude] 5 策略 7 指標 head-to-head。Composite rank: Percentile 11/35 #1, Piecewise 14/35 #2。Percentile: Sharpe 1.68, CAGR 15.4%, MDD -6.7%。Piecewise: Sharpe 1.48, CAGR 11.1%, MDD -4.9%。DM daily return t=3.74 p=0.0002 Harvey PASS——統計上不同。但 bootstrap Sharpe diff CI [-0.15, +0.56] 含零（p=0.134）——Sharpe 差不顯著。Regime: Percentile 在 calm/elevated/crisis 全勝。Piecewise crisis 零損失但也零收益。結論：報酬導向→Percentile（新 default），風險厭惡→Piecewise，簡單→P3-AGG lookup。",
+    "tags": [
+      "percentile-vs-piecewise",
+      "head-to-head",
+      "composite-rank",
+      "Harvey-PASS",
+      "strategy-recommendation"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k683",
+    "created_at": "2026-03-29T12:10:19.036472",
+    "importance": 4
   }
 ]
