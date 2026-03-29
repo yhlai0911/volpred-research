@@ -768,64 +768,65 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ---
 
-## Next Session Priorities（2026-03-28 起）
+## Next Session Priorities（2026-03-30 起）
 
-基於本 session K526-K612 成果（87 實驗、5 策略上架、3 論文 Codex 審查、K600 meta-analysis、K590 文獻掃描、K608 SEO 稽核），依優先級排序。
+基於 K621-K701 session（81 實驗、paradigm shift: VT=insurance not alpha、K693 數據修正、4 Codex 審查），依優先級排序。
 
-### P0: 時間敏感，必須立即處理
+### 重大研究結論更新（2026-03-29 K687/K697/K700/K701）
 
-| 項目 | 說明 | 依據 | 截止日 |
-|------|------|------|--------|
-| **HAR-RV 正式實驗** | 5-min 數據累積中（SPY 46d / 0050 35d），ETA 04/11 達 60 天門檻 → 立刻跑 K525 HAR-RV formal | K530 HAR-ABS DM=-15.45 史上最強，5-min RV 應更強 | 04/11 |
-| **NFP 04/03 事後文章** | 非農數據發布後 1 天內發「非農報告後市場怎麼走」解讀文 | 事件日曆 | 04/04 |
-| **TSMC 營收 04/10** | 3 月營收公告前 2 天發預告文，公告後 1 天發解讀文 | 事件日曆 | 04/08 預告, 04/11 解讀 |
-| **TSMC 法說 04/16** | Q1 法說前發「台積電法說前後台股波動」預告 + 事後解讀 | 事件日曆 | 04/14 預告, 04/17 解讀 |
+**VT 策略是 drawdown insurance，不是 alpha generator。**
+- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）
+- K697：VIX 預測 vol（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 理論不可能
+- K701：weekly/monthly 也一樣（direction corr 全部<0.04）
+- K688：VT 在 CRRA utility γ≥5 時勝出——drawdown protection 對風險厭惡投資人有價值
+- K693：歷史 paper_trading 9935 筆修正 same-day→next-day return
+- K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
 
-### P1: 高價值，本週內完成
+### P0: 時間敏感
 
-**平台與策略維護：**
-- [ ] **Inactive 策略 howto 更新**：`taiwan_spy_momentum`、`tz_tw_jp_5050`、`global_vt_tz` 缺少操作說明 → 用 `ops strategy-upsert` 補齊 howto 欄位
-- [ ] **Badge DB 驅動遷移**：策略卡片的 assets/rebalance_freq 目前前端 hardcode → 移入 Supabase `strategy_signals` 或 `strategy_metrics_cache` 表，前端改讀 DB
-- [ ] **SEO 修正**（K608 稽核剩餘 7 項）：canonical URL（防重複索引）、`/guide` `/paper` `/me` 頁面缺 metadata、sitemap 動態化（含文章 URL）
-- [ ] **Google Search Console 註冊**：提交 sitemap.xml（手動操作，W1.4）
+| 項目 | 說明 | 截止日 |
+|------|------|--------|
+| **NFP 04/03 事後文章** | 非農數據發布後 1 天內發解讀文（K661 數據已備） | 04/04 |
+| **HAR-RV 正式實驗** | 5-min 數據 ETA 04/11 達 60 天門檻 | 04/11 |
+| **TSMC 營收 04/10** | 預告+解讀文 | 04/08, 04/11 |
+| **TSMC 法說 04/16** | 預告+解讀文 | 04/14, 04/17 |
 
-**論文修正（3 篇 Codex 審查）：**
-- [ ] **Leverage-Direction**（K585）：修正日期不一致（2017-2025 vs 2026-03）、gamma window "non-overlapping" 矛盾、TZ alpha 可交易性語氣
-- [ ] **Taiwan VT**（K585）：修正 4.6x amplification 樣本量問題、Table 3 期間不一致、TX cost 算術錯誤
-- [ ] **VT-Trend**（K585）：修正 L164/Table 1 矛盾、Table 3 M5 空白、L352 EWT/EWJ text-table mismatch
+### P1: 高價值
 
-### P2: 研究新方向（本 session 文獻掃描 K590 的可行動項目）
+**論文修正（需反映 K687 paradigm shift）：**
+- [ ] **Leverage-Direction**（K628 已瘦身 64→52p）：加入「VT is insurance」框架
+- [ ] **Taiwan VT**：K636 修正 amplification（gamma vs vol level）、TX cost 已修正
+- [ ] **VT-Trend**：需重新定位——VT 不是 trend following 也不是 alpha
 
-| 項目 | 來源論文 | 可行性 | 備註 |
-|------|---------|--------|------|
-| **KAN-GARCH-MIDAS** | J. Applied Economics 2025 | ★★ 可用日頻，結構化 NN 可能突破 ML ceiling | 需確認 KAN 套件可用性 |
-| **MF2-GARCH** | Conrad & Engle, JAE 2025 | ★★ 短期 GJR + 長期 MEM，與 K475 ensemble 比較 | 可立即實作 |
-| **Bespoke RV** | Patton & Zhang, JoE 2026 | ★ 886 股 OOS 顯著改善 HAR/GARCH-X | BLOCKED: 需 tick data |
-| **Window Size Sensitivity** | Feng & Zhang, J.Forecasting 2025 | ★ 確認 W=2000 非 ad hoc，U-shape loss | 可立即做 sweep |
-| **月頻 VT 最佳化** | 內部需求 | 所有 9 策略的月度 rebalancing 頻率 sensitivity | K499 + K548 延伸 |
+**平台維護：**
+- [ ] Supabase paper_trades 全量清理（剝離舊 entry 中的市場數據）
+- [x] 前端 groupPaperTrades 已剝離市場 keys（API 2.9MB→1.8MB）
+- [x] feed-publisher SKILL.md 已更新（寫到 reports/feed.json）
+- [ ] SEO 修正（K608 剩餘項目）
+- [ ] merge_feed_files.py 加入 system crontab（需手動）
 
-**K600 Meta-Analysis 五大教訓（指導未來實驗設計）：**
-1. Cross-OOS 是必要品質控制（53% false positive rate without it）
-2. Information decomposition > model complexity（corr=-0.259）
-3. Prediction ≠ Application（4 次確認）
-4. VIX sufficiency 是真正的 ceiling（32 次確認）
-5. Gamma decision tree 是最終工具（15/15 within 1% of oracle）
+### P2: 研究新方向
 
-### P3: 長期待辦（不急但要追蹤）
+**已完成（本 session）：**
+- [x] MF2-GARCH（K621-K623）：實作困難，Codex 抓 5 bugs
+- [x] Window Size Sensitivity（K622）：w=1000-1500 sweet spot
+- [x] 月頻 VT 最佳化（K642）：US daily 最佳，TW monthly
 
-**前端效能：**
-- [ ] Portfolio 頁面 lazy-load `paper_trades`（目前一次載入全部，大量數據）
-- [ ] `market_daily` Phase 2：從 `paper_trades.entry` 剝離 market data 到獨立表
+**新方向（post-K697 alpha impossibility）：**
+- [ ] **Asset selection optimization**：不用 timing 而是用更好的資產配置（beyond SPY/GLD）
+- [ ] **Risk budgeting**：Equal Risk Contribution portfolio without timing
+- [ ] **Alternative data**：NLP sentiment、satellite data — 可能有 VIX 之外的方向信號
+- [ ] **Intraday alpha**：5-min RV 數據就緒後，日內 alpha 可能存在（K697 只測日頻）
+- [ ] **Cross-asset regime detection**：不基於 VIX 的 regime 識別
 
-**研究長期：**
-- [ ] Rough Volatility multivariate extension（arXiv:2504.15985，需更多理論準備）
-- [ ] Decision-focused policy learning（Codex 建議，contextual bandit，需框架設計）
-- [ ] Options surface state variables（BLOCKED: 需 options 歷史數據）
-- [ ] 除權息季節研究（06 月開始，04 月可先做文獻調查）
-- [ ] SEC filing 文字探勘系列（需 EDGAR API 整合）
+### P3: 長期待辦
 
-**平台長期：**
-- [ ] Feature gating 前端 enforce（V0.7）
+**研究：**
+- [ ] Rough Volatility multivariate（需理論準備）
+- [ ] Decision-focused policy learning（contextual bandit）
+- [ ] 除權息季節研究（06 月）
+
+**平台：**
+- [ ] Feature gating（V0.7）
 - [ ] API rate limiting（V0.9）
-- [ ] Supabase heartbeat cron 防 pause（V0.10）
-- [ ] Email/LINE 訂閱系統（W3.1）
+- [ ] Email/LINE 訂閱（W3.1）
