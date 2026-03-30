@@ -179,7 +179,7 @@
 - Diversification amplification（index vs stock gamma）
 - MDD vs Sharpe 區分（mechanical vs skill）— **K49: 雙通道分離**
 - Anti-tautology 驗證
-- **VIX sufficient statistic**（22 次確認：K43/K48/K57/K61/K65/K80/K84 + 歷史 15 次）
+- **VIX sufficient statistic**（25+ 次確認：K43/K48/K57/K61/K65/K80/K84 + K730 cross-asset + K731 term structure + K732 behavioral sentiment + 歷史 15 次）
 - **VT 保險費定價**（K41: ~4%/yr 恆定，K62: 利率依賴，K74: 80% 時間落後是正常的）
 
 ### 面向 E: 即時市場分析

@@ -17155,5 +17155,25 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-30T10:27:17.336261+00:00"
+  },
+  {
+    "id": "K732",
+    "title": "K732: Behavioral Sentiment Index (BSI) for Vol Prediction — Null, VIX Sufficiency #35",
+    "content": "[提出: Claude, 執行: Claude] K732: Composite Behavioral Sentiment Index (BSI) combining SKEW + VIX/VIX3M ratio + VIX momentum + VIX level (equal-weight percentile ranks, 252d window). N=3760, 2011-2026. CBOE Put/Call ratio (^CPCE) unavailable via yfinance; used behavioral proxies. Part A: BSI-RV5d corr=0.347 (sig) but partial_r|VIX=0.091 (tiny). Regression Δ R²=0.004 (VIX R²=0.478 → VIX+BSI 0.482). OOS DM t=1.64 (Harvey FAIL). Part B: BSI Fear Hedge Sharpe=0.900 < BH 50/50 0.947 < 12/VIX 0.950. DM vs BH t=-1.18 (NS). TX cost 0.51%/yr. Part C: Cross-OOS 2/5 FAIL. Part D: VIX level pctile (r=0.473) and VIX term structure (r=0.414) dominate; SKEW pctile r=-0.236 (wrong sign for fear). Regime analysis: Fear RV=20.9% vs Greed=9.2% (t=13.92, sig) but this is entirely captured by VIX level. Conclusion: composite behavioral proxies do not add to VIX for either prediction or trading. VIX sufficiency #35.",
+    "tags": [
+      "behavioral_finance",
+      "sentiment",
+      "SKEW",
+      "VIX_term_structure",
+      "put_call_ratio",
+      "null_result",
+      "VIX_sufficiency",
+      "jump_direction"
+    ],
+    "experiment_id": "K732",
+    "data_source": "yfinance (^SKEW, ^VIX, ^VIX3M, SPY, GLD)",
+    "data_period": "2011-2026",
+    "created_at": "2026-03-30T10:32:20Z",
+    "category": "research"
   }
 ]
