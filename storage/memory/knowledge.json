@@ -17417,5 +17417,20 @@
       "K15",
       "N115"
     ]
+  },
+  {
+    "id": "K738-review",
+    "title": "Codex Review K738: 2 HIGH (sign inversion + missing cash carry), decision guide direction correct but numbers need fix",
+    "content": "[提出: Codex, 執行: Claude] K738 review: (1) HIGH: MDD reduction signs inverted — improvement prints negative. (2) HIGH: VT returns omit cash carry ((1-w)×RF_DAILY), biasing CRRA break-even gamma too high. K687 reference uses w*port_ret+(1-w)*RF. (3) MEDIUM: break-even gamma is 4-point grid search [2,5,10,20], not true crossover. (4) LOW: total_cost double-counts TX. DIRECTION correct: VT costs return for MDD protection, higher gamma → more VT. But specific numbers (4.80%/yr, γ=10) unreliable until fixed. Do NOT publish decision guide article with current numbers.",
+    "tags": [
+      "codex-review",
+      "K738",
+      "HIGH-severity",
+      "CRRA",
+      "insurance-cost"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "timestamp": "2026-03-30T11:16:33.546459+00:00"
   }
 ]
