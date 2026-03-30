@@ -17386,5 +17386,36 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-30T11:09:15.414585+00:00"
+  },
+  {
+    "id": "K738",
+    "title": "K738: ★★★★ VT Insurance Cost-Benefit Analysis — Cross-Asset Quantification",
+    "content": "[提出: Claude, 執行: Claude] K738: Comprehensive VT cost-benefit across 5 assets (SPY/GLD/QQQ/EEM/0050.TW), 2007-2026. KEY FINDINGS: (1) 12/VIX costs +4.80%/yr return drag (avg), EWMA VT costs +2.79%/yr — K41 estimate of 4%/yr confirmed for 12/VIX. (2) Cost per 1pp MDD reduction: 12/VIX=0.549%/yr, EWMA=0.424%/yr — EWMA is 23% more cost-efficient. (3) Break-even gamma: 12/VIX=10, EWMA=5 (medians across assets). Investors with gamma>=5 should use EWMA VT. (4) Simple 50/50 diversification is the cheapest insurance: -0.51%/yr drag but -19.6pp avg MDD reduction (FREE insurance for diversified assets like SPY/EEM). (5) Bull market drag: VT gives back ~60% of bull returns (12/VIX) or ~40% (EWMA). (6) SPY best for VT: cost 0.106%/yr per pp MDD reduction. EEM worst: 0.855%/yr per pp. (7) 0050.TW: 12/VIX Sharpe=0.648 vs BH 50/50=0.638 — VT nearly free for Taiwan. Decision guide: gamma<2 → BH 100%; gamma 2-5 → BH 50/50; gamma 5-10 → EWMA VT; gamma>10 → 12/VIX max protection.",
+    "tags": [
+      "VT",
+      "insurance",
+      "cost-benefit",
+      "CRRA",
+      "cross-asset",
+      "MDD",
+      "gamma",
+      "decision_guide",
+      "K687修正"
+    ],
+    "evidence": "5 assets, 2007-2026, 4838 days (SPY/GLD/QQQ/EEM) + 4075 days (0050.TW), proper lag, 5bps TX, CRRA gamma 2/5/10/20",
+    "data_source": "yfinance (SPY, GLD, QQQ, EEM, 0050.TW, ^VIX)",
+    "experiment_script": "experiments/k738_vt_insurance_cost_benefit.py",
+    "results_file": "experiments/k738_vt_insurance_cost_benefit_results.json",
+    "created_at": "2026-03-30T19:10:41.870716",
+    "phase": "Phase_Insurance",
+    "importance": 4,
+    "related": [
+      "K687",
+      "K688",
+      "K697",
+      "K41",
+      "K15",
+      "N115"
+    ]
   }
 ]

@@ -1,0 +1,763 @@
+{
+  "experiment_id": "K738",
+  "title": "VT Insurance Cost-Benefit Analysis",
+  "description": "Comprehensive cost-benefit analysis of Volatility Targeting across 5 assets",
+  "date": "2026-03-30",
+  "data_source": "yfinance",
+  "period": "2006-01-01 to 2026-03-30",
+  "eval_period": "2007-01-03 to 2026-03-30",
+  "type": "empirical_analysis",
+  "proposer": "Claude",
+  "executor": "Claude",
+  "references": [
+    "K687: Post-correction definitive ranking",
+    "K688: CRRA lag-corrected",
+    "K697: VIX predicts vol not direction",
+    "K41: VT insurance premium ~4%/yr",
+    "Moreira & Muir (2017), Volatility-Managed Portfolios, JF",
+    "Arrow (1965), Aspects of the Theory of Risk-Bearing",
+    "Copeland & Copeland (1999), Market Timing with VIX"
+  ],
+  "configuration": {
+    "start_date": "2006-01-01",
+    "end_date": "2026-03-30",
+    "eval_start": "2007-01-03",
+    "ewma_lambda": 0.94,
+    "target_vol": 0.1,
+    "vix_12_cap": 1.5,
+    "tc_bps": 5,
+    "rf_annual": 0.04,
+    "gammas": [
+      2,
+      5,
+      10,
+      20
+    ],
+    "bull_threshold": 0.2,
+    "assets": [
+      "SPY",
+      "GLD",
+      "QQQ",
+      "EEM",
+      "0050.TW"
+    ]
+  },
+  "per_asset_results": {
+    "SPY": {
+      "asset": "SPY",
+      "eval_days": 4839,
+      "eval_start": "2007-01-03",
+      "eval_end": "2026-03-27",
+      "strategies": {
+        "BH_100": {
+          "n_days": 4839,
+          "years": 19.2,
+          "cagr_pct": 10.137,
+          "ann_vol_pct": 19.692,
+          "sharpe": 0.3858,
+          "sortino": 0.4713,
+          "calmar": 0.1837,
+          "mdd_pct": -55.189,
+          "worst_month_pct": -16.519,
+          "best_month_pct": 12.698,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 40.65,
+          "crra_ce": {
+            "gamma_2": 8.016,
+            "gamma_5": 1.847,
+            "gamma_10": -7.932,
+            "gamma_20": -26.366
+          },
+          "bull_year_count": 7,
+          "bull_avg_ret_bh100_pct": 27.34,
+          "bull_avg_ret_strat_pct": 27.34,
+          "bull_drag_pct": 0.0
+        },
+        "BH_5050": {
+          "n_days": 4839,
+          "years": 19.2,
+          "cagr_pct": 11.146,
+          "ann_vol_pct": 13.701,
+          "sharpe": 0.5481,
+          "sortino": 0.6973,
+          "calmar": 0.3431,
+          "mdd_pct": -32.49,
+          "worst_month_pct": -15.393,
+          "best_month_pct": 10.125,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 25.15,
+          "crra_ce": {
+            "gamma_2": 10.105,
+            "gamma_5": 7.025,
+            "gamma_10": 2.013,
+            "gamma_20": -7.712
+          },
+          "bull_year_count": 7,
+          "bull_avg_ret_bh100_pct": 27.34,
+          "bull_avg_ret_strat_pct": 17.823,
+          "bull_drag_pct": -9.517
+        },
+        "12/VIX": {
+          "n_days": 4838,
+          "years": 19.2,
+          "cagr_pct": 6.069,
+          "ann_vol_pct": 7.656,
+          "sharpe": 0.2856,
+          "sortino": 0.373,
+          "calmar": 0.4675,
+          "mdd_pct": -12.984,
+          "worst_month_pct": -5.728,
+          "best_month_pct": 5.836,
+          "avg_turnover_annual_pct": 888.472,
+          "tc_annual_pct": 0.4442,
+          "days_in_deep_dd_pct": 25.53,
+          "crra_ce": {
+            "gamma_2": 5.757,
+            "gamma_5": 4.821,
+            "gamma_10": 3.258,
+            "gamma_20": 0.113
+          },
+          "bull_year_count": 7,
+          "bull_avg_ret_bh100_pct": 27.34,
+          "bull_avg_ret_strat_pct": 10.906,
+          "bull_drag_pct": -16.434
+        },
+        "EWMA_VT": {
+          "n_days": 4838,
+          "years": 19.2,
+          "cagr_pct": 9.616,
+          "ann_vol_pct": 10.544,
+          "sharpe": 0.5444,
+          "sortino": 0.7313,
+          "calmar": 0.5337,
+          "mdd_pct": -18.018,
+          "worst_month_pct": -6.721,
+          "best_month_pct": 10.372,
+          "avg_turnover_annual_pct": 758.177,
+          "tc_annual_pct": 0.3791,
+          "days_in_deep_dd_pct": 38.07,
+          "crra_ce": {
+            "gamma_2": 9.006,
+            "gamma_5": 7.186,
+            "gamma_10": 4.187,
+            "gamma_20": -1.7
+          },
+          "bull_year_count": 7,
+          "bull_avg_ret_bh100_pct": 27.34,
+          "bull_avg_ret_strat_pct": 17.858,
+          "bull_drag_pct": -9.482
+        }
+      },
+      "cost_benefit": {
+        "12/VIX": {
+          "return_drag_pct": 5.077,
+          "tc_annual_pct": 0.4442,
+          "total_annual_cost_pct": 5.521,
+          "mdd_reduction_pp": -19.506,
+          "mdd_reduction_ratio": 0.3996,
+          "worst_month_improvement_pp": -9.665,
+          "dd_time_reduction_pp": -0.38,
+          "cost_per_pct_mdd_reduction": 0.2603,
+          "breakeven_gamma": 10
+        },
+        "EWMA_VT": {
+          "return_drag_pct": 1.53,
+          "tc_annual_pct": 0.3791,
+          "total_annual_cost_pct": 1.909,
+          "mdd_reduction_pp": -14.472,
+          "mdd_reduction_ratio": 0.5546,
+          "worst_month_improvement_pp": -8.672,
+          "dd_time_reduction_pp": -12.92,
+          "cost_per_pct_mdd_reduction": 0.1057,
+          "breakeven_gamma": 5
+        },
+        "diversification_5050": {
+          "return_drag_pct": -1.009,
+          "mdd_reduction_pp": -22.699,
+          "cost_per_pct_mdd_reduction": -0.0445,
+          "breakeven_gamma": 2
+        }
+      }
+    },
+    "GLD": {
+      "asset": "GLD",
+      "eval_days": 4839,
+      "eval_start": "2007-01-03",
+      "eval_end": "2026-03-27",
+      "strategies": {
+        "BH_100": {
+          "n_days": 4839,
+          "years": 19.2,
+          "cagr_pct": 10.292,
+          "ann_vol_pct": 17.997,
+          "sharpe": 0.4123,
+          "sortino": 0.5489,
+          "calmar": 0.2259,
+          "mdd_pct": -45.555,
+          "worst_month_pct": -16.14,
+          "best_month_pct": 12.787,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 74.75,
+          "crra_ce": {
+            "gamma_2": 8.512,
+            "gamma_5": 3.3,
+            "gamma_10": -5.009,
+            "gamma_20": -20.582
+          },
+          "bull_year_count": 6,
+          "bull_avg_ret_bh100_pct": 33.15,
+          "bull_avg_ret_strat_pct": 33.15,
+          "bull_drag_pct": 0.0
+        },
+        "BH_5050": {
+          "n_days": 4839,
+          "years": 19.2,
+          "cagr_pct": 10.292,
+          "ann_vol_pct": 17.997,
+          "sharpe": 0.4123,
+          "sortino": 0.5489,
+          "calmar": 0.2259,
+          "mdd_pct": -45.555,
+          "worst_month_pct": -16.14,
+          "best_month_pct": 12.787,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 74.75,
+          "crra_ce": {
+            "gamma_2": 8.512,
+            "gamma_5": 3.3,
+            "gamma_10": -5.009,
+            "gamma_20": -20.582
+          },
+          "bull_year_count": 6,
+          "bull_avg_ret_bh100_pct": 33.15,
+          "bull_avg_ret_strat_pct": 33.15,
+          "bull_drag_pct": 0.0
+        },
+        "12/VIX": {
+          "n_days": 4838,
+          "years": 19.2,
+          "cagr_pct": 5.702,
+          "ann_vol_pct": 11.422,
+          "sharpe": 0.1926,
+          "sortino": 0.2516,
+          "calmar": 0.1481,
+          "mdd_pct": -38.493,
+          "worst_month_pct": -8.846,
+          "best_month_pct": 9.779,
+          "avg_turnover_annual_pct": 888.472,
+          "tc_annual_pct": 0.4442,
+          "days_in_deep_dd_pct": 68.35,
+          "crra_ce": {
+            "gamma_2": 5.009,
+            "gamma_5": 2.941,
+            "gamma_10": -0.491,
+            "gamma_20": -7.398
+          },
+          "bull_year_count": 6,
+          "bull_avg_ret_bh100_pct": 33.15,
+          "bull_avg_ret_strat_pct": 19.298,
+          "bull_drag_pct": -13.852
+        },
+        "EWMA_VT": {
+          "n_days": 4838,
+          "years": 19.2,
+          "cagr_pct": 7.021,
+          "ann_vol_pct": 10.576,
+          "sharpe": 0.3164,
+          "sortino": 0.4497,
+          "calmar": 0.1869,
+          "mdd_pct": -37.567,
+          "worst_month_pct": -7.214,
+          "best_month_pct": 8.465,
+          "avg_turnover_annual_pct": 569.227,
+          "tc_annual_pct": 0.2846,
+          "days_in_deep_dd_pct": 61.22,
+          "crra_ce": {
+            "gamma_2": 6.423,
+            "gamma_5": 4.645,
+            "gamma_10": 1.729,
+            "gamma_20": -3.936
+          },
+          "bull_year_count": 6,
+          "bull_avg_ret_bh100_pct": 33.15,
+          "bull_avg_ret_strat_pct": 22.38,
+          "bull_drag_pct": -10.77
+        }
+      },
+      "cost_benefit": {
+        "12/VIX": {
+          "return_drag_pct": 4.59,
+          "tc_annual_pct": 0.4442,
+          "total_annual_cost_pct": 5.034,
+          "mdd_reduction_pp": -7.062,
+          "mdd_reduction_ratio": 0.845,
+          "worst_month_improvement_pp": -7.294,
+          "dd_time_reduction_pp": 6.4,
+          "cost_per_pct_mdd_reduction": 0.65,
+          "breakeven_gamma": 10
+        },
+        "EWMA_VT": {
+          "return_drag_pct": 3.271,
+          "tc_annual_pct": 0.2846,
+          "total_annual_cost_pct": 3.556,
+          "mdd_reduction_pp": -7.988,
+          "mdd_reduction_ratio": 0.8247,
+          "worst_month_improvement_pp": -8.926,
+          "dd_time_reduction_pp": 13.53,
+          "cost_per_pct_mdd_reduction": 0.4095,
+          "breakeven_gamma": 5
+        },
+        "diversification_5050": {
+          "return_drag_pct": 0.0,
+          "mdd_reduction_pp": 0.0,
+          "cost_per_pct_mdd_reduction": null,
+          "breakeven_gamma": null
+        }
+      }
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "eval_days": 4839,
+      "eval_start": "2007-01-03",
+      "eval_end": "2026-03-27",
+      "strategies": {
+        "BH_100": {
+          "n_days": 4839,
+          "years": 19.2,
+          "cagr_pct": 15.218,
+          "ann_vol_pct": 22.204,
+          "sharpe": 0.5691,
+          "sortino": 0.7352,
+          "calmar": 0.285,
+          "mdd_pct": -53.404,
+          "worst_month_pct": -15.576,
+          "best_month_pct": 14.974,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 41.41,
+          "crra_ce": {
+            "gamma_2": 12.405,
+            "gamma_5": 4.317,
+            "gamma_10": -8.159,
+            "gamma_20": -30.273
+          },
+          "bull_year_count": 10,
+          "bull_avg_ret_bh100_pct": 36.012,
+          "bull_avg_ret_strat_pct": 36.012,
+          "bull_drag_pct": 0.0
+        },
+        "BH_5050": {
+          "n_days": 4839,
+          "years": 19.2,
+          "cagr_pct": 13.835,
+          "ann_vol_pct": 14.604,
+          "sharpe": 0.6867,
+          "sortino": 0.9059,
+          "calmar": 0.4129,
+          "mdd_pct": -33.507,
+          "worst_month_pct": -14.979,
+          "best_month_pct": 11.224,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 27.32,
+          "crra_ce": {
+            "gamma_2": 12.625,
+            "gamma_5": 9.055,
+            "gamma_10": 3.285,
+            "gamma_20": -7.729
+          },
+          "bull_year_count": 10,
+          "bull_avg_ret_bh100_pct": 36.012,
+          "bull_avg_ret_strat_pct": 26.84,
+          "bull_drag_pct": -9.172
+        },
+        "12/VIX": {
+          "n_days": 4838,
+          "years": 19.2,
+          "cagr_pct": 7.805,
+          "ann_vol_pct": 8.421,
+          "sharpe": 0.4598,
+          "sortino": 0.6141,
+          "calmar": 0.5012,
+          "mdd_pct": -15.573,
+          "worst_month_pct": -5.728,
+          "best_month_pct": 6.792,
+          "avg_turnover_annual_pct": 888.472,
+          "tc_annual_pct": 0.4442,
+          "days_in_deep_dd_pct": 23.85,
+          "crra_ce": {
+            "gamma_2": 7.422,
+            "gamma_5": 6.274,
+            "gamma_10": 4.365,
+            "gamma_20": 0.552
+          },
+          "bull_year_count": 10,
+          "bull_avg_ret_bh100_pct": 36.012,
+          "bull_avg_ret_strat_pct": 14.953,
+          "bull_drag_pct": -21.059
+        },
+        "EWMA_VT": {
+          "n_days": 4838,
+          "years": 19.2,
+          "cagr_pct": 11.068,
+          "ann_vol_pct": 10.529,
+          "sharpe": 0.67,
+          "sortino": 0.9146,
+          "calmar": 0.6239,
+          "mdd_pct": -17.74,
+          "worst_month_pct": -6.321,
+          "best_month_pct": 9.497,
+          "avg_turnover_annual_pct": 696.903,
+          "tc_annual_pct": 0.3485,
+          "days_in_deep_dd_pct": 30.38,
+          "crra_ce": {
+            "gamma_2": 10.452,
+            "gamma_5": 8.617,
+            "gamma_10": 5.596,
+            "gamma_20": -0.315
+          },
+          "bull_year_count": 10,
+          "bull_avg_ret_bh100_pct": 36.012,
+          "bull_avg_ret_strat_pct": 20.937,
+          "bull_drag_pct": -15.075
+        }
+      },
+      "cost_benefit": {
+        "12/VIX": {
+          "return_drag_pct": 6.03,
+          "tc_annual_pct": 0.4442,
+          "total_annual_cost_pct": 6.474,
+          "mdd_reduction_pp": -17.934,
+          "mdd_reduction_ratio": 0.4648,
+          "worst_month_improvement_pp": -9.251,
+          "dd_time_reduction_pp": 3.47,
+          "cost_per_pct_mdd_reduction": 0.3362,
+          "breakeven_gamma": 10
+        },
+        "EWMA_VT": {
+          "return_drag_pct": 2.767,
+          "tc_annual_pct": 0.3485,
+          "total_annual_cost_pct": 3.116,
+          "mdd_reduction_pp": -15.767,
+          "mdd_reduction_ratio": 0.5294,
+          "worst_month_improvement_pp": -8.658,
+          "dd_time_reduction_pp": -3.06,
+          "cost_per_pct_mdd_reduction": 0.1755,
+          "breakeven_gamma": 10
+        },
+        "diversification_5050": {
+          "return_drag_pct": 1.383,
+          "mdd_reduction_pp": -19.897,
+          "cost_per_pct_mdd_reduction": 0.0695,
+          "breakeven_gamma": 2
+        }
+      }
+    },
+    "EEM": {
+      "asset": "EEM",
+      "eval_days": 4839,
+      "eval_start": "2007-01-03",
+      "eval_end": "2026-03-27",
+      "strategies": {
+        "BH_100": {
+          "n_days": 4839,
+          "years": 19.2,
+          "cagr_pct": 4.081,
+          "ann_vol_pct": 27.958,
+          "sharpe": 0.1393,
+          "sortino": 0.1833,
+          "calmar": 0.0614,
+          "mdd_pct": -66.434,
+          "worst_month_pct": -25.578,
+          "best_month_pct": 16.863,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 88.61,
+          "crra_ce": {
+            "gamma_2": 0.109,
+            "gamma_5": -10.994,
+            "gamma_10": -27.458,
+            "gamma_20": -55.744
+          },
+          "bull_year_count": 4,
+          "bull_avg_ret_bh100_pct": 43.383,
+          "bull_avg_ret_strat_pct": 43.383,
+          "bull_drag_pct": 0.0
+        },
+        "BH_5050": {
+          "n_days": 4839,
+          "years": 19.2,
+          "cagr_pct": 8.39,
+          "ann_vol_pct": 17.895,
+          "sharpe": 0.3161,
+          "sortino": 0.4216,
+          "calmar": 0.1964,
+          "mdd_pct": -42.722,
+          "worst_month_pct": -18.837,
+          "best_month_pct": 13.239,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 61.87,
+          "crra_ce": {
+            "gamma_2": 6.671,
+            "gamma_5": 1.662,
+            "gamma_10": -6.27,
+            "gamma_20": -21.041
+          },
+          "bull_year_count": 4,
+          "bull_avg_ret_bh100_pct": 43.383,
+          "bull_avg_ret_strat_pct": 38.789,
+          "bull_drag_pct": -4.594
+        },
+        "12/VIX": {
+          "n_days": 4838,
+          "years": 19.2,
+          "cagr_pct": 3.085,
+          "ann_vol_pct": 10.032,
+          "sharpe": -0.0456,
+          "sortino": -0.0619,
+          "calmar": 0.0845,
+          "mdd_pct": -36.514,
+          "worst_month_pct": -7.29,
+          "best_month_pct": 7.977,
+          "avg_turnover_annual_pct": 888.472,
+          "tc_annual_pct": 0.4442,
+          "days_in_deep_dd_pct": 69.72,
+          "crra_ce": {
+            "gamma_2": 2.565,
+            "gamma_5": 1.011,
+            "gamma_10": -1.562,
+            "gamma_20": -6.672
+          },
+          "bull_year_count": 4,
+          "bull_avg_ret_bh100_pct": 43.383,
+          "bull_avg_ret_strat_pct": 21.705,
+          "bull_drag_pct": -21.678
+        },
+        "EWMA_VT": {
+          "n_days": 4838,
+          "years": 19.2,
+          "cagr_pct": 4.957,
+          "ann_vol_pct": 10.514,
+          "sharpe": 0.1324,
+          "sortino": 0.1881,
+          "calmar": 0.1429,
+          "mdd_pct": -34.678,
+          "worst_month_pct": -7.728,
+          "best_month_pct": 9.571,
+          "avg_turnover_annual_pct": 591.96,
+          "tc_annual_pct": 0.296,
+          "days_in_deep_dd_pct": 59.09,
+          "crra_ce": {
+            "gamma_2": 4.377,
+            "gamma_5": 2.649,
+            "gamma_10": -0.191,
+            "gamma_20": -5.732
+          },
+          "bull_year_count": 4,
+          "bull_avg_ret_bh100_pct": 43.383,
+          "bull_avg_ret_strat_pct": 23.208,
+          "bull_drag_pct": -20.175
+        }
+      },
+      "cost_benefit": {
+        "12/VIX": {
+          "return_drag_pct": 5.305,
+          "tc_annual_pct": 0.4442,
+          "total_annual_cost_pct": 5.749,
+          "mdd_reduction_pp": -6.208,
+          "mdd_reduction_ratio": 0.8547,
+          "worst_month_improvement_pp": -11.547,
+          "dd_time_reduction_pp": -7.85,
+          "cost_per_pct_mdd_reduction": 0.8545,
+          "breakeven_gamma": 10
+        },
+        "EWMA_VT": {
+          "return_drag_pct": 3.433,
+          "tc_annual_pct": 0.296,
+          "total_annual_cost_pct": 3.729,
+          "mdd_reduction_pp": -8.044,
+          "mdd_reduction_ratio": 0.8117,
+          "worst_month_improvement_pp": -11.109,
+          "dd_time_reduction_pp": 2.78,
+          "cost_per_pct_mdd_reduction": 0.4268,
+          "breakeven_gamma": 5
+        },
+        "diversification_5050": {
+          "return_drag_pct": -4.309,
+          "mdd_reduction_pp": -23.712,
+          "cost_per_pct_mdd_reduction": -0.1817,
+          "breakeven_gamma": 2
+        }
+      }
+    },
+    "0050.TW": {
+      "asset": "0050.TW",
+      "eval_days": 4075,
+      "eval_start": "2009-01-06",
+      "eval_end": "2026-03-27",
+      "strategies": {
+        "BH_100": {
+          "n_days": 4075,
+          "years": 16.2,
+          "cagr_pct": 13.813,
+          "ann_vol_pct": 21.091,
+          "sharpe": 0.5294,
+          "sortino": 0.6813,
+          "calmar": 0.4184,
+          "mdd_pct": -33.017,
+          "worst_month_pct": -25.862,
+          "best_month_pct": 16.359,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 53.72,
+          "crra_ce": {
+            "gamma_2": 11.307,
+            "gamma_5": 4.052,
+            "gamma_10": -7.387,
+            "gamma_20": -29.14
+          },
+          "bull_year_count": 8,
+          "bull_avg_ret_bh100_pct": 28.532,
+          "bull_avg_ret_strat_pct": 28.532,
+          "bull_drag_pct": 0.0
+        },
+        "BH_5050": {
+          "n_days": 4075,
+          "years": 16.2,
+          "cagr_pct": 12.407,
+          "ann_vol_pct": 13.5,
+          "sharpe": 0.6378,
+          "sortino": 0.8524,
+          "calmar": 0.5914,
+          "mdd_pct": -20.981,
+          "worst_month_pct": -13.354,
+          "best_month_pct": 12.908,
+          "avg_turnover_annual_pct": 0.0,
+          "tc_annual_pct": 0.0,
+          "days_in_deep_dd_pct": 41.89,
+          "crra_ce": {
+            "gamma_2": 11.386,
+            "gamma_5": 8.361,
+            "gamma_10": 3.436,
+            "gamma_20": -6.115
+          },
+          "bull_year_count": 8,
+          "bull_avg_ret_bh100_pct": 28.532,
+          "bull_avg_ret_strat_pct": 26.101,
+          "bull_drag_pct": -2.43
+        },
+        "12/VIX": {
+          "n_days": 4074,
+          "years": 16.2,
+          "cagr_pct": 9.4,
+          "ann_vol_pct": 8.214,
+          "sharpe": 0.648,
+          "sortino": 0.9155,
+          "calmar": 0.5766,
+          "mdd_pct": -16.3,
+          "worst_month_pct": -5.466,
+          "best_month_pct": 9.521,
+          "avg_turnover_annual_pct": 918.21,
+          "tc_annual_pct": 0.4591,
+          "days_in_deep_dd_pct": 21.77,
+          "crra_ce": {
+            "gamma_2": 9.03,
+            "gamma_5": 7.927,
+            "gamma_10": 6.098,
+            "gamma_20": 2.47
+          },
+          "bull_year_count": 8,
+          "bull_avg_ret_bh100_pct": 28.532,
+          "bull_avg_ret_strat_pct": 18.599,
+          "bull_drag_pct": -9.932
+        },
+        "EWMA_VT": {
+          "n_days": 4074,
+          "years": 16.2,
+          "cagr_pct": 9.447,
+          "ann_vol_pct": 10.53,
+          "sharpe": 0.5303,
+          "sortino": 0.7443,
+          "calmar": 0.3947,
+          "mdd_pct": -23.934,
+          "worst_month_pct": -7.576,
+          "best_month_pct": 10.539,
+          "avg_turnover_annual_pct": 744.025,
+          "tc_annual_pct": 0.372,
+          "days_in_deep_dd_pct": 46.42,
+          "crra_ce": {
+            "gamma_2": 8.84,
+            "gamma_5": 7.031,
+            "gamma_10": 4.055,
+            "gamma_20": -1.784
+          },
+          "bull_year_count": 8,
+          "bull_avg_ret_bh100_pct": 28.532,
+          "bull_avg_ret_strat_pct": 22.325,
+          "bull_drag_pct": -6.206
+        }
+      },
+      "cost_benefit": {
+        "12/VIX": {
+          "return_drag_pct": 3.007,
+          "tc_annual_pct": 0.4591,
+          "total_annual_cost_pct": 3.466,
+          "mdd_reduction_pp": -4.681,
+          "mdd_reduction_ratio": 0.7769,
+          "worst_month_improvement_pp": -7.888,
+          "dd_time_reduction_pp": 20.12,
+          "cost_per_pct_mdd_reduction": 0.6424,
+          "breakeven_gamma": 10
+        },
+        "EWMA_VT": {
+          "return_drag_pct": 2.96,
+          "tc_annual_pct": 0.372,
+          "total_annual_cost_pct": 3.332,
+          "mdd_reduction_pp": 2.953,
+          "mdd_reduction_ratio": 1.1407,
+          "worst_month_improvement_pp": -5.778,
+          "dd_time_reduction_pp": -4.53,
+          "cost_per_pct_mdd_reduction": 1.0024,
+          "breakeven_gamma": 10
+        },
+        "diversification_5050": {
+          "return_drag_pct": 1.406,
+          "mdd_reduction_pp": -12.036,
+          "cost_per_pct_mdd_reduction": 0.1168,
+          "breakeven_gamma": 2
+        }
+      }
+    }
+  },
+  "cross_asset_summary": {
+    "avg_return_drag_12vix": 4.802,
+    "avg_return_drag_ewma": 2.792,
+    "avg_return_drag_diversification": -0.506,
+    "avg_cost_per_mdd_12vix": 0.5487,
+    "avg_cost_per_mdd_ewma": 0.424,
+    "avg_cost_per_mdd_diversification": -0.01
+  },
+  "decision_guide": {
+    "median_breakeven_gamma_12vix": 10,
+    "median_breakeven_gamma_ewma": 5,
+    "recommendations": {
+      "high_risk_tolerance": "BH 100% equity \u2014 no insurance needed, gamma < 2",
+      "moderate_risk_tolerance": "BH 50/50 diversification \u2014 cheapest insurance, gamma 2-5",
+      "low_risk_tolerance": "12/VIX VT on 50/50 \u2014 active insurance, gamma 5-10",
+      "very_low_risk_tolerance": "EWMA VT on 50/50 \u2014 maximum protection, gamma > 10"
+    }
+  },
+  "runtime_seconds": 2.7,
+  "conclusions": [
+    "12/VIX costs +4.80%/yr return drag (avg across 5 assets)",
+    "EWMA VT costs +2.79%/yr return drag (avg across assets)",
+    "Cost per 1pp MDD reduction: 12/VIX=0.549, EWMA=0.424 \u2192 EWMA VT more cost-efficient",
+    "Break-even gamma: 12/VIX=10, EWMA=5 \u2014 investors with gamma>=5 should use VT",
+    "Simple 50/50 diversification: -0.51%/yr drag, cost per 1pp MDD = -0.010 \u2014 cheapest form of insurance"
+  ]
+}
