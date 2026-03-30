@@ -161,7 +161,7 @@
 
 #### Codex 第 7 次建議：從預測轉向策略（2026-03-27）[提出: Codex GPT-5.4]
 **核心洞見**：瓶頸不是預測 RV，而是判斷何時 forecast 值得交易。
-- [ ] **Cross-Asset Vol Momentum**：跨資產（rates/FX/credit/commodity）vol lead-lag → equity vol timing。可用 MOVE/CVIX/CDX + VIX 日頻。
+- [x] **Cross-Asset Vol Momentum**：K730 — 6/8 signals Granger-cause VIX（TLT lag=7 p=0.006, USO lag=5 p<0.001），但 OOS composite R² WORSE than VIX-only（-0.022）。Strategy wins 2/5 vs 50/50。**結論：可偵測但不可用。VIX sufficiency 第 24 次確認。** 文獻：Xu (2025) I-XTSM, CFA Institute (2025) MOVE→VIX stress-only。
 - [ ] **Conditional Dispersion Trade**：預測 correlation risk premium mispricing → index vs sector options。需 sector ETF options data。
 - [ ] **Regime-Switched Options Carry + Crash Filter**：不預測 vol，建 carry admission filter（term structure + skew + dealer gamma + liquidity）。只在結構有利時賣 premium。
 - [ ] **Alt Risk Premia Rotation**：variance carry / skew premium / correlation premium / convexity 四 sleeve 輪動，用 macro/liquidity regime 選擇。

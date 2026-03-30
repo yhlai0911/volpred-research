@@ -618,8 +618,8 @@ def ops_paper_list() -> None:
 
 @ops.command("paper-upsert")
 @click.option("--paper-id", required=True, help="Stable paper id")
-@click.option("--title", required=True, help="Paper title")
-@click.option("--authors", required=True, help="Authors string")
+@click.option("--title", default=None, help="Paper title (omit to keep existing)")
+@click.option("--authors", default=None, help="Authors string (omit to keep existing)")
 @click.option("--abstract", default=None, help="Abstract")
 @click.option("--status", default="working", show_default=True, help="Paper status")
 @click.option("--target-journal", default=None, help="Target journal")
@@ -650,22 +650,35 @@ def ops_paper_upsert(
     """Upsert a paper row in the DB-driven papers table."""
     from volpred.ops import upsert_paper_metadata
 
-    paper = upsert_paper_metadata(
-        paper_id=paper_id,
-        title=title,
-        authors=authors,
-        abstract=abstract,
-        status=status,
-        target_journal=target_journal,
-        pdf_url=pdf_url,
-        pages=_parse_optional_number(pages),
-        figures=_parse_optional_number(figures),
-        tables=_parse_optional_number(tables),
-        citations=_parse_optional_number(citations),
-        score=_parse_optional_float(score),
-        tags=_parse_tags(tags),
-        display_order=int(display_order),
-    )
+    # Only pass explicitly provided fields to enable merge mode
+    kwargs: dict = {"paper_id": paper_id}
+    if title is not None:
+        kwargs["title"] = title
+    if authors is not None:
+        kwargs["authors"] = authors
+    if abstract is not None:
+        kwargs["abstract"] = abstract
+    if status != "working":  # only override if explicitly changed
+        kwargs["status"] = status
+    if target_journal is not None:
+        kwargs["target_journal"] = target_journal
+    if pdf_url is not None:
+        kwargs["pdf_url"] = pdf_url
+    if pages is not None:
+        kwargs["pages"] = _parse_optional_number(pages)
+    if figures is not None:
+        kwargs["figures"] = _parse_optional_number(figures)
+    if tables is not None:
+        kwargs["tables"] = _parse_optional_number(tables)
+    if citations is not None:
+        kwargs["citations"] = _parse_optional_number(citations)
+    if score is not None:
+        kwargs["score"] = _parse_optional_float(score)
+    if tags is not None:
+        kwargs["tags"] = _parse_tags(tags)
+    if display_order != "0":  # only override if explicitly changed
+        kwargs["display_order"] = int(display_order)
+    paper = upsert_paper_metadata(**kwargs)
     console.print(f"[green]Upserted paper[/green] {paper_id}")
     _print_json({"action": "paper_upsert", "item": paper})
 

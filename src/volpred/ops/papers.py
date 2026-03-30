@@ -69,50 +69,63 @@ def get_paper(paper_id: str) -> dict[str, Any] | None:
     return _normalize_paper(rows[0])
 
 
+_SENTINEL = object()  # distinguishes "not provided" from explicit None
+
+
 def upsert_paper_metadata(
     *,
     paper_id: str,
-    title: str,
-    authors: str,
-    abstract: str | None = None,
-    status: str = "working",
-    target_journal: str | None = None,
-    pdf_url: str | None = None,
-    pages: int | None = None,
-    figures: int | None = None,
-    tables: int | None = None,
-    citations: int | None = None,
-    score: float | None = None,
-    tags: list[str] | None = None,
-    display_order: int = 0,
-    storage_bucket: str | None = None,
-    storage_path: str | None = None,
+    title: str | None = _SENTINEL,
+    authors: str | None = _SENTINEL,
+    abstract: str | None = _SENTINEL,
+    status: str | None = _SENTINEL,
+    target_journal: str | None = _SENTINEL,
+    pdf_url: str | None = _SENTINEL,
+    pages: int | None = _SENTINEL,
+    figures: int | None = _SENTINEL,
+    tables: int | None = _SENTINEL,
+    citations: int | None = _SENTINEL,
+    score: float | None = _SENTINEL,
+    tags: list[str] | None = _SENTINEL,
+    display_order: int | None = _SENTINEL,
+    storage_bucket: str | None = _SENTINEL,
+    storage_path: str | None = _SENTINEL,
 ) -> dict[str, Any]:
+    # Merge mode: read existing paper first, only overwrite provided fields
+    existing = get_paper(paper_id.strip()) or {}
+
+    def _pick(new_val, field_name, *, strip=False):
+        """Return new_val if explicitly provided, else keep existing."""
+        if new_val is _SENTINEL:
+            return existing.get(field_name)
+        if strip and isinstance(new_val, str):
+            return new_val.strip() or None
+        return new_val
+
     payload = {
         "id": paper_id.strip(),
-        "title": title.strip(),
-        "authors": authors.strip(),
-        "abstract": abstract.strip() if isinstance(abstract, str) and abstract.strip() else None,
-        "status": status.strip() if isinstance(status, str) and status.strip() else "working",
-        "target_journal": target_journal.strip()
-        if isinstance(target_journal, str) and target_journal.strip()
-        else None,
-        "pdf_url": pdf_url.strip() if isinstance(pdf_url, str) and pdf_url.strip() else None,
-        "pages": pages,
-        "figures": figures,
-        "tables": tables,
-        "citations": citations,
-        "score": score,
-        "tags": [str(tag).strip() for tag in (tags or []) if str(tag).strip()],
-        "display_order": int(display_order or 0),
-        "storage_bucket": storage_bucket.strip()
-        if isinstance(storage_bucket, str) and storage_bucket.strip()
-        else None,
-        "storage_path": storage_path.strip()
-        if isinstance(storage_path, str) and storage_path.strip()
-        else None,
+        "title": _pick(title, "title", strip=True) or paper_id,
+        "authors": _pick(authors, "authors", strip=True) or "",
+        "abstract": _pick(abstract, "abstract", strip=True),
+        "status": _pick(status, "status", strip=True) or "working",
+        "target_journal": _pick(target_journal, "target_journal", strip=True),
+        "pdf_url": _pick(pdf_url, "pdf_url", strip=True),
+        "pages": _pick(pages, "pages"),
+        "figures": _pick(figures, "figures"),
+        "tables": _pick(tables, "tables"),
+        "citations": _pick(citations, "citations"),
+        "score": _pick(score, "score"),
+        "display_order": int(_pick(display_order, "display_order") or 0),
+        "storage_bucket": _pick(storage_bucket, "storage_bucket", strip=True),
+        "storage_path": _pick(storage_path, "storage_path", strip=True),
         "updated_at": _utc_now(),
     }
+    # Tags: only overwrite if explicitly provided
+    if tags is not _SENTINEL:
+        payload["tags"] = [str(tag).strip() for tag in (tags or []) if str(tag).strip()]
+    else:
+        payload["tags"] = existing.get("tags") or []
+
     if not _post("papers", payload):
         raise RuntimeError(f"Failed to upsert paper metadata: {paper_id}")
     paper = get_paper(payload["id"])

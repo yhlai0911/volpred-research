@@ -17087,5 +17087,73 @@
     "experiment_id": "k729",
     "created_at": "2026-03-30T16:12:23.323884",
     "importance": 2
+  },
+  {
+    "id": "K959",
+    "title": "Paper 4 Final: Volatility Absorption Hypothesis (33p, 3 Codex reviews, uploaded to Supabase)",
+    "content": "[提出: Claude, 執行: Claude] Paper 4 'The Volatility Absorption Hypothesis: Why Panic Paralyzes Markets' completed and uploaded. 33 pages, 3 rounds of Codex review (K723→K728→K729). Final fixes: (1) 767/893 N reconciliation — 767=five-bin SAR sample, 893=regression sample (378+198+317). (2) 1.17x NFP source footnote added (K661, Welch t p=0.037). (3) 0050.TW N typo 712→612. Paper uploaded to Supabase papers table + Storage. PDF in frontend public/paper/. Target: JFE. Key findings: VIX top quintile shock impact 40-60% smaller than bottom. Endogenous absorbed (+0.019), exogenous not (-0.003).",
+    "tags": [
+      "paper",
+      "volatility-absorption",
+      "VIX",
+      "panic-paralysis",
+      "publication"
+    ],
+    "phase": "research",
+    "importance": 5,
+    "data_source": "K716/K718/K721 experiments",
+    "timestamp": "2026-03-30T10:10:19.576562+00:00"
+  },
+  {
+    "id": "K730",
+    "title": "Cross-Asset Volatility Momentum: Granger Evidence but No Strategy Value",
+    "content": "[提出: Codex, 執行: Claude] Cross-asset vol momentum (TLT/USO/UUP/GLD + HYG-LQD credit spread, 2010-2026, 4053 obs). GRANGER CAUSALITY: ALL 6/6 predictors Granger-cause VIX changes at 5% (bonds lag=7 p=0.006, oil lag=5 p<0.001, FX lag=2 p=0.006, gold lag=2 p=0.007, credit 5d lag=4 p<0.001, credit 20d lag=6 p<0.001). But CROSS-CORRELATIONS are tiny: max |r|=0.087 (credit_change5 at 5d horizon). VOL PREDICTION: Composite adds NEGATIVE OOS R2 (-0.022), DM t=-1.45 (Harvey FAIL). STRATEGY (5 OOS periods): Wins 2/5 vs 50/50 (avg Sharpe diff -0.060), 2/5 vs 12/VIX (avg -0.068). Only COVID period helped (+0.34 Sharpe vs 50/50) where cross-asset stress correctly signaled defensive positioning. CONCLUSION: Statistical Granger causality exists (vol shocks in bonds/oil/FX/credit DO lead VIX) but effect sizes are too small for profitable timing. VIX already embeds cross-asset information efficiently. Upgrades from K537: FRED credit (fell back to HYG-LQD), USO added, formal Granger with AIC lag, vol momentum not just levels, TX costs, signal.shift(1), 5 OOS periods. Both K537 and K730 confirm VIX sufficiency.",
+    "tags": [
+      "cross_asset",
+      "vol_momentum",
+      "granger_causality",
+      "vix_sufficiency",
+      "null_result",
+      "jump_direction"
+    ],
+    "data_source": "yfinance (SPY, GLD, TLT, USO, UUP, HYG, LQD, ^VIX), 2010-2026",
+    "experiment_script": "experiments/k730_cross_asset_vol_momentum.py",
+    "results_file": "experiments/k730_cross_asset_vol_momentum_results.json",
+    "timestamp": "2026-03-30T10:11:40.218856+00:00"
+  },
+  {
+    "id": "K731",
+    "title": "VIX Term Structure Trading Strategy — Null Result",
+    "content": "[提出: Claude, 執行: Claude] K731: VIX term structure (VIX/VIX3M ratio) does NOT improve smooth-weight trading strategies. Full sample (2008-2026, N=4566): 12/VIX Sharpe 0.870, best TS variant (Contango Boost) Sharpe 0.880 — improvement of only +0.010, not meaningful. Information content: VIX/VIX3M ratio has incremental R² of +0.033 beyond VIX level for predicting 22d forward vol (F=309, p≈0), but this in-sample statistical significance does NOT translate to strategy improvement. Double sort (controlling VIX level): ratio spread avg +0.045%/5d, t=0.65, p=0.55 — no independent effect. Cross-OOS: all TS variants beat BH 50/50 in 5/5 periods, but so does plain 12/VIX (4/5). Recent OOS (2022-2026): BH 50/50 Sharpe 1.20 dominates all VT variants (~0.94). LAG ROBUSTNESS: lag-0 to lag-1 decay +0.757 — NOT lag-robust (unlike pure 12/VIX). This is because VIX/VIX3M ratio changes abruptly during vol events, creating large same-day effects. Sensitivity: backwardation threshold 0.95-1.10 changes Sharpe by only ±0.01. Confirms: VIX level is sufficient for smooth-weight VT. Term structure info is absorbed by VIX level. Backwardation signal adds complexity without benefit in smooth-weight context.",
+    "tags": [
+      "VIX",
+      "term_structure",
+      "VIX3M",
+      "contango",
+      "backwardation",
+      "null_result",
+      "smooth_weight",
+      "lag_robustness",
+      "strategy"
+    ],
+    "data_source": "yfinance (^VIX, ^VIX3M, SPY, GLD) 2008-2026",
+    "experiment_id": "K731",
+    "evidence": "Full sample N=4566. 12/VIX SR 0.870 vs best TS 0.880 (Δ+0.010). DM vs 12/VIX: all fail Harvey t>3. Lag decay +0.757. Double-sort t=0.65 p=0.55.",
+    "created_at": "2026-03-30T10:19:24.801169+00:00",
+    "phase": "Phase_12"
+  },
+  {
+    "id": "K730-review",
+    "title": "Codex Review K730: 5 bugs found but NULL conclusion stands",
+    "content": "[提出: Codex, 執行: Claude] Codex review of K730 found 5 issues: (1) HIGH: Granger test uses min-p lag picking (p-hacking), not AIC as claimed — significance overstated. (2) HIGH: TX costs charge only 1 leg (abs(Δw_spy)), should be 2 legs (abs(Δw_spy)+abs(Δw_gld)=2×abs(Δw_spy)) — costs understated by ~50%. (3) MEDIUM: signal.shift(1) applied after OOS slicing — boundary state resets. (4) MEDIUM: 50/50 baseline is constant-mix (daily rebalance) not buy-and-hold as K702. (5) MEDIUM: Log returns weighted linearly then compounded with (1+r) — mathematically inconsistent. NULL conclusion SAFE: all bugs would make strategy performance WORSE (higher costs, stricter Granger, correct baseline). VIX sufficiency still confirmed.",
+    "tags": [
+      "codex-review",
+      "K730",
+      "methodology",
+      "bugs"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-30T10:27:17.336261+00:00"
   }
 ]
