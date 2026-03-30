@@ -17626,5 +17626,31 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-30T12:31:53.577216+00:00"
+  },
+  {
+    "id": "K744",
+    "experiment_id": "K744",
+    "title": "K744: 5-Min RV Data Validation — AC(1)=0.423 confirms daily proxy ceiling, U-shape moderate",
+    "content": "[提出: Claude, 執行: Claude] K744: DATA VALIDATION of 51 days SPY 5-min data (2026-01-14 to 2026-03-27). Part A: Data quality good — mean 76 bars/day, only 3/51 flagged (2 partial days + 1 gap). Part B: CRITICAL FINDING — RV AC(1)=0.423 vs daily r² AC(1)=0.076, confirming K196 (0.414 vs -0.118). Daily proxies are poor: |r| Spearman ρ=0.196, r² Spearman ρ=0.196, GARCH σ² Spearman ρ=0.107 — all insignificant (p>0.2). Mean r²/RV ratio=1.83 (overestimates) but median=0.80 (high variance). Part C: U-shape present but moderate (ratio=1.258). First 30 min = 19.6% of daily RV, last 30 min = 6.5%, combined 26%. First-vs-middle t=13.1 (p<0.001), last-vs-middle not significant (p=0.066). HAR-RV pilot feasible with 51 days but estimation window tight. KEY INSIGHT: The 5.6x AC(1) gap (0.423 vs 0.076) is the fundamental reason GARCH has a ceiling on daily data — RV is much more predictable than daily squared returns.",
+    "evidence": [
+      "AC(1) RV_5min = 0.423 vs AC(1) r² = 0.076 (5.6x gap)",
+      "Proxy correlations: |r| ρ=0.196, r² ρ=0.196, GARCH σ² ρ=0.107 — all insignificant",
+      "Mean annualized vol from RV: 11.1%",
+      "U-shape ratio 1.258, first 30 min = 19.6% of daily RV",
+      "3/51 days flagged (94% clean data)"
+    ],
+    "confidence": 0.9,
+    "tags": [
+      "realized_volatility",
+      "data_validation",
+      "intraday",
+      "5min",
+      "HAR-RV",
+      "proxy_comparison",
+      "SPY",
+      "methodology"
+    ],
+    "data_source": "yfinance 5-min bars (SPY, 51 days)",
+    "created_at": "2026-03-30T12:40:25.201433+00:00"
   }
 ]
