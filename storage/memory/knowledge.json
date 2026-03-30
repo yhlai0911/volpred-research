@@ -17175,5 +17175,73 @@
     "data_period": "2011-2026",
     "created_at": "2026-03-30T10:32:20Z",
     "category": "research"
+  },
+  {
+    "id": "K731-review",
+    "title": "Codex Review K731: TX cost 1-leg bug (same as K730), OOS benchmark switch",
+    "content": "[提出: Codex, 執行: Claude] Codex K731 review: (1) HIGH: TX costs charge only 1 leg — recurring pattern from K730. Both-leg convention is standard per K704. (2) MEDIUM: OOS benchmark switches from 12/VIX (Part 2) to BH 50/50 (Part 3). (3) MEDIUM: DM test uses squared returns not return difference. (4) LOW: OOS min 252d not enforced (uses 100d threshold). Positives: signal.shift(1) correct, no lookahead, simple returns consistent. NULL conclusion SAFE. PATTERN: TX cost 1-leg bug appeared in K730 AND K731 — future experiment templates must use sum(abs(Δw)) across ALL assets.",
+    "tags": [
+      "codex-review",
+      "K731",
+      "methodology",
+      "TX-cost-pattern"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-30T10:34:30.874272+00:00"
+  },
+  {
+    "item_id": "141ce2e8",
+    "category": "strategy_rebalancing",
+    "content": "[提出: Claude, 執行: Claude] K733: Regime-Dependent Rebalancing Frequency — NULL RESULT confirmed. Adaptive rebalancing (daily in high-vol, monthly in low-vol) does NOT improve over fixed monthly. 12/VIX SPY/GLD results (2006-2026, 5029 days, 5 bps TX): Fixed Monthly Sharpe 0.8917 (BEST), Daily 0.8180, Weekly 0.8510, Quarterly 0.7724, Adaptive v1 (D>25/W>15/M≤15) 0.8318, Adaptive v2 (D>30/M) 0.8358. Key findings: (1) Monthly best net Sharpe because TX drag is minimal (13 bps/yr vs Daily 86 bps/yr). (2) Gross Sharpe nearly identical (0.885-0.901) across all except Quarterly (0.777) — the difference is mostly TX. (3) DM test: Daily/Weekly/Quarterly/Adaptive v1 all statistically DIFFERENT from Monthly (p<0.001), but WORSE. (4) Cross-OOS: Monthly wins 3-4/5 periods. Adaptive v1 wins only 1/5. (5) Regime-conditional: In high-vol (VIX>25), Daily Sharpe -1.17 vs Monthly -1.16 — negligible difference. In low-vol, all VT strategies similar (~4.2 Sharpe). (6) BH 50/50 Sharpe 0.8084 — VT beats BH mainly via low-vol periods. Conclusion: Monthly rebalancing is optimal regardless of VIX regime. 12/VIX weight is already smooth enough that daily adjustment adds only TX cost without improving timing.",
+    "tags": [
+      "rebalancing",
+      "regime_dependent",
+      "VIX",
+      "12/VIX",
+      "null_result",
+      "TX_cost",
+      "adaptive",
+      "SPY",
+      "GLD",
+      "cross_OOS"
+    ],
+    "experiment_id": "K733",
+    "title": "K733: Regime-Dependent Rebalancing Frequency (NULL RESULT)",
+    "data_source": "yfinance (SPY, GLD, ^VIX, 2006-2026)",
+    "created_at": "2026-03-30T10:36:37.236616+00:00",
+    "experiment_files": [
+      "experiments/k733_regime_rebalancing.py",
+      "experiments/k733_regime_rebalancing_results.json"
+    ]
+  },
+  {
+    "id": "K732-review",
+    "title": "Codex Review K732: IS/OOS split not enforced, drift-rebalance TX missing",
+    "content": "[提出: Codex, 執行: Claude] K732 review: (1) IS/OOS split defined but loop forecasts from min_train over full sample — many 'OOS' points are actually IS. (2) TX only charges target weight changes, not drift-rebalance. (3) BH 50/50 is daily constant-mix with zero TX (not fair). Positives: shift(1) correct, simple returns, no lookahead. NULL conclusion safe — all bugs favor the strategy, fixing them would make results worse.",
+    "tags": [
+      "codex-review",
+      "K732",
+      "methodology"
+    ],
+    "phase": "research",
+    "importance": 2,
+    "timestamp": "2026-03-30T10:37:56.184540+00:00"
+  },
+  {
+    "id": "K733",
+    "title": "Regime-Dependent Rebalancing: Monthly wins regardless of VIX regime",
+    "content": "[提出: Claude, 執行: Claude] K733 tested adaptive rebalancing (daily in high-vol, monthly in low-vol) vs fixed frequencies. Data: SPY+GLD+VIX, 2006-2026, 5029 days. Monthly Net Sharpe 0.892 > Weekly 0.851 > Adaptive v2 0.836 > Adaptive v1 0.832 > Daily 0.818. Monthly TX drag only 13 bps/yr vs Daily 86 bps. DM tests: Daily/Weekly/Quarterly/Adaptive all significantly worse than Monthly (p<0.001). Cross-OOS: Monthly wins 3-4/5 periods. In high-vol (VIX>25), daily Sharpe -1.17 ≈ monthly -1.16 — no benefit from faster rebalancing in crises. Conclusion: 12/VIX is inherently smooth, monthly rebalancing is robust regardless of regime.",
+    "tags": [
+      "rebalancing",
+      "regime-dependent",
+      "execution",
+      "TX-cost",
+      "monthly-optimal"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "data_source": "yfinance (SPY/GLD/VIX), 2006-2026",
+    "timestamp": "2026-03-30T10:37:56.185211+00:00"
   }
 ]

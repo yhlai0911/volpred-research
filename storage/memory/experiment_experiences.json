@@ -415,5 +415,16 @@
       "verify_data"
     ],
     "created_at": "2026-03-28T11:35:50.990233+00:00"
+  },
+  {
+    "id": "E32",
+    "title": "TX Cost Must Use Both Legs: sum(abs(Δw)) Across All Assets",
+    "content": "K730 and K731 both had the same bug: TX cost only charged abs(Δw_spy) instead of abs(Δw_spy)+abs(Δw_gld). In a 2-asset portfolio where w_gld=1-w_spy, the total turnover is 2×abs(Δw_spy). This understates costs by ~50%. The correct convention (per K704) is: tx_cost = sum(abs(Δw_i) for all assets i) × TX_COST_BPS / 10000. Also: the first trade (entry) has NaN diff and gets zero cost — should initialize prev_w = initial weights. TEMPLATE FIX: all future experiments must use evaluate_new_strategy.py (which has correct TX) or explicitly compute both-leg turnover.",
+    "source_experiments": [
+      "K730",
+      "K731"
+    ],
+    "lesson_type": "recurring_bug",
+    "timestamp": "2026-03-30T10:34:50.103355+00:00"
   }
 ]
