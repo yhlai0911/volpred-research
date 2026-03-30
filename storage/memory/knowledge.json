@@ -16975,5 +16975,21 @@
     "experiment_id": "k722",
     "created_at": "2026-03-30T11:58:41.808889",
     "importance": 2
+  },
+  {
+    "id": "K723",
+    "title": "K723: Codex Review Paper 4 — 3 major issues (sign convention, data mismatch, NFP overstatement)",
+    "content": "[提出: Codex 審查, 執行: Codex] Paper 4 Volatility Absorption 審查。(1)Absorption sign convention 反：正值應=更大衝擊但論文解讀為更吸收。(2)SAR 數字跟 K716 不匹配——K716 有 5 bin 不是 3，且不嚴格單調。(3)NFP 過度宣稱——K661 VIX<15 p=0.069, K528 p=0.128，不能說 fully consistent。(4)NSI 方法論：VIX 同時在分母和 regressor → 機械性相關。需要：fix sign convention, regenerate tables from experiments, rewrite NFP/limitations cautiously.",
+    "tags": [
+      "Codex-review",
+      "paper-4",
+      "sign-convention",
+      "NFP-overstatement",
+      "methodology"
+    ],
+    "data_source": "Codex review of paper/volatility-absorption/main.tex",
+    "experiment_id": "k723",
+    "created_at": "2026-03-30T11:59:16.180817",
+    "importance": 3
   }
 ]
