@@ -17243,5 +17243,26 @@
     "importance": 3,
     "data_source": "yfinance (SPY/GLD/VIX), 2006-2026",
     "timestamp": "2026-03-30T10:37:56.185211+00:00"
+  },
+  {
+    "item_id": "k734_vrp_trading",
+    "category": "trading_strategy",
+    "title": "K734: VRP Trading Signal — Comprehensive test confirms VRP NOT tradeable beyond 12/VIX",
+    "content": "[提出: Claude, 執行: Claude] VRP = VIX - 22d Realized Vol. Part A: VRP mean=+3.50%, 85% positive, highly autocorrelated (lag1=0.93). By regime: Low VIX VRP=+3.2%, High VIX VRP=+4.4%, Extreme VIX VRP=+0.3% (narrows). Part B: VRP predicts returns at 1d (t=3.51), 5d (t=2.79), 22d (t=2.23) but R²<0.3%. Partial corr controlling VIX = 0.054 (p=0.0001) — statistically significant but economically trivial. VRP Q5 fwd 22d ann=22.7% vs Q1=14.0% — monotonic but small. VRP<0 contrarian analysis: NOT significant (t=-1.41, p=0.16), contradicts K539 magnitude. Part C: 3 VRP strategies (Timing/Percentile/Momentum) all Sharpe 0.74-0.80 vs 12/VIX 0.81 — ALL worse. DM test all p>0.83 (massively insignificant). Cross-OOS: 1-2/5 wins vs BH. VRP strategies have 30-70% MORE turnover than 12/VIX → higher TX drag. Key insight: R²(VRP~VIX)=3.3% — VRP is 97% orthogonal to VIX, but the orthogonal part has zero trading value. Confirms K430/K440/K539/K720. 數據來源: yfinance SPY/GLD/VIX 2006-2026.",
+    "tags": [
+      "VRP",
+      "trading_strategy",
+      "null_result",
+      "VIX",
+      "SPY",
+      "cross_oos"
+    ],
+    "data_source": "yfinance (SPY, GLD, ^VIX), 2006-2026",
+    "experiment_script": "experiments/k734_vrp_trading.py",
+    "evidence": [
+      "k734_vrp_trading"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-03-30T18:40:49.474966"
   }
 ]
