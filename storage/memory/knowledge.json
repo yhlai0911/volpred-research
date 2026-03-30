@@ -16913,8 +16913,8 @@
   },
   {
     "id": "K719",
-    "title": "K719: ★★★★ Volatility Absorption — 5 economic implications, VRP flips negative at VIX>25",
-    "content": "[提出: 用戶要求經濟意涵, 執行: Claude] 5 大 implications: (1)Options: VIX>25 VRP=-3.1%（選擇權被低估！）vs VIX<15 VRP=+4.6%。(2)Hedging: 高 VIX 避險 payoff ratio 13.7x→3.6x（性價比大降）。(3)Rebalance: 所有 regime value≈0。(4)Crisis: VIX>30 fwd 5d=-1.55% 20d=-6.16%（危機初期不是買點）。(5)Strategy: 12/VIX 自然處理麻痺（exposure∝1/VIX），K649 額外 overlay 有害。論文框架：Paralysis → VRP sign flip → hedging cost-benefit → strategy design → crisis timing。",
+    "title": "K719: ⚠️ VRP sign flip PARTIALLY WRONG — VRP narrows but stays positive with rolling RV22",
+    "content": "[提出: 用戶要求經濟意涵, 執行: Claude] 5 大 implications: (1)Options: VIX>25 VRP=-3.1%（選擇權被低估！）vs VIX<15 VRP=+4.6%。(2)Hedging: 高 VIX 避險 payoff ratio 13.7x→3.6x（性價比大降）。(3)Rebalance: 所有 regime value≈0。(4)Crisis: VIX>30 fwd 5d=-1.55% 20d=-6.16%（危機初期不是買點）。(5)Strategy: 12/VIX 自然處理麻痺（exposure∝1/VIX），K649 額外 overlay 有害。論文框架：Paralysis → VRP sign flip → hedging cost-benefit → strategy design → crisis timing。 ⚠️ K720 修正：用 rolling 22d RV 計算 VRP 在所有 quintile 都是正的（Q5 +2.8%），只是收窄不是翻負。K719 用 cross-sectional RV 導致偏差。",
     "tags": [
       "volatility-absorption",
       "VRP",
@@ -16926,6 +16926,22 @@
     "data_source": "yfinance SPY/GLD/VIX 2006-2026",
     "experiment_id": "k719",
     "created_at": "2026-03-30T11:13:31.777870",
-    "importance": 4
+    "importance": 2
+  },
+  {
+    "id": "K720",
+    "title": "K720: ★★ VRP Correction — narrows at high VIX (+2.8%) but stays POSITIVE, not tradeable",
+    "content": "[提出: K719 驗證, 執行: Claude] VRP = VIX - rolling 22d RV。Q1(VIX 11.9) VRP=+3.5%, Q5(VIX 32.7) VRP=+2.8%——收窄但不翻負。所有 sub-period VIX>25 VRP 都正。VRP 作為交易信號 corr=0.028 不能預測方向。VRP<0 fwd 20d +1.02%(t=4.90) vs VRP>0 +0.94%(t=14.28)——差異微小。修正 K719 的過度宣稱。結論：恐慌麻痺在 impact ratio 成立（K716/K718），但 VRP sign flip 不成立。論文只用 impact ratio 不用 VRP。",
+    "tags": [
+      "VRP",
+      "correction",
+      "rolling-RV",
+      "not-tradeable",
+      "self-correction"
+    ],
+    "data_source": "yfinance SPY/VIX 2006-2026",
+    "experiment_id": "k720",
+    "created_at": "2026-03-30T11:21:36.405357",
+    "importance": 3
   }
 ]
