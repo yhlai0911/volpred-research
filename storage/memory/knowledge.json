@@ -17813,5 +17813,40 @@
     "results_file": "experiments/k751_overnight_vix_news_results.json",
     "created_at": "2026-03-30T23:09:25.441241",
     "category": "alternative_data"
+  },
+  {
+    "id": "K752",
+    "title": "K752: ★★★ VIX Sufficiency Era Stability — TIME-INVARIANT across 33 years (1993-2026)",
+    "content": "[提出: Claude, 執行: Claude] K752: VIX sufficiency era stability test across 5 eras spanning 33 years (1993-2026, 8325 obs). PART B — VIX prediction power: R² ranges 0.24 (low-vol QE era) to 0.64 (post-dot-com), mean 0.45, CV=0.33 — TIME-INVARIANT (CV<0.50). Lowest R²=0.24 in 2012-2020 low-vol era (VIX stuck near 15, less variation). Highest R²=0.64 in 2000-2007 (higher VIX range). Full sample R²=0.51, corr=0.72. All eras highly significant (all t>24). PART C — 12/VIX strategy: wins only 1/5 eras vs 50/50 baseline (only in low-vol QE era where VIX<15 pushed w_SPY>80%). Confirms K687: no VT beats BH 50/50 in Sharpe with correct lag. PART D — Competing signals: GFC era is the ONLY period where all 3 signals add value (overnight VIX t=-3.15, VRP t=-6.51, vol momentum t=7.60). Vol momentum also significant in COVID era (t=9.30). Normal eras: ZERO competing signals pass Harvey t>3.0. IMPLICATION: VIX sufficiency is the norm; crisis periods briefly open a window where additional signals (VRP, vol momentum) add tiny incremental R² (0.4-3.7%), but these are too small and too rare to be tradeable. KEY FINDING: VIX sufficiency is NOT a recent artifact — it holds from the 1993 VIX inception through 2026, across dot-com, GFC, QE, and COVID eras.",
+    "tags": [
+      "vix_sufficiency",
+      "era_stability",
+      "time_invariance",
+      "robustness",
+      "cross_era",
+      "competing_signals",
+      "vrp",
+      "vol_momentum",
+      "paper_5"
+    ],
+    "data_source": "yfinance (^VIX, SPY, GLD, ^TNX), 1993-2026",
+    "experiment_script": "experiments/k752_vix_sufficiency_eras.py",
+    "results_file": "experiments/k752_vix_sufficiency_eras_results.json",
+    "created_at": "2026-03-30T23:39:20",
+    "category": "model_behavior"
+  },
+  {
+    "id": "Paper5-plan",
+    "title": "Paper 5 Plan: 'Can Anything Beat VIX?' — Codex evaluation + journal targets",
+    "content": "[提出: Codex GPT-5.4, 執行: Claude] Paper 5 feasibility confirmed by Codex. Title: 'Can Anything Beat VIX? A Systematic OOS Evaluation of 11 Signal Families'. Journals: J. Forecasting (realistic), Int'l J. Forecasting (ambitious), Finance Research Letters (short). Key requirements: (1) uniform pipeline across all 11 families, (2) benchmark suite = VIX + HAR-RV + GARCH, (3) multiple-testing control (Bonferroni/Romano-Wolf), (4) subsample/regime robustness (K752), (5) replication package. Main reviewer attacks: HARKing, low power, signal not tuned as carefully as benchmark, US-specific. Outline: 9 sections. Need K752 era stability + cross-country validation for strongest version.",
+    "tags": [
+      "paper-5",
+      "VIX-sufficiency",
+      "journal-strategy",
+      "Codex-evaluation"
+    ],
+    "phase": "research",
+    "importance": 5,
+    "timestamp": "2026-03-30T15:39:24.892003+00:00"
   }
 ]
