@@ -69,11 +69,20 @@ def _calc_metrics(returns: list) -> dict:
     cagr = ((1 + np.sum(r)) ** (252 / n) - 1) * 100
     calmar = cagr / abs(mdd) if mdd != 0 else 0
 
+    # Win rate (monthly)
+    monthly_r = []
+    for i in range(0, n, 21):
+        chunk = r[i:i+21]
+        if len(chunk) > 10:
+            monthly_r.append(np.sum(chunk))
+    win_rate = sum(1 for x in monthly_r if x > 0) / len(monthly_r) * 100 if monthly_r else 0
+
     return {
         "sharpe": round(sharpe, 3),
         "mdd": round(mdd, 1),
         "cagr": round(cagr, 1),
         "calmar": round(calmar, 2),
+        "win_rate": round(win_rate, 1),
         "n_days": n,
     }
 
@@ -154,26 +163,43 @@ def simulate_strategy(
 
 
 def compare(new_metrics: dict, existing: dict, new_name: str = "NEW") -> None:
-    """Print comparison table."""
+    """Print comparison table with composite ranking (K717 multi-dimensional)."""
     all_strats = {new_name: new_metrics, **existing}
-    sorted_strats = sorted(all_strats.items(), key=lambda x: x[1].get("sharpe", 0), reverse=True)
 
-    print(f"\n{'Strategy':30s} {'Sharpe':>7} {'CAGR':>7} {'MDD':>7} {'Calmar':>7} {'Days':>5}")
-    print("-" * 70)
+    # Composite score: CAGR + Sharpe + Calmar + win_rate (normalized 0-1, equal weight)
+    for key in ["cagr", "sharpe", "calmar", "win_rate"]:
+        vals = [m.get(key, 0) for m in all_strats.values() if isinstance(m.get(key), (int, float))]
+        if not vals:
+            continue
+        mn, mx = min(vals), max(vals)
+        rng = mx - mn if mx != mn else 1
+        for m in all_strats.values():
+            v = m.get(key)
+            if isinstance(v, (int, float)):
+                m[f"_{key}_n"] = (v - mn) / rng
+
+    for m in all_strats.values():
+        norms = [m.get(f"_{k}_n", 0) for k in ["cagr", "sharpe", "calmar", "win_rate"]]
+        m["composite"] = round(sum(norms) / len(norms), 3) if norms else 0
+
+    sorted_strats = sorted(all_strats.items(), key=lambda x: x[1].get("composite", 0), reverse=True)
+
+    print(f"\n{'Strategy':30s} {'Comp':>5} {'Sharpe':>7} {'CAGR':>7} {'MDD':>7} {'Calmar':>7} {'Win%':>5}")
+    print("-" * 75)
     for name, m in sorted_strats:
         marker = " ◀◀◀" if name == new_name else ""
-        print(f"{name:30s} {m.get('sharpe',0):>7.3f} {m.get('cagr',0):>6.1f}% {m.get('mdd',0):>6.1f}% {m.get('calmar',0):>7.2f} {m.get('n_days',0):>5d}{marker}")
+        print(f"{name:30s} {m.get('composite',0):>5.3f} {m.get('sharpe',0):>7.3f} {m.get('cagr',0):>6.1f}% {m.get('mdd',0):>6.1f}% {m.get('calmar',0):>7.2f} {m.get('win_rate',0):>4.0f}%{marker}")
 
-    # Rank
     rank = next(i for i, (n, _) in enumerate(sorted_strats, 1) if n == new_name)
-    print(f"\n{new_name} ranks #{rank}/{len(sorted_strats)} by Sharpe")
+    total = len(sorted_strats)
+    median_rank = total // 2
 
-    if rank == 1:
-        print("✅ PASSES: New strategy is #1 — proceed to cross-OOS validation")
-    elif rank <= 3:
-        print("⚠️ MARGINAL: Top 3 but not #1 — consider if MDD/Calmar advantage justifies")
+    print(f"\n{new_name} ranks #{rank}/{total} by composite (CAGR+Sharpe+Calmar+WinRate)")
+
+    if rank <= median_rank:
+        print(f"✅ PASSES: Above median (#{median_rank}) — proceed to cross-OOS validation")
     else:
-        print("❌ FAILS: Not competitive with existing strategies — do not list")
+        print(f"❌ FAILS: Below median — not competitive with existing strategies")
 
 
 def run_example():
