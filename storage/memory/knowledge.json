@@ -17586,5 +17586,30 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-30T12:20:39.055211+00:00"
+  },
+  {
+    "item_id": "k743_20260330202542",
+    "category": "behavioral_finance",
+    "content": "[提出: Claude, 執行: Claude] K743 Investor Behavior Under VT — 5 behavioral mistakes simulated on real 12/VIX (SPY/GLD/VIX, 2007-2026, 4839 days). RANKING: (1) FOMO Override most costly (Sharpe -0.294, -58%, terminal -52%, t=3.50 ***Harvey-significant). Going 100% equity after SPY>2% days devastates returns. (2) Anchoring 2nd (Sharpe -0.111, -22%, terminal -19%). Stale 21-day VIX loses responsiveness. (3) Panic Override 3rd (Sharpe -0.071, -14%, terminal -12%). Ironically helps during GFC (+9.8% vs -7.4%) but hurts long-run. NOT stat significant. (4) Loss Aversion 4th (Sharpe -0.055, -11%, terminal -11%). Quitting VT after 3 losing months is mild. (5) SURPRISE: Delayed Rebalance HELPS (+0.092 Sharpe, +18%, terminal +26%, t=-4.59 ***). Lazy >10% threshold rebalancing beats daily — overly frequent rebalancing is a drag. Robust VT: Combined Floor(30%)/Cap(90%)+Smoothing(α=0.3)+Weekly recovers 172% of panic cost (Sharpe 0.572 vs 0.505 perfect). KEY INSIGHT: FOMO, not panic, is the deadliest behavioral mistake. Teaching investors \"don't chase rallies\" has 5x more value than \"don't panic sell\". Lazy investors do BETTER than disciplined daily rebalancers.",
+    "tags": [
+      "behavioral-finance",
+      "investor-behavior",
+      "VT-strategy",
+      "12/VIX",
+      "FOMO",
+      "panic-selling",
+      "rebalancing",
+      "loss-aversion",
+      "anchoring",
+      "robust-VT",
+      "SPY",
+      "GLD"
+    ],
+    "title": "K743: ★★★★ Investor Behavior Under VT — FOMO costliest (-58% Sharpe), lazy rebalancing HELPS (+18%), combined robust VT recovers 172% of panic cost",
+    "timestamp": "2026-03-30T20:25:42.154098",
+    "id": "K743",
+    "data_source": "yfinance (SPY, GLD, ^VIX), 2007-2026",
+    "experiment_file": "experiments/k743_investor_behavior.py",
+    "results_file": "experiments/k743_investor_behavior_results.json"
   }
 ]
