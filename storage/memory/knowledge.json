@@ -17652,5 +17652,25 @@
     ],
     "data_source": "yfinance 5-min bars (SPY, 51 days)",
     "created_at": "2026-03-30T12:40:25.201433+00:00"
+  },
+  {
+    "id": "K745",
+    "experiment_id": "K745",
+    "title": "K745: Pilot HAR-RV with 5-Min Data — HAR-ABS daily proxy beats HAR-RV (N=37, preliminary)",
+    "content": "[提出: Claude, 執行: Claude] K745: PILOT HAR-RV with 51 days SPY 5-min data (2026-01-14 to 2026-03-27, N_OOS=37). PRELIMINARY — below 252-day OOS minimum. Part A: Realized measures computed — mean RV annualized vol 11.1%, jump fraction low (4.8%), AC(1)=0.423, ADF stationary (t=-4.41). Part B: In-sample HAR-RV R²=0.16 (N=41), β_daily=0.385 (t=2.35, only significant coef). Part C: 11 models compared. SURPRISE RESULT: HAR-ABS (daily |r| proxy targeting RV) ranks #1 (QLIKE=0.077, R²=0.41, MZ-R²=0.41), beating HAR-RV (QLIKE=0.109, R²=0.35, MZ-R²=0.39). HAR framework dominates: top 4 are all HAR variants. GJR-GARCH (QLIKE=0.157) and EWMA (0.207) much worse. VIX-implied and Naive-RV worst. Part D: No DM significant except VIX-implied (DM=-6.47). Why daily proxy wins with N=37: (1) HAR-ABS has 51 training points all sharing the same target (RV), while HAR-RV features need 5-22 day rolling → fewer usable rows; (2) Corr(RV_5min, r²_daily) same-day only 0.119 — daily r² is a very noisy proxy, but HAR-ABS learns the mapping from |r| patterns to RV over sufficient training; (3) With longer samples HAR-RV should overtake (literature R²=0.3-0.6 at N=500+). Key: methodology validated — pipeline works end-to-end. Next: 60 days (~April 11) for more stable estimation.",
+    "tags": [
+      "HAR-RV",
+      "realized_volatility",
+      "5-min_data",
+      "high_frequency",
+      "pilot",
+      "SPY",
+      "QLIKE",
+      "daily_proxy",
+      "preliminary"
+    ],
+    "data_source": "yfinance 5-min SPY + daily SPY/VIX",
+    "created_at": "2026-03-30T20:50:00",
+    "category": "model_evaluation"
   }
 ]
