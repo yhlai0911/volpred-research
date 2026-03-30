@@ -17535,5 +17535,20 @@
     "experiment_id": "K741",
     "data_source": "yfinance",
     "created_at": "2026-03-30T19:54:51.504321"
+  },
+  {
+    "id": "K741-review",
+    "title": "Codex Review K741: 2 HIGH (NFP date ID + skip strategy T+1 error), absorption claim supported by K716/K721",
+    "content": "[提出: Codex, 執行: Claude] K741 review: (1) HIGH: NFP date identification wrong for Good Friday/holiday first Fridays — maps to prior Thursday instead of next session. ~5-10 of 195 dates affected. (2) HIGH: Skip-NFP strategy uses shift(1) making it skip T+1 not T — 'avoiding NFP is worse' conclusion unsupported by implementation. (3) MEDIUM: VIX regime comparison not Friday-matched. CORE ABSORPTION FINDING SAFE: independently confirmed by K716/K721. April 3 guidance (HOLD) still valid — it IS a first Friday, VIX~24 is elevated regime.",
+    "tags": [
+      "codex-review",
+      "K741",
+      "HIGH-severity",
+      "NFP",
+      "event-study"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-30T12:00:25.675364+00:00"
   }
 ]
