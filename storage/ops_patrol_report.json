@@ -1,37 +1,41 @@
 {
-  "timestamp": "2026-03-30T06:21:26.769673+00:00",
+  "timestamp": "2026-03-30T12:07:28Z",
   "all_ok": true,
   "checks": [
     {
       "name": "article_pool",
       "status": "ok",
-      "detail": "4 draft articles in pool (total: 630)"
+      "detail": "4 draft articles in pool (total: 636). Threshold: >=3."
     },
     {
       "name": "strategy_metrics_freshness",
       "status": "ok",
-      "detail": "strategy_metrics.json is 4.8 hours old"
+      "detail": "strategy_metrics.json is 10.6 hours old. Threshold: <26 hours."
     },
     {
       "name": "error_log",
       "status": "ok",
-      "detail": "Most recent error log entry: 2026-03-29 (yesterday). Content: 2026-03-29: K693 不應修改歷史數據 — 修改了 9,935 筆歷史 portfolio_return 導致 Supabase 不同步。Revert + 建立 evaluate_new_strategy.py + CLAUDE.md 更新。"
+      "detail": "2 entries dated 2026-03-29 (yesterday): (1) 文章發佈管線故障（7 小時斷檔 + 空白內容）; (2) K693 不應修改歷史數據 — 修改了 9,935 筆歷史 portfolio_return 導致 Supabase 不同步，Revert + 建立 evaluate_new_strategy.py + CLAUDE.md 更新。No entries dated 2026-03-30 (today)."
     },
     {
       "name": "paper_trading_gaps",
       "status": "ok",
-      "detail": "All strategies: 1 null in last 3 entries (latest data_date=2026-03-27, today 2026-03-30 = weekend+1 business day gap). No strategy exceeds >2 nulls."
+      "detail": "No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "git_status",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files. Threshold: <50."
     },
     {
       "name": "knowledge_size",
       "status": "ok",
-      "detail": "1476 entries in knowledge.json"
+      "detail": "1499 entries in storage/memory/knowledge.json."
     }
   ],
-  "alerts": []
+  "alerts": [],
+  "error_log_recent_entries": [
+    "2026-03-29: 文章發佈管線故障（7 小時斷檔 + 空白內容）",
+    "2026-03-29: K693 不應修改歷史數據"
+  ]
 }
