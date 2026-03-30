@@ -17390,7 +17390,7 @@
   {
     "id": "K738",
     "title": "K738: ★★★★ VT Insurance Cost-Benefit Analysis — Cross-Asset Quantification",
-    "content": "[提出: Claude, 執行: Claude] K738: Comprehensive VT cost-benefit across 5 assets (SPY/GLD/QQQ/EEM/0050.TW), 2007-2026. KEY FINDINGS: (1) 12/VIX costs +4.80%/yr return drag (avg), EWMA VT costs +2.79%/yr — K41 estimate of 4%/yr confirmed for 12/VIX. (2) Cost per 1pp MDD reduction: 12/VIX=0.549%/yr, EWMA=0.424%/yr — EWMA is 23% more cost-efficient. (3) Break-even gamma: 12/VIX=10, EWMA=5 (medians across assets). Investors with gamma>=5 should use EWMA VT. (4) Simple 50/50 diversification is the cheapest insurance: -0.51%/yr drag but -19.6pp avg MDD reduction (FREE insurance for diversified assets like SPY/EEM). (5) Bull market drag: VT gives back ~60% of bull returns (12/VIX) or ~40% (EWMA). (6) SPY best for VT: cost 0.106%/yr per pp MDD reduction. EEM worst: 0.855%/yr per pp. (7) 0050.TW: 12/VIX Sharpe=0.648 vs BH 50/50=0.638 — VT nearly free for Taiwan. Decision guide: gamma<2 → BH 100%; gamma 2-5 → BH 50/50; gamma 5-10 → EWMA VT; gamma>10 → 12/VIX max protection.",
+    "content": "[提出: Claude, 執行: Claude] K738 (v2, Codex bug-fix): Comprehensive VT cost-benefit across 5 assets (SPY/GLD/QQQ/EEM/0050.TW), 2007-2026. Fixed 4 bugs from Codex review: (a) MDD reduction sign inversion, (b) cash carry omitted in VT returns (now uses RF_DAILY per K687), (c) break-even gamma coarse grid → fine grid 1-30 with interpolation + monotonicity check, (d) total cost double-counted TX. CORRECTED FINDINGS: (1) 12/VIX costs +3.49%/yr return drag (avg), EWMA VT costs +2.12%/yr. (2) Cost per 1pp MDD reduction: 12/VIX=0.321%/yr, EWMA=0.310%/yr — nearly identical cost-efficiency. (3) Break-even gamma (interpolated): 12/VIX median=4.5, EWMA median=4.4 — investors with gamma>=4.4 benefit from VT. (4) 50/50 diversification: -0.51%/yr drag (negative drag = free return!) with large MDD reduction — cheapest insurance. (5) SPY: EWMA VT cost 0.095%/yr per pp MDD reduction (most efficient). (6) 0050.TW: 12/VIX Sharpe=0.793 vs BH 50/50=0.638. (7) MDD reductions now correctly positive: 12/VIX avg +12.3pp, EWMA avg +9.6pp across assets. Decision guide unchanged: gamma<2 → BH 100%; gamma 2-5 → BH 50/50; gamma 5-10 → 12/VIX VT; gamma>10 → EWMA VT.",
     "tags": [
       "VT",
       "insurance",
@@ -17400,9 +17400,10 @@
       "MDD",
       "gamma",
       "decision_guide",
-      "K687修正"
+      "K687修正",
+      "codex-bugfix"
     ],
-    "evidence": "5 assets, 2007-2026, 4838 days (SPY/GLD/QQQ/EEM) + 4075 days (0050.TW), proper lag, 5bps TX, CRRA gamma 2/5/10/20",
+    "evidence": "5 assets, 2007-2026, 4839 days (SPY/GLD/QQQ/EEM) + 4075 days (0050.TW), proper lag, 5bps TX, RF 4%/yr cash carry, CRRA gamma 1-30 fine grid with interpolation",
     "data_source": "yfinance (SPY, GLD, QQQ, EEM, 0050.TW, ^VIX)",
     "experiment_script": "experiments/k738_vt_insurance_cost_benefit.py",
     "results_file": "experiments/k738_vt_insurance_cost_benefit_results.json",

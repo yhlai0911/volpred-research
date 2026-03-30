@@ -65,8 +65,8 @@ TC_BPS = 5                     # Transaction cost in basis points
 RF_ANNUAL = 0.04               # Risk-free rate
 RF_DAILY = RF_ANNUAL / 252
 
-# CRRA gamma values
-GAMMAS = [2, 5, 10, 20]
+# CRRA gamma values — fine grid for accurate break-even interpolation
+GAMMAS = list(range(1, 31))
 
 # Assets to analyze
 ASSETS = {
@@ -245,16 +245,16 @@ def run_single_asset(asset_name, asset_ret, vix_close, gld_ret):
     else:
         strategies["BH_5050"] = data["port_ret"].copy()
 
-    # (3) 12/VIX on 50/50
+    # (3) 12/VIX on 50/50 — cash portion earns RF (K687 convention)
     w = data["w_12vix"]
-    raw_ret = w * data["port_ret"]
+    raw_ret = w * data["port_ret"] + (1 - w) * RF_DAILY
     dw = w.diff().abs()
     tc = dw * (TC_BPS / 10000)
     strategies["12/VIX"] = raw_ret - tc
 
-    # (4) EWMA VT on 50/50
+    # (4) EWMA VT on 50/50 — cash portion earns RF (K687 convention)
     w = data["w_ewma"]
-    raw_ret = w * data["port_ret"]
+    raw_ret = w * data["port_ret"] + (1 - w) * RF_DAILY
     dw = w.diff().abs()
     tc = dw * (TC_BPS / 10000)
     strategies["EWMA_VT"] = raw_ret - tc
@@ -368,10 +368,10 @@ def run_single_asset(asset_name, asset_ret, vix_close, gld_ret):
         return_drag = bh5050["cagr_pct"] - s["cagr_pct"]  # positive = VT costs return
         tc_cost = s["tc_annual_pct"]
 
-        # Benefits
-        mdd_reduction = bh5050["mdd_pct"] - s["mdd_pct"]  # positive = VT improves (less negative)
+        # Benefits — MDD values are negative (e.g., -35%), so VT - BH = -20 - (-35) = +15 = improvement
+        mdd_reduction = s["mdd_pct"] - bh5050["mdd_pct"]  # positive = VT has less drawdown = improvement
         mdd_reduction_ratio = s["mdd_pct"] / bh5050["mdd_pct"] if bh5050["mdd_pct"] != 0 else np.nan
-        worst_month_improvement = bh5050["worst_month_pct"] - s["worst_month_pct"]  # positive = VT improves
+        worst_month_improvement = s["worst_month_pct"] - bh5050["worst_month_pct"]  # positive = VT has better worst month
         dd_time_reduction = bh5050["days_in_deep_dd_pct"] - s["days_in_deep_dd_pct"]
 
         # Cost per unit MDD reduction
@@ -381,19 +381,38 @@ def run_single_asset(asset_name, asset_ret, vix_close, gld_ret):
             cost_per_mdd_pct = np.nan
 
         # Break-even gamma: find gamma where VT CE > BH 50/50 CE
+        # Use fine grid (1-30) and linear interpolation for true crossover
         breakeven_gamma = None
+        ce_diffs = []  # (gamma, ce_vt - ce_bh)
         for g in GAMMAS:
             ce_vt = s["crra_ce"].get(f"gamma_{g}")
             ce_bh = bh5050["crra_ce"].get(f"gamma_{g}")
             if ce_vt is not None and ce_bh is not None:
-                if ce_vt > ce_bh:
-                    breakeven_gamma = g
-                    break
+                ce_diffs.append((g, ce_vt - ce_bh))
+
+        # Find crossover via linear interpolation
+        for i in range(1, len(ce_diffs)):
+            g_prev, d_prev = ce_diffs[i - 1]
+            g_curr, d_curr = ce_diffs[i]
+            if d_prev <= 0 < d_curr:
+                # Linear interpolation: find exact gamma where diff crosses 0
+                frac = -d_prev / (d_curr - d_prev) if (d_curr - d_prev) != 0 else 0
+                breakeven_gamma = round(g_prev + frac * (g_curr - g_prev), 1)
+                break
+
+        # Monotonicity check: verify CE diff trend is generally increasing with gamma
+        if len(ce_diffs) >= 3:
+            diffs_only = [d for _, d in ce_diffs]
+            increasing_count = sum(1 for i in range(1, len(diffs_only)) if diffs_only[i] > diffs_only[i-1])
+            monotonicity_ratio = increasing_count / (len(diffs_only) - 1) if len(diffs_only) > 1 else 0
+            # If not mostly monotone (< 60%), flag as unreliable
+            if monotonicity_ratio < 0.6 and breakeven_gamma is not None:
+                breakeven_gamma = None  # non-monotone → unreliable crossover
 
         cb = {
             "return_drag_pct": round(return_drag, 3),
             "tc_annual_pct": round(tc_cost, 4),
-            "total_annual_cost_pct": round(return_drag + tc_cost, 3),
+            "total_annual_cost_pct": round(return_drag, 3),  # return_drag already includes TX (net-of-TX CAGR)
             "mdd_reduction_pp": round(mdd_reduction, 3),
             "mdd_reduction_ratio": round(mdd_reduction_ratio, 4) if not np.isnan(mdd_reduction_ratio) else None,
             "worst_month_improvement_pp": round(worst_month_improvement, 3),
@@ -414,17 +433,24 @@ def run_single_asset(asset_name, asset_ret, vix_close, gld_ret):
     # Also compare BH 100% vs BH 50/50 (diversification cost-benefit)
     bh100 = results["BH_100"]
     div_drag = bh100["cagr_pct"] - bh5050["cagr_pct"]
-    div_mdd_reduction = bh100["mdd_pct"] - bh5050["mdd_pct"]
+    div_mdd_reduction = bh5050["mdd_pct"] - bh100["mdd_pct"]  # positive = 50/50 has less drawdown than 100%
     div_cost_per_mdd = div_drag / abs(div_mdd_reduction) if abs(div_mdd_reduction) > 0.1 else np.nan
 
     div_breakeven = None
+    div_ce_diffs = []
     for g in GAMMAS:
         ce_div = bh5050["crra_ce"].get(f"gamma_{g}")
         ce_100 = bh100["crra_ce"].get(f"gamma_{g}")
         if ce_div is not None and ce_100 is not None:
-            if ce_div > ce_100:
-                div_breakeven = g
-                break
+            div_ce_diffs.append((g, ce_div - ce_100))
+
+    for i in range(1, len(div_ce_diffs)):
+        g_prev, d_prev = div_ce_diffs[i - 1]
+        g_curr, d_curr = div_ce_diffs[i]
+        if d_prev <= 0 < d_curr:
+            frac = -d_prev / (d_curr - d_prev) if (d_curr - d_prev) != 0 else 0
+            div_breakeven = round(g_prev + frac * (g_curr - g_prev), 1)
+            break
 
     cost_benefit["diversification_5050"] = {
         "return_drag_pct": round(div_drag, 3),
@@ -540,9 +566,9 @@ def cross_asset_summary(all_results):
         gew = cb.get("EWMA_VT", {}).get("breakeven_gamma")
         gdiv = cb.get("diversification_5050", {}).get("breakeven_gamma")
 
-        g12_str = f"{g12:>10d}" if g12 is not None else f"{'>20':>10s}"
-        gew_str = f"{gew:>10d}" if gew is not None else f"{'>20':>10s}"
-        gdiv_str = f"{gdiv:>10d}" if gdiv is not None else f"{'>20':>10s}"
+        g12_str = f"{g12:>10.1f}" if g12 is not None else f"{'>30':>10s}"
+        gew_str = f"{gew:>10.1f}" if gew is not None else f"{'>30':>10s}"
+        gdiv_str = f"{gdiv:>10.1f}" if gdiv is not None else f"{'>30':>10s}"
         print(f"  {asset_name:10s} | {g12_str} | {gew_str} | {gdiv_str}")
 
     # --- Table 5: Bull Market Drag ---
@@ -600,8 +626,8 @@ def print_decision_guide(all_results, summary):
         if gew is not None:
             be_ewma.append(gew)
 
-    med_g12 = int(np.median(be_12vix)) if be_12vix else None
-    med_gew = int(np.median(be_ewma)) if be_ewma else None
+    med_g12 = round(float(np.median(be_12vix)), 1) if be_12vix else None
+    med_gew = round(float(np.median(be_ewma)), 1) if be_ewma else None
 
     print(f"\n  KEY FINDINGS:")
     print(f"  1. Average annual return drag: 12/VIX = {summary.get('avg_return_drag_12vix', 'N/A')}%, "
