@@ -16910,5 +16910,22 @@
     "experiment_id": "k718",
     "created_at": "2026-03-30T11:06:22.947957",
     "importance": 3
+  },
+  {
+    "id": "K719",
+    "title": "K719: ★★★★ Volatility Absorption — 5 economic implications, VRP flips negative at VIX>25",
+    "content": "[提出: 用戶要求經濟意涵, 執行: Claude] 5 大 implications: (1)Options: VIX>25 VRP=-3.1%（選擇權被低估！）vs VIX<15 VRP=+4.6%。(2)Hedging: 高 VIX 避險 payoff ratio 13.7x→3.6x（性價比大降）。(3)Rebalance: 所有 regime value≈0。(4)Crisis: VIX>30 fwd 5d=-1.55% 20d=-6.16%（危機初期不是買點）。(5)Strategy: 12/VIX 自然處理麻痺（exposure∝1/VIX），K649 額外 overlay 有害。論文框架：Paralysis → VRP sign flip → hedging cost-benefit → strategy design → crisis timing。",
+    "tags": [
+      "volatility-absorption",
+      "VRP",
+      "options-pricing",
+      "hedging-cost",
+      "crisis-response",
+      "paper-framework"
+    ],
+    "data_source": "yfinance SPY/GLD/VIX 2006-2026",
+    "experiment_id": "k719",
+    "created_at": "2026-03-30T11:13:31.777870",
+    "importance": 4
   }
 ]
