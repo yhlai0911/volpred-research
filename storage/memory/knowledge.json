@@ -17026,7 +17026,7 @@
   },
   {
     "id": "K726",
-    "title": "K726: ★★★ Taiwan VIX Lag Advantage — crisis loss -11.8% vs SPY -20.7% (+9%/yr)",
+    "title": "K726: ⚠️ CORRECTED — Taiwan crisis advantage is asset behavior, NOT VIX lag",
     "content": "[提出: K725 驗證, 執行: Claude] 用 2010-2026 長期數據驗證。VIX>25 時 Taiwan VT(8.63/VIX_lag) -11.8%/yr vs SPY VT(12/VIX_same) -20.7%/yr → 台灣少虧 9%/yr。Raw crisis: TW Sharpe -1.06 vs SPY -1.86。機制：台股開盤前已知美股收盤 VIX → 來得及在開盤時減倉。SPY 同時面對 VIX 飆升+價格暴跌。這是 timezone lag 帶來的結構性優勢——台灣 VT 策略在 crisis 時自動有「隔夜信號」保護。可寫入 Taiwan VT 論文。",
     "tags": [
       "Taiwan",
@@ -17039,6 +17039,22 @@
     "data_source": "yfinance 0050.TW/SPY/VIX 2010-2026",
     "experiment_id": "k726",
     "created_at": "2026-03-30T13:21:50.801915",
-    "importance": 4
+    "importance": 2
+  },
+  {
+    "id": "K727",
+    "title": "K727: ★★ VIX Lag is Always WORSE — K726 advantage was cross-asset confound",
+    "content": "[提出: K726 驗證, 執行: Claude] 跨 6 市場（TW/JP/KR/CN/Intl/US）測試 lag vs same-day VT 在 VIX>25。所有市場 lag 都更差（-3.6% to -19.2%）。K726 的 '+9%/yr advantage' 是因為比較不同資產（0050 vs SPY），0050 crisis 跌幅本來就比 SPY 小。Same-asset lag 永遠劣於 same-day（用舊信號不如用新信號）。Taiwan VT crisis 表現好是因為 0050 波動特性，不是 timezone 優勢。Self-correction: K726 結論撤回。",
+    "tags": [
+      "VIX-lag",
+      "cross-asset-confound",
+      "self-correction",
+      "K726-corrected",
+      "Asia"
+    ],
+    "data_source": "yfinance 6 markets/VIX 2010-2026",
+    "experiment_id": "k727",
+    "created_at": "2026-03-30T13:36:48.217543",
+    "importance": 3
   }
 ]
