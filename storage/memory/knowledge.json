@@ -17550,5 +17550,26 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-30T12:00:25.675364+00:00"
+  },
+  {
+    "id": "K742",
+    "title": "K742: ★★ 12/VIX Crowding Risk Simulation — safe to publish, feedback loops always converge",
+    "content": "[提出: Claude 面向G, 執行: Claude] K742: SIMULATION (theoretical). Dollar-denominated crowding analysis of 12/VIX strategy using Kyle's lambda + VIX-SPY elasticity feedback loops. Data: SPY/VIX 2006-2026 (5087 days). KEY FINDINGS: (1) 12/VIX is inherently crowding-resistant — smooth 1/VIX concave mapping with mean daily |Δw|=0.035, annual turnover 8.9x (much lower than binary signals). (2) Feedback loops ALWAYS converge (tested λ≤0.50, AUM≤$500B) — geometric decay, NOT positive feedback like 1987 portfolio insurance. (3) Worst-day extra impact thresholds (λ=moderate): 5 bps at $0.3B, 25 bps at $1.5B, 50 bps at $2.9B, 100 bps at $5.6B AUM. (4) Sharpe degradation: $0.1B→-6%, $1B→-60%. Friction grows linearly with AUM. (5) Retail adoption (<$1B) has NEGLIGIBLE crowding risk. Even $10B institutional scale, while producing measurable friction, does not destabilize. (6) Publishing 12/VIX is safe for responsible disclosure — global VT AUM ~$50-200B across ALL variants, 12/VIX specifically would capture tiny fraction. (7) Key protection vs 1987 crash: discrete daily rebalancing (not continuous), concave mapping (not linear), heterogeneous timing in practice. LIMITATIONS: Kyle lambda approximate (0.01-0.50 range), constant VIX elasticity (-4x), assumes simultaneous rebalancing (worst case), no arbitrageur response modeled. Extends K94/K110 (abstract adoption rates) with dollar-denominated AUM analysis. Script: experiments/k742_crowding_simulation.py. Data: yfinance SPY/VIX 2006-2026.",
+    "tags": [
+      "simulation",
+      "crowding",
+      "market-impact",
+      "12/VIX",
+      "feedback-loop",
+      "Kyle-lambda",
+      "responsible-disclosure",
+      "agent-based",
+      "面向G"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "experiment_id": "K742",
+    "data_source": "yfinance (SPY, ^VIX) 2006-2026",
+    "timestamp": "2026-03-30T12:13:23.455134+00:00"
   }
 ]
