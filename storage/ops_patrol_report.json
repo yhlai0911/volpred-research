@@ -1,41 +1,37 @@
 {
-  "timestamp": "2026-03-30T12:07:28Z",
+  "timestamp": "2026-03-30T18:09:33.704793+00:00",
   "all_ok": true,
   "checks": [
     {
-      "name": "article_pool",
+      "name": "ARTICLE POOL",
       "status": "ok",
-      "detail": "4 draft articles in pool (total: 636). Threshold: >=3."
+      "detail": "7 draft articles in pool (threshold: >=3)"
     },
     {
-      "name": "strategy_metrics_freshness",
+      "name": "STRATEGY METRICS FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json is 10.6 hours old. Threshold: <26 hours."
+      "detail": "strategy_metrics.json is 16.6 hours old (threshold: <26h)"
     },
     {
-      "name": "error_log",
+      "name": "ERROR LOG",
       "status": "ok",
-      "detail": "2 entries dated 2026-03-29 (yesterday): (1) 文章發佈管線故障（7 小時斷檔 + 空白內容）; (2) K693 不應修改歷史數據 — 修改了 9,935 筆歷史 portfolio_return 導致 Supabase 不同步，Revert + 建立 evaluate_new_strategy.py + CLAUDE.md 更新。No entries dated 2026-03-30 (today)."
+      "detail": "Last error log entry dated 2026-03-29 (yesterday): K693 不應修改歷史數據 — paper_trading.json history modification caused sync issues, resolved by reverting and adding recalc_metrics.py auto-sync."
     },
     {
-      "name": "paper_trading_gaps",
+      "name": "PAPER TRADING GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return in last 3 entries."
+      "detail": "All 14 strategies have <=1 null in last 3 entries (threshold: >2 nulls triggers alert). Typical: 1 null = todays entry pending."
     },
     {
-      "name": "git_status",
+      "name": "GIT STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Threshold: <50."
+      "detail": "0 uncommitted files (threshold: >50)"
     },
     {
-      "name": "knowledge_size",
+      "name": "KNOWLEDGE SIZE",
       "status": "ok",
-      "detail": "1499 entries in storage/memory/knowledge.json."
+      "detail": "1519 entries in storage/memory/knowledge.json"
     }
   ],
-  "alerts": [],
-  "error_log_recent_entries": [
-    "2026-03-29: 文章發佈管線故障（7 小時斷檔 + 空白內容）",
-    "2026-03-29: K693 不應修改歷史數據"
-  ]
+  "alerts": []
 }
