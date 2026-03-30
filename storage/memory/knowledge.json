@@ -16893,5 +16893,22 @@
     "experiment_id": "k717",
     "created_at": "2026-03-30T10:51:33.706735",
     "importance": 4
+  },
+  {
+    "id": "K718",
+    "title": "K718: ★★ Panic Paralysis Cross-Asset — 3/4 assets confirm (SPY strongest, 0050 exception)",
+    "content": "[提出: K716 延伸, 執行: Claude] SPY/GLD/TLT/0050 跨資產驗證。Normalized slope: SPY -0.00028, GLD -0.00043, TLT -0.00044, 0050 +0.00019。3/4 確認麻痺。SPY ratio 從 calm 3.16x 降到 high 2.63x（最明顯）。0050 不顯著（可能因 VIX lag）。GLD/TLT ratio 看似上升但 normalized 是負的——相對於 VIX 水平衝擊遞減。結論：恐慌麻痺是美國市場的普遍現象，可能因為 VIX 本身就是美國市場指標。",
+    "tags": [
+      "panic-paralysis",
+      "cross-asset",
+      "SPY",
+      "GLD",
+      "TLT",
+      "0050.TW"
+    ],
+    "data_source": "yfinance SPY/GLD/TLT/0050.TW/VIX 2006-2026",
+    "experiment_id": "k718",
+    "created_at": "2026-03-30T11:06:22.947957",
+    "importance": 3
   }
 ]
