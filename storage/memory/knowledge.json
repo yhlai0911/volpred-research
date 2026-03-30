@@ -17312,5 +17312,25 @@
     "phase": "research",
     "importance": 5,
     "timestamp": "2026-03-30T10:53:15.701335+00:00"
+  },
+  {
+    "item_id": "kb_k736",
+    "category": "vt_strategy",
+    "title": "K736: ★★★★ Calendar Anomalies & VT — VT Alpha is NOT 'Sell in May' (R²=0.0000, only 1.2% seasonal)",
+    "content": "[提出: Claude, 執行: Claude] K736 tests whether 12/VIX strategy alpha is just the 'Sell in May' calendar anomaly. DEFINITIVE ANSWER: NO. (1) VIX seasonal pattern is REVERSED — VIX is slightly HIGHER in winter (19.8) than summer (19.2), t=-2.39, p=0.017. 12/VIX naturally gives MORE equity in summer, OPPOSITE of Sell-in-May. (2) Calendar-only strategy (100% SPY winter, 50/50 summer) Sharpe=0.658 vs 12/VIX Sharpe=0.806 vs BH Sharpe=0.862. Calendar beats BH in only 1/5 OOS periods. (3) Regression: calendar explains R²=0.0000 of VT excess return; TSMOM explains R²=0.118. Calendar beta t=-0.15 (completely insignificant). (4) Only 1.2% of VT weight variation is seasonal (R² month dummies); 98.8% is VIX-level driven. Partial corr(VT weight, VIX | month) = -0.867. (5) VT-exCalendar (de-seasonalized VIX) performs nearly identically to standard 12/VIX (corr=0.998). VERDICT: VT responds to VIX LEVEL (fear/uncertainty), not season. This refutes the calendar anomaly explanation. Combined with K46/K53 (TSMOM r=0.564): VT alpha = trend following + vol-level response, NOT calendar artifact. Data: SPY/GLD/VIX 2006-2026, 5089 days, TX=5bps, signal.shift(1).",
+    "evidence": ["experiments/k736_calendar_anomaly_vt.py", "experiments/k736_calendar_anomaly_vt_results.json"],
+    "confidence": 0.95,
+    "tags": [
+      "important",
+      "vt_strategy",
+      "calendar_anomaly",
+      "sell_in_may",
+      "alpha_decomposition",
+      "tsmom",
+      "vix_seasonality"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "timestamp": "2026-03-30T12:00:00.000000+00:00"
   }
 ]

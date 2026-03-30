@@ -1,0 +1,223 @@
+{
+  "part_a": {
+    "monthly_avg_vix": {
+      "1": 18.66,
+      "2": 19.48,
+      "3": 21.29,
+      "4": 19.34,
+      "5": 18.59,
+      "6": 18.85,
+      "7": 17.53,
+      "8": 18.8,
+      "9": 19.78,
+      "10": 21.49,
+      "11": 20.31,
+      "12": 19.39
+    },
+    "summer_avg_vix": 19.18,
+    "winter_avg_vix": 19.77,
+    "vix_seasonal_diff": -0.58,
+    "t_stat": -2.392,
+    "p_value": 0.0168,
+    "significant_5pct": true
+  },
+  "part_b": {
+    "winter_avg_daily_ret_bps": 5.44,
+    "summer_avg_daily_ret_bps": 3.86,
+    "winter_annualized_pct": 13.7,
+    "summer_annualized_pct": 9.72,
+    "diff_annualized_pct": 3.98,
+    "t_stat": 0.463,
+    "p_value": 0.6433,
+    "significant_5pct": false,
+    "halloween_win_rate": 0.7
+  },
+  "part_c": {
+    "strategy_metrics": {
+      "12/VIX": {
+        "name": "12/VIX",
+        "ann_ret": 0.1037,
+        "ann_vol": 0.1287,
+        "sharpe": 0.8056,
+        "mdd": -0.3233,
+        "calmar": 0.3207,
+        "sortino": 1.0336
+      },
+      "Calendar-Only": {
+        "name": "Calendar-Only",
+        "ann_ret": 0.1105,
+        "ann_vol": 0.168,
+        "sharpe": 0.658,
+        "mdd": -0.4843,
+        "calmar": 0.2282,
+        "sortino": 0.8078
+      },
+      "VT ex-Calendar": {
+        "name": "VT ex-Calendar",
+        "ann_ret": 0.1063,
+        "ann_vol": 0.1288,
+        "sharpe": 0.8252,
+        "mdd": -0.3213,
+        "calmar": 0.3308,
+        "sortino": 1.0586
+      },
+      "Inverse Calendar": {
+        "name": "Inverse Calendar",
+        "ann_ret": 0.1223,
+        "ann_vol": 0.167,
+        "sharpe": 0.732,
+        "mdd": -0.4258,
+        "calmar": 0.2871,
+        "sortino": 0.8992
+      },
+      "50/50 BH": {
+        "name": "50/50 BH",
+        "ann_ret": 0.1181,
+        "ann_vol": 0.1369,
+        "sharpe": 0.8621,
+        "mdd": -0.3249,
+        "calmar": 0.3634,
+        "sortino": 1.1018
+      }
+    },
+    "regression": {
+      "alpha_daily": -4.963e-05,
+      "alpha_annualized_pct": -1.2506,
+      "alpha_t_stat": -0.986,
+      "beta_tsmom": 0.1032,
+      "beta_tsmom_t_stat": 25.443,
+      "beta_calendar": -0.0013,
+      "beta_calendar_t_stat": -0.15,
+      "r_squared_both": 0.1181,
+      "r_squared_tsmom_only": 0.1181,
+      "r_squared_calendar_only": 0.0
+    },
+    "vt_weight_seasonality": {
+      "avg_spy_weight_winter": 0.6921,
+      "avg_spy_weight_summer": 0.696,
+      "weight_diff": -0.0038,
+      "t_stat": -0.656,
+      "p_value": 0.5121
+    }
+  },
+  "part_d": {
+    "cross_oos": [
+      {
+        "period": "Period 1 (2006-2009, GFC)",
+        "sharpe_12vix": 0.373,
+        "sharpe_calendar": 0.205,
+        "sharpe_vt_ex_cal": 0.39,
+        "sharpe_inv_cal": 0.389,
+        "sharpe_bh": 0.627,
+        "vt_beats_bh": false,
+        "cal_beats_bh": false
+      },
+      {
+        "period": "Period 2 (2010-2013, Recovery)",
+        "sharpe_12vix": 0.998,
+        "sharpe_calendar": 1.302,
+        "sharpe_vt_ex_cal": 1.064,
+        "sharpe_inv_cal": 0.499,
+        "sharpe_bh": 0.752,
+        "vt_beats_bh": true,
+        "cal_beats_bh": true
+      },
+      {
+        "period": "Period 3 (2014-2017, Bull)",
+        "sharpe_12vix": 0.974,
+        "sharpe_calendar": 0.763,
+        "sharpe_vt_ex_cal": 1.048,
+        "sharpe_inv_cal": 1.066,
+        "sharpe_bh": 0.871,
+        "vt_beats_bh": true,
+        "cal_beats_bh": false
+      },
+      {
+        "period": "Period 4 (2018-2021, COVID)",
+        "sharpe_12vix": 1.059,
+        "sharpe_calendar": 0.845,
+        "sharpe_vt_ex_cal": 1.047,
+        "sharpe_inv_cal": 1.025,
+        "sharpe_bh": 1.053,
+        "vt_beats_bh": true,
+        "cal_beats_bh": false
+      },
+      {
+        "period": "Period 5 (2022-2025, Recent)",
+        "sharpe_12vix": 1.103,
+        "sharpe_calendar": 0.704,
+        "sharpe_vt_ex_cal": 1.059,
+        "sharpe_inv_cal": 1.183,
+        "sharpe_bh": 1.353,
+        "vt_beats_bh": false,
+        "cal_beats_bh": false
+      }
+    ],
+    "vt_beats_bh_count": 3,
+    "cal_beats_bh_count": 1,
+    "dm_tests": {
+      "12/VIX vs BH": {
+        "dm_stat": 1.042,
+        "p_value": 0.2975,
+        "winner": "BH",
+        "significant_5pct": false
+      },
+      "Calendar vs BH": {
+        "dm_stat": 0.369,
+        "p_value": 0.712,
+        "winner": "BH",
+        "significant_5pct": false
+      },
+      "VT-exCal vs BH": {
+        "dm_stat": 0.862,
+        "p_value": 0.3886,
+        "winner": "BH",
+        "significant_5pct": false
+      },
+      "12/VIX vs Calendar": {
+        "dm_stat": 0.285,
+        "p_value": 0.7753,
+        "winner": "Calendar",
+        "significant_5pct": false
+      },
+      "VT-exCal vs 12/VIX": {
+        "dm_stat": -1.361,
+        "p_value": 0.1736,
+        "winner": "VT-exCal",
+        "significant_5pct": false
+      }
+    }
+  },
+  "part_e": {
+    "corr_vt_calendar": 0.7676,
+    "corr_vt_bh": 0.8932,
+    "corr_cal_bh": 0.8391,
+    "corr_vtx_vt": 0.9978,
+    "weight_corr_vt_calendar": -0.0068,
+    "partial_corr_vt_weight_vix_given_month": -0.8674,
+    "partial_corr_pval": 0.0,
+    "simple_corr_vt_weight_vix": -0.8685,
+    "r2_weights_month_dummies": 0.0123,
+    "pct_seasonal": 1.2,
+    "pct_vix_level": 98.8
+  },
+  "verdict": "VT alpha is NOT a calendar anomaly \u2014 less than 10% of weight variation is seasonal",
+  "metadata": {
+    "experiment_id": "K736",
+    "title": "Calendar Anomalies and Volatility Targeting \u2014 Is VT Alpha Just Sell in May?",
+    "data_source": "yfinance (SPY, GLD, ^VIX)",
+    "period": "2006-01-01 to 2026-03-29",
+    "n_observations": 5089,
+    "tx_cost_bps": 5,
+    "lag": "signal.shift(1) \u2014 all dynamic strategies use t-1 signal",
+    "references": [
+      "Bouman & Jacobsen (2002): The Halloween Indicator",
+      "Kamstra, Kramer & Levi (2003): SAD and stock returns",
+      "K35: VT seasonality null (ANOVA p=0.69)",
+      "K46/K53: VT alpha = trend following (r=0.564)"
+    ],
+    "proposer": "Claude",
+    "executor": "Claude",
+    "timestamp": "2026-03-30T18:54:53.482743"
+  }
+}
