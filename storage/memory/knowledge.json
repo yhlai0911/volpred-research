@@ -17470,5 +17470,20 @@
     "data_source": "yfinance",
     "experiment_file": "experiments/k739_taiwan_vt_crossval.py",
     "results_file": "experiments/k739_taiwan_vt_crossval_results.json"
+  },
+  {
+    "id": "K739-review",
+    "title": "Codex Review K739: 2 HIGH (holiday calendar pollution + ghost trades)",
+    "content": "[提出: Codex, 執行: Claude] K739 review: (1) HIGH: Union calendar creates synthetic zero returns on mismatched holidays → pollutes RV, regression, seasonality. (2) HIGH: Strategy rebalances/pays TX on days 0050 is closed (ghost trades). (3) MEDIUM: Monthly rebalance keyed to merged index not TW calendar. IMPACT: VIX sufficiency + calendar NS probably directionally correct. Optimal allocation 20/80 may be affected (inflated 0050 apparent vol). Daily>Monthly finding most contaminated (ghost trades). PATTERN: cross-market holiday handling is a SYSTEMATIC issue for all Taiwan experiments — needs proper fix (use TW-only calendar for TW strategies).",
+    "tags": [
+      "codex-review",
+      "K739",
+      "HIGH-severity",
+      "holiday-handling",
+      "Taiwan"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "timestamp": "2026-03-30T11:31:31.389483+00:00"
   }
 ]
