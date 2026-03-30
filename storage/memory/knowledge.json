@@ -17731,5 +17731,27 @@
     "created_at": "2026-03-30T21:41:06.644482",
     "phase": "ongoing",
     "importance": 2
+  },
+  {
+    "id": "K748",
+    "title": "The Simplicity Premium — Hypothesis REJECTED: Complex VIX-based strategies beat simple ones",
+    "content": "[提出: Claude, 執行: Claude] K748 tested whether simple strategies outperform complex ones (K740/K747/K737 suggested this). RESULT: Hypothesis REJECTED. 14 forward-tracked strategies (2023-01-04 to 2026-03-27). (A) Parameter count vs Sharpe: rho=+0.077 p=0.79 — NO correlation. Complex category avg Sharpe 2.51 > simple 2.03. (B) Turnover: rho=+0.749 p=0.002 — higher turnover = HIGHER Sharpe (not lower). TX cost explains only 9.7% of gap. (C) Regime robustness: rho=-0.066 p=0.82 — no complexity-regime link. Most regime-robust are momentum strategies (range 1.6), least robust are single-asset VT (range 10.4). (D) Bootstrap: simple underperforms complex by 0.47 Sharpe, 95% CI [-0.62, +0.05], P(simple worse)=0.95. (E) Composite rank: piecewise(moderate)>#1, adaptive_tier(complex)>#2, taiwan_spy_momentum(simple)>#3. KEY INSIGHT: DeMiguel (2009) 1/N result does NOT apply to VIX-based rule strategies because parameters are thresholds on OBSERVABLES (VIX), not estimates of future returns. No estimation error → no overfitting penalty → complexity can help. The real driver of performance is not simplicity but DESIGN QUALITY: the best strategy (piecewise_conservative) uses just 2 well-chosen parameters (VIX 12/20 breakpoints) to achieve Sharpe 3.16, MDD -2.5%.",
+    "tags": [
+      "simplicity_premium",
+      "complexity",
+      "strategy_comparison",
+      "hypothesis_rejected",
+      "DeMiguel",
+      "turnover",
+      "regime_robustness",
+      "bootstrap",
+      "paper_trading",
+      "VIX"
+    ],
+    "data_source": "storage/paper_trading.json (14 strategies, actual forward-tracked), yfinance ^VIX",
+    "experiment_script": "experiments/k748_simplicity_premium.py",
+    "results_file": "experiments/k748_simplicity_premium_results.json",
+    "created_at": "2026-03-30T22:10:27.570900",
+    "phase": "simplicity_analysis"
   }
 ]
