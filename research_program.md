@@ -793,17 +793,20 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### P1: 高價值
 
-**論文修正（需反映 K687 paradigm shift）：**
+**新研究主軸（用戶提出 2026-03-30）：**
+- [ ] **什麼是好的交易策略？多維度評估框架**：不只看 Sharpe——CAGR、勝率、壓力情境表現、操作複雜度、TX 成本都要。高 Sharpe 但 CAGR 3% 不算好策略。建立量化評估矩陣。
+- [ ] **恐慌麻痺效應（Panic Paralysis / Volatility Absorption）**：VIX 已高時，額外衝擊的邊際影響遞減。K661 發現 VIX>25 時 NFP 效果消失。可擴展為正式論文——「波動率吸收假說」。相關文章：mile_44fb4b90。
+
+**論文修正：**
 - [ ] **Leverage-Direction**（K628 已瘦身 64→52p）：加入「VT is insurance」框架
 - [ ] **Taiwan VT**：K636 修正 amplification（gamma vs vol level）、TX cost 已修正
-- [ ] **VT-Trend**：需重新定位——VT 不是 trend following 也不是 alpha
+- [x] **VT-Trend**：6 項 K585 Codex 修正完成（2026-03-30）
 
-**平台維護：**
-- [ ] Supabase paper_trades 全量清理（剝離舊 entry 中的市場數據）
-- [x] 前端 groupPaperTrades 已剝離市場 keys（API 2.9MB→1.8MB）
-- [x] feed-publisher SKILL.md 已更新（寫到 reports/feed.json）
-- [ ] SEO 修正（K608 剩餘項目）
-- [ ] merge_feed_files.py 加入 system crontab（需手動）
+**平台經營方向（基於 analytics：192 views, 3 users, 10 reactions）：**
+- [ ] **SEO 是最優先**：3 個用戶太少，需要 Google Search Console + sitemap 提交
+- [ ] **加強入門內容**：「從零開始」是最熱門文章之一，應建立 /guide 頁面
+- [ ] **減少學術文章比例，增加實務操作指南**：收藏(7)>按讚(3) = 讀者當工具書用
+- [ ] K705 GAP-03：StrategySelector 不要突出 CAGR
 
 ### P2: 研究新方向
 
