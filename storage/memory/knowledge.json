@@ -17571,5 +17571,20 @@
     "experiment_id": "K742",
     "data_source": "yfinance (SPY, ^VIX) 2006-2026",
     "timestamp": "2026-03-30T12:13:23.455134+00:00"
+  },
+  {
+    "id": "K742-review",
+    "title": "Codex Review K742: 2 HIGH (lag misalign + Sharpe formula), crowding-resistant conclusion directionally safe",
+    "content": "[提出: Codex, 執行: Claude] K742 review: (1) HIGH: Part B lag-misaligned — VIX spike ranked by VIX[t] but weight_change uses VIX[t-1]/VIX[t-2]. Explains zero-flow on large spikes. (2) HIGH: Part D Sharpe-drag scales with held weight, should scale with |Δw| (traded fraction). Overstates drag. (3) MEDIUM: Kyle lambda 0.50 not justified for SPY (0.10 defensible). (4) MEDIUM: VIX elasticity -4.0 unsourced. (5) LOW: 'geometric decay' too strong — convergence is from bounded 12/VIX target, not local contraction. DIRECTION SAFE: 1/x concavity IS self-dampening, convergence IS proven. Specific AUM thresholds need fix.",
+    "tags": [
+      "codex-review",
+      "K742",
+      "HIGH-severity",
+      "crowding",
+      "simulation"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-30T12:20:39.055211+00:00"
   }
 ]
