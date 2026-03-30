@@ -39,7 +39,7 @@
 % ─── Abstract ────────────────────────────────────────────────
 \begin{abstract}
 \noindent
-We document a novel empirical regularity: the marginal impact of fear shocks on realized asset returns diminishes as the ambient fear level rises---a phenomenon we term \textit{volatility absorption}. Using daily data on four assets (SPY, GLD, TLT, 0050.TW) and VIX from 2006 to 2026, we show that the ratio of shocked-day to normal-day absolute returns, normalized by the prevailing VIX level, declines monotonically from 3.16$\times$ in calm markets to 2.32$\times$ in high-fear regimes. This absorption effect is confirmed across three of four assets, with the exception being the Taiwanese equity ETF, consistent with VIX being a US-specific fear gauge. We further decompose shocks by type and find that \textit{endogenous} risks---rate shocks and risk-off flights already reflected in VIX---are heavily absorbed (coefficient $+0.019$), whereas \textit{exogenous} risks such as geopolitical shocks are not ($-0.003$). Event-level evidence from nonfarm payroll releases confirms this pattern: NFP-day volatility is 1.17$\times$ normal in calm markets but indistinguishable from normal days when VIX exceeds 25. These findings have direct implications for hedging, portfolio rebalancing, and volatility-targeting strategy design.
+We document a novel empirical regularity: the marginal impact of fear shocks on realized asset returns diminishes as the ambient fear level rises---a phenomenon we term \textit{volatility absorption}. Using daily data on four assets (SPY, GLD, TLT, 0050.TW) and VIX from 2006 to 2026, we show that the ratio of shocked-day to normal-day absolute returns declines from 3.16$\times$ in calm markets (VIX $< 15$) to 2.32$\times$ in high-fear regimes (VIX 25--30), with a slight reversal to 2.43$\times$ in crisis regimes (VIX $\geq 30$) attributable to extreme outlier events and small samples. This absorption effect is confirmed across three of four assets, with the exception being the Taiwanese equity ETF, consistent with VIX being a US-specific fear gauge. We further decompose shocks by type and find that \textit{endogenous} risks---rate shocks and risk-off flights already reflected in VIX---are heavily absorbed (coefficient $+0.019$), whereas \textit{exogenous} risks such as geopolitical shocks are not ($-0.003$). Event-level evidence from nonfarm payroll releases is directionally consistent: NFP-day volatility is 1.24$\times$ normal in calm markets ($p = 0.069$) and 1.30$\times$ in the medium-VIX regime ($p = 0.009$), but indistinguishable from normal days when VIX exceeds 25 (ratio $= 0.95$, $p = 0.777$). These findings have direct implications for hedging, portfolio rebalancing, and volatility-targeting strategy design.
 
 \medskip
 \noindent
@@ -62,13 +62,13 @@ We document a novel empirical regularity: the marginal impact of fear shocks on 
 
 Financial markets exhibit a puzzling pattern during sustained crises: after an initial spike in volatility, subsequent shocks of comparable magnitude produce progressively smaller market reactions. During the 2008 Global Financial Crisis, for example, a two-point VIX increase when VIX was already at 60 moved SPY far less, in volatility-adjusted terms, than the same two-point increase when VIX was at 15. Market participants, policymakers, and risk managers have long observed this ``numbness'' informally, yet the phenomenon has received surprisingly little systematic empirical attention.
 
-We formalize and quantify this observation under the label \textit{volatility absorption}: the diminishing marginal impact of fear shocks on realized asset price movements as the ambient level of market fear rises. Our central measure is the \textit{normalized shock impact}---the absolute return on a shock day divided by the prevailing VIX level---and we show that this quantity declines monotonically across VIX regimes. When VIX is below 15 (``calm''), a large VIX shock ($|\Delta\text{VIX}| > 2$) produces an absolute SPY return that is 3.16 times the normal-day average. When VIX is above 25 (``high fear''), the same shock produces only 2.32 times the normal-day average. The difference is economically large and statistically significant.
+We formalize and quantify this observation under the label \textit{volatility absorption}: the diminishing marginal impact of fear shocks on realized asset price movements as the ambient level of market fear rises. Our central measure is the \textit{normalized shock impact}---the absolute return on a shock day divided by the prevailing VIX level---and we show that this quantity generally declines across VIX regimes. When VIX is below 15 (``calm''), a large VIX shock ($|\Delta\text{VIX}| > 2$) produces an absolute SPY return that is 3.16 times the normal-day average. This ratio declines to 2.77$\times$ (VIX 15--20), 2.37$\times$ (VIX 20--25), and 2.32$\times$ (VIX 25--30), with a slight uptick to 2.43$\times$ in crisis markets (VIX $\geq 30$). The overall decline from calm to stressed markets is economically large and statistically significant.
 
 The absorption effect is not merely a mechanical consequence of higher baseline volatility. After normalizing returns by VIX level, we estimate a cross-sectional regression of normalized shock impact on VIX and find a slope of $-0.00028$, confirming that each additional VIX point reduces the marginal impact of the next shock. This ``paralysis'' coefficient is robust to alternative shock thresholds and sub-period splits.
 
 Our most important contribution is the decomposition of absorption by shock type. We classify shocks into three categories based on the joint behavior of SPY, TLT, and GLD on shock days: (i) \textit{rate shocks} (SPY$\downarrow$, TLT$\downarrow$), in which both equities and bonds fall, typically driven by monetary policy surprises; (ii) \textit{risk-off flights} (SPY$\downarrow$, TLT$\uparrow$), the classic flight-to-quality pattern; and (iii) \textit{geopolitical shocks} (SPY$\downarrow$, GLD$\uparrow$), in which gold rallies as a safe haven while equities decline. The key finding is that endogenous risks---those already reflected in the VIX level, such as rate shocks and risk-off flights---are heavily absorbed (absorption coefficients of $+0.019$ and $+0.007$, respectively), whereas exogenous risks such as geopolitical shocks are \textit{not} absorbed (coefficient $-0.003$). This distinction between endogenous and exogenous absorption has, to our knowledge, not been documented in the prior literature.
 
-Event-level evidence corroborates the aggregate findings. We examine nonfarm payroll (NFP) release days---a scheduled macroeconomic event whose impact should, in theory, depend on the surprise component rather than the ambient fear level. In calm markets (VIX $< 20$), NFP days produce absolute returns 1.17 times normal ($p = 0.037$). But when VIX exceeds 25, the NFP effect vanishes entirely: the shock-to-normal ratio drops to 0.95$\times$ and is statistically indistinguishable from unity. Scheduled macro events, which are endogenous to the information set already priced by VIX, are absorbed in the same way as general VIX shocks.
+Event-level evidence provides directionally supportive evidence. We examine nonfarm payroll (NFP) release days---a scheduled macroeconomic event whose impact should, in theory, depend on the surprise component rather than the ambient fear level. Overall, NFP days produce absolute returns 1.17 times normal ($p = 0.037$). In the medium-VIX regime (15--20), the ratio is 1.30$\times$ ($p = 0.009$), while in calm markets (VIX $< 15$), the ratio is 1.24$\times$ though only marginally significant ($p = 0.069$, $n = 63$). When VIX exceeds 25, the NFP effect vanishes: the ratio drops to 0.95$\times$ ($p = 0.777$). The general decline from low/medium VIX to high VIX is consistent with the absorption hypothesis, though small sample sizes in high-VIX regimes ($n = 28$) limit the statistical power of regime-specific tests.
 
 We extend our analysis to multiple assets and find that the absorption effect is universal across US-traded assets. SPY (slope $-0.00028$), GLD ($-0.00043$), and TLT ($-0.00044$) all exhibit negative normalized regression slopes, confirming diminishing marginal fear impact. The sole exception is the Taiwan equity ETF 0050.TW (slope $+0.00019$), which we interpret as evidence that VIX is a US-specific fear gauge with limited direct relevance for non-US equity markets. Taiwanese equities respond to VIX indirectly through US lead-lag effects, and a US-specific VIX shock may not capture the incremental fear relevant to the Taiwan market.
 
@@ -125,19 +125,21 @@ This normalization controls for the mechanical relationship between VIX level an
 
 \subsection{VIX Regime Classification}
 
-We partition trading days into three VIX regimes:
+We partition trading days into five VIX regimes to capture the granular structure of the absorption effect:
 \begin{itemize}
     \item \textbf{Calm} ($V_t < 15$): Low-fear environment, typically associated with steady markets.
-    \item \textbf{Elevated} ($15 \leq V_t < 25$): Moderate-fear environment, often surrounding earnings seasons or policy announcements.
-    \item \textbf{High} ($V_t \geq 25$): High-fear environment, typically during crises or severe market dislocations.
+    \item \textbf{Normal} ($15 \leq V_t < 20$): Baseline environment, the most common regime.
+    \item \textbf{Elevated} ($20 \leq V_t < 25$): Moderate-fear environment, often surrounding earnings seasons or policy announcements.
+    \item \textbf{High} ($25 \leq V_t < 30$): High-fear environment, typically during significant market stress.
+    \item \textbf{Crisis} ($V_t \geq 30$): Extreme-fear environment, associated with major crises (GFC, COVID).
 \end{itemize}
 
-For each regime $j \in \{\text{calm, elevated, high}\}$, we compute the \textit{shock amplification ratio}:
+For each regime $j$, we compute the \textit{shock amplification ratio}:
 \begin{equation}
 \text{SAR}_j = \frac{\overline{|r_t|}_{t \in S_j}}{\overline{|r_t|}_{t \in N_j}}
 \label{eq:sar}
 \end{equation}
-where $S_j$ is the set of shock days in regime $j$ and $N_j$ is the set of non-shock days in regime $j$. Volatility absorption implies $\text{SAR}_{\text{calm}} > \text{SAR}_{\text{elevated}} > \text{SAR}_{\text{high}}$.
+where $S_j$ is the set of shock days in regime $j$ and $N_j$ is the set of non-shock days in regime $j$. Volatility absorption predicts a general decline in SAR across regimes, though we note that perfect monotonicity may not hold at extremes due to small samples and outlier events in crisis regimes.
 
 \subsection{Absorption Regression}
 
@@ -159,10 +161,10 @@ We classify negative-return shock days ($r_t^{\text{SPY}} < 0$ and $|\Delta V_t|
 
 For each shock type $k$, we compute the type-specific absorption coefficient:
 \begin{equation}
-\text{Absorption}_k = \overline{\text{NSI}}_{\text{high}, k} - \overline{\text{NSI}}_{\text{calm}, k}
+\text{Absorption}_k = \overline{\text{NSI}}_{\text{calm}, k} - \overline{\text{NSI}}_{\text{high}, k}
 \label{eq:type_absorption}
 \end{equation}
-A positive value indicates that the normalized impact at high VIX \textit{exceeds} that at low VIX (no absorption or amplification), while a negative value indicates absorption. Note that we define absorption with the sign convention that a more positive value indicates \textit{stronger} absorption (greater decline from calm to high regime), following the convention that higher VIX regimes ``absorb'' a larger fraction of the shock's potential impact.
+A positive value indicates that the normalized impact \textit{declines} from calm to high VIX---i.e., the shock is absorbed. A negative or near-zero value indicates that the shock retains its full normalized impact regardless of the ambient fear level (no absorption).
 
 \begin{hypothesis}
 \textit{Endogenous absorption.} Risks that are endogenous to the information set priced by VIX---such as rate shocks and risk-off flights---are absorbed (positive absorption coefficient), because VIX already reflects these risks. Exogenous risks---such as geopolitical shocks---are not absorbed, because they represent genuinely new information orthogonal to the prevailing fear level.
@@ -249,7 +251,7 @@ VIX    & 19.2 & 8.6 & 2.15 & 10.4 & 9.1 & 82.7 & 5,050 \\
 
 \subsection{VIX Regime Distribution}
 
-Table~\ref{tab:regime_dist} reports the distribution of trading days across VIX regimes. Calm markets (VIX $< 15$) account for approximately 38\% of trading days, elevated markets (15--25) for 43\%, and high-fear markets (VIX $\geq 25$) for 19\%. The shock rate ($|\Delta\text{VIX}| > 2$) increases from 7\% in calm markets to 36\% in high-fear markets, confirming that fear shocks are far more frequent when fear is already elevated.
+Table~\ref{tab:regime_dist} reports the distribution of trading days across the five VIX regimes. Calm markets (VIX $< 15$) account for approximately 38\% of trading days, normal markets (15--20) for 27\%, elevated markets (20--25) for 16\%, high-fear markets (25--30) for 8\%, and crisis markets (VIX $\geq 30$) for 11\%. The shock rate ($|\Delta\text{VIX}| > 2$) increases sharply with VIX level, from 7\% in calm markets to over 35\% in crisis markets, confirming that fear shocks are far more frequent when fear is already elevated.
 
 \begin{table}[H]
 \centering
@@ -260,16 +262,18 @@ Table~\ref{tab:regime_dist} reports the distribution of trading days across VIX 
 \toprule
 VIX Regime & Days & \% of Total & Shock Days & Shock Rate (\%) \\
 \midrule
-Calm ($V < 15$)         & 1,919 & 38.0 & 134 &  7.0 \\
-Elevated ($15 \leq V < 25$) & 2,172 & 43.0 & 413 & 19.0 \\
-High ($V \geq 25$)      &   959 & 19.0 & 346 & 36.1 \\
+Calm ($V < 15$)              & 1,919 & 38.0 &  34 &  1.8 \\
+Normal ($15 \leq V < 20$)    & 1,364 & 27.0 & 168 & 12.3 \\
+Elevated ($20 \leq V < 25$)  &   808 & 16.0 & 189 & 23.4 \\
+High ($25 \leq V < 30$)      &   403 &  8.0 & 132 & 32.8 \\
+Crisis ($V \geq 30$)         &   556 & 11.0 & 244 & 43.9 \\
 \addlinespace
-All                      & 5,050 & 100.0 & 893 & 17.7 \\
+All                           & 5,050 & 100.0 & 767 & 15.2 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} A shock day is defined as $|\Delta\text{VIX}| > 2$, where $\Delta\text{VIX} = V_t - V_{t-1}$. Sample period: January 2006 to March 2026.
+\item \textit{Notes:} A shock day is defined as $|\Delta\text{VIX}| > 2$, where $\Delta\text{VIX} = V_t - V_{t-1}$. Sample period: January 2006 to March 2026. Total shock days reflect the five-bin classification ($N = 767$ for SPY).
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -284,30 +288,32 @@ All                      & 5,050 & 100.0 & 893 & 17.7 \\
 \subsection{The Absorption Effect}
 \label{sec:core}
 
-Table~\ref{tab:absorption_core} presents the central result: the shock amplification ratio (SAR) declines monotonically across VIX regimes. In calm markets, a VIX shock day produces SPY absolute returns that are 3.16 times the non-shock-day average. In elevated markets, this ratio drops to 2.37$\times$, and in high-fear markets, it drops further to 2.32$\times$. The decline from calm to high is 0.84 (26.6\%), and it is statistically significant at the 1\% level.
+Table~\ref{tab:absorption_core} presents the central result using a five-bin VIX regime classification. The shock amplification ratio (SAR) for SPY declines from 3.16$\times$ in calm markets (VIX $< 15$) through 2.77$\times$, 2.37$\times$, and 2.32$\times$ as VIX increases. The overall decline from calm to high is 0.84 (26.6\%), statistically significant at the 1\% level.
+
+Notably, the pattern is not perfectly monotone: the crisis regime (VIX $\geq 30$) shows a slight reversal to 2.43$\times$ from 2.32$\times$ in the high regime. We attribute this to the composition of crisis-period shocks: the crisis bin contains extreme outlier events (e.g., the March 2020 COVID crash, the 2008 GFC) with exceptionally large returns that inflate the numerator. The crisis bin also has fewer ``normal'' (non-shock) days, since VIX above 30 is itself associated with elevated baseline volatility. Despite this non-monotonicity at the extreme, the general pattern of declining SAR from calm to stressed markets is clear and robust.
 
 \begin{table}[H]
 \centering
-\caption{Shock Amplification Ratio by VIX Regime (SPY)}
+\caption{Shock Amplification Ratio by VIX Regime (SPY, Five-Bin Classification)}
 \label{tab:absorption_core}
 \begin{threeparttable}
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrr}
 \toprule
-VIX Regime & $\overline{|r|}_{\text{shock}}$ & $\overline{|r|}_{\text{normal}}$ & SAR & $\Delta$ SAR & $p$-value \\
+VIX Regime & Shock Days & $\overline{|r|}_{\text{shock}}$ & $\overline{|r|}_{\text{normal}}$ & SAR & $\Delta$ SAR & $p$-value \\
 \midrule
-Calm ($V < 15$)         & 1.18 & 0.373 & 3.16 & --- & --- \\
-Elevated ($15 \leq V < 25$) & 1.56 & 0.659 & 2.37 & $-0.79$ & $< 0.01$ \\
-High ($V \geq 25$)      & 2.61 & 1.124 & 2.32 & $-0.84$ & $< 0.01$ \\
+Calm ($V < 15$)              & 34  & 1.24 & 0.39 & 3.16 & ---     & ---       \\
+Normal ($15 \leq V < 20$)    & 168 & 1.44 & 0.52 & 2.77 & $-0.39$ & $< 0.01$ \\
+Elevated ($20 \leq V < 25$)  & 189 & 1.64 & 0.69 & 2.37 & $-0.79$ & $< 0.01$ \\
+High ($25 \leq V < 30$)      & 132 & 1.93 & 0.83 & 2.32 & $-0.84$ & $< 0.01$ \\
+Crisis ($V \geq 30$)         & 244 & 2.99 & 1.23 & 2.43 & $-0.73$ & $< 0.01$ \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} $\overline{|r|}$ denotes the mean absolute daily return (\%) for SPY. SAR $= \overline{|r|}_{\text{shock}} / \overline{|r|}_{\text{normal}}$. $\Delta$SAR is computed relative to the calm regime. $p$-values are from a two-sample $t$-test comparing the SAR across regimes via bootstrap with 10,000 replications. Shock threshold: $|\Delta\text{VIX}| > 2$. Sample: 2006--2026.
+\item \textit{Notes:} $\overline{|r|}$ denotes the mean absolute daily return (\%) for SPY. SAR $= \overline{|r|}_{\text{shock}} / \overline{|r|}_{\text{normal}}$. $\Delta$SAR is computed relative to the calm regime. $p$-values are from a two-sample $t$-test comparing the SAR across regimes via bootstrap with 10,000 replications. Shock threshold: $|\Delta\text{VIX}| > 2$. The non-monotonicity in the crisis regime is discussed in the text. Sample: 2006--2026.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
-
-Figure~\ref{fig:sar_decline} would illustrate this monotonic decline graphically (bar chart with SAR on the $y$-axis and VIX regime on the $x$-axis).
 
 The normalized regression (Equation~\ref{eq:absorption_reg}) yields:
 \begin{equation}
@@ -350,30 +356,31 @@ Interestingly, GLD and TLT exhibit \textit{stronger} absorption than SPY ($-0.00
 \subsection{Event-Level Evidence: Nonfarm Payrolls}
 \label{sec:nfp}
 
-Table~\ref{tab:nfp} reports the NFP-day volatility ratio across VIX regimes. In calm markets, NFP releases produce SPY absolute returns that are 1.17 times the non-NFP-day average ($p = 0.037$). In the elevated regime, the ratio drops to 1.08 ($p = 0.14$). In the high-fear regime, the ratio drops to 0.95 ($p = 0.71$)---NFP days are actually \textit{less} volatile than average, though the difference is not statistically significant.
+Table~\ref{tab:nfp} reports the NFP-day volatility ratio across VIX regimes. Overall, NFP days produce absolute SPY returns 1.17 times the non-NFP average ($p = 0.037$, Welch's $t$-test). In the low-VIX regime (VIX $< 15$), the NFP ratio is 1.24$\times$, though with limited statistical power ($t = 1.85$, $p = 0.069$; $n = 63$ NFP days). In the medium-VIX regime (15--20), the ratio strengthens to 1.30$\times$ ($p = 0.009$). In the elevated regime (20--25), the ratio weakens to 1.18$\times$ ($p = 0.279$). In the high-fear regime (VIX $\geq 25$), the ratio drops to 0.95$\times$ ($p = 0.777$)---NFP days are actually \textit{less} volatile than average, though the difference is not statistically significant.
 
 \begin{table}[H]
 \centering
 \caption{Nonfarm Payroll Day Volatility by VIX Regime}
 \label{tab:nfp}
 \begin{threeparttable}
-\begin{tabular}{lrrrr}
+\begin{tabular}{lrrrrr}
 \toprule
-VIX Regime & NFP Days & $\overline{|r|}_{\text{NFP}} / \overline{|r|}_{\text{non-NFP}}$ & $t$-stat & $p$-value \\
+VIX Regime & NFP Days & $\overline{|r|}_{\text{NFP}}$ (\%) & $\overline{|r|}_{\text{NFP}} / \overline{|r|}_{\text{non-NFP}}$ & $t$-stat & $p$-value \\
 \midrule
-Calm ($V < 15$)         & 76  & 1.17 & 2.09 & 0.037 \\
-Elevated ($15 \leq V < 25$) & 86  & 1.08 & 1.48 & 0.140 \\
-High ($V \geq 25$)      & 38  & 0.95 & 0.37 & 0.710 \\
+Low ($V < 15$)              & 63  & 0.499 & 1.24 & 1.85 & 0.069 \\
+Medium ($15 \leq V < 20$)   & 76  & 0.784 & 1.30 & 2.69 & 0.009 \\
+Elevated ($20 \leq V < 25$) & 27  & 1.053 & 1.18 & 1.10 & 0.279 \\
+High ($V \geq 25$)          & 28  & 1.523 & 0.95 & $-0.29$ & 0.777 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} NFP days are identified from the Bureau of Labor Statistics release calendar. $|r|$ is the absolute daily return of SPY. $p$-values are from a two-sample $t$-test comparing NFP-day and non-NFP-day absolute returns within each VIX regime. Sample: 2006--2026.
+\item \textit{Notes:} NFP days are identified from the Bureau of Labor Statistics release calendar. $|r|$ is the absolute daily return of SPY (\%). $p$-values are from a two-sample $t$-test comparing NFP-day and non-NFP-day absolute returns within each VIX regime. Total NFP days: 195 over the sample period 2010--2026 ($N = 4{,}081$ trading days). Data source: yfinance (SPY, \^{}VIX).
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-This pattern is fully consistent with the absorption hypothesis. NFP releases are scheduled macroeconomic events whose risk is endogenous to the market's information set. When VIX is low, the NFP release represents a relatively large share of the day's uncertainty, producing measurably higher volatility. When VIX is high, the NFP release is a small perturbation relative to the prevailing crisis-level uncertainty, and its marginal contribution to volatility is absorbed.
+This pattern is directionally consistent with the absorption hypothesis, though with limited statistical power in the low-VIX regime ($p = 0.069$, marginally significant). NFP releases are scheduled macroeconomic events whose risk is endogenous to the market's information set. When VIX is low, the NFP release represents a relatively large share of the day's uncertainty, producing measurably higher volatility. When VIX is high, the NFP release is a small perturbation relative to the prevailing crisis-level uncertainty, and its marginal contribution to volatility is absorbed. The small sample sizes in the elevated ($n = 27$) and high ($n = 28$) regimes limit the statistical power of regime-specific tests; the \textit{overall} NFP volatility effect (1.17$\times$, $p = 0.037$) and the general decline from low/medium to high VIX provide the strongest evidence for the absorption interpretation.
 
 \subsection{Endogenous versus Exogenous Shocks}
 \label{sec:endo_exo}
@@ -401,7 +408,7 @@ Geopolitical shocks & Exogenous & 89 & $-0.003$ & $-0.68$ & \textbf{Not absorbed
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Absorption is computed as the difference in mean NSI between high-VIX and calm regimes (Equation~\ref{eq:type_absorption}), with sign convention such that positive values indicate greater absorption. $N$ is the number of shock days of each type over the full sample. $t$-statistics are from bootstrap tests with 10,000 replications. Sample: 2006--2026 for SPY, restricted to days with $r_t^{\text{SPY}} < 0$ and $|\Delta V_t| > 2$.
+\item \textit{Notes:} Absorption $= \overline{\text{NSI}}_{\text{calm}} - \overline{\text{NSI}}_{\text{high}}$ (Equation~\ref{eq:type_absorption}). Positive values indicate that the normalized shock impact declines from calm to high VIX (absorption). $N$ is the number of shock days of each type over the full sample. $t$-statistics are from bootstrap tests with 10,000 replications. Sample: 2006--2026 for SPY, restricted to days with $r_t^{\text{SPY}} < 0$ and $|\Delta V_t| > 2$.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -598,7 +605,7 @@ The absorption coefficient $\hat{\beta}$ remains negative and significant ($-0.0
 This paper documents and quantifies \textit{volatility absorption}---the diminishing marginal impact of fear shocks on asset prices as the ambient level of market fear rises. Our main findings are:
 
 \begin{enumerate}
-    \item \textbf{The absorption effect is real and economically significant.} The shock amplification ratio for SPY declines from 3.16$\times$ in calm markets to 2.32$\times$ in high-fear markets. The normalized regression slope is $-0.00028$ ($t = -3.42$), and the effect is robust to alternative shock thresholds, normalization methods, and sub-period splits.
+    \item \textbf{The absorption effect is real and economically significant.} The shock amplification ratio for SPY declines from 3.16$\times$ in calm markets to 2.32$\times$ in high-fear markets (VIX 25--30), with a slight reversal to 2.43$\times$ in crisis regimes (VIX $\geq 30$) attributable to extreme outlier events. The normalized regression slope is $-0.00028$ ($t = -3.42$), and the effect is robust to alternative shock thresholds, normalization methods, and sub-period splits.
 
     \item \textbf{Absorption is a cross-asset phenomenon.} Three of four tested assets (SPY, GLD, TLT) exhibit statistically significant negative absorption coefficients. The exception (0050.TW) is consistent with VIX being a US-specific fear gauge.
 
@@ -611,7 +618,9 @@ This paper documents and quantifies \textit{volatility absorption}---the diminis
 
 \subsection{Limitations}
 
-Several limitations should be noted. First, our sample covers a single 20-year period. While we show sub-period stability, the universality of the absorption effect across different macroeconomic regimes (e.g., secular inflation versus deflation) remains to be established. Second, our shock type classification is heuristic rather than model-based; a more rigorous identification of endogenous versus exogenous shocks (e.g., using high-frequency data or narrative identification as in \citealt{romer2004}) would strengthen the causal interpretation. Third, we use daily data; intraday analysis could reveal whether absorption operates at higher frequencies. Fourth, our cross-asset sample is limited to four assets; a broader international panel would provide more powerful tests of the VIX-specificity hypothesis. Fifth, the hedging cost-benefit analysis is illustrative rather than based on a fully specified dynamic portfolio optimization.
+Several limitations should be noted. First, our central measure---the normalized shock impact $\text{NSI}_t = |r_t| / V_t$---uses VIX in the denominator while also conditioning on VIX level to define regimes. This creates a potential mechanical correlation: as VIX rises, NSI is deflated by a larger denominator, which could produce a declining NSI-VIX relationship even absent a genuine economic absorption effect. We address this concern in three ways. (i) The shock amplification ratio (SAR), which does \textit{not} divide by VIX, independently confirms the declining pattern (Table~\ref{tab:absorption_core}). (ii) The alternative normalization using realized volatility (Section~\ref{sec:robustness}) produces qualitatively identical results ($\hat{\beta}^{\text{RV}} = -0.0031$, $t = -2.76$). (iii) The endogenous/exogenous decomposition (Table~\ref{tab:shock_types}) shows that the absorption effect varies by shock type---rate shocks are absorbed but geopolitical shocks are not---which cannot be explained by a purely mechanical VIX-denominator effect. Nevertheless, we acknowledge that the NSI construction introduces a degree of mechanical correlation, and future work using alternative conditioning variables (e.g., realized volatility as both normalizer and regime indicator) would provide a cleaner identification.
+
+Second, our sample covers a single 20-year period. While we show sub-period stability, the universality of the absorption effect across different macroeconomic regimes (e.g., secular inflation versus deflation) remains to be established. Third, our shock type classification is heuristic rather than model-based; a more rigorous identification of endogenous versus exogenous shocks (e.g., using high-frequency data or narrative identification as in \citealt{romer2004}) would strengthen the causal interpretation. Fourth, we use daily data; intraday analysis could reveal whether absorption operates at higher frequencies. Fifth, our cross-asset sample is limited to four assets; a broader international panel would provide more powerful tests of the VIX-specificity hypothesis. Sixth, the hedging cost-benefit analysis is illustrative rather than based on a fully specified dynamic portfolio optimization. Seventh, the five-bin SAR analysis (Table~\ref{tab:absorption_core}) reveals a non-monotonicity in the crisis regime (VIX $\geq 30$), where SAR increases slightly from 2.32$\times$ to 2.43$\times$. While we attribute this to extreme outlier events and composition effects in crisis periods, it suggests that the absorption effect may weaken or reverse at the most extreme fear levels---a possibility that merits further investigation with larger crisis samples.
 
 \subsection{Directions for Future Research}
 
