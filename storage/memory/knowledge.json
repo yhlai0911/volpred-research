@@ -17448,5 +17448,27 @@
     "phase": "research",
     "importance": 5,
     "timestamp": "2026-03-30T11:21:53.391395+00:00"
+  },
+  {
+    "id": "K739",
+    "title": "K739: Taiwan 0050.TW VT Cross-Validation — US findings partially generalize",
+    "content": "[提出: Claude, 執行: Claude] 4 項美股 VT 發現在台股的交叉驗證。(1) VIX 充分性：VIX(t-1) 預測 0050 未來 RV R²=0.039，加入自身 RV 僅增 R²=0.003（+7.3%）→ VIX 對台股也充分。(2) 最適配置：0050+SPY 20/80 最佳 Sharpe 0.865（非 50/50！台灣投資人應以 SPY 為主）；0050+GLD 30/70 Sharpe 0.751；0050+Cash 10/90 Sharpe 0.467。台股最適配置偏向低 0050 權重，因波動太高。(3) 曆效應：Sell-in-May 在台股不顯著（t=-0.204, p=0.84），農曆年效應也不顯著（p=0.38）。台股七月最強（+3.71%/月），一月最弱（-2.34%/月）。(4) 調倉頻率：台股 daily 最佳 Sharpe 0.397 vs monthly 0.263——反轉美股 K733 月頻最佳的結論。原因：台股波動更高更急，月頻反應太慢。VT 保險：台股 MDD 從 -77.3% 降到 -48.6%（-28.8pp），但 CAGR 從 7.59% 降到 3.71%。台股 VT 的保險效果比美股大（MDD -28.8pp vs 美股 -15pp），但成本也更高（CAGR 損失 3.88pp）。",
+    "tags": [
+      "taiwan",
+      "0050.TW",
+      "cross-validation",
+      "VIX-sufficiency",
+      "asset-allocation",
+      "calendar-anomaly",
+      "rebalancing-frequency",
+      "VT-insurance"
+    ],
+    "phase": "Phase_K",
+    "importance": 4,
+    "timestamp": "2026-03-30T19:25:21.642460",
+    "evidence": "0050.TW/SPY/GLD/VIX 2009-2026, 4473 trading days, OLS regression, grid search, t-tests",
+    "data_source": "yfinance",
+    "experiment_file": "experiments/k739_taiwan_vt_crossval.py",
+    "results_file": "experiments/k739_taiwan_vt_crossval_results.json"
   }
 ]
