@@ -17708,5 +17708,28 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-30T13:30:16.106848+00:00"
+  },
+  {
+    "id": "K747",
+    "title": "K747: Equal Risk Contribution (ERC) Portfolio — Risk Budgeting Without Timing",
+    "content": "[提出: Claude, 執行: Claude] ERC (Maillard et al 2010) equalizes marginal risk contributions via optimization. Tested 2/3/4-asset ERC vs static 50/50 SPY/GLD with proper monthly hold-and-drift rebalancing (fixing K737 Codex bug). RESULTS: 2-asset ERC Sharpe=1.795 vs 50/50 Sharpe=1.849 (diff=-0.054, DM t=-1.019 NS). ERC ≈ InvVol for 2-asset (both 1.795) — confirms K704: when SPY vol(19.0%)≈GLD vol(18.1%), all RP methods converge. Multi-asset ERC worse: 3-asset 1.492, 4-asset 1.396 (TLT drags). ERC+12/VIX=1.755, worse than static ERC. Cross-OOS: ERC 3/5 wins (wins in 2006-2018 periods, loses 2018-2026). Weight stability: SPY mean=0.504 std=0.085, annual turnover 1.66. TX cost impact negligible (0-50bps: 1.796→1.783). ERC vs InvVol diff: -0.21%/yr, practically zero. VERDICT: ERC is mathematically elegant but adds zero practical value over 50/50 SPY/GLD. The sophistication premium is effectively nil. Data: yfinance SPY/GLD/TLT/EEM 2005-2026.",
+    "tags": [
+      "ERC",
+      "risk parity",
+      "portfolio optimization",
+      "equal risk contribution",
+      "null result",
+      "SPY",
+      "GLD",
+      "TLT",
+      "EEM",
+      "研究"
+    ],
+    "data_source": "yfinance",
+    "experiment_script": "experiments/k747_equal_risk_contribution.py",
+    "results_file": "experiments/k747_equal_risk_contribution_results.json",
+    "created_at": "2026-03-30T21:41:06.644482",
+    "phase": "ongoing",
+    "importance": 2
   }
 ]
