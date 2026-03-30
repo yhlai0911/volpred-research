@@ -17504,5 +17504,19 @@
     "experiment_id": "K740",
     "created_at": "2026-03-30T19:40:12.857837",
     "phase": "K_meta_analysis"
+  },
+  {
+    "id": "K740-review",
+    "title": "Codex Review K740: 2 HIGH (turnover bug + mixed start dates), directional findings safe",
+    "content": "[提出: Codex, 執行: Claude] K740 review: (1) HIGH: Turnover computed as sum(weights) not sum(abs(Δweights)) → net_sharpe and composite biased, understated by 1.4-2x. (2) HIGH: Mixed start dates 748-1088 days (should enforce COMMON_START 2023-01-04). global_vt_tz Sharpe shifts 2.30→2.84 on common window. (3) MEDIUM: Min-max normalization outlier-sensitive with N=14, metrics highly correlated (Sharpe-Sortino 0.97). (4) LOW: Spearman valid (exact permutation p matches). DIRECTION SAFE: complexity NS confirmed, multi-asset premium robust, Piecewise top likely holds. Specific composite scores need fix.",
+    "tags": [
+      "codex-review",
+      "K740",
+      "methodology",
+      "turnover"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-30T11:49:04.050948+00:00"
   }
 ]
