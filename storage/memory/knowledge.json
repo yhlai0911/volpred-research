@@ -17794,5 +17794,24 @@
     "data_period": "2010-2026",
     "created_at": "2026-03-30T14:57:34Z",
     "category": "research"
+  },
+  {
+    "id": "K751",
+    "title": "K751: Overnight VIX News Sentiment Proxy — Statistically Significant but Economically Marginal",
+    "content": "[提出: Claude, 執行: Claude] K751: Overnight VIX change (close→open) as proxy for financial news sentiment. 4082 days (2010-2026). Part A: |overnight VIX Δ| correlates r=0.30 with next-day |SPY ret| (p<1e-86), but incremental R² over VIX level is only 0.45% (F=25.67, p<1e-6). Signed change much weaker r=0.075. Part B: Event-day detection strong—2σ overnight VIX moves predict 2.34x next-day vol (t=15.61). U-shaped quintile pattern: both extreme up and down overnight VIX changes predict higher vol. Direction does NOT matter (up vs down: p=0.52). Part C: Trading strategy HURTS: overnight-adjusted 12/VIX Sharpe 0.679 vs standard 0.788 (DM t=-2.68, p=0.0075). Extra turnover 12.37 annualized destroys any marginal signal. Part D: Higher thresholds (less adjustment) → closer to standard 12/VIX → better Sharpe. Part E: Rolling correlation varies 0-0.70, mean 0.22, 94% positive but unstable year-to-year. Part F: Signal stronger in high VIX regime (r=0.21) vs low VIX (r=0.08). Conclusion: overnight VIX carries real but tiny incremental info. As EVENT DETECTOR (rare extreme days) it works; as DAILY TRADING SIGNAL it fails after TX costs. Real NLP pipeline would need to beat this 0.45% R² ceiling significantly to be tradeable.",
+    "tags": [
+      "overnight_vix",
+      "news_sentiment",
+      "alternative_data",
+      "NLP_proxy",
+      "event_detection",
+      "trading_strategy",
+      "null_result_trading"
+    ],
+    "data_source": "yfinance (^VIX, SPY, GLD)",
+    "experiment_script": "experiments/k751_overnight_vix_news.py",
+    "results_file": "experiments/k751_overnight_vix_news_results.json",
+    "created_at": "2026-03-30T23:09:25.441241",
+    "category": "alternative_data"
   }
 ]
