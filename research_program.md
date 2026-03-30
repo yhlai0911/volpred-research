@@ -825,13 +825,20 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **★ K738 VT Insurance Cost-Benefit**：Codex 二審 PASS。γ≥4.5→VT，cost 3.49%/yr（12/VIX）、2.12%（EWMA）
 - [x] ⚠️ K739 Taiwan Cross-Val：2/4 generalizes（VIX suff + calendar NS），2/4 不同（20/80 配置 + daily rebalance）。Codex: holiday calendar bug
 - [x] **★ K740 Strategy Meta-Analysis**：簡單+多資產=最佳。複雜度 vs Sharpe ρ=0.149 NS。Piecewise Conservative 主導效率前緣
-- [ ] K741 NFP Event Study：進行中（04/03 準備）
+- [x] K741 NFP Event Study：VIX≥25 時 NFP 效果消失（0.98x）。04/03 HOLD
+- [x] K742 Crowding Simulation：12/VIX 天生抗擠壓（concave 1/x），安全公開
+- [x] K743 Investor Behavior：FOMO(-58%) 比 Panic(-14%) 貴 5 倍
+- [x] K744 5-Min RV Validation：AC(1) gap 5.6x，data 94% clean
+- [x] K745 Pilot HAR-RV：Pipeline OK，HAR-ABS 暫勝（N=37），等 100+ OOS
+- [x] K746 Bitcoin×VIX：BTC 非避風港，coupling post-2021 增。Granger 方法待修
+- [x] Paper 1 更新：+K736/K738/K742/K743 → 53p
 
-**新方向（post-K697 alpha impossibility）：**
-- [ ] **Asset selection optimization**：不用 timing 而是用更好的資產配置（beyond SPY/GLD）
+**新方向（post-K746）：**
+- [x] **Asset selection optimization**：K737 測 28 組合，50/50 SPY/GLD 仍最佳
 - [ ] **Risk budgeting**：Equal Risk Contribution portfolio without timing
-- [ ] **Alternative data**：NLP sentiment、satellite data — 可能有 VIX 之外的方向信號
-- [ ] **Intraday alpha**：5-min RV 數據就緒後，日內 alpha 可能存在（K697 只測日頻）
+- [ ] **Alternative data**：NLP sentiment、satellite data
+- [ ] **Intraday alpha**：5-min RV 數據就緒後（ETA 04/11），日內 alpha
+- [ ] **Crypto fear channel**：K746 Granger 需用 forward-looking RV 重做
 - [ ] **Cross-asset regime detection**：不基於 VIX 的 regime 識別
 
 ### P3: 長期待辦
