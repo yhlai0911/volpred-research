@@ -426,5 +426,30 @@
     ],
     "lesson_type": "recurring_bug",
     "timestamp": "2026-03-30T10:34:50.103355+00:00"
+  },
+  {
+    "id": "E33",
+    "title": "Session K730-K749: 20 Experiments Codex Review Patterns — Recurring Bugs and Lessons",
+    "content": "20 experiments reviewed by Codex in one session. Recurring bug patterns:\n\n1. TX COST 1-LEG (K730, K731, K732, K737): Only charging abs(Δw_spy), missing abs(Δw_gld). Fix: sum(abs(Δw_i)) for ALL assets.\n\n2. DAILY CONSTANT-WEIGHT vs MONTHLY HOLD-AND-DRIFT (K737, K747 fixed): Engine reuses target weights daily instead of letting weights drift. K747 properly implemented drift.\n\n3. BH 50/50 BASELINE MISLABELED (K730, K732, K734, K737): Daily constant-mix labeled as 'buy-and-hold'. True BH lets weights drift with returns.\n\n4. LOG vs SIMPLE RETURNS (K730): Used log returns but compounded with (1+r). Must be consistent — use pct_change() throughout.\n\n5. OOS CONTAMINATION (K735, K741): Fitting on full sample then 'testing' on subperiods is NOT OOS. Must refit on prior data only.\n\n6. FORWARD-LOOKING VARIABLES (K735, K743): Using same-day returns for drift then applying to same-day PnL = lookahead.\n\n7. GRANGER ON BACKWARD RV (K746): Testing overlapping historical-vol statistic, not future vol prediction.\n\nKEY LESSON: Codex caught 1 false breakthrough (K735), forced 1 critical fix (K738 4/4 PASS after), and identified 1 self-correction (K748 rejected K740). Without Codex, false positive rate would be ~15% (3/20). With Codex, it's 0% (all caught before publish).",
+    "source_experiments": [
+      "K730",
+      "K731",
+      "K732",
+      "K734",
+      "K735",
+      "K737",
+      "K738",
+      "K739",
+      "K740",
+      "K741",
+      "K742",
+      "K743",
+      "K746",
+      "K747",
+      "K748",
+      "K749"
+    ],
+    "lesson_type": "session_methodology_summary",
+    "timestamp": "2026-03-30T14:51:10.523898+00:00"
   }
 ]
