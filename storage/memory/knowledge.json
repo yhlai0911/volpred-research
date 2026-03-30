@@ -17348,5 +17348,29 @@
     "phase": "research",
     "importance": 2,
     "timestamp": "2026-03-30T11:00:25.178193+00:00"
+  },
+  {
+    "item_id": "ba5ff68e",
+    "category": "portfolio_construction",
+    "content": "[提出: Claude, 執行: Claude] K737 Maximum Diversification Portfolio: tested 4 methods (EW, MinVar, MaxDiv, RiskParity) × 7 asset subsets (2-9 assets) vs 50/50 SPY/GLD baseline. COMMON_START 2023-01-04 to 2026-03-27. Key findings: (1) NO multi-asset strategy beats 50/50 SPY/GLD on Sharpe (baseline 1.862). Adding assets dilutes returns without improving risk-adjusted performance. (2) More assets → lower MDD but lower Sharpe: 9-asset EW MDD=-8.33% (vs -12.89%) but Sharpe=1.285. MinVar 9-asset MDD=-5.72% but Sharpe=1.007. (3) TLT hurts in 2023-2026: 3-asset with TLT Sharpe=1.49-1.51 vs without TLT 1.67-1.80. (4) 1/N beats optimization at same asset count (DeMiguel et al 2009 confirmed). (5) Max Diversification allocates heavily to low-vol bonds (IEF 68%) — DR=1.85 but low return. (6) Cross-OOS: only max_div 9-asset passes 3/5, but its COMMON Sharpe is only 0.87. (7) Sensitivity: longer lookback (504) helps max_div (1.37 vs 0.87) but still far below 50/50. CONCLUSION: asset selection cannot beat 50/50 SPY/GLD in 2023-2026 — the GLD bull run (+61% in 2025) makes any dilution harmful. The diversification-return tradeoff is unfavorable: you buy lower MDD but pay too much in Sharpe.",
+    "title": "K737: ★★ Maximum Diversification Portfolio — 50/50 SPY/GLD unbeatable by asset expansion (4 methods × 7 subsets)",
+    "tags": [
+      "portfolio_construction",
+      "diversification",
+      "max_diversification",
+      "risk_parity",
+      "minimum_variance",
+      "equal_weight",
+      "multi_asset",
+      "cross_oos"
+    ],
+    "experiment_id": "K737",
+    "data_source": "yfinance (SPY, GLD, TLT, IEF, EFA, EEM, VNQ, DBC, TIP), 2006-2026",
+    "created_at": "2026-03-30T19:04:45.047179",
+    "references": [
+      "Choueifaty & Coignard (2008) Toward Maximum Diversification, JPM",
+      "DeMiguel, Garlappi & Uppal (2009) Optimal vs Naive Diversification, RFS",
+      "Maillard, Roncalli & Teiletche (2010) On the Properties of ERC Portfolios, JPM"
+    ]
   }
 ]
