@@ -17611,5 +17611,20 @@
     "data_source": "yfinance (SPY, GLD, ^VIX), 2007-2026",
     "experiment_file": "experiments/k743_investor_behavior.py",
     "results_file": "experiments/k743_investor_behavior_results.json"
+  },
+  {
+    "id": "K743-review",
+    "title": "Codex Review K743: 2 HIGH (delayed rebalance lookahead + loss aversion lag), FOMO finding likely safe",
+    "content": "[提出: Codex, 執行: Claude] K743 review: (1) HIGH: Delayed rebalance uses same-day returns for drift then applies to same-day P&L = lookahead. Also counts passive drift as TX. The 'lazy beats perfect' finding is UNRELIABLE. (2) HIGH: Loss aversion switches 1 month late + uses sum not compound. (3) MEDIUM: Panic goes to GLD not cash as described. (4) MEDIUM: t-test invalid (needs HAC/DM). FOMO finding (-58% Sharpe) LIKELY SAFE: simple override logic, no timing bug identified. 'FOMO > Panic in cost' is the key publishable takeaway.",
+    "tags": [
+      "codex-review",
+      "K743",
+      "HIGH-severity",
+      "behavioral-finance",
+      "FOMO"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-30T12:31:53.577216+00:00"
   }
 ]
