@@ -31,12 +31,23 @@
         ]
       }
     ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/yhlai0911/Desktop/volpred-research && bash scripts/save_session_state.sh",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "PostCompact": [
       {
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'CONTEXT COMPACTED: Critical info may be lost. Read research_program.md and storage/memory/ to recover state. Do NOT stop to ask the user — just recover and continue.'"
+            "command": "cd /Users/yhlai0911/Desktop/volpred-research && cat storage/session_state.json 2>/dev/null | python3 -c \"import json,sys; d=json.load(sys.stdin); print(json.dumps({'systemMessage': f'SESSION RECOVERED: {d.get(\\\"knowledge_count\\\",\\\"?\\\") } knowledge, last={d.get(\\\"last_experiment\\\",\\\"?\\\")}, drafts={d.get(\\\"draft_count\\\",\\\"?\\\")}, metrics age={d.get(\\\"metrics_age_hours\\\",\\\"?\\\")}h. Read storage/session_state.json for full state. Resume unfinished tasks immediately.'}))\""
           }
         ]
       }
