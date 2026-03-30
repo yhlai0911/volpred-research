@@ -17023,5 +17023,22 @@
     "experiment_id": "k725",
     "created_at": "2026-03-30T13:06:42.315284",
     "importance": 3
+  },
+  {
+    "id": "K726",
+    "title": "K726: ★★★ Taiwan VIX Lag Advantage — crisis loss -11.8% vs SPY -20.7% (+9%/yr)",
+    "content": "[提出: K725 驗證, 執行: Claude] 用 2010-2026 長期數據驗證。VIX>25 時 Taiwan VT(8.63/VIX_lag) -11.8%/yr vs SPY VT(12/VIX_same) -20.7%/yr → 台灣少虧 9%/yr。Raw crisis: TW Sharpe -1.06 vs SPY -1.86。機制：台股開盤前已知美股收盤 VIX → 來得及在開盤時減倉。SPY 同時面對 VIX 飆升+價格暴跌。這是 timezone lag 帶來的結構性優勢——台灣 VT 策略在 crisis 時自動有「隔夜信號」保護。可寫入 Taiwan VT 論文。",
+    "tags": [
+      "Taiwan",
+      "VIX-lag",
+      "crisis-advantage",
+      "timezone",
+      "structural-edge",
+      "paper-worthy"
+    ],
+    "data_source": "yfinance 0050.TW/SPY/VIX 2010-2026",
+    "experiment_id": "k726",
+    "created_at": "2026-03-30T13:21:50.801915",
+    "importance": 4
   }
 ]
