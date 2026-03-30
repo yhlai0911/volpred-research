@@ -17297,5 +17297,20 @@
     "phase": "research",
     "importance": 2,
     "timestamp": "2026-03-30T10:46:23.762454+00:00"
+  },
+  {
+    "id": "K735-review",
+    "title": "Codex Review K735: 2 HIGH bugs — strategy result CONTAMINATED by lookahead",
+    "content": "[提出: Codex, 執行: Claude] K735 POSITIVE result OVERTURNED by Codex. (1) HIGH: 'OOS' is fake — slope_r/intercept_r fitted on FULL 2006-2026 sample then reused in every subperiod. This is classic lookahead in strategy evaluation. (2) HIGH: predictor (VIX at first_cross_date) / target (recovery from peak_date) timing misaligned — part of target already elapsed when predictor observed. (3) MEDIUM: N=22, R²=0.04, p borderline, none survive Bonferroni. (4) MEDIUM: Always-Reduce comparator unfair. DESCRIPTIVE results (drawdown anatomy, Spearman ρ) may still hold but STRATEGY results are unreliable. This is the 4th Codex false-breakthrough catch (K679, K700, K735). 37.5%→50% false positive rate without Codex review.",
+    "tags": [
+      "codex-review",
+      "K735",
+      "HIGH-severity",
+      "lookahead",
+      "overturned"
+    ],
+    "phase": "research",
+    "importance": 5,
+    "timestamp": "2026-03-30T10:53:15.701335+00:00"
   }
 ]

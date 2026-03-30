@@ -819,7 +819,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **K732 Behavioral Sentiment**：partial r|VIX = 0.091，完全被 VIX 主導
 - [x] **K733 Regime Rebalancing**：Monthly 明確勝出（Net Sharpe 0.892），adaptive 反而更差
 - [x] **K734 VRP Trading**：學術顯著（t=3.51）但 R²<0.3%，不可交易
-- [x] **★ K735 Drawdown Recovery**：VIX 預測回撤深度（ρ=-0.49, p=0.02）和恢復時間（ρ=+0.45, p=0.04）— VIX 第三種用途！N=22 小樣本待確認
+- [x] **⚠️ K735 Drawdown Recovery**：描述性結果有效（22 episodes anatomy），但 Codex 抓到 2 HIGH bugs（fake OOS + predictor/target timing misalignment）。策略結果（+29% Sharpe）被 lookahead 污染，不可信。第 4 次 Codex 抓到 false breakthrough
 - [ ] K736 Calendar Anomaly vs VT：進行中
 
 **新方向（post-K697 alpha impossibility）：**
