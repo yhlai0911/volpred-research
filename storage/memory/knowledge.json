@@ -17264,5 +17264,38 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-03-30T18:40:49.474966"
+  },
+  {
+    "item_id": "f29efeba",
+    "category": "research_finding",
+    "content": "[提出: Claude, 執行: Claude] K735 Drawdown Recovery Speed Prediction. SPY 2006-2026, 22 drawdown episodes (>5% depth). VIX at drawdown onset is a significant predictor of DEPTH (Spearman rho=-0.489, p=0.021, 95% CI [-0.73,-0.09]) and RECOVERY TIME (rho=+0.448, p=0.037, CI [+0.04,+0.74]), but NOT days-to-trough (rho=-0.05, NS). VIX CHANGE during drawdown is even stronger (rho with depth=-0.711, rho with recovery=+0.604). VIX regime strategy (reduce to 50% when predicted recovery >120 days) beats BH in 5/5 OOS periods: Sharpe 0.687 vs 0.534, MDD -34.8% vs -55.2%. However R-squared is low (0.041-0.086) — wide uncertainty per episode. Log-log elasticity: 1% higher VIX -> 1.92% longer recovery. Key insight: VIX is a NEW utility — drawdown DURATION predictor, not just vol predictor. Exclud GFC: rho with depth still -0.437 (p=0.048). Limitation: only 22 episodes in 20 years.",
+    "id": "K735",
+    "title": "K735: ★★ Drawdown Recovery Speed — VIX predicts depth (rho -0.49) & duration (rho +0.45), strategy 5/5 OOS",
+    "tags": [
+      "drawdown",
+      "VIX",
+      "recovery",
+      "duration_prediction",
+      "drawdown_anatomy",
+      "strategy",
+      "cross_OOS"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-03-30T18:45:34",
+    "experiment_script": "experiments/k735_drawdown_recovery.py",
+    "results_file": "experiments/k735_drawdown_recovery_results.json"
+  },
+  {
+    "id": "K734-review",
+    "title": "Codex Review K734: Cleanest review — no HIGH issues, 2 MEDIUM (sum vs compound, drift TX)",
+    "content": "[提出: Codex, 執行: Claude] K734 review: NO HIGH issues (best of K730-K734 series). (1) MEDIUM: multi-day returns summed instead of compounded — should be (1+r).prod()-1. (2) MEDIUM: TX misses drift-rebalance (recurring pattern E32). (3) LOW: BH drift vs target-weight baseline mismatch. shift(1) correct, no lookahead. NULL conclusion safe. Pattern: drift-rebalance TX is a systematic omission across K730-K734 — should fix in experiment template.",
+    "tags": [
+      "codex-review",
+      "K734",
+      "methodology"
+    ],
+    "phase": "research",
+    "importance": 2,
+    "timestamp": "2026-03-30T10:46:23.762454+00:00"
   }
 ]
