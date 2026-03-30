@@ -17672,5 +17672,26 @@
     "data_source": "yfinance 5-min SPY + daily SPY/VIX",
     "created_at": "2026-03-30T20:50:00",
     "category": "model_evaluation"
+  },
+  {
+    "id": "know_20260330_132359_k746",
+    "experiment_id": "K746",
+    "title": "K746: ★★ Bitcoin Volatility and VIX — Crypto Fear Channel is Asymmetric",
+    "content": "[提出: Claude, 執行: Claude] Bitcoin-VIX relationship is ASYMMETRIC: BTC vol Granger-causes VIX changes (F=8.5, p=0.004 at lag-1) but VIX does NOT predict BTC vol (F=2.9, p=0.086). The 'fear channel' runs FROM crypto TO TradFi, not reverse. Full-sample VIX-BTC_RV correlation is weak (r=0.178) vs VIX-SPY_RV (r=0.805). STRUCTURAL BREAK confirmed (Fisher z=-6.63, p<0.001): BTC-SPY daily correlation jumped from 0.138 (pre-2021) to 0.371 (2021+), consistent with institutional adoption increasing coupling. BTC vol (66.7% ann) is 3.8x SPY (17.7%). When SPY crashes >2%, BTC also negative 71% of times (mean -3.0%). VIX regime matters: BTC mean return is +42 bps/day in low VIX (<15) but -72 bps/day in extreme VIX (>35), with BTC-SPY correlation rising from 0.067 to 0.569 across regimes. COVID crash was COUPLED (BTC -33%, SPY -34%, corr 0.61); crypto winter 2022 was DECOUPLED from equity markets. Portfolio: 5% BTC in 50/50 SPY/GLD improves Sharpe from 1.060 to 1.278 (2015-2026), but MDD worsens from -20.3% to -20.8%. VIX-conditioned BTC allocation (remove BTC when VIX>25, lag=1) reduces Sharpe slightly vs static (1.247 vs 1.278 for 5% BTC) due to TX costs (20bps). Best static allocation: 20% BTC with Sharpe 1.449 but MDD -30.7%. Key insight: BTC is NOT a safe haven — it amplifies TradFi stress. The asymmetric Granger causality (crypto→TradFi but not reverse) is novel and could be a paper contribution.",
+    "tags": [
+      "bitcoin",
+      "vix",
+      "volatility-spillover",
+      "granger-causality",
+      "crypto",
+      "portfolio",
+      "structural-break",
+      "tail-dependence"
+    ],
+    "data_source": "yfinance (BTC-USD, SPY, GLD, ^VIX)",
+    "data_period": "2015-01 to 2026-03",
+    "created_at": "2026-03-30T13:23:59.397448+00:00",
+    "type": "knowledge",
+    "importance": "high"
   }
 ]
