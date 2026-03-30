@@ -17007,5 +17007,21 @@
     "experiment_id": "k724",
     "created_at": "2026-03-30T12:51:20.134590",
     "importance": 2
+  },
+  {
+    "id": "K725",
+    "title": "K725: ★★ Crisis Advantage — TW Momentum best (+1.44), GARCH VT worst (-6.66)",
+    "content": "[提出: 策略 crisis 表現, 執行: Claude] VIX≥25 vs <25 策略 Sharpe 比較。所有策略 crisis 時下降但幅度差異巨大。Best crisis: TW Momentum +1.44（台股 VIX lag 優勢）, TW+JP TZ +1.21, Piecewise 0.00（全現金）。Worst: GARCH VT -6.66, 12/VIX -6.07, Fear DCA -3.72。Smooth-weight 策略在 crisis 最脆弱（持有太多曝險）。台灣策略反而 crisis 最好——可能因 US VIX 的 overnight lag 讓台股有「提前反應」時間。與 K717 composite 一致：TW Momentum composite #1。",
+    "tags": [
+      "crisis-advantage",
+      "strategy-comparison",
+      "Taiwan",
+      "VIX-regime",
+      "GARCH-worst"
+    ],
+    "data_source": "paper_trading.json + yfinance VIX 2023-2026",
+    "experiment_id": "k725",
+    "created_at": "2026-03-30T13:06:42.315284",
+    "importance": 3
   }
 ]
