@@ -1,6 +1,16 @@
 {
   "hooks": {
-    "Stop": [],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "cd /Users/yhlai0911/Desktop/volpred-research && bash scripts/save_session_state.sh 2>/dev/null || true",
+            "timeout": 30
+          }
+        ]
+      }
+    ],
     "SubagentStop": [
       {
         "hooks": [
