@@ -16859,5 +16859,22 @@
     "experiment_id": "k715",
     "created_at": "2026-03-29T19:36:23.696964",
     "importance": 4
+  },
+  {
+    "id": "K716",
+    "title": "K716: ★★★ Panic Paralysis CONFIRMED — normalized shock impact decreases with VIX",
+    "content": "[提出: 用戶, 執行: Claude] 恐慌麻痺效應驗證。VIX shock(|ΔVIX|>2) 的 |SPY return| 隨 VIX 增加（raw amplification），但 normalized(|r|/VIX) 隨 VIX 遞減（slope=-0.00028）——每單位恐慌的邊際衝擊遞減。Shock/normal ratio: calm 3.16x → elevated 2.37x → high 2.32x。VIX=12 時 2pt shock = 17% 相對變化（大驚小怪），VIX=35 時 2pt = 6%（已經麻了）。可發展為論文：「波動率吸收假說——恐慌的邊際遞減」。與 K661(NFP VIX>25 效果消失) 一致。",
+    "tags": [
+      "panic-paralysis",
+      "volatility-absorption",
+      "marginal-fear",
+      "VIX",
+      "novel-concept",
+      "paper-candidate"
+    ],
+    "data_source": "yfinance SPY/VIX 2006-2026",
+    "experiment_id": "k716",
+    "created_at": "2026-03-30T10:40:53.987420",
+    "importance": 4
   }
 ]
