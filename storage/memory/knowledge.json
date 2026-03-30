@@ -17773,5 +17773,26 @@
     "data_source": "yfinance (^TNX, ^IRX, SPY, ^VIX)",
     "created_at": "2026-03-30T22:39:51.576825",
     "category": "research"
+  },
+  {
+    "id": "K750",
+    "title": "K750: Google Trends Fear Proxy — Real Alternative Data, NULL for Vol Prediction (VIX Sufficiency #36)",
+    "content": "[提出: Claude, 執行: Claude] K750: Google Trends as Fear Proxy — tested REAL Google Trends search volume (pytrends) for 5 fear-related terms: \"stock market crash\", \"recession\", \"VIX\", \"market crash\", \"bear market\" (US, 2010-2026 weekly). Composite Google Fear Index (rolling z-score of 5 terms). N=797 weekly. Part A: Fear-VIX corr=0.421, Fear-RV corr=0.570, Fear-SPY ret corr=-0.286. Part B: In-sample ΔR²=0.0377 (VIX R²=0.486 → VIX+Fear 0.524), partial r|VIX=0.271 (t=7.92, sig). BUT OOS DM t=0.669 (Harvey FAIL, 744 forecasts). Part C: Fear Binary strategy Sharpe=0.834 < BH 50/50 0.938 < 12/VIX 0.904. DM vs BH t=-0.96 (NS). Part D: CRITICAL FINDING — peak cross-correlation at lag=0 (contemporaneous), NOT leading. Fear LAGS VIX at lag=-1 (r=0.306) > lag=+1 (r=0.369). Google searches are REACTIVE to market events, not predictive. Granger test: Fear(t-1) → ΔlnVIX(t) coef=-0.0216 (t=-2.71, sig) — but NEGATIVE sign means high fear predicts VIX DECREASE (mean-reversion, not escalation). Part E: Cross-OOS 1/5 FAIL. Conclusion: Google Trends search volume is genuine alternative data but does not beat VIX for either prediction or trading. In-sample partial correlation exists (0.271) but does not survive OOS. VIX sufficiency #36. References: Da, Engelberg & Gao (2015) RFS; Vlastakis & Markellos (2012) JBFA; Preis, Moat & Stanley (2013) Sci Rep.",
+    "tags": [
+      "alternative_data",
+      "google_trends",
+      "search_volume",
+      "behavioral",
+      "sentiment",
+      "null_result",
+      "VIX_sufficiency",
+      "jump_direction",
+      "investor_attention"
+    ],
+    "experiment_id": "K750",
+    "data_source": "Google Trends (pytrends) + yfinance (SPY, GLD, ^VIX)",
+    "data_period": "2010-2026",
+    "created_at": "2026-03-30T14:57:34Z",
+    "category": "research"
   }
 ]
