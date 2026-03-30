@@ -16959,5 +16959,21 @@
     "experiment_id": "k721",
     "created_at": "2026-03-30T11:36:42.606403",
     "importance": 4
+  },
+  {
+    "id": "K722",
+    "title": "K722: Absorption-adjusted VIX does NOT improve vol prediction (corr 0.669 < raw 0.680)",
+    "content": "[提出: 論文應用, 執行: Claude] 嘗試用 absorption factor 調整 VIX 來改善 vol 預測。Adjusted VIX corr=0.669 < raw VIX 0.680。Combined R² incremental 僅 0.002。結論：absorption 是描述性現象非預測工具——VIX 本身已最佳，調整反而加噪音。這強化論文定位：absorption 解釋市場行為但不改善預測。",
+    "tags": [
+      "absorption-adjusted",
+      "prediction",
+      "null-result",
+      "VIX-sufficiency",
+      "descriptive-not-predictive"
+    ],
+    "data_source": "yfinance SPY/VIX 2006-2026",
+    "experiment_id": "k722",
+    "created_at": "2026-03-30T11:58:41.808889",
+    "importance": 2
   }
 ]
