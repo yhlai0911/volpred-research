@@ -820,7 +820,12 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **K733 Regime Rebalancing**：Monthly 明確勝出（Net Sharpe 0.892），adaptive 反而更差
 - [x] **K734 VRP Trading**：學術顯著（t=3.51）但 R²<0.3%，不可交易
 - [x] **⚠️ K735 Drawdown Recovery**：描述性結果有效（22 episodes anatomy），但 Codex 抓到 2 HIGH bugs（fake OOS + predictor/target timing misalignment）。策略結果（+29% Sharpe）被 lookahead 污染，不可信。第 4 次 Codex 抓到 false breakthrough
-- [ ] K736 Calendar Anomaly vs VT：進行中
+- [x] K736 Calendar Anomaly vs VT：VT ≠ calendar（R²=0.000），88% VIX level response
+- [x] K737 Max Diversification：50/50 SPY/GLD 勝 28 種多資產組合
+- [x] **★ K738 VT Insurance Cost-Benefit**：Codex 二審 PASS。γ≥4.5→VT，cost 3.49%/yr（12/VIX）、2.12%（EWMA）
+- [x] ⚠️ K739 Taiwan Cross-Val：2/4 generalizes（VIX suff + calendar NS），2/4 不同（20/80 配置 + daily rebalance）。Codex: holiday calendar bug
+- [x] **★ K740 Strategy Meta-Analysis**：簡單+多資產=最佳。複雜度 vs Sharpe ρ=0.149 NS。Piecewise Conservative 主導效率前緣
+- [ ] K741 NFP Event Study：進行中（04/03 準備）
 
 **新方向（post-K697 alpha impossibility）：**
 - [ ] **Asset selection optimization**：不用 timing 而是用更好的資產配置（beyond SPY/GLD）
