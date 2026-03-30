@@ -833,13 +833,16 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] K746 Bitcoin×VIX：BTC 非避風港，coupling post-2021 增。Granger 方法待修
 - [x] Paper 1 更新：+K736/K738/K742/K743 → 53p
 
-**新方向（post-K746）：**
-- [x] **Asset selection optimization**：K737 測 28 組合，50/50 SPY/GLD 仍最佳
-- [ ] **Risk budgeting**：Equal Risk Contribution portfolio without timing
+**新方向（post-K749，2026-03-30 session 完成）：**
+- [x] **Asset selection**：K737 測 28 組合 + K747 ERC = 50/50 仍最佳
+- [x] **Risk budgeting**：K747 ERC = zero sophistication premium（Sharpe 1.795 vs 50/50 1.849, NS）
+- [x] **Simplicity premium**：K748 REJECTED — 設計品質 > 簡單性（修正 K740）
+- [x] **Macro signal**：K749 殖利率曲線被 VIX 吸收（partial r < 0.08）
+- [x] Paper 2 更新：+K739/K738 → 45p
 - [ ] **Alternative data**：NLP sentiment、satellite data
 - [ ] **Intraday alpha**：5-min RV 數據就緒後（ETA 04/11），日內 alpha
 - [ ] **Crypto fear channel**：K746 Granger 需用 forward-looking RV 重做
-- [ ] **Cross-asset regime detection**：不基於 VIX 的 regime 識別
+- [ ] **Fix K739 Taiwan holiday handling**：用 TW-only calendar 重做
 
 ### P3: 長期待辦
 
