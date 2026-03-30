@@ -795,7 +795,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 **新研究主軸（用戶提出 2026-03-30）：**
 - [ ] **什麼是好的交易策略？多維度評估框架**：不只看 Sharpe——CAGR、勝率、壓力情境表現、操作複雜度、TX 成本都要。高 Sharpe 但 CAGR 3% 不算好策略。建立量化評估矩陣。
-- [ ] **恐慌麻痺效應（Panic Paralysis / Volatility Absorption）**：VIX 已高時，額外衝擊的邊際影響遞減。K661 發現 VIX>25 時 NFP 效果消失。可擴展為正式論文——「波動率吸收假說」。相關文章：mile_44fb4b90。
+- [x] **恐慌麻痺效應（Paper 4: Volatility Absorption）**：33p 論文完成，3 輪 Codex 審查通過，已上架 Supabase（target JFE）。K716/K718/K721 支撐。4 項最終殘留已修正。
 
 **論文修正：**
 - [ ] **Leverage-Direction**（K628 已瘦身 64→52p）：加入「VT is insurance」框架
@@ -810,10 +810,17 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### P2: 研究新方向
 
-**已完成（本 session）：**
+**已完成（本 session K730-K736）：**
 - [x] MF2-GARCH（K621-K623）：實作困難，Codex 抓 5 bugs
 - [x] Window Size Sensitivity（K622）：w=1000-1500 sweet spot
 - [x] 月頻 VT 最佳化（K642）：US daily 最佳，TW monthly
+- [x] **K730 Cross-Asset Vol Momentum**：Granger-causal（6/8 sig）但 OOS 不可用，VIX sufficiency #25+
+- [x] **K731 VIX Term Structure**：不 lag-robust（衰減 0.757），VIX level 足夠
+- [x] **K732 Behavioral Sentiment**：partial r|VIX = 0.091，完全被 VIX 主導
+- [x] **K733 Regime Rebalancing**：Monthly 明確勝出（Net Sharpe 0.892），adaptive 反而更差
+- [x] **K734 VRP Trading**：學術顯著（t=3.51）但 R²<0.3%，不可交易
+- [x] **★ K735 Drawdown Recovery**：VIX 預測回撤深度（ρ=-0.49, p=0.02）和恢復時間（ρ=+0.45, p=0.04）— VIX 第三種用途！N=22 小樣本待確認
+- [ ] K736 Calendar Anomaly vs VT：進行中
 
 **新方向（post-K697 alpha impossibility）：**
 - [ ] **Asset selection optimization**：不用 timing 而是用更好的資產配置（beyond SPY/GLD）
