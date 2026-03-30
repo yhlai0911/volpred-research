@@ -17485,5 +17485,24 @@
     "phase": "research",
     "importance": 4,
     "timestamp": "2026-03-30T11:31:31.389483+00:00"
+  },
+  {
+    "id": "K740",
+    "title": "What Makes a Good Trading Strategy? Meta-Analysis of 14 Paper-Trading Strategies",
+    "content": "[提出: 用戶, 執行: Claude] 14 策略 meta-analysis（2023-01-04~2026-03-27 實際 paper trading）。核心發現：(1) 複雜度不預測 Sharpe（Spearman rho=0.149, p=0.611），簡單 VIX 策略表現與 GARCH 同級。(2) 多資產分散溢酬 +0.826 Sharpe，SPY+GLD 均值 2.546 vs SPY-only 1.176。(3) Piecewise Conservative 獨佔效率前緣（Sharpe 3.158, MDD -2.48%, Calmar 7.26）。(4) 月頻再平衡略勝日頻（2.343 vs 2.094），可能因交易成本節省。(5) 投資人分類指南：保守→Piecewise/Adaptive Tier，成長→台股動量/TW+JP TZ，台灣→台股混合槓桿/台灣 VT，簡單→12/VIX/50-50。14 策略 Sharpe 中位數 2.17，MDD 中位數 -9.2%。局限：3.2 年追蹤期、多頭市場偏差、不含 2020 崩盤。",
+    "tags": [
+      "meta-analysis",
+      "strategy-selection",
+      "paper-trading",
+      "composite-score",
+      "efficiency-frontier",
+      "diversification",
+      "complexity",
+      "用戶提問"
+    ],
+    "data_source": "storage/paper_trading.json (forward-tracked), storage/strategy_metrics.json",
+    "experiment_id": "K740",
+    "created_at": "2026-03-30T19:40:12.857837",
+    "phase": "K_meta_analysis"
   }
 ]
