@@ -253,6 +253,7 @@ Tag 規則：
 - [ ] content 欄位非空且 > 300 字
 - [ ] 寫入 `storage/reports/feed.json`（`storage/feed.json` 已廢除，不要使用）
 - [ ] 寫入 `storage/reports/{id}.json`，且**必須包含完整 content**（不可空白）
+- [ ] **圖片 URL 必須是 Supabase Storage**（`https://...supabase.co/storage/...`），不可用 `/tmp/` 本地路徑
 - [ ] 寫完後執行 `uv run python scripts/supabase_sync.py full`（確保同步到 Supabase）
 - [ ] Badge：category=milestone, status=published
 - [ ] **tags 欄位**：包含資產代碼 + 方法 + 主題分類
