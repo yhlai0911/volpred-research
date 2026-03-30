@@ -1,7 +1,8 @@
 {
-  "saved_at": "2026-03-30T09:47:43.687950+00:00",
+  "saved_at": "2026-03-30T09:52:37.550428+00:00",
   "reason": "pre-compact auto-save",
   "recent_commits": [
+    "6c72d9e Pre-emptive session state save (context near limit)",
     "fb6974b Hook: Stop also saves session state (PreCompact + Stop = double safety)",
     "e7a85fa Hook: PreCompact auto-saves session state, PostCompact recovers",
     "7bbc731 Bi-hourly: index 3941, knowledge 1478, all systems nominal",
@@ -30,14 +31,13 @@
     "e309016 Paper 4: Volatility Absorption first draft (29 pages)",
     "42ceced K721: Rate shocks absorbed most (+0.019), geopolitical NOT absorbed (-0.003)",
     "5d00335 K720: VRP narrows but stays POSITIVE — K719 sign flip was method artifact",
-    "bb023f8 K719: Volatility Absorption economic implications — VRP flips negative at VIX>25",
-    "ca9d52d K718: Panic Paralysis cross-asset — 3/4 confirm (SPY/GLD/TLT yes, 0050 no)"
+    "bb023f8 K719: Volatility Absorption economic implications — VRP flips negative at VIX>25"
   ],
   "knowledge_count": 1478,
   "last_experiment": "K729",
   "uncommitted_files": 1,
   "draft_count": 1,
-  "metrics_age_hours": 22.1,
+  "metrics_age_hours": 22.2,
   "next_priorities": "## Next Session Priorities（2026-03-30 起）\n\n基於 K621-K701 session（81 實驗、paradigm shift: VT=insurance not alpha、K693 數據修正、4 Codex 審查），依優先級排序。\n\n### 重大研究結論更新（2026-03-29 K687/K697/K700/K701）\n\n**VT 策略是 drawdown insurance，不是 alpha generator。**\n- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）\n- K697：VIX 預測 vol（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 理論不可能\n- K701：weekly/monthly 也一樣（direction corr 全部<0.04）\n- K688：VT 在 CRRA utility γ≥5 時勝出——drawdown protection 對風險厭惡投資人有價值\n- K693：歷史 paper_trading 9935 筆修正 same-day→next-day return\n- K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）\n\n### P0: 時間敏感\n\n| 項目 | 說明 | 截止日 |\n|------|------|--------|\n| **NFP 04/03 事後文章** | 非農數據發布後 1 天內發解讀文（K661 數據已備） | 04/04 |\n| **HAR-RV 正式實驗** | 5-min 數據 ETA 04/11 達 60 天門檻 | 04/11 |\n| **TSMC 營收 04/10** | 預告+解讀文 | 04/08, 04/11 |\n| **TSMC 法說 04/16** | 預告+解讀文 | 04/14, 04/17 |\n\n### P1: 高價值\n\n**新研究主軸（用戶提出 2026-03-30）：**\n- [ ] **什麼是好的交易策略？多維度評估框架**：不只看 Sharpe——CAGR、勝率、壓力情境表現、操作複雜度、TX 成本都要。高 Sharpe 但 CAGR 3% 不算好策略。建立量化評估矩陣。\n- [ ] **恐慌麻痺效應（Panic Paralysis / Volatility Absorption）**：VIX 已高時，額外衝擊的邊際影響遞減。K661 發現 VIX>25 時 NFP 效果消失。可擴展為正式論文——「波動率吸收假說」。相關文章：mile_44fb4b90。\n\n**論文修正：**\n- [ ] **Leverage-Direction**（K628 已瘦身 64→52p）：加入「VT is insurance」框架\n- [ ] **Taiwan VT**：K636 修正 amplification（gamma vs vol level）、TX cost 已修正\n- [x] **VT-Trend**：6 項 K585 Codex 修正完成（2026-03-30）\n\n**平台經營方向（基於 analytics：192 views, 3 users, 10 reactions）：**\n- [ ] **SEO 是最優先**：3 個用戶太少，需要 Google Search Console + sitem",
   "pending_events": [
     "NFP 04/03 — post-event article template ready (mile_nfp_040326)",
