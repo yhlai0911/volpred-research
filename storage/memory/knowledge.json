@@ -17372,5 +17372,19 @@
       "DeMiguel, Garlappi & Uppal (2009) Optimal vs Naive Diversification, RFS",
       "Maillard, Roncalli & Teiletche (2010) On the Properties of ERC Portfolios, JPM"
     ]
+  },
+  {
+    "id": "K737-review",
+    "title": "Codex Review K737: 2 HIGH (daily constant-weight not monthly, baseline same bias)",
+    "content": "[提出: Codex, 執行: Claude] K737 review: (1) HIGH: 'Monthly rebalancing' is actually daily constant-weight — engine reuses target weights daily, not hold-and-drift. (2) HIGH: 50/50 baseline also daily constant-weight, not true static. OOS hardcodes 9-asset configs. (3) MEDIUM: TX against prior targets not drifted holdings. CONCLUSION PROBABLY SAFE: same bias affects ALL strategies uniformly, so relative rankings (50/50 > multi-asset) likely hold. But absolute Sharpe inflated. PATTERN: daily constant-weight vs true monthly hold-and-drift is a recurring confusion across experiments.",
+    "tags": [
+      "codex-review",
+      "K737",
+      "methodology",
+      "rebalancing-convention"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-30T11:09:15.414585+00:00"
   }
 ]
