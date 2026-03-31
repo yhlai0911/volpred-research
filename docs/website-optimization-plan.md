@@ -47,39 +47,35 @@
 ## Phase W1: SEO 基礎建設（最高優先）
 
 ### W1.1 搜尋引擎基礎
-- [ ] 新增 `robots.txt`（`frontend-v2/src/app/robots.ts`）
-- [ ] 新增 `sitemap.xml`（`frontend-v2/src/app/sitemap.ts`），動態列出所有文章
-- [ ] 新增 favicon + apple-touch-icon（`frontend-v2/public/`）
-- [ ] 新增 `manifest.json`（PWA 支援，可加到手機主畫面）
+- [x] 新增 `robots.txt`（`frontend-v2/src/app/robots.ts`） ✅ 2026-03-31
+- [x] 新增 `sitemap.xml`（`frontend-v2/src/app/sitemap.ts`），動態列出所有文章 ✅ 2026-03-31
+- [x] 新增 favicon + apple-touch-icon（`frontend-v2/public/`） ✅
+- [x] 新增 `manifest.json`（PWA 支援，可加到手機主畫面） ✅
 
 ### W1.2 Open Graph & 社群分享
-- [ ] `layout.tsx` 加入全站預設 OG tags（og:title, og:description, og:image, og:url）
-- [ ] `/reports/[id]` 加入 `generateMetadata()` 動態產生每篇文章的 title、description、OG tags
-- [ ] 製作預設 OG image（1200x630，品牌視覺）
-- [ ] 各子頁面加入各自的 metadata（VIX 計算器、風險預報、論文、問答）
+- [x] `layout.tsx` 加入全站預設 OG tags（og:title, og:description, og:image, og:url） ✅ 2026-03-31
+- [x] `/reports/[id]` 加入 `generateMetadata()` 動態產生每篇文章的 title、description、OG tags ✅
+- [x] 製作預設 OG image（1200x630，品牌視覺） ✅
+- [x] 各子頁面加入各自的 metadata（VIX 計算器、風險預報、論文、問答） ✅ 2026-03-31
 
 ### W1.3 結構化資料
-- [ ] 文章頁加入 JSON-LD `Article` schema
-- [ ] 問答頁加入 JSON-LD `FAQPage` schema
-- [ ] 首頁加入 JSON-LD `WebSite` schema（啟用 Google Sitelinks Search Box）
+- [x] 文章頁加入 JSON-LD `Article` schema（含 dateModified, image, BreadcrumbList） ✅ 2026-03-31
+- [x] 問答頁加入 JSON-LD `FAQPage` schema ✅ 2026-03-31
+- [x] 首頁加入 JSON-LD `WebSite` schema（啟用 Google Sitelinks Search Box） ✅
 
 ## Phase W2: 首頁改造 — 產品化
 
 ### W2.1 Hero Section
-- [ ] 新增 Hero 區塊：一句話價值主張 + 副標題 + CTA 按鈕
-  - 主標題：「AI 驅動的科學化投資策略」
-  - 副標題：「每日更新波動率預測，幫你決定該持有多少股票」
-  - CTA：「查看今日建議」→ 滾動到策略卡片
+- [x] 新增 Hero 區塊：一句話價值主張 + 副標題 + CTA 按鈕 ✅
 - [ ] 策略卡片加一行導語：「以下策略正在用真實數據實盤追蹤 →」
 
 ### W2.2 內容分層
-- [ ] 首頁預設顯示「一般讀者」tab（而非「全部」）
+- [x] 首頁預設顯示「一般讀者」tab（而非「全部」） ✅ 2026-03-31
 - [ ] 新增「精選文章」區塊（手動或自動置頂高品質一般讀者文章）
 - [ ] 「研究」tab 改為需要點擊才展開，避免嚇跑新訪客
 
 ### W2.3 重複內容清理
-- [ ] 修改 `daily_update.py`：同一天只保留最新一篇「每日建議」
-- [ ] 或在前端 deduplicate 同日同標題的文章
+- [x] Publisher.py 24h dedup by title ✅
 
 ## Phase W3: 用戶留存機制
 
@@ -89,7 +85,7 @@
 - [ ] 或串接 LINE Notify API，每日推送策略建議
 
 ### W3.2 社群 & 分享
-- [ ] 每篇文章加入分享按鈕（LINE、Facebook、Twitter、複製連結）
+- [x] 每篇文章加入分享按鈕（LINE、Facebook、X/Twitter、複製連結） ✅ 2026-03-31
 - [ ] 頁尾加入社群連結（如有經營 LINE 群、FB 粉專）
 - [ ] 文章卡片加入「分享」快捷按鈕
 
@@ -100,7 +96,7 @@
 ## Phase W4: 信任 & 品牌
 
 ### W4.1 關於頁面
-- [ ] 新增「關於」頁面（`/about`）：研究背景、團隊（大葉大學）、研究方法
+- [x] 新增「關於」頁面（`/about`）：研究背景、團隊、研究方法 ✅
 - [ ] 加入學術論文引用作為可信度背書
 
 ### W4.2 績效視覺化（合併 V0.1 + V0.4）
@@ -111,8 +107,8 @@
 - [ ] 策略面板「查看績效」連結（V0.3）
 
 ### W4.3 法律 & 免責
-- [ ] 新增免責聲明頁面（`/disclaimer`）
-- [ ] 頁尾加入「免責聲明」連結
+- [x] 新增免責聲明頁面（`/disclaimer`） ✅
+- [x] 頁尾/導航加入「免責聲明」連結 ✅
 
 ## Phase W5: 技術優化
 

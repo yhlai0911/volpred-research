@@ -492,7 +492,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] **Taiwan VT**：K636 修正 amplification（gamma vs vol level）、TX cost 已修正
 
 **平台經營方向（基於 analytics：192 views, 3 users, 10 reactions）：**
-- [ ] **SEO 是最優先**：3 個用戶太少，需要 Google Search Console + sitemap 提交
+- [x] **SEO 完成**：Google Search Console 驗證 + sitemap + 6 頁 metadata + FAQ/Article/Breadcrumb schema + admin noindex + /portfolio 公開路由 ✅ 2026-03-31
+- [x] **分享按鈕**：LINE/Facebook/X/Twitter + 複製連結 ✅ 2026-03-31
+- [x] **首頁預設「一般讀者」tab** ✅ 2026-03-31
 - [ ] **加強入門內容**：「從零開始」是最熱門文章之一，應建立 /guide 頁面
 - [ ] **減少學術文章比例，增加實務操作指南**：收藏(7)>按讚(3) = 讀者當工具書用
 - [ ] K705 GAP-03：StrategySelector 不要突出 CAGR
