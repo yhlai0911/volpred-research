@@ -708,3 +708,7 @@ K519-K521 完成結果 + K527 Volume-GARCH 結果：見 `docs/research_archive/c
 - [ ] Feature gating（V0.7）
 - [ ] API rate limiting（V0.9）
 - [ ] Email/LINE 訂閱（W3.1）
+
+#### 用戶提出方向（2026-03-31）
+- [ ] **HAR-RV with 5-day RV**：用 5 日內日頻 squared returns 加總作為 5-day RV，避免日內數據不足。可討論中期（週/月/季/年）波動預測。[提出: 用戶]
+- [ ] **MEM（Multiplicative Error Model）**：Engle & Gallo (2006) 的相乘誤差模型，作為 GARCH 和 HAR 之外的第三條路線。適合正值時間序列（RV, volume, duration）。[提出: 用戶]
