@@ -17968,5 +17968,42 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-31T05:00:56.739200+00:00"
+  },
+  {
+    "id": "K755",
+    "experiment_id": "K755",
+    "title": "K755: ★★★ FOMO Cooling Mechanism — Lock-5d best (+0.022 Sharpe vs 12/VIX), mean reversion confirmed but none beat BH 50/50",
+    "content": "[提出: Claude (from K743 + research_program), 執行: Claude] K755: FOMO COOLING MECHANISM. Data: yfinance SPY/GLD/VIX 2007-2026 (4839 trading days). Part A: FOMO events (SPY >+2%) occur 8.3x/year (159 events, 3.3% of days). CRITICAL FINDING: next-1d mean return -0.319% (t=-2.07, p<0.05) — statistically significant mean reversion! Next-2d: -0.35% (t=-1.43, ns). Next-5d: -0.49% (t=-1.35, ns). But by day 20, +1.06% (t=1.86, marginal momentum). VIX regime matters: 67% of FOMO events occur at VIX>25 (crisis recoveries, not genuine rallies). High-VIX FOMO next-5d: -0.83%; Low-VIX FOMO: +0.23%. Part B: 4 cooling variants vs perfect 12/VIX (Sharpe 0.505). Lock-5d BEST: Sharpe 0.527 (+0.022), MDD -0.312 (from -0.323). Lock-48h: 0.524. Gradual-return: 0.526. Cap-increase: 0.505 (≈no change). Combined Robust (Lock+Panic floor): 0.524, best MDD -0.306. Bootstrap: Lock-48h vs 12/VIX p=0.057, marginal significance. ALL cooling variants improve vs 12/VIX but NONE beat BH 50/50 (0.547). Sub-periods: cooling helps most during GFC (0.072→0.136 Sharpe) and recovery periods. Sensitivity: 1.5% threshold best Sharpe 0.531, MDD -0.298. Lock=10d hurts (0.494). CONCLUSION: FOMO cooling is a real but small effect (+2-4% Sharpe improvement over 12/VIX). Mean reversion after large rallies is genuine (especially high-VIX days). Cooling reduces turnover 5-8% and MDD 1-2pp. As behavioral guardrail it works; as alpha source it's marginal. Consistent with K743 (FOMO costliest mistake) but the systematic cure is mild.",
+    "evidence": [
+      "SPY >+2%: 159 events in 4839 days (3.3%), 8.3x/year",
+      "Next-1d mean: -0.319% (t=-2.07, p<0.05) — significant mean reversion",
+      "67% of FOMO events occur at VIX>25 (crisis recovery bounces)",
+      "High-VIX FOMO next-5d: -0.83%, Low-VIX: +0.23%",
+      "Lock-5d Sharpe: 0.527 vs 12/VIX 0.505 (+0.022), Bootstrap p=0.14",
+      "Lock-48h vs 12/VIX: +0.019 Sharpe, p=0.057 (marginal)",
+      "Combined Robust best MDD: -0.306 (vs 12/VIX -0.323)",
+      "BH 50/50 Sharpe: 0.547 — none beat passive benchmark",
+      "Sensitivity: 1.5% threshold optimal (Sharpe 0.531), Lock 10d hurts (0.494)"
+    ],
+    "confidence": 0.85,
+    "tags": [
+      "behavioral-finance",
+      "FOMO",
+      "cooling-mechanism",
+      "mean-reversion",
+      "12/VIX",
+      "VT-strategy",
+      "SPY",
+      "GLD",
+      "drawdown",
+      "investor-protection"
+    ],
+    "category": "behavioral_finance",
+    "phase": "research",
+    "importance": 3,
+    "data_source": "yfinance (SPY, GLD, ^VIX), 2007-2026",
+    "experiment_file": "experiments/k755_fomo_cooling.py",
+    "results_file": "experiments/k755_fomo_cooling_results.json",
+    "timestamp": "2026-03-31T05:57:49.066118+00:00"
   }
 ]

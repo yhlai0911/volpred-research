@@ -673,7 +673,7 @@ K519-K521 完成結果 + K527 Volume-GARCH 結果：見 `docs/research_archive/c
 - [ ] **VT Insurance 實務指南頁面**：K738 decision guide（γ≥4.5）已確認，做成網站互動工具（`/vt-calculator`）
 
 **中優先（新研究主題）：**
-- [ ] **FOMO 行為干預設計**：K743 發現 FOMO 成本 5x > Panic。設計「冷靜期」機制——當 SPY 單日 >2% 時，VT 策略自動鎖定 48 小時不調倉。測試是否改善投資人行為
+- [x] **FOMO 行為干預設計**：K755 — Lock-5d 最佳（+4% Sharpe vs 12/VIX），但仍不勝 BH 50/50。Mean reversion 真實（t=-2.07）。最佳用途=行為護欄（MDD -1-2pp），非 alpha
 - [ ] **Robust VT 設計**：K743 的 floor(30%)/cap(90%) + EWMA 平滑 + 週頻 rebalance 組合。修正 Codex 找到的 bug 後重跑
 - [ ] **VIX Regime 轉換預測**：K752 發現不同 era 的 VIX R² 差異大（0.24-0.64）。能否預測 VIX regime 何時轉換？（從低 vol QE 進入高 vol inflation era）
 - [ ] **Drawdown Recovery 修正版**：K735 被 Codex 推翻（fake OOS + timing misalign）。修正方法論後重做——用 proper expanding window OOS + peak-to-first_cross recovery time
