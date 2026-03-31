@@ -18617,5 +18617,25 @@
     "data_source": "yfinance (0050.TW, 2330.TW, 2881.TW, 2882.TW, ^VIX), 2010-2026, clean_tw50_data",
     "created_at": "2026-03-31T20:16:00.117667",
     "category": "risk_transmission"
+  },
+  {
+    "id": "k_20260331_k776",
+    "experiment_id": "K776",
+    "title": "K776 DMEM (Long/Short Components): AMEM still wins — explicit decomposition loses OOS",
+    "content": "[提出: 用戶 + 文獻, 執行: Claude] DMEM decomposes x_t = τ_t × g_t × ε_t into long-run τ_t = exp(ω_τ + α_τ × log(RV_22d)) and short-run g_t with leverage (7 params total). On SPY 2007-2026 (n_oos=4326), QLIKE ranking: AMEM(0.473) > DMEM(0.483) > GJR(0.487) > MEM(0.498) > HAR-ABS(0.502). DM test DMEM vs AMEM: +4.35 (Harvey PASS) — AMEM significantly better. Full-sample NLL improvement +122 (DMEM wins IS with 7 vs 5 params), but OOS the extra parameters hurt. α_g collapsed to 0 in DMEM (short-run ARCH dead). Regime split: DMEM wins calm (QLIKE 1.18 vs 1.22) but loses crisis (0.41 vs 0.37) — τ_t estimation noise amplified during volatility spikes. AMEM β=0.88 implicitly captures long-memory without explicit decomposition. Subsample: AMEM #1 in all 3 splits. Conclusion: simpler AMEM dominates despite DMEM theoretical appeal.",
+    "tags": [
+      "DMEM",
+      "AMEM",
+      "MEM",
+      "volatility_forecasting",
+      "long_short_decomposition",
+      "SPY",
+      "QLIKE",
+      "Harvey_test",
+      "model_comparison"
+    ],
+    "data_source": "yfinance SPY 2007-01-04 to 2026-03-30",
+    "created_at": "2026-03-31T12:28:51.864562+00:00",
+    "category": "volatility_models"
   }
 ]
