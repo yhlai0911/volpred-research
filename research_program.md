@@ -166,6 +166,15 @@
 - [x] **Regime-Switched Carry Filter**：K763 NULL — binary switching 顯著差於 12/VIX（DM p<0.001）。平滑連續>離散二元。Codex 0 HIGH
 - [x] **Alt Risk Premia Rotation**：K760 NULL — 混合 4 弱信號=信號稀釋。12/VIX 簡單最強。Codex 4/4 PASS
 - [x] **Action-First ML (Meta-Model)**：K762 NULL — consensus=12/VIX 平滑版，不勝 50/50。Codex 2 HIGH（weight parsing + binary consensus）
+
+#### Codex 第 8 次建議：從 vol 預測轉向風險管理實務（2026-03-31）[提出: Codex GPT-5.4]
+**核心洞見**：VIX sufficiency 已確認——不再嘗試打敗 VIX，改為用 VIX 建構更好的風險管理工具。
+- [ ] **跨資產 All-Weather VT**：SPY+TLT+GLD+DBC+SGOV+BTC ETF 組合，target-vol + weight caps + cash floor。超越 2-asset。可行性高。
+- [ ] **債券壓力去風險信號**：HYG/LQD/TLT spread + rolling vol → 預測 SPY downside semivariance。非 VIX 依賴的去風險規則。
+- [ ] **Dispersion Timing（index vs sector）**：當 sector 分散度高時，equal-weight sectors > hold SPY。long-only ETF 實作。
+- [ ] **Tail-First ES 配置 + Conformal Calibration**：從「預測 vol」轉向「控制尾部風險」。inverse-ES 配置 + 校準覆蓋率 OOS 驗證。
+- [ ] **Event-Risk Budgeter（CPI/FOMC/NFP/Earnings）**：事件窗口自動半倉。實務投資人工具，不只是事後分析。
+- [x] **Action-First ML (Meta-Model)**：K762 NULL — consensus=12/VIX 平滑版，不勝 50/50。Codex 2 HIGH（weight parsing + binary consensus）
 - **5% BTC 唯一統計顯著改善但尾部風險代價**（K66: p=0.014, 但 coskewness -0.50）
 - **Sector VT uniform**（K58: gamma 不預測行業 VT 效果）
 - **International VT universal**（K68: 13/13 市場 MDD 改善，US VIX 通用）
