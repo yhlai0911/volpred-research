@@ -1,34 +1,34 @@
 {
-  "timestamp": "2026-03-30T18:09:33.704793+00:00",
+  "timestamp": "2026-03-31T00:04:25.901111+00:00",
   "all_ok": true,
   "checks": [
     {
-      "name": "ARTICLE POOL",
+      "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "7 draft articles in pool (threshold: >=3)"
+      "detail": "6 draft articles in pool (threshold: >=3)"
     },
     {
-      "name": "STRATEGY METRICS FRESHNESS",
+      "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json is 16.6 hours old (threshold: <26h)"
+      "detail": "strategy_metrics.json age: 0.0 hours (threshold: <26h)"
     },
     {
-      "name": "ERROR LOG",
+      "name": "ERROR_LOG_RECENT",
       "status": "ok",
-      "detail": "Last error log entry dated 2026-03-29 (yesterday): K693 不應修改歷史數據 — paper_trading.json history modification caused sync issues, resolved by reverting and adding recalc_metrics.py auto-sync."
+      "detail": "Recent errors (today/yesterday): none. Last entry dated 2026-03-29."
     },
     {
-      "name": "PAPER TRADING GAPS",
+      "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies have <=1 null in last 3 entries (threshold: >2 nulls triggers alert). Typical: 1 null = todays entry pending."
+      "detail": "All 14 strategies have <=1 null in last 3 entries (threshold: >2 nulls triggers alert). 1 null = today's entry pending."
     },
     {
-      "name": "GIT STATUS",
+      "name": "GIT_STATUS",
       "status": "ok",
       "detail": "0 uncommitted files (threshold: >50)"
     },
     {
-      "name": "KNOWLEDGE SIZE",
+      "name": "KNOWLEDGE_SIZE",
       "status": "ok",
       "detail": "1519 entries in storage/memory/knowledge.json"
     }
