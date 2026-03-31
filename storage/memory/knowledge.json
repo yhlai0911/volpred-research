@@ -18396,5 +18396,22 @@
     "importance": 5,
     "data_source": "yfinance (SPY/GLD/0050.TW), 2007-2026",
     "timestamp": "2026-03-31T10:49:26.675403+00:00"
+  },
+  {
+    "experiment_id": "K771",
+    "title": "Dispersion Timing — Index vs Sector Basket (Codex 8th suggestion)",
+    "content": "[提出: Codex GPT-5.4, 執行: Claude] K771: Sector dispersion timing REJECTED. Hypothesis: high cross-sector return dispersion → EW sectors outperform SPY. Reality: EW sectors underperform SPY by 108% cumulative over 2010-2026. Dispersion timing (net TX) Sharpe 0.812 < SPY B&H 0.822 < 50/50 SPY/GLD 0.973 < 12/VIX 1.054. Per-regime analysis: EW sectors underperform SPY in ALL regimes (low: -1.7%, medium: -1.7%, high: -0.1%). Cross-OOS: only beats SPY 2/7, beats 50/50 3/7. DM test p<0.001 confirms dispersion timing significantly WORSE than SPY. Dispersion-VIX corr=0.66 (dispersion is mostly redundant with VIX). Sensitivity stable (window ±20% → Sharpe ±1.5%). Key insight: cap-weighted SPY dominates EW sectors because large-cap tech (AAPL, MSFT, NVDA) drove returns 2010-2026; equal-weighting dilutes winners.",
+    "tags": [
+      "dispersion",
+      "sector",
+      "timing",
+      "equal-weight",
+      "null-result",
+      "cross-OOS",
+      "Codex-suggestion"
+    ],
+    "data_source": "yfinance (11 sector ETFs + SPY + GLD + VIX, 2010-2026)",
+    "evidence": "k771_dispersion_timing_results.json: Sharpe 0.812 vs SPY 0.822, cross-OOS 2/7",
+    "created_at": "2026-03-31T10:54:49.055359+00:00"
   }
 ]
