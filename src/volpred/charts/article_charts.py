@@ -32,18 +32,28 @@ import numpy as np
 
 
 # ─── Style defaults ─────────────────────────────────────────
-_FONT_CANDIDATES = ["PingFang HK", "PingFang TC", "Heiti TC", "Arial Unicode MS", "Noto Sans CJK SC", "STHeiti", "sans-serif"]
+_FONT_CANDIDATES = ["PingFang HK", "Heiti TC", "STHeiti", "Arial Unicode MS", "PingFang TC", "Noto Sans CJK SC", "sans-serif"]
 _COLORS = ["#2196F3", "#FF9800", "#4CAF50", "#F44336", "#9C27B0", "#00BCD4", "#795548", "#607D8B"]
 _DPI = 150
 _CHART_DIR = Path("/tmp/volpred_charts")
 
 
 def _setup_style():
-    """Configure matplotlib for CJK + clean style."""
+    """Configure matplotlib for CJK + clean style.
+
+    Ensures a real CJK font (PingFang HK or Heiti TC) is resolved.
+    Worktree agents often have a stale font cache that maps CJK names
+    to DejaVu Sans, producing tofu boxes.  We verify the resolved path
+    actually contains a CJK font file, and rebuild the cache if not.
+    """
     import matplotlib.font_manager as fm
-    # Rebuild font cache if needed (worktree agents may have stale cache)
-    if not any(f.name == "PingFang HK" for f in fm.fontManager.ttflist):
+
+    # Quick check: does findfont resolve to a real CJK font?
+    _resolved = fm.findfont("PingFang HK")
+    if "PingFang" not in _resolved and "Heiti" not in _resolved and "STHeiti" not in _resolved:
+        # Stale cache — force full rebuild
         fm._load_fontmanager(try_read_cache=False)
+
     plt.rcParams["font.sans-serif"] = _FONT_CANDIDATES
     plt.rcParams["axes.unicode_minus"] = False
     plt.rcParams["figure.facecolor"] = "white"
