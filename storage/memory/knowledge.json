@@ -18747,5 +18747,25 @@
     "experiment_file": "experiments/k782_har_5d_rv.py",
     "timestamp": "2026-03-31T14:18:05.574863+00:00",
     "importance": "high"
+  },
+  {
+    "id": "K783b",
+    "type": "experiment",
+    "title": "Cross-Asset Window Sensitivity: Optimal Window is ASSET-SPECIFIC, Not Universal",
+    "content": "[提出: K783 衍生, 執行: Claude] 跨資產驗證 K783 expanding window 優勢。結果：最優 window 因資產而異。SPY 偏好 expanding (K783)，QQQ 偏好 w=504（DM=+3.59 Harvey PASS，小 window 顯著勝大 window），GLD 偏好 w=3000（但 NS），0050.TW 偏好 w=1000（NS），BTC 偏好 w=2000（NS）。**w=2000 仍是合理預設**——不應改為 expanding。QQQ 的反向結果特別重要：高波動科技股需要更快適應（小 window），而 SPY 的多元化結構受益於長歷史。這表明 window size 本身可以作為一個 hyperparameter 進行 asset-specific 調優。",
+    "tags": [
+      "window_size",
+      "cross_asset",
+      "sensitivity",
+      "QQQ",
+      "GLD",
+      "0050.TW",
+      "BTC",
+      "methodology"
+    ],
+    "data_source": "yfinance QQQ/GLD/0050.TW/BTC-USD 2000-2024",
+    "experiment_file": "experiments/k783b_cross_asset_window.py",
+    "timestamp": "2026-03-31T14:22:36.142207+00:00",
+    "importance": "high"
   }
 ]

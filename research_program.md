@@ -78,7 +78,7 @@
 - OOS 期間（高波動）: 2022-01-01 ~ 2023-12-31
 - 評估獲利期間：2025-01-01 ~ 2026-03-21（隨時間延伸）
 - Rolling window 預設 2000（w=504 僅在特殊情況使用，gamma sign invariant to window）
-- ⚠️ **K783 發現 expanding window 顯著勝過 w=2000**（DM=-3.23 Harvey PASS, SPY OOS 2023-2024）。中間 window (1000-2000) 反而最差。待 K783b/K783c 跨資產+跨期驗證後可能修改預設。
+- ⚠️ **K783/K783b 結論**：expanding window 在 SPY 勝 w=2000 但在 QQQ 反向（小 window 勝）。**最優 window 因資產而異，w=2000 仍是合理通用預設。**
 - 5-min 數據：SPY 46 天 / 0050.TW 35 天（需 60+ 天 HAR-RV，ETA 2026-04-11）。收集正常（collect_us_data.py 自動調用 collect_5min_data.py）
 
 ### 評估指標
@@ -368,7 +368,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### 即刻可行動（不需新數據）
 1. ★ ~~Window Size Sensitivity~~ → **K783 完成**：expanding window 以 QLIKE=0.529 勝 w=2000 的 0.560（DM=-3.23 Harvey PASS）。w=2000 不是最優。
-   - [ ] **K783b: 跨資產 Window Sensitivity**：在 0050.TW、QQQ、GLD、BTC 重複 K783 驗證 expanding 優勢是否普遍
+   - [x] **K783b 完成**：最優 window 因資產而異。QQQ 偏好 504（DM=+3.59 PASS），GLD 偏好 3000，0050 偏好 1000，BTC 偏好 2000。**w=2000 仍是合理預設。**
    - [ ] **K783c: 跨期驗證**：不同 OOS 期間（2019-2020 高波動、2015-2016 溫和期）expanding 是否仍勝
 2. ★ MF2-GARCH 實作（短期 GJR + 長期 MEM）— Conrad & Engle 2025, J. Applied Econometrics
 3. KAN-GARCH-MIDAS（結構化 NN 可能突破 ML ceiling）— J. Applied Economics 2025
