@@ -761,3 +761,25 @@
 - [x] **恐慌麻痺效應（Paper 4: Volatility Absorption）**：33p 論文完成，3 輪 Codex 審查通過，已上架 Supabase（target JFE）。K716/K718/K721 支撐。4 項最終殘留已修正。
 - [x] **VT-Trend**：6 項 K585 Codex 修正完成（2026-03-30）
 
+## Codex 第 7 次建議完成項目（archived 2026-03-31）
+- [x] **Cross-Asset Vol Momentum**：K730 — 6/8 signals Granger-cause VIX（TLT lag=7 p=0.006, USO lag=5 p<0.001），但 OOS composite R² WORSE than VIX-only（-0.022）。Strategy wins 2/5 vs 50/50。**結論：可偵測但不可用。VIX sufficiency 第 24 次確認。** 文獻：Xu (2025) I-XTSM, CFA Institute (2025) MOVE→VIX stress-only。
+- [x] **Regime-Switched Carry Filter**：K763 NULL — binary switching 顯著差於 12/VIX（DM p<0.001）。平滑連續>離散二元。Codex 0 HIGH
+- [x] **Alt Risk Premia Rotation**：K760 NULL — 混合 4 弱信號=信號稀釋。12/VIX 簡單最強。Codex 4/4 PASS
+- [x] **Action-First ML (Meta-Model)**：K762 NULL — consensus=12/VIX 平滑版，不勝 50/50。Codex 2 HIGH（weight parsing + binary consensus）
+
+## Codex 第 8 次建議完成項目（archived 2026-03-31）
+- [x] **Action-First ML (Meta-Model)**：K762 NULL — consensus=12/VIX 平滑版，不勝 50/50。Codex 2 HIGH（weight parsing + binary consensus）
+
+## 面向 TW 台灣市場完成項目（archived 2026-03-31）
+- [x] 台灣公債殖利率曲線：K761 — partial r=0.117 at 126d（Harvey PASS），但交易 NULL。曲線反轉+台股牛市=減倉錯誤。Codex 0 HIGH
+- [x] 台灣 CoVaR 傳染結構：K757 — **金融股→TSMC**（非反向）。TSMC CoVaR β=0.102 (p=0.0006)。VIX 仍足夠
+- [x] 台灣月頻 VT 最佳實務完整指南（mile_9fed5ece，3500 字，整合 K739b/K738/K636/K82/K725）
+
+## P2 研究新方向完成項目（archived 2026-03-31）
+- [x] **Fix K739 Taiwan holiday handling**：K739b 修正完成。TW/US calendar 分離 + VIX asof-lookup。**所有 4 結論存活**（20/80 配置 + daily rebalance + VIX suff + calendar NS）
+- [x] **Fix K746 Granger methodology**：K746b 修正完成。BTC vol → VIX Granger **存活**（p=0.0002, AIC lag=10）。VIX → BTC vol 較弱（p=0.013）。斷點 2022-08-10。**Paper 6 方向確認**
+- [x] **K753 Liquidity-Vol**：NULL — partial r=0.089, VIX 已定價 volume。VIX sufficiency #12
+- [x] **Volume Exhaustion Effect**：K754 REJECTED — extreme volume 預測更高 vol（+86.5%, t=6.01），非更低。K753 是 confound：VIX 已高→mean revert→低 spike 但高 RV
+- [x] **VT Insurance 實務指南頁面**：/vt-calculator 完成。風險測驗→gamma→策略推薦。K738 confirmed
+- [x] **FOMO 行為干預設計**：K755 — Lock-5d 最佳（+4% Sharpe vs 12/VIX），但仍不勝 BH 50/50。Mean reversion 真實（t=-2.07）。最佳用途=行為護欄（MDD -1-2pp），非 alpha
+
