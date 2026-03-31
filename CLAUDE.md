@@ -565,12 +565,25 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 | **Claude**（主研究員）| 實驗執行、分析、記憶管理、論文寫作 | 直接執行 | 深度分析、code、持續研究 |
 | **Codex (GPT)**| 針對性審查、第二意見、新方向 | `/codex:rescue`、`/codex:review`、`codex exec` | 找漏洞、結構性問題、editorial advice |
 
-**Codex 使用原則：針對特定目標，不掃全專案。**
-- ✅ 審查單一實驗腳本：`/codex:rescue "Review experiments/kXXX.py for bugs"`
-- ✅ 論文特定 section 第二意見：`codex exec "Check Section 3 methodology..."`
-- ✅ 代碼 bug 診斷：`/codex:rescue "Why does this function return wrong value?"`
-- ❌ 不要用 `/codex:review --scope working-tree`（掃整個專案，浪費資源）
+**Codex Plugin 可用命令（openai/codex-plugin-cc v1.0.1）：**
+| 命令 | 用途 | Claude 可呼叫 |
+|------|------|--------------|
+| `/codex:rescue` | 委派特定任務（審查、診斷、修正建議） | ✅ |
+| `/codex:review` | Git diff 代碼審查（需指定 scope） | ✅ |
+| `/codex:adversarial-review` | 對抗性審查（挑戰設計決策） | ✅ |
+| `/codex:status` | 查看背景任務進度 | ✅ |
+| `/codex:result` | 取得背景任務結果 | ✅ |
+| `/codex:cancel` | 取消背景任務 | ✅ |
+| `/codex:setup` | 檢查 Codex 就緒狀態 | ✅ |
+
+**使用原則：針對特定目標，不掃全專案。**
+- ✅ 審查單一實驗：`/codex:rescue "Review experiments/kXXX.py for bugs"`
+- ✅ 論文特定 section：`/codex:rescue "Check Section 3 methodology in paper/xxx/main.tex"`
+- ✅ 對抗性挑戰：`/codex:adversarial-review --wait --base HEAD~1`
+- ✅ Git diff 審查：`/codex:review --wait --scope branch --base HEAD~3`
+- ❌ 不要用 `--scope working-tree`（掃整個專案）
 - ❌ 不要無目標地「讓 Codex 看看」——必須有具體問題或檔案
+- ⚠️ `codex exec` 仍可用作 fallback，但優先用 plugin 命令
 | **Gemini** | 方法論建議、文獻連結、robustness 建議 | `/gemini-cli` | 學術框架、cross-reference、新測試建議 |
 
 ### 協作場景

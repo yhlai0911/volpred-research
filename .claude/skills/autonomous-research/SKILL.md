@@ -47,7 +47,7 @@ You are not a script runner. You are a thinking researcher with these abilities:
 4. **Adaptive Decisions** — Don't blindly follow the plan. If unexpected results, adjust strategy
 5. **Manage research_program.md** — 研究推展時要逐步奠基衍生：打勾+寫結論、衍生新方向、修正約束
 6. **Cross-Validate Good Results** — Sharpe > 1.0 → check look-ahead bias, CI, cross-OOS, second opinion
-7. **Use `/codex-cli` and `/gemini-cli` for Second Opinions**
+7. **Use `/codex:rescue` and `/gemini-cli` for Second Opinions**
 8. **Open Questions = 大問題、大方向** — 不是小實驗疑問（那些放 thinking/knowledge）。Open Question 是需要多個實驗才能回答的研究大方向，例如「12/VIX 能否擴展到亞洲市場？」「最佳零售組合是什麼？」。解決過程：大問題 → 分解為多個小實驗 → 每個實驗產出 feed 文章 → 最後整合寫一篇統合文章（Q&A article）來回答大問題。回答時：(a) 標記 status='answered' (b) answer 含關鍵數字 (c) 附上 feed_articles 鏈接到所有相關文章（用文章標題）
 9. **Agent Teams** — Independent tasks can run in parallel with `isolation: "worktree"`
 10. **Stay on track** — 不要做和 research_program.md 無關的分析
@@ -91,7 +91,7 @@ grep -i 'BTC\|bitcoin\|加密' storage/memory/knowledge.json | grep 'title' | he
 
 **Step 3: Codex 審代碼（在跑之前！）**
 ```bash
-codex exec -C . -s read-only "Review experiments/kXXX.py for:
+/codex:rescue "Review experiments/kXXX.py for:
 1) Is signal lagged? (signal.shift(1) or equivalent)
 2) Is TX cost on every weight change?
 3) Is baseline using same lag?
@@ -281,7 +281,7 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 7. **Deep-dive root causes** — never skip investigating unexpected results
 8. **Never conclude from a single attempt** — systematic ablation before declaring failure
 9. **不懂的模型或理論必須先查文獻** — 用 WebSearch 搜尋論文、用 `/sci-hub` 讀全文。記錄：模型規格、估計方法、關鍵參數、原始論文引用。不要猜測或憑記憶實現——查到原始公式再寫程式碼
-10. **定期使用 Codex/Gemini 審查研究** — 每完成一個 Phase 或重大發現後，用 `/codex-cli` 和 `/gemini-cli` 取得第二意見。不要只在用戶要求時才用——主動每隔 5-10 個實驗就做一次 AI 協作審查
+10. **定期使用 Codex/Gemini 審查研究** — 每完成一個 Phase 或重大發現後，用 `/codex:rescue` 和 `/gemini-cli` 取得第二意見。不要只在用戶要求時才用——主動每隔 5-10 個實驗就做一次 AI 協作審查
 11. **定期搜索最新文獻（每 session 至少一次）** — WebSearch arXiv/SSRN/JFE 搜尋最新波動率文獻，用 `/sci-hub` 讀全文。發現新方向 → 寫入 research_program.md 待探索方向 + 提出新 open question。永遠有新議題可以研究：rough volatility、XAI、intraday commonality、panel data ML、non-Gaussian models 等
 11. **數據會增加** — 定期延伸 OOS、重新驗證結論
 12. **與使用者討論中產生的 insight 必須即時內化** — 方法論改進、新觀念立刻寫入對應檔案
@@ -309,7 +309,7 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 
 ## Available Tools
 
-- `/codex-cli` — GPT 第二意見
+- `/codex:rescue` — GPT 第二意見
 - `/gemini-cli` — Gemini 第二意見
 - `WebSearch` — 搜尋最新文獻和方法
 - `/sci-hub` — 讀付費論文
@@ -320,7 +320,7 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 
 論文完成後的正式審查流程（每次大改版後執行）：
 
-1. **Codex 整體審查**: `codex exec -C paper -s read-only "Review this paper for top-tier journal..."` → 產出結構性問題清單
+1. **Codex 整體審查**: `/codex:rescue "Review paper/<name>/main.tex for top-tier journal submission bugs"` → 產出結構性問題清單
 2. **LaTeX 學術審查**: `/latex-academic-reviewer` → 版面、方程式、符號一致性、邏輯流暢
 3. **引用驗證**: `/citation-verifier` → DOI、作者名、期刊名、引用格式
 4. **根據報告修正** → 重新編譯 PDF → 重複審查直到問題清零
