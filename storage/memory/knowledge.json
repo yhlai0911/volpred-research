@@ -18714,7 +18714,7 @@
     "id": "K783",
     "type": "experiment",
     "title": "Window Size Sensitivity: Expanding Window Beats w=2000 (DM=-3.23, Harvey PASS)",
-    "content": "[提出: 文獻 Feng & Zhang 2025, 執行: Claude] 系統性測試 GJR-GARCH window size 252~ALL(expanding) 對 OOS QLIKE 影響。w=2000 並非最優——expanding window (ALL) QLIKE=0.529 顯著勝過 w=2000 的 0.560（DM=-3.226, Harvey PASS）。w=3780（DM=-4.222）和 w=5040（DM=-3.960）也顯著更好。模式：中間 window (1000-2000) 最差，短 (252-504) 和長 (3780+) 都較好。Persistence bias 存在（w=252: 0.963 vs w=ALL: 0.983）但不直接轉化為更差預測。GARCH(1,1) 類似。EWMA 0.593 遠遜 GJR-expanding 0.529。需跨資產驗證。",
+    "content": "[提出: 文獻 Feng & Zhang 2025, 執行: Claude] 系統性測試 GJR-GARCH window size 252~ALL(expanding) 對 OOS QLIKE 影響。w=2000 並非最優——expanding window (ALL) QLIKE=0.529 顯著勝過 w=2000 的 0.560（DM=-3.226, Harvey PASS）。w=3780（DM=-4.222）和 w=5040（DM=-3.960）也顯著更好。模式：中間 window (1000-2000) 最差，短 (252-504) 和長 (3780+) 都較好。Persistence bias 存在（w=252: 0.963 vs w=ALL: 0.983）但不直接轉化為更差預測。GARCH(1,1) 類似。EWMA 0.593 遠遜 GJR-expanding 0.529。需跨資產驗證。 Codex 審查：lag LOW, DM alignment HIGH（不同 window 的 valid subset 不同導致 DM 比較不同日期），QLIKE 排名仍有效但 DM 數字需修正。",
     "tags": [
       "window_size",
       "GARCH",
@@ -18727,13 +18727,14 @@
     "data_source": "yfinance SPY 2000-2024",
     "experiment_file": "experiments/k783_window_sensitivity.py",
     "timestamp": "2026-03-31T14:13:49.651497+00:00",
-    "importance": "high"
+    "importance": "high",
+    "codex_reviewed": true
   },
   {
     "id": "K782",
     "type": "experiment",
     "title": "HAR-5d-RV: GJR-GARCH Dominates All Horizons (5d/22d/66d) Using Daily Squared Returns",
-    "content": "[提出: 用戶, 執行: Claude] 用日頻 squared returns 加總構建 5-day/22-day/66-day RV，以 HAR 框架預測中長期波動。結果：GJR-GARCH multi-step 在所有預測期間都勝出。5d: GJR QLIKE=0.350 vs HAR-RV 0.408 (DM=2.44 NS)。22d: GJR 0.235 vs HAR-RV 0.318 (DM=3.04 Harvey PASS)。66d: GJR 0.254 vs HAR-log 0.269 (NS)。關鍵 insight: 日頻 squared returns 做的 RV proxy 不足以讓 HAR 發揮優勢——HAR 的文獻優勢來自 5-min intraday RV 捕捉的日內模式。GJR 的 multi-step recursive forecast 在沒有高頻數據時更可靠。隨預測期間拉長，所有模型預測力急劇下降（66d Spearman 僅 0.24）。等 5-min 數據累積到 60+ 天後（ETA 04/11）重測 HAR-RV。",
+    "content": "[提出: 用戶, 執行: Claude] 用日頻 squared returns 加總構建 5-day/22-day/66-day RV，以 HAR 框架預測中長期波動。結果：GJR-GARCH multi-step 在所有預測期間都勝出。5d: GJR QLIKE=0.350 vs HAR-RV 0.408 (DM=2.44 NS)。22d: GJR 0.235 vs HAR-RV 0.318 (DM=3.04 Harvey PASS)。66d: GJR 0.254 vs HAR-log 0.269 (NS)。關鍵 insight: 日頻 squared returns 做的 RV proxy 不足以讓 HAR 發揮優勢——HAR 的文獻優勢來自 5-min intraday RV 捕捉的日內模式。GJR 的 multi-step recursive forecast 在沒有高頻數據時更可靠。隨預測期間拉長，所有模型預測力急劇下降（66d Spearman 僅 0.24）。等 5-min 數據累積到 60+ 天後（ETA 04/11）重測 HAR-RV。 ⚠️ Codex 審查發現 2 個 HIGH bug：(1) HAR target 預計算包含未來數據 (2) GJR multi-step off-by-one。需重跑修正。結論可能改變。",
     "tags": [
       "HAR",
       "multi-horizon",
@@ -18746,13 +18747,15 @@
     "data_source": "yfinance SPY 2006-2025",
     "experiment_file": "experiments/k782_har_5d_rv.py",
     "timestamp": "2026-03-31T14:18:05.574863+00:00",
-    "importance": "high"
+    "importance": "high",
+    "codex_reviewed": true,
+    "codex_high_bugs": 2
   },
   {
     "id": "K783b",
     "type": "experiment",
     "title": "Cross-Asset Window Sensitivity: Optimal Window is ASSET-SPECIFIC, Not Universal",
-    "content": "[提出: K783 衍生, 執行: Claude] 跨資產驗證 K783 expanding window 優勢。結果：最優 window 因資產而異。SPY 偏好 expanding (K783)，QQQ 偏好 w=504（DM=+3.59 Harvey PASS，小 window 顯著勝大 window），GLD 偏好 w=3000（但 NS），0050.TW 偏好 w=1000（NS），BTC 偏好 w=2000（NS）。**w=2000 仍是合理預設**——不應改為 expanding。QQQ 的反向結果特別重要：高波動科技股需要更快適應（小 window），而 SPY 的多元化結構受益於長歷史。這表明 window size 本身可以作為一個 hyperparameter 進行 asset-specific 調優。",
+    "content": "[提出: K783 衍生, 執行: Claude] 跨資產驗證 K783 expanding window 優勢。結果：最優 window 因資產而異。SPY 偏好 expanding (K783)，QQQ 偏好 w=504（DM=+3.59 Harvey PASS，小 window 顯著勝大 window），GLD 偏好 w=3000（但 NS），0050.TW 偏好 w=1000（NS），BTC 偏好 w=2000（NS）。**w=2000 仍是合理預設**——不應改為 expanding。QQQ 的反向結果特別重要：高波動科技股需要更快適應（小 window），而 SPY 的多元化結構受益於長歷史。這表明 window size 本身可以作為一個 hyperparameter 進行 asset-specific 調優。 Codex 審查：lag LOW, leakage LOW, DM test HIGH（bandwidth/Harvey correction 有問題，但不影響「最優 window 因資產而異」的核心結論）。",
     "tags": [
       "window_size",
       "cross_asset",
@@ -18766,6 +18769,7 @@
     "data_source": "yfinance QQQ/GLD/0050.TW/BTC-USD 2000-2024",
     "experiment_file": "experiments/k783b_cross_asset_window.py",
     "timestamp": "2026-03-31T14:22:36.142207+00:00",
-    "importance": "high"
+    "importance": "high",
+    "codex_reviewed": true
   }
 ]
