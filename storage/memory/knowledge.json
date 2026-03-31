@@ -18479,5 +18479,29 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-31T11:48:00.158561+00:00"
+  },
+  {
+    "id": "k_20260331195826",
+    "experiment_id": "K774",
+    "title": "K774: All-Weather Multi-Asset VT — VIX-scaled 5 ETFs: higher Sharpe full-sample but CAGR sacrifice, MDD -12% vs -33%",
+    "content": "[提出: Codex GPT-5.4, 執行: Claude] 5-asset All-Weather VT: SPY/GLD/TLT/DBC/SHY with VIX-based target-vol scaling (12/VIX), monthly rebalance, 5bps TX. Full-sample (2006-2026): AW_VT_5Asset Sharpe 1.038 vs 50/50 0.838 (+0.200), but CAGR 5.13% vs 11.10% and MDD -11.78% vs -32.49%. COMMON_START: 0/4 multi-asset strategies beat 50/50 (Sharpe 1.724 vs 1.856). Cross-OOS: AW_VT_5Asset wins 3/5 periods. DM t=-2.797 (below Harvey 3.0), bootstrap CI [-0.073, 0.473] includes zero. Sensitivity PASS (max drop 4.4%). KEY: VIX scaling to SHY creates extreme conservatism (48-66% SHY in normal/high VIX) — great for MDD but sacrifices returns. 3-Asset VT (SPY/GLD/TLT) nearly identical results (Sharpe 1.022, MDD -14.94%). CONCLUSION: All-Weather VT is a drawdown insurance strategy (MDD halved), not an alpha strategy. Confirms K697/K737: VT = risk management, not return enhancement. The 50/50 SPY/GLD remains unbeatable on Sharpe in COMMON_START period due to gold bull run.",
+    "tags": [
+      "multi-asset",
+      "all-weather",
+      "VT",
+      "target-volatility",
+      "SPY",
+      "GLD",
+      "TLT",
+      "DBC",
+      "SHY",
+      "VIX",
+      "drawdown",
+      "MDD",
+      "Codex-proposed"
+    ],
+    "data_source": "yfinance (SPY, GLD, TLT, DBC, SHY, ^VIX), 2006-2026",
+    "created_at": "2026-03-31T19:58:26.894456",
+    "category": "experiment"
   }
 ]
