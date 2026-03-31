@@ -592,3 +592,36 @@
 - ⏸ 暫停：在 daily QLIKE 上堆積更多 null results（除非有全新信息源）
 - ✅ 繼續：一般讀者文章、策略、論文、跳躍式探索
 
+## Session K730-K752 (2026-03-30~31)
+# Archived from research_program.md on 2026-03-30
+
+**已完成（本 session K730-K736）：**
+- [x] MF2-GARCH（K621-K623）：實作困難，Codex 抓 5 bugs
+- [x] Window Size Sensitivity（K622）：w=1000-1500 sweet spot
+- [x] 月頻 VT 最佳化（K642）：US daily 最佳，TW monthly
+- [x] **K730 Cross-Asset Vol Momentum**：Granger-causal（6/8 sig）但 OOS 不可用，VIX sufficiency #25+
+- [x] **K731 VIX Term Structure**：不 lag-robust（衰減 0.757），VIX level 足夠
+- [x] **K732 Behavioral Sentiment**：partial r|VIX = 0.091，完全被 VIX 主導
+- [x] **K733 Regime Rebalancing**：Monthly 明確勝出（Net Sharpe 0.892），adaptive 反而更差
+- [x] **K734 VRP Trading**：學術顯著（t=3.51）但 R²<0.3%，不可交易
+- [x] **⚠️ K735 Drawdown Recovery**：描述性結果有效（22 episodes anatomy），但 Codex 抓到 2 HIGH bugs（fake OOS + predictor/target timing misalignment）。策略結果（+29% Sharpe）被 lookahead 污染，不可信。第 4 次 Codex 抓到 false breakthrough
+- [x] K736 Calendar Anomaly vs VT：VT ≠ calendar（R²=0.000），88% VIX level response
+- [x] K737 Max Diversification：50/50 SPY/GLD 勝 28 種多資產組合
+- [x] **★ K738 VT Insurance Cost-Benefit**：Codex 二審 PASS。γ≥4.5→VT，cost 3.49%/yr（12/VIX）、2.12%（EWMA）
+- [x] ⚠️ K739 Taiwan Cross-Val：2/4 generalizes（VIX suff + calendar NS），2/4 不同（20/80 配置 + daily rebalance）。Codex: holiday calendar bug
+- [x] **★ K740 Strategy Meta-Analysis**：簡單+多資產=最佳。複雜度 vs Sharpe ρ=0.149 NS。Piecewise Conservative 主導效率前緣
+- [x] K741 NFP Event Study：VIX≥25 時 NFP 效果消失（0.98x）。04/03 HOLD
+- [x] K742 Crowding Simulation：12/VIX 天生抗擠壓（concave 1/x），安全公開
+- [x] K743 Investor Behavior：FOMO(-58%) 比 Panic(-14%) 貴 5 倍
+- [x] K744 5-Min RV Validation：AC(1) gap 5.6x，data 94% clean
+- [x] K745 Pilot HAR-RV：Pipeline OK，HAR-ABS 暫勝（N=37），等 100+ OOS
+- [x] K746 Bitcoin×VIX：BTC 非避風港，coupling post-2021 增。Granger 方法待修
+- [x] Paper 1 更新：+K736/K738/K742/K743 → 53p
+
+**新方向（post-K749，2026-03-30 session 完成）：**
+- [x] **Asset selection**：K737 測 28 組合 + K747 ERC = 50/50 仍最佳
+- [x] **Risk budgeting**：K747 ERC = zero sophistication premium（Sharpe 1.795 vs 50/50 1.849, NS）
+- [x] **Simplicity premium**：K748 REJECTED — 設計品質 > 簡單性（修正 K740）
+- [x] **Macro signal**：K749 殖利率曲線被 VIX 吸收（partial r < 0.08）
+- [x] Paper 2 更新：+K739/K738 → 45p
+
