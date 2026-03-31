@@ -1,0 +1,256 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue}
+\usepackage{soul}
+
+\definecolor{addgreen}{RGB}{0,100,0}
+\definecolor{delred}{RGB}{180,0,0}
+\definecolor{modblue}{RGB}{0,0,160}
+
+\newcommand{\added}[1]{\textcolor{addgreen}{[+] #1}}
+\newcommand{\deleted}[1]{\textcolor{delred}{[$-$] \st{#1}}}
+\newcommand{\modified}[1]{\textcolor{modblue}{[$\Delta$] #1}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Revision Diff Report: v1 $\to$ v2}\\[0.5em]
+{\large Volatility Absorption: The Diminishing Marginal Impact of Market Fear}\\[0.5em]
+{\normalsize Date: 2026-03-30}\\
+{\normalsize Issues Addressed: L1 (HIGH), S1 (HIGH), R1 (HIGH)}
+\end{center}
+
+\vspace{1em}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Summary of Changes}
+
+\begin{tabular}{lrr}
+\toprule
+\textbf{Metric} & \textbf{v1} & \textbf{v2} \\
+\midrule
+Total pages & 33 & 38 \\
+Bibliography entries & 21 & 37 \\
+New references added & --- & 16 \\
+Sections restructured & --- & 2 (Methodology, Results) \\
+New paragraphs added & --- & 4 \\
+Net new text & --- & $\sim$1{,}400 words \\
+\bottomrule
+\end{tabular}
+
+\vspace{1em}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Issue L1 (HIGH): NSI Mechanical Correlation Undermines Identification}
+
+\textbf{Reviewer concern:} The primary measure NSI $= |r_t|/V_t$ mechanically declines with $V_t$ because VIX is in the denominator AND defines the conditioning regimes.
+
+\subsection*{Changes Made}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \modified{Abstract: Reframed to present SAR as primary measure.}
+\begin{itemize}
+\item \deleted{``Our central measure is the normalized shock impact---the absolute return on a shock day divided by the prevailing VIX level.''}
+\item \added{``we measure absorption primarily through the \textit{shock amplification ratio} (SAR)---the ratio of shock-day to normal-day absolute returns within each VIX regime---which avoids the mechanical denominator problem inherent in VIX-normalized measures.''}
+\item \added{Note about NFP limitation added to abstract.}
+\end{itemize}
+
+\item \modified{Introduction \S1: SAR promoted to primary, NSI demoted to supplementary.}
+\begin{itemize}
+\item \deleted{``Our central measure is the normalized shock impact...''}
+\item \added{``Our primary measure is the \textit{shock amplification ratio} (SAR)---the ratio of mean absolute returns on shock days to non-shock days \textit{within} each VIX regime---which is free of the mechanical denominator problems...''}
+\item \added{``As a supplementary continuous-variable summary, we also compute the \textit{normalized shock impact} (NSI $= |r_t|/V_t$)... We emphasize that this `paralysis' coefficient is consistent with---but does not substitute for---the SAR evidence, because the NSI construction introduces a mechanical negative correlation through the VIX denominator.''}
+\end{itemize}
+
+\item \modified{Methodology \S3: Major restructuring of subsections.}
+\begin{itemize}
+\item \deleted{Subsection ``Normalized Shock Impact'' was the first methodology subsection.}
+\item \added{New ordering: (1) VIX Regime Classification, (2) \textbf{Shock Amplification Ratio (Primary Measure)}, (3) Normalized Shock Impact (Supplementary Measure).}
+\item \added{SAR subsection explicitly states: ``Crucially, the SAR compares shock-day to non-shock-day absolute returns \textit{within} each VIX bin and does not divide by VIX. It is therefore free of the mechanical denominator problem.''}
+\item \added{New paragraph ``\textbf{Mechanical correlation caveat}'' added to the NSI subsection, explicitly explaining the mechanical correlation problem and three pieces of mitigating evidence.}
+\end{itemize}
+
+\item \modified{Results \S5.1: SAR analysis explicitly labeled as primary identification evidence.}
+\begin{itemize}
+\item \added{``Because the SAR does not divide by VIX, it avoids the mechanical denominator problem inherent in VIX-normalized measures and constitutes our primary identification evidence.''}
+\item \modified{NSI regression relabeled as ``supplementary'' with caveat: ``We reiterate, however, that the NSI regression carries a mechanical component from the VIX denominator (see Section 3), and the SAR analysis above provides the cleaner identification.''}
+\end{itemize}
+
+\item \modified{Limitations \S8.1: Strengthened acknowledgment of mechanical correlation.}
+\begin{itemize}
+\item \deleted{``our central measure---the normalized shock impact...''}
+\item \added{``the supplementary normalized shock impact measure ($\text{NSI}_t = |r_t| / V_t$) uses VIX in the denominator...''}
+\item \added{``For this reason, we designate the SAR---which does \textit{not} divide by VIX---as our primary identification measure.''}
+\item \added{Reference to Patton (2011) as alternative methodology for future work.}
+\end{itemize}
+
+\item \modified{Future Research \S8.2: Added simulation exercise suggestion.}
+\begin{itemize}
+\item \added{``simulation exercises quantifying the mechanical component of the NSI regression---for example, generating returns under a null of no absorption and measuring the spurious slope attributable to the VIX denominator---would further sharpen identification; the forecast comparison methodology of Patton (2011) offers an alternative approach.''}
+\end{itemize}
+
+\end{enumerate}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Issue S1 (HIGH): NFP Event Study Lacks Surprise Magnitude Control}
+
+\textbf{Reviewer concern:} The paper uses NFP day dummy without controlling for surprise component (actual minus consensus). The declining NFP effect could reflect smaller surprises during high-VIX periods.
+
+\subsection*{Changes Made}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \modified{Abstract: Added limitation note.}
+\begin{itemize}
+\item \deleted{Specific NFP numbers in abstract (1.24$\times$, 1.30$\times$, 0.95$\times$).}
+\item \added{``Event-level evidence from nonfarm payroll releases is directionally consistent, though we note the limitation of using a binary NFP dummy rather than surprise-magnitude controls.''}
+\end{itemize}
+
+\item \modified{Methodology \S3.5: Pre-emptive caveat added.}
+\begin{itemize}
+\item \added{``We note that the standard approach in this literature uses the \textit{surprise component} (actual minus consensus forecast) as the key regressor; our analysis uses a binary NFP dummy due to data constraints, and we discuss the implications of this limitation in Section 5.''}
+\item \added{Citations: Andersen et al.\ (2003), Balduzzi et al.\ (2001).}
+\end{itemize}
+
+\item \added{Results \S5.3: New paragraph ``\textbf{Limitation: absence of surprise control}'' ($\sim$200 words).}
+\begin{itemize}
+\item Explains the alternative interpretation: declining NFP effect could reflect smaller surprises during high-VIX periods.
+\item References Andersen et al.\ (2003) and Balduzzi et al.\ (2001) methodology.
+\item Notes that NFP evidence is ``supplementary to the SAR-based primary analysis.''
+\item Provides the correct specification for future work: $|r_t^{\text{SPY}}| = \alpha + \beta_1 |\text{surprise}_t| + \beta_2 V_t + \beta_3 (|\text{surprise}_t| \times V_t) + \varepsilon_t$.
+\item Identifies data sources: Bloomberg, Federal Reserve Bank of Philadelphia real-time dataset.
+\end{itemize}
+
+\item \modified{Future Research \S8.2: Added NFP surprise extension.}
+\begin{itemize}
+\item \added{``the NFP event study could be strengthened substantially by incorporating surprise-magnitude controls following Andersen et al.\ (2003), using consensus forecast data from Bloomberg or the Federal Reserve Bank of Philadelphia's real-time dataset.''}
+\end{itemize}
+
+\end{enumerate}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Issue R1 (HIGH): Missing Critical References}
+
+\textbf{Reviewer concern:} Only 20 references; JBF norm is 40--60. Missing key citations on regime-dependent volatility, news impact curves, attention, and VRP.
+
+\subsection*{New References Added (15)}
+
+\begin{longtable}{p{0.5cm}p{5cm}p{3cm}p{5.5cm}}
+\toprule
+\textbf{\#} & \textbf{Reference} & \textbf{Journal} & \textbf{Where Cited in v2} \\
+\midrule
+\endhead
+1 & Andersen, Bollerslev, Diebold \& Vega (2003) & AER & \S3.5 (NFP methodology), \S5.3 (limitation caveat), \S8.2 (future work) \\
+2 & Balduzzi, Elton \& Green (2001) & JFQA & \S3.5 (NFP methodology), \S5.3 (limitation caveat) \\
+3 & Baur \& Lucey (2010) & Financial Review & \S1 (GLD as safe haven) \\
+4 & Bekaert, Engstrom \& Xu (2022) & Management Science & \S2.2 (VRP time variation), \S5.5 (VRP results) \\
+5 & Chernov, Lochstoer \& Lundeby (2022) & RFS & \S2.2 (risk-return trade-off) \\
+6 & Da, Engelberg \& Gao (2015) & RFS & \S1 (intro lit connections), \S2.4 (FEARS index) \\
+7 & Danielsson, Valenzuela \& Zer (2018) & RFS & \S1 (endo/exo risk), \S5.4 (endo/exo results) \\
+8 & Drechsler \& Yaron (2011) & RFS & \S2.2 (uncertainty premia), \S5.5 (VRP results) \\
+9 & Engle \& Ng (1993) & JoF & \S1 (intro lit), \S2.1 (news impact curves) \\
+10 & Martin (2017) & QJE & \S2.2 (expected returns) \\
+11 & Muler \& Yohai (2008) & JSPI & \S2.1 (robust GARCH) \\
+12 & Patton (2011) & J.\ Econometrics & \S8.1 (limitations), \S8.2 (future work) \\
+13 & Todorov (2010) & RFS & \S2.2 (VRP and jumps), \S5.5 (VRP results) \\
+14 & Vlastakis \& Markellos (2012) & JBF & \S2.4 (information demand), \S5.4 (endo/exo) \\
+15 & Whaley (2000) & JPM & \S1 (intro lit), \S5.4 (fear gauge) \\
+\addlinespace
+& Zakoian (1994) & JTSA & \S1 (intro lit), \S2.1 (TGARCH) \\
+\bottomrule
+\end{longtable}
+
+\textit{Note:} 16 new entries total. Zakoian (1994) was listed separately in the review but is included in the additions above.
+
+\subsection*{Text Integration Points}
+
+\begin{enumerate}[leftmargin=*]
+
+\item \modified{Literature Review \S2.1 (GARCH): Substantially expanded.}
+\begin{itemize}
+\item \added{Zakoian (1994) TGARCH as closest parametric analogue to absorption.}
+\item \added{Engle \& Ng (1993) news impact curve framework as natural comparison.}
+\item \added{Muler \& Yohai (2008) for robust estimation under heavy-tailed outliers.}
+\item \added{Explicit differentiation: our contribution documents declining marginal impact \textit{within} high-volatility regime, which standard regime-switching models do not capture.}
+\end{itemize}
+
+\item \modified{Literature Review \S2.2 (VRP): Substantially expanded.}
+\begin{itemize}
+\item \added{Todorov (2010) on jump risk premium.}
+\item \added{Drechsler \& Yaron (2011) on macroeconomic uncertainty premia.}
+\item \added{Bekaert, Engstrom \& Xu (2022) on time-varying risk appetite.}
+\item \added{Martin (2017) on alternative expected return framework.}
+\end{itemize}
+
+\item \modified{Literature Review \S2.4 (Behavioral): Substantially rewritten.}
+\begin{itemize}
+\item \deleted{Misattribution of ``panic fatigue'' / ``crisis habituation'' to Kahneman \& Tversky (1979) and Barberis et al.\ (2001).}
+\item \added{Da et al.\ (2015) FEARS index as direct fear measure.}
+\item \added{Vlastakis \& Markellos (2012) information demand framework.}
+\item \added{Careful separation: prospect theory provides general foundation for diminishing sensitivity, but absorption is more directly linked to attention-saturation models.}
+\item \added{Explicit statement: ``we avoid attributing it to prospect theory directly.''}
+\end{itemize}
+
+\item \modified{VRP Results \S5.5: Added theoretical context.}
+\begin{itemize}
+\item \added{``consistent with the theoretical frameworks of Todorov (2010) and Drechsler and Yaron (2011)''}
+\item \added{Bekaert et al.\ (2022) citation for time-varying risk appetite.}
+\end{itemize}
+
+\item \modified{Introduction \S1: Added 5 new citations throughout.}
+
+\end{enumerate}
+
+\subsection*{Reference Count}
+
+\begin{tabular}{lr}
+\toprule
+& Count \\
+\midrule
+v1 bibliography entries & 21 \\
+New entries added in v2 & 16 \\
+\textbf{v2 total bibliography entries} & \textbf{37} \\
+JBF typical range & 40--60 \\
+\bottomrule
+\end{tabular}
+
+\vspace{0.5em}
+\noindent The reference list has grown from 21 to 37 entries. While still below the JBF median ($\sim$50), the additions address all specific gaps flagged in the review (regime-dependent volatility, news impact curves, investor attention/fear, VRP dynamics, macro event studies). Further references can be added during subsequent revision rounds as additional robustness analyses are completed.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Additional Minor Fixes (Bonus)}
+
+\begin{enumerate}[leftmargin=*]
+\item \deleted{\texttt{\textbackslash bibliographystyle\{apalike\}} --- removed because the bibliography is manual (\texttt{thebibliography} environment), making the style declaration a no-op.} (Review FMT2)
+\item \modified{Behavioral citations in \S2.4: Fixed misattribution of ``panic fatigue'' to prospect theory.} (Review R2, citation\_check P5)
+\item \modified{VRP discussion: Now cites specific theoretical frameworks rather than vague ``some prior claims.''} (Review R3, citation\_check P4)
+\end{enumerate}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{What Was NOT Changed (Preserved for Future Rounds)}
+
+The following MEDIUM/LOW issues from review\_v1 were \textbf{not} addressed in this revision and remain open for future rounds:
+
+\begin{itemize}[nosep]
+\item L2: SAR non-monotonicity in crisis regime (needs structural break test)
+\item M1 (Methodology): Shock-type GLD threshold sensitivity analysis
+\item C1: Sharper differentiation from regime-switching literature
+\item T1: Adding figures (bar charts, scatter plots)
+\item S2: Multiple comparisons correction
+\item L4: Proposition relabeled to Remark
+\item Additional 5--15 references to reach JBF median of $\sim$50
+\end{itemize}
+
+\end{document}
