@@ -1,0 +1,65 @@
+{
+  "experiment_id": "K791",
+  "title": "Overnight vs Intraday Return Decomposition for SPY Vol Forecasting",
+  "date": "2026-04-01T01:15:11.438344",
+  "data_source": "yfinance (SPY, OHLC)",
+  "period": {
+    "full_sample": "2006-01-04 to 2024-12-30",
+    "oos_period": "2023-01-03 to 2024-12-27",
+    "n_total": 4779,
+    "n_oos": 500
+  },
+  "return_decomposition": {
+    "mean_r_overnight": 0.00021848076265434146,
+    "mean_r_intraday": 0.0001027745029944068,
+    "std_r_overnight": 0.007385620689768349,
+    "std_r_intraday": 0.009368579121569012,
+    "std_r_total": 0.012253400650960866,
+    "var_share_overnight": 0.36329609604651203,
+    "var_share_intraday": 0.5845668588394042,
+    "corr_on_in": 0.0565677568608026
+  },
+  "models": {
+    "gjr_base": {
+      "qlike": -8.631625895332917,
+      "spearman": 0.15197225588902355
+    },
+    "additive": {
+      "qlike": -8.629634540665592,
+      "spearman": 0.18970357481429925
+    },
+    "gjrx": {
+      "qlike": -8.632602412832613,
+      "spearman": 0.14863480253921016
+    },
+    "ols_2f": {
+      "qlike": -8.606578107159642,
+      "spearman": 0.14506512426049703
+    }
+  },
+  "dm_tests_vs_baseline": {
+    "additive": {
+      "dm_stat": -0.11415692122451214,
+      "p_value": 0.9091134004800456,
+      "significant_at_5pct": false
+    },
+    "gjrx": {
+      "dm_stat": 0.11081508703747767,
+      "p_value": 0.9117629813134274,
+      "significant_at_5pct": false
+    },
+    "ols_2f": {
+      "dm_stat": -0.917930598713251,
+      "p_value": 0.3586552009485011,
+      "significant_at_5pct": false
+    }
+  },
+  "best_model": "gjrx",
+  "improvement_vs_baseline_pct": 0.011313250962649705,
+  "conclusion": "Overnight variance share: 36.3%, intraday: 58.5%. Best OOS model: gjrx with QLIKE improvement of +0.01% vs GJR baseline. Corr(r_on, r_in) = 0.0566 (overnight-intraday interaction).",
+  "references": [
+    "Gallo & Pacini (1998) 'Early news is good news: The effects of market opening on market volatility'",
+    "Andersen et al. (2003) 'Modeling and forecasting realized volatility', Econometrica",
+    "Patton (2011) 'Volatility forecast comparison using imperfect volatility proxies', JoE"
+  ]
+}
