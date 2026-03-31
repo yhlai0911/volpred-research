@@ -246,7 +246,7 @@
 **開放議題：**
 - [ ] VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）
 - [ ] 台灣 5-min 數據 HAR-RV（0050.TW 35 天，ETA 2026 Q2）
-- [ ] 台灣公債殖利率曲線 → vol 預測
+- [x] 台灣公債殖利率曲線：K761 — partial r=0.117 at 126d（Harvey PASS），但交易 NULL。曲線反轉+台股牛市=減倉錯誤。Codex 0 HIGH
 - [x] 台灣 CoVaR 傳染結構：K757 — **金融股→TSMC**（非反向）。TSMC CoVaR β=0.102 (p=0.0006)。VIX 仍足夠
 - [ ] **金融股早期預警系統**：K757 發現 Fubon→TSMC Granger (F=6.11)。可建立金融股壓力指標作為 TSMC vol 早期預警
 - [x] 台灣月頻 VT 最佳實務完整指南（mile_9fed5ece，3500 字，整合 K739b/K738/K636/K82/K725）
