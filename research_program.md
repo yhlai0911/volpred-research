@@ -666,3 +666,8 @@ K519-K521 + K527 完成結果：見 archive。
 - [ ] **DMEM（Doubly MEM）**：長短期雙成分（Spline-MEM, Component-MEM, MEM-MIDAS）。ScienceDirect 2023 [提出: 文獻]
 - [ ] **Vector MEM**：多變量 MEM（Cipollini, Engle & Gallo）。跨資產 vol 聯合建模 [提出: 文獻]
 - [ ] **AMEM-MV**：分解 RV 為 base + meaningful volatility events 成分。2025 [提出: 文獻]
+
+#### Gemini 建議（2026-03-31）[提出: Gemini 2.5 Pro]
+- [ ] **Wasserstein Volatility Drift (WVD)**：用 2-Wasserstein 距離測量日內 RV 分布漂移。假說：WVD 領先 VIX regime shift 1-3 天。需 5-min 數據（ETA 04/11）[提出: Gemini]
+- [ ] **Gamma-Trap 零售回饋迴路**：0DTE option flow → MM hedging → vol pin/explosion。假說：NRGE 顯著負值時 realized-implied gap 縮小 >20%。需 option flow 數據（BLOCKED）[提出: Gemini]
+- [ ] **Transfer Entropy VT Budgeting (TE-VT)**：用 Fed liquidity → VIX 的 transfer entropy 動態調整 VT 保險。假說：TE-VT Sortino +15% vs static γ=4.5。FRED 數據可得 [提出: Gemini]
