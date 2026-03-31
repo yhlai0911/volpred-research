@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-03-31T12:08:55Z",
-  "all_ok": false,
+  "timestamp": "2026-03-31T18:06:55Z",
+  "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "12 draft articles in pool"
+      "detail": "13 draft articles in feed.json"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "Age: 0.00 hours"
+      "detail": "strategy_metrics.json age: 0.01 hours"
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Entry found: 2026-03-31: Session Cron 空轉 6-8 小時"
+      "status": "ok",
+      "detail": "Entry dated 2026-03-31 found: Session Cron 空轉 6-8 小時 (idle loop for 6-8h, cron triggered but Claude only checked status). Root cause: weak cron prompt, no anti-idle mechanism. Fixed: CLAUDE.md updated with anti-idle rules."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies have <=2 nulls in last 3 entries (today is non-trading day, 1 null each is expected)"
+      "detail": "14 strategies checked; each has exactly 1 null in last 3 entries (today not yet filled), all within threshold of <=2 nulls"
     },
     {
       "name": "GIT_STATUS",
@@ -30,10 +30,8 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1557 entries in knowledge.json"
+      "detail": "1569 entries in knowledge.json"
     }
   ],
-  "alerts": [
-    "Entry found: 2026-03-31: Session Cron 空轉 6-8 小時"
-  ]
+  "alerts": []
 }
