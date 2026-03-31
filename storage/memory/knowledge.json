@@ -17881,5 +17881,38 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-31T04:20:49.247061+00:00"
+  },
+  {
+    "id": "K753-review",
+    "title": "Codex Review K753: 1 HIGH (double-lag in Part D), NULL safe",
+    "content": "[提出: Codex, 執行: Claude] K753 review: (1) HIGH: Part D shift(1) is double-lag — ret_next already puts t+1 return on month-end t, shifting again uses t-1 info. Extra one-month staleness. (2) MEDIUM: 50/50 baseline no TX. (3) LOW: TX single-leg OK for SPY/cash. NULL conclusion safe (extra lag makes strategy worse).",
+    "tags": [
+      "codex-review",
+      "K753",
+      "methodology"
+    ],
+    "phase": "research",
+    "importance": 2,
+    "timestamp": "2026-03-31T04:25:29.839355+00:00"
+  },
+  {
+    "id": "K739b",
+    "title": "Taiwan VT Cross-Validation Holiday-Bug Fix — All 4 Findings Survive",
+    "content": "[提出: Codex (K739 review), 執行: Claude] K739b fixes 2 HIGH bugs from Codex review: (1) union calendar ffill created synthetic zero returns on ~1150 mismatched holidays (22.6% of days), polluting RV and seasonality; (2) ghost trades on closed-market days. FIX: separate calendars per market, VIX mapped via asof-lookup (most recent prior US close), TX only on open days. RESULTS: All 4 findings SURVIVE the fix with minor numerical shifts. Test1 VIX sufficiency: R2=0.036 (unchanged), own_rv gain still <1%. Test2 allocation: 0050+SPY optimal 20/80 (unchanged), 0050+GLD 30/70 (unchanged). Test3 calendar: Sell-in-May still insignificant (p=0.87). Test4 rebalancing: daily still best (Sharpe 0.41 vs monthly 0.26). The holiday bug affected 22.6% of days but conclusions are robust because zero-return days were roughly symmetric and VIX is slow-moving. Key lesson: proper calendar handling is methodologically necessary but practical impact was small for these tests.",
+    "tags": [
+      "taiwan",
+      "cross-validation",
+      "holiday-bug",
+      "calendar",
+      "codex-review",
+      "VIX",
+      "0050.TW",
+      "bug-fix"
+    ],
+    "data_source": "yfinance (0050.TW, SPY, GLD, ^VIX)",
+    "experiment_file": "experiments/k739b_taiwan_vt_fixed.py",
+    "results_file": "experiments/k739b_taiwan_vt_fixed_results.json",
+    "created_at": "2026-03-31T12:25:31.617851",
+    "phase": "Phase_VT_CrossValidation"
   }
 ]
