@@ -1,0 +1,279 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\newcommand{\high}[1]{\textcolor{errorred}{\textbf{[HIGH]} #1}}
+\newcommand{\med}[1]{\textcolor{warncolor}{\textbf{[MEDIUM]} #1}}
+\newcommand{\low}[1]{\textcolor{okgreen}{\textbf{[LOW]} #1}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report}\\[0.5em]
+{\large Leverage Direction Matters: Cross-Asset Evidence on\\
+GARCH Model Selection and Volatility Targeting}\\[0.5em]
+{\normalsize Document Type: Journal Paper (target: Journal of Banking \& Finance)}\\
+{\normalsize Review Date: 2026-03-30}\\
+{\normalsize Review Standard: \textbf{Strict} (simulating JBF referee)}
+\end{center}
+
+\vspace{1em}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{\textbf{HIGH --- must fix before submission}} & \textbf{9 issues} \\
+\textcolor{warncolor}{\textbf{MEDIUM --- should fix}} & \textbf{14 issues} \\
+\textcolor{okgreen}{\textbf{LOW --- optional}} & \textbf{11 issues} \\[0.5em]
+Overall Assessment & \textbf{Major Revision Required} \\
+\end{tabular}
+
+\vspace{0.5em}
+\noindent\textbf{One-paragraph summary:}
+The paper proposes a cross-asset leverage direction taxonomy based on the GJR-GARCH $\gamma$ parameter and links it to volatility targeting mechanisms. The core idea---that the \emph{sign} of $\gamma$ varies systematically across asset classes and this matters for model selection---is interesting and potentially publishable. However, the manuscript in its current form suffers from (1) scope overload: three loosely connected contributions crammed into one paper, (2) a central ``Proposition 1'' whose near-perfect correlation is partly mechanical and whose domain is severely limited, (3) data source concerns (Yahoo Finance for a JBF paper), (4) several internal numerical inconsistencies, and (5) an appendix on time-zone momentum that is tangential and weakens the paper. A focused revision addressing these issues could yield a solid JBF contribution.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{1. Logic and Structure (邏輯結構)}
+
+\high{L1. Paper tries to be three papers at once.} The abstract announces three contributions: (i) leverage direction taxonomy, (ii) $\gamma$--VT mechanism link, and (iii) time-zone information transmission. Contribution (iii) has almost no logical connection to (i) or (ii)---it is an independent empirical finding about U.S.--Asia lead-lag, relegated to an appendix yet prominently featured in the abstract and conclusion. This dilutes the core message and will confuse referees. \emph{Recommendation:} Remove contribution (iii) from the abstract and conclusion; keep it as a brief appendix at most, or spin it off as a separate paper.
+
+\med{L2. Section ordering creates logical gaps.} Section 4.3 (GARCH vs.\ GJR-GARCH forecasting comparison) largely repeats Section 4.2.2 (implications for model selection). Both present QLIKE comparisons from Table 3 and discuss the DM test results. The duplication makes the paper feel padded. \emph{Recommendation:} Merge 4.2.2 and 4.3 into a single subsection.
+
+\med{L3. The ``complexity ceiling'' concept is introduced late and lacks a clear definition.} The term appears in the abstract, then reappears in Section 4.5, Section 5.8, and the conclusion, each time with slightly different framing. A formal definition (what counts as ``complexity'' and what counts as ``investable improvement'') is never given. \emph{Recommendation:} Define ``complexity ceiling'' formally in the introduction or methodology and use it consistently.
+
+\low{L4. The conclusion repeats the abstract almost verbatim.} While some overlap is acceptable, the conclusion should offer synthesis and reflection rather than restating numbers.
+
+\low{L5. The paper length ($\sim$62 pages with tables) is excessive for JBF.} Typical JBF articles are 30--45 pages. The text could be tightened substantially.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{2. Research Motivation (研究動機)}
+
+\med{M1. The practical motivation is stronger than the academic motivation.} The paper frames the problem as ``the implicit assumption that asymmetric models uniformly improve upon symmetric counterparts warrants closer examination.'' But this is not really a widespread assumption in the academic literature---Hansen and Lunde (2005) already showed that asymmetric models do not always dominate. The paper should position itself more clearly: the novel contribution is the \emph{cross-asset taxonomy} and its \emph{implications for VT}, not the observation that asymmetric GARCH does not always win. \emph{Recommendation:} Rewrite the first two paragraphs of the introduction to emphasize the taxonomy-to-VT link as the core contribution.
+
+\low{M2. The VaR/Basel III motivation feels obligatory.} The VaR results (Student-$t$ beats Normal) are well-known and do not constitute a contribution. Including them is fine as supporting evidence, but the introduction over-emphasizes VaR compliance.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{3. Literature Review (文獻回顧)}
+
+\high{R1. Missing critical references on commodity asymmetric volatility.} The paper cites Chevallier and Ielpo (2017) for inverted leverage in commodities, but omits:
+\begin{itemize}[nosep]
+\item Cappiello, Engle, and Sheppard (2006, JFE) --- asymmetric dynamic conditional correlation across asset classes.
+\item Tully and Lucey (2007, Resources Policy) --- APGARCH for gold, documenting inverted asymmetry.
+\item Hammoudeh et al.\ (2010, NAJEF) --- asymmetric volatility in gold and silver.
+\item Barunik, Kocenda, and Vacha (2016, JIFMIM) --- asymmetric volatility spillovers across assets.
+\end{itemize}
+A JBF referee specializing in gold or commodities would likely flag this gap.
+
+\med{R2. The VT literature review omits the critical replication debate.} Cederburg et al.\ (2020) is cited but their \emph{critique} of Moreira and Muir (2017) is not adequately discussed. The paper should engage with the argument that VT alpha may not survive transaction costs and out-of-sample testing. The current treatment presents VT alpha as established fact.
+
+\med{R3. No discussion of EGARCH vs.\ GJR in the literature review.} The paper uses GJR-GARCH exclusively (with a brief EGARCH robustness check). But Nelson (1991) EGARCH is the more common asymmetric specification in the broader literature, and there are important technical differences (logarithmic variance, no non-negativity constraints). A referee may ask why GJR was chosen over EGARCH as the primary specification. The literature review should motivate this choice.
+
+\low{R4. The deep learning section (2.5) feels perfunctory.} It cites only three papers and dismisses the entire literature in one paragraph. Either engage more substantively or remove the subsection.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{4. Research Gap and Contributions (研究缺口與貢獻)}
+
+\high{G1. Contribution 2 (Proposition 1) is partly mechanical and its domain is severely limited.} The paper acknowledges (line 417) that the near-perfect Spearman $\rho = 1.000$ is ``partly mechanical, as both $\beta^{\text{trend}}$ and $\gamma$ derive from the GJR specification.'' But ``partly mechanical'' understates the issue. If VT weight is $w_t = c / \sigma_t$, and $\sigma_t$ responds asymmetrically to $\varepsilon_{t-1}$ via $\gamma$, then the direction of the weight change after a return shock is \emph{algebraically determined} by the sign of $\gamma$. The Spearman $\rho = 1.000$ with $N = 7$ is not evidence of an empirical regularity---it is a mathematical consequence of the model structure. The paper partially addresses this with OOS prediction ($\rho = 0.821$), but the OOS test still uses only $N = 6$ equity-type assets, and the mapping ``becomes insignificant for 12 diverse assets'' ($\rho = -0.448$, $p = 0.14$). A proposition that works only for equities and is partly tautological is a weak contribution for a top journal.
+
+\emph{Recommendation:} Either (a) formally prove the algebraic relationship and present it as a theorem (not an empirical proposition), clearly separating the mechanical component from any residual empirical content, or (b) test the proposition using an \emph{independent} volatility measure (e.g., realized variance from 5-minute data, or VIX-implied) that is not derived from the GJR model.
+
+\med{G2. Contribution 3 (time-zone momentum) does not follow from the leverage direction framework.} The paper's title is ``Leverage Direction Matters,'' but the time-zone arbitrage finding has nothing to do with leverage direction. Including it as a contribution inflates the paper's apparent scope without strengthening the core argument. The o2o Sharpe ratios fail the Harvey threshold, which the paper honestly acknowledges, but this means the ``contribution'' is essentially a null result for tradable purposes.
+
+\med{G3. The ``complexity ceiling'' is a framing device, not a testable proposition.} The paper uses this term to describe a pattern (more complexity $\neq$ better allocation), but it is not a formal model or testable hypothesis. The nine examples in Table 11 are heterogeneous (some compare GARCH variants, some compare VaR distributions, some compare strategies). A referee could argue this is cherry-picking: any researcher who tried many things and found most do not help can construct such a table.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{5. Model Specification (模型設定)}
+
+\high{S1. Zero-mean specification is questionable for assets with non-zero drift.} The paper states ``All models use zero-mean specification'' (line 70). BTC-USD has a daily mean return of 0.202\% (Table 1), which is economically significant. Imposing $\mu = 0$ biases the residuals and can affect $\gamma$ estimates. For BTC especially, this could explain the high $\gamma$ instability (std = 0.136). \emph{Recommendation:} At minimum, provide a robustness check with an AR(1) or constant-mean specification. The current brief mention in line 313 (``AR(1)-GARCH produces materially identical results'') should be in the main text with supporting evidence.
+
+\med{S2. Normal distribution for GARCH estimation with fat-tailed data is suboptimal.} All assets show excess kurtosis up to 14.6 (SPY). Estimating GARCH with Normal innovations produces inconsistent (but still consistent for QML) parameter estimates, but the efficiency loss can be substantial. More importantly, the Student-$t$ MLE will produce different $\gamma$ estimates. Since the entire taxonomy rests on $\gamma$, the distributional assumption matters.
+
+\med{S3. Window size of 504 days is motivated but alternative results suggest it is not optimal.} Table 7 shows $w = 5000$ produces the best QLIKE in 2 of 3 periods, yet $w = 504$ is chosen as primary. The justification (``avoids contamination from distant regime changes'') is reasonable but the paper should acknowledge that the primary window is not necessarily the best for all purposes.
+
+\low{S4. The weight clipping to $[0, 1.5]$ is ad hoc.} The paper does not discuss the sensitivity of results to this choice. Different clip bounds (e.g., $[0, 1.0]$ or $[0, 2.0]$) could affect both Sharpe and MDD.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{6. Equations and Symbols (方程式與符號)}
+
+\med{E1. Symbol conflict: $\gamma$ is used for four different things.}
+\begin{itemize}[nosep]
+\item $\gamma$ in GJR-GARCH (Eq.\ 1): asymmetry parameter
+\item $\gamma_{HM}$ in Henriksson-Merton (Eq.\ 5): market timing coefficient
+\item $\gamma_{TM}$ in Treynor-Mazuy: convexity coefficient
+\item $\gamma$ in CRRA utility (Section 5.6): risk aversion parameter
+\end{itemize}
+While subscripts distinguish the first three, the CRRA $\gamma$ (Section 5.6) is introduced without any subscript and shares the same symbol as the paper's \emph{central object of study}. This is confusing.
+
+\med{E2. Equation 4 (VT weight) omits the time-subscript convention.} The equation defines $w_t = \sigma_{\text{target}} / \hat{\sigma}_t$, but it is unclear whether $\hat{\sigma}_t$ is the one-step-ahead forecast made at $t-1$ (i.e., $\hat{\sigma}_{t|t-1}$) or the contemporaneous estimate. Given the paper's own emphasis on look-ahead bias (Section 5.8), this distinction is critical.
+
+\low{E3. Equation 6 (MDD utility) is non-standard.} The utility function $U = W_T \cdot (1 + \lambda \cdot \text{MDD})$ is introduced without motivation. Since MDD is negative by convention, the factor $(1 + \lambda \cdot \text{MDD})$ is less than 1, making $U < W_T$, which is sensible. But this functional form has no axiomatic foundation and is not used elsewhere in the literature. It should be presented as an \emph{ad hoc} evaluation criterion, not a utility function.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{7. Methodology (研究方法)}
+
+\high{M1. The $\gamma > 0.10$ threshold is estimated and tested on the same data.} The paper acknowledges this (line 205: ``threshold and significance-based formulation are estimated from the same sample used for evaluation''), but the acknowledgment is buried in a caveat. The ``perfect classification rate'' (12/12 DM tests) is the headline result, yet it is in-sample. The OOS test (2023 $\gamma$ predicting 2024--2025) uses only 6 assets. With $N = 6$, even random classification would achieve 100\% accuracy with probability $2^{-6} = 1.6\%$---not negligible. This is a fundamental limitation that should be front-and-center.
+
+\high{M2. Overlapping windows inflate statistical significance of gamma persistence.} The quarterly gamma estimates use ``504-day windows advanced by 63 trading days''---i.e., 87.5\% overlap between consecutive windows. The Newey-West correction with 8 lags partially addresses this, but the HAC $t$-statistic ($-5.79$ for gold) may still be inflated due to the extreme overlap. A referee may require non-overlapping windows or a block bootstrap approach.
+
+\med{M3. The Diebold-Mariano test assumptions may be violated.} The DM test assumes the loss differential is covariance-stationary. Given that the paper documents regime-dependent $\gamma$ (gold switches sign between bull and bear markets), the loss differential between GARCH and GJR-GARCH is likely non-stationary over the full sample. This could invalidate the DM $p$-values. \emph{Recommendation:} Report sub-period DM tests (which the paper partially does) and discuss the stationarity assumption explicitly.
+
+\med{M4. Transaction cost analysis is too brief.} The paper mentions ``annual turnover of 756\%'' with ``cost drag of only 8--15 basis points at typical SPY bid-ask spreads.'' But 756\% turnover $\times$ 1 bp half-spread $\times$ 2 (round-trip) $= 15$ bp, which is at the upper end of the stated range. For assets other than SPY (e.g., EEM, BTC-USD), trading costs are much higher and could materially affect VT performance. The cross-asset VT comparison (Table 5) does not account for differential transaction costs.
+
+\low{M5. The Harvey (2016) $t > 3.0$ threshold is applied inconsistently.} The paper invokes this threshold for time-zone momentum but not for the core VT alpha results. If the standard applies, the SPY VT Sharpe improvement ($+0.03$, certainly $t \ll 3.0$) should be flagged as statistically insignificant even by conventional standards.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{8. Data and Sample (資料與樣本)}
+
+\high{D1. Yahoo Finance as primary data source is problematic for a JBF paper.} Yahoo Finance data is free, convenient, and generally reliable for liquid U.S.\ ETFs, but it is not an accepted primary source for top finance journals. Issues include: (a) retroactive adjustments without documentation, (b) no formal data vendor agreement, (c) potential for gaps and errors in historical data. The brief statement ``we verify price accuracy against Bloomberg terminal data for key crisis dates'' is insufficient---it should be a systematic comparison, not spot-checking two dates.
+
+\emph{Recommendation:} Use CRSP, Bloomberg, or Refinitiv as the primary source and note Yahoo Finance as a replication convenience.
+
+\high{D2. The sample period is short for some analyses.} The primary sample is 2017--2025 (8 years, $N = 2{,}260$ for ETFs). The gold regime analysis requires extending to 2005--2016 (to observe the bear market), but this extended period is discussed informally without clear sample demarcation. The VT analysis covers 2014--2026. The time-zone analysis uses yet another period. The lack of a unified sample period makes it difficult to assess how robust the findings are.
+
+\med{D3. The ``26 asset'' validation is mentioned but never fully presented.} The abstract says ``extended to 26 assets in validation analyses,'' but the paper only shows 7 primary assets plus 8 commodities (Appendix A) and 8 Asian markets (Appendix B). The mapping from these to 26 is unclear. A supplementary table with all 26 assets' $\gamma$ estimates should be provided.
+
+\med{D4. BTC-USD data starts earlier than ETFs but this is not discussed.} Table 1 shows $N = 3{,}285$ for BTC vs.\ $N = 2{,}260$ for ETFs. Different sample lengths for different assets create comparability issues, particularly for the cross-asset $\gamma$ comparison.
+
+\low{D5. SLV appears in Table 1 but is barely discussed in the text.} It appears in the gamma table (Table 2) but not in the QLIKE comparison (Table 3) or VT analysis (Table 5). Either include it in all analyses or explain why it is excluded.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{9. Results and Claims (結果合理性)}
+
+\high{R1. Internal numerical inconsistencies.}
+\begin{enumerate}[nosep]
+\item The abstract reports Spearman $\rho = 0.886$ ($p = 0.019$) for ``six equity-type assets,'' but Table 9 reports $\rho = 1.000$ ($p < 0.001$) for ``7 assets'' including GLD and TLT. The text (line 417) gives $\rho = 0.886$ ($p = 0.019$, $N = 6$) for equity-type assets. The different statistics for different subsets need to be clearly reconciled---a reader encountering $\rho = 1.000$ in the table and $\rho = 0.886$ in the abstract will be confused.
+\item The abstract claims ``twelve Diebold-Mariano comparisons across two out-of-sample periods,'' but Table 3 shows only 9 rows (6 assets $\times$ 2 periods minus three assets with only one period). The count of ``twelve'' needs verification.
+\item Section 4.5 reports MDD correlation with base volatility as $\rho = 0.83$ ($N = 14$) and Spearman $\rho = 0.88$, but Section 4.4 reports $\rho = 0.944$ ($p < 0.001$). These appear to be from different samples but the distinction is not made clear.
+\end{enumerate}
+
+\med{R2. The ``VIX sufficient statistic'' claim is too strong.} Showing that partial correlations with VIX controlled are small for U.S.\ indicators does not establish sufficiency in the statistical sense. The paper uses ``sufficient statistic'' loosely. A formal test of sufficiency (e.g., encompassing regression) would be more convincing. Furthermore, the sole exception (Taiwan import growth, $p = 0.043$) undermines the ``sufficient'' claim by definition.
+
+\med{R3. Proposition 1 domain restriction is not adequately flagged.} The proposition claims a general mapping between $\gamma$ and $\beta^{\text{trend}}$, but it works only for equity-type assets ($N = 6$). For diverse assets ($N = 12$), $\rho = -0.448$ and the proposition \emph{reverses sign}. This is a major qualification that should appear in the proposition statement itself, not just in the evidence discussion.
+
+\med{R4. The Hybrid VT alpha of 5.77\% ($t = 3.99$) is not clearly net of transaction costs.} Section 5.5 reports this alpha, but the transaction cost analysis (Section 5.1) estimates only 8--15 bp drag. With 756\% turnover for a strategy with shifting leverage, 15 bp seems conservative, especially if one accounts for market impact.
+
+\low{R5. The insurance premium of $\sim$4\%/year is presented as constant across all VT variants.} But Table 8 shows different strategies have very different Sharpe ratios (0.79--0.99), implying different insurance premiums. The ``4\% constant premium'' applies only to the Hybrid VT.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{10. Citation Standards (引用規範)}
+
+\med{C1. Inconsistent citation format.} The paper uses both natbib-style parenthetical citations (\texttt{\textbackslash citealt}, \texttt{\textbackslash citet}) and inline author-year references (``Bollerslev (1986)'', ``Moreira and Muir (2017)''). Some are formatted correctly; others are not. Specific issues:
+\begin{itemize}[nosep]
+\item Line 28: ``Glosten, Jagannathan, and Runkle (1993)'' --- correct for first citation, but subsequent citations should use ``Glosten et al.\ (1993)'' or \texttt{\textbackslash citet}.
+\item The bibliography uses manual \texttt{thebibliography} instead of BibTeX, despite declaring \texttt{\textbackslash bibliographystyle\{apalike\}}. The style declaration is thus dead code.
+\end{itemize}
+
+\med{C2. Several in-text citations may lack bibliography entries.} The paper references ``Benjamini-Hochberg FDR'' (line 533) and ``PC algorithm'' (line 519) without formal citations. These are standard methods but should be cited in a journal paper.
+
+\low{C3. The Nelson (2025) reference is an SSRN working paper.} While citing working papers is acceptable, referees may question the reliance on an unpublished paper for characterizing VT as ``non-predictive risk control.'' Verify if this has since been published.
+
+\low{C4. The Hood and Raughtigan (2025) reference is ``early access.''} This is the paper's primary theoretical foil. Confirm the final publication details.
+
+\low{C5. Campbell et al.\ (2017) bibliography entry format differs from others.} It uses ``Campbell, J.Y., Sunderam, A., and Viceira, L.M.'' instead of the ``Last, F.~I.'' format used elsewhere.
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Consolidated Issue List}
+
+\subsection*{\textcolor{errorred}{HIGH --- Must Fix (9 issues)}}
+
+\begin{enumerate}[label=H\arabic*.]
+\item \textbf{Scope overload}: Three loosely connected contributions dilute the paper. Remove or drastically reduce the time-zone momentum contribution. (L1)
+\item \textbf{Proposition 1 is partly mechanical}: The $\rho = 1.000$ with $N = 7$ is algebraically determined, not empirical. Needs formal separation of mechanical vs.\ empirical content. (G1)
+\item \textbf{In-sample threshold}: The $\gamma > 0.10$ rule and its ``perfect'' 12/12 classification are tested on training data. Genuine OOS has only $N = 6$. (M1)
+\item \textbf{Overlapping windows inflate significance}: 87.5\% overlap in quarterly gamma estimates; HAC correction may be insufficient. (M2)
+\item \textbf{Yahoo Finance data source}: Not acceptable as primary source for JBF. (D1)
+\item \textbf{Short sample}: 2017--2025 for 7 assets; no unified extended sample. (D2)
+\item \textbf{Internal numerical inconsistencies}: Multiple $\rho$ values, ``twelve'' DM tests vs.\ 9 table rows, and inconsistent $N$ across claims. (R1)
+\item \textbf{Zero-mean specification}: Biases residuals for high-drift assets (BTC). (S1)
+\item \textbf{Proposition 1 reverses for diverse assets}: $\rho = -0.448$ for $N = 12$ means the proposition is not general. Must be flagged in the proposition statement. (R3)
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{MEDIUM --- Should Fix (14 issues)}}
+
+\begin{enumerate}[label=M\arabic*.]
+\item Sections 4.2.2 and 4.3 duplicate QLIKE discussion. (L2)
+\item ``Complexity ceiling'' never formally defined. (L3)
+\item Academic motivation weaker than practical motivation. (M1)
+\item Missing key references on commodity asymmetric volatility. (R1)
+\item VT replication debate (Cederburg et al.) insufficiently discussed. (R2)
+\item No motivation for choosing GJR over EGARCH as primary specification. (R3)
+\item Contribution 3 (TZ momentum) disconnected from core framework. (G2)
+\item ``Complexity ceiling'' is a framing device, not testable. (G3)
+\item Normal distribution for GARCH estimation with fat tails. (S2)
+\item Window $w = 504$ chosen despite evidence $w = 5000$ often better. (S3)
+\item DM test stationarity assumption may be violated. (M3)
+\item Transaction costs too briefly addressed; cross-asset comparison ignores differential costs. (M4)
+\item ``VIX sufficient statistic'' claim overstated. (R2)
+\item Hybrid VT alpha unclear if net of costs. (R4)
+\end{enumerate}
+
+\subsection*{\textcolor{okgreen}{LOW --- Optional (11 issues)}}
+
+\begin{enumerate}[label=O\arabic*.]
+\item Conclusion repeats abstract. (L4)
+\item Paper too long ($\sim$62 pages). (L5)
+\item VaR/Basel III motivation feels obligatory. (M2)
+\item Deep learning section perfunctory. (R4)
+\item Weight clipping $[0, 1.5]$ sensitivity not discussed. (S4)
+\item Symbol conflict: $\gamma$ used for four different concepts. (E1)
+\item Equation 4 time-subscript ambiguity. (E2)
+\item MDD utility function non-standard. (E3)
+\item Harvey threshold applied inconsistently. (M5)
+\item SLV in Table 1 but barely discussed. (D5)
+\item Insurance premium ``4\%'' varies by strategy. (R5)
+\end{enumerate}
+
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Overall Assessment and Recommendations}
+
+\textbf{Overall assessment:} The paper contains a genuinely interesting idea---that the sign of the GJR-GARCH $\gamma$ varies systematically across asset classes and determines GARCH model selection. This is a clean, novel contribution that could make a nice JBF paper. However, the paper is currently trying to do too much, and the execution has several significant flaws.
+
+\textbf{Revision priority:}
+
+\begin{enumerate}
+\item \textbf{Focus the paper.} Make the leverage direction taxonomy (Contribution 1) the centerpiece. Strengthen it with professional data sources and formal non-overlapping tests. Reduce the VT analysis to a supporting application. Remove the time-zone momentum from the main contributions.
+
+\item \textbf{Fix Proposition 1.} Either prove the algebraic relationship as a theorem (separating the tautological component from the empirical residual) or test it with an independent volatility measure. State the domain restriction ($N = 6$ equity-type assets only) in the proposition itself.
+
+\item \textbf{Use professional data.} Switch primary data to CRSP/Bloomberg/Refinitiv. Yahoo Finance can be noted for replication convenience.
+
+\item \textbf{Resolve numerical inconsistencies.} Audit all $\rho$ values, sample sizes, and cross-references between text and tables.
+
+\item \textbf{Address overlapping-window inference.} Either use non-overlapping quarterly windows or provide a formal bootstrap inference framework.
+
+\item \textbf{Tighten the paper.} Target 35--40 pages. Merge duplicated sections. Move the complexity ceiling table and VIX sufficient statistic discussion to an online appendix.
+
+\item \textbf{Deepen robustness.} Add Student-$t$ MLE for gamma estimation as primary robustness. Add AR(1)-mean specification results to the main text. Properly account for transaction costs cross-asset.
+\end{enumerate}
+
+\vspace{1em}
+\noindent\textbf{Verdict:} The core idea is publishable at JBF with major revision. The current draft needs substantial restructuring, data upgrade, and methodological tightening. The timeline for a successful revision is 3--6 months.
+
+\end{document}
