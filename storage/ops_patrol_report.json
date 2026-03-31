@@ -1,39 +1,39 @@
 {
-  "timestamp": "2026-03-31T06:27:58Z",
+  "timestamp": "2026-03-31T12:08:55Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "6 draft articles in pool (threshold: <3 triggers alert)"
+      "detail": "12 draft articles in pool"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime ~9 seconds ago (threshold: >26h triggers alert)"
+      "detail": "Age: 0.00 hours"
     },
     {
       "name": "ERROR_LOG",
       "status": "alert",
-      "detail": "Entry dated 2026-03-31 (today): \"Session Cron 空轉 6-8 小時\" — cron triggered ~30x without doing work; root cause: Claude judged direction exhausted without reading research_program.md; fix applied in CLAUDE.md (anti-idle rules + stronger cron prompts)"
+      "detail": "Entry found: 2026-03-31: Session Cron 空轉 6-8 小時"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return in last 3 entries across all strategies"
+      "detail": "All 14 strategies have <=2 nulls in last 3 entries (today is non-trading day, 1 null each is expected)"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50 triggers alert)"
+      "detail": "0 uncommitted files"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1527 entries in storage/memory/knowledge.json"
+      "detail": "1557 entries in knowledge.json"
     }
   ],
   "alerts": [
-    "error_log_has_recent_entry: 2026-03-31 Session Cron 空轉 entry present in docs/error_log.md"
+    "Entry found: 2026-03-31: Session Cron 空轉 6-8 小時"
   ]
 }
