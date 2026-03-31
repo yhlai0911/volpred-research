@@ -1,0 +1,456 @@
+{
+  "test1_vix_sufficiency": {
+    "model1_vix_only": {
+      "r2": 0.2567,
+      "adj_r2": 0.2565
+    },
+    "model2_own_rv_only": {
+      "r2": 0.3543,
+      "adj_r2": 0.3542
+    },
+    "model3_combined": {
+      "r2": 0.3866,
+      "adj_r2": 0.3863
+    },
+    "r2_gain_from_own_rv": 0.1299,
+    "r2_gain_pct": 50.6,
+    "corr_vix_future_rv": 0.5067,
+    "corr_own_rv_future_rv": 0.5952,
+    "n_observations": 4181,
+    "data_fix": "CLEAN 0050.TW \u2014 split artifact corrected"
+  },
+  "test2_optimal_allocation": {
+    "0050+GLD": {
+      "best_static_weight": 0.5,
+      "best_static_sharpe": 0.9382,
+      "strategies": {
+        "bh_20_80": {
+          "name": "BH 20/80",
+          "ann_ret": 10.71,
+          "ann_vol": 14.05,
+          "sharpe": 0.762,
+          "mdd": -31.25,
+          "calmar": 0.3427,
+          "sortino": 1.0094,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_30_70": {
+          "name": "BH 30/70",
+          "ann_ret": 11.45,
+          "ann_vol": 13.35,
+          "sharpe": 0.8579,
+          "mdd": -27.21,
+          "calmar": 0.4209,
+          "sortino": 1.1443,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_40_60": {
+          "name": "BH 40/60",
+          "ann_ret": 12.12,
+          "ann_vol": 13.17,
+          "sharpe": 0.9201,
+          "mdd": -23.9,
+          "calmar": 0.5072,
+          "sortino": 1.2339,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_50_50": {
+          "name": "BH 50/50",
+          "ann_ret": 12.71,
+          "ann_vol": 13.55,
+          "sharpe": 0.9382,
+          "mdd": -20.98,
+          "calmar": 0.6057,
+          "sortino": 1.2584,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_60_40": {
+          "name": "BH 60/40",
+          "ann_ret": 13.22,
+          "ann_vol": 14.42,
+          "sharpe": 0.9164,
+          "mdd": -23.04,
+          "calmar": 0.5737,
+          "sortino": 1.223,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_70_30": {
+          "name": "BH 70/30",
+          "ann_ret": 13.64,
+          "ann_vol": 15.72,
+          "sharpe": 0.8678,
+          "mdd": -25.52,
+          "calmar": 0.5347,
+          "sortino": 1.1474,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "vt_8.63": {
+          "name": "VT 8.63/VIX",
+          "ann_ret": 12.24,
+          "ann_vol": 13.05,
+          "sharpe": 0.938,
+          "mdd": -21.26,
+          "calmar": 0.5757,
+          "sortino": 1.2846,
+          "n_days": 4077,
+          "n_years": 16.2,
+          "ann_turnover_pct": 103.1,
+          "ann_tx_drag_pct": 0.206
+        }
+      }
+    },
+    "0050+SPY": {
+      "best_static_weight": 0.4,
+      "best_static_sharpe": 1.0798,
+      "strategies": {
+        "bh_20_80": {
+          "name": "BH 20/80",
+          "ann_ret": 15.59,
+          "ann_vol": 15.47,
+          "sharpe": 1.0076,
+          "mdd": -31.15,
+          "calmar": 0.5003,
+          "sortino": 1.244,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_30_70": {
+          "name": "BH 30/70",
+          "ann_ret": 15.71,
+          "ann_vol": 14.81,
+          "sharpe": 1.0605,
+          "mdd": -30.04,
+          "calmar": 0.5229,
+          "sortino": 1.3121,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_40_60": {
+          "name": "BH 40/60",
+          "ann_ret": 15.75,
+          "ann_vol": 14.59,
+          "sharpe": 1.0798,
+          "mdd": -28.96,
+          "calmar": 0.544,
+          "sortino": 1.3439,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_50_50": {
+          "name": "BH 50/50",
+          "ann_ret": 15.73,
+          "ann_vol": 14.82,
+          "sharpe": 1.0611,
+          "mdd": -27.91,
+          "calmar": 0.5634,
+          "sortino": 1.3337,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_60_40": {
+          "name": "BH 60/40",
+          "ann_ret": 15.62,
+          "ann_vol": 15.48,
+          "sharpe": 1.0089,
+          "mdd": -28.19,
+          "calmar": 0.5541,
+          "sortino": 1.2842,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "bh_70_30": {
+          "name": "BH 70/30",
+          "ann_ret": 15.44,
+          "ann_vol": 16.52,
+          "sharpe": 0.9343,
+          "mdd": -28.72,
+          "calmar": 0.5375,
+          "sortino": 1.2005,
+          "n_days": 4078,
+          "n_years": 16.2
+        },
+        "vt_8.63": {
+          "name": "VT 8.63/VIX",
+          "ann_ret": 15.52,
+          "ann_vol": 15.29,
+          "sharpe": 1.015,
+          "mdd": -29.47,
+          "calmar": 0.5264,
+          "sortino": 1.2844,
+          "n_days": 4077,
+          "n_years": 16.2,
+          "ann_turnover_pct": 103.1,
+          "ann_tx_drag_pct": 0.206
+        }
+      }
+    },
+    "0050+Cash": {
+      "best_static_weight": 0.1,
+      "best_static_sharpe": 0.8515,
+      "strategies": {
+        "bh_10_90": {
+          "name": "BH 10/90",
+          "ann_ret": 1.82,
+          "ann_vol": 2.13,
+          "sharpe": 0.8515,
+          "mdd": -3.89,
+          "calmar": 0.4673,
+          "sortino": 1.1171,
+          "n_days": 4216,
+          "n_years": 16.7
+        },
+        "bh_20_80": {
+          "name": "BH 20/80",
+          "ann_ret": 3.62,
+          "ann_vol": 4.27,
+          "sharpe": 0.8481,
+          "mdd": -7.66,
+          "calmar": 0.4726,
+          "sortino": 1.1127,
+          "n_days": 4216,
+          "n_years": 16.7
+        },
+        "bh_30_70": {
+          "name": "BH 30/70",
+          "ann_ret": 5.41,
+          "ann_vol": 6.4,
+          "sharpe": 0.8445,
+          "mdd": -11.31,
+          "calmar": 0.4778,
+          "sortino": 1.108,
+          "n_days": 4216,
+          "n_years": 16.7
+        },
+        "bh_40_60": {
+          "name": "BH 40/60",
+          "ann_ret": 7.17,
+          "ann_vol": 8.54,
+          "sharpe": 0.8406,
+          "mdd": -14.85,
+          "calmar": 0.483,
+          "sortino": 1.1028,
+          "n_days": 4216,
+          "n_years": 16.7
+        },
+        "bh_50_50": {
+          "name": "BH 50/50",
+          "ann_ret": 8.92,
+          "ann_vol": 10.67,
+          "sharpe": 0.8364,
+          "mdd": -18.28,
+          "calmar": 0.4881,
+          "sortino": 1.0973,
+          "n_days": 4216,
+          "n_years": 16.7
+        },
+        "bh_60_40": {
+          "name": "BH 60/40",
+          "ann_ret": 10.65,
+          "ann_vol": 12.8,
+          "sharpe": 0.8319,
+          "mdd": -21.6,
+          "calmar": 0.493,
+          "sortino": 1.0914,
+          "n_days": 4216,
+          "n_years": 16.7
+        },
+        "bh_70_30": {
+          "name": "BH 70/30",
+          "ann_ret": 12.35,
+          "ann_vol": 14.94,
+          "sharpe": 0.8271,
+          "mdd": -24.82,
+          "calmar": 0.4979,
+          "sortino": 1.0851,
+          "n_days": 4216,
+          "n_years": 16.7
+        },
+        "vt_8.63": {
+          "name": "VT 8.63/VIX",
+          "ann_ret": 7.84,
+          "ann_vol": 8.89,
+          "sharpe": 0.8823,
+          "mdd": -14.04,
+          "calmar": 0.5585,
+          "sortino": 1.1834,
+          "n_days": 4215,
+          "n_years": 16.7,
+          "ann_turnover_pct": 99.7,
+          "ann_tx_drag_pct": 0.199
+        }
+      }
+    }
+  },
+  "test3_calendar_anomaly": {
+    "monthly_avg_return_pct": {
+      "1": 1.75,
+      "2": 2.01,
+      "3": 0.23,
+      "4": 1.42,
+      "5": 1.32,
+      "6": 1.03,
+      "7": 3.71,
+      "8": -0.41,
+      "9": 0.77,
+      "10": 1.1,
+      "11": 1.72,
+      "12": 2.6
+    },
+    "winter_annualized_pct": 21.65,
+    "summer_annualized_pct": 14.95,
+    "diff_annualized_pct": 6.71,
+    "sell_in_may_t_stat": 0.643,
+    "sell_in_may_p_value": 0.5206,
+    "sell_in_may_significant_5pct": false,
+    "halloween_win_rate": 0.625,
+    "halloween_wins_total": "10/16",
+    "cny_window_annualized_pct": 31.57,
+    "cny_t_stat": 1.046,
+    "cny_p_value": 0.2958,
+    "data_fix": "CLEAN 0050.TW \u2014 split artifact corrected"
+  },
+  "test4_rebalancing_frequency": {
+    "strategies": {
+      "daily": {
+        "name": "VT daily",
+        "ann_ret": 9.97,
+        "ann_vol": 8.33,
+        "sharpe": 1.1965,
+        "mdd": -14.27,
+        "calmar": 0.6984,
+        "sortino": 1.7973,
+        "n_days": 4215,
+        "n_years": 16.7,
+        "ann_turnover_pct": 639.3,
+        "ann_tx_drag_pct": 1.279
+      },
+      "weekly": {
+        "name": "VT weekly",
+        "ann_ret": 7.99,
+        "ann_vol": 8.53,
+        "sharpe": 0.9367,
+        "mdd": -15.56,
+        "calmar": 0.5136,
+        "sortino": 1.3263,
+        "n_days": 4215,
+        "n_years": 16.7,
+        "ann_turnover_pct": 272.3,
+        "ann_tx_drag_pct": 0.545
+      },
+      "monthly": {
+        "name": "VT monthly",
+        "ann_ret": 7.84,
+        "ann_vol": 8.89,
+        "sharpe": 0.8823,
+        "mdd": -14.04,
+        "calmar": 0.5585,
+        "sortino": 1.1834,
+        "n_days": 4215,
+        "n_years": 16.7,
+        "ann_turnover_pct": 99.7,
+        "ann_tx_drag_pct": 0.199
+      }
+    },
+    "baseline_bh_100": {
+      "name": "BH 100% 0050.TW",
+      "ann_ret": 17.3,
+      "ann_vol": 21.34,
+      "sharpe": 0.8109,
+      "mdd": -33.83,
+      "calmar": 0.5115,
+      "sortino": 1.0639,
+      "n_days": 4216,
+      "n_years": 16.7
+    },
+    "best_frequency": "daily",
+    "best_sharpe": 1.1965,
+    "data_fix": "CLEAN 0050.TW \u2014 split artifact corrected"
+  },
+  "experiment_id": "K739bv2",
+  "title": "Taiwan VT Cross-Validation \u2014 CLEAN 0050.TW Data (Split Fix)",
+  "data_source": "yfinance + clean_tw50_data (volpred.utils)",
+  "data_fix": "Pre-2014 0050.TW prices divided by 4 (split ratio) to remove discontinuity",
+  "original_experiment": "K739b",
+  "assets": [
+    "0050.TW (clean)",
+    "SPY",
+    "GLD",
+    "^VIX"
+  ],
+  "period": "2009-01-02 to 2026-03-30",
+  "n_tw_trading_days": 4216,
+  "n_us_trading_days": 5090,
+  "comparison_k739b_vs_k739bv2": {
+    "test1": {
+      "r2_vix_old": 0.0364,
+      "r2_vix_new": 0.2567,
+      "r2_combined_old": 0.0402,
+      "r2_combined_new": 0.3866,
+      "gain_old": 0.0038,
+      "gain_new": 0.1299,
+      "conclusion_changed": "True"
+    },
+    "test2": {
+      "0050+GLD": {
+        "weight_old": 0.3,
+        "weight_new": 0.5,
+        "sharpe_old": 0.6798,
+        "sharpe_new": 0.9382,
+        "changed": true
+      },
+      "0050+SPY": {
+        "weight_old": 0.2,
+        "weight_new": 0.4,
+        "sharpe_old": 0.9064,
+        "sharpe_new": 1.0798,
+        "changed": true
+      },
+      "0050+Cash": {
+        "weight_old": 0.1,
+        "weight_new": 0.1,
+        "sharpe_old": 0.4808,
+        "sharpe_new": 0.8515,
+        "changed": false
+      }
+    },
+    "test3": {
+      "p_value_old": 0.8714,
+      "p_value_new": 0.5206,
+      "halloween_old": 0.625,
+      "halloween_new": 0.625
+    },
+    "test4": {
+      "best_freq_old": "daily",
+      "best_freq_new": "daily",
+      "best_freq_changed": false,
+      "sharpe_changes": {
+        "daily": {
+          "old": 0.4129,
+          "new": 1.1965
+        },
+        "weekly": {
+          "old": 0.2217,
+          "new": 0.9367
+        },
+        "monthly": {
+          "old": 0.264,
+          "new": 0.8823
+        }
+      }
+    }
+  },
+  "timestamp": "2026-03-31T20:14:33.799792",
+  "proposer": "User (split artifact fix)",
+  "executor": "Claude",
+  "references": [
+    "K739b: Holiday-bug-fixed Taiwan VT cross-validation (raw 0050.TW)",
+    "K738: VT insurance cost-benefit (raw data)",
+    "K82/K88: Taiwan VT guide (8.63/VIX target)"
+  ]
+}

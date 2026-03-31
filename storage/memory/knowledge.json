@@ -18556,5 +18556,66 @@
     "data_source": "yfinance (0050.TW), 2009-2026",
     "created_at": "2026-03-31T20:06:54.892122",
     "category": "model_behavior"
+  },
+  {
+    "id": "k_20260331201600_01",
+    "experiment_id": "K738v2",
+    "title": "K738v2: VT Insurance Cost-Benefit 0050.TW — clean_tw50_data rerun: CONCLUSIONS ESSENTIALLY UNCHANGED",
+    "content": "[提出: User, 執行: Claude] Rerun K738 for 0050.TW only with clean_tw50_data (split artifact fix). Results barely changed: BH_100 CAGR 13.81→13.68 (−0.13pp), BH_5050 CAGR 12.41→12.40 (−0.01pp), 12/VIX Sharpe 0.793→0.795 (+0.002), EWMA_VT MDD −24.0→−23.4 (+0.5pp). Break-even gamma: 12/VIX unchanged at 3.6, EWMA shifted trivially from 7.6→7.5. Insurance cost: 12/VIX drag 1.70→1.67%/yr for +5.1pp MDD reduction (identical). Core conclusion CONFIRMED: VT is drawdown insurance not alpha generator. The split artifact mainly affected the raw return filter (1 extreme return removed in K738 vs properly corrected continuous price in K738v2) — since evaluation starts in 2007/2009 and the artifact is at 2014-01-02, the effect is limited to ~1 day's worth of contamination that the |r|>30% filter already caught.",
+    "tags": [
+      "taiwan",
+      "VT",
+      "insurance",
+      "cost-benefit",
+      "0050.TW",
+      "clean_tw50_data",
+      "rerun",
+      "CRRA",
+      "break-even-gamma"
+    ],
+    "data_source": "yfinance (0050.TW, ^VIX, GLD), 2006-2026, clean_tw50_data",
+    "created_at": "2026-03-31T20:16:00.117667",
+    "category": "strategy_evaluation"
+  },
+  {
+    "id": "k_20260331201600_02",
+    "experiment_id": "K739bv2",
+    "title": "K739bv2: Taiwan VT Cross-Validation — clean_tw50_data: MAJOR CHANGES in VIX sufficiency & allocation",
+    "content": "[提出: User, 執行: Claude] Rerun K739b with clean_tw50_data. MAJOR findings: (1) VIX sufficiency R² jumped 0.036→0.257 (+614%) — the split artifact was destroying VIX's predictive power for 0050 RV because the phantom −75% return corrupted RV estimates in 2014. With clean data, VIX R²=0.257 for Taiwan (still lower than SPY ~0.35). Adding own RV: R² gain 0.004→0.130 (R² 0.387) — own RV matters MORE for Taiwan than US. (2) Optimal allocation CHANGED: 0050+GLD 30/70→50/50, 0050+SPY 20/80→40/60 — the pre-split inflated prices made 0050 look riskier than it really was, so optimizer allocated less to it. With clean prices, proper risk profile favors more 0050 weight. (3) Rebalancing: daily best confirmed (Sharpe 0.41→1.20 with clean data — huge because daily VT was reacting to the split artifact day). (4) Calendar anomaly: Halloween win rate unchanged at 62.5%, Sell-in-May still insignificant (p=0.52 vs 0.87).",
+    "tags": [
+      "taiwan",
+      "VT",
+      "cross-validation",
+      "VIX-sufficiency",
+      "allocation",
+      "0050.TW",
+      "clean_tw50_data",
+      "rerun",
+      "split-artifact"
+    ],
+    "data_source": "yfinance (0050.TW, SPY, GLD, ^VIX), 2006-2026, clean_tw50_data",
+    "created_at": "2026-03-31T20:16:00.117667",
+    "category": "predictive_power"
+  },
+  {
+    "id": "k_20260331201600_03",
+    "experiment_id": "K757bv2",
+    "title": "K757bv2: Taiwan CoVaR Contagion — clean_tw50_data: CORRELATIONS SHARPLY HIGHER, CoVaR STABLE",
+    "content": "[提出: User, 執行: Claude] Rerun K757b with clean_tw50_data for 0050.TW. MAJOR finding: 0050-TSMC correlation jumped from 0.587→0.838 (+0.251), 0050-Fubon from 0.424→0.611 (+0.187), 0050-Cathay from 0.407→0.608 (+0.201). The split artifact was adding noise that suppressed measured correlations. Granger causality: now 6/12 pairs significant (vs unclear comparison due to format mismatch with K757b). New finding: 0050 Granger-causes TSMC/Fubon/Cathay RV (index→components), while financials Granger-cause TSMC (cross-sector). CoVaR: DeltaCoVaR for TSMC→0050 essentially unchanged (−0.01888→−0.01888), beta_x significant (p=0.001). The CoVaR methodology uses quantile regression on returns which is relatively robust to a single day's artifact. VIX-only OOS R² improved from 0.024→0.101 — same story as K739bv2: the split artifact was destroying return-based predictions. Partial corr TSMC_RV→0050_RV|VIX = 0.521 (high), indicating TSMC RV contains substantial information beyond VIX for 0050 vol prediction.",
+    "tags": [
+      "taiwan",
+      "CoVaR",
+      "contagion",
+      "correlation",
+      "Granger",
+      "0050.TW",
+      "TSMC",
+      "clean_tw50_data",
+      "rerun",
+      "systemic-risk"
+    ],
+    "data_source": "yfinance (0050.TW, 2330.TW, 2881.TW, 2882.TW, ^VIX), 2010-2026, clean_tw50_data",
+    "created_at": "2026-03-31T20:16:00.117667",
+    "category": "risk_transmission"
   }
 ]
