@@ -18503,5 +18503,58 @@
     "data_source": "yfinance (SPY, GLD, TLT, DBC, SHY, ^VIX), 2006-2026",
     "created_at": "2026-03-31T19:58:26.894456",
     "category": "experiment"
+  },
+  {
+    "id": "k_20260331200654_01",
+    "experiment_id": "K758v2",
+    "title": "K758v2: Cross-Border Hedging — clean_tw50_data rerun: CONCLUSION UNCHANGED",
+    "content": "[提出: User, 執行: Claude] Rerun K758 with clean_tw50_data (fixes 2014 split breakpoint). KEY CHANGE: 0050.TW vol drops from 26.04% to 18.0% (removing phantom -75% return inflated vol). All 0050.TW-containing portfolios see Sharpe improvements: 100% 0050 Sharpe 0.38→0.82, 50/50 TW+SPY 0.76→1.10, 33/33/33 0.89→1.14. Best portfolio now 40/30/30 0050/SPY/GLD (Sharpe 1.18). BUT the core conclusion HOLDS: unhedged beats hedged for all portfolio pairs (SPY unhedged 0.80 vs hedged 0.74; 50/50 unhedged 1.10 vs hedged 1.03). 'Don't hedge FX for retail' survives — USD still strengthens in crashes (+1.4% annualized on worst 5% SPY days), hedging costs 4.9%/yr retail. Clean data makes 0050 more attractive but doesn't change the FX hedging calculus.",
+    "tags": [
+      "taiwan",
+      "cross-border",
+      "hedging",
+      "FX",
+      "0050.TW",
+      "clean_tw50_data",
+      "rerun"
+    ],
+    "data_source": "yfinance (SPY, 0050.TW, GLD, USDTWD=X, ^TNX, ^VIX), 2010-2026",
+    "created_at": "2026-03-31T20:06:54.892118",
+    "category": "cross_asset"
+  },
+  {
+    "id": "k_20260331200654_02",
+    "experiment_id": "K761v2",
+    "title": "K761v2: Taiwan Yield Curve — clean_tw50_data rerun: CONCLUSION CHANGED (sign flipped!)",
+    "content": "[提出: User, 執行: Claude] Rerun K761 with clean_tw50_data. MAJOR FINDING: partial correlation at 126d FLIPPED SIGN. Original: partial_r=+0.117 (t=7.53). V2: partial_r=-0.273 (t=-18.15). The sign change means: with clean data, steep yield curve predicts LOWER 0050 vol (intuitive: steep curve → healthy economy → lower vol), while original corrupted data showed the opposite. All three horizons now show NEGATIVE partial_r: 21d=-0.144, 63d=-0.193, 126d=-0.273 (all pass Harvey t>3). DM test still shows slope does NOT add trading value (p>0.05 all horizons). Trading strategies: slope guard Sharpe 0.66 < plain VT 0.74. Root cause: the phantom -75% return at 2014-01-02 created an artificial vol spike that corrupted the realized volatility calculations, inflating forward RV in a period when the yield curve was steep (post-taper-tantrum 2013). This inflated the positive slope-vol correlation.",
+    "tags": [
+      "taiwan",
+      "yield-curve",
+      "0050.TW",
+      "clean_tw50_data",
+      "rerun",
+      "sign-change",
+      "partial-correlation"
+    ],
+    "data_source": "yfinance (0050.TW, ^VIX, ^TNX, ^IRX), 2009-2026",
+    "created_at": "2026-03-31T20:06:54.892121",
+    "category": "predictive_power"
+  },
+  {
+    "id": "k_20260331200654_03",
+    "experiment_id": "K764v2",
+    "title": "K764v2: Rough Vol 0050.TW — clean_tw50_data rerun: CONCLUSION UNCHANGED (H=0.003)",
+    "content": "[提出: User, 執行: Claude] Rerun K764 0050.TW portion with clean_tw50_data. H shifted from 0.0025 to 0.0026 (+0.0001) — effectively identical. Rolling H mean unchanged at 0.0132. 100% of rolling windows show H<0.5 (rough). The split fix only affects price LEVELS (dividing pre-2014 by 4), not daily return patterns (except the single breakpoint day which clean_tw50_data zeroes out). Since Hurst estimation uses log(|r|) variograms over 252-day windows, the single cleaned day has negligible impact on the thousands of valid return observations. 0050.TW remains extremely rough (H≈0.003), consistent with Gatheral et al. (2018). This is even rougher than SPY (H≈0.1), likely due to Taiwan market microstructure (price limits, less continuous trading).",
+    "tags": [
+      "taiwan",
+      "rough-volatility",
+      "Hurst",
+      "0050.TW",
+      "clean_tw50_data",
+      "rerun"
+    ],
+    "data_source": "yfinance (0050.TW), 2009-2026",
+    "created_at": "2026-03-31T20:06:54.892122",
+    "category": "model_behavior"
   }
 ]

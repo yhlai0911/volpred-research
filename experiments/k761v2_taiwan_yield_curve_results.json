@@ -1,0 +1,178 @@
+{
+  "part_a": {
+    "slope_descriptive": {
+      "mean": 1.342860294351433,
+      "std": 1.2613903778750788,
+      "n_obs": 4216
+    },
+    "corr_vix_slope_tw": 0.13499440831869441
+  },
+  "part_b": {
+    "21d": {
+      "n": 4187,
+      "slope_only": {
+        "beta": -0.4009731597454983,
+        "t_stat": -0.8489617684235218,
+        "r_squared": 0.0032168214817606122
+      },
+      "vix_only": {
+        "beta": 0.6058328793505838,
+        "t_stat": 5.546977464544004,
+        "r_squared": 0.25669334371639696
+      },
+      "slope_plus_vix": {
+        "beta_slope": -0.8863607113371079,
+        "t_slope": -2.267047553111404,
+        "beta_vix": 0.6255095937686059,
+        "t_vix": 5.657389624627045,
+        "r_squared": 0.27214129147200583,
+        "delta_r2_vs_vix": 0.01544794775560887
+      },
+      "partial_correlation": {
+        "partial_r": -0.14416219461329696,
+        "t_stat": -9.423401441524966,
+        "passes_harvey_3": true
+      },
+      "kitchen_sink": {
+        "beta_slope": -0.6440311083985113,
+        "t_slope": -1.8149824583870038,
+        "r_squared": 0.39500460455630737
+      }
+    },
+    "63d": {
+      "n": 4157,
+      "slope_only": {
+        "beta": -0.657480804193888,
+        "t_stat": -1.6910089985881422,
+        "r_squared": 0.015105670158926499
+      },
+      "vix_only": {
+        "beta": 0.3615716591759505,
+        "t_stat": 4.513254896480128,
+        "r_squared": 0.15991049150311798
+      },
+      "slope_plus_vix": {
+        "beta_slope": -0.9551754294422791,
+        "t_slope": -2.681284789524061,
+        "beta_vix": 0.38279313779961904,
+        "t_vix": 4.665231370508531,
+        "r_squared": 0.19124123506044532,
+        "delta_r2_vs_vix": 0.031330743557327345
+      },
+      "partial_correlation": {
+        "partial_r": -0.19311791790061555,
+        "t_stat": -12.685544025013211,
+        "passes_harvey_3": true
+      },
+      "kitchen_sink": {
+        "beta_slope": -0.7643302976399882,
+        "t_slope": -2.4069715745003797,
+        "r_squared": 0.3279258313358725
+      }
+    },
+    "126d": {
+      "n": 4112,
+      "slope_only": {
+        "beta": -0.9285257954798875,
+        "t_stat": -2.765615808263029,
+        "r_squared": 0.045616177814940206
+      },
+      "vix_only": {
+        "beta": 0.23704248963506444,
+        "t_stat": 4.22177433023,
+        "r_squared": 0.10432557552232491
+      },
+      "slope_plus_vix": {
+        "beta_slope": -1.1306452645716412,
+        "t_slope": -3.4685996101253576,
+        "beta_vix": 0.2619070029276298,
+        "t_vix": 4.474488576338189,
+        "r_squared": 0.1708145888166649,
+        "delta_r2_vs_vix": 0.06648901329433998
+      },
+      "partial_correlation": {
+        "partial_r": -0.2724581838256554,
+        "t_stat": -18.151695119395022,
+        "passes_harvey_3": true
+      },
+      "kitchen_sink": {
+        "beta_slope": -1.0078784471819735,
+        "t_slope": -3.3148326424876275,
+        "r_squared": 0.2614149123361901
+      }
+    }
+  },
+  "part_b2_dm_test": {
+    "21d": {
+      "dm_stat": 1.2055924251766608,
+      "p_value": 0.22797468132053478,
+      "d_bar": 1.2330919020357611,
+      "slope_adds_value": false
+    },
+    "63d": {
+      "dm_stat": 1.4752911203541872,
+      "p_value": 0.14013429268844435,
+      "d_bar": 1.438515731424498,
+      "slope_adds_value": false
+    },
+    "126d": {
+      "dm_stat": 1.9318569603875975,
+      "p_value": 0.053377163304148434,
+      "d_bar": 2.027971068792321,
+      "slope_adds_value": false
+    }
+  },
+  "part_c": {
+    "full_period": {
+      "buy_hold_0050": {
+        "ann_return": 0.14334037975334413,
+        "ann_vol": 0.181308602817131,
+        "sharpe": 0.7905878569806097,
+        "sortino": 1.0732129986716095,
+        "max_drawdown": -0.338276377730481,
+        "total_return": 7.220148302569818
+      },
+      "taiwan_vt_863": {
+        "ann_return": 0.06218247278975819,
+        "ann_vol": 0.08384489488093191,
+        "sharpe": 0.7416369580767378,
+        "sortino": 1.0131957488472227,
+        "max_drawdown": -0.15936907665417088,
+        "total_return": 1.5823346409418306
+      },
+      "slope_guard": {
+        "ann_return": 0.04997482181286861,
+        "ann_vol": 0.07589587567110885,
+        "sharpe": 0.6584655802567205,
+        "sortino": 0.9063247927506792,
+        "max_drawdown": -0.15936907665417088,
+        "total_return": 1.1530949285440513
+      },
+      "continuous_slope": {
+        "ann_return": 0.01737675108747161,
+        "ann_vol": 0.02991082962314979,
+        "sharpe": 0.5809518260243339,
+        "sortino": 0.7658433886378957,
+        "max_drawdown": -0.06121631899011548,
+        "total_return": 0.3111740739041362
+      }
+    }
+  },
+  "conclusion": {
+    "any_partial_r_passes_harvey": true,
+    "slope_guard_sharpe": 0.6584655802567205,
+    "vt_sharpe": 0.7416369580767378,
+    "verdict": "PARTIAL: Slope significant at 21d, 63d, 126d. Trading: slope guard (0.658) <= VT (0.742). CONCLUSION CHANGED: 126d partial r shifted -0.3892."
+  },
+  "metadata": {
+    "experiment": "K761v2",
+    "title": "Taiwan Yield Curve \u2014 Rerun with clean_tw50_data",
+    "date": "2026-03-31T20:05:52.793373",
+    "data_source": "yfinance (0050.TW, ^VIX, ^TNX, ^IRX)",
+    "period": "2009-01-05 to 2026-03-30",
+    "n_obs": 4216,
+    "fix_applied": "clean_tw50_data \u2014 fixes 2014-01-02 split breakpoint",
+    "methodology": "TW calendar primary, VIX/slope asof-lookup, signal.shift(1), TX 10bps",
+    "attribution": "[\u63d0\u51fa: User (rerun request), \u57f7\u884c: Claude]"
+  }
+}
