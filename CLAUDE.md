@@ -313,12 +313,13 @@ uv run python scripts/list_new_strategy.py \
 1. 審查：/latex-academic-reviewer + /citation-verifier → review_v1.tex + citation_check.md
 2. 修正：body_v2.tex（保留原版）+ v1_to_v2_diff.tex（差異報告）
 3. 編譯：cd paper/<name> && xelatex main_v2.tex && xelatex main_v2.tex
-4. 上傳 Supabase Storage：uv run volpred ops paper-upload-pdf --paper-id <id> --file paper/<name>/main_v2.pdf
-5. 更新 metadata：uv run volpred ops paper-upsert --paper-id <id> --pages <N>
-6. 複製到前端：cp paper/<name>/main_v2.pdf frontend-v2-fix/public/paper/<slug>.pdf
-7. Git commit：含 review + diff + v2 所有檔案
-8. 驗證：curl API 確認 pages 和 pdf_url 正確
+4. **一鍵同步**：uv run volpred ops paper-update --paper-id <id>
+   （自動：計算 pages + citations → 上傳 PDF → 更新 metadata → 複製到前端）
+5. Git commit：含 review + diff + v2 所有檔案
+6. 驗證：curl API 確認 pages/citations/pdf_url 正確
 ```
+
+**⚠️ 步驟 4 的 `paper-update` 自動完成原本的步驟 4-6，不需要手動跑 3 個命令。**
 
 **版本命名規則**：
 - `main.tex` / `body.tex` = 原版（不動）

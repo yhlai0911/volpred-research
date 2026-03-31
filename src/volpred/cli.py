@@ -695,6 +695,19 @@ def ops_paper_upload_pdf(paper_id: str, file_path: str) -> None:
     _print_json({"action": "paper_upload_pdf", "item": paper})
 
 
+@ops.command("paper-update")
+@click.option("--paper-id", required=True, help="Stable paper id")
+@click.option("--paper-dir", default=None, help="Paper directory (default: paper/<paper-id>)")
+def ops_paper_update(paper_id: str, paper_dir: str | None) -> None:
+    """One-command paper update: auto-count pages/citations from .tex → upload PDF → sync metadata → copy to frontend."""
+    from volpred.ops.papers import update_paper_full
+
+    paper = update_paper_full(paper_id=paper_id, paper_dir=paper_dir)
+    console.print(f"[green]Paper fully updated[/green] {paper_id}")
+    console.print(f"  pages={paper.get('pages')} citations={paper.get('citations')} pdf_url={'✅' if paper.get('pdf_url') else '❌'}")
+    _print_json({"action": "paper_update", "item": paper})
+
+
 @ops.command("paper-migrate-storage")
 @click.option("--paper-id", required=True, help="Stable paper id")
 @click.option("--file", "file_path", default=None, type=click.Path(exists=True), help="Optional local PDF path; defaults to current static paper URL")

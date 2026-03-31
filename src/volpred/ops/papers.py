@@ -220,6 +220,119 @@ def upload_paper_pdf(
     return updated
 
 
+def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
+    """Auto-extract pages, citations from .tex files in a paper directory."""
+    import re
+    import subprocess
+
+    metrics: dict[str, int | None] = {}
+
+    # Find the best tex file (v2 preferred over v1)
+    for name in ["main_v2.tex", "main.tex"]:
+        tex = paper_dir / name
+        if tex.exists():
+            break
+    else:
+        return metrics
+
+    content = tex.read_text(errors="ignore")
+
+    # Count \bibitem entries (citations)
+    citations = len(re.findall(r"\\bibitem", content))
+    # Also check body files
+    for body_name in ["body_v2.tex", "body.tex"]:
+        body = paper_dir / body_name
+        if body.exists():
+            body_content = body.read_text(errors="ignore")
+            citations += len(re.findall(r"\\bibitem", body_content))
+            break
+    if citations > 0:
+        metrics["citations"] = citations
+
+    # Count pages from PDF
+    pdf_name = tex.stem + ".pdf"
+    pdf = paper_dir / pdf_name
+    if pdf.exists():
+        try:
+            result = subprocess.run(
+                ["python3", "-c", f"import fitz; print(fitz.open('{pdf}').page_count)"],
+                capture_output=True, text=True, timeout=10,
+            )
+            if result.returncode == 0 and result.stdout.strip().isdigit():
+                metrics["pages"] = int(result.stdout.strip())
+        except Exception:
+            pass
+
+    return metrics
+
+
+def update_paper_full(
+    *,
+    paper_id: str,
+    paper_dir: str | Path | None = None,
+) -> dict[str, Any]:
+    """One-command paper update: auto-detect metrics from .tex → upload PDF → sync metadata.
+
+    Steps:
+    1. Auto-count citations from \\bibitem in .tex files
+    2. Auto-count pages from compiled PDF
+    3. Upload PDF to Supabase Storage
+    4. Update metadata (pages, citations, pdf_url)
+    """
+    PROJECT = Path(__file__).resolve().parent.parent.parent.parent
+
+    if paper_dir is None:
+        paper_dir = PROJECT / "paper" / paper_id
+    paper_dir = Path(paper_dir)
+
+    if not paper_dir.exists():
+        raise RuntimeError(f"Paper directory not found: {paper_dir}")
+
+    # 1. Auto-detect metrics
+    metrics = _count_tex_metrics(paper_dir)
+
+    # 2. Find best PDF (v2 preferred)
+    pdf_path = None
+    for name in ["main_v2.pdf", "main.pdf"]:
+        candidate = paper_dir / name
+        if candidate.exists():
+            pdf_path = candidate
+            break
+
+    if not pdf_path:
+        raise RuntimeError(f"No PDF found in {paper_dir}")
+
+    # 3. Upload PDF
+    paper = upload_paper_pdf(paper_id=paper_id, file_path=str(pdf_path))
+
+    # 4. Update metadata with auto-detected metrics
+    kwargs: dict[str, Any] = {"paper_id": paper_id}
+    if "pages" in metrics:
+        kwargs["pages"] = metrics["pages"]
+    if "citations" in metrics:
+        kwargs["citations"] = metrics["citations"]
+
+    if len(kwargs) > 1:  # has something beyond paper_id
+        paper = upsert_paper_metadata(**kwargs)
+
+    # 5. Copy to frontend
+    slug_map = {
+        "leverage-direction": "leverage-direction-matters.pdf",
+        "taiwan-vt": "taiwan-vt-tz-arbitrage.pdf",
+        "vt-trend-following": "vt-trend-following.pdf",
+        "volatility-absorption": "volatility-absorption.pdf",
+        "vix-sufficiency": "vix-sufficiency.pdf",
+    }
+    frontend_name = slug_map.get(paper_id)
+    if frontend_name:
+        frontend_dst = PROJECT / "frontend-v2-fix" / "public" / "paper" / frontend_name
+        if frontend_dst.parent.exists():
+            import shutil
+            shutil.copy2(pdf_path, frontend_dst)
+
+    return paper
+
+
 def _resolve_static_pdf_path(pdf_url: str | None) -> Path | None:
     if not isinstance(pdf_url, str) or not pdf_url.startswith("/paper/"):
         return None
