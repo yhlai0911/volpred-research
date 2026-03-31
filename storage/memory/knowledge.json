@@ -18190,5 +18190,36 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-31T08:26:25.751125+00:00"
+  },
+  {
+    "id": "K763",
+    "title": "K763: Regime-Switched Carry Filter — Underperforms (Sharpe 0.674 vs 12/VIX 0.827)",
+    "content": "[提出: Codex (7th suggestion), 執行: Claude] K763: Binary admission filter for vol risk premium harvesting. 3 filters: (1) term structure VIX/VIX3M<0.95, (2) VIX 5d momentum<0, (3) VIX level<30. All pass→80/20 SPY/GLD, any fail→30/70. Data: SPY/GLD/VIX/VIX3M 2006-2026 (4956 days). ALL filters pass 44% of days. RESULT: Sharpe 0.674 vs 12/VIX 0.827 vs 50/50 0.817 — worst of the 3. Cross-OOS 0/5 vs 50/50, 1/5 vs 12/VIX. DM p=0.0000 (sig worse). KEY INSIGHTS: (1) Momentum filter WORST — removing it improves Sharpe to 0.828. Declining VIX=recovery where SPY returns highest (14.3% ann when defensive vs 8.9% risk-on). Filter is ANTI-correlated with best SPY periods. (2) Term structure alone (0.800) > all-3 combined (0.674) — complexity destroys value. (3) Simple VIX<20 (0.793) > carry filter. (4) TX 52 turns/yr (3x 12/VIX 16/yr) — binary switching=excessive churn. (5) Conservative variant (70/30 vs 40/60) best at 0.750 but still < 12/VIX. Confirms K760 (signal dilution), K161 (TS absorbed by VIX), K440 (VRP null). Smooth weighting dominates discrete regime switch. Script: experiments/k763_regime_carry_filter.py",
+    "tags": [
+      "carry",
+      "VRP",
+      "regime-switch",
+      "admission-filter",
+      "term-structure",
+      "VIX",
+      "null-result",
+      "Codex-suggestion"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "timestamp": "2026-03-31T09:09:49.806156+00:00"
+  },
+  {
+    "id": "K763-review",
+    "title": "Codex Review K763 (GPT-5.4): 0 HIGH, 2 MEDIUM (VRP dead code, VIX3M ffill stale)",
+    "content": "[提出: Codex rescue GPT-5.4] K763 review: 0 HIGH. (1) MEDIUM: VRP computed but never used in admission filter — effectively regime-only, not carry+regime. (2) MEDIUM: VIX3M forward-fill may carry stale values on missing dates. shift(1) correct. TX both legs correct. NULL conclusion fully validated — binary switching loses to smooth 12/VIX.",
+    "tags": [
+      "codex-review",
+      "K763",
+      "clean"
+    ],
+    "phase": "research",
+    "importance": 2,
+    "timestamp": "2026-03-31T09:12:48.631873+00:00"
   }
 ]
