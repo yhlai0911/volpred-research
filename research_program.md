@@ -337,14 +337,14 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] **Convexity-Adjusted Insurance Premium Tool**：VT 的核心問題是 carry cost。用 Vol-of-Vol 聚類判斷保險是否被高估，建議「Strategic Under-Hedging」在高 VoV-decay 期間回收被拖累的 alpha。可結合 K41 保險費定價（~4%/yr）
 
 ### Gemini 第 1 次建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
-- [ ] **Taiwan Price Limit Latent Volatility**：台股 ±10% 漲跌幅限制壓抑觀察波動率，limit-hit 日隱含更高真實 vol。GARCH-X 加 LimitHit dummy。Data: yfinance
+- [x] ~~Taiwan Price Limit Latent Volatility~~ → **K790v2 完成 NULL**：>5% 天數僅 0.9%，GJR asymmetry 已捕捉。DM 全 NS。
 - [ ] **FRED STLFSI4 Macro Stress Regime**：用聖路易金融壓力指數做 regime switching，壓力期降低 target vol (12%→8%)。Data: FRED STLFSI4
 - [ ] **VIX→Taiwan Vol Spillover Strategy**：VIX 在美股時段 spike > 15% → 次日台股開盤自動減倉。比 return lead-lag 更直接。Data: yfinance
 - [ ] **TXO Put-Call Ratio Mean-Reversion**：台指選擇權 P/C ratio 作為散戶恐慌指標，極端值做反向操作。Data: TAIFEX 網站
-- [ ] **EWT vs 0050.TW Vol Arbitrage Spread**：同一標的不同市場的 vol 差異信號。EWT vol >> 0050 vol → 預警台股 vol 將追趕。Data: yfinance
+- [x] ~~EWT vs 0050.TW Vol Arbitrage Spread~~ → **K792 完成**：Granger YES (F=28.4) 但方向反（高 ratio → vol 下降）。Trading 虧損。Mean reversion 陷阱。
 
 ### 用戶提出方向
-- [ ] **什麼是好的交易策略？多維度評估框架** [提出: 用戶, 2026-03-30]：不只看 Sharpe——CAGR、勝率、壓力情境表現、操作複雜度、TX 成本都要。高 Sharpe 但 CAGR 3% 不算好策略。建立量化評估矩陣。
+- [x] ~~什麼是好的交易策略？~~ → **K793 完成**：8 維度評估 6 策略。BH 50/50 #1 (75.4), Risk Parity #2 (73.7), Piecewise #3 (54.0，唯一正 stress)。單一 Sharpe 遺漏大量 tradeoffs。
 - [x] **HAR-RV with 5-day RV** [提出: 用戶, 2026-03-31] → **K782 完成**：GJR-GARCH multi-step 在 5d/22d/66d 全勝 HAR。日頻 squared returns 做的 RV 不足以讓 HAR 發揮優勢——需等 5-min 數據。
 - [ ] **MEM（Multiplicative Error Model）** [提出: 用戶, 2026-03-31]：Engle & Gallo (2006) 的相乘誤差模型，作為 GARCH 和 HAR 之外的第三條路線。適合正值時間序列（RV, volume, duration）。
 - [ ] K501: **SSVS for Return Prediction** [提出: 用戶] — 用陳婉淑方法預測報酬率（不只波動率）。K461 已發現 SPY_ret PIP=1.000 for Taiwan (t=10.81)。**進行中**
@@ -369,8 +369,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ### 即刻可行動（不需新數據）
 1. ★ ~~Window Size Sensitivity~~ → **K783 完成**：expanding window 以 QLIKE=0.529 勝 w=2000 的 0.560（DM=-3.23 Harvey PASS）。w=2000 不是最優。
    - [x] **K783b 完成**：最優 window 因資產而異。QQQ 偏好 504（DM=+3.59 PASS），GLD 偏好 3000，0050 偏好 1000，BTC 偏好 2000。**w=2000 仍是合理預設。**
-   - [ ] **K783c: 跨期驗證**：不同 OOS 期間（2019-2020 高波動、2015-2016 溫和期）expanding 是否仍勝
-2. ★ MF2-GARCH 實作（短期 GJR + 長期 MEM）— Conrad & Engle 2025, J. Applied Econometrics
+   - [x] **K783c 完成**：regime-dependent。危機→w=2000，中波動→w=504，平靜→w=252。1/14 DM 通過 Harvey。w=504 是跨 regime 最佳折衷。
+2. ★ ~~MF2-GARCH~~ → **K785 完成 NULL**：GJR baseline 仍勝（QLIKE 0.529），MF2-EWMA 0.533 (NS)，MF2-MEM 0.599（worse）。Expanding GJR 已隱式捕捉長期趨勢。
 3. KAN-GARCH-MIDAS（結構化 NN 可能突破 ML ceiling）— J. Applied Economics 2025
 4. VIX-Managed Portfolio 文獻引用整理 — Int. Rev. Financial Analysis 2024（支持 Paper 3）
 
@@ -391,8 +391,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### ML-GARCH 混合
 - [ ] GARCH-Informed NN (GINN) — arXiv:2410.00288
-- [ ] ★ **GARCH-GRU** — arXiv:2504.09380（將 GARCH(1,1) 嵌入 GRU cell，unified recurrent unit）。即刻可做。
-- [ ] **HAR Directional Prediction** — Applied Economics Letters 2024（預測 RV 方向而非幅度，ML integration）
+- [x] ★ ~~GARCH-GRU~~ → **K784 完成 NULL**：QLIKE 排 #1 但 vs GJR DM=-0.51 不顯著。ML 額外複雜度不帶來改善。
+- [x] ~~HAR Directional Prediction~~ → **K787 完成**：67.9% 方向準確率(z=8.03)但無經濟價值（timing +33% vs B&H +58%）。VIX 對方向無用(49.6%)。
 - [ ] **Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）
 - [ ] Sentiment-Augmented GARCH-LSTM — Computational Economics 2025
 - [ ] KAN for VIX Forecasting — Expert Systems with Applications 2025
