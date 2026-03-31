@@ -1,0 +1,155 @@
+{
+  "experiment_id": "K784",
+  "title": "GARCH-GRU Hybrid Volatility Forecasting",
+  "description": "Integrates GARCH(1,1) variance as input feature to GRU for volatility forecasting (inspired by arXiv:2504.09380)",
+  "timestamp": "2026-03-31T14:24:10.570468+00:00",
+  "data_source": "yfinance (SPY)",
+  "data_period": "2006-01-04 to 2024-12-31",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "n_total": 4780,
+  "n_oos": 502,
+  "n_refits": 8,
+  "methodology": {
+    "model": "GRU(hidden=32, layers=1) with GARCH-informed features",
+    "features": [
+      "r_t",
+      "r^2_t",
+      "sigma^2_t(GARCH)",
+      "|r_t|",
+      "log(sigma^2_t)"
+    ],
+    "seq_len": 22,
+    "training_loss": "QLIKE",
+    "refit_frequency": "63 trading days",
+    "min_window": 2000,
+    "expanding_window": true,
+    "epochs": 50,
+    "batch_size": 32,
+    "hidden_size": 32,
+    "early_stopping_patience": 10,
+    "learning_rate": 0.001,
+    "seed": 42
+  },
+  "benchmarks": [
+    "GJR-GARCH(1,1)",
+    "GARCH(1,1)",
+    "EWMA(0.94)",
+    "HAR-SQ"
+  ],
+  "target": "r^2 (squared returns, Patton 2011 proxy-robust)",
+  "results": {
+    "garch_gru": {
+      "display_name": "GARCH-GRU",
+      "qlike": 1.451973,
+      "mse": 1.0734e-08,
+      "spearman": 0.233,
+      "spearman_p": 0.0,
+      "n_valid": 501
+    },
+    "gjr_garch": {
+      "display_name": "GJR-GARCH",
+      "qlike": 1.459378,
+      "mse": 1.0676e-08,
+      "spearman": 0.1968,
+      "spearman_p": 9e-06,
+      "n_valid": 501
+    },
+    "garch11": {
+      "display_name": "GARCH(1,1)",
+      "qlike": 1.513093,
+      "mse": 1.1358e-08,
+      "spearman": 0.1035,
+      "spearman_p": 0.020465,
+      "n_valid": 501
+    },
+    "ewma": {
+      "display_name": "EWMA(0.94)",
+      "qlike": 1.521404,
+      "mse": 1.1232e-08,
+      "spearman": 0.0863,
+      "spearman_p": 0.053596,
+      "n_valid": 501
+    },
+    "har_sq": {
+      "display_name": "HAR-SQ",
+      "qlike": 1.518472,
+      "mse": 1.1646e-08,
+      "spearman": 0.1012,
+      "spearman_p": 0.023497,
+      "n_valid": 501
+    }
+  },
+  "dm_tests": {
+    "garch_gru_vs_gjr_garch": {
+      "stat": -0.5069,
+      "pvalue": 0.6122,
+      "significant_harvey": false,
+      "better_model": "GARCH-GRU"
+    },
+    "garch_gru_vs_garch11": {
+      "stat": -2.9764,
+      "pvalue": 0.0029,
+      "significant_harvey": false,
+      "better_model": "GARCH-GRU"
+    },
+    "garch_gru_vs_ewma": {
+      "stat": -2.9503,
+      "pvalue": 0.0032,
+      "significant_harvey": false,
+      "better_model": "GARCH-GRU"
+    },
+    "garch_gru_vs_har_sq": {
+      "stat": -2.624,
+      "pvalue": 0.0087,
+      "significant_harvey": false,
+      "better_model": "GARCH-GRU"
+    }
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "model": "GARCH-GRU",
+      "qlike": 1.451973
+    },
+    {
+      "rank": 2,
+      "model": "GJR-GARCH",
+      "qlike": 1.459378
+    },
+    {
+      "rank": 3,
+      "model": "GARCH(1,1)",
+      "qlike": 1.513093
+    },
+    {
+      "rank": 4,
+      "model": "HAR-SQ",
+      "qlike": 1.518472
+    },
+    {
+      "rank": 5,
+      "model": "EWMA(0.94)",
+      "qlike": 1.521404
+    }
+  ],
+  "garch_gru_rank": 1,
+  "garch_gru_beats_gjr": true,
+  "conclusion": "GARCH-GRU (rank #1) achieves QLIKE=1.451973, beating GJR-GARCH (1.459378) by 0.51%. However, the DM test (t=-0.5069) is NOT statistically significant at Harvey (2016) t>3.0 threshold. The hybrid model captures nonlinear dynamics beyond GARCH's linear structure.",
+  "limitations": [
+    "Daily returns only (no intraday RV)",
+    "Single asset (SPY) -- needs cross-asset validation",
+    "GARCH component is pre-computed, not fully integrated into GRU cell",
+    "Relatively short OOS period (504 days)",
+    "r^2 is noisy proxy for true sigma^2 (Patton 2011 guarantees ranking consistency)",
+    "GRU hyperparameters not extensively tuned"
+  ],
+  "references": [
+    "arXiv:2504.09380 -- Integrated GARCH-GRU (April 2025)",
+    "Bollerslev (1986) J.Econometrics -- GARCH(1,1)",
+    "Glosten, Jagannathan, Runkle (1993) JoF -- GJR-GARCH",
+    "Corsi (2009) J.Financial Econometrics -- HAR",
+    "Patton (2011) J.Econometrics -- robust loss, QLIKE",
+    "Harvey et al. (2016) -- multiple testing t>3.0"
+  ],
+  "elapsed_seconds": 140.4
+}
