@@ -814,7 +814,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 **高優先（有明確下一步）：**
 - [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較
-- [ ] **Fix K739 Taiwan holiday handling**：用 TW-only calendar 重做。跨市場研究必須用各自市場的交易日曆。影響：最佳配置 20/80 和 daily rebalancing 結論待驗證
+- [x] **Fix K739 Taiwan holiday handling**：K739b 修正完成。TW/US calendar 分離 + VIX asof-lookup。**所有 4 結論存活**（20/80 配置 + daily rebalance + VIX suff + calendar NS）
 - [ ] **Fix K746 Granger methodology**：用 forward-looking RV（非 backward 22d RV）重做 BTC→VIX Granger 檢定。若仍顯著，可作為 Paper 6 方向
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
 - [x] **K753 Liquidity-Vol**：NULL — partial r=0.089, VIX 已定價 volume。VIX sufficiency #12
