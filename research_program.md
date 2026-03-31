@@ -401,7 +401,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）
 
 ### Rough Volatility & Hurst
-- [ ] Multivariate fBm for RV — arXiv:2504.15985
+- [ ] ★ **Multivariate fBm for RV** — arXiv:2504.15985 (April 2025)。不同資產有不同 H，跨資產 mfBm 預測勝過單變量。即刻可做（不需日內數據）。
+- [ ] ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。
 - [ ] Time-Varying Hurst via EWMA — arXiv:2509.05820
 - [ ] Adaptive Fractal Dynamics — Frontiers Applied Math 2025
 - [ ] Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437
