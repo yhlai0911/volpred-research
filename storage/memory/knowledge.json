@@ -18275,5 +18275,31 @@
     "phase": "research",
     "importance": 4,
     "timestamp": "2026-03-31T09:48:38.460466+00:00"
+  },
+  {
+    "id": "K768",
+    "title": "K768: Conformal VaR Wrapper — Model-Agnostic Tail Risk Calibration",
+    "content": "[提出: 文獻搜尋 arXiv:2602.03903, 執行: Claude] Conformal VaR calibration: model-agnostic post-hoc wrapper that adjusts any VaR forecast using expanding-window quantile of past (loss - VaR) residuals. SPY Normal 1% VaR: uncalibrated violation ratio 2.06x (Kupiec FAIL, Basel RED) → uniform conformal 1.24x (Kupiec PASS, Basel GREEN, 77% improvement). Three methods tested: (1) uniform quantile: simplest, 77% improvement, (2) time-decay (lambda=0.01): 70% improvement, (3) regime-weighted (VIX kernel + time decay): 62% improvement but best sub-period adaptation (Volmageddon 2.39x→0.99x). Key asymmetry: conformal fixes under-coverage (Normal 2x→1.2x) but worsens already-conservative models (Student-t 0.85x→1.3x). Portfolio 50/50 SPY/GLD: Normal 2.06x→1.32x (RED→GREEN). 5% VaR: Student-t time-decay achieves near-perfect 1.00x ratio. Limitations: needs 250-day history, cannot fix violation clustering (independence), expanding window has regime inertia. Codex review fixed regime VIX lookahead bug (using lagged VIX for historical weights). OOS: 2016-2026, N=2576. Data: yfinance SPY/GLD/VIX.",
+    "tags": [
+      "VaR",
+      "conformal_prediction",
+      "calibration",
+      "model_agnostic",
+      "tail_risk",
+      "GJR-GARCH",
+      "regime_weighted",
+      "SPY",
+      "GLD",
+      "portfolio",
+      "Kupiec",
+      "Basel"
+    ],
+    "data_source": "yfinance (SPY, GLD, ^VIX)",
+    "data_period": "2005-2026 (IS), 2016-2026 (OOS conformal)",
+    "experiment_id": "K768",
+    "evidence": "SPY+GLD 2826 OOS VaR forecasts, 3 conformal methods, Kupiec+Christoffersen tests, 5 sub-periods, Codex-reviewed",
+    "confidence": 0.85,
+    "category": "var_calibration",
+    "created_at": "2026-03-31T10:09:14.816929+00:00"
   }
 ]
