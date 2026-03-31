@@ -1,0 +1,353 @@
+{
+  "experiment": "K792",
+  "title": "EWT vs 0050.TW Volatility Spread Signal",
+  "date": "2026-03-31T17:36:37.852217+00:00",
+  "data_source": "yfinance (EWT, 0050.TW, ^VIX); 0050.TW cleaned via clean_tw50_data",
+  "data_range": "2012-02-13 to 2025-12-30",
+  "n_total_days": 3393,
+  "config": {
+    "rv_window": 22,
+    "trading_days": 252,
+    "tx_roundtrip": 0.001855,
+    "granger_lags_tested": [
+      1,
+      5,
+      10,
+      22
+    ],
+    "max_lead_lag": 22,
+    "strategy_threshold_high": 1.3,
+    "strategy_threshold_low": 0.85
+  },
+  "descriptive_stats": {
+    "rv_ewt": {
+      "mean": 0.1902,
+      "std": 0.0826,
+      "skew": 3.2988,
+      "kurt": 17.1174,
+      "min": 0.0602,
+      "max": 0.7888,
+      "pct25": 0.1409,
+      "pct75": 0.2142
+    },
+    "rv_tw50": {
+      "mean": 0.1622,
+      "std": 0.0734,
+      "skew": 2.5685,
+      "kurt": 10.0163,
+      "min": 0.0567,
+      "max": 0.6019,
+      "pct25": 0.1168,
+      "pct75": 0.1876
+    },
+    "vol_ratio": {
+      "mean": 1.2154,
+      "std": 0.2682,
+      "skew": 0.4802,
+      "kurt": 0.7207,
+      "min": 0.5075,
+      "max": 2.5654,
+      "pct25": 1.0353,
+      "pct75": 1.3844
+    }
+  },
+  "adf_tests": {
+    "rv_ewt": {
+      "name": "rv_ewt",
+      "adf_stat": -6.2469,
+      "p_value": 0.0,
+      "lags_used": 26,
+      "is_stationary_5pct": true
+    },
+    "rv_tw50": {
+      "name": "rv_tw50",
+      "adf_stat": -5.7946,
+      "p_value": 0.0,
+      "lags_used": 29,
+      "is_stationary_5pct": true
+    },
+    "vol_ratio": {
+      "name": "vol_ratio",
+      "adf_stat": -6.6273,
+      "p_value": 0.0,
+      "lags_used": 23,
+      "is_stationary_5pct": true
+    }
+  },
+  "granger_causality": {
+    "vol_ratio_to_rv_tw50": {
+      "lag_1": {
+        "f_stat": 28.3748,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "significant_1pct": true
+      },
+      "lag_5": {
+        "f_stat": 23.6202,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "significant_1pct": true
+      },
+      "lag_10": {
+        "f_stat": 11.9518,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "significant_1pct": true
+      },
+      "lag_22": {
+        "f_stat": 5.7814,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "significant_1pct": true
+      }
+    },
+    "rv_ewt_to_rv_tw50": {
+      "lag_1": {
+        "f_stat": 35.3039,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "significant_1pct": true
+      },
+      "lag_5": {
+        "f_stat": 31.1195,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "significant_1pct": true
+      },
+      "lag_10": {
+        "f_stat": 15.9224,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "significant_1pct": true
+      },
+      "lag_22": {
+        "f_stat": 7.8832,
+        "p_value": 0.0,
+        "significant_5pct": true,
+        "significant_1pct": true
+      }
+    },
+    "rv_tw50_to_vol_ratio": {
+      "lag_1": {
+        "f_stat": 4.2205,
+        "p_value": 0.04,
+        "significant_5pct": true
+      },
+      "lag_5": {
+        "f_stat": 4.9577,
+        "p_value": 0.0002,
+        "significant_5pct": true
+      },
+      "lag_10": {
+        "f_stat": 3.0147,
+        "p_value": 0.0008,
+        "significant_5pct": true
+      },
+      "lag_22": {
+        "f_stat": 2.0953,
+        "p_value": 0.002,
+        "significant_5pct": true
+      }
+    }
+  },
+  "lead_lag_correlations": {
+    "vol_ratio_vs_rv_tw50": {
+      "-22": -0.1177,
+      "-21": -0.1211,
+      "-20": -0.1262,
+      "-19": -0.1323,
+      "-18": -0.1404,
+      "-17": -0.1487,
+      "-16": -0.1566,
+      "-15": -0.1651,
+      "-14": -0.1751,
+      "-13": -0.1848,
+      "-12": -0.1947,
+      "-11": -0.2031,
+      "-10": -0.2126,
+      "-9": -0.2226,
+      "-8": -0.2318,
+      "-7": -0.242,
+      "-6": -0.2525,
+      "-5": -0.2653,
+      "-4": -0.2785,
+      "-3": -0.2938,
+      "-2": -0.3107,
+      "-1": -0.3267,
+      "0": -0.3471,
+      "1": -0.3386,
+      "2": -0.33,
+      "3": -0.3208,
+      "4": -0.3094,
+      "5": -0.2979,
+      "6": -0.2864,
+      "7": -0.2757,
+      "8": -0.2647,
+      "9": -0.2533,
+      "10": -0.2408,
+      "11": -0.2283,
+      "12": -0.215,
+      "13": -0.2001,
+      "14": -0.1866,
+      "15": -0.1717,
+      "16": -0.1586,
+      "17": -0.146,
+      "18": -0.1345,
+      "19": -0.1231,
+      "20": -0.1118,
+      "21": -0.1008,
+      "22": -0.0894
+    },
+    "rv_ewt_vs_rv_tw50": {
+      "-22": 0.3001,
+      "-21": 0.324,
+      "-20": 0.3489,
+      "-19": 0.3757,
+      "-18": 0.4032,
+      "-17": 0.4313,
+      "-16": 0.4602,
+      "-15": 0.4895,
+      "-14": 0.5187,
+      "-13": 0.5477,
+      "-12": 0.5772,
+      "-11": 0.6063,
+      "-10": 0.6343,
+      "-9": 0.6621,
+      "-8": 0.6889,
+      "-7": 0.7144,
+      "-6": 0.7392,
+      "-5": 0.7616,
+      "-4": 0.7823,
+      "-3": 0.7997,
+      "-2": 0.8107,
+      "-1": 0.8192,
+      "0": 0.8218,
+      "1": 0.8092,
+      "2": 0.7942,
+      "3": 0.7756,
+      "4": 0.7544,
+      "5": 0.7318,
+      "6": 0.7081,
+      "7": 0.6834,
+      "8": 0.6585,
+      "9": 0.6333,
+      "10": 0.6073,
+      "11": 0.5815,
+      "12": 0.5557,
+      "13": 0.5299,
+      "14": 0.504,
+      "15": 0.4786,
+      "16": 0.4527,
+      "17": 0.4277,
+      "18": 0.403,
+      "19": 0.3793,
+      "20": 0.3577,
+      "21": 0.3383,
+      "22": 0.3208
+    },
+    "contemporaneous_corr_vol_ratio_rv_tw50": -0.3471,
+    "max_corr_lag": 22,
+    "max_corr_value": -0.0894,
+    "max_ewt_tw50_lag": 0,
+    "max_ewt_tw50_value": 0.8218
+  },
+  "predictive_regressions": {
+    "vol_ratio_lag1_to_rv_tw50": {
+      "intercept": 0.27084,
+      "slope": -0.089424,
+      "r_squared": 0.106726,
+      "t_stat_slope": -20.1254,
+      "p_value_slope": 0.0,
+      "significant_5pct": true,
+      "n": 3392
+    },
+    "rv_ewt_lag1_to_rv_tw50": {
+      "intercept": 0.023619,
+      "slope": 0.728192,
+      "r_squared": 0.671036,
+      "t_stat_slope": 83.157,
+      "p_value_slope": 0.0,
+      "significant_5pct": true,
+      "n": 3392
+    },
+    "vol_ratio_lag1_to_tw50_ret": {
+      "intercept": 0.002112,
+      "slope": -0.001194,
+      "r_squared": 0.000817,
+      "t_stat_slope": -1.6646,
+      "p_value_slope": 0.0961,
+      "significant_5pct": false,
+      "n": 3392
+    },
+    "vol_ratio_lag22_to_rv_tw50": {
+      "intercept": 0.201548,
+      "slope": -0.032334,
+      "r_squared": 0.013847,
+      "t_stat_slope": -6.8779,
+      "p_value_slope": 0.0,
+      "significant_5pct": true,
+      "n": 3371
+    }
+  },
+  "strategy_backtest": {
+    "period": "2012-02-14 to 2025-12-30",
+    "n_days": 3392,
+    "high_stress_days_pct": 35.7,
+    "low_stress_days_pct": 6.5,
+    "buy_hold": {
+      "label": "Buy & Hold 0050.TW",
+      "ann_ret_pct": 16.28,
+      "sharpe": 0.9371,
+      "mdd_pct": -33.83,
+      "n_days": 3392,
+      "ann_vol_pct": 17.79,
+      "calmar": 0.481
+    },
+    "vt_base": {
+      "label": "VT (8.63/VIX)",
+      "ann_ret_pct": 12.4,
+      "ann_vol_pct": 8.25,
+      "sharpe": 1.5021,
+      "mdd_pct": -11.43,
+      "calmar": 1.084,
+      "n_days": 3392
+    },
+    "vt_ewt_signal": {
+      "label": "VT + EWT Vol Signal",
+      "ann_ret_pct": 9.98,
+      "ann_vol_pct": 7.42,
+      "sharpe": 1.3458,
+      "mdd_pct": -10.85,
+      "calmar": 0.92,
+      "n_days": 3392
+    },
+    "sharpe_improvement_vs_vt": -0.1563
+  },
+  "key_findings": [
+    "vol_ratio Granger-causes rv_tw50 at lag=1 (p<0.05)",
+    "vol_ratio[t-1] significantly predicts rv_tw50[t]: \u03b2=-0.0894, t=-20.125",
+    "Strategy Sharpe: 1.3458 vs VT 1.5021 (diff=-0.1563)"
+  ],
+  "connection_to_k506": {
+    "note": "K506 used EWT/0050 vol ratio as a VT overlay signal (threshold 1.2)",
+    "k506_result": "FAIL \u2014 VT+VolSpread wins only 2/5 OOS periods",
+    "k792_contribution": "K792 examines causal/predictive mechanism more deeply (Granger, lead-lag, regression)",
+    "k506_data_range": "2010-2022",
+    "k792_data_range": "2012-02-13 to 2025-12-30"
+  },
+  "runtime_seconds": 1.86,
+  "references": [
+    "Granger (1969) 'Investigating Causal Relations by Econometric Models' Econometrica 37(3):424-438",
+    "Moreira & Muir (2017) 'Volatility-Managed Portfolios' JF 72(4):1611-1644",
+    "Harvey, Liu, Zhu (2016) '...and the Cross-Section of Expected Returns' RFS",
+    "K506: EWT-0050 Vol Spread Cross-OOS (FAIL: 2/5 periods, 2010-2022)",
+    "K697: VIX predicts vol magnitude (corr=0.57) not direction (corr=0.04)"
+  ],
+  "limitations": [
+    "Vol ratio uses 22d backward window \u2014 potential overlap with target variable",
+    "EWT trades in USD; currency effects may affect vol ratio interpretation",
+    "0050.TW split artifact corrected but data quality pre-2014 uncertain",
+    "Granger causality \u2260 structural causality; only statistical precedence",
+    "Strategy threshold parameters (1.3/0.85) not optimized; risk of data snooping if tuned"
+  ]
+}
