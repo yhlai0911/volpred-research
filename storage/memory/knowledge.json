@@ -18855,5 +18855,71 @@
     "codex_reviewed": true,
     "codex_findings": "Self-reviewed (Codex overloaded). Lag shift(1) line 162 OK.",
     "timestamp": "2026-03-31T18:38:37.240997+00:00"
+  },
+  {
+    "id": "K784",
+    "type": "experiment",
+    "title": "GARCH-GRU: NULL vs GJR (DM=-0",
+    "content": "GARCH-GRU: NULL vs GJR (DM=-0.51). ML adds no value. Codex: val split MEDIUM.",
+    "tags": [
+      "session_recovery"
+    ],
+    "timestamp": "2026-03-31T18:41:10.376066+00:00",
+    "codex_reviewed": true
+  },
+  {
+    "id": "K785",
+    "type": "experiment",
+    "title": "MF2-GARCH: NULL",
+    "content": "MF2-GARCH: NULL. Two-component no help. Codex: MEM tau HIGH bug, EWMA OK.",
+    "tags": [
+      "session_recovery"
+    ],
+    "timestamp": "2026-03-31T18:41:10.376357+00:00",
+    "codex_reviewed": true
+  },
+  {
+    "id": "K786",
+    "type": "experiment",
+    "title": "VT Insurance Premium: VoV timing NULL (t=0",
+    "content": "VT Insurance Premium: VoV timing NULL (t=0.98). Codex: pseudo-t HIGH.",
+    "tags": [
+      "session_recovery"
+    ],
+    "timestamp": "2026-03-31T18:41:10.376360+00:00",
+    "codex_reviewed": true
+  },
+  {
+    "id": "K787",
+    "type": "experiment",
+    "title": "HAR Directional: 67",
+    "content": "HAR Directional: 67.9% accuracy (z=8.03) but no economic value. Codex: econ test HIGH.",
+    "tags": [
+      "session_recovery"
+    ],
+    "timestamp": "2026-03-31T18:41:10.376362+00:00",
+    "codex_reviewed": true
+  },
+  {
+    "id": "K788",
+    "type": "experiment",
+    "title": "VT Crowding ABM: VT is stabilizing (contrarian)",
+    "content": "VT Crowding ABM: VT is stabilizing (contrarian). SIMULATION. Codex: price model HIGH.",
+    "tags": [
+      "session_recovery"
+    ],
+    "timestamp": "2026-03-31T18:41:10.376364+00:00",
+    "codex_reviewed": true
+  },
+  {
+    "id": "K791",
+    "type": "experiment",
+    "title": "Overnight-Intraday: NULL",
+    "content": "Overnight-Intraday: NULL. Decomposition no help. Codex: warm start fixed, cov MEDIUM.",
+    "tags": [
+      "session_recovery"
+    ],
+    "timestamp": "2026-03-31T18:41:10.376366+00:00",
+    "codex_reviewed": true
   }
 ]
