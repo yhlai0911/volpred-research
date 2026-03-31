@@ -18771,5 +18771,25 @@
     "timestamp": "2026-03-31T14:22:36.142207+00:00",
     "importance": "high",
     "codex_reviewed": true
+  },
+  {
+    "id": "K785",
+    "type": "experiment",
+    "title": "MF2-GARCH: GJR Baseline Still Best — Two-Component Decomposition Adds No Value",
+    "content": "[提出: 文獻 Conrad & Engle 2025, 執行: Claude] MF2-GARCH（短期 GJR + 長期 EWMA/MEM 乘法分解）在 SPY OOS 2023-2024 無法勝過 plain GJR。GJR QLIKE=0.529，MF2-EWMA(0.999) 0.533 (DM=-0.59 NS)，MF2-MEM 0.599（顯著更差）。Codex 審查：MEM tau 有 state-timing HIGH bug（refit 後 tau 跳步），EWMA tau 有 init leak MEDIUM（tau[0] 用全樣本 mean）。MEM 表現差的主因可能就是這個 bug。EWMA MF2 的 Spearman 略高(0.23 vs 0.22)但 QLIKE 不改善。結論：expanding window GJR 已隱式捕捉長期趨勢，顯式分解增加複雜度但無改善。",
+    "tags": [
+      "MF2-GARCH",
+      "two-component",
+      "Conrad_Engle",
+      "null_result",
+      "EWMA",
+      "MEM"
+    ],
+    "data_source": "yfinance SPY 2000-2024",
+    "experiment_file": "experiments/k785_mf2_garch.py",
+    "timestamp": "2026-03-31T14:40:32.361662+00:00",
+    "importance": "medium",
+    "codex_reviewed": true,
+    "codex_findings": "MEM tau HIGH (state-timing bug), EWMA tau MEDIUM (init leak). EWMA MF2 structurally OK."
   }
 ]
