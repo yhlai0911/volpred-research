@@ -665,7 +665,8 @@ K519-K521 完成結果 + K527 Volume-GARCH 結果：見 `docs/research_archive/c
 **高優先（有明確下一步）：**
 - [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較
 - [x] **Fix K739 Taiwan holiday handling**：K739b 修正完成。TW/US calendar 分離 + VIX asof-lookup。**所有 4 結論存活**（20/80 配置 + daily rebalance + VIX suff + calendar NS）
-- [ ] **Fix K746 Granger methodology**：用 forward-looking RV（非 backward 22d RV）重做 BTC→VIX Granger 檢定。若仍顯著，可作為 Paper 6 方向
+- [x] **Fix K746 Granger methodology**：K746b 修正完成。BTC vol → VIX Granger **存活**（p=0.0002, AIC lag=10）。VIX → BTC vol 較弱（p=0.013）。斷點 2022-08-10。**Paper 6 方向確認**
+- [ ] **Paper 6: Crypto Fear Channel**：K746b 確認 BTC vol asymmetrically Granger-causes VIX。結合 coupling 增加 + tail dependence，可寫成「加密貨幣市場對傳統金融的波動率溢出」論文
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
 - [x] **K753 Liquidity-Vol**：NULL — partial r=0.089, VIX 已定價 volume。VIX sufficiency #12
 - [x] **Volume Exhaustion Effect**：K754 REJECTED — extreme volume 預測更高 vol（+86.5%, t=6.01），非更低。K753 是 confound：VIX 已高→mean revert→低 spike 但高 RV
