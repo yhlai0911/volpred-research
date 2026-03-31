@@ -695,3 +695,6 @@ K519-K521 + K527 完成結果：見 archive。
 #### 用戶提出方向（2026-03-31 追加）
 - [ ] **K770 修正版：統一 forecast target**：MEM/HAR 預測 |r| 但 GARCH 預測 σ。需統一到同一 target（close-to-close RV = intraday + overnight）。Hansen & Lunde (2005) 提出最優加權方案。[提出: 用戶]
 - [ ] **Overnight volatility component**：隔夜波動約佔全日 20%（Hansen & Lunde 2005）。加入隔夜 r² 到 HAR/MEM 作為額外 regressor。文獻：ScienceDirect 2014 "Overnight information flow and RV forecasting"。[提出: 用戶]
+
+### Hansen & Lunde (2005) Gold Standard 比較（等 5-min 數據就緒）
+- [ ] **K779（ETA ~04/07）**：用 Hansen & Lunde 最優加權 RV_total = w₁×RV_intraday + w₂×r²_overnight 作為「真實 σ²」proxy，所有模型（GARCH/MEM/HAR）都跟 RV_total 比。這是學術最高標準。需 5-min 數據 ≥60 天。[提出: 用戶]
