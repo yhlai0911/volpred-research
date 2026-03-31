@@ -839,10 +839,30 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **Simplicity premium**：K748 REJECTED — 設計品質 > 簡單性（修正 K740）
 - [x] **Macro signal**：K749 殖利率曲線被 VIX 吸收（partial r < 0.08）
 - [x] Paper 2 更新：+K739/K738 → 45p
-- [ ] **Alternative data**：NLP sentiment、satellite data
-- [ ] **Intraday alpha**：5-min RV 數據就緒後（ETA 04/11），日內 alpha
-- [ ] **Crypto fear channel**：K746 Granger 需用 forward-looking RV 重做
-- [ ] **Fix K739 Taiwan holiday handling**：用 TW-only calendar 重做
+**從 K730-K752 實驗中衍生的新方向（2026-03-31 補充）：**
+
+**高優先（有明確下一步）：**
+- [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較
+- [ ] **Fix K739 Taiwan holiday handling**：用 TW-only calendar 重做。跨市場研究必須用各自市場的交易日曆。影響：最佳配置 20/80 和 daily rebalancing 結論待驗證
+- [ ] **Fix K746 Granger methodology**：用 forward-looking RV（非 backward 22d RV）重做 BTC→VIX Granger 檢定。若仍顯著，可作為 Paper 6 方向
+- [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
+- [ ] **K753 Liquidity-Vol**：進行中——測試交易量是否預測 vol（第 12 個 VIX sufficiency 角度）
+- [ ] **VT Insurance 實務指南頁面**：K738 decision guide（γ≥4.5）已確認，做成網站互動工具（`/vt-calculator`）
+
+**中優先（新研究主題）：**
+- [ ] **FOMO 行為干預設計**：K743 發現 FOMO 成本 5x > Panic。設計「冷靜期」機制——當 SPY 單日 >2% 時，VT 策略自動鎖定 48 小時不調倉。測試是否改善投資人行為
+- [ ] **Robust VT 設計**：K743 的 floor(30%)/cap(90%) + EWMA 平滑 + 週頻 rebalance 組合。修正 Codex 找到的 bug 後重跑
+- [ ] **VIX Regime 轉換預測**：K752 發現不同 era 的 VIX R² 差異大（0.24-0.64）。能否預測 VIX regime 何時轉換？（從低 vol QE 進入高 vol inflation era）
+- [ ] **Drawdown Recovery 修正版**：K735 被 Codex 推翻（fake OOS + timing misalign）。修正方法論後重做——用 proper expanding window OOS + peak-to-first_cross recovery time
+- [ ] **跨國 VIX sufficiency**：K752 證明 US 33 年成立。在其他市場（歐洲 VSTOXX、日本 VNKY、台灣 VIXTWN proxy）驗證？
+- [ ] **Alternative data**：K750 Google Trends 是反應式。嘗試 Reddit/Twitter 情緒（可能更即時）或 options flow（CBOE 數據）
+- [ ] **Intraday alpha**：5-min 數據就緒後，測試日內 VIX-equity lead-lag（K751 overnight 有 +0.45% R²，日內可能更多）
+
+**低優先（長期探索）：**
+- [ ] **VT 與 ESG 整合**：ESG 評分高的公司是否有不同的 gamma（leverage effect）？
+- [ ] **Agent-Based Model 正式版**：K742 用簡化 Kyle's lambda。正式 ABM 可模擬異質投資人（VT users + momentum + value + passive）的市場均衡
+- [ ] **因果推論**：用 DiD/RDD 分析 Fed 升息決議對 VIX regime 的因果影響（非相關）
+- [ ] **Climate vol**：極端天氣事件頻率增加是否改變 vol 動態？（新的 non-stationary source）
 
 ### P3: 長期待辦
 
