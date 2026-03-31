@@ -463,5 +463,12 @@
     ],
     "lesson_type": "signal_vs_strategy",
     "timestamp": "2026-03-31T17:38:05.599601+00:00"
+  },
+  {
+    "id": "E35",
+    "title": "Session 2026-03-31~04-01: 14 experiments, Codex review flow enforced",
+    "content": "14 個實驗（K782-K793）跨 10 個研究方向。核心教訓：\n1. **Codex 審查必須在 knowledge 之前** — 前 5 個實驗跳過審查直接記錄，用戶糾正後補審。K782 被發現 2 HIGH bug（HAR lookahead + GJR off-by-one），需重跑。如果先審就不會浪費。\n2. **Proxy 比模型更重要** — K782v2 確認 HAR 在 |r| 贏（DM=-15.45），在 r² 輸 GJR。同模型不同 target 排名完全反轉。\n3. **Window size 是 regime + asset dependent** — K783/K783b/K783c 三部曲。SPY expanding 勝，QQQ 短窗勝，BTC w=2000 勝。危機期長窗，平靜期短窗。w=2000 仍是合理通用預設。\n4. **ML 不改善日頻 vol forecasting** — K784 GARCH-GRU NULL (DM=-0.51)，K785 MF2-GARCH NULL。GJR-GARCH 仍是最佳性價比。\n5. **能預測 ≠ 能賺錢** — K787 方向 67.9% 準確但經濟價值零，K792 EWT Granger YES 但方向反。統計顯著不等於 trading profit。\n6. **VT 是 contrarian stabilizer** — K788 ABM 模擬，90% 採用率 vol 僅增 4.6%，無 tipping point。\n7. **Codex overloaded 時 self-review 可接受** — 但必須至少 grep shift(1) 和 clean_tw50。\n8. **主計總處數據可用但需 Chrome 自動化** — 建立 taiwan-macro-data skill，funid 對照表。",
+    "experiments_covered": "K782-K793 (14 experiments)",
+    "timestamp": "2026-03-31T21:11:32.957540+00:00"
   }
 ]
