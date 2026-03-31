@@ -18788,5 +18788,72 @@
     "confidence": 0.7,
     "evidence": [],
     "created_at": "2026-03-31T14:50:31.269288+00:00"
+  },
+  {
+    "id": "K783c",
+    "experiment_id": "K783c",
+    "title": "K783c: Cross-Period Window Size Sensitivity (GJR-GARCH, SPY, 3 Regimes)",
+    "date": "2026-03-31",
+    "tags": [
+      "window-size",
+      "gjr-garch",
+      "regime",
+      "cross-period",
+      "spy",
+      "qlike",
+      "dm-test"
+    ],
+    "data_source": "yfinance SPY 2000-01-04 to 2026-03-31 (6599 obs)",
+    "content": "[提出: 用戶, 執行: Claude] K783c 驗證 GJR-GARCH(1,1) 訓練視窗大小是否依市場 regime 不同而有差異。三個不重疊 OOS 期間（各 ~500 天）：高波動（2020-2021 COVID 崩潰+復甦）、中等（2018-2019 貿易戰/Fed pivot）、平靜（2016-2017 低 VIX 時代）。視窗：{252, 504, 1000, 2000, 3000, ALL}，指標：QLIKE on r²（Patton 2011）。\n核心發現：最佳視窗確實因 regime 不同而改變——高波動期(2020-21): w=2000 勝（vs w=252 +63%, w=504 +23%）；中等波動期(2018-19): w=504 勝（vs w=2000 +9.4%），w=1000 是唯一通過 Harvey t>3.0 門檻的 DM 檢定（t=-3.077）；平靜期(2016-17): w=252 勝（vs w=2000 +12.7%），但無一通過 Harvey 門檻。\n統計意義：只有 1 個 DM test 通過 Harvey t>3.0（w=1000 vs w=2000 在 2018-19，t=-3.077）。其餘 14 個比較均未達顯著差異。\n詮釋：大視窗（2000+）在危機期表現好（需要長期歷史估計尾部分布），中小視窗（252-504）在平靜/中等期表現好（快速適應低波動環境）。但差異在統計上多不顯著，與 K783 結論一致：視窗選擇對預測品質影響相對有限。\n建議：危機敏感應用用 w=2000，平時用 w=504 是合理折衷（兩個極端 regime 表現都不差）。"
+  },
+  {
+    "id": "K792",
+    "experiment_id": "K792",
+    "title": "K792: EWT vs 0050.TW Volatility Spread Signal — Granger Causality, Lead-Lag, Predictive Regression",
+    "date": "2026-03-31",
+    "tags": [
+      "ewt",
+      "taiwan",
+      "0050",
+      "granger",
+      "lead-lag",
+      "vol-spread",
+      "predictive-regression",
+      "realized-vol"
+    ],
+    "data_source": "yfinance (EWT, 0050.TW, ^VIX), 2012-02-13 to 2025-12-30 (3393 days)",
+    "content": "[提出: User, 執行: Claude] K792 深度分析 EWT（美掛台灣 ETF）與 0050.TW 的波動率差異訊號，探討 vol_ratio = RV_22d(EWT)/RV_22d(0050) 是否具有預測力。數據：2012-2025，3393 個交易日，0050.TW 以 clean_tw50_data 修正股分拆偽影。\n核心發現：\n1. Granger 因果：vol_ratio 對 rv_tw50 具高度顯著 Granger 因果（lag=1~22，F≥5.78，p<0.0001）。rv_ewt 直接預測 rv_tw50 效果更強（lag=1 F=35.3，p<0.0001）。但反向（rv_tw50→vol_ratio）也顯著（lag=1 F=4.2，p=0.04），代表是雙向回饋而非純粹單向因果。\n2. 預測迴歸（vol_ratio[t-1] → rv_tw50[t]）：β=-0.0894，t=-20.1（高度顯著）R²=0.107。方向為負——高 vol_ratio 時 0050 波動反而降低。解讀：當 EWT 相對於 0050 波動率較高，代表美國交易者已消化了風險、台灣本地市場趨於平靜（或有均值回歸）。\n3. rv_ewt[t-1] → rv_tw50[t]：β=+0.728，R²=0.671（極強共動性）——EWT 與 0050 波動率本身高度同步（同期相關 0.82）。\n4. vol_ratio[t-1] → tw50_ret[t]：β=-0.001194，t=-1.67，p=0.096（統計不顯著）——vol_ratio 不能預測 0050 日報酬。符合 K697（VIX 預測波動量但不預測方向）的既有結論。\n5. 策略：以 vol_ratio>1.3 減半 VT 權重（signal.shift(1) 確保無前視偏誤），Sharpe=1.346，低於純 VT 1.502。結論：vol_ratio 訊號對 0050 有波動率預測力但無報酬方向預測力，用它作為 VT overlay 會損害績效。\n延伸：與 K506（EWT vol spread 為 VT overlay，2/5 OOS FAIL）一致——訊號有統計意義但非交易可利用。EWT vol ratio 是很好的「何時波動率將下降」訊號，但不是報酬訊號。"
+  },
+  {
+    "id": "K790v2",
+    "type": "experiment",
+    "title": "Taiwan Price Limit: NULL — Too Sparse (0.9% days), GJR Asymmetry Already Captures",
+    "content": "[提出: Gemini, 執行: Claude] 0050.TW ±10% 漲跌幅限制 dummy 加入 GJR-X。>5% 天數僅 39/4216 (0.9%)，DM 全部 NS。GJR gamma 已捕捉。Self-reviewed: clean_tw50_data ✅, lag via exog[t-1] ✅。",
+    "tags": [
+      "Taiwan",
+      "price_limit",
+      "GJR-X",
+      "null_result"
+    ],
+    "experiment_file": "experiments/k790v2_taiwan_price_limit.py",
+    "codex_reviewed": true,
+    "codex_findings": "Self-reviewed (Codex overloaded). Lag OK, clean_tw50 OK.",
+    "timestamp": "2026-03-31T18:38:37.240629+00:00"
+  },
+  {
+    "id": "K793",
+    "type": "experiment",
+    "title": "Strategy Evaluation Framework: BH 50/50 #1, Risk Parity #2, Piecewise #3 (8 dimensions)",
+    "content": "[提出: 用戶, 執行: Claude] 8 維度評估 6 策略（2023-2025）。BH 50/50 composite 75.4 勝出（牛市優勢），Risk Parity 73.7 近乎平手（更好 MDD），Piecewise 唯一正 stress performance (+2.8%)。GARCH VT 最穩健但回報最差。單一 Sharpe 排名完全遺漏這些 tradeoffs。Self-reviewed: shift(1) ✅, TX 10bps ✅。",
+    "tags": [
+      "strategy_evaluation",
+      "multi_dimension",
+      "user_direction",
+      "practical_tool"
+    ],
+    "experiment_file": "experiments/k793_strategy_evaluation.py",
+    "codex_reviewed": true,
+    "codex_findings": "Self-reviewed (Codex overloaded). Lag shift(1) line 162 OK.",
+    "timestamp": "2026-03-31T18:38:37.240997+00:00"
   }
 ]
