@@ -1,0 +1,253 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\newcommand{\high}[1]{\textcolor{errorred}{\textbf{[HIGH]} #1}}
+\newcommand{\med}[1]{\textcolor{warncolor}{\textbf{[MEDIUM]} #1}}
+\newcommand{\low}[1]{\textcolor{okgreen}{\textbf{[LOW]} #1}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report}\\[0.5em]
+{\large Volatility Absorption: The Diminishing Marginal Impact\\
+of Market Fear}\\[0.5em]
+{\normalsize Document Type: Journal Paper (target: Journal of Banking \& Finance)}\\
+{\normalsize Review Date: 2026-03-30}\\
+{\normalsize Review Standard: \textbf{Strict} (simulating JBF referee)}
+\end{center}
+
+\vspace{1em}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{\textbf{HIGH --- must fix before submission}} & \textbf{6 issues} \\
+\textcolor{warncolor}{\textbf{MEDIUM --- should fix}} & \textbf{12 issues} \\
+\textcolor{okgreen}{\textbf{LOW --- optional}} & \textbf{9 issues} \\[0.5em]
+Overall Assessment & \textbf{Major Revision Required} \\
+\end{tabular}
+
+\vspace{0.5em}
+\noindent\textbf{One-paragraph summary:}
+The paper introduces ``volatility absorption''---the idea that the marginal impact of fear shocks on asset returns diminishes as the ambient VIX level rises. The core empirical finding is interesting and the endogenous/exogenous shock decomposition is a genuine conceptual contribution. However, the paper suffers from (1)~a fundamental identification problem: the primary measure NSI $= |r_t|/V_t$ mechanically declines with $V_t$ because VIX appears in the denominator and simultaneously defines the conditioning regimes, (2)~the SAR measure, which avoids this problem, shows a non-monotonic pattern in the crisis regime that is dismissed too casually, (3)~the shock-type classification is ad hoc with an asymmetric GLD threshold that invites data-mining concerns, (4)~the NFP event study lacks proper controls for surprise magnitude, (5)~the ``Proposition'' on VT as an absorption handler is stated without formal proof, and (6)~the reference list is thin (20 entries) and missing key citations on regime-dependent volatility, attention, and VRP. A major revision addressing identification, formal modeling, and literature gaps could yield a publishable contribution.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{1. Logic and Structure (邏輯結構)}
+
+\high{L1. Mechanical correlation in the primary measure undermines identification.} The central metric $\text{NSI}_t = |r_t| / V_t$ uses VIX in the denominator, while the absorption regression (Eq.~3) regresses NSI on $V_t$. By construction, NSI declines mechanically with $V_t$: even if $|r_t|$ were independent of $V_t$, dividing by a larger $V_t$ produces a smaller NSI. The paper acknowledges this in the Limitations section (Section~8.1), but the acknowledgment is insufficient---this is a \emph{first-order identification problem}, not a limitation footnote. The authors note three mitigating arguments: (i)~the SAR measure, (ii)~alternative RV normalization, (iii)~endogenous/exogenous decomposition. Of these, (i) is the strongest but shows non-monotonicity; (ii) still conditions on a correlated variable; (iii) is suggestive but not a formal identification test. \emph{Recommendation:} Promote the SAR analysis to the primary measure. Add a simulation exercise showing what the NSI regression slope would be under a null of no absorption (constant marginal impact) to quantify the mechanical component. Alternatively, use the methodology of Patton (2011) for forecast comparison rather than level regression.
+
+\med{L2. The SAR non-monotonicity is inadequately addressed.} The SAR for SPY rises from 2.32$\times$ (High) to 2.43$\times$ (Crisis), which directly contradicts the absorption hypothesis at the extreme. The text attributes this to ``extreme outlier events and small samples,'' but the Crisis bin has $N=244$ shock days---the \emph{second-largest} bin. This is not a small sample. \emph{Recommendation:} Perform a formal structural break test at the VIX$=30$ boundary. Consider whether the absorption effect saturates (i.e., a concave rather than linear relationship) and re-specify the regression with a quadratic or piecewise-linear term.
+
+\med{L3. The paper structure is sequential but the argument could be tighter.} The flow Introduction $\to$ Lit Review $\to$ Methodology $\to$ Data $\to$ Results $\to$ Implications $\to$ Robustness $\to$ Conclusion is standard, but Section~6 (Implications) contains empirical claims (e.g., hedging cost-benefit ratios, rebalancing frequency results) that would be stronger in the Results section. The implications section mixes new results with discussion. \emph{Recommendation:} Move quantitative claims to Results or Robustness; keep Implications for interpretation and practitioner guidance.
+
+\low{L4. The Proposition (p.~22) is stated in proposition format but lacks a formal proof.} It is more of an observation or remark. Using formal mathematical environment (Proposition) without a proof or formal derivation will annoy referees. Either provide a derivation or relabel as ``Remark'' or ``Observation.''
+
+\low{L5. The conclusion repeats too many specific numbers from the abstract.} The conclusion should synthesize and offer broader perspective, not re-list all numerical results.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{2. Research Motivation (研究動機)}
+
+\med{M1. The novelty claim needs better positioning against existing literature.} The paper claims the phenomenon has ``received surprisingly little systematic empirical attention.'' However, regime-switching GARCH models (Hamilton 1989, Haas et al.\ 2004), threshold GARCH (Zakoian 1994), and time-varying parameter models implicitly capture regime-dependent shock responses. The paper needs to explain more precisely how ``absorption'' differs from these existing frameworks. Is the contribution the \emph{measurement} (NSI, SAR), the \emph{decomposition} (endo/exo), or the \emph{interpretation} (behavioral absorption)? Currently all three are claimed, diluting the focus.
+
+\med{M2. The VT connection feels like a separate paper grafted on.} Sections~6.2 (Portfolio Rebalancing) and 6.3 (VT Strategy Design) reference ``prior work in our research program (available upon request)'' multiple times. These are essentially self-citations to unpublished work with no verifiable source. A JBF referee will not accept claims based on unavailable evidence. \emph{Recommendation:} Either include the VT analysis as a formal section with data and tables, or remove the VT claims and focus the paper purely on the absorption phenomenon.
+
+\low{M3. The title is descriptive but the subtitle is somewhat vague.} ``The Diminishing Marginal Impact of Market Fear'' could describe many phenomena. Consider a more specific subtitle that hints at the mechanism (e.g., ``Evidence from Endogenous vs.\ Exogenous Shocks'').
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{3. Literature Review (文獻回顧)}
+
+\high{R1. Critical missing references on regime-dependent volatility dynamics.} The paper cites Hamilton (1989) and Haas et al.\ (2004) for regime-switching GARCH, but omits:
+\begin{itemize}[nosep]
+\item Zakoian (1994, \textit{JTSA}) --- Threshold GARCH, directly relevant to state-dependent shock impacts.
+\item Engle and Ng (1993, \textit{JoF}) --- News impact curves that parameterize how shock magnitude varies with the sign and size of prior shocks.
+\item Muler and Yohai (2008, \textit{JASA}) --- Robust GARCH estimation under outliers, relevant to the crisis-bin non-monotonicity.
+\item Danielsson et al.\ (2018, \textit{RFS}) --- Endogenous vs.\ exogenous risk in financial regulation, directly relevant to Section~5.4's framework.
+\end{itemize}
+\emph{Recommendation:} Add these references and position the paper against Engle and Ng's news impact curve framework, which is the most natural comparison.
+
+\high{R2. The behavioral finance citations are superficial.} The paper cites Kahneman and Tversky (1979) and Barberis et al.\ (2001) for ``panic fatigue'' and ``crisis habituation,'' but neither paper discusses habituation to financial crises. Missing:
+\begin{itemize}[nosep]
+\item Da et al.\ (2015, \textit{RFS}) --- The FEARS index; direct evidence on investor attention and fear.
+\item Vlastakis and Markellos (2012, \textit{JBF}) --- Information demand and stock market volatility; attention-based framework.
+\item Andrei and Hasler (2015) is cited but the discussion does not engage with their model's predictions for the absorption pattern.
+\end{itemize}
+The claim that prospect theory's diminishing sensitivity explains absorption is a stretch: prospect theory is about gains/losses relative to a reference point, not about shock magnitude relative to ambient volatility.
+
+\med{R3. The VRP literature review is incomplete.} Missing:
+\begin{itemize}[nosep]
+\item Todorov (2010, \textit{Econometrica}) --- Variance risk premium and extreme events.
+\item Drechsler and Yaron (2011, \textit{JoF}) --- Uncertainty, premia, and asset pricing.
+\item Bekaert, Engstrom, and Xu (2022, \textit{JFE}) --- The time variation in the VRP tied to macro uncertainty.
+\end{itemize}
+The VRP section (5.5) makes the strong claim that ``there is no VRP sign flip, contrary to some prior claims'' but does not cite which prior claims it is refuting.
+
+\med{R4. Missing references on VIX and information content.} The paper's core argument is about the information content of VIX shocks, yet it does not cite:
+\begin{itemize}[nosep]
+\item Whaley (2000, \textit{JD}) --- The original ``investor fear gauge'' paper.
+\item Bekaert and Hoerova (2014) is cited but their decomposition into expected variance vs.\ VRP is not leveraged in the methodology.
+\end{itemize}
+
+\low{R5. Only 20 references for a JBF paper is thin.} Typical JBF papers cite 40--60 references. The bibliography should be expanded.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{4. Methodology (方法論)}
+
+\high{M1. The shock-type classification has an asymmetric threshold that invites data-mining concerns.} Geopolitical shocks require GLD $> 0.5\%$, while risk-off flights require only TLT $> 0$ (any positive value). Rate shocks are the residual. Why 0.5\% for gold but 0\% for bonds? The 0.5\% threshold is described as isolating ``economically significant'' gold moves, but no sensitivity analysis is provided. \emph{Recommendation:} (a)~Show results for GLD thresholds of 0\%, 0.25\%, 0.5\%, 0.75\%, 1.0\% to demonstrate robustness. (b)~Consider a symmetric classification rule (e.g., both TLT and GLD at the same percentile threshold). (c)~Justify the priority ordering (geopolitical first) with an economic argument beyond ``exogenous information.''
+
+\med{M2. The VRP formula appears to mix daily and annualized scales.} Equation~7 defines VRP as $\text{VIX}_t^2 / 252 - RV_t^{(22)} / 22$. The first term ($\text{VIX}^2/252$) converts annualized implied variance to daily implied variance. The second term ($RV^{(22)}/22$) computes the average daily squared return over 22 days. These are both on a daily scale, but the table reports VRP in ``\% annualized.'' The annualization step is not shown. Clarify: is the reported VRP $\times 252$ or $\times \sqrt{252}$? For variance risk premium, $\times 252$ is standard, but this should be explicit.
+
+\med{M3. Newey-West lag selection (10 lags) is not justified.} Why 10 lags? Standard practice is to use $\lfloor T^{1/3} \rfloor$ or the Newey-West (1994) automatic bandwidth selector. For $T = 893$, the rule gives $\approx 10$, which matches, but this should be stated explicitly. Also report whether results are sensitive to 5 or 15 lags.
+
+\med{M4. The bootstrap test for SAR comparison (Table~3) is described too briefly.} The notes say ``$p$-values are from a two-sample $t$-test comparing the SAR across regimes via bootstrap with 10,000 replications.'' This is ambiguous: is it a bootstrap of the $t$-statistic? A permutation test? Block bootstrap to preserve time-series dependence? Clarify the exact bootstrap procedure.
+
+\low{M5. The NSI regression (Eq.~3) does not control for any covariates.} The robustness check in Eq.~10 adds $|r_{t-1}|$, but this should be the baseline specification. Other natural controls: day-of-week, contemporaneous volume, bid-ask spread.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{5. Statistical Rigor (統計嚴謹度)}
+
+\high{S1. The NFP event study lacks a surprise measure.} The paper examines whether NFP releases produce more volatility in different VIX regimes, but uses only a dummy (NFP day yes/no). The seminal event-study approach in macro-finance (e.g., Andersen et al.\ 2003, \textit{AER}; Balduzzi et al.\ 2001, \textit{JFE}) uses the \emph{surprise component} (actual minus consensus forecast) as the independent variable. A larger surprise should produce more volatility regardless of VIX regime. Without controlling for surprise magnitude, the NFP result could reflect the fact that NFP surprises are smaller (in absolute terms) when VIX is already high, not that the market ``absorbs'' the same-sized surprise. \emph{Recommendation:} Obtain NFP consensus forecasts (Bloomberg or FRED) and regress $|r_t^{\text{SPY}}|$ on $|\text{surprise}_t|$, $V_t$, and their interaction. The absorption hypothesis predicts a negative interaction coefficient.
+
+\med{S2. Multiple comparisons in the SAR analysis.} Five VIX bins $\times$ four assets $= 20$ comparisons. The paper does not adjust for multiple hypothesis testing. While this is common in finance, given that several results are only marginally significant ($p = 0.069$ for NFP low-VIX, $t = 1.94$ for risk-off absorption), a Bonferroni or Holm correction would provide reassurance.
+
+\med{S3. The shock-type absorption coefficients lack confidence intervals.} Table~5 reports point estimates and $t$-statistics but not confidence intervals. For the geopolitical shock category ($N = 89$), the wide confidence interval would make the ``no absorption'' conclusion more transparent.
+
+\med{S4. Adj $R^2$ values are very low (0.008--0.044).} The paper does not discuss what fraction of NSI variation is explained by VIX level. An Adj $R^2$ of 3--4\% means 96--97\% of the variation is unexplained. While low $R^2$ is common in return regressions, the paper should acknowledge this and discuss whether a richer model would improve explanatory power.
+
+\low{S5. No out-of-sample test.} All results are in-sample. A simple split-sample exercise (estimate on 2006--2016, test on 2016--2026) would strengthen the claims.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{6. Data and Reproducibility (數據與可重現性)}
+
+\med{D1. Yahoo Finance as the primary data source may concern referees.} While yfinance is adequate for daily closing prices, JBF papers typically cite CRSP (equities), CBOE (VIX), and FRED (macro). The paper should verify VIX data against the CBOE's official series and note any discrepancies. For a 20-year daily sample, data quality matters.
+
+\med{D2. The sample size discrepancy (767 vs.\ 893 shock days) requires better explanation.} Table~2 reports 767 shock days in the five-bin SAR analysis, while Table~A2 reports $N = 893$ for the regression. The table notes explain this is due to ``missing or misaligned data (primarily affecting 0050.TW trading-calendar gaps and boundary observations),'' but 126 missing days (14\%) is substantial. Are these days systematically different? Could their exclusion bias the SAR results?
+
+\low{D3. No discussion of survivorship bias or ETF-specific issues.} SPY, GLD, and TLT are ETFs with specific creation/redemption mechanisms. GLD, for example, launched in November 2004---barely 14 months before the sample start. TLT began in 2002. Any structural issues in early data?
+
+\low{D4. Replication code is ``available upon request'' rather than posted publicly.} Best practice is to post code and data to a public repository.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{7. Contribution and Novelty (貢獻與新穎性)}
+
+\high{C1. The connection between ``absorption'' and existing regime-dependent volatility literature needs sharper differentiation.} The core finding---that shock impact varies with the volatility regime---is implicit in every regime-switching or threshold GARCH model. The news impact curve framework of Engle and Ng (1993) already parameterizes how the impact of a shock depends on the state. What is genuinely new here? The paper needs to argue explicitly that (a)~the NSI/SAR measurement is novel, (b)~the endogenous/exogenous decomposition is novel, and (c)~the VT connection is novel. Currently, the novelty is assumed rather than argued.
+
+\med{C2. The endogenous/exogenous decomposition is the strongest contribution but is under-developed.} This is the most publishable finding: different \emph{types} of shocks are absorbed at different rates. But the analysis is limited to a simple mean comparison (Eq.~4) without formal statistical testing beyond bootstrap $t$-statistics. A proper panel regression with shock-type dummies and interaction terms would be more convincing.
+
+\med{C3. The VRP analysis (Section~5.5) adds little beyond existing knowledge.} The finding that VRP narrows at high VIX but stays positive is well-known from Bollerslev et al.\ (2009) and Bekaert and Hoerova (2014). The paper claims to refute ``some prior claims'' of VRP sign flips but does not cite these claims. Either cite and refute them or remove the VRP section.
+
+\low{C4. The 0050.TW exception is presented as a ``finding'' but is largely an absence of evidence.} The positive slope ($+0.00019$, $t = 1.62$) is not statistically significant. The interpretation (VIX is US-specific) is reasonable but could be a sample-size artifact ($N = 612$ vs.\ $893$ for US assets).
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{8. Writing Quality (寫作品質)}
+
+\med{W1. Excessive hedging language undermines confidence.} The paper uses phrases like ``directionally consistent,'' ``directionally supportive evidence,'' ``suggestive implications,'' ``our evidence suggests,'' ``may retain its value,'' and ``appears to diminish'' extensively. While appropriate caution is a virtue, the cumulative effect is to make the reader wonder whether the authors believe their own results. \emph{Recommendation:} State the main findings confidently; reserve hedging language for genuinely uncertain claims.
+
+\low{W2. Some sentences are overly long and complex.} For example, the first sentence of the abstract is 53 words. Break complex sentences into shorter statements for clarity.
+
+\low{W3. Inconsistent regime labels.} The NFP table (Table~4) uses ``Low'' and ``Medium'' for VIX regimes, while the main analysis (Tables~2 and 3) uses ``Calm'' and ``Normal.'' Use consistent labels throughout.
+
+\low{W4. The acknowledgments footnote mentions ``seminar participants'' generically.} If the paper has not been presented, remove this stock phrase.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{9. Tables and Figures (表格與圖表)}
+
+\med{T1. No figures in the entire paper.} A 33-page empirical paper with zero figures is unusual for JBF. Key candidates:
+\begin{itemize}[nosep]
+\item SAR by VIX regime (bar chart with confidence intervals)
+\item Scatter plot of NSI vs.\ VIX level with regression line
+\item Time series of VIX with shock days marked
+\item Absorption coefficient by shock type (grouped bar chart)
+\end{itemize}
+\emph{Recommendation:} Add at least 3--4 figures. Visual evidence is far more persuasive than tables alone.
+
+\med{T2. Table~6 (Hedging Cost-Benefit) is illustrative but the assumptions are opaque.} The ``Daily Hedge Cost'' is proxied by VRP, but the cost of an actual hedge (e.g., put option premium) can be dramatically different from the VRP. Labeling VRP as ``hedge cost'' is misleading. \emph{Recommendation:} Use actual put option prices or clearly label the column as ``VRP proxy (not actual hedge cost).''
+
+\low{T3. Table~A2 reports $\hat{\beta} \times 10^4$ but this is mentioned only in the notes.} Make the scaling explicit in the column header (e.g., ``$\hat{\beta}$ ($\times 10^{-4}$)'').
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{10. Robustness and Sensitivity (穩健性與敏感度)}
+
+\med{R1. No placebo test.} The paper tests multiple shock thresholds and sub-periods but does not perform a placebo test. A natural placebo: apply the same NSI regression to days with $|\Delta V_t| < 0.5$ (``non-shock days''). If the VIX slope is also negative for non-shock days, then absorption may be a mechanical artifact rather than a shock-specific phenomenon.
+
+\med{R2. No test for asymmetry in absorption.} Do VIX increases (fear spikes) show the same absorption as VIX decreases (fear relief)? If VIX \emph{drops} by 2 points from VIX $= 30$, is the positive market reaction similarly absorbed? The absorption hypothesis should apply symmetrically, but this is not tested.
+
+\low{R3. The controlled regression (Eq.~10) adds only $|r_{t-1}|$.} A richer set of controls would include: lagged VIX change, trading volume, term structure slope (VIX vs.\ VIX3M), and calendar effects.
+
+\low{R4. The sub-period split (Table~8) uses 7-year windows.} Consider rolling-window estimation (e.g., 5-year rolling) to visualize how the absorption coefficient evolves over time.
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Action Priority}
+
+\begin{longtable}{p{1.2cm}p{12cm}p{2cm}}
+\toprule
+\textbf{ID} & \textbf{Issue} & \textbf{Severity} \\
+\midrule
+\endhead
+L1 & Mechanical correlation in NSI undermines identification & \textcolor{errorred}{HIGH} \\
+S1 & NFP event study lacks surprise magnitude control & \textcolor{errorred}{HIGH} \\
+R1 & Missing critical references (regime-dependent vol, news impact curves) & \textcolor{errorred}{HIGH} \\
+R2 & Behavioral citations are superficial; prospect theory misapplied & \textcolor{errorred}{HIGH} \\
+C1 & Novelty vs.\ existing regime-dependent models not clearly argued & \textcolor{errorred}{HIGH} \\
+M1 & Shock-type GLD threshold (0.5\%) not justified, no sensitivity & \textcolor{errorred}{HIGH} \\
+\midrule
+L2 & SAR non-monotonicity inadequately addressed & \textcolor{warncolor}{MEDIUM} \\
+L3 & Implications section mixes new results with discussion & \textcolor{warncolor}{MEDIUM} \\
+M1 & Novelty claim needs sharper positioning & \textcolor{warncolor}{MEDIUM} \\
+M2 & VT connection relies on unavailable ``prior work'' & \textcolor{warncolor}{MEDIUM} \\
+R3 & VRP literature review incomplete & \textcolor{warncolor}{MEDIUM} \\
+R4 & Missing VIX information content references & \textcolor{warncolor}{MEDIUM} \\
+M2 & VRP formula annualization unclear & \textcolor{warncolor}{MEDIUM} \\
+M3 & Newey-West lag not justified & \textcolor{warncolor}{MEDIUM} \\
+M4 & Bootstrap procedure for SAR ambiguous & \textcolor{warncolor}{MEDIUM} \\
+S2 & No multiple-testing correction & \textcolor{warncolor}{MEDIUM} \\
+S3 & No confidence intervals for shock-type absorption & \textcolor{warncolor}{MEDIUM} \\
+S4 & Low $R^2$ not discussed & \textcolor{warncolor}{MEDIUM} \\
+C2 & Endogenous/exogenous decomposition under-developed & \textcolor{warncolor}{MEDIUM} \\
+C3 & VRP section adds little beyond existing literature & \textcolor{warncolor}{MEDIUM} \\
+D1 & Yahoo Finance data source may concern referees & \textcolor{warncolor}{MEDIUM} \\
+D2 & 14\% sample size discrepancy unexplained & \textcolor{warncolor}{MEDIUM} \\
+W1 & Excessive hedging language & \textcolor{warncolor}{MEDIUM} \\
+T1 & No figures in entire paper & \textcolor{warncolor}{MEDIUM} \\
+T2 & Hedge cost proxy assumptions opaque & \textcolor{warncolor}{MEDIUM} \\
+R1r & No placebo test & \textcolor{warncolor}{MEDIUM} \\
+R2r & No asymmetry test (VIX up vs.\ down) & \textcolor{warncolor}{MEDIUM} \\
+\midrule
+L4 & Proposition lacks formal proof & \textcolor{okgreen}{LOW} \\
+L5 & Conclusion too repetitive of abstract & \textcolor{okgreen}{LOW} \\
+M3 & Title subtitle vague & \textcolor{okgreen}{LOW} \\
+R5 & Only 20 references & \textcolor{okgreen}{LOW} \\
+M5 & NSI regression lacks covariates & \textcolor{okgreen}{LOW} \\
+S5 & No out-of-sample test & \textcolor{okgreen}{LOW} \\
+D3 & No discussion of ETF-specific issues & \textcolor{okgreen}{LOW} \\
+D4 & Replication code not public & \textcolor{okgreen}{LOW} \\
+C4 & 0050.TW exception is absence of evidence & \textcolor{okgreen}{LOW} \\
+W2 & Overly long sentences & \textcolor{okgreen}{LOW} \\
+W3 & Inconsistent regime labels & \textcolor{okgreen}{LOW} \\
+W4 & Generic acknowledgments & \textcolor{okgreen}{LOW} \\
+T3 & Table scaling not in header & \textcolor{okgreen}{LOW} \\
+R3r & Controlled regression too simple & \textcolor{okgreen}{LOW} \\
+R4r & Sub-period split could use rolling windows & \textcolor{okgreen}{LOW} \\
+\bottomrule
+\end{longtable}
+
+\vspace{1em}
+\noindent\textbf{Overall verdict:} The paper documents a real empirical pattern and the endogenous/exogenous decomposition is a genuine conceptual advance. However, the identification strategy needs strengthening (mechanical NSI correlation), the NFP event study needs surprise controls, several literature gaps must be filled, and the paper needs figures. With a focused revision addressing the 6 HIGH-severity issues, this could be a solid contribution to JBF.
+
+\end{document}
