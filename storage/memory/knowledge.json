@@ -18413,5 +18413,20 @@
     "data_source": "yfinance (11 sector ETFs + SPY + GLD + VIX, 2010-2026)",
     "evidence": "k771_dispersion_timing_results.json: Sharpe 0.812 vs SPY 0.822, cross-OOS 2/7",
     "created_at": "2026-03-31T10:54:49.055359+00:00"
+  },
+  {
+    "id": "K770-review",
+    "title": "K770 OVERTURNED by Codex: QLIKE applied to wrong target (|r| vs σ²), DM=-7.46 INVALID",
+    "content": "[提出: Codex rescue GPT-5.4] K770 REJECTED. FATAL BUG: QLIKE applied to |r_{t+1}| not variance. MEM forecasts E[|r|] but GJR/EWMA return sqrt(σ²) — mixing non-equivalent forecast objects. DM=-7.46 is meaningless. Also: failed refits silently reuse old params, refit every 63 obs not every step. 5th Codex false-breakthrough catch (K679, K700, K735, K770).",
+    "tags": [
+      "K770",
+      "OVERTURNED",
+      "codex-review",
+      "FATAL",
+      "MEM"
+    ],
+    "phase": "research",
+    "importance": 5,
+    "timestamp": "2026-03-31T11:00:44.963312+00:00"
   }
 ]
