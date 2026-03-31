@@ -1,0 +1,42 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{threeparttable}
+\usepackage{multirow}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\doublespacing
+
+% --- Custom column types -----------------------------------------------------
+\newcolumntype{L}[1]{>{\raggedright\arraybackslash}p{#1}}
+\newcolumntype{C}[1]{>{\centering\arraybackslash}p{#1}}
+\newcolumntype{R}[1]{>{\raggedleft\arraybackslash}p{#1}}
+
+% --- Title -------------------------------------------------------------------
+\title{Is Volatility Targeting Just Trend Following?\\Decomposing the Benefits of Volatility Targeting\thanks{We thank anonymous reviewers for helpful comments. Data and replication code are available upon request.}}
+
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
+
+\date{March 2026}
+
+\begin{document}
+
+\maketitle
+
+\input{body_v2}
+
+\end{document}

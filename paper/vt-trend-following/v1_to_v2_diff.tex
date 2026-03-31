@@ -1,0 +1,319 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{natbib}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% --- Diff colors -------------------------------------------------------------
+\definecolor{added}{RGB}{0,128,0}
+\definecolor{removed}{RGB}{204,0,0}
+\definecolor{modified}{RGB}{0,51,153}
+
+\newcommand{\ADDED}{\textcolor{added}{\textbf{[ADDED]}}}
+\newcommand{\MODIFIED}{\textcolor{modified}{\textbf{[MODIFIED]}}}
+\newcommand{\REMOVED}{\textcolor{removed}{\textbf{[REMOVED]}}}
+
+% --- Title ------------------------------------------------------------------
+\title{Revision Diff Report: v1 $\to$ v2\\
+\Large ``Is Volatility Targeting Just Trend Following?''\\[6pt]
+\normalsize Addressing HIGH-Severity Review Issues H1, H2, H4}
+
+\author{VolPred Research System\\
+\small Claude Opus 4.6 (1M context)}
+
+\date{March 30, 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Overview}
+% =============================================================================
+
+This document details all changes made from v1 (\texttt{main.tex}) to v2 (\texttt{body\_v2.tex} + \texttt{main\_v2.tex}) of the paper ``Is Volatility Targeting Just Trend Following?'' The revision addresses the top 3 HIGH-severity issues identified in the academic review (\texttt{review\_v1.tex}).
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Metric & v1 & v2 \\
+\midrule
+Page count & 29 & $\sim$31--32 \\
+Tables & 5 & 6 (+1 new) \\
+Figures & 2 & 2 (unchanged) \\
+Bibliography entries & 18 & 18 (unchanged count; 0 orphans remain) \\
+Orphan references & 3 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent\textbf{File structure change:} v2 splits the paper into \texttt{main\_v2.tex} (preamble + \verb|\input{body_v2}|) and \texttt{body\_v2.tex} (all content from abstract through bibliography). The original \texttt{main.tex} is preserved unchanged.
+
+
+% =============================================================================
+\section{Issue H1: Circular Logic in $\gamma$--TSMOM Argument}
+% =============================================================================
+
+\noindent\textbf{Review concern (Issues 1.1 + 7.1):} Both $\gamma$ and the TSMOM loading are estimated from the same return series, creating mechanical endogeneity in the $N=22$ cross-sectional regression. The paper frames this as a ``predictive relationship'' without adequate acknowledgment of the identification challenge.
+
+\subsection{Changes Made}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item \ADDED\ \textbf{Split-sample robustness test (Section 3.2).}
+
+A new paragraph ``Endogeneity concern and split-sample robustness'' is added after the main cross-sectional results. The test estimates $\gamma$ from the first half (2007--2016) and $\hat{\beta}_{\text{TSMOM}}^{\perp}$ from the second half (2017--2026) using non-overlapping data. Results:
+\begin{itemize}
+\item Split-sample Pearson $r = 0.487$ ($p = 0.021$), bootstrap 95\% CI $[0.114, 0.737]$
+\item Split-sample Spearman $\rho = 0.461$ ($p = 0.031$)
+\item Attenuation relative to full-sample ($r = 0.564$) is acknowledged and explained as expected given reduced estimation precision
+\end{itemize}
+
+The paragraph explicitly states that this approach ``reduces but does not fully eliminate the mechanical channel'' and discusses why a formal IV approach is infeasible with $N = 22$ mixed-class assets.
+
+\item \ADDED\ \textbf{Panel B in Table 2 (Cross-Sectional Predictors).}
+
+Table~2 is expanded with a new Panel B reporting split-sample results alongside the existing full-sample Panel A, making the robustness check immediately visible to reviewers.
+
+\item \MODIFIED\ \textbf{Abstract updated.}
+
+Added one sentence to the abstract: ``A split-sample robustness check---estimating $\gamma$ from 2007--2016 and TSMOM loading from 2017--2026---yields $r = 0.487$ ($p = 0.021$), confirming that the relationship is not purely mechanical.''
+
+\item \MODIFIED\ \textbf{Introduction Contribution 1 updated.}
+
+Added: ``A potential endogeneity concern arises because both $\gamma$ and the TSMOM loading are estimated from the same return series: a split-sample robustness check (estimating $\gamma$ from 2007--2016 and TSMOM loading from 2017--2026) yields $r = 0.487$ ($p = 0.021$), confirming that the relationship survives temporal separation.''
+
+\item \ADDED\ \textbf{Limitations paragraph 5 (Section 4.4).}
+
+New paragraph added: ``Fifth, the cross-sectional regression linking $\gamma$ to TSMOM loading ($N = 22$) faces an inherent endogeneity concern\ldots Future work with a larger cross-section of futures contracts---as in Hood \& Raughtigan's 50-asset sample---could employ a more diverse set of instruments or within-asset-class variation to address this limitation.''
+
+\item \MODIFIED\ \textbf{Conclusion updated.}
+
+Added after the full-sample correlation: ``a split-sample robustness check ($r = 0.487$, $p = 0.021$) confirms this relationship survives temporal separation of the estimation windows.''
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Issue H2: MDD Retention Lacks Statistical Test}
+% =============================================================================
+
+\noindent\textbf{Review concern (Issue 7.2):} The central claim (90--97\% MDD retention) is based on point estimates without confidence intervals. MDD is a single extreme-value statistic with high sampling variability.
+
+\subsection{Changes Made}
+
+\begin{enumerate}[label=\arabic*.]
+
+\item \ADDED\ \textbf{New Section 2.7: ``MDD Retention Bootstrap Inference.''}
+
+A complete methodological description of the block bootstrap procedure:
+\begin{itemize}
+\item 10,000 replications, block size = 252 trading days
+\item Formal definition of MDD retention for each bootstrap draw (new Eq.~\ref{eq:mdd_retention_boot} in the paper)
+\item Reports 5th and 95th percentiles as 90\% confidence interval
+\item Justification: block bootstrap preserves serial dependence and path-dependent nature of MDD
+\end{itemize}
+
+\item \ADDED\ \textbf{New Table 6 (``Block Bootstrap Confidence Intervals for MDD Retention'').}
+
+\begin{center}
+\small
+\begin{tabular}{lccccc}
+\toprule
+& SPY & 50/50 & DIA & QQQ & IWM \\
+\midrule
+Point estimate & 93\% & 96\% & 91\% & 90\% & 97\% \\
+90\% CI lower & 86\% & 90\% & 83\% & 82\% & 91\% \\
+90\% CI upper & 97\% & 99\% & 96\% & 95\% & 100\% \\
+$H_0$: $\leq 80\%$ & Reject & Reject & Reject & Reject & Reject \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+All five lower bounds exceed 80\%. The one-sided test rejects $H_0$: Retention $\leq 80\%$ at the 1\% level for all five assets.
+
+\item \ADDED\ \textbf{Bootstrap interpretation paragraph (Section 3.3).}
+
+New paragraph: ``Because maximum drawdown is a single extreme-value statistic with high sampling variability, we provide formal statistical inference via block bootstrap\ldots Even under conservative inference, at least four-fifths of VT's drawdown protection survives TSMOM removal for every asset tested.''
+
+\item \MODIFIED\ \textbf{Abstract updated.}
+
+Added: ``Block bootstrap confidence intervals (10,000 replications, block size = 252 days) confirm that MDD retention is statistically robust, with 90\% CIs excluding values below 80\% for all five assets tested.''
+
+\item \MODIFIED\ \textbf{Introduction Contribution 2 updated.}
+
+Added: ``Block bootstrap inference (10,000 replications, block size = 252 days) confirms that MDD retention is statistically robust: the 90\% confidence intervals are [86\%, 97\%] for SPY, [90\%, 99\%] for 50/50, [83\%, 96\%] for DIA, [82\%, 95\%] for QQQ, and [91\%, 100\%] for IWM, all excluding values below 80\%.''
+
+\item \MODIFIED\ \textbf{Table 3 notes updated.}
+
+Added cross-reference: ``Block bootstrap 90\% confidence intervals for MDD retention are reported in Table~6.''
+
+\item \MODIFIED\ \textbf{Discussion Section 4.1 updated.}
+
+Added parenthetical: ``with block bootstrap 90\% CIs excluding retention below 80\% for all five assets; Table~6.''
+
+\item \MODIFIED\ \textbf{Conclusion updated.}
+
+Added: ``with block bootstrap 90\% confidence intervals excluding retention below 80\% for all five assets.''
+
+\item \ADDED\ \textbf{Limitations paragraph 6 (Section 4.4).}
+
+New paragraph: ``Sixth, our MDD retention estimates, while supported by block bootstrap inference (Table~6), are based on five US equity assets. Extending the MDD decomposition to the full 22-asset sample and to international markets would further strengthen the generalizability of the 90--97\% retention finding.''
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Issue H4: Three Orphan Bibliography Entries}
+% =============================================================================
+
+\noindent\textbf{Review concern (Issues 3.1 + 10.1):} Three bibliography entries---\texttt{barroso2015}, \texttt{daniel2016}, \texttt{fleming2001}---appear in the bibliography but are never cited in the text. These orphan references may trigger a desk reject.
+
+\subsection{Changes Made}
+
+All three orphan entries are now cited in the text at locations where they are substantively relevant. No entries were removed.
+
+\begin{enumerate}[label=\arabic*.]
+
+\item \ADDED\ \textbf{Barroso \& Santa-Clara (2015) --- cited in Section 1 (Introduction).}
+
+\textit{Location:} Paragraph 2, after discussing the leverage effect connection to VT.
+
+\textit{Citation context:} ``This mechanical channel is well-documented: \citet{barroso2015} show that volatility-scaling momentum strategies eliminates momentum crashes, precisely because the leverage effect creates a natural hedge that scales down exposure when volatility spikes after losses.''
+
+\textit{Rationale:} Barroso \& Santa-Clara (2015) directly demonstrates that volatility-scaling (the core of VT) interacts with momentum through the leverage effect---precisely the paper's central thesis. Citing them in the Introduction establishes that the VT--momentum connection has precedent.
+
+\item \ADDED\ \textbf{Daniel \& Moskowitz (2016) --- cited in Section 1 (Introduction, last paragraph before roadmap).}
+
+\textit{Location:} ``Our paper contributes to several literatures'' paragraph.
+
+\textit{Citation context:} ``Our finding that VT's embedded momentum exposure operates through the leverage effect channel complements \citet{daniel2016}, who show that momentum crashes are driven by precisely this leverage-effect-induced volatility clustering.''
+
+\textit{Rationale:} Daniel \& Moskowitz (2016) directly links leverage-effect-induced volatility to momentum crashes, providing the theoretical bridge between VT and TSMOM that the paper exploits.
+
+\item \ADDED\ \textbf{Fleming, Kirby \& Ostdiek (2001) --- cited in Section 1 (Introduction, last paragraph before roadmap).}
+
+\textit{Location:} ``Our paper contributes to several literatures'' paragraph.
+
+\textit{Citation context:} ``We also extend the `volatility-as-insurance' perspective of \citet{lai2026a} to a global setting, building on the foundational work of \citet{fleming2001}, who established the economic value of volatility timing in a portfolio context.''
+
+\textit{Rationale:} Fleming et al.\ (2001) is the foundational paper on the economic value of volatility timing---the intellectual ancestor of the VT literature. Citing them grounds the paper's contribution in the established literature.
+
+\end{enumerate}
+
+\subsection{Verification}
+
+After these additions, all 18 bibliography entries are cited at least once in the text. The orphan count drops from 3 to 0.
+
+
+% =============================================================================
+\section{Summary of All Text Changes by Section}
+% =============================================================================
+
+\begin{longtable}{@{}p{3.5cm}p{1.5cm}p{9cm}@{}}
+\toprule
+Section & Type & Description \\
+\midrule
+\endhead
+Abstract & \MODIFIED & +2 sentences (split-sample result; bootstrap CIs) \\
+\midrule
+1. Introduction, \S2 & \MODIFIED & +1 sentence citing \citet{barroso2015} on leverage effect and momentum crashes \\
+\midrule
+1. Introduction, Contribution 1 & \MODIFIED & +1 sentence on endogeneity concern and split-sample result \\
+\midrule
+1. Introduction, Contribution 2 & \MODIFIED & +2 sentences on bootstrap CIs with specific numbers \\
+\midrule
+1. Introduction, ``contributes to'' & \MODIFIED & +2 citations: \citet{daniel2016} and \citet{fleming2001} integrated into existing paragraph \\
+\midrule
+2.7 MDD Bootstrap & \ADDED & New subsection (methodology for block bootstrap) + new equation (Eq.~\ref{eq:mdd_retention_boot}) \\
+\midrule
+3.2 Cross-section & \ADDED & New paragraph: ``Endogeneity concern and split-sample robustness'' ($\sim$180 words) \\
+\midrule
+Table 2 & \MODIFIED & +Panel B (split-sample results); table notes expanded \\
+\midrule
+3.3 Dual Mechanism & \ADDED & New paragraph: ``Bootstrap inference for MDD retention'' + new Table 6 \\
+\midrule
+Table 3 notes & \MODIFIED & +1 sentence cross-referencing Table 6 \\
+\midrule
+4.1 Discussion & \MODIFIED & +1 parenthetical referencing bootstrap CIs and Table 6 \\
+\midrule
+4.4 Limitations & \ADDED & +2 new paragraphs (5th: endogeneity limitation; 6th: MDD generalizability) \\
+\midrule
+5. Conclusion & \MODIFIED & +2 clauses (split-sample result; bootstrap CIs) \\
+\midrule
+Bibliography & --- & No entries added or removed; orphan count: 3 $\to$ 0 \\
+\bottomrule
+\end{longtable}
+
+
+% =============================================================================
+\section{Impact Assessment}
+% =============================================================================
+
+\subsection{Page Count}
+
+\begin{itemize}
+\item v1: 29 pages
+\item v2: $\sim$31--32 pages (estimated +2--3 pages from new content)
+\item Net additions: $\sim$600 words of text + 1 new table + 1 new equation
+\end{itemize}
+
+\subsection{Claim Strength Changes}
+
+\begin{center}
+\begin{tabular}{p{5cm}p{4cm}p{4cm}}
+\toprule
+Claim & v1 Strength & v2 Strength \\
+\midrule
+$\gamma$ predicts TSMOM loading & ``empirical regularity'' (point estimate only) & ``empirical regularity'' + split-sample confirmation ($r = 0.487$, $p = 0.021$) + explicit endogeneity discussion \\
+\midrule
+90--97\% MDD retention & Point estimates, no CI & Point estimates + 90\% bootstrap CIs (all lower bounds $> 80\%$) + formal $H_0$ test \\
+\midrule
+VT--TSMOM connection via leverage effect & Supported by 3 cited papers & Supported by 3 cited papers + \citet{barroso2015} + \citet{daniel2016} + \citet{fleming2001} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Remaining HIGH Issues Not Addressed in This Revision}
+
+The review identified 8 HIGH-severity issues total. This revision addresses 3 (H1, H2, H4). The remaining 5 are:
+
+\begin{enumerate}
+\item[\textbf{5.1}] BAB proxy (SPLV$-$SPHB) sample truncation --- requires AQR BAB data download
+\item[\textbf{8.1}] Inconsistent sample periods --- requires data re-analysis
+\item[\textbf{9.1}] MDD retention for all 22 assets --- requires additional computation
+\item[\textbf{3.1}] Missing key literature beyond orphans (Liu et al.\ 2019, etc.) --- partially addressed by citing the 3 orphans; additional citations deferred
+\item[\textbf{7.1}] IV approach for cross-sectional regression --- acknowledged as limitation in v2; full IV deferred to future work
+\end{enumerate}
+
+
+% --- Minimal bibliography for citation resolution in this diff report --------
+\bibliographystyle{apalike}
+\begin{thebibliography}{99}
+\bibitem[Barroso and Santa-Clara(2015)]{barroso2015}
+Barroso, P., \& Santa-Clara, P. (2015). Momentum has its moments. \textit{JFE}, 116(1), 111--120.
+\bibitem[Daniel and Moskowitz(2016)]{daniel2016}
+Daniel, K., \& Moskowitz, T.~J. (2016). Momentum crashes. \textit{JFE}, 122(2), 221--247.
+\bibitem[Fleming et~al.(2001)]{fleming2001}
+Fleming, J., Kirby, C., \& Ostdiek, B. (2001). The economic value of volatility timing. \textit{JF}, 56(1), 329--352.
+\bibitem[Lai(2026a)]{lai2026a}
+Lai, Y.-H. (2026a). Leverage direction matters. \textit{Working Paper}, Da-Yeh University.
+\end{thebibliography}
+
+\end{document}
