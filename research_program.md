@@ -671,7 +671,7 @@ K519-K521 完成結果 + K527 Volume-GARCH 結果：見 `docs/research_archive/c
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
 - [x] **K753 Liquidity-Vol**：NULL — partial r=0.089, VIX 已定價 volume。VIX sufficiency #12
 - [x] **Volume Exhaustion Effect**：K754 REJECTED — extreme volume 預測更高 vol（+86.5%, t=6.01），非更低。K753 是 confound：VIX 已高→mean revert→低 spike 但高 RV
-- [ ] **VT Insurance 實務指南頁面**：K738 decision guide（γ≥4.5）已確認，做成網站互動工具（`/vt-calculator`）
+- [x] **VT Insurance 實務指南頁面**：/vt-calculator 完成。風險測驗→gamma→策略推薦。K738 confirmed
 
 **中優先（新研究主題）：**
 - [x] **FOMO 行為干預設計**：K755 — Lock-5d 最佳（+4% Sharpe vs 12/VIX），但仍不勝 BH 50/50。Mean reversion 真實（t=-2.07）。最佳用途=行為護欄（MDD -1-2pp），非 alpha
