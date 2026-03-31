@@ -34,6 +34,13 @@
    - 如有日內數據：**QLIKE on 5-min RV**（Hansen & Lunde 2005 gold standard）
    - 如有多模型：**MCS（Model Confidence Set）**（控制多重比較）
    - **不可只報告對自己有利的 target**——必須報告所有 target 的結果，包括模型表現差的
+   - **經濟顯著性（VaR/ES）評估**：每個模型預測不同東西，轉換到 VaR 時**必須做適當處理**：
+     - GARCH（σ²）→ VaR = σ × z_α（z_α 取決於創新分配：Normal/Student-t/Skewed-t）
+     - MEM(|r|) → 先轉 σ = E[|r|] / C（C 來自 MEM 的 Gamma 分配，非 Normal 的 √(2/π)），再 VaR = σ × z_α
+     - HAR-RV → σ = √RV，VaR 需考慮 HAR 殘差分配（通常 log-normal 或 F）
+     - **不可直接把模型預測值當 VaR**——必須經過正確的分配轉換
+     - VaR backtesting: Kupiec + Christoffersen + Basel traffic light
+     - 如有日內數據：Hansen & Lunde (2005) 最優加權 RV_total 作為真實 σ² 的最佳估計
 7. **區分實證與理論**：明確標示每項分析屬於「實證分析（真實數據）」、「理論推導」或「模擬實驗」。不可混淆
 8. **Null result 如實報告**：負面結果同樣重要，必須完整記錄。不可只報告成功、隱藏失敗
 9. **發佈內容真實不虛**：Feed 文章、研究摘要、知識記錄的每一項數據和結論都必須可追溯到具體實驗腳本和數據

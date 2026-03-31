@@ -37,6 +37,19 @@
 **每次模型比較實驗必須至少包含前 3 層。不可只報告對自己有利的 target。**
 **MEM 可直接建模 r²（不需轉換）——與 GARCH 在相同 σ² 空間公平比較。**
 
+### 經濟顯著性評估（VaR/ES）
+**不同模型預測不同東西，計算 VaR 時必須做正確的分配轉換，不可直接用預測值當 VaR：**
+
+| 模型 | 原生預測 | → VaR 轉換 | 注意 |
+|------|---------|-----------|------|
+| GARCH/GJR | σ² | VaR = σ × z_α | z_α 取決於創新分配（Normal/Student-t/Skewed-t）|
+| MEM(\|r\|) | E[\|r\|] | σ = E[\|r\|] / C_gamma → VaR | C 來自 Gamma 分配，非 √(2/π) |
+| MEM(r²) | E[r²] | σ = √E[r²] → VaR | Gamma 創新 |
+| HAR-RV | E[RV] | σ = √RV，需 HAR 殘差分配 | log-normal 或 F |
+
+- Backtesting: Kupiec + Christoffersen + Basel traffic light
+- K768 Conformal VaR: model-agnostic 後校準（避開分配假設）
+
 ### 多頻率研究約束
 | 頻率 | 最低 OOS obs | 適合模型 | 不適合模型 | 資料年限需求 |
 |------|------------|---------|-----------|------------|
