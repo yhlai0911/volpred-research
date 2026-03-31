@@ -26,6 +26,14 @@
    - **結果異常時**：HE < 0、相關係數不穩定、parameter 在邊界上 → 必須啟動覆查，不能直接報告
    - **期貨避險特別注意**：spot-futures 相關性穩定性（rolling correlation）、共整合檢定、ETF 結構問題（如 USO contango roll）
 6. **方法論嚴謹**：每個結論必須經過正規統計檢定（DM test、t-test、bootstrap），不可僅憑觀察就下結論。遵守 Harvey (2016) t>3.0 門檻
+6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型（GARCH 預測 σ²、MEM/HAR 預測 |r| 或 RV）必須在公平框架下比較，**不可只用單一 target**。每次模型比較實驗必須包含：
+   - **各模型在原生 target 上的表現**（GARCH on r²、MEM on |r|、HAR on RV）——展示各自最佳表現
+   - **QLIKE on r²**（Patton 2011 proxy-robust：r² 是 σ² 的無偏估計，排名一致性有理論保證）
+   - **Spearman rank correlation**（分配無關，不需轉換假設）
+   - **DM test + Harvey t>3.0**（每對模型）
+   - 如有日內數據：**QLIKE on 5-min RV**（Hansen & Lunde 2005 gold standard）
+   - 如有多模型：**MCS（Model Confidence Set）**（控制多重比較）
+   - **不可只報告對自己有利的 target**——必須報告所有 target 的結果，包括模型表現差的
 7. **區分實證與理論**：明確標示每項分析屬於「實證分析（真實數據）」、「理論推導」或「模擬實驗」。不可混淆
 8. **Null result 如實報告**：負面結果同樣重要，必須完整記錄。不可只報告成功、隱藏失敗
 9. **發佈內容真實不虛**：Feed 文章、研究摘要、知識記錄的每一項數據和結論都必須可追溯到具體實驗腳本和數據

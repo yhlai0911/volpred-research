@@ -21,6 +21,22 @@
 
 **違反這些約束的結果應標記為 preliminary / unreliable，不可作為結論。**
 
+### 模型比較公平性標準（2026-03-31 建立，K777/K778 教訓）
+
+**不同類型波動率模型（GARCH/MEM/HAR）預測不同 target（σ²/|r|/RV）。比較必須公平。**
+
+| 評估層次 | 方法 | 為什麼需要 | 依據 |
+|---------|------|----------|------|
+| **各自最佳** | 每個模型在原生 target 評估 | 展示各自天花板 | — |
+| **統一 proxy-robust** | QLIKE on r²（squared return） | r² 是 σ² 的無偏估計，排名有理論保證 | Patton (2011) |
+| **分配無關** | Spearman rank correlation | 不需要任何轉換或分配假設 | — |
+| **多模型控制** | MCS（Model Confidence Set） | 控制 data snooping，找不可區分最佳集 | Hansen, Lunde & Nason (2011) |
+| **經濟價值** | 策略 Sharpe/MDD/Utility | 預測好 ≠ 交易好（K770b 教訓）| — |
+| **高頻標準**（若有 5-min） | QLIKE on RV | 最精確的真實 vol proxy | Hansen & Lunde (2005) |
+
+**每次模型比較實驗必須至少包含前 3 層。不可只報告對自己有利的 target。**
+**MEM 可直接建模 r²（不需轉換）——與 GARCH 在相同 σ² 空間公平比較。**
+
 ### 多頻率研究約束
 | 頻率 | 最低 OOS obs | 適合模型 | 不適合模型 | 資料年限需求 |
 |------|------------|---------|-----------|------------|
@@ -497,7 +513,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **首頁預設「一般讀者」tab** ✅ 2026-03-31
 - [ ] **加強入門內容**：「從零開始」是最熱門文章之一，應建立 /guide 頁面
 - [ ] **減少學術文章比例，增加實務操作指南**：收藏(7)>按讚(3) = 讀者當工具書用
-- [ ] K705 GAP-03：StrategySelector 不要突出 CAGR
+- [x] K705 GAP-03：StrategySelector CAGR 降級，突出 Sharpe/MDD ✅ 2026-03-31
+- [x] **Umami Analytics** 上線（cloud.umami.is，免費方案） ✅ 2026-03-31
+- [ ] **Umami API 自動化**：寫 scripts/analytics.py 包裝 Umami REST API，方便終端查看訪客數據（**2026-04-04 週五檢視數據後決定**）
 
 ### P2: 研究新方向
 
