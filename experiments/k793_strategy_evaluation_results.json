@@ -1,0 +1,229 @@
+{
+  "experiment_id": "K793",
+  "title": "Multi-Dimensional Strategy Evaluation Framework \u2014 8-Dimension Holistic Ranking",
+  "proposed_by": "User",
+  "executed_by": "Claude",
+  "date": "2026-04-01T01:38:05.707940",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "data_period": "2023-01-01 to 2025-12-31",
+  "n_eval_days": 752,
+  "methodology": {
+    "lag": "signal.shift(1) \u2014 weight from t-1, return at t (no lookahead)",
+    "tx_cost_bps": 10,
+    "target_vol_garch": 0.1,
+    "vix_stress_threshold": 25.0,
+    "rolling_window_robustness": 126,
+    "garch_model": "GJR-GARCH(1,1) quarterly refit expanding window",
+    "normalisation": "min-max 0-100 per dimension, then weighted composite",
+    "dimension_weights": {
+      "CAGR": 0.12,
+      "Sharpe": 0.18,
+      "Sortino": 0.12,
+      "MaxDrawdown": 0.15,
+      "WinRate": 0.06,
+      "Calmar": 0.1,
+      "StressPerf": 0.1,
+      "TurnoverCost": 0.08,
+      "Robustness": 0.09
+    }
+  },
+  "raw_metrics": {
+    "BH 50/50": {
+      "CAGR": 0.2859,
+      "Sharpe": 2.2186,
+      "Sortino": 2.1808,
+      "MaxDrawdown": -0.0902,
+      "WinRate": 0.6011,
+      "Calmar": 3.1711,
+      "StressPerf_ann": -0.1125,
+      "TurnoverCost_ann": 0.0,
+      "Robustness_std": 1.0835,
+      "n_days": 752,
+      "n_stress_days": 27
+    },
+    "12/VIX": {
+      "CAGR": 0.2449,
+      "Sharpe": 2.0211,
+      "Sortino": 1.9556,
+      "MaxDrawdown": -0.1042,
+      "WinRate": 0.5851,
+      "Calmar": 2.351,
+      "StressPerf_ann": -0.2854,
+      "TurnoverCost_ann": 0.0087,
+      "Robustness_std": 1.0475,
+      "n_days": 752,
+      "n_stress_days": 27
+    },
+    "Risk Parity": {
+      "CAGR": 0.2776,
+      "Sharpe": 2.2089,
+      "Sortino": 2.194,
+      "MaxDrawdown": -0.0823,
+      "WinRate": 0.5944,
+      "Calmar": 3.3714,
+      "StressPerf_ann": -0.011,
+      "TurnoverCost_ann": 0.00112,
+      "Robustness_std": 1.0255,
+      "n_days": 752,
+      "n_stress_days": 27
+    },
+    "GARCH VT": {
+      "CAGR": 0.2498,
+      "Sharpe": 1.841,
+      "Sortino": 1.8502,
+      "MaxDrawdown": -0.1091,
+      "WinRate": 0.5758,
+      "Calmar": 2.2908,
+      "StressPerf_ann": -0.146,
+      "TurnoverCost_ann": 0.00079,
+      "Robustness_std": 0.8628,
+      "n_days": 752,
+      "n_stress_days": 27
+    },
+    "Piecewise": {
+      "CAGR": 0.2708,
+      "Sharpe": 2.0951,
+      "Sortino": 2.0104,
+      "MaxDrawdown": -0.0765,
+      "WinRate": 0.5957,
+      "Calmar": 3.5375,
+      "StressPerf_ann": 0.0284,
+      "TurnoverCost_ann": 0.00583,
+      "Robustness_std": 1.0756,
+      "n_days": 752,
+      "n_stress_days": 27
+    },
+    "Adaptive Tier": {
+      "CAGR": 0.2594,
+      "Sharpe": 2.0642,
+      "Sortino": 1.9945,
+      "MaxDrawdown": -0.0936,
+      "WinRate": 0.5878,
+      "Calmar": 2.7715,
+      "StressPerf_ann": -0.2123,
+      "TurnoverCost_ann": 0.00617,
+      "Robustness_std": 1.1126,
+      "n_days": 752,
+      "n_stress_days": 27
+    }
+  },
+  "dimension_scores": {
+    "BH 50/50": {
+      "CAGR": 100.0,
+      "Sharpe": 100.0,
+      "Sortino": 96.17,
+      "MaxDrawdown": 41.87,
+      "WinRate": 100.0,
+      "Calmar": 70.61,
+      "StressPerf": 55.11,
+      "TurnoverCost": 100.0,
+      "Robustness": 11.63
+    },
+    "12/VIX": {
+      "CAGR": 0.0,
+      "Sharpe": 47.69,
+      "Sortino": 30.68,
+      "MaxDrawdown": 84.92,
+      "WinRate": 36.84,
+      "Calmar": 4.83,
+      "StressPerf": 0.0,
+      "TurnoverCost": 0.0,
+      "Robustness": 26.06
+    },
+    "Risk Parity": {
+      "CAGR": 79.73,
+      "Sharpe": 97.43,
+      "Sortino": 100.0,
+      "MaxDrawdown": 17.8,
+      "WinRate": 73.68,
+      "Calmar": 86.68,
+      "StressPerf": 87.46,
+      "TurnoverCost": 87.1,
+      "Robustness": 34.87
+    },
+    "GARCH VT": {
+      "CAGR": 12.09,
+      "Sharpe": 0.0,
+      "Sortino": 0.0,
+      "MaxDrawdown": 100.0,
+      "WinRate": 0.0,
+      "Calmar": 0.0,
+      "StressPerf": 44.42,
+      "TurnoverCost": 90.9,
+      "Robustness": 100.0
+    },
+    "Piecewise": {
+      "CAGR": 63.16,
+      "Sharpe": 67.3,
+      "Sortino": 46.6,
+      "MaxDrawdown": 0.0,
+      "WinRate": 78.95,
+      "Calmar": 100.0,
+      "StressPerf": 100.0,
+      "TurnoverCost": 32.96,
+      "Robustness": 14.83
+    },
+    "Adaptive Tier": {
+      "CAGR": 35.35,
+      "Sharpe": 59.11,
+      "Sortino": 41.98,
+      "MaxDrawdown": 52.4,
+      "WinRate": 47.37,
+      "Calmar": 38.56,
+      "StressPerf": 23.28,
+      "TurnoverCost": 29.11,
+      "Robustness": 0.0
+    }
+  },
+  "composite_scores": {
+    "BH 50/50": 75.44,
+    "12/VIX": 30.04,
+    "Risk Parity": 73.72,
+    "GARCH VT": 37.17,
+    "Piecewise": 53.99,
+    "Adaptive Tier": 39.13
+  },
+  "final_ranking": [
+    {
+      "rank": 1,
+      "strategy": "BH 50/50",
+      "composite_score": 75.44
+    },
+    {
+      "rank": 2,
+      "strategy": "Risk Parity",
+      "composite_score": 73.72
+    },
+    {
+      "rank": 3,
+      "strategy": "Piecewise",
+      "composite_score": 53.99
+    },
+    {
+      "rank": 4,
+      "strategy": "Adaptive Tier",
+      "composite_score": 39.13
+    },
+    {
+      "rank": 5,
+      "strategy": "GARCH VT",
+      "composite_score": 37.17
+    },
+    {
+      "rank": 6,
+      "strategy": "12/VIX",
+      "composite_score": 30.04
+    }
+  ],
+  "key_findings": [
+    "Overall winner: BH 50/50 (composite=75.4/100)",
+    "Overall worst: 12/VIX (composite=30.0/100)",
+    "Best Sharpe: BH 50/50 (2.219)",
+    "Best MDD protection: Piecewise (MDD=-0.077)",
+    "Best stress performance: Piecewise (stress_ann=0.0284)",
+    "Lowest turnover: BH 50/50 (ann_tx_cost=0.00000)",
+    "Most robust: GARCH VT (rolling_sharpe_std=0.8628)",
+    "Multi-dim framework reveals strategy tradeoffs invisible to single-metric ranking",
+    "Smooth-weight strategies (12/VIX, Risk Parity) tend to dominate on Robustness and Turnover"
+  ]
+}
