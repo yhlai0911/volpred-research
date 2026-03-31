@@ -18728,5 +18728,24 @@
     "experiment_file": "experiments/k783_window_sensitivity.py",
     "timestamp": "2026-03-31T14:13:49.651497+00:00",
     "importance": "high"
+  },
+  {
+    "id": "K782",
+    "type": "experiment",
+    "title": "HAR-5d-RV: GJR-GARCH Dominates All Horizons (5d/22d/66d) Using Daily Squared Returns",
+    "content": "[提出: 用戶, 執行: Claude] 用日頻 squared returns 加總構建 5-day/22-day/66-day RV，以 HAR 框架預測中長期波動。結果：GJR-GARCH multi-step 在所有預測期間都勝出。5d: GJR QLIKE=0.350 vs HAR-RV 0.408 (DM=2.44 NS)。22d: GJR 0.235 vs HAR-RV 0.318 (DM=3.04 Harvey PASS)。66d: GJR 0.254 vs HAR-log 0.269 (NS)。關鍵 insight: 日頻 squared returns 做的 RV proxy 不足以讓 HAR 發揮優勢——HAR 的文獻優勢來自 5-min intraday RV 捕捉的日內模式。GJR 的 multi-step recursive forecast 在沒有高頻數據時更可靠。隨預測期間拉長，所有模型預測力急劇下降（66d Spearman 僅 0.24）。等 5-min 數據累積到 60+ 天後（ETA 04/11）重測 HAR-RV。",
+    "tags": [
+      "HAR",
+      "multi-horizon",
+      "5d_RV",
+      "22d_RV",
+      "GJR-GARCH",
+      "volatility_forecasting",
+      "daily_squared_returns"
+    ],
+    "data_source": "yfinance SPY 2006-2025",
+    "experiment_file": "experiments/k782_har_5d_rv.py",
+    "timestamp": "2026-03-31T14:18:05.574863+00:00",
+    "importance": "high"
   }
 ]

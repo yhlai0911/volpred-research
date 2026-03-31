@@ -77,6 +77,7 @@
 - OOS 期間（高波動）: 2022-01-01 ~ 2023-12-31
 - 評估獲利期間：2025-01-01 ~ 2026-03-21（隨時間延伸）
 - Rolling window 預設 2000（w=504 僅在特殊情況使用，gamma sign invariant to window）
+- ⚠️ **K783 發現 expanding window 顯著勝過 w=2000**（DM=-3.23 Harvey PASS, SPY OOS 2023-2024）。中間 window (1000-2000) 反而最差。待 K783b/K783c 跨資產+跨期驗證後可能修改預設。
 - 5-min 數據：SPY 46 天 / 0050.TW 35 天（需 60+ 天 HAR-RV，ETA 2026-04-11）。收集正常（collect_us_data.py 自動調用 collect_5min_data.py）
 
 ### 評估指標
@@ -342,7 +343,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### 用戶提出方向
 - [ ] **什麼是好的交易策略？多維度評估框架** [提出: 用戶, 2026-03-30]：不只看 Sharpe——CAGR、勝率、壓力情境表現、操作複雜度、TX 成本都要。高 Sharpe 但 CAGR 3% 不算好策略。建立量化評估矩陣。
-- [ ] **HAR-RV with 5-day RV** [提出: 用戶, 2026-03-31]：用 5 日內日頻 squared returns 加總作為 5-day RV，避免日內數據不足。可討論中期（週/月/季/年）波動預測。
+- [x] **HAR-RV with 5-day RV** [提出: 用戶, 2026-03-31] → **K782 完成**：GJR-GARCH multi-step 在 5d/22d/66d 全勝 HAR。日頻 squared returns 做的 RV 不足以讓 HAR 發揮優勢——需等 5-min 數據。
 - [ ] **MEM（Multiplicative Error Model）** [提出: 用戶, 2026-03-31]：Engle & Gallo (2006) 的相乘誤差模型，作為 GARCH 和 HAR 之外的第三條路線。適合正值時間序列（RV, volume, duration）。
 - [ ] K501: **SSVS for Return Prediction** [提出: 用戶] — 用陳婉淑方法預測報酬率（不只波動率）。K461 已發現 SPY_ret PIP=1.000 for Taiwan (t=10.81)。**進行中**
 - [ ] Return prediction → trading strategy pipeline：如果方向準確度 > 55% → 可做 long/short 策略
