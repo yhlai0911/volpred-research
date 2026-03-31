@@ -18328,5 +18328,19 @@
     "phase": "Phase_5",
     "experiment_script": "experiments/k767_har_5day_rv.py",
     "results_file": "experiments/k767_har_5day_rv_results.json"
+  },
+  {
+    "id": "K767-review",
+    "title": "Codex Review K767 (GPT-5.4): 1 HIGH (forward RV label leaks in expanding window)",
+    "content": "[提出: Codex rescue GPT-5.4] K767 review: (1) HIGH: HAR expanding window uses forward-RV labels (s+1 to s+h) in training without truncating observations whose forward windows extend past forecast origin = future info leaks. (2) LOW: RV construction correct (squared log returns). (3) LOW: QLIKE equivalent to standard form. (4) LOW: Cross-asset independent processing, no alignment issue. Direction likely safe (log-HAR dominance at long horizons) but QLIKE values may shift after fix.",
+    "tags": [
+      "codex-review",
+      "K767",
+      "HIGH-severity",
+      "HAR-RV"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-31T10:22:11.797388+00:00"
   }
 ]
