@@ -18036,5 +18036,25 @@
     "phase": "research",
     "importance": 2,
     "timestamp": "2026-03-31T06:45:23.446484+00:00"
+  },
+  {
+    "id": "K757",
+    "title": "Taiwan CoVaR Contagion Structure: 0050→TSMC→Financial Sector",
+    "content": "[提出: Claude(research_program), 執行: Claude] K757: Taiwan CoVaR contagion analysis (0050/TSMC/Fubon/Cathay, 2010-2026, N=3835). Part A: 0050-TSMC return corr=0.588, rolling 60d mean=0.811. Crisis (VIX>30) corr jumps to 0.910 vs calm 0.452 (+0.458 shift). Fubon-Cathay strongly coupled (0.772). Part B: Granger causality surprises — Financials lead TSMC (Fubon→TSMC F=6.11 p<0.001), not the reverse. Cathay→0050 significant (F=2.69, p=0.045). TSMC does NOT Granger-cause 0050 (confirming T16). Part C: CoVaR — TSMC β=0.102 significant (p=0.0006) for 0050 left-tail risk; Fubon/Cathay not significant (p>0.09). ΔCoVaR time trend near-significant (p=0.063), peaked 2020-2023. Part D: TSMC RV does NOT improve OOS prediction beyond VIX (R² 0.0251→0.0250). High partial corr TSMC_RV|VIX=0.515 is in-sample co-movement, not predictive. Conclusion: Taiwan contagion flows Financial→TSMC→0050(tail risk), but VIX alone is sufficient for VT. TSMC is a systemic risk contributor but not a leading indicator.",
+    "tags": [
+      "CoVaR",
+      "K757",
+      "Taiwan",
+      "contagion",
+      "systemic-risk",
+      "TSMC",
+      "0050.TW",
+      "Granger-causality",
+      "financial-sector",
+      "tail-risk"
+    ],
+    "phase": "Phase_8",
+    "importance": 4,
+    "timestamp": "2026-03-31T07:04:05.602212+00:00"
   }
 ]
