@@ -164,7 +164,7 @@
 - [x] **Cross-Asset Vol Momentum**：K730 — 6/8 signals Granger-cause VIX（TLT lag=7 p=0.006, USO lag=5 p<0.001），但 OOS composite R² WORSE than VIX-only（-0.022）。Strategy wins 2/5 vs 50/50。**結論：可偵測但不可用。VIX sufficiency 第 24 次確認。** 文獻：Xu (2025) I-XTSM, CFA Institute (2025) MOVE→VIX stress-only。
 - [ ] **Conditional Dispersion Trade**：預測 correlation risk premium mispricing → index vs sector options。需 sector ETF options data。
 - [ ] **Regime-Switched Options Carry + Crash Filter**：不預測 vol，建 carry admission filter（term structure + skew + dealer gamma + liquidity）。只在結構有利時賣 premium。
-- [ ] **Alt Risk Premia Rotation**：variance carry / skew premium / correlation premium / convexity 四 sleeve 輪動，用 macro/liquidity regime 選擇。
+- [x] **Alt Risk Premia Rotation**：K760 NULL — 混合 4 弱信號=信號稀釋。12/VIX 簡單最強。Codex 4/4 PASS
 - [ ] **Action-First ML (Meta-Model)**：用 1300+ 實驗作 features，學 trading policy（long/short/flat/dispersion/carry）而非 vol forecast。Meta-labeling + contextual bandits。
 - **5% BTC 唯一統計顯著改善但尾部風險代價**（K66: p=0.014, 但 coskewness -0.50）
 - **Sector VT uniform**（K58: gamma 不預測行業 VT 效果）

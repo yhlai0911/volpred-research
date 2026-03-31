@@ -1,0 +1,420 @@
+{
+  "experiment_id": "K760",
+  "title": "Alternative Risk Premia Rotation \u2014 Can Multi-Factor Vol Strategies Beat 12/VIX?",
+  "proposer": "Codex (7th suggestion)",
+  "executor": "Claude",
+  "date": "2026-03-31",
+  "data_source": "yfinance (SPY, GLD, ^VIX, ^VIX3M)",
+  "data_period": "2007-01-03 to 2026-03-30",
+  "n_days": 4840,
+  "methodology": {
+    "signals": [
+      "Variance Carry: (VIX - RV22d) / VIX, clipped [0,1]",
+      "Term Structure: max(0, 1 - VIX/VIX3M)",
+      "Equity (12/VIX): 12/VIX, clipped [0,1]",
+      "Safe Haven: 1 - equity_signal"
+    ],
+    "regimes": {
+      "Low": "VIX < 15",
+      "Normal": "15 <= VIX <= 25",
+      "High": "VIX > 25"
+    },
+    "rebalancing": "Monthly (first trading day)",
+    "tx_cost": "5 bps per leg on weight changes",
+    "lag": "signal.shift(1) \u2014 all signals use t-1 data"
+  },
+  "references": [
+    "Ilmanen (2011) Expected Returns",
+    "Carr & Wu (2009) Variance Risk Premiums, RFS",
+    "K175: Cross-asset rotation < Fixed allocation",
+    "K43: VIX3M overlay NULL",
+    "T13: Term structure vol predictor but no VT gain"
+  ],
+  "full_sample_results": {
+    "Equal-Weight Multi-Premia": {
+      "name": "Equal-Weight Multi-Premia",
+      "cagr": 10.65,
+      "vol": 13.96,
+      "sharpe": 0.762,
+      "mdd": -29.29,
+      "calmar": 0.364,
+      "sortino": 0.987,
+      "n_days": 4589,
+      "n_years": 18.2
+    },
+    "Regime-Rotated Multi-Premia": {
+      "name": "Regime-Rotated Multi-Premia",
+      "cagr": 10.27,
+      "vol": 14.42,
+      "sharpe": 0.712,
+      "mdd": -30.53,
+      "calmar": 0.336,
+      "sortino": 0.924,
+      "n_days": 4589,
+      "n_years": 18.2
+    },
+    "Carry-Weighted Multi-Premia": {
+      "name": "Carry-Weighted Multi-Premia",
+      "cagr": 10.8,
+      "vol": 13.99,
+      "sharpe": 0.773,
+      "mdd": -28.9,
+      "calmar": 0.374,
+      "sortino": 1.001,
+      "n_days": 4589,
+      "n_years": 18.2
+    },
+    "12/VIX (Baseline)": {
+      "name": "12/VIX (Baseline)",
+      "cagr": 11.13,
+      "vol": 13.43,
+      "sharpe": 0.829,
+      "mdd": -30.37,
+      "calmar": 0.367,
+      "sortino": 1.072,
+      "n_days": 4589,
+      "n_years": 18.2
+    },
+    "50/50 SPY/GLD (Baseline)": {
+      "name": "50/50 SPY/GLD (Baseline)",
+      "cagr": 10.78,
+      "vol": 13.69,
+      "sharpe": 0.788,
+      "mdd": -32.49,
+      "calmar": 0.332,
+      "sortino": 1.0,
+      "n_days": 4589,
+      "n_years": 18.2
+    },
+    "SPY Buy-Hold": {
+      "name": "SPY Buy-Hold",
+      "cagr": 10.39,
+      "vol": 19.88,
+      "sharpe": 0.523,
+      "mdd": -51.87,
+      "calmar": 0.2,
+      "sortino": 0.638,
+      "n_days": 4589,
+      "n_years": 18.2
+    }
+  },
+  "dm_tests_vs_12vix": {
+    "Equal-Weight Multi-Premia": {
+      "t_stat": -0.198,
+      "p_value": 0.8429
+    },
+    "Regime-Rotated Multi-Premia": {
+      "t_stat": -0.312,
+      "p_value": 0.755
+    },
+    "Carry-Weighted Multi-Premia": {
+      "t_stat": -0.119,
+      "p_value": 0.9055
+    }
+  },
+  "cross_oos_5_periods": {
+    "Equal-Weight Multi-Premia": [
+      {
+        "period": "2010-2011",
+        "strategy_sharpe": 1.019,
+        "baseline_sharpe": 1.018,
+        "win": true
+      },
+      {
+        "period": "2012-2013",
+        "strategy_sharpe": 0.064,
+        "baseline_sharpe": 0.384,
+        "win": false
+      },
+      {
+        "period": "2014-2015",
+        "strategy_sharpe": -0.222,
+        "baseline_sharpe": 0.067,
+        "win": false
+      },
+      {
+        "period": "2016-2017",
+        "strategy_sharpe": 1.895,
+        "baseline_sharpe": 2.008,
+        "win": false
+      },
+      {
+        "period": "2020-2021",
+        "strategy_sharpe": 0.946,
+        "baseline_sharpe": 1.064,
+        "win": false
+      }
+    ],
+    "Regime-Rotated Multi-Premia": [
+      {
+        "period": "2010-2011",
+        "strategy_sharpe": 0.963,
+        "baseline_sharpe": 1.018,
+        "win": false
+      },
+      {
+        "period": "2012-2013",
+        "strategy_sharpe": 0.059,
+        "baseline_sharpe": 0.384,
+        "win": false
+      },
+      {
+        "period": "2014-2015",
+        "strategy_sharpe": -0.293,
+        "baseline_sharpe": 0.067,
+        "win": false
+      },
+      {
+        "period": "2016-2017",
+        "strategy_sharpe": 1.829,
+        "baseline_sharpe": 2.008,
+        "win": false
+      },
+      {
+        "period": "2020-2021",
+        "strategy_sharpe": 0.719,
+        "baseline_sharpe": 1.064,
+        "win": false
+      }
+    ],
+    "Carry-Weighted Multi-Premia": [
+      {
+        "period": "2010-2011",
+        "strategy_sharpe": 1.008,
+        "baseline_sharpe": 1.018,
+        "win": false
+      },
+      {
+        "period": "2012-2013",
+        "strategy_sharpe": 0.109,
+        "baseline_sharpe": 0.384,
+        "win": false
+      },
+      {
+        "period": "2014-2015",
+        "strategy_sharpe": -0.205,
+        "baseline_sharpe": 0.067,
+        "win": false
+      },
+      {
+        "period": "2016-2017",
+        "strategy_sharpe": 1.905,
+        "baseline_sharpe": 2.008,
+        "win": false
+      },
+      {
+        "period": "2020-2021",
+        "strategy_sharpe": 0.988,
+        "baseline_sharpe": 1.064,
+        "win": false
+      }
+    ]
+  },
+  "common_start_results": {
+    "Equal-Weight Multi-Premia": {
+      "name": "Equal-Weight Multi-Premia",
+      "cagr": 26.46,
+      "vol": 13.69,
+      "sharpe": 1.933,
+      "mdd": -14.17,
+      "calmar": 1.868,
+      "sortino": 2.492,
+      "n_days": 811,
+      "n_years": 3.2
+    },
+    "Regime-Rotated Multi-Premia": {
+      "name": "Regime-Rotated Multi-Premia",
+      "cagr": 26.56,
+      "vol": 13.96,
+      "sharpe": 1.903,
+      "mdd": -14.5,
+      "calmar": 1.832,
+      "sortino": 2.473,
+      "n_days": 811,
+      "n_years": 3.2
+    },
+    "Carry-Weighted Multi-Premia": {
+      "name": "Carry-Weighted Multi-Premia",
+      "cagr": 26.29,
+      "vol": 13.55,
+      "sharpe": 1.94,
+      "mdd": -13.86,
+      "calmar": 1.897,
+      "sortino": 2.529,
+      "n_days": 811,
+      "n_years": 3.2
+    },
+    "12/VIX (Baseline)": {
+      "name": "12/VIX (Baseline)",
+      "cagr": 21.2,
+      "vol": 12.26,
+      "sharpe": 1.729,
+      "mdd": -10.84,
+      "calmar": 1.956,
+      "sortino": 2.34,
+      "n_days": 811,
+      "n_years": 3.2
+    },
+    "50/50 SPY/GLD (Baseline)": {
+      "name": "50/50 SPY/GLD (Baseline)",
+      "cagr": 25.82,
+      "vol": 12.83,
+      "sharpe": 2.013,
+      "mdd": -12.89,
+      "calmar": 2.004,
+      "sortino": 2.54,
+      "n_days": 811,
+      "n_years": 3.2
+    },
+    "SPY Buy-Hold": {
+      "name": "SPY Buy-Hold",
+      "cagr": 18.59,
+      "vol": 15.21,
+      "sharpe": 1.222,
+      "mdd": -18.76,
+      "calmar": 0.991,
+      "sortino": 1.654,
+      "n_days": 811,
+      "n_years": 3.2
+    }
+  },
+  "sensitivity_analysis": {
+    "-20%": {
+      "name": "Regime-Rotated (-20%)",
+      "cagr": 10.37,
+      "vol": 14.91,
+      "sharpe": 0.695,
+      "mdd": -30.55,
+      "calmar": 0.339,
+      "sortino": 0.901,
+      "n_days": 4589,
+      "n_years": 18.2
+    },
+    "Base": {
+      "name": "Regime-Rotated (Base)",
+      "cagr": 10.27,
+      "vol": 14.42,
+      "sharpe": 0.712,
+      "mdd": -30.53,
+      "calmar": 0.336,
+      "sortino": 0.924,
+      "n_days": 4589,
+      "n_years": 18.2
+    },
+    "+20%": {
+      "name": "Regime-Rotated (+20%)",
+      "cagr": 10.44,
+      "vol": 14.12,
+      "sharpe": 0.739,
+      "mdd": -29.79,
+      "calmar": 0.351,
+      "sortino": 0.959,
+      "n_days": 4589,
+      "n_years": 18.2
+    }
+  },
+  "weight_analysis": {
+    "Equal-Weight": {
+      "overall_spy_mean": 0.34,
+      "overall_spy_std": 0.114,
+      "Low_spy_mean": 0.442,
+      "Normal_spy_mean": 0.329,
+      "High_spy_mean": 0.196
+    },
+    "Regime-Rotated": {
+      "overall_spy_mean": 0.317,
+      "overall_spy_std": 0.162,
+      "Low_spy_mean": 0.493,
+      "Normal_spy_mean": 0.287,
+      "High_spy_mean": 0.096
+    },
+    "12/VIX": {
+      "overall_spy_mean": 0.682,
+      "overall_spy_std": 0.206,
+      "Low_spy_mean": 0.912,
+      "Normal_spy_mean": 0.644,
+      "High_spy_mean": 0.384
+    }
+  },
+  "variance_carry_analysis": {
+    "vrp_positive_pct": 83.8,
+    "vrp_mean": 3.57,
+    "vrp_std": 5.74
+  },
+  "regime_conditional_performance": {
+    "Low": {
+      "Equal-Weight Multi-Premia": {
+        "ann_ret": 3.71,
+        "ann_vol": 9.47,
+        "sharpe": 0.004
+      },
+      "Regime-Rotated Multi-Premia": {
+        "ann_ret": 3.31,
+        "ann_vol": 9.35,
+        "sharpe": 0.004
+      },
+      "12/VIX (Baseline)": {
+        "ann_ret": 8.01,
+        "ann_vol": 8.23,
+        "sharpe": 0.01
+      },
+      "50/50 SPY/GLD (Baseline)": {
+        "ann_ret": 5.31,
+        "ann_vol": 8.66,
+        "sharpe": 0.006
+      }
+    },
+    "High": {
+      "Equal-Weight Multi-Premia": {
+        "ann_ret": 17.33,
+        "ann_vol": 21.68,
+        "sharpe": 0.008
+      },
+      "Regime-Rotated Multi-Premia": {
+        "ann_ret": 15.83,
+        "ann_vol": 22.64,
+        "sharpe": 0.007
+      },
+      "12/VIX (Baseline)": {
+        "ann_ret": 19.34,
+        "ann_vol": 21.4,
+        "sharpe": 0.009
+      },
+      "50/50 SPY/GLD (Baseline)": {
+        "ann_ret": 18.67,
+        "ann_vol": 22.76,
+        "sharpe": 0.008
+      }
+    },
+    "Normal": {
+      "Equal-Weight Multi-Premia": {
+        "ann_ret": 13.41,
+        "ann_vol": 12.62,
+        "sharpe": 0.011
+      },
+      "Regime-Rotated Multi-Premia": {
+        "ann_ret": 13.65,
+        "ann_vol": 13.07,
+        "sharpe": 0.01
+      },
+      "12/VIX (Baseline)": {
+        "ann_ret": 10.71,
+        "ann_vol": 12.19,
+        "sharpe": 0.009
+      },
+      "50/50 SPY/GLD (Baseline)": {
+        "ann_ret": 12.09,
+        "ann_vol": 11.65,
+        "sharpe": 0.01
+      }
+    }
+  },
+  "conclusions": [
+    "Best multi-premia strategy: Carry-Weighted Multi-Premia (Sharpe 0.773) vs 12/VIX (0.829) vs 50/50 (0.788)",
+    "DM tests: No strategy significantly beats 12/VIX",
+    "Cross-OOS Equal-Weight Multi-Premia: 1/5 beat 50/50",
+    "Cross-OOS Regime-Rotated Multi-Premia: 0/5 beat 50/50",
+    "Cross-OOS Carry-Weighted Multi-Premia: 0/5 beat 50/50",
+    "Variance Risk Premium positive 84% of days (mean VIX-RV = 3.6%)"
+  ]
+}

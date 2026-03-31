@@ -18089,5 +18089,78 @@
     "experiment_id": "K757b",
     "created_at": "2026-03-31T07:13:12.704711+00:00",
     "phase": "contagion_structure"
+  },
+  {
+    "id": "K758",
+    "title": "K758: Taiwan Investor Cross-Border Hedging — Practical Guide with Real Costs",
+    "content": "[提出: Claude (research_program I7), 執行: Claude] K758: Comprehensive analysis of FX hedging for Taiwan investors holding US equities. Data: SPY, 0050.TW, GLD, USDTWD=X, ^TNX 2010-2026 (4003 obs after cleaning yfinance FX corruption). KEY FINDINGS: (1) FX adds only 2.6pp to SPY vol (17.1%→19.7%); FX accounts for 24% of SPY(TWD) variance. (2) SPY-FX correlation near zero (0.002) but USD strengthens modestly in crashes (+1.4% annualized on worst 5% SPY days) — weak natural hedge. (3) Specific crises: 2022 rate hike USD/TWD +14.9% cushioned SPY -24.5% to only -13.3% in TWD; COVID was neutral (+0.7%). (4) Full FX hedging costs 4.9%/yr retail (IR diff 1.1% + NDF spreads 3.6% + margin 0.12%), 1.9%/yr institutional. (5) Hedging HURTS Sharpe: unhedged SPY 0.801 vs hedged 0.736 (cost > benefit). (6) Best portfolio: 20% 0050 + 50% SPY + 30% GLD with 50% hedge → Sharpe 0.963, but even 0% hedge version scores 0.937. (7) Grid search 330 combos: optimal allocation robust at 10-20% 0050 + 40-60% SPY + 30-40% GLD. (8) Sub-period: 33/33/33 most stable across all 4 periods; hedging helps in low-rate eras, hurts in USD appreciation eras. (9) Practical rec for retail TW investors: 50% 0050 + 30% SPY + 20% GLD, NO FX hedge — too expensive. Confirms R14's 'do not hedge' conclusion with much more granular cost analysis. LIMITATIONS: yfinance FX data has corruption (cleaned), TNX as US rate proxy imperfect, TW deposit rate assumed flat 1.5%, NDF spreads are estimates.",
+    "tags": [
+      "taiwan",
+      "FX-hedging",
+      "cross-border",
+      "USD-TWD",
+      "portfolio-optimization",
+      "SPY",
+      "0050.TW",
+      "GLD",
+      "practical-guide",
+      "hedging-cost"
+    ],
+    "data_source": "yfinance (SPY, 0050.TW, GLD, USDTWD=X, ^TNX, ^VIX), 2010-2026",
+    "experiment_file": "experiments/k758_tw_cross_border_hedge.py",
+    "results_file": "experiments/k758_tw_cross_border_hedge_results.json",
+    "created_at": "2026-03-31T15:30:00.000000+08:00",
+    "phase": "Phase_Taiwan_CrossBorder"
+  },
+  {
+    "id": "K760",
+    "experiment_id": "K760",
+    "title": "K760: Alt Risk Premia Rotation NULL — Multi-factor vol strategies (variance carry + skew + equity + safe haven) all underperform 12/VIX",
+    "content": "[提出: Codex (7th suggestion), 執行: Claude] K760: ALTERNATIVE RISK PREMIA ROTATION. Data: yfinance SPY/GLD/VIX/VIX3M 2007-2026 (4840 days). Hypothesis: harvesting 4 vol risk premia (variance carry, skew/term structure, equity, safe haven) and rotating by VIX regime can beat 12/VIX. 4 signals: (1) Variance Carry = (VIX-RV22d)/VIX mean=0.241 (2) Term Structure = max(0, 1-VIX/VIX3M) mean=0.099 (3) Equity = 12/VIX mean=0.682 (4) Safe Haven = 1-equity. 3 regimes: Low VIX<15 (32%), Normal 15-25 (50%), High >25 (18%). 3 strategies tested: Equal-Weight (Sharpe 0.762), Regime-Rotated (0.712), Carry-Weighted (0.773) — ALL below 12/VIX (0.829) and 50/50 (0.788). DM tests: all NS (p>0.75). Cross-OOS: 0-1/5 periods beat 50/50. KEY INSIGHT: variance carry and term structure signals are tiny (mean 0.24 and 0.10) vs 12/VIX (0.68) — averaging them dilutes the equity signal, reducing SPY allocation from 68% to 34%. This is effectively a MORE CONSERVATIVE portfolio, not a smarter one. VRP analysis: VIX>RV 84% of days (mean premium 3.6%), SPY returns +14%/yr when VRP>0 vs -1.9%/yr when VRP<=0, but t=1.29 (NS). Sensitivity: ±20% threshold change only ±3.8% Sharpe change (stable but still loses). COMMON_START 2023-2026: multi-premia Sharpe 1.90-1.94 vs 12/VIX 1.73, but 50/50 still best at 2.01. Confirms K175 (rotation adds noise) and T13 (VIX term structure no incremental value for VT). The fundamental problem: mixing 4 weak-to-moderate signals doesn't create a strong signal — it creates signal dilution. 12/VIX's simplicity IS its strength.",
+    "evidence": [
+      "Equal-Weight Multi-Premia Sharpe 0.762 vs 12/VIX 0.829 vs 50/50 0.788",
+      "Regime-Rotated Sharpe 0.712, Carry-Weighted 0.773",
+      "DM test all NS: t=-0.12 to -0.31, p>0.75",
+      "Cross-OOS: 0-1/5 beat 50/50",
+      "Signal means: variance_carry 0.241, term_structure 0.099, 12/VIX 0.682",
+      "Multi-premia avg SPY weight 0.34 vs 12/VIX 0.68 — signal dilution",
+      "VRP positive 84% of days, mean 3.6% (VIX-RV22d)",
+      "Sensitivity: ±20% threshold → ±3.8% Sharpe change (stable)"
+    ],
+    "tags": [
+      "alt_risk_premia",
+      "variance_carry",
+      "skew_premium",
+      "term_structure",
+      "regime_rotation",
+      "12/VIX",
+      "null_result",
+      "signal_dilution",
+      "VRP"
+    ],
+    "category": "strategy_evaluation",
+    "data_source": "yfinance (SPY, GLD, ^VIX, ^VIX3M) 2007-2026",
+    "created_at": "2026-03-31T07:54:37.210861+00:00",
+    "importance": 2,
+    "references": [
+      "Ilmanen (2011) Expected Returns",
+      "Carr & Wu (2009) Variance Risk Premiums, RFS",
+      "K175: Cross-asset rotation < Fixed allocation",
+      "K43: VIX3M overlay NULL",
+      "T13: Term structure vol predictor but no VT gain"
+    ]
+  },
+  {
+    "id": "K760-review",
+    "title": "Codex Review K760 (GPT-5.4): 0 HIGH, 4/4 LOW — cleanest review of session",
+    "content": "[提出: Codex rescue GPT-5.4, 執行: Claude] K760 review: ALL PASS. shift(1) correct for all signals + regime. TX both legs (dw_spy + dw_gld). No regime lookahead. VIX3M dropna not ffill. NULL conclusion fully validated.",
+    "tags": [
+      "codex-review",
+      "K760",
+      "clean"
+    ],
+    "phase": "research",
+    "importance": 2,
+    "timestamp": "2026-03-31T07:57:02.618805+00:00"
   }
 ]
