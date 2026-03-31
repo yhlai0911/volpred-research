@@ -451,5 +451,17 @@
     ],
     "lesson_type": "session_methodology_summary",
     "timestamp": "2026-03-30T14:51:10.523898+00:00"
+  },
+  {
+    "id": "E34",
+    "title": "Cross-listed vol spread predicts domestic vol but not returns — K792 confirms K506 pattern",
+    "content": "跨市場掛牌的 vol spread（如 EWT/0050 vol ratio）具有統計上顯著的 Granger 因果和預測迴歸能力，但無法預測報酬方向、無法作為有利的 VT overlay。\n具體教訓：\n1. 顯著的 Granger 因果（F=28, p<0.0001）≠ 有用的交易訊號。統計顯著性和經濟可利用性必須分開評估。\n2. vol_ratio 預測「波動率何時會下降」（β<0，高 ratio 後 rv_tw50 降低），但這不代表可以提高 VT 報酬。\n3. 把 vol spread 疊加在 VT 策略上時，會降低 Sharpe（1.346 vs 1.502），因為它讓策略在 vol 即將降低時減少部位。\n4. 方向：β=-0.089 代表高 EWT vol ratio → 0050 vol 下降（均值回歸），這對 VT 不是好訊號。\n5. 與 K506（cross-OOS FAIL）、K697（VIX 預測量不預測方向）一致——波動率預測力和交易利用性不等價。\n6. 正確工作流程：先做 Granger + 預測迴歸確認訊號性質，再做策略測試。不要直接跳進策略。",
+    "source_experiments": [
+      "K506",
+      "K792",
+      "K697"
+    ],
+    "lesson_type": "signal_vs_strategy",
+    "timestamp": "2026-03-31T17:38:05.599601+00:00"
   }
 ]
