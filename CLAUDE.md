@@ -563,7 +563,14 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 | AI | 角色 | 使用方式 | 擅長 |
 |---|---|---|---|
 | **Claude**（主研究員）| 實驗執行、分析、記憶管理、論文寫作 | 直接執行 | 深度分析、code、持續研究 |
-| **Codex (GPT)**| 嚴格審查、策略建議、新方向 | `/codex:rescue`（plugin）或 `codex exec`（CLI fallback） | 找漏洞、結構性問題、editorial advice |
+| **Codex (GPT)**| 針對性審查、第二意見、新方向 | `/codex:rescue`、`/codex:review`、`codex exec` | 找漏洞、結構性問題、editorial advice |
+
+**Codex 使用原則：針對特定目標，不掃全專案。**
+- ✅ 審查單一實驗腳本：`/codex:rescue "Review experiments/kXXX.py for bugs"`
+- ✅ 論文特定 section 第二意見：`codex exec "Check Section 3 methodology..."`
+- ✅ 代碼 bug 診斷：`/codex:rescue "Why does this function return wrong value?"`
+- ❌ 不要用 `/codex:review --scope working-tree`（掃整個專案，浪費資源）
+- ❌ 不要無目標地「讓 Codex 看看」——必須有具體問題或檔案
 | **Gemini** | 方法論建議、文獻連結、robustness 建議 | `/gemini-cli` | 學術框架、cross-reference、新測試建議 |
 
 ### 協作場景
