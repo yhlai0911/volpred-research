@@ -1,0 +1,517 @@
+{
+  "experiment_id": "K746b",
+  "title": "Bitcoin Volatility and VIX \u2014 Crypto Fear Channel (Fixed Methodology)",
+  "timestamp": "2026-03-31T04:54:37.194289+00:00",
+  "data_source": "yfinance (BTC-USD, SPY, GLD, ^VIX)",
+  "data_period": "2015-02-04 to 2026-03-27",
+  "n_obs": 2803,
+  "flag": "FIXED \u2014 corrects K746 Granger + structural break methodology",
+  "proposer": "Codex (K746 review)",
+  "executor": "Claude",
+  "fixes_applied": {
+    "fix1_granger_target": "Changed from backward 22d RV to forward |r_{t+1}| (non-overlapping)",
+    "fix2_fisher_z_variable": "Changed from BTC-SPY return corr to VIX-BTC_RV corr",
+    "fix3_andrews_test": "Added Andrews (1993) sup-Wald unknown-breakpoint test (vs hardcoded 2021)",
+    "fix4_lag_selection": "AIC-optimal lag selection (not min-p cherry-picking)",
+    "fix5_benchmark": "Added VIX->SPY vol benchmark Granger test"
+  },
+  "part_a_descriptive": {
+    "BTC": {
+      "n_obs": 2824,
+      "ann_return_pct": 61.18692123976648,
+      "ann_vol_pct": 66.70206941596769,
+      "skewness": 0.010078785870918153,
+      "kurtosis": 6.693705615945431,
+      "min_daily_pct": -37.169538560117076,
+      "max_daily_pct": 25.24716942763181,
+      "adf_stat": -29.365299843813023,
+      "adf_pval": 0.0
+    },
+    "SPY": {
+      "n_obs": 2824,
+      "ann_return_pct": 12.457240514943212,
+      "ann_vol_pct": 17.710057533897526,
+      "skewness": -0.30794188220614105,
+      "kurtosis": 14.10927086484524,
+      "min_daily_pct": -10.942376229594885,
+      "max_daily_pct": 10.50192812545172,
+      "adf_stat": -17.307208518202085,
+      "adf_pval": 5.582502295709465e-30
+    },
+    "GLD": {
+      "n_obs": 2824,
+      "ann_return_pct": 12.206619343226244,
+      "ann_vol_pct": 15.785000326230206,
+      "skewness": -0.5027998414392253,
+      "kurtosis": 7.31976116648571,
+      "min_daily_pct": -10.274245274560045,
+      "max_daily_pct": 6.358720612372104,
+      "adf_stat": -38.88836789772067,
+      "adf_pval": 0.0
+    }
+  },
+  "part_b_correlations": {
+    "VIX vs BTC RV": {
+      "pearson_r": 0.17783248568223836,
+      "pearson_p": 2.38787640942055e-21,
+      "spearman_r": 0.06561495464233452,
+      "spearman_p": 0.0005088132258626469
+    },
+    "VIX vs SPY RV": {
+      "pearson_r": 0.8051064104640662,
+      "pearson_p": 0.0,
+      "spearman_r": 0.7683365786002899,
+      "spearman_p": 0.0
+    },
+    "BTC RV vs SPY RV": {
+      "pearson_r": 0.2491682170844765,
+      "pearson_p": 6.230565818998165e-41,
+      "spearman_r": 0.09563036812314608,
+      "spearman_p": 3.929047417869359e-07
+    }
+  },
+  "part_b_granger_fixed": {
+    "VIX_to_BTC_absret": {
+      "1": {
+        "F": 2.8896889124221032,
+        "p": 0.0892592797981965,
+        "AIC": -11571.07406178386
+      },
+      "2": {
+        "F": 2.279978640722167,
+        "p": 0.1024765995747103,
+        "AIC": -11601.756049728043
+      },
+      "3": {
+        "F": 1.1590109414531613,
+        "p": 0.3239547062952751,
+        "AIC": -11628.725562122134
+      },
+      "4": {
+        "F": 3.4061297206439076,
+        "p": 0.008701776851031977,
+        "AIC": -11654.537393796869
+      },
+      "5": {
+        "F": 2.6635944114593353,
+        "p": 0.02077915319653659,
+        "AIC": -11665.331194701757
+      },
+      "6": {
+        "F": 2.698479967876162,
+        "p": 0.012942938372974718,
+        "AIC": -11663.593447544306
+      },
+      "7": {
+        "F": 2.5487803592431306,
+        "p": 0.012903586451557075,
+        "AIC": -11668.50988238855
+      },
+      "8": {
+        "F": 2.4884515805879226,
+        "p": 0.010886819939841691,
+        "AIC": -11668.182426176738
+      },
+      "9": {
+        "F": 2.3377867702766437,
+        "p": 0.012707771770200795,
+        "AIC": -11662.35378795261
+      },
+      "10": {
+        "F": 2.1393780942784253,
+        "p": 0.018828852600939354,
+        "AIC": -11656.760582958881
+      },
+      "aic_best_lag": 7,
+      "aic_best_p": 0.012903586451557075
+    },
+    "BTC_absret_to_dVIX": {
+      "1": {
+        "F": 14.819265481222736,
+        "p": 0.00012096905800267013,
+        "AIC": 11614.250755649711
+      },
+      "2": {
+        "F": 8.471334559813874,
+        "p": 0.0002148088110519287,
+        "AIC": 11612.694636413164
+      },
+      "3": {
+        "F": 5.90204058213968,
+        "p": 0.0005185130671515885,
+        "AIC": 11611.63742594995
+      },
+      "4": {
+        "F": 4.084763026346203,
+        "p": 0.0026452069627826186,
+        "AIC": 11596.068890408684
+      },
+      "5": {
+        "F": 4.326634930224091,
+        "p": 0.0006343089900412631,
+        "AIC": 11591.449663925632
+      },
+      "6": {
+        "F": 5.291663838864741,
+        "p": 1.952678495975438e-05,
+        "AIC": 11578.427678926404
+      },
+      "7": {
+        "F": 4.5745747160357775,
+        "p": 4.2976705346440546e-05,
+        "AIC": 11578.510511300443
+      },
+      "8": {
+        "F": 3.8832873374071237,
+        "p": 0.00014476016888356947,
+        "AIC": 11563.86775175603
+      },
+      "9": {
+        "F": 3.7181846891573866,
+        "p": 0.00011815035194829181,
+        "AIC": 11557.317176584442
+      },
+      "10": {
+        "F": 3.338392453027465,
+        "p": 0.0002489521850679021,
+        "AIC": 11556.371644911305
+      },
+      "aic_best_lag": 10,
+      "aic_best_p": 0.0002489521850679021
+    },
+    "VIX_to_SPY_absret_benchmark": {
+      "1": {
+        "F": 739.3576082016826,
+        "p": 1.1228793556056373e-144,
+        "AIC": -19819.082595243814
+      },
+      "2": {
+        "F": 225.9790939547545,
+        "p": 1.0655620235135276e-91,
+        "AIC": -19827.672441242074
+      },
+      "3": {
+        "F": 113.61607716983697,
+        "p": 2.040758108279268e-69,
+        "AIC": -19831.938739322028
+      },
+      "4": {
+        "F": 72.36291981463086,
+        "p": 2.0818797772441684e-58,
+        "AIC": -19846.74781479698
+      },
+      "5": {
+        "F": 61.990566912693055,
+        "p": 1.9004502129186676e-61,
+        "AIC": -19871.19070373844
+      },
+      "6": {
+        "F": 50.11387372198036,
+        "p": 9.31546501405624e-59,
+        "AIC": -19873.480500281716
+      },
+      "7": {
+        "F": 44.46214522481235,
+        "p": 6.15618706689334e-60,
+        "AIC": -19876.368534952573
+      },
+      "8": {
+        "F": 39.49093169437425,
+        "p": 5.162350117414841e-60,
+        "AIC": -19883.494704255674
+      },
+      "9": {
+        "F": 36.090289587765,
+        "p": 6.524423512657366e-61,
+        "AIC": -19887.203590691657
+      },
+      "10": {
+        "F": 33.401162349665846,
+        "p": 6.992120154625147e-62,
+        "AIC": -19886.96392109056
+      },
+      "aic_best_lag": 9,
+      "aic_best_p": 6.524423512657366e-61
+    }
+  },
+  "part_b_rolling_corr_by_period": {
+    "Pre-2018 (early crypto)": 0.16050106183253424,
+    "2018 (crypto winter 1)": 0.005861707893618138,
+    "2019 (recovery)": 0.19876984363494002,
+    "2020 (COVID)": 0.48160867447093497,
+    "2021 (bull run)": 0.020538122517035726,
+    "2022 (crypto winter 2)": 0.07850789775958061,
+    "2023 (recovery 2)": 0.25541991601466973,
+    "2024-2026 (maturation)": 0.10664912074105223
+  },
+  "part_b_trend": {
+    "slope_per_day": -1.8372448414064503e-05,
+    "slope_per_year": -0.004629857000344254,
+    "t_stat": -2.432007571391378,
+    "p_value": 0.015083796449078937,
+    "increasing": false
+  },
+  "part_c_regime_stats": {
+    "Low(<15)": {
+      "n_days": 1039,
+      "btc_mean_daily_bps": 42.40726282358411,
+      "btc_vol_ann_pct": 66.62669440214263,
+      "spy_mean_daily_bps": 16.68753984568681,
+      "btc_spy_corr": 0.0670575004998843
+    },
+    "Normal(15-20)": {
+      "n_days": 919,
+      "btc_mean_daily_bps": 28.675049196269335,
+      "btc_vol_ann_pct": 53.31764027370571,
+      "spy_mean_daily_bps": 11.426141077169245,
+      "btc_spy_corr": 0.07633787345784197
+    },
+    "Elevated(20-25)": {
+      "n_days": 459,
+      "btc_mean_daily_bps": 34.86731028283011,
+      "btc_vol_ann_pct": 70.83882290150042,
+      "spy_mean_daily_bps": -5.111871579600415,
+      "btc_spy_corr": 0.2519133407779581
+    },
+    "High(25-35)": {
+      "n_days": 323,
+      "btc_mean_daily_bps": -3.0051263328480156,
+      "btc_vol_ann_pct": 72.59078469699918,
+      "spy_mean_daily_bps": -15.740199482186373,
+      "btc_spy_corr": 0.36863853751250353
+    },
+    "Extreme(>35)": {
+      "n_days": 63,
+      "btc_mean_daily_bps": -71.83439069099518,
+      "btc_vol_ann_pct": 116.96176160715706,
+      "spy_mean_daily_bps": -86.8432865907368,
+      "btc_spy_corr": 0.5692967408870893
+    }
+  },
+  "part_c_events": {
+    "COVID crash (2020-02-20 to 2020-03-23)": {
+      "btc_return_pct": -33.39502369485678,
+      "spy_return_pct": -33.717271363429965,
+      "vix_mean": 47.81652189337689,
+      "btc_spy_corr": 0.6141464558292317,
+      "classification": "COUPLED",
+      "n_days": 23
+    },
+    "Post-COVID rally (2020-04 to 2020-08)": {
+      "btc_return_pct": 81.41738149710038,
+      "spy_return_pct": 36.11915603177571,
+      "vix_mean": 30.60632081301707,
+      "btc_spy_corr": 0.32580147827193917,
+      "classification": "COUPLED",
+      "n_days": 106
+    },
+    "BTC bull peak (2021-10 to 2021-11)": {
+      "btc_return_pct": 30.176435972482587,
+      "spy_return_pct": 6.1564852643629875,
+      "vix_mean": 18.18476191021147,
+      "btc_spy_corr": 0.33626530190919063,
+      "classification": "COUPLED",
+      "n_days": 42
+    },
+    "Crypto winter (2022-05 to 2022-07)": {
+      "btc_return_pct": -38.34565866544444,
+      "spy_return_pct": 0.4295312877688806,
+      "vix_mean": 27.513387218598396,
+      "btc_spy_corr": 0.5901272153690993,
+      "classification": "COUPLED",
+      "n_days": 62
+    },
+    "FTX collapse (2022-11-01 to 2022-11-30)": {
+      "btc_return_pct": -16.23362514908755,
+      "spy_return_pct": 5.559167241541663,
+      "vix_mean": 23.436190650576638,
+      "btc_spy_corr": 0.664400295939189,
+      "classification": "COUPLED",
+      "n_days": 21
+    },
+    "SVB crisis (2023-03-08 to 2023-03-15)": {
+      "btc_return_pct": 9.70393236175342,
+      "spy_return_pct": -2.257251234050228,
+      "vix_mean": 23.81833330790202,
+      "btc_spy_corr": 0.31978537390940964,
+      "classification": "COUPLED",
+      "n_days": 6
+    },
+    "BTC ETF approval rally (2024-01)": {
+      "btc_return_pct": 1.147767184566062,
+      "spy_return_pct": 1.5926365669577613,
+      "vix_mean": 13.395238149733771,
+      "btc_spy_corr": 0.1833212168045164,
+      "classification": "MIXED",
+      "n_days": 21
+    }
+  },
+  "part_d_static_allocations": {
+    "BTC_0pct": {
+      "weights": "SPY 50% / GLD 50% / BTC 0%",
+      "ann_return_pct": 12.896534986270991,
+      "ann_vol_pct": 12.162752073730179,
+      "sharpe": 1.0603303354448603,
+      "max_dd_pct": -20.315126821288743
+    },
+    "BTC_2pct": {
+      "weights": "SPY 49% / GLD 49% / BTC 2%",
+      "ann_return_pct": 14.238690557481881,
+      "ann_vol_pct": 12.283574644670626,
+      "sharpe": 1.1591650614228575,
+      "max_dd_pct": -20.509024983495028
+    },
+    "BTC_5pct": {
+      "weights": "SPY 48% / GLD 48% / BTC 5%",
+      "ann_return_pct": 16.245899790615127,
+      "ann_vol_pct": 12.707030873651146,
+      "sharpe": 1.2784969165615279,
+      "max_dd_pct": -20.809249734210454
+    },
+    "BTC_10pct": {
+      "weights": "SPY 45% / GLD 45% / BTC 10%",
+      "ann_return_pct": 19.571242178067937,
+      "ann_vol_pct": 13.982530085636972,
+      "sharpe": 1.3996924775561013,
+      "max_dd_pct": -23.779880390656448
+    },
+    "BTC_15pct": {
+      "weights": "SPY 42% / GLD 42% / BTC 15%",
+      "ann_return_pct": 22.865076429349674,
+      "ann_vol_pct": 15.813288080677182,
+      "sharpe": 1.4459406742415148,
+      "max_dd_pct": -27.134386460917725
+    },
+    "BTC_20pct": {
+      "weights": "SPY 40% / GLD 40% / BTC 20%",
+      "ann_return_pct": 26.11978866683573,
+      "ann_vol_pct": 18.03095756204187,
+      "sharpe": 1.4486079608895637,
+      "max_dd_pct": -30.68194665380648
+    }
+  },
+  "part_d_vix_conditioned": {
+    "BTC_5pct_VIXcond": {
+      "base_btc_pct": 5,
+      "ann_return_pct": 15.552545415399921,
+      "ann_vol_pct": 12.472735073433308,
+      "sharpe": 1.246923415260102,
+      "max_dd_pct": -20.289635578894416,
+      "n_days_btc_reduced": 385,
+      "total_tx_cost_pct": 1.09,
+      "lag": "signal.shift(1) \u2014 VIX from t-1 applied at t"
+    },
+    "BTC_10pct_VIXcond": {
+      "base_btc_pct": 10,
+      "ann_return_pct": 18.165774651761947,
+      "ann_vol_pct": 13.438998034493125,
+      "sharpe": 1.351720909932189,
+      "max_dd_pct": -20.627203393565587,
+      "n_days_btc_reduced": 385,
+      "total_tx_cost_pct": 2.18,
+      "lag": "signal.shift(1) \u2014 VIX from t-1 applied at t"
+    }
+  },
+  "part_d_baseline_5050": {
+    "ann_return_pct": 12.896534986270991,
+    "ann_vol_pct": 12.162752073730179,
+    "sharpe": 1.0603303354448603,
+    "max_dd_pct": -20.315126821288743
+  },
+  "part_e_tail_dependence": {
+    "n_spy_crash_days": 97,
+    "btc_mean_crash_days_pct": -3.030107577074395,
+    "btc_mean_normal_days_pct": 0.4076623532279138,
+    "btc_also_negative_pct": 71.1340206185567,
+    "t_stat": -8.132449486169287,
+    "p_value": 6.250779955038742e-16
+  },
+  "part_e_vix_on_btc_crash": {
+    "n_btc_crash_days": 201,
+    "vix_mean_btc_crash": 19.768905478330392,
+    "vix_mean_normal": 18.257286715745742,
+    "t_stat": 2.9068637961738637,
+    "p_value": 0.00367939050198528
+  },
+  "part_f_structural_break_fixed": {
+    "Pre-2021": {
+      "n_days": 1489,
+      "btc_spy_daily_corr": 0.13761618998822175,
+      "btc_ann_vol_pct": 71.06010543697008,
+      "vix_btcrv_corr": 0.1722145646685681
+    },
+    "2021+": {
+      "n_days": 1314,
+      "btc_spy_daily_corr": 0.37107470444436075,
+      "btc_ann_vol_pct": 58.93992189767887,
+      "vix_btcrv_corr": 0.28987223074348517
+    },
+    "fisher_z_test_vix_btcrv": {
+      "variable": "VIX vs BTC_RV22 correlation",
+      "pre_2021_corr": 0.1722145646685681,
+      "post_2021_corr": 0.28987223074348517,
+      "z_stat": -3.2851841692475734,
+      "p_value": 0.0010191573072195759,
+      "significant": true,
+      "note": "FIXED: now tests VIX-BTC_RV corr (not BTC-SPY return corr as in K746)"
+    },
+    "fisher_z_test_btc_spy_ref": {
+      "variable": "BTC vs SPY daily return correlation (reference only)",
+      "pre_2021_corr": 0.13761618998822175,
+      "post_2021_corr": 0.37107470444436075,
+      "z_stat": -6.628863010520864,
+      "p_value": 3.3828273515723595e-11,
+      "significant": true
+    },
+    "andrews_sup_wald": {
+      "sup_wald_stat": 162.47806477713291,
+      "estimated_break_date": "2022-08-10",
+      "trim_pct": 0.15,
+      "cv_10pct": 7.1,
+      "cv_5pct": 8.7,
+      "cv_1pct": 12.2,
+      "significance": "p < 0.01 ***",
+      "pre_break_vix_btcrv_corr": 0.1898655945996502,
+      "post_break_vix_btcrv_corr": 0.13991403188560383,
+      "pre_break_n": 1893,
+      "post_break_n": 911,
+      "note": "Andrews (1993) unknown-breakpoint test on VIX-BTC_RV regression"
+    }
+  },
+  "summary": {
+    "methodology_fixes": {
+      "fix1": "Granger target changed from backward 22d RV to forward |r_{t+1}| (non-overlapping)",
+      "fix2": "Fisher z-test now on VIX-BTC_RV corr (not BTC-SPY return corr)",
+      "fix3": "Added Andrews (1993) sup-Wald unknown-breakpoint test",
+      "fix4": "Lag selection via AIC (not min-p cherry-picking)",
+      "fix5": "Added VIX\u2192SPY benchmark Granger test for comparison"
+    },
+    "Q1_VIX_predicts_BTC_vol": true,
+    "Q1_VIX_to_BTC_aic_p": 0.012903586451557075,
+    "Q2_BTC_vol_predicts_VIX": true,
+    "Q2_BTC_to_VIX_aic_p": 0.0002489521850679021,
+    "benchmark_VIX_predicts_SPY_vol": true,
+    "benchmark_VIX_to_SPY_aic_p": 6.524423512657366e-61,
+    "Q3_correlation_increasing": false,
+    "Q3_trend_slope_per_year": -0.004629857000344254,
+    "Q4_best_static_BTC_allocation": "BTC_20pct",
+    "Q4_best_static_sharpe": 1.4486079608895637,
+    "full_sample_VIX_BTC_RV_corr": 0.17783248568223836,
+    "btc_also_crashes_on_spy_crash_pct": 71.1340206185567,
+    "structural_break_fisher_z_significant": true,
+    "structural_break_andrews_significance": "p < 0.01 ***",
+    "structural_break_andrews_date": "2022-08-10",
+    "key_question": "Does asymmetric Granger causality (BTC vol -> VIX) survive with forward-looking target?",
+    "answer": "VIX\u2192BTC: YES (p=0.012903586451557075), BTC\u2192VIX: YES (p=0.0002489521850679021)"
+  },
+  "references": [
+    "K746: Original experiment (methodology issues identified by Codex)",
+    "K66: 5% BTC improves portfolio Sharpe (prior VolPred result)",
+    "K445: BTC inverse leverage effect (prior VolPred result)",
+    "Andrews (1993) \"Tests for Parameter Instability and Structural Change\" Econometrica",
+    "Hansen (1997) \"Approximate Asymptotic P Values for Structural-Change Tests\" JBES",
+    "Baur & Dimpfl (2018) Economics Letters \u2014 BTC volatility",
+    "Bouri et al. (2017) Finance Research Letters \u2014 BTC as hedge/safe haven",
+    "Conlon & McGee (2020) Finance Research Letters \u2014 BTC during COVID"
+  ]
+}
