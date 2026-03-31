@@ -18240,5 +18240,40 @@
     "phase": "research",
     "importance": 4,
     "timestamp": "2026-03-31T17:42:30.000000+00:00"
+  },
+  {
+    "item_id": "k766_bsi",
+    "category": "portfolio_strategy",
+    "id": "K766",
+    "title": "K766: ★★ Bond Stress Index (BSI) — Sharpe 1.04 net, MDD -17%, Cross-OOS 5/5, but DM NS",
+    "content": "[提出: Codex GPT-5.4 8th suggestion #2, 執行: Claude] Composite Bond Stress Index from 4 non-VIX features: HYG-LQD credit spread, TLT 20d RV, TLT-SHY slope, SPY-TLT 60d corr. BSI > 75th pct → defensive (30% SPY + 35% GLD + 35% SHY), BSI < 25th → risk-on (12/VIX SPY weight), else 50/50. Monthly rebal with daily stress override. Net Sharpe 1.041 vs 12/VIX 0.902 vs 50/50 0.872. MDD -17.1% vs -23.2% vs -26.0%. Cross-OOS 5/5 vs both benchmarks. BUT DM test NS (t=-0.27 vs 50/50, t=0.02 vs 12/VIX) — return difference not significant, improvement is risk reduction. Component analysis: HYG-LQD spread is strongest predictor (t=4.50). Regime: 44% stress, 38% neutral, 18% risk-on — very defensive. Sensitivity PASS (±20% → max 9.4% Sharpe drop). Key insight: bond stress IS informative for equity risk management even though it does not predict returns (corr ~0.01). Value is in drawdown insurance, consistent with K697 finding. First non-VIX signal to achieve 5/5 cross-OOS.",
+    "evidence": [],
+    "confidence": 0.82,
+    "tags": [
+      "bond-stress",
+      "credit-spread",
+      "de-risking",
+      "cross-OOS",
+      "non-VIX",
+      "drawdown-insurance",
+      "Codex-suggestion"
+    ],
+    "data_source": "yfinance daily (SPY, GLD, TLT, SHY, HYG, LQD, ^VIX)",
+    "created_at": "2026-03-31T17:45:34.045820"
+  },
+  {
+    "id": "K766-review",
+    "title": "Codex Review K766 (GPT-5.4): 1 HIGH (OOS contamination), 5/5 cross-OOS unreliable",
+    "content": "[提出: Codex rescue GPT-5.4] K766 review: (1) HIGH: BSI expanding_zscore + expanding quantile fit on full history before OOS slicing = future data leaks into signal. 5/5 cross-OOS unreliable. (2) MEDIUM: 50/50 benchmark frictionless. (3) LOW: shift(1) correct. (4) LOW: BSI construction backward-looking. MDD improvement direction likely correct but magnitude and 5/5 claim need fold-specific rebuild.",
+    "tags": [
+      "codex-review",
+      "K766",
+      "HIGH-severity",
+      "bond-stress",
+      "OOS-contamination"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "timestamp": "2026-03-31T09:48:38.460466+00:00"
   }
 ]
