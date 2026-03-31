@@ -165,7 +165,7 @@
 - [ ] **Conditional Dispersion Trade**：預測 correlation risk premium mispricing → index vs sector options。需 sector ETF options data。
 - [ ] **Regime-Switched Options Carry + Crash Filter**：不預測 vol，建 carry admission filter（term structure + skew + dealer gamma + liquidity）。只在結構有利時賣 premium。
 - [x] **Alt Risk Premia Rotation**：K760 NULL — 混合 4 弱信號=信號稀釋。12/VIX 簡單最強。Codex 4/4 PASS
-- [ ] **Action-First ML (Meta-Model)**：用 1300+ 實驗作 features，學 trading policy（long/short/flat/dispersion/carry）而非 vol forecast。Meta-labeling + contextual bandits。
+- [x] **Action-First ML (Meta-Model)**：K762 NULL — consensus=12/VIX 平滑版，不勝 50/50。Codex 2 HIGH（weight parsing + binary consensus）
 - **5% BTC 唯一統計顯著改善但尾部風險代價**（K66: p=0.014, 但 coskewness -0.50）
 - **Sector VT uniform**（K58: gamma 不預測行業 VT 效果）
 - **International VT universal**（K68: 13/13 市場 MDD 改善，US VIX 通用）
