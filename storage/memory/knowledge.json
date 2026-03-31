@@ -17848,5 +17848,38 @@
     "phase": "research",
     "importance": 5,
     "timestamp": "2026-03-30T15:39:24.892003+00:00"
+  },
+  {
+    "id": "K753",
+    "title": "K753: Market Liquidity as Volatility Predictor — Volume has small partial corr but NO strategy value",
+    "content": "[提出: Claude, 執行: Claude] SPY volume as vol predictor (2006-2026, N=5090). Part A: Volume-|ret| contemporaneous corr=0.333 (MDH confirmed), monotonic quintile pattern (Q1 0.50% → Q5 1.25%). Part B: Partial corr(volume→next |ret| | VIX)=0.089 (p<0.001) — statistically significant but economically tiny. Incremental R²=0.005 beyond VIX (0.325→0.331). DM test marginal (p=0.045). Volume change has zero predictive power (r=-0.009). Part C: \"Calm before storm\" NOT confirmed — volume drop → VIX spike lift only 1.19x (not actionable). Counterintuitively, EXTREME volume days have LOWEST subsequent VIX spike probability (12.6% vs 21% unconditional) — volume exhaustion effect. Part D: Volume strategy Sharpe 0.581 vs 12/VIX 0.729 vs 50/50 0.918 — volume strategy is WORST. Volume+VIX combo (0.626) also worse than VIX alone. Part E: Granger F-test not significant (p=0.132). Conclusion: Volume is a contemporaneous correlate of volatility (MDH) but VIX already prices this information. The tiny partial correlation (0.089) cannot translate into trading value. Refs: Lamoureux & Lastrapes (1990), Gallant et al. (1992), K710.",
+    "tags": [
+      "volume",
+      "liquidity",
+      "vol-predictor",
+      "VIX-sufficiency",
+      "MDH",
+      "calm-before-storm",
+      "null-result",
+      "partial-result"
+    ],
+    "data_source": "yfinance SPY/VIX 2006-2026",
+    "experiment_id": "k753",
+    "created_at": "2026-03-31T04:17:12.707158",
+    "importance": 2
+  },
+  {
+    "id": "K753-direction",
+    "title": "K753 new direction: Volume Exhaustion Effect — extreme volume predicts LOWER future VIX",
+    "content": "K753 found counterintuitive result: extreme volume days (>2x avg) have LOWEST subsequent VIX spike probability (12.6% vs 21% unconditional). This 'volume exhaustion' effect is opposite to 'calm before storm'. Could be exploitable: after extreme volume days, reduce hedging because VIX spike risk is lower. Needs dedicated experiment with proper OOS testing.",
+    "tags": [
+      "K753",
+      "new-direction",
+      "volume-exhaustion",
+      "liquidity"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-31T04:20:49.247061+00:00"
   }
 ]

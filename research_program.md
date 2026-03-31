@@ -810,43 +810,15 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### P2: 研究新方向
 
-**已完成（本 session K730-K736）：**
-- [x] MF2-GARCH（K621-K623）：實作困難，Codex 抓 5 bugs
-- [x] Window Size Sensitivity（K622）：w=1000-1500 sweet spot
-- [x] 月頻 VT 最佳化（K642）：US daily 最佳，TW monthly
-- [x] **K730 Cross-Asset Vol Momentum**：Granger-causal（6/8 sig）但 OOS 不可用，VIX sufficiency #25+
-- [x] **K731 VIX Term Structure**：不 lag-robust（衰減 0.757），VIX level 足夠
-- [x] **K732 Behavioral Sentiment**：partial r|VIX = 0.091，完全被 VIX 主導
-- [x] **K733 Regime Rebalancing**：Monthly 明確勝出（Net Sharpe 0.892），adaptive 反而更差
-- [x] **K734 VRP Trading**：學術顯著（t=3.51）但 R²<0.3%，不可交易
-- [x] **⚠️ K735 Drawdown Recovery**：描述性結果有效（22 episodes anatomy），但 Codex 抓到 2 HIGH bugs（fake OOS + predictor/target timing misalignment）。策略結果（+29% Sharpe）被 lookahead 污染，不可信。第 4 次 Codex 抓到 false breakthrough
-- [x] K736 Calendar Anomaly vs VT：VT ≠ calendar（R²=0.000），88% VIX level response
-- [x] K737 Max Diversification：50/50 SPY/GLD 勝 28 種多資產組合
-- [x] **★ K738 VT Insurance Cost-Benefit**：Codex 二審 PASS。γ≥4.5→VT，cost 3.49%/yr（12/VIX）、2.12%（EWMA）
-- [x] ⚠️ K739 Taiwan Cross-Val：2/4 generalizes（VIX suff + calendar NS），2/4 不同（20/80 配置 + daily rebalance）。Codex: holiday calendar bug
-- [x] **★ K740 Strategy Meta-Analysis**：簡單+多資產=最佳。複雜度 vs Sharpe ρ=0.149 NS。Piecewise Conservative 主導效率前緣
-- [x] K741 NFP Event Study：VIX≥25 時 NFP 效果消失（0.98x）。04/03 HOLD
-- [x] K742 Crowding Simulation：12/VIX 天生抗擠壓（concave 1/x），安全公開
-- [x] K743 Investor Behavior：FOMO(-58%) 比 Panic(-14%) 貴 5 倍
-- [x] K744 5-Min RV Validation：AC(1) gap 5.6x，data 94% clean
-- [x] K745 Pilot HAR-RV：Pipeline OK，HAR-ABS 暫勝（N=37），等 100+ OOS
-- [x] K746 Bitcoin×VIX：BTC 非避風港，coupling post-2021 增。Granger 方法待修
-- [x] Paper 1 更新：+K736/K738/K742/K743 → 53p
-
-**新方向（post-K749，2026-03-30 session 完成）：**
-- [x] **Asset selection**：K737 測 28 組合 + K747 ERC = 50/50 仍最佳
-- [x] **Risk budgeting**：K747 ERC = zero sophistication premium（Sharpe 1.795 vs 50/50 1.849, NS）
-- [x] **Simplicity premium**：K748 REJECTED — 設計品質 > 簡單性（修正 K740）
-- [x] **Macro signal**：K749 殖利率曲線被 VIX 吸收（partial r < 0.08）
-- [x] Paper 2 更新：+K739/K738 → 45p
-**從 K730-K752 實驗中衍生的新方向（2026-03-31 補充）：**
+**從 K730-K752 實驗中衍生的新方向（2026-03-31 補充，已完成項目見 `docs/research_archive/completed_phases_2026-03.md`）：**
 
 **高優先（有明確下一步）：**
 - [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較
 - [ ] **Fix K739 Taiwan holiday handling**：用 TW-only calendar 重做。跨市場研究必須用各自市場的交易日曆。影響：最佳配置 20/80 和 daily rebalancing 結論待驗證
 - [ ] **Fix K746 Granger methodology**：用 forward-looking RV（非 backward 22d RV）重做 BTC→VIX Granger 檢定。若仍顯著，可作為 Paper 6 方向
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
-- [ ] **K753 Liquidity-Vol**：進行中——測試交易量是否預測 vol（第 12 個 VIX sufficiency 角度）
+- [x] **K753 Liquidity-Vol**：NULL — partial r=0.089, VIX 已定價 volume。VIX sufficiency #12
+- [ ] **Volume Exhaustion Effect**：K753 發現極端成交量（>2x avg）後 VIX spike 機率反而最低（12.6% vs 21%）。反直覺，值得專門實驗
 - [ ] **VT Insurance 實務指南頁面**：K738 decision guide（γ≥4.5）已確認，做成網站互動工具（`/vt-calculator`）
 
 **中優先（新研究主題）：**
