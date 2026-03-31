@@ -1,0 +1,311 @@
+{
+  "experiment_id": "K772",
+  "title": "Overnight Volatility Component \u2014 Hansen & Lunde (2005) Decomposition",
+  "proposer": "\u7528\u6236",
+  "executor": "Claude",
+  "date": "2026-03-31",
+  "data_source": "yfinance (SPY OHLC)",
+  "methodology": "Return decomposition (overnight + intraday), expanding window (min 1000 obs, refit every 63), QLIKE, DM test with Harvey correction.",
+  "references": [
+    "Hansen & Lunde (2005) J.Applied Econometrics 20, 873-889",
+    "Corsi (2009) J.Financial Econometrics 7, 174-196",
+    "Patton (2011) J.Econometrics 160, 246-256",
+    "Engle & Gallo (2006) J.Econometrics 131, 3-27"
+  ],
+  "part_a_variance_decomposition": {
+    "n": 4840,
+    "date_range": "2007-01-03 to 2026-03-30",
+    "var_total": 0.00015407381573853853,
+    "var_overnight": 5.675909418499793e-05,
+    "var_intraday": 9.157012480146906e-05,
+    "cov_overnight_intraday": 2.8722983760357474e-06,
+    "corr_overnight_intraday": 0.039841430348610214,
+    "overnight_share": 0.3683889693581514,
+    "intraday_share": 0.5943263257454628,
+    "covariance_share": 0.037284704896385565,
+    "decomp_check_error": 1.759225224754255e-16,
+    "annualized_vol_total": 0.19704466896141015,
+    "annualized_vol_overnight": 0.11959637007292269,
+    "annualized_vol_intraday": 0.15190678539805325,
+    "descriptive_stats": {
+      "total": {
+        "mean": 0.0003823763273275719,
+        "std": 0.012412647410546169,
+        "skew": -0.29849889159979087,
+        "kurtosis": 13.93028717368662,
+        "min": -0.11588656005464254,
+        "max": 0.13557671477938582,
+        "mean_abs": 0.007956855799486224
+      },
+      "overnight": {
+        "mean": 0.0002806124949895946,
+        "std": 0.007533863164738123,
+        "skew": -1.4195091226449525,
+        "kurtosis": 24.810170417974916,
+        "min": -0.11035680114275638,
+        "max": 0.05951865300917957,
+        "mean_abs": 0.0046986171609733045
+      },
+      "intraday": {
+        "mean": 0.0001017638323379767,
+        "std": 0.009569228014916829,
+        "skew": -0.22761569643683743,
+        "kurtosis": 12.295070445282354,
+        "min": -0.09420710612492107,
+        "max": 0.10600474949073482,
+        "mean_abs": 0.006260470220797271
+      }
+    }
+  },
+  "part_b_time_varying": {
+    "window": 252,
+    "mean_overnight_fraction": 0.3646889697856079,
+    "std_overnight_fraction": 0.07807024791843106,
+    "min_overnight_fraction": 0.20179417185118995,
+    "max_overnight_fraction": 0.613738010387093,
+    "regime_stats": {
+      "low_vol": {
+        "mean_overnight_share": 0.3265789179940511,
+        "std_overnight_share": 0.0510348614694033,
+        "n": 1147
+      },
+      "mid_vol": {
+        "mean_overnight_share": 0.3766370091786648,
+        "std_overnight_share": 0.07025280266230044,
+        "n": 2294
+      },
+      "high_vol": {
+        "mean_overnight_share": 0.378902942791051,
+        "std_overnight_share": 0.09982214395780642,
+        "n": 1147
+      }
+    },
+    "yearly": {
+      "2008": 0.3251511148756707,
+      "2009": 0.28951927483728845,
+      "2010": 0.3539272697014171,
+      "2011": 0.3915948986456866,
+      "2012": 0.39807497884089765,
+      "2013": 0.34874748834812497,
+      "2014": 0.3045101647507442,
+      "2015": 0.3764717810254945,
+      "2016": 0.4782241966108157,
+      "2017": 0.33370574430937583,
+      "2018": 0.2512378312636979,
+      "2019": 0.31046604793793386,
+      "2020": 0.5278633024445696,
+      "2021": 0.4404901405016238,
+      "2022": 0.3131245580059168,
+      "2023": 0.34514272443775335,
+      "2024": 0.3752545300119046,
+      "2025": 0.3994653154672389,
+      "2026": 0.36632968361540535
+    }
+  },
+  "part_c_har_oc_regression": {
+    "har_rv2": {
+      "beta": [
+        3.403609153417759e-05,
+        -0.06024570065084006,
+        0.5870601956158708,
+        0.2539928961705862
+      ],
+      "se": [
+        8.104377893288538e-06,
+        0.1040052386710266,
+        0.18410127254360584,
+        0.13126136987162368
+      ],
+      "t_stats": [
+        4.199716743510175,
+        -0.5792564049720612,
+        3.1887894499850398,
+        1.935016345014504
+      ],
+      "r2": 0.22324884141171153,
+      "adj_r2": 0.22260316297564486,
+      "n": 4817
+    },
+    "har_oc": {
+      "beta": [
+        3.32344785571227e-05,
+        -0.00448015863899277,
+        0.46321860913109825,
+        0.2710301717960446,
+        0.1474500326312267
+      ],
+      "se": [
+        7.622528230047221e-06,
+        0.10253054706194666,
+        0.15281279343594206,
+        0.12177005386300871,
+        0.10087582419037763
+      ],
+      "t_stats": [
+        4.360033515666864,
+        -0.04369584253057734,
+        3.031281600943156,
+        2.2257538959533805,
+        1.461698417977255
+      ],
+      "r2": 0.22476358452581902,
+      "adj_r2": 0.22395789296951663,
+      "n": 4817
+    },
+    "r2_improvement": 0.0013547299938717616,
+    "overnight_t_stat": 1.461698417977255,
+    "overnight_significant_harvey": false
+  },
+  "part_d_model_comparison": {
+    "metrics": {
+      "gjr": {
+        "qlike": 1.5380489687729477,
+        "mse": 1.531981018731329e-07,
+        "n_valid": 3828
+      },
+      "ewma": {
+        "qlike": 1.6237882830182067,
+        "mse": 1.7225229769404333e-07,
+        "n_valid": 3828
+      },
+      "har_rv2": {
+        "qlike": 1.6731913979172608,
+        "mse": 1.660665305293281e-07,
+        "n_valid": 3828
+      },
+      "har_oc": {
+        "qlike": 1.6048408246018802,
+        "mse": 1.5981968042258271e-07,
+        "n_valid": 3828
+      },
+      "har_oc_ext": {
+        "qlike": 162893.00810526643,
+        "mse": 1.7434619261637346e-07,
+        "n_valid": 3828
+      },
+      "amem": {
+        "qlike": 1.5074107558003462,
+        "mse": 1.475130695281197e-07,
+        "n_valid": 3828
+      }
+    },
+    "ranking": [
+      "amem",
+      "gjr",
+      "har_oc",
+      "ewma",
+      "har_rv2",
+      "har_oc_ext"
+    ],
+    "dm_tests": {
+      "gjr_vs_ewma": {
+        "dm_stat": -4.751631357028456,
+        "p_value": 2.0178200639264787e-06,
+        "harvey_pass": true,
+        "better": "gjr",
+        "n_common": 3828
+      },
+      "gjr_vs_har_rv2": {
+        "dm_stat": -3.2603271529063913,
+        "p_value": 0.0011128377234073117,
+        "harvey_pass": true,
+        "better": "gjr",
+        "n_common": 3828
+      },
+      "gjr_vs_har_oc": {
+        "dm_stat": -6.618136298780391,
+        "p_value": 3.6375569223423554e-11,
+        "harvey_pass": true,
+        "better": "gjr",
+        "n_common": 3828
+      },
+      "gjr_vs_har_oc_ext": {
+        "dm_stat": -1.2401010285534064,
+        "p_value": 0.21493802859784505,
+        "harvey_pass": false,
+        "better": "gjr",
+        "n_common": 3828
+      },
+      "gjr_vs_amem": {
+        "dm_stat": 2.105541306815135,
+        "p_value": 0.035244215613001506,
+        "harvey_pass": false,
+        "better": "amem",
+        "n_common": 3828
+      },
+      "ewma_vs_har_rv2": {
+        "dm_stat": -1.1513850054850523,
+        "p_value": 0.24957387978237833,
+        "harvey_pass": false,
+        "better": "ewma",
+        "n_common": 3828
+      },
+      "ewma_vs_har_oc": {
+        "dm_stat": 0.9720616933348949,
+        "p_value": 0.3310198577704142,
+        "harvey_pass": false,
+        "better": "har_oc",
+        "n_common": 3828
+      },
+      "ewma_vs_har_oc_ext": {
+        "dm_stat": -1.2401003829057426,
+        "p_value": 0.21493826737667154,
+        "harvey_pass": false,
+        "better": "ewma",
+        "n_common": 3828
+      },
+      "ewma_vs_amem": {
+        "dm_stat": 4.558345819001482,
+        "p_value": 5.155809329693284e-06,
+        "harvey_pass": true,
+        "better": "amem",
+        "n_common": 3828
+      },
+      "har_rv2_vs_har_oc": {
+        "dm_stat": 1.7628769156133028,
+        "p_value": 0.07792125121679261,
+        "harvey_pass": false,
+        "better": "har_oc",
+        "n_common": 3828
+      },
+      "har_rv2_vs_har_oc_ext": {
+        "dm_stat": -1.2401003513886615,
+        "p_value": 0.21493827903258733,
+        "harvey_pass": false,
+        "better": "har_rv2",
+        "n_common": 3828
+      },
+      "har_rv2_vs_amem": {
+        "dm_stat": 3.6545736692930553,
+        "p_value": 0.0002576096881787837,
+        "harvey_pass": true,
+        "better": "amem",
+        "n_common": 3828
+      },
+      "har_oc_vs_har_oc_ext": {
+        "dm_stat": -1.240100531486356,
+        "p_value": 0.2149382124273278,
+        "harvey_pass": false,
+        "better": "har_oc",
+        "n_common": 3828
+      },
+      "har_oc_vs_amem": {
+        "dm_stat": 4.48239883315136,
+        "p_value": 7.3808635625560726e-06,
+        "harvey_pass": true,
+        "better": "amem",
+        "n_common": 3828
+      },
+      "har_oc_ext_vs_amem": {
+        "dm_stat": 1.2401012625795185,
+        "p_value": 0.2149379420483959,
+        "harvey_pass": false,
+        "better": "amem",
+        "n_common": 3828
+      }
+    },
+    "oos_range": "2010-12-22 to 2026-03-30",
+    "n_oos": 3839
+  },
+  "runtime_seconds": 10.774552822113037
+}

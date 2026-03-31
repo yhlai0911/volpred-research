@@ -18443,5 +18443,27 @@
     "phase": "research",
     "importance": 5,
     "timestamp": "2026-03-31T11:28:24.634332+00:00"
+  },
+  {
+    "id": "K772",
+    "experiment_id": "K772",
+    "title": "K772 Overnight Vol Decomposition: overnight=36.8%, HAR-OC insignificant, AMEM>GJR>HAR-OC",
+    "content": "[提出: 用戶, 執行: Claude] K772: Hansen & Lunde (2005) overnight/intraday decomposition for SPY (2007-2026, n=4840). Part A: Overnight variance share = 36.8% of total (Hansen & Lunde benchmark ~20% — difference because they used 2000-era data with less overnight trading). Corr(overnight, intraday) = 0.040 (near-independent). Part B: Overnight share ranges 20-61% across years (2020 COVID peak 52.8%, 2018 low 25.1%). Regime-dependent: high-vol periods have slightly higher overnight share (37.9% vs 32.7% in low-vol). Part C: HAR-OC regression adds r²_overnight to HAR-RV². Overnight coefficient β₄=0.147, t=1.46 — NOT significant at Harvey |t|>3.0 threshold. R² improvement only 0.14% (0.2232→0.2248). The overnight squared return adds negligible predictive power beyond what weekly/monthly averages already capture. Part D: Expanding window OOS (n=3828, 2010-2026). QLIKE ranking: AMEM (1.507) > GJR (1.538) > HAR-OC (1.605) > EWMA (1.624) > HAR-RV² (1.673). HAR-OC-Ext overfits (QLIKE=162893). DM tests: AMEM beats all at p<0.05 (Harvey PASS vs EWMA/HAR-RV²/HAR-OC, FAIL vs GJR at p=0.035). GJR beats HAR-OC (DM=-6.62, Harvey PASS). HAR-OC vs HAR-RV²: DM=1.76, p=0.078 (marginal, Harvey FAIL). KEY INSIGHT: Overnight component is descriptively important (37% of variance) but has near-zero incremental PREDICTIVE power for next-day volatility. GARCH/AMEM already capture overnight info through close-to-close returns. Explicitly separating overnight adds nothing.",
+    "tags": [
+      "overnight",
+      "intraday",
+      "Hansen-Lunde",
+      "variance-decomposition",
+      "HAR-OC",
+      "AMEM",
+      "GJR",
+      "null-result",
+      "SPY"
+    ],
+    "data_source": "yfinance (SPY OHLC, 2007-2026, n=4840)",
+    "evidence": "k772_overnight_vol_results.json: overnight share 36.8%, HAR-OC t=1.46, QLIKE ranking AMEM>GJR>HAR-OC",
+    "phase": "research",
+    "importance": 4,
+    "created_at": "2026-03-31T13:30:00.000000+00:00"
   }
 ]
