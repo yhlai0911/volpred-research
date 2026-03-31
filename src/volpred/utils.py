@@ -2,61 +2,72 @@
 
 import pandas as pd
 
+# Known 0050.TW split breakpoints in yfinance data
+# Yahoo pre-applied the 2025-06-18 1:4 split, but only from 2014-01-02 onwards.
+# Pre-2014 prices are ~4x too high compared to post-2014.
+_TW50_SPLIT_DATE = "2014-01-02"
+_TW50_SPLIT_RATIO = 4.0
+
 
 def clean_tw50_data(prices: pd.Series, returns: pd.Series = None) -> tuple:
     """Fix 0050.TW stock split artifacts in yfinance data.
 
-    yfinance data for 0050.TW has a KNOWN ISSUE:
-    - 官方分割日是 2025-06-11（1:4），但 yfinance 原始價格從 2014-01-02 起就已反映分割
-    - 2013-12-31 Close=58.70 → 2014-01-02 Close=14.64（÷4.01）
-    - yfinance splits metadata 完全沒記錄此分割（Stock Splits 全 0.0）
-    - Adj Close 也沒有回溯調整 → 造成 2014-01-02 假 -75% 回報
-    - 原因不明（可能是 yfinance 提前應用 2025 分割，或台灣證交所數據問題）
+    Problem:
+    - Yahoo Finance 把 2025-06-18 的 1:4 分割回溯應用到歷史數據
+    - 但只從 2014-01-02 起調整，2013 年以前的價格未除以 4
+    - 造成 2014-01-02 出現假 -75% 回報
+    - yfinance splits metadata 空，repair=True 也無法修復
 
-    This function:
-    1. Detects split days (|return| > 50%)
-    2. Replaces split-day return with 0
-    3. Reconstructs clean price series
+    Fix:
+    - 偵測 2014-01-02 斷點（pre-split 價格 ÷ split_ratio）
+    - 將 2014-01-02 之前的所有價格除以 4，使整個序列連續
+    - 重新計算 returns
 
     Args:
         prices: 0050.TW price series (Close or Adj Close)
-        returns: pre-computed returns (optional, will compute if None)
+        returns: pre-computed returns (optional, will recompute after fix)
 
     Returns:
         (clean_prices, clean_returns) tuple
-
-    Usage:
-        prices = df['Close']
-        clean_p, clean_r = clean_tw50_data(prices)
     """
-    if returns is None:
-        returns = prices.pct_change()
+    clean_prices = prices.copy()
 
-    # Detect split artifacts: |return| > 50% on a single day
-    split_mask = returns.abs() > 0.50
-    n_splits = split_mask.sum()
+    # Find the split breakpoint
+    split_date = pd.Timestamp(_TW50_SPLIT_DATE)
 
-    if n_splits > 0:
-        # Replace split returns with 0
-        clean_returns = returns.copy()
-        clean_returns[split_mask] = 0.0
+    # Check if the breakpoint exists in our data
+    if split_date in clean_prices.index:
+        pre_split_mask = clean_prices.index < split_date
 
-        # Reconstruct clean prices from returns
-        clean_prices = prices.copy()
-        base = prices.iloc[0]
+        if pre_split_mask.any():
+            # Check if there's actually a discontinuity
+            last_pre = clean_prices[pre_split_mask].iloc[-1]
+            first_post = clean_prices.loc[split_date]
+
+            ratio = last_pre / first_post
+            # If ratio is close to 4 (within 10%), apply the fix
+            if 3.5 < ratio < 4.5:
+                clean_prices[pre_split_mask] = clean_prices[pre_split_mask] / _TW50_SPLIT_RATIO
+
+    # Also handle any remaining extreme returns (safety net)
+    clean_returns = clean_prices.pct_change()
+    extreme_mask = clean_returns.abs() > 0.50
+    if extreme_mask.any():
+        clean_returns[extreme_mask] = 0.0
+        # Reconstruct prices from cleaned returns
+        base = clean_prices.iloc[0]
         cum = (1 + clean_returns.fillna(0)).cumprod()
         clean_prices = base * cum
 
-        return clean_prices, clean_returns
-
-    return prices, returns
+    clean_returns = clean_prices.pct_change()
+    return clean_prices, clean_returns
 
 
 def download_tw50_clean(start="2006-01-01", end=None):
     """Download and clean 0050.TW data from yfinance.
 
     Handles:
-    - Stock split artifacts (2014-01-02 1:4 split)
+    - Stock split price discontinuity (2014-01-02: pre-split prices ÷ 4)
     - Returns auto_adjust=True (yfinance default)
     - Returns both clean prices and clean returns
 
