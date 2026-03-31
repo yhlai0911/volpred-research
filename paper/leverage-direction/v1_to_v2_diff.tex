@@ -1,0 +1,149 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue}
+\usepackage{soul} % for strikethrough
+
+\definecolor{oldred}{RGB}{180,0,0}
+\definecolor{newgreen}{RGB}{0,120,0}
+\definecolor{noteblue}{RGB}{0,0,160}
+
+\newcommand{\old}[1]{\textcolor{oldred}{\st{#1}}}
+\newcommand{\new}[1]{\textcolor{newgreen}{\textbf{#1}}}
+\newcommand{\note}[1]{\textcolor{noteblue}{\textit{[#1]}}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Revision Diff Report: body.tex v1 $\to$ v2}\\[0.5em]
+{\large Leverage Direction Matters}\\[0.5em]
+{\normalsize Date: 2026-03-30}\\
+{\normalsize Issues Addressed: H1 (Scope overload), H3 (In-sample threshold), H7 (Numerical inconsistencies)}
+\end{center}
+
+\vspace{1em}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Summary of Changes}
+
+\begin{tabular}{lp{10cm}}
+\toprule
+Issue & Change Description \\
+\midrule
+\textbf{H1} (Scope overload) & Restructured from three contributions to two. TZ momentum removed from abstract, introduction, and conclusion as a contribution; retained as Appendix B with explicit framing as ``supplementary evidence of information transmission.'' \\
+\textbf{H3} (In-sample threshold) & Added explicit in-sample vs.\ OOS caveat paragraph with uncertainty quantification. Reported OOS classification accuracy (6/6 and 5/6) separately from in-sample (9/9). Noted random baseline probability ($2^{-6} \approx 1.6\%$). \\
+\textbf{H7} (Numerical inconsistencies) & (a) Corrected ``twelve DM comparisons'' to ``nine'' throughout (matching Table~3's 9 rows). (b) Reconciled $\rho$ values by attributing each to its specific sample ($\rho = 0.944$, $N = 5$ primary; $\rho = 0.83$, $N = 14$ extended). (c) Corrected ``all four above / all eight below'' to ``all four above / all five below'' (matching 9 total). \\
+\bottomrule
+\end{tabular}
+
+\vspace{1em}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Detailed Changes}
+
+\subsection*{1. Abstract (main\_v2.tex)}
+
+\textbf{H7:} \old{correctly classifying all twelve Diebold-Mariano comparisons across two out-of-sample periods} $\to$ \new{correctly classifying all nine Diebold-Mariano comparisons in the primary sample, with 6/6 correct out-of-sample predictions}
+
+\textbf{H7:} \old{universal across all twelve tested assets and driven by base volatility level ($\rho = 0.944$)} $\to$ \new{universal across all tested assets and driven by base volatility level ($\rho = 0.944$ for primary assets, $\rho = 0.83$ for the extended $N = 14$ sample)}
+
+\textbf{H1:} Removed all TZ momentum content from abstract. Added domain restriction clarification ($\rho = -0.448$, $p = 0.14$ for twelve assets).
+
+\subsection*{2. Introduction (body\_v2.tex, lines 9--17)}
+
+\textbf{H1:} \old{This paper makes three contributions} $\to$ \new{This paper makes two contributions}
+
+\textbf{H1:} Entire ``Third'' contribution paragraph (TZ momentum, 8 lines) removed. Replaced with single sentence: \new{Supplementary evidence of cross-market information transmission is presented in Appendix~B.}
+
+\textbf{H7:} In First contribution: \old{all twelve Diebold-Mariano comparisons} $\to$ \new{all nine Diebold-Mariano comparisons across two out-of-sample periods (Table~3)}
+
+\textbf{H7:} In Second contribution: Added explicit sample attribution for $\rho$ values: \new{(Pearson $\rho = 0.944$, $p < 0.001$, $N = 5$ primary assets; Pearson $\rho = 0.83$, $p = 0.0002$, $N = 14$ in the extended sample)}
+
+\textbf{H1:} Second contribution reframed as ``application of the leverage taxonomy to VT'' rather than an independent contribution.
+
+\subsection*{3. Model Selection Rule (body\_v2.tex, Section 4.3.2)}
+
+\textbf{H7:} \old{all twelve DM test outcomes across six assets and two OOS periods} $\to$ \new{all nine DM test outcomes across six assets and two OOS periods (Table~3)}
+
+\textbf{H7:} \old{all four asset-period combinations above the threshold\ldots while all eight combinations below} $\to$ \new{all four asset-period combinations above the threshold\ldots while all five combinations below}
+
+\textbf{H7:} \old{identical classifications for all twelve asset-period combinations} $\to$ \new{identical classifications for all nine asset-period combinations}
+
+\subsection*{4. In-Sample Caveat (body\_v2.tex, new paragraph after Section 4.3.2)}
+
+\textbf{H3:} Replaced brief one-sentence caveat with dedicated subsection ``\textbf{In-sample versus out-of-sample classification.}'' New content:
+
+\begin{quote}
+\new{An important caveat is that both the numerical threshold ($\gamma > 0.08$) and the significance-based formulation ($t > 1.65$) are calibrated on the same sample used for evaluation; the 9/9 ``perfect classification'' is therefore partly in-sample and should not be interpreted as a measure of predictive accuracy. In the genuinely out-of-sample test---using 2023 $\gamma$ estimates to predict 2024--2025 model choice for $N = 6$ assets---the multi-window average achieves 6/6 correct classifications, and the single-point rule achieves 5/6 (83\%). However, with $N = 6$, even random classification would achieve 100\% accuracy with probability $2^{-6} \approx 1.6\%$, so the OOS evidence, while supportive, has limited statistical power. Independent validation on a larger, separate asset universe is needed to confirm generalizability of both the threshold level and the classification accuracy.}
+\end{quote}
+
+\subsection*{5. VT Cross-Asset Results (body\_v2.tex, Section 4.4.2)}
+
+\textbf{H7:} \old{improvement strongly correlated with base volatility ($\rho = 0.83$, $p = 0.0002$, $N = 14$ assets\ldots; Spearman $\rho = 0.88$)} $\to$ \new{For the five primary assets in Table~5, Pearson $\rho = 0.944$ ($p < 0.001$); for the extended sample of $N = 14$ assets (including eight additional commodities and international equities from Appendix~A), Pearson $\rho = 0.83$ ($p = 0.0002$, Spearman $\rho = 0.88$).}
+
+\subsection*{6. VT as Volatility Scaling (body\_v2.tex, Section 4.4.5)}
+
+\textbf{H7:} \old{$\rho = 0.83$, $p = 0.0002$, $N = 14$} $\to$ \new{$\rho = 0.944$ ($p < 0.001$) for the five primary assets, $\rho = 0.83$ ($p = 0.0002$) in the extended $N = 14$ sample}
+
+\subsection*{7. Conclusion (body\_v2.tex, Section 6)}
+
+\textbf{H1:} \old{Three contributions emerge} $\to$ \new{Two contributions emerge}
+
+\textbf{H7:} \old{correctly classifying all twelve Diebold-Mariano comparisons} $\to$ \new{correctly classifies all nine Diebold-Mariano comparisons in the primary sample (Table~3), with out-of-sample validation achieving 6/6 correct classifications\ldots though the small cross-section ($N = 6$) limits the statistical power of this OOS test}
+
+\textbf{H1:} Entire ``Third'' contribution paragraph (TZ momentum, 5 lines) replaced with single sentence: \new{Supplementary evidence on cross-market information transmission between U.S.\ and Asian equity markets is presented in Appendix~B.}
+
+\textbf{H7:} Reconciled $\rho$ values: \new{$\rho = 0.944$ for $N = 5$ primary assets; $\rho = 0.83$ for the extended $N = 14$ sample}
+
+\textbf{H7:} Added domain restriction note: \new{the mapping does not extend to diverse asset classes ($\rho = -0.448$, $p = 0.14$ for $N = 12$), delineating a clear domain restriction}
+
+\subsection*{8. Appendix B Heading (body\_v2.tex)}
+
+\textbf{H1:} \old{Time-Zone Information Transmission: US to Asian Markets} $\to$ \new{Time-Zone Information Transmission: Supplementary Evidence}
+
+Added framing paragraph: \new{This appendix presents supplementary evidence on cross-market information transmission between U.S.\ and Asian equity markets. While not a main contribution of this paper, the lead-lag relationship provides independent evidence that the leverage-direction taxonomy has cross-market implications: U.S.\ equity volatility (driven by standard leverage) transmits to Asian markets with predictable timing.}
+
+%% ═══════════════════════════════════════════════════════════════
+\section*{Files Modified}
+
+\begin{tabular}{ll}
+\toprule
+File & Status \\
+\midrule
+\texttt{body.tex} & Unchanged (original preserved) \\
+\texttt{body\_v2.tex} & New file (revised body) \\
+\texttt{main.tex} & Unchanged (original preserved) \\
+\texttt{main\_v2.tex} & New file (revised main, references body\_v2) \\
+\texttt{tables.tex} & Unchanged (no table data modified) \\
+\texttt{table\_nulls.tex} & Unchanged \\
+\texttt{v1\_to\_v2\_diff.tex} & This document \\
+\bottomrule
+\end{tabular}
+
+\vspace{1em}
+
+\section*{Remaining HIGH Issues (Not Addressed in This Revision)}
+
+\begin{enumerate}[label=H\arabic*.]
+\setcounter{enumi}{1}
+\item \textbf{Proposition 1 is partly mechanical} (G1) --- requires either algebraic proof or independent volatility measure test
+\setcounter{enumi}{3}
+\item \textbf{Overlapping windows inflate significance} (M2) --- requires non-overlapping windows or block bootstrap
+\item \textbf{Yahoo Finance data source} (D1) --- requires CRSP/Bloomberg switch
+\item \textbf{Short sample period} (D2) --- requires unified extended sample
+\setcounter{enumi}{7}
+\item \textbf{Zero-mean specification} (S1) --- requires AR(1) robustness in main text
+\item \textbf{Proposition 1 reverses for diverse assets} (R3) --- domain restriction now flagged more prominently (partial fix via H7)
+\end{enumerate}
+
+\end{document}
