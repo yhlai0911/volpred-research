@@ -18071,5 +18071,23 @@
     "phase": "research",
     "importance": 4,
     "timestamp": "2026-03-31T07:08:59.788503+00:00"
+  },
+  {
+    "id": "K757b",
+    "title": "Taiwan CoVaR Fixed: Proper A&B(2016) + AIC Granger + TW Calendar",
+    "content": "[提出: Codex rescue (K757 review), 執行: Claude] K757b fixes 3 bugs from Codex review of K757. FIX #1 (HIGH): Proper Adrian & Brunnermeier (2016) CoVaR — now estimates VaR_x(q) via quantile regression of x on lagged x + state vars, then conditions CoVaR_{y|x} on x=VaR_x(q). Result: TSMC has significant tail-risk contribution to 0050 (beta=0.097, p=0.001, DeltaCoVaR=-0.019). FIX #2 (MEDIUM): Granger causality lag by AIC via VAR.select_order() instead of min-p loop. Only 3/12 pairs significant (Fubon->TSMC, Cathay->TSMC, Fubon->Cathay) — financials Granger-cause TSMC, not the reverse. FIX #3 (MEDIUM): TW trading calendar as primary, US VIX forward-filled to TW dates — 130 TW-only days preserved. Key findings: crisis contagion amplification (0050-TSMC corr jumps 0.45->0.91 in VIX>30), TSMC RV adds info beyond VIX (partial rho=0.52) but no OOS R^2 improvement, financial sector Granger-causes TSMC vol (not the reverse).",
+    "tags": [
+      "taiwan",
+      "covar",
+      "systemic-risk",
+      "granger-causality",
+      "adrian-brunnermeier",
+      "fix",
+      "codex-review"
+    ],
+    "data_source": "yfinance (0050.TW, 2330.TW, 2881.TW, 2882.TW, ^VIX), 2010-2026",
+    "experiment_id": "K757b",
+    "created_at": "2026-03-31T07:13:12.704711+00:00",
+    "phase": "contagion_structure"
   }
 ]
