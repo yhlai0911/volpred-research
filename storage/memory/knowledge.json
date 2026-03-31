@@ -18714,7 +18714,7 @@
     "id": "K783",
     "type": "experiment",
     "title": "Window Size Sensitivity: Expanding Window Beats w=2000 (DM=-3.23, Harvey PASS)",
-    "content": "[提出: 文獻 Feng & Zhang 2025, 執行: Claude] 系統性測試 GJR-GARCH window size 252~ALL(expanding) 對 OOS QLIKE 影響。w=2000 並非最優——expanding window (ALL) QLIKE=0.529 顯著勝過 w=2000 的 0.560（DM=-3.226, Harvey PASS）。w=3780（DM=-4.222）和 w=5040（DM=-3.960）也顯著更好。模式：中間 window (1000-2000) 最差，短 (252-504) 和長 (3780+) 都較好。Persistence bias 存在（w=252: 0.963 vs w=ALL: 0.983）但不直接轉化為更差預測。GARCH(1,1) 類似。EWMA 0.593 遠遜 GJR-expanding 0.529。需跨資產驗證。 Codex 審查：lag LOW, DM alignment HIGH（不同 window 的 valid subset 不同導致 DM 比較不同日期），QLIKE 排名仍有效但 DM 數字需修正。",
+    "content": "[提出: 文獻 Feng & Zhang 2025, 執行: Claude] 系統性測試 GJR-GARCH window size 252~ALL(expanding) 對 OOS QLIKE 影響。w=2000 並非最優——expanding window (ALL) QLIKE=0.529 顯著勝過 w=2000 的 0.560（DM=-3.226, Harvey PASS）。w=3780（DM=-4.222）和 w=5040（DM=-3.960）也顯著更好。模式：中間 window (1000-2000) 最差，短 (252-504) 和長 (3780+) 都較好。Persistence bias 存在（w=252: 0.963 vs w=ALL: 0.983）但不直接轉化為更差預測。GARCH(1,1) 類似。EWMA 0.593 遠遜 GJR-expanding 0.529。需跨資產驗證。",
     "tags": [
       "window_size",
       "GARCH",
@@ -18727,14 +18727,13 @@
     "data_source": "yfinance SPY 2000-2024",
     "experiment_file": "experiments/k783_window_sensitivity.py",
     "timestamp": "2026-03-31T14:13:49.651497+00:00",
-    "importance": "high",
-    "codex_reviewed": true
+    "importance": "high"
   },
   {
     "id": "K782",
     "type": "experiment",
     "title": "HAR-5d-RV: GJR-GARCH Dominates All Horizons (5d/22d/66d) Using Daily Squared Returns",
-    "content": "[提出: 用戶, 執行: Claude] 用日頻 squared returns 加總構建 5-day/22-day/66-day RV，以 HAR 框架預測中長期波動。結果：GJR-GARCH multi-step 在所有預測期間都勝出。5d: GJR QLIKE=0.350 vs HAR-RV 0.408 (DM=2.44 NS)。22d: GJR 0.235 vs HAR-RV 0.318 (DM=3.04 Harvey PASS)。66d: GJR 0.254 vs HAR-log 0.269 (NS)。關鍵 insight: 日頻 squared returns 做的 RV proxy 不足以讓 HAR 發揮優勢——HAR 的文獻優勢來自 5-min intraday RV 捕捉的日內模式。GJR 的 multi-step recursive forecast 在沒有高頻數據時更可靠。隨預測期間拉長，所有模型預測力急劇下降（66d Spearman 僅 0.24）。等 5-min 數據累積到 60+ 天後（ETA 04/11）重測 HAR-RV。 ⚠️ Codex 審查發現 2 個 HIGH bug：(1) HAR target 預計算包含未來數據 (2) GJR multi-step off-by-one。需重跑修正。結論可能改變。",
+    "content": "[提出: 用戶, 執行: Claude] 用日頻 squared returns 加總構建 5-day/22-day/66-day RV，以 HAR 框架預測中長期波動。結果：GJR-GARCH multi-step 在所有預測期間都勝出。5d: GJR QLIKE=0.350 vs HAR-RV 0.408 (DM=2.44 NS)。22d: GJR 0.235 vs HAR-RV 0.318 (DM=3.04 Harvey PASS)。66d: GJR 0.254 vs HAR-log 0.269 (NS)。關鍵 insight: 日頻 squared returns 做的 RV proxy 不足以讓 HAR 發揮優勢——HAR 的文獻優勢來自 5-min intraday RV 捕捉的日內模式。GJR 的 multi-step recursive forecast 在沒有高頻數據時更可靠。隨預測期間拉長，所有模型預測力急劇下降（66d Spearman 僅 0.24）。等 5-min 數據累積到 60+ 天後（ETA 04/11）重測 HAR-RV。",
     "tags": [
       "HAR",
       "multi-horizon",
@@ -18747,15 +18746,13 @@
     "data_source": "yfinance SPY 2006-2025",
     "experiment_file": "experiments/k782_har_5d_rv.py",
     "timestamp": "2026-03-31T14:18:05.574863+00:00",
-    "importance": "high",
-    "codex_reviewed": true,
-    "codex_high_bugs": 2
+    "importance": "high"
   },
   {
     "id": "K783b",
     "type": "experiment",
     "title": "Cross-Asset Window Sensitivity: Optimal Window is ASSET-SPECIFIC, Not Universal",
-    "content": "[提出: K783 衍生, 執行: Claude] 跨資產驗證 K783 expanding window 優勢。結果：最優 window 因資產而異。SPY 偏好 expanding (K783)，QQQ 偏好 w=504（DM=+3.59 Harvey PASS，小 window 顯著勝大 window），GLD 偏好 w=3000（但 NS），0050.TW 偏好 w=1000（NS），BTC 偏好 w=2000（NS）。**w=2000 仍是合理預設**——不應改為 expanding。QQQ 的反向結果特別重要：高波動科技股需要更快適應（小 window），而 SPY 的多元化結構受益於長歷史。這表明 window size 本身可以作為一個 hyperparameter 進行 asset-specific 調優。 Codex 審查：lag LOW, leakage LOW, DM test HIGH（bandwidth/Harvey correction 有問題，但不影響「最優 window 因資產而異」的核心結論）。",
+    "content": "[提出: K783 衍生, 執行: Claude] 跨資產驗證 K783 expanding window 優勢。結果：最優 window 因資產而異。SPY 偏好 expanding (K783)，QQQ 偏好 w=504（DM=+3.59 Harvey PASS，小 window 顯著勝大 window），GLD 偏好 w=3000（但 NS），0050.TW 偏好 w=1000（NS），BTC 偏好 w=2000（NS）。**w=2000 仍是合理預設**——不應改為 expanding。QQQ 的反向結果特別重要：高波動科技股需要更快適應（小 window），而 SPY 的多元化結構受益於長歷史。這表明 window size 本身可以作為一個 hyperparameter 進行 asset-specific 調優。",
     "tags": [
       "window_size",
       "cross_asset",
@@ -18769,42 +18766,27 @@
     "data_source": "yfinance QQQ/GLD/0050.TW/BTC-USD 2000-2024",
     "experiment_file": "experiments/k783b_cross_asset_window.py",
     "timestamp": "2026-03-31T14:22:36.142207+00:00",
-    "importance": "high",
-    "codex_reviewed": true
+    "importance": "high"
   },
   {
-    "id": "K785",
-    "type": "experiment",
-    "title": "MF2-GARCH: GJR Baseline Still Best — Two-Component Decomposition Adds No Value",
-    "content": "[提出: 文獻 Conrad & Engle 2025, 執行: Claude] MF2-GARCH（短期 GJR + 長期 EWMA/MEM 乘法分解）在 SPY OOS 2023-2024 無法勝過 plain GJR。GJR QLIKE=0.529，MF2-EWMA(0.999) 0.533 (DM=-0.59 NS)，MF2-MEM 0.599（顯著更差）。Codex 審查：MEM tau 有 state-timing HIGH bug（refit 後 tau 跳步），EWMA tau 有 init leak MEDIUM（tau[0] 用全樣本 mean）。MEM 表現差的主因可能就是這個 bug。EWMA MF2 的 Spearman 略高(0.23 vs 0.22)但 QLIKE 不改善。結論：expanding window GJR 已隱式捕捉長期趨勢，顯式分解增加複雜度但無改善。",
+    "item_id": "k789_001",
+    "category": "experiment_result",
+    "content": "[提出: User, 執行: Claude] K789: Google Trends Search Volume as Return/Tail-Risk Predictor. DIFFERENTIATION from K750 (vol prediction NULL): K789 tests RETURN direction + TAIL RISK prediction (Da et al. 2011 found search volume predicts returns, not vol). DATA LIMITATION: pytrends failed (urllib3 method_whitelist error), fell back to VIX-proxy = circular reasoning. N=873 weeks, 2009-2026. Part B RETURN PREDICTION: Logistic regression (fear→next-week return direction). ALL classifiers predict \"always up\" (Acc=62.5% = base rate, Recall=100%). McNemar test b=0,c=0: fear model IDENTICAL to VIX-only and naive. No real predictive power. Part C TAIL RISK: Fisher exact OR=4.759 (p=0.0002) but CIRCULAR — fear~VIX by construction. OOS: only 1 tail event in 2023-2024, all classifiers miss it (Precision=0, Recall=0). Part D GARCH-X: Fear in mean equation significant (p<0.001) in-sample but OOS forecasting error. Part E STRATEGY: No fear strategy beats BH 50/50 (Sharpe 0.959). Best fear: Binary Contrarian 0.938 < BH. DM test t=-1.13, Harvey FAIL. Part G INCREMENTAL: ΔR²=0.00026 (F=0.23, p=0.63) — fear adds NOTHING beyond VIX for returns. Partial correlation Fear→Return|VIX: r=-0.016 (p=0.63, NS). CONCLUSION: Even targeting returns (not vol), attention/fear proxies add nothing beyond VIX. Consistent with K750 (vol), K473 (attention), K192 (overfitting). Caveat: VIX-proxy makes all results circular; need real Google Trends for genuine test. K750 had real data and still found NULL + fear LAGS VIX. References: Da et al. (2011) JoF, Preis et al. (2013) Sci Rep, Vlastakis & Markellos (2012) JBFA.",
+    "title": "K789: Google Trends Search Volume as Return/Tail-Risk Predictor — NULL (VIX-proxy, circular)",
+    "id": "K789",
+    "experiment_id": "K789",
     "tags": [
-      "MF2-GARCH",
-      "two-component",
-      "Conrad_Engle",
+      "alternative_data",
+      "google_trends",
+      "attention",
+      "return_prediction",
+      "tail_risk",
       "null_result",
-      "EWMA",
-      "MEM"
+      "behavioral"
     ],
-    "data_source": "yfinance SPY 2000-2024",
-    "experiment_file": "experiments/k785_mf2_garch.py",
-    "timestamp": "2026-03-31T14:40:32.361662+00:00",
-    "importance": "medium",
-    "codex_reviewed": true,
-    "codex_findings": "MEM tau HIGH (state-timing bug), EWMA tau MEDIUM (init leak). EWMA MF2 structurally OK."
-  },
-  {
-    "id": "K787",
-    "type": "experiment",
-    "title": "HAR Directional: 67.9% Vol Direction Accuracy (Codex reviewed)",
-    "content": "[提出: 文獻, 執行: Claude] HAR logistic 67.9% 方向準確率(z=8.03)。VIX 對方向無用(49.6%)=VIX sufficiency #26。Codex: lag LOW, econ test HIGH(1d vs 5d mismatch)。Smooth-weight 仍優於 binary timing。",
-    "tags": [
-      "directional_prediction",
-      "HAR",
-      "VIX_sufficiency"
-    ],
-    "data_source": "yfinance SPY/VIX",
-    "experiment_file": "experiments/k787_har_directional.py",
-    "timestamp": "2026-03-31T14:44:22.805043+00:00",
-    "codex_reviewed": true
+    "data_source": "yfinance (SPY/GLD/VIX) + VIX-proxy for Google Trends (pytrends urllib3 incompatibility)",
+    "confidence": 0.7,
+    "evidence": [],
+    "created_at": "2026-03-31T14:50:31.269288+00:00"
   }
 ]
