@@ -18005,5 +18005,23 @@
     "experiment_file": "experiments/k755_fomo_cooling.py",
     "results_file": "experiments/k755_fomo_cooling_results.json",
     "timestamp": "2026-03-31T05:57:49.066118+00:00"
+  },
+  {
+    "id": "K756",
+    "title": "K756: ★★★ International VIX Sufficiency — VIX Predicts Vol for ALL 12 Global Markets",
+    "content": "[提出: Claude (Paper 5 review + research_program), 執行: Claude] K756: 國際 VIX 充分性測試。12 個市場（SPY, EFA, EWG, EWU, EWJ, EWT, EWY, EWH, EEM, EWZ, GLD, USO）× 3 個模型（VIX-only, OwnRV-only, Combined）。2010-2026, 4040 obs per market。\n\n**核心發現：VIX 是全球波動率預測指標。** 12/12 市場 VIX 都顯著預測 forward RV（全部通過 Harvey t>3.0）。R² 範圍 0.10（GLD）到 0.35（EWG），non-US 平均 R²=0.236（vs SPY 0.332）。歐洲最強（mean R²=0.324）、亞洲中等（0.212）、新興/商品最弱（0.177-0.209）。\n\n**VIX 獨特貢獻（beyond own RV）**：12/12 市場 VIX 都提供 incremental R²（ΔR² 2.4%-9.3%），partial correlation 全部 Harvey 顯著（t=11.3-23.4）。EWU（UK）ΔR²=9.3% 最高，EWZ（Brazil）ΔR²=2.4% 最低。\n\n**Cross-sectional 發現**：US-correlation 預測 VIX R²（Spearman r=0.773, p=0.005）。與美國市場越相關的市場，VIX 預測力越強。GLD 因為與 SPY 幾乎不相關（ρ=0.055），VIX R² 最低（0.10）。\n\n**Region hierarchy**：Europe (0.324) > Americas (0.332) > Asia (0.212) > Emerging (0.209) > Commodity (0.177)。\n\n**Paper 5 意義**：直接回應 reviewer「US-specific」質疑——VIX sufficiency 不限美國市場。data_source: yfinance (12 ETFs + ^VIX) data_period: 2010-2026 n_obs: 4040/market",
+    "tags": [
+      "vix",
+      "international",
+      "sufficiency",
+      "prediction",
+      "cross-sectional",
+      "paper5",
+      "★★★"
+    ],
+    "data_source": "yfinance (SPY, EFA, EWG, EWU, EWJ, EWT, EWY, EWH, EEM, EWZ, GLD, USO, ^VIX)",
+    "created_at": "2026-03-31T14:39:28.802893",
+    "experiment_file": "experiments/k756_international_vix.py",
+    "results_file": "experiments/k756_international_vix_results.json"
   }
 ]
