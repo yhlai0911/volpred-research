@@ -241,3 +241,34 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **新舊策略比較必須同期間**。不是修正舊數據，是在同一個框架下重新模擬。
 - **Metrics 必須是數據的衍生品**，不可手動 PATCH。recalc_metrics.py 是唯一寫入路徑。
 - **修流程不修資料**——改 recalc_metrics 的 sync 邏輯，不是手動改 Supabase。
+
+---
+
+## 2026-03-31: Session Cron 空轉 6-8 小時
+
+### 問題
+「繼續研究」cron 每 15 分鐘觸發，但 Claude 只 check status 回「系統穩定」，連續空轉 6-8 小時。
+
+### 現象
+- 23 個實驗完成後，連續 ~30 次 cron 觸發都只檢查草稿數
+- 沒有啟動任何實驗、文章、或其他工作
+- research_program.md 有 160+ 未完成項目但完全沒讀
+- 實驗衍生的 18 個新方向沒寫回 research_program.md
+- 已完成項目沒做 archive（877 行 vs 目標 500 行）
+
+### 根因
+1. Claude 自己判斷「方向窮盡」而不看文件 — 實際有 160+ 待辦
+2. cron prompt 太弱：「繼續研究」沒有強制讀 research_program.md
+3. 沒有「反空轉」機制：允許連續多次只回 status check
+4. 實驗完成流程缺少「寫回新方向」和「archive 舊方向」步驟
+
+### 解決方法
+1. **CLAUDE.md 更新**：加入反空轉規則（禁止連續兩次空轉）+ 實驗完成必做流程
+2. **Cron prompt 加強**：明確要求「讀 research_program.md → 選一個 → 啟動」
+3. **Feedback memory**：feedback_never_idle_loop.md
+4. **Error log**：本條記錄
+
+### 教訓
+- **「沒事做」是不存在的** — research_program.md 是北極星，永遠有未完成項目
+- **Cron prompt 要具體到操作步驟**，不能只是「繼續研究」這種模糊指令
+- **流程完整性**：實驗 → 記錄 → 衍生方向 → archive → 下一個。少一步就會斷鏈

@@ -413,6 +413,12 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **研究永不停止。** 完成任何任務後**立刻執行下一個任務**，不需要回報等待、不需要徵求同意。在同一個 turn 中連續做多個實驗（用 agent team 並行 + 主線串行）。不要做完一個實驗就停下來——連續鏈式執行直到使用者主動中斷。
 **透過 session cron 每 15 分鐘自動觸發 autonomous-research 繼續研究。**
 
+**⚠️ 反空轉原則（2026-03-31 教訓）：**
+- **「方向窮盡」是假象** — research_program.md 永遠有 100+ 未完成項目。不要靠腦中判斷「沒事做」，要讀文件。
+- **每次 cron 觸發必須做事** — 讀 research_program.md 選一個待辦，啟動 agent 或自己做。禁止只回「系統穩定」。
+- **實驗衍生方向必須寫回** — 每個實驗完成後，提取 2-3 個新方向寫入 research_program.md。不寫 = 知識流失。
+- **完成項目必須 archive** — 移到 `docs/research_archive/`，保持 research_program.md < 700 行。
+
 ### 實驗前必做：查詢知識庫 + 搜尋文獻（不可跳過，違反即無效）
 **每個實驗/新主題路線開始前，必須完成以下步驟，缺一不可：**
 
@@ -644,11 +650,28 @@ CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07�
 
 #### 全速模式（確認穩定後加入）
 ```
-CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究")         # 08-23時 每15分鐘
-CronCreate(cron="5 0-7 * * *", prompt="繼續研究")                   # 00-07時 每小時
+CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動（實驗/文章/論文/bug fix/文獻搜尋）(3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出")
+CronCreate(cron="5 0-7 * * *", prompt="繼續研究（夜間）：讀 research_program.md 未完成項目，啟動 1 個低強度任務（寫文章或文獻搜尋）。不可空轉。")
 CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")   # :37（升級為每2小時）
 ```
 注意：一次性 cron（如 FOMC 提醒）必須先確認事件的確切時間再換算台灣時間（UTC+8）。
+
+#### 反空轉規則（2026-03-31 教訓）
+**每次「繼續研究」cron 觸發後，必須滿足以下至少一項才算完成：**
+1. 有新 agent 在背景跑（實驗、文章、論文修訂）
+2. 有實際的 git diff（不是只改 session_state.json）
+3. 有新的知識庫/經驗庫記錄
+4. 有新的 research_program.md 內容更新
+
+**禁止連續兩次 cron 觸發都只回覆 status check。** 如果上一次沒做事，這一次必須補上。
+
+#### 實驗完成後的必做流程（不可跳步）
+```
+實驗完成 → Codex 審查 → 記錄 knowledge → 記錄 experience（如適用）
+         → 衍生新方向寫入 research_program.md
+         → 已完成項目從 research_program.md 移到 archive
+         → research_program.md 保持 < 700 行
+```
 
 ## 研究方法論與模型
 
