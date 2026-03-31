@@ -18342,5 +18342,41 @@
     "phase": "research",
     "importance": 3,
     "timestamp": "2026-03-31T10:22:11.797388+00:00"
+  },
+  {
+    "item_id": "b2899fe6",
+    "category": "strategy_evaluation",
+    "content": "[提出: Gemini 2.5 Pro, 執行: Claude] K769: Transfer Entropy VT Budgeting — Dynamic Insurance Scaling via Information Flow. Tested whether TE(macro-liquidity → VIX) can scale VT insurance allocation. 6 FRED macro proxies (WALCL, EFFR, HY spread, yield slope, STLFSI2, DGS10) → composite TE signal. RESULT: NULL — all 3 TE-VT variants WORSE than static 12/VIX (Sharpe: TE_VT 0.739, TE_VT_AGG 0.702, TE_BINARY 0.748 vs 12/VIX 0.782 vs BH 50/50 0.847). TE scaling REDUCES equity weight too aggressively (avg SPY weight: 12/VIX=0.371, TE_VT=0.290, TE_VT_AGG=0.241) without compensating upside. TE-VIX correlation=0.289 — TE is HIGHER during high VIX (TE pctl 0.651 when VIX≥25 vs 0.405 when VIX<15), meaning TE reduces insurance precisely when it's most needed (crisis = more predictable = reduce insurance = BAD). Cross-OOS: all strategies win 2/7 periods vs BH. DM test: TE_VT significantly WORSE than 12/VIX (t=-2.40, p=0.017). Sensitivity: larger TE scalar = worse Sharpe (0.3→0.758, 0.5→0.739, 0.7→0.715). Conclusion: Gemini's hypothesis inverted — high TE during crises means 'reduce insurance during crisis' which is exactly wrong. VIX already encodes macro liquidity info. K152 confirmed again.",
+    "evidence": [
+      "k769_transfer_entropy_vt_results.json"
+    ],
+    "title": "K769: Transfer Entropy VT Budgeting — NULL, TE scaling reduces insurance during crises (inverted logic)",
+    "tags": [
+      "transfer-entropy",
+      "information-theory",
+      "vt-strategy",
+      "macro-liquidity",
+      "fred",
+      "null-result",
+      "vix-sufficient"
+    ],
+    "data_source": "yfinance (SPY, GLD, ^VIX) + FRED (DGS10, DGS2, BAMLH0A0HYM2, FEDFUNDS, STLFSI2, WALCL, EFFR), 2012-2026, n=3579",
+    "timestamp": "2026-03-31T18:26:22.013254"
+  },
+  {
+    "id": "K769",
+    "title": "K769 Transfer Entropy VT: NULL — Gemini hypothesis INVERTED, crises are MORE predictable",
+    "content": "[提出: Gemini 2.5 Pro, 執行: Claude] K769 TE-VT NULL. Gemini predicted high TE=predictable=reduce insurance. Reality: TE is HIGHER during high VIX (0.651 vs 0.405, corr=0.289). Crises are MORE predictable because macro→VIX flow strengthens during stress. TE-VT reduces insurance when most needed = opposite of intended. Sharpe 0.739 < 12/VIX 0.782 (DM t=-2.40, significantly worse). Cross-OOS 2/7. Sensitivity: more TE scaling = worse monotonically.",
+    "tags": [
+      "K769",
+      "transfer-entropy",
+      "NULL",
+      "Gemini-suggestion",
+      "inverted-hypothesis"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "data_source": "FRED (WALCL, EFFR, HY spread, yield slope, STLFSI2, DGS10) + yfinance",
+    "timestamp": "2026-03-31T10:27:06.914048+00:00"
   }
 ]
