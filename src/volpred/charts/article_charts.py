@@ -40,6 +40,10 @@ _CHART_DIR = Path("/tmp/volpred_charts")
 
 def _setup_style():
     """Configure matplotlib for CJK + clean style."""
+    import matplotlib.font_manager as fm
+    # Rebuild font cache if needed (worktree agents may have stale cache)
+    if not any(f.name == "PingFang HK" for f in fm.fontManager.ttflist):
+        fm._load_fontmanager(try_read_cache=False)
     plt.rcParams["font.sans-serif"] = _FONT_CANDIDATES
     plt.rcParams["axes.unicode_minus"] = False
     plt.rcParams["figure.facecolor"] = "white"
