@@ -18637,5 +18637,20 @@
     "data_source": "yfinance SPY 2007-01-04 to 2026-03-30",
     "created_at": "2026-03-31T12:28:51.864562+00:00",
     "category": "volatility_models"
+  },
+  {
+    "id": "Patton2011-proxy-robust",
+    "title": "Patton (2011): QLIKE/MSE only rank correctly if proxy is conditionally unbiased for true vol",
+    "content": "[提出: 文獻搜尋] Patton (2011, J. Econometrics) proved MSE and QLIKE are 'robust' loss functions — ranking is preserved even with noisy proxy, BUT only if proxy is conditionally unbiased estimator of true volatility. |r| is NOT unbiased for σ² (E[|r|] = σ×sqrt(2/π) under Normal, different under fat tails). r² IS unbiased for σ² (E[r²] = σ²). This means: (1) comparing models on QLIKE(|r|) favors models that predict |r| natively, (2) comparing on QLIKE(r²) favors σ² models, (3) rank correlation (Spearman) is distribution-free and avoids this problem entirely. K777 addresses this by doing all three.",
+    "tags": [
+      "Patton2011",
+      "QLIKE",
+      "loss-function",
+      "proxy-robust",
+      "methodology"
+    ],
+    "phase": "research",
+    "importance": 5,
+    "timestamp": "2026-03-31T12:36:46.076489+00:00"
   }
 ]
