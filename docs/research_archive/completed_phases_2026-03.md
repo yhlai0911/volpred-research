@@ -625,3 +625,139 @@
 - [x] **Macro signal**：K749 殖利率曲線被 VIX 吸收（partial r < 0.08）
 - [x] Paper 2 更新：+K739/K738 → 45p
 
+---
+
+## 面向 I: 期貨避險完成實驗（archived 2026-03-30）
+
+**已完成實驗（按正確順序排列）：**
+- [x] I0: ★★★ Data Diagnostics (15 pairs) — A=9, B=3, C=3。USO-CL/UNG-NG 不適合 GARCH。Bond corr 不穩定。experiments/i0_futures_data_diagnostics.py
+
+**已有基礎：**
+- [x] K341: ★★ Futures Hedging Framework — VIX>25 tail hedge 效率 7.71 MDD/cost, 12/VIX VT 勝固定避險
+- [x] K199: VIX Futures Basis — IS Harvey pass 但 OOS overfit
+- [x] K340: ES Futures Basis — null（VIX 吸收）
+
+**研究方向完成項目：**
+- [x] I1: ★ GARCH-based OHR — GARCH 不勝 EWMA（DM 全 NS）。Correlation 決定複雜度：SPY-ES corr>0.95→h=1 足夠，TLT-ZN corr<0.90→dynamic 必要（Harvey t=3.88）。EWMA(0.94) 是最佳實務。experiments/I1_garch_ohr.py
+- [x] I1b: ★★ Commodity Futures Dynamic Hedging — Static OHR wins 5/6 pairs！GLD DM t=-3.8★（dynamic HURTS）。USO-CL catastrophic（corr 0.510）。Static 對所有資產類別都夠用。experiments/i1b_commodity_futures_hedge.py
+- [x] I2: ★★ 台指期避險 — GARCH OHR~0.74（非 1.0），50/50 0050+GLD 仍是 Sharpe 冠軍（0.940）。GARCH hedge only MDD -14.0%（equity-only 最佳）。Futures on top of VT: 統計顯著但經濟邊際。SPY NOT viable cross-hedge（corr=0.15）。experiments/i2_taiwan_futures_hedge.py
+- [x] I3 Fixed: Multi-futures HE 評估 — ES only HE=94.3% ≈ ES+GC+ZN 94.2%（DM 全 NS）。多期貨對 SPY 零增量。experiments/i3_fixed_hedging_metrics.py
+- [x] I5: Regime-Switching Hedge Ratio — NULL。OHR 跨 VIX regime 穩定。experiments/i5_regime_hedge_ratio.py
+- [x] I12: ★★ Window Sensitivity — 最佳窗口取決於 corr + structural stability。High corr→Naive 最好。Medium corr→長窗口(500d+)。Low corr + shift→短窗口(60-120d)。experiments/i12_window_sensitivity_hedge.py
+- [x] K417: ★★★ Naive Hedge Superiority (Cao & Conlon 2025 JFM) — PARTIALLY REJECTED。Complex beats Naive 10/15 pairs (67%)。Correlation r=-0.899 是決定性 moderator。Equity: Naive 3/3。Commodity: Complex 4/4。Bond: Complex 3/4。FX: marginal 3/4
+- [x] I11: ★★★ Full Panel 15 Pairs — Naive wins 8/15, Complex wins 7/15。Correlation threshold refined: >0.96→Naive, 0.89-0.96→mixed, <0.89→Complex。USO-CL disaster (HE=-817%)。Bond pairs 全需 dynamic (TLT-ZN t=9.2★★★)。experiments/i11_full_panel_daily_garch_hedge.py
+- [x] I10: ★ VOV State-Dependent Hedging (Li & Chen 2025 JFM) — 方向確認但幅度微小（HE 差 1.9pp）。Partial r(VVIX,HE|VIX)=0.003 FAIL。SPY-ES corr>0.96 壓縮了所有差異。VIX sufficient for hedging decisions
+- [x] I9: ★★★ Proper Hedging Effectiveness (Academic Standard) — Ederington HE + VaR/ES + Utility。SPY-ES corr>0.95: h=1 足夠（HE 94%）。TLT-ZN corr=0.81: EWMA t=6.91★（HE 45%→68%）。GLD-GC: OLS→85% 略勝 Naive。避險價值取決於 corr + h 偏離度 + unhedged 風險。experiments/i9_proper_hedging_effectiveness.py
+- [x] I6 Fixed: 避險 vs 投資組合（分開評估）— Section A 避險: Static OHR HE=94.5%, TX 0.12%/yr。Section B 投資組合: 50/50 Sharpe 1.155, 50/50+VT MDD -14.3%。兩個框架不混用。experiments/i6_fixed_hedging_metrics.py
+- [x] I8: 期貨基差波動率預測 — NULL（confirms K340）。SPY-ES r=-0.045 FAIL, GLD-GC null, TLT-ZN IS t=5.11★ BUT OOS collapses (ΔR²=-0.074)。Sixth Law confirmed。VIX sufficient re-confirmed
+- [x] I5: Regime-Switching Hedge Ratio — NULL。OHR 跨 regime 穩定。文獻預測 regime-switching 有效但我們實證否定
+- [x] I1b: Static OHR 跨 6 資產類別勝出。文獻推薦 DCC/copula 的增量價值可疑
+
+## 面向 H: Taiwan VT 論文初稿完成項目（archived 2026-03-30）
+- [x] 完成初稿（H10, 26→28 頁）
+- [x] Codex 審查 + 修正（H11, 5 issues fixed）
+- [x] 加入 G20 景氣燈號結果（G22）
+- [x] 加入進口 YoY macro guard (G12/G13)（G22）
+- [x] `/citation-verifier` 引用驗證（H13, 14/14 OK）
+
+## 待探索方向 — 已完成項目（archived 2026-03-30）
+- [x] Panel Data ML — U1 null result（顯著更差）。更多變數=更多估計噪音。QLIKE ceiling #14
+
+## K426-K495 實驗完成項目（archived 2026-03-30）
+
+**2026-03-26 本 session 完成實驗（K426-K460）：**
+- [x] K426: 高效 GINN — ML 仍無法打破 QLIKE ceiling（1.5s runtime，K419 效率修正）
+- [x] K431: STGARCH — GJR 顯著勝（DM p<0.001），9 參數過擬合
+- [x] K432: Bayesian MCMC — MLE 勝（大樣本後驗集中於 MLE 附近）
+- [x] K433: **★ SSVS Definitive Null (SPY)** — 空模型勝 524K 子集。Mean equation 不需要外生變數
+- [x] K434: BMA — BIC 權重退化（EGARCH-t 佔 99.8%）
+- [x] K435: **★ Hillebrand Effect** — Persistence 膨脹 +0.073。ICSS 偵測 20 個斷裂
+- [x] K436: VRP Daily — IS t=4.38 pass Harvey，bootstrap p=0.000。**⚠️ K459 修正：cross-OOS 0/5 QLIKE wins**
+- [x] K437: GAS-t — Rank 6/6。Outlier downweighting 在日頻有害
+- [x] K438: GARCH-X(VRP) — Null。GARCH-X(VIX) borderline -6.3%
+- [x] K439: VRP Cross-Asset — Equity-specific (SPY/QQQ only)
+- [x] K440: VRP-VT Strategy — **預測≠交易能力**。12/VIX irreducible kernel 第 7 次確認
+- [x] K441: **★ Range-Based Vol** — Parkinson 6.8x, GK 5.5x 效率。Cross-proxy GJR consistent
+- [x] K442: FIGARCH — d=0.61 長記憶確認但 OOS 不改善
+- [x] K443: **★ Copula Tail Dependence** — Post-2020 SPY-TLT doubly broken（失去負相關+增加尾部共動）
+- [x] K444: DCC-GARCH Portfolio — EWMA equally good for low-corr pair
+- [x] K445: **★ BTC Inverse Leverage** — Regime-dependent 非永久（gamma 翻轉）
+- [x] K446: GPR — Null。**Granger 因果反轉**：VIX→GPR 不是 GPR→VIX
+- [x] K447: SKEW — Null（反而降低預測力）
+- [x] K448: VVIX — Null（2.3% improvement, NS）
+- [x] K449: **★★ Daily Semivariance** — RS⁻ 5.5x R² improvement (SPY)。Equity-specific (K453: gamma mechanism r=0.812)
+- [x] K450: VRP+Semi Combined — 無協同（維度詛咒）
+- [x] K451: Overnight/Intraday — 描述性豐富但預測 null
+- [x] K452: Yield Curve — Null。Inverted = lower vol（反直覺）
+- [x] K453: **★ Semivariance Cross-Asset** — 4/5 equity sig, gamma mechanism (r=0.812)
+- [x] K454: **★★ Semivariance VaR** — Trinity 3/3 at 1%，勝 GARCH Skewed-t 1/3
+- [x] K455: **★ Vol Spillover Network** — 74% total, SPY net +1.9%。COVID +13.2%
+- [x] K456: Taiwan Semivar VaR — RS⁻ FAILS（gamma 低）。GJR-SkewT 勝
+- [x] K457: Weekly Vol — QLIKE ceiling diffuse。GJR gamma 2.36x 放大
+- [x] K458: **★ Meta-Analysis** — Information decomposition > complexity。corr(params, success)=-0.259
+- [x] K459: **★ VRP Cross-OOS FAIL** — 0/5 QLIKE wins（significance ≠ forecasting）。VIX sufficiency #30
+- [x] K460: **★★ Semivariance Cross-OOS PASS** — SPY 4/5 significant, 5/5 directional。Publication ready
+- [x] K461: **★ SSVS Taiwan** — SPY_ret PIP=1.000（台股選出 SPY，美股選空模型——完美對比）。但 QLIKE 不改善（mean≠variance disconnect）
+- [x] K462: Taiwan GARCH-X/STGARCH — Null。VIX IS t=3.58 但 OOS +7.1% worse（overfitting）。GARCH ceiling 延伸到台股
+- [x] K463: TVP GARCH-X Taiwan — EWMA delta -1.71% 但 DM p=0.264 NS。方向正確但太小
+- [x] K464: **★ Threshold SV Asian Markets** — HAR log-range 6/6 markets 最佳。Ref: Chen, Liu, So (2013)
+- [x] K465: **★★★ HAR Log-Range Cross-OOS** — 10/10 (Parkinson), **8/10 (r² proxy, K469 驗證)**。Publication ready
+- [x] K466: HAR+Semi Combined — 無協同。HAR encompasses semivariance (lambda=1.94)
+- [x] K467: HAR VaR — 0/6 Trinity pass！Best forecaster ≠ best VaR（Parkinson misses jumps/overnight）
+- [x] K468: **⚠️ Yang-Zhang Tautology Test** — Range proxy 偏好 range model。但 K469 證明影響極小
+- [x] K469: **HAR r² Proxy Validation** — 8/10 cross-OOS。Tautology 只降 2/10。K465 結論 validated
+- [x] K470: HAR-VT Strategy — +0.067 Sharpe but p=0.181 NS。**3rd prediction≠application** (K440 VRP, K467 VaR, K470 VT)
+- [x] K471: Higher Moments — Rolling kurtosis +16pp R² but DM p=0.11 NS。BTC harmful。Kurtosis > skewness
+- [x] K472: **Taiwan Comprehensive** — All US-validated methods fail on 0050.TW。GARCH ceiling is cross-market universal
+- [x] K473: Attention/Google Trends — IS R²+6.2% but OOS 全 null。⚠️ K474 修正：weekly RV>VIX 是 artifact
+- [x] K474: **Weekly RV vs VIX Cross-OOS** — VIX wins **6/6**。K473 retracted (level-OLS artifact)。**VIX sufficiency #31（含週頻）**
+- [x] K475: **★★ Validated Ensemble** — GJR+HAR forecasting 5/5 top rank。⚠️ K476 修正：VaR 0/5 at 1%（HAR contaminates）
+- [x] K476: **Ensemble VaR Cross-OOS** — 0/5 at 1%。GJR alone 3/5 (best)。K475 VaR claim overturned
+- [x] K478: Entropy — Null（Complexity Ceiling）
+- [x] K479: Wavelet — Null（Decomposition Ceiling，HAR ad-hoc 已最優）
+- [x] K480: Regime-switching tool selection — Forecasting/VaR tradeoff is fundamental
+- [x] K481: **★★★ MCS Capstone** — 5-model superior set, ensemble 5/5 最穩健。Econometrica 級確認
+- [x] K482: MCS-weighted ensemble — Equal weight wins（Timmermann combination puzzle）
+- [x] K483: **★ Commodity Vol** — Opposite of equity: GARCH(1,1) symmetric wins, HAR worst, oil inverted leverage
+- [x] K484: **★★★ SSVS Variance Eq** — 4/5 components PIP=1.000, QLIKE -7.43%（用戶創意）
+- [x] K485: SSVS Variance Eq Cross-OOS — 4/5 directional, 2/5 sig（promising, GJR+VIX better alone）
+- [x] K486: **★★★ GJR-X(VIX) Breaks Impossible Triangle** — SPY forecasting -17% + VaR 5/5 pass
+- [x] K487: GJR-X(VIX) Cross-Asset — Equity-specific forecasting, broader VaR (5/6 pass)
+- [x] K488: GJR-X(VIX) VT — Cannot beat 12/VIX（4th prediction≠trading, risk premium is feature not bug）
+- [x] K489: **★ VIX Term Structure** — VIX9D R²=0.41 for 5d vol, direction accuracy 58-61%
+- [x] K490: **★★ GJR-X(VIX9D) beats GJR-X(VIX)** — 3/3 OOS (DM t=6.63), delta CV=0.08 (10x more stable), VIX9D subsumes VIX
+- [x] K491: **★★ Universal Persistence Law** — mean=0.980, std=0.014 across 14 assets. Hillebrand 14/14 (p=0.0002)
+- [x] K492: Research Efficiency Meta-Study — 52.9% cross-OOS false positive rate, 8.5 experiments/finding
+- [x] K493: GJR-X(VIX9D) Real-Time Signal — R²=0.614 (best thermometer), +22% higher weight than 12/VIX (safest umbrella)
+- [x] K494: Forex Vol — No leverage (gamma≈0), EWMA wins JPY, persistence 0.994 (highest cross-asset)
+- [x] K495: **★★★ Grand Unified Model Guide** — Gamma decision tree 15/15 within 1% of oracle. Capstone
+
+## 新交易策略上架完成（archived 2026-03-30）
+- [x] **VIX 條件槓桿（月頻）** `vix_cond_leverage` [提出: 用戶] — 50/50 SPY/GLD + 12/VIX sizing + VIX<15 時 1.5x 槓桿。K548/K551 (t=7.90), K577 monthly hybrid (t=5.16)。**已上架 2026-03-27**
+- [x] **台股混合槓桿** `taiwan_hybrid_leverage` [提出: 用戶] — 0050.TW + RV22 sizing + VIX percentile 條件槓桿。K553/K558 驗證。**已上架 2026-03-27**
+- [x] **保守型 VT（Piecewise）** `piecewise_conservative` [提出: 用戶] — 50/50 SPY/GLD + piecewise VIX mapping: w=1.0 if VIX<12, w=(20-VIX)/8 if 12≤VIX≤20, w=0.0 if VIX>20。K569 驗證 (6/8 pass, JKM z=2.84), K574 確認最高 Sharpe 1.875 + 最低 MDD -4.9%。Harvey near-miss 因保守設計（低 return vs B&H），非可靠性問題。**已上架 2026-03-27**
+- [x] **恐慌加碼定期定額** `fear_dca` [提出: 用戶] — VIX>25 月投 1.5x, VIX<15 月投 0.5x, 否則 1x。K552 驗證 (3/3 cross-OOS, MDD -9pp improvement vs plain DCA)。Signal-only 策略（告訴投資人這個月投多少），非 portfolio weight。Budget neutral，零額外成本。**已上架 2026-03-27**
+- [x] **自適應三階 VT** `adaptive_tier` [提出: 用戶] — VIX<15 用 VIX 條件槓桿（1.5x），VIX 15-20 用標準 12/VIX，VIX>20 用 Piecewise（退出市場）。50/50 SPY/GLD。K595 驗證 (Harvey pass vs B&H, 5/5 OOS, CAGR 14.7%, MDD -8.7%)。回測 Sharpe 3.02, 累計報酬 141.3%, MDD -5.1%。**已上架 2026-03-28**
+
+## 文章品質修正（archived 2026-03-30）
+- [x] Feed 文章必須附圖表——已修正 3 篇文章、已寫入 feedback memory
+
+## K519-K527 台股 Overnight + Volume 完成項目（archived 2026-03-30）
+
+**⚠️ K519 上架暫停（K521 data alignment bug）：**
+- [x] K519 VT-Sized Overnight 原本通過全部上架標準（Sharpe 1.079, 5/5 OOS, t=4.26）
+- [x] K520 Sensitivity 確認穩健（4/4 維度 wide safe zones）
+- [x] **K521 發現 merge_asof bug**：SPY(T) 配 TW(T) 但 SPY 收盤在台股交易之後
+- [x] 修正後 Sharpe 更高（4.445）但暴露 I8 timing bias：gap 在開盤拍賣 priced in
+- [x] **上架暫停**——需要找到在 5AM-9AM 之間可執行的交易機制才能重啟
+- [x] E017: 所有台股用美股信號的策略必須手動驗證日期對齊
+
+**Volume-GARCH 完成：**
+- [x] K527: **Volume-GARCH (Lamoureux & Lastrapes 1990 replication)** [提出: 用戶, 執行: K527] — IS persistence drop 確認（SPY 4%, 0050 92%），但 **OOS 完全失敗**（DM t=1.05）。Volume 是 contemporaneous effect（Clark MDH），不是 predictive。detrended volume (V/MA252) 也無效。
+- [x] MDH 框架結論：volume 和 vol 同源於 info flow，加入 variance eq 只改善 IS fit 不改善 OOS forecast
+- [x] Volume detrending：L&L 用 detrended volume 確實改善 IS，但 OOS 仍然 null（K527 vs K113 一致結論）
+
+## P1 高價值 — 已完成項目（archived 2026-03-30）
+- [x] **恐慌麻痺效應（Paper 4: Volatility Absorption）**：33p 論文完成，3 輪 Codex 審查通過，已上架 Supabase（target JFE）。K716/K718/K721 支撐。4 項最終殘留已修正。
+- [x] **VT-Trend**：6 項 K585 Codex 修正完成（2026-03-30）
+
