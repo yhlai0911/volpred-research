@@ -668,7 +668,7 @@ K519-K521 完成結果 + K527 Volume-GARCH 結果：見 `docs/research_archive/c
 - [ ] **Fix K746 Granger methodology**：用 forward-looking RV（非 backward 22d RV）重做 BTC→VIX Granger 檢定。若仍顯著，可作為 Paper 6 方向
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
 - [x] **K753 Liquidity-Vol**：NULL — partial r=0.089, VIX 已定價 volume。VIX sufficiency #12
-- [ ] **Volume Exhaustion Effect**：K753 發現極端成交量（>2x avg）後 VIX spike 機率反而最低（12.6% vs 21%）。反直覺，值得專門實驗
+- [x] **Volume Exhaustion Effect**：K754 REJECTED — extreme volume 預測更高 vol（+86.5%, t=6.01），非更低。K753 是 confound：VIX 已高→mean revert→低 spike 但高 RV
 - [ ] **VT Insurance 實務指南頁面**：K738 decision guide（γ≥4.5）已確認，做成網站互動工具（`/vt-calculator`）
 
 **中優先（新研究主題）：**

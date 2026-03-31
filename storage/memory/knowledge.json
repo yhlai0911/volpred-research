@@ -17914,5 +17914,45 @@
     "results_file": "experiments/k739b_taiwan_vt_fixed_results.json",
     "created_at": "2026-03-31T12:25:31.617851",
     "phase": "Phase_VT_CrossValidation"
+  },
+  {
+    "id": "K754",
+    "title": "K754: Volume Exhaustion Effect — Extreme Volume Does NOT Predict Lower Future Vol (Resolves K753 Paradox)",
+    "content": "[提出: Claude (from K753 finding), 執行: Claude] K753 found extreme volume days (>2x avg) have lowest VIX spike prob (12.6% vs 21%). K754 tests whether this means lower FUTURE volatility. RESULT: OPPOSITE — extreme volume is followed by 86.5% HIGHER 5d realized vol (t=6.01, p<0.001, Cohen d=0.75). The K753 spike probability was misleading because extreme volume already occurs DURING high-vol periods (mean VIX 25.6 vs 19.3), so VIX has already spiked. The mean-reversion of VIX (5d VIX change -2.40 vs +0.06, t=-4.30) explains the lower spike prob — VIX drops FROM the already-elevated level, not TO a lower level. Key findings: (1) 95 extreme days in 20 yrs (4.8/yr), 76% are down days, 35% cluster next-day; (2) Forward RV is HIGHER at all horizons (1d/5d/22d all +65-87%); (3) VIX DROPS after extreme vol (mean reversion), but future RV stays elevated; (4) No direction asymmetry (UP vs DOWN extreme → same fwd RV, t=-0.32); (5) Strategy: vol_exhaust_simple Sharpe 0.59 vs 12/VIX 0.60 — NO improvement (DM t=0.39); (6) Cross-OOS: wins only 1/5 periods; (7) Effect stable across all sub-periods (2006-2025). CONCLUSION: Volume exhaustion is real for VIX level (mean reversion) but NOT for realized vol. Extreme volume signals ongoing turbulence, not resolution. The K753 finding was a CONFOUND: low spike prob because VIX is already high, not because risk is low.",
+    "tags": [
+      "volume",
+      "VIX",
+      "realized volatility",
+      "mean reversion",
+      "SPY",
+      "null result",
+      "confound",
+      "K753"
+    ],
+    "data_source": "yfinance SPY/^VIX 2006-2026",
+    "experiment_file": "experiments/k754_volume_exhaustion.py",
+    "results_file": "experiments/k754_volume_exhaustion_results.json",
+    "created_at": "2026-03-30T12:00:00"
+  },
+  {
+    "id": "know_20260331_045518_k746b",
+    "title": "K746b: ★★ Bitcoin-VIX Crypto Fear Channel — FIXED Methodology Confirms Bidirectional Causality",
+    "content": "[提出: Codex (K746 review), 執行: Claude] Codex 審查 K746 發現 2 個 HIGH bug：(1) Granger 用 backward 22d RV（overlapping），(2) Fisher z-test 比較 BTC-SPY return corr 而非 VIX-BTC_RV corr。K746b 修正後結果：**VIX → BTC vol Granger 因果仍顯著**（AIC-optimal lag=7, p=0.013），但弱於 benchmark VIX→SPY（F=739 vs F=2.89）。**BTC vol → VIX 更強**（AIC-opt lag=10, p=0.0002, F=14.8 at lag 1）——非對稱性得到確認。Fisher z-test 修正為 VIX-BTC_RV 相關：Pre-2021=0.172 → 2021+=0.290，z=-3.29, p=0.001（顯著增強）。Andrews (1993) sup-Wald 確認斷點在 2022-08-10（sup=162.5, p<0.01），非人為假設 2021。關鍵發現：BTC 恐慌→VIX 因果強於反向，且 coupling 在機構化後增強。Portfolio：5% BTC 靜態提升 Sharpe 1.06→1.28；VIX>25 條件式避險有效但 TX cost 抵消部分收益。數據：yfinance BTC-USD/SPY/GLD/VIX 2015-2026, n=2803。",
+    "tags": [
+      "bitcoin",
+      "VIX",
+      "granger-causality",
+      "structural-break",
+      "crypto",
+      "volatility-spillover",
+      "methodology-fix",
+      "andrews-test",
+      "K746b"
+    ],
+    "data_source": "yfinance (BTC-USD, SPY, GLD, ^VIX)",
+    "experiment_id": "K746b",
+    "timestamp": "2026-03-31T04:55:18.324685+00:00",
+    "category": "research",
+    "priority": 2
   }
 ]
