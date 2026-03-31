@@ -150,7 +150,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 |---|------|---------|------|
 | 1 | **同期間比較** | `evaluate_new_strategy.py` Sharpe **≥ 已上架策略中位數**（不需要 #1，差不多就行） | `uv run python scripts/evaluate_new_strategy.py` |
 | 2 | **Cross-OOS** | 5 個非重疊 2 年期間，勝 BH 50/50 **≥ 3/5** | 回測腳本（可用 2006-2026） |
-| 3 | **Codex 審查** | 無 HIGH severity bug（lag/lookahead/TX） | `/codex-cli -s read-only` |
+| 3 | **Codex 審查** | 無 HIGH severity bug（lag/lookahead/TX） | `/codex:review` 或 `/codex:adversarial-review` |
 | 4 | **Sensitivity** | 參數 ±20% 變動後 Sharpe 不降 > 30% | 回測腳本 |
 | 5 | **MDD 可接受** | 同期間 MDD **< -20%** | `evaluate_new_strategy.py` 輸出 |
 
@@ -470,8 +470,8 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 15. 設計實驗時預估運行時間，控制在合理範圍（< 3-5 分鐘）
 
 **Step 6: 錯誤處理與 AI 協作規則**
-16. 程式跑不出結果或產生錯誤時，**必須用 Codex CLI 檢查並修正**——不要自己猜、不要反覆重試同一個錯
-17. Gemini API 額度用完時，**轉由 Codex CLI 協助**（embedding 除外的分析任務）
+16. 程式跑不出結果或產生錯誤時，**必須用 `/codex:review` 或 `/codex:rescue` 檢查並修正**——不要自己猜、不要反覆重試同一個錯
+17. Gemini API 額度用完時，**轉由 Codex 協助**（`/codex:rescue` 委派任務）
 18. 為避免 Gemini API 額度快速用完：知識索引用 `auto`（增量）不用 `build`（全量），每 session 論文修訂任務**不可過於集中**（分散在不同時段執行）
 
 ### 實驗完整流程（強制，不可跳步）
@@ -563,7 +563,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 | AI | 角色 | 使用方式 | 擅長 |
 |---|---|---|---|
 | **Claude**（主研究員）| 實驗執行、分析、記憶管理、論文寫作 | 直接執行 | 深度分析、code、持續研究 |
-| **Codex (GPT)**| 嚴格審查、策略建議、新方向 | `/codex-cli` | 找漏洞、結構性問題、editorial advice |
+| **Codex (GPT)**| 嚴格審查、策略建議、新方向 | `/codex:review`、`/codex:adversarial-review`、`/codex:rescue` | 找漏洞、結構性問題、editorial advice |
 | **Gemini** | 方法論建議、文獻連結、robustness 建議 | `/gemini-cli` | 學術框架、cross-reference、新測試建議 |
 
 ### 協作場景
