@@ -305,15 +305,35 @@ uv run python scripts/list_new_strategy.py \
 11. **發佈 Feed 文章**：用 `feed-publisher` skill
 - 詳細流程見 `.claude/skills/autonomous-research/references/add-strategy-guide.md`
 
-### 論文更新標準程序（每次編譯新版都要做）
-1. **編譯 PDF**：`cd paper/<name> && xelatex main.tex && xelatex main.tex`
-2. **複製 PDF 到前端**：`cp paper/<name>/main.pdf frontend-v2-fix/public/paper/<slug>.pdf`
-   - leverage-direction → `leverage-direction-matters.pdf`
-   - taiwan-vt → `taiwan-vt-tz-arbitrage.pdf`
-   - vt-trend-following → `vt-trend-following.pdf`
-3. **更新論文 metadata**（Supabase `papers` table 的 `pdf_url` 指向 `/paper/<slug>.pdf`）
-4. **部署前端**（因為 PDF 在 `public/` 裡，需要 redeploy 才會更新）
-5. **審查流程**：Codex 審查 → Gemini 審查 → 修正 → 重新編譯 → 重複 1-4
+### 論文更新標準程序（每次修訂都要完整執行，不可跳步）
+
+**審查 → 修正 → 版本化 → 平台同步，一氣呵成。**
+
+```
+1. 審查：/latex-academic-reviewer + /citation-verifier → review_v1.tex + citation_check.md
+2. 修正：body_v2.tex（保留原版）+ v1_to_v2_diff.tex（差異報告）
+3. 編譯：cd paper/<name> && xelatex main_v2.tex && xelatex main_v2.tex
+4. 上傳 Supabase Storage：uv run volpred ops paper-upload-pdf --paper-id <id> --file paper/<name>/main_v2.pdf
+5. 更新 metadata：uv run volpred ops paper-upsert --paper-id <id> --pages <N>
+6. 複製到前端：cp paper/<name>/main_v2.pdf frontend-v2-fix/public/paper/<slug>.pdf
+7. Git commit：含 review + diff + v2 所有檔案
+8. 驗證：curl API 確認 pages 和 pdf_url 正確
+```
+
+**版本命名規則**：
+- `main.tex` / `body.tex` = 原版（不動）
+- `main_v2.tex` / `body_v2.tex` = 修正版
+- `review_v1.tex` = 審查報告
+- `v1_to_v2_diff.tex` = 差異對照
+
+**PDF slug 對照**：
+- leverage-direction → `leverage-direction-matters.pdf`
+- taiwan-vt → `taiwan-vt-tz-arbitrage.pdf`
+- vt-trend-following → `vt-trend-following.pdf`
+- volatility-absorption → `volatility-absorption.pdf`
+- vix-sufficiency → `vix-sufficiency.pdf`
+
+**⚠️ 修正完不更新平台 = 沒修。步驟 4-6 不可省略。**
 
 ## 快速指令
 ```bash
