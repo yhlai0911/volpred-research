@@ -1,0 +1,242 @@
+{
+  "experiment_id": "K759",
+  "title": "Financial Sector Early Warning System for TSMC Volatility",
+  "data_source": "yfinance",
+  "tickers": {
+    "0050": "0050.TW",
+    "TSMC": "2330.TW",
+    "Fubon": "2881.TW",
+    "Cathay": "2882.TW",
+    "VIX": "^VIX"
+  },
+  "prior_work": "K757b (Granger causality confirmed), K739b (TW calendar methodology)",
+  "period": "2010-01-04 to 2026-03-27",
+  "n_obs_prices": 3966,
+  "n_obs_returns": 3965,
+  "n_vix_ffilled": 130,
+  "proposer": "Claude (from K757b direction)",
+  "executor": "Claude",
+  "part_a": {
+    "fsi_stats": {
+      "mean": 0.2162,
+      "std": 0.0901,
+      "median": 0.196,
+      "p75": 0.2461,
+      "p90": 0.3337,
+      "p95": 0.3972,
+      "skew": 1.664,
+      "kurtosis": 3.733
+    },
+    "stress_days": 987,
+    "severe_stress_days": 395,
+    "tsmc_spike_threshold": 0.4159,
+    "tsmc_spike_days": 190,
+    "lead_lag_analysis": {
+      "lead_1d": {
+        "p_spike_given_stress": 0.1582,
+        "p_spike_given_no_stress": 0.0115,
+        "lift": 13.77,
+        "n_stress_days": 986,
+        "n_no_stress_days": 2959
+      },
+      "lead_2d": {
+        "p_spike_given_stress": 0.1553,
+        "p_spike_given_no_stress": 0.0125,
+        "lift": 12.42,
+        "n_stress_days": 985,
+        "n_no_stress_days": 2959
+      },
+      "lead_3d": {
+        "p_spike_given_stress": 0.1524,
+        "p_spike_given_no_stress": 0.0135,
+        "lift": 11.28,
+        "n_stress_days": 984,
+        "n_no_stress_days": 2959
+      },
+      "lead_5d": {
+        "p_spike_given_stress": 0.1456,
+        "p_spike_given_no_stress": 0.0159,
+        "lift": 9.17,
+        "n_stress_days": 982,
+        "n_no_stress_days": 2959
+      },
+      "lead_10d": {
+        "p_spike_given_stress": 0.1228,
+        "p_spike_given_no_stress": 0.0237,
+        "lift": 5.19,
+        "n_stress_days": 977,
+        "n_no_stress_days": 2959
+      },
+      "lead_15d": {
+        "p_spike_given_stress": 0.0967,
+        "p_spike_given_no_stress": 0.0324,
+        "lift": 2.98,
+        "n_stress_days": 972,
+        "n_no_stress_days": 2959
+      },
+      "lead_20d": {
+        "p_spike_given_stress": 0.0743,
+        "p_spike_given_no_stress": 0.0399,
+        "lift": 1.86,
+        "n_stress_days": 969,
+        "n_no_stress_days": 2957
+      }
+    },
+    "stress_episodes": {
+      "count": 60,
+      "mean_duration": 16.4,
+      "median_duration": 9.5,
+      "max_duration": 134
+    }
+  },
+  "part_b": {
+    "n_obs": 3941,
+    "simple_corr_fsi_future": 0.4467,
+    "simple_corr_vix_future": 0.3746,
+    "partial_corr_fsi_given_vix": 0.3559,
+    "partial_corr_t": 23.902,
+    "partial_corr_p": 0.0,
+    "model_vix_only": {
+      "r2": 0.1404,
+      "adj_r2": 0.1401,
+      "vix_coef": 0.004601,
+      "vix_t": 18.42
+    },
+    "model_vix_plus_fsi": {
+      "r2": 0.2493,
+      "adj_r2": 0.2489,
+      "vix_coef": 0.002955,
+      "vix_t": 12.89,
+      "fsi_coef": 0.333626,
+      "fsi_t": 15.14,
+      "fsi_p": 0.0
+    },
+    "delta_r2": 0.1089,
+    "dm_test": {
+      "mean_loss_diff": 0.000777,
+      "dm_t_hac": 2.237,
+      "dm_p": 0.0253
+    },
+    "roc_analysis": {
+      "n_obs": 3941,
+      "spike_rate": 0.0624,
+      "auc_fsi": 0.8045,
+      "auc_vix": 0.8019,
+      "auc_combo": 0.8608,
+      "delta_auc_combo_vs_vix": 0.059
+    },
+    "bootstrap_auc_diff": {
+      "n_boot": 5000,
+      "mean_diff_fsi_vs_vix": 0.0028,
+      "se": 0.0215,
+      "ci_95_lower": -0.0404,
+      "ci_95_upper": 0.0444
+    }
+  },
+  "part_c": {
+    "tx_cost_bps": 10,
+    "strategies": {
+      "BH_0050": {
+        "ann_return": 0.1052,
+        "ann_vol": 0.2622,
+        "sharpe": 0.401,
+        "mdd": -0.7734,
+        "calmar": 0.136,
+        "total_tx_cost": 0.0,
+        "n_obs": 3965
+      },
+      "8.63/VIX_VT": {
+        "ann_return": 0.0674,
+        "ann_vol": 0.1452,
+        "sharpe": 0.464,
+        "mdd": -0.4843,
+        "calmar": 0.139,
+        "total_tx_cost": 0.1037,
+        "n_obs": 3964
+      },
+      "VT+FSI_Override": {
+        "ann_return": 0.0563,
+        "ann_vol": 0.1403,
+        "sharpe": 0.402,
+        "mdd": -0.4843,
+        "calmar": 0.116,
+        "total_tx_cost": 0.1182,
+        "n_obs": 3964
+      },
+      "Monthly_VT+FSI": {
+        "ann_return": 0.0393,
+        "ann_vol": 0.142,
+        "sharpe": 0.277,
+        "mdd": -0.4871,
+        "calmar": 0.081,
+        "total_tx_cost": 0.0438,
+        "n_obs": 3946
+      },
+      "event_study": {
+        "n_episodes": 60,
+        "window_days": 20,
+        "avg_cum_return_20d": {
+          "BH_0050": -0.0062,
+          "8.63/VIX_VT": -0.0015,
+          "VT+FSI_Override": -0.0011
+        }
+      },
+      "dm_tests": {
+        "VT+FSI_Override_vs_8.63/VIX_VT": {
+          "dm_t": -7.132,
+          "dm_p": 0.0
+        },
+        "Monthly_VT+FSI_vs_8.63/VIX_VT": {
+          "dm_t": -4.255,
+          "dm_p": 0.0
+        }
+      }
+    }
+  },
+  "part_d": {
+    "oos_periods": {
+      "2012-2013": {
+        "bh_sharpe": 0.754,
+        "vt_sharpe": 0.808,
+        "override_sharpe": 0.831,
+        "winner": "Override"
+      },
+      "2014-2015": {
+        "bh_sharpe": -0.512,
+        "vt_sharpe": -0.545,
+        "override_sharpe": -0.589,
+        "winner": "VT"
+      },
+      "2016-2017": {
+        "bh_sharpe": 1.472,
+        "vt_sharpe": 1.584,
+        "override_sharpe": 1.601,
+        "winner": "Override"
+      },
+      "2018-2019": {
+        "bh_sharpe": 0.911,
+        "vt_sharpe": 1.3,
+        "override_sharpe": 1.224,
+        "winner": "VT"
+      },
+      "2020-2021": {
+        "bh_sharpe": 1.271,
+        "vt_sharpe": 1.421,
+        "override_sharpe": 1.524,
+        "winner": "Override"
+      }
+    },
+    "override_win_rate": "3/5",
+    "vt_win_rate": "2/5"
+  },
+  "summary": {
+    "fsi_threshold_p75": 0.2461,
+    "fsi_adds_predictive_power": true,
+    "partial_corr_significant": true,
+    "dm_test_significant": true,
+    "auc_improvement": 0.059,
+    "override_improves_sharpe": false,
+    "override_oos_win_rate": "3/5"
+  },
+  "timestamp": "2026-03-31T07:41:14.237235+00:00"
+}
