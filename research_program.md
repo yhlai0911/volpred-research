@@ -712,3 +712,17 @@ K519-K521 完成結果 + K527 Volume-GARCH 結果：見 `docs/research_archive/c
 #### 用戶提出方向（2026-03-31）
 - [ ] **HAR-RV with 5-day RV**：用 5 日內日頻 squared returns 加總作為 5-day RV，避免日內數據不足。可討論中期（週/月/季/年）波動預測。[提出: 用戶]
 - [ ] **MEM（Multiplicative Error Model）**：Engle & Gallo (2006) 的相乘誤差模型，作為 GARCH 和 HAR 之外的第三條路線。適合正值時間序列（RV, volume, duration）。[提出: 用戶]
+
+#### 前沿文獻搜尋（2026-03-31）
+**Vol Forecasting 新模型（2025-2026 papers）：**
+- [ ] **HAR-PD（Path-Dependent）**：結合 HAR + path-dependent vol model，利用價格路徑的長短期記憶。arXiv:2503.00851 [提出: 文獻搜尋]
+- [ ] **HAR + Wavelet Decomposition**：小波分解 RV → HAR 預測，ScienceDirect 2026 [提出: 文獻搜尋]
+- [ ] **HAR-GNN（Graph Neural Network）**：用圖神經網路捕捉跨資產 vol 結構。ScienceDirect 2024 [提出: 文獻搜尋]
+- [ ] **Multiplicative Volatility Factor (MVF)**：非負+厚尾+簡約的乘法因子模型。ScienceDirect 2025（J. Econometrics）[提出: 文獻搜尋]
+- [ ] **RGARCH-CARR-SK**：結合 Realized GARCH + CARR + 高階動差（Gram-Charlier），2025 [提出: 文獻搜尋]
+- [ ] **VOLARE 平台**：提供 HAR/HAR-Q/MEM/AMEM 的標準化比較框架。arXiv:2602.19732 [提出: 文獻搜尋]
+
+**Tail Risk + Conformal Prediction（前沿方法）：**
+- [ ] **Regime-Weighted Conformal VaR（RWC）**：regime-similarity weights + 指數時間衰減校準 VaR。Model-agnostic wrapper。arXiv:2602.03903 (2026) [提出: 文獻搜尋]
+- [ ] **Conformal Predictive Portfolio Selection（CPPS）**：用 conformal prediction interval 選投資組合。arXiv:2410.16333 [提出: 文獻搜尋]
+- [ ] **Risk Parity + Heavy-Tailed + Regime-Switching DCC**：Paolella (2025, JTSA)，用 ES 做風險平價 [提出: 文獻搜尋]
