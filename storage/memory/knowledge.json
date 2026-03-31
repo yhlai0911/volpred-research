@@ -18791,5 +18791,20 @@
     "importance": "medium",
     "codex_reviewed": true,
     "codex_findings": "MEM tau HIGH (state-timing bug), EWMA tau MEDIUM (init leak). EWMA MF2 structurally OK."
+  },
+  {
+    "id": "K787",
+    "type": "experiment",
+    "title": "HAR Directional: 67.9% Vol Direction Accuracy (Codex reviewed)",
+    "content": "[提出: 文獻, 執行: Claude] HAR logistic 67.9% 方向準確率(z=8.03)。VIX 對方向無用(49.6%)=VIX sufficiency #26。Codex: lag LOW, econ test HIGH(1d vs 5d mismatch)。Smooth-weight 仍優於 binary timing。",
+    "tags": [
+      "directional_prediction",
+      "HAR",
+      "VIX_sufficiency"
+    ],
+    "data_source": "yfinance SPY/VIX",
+    "experiment_file": "experiments/k787_har_directional.py",
+    "timestamp": "2026-03-31T14:44:22.805043+00:00",
+    "codex_reviewed": true
   }
 ]
