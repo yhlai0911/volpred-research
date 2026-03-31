@@ -18378,5 +18378,23 @@
     "importance": 3,
     "data_source": "FRED (WALCL, EFFR, HY spread, yield slope, STLFSI2, DGS10) + yfinance",
     "timestamp": "2026-03-31T10:27:06.914048+00:00"
+  },
+  {
+    "id": "K770",
+    "title": "K770 MEM: AMEM BEATS HAR-ABS on SPY (DM=-7.46, Harvey PASS) — vol forecast ceiling BROKEN",
+    "content": "[提出: 用戶, 執行: Claude] K770 MEM model implementation. AMEM (Asymmetric MEM) significantly beats HAR-ABS on SPY (QLIKE 0.473 vs 0.502, DM=-7.46, Harvey PASS). First model to break the HAR-ABS ceiling. MEM/AMEM rank #1-2 across all 3 assets (SPY/GLD/0050). AMEM leverage γ=0.184 for SPY captures asymmetric vol response. GLD and 0050 improvement NS (no leverage effect). MEM is a genuine third paradigm: non-negative, heavy-tailed (Gamma innovations k=1.1-1.3), persistence 0.96-0.99. All smart models crush GJR-GARCH and EWMA (Harvey t>>3.0).",
+    "tags": [
+      "K770",
+      "MEM",
+      "AMEM",
+      "HAR-ABS",
+      "ceiling-broken",
+      "user-direction",
+      "vol-forecasting"
+    ],
+    "phase": "research",
+    "importance": 5,
+    "data_source": "yfinance (SPY/GLD/0050.TW), 2007-2026",
+    "timestamp": "2026-03-31T10:49:26.675403+00:00"
   }
 ]
