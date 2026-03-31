@@ -18652,5 +18652,21 @@
     "phase": "research",
     "importance": 5,
     "timestamp": "2026-03-31T12:36:46.076489+00:00"
+  },
+  {
+    "id": "lit-fair-vol-comparison",
+    "title": "Literature: Fair volatility model comparison framework (Hansen&Lunde 2005, Patton 2011, MCS)",
+    "content": "[提出: 用戶 + 文獻搜尋] Academic best practice for fair vol model comparison: (1) Hansen&Lunde 2005: r² as proxy severely distorts ranking, use 5-min RV instead. (2) Patton 2011: QLIKE is proxy-robust IF proxy is conditionally unbiased for σ². r² IS unbiased (E[r²]=σ²), |r| is NOT. So QLIKE on r² is correct, QLIKE on |r| is biased. (3) Patton&Sheppard 2009: QLIKE has more power than MSE on r² proxy. (4) Hansen,Lunde&Nason 2011: MCS for multi-model comparison without data snooping. (5) Economic evaluation: use portfolio Sharpe/utility, not just forecast accuracy. Our K777 should primarily use QLIKE on r² (not |r|) + Spearman (distribution-free) + MCS.",
+    "tags": [
+      "methodology",
+      "Patton2011",
+      "Hansen-Lunde",
+      "MCS",
+      "fair-comparison",
+      "QLIKE"
+    ],
+    "phase": "research",
+    "importance": 5,
+    "timestamp": "2026-03-31T12:41:09.555182+00:00"
   }
 ]
