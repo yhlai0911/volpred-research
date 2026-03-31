@@ -18709,5 +18709,24 @@
     "results_file": "experiments/k780_tail_first_es_results.json",
     "created_at": "2026-03-31T13:15:11.714654+00:00",
     "significance": "HIGH — first comprehensive VaR/ES backtest comparing all 5 model families; shows forecast accuracy and risk management are different criteria with different winners"
+  },
+  {
+    "id": "K783",
+    "type": "experiment",
+    "title": "Window Size Sensitivity: Expanding Window Beats w=2000 (DM=-3.23, Harvey PASS)",
+    "content": "[提出: 文獻 Feng & Zhang 2025, 執行: Claude] 系統性測試 GJR-GARCH window size 252~ALL(expanding) 對 OOS QLIKE 影響。w=2000 並非最優——expanding window (ALL) QLIKE=0.529 顯著勝過 w=2000 的 0.560（DM=-3.226, Harvey PASS）。w=3780（DM=-4.222）和 w=5040（DM=-3.960）也顯著更好。模式：中間 window (1000-2000) 最差，短 (252-504) 和長 (3780+) 都較好。Persistence bias 存在（w=252: 0.963 vs w=ALL: 0.983）但不直接轉化為更差預測。GARCH(1,1) 類似。EWMA 0.593 遠遜 GJR-expanding 0.529。需跨資產驗證。",
+    "tags": [
+      "window_size",
+      "GARCH",
+      "GJR",
+      "sensitivity",
+      "expanding_window",
+      "QLIKE",
+      "methodology"
+    ],
+    "data_source": "yfinance SPY 2000-2024",
+    "experiment_file": "experiments/k783_window_sensitivity.py",
+    "timestamp": "2026-03-31T14:13:49.651497+00:00",
+    "importance": "high"
   }
 ]

@@ -328,7 +328,12 @@
 
 Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decomposition (3) Dispersion trading
 
-### Gemini 建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
+### Gemini 第 2 次建議（2026-03-31，行為金融 + 方法論 + 實務工具）[提出: Gemini]
+- [ ] **Retail Reflexivity & Gamma-Driven Skew**：0DTE 散戶 flow 導致 delta-hedging 連鎖反應，可能打破 VIX sufficiency。量化 "Volatility Gap"（VIX-implied vs flow-induced realized move）。⚠️ BLOCKED: 需 order flow 數據
+- [ ] **Path Signatures for Rough Volatility**：用 rough path theory 的 signature transform 編碼日內價格路徑的幾何特性，捕捉 HAR 遺漏的路徑依賴性。需 5-min 數據（ETA 04/11）
+- [ ] **Convexity-Adjusted Insurance Premium Tool**：VT 的核心問題是 carry cost。用 Vol-of-Vol 聚類判斷保險是否被高估，建議「Strategic Under-Hedging」在高 VoV-decay 期間回收被拖累的 alpha。可結合 K41 保險費定價（~4%/yr）
+
+### Gemini 第 1 次建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
 - [ ] **Taiwan Price Limit Latent Volatility**：台股 ±10% 漲跌幅限制壓抑觀察波動率，limit-hit 日隱含更高真實 vol。GARCH-X 加 LimitHit dummy。Data: yfinance
 - [ ] **FRED STLFSI4 Macro Stress Regime**：用聖路易金融壓力指數做 regime switching，壓力期降低 target vol (12%→8%)。Data: FRED STLFSI4
 - [ ] **VIX→Taiwan Vol Spillover Strategy**：VIX 在美股時段 spike > 15% → 次日台股開盤自動減倉。比 return lead-lag 更直接。Data: yfinance
@@ -359,7 +364,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ## 前沿文獻方向（2025-2026）
 
 ### 即刻可行動（不需新數據）
-1. ★ Window Size Sensitivity（確認 W=2000 最優）— Feng & Zhang 2025, J. Forecasting
+1. ★ ~~Window Size Sensitivity~~ → **K783 完成**：expanding window 以 QLIKE=0.529 勝 w=2000 的 0.560（DM=-3.23 Harvey PASS）。w=2000 不是最優。
+   - [ ] **K783b: 跨資產 Window Sensitivity**：在 0050.TW、QQQ、GLD、BTC 重複 K783 驗證 expanding 優勢是否普遍
+   - [ ] **K783c: 跨期驗證**：不同 OOS 期間（2019-2020 高波動、2015-2016 溫和期）expanding 是否仍勝
 2. ★ MF2-GARCH 實作（短期 GJR + 長期 MEM）— Conrad & Engle 2025, J. Applied Econometrics
 3. KAN-GARCH-MIDAS（結構化 NN 可能突破 ML ceiling）— J. Applied Economics 2025
 4. VIX-Managed Portfolio 文獻引用整理 — Int. Rev. Financial Analysis 2024（支持 Paper 3）
@@ -381,6 +388,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### ML-GARCH 混合
 - [ ] GARCH-Informed NN (GINN) — arXiv:2410.00288
+- [ ] ★ **GARCH-GRU** — arXiv:2504.09380（將 GARCH(1,1) 嵌入 GRU cell，unified recurrent unit）。即刻可做。
+- [ ] **HAR Directional Prediction** — Applied Economics Letters 2024（預測 RV 方向而非幅度，ML integration）
+- [ ] **Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）
 - [ ] Sentiment-Augmented GARCH-LSTM — Computational Economics 2025
 - [ ] KAN for VIX Forecasting — Expert Systems with Applications 2025
 - [ ] CNN-Transformer Hybrid — European J. Finance 2025
