@@ -18301,5 +18301,32 @@
     "confidence": 0.85,
     "category": "var_calibration",
     "created_at": "2026-03-31T10:09:14.816929+00:00"
+  },
+  {
+    "id": "K767",
+    "experiment_id": "K767",
+    "title": "K767: HAR-RV with 5-Day Realized Volatility — Multi-Horizon, Cross-Asset (No Intraday Data)",
+    "content": "[提出: 用戶, 執行: Claude] HAR-RV using daily-frequency multi-scale RV (5d/22d/66d squared returns sum) across SPY/GLD/0050.TW, 3 horizons (5d/22d/66d), expanding window OOS (2008-2026, N≈3600-4500). KEY RESULTS: (1) log-HAR dominates at longer horizons — best for GLD all 3 horizons and 0050.TW 22d+66d. Log specification avoids OLS negativity issues. (2) For SPY: GJR-GARCH wins 5d (QLIKE=0.464), VIX-implied wins 22d (0.387), HAR-5d+22d wins 66d (0.443). Different horizons favor different models. (3) HAR-full beats GARCH in 5/9 (56%) asset-horizon pairs — multi-scale helps. (4) Predictability increases with horizon for non-SPY: GLD R²_OOS 0.22→0.30→0.30; 0050.TW 0.05→0.09→0.10. (5) Only 5/57 DM tests pass Harvey t>3.0 — most model differences NOT significant. (6) 0050.TW much harder to forecast than SPY/GLD. (7) Daily-frequency RV works well — no intraday data needed for medium-horizon forecasting. Data: yfinance 2006-2026. 0050.TW had 1 data artifact removed (2014-01-02: -138.9% return from unadjusted split).",
+    "tags": [
+      "HAR-RV",
+      "realized_volatility",
+      "multi-horizon",
+      "cross-asset",
+      "log-HAR",
+      "SPY",
+      "GLD",
+      "0050.TW",
+      "GARCH",
+      "VIX",
+      "QLIKE",
+      "expanding_window",
+      "Corsi_2009"
+    ],
+    "data_source": "yfinance (daily prices: SPY, GLD, 0050.TW, ^VIX)",
+    "data_period": "2006-2026",
+    "created_at": "2026-03-31T18:16:10.329119",
+    "phase": "Phase_5",
+    "experiment_script": "experiments/k767_har_5day_rv.py",
+    "results_file": "experiments/k767_har_5day_rv_results.json"
   }
 ]

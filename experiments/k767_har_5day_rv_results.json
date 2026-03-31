@@ -1,0 +1,1368 @@
+{
+  "experiment_id": "K767",
+  "title": "HAR-RV with 5-Day Realized Volatility \u2014 Avoiding Intraday Data",
+  "timestamp": "2026-03-31T18:13:31.494762",
+  "data_source": "yfinance (daily)",
+  "methodology": {
+    "rv_construction": "RV_Nd = sum(r\u00b2_{t-N+1}...r\u00b2_t) from daily log returns",
+    "har_model": "RV_h(t+h) = \u03b2\u2080 + \u03b2\u2081\u00d7RV_5d(t) + \u03b2\u2082\u00d7RV_22d(t) + \u03b2\u2083\u00d7RV_66d(t)",
+    "estimation": "OLS, expanding window, min 504 training days",
+    "evaluation": "QLIKE (primary), MSE, R\u00b2_OOS, MZ regression",
+    "horizons": "5d (weekly), 22d (monthly), 66d (quarterly)",
+    "dm_test": "HAC-corrected with h-1 lags, Harvey (2016) t>3.0 threshold"
+  },
+  "literature": [
+    "Corsi (2009, JFE) \u2014 HAR-RV model",
+    "Andersen et al. (2003, Econometrica) \u2014 Realized volatility theory",
+    "Patton (2011, JoE) \u2014 QLIKE loss function",
+    "Hansen & Lunde (2005, JBES) \u2014 GARCH(1,1) benchmark",
+    "Harvey (2016) \u2014 t>3.0 threshold for multiple testing"
+  ],
+  "assets": {
+    "SPY": {
+      "ticker": "SPY",
+      "n_total": 5025,
+      "data_start": "2006-04-07",
+      "data_end": "2026-03-30",
+      "descriptive_stats": {
+        "RV_5d": {
+          "mean": 0.0007499139771953894,
+          "std": 0.002041576885054535,
+          "skew": 9.657465699911532,
+          "kurtosis": 123.4519917739629,
+          "AC1": 0.9390472038072217,
+          "AC5": 0.631426783273868
+        },
+        "RV_22d": {
+          "mean": 0.003296512803250049,
+          "std": 0.0072114514371812745,
+          "skew": 6.470817062634656,
+          "kurtosis": 48.01510389854977,
+          "AC1": 0.9938880236424855,
+          "AC5": 0.9440832264530623
+        },
+        "RV_66d": {
+          "mean": 0.00988061983094544,
+          "std": 0.01696427684877342,
+          "skew": 4.697748743105654,
+          "kurtosis": 25.084334789842792,
+          "AC1": 0.9987946531482346,
+          "AC5": 0.9870401267331687
+        }
+      },
+      "horizons": {
+        "5d": {
+          "horizon_days": 5,
+          "n_oos": 4516,
+          "oos_start": "2008-04-10",
+          "oos_end": "2026-03-23",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.503757,
+              "MSE": 3.010412e-06,
+              "R2_OOS": 0.3451,
+              "Corr": 0.6656,
+              "MZ_R2": 0.443,
+              "MZ_slope": 0.6828,
+              "MZ_intercept": 0.0001780692
+            },
+            "HAR-5d": {
+              "QLIKE": 0.510609,
+              "MSE": 3.009889e-06,
+              "R2_OOS": 0.3452,
+              "Corr": 0.6217,
+              "MZ_R2": 0.3865,
+              "MZ_slope": 0.7567,
+              "MZ_intercept": 0.0001307642
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.467817,
+              "MSE": 2.977729e-06,
+              "R2_OOS": 0.3522,
+              "Corr": 0.6611,
+              "MZ_R2": 0.4371,
+              "MZ_slope": 0.6968,
+              "MZ_intercept": 0.0001696303
+            },
+            "log-HAR": {
+              "QLIKE": 0.481314,
+              "MSE": 3.120892e-06,
+              "R2_OOS": 0.3211,
+              "Corr": 0.6004,
+              "MZ_R2": 0.3605,
+              "MZ_slope": 0.7549,
+              "MZ_intercept": 0.0001309768
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.463938,
+              "MSE": 2.765503e-06,
+              "R2_OOS": 0.3984,
+              "Corr": 0.6482,
+              "MZ_R2": 0.4201,
+              "MZ_slope": 0.8148,
+              "MZ_intercept": 0.0001348905
+            },
+            "EWMA": {
+              "QLIKE": 0.555493,
+              "MSE": 3.225649e-06,
+              "R2_OOS": 0.2983,
+              "Corr": 0.5655,
+              "MZ_R2": 0.3198,
+              "MZ_slope": 0.7941,
+              "MZ_intercept": 0.0001590114
+            },
+            "HistVol": {
+              "QLIKE": 0.836614,
+              "MSE": 4.577006e-06,
+              "R2_OOS": 0.0043,
+              "Corr": 0.2044,
+              "MZ_R2": 0.0418,
+              "MZ_slope": 0.5138,
+              "MZ_intercept": 0.0003727405
+            },
+            "VIX-implied": {
+              "QLIKE": 0.481608,
+              "MSE": 2.586401e-06,
+              "R2_OOS": 0.4373,
+              "Corr": 0.6804,
+              "MZ_R2": 0.4629,
+              "MZ_slope": 1.2637,
+              "MZ_intercept": -0.0004056127
+            }
+          },
+          "dm_tests": {
+            "GJR-GARCH_vs_HAR-full": {
+              "DM_stat": -1.2464,
+              "p_value": 0.2127,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_HAR-5d": {
+              "DM_stat": -2.0554,
+              "p_value": 0.0399,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_HAR-5d+22d": {
+              "DM_stat": -0.2113,
+              "p_value": 0.8326,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_log-HAR": {
+              "DM_stat": -0.9477,
+              "p_value": 0.3434,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_EWMA": {
+              "DM_stat": -3.2477,
+              "p_value": 0.0012,
+              "significant_harvey": true
+            },
+            "GJR-GARCH_vs_HistVol": {
+              "DM_stat": -4.2474,
+              "p_value": 0.0,
+              "significant_harvey": true
+            },
+            "GJR-GARCH_vs_VIX-implied": {
+              "DM_stat": -0.6465,
+              "p_value": 0.518,
+              "significant_harvey": false
+            }
+          },
+          "best_model": "GJR-GARCH",
+          "best_QLIKE": 0.463938,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.522989,
+            "HAR-5d": 0.507542,
+            "HAR-5d+22d": 0.450495,
+            "log-HAR": 0.452979,
+            "GJR-GARCH": 0.409064,
+            "EWMA": 0.499997,
+            "HistVol": 0.718393,
+            "VIX-implied": 0.457695
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.484525,
+            "HAR-5d": 0.513677,
+            "HAR-5d+22d": 0.485138,
+            "log-HAR": 0.509648,
+            "GJR-GARCH": 0.518813,
+            "EWMA": 0.610989,
+            "HistVol": 0.954834,
+            "VIX-implied": 0.505521
+          }
+        },
+        "22d": {
+          "horizon_days": 22,
+          "n_oos": 4499,
+          "oos_start": "2008-04-10",
+          "oos_end": "2026-02-26",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.443354,
+              "MSE": 4.240196e-05,
+              "R2_OOS": 0.2631,
+              "Corr": 0.6555,
+              "MZ_R2": 0.4297,
+              "MZ_slope": 0.6201,
+              "MZ_intercept": 0.0009679063
+            },
+            "HAR-5d": {
+              "QLIKE": 0.421324,
+              "MSE": 4.392006e-05,
+              "R2_OOS": 0.2367,
+              "Corr": 0.6087,
+              "MZ_R2": 0.3705,
+              "MZ_slope": 0.6293,
+              "MZ_intercept": 0.0009343746
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.388974,
+              "MSE": 4.288338e-05,
+              "R2_OOS": 0.2547,
+              "Corr": 0.6551,
+              "MZ_R2": 0.4292,
+              "MZ_slope": 0.6148,
+              "MZ_intercept": 0.0009684996
+            },
+            "log-HAR": {
+              "QLIKE": 0.40948,
+              "MSE": 4.281439e-05,
+              "R2_OOS": 0.2559,
+              "Corr": 0.5736,
+              "MZ_R2": 0.329,
+              "MZ_slope": 0.6805,
+              "MZ_intercept": 0.0009779955
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.393168,
+              "MSE": 4.497027e-05,
+              "R2_OOS": 0.2185,
+              "Corr": 0.5568,
+              "MZ_R2": 0.3101,
+              "MZ_slope": 0.6479,
+              "MZ_intercept": 0.001203139
+            },
+            "EWMA": {
+              "QLIKE": 0.54448,
+              "MSE": 5.000529e-05,
+              "R2_OOS": 0.131,
+              "Corr": 0.5174,
+              "MZ_R2": 0.2677,
+              "MZ_slope": 0.5832,
+              "MZ_intercept": 0.001427699
+            },
+            "HistVol": {
+              "QLIKE": 0.732663,
+              "MSE": 6.054116e-05,
+              "R2_OOS": -0.0521,
+              "Corr": 0.1954,
+              "MZ_R2": 0.0382,
+              "MZ_slope": 0.3941,
+              "MZ_intercept": 0.002063637
+            },
+            "VIX-implied": {
+              "QLIKE": 0.386972,
+              "MSE": 3.79274e-05,
+              "R2_OOS": 0.3409,
+              "Corr": 0.5955,
+              "MZ_R2": 0.3547,
+              "MZ_slope": 0.8879,
+              "MZ_intercept": -0.0002221844
+            }
+          },
+          "dm_tests": {
+            "VIX-implied_vs_HAR-full": {
+              "DM_stat": -0.9946,
+              "p_value": 0.32,
+              "significant_harvey": false
+            },
+            "VIX-implied_vs_HAR-5d": {
+              "DM_stat": -2.0349,
+              "p_value": 0.0419,
+              "significant_harvey": false
+            },
+            "VIX-implied_vs_HAR-5d+22d": {
+              "DM_stat": -0.1417,
+              "p_value": 0.8874,
+              "significant_harvey": false
+            },
+            "VIX-implied_vs_log-HAR": {
+              "DM_stat": -0.5531,
+              "p_value": 0.5802,
+              "significant_harvey": false
+            },
+            "VIX-implied_vs_GJR-GARCH": {
+              "DM_stat": -0.224,
+              "p_value": 0.8228,
+              "significant_harvey": false
+            },
+            "VIX-implied_vs_EWMA": {
+              "DM_stat": -1.8868,
+              "p_value": 0.0592,
+              "significant_harvey": false
+            },
+            "VIX-implied_vs_HistVol": {
+              "DM_stat": -2.481,
+              "p_value": 0.0131,
+              "significant_harvey": false
+            }
+          },
+          "best_model": "VIX-implied",
+          "best_QLIKE": 0.386972,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.445486,
+            "HAR-5d": 0.380755,
+            "HAR-5d+22d": 0.329545,
+            "log-HAR": 0.310056,
+            "GJR-GARCH": 0.315167,
+            "EWMA": 0.389257,
+            "HistVol": 0.545682,
+            "VIX-implied": 0.326498
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.441222,
+            "HAR-5d": 0.461875,
+            "HAR-5d+22d": 0.448377,
+            "log-HAR": 0.508859,
+            "GJR-GARCH": 0.471135,
+            "EWMA": 0.699633,
+            "HistVol": 0.919562,
+            "VIX-implied": 0.447419
+          }
+        },
+        "66d": {
+          "horizon_days": 66,
+          "n_oos": 4455,
+          "oos_start": "2008-04-10",
+          "oos_end": "2025-12-22",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.443311,
+              "MSE": 0.0002860442,
+              "R2_OOS": 0.1072,
+              "Corr": 0.5256,
+              "MZ_R2": 0.2762,
+              "MZ_slope": 0.5721,
+              "MZ_intercept": 0.003212168
+            },
+            "HAR-5d": {
+              "QLIKE": 0.462,
+              "MSE": 0.0002901157,
+              "R2_OOS": 0.0945,
+              "Corr": 0.4889,
+              "MZ_R2": 0.239,
+              "MZ_slope": 0.5745,
+              "MZ_intercept": 0.003226475
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.443164,
+              "MSE": 0.0002873664,
+              "R2_OOS": 0.1031,
+              "Corr": 0.5251,
+              "MZ_R2": 0.2757,
+              "MZ_slope": 0.5693,
+              "MZ_intercept": 0.00323614
+            },
+            "log-HAR": {
+              "QLIKE": 0.465328,
+              "MSE": 0.0004063174,
+              "R2_OOS": -0.2682,
+              "Corr": 0.4596,
+              "MZ_R2": 0.2113,
+              "MZ_slope": 0.401,
+              "MZ_intercept": 0.005580089
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.475192,
+              "MSE": 0.0003214241,
+              "R2_OOS": -0.0032,
+              "Corr": 0.3964,
+              "MZ_R2": 0.1571,
+              "MZ_slope": 0.4976,
+              "MZ_intercept": 0.005323335
+            },
+            "EWMA": {
+              "QLIKE": 0.930416,
+              "MSE": 0.0004531304,
+              "R2_OOS": -0.4143,
+              "Corr": 0.3834,
+              "MZ_R2": 0.147,
+              "MZ_slope": 0.3385,
+              "MZ_intercept": 0.006847475
+            },
+            "HistVol": {
+              "QLIKE": 0.744442,
+              "MSE": 0.0003881312,
+              "R2_OOS": -0.2114,
+              "Corr": 0.1498,
+              "MZ_R2": 0.0224,
+              "MZ_slope": 0.2366,
+              "MZ_intercept": 0.007894466
+            },
+            "VIX-implied": {
+              "QLIKE": 0.469275,
+              "MSE": 0.0003220298,
+              "R2_OOS": -0.0051,
+              "Corr": 0.4329,
+              "MZ_R2": 0.1874,
+              "MZ_slope": 0.5055,
+              "MZ_intercept": 0.004098117
+            }
+          },
+          "dm_tests": {
+            "HAR-5d+22d_vs_HAR-full": {
+              "DM_stat": -0.0231,
+              "p_value": 0.9816,
+              "significant_harvey": false
+            },
+            "HAR-5d+22d_vs_HAR-5d": {
+              "DM_stat": -1.0763,
+              "p_value": 0.2818,
+              "significant_harvey": false
+            },
+            "HAR-5d+22d_vs_log-HAR": {
+              "DM_stat": -0.2992,
+              "p_value": 0.7648,
+              "significant_harvey": false
+            },
+            "HAR-5d+22d_vs_GJR-GARCH": {
+              "DM_stat": -0.4251,
+              "p_value": 0.6708,
+              "significant_harvey": false
+            },
+            "HAR-5d+22d_vs_EWMA": {
+              "DM_stat": -1.4204,
+              "p_value": 0.1556,
+              "significant_harvey": false
+            },
+            "HAR-5d+22d_vs_HistVol": {
+              "DM_stat": -1.9253,
+              "p_value": 0.0543,
+              "significant_harvey": false
+            },
+            "HAR-5d+22d_vs_VIX-implied": {
+              "DM_stat": -0.4369,
+              "p_value": 0.6622,
+              "significant_harvey": false
+            }
+          },
+          "best_model": "HAR-5d+22d",
+          "best_QLIKE": 0.443164,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.392488,
+            "HAR-5d": 0.452355,
+            "HAR-5d+22d": 0.402398,
+            "log-HAR": 0.329729,
+            "GJR-GARCH": 0.42802,
+            "EWMA": 0.465897,
+            "HistVol": 0.528151,
+            "VIX-implied": 0.361223
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.494112,
+            "HAR-5d": 0.47164,
+            "HAR-5d+22d": 0.483911,
+            "log-HAR": 0.600866,
+            "GJR-GARCH": 0.522342,
+            "EWMA": 1.394727,
+            "HistVol": 0.960636,
+            "VIX-implied": 0.577278
+          }
+        }
+      }
+    },
+    "GLD": {
+      "ticker": "GLD",
+      "n_total": 5025,
+      "data_start": "2006-04-07",
+      "data_end": "2026-03-30",
+      "descriptive_stats": {
+        "RV_5d": {
+          "mean": 0.000665726924093407,
+          "std": 0.0011018569972345994,
+          "skew": 7.397719545003322,
+          "kurtosis": 83.71628508721108,
+          "AC1": 0.8835389702616415,
+          "AC5": 0.3719543947442514
+        },
+        "RV_22d": {
+          "mean": 0.002912803101761367,
+          "std": 0.003366268788846318,
+          "skew": 3.98469248484597,
+          "kurtosis": 21.216227832317504,
+          "AC1": 0.9876988630813305,
+          "AC5": 0.9256030843979783
+        },
+        "RV_66d": {
+          "mean": 0.008582956302996218,
+          "std": 0.00789018101263404,
+          "skew": 3.259374853357248,
+          "kurtosis": 14.338717895408298,
+          "AC1": 0.9977882789894427,
+          "AC5": 0.9854729352600614
+        }
+      },
+      "horizons": {
+        "5d": {
+          "horizon_days": 5,
+          "n_oos": 4516,
+          "oos_start": "2008-04-10",
+          "oos_end": "2026-03-23",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.400773,
+              "MSE": 9.724544e-07,
+              "R2_OOS": 0.2153,
+              "Corr": 0.471,
+              "MZ_R2": 0.2219,
+              "MZ_slope": 0.8747,
+              "MZ_intercept": 3.571409e-05
+            },
+            "HAR-5d": {
+              "QLIKE": 0.4661,
+              "MSE": 1.074914e-06,
+              "R2_OOS": 0.1326,
+              "Corr": 0.3816,
+              "MZ_R2": 0.1457,
+              "MZ_slope": 0.9289,
+              "MZ_intercept": -6.887297e-05
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.405553,
+              "MSE": 9.785632e-07,
+              "R2_OOS": 0.2104,
+              "Corr": 0.4685,
+              "MZ_R2": 0.2195,
+              "MZ_slope": 0.8548,
+              "MZ_intercept": 4.201022e-05
+            },
+            "log-HAR": {
+              "QLIKE": 0.394784,
+              "MSE": 9.675388e-07,
+              "R2_OOS": 0.2193,
+              "Corr": 0.4702,
+              "MZ_R2": 0.2211,
+              "MZ_slope": 0.9222,
+              "MZ_intercept": 3.385562e-05
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.40798,
+              "MSE": 1.005223e-06,
+              "R2_OOS": 0.1888,
+              "Corr": 0.4501,
+              "MZ_R2": 0.2026,
+              "MZ_slope": 0.798,
+              "MZ_intercept": 0.0001040986
+            },
+            "EWMA": {
+              "QLIKE": 0.423126,
+              "MSE": 1.013106e-06,
+              "R2_OOS": 0.1825,
+              "Corr": 0.459,
+              "MZ_R2": 0.2107,
+              "MZ_slope": 0.7323,
+              "MZ_intercept": 0.0001753599
+            },
+            "HistVol": {
+              "QLIKE": 0.490145,
+              "MSE": 1.161792e-06,
+              "R2_OOS": 0.0625,
+              "Corr": 0.2728,
+              "MZ_R2": 0.0744,
+              "MZ_slope": 0.7195,
+              "MZ_intercept": 0.000197942
+            }
+          },
+          "dm_tests": {
+            "log-HAR_vs_HAR-full": {
+              "DM_stat": -1.0027,
+              "p_value": 0.3161,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d": {
+              "DM_stat": -3.7119,
+              "p_value": 0.0002,
+              "significant_harvey": true
+            },
+            "log-HAR_vs_HAR-5d+22d": {
+              "DM_stat": -1.5821,
+              "p_value": 0.1137,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_GJR-GARCH": {
+              "DM_stat": -1.4065,
+              "p_value": 0.1596,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_EWMA": {
+              "DM_stat": -2.4699,
+              "p_value": 0.0136,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HistVol": {
+              "DM_stat": -4.8195,
+              "p_value": 0.0,
+              "significant_harvey": true
+            }
+          },
+          "best_model": "log-HAR",
+          "best_QLIKE": 0.394784,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.402511,
+            "HAR-5d": 0.460892,
+            "HAR-5d+22d": 0.403636,
+            "log-HAR": 0.400556,
+            "GJR-GARCH": 0.425419,
+            "EWMA": 0.435537,
+            "HistVol": 0.531972
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.399036,
+            "HAR-5d": 0.471308,
+            "HAR-5d+22d": 0.40747,
+            "log-HAR": 0.389011,
+            "GJR-GARCH": 0.39054,
+            "EWMA": 0.410714,
+            "HistVol": 0.448317
+          }
+        },
+        "22d": {
+          "horizon_days": 22,
+          "n_oos": 4499,
+          "oos_start": "2008-04-10",
+          "oos_end": "2026-02-26",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.224073,
+              "MSE": 7.832559e-06,
+              "R2_OOS": 0.3279,
+              "Corr": 0.5885,
+              "MZ_R2": 0.3463,
+              "MZ_slope": 0.8389,
+              "MZ_intercept": 0.0002327578
+            },
+            "HAR-5d": {
+              "QLIKE": 0.271727,
+              "MSE": 9.342545e-06,
+              "R2_OOS": 0.1983,
+              "Corr": 0.4792,
+              "MZ_R2": 0.2296,
+              "MZ_slope": 0.8468,
+              "MZ_intercept": -2.000125e-05
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.227605,
+              "MSE": 7.985197e-06,
+              "R2_OOS": 0.3148,
+              "Corr": 0.5831,
+              "MZ_R2": 0.34,
+              "MZ_slope": 0.8119,
+              "MZ_intercept": 0.0002909062
+            },
+            "log-HAR": {
+              "QLIKE": 0.222729,
+              "MSE": 7.63399e-06,
+              "R2_OOS": 0.3449,
+              "Corr": 0.5927,
+              "MZ_R2": 0.3513,
+              "MZ_slope": 0.8879,
+              "MZ_intercept": 0.0002303857
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.24031,
+              "MSE": 8.871845e-06,
+              "R2_OOS": 0.2387,
+              "Corr": 0.5455,
+              "MZ_R2": 0.2975,
+              "MZ_slope": 0.6996,
+              "MZ_intercept": 0.0006851006
+            },
+            "EWMA": {
+              "QLIKE": 0.280618,
+              "MSE": 9.109312e-06,
+              "R2_OOS": 0.2184,
+              "Corr": 0.5647,
+              "MZ_R2": 0.3189,
+              "MZ_slope": 0.6406,
+              "MZ_intercept": 0.001028551
+            },
+            "HistVol": {
+              "QLIKE": 0.289066,
+              "MSE": 1.077002e-05,
+              "R2_OOS": 0.0759,
+              "Corr": 0.3417,
+              "MZ_R2": 0.1167,
+              "MZ_slope": 0.6312,
+              "MZ_intercept": 0.001094464
+            }
+          },
+          "dm_tests": {
+            "log-HAR_vs_HAR-full": {
+              "DM_stat": -0.1041,
+              "p_value": 0.9171,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d": {
+              "DM_stat": -1.8736,
+              "p_value": 0.0611,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d+22d": {
+              "DM_stat": -0.3526,
+              "p_value": 0.7244,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_GJR-GARCH": {
+              "DM_stat": -1.763,
+              "p_value": 0.078,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_EWMA": {
+              "DM_stat": -2.5341,
+              "p_value": 0.0113,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HistVol": {
+              "DM_stat": -2.8425,
+              "p_value": 0.0045,
+              "significant_harvey": false
+            }
+          },
+          "best_model": "log-HAR",
+          "best_QLIKE": 0.222729,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.202865,
+            "HAR-5d": 0.249528,
+            "HAR-5d+22d": 0.202379,
+            "log-HAR": 0.209162,
+            "GJR-GARCH": 0.23389,
+            "EWMA": 0.269369,
+            "HistVol": 0.327088
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.245272,
+            "HAR-5d": 0.293916,
+            "HAR-5d+22d": 0.252819,
+            "log-HAR": 0.23629,
+            "GJR-GARCH": 0.246727,
+            "EWMA": 0.291861,
+            "HistVol": 0.25106
+          }
+        },
+        "66d": {
+          "horizon_days": 66,
+          "n_oos": 4455,
+          "oos_start": "2008-04-10",
+          "oos_end": "2025-12-22",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.18938,
+              "MSE": 4.556382e-05,
+              "R2_OOS": 0.2838,
+              "Corr": 0.5578,
+              "MZ_R2": 0.3112,
+              "MZ_slope": 0.8779,
+              "MZ_intercept": -3.210192e-05
+            },
+            "HAR-5d": {
+              "QLIKE": 0.227935,
+              "MSE": 5.363083e-05,
+              "R2_OOS": 0.157,
+              "Corr": 0.4589,
+              "MZ_R2": 0.2106,
+              "MZ_slope": 0.888,
+              "MZ_intercept": -0.000679538
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.196588,
+              "MSE": 4.638171e-05,
+              "R2_OOS": 0.2709,
+              "Corr": 0.5501,
+              "MZ_R2": 0.3026,
+              "MZ_slope": 0.865,
+              "MZ_intercept": 2.017935e-05
+            },
+            "log-HAR": {
+              "QLIKE": 0.184421,
+              "MSE": 4.484137e-05,
+              "R2_OOS": 0.2951,
+              "Corr": 0.5629,
+              "MZ_R2": 0.3169,
+              "MZ_slope": 0.8231,
+              "MZ_intercept": 0.0008824634
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.214024,
+              "MSE": 6.168632e-05,
+              "R2_OOS": 0.0303,
+              "Corr": 0.4891,
+              "MZ_R2": 0.2392,
+              "MZ_slope": 0.533,
+              "MZ_intercept": 0.003117259
+            },
+            "EWMA": {
+              "QLIKE": 0.300408,
+              "MSE": 6.154621e-05,
+              "R2_OOS": 0.0326,
+              "Corr": 0.537,
+              "MZ_R2": 0.2883,
+              "MZ_slope": 0.5152,
+              "MZ_intercept": 0.004028256
+            },
+            "HistVol": {
+              "QLIKE": 0.228884,
+              "MSE": 6.491003e-05,
+              "R2_OOS": -0.0203,
+              "Corr": 0.3327,
+              "MZ_R2": 0.1107,
+              "MZ_slope": 0.4794,
+              "MZ_intercept": 0.004306888
+            }
+          },
+          "dm_tests": {
+            "log-HAR_vs_HAR-full": {
+              "DM_stat": -0.3069,
+              "p_value": 0.7589,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d": {
+              "DM_stat": -1.5003,
+              "p_value": 0.1336,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d+22d": {
+              "DM_stat": -0.6799,
+              "p_value": 0.4966,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_GJR-GARCH": {
+              "DM_stat": -2.6263,
+              "p_value": 0.0087,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_EWMA": {
+              "DM_stat": -2.1899,
+              "p_value": 0.0286,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HistVol": {
+              "DM_stat": -1.7598,
+              "p_value": 0.0785,
+              "significant_harvey": false
+            }
+          },
+          "best_model": "log-HAR",
+          "best_QLIKE": 0.184421,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.179577,
+            "HAR-5d": 0.209659,
+            "HAR-5d+22d": 0.180899,
+            "log-HAR": 0.184987,
+            "GJR-GARCH": 0.224964,
+            "EWMA": 0.306139,
+            "HistVol": 0.284153
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.199179,
+            "HAR-5d": 0.246202,
+            "HAR-5d+22d": 0.21227,
+            "log-HAR": 0.183855,
+            "GJR-GARCH": 0.20309,
+            "EWMA": 0.294681,
+            "HistVol": 0.17364
+          }
+        }
+      }
+    },
+    "0050.TW": {
+      "ticker": "0050.TW",
+      "n_total": 4151,
+      "data_start": "2009-04-16",
+      "data_end": "2026-03-31",
+      "descriptive_stats": {
+        "RV_5d": {
+          "mean": 0.0006740089532928062,
+          "std": 0.0012348893628742258,
+          "skew": 8.974084989801721,
+          "kurtosis": 114.21791233953613,
+          "AC1": 0.8950705153988741,
+          "AC5": 0.2844013251511734
+        },
+        "RV_22d": {
+          "mean": 0.0029751286012600054,
+          "std": 0.0033676886349699796,
+          "skew": 4.344039478405129,
+          "kurtosis": 24.44085316040209,
+          "AC1": 0.9859968852497195,
+          "AC5": 0.88002820776945
+        },
+        "RV_66d": {
+          "mean": 0.00966776660849313,
+          "std": 0.012759394049126953,
+          "skew": 8.048152218364915,
+          "kurtosis": 88.50637355673254,
+          "AC1": 0.997925153449671,
+          "AC5": 0.9810775166252244
+        }
+      },
+      "horizons": {
+        "5d": {
+          "horizon_days": 5,
+          "n_oos": 3642,
+          "oos_start": "2011-04-25",
+          "oos_end": "2026-03-24",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.47067,
+              "MSE": 1.474754e-06,
+              "R2_OOS": 0.0744,
+              "Corr": 0.2789,
+              "MZ_R2": 0.0778,
+              "MZ_slope": 0.9183,
+              "MZ_intercept": 0.0001159213
+            },
+            "HAR-5d": {
+              "QLIKE": 0.46682,
+              "MSE": 1.469699e-06,
+              "R2_OOS": 0.0775,
+              "Corr": 0.2819,
+              "MZ_R2": 0.0795,
+              "MZ_slope": 0.8923,
+              "MZ_intercept": 0.0001029657
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.450321,
+              "MSE": 1.478906e-06,
+              "R2_OOS": 0.0717,
+              "Corr": 0.2829,
+              "MZ_R2": 0.08,
+              "MZ_slope": 0.7776,
+              "MZ_intercept": 0.0001892272
+            },
+            "log-HAR": {
+              "QLIKE": 0.445245,
+              "MSE": 1.464909e-06,
+              "R2_OOS": 0.0805,
+              "Corr": 0.2924,
+              "MZ_R2": 0.0855,
+              "MZ_slope": 1.156,
+              "MZ_intercept": -1.896837e-05
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.443093,
+              "MSE": 1.519593e-06,
+              "R2_OOS": 0.0462,
+              "Corr": 0.2901,
+              "MZ_R2": 0.0842,
+              "MZ_slope": 0.6022,
+              "MZ_intercept": 0.0002918865
+            },
+            "EWMA": {
+              "QLIKE": 0.478824,
+              "MSE": 1.629763e-06,
+              "R2_OOS": -0.0229,
+              "Corr": 0.2378,
+              "MZ_R2": 0.0566,
+              "MZ_slope": 0.4576,
+              "MZ_intercept": 0.0003646598
+            },
+            "HistVol": {
+              "QLIKE": 0.563029,
+              "MSE": 1.578582e-06,
+              "R2_OOS": 0.0092,
+              "Corr": 0.1499,
+              "MZ_R2": 0.0225,
+              "MZ_slope": 0.5684,
+              "MZ_intercept": 0.0003008367
+            }
+          },
+          "dm_tests": {
+            "GJR-GARCH_vs_HAR-full": {
+              "DM_stat": NaN,
+              "p_value": NaN,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_HAR-5d": {
+              "DM_stat": NaN,
+              "p_value": NaN,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_HAR-5d+22d": {
+              "DM_stat": NaN,
+              "p_value": NaN,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_log-HAR": {
+              "DM_stat": NaN,
+              "p_value": NaN,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_EWMA": {
+              "DM_stat": NaN,
+              "p_value": NaN,
+              "significant_harvey": false
+            },
+            "GJR-GARCH_vs_HistVol": {
+              "DM_stat": NaN,
+              "p_value": NaN,
+              "significant_harvey": false
+            }
+          },
+          "best_model": "GJR-GARCH",
+          "best_QLIKE": 0.443093,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.434306,
+            "HAR-5d": 0.449353,
+            "HAR-5d+22d": 0.40117,
+            "log-HAR": 0.384272,
+            "GJR-GARCH": 0.363325,
+            "EWMA": 0.412176,
+            "HistVol": 0.468127
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.507054,
+            "HAR-5d": 0.484298,
+            "HAR-5d+22d": 0.499498,
+            "log-HAR": 0.506251,
+            "GJR-GARCH": 0.522905,
+            "EWMA": 0.54551,
+            "HistVol": 0.657982
+          }
+        },
+        "22d": {
+          "horizon_days": 22,
+          "n_oos": 3625,
+          "oos_start": "2011-04-25",
+          "oos_end": "2026-02-26",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.273546,
+              "MSE": 1.08633e-05,
+              "R2_OOS": 0.0647,
+              "Corr": 0.2813,
+              "MZ_R2": 0.0791,
+              "MZ_slope": 0.8582,
+              "MZ_intercept": 0.0007390164
+            },
+            "HAR-5d": {
+              "QLIKE": 0.290515,
+              "MSE": 1.108154e-05,
+              "R2_OOS": 0.0459,
+              "Corr": 0.2438,
+              "MZ_R2": 0.0594,
+              "MZ_slope": 0.7717,
+              "MZ_intercept": 0.0009084835
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.267168,
+              "MSE": 1.097587e-05,
+              "R2_OOS": 0.055,
+              "Corr": 0.2839,
+              "MZ_R2": 0.0806,
+              "MZ_slope": 0.6924,
+              "MZ_intercept": 0.001132774
+            },
+            "log-HAR": {
+              "QLIKE": 0.258835,
+              "MSE": 1.053978e-05,
+              "R2_OOS": 0.0925,
+              "Corr": 0.3262,
+              "MZ_R2": 0.1064,
+              "MZ_slope": 0.9367,
+              "MZ_intercept": 0.0005544684
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.272014,
+              "MSE": 1.252267e-05,
+              "R2_OOS": -0.0782,
+              "Corr": 0.2663,
+              "MZ_R2": 0.0709,
+              "MZ_slope": 0.4124,
+              "MZ_intercept": 0.001820274
+            },
+            "EWMA": {
+              "QLIKE": 0.312561,
+              "MSE": 1.494355e-05,
+              "R2_OOS": -0.2866,
+              "Corr": 0.2507,
+              "MZ_R2": 0.0629,
+              "MZ_slope": 0.2978,
+              "MZ_intercept": 0.002069197
+            },
+            "HistVol": {
+              "QLIKE": 0.356006,
+              "MSE": 1.179865e-05,
+              "R2_OOS": -0.0159,
+              "Corr": 0.196,
+              "MZ_R2": 0.0384,
+              "MZ_slope": 0.4593,
+              "MZ_intercept": 0.001632643
+            }
+          },
+          "dm_tests": {
+            "log-HAR_vs_HAR-full": {
+              "DM_stat": -1.6737,
+              "p_value": 0.0943,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d": {
+              "DM_stat": -1.9334,
+              "p_value": 0.0533,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d+22d": {
+              "DM_stat": -0.8618,
+              "p_value": 0.3889,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_GJR-GARCH": {
+              "DM_stat": -0.734,
+              "p_value": 0.463,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_EWMA": {
+              "DM_stat": -2.7732,
+              "p_value": 0.0056,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HistVol": {
+              "DM_stat": -2.267,
+              "p_value": 0.0234,
+              "significant_harvey": false
+            }
+          },
+          "best_model": "log-HAR",
+          "best_QLIKE": 0.258835,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.200703,
+            "HAR-5d": 0.223371,
+            "HAR-5d+22d": 0.192314,
+            "log-HAR": 0.1861,
+            "GJR-GARCH": 0.177496,
+            "EWMA": 0.231046,
+            "HistVol": 0.262242
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.346349,
+            "HAR-5d": 0.357623,
+            "HAR-5d+22d": 0.34198,
+            "log-HAR": 0.33153,
+            "GJR-GARCH": 0.36648,
+            "EWMA": 0.39403,
+            "HistVol": 0.449718
+          }
+        },
+        "66d": {
+          "horizon_days": 66,
+          "n_oos": 3581,
+          "oos_start": "2011-04-25",
+          "oos_end": "2025-12-15",
+          "models": {
+            "HAR-full": {
+              "QLIKE": 0.206569,
+              "MSE": 4.643775e-05,
+              "R2_OOS": 0.0465,
+              "Corr": 0.2856,
+              "MZ_R2": 0.0815,
+              "MZ_slope": 0.8468,
+              "MZ_intercept": 0.00239935
+            },
+            "HAR-5d": {
+              "QLIKE": 0.216506,
+              "MSE": 4.739301e-05,
+              "R2_OOS": 0.0268,
+              "Corr": 0.242,
+              "MZ_R2": 0.0586,
+              "MZ_slope": 0.8046,
+              "MZ_intercept": 0.002647367
+            },
+            "HAR-5d+22d": {
+              "QLIKE": 0.203623,
+              "MSE": 4.667806e-05,
+              "R2_OOS": 0.0415,
+              "Corr": 0.2855,
+              "MZ_R2": 0.0815,
+              "MZ_slope": 0.7402,
+              "MZ_intercept": 0.003158964
+            },
+            "log-HAR": {
+              "QLIKE": 0.192753,
+              "MSE": 4.389518e-05,
+              "R2_OOS": 0.0987,
+              "Corr": 0.3606,
+              "MZ_R2": 0.1301,
+              "MZ_slope": 0.9083,
+              "MZ_intercept": 0.001898285
+            },
+            "GJR-GARCH": {
+              "QLIKE": 0.209809,
+              "MSE": 5.393991e-05,
+              "R2_OOS": -0.1076,
+              "Corr": 0.2409,
+              "MZ_R2": 0.058,
+              "MZ_slope": 0.3816,
+              "MZ_intercept": 0.005696758
+            },
+            "EWMA": {
+              "QLIKE": 0.291798,
+              "MSE": 9.527846e-05,
+              "R2_OOS": -0.9564,
+              "Corr": 0.2345,
+              "MZ_R2": 0.055,
+              "MZ_slope": 0.1891,
+              "MZ_intercept": 0.007085907
+            },
+            "HistVol": {
+              "QLIKE": 0.296372,
+              "MSE": 5.454488e-05,
+              "R2_OOS": -0.12,
+              "Corr": 0.2137,
+              "MZ_R2": 0.0457,
+              "MZ_slope": 0.3461,
+              "MZ_intercept": 0.005822765
+            }
+          },
+          "dm_tests": {
+            "log-HAR_vs_HAR-full": {
+              "DM_stat": -1.4422,
+              "p_value": 0.1493,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d": {
+              "DM_stat": -1.4454,
+              "p_value": 0.1484,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_HAR-5d+22d": {
+              "DM_stat": -1.1515,
+              "p_value": 0.2496,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_GJR-GARCH": {
+              "DM_stat": -1.9664,
+              "p_value": 0.0493,
+              "significant_harvey": false
+            },
+            "log-HAR_vs_EWMA": {
+              "DM_stat": -3.5098,
+              "p_value": 0.0005,
+              "significant_harvey": true
+            },
+            "log-HAR_vs_HistVol": {
+              "DM_stat": -2.317,
+              "p_value": 0.0206,
+              "significant_harvey": false
+            }
+          },
+          "best_model": "log-HAR",
+          "best_QLIKE": 0.192753,
+          "sub_first_half_QLIKE": {
+            "HAR-full": 0.145456,
+            "HAR-5d": 0.157907,
+            "HAR-5d+22d": 0.1414,
+            "log-HAR": 0.137298,
+            "GJR-GARCH": 0.145813,
+            "EWMA": 0.217294,
+            "HistVol": 0.220324
+          },
+          "sub_second_half_QLIKE": {
+            "HAR-full": 0.267649,
+            "HAR-5d": 0.275073,
+            "HAR-5d+22d": 0.265813,
+            "log-HAR": 0.248178,
+            "GJR-GARCH": 0.273769,
+            "EWMA": 0.366261,
+            "HistVol": 0.372377
+          }
+        }
+      }
+    }
+  },
+  "cross_asset_summary": [
+    {
+      "asset": "SPY",
+      "horizon": "5d",
+      "best_model": "GJR-GARCH",
+      "QLIKE": 0.463938,
+      "R2_OOS": 0.3984,
+      "Corr": 0.6482
+    },
+    {
+      "asset": "SPY",
+      "horizon": "22d",
+      "best_model": "VIX-implied",
+      "QLIKE": 0.386972,
+      "R2_OOS": 0.3409,
+      "Corr": 0.5955
+    },
+    {
+      "asset": "SPY",
+      "horizon": "66d",
+      "best_model": "HAR-5d+22d",
+      "QLIKE": 0.443164,
+      "R2_OOS": 0.1031,
+      "Corr": 0.5251
+    },
+    {
+      "asset": "GLD",
+      "horizon": "5d",
+      "best_model": "log-HAR",
+      "QLIKE": 0.394784,
+      "R2_OOS": 0.2193,
+      "Corr": 0.4702
+    },
+    {
+      "asset": "GLD",
+      "horizon": "22d",
+      "best_model": "log-HAR",
+      "QLIKE": 0.222729,
+      "R2_OOS": 0.3449,
+      "Corr": 0.5927
+    },
+    {
+      "asset": "GLD",
+      "horizon": "66d",
+      "best_model": "log-HAR",
+      "QLIKE": 0.184421,
+      "R2_OOS": 0.2951,
+      "Corr": 0.5629
+    },
+    {
+      "asset": "0050.TW",
+      "horizon": "5d",
+      "best_model": "GJR-GARCH",
+      "QLIKE": 0.443093,
+      "R2_OOS": 0.0462,
+      "Corr": 0.2901
+    },
+    {
+      "asset": "0050.TW",
+      "horizon": "22d",
+      "best_model": "log-HAR",
+      "QLIKE": 0.258835,
+      "R2_OOS": 0.0925,
+      "Corr": 0.3262
+    },
+    {
+      "asset": "0050.TW",
+      "horizon": "66d",
+      "best_model": "log-HAR",
+      "QLIKE": 0.192753,
+      "R2_OOS": 0.0987,
+      "Corr": 0.3606
+    }
+  ],
+  "findings": [
+    "HAR-full beats GJR-GARCH in 5/9 (56%) asset-horizon combinations (QLIKE)",
+    "SPY 5d: HAR R\u00b2_OOS=0.345, Corr=0.666",
+    "SPY 22d: HAR R\u00b2_OOS=0.263, Corr=0.655",
+    "SPY 66d: HAR R\u00b2_OOS=0.107, Corr=0.526",
+    "GLD 5d: HAR R\u00b2_OOS=0.215, Corr=0.471",
+    "GLD 22d: HAR R\u00b2_OOS=0.328, Corr=0.589",
+    "GLD 66d: HAR R\u00b2_OOS=0.284, Corr=0.558",
+    "0050.TW 5d: HAR R\u00b2_OOS=0.074, Corr=0.279",
+    "0050.TW 22d: HAR R\u00b2_OOS=0.065, Corr=0.281",
+    "0050.TW 66d: HAR R\u00b2_OOS=0.046, Corr=0.286",
+    "5/57 DM tests significant at Harvey t>3.0"
+  ],
+  "runtime_seconds": 123.1
+}
