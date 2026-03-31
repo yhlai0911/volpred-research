@@ -18668,5 +18668,19 @@
     "phase": "research",
     "importance": 5,
     "timestamp": "2026-03-31T12:41:09.555182+00:00"
+  },
+  {
+    "id": "K778-review",
+    "title": "Codex K778: 1 HIGH (MCS implementation wrong), DM result safe (GJR beats MEM-r²)",
+    "content": "[提出: Codex GPT-5.4] K778 review: (1) HIGH: MCS uses iid resample (should be block bootstrap), degenerate test stat, wrong elimination criterion. MCS p-values unreliable. (2-4) LOW: MEM-r² Gamma MLE on r² correct, same expanding window, QLIKE on r² correct. DM=3.78 (GJR > AMEM-r²) SAFE — unaffected by MCS bug. Need proper HLN MCS implementation for future experiments.",
+    "tags": [
+      "codex-review",
+      "K778",
+      "MCS",
+      "methodology"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "timestamp": "2026-03-31T12:54:51.449881+00:00"
   }
 ]
