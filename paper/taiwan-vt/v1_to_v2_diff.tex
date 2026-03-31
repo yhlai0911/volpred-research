@@ -1,0 +1,210 @@
+\documentclass[12pt,a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\definecolor{addgreen}{RGB}{0,120,60}
+\definecolor{delred}{RGB}{180,30,30}
+\definecolor{modblue}{RGB}{40,80,160}
+
+\newcommand{\ADD}[1]{\textcolor{addgreen}{\textbf{[+]} #1}}
+\newcommand{\DEL}[1]{\textcolor{delred}{\textbf{[--]} #1}}
+\newcommand{\MOD}[1]{\textcolor{modblue}{\textbf{[M]} #1}}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% ─── Title ───────────────────────────────────────────────────
+\title{Revision Diff Report: v1 $\to$ v2\\[6pt]
+\large Paper: \textit{Volatility Targeting in the Taiwan Stock Market}\\[4pt]
+\normalsize Author: Yi-Hao Lai (Da-Yeh University)}
+
+\author{Revision by: VolPred Research System (Claude Opus 4.6)}
+\date{March 30, 2026}
+
+\begin{document}
+\maketitle
+
+% ════════════════════════════════════════════════════════════════
+\section{Overview}
+% ════════════════════════════════════════════════════════════════
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Metric & v1 & v2 \\
+\midrule
+Page count & 45 & 43 \\
+Main-body contributions & 3 & 2 \\
+Tables (main body) & 7 & 8 (+1 new common-period table) \\
+Figures (main body) & 2 & 2 \\
+Appendix sections & 0 & 1 (TZ analysis, 6 subsections) \\
+Appendix tables & 0 & 1 (TZ table moved) \\
+Appendix figures & 0 & 1 (Fig.\ 3 moved) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent
+Three HIGH-severity issues from the v1 academic review were addressed:
+
+\begin{enumerate}
+\item \textbf{H1}: Non-comparable evaluation periods (Table 3)
+\item \textbf{H2}: Scope overreach --- three loosely connected contributions
+\item \textbf{H3}: Diversification amplification based on $N = 10$ (including 1 ETF)
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{H1: Non-Comparable Evaluation Periods}
+% ════════════════════════════════════════════════════════════════
+
+\textbf{Problem.} Table~3 (v1) compared strategies across different time periods (BH 2010--2026, GJR VT 2020--2026, 8.63/VIX 2016--2026), making Sharpe ratio rankings unreliable.
+
+\textbf{Changes:}
+\begin{itemize}
+\item \ADD{New Table 4 (``Common-Period Strategy Comparison, 2020--2026'')} evaluates \textit{all five} strategies over the identical 2020--2026 window. Over this common period:
+  \begin{itemize}
+  \item GJR VT: 1.108 (unchanged, this was already its native period)
+  \item GARCH VT: 0.994
+  \item EWMA VT: 0.927 (up from 0.796 over 2010--2026)
+  \item 8.63/VIX: 0.856 (up from 0.690 over 2016--2026)
+  \item Buy \& Hold: 0.824 (up from 0.729 over 2010--2026)
+  \end{itemize}
+\item \MOD{Table 3 notes} updated with cross-reference to Table 4 and stronger caveat language.
+\item \ADD{Explanatory paragraph} between Tables 3 and 4 documents that the Sharpe gap between GJR VT and 8.63/VIX narrows from 0.418 to 0.252 over the common period, confirming that period effects explain a substantial portion of the apparent superiority.
+\item \MOD{Abstract, Introduction, Conclusion} updated to reference common-period results.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════
+\section{H2: Scope Overreach --- Three to Two Contributions}
+% ════════════════════════════════════════════════════════════════
+
+\textbf{Problem.} The time-zone (TZ) information transmission analysis (Section 5 in v1) read as a separate paper grafted onto the VT paper.
+
+\textbf{Changes:}
+\begin{itemize}
+\item \DEL{Section 5 (Time-Zone Information Transmission)} removed from main body.
+\item \ADD{Appendix A} created with the full TZ analysis (6 subsections, 1 table, 1 figure), labeled as ``supplementary evidence.'' Content is preserved intact.
+\item \MOD{Abstract} rewritten from ``Three contributions'' to ``Two contributions.'' TZ channel mentioned as supplementary evidence. Keywords updated (removed ``cross-market price discovery,'' ``opening auction efficiency''; removed G15 from JEL).
+\item \MOD{Introduction} restructured:
+  \begin{itemize}
+  \item Contribution 1 (leverage amplification): unchanged in substance, updated numbers.
+  \item Contribution 2 (VT strategies): expanded to include cross-market validation (``2 of 4 U.S.\ findings generalize''). Common-period comparison referenced.
+  \item Former Contribution 3 (TZ): replaced with a brief paragraph pointing to Appendix A.
+  \end{itemize}
+\item \MOD{Section ordering} changed: former Sections 6 (Macro) and 7 (VaR) are now Sections 5 and 6, flowing directly from VT strategies.
+\item \MOD{Discussion section}:
+  \begin{itemize}
+  \item \DEL{Subsection ``ETFs Versus Individual Stocks for Momentum Strategies''} removed (content moved to Appendix A.6).
+  \item \DEL{Practical implications: ``Time-zone momentum'' and ``Combined strategy'' items} removed from main body (covered in Appendix).
+  \item \MOD{``Comparison to Prior Literature''} shortened: TZ discussion replaced with brief pointer to Appendix.
+  \end{itemize}
+\item \MOD{Conclusion} rewritten from three findings to two findings, with a brief paragraph pointing to Appendix for TZ evidence.
+\item \MOD{All cross-references} from ``Section~5'' to ``Appendix~A'' throughout.
+\end{itemize}
+
+\textbf{Net effect:} Main body reduced by $\sim$2 pages. The TZ analysis is fully preserved in the appendix, available to referees who want the details.
+
+% ════════════════════════════════════════════════════════════════
+\section{H3: Diversification Amplification ($N = 10 \to N = 9$)}
+% ════════════════════════════════════════════════════════════════
+
+\textbf{Problem.} The 4.6$\times$ amplification ratio was based on only 10 securities, one of which (0056.TW) is an ETF misclassified as an ``individual stock.''
+
+\textbf{Changes:}
+\begin{itemize}
+\item \MOD{0056.TW reclassified.} Data section now reads ``Nine individual Taiwan stocks and one ETF.'' 0056.TW labeled as ETF throughout.
+\item \MOD{Tables 1 and 2} updated:
+  \begin{itemize}
+  \item 0056.TW separated into its own row under ``ETF (excluded from individual-stock average).''
+  \item New row: ``9-stock average (excl.\ 0056)'' with $\bar{\gamma} = 0.054$.
+  \item Existing row relabeled: ``10-security average (incl.\ 0056 ETF)'' with $\bar{\gamma} = 0.060$.
+  \item Table notes explain why 0056 is excluded from the primary average.
+  \end{itemize}
+\item \MOD{Amplification ratio recalculated:}
+  \begin{itemize}
+  \item Primary: $0.272 / 0.054 = 5.0\times$ (9 stocks, excluding 0056 ETF)
+  \item Secondary: $0.272 / 0.060 = 4.5\times$ (10 securities, including 0056 ETF)
+  \item 0050.TW-based: $0.087 / 0.054 = 1.6\times$ (was $1.45\times$ with 0056)
+  \end{itemize}
+\item \ADD{Bootstrap confidence interval.} New paragraph reports 90\% CI from block bootstrap (10,000 reps, block = 252 days): $[2.8, \, 8.1]$ with median 4.9. The CI excludes 1.0 but includes the U.S.\ benchmark at its lower bound.
+\item \ADD{``Sensitivity to 0056.TW inclusion'' paragraph.} Documents that including 0056 biases the ratio downward (conservative direction) and is factually incorrect.
+\item \MOD{Language downgraded:} ``4.6$\times$'' $\to$ ``approximately 5.0$\times$ (suggestive evidence)'' throughout abstract, introduction, discussion, and conclusion.
+\item \MOD{Abstract} now includes CI and $N$ in parenthetical.
+\item \MOD{Conclusion} explicitly acknowledges wide confidence interval as a limitation.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════
+\section{Other Minor Changes}
+% ════════════════════════════════════════════════════════════════
+
+\begin{itemize}
+\item \DEL{Two Codex inline comments} (``Codex-R6-fix'') removed from body.
+\item \MOD{Fixed missing space} before ``provides statistical evidence'' (line 223).
+\item \ADD{Appendix TZ table} wrapped in \texttt{resizebox} to fix overfull hbox.
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════
+\section{Summary of Changes by Location}
+% ════════════════════════════════════════════════════════════════
+
+\begin{longtable}{p{3.5cm}p{2cm}p{7.5cm}}
+\toprule
+Location & Type & Description \\
+\midrule
+\endhead
+Abstract & \MOD{Rewrite} & 3 $\to$ 2 contributions; added CI and $N$; removed TZ; updated keywords/JEL \\
+\addlinespace
+Introduction \S1 & \MOD{Edit} & Updated amplification numbers; restructured contributions; TZ $\to$ appendix pointer \\
+\addlinespace
+Data \S2.1 & \MOD{Edit} & ``Ten individual stocks'' $\to$ ``Nine individual stocks and one ETF'' \\
+\addlinespace
+Table 1 & \MOD{Edit} & Added 9-stock average row; relabeled 10-security row; updated notes \\
+\addlinespace
+Table 2 & \MOD{Edit} & 0056 separated; 9-stock average added; notes updated \\
+\addlinespace
+\S3.2 (Amplification) & \MOD{Rewrite} & New CI paragraph; sensitivity paragraph; language downgrade \\
+\addlinespace
+Table 3 notes & \MOD{Edit} & Cross-reference to new Table 4 \\
+\addlinespace
+Table 4 & \ADD{New} & Common-period comparison (2020--2026) \\
+\addlinespace
+\S5 (TZ) & \DEL{Moved} & Entire section moved to Appendix A \\
+\addlinespace
+\S6 $\to$ \S5 & \MOD{Renumber} & Macro indicators \\
+\addlinespace
+\S7 $\to$ \S6 & \MOD{Renumber} & VaR and risk management \\
+\addlinespace
+Discussion & \MOD{Edit} & Removed TZ-specific subsections; shortened lit comparison \\
+\addlinespace
+Conclusion & \MOD{Rewrite} & 3 $\to$ 2 contributions; added CI limitation; TZ as appendix pointer \\
+\addlinespace
+Appendix A & \ADD{New} & TZ analysis (6 subsections, 1 table, 1 figure) \\
+\bottomrule
+\end{longtable}
+
+% ════════════════════════════════════════════════════════════════
+\section{Files}
+% ════════════════════════════════════════════════════════════════
+
+\begin{itemize}
+\item \texttt{body.tex} --- v1 body (unchanged, preserved as reference)
+\item \texttt{body\_v2.tex} --- v2 body with all three fixes
+\item \texttt{main.tex} --- v1 driver (inputs \texttt{body.tex})
+\item \texttt{main\_v2.tex} --- v2 driver (inputs \texttt{body\_v2.tex}; updated abstract)
+\item \texttt{main\_v2.pdf} --- compiled v2 (43 pages)
+\item \texttt{v1\_to\_v2\_diff.tex} --- this document
+\end{itemize}
+
+\end{document}
