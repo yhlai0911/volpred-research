@@ -17954,5 +17954,19 @@
     "timestamp": "2026-03-31T04:55:18.324685+00:00",
     "category": "research",
     "priority": 2
+  },
+  {
+    "id": "K746b-review",
+    "title": "Codex Review K746b: 1 HIGH (Granger target doc mismatch) + 1 MEDIUM (Andrews partial)",
+    "content": "[提出: Codex, 執行: Claude] K746b review: (1) HIGH: Granger target is |r_t| with lagged VIX, not explicitly |r_{t+1}|. But statsmodels grangercausalitytests uses VAR where 'lagged X→current Y' IS equivalent to 'X_t→Y_{t+1}'. Documentation misleading but result likely correct. (2) MEDIUM: Andrews test is sup-Chow scan with hardcoded cutoffs, not full Hansen bootstrap. (3) LOW: AIC lag selection correct, Fisher z on right variable, no lookahead in portfolio. DIRECTION: Granger finding (BTC vol→VIX, p=0.0002) probably valid but needs explicit shift(1) for clarity in Paper 6.",
+    "tags": [
+      "codex-review",
+      "K746b",
+      "Granger",
+      "Bitcoin"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-31T05:00:56.739200+00:00"
   }
 ]
