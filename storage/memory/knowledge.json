@@ -18023,5 +18023,18 @@
     "created_at": "2026-03-31T14:39:28.802893",
     "experiment_file": "experiments/k756_international_vix.py",
     "results_file": "experiments/k756_international_vix_results.json"
+  },
+  {
+    "id": "K755-review",
+    "title": "Codex Review K755: 0 HIGH, cleanest review — lock off-by-one only MEDIUM issue",
+    "content": "[提出: Codex, 執行: Claude] K755 review: 0 HIGH issues! (1) MEDIUM: Lock-48h actually freezes 3 sessions not 2 (off-by-one in loop counter). (2) LOW: shift(1) correct, TX both legs correct (abs(Δw)*TC*2), simple returns correct. Multi-day sums instead of compound (minor). Conclusion safe.",
+    "tags": [
+      "codex-review",
+      "K755",
+      "methodology"
+    ],
+    "phase": "research",
+    "importance": 2,
+    "timestamp": "2026-03-31T06:45:23.446484+00:00"
   }
 ]
