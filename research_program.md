@@ -476,30 +476,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 | 策略 Paper Trading | storage/paper_trading.json | 9 策略 × 7,950+ entries |
 | 同步狀態 | storage/.supabase_sync_state.json | Supabase 增量同步狀態 |
 
-| Phase | 期間 | 實驗數 | 核心成果 |
-|-------|------|--------|---------|
-| O | 2026-03-16 | ~15 | VaR 方法論：Trinity test, FHS, CF-VaR |
-| P | 2026-03-17 | ~20 | 自建模型 GJR-HAR, QLIKE ceiling 建立 |
-| Q | 2026-03-17 | ~25 | 跨市場 VT, Asia-Pacific lead-lag |
-| R | 2026-03-17 | ~15 | GARCH 應用擴展, VRP discovery |
-| S-U | 2026-03-17 | ~15 | Narrative-GARCH, Rough Vol, Panel |
-| J | 2026-03-18 | ~15 | 策略優化, 50/50 SPY/GLD 確立 |
-| K(early) | 2026-03-18 | ~30 | Options surface, portfolio science |
-| K(K183-K289) | 2026-03-24 | 107 | 大規模 sweep, Taiwan deep, 期貨避險 |
-| K(K426-K507) | 2026-03-26~27 | 82 | SSVS, HAR, ensemble, MCS, VIX9D, commodity, forex |
-
-**82 個實驗的關鍵成果摘要（K426-K507）：**
-- ★★★ GJR-X(VIX9D): best forecaster (K490, DM t=6.63)
-- ★★★ MCS: 5-model superior set (K481, Econometrica method)
-- ★★★ K500 Grand Retrospective: 119 experiments, one sentence summary
-- ★★ HAR log-range: 8/10 cross-OOS (K469, with tautology correction K468)
-- ★★ Semivariance: 4/5 cross-OOS equity (K460, gamma-driven K453)
-- ★★ Universal persistence law: mean=0.980 across 14 assets (K491)
-- ★ VIX sufficiency: 32x confirmed + causal K477 (VIX is sink not source)
-- ★ 12/VIX irreducible kernel: 5x confirmed for VT strategy
-- ★ 50/50 SPY/GLD irreducible: K507 dynamic allocation all fail
-- ★ Prediction ≠ Application: 4x confirmed (K440/K467/K470/K488)
-- ⚠️ Cross-OOS caught 4 false positives (K459/K474/K476/K506)
+**Phase O~K(K507) 共 ~340 個實驗，詳見 `docs/research_archive/completed_phases_2026-03.md`。**
+核心成果：GJR-X(VIX9D) best forecaster, MCS 5-model set, VIX sufficiency 32x, 50/50 irreducible, Prediction≠Application 4x。
 
 ### 最終工具指南（K426-K495, cross-OOS validated）
 | 任務 | SPY | Other equity | Non-equity | Taiwan |
