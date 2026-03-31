@@ -18056,5 +18056,20 @@
     "phase": "Phase_8",
     "importance": 4,
     "timestamp": "2026-03-31T07:04:05.602212+00:00"
+  },
+  {
+    "id": "K757-review",
+    "title": "Codex Review K757: 1 HIGH (CoVaR not Adrian&Brunnermeier), 2 MEDIUM (min-p + holiday)",
+    "content": "[提出: Codex rescue plugin, 執行: Claude] K757 review via /codex:rescue: (1) HIGH: CoVaR doesn't condition on VaR_x — subtracts two fitted quantiles of y on actual x, not x=VaR_x. ΔCoVaR numbers unreliable. (2) MEDIUM: Granger uses min-p not AIC (recurring pattern). (3) MEDIUM: inner-join drops TW-only trading days. (4) LOW: regime split uses same-day VIX (timezone). Granger direction (financials→TSMC) possibly correct but needs AIC fix. CoVaR needs full rewrite.",
+    "tags": [
+      "codex-review",
+      "K757",
+      "HIGH-severity",
+      "CoVaR",
+      "Taiwan"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "timestamp": "2026-03-31T07:08:59.788503+00:00"
   }
 ]
