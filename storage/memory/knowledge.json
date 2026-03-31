@@ -18465,5 +18465,19 @@
     "phase": "research",
     "importance": 4,
     "created_at": "2026-03-31T13:30:00.000000+00:00"
+  },
+  {
+    "id": "K773",
+    "title": "K773 Event Risk Budgeter + Codex review: 4 bugs (event window shift, CPI dates, TX 1-leg, DM squared)",
+    "content": "[提出: Codex GPT-5.4, 執行: Claude] K773 event budgeter tested systematic de-risking around NFP/CPI/FOMC. Codex found 4 issues: (1) Event window applied 1 day late (shift after stamping). (2) CPI dates approximate (13th+weekend adj, not actual release). (3) TX only 1 leg. (4) DM test squares returns, removing sign. Results direction: event budgeting likely hurts (consistent with K741 showing NFP avoidance costs return), but specific numbers unreliable.",
+    "tags": [
+      "K773",
+      "event-risk",
+      "Codex-suggestion",
+      "codex-review"
+    ],
+    "phase": "research",
+    "importance": 3,
+    "timestamp": "2026-03-31T11:48:00.158561+00:00"
   }
 ]
