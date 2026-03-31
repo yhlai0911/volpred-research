@@ -904,7 +904,7 @@ def main():
     # Sort feed
     fp = pub_data / "feed.json"
     feed = json.loads(fp.read_text())
-    feed.sort(key=lambda x: x.get("published_at", ""), reverse=True)
+    feed.sort(key=lambda x: x.get("published_at") or "", reverse=True)
     fp.write_text(json.dumps(feed, indent=2, ensure_ascii=False, default=str))
 
     print(f"  Published + synced locally. Feed: {len(feed)} items")
