@@ -1,0 +1,484 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% --- Severity colors --------------------------------------------------------
+\definecolor{highsev}{RGB}{204,0,0}
+\definecolor{medsev}{RGB}{204,102,0}
+\definecolor{lowsev}{RGB}{0,102,204}
+
+\newcommand{\HIGH}{\textcolor{highsev}{\textbf{[HIGH]}}}
+\newcommand{\MEDIUM}{\textcolor{medsev}{\textbf{[MEDIUM]}}}
+\newcommand{\LOW}{\textcolor{lowsev}{\textbf{[LOW]}}}
+
+% --- Title ------------------------------------------------------------------
+\title{Academic Review Report (v1)\\
+\Large ``Is Volatility Targeting Just Trend Following?\\
+Decomposing the Benefits of Volatility Targeting''\\[6pt]
+\normalsize Lai (2026) --- 29 pages, targeting JBF/JFE}
+
+\author{Review prepared by VolPred Research System\\
+\small Claude Opus 4.6 (1M context)}
+
+\date{March 30, 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Executive Summary}
+% =============================================================================
+
+This report provides a 10-dimension academic review of the paper ``Is Volatility Targeting Just Trend Following?'' (Lai, 2026, 29 pages). The paper makes three contributions: (1) linking GJR-GARCH $\gamma$ to VT's TSMOM loading cross-sectionally ($N=22$), (2) decomposing VT benefits into Sharpe and MDD channels, showing 90--97\% MDD retention after TSMOM removal, and (3) international evidence that US VIX provides broad drawdown protection across 13 markets.
+
+\medskip
+\noindent\textbf{Summary of Issues Found:}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Dimension & HIGH & MEDIUM & LOW \\
+\midrule
+1. Logic \& Flow              & 1 & 1 & 1 \\
+2. Motivation \& Framing      & 0 & 2 & 1 \\
+3. Literature Review           & 1 & 2 & 1 \\
+4. Gap Identification          & 0 & 2 & 0 \\
+5. Model Specification         & 1 & 2 & 1 \\
+6. Equations \& Notation       & 0 & 2 & 2 \\
+7. Methodology \& Identification & 2 & 2 & 1 \\
+8. Data \& Sample              & 1 & 2 & 1 \\
+9. Results \& Interpretation   & 1 & 3 & 1 \\
+10. Citations \& Bibliography  & 1 & 1 & 1 \\
+\midrule
+\textbf{Total}                 & \textbf{8} & \textbf{19} & \textbf{10} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Overall assessment: The paper has a clear and original thesis with compelling empirical evidence. However, several HIGH-severity issues---particularly around endogeneity in the cross-sectional test, missing literature, sample period inconsistencies, and the causal framing of the leverage effect channel---need resolution before journal submission.
+
+
+% =============================================================================
+\section{Dimension 1: Logic \& Argumentative Flow}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The paper follows a clear logical arc: establish VT--TSMOM overlap $\to$ show it comes from the leverage effect $\to$ decompose into Sharpe vs.\ MDD channels $\to$ show MDD survives TSMOM removal $\to$ international extension. The structure is well-organized with five sections.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{1.\arabic*}]
+
+\item \HIGH\ \textbf{Circular logic risk in the leverage effect argument.}
+The paper argues: (a) the leverage effect causes VT to mimic TSMOM, and (b) GJR-GARCH $\gamma$ predicts TSMOM loading. However, $\gamma$ is estimated from the \textit{same return series} used to construct VT weights and TSMOM signals. The cross-sectional correlation ($r = 0.564$) may reflect a mechanical relationship: assets with higher $\gamma$ have stronger negative return-volatility correlation, which simultaneously increases VIX-based deleveraging after losses (VT effect) and the alignment with past-return-sign signals (TSMOM loading). The paper acknowledges this is ``an empirical regularity consistent with the leverage effect mechanism'' (Section 5), but the main text and abstract still frame it as a predictive relationship. A reviewer may challenge whether $\gamma$ adds information beyond what is mechanically embedded.
+
+\textbf{Recommendation:} Explicitly discuss the mechanical channel. Show that $\gamma$ predicts TSMOM loading \textit{after controlling for} the asset's market beta and volatility level (i.e., run a multivariate cross-sectional regression with $\beta_{\text{MKT}}$ and average vol as additional regressors). If the $\gamma$ coefficient survives, the claim is strengthened.
+
+\item \MEDIUM\ \textbf{The ``insurance pricing'' analogy is introduced in the Introduction but not formalized until Section 4.3.}
+The abstract mentions ``drawdown insurance priced at $\sim$4\%/year Sharpe drag'' and the Introduction uses this framing, but the formal decomposition (breakeven VIX level, premium/payout regimes) appears only in the Discussion. This creates a forward-reference problem where the reader encounters the conclusion before the evidence.
+
+\textbf{Recommendation:} Either move the breakeven VIX analysis to Section 3 (as a subsection of empirical results) or temper the insurance pricing language in the Introduction/abstract until Section 4.
+
+\item \LOW\ \textbf{The sub-period stability discussion (Section 3.5) is too brief.}
+Section 3.5 is only one paragraph with no table, referencing the Online Appendix. For a key robustness result, this is insufficient. Reviewers will expect to see at least a summary table of sub-period Sharpe and MDD for the main strategies.
+
+\textbf{Recommendation:} Add a compact table (e.g., 4 sub-periods $\times$ 4 strategies) showing Sharpe and MDD for each sub-period, even if the full details remain in the appendix.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 2: Motivation \& Framing}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The motivation is strong and timely: directly responding to Hood \& Raughtigan (2025) who claim VT alpha = TSMOM alpha. The ``VT contains but is not reducible to trend following'' framing is effective and quotable.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{2.\arabic*}]
+
+\item \MEDIUM\ \textbf{The Cederburg et al.\ (2020) critique is addressed but incompletely.}
+The paper argues that Cederburg et al.'s utility framework ``may underweight'' the MDD channel, but does not explain \textit{why} standard utility functions underweight MDD. A utility function with loss aversion (Kahneman \& Tversky, 1979) or a safety-first criterion (Roy, 1952) would weight MDD more heavily. Without this connection, the rebuttal is assertion rather than argument.
+
+\textbf{Recommendation:} Add 2--3 sentences connecting MDD protection to behavioral/safety-first utility frameworks, citing the relevant literature.
+
+\item \MEDIUM\ \textbf{The ``repackaged trend following'' characterization of Hood \& Raughtigan may be somewhat of a straw man.}
+Hood \& Raughtigan (2025) show that VT alpha is \textit{absorbed} by TSMOM, which is a statistical statement. The paper sometimes frames their claim as ``VT \textit{is} trend following'' (the title question). If Hood \& Raughtigan's actual claim is more nuanced (alpha absorption $\neq$ identity), the paper should acknowledge this more carefully to avoid appearing to attack a position the original authors did not fully hold.
+
+\textbf{Recommendation:} Review Hood \& Raughtigan's exact wording and ensure the characterization is accurate. If they do not explicitly claim VT = TSMOM, soften the framing.
+
+\item \LOW\ \textbf{The paper would benefit from a brief discussion of practitioner relevance.}
+The paper targets JBF/JFE, but the practical implications (Section 5) are somewhat generic. Adding one paragraph about how institutional investors (pension funds, endowments) currently implement VT vs.\ trend following would ground the motivation.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 3: Literature Review}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The paper cites key works (Moreira \& Muir 2017, Moskowitz et al.\ 2012, Hood \& Raughtigan 2025) but the literature coverage has notable gaps.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{3.\arabic*}]
+
+\item \HIGH\ \textbf{Missing key literature on VT and managed portfolios.}
+Several important papers are absent:
+\begin{itemize}
+\item \textbf{Barroso \& Santa-Clara (2015)} --- ``Momentum has its moments.'' This paper is in the bibliography but never cited in the text! It directly addresses the VT--momentum connection by showing that volatility-scaling momentum eliminates crashes. This is highly relevant to the paper's thesis.
+\item \textbf{Daniel \& Moskowitz (2016)} --- ``Momentum crashes.'' Also in the bibliography but uncited. The leverage effect connection to momentum crashes is directly relevant.
+\item \textbf{Fleming, Kirby \& Ostdiek (2001)} --- ``The economic value of volatility timing.'' In the bibliography but uncited. A foundational paper on the economic benefits of volatility timing.
+\item \textbf{Liu et al.\ (2019)} --- ``Volatility-managed portfolios revisited.'' A direct response to Moreira \& Muir that the paper should engage with.
+\item \textbf{Cederburg et al.\ (2023)} --- ``Does it pay to follow anomaly-based smart money?'' Extension of their 2020 work.
+\item \textbf{Hocquard et al.\ (2013)} --- ``A constant volatility framework for managing tail risk.'' Early VT work.
+\end{itemize}
+Three papers are included in the bibliography but never cited in the text---these are ``orphan'' references (see Section 11).
+
+\textbf{Recommendation:} (1) Either cite the three orphan entries (barroso2015, daniel2016, fleming2001) in the text where appropriate or remove them from the bibliography. (2) Add citations to Liu et al.\ (2019) and other key VT papers.
+
+\item \MEDIUM\ \textbf{The trend-following literature is narrowly cited.}
+Only Moskowitz et al.\ (2012) and Baltas \& Kosowski (2013) are cited for TSMOM. The paper should also consider:
+\begin{itemize}
+\item Hurst, Ooi \& Pedersen (2017) --- ``A century of evidence on trend following.'' Provides the longest backtests.
+\item Levine \& Pedersen (2016) --- ``Which trend is your friend?'' Directly relevant to the distinction between different types of trend-following strategies.
+\item Jegadeesh \& Titman (1993) --- For the cross-sectional momentum distinction (mentioned but uncited in Section 3.4 where MOM is discussed).
+\end{itemize}
+
+\textbf{Recommendation:} Add these citations to strengthen the trend-following literature coverage.
+
+\item \MEDIUM\ \textbf{The global financial cycle literature is thinly cited.}
+Only Miranda-Agrippino \& Rey (2020) and Rapach et al.\ (2013) are cited for the international channel. Given that the international evidence is a full contribution (Contribution 3), this literature should be more thoroughly reviewed:
+\begin{itemize}
+\item Rey (2015, Jackson Hole) --- The seminal ``dilemma, not trilemma'' argument.
+\item Bekaert et al.\ (2014) --- Risk, uncertainty, and asset prices.
+\item Forbes \& Rigobon (2002) --- Contagion vs.\ interdependence (relevant to VIX propagation).
+\end{itemize}
+
+\item \LOW\ \textbf{Self-citation of Lai (2026a) could be perceived as excessive.}
+The paper cites Lai (2026a) six times, which is many citations to a single working paper. While self-citation is normal when building on prior work, reviewers may flag this. Consider whether some citations can be replaced with or supplemented by published references.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 4: Gap Identification}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The gap is clearly identified: Hood \& Raughtigan (2025) show VT alpha = TSMOM alpha, but no one has decomposed whether this alpha absorption implies \textit{economic} value destruction. The dual-mechanism decomposition is a genuine contribution.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{4.\arabic*}]
+
+\item \MEDIUM\ \textbf{The ``gap'' framing could be sharper.}
+The paper identifies three contributions, but the first two are tightly linked (gamma predicts TSMOM loading; Sharpe vs.\ MDD decomposition). The distinction between ``the leverage effect drives the overlap'' and ``MDD survives TSMOM removal'' could be stated more crisply as a single unified contribution.
+
+\textbf{Recommendation:} Consider restructuring contributions as: (1) a unified ``dual mechanism'' contribution (the leverage effect channel drives Sharpe overlap, but MDD operates through a separate VIX-level channel), and (2) international evidence as the second contribution. This would make the gap identification cleaner.
+
+\item \MEDIUM\ \textbf{The paper does not fully address what is ``new'' about the MDD focus.}
+Several papers have noted VT's MDD benefits (Harvey et al.\ 2018, Moreira \& Muir 2017). The paper should more explicitly state what is new: not the MDD observation itself, but the \textit{decomposition} showing MDD is orthogonal to TSMOM. Currently, this distinction is somewhat buried.
+
+\textbf{Recommendation:} Add one sentence in the Introduction stating: ``While VT's MDD benefits have been previously documented (Harvey et al.\ 2018), no prior work has tested whether these benefits survive TSMOM removal.''
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 5: Model Specification}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The model specifications are standard and appropriate (CAPM, CAPM+TSMOM, FF5+MOM+BAB). The GJR-GARCH specification is correctly applied.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{5.\arabic*}]
+
+\item \HIGH\ \textbf{The BAB proxy (SPLV$-$SPHB) is problematic and limits M5 sample.}
+The paper uses SPLV$-$SPHB as a BAB proxy, but these ETFs are only available from May 2011, reducing M5 to $N = 3{,}740$ vs.\ $N = 5{,}049$ for M1--M4. This is a significant sample reduction (26\%). Moreover, SPLV$-$SPHB is not the standard BAB factor---the Frazzini \& Pedersen (2014) BAB factor from AQR is the standard reference.
+
+\textbf{Recommendation:} (1) Use the AQR BAB factor (available from 1926 for US equities) to avoid the sample truncation. (2) If SPLV$-$SPHB must be used, run M5 on both the full sample (using AQR BAB) and the post-2011 subsample (using SPLV$-$SPHB) and report both.
+
+\item \MEDIUM\ \textbf{The TSMOM orthogonalization uses full-sample $\hat{\beta}_{\text{MKT}}$.}
+Equation (3) orthogonalizes TSMOM to MKT using a full-sample regression coefficient. This introduces a look-ahead bias: the orthogonalization at time $t$ uses information from times $t+1, \ldots, T$. While this is standard in factor model estimation (see, e.g., Daniel \& Moskowitz 2016), it should be explicitly acknowledged.
+
+\textbf{Recommendation:} Add a footnote acknowledging the full-sample orthogonalization and noting that an expanding-window alternative produces qualitatively similar results (if true, verify and state; if not verified, this is a robustness gap).
+
+\item \MEDIUM\ \textbf{The Pure VT construction (Eq.~6) uses rolling 252-day $\hat{\beta}$.}
+The rolling hedge ratio in Eq.~(6) is estimated over the past 252 days, but this window choice is not justified. The sensitivity to this window length should be discussed (e.g., does 126-day or 504-day produce similar MDD retention rates?).
+
+\textbf{Recommendation:} Add a robustness check varying the rolling window (126, 252, 504 days) and report MDD retention rates. If they are all 90\%+, this strengthens the claim; if not, it qualifies it.
+
+\item \LOW\ \textbf{No GJR-GARCH convergence diagnostics reported.}
+The paper estimates GJR-GARCH(1,1) for 22 assets but does not report convergence flags, persistence ($\alpha + \beta + \gamma/2$), or any estimation diagnostics. Standard practice in the GARCH literature requires at least reporting persistence and confirming $\alpha + \beta + \gamma/2 < 1$ for all 22 assets.
+
+\textbf{Recommendation:} Add a table or footnote reporting GJR-GARCH estimation summary (convergence success rate, persistence range, any boundary cases).
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 6: Equations \& Notation}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+Equations are generally clear and well-formatted. Notation is consistent throughout.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{6.\arabic*}]
+
+\item \MEDIUM\ \textbf{Inconsistent use of $\beta_1$ in Equations (4)--(6).}
+In Eqs.~(4)--(6), $\beta_1$ denotes the MKT loading in all three models, but $\beta_2$ denotes the TSMOM loading in M2 and also appears in M3 for TSMOM. Meanwhile, $\boldsymbol{\beta}_{\text{FF}}$ is a vector for the FF5 factors. This overloading of $\beta$ with different subscripting conventions (numeric vs.\ named) may confuse readers.
+
+\textbf{Recommendation:} Use a consistent subscript convention: $\beta_{\text{MKT}}$, $\beta_{\text{TSMOM}}$, $\boldsymbol{\beta}_{\text{FF}}$ throughout Eqs.~(4)--(6), matching the notation in Table~4.
+
+\item \MEDIUM\ \textbf{The alpha reduction formula (Eq.~7) is undefined when $\alpha_k < 0$.}
+The table notes acknowledge this (``reported only when M1 alpha is positive; `--' indicates negative M1 alpha''), but the formula itself does not include this restriction. A negative $\alpha_k$ produces a positive $\Delta\alpha$ when $\alpha_{k+1}$ is even more negative, which would be misleading.
+
+\textbf{Recommendation:} Add a condition to Eq.~(7): ``defined for $\alpha_k > 0$ only.''
+
+\item \LOW\ \textbf{The GJR-GARCH indicator function notation.}
+Equation~(8) uses $\mathbb{1}_{r_{i,t-1}<0}$, which is standard, but the text uses ``$\gamma_i$ captures the asymmetric volatility response'' without defining what $\gamma_i > 0$ means economically (i.e., negative returns increase volatility more than positive returns of the same magnitude). This should be stated explicitly for readers less familiar with GARCH models.
+
+\item \LOW\ \textbf{Eq.~(2) defines TSMOM using daily frequency but the lookback is 252 days.}
+The equation uses $r_{t-252:t}$ as the cumulative return, but the VT construction uses monthly rebalancing. The interaction between daily TSMOM signals and monthly VT weights is not discussed. If TSMOM is computed daily but VT rebalances monthly, the regression mixes frequencies.
+
+\textbf{Recommendation:} Clarify whether the alpha decomposition regressions use daily or monthly data. If daily, explain how the monthly-rebalanced VT weights interact with daily TSMOM signals.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 7: Methodology \& Identification}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The methodology is generally sound, but two identification issues require attention.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{7.\arabic*}]
+
+\item \HIGH\ \textbf{The cross-sectional regression ($N = 22$) has low statistical power and potential endogeneity.}
+The main cross-sectional result ($r = 0.564$, $p = 0.006$, $N = 22$) is based on only 22 observations. With standard errors from 22 observations, the regression coefficients are imprecisely estimated ($R^2 = 0.319$). More critically, both $\gamma_i$ and $\hat{\beta}_{\text{TSMOM},i}^{\perp}$ are derived from the same return data, creating a mechanical endogeneity concern: assets with stronger return-volatility correlations will mechanically have both higher $\gamma$ and higher TSMOM loadings in VT regressions.
+
+\textbf{Recommendation:} (1) Split the sample temporally: estimate $\gamma$ from the first half and $\beta_{\text{TSMOM}}$ from the second half to reduce mechanical correlation. (2) Report bootstrap confidence intervals for the cross-sectional regression coefficients (currently reported only for the correlation). (3) Consider an instrumental variable approach or at minimum discuss the identification challenge.
+
+\item \HIGH\ \textbf{The MDD retention metric (90--97\%) lacks a formal statistical test.}
+The paper's central claim---that 90--97\% of MDD protection survives TSMOM removal---is based on point estimates without confidence intervals or statistical tests. MDD is a single extreme-value statistic with high sampling variability. A bootstrap test of $H_0$: MDD retention $\leq 80\%$ would strengthen this claim considerably.
+
+\textbf{Recommendation:} Bootstrap the MDD retention rate (10,000 replications, block bootstrap to preserve autocorrelation) and report 95\% confidence intervals. If the lower bound exceeds, say, 80\%, the claim is robust.
+
+\item \MEDIUM\ \textbf{The international test (Table 5) does not control for local volatility.}
+The VIX overlay is applied uniformly to all 13 international ETFs using US VIX. However, the MDD improvement may partly reflect local market volatility dynamics rather than the VIX signal per se. A placebo test using a randomized VIX signal (or a non-US volatility index) would help isolate the US VIX channel.
+
+\textbf{Recommendation:} Add a placebo test: apply the 12/VIX overlay using a randomized (shuffled) VIX series and report the average MDD improvement. If the placebo MDD improvement is close to zero, the US VIX channel is confirmed.
+
+\item \MEDIUM\ \textbf{The trend-following comparison (Section 4.1) uses SPY only.}
+The direct test of five trend-following strategies (SMA, Faber, Golden Cross, Dual Momentum, MA+VT) is applied only to SPY. This is a single-asset test for a claim that is meant to be general. At minimum, the comparison should be extended to the 50/50 SPY/GLD blend and one or two additional assets.
+
+\textbf{Recommendation:} Extend the trend-following comparison to at least 3 assets (SPY, 50/50, one non-US) and report results in a table.
+
+\item \LOW\ \textbf{The ``prediction $\neq$ application'' finding (Section 4.1) is based on a single asset.}
+The finding that HAR-RV produces the best forecasts but worst VT allocation is interesting but based on SPY only. Generalization to other assets would strengthen this claim.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 8: Data \& Sample}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The data are clearly described and sources are transparent (Yahoo Finance, CBOE, Kenneth French library, AQR). However, several sample issues need attention.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{8.\arabic*}]
+
+\item \HIGH\ \textbf{Inconsistent sample periods across analyses.}
+The paper uses multiple overlapping but different sample periods:
+\begin{itemize}
+\item Primary sample: January 2007--March 2026 (Section 2.1)
+\item Table 3 (Dual Mechanism): 2005--2026 (Table 3 notes)
+\item Table 4 (Factor Models): January 2005--March 2026
+\item Sector sample: December 1998--March 2026
+\end{itemize}
+SPY starts in 1993, VIX in 1990, so there is no reason the primary sample cannot start in 2005 uniformly. The 2005 vs.\ 2007 discrepancy between the primary sample definition and Tables 3--4 is confusing and may indicate different data pulls.
+
+\textbf{Recommendation:} Unify all analyses to the same start date. If some assets (e.g., INDA, MCHI) have shorter histories, clearly indicate ``common sample: 2005--2026'' with footnotes for shorter-history assets.
+
+\item \MEDIUM\ \textbf{Yahoo Finance as the sole return data source raises reliability concerns.}
+Academic publications typically use CRSP (for US equities), Bloomberg, or Datastream. Yahoo Finance data can contain errors (splits, dividend adjustments). While the paper targets assets that are major ETFs (less prone to Yahoo errors), a reviewer may raise this.
+
+\textbf{Recommendation:} Add a footnote noting that Yahoo Finance adjusted close prices account for dividends and splits, and that spot checks against Bloomberg/CRSP confirmed data accuracy (if true).
+
+\item \MEDIUM\ \textbf{The risk-free rate (IRX) is nonstandard.}
+The paper uses the 13-week Treasury bill rate (IRX ticker) as the risk-free rate. The standard in the VT literature is to use the daily risk-free rate from the Fama--French data library. Using IRX may create a mismatch with the Fama--French factors that are computed using the FF risk-free rate.
+
+\textbf{Recommendation:} Use the Fama--French daily risk-free rate for consistency with the factor model regressions. Report IRX as a robustness check if desired.
+
+\item \LOW\ \textbf{No discussion of survivorship bias in ETF selection.}
+The 22 assets are all currently trading ETFs. There may be survivorship bias if some ETFs were delisted during the sample. While major ETFs like SPY/QQQ are unlikely to be affected, this should be acknowledged.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 9: Results \& Interpretation}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The results are clearly presented with well-formatted tables and a clear narrative. The dual-mechanism decomposition is the paper's strongest contribution. However, some interpretive issues need attention.
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{9.\arabic*}]
+
+\item \HIGH\ \textbf{The claim ``90--97\% MDD retention'' is based on only 5 assets.}
+The abstract and conclusion prominently feature the 90--97\% range, but this is based on only SPY, 50/50 SPY/GLD, DIA, QQQ, and IWM---all US large/mid-cap equity ETFs (plus a blend). This is a narrow base for a strong claim. The paper has 22 assets; why not report MDD retention for all 22?
+
+\textbf{Recommendation:} Report MDD retention for all 22 assets (or at least all 15 equity assets). If the 90--97\% range holds broadly, the claim is much stronger. If it does not hold for all assets (e.g., EM or commodity assets), this is an important boundary condition that should be reported.
+
+\item \MEDIUM\ \textbf{The ``1.4\% TSMOM contribution to total strategy Sharpe'' needs more explanation.}
+This number appears in Sections 3.3 and 3.1 (table notes) but is not derived in the text. The reader needs to understand how 1.4\% is computed: is it $\Delta\text{Sharpe}_{\text{TSMOM}} / \text{Sharpe}_{\text{VT}}$? If so, $0.060 / 0.797 = 7.5\%$, not 1.4\%. The discrepancy suggests the 1.4\% uses a different calculation.
+
+\textbf{Recommendation:} Explicitly define the calculation for the 1.4\% figure with the formula and numbers used.
+
+\item \MEDIUM\ \textbf{The Harvey (2016) $t > 3.0$ threshold is applied selectively.}
+The paper applies the Harvey threshold to trend-following strategies (all fail) but does not apply it to VT's own alpha ($t = 1.50$). While the paper correctly notes that VT's alpha is not significant, the framing creates an asymmetry: trend-following is judged by $t > 3.0$, but VT's MDD benefit is not held to any formal threshold.
+
+\textbf{Recommendation:} Either apply a formal test to the MDD benefit (e.g., bootstrap test of MDD improvement significance) or acknowledge the asymmetric application of the Harvey threshold.
+
+\item \MEDIUM\ \textbf{The international $\Delta$Sharpe of $-$0.048 ($t = -5.91$) undermines the ``insurance'' framing.}
+A statistically significant negative Sharpe impact ($t = -5.91$) means VT \textit{reliably reduces} risk-adjusted returns internationally. While the paper frames this as an ``insurance premium,'' a reviewer may counter that paying a statistically significant premium for a benefit (MDD reduction) that has no formal significance test is not obviously optimal.
+
+\textbf{Recommendation:} Provide a formal cost-benefit analysis: quantify the breakeven investor risk aversion ($\gamma$) at which the MDD protection compensates for the Sharpe drag, using a CRRA or prospect theory utility framework.
+
+\item \LOW\ \textbf{Table~1 has 22 assets but the dual-mechanism analysis (Table~3) uses only 2 assets in the main table.}
+The main decomposition table shows SPY and 50/50 SPY/GLD. While the text mentions DIA, QQQ, and IWM results, these are not in the table. Readers expect the main results table to contain the full evidence base.
+
+\textbf{Recommendation:} Expand Table~3 to include all 5 assets with the MDD retention percentage as a column, or add a Panel B with DIA, QQQ, IWM.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Dimension 10: Citations \& Bibliography}
+% =============================================================================
+
+\subsection*{Overall Assessment}
+The bibliography contains 18 entries. Three are orphan references (in bibliography but never cited in text). Citation formatting is generally correct with \texttt{natbib} (\texttt{citet}/\texttt{citep}).
+
+\subsection*{Issues}
+
+\begin{enumerate}[label=\textbf{10.\arabic*}]
+
+\item \HIGH\ \textbf{Three orphan references: never cited in the text.}
+\begin{itemize}
+\item \texttt{barroso2015} --- Barroso \& Santa-Clara (2015): ``Momentum has its moments.'' Highly relevant to VT--momentum connection. Should be cited or removed.
+\item \texttt{daniel2016} --- Daniel \& Moskowitz (2016): ``Momentum crashes.'' Relevant to leverage effect and momentum. Should be cited or removed.
+\item \texttt{fleming2001} --- Fleming, Kirby \& Ostdiek (2001): ``The economic value of volatility timing.'' Foundational VT paper. Should be cited or removed.
+\end{itemize}
+These orphan entries suggest the bibliography was prepared for a longer version and not cleaned up. They will trigger a desk reject at some journals.
+
+\textbf{Recommendation:} Cite all three in the text where appropriate (see specific suggestions in the Citation Check document), or remove them from the bibliography.
+
+\item \MEDIUM\ \textbf{Hood \& Raughtigan (2025) publication details are incomplete.}
+The entry lists only ``Working Paper'' without an institution, SSRN number, or URL. For the paper's primary foil, this is insufficient. If the paper is on SSRN, add the SSRN number and URL. If it is a journal submission, note ``under review at [journal].''
+
+\textbf{Recommendation:} Add institutional affiliation and SSRN/DOI link for Hood \& Raughtigan (2025).
+
+\item \LOW\ \textbf{Lai (2026a) is labeled ``2026a'' implying a ``2026b'' exists.}
+The ``a'' suffix in Lai (2026a) implies there is a Lai (2026b), which is presumably the current paper. However, the current paper has no year suffix in its bibliography. If this paper will be Lai (2026b), the bibliography should include a self-citation. If not, the ``a'' is unnecessary.
+
+\textbf{Recommendation:} If this paper is Lai (2026b), add it to the bibliography. If not, change ``Lai (2026a)'' to ``Lai (2026)'' throughout.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Citation Verification Summary}
+% =============================================================================
+
+Full citation verification details are in the companion document \texttt{citation\_check.md}. Key findings:
+
+\begin{center}
+\small
+\begin{tabular}{lcp{6cm}}
+\toprule
+Category & Count & Details \\
+\midrule
+Bibliography entries & 18 & \\
+In-text citation keys & 15 & \\
+Orphan entries (bib but uncited) & 3 & barroso2015, daniel2016, fleming2001 \\
+Missing citations (cited but no bib) & 0 & \\
+Format issues & 2 & Hood (2025) incomplete; harvey2016 title truncated \\
+DOI verification needed & 2 & hood2025 (no DOI), baltas2013 (working paper) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+% =============================================================================
+\section{Summary of Recommendations by Priority}
+% =============================================================================
+
+\subsection*{Must Fix (HIGH --- 8 issues)}
+\begin{enumerate}
+\item[\textbf{1.1}] Address circularity in the $\gamma \to \beta_{\text{TSMOM}}$ argument (add controls for $\beta_{\text{MKT}}$ and vol level).
+\item[\textbf{3.1}] Cite or remove 3 orphan bibliography entries; add missing key literature.
+\item[\textbf{5.1}] Replace SPLV$-$SPHB BAB proxy with AQR BAB factor to avoid sample truncation.
+\item[\textbf{7.1}] Address endogeneity in $N = 22$ cross-sectional regression (split-sample or IV approach).
+\item[\textbf{7.2}] Add bootstrap confidence intervals for MDD retention rates.
+\item[\textbf{8.1}] Unify sample periods across all analyses.
+\item[\textbf{9.1}] Report MDD retention for all 22 assets, not just 5 US equity ETFs.
+\item[\textbf{10.1}] Fix 3 orphan bibliography entries.
+\end{enumerate}
+
+\subsection*{Should Fix (MEDIUM --- 19 issues)}
+Key items: formalize insurance pricing earlier (1.2), address Cederburg critique more deeply (2.1), add placebo test for international VIX channel (7.3), extend trend-following comparison beyond SPY (7.4), explain 1.4\% TSMOM contribution calculation (9.2), provide cost-benefit analysis for insurance pricing (9.4), complete Hood (2025) bibliography entry (10.2).
+
+\subsection*{Nice to Fix (LOW --- 10 issues)}
+Sub-period table (1.3), practitioner relevance (2.3), self-citation frequency (3.4), GARCH diagnostics (5.4), GJR indicator interpretation (6.3), frequency mismatch (6.4), survivorship bias (8.4), expand Table~3 (9.5).
+
+
+% =============================================================================
+\section{Overall Verdict}
+% =============================================================================
+
+The paper presents a compelling thesis with clear empirical evidence. The dual-mechanism decomposition (Sharpe vs.\ MDD) is a genuine contribution that resolves an open question in the VT literature. The international extension provides breadth. However, the paper needs:
+
+\begin{enumerate}
+\item \textbf{Stronger identification} in the cross-sectional test (address endogeneity, expand the MDD retention beyond 5 assets).
+\item \textbf{Statistical rigor} for the central MDD claim (bootstrap CIs).
+\item \textbf{Literature cleanup} (cite or remove orphan entries, add missing papers).
+\item \textbf{Sample consistency} (unify periods, fix the BAB proxy).
+\end{enumerate}
+
+After addressing the HIGH-severity issues, this paper should be competitive at JBF or a similar Tier-1 finance journal. The core insight---VT contains but is not reducible to trend following, with MDD as the orthogonal channel---is original and well-supported.
+
+\end{document}
