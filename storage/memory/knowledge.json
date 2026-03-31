@@ -18221,5 +18221,24 @@
     "phase": "research",
     "importance": 2,
     "timestamp": "2026-03-31T09:12:48.631873+00:00"
+  },
+  {
+    "id": "K765",
+    "title": "K765: Explainable AI for Volatility — Which Features Matter Most?",
+    "content": "[提出: Claude (research_program), 執行: Claude] K765 XAI for vol forecasting. 4-part analysis using SPY 2006-2026 (5090 obs). PART A: GJR-GARCH parameter importance. alpha is MOST VARIABLE (CV=0.972), beta MOST STABLE (CV=0.104). gamma does NOT predict forecast accuracy (t=-0.260, p=0.80, corr=-0.04). Persistence mean=0.956, range [0.782, 1.095]. PART B: HAR-ABS feature importance. WEEKLY horizon dominates (51.0%) >> monthly (39.2%) >> daily (9.8%). Daily beta is NEGATIVE (-0.107) — contrarian signal. VIX regime CHANGES feature importance: high VIX → weekly importance rises (0.59 vs 0.51, t=10.3), monthly drops (0.35 vs 0.48, t=-9.9). R²=0.298. PART C: SHAP-like decomposition (2020-2026, 1567 days). Monthly component is MOST crisis-sensitive (1.97x increase during high VIX vs calm). Weekly still largest absolute contributor (57.8% of total deviation). PART D: Component agreement as confidence indicator. Statistical: disagreement-error corr r=0.045 (p=0.007). But PRACTICAL value near zero — only 0.5% error reduction. Quintile monotonicity holds but effect too small. KEY INSIGHT: HAR-ABS works because WEEKLY horizon captures the 'goldilocks' timescale — not too noisy (daily) nor too sluggish (monthly). During crises, monthly component surges but weekly stays dominant. This explains WHY HAR beats GARCH: multi-scale structure adapts to regime. Script: experiments/k765_xai_volatility.py",
+    "tags": [
+      "XAI",
+      "explainability",
+      "HAR-ABS",
+      "GARCH",
+      "feature-importance",
+      "SHAP",
+      "regime",
+      "VIX",
+      "SPY"
+    ],
+    "phase": "research",
+    "importance": 4,
+    "timestamp": "2026-03-31T17:42:30.000000+00:00"
   }
 ]
