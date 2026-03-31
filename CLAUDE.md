@@ -50,10 +50,90 @@
 ## 專案簡介
 Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波動率預測模型，並建立一般投資人可用的交易策略。
 
-## 網站架構
-→ 詳見 `docs/architecture.md`（前端 v4、資料流、策略管理、Ops Layer、Supabase 表、發佈流程）
+## 網站架構（v4 Supabase + Admin CMS + Mirror API）
+→ 完整細節見 `docs/architecture.md`
 
-**核心要點**：Next.js 15 + Supabase，`storage/` 為本地唯一源頭，`daily_update.py` 每日同步，agent-first ops layer (`uv run volpred ops ...`)。14 策略（10 active）→ 詳見 `docs/strategy-registry.md`
+- **前端（線上版）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，部署於 volpred-v3 服務）
+- **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
+- **資料庫**：Supabase（PostgreSQL + Auth + REST API + RPC）
+- **線上網址**：https://volpred.zeabur.app
+- **Zeabur Dashboard**：https://zeabur.com/projects/69b5b264800a475a1f82b073
+
+### 前端頁面列表
+| 路徑 | 說明 |
+|------|------|
+| `/` | 首頁 Feed（SSR + `FeedBrowser` 無限滾動） |
+| `/about` | 關於頁面（研究背景、團隊） |
+| `/admin/*` | Admin CMS（10 面板：analytics/content/ops/strategies/questions/users/papers/paper-trading/health/schedules） |
+| `/disclaimer` | 免責聲明 |
+| `/me` | 用戶專區（書籤、提問、活動摘要） |
+| `/paper` | 論文頁（讀 Supabase `papers` table） |
+| `/portfolio` | 投資組合總覽（`PaperTradingStrategyChart` + `PaperTradingTradeLog`） |
+| `/questions` | 會員問答 |
+| `/risk-forecast` | 風險預測儀表板 |
+| `/strategy-selector` | 策略選擇器 |
+| `/vix-calculator` | VIX 計算器 |
+| `/vt-calculator` | VT 計算器 |
+
+### 資料流核心規則
+- `storage/` → 本地唯一源頭（JSON）
+- `scripts/supabase_sync.py` → Supabase 同步（由 daily_update.py 呼叫）
+  - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
+  - **Paper trades 同步**：自動剝離市場數據，只存策略 weights + returns
+  - **Draft 同步**：用 `published_at OR created_at` 過濾
+- `scripts/daily_update.py` → 每日 06:03 計算策略權重 + 同步 Supabase + 重算績效指標
+- **Paper Trading 資料結構**：
+  - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
+  - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
+  - `recalc_metrics.py` 每次執行自動 sync 到 Supabase `strategy_metrics_cache`
+  - 市場數據統一存在 `_market_daily`（key=日期），不在每個 entry 重複
+- **新策略評估**：必須用 `scripts/evaluate_new_strategy.py` 在 COMMON_START（2023-01-04）~ 今天同期間比較
+- **Mirror 資料流**：`MemorySystem._sync_to_remote()` → 雙寫 Supabase + Mirror API
+
+### Supabase 資料庫表
+| 表名 | 用途 |
+|------|------|
+| `articles` + `article_tags` | 文章（feed）+ 標籤 |
+| `strategy_signals` | 策略即時信號（權重、VIX、sigma） |
+| `paper_trades` | Paper trading 每日記錄 |
+| `strategy_metrics_cache` | 預計算的績效指標 + sparkline |
+| `questions` + `question_articles` | 會員問答系統 |
+| `memory_entries` | 研究記憶（thinking/knowledge/experiments） |
+| `profiles` + `quota_usage` | 用戶角色（admin/premium/free）+ 配額 |
+| `article_impressions` + `article_reactions` | 互動追蹤（瀏覽/按讚/收藏） |
+| `ops_jobs` + `ops_job_logs` + `ops_audit_logs` | Job queue + 審計紀錄 |
+| `papers` | 論文 metadata（論文頁 DB 驅動） |
+| RPC: `feed_page()`, `feed_tag_counts()` | 伺服器端分頁查詢 |
+
+### 策略管理（DB 驅動，無需重新部署）
+- 策略 metadata 唯一來源：`daily_update.py` 頂部的 `STRATEGY_REGISTRY`
+- Registry 驅動：Feed 文章（只列 active）、Supabase 同步、Paper trading
+- **新增策略**：(1) 加入 STRATEGY_REGISTRY (2) 加計算邏輯到 strat_list (3) `add_strategy.py` 寫 DB
+- **下架策略**：改 `is_active=False`（面板隱藏、文章不列、paper trading 繼續記錄）
+
+### Agent-first Ops Layer
+- **CLI 首選入口**：`uv run volpred ops ...`
+- 已統一操作：publish-milestone / release-pool-by-settings / sync-all / daily-update / recalc-metrics / strategy-upsert / strategy-set-active / question-ranking-summary / question-rerank / question-answer / health / cleanup-post / unpublish / send-article-notification / send-daily-digest
+- **Job Queue**（`src/volpred/ops/jobs.py`）：Supabase-backed，lifecycle: `queued` → `running` → `succeeded|failed`
+
+### 程式碼架構
+- **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）
+- **storage/**：唯一資料源頭（JSON），跨 session 保存
+- **frontend-v2-fix/**：Next.js 15 前端（線上版，volpred-v3 服務）
+- **scripts/supabase_sync.py**：資料同步到 Supabase
+- **src/volpred/ops/jobs.py**：Supabase-backed job queue（agent + human 共用）
+- **research_program.md**：研究策略文件（北極星）
+- **paper/**：學術論文（按子目錄組織）
+
+### 重要研究結論（2026-03-29 K687/K697/K700）
+
+**VT 策略是 drawdown insurance，不是 alpha generator。**
+- K697：VIX 預測 vol magnitude（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 不可能
+- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）
+- K688：但 VT 在 CRRA utility 框架 gamma>=5 時勝出（風險厭惡投資人受益）
+- K702：50/50 SPY/GLD 是最佳靜態配置（grid search 確認）
+- K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
+- **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——這是最可靠的設計原則**
 
 ### 注意事項
 - Feed 發文要用 `feed-publisher` skill（thinking ≠ content）
@@ -118,11 +198,96 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 **⚠️ 步驟 4 的 `paper-update` 自動完成原本的步驟 4-6，不需要手動跑 3 個命令。**
 **⚠️ 修正完不更新平台 = 沒修。步驟 4-6 不可省略。**
 
+### 目前 STRATEGY_REGISTRY（14 筆，10 個 active）
+→ 完整上架流程見 `docs/strategy-registry.md`
+
+| key | display_name | is_active | order |
+|-----|-------------|-----------|-------|
+| `slow_vt` | GARCH VT (SPY) | True | 0 |
+| `risk_parity` | Risk Parity (SPY+GLD) | True | 1 |
+| `simple_12vix` | 12/VIX (SPY) | True | 2 |
+| `recommended_5050` | 50/50 SPY/GLD | True | 3 |
+| `taiwan_8.63vix` | 台灣 VT (0050.TW) | True | 4 |
+| `taiwan_spy_momentum` | 台股動量 (0050.TW) | False | 5 |
+| `tz_tw_jp_5050` | TW+JP 50/50 TZ | False | 6 |
+| `global_vt_tz` | Global US VT + TW TZ | False | 7 |
+| `vix_leading_guard` | VIX+景氣領先 (0050.TW) | True | 8 |
+| `vix_cond_leverage` | VIX 條件槓桿（月頻） | True | 9 |
+| `taiwan_hybrid_leverage` | 台股混合槓桿 | True | 10 |
+| `piecewise_conservative` | 保守型 VT（Piecewise） | True | 11 |
+| `fear_dca` | 恐慌加碼定期定額 | True | 12 |
+| `adaptive_tier` | 自適應三階 VT | True | 13 |
+
+### 上架必須通過的 5 項檢驗（ALL PASS 才可上架）
+
+| # | 檢驗 | 通過標準 | 工具 |
+|---|------|---------|------|
+| 1 | **同期間比較** | `evaluate_new_strategy.py` Sharpe **>= 已上架策略中位數** | `uv run python scripts/evaluate_new_strategy.py` |
+| 2 | **Cross-OOS** | 5 個非重疊 2 年期間，勝 BH 50/50 **>= 3/5** | 回測腳本（可用 2006-2026） |
+| 3 | **Codex 審查** | 無 HIGH severity bug（lag/lookahead/TX） | `/codex:rescue` 或 `codex exec -s read-only` |
+| 4 | **Sensitivity** | 參數 +-20% 變動後 Sharpe 不降 > 30% | 回測腳本 |
+| 5 | **MDD 可接受** | 同期間 MDD **< -20%** | `evaluate_new_strategy.py` 輸出 |
+
 ### 新策略上線標準程序
-→ 詳見 `docs/strategy-registry.md`（5 項檢驗、上架流程、生命週期）
 
 ## 快速指令
-→ 詳見 `docs/quick-commands.md`
+→ 完整指令見 `docs/quick-commands.md`
+
+```bash
+# 研究
+uv run volpred summary                              # 研究摘要
+uv run volpred analyze-data --asset SPY              # 資料特性
+uv run volpred run-experiment --asset SPY --model gjr_arch --window 2000
+uv run python scripts/build_knowledge_index.py auto  # 知識索引（增量，偵測變化才重建，省 API）
+
+# 每日運營
+uv run python scripts/daily_update.py                # 每日更新（策略計算 + 績效重算 + Supabase 同步）
+uv run python scripts/recalc_metrics.py              # 手動重算績效指標
+uv run python scripts/supabase_sync.py full          # 手動 incremental sync
+uv run python scripts/supabase_sync.py force-full    # 強制全量同步（慎用，IO 大）
+uv run volpred ops health                            # 本地營運健康檢查
+uv run volpred ops article-backups --repair          # 確保每篇已發布文章都有本地單篇 JSON
+uv run volpred ops sync-all                          # 統一入口：手動 Supabase sync
+uv run volpred ops daily-update                      # 統一入口：每日更新
+uv run volpred ops recalc-metrics                    # 統一入口：重算績效指標
+uv run volpred ops paper-list                        # 查看論文與 Storage 狀態
+uv run volpred ops paper-upsert --paper-id xxx --title "..." --authors "..."
+uv run volpred ops paper-upload-pdf --paper-id xxx --file paper/<name>/main.pdf
+
+# 策略管理（只寫 DB，不需部署）
+uv run python scripts/list_new_strategy.py --list-all                          # 查看所有策略上線狀態
+uv run python scripts/list_new_strategy.py --key xxx --verify-only             # 驗證單一策略
+uv run python scripts/list_new_strategy.py --key xxx --name "名稱" --howto "說明" --description "完整說明" --assets '{"SPY":50}' --order N  # 一鍵上架
+uv run volpred ops strategy-upsert --strategy-key xxx --strategy-name "名稱" --weights-json '{"SPY":0.5}'
+uv run volpred ops strategy-set-active xxx --inactive
+
+# Jobs 與 Worker（agent-first ops）
+uv run volpred ops jobs --status queued              # 查看待處理任務
+uv run volpred ops job-show <job_id>                 # 查看任務詳情及日誌
+uv run volpred ops enqueue --action daily_update     # 手動入隊任務
+uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
+
+# Zeabur CLI（部署 + 域名管理）
+# Project ID: 69b5b264800a475a1f82b073
+# Environment ID: 69b5b2646853f6f4f5f6a16d
+# Services: volpred-web (69b5b279e0a0c18cef9d780d), volpred-v2 (69b8ed895a53b5901a3c8d25), volpred-v3 (69be521a1066986b9a1692be)
+npx zeabur@latest auth status                    # 確認登入狀態
+npx zeabur@latest service list --project-id 69b5b264800a475a1f82b073 --json  # 列出服務
+npx zeabur@latest service redeploy --id <service_id> -i=false -y             # 重新部署
+cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh  # 安全部署前端
+
+# 發佈
+uv run volpred ops publish-milestone --title "標題" --description "Markdown 內容" --phase "Phase_X"
+uv run volpred ops release-pool-by-settings --storage-dir storage
+uv run volpred ops send-article-notification mile_xxxxxxxx
+uv run volpred ops send-daily-digest --target-date 2026-03-21
+uv run volpred ops unpublish mile_xxxxxxxx
+uv run volpred ops cleanup-post mile_xxxxxxxx --hard-delete
+
+# 會員問題排行
+uv run volpred ops question-ranking-summary --limit 20
+uv run volpred ops question-rerank --evaluations-json '[...]'
+```
 
 ## 思維模式：永遠修流程，不修資料
 
@@ -248,15 +413,62 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **論文**：作者為 Yi-Hao Lai + VolPred Research System，致謝 Codex/Gemini
 - **研究方向**：記錄建議來源（例：N182 Excess Fear Signal 由 Gemini 提出）
 
-## AI 協作模式
-→ 詳見 `docs/ai-collaboration.md`（角色分工、Codex 命令、協作場景、研究主題來源）
+## AI 協作模式（Claude + Codex + Gemini）
+→ 完整協作場景見 `docs/ai-collaboration.md`
 
-**核心規則**：Codex 用 plugin 命令（`/codex:rescue`、`/codex:review`）針對特定目標審查，不掃全專案。研究主題來源必須多元（Codex/Gemini 建議、用戶指定、會員問題、文獻搜索、Claude 自選）。
+| AI | 角色 | 使用方式 | 擅長 |
+|---|---|---|---|
+| **Claude**（主研究員）| 實驗執行、分析、記憶管理、論文寫作 | 直接執行 | 深度分析、code、持續研究 |
+| **Codex (GPT)**| 針對性審查、第二意見、新方向 | `/codex:rescue`、`/codex:review`、`codex exec` | 找漏洞、結構性問題、editorial advice |
+| **Gemini** | 方法論建議、文獻連結、robustness 建議 | `/gemini-cli` | 學術框架、cross-reference、新測試建議 |
+
+### Codex Plugin 可用命令（openai/codex-plugin-cc v1.0.1）
+| 命令 | 用途 |
+|------|------|
+| `/codex:rescue` | 委派特定任務（審查、診斷、修正建議） |
+| `/codex:review` | Git diff 代碼審查（需指定 scope） |
+| `/codex:adversarial-review` | 對抗性審查（挑戰設計決策） |
+| `/codex:status` | 查看背景任務進度 |
+| `/codex:result` | 取得背景任務結果 |
+| `/codex:cancel` | 取消背景任務 |
+| `/codex:setup` | 檢查 Codex 就緒狀態 |
+
+**使用原則**：針對特定目標，不掃全專案。不要用 `--scope working-tree`。不要無目標地「讓 Codex 看看」。
+
+### 研究主題來源（必須多元）
+1. **Codex/Gemini 建議**：每 5-10 個實驗主動問一次
+2. **用戶指定**：優先執行，必須立刻寫入 research_program.md
+3. **會員問題**：每 6 小時 cron 自動評估
+4. **文獻搜索**：WebSearch arXiv/SSRN 前沿方向
+5. **Claude 自選**：基於 research_program.md 待探索方向
+6. **跨 AI 交叉驗證**：一個 AI 提出假說 → 另一個 AI 設計實驗 → Claude 執行
 
 ## 硬體資源與 Agent Team
-→ 詳見 `docs/hardware.md`（M1 Max 10核 64GB、模型選擇原則、Agent 設定對照表）
+→ 完整 Agent 設定對照表見 `docs/hardware.md`
 
-**核心規則**：研究/分析/程式必用 `model: "opus"`，不確定時預設 opus。優先使用 agent team 並行分派，同時推進 3-4 個方向。
+| 項目 | 規格 |
+|------|------|
+| CPU | Apple M1 Max · 10 核心 |
+| RAM | 64 GB |
+| 平行 agent 建議 | 3-4 個 worktree agent 同時跑（每個 ~1GB RAM） |
+| GARCH 估計速度 | ~6ms/model（單核） |
+| Bootstrap 10,000 reps | ~2-5 秒 |
+
+### 模型選擇原則（必須遵守）
+
+| 任務類型 | 模型 | 原因 |
+|---------|------|------|
+| **研究實驗**（GARCH、統計檢定、策略回測） | `model: "opus"` | 精確性與專業性要求高 |
+| **程式開發**（前端、後端、bug 修復） | `model: "opus"` | 程式碼正確性關鍵 |
+| **統計分析**（DM test、bootstrap、cross-OOS） | `model: "opus"` | 數學嚴謹性不可妥協 |
+| **論文寫作/審查** | `model: "opus"` | 學術品質要求 |
+| **知識合成**（meta-analysis、投資指南） | `model: "opus"` | 需要深度推理 |
+| 簡單搜尋（grep、檔案查找） | `subagent_type: "Explore"` | 快速唯讀 |
+| 簡單文章撰寫（feed 文章） | `model: "sonnet"` 可接受 | 創意寫作彈性較大 |
+| 規劃與架構 | `subagent_type: "Plan"` | 結構化思考 |
+
+**規則：研究、分析、程式等精確性與專業性工作，務必使用 opus 模型。不確定時預設 opus。**
+**優先使用 agent team 並行分派任務**，同時推進 3-4 個方向以最大化效率。
 
 ## 自動化排程
 ### 永久任務（系統 crontab — 無人值守也會跑）
