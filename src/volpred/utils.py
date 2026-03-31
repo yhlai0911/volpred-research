@@ -6,10 +6,12 @@ import pandas as pd
 def clean_tw50_data(prices: pd.Series, returns: pd.Series = None) -> tuple:
     """Fix 0050.TW stock split artifacts in yfinance data.
 
-    yfinance adjusted close for 0050.TW has a KNOWN BUG:
-    - 2014-01-02: 1-for-4 stock split. Raw price 58.70 → 14.64.
-    - yfinance does NOT back-adjust pre-split prices, creating a fake -75% drop.
-    - 2025-04: Another 1-for-4 split planned (check if data needs similar fix).
+    yfinance data for 0050.TW has a KNOWN ISSUE:
+    - 官方分割日是 2025-06-11（1:4），但 yfinance 原始價格從 2014-01-02 起就已反映分割
+    - 2013-12-31 Close=58.70 → 2014-01-02 Close=14.64（÷4.01）
+    - yfinance splits metadata 完全沒記錄此分割（Stock Splits 全 0.0）
+    - Adj Close 也沒有回溯調整 → 造成 2014-01-02 假 -75% 回報
+    - 原因不明（可能是 yfinance 提前應用 2025 分割，或台灣證交所數據問題）
 
     This function:
     1. Detects split days (|return| > 50%)
