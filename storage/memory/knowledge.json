@@ -18682,5 +18682,32 @@
     "phase": "research",
     "importance": 4,
     "timestamp": "2026-03-31T12:54:51.449881+00:00"
+  },
+  {
+    "id": "K780",
+    "type": "experiment",
+    "title": "K780: Tail-First ES Allocation — AMEM Best Risk Manager, ES-alloc beats 50/50 by +0.06 Sharpe",
+    "content": "[提出: Codex GPT-5.4, 執行: Claude] Evaluated 5 vol models (GJR-GARCH/Student-t, AMEM/Gamma, HAR-ABS/Gauss, EWMA/Gauss, Historical Sim) on VaR/ES backtesting rather than forecast accuracy. SPY 2008-2026 OOS (N=4590). KEY RESULTS: (1) AMEM wins risk management (score 1.94/2.0): 1% violation=1.09% (target 1%), Kupiec p=0.55, Basel Green — best calibrated VaR. (2) GJR-GARCH 2nd (1.63): good at 5% but slightly over-violates at 1%. (3) HAR-ABS/EWMA worst: Gaussian tails too thin → 2.5x over-violation at 1%, Basel Yellow. (4) Forecast accuracy ≠ risk management: K778 showed GJR best on QLIKE(σ²), but AMEM best on VaR calibration — different criterion, different winner. (5) Inverse-ES portfolio (SPY+GLD): GJR-ES Sharpe=0.876 vs 50/50=0.814 (+0.062) but marginal (< 0.1 threshold). 12/VIX Sharpe=0.886 still best. (6) All Acerbi-Szekely ES tests passed (p>0.5) — ES conservatively calibrated. Data: yfinance SPY/GLD/VIX 2006-2026, expanding window, 73 refits.",
+    "tags": [
+      "VaR",
+      "Expected Shortfall",
+      "risk management",
+      "AMEM",
+      "GJR-GARCH",
+      "HAR-ABS",
+      "EWMA",
+      "Kupiec",
+      "Christoffersen",
+      "Basel",
+      "tail risk",
+      "portfolio allocation",
+      "SPY",
+      "GLD"
+    ],
+    "data_source": "yfinance SPY, GLD, VIX 2006-2026",
+    "experiment_script": "experiments/k780_tail_first_es.py",
+    "results_file": "experiments/k780_tail_first_es_results.json",
+    "created_at": "2026-03-31T13:15:11.714654+00:00",
+    "significance": "HIGH — first comprehensive VaR/ES backtest comparing all 5 model families; shows forecast accuracy and risk management are different criteria with different winners"
   }
 ]

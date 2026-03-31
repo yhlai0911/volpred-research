@@ -1,0 +1,556 @@
+{
+  "experiment_id": "K780",
+  "title": "Tail-First Expected Shortfall Allocation \u2014 Risk Control Over Vol Prediction",
+  "proposer": "Codex GPT-5.4",
+  "executor": "Claude",
+  "timestamp": "2026-03-31T13:14:44.096712+00:00",
+  "data_source": "yfinance SPY, GLD, VIX 2006-2026",
+  "n_spy": 5090,
+  "n_oos": 4590,
+  "min_window": 500,
+  "refit_freq": 63,
+  "oos_period": "2007-12-31 to 2026-03-30",
+  "models": [
+    "GJR-GARCH(t)",
+    "AMEM(Gamma)",
+    "HAR-ABS(Gauss)",
+    "EWMA(Gauss)",
+    "Hist.Sim(250d)"
+  ],
+  "part_b_backtest": {
+    "gjr": {
+      "0.01": {
+        "kupiec": {
+          "stat": 5.140099916898741,
+          "p_value": 0.02337930258319809,
+          "n_violations": 62,
+          "violation_rate": 0.013507625272331155,
+          "expected_rate": 0.01
+        },
+        "christoffersen": {
+          "independence_stat": 6.517892157179465,
+          "independence_p": 0.010679450251502076,
+          "n00": 4469,
+          "n01": 58,
+          "n10": 58,
+          "n11": 4,
+          "p01": 0.012812016788159929,
+          "p11": 0.06451612903225806
+        },
+        "basel": {
+          "zone": "Green",
+          "surcharge": 0.0,
+          "n_violations": 62,
+          "expected_violations": 45.9,
+          "ratio": 1.351
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.1009271467682944,
+          "p_value": 0.511,
+          "n_violations": 62
+        },
+        "n_oos": 4590,
+        "mean_var": 0.02683626374841172,
+        "mean_es": 0.03191436713888948
+      },
+      "0.05": {
+        "kupiec": {
+          "stat": 1.7929641133209486,
+          "p_value": 0.18056543200678898,
+          "n_violations": 210,
+          "violation_rate": 0.0457516339869281,
+          "expected_rate": 0.05
+        },
+        "christoffersen": {
+          "independence_stat": 0.31259579626740486,
+          "independence_p": 0.5760916522518995,
+          "n00": 4177,
+          "n01": 202,
+          "n10": 202,
+          "n11": 8,
+          "p01": 0.04612925325416762,
+          "p11": 0.0380952380952381
+        },
+        "basel": {
+          "zone": "Green",
+          "surcharge": 0.0,
+          "n_violations": 210,
+          "expected_violations": 229.5,
+          "ratio": 0.915
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.098998161810217,
+          "p_value": 0.525,
+          "n_violations": 210
+        },
+        "n_oos": 4590,
+        "mean_var": 0.018088665316764577,
+        "mean_es": 0.02352152938456664
+      }
+    },
+    "amem": {
+      "0.01": {
+        "kupiec": {
+          "stat": 0.3594892516472985,
+          "p_value": 0.5487900289485281,
+          "n_violations": 50,
+          "violation_rate": 0.010893246187363835,
+          "expected_rate": 0.01
+        },
+        "christoffersen": {
+          "independence_stat": 0.3127570722198817,
+          "independence_p": 0.5759932431461303,
+          "n00": 4490,
+          "n01": 49,
+          "n10": 49,
+          "n11": 1,
+          "p01": 0.010795329367702137,
+          "p11": 0.02
+        },
+        "basel": {
+          "zone": "Green",
+          "surcharge": 0.0,
+          "n_violations": 50,
+          "expected_violations": 45.9,
+          "ratio": 1.089
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.0753540638493524,
+          "p_value": 0.549,
+          "n_violations": 50
+        },
+        "n_oos": 4590,
+        "mean_var": 0.02890031448802206,
+        "mean_es": 0.03584624223649565
+      },
+      "0.05": {
+        "kupiec": {
+          "stat": 0.8208279915245633,
+          "p_value": 0.36493819176964104,
+          "n_violations": 243,
+          "violation_rate": 0.052941176470588235,
+          "expected_rate": 0.05
+        },
+        "christoffersen": {
+          "independence_stat": 0.31626937656840637,
+          "independence_p": 0.5738582859313777,
+          "n00": 4114,
+          "n01": 232,
+          "n10": 232,
+          "n11": 11,
+          "p01": 0.053382420616658995,
+          "p11": 0.04526748971193416
+        },
+        "basel": {
+          "zone": "Green",
+          "surcharge": 0.0,
+          "n_violations": 243,
+          "expected_violations": 229.5,
+          "ratio": 1.059
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.019351822273567,
+          "p_value": 0.529,
+          "n_violations": 243
+        },
+        "n_oos": 4590,
+        "mean_var": 0.017573236186117405,
+        "mean_es": 0.024606005999174882
+      }
+    },
+    "har_abs": {
+      "0.01": {
+        "kupiec": {
+          "stat": 74.1035509936574,
+          "p_value": 0.0,
+          "n_violations": 115,
+          "violation_rate": 0.02505446623093682,
+          "expected_rate": 0.01
+        },
+        "christoffersen": {
+          "independence_stat": 6.5802541000082915,
+          "independence_p": 0.010311617141820606,
+          "n00": 4367,
+          "n01": 107,
+          "n10": 107,
+          "n11": 8,
+          "p01": 0.023915958873491284,
+          "p11": 0.06956521739130435
+        },
+        "basel": {
+          "zone": "Yellow",
+          "surcharge": 0.626,
+          "n_violations": 115,
+          "expected_violations": 45.9,
+          "ratio": 2.505
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.231417753456452,
+          "p_value": 0.497,
+          "n_violations": 115
+        },
+        "n_oos": 4590,
+        "mean_var": 0.023435221389340656,
+        "mean_es": 0.0268489016629017
+      },
+      "0.05": {
+        "kupiec": {
+          "stat": 16.556988426757755,
+          "p_value": 4.7209685157811876e-05,
+          "n_violations": 292,
+          "violation_rate": 0.0636165577342048,
+          "expected_rate": 0.05
+        },
+        "christoffersen": {
+          "independence_stat": 0.3467372800740254,
+          "independence_p": 0.5559659130838086,
+          "n00": 4026,
+          "n01": 271,
+          "n10": 271,
+          "n11": 21,
+          "p01": 0.06306725622527344,
+          "p11": 0.07191780821917808
+        },
+        "basel": {
+          "zone": "Green",
+          "surcharge": 0.0,
+          "n_violations": 292,
+          "expected_violations": 229.5,
+          "ratio": 1.272
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.195203138162383,
+          "p_value": 0.511,
+          "n_violations": 292
+        },
+        "n_oos": 4590,
+        "mean_var": 0.016569967600637094,
+        "mean_es": 0.02077940786327827
+      }
+    },
+    "ewma": {
+      "0.01": {
+        "kupiec": {
+          "stat": 59.74709369532046,
+          "p_value": 1.0769163338864018e-14,
+          "n_violations": 107,
+          "violation_rate": 0.023311546840958607,
+          "expected_rate": 0.01
+        },
+        "christoffersen": {
+          "independence_stat": 5.831899908408017,
+          "independence_p": 0.0157381176494803,
+          "n00": 4382,
+          "n01": 100,
+          "n10": 100,
+          "n11": 7,
+          "p01": 0.022311468094600623,
+          "p11": 0.06542056074766354
+        },
+        "basel": {
+          "zone": "Yellow",
+          "surcharge": 0.583,
+          "n_violations": 107,
+          "expected_violations": 45.9,
+          "ratio": 2.331
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.21704518122639,
+          "p_value": 0.521,
+          "n_violations": 107
+        },
+        "n_oos": 4590,
+        "mean_var": 0.024451455587001698,
+        "mean_es": 0.02801316512712011
+      },
+      "0.05": {
+        "kupiec": {
+          "stat": 7.485184096115091,
+          "p_value": 0.00622087086518297,
+          "n_violations": 271,
+          "violation_rate": 0.05904139433551198,
+          "expected_rate": 0.05
+        },
+        "christoffersen": {
+          "independence_stat": 0.2715835885073816,
+          "independence_p": 0.6022714606607522,
+          "n00": 4065,
+          "n01": 253,
+          "n10": 253,
+          "n11": 18,
+          "p01": 0.05859194071329319,
+          "p11": 0.06642066420664207
+        },
+        "basel": {
+          "zone": "Green",
+          "surcharge": 0.0,
+          "n_violations": 271,
+          "expected_violations": 229.5,
+          "ratio": 1.181
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.187009311815994,
+          "p_value": 0.526,
+          "n_violations": 271
+        },
+        "n_oos": 4590,
+        "mean_var": 0.017288500080025658,
+        "mean_es": 0.021680476580615626
+      }
+    },
+    "hist_sim": {
+      "0.01": {
+        "kupiec": {
+          "stat": 13.705111925008694,
+          "p_value": 0.00021387154935048613,
+          "n_violations": 73,
+          "violation_rate": 0.0159041394335512,
+          "expected_rate": 0.01
+        },
+        "christoffersen": {
+          "independence_stat": 18.557511650131005,
+          "independence_p": 1.648543007493064e-05,
+          "n00": 4451,
+          "n01": 65,
+          "n10": 65,
+          "n11": 8,
+          "p01": 0.014393268379096545,
+          "p11": 0.1095890410958904
+        },
+        "basel": {
+          "zone": "Green",
+          "surcharge": 0.0,
+          "n_violations": 73,
+          "expected_violations": 45.9,
+          "ratio": 1.59
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.163816552168267,
+          "p_value": 0.528,
+          "n_violations": 73
+        },
+        "n_oos": 4590,
+        "mean_var": 0.03181176576976272,
+        "mean_es": 0.038626642227876574
+      },
+      "0.05": {
+        "kupiec": {
+          "stat": 0.5972175115499425,
+          "p_value": 0.43964164513593507,
+          "n_violations": 241,
+          "violation_rate": 0.052505446623093685,
+          "expected_rate": 0.05
+        },
+        "christoffersen": {
+          "independence_stat": 33.65409553726489,
+          "independence_p": 6.5836117668638394e-09,
+          "n00": 4143,
+          "n01": 205,
+          "n10": 205,
+          "n11": 36,
+          "p01": 0.04714811407543698,
+          "p11": 0.14937759336099585
+        },
+        "basel": {
+          "zone": "Green",
+          "surcharge": 0.0,
+          "n_violations": 241,
+          "expected_violations": 229.5,
+          "ratio": 1.05
+        },
+        "acerbi_szekely": {
+          "Z_stat": 2.1167285910040734,
+          "p_value": 0.518,
+          "n_violations": 241
+        },
+        "n_oos": 4590,
+        "mean_var": 0.018612934016434605,
+        "mean_es": 0.026733025035978013
+      }
+    }
+  },
+  "part_b_scores": {
+    "gjr": 20,
+    "amem": 24,
+    "har_abs": 12,
+    "ewma": 13,
+    "hist_sim": 16
+  },
+  "part_c_portfolio_metrics": {
+    "gjr_es": {
+      "sharpe": 0.8758,
+      "cagr": 0.1099,
+      "mdd": -0.3336,
+      "calmar": 0.3294,
+      "sortino": 1.1312,
+      "ann_vol": 0.128,
+      "n_days": 4590,
+      "mean_spy_weight": 0.54,
+      "std_spy_weight": 0.0946,
+      "turnover": 0.015034
+    },
+    "amem_es": {
+      "sharpe": 0.8612,
+      "cagr": 0.1068,
+      "mdd": -0.3281,
+      "calmar": 0.3255,
+      "sortino": 1.1086,
+      "ann_vol": 0.1267,
+      "n_days": 4590,
+      "mean_spy_weight": 0.5246,
+      "std_spy_weight": 0.1066,
+      "turnover": 0.022424
+    },
+    "ewma_es": {
+      "sharpe": 0.8727,
+      "cagr": 0.1101,
+      "mdd": -0.3348,
+      "calmar": 0.3288,
+      "sortino": 1.1304,
+      "ann_vol": 0.1287,
+      "n_days": 4590,
+      "mean_spy_weight": 0.5115,
+      "std_spy_weight": 0.0988,
+      "turnover": 0.009165
+    },
+    "12_vix": {
+      "sharpe": 0.8863,
+      "cagr": 0.1127,
+      "mdd": -0.3203,
+      "calmar": 0.3518,
+      "sortino": 1.1402,
+      "ann_vol": 0.1295,
+      "n_days": 4590,
+      "mean_spy_weight": 0.6792,
+      "std_spy_weight": 0.2057,
+      "turnover": 0.03224
+    },
+    "equal_50_50": {
+      "sharpe": 0.8137,
+      "cagr": 0.1078,
+      "mdd": -0.3249,
+      "calmar": 0.3318,
+      "sortino": 1.0335,
+      "ann_vol": 0.1369,
+      "n_days": 4590,
+      "mean_spy_weight": 0.5,
+      "std_spy_weight": 0.0,
+      "turnover": 0.0
+    }
+  },
+  "part_d_economic_ranking": {
+    "gjr": {
+      "total_score": 1.6257,
+      "details": {
+        "alpha_0.01": {
+          "calibration": 0.6492,
+          "independence": 0.0,
+          "basel_score": 1.0,
+          "es_score": 1.0,
+          "composite": 0.6597
+        },
+        "alpha_0.05": {
+          "calibration": 0.915,
+          "independence": 1.0,
+          "basel_score": 1.0,
+          "es_score": 1.0,
+          "composite": 0.966
+        }
+      }
+    },
+    "amem": {
+      "total_score": 1.9407,
+      "details": {
+        "alpha_0.01": {
+          "calibration": 0.9107,
+          "independence": 1.0,
+          "basel_score": 1.0,
+          "es_score": 1.0,
+          "composite": 0.9643
+        },
+        "alpha_0.05": {
+          "calibration": 0.9412,
+          "independence": 1.0,
+          "basel_score": 1.0,
+          "es_score": 1.0,
+          "composite": 0.9765
+        }
+      }
+    },
+    "har_abs": {
+      "total_score": 1.1911,
+      "details": {
+        "alpha_0.01": {
+          "calibration": 0,
+          "independence": 0.0,
+          "basel_score": 0.5,
+          "es_score": 1.0,
+          "composite": 0.3
+        },
+        "alpha_0.05": {
+          "calibration": 0.7277,
+          "independence": 1.0,
+          "basel_score": 1.0,
+          "es_score": 1.0,
+          "composite": 0.8911
+        }
+      }
+    },
+    "ewma": {
+      "total_score": 1.2277,
+      "details": {
+        "alpha_0.01": {
+          "calibration": 0,
+          "independence": 0.0,
+          "basel_score": 0.5,
+          "es_score": 1.0,
+          "composite": 0.3
+        },
+        "alpha_0.05": {
+          "calibration": 0.8192,
+          "independence": 1.0,
+          "basel_score": 1.0,
+          "es_score": 1.0,
+          "composite": 0.9277
+        }
+      }
+    },
+    "hist_sim": {
+      "total_score": 1.3438,
+      "details": {
+        "alpha_0.01": {
+          "calibration": 0.4096,
+          "independence": 0.0,
+          "basel_score": 1.0,
+          "es_score": 1.0,
+          "composite": 0.5638
+        },
+        "alpha_0.05": {
+          "calibration": 0.9499,
+          "independence": 0.0,
+          "basel_score": 1.0,
+          "es_score": 1.0,
+          "composite": 0.78
+        }
+      }
+    }
+  },
+  "best_risk_model": "AMEM(Gamma)",
+  "best_risk_score": 1.9407,
+  "key_findings": {
+    "best_var_model": "AMEM(Gamma)",
+    "worst_var_model": "HAR-ABS(Gauss)",
+    "es_vs_5050": "GJR-ES Sharpe 0.8758 vs 50/50 0.8137",
+    "forecast_vs_risk": "See part_d for full ranking"
+  },
+  "references": [
+    "Kupiec (1995) \"Techniques for verifying risk measurement models\" J.Derivatives",
+    "Christoffersen (1998) \"Evaluating interval forecasts\" Intl Economic Review",
+    "Acerbi & Szekely (2014) \"Backtesting Expected Shortfall\" Risk Magazine",
+    "Basel III BCBS (2016) traffic light system",
+    "Engle & Gallo (2006) MEM for volatility",
+    "K770: AMEM beats HAR-ABS",
+    "K778: GJR beats MEM in sigma-squared space",
+    "K116: CVaR Tail Risk Parity null result"
+  ]
+}
