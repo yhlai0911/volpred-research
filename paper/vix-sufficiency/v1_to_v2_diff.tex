@@ -1,0 +1,246 @@
+\documentclass[12pt,a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{array}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% Colors for diff marking
+\newcommand{\added}[1]{\textcolor{blue}{#1}}
+\newcommand{\removed}[1]{\textcolor{red}{\sout{#1}}}
+\newcommand{\changed}[1]{\textcolor{orange}{#1}}
+\usepackage[normalem]{ulem}  % for \sout
+
+\title{Revision Diff Report: v1 $\rightarrow$ v2\\
+\large ``Can Anything Beat VIX?''\\[6pt]
+\normalsize Addressing TOP 3 HIGH-Severity Review Issues + Citation Fixes}
+
+\author{VolPred Research System}
+\date{March 30, 2026}
+
+\begin{document}
+
+\maketitle
+
+%=================================================================
+\section{Overview}
+%=================================================================
+
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{v1} & \textbf{v2} \\
+\midrule
+Pages & 31 & 34 \\
+References & 24 & 33 \\
+$R^2$ metrics reported & 1 (VIX-relative only) & 2 (Campbell-Thompson + VIX-relative) \\
+Multiple-testing method & $|t|>3.0$ rule of thumb & $|t|>3.0$ + Holm-Bonferroni FWER \\
+Table 2 columns & 7 & 10 \\
+Issues addressed & --- & 3 HIGH + 3 citation fixes \\
+\bottomrule
+\end{tabular}
+
+\bigskip
+
+\noindent\textbf{Page count change}: +3 pages (31 $\rightarrow$ 34). The increase comes from:
+\begin{itemize}
+    \item Expanded literature review in Section 2 (+1 page): Poon \& Granger, Andersen et al., Hansen \& Lunde, Patton \& Sheppard, Patton (2011)
+    \item Dual $R^2$ definition in Section 4 (+0.5 page): Campbell-Thompson formula + explanation paragraph
+    \item Expanded multiple-testing section in Section 5 (+0.5 page): Holm-Bonferroni procedure description
+    \item Wider Table 2 with 3 new columns (+0.5 page): $R^2_{\text{OOS,CT}}$, Raw $p$, HB $p$
+    \item New discussion paragraphs after Table 2 (+0.5 page): dual $R^2$ interpretation + Holm-Bonferroni results
+    \item 9 new bibliography entries (+0.5 page)
+\end{itemize}
+
+
+%=================================================================
+\section{Issue D2.1: Missing Foundational Literature [HIGH]}
+%=================================================================
+
+\subsection*{Problem}
+Eight foundational papers were not cited: Poon \& Granger (2003), Hansen \& Lunde (2005), Andersen et al.\ (2003), Patton \& Sheppard (2015), Campbell \& Thompson (2008), Newey \& West (1987), Patton (2011), Holm (1979).
+
+\subsection*{Changes Made}
+
+\begin{enumerate}
+
+\item \textbf{Section 2.2 (Empirical Evidence)} --- Added opening paragraph:
+
+\added{``The volatility forecasting literature is vast; Poon and Granger (2003) provide the definitive survey, cataloguing over 90 studies and concluding that implied volatility generally dominates time-series models.''}
+
+\added{Added new paragraph on Andersen et al.\ (2003) for realized volatility methodology and Patton (2011) for loss function choice.}
+
+\item \textbf{Section 2.4 (Prior Horse Races)} --- Added opening paragraph:
+
+\added{``The canonical volatility model horse race is Hansen and Lunde (2005), who compare 330 ARCH-type models for forecasting daily exchange rate and IBM stock volatility. Their central finding---that no model significantly outperforms the simple GARCH(1,1)---sets the precedent for our study\ldots''}
+
+\added{Added Patton and Sheppard (2015) for good/bad volatility decomposition.}
+
+\item \textbf{Section 5.1 (DM Test)} --- Added Newey-West citation:
+
+\added{``\ldots with Newey and West (1987) heteroskedasticity and autocorrelation consistent (HAC) standard errors (bandwidth = 22, matching the forecast horizon).''}
+
+\item \textbf{Bibliography} --- Added 9 new entries:
+
+\begin{itemize}
+    \item Andersen, Bollerslev, Diebold, and Labys (2003) -- \textit{Econometrica}
+    \item Campbell and Thompson (2008) -- \textit{Review of Financial Studies}
+    \item Engle and Rangel (2008) -- \textit{Review of Financial Studies}
+    \item Hansen and Lunde (2005) -- \textit{Journal of Applied Econometrics}
+    \item Holm (1979) -- \textit{Scandinavian Journal of Statistics}
+    \item Lou, Polk, and Skouras (2019) -- \textit{Journal of Financial Economics}
+    \item Newey and West (1987) -- \textit{Econometrica}
+    \item Patton (2011) -- \textit{Journal of Econometrics}
+    \item Patton and Sheppard (2015) -- \textit{Review of Economics and Statistics}
+    \item Poon and Granger (2003) -- \textit{Journal of Economic Literature}
+\end{itemize}
+
+Total references: \removed{24} $\rightarrow$ \added{33} (+9 new, including 1 replacement).
+
+\end{enumerate}
+
+
+%=================================================================
+\section{Issue D3.1: Non-Standard OOS $R^2$ [HIGH]}
+%=================================================================
+
+\subsection*{Problem}
+OOS $R^2$ was defined relative to VIX forecasts (Eq.\ 5 in v1) rather than the Campbell-Thompson (2008) convention (relative to historical mean), making results incomparable to the existing literature.
+
+\subsection*{Changes Made}
+
+\begin{enumerate}
+
+\item \textbf{Section 4.4 (Out-of-Sample $R^2$)} --- Completely rewritten to define \textbf{both} metrics:
+
+\added{New Equation (5a): $R^2_{\text{OOS,CT}} = 1 - \frac{\sum (RV_t - \hat{RV}_t^{\text{model}})^2}{\sum (RV_t - \bar{RV}_{1:t-1})^2}$ \quad [Campbell-Thompson, relative to historical mean]}
+
+\added{New Equation (5b): $R^2_{\text{OOS,VIX}} = 1 - \frac{\sum (RV_t - \hat{RV}_t^{\text{model}})^2}{\sum (RV_t - \hat{RV}_t^{\text{VIX}})^2}$ \quad [VIX-relative, our primary metric]}
+
+\added{Added explanatory paragraph: ``We report both metrics to ensure comparability with the existing literature\ldots many signals that achieve positive $R^2_{\text{OOS,CT}}$ (i.e., beat the historical mean) still show zero $R^2_{\text{OOS,VIX}}$ (i.e., add nothing beyond VIX).''}
+
+\item \textbf{Table 2} --- Added new column $R^2_{\text{OOS,CT}}$:
+
+\added{All 8 testable signal families now report Campbell-Thompson $R^2_{\text{OOS,CT}}$ values (range: 0.312--0.398). The VIX-only benchmark achieves $R^2_{\text{OOS,CT}} = 0.365$.}
+
+\item \textbf{Discussion after Table 2} --- Added new paragraph:
+
+\added{``The dual $R^2$ metrics reveal a striking pattern: most signal families achieve positive Campbell-Thompson $R^2_{\text{OOS,CT}}$ values in the range of 0.31--0.40, indicating that they do forecast volatility better than the naive historical mean. However, these same signals show zero or negative VIX-relative $R^2_{\text{OOS,VIX}}$, confirming that their forecasting power is entirely subsumed by VIX.''}
+
+\item \textbf{Abstract} --- Updated to mention both metrics:
+
+\added{``\ldots whether measured by the standard Campbell and Thompson (2008) $R^2_{\text{OOS}}$ relative to the historical mean, by incremental $R^2$ relative to VIX-only forecasts, or by Sharpe ratio gains\ldots''}
+
+\end{enumerate}
+
+
+%=================================================================
+\section{Issue D4.1: No Formal Multiple-Testing Correction [HIGH]}
+%=================================================================
+
+\subsection*{Problem}
+Only $|t|>3.0$ rule of thumb from Harvey et al.\ (2016). No Bonferroni, Holm-Bonferroni, or BH FDR. Harvey et al.\ recommendation was oversimplified.
+
+\subsection*{Changes Made}
+
+\begin{enumerate}
+
+\item \textbf{Section 5.2} --- Completely rewritten and retitled from ``Harvey (2016) Multiple-Testing Threshold'' to ``Multiple-Testing Corrections'':
+
+\added{Clarified Harvey et al.\ (2016): ``Their analysis---applied to roughly 300 factors in the cross-section literature---yields an approximate threshold of $|t| > 3.0$ under conservative priors. We adopt $|t| > 3.0$ as an approximate conservative threshold motivated by their analysis, noting that for our 11 tests the simple Bonferroni correction yields a comparable threshold of $|t| > 3.23$.'' [Fixes citation check issue: harvey2016 oversimplified claim]}
+
+\added{Added formal Holm-Bonferroni procedure: ``We implement the Holm-Bonferroni sequential procedure (Holm, 1979) across the 11 primary Diebold-Mariano tests. The procedure works as follows: (i) rank the 11 raw $p$-values from smallest to largest; (ii) for rank $k$, reject $H_0$ if $p_{(k)} \leq \alpha / (11 - k + 1)$; (iii) stop at the first non-rejection.''}
+
+\item \textbf{Table 2} --- Added two new columns:
+
+\added{Raw $p$: Two-sided $p$-values from DM tests (range: 0.147--0.881)}
+
+\added{HB $p$: Holm-Bonferroni adjusted $p$-values (all 1.000, confirming null survives formal correction)}
+
+\item \textbf{Introduction safeguard (iv)} --- Updated:
+
+\removed{``We adopt the Harvey (2016) threshold of $|t| > 3.0$\ldots''}
+
+\added{``We adopt the approximate conservative threshold of $|t| > 3.0$ motivated by Harvey et al.\ (2016) and implement formal Holm-Bonferroni sequential correction across all eleven Diebold-Mariano tests, controlling the family-wise error rate at $\alpha = 0.05$.''}
+
+\item \textbf{Discussion after Table 2} --- Added new paragraph:
+
+\added{``The Holm-Bonferroni correction reinforces the null. All eight testable DM tests produce raw $p$-values well above 0.05 (minimum raw $p = 0.147$), and the adjusted $p$-values are uniformly 1.000. The multiplicity correction is strictly redundant here\ldots but reporting it demonstrates that our conclusions are robust to formal multiple-testing control.''}
+
+\item \textbf{Abstract and Conclusion} --- Updated to mention Holm-Bonferroni.
+
+\end{enumerate}
+
+
+%=================================================================
+\section{Citation Fixes (from Citation Check Report)}
+%=================================================================
+
+\subsection{harvey2016: Oversimplified Claim [HIGH]}
+
+\removed{``They recommend $|t| > 3.0$ as a minimum threshold for asset pricing tests.''}
+
+\added{``Their analysis---applied to roughly 300 factors in the cross-section literature---yields an approximate threshold of $|t| > 3.0$ under conservative priors. We adopt $|t| > 3.0$ as an approximate conservative threshold motivated by their analysis.''}
+
+\subsection{schwert1989: Misleading Positioning [HIGH]}
+
+\removed{``economic indicators (Schwert, 1989)''}
+
+\added{``macroeconomic determinants of time-varying volatility (Schwert, 1989; Engle and Rangel, 2008)'' --- Added Engle \& Rangel (2008) as the more directly relevant citation for economic indicator signals, while retaining Schwert for time-varying volatility documentation.}
+
+\subsection{bollerslev2020: Content Mismatch [MEDIUM]}
+
+\removed{``Overnight price changes reflect the processing of after-hours news\ldots (Bollerslev et al., 2020)'' --- Bollerslev et al.\ (2020) is about the cross-section of stock returns and semivariance, NOT overnight returns.}
+
+\added{``Overnight price changes reflect the processing of after-hours news\ldots (Lou et al., 2019)'' --- Lou, Polk, and Skouras (2019) ``A Tug of War: Overnight Versus Intraday Expected Returns'' is the correct citation for overnight return dynamics.}
+
+Note: The \texttt{bollerslev2020} bibitem is retained in the bibliography for potential use elsewhere but is no longer cited in the text for the overnight claim.
+
+
+%=================================================================
+\section{Additional Improvements}
+%=================================================================
+
+\begin{enumerate}
+    \item \textbf{Table label fix}: Moved \texttt{\textbackslash caption} and \texttt{\textbackslash label} outside \texttt{threeparttable} for Tables 1 and 2 to resolve cross-reference warnings that existed in v1.
+
+    \item \textbf{Table 2 expanded}: From 7 columns to 10 columns ($R^2_{\text{OOS,CT}}$, Raw $p$, HB $p$), with \texttt{resizebox} to fit within margins.
+
+    \item \textbf{VIX-only benchmark row}: Added to Table 2 showing $R^2_{\text{OOS,CT}} = 0.365$ for the VIX benchmark itself, giving readers a reference point for signal comparison.
+\end{enumerate}
+
+
+%=================================================================
+\section{Issues NOT Addressed in This Revision}
+%=================================================================
+
+The following review issues were not in scope for this revision but should be addressed in v3:
+
+\begin{itemize}
+    \item D3.2 [HIGH]: Uneven sample periods (811 to 8,325 days)
+    \item D7.1 [HIGH]: Missing robustness checks (forecast horizon, QLIKE, international)
+    \item D1.1 [MEDIUM]: ``Pre-registered'' $\rightarrow$ ``pre-specified''
+    \item D2.2 [MEDIUM]: Post-Moreira-Muir debate
+    \item D5.1 [MEDIUM]: Incomplete results for Families 5--7
+    \item D5.2 [MEDIUM]: Inconsistent Table 3 numbering
+    \item D6.1 [MEDIUM]: Proposition 1 approximation
+    \item D9.1 [MEDIUM]: No MCS analysis
+    \item D10.1 [MEDIUM]: Paper length
+    \item All LOW issues
+    \item \texttt{luo2019} [MEDIUM citation]: Weak support for contango/backwardation claim (not addressed --- requires finding a better primary citation)
+\end{itemize}
+
+
+\end{document}
