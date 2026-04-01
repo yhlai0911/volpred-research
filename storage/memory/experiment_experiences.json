@@ -529,5 +529,24 @@
     "title": "K799-K804 VaR story arc: Codex saves from false breakthrough",
     "content": "預測選模型(GJR)，風險管理選分配(Student-t)，兩個維度獨立。K800 conformal artifact被Codex抓到。跨資產3/4通過，BTC例外。",
     "timestamp": "2026-04-01T04:06:31.673873+00:00"
+  },
+  {
+    "id": "E41",
+    "title": "Session 2026-04-01: 12 experiments, Codex quality crisis, methodology lessons",
+    "created_at": "2026-04-01T14:30:00Z",
+    "experiments": "K795-K816 (12 completed + 1 INVALID)",
+    "lessons": [
+      "DM test must use standard module (E40): 3/12 experiments had ad-hoc DM as HIGH bug. Created strategy_dm_test() to fix.",
+      "Sharpe > 2x baseline = bug: K812 (Sharpe 3.4) was 5th validation. Agent fabricated sanity check (hard-coded numbers).",
+      "QLIKE training loss is critical for NN: K426 used MSE → +1230% worse. K816 used QLIKE → -9.23% better. Same architecture, different loss.",
+      "VIX is always the real driver: K807 (bond stress corr 0.64 with VIX), K816 (GINN-VIX wins but GJR input alone redundant), K809 (dispersion not independent of cap-weight).",
+      "In-sample significance ≠ OOS improvement: K813 LR=252 (p<0.001) but OOS DM=-0.11 (NS). 11 extra parameters for nothing.",
+      "Bayesian priors must allow falsification: K814 P(gamma>0)=1.0 was tautological because prior forced gamma>0. Prior must be testable.",
+      "Agent code quality declining: only 2/12 passed Codex 0 HIGH. Most common: DM impl, data availability, variance init leak.",
+      "Concave/convex matters: K815 claimed 12/VIX is concave but it is convex decreasing. Anti-stampede from shrinking slope, not concavity.",
+      "50/50 SPY/GLD Sharpe unbeatable: confirmed for 10th time (K808/K810). VT = insurance not alpha.",
+      "Cross-market experiments need open-to-close returns: K812 used close-to-close capturing untradable overnight gap."
+    ],
+    "meta_observation": "Codex審查品質下降可能因為session太長,agent prompts變得模板化。每5個實驗後應pause和反思,不是一直衝量。"
   }
 ]
