@@ -856,15 +856,21 @@ def ops_strategy_set_active(identifier: str, active: bool) -> None:
 @ops.command("question-answer")
 @click.argument("question_id")
 @click.option("--answer", required=True, help="Answer content")
+@click.option("--article-id", default=None, help="Article slug to link as an answer in question_articles")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_question_answer(question_id: str, answer: str, storage_dir: str) -> None:
+def ops_question_answer(question_id: str, answer: str, article_id: str | None, storage_dir: str) -> None:
     """Answer a local internal research question and sync it."""
     from volpred.ops import answer_internal_question
 
-    result = answer_internal_question(question_id, answer, storage_dir=storage_dir)
-    if not result["found"]:
+    result = answer_internal_question(question_id, answer, storage_dir=storage_dir, article_id=article_id)
+    if not result.get("found", True) and result.get("status") is None:
         raise click.ClickException(f"Question not found: {question_id}")
-    console.print(f"[green]Answered question[/green] {question_id}")
+    status = result.get("status", "unknown")
+    console.print(f"[green]Question {question_id}[/green] → status: {status}")
+    if result.get("linked_article"):
+        console.print(f"[green]Linked article[/green] {result['linked_article']}")
+    if result.get("note"):
+        console.print(f"[yellow]⚠ {result['note']}[/yellow]")
     _print_json(result)
 
 

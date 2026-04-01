@@ -7,7 +7,7 @@ from scripts.article_backups import ensure_local_article_backups
 from volpred.publisher.publisher import Publisher
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
-from scripts.supabase_sync import _patch_where, _select_rows, delete_article, sync_article
+from scripts.supabase_sync import _delete_where, _get_article_id, _patch_where, _select_rows, delete_article, sync_article
 
 DEFAULT_RELEASE_SETTINGS = {
     "mode": "manual",
@@ -211,14 +211,17 @@ def release_pool_articles(
             # Previously `item = report` only reassigned the local variable,
             # leaving the feed list entry unchanged (missing content/audience)
             item.update(report)
+        article_slug = str(item.get("id", ""))
         released.append({
-            "id": item.get("id"),
+            "id": article_slug,
             "title": item.get("title"),
             "status": item.get("status"),
             "published_at": item.get("published_at"),
         })
-        publisher._sync_report_to_remote(str(item["id"]), item)
+        publisher._sync_report_to_remote(article_slug, item)
         sync_article(item, storage_dir=publisher.reports_dir.parent)
+        # Auto-mark linked questions as answered now that article is published
+        _mark_questions_answered_on_publish(article_slug)
         try:
             from volpred.publisher.email_notifier import EmailNotifier
 
@@ -446,13 +449,74 @@ def send_daily_digest(
     return publisher.send_daily_digest(target_date=parsed, force_send=force_send)
 
 
+def _mark_questions_answered_on_publish(article_slug: str) -> int:
+    """When an article is published, mark any linked questions as answered.
+
+    Checks question_articles for questions linked to this article, and if
+    they are in 'researching' status, marks them as 'answered'.
+    Returns the number of questions marked.
+    """
+    try:
+        article_id = _get_article_id(article_slug)
+        if not article_id:
+            return 0
+        rows = _select_rows("question_articles", select="question_id,article_id", article_id=article_id)
+        if not rows:
+            return 0
+        marked = 0
+        now_utc = datetime.now(timezone.utc).isoformat()
+        for row in rows:
+            question_id = row.get("question_id")
+            if not question_id:
+                continue
+            q_rows = _select_rows("questions", select="id,status", id=question_id)
+            if q_rows and q_rows[0].get("status") == "researching":
+                _patch_where("questions", {"id": question_id}, {
+                    "status": "answered",
+                    "answered_at": now_utc,
+                    "updated_at": now_utc,
+                })
+                marked += 1
+        return marked
+    except Exception:
+        return 0
+
+
+def _cleanup_question_article_links(article_slug: str) -> int:
+    """Remove question_articles rows that reference the given article slug.
+
+    Returns the number of rows deleted (0 if none found or on error).
+    """
+    try:
+        article_id = _get_article_id(article_slug)
+        if not article_id:
+            return 0
+        rows = _select_rows("question_articles", select="question_id,article_id", article_id=article_id)
+        if not rows:
+            return 0
+        deleted = 0
+        for row in rows:
+            question_id = row.get("question_id")
+            if question_id and _delete_where("question_articles", {"question_id": question_id, "article_id": article_id}):
+                deleted += 1
+        return deleted
+    except Exception:
+        return 0
+
+
 def unpublish_article(pub_id: str, storage_dir: str = "storage") -> dict:
     publisher = Publisher(storage_dir=storage_dir)
     success = publisher.unpublish(pub_id)
+    # Clean up question_articles links so question pages don't reference
+    # an unpublished article.
+    qa_deleted = 0
+    if success:
+        qa_deleted = _cleanup_question_article_links(pub_id)
     return {
         "id": pub_id,
         "found": success,
         "status": "unpublished" if success else "missing",
+        "question_article_links_removed": qa_deleted,
     }
 
 
@@ -474,7 +538,11 @@ def cleanup_test_post(pub_id: str, *, hard_delete: bool = False, storage_dir: st
         "local_feed_removed": False,
         "local_report_deleted": False,
         "supabase_deleted": False,
+        "question_article_links_removed": 0,
     }
+
+    # Always clean up question_articles links when cleaning up a post
+    result["question_article_links_removed"] = _cleanup_question_article_links(pub_id)
 
     if not hard_delete:
         return result

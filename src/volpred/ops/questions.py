@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from scripts.supabase_sync import _patch_where, _select_rows
+from scripts.supabase_sync import _patch_where, _post, _select_rows
 from volpred.memory.system import MemorySystem
 
 from .common import load_json, project_path, write_ops_snapshot
@@ -13,21 +13,84 @@ def _utc_now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
-def answer_internal_question(question_id: str, answer: str, storage_dir: str = "storage") -> dict:
+def _get_article_status(article_slug: str) -> str | None:
+    """Return the Supabase status of an article ('published', 'draft', etc.)."""
+    try:
+        rows = _select_rows("articles", select="id,status", slug=article_slug)
+        if rows:
+            return str(rows[0].get("status") or "")
+    except Exception:
+        pass
+    return None
+
+
+def _link_question_article(question_id: str, article_slug: str) -> bool:
+    """Insert a question_articles row linking a question to an article.
+
+    Uses the article slug to resolve the Supabase article UUID, then upserts
+    into the question_articles table.  Returns True on success.
+    """
+    try:
+        from scripts.supabase_sync import _get_article_id
+        article_id = _get_article_id(article_slug)
+        if not article_id:
+            return False
+        return _post("question_articles", {"question_id": question_id, "article_id": article_id})
+    except Exception:
+        return False
+
+
+def answer_internal_question(
+    question_id: str,
+    answer: str,
+    storage_dir: str = "storage",
+    article_id: str | None = None,
+) -> dict:
+    # Determine if the linked article is already published
+    article_is_published = False
+    if article_id:
+        article_status = _get_article_status(article_id)
+        article_is_published = article_status == "published"
+
     memory = MemorySystem(storage_dir=storage_dir)
-    memory.answer_question(question_id, answer)
 
-    questions = load_json(project_path(storage_dir, "memory", "open_questions.json"), [])
-    for question in questions:
-        if question.get("id") == question_id:
-            return {
-                "id": question_id,
-                "found": True,
-                "status": question.get("status"),
-                "answered_at": question.get("answered_at"),
-            }
+    if article_is_published:
+        # Article is published → mark question as answered
+        memory.answer_question(question_id, answer)
+        question_status = "answered"
+    else:
+        # Article is draft/scheduled → keep question as researching, store pending article
+        questions = load_json(project_path(storage_dir, "memory", "open_questions.json"), [])
+        for q in questions:
+            if q["id"] == question_id:
+                q["status"] = "researching"
+                q["answer"] = answer
+                q["pending_article"] = article_id
+                break
+        filepath = project_path(storage_dir, "memory", "open_questions.json")
+        dump_json(filepath, questions)
+        question_status = "researching"
 
-    return {"id": question_id, "found": False}
+    # Update Supabase question status
+    _patch_where("questions", {"id": question_id}, {
+        "status": question_status,
+        "answer": answer[:500] if answer else None,
+        "updated_at": _utc_now(),
+        **({"answered_at": _utc_now()} if article_is_published else {}),
+    })
+
+    linked_article = False
+    if article_id:
+        linked_article = _link_question_article(question_id, article_id)
+
+    return {
+        "id": question_id,
+        "found": True,
+        "status": question_status,
+        "article_published": article_is_published,
+        "linked_article": article_id if linked_article else None,
+        "note": None if article_is_published else "文章尚未發佈，問題保持 researching 狀態。文章發佈時會自動標為 answered。",
+    }
 
 
 ACTIVE_USER_STATUSES = {"ranked", "researching"}

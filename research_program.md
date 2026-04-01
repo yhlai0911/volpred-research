@@ -317,7 +317,7 @@
 ### Codex 第 8 次建議：從 vol 預測轉向風險管理實務（2026-03-31）[提出: Codex GPT-5.4]
 **核心洞見**：VIX sufficiency 已確認——不再嘗試打敗 VIX，改為用 VIX 建構更好的風險管理工具。
 - [ ] **跨資產 All-Weather VT**：SPY+TLT+GLD+DBC+SGOV+BTC ETF 組合，target-vol + weight caps + cash floor。超越 2-asset。可行性高。
-- [ ] **債券壓力去風險信號**：HYG/LQD/TLT spread + rolling vol → 預測 SPY downside semivariance。非 VIX 依賴的去風險規則。
+- [x] ~~債券壓力去風險信號~~ → **K807 完成 NULL**。Composite 與 VIX 相關 0.641，不是獨立信號。所有策略 Sharpe < baseline 50/50（0.856）。DM 全 NS。K766 的 1.041 可能 overfitting。
 - [ ] **Dispersion Timing（index vs sector）**：當 sector 分散度高時，equal-weight sectors > hold SPY。long-only ETF 實作。
 - [ ] **Tail-First ES 配置 + Conformal Calibration**：從「預測 vol」轉向「控制尾部風險」。inverse-ES 配置 + 校準覆蓋率 OOS 驗證。
 - [ ] **Event-Risk Budgeter（CPI/FOMC/NFP/Earnings）**：事件窗口自動半倉。實務投資人工具，不只是事後分析。
@@ -338,7 +338,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### Gemini 第 1 次建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
 - [x] ~~Taiwan Price Limit Latent Volatility~~ → **K790v2 完成 NULL**：>5% 天數僅 0.9%，GJR asymmetry 已捕捉。DM 全 NS。
-- [ ] **FRED STLFSI4 Macro Stress Regime** → K795 BLOCKED（FRED API timeout）。腳本已寫好，需修正 pre-GLD 零 vol 和 TX 問題。
+- [x] ~~FRED STLFSI4 Macro Stress Regime~~ → **K795 完成 NULL**（⚠️ Codex 2 HIGH：pre-2004 GLD + DM 實作錯誤，數字不可靠但方向正確）。Binary Sharpe 0.466 vs 0.313 但 DM 未通過。VIX sufficiency #24（方向確認，精確統計待 K795v2）。
 - [ ] **VIX→Taiwan Vol Spillover Strategy** → K796 進行中。VIX spike >15% → 次日台股減倉。
 - [ ] **TXO Put-Call Ratio Mean-Reversion**：台指選擇權 P/C ratio 作為散戶恐慌指標，極端值做反向操作。Data: TAIFEX 網站
 - [x] ~~EWT vs 0050.TW Vol Arbitrage Spread~~ → **K792 完成**：Granger YES (F=28.4) 但方向反（高 ratio → vol 下降）。Trading 虧損。Mean reversion 陷阱。
@@ -346,7 +346,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ### 用戶提出方向
 - [x] ~~什麼是好的交易策略？~~ → **K793 完成**：8 維度評估 6 策略。BH 50/50 #1 (75.4), Risk Parity #2 (73.7), Piecewise #3 (54.0，唯一正 stress)。單一 Sharpe 遺漏大量 tradeoffs。
 - [x] **HAR-RV with 5-day RV** [提出: 用戶, 2026-03-31] → **K782 完成**：GJR-GARCH multi-step 在 5d/22d/66d 全勝 HAR。日頻 squared returns 做的 RV 不足以讓 HAR 發揮優勢——需等 5-min 數據。
-- [ ] **MEM（Multiplicative Error Model）** [提出: 用戶, 2026-03-31]：Engle & Gallo (2006) 的相乘誤差模型，作為 GARCH 和 HAR 之外的第三條路線。適合正值時間序列（RV, volume, duration）。
+- [x] ~~MEM（Multiplicative Error Model）~~ [提出: 用戶] → **K805 完成**：AMEM-r² 數值最佳（QLIKE 1.4689 vs GJR 1.4824）但 DM=-2.19 未通過 Harvey t>3.0。非對稱性（leverage）比模型類別更重要。MEM 不提供超過 GJR 的統計顯著改善。
 - [ ] K501: **SSVS for Return Prediction** [提出: 用戶] — 用陳婉淑方法預測報酬率（不只波動率）。K461 已發現 SPY_ret PIP=1.000 for Taiwan (t=10.81)。**進行中**
 - [ ] Return prediction → trading strategy pipeline：如果方向準確度 > 55% → 可做 long/short 策略
 - [ ] 跨資產 return prediction：SPY、0050.TW、QQQ

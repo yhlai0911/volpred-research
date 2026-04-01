@@ -355,6 +355,7 @@ def _run_action(action: str, payload: dict[str, Any]) -> Any:
             str(payload["question_id"]),
             str(payload["answer"]),
             storage_dir=str(payload.get("storage_dir", "storage")),
+            article_id=payload.get("article_id"),
         )
         if not result.get("found"):
             raise RuntimeError(f"Question not found: {payload['question_id']}")

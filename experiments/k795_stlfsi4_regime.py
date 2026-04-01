@@ -64,26 +64,45 @@ spy = spy_raw[["Close"]].rename(columns={"Close": "spy_close"})
 gld = gld_raw[["Close"]].rename(columns={"Close": "gld_close"})
 vix = vix_raw[["Close"]].rename(columns={"Close": "vix_close"})
 
-# FRED STLFSI4 via direct CSV
-print("  Fetching STLFSI4 from FRED...")
-try:
-    url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=STLFSI4"
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-    resp = urllib.request.urlopen(req, timeout=30)
-    csv_data = resp.read().decode("utf-8")
-    stlfsi_raw = pd.read_csv(io.StringIO(csv_data))
+# FRED STLFSI4 — use local cache first, fallback to FRED API
+print("  Fetching STLFSI4...")
+import os
+local_cache = os.path.join(os.path.dirname(__file__), "..", "storage", "macro", "fred_STLFSI4.csv")
+local_cache = os.path.abspath(local_cache)
+
+if os.path.exists(local_cache):
+    print(f"  Using local cache: {local_cache}")
+    stlfsi_raw = pd.read_csv(local_cache)
     date_col = [c for c in stlfsi_raw.columns if "date" in c.lower()][0]
-    val_col  = [c for c in stlfsi_raw.columns if c != date_col][0]
     stlfsi_raw[date_col] = pd.to_datetime(stlfsi_raw[date_col])
     stlfsi_raw = stlfsi_raw.set_index(date_col)
     stlfsi_raw.columns = ["stlfsi4"]
     stlfsi_raw["stlfsi4"] = pd.to_numeric(stlfsi_raw["stlfsi4"], errors="coerce")
     stlfsi_raw = stlfsi_raw.dropna()
-    print(f"  STLFSI4: {stlfsi_raw.index[0].date()} to {stlfsi_raw.index[-1].date()}, n={len(stlfsi_raw)}")
-    print(f"  STLFSI4 range: {stlfsi_raw['stlfsi4'].min():.3f} to {stlfsi_raw['stlfsi4'].max():.3f}")
-except Exception as e:
-    print(f"  STLFSI4 download failed: {e}")
-    raise
+else:
+    print(f"  No local cache, trying FRED API...")
+    try:
+        url = "https://fred.stlouisfed.org/graph/fredgraph.csv?id=STLFSI4"
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        resp = urllib.request.urlopen(req, timeout=60)
+        csv_data = resp.read().decode("utf-8")
+        stlfsi_raw = pd.read_csv(io.StringIO(csv_data))
+        date_col = [c for c in stlfsi_raw.columns if "date" in c.lower()][0]
+        stlfsi_raw[date_col] = pd.to_datetime(stlfsi_raw[date_col])
+        stlfsi_raw = stlfsi_raw.set_index(date_col)
+        stlfsi_raw.columns = ["stlfsi4"]
+        stlfsi_raw["stlfsi4"] = pd.to_numeric(stlfsi_raw["stlfsi4"], errors="coerce")
+        stlfsi_raw = stlfsi_raw.dropna()
+        # Save to local cache
+        os.makedirs(os.path.dirname(local_cache), exist_ok=True)
+        stlfsi_raw.to_csv(local_cache)
+        print(f"  Saved to cache: {local_cache}")
+    except Exception as e:
+        print(f"  STLFSI4 download failed: {e}")
+        raise
+
+print(f"  STLFSI4: {stlfsi_raw.index[0].date()} to {stlfsi_raw.index[-1].date()}, n={len(stlfsi_raw)}")
+print(f"  STLFSI4 range: {stlfsi_raw['stlfsi4'].min():.3f} to {stlfsi_raw['stlfsi4'].max():.3f}")
 
 # ============================================================
 # 2. Prepare data
