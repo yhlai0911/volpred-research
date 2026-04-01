@@ -19061,5 +19061,43 @@
     "timestamp": "2026-04-01T02:42:44.378221+00:00",
     "codex_reviewed": true,
     "codex_findings": "Agent self-reviewed: lag correct, TX applied. NULL confirmed."
+  },
+  {
+    "item_id": "k802_gjr_skewt",
+    "experiment_id": "K802",
+    "category": "model_evaluation",
+    "title": "K802: GJR + Skewed-t VaR — Dual Champion Achieved",
+    "content": "[提出: 用戶, 執行: Claude]\n\nK802 resolves the K799 conflict: GJR wins QLIKE but fails VaR 1% under Normal distribution assumption. By replacing the Normal quantile with a fat-tail distribution, GJR achieves BOTH best QLIKE and VaR Trinity PASS simultaneously.\n\nKEY RESULTS (SPY 2023-2024, n=502 OOS days):\n- QLIKE: GJR=1.4686 vs GARCH=1.5137 (GJR wins, DM t=-3.25, p=0.001, Harvey t>3.0 PASS)\n- Spearman: GJR rho=0.2116 >> GARCH rho=0.1087\n\nVaR BACKTEST (1% level, Trinity = Kupiec + Christoffersen + Basel Green):\n- GJR+Normal: violations=9/502 (1.79%), Kupiec p=0.108 → Basel YELLOW → FAIL (replicates K799)\n- GJR+StudentT: violations=6/502 (1.20%), all PASS → Trinity PASS\n- GJR+SkewedT: violations=6/502 (1.20%), all PASS → Trinity PASS ← DUAL CHAMPION\n- GARCH+Normal: violations=7/502 (1.39%), all PASS → Trinity PASS (K799 baseline)\n- GJR+FHS: violations=5/502 (1.00%), Kupiec p=0.993 → Trinity PASS\n\nDISTRIBUTION PARAMETERS (estimated from IS standardized residuals):\n- Student-t df ≈ 15–16 (fat tails, not ~5 as often assumed)\n- Skewed-t xi ≈ 0.99 (nearly symmetric — equity returns in 2023-2024 not strongly skewed)\n- FHS 1% quantile ≈ -2.73 to -2.81 (vs Normal -2.33, confirming fat tails)\n\nCONCLUSION: GJR+Skewed-t is the Dual Champion — best σ² forecasting (QLIKE) AND correct VaR tail coverage. The Normal distribution underestimates tails (z=-2.33 too small), while Student-t df~16 and Skewed-t both give z~-2.58 to -2.60, achieving correct 1% VaR coverage. The high df (15-16) means tails are fatter than Normal but not as extreme as often parameterized (df=5). Xi~0.99 (near-symmetric) in the 2023-2024 period.\n",
+    "tags": [
+      "GJR-GARCH",
+      "skewed-t",
+      "VaR",
+      "distribution",
+      "QLIKE",
+      "fat-tails",
+      "model-evaluation",
+      "K799-followup"
+    ],
+    "data_source": "yfinance",
+    "asset": "SPY",
+    "oos_period": "2023-01-03 to 2024-12-31",
+    "experiment_file": "experiments/k802_gjr_skewt.py",
+    "results_file": "experiments/k802_gjr_skewt_results.json",
+    "timestamp": "2026-04-01T03:02:28.133265+00:00",
+    "key_numbers": {
+      "qlike_gjr": 1.4686,
+      "qlike_garch": 1.5137,
+      "dm_stat_gjr_vs_garch": -3.25,
+      "dm_p": 0.0012,
+      "harvey_pass": true,
+      "gjr_normal_violations": "9/502 (1.79%) FAIL",
+      "gjr_t_violations": "6/502 (1.20%) PASS",
+      "gjr_skewt_violations": "6/502 (1.20%) PASS",
+      "garch_normal_violations": "7/502 (1.39%) PASS",
+      "gjr_fhs_violations": "5/502 (1.00%) PASS",
+      "student_t_df_final": 16.1,
+      "skewt_xi_final": 0.996,
+      "fhs_quantile_final": -2.74
+    }
   }
 ]
