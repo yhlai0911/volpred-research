@@ -51,6 +51,7 @@ def publish_milestone_article(
     publish_at: str | None = None,
     audience: str | None = None,
     category: str | None = None,
+    proposer: str | None = None,
     storage_dir: str = "storage",
 ) -> str:
     publisher = Publisher(storage_dir=storage_dir)
@@ -64,6 +65,7 @@ def publish_milestone_article(
         publish_at=publish_at,
         audience=audience,
         category=category,
+        proposer=proposer,
     )
 
 

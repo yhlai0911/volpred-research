@@ -502,6 +502,8 @@ def ops_recalc_metrics() -> None:
 @click.option("--tags", default=None, help="Comma-separated tags")
 @click.option("--status", "status_name", default="published", type=click.Choice(["published", "draft", "scheduled"]), show_default=True, help="Initial publish status")
 @click.option("--publish-at", default=None, help="Scheduled publish time (ISO datetime) when status=scheduled")
+@click.option("--audience", default=None, help="Target audience: general, research, daily, member_qa")
+@click.option("--proposer", default=None, help="Who proposed/asked this (member name for Q&A)")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_publish_milestone(
     title: str,
@@ -511,6 +513,8 @@ def ops_publish_milestone(
     tags: str | None,
     status_name: str,
     publish_at: str | None,
+    audience: str | None,
+    proposer: str | None,
     storage_dir: str,
 ) -> None:
     """Publish a milestone article through the unified publisher path."""
@@ -528,6 +532,8 @@ def ops_publish_milestone(
         tags=_parse_tags(tags),
         status=status_name,
         publish_at=publish_at,
+        audience=audience,
+        proposer=proposer,
         storage_dir=storage_dir,
     )
     console.print(f"[green]Stored milestone[/green] {pub_id}")

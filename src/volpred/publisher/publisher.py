@@ -100,7 +100,8 @@ class Publisher:
                          status: str = 'published',
                          publish_at: str | None = None,
                          audience: str | None = None,
-                         category: str | None = None) -> str:
+                         category: str | None = None,
+                         proposer: str | None = None) -> str:
         """Publish a research milestone.
 
         audience: 'general' (一般讀者), 'research' (研究), 'daily' (每日建議), 'member_qa'
@@ -166,6 +167,8 @@ class Publisher:
             'published_at': publish_at or now,
             'status': normalized_status,
         }
+        if proposer:
+            item['proposer'] = proposer
 
         report_file = self.reports_dir / f"{pub_id}.json"
         with open(report_file, 'w') as f:

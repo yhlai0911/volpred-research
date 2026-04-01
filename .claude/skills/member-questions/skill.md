@@ -36,7 +36,8 @@ user-invocable: true
 5. 若進研究候選池，遵循 lifecycle：
    - `queued` → `claimed` → `completed` / `cancelled`
 6. 做研究（LanceDB 搜尋 + Agent 實驗 if needed）
-7. 發 feed 文章（`publish_milestone`, proposer=會員名稱, phase=member_qa）
+7. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --audience member_qa --proposer 會員名稱 --status draft --tags "會員提問,..."`
+   - **必須傳 `--audience member_qa` 和 `--proposer 會員名稱`**（否則 badge 和署名不顯示）
 8. 更新 question（answer=摘要, feed_articles=[article_slug]）→ status: `answered`
 9. 回報：處理了哪個問題、發了什麼文章、榜單是否更新
 
