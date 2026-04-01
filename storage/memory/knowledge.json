@@ -18940,5 +18940,21 @@
     "timestamp": "2026-04-01T00:17:07.987225+00:00",
     "codex_reviewed": true,
     "codex_findings": "Self-reviewed. shift(1) at lines 221/300/322/368."
+  },
+  {
+    "id": "K795",
+    "type": "experiment",
+    "title": "STLFSI4 Stress Regime: BLOCKED — FRED API timeout, code ready but needs data",
+    "content": "[提出: Gemini, 執行: Claude] FRED STLFSI4 下載 timeout。腳本已寫好但無法執行。Agent self-review 發現 2 HIGH（pre-GLD zero vol, TX understate）+ 1 MEDIUM（STLFSI4 vintage lookahead risk）。需修正後重跑。下次 session 檢查 FRED 可用性。",
+    "tags": [
+      "STLFSI4",
+      "FRED",
+      "macro_stress",
+      "blocked"
+    ],
+    "experiment_file": "experiments/k795_stlfsi4_regime.py",
+    "timestamp": "2026-04-01T00:24:48.365792+00:00",
+    "codex_reviewed": true,
+    "codex_findings": "Agent self-review: 2 HIGH (pre-GLD, TX), 1 MEDIUM (vintage). BLOCKED: FRED timeout."
   }
 ]
