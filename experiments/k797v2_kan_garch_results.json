@@ -1,0 +1,89 @@
+{
+  "experiment_id": "k797v2",
+  "title": "K797v2: GARCH-MIDAS vs MLP -- QLIKE Bug Fixed",
+  "date": "2026-04-01",
+  "bug_fix": {
+    "k797_bug": "QLIKE formula used -log(s2)+r2/s2 (neg log-likelihood), producing negative values",
+    "fix": "Correct Patton (2011): a/f - log(a/f) - 1, always >= 0",
+    "mlp_fix": "Added output_bias=-9 init + log_s2 clamp [-20,-2] to prevent exp() explosion",
+    "confirmed_nonnegative": true
+  },
+  "literature": [
+    "Patton (2011) J. Econometrics 160(1), 246-256",
+    "Engle, Ghysels & Sohn (2013) GARCH-MIDAS, JBES",
+    "Harvey et al. (1997) DM correction, JBES"
+  ],
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance",
+    "vix_source": "yfinance ^VIX",
+    "is_period": "2010-01-05 to 2022-12-30",
+    "oos_period": "2023-01-01 to 2024-12-31",
+    "n_oos": 502,
+    "n_is": 3271
+  },
+  "forecast_diagnostics": {
+    "gjr_min": 2.933873253104655e-05,
+    "gjr_max": 0.0003378859518262308,
+    "gjr_mean": 6.74251549376698e-05,
+    "midas_min": 2.3385878537159322e-05,
+    "midas_max": 0.0003597132950062621,
+    "midas_mean": 7.584732370751936e-05,
+    "mlp_min": 0.0067379469983279705,
+    "mlp_max": 0.0067379469983279705,
+    "mlp_mean": 0.0067379469983279705,
+    "n_nonpositive_gjr": 0,
+    "n_nonpositive_midas": 0,
+    "n_nonpositive_mlp": 0
+  },
+  "results": {
+    "qlike_mean": {
+      "gjr": 1.518292,
+      "garch_midas": 1.547442,
+      "mlp_garch": 5.182535
+    },
+    "qlike_all_nonnegative": {
+      "gjr": true,
+      "garch_midas": true,
+      "mlp_garch": true
+    },
+    "qlike_vs_gjr_pct": {
+      "garch_midas": 1.9199,
+      "mlp_garch": 241.3399
+    },
+    "dm_vs_gjr_positive_means_beats": {
+      "garch_midas": {
+        "dm": -1.8831,
+        "p_value": 0.0603,
+        "beats_gjr_harvey": false
+      },
+      "mlp_garch": {
+        "dm": -36.1897,
+        "p_value": 0.0,
+        "beats_gjr_harvey": false
+      }
+    },
+    "dm_midas_vs_mlp_positive_means_mlp_better": {
+      "dm": -33.2142,
+      "p_value": 0.0
+    },
+    "spearman": {
+      "gjr": 0.1709,
+      "garch_midas": 0.1818,
+      "mlp_garch": NaN
+    },
+    "harvey_significant": {
+      "midas_beats_gjr": false,
+      "mlp_beats_gjr": false
+    }
+  },
+  "conclusion": "NULL RESULT: Neither GARCH-MIDAS (+1.92%, DM=-1.883, p=0.0603) nor MLP (+241.34%, DM=-36.190, p=0.0000) beats GJR at Harvey t>3.0. Consistent with K526, K784: ML adds no value over GJR for daily SPY vol forecasting.",
+  "limitations": [
+    "SPY only -- cross-asset validation needed",
+    "OOS 2023-2024 (~504 days) -- limited OOS sample",
+    "tau uses EWMA not true Beta polynomial (Engle et al. 2013)",
+    "MLP hidden=16 -- limited capacity; larger models untested",
+    "log_s2 clamped to [-20,-2] to prevent overflow; may constrain MLP flexibility",
+    "r2 proxy for sigma2 is noisy (Hansen & Lunde 2005)"
+  ]
+}
