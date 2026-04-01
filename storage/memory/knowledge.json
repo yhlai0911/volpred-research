@@ -19336,5 +19336,27 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-04-01T13:45:06.517622"
+  },
+  {
+    "item_id": "3804c778",
+    "category": "experiment_validation",
+    "content": "K810 Codex \u5be9\u67e5\uff1a1 HIGH (S1 \u96d9\u91cd lag), NULL \u7d50\u8ad6\u6210\u7acb\n\n- HIGH: S1 Spike Recovery \u6709\u96d9\u91cd lag\uff08spike detection lag + shift(1) = 2-day lag\uff09\uff0c\u4f7f\u7d50\u679c\u904e\u5ea6\u4fdd\u5b88\u800c\u975e lookahead\n- MEDIUM: DM test \u7528 model_evaluation \u7248\u672c\uff08HAC on -return\uff09\uff0c\u975e\u56b4\u683c HLN correction\n- MEDIUM: Spike recovery \u5206\u6790\u662f\u56de\u6eaf\u6027\u7684\uff08forward-scan\uff09\uff0c\u4e0d\u53ef\u524d\u77bb\u5be6\u4f5c\uff0c\u4f46\u4f5c\u70ba\u63cf\u8ff0\u6027\u5206\u6790\u5408\u7406\n- LOW: TX cost \u548c spike detection \u6b63\u78ba\n\nNULL \u7d50\u8ad6\u4ecd\u6210\u7acb\u2014\u2014over-lag \u53cd\u800c\u4f7f spike \u7b56\u7565\u66f4\u96e3\u8868\u73fe\u300212/VIX \u662f MR \u4ea4\u6613\u7684\u7d50\u8ad6\u53ef\u4fe1\u3002",
+    "evidence": [
+      "K810",
+      "Codex_review"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-01T13:47:29.402640"
+  },
+  {
+    "item_id": "5806971a",
+    "category": "experiment_validation",
+    "content": "K811 Codex \u5be9\u67e5\uff1a2 HIGH\uff0c\u6838\u5fc3\u65b9\u5411\u53ef\u4fe1\u4f46\u6578\u5b57\u9700\u4fee\u6b63\n\nHIGH 1: VVIX 2012/3 \u624d\u516c\u958b\uff0c2007-2012 \u662f CBOE \u56de\u6eaf\u586b\u5145\uff08\u975e\u5373\u6642\u53ef\u89c0\u6e2c\uff09\u3002proxy scaling \u7528\u5168\u6a23\u672c\u91cd\u758a\u4f30\u8a08\uff08future leak\uff09\u3002\nHIGH 2: \u4fdd\u96aa\u8cbb\u300c40% reduction\u300d\u8a08\u7b97\u7528 mean(log return)\u00d7252 \u975e CAGR\u3002\u6578\u5b57\u4e0d\u53ef\u76f4\u63a5\u5f15\u7528\u3002\n\nMEDIUM: VoV regime \u908f\u8f2f\u672c\u8eab OK\uff08expanding + shift(1)\uff09\uff0c\u4f46\u53d7 VVIX \u6c61\u67d3\u3002DM test \u53ef\u80fd fallback \u5230\u7c21\u5316\u7248\u3002\nLOW: \u4ea4\u6613\u6b0a\u91cd shift(1) \u6b63\u78ba\uff0c\u7121 lookahead\u3002\n\n\u7d50\u8ad6\u65b9\u5411\u4ecd\u53ef\u4fe1\uff1aVoV-conditional \u53ef\u6e1b\u5c11\u4fdd\u96aa\u8cbb\u3001smooth \u7248\u512a\u65bc binary\u3001VoV \u9810\u6e2c MDD \u6709\u6548\u4f46\u5f31\u65bc VIX\u3002\n\u7cbe\u78ba\u6578\u5b57\uff0840% reduction\uff09\u9700 K811v2 \u4fee\u6b63\uff08\u9650\u5236 2012+ \u6578\u64da\u3001\u7528 CAGR \u8a08\u7b97\u4fdd\u96aa\u8cbb\uff09\u3002",
+    "evidence": [
+      "K811",
+      "Codex_review"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-04-01T13:52:34.891378"
   }
 ]
