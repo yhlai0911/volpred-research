@@ -197,6 +197,20 @@ class Publisher:
             metadata_pattern = re.search(r'\{"parentToolUseID":', description)
             if metadata_pattern:
                 description = description[:metadata_pattern.start()].rstrip()
+        # --- Auto-append related articles (延伸閱讀) ---
+        if similar and isinstance(description, str):
+            related_published = [
+                s for s in similar
+                if s.get('status') in ('published', 'draft') and s['similarity'] > 0.2
+            ][:3]
+            if related_published:
+                related_section = "\n\n---\n\n### 延伸閱讀\n"
+                for s in related_published:
+                    related_section += f"- [{s['title']}](/reports/{s['id']})\n"
+                # Only append if not already has 延伸閱讀
+                if '延伸閱讀' not in description:
+                    description += related_section
+
         pub_id = f"mile_{uuid.uuid4().hex[:8]}"
         now = datetime.now(timezone.utc).isoformat()
         normalized_status = status if status in {'published', 'draft', 'scheduled', 'unpublished', 'archived'} else 'published'
@@ -215,6 +229,14 @@ class Publisher:
             else:
                 category = 'milestone'
 
+        # Build related_articles list for metadata
+        related_articles = []
+        if similar:
+            related_articles = [
+                {'id': s['id'], 'title': s['title'], 'similarity': round(s['similarity'], 2)}
+                for s in similar if s.get('status') in ('published', 'draft') and s['similarity'] > 0.2
+            ][:5]
+
         item = {
             'id': pub_id,
             'title': title,
@@ -225,6 +247,7 @@ class Publisher:
             'phase': phase,
             'details': details or {},
             'tags': tag_list,
+            'related_articles': related_articles,
             'created_at': now,
             'published_at': publish_at or now,
             'status': normalized_status,
