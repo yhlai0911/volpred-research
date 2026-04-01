@@ -1,0 +1,679 @@
+{
+  "descriptive_stats": {
+    "SPY": {
+      "ann_return": 0.1187,
+      "ann_vol": 0.1937,
+      "sharpe": 0.613,
+      "skew": 0.001,
+      "kurtosis": 14.954,
+      "mdd": -0.5519
+    },
+    "GLD": {
+      "ann_return": 0.1176,
+      "ann_vol": 0.1834,
+      "sharpe": 0.642,
+      "skew": -0.315,
+      "kurtosis": 6.75,
+      "mdd": -0.4556
+    },
+    "TLT": {
+      "ann_return": 0.0403,
+      "ann_vol": 0.1488,
+      "sharpe": 0.271,
+      "skew": 0.082,
+      "kurtosis": 3.384,
+      "mdd": -0.4835
+    },
+    "DBC": {
+      "ann_return": 0.0391,
+      "ann_vol": 0.1926,
+      "sharpe": 0.203,
+      "skew": -0.397,
+      "kurtosis": 3.071,
+      "mdd": -0.7636
+    }
+  },
+  "data_period": "2006-02-06 to 2026-03-31",
+  "n_days": 5068,
+  "vix_stats": {
+    "mean": 19.51,
+    "median": 17.16,
+    "min": 9.14,
+    "max": 82.69
+  },
+  "correlation": {
+    "full_sample": {
+      "SPY_GLD": 0.0581,
+      "SPY_TLT": -0.3087,
+      "SPY_DBC": 0.3972
+    },
+    "low_vix": {
+      "SPY_GLD": 0.0733,
+      "SPY_TLT": -0.089,
+      "SPY_DBC": 0.1787
+    },
+    "high_vix": {
+      "SPY_GLD": 0.0576,
+      "SPY_TLT": -0.3898,
+      "SPY_DBC": 0.4737
+    }
+  },
+  "full_sample": {
+    "S0_BH_5050": {
+      "cagr": 0.1096,
+      "ann_vol": 0.1362,
+      "sharpe": 0.832,
+      "mdd": -0.3339,
+      "calmar": 0.328,
+      "sortino": 1.055,
+      "total_return": 6.3014,
+      "n_days": 4816,
+      "n_years": 19.11,
+      "avg_hhi": 0.5003,
+      "description": "BH 50/50 SPY/GLD (baseline)"
+    },
+    "S1_EW_4Asset": {
+      "cagr": 0.0733,
+      "ann_vol": 0.1015,
+      "sharpe": 0.748,
+      "mdd": -0.2789,
+      "calmar": 0.263,
+      "sortino": 1.005,
+      "total_return": 2.8613,
+      "n_days": 4816,
+      "n_years": 19.11,
+      "avg_hhi": 0.2502,
+      "description": "BH Equal-Weight 4 assets (25% each)"
+    },
+    "S2_RP_4Asset": {
+      "cagr": 0.0725,
+      "ann_vol": 0.0945,
+      "sharpe": 0.788,
+      "mdd": -0.2155,
+      "calmar": 0.336,
+      "sortino": 1.078,
+      "total_return": 2.8093,
+      "n_days": 4816,
+      "n_years": 19.11,
+      "avg_hhi": 0.2595,
+      "description": "Risk Parity 4 assets (inverse vol)"
+    },
+    "S3_VT_RP_4Asset": {
+      "cagr": 0.0433,
+      "ann_vol": 0.0575,
+      "sharpe": 0.766,
+      "mdd": -0.1704,
+      "calmar": 0.254,
+      "sortino": 1.056,
+      "total_return": 1.2476,
+      "n_days": 4816,
+      "n_years": 19.11,
+      "avg_hhi": 0.2595,
+      "description": "12/VIX VT + RP allocation (4 assets)"
+    },
+    "S4_RegimeAware": {
+      "cagr": 0.0432,
+      "ann_vol": 0.0579,
+      "sharpe": 0.76,
+      "mdd": -0.1995,
+      "calmar": 0.217,
+      "sortino": 1.046,
+      "total_return": 1.2447,
+      "n_days": 4816,
+      "n_years": 19.11,
+      "avg_hhi": 0.2799,
+      "description": "Regime-Aware VT (VIX thresholds + RP)"
+    }
+  },
+  "common_start": {
+    "S0_BH_5050": {
+      "cagr": 0.2676,
+      "ann_vol": 0.1301,
+      "sharpe": 1.888,
+      "mdd": -0.1331,
+      "calmar": 2.011,
+      "sortino": 2.366,
+      "total_return": 1.1473,
+      "n_days": 812,
+      "n_years": 3.22,
+      "description": "BH 50/50 SPY/GLD (baseline)"
+    },
+    "S1_EW_4Asset": {
+      "cagr": 0.1566,
+      "ann_vol": 0.0995,
+      "sharpe": 1.512,
+      "mdd": -0.079,
+      "calmar": 1.983,
+      "sortino": 2.109,
+      "total_return": 0.5978,
+      "n_days": 812,
+      "n_years": 3.22,
+      "description": "BH Equal-Weight 4 assets (25% each)"
+    },
+    "S2_RP_4Asset": {
+      "cagr": 0.154,
+      "ann_vol": 0.0969,
+      "sharpe": 1.527,
+      "mdd": -0.079,
+      "calmar": 1.949,
+      "sortino": 2.177,
+      "total_return": 0.5866,
+      "n_days": 812,
+      "n_years": 3.22,
+      "description": "Risk Parity 4 assets (inverse vol)"
+    },
+    "S3_VT_RP_4Asset": {
+      "cagr": 0.109,
+      "ann_vol": 0.07,
+      "sharpe": 1.514,
+      "mdd": -0.0657,
+      "calmar": 1.66,
+      "sortino": 2.12,
+      "total_return": 0.3958,
+      "n_days": 812,
+      "n_years": 3.22,
+      "description": "12/VIX VT + RP allocation (4 assets)"
+    },
+    "S4_RegimeAware": {
+      "cagr": 0.1153,
+      "ann_vol": 0.0687,
+      "sharpe": 1.624,
+      "mdd": -0.0573,
+      "calmar": 2.014,
+      "sortino": 2.364,
+      "total_return": 0.4214,
+      "n_days": 812,
+      "n_years": 3.22,
+      "description": "Regime-Aware VT (VIX thresholds + RP)"
+    }
+  },
+  "sub_periods": {
+    "GFC": {
+      "S0_BH_5050": {
+        "cagr": 0.0235,
+        "ann_vol": 0.2193,
+        "sharpe": 0.215,
+        "mdd": -0.3339,
+        "calmar": 0.07,
+        "sortino": 0.298,
+        "total_return": 0.0476,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "S1_EW_4Asset": {
+        "cagr": -0.0001,
+        "ann_vol": 0.1583,
+        "sharpe": 0.078,
+        "mdd": -0.2789,
+        "calmar": -0.0,
+        "sortino": 0.118,
+        "total_return": -0.0002,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "S2_RP_4Asset": {
+        "cagr": 0.0139,
+        "ann_vol": 0.1307,
+        "sharpe": 0.171,
+        "mdd": -0.2155,
+        "calmar": 0.064,
+        "sortino": 0.276,
+        "total_return": 0.028,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "S3_VT_RP_4Asset": {
+        "cagr": 0.0063,
+        "ann_vol": 0.0502,
+        "sharpe": 0.151,
+        "mdd": -0.0904,
+        "calmar": 0.07,
+        "sortino": 0.252,
+        "total_return": 0.0128,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "S4_RegimeAware": {
+        "cagr": 0.0114,
+        "ann_vol": 0.0491,
+        "sharpe": 0.254,
+        "mdd": -0.0666,
+        "calmar": 0.171,
+        "sortino": 0.426,
+        "total_return": 0.0229,
+        "n_days": 505,
+        "n_years": 2.0
+      }
+    },
+    "Recovery": {
+      "S0_BH_5050": {
+        "cagr": 0.0456,
+        "ann_vol": 0.1191,
+        "sharpe": 0.435,
+        "mdd": -0.13,
+        "calmar": 0.351,
+        "sortino": 0.547,
+        "total_return": 0.093,
+        "n_days": 502,
+        "n_years": 1.99
+      },
+      "S1_EW_4Asset": {
+        "cagr": 0.0056,
+        "ann_vol": 0.0829,
+        "sharpe": 0.109,
+        "mdd": -0.1167,
+        "calmar": 0.048,
+        "sortino": 0.144,
+        "total_return": 0.0112,
+        "n_days": 502,
+        "n_years": 1.99
+      },
+      "S2_RP_4Asset": {
+        "cagr": 0.0148,
+        "ann_vol": 0.0807,
+        "sharpe": 0.222,
+        "mdd": -0.1073,
+        "calmar": 0.138,
+        "sortino": 0.291,
+        "total_return": 0.0296,
+        "n_days": 502,
+        "n_years": 1.99
+      },
+      "S3_VT_RP_4Asset": {
+        "cagr": -0.0039,
+        "ann_vol": 0.0601,
+        "sharpe": -0.035,
+        "mdd": -0.0898,
+        "calmar": -0.043,
+        "sortino": -0.043,
+        "total_return": -0.0078,
+        "n_days": 502,
+        "n_years": 1.99
+      },
+      "S4_RegimeAware": {
+        "cagr": 0.0053,
+        "ann_vol": 0.059,
+        "sharpe": 0.119,
+        "mdd": -0.0801,
+        "calmar": 0.066,
+        "sortino": 0.146,
+        "total_return": 0.0106,
+        "n_days": 502,
+        "n_years": 1.99
+      }
+    },
+    "Late_Cycle": {
+      "S0_BH_5050": {
+        "cagr": 0.1018,
+        "ann_vol": 0.085,
+        "sharpe": 1.182,
+        "mdd": -0.1101,
+        "calmar": 0.924,
+        "sortino": 1.741,
+        "total_return": 0.2134,
+        "n_days": 503,
+        "n_years": 2.0
+      },
+      "S1_EW_4Asset": {
+        "cagr": 0.0675,
+        "ann_vol": 0.0667,
+        "sharpe": 1.013,
+        "mdd": -0.0908,
+        "calmar": 0.744,
+        "sortino": 1.572,
+        "total_return": 0.1393,
+        "n_days": 503,
+        "n_years": 2.0
+      },
+      "S2_RP_4Asset": {
+        "cagr": 0.0726,
+        "ann_vol": 0.0662,
+        "sharpe": 1.092,
+        "mdd": -0.0802,
+        "calmar": 0.905,
+        "sortino": 1.597,
+        "total_return": 0.1502,
+        "n_days": 503,
+        "n_years": 2.0
+      },
+      "S3_VT_RP_4Asset": {
+        "cagr": 0.0466,
+        "ann_vol": 0.0519,
+        "sharpe": 0.904,
+        "mdd": -0.0711,
+        "calmar": 0.655,
+        "sortino": 1.244,
+        "total_return": 0.0952,
+        "n_days": 503,
+        "n_years": 2.0
+      },
+      "S4_RegimeAware": {
+        "cagr": 0.0494,
+        "ann_vol": 0.0549,
+        "sharpe": 0.904,
+        "mdd": -0.0698,
+        "calmar": 0.707,
+        "sortino": 1.183,
+        "total_return": 0.1009,
+        "n_days": 503,
+        "n_years": 2.0
+      }
+    },
+    "COVID_Bull": {
+      "S0_BH_5050": {
+        "cagr": 0.168,
+        "ann_vol": 0.1601,
+        "sharpe": 1.051,
+        "mdd": -0.2051,
+        "calmar": 0.819,
+        "sortino": 1.196,
+        "total_return": 0.3652,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "S1_EW_4Asset": {
+        "cagr": 0.1433,
+        "ann_vol": 0.1118,
+        "sharpe": 1.254,
+        "mdd": -0.1688,
+        "calmar": 0.849,
+        "sortino": 1.4,
+        "total_return": 0.3079,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "S2_RP_4Asset": {
+        "cagr": 0.1326,
+        "ann_vol": 0.11,
+        "sharpe": 1.187,
+        "mdd": -0.1654,
+        "calmar": 0.802,
+        "sortino": 1.348,
+        "total_return": 0.2833,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "S3_VT_RP_4Asset": {
+        "cagr": 0.0644,
+        "ann_vol": 0.0496,
+        "sharpe": 1.283,
+        "mdd": -0.067,
+        "calmar": 0.962,
+        "sortino": 1.61,
+        "total_return": 0.1332,
+        "n_days": 505,
+        "n_years": 2.0
+      },
+      "S4_RegimeAware": {
+        "cagr": 0.0445,
+        "ann_vol": 0.0491,
+        "sharpe": 0.911,
+        "mdd": -0.0613,
+        "calmar": 0.725,
+        "sortino": 1.179,
+        "total_return": 0.0911,
+        "n_days": 505,
+        "n_years": 2.0
+      }
+    },
+    "Rate_Hikes": {
+      "S0_BH_5050": {
+        "cagr": 0.0419,
+        "ann_vol": 0.1283,
+        "sharpe": 0.384,
+        "mdd": -0.1811,
+        "calmar": 0.231,
+        "sortino": 0.582,
+        "total_return": 0.085,
+        "n_days": 501,
+        "n_years": 1.99
+      },
+      "S1_EW_4Asset": {
+        "cagr": -0.0032,
+        "ann_vol": 0.1171,
+        "sharpe": 0.031,
+        "mdd": -0.1857,
+        "calmar": -0.017,
+        "sortino": 0.047,
+        "total_return": -0.0064,
+        "n_days": 501,
+        "n_years": 1.99
+      },
+      "S2_RP_4Asset": {
+        "cagr": -0.0112,
+        "ann_vol": 0.1143,
+        "sharpe": -0.042,
+        "mdd": -0.1941,
+        "calmar": -0.058,
+        "sortino": -0.066,
+        "total_return": -0.0222,
+        "n_days": 501,
+        "n_years": 1.99
+      },
+      "S3_VT_RP_4Asset": {
+        "cagr": -0.0079,
+        "ann_vol": 0.0652,
+        "sharpe": -0.09,
+        "mdd": -0.0997,
+        "calmar": -0.08,
+        "sortino": -0.148,
+        "total_return": -0.0157,
+        "n_days": 501,
+        "n_years": 1.99
+      },
+      "S4_RegimeAware": {
+        "cagr": -0.0019,
+        "ann_vol": 0.0649,
+        "sharpe": 0.003,
+        "mdd": -0.1079,
+        "calmar": -0.018,
+        "sortino": 0.004,
+        "total_return": -0.0038,
+        "n_days": 501,
+        "n_years": 1.99
+      }
+    }
+  },
+  "cross_oos_wins": {
+    "S1_EW_4Asset": "1/5",
+    "S2_RP_4Asset": "1/5",
+    "S3_VT_RP_4Asset": "1/5",
+    "S4_RegimeAware": "1/5"
+  },
+  "crra_utility": {
+    "S0_BH_5050": {
+      "crra_full": -0.249736,
+      "crra_common_start": -0.249195
+    },
+    "S1_EW_4Asset": {
+      "crra_full": -0.249802,
+      "crra_common_start": -0.249502
+    },
+    "S2_RP_4Asset": {
+      "crra_full": -0.249794,
+      "crra_common_start": -0.249506
+    },
+    "S3_VT_RP_4Asset": {
+      "crra_full": -0.249858,
+      "crra_common_start": -0.249629
+    },
+    "S4_RegimeAware": {
+      "crra_full": -0.249859,
+      "crra_common_start": -0.249605
+    }
+  },
+  "dm_test": {
+    "S1_EW_4Asset": {
+      "dm_stat": -2.662,
+      "p_value": 0.0078,
+      "harvey_significant": "False",
+      "n_obs": 4816
+    },
+    "S2_RP_4Asset": {
+      "dm_stat": -2.452,
+      "p_value": 0.0142,
+      "harvey_significant": "False",
+      "n_obs": 4816
+    },
+    "S3_VT_RP_4Asset": {
+      "dm_stat": -3.307,
+      "p_value": 0.001,
+      "harvey_significant": "True",
+      "n_obs": 4816
+    },
+    "S4_RegimeAware": {
+      "dm_stat": -3.168,
+      "p_value": 0.0015,
+      "harvey_significant": "True",
+      "n_obs": 4816
+    }
+  },
+  "sensitivity": {
+    "tv_9.6": {
+      "cagr": 0.0406,
+      "ann_vol": 0.0618,
+      "sharpe": 0.676,
+      "mdd": -0.1631,
+      "calmar": 0.249,
+      "sortino": 0.848,
+      "total_return": 1.1413,
+      "n_days": 4816,
+      "n_years": 19.11
+    },
+    "tv_12.0": {
+      "cagr": 0.0481,
+      "ann_vol": 0.07,
+      "sharpe": 0.706,
+      "mdd": -0.1705,
+      "calmar": 0.282,
+      "sortino": 0.918,
+      "total_return": 1.4534,
+      "n_days": 4816,
+      "n_years": 19.11
+    },
+    "tv_14.4": {
+      "cagr": 0.0557,
+      "ann_vol": 0.0773,
+      "sharpe": 0.74,
+      "mdd": -0.1867,
+      "calmar": 0.298,
+      "sortino": 0.988,
+      "total_return": 1.8166,
+      "n_days": 4816,
+      "n_years": 19.11
+    }
+  },
+  "avg_weights": {
+    "S0_BH_5050": {
+      "SPY": 0.4997,
+      "GLD": 0.5003,
+      "TLT": 0.0,
+      "DBC": 0.0,
+      "CASH": 0
+    },
+    "S1_EW_4Asset": {
+      "SPY": 0.2505,
+      "GLD": 0.2508,
+      "TLT": 0.249,
+      "DBC": 0.2497,
+      "CASH": 0
+    },
+    "S2_RP_4Asset": {
+      "SPY": 0.244,
+      "GLD": 0.2475,
+      "TLT": 0.2819,
+      "DBC": 0.2267,
+      "CASH": 0
+    },
+    "S3_VT_RP_4Asset": {
+      "SPY": 0.1693,
+      "GLD": 0.1642,
+      "TLT": 0.1864,
+      "DBC": 0.1534,
+      "CASH": 0.3266
+    },
+    "S4_RegimeAware": {
+      "SPY": 0.1789,
+      "GLD": 0.1572,
+      "TLT": 0.1779,
+      "DBC": 0.1595,
+      "CASH": 0.3266
+    }
+  },
+  "oos_2023_2024": {
+    "S0_BH_5050": {
+      "cagr": 0.2293,
+      "ann_vol": 0.1021,
+      "sharpe": 2.075,
+      "mdd": -0.0748,
+      "calmar": 3.066,
+      "sortino": 2.99,
+      "total_return": 0.5088,
+      "n_days": 502,
+      "n_years": 1.99
+    },
+    "S1_EW_4Asset": {
+      "cagr": 0.0992,
+      "ann_vol": 0.0894,
+      "sharpe": 1.103,
+      "mdd": -0.079,
+      "calmar": 1.256,
+      "sortino": 1.754,
+      "total_return": 0.2072,
+      "n_days": 502,
+      "n_years": 1.99
+    },
+    "S2_RP_4Asset": {
+      "cagr": 0.108,
+      "ann_vol": 0.09,
+      "sharpe": 1.185,
+      "mdd": -0.079,
+      "calmar": 1.367,
+      "sortino": 1.876,
+      "total_return": 0.2266,
+      "n_days": 502,
+      "n_years": 1.99
+    },
+    "S3_VT_RP_4Asset": {
+      "cagr": 0.0745,
+      "ann_vol": 0.0698,
+      "sharpe": 1.064,
+      "mdd": -0.0657,
+      "calmar": 1.134,
+      "sortino": 1.613,
+      "total_return": 0.1539,
+      "n_days": 502,
+      "n_years": 1.99
+    },
+    "S4_RegimeAware": {
+      "cagr": 0.084,
+      "ann_vol": 0.0694,
+      "sharpe": 1.197,
+      "mdd": -0.0573,
+      "calmar": 1.467,
+      "sortino": 1.856,
+      "total_return": 0.1743,
+      "n_days": 502,
+      "n_years": 1.99
+    }
+  },
+  "summary": {
+    "best_sharpe_full": {
+      "strategy": "S0_BH_5050",
+      "sharpe": 0.832
+    },
+    "best_mdd_full": {
+      "strategy": "S3_VT_RP_4Asset",
+      "mdd": -0.1704
+    },
+    "best_crra_full": {
+      "strategy": "S0_BH_5050",
+      "crra": -0.249736
+    },
+    "conclusion": "NULL RESULT: Multi-asset VT (S3/S4) trades lower Sharpe for MDD improvement (~16pp). DM test significant (Harvey t>3) AGAINST VT vs 50/50 baseline. S3 best MDD=-17.04% vs baseline -33.39%, but Sharpe 0.766 vs 0.832. 50/50 SPY/GLD remains champion on Sharpe/CRRA; multi-asset VT is drawdown insurance with a return cost."
+  },
+  "experiment_id": "K808",
+  "title": "Cross-Asset All-Weather Volatility Targeting",
+  "data_source": "yfinance (SPY, GLD, TLT, DBC, ^VIX)",
+  "timestamp": "2026-04-01T13:29:54.782259"
+}

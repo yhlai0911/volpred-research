@@ -19250,5 +19250,30 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-04-01T13:23:29.899570"
+  },
+  {
+    "item_id": "280c82cc",
+    "category": "experiment_validation",
+    "content": "K806 Codex \u5be9\u67e5\uff1a1 HIGH (0050.TW \u672a\u6e05\u6d17), SPY \u7d50\u679c\u53ef\u4fe1\n\n- HIGH: 0050.TW \u672a\u7528 clean_tw50_data \u6e05\u6d17\uff082014 \u5047 -75% \u8df3\u8e8d\uff09\uff0c\u8de8\u8cc7\u7522 H \u88ab\u6c61\u67d3\u3002BTC timezone \u4e5f\u672a\u8655\u7406\u3002\n- MEDIUM: variogram H \u4f30\u8a08 noisy\uff08\u7121 bias correction\u30015 \u500b ad hoc lags\uff09\n- LOW\u00d73: \u7121 lookahead\u3001QLIKE \u6b63\u78ba\u3001expanding window \u6b63\u78ba\n\n\u5f71\u97ff\uff1a\u8de8\u8cc7\u7522 H \u7d50\u679c\u4e0d\u53ef\u4fe1\uff08\u53d7 0050.TW \u6c61\u67d3\uff09\uff0c\u4f46 SPY \u81ea\u8eab GJR+ownH \u7684 NULL\uff08DM=-0.09\uff09\u53ef\u4fe1\u3002\n\u6838\u5fc3\u7d50\u8ad6\u300c\u81ea\u8eab H(t) \u4e0d\u6539\u5584 GJR \u9810\u6e2c\u300d\u4ecd\u7136\u6210\u7acb\u3002\n\u8de8\u8cc7\u7522\u7d50\u8ad6\u9700 K806v2 \u4fee\u6b63\uff08clean 0050.TW + \u5c0d\u9f4a calendar\uff09\u3002",
+    "evidence": [
+      "K806",
+      "Codex_review"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-01T13:27:46.603657"
+  },
+  {
+    "item_id": "440c45bb",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Codex #8, \u57f7\u884c: Claude] K808 Cross-Asset All-Weather VT \u2014 NULL on Sharpe, MDD \u6539\u5584\u986f\u8457\n\n4 \u8cc7\u7522\uff08SPY+GLD+TLT+DBC\uff09All-Weather VT\uff0c7 \u500b\u7b56\u7565\u6bd4\u8f03\uff082006-2026, 5068 \u5929\uff09\u3002\n\n\u5168\u671f\u9593\u7d50\u679c\uff1a\n- S0 BH 50/50: Sharpe 0.832, MDD -33.4%, CAGR 11.0%\uff08\u4ecd\u7136\u662f Sharpe \u738b\u8005\uff09\n- S1 EW 4-Asset: Sharpe 0.748\n- S2 Risk Parity: Sharpe 0.788, MDD -21.6%\n- S3 12/VIX VT+RP: Sharpe 0.766, MDD -17.0%\uff08\u6700\u4f4e MDD\uff09\n- S4 Regime-Aware: Sharpe 0.760, MDD -20.0%\n\nDM tests\uff1aS3/S4 vs 50/50 = t=-3.31/-3.17\uff08Harvey PASS \u4f46\u65b9\u5411\u662f baseline \u52dd\uff09\nCross-OOS\uff1a\u6240\u6709\u7b56\u7565\u50c5 1/5 \u52dd 50/50\n\n\u7d50\u8ad6\uff1a\n1. 50/50 SPY/GLD Sharpe \u4e0d\u53ef\u52d5\u6416\uff08\u7b2c 9 \u6b21\u78ba\u8a8d\uff09\n2. VT+RP \u7684 MDD \u6539\u5584\u771f\u5be6\u4e14\u5927\uff08-17% vs -33%\uff09\uff0cGFC \u671f\u9593 -9% vs -33%\n3. TLT/DBC \u662f\u7d50\u69cb\u6027\u5f31\u8cc7\u7522\uff08Sharpe 0.27/0.20\uff09\uff0c\u52a0\u5165\u4e0d\u6539\u5584 risk-adjusted return\n4. Regime-Aware tilting\uff08VIX \u95be\u503c\u5207\u63db\uff09\u4e0d\u512a\u65bc smooth VT\n5. VT = drawdown insurance\uff0c\u4ee3\u50f9\u662f CAGR \u5c11 6.6pp\n\n\u958b\u767c\u4e2d\u4fee\u6b63 bug\uff1aweight constraint normalize_to_one=False \u907f\u514d\u62b5\u6d88 VT scaling\n\n\u5be6\u9a57\u8173\u672c: experiments/k808_allweather_vt.py\n\u7d50\u679c\u6578\u64da: experiments/k808_allweather_vt_results.json\n\u6578\u64da\u4f86\u6e90: yfinance (SPY, GLD, TLT, DBC, ^VIX)",
+    "evidence": [
+      "K808",
+      "K702",
+      "K774",
+      "K687",
+      "Codex_suggestion_8"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-01T13:30:58.214292"
   }
 ]

@@ -316,7 +316,7 @@
 
 ### Codex 第 8 次建議：從 vol 預測轉向風險管理實務（2026-03-31）[提出: Codex GPT-5.4]
 **核心洞見**：VIX sufficiency 已確認——不再嘗試打敗 VIX，改為用 VIX 建構更好的風險管理工具。
-- [ ] **跨資產 All-Weather VT**：SPY+TLT+GLD+DBC+SGOV+BTC ETF 組合，target-vol + weight caps + cash floor。超越 2-asset。可行性高。
+- [x] ~~跨資產 All-Weather VT~~ → **K808 完成 NULL on Sharpe**。50/50 Sharpe 0.832 仍不可動搖（#9）。但 VT+RP MDD -17% vs -33%（改善真實）。TLT/DBC 結構性弱（Sharpe 0.27/0.20）。Regime tilting 無用。VT = insurance。
 - [x] ~~債券壓力去風險信號~~ → **K807 完成 NULL**。Composite 與 VIX 相關 0.641，不是獨立信號。所有策略 Sharpe < baseline 50/50（0.856）。DM 全 NS。K766 的 1.041 可能 overfitting。
 - [ ] **Dispersion Timing（index vs sector）**：當 sector 分散度高時，equal-weight sectors > hold SPY。long-only ETF 實作。
 - [ ] **Tail-First ES 配置 + Conformal Calibration**：從「預測 vol」轉向「控制尾部風險」。inverse-ES 配置 + 校準覆蓋率 OOS 驗證。
@@ -401,7 +401,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）
 
 ### Rough Volatility & Hurst
-- [x] ~~Multivariate fBm for RV~~ → **K806 完成 NULL**。5 資產全 rough (H<<0.5)，但跨資產 H 相關太低（除 SPY-QQQ 0.53）。GJR+crossH 反而更差。自身 H(t) 改善 NS (DM=-0.09)。日頻 variogram 不夠精確，需 5-min 數據。
+- [x] ~~Multivariate fBm for RV~~ → **K806 完成 NULL**（⚠️ Codex 1 HIGH: 0050.TW 未清洗，跨資產 H 不可信；SPY 自身結果可信）。自身 H(t) 改善 NS (DM=-0.09)。5 資產全 rough (H<<0.5)。日頻 variogram 不夠精確。
 - [ ] ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。
 - [ ] Time-Varying Hurst via EWMA — arXiv:2509.05820
 - [ ] Adaptive Fractal Dynamics — Frontiers Applied Math 2025
