@@ -82,6 +82,9 @@ def answer_internal_question(
     linked_article = False
     if article_id:
         linked_article = _link_question_article(question_id, article_id)
+        # Ensure article's details.question_id is set so frontend sync
+        # (syncQuestionArticleLinks) maintains the link on every article upsert.
+        _ensure_article_question_metadata(article_id, question_id)
 
     return {
         "id": question_id,
@@ -91,6 +94,47 @@ def answer_internal_question(
         "linked_article": article_id if linked_article else None,
         "note": None if article_is_published else "文章尚未發佈，問題保持 researching 狀態。文章發佈時會自動標為 answered。",
     }
+
+
+def _ensure_article_question_metadata(article_slug: str, question_id: str) -> None:
+    """Write question_id into article's details so frontend sync preserves the link.
+
+    The frontend syncQuestionArticleLinks() reads details.question_id on every
+    article upsert to rebuild question_articles rows. Without this metadata,
+    the link gets dropped on the next sync cycle.
+    """
+    try:
+        # Update local report JSON
+        import json
+        from pathlib import Path
+        report_path = Path("storage/reports") / f"{article_slug}.json"
+        if report_path.exists():
+            report = json.loads(report_path.read_text())
+            if not report.get("details"):
+                report["details"] = {}
+            report["details"]["question_id"] = question_id
+            report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2))
+
+        # Update feed.json
+        feed_path = Path("storage/reports/feed.json")
+        if feed_path.exists():
+            feed = json.loads(feed_path.read_text())
+            for item in feed:
+                if item.get("id") == article_slug:
+                    if not item.get("details"):
+                        item["details"] = {}
+                    item["details"]["question_id"] = question_id
+                    break
+            feed_path.write_text(json.dumps(feed, ensure_ascii=False, indent=2))
+
+        # Update Supabase article details
+        rows = _select_rows("articles", select="id,details", slug=article_slug)
+        if rows:
+            details = rows[0].get("details") or {}
+            details["question_id"] = question_id
+            _patch_where("articles", {"slug": article_slug}, {"details": details})
+    except Exception:
+        pass  # Non-critical; question_articles row is the primary link
 
 
 ACTIVE_USER_STATUSES = {"ranked", "researching"}
