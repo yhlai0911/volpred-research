@@ -19011,5 +19011,21 @@
     "timestamp": "2026-04-01T01:05:06.516194+00:00",
     "codex_reviewed": true,
     "codex_findings": "Agent self-reviewed + fixed 3 bugs (DM HAC, TX fairness, feature index). shift(1) verified."
+  },
+  {
+    "id": "K800",
+    "type": "experiment",
+    "title": "Conformal VaR: GJR 1.99%→0.80% — direction correct but ⚠️ Codex: heuristic needs fix",
+    "content": "Conformal simple calibration 修復 GJR VaR（0.80% Trinity PASS）。QLIKE 不變。但 Codex 發現 2 HIGH：(1) 追蹤 raw VaR violations 非 adjusted→over-widen (2) 放大公式是 heuristic 非 proper conformal。方向正確但 0.80% 可能被高估，需修正追蹤 adjusted violations。",
+    "tags": [
+      "conformal",
+      "VaR",
+      "GJR",
+      "Codex_HIGH"
+    ],
+    "experiment_file": "experiments/k800_conformal_var.py",
+    "timestamp": "2026-04-01T02:07:22.169221+00:00",
+    "codex_reviewed": true,
+    "codex_findings": "2 HIGH: raw-vs-adjusted VaR tracking, heuristic formula. Lag OK. QLIKE unchanged OK."
   }
 ]
