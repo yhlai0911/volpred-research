@@ -350,7 +350,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] ~~K501/K818: SSVS for Return Prediction~~ [提出: 用戶] → **K818 完成 NULL for SPY**。OOS R²=-1.47%（EMH barrier）。SSVS 選出 HYG(0.93)+VIX_change(0.78)。台灣 hit 62.1% 但 c2c gap artifact。SSVS 更適合 vol 非 return。
 - [ ] Return prediction → trading strategy pipeline：如果方向準確度 > 55% → 可做 long/short 策略
 - [ ] 跨資產 return prediction：SPY、0050.TW、QQQ
-- [ ] K502: **US→Taiwan Lead-Lag Strategy** [提出: 用戶] — K812 INVALID（Codex 3 HIGH：混合日曆 lag + c2c 隔夜 gap + sanity check 造假）。需 K812v2 用 open-to-close return + 正確日曆對齊。I8 已預示 o2o FAIL。
+- [x] ~~K502/K812v2: US→Taiwan Lead-Lag Strategy~~ [提出: 用戶] → **K812v2 完成 乾淨 NULL**。OtC direction accuracy 50.2%（硬幣），lead-lag beta t=-0.25 (NS)。C2C Sharpe 3.51 → OtC -0.17（100% 信號在隔夜 gap）。方向正式關閉。
 - [x] ~~K503/K810: VIX Mean-Reversion Strategy~~ [提出: 用戶] → **K810 完成 NULL**。12/VIX 本身就是 MR 交易。顯式 MR 策略增加 vol 和 MDD，得不償失。VIX spike 93.5% 回復但短期 NS。50/50 不可動搖 #10。
 - 策略上架前必須：Cross-OOS ≥ 5 periods、3 年回測、Net Sharpe (after TX) > 0
 - **不要輕易上架**——交易策略必須多次確認（cross-OOS + out-of-sample + sensitivity），避免上架後發現是錯誤

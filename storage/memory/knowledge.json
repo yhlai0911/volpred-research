@@ -19516,5 +19516,20 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-04-01T15:10:15.844609"
+  },
+  {
+    "item_id": "6c2f787b",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: \u7528\u6236 (K502), \u57f7\u884c: Claude] K812v2 US\u2192Taiwan Lead-Lag OtC \u2014 \u4e7e\u6de8 NULL\uff083 bug \u5168\u4fee\u6b63\uff09\n\nK812 \u7684 3 HIGH bug \u5168\u4fee\u6b63\uff1a\u6b63\u78ba\u65e5\u66c6\u5c0d\u9f4a + \u5be6\u969b\u8a08\u7b97 sanity check + open-to-close return\u3002\n\nC2C vs OtC \u7684\u6bc0\u6ec5\u6027\u5c0d\u6bd4\uff1a\n- BH 0050: Sharpe 0.908 \u2192 0.071\uff08\u81a8\u8139 +0.84\uff09\n- Smooth tanh: 3.514 \u2192 -0.168\uff08\u81a8\u8139 +3.68\uff01\uff09\n- 8.63/VIX: 1.308 \u2192 0.239\uff08\u81a8\u8139 +1.07\uff09\n- \u65b9\u5411\u6e96\u78ba\u5ea6: 63.9% \u2192 50.2%\uff08\u786c\u5e63\u7ffb\u8f49\uff09\n- Lead-lag beta: \u986f\u8457 \u2192 t=-0.25 (p=0.80)\n- Rolling corr: 0.410 \u2192 0.009\n\nSanity check\uff08\u5be6\u969b\u8a08\u7b97\uff0c\u975e hard-coded\uff09\uff1a\n- Lookahead shift(0): Sharpe 0.853 > Correct shift(1): 0.258\uff08\u5408\u7406\uff09\n- Random baseline: 0.065 \u00b1 0.103, z=1.88\uff08\u4e0d\u986f\u8457\uff09\n\n\u7d50\u8ad6\uff1aUS\u2192Taiwan lead-lag 100% \u5728\u9694\u591c gap\u3002OtC return \u5b8c\u5168\u6c92\u6709\u4fe1\u865f\u3002\n\u7b2c 4 \u6b21\u78ba\u8a8d\u9694\u591c gap \u4e0d\u53ef\u4ea4\u6613\uff08K812/K817/K818/K812v2\uff09\u3002\nK502 \u65b9\u5411\u6b63\u5f0f\u95dc\u9589\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k812v2_us_taiwan_leadlag_otc.py\n\u7d50\u679c\u6578\u64da: experiments/k812v2_us_taiwan_leadlag_otc_results.json",
+    "evidence": [
+      "K812v2",
+      "K812",
+      "K817",
+      "K818",
+      "K502",
+      "I8"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-01T15:12:14.894291"
   }
 ]
