@@ -320,7 +320,7 @@
 - [x] ~~債券壓力去風險信號~~ → **K807 完成 NULL**。Composite 與 VIX 相關 0.641，不是獨立信號。所有策略 Sharpe < baseline 50/50（0.856）。DM 全 NS。K766 的 1.041 可能 overfitting。
 - [x] ~~Dispersion Timing（index vs sector）~~ → **K809 完成 NULL**。假說方向錯誤：高 dispersion 時 SPY 反而優於 EW（+2.8%/yr），因市值加權自動給贏家更高權重。DM 全 NS。
 - [x] ~~Tail-First ES 配置~~ → **K819 完成 NULL**。Inverse-ES 比 inverse-vol 更差（DM=-4.1，ES 方法統計上 worse）。Expanding ES 太平滑反應太慢。50/50 不可動搖 #11。
-- [ ] **Event-Risk Budgeter（CPI/FOMC/NFP/Earnings）**：事件窗口自動半倉。實務投資人工具，不只是事後分析。
+- [x] ~~Event-Risk Budgeter~~ → **K820 完成 NULL**。事件減倉有害！事件日 mean return 為正（+0.111%），最慘 20 天僅 3 天是事件日。GLD 自然對沖 FOMC。連續調整 >> binary 切換。
 
 ### Codex 第 5 次建議（2026-03-26）[提出: Codex]
 - [x] ~~Decision-focused policy learning~~ → **K798 NULL**。DM 全 NS。12/VIX irreducible #7。
