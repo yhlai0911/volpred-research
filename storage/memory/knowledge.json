@@ -19405,5 +19405,16 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-04-01T14:17:46.645637"
+  },
+  {
+    "item_id": "5b5bf3cf",
+    "category": "experiment_validation",
+    "content": "K813 Codex \u5be9\u67e5\uff1a1 HIGH (state propagation), NS \u65b9\u5411\u53ef\u4fe1\n\nHIGH: OOS STGARCH variance \u5728 refit \u9593\u7684 state update \u6709 off-by-one\uff08h_t \u672a\u6b63\u78ba\u5f9e h_forecast \u50b3\u64ad\uff09\u3002\nDM=-0.11 \u7684\u7cbe\u78ba\u6578\u5b57\u4e0d\u53ef\u9760\uff0c\u4f46 NS \u65b9\u5411\u5927\u6982\u7387\u6b63\u78ba\uff08\u5dee\u7570\u6975\u5c0f\uff09\u3002\n\nMEDIUM: LRT df=6 \u4e0d\u56b4\u683c\u6709\u6548\uff08Davies problem\uff1agamma_tr=0 \u6642 c unidentified\uff09\u3002p<0.001 \u61c9\u8996\u70ba\u555f\u767c\u5f0f\u3002\n\nLOW: log-likelihood \u7d50\u69cb\u6b63\u78ba\u3001transition function \u6b63\u78ba\u3001QLIKE \u6b63\u78ba\u3002\n\n\u7d50\u8ad6\uff1aSTGARCH \u4e0d\u512a\u65bc GJR \u7684\u65b9\u5411\u78ba\u8a8d\uff0c\u4f46\u7cbe\u78ba DM \u6578\u5b57\u5f85 K813v2 \u4fee\u6b63 state propagation\u3002",
+    "evidence": [
+      "K813",
+      "Codex_review"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-04-01T14:19:20.584434"
   }
 ]
