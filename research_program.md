@@ -323,7 +323,7 @@
 - [ ] **Event-Risk Budgeter（CPI/FOMC/NFP/Earnings）**：事件窗口自動半倉。實務投資人工具，不只是事後分析。
 
 ### Codex 第 5 次建議（2026-03-26）[提出: Codex]
-- [ ] **Decision-focused policy learning**：不預測 return/vol 再映射到交易，而是直接學習最優行動（contextual bandit / dynamic treatment）。回應核心發現「prediction ≠ trading」
+- [ ] **Decision-focused policy learning** → K798 進行中。Contextual bandit vs predict-then-optimize。回應「prediction ≠ trading」
 - [ ] **Two-clock decomposition: overnight + intraday + jump**：分開建模 close-to-open / open-to-close / jump probability，只交易有信號的 segment。K451 已做描述性分析但未做策略
 - [ ] **Options surface state variables**：超越 VIX/SKEW 的 scalar summary，用完整 IV surface（left-tail slope, corridor variance, GEX/vanna, 0DTE share）。⚠️ BLOCKED: 需 options 歷史數據
 - [ ] **Dispersion / correlation-regime trading**：將 DCC/copula/network 分析（K443/K444/K455）轉化為策略：sector dispersion, correlation breakdown trades, network-hub rotation
@@ -338,8 +338,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### Gemini 第 1 次建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
 - [x] ~~Taiwan Price Limit Latent Volatility~~ → **K790v2 完成 NULL**：>5% 天數僅 0.9%，GJR asymmetry 已捕捉。DM 全 NS。
-- [ ] **FRED STLFSI4 Macro Stress Regime**：用聖路易金融壓力指數做 regime switching，壓力期降低 target vol (12%→8%)。Data: FRED STLFSI4
-- [ ] **VIX→Taiwan Vol Spillover Strategy**：VIX 在美股時段 spike > 15% → 次日台股開盤自動減倉。比 return lead-lag 更直接。Data: yfinance
+- [ ] **FRED STLFSI4 Macro Stress Regime** → K795 BLOCKED（FRED API timeout）。腳本已寫好，需修正 pre-GLD 零 vol 和 TX 問題。
+- [ ] **VIX→Taiwan Vol Spillover Strategy** → K796 進行中。VIX spike >15% → 次日台股減倉。
 - [ ] **TXO Put-Call Ratio Mean-Reversion**：台指選擇權 P/C ratio 作為散戶恐慌指標，極端值做反向操作。Data: TAIFEX 網站
 - [x] ~~EWT vs 0050.TW Vol Arbitrage Spread~~ → **K792 完成**：Granger YES (F=28.4) 但方向反（高 ratio → vol 下降）。Trading 虧損。Mean reversion 陷阱。
 
