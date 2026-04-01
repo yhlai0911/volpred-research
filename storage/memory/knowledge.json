@@ -19313,5 +19313,28 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-04-01T13:44:11.532460"
+  },
+  {
+    "item_id": "a13e3a65",
+    "category": "experiment_validation",
+    "content": "K809 Codex \u5be9\u67e5\u901a\u904e\uff1a0 HIGH, 1 LOW (ffill limit=5 \u8f15\u5fae\u5f71\u97ff)\u3002NULL \u7d50\u8ad6\u78ba\u8a8d\u3002",
+    "evidence": [
+      "K809",
+      "Codex_review_pass"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-01T13:45:05.782789"
+  },
+  {
+    "item_id": "275a5311",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Gemini #2, \u57f7\u884c: Claude] K811 Convexity-Adjusted Insurance Premium (VoV) \u2014 \u6df7\u5408\u7d50\u679c\n\nVoV-Conditional VT\uff1a\u7528 Vol-of-Vol \u5224\u65b7\u4fdd\u96aa\u662f\u5426\u503c\u5f97\u3002VVIX \u4f5c\u70ba VoV proxy\u3002\n\n\u4fdd\u96aa\u8cbb\u5206\u6790\uff082006-2026, 5092 \u5929\uff09\uff1a\n- Always VT \u4fdd\u96aa\u8cbb: 3.76%/yr\n- VoV-Conditional\uff08S2 binary\uff09: 2.20%/yr\uff08\u6e1b\u5c11 41%\uff09\u4f46 MDD -59.9%\uff08\u707d\u96e3\u6027\uff0c\u56e0\u5371\u6a5f\u53ef\u59cb\u65bc\u4f4e VoV\uff09\n- VoV-Smooth\uff08S3\uff09: 2.24%/yr\uff08\u6e1b\u5c11 40%\uff09MDD -43.6%\uff08\u6bd4 BH SPY -56% \u597d\uff09\n- 50/50 SPY/GLD: Sharpe 0.534\uff08\u4ecd\u662f\u738b\u8005\uff09\n\nVoV \u9810\u6e2c\u529b\uff1aVoV\u219230d MDD Spearman=-0.17\uff08\u986f\u8457\u4f46 VIX=-0.38 \u66f4\u5f37 2x\uff09\n\nCRRA(\u03b3=5): S3 Smooth 0.1534 > Always VT 0.1260 > BH SPY 0.1219\uff0850/50 \u4ecd\u6700\u4f73 0.2135\uff09\n\n\u7d50\u8ad6\uff1a\n1. VoV-conditional \u6210\u529f\u6e1b\u5c11 40% \u4fdd\u96aa\u8cbb\n2. Binary \u7248\u672c\u5371\u96aa\uff08\u4f4e VoV \u8d77\u59cb\u7684\u5371\u6a5f\u6703\u88ab\u932f\u904e\uff09\n3. Smooth \u7248\u672c\u662f\u5408\u7406\u6298\u8877\n4. \u5be6\u52d9\u5de5\u5177\u6709\u50f9\u503c\uff1a\u6b63\u78ba\u8b58\u5225\u300c\u73fe\u5728\u8a72\u4fdd\u96aa\u300d\uff08VIX=30.6, VoV z=1.79\uff09\n5. 50/50 \u4ecd\u7136\u4e0d\u53ef\u52d5\u6416\n\n\u5f85 Codex \u5be9\u67e5\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k811_insurance_premium_vov.py\n\u7d50\u679c\u6578\u64da: experiments/k811_insurance_premium_vov_results.json",
+    "evidence": [
+      "K811",
+      "K41",
+      "Gemini_suggestion_2"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-04-01T13:45:06.517622"
   }
 ]

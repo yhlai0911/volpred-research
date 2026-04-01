@@ -334,7 +334,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ### Gemini 第 2 次建議（2026-03-31，行為金融 + 方法論 + 實務工具）[提出: Gemini]
 - [ ] **Retail Reflexivity & Gamma-Driven Skew**：0DTE 散戶 flow 導致 delta-hedging 連鎖反應，可能打破 VIX sufficiency。量化 "Volatility Gap"（VIX-implied vs flow-induced realized move）。⚠️ BLOCKED: 需 order flow 數據
 - [ ] **Path Signatures for Rough Volatility**：用 rough path theory 的 signature transform 編碼日內價格路徑的幾何特性，捕捉 HAR 遺漏的路徑依賴性。需 5-min 數據（ETA 04/11）
-- [ ] **Convexity-Adjusted Insurance Premium Tool**：VT 的核心問題是 carry cost。用 Vol-of-Vol 聚類判斷保險是否被高估，建議「Strategic Under-Hedging」在高 VoV-decay 期間回收被拖累的 alpha。可結合 K41 保險費定價（~4%/yr）
+- [x] ~~Convexity-Adjusted Insurance Premium Tool~~ → **K811 完成 混合結果**。VoV-cond 減 40% 保險費，但 binary 版 MDD -59.9%（危機始於低 VoV）。Smooth 版合理（MDD -43.6%）。VoV 預測 MDD (r=-0.17) 但 VIX 更強 (r=-0.38)。實務工具有價值。
 
 ### Gemini 第 1 次建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
 - [x] ~~Taiwan Price Limit Latent Volatility~~ → **K790v2 完成 NULL**：>5% 天數僅 0.9%，GJR asymmetry 已捕捉。DM 全 NS。
