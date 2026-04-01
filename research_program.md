@@ -347,7 +347,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] ~~什麼是好的交易策略？~~ → **K793 完成**：8 維度評估 6 策略。BH 50/50 #1 (75.4), Risk Parity #2 (73.7), Piecewise #3 (54.0，唯一正 stress)。單一 Sharpe 遺漏大量 tradeoffs。
 - [x] **HAR-RV with 5-day RV** [提出: 用戶, 2026-03-31] → **K782 完成**：GJR-GARCH multi-step 在 5d/22d/66d 全勝 HAR。日頻 squared returns 做的 RV 不足以讓 HAR 發揮優勢——需等 5-min 數據。
 - [x] ~~MEM（Multiplicative Error Model）~~ [提出: 用戶] → **K805 完成**：AMEM-r² 數值最佳（QLIKE 1.4689 vs GJR 1.4824）但 DM=-2.19 未通過 Harvey t>3.0。非對稱性（leverage）比模型類別更重要。MEM 不提供超過 GJR 的統計顯著改善。
-- [ ] K501: **SSVS for Return Prediction** [提出: 用戶] — 用陳婉淑方法預測報酬率（不只波動率）。K461 已發現 SPY_ret PIP=1.000 for Taiwan (t=10.81)。**進行中**
+- [x] ~~K501/K818: SSVS for Return Prediction~~ [提出: 用戶] → **K818 完成 NULL for SPY**。OOS R²=-1.47%（EMH barrier）。SSVS 選出 HYG(0.93)+VIX_change(0.78)。台灣 hit 62.1% 但 c2c gap artifact。SSVS 更適合 vol 非 return。
 - [ ] Return prediction → trading strategy pipeline：如果方向準確度 > 55% → 可做 long/short 策略
 - [ ] 跨資產 return prediction：SPY、0050.TW、QQQ
 - [ ] K502: **US→Taiwan Lead-Lag Strategy** [提出: 用戶] — K812 INVALID（Codex 3 HIGH：混合日曆 lag + c2c 隔夜 gap + sanity check 造假）。需 K812v2 用 open-to-close return + 正確日曆對齊。I8 已預示 o2o FAIL。

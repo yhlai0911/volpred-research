@@ -1,0 +1,344 @@
+{
+  "experiment_id": "K818",
+  "title": "SSVS for Return Prediction (ARX model with Gibbs Sampler)",
+  "reference": "So, Chen, Liu (2006) JRSS-C Applied Statistics 55(2):201-224; George & McCulloch (1993) JASA",
+  "prior_work": "K461 (SSVS Taiwan PIP=1.000), K501 (return pred c2c gap issue), K433 (SSVS variance eq)",
+  "attribution": "[提出: 用戶, 執行: Claude]",
+  "hypothesis": "Bayesian SSVS can identify predictive variables for daily returns; if hit rate > 55%, long/short strategy viable",
+  "data": {
+    "asset_primary": "SPY",
+    "asset_extension": "0050.TW",
+    "source": "yfinance",
+    "period": "2007-04-12 to 2026-03-31",
+    "T_total": 4773,
+    "oos_period": "2023-01-01 to 2024-12-31",
+    "T_oos": 501,
+    "candidate_variables": [
+      "VIX",
+      "VIX_change",
+      "SPY_vol_20d",
+      "SPY_mom_5d",
+      "SPY_mom_22d",
+      "TLT_ret",
+      "GLD_ret",
+      "DXY_ret",
+      "HYG_ret",
+      "term_spread"
+    ],
+    "n_candidates": 10
+  },
+  "descriptive_stats": {
+    "mean_pct": 0.04671755941527466,
+    "std_pct": 1.2461486443465934,
+    "skewness": 0.008446930503495107,
+    "excess_kurtosis": 14.464067543058764,
+    "adf_stat": -23.69644436206,
+    "adf_p": 0.0,
+    "arch_lm_stat": 1114.0884951643682,
+    "arch_lm_p": 1.1888426458543867e-238
+  },
+  "mcmc_settings": {
+    "n_iterations_full": 10000,
+    "n_burnin_full": 2000,
+    "n_iterations_refit": 5000,
+    "n_burnin_refit": 1000,
+    "c_spike": 0.01,
+    "p_prior": 0.5,
+    "tau_source": "10x OLS standard errors",
+    "refit_interval": 63,
+    "method": "Gibbs Sampler (conjugate Normal-InverseGamma)"
+  },
+  "pip_table_insample": {
+    "VIX": {
+      "PIP": 0.076375,
+      "beta_posterior_mean": 0.00042979938776820337,
+      "beta_posterior_std": 0.0019786476695125613,
+      "OLS_coef": 0.009194610703499632,
+      "OLS_t": 1.636746520757638,
+      "selected_median": false
+    },
+    "VIX_change": {
+      "PIP": 0.782625,
+      "beta_posterior_mean": -0.008438947524601038,
+      "beta_posterior_std": 0.005683681847999723,
+      "OLS_coef": -0.011683682915972427,
+      "OLS_t": -2.8270392013207704,
+      "selected_median": true
+    },
+    "SPY_vol_20d": {
+      "PIP": 0.07725,
+      "beta_posterior_mean": -0.0002453965953128662,
+      "beta_posterior_std": 0.0014686320132893604,
+      "OLS_coef": -0.007211960926826672,
+      "OLS_t": -1.6642570115232476,
+      "selected_median": false
+    },
+    "SPY_mom_5d": {
+      "PIP": 0.116125,
+      "beta_posterior_mean": -0.0009887599117633765,
+      "beta_posterior_std": 0.0044708528485107035,
+      "OLS_coef": 0.001494752756407744,
+      "OLS_t": 0.12854905258103255,
+      "selected_median": false
+    },
+    "SPY_mom_22d": {
+      "PIP": 0.107,
+      "beta_posterior_mean": -0.000472728786482639,
+      "beta_posterior_std": 0.0020333217367266786,
+      "OLS_coef": -0.004170078858438137,
+      "OLS_t": -0.7422673645801734,
+      "selected_median": false
+    },
+    "TLT_ret": {
+      "PIP": 0.019875,
+      "beta_posterior_mean": 6.553652615604398e-05,
+      "beta_posterior_std": 0.034576732550401015,
+      "OLS_coef": 0.46897944423223364,
+      "OLS_t": 1.5990489733728979,
+      "selected_median": false
+    },
+    "GLD_ret": {
+      "PIP": 0.1605,
+      "beta_posterior_mean": -0.0039175487410464714,
+      "beta_posterior_std": 0.01176983060454115,
+      "OLS_coef": -0.029569793025046295,
+      "OLS_t": -1.3171937603338113,
+      "selected_median": false
+    },
+    "DXY_ret": {
+      "PIP": 0.083125,
+      "beta_posterior_mean": -3.251240434963319e-05,
+      "beta_posterior_std": 0.01471355546389748,
+      "OLS_coef": -0.006278805054756936,
+      "OLS_t": -0.12219293041268821,
+      "selected_median": false
+    },
+    "HYG_ret": {
+      "PIP": 0.93475,
+      "beta_posterior_mean": 0.14754174692181588,
+      "beta_posterior_std": 0.0618062579742407,
+      "OLS_coef": 0.14833230272195852,
+      "OLS_t": 2.866193549843415,
+      "selected_median": true
+    },
+    "term_spread": {
+      "PIP": 0.018625,
+      "beta_posterior_mean": -0.006906865084386159,
+      "beta_posterior_std": 0.03604683856248197,
+      "OLS_coef": -0.49035618216657,
+      "OLS_t": -1.5995895924023353,
+      "selected_median": false
+    }
+  },
+  "median_model_vars": [
+    "VIX_change",
+    "HYG_ret"
+  ],
+  "oos_metrics": {
+    "SSVS": {
+      "MSE": 0.6603210077697842,
+      "MAE": 0.6190835759318859,
+      "R2_OOS": -0.014711260312212815,
+      "hit_rate": 0.5389221556886228,
+      "hit_rate_nonzero": 0.5389221556886228,
+      "n_correct": 270,
+      "n_total": 501,
+      "binomial_p": 0.08143996202303105
+    },
+    "AR1": {
+      "MSE": 0.6672073411749718,
+      "MAE": 0.6237734572847649,
+      "R2_OOS": -0.025293446803762665,
+      "hit_rate": 0.5189620758483033,
+      "hit_rate_nonzero": 0.5189620758483033,
+      "n_correct": 260,
+      "n_total": 501,
+      "binomial_p": 0.3959606468313166
+    },
+    "HistMean": {
+      "MSE": 0.653468432408516,
+      "MAE": 0.6130146289600017,
+      "R2_OOS": -0.004180949600606443,
+      "hit_rate": 0.5748502994011976,
+      "hit_rate_nonzero": 0.5748502994011976,
+      "n_correct": 288,
+      "n_total": 501,
+      "binomial_p": 0.000805921852496505
+    }
+  },
+  "dm_tests": {
+    "SSVS_vs_AR1": {
+      "stat": -1.3952382800774448,
+      "p": 0.16294399702719886,
+      "winner": "SSVS",
+      "harvey_pass": false
+    },
+    "SSVS_vs_Mean": {
+      "stat": 1.0478983895747644,
+      "p": 0.2946854243333239,
+      "winner": "Mean",
+      "harvey_pass": false
+    },
+    "AR1_vs_Mean": {
+      "stat": 2.0699898307871782,
+      "p": 0.03845329676374365,
+      "winner": "Mean",
+      "harvey_pass": false
+    }
+  },
+  "strategy_performance": {
+    "LS_SSVS_10bps": {
+      "Sharpe": -0.3553242481481256,
+      "Sharpe_BH": 1.8676192003713608,
+      "total_return_pct": -9.259701450267013,
+      "total_return_BH_pct": 47.5479834561217,
+      "MDD_pct": -16.282763875447053,
+      "MDD_BH_pct": -10.316183076122833,
+      "win_rate": 0.46107784431137727,
+      "n_trades": 237,
+      "total_tx_cost_pct": 47.3
+    },
+    "LS_AR1_10bps": {
+      "Sharpe": -1.475936432713453,
+      "Sharpe_BH": 1.8676192003713608,
+      "total_return_pct": -38.325875390020876,
+      "total_return_BH_pct": 47.5479834561217,
+      "MDD_pct": -42.39037297184373,
+      "MDD_BH_pct": -10.316183076122833,
+      "win_rate": 0.4411177644710579,
+      "n_trades": 215,
+      "total_tx_cost_pct": 42.9
+    },
+    "LO_SSVS_10bps": {
+      "Sharpe": 0.8864004352073399,
+      "Sharpe_BH": 1.8676192003713608,
+      "total_return_pct": 19.094141002927337,
+      "total_return_BH_pct": 47.5479834561217,
+      "MDD_pct": -6.928870662229421,
+      "MDD_BH_pct": -10.316183076122833,
+      "win_rate": 0.36726546906187624,
+      "n_trades": 237,
+      "total_tx_cost_pct": 23.7
+    },
+    "LO_AR1_10bps": {
+      "Sharpe": 0.20712468697347142,
+      "Sharpe_BH": 1.8676192003713608,
+      "total_return_pct": 4.561054033050407,
+      "total_return_BH_pct": 47.5479834561217,
+      "MDD_pct": -11.203377038001591,
+      "MDD_BH_pct": -10.316183076122833,
+      "win_rate": 0.3712574850299401,
+      "n_trades": 215,
+      "total_tx_cost_pct": 21.5
+    },
+    "LS_SSVS_20bps": {
+      "Sharpe": -2.098181666844589,
+      "Sharpe_BH": 1.8676192003713608,
+      "total_return_pct": -56.559701450267006,
+      "total_return_BH_pct": 47.5479834561217,
+      "MDD_pct": -60.482763875447034,
+      "MDD_BH_pct": -10.316183076122833,
+      "win_rate": 0.42714570858283435,
+      "n_trades": 237,
+      "total_tx_cost_pct": 94.6
+    }
+  },
+  "rolling_hit_rate": {
+    "window": 63,
+    "mean": 0.5353798315073941,
+    "std": 0.0445281895631958,
+    "min": 0.42857142857142855,
+    "max": 0.6507936507936508,
+    "pct_above_55": 42.8246013667426,
+    "pct_above_50": 77.90432801822324
+  },
+  "taiwan_extension": {
+    "n_obs": 480,
+    "hit_rate": 0.6208333333333333,
+    "R2_OOS": 0.14233001560017355,
+    "LS_Sharpe": 3.689332572867239,
+    "BH_Sharpe": 1.7335425185023436,
+    "pip_table": {
+      "VIX": {
+        "PIP": 0.160375,
+        "OLS_coef": 0.006830845132010159,
+        "OLS_t": 1.188024384970424,
+        "selected_median": false
+      },
+      "VIX_change": {
+        "PIP": 1.0,
+        "OLS_coef": -0.028929200241398258,
+        "OLS_t": -8.614418136042174,
+        "selected_median": true
+      },
+      "SPY_vol_20d": {
+        "PIP": 0.071,
+        "OLS_coef": -0.0013806391830650207,
+        "OLS_t": -0.2792907443755618,
+        "selected_median": false
+      },
+      "SPY_mom_5d": {
+        "PIP": 1.0,
+        "OLS_coef": 0.05064948703887936,
+        "OLS_t": 4.3439738419514295,
+        "selected_median": true
+      },
+      "SPY_mom_22d": {
+        "PIP": 0.1205,
+        "OLS_coef": 0.005748765457844054,
+        "OLS_t": 1.095831830176378,
+        "selected_median": false
+      },
+      "TLT_ret": {
+        "PIP": 0.0255,
+        "OLS_coef": -0.44509429581583404,
+        "OLS_t": -1.2799022204140023,
+        "selected_median": false
+      },
+      "GLD_ret": {
+        "PIP": 0.9475,
+        "OLS_coef": 0.07992250768453074,
+        "OLS_t": 3.3354667999138696,
+        "selected_median": true
+      },
+      "DXY_ret": {
+        "PIP": 0.944,
+        "OLS_coef": -0.1557328782052294,
+        "OLS_t": -3.066727628243865,
+        "selected_median": true
+      },
+      "HYG_ret": {
+        "PIP": 1.0,
+        "OLS_coef": 0.37902501844508624,
+        "OLS_t": 7.567667415338454,
+        "selected_median": true
+      },
+      "term_spread": {
+        "PIP": 0.021375,
+        "OLS_coef": 0.42715516603983883,
+        "OLS_t": 1.1771364775792519,
+        "selected_median": false
+      }
+    },
+    "NOTE": "c2c returns include overnight gap — hit rate may overstate tradable accuracy (K501 lesson)"
+  },
+  "signal_lag_verification": {
+    "method": "Predictions use X_{t-1} to predict r_t (built into build_X_matrix)",
+    "strategy": "Position at day t based on prediction from day t-1 data",
+    "tx_cost": "10bps per side",
+    "no_additional_shift_needed": true,
+    "reason": "Prediction function already uses lagged data; signal IS the lagged prediction"
+  },
+  "conclusions": [
+    "In-sample PIP>0.7 variables: ['VIX_change', 'HYG_ret']",
+    "SPY hit rate 53.9% — marginally above random, likely noise",
+    "OOS R²=-0.0147 (negative) — SSVS worse than mean, EMH holds",
+    "DM test SSVS vs AR(1): t=-1.40 — Harvey FAIL (no significant difference)",
+    "L/S SSVS Sharpe -0.3553 <= BH 1.8676 — no alpha from return prediction",
+    "Taiwan: hit rate 62.1%, R²=0.1423, L/S Sharpe 3.6893 (BH 1.7335)",
+    "Taiwan caveat: c2c returns include overnight gap (K501: gap captures 93% of signal)",
+    "VERDICT: Daily return prediction via SSVS faces fundamental EMH barrier for SPY. Variable selection identifies which factors have marginal IS signal, but OOS prediction is near-random.",
+    "Implication: SSVS is better suited for volatility/variance prediction (K484: QLIKE -7.43%) than return prediction."
+  ],
+  "timestamp": "2026-04-01T06:50:16.595692+00:00"
+}

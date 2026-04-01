@@ -19479,5 +19479,19 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-04-01T14:43:18.291207"
+  },
+  {
+    "item_id": "4f54336b",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: \u7528\u6236 (K501), \u57f7\u884c: Claude] K818 SSVS Return Prediction \u2014 SPY NULL (EMH barrier)\n\nGibbs Sampler SSVS for ARX(1) return prediction\u300210 \u5019\u9078\u8b8a\u6578\uff0cexpanding window\u3002\n\nSPY \u7d50\u679c\uff08OOS 2023-2025\uff09\uff1a\n- SSVS \u9078\u51fa 2 \u8b8a\u6578\uff1aVIX_change (PIP=0.78), HYG_ret (PIP=0.93)\n- OOS R\u00b2 = -1.47%\uff08\u6bd4 historical mean \u5dee\uff09\n- Hit rate 53.9%\uff08< 55% \u9580\u6abb\uff09\n- L/S Sharpe = -0.36\uff08BH = 1.87\uff09\n- DM tests \u5168 NS\n\n\u53f0\u7063 0050.TW\uff1a\n- 5 \u8b8a\u6578 PIP>0.9\uff1aVIX_change, SPY_mom_5d, HYG_ret, GLD_ret, DXY_ret\n- Hit rate 62.1%, R\u00b2=14.2%, L/S Sharpe=3.69\n- \u26a0\ufe0f \u4f46\u662f c2c return\uff08\u9694\u591c gap artifact\uff0cK812/K817 \u5df2\u78ba\u8a8d\u4e0d\u53ef\u4ea4\u6613\uff09\n\n\u7d50\u8ad6\uff1a\n1. \u65e5\u983b SPY return prediction \u9762\u81e8 EMH barrier\uff08R\u00b2 negative\uff09\n2. SSVS \u6b63\u78ba\u8b58\u5225\u6709\u4fe1\u865f\u8b8a\u6578\uff08HYG credit spread, VIX fear\uff09\u4f46 OOS \u4e0d work\n3. \u53f0\u7063 lead-lag signal \u771f\u5be6\u5b58\u5728\u4f46 93% \u5728\u9694\u591c gap\n4. SSVS \u66f4\u9069\u5408 vol prediction\uff08K484 QLIKE -7.43%\uff09\u975e return prediction\n\n\u5f85 Codex \u5be9\u67e5\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k818_ssvs_return_prediction.py\n\u7d50\u679c\u6578\u64da: experiments/k818_ssvs_return_prediction_results.json",
+    "evidence": [
+      "K818",
+      "K501",
+      "K461",
+      "K812",
+      "K817"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-04-01T14:51:25.867963"
   }
 ]
