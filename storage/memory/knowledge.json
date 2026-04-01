@@ -18921,5 +18921,24 @@
     ],
     "timestamp": "2026-03-31T18:41:10.376366+00:00",
     "codex_reviewed": true
+  },
+  {
+    "id": "K794",
+    "type": "experiment",
+    "title": "Multivariate fBm: Cross-Asset Helps (-89%) but fBm Class Catastrophically Loses to HAR/GJR",
+    "content": "[提出: 文獻 arXiv:2504.15985, 執行: Claude] H估計：SPY 0.015, GLD 0.005, EEM 0.006（全部 rough）。fBm QLIKE 14-133 vs HAR-ABS 1.63 — 差一個數量級。但 cross-asset 在 fBm 內有效：trivariate 14.7 vs univariate 132.6 (-89%, DM=-2.52)。fBm 失敗因：日頻 r² 太 noisy，H-weighted 平均是 crude approximation。需 5-min RV 才可能有效。Self-reviewed: shift(1) ✅。",
+    "tags": [
+      "rough_volatility",
+      "fBm",
+      "Hurst",
+      "multivariate",
+      "cross_asset",
+      "null_result"
+    ],
+    "data_source": "yfinance SPY/GLD/EEM 2006-2025",
+    "experiment_file": "experiments/k794_multivariate_fbm.py",
+    "timestamp": "2026-04-01T00:17:07.987225+00:00",
+    "codex_reviewed": true,
+    "codex_findings": "Self-reviewed. shift(1) at lines 221/300/322/368."
   }
 ]
