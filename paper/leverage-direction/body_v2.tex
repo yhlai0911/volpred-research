@@ -376,7 +376,9 @@ A further null result clarifies the role of distributional assumptions: changing
 
 \subsubsection{Criterion-Dependent Model Rankings}
 
-The model comparison framework reveals that rankings depend critically on the evaluation criterion. In a comprehensive comparison across seven volatility models (K778/K780), GJR-GARCH dominates on QLIKE($r^2$)---the \citet{patton2011} proxy-robust metric---while AMEM (Asymmetric Multiplicative Error Model) with Gamma-distributed innovations dominates on VaR calibration, achieving a 1\% violation rate of 1.09\% versus the 1\% target. This asymmetry between forecast accuracy and risk management quality has practical implications: practitioners selecting models for VaR compliance should prefer AMEM's Gamma-distributed innovations, which naturally accommodate the right-skewed distribution of volatility, while researchers evaluating point forecast accuracy should use GJR-GARCH as the benchmark. The finding reinforces the three-domain separation in Table~\ref{tab:complexity_ceiling}: the GARCH equation governs QLIKE, the distributional assumption governs VaR, and neither domain's ranking transfers to the other.
+The model comparison framework reveals that rankings depend critically on the evaluation criterion. In a comprehensive comparison across seven volatility models, GJR-GARCH dominates on QLIKE($r^2$)---the \citet{patton2011} proxy-robust metric---while the Asymmetric Multiplicative Error Model (AMEM; \citealt{engle2006}) with Gamma-distributed innovations dominates on VaR calibration, achieving a 1\% violation rate of 1.09\% versus the 1\% target. This asymmetry between forecast accuracy and risk management quality has practical implications: practitioners selecting models for VaR compliance should prefer AMEM's Gamma-distributed innovations, which naturally accommodate the right-skewed distribution of volatility, while researchers evaluating point forecast accuracy should use GJR-GARCH as the benchmark. The finding reinforces the three-domain separation in Table~\ref{tab:complexity_ceiling}: the GARCH equation governs QLIKE, the distributional assumption governs VaR, and neither domain's ranking transfers to the other.
+
+A deeper comparison reveals that \textit{leverage direction}---not model family---is the binding factor for forecast improvement. The AMEM of \citet{engle2006}, which models conditional expected absolute returns $\mu_t = \omega + \alpha |r_{t-1}| + \gamma |r_{t-1}| \mathbf{1}_{[r_{t-1}<0]} + \beta \mu_{t-1}$ with Gamma innovations, represents a fundamentally different model class from GARCH: it targets $|r_t|$ rather than $\sigma^2_t$, uses a multiplicative error structure, and requires no distributional transformation for VaR. Despite these structural differences, AMEM's QLIKE on $r^2$ (1.4689) is statistically indistinguishable from GJR-GARCH (1.4824) by the Diebold-Mariano test (DM $t = -2.19$, NS at the \citealt{harvey2016} $t > 3.0$ threshold). In contrast, asymmetric variants significantly outperform their symmetric counterparts \textit{within} each model family: AMEM versus MEM (DM $t = 3.78$, $p < 0.001$) and GJR-GARCH versus GARCH (DM $t = -4.27$, $p < 0.001$). The common factor driving both improvements is the $\gamma$ term capturing leverage direction, not the choice between variance-targeting and absolute-return-targeting model architectures. This result generalizes the leverage taxonomy beyond the GARCH family: the sign of $\gamma$ is informative regardless of whether the conditional moment being modeled is $\sigma^2_t$ or $E[|r_t|]$.
 
 \subsubsection{Model Selection: Check Gamma, Not Skewness}
 
@@ -487,7 +489,7 @@ Results are robust to rebalancing frequency: monthly and daily rebalancing produ
 
 \subsection{The Complexity Ceiling}
 
-Table~\ref{tab:complexity_ceiling} summarizes nine independent tests showing that increased complexity improves statistical measurement but not investable decisions, across six of seven asset classes.
+Table~\ref{tab:complexity_ceiling} summarizes ten independent tests showing that increased complexity improves statistical measurement but not investable decisions, across six of seven asset classes.
 
 \begin{table}[H]
 \centering
@@ -508,11 +510,14 @@ Fixed 12 $\to$ CDaR-opt $K$ & Nothing & --- & $K=12$ near-optimal \\
 VVIX as VaR indicator & Nothing & --- & AUC $= 0.44$ ($<$ random) \\
 Cross-asset ceiling & 6/7 asset classes & USO borderline & BTC, EEM, TLT confirmed \\
 GJR $\to$ HAR-ABS ($|r_t|$) & QLIKE ($-67\%$, DM $-15.45$) & VT Sharpe (worst) & 7/7 assets, \S\ref{sec:har_paradox} \\
+GARCH $\to$ MEM/AMEM & Nothing (NS) & --- & DM $t = -2.19$; leverage, not model class \\
 \hline
 \end{tabular}
 \end{table}
 
 Three orthogonal domains emerge: (i) the \textit{GARCH equation} determines volatility forecast accuracy (QLIKE), where GJR-GARCH defines a daily-frequency floor; (ii) the \textit{distributional assumption} determines tail risk coverage (VaR), where Skewed Student-$t$ and FHS are optimal; (iii) the \textit{signal source} determines strategy performance, where VIX-implied volatility dominates via the embedded variance risk premium.
+
+The last row of Table~\ref{tab:complexity_ceiling} is particularly instructive: switching from the GARCH family to the Multiplicative Error Model (MEM) family of \citet{engle2006}---a structurally different framework that models conditional expected absolute returns with Gamma-distributed multiplicative innovations---yields no significant improvement. The AMEM achieves QLIKE $= 1.4689$ on $r^2$ versus GJR-GARCH's $1.4824$ (DM $t = -2.19$, not significant at the Harvey $t > 3.0$ threshold). Yet within each family, the asymmetric variant significantly dominates its symmetric counterpart: AMEM versus MEM (DM $t = 3.78$, exceeding the Harvey threshold) and GJR-GARCH versus GARCH (DM $t = -4.27$). This pattern---asymmetry matters, model family does not---provides the strongest evidence that the $\gamma$ leverage term, rather than any particular parameterization of the conditional moment, is the active ingredient in volatility forecast improvement at daily frequency.
 
 Notably, VIX bridges domains (i) and (iii): when incorporated into the variance equation of GJR-GARCH-X, it substantially improves QLIKE (Section~4.5), while simultaneously dominating as a strategy signal. This dual role---variance equation predictor and strategy signal---is consistent with VIX's status as a sufficient statistic.
 
