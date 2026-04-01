@@ -100,9 +100,10 @@ For each out-of-sample date $t$, we estimate the model using data from $t-w$ to 
 
 \subsubsection{Statistical Loss Functions}
 
-The primary evaluation metric is the QLIKE loss function (Patton, 2011):
+The primary evaluation metric is the QLIKE loss function \citep{patton2011}, defined as the Gaussian quasi-log-likelihood contribution:\footnote{This formulation is equivalent to $-\ln f(r_t \mid \hat{\sigma}^2_t)$ under Gaussian quasi-likelihood, up to an additive constant. Values are negative for daily returns because $\ln \hat{\sigma}^2_t \approx \ln(10^{-4}) \approx -9.2$. \textbf{Lower (more negative) values indicate better forecasts.} An alternative convention in the literature defines the Patton (2011) centered loss as $L^*(\sigma^2, h) = \sigma^2/h - \ln(\sigma^2/h) - 1$, which produces values centered near 1.0. Both formulations preserve forecast rankings; we adopt the quasi-log-likelihood form throughout Tables~\ref{tab:qlike}--\ref{tab:window} for consistency with maximum likelihood estimation.}
 \begin{equation}
 \text{QLIKE} = \frac{1}{T} \sum_{t=1}^{T} \left( \frac{r^2_t}{\hat{\sigma}^2_t} + \ln \hat{\sigma}^2_t \right)
+\label{eq:qlike}
 \end{equation}
 
 QLIKE is robust to noise in the realized variance proxy and ranks forecasts consistently regardless of the proxy used, provided the proxy has equal bias across models.
@@ -340,7 +341,7 @@ A comprehensive ablation of twelve alternatives confirms this diagnostic (Table~
 
 The sole exception involves implied volatility in the \textit{variance equation}. Including VIX in the \textit{mean equation} yields no improvement---SSVS consistently selects the empty model. However, GJR-GARCH-X with VIX in the variance equation ($\sigma^2_t = \omega + \alpha \varepsilon^2_{t-1} + \gamma \varepsilon^2_{t-1} \mathbf{1}_{[\varepsilon_{t-1}<0]} + \beta \sigma^2_{t-1} + \delta \text{VIX}^2_{t-1}$) achieves $-17.4\%$ QLIKE improvement (DM $t = -2.93$, $p < 0.01$, confirmed across five cross-OOS periods). VIX9D (9-day) further outperforms VIX (DM $t = 6.63$), consistent with closer horizon matching. This demonstrates that the ceiling applies to \textit{return-based} models; implied volatility provides forward-looking information the variance equation can exploit.
 
-Three parameters ($\omega$, $\alpha+\gamma$, $\beta$) suffice for all exploitable variance autocorrelation in daily returns. Overnight returns contribute 44.3\% of total variance, confirming return-based models process all available daily information. The practical ceiling is QLIKE $\approx -9.034$ for SPY with GJR-GARCH(1,1), $w = 504$.
+Three parameters ($\omega$, $\alpha+\gamma$, $\beta$) suffice for all exploitable variance autocorrelation in daily returns. Overnight returns contribute 44.3\% of total variance, confirming return-based models process all available daily information. The practical ceiling is QLIKE $\approx -9.034$ for SPY with GJR-GARCH(1,1), $w = 504$ (quasi-log-likelihood scale per Eq.~\eqref{eq:qlike}; the equivalent Patton centered loss is $\approx 1.47$).
 
 \subsubsection{Mincer-Zarnowitz Forecast Evaluation}
 
@@ -575,7 +576,7 @@ Taken together, these results suggest that VIX subsumes the volatility-relevant 
 \subsection{The HAR Paradox: Prediction Superiority Without Economic Improvement}
 \label{sec:har_paradox}
 
-HAR with absolute returns ($|r_t|$) achieves QLIKE of 0.49 versus GJR-GARCH's 1.51 (DM $= -15.45$, $p < 0.001$). This result is universal: HAR-ABS outperforms GJR-GARCH in all seven markets tested (SPY, QQQ, EFA, EWZ, GLD, TLT, 0050.TW), with DM statistics from $-11.11$ to $-21.74$, all at $p < 0.001$. The proxy choice is decisive: HAR with $r^2_t$ produces QLIKE $= 1.57$, \textit{worse} than GJR---a threefold swing from the same model structure.
+HAR with absolute returns ($|r_t|$) achieves QLIKE of 0.49 versus GJR-GARCH's 1.51 (DM $= -15.45$, $p < 0.001$).\footnote{The HAR comparison uses the Patton (2011) centered QLIKE loss, $L^*(\sigma^2, h) = \sigma^2/h - \ln(\sigma^2/h) - 1$, which produces values centered near 1.0. This differs from the quasi-log-likelihood formulation in Eq.~\eqref{eq:qlike} used in Tables~\ref{tab:qlike}--\ref{tab:window} (values near $-9.0$). The two formulations are order-preserving: model rankings are identical under both conventions. The centered form is used here because HAR targets $|r_t|$ rather than $r^2_t$, making the quasi-log-likelihood scale inapplicable.} This result is universal: HAR-ABS outperforms GJR-GARCH in all seven markets tested (SPY, QQQ, EFA, EWZ, GLD, TLT, 0050.TW), with DM statistics from $-11.11$ to $-21.74$, all at $p < 0.001$. The proxy choice is decisive: HAR with $r^2_t$ produces QLIKE $= 1.57$, \textit{worse} than GJR---a threefold swing from the same model structure.
 
 Yet HAR-ABS produces the \textit{lowest} VT Sharpe (1.12 vs.\ 1.75 for 12/VIX) with $1.9\times$ higher turnover and weight correlation of only 0.51 with 12/VIX. The resolution: HAR is backward-looking, optimally aggregating historical magnitudes at daily, weekly, and monthly horizons. VIX is forward-looking, embedding the variance risk premium. For \textit{measurement}, backward aggregation is superior; for \textit{allocation}, forward-looking risk pricing is irreplaceable. This is the fifth independent confirmation of the prediction$\neq$application paradox in our analysis, sharpening rather than refuting the complexity ceiling.
 
