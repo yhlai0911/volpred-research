@@ -1,21 +1,21 @@
 {
-  "timestamp": "2026-04-01T06:15:00Z",
+  "timestamp": "2026-04-01T18:03:11Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "20 draft articles in storage/reports/feed.json (threshold: <3). Pool is healthy."
+      "detail": "12 draft articles in storage/reports/feed.json (threshold: >=3). Pool is healthy."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json is 0.01 hours old (threshold: >26 hours). Metrics are current."
+      "detail": "storage/strategy_metrics.json is ~17 seconds old (threshold: >26 hours). Metrics are current."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Most recent entry dated 2026-03-31 (yesterday): 'Session Cron 空轉 6-8 小時 — Claude only did status checks for ~30 consecutive cron triggers, never launched experiments. Root cause: missing anti-idle rules and weak cron prompts. Fix: CLAUDE.md updated with anti-idle rules + cron prompt strengthened.'"
+      "detail": "Most recent entry dated 2026-03-31 (yesterday): Session Cron 空轉 6-8 小時 — Claude only did status checks for ~30 consecutive cron triggers, never launched experiments. Root cause: missing anti-idle rules and weak cron prompts. Fix: CLAUDE.md updated with anti-idle rules + cron prompt strengthened."
     },
     {
       "name": "PAPER_TRADING_GAPS",
@@ -30,7 +30,7 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1625 entries in storage/memory/knowledge.json."
+      "detail": "1626 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": []
