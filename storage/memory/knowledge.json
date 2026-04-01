@@ -19465,5 +19465,19 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-04-01T14:39:11.510675"
+  },
+  {
+    "item_id": "4be5f4ad",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Gemini #1, \u57f7\u884c: Claude] K817 VIX\u2192Taiwan Spillover Strategy \u2014 NULL\n\nVIX spike/level + SPY crash \u4fe1\u865f\u4ea4\u6613 0050.TW\u3002\u4f7f\u7528 open-to-close returns\uff08\u907f\u514d K812 \u7684\u9694\u591c gap artifact\uff09\u3002\n\n\u5168\u671f\u9593 Sharpe\uff082009-2026, 4215 \u53f0\u7063\u4ea4\u6613\u65e5\uff09\uff1a\n- BH 0050: 0.14, VIX Spike Guard: 0.11\uff08\u66f4\u5dee\uff09, VIX Level: 0.21, SPY Crash: 0.14\n- Combined VIX+SPY: 0.24, 8.63/VIX: 0.24\uff08\u6700\u4f4e MDD -21.2%\uff09\n- DM tests \u5168 NS\uff0cCross-OOS \u6700\u591a 2/4\n\nSpillover timing\uff08open-to-close\uff09\uff1a\n- VIX spike >15% \u5f8c OTC: mean +0.003%\uff08vs \u975e\u4e8b\u4ef6 +0.012%\uff09\uff0ct=-0.089 (NS)\n- SPY crash <-2% \u5f8c OTC: mean -0.048%\uff0ct=-0.568 (NS)\n- \u4fe1\u865f\u4e0d\u9810\u6e2c\u986f\u8457\u7684 OTC return\n\n\u7d50\u8ad6\uff1a\n1. Spillover \u5b58\u5728\uff08T5b r=0.376\uff09\u4f46\u4e0d\u53ef\u7528 OTC return \u4ea4\u6613\n2. 77-93% lead-lag alpha \u5728\u9694\u591c gap\uff08K812/I8 \u5df2\u9810\u793a\uff09\n3. 8.63/VIX smooth VT \u4ecd\u662f\u6700\u4f73\u53f0\u7063\u7b56\u7565\n4. Binary switching \u589e\u52a0 TX cost \u7121\u56de\u5831\n\n\u5f85 Codex \u5be9\u67e5\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k817_vix_taiwan_spillover.py\n\u7d50\u679c\u6578\u64da: experiments/k817_vix_taiwan_spillover_results.json",
+    "evidence": [
+      "K817",
+      "K796",
+      "K812",
+      "I8",
+      "T5b"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-01T14:43:18.291207"
   }
 ]
