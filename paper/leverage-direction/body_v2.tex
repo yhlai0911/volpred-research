@@ -215,6 +215,11 @@ Using optimal GARCH specifications (Section 4.3) with Normal distribution VaR, w
 
 VaR method ranking is \textbf{criterion-dependent}. Under Kupiec unconditional coverage, skewed-$t$ performs best (7/7 assets pass); under the Trinity criterion (Kupiec + Christoffersen + DQ), FHS leads (7/7); under Fissler-Ziegel joint loss, Normal is most capital-efficient. Table~\ref{tab:var_panel} presents the comprehensive panel (7 assets $\times$ 5 methods $\times$ 3 $\alpha$ levels = 105 cells): skewed-$t$ and FHS share the highest Trinity pass rate at 76.2\% (16/21). TLT fails all five methods---its near-zero asymmetry and regime-dependent volatility produce systematic under-violation. VaR method suitability is driven by volatility regime stability rather than skewness: an initial cross-sectional association ($\rho = -0.636$, $N = 12$) did not survive expansion to $N = 21$ ($\rho = -0.086$, $p = 0.71$). This reinforces the complexity ceiling: the most impactful improvement is the simplest.
 
+% v2-NEW-H1: Orthogonality of GARCH equation and distributional assumption (K799/K802)
+A sharper demonstration of domain orthogonality emerges when we cross the GARCH equation choice with the distributional assumption. Table~\ref{tab:var_ortho} reports VaR 1\% backtesting results for SPY over 2023--2024 (502 trading days) under three configurations. GARCH(1,1) with Normal innovations produces 7 violations (1.39\%, Kupiec $p = 0.40$, Basel Green Zone)---a comfortable pass. Switching to GJR-GARCH---which dominates on QLIKE ($-3.8\%$, DM $p = 0.001$)---raises violations to 10 (1.99\%, Kupiec $p = 0.049$), a borderline failure. The mechanism is straightforward: GJR's asymmetric response to negative returns generates higher conditional variance during stress periods; under Normal quantiles, the fatter conditional tails produce excess VaR exceedances that the thin-tailed Normal $z$-score cannot accommodate.
+
+Crucially, replacing the Normal with Student-$t$ (df=5) innovations \textit{under the same GJR-GARCH equation} reduces violations to 6 (1.20\%, Kupiec $p = 0.60$, Basel Green Zone). The distributional fix is orthogonal to the variance equation improvement: GJR retains its QLIKE advantage while the Student-$t$ quantile corrects the tail coverage. This confirms that \textbf{the GARCH equation and the distributional assumption constitute independent, non-transferable optimization domains}. Improving one dimension (variance dynamics via GJR) can degrade another (tail quantiles under Normal) unless both are jointly calibrated. The practical implication is clear: practitioners who adopt GJR-GARCH for its forecast superiority \textit{must} simultaneously upgrade to fat-tailed innovations---failing to do so converts a QLIKE improvement into a VaR compliance failure.
+
 \begin{figure}[H]
 \centering
 \includegraphics[width=0.95\textwidth]{fig_rolling_gamma.pdf}
@@ -372,7 +377,7 @@ A notable shift in cross-asset dependence occurred post-2022: the SPY--TLT corre
 
 Our VaR attribution analysis carries a practical message for risk managers: the largest improvements in Basel III compliance come from the simplest adjustment---using Student-$t$ instead of Normal quantiles. This pushes back against the trend toward increasingly complex tail-risk models. The Student-$t$ correction addresses the fundamental problem (fat tails) directly, while more sophisticated approaches capture second-order effects that are empirically negligible.
 
-A further null result clarifies the role of distributional assumptions: changing the innovation distribution materially affects VaR performance but does not affect QLIKE rankings (DM $p = 0.56$). This separation is economically intuitive: QLIKE evaluates second-moment forecasting, whereas VaR depends on tail quantiles.
+A further null result clarifies the role of distributional assumptions: changing the innovation distribution materially affects VaR performance but does not affect QLIKE rankings (DM $p = 0.56$). This separation is economically intuitive: QLIKE evaluates second-moment forecasting, whereas VaR depends on tail quantiles. The orthogonality is starkly demonstrated when GJR-GARCH---the QLIKE-optimal equation---produces a borderline VaR failure under Normal innovations (10/502 violations, Kupiec $p = 0.049$), while symmetric GARCH passes comfortably (7/502, $p = 0.40$). Restoring compliance requires only a distributional upgrade: GJR-GARCH with Student-$t$(df=5) achieves 6/502 violations ($p = 0.60$), retaining the forecast advantage while satisfying risk management constraints (Table~\ref{tab:var_ortho}). The lesson is that optimizing the variance equation and the distributional assumption are independent tasks that must be pursued jointly.
 
 \subsubsection{Criterion-Dependent Model Rankings}
 
@@ -500,7 +505,7 @@ Table~\ref{tab:complexity_ceiling} summarizes ten independent tests showing that
 \hline
 Complexity Step & What Improves & What Does Not & Evidence \\
 \hline
-GARCH $\to$ GJR-GARCH & QLIKE ($-3.8\%$) & VaR, Strategy & MCS $p=0.044$ \\
+GARCH $\to$ GJR-GARCH & QLIKE ($-3.8\%$) & VaR (Normal: degrades) & MCS $p=0.044$; Tab.~\ref{tab:var_ortho} \\
 Normal $\to$ Skewed-$t$ & VaR (6/6 Kupiec) & QLIKE ($+0.06\%$, NS) & DM $p=0.56$ \\
 GJR $\to$ MIDAS/MS/CARR & Nothing (OOS) & --- & 5 models $\times$ 4 vars \\
 Naive $\to$ DCC(1,1) & VaR (Kupiec pass) & 2-asset allocation & Analytical: $\rho$ cancels \\
@@ -515,7 +520,7 @@ GARCH $\to$ MEM/AMEM & Nothing (NS) & --- & DM $t = -2.19$; leverage, not model 
 \end{tabular}
 \end{table}
 
-Three orthogonal domains emerge: (i) the \textit{GARCH equation} determines volatility forecast accuracy (QLIKE), where GJR-GARCH defines a daily-frequency floor; (ii) the \textit{distributional assumption} determines tail risk coverage (VaR), where Skewed Student-$t$ and FHS are optimal; (iii) the \textit{signal source} determines strategy performance, where VIX-implied volatility dominates via the embedded variance risk premium.
+Three orthogonal domains emerge: (i) the \textit{GARCH equation} determines volatility forecast accuracy (QLIKE), where GJR-GARCH defines a daily-frequency floor; (ii) the \textit{distributional assumption} determines tail risk coverage (VaR), where Skewed Student-$t$ and FHS are optimal; (iii) the \textit{signal source} determines strategy performance, where VIX-implied volatility dominates via the embedded variance risk premium. The orthogonality between domains (i) and (ii) is directly quantified in Table~\ref{tab:var_ortho}: GJR-GARCH wins QLIKE but \textit{fails} VaR under Normal innovations, while the distributional upgrade to Student-$t$ restores compliance without affecting forecast accuracy. Gains in one domain do not transfer---and can actively harm---performance in another.
 
 The last row of Table~\ref{tab:complexity_ceiling} is particularly instructive: switching from the GARCH family to the Multiplicative Error Model (MEM) family of \citet{engle2006}---a structurally different framework that models conditional expected absolute returns with Gamma-distributed multiplicative innovations---yields no significant improvement. The AMEM achieves QLIKE $= 1.4689$ on $r^2$ versus GJR-GARCH's $1.4824$ (DM $t = -2.19$, not significant at the Harvey $t > 3.0$ threshold). Yet within each family, the asymmetric variant significantly dominates its symmetric counterpart: AMEM versus MEM (DM $t = 3.78$, exceeding the Harvey threshold) and GJR-GARCH versus GARCH (DM $t = -4.27$). This pattern---asymmetry matters, model family does not---provides the strongest evidence that the $\gamma$ leverage term, rather than any particular parameterization of the conditional moment, is the active ingredient in volatility forecast improvement at daily frequency.
 
