@@ -483,12 +483,15 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 | 任務 | SPY | Other equity | Non-equity | Taiwan |
 |------|-----|-------------|------------|--------|
 | **Forecasting** | **GJR-X(VIX9D) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
-| **VaR** | **GJR-X(VIX)** | GJR-X(VIX) | GJR alone | GJR-SkewT |
-| **VT Strategy** | 12/VIX | 12/VIX adapted | Asset-specific | 8.63/VIX |
+| **VaR** | **GJR + Student-t ★★★** | GJR + Student-t | GJR + Student-t | GJR + Student-t |
+| **VT Strategy** | 12/VIX（#9 irreducible） | 12/VIX adapted | Asset-specific | 8.63/VIX |
 
-**最終最佳模型**：GJR-GARCH-X(VIX9D) — Forecasting QLIKE -17.7%, delta CV=0.08 (ultra-stable)。
-
-**★★★ K799-K802 最終結論（2026-04-01）：GJR + Skewed-t = 真正的雙冠王**
+**★★★ K799-K804 最終結論（2026-04-01）：**
+- **預測選模型**：GJR-GARCH（QLIKE #1，DM vs GARCH t=-3.25 Harvey PASS）
+- **風險管理選分配**：Student-t/Skewed-t（VaR Trinity PASS，df=5-8 for equity）
+- **兩個維度獨立選擇** — 預測精度和風險管理是正交問題
+- K804 跨資產驗證：equity/commodity 3/4 PASS，BTC 例外（右偏需不同分配）
+- K800 conformal 是 artifact（Codex 抓到），K802 分配修正才是正解
 - K799：六層評估發現 GJR QLIKE #1 但 VaR Normal FAIL（1.79%）。MCS 含全部 5 模型。
 - K800：Conformal heuristic 看似修復（0.80%）→ K800v2 推翻（artifact，Codex 抓到）
 - **K802：正確解法 = GJR + Skewed-t/Student-t 分配**。QLIKE 不變 + VaR 1.20% Trinity PASS。
