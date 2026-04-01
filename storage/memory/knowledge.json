@@ -18956,5 +18956,21 @@
     "timestamp": "2026-04-01T00:24:48.365792+00:00",
     "codex_reviewed": true,
     "codex_findings": "Agent self-review: 2 HIGH (pre-GLD, TX), 1 MEDIUM (vintage). BLOCKED: FRED timeout."
+  },
+  {
+    "id": "K797",
+    "type": "experiment",
+    "title": "KAN-GARCH: ⚠️ INVALID — Negative QLIKE values (code bug)",
+    "content": "[提出: 文獻, 執行: Claude] KAN QLIKE=-0.31, MLP QLIKE=-88.38 — QLIKE 定義域是 [0,∞)，負值 = 代碼 bug。DM=135/1544 荒謬。可能 QLIKE 公式錯誤或預測值有問題。需 debug 重跑。",
+    "tags": [
+      "KAN",
+      "GARCH",
+      "ML",
+      "invalid",
+      "code_bug"
+    ],
+    "experiment_file": "experiments/k797_kan_garch.py",
+    "timestamp": "2026-04-01T00:54:39.740466+00:00",
+    "codex_reviewed": false
   }
 ]
