@@ -486,7 +486,14 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 | **VaR** | **GJR-X(VIX)** | GJR-X(VIX) | GJR alone | GJR-SkewT |
 | **VT Strategy** | 12/VIX | 12/VIX adapted | Asset-specific | 8.63/VIX |
 
-**最終最佳模型**：GJR-GARCH-X(VIX9D) — Forecasting QLIKE -17.7%, VaR Trinity 3/3, delta CV=0.08 (ultra-stable)。日頻方向已完全飽和，下一突破需 5-min HAR-RV（ETA 2026-04-11）。
+**最終最佳模型**：GJR-GARCH-X(VIX9D) — Forecasting QLIKE -17.7%, delta CV=0.08 (ultra-stable)。
+
+**⚠️ K799/K800 更新（2026-04-01）：GJR + Conformal VaR = 所有指標全勝**
+- K799：六層評估發現 GJR QLIKE #1 但 VaR 1% FAIL（1.99% 違規率）。MCS 含全部 5 模型。
+- K800：Conformal simple calibration 修復 VaR（0.80%，Trinity PASS），QLIKE 不變。
+- **新推薦**：GJR + conformal 用於風險管理，raw GJR 用於純預測。
+- 待驗證：跨資產（0050.TW, QQQ, GLD）conformal 效果
+- 待整合進 Paper 1 和 Paper 5
 
 ## 重大研究結論更新（2026-03-29 K687/K697/K700/K701）
 
