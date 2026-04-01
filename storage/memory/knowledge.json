@@ -19531,5 +19531,19 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-01T15:12:14.894291"
+  },
+  {
+    "item_id": "9c493de6",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: arXiv:2410.00288, \u57f7\u884c: Claude] K816v2 GINN Fixed \u2014 NULL\uff08ML ceiling #6 \u78ba\u8a8d\uff09\n\n\u4fee\u6b63 K816 \u7684 GJR state propagation bug\u3002GJR baseline \u6539\u5584 8.56%\uff081.6023\u21921.4652\uff09\u3002\n\n\u4fee\u6b63\u5f8c QLIKE \u6392\u540d\uff08\u5168\u90e8 NS\uff09\uff1a\n1. GINN-VIX: 1.4504\n2. Pure MLP: 1.4626\n3. GJR-GARCH: 1.4652\n4. GINN: 1.4845\n\nK816 DM=2.96 \u2192 K816v2 DM=0.64\uff08\u5b8c\u5168 NS\uff09\u3002\nK816 \u7684 near-significant \u7d50\u679c 100% \u662f degraded GJR baseline \u9020\u6210\u7684 artifact\u3002\n\nML ceiling \u7b2c 6 \u6b21\u78ba\u8a8d\uff08K426/K784/K797/K816/K816v2/K787\uff09\u3002\n\u6c92\u6709\u4efb\u4f55 NN \u67b6\u69cb\u5728\u6b63\u78ba\u5be6\u4f5c\u4e0b\u986f\u8457\u6253\u6557 GJR-GARCH\u3002\nGJR input \u55ae\u7368 redundant\uff08GINN > Pure MLP\uff09\uff0c\u4f46 GJR+VIX \u7565\u597d\uff08NS\uff09\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k816v2_ginn_fixed.py\n\u7d50\u679c\u6578\u64da: experiments/k816v2_ginn_fixed_results.json",
+    "evidence": [
+      "K816v2",
+      "K816",
+      "K426",
+      "K784",
+      "K797"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-01T15:36:46.728093"
   }
 ]
