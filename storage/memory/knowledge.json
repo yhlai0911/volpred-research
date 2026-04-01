@@ -19099,5 +19099,26 @@
       "skewt_xi_final": 0.996,
       "fhs_quantile_final": -2.74
     }
+  },
+  {
+    "item_id": "k803_vix_ts",
+    "experiment_id": "K803",
+    "category": "strategy_evaluation",
+    "title": "K803: VIX Term Structure Overlay NULL for 12/VIX Strategy",
+    "content": "[提出: User, 執行: Claude] K803 測試 VIX3M/VIX 期限結構比率作為 12/VIX 策略的覆蓋信號。3 個變體：(1) Contango Guard：VIX3M/VIX<0.95 時 weight×0.5；(2) Contango Smooth：weight×min(1, VIX3M/VIX)；(3) Contango Binary：VIX3M/VIX<0.90 時現金 5 天。數據：SPY+^VIX+^VIX3M yfinance 2008-2026，N=4588。全期 Sharpe：Baseline=0.641, Guard=0.684, Smooth=0.649, Binary=0.703。OOS(2023-2024) Sharpe：Baseline=1.194, Guard=1.206, Smooth=1.192, Binary=1.100。HAC NW return-spread t-stats：Guard t=+0.48(NS), Smooth t=-0.25(NS), Binary t=+0.38(NS)，全部低於 Harvey t>3.0 門檻。Term structure 特性：backwardation(VIX3M/VIX<1) 佔 10.4%，backwardation 日 SPY 均報酬=-0.61%（高壓力），contango 日=+0.12%。Binary 策略降低全期 MDD 從 -23.7% 到 -16.4%，但 OOS MDD 反而更差（-12.9% vs -11.1%）。結論：NULL RESULT，第 4 次 VIX TS 覆蓋失敗（T13、N102、N177 皆失敗）。12/VIX 已隱含期限結構信息，額外信號不提供增量。",
+    "tags": [
+      "vix_term_structure",
+      "vt_strategy",
+      "12vix",
+      "null_result",
+      "contango",
+      "backwardation",
+      "harvey_test",
+      "overlay"
+    ],
+    "data_source": "yfinance: SPY, ^VIX, ^VIX3M",
+    "data_period": "2008-01-04 to 2026-03-31",
+    "sample_n": 4588,
+    "created_at": "2026-04-01T11:28:57.013266"
   }
 ]

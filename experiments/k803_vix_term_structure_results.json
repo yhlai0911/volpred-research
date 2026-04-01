@@ -1,0 +1,124 @@
+{
+  "experiment_id": "K803",
+  "title": "VIX Term Structure Spread as VT Overlay Signal",
+  "data_source": "yfinance: SPY, ^VIX, ^VIX3M",
+  "data_period": "2008-01-04 to 2026-03-31",
+  "n_days": 4588,
+  "oos_start": "2023-01-01",
+  "parameters": {
+    "vix_scale": 12.0,
+    "weight_cap": 1.5,
+    "weight_floor": 0.0,
+    "tx_cost": 0.001,
+    "backwardation_guard_threshold": 0.95,
+    "backwardation_binary_threshold": 0.9,
+    "binary_cash_days": 5,
+    "lag": 1
+  },
+  "full_period_metrics": [
+    {
+      "label": "12/VIX (Baseline)",
+      "sharpe": 0.6409,
+      "cagr": 0.0578,
+      "mdd": -0.237,
+      "ann_vol": 0.0948,
+      "n_days": 4588
+    },
+    {
+      "label": "Contango Guard (0.95)",
+      "sharpe": 0.6843,
+      "cagr": 0.0598,
+      "mdd": -0.2102,
+      "ann_vol": 0.091,
+      "n_days": 4588
+    },
+    {
+      "label": "Contango Smooth",
+      "sharpe": 0.6489,
+      "cagr": 0.0578,
+      "mdd": -0.2299,
+      "ann_vol": 0.0933,
+      "n_days": 4588
+    },
+    {
+      "label": "Contango Binary (0.90)",
+      "sharpe": 0.7026,
+      "cagr": 0.0609,
+      "mdd": -0.1638,
+      "ann_vol": 0.0899,
+      "n_days": 4588
+    }
+  ],
+  "oos_metrics": [
+    {
+      "label": "12/VIX (Baseline) [OOS]",
+      "sharpe": 1.1937,
+      "cagr": 0.1116,
+      "mdd": -0.1105,
+      "ann_vol": 0.0922,
+      "n_days": 813
+    },
+    {
+      "label": "Contango Guard (0.95) [OOS]",
+      "sharpe": 1.2058,
+      "cagr": 0.1104,
+      "mdd": -0.1059,
+      "ann_vol": 0.0903,
+      "n_days": 813
+    },
+    {
+      "label": "Contango Smooth [OOS]",
+      "sharpe": 1.192,
+      "cagr": 0.1105,
+      "mdd": -0.1108,
+      "ann_vol": 0.0915,
+      "n_days": 813
+    },
+    {
+      "label": "Contango Binary (0.90) [OOS]",
+      "sharpe": 1.1,
+      "cagr": 0.0999,
+      "mdd": -0.1292,
+      "ann_vol": 0.0903,
+      "n_days": 813
+    }
+  ],
+  "dm_tests_vs_baseline": [
+    {
+      "strategy": "Contango Guard (0.95)",
+      "t_stat": 0.48,
+      "p_value": 0.6312,
+      "significant": false,
+      "test": "HAC NW return-spread t-test (Harvey 2016 t>3.0)"
+    },
+    {
+      "strategy": "Contango Smooth",
+      "t_stat": -0.2544,
+      "p_value": 0.7992,
+      "significant": false,
+      "test": "HAC NW return-spread t-test (Harvey 2016 t>3.0)"
+    },
+    {
+      "strategy": "Contango Binary (0.90)",
+      "t_stat": 0.3828,
+      "p_value": 0.7019,
+      "significant": false,
+      "test": "HAC NW return-spread t-test (Harvey 2016 t>3.0)"
+    }
+  ],
+  "term_structure_stats": {
+    "backwardation_fraction": 0.1037489102005231,
+    "backwardation_days": 476,
+    "mean_spy_ret_backwardation": -0.00610622003149564,
+    "mean_spy_ret_contango": 0.0012416560251376093,
+    "mean_abs_spy_ret_backwardation": 0.02059046863248609,
+    "mean_abs_spy_ret_contango": 0.006544435546435904
+  },
+  "conclusion": "NULL RESULT. Term structure overlays provide no statistically significant improvement. Sharpe: Baseline=0.6409, Guard=0.6843, Smooth=0.6489, Binary=0.7026. DM t-stats all below Harvey threshold.",
+  "references": [
+    "Chang (2016): VIX backwardation predicts monthly SPY returns",
+    "K731 (internal): VIX TS NULL for GARCH-X 1-step forecast",
+    "T13 (internal): Daily TS signal NS on VT (DM t=0.44)",
+    "E037 (internal): VIX level absorbs event overlays \u2014 orthogonality test"
+  ]
+}
