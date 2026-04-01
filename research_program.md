@@ -358,7 +358,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ### Bayesian Subset Selection 方法論（用戶指定，2026-03-26）
 - [ ] K433: **Bayesian SSVS for ARX-GARCH** — So, Chen, Liu (2006) JRSS-C, 55(2), 201-224. Latent binary indicator δ_i + MCMC 從 2^(p+q) 子集空間搜索最優外生變數組合。比 K113 逐一測試更有力。**進行中**
 - [ ] K431: **Smooth Transition GARCH (STGARCH)** — González-Rivera (1998), Hagerud (1997). 允許 GARCH 參數漸進轉換（VIX 作為 transition variable）。K427 發現結構性斷裂，ST 可能比 abrupt switch 更合適。**進行中**
-- [ ] K432: **Bayesian MCMC GARCH** — 用 Metropolis-Hastings 估計 GJR-GARCH 後驗分布，量化參數不確定性。比 MLE 點估計更穩健。**進行中**
+- [x] ~~K432/K814: Bayesian MCMC GARCH~~ → **K814 完成**。MLE QLIKE 勝 Bayesian（1.4629 vs 1.4651），但 Bayesian 揭示 alpha CV=0.367（不穩定）、gamma P(>0)=1.0000（最強 leverage 證據）。方法論貢獻：參數可信度量化。
 - [ ] Bayesian Subset Selection for TARMA — Chen, Liu, Gerlach (2011) Computational Statistics, 26, 1-30. 擴展 SSVS 到 threshold + MA terms，16M+ 可能子集
 - [ ] Threshold Variable Selection for Asymmetric SV — Chen, Liu, So (2013) Computational Statistics, 28, 2415-2447. Combined threshold variable Z_t = Σω_i Z_i，同時選 threshold 變數和模型結構。五個亞洲市場實證
 - [ ] SSVS for Variance Equation — 將 SSVS 擴展到 variance equation（GARCH-X 的 variance side 加外生變數），目前 K433 只處理 mean equation

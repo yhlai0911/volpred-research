@@ -19370,5 +19370,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-01T14:05:00.339371"
+  },
+  {
+    "item_id": "2ad825a5",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: \u7528\u6236 (K432), \u57f7\u884c: Claude] K814 Bayesian MCMC GJR-GARCH \u2014 MLE \u52dd\u9810\u6e2c\uff0cBayesian \u52dd\u4e0d\u78ba\u5b9a\u6027\u91cf\u5316\n\nRandom Walk Metropolis-Hastings MCMC\uff0c24000 posterior samples\uff088000 burn-in\uff09\uff0cNumba \u52a0\u901f 4.6 \u79d2\u3002\n\n\u9810\u6e2c\u6bd4\u8f03\uff08SPY OOS 2023-2024, 502 obs\uff09\uff1a\n- MLE QLIKE: 1.4629\uff08\u52dd\uff09\n- Bayesian Median: 1.4651\uff08-0.156%\uff09\n- DM: MLE \u986f\u8457\u66f4\u597d\uff08|t|=2.85-4.26\uff09\n- \u50c5 25.3% posterior draws \u52dd MLE\n\n\u53c3\u6578\u4e0d\u78ba\u5b9a\u6027\u63ed\u793a\uff1a\n- alpha CV=0.367\uff08\u8b58\u5225\u56f0\u96e3\uff01ARCH shock \u6700\u4e0d\u7a69\u5b9a\uff09\n- beta CV=0.013\uff08\u6975\u7cbe\u78ba\uff0cpersistence \u7a69\u5b9a\uff09\n- gamma CV=0.095\uff08well-identified\uff0cleverage \u53ef\u9760\uff09\n- P(gamma>0)=1.0000\uff08leverage effect \u7684\u6700\u5f37 Bayesian \u8b49\u64da\uff09\n- alpha-beta correlation=-0.546\uff08trade-off \u56b4\u91cd\uff09\n- persistence=0.978 [0.968, 0.988]\n\n\u7d50\u8ad6\uff1a\n1. Bayesian \u4e0d\u6539\u5584\u9ede\u9810\u6e2c\uff08MLE \u66f4\u597d\uff09\uff0c\u4f46\u63ed\u793a\u53c3\u6578\u53ef\u4fe1\u5ea6\n2. gamma\uff08leverage\uff09\u6bd4 alpha\uff08ARCH\uff09\u66f4\u53ef\u9760\u2014\u2014\u8207 K805 \u7d50\u8ad6\u4e00\u81f4\n3. \u672a\u4f86\u53ef\u64f4\u5c55\u5230 Student-t innovations\uff08\u91cf\u5316 df \u4e0d\u78ba\u5b9a\u6027\uff09\n4. \u503c\u5f97\u5beb\u5165\u8ad6\u6587\uff08\u53c3\u6578\u4e0d\u78ba\u5b9a\u6027 \u00d7 \u9810\u6e2c\u7a69\u5065\u6027\uff09\n\n\u5f85 Codex \u5be9\u67e5\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k814_bayesian_mcmc_garch.py\n\u7d50\u679c\u6578\u64da: experiments/k814_bayesian_mcmc_garch_results.json",
+    "evidence": [
+      "K814",
+      "K432",
+      "K805"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-04-01T14:13:45.138996"
   }
 ]
