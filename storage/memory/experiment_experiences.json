@@ -501,5 +501,18 @@
     "fix_applied": "Switch NN training to log-MSE: MSE(log_pred_sigma2, log(r2+eps)). Also initialize output_bias = log(mean(r2_train)) ~ -9.0. Final evaluation still uses QLIKE on r2 (Patton 2011) for comparison. Result v2: KAN QLIKE=+39.7% worse, MLP QLIKE=+59.3% worse -- proper NULL result.",
     "general_lesson": "NEVER train volatility NNs directly with QLIKE loss without sigma2 clipping. QLIKE = -log(sigma2) + r2/sigma2 has degenerate gradient for unconstrained sigma2. Safe alternatives: (1) log-MSE on log(r2), (2) QLIKE with sigma2 clamped to [1e-6, 1e-2], (3) QLIKE with strong sigma2 regularizer, (4) predict log(sigma2) with MSE. Always initialize output_bias = log(mean(r2_train)), not a hardcoded constant.",
     "result": "NULL RESULT: KAN/MLP both significantly worse than GJR. QLIKE ceiling confirmed (K526, K784, K797)."
+  },
+  {
+    "id": "E037",
+    "title": "K801: VIX Level Already Absorbs Surprise — Daily Change Redundant",
+    "experiments": [
+      "K498",
+      "K801"
+    ],
+    "lesson": "Testing VIX daily change (|ΔVIX|>2σ) as a surprise proxy for event-driven volatility guard. Key learning: VIX LEVEL encodes surprise information through its own dynamics (mean-reversion). When VIX spikes, the level rises, and 12/VIX automatically reduces equity. Adding a guard based on ΔVIX is therefore redundant — the signal is already captured. The guard reduces CAGR (6.7-7.4% vs baseline 7.4%) and Sharpe is statistically unchanged (DM t<1.3 in all variants). Forward returns after shocks are indistinguishable from noise (t=0.29 after any shock). This is the third null for event-based overlays on 12/VIX (K498 calendar dummies, K801 shock guard). Pattern: overlays that mechanically reduce exposure systematically drag on CAGR without DM-significant improvement in risk-adjusted returns.",
+    "why_failed": "VIX level = lagged integral of VIX changes. ΔVIX provides no new information once VIX level is used. The 12/VIX formula already implements a smooth, continuous version of the shock guard.",
+    "next_time": "Do not test VIX-derived overlays unless they capture information orthogonal to VIX level itself (e.g., VIX term structure spread, VRP = VIX - realized vol, or cross-asset divergence).",
+    "severity": "null_result",
+    "created_at": "2026-04-01T10:41:39.461228"
   }
 ]
