@@ -3,9 +3,10 @@
   "title": "K797v2: GARCH-MIDAS vs MLP -- QLIKE Bug Fixed",
   "date": "2026-04-01",
   "bug_fix": {
-    "k797_bug": "QLIKE formula used -log(s2)+r2/s2 (neg log-likelihood), producing negative values",
-    "fix": "Correct Patton (2011): a/f - log(a/f) - 1, always >= 0",
-    "mlp_fix": "Added output_bias=-9 init + log_s2 clamp [-20,-2] to prevent exp() explosion",
+    "k797_qlike_bug": "QLIKE formula used -log(s2)+r2/s2 (neg log-likelihood), always negative when forecasts diverge from actuals",
+    "k797_training_loss_bug": "Training used -log(s2)+r2/s2 which is unbounded below (s2->inf minimizes it), causing MLP explosion to 1e38",
+    "fix_evaluation": "Correct Patton (2011): QLIKE = a/f - log(a/f) - 1, always >= 0",
+    "fix_training": "Correct QLIKE training loss = r2/s2 + log(s2) (bounded below, minimizer at s2=r2)",
     "confirmed_nonnegative": true
   },
   "literature": [
@@ -23,24 +24,24 @@
     "n_is": 3271
   },
   "forecast_diagnostics": {
-    "gjr_min": 2.933873253104655e-05,
-    "gjr_max": 0.0003378859518262308,
-    "gjr_mean": 6.74251549376698e-05,
-    "midas_min": 2.3385878537159322e-05,
-    "midas_max": 0.0003597132950062621,
-    "midas_mean": 7.584732370751936e-05,
-    "mlp_min": 0.0067379469983279705,
-    "mlp_max": 0.0067379469983279705,
-    "mlp_mean": 0.0067379469983279705,
+    "gjr_min": 2.383087548771229e-05,
+    "gjr_max": 0.0004900924310485669,
+    "gjr_mean": 6.546918494233771e-05,
+    "midas_min": 2.028237112675894e-05,
+    "midas_max": 0.00042905011301657916,
+    "midas_mean": 7.21850551948274e-05,
+    "mlp_min": 1.6151881936821155e-05,
+    "mlp_max": 0.00046429113717749715,
+    "mlp_mean": 5.7320598166569764e-05,
     "n_nonpositive_gjr": 0,
     "n_nonpositive_midas": 0,
     "n_nonpositive_mlp": 0
   },
   "results": {
     "qlike_mean": {
-      "gjr": 1.518292,
-      "garch_midas": 1.547442,
-      "mlp_garch": 5.182535
+      "gjr": 1.507004,
+      "garch_midas": 1.52475,
+      "mlp_garch": 1.508124
     },
     "qlike_all_nonnegative": {
       "gjr": true,
@@ -48,36 +49,36 @@
       "mlp_garch": true
     },
     "qlike_vs_gjr_pct": {
-      "garch_midas": 1.9199,
-      "mlp_garch": 241.3399
+      "garch_midas": 1.1776,
+      "mlp_garch": 0.0744
     },
     "dm_vs_gjr_positive_means_beats": {
       "garch_midas": {
-        "dm": -1.8831,
-        "p_value": 0.0603,
+        "dm": -1.1986,
+        "p_value": 0.2313,
         "beats_gjr_harvey": false
       },
       "mlp_garch": {
-        "dm": -36.1897,
-        "p_value": 0.0,
+        "dm": -0.0369,
+        "p_value": 0.9706,
         "beats_gjr_harvey": false
       }
     },
     "dm_midas_vs_mlp_positive_means_mlp_better": {
-      "dm": -33.2142,
-      "p_value": 0.0
+      "dm": 0.4156,
+      "p_value": 0.6779
     },
     "spearman": {
-      "gjr": 0.1709,
-      "garch_midas": 0.1818,
-      "mlp_garch": NaN
+      "gjr": 0.1822,
+      "garch_midas": 0.1956,
+      "mlp_garch": 0.2327
     },
     "harvey_significant": {
       "midas_beats_gjr": false,
       "mlp_beats_gjr": false
     }
   },
-  "conclusion": "NULL RESULT: Neither GARCH-MIDAS (+1.92%, DM=-1.883, p=0.0603) nor MLP (+241.34%, DM=-36.190, p=0.0000) beats GJR at Harvey t>3.0. Consistent with K526, K784: ML adds no value over GJR for daily SPY vol forecasting.",
+  "conclusion": "NULL RESULT: Neither GARCH-MIDAS (+1.18%, DM=-1.199, p=0.231) nor MLP (+0.07%, DM=-0.037, p=0.971) beats GJR at Harvey t>3.0 threshold. MLP and GJR are statistically indistinguishable (DM=-0.037). Consistent with K526, K784: ML/MIDAS adds no value over GJR for daily SPY volatility forecasting. This result is robust once the QLIKE formula bug is fixed.",
   "limitations": [
     "SPY only -- cross-asset validation needed",
     "OOS 2023-2024 (~504 days) -- limited OOS sample",
