@@ -1,0 +1,223 @@
+{
+  "experiment_id": "k796v2",
+  "title": "K796v2: VIX Spike \u2192 Next-Day Taiwan De-Risking (Bar-Timing Fix)",
+  "bug_fix": {
+    "original": "K796 used close-to-close returns \u2014 includes overnight gap before VIX signal available",
+    "fixed": "K796v2 uses open-to-close returns \u2014 only captures intraday move after Taiwan opens",
+    "tx_cost_original": 0.001,
+    "tx_cost_fixed": 0.00186,
+    "description": "Open-to-close return = log(Close_t / Open_t), not log(Close_t / Close_{t-1})"
+  },
+  "data_source": "yfinance (0050.TW clean_tw50_data Open+Close, ^VIX)",
+  "period_full": {
+    "start": "2009-01-01",
+    "end": "2024-12-31"
+  },
+  "period_oos": {
+    "start": "2023-01-01",
+    "end": "2024-12-31"
+  },
+  "n_days_full": 3915,
+  "n_days_oos": 480,
+  "parameters": {
+    "lambda": 8.63,
+    "max_weight": 1.5,
+    "tx_cost": 0.00186,
+    "spike_guard_thresh": 0.15,
+    "spike_binary_thresh": 0.1,
+    "level_jump_thresh": 25.0,
+    "level_guard_mult": 0.5,
+    "level_jump_days": 5,
+    "return_type": "open_to_close"
+  },
+  "spike_events": {
+    "full_spike_guard_days": 149,
+    "full_spike_guard_pct": 0.0381,
+    "full_spike_binary_days": 313,
+    "full_spike_binary_pct": 0.0799,
+    "full_level_crossings": 71,
+    "full_level_reduced_days": 318,
+    "oos_spike_guard_days": 9,
+    "oos_spike_binary_days": 29,
+    "oos_level_crossings": 5,
+    "oos_level_reduced_days": 19
+  },
+  "conditional_returns_otc": {
+    "all_days_mean": 8.8e-05,
+    "spike_15pct_mean": -0.000574,
+    "spike_15pct_pct_negative": 0.4698,
+    "spike_10pct_mean": -0.001229,
+    "spike_10pct_pct_negative": 0.4952
+  },
+  "k796_original_for_comparison": {
+    "return_type": "close_to_close",
+    "tx_cost": 0.001,
+    "baseline_sharpe": 1.1371,
+    "spike_guard_sharpe": 1.3643,
+    "spike_binary_sharpe": 1.9562,
+    "level_jump_sharpe": 1.1059
+  },
+  "full_period_metrics": {
+    "buy_hold": {
+      "sharpe": 0.103,
+      "sortino": 0.1196,
+      "cagr": -0.0009,
+      "mdd": -0.5285,
+      "ann_vol": 0.215,
+      "win_rate": 0.4884,
+      "n_days": 3915
+    },
+    "baseline": {
+      "sharpe": 0.0494,
+      "sortino": 0.0663,
+      "cagr": 0.001,
+      "mdd": -0.2565,
+      "ann_vol": 0.0686,
+      "win_rate": 0.4858,
+      "n_days": 3915
+    },
+    "spike_guard": {
+      "sharpe": -0.0077,
+      "sortino": -0.0104,
+      "cagr": -0.0028,
+      "mdd": -0.2775,
+      "ann_vol": 0.0679,
+      "win_rate": 0.4805,
+      "n_days": 3915
+    },
+    "spike_binary": {
+      "sharpe": -0.2407,
+      "sortino": -0.3298,
+      "cagr": -0.018,
+      "mdd": -0.4635,
+      "ann_vol": 0.0664,
+      "win_rate": 0.4442,
+      "n_days": 3915
+    },
+    "level_jump": {
+      "sharpe": -0.0168,
+      "sortino": -0.0224,
+      "cagr": -0.0034,
+      "mdd": -0.2798,
+      "ann_vol": 0.0671,
+      "win_rate": 0.4848,
+      "n_days": 3915
+    }
+  },
+  "oos_metrics": {
+    "buy_hold": {
+      "sharpe": 1.0528,
+      "sortino": 1.4792,
+      "cagr": 0.1215,
+      "mdd": -0.0927,
+      "ann_vol": 0.1153,
+      "win_rate": 0.4917,
+      "n_days": 480
+    },
+    "baseline": {
+      "sharpe": 0.9878,
+      "sortino": 1.5052,
+      "cagr": 0.0611,
+      "mdd": -0.0477,
+      "ann_vol": 0.0619,
+      "win_rate": 0.4875,
+      "n_days": 480
+    },
+    "spike_guard": {
+      "sharpe": 1.0357,
+      "sortino": 1.6588,
+      "cagr": 0.0631,
+      "mdd": -0.0491,
+      "ann_vol": 0.0609,
+      "win_rate": 0.4813,
+      "n_days": 480
+    },
+    "spike_binary": {
+      "sharpe": 1.0913,
+      "sortino": 1.7984,
+      "cagr": 0.0645,
+      "mdd": -0.0603,
+      "ann_vol": 0.0589,
+      "win_rate": 0.4667,
+      "n_days": 480
+    },
+    "level_jump": {
+      "sharpe": 0.896,
+      "sortino": 1.3527,
+      "cagr": 0.0546,
+      "mdd": -0.0531,
+      "ann_vol": 0.0614,
+      "win_rate": 0.4875,
+      "n_days": 480
+    }
+  },
+  "dm_tests": {
+    "full_period": {
+      "guard_vs_base": {
+        "t_stat": 4.3893,
+        "p_value": 0.0,
+        "harvey_pass": true
+      },
+      "binary_vs_base": {
+        "t_stat": 5.0663,
+        "p_value": 0.0,
+        "harvey_pass": true
+      },
+      "jump_vs_base": {
+        "t_stat": 4.614,
+        "p_value": 0.0,
+        "harvey_pass": true
+      }
+    },
+    "oos": {
+      "guard_vs_base": {
+        "t_stat": 1.005,
+        "p_value": 0.3154,
+        "harvey_pass": false
+      },
+      "binary_vs_base": {
+        "t_stat": 1.6547,
+        "p_value": 0.0986,
+        "harvey_pass": false
+      },
+      "jump_vs_base": {
+        "t_stat": 1.9887,
+        "p_value": 0.0473,
+        "harvey_pass": false
+      }
+    }
+  },
+  "threshold_sensitivity": {
+    "thresh_5pct": {
+      "sharpe": -0.3589,
+      "mdd": -0.4846,
+      "n_events": 755
+    },
+    "thresh_10pct": {
+      "sharpe": -0.0916,
+      "mdd": -0.3531,
+      "n_events": 313
+    },
+    "thresh_15pct": {
+      "sharpe": -0.0077,
+      "mdd": -0.2775,
+      "n_events": 149
+    },
+    "thresh_20pct": {
+      "sharpe": 0.0124,
+      "mdd": -0.2736,
+      "n_events": 80
+    },
+    "thresh_25pct": {
+      "sharpe": 0.0282,
+      "mdd": -0.2648,
+      "n_events": 49
+    },
+    "thresh_30pct": {
+      "sharpe": 0.0242,
+      "mdd": -0.2654,
+      "n_events": 32
+    }
+  },
+  "timestamp": "2026-04-01T09:10:16.827294"
+}
