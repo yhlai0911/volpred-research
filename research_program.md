@@ -488,12 +488,12 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 **最終最佳模型**：GJR-GARCH-X(VIX9D) — Forecasting QLIKE -17.7%, delta CV=0.08 (ultra-stable)。
 
-**⚠️ K799/K800 更新（2026-04-01）：GJR + Conformal VaR = 所有指標全勝**
-- K799：六層評估發現 GJR QLIKE #1 但 VaR 1% FAIL（1.99% 違規率）。MCS 含全部 5 模型。
-- K800：Conformal simple calibration 修復 VaR（0.80%，Trinity PASS），QLIKE 不變。
-- **新推薦**：GJR + conformal 用於風險管理，raw GJR 用於純預測。
-- 待驗證：跨資產（0050.TW, QQQ, GLD）conformal 效果
-- 待整合進 Paper 1 和 Paper 5
+**★★★ K799-K802 最終結論（2026-04-01）：GJR + Skewed-t = 真正的雙冠王**
+- K799：六層評估發現 GJR QLIKE #1 但 VaR Normal FAIL（1.79%）。MCS 含全部 5 模型。
+- K800：Conformal heuristic 看似修復（0.80%）→ K800v2 推翻（artifact，Codex 抓到）
+- **K802：正確解法 = GJR + Skewed-t/Student-t 分配**。QLIKE 不變 + VaR 1.20% Trinity PASS。
+- **結論**：預測選模型（GJR），風險管理選分配（Skewed-t）。兩個維度獨立。
+- 待驗證：跨資產 + 整合進 Paper 1/5
 
 **K801 完成（2026-04-01）：Event-Surprise VIX Shock Guard — NULL**
 - VIX shock guard（|ΔVIX|>2σ → 減倉 5 天）不顯著改善 12/VIX（DM |t|<1.3，全部 FAIL Harvey）
