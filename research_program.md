@@ -316,7 +316,7 @@
 
 ### Codex 第 8 次建議：從 vol 預測轉向風險管理實務（2026-03-31）[提出: Codex GPT-5.4]
 **核心洞見**：VIX sufficiency 已確認——不再嘗試打敗 VIX，改為用 VIX 建構更好的風險管理工具。
-- [x] ~~跨資產 All-Weather VT~~ → **K808 完成 NULL on Sharpe**。50/50 Sharpe 0.832 仍不可動搖（#9）。但 VT+RP MDD -17% vs -33%（改善真實）。TLT/DBC 結構性弱（Sharpe 0.27/0.20）。Regime tilting 無用。VT = insurance。
+- [x] ~~跨資產 All-Weather VT~~ → **K808 完成 NULL on Sharpe**（⚠️ Codex 2 HIGH: DM impl + weight constraint bug）。50/50 Sharpe 不可動搖（#9，方向確認）。VT+RP MDD 改善方向正確但精確數字待 K808v2。
 - [x] ~~債券壓力去風險信號~~ → **K807 完成 NULL**。Composite 與 VIX 相關 0.641，不是獨立信號。所有策略 Sharpe < baseline 50/50（0.856）。DM 全 NS。K766 的 1.041 可能 overfitting。
 - [ ] **Dispersion Timing（index vs sector）**：當 sector 分散度高時，equal-weight sectors > hold SPY。long-only ETF 實作。
 - [ ] **Tail-First ES 配置 + Conformal Calibration**：從「預測 vol」轉向「控制尾部風險」。inverse-ES 配置 + 校準覆蓋率 OOS 驗證。

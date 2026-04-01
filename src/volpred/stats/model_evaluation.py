@@ -111,6 +111,46 @@ def dm_test(loss1: np.ndarray, loss2: np.ndarray, h: int = 1) -> Tuple[float, fl
     return (float(t_stat), float(p_val))
 
 
+def strategy_dm_test(
+    returns1: np.ndarray,
+    returns2: np.ndarray,
+    h: int = 1,
+    loss_fn: str = "negative_return",
+) -> Tuple[float, float]:
+    """Diebold-Mariano test for comparing trading strategies.
+
+    Unlike dm_test() which compares forecast losses against a realized target,
+    this compares strategy performance using proper loss functions.
+
+    Args:
+        returns1: Daily returns of strategy 1.
+        returns2: Daily returns of strategy 2.
+        h: Forecast horizon for HAC bandwidth.
+        loss_fn: Loss function. Options:
+            - "negative_return": L = -r (higher return = lower loss)
+            - "squared_return": L = -r² (penalizes low absolute returns)
+            - "downside": L = max(0, -r)² (penalizes downside only)
+
+    Returns:
+        (t_stat, p_value). Negative t → strategy 1 is better.
+        Harvey (2016): |t| > 3.0 for significance under multiple testing.
+    """
+    r1 = np.asarray(returns1, dtype=np.float64)
+    r2 = np.asarray(returns2, dtype=np.float64)
+
+    if loss_fn == "negative_return":
+        loss1, loss2 = -r1, -r2
+    elif loss_fn == "squared_return":
+        loss1, loss2 = -(r1 ** 2), -(r2 ** 2)
+    elif loss_fn == "downside":
+        loss1 = np.where(r1 < 0, r1 ** 2, 0.0)
+        loss2 = np.where(r2 < 0, r2 ** 2, 0.0)
+    else:
+        raise ValueError(f"Unknown loss_fn: {loss_fn}")
+
+    return dm_test(loss1, loss2, h=h)
+
+
 # ─── Layer 5: Model Confidence Set ──────────────────────────────
 
 def model_confidence_set(
