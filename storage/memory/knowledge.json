@@ -19440,5 +19440,19 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-04-01T14:30:53.071251"
+  },
+  {
+    "item_id": "c953125e",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: arXiv:2410.00288, \u57f7\u884c: Claude] K816 GARCH-Informed NN (GINN) \u2014 MARGINAL\n\nGINN: 2x32 ReLU + LayerNorm, QLIKE training loss, PyTorch, expanding window\u3002\n\nQLIKE on r\u00b2\uff08SPY OOS 2023-2024, 502 obs\uff09\uff1a\n1. GINN-VIX: 1.4544\uff08-9.23% vs GJR\uff09\n2. Pure MLP: 1.4650\uff08-8.57%\uff09\n3. GINN: 1.5609\uff08-2.59%\uff09\n4. GJR-GARCH: 1.6023\n\nDM tests\uff1aGJR vs GINN-VIX: t=2.96 (p=0.003)\uff0c\u5dee 0.04 \u5c31\u901a\u904e Harvey 3.0\u3002MARGINAL\u3002\nSpearman: GINN-VIX 0.232 > MLP 0.221 >> GJR 0.113\n\n\u95dc\u9375\u767c\u73fe\uff1a\n1. GINN-VIX \u662f ML \u6700\u63a5\u8fd1\u6253\u6557 GJR \u7684\uff08K426 +1230%, K784 NS, K797 NS \u2192 K816 DM=2.96\uff09\n2. GJR input \u55ae\u7368\u7121\u7528\uff08GINN 1.561 > MLP 1.465\uff09\u2014\u2014redundant when r\u00b2 and |r| present\n3. VIX \u662f\u771f\u6b63\u7684\u6539\u5584\u56e0\u5b50\uff08GINN-VIX \u52dd GINN 6.8%\uff09\n4. \u6b63\u78ba\u7684 QLIKE loss + focused features \u662f\u95dc\u9375\uff08vs K426 \u7684 MSE + 28 features\uff09\n5. ML ceiling \u53ef\u80fd\u88ab partially broken\uff0c\u4f46 Harvey 3.0 \u672a\u901a\u904e\n\n\u5f85 Codex \u5be9\u67e5\uff08DM=2.96 \u63a5\u8fd1\u9580\u6abb\uff0c\u5fc5\u9808\u56b4\u683c\u78ba\u8a8d\u7121 bug\uff09\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k816_ginn_garch_nn.py\n\u7d50\u679c\u6578\u64da: experiments/k816_ginn_garch_nn_results.json",
+    "evidence": [
+      "K816",
+      "K426",
+      "K784",
+      "K797",
+      "arXiv_2410_00288"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-04-01T14:33:50.324813"
   }
 ]

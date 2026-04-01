@@ -1,0 +1,245 @@
+{
+  "experiment_id": "K816",
+  "title": "GARCH-Informed Neural Network (GINN) -- Physics-Informed Volatility Forecasting",
+  "date": "2026-04-01T06:32:53.218621+00:00",
+  "proposer": "User",
+  "executor": "Claude",
+  "asset": "SPY",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "data_period": "2005-01-04 to 2025-12-30",
+  "total_observations": 5281,
+  "oos_period": "2023-01-03 to 2024-12-31",
+  "oos_observations": 502,
+  "refit_every": 63,
+  "n_refits": 8,
+  "min_train_window": 2000,
+  "literature": [
+    "Bali, Karabulut & Zhao (2024) GINN, arXiv:2410.00288",
+    "Patton (2011) J. Econometrics 160(1), 246-256 -- QLIKE proxy-robust",
+    "Hansen & Lunde (2005) JFE 72(2), 401-438 -- r2 proxy",
+    "Harvey et al. (2016) -- multiple testing t>3.0",
+    "K426: GINN sklearn MLP, 28 features, MSE loss -> QLIKE +1230% worse",
+    "K797v2: QLIKE training loss bug fix (must use +log_s2)",
+    "K784: GARCH-GRU null, K785: MF2 null, K787: HAR directional null"
+  ],
+  "hypothesis": "Structure + flexibility > pure GARCH or pure ML. GINN uses GJR fitted sigma2 as physics-informed prior in NN architecture.",
+  "architecture": {
+    "GJR-GARCH": "GJR-GARCH(1,1) baseline, arch package",
+    "Pure_MLP": {
+      "inputs": [
+        "r2_{t-1}",
+        "|r_{t-1}|",
+        "VIX_{t-1}"
+      ],
+      "hidden": "2x32 neurons, ReLU, LayerNorm",
+      "output": "log(sigma2) + learnable bias -> exp -> sigma2",
+      "loss": "QLIKE (r2/sigma2 + log(sigma2))",
+      "optimizer": "Adam lr=0.001, weight_decay=1e-5",
+      "scheduler": "CosineAnnealing",
+      "early_stopping": "patience=20 on validation QLIKE (20% holdout)",
+      "epochs": "200 max"
+    },
+    "GINN": {
+      "inputs": [
+        "r2_{t-1}",
+        "sigma2_{GJR,t-1}",
+        "|r_{t-1}|"
+      ],
+      "note": "sigma2_{GJR,t-1} is the physics-informed feature from GARCH",
+      "hidden": "2x32 neurons, ReLU, LayerNorm",
+      "output": "log(sigma2) + learnable bias -> exp -> sigma2",
+      "loss": "QLIKE"
+    },
+    "GINN-VIX": {
+      "inputs": [
+        "r2_{t-1}",
+        "sigma2_{GJR,t-1}",
+        "VIX_{t-1}",
+        "|r_{t-1}|"
+      ],
+      "note": "Full physics-informed model with market-implied vol",
+      "hidden": "2x32 neurons, ReLU, LayerNorm",
+      "output": "log(sigma2) + learnable bias -> exp -> sigma2",
+      "loss": "QLIKE"
+    }
+  },
+  "diagnostics": {
+    "ADF": {
+      "stat": -18.180414884975413,
+      "p": 2.4338386465784375e-30,
+      "stationary": true
+    },
+    "ARCH_LM": {
+      "stat": 1342.2952012665505,
+      "p": 2.844157552308549e-282,
+      "arch_effects": true
+    },
+    "Ljung_Box_r2": {
+      "stat": 4069.970153625058,
+      "p": 0.0,
+      "autocorrelated": true
+    }
+  },
+  "garch_params": {
+    "omega": 0.02838862195461522,
+    "alpha": 0.006118781881357511,
+    "gamma": 0.2115762207724187,
+    "beta": 0.8606849925565568,
+    "persistence": 0.9725918848241237,
+    "convergence": 0,
+    "std_resid_sq_LB10_p": 0.4265268509403306
+  },
+  "models": {
+    "GJR-GARCH": {
+      "QLIKE": 1.6023383244252047,
+      "MSE": 1.1650466757489814e-08,
+      "MAE": 6.7832425902509e-05,
+      "Spearman_rho": 0.11321393394529405,
+      "Spearman_p": 0.011134754372393528,
+      "Pearson_r": 0.13222068379050134,
+      "pred_min": 2.4761868398067115e-05,
+      "pred_max": 0.00023867030746142385,
+      "pred_mean": 6.485837317226832e-05,
+      "n_valid": 502
+    },
+    "Pure_MLP": {
+      "QLIKE": 1.4649690382591094,
+      "MSE": 1.0707039682458344e-08,
+      "MAE": 6.449813772591575e-05,
+      "Spearman_rho": 0.22053033802339006,
+      "Spearman_p": 6.028197321793163e-07,
+      "Pearson_r": 0.25284105896089215,
+      "pred_min": 2.0523351849988103e-05,
+      "pred_max": 0.0003910614759661257,
+      "pred_mean": 6.296889293672534e-05,
+      "n_valid": 502
+    },
+    "GINN": {
+      "QLIKE": 1.560907555575068,
+      "MSE": 1.1599737090823417e-08,
+      "MAE": 7.093562064706182e-05,
+      "Spearman_rho": 0.12392505666907494,
+      "Spearman_p": 0.005429394635786882,
+      "Pearson_r": 0.16340882633428994,
+      "pred_min": 3.1421710446011275e-05,
+      "pred_max": 0.00026951965992338955,
+      "pred_mean": 7.455382682568583e-05,
+      "n_valid": 502
+    },
+    "GINN-VIX": {
+      "QLIKE": 1.4543894016068308,
+      "MSE": 1.0562769185857936e-08,
+      "MAE": 6.37593470915503e-05,
+      "Spearman_rho": 0.23158755394221872,
+      "Spearman_p": 1.5428617228434496e-07,
+      "Pearson_r": 0.26010330749421334,
+      "pred_min": 2.3054568373481743e-05,
+      "pred_max": 0.00023618504928890616,
+      "pred_mean": 6.223360983258535e-05,
+      "n_valid": 502
+    }
+  },
+  "dm_tests": {
+    "GJR vs Pure_MLP": {
+      "DM_stat": 2.3254333543832066,
+      "p_value": 0.020447211577363067,
+      "better_model": "Pure_MLP",
+      "significant_Harvey": false
+    },
+    "GJR vs GINN": {
+      "DM_stat": 1.7008717632861015,
+      "p_value": 0.08958759946559214,
+      "better_model": "GINN",
+      "significant_Harvey": false
+    },
+    "GJR vs GINN-VIX": {
+      "DM_stat": 2.959873891181993,
+      "p_value": 0.0032234216319195763,
+      "better_model": "GINN-VIX",
+      "significant_Harvey": false
+    },
+    "Pure_MLP vs GINN": {
+      "DM_stat": -2.0069617509070383,
+      "p_value": 0.04529045155233047,
+      "better_model": "Pure_MLP",
+      "significant_Harvey": false
+    },
+    "Pure_MLP vs GINN-VIX": {
+      "DM_stat": 0.8342431400970043,
+      "p_value": 0.4045415762697404,
+      "better_model": "GINN-VIX",
+      "significant_Harvey": false
+    },
+    "GINN vs GINN-VIX": {
+      "DM_stat": 2.7187246702114427,
+      "p_value": 0.006780704274168103,
+      "better_model": "GINN-VIX",
+      "significant_Harvey": false
+    }
+  },
+  "ablation": {
+    "Pure_MLP": {
+      "QLIKE": 1.4649690382591094,
+      "pct_vs_GJR": -8.573051275882877,
+      "direction": "BETTER"
+    },
+    "GINN": {
+      "QLIKE": 1.560907555575068,
+      "pct_vs_GJR": -2.5856442561840933,
+      "direction": "BETTER"
+    },
+    "GINN-VIX": {
+      "QLIKE": 1.4543894016068308,
+      "pct_vs_GJR": -9.233313624414903,
+      "direction": "BETTER"
+    }
+  },
+  "gjr_input_effect": {
+    "GINN_minus_PureMLP_QLIKE": 0.0959385173159586,
+    "GINN-VIX_minus_PureMLP_QLIKE": -0.010579636652278568,
+    "gjr_input_helps": false,
+    "insight": "GJR input HURTS/NEUTRAL: GINN >= Pure MLP (physics-informed prior adds no value or is redundant)"
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "model": "GINN-VIX",
+      "QLIKE": 1.4543894016068308
+    },
+    {
+      "rank": 2,
+      "model": "Pure_MLP",
+      "QLIKE": 1.4649690382591094
+    },
+    {
+      "rank": 3,
+      "model": "GINN",
+      "QLIKE": 1.560907555575068
+    },
+    {
+      "rank": 4,
+      "model": "GJR-GARCH",
+      "QLIKE": 1.6023383244252047
+    }
+  ],
+  "verdict": "MARGINAL: GINN-VIX has lowest QLIKE but difference not significant (Harvey t>3.0)",
+  "ginn_insight": "GJR input HURTS/NEUTRAL: GINN >= Pure MLP (physics-informed prior adds no value or is redundant)",
+  "any_nn_beats_gjr_harvey": false,
+  "ginn_beats_pure_mlp_harvey": false,
+  "total_runtime_s": 50.1,
+  "k426_comparison": "K426 used sklearn MLPRegressor with MSE loss + 28 generic features -> QLIKE +1230% worse. K816 uses PyTorch with proper QLIKE training loss + only 4 physics-informed features. This tests whether the failure was due to (a) wrong loss function, (b) too many features, or (c) fundamental ML ceiling.",
+  "lookahead_check": {
+    "all_features_lagged": true,
+    "lag_mechanism": "Features at t-1 -> target r2_t. GJR sigma2_{t-1} from model fitted on data up to t-1. No contemporaneous data.",
+    "shift_equivalent": "Explicit index-based lag (features[t-1] -> target[t])"
+  },
+  "limitations": [
+    "r2 proxy for sigma2 is noisy (no intraday data) -- Hansen & Lunde (2005)",
+    "Single asset (SPY) -- cross-asset validation needed",
+    "OOS 2023-2024 (~500 days) -- limited OOS sample",
+    "Hidden dim=32 -- larger architectures not tested",
+    "No attention/transformer -- only feedforward MLP",
+    "GJR refit every 63 days -- params may be stale during fast regimes",
+    "VIX is closing value -- intraday VIX spikes not captured"
+  ]
+}
