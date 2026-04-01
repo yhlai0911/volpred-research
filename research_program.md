@@ -390,7 +390,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] Vision Transformer for RV — arXiv:2511.03046（需 IV surface 圖像）
 
 ### ML-GARCH 混合
-- [x] ~~GARCH-Informed NN (GINN)~~ → **K816 完成 MARGINAL**。GINN-VIX QLIKE -9.23% vs GJR，DM=2.96（差 0.04 通過 Harvey）。ML 最接近打敗 GJR。VIX 是真正驅動因子。待 Codex 確認。
+- [x] ~~GARCH-Informed NN (GINN)~~ → **K816 Codex FATAL**（GJR misindexing 使 baseline 劣化，DM=2.96 是 artifact）。ML ceiling 第 5 次未被打破。需 K816v2 修正 GJR state propagation。
 - [x] ★ ~~GARCH-GRU~~ → **K784 完成 NULL**：QLIKE 排 #1 但 vs GJR DM=-0.51 不顯著。ML 額外複雜度不帶來改善。
 - [x] ~~HAR Directional Prediction~~ → **K787 完成**：67.9% 方向準確率(z=8.03)但無經濟價值（timing +33% vs B&H +58%）。VIX 對方向無用(49.6%)。
 - [ ] **Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）

@@ -19454,5 +19454,16 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-04-01T14:33:50.324813"
+  },
+  {
+    "item_id": "56c30d84",
+    "category": "experiment_validation",
+    "content": "K816 Codex \u5be9\u67e5\uff1aFATAL \u2014 GJR misindexing \u4f7f baseline \u88ab\u52a3\u5316\n\nHIGH: GJR conditional variance \u5728\u6bcf 63 \u5929 refit block \u7684\u9996\u65e5\u5f8c misindexed\uff08stale values\uff09\u3002\nGJR baseline \u548c GINN \u7684 GJR input \u90fd\u53d7\u5f71\u97ff\u3002\nDM=2.96 \u53ef\u80fd\u662f GJR baseline \u88ab\u4eba\u70ba\u52a3\u5316\u7684 artifact\uff0c\u975e GINN \u771f\u6b63\u6539\u5584\u3002\n\n\u901a\u904e\u7684 checks\uff085/6\uff09\uff1aQLIKE loss \u6b63\u78ba\u3001early stopping \u7121 leak\u3001feature norm \u6b63\u78ba\u3001VIX lag \u6b63\u78ba\u3001LayerNorm \u5b89\u5168\u3002\n\nML ceiling \u7b2c 5 \u6b21\u78ba\u8a8d\u672a\u88ab\u6253\u7834\uff08K426/K784/K797/K816 \u5168\u6709 bug \u6216 NS\uff09\u3002\n\u9700 K816v2\uff1aproperly propagate GJR state day-by-day through OOS blocks\u3002",
+    "evidence": [
+      "K816",
+      "Codex_review_FATAL"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-04-01T14:39:11.510675"
   }
 ]
