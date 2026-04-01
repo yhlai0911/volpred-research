@@ -19027,5 +19027,39 @@
     "timestamp": "2026-04-01T02:07:22.169221+00:00",
     "codex_reviewed": true,
     "codex_findings": "2 HIGH: raw-vs-adjusted VaR tracking, heuristic formula. Lag OK. QLIKE unchanged OK."
+  },
+  {
+    "item_id": "19503d3d",
+    "category": "strategy",
+    "title": "K801: VIX Shock Guard — Event-Surprise Strategy NULL",
+    "content": "[提出: Codex #5, 執行: Claude] K801 tests whether VIX daily change > 2σ (rolling 252d) can improve the 12/VIX strategy by reducing equity exposure for 5 days after large VIX shocks (surprise proxy). Four variants tested: (A) 50% weight reduction after any shock, (B) go to cash after any shock, (C) reduce only on spikes (ΔVIX > +2σ), (D) boost to 100% after drops. Data: SPY+VIX yfinance 2010-2025, N=3960, OOS=2023-2025 N=751. Shock frequency: 4.8% of days (192 events). Guard active: 15.6% of days. Results — Full period: Baseline Sharpe=0.813, Guard=0.818, Binary=0.763, Spike=0.816, Drop-Boost=0.615. DM t-stats all near zero (range -1.2 to -0.06, none |t|>3). OOS: all variants Sharpe 1.28-1.50 vs baseline 1.41 — no consistent improvement. Forward return analysis: post-shock 5d SPY returns indistinguishable from zero (t=0.29, p=0.77); normal days clearly positive (t=8.42, p<0.001). CONCLUSION: NULL. VIX shock guard adds no independent signal beyond 12/VIX. VIX LEVEL already encodes recent surprise via mean-reversion dynamics; daily change carries no incremental predictive power. Consistent with K498 (calendar dummies also null).",
+    "tags": [
+      "strategy",
+      "VIX",
+      "event-surprise",
+      "null-result",
+      "12/VIX",
+      "DM-test",
+      "K801"
+    ],
+    "data_source": "yfinance (SPY, ^VIX), 2010-2025",
+    "experiment_id": "K801",
+    "created_at": "2026-04-01T10:41:25.044071"
+  },
+  {
+    "id": "K801",
+    "type": "experiment",
+    "title": "Event-Surprise VIX Shock: NULL — 12/VIX already is a continuous shock guard",
+    "content": "[提出: Codex #5, 執行: Claude] |ΔVIX|>2σ 事件後減倉。DM 全 NS (t=-1.18~-0.06)。Post-shock 5d return=+0.08% (NS)。12/VIX 本身就是連續 shock guard——VIX spike 時 weight 自動降低。Event overlay 多餘且拖累 CAGR -0.7pp。3rd null for event overlays (K498/K773/K801)。E037: 只測與 VIX level 正交的 overlay（VRP, term structure）。",
+    "tags": [
+      "event_surprise",
+      "VIX_shock",
+      "null_result",
+      "12VIX_irreducible"
+    ],
+    "experiment_file": "experiments/k801_event_surprise.py",
+    "timestamp": "2026-04-01T02:42:44.378221+00:00",
+    "codex_reviewed": true,
+    "codex_findings": "Agent self-reviewed: lag correct, TX applied. NULL confirmed."
   }
 ]
