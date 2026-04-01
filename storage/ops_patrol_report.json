@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-03-31T18:06:55Z",
+  "timestamp": "2026-04-01T00:22:59Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "13 draft articles in feed.json"
+      "detail": "13 draft articles in pool"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json age: 0.01 hours"
+      "detail": "strategy_metrics.json is 0.0h old"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Entry dated 2026-03-31 found: Session Cron 空轉 6-8 小時 (idle loop for 6-8h, cron triggered but Claude only checked status). Root cause: weak cron prompt, no anti-idle mechanism. Fixed: CLAUDE.md updated with anti-idle rules."
+      "detail": "Recent entry found (yesterday 2026-03-31): 2026-03-31: Session Cron 空轉 6-8 小時 — cron triggered but no research done; root cause: Claude judged direction exhausted ..."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked; each has exactly 1 null in last 3 entries (today not yet filled), all within threshold of <=2 nulls"
+      "detail": "All 14 strategies have portfolio_return populated in last 3 entries"
     },
     {
       "name": "GIT_STATUS",
@@ -30,7 +30,7 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1569 entries in knowledge.json"
+      "detail": "1580 entries in knowledge.json"
     }
   ],
   "alerts": []
