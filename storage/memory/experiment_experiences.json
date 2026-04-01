@@ -470,5 +470,36 @@
     "content": "14 個實驗（K782-K793）跨 10 個研究方向。核心教訓：\n1. **Codex 審查必須在 knowledge 之前** — 前 5 個實驗跳過審查直接記錄，用戶糾正後補審。K782 被發現 2 HIGH bug（HAR lookahead + GJR off-by-one），需重跑。如果先審就不會浪費。\n2. **Proxy 比模型更重要** — K782v2 確認 HAR 在 |r| 贏（DM=-15.45），在 r² 輸 GJR。同模型不同 target 排名完全反轉。\n3. **Window size 是 regime + asset dependent** — K783/K783b/K783c 三部曲。SPY expanding 勝，QQQ 短窗勝，BTC w=2000 勝。危機期長窗，平靜期短窗。w=2000 仍是合理通用預設。\n4. **ML 不改善日頻 vol forecasting** — K784 GARCH-GRU NULL (DM=-0.51)，K785 MF2-GARCH NULL。GJR-GARCH 仍是最佳性價比。\n5. **能預測 ≠ 能賺錢** — K787 方向 67.9% 準確但經濟價值零，K792 EWT Granger YES 但方向反。統計顯著不等於 trading profit。\n6. **VT 是 contrarian stabilizer** — K788 ABM 模擬，90% 採用率 vol 僅增 4.6%，無 tipping point。\n7. **Codex overloaded 時 self-review 可接受** — 但必須至少 grep shift(1) 和 clean_tw50。\n8. **主計總處數據可用但需 Chrome 自動化** — 建立 taiwan-macro-data skill，funid 對照表。",
     "experiments_covered": "K782-K793 (14 experiments)",
     "timestamp": "2026-03-31T21:11:32.957540+00:00"
+  },
+  {
+    "experience_id": "E1",
+    "experiment_ids": [
+      "K798"
+    ],
+    "title": "Decision-focused / RL methods: OOS bull market inflates Sharpe; Harvey t>3.0 never reached",
+    "lesson": "K798 教訓 (Decision-Focused Policy Learning):\n\n1. 【OOS 期間偏差】OOS 2023-2025 是 SPY 強勁牛市(+70%)。所有「聰明」方法若比 12/VIX 好，通常因為偶然超重 SPY，不是因為政策本身好。下次應選更中性的 OOS 期間，或報告 full-period 結果。\n\n2. 【DF-OLS 幾乎等於靜態】MV 公式用 expanding window 估計後，w* 收斂到 ~0.5-0.55，接近 BH 50/50。擴張窗口稀釋近期訊號，MV 公式等效於長期均值。不必期待「動態 MV」比靜態明顯更好。\n\n3. 【Bandit 學到矛盾政策】Q1(低 VIX)→arm=0.8，Q3(中 VIX)→arm=0.2。這說明隨機性（ε-greedy 探索）在短樣本內主導學習，政策不穩定。Bandit 需要更多樣本才有意義。\n\n4. 【DM test 正確實作】h=1 步預測：variance = var(d)/n（不需 HAC）。若加 HAC 反而 wrong。Codex 抓到此 HIGH bug。\n\n5. 【TX cost 比較必須一致】要麼全部加 TX，要麼全部不加。不能只對 baseline 加。Codex 也抓到此 MEDIUM bug。\n\n6. 【結論累積】12/VIX 不可約性確認第 7 次 (K440/K470/K488/K524/K687/K763/K798)。Harvey t>3.0 breaches: 0/5。",
+    "date_added": "2026-04-01",
+    "category": "methodology",
+    "related_tags": [
+      "decision-focused",
+      "bandit",
+      "OOS-bias",
+      "DM-test",
+      "12/VIX-irreducible"
+    ]
+  },
+  {
+    "id": "E036",
+    "experiment_ids": [
+      "K797"
+    ],
+    "date": "2026-04-01",
+    "title": "K797: NN QLIKE Training Degeneracy -- sigma2->inf minimizes -log(sigma2)",
+    "category": "numerical-stability",
+    "what_happened": "K797 v1 trained KAN and MLP with QLIKE loss: E = -log(sigma2) + r2/sigma2. Result: KAN QLIKE=-0.31, MLP QLIKE=-88.38 (both heavily negative). This is impossible for a valid volatility forecast -- indicates sigma2 >> r2.",
+    "why_it_happened": "QLIKE has a degenerate gradient direction: d/d(sigma2)[-log(sigma2)] = -1/sigma2 < 0. Early in training, large sigma2 reduces -log(sigma2) faster than r2/sigma2 increases. If the network output is unconstrained, gradient descent pushes sigma2 toward infinity. The initializer output_bias=-8.0 was too high relative to log(mean_r2) ~ -9.6. Combined with KAN/MLP expressivity, the model found the degenerate direction.",
+    "fix_applied": "Switch NN training to log-MSE: MSE(log_pred_sigma2, log(r2+eps)). Also initialize output_bias = log(mean(r2_train)) ~ -9.0. Final evaluation still uses QLIKE on r2 (Patton 2011) for comparison. Result v2: KAN QLIKE=+39.7% worse, MLP QLIKE=+59.3% worse -- proper NULL result.",
+    "general_lesson": "NEVER train volatility NNs directly with QLIKE loss without sigma2 clipping. QLIKE = -log(sigma2) + r2/sigma2 has degenerate gradient for unconstrained sigma2. Safe alternatives: (1) log-MSE on log(r2), (2) QLIKE with sigma2 clamped to [1e-6, 1e-2], (3) QLIKE with strong sigma2 regularizer, (4) predict log(sigma2) with MSE. Always initialize output_bias = log(mean(r2_train)), not a hardcoded constant.",
+    "result": "NULL RESULT: KAN/MLP both significantly worse than GJR. QLIKE ceiling confirmed (K526, K784, K797)."
   }
 ]

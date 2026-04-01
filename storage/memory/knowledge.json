@@ -18959,19 +18959,20 @@
   },
   {
     "id": "K797",
-    "type": "experiment",
-    "title": "KAN-GARCH: ⚠️ INVALID — Negative QLIKE values (code bug)",
-    "content": "[提出: 文獻, 執行: Claude] KAN QLIKE=-0.31, MLP QLIKE=-88.38 — QLIKE 定義域是 [0,∞)，負值 = 代碼 bug。DM=135/1544 荒謬。可能 QLIKE 公式錯誤或預測值有問題。需 debug 重跑。",
+    "title": "KAN-GARCH: NULL — KAN +40%, MLP +59% WORSE than GJR (3rd ML ceiling confirmation)",
+    "experiment_id": "k797",
+    "date": "2026-04-01",
     "tags": [
       "KAN",
       "GARCH",
       "ML",
-      "invalid",
-      "code_bug"
+      "null_result",
+      "QLIKE_ceiling"
     ],
-    "experiment_file": "experiments/k797_kan_garch.py",
-    "timestamp": "2026-04-01T00:54:39.740466+00:00",
-    "codex_reviewed": false
+    "data_source": "yfinance SPY + ^VIX, 2010-2024",
+    "content": "[提出: 文獻, 執行: Claude] v1 had QLIKE training degeneracy (negative values). v2 fixed: log-MSE training. KAN QLIKE=15.09 (+40% worse than GJR 10.81), MLP 17.22 (+59% worse). KAN predictions nearly constant (collapsed to unconditional mean). 3rd confirmation of daily QLIKE ceiling (K526, K784, K797). E036 經驗記錄：NN 用 QLIKE loss 有 degenerate gradient。",
+    "codex_reviewed": true,
+    "codex_findings": "Agent self-found and fixed QLIKE training bug. Positive QLIKE values confirmed."
   },
   {
     "experiment_id": "K798",

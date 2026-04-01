@@ -1,6 +1,7 @@
 {
   "experiment_id": "k797",
   "title": "K797: KAN-GARCH-MIDAS -- Kolmogorov-Arnold Network for Volatility Forecasting",
+  "version": "v2 (log-MSE training for numerical stability)",
   "date": "2026-04-01",
   "literature": [
     "Liu et al. (2024) KAN: Kolmogorov-Arnold Networks, arXiv:2404.19756",
@@ -20,62 +21,66 @@
   },
   "model_details": {
     "gjr": "GJR-GARCH(1,1), L-BFGS-B, 3-start, Normal QML",
-    "midas": "normalized g * tau, tau=EWMA(r2,lambda=0.997)",
+    "midas": "normalized g * tau, tau=EWMA(r2, lambda=0.997)",
     "kan": "2-layer KAN, vectorized B-spline (einsum), 8 knots, hidden=8",
-    "mlp": "2-layer MLP ReLU LayerNorm hidden=16->8, same features",
-    "features": "[g_t-1, tau_t-1, VIX_t-1/100, |r_t-1|, log(tau_t-1)]",
+    "mlp": "2-layer MLP ReLU LayerNorm, hidden=16->8",
+    "features": "[g_{t-1}, tau_{t-1}, VIX_{t-1}/100, |r_{t-1}|, log(tau_{t-1})]",
+    "nn_training": "log-MSE on log(r2+eps): MSE(log_pred_sigma2, log(r2+eps))",
+    "nn_eval": "QLIKE on r2 (Patton 2011) for fair comparison",
     "oos_window": "expanding, refit every 63 days",
-    "lookahead_check": "Features at t-1 -> r2_t. Code verified: no lookahead."
+    "lookahead_check": "Features at t-1 -> r2_t. No lookahead."
   },
   "results": {
     "qlike_mean": {
-      "gjr": 10.84195,
-      "garch_midas": 10.727613,
-      "kan_garch": -0.313027,
-      "mlp_garch": -88.384903
+      "gjr": 10.807118,
+      "garch_midas": 10.693017,
+      "kan_garch": 15.0927,
+      "mlp_garch": 17.215225
     },
     "qlike_vs_gjr_pct": {
-      "garch_midas": -1.0546,
-      "kan_garch": -102.8872,
-      "mlp_garch": -915.2123
+      "garch_midas": -1.0558,
+      "kan_garch": 39.6552,
+      "mlp_garch": 59.2953
     },
     "dm_vs_gjr": {
       "garch_midas": {
-        "dm": 1.6684,
-        "p_value": 0.0959
+        "dm": 1.6699,
+        "p_value": 0.0956
       },
       "kan_garch": {
-        "dm": 135.9259,
+        "dm": -10.9403,
         "p_value": 0.0
       },
       "mlp_garch": {
-        "dm": 1544.8762,
+        "dm": -14.1318,
         "p_value": 0.0
       }
     },
     "dm_kan_vs_mlp": {
-      "dm": -1222.3696,
+      "dm": 4.3175,
       "p_value": 0.0
     },
     "spearman": {
-      "gjr": 0.16,
-      "garch_midas": 0.174,
-      "kan_garch": -0.1008,
-      "mlp_garch": 0.0384
+      "gjr": 0.1586,
+      "garch_midas": 0.1714,
+      "kan_garch": 0.0135,
+      "mlp_garch": 0.1855
     },
     "harvey_significant": {
       "garch_midas_beats_gjr": false,
-      "kan_beats_gjr": true,
-      "mlp_beats_gjr": true,
-      "kan_beats_mlp": false
+      "kan_beats_gjr": false,
+      "mlp_beats_gjr": false,
+      "kan_beats_mlp": true
     }
   },
-  "conclusion": "Both KAN and MLP beat GJR (KAN -102.89%, MLP -915.21%). Nonlinear combination helps.",
+  "v1_anomaly_note": "v1 used QLIKE training loss which has degenerate gradient (sigma2->inf minimizes -log(sigma2)). Resulted in sigma2>>r2, QLIKE<0. Fixed in v2 with log-MSE training.",
+  "conclusion": "NULL RESULT: Neither KAN (+39.66%, DM=-10.940) nor MLP (+59.30%, DM=-14.132) beats GJR. Consistent with QLIKE ceiling (K526, K784). Daily r2 is already a sufficient statistic for conditional sigma2.",
   "limitations": [
     "SPY only -- cross-asset validation needed",
-    "OOS 2023-2024 (504 days) -- limited OOS sample",
-    "KAN uses Gaussian basis approximation of B-splines (not exact)",
-    "tau is EWMA, not true MIDAS Beta polynomial weighting",
+    "OOS 2023-2024 (502 days) -- limited OOS sample",
+    "KAN uses Gaussian basis as B-spline approximation (not exact)",
+    "tau is EWMA proxy, not true MIDAS Beta polynomial weighting",
+    "log-MSE training differs from QLIKE training in J.AE 2025 paper",
     "Pure vol forecast test; no transaction costs needed"
   ]
 }

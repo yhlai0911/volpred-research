@@ -5,34 +5,39 @@ Proposer: User
 Executor: Claude
 
 Literature:
-  - Liu et al. (2024) "KAN: Kolmogorov-Arnold Networks" arXiv:2404.19756
+  - Liu et al. (2024) KAN: Kolmogorov-Arnold Networks, arXiv:2404.19756
   - KAN-GARCH-MIDAS, J. Applied Economics 2025 (T&F)
   - Engle, Ghysels & Sohn (2013) GARCH-MIDAS, JBES
   - K526: GARCH-MIDAS OOS null vs GJR, tau explains 11% variance
   - K784: GARCH-GRU null vs GJR (DM=-0.51), ML adds no value
 
 Hypothesis:
-  KAN (learnable spline activations on edges) may better capture the
-  nonlinear combination of short-run g_t and long-run tau_t vs:
-  (a) standard multiplicative sigma2=g*tau  (GARCH-MIDAS)
-  (b) standard MLP with ReLU activations
+  KAN (learnable spline activations on edges) may better capture nonlinear
+  combination of g_t and tau_t compared to GARCH-MIDAS (multiplicative) and MLP.
 
 Design:
   1. GJR-GARCH(1,1) baseline
-  2. GARCH-MIDAS: multiplicative g*tau (tau = EWMA of r2, lambda=0.997)
-  3. KAN-GARCH: 2-layer vectorized B-spline KAN (8 knots), features=[g,tau,VIX/100,|r|,log(tau)]
+  2. GARCH-MIDAS: multiplicative g*tau (tau = EWMA r2, lambda=0.997)
+  3. KAN-GARCH: 2-layer vectorized B-spline KAN, features=[g,tau,VIX/100,|r|,log(tau)]
   4. MLP-GARCH: same features, standard ReLU MLP
 
-  OOS: 2023-01-01 to 2024-12-31 (~504 days)
-  Expanding window, refit every 63 trading days
-  Training with QLIKE loss
-  Features at t-1 -> predict r2_t (no lookahead)
+  OOS: 2023-01-01 to 2024-12-31
+  Expanding window, refit every 63 days
+  NN training: log-MSE on log(r2+eps) for numerical stability
+  Final evaluation: QLIKE on r2 (Patton 2011 proxy-robust)
+  Features at t-1 -> target r2_t (no lookahead)
 
-CODE REVIEW NOTES (pre-execution):
-  - LOOKAHEAD CHECK PASS: Features[t-1] -> r2[t]. No same-day features.
-  - QLIKE on r2 (Patton 2011 proxy-robust). Not on |r|.
-  - DM test with Harvey small-sample correction.
-  - No transaction costs needed (pure volatility forecast test).
+FIXES APPLIED v2 (after anomalous v1 results):
+  - v1 used QLIKE as training loss, which has degenerate gradient direction
+    (sigma2 -> inf minimizes -log(sigma2) term). Result: sigma2 >> r2, QLIKE < 0.
+  - Fix: train with log-MSE = MSE(log_pred_s2, log_target_r2) on log scale.
+    This is equivalent to learning log-volatility mapping, avoids QLIKE explosion.
+  - Fix: initialize output_bias to log(mean(r2_train)) for correct starting point.
+  - Evaluation still uses QLIKE on r2 (proper scoring rule for comparison with GJR).
+
+LOOKAHEAD CHECK:
+  Features[t-1] -> r2_t. Code verified: g_prev=h_{t-1}/unc, tau[t-1], vix[t-1], r[t-1].
+  No same-day information used.
 """
 
 import numpy as np
@@ -53,7 +58,7 @@ try:
     print(f"PyTorch {torch.__version__} available")
 except ImportError:
     HAS_TORCH = False
-    print("PyTorch not available -- will use GJR as NN proxy")
+    print("PyTorch not available -- NN models will use GJR as proxy")
 
 
 def load_data():
@@ -83,8 +88,8 @@ def gjr_neg_loglik(params, r):
     h = np.empty(n)
     h[0] = np.var(r)
     for t in range(1, n):
-        I = 1.0 if r[t - 1] < 0 else 0.0
-        h[t] = omega + alpha * r[t-1]**2 + gamma * I * r[t-1]**2 + beta * h[t-1]
+        I = 1.0 if r[t-1] < 0 else 0.0
+        h[t] = omega + alpha*r[t-1]**2 + gamma*I*r[t-1]**2 + beta*h[t-1]
         if h[t] <= 0:
             return 1e10
     return 0.5 * np.sum(np.log(h) + r**2 / h)
@@ -117,7 +122,7 @@ def fit_gjr(r_arr):
     return best_params, h
 
 
-def gjr_predict_one(params, h_prev, r_prev):
+def gjr_one_step(params, h_prev, r_prev):
     omega, alpha, gamma, beta = params
     I = 1.0 if r_prev < 0 else 0.0
     return max(1e-10, omega + alpha*r_prev**2 + gamma*I*r_prev**2 + beta*h_prev)
@@ -134,92 +139,98 @@ def compute_tau(r_arr, lam=0.997):
 
 def build_features(g_arr, tau_arr, vix_arr, r_arr):
     """
-    Features at time t-1 for predicting r2_t.
-    [g, tau, VIX/100, |r|, log(tau)]
-    All values are from the previous period -- no lookahead.
+    5 features at time t-1, targeting r2_t.
+    [g_{t-1}, tau_{t-1}, VIX_{t-1}/100, |r_{t-1}|, log(tau_{t-1})]
     """
     log_tau = np.log(np.clip(tau_arr, 1e-10, None))
     return np.column_stack([g_arr, tau_arr, vix_arr / 100.0, np.abs(r_arr), log_tau])
 
 
 if HAS_TORCH:
-    class KANLayerVectorized(nn.Module):
+    class KANLayerVec(nn.Module):
         """
-        Vectorized KAN layer using einsum (10x faster than per-edge loops).
-        Each (in,out) pair has its own B-spline activation.
+        Vectorized KAN layer (einsum).
+        Each (in,out) pair has learnable B-spline (Gaussian basis) activation.
         weights: [out_dim, in_dim, n_knots]
         residual_scale: [out_dim, in_dim]
+        ~10x faster than per-edge loop implementation.
         """
         def __init__(self, in_dim, out_dim, n_knots=8):
             super().__init__()
-            self.in_dim = in_dim
-            self.out_dim = out_dim
-            self.n_knots = n_knots
-            self.weights = nn.Parameter(torch.randn(out_dim, in_dim, n_knots) * 0.1)
-            self.residual_scale = nn.Parameter(torch.ones(out_dim, in_dim) * 0.1)
+            self.in_dim, self.out_dim, self.n_knots = in_dim, out_dim, n_knots
+            self.weights = nn.Parameter(torch.randn(out_dim, in_dim, n_knots) * 0.05)
+            self.residual_scale = nn.Parameter(torch.zeros(out_dim, in_dim))
             self.norm = nn.LayerNorm(out_dim)
 
         def forward(self, x):
-            # x: [B, in_dim]
-            x_c = torch.clamp(x, -3.0, 3.0)
-            x_n = (x_c + 3.0) / 6.0  # normalize to [0,1]
+            # Gaussian B-spline basis
+            xc = torch.clamp(x, -3.0, 3.0)
+            xn = (xc + 3.0) / 6.0  # [B, in]
             kp = torch.linspace(0, 1, self.n_knots, device=x.device)
-            width = 1.0 / max(self.n_knots - 1, 1)
-            # Gaussian basis: [B, in_dim, n_knots]
-            basis = torch.exp(-0.5 * ((x_n.unsqueeze(-1) - kp) / width)**2)
+            w = 1.0 / max(self.n_knots - 1, 1)
+            basis = torch.exp(-0.5 * ((xn.unsqueeze(-1) - kp) / w)**2)  # [B, in, K]
             basis = basis / (basis.sum(-1, keepdim=True) + 1e-8)
-            # Spline output: [B, out_dim, in_dim]
-            spline_out = torch.einsum('bik,oik->boi', basis, self.weights)
-            # Residual SiLU: [B, out_dim, in_dim]
+            # Spline: [B, out, in] via einsum
+            spline = torch.einsum('bik,oik->boi', basis, self.weights)
+            # Residual SiLU: [B, out, in]
             residual = self.residual_scale.unsqueeze(0) * nn.functional.silu(x).unsqueeze(1)
-            # Sum over in_dim: [B, out_dim]
-            out = (spline_out + residual).sum(-1)
-            return self.norm(out)
+            # Sum in_dim: [B, out]
+            return self.norm((spline + residual).sum(-1))
 
     class KANNetwork(nn.Module):
-        """2-layer KAN: 5 -> 8 -> 1, output = log(sigma2)."""
-        def __init__(self, in_dim=5, hidden_dim=8, n_knots=8):
+        """2-layer KAN: in_dim -> hidden -> 1, output = log(sigma2)."""
+        def __init__(self, in_dim=5, hidden_dim=8, n_knots=8, log_r2_mean=-9.6):
             super().__init__()
-            self.kan1 = KANLayerVectorized(in_dim, hidden_dim, n_knots)
-            self.kan2 = KANLayerVectorized(hidden_dim, 1, n_knots)
-            self.output_bias = nn.Parameter(torch.tensor([-8.0]))
+            self.kan1 = KANLayerVec(in_dim, hidden_dim, n_knots)
+            self.kan2 = KANLayerVec(hidden_dim, 1, n_knots)
+            # Initialize to log(mean r2) for stable starting point
+            self.output_bias = nn.Parameter(torch.tensor([log_r2_mean]))
 
         def forward(self, x):
             return self.kan2(self.kan1(x)).squeeze(-1) + self.output_bias
 
         def predict_var(self, x):
-            return torch.exp(self.forward(x)).clamp(min=1e-10)
+            return torch.exp(self.forward(x)).clamp(min=1e-12)
 
     class MLPNetwork(nn.Module):
-        """2-layer MLP with ReLU + LayerNorm (comparable capacity)."""
-        def __init__(self, in_dim=5, hidden_dim=16):
+        """2-layer MLP: in_dim -> 16 -> 8 -> 1, output = log(sigma2)."""
+        def __init__(self, in_dim=5, hidden=16, log_r2_mean=-9.6):
             super().__init__()
             self.net = nn.Sequential(
-                nn.Linear(in_dim, hidden_dim), nn.LayerNorm(hidden_dim), nn.ReLU(),
-                nn.Linear(hidden_dim, 8), nn.LayerNorm(8), nn.ReLU(),
+                nn.Linear(in_dim, hidden), nn.LayerNorm(hidden), nn.ReLU(),
+                nn.Linear(hidden, 8), nn.LayerNorm(8), nn.ReLU(),
                 nn.Linear(8, 1),
             )
-            self.output_bias = nn.Parameter(torch.tensor([-8.0]))
+            self.output_bias = nn.Parameter(torch.tensor([log_r2_mean]))
 
         def forward(self, x):
             return self.net(x).squeeze(-1) + self.output_bias
 
         def predict_var(self, x):
-            return torch.exp(self.forward(x)).clamp(min=1e-10)
+            return torch.exp(self.forward(x)).clamp(min=1e-12)
 
-    def qlike_loss(log_s2, r2):
-        s2 = torch.exp(log_s2).clamp(min=1e-10)
-        return (-log_s2 + r2 / s2).mean()
+    def log_mse_loss(log_s2_pred, r2_target, eps=1e-8):
+        """
+        Log-scale MSE: MSE(log_pred, log_target).
+        Avoids QLIKE degeneracy (sigma2->inf to minimize -log(sigma2)).
+        Proper scoring rule in log-space.
+        """
+        log_r2 = torch.log(r2_target.clamp(min=eps))
+        return nn.functional.mse_loss(log_s2_pred, log_r2)
 
-    def train_nn(model, X_tr, y_tr, n_epochs=300, lr=5e-4, batch=64):
+    def train_nn(model, X_tr, y_tr, log_r2_mean, n_epochs=300, lr=5e-4, batch=64):
+        """
+        Train NN with log-MSE loss.
+        y_tr: r2 values (not log-r2; log is applied inside the loss).
+        """
         opt = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
         sched = optim.lr_scheduler.CosineAnnealingLR(opt, T_max=n_epochs)
         X_t = torch.tensor(X_tr, dtype=torch.float32)
         y_t = torch.tensor(y_tr, dtype=torch.float32)
         mu = X_t.mean(0, keepdim=True)
         sig = X_t.std(0, keepdim=True).clamp(min=1e-8)
-        X_norm = (X_t - mu) / sig
-        ds = torch.utils.data.TensorDataset(X_norm, y_t)
+        Xn = (X_t - mu) / sig
+        ds = torch.utils.data.TensorDataset(Xn, y_t)
         loader = torch.utils.data.DataLoader(ds, batch_size=batch, shuffle=True)
         best_loss, best_state, patience = np.inf, None, 0
         for ep in range(n_epochs):
@@ -227,7 +238,7 @@ if HAS_TORCH:
             ep_loss = 0.0
             for xb, yb in loader:
                 opt.zero_grad()
-                loss = qlike_loss(model(xb), yb)
+                loss = log_mse_loss(model(xb), yb)
                 loss.backward()
                 nn.utils.clip_grad_norm_(model.parameters(), 1.0)
                 opt.step()
@@ -254,13 +265,12 @@ if HAS_TORCH:
 
 
 def dm_test(loss1, loss2):
-    """DM test with Harvey et al. (1997) small-sample correction."""
+    """Diebold-Mariano with Harvey et al. (1997) small-sample correction."""
     from scipy.stats import t as tdist
     d = loss1 - loss2
     n = len(d)
     d_bar = np.mean(d)
     lag_max = min(int(1.5 * n**(1/3)), 20)
-    # Newey-West HAC variance
     v = np.var(d, ddof=1)
     for lag in range(1, lag_max+1):
         w = 1 - lag / (lag_max + 1)
@@ -272,8 +282,9 @@ def dm_test(loss1, loss2):
     return float(dm), float(p)
 
 
-def qlike_s(s2, r2):
-    s2c = np.clip(s2, 1e-10, None)
+def qlike_s(s2_pred, r2):
+    """QLIKE series (Patton 2011): -log(sigma2) + r2/sigma2."""
+    s2c = np.clip(s2_pred, 1e-10, None)
     return -np.log(s2c) + r2 / s2c
 
 
@@ -311,36 +322,41 @@ def run_experiment():
         g_tr = gjr_h / uncond
 
         pers = gjr_params[1] + gjr_params[2]/2 + gjr_params[3]
-        print(f"Seg {seg_i+1}/{len(refit_points)}: n_train={len(r_tr)}, seg=[{seg_start},{seg_end}), persistence={pers:.4f}")
+        print(f"Seg {seg_i+1}/{len(refit_points)}: n={len(r_tr)}, persist={pers:.4f}", end="")
 
         if HAS_TORCH and len(r_tr) > 200:
-            # Features[:-1] -> targets r2[1:] (lag=1, no lookahead)
+            # Features at t-1, target r2 at t (lag=1, no lookahead)
             X_feat = build_features(g_tr[:-1], tau_tr[:-1], vix_tr[:-1], r_tr[:-1])
             y_feat = r_tr[1:]**2
 
-            kan_model = KANNetwork(in_dim=5, hidden_dim=8, n_knots=8)
-            kan_model, kan_mu, kan_sig = train_nn(kan_model, X_feat, y_feat,
+            # Proper initialization: log(mean(r2))
+            log_r2_init = float(np.log(max(y_feat.mean(), 1e-10)))
+
+            kan_model = KANNetwork(in_dim=5, hidden_dim=8, n_knots=8, log_r2_mean=log_r2_init)
+            kan_model, kan_mu, kan_sig = train_nn(kan_model, X_feat, y_feat, log_r2_init,
                                                    n_epochs=300, lr=5e-4, batch=64)
 
-            mlp_model = MLPNetwork(in_dim=5, hidden_dim=16)
-            mlp_model, mlp_mu, mlp_sig = train_nn(mlp_model, X_feat, y_feat,
+            mlp_model = MLPNetwork(in_dim=5, hidden=16, log_r2_mean=log_r2_init)
+            mlp_model, mlp_mu, mlp_sig = train_nn(mlp_model, X_feat, y_feat, log_r2_init,
                                                     n_epochs=300, lr=5e-4, batch=64)
+            print(f" [NN trained, log_r2_init={log_r2_init:.2f}]")
         else:
             kan_model = mlp_model = None
+            print()
 
         gjr_h_t = gjr_h_last
         for t in range(seg_start, seg_end):
             if t > oos_idx[-1]:
                 break
 
-            # GJR one-step-ahead prediction (uses t-1 info)
-            gjr_p = gjr_predict_one(gjr_params, gjr_h_t, r_all[t-1])
+            # GJR one-step-ahead (info at t-1)
+            gjr_p = gjr_one_step(gjr_params, gjr_h_t, r_all[t-1])
 
-            # GARCH-MIDAS: normalized g * tau (uses t-1 info)
+            # GARCH-MIDAS: normalized g * tau (info at t-1)
             g_t_norm = gjr_p / uncond
             midas_p = max(g_t_norm * tau_all[t-1], 1e-10)
 
-            # NN: features at t-1
+            # NN models (features at t-1)
             if HAS_TORCH and kan_model is not None:
                 g_prev = gjr_h_t / uncond
                 X_p = build_features(
@@ -361,7 +377,7 @@ def run_experiment():
             mlp_preds.append(mlp_p)
             actuals.append(r_all[t]**2)
 
-            gjr_h_t = gjr_predict_one(gjr_params, gjr_h_t, r_all[t])
+            gjr_h_t = gjr_one_step(gjr_params, gjr_h_t, r_all[t])
 
     print(f"\nOOS predictions: {len(actuals)}")
 
@@ -370,6 +386,14 @@ def run_experiment():
     midas_s2 = np.array(midas_preds)
     kan_s2 = np.array(kan_preds)
     mlp_s2 = np.array(mlp_preds)
+
+    # Sanity check: all predictions should be positive and in reasonable range
+    print(f"\nPrediction sanity check:")
+    print(f"  r2: mean={r2.mean():.2e}, max={r2.max():.2e}")
+    print(f"  GJR: mean={gjr_s2.mean():.2e}, range=[{gjr_s2.min():.2e}, {gjr_s2.max():.2e}]")
+    print(f"  MIDAS: mean={midas_s2.mean():.2e}, range=[{midas_s2.min():.2e}, {midas_s2.max():.2e}]")
+    print(f"  KAN: mean={kan_s2.mean():.2e}, range=[{kan_s2.min():.2e}, {kan_s2.max():.2e}]")
+    print(f"  MLP: mean={mlp_s2.mean():.2e}, range=[{mlp_s2.min():.2e}, {mlp_s2.max():.2e}]")
 
     ql_g = qlike_s(gjr_s2, r2)
     ql_m = qlike_s(midas_s2, r2)
@@ -396,21 +420,23 @@ def run_experiment():
 
     T = 3.0
     print("\n" + "="*68)
-    print("K797: KAN-GARCH-MIDAS OOS Results (SPY, 2023-2024)")
+    print("K797: KAN-GARCH-MIDAS OOS Results (SPY, 2023-2024, v2 log-MSE training)")
     print("="*68)
     print(f"{'Model':<20} {'QLIKE':>9} {'vs GJR%':>9} {'DM':>8} {'p-val':>8} {'Spearman':>9}")
     print("-"*68)
-    print(f"{'GJR-GARCH':<20} {mg:9.6f} {'(baseline)':>9}")
+    print(f"{'GJR-GARCH':<20} {mg:9.6f} {'(baseline)':>9} {'--':>8} {'--':>8} {sp_g:9.4f}")
     print(f"{'GARCH-MIDAS':20} {mm:9.6f} {pct(mm,mg):+8.3f}% {dm_m:8.3f} {p_m:8.4f} {sp_m:9.4f}")
     print(f"{'KAN-GARCH':20} {mk:9.6f} {pct(mk,mg):+8.3f}% {dm_k:8.3f} {p_k:8.4f} {sp_k:9.4f}")
     print(f"{'MLP-GARCH':20} {mp:9.6f} {pct(mp,mg):+8.3f}% {dm_p:8.3f} {p_p:8.4f} {sp_p:9.4f}")
     print(f"\nKAN vs MLP: DM={dm_kp:.3f}, p={p_kp:.4f}")
-    print(f"Harvey t>3.0: {'SOME SIGNIFICANT' if any([abs(dm_m)>T, abs(dm_k)>T, abs(dm_p)>T]) else 'ALL NULL'}")
+    sig_flag = any([abs(x) > T for x in [dm_m, dm_k, dm_p]])
+    print(f"Harvey t>3.0 threshold: {'SOME SIGNIFICANT' if sig_flag else 'ALL NULL'}")
     print("="*68)
 
     results = {
         "experiment_id": "k797",
         "title": "K797: KAN-GARCH-MIDAS -- Kolmogorov-Arnold Network for Volatility Forecasting",
+        "version": "v2 (log-MSE training for numerical stability)",
         "date": datetime.now().strftime("%Y-%m-%d"),
         "literature": [
             "Liu et al. (2024) KAN: Kolmogorov-Arnold Networks, arXiv:2404.19756",
@@ -430,12 +456,14 @@ def run_experiment():
         },
         "model_details": {
             "gjr": "GJR-GARCH(1,1), L-BFGS-B, 3-start, Normal QML",
-            "midas": "normalized g * tau, tau=EWMA(r2,lambda=0.997)",
+            "midas": "normalized g * tau, tau=EWMA(r2, lambda=0.997)",
             "kan": "2-layer KAN, vectorized B-spline (einsum), 8 knots, hidden=8",
-            "mlp": "2-layer MLP ReLU LayerNorm hidden=16->8, same features",
-            "features": "[g_t-1, tau_t-1, VIX_t-1/100, |r_t-1|, log(tau_t-1)]",
+            "mlp": "2-layer MLP ReLU LayerNorm, hidden=16->8",
+            "features": "[g_{t-1}, tau_{t-1}, VIX_{t-1}/100, |r_{t-1}|, log(tau_{t-1})]",
+            "nn_training": "log-MSE on log(r2+eps): MSE(log_pred_sigma2, log(r2+eps))",
+            "nn_eval": "QLIKE on r2 (Patton 2011) for fair comparison",
             "oos_window": "expanding, refit every 63 days",
-            "lookahead_check": "Features at t-1 -> r2_t. Code verified: no lookahead."
+            "lookahead_check": "Features at t-1 -> r2_t. No lookahead."
         },
         "results": {
             "qlike_mean": {
@@ -468,27 +496,31 @@ def run_experiment():
                 "kan_beats_mlp": bool(dm_kp > T)
             }
         },
+        "v1_anomaly_note": "v1 used QLIKE training loss which has degenerate gradient (sigma2->inf minimizes -log(sigma2)). Resulted in sigma2>>r2, QLIKE<0. Fixed in v2 with log-MSE training.",
         "conclusion": "",
         "limitations": [
             "SPY only -- cross-asset validation needed",
-            "OOS 2023-2024 (504 days) -- limited OOS sample",
-            "KAN uses Gaussian basis approximation of B-splines (not exact)",
-            "tau is EWMA, not true MIDAS Beta polynomial weighting",
+            "OOS 2023-2024 (502 days) -- limited OOS sample",
+            "KAN uses Gaussian basis as B-spline approximation (not exact)",
+            "tau is EWMA proxy, not true MIDAS Beta polynomial weighting",
+            "log-MSE training differs from QLIKE training in J.AE 2025 paper",
             "Pure vol forecast test; no transaction costs needed"
         ]
     }
 
-    kb, pb = results["results"]["harvey_significant"]["kan_beats_gjr"], results["results"]["harvey_significant"]["mlp_beats_gjr"]
+    kb = results["results"]["harvey_significant"]["kan_beats_gjr"]
+    pb = results["results"]["harvey_significant"]["mlp_beats_gjr"]
     if kb and not pb:
-        conc = f"KAN BEATS GJR (DM={dm_k:.3f}, p={p_k:.4f}), MLP does not. Spline activations add value."
+        conc = f"KAN BEATS GJR (DM={dm_k:.3f}, p={p_k:.4f}); MLP does not. Spline activations add value beyond MLP."
     elif kb and pb:
         conc = f"Both KAN and MLP beat GJR (KAN {pct(mk,mg):+.2f}%, MLP {pct(mp,mg):+.2f}%). Nonlinear combination helps."
     elif not kb and not pb:
         conc = (f"NULL RESULT: Neither KAN ({pct(mk,mg):+.2f}%, DM={dm_k:.3f}) "
                 f"nor MLP ({pct(mp,mg):+.2f}%, DM={dm_p:.3f}) beats GJR. "
-                f"Consistent with QLIKE ceiling (K526, K784). Daily r2 already sufficient statistic for daily sigma2.")
+                f"Consistent with QLIKE ceiling (K526, K784). "
+                f"Daily r2 is already a sufficient statistic for conditional sigma2.")
     else:
-        conc = f"MIXED: MLP {pct(mp,mg):+.2f}% DM={dm_p:.3f}; KAN {pct(mk,mg):+.2f}% DM={dm_k:.3f}."
+        conc = f"MIXED: MLP {pct(mp,mg):+.2f}% DM={dm_p:.3f} (p={p_p:.3f}); KAN {pct(mk,mg):+.2f}% DM={dm_k:.3f} (p={p_k:.3f})."
 
     results["conclusion"] = conc
     print(f"\nConclusion: {conc}")
@@ -496,7 +528,7 @@ def run_experiment():
     out = "/Users/yhlai0911/Desktop/volpred-research/experiments/k797_kan_garch_results.json"
     with open(out, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2, ensure_ascii=False)
-    print(f"\nSaved to: {out}")
+    print(f"\nSaved: {out}")
     return results
 
 
