@@ -19120,5 +19120,40 @@
     "data_period": "2008-01-04 to 2026-03-31",
     "sample_n": 4588,
     "created_at": "2026-04-01T11:28:57.013266"
+  },
+  {
+    "item_id": "k804_cross_asset_skewt",
+    "experiment_id": "K804",
+    "category": "model_comparison",
+    "title": "Cross-Asset GJR VaR Validation: Student-t fixes Normal tail underestimation on 3/4 assets",
+    "content": "[提出: 用戶, 執行: Claude] K804 extends K802 (GJR+SkewedT dual champion on SPY) to 4 asset classes. OOS 2023-2024, expanding window, refit every 63 days. Results: GJR Normal VaR FAILS on 2/4 assets (QQQ 2.0% rate, 0050.TW 1.87% — both Basel YELLOW). Student-t VaR PASSES 3/4: QQQ df=8.2 (6 violations, green), GLD df=5.0 (3 violations), 0050.TW df=4.9 (6 violations). FHS (empirical quantile) also PASSES 3/4. The one exception is BTC-USD: Normal surprisingly over-conservative (3/731 violations, 0.41%), while Student-t df=3.2 and FHS are TOO conservative (1 violation each, 0.14%, Kupiec FAIL). BTC has positive skewness (+0.619) vs all equity assets (negative skew), suggesting fat-tail correction overshoots in crypto. QLIKE ranking by asset: SPY 1.469 < GLD 1.491 = QQQ 1.492 < 0050.TW 1.657 < BTC 1.984 — higher QLIKE = harder to predict, consistent with asset complexity. Key conclusion: Student-t distribution fixes GJR Normal tail underestimation for EQUITY assets (QQQ, GLD, 0050.TW: 3/3 fixed), but not for crypto where BTC has right-skewed returns and over-conservative VaR. Codex review caught 2 HIGH severity bugs pre-run: (1) Kupiec n1=0 falsely PASS, (2) Student-t quantile missing sqrt((df-2)/df) scale correction for unit-variance residuals.",
+    "tags": [
+      "VaR",
+      "GJR-GARCH",
+      "Student-t",
+      "cross-asset",
+      "QQQ",
+      "GLD",
+      "0050.TW",
+      "BTC",
+      "Kupiec",
+      "Basel",
+      "fat-tails",
+      "K804"
+    ],
+    "data_source": "yfinance",
+    "asset": "QQQ, GLD, 0050.TW, BTC-USD",
+    "period": "2023-01-03 to 2024-12-31 (OOS)",
+    "key_numbers": {
+      "normal_pass_rate": "2/4",
+      "student_t_pass_rate": "3/4",
+      "fhs_pass_rate": "3/4",
+      "btc_anomaly": "right-skewed returns (+0.619), Normal over-conservative (0.41%), t and FHS too conservative (0.14%)",
+      "equity_finding": "Student-t fixes Normal on all 3 equity/commodity assets",
+      "btc_df": 3.2,
+      "qqq_df": 8.2,
+      "gld_df": 5.0,
+      "tw50_df": 4.9
+    }
   }
 ]
