@@ -323,11 +323,11 @@
 - [ ] **Event-Risk Budgeter（CPI/FOMC/NFP/Earnings）**：事件窗口自動半倉。實務投資人工具，不只是事後分析。
 
 ### Codex 第 5 次建議（2026-03-26）[提出: Codex]
-- [ ] **Decision-focused policy learning** → K798 進行中。Contextual bandit vs predict-then-optimize。回應「prediction ≠ trading」
-- [ ] **Two-clock decomposition: overnight + intraday + jump**：分開建模 close-to-open / open-to-close / jump probability，只交易有信號的 segment。K451 已做描述性分析但未做策略
-- [ ] **Options surface state variables**：超越 VIX/SKEW 的 scalar summary，用完整 IV surface（left-tail slope, corridor variance, GEX/vanna, 0DTE share）。⚠️ BLOCKED: 需 options 歷史數據
-- [ ] **Dispersion / correlation-regime trading**：將 DCC/copula/network 分析（K443/K444/K455）轉化為策略：sector dispersion, correlation breakdown trades, network-hub rotation
-- [ ] **Event-surprise strategies**：不是 calendar dummy（K498 null），而是用 surprise component（fed funds futures surprise, CPI surprise vs option-implied move）。條件預測比無條件預測更可行
+- [x] ~~Decision-focused policy learning~~ → **K798 NULL**。DM 全 NS。12/VIX irreducible #7。
+- [x] ~~Two-clock decomposition~~ → **K791 NULL**。隔夜/盤中分解不改善預測。
+- [ ] **Options surface state variables**：⚠️ BLOCKED: 需 options 歷史數據
+- [ ] **Dispersion / correlation-regime trading**：sector dispersion, correlation breakdown trades
+- [x] ~~Event-surprise strategies~~ → **K801 NULL**。|ΔVIX|>2σ 多餘，12/VIX 自帶 shock guard。#8 irreducible。
 
 Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decomposition (3) Dispersion trading
 
@@ -494,6 +494,11 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - **新推薦**：GJR + conformal 用於風險管理，raw GJR 用於純預測。
 - 待驗證：跨資產（0050.TW, QQQ, GLD）conformal 效果
 - 待整合進 Paper 1 和 Paper 5
+
+**K801 完成（2026-04-01）：Event-Surprise VIX Shock Guard — NULL**
+- VIX shock guard（|ΔVIX|>2σ → 減倉 5 天）不顯著改善 12/VIX（DM |t|<1.3，全部 FAIL Harvey）
+- 原因：VIX 水位已吸收 ΔVIX 資訊——12/VIX 本身即動態 shock-guard
+- 衍生方向（可探索，有差異化）：VRP = VIX - realized vol（恐懼溢價 vs 實現波動差異）、VIX term structure（VX1-VX2 期貨 contango/backwardation）、跨資產 shock（VIX+DXY 同時跳=更強信號）
 
 ## 重大研究結論更新（2026-03-29 K687/K697/K700/K701）
 
