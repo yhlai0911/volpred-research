@@ -523,5 +523,11 @@
     "title": "K803: VIX TS Overlay — 4th Consecutive NULL Confirms 12/VIX Sufficiency",
     "lesson": "第 4 次測試 VIX 期限結構作為 12/VIX 覆蓋信號，全部失敗（T13、N102、N177、K803）。核心教訓：12/VIX 的 sufficient statistic 屬性已被反覆確認。VIX level 隱含了 term structure 信息（backwardation 本身就是 VIX spike 的結果，而 VIX spike 已使 12/VIX 降槓桿）。設計減槓桿覆蓋時，必須先問「VIX level 是否已捕捉此信號？」。若答案是「部分是」，則覆蓋幾乎必定是 redundant。未來測試 VIX TS 的唯一有效角度：(1) 月頻策略（文獻支持月頻 backwardation 信號）；(2) 增槓桿而非減槓桿（backwardation 後期望報酬反而更高）——但需注意 timing 不確定性。Codex 審查抓到的 HIGH 問題：原始 dm_test() 實作錯誤（return spread 非 DM loss differential），已修正為正確的 HAC NW return-spread t-test，並明確標示為 Harvey (2016) 框架。每次 strategy comparison 必須用 HAC t-test + Harvey t>3.0，不可混淆 DM forecast test 與 strategy return test。",
     "created_at": "2026-04-01T11:29:13.766452"
+  },
+  {
+    "id": "E39",
+    "title": "K799-K804 VaR story arc: Codex saves from false breakthrough",
+    "content": "預測選模型(GJR)，風險管理選分配(Student-t)，兩個維度獨立。K800 conformal artifact被Codex抓到。跨資產3/4通過，BTC例外。",
+    "timestamp": "2026-04-01T04:06:31.673873+00:00"
   }
 ]
