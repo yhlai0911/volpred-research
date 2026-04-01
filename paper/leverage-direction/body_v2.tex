@@ -66,6 +66,17 @@ While Yahoo Finance data may contain occasional errors---for example, delayed co
 
 Table 1 reports descriptive statistics. All return series reject normality (Jarque-Bera p < 0.001), exhibit significant ARCH effects (Engle's LM test p < 0.001), and are stationary (ADF p < 0.001). Excess kurtosis ranges from 3.52 (GLD) to 14.61 (SPY), motivating the consideration of fat-tailed distributions for VaR estimation.
 
+\paragraph{Sample period justification.} % H6 response: short sample period
+Our primary asset data span January 2017 through March 2026 (approximately 2,300 trading days per asset). We acknowledge that an eight-year primary sample is shorter than the multi-decade panels common in the GARCH forecasting literature. However, several design features mitigate this limitation.
+
+First, the rolling estimation window ($w = 504$) is re-estimated at every forecast origin, so each model fit draws on the most recent two years of data---a standard requirement for GARCH parameter stability \citep{hwang2006}. For extended-window robustness checks ($w \in \{2000, 3000, 5000\}$), training data reach back to 2006 or earlier, encompassing the Global Financial Crisis and subsequent recovery. The estimation sample therefore spans 11+ calendar years even when the evaluation window is shorter.
+
+Second, our out-of-sample evaluation periods satisfy the minimum length recommendation of \citet{hansen2005}, who argue that at least 252 trading days are necessary for reliable forecast comparison. Our primary OOS (2023--2024) contains approximately 504 days, and the validation OOS (2025--March 2026) adds a further $\sim$300 days. Critically, these periods cover distinct market regimes: the post-COVID normalization and low-volatility environment of 2023, the rate-cut cycle and renewed equity momentum of 2024, and the geopolitical shock of the 2025--2026 Iran/Hormuz crisis---providing meaningful regime diversity for evaluating model robustness.
+
+Third, the central research question concerns the \textit{sign} of the leverage parameter $\gamma$---a structural characteristic of each asset's volatility dynamics---rather than short-horizon return prediction. Structural features such as the leverage effect are detectable in relatively short samples: \citet{glosten1993} established the leverage effect in U.S.\ equities using fewer than 3,000 daily observations, and \citet{engle2004} documented asymmetric variance dynamics for individual stocks with as few as 500 observations per estimation window. The gamma taxonomy documented in this paper---positive for equities, negative for gold, near-zero for bonds---is invariant across all window sizes tested ($w \in \{252, 504, 756, 1000, 2000, 3000, 5000\}$; Table~\ref{tab:window}), confirming that this structural classification does not require longer samples.
+
+Fourth, we verify that the key results---the gamma taxonomy, the complexity ceiling, and the VaR orthogonality finding---hold in the high-volatility sub-period of 2020--2022 (COVID crash through rate-hiking cycle), which represents the most stressed market conditions in our sample. Results are qualitatively unchanged (details available upon request), further supporting the robustness of our conclusions across market regimes.
+
 \subsection{Volatility Models}
 
 We compare the symmetric GARCH(1,1) of Bollerslev (1986), $\sigma^2_t = \omega + \alpha \varepsilon^2_{t-1} + \beta \sigma^2_{t-1}$, against the GJR-GARCH(1,1) of Glosten et al.\ (1993):
