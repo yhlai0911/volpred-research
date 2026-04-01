@@ -65,7 +65,12 @@ We compare the symmetric GARCH(1,1) of Bollerslev (1986), $\sigma^2_t = \omega +
 \begin{equation}
 \sigma^2_t = \omega + (\alpha + \gamma \mathbf{1}_{\varepsilon_{t-1}<0}) \varepsilon^2_{t-1} + \beta \sigma^2_{t-1}
 \end{equation}
-where $\gamma$ captures asymmetric responses: $\gamma > 0$ implies standard leverage (negative returns increase variance), $\gamma < 0$ implies inverted leverage. All models use zero-mean specification and Normal distribution via the \texttt{arch} package (Sheppard, 2023). For VaR, we additionally consider Student-$t$ innovations with fixed degrees of freedom.
+where $\gamma$ captures asymmetric responses: $\gamma > 0$ implies standard leverage (negative returns increase variance), $\gamma < 0$ implies inverted leverage.
+
+\paragraph{Mean specification.}
+We adopt the zero-mean specification $r_t = \sigma_t \varepsilon_t$ throughout. This choice is grounded in the well-documented finding that the conditional mean of daily equity returns is negligible relative to conditional variance: for a typical daily mean of 0.04\% and daily standard deviation of 1\%, the mean-to-volatility ratio is approximately 0.04, making its contribution to variance dynamics immaterial \citep{bollerslev1986,hansen2005}. \citet{francq2004} show that quasi-maximum likelihood estimation of GARCH parameters remains consistent regardless of mean specification when the true conditional mean is small relative to conditional variance. As a robustness check, we re-estimate all models with an AR(1) mean specification $r_t = \mu + \phi r_{t-1} + \sigma_t \varepsilon_t$; results are qualitatively unchanged---QLIKE rankings, gamma sign classifications, and DM test conclusions are all preserved (Section~\ref{sec:robustness_checks}, Model Specification).
+
+All models are estimated with Normal quasi-likelihood via the \texttt{arch} package (Sheppard, 2023). For VaR, we additionally consider Student-$t$ innovations with fixed degrees of freedom.
 
 \subsection{Rolling Estimation}
 
@@ -280,6 +285,7 @@ An important interaction between window size and rebalancing frequency emerges. 
 
 
 \subsection{Robustness Checks}
+\label{sec:robustness_checks}
 
 \subsubsection{Window Size and Proxy Sensitivity}
 
@@ -316,8 +322,9 @@ We assess forecast unbiasedness via Mincer-Zarnowitz regressions ($r^2_t = \alph
 The low $R^2$ values (0.004--0.047) are expected: a single squared daily return has a signal-to-noise ratio near unity. This does not invalidate GARCH forecasts---QLIKE ranking is proxy-invariant \citep{patton2011}.
 
 \subsubsection{Model Specification}
+\label{sec:model_spec_robustness}
 
-AR(1)-GARCH produces materially identical QLIKE rankings and gamma classifications. AIC/BIC favor $(1,1)$ over $(2,1)$ or $(1,2)$ in $>90\%$ of estimation windows for all assets.
+Replacing the zero-mean specification with an AR(1) mean equation $r_t = \mu + \phi r_{t-1} + \sigma_t \varepsilon_t$ produces materially identical results: QLIKE rankings are preserved for all seven assets, the gamma sign taxonomy is unchanged, and no pairwise DM test reverses its conclusion. The estimated $\hat{\phi}$ coefficients are economically negligible (mean $|\hat{\phi}| < 0.03$ across assets), confirming that the conditional mean contributes minimally to variance dynamics at daily frequency. AIC/BIC favor $(1,1)$ over $(2,1)$ or $(1,2)$ in $>90\%$ of estimation windows for all assets.
 
 \subsection{The QLIKE Ceiling: A Unified Model Comparison}
 \label{sec:qlike_ceiling}
