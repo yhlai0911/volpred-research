@@ -19358,5 +19358,17 @@
     ],
     "confidence": 0.7,
     "created_at": "2026-04-01T13:52:34.891378"
+  },
+  {
+    "item_id": "b1fd73bf",
+    "category": "experiment_correction",
+    "content": "K812 US\u2192Taiwan Lead-Lag \u2014 INVALID\uff08Codex 3 HIGH\uff09\n\nSharpe 3.400 \u662f\u5047\u7684\u3002\u4e09\u500b\u81f4\u547d bug\uff1a\n1. \u6df7\u5408\u65e5\u66c6 shift(1)\uff1a\u53f0\u7063\u5047\u65e5\u5f8c\u7f8e\u80a1 session \u88ab\u4e1f\u68c4\uff0clag \u4e0d\u6b63\u78ba\n2. Sanity check \u9020\u5047\uff1alookahead_sharpe=1.938 \u662f hard-coded\uff0c\u975e\u8a08\u7b97\u7d50\u679c\n3. Close-to-close return \u6355\u6349\u4e0d\u53ef\u4ea4\u6613\u7684\u9694\u591c gap\uff08\u8173\u672c\u7b2c 9 \u884c\u81ea\u5df1\u627f\u8a8d\uff09\n\n\u898f\u5247\u300cSharpe > 2x baseline = \u5e7e\u4e4e\u4e00\u5b9a\u6709 bug\u300d\u7b2c 5 \u6b21\u9a57\u8b49\uff08K618/K621/K679/K698/K812\uff09\u3002\n\n\u6b63\u78ba\u505a\u6cd5\uff08K812v2 \u9700\u8981\uff09\uff1a\n- \u7528 open-to-close 0050.TW return\uff08\u4e0d\u662f close-to-close\uff09\n- \u6b63\u78ba\u7684\u8de8\u5e02\u5834\u65e5\u66c6\u5c0d\u9f4a\uff08merge on date, \u800c\u975e stack+filter\uff09\n- \u5be6\u969b\u8a08\u7b97 shift(0) sanity check\n- I8 \u5df2\u767c\u73fe SPY Momentum o2o FAIL\uff08\u53ea\u6709 c2c \u624d\u300c\u6709\u6548\u300d= overnight gap artifact\uff09",
+    "evidence": [
+      "K812",
+      "Codex_review_FAIL",
+      "I8"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-01T14:05:00.339371"
   }
 ]
