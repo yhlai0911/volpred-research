@@ -23,6 +23,59 @@ class Publisher:
         POST is no longer used to avoid duplicate/ordering conflicts."""
         pass
 
+    @staticmethod
+    def _tokenize_title(title: str) -> set:
+        """Extract meaningful Chinese/English keywords from title."""
+        import re
+        # Remove punctuation and split
+        clean = re.sub(r'[^\w\u4e00-\u9fff]', ' ', title.lower())
+        # Split Chinese into 2-char ngrams + keep English words
+        tokens = set()
+        for word in clean.split():
+            if len(word) >= 2:
+                tokens.add(word)
+        # Chinese 2-gram
+        chinese = re.findall(r'[\u4e00-\u9fff]+', title)
+        for phrase in chinese:
+            for i in range(len(phrase) - 1):
+                tokens.add(phrase[i:i+2])
+        # Remove very common words
+        stopwords = {'的', '了', '是', '在', '和', '你', '我', '這', '那', '都', '也', '就', '但'}
+        tokens -= stopwords
+        return tokens
+
+    def _find_similar_articles(self, title: str, feed: list, audience: str | None = None) -> list:
+        """Find articles with similar topics (>50% keyword overlap).
+        Only checks same audience type to avoid false positives across general/research.
+        """
+        new_tokens = self._tokenize_title(title)
+        if not new_tokens:
+            return []
+
+        similar = []
+        for existing in feed:
+            if existing.get('status') == 'unpublished':
+                continue
+            # Only compare within same audience
+            if audience and existing.get('audience') != audience:
+                continue
+            ex_tokens = self._tokenize_title(existing.get('title', ''))
+            if not ex_tokens:
+                continue
+            overlap = len(new_tokens & ex_tokens)
+            union = len(new_tokens | ex_tokens)
+            jaccard = overlap / union if union > 0 else 0
+            if jaccard > 0.35:  # 35% Jaccard similarity threshold
+                similar.append({
+                    'id': existing.get('id', '?'),
+                    'title': existing.get('title', '?'),
+                    'similarity': jaccard,
+                    'status': existing.get('status', '?'),
+                })
+
+        similar.sort(key=lambda x: -x['similarity'])
+        return similar
+
     def publish_experiment(self, experiment_id: str, title: str,
                           summary: str, metrics: dict,
                           category: str = 'experiment',
@@ -109,20 +162,29 @@ class Publisher:
         If not provided, auto-detected from tags.
         """
         import uuid
-        # --- Dedupe check: reject if same title published/drafted in last 24h ---
+        import re
+        # --- Dedupe check: reject exact title + warn similar topics ---
         feed = self._load_feed()
         from datetime import timedelta
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+        cutoff_exact = datetime.now(timezone.utc) - timedelta(hours=24)
         for existing in feed:
             if existing.get('title') == title:
                 existing_time = existing.get('published_at') or existing.get('created_at', '')
                 try:
                     from dateutil.parser import parse as dtparse
-                    if dtparse(existing_time) > cutoff:
+                    if dtparse(existing_time) > cutoff_exact:
                         print(f"  ⚠️ Duplicate title within 24h: '{title[:50]}' (existing: {existing['id']}). Skipping.")
                         return existing['id']
                 except Exception:
                     pass
+
+        # --- Similar topic check: warn if >60% keyword overlap with existing ---
+        similar = self._find_similar_articles(title, feed, audience)
+        if similar:
+            print(f"  ⚠️ Similar articles found ({len(similar)}):")
+            for s in similar[:3]:
+                print(f"    [{s['similarity']:.0%}] {s['id']}: {s['title'][:60]}")
+            print(f"  → Proceeding with publish, but consider if this adds new value.")
         # Sanitize description
         if isinstance(description, str):
             # Fix double-escaped newlines from various input sources
