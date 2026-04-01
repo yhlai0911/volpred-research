@@ -1,0 +1,167 @@
+{
+  "experiment_id": "K798",
+  "title": "Decision-Focused Policy Learning \u2014 Skip Prediction, Learn Optimal Action Directly",
+  "description": "Tests Predict-then-Optimize (12/VIX), DF-OLS (direct MV optimization), Feature-Conditioned Policy, and Contextual Bandit (epsilon-greedy) for VT weighting. Can decision-focused methods beat 12/VIX?",
+  "timestamp": "2026-04-01 09:03:18",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "data_period": "2008-01-04 to 2025-12-30",
+  "oos_period": "2023-01-03 to 2025-12-30",
+  "n_total": 4526,
+  "n_train": 3775,
+  "n_oos": 751,
+  "lag_convention": "signal.shift(1) \u2014 all signals use t-1 features, t returns",
+  "gamma": 5.0,
+  "tx_cost_note": "All metrics are GROSS (pre-TX). TX cost uniformly applied would be ~5-15 bps/year for smooth strategies (12/VIX, DF-OLS) and higher for bandit due to discretization. Gross comparison is fair for policy comparison.",
+  "approaches": {
+    "1_predict_then_optimize": {
+      "description": "Standard 12/VIX: GJR-GARCH \u2192 \u03c3 \u2192 w = 12/(\u03c3_annual\u00d7100)",
+      "oos_sharpe": 1.5091,
+      "oos_mdd": -0.1067,
+      "oos_crra_utility": -0.24953
+    },
+    "2_decision_focused_ols": {
+      "description": "Direct mean-variance optimization: w* = [\u03bc_S - \u03bc_G + \u03b3(\u03c3_G\u00b2 - \u03c3_SG)] / [\u03b3(\u03c3_S\u00b2 + \u03c3_G\u00b2 - 2\u03c3_SG)], expanding window",
+      "oos_sharpe": 2.1959,
+      "oos_mdd": -0.0968,
+      "oos_crra_utility": -0.249122,
+      "oos_mean_weight": 0.5449
+    },
+    "2b_feature_conditioned": {
+      "description": "OLS features [VIX, |r|, r\u00b2_5d, vix_chg, vix_pct] \u2192 optimal_w (estimated via 63-day rolling grid search)",
+      "oos_sharpe": 2.262,
+      "oos_mdd": -0.0792,
+      "oos_crra_utility": -0.249127,
+      "oos_mean_weight": 0.6412
+    },
+    "3_contextual_bandit": {
+      "description": "Epsilon-greedy (\u03b5=0.1) bandit, 6 arms [0.2,0.4,0.5,0.6,0.8,1.0], 5 VIX quintile contexts, CRRA reward",
+      "epsilon": 0.1,
+      "n_arms": 6,
+      "arms": [
+        0.2,
+        0.4,
+        0.5,
+        0.6,
+        0.8,
+        1.0
+      ],
+      "n_contexts": 5,
+      "oos_sharpe": 2.0081,
+      "oos_mdd": -0.101,
+      "oos_crra_utility": -0.249163,
+      "oos_mean_weight": 0.5583,
+      "learned_policies": {
+        "VIX_Q1": {
+          "best_arm": 0.8,
+          "arm_counts": {
+            "0.2": 29,
+            "0.4": 37,
+            "0.5": 241,
+            "0.6": 329,
+            "0.8": 661,
+            "1.0": 27
+          }
+        },
+        "VIX_Q2": {
+          "best_arm": 0.4,
+          "arm_counts": {
+            "0.2": 15,
+            "0.4": 708,
+            "0.5": 26,
+            "0.6": 12,
+            "0.8": 15,
+            "1.0": 15
+          }
+        },
+        "VIX_Q3": {
+          "best_arm": 0.2,
+          "arm_counts": {
+            "0.2": 597,
+            "0.4": 24,
+            "0.5": 46,
+            "0.6": 12,
+            "0.8": 21,
+            "1.0": 8
+          }
+        },
+        "VIX_Q4": {
+          "best_arm": 0.5,
+          "arm_counts": {
+            "0.2": 24,
+            "0.4": 552,
+            "0.5": 32,
+            "0.6": 42,
+            "0.8": 25,
+            "1.0": 47
+          }
+        },
+        "VIX_Q5": {
+          "best_arm": 0.6,
+          "arm_counts": {
+            "0.2": 31,
+            "0.4": 33,
+            "0.5": 25,
+            "0.6": 593,
+            "0.8": 13,
+            "1.0": 34
+          }
+        }
+      }
+    }
+  },
+  "baselines_oos": {
+    "BH_50_50": {
+      "sharpe": 2.2433,
+      "mdd": -0.0902,
+      "crra_utility": -0.2491
+    },
+    "12vix_spy_only": {
+      "sharpe": 1.5091,
+      "mdd": -0.1067,
+      "crra_utility": -0.24953
+    }
+  },
+  "dm_tests_oos": {
+    "DF-OLS vs 12/VIX": {
+      "dm_stat": -0.687,
+      "p_val": 0.4918,
+      "harvey_sig_t3": "NO"
+    },
+    "FC-Policy vs 12/VIX": {
+      "dm_stat": -0.924,
+      "p_val": 0.3557,
+      "harvey_sig_t3": "NO"
+    },
+    "Bandit vs 12/VIX": {
+      "dm_stat": -0.171,
+      "p_val": 0.8644,
+      "harvey_sig_t3": "NO"
+    },
+    "DF-OLS vs BH": {
+      "dm_stat": 1.174,
+      "p_val": 0.2405,
+      "harvey_sig_t3": "NO"
+    },
+    "Bandit vs BH": {
+      "dm_stat": 0.638,
+      "p_val": 0.5235,
+      "harvey_sig_t3": "NO"
+    }
+  },
+  "conclusions": [
+    "Sharpe winner: FC-Policy OOS (2.262)",
+    "CRRA utility winner: BH 50/50 OOS (-0.249100)",
+    "12/VIX OOS Sharpe: 1.509",
+    "DF-OLS OOS Sharpe: 2.196 (diff: +0.687)",
+    "FC-Policy OOS Sharpe: 2.262 (diff: +0.753)",
+    "Bandit OOS Sharpe: 2.008 (diff: +0.499)",
+    "Harvey t>3.0 breaches: 0/5",
+    "Decision-focused approaches face sample limitation: not enough data for reliable policy estimation"
+  ],
+  "references": [
+    "Elmachtoub & Grigas (2022) Smart Predict-then-Optimize, Operations Research",
+    "Mnih et al. (2015) Human-level control through deep reinforcement learning, Nature",
+    "K524: Decision-Focused Policy 384 rules, 0 survive BH correction",
+    "K787: HAR Directional \u2014 accuracy \u2260 trading profit"
+  ]
+}
