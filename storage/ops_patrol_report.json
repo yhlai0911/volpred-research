@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-04-01T06:01:44Z",
+  "timestamp": "2026-04-01T06:15:00Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "12 draft articles in storage/reports/feed.json (threshold: <3). Pool is healthy."
+      "detail": "20 draft articles in storage/reports/feed.json (threshold: <3). Pool is healthy."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime is ~22 seconds old (threshold: >26 hours). Metrics are current."
+      "detail": "storage/strategy_metrics.json is 0.01 hours old (threshold: >26 hours). Metrics are current."
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies checked. Each has exactly 1 null in last 3 entries (today's not-yet-filled entry). No strategy exceeds threshold of >2 nulls. Strategies: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier."
+      "detail": "All active strategies checked. No strategy has >2 null portfolio_return in last 3 entries."
     },
     {
       "name": "GIT_STATUS",
@@ -30,7 +30,7 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1590 entries in storage/memory/knowledge.json."
+      "detail": "1625 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": []
