@@ -19568,5 +19568,18 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-04-01T16:11:50.334407"
+  },
+  {
+    "item_id": "350a0530",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: \u7528\u6236 (K433), \u57f7\u884c: Claude] K821 SSVS Variance Equation \u2014 NULL\uff08GJR \u81ea\u8db3\uff09\n\nBayesian SSVS \u61c9\u7528\u5230 GJR-GARCH variance equation \u7684\u5916\u751f\u8b8a\u6578\u30028 \u5019\u9078\u8b8a\u6578\u3002\n\nPIP \u6392\u540d\uff08\u5168\u90e8 < 0.5\uff0c\u5373\u300c\u4e0d\u9078\u300d\uff09\uff1a\n1. HYG_spread: 0.428\uff08\u6700\u9ad8\u4f46\u672a\u904e\u9580\u6abb\uff09\n2. VIX_change: 0.330\n3. SPY_volume_ratio: 0.189\n4. term_spread: 0.152\n5. TLT_vol: 0.120\n6. VIX9D: 0.084\n7. VVIX_proxy: 0.056\n8. VIX_level: 0.039\uff08\u5e7e\u4e4e\u70ba\u96f6\u2014\u2014VIX \u5df2\u88ab GARCH \u5167\u90e8\u52d5\u614b\u6355\u6349\uff09\n\nOOS QLIKE\uff1aSSVS median model\uff08\u7a7a\u6a21\u578b\uff09-0.07% vs baseline\uff08NS\uff09\nDM tests\uff1a\u5168\u90e8 NS\uff08Harvey t<3.0\uff09\n\n\u8207 K484 \u5c0d\u6bd4\uff08\u95dc\u9375\u767c\u73fe\uff09\uff1a\n- K484 internal SSVS\uff1a4/5 PIP=1.000, QLIKE -7.43%, DM=4.31 (Harvey PASS)\n- K821 external SSVS\uff1a0/8 PIP>0.5, QLIKE -0.07%, \u5168 NS\n- \u7d50\u8ad6\uff1avariance equation \u7684\u9810\u6e2c\u529b\u4f86\u81ea\u5167\u90e8\u7d50\u69cb\uff08leverage, past shocks\uff09\uff0c\u975e\u5916\u90e8\u4fe1\u865f\n\nVIX sufficiency \u518d\u6b21\u78ba\u8a8d\uff1aVIX_level PIP=0.039\u3002\nGJR-GARCH variance equation \u662f\u81ea\u8db3\u7684\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k821_ssvs_variance_equation.py\n\u7d50\u679c\u6578\u64da: experiments/k821_ssvs_variance_equation_results.json",
+    "evidence": [
+      "K821",
+      "K433",
+      "K484",
+      "K461"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-01T16:48:24.300395"
   }
 ]

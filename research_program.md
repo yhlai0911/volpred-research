@@ -357,7 +357,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] ~~K432/K814: Bayesian MCMC GARCH~~ → **K814 完成**（⚠️ Codex 3 HIGH：P(γ>0) 是先驗 tautology、OOS h[0] leak、ESS/Geweke 錯誤）。框架有價值但數字不可靠。需 K814v2 修正 prior + 初始化 + 診斷。
 - [ ] Bayesian Subset Selection for TARMA — Chen, Liu, Gerlach (2011) Computational Statistics, 26, 1-30. 擴展 SSVS 到 threshold + MA terms，16M+ 可能子集
 - [ ] Threshold Variable Selection for Asymmetric SV — Chen, Liu, So (2013) Computational Statistics, 28, 2415-2447. Combined threshold variable Z_t = Σω_i Z_i，同時選 threshold 變數和模型結構。五個亞洲市場實證
-- [ ] SSVS for Variance Equation — 將 SSVS 擴展到 variance equation（GARCH-X 的 variance side 加外生變數），目前 K433 只處理 mean equation
+- [x] ~~SSVS for Variance Equation~~ → **K821 完成 NULL**。0/8 外生變數 PIP>0.5。GJR variance equation 自足。VIX_level PIP=0.039。與 K484 internal（4/5 PIP=1.0）形成鮮明對比。
 - [ ] Threshold GARCH with Bayesian Model Selection — 結合 2006+2013 方法：threshold GARCH + SSVS 同時選 regime 結構和變數子集
 
 ## 前沿文獻方向（2025-2026）
