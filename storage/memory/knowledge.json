@@ -19214,5 +19214,41 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-04-01T13:20:41.760072"
+  },
+  {
+    "item_id": "6dc48184",
+    "category": "experiment_validation",
+    "content": "K807 Codex \u5be9\u67e5\uff1a1 HIGH (DM impl), \u6838\u5fc3\u7d50\u8ad6\u78ba\u8a8d\n\nCodex \u78ba\u8a8d underperformance \u662f\u771f\u5be6\u7684\uff0c\u4e0d\u662f lag/TX/lookahead bug \u9020\u6210\u3002\n- signal.shift(1) \u6b63\u78ba (LOW)\n- TX cost \u6b63\u78ba (LOW)\n- Expanding z-score \u7121 lookahead (LOW)\n- HIGH: DM test \u7528 return \u5dee\u7570\u975e\u6a19\u6e96\u5be6\u4f5c\uff08\u540c K795 \u554f\u984c\uff09\uff0c\u61c9\u7528 model_evaluation.py\n- MEDIUM: Cross-OOS periods ad-hoc\uff0c\u5305\u542b headline OOS \u671f\u9593\n\nK807 NULL \u7d50\u8ad6\u78ba\u8a8d\uff1a\u50b5\u5238\u58d3\u529b\u4fe1\u865f\u4e0d\u512a\u65bc 50/50 baseline\u3002",
+    "evidence": [
+      "K807",
+      "Codex_review"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-01T13:22:42.246799"
+  },
+  {
+    "item_id": "71606f33",
+    "category": "methodology",
+    "content": "E40 \u7d93\u9a57\u6559\u8a13\uff1a\u5be6\u9a57\u8173\u672c\u7684 DM test \u5fc5\u9808\u4f7f\u7528\u6a19\u6e96\u6a21\u7d44\n\nK795 \u548c K807 \u90fd\u88ab Codex \u6293\u5230\u540c\u4e00\u500b HIGH\uff1a\u81ea\u884c\u5be6\u4f5c\u7684 DM test \u7528 return \u5dee\u7570\uff08\u975e forecast-loss\uff09\uff0c\n\u4e14 h=1 \u6642\u7121 HAC \u8abf\u6574\u3002\u61c9\u7d71\u4e00\u4f7f\u7528 src/volpred/stats/model_evaluation.py \u7684 dm_test() \u51fd\u5f0f\u3002\n\n\u6559\u8a13\uff1a\u4e0d\u8981\u5728\u6bcf\u500b\u5be6\u9a57\u8173\u672c\u88e1\u81ea\u5df1\u5beb\u7d71\u8a08\u6aa2\u5b9a\uff0c\u7528\u5df2\u5be9\u67e5\u904e\u7684\u6a19\u6e96\u6a21\u7d44\u3002\n\u985e\u4f3c\u554f\u984c\uff1aCross-OOS \u671f\u9593\u4e5f\u61c9\u6a19\u6e96\u5316\uff085 \u500b\u9023\u7e8c 2 \u5e74\u975e\u91cd\u758a\u671f\u9593\uff09\u3002",
+    "evidence": [
+      "K795",
+      "K807",
+      "E40"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-01T13:22:53.446623"
+  },
+  {
+    "item_id": "24518642",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude (arXiv:2504.15985), \u57f7\u884c: Claude] K806 Multivariate fBm Rough Vol \u2014 NULL\n\n\u8de8\u8cc7\u7522 fractional Brownian motion\uff08mfBm\uff09\u6ce2\u52d5\u7387\u9810\u6e2c\u30025 \u8cc7\u7522 Hurst \u4f30\u8a08 + \u8de8\u8cc7\u7522 H(t) \u4f5c\u70ba\u5916\u751f\u8b8a\u6578\u3002\n\nHurst \u4f30\u8a08\uff08\u5168\u8cc7\u7522 H << 0.5\uff0crough vol \u666e\u904d\uff09\uff1a\nSPY: 0.014, QQQ: 0.005, GLD: -0.008, 0050.TW: 0.000, BTC: 0.014\n\nQLIKE on r\u00b2\uff08OOS 2023-2024, n=501\uff09\uff1a\n1. GJR+ownH: 1.4773\uff08\u5fae\u5e45\u6539\u5584\u4f46 DM=-0.09 vs GJR\uff0c\u5b8c\u5168 NS\uff09\n2. GJR-GARCH: 1.4785\n3. GJR+crossH: 1.4852\uff08\u8de8\u8cc7\u7522 H \u53cd\u800c\u66f4\u5dee\uff09\n7. HAR+crossH: 1.6324\uff08HAR \u7cfb\u5217\u5728 r\u00b2 target \u5168\u8f38 GJR\uff09\n\n\u7d50\u8ad6\uff1a\n1. Rough vol \u662f\u8de8 5 \u8cc7\u7522\u666e\u904d\u73fe\u8c61\uff08100% rough regime\uff09\n2. \u8de8\u8cc7\u7522 H \u76f8\u95dc\u6027\u592a\u4f4e\uff08\u9664 SPY-QQQ 0.53 \u5916\u5747 <0.16\uff09\u2192 \u7121\u53ef\u5229\u7528\u8cc7\u8a0a\n3. \u81ea\u8eab H(t) \u6539\u5584\u6975\u5fae\u4e14 NS \u2192 \u65e5\u983b variogram H \u4e0d\u5920\u7cbe\u78ba\n4. \u9700\u9ad8\u983b\uff085-min\uff09\u6578\u64da\u624d\u53ef\u80fd\u6355\u6349\u6709\u610f\u7fa9\u7684\u8de8\u8cc7\u7522 rough vol \u5171\u904b\u52d5\n5. \u8207 K782 \u4e00\u81f4\uff1aproxy\uff08r\u00b2 vs |r|\uff09\u6bd4\u6a21\u578b\u66f4\u91cd\u8981\n\n\u5f85 Codex \u5be9\u67e5\u78ba\u8a8d\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k806_multivariate_fbm.py\n\u7d50\u679c\u6578\u64da: experiments/k806_multivariate_fbm_results.json\n\u6578\u64da\u4f86\u6e90: yfinance (SPY, QQQ, GLD, 0050.TW, BTC-USD)",
+    "evidence": [
+      "K806",
+      "K529",
+      "K782",
+      "arXiv_2504_15985"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-04-01T13:23:29.899570"
   }
 ]

@@ -401,7 +401,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）
 
 ### Rough Volatility & Hurst
-- [ ] ★ **Multivariate fBm for RV** — arXiv:2504.15985 (April 2025)。不同資產有不同 H，跨資產 mfBm 預測勝過單變量。即刻可做（不需日內數據）。
+- [x] ~~Multivariate fBm for RV~~ → **K806 完成 NULL**。5 資產全 rough (H<<0.5)，但跨資產 H 相關太低（除 SPY-QQQ 0.53）。GJR+crossH 反而更差。自身 H(t) 改善 NS (DM=-0.09)。日頻 variogram 不夠精確，需 5-min 數據。
 - [ ] ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。
 - [ ] Time-Varying Hurst via EWMA — arXiv:2509.05820
 - [ ] Adaptive Fractal Dynamics — Frontiers Applied Math 2025
@@ -421,6 +421,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] Wild Bootstrap OHR — JRFM 2024
 - [ ] Partial Cointegration Hedging — RQFA 2023
 - [ ] Regime-Switching Correlation Hedging
+
+### 新發現（2026-04-01 文獻搜尋）
+- [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。
 
 ### 其他
 - [ ] Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting）
