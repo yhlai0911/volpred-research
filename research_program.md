@@ -319,7 +319,7 @@
 - [x] ~~跨資產 All-Weather VT~~ → **K808 完成 NULL on Sharpe**（⚠️ Codex 2 HIGH: DM impl + weight constraint bug）。50/50 Sharpe 不可動搖（#9，方向確認）。VT+RP MDD 改善方向正確但精確數字待 K808v2。
 - [x] ~~債券壓力去風險信號~~ → **K807 完成 NULL**。Composite 與 VIX 相關 0.641，不是獨立信號。所有策略 Sharpe < baseline 50/50（0.856）。DM 全 NS。K766 的 1.041 可能 overfitting。
 - [x] ~~Dispersion Timing（index vs sector）~~ → **K809 完成 NULL**。假說方向錯誤：高 dispersion 時 SPY 反而優於 EW（+2.8%/yr），因市值加權自動給贏家更高權重。DM 全 NS。
-- [ ] **Tail-First ES 配置 + Conformal Calibration**：從「預測 vol」轉向「控制尾部風險」。inverse-ES 配置 + 校準覆蓋率 OOS 驗證。
+- [x] ~~Tail-First ES 配置~~ → **K819 完成 NULL**。Inverse-ES 比 inverse-vol 更差（DM=-4.1，ES 方法統計上 worse）。Expanding ES 太平滑反應太慢。50/50 不可動搖 #11。
 - [ ] **Event-Risk Budgeter（CPI/FOMC/NFP/Earnings）**：事件窗口自動半倉。實務投資人工具，不只是事後分析。
 
 ### Codex 第 5 次建議（2026-03-26）[提出: Codex]

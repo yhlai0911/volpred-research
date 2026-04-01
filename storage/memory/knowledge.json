@@ -19493,5 +19493,17 @@
     ],
     "confidence": 0.8,
     "created_at": "2026-04-01T14:51:25.867963"
+  },
+  {
+    "item_id": "9e8d983e",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Codex #8, \u57f7\u884c: Claude] K819 Tail-First ES Allocation \u2014 NULL\n\nInverse-ES \u914d\u7f6e vs Inverse-Vol vs 50/50\u3002\u5047\u8aaa\uff1aES \u76f4\u63a5\u63a7\u5236\u5c3e\u90e8\u6bd4 vol \u66f4\u597d\u3002\n\n\u7d50\u679c\uff08SPY+GLD, 2006-2026\uff09\uff1a\n- S0 BH 50/50: OOS Sharpe 1.726\uff08\u4ecd\u662f\u738b\u8005 #11\uff09\n- S1 Inverse-Vol: Sharpe 0.499, MDD -23.8%\n- S2 Inverse-ES: Sharpe 0.457, MDD -25.9%\uff08\u6bd4 vol \u66f4\u5dee\uff01\uff09\n- S3 Inverse-Semivar: Sharpe 0.525\uff08\u52d5\u614b\u7b56\u7565\u6700\u4f73\u4f46\u4ecd\u4e0d\u5982 50/50\uff09\n- S4 12/VIX: Sharpe 0.457, MDD -20.3%\uff08stress \u671f\u9593 ES \u6700\u4f73\uff09\n\nDM S1 vs S2: t=-4.105\uff08S2 \u4e0b\u884c\u640d\u5931\u66f4\u9ad8\uff0cES \u65b9\u6cd5\u7d71\u8a08\u4e0a\u66f4\u5dee\uff09\nCross-OOS: S2 Inverse-ES \u50c5 1/5 \u52dd 50/50\uff08\u6700\u5dee\uff09\n\n\u6838\u5fc3\u767c\u73fe\uff1a\n1. Expanding-window ES \u592a\u5e73\u6ed1\uff08weight std 0.049 vs vol 0.078\uff09\u2192 \u5c0d regime \u8b8a\u5316\u53cd\u61c9\u592a\u6162\n2. ES \u548c Vol \u6b0a\u91cd\u76f8\u95dc\u50c5 0.475 \u2192 \u4e0d\u540c\u65b9\u6cd5\u4f46\u7d50\u679c\u985e\u4f3c\uff082 \u8cc7\u7522\u4e0b\u6536\u6582\u5230 ~50/50\uff09\n3. \u9ad8 VIX \u6642 ES \u53cd\u800c\u7d66 SPY \u66f4\u9ad8\u6b0a\u91cd\uff08+3.8%\uff09\u2192 \u53cd\u76f4\u89ba\uff0c\u56e0 expanding ES \u6eef\u5f8c\n4. Semivariance\uff08\u53ea\u770b\u8ca0 return\uff09\u662f\u6700\u4f73\u66ff\u4ee3\u4f46\u4ecd\u4e0d\u986f\u8457\n5. 50/50 \u4e0d\u53ef\u52d5\u6416 #11\n\n\u5be6\u9a57\u8173\u672c: experiments/k819_tail_first_es.py\n\u7d50\u679c\u6578\u64da: experiments/k819_tail_first_es_results.json",
+    "evidence": [
+      "K819",
+      "K687",
+      "Codex_suggestion_8"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-01T14:57:15.021654"
   }
 ]
