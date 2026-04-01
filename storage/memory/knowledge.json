@@ -19287,5 +19287,18 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-04-01T13:34:09.737287"
+  },
+  {
+    "item_id": "f269be3a",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Codex #5/#8, \u57f7\u884c: Claude] K809 Dispersion Timing \u2014 NULL\n\nSector \u5206\u6563\u5ea6\u4ea4\u6613\uff1a\u9ad8 dispersion ratio \u6642\u5207\u63db\u5230 equal-weight sectors vs SPY\u30029 \u500b SPDR sector ETFs\u3002\n\n\u7d50\u679c\uff08\u5168\u671f\u9593 2011-2026, 3813 \u5929\uff09\uff1a\n- S0 BH SPY: Sharpe 0.815\uff08\u6700\u4f73\uff09\n- S1 BH EW Sectors: 0.791\n- S2 Dispersion Switch: 0.762\n- S3 Smooth: 0.804\n- DM tests \u5168 NS\uff0cCross-OOS \u6700\u591a 2/5\n\n\u6838\u5fc3\u53cd\u9762\u767c\u73fe\uff1a\u9ad8\u5206\u6563\u5ea6\u6642 SPY \u53cd\u800c\u512a\u65bc EW sectors\uff08\u5e74\u5316\u5dee -2.8%\uff09\u3002\n\u539f\u56e0\uff1a\u9ad8\u5206\u6563\u5ea6 = \u90e8\u5206 sector \u9818\u5148\u3001\u90e8\u5206\u843d\u5f8c\u3002\u5e02\u503c\u52a0\u6b0a\u7684 SPY \u81ea\u52d5\u7d66\u8d0f\u5bb6\u66f4\u9ad8\u6b0a\u91cd\u3002\nEW \u5247\u5e73\u5747\u5206\u914d\uff0c\u53cd\u800c\u62d6\u7d2f\u3002\n\n\u7d50\u8ad6\uff1aCodex \u7684\u300chigh dispersion \u2192 EW sectors > SPY\u300d\u5047\u8aaa\u65b9\u5411\u932f\u8aa4\u3002\n\u9996\u6b21\u4f7f\u7528\u6a19\u6e96 strategy_dm_test/dm_test\uff08\u89e3\u6c7a E40 \u554f\u984c\uff09\u3002\n\n\u5be6\u9a57\u8173\u672c: experiments/k809_dispersion_timing.py\n\u7d50\u679c\u6578\u64da: experiments/k809_dispersion_timing_results.json\n\u6578\u64da\u4f86\u6e90: yfinance (SPY + 9 SPDR sector ETFs)",
+    "evidence": [
+      "K809",
+      "K771",
+      "Codex_suggestion_5",
+      "Codex_suggestion_8"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-01T13:42:07.460469"
   }
 ]

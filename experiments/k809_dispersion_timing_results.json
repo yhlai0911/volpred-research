@@ -1,0 +1,237 @@
+{
+  "experiment_id": "K809",
+  "title": "Dispersion Timing \u2014 Dispersion Ratio Strategies",
+  "proposer": "Codex GPT-5.4 #8 suggestion",
+  "executor": "Claude",
+  "timestamp": "2026-04-01T05:41:19.812583+00:00",
+  "data_source": "yfinance",
+  "data_period": "2011-02-01 to 2026-03-31",
+  "n_trading_days": 3813,
+  "sectors_used": [
+    "XLK",
+    "XLF",
+    "XLV",
+    "XLE",
+    "XLI",
+    "XLY",
+    "XLP",
+    "XLU",
+    "XLB"
+  ],
+  "n_sectors": 9,
+  "methodology": {
+    "dispersion_measure": "dispersion_ratio = rolling_20d_cs_std / rolling_20d_SPY_vol",
+    "S0": "Buy & Hold SPY",
+    "S1": "Buy & Hold Equal-Weight Sectors",
+    "S2": "Dispersion Switch: disp_ratio > expanding_median \u2192 EW sectors, else SPY",
+    "S3": "Smooth: weight_EW = clip(disp_ratio / (2*expanding_median), 0, 1)",
+    "signal_lag": "shift(1)",
+    "rebalancing": "monthly",
+    "tx_cost_per_unit_change": 0.0005,
+    "expanding_median_warmup": 252
+  },
+  "dispersion_ratio_stats": {
+    "mean": 0.8547,
+    "std": 0.3289,
+    "median": 0.7967,
+    "q25": 0.6126,
+    "q75": 1.0358
+  },
+  "signal_distribution": {
+    "S2_spy_pct": 29.8,
+    "S2_ew_pct": 70.2,
+    "S3_mean_ew_weight": 0.6312,
+    "S3_std_ew_weight": 0.1973
+  },
+  "full_period_results": {
+    "S0: BH SPY": {
+      "name": "S0: BH SPY",
+      "n_days": 3813,
+      "ann_return": 0.1397,
+      "ann_vol": 0.1715,
+      "sharpe": 0.8146,
+      "mdd": -0.3372,
+      "calmar": 0.4145,
+      "sortino": 1.0002,
+      "cagr": 0.1331
+    },
+    "S1: BH EW Sectors": {
+      "name": "S1: BH EW Sectors",
+      "n_days": 3813,
+      "ann_return": 0.1305,
+      "ann_vol": 0.165,
+      "sharpe": 0.7908,
+      "mdd": -0.3691,
+      "calmar": 0.3535,
+      "sortino": 0.9634,
+      "cagr": 0.1239
+    },
+    "S2: Dispersion Switch": {
+      "name": "S2: Dispersion Switch",
+      "n_days": 3813,
+      "ann_return": 0.1272,
+      "ann_vol": 0.1669,
+      "sharpe": 0.762,
+      "mdd": -0.3356,
+      "calmar": 0.379,
+      "sortino": 0.9387,
+      "cagr": 0.1199
+    },
+    "S3: Smooth": {
+      "name": "S3: Smooth",
+      "n_days": 3813,
+      "ann_return": 0.1334,
+      "ann_vol": 0.1659,
+      "sharpe": 0.8036,
+      "mdd": -0.347,
+      "calmar": 0.3843,
+      "sortino": 0.9844,
+      "cagr": 0.1269
+    }
+  },
+  "oos_results": {
+    "S0: BH SPY": {
+      "name": "S0: BH SPY",
+      "n_days": 502,
+      "ann_return": 0.2366,
+      "ann_vol": 0.1281,
+      "sharpe": 1.8466,
+      "mdd": -0.0997,
+      "calmar": 2.3718,
+      "sortino": 2.7032,
+      "cagr": 0.2564
+    },
+    "S1: BH EW Sectors": {
+      "name": "S1: BH EW Sectors",
+      "n_days": 502,
+      "ann_return": 0.1455,
+      "ann_vol": 0.1133,
+      "sharpe": 1.2847,
+      "mdd": -0.1011,
+      "calmar": 1.4397,
+      "sortino": 1.9297,
+      "cagr": 0.1492
+    },
+    "S2: Dispersion Switch": {
+      "name": "S2: Dispersion Switch",
+      "n_days": 502,
+      "ann_return": 0.1511,
+      "ann_vol": 0.1154,
+      "sharpe": 1.3097,
+      "mdd": -0.1011,
+      "calmar": 1.4952,
+      "sortino": 1.9715,
+      "cagr": 0.1554
+    },
+    "S3: Smooth": {
+      "name": "S3: Smooth",
+      "n_days": 502,
+      "ann_return": 0.1885,
+      "ann_vol": 0.116,
+      "sharpe": 1.6257,
+      "mdd": -0.1026,
+      "calmar": 1.8367,
+      "sortino": 2.3935,
+      "cagr": 0.1993
+    }
+  },
+  "dm_tests_full": {
+    "S1: BH EW Sectors": {
+      "t_stat": 0.8835,
+      "p_value": 0.377,
+      "harvey_significant": false
+    },
+    "S2: Dispersion Switch": {
+      "t_stat": 1.4466,
+      "p_value": 0.1481,
+      "harvey_significant": false
+    },
+    "S3: Smooth": {
+      "t_stat": 0.9383,
+      "p_value": 0.3481,
+      "harvey_significant": false
+    }
+  },
+  "dm_tests_oos": {
+    "S1: BH EW Sectors": {
+      "t_stat": 2.314,
+      "p_value": 0.0211
+    },
+    "S2: Dispersion Switch": {
+      "t_stat": 2.2468,
+      "p_value": 0.0251
+    },
+    "S3: Smooth": {
+      "t_stat": 1.8071,
+      "p_value": 0.0713
+    }
+  },
+  "dm_test_source": "volpred.stats.model_evaluation",
+  "cross_oos": {
+    "periods": [
+      {
+        "period": "2011-01-01 to 2012-12-31",
+        "s0_sharpe": 0.4936,
+        "s1_sharpe": 0.5091,
+        "s2_sharpe": 0.498,
+        "s3_sharpe": 0.4964,
+        "s2_beats_s0": true,
+        "s3_beats_s0": true
+      },
+      {
+        "period": "2013-01-01 to 2014-12-31",
+        "s0_sharpe": 1.8768,
+        "s1_sharpe": 1.8467,
+        "s2_sharpe": 1.8419,
+        "s3_sharpe": 1.8505,
+        "s2_beats_s0": false,
+        "s3_beats_s0": false
+      },
+      {
+        "period": "2015-01-01 to 2016-12-31",
+        "s0_sharpe": 0.511,
+        "s1_sharpe": 0.5014,
+        "s2_sharpe": 0.5633,
+        "s3_sharpe": 0.5067,
+        "s2_beats_s0": true,
+        "s3_beats_s0": false
+      },
+      {
+        "period": "2017-01-01 to 2018-12-31",
+        "s0_sharpe": 0.6445,
+        "s1_sharpe": 0.5384,
+        "s2_sharpe": 0.4851,
+        "s3_sharpe": 0.516,
+        "s2_beats_s0": false,
+        "s3_beats_s0": false
+      },
+      {
+        "period": "2019-01-01 to 2020-12-31",
+        "s0_sharpe": 0.9983,
+        "s1_sharpe": 0.7831,
+        "s2_sharpe": 0.7804,
+        "s3_sharpe": 0.8561,
+        "s2_beats_s0": false,
+        "s3_beats_s0": false
+      }
+    ],
+    "S2_beats_S0": "2/5",
+    "S3_beats_S0": "1/5"
+  },
+  "sensitivity": {
+    "16": 0.7882,
+    "20": 0.7977,
+    "24": 0.7991
+  },
+  "sensitivity_pass": true,
+  "verdict": "NULL: dispersion timing with ratio signal adds no value over SPY",
+  "codex_severity": "LOW",
+  "comparison_with_K771": "K771 used raw dispersion \u2192 NULL. K809 uses dispersion ratio.",
+  "references": [
+    "Solnik & Roulet (2000) Dispersion as cross-sectional volatility",
+    "Stivers (2003) Firm-level return dispersion and future volatility",
+    "Connolly & Stivers (2006) Information content of sector dispersion",
+    "Harvey, Liu, Zhu (2016) ... and the Cross-Section of Expected Returns, RFS",
+    "K771: prior dispersion timing experiment (NULL result)"
+  ]
+}
