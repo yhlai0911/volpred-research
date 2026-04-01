@@ -434,8 +434,34 @@ def set_strategy_active(identifier: str, active: bool) -> bool:
 
 
 def sync_article_status(slug: str, status: str) -> bool:
-    """Update article status (e.g. published/unpublished) by slug."""
-    return _patch_where("articles", {"slug": slug}, {"status": status})
+    """Update article status (e.g. published/unpublished) by slug.
+
+    Side effects:
+    - If status becomes 'unpublished': auto-removes question_articles links
+    - If status becomes 'published': auto-marks linked questions as 'answered'
+    """
+    ok = _patch_where("articles", {"slug": slug}, {"status": status})
+    if ok and status == "unpublished":
+        # Clean up question_articles links so questions page doesn't show dead links
+        article_id = _get_article_id(slug)
+        if article_id:
+            rows = _select_rows("question_articles", select="question_id", article_id=article_id)
+            for row in rows:
+                _delete_where("question_articles", {"question_id": row.get("question_id"), "article_id": article_id})
+    elif ok and status == "published":
+        # Auto-mark linked questions as answered
+        article_id = _get_article_id(slug)
+        if article_id:
+            rows = _select_rows("question_articles", select="question_id", article_id=article_id)
+            import datetime
+            now_utc = datetime.datetime.now(datetime.timezone.utc).isoformat()
+            for row in rows:
+                qid = row.get("question_id")
+                if qid:
+                    q_rows = _select_rows("questions", select="id,status", id=qid)
+                    if q_rows and q_rows[0].get("status") == "researching":
+                        _patch_where("questions", {"id": qid}, {"status": "answered", "answered_at": now_utc})
+    return ok
 
 
 def delete_article(slug: str) -> bool:
