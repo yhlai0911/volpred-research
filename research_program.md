@@ -244,15 +244,19 @@
 - `paper/taiwan-vt/main.tex`（34 頁）
 - 目標：Pacific-Basin Finance Journal 或 Emerging Markets Review
 - 初稿、Codex 審查、引用驗證已完成（見 archive）
-- [ ] Gemini 審查
+- [x] Gemini 審查 → gemini_review_v1.md（3 weaknesses: TX tax、linear scaling、TSMC endogeneity）
 - [ ] `/latex-academic-reviewer` 全面審查
+- [ ] 修正 Gemini 指出的 3 弱點
 
 **第三篇：Is Volatility Targeting Just Trend Following?**
-- `paper/vt-trend-following/main.tex`（24 頁）
-- 目標：待定（可考慮 Journal of Portfolio Management 或 Financial Analysts Journal）
+- `paper/vt-trend-following/main.tex`（29 頁）
+- 目標：Journal of Portfolio Management 或 Financial Analysts Journal
 - 核心貢獻：分解 VT 的 alpha 來源（K46→K53→K79: r=0.564, VT alpha = trend following）
-- [ ] Codex/Gemini 審查
-- [ ] `/latex-academic-reviewer` 全面審查
+- [x] `/latex-academic-reviewer` 全面審查 → review_v2.tex（5H/12M/6L）
+  - HIGH: 樣本期間不一致、BAB proxy（SPLV→AQR）、MDD 只有 5 美股、1.4% 數字不可驗證、需引用 K687/K697/K688
+  - K687 分析：**不矛盾**——VT 打敗 BH(SPY) 但打不過 BH(50/50)，支持 insurance 論述
+- [ ] 修正 review_v2 的 5 HIGH
+- [ ] Gemini 審查
 - [ ] `/citation-verifier` 引用驗證
 
 **未來可能的第四篇：VIX Sufficient Statistic**
