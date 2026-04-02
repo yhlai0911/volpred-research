@@ -1,0 +1,474 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% --- Severity colors --------------------------------------------------------
+\definecolor{highsev}{RGB}{204,0,0}
+\definecolor{medsev}{RGB}{204,102,0}
+\definecolor{lowsev}{RGB}{0,102,204}
+
+\newcommand{\HIGH}{\textcolor{highsev}{\textbf{[HIGH]}}}
+\newcommand{\MEDIUM}{\textcolor{medsev}{\textbf{[MEDIUM]}}}
+\newcommand{\LOW}{\textcolor{lowsev}{\textbf{[LOW]}}}
+
+% --- Title ------------------------------------------------------------------
+\title{Academic Review Report (v2)\\
+\Large ``Is Volatility Targeting Just Trend Following?\\
+Decomposing the Benefits of Volatility Targeting''\\[6pt]
+\normalsize Lai (2026) --- body\_v2.tex + main\_v2.tex, $\sim$31--32 pages\\
+\normalsize Targeting \textit{Journal of Portfolio Management} / \textit{Financial Analysts Journal}}
+
+\author{Review prepared by VolPred Research System\\
+\small Claude Opus 4.6 (1M context)}
+
+\date{April 1, 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Executive Summary}
+% =============================================================================
+
+This report provides a comprehensive academic review of the v2 revision of ``Is Volatility Targeting Just Trend Following?'' (Lai, 2026). The v2 revision addressed three HIGH-severity issues from the v1 review: (H1) circular logic / endogeneity via a split-sample test, (H2) missing statistical inference for MDD retention via block bootstrap, and (H4) three orphan bibliography entries. These fixes are well-executed and materially strengthen the paper.
+
+This v2 review identifies \textbf{remaining and newly salient issues}, including a critical internal consistency question: the paper's own research system (experiments K687/K697/K688) has concluded that ``VT is drawdown insurance, not alpha generator'' --- a finding that largely \textit{supports} the paper's thesis but creates potential tensions that must be explicitly addressed.
+
+\medskip
+\noindent\textbf{Summary of Issues Found in v2:}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Category & HIGH & MEDIUM & LOW \\
+\midrule
+A. Core Thesis \& Internal Consistency   & 1 & 2 & 0 \\
+B. Remaining v1 Issues (Unaddressed)     & 3 & 3 & 2 \\
+C. New Issues in v2 Text                 & 1 & 3 & 2 \\
+D. Journal Targeting                     & 0 & 2 & 1 \\
+E. Citation \& Bibliography              & 0 & 2 & 1 \\
+\midrule
+\textbf{Total}                           & \textbf{5} & \textbf{12} & \textbf{6} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Overall Assessment:} The paper is substantially improved from v1. The dual-mechanism decomposition remains the central, original contribution. The split-sample test and block bootstrap add genuine statistical rigor. However, five HIGH-severity issues remain --- three carried over from v1 (sample period inconsistency, BAB proxy, MDD retention coverage) and two newly prominent (internal consistency with K687, and a problematic ``1.4\%'' statistic). After addressing these, the paper should be competitive at \textit{Journal of Portfolio Management} (JPM) or \textit{Financial Analysts Journal} (FAJ).
+
+
+% =============================================================================
+\section{Category A: Core Thesis \& Internal Consistency}
+% =============================================================================
+
+This is the most important category for this review. The paper's core claim --- that VT is not reducible to trend following because its primary value is MDD insurance --- must be reconciled with the author's own research findings.
+
+\begin{enumerate}[label=\textbf{A.\arabic*}]
+
+\item \HIGH\ \textbf{Reconciliation with K687/K697/K688 required.}
+
+The paper's research system has produced three definitive experiments that directly bear on this paper's thesis:
+
+\begin{itemize}
+\item \textbf{K687} (``No VT beats BH 50/50 on Sharpe after proper lag''):  After correcting for look-ahead bias, no VT strategy outperforms buy-and-hold 50/50 SPY/GLD on the Sharpe ratio. This \textit{supports} the paper's framing of VT as insurance (not alpha), but the paper never references this result or its implication that the Sharpe channel in the decomposition is essentially zero after lag correction.
+
+\item \textbf{K697} (``VIX predicts vol magnitude (corr 0.57) but NOT direction (corr 0.04)''):  VIX can predict how much the market will move but not which direction. This directly supports the paper's ``VIX-level channel'' mechanism (Section 4.2), but is not cited. It would provide the strongest empirical support for why MDD protection operates through a level channel distinct from directional trend following.
+
+\item \textbf{K688} (``VT wins CRRA utility at gamma $\geq 5$''): VT does not generate alpha, but risk-averse investors (CRRA $\gamma \geq 5$) benefit from VT through utility improvement. This directly addresses the Cederburg et al.\ (2020) critique mentioned in the paper but currently handled only with hand-waving (``utility tests may underweight the MDD channel'').
+\end{itemize}
+
+\textbf{The tension:} The paper's Table~3 reports VT Sharpe of 0.797 vs.\ B\&H Sharpe of 0.611 for SPY --- a 0.186 improvement. But K687 found that after proper lag correction, this improvement vanishes. The paper uses ``lagged weights'' (Section 2.2) which should address this, but the discrepancy needs explicit reconciliation. If the paper's lag implementation is correct and K687 used a different asset universe or period, this must be stated. If the paper's Sharpe improvement is genuine (i.e., the lag is properly implemented), then K687's finding applies only to a different comparison.
+
+\textbf{More importantly:} The paper's thesis (``VT's primary value is MDD insurance, not alpha'') is \textit{strengthened} by K687/K697/K688. The paper should cite these findings (as Lai, 2026b or as internal robustness checks) because they provide the strongest possible support for the core argument.
+
+\textbf{Recommendation:}
+\begin{enumerate}
+\item Add a paragraph in Section 4.1 or 4.3 explicitly stating that separate lag-corrected analysis (K687) confirms VT does not generate Sharpe alpha, reinforcing the insurance interpretation.
+\item Cite K697's direction-vs.-magnitude finding as evidence for the VIX-level mechanism (Section 4.2).
+\item Use K688's CRRA utility result to provide a formal framework for the Cederburg rebuttal (Section 4.1): state the breakeven $\gamma \approx 5$ rather than leaving it as ``may underweight.''
+\item Reconcile the Table~3 Sharpe numbers with K687 --- explain whether the apparent Sharpe improvement in Table~3 is statistically insignificant (which it is: $t = 1.50$) and emphasize that this \textit{supports} the paper's thesis.
+\end{enumerate}
+
+
+\item \MEDIUM\ \textbf{The ``VT contains trend following'' framing needs sharper scoping.}
+
+The paper's title asks ``Is Volatility Targeting Just Trend Following?'' and answers ``no --- VT contains TSMOM but is not reducible to it.'' However, the TSMOM in the paper is \textit{asset-specific} (the sign of each asset's own past return), which is fundamentally different from the diversified trend-following strategies employed by CTAs and managed-futures funds (Moskowitz et al.\ 2012, who trade 58 futures across uncorrelated markets).
+
+Section 4.1 does include a scope clarification paragraph (``Our TSMOM factor is constructed on a per-asset basis\ldots''). This is good. However, the abstract, title, and conclusion still use the phrase ``trend following'' without qualification, which could mislead readers into thinking the paper addresses whether VT replicates CTA-style diversified trend following. A reader who manages a CTA fund might conclude from the title that VT is a substitute for their strategy, which is not what the paper shows.
+
+\textbf{Recommendation:} Add ``asset-specific'' or ``single-asset'' before ``trend following'' in the abstract and conclusion. The title can remain as-is (it is a provocative question, not a claim), but the first paragraph of the abstract should clarify: ``\ldots we decompose VT's benefits relative to asset-specific time-series momentum (TSMOM), as distinct from diversified managed-futures trend following.''
+
+
+\item \MEDIUM\ \textbf{The ``insurance pricing'' at $\sim$4\%/year Sharpe drag needs formal derivation.}
+
+The paper repeatedly states that VT costs ``$\sim$4\%/year Sharpe drag'' as an insurance premium (Abstract, Section 4.3, Conclusion). This number appears to come from the international evidence (average $\Delta$Sharpe $= -0.048$, Table~5). However:
+
+\begin{itemize}
+\item The $-0.048$ is a \textit{Sharpe ratio} difference, not a \textit{percentage} drag. Calling it ``4\%/year'' conflates Sharpe units with return units.
+\item The SPY evidence shows $\Delta$Sharpe $= +0.186$ (Table~3), which contradicts the ``4\% drag'' narrative for US assets.
+\item If ``4\%/year'' refers to the annualized return difference (not Sharpe), this number is never computed in the paper.
+\end{itemize}
+
+\textbf{Recommendation:} Either (a) compute and report the annualized return drag (in basis points or percentage) alongside the Sharpe drag, clearly distinguishing units, or (b) change ``4\%/year Sharpe drag'' to ``$\sim$0.05 Sharpe ratio units'' throughout. The current phrasing will confuse reviewers.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Category B: Remaining v1 Issues (Unaddressed in v2)}
+% =============================================================================
+
+The v1 review identified 8 HIGH-severity issues. The v2 revision addressed 3 (H1 endogeneity, H2 bootstrap, H4 orphans). Five HIGH and several MEDIUM issues remain unaddressed. We re-assess their severity for the current v2 manuscript.
+
+\begin{enumerate}[label=\textbf{B.\arabic*}]
+
+\item \HIGH\ \textbf{[v1 Issue 8.1] Inconsistent sample periods remain.}
+
+The v2 text still contains conflicting sample periods:
+\begin{itemize}
+\item Section 2.1 (Data): ``January 2007 to March 2026''
+\item Table~3 notes (Dual Mechanism): ``2005--2026''
+\item Table~4 notes (Factor Models): ``January 2005--March 2026''
+\item Section 3.4 (Sectors): ``December 1998--March 2026''
+\end{itemize}
+
+The SPY/VIX data are available from 1993/1990, so there is no data constraint preventing a unified start date. The 2005 vs.\ 2007 discrepancy is unexplained and may indicate different data pulls for different analyses.
+
+\textbf{Severity remains HIGH:} A referee at JPM or FAJ will notice this inconsistency in the first read. It undermines confidence in the empirical pipeline.
+
+\textbf{Recommendation:} Choose one start date (2005 or 2007) and use it for all analyses. Clearly footnote any assets with shorter histories (e.g., INDA starts 2012, MCHI starts 2013).
+
+
+\item \HIGH\ \textbf{[v1 Issue 5.1] BAB proxy (SPLV$-$SPHB) still causes sample truncation.}
+
+Table~4 (M5) still uses $N = 3{,}740$ vs.\ $N = 5{,}049$ for M1--M4 --- a 26\% sample reduction due to the SPLV/SPHB ETF proxy for BAB. The AQR BAB factor is freely available from 1926 for US equities and would eliminate this truncation.
+
+\textbf{Severity remains HIGH:} The sample truncation means M5 is estimated on a fundamentally different sample than M1--M4, making direct comparison of $\alpha$ and $R^2$ across models misleading. A reviewer will question why a freely available factor was not used.
+
+\textbf{Recommendation:} Download the AQR BAB factor and re-estimate M5 on the full sample. Report the SPLV$-$SPHB result as a robustness check if desired.
+
+
+\item \HIGH\ \textbf{[v1 Issue 9.1] MDD retention still reported for only 5 US equity assets.}
+
+The paper has 22 assets in Table~1 but the MDD retention decomposition (Table~3 + Table~6 bootstrap) covers only SPY, 50/50, DIA, QQQ, and IWM --- all US large-cap equity (plus a blend). The 90--97\% retention claim is prominently featured in the abstract and conclusion.
+
+\textbf{Severity remains HIGH:} The paper's strongest claim (``90--97\% MDD retention'') rests on 5 assets that are highly correlated (SPY/DIA/QQQ/IWM all have $\rho > 0.85$ with each other). This is essentially 1--2 independent observations. If MDD retention is 70\% for EEM or 50\% for GLD, the narrative changes substantially.
+
+\textbf{Recommendation:} Report MDD retention for all 22 assets (at minimum: one commodity, one bond, one EM equity). If retention varies across asset classes, this is a valuable finding that strengthens the paper (boundary condition), not a weakness.
+
+
+\item \MEDIUM\ \textbf{[v1 Issue 7.3] No placebo test for international VIX channel.}
+
+The international evidence (Table~5, 13 markets) shows that US VIX provides MDD protection globally. However, there is no test of whether a \textit{randomized} VIX signal would produce similar results. Since all global equity markets tend to draw down simultaneously (contagion), the MDD improvement might partly reflect a mechanical ``cash drag during crises'' effect rather than the VIX signal specifically.
+
+\textbf{Recommendation:} Add a placebo test: apply 12/VIX using a time-shuffled VIX series (preserving the unconditional distribution but breaking the timing). If the placebo MDD improvement is near zero, the VIX timing channel is confirmed.
+
+
+\item \MEDIUM\ \textbf{[v1 Issue 7.4] Trend-following comparison uses SPY only.}
+
+The direct comparison with five canonical trend-following strategies (SMA, Faber, Golden Cross, Dual Momentum, MA+VT) in Section 4.1 is SPY-only. This is a single-asset test for a general claim.
+
+\textbf{Recommendation:} Extend to at least 50/50 SPY/GLD (the recommended portfolio) and one international market. Report in a compact table.
+
+
+\item \MEDIUM\ \textbf{[v1 Issue 5.2] Full-sample TSMOM orthogonalization look-ahead.}
+
+Equation~(3) orthogonalizes TSMOM using a full-sample regression coefficient ($\hat{\beta}_{\text{MKT}}$ estimated over the entire period). This introduces mild look-ahead bias. The paper should acknowledge this is standard practice in factor model estimation and add a footnote that an expanding-window orthogonalization produces qualitatively similar results.
+
+\textbf{Recommendation:} Add a one-sentence footnote.
+
+
+\item \LOW\ \textbf{[v1 Issue 1.3] Sub-period stability still has no table.}
+
+Section 3.6 (``Sub-Period Stability'') remains a single paragraph with no table, referencing an Online Appendix. A key robustness claim (``MDD protection survives TSMOM removal across all sub-periods'') deserves at least a compact summary table in the main text.
+
+\textbf{Recommendation:} Add a 4-row $\times$ 4-column table (4 sub-periods $\times$ \{B\&H Sharpe, VT Sharpe, B\&H MDD, VT MDD\}).
+
+
+\item \LOW\ \textbf{[v1 Issue 5.4] No GJR-GARCH convergence diagnostics.}
+
+The paper estimates GJR-GARCH(1,1) for 22 assets but reports no convergence flags or persistence ($\alpha + \beta + \gamma/2$) summary. Standard practice requires confirming stationarity for all 22 models.
+
+\textbf{Recommendation:} Add a footnote: ``All 22 GJR-GARCH models converge with persistence $\alpha + \beta + \gamma/2 \in [x, y]$, confirming covariance stationarity.''
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Category C: New Issues in v2 Text}
+% =============================================================================
+
+These issues arise from the v2 revisions or were not salient in v1.
+
+\begin{enumerate}[label=\textbf{C.\arabic*}]
+
+\item \HIGH\ \textbf{The ``1.4\% TSMOM contribution to total strategy Sharpe'' is unexplained and potentially wrong.}
+
+This number appears in Section 3.3 (``The TSMOM contribution to Sharpe improvement is approximately 1.4\% of total strategy Sharpe'') and in the Table~1 notes. However, the derivation is unclear:
+
+\begin{itemize}
+\item If computed as $\Delta\text{Sharpe}_{\text{TSMOM}} / \text{Sharpe}_{\text{VT}} = 0.060 / 0.797 = 7.5\%$, the answer is not 1.4\%.
+\item If computed as $\Delta\text{Sharpe}_{\text{TSMOM}} / \text{Sharpe}_{\text{B\&H}} = 0.060 / 0.611 = 9.8\%$, still not 1.4\%.
+\item If computed differently (e.g., using daily Sharpe units), the calculation must be shown.
+\end{itemize}
+
+This number is used to argue that TSMOM's contribution is ``economically small,'' so its accuracy matters for the paper's thesis.
+
+\textbf{Severity: HIGH} because an unexplained or incorrect statistic in a central argument will be caught by any careful reviewer and could undermine credibility.
+
+\textbf{Recommendation:} Show the exact calculation for 1.4\% with the formula and inputs. If the number is wrong, correct it. If it uses a non-obvious definition, define it explicitly.
+
+
+\item \MEDIUM\ \textbf{The split-sample test (Section 3.2) is well-executed but the attenuation discussion is incomplete.}
+
+The split-sample $r = 0.487$ (vs.\ full-sample $r = 0.564$) is appropriately characterized as ``somewhat attenuated.'' However, the paper attributes the attenuation solely to ``reduced estimation precision from using half the sample.'' An alternative explanation is that some of the full-sample correlation is indeed mechanical, and the split-sample eliminates that mechanical portion. The paper should acknowledge both explanations.
+
+\textbf{Recommendation:} Add one sentence: ``The attenuation from $r = 0.564$ to $r = 0.487$ may reflect either reduced estimation precision or partial removal of the mechanical channel; our data do not distinguish between these explanations.''
+
+
+\item \MEDIUM\ \textbf{Block bootstrap block size of 252 days may be too large.}
+
+The MDD bootstrap uses block size $= 252$ trading days (one year). This is reasonable for preserving drawdown dynamics, but with a sample of approximately 5,000 trading days, each bootstrap draw contains roughly 20 blocks. The effective number of independent observations is therefore only $\sim$20, which may produce overly narrow confidence intervals.
+
+The standard rule of thumb for block bootstrap is $b \approx T^{1/3}$ (Lahiri, 2003), which for $T = 5{,}000$ gives $b \approx 17$ trading days. A 252-day block is far above this, and the choice should be justified more explicitly.
+
+\textbf{Recommendation:} Add a sensitivity check with block sizes of 63 (one quarter) and 126 (half year). If the CIs are similar, the choice is robust; if they widen substantially with smaller blocks, the 252-day CI may be overconfident.
+
+
+\item \MEDIUM\ \textbf{The ``prediction $\neq$ application'' finding (Section 4.1) is interesting but tangential.}
+
+The paragraph about K533 (HAR-RV best forecaster but worst VT allocator) is inserted into the Discussion as supporting evidence. While interesting, this result (a) is based on a single asset (SPY), (b) is not formalized in the paper's methodology, and (c) was not in v1. Its inclusion feels like an afterthought rather than an integrated contribution.
+
+\textbf{Recommendation:} Either (a) integrate this finding with formal methodology (extend to multiple assets, add a table), or (b) move it to a footnote to avoid distracting from the main narrative.
+
+
+\item \LOW\ \textbf{The Calmar ratio column in Table~3 is never discussed in the text.}
+
+Table~3 includes a ``Calmar'' column for all four strategies, but the text never refers to it. Either discuss the Calmar ratios (they support the MDD narrative) or remove the column to reduce clutter.
+
+
+\item \LOW\ \textbf{Minor: ``strategies eliminates'' grammatical error in Introduction.}
+
+Section 1, paragraph 2: ``\ldots volatility-scaling momentum strategies eliminates momentum crashes'' should be ``\ldots volatility-scaling momentum strategies \textit{eliminate} momentum crashes'' (subject-verb agreement; ``strategies'' is plural).
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Category D: Journal Targeting Assessment}
+% =============================================================================
+
+The paper targets JPM or FAJ. We assess fit for both.
+
+\begin{enumerate}[label=\textbf{D.\arabic*}]
+
+\item \MEDIUM\ \textbf{For JPM: the paper needs more practitioner-oriented content.}
+
+JPM publishes for portfolio managers and institutional investors. The current paper is written in an academic style (factor regressions, Newey-West $t$-statistics, bootstrap inference). JPM reviewers will want:
+
+\begin{itemize}
+\item A clear ``what should I do?'' section: specific portfolio construction advice
+\item Implementation details: how does a portfolio manager actually implement 12/VIX? What rebalancing costs does a typical institution face?
+\item Comparison with actual CTA products or managed-futures ETFs (DBMF, KMLM)
+\item Less emphasis on statistical significance, more on economic magnitude
+\end{itemize}
+
+\textbf{Recommendation:} If targeting JPM, add a ``Practical Implementation'' subsection in the Discussion with concrete portfolio construction guidance. Alternatively, if the paper is more naturally academic, target \textit{Journal of Empirical Finance} (JEF) instead.
+
+
+\item \MEDIUM\ \textbf{For FAJ: the paper length ($\sim$31 pages) may exceed FAJ norms.}
+
+FAJ articles are typically 15--20 pages. The current $\sim$31 pages with 6 tables and 2 figures is closer to a full academic journal article. The paper would need substantial condensation for FAJ.
+
+\textbf{Recommendation:} If targeting FAJ, condense the paper to $\sim$18--20 pages by moving the sector analysis (Section 3.4), full alpha decomposition (Table~1), and factor model controls (Table~4) to an online appendix. The core narrative (dual mechanism + international evidence) can be told in 20 pages.
+
+
+\item \LOW\ \textbf{The 427-configuration search (Section 4.2) is impressive but may distract practitioners.}
+
+The K568 finding (12/VIX optimal among 427 configurations) is a strong result, but presenting it as a single sentence in the Discussion undersells its importance while potentially overwhelming practitioners. Consider presenting it as a separate subsection with a brief summary table.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Category E: Citation \& Bibliography}
+% =============================================================================
+
+The v2 revision fixed the three orphan entries (barroso2015, daniel2016, fleming2001). All 18 entries are now cited. Remaining issues:
+
+\begin{enumerate}[label=\textbf{E.\arabic*}]
+
+\item \MEDIUM\ \textbf{Hood \& Raughtigan (2025) still lacks identification details.}
+
+The bibliography entry remains: ``Hood, M., \& Raughtigan, J. (2025). Volatility targeting alpha is trend following alpha. \textit{Working Paper}.'' For the paper's primary interlocutor, this is insufficient. An SSRN link, institutional affiliation, or at minimum a conference presentation venue would help readers locate the paper.
+
+\textbf{Recommendation:} Add the SSRN link or institutional affiliation.
+
+
+\item \MEDIUM\ \textbf{Missing key references flagged in v1 are still absent.}
+
+The v1 review and citation check identified several important missing references:
+\begin{itemize}
+\item \textbf{Frazzini \& Pedersen (2014)} --- ``Betting Against Beta,'' \textit{JFE}. The BAB factor is used in Table~4 but the original paper is not cited.
+\item \textbf{Liu et al.\ (2019)} --- ``Volatility-managed portfolios revisited.'' A direct response to Moreira \& Muir that challenges VT benefits.
+\item \textbf{Jegadeesh \& Titman (1993)} --- The canonical cross-sectional momentum paper, relevant when discussing the MOM factor in Table~4.
+\item \textbf{Hurst, Ooi \& Pedersen (2017)} --- ``A Century of Evidence on Trend-Following Investing.'' The longest trend-following backtest, highly relevant to Section 4.1.
+\end{itemize}
+
+\textbf{Recommendation:} Add at least Frazzini \& Pedersen (2014) (essential if using BAB) and one trend-following survey.
+
+
+\item \LOW\ \textbf{Lai (2026a) suffix still implies a (2026b).}
+
+The ``a'' suffix in Lai (2026a) implies a companion paper exists. If this paper will be Lai (2026b), add a self-citation. If not, remove the suffix to avoid confusion.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Assessment of v1 $\to$ v2 Fixes}
+% =============================================================================
+
+We evaluate the quality of the three fixes implemented in v2.
+
+\subsection{H1: Endogeneity / Circular Logic --- \textcolor{green!60!black}{\textbf{WELL ADDRESSED}}}
+
+The split-sample test ($r = 0.487$, $p = 0.021$) is a substantive improvement. The paper now:
+\begin{itemize}
+\item Explicitly acknowledges the mechanical channel
+\item Provides a temporally separated test that survives
+\item Discusses limitations of the split-sample approach honestly
+\item Notes that a formal IV approach is infeasible with $N = 22$
+\end{itemize}
+The hedging language (``empirical regularity consistent with\ldots rather than a causally identified relationship'') is appropriate for the evidence strength.
+
+\textbf{One minor gap:} The v1 review recommended adding controls ($\beta_{\text{MKT}}$, average vol) in the cross-sectional regression. The v2 adds split-sample but not controls. A multivariate cross-sectional regression (even with $N = 22$) would further strengthen the claim.
+
+\subsection{H2: MDD Bootstrap --- \textcolor{green!60!black}{\textbf{WELL ADDRESSED}}}
+
+The block bootstrap (10,000 reps, block size 252) with formal $H_0$ testing is exactly what was needed. The new Table~6 and Section 2.7 methodology are clear and rigorous. The one-sided test rejecting $H_0$: Retention $\leq 80\%$ at the 1\% level for all five assets is convincing.
+
+\textbf{One caveat:} See Issue C.3 regarding block size sensitivity.
+
+\subsection{H4: Orphan References --- \textcolor{green!60!black}{\textbf{FULLY RESOLVED}}}
+
+All three orphan entries (barroso2015, daniel2016, fleming2001) are now cited in substantively appropriate locations. The orphan count is zero.
+
+
+% =============================================================================
+\section{Specific Attention: K687 Contradiction Analysis}
+% =============================================================================
+
+The user specifically asked whether K687 (``VT = insurance not alpha'') contradicts the paper. Our assessment:
+
+\subsection{Is There a Contradiction?}
+
+\textbf{No, there is no fundamental contradiction.} K687 and the paper reach the same conclusion through different methods:
+
+\begin{center}
+\begin{tabular}{p{4cm}p{5cm}p{5cm}}
+\toprule
+Dimension & K687 Finding & Paper Finding \\
+\midrule
+VT generates alpha? & No (after lag correction) & No ($t = 1.50$, NS in M5) \\
+VT improves Sharpe? & No (vs.\ BH 50/50) & Marginal (+0.186 for SPY, larger for 50/50) \\
+VT protects MDD? & Implied (utility gain at $\gamma \geq 5$) & Yes (90--97\% retained after TSMOM) \\
+VT = trend following? & Not tested & No (MDD channel orthogonal) \\
+Core interpretation & Insurance, not alpha & Insurance, not alpha (with formal decomposition) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{Where Reconciliation Is Needed}
+
+\begin{enumerate}
+\item \textbf{Table~3 Sharpe improvement:} The paper reports $\Delta$Sharpe $= +0.186$ for SPY (VT over B\&H). K687 found this improvement vanishes after proper lag correction. The paper claims to use lagged weights (Section 2.2: ``VIX at the end of month $t$ determines the allocation for month $t+1$''). If the lag is correctly implemented, the $+0.186$ should be a lagged result. The discrepancy may stem from:
+\begin{itemize}
+\item Different comparison baselines (VT vs.\ B\&H SPY in the paper; VT vs.\ B\&H 50/50 in K687)
+\item Different sample periods (2005--2026 in Table~3; 2006--2026 in K687)
+\item VT improving SPY Sharpe but not beating the already-superior 50/50 baseline
+\end{itemize}
+The third explanation is the most likely: VT(SPY) has Sharpe 0.797, which is better than B\&H(SPY) at 0.611 but worse than B\&H(50/50) at $\sim$0.865. K687's claim is about the latter comparison. This is not a contradiction but needs explicit statement.
+
+\item \textbf{K697 direction-vs.-magnitude:} The paper's ``VIX-level channel'' mechanism (Section 4.2) is \textit{exactly} what K697 demonstrates empirically. The paper should cite this as supporting evidence: VIX predicts volatility magnitude ($r = 0.57$) but not return direction ($r = 0.04$), explaining why VIX-based position sizing provides drawdown protection (magnitude channel) but not Sharpe improvement (direction channel).
+
+\item \textbf{K688 CRRA utility:} The paper's rebuttal of Cederburg et al.\ (2020) currently reads: ``utility-based tests may underweight the distinct MDD protection channel.'' K688 provides the specific answer: CRRA utility with $\gamma \geq 5$ favors VT. This is much stronger than ``may underweight.''
+\end{enumerate}
+
+\subsection{Recommendation}
+
+The paper and K687/K697/K688 are \textbf{mutually reinforcing, not contradictory}. The paper should incorporate these findings as:
+\begin{enumerate}
+\item A ``robustness: lag sensitivity'' footnote confirming that Sharpe improvement vanishes against the optimal baseline (50/50), reinforcing the insurance framing
+\item An empirical support paragraph for the VIX-level mechanism (K697)
+\item A formal CRRA breakeven parameter ($\gamma \approx 5$) for the Cederburg rebuttal (K688)
+\end{enumerate}
+
+
+% =============================================================================
+\section{Summary of Recommendations by Priority}
+% =============================================================================
+
+\subsection*{Must Fix Before Submission (HIGH --- 5 issues)}
+\begin{enumerate}
+\item[\textbf{A.1}] Reconcile with K687/K697/K688 (internal consistency)
+\item[\textbf{B.1}] Unify sample periods across all analyses
+\item[\textbf{B.2}] Replace SPLV$-$SPHB BAB proxy with AQR BAB factor
+\item[\textbf{B.3}] Report MDD retention for all 22 assets (or at minimum one non-equity)
+\item[\textbf{C.1}] Explain or correct the ``1.4\%'' TSMOM contribution statistic
+\end{enumerate}
+
+\subsection*{Should Fix (MEDIUM --- 12 issues)}
+Key items:
+\begin{itemize}
+\item Scope ``trend following'' as ``asset-specific'' in abstract/conclusion (A.2)
+\item Derive the ``4\%/year'' insurance pricing claim formally (A.3)
+\item Add VIX placebo test for international evidence (B.4)
+\item Extend trend-following comparison beyond SPY (B.5)
+\item Acknowledge split-sample attenuation ambiguity (C.2)
+\item Test block bootstrap sensitivity to block size (C.3)
+\item Add Hood \& Raughtigan SSRN link and Frazzini \& Pedersen citation (E.1, E.2)
+\item Add practitioner-oriented content if targeting JPM (D.1)
+\end{itemize}
+
+\subsection*{Nice to Fix (LOW --- 6 issues)}
+Sub-period summary table, GARCH convergence footnote, Calmar discussion, grammatical fix, 427-config presentation, Lai (2026a) suffix.
+
+
+% =============================================================================
+\section{Overall Verdict}
+% =============================================================================
+
+The v2 revision is a substantial improvement over v1. The three HIGH-severity fixes (split-sample endogeneity test, block bootstrap for MDD, orphan reference resolution) are well-executed and materially strengthen the paper's empirical foundation.
+
+\textbf{The paper's core thesis is sound and original:} VT contains asset-specific trend following (through the leverage effect) but its primary economic value --- drawdown insurance --- operates through a distinct VIX-level channel that is 90--97\% orthogonal to TSMOM. This is a genuine contribution that resolves an open question posed by Hood \& Raughtigan (2025).
+
+\textbf{The paper's main weakness is internal:} The author's own research program (K687/K697/K688) provides the strongest possible support for the paper's thesis, but is not incorporated. Integrating these findings would transform the Cederburg rebuttal from hand-waving to formal argument and provide direct empirical evidence for the VIX-level mechanism.
+
+\textbf{After addressing the 5 HIGH-severity issues, this paper should be competitive at:}
+\begin{itemize}
+\item \textbf{Journal of Portfolio Management} (best fit if practitioner content added): the ``VT $\neq$ trend following'' question is directly relevant to institutional asset allocators
+\item \textbf{Financial Analysts Journal} (if condensed to $\sim$20 pages): broader CFA audience, high impact
+\item \textbf{Journal of Empirical Finance} (if kept at current length): more technical audience, full robustness appreciated
+\end{itemize}
+
+The core insight --- that alpha absorption does not imply economic value destruction when the economic value operates through a different channel (MDD vs.\ Sharpe) --- is both original and practically important. With the recommended fixes, this is a publishable paper.
+
+\end{document}
