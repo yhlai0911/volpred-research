@@ -1,0 +1,595 @@
+{
+  "experiment_id": "K837",
+  "title": "K837: BTC Regime-Switching VaR \u2014 Solving the 1%/5% Mutual Exclusion",
+  "method": "GJR-GARCH(1,1) + 4 regime-switching VaR methods (RV-Regime, VIX-Regime, GMM-Regime, Adaptive-Blend)",
+  "asset": "BTC-USD",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "refit_every": 63,
+  "alpha_levels": [
+    0.01,
+    0.05
+  ],
+  "data_source": "yfinance (BTC-USD, ^VIX)",
+  "hypothesis": "Regime-switching (Normal in low-vol, Student-t in high-vol) can pass both 1% and 5% VaR Trinity",
+  "error_log_rules": [
+    "GARCH OOS: recursive h[t]=f(h[t-1], r\u00b2[t-1])",
+    "Student-t: scale=sqrt((df-2)/df) per-refit (K824v2 fix)",
+    "Regime signal: shift(1) \u2014 use yesterday regime for today VaR",
+    "Basel/stats tests: standard implementations"
+  ],
+  "references": [
+    "K830: BTC Normal PASS@1%, Student-t PASS@5%, none pass both",
+    "K824v2: Student-t scale=sqrt((df-2)/df) fix",
+    "Hamilton (1989) Econometrica \u2014 regime switching",
+    "Marcucci (2005) J. Financial Econometrics \u2014 MS-GARCH VaR",
+    "Kupiec (1995), Christoffersen (1998), Basel Committee (1996, 2019)"
+  ],
+  "timestamp": "2026-04-03T12:41:58.901107+00:00",
+  "elapsed_total_sec": 2.7,
+  "n_oos": 731,
+  "oos_stats": {
+    "mean": 0.00269377,
+    "std": 0.02556595,
+    "skewness": 0.6193,
+    "kurtosis": 2.538,
+    "min": -0.08343357,
+    "max": 0.12144256
+  },
+  "n_refits": 12,
+  "refit_params_log": [
+    {
+      "refit_num": 1,
+      "day_idx": "0",
+      "date": "2023-01-01",
+      "n_train": 2921,
+      "gjr_persistence": 0.97,
+      "student_df": 3.12
+    },
+    {
+      "refit_num": 2,
+      "day_idx": "63",
+      "date": "2023-03-05",
+      "n_train": 2984,
+      "gjr_persistence": 0.9624,
+      "student_df": 3.17
+    },
+    {
+      "refit_num": 3,
+      "day_idx": "126",
+      "date": "2023-05-07",
+      "n_train": 3047,
+      "gjr_persistence": 0.9618,
+      "student_df": 3.18
+    },
+    {
+      "refit_num": 4,
+      "day_idx": "189",
+      "date": "2023-07-09",
+      "n_train": 3110,
+      "gjr_persistence": 0.9614,
+      "student_df": 3.17
+    },
+    {
+      "refit_num": 5,
+      "day_idx": "252",
+      "date": "2023-09-10",
+      "n_train": 3173,
+      "gjr_persistence": 0.97,
+      "student_df": 3.11
+    },
+    {
+      "refit_num": 6,
+      "day_idx": "315",
+      "date": "2023-11-12",
+      "n_train": 3236,
+      "gjr_persistence": 0.9649,
+      "student_df": 3.12
+    },
+    {
+      "refit_num": 7,
+      "day_idx": "378",
+      "date": "2024-01-14",
+      "n_train": 3299,
+      "gjr_persistence": 0.9658,
+      "student_df": 3.14
+    },
+    {
+      "refit_num": 8,
+      "day_idx": "441",
+      "date": "2024-03-17",
+      "n_train": 3362,
+      "gjr_persistence": 0.9651,
+      "student_df": 3.14
+    },
+    {
+      "refit_num": 9,
+      "day_idx": "504",
+      "date": "2024-05-19",
+      "n_train": 3425,
+      "gjr_persistence": 0.97,
+      "student_df": 3.12
+    },
+    {
+      "refit_num": 10,
+      "day_idx": "567",
+      "date": "2024-07-21",
+      "n_train": 3488,
+      "gjr_persistence": 0.9646,
+      "student_df": 3.18
+    },
+    {
+      "refit_num": 11,
+      "day_idx": "630",
+      "date": "2024-09-22",
+      "n_train": 3551,
+      "gjr_persistence": 0.9638,
+      "student_df": 3.19
+    },
+    {
+      "refit_num": 12,
+      "day_idx": "693",
+      "date": "2024-11-24",
+      "n_train": 3614,
+      "gjr_persistence": 0.9636,
+      "student_df": 3.2
+    }
+  ],
+  "var_results": {
+    "1%": {
+      "Normal": {
+        "violation_rate": 0.004104,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 3.3018,
+          "p_value": 0.0692,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 1,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00074454,
+        "trinity_pass": true
+      },
+      "Student-t": {
+        "violation_rate": 0.001368,
+        "expected_rate": 0.01,
+        "n_violations": 1,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 8.6964,
+          "p_value": 0.0032,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 0,
+        "basel_window_size": 250,
+        "pinball_loss": 0.0008172,
+        "trinity_pass": false
+      },
+      "RV-Regime": {
+        "violation_rate": 0.004104,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 3.3018,
+          "p_value": 0.0692,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 1,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00075327,
+        "trinity_pass": true
+      },
+      "VIX-Regime": {
+        "violation_rate": 0.004104,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 3.3018,
+          "p_value": 0.0692,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 1,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00075836,
+        "trinity_pass": true
+      },
+      "GMM-Regime": {
+        "violation_rate": 0.004104,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 3.3018,
+          "p_value": 0.0692,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 1,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00075327,
+        "trinity_pass": true
+      },
+      "Adaptive-Blend": {
+        "violation_rate": 0.004104,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 3.3018,
+          "p_value": 0.0692,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 1,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00075685,
+        "trinity_pass": true
+      }
+    },
+    "5%": {
+      "Normal": {
+        "violation_rate": 0.030096,
+        "expected_rate": 0.05,
+        "n_violations": 22,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 7.0666,
+          "p_value": 0.0079,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00286627,
+        "trinity_pass": false
+      },
+      "Student-t": {
+        "violation_rate": 0.045144,
+        "expected_rate": 0.05,
+        "n_violations": 33,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 0.3747,
+          "p_value": 0.5405,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.1993,
+          "p_value": 0.6553,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 12,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00275055,
+        "trinity_pass": true
+      },
+      "RV-Regime": {
+        "violation_rate": 0.031464,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 6.0561,
+          "p_value": 0.0139,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00285704,
+        "trinity_pass": false
+      },
+      "VIX-Regime": {
+        "violation_rate": 0.030096,
+        "expected_rate": 0.05,
+        "n_violations": 22,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 7.0666,
+          "p_value": 0.0079,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00282343,
+        "trinity_pass": false
+      },
+      "GMM-Regime": {
+        "violation_rate": 0.031464,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 6.0561,
+          "p_value": 0.0139,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00285704,
+        "trinity_pass": false
+      },
+      "Adaptive-Blend": {
+        "violation_rate": 0.032832,
+        "expected_rate": 0.05,
+        "n_violations": 24,
+        "n_total": 731,
+        "kupiec": {
+          "stat": 5.1353,
+          "p_value": 0.0234,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "pinball_loss": 0.00284267,
+        "trinity_pass": false
+      }
+    }
+  },
+  "regime_analysis": {
+    "RV-Regime": {
+      "fraction_low_vol": 0.9193,
+      "fraction_high_vol": 0.0807,
+      "n_low": 672,
+      "n_high": 59,
+      "mean_return_low": 0.002916,
+      "mean_return_high": 0.000158,
+      "std_return_low": 0.02529,
+      "std_return_high": 0.0284
+    },
+    "VIX-Regime": {
+      "fraction_low_vol": 0.8618,
+      "fraction_high_vol": 0.1382,
+      "n_low": 630,
+      "n_high": 101,
+      "mean_return_low": 0.001616,
+      "mean_return_high": 0.009415,
+      "std_return_low": 0.024425,
+      "std_return_high": 0.030933
+    },
+    "GMM-Regime": {
+      "fraction_low_vol": 0.9193,
+      "fraction_high_vol": 0.0807,
+      "n_low": 672,
+      "n_high": 59,
+      "mean_return_low": 0.002916,
+      "mean_return_high": 0.000158,
+      "std_return_low": 0.02529,
+      "std_return_high": 0.0284
+    },
+    "Adaptive-Blend": {
+      "mean_weight": 0.1373,
+      "std_weight": 0.1797,
+      "min_weight": 0.009,
+      "max_weight": 0.8387,
+      "frac_near_normal": 0.8741,
+      "frac_near_student": 0.0287
+    }
+  },
+  "trinity_summary": {
+    "Normal": {
+      "1%": true,
+      "5%": false
+    },
+    "Student-t": {
+      "1%": false,
+      "5%": true
+    },
+    "RV-Regime": {
+      "1%": true,
+      "5%": false
+    },
+    "VIX-Regime": {
+      "1%": true,
+      "5%": false
+    },
+    "GMM-Regime": {
+      "1%": true,
+      "5%": false
+    },
+    "Adaptive-Blend": {
+      "1%": true,
+      "5%": false
+    }
+  },
+  "dm_tests": {
+    "1%": {
+      "RV-Regime vs Normal": {
+        "dm_stat": 7.8857,
+        "p_value": 0.0,
+        "regime_better": "False",
+        "harvey_significant": "True"
+      },
+      "RV-Regime vs Student-t": {
+        "dm_stat": -4.8364,
+        "p_value": 0.0,
+        "regime_better": "True",
+        "harvey_significant": "True"
+      },
+      "VIX-Regime vs Normal": {
+        "dm_stat": 10.4885,
+        "p_value": 0.0,
+        "regime_better": "False",
+        "harvey_significant": "True"
+      },
+      "VIX-Regime vs Student-t": {
+        "dm_stat": -4.4486,
+        "p_value": 0.0,
+        "regime_better": "True",
+        "harvey_significant": "True"
+      },
+      "GMM-Regime vs Normal": {
+        "dm_stat": 7.8857,
+        "p_value": 0.0,
+        "regime_better": "False",
+        "harvey_significant": "True"
+      },
+      "GMM-Regime vs Student-t": {
+        "dm_stat": -4.8364,
+        "p_value": 0.0,
+        "regime_better": "True",
+        "harvey_significant": "True"
+      },
+      "Adaptive-Blend vs Normal": {
+        "dm_stat": 8.8938,
+        "p_value": 0.0,
+        "regime_better": "False",
+        "harvey_significant": "True"
+      },
+      "Adaptive-Blend vs Student-t": {
+        "dm_stat": -4.8737,
+        "p_value": 0.0,
+        "regime_better": "True",
+        "harvey_significant": "True"
+      }
+    },
+    "5%": {
+      "RV-Regime vs Normal": {
+        "dm_stat": -0.6114,
+        "p_value": 0.5409,
+        "regime_better": "True",
+        "harvey_significant": "False"
+      },
+      "RV-Regime vs Student-t": {
+        "dm_stat": 2.3606,
+        "p_value": 0.0182,
+        "regime_better": "False",
+        "harvey_significant": "False"
+      },
+      "VIX-Regime vs Normal": {
+        "dm_stat": -3.4861,
+        "p_value": 0.0005,
+        "regime_better": "True",
+        "harvey_significant": "True"
+      },
+      "VIX-Regime vs Student-t": {
+        "dm_stat": 1.5837,
+        "p_value": 0.1133,
+        "regime_better": "False",
+        "harvey_significant": "False"
+      },
+      "GMM-Regime vs Normal": {
+        "dm_stat": -0.6114,
+        "p_value": 0.5409,
+        "regime_better": "True",
+        "harvey_significant": "False"
+      },
+      "GMM-Regime vs Student-t": {
+        "dm_stat": 2.3606,
+        "p_value": 0.0182,
+        "regime_better": "False",
+        "harvey_significant": "False"
+      },
+      "Adaptive-Blend vs Normal": {
+        "dm_stat": -2.3031,
+        "p_value": 0.0213,
+        "regime_better": "True",
+        "harvey_significant": "False"
+      },
+      "Adaptive-Blend vs Student-t": {
+        "dm_stat": 2.1888,
+        "p_value": 0.0286,
+        "regime_better": "False",
+        "harvey_significant": "False"
+      }
+    }
+  },
+  "conclusion": {
+    "hypothesis_confirmed": false,
+    "methods_passing_both": [],
+    "best_pinball_1pct": {
+      "method": "Normal",
+      "loss": 0.00074454
+    },
+    "best_pinball_5pct": {
+      "method": "Student-t",
+      "loss": 0.00275055
+    },
+    "key_findings": [
+      "1. Regime-switching does NOT solve the BTC 1%/5% VaR mutual exclusion",
+      "2. All 4 regime methods (RV, VIX, GMM, Adaptive) pass 1% but fail 5% — identical to Normal",
+      "3. Root cause: 2023-2024 is 87-92% low-vol regime, so regime switching degenerates to pure Normal",
+      "4. RV-Regime: only 59/731 days (8.1%) classified as high-vol — too few for Student-t to affect 5% coverage",
+      "5. VIX-Regime: only 101/731 days (13.8%) with VIX>=20 — still insufficient",
+      "6. Adaptive-Blend: mean weight=0.137 (87% Normal), only 2.9% of days near-Student-t",
+      "7. At 5% VaR: regime methods get 22-24 violations (need ~37 to pass Kupiec), Student-t gets 33",
+      "8. The problem is GARCH variance over-prediction during bull runs, not distributional misspecification",
+      "9. DM test: VIX-Regime significantly better than Normal at 5% pinball (DM=-3.49, p<0.001) but still fails Trinity",
+      "10. Fundamental impossibility: when GARCH sigma is too high, both Normal and Student-t VaR are too conservative — switching between them cannot fix the sigma"
+    ],
+    "practical_implication": "Simple regime-switching between Normal and Student-t quantiles cannot solve the BTC VaR mutual exclusion. The 1%/5% split is caused by GARCH variance over-prediction during prolonged bull runs (mean return 0.27%/day in 2023-2024). The fix must come from the variance model (e.g., lower persistence, variance targeting, or regime-switching GARCH with separate parameter sets per regime) rather than from the distribution. For practitioners: use Normal at 1% and Student-t at 5% as separate models.",
+    "limitations": [
+      "OOS 2023-2024 is a bull market period; bear market results may differ dramatically",
+      "BTC trades 24/7 but VIX only weekdays — forward-fill introduces lag",
+      "Simple regime detection; full Hamilton filter or MS-GARCH (with separate GARCH params per regime) may perform differently",
+      "Only GJR-GARCH variance model tested; EGARCH, HAR-RV, or realized measures could change results",
+      "Regime threshold sensitivity not fully explored (e.g., lower RV percentile could increase Student-t usage)"
+    ]
+  }
+}
