@@ -423,7 +423,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] Regime-Switching Correlation Hedging
 
 ### Codex 第 9 次建議（2026-04-03，基於 K825-K830 成果）[提出: Codex GPT-5.4]
-- [ ] **K833: CBOE IV Weekly Straddle Validation**：用真實 VIX/VXN/GVZ 驗證 short-vol 策略。最可能產出新可交易結果。
+- [x] ~~K833: CBOE IV Weekly Straddle Validation~~ → **K833 完成 POSITIVE**。VRP 一致為正（78-83% win rate），SPY S1 Sharpe 3.69，S2 VRP Timing MDD -33%。⚠️ Proxy P&L，真實 Sharpe 可能減半。需真實選擇權數據進一步驗證。
+- [ ] **K833 衍生：Real Options P&L Validation**：用真實選擇權歷史數據（OptionMetrics 或 CBOE DataShop）驗證 VRP proxy 結果
 - [ ] **K831: 5-Min RV Horse Race**：HAR-RV/HEAVY/Realized GARCH vs GJR，5-min RV 作 target。⚠️ 需 60+ 天 5-min 數據（ETA 04/11）
 - [ ] **K832: Continuous-Jump-Overnight Decomposition**：BPV + jump + overnight 三桶分開建模。⚠️ 需 5-min 數據
 - [x] ~~K835: Taiwan VIX/VIXTWN Blend~~ → **K835 探索性 NULL（僅 74 天）**。8.63/VIX Sharpe 4.02 最佳，VIXTWN 無增量（level r=0.91）。DM 全 NS。⚠️ 待 VIXTWN 252+ 天後重驗。

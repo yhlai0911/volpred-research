@@ -566,5 +566,24 @@
       "經驗法則：per-refit 的參數（如 t_df）必須存在 array 中逐日套用，不能用最後一個值回溯套用到全部 OOS（K825 Bug 1 教訓）。"
     ],
     "timestamp": "2026-04-03T08:06:26.755406+00:00"
+  },
+  {
+    "id": "E43",
+    "title": "E43: Session 2026-04-03 Part 2 — VaR cross-asset/BTC + insurance + Taiwan (K828-K835)",
+    "experiments": [
+      "K828",
+      "K829",
+      "K830",
+      "K811v2",
+      "K835"
+    ],
+    "lessons": [
+      "K828: VIX percentile conditioning 在 12/VIX 上完全多餘——12/VIX 公式本身就是 VIX 的單調遞減函數，疊加 percentile = 用同一信號兩次。這反向確認了 12/VIX 的優雅性。",
+      "K829 跨資產 VaR: 沒有一個方法在所有資產都最好。GLD 最容易（對稱低波動），QQQ 類似 SPY，BTC 和 0050.TW 各有獨特挑戰。資產特性（skew/kurtosis）決定方法選擇。",
+      "K830 BTC 教訓：原始 return 的 skew 不等於 GARCH 殘差的 skew。GJR 的 leverage term 已吸收方向不對稱。問題不是分配而是 regime-dependent variance（bull vs bear 過度/不足預測）。",
+      "K811v2 vs K811: 去掉 pre-2012 不可靠 VVIX 數據後結論完全翻轉（S2 從最差變最佳）。數據品質比方法論更重要——這應該是所有實驗的第一步。",
+      "K835 台灣: VIXTWN 和 VIX level 相關 0.91 但日變化 r=-0.11。高 level 相關 = 無增量信息，低 change 相關 = 不同的短期動態但不足以改善策略。僅 74 天太短下結論。"
+    ],
+    "timestamp": "2026-04-03T10:36:25.168093+00:00"
   }
 ]
