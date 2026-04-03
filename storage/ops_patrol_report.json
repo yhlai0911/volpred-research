@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-04-02T06:06:45Z",
+  "timestamp": "2026-04-03T12:13:37Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "14 draft articles in storage/reports/feed.json (threshold: >=3). Total articles: 711. Pool is healthy."
+      "detail": "14 draft articles in storage/reports/feed.json (threshold: >=3). Total articles: 712. Pool is healthy."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified ~22 seconds ago (threshold: >26 hours). Metrics are current."
+      "detail": "storage/strategy_metrics.json is ~12 hours old (mtime=1775153491, now=1775196817, diff=43326s). Threshold: >26h (93600s). Metrics are current."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Most recent entry dated 2026-03-31 (not today 2026-04-02 nor yesterday 2026-04-01). Last entry: 'Session Cron 空轉 6-8 小時' — cron idling root cause and fix already applied to CLAUDE.md. No new error entries today or yesterday."
+      "detail": "Most recent entry in docs/error_log.md dated 2026-03-31 (not today 2026-04-03 nor yesterday 2026-04-02). Last issue: 'Session Cron 空轉 6-8 小時' — fix already applied to CLAUDE.md. No new errors today or yesterday."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies checked. Each has exactly 1 null in last 3 entries (today's return not yet settled — normal). No strategy exceeds threshold of >2 nulls. Strategies: slow_vt(813), risk_parity(813), simple_12vix(813), recommended_5050(813), taiwan_8.63vix(752), taiwan_spy_momentum(752), tz_tw_jp_5050(1089), global_vt_tz(1092), vix_leading_guard(989), vix_cond_leverage(813), taiwan_hybrid_leverage(779), piecewise_conservative(813), fear_dca(813), adaptive_tier(813)."
+      "detail": "All 14 strategies checked. Each has exactly 1 null in last 3 entries (most recent trading day not yet settled — normal). No strategy exceeds threshold of >2 nulls. Strategies: slow_vt(813), risk_parity(813), simple_12vix(813), recommended_5050(813), taiwan_8.63vix(752), taiwan_spy_momentum(752), tz_tw_jp_5050(1089), global_vt_tz(1092), vix_leading_guard(989), vix_cond_leverage(813), taiwan_hybrid_leverage(779), piecewise_conservative(813), fear_dca(813), adaptive_tier(813)."
     },
     {
       "name": "GIT_STATUS",
@@ -30,7 +30,7 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1627 entries in storage/memory/knowledge.json (+1 since last patrol)."
+      "detail": "1628 entries in storage/memory/knowledge.json (+1 since last patrol on 2026-04-02)."
     }
   ],
   "alerts": []
