@@ -19624,5 +19624,17 @@
     ],
     "confidence": 0.5,
     "created_at": "2026-04-03T13:08:04.724349"
+  },
+  {
+    "item_id": "ec9ffa84",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude] K823 Congressional Trading \u2014 45 \u5929\u5ef6\u9072\u6467\u6bc0\u6240\u6709\u4fe1\u865f\u50f9\u503c\n\n\u7528\u6236\u554f\uff1a\u8ddf\u8457\u653f\u6cbb\u4eba\u7269\u8cb7\u80a1\u7968\u6703\u8cfa\u9322\u55ce\uff1f\n\n\u4fe1\u865f\u8870\u6e1b\u5206\u6790\uff08SPY, 2006-2024\uff09\uff1a\n- \u5b8c\u7f8e Oracle D=0: Sharpe 7.665\uff08\u4e0d\u53ef\u80fd\uff09\n- D=1: Sharpe -0.884\uff08\u5df2\u6df1\u5ea6\u8ca0\u503c\uff01\u56e0 SPY ACF=-0.103 \u8ca0\u81ea\u76f8\u95dc\uff09\n- D=22: Sharpe 2.407\uff08\u6708\u5ea6\u52d5\u91cf\u5cf0\u503c\uff09\n- D=45\uff08STOCK Act\uff09: Sharpe 0.275\uff08< BH SPY 0.611\uff09\n\n\u90e8\u5206\u6e96\u78ba\u5ea6 + 45 \u5929\u5ef6\u9072\uff1a\n- 55% + D=45: Sharpe -0.554\n- 65% + D=45: Sharpe -0.477\n- 100% + D=45: Sharpe 0.275\uff08\u4ecd\u6253\u4e0d\u904e BH\uff01\uff09\n\n\u95dc\u9375\u5c0d\u6bd4\u2014\u2014\u6162\u4fe1\u865f\u4e0d\u53d7\u5ef6\u9072\u5f71\u97ff\uff1a\n- VIX regime: D=0 Sharpe 0.377 \u2192 D=45 Sharpe 0.541\uff08\u5e7e\u4e4e\u4e0d\u8b8a\uff09\n- 12-month momentum: \u540c\u6a23 delay-immune\n\n\u7d50\u8ad6\uff1a\n1. STOCK Act 45 \u5929\u5ef6\u9072\u5b8c\u5168\u4e2d\u548c insider \u4fe1\u606f\u50f9\u503c\n2. \u65e5\u983b\u4fe1\u865f half-life < 1 \u5929\uff08SPY \u8ca0\u81ea\u76f8\u95dc\u4f7f\u5ef6\u9072\u66f4\u81f4\u547d\uff09\n3. \u6708\u983b\u4fe1\u865f half-life ~22 \u5929\n4. \u6162\u4fe1\u865f\uff08VIX regime, momentum\uff09delay-immune \u2192 \u9019\u624d\u662f\u6563\u6236\u8a72\u7528\u7684\n\n\u5be6\u9a57\u8173\u672c: experiments/k823_congressional_trading.py\n\u7d50\u679c\u6578\u64da: experiments/k823_congressional_trading_results.json",
+    "evidence": [
+      "K823",
+      "Ziobrowski_2004",
+      "STOCK_Act_2012"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-03T13:30:39.737530"
   }
 ]
