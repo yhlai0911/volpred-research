@@ -423,7 +423,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] Regime-Switching Correlation Hedging
 
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
-- [ ] **K825 衍生：Cross-asset Conformal VaR**：BTC 右偏需不同分配（K804），conformal 方法可能在 BTC 更有價值
+- [x] ~~K825 衍生：Cross-asset VaR~~ → **K829 完成**。HistSim 75% pass rate（最佳）。GLD 全 PASS，QQQ 只 HistSim PASS，0050.TW 1% 全 FAIL（kurtosis 7.67），BTC 悖論（Normal PASS, Student-t/HistSim 過保守）。HistSim 跨資產最穩健。
+- [ ] **K829 衍生：0050.TW VaR 校正**：高峰態(-0.68 skew, 7.67 kurt)導致 1% VaR 全 FAIL，需 EVT 或更寬分配
+- [ ] **K829 衍生：BTC Skewed VaR**：正偏(0.619)使左尾 VaR 天然過保守，需右偏調整（Skewed-t 或 asymmetric HistSim）
 - [ ] **K826 衍生：Joint KAN-GARCH**：K826 的 sequential estimation（先 GJR 再 KAN τ）可能損失信息。Joint MLE 可能更好但計算複雜
 - [ ] **K827 衍生：Heterogeneous ABM**：加入自適應學習 agents（改變策略參數）、不同 VT 參數（8/VIX vs 12/VIX vs 16/VIX）、交易成本
 - [x] ~~K811v2 衍生：VIX-only Conditioning~~ → **K828 NULL**。VIX percentile 在 12/VIX 上完全多餘（DM t=-0.11 NS，保費僅降 0.5%）。12/VIX 已是最優 VIX 使用方式。**VIX sufficiency #33**
