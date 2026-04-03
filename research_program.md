@@ -432,7 +432,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
 - [x] ~~K825 衍生：Cross-asset VaR~~ → **K829 完成**。HistSim 75% pass rate（最佳）。GLD 全 PASS，QQQ 只 HistSim PASS，0050.TW 1% 全 FAIL（kurtosis 7.67），BTC 悖論（Normal PASS, Student-t/HistSim 過保守）。HistSim 跨資產最穩健。
-- [ ] **K829 衍生：0050.TW VaR 校正**：高峰態(-0.68 skew, 7.67 kurt)導致 1% VaR 全 FAIL，需 EVT 或更寬分配
+- [x] ~~K829 衍生：0050.TW VaR 校正~~ → **K836 完成 POSITIVE**。Cornish-Fisher 3/481 Trinity PASS！用 skew+kurtosis 修正 quantile(-2.326→-3.204)。純 EVT-POT 全 FAIL。CF 是最簡單有效方案。**VaR 最佳實踐更新：SPY=HistSim/Student-t，0050.TW=Cornish-Fisher**
 - [x] ~~K829 衍生：BTC Skewed VaR~~ → **K830 NULL**。Skewed-t 無效——BTC 正偏(0.619)在 GJR 殘差中消失(skew→-0.19)。真正問題是 regime-dependent variance（bull run 過度預測），不是尾部分配。無單一方法在 BTC 的 1%+5% 同時 Trinity PASS。
 - [ ] **K826 衍生：Joint KAN-GARCH**：K826 的 sequential estimation（先 GJR 再 KAN τ）可能損失信息。Joint MLE 可能更好但計算複雜
 - [ ] **K827 衍生：Heterogeneous ABM**：加入自適應學習 agents（改變策略參數）、不同 VT 參數（8/VIX vs 12/VIX vs 16/VIX）、交易成本
