@@ -443,6 +443,14 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] ~~K835: Taiwan VIX/VIXTWN Blend~~ → **K835 探索性 NULL（僅 74 天）**。8.63/VIX Sharpe 4.02 最佳，VIXTWN 無增量（level r=0.91）。DM 全 NS。⚠️ 待 VIXTWN 252+ 天後重驗。
 - [x] ~~K834: IV Connectedness Regime Filter~~ → **K834 NULL**。TCI 控制 VIX 後 partial r=-0.003(p=0.84)。S2 vs S1 DM t=-0.68 NS。高 TCI 期反而 return 更高（risk premium）。**VIX sufficiency #34**。
 
+### 衍生方向（2026-04-03~04 TAIFEX paradigm shift，K847-K849）
+- [ ] **K849 衍生：SPY HAR-RV**：用 yfinance 5-min 數據（04/11 ETA）在 SPY 上重現 K849，驗證 proxy ceiling 是否跨資產通用
+- [ ] **K849 衍生：HAR-RV-Night 成分分析**：K848 發現夜盤 vol 57%。HAR 模型分開 RV_night 和 RV_day 做 regressors 是否更好（K849 Track B 初步驗證 R² 0.17→0.58）
+- [ ] **K849 衍生：HAR-RV based VaR**：用 HAR-RV 做台灣 VaR（替代 GJR+CF），可能更準
+- [ ] **K849 衍生：Realized GARCH**：Hansen, Huang & Shek (2012) 的 Realized GARCH 結合 GARCH + RV，可能比純 HAR 或純 GJR 更好
+- [ ] **K847 衍生：Paper 2 更新**：Taiwan VT 論文需加入 K844（期貨 VT）+ K847（gap 拆解）+ K849（HAR-RV）的重大發現
+- [ ] **K848 衍生：Jump Dynamics**：74.9% 天有 jump（K848），jump 頻率/大小能否預測隔日 vol？
+
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
 - [x] ~~K825 衍生：Cross-asset VaR~~ → **K829 完成**。HistSim 75% pass rate（最佳）。GLD 全 PASS，QQQ 只 HistSim PASS，0050.TW 1% 全 FAIL（kurtosis 7.67），BTC 悖論（Normal PASS, Student-t/HistSim 過保守）。HistSim 跨資產最穩健。
 - [x] ~~K829 衍生：0050.TW VaR 校正~~ → **K836 完成 POSITIVE**。Cornish-Fisher 3/481 Trinity PASS！用 skew+kurtosis 修正 quantile(-2.326→-3.204)。純 EVT-POT 全 FAIL。CF 是最簡單有效方案。**VaR 最佳實踐更新：SPY=HistSim/Student-t，0050.TW=Cornish-Fisher**
