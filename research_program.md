@@ -517,7 +517,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ### 最終工具指南（K426-K495, cross-OOS validated）
 | 任務 | SPY | Other equity | Non-equity | Taiwan |
 |------|-----|-------------|------------|--------|
-| **Forecasting** | **GJR-X(VIX9D) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
+| **Forecasting (日頻 r²)** | **GJR-X(VIX9D) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
+| **Forecasting (5-min RV)** | HAR-RV (未測) | HAR-RV (未測) | HAR-RV (未測) | **HAR-RV ★★★** (K849: DM t=-11.14 勝 GJR，QLIKE 0.18 vs 0.53) |
 | **VaR** | **GJR + HistSim/Student-t ★★★** (K825) | GJR + HistSim (K829 QQQ only HistSim PASS) | GJR + any (K829 GLD all PASS) | **GJR + Cornish-Fisher ★★★** (K836: 唯一 Trinity PASS for 0050.TW) |
 | **VT Strategy** | 12/VIX（#9 irreducible） | 12/VIX adapted | Asset-specific | 8.63/VIX |
 
