@@ -19649,5 +19649,16 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-04-03T13:57:39.278933"
+  },
+  {
+    "item_id": "ae07db19",
+    "category": "experiment_validation",
+    "content": "K824 Codex \u5be9\u67e5\uff1a2 HIGH \u2014 HistSim \u52dd Student-t \u7d50\u8ad6\u4e0d\u53ef\u9760\n\nHIGH 1: Student-t df \u4f30\u8a08\u7f3a scale term sqrt((df-2)/df)\u3002z_t \u662f unit-variance\uff0c\u4f46 t-dist fit \u6c92\u6709 rescale\u3002\ndf \u504f\u5411\u66f4\u8584\u7684\u5c3e\u90e8 \u2192 Student-t VaR \u88ab\u4f4e\u4f30 \u2192 violations \u88ab\u9ad8\u4f30\u3002\u4fee\u6b63\u5f8c Student-t \u53ef\u80fd\u8868\u73fe\u66f4\u597d\u3002\n\nHIGH 2: Basel traffic light \u662f\u81ea\u5b9a\u7fa9\uff08ad-hoc rate thresholds\uff09\uff0c\u975e\u6a19\u6e96 Basel \u6e2c\u8a66\u3002\nStudent-t 8/502 \u5df2\u901a\u904e Kupiec (p=0.2185) \u4f46\u88ab\u81ea\u5b9a\u7fa9\u898f\u5247\u6a19\u70ba fail\u3002\n\n\u7d50\u8ad6\uff1aK824 \u7684 HistSim > Student-t \u7d50\u8ad6\u4e0d\u53ef\u9760\u3002\u9700 K824v2 \u4fee\u6b63\uff1a\n1. Student-t df \u4f30\u8a08\u52a0\u5165 scale term\n2. \u7528\u6a19\u6e96 Basel traffic light\uff08250 \u5929\u56de\u6eaf\u7a97\uff0cGreen<5, Yellow 5-9, Red\u226510\uff09\n3. \u4fee\u6b63\u5f8c\u91cd\u65b0\u6bd4\u8f03\n\n\u66ab\u6642\u6062\u5fa9 VaR \u6700\u4f73\u5be6\u8e10\u70ba GJR + Student-t\uff08K802 \u7d50\u8ad6\uff09\u3002",
+    "evidence": [
+      "K824",
+      "Codex_review"
+    ],
+    "confidence": 0.6,
+    "created_at": "2026-04-03T14:10:58.355328"
   }
 ]

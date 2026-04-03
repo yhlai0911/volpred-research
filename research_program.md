@@ -486,12 +486,12 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 | 任務 | SPY | Other equity | Non-equity | Taiwan |
 |------|-----|-------------|------------|--------|
 | **Forecasting** | **GJR-X(VIX9D) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
-| **VaR** | **GJR + HistSim ★★★** (K824) | GJR + HistSim | GJR + HistSim | GJR + HistSim |
+| **VaR** | **GJR + Student-t ★★★** (K802; K824 HistSim promising but Codex 2H) | GJR + Student-t | GJR + Student-t | GJR + Student-t |
 | **VT Strategy** | 12/VIX（#9 irreducible） | 12/VIX adapted | Asset-specific | 8.63/VIX |
 
 **★★★ K799-K804 最終結論（2026-04-01）：**
 - **預測選模型**：GJR-GARCH（QLIKE #1，DM vs GARCH t=-3.25 Harvey PASS）
-- **風險管理選分位數方法**：Historical Simulation（K824: 零假設、VaR 1% PASS、Basel Green）> Student-t（K802: VaR PASS 但 Basel Yellow）
+- **風險管理選分配**：Student-t（K802 確認）。K824 HistSim 有潛力但 Codex 2 HIGH（Student-t df 估計缺 scale term + 非標準 Basel），待 K824v2 修正
 - **兩個維度獨立選擇** — 預測精度和風險管理是正交問題
 - K804 跨資產驗證：equity/commodity 3/4 PASS，BTC 例外（右偏需不同分配）
 - K800 conformal 是 artifact（Codex 抓到），K802 分配修正才是正解
