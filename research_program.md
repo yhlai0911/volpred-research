@@ -503,7 +503,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 | 任務 | SPY | Other equity | Non-equity | Taiwan |
 |------|-----|-------------|------------|--------|
 | **Forecasting** | **GJR-X(VIX9D) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
-| **VaR** | **GJR + HistSim/Student-t ★★★** (K825 修正後：Student-t pinball #1 + HistSim violations 最少，均 Trinity PASS) | GJR + HistSim | GJR + HistSim | GJR + HistSim |
+| **VaR** | **GJR + HistSim/Student-t ★★★** (K825) | GJR + HistSim (K829 QQQ only HistSim PASS) | GJR + any (K829 GLD all PASS) | **GJR + Cornish-Fisher ★★★** (K836: 唯一 Trinity PASS for 0050.TW) |
 | **VT Strategy** | 12/VIX（#9 irreducible） | 12/VIX adapted | Asset-specific | 8.63/VIX |
 
 **★★★ K799-K804 最終結論（2026-04-01）：**
