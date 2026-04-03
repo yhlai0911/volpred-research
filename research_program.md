@@ -428,7 +428,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] **K831: 5-Min RV Horse Race**：HAR-RV/HEAVY/Realized GARCH vs GJR，5-min RV 作 target。⚠️ 需 60+ 天 5-min 數據（ETA 04/11）
 - [ ] **K832: Continuous-Jump-Overnight Decomposition**：BPV + jump + overnight 三桶分開建模。⚠️ 需 5-min 數據
 - [x] ~~K835: Taiwan VIX/VIXTWN Blend~~ → **K835 探索性 NULL（僅 74 天）**。8.63/VIX Sharpe 4.02 最佳，VIXTWN 無增量（level r=0.91）。DM 全 NS。⚠️ 待 VIXTWN 252+ 天後重驗。
-- [ ] **K834: IV Connectedness Regime Filter**：Diebold-Yilmaz 跨 IV 溢出預測系統風險
+- [x] ~~K834: IV Connectedness Regime Filter~~ → **K834 NULL**。TCI 控制 VIX 後 partial r=-0.003(p=0.84)。S2 vs S1 DM t=-0.68 NS。高 TCI 期反而 return 更高（risk premium）。**VIX sufficiency #34**。
 
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
 - [x] ~~K825 衍生：Cross-asset VaR~~ → **K829 完成**。HistSim 75% pass rate（最佳）。GLD 全 PASS，QQQ 只 HistSim PASS，0050.TW 1% 全 FAIL（kurtosis 7.67），BTC 悖論（Normal PASS, Student-t/HistSim 過保守）。HistSim 跨資產最穩健。
