@@ -140,15 +140,23 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **research_program.md**：研究策略文件（北極星）
 - **paper/**：學術論文（按子目錄組織）
 
-### 重要研究結論（2026-03-29 K687/K697/K700）
+### 重要研究結論
 
-**VT 策略是 drawdown insurance，不是 alpha generator。**
+**VT 策略是 drawdown insurance，不是 alpha generator（K687/K697/K700）。**
 - K697：VIX 預測 vol magnitude（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 不可能
 - K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）
 - K688：但 VT 在 CRRA utility 框架 gamma>=5 時勝出（風險厭惡投資人受益）
 - K702：50/50 SPY/GLD 是最佳靜態配置（grid search 確認）
 - K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
 - **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——這是最可靠的設計原則**
+- K846：50/50 的三重護城河（分散化 r=0.057 + 再平衡溢酬 54bps/yr + 黃金危機 alpha）
+
+**★★★ Proxy Ceiling Paradigm Shift（2026-04-03~04 K847-K849）**
+- **K849：HAR-RV 壓倒 GJR（DM t=-11.14）**——之前 800+ 實驗說 GJR 不可動搖是 proxy ceiling 不是 model ceiling。r² 只捕捉 29% true vol（K848）
+- **K847：隔夜 gap 61% 可交易**——用 TAIFEX 夜盤期貨可捕捉。Slot C（美股時段）佔 39.8%
+- **K848：夜盤 vol 佔比 24%→57%**（2017→2026）——台灣市場正在全球化
+- **K844：TX 期貨 VT 空頭期全勝**——交易成本省 97%，機構投資人應用期貨執行
+- **台灣 vol 模型評估必須用 5-min RV 做 target，不能用 r²**
 
 ### 注意事項
 - Feed 發文要用 `feed-publisher` skill（thinking ≠ content）
