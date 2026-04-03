@@ -1,0 +1,437 @@
+{
+  "experiment_id": "K843",
+  "title": "TAIFEX Night Session Intraday Strategies Using TX Tick Data",
+  "description": "TX futures price as real-time signal. Night session slot-based strategies.",
+  "data_source": "TAIFEX TX tick data (Daily_*TX.csv)",
+  "data_period": "20170515 - 20260401",
+  "n_trading_days": 2158,
+  "runtime_seconds": 32.9,
+  "tx_cost_assumption": "2 ticks round-trip (0.01%)",
+  "correlations": {
+    "slot_c_vs_next_day": -0.0787,
+    "slot_a_vs_slot_c": -0.0089,
+    "slot_c_vs_overnight_gap": 0.0676,
+    "night_full_vs_next_day": -0.0768
+  },
+  "strategy_metrics": {
+    "S0: BH Night Session": {
+      "name": "S0: BH Night Session",
+      "n_days": 2158,
+      "n_active_trades": 2158,
+      "trade_pct": 100.0,
+      "mean_daily_ret_bps": 3.55,
+      "ann_return_pct": 8.95,
+      "ann_vol_pct": 11.35,
+      "sharpe": 0.788,
+      "win_rate_pct": 55.7,
+      "max_drawdown_pct": -18.83,
+      "profit_factor": 1.16,
+      "total_return_pct": 76.62,
+      "avg_win_bps": 45.53,
+      "avg_loss_bps": -49.13
+    },
+    "S1: Slot C Momentum": {
+      "name": "S1: Slot C Momentum",
+      "n_days": 1687,
+      "n_active_trades": 515,
+      "trade_pct": 30.5,
+      "mean_daily_ret_bps": 1.12,
+      "ann_return_pct": 2.82,
+      "ann_vol_pct": 4.85,
+      "sharpe": 0.581,
+      "win_rate_pct": 53.8,
+      "max_drawdown_pct": -8.35,
+      "profit_factor": 1.22,
+      "total_return_pct": 18.88,
+      "avg_win_bps": 38.14,
+      "avg_loss_bps": -36.46
+    },
+    "S2: US Open Reaction": {
+      "name": "S2: US Open Reaction",
+      "n_days": 2158,
+      "n_active_trades": 99,
+      "trade_pct": 4.6,
+      "mean_daily_ret_bps": 1.18,
+      "ann_return_pct": 2.98,
+      "ann_vol_pct": 4.48,
+      "sharpe": 0.664,
+      "win_rate_pct": 57.6,
+      "max_drawdown_pct": -4.81,
+      "profit_factor": 1.95,
+      "total_return_pct": 25.5,
+      "avg_win_bps": 91.92,
+      "avg_loss_bps": -64.05
+    },
+    "S3: VWAP Crossover": {
+      "name": "S3: VWAP Crossover",
+      "n_days": 2158,
+      "n_active_trades": 2158,
+      "trade_pct": 100.0,
+      "mean_daily_ret_bps": -9.5,
+      "ann_return_pct": -23.95,
+      "ann_vol_pct": 11.24,
+      "sharpe": -2.13,
+      "win_rate_pct": 38.6,
+      "max_drawdown_pct": -213.79,
+      "profit_factor": 0.69,
+      "total_return_pct": -205.1,
+      "avg_win_bps": 53.83,
+      "avg_loss_bps": -49.25
+    },
+    "S4: Slot A→C Alignment": {
+      "name": "S4: Slot A→C Alignment",
+      "n_days": 1687,
+      "n_active_trades": 316,
+      "trade_pct": 18.7,
+      "mean_daily_ret_bps": 1.62,
+      "ann_return_pct": 4.08,
+      "ann_vol_pct": 4.89,
+      "sharpe": 0.835,
+      "win_rate_pct": 57.3,
+      "max_drawdown_pct": -4.02,
+      "profit_factor": 1.61,
+      "total_return_pct": 27.34,
+      "avg_win_bps": 39.89,
+      "avg_loss_bps": -33.23
+    }
+  },
+  "dm_tests_vs_s0": {
+    "S1: Slot C Momentum": {
+      "stat": 8.044,
+      "p_value": 0.0
+    },
+    "S2: US Open Reaction": {
+      "stat": 14.274,
+      "p_value": 0.0
+    },
+    "S3: VWAP Crossover": {
+      "stat": 0.048,
+      "p_value": 0.962
+    },
+    "S4: Slot A→C Alignment": {
+      "stat": 12.999,
+      "p_value": 0.0
+    }
+  },
+  "yearly_sharpe": {
+    "S0: BH Night Session": {
+      "2017": {
+        "sharpe": 1.398,
+        "win_rate": 61.0,
+        "n_days": 159,
+        "mean_ret_bps": 2.31
+      },
+      "2018": {
+        "sharpe": -0.388,
+        "win_rate": 54.1,
+        "n_days": 244,
+        "mean_ret_bps": -1.36
+      },
+      "2019": {
+        "sharpe": 1.15,
+        "win_rate": 59.1,
+        "n_days": 242,
+        "mean_ret_bps": 3.04
+      },
+      "2020": {
+        "sharpe": 0.778,
+        "win_rate": 58.4,
+        "n_days": 245,
+        "mean_ret_bps": 3.93
+      },
+      "2021": {
+        "sharpe": 1.541,
+        "win_rate": 58.0,
+        "n_days": 243,
+        "mean_ret_bps": 5.07
+      },
+      "2022": {
+        "sharpe": 0.319,
+        "win_rate": 52.8,
+        "n_days": 246,
+        "mean_ret_bps": 1.64
+      },
+      "2023": {
+        "sharpe": 1.655,
+        "win_rate": 55.2,
+        "n_days": 239,
+        "mean_ret_bps": 4.95
+      },
+      "2024": {
+        "sharpe": 0.708,
+        "win_rate": 49.6,
+        "n_days": 242,
+        "mean_ret_bps": 3.79
+      },
+      "2025": {
+        "sharpe": 1.267,
+        "win_rate": 54.5,
+        "n_days": 242,
+        "mean_ret_bps": 8.03
+      },
+      "2026": {
+        "sharpe": 0.488,
+        "win_rate": 55.4,
+        "n_days": 56,
+        "mean_ret_bps": 4.48
+      }
+    },
+    "S1: Slot C Momentum": {
+      "2017": {
+        "sharpe": 1.507,
+        "win_rate": 50.0,
+        "n_days": 128,
+        "mean_ret_bps": 0.5
+      },
+      "2018": {
+        "sharpe": 0.375,
+        "win_rate": 54.8,
+        "n_days": 191,
+        "mean_ret_bps": 0.72
+      },
+      "2019": {
+        "sharpe": -0.24,
+        "win_rate": 59.5,
+        "n_days": 189,
+        "mean_ret_bps": -0.26
+      },
+      "2020": {
+        "sharpe": -0.459,
+        "win_rate": 44.8,
+        "n_days": 192,
+        "mean_ret_bps": -1.08
+      },
+      "2021": {
+        "sharpe": 0.848,
+        "win_rate": 54.3,
+        "n_days": 192,
+        "mean_ret_bps": 0.98
+      },
+      "2022": {
+        "sharpe": 1.628,
+        "win_rate": 65.4,
+        "n_days": 195,
+        "mean_ret_bps": 3.93
+      },
+      "2023": {
+        "sharpe": 0.88,
+        "win_rate": 55.8,
+        "n_days": 187,
+        "mean_ret_bps": 0.8
+      },
+      "2024": {
+        "sharpe": 1.089,
+        "win_rate": 52.0,
+        "n_days": 182,
+        "mean_ret_bps": 2.27
+      },
+      "2025": {
+        "sharpe": 0.069,
+        "win_rate": 47.8,
+        "n_days": 188,
+        "mean_ret_bps": 0.17
+      },
+      "2026": {
+        "sharpe": 2.198,
+        "win_rate": 50.0,
+        "n_days": 43,
+        "mean_ret_bps": 9.11
+      }
+    },
+    "S2: US Open Reaction": {
+      "2017": {
+        "sharpe": 0,
+        "win_rate": 0,
+        "n_days": 159,
+        "mean_ret_bps": 0.0
+      },
+      "2018": {
+        "sharpe": -1.631,
+        "win_rate": 0.0,
+        "n_days": 244,
+        "mean_ret_bps": -0.78
+      },
+      "2019": {
+        "sharpe": -0.394,
+        "win_rate": 50.0,
+        "n_days": 242,
+        "mean_ret_bps": -0.09
+      },
+      "2020": {
+        "sharpe": 0.641,
+        "win_rate": 57.1,
+        "n_days": 245,
+        "mean_ret_bps": 1.38
+      },
+      "2021": {
+        "sharpe": 1.782,
+        "win_rate": 83.3,
+        "n_days": 243,
+        "mean_ret_bps": 1.15
+      },
+      "2022": {
+        "sharpe": 0.937,
+        "win_rate": 60.0,
+        "n_days": 246,
+        "mean_ret_bps": 1.69
+      },
+      "2023": {
+        "sharpe": -0.267,
+        "win_rate": 50.0,
+        "n_days": 239,
+        "mean_ret_bps": -0.08
+      },
+      "2024": {
+        "sharpe": 1.31,
+        "win_rate": 63.2,
+        "n_days": 242,
+        "mean_ret_bps": 2.71
+      },
+      "2025": {
+        "sharpe": 1.081,
+        "win_rate": 63.6,
+        "n_days": 242,
+        "mean_ret_bps": 4.09
+      },
+      "2026": {
+        "sharpe": 0.992,
+        "win_rate": 33.3,
+        "n_days": 56,
+        "mean_ret_bps": 1.84
+      }
+    },
+    "S3: VWAP Crossover": {
+      "2017": {
+        "sharpe": -6.841,
+        "win_rate": 29.6,
+        "n_days": 159,
+        "mean_ret_bps": -12.85
+      },
+      "2018": {
+        "sharpe": -2.601,
+        "win_rate": 38.1,
+        "n_days": 244,
+        "mean_ret_bps": -9.08
+      },
+      "2019": {
+        "sharpe": -5.082,
+        "win_rate": 33.1,
+        "n_days": 242,
+        "mean_ret_bps": -14.34
+      },
+      "2020": {
+        "sharpe": -1.94,
+        "win_rate": 38.0,
+        "n_days": 245,
+        "mean_ret_bps": -10.11
+      },
+      "2021": {
+        "sharpe": -2.664,
+        "win_rate": 39.5,
+        "n_days": 243,
+        "mean_ret_bps": -8.77
+      },
+      "2022": {
+        "sharpe": -2.232,
+        "win_rate": 42.3,
+        "n_days": 246,
+        "mean_ret_bps": -12.37
+      },
+      "2023": {
+        "sharpe": -3.511,
+        "win_rate": 36.8,
+        "n_days": 239,
+        "mean_ret_bps": -10.46
+      },
+      "2024": {
+        "sharpe": 0.378,
+        "win_rate": 45.9,
+        "n_days": 242,
+        "mean_ret_bps": 1.88
+      },
+      "2025": {
+        "sharpe": -2.285,
+        "win_rate": 38.8,
+        "n_days": 242,
+        "mean_ret_bps": -13.58
+      },
+      "2026": {
+        "sharpe": 0.429,
+        "win_rate": 46.4,
+        "n_days": 56,
+        "mean_ret_bps": 3.62
+      }
+    },
+    "S4: Slot A→C Alignment": {
+      "2017": {
+        "sharpe": 1.699,
+        "win_rate": 100.0,
+        "n_days": 128,
+        "mean_ret_bps": 0.43
+      },
+      "2018": {
+        "sharpe": 2.007,
+        "win_rate": 60.0,
+        "n_days": 191,
+        "mean_ret_bps": 3.27
+      },
+      "2019": {
+        "sharpe": 1.187,
+        "win_rate": 60.0,
+        "n_days": 189,
+        "mean_ret_bps": 0.97
+      },
+      "2020": {
+        "sharpe": 0.447,
+        "win_rate": 55.3,
+        "n_days": 192,
+        "mean_ret_bps": 0.75
+      },
+      "2021": {
+        "sharpe": -0.373,
+        "win_rate": 50.0,
+        "n_days": 192,
+        "mean_ret_bps": -0.34
+      },
+      "2022": {
+        "sharpe": 0.236,
+        "win_rate": 64.7,
+        "n_days": 195,
+        "mean_ret_bps": 0.39
+      },
+      "2023": {
+        "sharpe": 0.761,
+        "win_rate": 53.3,
+        "n_days": 187,
+        "mean_ret_bps": 0.53
+      },
+      "2024": {
+        "sharpe": 0.52,
+        "win_rate": 48.8,
+        "n_days": 182,
+        "mean_ret_bps": 0.66
+      },
+      "2025": {
+        "sharpe": 1.696,
+        "win_rate": 63.6,
+        "n_days": 188,
+        "mean_ret_bps": 7.53
+      },
+      "2026": {
+        "sharpe": 0.629,
+        "win_rate": 50.0,
+        "n_days": 43,
+        "mean_ret_bps": 1.9
+      }
+    }
+  },
+  "slot_c_stats": {
+    "n": 2158,
+    "mean_bps": -0.11,
+    "std_bps": 44.35,
+    "skew": 0.531,
+    "kurtosis": 21.511,
+    "pct_above_30bps": 31.6
+  },
+  "conclusion": "Best strategy: S4: Slot A→C Alignment (Sharpe 0.835); BH Night benchmark: Sharpe 0.788; Slot C → next-day correlation: -0.0787"
+}
