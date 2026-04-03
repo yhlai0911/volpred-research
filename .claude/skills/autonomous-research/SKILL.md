@@ -150,10 +150,14 @@ uv run python scripts/build_knowledge_index.py build
 系統 crontab 已設定永久任務（5-min 數據收集 + daily update）。
 但以下 session-only cron 需要每次新 session 重新建立：
 
+#### 雲端觸發（RemoteTrigger，無需 session）
+```
+platform-ops-patrol: 0 */6 * * *  # 平台巡檢（雲端 trigger，不再用 session cron）
+```
+
 #### 最小啟動集（保守模式）
 ```
 CronCreate(cron="13 */6 * * *", prompt="會員問題研究")               # :13 每6小時
-CronCreate(cron="37 */6 * * *", prompt="平台巡檢")                   # :37 每6小時
 CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit")        # :47
 CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07
 ```
@@ -162,7 +166,6 @@ CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07
 ```
 CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究")         # 08-23時 每15分鐘
 CronCreate(cron="5 0-7 * * *", prompt="繼續研究")                   # 00-07時 每小時
-CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")   # :37 每2小時
 ```
 
 也可以安排**單次性提醒**避免忘記（範例格式，日期需依實際事件更新）：

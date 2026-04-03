@@ -516,10 +516,14 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ### Session Cron（每次新 session 重建，需 Claude 活躍）
 
+#### 雲端觸發（RemoteTrigger，無需 session 活躍）
+```
+platform-ops-patrol: 0 */6 * * *  # 平台巡檢（已遷移至雲端 trigger trig_01HzWX2ZUmsGHnzwciGpHeNz）
+```
+
 #### 最小啟動集
 ```
 CronCreate(cron="13 */6 * * *", prompt="會員問題研究")
-CronCreate(cron="37 */6 * * *", prompt="平台巡檢")
 CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit")
 CronCreate(cron="7 * * * *", prompt="知識索引更新")
 ```
@@ -528,7 +532,6 @@ CronCreate(cron="7 * * * *", prompt="知識索引更新")
 ```
 CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動 (3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出")
 CronCreate(cron="5 0-7 * * *", prompt="繼續研究（夜間）：讀 research_program.md 未完成項目，啟動 1 個低強度任務。不可空轉。")
-CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")
 ```
 
 #### 反空轉規則（2026-03-31 教訓）

@@ -126,7 +126,7 @@
 - 站務健康面板（`/admin/health`）：local + jobs + workflows + content_release + analytics + questions
 - 排程管理面板（`/admin/schedules`）：session cron 定義 + system crontab 即時讀取 + 核心任務覆蓋檢查
 - Session cron 驅動的 6 小時會員問題重排（CLI + API + workflow snapshot 全通過 2026-03-21 測試）
-- Session cron 驅動的平台巡檢（`platform-cycle-summary` → `storage/ops/` snapshot）
+- 雲端 trigger 驅動的平台巡檢（`platform-ops-patrol`，每 6 小時，已遷移至 RemoteTrigger）
 - 論文頁 DB 驅動 + PDF Storage 交付（metadata / PDF 更新不必 redeploy）
 
 ### 尚未完全產品化

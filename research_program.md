@@ -225,7 +225,7 @@
 - **市場微結構**：order flow imbalance → 短期波動率預測、bid-ask spread dynamics
 - **網絡/傳染模型**：用圖模型分析波動率在資產間的傳播路徑（beyond linear Granger）
 - **因果推論**：用 DiD / RDD 分析政策事件（例如 Fed 升息）對波動率的因果影響
-- **Agent-Based Simulation**：模擬不同比例投資人使用 VT 對市場穩定性的影響（如果所有人都用 12/VIX 會怎樣？）
+- **★★ Agent-Based Simulation**（K827 完成）：模擬 VT 擁擠效應。**臨界點 30-50%**：10-20% 無退化(Sharpe~0.50)，50% 崩潰(-70%, t=8.88)，70%+ 策略毀滅(負 Sharpe)。正反饋 loss spiral 確認。目前 <5% 採用率安全。⚠️ 模擬實驗，Kyle 簡化模型
 - **加密 DeFi**：AMM 池的 impermanent loss 與波動率的關係、DeFi yield 策略的風險管理
 - **氣候金融**：極端天氣事件對商品/保險公司波動率的影響
 - **行為金融**：投資人對 VT 的心理接受度實驗、為什麼知道 VT 有效卻不用？
@@ -358,7 +358,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ### Bayesian Subset Selection 方法論（用戶指定，2026-03-26）
 - [ ] K433: **Bayesian SSVS for ARX-GARCH** — So, Chen, Liu (2006) JRSS-C, 55(2), 201-224. Latent binary indicator δ_i + MCMC 從 2^(p+q) 子集空間搜索最優外生變數組合。比 K113 逐一測試更有力。**進行中**
 - [x] ~~K431/K813: Smooth Transition GARCH~~ → **K813 完成 NS**。In-sample LR=252 強烈顯著但 OOS DM=-0.11 NS。11 參數不優於 5 參數 GJR。結構發現：低 VIX 高 leverage(0.50)/低 persistence(0.39)，高 VIX 相反。QLIKE ceiling 持續。
-- [x] ~~K432/K814: Bayesian MCMC GARCH~~ → **K814 完成**（⚠️ Codex 3 HIGH：P(γ>0) 是先驗 tautology、OOS h[0] leak、ESS/Geweke 錯誤）。框架有價值但數字不可靠。需 K814v2 修正 prior + 初始化 + 診斷。
+- [x] ~~K432/K814/K814v2: Bayesian MCMC GARCH~~ → **K814v2 完成（3 bugs 修正）**。Bug 1: Normal(0,0.2) prior 後 P(γ>0|data)=1.000, BF=∞（leverage 真實非 artifact）。Bug 2: OOS h[0] leak 影響極小。Bug 3: batch means ESS min=136, 4/5 Geweke fail（需更長 chains）。**MLE 勝 Bayes 做點預測**（QLIKE 1.4628 vs 1.4653, DM |t|=4.23 Harvey PASS）。Bayesian 價值在不確定性量化，非點預測。
 - [ ] Bayesian Subset Selection for TARMA — Chen, Liu, Gerlach (2011) Computational Statistics, 26, 1-30. 擴展 SSVS 到 threshold + MA terms，16M+ 可能子集
 - [ ] Threshold Variable Selection for Asymmetric SV — Chen, Liu, So (2013) Computational Statistics, 28, 2415-2447. Combined threshold variable Z_t = Σω_i Z_i，同時選 threshold 變數和模型結構。五個亞洲市場實證
 - [x] ~~SSVS for Variance Equation~~ → **K821 完成 NULL**。0/8 外生變數 PIP>0.5。GJR variance equation 自足。VIX_level PIP=0.039。與 K484 internal（4/5 PIP=1.0）形成鮮明對比。
@@ -371,7 +371,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
    - [x] **K783b 完成**：最優 window 因資產而異。QQQ 偏好 504（DM=+3.59 PASS），GLD 偏好 3000，0050 偏好 1000，BTC 偏好 2000。**w=2000 仍是合理預設。**
    - [x] **K783c 完成**：regime-dependent。危機→w=2000，中波動→w=504，平靜→w=252。1/14 DM 通過 Harvey。w=504 是跨 regime 最佳折衷。
 2. ★ ~~MF2-GARCH~~ → **K785 完成 NULL**：GJR baseline 仍勝（QLIKE 0.529），MF2-EWMA 0.533 (NS)，MF2-MEM 0.599（worse）。Expanding GJR 已隱式捕捉長期趨勢。
-3. KAN-GARCH-MIDAS（結構化 NN 可能突破 ML ceiling）— J. Applied Economics 2025
+3. ~~KAN-GARCH-MIDAS~~ → **K826 完成 NULL**。GJR QLIKE -8.680 顯著勝 KAN -8.582 (DM t=-3.16 Harvey PASS)。KAN 偵測到非線性但 OOS 無法轉化。**ML ceiling 第 7 次確認。**
 4. VIX-Managed Portfolio 文獻引用整理 — Int. Rev. Financial Analysis 2024（支持 Paper 3）
 
 ### 需 5-min 數據（ETA 2026 Q2）
@@ -486,7 +486,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 | 任務 | SPY | Other equity | Non-equity | Taiwan |
 |------|-----|-------------|------------|--------|
 | **Forecasting** | **GJR-X(VIX9D) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
-| **VaR** | **GJR + HistSim ★★★** (K824v2 乾淨確認：唯一 Basel Green + Trinity PASS) | GJR + HistSim | GJR + HistSim | GJR + HistSim |
+| **VaR** | **GJR + HistSim/Student-t ★★★** (K825 修正後：Student-t pinball #1 + HistSim violations 最少，均 Trinity PASS) | GJR + HistSim | GJR + HistSim | GJR + HistSim |
 | **VT Strategy** | 12/VIX（#9 irreducible） | 12/VIX adapted | Asset-specific | 8.63/VIX |
 
 **★★★ K799-K804 最終結論（2026-04-01）：**
@@ -498,7 +498,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - K799：六層評估發現 GJR QLIKE #1 但 VaR Normal FAIL（1.79%）。MCS 含全部 5 模型。
 - K800：Conformal heuristic 看似修復（0.80%）→ K800v2 推翻（artifact，Codex 抓到）
 - **K802：正確解法 = GJR + Skewed-t/Student-t 分配**。QLIKE 不變 + VaR 1.20% Trinity PASS。
-- **結論**：預測選模型（GJR），風險管理選分配（Skewed-t）。兩個維度獨立。
+- **K825：Conformal VaR Proxy-Reliance**（2026-04-03）：3 種 conformal 方法 vs 3 baselines。Codex 審查 3 HIGH（Student-t lookahead/conformal order stat/Kupiec boundary）修正後——Student-t 升為 pinball #1（6 viol, Trinity PASS），C2 Proxy-Robust 唯一 conformal Trinity PASS（0 viol）但 VaR 寬度 4.29%（HistSim 2x）。C1/C3 Naive/Exch 均 FAIL。**結論：HistSim 和 Student-t 並列最佳平衡（Trinity PASS + 合理寬度），conformal 可行但犧牲資本效率。**
+- **結論**：預測選模型（GJR），風險管理選分配（Student-t/HistSim 並列）。兩個維度獨立。
 - 待驗證：跨資產 + 整合進 Paper 1/5
 
 **K801 完成（2026-04-01）：Event-Surprise VIX Shock Guard — NULL**
