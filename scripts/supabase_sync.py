@@ -596,6 +596,20 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             counts[mem_type] = ok
             state[f"{mem_type}_count"] = len(entries)
 
+    # Clean up orphan drafts in Supabase (exist in DB but not in local feed)
+    # These accumulate when articles are removed from local feed.json but not cleaned in DB.
+    if feed:
+        local_slugs = {a.get("id") for a in feed if isinstance(a, dict) and a.get("id")}
+        try:
+            db_drafts = _select_rows("articles", select="slug", status="draft")
+            orphans = [r["slug"] for r in db_drafts if r.get("slug") and r["slug"] not in local_slugs]
+            if orphans:
+                for slug in orphans:
+                    _patch_where("articles", {"slug": slug}, {"status": "unpublished"})
+                counts["orphan_drafts_cleaned"] = len(orphans)
+        except Exception:
+            pass
+
     _save_sync_state(storage, state)
     return counts
 
