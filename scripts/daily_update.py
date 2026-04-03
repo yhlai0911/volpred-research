@@ -844,25 +844,11 @@ def main():
 {strat_table}
 {gap_section}
 """
-        pub.publish_milestone(
-            title=f"{today} 本日持倉比率建議（依據 {spy_date} 收盤數據）",
-            tags=["持倉建議", "daily-update", "12/VIX", "SPY", "GLD", "0050.TW", "VT策略"],
-            description=desc,
-            phase="daily_update",
-            details={
-                "date": today,
-                "spy_date": spy_date,
-                "spy_close": spy_close,
-                "gld_close": gld_close,
-                "sigma_annual": sigma_gjr_ann,
-                "vix_level": round(vix_level, 2) if vix_level else None,
-                "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
-                "gap_alert_level": gap_alert_level,
-                "strategies": {sid: dict(w_info) for sid, w_info in strat_list},
-            },
-        )
+        # NOTE: 「本日持倉比率建議」已合併到 generate_daily_article() 的完整版文章中。
+        # 不再單獨發佈簡潔版，避免一天出現兩篇高度重疊的每日文章。
+        # 合併決定：2026-04-03，用戶要求。
 
-        # --- Auto-generate 每日建議 article (rich content + chart) ---
+        # --- Auto-generate 每日建議 article (rich content + chart + 持倉表) ---
         try:
             generate_daily_article(
                 pub=pub,
