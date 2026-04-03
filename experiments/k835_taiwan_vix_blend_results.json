@@ -1,0 +1,209 @@
+{
+  "experiment_id": "K835",
+  "title": "Taiwan VIX/VIXTWN Blend Strategy",
+  "timestamp": "2026-04-03T10:34:44.453378+00:00",
+  "data_sources": {
+    "asset": "0050.TW (yfinance, cleaned with clean_tw50_data)",
+    "vix": "^VIX (yfinance)",
+    "vixtwn": "data/vixtwn/vixtwn_daily.csv (TWSE)"
+  },
+  "data_period": {
+    "tw50": "2025-10-01 ~ 2026-04-02",
+    "vix": "2025-10-01 ~ 2026-04-02",
+    "vixtwn": "2025-12-01 ~ 2026-03-30",
+    "oos_period": "VIXTWN overlap period (~76 trading days)"
+  },
+  "descriptive_stats": {
+    "VIX": {
+      "n": 127,
+      "mean": 19.1672,
+      "std": 3.9828,
+      "min": 13.47,
+      "max": 31.05,
+      "skew": 0.9645,
+      "kurtosis": 0.1806
+    },
+    "VIXTWN": {
+      "n": 76,
+      "mean": 26.377,
+      "std": 6.8213,
+      "min": 16.5,
+      "max": 41.63,
+      "skew": 0.6153,
+      "kurtosis": -0.917
+    },
+    "0050.TW_returns": {
+      "n": 118,
+      "mean": 0.0023,
+      "std": 0.0156,
+      "min": -0.0423,
+      "max": 0.0428,
+      "skew": -0.0398,
+      "kurtosis": 0.3063
+    },
+    "vix_vixtwn_correlation": 0.9137
+  },
+  "strategies": {
+    "S1_8.63_VIX": {
+      "sharpe": 4.0203,
+      "cagr": 0.5167,
+      "mdd": -0.0322,
+      "vol": 0.1065,
+      "n_days": 74
+    },
+    "S2_12_VIXTWN": {
+      "sharpe": 3.6143,
+      "cagr": 0.4617,
+      "mdd": -0.038,
+      "vol": 0.1082,
+      "n_days": 74
+    },
+    "S3_Static_Blend": {
+      "sharpe": 3.8206,
+      "cagr": 0.4889,
+      "mdd": -0.0345,
+      "vol": 0.1072,
+      "n_days": 74
+    },
+    "S4_Rolling_Corr_Blend": {
+      "sharpe": 3.6977,
+      "cagr": 0.4677,
+      "mdd": -0.0363,
+      "vol": 0.1068,
+      "n_days": 74
+    },
+    "S5_BuyHold": {
+      "sharpe": 2.5188,
+      "cagr": 0.8896,
+      "mdd": -0.093,
+      "vol": 0.2465,
+      "n_days": 75
+    }
+  },
+  "weight_stats": {
+    "S1_8.63_VIX": {
+      "mean": 0.4801,
+      "std": 0.0976,
+      "min": 0.2779,
+      "max": 0.6407,
+      "pct_full_invest": 0.0,
+      "pct_zero": 0.0
+    },
+    "S2_12_VIXTWN": {
+      "mean": 0.4852,
+      "std": 0.1155,
+      "min": 0.2883,
+      "max": 0.7273,
+      "pct_full_invest": 0.0,
+      "pct_zero": 0.0
+    },
+    "S3_Static_Blend": {
+      "mean": 0.4827,
+      "std": 0.1045,
+      "min": 0.3046,
+      "max": 0.6809,
+      "pct_full_invest": 0.0,
+      "pct_zero": 0.0
+    },
+    "S4_Rolling_Corr_Blend": {
+      "mean": 0.4789,
+      "std": 0.1053,
+      "min": 0.2961,
+      "max": 0.6945,
+      "pct_full_invest": 0.0,
+      "pct_zero": 0.0
+    },
+    "S5_BuyHold": {
+      "mean": 1.0,
+      "std": 0.0,
+      "min": 1.0,
+      "max": 1.0,
+      "pct_full_invest": 1.0,
+      "pct_zero": 0.0
+    }
+  },
+  "dm_tests": {
+    "S1_8.63_VIX_vs_S2_12_VIXTWN": {
+      "t_stat": -1.3507,
+      "p_value": 0.181,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S1_8.63_VIX_vs_S3_Static_Blend": {
+      "t_stat": -1.3507,
+      "p_value": 0.181,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S1_8.63_VIX_vs_S4_Rolling_Corr_Blend": {
+      "t_stat": -1.771,
+      "p_value": 0.0807,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S1_8.63_VIX_vs_S5_BuyHold": {
+      "t_stat": 0.8138,
+      "p_value": 0.4184,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S2_12_VIXTWN_vs_S3_Static_Blend": {
+      "t_stat": 1.3507,
+      "p_value": 0.181,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S2_12_VIXTWN_vs_S4_Rolling_Corr_Blend": {
+      "t_stat": 0.3521,
+      "p_value": 0.7258,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S2_12_VIXTWN_vs_S5_BuyHold": {
+      "t_stat": 0.9688,
+      "p_value": 0.3359,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S3_Static_Blend_vs_S4_Rolling_Corr_Blend": {
+      "t_stat": -1.9706,
+      "p_value": 0.0526,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S3_Static_Blend_vs_S5_BuyHold": {
+      "t_stat": 0.8906,
+      "p_value": 0.3761,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    },
+    "S4_Rolling_Corr_Blend_vs_S5_BuyHold": {
+      "t_stat": 0.944,
+      "p_value": 0.3483,
+      "significant_3.0": false,
+      "interpretation": "No significant difference"
+    }
+  },
+  "sanity_check": {
+    "shift_0_sharpe": 3.6989,
+    "shift_1_sharpe": 4.0203,
+    "lag_impact": "moderate"
+  },
+  "vix_vixtwn_relationship": {
+    "level_correlation": 0.9137,
+    "change_correlation": -0.1128
+  },
+  "conclusion": "Best strategy: S1_8.63_VIX (Sharpe=4.0203) | S1 baseline (8.63/VIX): Sharpe=4.0203 | Blend strategies do NOT improve over VIX-only baseline. VIXTWN adds noise rather than signal in this short sample. | No pairwise comparison reaches Harvey (2016) t>3.0 threshold — all differences are statistically insignificant. | CAVEAT: Only 74 trading days — results are exploratory, not conclusive.",
+  "limitations": [
+    "VIXTWN data only available from 2025-12-01 (~76 trading days)",
+    "Short OOS period limits statistical power significantly",
+    "DM test results may not be reliable with <100 observations",
+    "VIXTWN was in a high-vol regime during most of the sample (COVID-era / tariff uncertainty)",
+    "Results cannot be generalized to normal market conditions"
+  ],
+  "references": [
+    "Poon & Granger (2003) Forecasting Volatility in Financial Markets: A Review, JEL",
+    "Bekaert & Hoerova (2014) The VIX, the variance premium and stock market volatility, JFE",
+    "Harvey et al. (2016) ...and the Cross-Section of Expected Returns, RFS (t>3.0 threshold)"
+  ]
+}

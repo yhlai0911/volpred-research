@@ -422,6 +422,13 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] Partial Cointegration Hedging — RQFA 2023
 - [ ] Regime-Switching Correlation Hedging
 
+### Codex 第 9 次建議（2026-04-03，基於 K825-K830 成果）[提出: Codex GPT-5.4]
+- [ ] **K833: CBOE IV Weekly Straddle Validation**：用真實 VIX/VXN/GVZ 驗證 short-vol 策略。最可能產出新可交易結果。
+- [ ] **K831: 5-Min RV Horse Race**：HAR-RV/HEAVY/Realized GARCH vs GJR，5-min RV 作 target。⚠️ 需 60+ 天 5-min 數據（ETA 04/11）
+- [ ] **K832: Continuous-Jump-Overnight Decomposition**：BPV + jump + overnight 三桶分開建模。⚠️ 需 5-min 數據
+- [x] ~~K835: Taiwan VIX/VIXTWN Blend~~ → **K835 探索性 NULL（僅 74 天）**。8.63/VIX Sharpe 4.02 最佳，VIXTWN 無增量（level r=0.91）。DM 全 NS。⚠️ 待 VIXTWN 252+ 天後重驗。
+- [ ] **K834: IV Connectedness Regime Filter**：Diebold-Yilmaz 跨 IV 溢出預測系統風險
+
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
 - [x] ~~K825 衍生：Cross-asset VaR~~ → **K829 完成**。HistSim 75% pass rate（最佳）。GLD 全 PASS，QQQ 只 HistSim PASS，0050.TW 1% 全 FAIL（kurtosis 7.67），BTC 悖論（Normal PASS, Student-t/HistSim 過保守）。HistSim 跨資產最穩健。
 - [ ] **K829 衍生：0050.TW VaR 校正**：高峰態(-0.68 skew, 7.67 kurt)導致 1% VaR 全 FAIL，需 EVT 或更寬分配
