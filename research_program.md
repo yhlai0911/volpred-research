@@ -420,9 +420,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - 格式：Daily_{YYYY}_{MM}_{DD}.zip → CSV（TX=台指期，TX1=近月，TX2=次月）
 - 期間：2012-2026，含日盤(8:45-13:45)和夜盤(15:00-05:00)
 - **核心假設**：台股期貨夜盤完整覆蓋美股交易時段，K817 的 77-93% 隔夜 gap alpha 可能被期貨 price in
-- [ ] **K838: 夜盤 Momentum**：夜盤收盤(05:00)方向是否預測隔日日盤開盤方向
-- [ ] **K839: Basis Trading**：期貨夜盤收盤 vs 現貨前日收盤的 basis 收斂策略
-- [ ] **K840: 夜盤 VIX 即時傳導**：美股 VIX 變化在夜盤期貨的即時反映 → 提前調整 VT 權重
+- [x] ~~K838: 夜盤 Momentum~~ → **NULL**。夜盤與日盤 r=-0.08（反向），方向一致率 48.4%。同商品資訊已透過 gap price in。
+- [ ] K839(原): Basis Trading → 改為 **K841: 夜盤即時 VT 避險**（進行中）+ **K842: 夜盤獲利性交易**（進行中）
+- [x] ~~K840(原): 夜盤 VIX 即時傳導~~ → 整合到 K841/K842
 - **業界注意**：近月/次月 roll、結算日效應、夜盤流動性、保證金成本、bid-ask spread
 
 ### 期貨避險方法論
@@ -444,7 +444,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] ~~K825 衍生：Cross-asset VaR~~ → **K829 完成**。HistSim 75% pass rate（最佳）。GLD 全 PASS，QQQ 只 HistSim PASS，0050.TW 1% 全 FAIL（kurtosis 7.67），BTC 悖論（Normal PASS, Student-t/HistSim 過保守）。HistSim 跨資產最穩健。
 - [x] ~~K829 衍生：0050.TW VaR 校正~~ → **K836 完成 POSITIVE**。Cornish-Fisher 3/481 Trinity PASS！用 skew+kurtosis 修正 quantile(-2.326→-3.204)。純 EVT-POT 全 FAIL。CF 是最簡單有效方案。**VaR 最佳實踐更新：SPY=HistSim/Student-t，0050.TW=Cornish-Fisher**
 - [x] ~~K829 衍生：BTC Skewed VaR~~ → **K830 NULL**。Skewed-t 無效——BTC 正偏(0.619)在 GJR 殘差中消失(skew→-0.19)。真正問題是 regime-dependent variance（bull run 過度預測），不是尾部分配。無單一方法在 BTC 的 1%+5% 同時 Trinity PASS。
-- [ ] **K826 衍生：Joint KAN-GARCH**：K826 的 sequential estimation（先 GJR 再 KAN τ）可能損失信息。Joint MLE 可能更好但計算複雜
+- [x] ~~K826 衍生：Joint KAN-GARCH~~ → 低優先（ML ceiling 7x，方向關閉）
+- [x] ~~K814v2 衍生：Hierarchical Bayesian~~ → **K839 NULL**。Gamma SE -50% 但 QLIKE 不改善。GLD 無 leverage(gamma=-0.02)使共享 prior 不適用。
+- [x] ~~Return prediction pipeline~~ → **K840 NULL**。55.6% hit rate 仍不夠（EMH：cash 太多錯過 rally）。
 - [ ] **K827 衍生：Heterogeneous ABM**：加入自適應學習 agents（改變策略參數）、不同 VT 參數（8/VIX vs 12/VIX vs 16/VIX）、交易成本
 - [x] ~~K811v2 衍生：VIX-only Conditioning~~ → **K828 NULL**。VIX percentile 在 12/VIX 上完全多餘（DM t=-0.11 NS，保費僅降 0.5%）。12/VIX 已是最優 VIX 使用方式。**VIX sufficiency #33**
 - [ ] **K814v2 衍生：Hierarchical Bayesian**：跨資產共享 prior（SPY+QQQ+GLD），估計 gamma 的跨資產分佈
