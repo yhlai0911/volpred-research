@@ -585,5 +585,25 @@
       "K835 台灣: VIXTWN 和 VIX level 相關 0.91 但日變化 r=-0.11。高 level 相關 = 無增量信息，低 change 相關 = 不同的短期動態但不足以改善策略。僅 74 天太短下結論。"
     ],
     "timestamp": "2026-04-03T10:36:25.168093+00:00"
+  },
+  {
+    "id": "E44",
+    "title": "E44: Session 2026-04-03 Part 3 — VRP/Congress/EVT/BTC Regime (K833-K837+K823v2)",
+    "experiments": [
+      "K833",
+      "K834",
+      "K835",
+      "K823v2",
+      "K836",
+      "K837"
+    ],
+    "lessons": [
+      "K833 VRP: IV 系統性高估 RV（78-83% of weeks）。但 proxy P&L ≠ 真實選擇權——bid-ask、margin、gamma risk 可能使 Sharpe 減半。VRP 方向正確但量化需真實數據。",
+      "K823v2 真實數據 vs proxy: 用真實國會交易數據（15,674 筆）vs K823 的完美信號延遲模型，結論一致但說服力天差地別。教訓：能用真實數據就不要用 proxy。House Stock Watcher 是免費可用的好數據源。",
+      "K836 Cornish-Fisher: 對 0050.TW 高峰態(7.67)問題，CF 比 EVT-POT 更有效。原因：充分樣本(3400+)下經驗分位數已很好，EVT 增量小。CF 只需 skew+kurtosis，不需 GPD fit——最簡單的方法往往最好。",
+      "K830→K837 BTC VaR: 三次嘗試（Skewed-t/Regime distribution/Regime switching）都失敗。問題不在分配而在 GARCH variance model 本身——bull run 過度預測。下一步應該是 regime-switching GARCH 參數(不是分配)或 variance targeting。",
+      "K834 IV Connectedness: 高 connectedness 反而 return 更高（risk premium），不是「高連動=壞」。Partial r = -0.003 after controlling VIX。跨 IV 的系統性信息完全被 VIX 吸收。"
+    ],
+    "timestamp": "2026-04-03T12:51:13.420837+00:00"
   }
 ]
