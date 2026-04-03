@@ -47,11 +47,35 @@ The remainder of the paper is organized as follows. Section~2 describes our data
 
 \subsection{Data}
 
-We employ three asset samples. The \textit{primary sample} comprises 22 assets across equities (SPY, QQQ, IWM, XLF, XLE, DIA, EEM, EFA, FXI, EWZ, EWJ, EWG, EWU, EWA, INDA), commodities (GLD, SLV, USO), bonds (TLT, LQD, HYG), and real estate (VNQ). Daily return data span January 2007 to March 2026, sourced from Yahoo Finance.
+We employ three asset samples with varying start dates determined by data availability, summarized in Table~\ref{tab:sample_periods}.
 
-The \textit{international sample} consists of 13 country-level equity ETFs: 7~developed markets (EFA, EWJ, EWG, EWU, EWA, EWC, VGK) and 6~emerging markets (EEM, FXI, EWZ, INDA, EWT, MCHI). The \textit{sector sample} comprises 11 SPDR sector ETFs (XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, XLRE, XLC) with data from December 1998 to March 2026.
+The \textit{primary sample} comprises 22 assets across equities (SPY, QQQ, IWM, XLF, XLE, DIA, EEM, EFA, FXI, EWZ, EWJ, EWG, EWU, EWA, INDA), commodities (GLD, SLV, USO), bonds (TLT, LQD, HYG), and real estate (VNQ). Cross-sectional analyses that require all 22 assets simultaneously (Tables~\ref{tab:alpha_decomp} and~\ref{tab:cross_section}) use the common start date of January 2007, when the latest-listing ETFs in the sample become available. Single-asset and two-asset analyses---including the dual mechanism decomposition (Table~\ref{tab:dual_mechanism}), block bootstrap inference (Table~\ref{tab:mdd_bootstrap}), and factor model regressions (Table~\ref{tab:ff5})---extend back to January 2005 for SPY, GLD, and the 50/50 SPY/GLD blend, exploiting the longer data availability to maximize statistical power.
 
-VIX data are obtained from the CBOE. The risk-free rate is the daily 13-week Treasury bill rate (IRX), time-varying throughout the sample. Fama--French five-factor data (MKT, SMB, HML, RMW, CMA), the momentum factor (MOM), and the betting-against-beta factor (BAB) are obtained from Kenneth French's data library and AQR, respectively.
+The \textit{international sample} consists of 13 country-level equity ETFs: 7~developed markets (EFA, EWJ, EWG, EWU, EWA, EWC, VGK) and 6~emerging markets (EEM, FXI, EWZ, INDA, EWT, MCHI), with a common start date of January 2007. The \textit{sector sample} comprises 11 SPDR sector ETFs (XLB, XLE, XLF, XLI, XLK, XLP, XLU, XLV, XLY, XLRE, XLC) with data from December 1998 to March 2026, providing the longest time series for within-equity robustness tests. All daily return data are sourced from Yahoo Finance.
+
+\begin{table}[H]
+\centering
+\small
+\caption{Sample Periods by Analysis}
+\label{tab:sample_periods}
+\begin{tabular}{@{}llll@{}}
+\toprule
+Sample / Analysis & Assets & Period & Rationale \\
+\midrule
+Cross-sectional (22 assets) & Full primary sample & Jan 2007--Mar 2026 & Common start of all ETFs \\
+Single-/two-asset decomposition & SPY, GLD, 50/50, DIA, QQQ, IWM & Jan 2005--Mar 2026 & Maximizes power for key tests \\
+Factor models (FF5 + BAB) & SPY & Jan 2005--Mar 2026$^{\dagger}$ & BAB proxy from May 2011 \\
+International (13 markets) & Country ETFs & Jan 2007--Mar 2026 & Common start of all ETFs \\
+Sector (11 sectors) & SPDR sector ETFs & Dec 1998--Mar 2026 & Longest available history \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item $^{\dagger}$M5 (with BAB) uses the post-May 2011 subsample when SPLV/SPHB become available.
+\end{tablenotes}
+\end{table}
+
+VIX data are obtained from the CBOE (available from January 1990, predating all ETF samples). The risk-free rate is the daily 13-week Treasury bill rate (IRX), time-varying throughout the sample. Fama--French five-factor data (MKT, SMB, HML, RMW, CMA), the momentum factor (MOM), and the betting-against-beta factor (BAB) are obtained from Kenneth French's data library and AQR, respectively.
 
 \subsection{Volatility Targeting Construction}
 
