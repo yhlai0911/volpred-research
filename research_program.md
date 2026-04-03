@@ -334,7 +334,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ### Gemini 第 2 次建議（2026-03-31，行為金融 + 方法論 + 實務工具）[提出: Gemini]
 - [ ] **Retail Reflexivity & Gamma-Driven Skew**：0DTE 散戶 flow 導致 delta-hedging 連鎖反應，可能打破 VIX sufficiency。量化 "Volatility Gap"（VIX-implied vs flow-induced realized move）。⚠️ BLOCKED: 需 order flow 數據
 - [ ] **Path Signatures for Rough Volatility**：用 rough path theory 的 signature transform 編碼日內價格路徑的幾何特性，捕捉 HAR 遺漏的路徑依賴性。需 5-min 數據（ETA 04/11）
-- [x] ~~Convexity-Adjusted Insurance Premium Tool~~ → **K811 完成 混合結果**（⚠️ Codex 2 HIGH: VVIX pre-2012 + cost calc mislabel）。VoV-cond 方向可信（減少保險費、smooth 優於 binary），但 40% 數字需 K811v2 修正。
+- [x] ~~Convexity-Adjusted Insurance Premium Tool~~ → **K811v2 完成（2 bugs 修正）**。去掉 pre-2012 不可靠 VVIX 後結論翻轉：S2 VoV-Cond Sharpe 0.634（最佳），保險費從 4.62% 降到 1.22%（-74%）。但 Cross-OOS 1/4（僅 COVID），DM 全 NS。Opportunity cost 佔 90%，direct cost 僅 10%。數據品質比方法論更重要。
 
 ### Gemini 第 1 次建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
 - [x] ~~Taiwan Price Limit Latent Volatility~~ → **K790v2 完成 NULL**：>5% 天數僅 0.9%，GJR asymmetry 已捕捉。DM 全 NS。
@@ -410,7 +410,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 ### Tail Risk & Conformal Prediction
 - [ ] Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)。控制非定態 portfolio VaR 超限率。regime-structured vol clustering。
 - [ ] Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。
-- [ ] ★ **Proxy-Reliance Control in Conformal VaR** — arXiv:2603.22569 (2026)。校準 one-sided VaR 時控制 proxy 依賴。直接相關我們的 Patton (2011) proxy-robust 框架。
+- [x] ~~★ Proxy-Reliance Control in Conformal VaR~~ → **K825 完成**。C2 Proxy-Robust Trinity PASS（0 violations）但 VaR 寬度 4.29%（HistSim 2x）。Student-t 修正 lookahead 後升 #1。HistSim/Student-t 並列最佳。
 - [ ] **Online Conformal via Universal Portfolio** — arXiv:2602.03168 (2026)。在線 conformal prediction + portfolio theory 交叉。
 - [ ] **KOWCPI (Kernel-Optimally-Weighted Conformal)** — arXiv:2405.16828。自適應權重 conformal prediction interval，適合波動率聚集。
 - [ ] Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)
@@ -421,6 +421,13 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] Wild Bootstrap OHR — JRFM 2024
 - [ ] Partial Cointegration Hedging — RQFA 2023
 - [ ] Regime-Switching Correlation Hedging
+
+### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
+- [ ] **K825 衍生：Cross-asset Conformal VaR**：BTC 右偏需不同分配（K804），conformal 方法可能在 BTC 更有價值
+- [ ] **K826 衍生：Joint KAN-GARCH**：K826 的 sequential estimation（先 GJR 再 KAN τ）可能損失信息。Joint MLE 可能更好但計算複雜
+- [ ] **K827 衍生：Heterogeneous ABM**：加入自適應學習 agents（改變策略參數）、不同 VT 參數（8/VIX vs 12/VIX vs 16/VIX）、交易成本
+- [ ] **K811v2 衍生：VIX-only Conditioning**：VVIX 不如 VIX（r=-0.148 vs -0.327），用 VIX percentile 直接做保險費 conditioning 可能更好更簡單
+- [ ] **K814v2 衍生：Hierarchical Bayesian**：跨資產共享 prior（SPY+QQQ+GLD），估計 gamma 的跨資產分佈
 
 ### 新發現（2026-04-01 文獻搜尋）
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。

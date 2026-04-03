@@ -548,5 +548,23 @@
       "Cross-market experiments need open-to-close returns: K812 used close-to-close capturing untradable overnight gap."
     ],
     "meta_observation": "Codex審查品質下降可能因為session太長,agent prompts變得模板化。每5個實驗後應pause和反思,不是一直衝量。"
+  },
+  {
+    "id": "E42",
+    "title": "E42: Session 2026-04-03 — Conformal VaR/KAN/ABM/Bayesian fix (K825-K827+K814v2)",
+    "experiments": [
+      "K825",
+      "K826",
+      "K827",
+      "K814v2"
+    ],
+    "lessons": [
+      "Codex 審查在 K825 抓到 3 HIGH bugs（Student-t lookahead, conformal order statistic, Kupiec boundary）——修正後 Student-t 從 #3 升到 #1。審查必須在跑實驗前完成。",
+      "K826 KAN-GARCH-MIDAS: ML ceiling 第 7 次確認。KAN 偵測到 in-sample 非線性但 OOS 無法轉化。MIDAS 的長期組件(τ)缺少短期反應性，是根本弱點而非 NN 結構問題。",
+      "K827 ABM 是本系統首個模擬實驗。模擬結果有趣但必須清楚標注局限性（Kyle 簡化、小 N、無 TX cost）。模擬用於探索機制，不能直接外推。",
+      "K814v2: 修正 prior tautology（HalfNormal→Normal）後 P(γ>0)=1.000 仍成立——leverage 是真實的。但 Geweke 4/5 fail 表示 10K iterations 可能不夠。未來 Bayesian 實驗建議 20K+ iterations。",
+      "經驗法則：per-refit 的參數（如 t_df）必須存在 array 中逐日套用，不能用最後一個值回溯套用到全部 OOS（K825 Bug 1 教訓）。"
+    ],
+    "timestamp": "2026-04-03T08:06:26.755406+00:00"
   }
 ]
