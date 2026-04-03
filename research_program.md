@@ -426,7 +426,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] **K825 衍生：Cross-asset Conformal VaR**：BTC 右偏需不同分配（K804），conformal 方法可能在 BTC 更有價值
 - [ ] **K826 衍生：Joint KAN-GARCH**：K826 的 sequential estimation（先 GJR 再 KAN τ）可能損失信息。Joint MLE 可能更好但計算複雜
 - [ ] **K827 衍生：Heterogeneous ABM**：加入自適應學習 agents（改變策略參數）、不同 VT 參數（8/VIX vs 12/VIX vs 16/VIX）、交易成本
-- [ ] **K811v2 衍生：VIX-only Conditioning**：VVIX 不如 VIX（r=-0.148 vs -0.327），用 VIX percentile 直接做保險費 conditioning 可能更好更簡單
+- [x] ~~K811v2 衍生：VIX-only Conditioning~~ → **K828 NULL**。VIX percentile 在 12/VIX 上完全多餘（DM t=-0.11 NS，保費僅降 0.5%）。12/VIX 已是最優 VIX 使用方式。**VIX sufficiency #33**
 - [ ] **K814v2 衍生：Hierarchical Bayesian**：跨資產共享 prior（SPY+QQQ+GLD），估計 gamma 的跨資產分佈
 
 ### 新發現（2026-04-01 文獻搜尋）
