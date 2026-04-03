@@ -425,7 +425,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] ~~K842: 夜盤獲利性交易~~ → **NULL**。SPY D-2 信號全虧(Sharpe -0.95)。資訊傳遞太快已 price in。
 - [x] ~~K843: 日內 tick 策略~~ → **夜盤正 drift Sharpe 0.788 是最大發現**。日內 timing 不改善 BH Night。S4 Slot A-C MDD 降 78%。
 - [x] ~~K844: TX 期貨 VT vs 0050.TW 現貨 VT~~ → **★★★ 期貨 VT 空頭期大幅勝出**。Return 分解：夜盤 73.7%。S2 Sharpe 1.465 vs S1 1.370，但**空頭期 TX 翻倍 Sharpe**（2022: 0.71 vs 0.37）。交易成本省 97%。多頭期 0050 靠股息勝。
-- [ ] **K844 衍生：TX 期貨策略上架評估**：如果 cross-OOS 3/4 勝 + 空頭保護更強，考慮上架 TX VT 策略
+- [x] ~~K844 衍生：TX 期貨策略上架評估~~ → **K845 FAIL Test 1**（Sharpe 1.76 < median 2.28）。不單獨上架，建議在 taiwan_8.63vix 加註「機構可用 TX 期貨執行」
 - **業界注意**：近月/次月 roll、結算日效應、夜盤流動性、保證金成本、bid-ask spread
 
 ### 期貨避險方法論
