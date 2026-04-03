@@ -349,8 +349,21 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 - **實驗衍生方向必須寫回** — 每個實驗完成後，提取 2-3 個新方向寫入 research_program.md。不寫 = 知識流失。
 - **完成項目必須 archive** — 移到 `docs/research_archive/`，保持 research_program.md < 700 行。
 
-### 實驗前必做：查詢知識庫 + 搜尋文獻（不可跳過，違反即無效）
+### 實驗前必做：防錯 + 查詢知識庫 + 搜尋文獻（不可跳過，違反即無效）
 **每個實驗/新主題路線開始前，必須完成以下步驟，缺一不可：**
+
+**Step 0: Error Log 防錯檢查（最重要，必須在 agent prompt 中包含）**
+0. **讀 `docs/error_log.md` 的常見錯誤**，在 agent prompt 中明確列出適用的防錯規則：
+   - **DM test**：必須用 `from volpred.stats.model_evaluation import strategy_dm_test`，不自己寫
+   - **0050.TW**：必須呼叫 `from volpred.utils import clean_tw50_data`
+   - **跨市場**：必須用 open-to-close return（不是 close-to-close）
+   - **GARCH OOS**：必須逐日遞迴 h[t]=f(h[t-1],r²[t-1])，不能用 stale variance
+   - **Bayesian prior**：必須允許否證（不能用 HalfNormal 然後說 P(>0)=1.0）
+   - **Sanity check**：必須實際計算（shift(0) lookahead vs shift(1)），絕不 hard-code
+   - **分配 fit**：Student-t 必須考慮 scale term sqrt((df-2)/df)
+   - **Basel/統計檢定**：用標準實作，不自定義閾值
+   - **Sharpe > 2x baseline**：幾乎一定有 bug，先停下來檢查
+1. 在 agent prompt 中**明確寫出**：「此實驗需注意的 error log 規則：XXX」
 
 **Step 1: 知識庫搜尋（過去成果）**
 1. `grep -i '關鍵詞' storage/memory/knowledge.json | grep title | head -10`
