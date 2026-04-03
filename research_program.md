@@ -415,6 +415,16 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] **KOWCPI (Kernel-Optimally-Weighted Conformal)** — arXiv:2405.16828。自適應權重 conformal prediction interval，適合波動率聚集。
 - [ ] Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)
 
+### 台股期貨夜盤策略（用戶提出 2026-04-03）
+**數據來源**：`/Users/yhlai0911/Dropbox/TAIFEXDATA/TAIFEXDATA/` (⚠️ 目前 Dropbox Smart Sync placeholder，需手動同步)
+- 格式：Daily_{YYYY}_{MM}_{DD}.zip → CSV（TX=台指期，TX1=近月，TX2=次月）
+- 期間：2012-2026，含日盤(8:45-13:45)和夜盤(15:00-05:00)
+- **核心假設**：台股期貨夜盤完整覆蓋美股交易時段，K817 的 77-93% 隔夜 gap alpha 可能被期貨 price in
+- [ ] **K838: 夜盤 Momentum**：夜盤收盤(05:00)方向是否預測隔日日盤開盤方向
+- [ ] **K839: Basis Trading**：期貨夜盤收盤 vs 現貨前日收盤的 basis 收斂策略
+- [ ] **K840: 夜盤 VIX 即時傳導**：美股 VIX 變化在夜盤期貨的即時反映 → 提前調整 VT 權重
+- **業界注意**：近月/次月 roll、結算日效應、夜盤流動性、保證金成本、bid-ask spread
+
 ### 期貨避險方法論
 - [ ] Quadratic Hedging under GARCH — Ma, J. Futures Markets 2026
 - [ ] Copula-based GARCH Hedge — Hsu et al.
