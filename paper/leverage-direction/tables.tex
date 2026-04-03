@@ -93,9 +93,11 @@ GARCH Equation & Distribution & Violations & Rate & Kupiec $p$ & Basel Zone & St
 GARCH(1,1) & Normal        & 7  & 1.39\% & 0.40 & Green & PASS \\
 GJR-GARCH  & Normal        & 10 & 1.99\% & 0.049 & Yellow & \textbf{Borderline FAIL} \\
 GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.60 & Green & PASS \\
+GJR-GARCH  & Hist.\ Sim.   & 4  & 0.80\% & 0.60 & Green & PASS \\
 \midrule
 \multicolumn{7}{l}{\textit{GJR wins QLIKE ($-3.8\%$, DM $p = 0.001$) but fails VaR under Normal.}} \\
-\multicolumn{7}{l}{\textit{Student-$t$ restores compliance: two optimization domains are independent.}} \\
+\multicolumn{7}{l}{\textit{Historical simulation (empirical quantile of standardized residuals) achieves the}} \\
+\multicolumn{7}{l}{\textit{lowest violation rate without any distributional assumption (K824).}} \\
 \bottomrule
 \end{tabular}
 \end{table}
