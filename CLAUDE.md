@@ -96,7 +96,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
   - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
   - **Paper trades 同步**：自動剝離市場數據，只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾
-- `scripts/daily_update.py` → 每日 06:03 計算策略權重 + 同步 Supabase + 重算績效指標
+- `scripts/daily_update.py` → 每日 22:03 UTC（台灣 06:03）美股收盤後計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
@@ -497,7 +497,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 ```
 0 15 * * 1-5   collect_tw_data.py      # 台股收盤後 15:00
 30 5 * * 2-6   collect_us_data.py      # 美股收盤後 05:30
-3 6 * * 2-6    daily_update.py         # 所有數據就緒 06:03
+3 22 * * 1-5   daily_update.py         # 美股收盤後 22:03 UTC（台灣 06:03），用當日收盤數據
 3 * * * *      release-pool-by-settings # 文章池定時釋出：每 1 小時 1 篇
 ```
 
