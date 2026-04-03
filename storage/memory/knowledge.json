@@ -19660,5 +19660,17 @@
     ],
     "confidence": 0.6,
     "created_at": "2026-04-03T14:10:58.355328"
+  },
+  {
+    "item_id": "081a8001",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: arXiv:2508.15922, \u57f7\u884c: Claude] K824v2 Quantile Fixed \u2014 HistSim \u78ba\u8a8d\u52dd Student-t\uff08\u4e7e\u6de8\u7d50\u679c\uff09\n\n\u4fee\u6b63 K824 \u7684 2 HIGH bug \u5f8c\u91cd\u65b0\u6bd4\u8f03\u3002Student-t df \u4fee\u6b63\uff08scale term\uff09+ \u6a19\u6e96 Basel 250 \u5929\u3002\n\n\u4fee\u6b63\u5f8c\u7d50\u679c\uff08SPY OOS 2023-2024, 502 obs\uff09\uff1a\n1. HistSim: Pinball 0.001148, VaR 1% 4 violations (0.8%), Basel Green, Trinity PASS \u2605\n2. QuantReg: 0.001149, 5 violations, Basel Yellow, FAIL\n3. Normal: 0.001152, 7 violations, Basel Yellow, FAIL\n4. Student-t: 0.001154, 5 violations, Basel Yellow, FAIL\n\nStudent-t df \u4fee\u6b63\u5f8c\uff1amean=6.68 [6.25-7.09]\uff08K824 \u672a\u4fee\u6b63\u6642\u504f\u9ad8\u2192\u8584\u5c3e\u2192violations \u88ab\u4f4e\u4f30\uff09\n\u4fee\u6b63\u5f8c Student-t \u4ecd 5 violations\uff08Basel Yellow\uff09\u2192 HistSim \u4ecd\u52dd\n\nDM tests \u5168 NS\uff08pinball \u5dee\u7570\u5728\u7b2c 6 \u4f4d\u5c0f\u6578\uff09\u3002\n\n\u6700\u7d42\u7d50\u8ad6\uff08K824v2 \u4e7e\u6de8\u78ba\u8a8d\uff09\uff1a\n- VaR \u6700\u4f73\u5be6\u8e10 = GJR + HistSim\uff08\u96f6\u5047\u8a2d\u3001Basel Green\u3001\u552f\u4e00 Trinity PASS\uff09\n- Student-t \u662f\u6b21\u4f73\u4f46 Basel Yellow\n- GJR \u9ede\u9810\u6e2c\u662f\u6838\u5fc3\uff0c\u5206\u4f4d\u6578\u65b9\u6cd5\u6c7a\u5b9a\u5408\u898f\u6027\n\n\u5be6\u9a57\u8173\u672c: experiments/k824v2_quantile_fixed.py\n\u7d50\u679c\u6578\u64da: experiments/k824v2_quantile_fixed_results.json",
+    "evidence": [
+      "K824v2",
+      "K824",
+      "K802"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-03T14:27:33.934163"
   }
 ]
