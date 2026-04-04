@@ -109,7 +109,8 @@ def _patch(table: str, conflict_key: str, data: list | dict) -> bool:
         req = Request(url, data=payload, headers=patch_headers, method="PATCH")
         try:
             urlopen(req, timeout=15)
-        except Exception:
+        except Exception as e:
+            print(f"  PATCH {table} error: {e}")
             ok = False
     return ok
 
@@ -243,8 +244,8 @@ def _get_tag_ids(tag_names: list[str]) -> dict[str, str]:
                 tag_id = row.get("id")
                 if isinstance(name, str) and name and isinstance(tag_id, str) and tag_id:
                     _TAG_ID_CACHE[name] = tag_id
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  WARNING _get_tag_ids: {e}")
     return {name: _TAG_ID_CACHE[name] for name in normalized if name in _TAG_ID_CACHE}
 
 
@@ -604,8 +605,8 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
                 for slug in orphans:
                     _patch_where("articles", {"slug": slug}, {"status": "unpublished"})
                 counts["orphan_drafts_cleaned"] = len(orphans)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  WARNING sync error: {e}")
 
     _save_sync_state(storage, state)
     return counts

@@ -107,8 +107,8 @@ class Publisher:
                 item,
                 reason='publish_experiment',
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  WARNING publisher: {e}")
 
         return item['id']
 
@@ -143,8 +143,8 @@ class Publisher:
                 item,
                 reason='publish_comparison',
             )
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  WARNING publisher: {e}")
         return pub_id
 
     def publish_milestone(self, title: str, description: str,
@@ -175,8 +175,8 @@ class Publisher:
                     if dtparse(existing_time) > cutoff_exact:
                         print(f"  ⚠️ Duplicate title within 24h: '{title[:50]}' (existing: {existing['id']}). Skipping.")
                         return existing['id']
-                except Exception:
-                    pass
+                except Exception as e:
+                    print(f"  WARNING publisher: {e}")
 
         # --- Similar topic check: warn if >60% keyword overlap with existing ---
         similar = self._find_similar_articles(title, feed, audience)
@@ -285,8 +285,8 @@ class Publisher:
                     item,
                     reason='publish_milestone',
                 )
-            except Exception:
-                pass
+            except Exception as e:
+                print(f"  WARNING publisher: {e}")
 
         return pub_id
 
@@ -328,8 +328,8 @@ class Publisher:
             sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
             from supabase_sync import sync_article
             sync_article(target_item, storage_dir=self.reports_dir.parent)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  WARNING publisher: {e}")
         return True
 
     def _append_to_feed(self, item: dict):
@@ -431,8 +431,8 @@ class Publisher:
                 method="PUT",
             )
             urllib.request.urlopen(req, timeout=5)
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  WARNING publisher: {e}")
 
     def _sync_feed_to_remote(self):
         """PUT full feed.json to remote for consistency."""

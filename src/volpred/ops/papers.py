@@ -260,8 +260,8 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
             )
             if result.returncode == 0 and result.stdout.strip().isdigit():
                 metrics["pages"] = int(result.stdout.strip())
-        except Exception:
-            pass
+        except Exception as e:
+            print(f"  WARNING: PDF page count failed: {e}")
 
     return metrics
 
