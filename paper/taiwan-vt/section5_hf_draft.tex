@@ -155,9 +155,9 @@ EWMA       & 0.530 & 0.645 & $-3.43$ & 0/5 \\
 \end{flushleft}
 \end{table}
 
-The cross-OOS validation reinforces these results. In five non-overlapping evaluation periods, HAR-RV (or HAR-RV-J) wins every fold on both tracks---GJR-GARCH and EWMA achieve 0/5 wins in all configurations. The jump component provides negligible incremental value: HAR-RV-J does not significantly outperform HAR-RV on either track (DM $t = 0.83$ on Track A, $t = -1.01$ on Track B), consistent with the finding that jumps account for only 7.6\% of total RV on average.
+The cross-OOS validation reinforces these results. In five non-overlapping evaluation periods, the HAR family (HAR-RV or HAR-RV-J) achieves the lowest QLIKE in every fold on both tracks, while GJR-GARCH and EWMA win 0/5 folds in all configurations. The jump component provides negligible incremental value: HAR-RV-J does not significantly outperform HAR-RV on either track (DM $t = 0.83$ on Track A, $t = -1.01$ on Track B), consistent with the finding that jumps account for only 7.6\% of total RV on average.
 
-A notable result is that the HAR-RV advantage is \textit{larger} on Track B (46\% QLIKE improvement) than on Track A (66\% improvement in absolute QLIKE terms, but Track B's lower baseline QLIKE reflects the more complete RV target). The interpretation is straightforward: when the target variable includes night-session volatility---information that is entirely invisible to GJR-GARCH, which conditions only on daily close-to-close returns---HAR-RV's advantage is amplified because it directly incorporates the night-session component through its RV input.
+A notable result is that while HAR-RV's \textit{percentage} QLIKE improvement appears larger on Track A (66\%) than Track B (46\%), this reflects the different baseline scales: GJR-GARCH's QLIKE is 0.531 on Track A versus 0.202 on Track B, and the absolute improvement (0.350 vs.\ 0.092) confirms that Track A benefits more from HAR-RV. The interpretation is straightforward: when the target variable includes night-session volatility---information that is entirely invisible to GJR-GARCH, which conditions only on daily close-to-close returns---HAR-RV's advantage is amplified because it directly incorporates the night-session component through its RV input.
 
 
 \subsection{The Proxy Ceiling: Why $r^2$ Flatters GARCH}
