@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-04T16:57:35Z",
+  "timestamp": "2026-04-04T07:45:29Z",
   "all_ok": true,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified ~16 seconds before check (mtime=1775321845, now=1775321861). Well within 26-hour threshold."
+      "detail": "storage/strategy_metrics.json last modified ~10 seconds before check (mtime=1775329519, now=1775329529). Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies have exactly 1 null in last 3 entries (today's return not yet recorded — normal pre-close). No strategy exceeds threshold >2 nulls. Entries: slow_vt(814), risk_parity(814), simple_12vix(814), recommended_5050(814), taiwan_8.63vix(753), taiwan_spy_momentum(753), tz_tw_jp_5050(1090), global_vt_tz(1093), vix_leading_guard(990), vix_cond_leverage(814), taiwan_hybrid_leverage(780), piecewise_conservative(814), fear_dca(814), adaptive_tier(814)."
+      "detail": "All 14 strategies checked. No strategy has >2 null portfolio_return in last 3 entries. Normal operations."
     },
     {
       "name": "GIT_STATUS",
