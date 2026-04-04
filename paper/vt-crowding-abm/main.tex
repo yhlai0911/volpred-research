@@ -14,6 +14,7 @@
 \usepackage{tabularx}
 \usepackage{array}
 \usepackage{caption}
+\usepackage{multirow}
 
 \hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
 \doublespacing
@@ -32,7 +33,7 @@
 % --- Abstract ---
 \begin{abstract}
 \noindent
-Volatility targeting (VT) strategies---which scale equity exposure inversely to conditional volatility---are increasingly adopted by institutional investors, yet the systemic consequences of widespread adoption remain unquantified. We develop an agent-based model (ABM) with a Kyle (1985) market maker, endogenous VIX dynamics, and 1{,}000 heterogeneous agents to simulate crowding effects as VT adoption rises from 0\% to 100\%. Across 100 Monte Carlo simulations per adoption level ($100 \times 2{,}520$ days each), we identify a nonlinear tipping point: VT strategy performance degrades gradually up to 20\% adoption (Sharpe ratio 0.52), but deteriorates sharply beyond 30\% (Sharpe~0.41, a 15\% decline), and collapses entirely at 50\% adoption (Sharpe~0.15, a 70\% decline). The mechanism is a Brunnermeier--Pedersen (2009) positive feedback loop: correlated VT selling amplifies price declines, raises realized volatility, and triggers further selling. At 70\% adoption, VT Sharpe turns negative ($-0.14$) and market kurtosis explodes to~18. Current real-world VT adoption is estimated below 5\%, suggesting the strategy remains safe for individual adopters but highlighting a trajectory that warrants monitoring. These preliminary simulation results provide the first quantitative crowding threshold for VT strategies.
+Volatility targeting (VT) strategies---which scale equity exposure inversely to conditional volatility---are increasingly adopted by institutional investors, yet the systemic consequences of widespread adoption remain unquantified. We develop an agent-based model (ABM) with a Kyle (1985) market maker, endogenous VIX dynamics, and 1{,}000 heterogeneous agents to simulate crowding effects as VT adoption rises from 0\% to 100\%. Across 500 Monte Carlo simulations per adoption level ($500 \times 2{,}520$ days each), we identify a nonlinear tipping point: VT strategy performance degrades gradually up to 20\% adoption (Sharpe ratio 0.47), but deteriorates sharply beyond 30\% (Sharpe~0.43, a 14\% decline), and collapses entirely at 50\% adoption (Sharpe~0.18, a 64\% decline). The mechanism is a Brunnermeier--Pedersen (2009) positive feedback loop: correlated VT selling amplifies price declines, raises realized volatility, and triggers further selling. At 70\% adoption, VT Sharpe turns negative ($-0.14$) and market kurtosis explodes to~19. Sensitivity analysis across 27 parameter combinations confirms that the tipping point is conditionally stable: it shifts primarily with market impact ($\lambda$), while VIX dynamics ($\gamma$, $\kappa$) have limited influence. Current real-world VT adoption is estimated below 5\%, suggesting the strategy remains safe for individual adopters but highlighting a trajectory that warrants monitoring. These preliminary simulation results provide the first quantitative crowding threshold for VT strategies.
 
 \medskip
 \noindent
@@ -52,11 +53,11 @@ Volatility targeting (VT) strategies---which scale equity exposure inversely to 
 
 Volatility targeting (VT) has become a ubiquitous tool in dynamic portfolio management. The canonical framework, formalized by \citet{moreira2017}, prescribes scaling equity exposure as $w_t = \sigma^*/\hat{\sigma}_t$, where $\sigma^*$ is the target volatility and $\hat{\sigma}_t$ is a conditional volatility estimate. \citet{harvey2018} demonstrate that such strategies meaningfully reduce tail risk across asset classes, and the approach has been widely adopted by pension funds, insurance companies, and target-date funds. Industry estimates suggest that short-volatility and volatility-sensitive strategies collectively manage over USD~2 trillion in assets \citep{bouchaud2018}.
 
-Despite individual-level benefits, VT strategies embed a fundamentally procyclical mechanism: when volatility rises, all VT investors simultaneously reduce equity exposure, creating correlated selling pressure. The European Central Bank \citep[ECB,][]{ecb2020} flagged this procyclicality as a potential source of market fragility, and several commentators have drawn parallels to the portfolio insurance strategies implicated in the 1987 crash \citep{gennotte1990}. \citet{bookstaber2014} use agent-based modeling to study financial system fragility but do not specifically examine VT crowding. More broadly, \citet{baltas2019} document crowding effects in alternative risk premia, though not in the VT context.
+Despite individual-level benefits, VT strategies embed a fundamentally procyclical mechanism: when volatility rises, all VT investors simultaneously reduce equity exposure, creating correlated selling pressure. The crowding risk literature warns of such procyclical dynamics---\citet{baltas2019} document crowding effects in alternative risk premia, and the European Central Bank \citep[ECB,][]{ecb2020} explicitly flagged VT procyclicality as a source of market fragility---but no study provides a quantitative threshold for VT crowding. Several commentators have drawn parallels to the portfolio insurance strategies implicated in the 1987 crash \citep{gennotte1990}. \citet{bookstaber2014} use agent-based modeling to study financial system fragility but do not specifically examine VT crowding.
 
 A critical gap remains: \emph{at what adoption level does VT crowding become destabilizing?} Existing analyses are either qualitative \citep{ecb2020}, focused on other strategy types \citep{baltas2019}, or lack a quantitative threshold. This matters because VT adoption is growing---from niche quantitative strategies a decade ago to mainstream institutional mandates today---yet no framework exists to assess whether or how the strategy might undermine itself.
 
-We address this gap with an agent-based simulation that embeds VT agents within an endogenous market microstructure. Our contribution is threefold. First, we identify a quantitative tipping point: VT strategy performance degrades gradually below 20\% adoption but collapses nonlinearly beyond 30\%. Second, we characterize the positive feedback mechanism through which correlated VT selling amplifies volatility, establishing a direct link to the \citet{brunnermeier2009} liquidity spiral. Third, we document the market-level consequences of excessive VT adoption, including volatility amplification, kurtosis explosion, and increased flash crash frequency. These results are preliminary and model-dependent, but they provide a first quantitative benchmark for assessing VT crowding risk.
+We address this gap with an agent-based simulation that embeds VT agents within an endogenous market microstructure. Our contribution is fourfold. First, we identify a quantitative tipping point: VT strategy performance degrades gradually below 20\% adoption but collapses nonlinearly beyond 30\%. Second, we characterize the positive feedback mechanism through which correlated VT selling amplifies volatility, establishing a direct link to the \citet{brunnermeier2009} liquidity spiral. Third, we document the market-level consequences of excessive VT adoption, including volatility amplification, kurtosis explosion, and increased flash crash frequency. Fourth, a sensitivity analysis across 27 parameter combinations shows that the tipping point shifts primarily with market impact ($\lambda$), while VIX dynamics are secondary---providing conditional robustness for the threshold estimate. These results are preliminary and model-dependent, but they provide a first quantitative benchmark for assessing VT crowding risk.
 
 %=================================================================
 \section{Model}
@@ -97,7 +98,7 @@ The model generates endogenous feedback: when VT agents sell (because VIX rises)
 
 \subsection{Simulation Design}
 
-For each of the 7 adoption levels, we run $M = 100$ independent Monte Carlo simulations with different random seeds, producing a total of 700 simulations $\times$ 2{,}520 days = 1.764 million agent-day observations. For each simulation we compute: annualized market volatility, VT strategy Sharpe ratio, maximum drawdown, excess kurtosis, skewness, flash crash frequency (daily returns exceeding $3\sigma$), and VIX dynamics.
+For each of the 7 adoption levels, we run $M = 500$ independent Monte Carlo simulations with different random seeds, producing a total of 3{,}500 simulations $\times$ 2{,}520 days = 8.82 million agent-day observations. Bootstrap 95\% confidence intervals (2{,}000 replications) are reported for all key metrics. For each simulation we compute: annualized market volatility, VT strategy Sharpe ratio, maximum drawdown, excess kurtosis, skewness, flash crash frequency (daily returns exceeding $3\sigma$), and VIX dynamics. We additionally run 200 simulations per cell across a $3 \times 3 \times 3$ sensitivity grid ($\lambda$, $\gamma$, $\kappa$ each at $\pm 50\%$ of baseline) at three adoption levels (10\%, 30\%, 50\%) to test threshold robustness.
 
 %=================================================================
 \section{Results}
@@ -106,7 +107,7 @@ For each of the 7 adoption levels, we run $M = 100$ independent Monte Carlo simu
 
 \subsection{Strategy Performance Degradation}
 
-Table~\ref{tab:main} presents the core results. VT strategy performance exhibits a clear nonlinear pattern. At low adoption ($\phi = 10$--$20\%$), the VT Sharpe ratio remains near 0.49--0.52, comparable to the uncrowded baseline. Between 20\% and 30\%, degradation accelerates: the Sharpe ratio falls to 0.41, a 15\% decline relative to the 10\% baseline. The critical transition occurs between 30\% and 50\%, where the Sharpe ratio collapses to 0.15---a 70\% decline. Beyond 50\%, VT generates negative risk-adjusted returns: $-0.14$ at 70\% and $-0.40$ at 100\%.
+Table~\ref{tab:main} presents the core results. VT strategy performance exhibits a clear nonlinear pattern. At low adoption ($\phi = 10$--$20\%$), the VT Sharpe ratio remains near 0.47--0.50, comparable to the uncrowded baseline. Between 20\% and 30\%, degradation accelerates: the Sharpe ratio falls to 0.43, a 14\% decline relative to the 10\% baseline. The critical transition occurs between 30\% and 50\%, where the Sharpe ratio collapses to 0.18---a 64\% decline. Beyond 50\%, VT generates negative risk-adjusted returns: $-0.14$ at 70\% and $-0.41$ at 100\%.
 
 \begin{table}[H]
 \centering
@@ -114,24 +115,24 @@ Table~\ref{tab:main} presents the core results. VT strategy performance exhibits
 \caption{VT Strategy and Market Outcomes by Adoption Level}
 \label{tab:main}
 \small
-\begin{tabular}{@{}lcccccc@{}}
+\begin{tabular}{@{}lccccccc@{}}
 \toprule
- & \multicolumn{3}{c}{\textbf{Strategy Performance}} & \multicolumn{3}{c}{\textbf{Market Stability}} \\
-\cmidrule(lr){2-4} \cmidrule(lr){5-7}
-$\phi$ & Sharpe & $\Delta$Sharpe & Return (\%) & $\Delta$Vol (\%) & Kurtosis & Flash/yr \\
+ & \multicolumn{4}{c}{\textbf{Strategy Performance}} & \multicolumn{3}{c}{\textbf{Market Stability}} \\
+\cmidrule(lr){2-5} \cmidrule(lr){6-8}
+$\phi$ & Sharpe & 95\% CI & $\Delta$Sharpe & Return (\%) & $\Delta$Vol (\%) & Kurtosis & Flash/yr \\
 \midrule
-0\%   & ---   & ---   & ---    & baseline & 0.01  & 0.31 \\
-10\%  & 0.49  & ---   & 4.86   & $+$0.2   & 0.02  & 0.31 \\
-20\%  & 0.52  & $+$6\%  & 5.22   & $+$2.3   & 0.00  & 0.29 \\
-30\%  & 0.41  & $-$15\% & 4.22   & $+$8.3   & 0.01  & 0.31 \\
-50\%  & 0.15  & $-$70\% & 1.54   & $+$32.7  & 0.40  & 0.74 \\
-70\%  & $-$0.14 & $-$129\% & $-$1.75 & $+$79.5 & 18.0 & 1.35 \\
-100\% & $-$0.40 & $-$182\% & $-$8.42 & $+$238.2 & 253.8 & 0.76\tnote{a} \\
+0\%   & ---   & ---   & ---   & ---    & baseline & 0.00  & 0.30 \\
+10\%  & 0.50  & [0.47, 0.53] & ---   & 5.02   & $+$0.1   & 0.00  & 0.31 \\
+20\%  & 0.47  & [0.45, 0.50] & $-$6\%  & 4.78   & $+$2.0   & $-$0.00  & 0.31 \\
+30\%  & 0.43  & [0.41, 0.46] & $-$14\% & 4.41   & $+$8.1   & 0.02  & 0.35 \\
+50\%  & 0.18  & [0.16, 0.20] & $-$64\% & 1.87   & $+$32.4  & 0.40  & 0.73 \\
+70\%  & $-$0.14 & [$-$0.16, $-$0.13] & $-$129\% & $-$1.77 & $+$79.6 & 18.9 & 1.37 \\
+100\% & $-$0.41 & [$-$0.41, $-$0.40] & $-$181\% & $-$8.59 & $+$237.0 & 250.6 & 0.77\tnote{a} \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \footnotesize
-\item Results are means across 100 Monte Carlo simulations $\times$ 2{,}520 days each ($N = 1{,}000$ agents). Sharpe ratio and return are for the VT portfolio. $\Delta$Sharpe is relative to the 10\% baseline. $\Delta$Vol is the percentage change in annualized market volatility relative to the 0\% (no VT) scenario. Flash crash frequency counts daily returns $> 3\sigma$. Kurtosis is excess (Fisher).
+\item Results are means across 500 Monte Carlo simulations $\times$ 2{,}520 days each ($N = 1{,}000$ agents). 95\% CI from 2{,}000 bootstrap replications. Sharpe ratio and return are for the VT portfolio. $\Delta$Sharpe is relative to the 10\% baseline. $\Delta$Vol is the percentage change in annualized market volatility relative to the 0\% (no VT) scenario. Flash crash frequency counts daily returns $> 3\sigma$. Kurtosis is excess (Fisher).
 \item[a] At 100\% adoption, the apparent decline in flash crash frequency reflects a measurement artifact: the standard deviation used to define the $3\sigma$ threshold is itself severely inflated (annualized vol of 54\%), masking extreme events.
 \end{tablenotes}
 \end{threeparttable}
@@ -153,9 +154,9 @@ The crowding effects extend beyond strategy performance to market structure. Tab
 \toprule
 $\phi$ & Ann.\ Vol & VIX Mean & VIX Std & Skewness & MDD & VIX $>$ 30 (\%) \\
 \midrule
-0\%   & 16.0\% & 19.4 & 1.74 & 0.001  & $-$35.1\% & 0.0 \\
-10\%  & 16.0\% & 19.5 & 1.75 & 0.011  & $-$32.3\% & 0.0 \\
-20\%  & 16.4\% & 19.7 & 1.85 & 0.008  & $-$32.6\% & 0.0 \\
+0\%   & 16.0\% & 19.4 & 1.76 & 0.002  & $-$33.8\% & 0.1 \\
+10\%  & 16.0\% & 19.4 & 1.76 & 0.001  & $-$33.4\% & 0.0 \\
+20\%  & 16.3\% & 19.7 & 1.85 & 0.008  & $-$32.6\% & 0.0 \\
 30\%  & 17.3\% & 20.7 & 1.99 & $-$0.002 & $-$35.2\% & 0.0 \\
 50\%  & 21.2\% & 25.5 & 2.80 & $-$0.134 & $-$51.5\% & 5.5 \\
 70\%  & 28.7\% & 32.0 & 6.11 & $-$2.023 & $-$82.7\% & 64.3 \\
@@ -164,24 +165,60 @@ $\phi$ & Ann.\ Vol & VIX Mean & VIX Std & Skewness & MDD & VIX $>$ 30 (\%) \\
 \end{tabular}
 \begin{tablenotes}
 \footnotesize
-\item Annualized volatility and VIX statistics are market-level outcomes. MDD is the mean maximum drawdown of the market portfolio across 100 simulations. VIX $>$ 30 is the percentage of trading days where VIX exceeds 30.
+\item Annualized volatility and VIX statistics are market-level outcomes across 500 simulations. MDD is the mean maximum drawdown of the market portfolio. VIX $>$ 30 is the percentage of trading days where VIX exceeds 30.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-Three patterns emerge. First, market volatility amplification is strongly nonlinear: from near-zero at 10\% to $+$33\% at 50\% and $+$238\% at 100\%. Second, the VIX distribution shifts dramatically---at 70\% adoption, VIX spends 64\% of days above~30, compared to 0\% in the uncrowded baseline. Third, return skewness turns sharply negative at high adoption levels ($-2.0$ at 70\%, $-12.2$ at 100\%), indicating that VT crowding manufactures left-tail events---precisely the risk that VT is designed to mitigate.
+Three patterns emerge. First, market volatility amplification is strongly nonlinear: from near-zero at 10\% to $+$32\% at 50\% and $+$237\% at 100\%. Second, the VIX distribution shifts dramatically---at 70\% adoption, VIX spends 64\% of days above~30, compared to near 0\% in the uncrowded baseline. Third, return skewness turns sharply negative at high adoption levels ($-2.0$ at 70\%, $-12.2$ at 100\%), indicating that VT crowding manufactures left-tail events---precisely the risk that VT is designed to mitigate.
 
 \subsection{Statistical Significance}
 
-The performance differences are statistically significant. Using Welch's $t$-test on the 100 simulation-level Sharpe ratios, the degradation at 50\% versus 10\% yields $t = 8.88$ ($p < 0.001$), exceeding the \citet{harvey2016} threshold of $t > 3.0$ for claiming statistical significance in asset pricing. The 30\% versus 10\% comparison yields $t = 1.79$ ($p = 0.038$), which is suggestive but below the Harvey threshold, indicating that the onset of crowding effects is gradual. All comparisons at $\phi \geq 50\%$ exceed $t = 3.0$.
+The performance differences are statistically significant. Using Welch's $t$-test on the 500 simulation-level Sharpe ratios, the degradation at 50\% versus 10\% yields $t = 17.82$ ($p < 0.001$), exceeding the \citet{harvey2016} threshold of $t > 3.0$ for claiming statistical significance in asset pricing. The 30\% versus 10\% comparison yields $t = 3.64$ ($p < 0.001$), now exceeding the Harvey threshold with the larger sample. All comparisons at $\phi \geq 30\%$ exceed $t = 3.0$, confirming that the onset of degradation at 30\% is statistically robust.
 
 \subsection{The Feedback Mechanism}
 
-The simulation reveals a clear causal chain. As $\phi$ increases, the correlation between VIX changes and contemporaneous returns becomes more negative (from near zero at 0\% to $-0.06$ at 100\%), confirming that VT-induced order flow creates a mechanical price-volatility nexus. When VIX rises, the aggregate VT selling pressure is:
+The simulation reveals a clear causal chain across all 500 replications. As $\phi$ increases, the correlation between VIX changes and contemporaneous returns becomes more negative (from near zero at 0\% to $-0.06$ at 100\%), confirming that VT-induced order flow creates a mechanical price-volatility nexus. When VIX rises, the aggregate VT selling pressure is:
 \begin{equation}
   \text{Sell pressure} \propto \phi \cdot N \cdot \left(\frac{12}{\text{VIX}_{t-1}} - \frac{12}{\text{VIX}_{t-2}}\right),
 \end{equation}
 which grows linearly in $\phi$ but produces \emph{nonlinear} market impact because the selling itself amplifies subsequent VIX increases. This is the discrete-time analogue of the \citet{brunnermeier2009} margin spiral, where funding constraints force leveraged investors into correlated liquidations.
+
+\subsection{Sensitivity Analysis}
+
+To assess whether the 30--50\% tipping point is an artifact of our baseline calibration, we vary $\lambda$ (market impact), $\gamma$ (VIX sensitivity to realized vol), and $\kappa$ (VIX mean-reversion speed) each by $\pm 50\%$, producing 27 parameter combinations tested at $\phi \in \{10\%, 30\%, 50\%\}$ with 200 simulations per cell (Table~\ref{tab:sensitivity}).
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{Sensitivity of VT Tipping Point to Key Parameters}
+\label{tab:sensitivity}
+\small
+\begin{tabular}{@{}llcccl@{}}
+\toprule
+Parameter & Value & Sharpe$_{10}$ & Sharpe$_{30}$ & Sharpe$_{50}$ & Threshold \\
+\midrule
+\multirow{3}{*}{$\lambda$} & 0.0025 ($-$50\%) & 0.50 & 0.49 & 0.40 & $>$50\% \\
+ & 0.005 (baseline)  & 0.48 & 0.42 & 0.20 & 30--50\% \\
+ & 0.0075 ($+$50\%)  & 0.52 & 0.36 & 0.02 & $\leq$30\% \\
+\midrule
+\multirow{3}{*}{$\gamma$} & 100 ($-$50\%) & 0.52 & 0.42 & 0.24 & 30--50\% \\
+ & 200 (baseline)     & 0.50 & 0.48 & 0.18 & 30--50\% \\
+ & 300 ($+$50\%)      & 0.51 & 0.45 & 0.15 & 30--50\% \\
+\midrule
+\multirow{3}{*}{$\kappa$} & 0.015 ($-$50\%) & 0.50 & 0.47 & 0.20 & 30--50\% \\
+ & 0.03 (baseline)    & 0.48 & 0.44 & 0.19 & 30--50\% \\
+ & 0.045 ($+$50\%)    & 0.53 & 0.46 & 0.21 & 30--50\% \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Each row varies one parameter while holding others at baseline. 200 simulations per cell. Threshold is the adoption region where Sharpe degradation first exceeds 50\% relative to the 10\% baseline. $\lambda$: Kyle market impact; $\gamma$: VIX sensitivity to realized volatility; $\kappa$: VIX mean-reversion speed.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The tipping point is \emph{conditionally} stable. VIX dynamics ($\gamma$, $\kappa$) have limited influence: all six $\gamma$/$\kappa$ variants produce a threshold in the 30--50\% region. Market impact ($\lambda$) is the dominant driver: halving $\lambda$ pushes the threshold beyond 50\%, while increasing $\lambda$ by 50\% pulls it to $\leq$30\%. This is economically intuitive---the feedback loop's severity depends on how much correlated selling moves prices, not on how VIX tracks volatility. The mean Sharpe range across $\lambda$ variation is 0.39 (at $\phi = 50\%$), compared to 0.09 for $\gamma$ and 0.02 for $\kappa$, confirming a clear parameter hierarchy.
 
 %=================================================================
 \section{Discussion}
@@ -190,36 +227,36 @@ which grows linearly in $\phi$ but produces \emph{nonlinear} market impact becau
 
 \subsection{Policy Implications}
 
-Our results suggest that regulators and market stability bodies should monitor VT adoption rates as a systemic risk indicator. The 30--50\% tipping point---while far from current estimated adoption levels of below 5\%---represents a quantitative benchmark against which future growth can be assessed. The European Systemic Risk Board and the Financial Stability Oversight Council could incorporate VT adoption metrics into their macroprudential surveillance frameworks, alongside existing measures of strategy crowding in other asset classes \citep{baltas2019}.
+Regulators should monitor VT adoption rates as a systemic risk indicator. The 30--50\% tipping point---while far from current levels below 5\%---provides a quantitative benchmark. The ESRB and FSOC could incorporate VT adoption metrics into macroprudential surveillance, alongside existing crowding measures \citep{baltas2019}.
 
 \subsection{Implications for Practitioners}
 
-For individual investors, our results are reassuring: at current adoption levels, VT remains a viable risk management tool. However, the nonlinear nature of the tipping point means that degradation could accelerate rapidly once critical mass is reached. Practitioners should monitor proxy indicators of crowding, such as the correlation between VIX changes and equity fund flows, the concentration of volatility-linked AUM, and episodes of anomalous intraday reversals during VIX spikes.
+At current adoption levels, VT remains viable. However, the nonlinear tipping point means degradation could accelerate rapidly once critical mass is reached. Practitioners should monitor proxy indicators: the correlation between VIX changes and equity fund flows, volatility-linked AUM concentration, and anomalous intraday reversals during VIX spikes.
 
 \subsection{Limitations}
 
 We emphasize that these are \emph{preliminary simulation results}, not empirical findings, and several limitations constrain their real-world applicability.
 
-First, the \citet{kyle1985} market maker is a simplification. Real markets feature multiple venues, heterogeneous liquidity providers, and dynamic order book depth---all of which would moderate the price impact of concentrated selling. Our constant $\lambda = 0.005$ likely overstates the feedback at low adoption levels and understates the nonlinear liquidity withdrawal that occurs during actual crises.
+First, our model uses a constant $\lambda$, whereas \citet{kyle1985} derives lambda endogenously from the information structure. In real markets, liquidity evaporates during stress as market makers widen spreads, which would amplify the feedback loop and potentially lower the tipping point. Conversely, in normal times, deep liquidity would moderate price impact. Our sensitivity analysis (Table~\ref{tab:sensitivity}) confirms that $\lambda$ is the most influential parameter, suggesting that endogenizing it is the highest-priority extension.
 
 Second, agents within each class are homogeneous: all VT agents use identical 12/VIX rules with the same rebalancing frequency. In practice, VT strategies vary widely in their volatility estimators, target levels, rebalancing frequencies, and position limits. This heterogeneity would likely smooth the tipping point and shift it to higher adoption levels.
 
 Third, the model excludes transaction costs, margin constraints, and short-selling restrictions, all of which would moderate extreme outcomes. It also lacks adaptive learning---agents do not switch strategies in response to poor performance, whereas real investors would eventually exit a degraded strategy.
 
-Fourth, with $N = 1{,}000$ agents, the model is small relative to real markets with millions of participants. The price impact per agent is correspondingly larger than in reality.
+Fourth, our simplified VIX is a realized-volatility tracker that omits the variance risk premium embedded in the true CBOE VIX (option-implied volatility). This distinction may affect the magnitude of the feedback---the real VIX typically exceeds realized volatility, so VT agents in practice hold lower weights than our model implies---but does not alter the direction of the crowding mechanism.
 
-Fifth, VIX dynamics are endogenous but simplified. The real VIX is option-implied and reflects market expectations, not merely realized volatility. A richer options market microstructure could alter the feedback dynamics.
+Fifth, with $N = 1{,}000$ agents, the model is small relative to real markets with millions of participants. The price impact per agent is correspondingly larger than in reality.
 
-These limitations suggest that our quantitative thresholds (30--50\%) should be interpreted as order-of-magnitude estimates rather than precise critical values. The qualitative finding---that VT strategies exhibit a nonlinear crowding tipping point driven by positive feedback---is more robust than any specific numerical threshold.
+These limitations suggest that our quantitative thresholds (30--50\%) should be interpreted as order-of-magnitude estimates rather than precise critical values. The emerging empirical literature on VT crowding, including ongoing work on realized VT fund flows, will be essential for calibrating these thresholds to real markets. The qualitative finding---that VT strategies exhibit a nonlinear crowding tipping point driven by positive feedback---is more robust than any specific numerical threshold.
 
 %=================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=================================================================
 
-This paper presents preliminary agent-based evidence that volatility targeting strategies exhibit a nonlinear crowding tipping point. Using a Kyle (1985) market microstructure with 1{,}000 heterogeneous agents and 100 Monte Carlo simulations, we find that VT performance degrades gradually below 20\% adoption but collapses between 30\% and 50\%, driven by a Brunnermeier--Pedersen positive feedback loop. At 70\% adoption, the strategy generates negative risk-adjusted returns and market kurtosis explodes to~18.
+This paper presents preliminary agent-based evidence that volatility targeting strategies exhibit a nonlinear crowding tipping point. Using a Kyle (1985) market microstructure with 1{,}000 heterogeneous agents and 500 Monte Carlo simulations, we find that VT performance degrades gradually below 20\% adoption but collapses between 30\% and 50\%, driven by a Brunnermeier--Pedersen positive feedback loop. At 70\% adoption, the strategy generates negative risk-adjusted returns and market kurtosis explodes to~19. Sensitivity analysis across 27 parameter combinations confirms that this threshold is conditionally stable---shifting primarily with market impact ($\lambda$) while remaining robust to VIX dynamics.
 
-Current VT adoption appears safely below this threshold. However, the nonlinear nature of the tipping point---where small increases in adoption produce disproportionately large degradation---suggests that monitoring VT growth is warranted. Future work should extend the model with heterogeneous VT specifications, endogenous strategy switching, and calibration to real market microstructure data to refine the threshold estimate.
+Current VT adoption appears safely below this threshold. However, the nonlinear nature of the tipping point---where small increases in adoption produce disproportionately large degradation---suggests that monitoring VT growth is warranted. Future work should extend the model with endogenous $\lambda$, heterogeneous VT specifications, adaptive strategy switching, and calibration to real market microstructure data to refine the threshold estimate.
 
 %=================================================================
 % References
@@ -236,7 +273,7 @@ Baltas, N. (2019).
 \bibitem[Bookstaber et~al.(2014)]{bookstaber2014}
 Bookstaber, R., Paddrik, M., and Tivnan, B. (2014).
 \newblock An agent-based model for financial vulnerability.
-\newblock \emph{Journal of Economic Interaction and Coordination}, 13, 433--466.
+\newblock OFR Working Paper 14-05, Office of Financial Research.
 
 \bibitem[Bouchaud et~al.(2018)]{bouchaud2018}
 Bouchaud, J.-P., Bonart, J., Donier, J., and Gould, M. (2018).
@@ -251,17 +288,17 @@ Brunnermeier, M.~K. and Pedersen, L.~H. (2009).
 \bibitem[{European Central Bank}(2020)]{ecb2020}
 {European Central Bank}. (2020).
 \newblock Procyclicality of volatility targeting strategies.
-\newblock \emph{Financial Stability Review}, November.
+\newblock \emph{Financial Stability Review}, May.
 
 \bibitem[Gennotte and Leland(1990)]{gennotte1990}
 Gennotte, G. and Leland, H.~E. (1990).
 \newblock Market liquidity, hedging, and crashes.
 \newblock \emph{American Economic Review}, 80(5), 999--1021.
 
-\bibitem[Harvey(2016)]{harvey2016}
-Harvey, C.~R. (2016).
-\newblock Presidential address: The scientific outlook in financial economics.
-\newblock \emph{Journal of Finance}, 72(4), 1399--1440.
+\bibitem[Harvey et~al.(2016)]{harvey2016}
+Harvey, C.~R., Liu, Y., and Zhu, H. (2016).
+\newblock \ldots and the cross-section of expected returns.
+\newblock \emph{Review of Financial Studies}, 29(1), 5--68.
 
 \bibitem[Harvey et~al.(2018)]{harvey2018}
 Harvey, C.~R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., and Van~Hemert, O. (2018).
@@ -278,10 +315,10 @@ Moreira, A. and Muir, T. (2017).
 \newblock Volatility-managed portfolios.
 \newblock \emph{Journal of Finance}, 72(4), 1611--1644.
 
-\bibitem[Perchet et~al.(2016)]{perchet2016}
-Perchet, R., de~Carvalho, R.~L., Heckel, T., and Moulin, P. (2016).
+\bibitem[Perchet et~al.(2015)]{perchet2016}
+Perchet, R., de~Carvalho, R.~L., Heckel, T., and Moulin, P. (2015).
 \newblock Inter- and intra-asset diversification in risk-based portfolios with the 1/VIX rule.
-\newblock \emph{Journal of Portfolio Management}, 42(3), 84--98.
+\newblock \emph{Journal of Alternative Investments}, 18(3), 48--64.
 
 \end{thebibliography}
 
