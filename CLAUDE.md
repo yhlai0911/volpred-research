@@ -182,7 +182,8 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 | **每日建議** (daily) | 所有讀者 | 1 篇 | 當日策略權重、VIX regime、持倉建議。由 `daily_update.py` 自動產生 | `每日建議` |
 
 **執行規則**：
-- 所有文章一律 `status=draft` 進文章池，由每小時 cron 按節奏釋出
+- **非時效性文章**一律 `status=draft` 進文章池，由每小時 cron 按節奏釋出
+- **⚠️ 事件驅動文章（NFP/FOMC/CPI/TSMC 營收等）必須立即 `status=published`** + Supabase sync。延遲 = 過期（2026-04-03 教訓：NFP 文章延遲 10 小時釋出）
 - **每篇文章必須附真正的圖表（不可用 ASCII/文字表格替代）**：
   - 使用共用模組 `from volpred.charts import generate_bar_chart, upload_chart, embed_chart`
   - 可用函式：`generate_bar_chart`、`generate_grouped_bar_chart`、`generate_line_chart`、`generate_heatmap`

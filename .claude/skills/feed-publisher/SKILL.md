@@ -152,12 +152,15 @@ Working directory: /Users/yhlai0911/Desktop/volpred-research
 
 ## 平台層發佈決策
 
-### 核心規則：所有文章一律 `status=draft`，由文章池節奏釋出
+### 核心規則：非時效性文章 `status=draft`，事件文章立即發佈
 
-- **永遠用 `status=draft`**：不論 research 或 general，所有文章先進文章池
-- **禁止直接 `status=published`**：除非用戶明確說「立即發布這篇」
-- **Agent prompt 必須指定 `status="draft"`**：不可省略
-- 文章池每 **15 分鐘**自動釋出 1 篇（session cron 驅動）
+- **一般/研究文章**：`status=draft`，進文章池由 cron 節奏釋出
+- **⚠️ 事件驅動文章必須立即發佈**：NFP/FOMC/CPI/TSMC 營收/法說/重大市場事件等時效性內容
+  - 使用 `status=published` + `published_at=datetime.now(timezone.utc).isoformat()`
+  - 寫完後立即 `uv run python scripts/supabase_sync.py full` 確保上線
+  - **延遲 = 過期**：NFP 文章延遲 10 小時釋出已無價值（2026-04-03 教訓）
+- **判斷標準**：如果讀者在 3 小時後讀到這篇文章會覺得「過時」→ 立即發佈
+- 文章池每 **1 小時**自動釋出 1 篇（system cron 驅動）
 - CLI 指令：`uv run python -m volpred.cli ops release-pool --include-drafts --limit 1 --storage-dir storage`
 
 ### 文章類型寫作模板（寫作前必須選定類型）
