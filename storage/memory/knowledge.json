@@ -19750,5 +19750,22 @@
     "data_source": "TAIFEX TX tick 5-min RV + yfinance 0050.TW, OOS 2023-2025",
     "timestamp": "2026-04-04T06:50:18.251452+00:00",
     "phase": "K850"
+  },
+  {
+    "experiment_id": "K851",
+    "title": "K851: Jump Dynamics — SignedJ最佳但DM NS(t=-1.20)，Jump頻率反而hurt",
+    "content": "[提出: K848衍生, 執行: Claude] K851用TAIFEX 5-min RV的jump分解測試預測改善。69.6%天有jump(佔RV 9.8%)。HAR-RV-SignedJ OOS QLIKE 0.1785(vs baseline 0.1807, -1.23%)但DM t=-1.20 NS。正jump係數-0.687(t=-3.28 IS)——正jump後vol降低(leverage effect)。Jump frequency(22d)反而惡化(t=+1.67)。Kitchen-sink overfitting(IS最��但OOS最差)。Cross-OOS: SignedJ 3/5勝。結論：signed jump分解方向正確但不顯著。HAR-RV baseline仍然足夠。",
+    "tags": [
+      "jump",
+      "BPV",
+      "HAR-RV",
+      "signed jump",
+      "leverage effect",
+      "TAIFEX",
+      "NS"
+    ],
+    "data_source": "TAIFEX TX1 tick 3424 days, OOS 2020-2024 (1457 days)",
+    "timestamp": "2026-04-04T08:33:02.646346+00:00",
+    "phase": "K851"
   }
 ]
