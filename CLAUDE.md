@@ -166,8 +166,16 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
   - **⚠️ 比較時間必須用 UTC**：`datetime.now(timezone.utc)` 不是 `datetime.now()`。後者是本地台灣時間（UTC+8），會差 8 小時
   - 檢查「多久沒發文」的正確寫法：`(datetime.now(timezone.utc) - datetime.fromisoformat(pub_at).replace(tzinfo=timezone.utc))`
 - 跨市場策略注意 VIX lag（台股用前一天 VIX）
-- **⚠️ 0050.TW 數據品質**：Yahoo Finance 把 2025-06-18 的 1:4 分割回溯應用到歷史數據，但只從 2014-01-02 起——**2013 年以前的數據未調整**，造成 2014-01-02 假 -75% 回報（58.70→14.64）。yfinance `splits` metadata 完全沒記錄此分割，`repair=True` 也無法修復。**所有使用 0050.TW 的實驗必須呼叫 `from volpred.utils import clean_tw50_data`**。目前市價 ~73 元（分割後）是正確的
-- **5-min 數據回補**：收集腳本自動偵測 gap 並回補（上限 59 天 = yfinance 免費版限制）。macOS 休眠時 cron 不執行，醒來後自動回補
+- **外部數據來源**：→ 完整操作手冊見 `.claude/skills/external-data-sources/SKILL.md`
+  - **yfinance**：股價/ETF/VIX（免費，無需 key）
+  - **FRED**：`pandas_datareader` 讀取數千個總經指標（免費，無需 key）
+  - **TAIFEX tick**：台指期日內 tick（`~/Dropbox/TAIFEXDATA/TAIFEXDATA/python/`，✅ 本地 33G；選擇權 41G ❌ 僅雲端）
+  - **CBOE**：VIX/VVIX/VIX3M/SKEW（透過 yfinance）
+  - **DGBAS 主計總處**：台灣 GDP/CPI/就業（需 Chrome 自動化，見 `taiwan-macro-data` skill）
+  - **Congressional trades**：`data/congressional_trades_house.csv`
+- **⚠️ 0050.TW 數據品質**：Yahoo Finance 1:4 分割只回溯到 2014，2013 前未調整。**所有 0050.TW 實驗必須 `from volpred.utils import clean_tw50_data`**
+- **5-min 數據回補**：`collect_5min_data.py` 自動偵測 gap 回補（上限 59 天）
+- **TAIFEX 格式陷阱**：2012 是 9 欄/2014 起 10 欄、時間格式 2017 夜盤前後不同、2011 特殊編碼。**必須用 header 判斷，不可硬編碼 index**。詳見 skill
 - **Paper trading 多日回補**：daily_update.py 自動回填所有 `portfolio_return=None` 的歷史條目（利用相鄰條目價差）
 - **frontend-v2-fix 已部署**：`volpred.zeabur.app` 綁定到 volpred-v3 服務（frontend-v2-fix），前端修改只需改 `frontend-v2-fix/`
 
