@@ -29,5 +29,6 @@
     "GARCH",
     "Normal-VaR",
     "Kupiec"
-  ]
+  ],
+  "content": "## 重大修正：Student-t 才是 VaR 改善的真正原因\n\n之前歸因到 Jump-Augmented VaR 的改善，經過嚴格歸因分析後發現：Student-t distribution 是最主要的改善因素。\n\n### GJR-GARCH(1,1) w=504 SPY 2020-2025 (1508 天)\n\n| 配置 | Violations | Rate | 2020 | 2024 |\n|------|-----------|------|------|------|\n| Normal 固定 | 33 | 2.2% | 7 YELLOW | 6 YELLOW |\n| Student-t(5) 固定 | 18 | 1.2% | 4 GREEN | 4 GREEN |\n| + Adaptive 13% | 14 | 0.9% | 4 GREEN | 2 GREEN |\n\n### 改善歸因\n1. Normal to Student-t(5): -45.5%（最大改善，SPY df≈4.78）\n2. + Adaptive threshold: -33.3%（低波動環境用更嚴格門檻）\n3. + Jump augmentation: +0%（在正確分配下完全冗餘）\n\n### Kupiec 檢定\n整體 p=0.78（✓ 通過），5/6 年通過\n\n### 結論\nOccam Razor 勝出——GJR w=504 + Student-t(df≈5) 是 SPY VaR 最佳實務配置。不需要複雜的 jump augmentation。"
 }

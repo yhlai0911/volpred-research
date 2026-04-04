@@ -17,5 +17,6 @@
     "波動率預測",
     "GJR-GARCH",
     "SPY"
-  ]
+  ],
+  "content": "## Adaptive VaR 門檻\n\n**規則**：σ < 13% 年化時用 z=2.576（0.5% level），σ ≥ 13% 用 z=2.326（1% level）\n\nSPY GJR w=504, 2020-2025（1506 天）：\n\n| 方法 | Violations | Rate | vs 預期 1% |\n|------|-----------|------|-----------|\n| Standard (z=2.326) | 33 | **2.2%** | 2.2x |\n| **Adaptive** | **25** | **1.7%** | 1.7x |\n\n**改善 24%**（8 fewer violations），更接近理論的 1%。\n\n## 為什麼有效？\n\n低波動環境（σ<13%）的 VaR violation rate 是 4.2%（之前發現）。用 z=2.576 相當於在低波動時加大 safety margin，補償了 GARCH 在低波動期對 jump 的低估。\n\n不改模型，只改 VaR 門檻——簡單、可操作、有效。"
 }

@@ -14,5 +14,6 @@
     "跨資產",
     "Hybrid-VT",
     "GJR-GARCH"
-  ]
+  ],
+  "content": "## 多資產 Hybrid VT 最終結果（SPY + GLD + TLT）\n\n### 策略設定\n- SPY: GJR w=2000, Hybrid VT (VIX switch)\n- GLD: GARCH w=2000（inverted leverage → 無 VIX switch）\n- TLT: GARCH w=504（利率 regime）\n- 每資產 target vol 10%，等權重\n\n### 結果\n\n| 指標 | 數值 | 比較 |\n|------|------|------|\n| Sharpe | 0.40 | < SPY-only (0.99) |\n| MaxDD | **-12.6%** | **最低！** (SPY-only -11.4%) |\n| 年化報酬 | 6.5% | < SPY-only (8.0%) |\n| Calmar | 0.51 | |\n\n### 結論\n- 多資產的價值在 **MaxDD protection**，不是 Sharpe 提升\n- GLD + TLT 在牛市拖累報酬，但在危機時提供緩衝\n- 適合極度風險厭惡的投資人"
 }

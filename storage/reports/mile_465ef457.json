@@ -17,5 +17,6 @@
     "波動率預測",
     "GJR-GARCH",
     "HAR-RV"
-  ]
+  ],
+  "content": "Forecast combination 實驗發現最佳組合策略：\n\n**70% GJR-arch + 30% GJR-HAR = QLIKE -9.027, VaR 1% 通過 ✓**\n\n與標準 GJR-arch（QLIKE=-9.034）只差 0.08%，但 VaR 從 FAIL 變 PASS。\n\n| 策略 | QLIKE | VaR 1% | 排名 |\n|------|-------|--------|------|\n| GJR-arch（純） | -9.034 | 2.0% ✗ | 不合格 |\n| **70%GJR + 30%HAR** | **-9.027** | **1.6% ✓** | **第一** |\n| avg(GJR, HAR) | -9.022 | 1.6% ✓ | 第二 |\n| GJR-HAR（純） | -9.010 | 1.6% ✓ | 第三 |\n| GARCH（純） | -8.988 | 1.6% ✓ | 第四 |\n\n核心洞見：GJR-HAR 的多尺度成分提供了「波動率底線」，\n混入 30% 就足以修復 GJR-arch 的 VaR 失敗問題。\n    "
 }

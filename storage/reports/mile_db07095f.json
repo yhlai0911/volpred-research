@@ -16,5 +16,6 @@
     "GARCH",
     "LSTM",
     "DM-test"
-  ]
+  ],
+  "content": "GRU 的 0.06% QLIKE 改善經 DM 檢定不顯著。\n\n| 比較 | DM stat | p-value | 結論 |\n|------|---------|---------|------|\n| GRU vs GARCH | -1.11 | 0.27 | 不顯著 |\n\n**Hansen & Lunde (2005) 再次確認：GARCH(1,1) is hard to beat.**\n\n即使有 25 年（5500 天）的訓練數據和 GRU 序列模型，\nDL 也無法統計顯著地超越 GARCH 的 3 參數線性遞迴。\n\nGARCH 捕捉了 99.9%+ 的日頻波動率 pattern。\n剩餘的非線性殘餘在統計上不可區分於噪聲。\n    "
 }

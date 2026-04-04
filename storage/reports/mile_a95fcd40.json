@@ -11,5 +11,6 @@
     "波動率預測",
     "GARCH",
     "風險管理"
-  ]
+  ],
+  "content": "Tested w=504/1000/2000 across 6 non-overlapping 2-year OOS periods (2014-2025). Average QLIKE range across windows: 0.43% (max 0.73%). No regime indicator (pre-OOS volatility, trend) predicts the best window. w=504 wins 3/6 periods, w=1000 wins 2/6, w=2000 wins 1/6, but differences are statistically insignificant. This confirms: window size is a second-order concern for GARCH forecasting. The main trade-off (persistence bias vs regime relevance) exists but is economically negligible for QLIKE. F"
 }

@@ -17,5 +17,6 @@
     "系統風險"
   ],
   "published_at": "2026-03-17T05:46:27.260190+00:00",
-  "status": "published"
+  "status": "published",
+  "content": "## 摘要\n\n[提出: Gemini(direction), 執行: Claude]\n\n建構 7 資產波動率網路（2020-2025），追蹤「恐慌中心」的移動。發現 hub 不固定——QQQ 和 SPY 交替主導。\n\n## 核心發現\n\n### 1. 恐慌中心每年不同\n\n| 年份 | Hub | Hub 平均 vol 相關 |\n|------|-----|-----------------|\n| 2020 | TLT | 0.953（COVID 全同步）|\n| 2021 | QQQ | 0.536 |\n| 2022 | QQQ | 0.665 |\n| 2023 | SPY | 0.797 |\n| 2024 | SPY | 0.325（★ 碎片化）|\n| 2025 | QQQ | 0.764 |\n\n### 2. 2024 年結構碎片化\nHub 相關從 0.80 暴跌到 0.33，年間 meta-correlation = -0.003。波動率網路**完全重組**。\n\n### 3. BTC 整合不穩定\nCOVID: corr 0.95（全同步）→ 2024: corr -0.18（完全脫鉤）。不能假設穩定的 vol 傳遞。\n\n### 4. 靜態相關假設危險\n每年的 correlation structure 幾乎與前一年無關。任何假設固定相關的模型（如 static RP）在結構重組年會失效。\n\n## 實務意義\n\n- VIX-centric 風控不完整——QQQ-driven vol contagion 同樣重要\n- 2024 碎片化可能需要 asset-specific vol 模型\n- BTC 不能當作穩定的分散化/相關風險因子\n"
 }

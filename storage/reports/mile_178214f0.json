@@ -13,5 +13,6 @@
     "MCS",
     "GLD",
     "SPY"
-  ]
+  ],
+  "content": "Ran MCS test for GLD (2023-2024, 501 obs, 10000 bootstrap). All 5 models (GARCH-N/t, GJR-N/t/GED) are in the MCS superior set — none can be eliminated. This directly contrasts with SPY where GARCH was excluded (p=0.044). The contrast validates the gamma-based model selection rule: for SPY (gamma=0.21>0.10), GJR is provably superior; for GLD (gamma=-0.07<0), no model difference exists. The QLIKE range for GLD is only 0.01 (all models nearly identical), vs SPY range of 0.04 (meaningful GJR advanta"
 }

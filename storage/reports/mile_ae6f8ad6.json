@@ -16,5 +16,6 @@
     "VaR",
     "波動率預測",
     "GJR-GARCH"
-  ]
+  ],
+  "content": "CARR (Conditional Autoregressive Range) 模型使用 High-Low 價格範圍預測波動率。\n\n**原始 CARR**: QLIKE=-9.121（vs Parkinson），但 VaR 全 FAIL（range 低估 37%）。\n**校正後 CARR** (×1.79): QLIKE=-9.049, VaR 1%=1.8% ✓, VaR 5%=5.0% ✓。\n\n**重要警告**：CARR 的 QLIKE 優勢主要來自 target alignment bias\n（CARR 和 Parkinson 都是 range-based）。\n用公平 target (r²) 比較：CARR=-8.680 vs GJR=-8.653，GJR 仍然更好。\n\n**結論**：CARR 適合 range/intraday 應用，但不能直接替代 GARCH。\n校正後的 CARR 是一個有效的替代方案，但需注意 bias correction 的估計穩定性。\n    "
 }

@@ -12,5 +12,6 @@
     "GARCH",
     "Normal-VaR",
     "SPY"
-  ]
+  ],
+  "content": "Analyzed overnight gap (Open[t]/Close[t-1]-1) for SPY 2018-2025. Gap<-1.5%: avg return -2.64%, 88% negative. |Gap|>1.5% days: 5% of days but 36% of VaR violations (10.5% violation rate vs 1.0% normal = 10.5x enrichment). This is a complementary real-time signal to VIX/GARCH ratio — the gap reflects overnight information that GARCH hasn't processed yet. Practical use: if |overnight gap|>1.5%, GARCH VaR is severely unreliable for that day. This could be incorporated into the daily monitoring syste"
 }

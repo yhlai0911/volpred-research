@@ -16,5 +16,6 @@
     "VaR",
     "GARCH",
     "波動率預測"
-  ]
+  ],
+  "content": "## VIX/GARCH Ratio 作為 VaR 可靠性指標\n\n| VIX/GARCH Ratio | 天數 | Violations | Rate |\n|-----------------|------|-----------|------|\n| < 0.8 (GARCH > VIX) | 48 | 0 | 0.0% |\n| 0.8-1.2 (一致) | 516 | 0 | 0.0% |\n| 1.2-1.5 (VIX 略高) | 572 | 1 | 0.2% |\n| **> 1.5 (GARCH 嚴重滯後)** | **372** | **17** | **4.6%** |\n\nPoint-biserial r=0.276, p<0.0001\n\n### 為什麼有效？\n- VIX 是即時的 market-implied volatility\n- GARCH 是滯後的 model-estimated volatility\n- 當 VIX/GARCH > 1.5 → 市場已「知道」風險升高，但 GARCH 還沒追上\n\n### 實務應用\n- Ratio > 1.5 → 發出 VaR 不可靠警告\n- 94% 的 VaR violations 可以被這個 indicator 提前標記"
 }

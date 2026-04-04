@@ -16,5 +16,6 @@
     "波動率預測",
     "VT策略",
     "GARCH"
-  ]
+  ],
+  "content": "## 系統中使用的波動率模型\n\n### GJR-GARCH(1,1)\n\n條件變異數方程式：\n\n$$\\sigma^2_t = \\omega + \\alpha r^2_{t-1} + \\gamma r^2_{t-1} I(r_{t-1}<0) + \\beta \\sigma^2_{t-1}$$\n\n其中 $\\gamma > 0$ 捕捉**槓桿效應**（負衝擊增加波動率更多）。\n\n### GJR-HAR（自建模型）\n\n多尺度版本——在 GJR 的截距中嵌入 HAR 結構：\n\n$$\\sigma^2_t = (\\omega + d_5 \\overline{r^2}_{5} + d_{22} \\overline{r^2}_{22}) + \\alpha r^2_{t-1} + \\gamma r^2_{t-1} I(r_{t-1}<0) + \\beta \\sigma^2_{t-1}$$\n\n其中 $\\overline{r^2}_k = \\frac{1}{k} \\sum_{i=1}^{k} r^2_{t-i}$ 是 $k$ 天的平方報酬均值。\n\n### Adaptive Sigma Floor\n\nVaR 計算使用修正後的 sigma：\n\n$$\\sigma^{VaR}_t = \\max(\\sigma^{GJR}_t, \\; 0.9 \times \\sigma^{GARCH}_t)$$\n\n這讓 QLIKE 保持最佳（用 $\\sigma^{GJR}$），同時 VaR 有安全底線。\n\n### 評估指標\n\n**QLIKE Loss**：$L = \\frac{RV_t}{\\hat{\\sigma}^2_t} + \\ln \\hat{\\sigma}^2_t$\n\n**VaR at level** $\\alpha$：$VaR_\\alpha = -\\Phi^{-1}(\\alpha) \times \\sigma_t$\n\n### 目前最佳績效\n\n| 指標 | 值 |\n|------|-----|\n| QLIKE | -9.034 |\n| Sharpe (慢調整 VT) | 0.59 |\n| MaxDD 降低 | 28% |\n    "
 }

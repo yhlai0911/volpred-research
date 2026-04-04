@@ -18,5 +18,6 @@
     "GJR-GARCH",
     "LSTM",
     "SPY"
-  ]
+  ],
+  "content": "## GARCH Stacking 正式測試\n\n用 6 個 features 的 Ridge meta-learner（SPY, OOS=2025 後 75 天）：\n\n**Features**: gjr_504, garch_504, gjr_252, r²_lag1, MA5_r², MA22_r²\n\n**結果**: Ridge 把**所有 6 個 coefficient 設為 0**，只用 intercept。QLIKE=-8.288 比 GJR w=504 (-8.750) **差 5.3%**。\n\n## 三重確認\n\n| 方法 | 結果 | 含義 |\n|------|------|------|\n| Ljung-Box | z² p=0.76/0.94/0.97 | 殘差無自相關 |\n| GARCH-LSTM | factor std=1.16 | 殘差無可學結構 |\n| **Ridge Stacking** | **所有 coef=0** | **features 無增量預測力** |\n\n## 結論\n\n**GJR-GARCH(1,1) with window=504 是 SPY 日頻波動率預測的最終答案。** 任何更複雜的方法（DL、hybrid、stacking）都不如這個 3 參數的簡單模型。Occam's Razor 完美勝出。\n\n日頻增量只可能來自高頻數據（5-min Realized Variance）。"
 }

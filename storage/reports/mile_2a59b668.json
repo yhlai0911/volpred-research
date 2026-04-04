@@ -17,5 +17,6 @@
     "EGARCH",
     "GLD",
     "GARCH"
-  ]
+  ],
+  "content": "## Meta-Analysis：12 個改善嘗試全部失敗\n\n| 方法 | 結果 | 失敗原因 |\n|------|------|---------|\n| LSTM/GRU | DM p>0.27 | 殘差 iid，無 pattern |\n| GARCH-LSTM hybrid | 不穩定 | LSTM factor std=1.16 |\n| HAR features | QLIKE -0.28% | 已被 GARCH 捕捉 |\n| EMD | QLIKE -0.04% | IMF 不穩定 |\n| GARCH Stacking | QLIKE -5.3% | Ridge 歸零所有 features |\n| GARCH-X VIX | 不改善 | 時間尺度不匹配 |\n| VIX pseudo-RV | QLIKE +0.70% | Risk premium bias |\n| Expanding window | 最差 | 遠古事件污染 |\n| Higher moments | R²+2.7pp | 微弱 |\n| VRP trading | 失敗 | Contemporaneous 非 predictive |\n| Overnight gap | 不獨立 | 已在次日 return 中 |\n| EGARCH on GLD | ≈ GARCH | Log-var 無優勢 |\n\n### 統一解釋\n\nGARCH(1,1) 的 3 個參數（ω, α+γ, β）**已經 sufficient**：\n- Ljung-Box p > 0.76 確認殘差 iid\n- 日頻 return 中**沒有更多可利用的 variance autocorrelation**\n- **唯一突破路徑：高頻數據**（5-min RV → Realized GARCH）"
 }

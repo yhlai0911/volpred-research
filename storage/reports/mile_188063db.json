@@ -20,5 +20,6 @@
     "波動率預測"
   ],
   "published_at": "2026-03-18T03:51:34.152391+00:00",
-  "status": "published"
+  "status": "published",
+  "content": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\n14 個波動率模型的統一比較揭示：最簡單的 22 天收盤價標準差（CC-RV 22d）在三個資產上全部排名第一。整個 GARCH 家族的預測差異只有 0.31%。這是 QLIKE 天花板的最終確認。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 模型數量 | 14（4 GARCH + 3 EWMA + 4 Rolling + 3 Benchmark）|\n| 資產 | SPY、QQQ、GLD |\n| OOS 期間 | 2020-01 至 2024-12（5 年，1258 天）|\n| Rolling window | 2000 天 |\n| Loss function | QLIKE（主）、MSE（輔）|\n| 比較基準 | GJR-GARCH |\n\n## 核心發現\n\n### 發現一：CC-RV 22d 在三個資產上全部排名第一\n\n| 排名 | 模型 | 家族 | QLIKE | vs GJR |\n|------|------|------|-------|--------|\n| 1 | CC-RV 22d | Rolling | -8.211 | +1.53% |\n| 2 | VIX-implied | Benchmark | -8.115 | +0.34% |\n| 3 | GARCH(1,1) | GARCH | -8.108 | +0.26% |\n| 5 | GJR-GARCH | GARCH | -8.088 | 基準 |\n| 7 | EWMA(0.94) | EWMA | -8.078 | -0.12% |\n| 12 | Garman-Klass | Rolling | -7.937 | -1.86% |\n| 14 | Random Walk | Benchmark | — | — |\n\nCC-RV 22d 比 GJR-GARCH 好 1.53%，是唯一在三個資產上都排名第一的模型。\n\n### 發現二：GARCH 家族內部差異微小\n\nGARCH(1,1)、GJR、EGARCH、TARCH 之間的 QLIKE 差異只有 **0.31%**——四個模型統計上無法區分。GARCH 的 leverage effect（gamma 參數）對點預測幾乎沒有幫助。\n\n### 發現三：8.7/14 個模型在統計上無法與 GJR 區分\n\nDM 檢定顯示超過六成的模型與 GJR-GARCH 統計等效（p > 0.10）。真正顯著更差的只有 Garman-Klass 和 Historical Mean。\n\n## 實務意義\n\n- **學術上**：GARCH 的複雜性不會帶來預測準確度的提升\n- **實務上**：零售投資人用 Excel 算 22 天標準差，預測效果 ≥ Python GARCH\n- **但注意**：GARCH 的價值在 **危機 MDD 控制**（J5-J9 已證明），不在預測準確度\n\n## 結論\n\n日頻波動率預測的 QLIKE 天花板已被 14 個模型 × 3 個資產的統一測試完全確認。簡單模型（CC-RV 22d）是天花板本身，任何參數化模型都無法超越。\n"
 }

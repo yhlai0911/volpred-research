@@ -11,5 +11,6 @@
     "波動率預測",
     "GARCH",
     "TLT"
-  ]
+  ],
+  "content": "Bias-corrected GARCH unnecessary: w=2000 eliminates persistence bias (-3%→~0%). Simpler than implementing jackknife/bootstrap bias correction. For bonds (TLT), w=504 remains optimal due to frequent regime changes. Open question closed."
 }

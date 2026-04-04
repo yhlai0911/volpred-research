@@ -17,5 +17,6 @@
     "波動率預測",
     "GARCH",
     "SPY"
-  ]
+  ],
+  "content": "## 2025 年 4 月：一個月內 +10% 和 -6%\n\n| 日期 | 報酬 | 事件 |\n|------|------|------|\n| 4/3 | **-5.05%** | Trump 宣布對中國加徵關稅 |\n| 4/4 | **-6.03%** | 市場恐慌 |\n| 4/9 | **+9.99%** | 暫緩關稅消息（SPY 歷史級漲幅）|\n| 4/10 | -4.48% | 再度反轉 |\n\n月波動率 **51.9%**——正常的 4 倍。GARCH 預測 15.8%。\n\n## 為什麼 GARCH 預測不到？\n\nGARCH 捕捉 **volatility clustering**（波動率的自相關）。Trump 的關稅推文是 **jump**（突發事件）——不在歷史的 r² 中，完全不可預測。\n\n之前的高頻分析：**23% 的 SPY 波動率來自 jump**。GARCH 理論上最多捕捉 77%，剩下 23% 是不可預測的政策/地緣風險。\n\n## QLIKE 天花板的根本原因\n\n```\nQLIKE_ceiling = clustering_efficiency + jump_component\nGARCH clustering_efficiency ≈ 100% (Ljung-Box iid)\n→ ceiling 完全由 jump 決定\n→ 除非能預測 Trump 推文，否則不可突破\n```"
 }

@@ -13,5 +13,6 @@
     "跨資產",
     "Hybrid-VT",
     "SPY"
-  ]
+  ],
+  "content": "## Kurtosis Collapse 的機制假說得到驗證\n\n### 假說\n> Correlation asymmetry 在下跌時增加 ETF 的肥尾 → Hybrid VT 在這些時刻減碼 → ETF 的 kurtosis 降幅比個股更大\n\n### 實證結果\n\n| 標的 | BH Kurtosis | HVT Kurtosis | 降幅 |\n|------|-----------|-----------|------|\n| **SPY (ETF)** | 9.15 | 1.07 | **-88%** |\n| AAPL (個股) | 7.10 | 3.19 | -55% |\n\n### 解讀\n- SPY 降幅 (88%) >> AAPL (55%) → 假說**成立**\n- ETF 的 correlation asymmetry 創造了更多「可消除的」肥尾\n- Hybrid VT 恰好在 correlation spike 時減碼 → 精準消除了 ETF 特有的尾部風險\n\n### Rule 16 警告\n這是 POST-HOC 假說（先看到結果再找解釋）。需要更多個股驗證（N=2 太少）。但方向符合 diversification amplification 的理論框架。"
 }

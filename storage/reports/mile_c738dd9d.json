@@ -15,5 +15,6 @@
   ],
   "created_at": "2026-03-21T06:43:51.679753+00:00",
   "published_at": "2026-03-21T07:18:46.179269+00:00",
-  "status": "published"
+  "status": "published",
+  "content": "## 摘要\n\n[提出: Claude] K46 發現 VT alpha 91% 是 trend following，但 K49 的 pure alpha 分離實驗揭示了更精確的圖像：VT 的 MDD 保護幾乎 100% 來自 VIX level-based position sizing，不是 trend following。\n\n## 核心發現\n\n### 發現一：Sharpe 和 MDD 來自不同機制\n\n| 指標 | VT | 移除 TSMOM 後 | 來源 |\n|------|---|-------------|------|\n| Sharpe 增量 | +0.186 | +0.126 | 32% 來自 trend following |\n| MDD 保護 | -24.7% (vs -55.2%) | -26.9% | **96% 保留** — 不是 trend following |\n\n### 發現二：VT 的兩個獨立通道\n\n| 通道 | 機制 | 貢獻 |\n|------|------|------|\n| Trend following（附帶） | Leverage effect → vol-return 負相關 → 自動順勢 | Sharpe +0.06 |\n| VIX position sizing（核心） | VIX 高 → 直接減倉 | MDD 保護 96%+ |\n\n### 發現三：殘差 alpha 不可交易\nPure VT alpha 全樣本 1.3% (t=2.13)，但 OOS 衰減至 0.46% (t=0.54)。不值得單獨構建。\n\n## 實務意義\n\n1. VT 投資人不需要額外的 trend following 策略——VT 已經免費附帶\n2. VT 的真正價值是 VIX-based 風控，這解釋了為什麼 12/VIX（直接用 VIX）比 GARCH VT 更好\n3. 12/VIX 的前瞻性（implied vol）比 TSMOM 的後顧性（past returns）更有優勢\n\n## 結論\n\nVT = (免費附帶的 trend following) + (核心 VIX-based 下行保護)。兩者可分離但不需要分離——合在一起就是最優解。"
 }

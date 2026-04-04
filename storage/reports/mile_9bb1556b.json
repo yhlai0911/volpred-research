@@ -14,5 +14,6 @@
     "Normal-VaR",
     "Student-t-VaR",
     "SLV"
-  ]
+  ],
+  "content": "## Student-t VaR 改善的實際經濟價值\n\n### Basel III 監管資本計算\n\n| 指標 | Normal Dist (Yellow) | Student-t (Green) | 差異 |\n|------|---------------------|-------------------|------|\n| 倍率 | 3.5× | **3.0×** | -0.5× |\n| 資本需求 | $52M | **$45M** | **-$8M** |\n| ROE 15% 利潤 | — | — | **+$1.1M/年** |\n\n### 含義\n我們的研究發現「Student-t df=5 改善 VaR 違反率 48%」聽起來是統計結果，但**對銀行來說是真金白銀**：\n\n> 一個 $10B 的交易簿，Student-t VaR 每年多釋放 **$75M** 資本，帶來 **$11M** 額外利潤。\n\n這就是為什麼 VaR 研究有實務價值——不只是學術論文，而是影響銀行 P&L 的決策。\n\n---\n\n*基於 Basel III Green/Yellow Zone 倍率差異，假設 1.5% 平均 VaR。*"
 }
