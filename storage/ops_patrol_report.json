@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-04-04T00:26:38.355675+00:00",
+  "timestamp": "2026-04-04T16:57:35Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "31 draft articles in pool (threshold: <3 = alert). Pool healthy."
+      "detail": "16 draft articles in feed.json (764 total). Threshold: <3 = alert. Pool healthy."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json is 0.02 hours old (threshold: >26h = alert). Fresh."
+      "detail": "storage/strategy_metrics.json last modified ~16 seconds before check (mtime=1775321845, now=1775321861). Well within 26-hour threshold."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No error_log.md entries dated 2026-04-03 or 2026-04-04. Last entry: 2026-03-31 (session cron idle loop)."
+      "detail": "4 entries dated 2026-04-04 (today) in docs/error_log.md, all resolved: (1) Badge 不一致 — fixed via classify_audience()+resolveBadge(); (2) Paper pages=None — fixed by adding pymupdf to pyproject.toml; (3) 文章圖片 404 — fixed by remote_filename param in upload_chart(); (4) 論文 abstract 空白 — fixed by LaTeX abstract auto-extraction. No unresolved errors."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies: exactly 1 null in last 3 entries (trade_date=2026-04-03, return pending next trading day). Null count <=2, no alert."
+      "detail": "All 14 strategies have exactly 1 null in last 3 entries (today's return not yet recorded — normal pre-close). No strategy exceeds threshold >2 nulls. Entries: slow_vt(814), risk_parity(814), simple_12vix(814), recommended_5050(814), taiwan_8.63vix(753), taiwan_spy_momentum(753), tz_tw_jp_5050(1090), global_vt_tz(1093), vix_leading_guard(990), vix_cond_leverage(814), taiwan_hybrid_leverage(780), piecewise_conservative(814), fear_dca(814), adaptive_tier(814)."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50 = alert). Working tree clean."
+      "detail": "0 uncommitted files. Working tree clean. Threshold: >50 files."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1637 entries in storage/memory/knowledge.json."
+      "detail": "1642 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": []
