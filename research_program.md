@@ -265,14 +265,13 @@
 - 核心貢獻：首次將 VT 保險費分解為 opportunity cost (91%) + direct cost (9%)
 - 基於：K811v2 + K846 (rebalancing premium)
 - 文獻缺口：Moreira & Muir (2017), Harvey et al. (2018) 都沒做 cost decomposition
-- 狀態：[ ] 草稿中
+- 狀態：**v1.2 submission-ready**（學術審查 + 引用驗證 + Codex adversarial 全通過）
 
-**第五篇：When Volatility Targeting Crowds — An ABM Tipping Point Analysis**
+**第五篇：When Volatility Targeting Crowds — Quantifying the Tipping Point via ABM**
 - `paper/vt-crowding-abm/` (FRL target)
-- 核心貢獻：首次用 ABM 量化 VT 擁擠臨界點 (30-50%)
-- 基於：K827
-- 文獻缺口：ECB (2020) 定性描述但無量化門檻
-- 狀態：[ ] 待 Paper 4 後啟動
+- 核心貢獻：ABM 量化 VT 擁擠臨界點 50-70%（K827v3 修正流動性混淆後）
+- 基於：K827 → K827v2（敏感度）→ K827v3（固定流動性，Codex 致命缺陷修正）
+- 狀態：**v1.2 submission-ready**（Codex 3H 修正：流動性隔離 + 量化非發現 + 敏感度驗證）
 
 **未來可能的第六篇：VIX Sufficient Statistic**
 - 23+ 個指標全被 VIX 吸收的 comprehensive study
