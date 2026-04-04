@@ -313,45 +313,17 @@
 
 ## Codex/Gemini/用戶建議（統一區）
 
-### Codex 第 7 次建議：從預測轉向策略（2026-03-27）[提出: Codex GPT-5.4]
-**核心洞見**：瓶頸不是預測 RV，而是判斷何時 forecast 值得交易。
-- [ ] **Conditional Dispersion Trade**：預測 correlation risk premium mispricing → index vs sector options。需 sector ETF options data。
-（已完成項目見 archive：K730 Cross-Asset Vol Momentum, K763 Regime-Switched Carry Filter, K760 Alt Risk Premia Rotation, K762 Action-First ML）
+### Codex/Gemini/用戶建議（已完成部分 → archive）
+→ Codex 5/7/8 次建議、Gemini 1/2 次建議的完成項目見 `docs/research_archive/completed_phases_2026-03.md` 和 `completed_session_2026-04-01.md`
 
-### Codex 第 8 次建議（2026-03-31）[提出: Codex GPT-5.4]
-**5/5 全 NULL**。詳見 `docs/research_archive/completed_session_2026-04-01.md`。
-核心結論：VIX-based 風險管理工具無法改善 50/50 baseline。連續調整 >> binary 切換。
-
-### Codex 第 5 次建議（2026-03-26）[提出: Codex]
-- [x] ~~Decision-focused policy learning~~ → **K798 NULL**。DM 全 NS。12/VIX irreducible #7。
-- [x] ~~Two-clock decomposition~~ → **K791 NULL**。隔夜/盤中分解不改善預測。
-- [ ] **Options surface state variables**：⚠️ BLOCKED: 需 options 歷史數據
-- [ ] **Dispersion / correlation-regime trading**：sector dispersion, correlation breakdown trades
-- [x] ~~Event-surprise strategies~~ → **K801 NULL**。|ΔVIX|>2σ 多餘，12/VIX 自帶 shock guard。#8 irreducible。
-
-Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decomposition (3) Dispersion trading
-
-### Gemini 第 2 次建議（2026-03-31，行為金融 + 方法論 + 實務工具）[提出: Gemini]
-- [ ] **Retail Reflexivity & Gamma-Driven Skew**：0DTE 散戶 flow 導致 delta-hedging 連鎖反應，可能打破 VIX sufficiency。量化 "Volatility Gap"（VIX-implied vs flow-induced realized move）。⚠️ BLOCKED: 需 order flow 數據
-- [ ] **Path Signatures for Rough Volatility**：用 rough path theory 的 signature transform 編碼日內價格路徑的幾何特性，捕捉 HAR 遺漏的路徑依賴性。需 5-min 數據（ETA 04/11）
-- [x] ~~Convexity-Adjusted Insurance Premium Tool~~ → **K811v2 完成（2 bugs 修正）**。去掉 pre-2012 不可靠 VVIX 後結論翻轉：S2 VoV-Cond Sharpe 0.634（最佳），保險費從 4.62% 降到 1.22%（-74%）。但 Cross-OOS 1/4（僅 COVID），DM 全 NS。Opportunity cost 佔 90%，direct cost 僅 10%。數據品質比方法論更重要。
-
-### Gemini 第 1 次建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
-- [x] ~~Taiwan Price Limit Latent Volatility~~ → **K790v2 完成 NULL**：>5% 天數僅 0.9%，GJR asymmetry 已捕捉。DM 全 NS。
-- [x] ~~FRED STLFSI4 Macro Stress Regime~~ → **K795 完成 NULL**（⚠️ Codex 2 HIGH：pre-2004 GLD + DM 實作錯誤，數字不可靠但方向正確）。Binary Sharpe 0.466 vs 0.313 但 DM 未通過。VIX sufficiency #24（方向確認，精確統計待 K795v2）。
-- [x] ~~VIX→Taiwan Vol Spillover Strategy~~ → **K817 完成 NULL**。Spillover 存在（r=0.376）但 OTC return 不可交易（77-93% alpha 在隔夜 gap）。DM 全 NS。8.63/VIX 仍最佳。
-- [ ] **TXO Put-Call Ratio Mean-Reversion**：台指選擇權 P/C ratio 作為散戶恐慌指標，極端值做反向操作。Data: TAIFEX 網站
-- [x] ~~EWT vs 0050.TW Vol Arbitrage Spread~~ → **K792 完成**：Granger YES (F=28.4) 但方向反（高 ratio → vol 下降）。Trading 虧損。Mean reversion 陷阱。
-
-### 用戶提出方向
-- [x] ~~什麼是好的交易策略？~~ → **K793 完成**：8 維度評估 6 策略。BH 50/50 #1 (75.4), Risk Parity #2 (73.7), Piecewise #3 (54.0，唯一正 stress)。單一 Sharpe 遺漏大量 tradeoffs。
-- [x] **HAR-RV with 5-day RV** [提出: 用戶, 2026-03-31] → **K782 完成**：GJR-GARCH multi-step 在 5d/22d/66d 全勝 HAR。日頻 squared returns 做的 RV 不足以讓 HAR 發揮優勢——需等 5-min 數據。
-- [x] ~~MEM（Multiplicative Error Model）~~ [提出: 用戶] → **K805 完成**：AMEM-r² 數值最佳（QLIKE 1.4689 vs GJR 1.4824）但 DM=-2.19 未通過 Harvey t>3.0。非對稱性（leverage）比模型類別更重要。MEM 不提供超過 GJR 的統計顯著改善。
-- [x] ~~K501/K818: SSVS for Return Prediction~~ [提出: 用戶] → **K818 完成 NULL for SPY**。OOS R²=-1.47%（EMH barrier）。SSVS 選出 HYG(0.93)+VIX_change(0.78)。台灣 hit 62.1% 但 c2c gap artifact。SSVS 更適合 vol 非 return。
-- [ ] Return prediction → trading strategy pipeline：如果方向準確度 > 55% → 可做 long/short 策略
+**仍然開放的方向：**
+- [ ] **Conditional Dispersion Trade**（Codex #7）：⚠️ BLOCKED 需 sector ETF options
+- [ ] **Options surface state variables**（Codex #5）：⚠️ BLOCKED 需 options 歷史數據
+- [ ] **Dispersion / correlation-regime trading**（Codex #5）
+- [ ] **Retail Reflexivity & Gamma-Driven Skew**（Gemini #2）：⚠️ BLOCKED 需 order flow 數據
+- [ ] **Path Signatures for Rough Volatility**（Gemini #2）：需 5-min 數據（可用 TAIFEX tick）
+- [ ] **TXO Put-Call Ratio Mean-Reversion**（Gemini #1）：TAIFEX 網站數據
 - [ ] 跨資產 return prediction：SPY、0050.TW、QQQ
-- [x] ~~K502/K812v2: US→Taiwan Lead-Lag Strategy~~ [提出: 用戶] → **K812v2 完成 乾淨 NULL**。OtC direction accuracy 50.2%（硬幣），lead-lag beta t=-0.25 (NS)。C2C Sharpe 3.51 → OtC -0.17（100% 信號在隔夜 gap）。方向正式關閉。
-- [x] ~~K503/K810: VIX Mean-Reversion Strategy~~ [提出: 用戶] → **K810 完成 NULL**。12/VIX 本身就是 MR 交易。顯式 MR 策略增加 vol 和 MDD，得不償失。VIX spike 93.5% 回復但短期 NS。50/50 不可動搖 #10。
 - 策略上架前必須：Cross-OOS ≥ 5 periods、3 年回測、Net Sharpe (after TX) > 0
 - **不要輕易上架**——交易策略必須多次確認（cross-OOS + out-of-sample + sensitivity），避免上架後發現是錯誤
 
@@ -416,17 +388,13 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)
 
 ### 台股期貨夜盤策略（用戶提出 2026-04-03）
-**數據來源**：`/Users/yhlai0911/Dropbox/TAIFEXDATA/TAIFEXDATA/` (⚠️ 目前 Dropbox Smart Sync placeholder，需手動同步)
-- 格式：Daily_{YYYY}_{MM}_{DD}.zip → CSV（TX=台指期，TX1=近月，TX2=次月）
-- 期間：2012-2026，含日盤(8:45-13:45)和夜盤(15:00-05:00)
-- **核心假設**：台股期貨夜盤完整覆蓋美股交易時段，K817 的 77-93% 隔夜 gap alpha 可能被期貨 price in
-- [x] ~~K838: 夜盤 Momentum~~ → **NULL**。夜盤與日盤 r=-0.08（反向），方向一致率 48.4%。同商品資訊已透過 gap price in。
-- [x] ~~K841: 夜盤即時 VT 避險~~ → **NULL**。VIX 是 T-2 非即時，timing gap 致命。
-- [x] ~~K842: 夜盤獲利性交易~~ → **NULL**。SPY D-2 信號全虧(Sharpe -0.95)。資訊傳遞太快已 price in。
-- [x] ~~K843: 日內 tick 策略~~ → **夜盤正 drift Sharpe 0.788 是最大發現**。日內 timing 不改善 BH Night。S4 Slot A-C MDD 降 78%。
-- [x] ~~K844: TX 期貨 VT vs 0050.TW 現貨 VT~~ → **★★★ 期貨 VT 空頭期大幅勝出**。Return 分解：夜盤 73.7%。S2 Sharpe 1.465 vs S1 1.370，但**空頭期 TX 翻倍 Sharpe**（2022: 0.71 vs 0.37）。交易成本省 97%。多頭期 0050 靠股息勝。
-- [x] ~~K844 衍生：TX 期貨策略上架評估~~ → **K845 FAIL Test 1**（Sharpe 1.76 < median 2.28）。不單獨上架，建議在 taiwan_8.63vix 加註「機構可用 TX 期貨執行」
-- **業界注意**：近月/次月 roll、結算日效應、夜盤流動性、保證金成本、bid-ask spread
+→ 8 實驗詳見 `docs/research_archive/completed_session_2026-04-03.md`
+- **數據**：TAIFEX TX tick（Dropbox），2012-2026。夜盤 2017/05/16+
+- K838/K841/K842 全 NULL（日頻信號太慢）
+- **★★★ K844**：TX VT 空頭全勝，夜盤 73.7%，TX cost 97% 低
+- **★★★ K847**：隔夜 gap 61% 可交易（R²=0.83）
+- **★★★ K849**：HAR-RV 勝 GJR（DM t=-11.14），proxy ceiling 確認
+- K845：上架 FAIL，建議在 taiwan_8.63vix 加註期貨執行
 
 ### 期貨避險方法論
 - [ ] Quadratic Hedging under GARCH — Ma, J. Futures Markets 2026
@@ -435,13 +403,12 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] Partial Cointegration Hedging — RQFA 2023
 - [ ] Regime-Switching Correlation Hedging
 
-### Codex 第 9 次建議（2026-04-03，基於 K825-K830 成果）[提出: Codex GPT-5.4]
-- [x] ~~K833: CBOE IV Weekly Straddle Validation~~ → **K833 完成 POSITIVE**。VRP 一致為正（78-83% win rate），SPY S1 Sharpe 3.69，S2 VRP Timing MDD -33%。⚠️ Proxy P&L，真實 Sharpe 可能減半。需真實選擇權數據進一步驗證。
-- [ ] **K833 衍生：Real Options P&L Validation**：用真實選擇權歷史數據（OptionMetrics 或 CBOE DataShop）驗證 VRP proxy 結果
-- [ ] **K831: 5-Min RV Horse Race**：HAR-RV/HEAVY/Realized GARCH vs GJR，5-min RV 作 target。⚠️ 需 60+ 天 5-min 數據（ETA 04/11）
-- [ ] **K832: Continuous-Jump-Overnight Decomposition**：BPV + jump + overnight 三桶分開建模。⚠️ 需 5-min 數據
-- [x] ~~K835: Taiwan VIX/VIXTWN Blend~~ → **K835 探索性 NULL（僅 74 天）**。8.63/VIX Sharpe 4.02 最佳，VIXTWN 無增量（level r=0.91）。DM 全 NS。⚠️ 待 VIXTWN 252+ 天後重驗。
-- [x] ~~K834: IV Connectedness Regime Filter~~ → **K834 NULL**。TCI 控制 VIX 後 partial r=-0.003(p=0.84)。S2 vs S1 DM t=-0.68 NS。高 TCI 期反而 return 更高（risk premium）。**VIX sufficiency #34**。
+### Codex 第 9 次建議（2026-04-03）[提出: Codex GPT-5.4]
+→ 詳見 `docs/research_archive/completed_session_2026-04-03.md`
+- [x] K833 POSITIVE（VRP 78-83%）、K834 NULL（VIX #34）、K835 NULL（74 天）
+- [ ] **K833 衍生：Real Options P&L Validation**：⚠️ BLOCKED 需 OptionMetrics
+- [ ] **K831: SPY 5-Min RV Horse Race**：SPY 55 天已收集，~04/07 達 60 天門檻
+- [ ] **K832: Jump Decomposition**：需 5-min 數據
 
 ### 衍生方向（2026-04-03~04 TAIFEX paradigm shift，K847-K849）
 - [ ] **K849 衍生：SPY HAR-RV**：用 yfinance 5-min 數據（04/11 ETA）在 SPY 上重現 K849，驗證 proxy ceiling 是否跨資產通用
@@ -452,15 +419,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] **K848 衍生：Jump Dynamics**：74.9% 天有 jump（K848），jump 頻率/大小能否預測隔日 vol？
 
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
-- [x] ~~K825 衍生：Cross-asset VaR~~ → **K829 完成**。HistSim 75% pass rate（最佳）。GLD 全 PASS，QQQ 只 HistSim PASS，0050.TW 1% 全 FAIL（kurtosis 7.67），BTC 悖論（Normal PASS, Student-t/HistSim 過保守）。HistSim 跨資產最穩健。
-- [x] ~~K829 衍生：0050.TW VaR 校正~~ → **K836 完成 POSITIVE**。Cornish-Fisher 3/481 Trinity PASS！用 skew+kurtosis 修正 quantile(-2.326→-3.204)。純 EVT-POT 全 FAIL。CF 是最簡單有效方案。**VaR 最佳實踐更新：SPY=HistSim/Student-t，0050.TW=Cornish-Fisher**
-- [x] ~~K829 衍生：BTC Skewed VaR~~ → **K830 NULL**。Skewed-t 無效——BTC 正偏(0.619)在 GJR 殘差中消失(skew→-0.19)。真正問題是 regime-dependent variance（bull run 過度預測），不是尾部分配。無單一方法在 BTC 的 1%+5% 同時 Trinity PASS。
-- [x] ~~K826 衍生：Joint KAN-GARCH~~ → 低優先（ML ceiling 7x，方向關閉）
-- [x] ~~K814v2 衍生：Hierarchical Bayesian~~ → **K839 NULL**。Gamma SE -50% 但 QLIKE 不改善。GLD 無 leverage(gamma=-0.02)使共享 prior 不適用。
-- [x] ~~Return prediction pipeline~~ → **K840 NULL**。55.6% hit rate 仍不夠（EMH：cash 太多錯過 rally）。
-- [ ] **K827 衍生：Heterogeneous ABM**：加入自適應學習 agents（改變策略參數）、不同 VT 參數（8/VIX vs 12/VIX vs 16/VIX）、交易成本
-- [x] ~~K811v2 衍生：VIX-only Conditioning~~ → **K828 NULL**。VIX percentile 在 12/VIX 上完全多餘（DM t=-0.11 NS，保費僅降 0.5%）。12/VIX 已是最優 VIX 使用方式。**VIX sufficiency #33**
-- [ ] **K814v2 衍生：Hierarchical Bayesian**：跨資產共享 prior（SPY+QQQ+GLD），估計 gamma 的跨資產分佈
+→ 已完成項目詳見 `docs/research_archive/completed_session_2026-04-03.md`
+- K829/K836(CF-VaR)/K830(BTC)/K839/K840/K828 全完成
+- [ ] **K827 衍生：Heterogeneous ABM**：自適應 agents + 不同 VT 參數
 
 ### 新發現（2026-04-01 文獻搜尋）
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。
