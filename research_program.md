@@ -574,7 +574,7 @@
 
 **高優先（有明確下一步）：**
 - [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較
-- [ ] **Paper 6: Crypto Fear Channel**：K746b 確認 BTC vol asymmetrically Granger-causes VIX。結合 coupling 增加 + tail dependence，可寫成「加密貨幣市場對傳統金融的波動率溢出」論文
+- [ ] **Paper 6: Crypto Fear Channel**：K746b + **K855 悖論發現**：BTC-ETF 後 Granger 弱化（p=0.32）但 shock 傳導放大 2.5x。機構化讓 channel 從「線性可預測」變成「事件驅動非線性」。BTC 已非分散化工具（corr>0.3 佔 76% 時間）。論文角度：「institutional adoption amplified shock transmission but destroyed linear predictability」
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
 
 **中優先（新研究主題）：**
@@ -588,7 +588,7 @@
 **低優先（長期探索）：**
 - [ ] **VT 與 ESG 整合**：ESG 評分高的公司是否有不同的 gamma？
 - [ ] **Agent-Based Model 正式版**：K742 用簡化 Kyle's lambda。正式 ABM 可模擬異質投資人
-- [ ] **因果推論**：用 DiD/RDD 分析 Fed 升息決議對 VIX regime 的因果影響
+- [x] ~~因果推論：Fed 升息 DiD/RDD~~ → **K856 完成 NULL（4 方法全 NS）**。Event study p=0.97, RDD t=-1.12, DiD t=0.48, Surprise t=-0.21。VIX 在 FOMC 前已預先調整（cuts 前+1.90, hikes 前-0.75，均 marginal）。Fed 不「造成」VIX regime shift，市場提前定價。與 K185/K514 一致。
 - [ ] **Climate vol**：極端天氣事件頻率增加是否改變 vol 動態？
 
 ### P3: 長期待辦

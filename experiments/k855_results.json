@@ -1,0 +1,889 @@
+{
+  "experiment_id": "K855",
+  "title": "Crypto Fear Channel \u2014 2026 Tariff Crisis Update",
+  "timestamp": "2026-04-04T19:25:59.487337+00:00",
+  "data_source": "yfinance",
+  "data_period": "2020-01 to 2026-04-04",
+  "methodology": {
+    "periods": {
+      "Full": {
+        "start": "2020-01-01",
+        "end": "2026-04-05"
+      },
+      "Pre-ETF": {
+        "start": "2020-01-01",
+        "end": "2023-12-31"
+      },
+      "Post-ETF": {
+        "start": "2024-01-01",
+        "end": "2026-04-05"
+      },
+      "Tariff Crisis (2026)": {
+        "start": "2026-03-01",
+        "end": "2026-04-05"
+      }
+    },
+    "rolling_window": 60,
+    "rv_window": 22,
+    "granger_max_lag": 5,
+    "granger_lag_selection": "AIC",
+    "var_max_lag": 5
+  },
+  "references": [
+    "K746b: Bitcoin-VIX bidirectional Granger (2015-2026)",
+    "K639: BTC\u2192SPY Granger, inverse leverage",
+    "K565: BTC 5% allocation Harvey PASS, post-ETF correlation 0\u21920.35",
+    "Corbet et al. (2020) JBF: Cryptocurrency reaction to FOMC",
+    "Bouri et al. (2017) FRL: Bitcoin as hedge/diversifier"
+  ],
+  "descriptive_stats": {
+    "Full": {
+      "BTC": {
+        "n_obs": 1549,
+        "ann_return_pct": 32.11,
+        "ann_vol_pct": 62.32,
+        "skewness": -1.2004,
+        "kurtosis": 15.9504,
+        "min_daily_pct": -46.47,
+        "max_daily_pct": 19.15
+      },
+      "SPY": {
+        "n_obs": 1549,
+        "ann_return_pct": 12.93,
+        "ann_vol_pct": 20.66,
+        "skewness": -0.5451,
+        "kurtosis": 13.3777,
+        "min_daily_pct": -11.59,
+        "max_daily_pct": 9.99
+      },
+      "GLD": {
+        "n_obs": 1549,
+        "ann_return_pct": 17.29,
+        "ann_vol_pct": 18.18,
+        "skewness": -0.838,
+        "kurtosis": 7.9382,
+        "min_daily_pct": -10.84,
+        "max_daily_pct": 6.16
+      },
+      "correlations": {
+        "BTC_SPY_return": 0.3963,
+        "BTC_VIX_change": -0.3895
+      },
+      "VIX": {
+        "mean": 21.09,
+        "median": 19.17,
+        "max": 82.69,
+        "days_above_25": 345,
+        "days_above_30": 149
+      }
+    },
+    "Pre-ETF": {
+      "BTC": {
+        "n_obs": 984,
+        "ann_return_pct": 38.69,
+        "ann_vol_pct": 68.43,
+        "skewness": -1.4781,
+        "kurtosis": 16.6217,
+        "min_daily_pct": -46.47,
+        "max_daily_pct": 19.15
+      },
+      "SPY": {
+        "n_obs": 984,
+        "ann_return_pct": 11.42,
+        "ann_vol_pct": 22.9,
+        "skewness": -0.7693,
+        "kurtosis": 10.9318,
+        "min_daily_pct": -11.59,
+        "max_daily_pct": 8.67
+      },
+      "GLD": {
+        "n_obs": 984,
+        "ann_return_pct": 6.49,
+        "ann_vol_pct": 15.77,
+        "skewness": -0.3048,
+        "kurtosis": 2.9191,
+        "min_daily_pct": -5.52,
+        "max_daily_pct": 4.74
+      },
+      "correlations": {
+        "BTC_SPY_return": 0.3992,
+        "BTC_VIX_change": -0.401
+      },
+      "VIX": {
+        "mean": 23.06,
+        "median": 21.56,
+        "max": 82.69,
+        "days_above_25": 308,
+        "days_above_30": 134
+      }
+    },
+    "Post-ETF": {
+      "BTC": {
+        "n_obs": 565,
+        "ann_return_pct": 20.65,
+        "ann_vol_pct": 49.97,
+        "skewness": 0.1865,
+        "kurtosis": 2.8294,
+        "min_daily_pct": -15.23,
+        "max_daily_pct": 14.74
+      },
+      "SPY": {
+        "n_obs": 565,
+        "ann_return_pct": 15.57,
+        "ann_vol_pct": 16.06,
+        "skewness": 0.7323,
+        "kurtosis": 19.758,
+        "min_daily_pct": -6.03,
+        "max_daily_pct": 9.99
+      },
+      "GLD": {
+        "n_obs": 565,
+        "ann_return_pct": 36.09,
+        "ann_vol_pct": 21.71,
+        "skewness": -1.2251,
+        "kurtosis": 9.1219,
+        "min_daily_pct": -10.84,
+        "max_daily_pct": 6.16
+      },
+      "correlations": {
+        "BTC_SPY_return": 0.3873,
+        "BTC_VIX_change": -0.3638
+      },
+      "VIX": {
+        "mean": 17.65,
+        "median": 16.42,
+        "max": 52.33,
+        "days_above_25": 37,
+        "days_above_30": 15
+      }
+    },
+    "Tariff Crisis (2026)": {
+      "BTC": {
+        "n_obs": 24,
+        "ann_return_pct": 15.92,
+        "ann_vol_pct": 43.23,
+        "skewness": 0.517,
+        "kurtosis": -0.1009,
+        "min_daily_pct": -3.89,
+        "max_daily_pct": 6.27
+      },
+      "SPY": {
+        "n_obs": 24,
+        "ann_return_pct": -44.35,
+        "ann_vol_pct": 17.48,
+        "skewness": 0.6131,
+        "kurtosis": 0.5668,
+        "min_daily_pct": -1.8,
+        "max_daily_pct": 2.87
+      },
+      "GLD": {
+        "n_obs": 24,
+        "ann_return_pct": -125.11,
+        "ann_vol_pct": 37.32,
+        "skewness": 0.013,
+        "kurtosis": -0.8118,
+        "min_daily_pct": -4.56,
+        "max_daily_pct": 3.72
+      },
+      "correlations": {
+        "BTC_SPY_return": 0.5899,
+        "BTC_VIX_change": -0.6029
+      },
+      "VIX": {
+        "mean": 25.48,
+        "median": 25.17,
+        "max": 31.05,
+        "days_above_25": 13,
+        "days_above_30": 2
+      }
+    }
+  },
+  "rolling_correlations": {
+    "Full": {
+      "BTC_SPY": {
+        "mean": 0.3627,
+        "std": 0.1811,
+        "min": -0.0966,
+        "max": 0.6742
+      },
+      "BTC_VIX_chg": {
+        "mean": -0.3412,
+        "std": 0.1656,
+        "min": -0.6669,
+        "max": 0.0912
+      },
+      "BTC_GLD": {
+        "mean": 0.1228,
+        "std": 0.1867,
+        "min": -0.3622,
+        "max": 0.5698
+      }
+    },
+    "Pre-ETF": {
+      "BTC_SPY": {
+        "mean": 0.3426,
+        "std": 0.1816,
+        "min": -0.068,
+        "max": 0.6742
+      },
+      "BTC_VIX_chg": {
+        "mean": -0.3371,
+        "std": 0.1681,
+        "min": -0.6669,
+        "max": 0.0912
+      },
+      "BTC_GLD": {
+        "mean": 0.1414,
+        "std": 0.2109,
+        "min": -0.3622,
+        "max": 0.5698
+      }
+    },
+    "Post-ETF": {
+      "BTC_SPY": {
+        "mean": 0.3956,
+        "std": 0.1755,
+        "min": -0.0966,
+        "max": 0.6711
+      },
+      "BTC_VIX_chg": {
+        "mean": -0.3478,
+        "std": 0.1613,
+        "min": -0.6264,
+        "max": 0.0414
+      },
+      "BTC_GLD": {
+        "mean": 0.0924,
+        "std": 0.133,
+        "min": -0.2601,
+        "max": 0.3779
+      }
+    },
+    "Tariff Crisis (2026)": {
+      "BTC_SPY": {
+        "mean": 0.583,
+        "std": 0.0157,
+        "min": 0.5558,
+        "max": 0.607
+      },
+      "BTC_VIX_chg": {
+        "mean": -0.4776,
+        "std": 0.0136,
+        "min": -0.4964,
+        "max": -0.4445
+      },
+      "BTC_GLD": {
+        "mean": 0.178,
+        "std": 0.009,
+        "min": 0.1611,
+        "max": 0.2042
+      }
+    }
+  },
+  "fisher_z_tests": {
+    "BTC_SPY": {
+      "pre_etf_corr": 0.3992,
+      "post_etf_corr": 0.3873,
+      "z_stat": 0.2642,
+      "p_val": 0.791621,
+      "significant_at_005": false
+    },
+    "BTC_VIX_chg": {
+      "pre_etf_corr": -0.401,
+      "post_etf_corr": -0.3638,
+      "z_stat": -0.8228,
+      "p_val": 0.410595,
+      "significant_at_005": false
+    }
+  },
+  "granger_causality": {
+    "Full": {
+      "BTC_absret_to_VIX_chg": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 2.7622,
+        "aic_p_val": 0.01719,
+        "min_p_lag": 5,
+        "min_p_val": 0.01719,
+        "n_obs": 1548,
+        "significant_aic": true
+      },
+      "VIX_to_BTC_absret": {
+        "aic_best_lag": 3,
+        "aic_f_stat": 7.2232,
+        "aic_p_val": 8.2e-05,
+        "min_p_lag": 1,
+        "min_p_val": 2e-05,
+        "n_obs": 1548,
+        "significant_aic": true
+      },
+      "BTC_RV22_to_VIX": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 3.7097,
+        "aic_p_val": 0.002427,
+        "min_p_lag": 2,
+        "min_p_val": 0.000157,
+        "n_obs": 1548,
+        "significant_aic": true
+      },
+      "SPY_absret_to_VIX_chg": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 6.589,
+        "aic_p_val": 4e-06,
+        "min_p_lag": 3,
+        "min_p_val": 1e-06,
+        "n_obs": 1548,
+        "significant_aic": true
+      }
+    },
+    "Pre-ETF": {
+      "BTC_absret_to_VIX_chg": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 3.4102,
+        "aic_p_val": 0.004637,
+        "min_p_lag": 1,
+        "min_p_val": 0.003725,
+        "n_obs": 983,
+        "significant_aic": true
+      },
+      "VIX_to_BTC_absret": {
+        "aic_best_lag": 3,
+        "aic_f_stat": 4.5759,
+        "aic_p_val": 0.003441,
+        "min_p_lag": 4,
+        "min_p_val": 0.001254,
+        "n_obs": 983,
+        "significant_aic": true
+      },
+      "BTC_RV22_to_VIX": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 4.3662,
+        "aic_p_val": 0.000618,
+        "min_p_lag": 2,
+        "min_p_val": 1e-05,
+        "n_obs": 983,
+        "significant_aic": true
+      },
+      "SPY_absret_to_VIX_chg": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 4.8709,
+        "aic_p_val": 0.000209,
+        "min_p_lag": 5,
+        "min_p_val": 0.000209,
+        "n_obs": 983,
+        "significant_aic": true
+      }
+    },
+    "Post-ETF": {
+      "BTC_absret_to_VIX_chg": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 1.1755,
+        "aic_p_val": 0.319866,
+        "min_p_lag": 1,
+        "min_p_val": 0.018464,
+        "n_obs": 564,
+        "significant_aic": false
+      },
+      "VIX_to_BTC_absret": {
+        "aic_best_lag": 1,
+        "aic_f_stat": 0.6395,
+        "aic_p_val": 0.424227,
+        "min_p_lag": 4,
+        "min_p_val": 0.089001,
+        "n_obs": 564,
+        "significant_aic": false
+      },
+      "BTC_RV22_to_VIX": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 0.8523,
+        "aic_p_val": 0.513067,
+        "min_p_lag": 3,
+        "min_p_val": 0.384386,
+        "n_obs": 564,
+        "significant_aic": false
+      },
+      "SPY_absret_to_VIX_chg": {
+        "aic_best_lag": 5,
+        "aic_f_stat": 7.9796,
+        "aic_p_val": 0.0,
+        "min_p_lag": 2,
+        "min_p_val": 0.0,
+        "n_obs": 564,
+        "significant_aic": true
+      }
+    },
+    "Tariff Crisis (2026)": {
+      "BTC_absret_to_VIX_chg": {
+        "lag": null,
+        "f_stat": null,
+        "p_val": null,
+        "n_obs": 23,
+        "error": "insufficient_data"
+      },
+      "VIX_to_BTC_absret": {
+        "lag": null,
+        "f_stat": null,
+        "p_val": null,
+        "n_obs": 23,
+        "error": "insufficient_data"
+      },
+      "BTC_RV22_to_VIX": {
+        "lag": null,
+        "f_stat": null,
+        "p_val": null,
+        "n_obs": 23,
+        "error": "insufficient_data"
+      },
+      "SPY_absret_to_VIX_chg": {
+        "lag": null,
+        "f_stat": null,
+        "p_val": null,
+        "n_obs": 23,
+        "error": "insufficient_data"
+      }
+    }
+  },
+  "asymmetric_granger": {
+    "Full": {
+      "vix_median": 19.17,
+      "High_VIX": {
+        "n_obs": 774,
+        "BTC_to_VIX": {
+          "aic_best_lag": 3,
+          "aic_f_stat": 2.641,
+          "aic_p_val": 0.0484,
+          "min_p_lag": 1,
+          "min_p_val": 0.012073,
+          "n_obs": 773,
+          "significant_aic": true
+        },
+        "VIX_to_BTC": {
+          "aic_best_lag": 3,
+          "aic_f_stat": 3.4725,
+          "aic_p_val": 0.015785,
+          "min_p_lag": 3,
+          "min_p_val": 0.015785,
+          "n_obs": 773,
+          "significant_aic": true
+        }
+      },
+      "Low_VIX": {
+        "n_obs": 775,
+        "BTC_to_VIX": {
+          "aic_best_lag": 3,
+          "aic_f_stat": 0.0695,
+          "aic_p_val": 0.976212,
+          "min_p_lag": 1,
+          "min_p_val": 0.932613,
+          "n_obs": 774,
+          "significant_aic": false
+        },
+        "VIX_to_BTC": {
+          "aic_best_lag": 1,
+          "aic_f_stat": 0.1351,
+          "aic_p_val": 0.7133,
+          "min_p_lag": 3,
+          "min_p_val": 0.612935,
+          "n_obs": 774,
+          "significant_aic": false
+        }
+      }
+    },
+    "Pre-ETF": {
+      "vix_median": 21.56,
+      "High_VIX": {
+        "n_obs": 492,
+        "BTC_to_VIX": {
+          "aic_best_lag": 3,
+          "aic_f_stat": 4.1155,
+          "aic_p_val": 0.006718,
+          "min_p_lag": 1,
+          "min_p_val": 0.000408,
+          "n_obs": 491,
+          "significant_aic": true
+        },
+        "VIX_to_BTC": {
+          "aic_best_lag": 3,
+          "aic_f_stat": 3.5983,
+          "aic_p_val": 0.013546,
+          "min_p_lag": 3,
+          "min_p_val": 0.013546,
+          "n_obs": 491,
+          "significant_aic": true
+        }
+      },
+      "Low_VIX": {
+        "n_obs": 492,
+        "BTC_to_VIX": {
+          "aic_best_lag": 3,
+          "aic_f_stat": 1.7533,
+          "aic_p_val": 0.155259,
+          "min_p_lag": 3,
+          "min_p_val": 0.155259,
+          "n_obs": 491,
+          "significant_aic": false
+        },
+        "VIX_to_BTC": {
+          "aic_best_lag": 1,
+          "aic_f_stat": 7.0421,
+          "aic_p_val": 0.008222,
+          "min_p_lag": 1,
+          "min_p_val": 0.008222,
+          "n_obs": 491,
+          "significant_aic": true
+        }
+      }
+    },
+    "Post-ETF": {
+      "vix_median": 16.42,
+      "High_VIX": {
+        "n_obs": 282,
+        "BTC_to_VIX": {
+          "aic_best_lag": 3,
+          "aic_f_stat": 3.0313,
+          "aic_p_val": 0.029812,
+          "min_p_lag": 2,
+          "min_p_val": 0.006796,
+          "n_obs": 281,
+          "significant_aic": true
+        },
+        "VIX_to_BTC": {
+          "aic_best_lag": 1,
+          "aic_f_stat": 0.5995,
+          "aic_p_val": 0.439415,
+          "min_p_lag": 3,
+          "min_p_val": 0.018088,
+          "n_obs": 281,
+          "significant_aic": false
+        }
+      },
+      "Low_VIX": {
+        "n_obs": 283,
+        "BTC_to_VIX": {
+          "aic_best_lag": 1,
+          "aic_f_stat": 0.0634,
+          "aic_p_val": 0.801311,
+          "min_p_lag": 3,
+          "min_p_val": 0.337493,
+          "n_obs": 282,
+          "significant_aic": false
+        },
+        "VIX_to_BTC": {
+          "aic_best_lag": 1,
+          "aic_f_stat": 1.3183,
+          "aic_p_val": 0.251882,
+          "min_p_lag": 1,
+          "min_p_val": 0.251882,
+          "n_obs": 282,
+          "significant_aic": false
+        }
+      }
+    }
+  },
+  "lead_lag_crosscorr": {
+    "Full": {
+      "lag_-5": 0.0149,
+      "lag_-4": 0.0359,
+      "lag_-3": 0.0215,
+      "lag_-2": -0.0886,
+      "lag_-1": 0.1036,
+      "lag_0": -0.3895,
+      "lag_1": 0.0403,
+      "lag_2": -0.0334,
+      "lag_3": -0.0253,
+      "lag_4": 0.0116,
+      "lag_5": -0.0414
+    },
+    "Pre-ETF": {
+      "lag_-5": 0.0114,
+      "lag_-4": 0.04,
+      "lag_-3": 0.0331,
+      "lag_-2": -0.1607,
+      "lag_-1": 0.1364,
+      "lag_0": -0.401,
+      "lag_1": 0.0366,
+      "lag_2": -0.0133,
+      "lag_3": -0.0396,
+      "lag_4": 0.0041,
+      "lag_5": -0.047
+    },
+    "Post-ETF": {
+      "lag_-5": 0.0249,
+      "lag_-4": 0.0255,
+      "lag_-3": -0.0093,
+      "lag_-2": 0.1058,
+      "lag_-1": 0.0171,
+      "lag_0": -0.3638,
+      "lag_1": 0.0512,
+      "lag_2": -0.0884,
+      "lag_3": 0.0147,
+      "lag_4": 0.032,
+      "lag_5": -0.0253
+    },
+    "Tariff Crisis (2026)": {
+      "lag_-5": -0.1898,
+      "lag_-4": 0.1599,
+      "lag_-3": -0.0151,
+      "lag_-2": 0.4326,
+      "lag_-1": 0.0058,
+      "lag_0": -0.6029,
+      "lag_1": 0.0679,
+      "lag_2": 0.5126,
+      "lag_3": 0.0346,
+      "lag_4": -0.3881,
+      "lag_5": -0.1993
+    }
+  },
+  "var_irf": {
+    "Full": {
+      "var_lag": 5,
+      "n_obs": 1549,
+      "BTC_shock_to_VIX": {
+        "irf": [
+          0.0,
+          -8.07968,
+          4.888586,
+          -0.876824,
+          -0.574021,
+          -2.352703,
+          -0.584208,
+          0.041357,
+          -0.39508,
+          -0.044,
+          -0.275853
+        ],
+        "cumulative": [
+          0.0,
+          -8.07968,
+          -3.191094,
+          -4.067918,
+          -4.641939,
+          -6.994642,
+          -7.57885,
+          -7.537493,
+          -7.932573,
+          -7.976573,
+          -8.252426
+        ]
+      },
+      "VIX_shock_to_BTC": {
+        "irf": [
+          0.0,
+          0.000537,
+          0.000165,
+          0.00131,
+          -0.000217,
+          0.000557,
+          9.3e-05,
+          4.2e-05,
+          0.000182,
+          -1.8e-05,
+          8.1e-05
+        ],
+        "cumulative": [
+          0.0,
+          0.000537,
+          0.000702,
+          0.002012,
+          0.001795,
+          0.002352,
+          0.002445,
+          0.002487,
+          0.002669,
+          0.002651,
+          0.002732
+        ]
+      }
+    },
+    "Pre-ETF": {
+      "var_lag": 5,
+      "n_obs": 984,
+      "BTC_shock_to_VIX": {
+        "irf": [
+          0.0,
+          -7.912584,
+          7.80278,
+          -1.369201,
+          -0.695038,
+          -2.775198,
+          -0.771127,
+          0.365798,
+          -0.689077,
+          -0.029571,
+          -0.422441
+        ],
+        "cumulative": [
+          0.0,
+          -7.912584,
+          -0.109804,
+          -1.479005,
+          -2.174043,
+          -4.949241,
+          -5.720368,
+          -5.35457,
+          -6.043647,
+          -6.073218,
+          -6.495659
+        ]
+      },
+      "VIX_shock_to_BTC": {
+        "irf": [
+          0.0,
+          0.000347,
+          5.3e-05,
+          0.00131,
+          -0.000635,
+          0.000664,
+          5.3e-05,
+          -1.3e-05,
+          0.000259,
+          -9.9e-05,
+          0.000114
+        ],
+        "cumulative": [
+          0.0,
+          0.000347,
+          0.0004,
+          0.00171,
+          0.001075,
+          0.001739,
+          0.001792,
+          0.001779,
+          0.002038,
+          0.001939,
+          0.002053
+        ]
+      }
+    },
+    "Post-ETF": {
+      "var_lag": 4,
+      "n_obs": 565,
+      "BTC_shock_to_VIX": {
+        "irf": [
+          0.0,
+          -7.100372,
+          -7.683846,
+          -1.108848,
+          0.414902,
+          -0.248904,
+          0.027212,
+          -0.029039,
+          -0.119354,
+          -0.129706,
+          -0.047191
+        ],
+        "cumulative": [
+          0.0,
+          -7.100372,
+          -14.784218,
+          -15.893066,
+          -15.478164,
+          -15.727068,
+          -15.699856,
+          -15.728895,
+          -15.848249,
+          -15.977955,
+          -16.025146
+        ]
+      },
+      "VIX_shock_to_BTC": {
+        "irf": [
+          0.0,
+          0.001121,
+          0.000386,
+          0.00118,
+          0.000726,
+          2.5e-05,
+          6.4e-05,
+          1.5e-05,
+          1.8e-05,
+          1.5e-05,
+          2e-05
+        ],
+        "cumulative": [
+          0.0,
+          0.001121,
+          0.001507,
+          0.002687,
+          0.003413,
+          0.003438,
+          0.003502,
+          0.003517,
+          0.003535,
+          0.00355,
+          0.00357
+        ]
+      }
+    }
+  },
+  "tariff_crisis_deep_dive": {
+    "march_2026": {
+      "n_days": 22,
+      "btc_cum_return_pct": 3.51,
+      "spy_cum_return_pct": -5.06,
+      "vix_start": 21.44,
+      "vix_end": 25.25,
+      "btc_spy_corr": 0.6202
+    },
+    "april_2026_start": {
+      "n_days": 2,
+      "btc_cum_return_pct": -1.99,
+      "spy_cum_return_pct": 0.84,
+      "btc_spy_corr": null
+    },
+    "first_day_reaction": {
+      "btc_return_pct": 0.53,
+      "spy_return_pct": -0.33,
+      "vix_change": -0.44
+    },
+    "first_day_z_scores": {
+      "btc_z": 0.17,
+      "spy_z": -0.33,
+      "btc_moved_more": false
+    }
+  },
+  "risk_on_analysis": {
+    "Full": {
+      "pct_corr_above_0.3": 64.5,
+      "pct_corr_above_0.5": 27.4,
+      "pct_corr_negative": 1.7,
+      "mean_corr": 0.3627
+    },
+    "Pre-ETF": {
+      "pct_corr_above_0.3": 57.3,
+      "pct_corr_above_0.5": 26.8,
+      "pct_corr_negative": 1.1,
+      "mean_corr": 0.3426
+    },
+    "Post-ETF": {
+      "pct_corr_above_0.3": 76.3,
+      "pct_corr_above_0.5": 28.5,
+      "pct_corr_negative": 2.8,
+      "mean_corr": 0.3956
+    },
+    "Tariff Crisis (2026)": {
+      "pct_corr_above_0.3": 100.0,
+      "pct_corr_above_0.5": 100.0,
+      "pct_corr_negative": 0.0,
+      "mean_corr": 0.583
+    }
+  },
+  "conclusions": [
+    "BTC-SPY correlation change modest: 0.343 \u2192 0.396 (\u0394=+0.053)",
+    "Crypto fear channel WEAKENED post-ETF: BTC\u2192VIX Granger lost significance",
+    "BTC has become more risk-on: time above 0.3 corr increased 57.3% \u2192 76.3%",
+    "Fisher z-test: NO significant structural break in BTC-SPY correlation (z=0.264, p=0.7916)"
+  ],
+  "charts": [
+    "k855_charts/k855_rolling_correlations.png",
+    "k855_charts/k855_lead_lag_xcorr.png",
+    "k855_charts/k855_irf_comparison.png",
+    "k855_charts/k855_risk_on_transition.png"
+  ],
+  "limitations": [
+    "BTC trades 24/7 but VIX/SPY only during market hours \u2014 alignment uses close-to-close",
+    "Tariff crisis period very short (25 trading days) \u2014 limited statistical power",
+    "Granger causality \u2260 true causality; confounders (global risk appetite) possible",
+    "Post-ETF period includes 2024-2026 only \u2014 may reflect specific market conditions not just ETF effect",
+    "Rolling correlations use 60-day window \u2014 smooths high-frequency dynamics"
+  ]
+}
