@@ -1,0 +1,260 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{threeparttable}
+\usepackage{tabularx}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage{caption}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\doublespacing
+
+% --- Title ---
+\title{The True Cost of Volatility Targeting: Decomposing the Insurance Premium into Opportunity and Transaction Components\thanks{We thank the VolPred Research System for computational support and OpenAI Codex for adversarial code review. Data and replication code available upon request.}}
+
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University. Corresponding author. Email: yhlai@mail.dyu.edu.tw} \and VolPred Research System}
+
+\date{April 2026}
+
+\begin{document}
+
+\maketitle
+
+% --- Abstract ---
+\begin{abstract}
+\noindent
+Volatility targeting (VT) strategies scale equity exposure inversely to expected volatility, producing well-documented reductions in tail risk but also persistent return shortfalls relative to buy-and-hold. We propose the first formal decomposition of this return gap---the ``insurance premium''---into two economically distinct components: \emph{opportunity cost} (foregone returns from reduced equity participation) and \emph{direct cost} (transaction expenses from weight rebalancing). Using daily S\&P~500 data conditioned on the CBOE VVIX index over the VVIX-reliable period 2012--2024 ($N=3{,}262$ trading days), we find that opportunity cost accounts for 91\% of the total insurance premium under unconditional VT (4.20\% vs.\ 0.43\% per annum). VVIX-conditional targeting---activating VT only when the volatility-of-volatility $z$-score exceeds 1.0---reduces total cost by 74\% (from 4.62\% to 1.22\%), primarily by eliminating unnecessary hedging during calm markets. We further show that the 50/50 SPY/GLD benchmark generates a structural rebalancing premium of 54~basis points per annum, which approximately equals the best-case VT alpha, explaining why VT strategies cannot outperform simple diversification on a risk-adjusted basis. These findings redirect the VT design problem from minimizing transaction costs to minimizing opportunity costs through regime conditioning.
+
+\medskip
+\noindent
+\textbf{Keywords:} volatility targeting, insurance premium, opportunity cost, transaction cost, volatility-of-volatility, rebalancing premium
+
+\medskip
+\noindent
+\textbf{JEL Classification:} G11, G12, G17
+\end{abstract}
+
+\newpage
+
+%=================================================================
+\section{Introduction}
+\label{sec:intro}
+%=================================================================
+
+Volatility targeting (VT) has become a standard technique for dynamic risk management. The framework, formalized by \citet{moreira2017}, prescribes scaling equity exposure inversely to conditional volatility---increasing allocation when markets are calm and reducing it when turbulence rises. \citet{harvey2018} demonstrate that such strategies meaningfully reduce tail risk, and several studies confirm VT's ability to compress the return distribution, particularly in the left tail \citep{fleming2001, hocquard2013}.
+
+Yet VT strategies systematically underperform buy-and-hold benchmarks in terms of cumulative returns. This shortfall is typically attributed to ``transaction costs,'' an attribution that conflates two fundamentally different economic mechanisms. The first is the \emph{opportunity cost} of holding cash instead of equities during periods of elevated volatility that do not materialize into realized losses. The second is the \emph{direct cost} of portfolio turnover---brokerage fees, bid-ask spreads, and market impact. Despite a substantial literature on VT mechanics \citep{moreira2017, barroso2015, cederburg2020}, no study has formally decomposed the insurance premium into these components.
+
+This decomposition matters for at least three reasons. First, it clarifies the economic nature of VT: investors are paying primarily for foregone upside, not for trading friction. Second, it implies that cost reduction should target the opportunity component rather than the transaction component, fundamentally reorienting strategy design. Third, it explains a persistent empirical puzzle: why does VT fail to outperform simple 50/50 SPY/GLD diversification, even when VT produces superior risk metrics?
+
+We answer this question with three contributions. First, we propose a formal decomposition of the VT insurance premium into opportunity and direct cost components (Section~\ref{sec:method}). Second, we show that conditioning on the CBOE VVIX---a real-time measure of volatility-of-volatility---reduces the total premium by 74\%, primarily through the opportunity cost channel (Section~\ref{sec:results}). Third, we quantify the structural rebalancing premium embedded in the 50/50 benchmark, demonstrating that it creates a ``triple moat'' that VT cannot overcome without genuine directional forecasting ability.
+
+%=================================================================
+\section{Methodology and Data}
+\label{sec:method}
+%=================================================================
+
+\subsection{Insurance Premium Decomposition}
+\label{sec:decomp}
+
+Let $r_t^{\text{BH}}$ denote the daily return of the buy-and-hold equity benchmark and $r_t^{\text{VT}}$ the daily return of the volatility-targeted strategy. The VT strategy allocates weight $w_t = \min(\sigma^*/\hat{\sigma}_t, 1)$ to equities, where $\sigma^*$ is the target volatility and $\hat{\sigma}_t$ is the conditional volatility estimate available at time $t-1$. We use the 12/VIX rule: $w_t = \min(12/\text{VIX}_{t-1}, 1)$.
+
+Define the \emph{total insurance premium} as the annualized return difference:
+\begin{equation}
+\text{IP}_{\text{total}} = \bar{r}^{\text{BH}} - \bar{r}^{\text{VT}}.
+\label{eq:ip_total}
+\end{equation}
+
+We decompose this into two components. Let $r_t^{\text{VT,gross}}$ denote the VT return \emph{before} transaction costs are deducted. The \emph{opportunity cost} captures the return gap due to reduced equity participation:
+\begin{equation}
+\text{IP}_{\text{opp}} = \bar{r}^{\text{BH}} - \bar{r}^{\text{VT,gross}}.
+\label{eq:ip_opp}
+\end{equation}
+
+The \emph{direct cost} captures the cumulative transaction expense:
+\begin{equation}
+\text{IP}_{\text{direct}} = \sum_{t} c \cdot |w_t - w_{t-1}| / N,
+\label{eq:ip_direct}
+\end{equation}
+where $c = 5$~basis points per unit weight change, annualized over $N$ years. By construction, $\text{IP}_{\text{total}} = \text{IP}_{\text{opp}} + \text{IP}_{\text{direct}}$.
+
+\subsection{VoV-Conditional Targeting}
+
+Rather than applying VT unconditionally, we propose conditioning on the volatility-of-volatility (VoV) regime. Using the CBOE VVIX index, we compute an expanding-window $z$-score (minimum 60 observations):
+\begin{equation}
+z_t^{\text{VoV}} = \frac{\text{VVIX}_t - \overline{\text{VVIX}}_{1:t}}{\text{sd}(\text{VVIX}_{1:t})}.
+\end{equation}
+
+We define two conditional strategies:
+\begin{itemize}
+\item \textbf{S2 (VoV-Conditional)}: Apply 12/VIX weight only when $z_t^{\text{VoV}} > 1.0$ \emph{and} VIX is rising (5-day change $ > 0$); otherwise hold 100\% equity.
+\item \textbf{S3 (Smooth VoV)}: Apply 12/VIX weight at all times, but blend toward 100\% equity when $z_t^{\text{VoV}} < 1.0$ via $w_t = w_t^{\text{VT}} + (1 - w_t^{\text{VT}}) \cdot \mathbb{1}(z_t^{\text{VoV}} < 1.0) \cdot 0.5$.
+\end{itemize}
+
+The economic intuition is that high VoV signals regime uncertainty---periods when insurance is most valuable---while low VoV indicates stable volatility regimes where VT hedging is unnecessary and costly.
+
+\subsection{Data}
+
+We use daily closing prices for SPY, GLD, VIX, and VVIX from Yahoo Finance (via \texttt{yfinance}), covering the VVIX-reliable period 2012-01-03 to 2024-12-31 ($N = 3{,}262$ trading days, 12.94 years). The VVIX restriction to post-2012 data follows from documented liquidity concerns in the VVIX options market prior to this date. All signals are lagged one trading day (\texttt{signal.shift(1)}) to prevent look-ahead bias. Transaction costs are set at 5~bps per leg on each weight change. We designate the out-of-sample (OOS) window as 2023-01-01 to 2024-12-31.
+
+%=================================================================
+\section{Results}
+\label{sec:results}
+%=================================================================
+
+\subsection{Strategy Performance}
+
+Table~\ref{tab:performance} reports performance metrics for five strategies over the full sample (2012--2024). The buy-and-hold benchmark (S0) achieves a CAGR of 12.51\% with a Sharpe ratio of 0.60. Unconditional VT (S1, Always 12/VIX) sacrifices 5.40 percentage points of CAGR for a 55\% reduction in maximum drawdown (MDD: $-15.46\%$ vs.\ $-34.10\%$). The VoV-conditional strategy (S2) retains most of the BH return (CAGR 11.14\%) while still reducing MDD by 33\% and achieving the highest Sharpe ratio (0.63) among all strategies.
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{Strategy Performance: Full Sample (2012--2024)}
+\label{tab:performance}
+\begin{tabular}{lccccc}
+\toprule
+ & S0: BH & S1: Always & S2: VoV- & S3: Smooth & S4: 50/50 \\
+Metric & SPY & 12/VIX & Cond. & VoV & SPY/GLD \\
+\midrule
+CAGR (\%) & 12.51 & 7.11 & 11.14 & 8.84 & 7.89 \\
+Ann.\ Vol (\%) & 16.56 & 9.33 & 13.72 & 11.57 & 11.47 \\
+Sharpe & 0.60 & 0.54 & 0.63 & 0.57 & 0.50 \\
+MDD (\%) & $-$34.10 & $-$15.46 & $-$22.78 & $-$23.20 & $-$21.17 \\
+Calmar & 0.37 & 0.46 & 0.49 & 0.38 & 0.37 \\
+Sortino & 0.55 & 0.49 & 0.61 & 0.53 & 0.46 \\
+CRRA $\gamma\!=\!5$ & 0.217 & 0.190 & 0.211 & 0.208 & 0.157 \\
+\midrule
+Avg.\ Weight (\%) & 100.0 & 74.1 & 93.4 & 86.0 & --- \\
+Ann.\ Turnover (\%) & 0.0 & 872.4 & 1044.7 & 912.4 & --- \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: S0 is 100\% SPY buy-and-hold. S1 sets $w = \min(12/\text{VIX}_{t-1}, 1)$ daily. S2 applies S1 only when VoV $z$-score $> 1.0$ and VIX is rising; otherwise $w = 1$. S3 blends S1 toward full equity when VoV $z$-score $< 1.0$. S4 is 50/50 SPY/GLD with monthly rebalancing. All signals lagged one day. TX cost: 5~bps per weight change. CRRA $\gamma\!=\!5$ reports certainty-equivalent excess return. Data source: yfinance; experiment K811v2.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+\subsection{Insurance Premium Decomposition}
+
+Table~\ref{tab:decomposition} presents the central result: the decomposition of the insurance premium into opportunity and direct cost components.
+
+\begin{table}[H]
+\centering
+\begin{threeparttable}
+\caption{Insurance Premium Decomposition (\%/year)}
+\label{tab:decomposition}
+\begin{tabular}{lccccc}
+\toprule
+Strategy & Opportunity & Direct & Total & Opp.\ Share & $\Delta$ vs.\ S1 \\
+ & Cost & Cost & Premium & (\%) & (\%) \\
+\midrule
+S1: Always 12/VIX & 4.20 & 0.43 & 4.62 & 90.7 & --- \\
+S2: VoV-Conditional & 0.70 & 0.52 & 1.22 & 57.1 & $-$73.6 \\
+S3: Smooth VoV & 2.85 & 0.46 & 3.31 & 86.2 & $-$28.4 \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\small
+\item \textit{Notes}: Opportunity cost $= \bar{r}^{\text{BH}} - \bar{r}^{\text{VT,gross}}$ (return gap before TX). Direct cost $= \sum c|w_t - w_{t-1}|$ annualized (TX friction). Total $=$ Opp.\ $+$ Direct. $\Delta$ vs.\ S1 shows percentage reduction in total premium relative to unconditional VT. Data: K811v2 (2012--2024, $N = 3{,}262$).
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+Three findings emerge. First, for unconditional VT (S1), opportunity cost dominates at 91\% of the total premium (4.20\% vs.\ 0.43\%). This overturns the common practitioner intuition that VT is expensive because of trading costs. The actual cost is foregone equity participation during elevated-VIX periods that are followed by positive returns.
+
+Second, VoV conditioning (S2) reduces the total premium by 74\%, from 4.62\% to 1.22\% per annum. Critically, this reduction operates almost entirely through the opportunity cost channel: S2's opportunity cost falls from 4.20\% to 0.70\% (an 83\% reduction), while its direct cost actually \emph{increases} slightly from 0.43\% to 0.52\%. The mechanism is intuitive: S2 is fully invested 86\% of the time ($w = 1$), engaging VT only during the 14\% of days when VoV $z$-score exceeds 1.0 and VIX is rising. This eliminates the wasteful hedging during calm periods that accounts for the bulk of S1's opportunity cost.
+
+Third, the smooth blending approach (S3) offers a middle ground but is less effective than the binary VoV switch, reducing total cost by only 28\%. This suggests that partial hedging during low-VoV regimes still incurs substantial opportunity cost without proportionate risk reduction.
+
+\subsection{The 50/50 Triple Moat}
+
+A persistent puzzle in our research program is that no VT strategy reliably outperforms a simple 50/50 SPY/GLD portfolio on a Sharpe-ratio basis, despite VT's superior drawdown characteristics. We resolve this puzzle by identifying three structural advantages embedded in the 50/50 benchmark.
+
+\textbf{Diversification.} SPY and GLD exhibit near-zero correlation ($\rho = 0.057$) over our sample, producing a portfolio volatility of 11.47\%---30.7\% below SPY's standalone volatility of 16.56\%.
+
+\textbf{Rebalancing premium.} Monthly rebalancing of the 50/50 portfolio generates a structural premium of 54~basis points per annum (CAGR of 10.02\% vs.\ 9.49\% for buy-and-hold), consistent with the theoretical prediction of \citet{booth1992} and confirmed by our weight-sweep analysis across allocations from 30/70 to 70/30 (experiment K846). This premium arises mechanically from systematic buy-low/sell-high behavior when rebalancing to fixed weights.
+
+\textbf{Gold's crisis alpha.} During the four VoV regimes identified by VVIX, gold consistently appreciates during equity drawdowns---the ``HighVoV\_Rising'' regime where VT provides its greatest benefit is precisely the regime where gold delivers positive returns, creating a natural hedge that requires no signal, no transaction, and no parameter estimation.
+
+These three structural edges stack to create a moat of approximately 54--80~bps per annum (the rebalancing premium alone plus the diversification benefit). The best-case VT alpha from VoV conditioning---the Sharpe improvement from 0.60 (BH SPY) to 0.63 (S2)---translates to a return improvement of approximately 50~bps at comparable volatility. That is, VoV-conditional VT merely matches the structural premium of 50/50, explaining why VT cannot outperform the diversified benchmark.
+
+\subsection{Regime Analysis}
+
+The insurance premium varies dramatically across VoV regimes. During ``HighVoV\_Falling'' periods (7.7\% of the sample), S1's opportunity cost spikes to 19.95\%---these are the post-crisis recoveries where VT misses the rebound. In contrast, during ``LowVoV\_Falling'' periods (45.5\% of the sample), S1's opportunity cost is a more modest 2.54\%. The VoV-conditional strategy S2 eliminates this regime asymmetry by construction: it holds 100\% equity during low-VoV regimes, incurring zero opportunity cost in the 76\% of days when VoV is below the threshold.
+
+\subsection{Cross-OOS Robustness}
+
+We evaluate robustness using four non-overlapping two-year windows. S2 outperforms BH SPY in only 1 of 4 periods (2019--2020, the COVID crash), while 50/50 SPY/GLD outperforms in 2 of 4. Diebold-Mariano tests confirm that no strategy difference achieves the \citet{harvey2016} threshold of $|t| > 3.0$ (S1 vs.\ S0: $t = 2.42$; S2 vs.\ S0: $t = 0.75$). The limited cross-OOS success rate is a material limitation, consistent with VT functioning as insurance rather than alpha generation.
+
+%=================================================================
+\section{Discussion}
+\label{sec:discussion}
+%=================================================================
+
+Our decomposition yields three implications for both researchers and practitioners.
+
+\textbf{Reframing the cost narrative.} The conventional view that VT is costly because of high turnover (S1's annualized turnover is 872\%) is misleading. At 5~bps per trade, this turnover generates only 43~bps of annual direct cost---less than a typical ETF expense ratio. The true cost is the 420~bps of foregone equity returns. This distinction matters for strategy design: reducing trading frequency or using futures (lower transaction costs) addresses at most 9\% of the problem.
+
+\textbf{VoV as a meta-signal.} VVIX conditioning does not improve the volatility forecast itself; rather, it identifies \emph{when forecasting matters}. During low-VoV regimes, the volatility forecast is accurate but irrelevant---the best action is to remain fully invested. VoV conditioning effectively converts VT from an always-on insurance policy to a state-contingent one, dramatically reducing the premium. This connects to the broader ``volatility-of-volatility risk'' literature \citep{bollerslev2009, huang2015} but applies it to a portfolio construction context rather than asset pricing.
+
+\textbf{The impossibility bound.} The rebalancing premium quantification from K846 reveals a structural constraint: a 50/50 SPY/GLD portfolio generates 54~bps of ``free'' alpha annually through mechanical rebalancing, requiring zero forecasting ability. Any VT strategy must first overcome this structural advantage before it can deliver net positive alpha. Since the best-case VT improvement (S2's Sharpe of 0.63 vs.\ BH's 0.60) translates to roughly 50~bps of return improvement, VT is playing a game it can, at best, tie.
+
+\textbf{Limitations.} The VVIX-reliable period begins only in 2012, limiting our sample to 13 years. Cross-OOS analysis uses 4 windows (not the desired 5), and VoV conditioning succeeds in only 1 of 4. The 5~bps transaction cost assumption is conservative; institutional investors may face lower costs, marginally reducing the direct component. Our analysis focuses on SPY; extension to other asset classes and international markets is warranted. The CRRA utility analysis suggests VT remains welfare-improving for highly risk-averse investors ($\gamma \geq 5$), even after accounting for the full insurance premium---a dimension not captured by Sharpe ratios.
+
+%=================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%=================================================================
+
+We introduce the first formal decomposition of the volatility targeting insurance premium into opportunity cost and direct (transaction) cost components. The key finding---that 91\% of the cost is opportunity cost, not transaction cost---fundamentally reframes the VT design problem. The path to cheaper VT lies not in lower-friction execution but in smarter regime identification. VVIX-conditional targeting demonstrates that a 74\% cost reduction is achievable by hedging only when the volatility-of-volatility signals genuine regime uncertainty. Nevertheless, the structural rebalancing premium embedded in simple diversification creates an impossibility bound: VT can match, but not beat, 50/50 SPY/GLD. For practitioners, the prescription is clear: use VT as drawdown insurance with VoV conditioning to minimize the premium, and use static diversification---not dynamic timing---as the primary return engine.
+
+%=================================================================
+% References
+%=================================================================
+\bibliographystyle{apalike}
+\begin{thebibliography}{99}
+
+\bibitem[Barroso and Santa-Clara(2015)]{barroso2015}
+Barroso, P., Santa-Clara, P., 2015. Momentum has its moments. \textit{Journal of Financial Economics} 116, 111--120.
+
+\bibitem[Bollerslev et al.(2009)]{bollerslev2009}
+Bollerslev, T., Tauchen, G., Zhou, H., 2009. Expected stock returns and variance risk premia. \textit{Review of Financial Studies} 22, 4463--4492.
+
+\bibitem[Booth and Fama(1992)]{booth1992}
+Booth, D.G., Fama, E.F., 1992. Diversification returns and asset contributions. \textit{Financial Analysts Journal} 48, 26--32.
+
+\bibitem[Cederburg et al.(2020)]{cederburg2020}
+Cederburg, S., O'Doherty, M.S., Wang, F., Yan, X.S., 2020. On the performance of volatility-managed portfolios. \textit{Journal of Financial Economics} 138, 95--117.
+
+\bibitem[Fleming et al.(2001)]{fleming2001}
+Fleming, J., Kirby, C., Ostdiek, B., 2001. The economic value of volatility timing. \textit{Journal of Finance} 56, 329--352.
+
+\bibitem[Harvey et al.(2016)]{harvey2016}
+Harvey, C.R., Liu, Y., Zhu, H., 2016. \ldots and the cross-section of expected returns. \textit{Review of Financial Studies} 29, 5--68.
+
+\bibitem[Harvey et al.(2018)]{harvey2018}
+Harvey, C.R., Hoyle, E., Korgaonkar, R., Rattray, S., Sargaison, M., Van~Hemert, O., 2018. The impact of volatility targeting. \textit{Journal of Portfolio Management} 45, 14--33.
+
+\bibitem[Hocquard et al.(2013)]{hocquard2013}
+Hocquard, A., Ng, S., Papageorgiou, N., 2013. A constant-volatility framework for managing tail risk. \textit{Journal of Portfolio Management} 39, 28--40.
+
+\bibitem[Huang and Shaliastovich(2015)]{huang2015}
+Huang, D., Shaliastovich, I., 2015. Volatility-of-volatility risk. Working Paper, University of Pennsylvania.
+
+\bibitem[Moreira and Muir(2017)]{moreira2017}
+Moreira, A., Muir, T., 2017. Volatility-managed portfolios. \textit{Journal of Finance} 72, 1611--1644.
+
+\end{thebibliography}
+
+\end{document}

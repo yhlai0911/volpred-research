@@ -259,7 +259,22 @@
 - [ ] Gemini 審查
 - [ ] `/citation-verifier` 引用驗證
 
-**未來可能的第四篇：VIX Sufficient Statistic**
+**第四篇：The True Cost of Volatility Targeting — Insurance Premium Decomposition**
+- `paper/vt-insurance-cost/` (FRL target)
+- 目標：Finance Research Letters（< 2500 words, $200 submission fee）
+- 核心貢獻：首次將 VT 保險費分解為 opportunity cost (91%) + direct cost (9%)
+- 基於：K811v2 + K846 (rebalancing premium)
+- 文獻缺口：Moreira & Muir (2017), Harvey et al. (2018) 都沒做 cost decomposition
+- 狀態：[ ] 草稿中
+
+**第五篇：When Volatility Targeting Crowds — An ABM Tipping Point Analysis**
+- `paper/vt-crowding-abm/` (FRL target)
+- 核心貢獻：首次用 ABM 量化 VT 擁擠臨界點 (30-50%)
+- 基於：K827
+- 文獻缺口：ECB (2020) 定性描述但無量化門檻
+- 狀態：[ ] 待 Paper 4 後啟動
+
+**未來可能的第六篇：VIX Sufficient Statistic**
 - 23+ 個指標全被 VIX 吸收的 comprehensive study
 - 適合 Journal of Financial Economics 或 Review of Financial Studies
 - 需要更多跨市場驗證（目前只有 US + Taiwan）
