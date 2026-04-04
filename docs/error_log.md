@@ -283,3 +283,4 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **Cron prompt 要具體到操作步驟**，不能只是「繼續研究」這種模糊指令
 - **流程完整性**：實驗 → 記錄 → 衍生方向 → archive → 下一個。少一步就會斷鏈
 | 2026-04-04 | Badge 不一致（Feed vs 文章頁） | Feed 顯示「一般讀者」但文章內頁顯示「milestone」或「general」 | 三層問題：(1) supabase_sync category 預設 "milestone" (2) 前端 Feed 用 tags、文章頁用 category 兩個不同 data source (3) force-full sync 用舊代碼沒修正既有資料 | (1) sync 改為 classify_audience() (2) 前端統一用 resolveBadge(tags, audience) 函式 (3) force-full sync 重跑 |
+| 2026-04-04 | Paper pages=None | 新論文頁數不顯示 | papers.py 用 subprocess 呼叫 python3 import fitz，但 pymupdf 只在系統 Python 有，不在 .venv。except:pass 靜默吞錯。之前靠碰巧系統 PATH 先找到系統 python3 才成功。 | 把 pymupdf 加入 pyproject.toml（uv add pymupdf），確保 .venv 內也有。教訓：所有 import 的套件必須在 pyproject.toml 宣告，不能靠系統安裝。 |
