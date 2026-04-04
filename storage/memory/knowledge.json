@@ -19733,5 +19733,22 @@
     "data_source": "yfinance SPY 2006-2025, OOS 2023-2025 (502 days)",
     "timestamp": "2026-04-03T07:54:17.303140+00:00",
     "phase": "K826"
+  },
+  {
+    "experiment_id": "K850",
+    "title": "K850: HAR-RV VaR台灣 — 悖論：HAR預測好54%但VaR更差，GJR+CF仍是冠軍",
+    "content": "[提出: research_program.md, 執行: Claude] K850用TAIFEX 5-min RV的HAR-RV做0050.TW VaR。悖論發現：HAR QLIKE 0.101 vs GJR 0.220(好54%, DM t=-5.60)但1% VaR: HAR+CF 17/450 Red FAIL vs GJR+CF 2/481 Green PASS。原因：VaR取決於殘差尾部行為而非sigma精度。GJR的in-model標準化殘差捕捉尾部結構更好(CF修正後VaR -3.83% vs HAR -2.52%——GJR更保守52%)。5% VaR: HAR+HistSim Trinity PASS(26/450)。結論：vol prediction quality ≠ VaR quality。GJR+CF仍是0050.TW 1% VaR唯一冠軍。K849的HAR優勢限於預測精度，不延伸到風險管理。",
+    "tags": [
+      "HAR-RV",
+      "VaR",
+      "Cornish-Fisher",
+      "GJR-GARCH",
+      "0050.TW",
+      "paradox",
+      "prediction≠risk"
+    ],
+    "data_source": "TAIFEX TX tick 5-min RV + yfinance 0050.TW, OOS 2023-2025",
+    "timestamp": "2026-04-04T06:50:18.251452+00:00",
+    "phase": "K850"
   }
 ]
