@@ -24,6 +24,42 @@ Enforce academic quality standards when writing or revising finance papers targe
 - Checking if a claim is appropriately stated
 - Adding new empirical results to the paper
 
+## Writing Style (最高優先，違反即退稿)
+
+### Academic Prose — 不可違反
+
+**學術論文必須用連續的學術散文體（academic prose）撰寫。**
+
+| 禁止 | 正確 |
+|------|------|
+| 段落內用 **粗體標題** 分隔（如 `\textbf{First}`, `\textbf{Second}`） | 用過渡句串聯（"First, we... Second, the evidence suggests..."） |
+| 用 bullet points / itemize 列舉結果 | 用完整句子在段落內敘述 |
+| 用編號列表呈現發現（1. 2. 3.） | 用學術連接詞（Furthermore, Moreover, In contrast） |
+| 像簡報一樣用標題+數字堆砌 | 像講故事一樣用因果邏輯串聯 |
+
+**唯一例外**：Methodology section 的模型定義可用 itemize，Introduction 的 contribution 列舉可用 `\textbf{First}...`。
+
+**檢查方式**：搜尋 `\textbf{` 在 Results/Discussion 段落裡 → 如果有，改寫為散文。
+
+**範例**：
+
+❌ 錯誤：
+```
+\textbf{Finding 1.} HAR-RV dominates GJR (DM $t = -11.14$).
+\textbf{Finding 2.} The proxy ceiling compresses advantages by 4x.
+\textbf{Finding 3.} Night session accounts for 73.7\% of returns.
+```
+
+✅ 正確：
+```
+HAR-RV dominates GJR-GARCH in volatility prediction, with a QLIKE improvement
+of 66\% and a Diebold-Mariano $t$-statistic of $-11.14$. This superiority is
+partially obscured when evaluated under daily squared returns, which compress
+the advantage by a factor of four---a phenomenon we term the proxy ceiling.
+The economic significance is amplified by the finding that TAIFEX night session
+returns account for 73.7\% of total daily returns, suggesting that...
+```
+
 ## Core Principles (from Codex Review Lessons)
 
 ### 1. Claims Must Match Evidence Scope
