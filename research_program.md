@@ -428,7 +428,7 @@
 - [ ] **K849 衍生：SPY HAR-RV**：用 yfinance 5-min 數據（04/11 ETA）在 SPY 上重現 K849，驗證 proxy ceiling 是否跨資產通用
 - [ ] **K849 衍生：HAR-RV-Night 成分分析**：K848 發現夜盤 vol 57%。HAR 模型分開 RV_night 和 RV_day 做 regressors 是否更好（K849 Track B 初步驗證 R² 0.17→0.58）
 - [x] ~~K849 衍生：HAR-RV based VaR~~ → **K850 悖論**：HAR 預測好 54% 但 VaR 更差（17/450 vs GJR+CF 2/481）。**Better prediction ≠ better VaR。** GJR+CF 仍是 0050.TW 冠軍。
-- [ ] **K849 衍生：Realized GARCH**：Hansen, Huang & Shek (2012) 的 Realized GARCH 結合 GARCH + RV，可能比純 HAR 或純 GJR 更好
+- [x] ~~K849 衍生：Realized GARCH~~ → **K852 ★★ 部分解決悖論**。RealGARCH-Log+CF: Trinity PASS (3 viol) + Spearman 0.790（最佳 rank ordering）。唯一在預測和 VaR 兩維度都好的模型。
 - [ ] **K847 衍生：Paper 2 更新**：Taiwan VT 論文需加入 K844（期貨 VT）+ K847（gap 拆解）+ K849（HAR-RV）的重大發現
 - [ ] **K848 衍生：Jump Dynamics**：74.9% 天有 jump（K848），jump 頻率/大小能否預測隔日 vol？
 
