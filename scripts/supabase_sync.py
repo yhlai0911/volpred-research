@@ -359,18 +359,11 @@ def _sync_article_tags(slug: str, tags: list[str]) -> None:
             return
         tag_map = _get_tag_ids(tag_names)
 
-        # Upsert article_tags
-        at_rows = []
+        # Upsert article_tags — one by one (batch POST silently fails on conflicts)
         for tag_name in tag_names:
             tag_id = tag_map.get(tag_name)
             if tag_id:
-                at_rows.append({"article_id": article_id, "tag_id": tag_id})
-        if at_rows:
-            ok = _post("article_tags", at_rows)
-            if not ok:
-                # Fallback: insert one by one
-                for row in at_rows:
-                    _post("article_tags", row)
+                _post("article_tags", {"article_id": article_id, "tag_id": tag_id})
     except Exception as e:
         print(f"  article_tags sync error for {slug}: {e}")
 
