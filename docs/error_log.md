@@ -284,3 +284,5 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **流程完整性**：實驗 → 記錄 → 衍生方向 → archive → 下一個。少一步就會斷鏈
 | 2026-04-04 | Badge 不一致（Feed vs 文章頁） | Feed 顯示「一般讀者」但文章內頁顯示「milestone」或「general」 | 三層問題：(1) supabase_sync category 預設 "milestone" (2) 前端 Feed 用 tags、文章頁用 category 兩個不同 data source (3) force-full sync 用舊代碼沒修正既有資料 | (1) sync 改為 classify_audience() (2) 前端統一用 resolveBadge(tags, audience) 函式 (3) force-full sync 重跑 |
 | 2026-04-04 | Paper pages=None | 新論文頁數不顯示 | papers.py 用 subprocess 呼叫 python3 import fitz，但 pymupdf 只在系統 Python 有，不在 .venv。except:pass 靜默吞錯。之前靠碰巧系統 PATH 先找到系統 python3 才成功。 | 把 pymupdf 加入 pyproject.toml（uv add pymupdf），確保 .venv 內也有。教訓：所有 import 的套件必須在 pyproject.toml 宣告，不能靠系統安裝。 |
+| 2026-04-04 | 文章圖片 404 | K838/K840 文章圖表顯示破圖 | Agent 呼叫 upload_chart(path, "custom.png") 但第二參數是 bucket 不是 filename，導致上傳到錯誤 bucket。另外 worktree agent 的圖片路徑和主分支不同。 | 新增 remote_filename 參數到 upload_chart()。重新上傳 3 張圖。310/310 恢復。 |
+| 2026-04-04 | 論文 abstract 空白 | Paper 4/5 在前端無摘要 | _count_tex_metrics 只提取 pages+citations 不提取 abstract。update_paper_full 不傳 abstract。 | 加入 LaTeX abstract 自動提取（regex）+ 傳給 upsert。7 篇論文全更新。 |
