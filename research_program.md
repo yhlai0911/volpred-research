@@ -429,7 +429,13 @@
 - [ ] **K849 衍生：HAR-RV-Night 成分分析**：K848 發現夜盤 vol 57%。HAR 模型分開 RV_night 和 RV_day 做 regressors 是否更好（K849 Track B 初步驗證 R² 0.17→0.58）
 - [x] ~~K849 衍生：HAR-RV based VaR~~ → **K850 悖論**：HAR 預測好 54% 但 VaR 更差（17/450 vs GJR+CF 2/481）。**Better prediction ≠ better VaR。** GJR+CF 仍是 0050.TW 冠軍。
 - [x] ~~K849 衍生：Realized GARCH~~ → **K852 ★★ 部分解決悖論**。RealGARCH-Log+CF: Trinity PASS (3 viol) + Spearman 0.790（最佳 rank ordering）。唯一在預測和 VaR 兩維度都好的模型。
-- [ ] **K847 衍生：Paper 2 更新**：Taiwan VT 論文需加入 K844（期貨 VT）+ K847（gap 拆解）+ K849（HAR-RV）的重大發現
+- [ ] **K847 衍生：Paper 2 更新（高優先）**：Taiwan VT 論文需加入：
+  - K844: TX 期貨 VT 空頭全勝（return 分解 73.7% 夜盤）
+  - K847: 隔夜 gap 61% 可交易（R²=0.83）
+  - K848/K849: 5-min RV 從 TAIFEX tick（proxy ceiling, HAR 勝 GJR t=-11.14）
+  - K850: HAR 預測好但 VaR 差（悖論）
+  - K852: RealGARCH-Log+CF 兩維度最佳
+  - 這些發現根本改變了 Paper 2 的貢獻和結論
 - [ ] **K848 衍生：Jump Dynamics**：74.9% 天有 jump（K848），jump 頻率/大小能否預測隔日 vol？
 
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
