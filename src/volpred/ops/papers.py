@@ -261,6 +261,11 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     )
     if abs_match:
         raw_abstract = abs_match.group(1).strip()
+        # Remove LaTeX comment lines (% ...)
+        lines = [l for l in raw_abstract.split("\n") if not l.strip().startswith("%")]
+        raw_abstract = "\n".join(lines)
+        # Remove \noindent, \medskip, \textbf{Keywords:}... and everything after
+        raw_abstract = re.split(r"\\textbf\{Keywords|\\medskip|\\textbf\{JEL", raw_abstract)[0]
         # Clean LaTeX commands for plain text display
         clean = re.sub(r"\\[a-zA-Z]+\{([^}]*)\}", r"\1", raw_abstract)
         clean = re.sub(r"\\[a-zA-Z]+", "", clean)
