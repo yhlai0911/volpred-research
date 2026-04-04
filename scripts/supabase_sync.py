@@ -328,7 +328,7 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         "audience": classify_audience(item),
         "phase": item.get("phase"),
         "status": item.get("status", "published"),
-        "category": item.get("category", "milestone"),
+        "category": item.get("category") or classify_audience(item),
         "proposer": extract_proposer(item),
         "author_id": "claude",
         "details": item.get("details"),
