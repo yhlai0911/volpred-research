@@ -19902,5 +19902,43 @@
     "category": "knowledge",
     "created_at": "2026-04-05T04:28:06.843669",
     "updated_at": "2026-04-05T04:28:06.843679"
+  },
+  {
+    "id": "K857",
+    "experiment_id": "K857",
+    "title": "K857: TSMC Revenue Vol 2026 Update — Event Day 1.23x Vol, VIX>30 Means 3.18% Absolute Move",
+    "content": "[提出: Claude, 執行: Claude] K857 updates K617 with 135 TSMC revenue events (2015-2026). Event day |ret| 0.999% vs 0.811% (1.23x, t=1.69 marginal p=0.093). REGIME INTERACTION: Low VIX event/pre ratio 1.53x, High VIX ratio 1.12x (baseline already elevated). VIX>=30 events (n=6): mean |ret|=3.18% (4x normal), includes extreme +9.99% (2025-04-10 tariff rebound). SURPRISE ASYMMETRY: positive surprises generate HIGHER vol (1.20% vs 0.79%) — good TSMC news moves markets more. TSMC amplification 2.18x vs 0050 (2.88x in high VIX). PREDICTION for April 10, 2026: if VIX stays >25, expect 0050 |ret| ~1.6-3.2%. Post-event vol crush pattern observed (1.19% post vs 1.42% pre in high VIX).",
+    "tags": [
+      "TSMC",
+      "earnings",
+      "event_study",
+      "0050.TW",
+      "Taiwan",
+      "VIX_regime",
+      "vol_crush",
+      "practical"
+    ],
+    "data_source": "yfinance (0050.TW, 2330.TW, ^VIX), 2015-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T05:25:37.088048",
+    "updated_at": "2026-04-05T05:25:37.088057"
+  },
+  {
+    "id": "K858",
+    "experiment_id": "K858",
+    "title": "K858: Congressional Trading Alpha NULL — Aggregate Portfolio CAGR 10.83% vs SPY 11.45%, t=-0.15",
+    "content": "[提出: 會員 ideahub.everything, 執行: Claude] K858 tests whether aggregate U.S. congressional stock trades generate alpha. Data: 13,401 trades (2020-2022), 165 House members, 2,061 tickers. STRATEGY: Monthly top-10 net-bought tickers (equal weight), using disclosure_date+1 (realistic, no lookahead). RESULT: CAGR 10.83% vs SPY 11.45% (-0.61%), Sharpe 0.502 vs 0.488, MDD -35.2% vs -36.2%. t-stat=-0.153 (p=0.879), far from Harvey 3.0. EVEN WITH PERFECT INFO (transaction_date+1): CAGR 10.07%, STILL underperforms. Disclosure lag median 27 days but is NOT the bottleneck. BUY/SELL ASYMMETRY: most-sold tickers (+11.41%) outperform most-bought (+10.83%) — aggregate buying is not a positive signal. Top traders: Gottheimer ($112M), DelBene ($99M), Pelosi ($80M). CONCLUSION: Aggregate congressional portfolio provides no alpha over SPY. Individual members (e.g., Pelosi) may have alpha but aggregation destroys it.",
+    "tags": [
+      "congressional_trades",
+      "alternative_data",
+      "member_qa",
+      "null_result",
+      "STOCK_Act",
+      "alpha"
+    ],
+    "data_source": "data/congressional_trades_house.csv + yfinance, 2020-2022",
+    "category": "knowledge",
+    "created_at": "2026-04-05T06:51:37.547225",
+    "updated_at": "2026-04-05T06:51:37.547235"
   }
 ]
