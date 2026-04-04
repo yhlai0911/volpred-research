@@ -321,6 +321,7 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
                 content = report["content"]
     if not content:
         content = item.get("description") or ""
+    from datetime import datetime, timezone as _tz
     row = {
         "slug": item.get("id", ""),
         "title": item.get("title", ""),
@@ -334,6 +335,7 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         "author_id": "claude",
         "details": item.get("details"),
         "published_at": item.get("published_at"),
+        "updated_at": item.get("updated_at") or datetime.now(_tz.utc).isoformat(),
     }
     ok = _post("articles", row)
     if ok:
@@ -541,9 +543,16 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
         last_feed_sync = state.get("feed_mtime", 0)
         if feed_mtime > last_feed_sync:
             last_sync_ts = state.get("articles_last_ts", "")
-            # Sync articles published/updated after last sync, OR drafts with created_at after last sync
+            # Sync articles published/updated/modified after last sync
+            # Compare max(published_at, created_at, updated_at) to catch content edits
+            def _article_latest_ts(item: dict) -> str:
+                return max(
+                    item.get("published_at") or "",
+                    item.get("created_at") or "",
+                    item.get("updated_at") or "",
+                )
             to_sync = [item for item in feed
-                       if (item.get("published_at") or item.get("created_at") or "") > last_sync_ts
+                       if _article_latest_ts(item) > last_sync_ts
                        or not last_sync_ts]
             ok = 0
             for item in to_sync:
@@ -558,7 +567,7 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             state["feed_mtime"] = feed_mtime
             if feed:
                 state["articles_last_ts"] = max(
-                    (item.get("published_at") or item.get("created_at") or "") for item in feed
+                    _article_latest_ts(item) for item in feed
                 )
         else:
             counts["articles"] = 0  # skipped, unchanged

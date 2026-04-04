@@ -12,6 +12,7 @@ del _sys, _Path, _PROJECT_ROOT
 from .content import (
     build_platform_cycle_summary,
     cleanup_test_post,
+    edit_article,
     ensure_article_local_backups,
     get_content_release_settings,
     publish_milestone_article,

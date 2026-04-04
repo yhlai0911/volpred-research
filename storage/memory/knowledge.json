@@ -19818,5 +19818,47 @@
     "data_source": "TAIFEX TX tick + yfinance 0050.TW, 450 common OOS days",
     "timestamp": "2026-04-04T14:18:56.384555+00:00",
     "phase": "K854"
+  },
+  {
+    "id": "K851",
+    "experiment_id": "K851",
+    "title": "K851: Jump Dynamics — Formal BNS Test Shows Only 10.1% Jump Days, No Significant OOS Improvement (DM t=1.10 NS)",
+    "content": "[提出: Claude, 執行: Claude] K851 tests whether TAIFEX TX1 jump components (Barndorff-Nielsen & Shephard 2004 bipower variation, formal z-test α=0.001) predict next-day RV in log-HAR framework. Data: 2,107 days (2017-2026 night session era), OOS: 633 days (2023-2026). CRITICAL FINDING: Formal BNS test reduces jump detection from naive 74.9% (K848) to only 10.1% — most apparent jumps are sampling noise. Jumps contribute only 2.5% of total RV. Jump AC(1)≈0, no clustering (ratio 1.13x). 4 models: HAR-RV (QLIKE 0.121), HAR-CJ (0.122, worse), HAR-CJ-A (0.116, +4.57% but DM t=1.10 NS), HAR-CJ-Night (0.127, worse). Night session=62.5% of jump variance. Continuous component R²=0.694 in log-space. All jump coefficients IS insignificant (max |t|=1.65). CONCLUSION: Consistent with ABD (2007) for US equities — separating jumps from continuous variation adds minimal forecasting value in HAR. The continuous component captures 97.5% of variance with strong long-memory. Negative jumps show suggestive but insignificant asymmetry. Taiwan futures conform to the international pattern.",
+    "tags": [
+      "jump_dynamics",
+      "HAR-RV",
+      "bipower_variation",
+      "BNS_test",
+      "TAIFEX",
+      "Taiwan",
+      "null_result",
+      "high_frequency",
+      "ABD2007"
+    ],
+    "data_source": "TAIFEX TX1 tick data (Dropbox), 5-min bars",
+    "category": "knowledge",
+    "created_at": "2026-04-05T01:31:28.356176",
+    "updated_at": "2026-04-05T01:31:28.356191"
+  },
+  {
+    "id": "K852b",
+    "experiment_id": "K852b",
+    "title": "K852b: Regime-Dependent HAR — Monthly Component Flips Sign at High VIX, but OOS NULL (DM all NS)",
+    "content": "[提出: Claude, 執行: Claude] K852b tests whether HAR-RV coefficients change across VIX regimes for TAIFEX TX1. Data: 2,107 days (2017-2026), OOS: 843 days. STRUCTURAL FINDING: HAR coefficients are strongly regime-dependent. Daily beta rises 0.40→0.62 as VIX increases. Monthly beta FLIPS SIGN to -0.086 in high VIX (mean-reversion). ST-HAR (γ=0.05, c=25.7) confirms: low-VIX state is weekly+monthly dominated (long-memory), high-VIX state is daily-dominated (reactive). ST-HAR improves 21.5% in high-VIX subsample (QLIKE 0.299 vs 0.380) but only 75 days, DM t=1.56 NS. OOS overall: standard HAR-RV still best QLIKE (0.1187). No regime model passes Harvey. Consistent with K783c: regime structure is real but estimation noise offsets benefit. IMPLICATION FOR PAPER 2: the coefficient instability is a reportable structural finding even though it doesn't improve forecasting.",
+    "tags": [
+      "HAR-RV",
+      "regime",
+      "VIX",
+      "TAIFEX",
+      "Taiwan",
+      "null_result",
+      "structural_finding",
+      "coefficient_instability",
+      "high_frequency"
+    ],
+    "data_source": "TAIFEX TX1 tick + yfinance VIX",
+    "category": "knowledge",
+    "created_at": "2026-04-05T02:34:44.471914",
+    "updated_at": "2026-04-05T02:34:44.471927"
   }
 ]

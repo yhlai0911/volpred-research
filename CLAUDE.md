@@ -320,6 +320,7 @@ uv run volpred ops publish-milestone --title "標題" --description "Markdown �
 uv run volpred ops release-pool-by-settings --storage-dir storage
 uv run volpred ops send-article-notification mile_xxxxxxxx
 uv run volpred ops send-daily-digest --target-date 2026-03-21
+uv run volpred ops edit-article mile_xxxxxxxx --title "新標題" --content "新內容" --audience research
 uv run volpred ops unpublish mile_xxxxxxxx
 uv run volpred ops cleanup-post mile_xxxxxxxx --hard-delete
 

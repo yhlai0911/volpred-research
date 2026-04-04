@@ -436,7 +436,9 @@
   - K850: HAR 預測好但 VaR 差（悖論）
   - K852: RealGARCH-Log+CF 兩維度最佳
   - 這些發現根本改變了 Paper 2 的貢獻和結論
-- [ ] **K848 衍生：Jump Dynamics**：74.9% 天有 jump（K848），jump 頻率/大小能否預測隔日 vol？
+- [x] ~~K848 衍生：Jump Dynamics~~ → **K851 完成 NULL**。正式 BNS 檢定（α=0.001）只有 10.1% 天有顯著 jump（naive 74.9% 多為噪音）。Jump 佔 RV 2.5%，AC1≈0。HAR-CJ-A 數值最佳（QLIKE +4.57%）但 DM t=1.10 NS。與 ABD (2007) 一致。
+- [ ] **K851 衍生：Day/Night Continuous Decomposition**：K851 確認 jump 無用，但 night session 佔 jump variance 62.5%。HAR 模型分開 C_day 和 C_night 做 regressors 可能比 jump decomposition 更有效（K849 Track B 初步 R² 0.17→0.58）
+- [x] ~~K852b: Regime-Dependent HAR~~ → **結構性發現但 OOS NULL**。HAR daily beta 隨 VIX 升高（0.40→0.62），monthly beta 在高 VIX 翻號（-0.086=均值回歸）。ST-HAR 高 VIX 改善 21.5% 但 DM t=1.56 NS（僅 75 天）。OOS 標準 HAR-RV 仍最佳。與 K783c 一致：regime 結構真實但不可被穩健利用。**Paper 2 可報告係數不穩定性作為結構性發現。**
 
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
 → 已完成項目詳見 `docs/research_archive/completed_session_2026-04-03.md`

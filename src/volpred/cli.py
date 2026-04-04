@@ -726,6 +726,26 @@ def ops_paper_migrate_storage(paper_id: str, file_path: str | None) -> None:
     _print_json({"action": "paper_migrate_storage", "item": paper})
 
 
+@ops.command("edit-article")
+@click.argument("pub_id")
+@click.option("--title", default=None, help="New title")
+@click.option("--content", default=None, help="New content (markdown)")
+@click.option("--audience", default=None, help="New audience: general, research, daily, member_qa")
+@click.option("--tags", default=None, help="JSON array of tags, e.g. '[\"研究\",\"VIX\"]'")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_edit_article(pub_id: str, title: str | None, content: str | None, audience: str | None, tags: str | None, storage_dir: str) -> None:
+    """Edit an existing article (title/content/tags/audience) and sync to Supabase."""
+    import json as _json
+    from volpred.ops import edit_article
+
+    parsed_tags = _json.loads(tags) if tags else None
+    result = edit_article(pub_id, title=title, content=content, audience=audience, tags=parsed_tags, storage_dir=storage_dir)
+    if not result["found"]:
+        raise click.ClickException(f"Article not found: {pub_id}")
+    console.print(f"[green]Edited[/green] {pub_id} (synced={result.get('synced')})")
+    _print_json(result)
+
+
 @ops.command("unpublish")
 @click.argument("pub_id")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
