@@ -19767,5 +19767,22 @@
     "data_source": "TAIFEX TX1 tick 3424 days, OOS 2020-2024 (1457 days)",
     "timestamp": "2026-04-04T08:33:02.646346+00:00",
     "phase": "K851"
+  },
+  {
+    "experiment_id": "K852",
+    "title": "K852: Realized GARCH — 部分解決K849/K850悖論，RGL+CF兩維度都好",
+    "content": "[提出: K849衍生, 執行: Claude] K852用Realized GARCH結合RV測量和GARCH結構。RealGARCH-Log+CF：Trinity PASS(3 violations=GJR+CF)且Spearman 0.790(最佳rank ordering)。HAR仍是QLIKE冠軍(0.101 vs RGL 0.209)但RGL在兩個維度都top-3。GJR被RealGARCH-Simple超16% QLIKE(但DM t=1.91 NS)。關鍵insight：GARCH殘差結構(CF tail correction)對VaR至關重要——HAR殘差kurtosis 4.0太厚，violations過多。RealGARCH兩全其美：RV信息→更好預測，GARCH殘差→更好VaR。台灣vol模型最佳實踐更新：預測用HAR-RV，VaR用GJR+CF或RealGARCH-Log+CF，兩維度最佳=RealGARCH-Log+CF。",
+    "tags": [
+      "Realized GARCH",
+      "HAR-RV",
+      "GJR",
+      "VaR",
+      "Cornish-Fisher",
+      "paradox resolution",
+      "0050.TW"
+    ],
+    "data_source": "TAIFEX TX tick 5-min RV + yfinance 0050.TW, OOS 2023-2024",
+    "timestamp": "2026-04-04T08:45:51.815385+00:00",
+    "phase": "K852"
   }
 ]
