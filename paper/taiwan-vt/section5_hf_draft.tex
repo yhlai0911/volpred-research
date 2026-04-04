@@ -54,6 +54,61 @@ Jump ($J_t$) & 0.81 & 0.27 & 0.39 & 21.9 & 546.4 & 4.5 \\
 An important caveat is that TX futures prices and 0050.TW ETF prices are not identical: the futures contract trades with a time-varying basis, and the leverage embedded in futures amplifies returns relative to the cash index. We therefore use $\text{RV}^{(\text{total})}$ from TX as a \textit{proxy} for the latent variance of the underlying TAIEX, acknowledging that basis risk introduces a source of measurement error that is not present when RV is computed directly from the traded asset. For the GJR-GARCH models, we continue to use 0050.TW daily returns, maintaining consistency with Sections~\ref{sec:leverage}--\ref{sec:vt}.
 
 
+\subsection{Return Decomposition: Night Session Dominance}
+\label{sec:hf_return}
+
+The TAIFEX night session (15:00--05:00) overlaps with U.S.\ market trading hours, creating a channel through which global information is reflected in Taiwan futures prices before the cash equity market opens. Using the full TX tick-level data (2017--2026, $N = 2{,}152$ days), we decompose the total daily TX return into three components: night session return (15:00 to 05:00), overnight gap (05:00 to 08:45), and day session return (08:45 to 13:45).
+
+Table~\ref{tab:return_decomp} reports that the night session accounts for \textbf{73.7\%} of the total daily return, with the overnight gap contributing 15.6\% and the day session only 10.5\%. This decomposition reveals that the majority of price discovery for Taiwan equities occurs \textit{outside} the cash market's trading hours. The TX futures VT strategy ($8.63/\text{VIX}$ applied to TX full-day returns) achieves a Sharpe ratio of 1.465 versus 1.370 for the equivalent 0050.TW strategy, with cross-OOS analysis showing TX outperforms in 3 of 4 sub-periods---particularly during bear markets (2022--2023: TX Sharpe 0.706 vs.\ 0050.TW 0.374). Transaction costs for TX futures are approximately 97\% lower than for 0050.TW ETF trades.
+
+\begin{table}[H]
+\centering
+\caption{TX Futures Return Decomposition (2017--2026)}
+\label{tab:return_decomp}
+\begin{tabular}{lcccc}
+\toprule
+Component & Time Window & Return Share & Correlation w/ 0050 gap \\
+\midrule
+Night Session & 15:00--05:00 & 73.7\% & 0.777 \\
+Overnight Gap & 05:00--08:45 & 15.6\% & --- \\
+Day Session & 08:45--13:45 & 10.5\% & --- \\
+\midrule
+Total & 15:00--13:45 & 100\% & 0.946 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Overnight Gap Decomposition: 61\% Is Tradable}
+\label{sec:hf_gap}
+
+A key finding from Appendix~\ref{app:tz} is that approximately 78\% of the 0050.TW close-to-close return is absorbed by the overnight gap, which was previously considered untradable. Using TAIFEX tick data, we decompose this gap into five time slots: Gap~A (13:45--15:00, no futures trading), Slot~B (15:00--21:30, pre-U.S.\ session), Slot~C (21:30--04:00, U.S.\ trading hours), Slot~D (04:00--05:00, pre-close), and Gap~E (05:00--08:45, no trading).
+
+Table~\ref{tab:gap_decomp} shows that the three tradable slots (B+C+D) account for \textbf{61.3\%} of the overnight gap variance and 69.2\% of its mean return, with a Sharpe ratio of 1.008. Slot~C (U.S.\ hours) is the largest single contributor at 39.8\% of variance and exhibits the highest correlation with SPY returns ($r = 0.641$). A regression of the stock gap on all five slot returns yields $R^2 = 0.83$, indicating that TAIFEX tick data explain 83\% of the previously opaque overnight gap.
+
+\begin{table}[H]
+\centering
+\caption{Overnight Gap Slot Decomposition ($N = 2{,}151$ days)}
+\label{tab:gap_decomp}
+\begin{tabular}{llccc}
+\toprule
+Slot & Time Window & Variance Share & Tradable? & Corr(SPY) \\
+\midrule
+Gap A & 13:45--15:00 & 5.1\% & No & --- \\
+Slot B & 15:00--21:30 & 16.2\% & Yes & 0.097 \\
+Slot C & 21:30--04:00 & 39.8\% & Yes & 0.641 \\
+Slot D & 04:00--05:00 & 5.3\% & Yes & --- \\
+Gap E & 05:00--08:45 & 23.6\% & No & --- \\
+\midrule
+Tradable (B+C+D) & & 61.3\% & & \\
+Non-tradable (A+E) & & 28.7\% & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Slot~B (pre-U.S.) is surprisingly important, contributing 35.6\% of the mean gap return despite preceding U.S.\ market opening. This suggests significant price discovery occurs in the TAIFEX night session even before the primary information source (U.S.\ equities) begins trading, consistent with Asian traders processing overnight news and global futures movements. These findings challenge the conventional view that overnight gaps are untradable risk and suggest that institutional investors should consider TAIFEX night session futures as a tool for real-time risk management.
+
+
 \subsection{HAR-RV Versus GARCH: Forecast Comparison}
 \label{sec:hf_har}
 
