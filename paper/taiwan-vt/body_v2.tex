@@ -321,7 +321,12 @@ We propose a \textit{hybrid} conditional leverage rule that combines a local vol
 This hybrid strategy improves the Sharpe ratio by +0.162 over the base $8.63/\text{VIX}$ strategy with zero maximum drawdown penalty, passing stringent statistical validation: the Harvey $t$-statistic is 4.79 (well above the $t > 3.0$ threshold of \citealt{harvey2016}), all 18 out of 18 cross-validated out-of-sample periods produce positive improvements, and 100\% of 10,000 bootstrap replications confirm a positive Sharpe increment. Robustness is confirmed on the 0056.TW high-dividend ETF ($t = 5.67$), which excludes TSMC and has a different sector composition, ruling out single-stock dependence. An important caveat emerges from cross-market analysis: conditional leverage is beneficial only for assets with low-to-moderate baseline volatility. In higher-volatility markets, the leverage episodes coincide too frequently with subsequent volatility spikes, eroding the benefit. This market-specificity constraint implies that the hybrid leverage rule should not be applied uniformly across all VT strategies but should be conditioned on the baseline volatility characteristics of the target asset.
 
 
-% ─── Section 5: Macroeconomic Indicators (renumbered from Section 6) ─────────────────────────
+% ─── Section 5: High-Frequency Volatility Evidence from TAIFEX ─────────────────────────
+
+\input{section5_hf_draft}
+
+
+% ─── Section 6: Macroeconomic Indicators (renumbered) ─────────────────────────
 
 \section{Macroeconomic Indicators for Taiwan Volatility}
 \label{sec:macro}
