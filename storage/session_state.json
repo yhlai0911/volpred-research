@@ -1,13 +1,18 @@
 {
-  "saved_at": "2026-04-04T14:50:56.328355+00:00",
-  "reason": "session complete: 32 exp, 40 art, 3 papers all submission-ready",
+  "saved_at": "2026-04-04T15:21:18.203929+00:00",
+  "reason": "session truly final: 32 exp, 40 art, 3 papers, platform hardened",
   "experiments": 32,
   "articles": 40,
-  "index": 4373,
-  "papers": {
-    "paper2": "v3 60pp, 3H+5M+4Codex all resolved, citations verified",
-    "paper4": "v1.2 13pp, submission-ready",
-    "paper5": "v1.2 14pp, submission-ready"
-  },
-  "next": "SPY HAR-RV (~04/07), TSMC 04/10, Paper 1+3 updates with TAIFEX findings"
+  "index": 4375,
+  "platform_fixes": [
+    "10 except:pass eliminated",
+    "pymupdf installed for page count",
+    "tag sync one-by-one (batch fix)",
+    "abstract auto-extraction from LaTeX",
+    "upload_chart remote_filename param",
+    "badge category default fix",
+    "article backups 89% recovered"
+  ],
+  "papers": "2(v3 60pp) + 4(v1.2 13pp) + 5(v1.2 14pp) all submission-ready",
+  "next": "SPY HAR-RV ~04/07, TSMC 04/10, FeedBrowser badge proper fix"
 }
