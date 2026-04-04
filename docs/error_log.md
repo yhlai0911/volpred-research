@@ -282,3 +282,4 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **「沒事做」是不存在的** — research_program.md 是北極星，永遠有未完成項目
 - **Cron prompt 要具體到操作步驟**，不能只是「繼續研究」這種模糊指令
 - **流程完整性**：實驗 → 記錄 → 衍生方向 → archive → 下一個。少一步就會斷鏈
+| 2026-04-04 | Badge 不一致（Feed vs 文章頁） | Feed 顯示「一般讀者」但文章內頁顯示「milestone」或「general」 | 三層問題：(1) supabase_sync category 預設 "milestone" (2) 前端 Feed 用 tags、文章頁用 category 兩個不同 data source (3) force-full sync 用舊代碼沒修正既有資料 | (1) sync 改為 classify_audience() (2) 前端統一用 resolveBadge(tags, audience) 函式 (3) force-full sync 重跑 |
