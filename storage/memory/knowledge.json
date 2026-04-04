@@ -19801,5 +19801,22 @@
     "data_source": "TAIFEX TX tick + yfinance 0050.TW, OOS 2020-2025 (1448 days)",
     "timestamp": "2026-04-04T13:44:52.053489+00:00",
     "phase": "K853"
+  },
+  {
+    "experiment_id": "K854",
+    "title": "K854: Common Sample VaR — Paradox CONFIRMED, 不是 sample artifact",
+    "content": "[提出: Codex H2, 執行: Claude] K854統一450天OOS比較7模型。HAR QLIKE 0.100 vs GJR 0.205(DM t=-4.98好51%)但HAR VaR全FAIL(9-17 violations)。GJR+CF和RGL+CF都3 violations Trinity PASS。GJR+Skewed-t 9 violations FAIL。結論：prediction-VaR paradox不是sample truncation artifact而是genuine methodological difference——HAR殘差寬尾導致VaR校準差。Codex H2 resolved。",
+    "tags": [
+      "common sample",
+      "VaR",
+      "paradox",
+      "HAR-RV",
+      "GJR-GARCH",
+      "ablation",
+      "Codex H2"
+    ],
+    "data_source": "TAIFEX TX tick + yfinance 0050.TW, 450 common OOS days",
+    "timestamp": "2026-04-04T14:18:56.384555+00:00",
+    "phase": "K854"
   }
 ]
