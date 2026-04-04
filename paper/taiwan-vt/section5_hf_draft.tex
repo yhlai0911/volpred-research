@@ -236,7 +236,7 @@ Interestingly, the day-session and night-session annualized volatilities are now
 
 The preceding subsections establish that HAR-RV is a significantly better volatility predictor than GJR-GARCH when evaluated against 5-minute RV. A natural expectation is that this superior prediction should translate into superior risk management---specifically, more accurate Value-at-Risk estimates. We now show that this expectation is dramatically wrong.
 
-Table~\ref{tab:var_paradox} reports VaR backtest results at the 1\% level over the common out-of-sample period 2023--2024 ($N = 481$ for GARCH-based methods; $N = 450$ for HAR-based methods, reflecting the 22-day burn-in for the monthly RV component). GJR-GARCH combined with the Cornish-Fisher expansion (GJR+CF) passes the full ``Trinity'' of VaR backtests: Kupiec unconditional coverage ($p = 0.14$), Christoffersen independence ($p = 1.00$), and Basel Green Zone (2 violations in 250 days). It produces only 2 violations in 481 days (0.42\%), with an average 1\% VaR of $-3.83\%$.
+Table~\ref{tab:var_paradox} reports VaR backtest results at the 1\% level over the common out-of-sample period 2023--2024 ($N = 481$ for GARCH-based methods; $N = 450$ for HAR-based methods, reflecting the 22-day burn-in for the monthly RV component). GJR-GARCH combined with the Cornish-Fisher expansion (GJR+CF) passes the full ``Trinity'' of VaR backtests: Kupiec unconditional coverage ($p = 0.37$), Christoffersen independence ($p = 1.00$), and Basel Green Zone (3 violations in 250 days). It produces only 3 violations in 481 days (0.62\%), with an average 1\% VaR of $-3.83\%$.
 
 By contrast, every HAR-RV-based VaR method fails catastrophically at the 1\% level. HAR+Normal produces 15 violations in 450 days (3.3\%), HAR+CF produces 17 violations (3.8\%), and even the best HAR variant---HAR+HistSim (historical simulation of standardized residuals)---produces 9 violations (2.0\%). All three are in the Basel Red or Yellow Zone, and both HAR+Normal and HAR+CF fail the Kupiec test ($p < 0.001$).
 
@@ -248,7 +248,7 @@ By contrast, every HAR-RV-based VaR method fails catastrophically at the 1\% lev
 \toprule
 Method & QLIKE & Viol.\ Rate & $N_{\text{viol}}$ & Kupiec $p$ & Basel & Trinity \\
 \midrule
-GJR+CF & 0.220 & 0.42\% & 2/481 & 0.14 & Green & PASS \\
+GJR+CF & 0.220 & 0.62\% & 3/481 & 0.37 & Green & PASS \\
 GJR+Normal & 0.220 & 1.87\% & 9/481 & 0.09 & Yellow & FAIL \\
 HAR+HistSim & 0.101 & 2.00\% & 9/450 & 0.06 & Yellow & FAIL \\
 HAR+Normal & 0.101 & 3.33\% & 15/450 & $<$0.001 & Red & FAIL \\
@@ -260,7 +260,7 @@ HAR+CF & 0.101 & 3.78\% & 17/450 & $<$0.001 & Red & FAIL \\
 \end{flushleft}
 \end{table}
 
-This result---HAR-RV QLIKE 54\% better than GJR-GARCH, yet HAR produces 8.5$\times$ more VaR violations---constitutes a prediction--VaR paradox. The resolution lies in two distinct mechanisms:
+This result---HAR-RV QLIKE 54\% better than GJR-GARCH, yet HAR produces nearly 6$\times$ more VaR violations---constitutes a prediction--VaR paradox. The resolution lies in two distinct mechanisms:
 
 \textbf{(1) Dimension mismatch.} HAR-RV predicts \textit{realized volatility}, which aggregates variance over all intraday intervals including the night session. GJR-GARCH predicts the conditional variance of \textit{close-to-close returns}, which is the relevant quantity for VaR defined over the close-to-close holding period. Because the night session contributes 43\% of total RV (Section~\ref{sec:hf_night}), HAR's RV forecast is systematically larger than the realized close-to-close variance, but the excess is concentrated in non-overlapping hours. The VaR violation occurs when $|r_t^{\text{c2c}}| > \hat{\sigma}_t \times |q_{0.01}|$, where $r_t^{\text{c2c}}$ is the close-to-close return. Converting HAR's $\text{RV}^{(\text{total})}$ forecast to a close-to-close $\sigma$ estimate requires knowledge of the night-to-day volatility ratio, which is time-varying (Section~\ref{sec:hf_night}), introducing a source of systematic error that inflates the violation rate.
 
