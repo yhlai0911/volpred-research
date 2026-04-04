@@ -19784,5 +19784,22 @@
     "data_source": "TAIFEX TX tick 5-min RV + yfinance 0050.TW, OOS 2023-2024",
     "timestamp": "2026-04-04T08:45:51.815385+00:00",
     "phase": "K852"
+  },
+  {
+    "experiment_id": "K853",
+    "title": "K853: Proxy Ceiling Ablation — HAR勝GJR即使在r²下(t=-5.14)，但r²壓縮優勢4倍",
+    "content": "[提出: Codex adversarial H1, 執行: Claude] K853固定sample/window只改evaluation target做ablation。結果：(A) r²: HAR勝GJR DM t=-5.14(proxy不翻轉排名！)(B) RV_day: HAR勝 t=-11.14(66%優勢)(C) RV_total: GJR勝 t=+4.02(HAR只訓練day RV不含夜盤)。結論：proxy ceiling不是翻轉排名而是壓縮優勢——r²下HAR優勢16% vs RV_day下66%(4倍壓縮)。Paper 2需修正：從'proxy reverses rankings'改為'proxy severely mutes the signal'。Condition C反轉是target mismatch非proxy問題。",
+    "tags": [
+      "proxy ceiling",
+      "ablation",
+      "HAR-RV",
+      "GJR-GARCH",
+      "r²",
+      "RV",
+      "causal"
+    ],
+    "data_source": "TAIFEX TX tick + yfinance 0050.TW, OOS 2020-2025 (1448 days)",
+    "timestamp": "2026-04-04T13:44:52.053489+00:00",
+    "phase": "K853"
   }
 ]
