@@ -366,9 +366,13 @@ def _sync_article_tags(slug: str, tags: list[str]) -> None:
             if tag_id:
                 at_rows.append({"article_id": article_id, "tag_id": tag_id})
         if at_rows:
-            _post("article_tags", at_rows)
-    except Exception:
-        pass  # Non-critical
+            ok = _post("article_tags", at_rows)
+            if not ok:
+                # Fallback: insert one by one
+                for row in at_rows:
+                    _post("article_tags", row)
+    except Exception as e:
+        print(f"  article_tags sync error for {slug}: {e}")
 
 
 def sync_risk_forecast(data: dict) -> bool:
