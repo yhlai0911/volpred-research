@@ -641,5 +641,23 @@
       "技術教訓：64K ticks/day 的數據不應只壓縮成 4 個價格。用 concurrent.futures 平行讀取 3400+ 檔案只需 30-60 秒。數據粒度決定發現深度。"
     ],
     "timestamp": "2026-04-03T18:20:46.586408+00:00"
+  },
+  {
+    "id": "E47",
+    "title": "E47: FRL Paper Writing Pipeline Lessons (Paper 4+5)",
+    "experiments": [
+      "K827v2",
+      "K827v3",
+      "Paper4",
+      "Paper5"
+    ],
+    "lessons": [
+      "Paper 4 教訓：Codex adversarial review 比學術審查更嚴格。學術審查找格式/引用問題，Codex 找邏輯矛盾（impossibility bound 自相矛盾）和計算標籤錯誤（CRRA）。兩者互補不可替代。",
+      "Paper 5 教訓：Codex 發現的流動性混淆（H1）是致命設計缺陷——K827v3 修正後臨界點從 50% 移到 70%。教訓：ABM 實驗必須嚴格控制混淆變量（固定 noise traders）。這個問題人工審查可能不會發現。",
+      "FRL 寫作流程：Draft → 學術審查 → 引用驗證 → Codex adversarial → 修訂 → 再審。每步都抓到前步遺漏的問題。2500 字限制迫使極度精煉——每個數字都必須有意義。",
+      "「量化而非發現」的語言修正（Paper 5 H3）是重要的學術誠信教訓。ABM 的結論是模型假設的推論，不是獨立發現。這個區別在 FRL 短文中特別重要。",
+      "Paper 4 的 91/9 分解被 Codex 質疑為「算術恆等式」——修正為「empirical magnitude not previously documented」是正確的定位。貢獻不在數學而在量化。"
+    ],
+    "timestamp": "2026-04-04T05:51:12.413209+00:00"
   }
 ]
