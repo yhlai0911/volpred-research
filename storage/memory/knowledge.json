@@ -20695,5 +20695,22 @@
     "data_source": "yfinance (SPY/QQQ/0050.TW + VIX)",
     "created_at": "2026-04-05T20:43:21.529593",
     "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405210707_k894",
+    "experiment_id": "K894",
+    "title": "K894: Multiplicative Structure Matters — MF-GJR beats GJR-X(VIX) with Harvey PASS",
+    "content": "[提出: Claude, 執行: Claude] GJR-X(VIX) additive: DM t=-2.39 Harvey FAIL. MF-GJR multiplicative: DM t=-3.15 Harvey PASS. MF-GJR vs GJR-X(VIX): DM t=-3.01 Harvey PASS. MCS eliminates GJR/GJR-X, only MF-GJR/MF-GARCH survive. Proves multiplicative decomposition σ²=exp(θ₀+θ₁×logVIX)×g_t adds structural value beyond simply including VIX as additive regressor. GJR-X(VIX²) also Harvey FAIL (t=-2.24).",
+    "tags": [
+      "MF-GJR",
+      "GJR-X",
+      "VIX",
+      "multiplicative",
+      "Harvey_PASS",
+      "structure"
+    ],
+    "data_source": "yfinance (SPY + VIX)",
+    "created_at": "2026-04-05T21:07:07.419408",
+    "type": "experiment_result"
   }
 ]
