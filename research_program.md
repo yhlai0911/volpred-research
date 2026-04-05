@@ -329,7 +329,7 @@
 **開放議題：**
 - [ ] VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）
 - [ ] 台灣 5-min 數據 HAR-RV（0050.TW 35 天，ETA 2026 Q2）
-- [ ] **金融股早期預警系統**：K757 發現 Fubon→TSMC Granger (F=6.11)。可建立金融股壓力指標作為 TSMC vol 早期預警
+- [x] ~~**金融股早期預警系統**~~ → **K887 完成**：FSI Granger-causes 0050 vol (F=9.64)，OOS DM t=8.92 Harvey PASS（+13% R² beyond VIX）。但策略 overlay DM t=-1.70 NS。Strong predictor, weak strategy signal。與 K697 一致。
 
 **論文**：第二篇 `paper/taiwan-vt/main.tex`（34 頁）涵蓋台灣 VT + TZ 資訊傳遞
 
@@ -461,7 +461,7 @@
 - [ ] 「HAR ceiling」驗證 — Los Flamingos 2025
 - [ ] Financial Innovation 2025 review — realized volatility forecasting 綜述
 - [ ] RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025
-- [ ] Multiplicative Volatility Factor (MVF) — ScienceDirect 2025, J. Econometrics
+- [x] ~~Multiplicative Volatility Factor (MVF)~~ → **K889 進行中**
 - [ ] VOLARE 平台（HAR/HAR-Q/MEM/AMEM 標準化比較框架）— arXiv:2602.19732
 - [ ] Multi-Transformer Vol Forecast — Engineering App AI 2024
 

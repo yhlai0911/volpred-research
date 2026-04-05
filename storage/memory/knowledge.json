@@ -20530,5 +20530,119 @@
     "category": "knowledge",
     "created_at": "2026-04-05T15:30:23.495847",
     "updated_at": "2026-04-05T15:30:23.495856"
+  },
+  {
+    "id": "know_20260405183609_k884",
+    "experiment_id": "K884",
+    "title": "K884: HAR Day/Night Decomposition NULL — Separating day/night RV regressors hurts OOS",
+    "content": "[提出: Claude, 執行: Claude] TAIFEX TX tick. HAR-DN (6 regressors) WORSE than standard HAR (QLIKE 0.574 vs 0.415). K849 IS R2 improvement was overfitting. PRG Extended best (QLIKE 0.230, vs GJR DM t=4.68 Harvey PASS).",
+    "tags": [
+      "HAR",
+      "day_night",
+      "TAIFEX",
+      "null_result",
+      "PRG"
+    ],
+    "data_source": "TAIFEX TX tick (volume-selected, 2017-2025)",
+    "created_at": "2026-04-05T18:36:09.652573",
+    "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405184021_k886",
+    "experiment_id": "K886",
+    "title": "K886: PRG on 0050.TW Daily — DM t=5.27 Harvey PASS, overnight share 46.1%",
+    "content": "[提出: User, 執行: Claude] PRG Extended beats GJR for 0050.TW (QLIKE 0.784 vs 0.981, DM t=5.27 Harvey PASS). Cross-recursion confirmed (PRG vs Separate DM t=-4.51 PASS). Overnight variance share 46.1% (highest among daily-freq assets), reflecting US session captured in Taiwan overnight gap. PRG is only model passing both Kupiec+CC at 1% and 5%. Consistent with cross-market pattern: higher overnight share → stronger PRG advantage. 6th market for PRG paper.",
+    "tags": [
+      "PRG",
+      "0050.TW",
+      "Taiwan",
+      "session_decomposition",
+      "VaR"
+    ],
+    "data_source": "yfinance (0050.TW, clean_tw50_data applied)",
+    "created_at": "2026-04-05T18:40:21.656672",
+    "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405184504_k887",
+    "experiment_id": "K887",
+    "title": "K887: Taiwan FSI Early Warning — Strong Predictor (DM t=8.92) but Weak Strategy Signal (t=-1.70 NS)",
+    "content": "[提出: Claude, 執行: Claude] Built Financial Stress Index from 4 TW financial HCs (Fubon/Cathay/CTBC/Mega). FSI Granger-causes 0050 vol (F=9.64). OOS: VIX+FSI R²=0.404 vs VIX-only 0.275, DM t=8.92 Harvey PASS. FSI contribution increases in crises (+23.4% at high VIX). But VT strategy overlay: DM t=-1.70 NS. MDD improves -13.1%→-10.3% but at CAGR cost. Consistent with K697: vol prediction ≠ strategy alpha.",
+    "tags": [
+      "Taiwan",
+      "FSI",
+      "early_warning",
+      "financial_stocks",
+      "Granger",
+      "0050.TW"
+    ],
+    "data_source": "yfinance (2881.TW/2882.TW/2891.TW/2886.TW/0050.TW)",
+    "created_at": "2026-04-05T18:45:04.866769",
+    "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405185119_k888",
+    "experiment_id": "K888",
+    "title": "K888: Congressional Contrarian NULL — Neither copy nor reverse works",
+    "content": "[提出: 會員yihao.lai, 執行: Claude] 14,127 House trades, 46 tickers. Copy: -0.294%/trade t=-1.81 NS. Contrarian: -0.147% t=-0.91 NS. Large-trade: -0.100% t=-0.25 NS. 28-day disclosure lag makes signals stale. Consistent with Eggers & Hainmueller (2013).",
+    "tags": [
+      "congressional_trading",
+      "contrarian",
+      "null_result",
+      "member_question"
+    ],
+    "data_source": "data/congressional_trades_house.csv + yfinance",
+    "created_at": "2026-04-05T18:51:19.292159",
+    "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405190344_k889",
+    "experiment_id": "K889",
+    "title": "K889: MF-GJR Beats GJR for SPY (DM t=-3.30 Harvey PASS, QLIKE -6.08%)",
+    "content": "[提出: Claude, 執行: Claude] Multiplicative Vol Factor: σ²=τ_t×g_t where τ_t=exp(θ₀+θ₁×VIX) is long-run, g_t is GJR short-run. SPY: MF-GJR QLIKE improvement -6.08% vs GJR, DM t=-3.30 Harvey PASS. MCS eliminates GJR. QQQ: t=-2.95 borderline. 0050.TW: NS (t=-0.09). VIX captures 77-94% of log-variance. Short-run g_t still clusters (AC1=0.87-0.95). VaR 1% fails under Normal (need Student-t). Key: multiplicative structure + daily VIX response outperforms additive GARCH-MIDAS (K526 was NS). Needs cross-OOS validation.",
+    "tags": [
+      "MVF",
+      "multiplicative",
+      "GARCH",
+      "VIX",
+      "SPY",
+      "Harvey_PASS"
+    ],
+    "data_source": "yfinance (SPY/QQQ/0050.TW + VIX)",
+    "created_at": "2026-04-05T19:03:44.355265",
+    "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405191529_k890",
+    "experiment_id": "K890",
+    "title": "K890: Path Signatures NULL — Depth-2 features add nothing to HAR-RV",
+    "content": "[提出: Gemini #2, 執行: Claude] TAIFEX TX tick, volume-based rollover. HAR-Sig vs HAR-RV DM t=-1.74 NS. Sig features (S2_serial rho=-0.09, S2_area rho=-0.01) orthogonal to vol level. Sig-Only significantly WORSE (DM t=-3.07). More features = overfitting. HAR daily/weekly/monthly lags already capture persistence. Path shape info does not predict next-day variance in linear framework.",
+    "tags": [
+      "path_signatures",
+      "rough_volatility",
+      "HAR",
+      "TAIFEX",
+      "null_result"
+    ],
+    "data_source": "TAIFEX TX tick (volume-selected, 2017-2025)",
+    "created_at": "2026-04-05T19:15:29.756367",
+    "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405191601_k889b",
+    "experiment_id": "K889b",
+    "title": "K889b: MF-GJR Cross-OOS VALIDATED — 5/5 periods beat GJR, avg -4.24% QLIKE",
+    "content": "[提出: Claude, 執行: Claude] Cross-OOS validation of K889 MF-GJR on SPY across 5 non-overlapping 2yr periods (2009-10, 2011-12, 2015-16, 2019-20, 2023-24). MF-GJR beats GJR 5/5 (exceeds 3/5 threshold). Avg QLIKE improvement -4.24% (std 2.20%). P3 (2015-16) Harvey PASS t=-4.69. Others consistent but 2yr windows lack power. MF-GARCH also 4/5. Spearman: MF-GJR 0.385 vs GJR 0.331. Result is robust across regimes (post-GFC, Euro crisis, China/oil, COVID, AI boom).",
+    "tags": [
+      "MVF",
+      "cross_OOS",
+      "validation",
+      "SPY",
+      "Harvey_PASS",
+      "multiplicative"
+    ],
+    "data_source": "yfinance (SPY + VIX)",
+    "created_at": "2026-04-05T19:16:01.715429",
+    "type": "experiment_result"
   }
 ]
