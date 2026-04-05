@@ -20793,5 +20793,22 @@
     "data_source": "yfinance (SPY/VIX/GLD/TLT)",
     "created_at": "2026-04-06T00:13:00.205577",
     "type": "experiment_result"
+  },
+  {
+    "id": "know_20260406012128_k905",
+    "experiment_id": "K905",
+    "title": "K905: Quantile Vol Forecast NULL — CAViaR/QuantHAR do not beat FHS",
+    "content": "[提出: research_program, 執行: Claude] SPY OOS 2019-2026. CAViaR (GARCH-like quantile recursion): too conservative at 1% (0.88%), CC FAIL. QuantHAR: also CC FAIL. FHS best pinball loss at both 1% and 5%. Student-t only Trinity PASS at 1%. No method passes 5% Trinity (Basel Red). Direct quantile forecasting does not improve over GARCH+distributional approach.",
+    "tags": [
+      "quantile_regression",
+      "CAViaR",
+      "VaR",
+      "null_result",
+      "FHS",
+      "pinball"
+    ],
+    "data_source": "yfinance (SPY)",
+    "created_at": "2026-04-06T01:21:28.863423",
+    "type": "experiment_result"
   }
 ]
