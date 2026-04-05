@@ -422,7 +422,7 @@
 
 ### Gemini 第 3 次建議（2026-04-06）[提出: Gemini]
 - [ ] **G3-1: Diurnal Asymmetric Spillover Networks (DASN)**：拆解 K907 的 TCI 為「隔夜 gap 傳導」vs「日內擴散傳導」。用 TAIFEX tick + SPY 5-min 建立雙變量 lead-lag 網絡。測試 SPY→台灣的傳導是在開盤 gap 還是日內趨勢跟隨。學術：市場微結構 × 國際傳染
-- [ ] **G3-2: Quantile Connectedness & Tail Contagion (QDVC)**：用 Quantile VAR（τ=0.05, 0.5, 0.95）替代標準 VAR 計算 TCI。K910 證明 mean TCI 不是交易信號，但 Tail TCI（τ=0.95）可能預測尾部風險。若 Tail TCI 獨立於 VIX spike，代表「波動率傳染」（結構同步）而非僅「高波動」。橋接 K907（描述性）和 K908（風控）
+- [x] ~~G3-2: Quantile Connectedness~~ → **K911 完成**。Left-tail TCI(τ=0.05) ≈ Mean TCI (r=0.952)——尾部不能拯救 TCI。Right-tail TCI(τ=0.95) 獨立 (r=0.017) 但恆定 (~70%)。AUC=0.581（弱）。**TCI 無論哪個 quantile 都是結構性描述，不是交易信號。**
 - [ ] **G3-3: Fractional Jump-Diffusion MF-GJR**：用 power-law（fractional）kernel 替代線性 MIDAS。K906 的 50% 隔夜 gap 建模為 point-mass jump，日內 RV 為 fractionally integrated diffusion。不是找更多指標（K909 已確認無用），而是優化 VIX 信號的吸收方式。需理論推導
 
 ### 其他

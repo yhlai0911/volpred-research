@@ -20914,5 +20914,41 @@
     "category": "experiment",
     "confidence": 0.85,
     "created_at": "2026-04-05T18:31:16.387106+00:00"
+  },
+  {
+    "id": "know_20260405193442_k911",
+    "experiment_id": "K911",
+    "title": "K911: Quantile Connectedness — Left-Tail ≈ Mean (r=0.952), Right-Tail Independent (r=0.017)",
+    "content": "[提出: Gemini G3-2, 執行: Claude] Quantile VAR connectedness at τ=0.05/0.50/0.95 on 4 assets (SPY/QQQ/GLD/0050.TW), rolling 250d step=5. KEY: Left-tail TCI(τ=0.05) tracks Mean TCI(τ=0.50) almost perfectly (r=0.952) — hypothesis that tail is different from mean REJECTED for left tail. But Right-tail TCI(τ=0.95) IS independent (r=0.017 vs mean), averages ~70% (much higher), nearly constant across regimes. Tail TCI-VIX r=0.399 (moderate, 4-asset composition effect vs K907 9-asset r=0.001). Tail risk prediction weak: AUC=0.581 (marginal). COVID spike 2.0x for left/mean, but right-tail barely moved (1.07x). Negative logistic coefficient (counterintuitive: high TCI → fewer tail events, possibly because TCI rises AFTER onset). CONCLUSION: Looking at quantile tails does not rescue TCI as a trading signal. Left-tail ≈ mean. Right-tail is independent but constant (no variation to exploit). TCI remains a structural descriptor.",
+    "tags": [
+      "quantile connectedness",
+      "QVAR",
+      "TCI",
+      "tail risk",
+      "Gemini suggestion",
+      "null result"
+    ],
+    "data_source": "yfinance",
+    "category": "experiment",
+    "confidence": 0.8,
+    "created_at": "2026-04-05T19:34:42.407815+00:00"
+  },
+  {
+    "id": "know_20260405203119_k912",
+    "experiment_id": "K912",
+    "title": "K912: MF-GJR Regime Decomposition ★★ — Advantage Strongest in LOW VIX (t=-3.98), Not Crisis",
+    "content": "[提出: Claude, 執行: Claude] Decomposed MF-GJR vs GJR advantage across VIX regimes for SPY (OOS 2019-2026, 1821 days). SURPRISING: MF-GJR advantage strongest in LOW VIX (<15): DM t=-3.98 Harvey PASS, win rate 70.1%. Medium (15-25): t=-2.46, 50.9%. High (25-35): t=-1.43 NS, 45.1%. Crisis (>35): t=-0.04 NS, 33.9%. Point estimate largest in High VIX (+0.212) but variance too large. Tau contribution: 66%(Low)→71%(Med)→51%(High)→82%(Crisis). Rolling advantage positive 83.9% of time. Advantage-VIX correlation r=0.359. COVID showed largest event advantage (+0.280). INTERPRETATION: MF-GJR adds value by precisely capturing the tau/VIX relationship during calm periods when short-run g_t is stable. During crises, both models struggle equally with extreme returns. This is COUNTER-INTUITIVE but makes sense: multiplicative structure matters most when the long-run component is the dominant driver (low vol, stable g). Paper angle: MF-GJR is a precision model for normal times, not a crisis tool.",
+    "tags": [
+      "MF-GJR",
+      "regime",
+      "VIX",
+      "decomposition",
+      "low volatility",
+      "counter-intuitive"
+    ],
+    "data_source": "yfinance",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-05T20:31:19.219726+00:00"
   }
 ]
