@@ -1,0 +1,420 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries 學術審查報告}\\[0.5em]
+{\large The True Cost of Volatility Targeting: Decomposing the Insurance Premium\\into Opportunity and Transaction Components}\\[0.5em]
+{\normalsize 文件類型：期刊論文（目標：Journal of Portfolio Management / Financial Analysts Journal）}\\
+{\normalsize 審查日期：2026-04-05}\\
+{\normalsize 審查標準：嚴格（依 12 維度全面審查）}\\
+{\normalsize 審查者：Claude Opus 4.6}
+\end{center}
+
+\bigskip
+
+%=================================================================
+\section*{審查摘要}
+%=================================================================
+
+\begin{tabular}{ll}
+\textcolor{errorred}{\textbf{嚴重問題（須修正）}} & \textbf{5 項} \\
+\textcolor{warncolor}{\textbf{中度問題（建議修正）}} & \textbf{8 項} \\
+輕微問題（可選修正） & 7 項 \\
+整體評估 & \textbf{良}（核心貢獻清晰，但數據可追溯性與穩健性有重大疑慮） \\
+\end{tabular}
+
+\bigskip
+
+本論文提出一個直覺且有價值的分解框架：將波動率目標策略（VT）的保險溢價拆解為機會成本與直接成本兩個部分。91\% 機會成本的核心發現具有新穎性和實務啟示。然而，審查發現：(1) 敏感度分析數據與可追溯的實驗 JSON 嚴重不一致；(2) 交叉樣本外表現薄弱（1/4 窗口），但論文結論語氣過強；(3) 文獻回顧在 VoV 條件配置領域有顯著遺漏；(4) 50/50 基準比較跨越不同樣本期間但未充分說明。以下逐項說明。
+
+%=================================================================
+\section*{一、邏輯結構審查}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{整體評價：良好}}
+
+論文的邏輯鏈條大致清晰：
+
+\begin{enumerate}[leftmargin=2em]
+\item 研究動機（VT 有 return shortfall）→ 分解問題（shortfall = 機會成本 + 直接成本）→ 實證結果（91\% 是機會成本）→ 政策含義（應減少機會成本而非交易成本）。
+\item 引言的三個 ``this distinction matters'' 理由與後續各節良好對應。
+\item VoV 條件策略作為第二貢獻與分解框架有邏輯延續。
+\end{enumerate}
+
+\textcolor{warncolor}{\textbf{W1：50/50 基準分析在邏輯結構中的定位不明}}
+
+\begin{itemize}[leftmargin=2em]
+\item Section 3.3（50/50 結構優勢）佔了大量篇幅，但其角色是「支持性證據」（supporting evidence）還是「第三貢獻」？
+\item 論文引言宣稱「two contributions」，但 Section 3.3 讀起來像獨立的第三項貢獻。
+\item \textbf{建議}：明確定位 50/50 分析——若為補充性質，可精簡；若為核心貢獻之一，則引言應修改為 ``three contributions''。
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{W2：條件策略設計與分解框架之間缺乏預測性假說}}
+
+\begin{itemize}[leftmargin=2em]
+\item 論文先展示分解結果（機會成本主導），然後才引入 VoV 條件策略。但缺乏一個正式的假說連接兩者，例如：``If opportunity cost dominates, then conditioning on VoV should reduce cost primarily through the opportunity channel.''
+\item 目前的寫法讀起來像事後解釋而非假說驅動的研究設計。
+\item \textbf{建議}：在 Section 2.2 前加入明確的假說陳述。
+\end{itemize}
+
+%=================================================================
+\section*{二、研究動機審查}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{整體評價：優}}
+
+研究動機清晰、有說服力：
+\begin{itemize}[leftmargin=2em]
+\item 準確指出現有文獻將 VT 的 return shortfall 歸因於交易成本，但未分解其組成。
+\item 引用 Harvey et al.\ (2018) 和 Cederburg et al.\ (2020) 作為「交易成本為主要拖累」的代表性文獻。
+\item 三個 ``why this matters'' 理由層次分明（經濟本質、策略設計、實證謎題）。
+\end{itemize}
+
+無嚴重問題。
+
+%=================================================================
+\section*{三、文獻回顧完整性審查}
+%=================================================================
+
+\textcolor{warncolor}{\textbf{W3：VoV/Variance Risk Premium 文獻覆蓋不足}}
+
+\begin{itemize}[leftmargin=2em]
+\item 論文引用 Bollerslev et al.\ (2009) 和 Huang \& Shaliastovich (2015) 代表 VoV 文獻，但遺漏了以下重要文獻：
+  \begin{itemize}
+  \item Baltussen, van Bekkum, Grient (2018)：VoV timing for equity portfolios（直接競爭文獻）
+  \item Todorov (2010)：Variance risk premium decomposition（方法論基礎）
+  \item Drechsler \& Yaron (2011)：VoV in long-run risk models（理論基礎）
+  \item Bekaert \& Hoerova (2014)：VIX decomposition into risk and uncertainty（與 VoV 條件化直接相關）
+  \end{itemize}
+\item \textbf{建議}：至少加入 2--3 篇 VoV 在投資組合配置中的應用文獻，以展示本文在此文獻脈絡中的位置。
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{W4：缺乏與 Bongaerts et al.\ (2020) 的充分區分}}
+
+\begin{itemize}[leftmargin=2em]
+\item 引言第二段末簡短提及 Bongaerts et al.\ (2020) 的條件 VT，但區分不足：
+  \begin{itemize}
+  \item 本文 condition on VoV，Bongaerts condition on expected returns——這是不同的條件變數。
+  \item 本文 focus on cost decomposition，Bongaerts focus on Sharpe optimization——這是不同的目標函數。
+  \end{itemize}
+\item 目前只有一句話區分兩者，建議擴展為一段完整的比較。
+\end{itemize}
+
+輕微問題：
+
+\begin{itemize}[leftmargin=2em]
+\item Perchet et al.\ (2015)：bib entry 標記為 \texttt{perchet2016}，但實際發表年份為 2015。
+\item Huang \& Shaliastovich (2015) 仍標示為 Working Paper——需確認是否已正式發表。
+\end{itemize}
+
+%=================================================================
+\section*{四、研究缺口與貢獻審查}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{整體評價：良好}}
+
+\begin{itemize}[leftmargin=2em]
+\item 貢獻一（分解框架）：合理且有價值。``while the decomposition is arithmetically straightforward, its empirical magnitude has not been previously documented'' 這個定位誠實。
+\item 貢獻二（VoV 條件化）：主張合理，但受限於 cross-OOS 1/4 成功率（見嚴重問題 E2）。
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{W5：``rebalancing premium'' 是否構成貢獻存在疑問}}
+
+\begin{itemize}[leftmargin=2em]
+\item 引言稱 ``as supporting evidence, we quantify the structural rebalancing premium''。但 Booth \& Fama (1992) 已提供理論框架，且 54 bps 的實證數字來自 K846（2006--2024），與主分析期間（2012--2024）不同。
+\item 這更像是一個已知現象的重新確認，而非新貢獻。
+\item \textbf{建議}：降低此項的貢獻宣稱強度，明確定位為 ``empirical confirmation'' 而非新發現。
+\end{itemize}
+
+%=================================================================
+\section*{五、模型設定審查}
+%=================================================================
+
+\textcolor{errorred}{\textbf{E1：VoV 條件規則的參數選擇缺乏理論依據}}
+
+\begin{itemize}[leftmargin=2em]
+\item $z > 1.0$ 的閾值選擇、5 天 VIX 變化方向的窗口選擇均缺乏理論基礎。
+\item 論文承認 ``the VoV conditioning rule has not been validated through nested out-of-sample testing''（Section 4），但閾值和方向過濾器的選擇理由完全未討論。
+\item 為什麼是 $z > 1.0$ 而不是 $z > 0.5$ 或 $z > 1.5$？為什麼是 5 天而不是 10 天或 20 天？
+\item 在腳注中提到「80/20 attribution has not been validated」——這意味著 VIX-rising 過濾器的邊際貢獻是估計值。
+\item \textbf{建議}：(a) 提供閾值選擇的敏感度分析（見 E3）；(b) 說明 5 天窗口的選擇理由（例如與 VIX 均值回歸半衰期的關係）。
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{W6：S3 Smooth VoV 策略的混合公式不夠直覺}}
+
+\begin{itemize}[leftmargin=2em]
+\item $w_t = w_t^{\text{VT}} + (1 - w_t^{\text{VT}}) \cdot \mathbb{1}(z_t^{\text{VoV}} < 1.0) \cdot 0.5$ 的 0.5 係數缺乏解釋。
+\item 為什麼 blend 50\% 而不是 25\% 或 75\%？這是任意選擇。
+\item \textbf{建議}：承認這是一個簡化設計，或提供敏感度分析。
+\end{itemize}
+
+%=================================================================
+\section*{六、方程式與推導審查}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{整體評價：良好——分解框架數學正確}}
+
+\begin{itemize}[leftmargin=2em]
+\item 方程 (1)--(3) 構成完整的會計恆等式：$\text{IP}_{\text{total}} = \text{IP}_{\text{opp}} + \text{IP}_{\text{direct}}$，數學上無誤。
+\item 方程 (4) 的 VoV $z$-score 定義清晰，expanding window 避免 look-ahead。
+\end{itemize}
+
+輕微問題：
+
+\begin{itemize}[leftmargin=2em]
+\item 方程 (3) 中的 $N$ 被定義為「years」，但內文 $N = 3{,}262$ 為交易日數。符號衝突。建議使用不同符號（如 $T$ 表年數、$N$ 表日數），或在方程 (3) 中改用 $T$ 且 $T = N/252$。
+\item 方程 (1) 使用 $\bar{r}$ 表示「annualized mean daily return」但 $\bar{r}$ 慣例上指 sample mean。建議使用 $\bar{r}_{\text{ann}}$ 或直接寫 CAGR。
+\item 12/VIX 規則中 VIX 是百分比（如 VIX = 20）還是小數（如 0.20）？需要明確定義。從 $w_t = \min(12/\text{VIX}_{t-1}, 1)$ 推斷 VIX 以百分比表示（VIX = 12 時 $w = 1$），但應明文說明。
+\end{itemize}
+
+%=================================================================
+\section*{七、研究方法審查}
+%=================================================================
+
+\textcolor{errorred}{\textbf{E2：Cross-OOS 結果（1/4 勝率）與結論強度不匹配}}
+
+\begin{itemize}[leftmargin=2em]
+\item Section 3.5 報告 S2 僅在 4 個非重疊窗口中的 1 個（2019--2020 COVID crash）打敗 BH SPY。DM test $|t| < 3.0$ 對所有策略對。
+\item 然而，結論部分（Section 5）寫道：``VVIX-conditional targeting \textbf{demonstrates} that a 74\% cost reduction is \textbf{achievable}''——語氣暗示 S2 是 validated result，而非 preliminary finding。
+\item Section 3.5 末段的保守聲明（``preliminary finding''、``fire insurance'' 類比）與結論的語氣不一致。
+\item \textbf{建議}：(a) 在結論中明確重申 1/4 cross-OOS 勝率的限制；(b) 將 ``demonstrates'' 改為 ``suggests'' 或 ``indicates in-sample''；(c) 在 Abstract 中加入 cross-OOS caveat。
+\end{itemize}
+
+\textcolor{errorred}{\textbf{E3：敏感度分析數據與可追溯 JSON 嚴重不一致}}
+
+\begin{itemize}[leftmargin=2em]
+\item Section 3.5 末段聲稱：``at thresholds of 0.5, 1.0, and 1.5, the opportunity cost share remains above 55\% in all cases (57\%, 57\%, and 62\%, respectively), and total premium reduction relative to unconditional VT ranges from 61\% to 79\%.''
+\item 但 \texttt{k811v2\_sensitivity\_sweep.json} 記錄的數據為：
+  \begin{itemize}
+  \item 閾值 0.5：opp share = \textbf{81.4\%}（非 57\%），total reduction = $-$30.5\%（非 $-$61\%）
+  \item 閾值 1.0：opp share = \textbf{85.0\%}（非 57\%），total reduction = $-$13.1\%（非 $-$74\%）
+  \item 閾值 1.5：opp share = \textbf{89.1\%}（非 62\%），total reduction = $-$8.5\%（非 $-$79\%）
+  \end{itemize}
+\item 原始審計報告（audit\_step1\_2.md）已標記這三個數字為 ``UNVERIFIABLE''。
+\item \textbf{這是嚴重的數據可追溯性問題}——論文中的數字無法從任何已記錄的實驗 JSON 再現。
+\item 可能原因：(a) 論文引用了不同版本的敏感度分析（例如早期 K811 的結果，而非 K811v2）；(b) 論文的 ``opp share'' 計算的是 S2 在不同閾值下的份額，而 JSON 記錄的是 S1 的份額——但即使如此數字仍不吻合。
+\item \textbf{建議}：(a) 立即重新執行閾值掃描，確保結果可追溯至 JSON；(b) 更正論文中的數字；(c) 如果 sweep JSON 的方法論與主分析不同，需要說明差異。
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{W7：DM test 使用需要更多細節}}
+
+\begin{itemize}[leftmargin=2em]
+\item DM test 的損失函數是什麼？對 portfolio strategies 而言，通常使用 squared return difference 或 utility-based loss。
+\item HAC bandwidth 選擇未說明。
+\item 使用 Harvey et al.\ (2016) $t > 3.0$ 門檻是否適用？Harvey threshold 是針對 cross-section of expected returns，不一定適用於 time-series strategy comparison。
+\item \textbf{建議}：明確說明 DM test 的實作細節（loss function、bandwidth selection、one-sided vs two-sided）。
+\end{itemize}
+
+%=================================================================
+\section*{八、資料與樣本審查}
+%=================================================================
+
+\textcolor{errorred}{\textbf{E4：K846 rebalancing premium 與主分析的樣本期間不一致}}
+
+\begin{itemize}[leftmargin=2em]
+\item 主分析（K811v2）覆蓋 2012--2024（13 年），但 rebalancing premium 54 bps 來自 K846（2006--2024，19 年）。
+\item 論文 Section 3.3 引用 54 bps 和 $\rho = 0.057$ 時，未明確說明這些數字來自更長的樣本。
+\item SPY-GLD correlation 在 2012--2024 子期間可能與 2006--2024 全樣本不同（2008 金融危機期間黃金行為異常）。
+\item 審計報告已標記此問題（FLAG 3, FLAG 4），但論文未修正。
+\item \textbf{建議}：(a) 在 2012--2024 期間重新計算 rebalancing premium 和相關係數；(b) 或在論文中明確說明數字來自 2006--2024 longer sample 並解釋為什麼使用不同期間。
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{W8：yfinance 作為數據來源的學術可接受性}}
+
+\begin{itemize}[leftmargin=2em]
+\item 論文聲稱 yfinance 數據 ``consistent with CRSP to within rounding precision''，但未提供比較證據。
+\item 頂級期刊通常要求 CRSP/Bloomberg/Datastream 等專業數據庫。
+\item yfinance 已知存在 adjusted close 的回溯修正問題（見 0050.TW 案例）。
+\item \textbf{建議}：(a) 提供 SPY yfinance vs CRSP 的比較統計（相關係數、最大偏差）；(b) 或使用 CRSP 數據並提供 yfinance replication code。
+\end{itemize}
+
+輕微問題：
+
+\begin{itemize}[leftmargin=2em]
+\item VVIX 2012 年起算的理由寫為 ``documented liquidity concerns''，但未引用具體文獻或 CBOE 公告。建議引用 CBOE 白皮書或相關研究。
+\item OOS 窗口（2023--2024）是最近的牛市期間，不包含任何重大回撤。這限制了 OOS 結論的普適性。
+\end{itemize}
+
+%=================================================================
+\section*{九、預期成果/結論合理性審查}
+%=================================================================
+
+\textcolor{errorred}{\textbf{E5：Abstract 和 Conclusion 的語氣超出證據支持範圍}}
+
+\begin{itemize}[leftmargin=2em]
+\item Abstract 寫道 ``VVIX-conditional targeting \ldots\ reduces total cost by 74\%''——未加任何限定詞。
+\item Conclusion 寫道 ``74\% cost reduction is achievable''——語氣暗示此為穩健結果。
+\item 然而 cross-OOS 僅 1/4 勝率，DM test 無統計顯著性（$|t| < 3.0$）。
+\item 論文自己在 Section 3.5 寫道 ``preliminary finding'' 和 ``may be sample-specific''——這些保守聲明應出現在 Abstract 和 Conclusion 中。
+\item \textbf{建議}：在 Abstract 加入 ``in-sample'' 或 ``full-sample'' 限定詞；在 Conclusion 重申 cross-OOS 限制。
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{W9：CRRA utility 報告方式不標準}}
+
+\begin{itemize}[leftmargin=2em]
+\item Table 1 報告 ``Mean CRRA $\gamma = 5$'' = 0.217，但 footnote 說明這是 ``mean CRRA utility of the wealth path (not certainty-equivalent)''。
+\item 這不是標準的效用比較方式。Certainty equivalent (CE) 才是可比較的數字。
+\item 此外，CRRA $\gamma = 5$ 的 utility 值取決於 wealth level 的絕對尺度——不同的初始投資金額會產生不同的 utility 值。
+\item \textbf{建議}：計算並報告 certainty equivalent return，或移除此指標。
+\end{itemize}
+
+%=================================================================
+\section*{十、引用規範審查}
+%=================================================================
+
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Perchet et al.\ (2015) vs \texttt{perchet2016}}：bib key 用 2016 但實際為 2015。雖不影響編譯，但 bib key 應與發表年一致。
+\item \textbf{Harvey 引用重複}：Harvey et al.\ (2016) 和 Harvey et al.\ (2018) 在內文不易區分。建議使用 Harvey, Liu, and Zhu (2016) vs Harvey, Hoyle, Korgaonkar et al.\ (2018)。
+\item \textbf{Huang \& Shaliastovich (2015)}：標示為 Working Paper。需確認是否已正式發表（Journal of Financial Economics, 2015 有一篇相關的 ``Expected Returns and Dividend Growth Rates Implied by Derivative Markets''，但 VoV risk 的 working paper 可能不同）。
+\item \textbf{CBOE (2014)}：White Paper 作為引用是可接受的（industry documentation），但建議補充 URL。
+\end{itemize}
+
+%=================================================================
+\section*{十一、參考文獻完整性}
+%=================================================================
+
+\textbf{正文引用 $\rightarrow$ 參考文獻}：15 個引用全部有對應的 bib entry。
+
+\textbf{參考文獻 $\rightarrow$ 正文引用}：15 篇參考文獻全部在正文中被引用，無孤兒文獻。
+
+\textcolor{warncolor}{\textbf{W10：缺少重要文獻}}
+
+\begin{itemize}[leftmargin=2em]
+\item Dreyer \& Hubrich (2019)：Volatility-managed portfolios across asset classes——直接比較 VT 在不同資產的表現。
+\item Barroso \& Maio (2023)：Volatility-managed portfolios in international markets。
+\item DeMiguel et al.\ (2009)：Optimal versus naive diversification——50/50 benchmarking 的理論基礎。
+\item Ilmanen (2011)：Expected Returns（rebalancing premium 的教科書處理）。
+\item 缺少任何 ``cost of hedging'' 或 ``insurance premium'' 的資產定價文獻（如 option-implied insurance premium 文獻），這些可以豐富分解框架的理論基礎。
+\end{itemize}
+
+%=================================================================
+\section*{十二、文字表述審查（學術散文、結果段禁止條列）}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{整體評價：良好}}
+
+\begin{itemize}[leftmargin=2em]
+\item 英文行文流暢，學術語調適當。
+\item Section 3 的結果以段落而非條列方式呈現，符合期刊規範。
+\item 術語使用一致（VT、VoV、insurance premium）。
+\end{itemize}
+
+輕微問題：
+
+\begin{itemize}[leftmargin=2em]
+\item Section 3.2 第一段開頭「Three findings emerge」用編號式寫法（First, Second, Third）是可接受的，但建議為每個 finding 提供更明確的主題句。
+\item ``apples-to-apples'' 出現 2 次（Sections 3.3 和 4）——口語化程度略高。
+\item ``free alpha''（Section 4, paragraph 3）——嚴格來說 rebalancing premium 不是 alpha（不需要 skill），建議改為 ``systematic premium'' 或 ``mechanical return''。
+\item ``smooth sailing''（Section 4, paragraph 2）——口語化，建議改為 ``low-volatility environments'' 或直接引用 Liu et al.\ (2019) 的原始用語。
+\end{itemize}
+
+%=================================================================
+\section*{具體問題清單}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{嚴重問題（必須修正）}}
+
+\begin{longtable}{p{0.5cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & 位置 & 說明 \\
+\midrule
+E1 & Sec 2.2 & VoV 條件規則的參數（$z > 1.0$、5 天窗口、0.5 混合係數）缺乏理論依據或敏感度分析。審查者無法判斷結果是否為特定參數組合的偶然結果。 \\
+\midrule
+E2 & Sec 3.5 / Sec 5 & Cross-OOS 1/4 勝率（僅 COVID 期間）與結論語氣（``demonstrates'', ``achievable''）不匹配。Abstract 缺少任何 cross-OOS caveat。 \\
+\midrule
+E3 & Sec 3.5 & 敏感度分析數字（opp share 57\%, 57\%, 62\%; reduction 61\%--79\%）\textbf{無法從 \texttt{k811v2\_sensitivity\_sweep.json} 再現}。JSON 顯示 opp share = 81\%--89\%，total reduction = $-$8.5\% 到 $-$30.5\%。這是數據可追溯性的根本問題。 \\
+\midrule
+E4 & Sec 3.3 & Rebalancing premium 54 bps（K846, 2006--2024）和 $\rho = 0.057$（K846, 2006--2024）被引用到 2012--2024 的分析中，未說明跨期間差異。 \\
+\midrule
+E5 & Abstract / Sec 5 & Abstract 和 Conclusion 的 ``74\% cost reduction'' 語氣暗示穩健結果，但 cross-OOS 不支持此宣稱。 \\
+\bottomrule
+\end{longtable}
+
+\subsection*{\textcolor{warncolor}{中度問題（建議修正）}}
+
+\begin{longtable}{p{0.5cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & 位置 & 說明 \\
+\midrule
+W1 & Sec 1 / Sec 3.3 & 50/50 分析在邏輯結構中的角色不明（第二貢獻 vs 支持性證據）。 \\
+\midrule
+W2 & Sec 2.2 前 & 缺乏連接分解結果與 VoV 條件策略的正式假說。 \\
+\midrule
+W3 & Sec 1 & VoV/Variance Risk Premium 文獻覆蓋不足，遺漏 Baltussen et al.\ (2018)、Bekaert \& Hoerova (2014)、Todorov (2010) 等關鍵文獻。 \\
+\midrule
+W4 & Sec 1 & 與 Bongaerts et al.\ (2020) 的區分僅一句話，不夠充分。 \\
+\midrule
+W5 & Sec 1 / Sec 3.3 & Rebalancing premium 54 bps 的貢獻宣稱——Booth \& Fama (1992) 已有理論預測，本文僅是實證確認。 \\
+\midrule
+W6 & Sec 2.2 & S3 混合公式的 0.5 係數缺乏解釋。 \\
+\midrule
+W7 & Sec 3.5 & DM test 的實作細節（loss function、bandwidth、one-sided vs two-sided）未說明。Harvey (2016) $t > 3.0$ 門檻是否適用於 time-series strategy comparison 值得商榷。 \\
+\midrule
+W8 & Sec 2.3 & yfinance ``consistent with CRSP'' 的宣稱缺乏比較證據。 \\
+\midrule
+W9 & Table 1 & CRRA utility 報告 mean utility 而非 certainty equivalent，不是標準做法。 \\
+\midrule
+W10 & References & 缺少 Dreyer \& Hubrich (2019)、DeMiguel et al.\ (2009)、insurance premium 相關文獻。 \\
+\bottomrule
+\end{longtable}
+
+\subsection*{輕微問題（可選修正）}
+
+\begin{longtable}{p{0.5cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & 位置 & 說明 \\
+\midrule
+L1 & Eq (3) / Sec 2.3 & $N$ 在方程 (3) 定義為 years，但內文 $N = 3{,}262$ 為交易日數。符號衝突。 \\
+\midrule
+L2 & Eq (1) & $\bar{r}$ 表示 annualized mean 但慣例上指 sample mean。 \\
+\midrule
+L3 & Sec 2.1 & 12/VIX 中 VIX 的單位（百分比 vs 小數）未明確定義。 \\
+\midrule
+L4 & Bib & \texttt{perchet2016} 應改為 \texttt{perchet2015}。 \\
+\midrule
+L5 & Sec 2.3 & ``At 1 bps, the opportunity cost share rises to 97\%''——精確計算為 98.0\%（4.195/(4.195+0.0856)）。 \\
+\midrule
+L6 & 通篇 & ``apples-to-apples'' 出現 2 次、``free alpha''、``smooth sailing'' 等口語表述。 \\
+\midrule
+L7 & Sec 2.3 & VVIX 2012 年起算的 ``documented liquidity concerns'' 缺乏具體引用。 \\
+\bottomrule
+\end{longtable}
+
+%=================================================================
+\section*{總結與建議}
+%=================================================================
+
+\textbf{整體評估}：本論文提出了一個有價值的分析框架——將 VT 保險溢價分解為機會成本與直接成本。91\% 機會成本的核心發現是新穎的、直覺的、且具有實務啟示。文章行文流暢，數據表格（除敏感度分析外）可追溯。然而，三個主要問題需要解決：(1) 敏感度分析數據的可追溯性嚴重存疑；(2) 結論語氣超出 cross-OOS 證據支持的範圍；(3) VoV 條件策略的參數選擇缺乏理論基礎。如果這些問題能妥善解決，本文具有在 Journal of Portfolio Management 或 Financial Analysts Journal 發表的潛力。
+
+\bigskip
+
+\textbf{修訂優先順序}：
+\begin{enumerate}
+\item \textcolor{errorred}{\textbf{最高優先（E3）}}：重新執行 threshold sensitivity sweep，確保所有數字可追溯至 JSON。目前論文中的 57\%/57\%/62\% 和 61\%--79\% 與唯一可追溯的 \texttt{k811v2\_sensitivity\_sweep.json} 嚴重不一致（JSON 顯示 81\%--89\% 和 $-$8.5\% 到 $-$30.5\%）。\textbf{必須立即修正。}
+\item \textcolor{errorred}{\textbf{高優先（E2/E5）}}：調整 Abstract 和 Conclusion 的語氣，加入 ``in-sample'' 限定和 cross-OOS caveat。1/4 cross-OOS 勝率不支持 ``demonstrates'' 或 ``achievable'' 的用語。
+\item \textcolor{errorred}{\textbf{高優先（E1）}}：為 VoV 條件規則的參數選擇提供理論依據或系統性的敏感度分析。
+\item \textcolor{errorred}{\textbf{中高優先（E4）}}：統一 rebalancing premium 和相關係數的樣本期間，或明確標注跨期引用。
+\item \textcolor{warncolor}{\textbf{中優先（W3/W4/W10）}}：補充 VoV 文獻、擴展 Bongaerts 比較、加入缺漏的參考文獻。
+\item \textcolor{warncolor}{\textbf{中優先（W2/W9）}}：加入正式假說連接分解與 VoV 策略；修正 CRRA utility 報告方式。
+\item 輕微問題可在下一版統一處理。
+\end{enumerate}
+
+\end{document}
