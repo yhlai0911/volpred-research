@@ -1,37 +1,39 @@
 {
-  "timestamp": "2026-04-04T07:45:29Z",
-  "all_ok": true,
+  "timestamp": "2026-04-05T00:02:58Z",
+  "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "16 draft articles in feed.json (764 total). Threshold: <3 = alert. Pool healthy."
+      "detail": "16 draft articles in pool (threshold: 3)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified ~10 seconds before check (mtime=1775329519, now=1775329529). Well within 26-hour threshold."
+      "detail": "strategy_metrics.json age: 0.0 hours (threshold: 26h)"
     },
     {
       "name": "ERROR_LOG",
-      "status": "ok",
-      "detail": "4 entries dated 2026-04-04 (today) in docs/error_log.md, all resolved: (1) Badge 不一致 — fixed via classify_audience()+resolveBadge(); (2) Paper pages=None — fixed by adding pymupdf to pyproject.toml; (3) 文章圖片 404 — fixed by remote_filename param in upload_chart(); (4) 論文 abstract 空白 — fixed by LaTeX abstract auto-extraction. No unresolved errors."
+      "status": "alert",
+      "detail": "Entries from yesterday (2026-04-04): 2026-04-04: Badge 不一致（Feed vs 文章頁）— 三層問題，已修正：sync 改 classify_audience()，前端統一 resolveBadge() | 2026-04-04: Paper pages=None — pymupdf 未在 pyproject.toml，已修正：uv add pymupdf | 2026-04-04: 文章圖片 404 — upload_chart 參數誤用，已修正：新增 remote_filename 參數 | 2026-04-04: 論文 abstract 空白 — 未提取 abstract，已修正：加入 LaTeX regex 提取"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies checked. No strategy has >2 null portfolio_return in last 3 entries. Normal operations."
+      "detail": "All 14 strategies have 0 null portfolio_return in last 3 entries"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files. Working tree clean. Threshold: >50 files."
+      "detail": "0 uncommitted files (threshold: 50)"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1642 entries in storage/memory/knowledge.json."
+      "detail": "1642 entries in knowledge.json"
     }
   ],
-  "alerts": []
+  "alerts": [
+    "Entries from yesterday (2026-04-04): 2026-04-04: Badge 不一致（Feed vs 文章頁）— 三層問題，已修正：sync 改 classify_audience()，前端統一 resolveBadge() | 2026-04-04: Paper pages=None — pymupdf 未在 pyproject.toml，已修正：uv add pymupdf | 2026-04-04: 文章圖片 404 — upload_chart 參數誤用，已修正：新增 remote_filename 參數 | 2026-04-04: 論文 abstract 空白 — 未提取 abstract，已修正：加入 LaTeX regex 提取"
+  ]
 }
