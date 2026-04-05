@@ -106,7 +106,7 @@
 |------|--------|--------|--------|--------|--------|--------|--------|------|
 | vt-insurance-cost | ✅ | ✅ | ✅ R3 | ✅ R3 S=0 | ✅ | ❌ PDF | ✅ v1.4 | ✅ |
 | vt-crowding-abm | ✅ | ✅ | ✅ R2 | 🔄 R3 | ✅ | ❌ PDF | ✅ v1.5 | 🔄 |
-| prg-periodic-garch | ❌ 需重做 | ❌ 需重做 | ✅ R1 | ✅ R1 | ❌ | ❌ | ❌ 需重寫 | |
+| prg-periodic-garch | ✅ K880/881/886/874d | ✅ 復現OK | 🔄 R1 | 🔄 R1 | ✅ reproduce.py | ❌ PDF | 🔄 v1.1 理論+6市場 | 🔄 |
 | leverage-direction | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
 | taiwan-vt | ❌ | ❌ | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ | |
 | vt-trend-following | ❌ | ❌ | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ | |

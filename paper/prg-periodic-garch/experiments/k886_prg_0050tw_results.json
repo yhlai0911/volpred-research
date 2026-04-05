@@ -1,0 +1,415 @@
+{
+  "experiment_id": "K886",
+  "title": "PRG on 0050.TW (Daily Frequency)",
+  "type": "empirical",
+  "data_source": "yfinance (0050.TW with clean_tw50_data fix)",
+  "asset": "0050.TW",
+  "description": "Taiwan Top-50 ETF (high amplification 4.6x, US lead-lag)",
+  "common_target": "sigma2_fullday = r2_overnight + r2_intraday",
+  "models": [
+    "GJR-GARCH",
+    "HAR-proxy",
+    "PRG_Basic",
+    "PRG_Extended",
+    "Separate_GARCH"
+  ],
+  "period": "2009-01-05 to 2026-04-02",
+  "is_period": "2009-01-05 to 2021-01-07",
+  "oos_period": "2021-01-08 to 2026-04-02",
+  "n_total": 4217,
+  "n_is": 2951,
+  "n_oos": 1266,
+  "is_fraction": 0.7,
+  "refit_freq_gjr_har": 63,
+  "refit_freq_prg": 252,
+  "data_cleaning": {
+    "method": "clean_tw50_data from volpred.utils",
+    "reason": "Yahoo Finance 1:4 split only adjusted from 2014-01-02; pre-2014 prices 4x too high",
+    "outlier_threshold": "25% daily move (more lenient than US 20%)"
+  },
+  "session_decomposition": {
+    "overnight_var_share_pct": 46.14516968413721,
+    "intraday_var_share_pct": 53.85483031586279,
+    "mean_sigma2_fullday": 0.00032722557544892186,
+    "mean_r2_overnight": 0.00015099879704079942,
+    "mean_r2_intraday": 0.00017622677840812239
+  },
+  "descriptive_stats": {
+    "c2c_return_mean": 0.0006288276006092041,
+    "c2c_return_std": 0.013430280217977559,
+    "overnight_return_mean": 0.0005196768882395112,
+    "overnight_return_std": 0.012278619000915128,
+    "intraday_return_mean": 0.00010915071236969262,
+    "intraday_return_std": 0.013276168921218743,
+    "skewness": 0.06863808322567302,
+    "kurtosis": 18.01428278258554
+  },
+  "layer1_loss_functions": {
+    "GJR": {
+      "QLIKE": 0.9806496667418942,
+      "MSE": 2.2332374089397872e-07,
+      "MAE": 0.00016921697147829232,
+      "HMSE": 4.288526344761817,
+      "MZ_R2": 0.1285735524895072,
+      "MZ_b": 0.9098906829004869,
+      "n_obs": 1251
+    },
+    "HAR": {
+      "QLIKE": 3.1890067839300094,
+      "MSE": 2.660606824873177e-07,
+      "MAE": 0.00015023118390636712,
+      "HMSE": 256.8124433759054,
+      "MZ_R2": 0.04025086345590312,
+      "MZ_b": 3.046569439826152,
+      "n_obs": 1251
+    },
+    "PRG_Basic": {
+      "QLIKE": 0.7973519177150263,
+      "MSE": 1.9279647168874662e-07,
+      "MAE": 0.00015343255382439049,
+      "HMSE": 1.355579168092941,
+      "MZ_R2": 0.2545921230211886,
+      "MZ_b": 1.213051941212146,
+      "n_obs": 1251
+    },
+    "PRG_Extended": {
+      "QLIKE": 0.7837583813784864,
+      "MSE": 1.7214206805822376e-07,
+      "MAE": 0.00015456160470882026,
+      "HMSE": 1.208596185289816,
+      "MZ_R2": 0.3276426350573117,
+      "MZ_b": 1.0353872421247121,
+      "n_obs": 1251
+    },
+    "Separate": {
+      "QLIKE": 0.9691190538872302,
+      "MSE": 2.3123803578136298e-07,
+      "MAE": 0.00016786568554632254,
+      "HMSE": 4.805478411005864,
+      "MZ_R2": 0.10000446570140531,
+      "MZ_b": 0.8423705912177596,
+      "n_obs": 1251
+    }
+  },
+  "layer2_mcs": {
+    "surviving": [
+      "GJR",
+      "HAR",
+      "PRG_Basic",
+      "PRG_Extended",
+      "Separate"
+    ],
+    "eliminated": {},
+    "alpha": 0.1
+  },
+  "layer3_spearman": {
+    "GJR": {
+      "rho": 0.3053771826838244,
+      "p": 2.064639970224854e-28,
+      "ci_lo": 0.251890891862426,
+      "ci_hi": 0.35581302206770715,
+      "n": 1251
+    },
+    "HAR": {
+      "rho": 0.2821350131888892,
+      "p": 2.5265829810585147e-24,
+      "ci_lo": 0.22910793430347637,
+      "ci_hi": 0.33315046107265733,
+      "n": 1251
+    },
+    "PRG_Basic": {
+      "rho": 0.42069221415816954,
+      "p": 7.964466870241058e-55,
+      "ci_lo": 0.37152804941739287,
+      "ci_hi": 0.46680144511250715,
+      "n": 1251
+    },
+    "PRG_Extended": {
+      "rho": 0.43976112110658233,
+      "p": 2.632636729561486e-60,
+      "ci_lo": 0.39219798666378586,
+      "ci_hi": 0.48498275495105236,
+      "n": 1251
+    },
+    "Separate": {
+      "rho": 0.3158702711684254,
+      "p": 2.2055708821634962e-30,
+      "ci_lo": 0.2639056161331519,
+      "ci_hi": 0.3658097666840488,
+      "n": 1251
+    }
+  },
+  "layer4_var": {
+    "GJR": {
+      "VaR_1pct": {
+        "n": 1266,
+        "n_violations": 27,
+        "violation_rate": 0.02132701421800948,
+        "expected_rate": 0.01,
+        "kupiec_LR": 12.383729682746477,
+        "kupiec_p": 0.0004330911838018592,
+        "kupiec_pass": false,
+        "cc_LR": 12.65241648976961,
+        "cc_p": 0.0017888036314800404,
+        "cc_pass": false,
+        "basel": "Green",
+        "basel_violations_250d": 4
+      },
+      "VaR_5pct": {
+        "n": 1266,
+        "n_violations": 64,
+        "violation_rate": 0.05055292259083728,
+        "expected_rate": 0.05,
+        "kupiec_LR": 0.008120034532211662,
+        "kupiec_p": 0.9281988219264365,
+        "kupiec_pass": true,
+        "cc_LR": 0.027961317286024467,
+        "cc_p": 0.9861166169119351,
+        "cc_pass": true,
+        "basel": "Red",
+        "basel_violations_250d": 11
+      }
+    },
+    "HAR": {
+      "VaR_1pct": {
+        "n": 1266,
+        "n_violations": 111,
+        "violation_rate": 0.08767772511848342,
+        "expected_rate": 0.01,
+        "kupiec_LR": 293.2264807835621,
+        "kupiec_p": 0.0,
+        "kupiec_pass": false,
+        "cc_LR": 296.2432761074121,
+        "cc_p": 0.0,
+        "cc_pass": false,
+        "basel": "Red",
+        "basel_violations_250d": 21
+      },
+      "VaR_5pct": {
+        "n": 1266,
+        "n_violations": 192,
+        "violation_rate": 0.15165876777251186,
+        "expected_rate": 0.05,
+        "kupiec_LR": 182.98169304882765,
+        "kupiec_p": 0.0,
+        "kupiec_pass": false,
+        "cc_LR": 184.55189904543687,
+        "cc_p": 0.0,
+        "cc_pass": false,
+        "basel": "Red",
+        "basel_violations_250d": 31
+      }
+    },
+    "PRG_Basic": {
+      "VaR_1pct": {
+        "n": 1266,
+        "n_violations": 19,
+        "violation_rate": 0.015007898894154818,
+        "expected_rate": 0.01,
+        "kupiec_LR": 2.7798043736802143,
+        "kupiec_p": 0.09545982787145846,
+        "kupiec_pass": true,
+        "cc_LR": null,
+        "cc_p": null,
+        "cc_pass": null,
+        "basel": "Green",
+        "basel_violations_250d": 4
+      },
+      "VaR_5pct": {
+        "n": 1266,
+        "n_violations": 62,
+        "violation_rate": 0.04897314375987362,
+        "expected_rate": 0.05,
+        "kupiec_LR": 0.0282875966617695,
+        "kupiec_p": 0.8664344612390922,
+        "kupiec_pass": true,
+        "cc_LR": 0.028835666115586633,
+        "cc_p": 0.9856856061773281,
+        "cc_pass": true,
+        "basel": "Red",
+        "basel_violations_250d": 10
+      }
+    },
+    "PRG_Extended": {
+      "VaR_1pct": {
+        "n": 1266,
+        "n_violations": 17,
+        "violation_rate": 0.013428120063191154,
+        "expected_rate": 0.01,
+        "kupiec_LR": 1.3570872304104356,
+        "kupiec_p": 0.24404292852109655,
+        "kupiec_pass": true,
+        "cc_LR": 2.839389787702178,
+        "cc_p": 0.24178777658156414,
+        "cc_pass": true,
+        "basel": "Green",
+        "basel_violations_250d": 2
+      },
+      "VaR_5pct": {
+        "n": 1266,
+        "n_violations": 58,
+        "violation_rate": 0.045813586097946286,
+        "expected_rate": 0.05,
+        "kupiec_LR": 0.48001259247497785,
+        "kupiec_p": 0.4884166128046843,
+        "kupiec_pass": true,
+        "cc_LR": 0.526216362323261,
+        "cc_p": 0.7686587384179091,
+        "cc_pass": true,
+        "basel": "Yellow",
+        "basel_violations_250d": 7
+      }
+    },
+    "Separate": {
+      "VaR_1pct": {
+        "n": 1266,
+        "n_violations": 26,
+        "violation_rate": 0.020537124802527645,
+        "expected_rate": 0.01,
+        "kupiec_LR": 10.884245844070435,
+        "kupiec_p": 0.0009698566226029603,
+        "kupiec_pass": false,
+        "cc_LR": 13.405948442745723,
+        "cc_p": 0.00122725633710985,
+        "cc_pass": false,
+        "basel": "Green",
+        "basel_violations_250d": 4
+      },
+      "VaR_5pct": {
+        "n": 1266,
+        "n_violations": 66,
+        "violation_rate": 0.052132701421800945,
+        "expected_rate": 0.05,
+        "kupiec_LR": 0.11962840252087403,
+        "kupiec_p": 0.7294378668761166,
+        "kupiec_pass": true,
+        "cc_LR": 0.215287103347233,
+        "cc_p": 0.8979476113158951,
+        "cc_pass": true,
+        "basel": "Yellow",
+        "basel_violations_250d": 9
+      }
+    }
+  },
+  "layer5_dm_tests": {
+    "GJR_vs_HAR": {
+      "t_stat": -4.285062910123734,
+      "p_value": 1.9670552260153684e-05,
+      "n": 1251,
+      "winner": "GJR",
+      "harvey_pass": true,
+      "interpretation": "GJR wins (Harvey PASS)"
+    },
+    "GJR_vs_PRG_Basic": {
+      "t_stat": 5.220532947888443,
+      "p_value": 2.0875051465196748e-07,
+      "n": 1251,
+      "winner": "PRG_Basic",
+      "harvey_pass": true,
+      "interpretation": "PRG_Basic wins (Harvey PASS)"
+    },
+    "GJR_vs_PRG_Extended": {
+      "t_stat": 5.2672259053388455,
+      "p_value": 1.629426940041867e-07,
+      "n": 1251,
+      "winner": "PRG_Extended",
+      "harvey_pass": true,
+      "interpretation": "PRG_Extended wins (Harvey PASS)"
+    },
+    "GJR_vs_Separate": {
+      "t_stat": 0.48930945542693394,
+      "p_value": 0.6247084758657349,
+      "n": 1251,
+      "winner": "Separate",
+      "harvey_pass": false,
+      "interpretation": "Separate wins (Harvey FAIL, NS)"
+    },
+    "HAR_vs_PRG_Basic": {
+      "t_stat": 4.499787672272537,
+      "p_value": 7.435388970966628e-06,
+      "n": 1251,
+      "winner": "PRG_Basic",
+      "harvey_pass": true,
+      "interpretation": "PRG_Basic wins (Harvey PASS)"
+    },
+    "HAR_vs_PRG_Extended": {
+      "t_stat": 4.513487502029419,
+      "p_value": 6.977917743178352e-06,
+      "n": 1251,
+      "winner": "PRG_Extended",
+      "harvey_pass": true,
+      "interpretation": "PRG_Extended wins (Harvey PASS)"
+    },
+    "HAR_vs_Separate": {
+      "t_stat": 4.342943229439746,
+      "p_value": 1.519592585408347e-05,
+      "n": 1251,
+      "winner": "Separate",
+      "harvey_pass": true,
+      "interpretation": "Separate wins (Harvey PASS)"
+    },
+    "PRG_Basic_vs_PRG_Extended": {
+      "t_stat": 1.7452894453846226,
+      "p_value": 0.08118021489297256,
+      "n": 1251,
+      "winner": "PRG_Extended",
+      "harvey_pass": false,
+      "interpretation": "PRG_Extended wins (Harvey FAIL, NS)"
+    },
+    "PRG_Basic_vs_Separate": {
+      "t_stat": -4.594883288756958,
+      "p_value": 4.768055186454845e-06,
+      "n": 1251,
+      "winner": "PRG_Basic",
+      "harvey_pass": true,
+      "interpretation": "PRG_Basic wins (Harvey PASS)"
+    },
+    "PRG_Extended_vs_Separate": {
+      "t_stat": -4.512697502280706,
+      "p_value": 7.003548529560533e-06,
+      "n": 1251,
+      "winner": "PRG_Extended",
+      "harvey_pass": true,
+      "interpretation": "PRG_Extended wins (Harvey PASS)"
+    }
+  },
+  "key_findings": [
+    "Best QLIKE: PRG_Extended (0.7838)",
+    "PRG_Ext vs GJR: DM t=5.27 (Harvey PASS)",
+    "Cross-recursion (PRG vs Separate): DM t=-4.51 (Harvey PASS)",
+    "MCS surviving: ['GJR', 'HAR', 'PRG_Basic', 'PRG_Extended', 'Separate']",
+    "Overnight var share: 46.1%"
+  ],
+  "cross_market_reference": {
+    "SPY_K880v2": {
+      "dm_t": -0.57,
+      "result": "PRG NS vs GJR"
+    },
+    "QQQ_K881": {
+      "dm_t": 4.26,
+      "result": "PRG beats GJR (Harvey PASS)"
+    },
+    "GLD_K881": {
+      "dm_t": 6.12,
+      "result": "PRG beats GJR (Harvey PASS)"
+    },
+    "EEM_K881": {
+      "dm_t": 6.63,
+      "result": "PRG beats GJR (Harvey PASS)"
+    },
+    "TAIFEX_K874e": {
+      "dm_t": 5.1,
+      "result": "PRG beats GJR (Harvey PASS)"
+    }
+  },
+  "runtime_seconds": 16.675489,
+  "references": [
+    "Patton (2011): Volatility forecast comparison using imperfect proxies",
+    "Hansen, Lunde & Nason (2011): Model Confidence Set",
+    "Bollerslev & Ghysels (1996): Periodic GARCH",
+    "Corsi (2009): HAR-RV",
+    "Kupiec (1995): Proportion of failures VaR test",
+    "Christoffersen (1998): Conditional coverage VaR test",
+    "Lai et al. (2024): PRS concept"
+  ]
+}

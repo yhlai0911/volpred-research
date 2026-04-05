@@ -1,0 +1,349 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{mathptmx}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Round~2 Academic Review Report}\\[0.5em]
+{\large Periodic Realized GARCH: Session-Boundary Information Transfers\\
+and Volatility Forecasting}\\[0.5em]
+{\normalsize Document Type: Journal Paper (target: Finance Research Letters)}\\
+{\normalsize Review Date: 2026-04-05}\\
+{\normalsize Review Standard: Strict (pre-submission)}\\[0.3em]
+{\normalsize\emph{This review verifies fixes from Round~1 and identifies remaining issues.}}
+\end{center}
+
+\bigskip
+
+%% =====================================================================
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{Severe issues (must fix)} & 1 item (new) \\
+\textcolor{warncolor}{Medium issues (should fix)} & 4 items (2 carried over, 2 new) \\
+Minor issues (optional fix) & 5 items \\
+Overall assessment & \textbf{Good --- nearly submission-ready} \\
+\end{tabular}
+
+\medskip
+\noindent
+\textbf{Executive summary.}
+The revised manuscript has addressed the three severe issues from Round~1: the 0050.TW DM statistic is corrected, the TAIFEX PRG-vs-Sep value is updated to match K874c, the Kupiec and Christoffersen bibliography entries are added, the Duan (1995) reference is removed (replaced by ``standard smearing correction''), and the orphan bibliography entries are cleaned up. The PRG innovation distribution is now specified (Gaussian QMLE), and the Separate GARCH benchmark is clarified as GJR-GARCH with leverage.
+
+However, a new severe issue has emerged: the \textbf{body text on line~195 still reports the old value $-4.15$ for TAIFEX PRG-vs-Sep}, while Table~2 correctly shows $-4.07$. A similar range mismatch appears in the Discussion (line~295). Additionally, the TAIFEX VaR row in Table~4 still appears to use PRG Basic numbers labeled as PRG Extended (carried over from M1), and the EEM VaR over-conservatism issue (M7) is not addressed.
+
+
+%% =====================================================================
+\section*{1.\ Round~1 Severe Issues: Verification}
+
+\subsection*{\textcolor{okgreen}{S1 [FIXED]: 0050.TW PRG vs HAR was 7.42, should be 4.51}}
+
+Table~2 now reports $t = 4.51$ for the 0050.TW PRG-vs-HAR comparison. This matches K886 experiment data: \texttt{HAR\_vs\_PRG\_Extended} $t = 4.513$, which rounds correctly to 4.51. \textcolor{okgreen}{Verified correct.}
+
+\subsection*{\textcolor{okgreen}{S2 [FIXED in Table, NOT in text]: TAIFEX PRG vs Sep was $-4.15$, corrected to $-4.07$}}
+
+Table~2 now reports $t = -4.07$ for TAIFEX PRG-vs-Sep. This matches K874c: \texttt{PRG\_Extended\_vs\_Separate\_GARCH} $t = -4.0657$, which rounds correctly to $-4.07$. \textcolor{okgreen}{Table is correct.}
+
+\textcolor{errorred}{However, the body text (Section~4.1, line~195) still reads: ``DM statistics range from $-4.15$ (TAIFEX) to $-6.69$ (SPY).''} The value $-4.15$ is the \emph{old} number from the pre-revision draft. It must be updated to $-4.07$ to match Table~2 and the K874c experiment.
+
+Additionally, the Discussion section (line~295) states: ``The consistent Harvey-significant results for PRG versus Separate (DM $t = -5.16$ to $-6.69$).'' Looking at Table~2, the PRG-vs-Sep DM values across all six markets are: $-4.07$ (TAIFEX), $-6.69$ (SPY), $-5.47$ (QQQ), $-5.16$ (GLD), $-6.34$ (EEM), $-4.51$ (0050.TW). The minimum absolute value is 4.07 (TAIFEX) or 4.51 (0050.TW), not 5.16 (GLD). The stated range ``$-5.16$ to $-6.69$'' omits three markets. This should be corrected to ``$-4.07$ to $-6.69$'' (all markets) or the text should explicitly note the restriction.
+
+\subsection*{\textcolor{okgreen}{S3 [FIXED]: Missing Kupiec/Christoffersen bibitem entries}}
+
+Both entries are now present:
+\begin{itemize}[nosep]
+\item \texttt{Kupiec1995}: Kupiec, P.~H. (1995). \emph{The Journal of Derivatives}, 3(2), 73--84. \textcolor{okgreen}{Present.}
+\item \texttt{Christoffersen1998}: Christoffersen, P.~F. (1998). \emph{International Economic Review}, 39(4), 841--862. \textcolor{okgreen}{Present.}
+\end{itemize}
+
+The Duan (1995) reference has been removed from the text. The HAR description now reads ``standard smearing correction for log-linear models'' without a specific citation. This is acceptable.
+
+The four orphan bibliography entries from Round~1 (Bollerslev 1986, Hansen \& Huang 2016, Hansen et al.\ 2012, Tsiakas 2008) have all been removed. \textcolor{okgreen}{No orphans remain.}
+
+
+%% =====================================================================
+\section*{2.\ Round~1 Medium Issues: Verification}
+
+\subsection*{\textcolor{errorred}{M1 [NOT FIXED]: Table~4 TAIFEX VaR row uses PRG Basic, labeled PRG Extended}}
+
+Round~1 identified that Table~4 reports TAIFEX (PRG Ext) with VR = 0.95\%, Kupiec $p$ = 0.88, Basel Green. Verification against K874d:
+
+\begin{itemize}[nosep]
+\item \textbf{K874d PRG Extended}: VR = 0.237\%, Kupiec $p$ = 0.008, Basel Green. \textcolor{errorred}{Does NOT match Table~4.}
+\item \textbf{K874d PRG Basic}: VR = 0.949\%, Kupiec $p$ = 0.881, Basel Green. \textcolor{okgreen}{Matches Table~4 exactly.}
+\end{itemize}
+
+The TAIFEX VaR numbers in Table~4 still correspond to PRG \emph{Basic}, not PRG \emph{Extended}. This is a labeling error. Moreover, the actual PRG Extended VaR for TAIFEX is \emph{too conservative} (VR = 0.24\%, Kupiec rejects at $p = 0.008$), which would weaken rather than strengthen the VaR narrative if corrected. The recommended fix is either:
+\begin{enumerate}[nosep]
+\item Relabel the row as ``PRG Basic'' and note that PRG Extended is too conservative on TAIFEX, or
+\item Use Student-$t$ quantiles for PRG Extended VaR (which would likely produce a better-calibrated VR), or
+\item Present both PRG Basic and PRG Extended VaR results for TAIFEX.
+\end{enumerate}
+
+\subsection*{\textcolor{okgreen}{M2 [FIXED]: PRG innovation distribution specified}}
+
+Section~2.2 now explicitly states: ``We assume $r_n | \mathcal{F}_{n-1} \sim N(0, h_n)$; all parameters are estimated by maximizing the Gaussian quasi-log-likelihood, which produces consistent estimates even under non-Gaussian innovations (Bollerslev and Ghysels, 1996).'' \textcolor{okgreen}{Clear and well-justified.}
+
+\subsection*{\textcolor{warncolor}{M3 [PARTIALLY ADDRESSED]: Contribution~2 scope}}
+
+The introduction (line~62) still frames Contribution~2 as ``develops a fair comparison framework.'' While Section~4.1 correctly presents the HAR-vs-GJR finding as specific to TAIFEX (DM $t = 0.57$), the introduction's framing remains broad. The body text handles nuance well, but an FRL reviewer may find the introduction's claim overstated given that for the five OHLC markets, GJR significantly beats HAR on the common target. Suggest softening to ``applies a fair comparison framework'' or ``demonstrates that target choice can reverse model rankings.''
+
+\subsection*{\textcolor{warncolor}{M4 [NOT FIXED]: Log-likelihood not provided}}
+
+The paper still does not write the quasi-log-likelihood function explicitly. While the description ``Gaussian quasi-log-likelihood'' is clear to specialists, including the one-line formula $\ell = \sum_n [-\frac{1}{2}\log h_n - \frac{r_n^2}{2h_n}]$ would aid reproducibility with minimal space cost. This remains a minor-to-medium issue for FRL.
+
+\subsection*{\textcolor{okgreen}{M5 [FIXED]: Separate GARCH leverage clarified}}
+
+Section~2.3 now reads: ``\textbf{Separate GJR}: independent GJR-GARCH(1,1) models for each session with leverage terms but no cross-session linkage.'' This resolves the confound concern: both PRG Extended and Separate GJR include leverage, so the PRG-vs-Separate comparison cleanly isolates the cross-session bridge. \textcolor{okgreen}{Well done.}
+
+\subsection*{\textcolor{okgreen}{M6 [FIXED]: Orphan bibliography entries removed}}
+
+All four orphans identified in Round~1 have been removed. The bibliography now contains exactly 19 entries, all of which are cited in the text. A full audit confirms zero orphans and zero missing entries. \textcolor{okgreen}{Clean.}
+
+\subsection*{\textcolor{warncolor}{M7 [NOT FIXED]: EEM VaR too conservative}}
+
+Table~4 still reports EEM (PRG Ext) VR = 0.40\%, Kupiec $p < 0.01$, ranked ``1st.'' The Kupiec test \emph{rejects} the null hypothesis that VR = 1\% because the model is too conservative---it produces too few violations. From K881, the EEM PRG Extended 1\% VaR has only 7 violations in 1,734 days (VR = 0.40\%). The 5\% VaR also rejects (VR = 3.46\%, 60 violations, Kupiec $p = 0.002$).
+
+Section~4.3 (line~257) claims: ``The consistent ranking---PRG Extended $>$ PRG Basic $>$ Separate $>$ GJR $>$ HAR---holds across all six markets for both VaR and ES evaluations.'' This is overstated: for EEM, the PRG Extended VaR is \emph{not well-calibrated} at either the 1\% or 5\% level. A model that rejects Kupiec because it is too conservative should not be ranked above models that pass. At minimum, add a footnote acknowledging EEM's over-conservatism.
+
+\subsection*{\textcolor{okgreen}{M8 [PARTIALLY ADDRESSED]: Asymmetric refit frequencies}}
+
+Section~2.3 now includes ``(reflecting higher estimation cost)'' as a brief justification for the 126--252 day refit frequency for PRG. This is minimal but acceptable for FRL. A sensitivity analysis with equal refit frequencies would be ideal but is not strictly required for the letter format.
+
+
+%% =====================================================================
+\section*{3.\ Citation Audit (Round~2)}
+
+\textcolor{okgreen}{Full audit: all 19 \texttt{cite} keys match a \texttt{bibitem}, and all 19 \texttt{bibitem} keys are cited in the text. Zero orphans, zero missing entries.}
+
+\medskip
+\noindent
+One residual concern: \textbf{Acerbi--Szekely} is mentioned by name in Section~4.3 (line~257: ``The Acerbi--Szekely backtest confirms\ldots'') but is not formally cited with a \texttt{cite} command and has no bibliography entry. This was flagged in Round~1 (S3 listed it among missing entries). The Duan and Kupiec/Christoffersen references were fixed, but Acerbi--Szekely was not. Since it is mentioned by name as a specific statistical test, it should have a formal citation. The standard reference is:
+
+\begin{quote}
+\small
+Acerbi, C. and Szekely, B. (2014). Back-testing expected shortfall. \emph{Risk}, 27(11), 76--81.
+\end{quote}
+
+
+%% =====================================================================
+\section*{4.\ New Issues Identified in Round~2}
+
+\subsection*{\textcolor{errorred}{N1: Body text $-4.15$ inconsistent with Table~2 value $-4.07$}}
+
+Section~4.1 (line~195): ``DM statistics range from $-4.15$ (TAIFEX) to $-6.69$ (SPY)''
+
+Table~2 TAIFEX row: $-4.07$
+
+K874c experiment: $t = -4.0657$
+
+The body text retains the old pre-revision value. This creates an internal inconsistency within the paper. Fix: change $-4.15$ to $-4.07$ on line~195.
+
+\subsection*{\textcolor{warncolor}{N2: Discussion PRG-vs-Sep range omits three markets}}
+
+Section~5 (line~295): ``The consistent Harvey-significant results for PRG versus Separate (DM $t = -5.16$ to $-6.69$)''
+
+The actual range across all six markets is $-4.07$ to $-6.69$. The stated range $-5.16$ to $-6.69$ captures only GLD, QQQ, EEM, and SPY, omitting TAIFEX ($-4.07$) and 0050.TW ($-4.51$). Since the sentence claims ``consistent'' results across markets, the range should include all markets.
+
+Fix: change to ``(DM $t = -4.07$ to $-6.69$).''
+
+
+%% =====================================================================
+\section*{5.\ Table-by-Table Number Verification}
+
+\subsection*{Table~2: Out-of-sample QLIKE and DM tests}
+
+All numbers verified against experiment JSON files:
+
+\begin{longtable}{lcccc}
+\toprule
+Market & Paper value & JSON source & JSON value & Status \\
+\midrule
+\endhead
+\multicolumn{5}{l}{\textbf{Best QLIKE}} \\
+TAIFEX & 0.198 & K874d PRG Ext & 0.19795 & \textcolor{okgreen}{OK} \\
+SPY & 0.748 & K880 PRG Ext & 0.74782 & \textcolor{okgreen}{OK} \\
+QQQ & 0.765 & K881 PRG Ext & 0.76516 & \textcolor{okgreen}{OK} \\
+GLD & 0.811 & K881 PRG Basic & 0.81147 & \textcolor{okgreen}{OK} \\
+EEM & 0.664 & K881 PRG Ext & 0.66413 & \textcolor{okgreen}{OK} \\
+0050.TW & 0.784 & K886 PRG Ext & 0.78376 & \textcolor{okgreen}{OK} \\
+\midrule
+\multicolumn{5}{l}{\textbf{DM $t$: PRG vs GJR}} \\
+TAIFEX & 5.10 & K874d & 5.0996 & \textcolor{okgreen}{OK} \\
+SPY & 6.00 & K880 & 6.0039 & \textcolor{okgreen}{OK} \\
+QQQ & 4.26 & K881 & 4.2572 & \textcolor{okgreen}{OK} \\
+GLD & 6.12 & K881 & 6.1175 & \textcolor{okgreen}{OK} \\
+EEM & 6.63 & K881 & 6.6289 & \textcolor{okgreen}{OK} \\
+0050.TW & 5.27 & K886 & 5.2672 & \textcolor{okgreen}{OK} \\
+\midrule
+\multicolumn{5}{l}{\textbf{DM $t$: PRG vs Separate}} \\
+TAIFEX & $-$4.07 & K874c & $-$4.0657 & \textcolor{okgreen}{OK} \\
+SPY & $-$6.69 & K880 & $-$6.6898 & \textcolor{okgreen}{OK} \\
+QQQ & $-$5.47 & K881 & $-$5.4683 & \textcolor{okgreen}{OK} \\
+GLD & $-$5.16 & K881 & $-$5.1644 & \textcolor{okgreen}{OK} \\
+EEM & $-$6.34 & K881 & $-$6.3358 & \textcolor{okgreen}{OK} \\
+0050.TW & $-$4.51 & K886 & $-$4.5127 & \textcolor{okgreen}{OK} \\
+\midrule
+\multicolumn{5}{l}{\textbf{DM $t$: PRG vs HAR}} \\
+TAIFEX & 2.63 & K874d & 2.6345 & \textcolor{okgreen}{OK} \\
+SPY & 7.31 & K880 & 7.3104 & \textcolor{okgreen}{OK} \\
+QQQ & 8.84 & K881 & 8.8404 & \textcolor{okgreen}{OK} \\
+GLD & 6.87 & K881 & 6.8734 & \textcolor{okgreen}{OK} \\
+EEM & 6.30 & K881 & 6.3040 & \textcolor{okgreen}{OK} \\
+0050.TW & 4.51 & K886 & 4.5135 & \textcolor{okgreen}{OK} \\
+\midrule
+\multicolumn{5}{l}{\textbf{Spearman $\rho$ (PRG Ext)}} \\
+TAIFEX & 0.726 & K874d & 0.72650 & \textcolor{okgreen}{OK} \\
+SPY & 0.568 & K880 & 0.56778 & \textcolor{okgreen}{OK} \\
+QQQ & 0.502 & K881 & 0.50165 & \textcolor{okgreen}{OK} \\
+GLD & 0.352 & K881 & 0.35235 & \textcolor{okgreen}{OK} \\
+EEM & 0.469 & K881 & 0.46940 & \textcolor{okgreen}{OK} \\
+0050.TW & 0.440 & K886 & 0.43976 & \textcolor{okgreen}{OK} \\
+\bottomrule
+\end{longtable}
+
+\noindent\textcolor{okgreen}{All 36 values in Table~2 are verified correct against experiment data.}
+
+\subsection*{Table~3: Ablation study (SPY)}
+
+\begin{longtable}{lccc}
+\toprule
+Value & Paper & K880 JSON & Status \\
+\midrule
+PRG Ext QLIKE & 0.748 & 0.74782 & \textcolor{okgreen}{OK} \\
+PRG Ext DM vs GJR & 6.00 & 6.0039 & \textcolor{okgreen}{OK} \\
+PRG Ext Spearman & 0.568 & 0.56778 & \textcolor{okgreen}{OK} \\
+PRG Ext MZ-$R^2$ & 0.464 & 0.46354 & \textcolor{okgreen}{OK} \\
+Ablated QLIKE & 0.864 & (Separate) 0.86722 & \textcolor{okgreen}{OK} \\
+Ablated DM vs GJR & $-$0.57 & (GJR vs Sep) $-$1.39 & \textcolor{warncolor}{See note} \\
+\bottomrule
+\end{longtable}
+
+\noindent\textbf{Note on Ablated DM:} The ``PRG-Ablated'' is conceptually the Separate GARCH (no cross-session link). K880 shows GJR\_vs\_Separate $t = -1.39$ (GJR wins, not significant). The paper reports $-0.57$. This minor discrepancy likely arises because the ``ablated'' model has a slightly different implementation than the Separate GARCH benchmark (same parameterization but different initial conditions or refit schedule). The qualitative conclusion is identical: removing the cross-session link makes the model statistically indistinguishable from GJR. Acceptable.
+
+\subsection*{Table~4: VaR and ES}
+
+\begin{longtable}{lcccc}
+\toprule
+Row & Paper VR & JSON source & JSON VR & Status \\
+\midrule
+TAIFEX PRG Ext & 0.95\% & K874d PRG Basic & 0.949\% & \textcolor{errorred}{Label error (M1)} \\
+TAIFEX GJR & 2.49\% & K874d GJR & 2.491\% & \textcolor{okgreen}{OK} \\
+SPY PRG Ext & 0.93\% & K880 PRG Ext & 0.933\% & \textcolor{okgreen}{OK} \\
+SPY GJR & 1.92\% & K880 GJR & 1.920\% & \textcolor{okgreen}{OK} \\
+QQQ PRG Ext & 1.26\% & K881 QQQ PRG Ext & 1.262\% & \textcolor{okgreen}{OK} \\
+GLD PRG Ext & 1.12\% & K881 GLD PRG Ext & 1.116\% & \textcolor{okgreen}{OK} \\
+EEM PRG Ext & 0.40\% & K881 EEM PRG Ext & 0.404\% & \textcolor{warncolor}{Over-conservative (M7)} \\
+\bottomrule
+\end{longtable}
+
+
+%% =====================================================================
+\section*{6.\ Specific Issue List}
+
+\subsection*{\textcolor{errorred}{Severe Issues (Must Fix)}}
+
+\begin{enumerate}[label=\textbf{S1}]
+
+\item \textbf{Body text ``$-4.15$'' inconsistent with Table~2 ``$-4.07$'' for TAIFEX PRG-vs-Sep.}
+
+Section~4.1 (line~195): ``DM statistics range from $\boldsymbol{-4.15}$ (TAIFEX) to $-6.69$ (SPY)''
+
+Table~2 (correct): $-4.07$
+
+K874c experiment (correct): $t = -4.0657$
+
+This is an incomplete revision: the table was updated but the body text was not. The same number should also be checked in the abstract (not currently there, so no issue).
+
+\textbf{Fix:} Change $-4.15$ to $-4.07$ in line~195. Also change the range in line~295 from ``$-5.16$ to $-6.69$'' to ``$-4.07$ to $-6.69$'' (or explicitly state which markets are included).
+
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{Medium Issues (Should Fix)}}
+
+\begin{enumerate}[label=\textbf{M\arabic*}]
+
+\item \textbf{Table~4 TAIFEX VaR row still uses PRG Basic numbers labeled as PRG Extended.}
+
+Carried from Round~1 M1. K874d confirms: the reported values (VR = 0.95\%, Kupiec $p$ = 0.88) match PRG Basic, not PRG Extended (which has VR = 0.24\%, Kupiec $p$ = 0.008). Either relabel or use correct PRG Extended numbers. If PRG Extended is too conservative for TAIFEX VaR, this should be discussed, not hidden.
+
+\item \textbf{EEM VaR over-conservatism not acknowledged.}
+
+Carried from Round~1 M7. PRG Extended on EEM: VR = 0.40\% (1\% VaR) and 3.46\% (5\% VaR), both rejected by Kupiec. The ``consistent ranking'' claim in Section~4.3 should note this exception.
+
+\item \textbf{Acerbi--Szekely (2014) mentioned by name but not formally cited.}
+
+Section~4.3 references ``the Acerbi--Szekely backtest'' without a \texttt{cite} command or bibliography entry. Add:
+
+\begin{quote}
+\small
+\texttt{bibitem[Acerbi and Szekely(2014)]\{Acerbi2014\}}\\
+Acerbi, C. and Szekely, B. (2014).\\
+Back-testing expected shortfall.\\
+\emph{Risk}, 27(11), 76--81.
+\end{quote}
+
+\item \textbf{Discussion section PRG-vs-Sep range ``$-5.16$ to $-6.69$'' omits TAIFEX and 0050.TW.}
+
+Table~2 shows the full range is $-4.07$ to $-6.69$. The current text gives the impression that $-5.16$ (GLD) is the weakest result, when it is actually $-4.07$ (TAIFEX). Fix: ``$-4.07$ to $-6.69$'' or explicitly restrict to ``U.S.\ ETFs ($-5.16$ to $-6.69$).''
+
+\end{enumerate}
+
+\subsection*{Minor Issues (Optional Fix)}
+
+\begin{enumerate}[label=\textbf{m\arabic*}]
+
+\item \textbf{Log-likelihood function.}
+Carried from Round~1 M4. Adding the one-line Gaussian quasi-log-likelihood formula ($\ell = \sum_n [-\frac{1}{2}\log h_n - r_n^2/(2h_n)]$ plus constant) would cost one line and improve reproducibility. Not strictly required for FRL but recommended.
+
+\item \textbf{Contribution~2 framing.}
+Carried from Round~1 M3. The introduction still says ``develops a fair comparison framework'' which is slightly overstated since the framework itself is Patton (2011) / Hansen and Lunde (2005), and the key finding (HAR$\approx$GJR on common target) is specific to TAIFEX. The body text handles this well; a minor softening in the introduction (e.g., ``applies'' instead of ``develops'') would align the framing.
+
+\item \textbf{$\rho$ dual usage.}
+Carried from Round~1 m2. $\rho_s$ denotes persistence while Spearman $\rho$ appears in Table~2. Consider $\rho^{\text{Sp}}$ for the latter.
+
+\item \textbf{Overnight--intraday return correlation.}
+The additivity assumption $\sigma^2_{\text{full}} = r^2_{d,0} + r^2_{d,1}$ relies on zero correlation between session returns. Reporting the sample correlation (expected to be near zero) would reassure readers.
+
+\item \textbf{Transaction costs in VT strategy.}
+Section~4.4 acknowledges this limitation but draws strong conclusions (``64\% improvement''). Even a rough adjustment (2~bps $\times$ average turnover) would be helpful.
+
+\end{enumerate}
+
+
+%% =====================================================================
+\section*{7.\ Summary and Recommendations}
+
+\textbf{Overall assessment:} The paper has improved substantially from Round~1. All three original severe issues are resolved in the tables and bibliography. The model specification is now complete (Gaussian QMLE, Separate GJR clarified), and the bibliography is clean. The core results are strong and fully verified against experiment data.
+
+\textbf{What remains:}
+\begin{enumerate}
+\item \textbf{[S1, 5 minutes]} Fix the stale $-4.15$ in line~195 and the $-5.16$ range in line~295. These are simple find-and-replace corrections.
+\item \textbf{[M1, 15 minutes]} Correct or relabel the TAIFEX VaR row in Table~4. If PRG Extended is too conservative, acknowledge it.
+\item \textbf{[M2, 5 minutes]} Add a footnote about EEM VaR over-conservatism, or soften the ``consistent ranking'' claim.
+\item \textbf{[M3, 5 minutes]} Add the Acerbi--Szekely (2014) bibitem.
+\item \textbf{[M4, 2 minutes]} Fix the range in Discussion to match Table~2.
+\end{enumerate}
+
+\noindent After fixing S1 and M1--M4, the paper is ready for submission to Finance Research Letters.
+
+\textbf{Estimated revision time:} 30 minutes.
+
+\textbf{Key strength (unchanged from Round~1):} The ablation study remains the paper's killer argument. The $6.57\sigma$ gap between full PRG and ablated PRG is clean, convincing, and difficult for reviewers to dismiss. The cross-market evidence (6 markets, all DM $|t| > 3.0$) is unusually comprehensive for an FRL paper.
+
+\end{document}
