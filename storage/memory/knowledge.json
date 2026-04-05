@@ -20211,5 +20211,23 @@
     "category": "knowledge",
     "created_at": "2026-04-05T11:41:51.308614",
     "updated_at": "2026-04-05T11:41:51.308622"
+  },
+  {
+    "id": "K873",
+    "experiment_id": "K873",
+    "title": "K873: Weekend Vol Effect NULL — Weekend Ratio 0.44 (DEFICIT, Not Excess). DOW Dummies Don't Improve HAR.",
+    "content": "[提出: Claude, 執行: Claude] K873 tests weekend vol effect. SPY weekend ratio=0.440 (95% CI [0.31,0.60]), significantly <1.0. French-Roll ratio=1.32 (far below 3.0). Weekend variance only 40% of 3x time-scaling prediction. Confirms French & Roll (1986): variance comes from trading not calendar time. Fri→Mon vol persistence (0.318) same as weekday (0.324, Fisher z=-0.18 NS). HAR+DOW dummies: DM t=-1.24 NS. VT Monday-adjusted: hurts Sharpe. Monday VIX +1.81% is only significant DOW effect (t=6.28 Harvey PASS) but already absorbed by 12/VIX. BTC (24/7 control): also ratio 0.325 <1.0. Comprehensive null.",
+    "tags": [
+      "weekend_effect",
+      "calendar",
+      "French_Roll",
+      "day_of_week",
+      "null_result",
+      "HAR"
+    ],
+    "data_source": "yfinance (SPY, QQQ, BTC-USD, ^VIX), 2005-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T11:57:52.283586",
+    "updated_at": "2026-04-05T11:57:52.283595"
   }
 ]
