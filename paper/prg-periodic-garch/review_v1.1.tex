@@ -1,0 +1,434 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries 學術審查報告}\\[0.5em]
+{\large PRG Periodic Realized GARCH --- FRL Paper}\\[0.5em]
+{\normalsize 文件類型：期刊論文（Finance Research Letters）}\\
+{\normalsize 審查日期：2026-04-05}\\
+{\normalsize 審查標準：嚴格（Strict）}\\
+{\normalsize 審查版本：v1.1（全面修訂）}
+\end{center}
+
+\bigskip
+\hrule
+\bigskip
+
+%% =====================================================================
+%% SUMMARY TABLE
+%% =====================================================================
+\section*{審查摘要}
+
+\begin{longtable}{p{4.5cm}p{2cm}p{7.5cm}}
+\toprule
+\textbf{審查維度} & \textbf{評級} & \textbf{摘要} \\
+\midrule
+\endhead
+邏輯結構 & \textcolor{warncolor}{中度} & 整體流暢，但 ablation 邏輯與 Separate GARCH 定義重疊混淆 \\
+研究動機與貢獻 & \textcolor{warncolor}{中度} & 貢獻宣稱部分超出證據支持；「Realized GARCH」命名有誤導性 \\
+文獻回顧 & \textcolor{warncolor}{中度} & 缺少 day/night decomposition 關鍵文獻；Hansen \& Huang (2016) 被引但未討論命名衝突 \\
+模型設定 & \textcolor{errorred}{嚴重} & 實證估計違反論文自訂的 stationarity 條件（$\alpha_0+\beta_0=1.086>1$） \\
+方程式與推導 & \textcolor{warncolor}{中度} & $\sigma^2_\text{full}$ 定義在 TAIFEX 使用三分量但論文寫兩分量；缺乏 full-day forecast aggregation 推導 \\
+研究方法 & \textcolor{warncolor}{中度} & Refit frequency 不對等（GJR/HAR 63天 vs PRG 126--252天）；HAR 在 proxy-only 環境下嚴重劣勢 \\
+資料與樣本 & \textcolor{warncolor}{中度} & TAIFEX 用 tick-level RV，U.S.\ 只用 OHLC $r^2$---兩者不可比但被放在同一張表 \\
+VaR 結果 & \textcolor{errorred}{嚴重} & Table 4 TAIFEX PRG Ext VaR 數字實為 PRG Basic（交叉驗證 K874e 確認） \\
+MCS 結論 & \textcolor{errorred}{嚴重} & 論文稱 U.S. MCS ``All survive'' 但宣稱 PRG dominates；TAIFEX MCS ``PRG only'' 與經濟表現落差未解釋 \\
+引用規範 & 輕微 & 少數引用格式問題；Duan (1995) 未列入 references \\
+學術文字 & \textcolor{warncolor}{中度} & Results 段有推銷語氣；``striking''等詞應避免 \\
+\bottomrule
+\end{longtable}
+
+\textbf{總體評價}：論文提出有價值的模型創新（session-periodic GARCH with cross-session recursion），實驗設計亦有可取之處。但存在 \textbf{3 個嚴重問題}（stationarity 違反、VaR 數據錯誤、MCS 解讀矛盾）和 \textbf{8 個中度問題}，需要 major revision 才能送審。
+
+
+%% =====================================================================
+%% 1. LOGIC STRUCTURE
+%% =====================================================================
+\section{一、邏輯結構審查}
+
+\textbf{整體架構}：Introduction $\to$ Methodology $\to$ Data $\to$ Results $\to$ Discussion $\to$ Conclusion，符合 FRL 格式。段落遞進大致合理：先建立 session decomposition 必要性，再提出 PRG，再提供實證。
+
+\textbf{問題 1.1}（\textcolor{warncolor}{中度}）：\textbf{Ablation study 與 Separate GARCH 的關係混淆。}
+
+論文定義兩個不同的 benchmark：
+\begin{itemize}
+    \item \textbf{Separate GARCH}（Section 2.3）：獨立估計兩個 session 的 GARCH，無 cross-session linkage，預測相加。
+    \item \textbf{PRG-Ablated}（Section 4.2）：移除 $r^2_\text{overnight}$ 對 $h_\text{intraday}$ 的影響。
+\end{itemize}
+
+但從模型角度看，PRG-Ablated 和 Separate GARCH 的差異並不明確。如果移除了 cross-session recursion，PRG 實質上就退化為 Separate GARCH。論文需要精確定義 PRG-Ablated 到底與 Separate GARCH 有什麼區別（例如：是否仍共享 initial variance？是否仍在同一 likelihood 中聯合估計？）。目前讀者無法區分這兩個 benchmark。
+
+\textbf{問題 1.2}（輕微）：Table 2 的 ``PRG vs Sep'' 在 Notes 中解釋方向，但正文中的``equally decisive'' 未匹配數字方向（負號表示 Separate 更差），可能造成讀者困惑。
+
+
+%% =====================================================================
+%% 2. MOTIVATION AND CONTRIBUTIONS
+%% =====================================================================
+\section{二、研究動機與貢獻審查}
+
+\textbf{動機}：利用 session boundary 的資訊傳遞提升波動率預測——這是合理且有實務價值的方向。相較 PRS 模型 (Lai et al., 2024) 減少 Markov switching 的估計複雜度，parsimonious 設計也有吸引力。
+
+\textbf{問題 2.1}（\textcolor{warncolor}{中度}）：\textbf{``Periodic Realized GARCH'' 命名有嚴重誤導性。}
+
+Hansen, Huang \& Shek (2012) 的 Realized GARCH 是一個有明確定義的模型類別：它包含一個 return equation 和一個 \textbf{measurement equation} 將 realized measure 連結到 conditional variance：
+\[
+    \log(\text{RV}_t) = \xi + \varphi \log(h_t) + \tau(z_t) + u_t
+\]
+PRG 模型\textbf{沒有} measurement equation。它只是一個標準 GARCH recursion，將 $r^2$ 或 RV 作為 $x_{n-1}$ 代入，等價於一個 GARCH(1,1) 用 squared return 作為 ARCH term。叫它 ``Realized GARCH'' 暗示它是 Hansen et al.\ (2012) 框架的擴展，但實際上它更接近 Bollerslev \& Ghysels (1996) 的 Periodic GARCH。
+
+\textbf{建議}：改名為 ``Periodic Session GARCH'' (PSG) 或 ``Session-Periodic GARCH'' (SPG)，避免與 Realized GARCH 文獻的定義衝突。論文已引用 Hansen \& Huang (2016) 但未解釋為何借用其名稱。
+
+\textbf{問題 2.2}（\textcolor{warncolor}{中度}）：\textbf{第三項貢獻（fair comparison 揭示 HAR/GJR target mismatch）的宣稱過強。}
+
+論文聲稱：``previously documented HAR dominance over GJR is largely a target-mismatch artifact (DM $t = 0.57$)''。但此 $t = 0.57$ 只在 TAIFEX 一個市場成立。在 SPY 中，HAR 的 VaR violation rate 為 6.03\%（at 1\% level），遠高於 GJR 的 1.92\%，顯示 HAR 的 proxy-to-full-day 轉換本身有問題。以單一市場的一個 DM statistic 宣稱``previously documented HAR dominance... is largely an artifact'' 是過度推論。
+
+\textbf{問題 2.3}（輕微）：Introduction 說 PRG 有 ``6--8 total'' 參數，但未與 GJR（4 params + distribution = 6）做正式 parameter count 比較。若計入 Student-$t$ 自由度，GJR 有 5--6 個參數，parsimony advantage 並不明顯。
+
+
+%% =====================================================================
+%% 3. LITERATURE REVIEW
+%% =====================================================================
+\section{三、文獻回顧審查}
+
+\textbf{涵蓋範圍}：引用了核心文獻（Bollerslev 1986, Bollerslev \& Ghysels 1996, Hansen \& Lunde 2005, Hansen et al.\ 2012, Corsi 2009, Patton 2011）。
+
+\textbf{問題 3.1}（\textcolor{warncolor}{中度}）：\textbf{缺少 overnight/intraday decomposition 的關鍵文獻。}
+
+以下高度相關的文獻未被引用：
+\begin{itemize}
+    \item \textbf{Tsiakas (2008), JFQA}：``Overnight information and stochastic volatility: A study of European and American stock exchanges''——直接研究隔夜/日間波動率分解。
+    \item \textbf{Ahoniemi \& Lanne (2013), International Journal of Forecasting}：分別建模 overnight 和 intraday 波動率並用於預測。
+    \item \textbf{Todorova \& Souček (2014), JIMF}：Overnight vs intraday volatility 的 information content。
+    \item \textbf{Koopman, Jungbacker \& Hol (2005), JoE}：Forecasting daily variability using intraday and overnight returns。
+\end{itemize}
+
+缺少這些文獻意味著讀者無法判斷 PRG 相對於已有的 session decomposition 方法有何增量貢獻。
+
+\textbf{問題 3.2}（輕微）：\textbf{Duan (1995) 在正文中被引用}（Section 2.3, HAR smearing correction）但\textbf{不在 References 中}。
+
+\textbf{問題 3.3}（輕微）：Harvey et al.\ (2016) 的 $|t| > 3.0$ 門檻原本是針對 cross-section of expected returns 中的 factor discovery（data mining 校正），並非專門為 forecast comparison 設計。應說明為何將此門檻應用於 DM test 的合理性。
+
+
+%% =====================================================================
+%% 4. MODEL SPECIFICATION
+%% =====================================================================
+\section{四、模型設定審查}
+
+\textbf{問題 4.1}（\textcolor{errorred}{嚴重}）：\textbf{PRG Basic 的估計結果違反論文自訂的 stationarity 條件。}
+
+論文 Eq.\ (5) 後聲明：``We impose $\alpha_s + 0.5\gamma_s + \beta_s < 1$ for each $s$ to ensure covariance stationarity.''
+
+但 K874c 實驗結果（TAIFEX in-sample estimates）顯示：
+\begin{itemize}
+    \item PRG Basic overnight: $\alpha_0 = 0.457$, $\beta_0 = 0.629$ $\Rightarrow$ $\alpha_0 + \beta_0 = 1.086 > 1$ \textcolor{errorred}{（\textbf{違反 stationarity}）}
+    \item PRG Basic intraday: $\alpha_1 = 0.131$, $\beta_1 = 0.791$ $\Rightarrow$ $\alpha_1 + \beta_1 = 0.922 < 1$ （通過）
+    \item PRG Extended overnight: $\alpha_0 = 0.236$, $\gamma_0 = 0.295$, $\beta_0 = 0.723$ $\Rightarrow$ $0.236 + 0.148 + 0.723 = 1.107 > 1$ \textcolor{errorred}{（\textbf{也違反}）}
+\end{itemize}
+
+這不是邊界情況——overnight session 的 persistence 顯著大於 1。這意味著：
+\begin{enumerate}
+    \item 論文聲稱 ``impose'' 了 stationarity constraint 但估計結果違反它——要嘛 constraint 未實作（soft bound），要嘛 optimizer 找到了邊界外的解。無論哪種，論文的陳述與實際不符。
+    \item 非平穩的 overnight process 理論上意味著 unconditional variance 不存在，forecasting properties 可能退化。
+    \item 若 overnight 非平穩但 intraday 平穩，整體 system 的 stationarity 條件為何？論文未討論跨 session 的 joint stationarity condition。
+\end{enumerate}
+
+\textbf{建議}：(a) 推導 PRG 作為跨 session 系統的正確 stationarity 條件（可能涉及 $(\alpha_0+0.5\gamma_0+\beta_0) \times (\alpha_1+0.5\gamma_1+\beta_1) < 1$ 的乘積形式），(b) 報告所有 session 的 persistence 值，(c) 若乘積條件成立則解釋為何單 session persistence $>1$ 仍可接受。
+
+\textbf{問題 4.2}（\textcolor{warncolor}{中度}）：\textbf{Information set 未形式化定義。}
+
+PRG 的核心宣稱是 ``information bridge across session boundaries''。但論文未形式化定義 information set $\mathcal{F}_n$。具體而言：
+\begin{itemize}
+    \item 在 overnight session $n$ ($s_n = 0$) 結束時，$\mathcal{F}_n$ 包含什麼？是否包含 overnight 的 realized variance（如果可用）？
+    \item $h_{n-1}$ 從上一個 session 攜帶過來——但 $h_{n-1}$ 本身是 $\mathcal{F}_{n-2}$-measurable（因為 $h_{n-1} = f(h_{n-2}, x_{n-2})$）。論文需要明確展示 $h_n$ 在何種意義上是 $\mathcal{F}_{n-1}$-measurable。
+\end{itemize}
+
+\textbf{問題 4.3}（\textcolor{warncolor}{中度}）：\textbf{Session close assumption 未明確陳述。}
+
+TAIFEX 的 session 結構：
+\begin{itemize}
+    \item Regular session: 08:45--13:45
+    \item Night session: 15:00--05:00（次日）
+\end{itemize}
+
+論文的 Eq.\ (1)---(2) 使用 $P^c_d$（收盤價）和 $P^o_d$（開盤價）。但 TAIFEX 有兩個 session——``收盤價'' 是指 regular session 的 13:45 收盤？還是 night session 的 05:00 收盤？overnight return 的起訖點為何？
+
+對 U.S.\ ETFs 用 OHLC 數據，overnight = $\log(O_d / C_{d-1})$ 是清楚的。但 TAIFEX 有 night session，``overnight'' 的定義需要精確說明。Table 1 的 footnote 說 ``overnight (15:00--08:45)'' 但 regular session 收在 13:45，之間有 15:00 到 13:45 的 gap 怎麼處理？
+
+
+%% =====================================================================
+%% 5. EQUATIONS AND DERIVATIONS
+%% =====================================================================
+\section{五、方程式與推導審查}
+
+\textbf{問題 5.1}（\textcolor{warncolor}{中度}）：\textbf{$\sigma^2_\text{full}$ 的定義在 TAIFEX 和 U.S.\ 之間不一致。}
+
+Eq.\ (3) 定義：$\sigma^2_{\text{full},d} = r^2_{d,0} + r^2_{d,1}$
+
+但 K874e 的 common target 是：``$\sigma^2_\text{fullday} = r^2_\text{gap} + \text{RV}_\text{intra} + \text{RV}_\text{night}$''（三分量）。
+
+這意味著：
+\begin{itemize}
+    \item TAIFEX 使用 $r^2_\text{gap}$（隔夜缺口平方）+ $\text{RV}_\text{intra}$（日間 5-min RV）+ $\text{RV}_\text{night}$（夜盤 5-min RV）= 三分量
+    \item U.S.\ 使用 $r^2_\text{overnight} + r^2_\text{intraday}$ = 兩分量
+\end{itemize}
+
+但論文只寫了 Eq.\ (3) 的兩分量形式。TAIFEX 的三分量 target 未被寫出。更重要的是，gap return 是 13:45（收盤）到 15:00（夜盤開盤）之間的價格變動，這 75 分鐘的 ``gap'' 在論文中完全未被討論。
+
+\textbf{問題 5.2}（輕微）：\textbf{Full-day forecast 的 aggregation。}
+
+Eq.\ (6) 聲稱 $\hat{\sigma}^2_{\text{full},d} = \hat{h}_{d,0} + \hat{h}_{d,1}$。但 $\hat{h}_{d,0}$ 和 $\hat{h}_{d,1}$ 分別是 overnight 和 intraday 的 conditional variance。將它們相加作為 full-day variance 估計的前提是 overnight 和 intraday returns 不相關。雖然論文在 Eq.\ (3) 後聲明了此假設，但\textbf{未驗證}它是否成立。建議報告 $\text{Corr}(r_{d,0}, r_{d,1})$ 的樣本值。
+
+\textbf{問題 5.3}（輕微）：PRG 的 innovation distribution 未指定。GJR 使用 Student-$t$。PRG 使用什麼？Normal？Student-$t$？session-specific distribution？這影響 VaR 的計算方式。
+
+
+%% =====================================================================
+%% 6. RESEARCH METHODS
+%% =====================================================================
+\section{六、研究方法審查}
+
+\textbf{問題 6.1}（\textcolor{warncolor}{中度}）：\textbf{Refit frequency 不對等。}
+
+Section 2.3 說明：``GJR and HAR every 63 trading days, PRG and Separate GARCH every 126--252 days.''
+
+這造成不公平的比較：
+\begin{itemize}
+    \item 較頻繁的 refit 對 GJR/HAR \textbf{有利}（參數更新更快）
+    \item 較不頻繁的 refit 對 PRG \textbf{不利}
+\end{itemize}
+
+PRG 仍然勝出暗示其優勢是 robust 的，但讀者會質疑：如果 PRG 也用 63 天 refit，改善幅度會不會更大？或者反過來，如果 GJR 也用 252 天，差距會不會縮小？應提供 sensitivity analysis 或統一 refit frequency。
+
+\textbf{問題 6.2}（\textcolor{warncolor}{中度}）：\textbf{HAR 在 proxy-only 環境下的建構存疑。}
+
+論文 Section 2.3 說 HAR 用 ``daily, weekly, and monthly lags of $\sigma^2_\text{full}$'' 並在 log-space 估計。但：
+\begin{itemize}
+    \item 對 TAIFEX，$\sigma^2_\text{full}$ 含 5-min RV，HAR-RV 是在其原生環境中操作——公平。
+    \item 對 U.S.\ ETFs，$\sigma^2_\text{full} = r^2_\text{overnight} + r^2_\text{intraday}$。將 squared daily OHLC returns 的 sum 作為 HAR 的 ``realized measure'' 極為粗糙。標準 HAR 使用 5-min RV，不是 $r^2$。
+\end{itemize}
+
+K874d 結果證實：HAR 在 TAIFEX（有 tick data）表現優異（native QLIKE = 0.119，遠低於 PRG 的 0.198），但轉換到 common target 後劣化（0.415）。在 U.S.\ 用 $r^2$ proxy 的 HAR 表現嚴重退化（SPY QLIKE = 1.464），這可能不是 HAR 模型的問題，而是 \textbf{proxy 品質}的問題。
+
+論文將此解讀為 ``target-mismatch artifact''，但更準確的解讀是：HAR 設計用於 realized measures，被迫用 $r^2$ proxy 時自然表現差。這不是 HAR 的 weakness，而是測試設計的 limitation。
+
+\textbf{問題 6.3}（輕微）：Ablation study 只報告 SPY 一個市場（Table 3）。如果 ablation 是論文的核心論證之一，應至少報告 TAIFEX 和一個 U.S.\ market。
+
+
+%% =====================================================================
+%% 7. DATA AND SAMPLE
+%% =====================================================================
+\section{七、資料與樣本審查}
+
+\textbf{問題 7.1}（\textcolor{warncolor}{中度}）：\textbf{TAIFEX tick data 與 U.S.\ OHLC data 的可比性。}
+
+將 tick-level 5-min RV（TAIFEX）與 OHLC squared returns（U.S.）放在同一張 Table 2 中比較，且用同一個 ``QLIKE'' 指標，暗示它們可比。但：
+\begin{itemize}
+    \item TAIFEX 的 $x_n$ 是 5-min RV（低噪音）
+    \item U.S.\ 的 $x_n$ 是 $r^2$（高噪音，estimation error $\approx$ 200\%）
+\end{itemize}
+
+PRG 在 TAIFEX 和 U.S.\ 的 QLIKE 值差異巨大（0.198 vs 0.748），主要反映的是 proxy quality 差異而非 model performance 差異。Table 2 應更清楚地標示 proxy 差異或分兩個 panel。
+
+\textbf{問題 7.2}（輕微）：Table 1 TAIFEX 的 ``ON var (\%)'' 列為 ``27--50''（range），其他市場是單一數字。K874e 顯示 gap share 在 OOS 期間為 49.6\%，但 IS 期間為 27.0\%。這種巨大變化（幾乎翻倍）暗示 regime shift，值得在正文中討論。
+
+\textbf{問題 7.3}（輕微）：U.S.\ ETFs 的 IS/OOS split 是 70/30，但具體 split date 取決於各 ETF 的上市日期。QQQ 從 2000 年開始、GLD 從 ~2004、EEM 從 ~2003——IS 長度不同，但論文未提供具體 IS 期間或樣本數。
+
+
+%% =====================================================================
+%% 8. RESULTS AND CONCLUSIONS
+%% =====================================================================
+\section{八、結果與預期成果審查}
+
+\textbf{問題 8.1}（\textcolor{errorred}{嚴重}）：\textbf{Table 4 TAIFEX PRG Extended 的 VaR 數字實為 PRG Basic。}
+
+交叉驗證 K874e 實驗結果：
+
+\begin{center}
+\small
+\begin{tabular}{lccc}
+\toprule
+& \textbf{K874e 實驗值} & \textbf{Paper Table 4} & \textbf{Match?} \\
+\midrule
+PRG Ext Normal VaR 1\% VR & 0.24\% (2/843) & 0.95\% & \textcolor{errorred}{NO} \\
+PRG Ext Normal VaR 1\% Kupiec $p$ & 0.0075 & 0.88 & \textcolor{errorred}{NO} \\
+PRG Basic Normal VaR 1\% VR & 0.95\% (8/843) & 0.95\% & \textcolor{okgreen}{YES} \\
+PRG Basic Normal VaR 1\% Kupiec $p$ & 0.8807 & 0.88 & \textcolor{okgreen}{YES} \\
+GJR Normal VaR 1\% VR & 2.49\% (21/843) & 2.49\% & \textcolor{okgreen}{YES} \\
+SPY PRG Ext VaR 1\% VR & 0.93\% (17/1823) & 0.93\% & \textcolor{okgreen}{YES} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{TAIFEX 的 PRG Extended VaR 數據被錯誤地替換為 PRG Basic 的數據。} 實際的 PRG Extended Normal VaR 1\% 只有 2 次違反（0.24\%），Kupiec $p = 0.0075$（拒絕 unconditional coverage），\textbf{未通過} Kupiec test。
+
+更嚴重的是：論文稱 ``the PRG VaR achieves the Kupiec--Christoffersen--Basel `trinity pass' using Normal quantiles''。但 K874e 顯示 PRG Extended Normal VaR 的 trinity pass = \textbf{false}（因 Kupiec 拒絕）。PRG \textbf{Basic} Normal VaR 才是 trinity pass = true（Kupiec $p=0.88$, independence $p=0.06$, CC $p=0.17$, Basel Green）。
+
+此錯誤可能是複製貼上時混淆了 PRG Basic 與 PRG Extended 的結果行。但若發表，這構成數據報告錯誤。
+
+\textbf{問題 8.2}（\textcolor{errorred}{嚴重}）：\textbf{MCS 結論在 TAIFEX 和 U.S.\ 之間的矛盾未被解釋。}
+
+\begin{itemize}
+    \item TAIFEX MCS (K874e)：只有 PRG Basic + PRG Extended 存活——GJR ($p=0.000$) 和 HAR ($p=0.000$) 被淘汰。
+    \item SPY MCS (K880)：\textbf{所有 5 個模型都存活}（GJR, HAR, PRG Basic, PRG Extended, Separate 全部存活）。
+    \item QQQ, GLD, EEM MCS (K881)：\textbf{所有 5 個模型都存活}。
+\end{itemize}
+
+論文 Table 2 最後一列標示 ``MCS: PRG only'' (TAIFEX) 和 ``All'' (U.S.)，但未解釋為何 U.S.\ 市場中 \textbf{Separate GARCH 也存活 MCS}。如果 Separate GARCH 存活 MCS，那 PRG 的 ``cross-session bridge'' 在 U.S.\ 市場中並無 MCS-level 的統計顯著優勢。
+
+論文的 Discussion section 試圖用 ``noisier daily OHLC proxies'' 解釋，但這實際上削弱了 U.S.\ 結果的所有結論——如果 proxy noise 導致 MCS 無法區分模型，那 DM test 的 $t > 3.0$ 結果是否也受到 noise 扭曲？QLIKE 的 proxy-robust 性質只保證 \textbf{ranking} 的一致性，不保證 \textbf{significance level} 不受 noise 影響。
+
+\textbf{問題 8.3}（\textcolor{warncolor}{中度}）：\textbf{FZ joint loss DM test 結果不支持論文宣稱的 ES dominance。}
+
+Table 4 報告 SPY PRG Ext vs GJR 的 FZ DM $t = 3.75$。但 K874e（TAIFEX）的 FZ DM tests 顯示：
+\begin{itemize}
+    \item GJR vs PRG Extended: $t = 2.50$, \textbf{not significant} at Harvey threshold
+    \item GJR vs PRG Basic: $t = 2.31$, \textbf{not significant}
+    \item HAR vs PRG Extended: $t = 2.20$, \textbf{not significant}
+\end{itemize}
+
+論文只報告了 SPY 的 FZ DM test（通過 Harvey 門檻），但隱瞞了 TAIFEX 的 FZ DM test（全部未通過）。如果 TAIFEX 有 tick-level data 且 PRG 的 MCS-level dominance 最強，為何 FZ joint loss 反而無法區分？這暗示 ES 層面的優勢不如 QLIKE 層面穩健。
+
+\textbf{問題 8.4}（\textcolor{warncolor}{中度}）：\textbf{Economic significance 的 VT strategy 有過度宣稱之嫌。}
+
+Table 5 報告 PRG Extended VT strategy Sharpe = 1.66，比 Buy\&Hold 的 1.01 高 64\%。但：
+\begin{itemize}
+    \item K874e layer6\_strategy\_dm 的 DM tests 顯示：GJR vs PRG Extended strategy DM $t = 1.22$（\textbf{not significant}）。PRG Extended 只顯著優於 PRG Basic（$t = 4.11$），但不顯著優於 GJR。
+    \item 論文未報告 strategy-level DM tests。只報告 Sharpe 差異（1.66 vs 1.11）暗示 PRG Extended ``economically meaningful''，但統計上策略表現差異可能 \textbf{不顯著}。
+    \item 論文承認未扣交易成本，但未提供 break-even cost analysis。以 avg daily turnover 5.9\% 和 TAIFEX 期貨單邊約 0.3--0.5 bps 的 transaction cost，年化成本約 4--7 bps，影響不大。但此計算應包含在論文中。
+\end{itemize}
+
+
+%% =====================================================================
+%% 9. CITATION STANDARDS
+%% =====================================================================
+\section{九、引用規範審查}
+
+\textbf{問題 9.1}（輕微）：\textbf{Duan (1995) 未列入 References。} Section 2.3 提到 ``Duan (1995) smearing correction'' 但 bibliography 中找不到。
+
+\textbf{問題 9.2}（輕微）：\textbf{Harvey (2016) 的 bibitem 標示為 ``Harvey, C.~R., Liu, Y., and Zhu, H.''} 但 \verb|\citet{Harvey2016}| 在正文中會顯示為 ``Harvey (2016)''，省略了共同作者。應標示為 Harvey et al.\ (2016)。
+
+\textbf{問題 9.3}（輕微）：\textbf{Bollerslev (1986) 被引用但在正文中未出現。} References 中列了 Bollerslev (1986) 但正文中只引用了 Bollerslev \& Ghysels (1996)。FRL 通常不允許 uncited references。
+
+\textbf{問題 9.4}（輕微）：Hansen \& Huang (2016) 的 bibitem key 是 \verb|Hansen2016RealizedGARCH| 但正文中\textbf{未引用}此 reference。它出現在 bibliography 中但正文中找不到對應的 \verb|\cite|。
+
+
+%% =====================================================================
+%% 10. SPECIFIC ISSUES LIST
+%% =====================================================================
+\section{十、具體問題清單}
+
+\subsection*{嚴重問題（必須修正才能送審）}
+
+\begin{longtable}{p{0.5cm}p{2cm}p{11cm}}
+\toprule
+\# & 位置 & 問題描述 \\
+\midrule
+\endhead
+S1 & Eq.~(5) + K874c & PRG Basic overnight persistence $\alpha_0+\beta_0 = 1.086 > 1$，PRG Extended overnight $\alpha_0+0.5\gamma_0+\beta_0 = 1.107 > 1$。違反論文自訂的 stationarity condition。需重新推導 joint stationarity condition 或修正估計。 \\
+S2 & Table 4 & TAIFEX PRG Ext VaR 1\% 數據（VR=0.95\%, Kupiec $p$=0.88）實際來自 PRG Basic。PRG Extended 實際 VR=0.24\%, Kupiec $p$=0.0075（拒絕）。``Trinity pass'' 宣稱不成立。 \\
+S3 & Table 2 & U.S.\ MCS ``All survive'' 表示包含 Separate GARCH。PRG 的 cross-session bridge 在 U.S.\ 無 MCS-level 統計優勢。需修正 Discussion 對此矛盾的解讀。 \\
+\bottomrule
+\end{longtable}
+
+\subsection*{中度問題（強烈建議修正）}
+
+\begin{longtable}{p{0.5cm}p{2cm}p{11cm}}
+\toprule
+\# & 位置 & 問題描述 \\
+\midrule
+\endhead
+M1 & Title & ``Periodic Realized GARCH'' 命名與 Hansen et al.\ (2012) 的 Realized GARCH 定義衝突（PRG 無 measurement equation）。建議改名。 \\
+M2 & Section 1 & ``previously documented HAR dominance over GJR is largely a target-mismatch artifact'' 基於 TAIFEX 單一市場的 DM $t=0.57$，過度推論。 \\
+M3 & Section 3 & 缺少 overnight/intraday decomposition 核心文獻（Tsiakas 2008, Ahoniemi \& Lanne 2013, Todorova \& Souček 2014）。 \\
+M4 & Section 2.2 & Information set $\mathcal{F}_n$ 未形式化定義。Cross-session bridge 的理論基礎需要更嚴謹的陳述。 \\
+M5 & Section 2.3 & Refit frequency 不對等（GJR/HAR 63天 vs PRG 126--252天）。應做 sensitivity analysis 或統一。 \\
+M6 & Section 2 & TAIFEX session close 假設（13:45 regular vs 05:00 night）未明確。Eq.~(1)--(2) 的 $P^c$, $P^o$ 在 TAIFEX 脈絡中需要精確定義。 \\
+M7 & Table 4 & TAIFEX FZ DM tests 全部不顯著（$t < 3.0$）但未報告，只報告 SPY FZ DM $t=3.75$。Selective reporting。 \\
+M8 & Section 4.4 & Strategy-level DM tests 不顯著（PRG Ext vs GJR: $t=1.22$）但未報告。Sharpe 差異的經濟意義被高估。 \\
+\bottomrule
+\end{longtable}
+
+\subsection*{輕微問題}
+
+\begin{longtable}{p{0.5cm}p{2cm}p{11cm}}
+\toprule
+\# & 位置 & 問題描述 \\
+\midrule
+\endhead
+L1 & References & Duan (1995) 在正文引用但不在 bibliography 中。 \\
+L2 & References & Bollerslev (1986) 在 bibliography 中但未在正文引用。Hansen \& Huang (2016) 同。 \\
+L3 & Section 4.2 & Ablation study 只報告 SPY。應至少加 TAIFEX。 \\
+L4 & Eq.~(3) & TAIFEX 的 $\sigma^2_\text{full}$ 實際使用三分量（gap + RV\_intra + RV\_night）但只寫了兩分量形式。 \\
+L5 & Table 1 & TAIFEX ON var 用 range (27--50)，其他用單一值。IS 與 OOS 的 overnight share 巨大差異暗示 regime shift，值得討論。 \\
+L6 & Section 2.2 & PRG innovation distribution 未指定（Normal? Student-$t$?）。影響 VaR 計算方式。 \\
+L7 & Section 4.1 & PRG-Ablated 與 Separate GARCH 的確切區別不清楚。 \\
+L8 & Section 4.2 & ``striking'' 等推銷性語言應替換為更中性的學術表述。 \\
+L9 & Table 5 & 未報告 transaction cost break-even analysis。Average daily turnover 已計算（5.9\%），應提供成本估計。 \\
+L10 & Section 1 & ``6--8 total parameters'' 與 GJR 的 5--6 parameters 差距不大，parsimony 優勢需量化（e.g., BIC comparison）。 \\
+L11 & Eq.~(6) & $\hat{\sigma}^2_\text{full} = \hat{h}_{d,0} + \hat{h}_{d,1}$ 假設 overnight/intraday 不相關但未驗證。應報告 $\text{Corr}(r_{d,0}, r_{d,1})$。 \\
+L12 & General & 論文長度接近 FRL word limit（估計約 2400 字）。修訂後可能超限。 \\
+\bottomrule
+\end{longtable}
+
+
+%% =====================================================================
+%% CONCLUSION
+%% =====================================================================
+\section{總結與建議}
+
+\subsection*{核心判斷}
+
+本文提出的 session-periodic GARCH 模型確實捕捉到了一個有價值的 empirical regularity：overnight 和 intraday session 的波動率動態不同，且 cross-session information transfer 有預測價值。TAIFEX tick-level 數據的 MCS 結果（只有 PRG 存活）是強有力的證據。然而，論文存在三個必須修正的嚴重問題：
+
+\begin{enumerate}
+    \item \textbf{Stationarity violation}：估計結果違反論文自訂的 constraint。這可能意味著需要重新推導 joint stationarity condition。
+    \item \textbf{VaR data error}：Table 4 TAIFEX PRG Extended 的數字來自 PRG Basic。這是可驗證的數據報告錯誤。
+    \item \textbf{MCS contradiction}：U.S.\ MCS ``All survive'' 包含 Separate GARCH，但論文宣稱 cross-session bridge 是 ``sole driver''。需要更 nuanced 的結論。
+\end{enumerate}
+
+\subsection*{修訂建議}
+
+\begin{enumerate}
+    \item \textbf{改名}：``Periodic Session GARCH'' (PSG) 或 ``Session-Switching GARCH'' (SSG)，避免與 Realized GARCH 文獻衝突。
+    \item \textbf{推導 joint stationarity condition}：考慮跨 session 的乘積形式或 spectral radius 條件。報告所有 persistence 值。
+    \item \textbf{修正 Table 4}：使用正確的 PRG Extended VaR 數據。如果 PRG Extended 的 VaR 不如 PRG Basic，這反而是一個有趣的發現（leverage term 可能導致過度保守），應該討論而非隱藏。
+    \item \textbf{擴展 ablation}：至少報告 TAIFEX + SPY 的 ablation，讓讀者判斷 cross-session bridge 在不同 proxy quality 下的貢獻。
+    \item \textbf{補充文獻}：加入 Tsiakas (2008), Ahoniemi \& Lanne (2013), Todorova \& Souček (2014) 等 overnight/intraday decomposition 文獻。
+    \item \textbf{報告完整 DM tests}：包括 TAIFEX FZ DM tests（雖然不顯著）和 strategy-level DM tests。Selective reporting 是審稿人最容易發現的問題。
+    \item \textbf{統一 refit frequency} 或提供 sensitivity analysis。
+    \item \textbf{加入 Duan (1995) reference}；移除未引用的 references。
+    \item \textbf{Tone down claims}：``target-mismatch artifact'' $\to$ ``TAIFEX evidence suggests potential target-mismatch concern''；``striking'' $\to$ ``notable'' 或直接刪除。
+    \item \textbf{FRL word limit}：目前接近上限。修訂時考慮將部分內容（ablation details, VT strategy）移至 Online Appendix。
+\end{enumerate}
+
+\subsection*{最終評語}
+
+模型創新有價值，實驗設計（5 市場、6 層評估、ablation）比多數 FRL 論文嚴謹。但 3 個嚴重問題（特別是 VaR 數據錯誤和 stationarity 違反）必須在送審前修正。建議進行 major revision 後再投稿。
+
+\bigskip
+\hrule
+\bigskip
+\begin{center}
+\textit{審查結束 --- 2026-04-05}
+\end{center}
+
+\end{document}
