@@ -1,0 +1,334 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{fixedblue}{RGB}{0,80,180}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Second-Round Review Report}\\[0.5em]
+{\large The True Cost of Volatility Targeting: Decomposing the Insurance Premium\\into Opportunity and Transaction Components}\\[0.5em]
+{\normalsize Document type: Journal paper (target: Journal of Portfolio Management / Financial Analysts Journal)}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (12-dimension full review)}\\
+{\normalsize Reviewer: Claude Opus 4.6 (1M context)}\\[0.3em]
+{\normalsize Previous review: review\_v1.tex (2026-04-05, Round~1)}
+\end{center}
+
+\bigskip
+
+%=================================================================
+\section*{Review Summary}
+%=================================================================
+
+\begin{tabular}{ll}
+\textcolor{errorred}{\textbf{SEVERE issues (must fix)}} & \textbf{1 item} (down from 5 in Round~1) \\
+\textcolor{warncolor}{\textbf{MEDIUM issues (should fix)}} & \textbf{6 items} (down from 8 in Round~1) \\
+Minor issues (optional) & 5 items (down from 7) \\
+Overall assessment & \textbf{Good} (improved from ``Good with serious concerns'') \\
+\end{tabular}
+
+\bigskip
+
+The revision addresses the most critical Round~1 issues---E2 (cross-OOS tone) and E5 (abstract/conclusion language) are now properly hedged, and E4 (K846 sample period) is disclosed via a footnote. However, \textbf{E3 (sensitivity numbers) remains unresolved}: the paper now reports different numbers from Round~1 (64\%, 57\%, 65\% instead of 57\%, 57\%, 62\%), but these \emph{still do not match} the only available JSON files (\texttt{k811v2\_sensitivity\_results.json} and \texttt{k811v2\_sensitivity\_sweep.json}), which show opportunity cost shares of 81--89\% and total reductions of $-8.5\%$ to $-30.5\%$. This is the single remaining blocking issue. Additionally, 4 of the 5 citation-check items (from \texttt{citation\_check.md}) were not addressed in this revision.
+
+%=================================================================
+\section*{Part A: Round~1 SEVERE Issue Resolution Checklist}
+%=================================================================
+
+\subsection*{\textcolor{fixedblue}{E1: VoV threshold justification --- PARTIALLY FIXED}}
+
+\textbf{Round~1 complaint}: The $z > 1.0$ threshold, 5-day VIX direction window, and S3 blend coefficient 0.5 lacked theoretical justification or sensitivity analysis.
+
+\textbf{What was done}: The paper now includes a sensitivity paragraph in Section~3.5 (line~196) reporting results at thresholds 0.5, 1.0, and 1.5. The paper also adds a footnote (line~104) acknowledging the 80/20 VoV/VIX-rising attribution ``has not been validated through nested out-of-sample testing.'' The limitation section (Section~4) adds a call for ``walk-forward optimization'' to confirm robustness.
+
+\textbf{Remaining problems}:
+\begin{enumerate}[leftmargin=2em]
+\item The sensitivity numbers themselves are incorrect (see E3 below), undermining the entire sensitivity argument.
+\item The 5-day VIX-rising window choice is still not justified---no explanation of why 5 days rather than 10 or 20.
+\item The S3 blend coefficient 0.5 is still arbitrary and unacknowledged.
+\end{enumerate}
+
+\textbf{Verdict}: \textcolor{warncolor}{Downgraded from SEVERE to MEDIUM}---the attempt is visible but incomplete due to the data discrepancy.
+
+\bigskip
+
+\subsection*{\textcolor{fixedblue}{E2: Cross-OOS tone vs.\ evidence --- FIXED}}
+
+\textbf{Round~1 complaint}: The conclusion used ``demonstrates'' and ``achievable'' despite 1/4 cross-OOS win rate and non-significant DM tests.
+
+\textbf{What was done}: The abstract now includes explicit caveats: ``Cross-OOS analysis shows that this cost reduction is sample-dependent (S2 outperforms in 1 of 4 non-overlapping windows), suggesting VoV conditioning operates as infrequent tail insurance rather than a consistently superior strategy.'' The conclusion uses ``reduces cost by 74\% in the full sample'' with immediate qualification: ``though cross-OOS analysis (1 of 4 non-overlapping windows) indicates this benefit may be sample-specific.'' The word ``demonstrates'' has been replaced with appropriately hedged language throughout.
+
+\textbf{Verdict}: \textcolor{okgreen}{FIXED.} The tone now matches the evidence.
+
+\bigskip
+
+\subsection*{\textcolor{errorred}{E3: Sensitivity numbers --- NOT FIXED (STILL SEVERE)}}
+
+\textbf{Round~1 complaint}: Sensitivity numbers (opp share 57\%, 57\%, 62\%; reduction 61\%--79\%) could not be reproduced from any JSON.
+
+\textbf{What was done}: The numbers were \emph{changed} but are \emph{still wrong}. The paper now reports (line~196):
+\begin{quote}
+``at thresholds of 0.5, 1.0, and 1.5, the opportunity cost share remains above 57\% in all cases (\textbf{64\%, 57\%, and 65\%}, respectively), and total premium reduction relative to unconditional VT ranges from \textbf{62\% to 76\%}.''
+\end{quote}
+
+\textbf{But the JSON files show}:
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+Threshold & \multicolumn{2}{c}{Opp.\ Share (\%)} & \multicolumn{2}{c}{Total Reduction (\%)} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+& Paper & JSON & Paper & JSON \\
+\midrule
+0.5 & 64 & \textcolor{errorred}{81.4--81.7} & $-$62 (implied) & \textcolor{errorred}{$-$30.5} \\
+1.0 & 57 & \textcolor{errorred}{85.0--85.5} & (baseline) & \textcolor{errorred}{$-$13.1 to $-$14.7} \\
+1.5 & 65 & \textcolor{errorred}{89.1} & $-$76 (implied) & \textcolor{errorred}{$-$8.4 to $-$8.5} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Sources checked}: \texttt{k811v2\_sensitivity\_results.json} and \texttt{k811v2\_sensitivity\_sweep.json}. Both consistently show opp shares of 81--89\% and total reductions of $-8$ to $-31$\%, not the 57--65\% and $-62$ to $-76$\% claimed in the paper. The discrepancies are enormous---the paper's sensitivity results appear to come from an unrecorded computation or a different definition of the metrics.
+
+\textbf{Possible explanations}:
+\begin{itemize}[leftmargin=2em]
+\item The paper may be computing the opp share \emph{for the S2 strategy at each threshold} using the main decomposition method, while the JSON sweep uses a different methodology (the sweep JSON has both \texttt{s1\_opp\_share} and \texttt{s2\_opp\_share} columns with very different values).
+\item The ``total reduction'' direction is inverted: the JSON shows S2 having a \emph{higher} total cost than S1 at the sweep thresholds (e.g., 4.89 vs.\ 3.75 at $z=0.5$), while the paper claims VoV conditioning \emph{reduces} cost. This suggests the sweep JSON may be computing something fundamentally different from the main analysis.
+\item Whatever the explanation, the \textbf{numbers in the paper cannot be traced to any recorded experiment output}, which violates basic reproducibility.
+\end{itemize}
+
+\textbf{Required action}: (a)~Re-run the threshold sensitivity analysis using the \emph{exact same methodology} as the main K811v2 decomposition; (b)~save results to a new JSON file; (c)~update the paper with the correct numbers; (d)~if the main-analysis and sweep definitions differ, explain why.
+
+\textbf{Verdict}: \textcolor{errorred}{STILL SEVERE.} This is the single blocking issue preventing acceptance.
+
+\bigskip
+
+\subsection*{\textcolor{fixedblue}{E4: K846 sample period disclosure --- FIXED}}
+
+\textbf{Round~1 complaint}: The 54~bps rebalancing premium and $\rho = 0.057$ come from K846 (2006--2024), but the main analysis covers 2012--2024, with no disclosure of the cross-period reference.
+
+\textbf{What was done}: A footnote is now present in Section~3.3 (line~183): ``The correlation and rebalancing premium estimates use the 2006--2024 sample (from GLD inception) rather than the 2012--2024 VVIX-reliable period. Both estimates are stable across sub-periods.'' This addresses the disclosure concern.
+
+\textbf{Minor residual}: The claim ``Both estimates are stable across sub-periods'' is asserted without evidence. Consider reporting the 2012--2024 sub-period correlation and rebalancing premium alongside the full-sample numbers.
+
+\textbf{Verdict}: \textcolor{okgreen}{FIXED} (with minor residual suggestion).
+
+\bigskip
+
+\subsection*{\textcolor{fixedblue}{E5: Abstract/Conclusion language --- FIXED}}
+
+\textbf{Round~1 complaint}: Abstract and Conclusion presented the 74\% cost reduction without qualification, despite weak cross-OOS support.
+
+\textbf{What was done}: The abstract now reads ``reduces total cost by 74\% \emph{in the full sample}'' and immediately adds ``Cross-OOS analysis shows that this cost reduction is sample-dependent.'' The conclusion similarly qualifies: ``though cross-OOS analysis (1 of 4 non-overlapping windows) indicates this benefit may be sample-specific.'' The final sentence of the conclusion positions VoV conditioning as ``a preliminary but promising direction.''
+
+\textbf{Verdict}: \textcolor{okgreen}{FIXED.} The language is now appropriately calibrated to the evidence.
+
+%=================================================================
+\section*{Part B: Round~1 MEDIUM Issue Resolution Checklist}
+%=================================================================
+
+\begin{longtable}{p{0.6cm}p{2.2cm}p{2cm}p{8.5cm}}
+\toprule
+\# & Issue & Status & Comment \\
+\midrule
+W1 & 50/50 role in logic & \textcolor{okgreen}{Fixed} & The introduction now positions 50/50 analysis as ``supporting evidence'' (line~60): ``As supporting evidence, we quantify the structural rebalancing premium\ldots'' This is consistent with the ``two contributions'' framing. \\
+\midrule
+W2 & Missing hypothesis & \textcolor{warncolor}{Partially} & No explicit hypothesis statement was added before Section~2.2. However, the introduction now better links the decomposition to VoV conditioning (line~59--60). A formal ``Hypothesis 1'' statement would strengthen the paper but is not strictly required for practitioner journals. \\
+\midrule
+W3 & VoV literature gaps & \textcolor{warncolor}{Not fixed} & Baltussen et al.\ (2018), Todorov (2010), Drechsler \& Yaron (2011), and Bekaert \& Hoerova (2014) are still not cited. The VoV literature review remains thin (only Bollerslev et al.\ 2009 and Huang \& Shaliastovich 2015). \\
+\midrule
+W4 & Bongaerts distinction & \textcolor{okgreen}{Fixed} & The Bongaerts description was corrected from ``conditioning on expected returns'' to ``conditioning on volatility states'' (line~58). A fuller distinction is provided: ``our approach conditions on volatility-of-volatility and focuses on cost decomposition rather than performance optimization'' (line~58). \\
+\midrule
+W5 & Rebalancing claim & \textcolor{okgreen}{Fixed} & Consistently framed as ``supporting evidence'' and ``empirical confirmation'' rather than a novel contribution. \\
+\midrule
+W6 & S3 blend 0.5 & \textcolor{warncolor}{Not fixed} & The 0.5 blending coefficient in S3 is still presented without justification or sensitivity analysis. \\
+\midrule
+W7 & DM test details & \textcolor{warncolor}{Not fixed} & The DM test loss function, HAC bandwidth, and one-sided vs.\ two-sided specification are still not reported. The applicability of Harvey (2016) $t > 3.0$ to time-series strategy comparison is not discussed. \\
+\midrule
+W8 & yfinance vs CRSP & \textcolor{okgreen}{Partially} & The paper now adds ``consistent with CRSP to within rounding precision'' (line~108), but still provides no comparative evidence. This is acceptable for FAJ/JPM but would need a robustness appendix for JFE/RFS. \\
+\midrule
+W9 & CRRA utility & \textcolor{okgreen}{Fixed} & Table~1 footnote now explicitly states: ``CRRA $\gamma\!=\!5$ reports mean CRRA utility of the wealth path (not certainty-equivalent); a formal CE analysis requires computing $\text{CE} = u^{-1}(E[u(W)])$.'' This acknowledges the limitation. \\
+\midrule
+W10 & Missing references & \textcolor{warncolor}{Not fixed} & DeMiguel et al.\ (2009), Dreyer \& Hubrich (2019), Ilmanen (2011) are still absent. No insurance premium pricing literature added. \\
+\bottomrule
+\end{longtable}
+
+\textbf{Summary}: 5 of 8 medium issues addressed (W1, W4, W5, W8, W9). Three remain open (W3, W7, W10) and one is partially addressed (W2). W6 (S3 blend) was not addressed but is minor in the context of S3 being a secondary strategy.
+
+%=================================================================
+\section*{Part C: Citation Check Issues (from citation\_check.md)}
+%=================================================================
+
+The citation verification report identified 1 MAJOR and 4 MINOR issues. Resolution status:
+
+\begin{longtable}{p{0.6cm}p{3cm}p{2cm}p{7.8cm}}
+\toprule
+\# & Issue & Status & Comment \\
+\midrule
+C1 & Bongaerts (2020) content claim & \textcolor{okgreen}{Fixed} & Changed from ``conditioning on expected returns'' to ``conditioning on volatility states'' (line~58). Correct. \\
+\midrule
+C2 & Huang \& Shaliastovich (2015) $\to$ 2019 JFQA & \textcolor{warncolor}{Not fixed} & Still cited as ``Working Paper, University of Pennsylvania'' (line~258). Should be: Huang, D., Schlag, C., Shaliastovich, I., Thimme, J., 2019. Volatility-of-volatility risk. \textit{JFQA} 54, 2423--2452. \\
+\midrule
+C3 & Perchet et al.\ pages & \textcolor{warncolor}{Not fixed} & Still listed as pages 21--36 (line~267). Multiple databases list 21--38. \\
+\midrule
+C4 & Liu et al.\ ``smooth sailing'' & \textcolor{warncolor}{Not fixed} & Quotation marks still present around ``smooth sailing'' (line~205), which is not a direct quote from Liu et al.\ (2019). \\
+\midrule
+C5 & Cederburg et al.\ characterization & \textcolor{warncolor}{Not fixed} & Still reads ``identify transaction costs as a primary concern'' (line~56). Cederburg et al.'s primary finding concerns OOS performance instability, not transaction costs specifically. \\
+\bottomrule
+\end{longtable}
+
+%=================================================================
+\section*{Part D: New Issues Introduced by the Revision}
+%=================================================================
+
+\subsection*{\textcolor{warncolor}{N1: Sensitivity numbers changed but still unverifiable}}
+
+The revision changed the sensitivity numbers from Round~1 values (57\%, 57\%, 62\%) to new values (64\%, 57\%, 65\%), but neither set matches the JSON. This creates a \emph{worse} situation than Round~1: now there are \emph{two} sets of unverifiable numbers in the paper's revision history, suggesting ad hoc adjustments rather than systematic computation. The paper must include a single, traceable sensitivity run.
+
+\subsection*{\textcolor{warncolor}{N2: New footnote claim ``Both estimates are stable across sub-periods'' (Section 3.3)}}
+
+The footnote (line~183) asserts that the SPY-GLD correlation and rebalancing premium are ``stable across sub-periods'' without providing the sub-period numbers. This is an empirical claim that requires evidence. At minimum, report the 2012--2024 values alongside the 2006--2024 values.
+
+%=================================================================
+\section*{Part E: Full 12-Dimension Re-Review (Focus on Remaining Problems)}
+%=================================================================
+
+\subsection*{A. Logic Structure}
+
+\textcolor{okgreen}{\textbf{Good.}} The two-contribution framing (decomposition + VoV conditioning) is now internally consistent. The 50/50 benchmark is properly positioned as supporting evidence. The only structural weakness is the missing formal hypothesis connecting decomposition to VoV conditioning (W2), which is a style preference rather than a logic flaw.
+
+\subsection*{B. Research Motivation}
+
+\textcolor{okgreen}{\textbf{Excellent.}} Unchanged from Round~1. The three ``why this matters'' reasons are compelling and well-ordered.
+
+\subsection*{C. Literature Review}
+
+\textcolor{warncolor}{\textbf{Adequate but thin on VoV.}} The core VT literature (Moreira \& Muir 2017, Harvey et al.\ 2018, Cederburg et al.\ 2020) is well-covered. The VoV/variance risk premium literature remains underrepresented (only 2 citations: Bollerslev 2009, Huang 2015). For JPM/FAJ this is acceptable; for a more academic venue it would need strengthening. The Bongaerts distinction is now properly drawn.
+
+\subsection*{D. Research Gap and Contribution}
+
+\textcolor{okgreen}{\textbf{Good.}} Contribution claims are now appropriately scoped. The rebalancing premium is positioned as supporting evidence. The VoV conditioning is explicitly presented as ``preliminary but promising'' (Section~5).
+
+\subsection*{E. Model Specification}
+
+\textcolor{warncolor}{\textbf{Adequate with caveats.}} The core decomposition (Equations 1--3) is a clean accounting identity---no specification risk. The VoV conditioning rule parameters remain partially justified: the threshold sensitivity is attempted (though numbers are wrong), the 5-day window and S3 blend coefficient are not. The footnote acknowledging unvalidated 80/20 attribution is appropriate intellectual honesty.
+
+\subsection*{F. Equations and Derivations}
+
+\textcolor{okgreen}{\textbf{Good.}} Equations (1)--(4) are mathematically correct. The $N$ symbol conflict (years in Eq.~3 vs.\ trading days in text) persists but is a minor formatting issue. The VIX percentage convention is implied by $w = \min(12/\text{VIX}, 1)$ but still not explicitly stated.
+
+\textbf{Remaining minor issues}:
+\begin{itemize}[leftmargin=2em]
+\item Equation~(3): $N$ should be replaced with $T$ (years) to avoid confusion with $N = 3{,}262$ trading days used elsewhere.
+\item Equation~(1): $\bar{r}$ denoting annualized mean should use a more explicit notation like $\bar{r}_{\text{ann}}$.
+\end{itemize}
+
+\subsection*{G. Research Methods}
+
+\textcolor{warncolor}{\textbf{Adequate.}} The decomposition methodology is clean and well-defined. The cross-OOS design (4 non-overlapping 2-year windows) is appropriate given the 13-year sample. DM test details (loss function, bandwidth) are still not reported---this should be a footnote at minimum.
+
+\subsection*{H. Data and Sample}
+
+\textcolor{okgreen}{\textbf{Good.}} The sample restriction to 2012--2024 (VVIX-reliable period) is well-motivated. The K846 cross-period reference is now disclosed. Transaction cost assumption (5~bps) is conservative and well-referenced (Hasbrouck 2009). Signal lag (\texttt{shift(1)}) is clearly documented.
+
+\subsection*{I. Results and Conclusions}
+
+\textcolor{okgreen}{\textbf{Good, conditional on E3 fix.}} The core finding (91\% opportunity cost) is novel, well-supported, and correctly stated. The VoV conditioning results are now appropriately hedged. The only issue is the sensitivity analysis numbers (E3), which undermine what should be a straightforward robustness check.
+
+\subsection*{J. Citation Standards}
+
+\textcolor{warncolor}{\textbf{Needs minor corrections.}} Four citation issues from the citation check remain unaddressed (C2--C5). These are all fixable in minutes.
+
+\subsection*{K. Reference Completeness}
+
+\textcolor{warncolor}{\textbf{Acceptable for practitioner journals.}} 15 references with no orphans and no missing keys. The VoV literature is thin (W3/W10) but adequate for JPM/FAJ.
+
+\subsection*{L. Writing Quality}
+
+\textcolor{okgreen}{\textbf{Good.}} The prose is fluent and well-structured. The added caveats in the abstract and conclusion are naturally integrated rather than feeling forced. ``Apples-to-apples'' appears twice (Sections 3.3 and 4)---mildly colloquial for an academic paper but acceptable for practitioner journals.
+
+%=================================================================
+\section*{Consolidated Issue List}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{SEVERE (must fix before submission)}}
+
+\begin{longtable}{p{0.6cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & Location & Description \\
+\midrule
+E3 & Sec 3.5, line 196 & \textbf{Sensitivity analysis numbers are still unverifiable.} Paper claims opp shares of 64\%, 57\%, 65\% and total reduction range 62--76\%. JSON files (\texttt{k811v2\_sensitivity\_results.json}, \texttt{k811v2\_sensitivity\_sweep.json}) show opp shares 81--89\% and total reductions $-8$ to $-31$\%. Must re-run with main-analysis methodology and update all numbers. \\
+\bottomrule
+\end{longtable}
+
+\subsection*{\textcolor{warncolor}{MEDIUM (should fix)}}
+
+\begin{longtable}{p{0.6cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & Location & Description \\
+\midrule
+M1 & Sec 2.2 & \textbf{E1 residual}: 5-day VIX-rising window and S3 blend coefficient 0.5 still lack justification. Add one sentence each explaining the design choice or acknowledging arbitrariness. \\
+\midrule
+M2 & Sec 3.5 & \textbf{W7 residual}: DM test implementation details missing---loss function (squared return? utility-based?), HAC bandwidth selection, one-sided vs.\ two-sided. Add as footnote or parenthetical. \\
+\midrule
+M3 & References & \textbf{C2}: Update Huang \& Shaliastovich (2015 WP) to Huang, Schlag, Shaliastovich, Thimme (2019, \textit{JFQA} 54, 2423--2452). Also update bibkey from \texttt{huang2015} to \texttt{huang2019}. \\
+\midrule
+M4 & Sec 1, line 56 & \textbf{C5}: Cederburg et al.\ (2020) characterization overstated. Change ``identify transaction costs as a primary concern'' to ``question the out-of-sample viability of volatility-managed portfolios, noting concerns including transaction costs.'' \\
+\midrule
+M5 & Sec 3.3, fn & \textbf{N2}: ``Both estimates are stable across sub-periods'' is an unsupported empirical claim. Report the 2012--2024 correlation and rebalancing premium values, or soften to ``appear qualitatively similar.'' \\
+\midrule
+M6 & Sec 1 / Sec 4 & \textbf{W3/W10 residual}: VoV literature still thin. Add at least Bekaert \& Hoerova (2014) for VIX decomposition and DeMiguel et al.\ (2009) for naive diversification benchmarking. \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Minor (optional)}
+
+\begin{longtable}{p{0.6cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & Location & Description \\
+\midrule
+L1 & Eq (3) / Sec 2.3 & $N$ symbol conflict: Eq.~(3) uses $N$ for years, but text uses $N = 3{,}262$ for trading days. Use $T$ for years. \\
+\midrule
+L2 & References & Perchet et al.\ pages: 21--36 should likely be 21--38. Verify and correct. \\
+\midrule
+L3 & Sec 4, line 205 & ``smooth sailing'' in quotation marks is not a direct quote from Liu et al.\ (2019). Remove quotes or rephrase as ``calm market environments.'' \\
+\midrule
+L4 & Sec 2.3, line 108 & ``At 1 bps, the opportunity cost share rises to 97\%''---exact computation yields 98.0\% ($4.195 / (4.195 + 0.0856)$). Minor rounding discrepancy. \\
+\midrule
+L5 & Throughout & ``apples-to-apples'' appears twice. Mildly colloquial; consider ``directly comparable'' for at least one instance. \\
+\bottomrule
+\end{longtable}
+
+%=================================================================
+\section*{Overall Assessment and Recommended Action}
+%=================================================================
+
+\textbf{Progress}: The revision is substantive and addresses the most critical tone/framing issues from Round~1. The abstract and conclusion are now properly hedged (E2, E5 fixed). The K846 cross-period reference is disclosed (E4 fixed). The Bongaerts characterization error is corrected (C1 fixed). The CRRA utility reporting is clarified (W9 fixed).
+
+\textbf{Remaining blocker}: A single issue prevents acceptance---the sensitivity analysis numbers (E3) \emph{still cannot be traced to any recorded experiment output}. This is not a rounding issue; the paper's numbers differ from the JSON by 20--30 percentage points on the opportunity cost share metric and the total reduction metric is directionally opposite (paper says $-62\%$ to $-76\%$ reduction; JSON shows $-8\%$ to $-31\%$). Until this is resolved with a clean, traceable sensitivity run, the robustness argument is built on unverifiable claims.
+
+\textbf{Estimated effort to reach submission-ready}:
+\begin{enumerate}
+\item \textcolor{errorred}{\textbf{E3 fix}}: Re-run threshold sweep with the main K811v2 decomposition code. Record to JSON. Update paper. \textbf{~1 hour.}
+\item \textcolor{warncolor}{\textbf{M1--M6}}: Citation updates, DM footnote, literature additions, minor rewording. \textbf{~2 hours.}
+\item Minor issues (L1--L5): Notation, pages, wording. \textbf{~30 minutes.}
+\end{enumerate}
+
+\textbf{Conditional recommendation}: If E3 is properly fixed and the corrected sensitivity analysis confirms that opportunity cost dominates across thresholds (which the JSON data suggests it does---opp shares of 81--89\% are even \emph{stronger} than the paper's current claims), this paper is suitable for submission to \textbf{Journal of Portfolio Management} or \textbf{Financial Analysts Journal}. The core contribution---the 91\% opportunity cost finding---is novel, practically relevant, and well-presented. The VoV conditioning contribution is appropriately hedged as preliminary. For a more academic venue (JFE, RFS), additional work on the VoV literature review, formal hypothesis testing, and walk-forward validation would be needed.
+
+\end{document}
