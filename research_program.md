@@ -222,13 +222,13 @@
 
 - **NLP 情緒分析**：用 FinBERT/LLM 分析財經新聞情緒，預測次日波動率或報酬
 - **替代數據**：Google Trends 搜尋量（已測 null for VT overlay，但可用於報酬預測）、衛星停車場數據、航運追蹤
-- **市場微結構**：order flow imbalance → 短期波動率預測、bid-ask spread dynamics
+- **市場微結構**：~~bid-ask spread~~ → **K862 完成**：Corwin-Schultz OHLC spread 在 US 有增量（SPY t=3.68 Harvey PASS，beyond VIX t=3.01），但台股無效（t=2.33）、不改善 HAR。可延伸：order flow imbalance（需 tick 數據）
 - **網絡/傳染模型**：用圖模型分析波動率在資產間的傳播路徑（beyond linear Granger）
 - **因果推論**：用 DiD / RDD 分析政策事件（例如 Fed 升息）對波動率的因果影響
 - **★★ Agent-Based Simulation**（K827 完成）：模擬 VT 擁擠效應。**臨界點 30-50%**：10-20% 無退化(Sharpe~0.50)，50% 崩潰(-70%, t=8.88)，70%+ 策略毀滅(負 Sharpe)。正反饋 loss spiral 確認。目前 <5% 採用率安全。⚠️ 模擬實驗，Kyle 簡化模型
 - **加密 DeFi**：AMM 池的 impermanent loss 與波動率的關係、DeFi yield 策略的風險管理
-- **氣候金融**：極端天氣事件對商品/保險公司波動率的影響
-- **行為金融**：投資人對 VT 的心理接受度實驗、為什麼知道 VT 有效卻不用？
+- **氣候金融**：~~極端天氣事件~~ → **K861 完成（油價代理）**：油價下跌衝擊驅動股市 vol（+4.8pp, t=5.82 Harvey PASS），上漲衝擊無效（t=0.70）。強非對稱性。但逆向 Granger 更強（SPY→Oil），是共同宏觀風險而非因果。需直接氣候數據延伸。
+- **行為金融**：~~投資人對 VT 的心理接受度~~ → **K860 完成 ★★**：PT(λ=1.52) 即翻轉 VT 評價。Robust VT CE 勝 BH 50/50 達 +0.17pp。Sharpe 低估 VT 價值。可延伸：為什麼知道 VT 有效卻不用？（status quo bias + complexity aversion）
 - **跨學科方法**：物理學的相變模型、生態學的 regime shift detection、複雜系統理論
 
 ### 面向 H: 論文撰寫與投稿
@@ -578,7 +578,7 @@
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
 
 **中優先（新研究主題）：**
-- [ ] **Robust VT 設計**：K743 的 floor(30%)/cap(90%) + EWMA 平滑 + 週頻 rebalance 組合。修正 Codex 找到的 bug 後重跑
+- [x] ~~Robust VT 設計~~ → **K859 完成**。Floor(0.3)+Cap(0.9)+EWMA(10)+月頻 = Sharpe 0.579（baseline 0.566），turnover -30%（0.96x vs 1.39x）。週頻反而更差（-0.024 Sharpe, 3x turnover）。DM 全 NS（Harvey）。**實用建議：Floor+Cap+EWMA 是更便宜的保險（少交易、同保護）**
 - [ ] **VIX Regime 轉換預測**：K752 發現不同 era 的 VIX R² 差異大（0.24-0.64）。能否預測 VIX regime 何時轉換？
 - [ ] **Drawdown Recovery 修正版**：K735 被 Codex 推翻（fake OOS + timing misalign）。修正方法論後重做
 - [ ] **跨國 VIX sufficiency**：K752 證明 US 33 年成立。在其他市場（VSTOXX、VNKY、VIXTWN proxy）驗證？

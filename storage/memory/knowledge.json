@@ -19940,5 +19940,85 @@
     "category": "knowledge",
     "created_at": "2026-04-05T06:51:37.547225",
     "updated_at": "2026-04-05T06:51:37.547235"
+  },
+  {
+    "id": "K859",
+    "experiment_id": "K859",
+    "title": "K859: Robust VT — Floor/Cap+EWMA(10) Best Combo, Sharpe 0.579, Turnover -30% vs Baseline",
+    "content": "[提出: Claude, 執行: Claude] K859 tests robust modifications to 12/VIX monthly VT. Data: SPY/GLD/VIX 2005-2026 (5094 days). All use shift(1). BEST COMBO: Floor(0.3)+Cap(0.9)+EWMA(10)+monthly = Sharpe 0.579 (baseline 0.566), turnover 0.96x (baseline 1.39x, -30%). Floor/Cap alone: +0.011 Sharpe, turnover 1.13x. EWMA(22): +0.007 Sharpe, turnover 0.92x. Weekly rebalance HURTS (-0.024 Sharpe, 3x turnover). Daily even worse. NO modification achieves Harvey t>3.0 — confirms K687: VT mods are marginal. Cross-OOS: all VT beat BH 50/50 in 3/5 periods. CRRA utility: VT dominates BH at all gamma. MDD: ~30% for all VT vs 55.2% for BH 50/50. PRACTICAL: Floor+Cap+EWMA(10-22)+monthly is the recommended robust VT — cheaper insurance (less turnover) for same protection.",
+    "tags": [
+      "VT策略",
+      "robust_design",
+      "floor_cap",
+      "EWMA",
+      "turnover",
+      "practical",
+      "SPY",
+      "GLD"
+    ],
+    "data_source": "yfinance (SPY, GLD, ^VIX), 2005-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T08:13:52.174086",
+    "updated_at": "2026-04-05T08:13:52.174093"
+  },
+  {
+    "id": "K860",
+    "experiment_id": "K860",
+    "title": "K860: Prospect Theory Flips VT Evaluation — Loss Aversion λ=1.52 Makes Robust VT Preferred Over BH 50/50",
+    "content": "[提出: Claude, 執行: Claude] K860 evaluates VT strategies under Prospect Theory (Tversky & Kahneman 1992, α=β=0.88, λ=2.25). Data: SPY/GLD/VIX 2005-2026. KEY FINDING: PT reverses VT evaluation. Sharpe says BH 50/50 (0.587) > VT Robust (0.579), but PT CE says VT Robust (-0.37%) > BH 50/50 (-0.54%). VT Robust becomes PT-preferred at λ=1.52 (mild loss aversion, well below standard 2.25). 12/VIX never becomes preferred (higher equity tilt = more loss exposure). Risk Parity breaks even at λ=1.06 (any loss aversion at all). PT ranking at λ=2.25: Risk_Parity > VT_Robust > BH_5050 > VT_12VIX > BH_SPY. AMPLIFICATION: mean return says VT Robust is -26bps/yr worse, but PT CE says +6bps/yr better — loss aversion converts tail protection into preference reversal. IMPLICATION: VT's value cannot be assessed by Sharpe alone. For real investors with loss aversion (everyone), VT Robust is objectively better insurance. This strengthens Paper 4 (insurance cost) narrative: the 'cost' of VT is an illusion under PT.",
+    "tags": [
+      "prospect_theory",
+      "behavioral_finance",
+      "loss_aversion",
+      "VT策略",
+      "CRRA",
+      "utility",
+      "Kahneman",
+      "Tversky"
+    ],
+    "data_source": "yfinance (SPY, GLD, ^VIX), 2005-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T08:26:30.028242",
+    "updated_at": "2026-04-05T08:26:30.028253"
+  },
+  {
+    "id": "K861",
+    "experiment_id": "K861",
+    "title": "K861: Oil-Equity Vol Channel — Oil DROPS Drive Equity Vol (t=5.82), Not Spikes (t=0.70). Asymmetric.",
+    "content": "[提出: Claude, 執行: Claude] K861 tests oil price shocks as climate/macro proxy for equity vol prediction. Data: SPY/XLE/DBA/CL=F 2007-2026 (4,839 days). KEY FINDING: Strong asymmetry — oil DROPS increase SPY RV by +4.8pp (t=5.82 Harvey PASS), but oil SPIKES only +0.7pp (t=0.70 NS). Oil drops signal demand destruction/recession fears (Kilian 2009). Oil vol regime predicts forward SPY vol: high oil vol → 19.0% vs low → 13.6% (t=16.82). BUT reverse Granger is stronger (SPY→Oil F=11-49 vs Oil→SPY F<10) — shared macro risk, not clean causal channel. XLE most sensitive (β=0.52), DBA weakest (β=0.12). Post-2020 effect slightly larger but not Harvey significant. LIMITATION: oil is proxy, not direct climate data. CONCLUSION: Oil vol is a COINCIDENT indicator of equity stress (not leading), and the asymmetry (drops > spikes) is the publishable finding.",
+    "tags": [
+      "climate_finance",
+      "oil",
+      "volatility_spillover",
+      "asymmetry",
+      "Granger",
+      "XLE",
+      "DBA",
+      "跳躍式探索"
+    ],
+    "data_source": "yfinance (SPY, XLE, DBA, CL=F), 2007-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T08:41:45.030764",
+    "updated_at": "2026-04-05T08:41:45.030770"
+  },
+  {
+    "id": "K862",
+    "experiment_id": "K862",
+    "title": "K862: OHLC Bid-Ask Spread — Harvey PASS for US (SPY t=3.68, incremental beyond VIX t=3.01), NULL for Taiwan",
+    "content": "[提出: Claude, 執行: Claude] K862 tests Corwin-Schultz (2012) OHLC bid-ask spread as vol predictor. Data: SPY/QQQ/0050.TW 2010-2026. US EQUITIES: spread univariate t=3.68 (SPY), 3.31 (QQQ) — Harvey PASS. Bivariate with VIX: spread still significant (SPY t=3.01, QQQ t=3.15) — incremental beyond VIX! Spread captures microstructure liquidity risk that VIX doesn't. BUT: does NOT improve HAR models (HAR-S vs HAR DM all NS). OOS Spearman: Spread+VIX (0.377) slightly > VIX alone (0.374). TAIWAN: 0050.TW spread not significant (t=2.33, bivariate t=1.95). Different market microstructure. REGIME: larger beta in high-VIX (0.070 vs 0.008). CONCLUSION: OHLC spread is a useful VIX complement for US vol monitoring but doesn't materially improve forecasting models. Cross-market microstructure differences are real.",
+    "tags": [
+      "microstructure",
+      "bid_ask_spread",
+      "Corwin_Schultz",
+      "liquidity",
+      "VIX",
+      "SPY",
+      "0050.TW",
+      "Harvey_PASS"
+    ],
+    "data_source": "yfinance (SPY, QQQ, 0050.TW, ^VIX), 2010-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T08:56:57.136023",
+    "updated_at": "2026-04-05T08:56:57.136030"
   }
 ]

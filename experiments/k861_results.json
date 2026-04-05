@@ -1,0 +1,292 @@
+{
+  "experiment_id": "K861",
+  "title": "Climate Events and Market Volatility: Oil Shocks as Climate Proxy",
+  "date": "2026-04-05",
+  "data_sources": {
+    "equities": "yfinance (SPY, XLE, DBA)",
+    "oil": "yfinance CL=F (WTI futures)",
+    "period": "2007-01-05 to 2026-04-02",
+    "n_observations": 4839
+  },
+  "methodology": {
+    "rv_window": 22,
+    "shock_threshold": "|return| > 2.0x rolling 60d std",
+    "granger_max_lag": 5,
+    "bootstrap_n": 10000,
+    "significance_threshold": "Harvey (2016) |t| > 3.0"
+  },
+  "results": {
+    "event_study_SPY": {
+      "n_events": 279,
+      "mean_pre_rv": 0.1788030514301558,
+      "mean_post_rv": 0.2097847385023032,
+      "mean_change": 0.030981687072147383,
+      "std_change": 0.10614933315531083,
+      "t_stat": 4.866426751214045,
+      "p_value": 1.906833200786712e-06,
+      "significant_harvey": true
+    },
+    "event_study_XLE": {
+      "n_events": 279,
+      "mean_pre_rv": 0.2800457478133424,
+      "mean_post_rv": 0.32807043868820795,
+      "mean_change": 0.048024690874865564,
+      "std_change": 0.14788221339939933,
+      "t_stat": 5.414658036101972,
+      "p_value": 1.3289372515504923e-07,
+      "significant_harvey": true
+    },
+    "event_study_DBA": {
+      "n_events": 279,
+      "mean_pre_rv": 0.15323350658810028,
+      "mean_post_rv": 0.1640557186215499,
+      "mean_change": 0.010822212033449683,
+      "std_change": 0.04198685514413674,
+      "t_stat": 4.297591081647575,
+      "p_value": 2.390568257555894e-05,
+      "significant_harvey": true
+    },
+    "asymmetry_spike": {
+      "n_events": 116,
+      "mean_change": 0.006614079066811337,
+      "t_stat": 0.696025235301937,
+      "p_value": 0.48781732434491343,
+      "significant_harvey": false
+    },
+    "asymmetry_drop": {
+      "n_events": 163,
+      "mean_change": 0.048323052278398795,
+      "t_stat": 5.818740983450904,
+      "p_value": 3.085332455371493e-08,
+      "significant_harvey": true
+    },
+    "asymmetry_diff_test": {
+      "spike_mean_change": 0.006614079066811337,
+      "drop_mean_change": 0.048323052278398795,
+      "t_stat_diff": -3.2852689501474637,
+      "p_value_diff": 0.0011500010590490466,
+      "significant_harvey": true
+    },
+    "granger_causality": {
+      "SPY": {
+        "lag_1": {
+          "f_stat": 8.717662466761587,
+          "p_value": 0.0031666566888698218,
+          "significant_005": true
+        },
+        "lag_2": {
+          "f_stat": 3.148146197083523,
+          "p_value": 0.04302014970116406,
+          "significant_005": true
+        },
+        "lag_3": {
+          "f_stat": 1.283931700648115,
+          "p_value": 0.278049094829772,
+          "significant_005": false
+        },
+        "lag_4": {
+          "f_stat": 2.916364678960382,
+          "p_value": 0.020120767770583022,
+          "significant_005": true
+        },
+        "lag_5": {
+          "f_stat": 3.741176269992056,
+          "p_value": 0.0022088990374459503,
+          "significant_005": true
+        }
+      },
+      "XLE": {
+        "lag_1": {
+          "f_stat": 8.750041267661,
+          "p_value": 0.0031110220777216995,
+          "significant_005": true
+        },
+        "lag_2": {
+          "f_stat": 3.552457594226339,
+          "p_value": 0.02872936827627443,
+          "significant_005": true
+        },
+        "lag_3": {
+          "f_stat": 1.305542393633906,
+          "p_value": 0.27074114137666033,
+          "significant_005": false
+        },
+        "lag_4": {
+          "f_stat": 0.5856222252756201,
+          "p_value": 0.6730595721073568,
+          "significant_005": false
+        },
+        "lag_5": {
+          "f_stat": 2.23068220726249,
+          "p_value": 0.04859938596116699,
+          "significant_005": true
+        }
+      },
+      "DBA": {
+        "lag_1": {
+          "f_stat": 0.0369321765027557,
+          "p_value": 0.8476113112207444,
+          "significant_005": false
+        },
+        "lag_2": {
+          "f_stat": 0.048345516440696804,
+          "p_value": 0.9528049837466497,
+          "significant_005": false
+        },
+        "lag_3": {
+          "f_stat": 1.572683290979294,
+          "p_value": 0.19379548787277673,
+          "significant_005": false
+        },
+        "lag_4": {
+          "f_stat": 8.425473877365352,
+          "p_value": 9.038209618262228e-07,
+          "significant_005": true
+        },
+        "lag_5": {
+          "f_stat": 6.686657018101483,
+          "p_value": 3.239459616726871e-06,
+          "significant_005": true
+        }
+      }
+    },
+    "granger_reverse_spy_to_oil": {
+      "lag_1": {
+        "f_stat": 49.485707616787714,
+        "p_value": 2.2789520100928572e-12
+      },
+      "lag_2": {
+        "f_stat": 23.335884280329484,
+        "p_value": 8.207809113512188e-11
+      },
+      "lag_3": {
+        "f_stat": 16.170282323172295,
+        "p_value": 1.863188011162752e-10
+      },
+      "lag_4": {
+        "f_stat": 12.184095230486365,
+        "p_value": 7.420799000456339e-10
+      },
+      "lag_5": {
+        "f_stat": 11.2690053606827,
+        "p_value": 7.99542511439559e-11
+      }
+    },
+    "correlation_SPY_oil": {
+      "pearson": 0.644313376001516,
+      "spearman": 0.5384133521461691,
+      "spearman_95ci": [
+        0.5172822878921318,
+        0.5591643503640105
+      ]
+    },
+    "correlation_XLE_oil": {
+      "pearson": 0.7166310968915519,
+      "spearman": 0.6848820803259549,
+      "spearman_95ci": [
+        0.6678651733496155,
+        0.7014817979570037
+      ]
+    },
+    "correlation_DBA_oil": {
+      "pearson": 0.3686820728050415,
+      "spearman": 0.3029189312643198,
+      "spearman_95ci": [
+        0.27488332275536037,
+        0.3300846639541967
+      ]
+    },
+    "regime_pre_2020": {
+      "n_obs": 3246,
+      "n_shocks": 186,
+      "mean_spy_rv": 0.15913325548332513,
+      "mean_oil_rv": 0.3350757919248564,
+      "event_study_change": 0.026514479000652083,
+      "event_study_t": 4.596247641706864,
+      "event_study_p": 7.947631084852462e-06,
+      "spy_oil_spearman": 0.5178599565065218,
+      "significant_harvey": true
+    },
+    "regime_post_2020": {
+      "n_obs": 1569,
+      "n_shocks": 98,
+      "mean_spy_rv": 0.17051251266845235,
+      "mean_oil_rv": 0.404811096740858,
+      "event_study_change": 0.0401717519873664,
+      "event_study_t": 2.6076471514885666,
+      "event_study_p": 0.010654562643444962,
+      "spy_oil_spearman": 0.5662833710166851,
+      "significant_harvey": false
+    },
+    "rolling_corr_stats": {
+      "mean": 0.48949197170327274,
+      "std": 0.2236296985185589,
+      "min": -0.22137279965900605,
+      "max": 0.9508652109570103,
+      "pct_positive": 98.55390008764242,
+      "recent_252d": 0.23711920067571615
+    },
+    "oil_vol_regime_prediction": {
+      "n_high": 2385,
+      "n_low": 2408,
+      "mean_forward_rv_high_oil": 0.1899801855417121,
+      "mean_forward_rv_low_oil": 0.13642595255048226,
+      "difference": 0.05355423299122983,
+      "t_stat": 16.8198046593053,
+      "p_value": 1.0004618184708533e-61,
+      "significant_harvey": true,
+      "note": "Forward RV = SPY 22d RV shifted 22 days ahead. High oil vol = above median."
+    },
+    "sensitivity_SPY": {
+      "alpha": 0.04769176784559767,
+      "beta_oil_rv": 0.3218268673080908,
+      "t_stat_beta": 58.449259951227646,
+      "r_squared": 0.41513972649447106,
+      "significant_harvey": true
+    },
+    "sensitivity_XLE": {
+      "alpha": 0.0724811475014734,
+      "beta_oil_rv": 0.5171653960796515,
+      "t_stat_beta": 71.28349719292717,
+      "r_squared": 0.5135601290319884,
+      "significant_harvey": true
+    },
+    "sensitivity_DBA": {
+      "alpha": 0.10385292391225923,
+      "beta_oil_rv": 0.12438493041991688,
+      "t_stat_beta": 27.515955661648405,
+      "r_squared": 0.13592647080782205,
+      "significant_harvey": true
+    }
+  },
+  "findings_summary": [
+    "[SIGNIFICANT] Oil shocks predict SPY vol changes (Δ=+0.0310, t=4.87)",
+    "Granger causality (Oil→SPY): YES at some lags",
+    "Asymmetry: Spike Δ=+0.0066 vs Drop Δ=+0.0483",
+    "Regime shift: SPY-OIL ρ pre-2020=0.518, post-2020=0.566",
+    "Oil vol regime → forward SPY RV: diff=+0.0536, t=16.82 (Harvey sig)",
+    "Sensitivity SPY: β_oil=0.3218, R²=0.4151",
+    "Sensitivity XLE: β_oil=0.5172, R²=0.5136",
+    "Sensitivity DBA: β_oil=0.1244, R²=0.1359"
+  ],
+  "limitations": [
+    "Oil price is a PROXY for climate events, not direct weather data",
+    "Oil shocks can be geopolitical (Iran, Russia) not climate-related",
+    "Realized vol uses overlapping windows (22d) — serial correlation",
+    "No control for other macro factors (VIX, rates, recession)",
+    "DBA may have structural issues similar to USO (contango/roll)",
+    "Forward RV analysis uses shift(-22) which is technically known at event time"
+  ],
+  "references": [
+    "Giglio, Maggiori, Stroebel, Weber (2021) Climate Finance, Annual Review",
+    "Engle, Giglio, Kelly, Lee, Stroebel (2020) Hedging Climate Change News, RFS",
+    "Hong, Li, Xu (2019) Climate Risks and Market Efficiency, JFE",
+    "Kilian (2009) Not All Oil Price Shocks Are Alike, AER",
+    "Sadorsky (1999) Oil price shocks and stock market activity, Energy Economics",
+    "Harvey (2016) ...and the cross-section of expected returns, RFS"
+  ],
+  "prior_related_work": [
+    "K25 series (Iran crisis 2026): oil-equity transmission is contemporaneous, no Granger causality",
+    "Commodity leverage asymmetry experiments: oil has standard leverage (γ=+0.10)"
+  ]
+}
