@@ -79,3 +79,9 @@
 3. 如果用不同的 target/proxy，結論會改變嗎？
 4. Sharpe > 2x baseline 嗎？（如果是，90% 有 bug）
 5. 這個結論的強度是否超過證據支持的範圍？
+
+## 6. Periodic Model Robustness（PRG/PRS 專用）
+
+- **Session 收盤價可交易性**：session 收盤價可能無法即時交易。Robustness check 應使用收盤前 n 分鐘（n=1,5,10）的價格重算 session return 和 RV，確認結果穩健。
+- **Information set 說明**：PRG/PRS 使用「前一 session 已實現的資訊」預測「下一 session」。這不是 lookahead——隔夜 session 在日盤開盤前已結束，日盤 session 在夜盤開盤前已結束。論文必須明確標註每個模型的 information set。
+- **公平比較**：PRG 在 session 邊界有更多資訊（剛完成的 session）。與 GJR（日頻）比較時，PRG 的優勢包含「模型結構」+「資訊即時性」兩個成分。要隔離純模型結構價值，可比 PRG vs GJR-X(r²_overnight)。
