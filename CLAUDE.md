@@ -528,6 +528,22 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **規則：研究、分析、程式等精確性與專業性工作，務必使用 opus 模型。不確定時預設 opus。**
 **優先使用 agent team 並行分派任務**，同時推進 3-4 個方向以最大化效率。
 
+### Agent Prompt 必備內容（不可省略）
+
+**Agent 是空白的 Claude，只知道 prompt 裡寫的東西。** 不要假設 agent 知道任何事。
+
+| 任務類型 | Agent prompt 必須包含 |
+|---------|---------------------|
+| **實驗** | 讀取 `experiment-preamble.md`（模型-target 匹配、統計門檻、防錯規則、VaR+ES 標準、periodic model 注意事項） |
+| **論文寫作** | 指示 agent 讀取：(1) `paper-writing-process.md`（12 步流程）(2) `finance-paper-quality` skill (3) 相關已發表論文 PDF (4) 實驗結果 JSON（不是摘要數字）(5) 參考文獻原文 |
+| **論文審查** | 指示 agent 讀取：(1) `latex-academic-reviewer` skill 完整內容 (2) `citation-verifier` skill (3) 論文本身 + 實驗結果 JSON |
+| **Feed 文章** | 指示 agent 讀取：(1) `feed-publisher` skill (2) 實驗結果 JSON (3) 已有文章（避免重複） |
+
+**絕對禁止**：
+- 在 prompt 中給 agent 「摘要數字」然後讓它寫論文 → 必須讓 agent 自己讀 JSON
+- 不告訴 agent 讀 skill 就讓它寫學術文件 → agent 不知道學術規範
+- 假設 agent「應該知道」某件事 → 它什麼都不知道，必須明確指示
+
 ## 自動化排程
 ### 永久任務（系統 crontab — 無人值守也會跑）
 ```
