@@ -20287,7 +20287,7 @@
   {
     "id": "K874c",
     "experiment_id": "K874c",
-    "title": "K874c: Periodic Realized GARCH ★★ — Cross-Recursion Validated (DM t=-4.15 vs Separate). HAR比較無效(target不同).",
+    "title": "⚠️ UNVERIFIED (Codex found lookahead): K874c: Periodic Realized GARCH ★★ — Cross-Recursion Validated (DM t=-4.15 vs Separate). HAR比較無效(target不同).",
     "content": "[提出: 用戶(PRS概念), 執行: Claude] K874c implements proper periodic realized GARCH with cross-session recursion (h_{n-1} carries between sessions). 2102 days TAIFEX TX (volume-selected). CORE RESULT: PRG vs Separate GARCH DM t=-4.15 Harvey PASS (QLIKE -36.7%). Cross-recursion IS valuable — validates Lai et al. (2024) PRS insight. BUT: ⚠️ HAR vs PRG 比較無效：HAR 預測完整 RV_total（含夜盤 5-min RV），PRG 只預測 gap r² + 日盤 RV（缺夜盤 5-min 成分）。target 不同不能比 QLIKE. HAR's log-space + 5-min RV advantage too large. PRG parameters: overnight α=0.457 β=0.629 (reactive), intraday α=0.131 β=0.791 (persistent). Leverage fixes overnight persistence>1. PRACTICAL VALUE: PRG gives session-level forecasts (useful for session-specific VaR), HAR only gives daily total.",
     "tags": [
       "periodic_GARCH",
@@ -20343,7 +20343,7 @@
   {
     "id": "K874d",
     "experiment_id": "K874d",
-    "title": "K874d ★★★ Fair Comparison: PRG Wins (DM t=5.10 vs GJR), HAR vs GJR NS (t=0.57). Prior HAR>>GJR Was Artifact.",
+    "title": "⚠️ UNVERIFIED (Codex found lookahead): K874d ★★★ Fair Comparison: PRG Wins (DM t=5.10 vs GJR), HAR vs GJR NS (t=0.57). Prior HAR>>GJR Was Artifact.",
     "content": "[提出: 用戶(公平比較要求), 執行: Claude] K874d establishes fair comparison: common target σ²_fullday = r²_gap + RV_intra + RV_night. ALL models evaluated on SAME target. RESULTS: PRG Extended QLIKE 0.198 (best), PRG Basic 0.207, HAR(RV_total) 0.415, GJR 0.448. PRG vs GJR: DM t=5.10 Harvey PASS. HAR vs GJR: DM t=0.57 NS — prior K849/K874c claim 'HAR>>GJR' was TARGET MISMATCH ARTIFACT. Gap variance share 27%→50% (non-stationary). PRG VaR: 0.95% violation (near perfect). User's PRS concept (simplified as PRG) is the TRUE winner when evaluated fairly. This is the definitive model comparison for TAIFEX.",
     "tags": [
       "fair_comparison",
@@ -20381,7 +20381,7 @@
   {
     "id": "K874e",
     "experiment_id": "K874e",
-    "title": "K874e ★★★ 6-Layer Fair Comparison: PRG Extended Wins ALL Dimensions (MCS eliminates GJR+HAR, VT Sharpe 1.66)",
+    "title": "⚠️ UNVERIFIED (Codex found lookahead): K874e ★★★ 6-Layer Fair Comparison: PRG Extended Wins ALL Dimensions (MCS eliminates GJR+HAR, VT Sharpe 1.66)",
     "content": "[提出: 用戶(完整比較要求), 執行: Claude] K874e: 6-layer comparison on common target σ²_fullday. PRG Extended wins 8/9 dimensions. Layer1: QLIKE 0.198 best (MSE/MAE/MZ-R² also best, HMSE PRG Basic wins). Layer2: MCS eliminates GJR+HAR, only PRG models survive (α=0.10). Layer3: Spearman 0.727 [0.688,0.757]. Layer4: VaR PRG Basic best calibrated 1% Normal (VR=0.95%, Kupiec p=0.88). Layer5: ES all pass Acerbi-Szekely, Fissler-Ziegel PRG Extended best (-1.450). Layer6: VT Sharpe 1.66, MDD -11.5% (vs BH -31.7%), CRRA CE 6.80bps/day. DM PRG_Ext vs GJR t=5.10 Harvey PASS. DEFINITIVE: user's PRS concept (simplified as PRG) is the best model for TAIFEX full-day vol across ALL evaluation dimensions.",
     "tags": [
       "fair_comparison",
@@ -20420,7 +20420,7 @@
   {
     "id": "K880",
     "experiment_id": "K880",
-    "title": "K880 ★★★ PRG Cross-Market SPY Validated — DM t=6.00 vs GJR, t=-6.69 vs Separate (Both Harvey PASS)",
+    "title": "⚠️ UNVERIFIED (Codex found lookahead): K880 ★★★ PRG Cross-Market SPY Validated — DM t=6.00 vs GJR, t=-6.69 vs Separate (Both Harvey PASS)",
     "content": "[提出: Claude, 執行: Claude] K880 validates PRG on SPY with daily OHLC proxies (2000-2026, 6601 days, OOS 1823). PRG Extended QLIKE 0.748 >> GJR 0.854 (DM t=6.00 Harvey PASS). Cross-recursion: PRG vs Separate DM t=-6.69 PASS. PRG best in ALL metrics (QLIKE/MSE/MAE/MZ-R²/Spearman). VaR 1%: PRG 0.93% perfect (Kupiec p=0.77), GJR+Separate FAIL. HAR catastrophic with OHLC proxies (6% violations). MZ-b=1.02 (unbiased). CROSS-MARKET CONFIRMED: TAIFEX t=5.10 + SPY t=6.00. Paper-ready.",
     "tags": [
       "PRG",
@@ -20458,7 +20458,7 @@
   {
     "id": "K881",
     "experiment_id": "K881",
-    "title": "K881 ★★★ PRG Multi-Asset: 3/3 Harvey PASS (QQQ t=4.26, GLD t=6.12, EEM t=6.63). Total 5 Markets Validated.",
+    "title": "⚠️ UNVERIFIED (Codex found lookahead): K881 ★★★ PRG Multi-Asset: 3/3 Harvey PASS (QQQ t=4.26, GLD t=6.12, EEM t=6.63). Total 5 Markets Validated.",
     "content": "[提出: Claude, 執行: Claude] K881 validates PRG on QQQ/GLD/EEM with daily OHLC. ALL 3 Harvey PASS vs GJR (t=4.26/6.12/6.63). Cross-recursion ALL 3 PASS (t=-5.47/-5.16/-6.34). GLD: PRG Basic > Extended (gold has no leverage effect). EEM: strongest advantage (52.6% overnight share). Higher overnight share → bigger PRG advantage. Combined with TAIFEX(K874e)+SPY(K880): 5/5 markets validated. PRG is UNIVERSAL. Paper-ready evidence across US equity, EM, gold, Taiwan futures.",
     "tags": [
       "PRG",
@@ -20478,7 +20478,7 @@
   {
     "id": "K880b",
     "experiment_id": "K880b",
-    "title": "K880b: SPY PRG ES Supplement — PRG Extended Wins FZ Score (DM t=3.75 vs GJR at 1%, Harvey PASS)",
+    "title": "⚠️ UNVERIFIED (Codex found lookahead): K880b: SPY PRG ES Supplement — PRG Extended Wins FZ Score (DM t=3.75 vs GJR at 1%, Harvey PASS)",
     "content": "[提出: 用戶(ES必做), 執行: Claude] K880b supplements K880 with ES evaluation on SPY. Fissler-Ziegel: PRG_Ext best (-3.53 at 1%, -3.92 at 5%). FZ DM: PRG_Ext vs GJR t=3.75 at 1% (Harvey PASS), t=4.94 at 5% (PASS). Acerbi-Szekely: all 5 models pass (all conservative). ES ranking same as QLIKE: PRG_Ext > PRG_Basic > Separate > GJR > HAR. PRG's ES superiority statistically confirmed.",
     "tags": [
       "ES",
@@ -20497,7 +20497,7 @@
   {
     "id": "K881b",
     "experiment_id": "K881b",
-    "title": "K881b: Multi-Asset ES — PRG Extended #1 FZ in 11/12 combos, Harvey PASS 5/6 vs GJR. Evidence Complete.",
+    "title": "⚠️ UNVERIFIED (Codex found lookahead): K881b: Multi-Asset ES — PRG Extended #1 FZ in 11/12 combos, Harvey PASS 5/6 vs GJR. Evidence Complete.",
     "content": "[提出: 用戶(ES必做), 執行: Claude] K881b supplements K881 with ES for QQQ/GLD/EEM. FZ DM PRG vs GJR: QQQ 5% t=3.12, GLD 1% t=3.21, GLD 5% t=3.76, EEM 1% t=4.05, EEM 5% t=6.53 (5/6 Harvey PASS). QQQ 1% t=2.96 marginal. Cross-recursion FZ: 4/6 Harvey PASS. Acerbi-Szekely: all pass. Ranking consistent: PRG_Ext>Basic>Separate>GJR>HAR across all 5 markets. PRG paper evidence NOW COMPLETE: 5 markets × (QLIKE + VaR + ES).",
     "tags": [
       "ES",

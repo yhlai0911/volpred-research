@@ -343,3 +343,26 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 2. research_program.md ES 改為「必做 + Basel III 依據」
 3. experiment preamble 已有完整 VaR+ES 表
 4. K880b 補做 ES 評估
+
+## K880 PRG Lookahead + VaR Cov 缺失 + MLE 約束不足（2026-04-05 Codex 審查）
+
+**問題**：Codex adversarial review 發現 K880 PRG 實作有 3 個嚴重問題。
+
+**[CRITICAL] Lookahead**：
+- PRG 的 h_intraday_t 用了 r2_overnight[t]（當天隔夜 return）
+- 但 GJR/HAR 沒有這個當天資訊
+- PRG 的 DM t=6.00 可能是 lookahead artifact（見 K679 前例）
+- 修正：h_total_t 必須只用 t-1 close 的資訊集
+
+**[HIGH] VaR Cov 缺失**：
+- σ²_fullday = Var(overnight) + Var(intraday) + 2×Cov(overnight,intraday)
+- 代碼只用 Var(overnight) + Var(intraday)，假設 Cov=0
+- 修正：估計 Cov 或在相同 target 上評估
+
+**[HIGH] MLE 參數約束不足**：
+- 沒有 periodic stationarity 約束
+- h <= 0 時 clip 到 1e-12 而非 reject
+- 修正：重參數化或加非線性約束
+
+**受影響**：K880, K881, K874c/d/e（所有 PRG 實驗）
+**狀態**：需修正後重跑，所有 PRG DM 結果暫時標記為 UNVERIFIED
