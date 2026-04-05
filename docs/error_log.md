@@ -366,3 +366,24 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 
 **受影響**：K880, K881, K874c/d/e（所有 PRG 實驗）
 **狀態**：需修正後重跑，所有 PRG DM 結果暫時標記為 UNVERIFIED
+
+## Codex 誤判 PRG Lookahead（2026-04-05 用戶糾正）
+
+**問題**：Codex adversarial review 將 PRG 使用 r_overnight_t 預測 h_intraday_t 判定為 lookahead。
+
+**為什麼 Codex 是錯的**：
+- PRG/PRS 是 **session 頻率模型**，不是日頻模型
+- 在日盤開盤（8:45）時，隔夜 session 已經結束，r_overnight_t 是已實現的資訊
+- 用已完成 session 的資訊預測下一個 session 是 periodic switching 的核心設計
+- 這跟「8:45 的交易者已經看到隔夜 gap」完全一致
+- 參見 Lai, Wang & Chang (2024 APFM) PRS 模型的 Section 2
+
+**根因**：
+1. Codex 用日頻思維（「day-t 的所有資訊都是未來」）審查 session 頻率模型
+2. 我沒有在 Codex prompt 中說明 periodic model 的 information set
+3. 我讀了用戶的 PRS 論文但沒有內化其核心機制就去實作
+
+**教訓**：
+- Codex review 也可能出錯——特別是對非標準模型結構
+- 要在 Codex prompt 中明確說明模型的 information set 和時間結構
+- **讀論文要讀懂，不是掃過就行**
