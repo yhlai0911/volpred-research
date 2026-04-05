@@ -107,8 +107,8 @@
 | vt-insurance-cost | ✅ | ✅ | ✅ R3 | ✅ R3 S=0 | ✅ | ❌ PDF | ✅ v1.4 | ✅ |
 | vt-crowding-abm | ✅ | ✅ | ✅ R2 | 🔄 R3 | ✅ | ❌ PDF | ✅ v1.5 | 🔄 |
 | prg-periodic-garch | ✅ K880/881/886/874d | ✅ 復現OK | ✅ R2 | ✅ R2 S=0 | ✅ reproduce.py | ❌ PDF | ✅ v1.1 (14p/19ref/6mkt) | 🔄 |
-| leverage-direction | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
-| taiwan-vt | ❌ | ❌ | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ | |
-| vt-trend-following | ❌ | ❌ | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ | |
+| leverage-direction | ✅ 多數部分驗證 | ✅ 2 mismatch | ❌ | ❌ | ❌ | ❌ | ❌ 需補JSON | |
+| taiwan-vt | ✅ 嚴重gamma衝突 | ✅ 多處mismatch | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ 需重估 | |
+| vt-trend-following | ✅ ~50%無源 | ✅ 3H | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ 需補實驗 | |
 | vix-sufficiency | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
 | volatility-absorption | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
