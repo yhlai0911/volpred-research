@@ -1,0 +1,234 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{resolved}{RGB}{0,100,180}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report R3}\\[0.5em]
+{\large Leverage Direction Matters: Cross-Asset Evidence on\\GARCH Model Selection and Volatility Targeting}\\[0.5em]
+{\normalsize Author: Yi-Hao Lai}\\[0.3em]
+{\normalsize Document Version: \texttt{main\_v2.tex} + \texttt{body\_v2.tex} + \texttt{tables.tex} (April 2026)}\\
+{\normalsize Review Date: 2026-04-05}\\
+{\normalsize Review Standard: Strict (JBF Referee Standard)}\\
+{\normalsize Reference: R2 review dated 2026-04-05; K899 unified VaR; K902 Tables 1\,\&\,3 supplement}
+\end{center}
+
+\bigskip
+
+%% ============================================================
+\section*{R3 Scorecard}
+
+\begin{tabular}{lll}
+\toprule
+\textbf{R2 Issue} & \textbf{R3 Status} & \textbf{Severity} \\
+\midrule
+C1: HM $\gamma$ contradiction & \textcolor{okgreen}{RESOLVED (R2)} & --- \\
+C2: Kupiec $p$-values falsely equalized & \textcolor{okgreen}{RESOLVED} & --- \\
+C3: Table 5 cherry-picks from multiple expts & \textcolor{warncolor}{PARTIALLY RESOLVED} & MAJOR \\
+C4: Table 1 descriptive stats untraceable & \textcolor{resolved}{RESOLVED (with caveats)} & MINOR \\
+C5: Table 3 QLIKE untraceable & \textcolor{errorred}{NOT RESOLVED --- scale mismatch} & SEVERE \\
+\addlinespace
+N1: K899 diverges from Table 5 & \textcolor{warncolor}{ACKNOWLEDGED, not acted on} & MAJOR \\
+N2: K899 ES results not incorporated & \textcolor{warncolor}{UNCHANGED} & MAJOR \\
+\addlinespace
+N3 (NEW): QLIKE scale mismatch K902 vs paper & \textcolor{errorred}{NEW} & SEVERE \\
+\bottomrule
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{SEVERE count: 1} (down from 4 in R2).\\
+\textbf{Overall assessment: Minor--Major Revision.} The core conceptual issues are solved. One severe traceability gap remains (Table~3 QLIKE scale) plus three major items that would strengthen the paper substantially.
+
+\bigskip
+
+%% ============================================================
+\section*{Detailed Assessment of Each Issue}
+
+\subsection*{C2: Kupiec $p$-values \hfill \textcolor{okgreen}{RESOLVED}}
+
+R2 flagged that Table~5 (\texttt{tab:var\_ortho}) reported $p = 0.60$ for both GJR+Student-$t$ and GJR+HistSim. The current \texttt{tables.tex} (lines 95--96) now shows:
+\begin{itemize}[nosep]
+\item GJR+Student-$t$: Kupiec $p = 0.67$
+\item GJR+HistSim: Kupiec $p = 0.64$
+\end{itemize}
+These are the correct values from K802/K824v2 for the 2023--2024 window ($N = 502$). No further action needed.
+
+
+\subsection*{C3: Table 5 Cherry-Picking \hfill \textcolor{warncolor}{PARTIALLY RESOLVED}}
+
+The current \texttt{tables.tex} (lines 100--103) adds a note referencing K899's extended OOS (2020--2025, $N = 1{,}508$). This is a constructive step: the reader now knows that a unified experiment exists and can judge the sensitivity to the evaluation window. However:
+\begin{enumerate}[nosep]
+\item The \textbf{main table values still come from the original mixed-source} (K799/K802/K824v2 for the 2023--2024 window). The four rows are now at least \textit{internally consistent} (same 502-day period, same Kupiec correction), but the underlying estimation settings (refit frequency, expanding vs.\ rolling window) may still differ across the original experiments.
+\item K899 data is mentioned only in a footnote, not incorporated as a robustness table.
+\item The note says ``all methods fail at 5\% due to COVID/2022 turbulence''---this is factually imprecise. At the 5\% VaR level under K899, most methods \textit{pass} Kupiec (e.g., GJR+HistSim Kupiec $p = 0.59$). The failures are in Basel traffic light (Red for all methods at 5\%).
+\end{enumerate}
+
+\textbf{Residual severity: MAJOR.} The 2023--2024 values are no longer falsely equalized (C2 fixed), but the single-source requirement is not fully met. Recommend either: (a)~re-extract the 2023--2024 subset from K899 to guarantee identical settings, or (b)~add K899 as a formal robustness table in the appendix.
+
+
+\subsection*{C4: Table 1 Descriptive Statistics \hfill \textcolor{resolved}{RESOLVED (with caveats)}}
+
+K902 now provides complete descriptive statistics for 9 assets with traceable methodology. Verification against \texttt{tables.tex}:
+
+\medskip
+\begin{tabular}{llrrl}
+\toprule
+\textbf{Asset} & \textbf{Stat} & \textbf{Paper} & \textbf{K902} & \textbf{Match?} \\
+\midrule
+SPY & Mean (\%) & 0.063 & 0.062 & \textcolor{warncolor}{Off by 0.001} \\
+SPY & Std (\%)  & 1.16  & 1.16  & \textcolor{okgreen}{Yes} \\
+SPY & Skewness  & $-0.32$ & $-0.32$ & \textcolor{okgreen}{Yes} \\
+SPY & Kurtosis  & 14.6  & 14.6  & \textcolor{okgreen}{Yes} \\
+SPY & $N$       & 2260  & 2262  & \textcolor{warncolor}{Off by 2} \\
+QQQ & Std (\%)  & 1.45  & 1.44  & \textcolor{warncolor}{Off by 0.01} \\
+EEM & Mean (\%) & 0.036 & 0.037 & \textcolor{warncolor}{Off by 0.001} \\
+BTC & Mean (\%) & 0.202 & 0.203 & \textcolor{warncolor}{Off by 0.001} \\
+BTC & $N$       & 3285  & 3287  & \textcolor{warncolor}{Off by 2} \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\noindent\textbf{Assessment:} The discrepancies are tiny---within rounding and likely due to (a)~2 additional trading days as data was re-downloaded, and (b)~different rounding conventions (0.0625\% rounds to either 0.062\% or 0.063\% depending on precision). These are \textbf{not substantive errors}. The paper should either: (i)~update Table~1 to exactly match K902, or (ii)~note that K902 was run on a slightly later data pull. The N discrepancy ($\pm 2$ observations) should be resolved by fixing the exact end date.
+
+\textbf{Residual severity: MINOR.} K902 provides the traceable source. The rounding-level discrepancies do not affect any conclusion.
+
+
+\subsection*{C5 + N3: Table 3 QLIKE --- Scale Mismatch \hfill \textcolor{errorred}{SEVERE}}
+
+This is the single remaining severe issue. K902 provides cross-asset QLIKE for 6 assets $\times$ 2 periods, but the values do not match the paper's Table~3:
+
+\medskip
+\begin{tabular}{lrrl}
+\toprule
+\textbf{Cell} & \textbf{Paper} & \textbf{K902} & \textbf{Difference} \\
+\midrule
+SPY 2023--24 GARCH & $-8.985$ & $-8.632$ & $-0.353$ \\
+SPY 2023--24 GJR   & $-9.034$ & $-8.681$ & $-0.353$ \\
+SPY 2025 GARCH     & $-8.719$ & $-8.321$ & $-0.398$ \\
+SPY 2025 GJR       & $-8.818$ & $-8.410$ & $-0.408$ \\
+QQQ 2023--24 GARCH & $-8.554$ & $-7.958$ & $-0.596$ \\
+QQQ 2023--24 GJR   & $-8.475$ & $-7.968$ & $-0.507$ \\
+GLD 2023--24 GARCH & $-9.058$ & $-8.432$ & $-0.626$ \\
+TLT 2023--24 GARCH & $-9.169$ & $-8.156$ & $-1.013$ \\
+BTC 2023--24 GARCH & $-6.871$ & $-6.319$ & $-0.552$ \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\noindent\textbf{Diagnosis:} The offsets are \textbf{not constant}---they range from $-0.35$ (SPY) to $-1.01$ (TLT). This rules out a simple additive constant difference. Two likely causes:
+\begin{enumerate}[nosep]
+\item \textbf{Different QLIKE formula conventions.} The paper's Eq.~(4) defines QLIKE $= \frac{1}{T}\sum(\frac{r^2_t}{h_t} + \ln h_t)$. Some implementations use $\ln(h_t) + r^2_t/h_t - 1 - \ln(r^2_t)$, which adds the term $-1 - \ln(r^2_t)$. Since $\ln(r^2_t)$ varies across assets (more negative for low-vol assets like TLT), this would explain both the sign and the asset-dependent offset.
+\item \textbf{Different estimation windows.} If K902 uses a different rolling window size ($w$) or refit frequency than the original experiment that produced the paper's numbers, the GARCH parameter estimates---and hence the forecast sequence $h_t$---will differ, producing different QLIKE means.
+\end{enumerate}
+
+\textbf{Either way, the paper's Table~3 values are not traceable to K902.} The original source experiment for Table~3 is unknown (K902 was supposed to \textit{replace} it), but K902 produces systematically different numbers.
+
+\textbf{Required action:}
+\begin{enumerate}[nosep]
+\item Determine which QLIKE formula the paper's Table~3 originally used (check the original experiment script, if it exists).
+\item If K902 uses the correct Patton (2011) proxy-robust form, \textbf{update Table~3 to K902's values}.
+\item If the paper's values are correct and K902 has a formula bug, fix K902.
+\item Either way, the \textbf{DM test statistics and $p$-values must come from the same experiment as the QLIKE values}. Currently the paper reports DM $p = 0.001$ for SPY, while K902 reports DM $t = 4.221$, $p = 0.000$. The qualitative conclusion (GJR wins for SPY) is unchanged, but the specific numbers differ.
+\item The \texttt{body\_v2.tex} text at line~347 quotes ``QLIKE $\approx -9.034$'' for SPY's GJR---this must match whichever source is adopted.
+\end{enumerate}
+
+Additionally, K902 reveals a noteworthy finding: \textbf{QQQ 2023--24 reverses sign.} The paper reports $\Delta = +0.92\%$ (GARCH wins, $p = 0.067$), while K902 reports $\Delta = -0.12\%$ (GJR slightly wins, $p = 0.619$, NS). This does not affect the paper's narrative (both are non-significant for 2023--24, and GJR wins significantly in 2025), but the sign reversal in the $\Delta$ column would change one cell in Table~3.
+
+\textbf{Severity: SEVERE.} This is the paper's most important empirical table. Untraceable QLIKE values undermine the reproducibility claim.
+
+
+\subsection*{N1 + N2: K899 Integration \hfill \textcolor{warncolor}{MAJOR (combined)}}
+
+K899 provides:
+\begin{itemize}[nosep]
+\item Unified VaR backtest (7 methods, 1508 OOS days, identical settings)
+\item ES backtest (Acerbi-Szekely): only GJR+HistSim passes ($z = 1.64$, $p = 0.10$)
+\item Fissler-Ziegel joint VaR-ES scores: GJR+HistSim best at both 1\% and 5\%
+\end{itemize}
+
+The current paper uses K899 only in a footnote (lines 100--103 of \texttt{tables.tex}). The ES results---arguably the paper's strongest practical finding and directly relevant to Basel III (which now requires ES over VaR)---are not mentioned at all.
+
+\textbf{Recommendation:}
+\begin{enumerate}[nosep]
+\item Add an appendix table with K899's full 7-method results (VaR + ES columns).
+\item Add 1--2 sentences to Section~4.6 or the conclusion noting that GJR+HistSim is the only method passing both VaR and ES tests. This strengthens the orthogonality narrative and the complexity ceiling argument without requiring a major rewrite.
+\item Correct the footnote: at 5\% VaR, methods pass Kupiec but fail Basel traffic light due to clustering---not ``all methods fail.''
+\end{enumerate}
+
+
+\bigskip
+
+%% ============================================================
+\section*{R2 Major Issues --- Quick Update}
+
+\begin{tabular}{p{1cm}p{5cm}p{2.5cm}p{5.5cm}}
+\toprule
+\textbf{ID} & \textbf{Issue} & \textbf{R3 Status} & \textbf{Note} \\
+\midrule
+M1 & Paper length (62 pp) & \textcolor{warncolor}{UNCHANGED} & Not addressed; lower priority \\
+M2 & Abstract overclaims & \textcolor{okgreen}{RESOLVED (R2)} & --- \\
+M3 & Proposition 1 mechanical & \textcolor{okgreen}{IMPROVED (R2)} & --- \\
+M4 & Harvey $t > 3.0$ inconsistency & \textcolor{warncolor}{UNCHANGED} & K902 now shows SPY DM $t = 4.22$ (Harvey pass), but body text still quotes $p = 0.001$ from old experiment \\
+M5 & No ES analysis & \textcolor{warncolor}{DATA READY} & K899 has ES data; not yet in paper \\
+M6 & DeMiguel mischaracterized & \textcolor{warncolor}{UNCHANGED} & Line 46: ``hybrid implied-realized'' should be ``conditional multifactor'' \\
+M7 & Hybrid VT Sharpe rounding & \textcolor{warncolor}{UNCHANGED} & \\
+M8 & Missing references & \textcolor{warncolor}{UNCHANGED} & Bekaert \& Wu (2000), Figlewski \& Wang (2000) \\
+\bottomrule
+\end{tabular}
+
+
+\bigskip
+
+%% ============================================================
+\section*{Summary and Action Plan}
+
+\textbf{SEVERE (must fix): 1 item}
+\begin{enumerate}
+\item \textbf{Resolve Table 3 QLIKE scale mismatch.} Determine which formula (paper or K902) is the Patton (2011) standard. Update Table~3 + body text to match the traceable experiment. Update DM statistics accordingly. \textit{[C5 + N3]}
+\end{enumerate}
+
+\textbf{MAJOR (strongly recommended): 3 items}
+\begin{enumerate}[resume]
+\item \textbf{Unify Table 5 source.} Either re-extract 2023--2024 from K899 or add K899 as appendix table. Fix footnote wording. \textit{[C3]}
+\item \textbf{Incorporate K899 ES results.} Add ES pass/fail column or appendix table. Mention in text. \textit{[N2, M5]}
+\item \textbf{Reconcile Table 1 rounding.} Update 5 cells to match K902 exactly ($N$, means). \textit{[C4 residual]}
+\end{enumerate}
+
+\textbf{MINOR (desirable): 5 items}
+\begin{enumerate}[resume]
+\item Fix DeMiguel characterization (M6, line 46).
+\item Add Bekaert \& Wu (2000) and Figlewski \& Wang (2000) references (M8).
+\item Standardize Harvey threshold usage (M4).
+\item Report Hybrid VT Sharpe as 0.985 (M7).
+\item Move secondary analyses to supplementary material (M1).
+\end{enumerate}
+
+\bigskip
+
+\noindent\textbf{Bottom line:} The paper has improved substantially from R2 (4 SEVERE $\to$ 1 SEVERE). The conceptual issues are all resolved. The single remaining severe item---Table~3 QLIKE traceability---is a mechanical fix once the formula convention is determined. The three major items (Table~5 unification, ES incorporation, Table~1 rounding) would strengthen the paper but are not blocking for a first submission if addressed in cover letter promises. With these fixes, the paper reaches a submittable state for JBF.
+
+\bigskip
+
+\noindent\textit{Reviewer: Claude Opus 4.6 (1M context), acting as JBF referee. R3 review, 2026-04-05.}\\
+\noindent\textit{Sources verified: K899 (\texttt{experiments/k899\_unified\_var\_paper1\_results.json}), K902 (\texttt{experiments/k902\_paper1\_tables\_supplement\_results.json}), \texttt{tables.tex}, \texttt{body\_v2.tex}.}
+
+\end{document}
