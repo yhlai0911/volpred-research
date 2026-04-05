@@ -1,0 +1,459 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{multirow}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\newcommand{\HIGH}{\textbf{\textcolor{errorred}{[HIGH]}}}
+\newcommand{\MED}{\textbf{\textcolor{warncolor}{[MED]}}}
+\newcommand{\LOW}{\textbf{\textcolor{okgreen}{[LOW]}}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Comprehensive Academic Review}\\[0.5em]
+{\large ``When Volatility Targeting Crowds: Quantifying the Tipping Point via Agent-Based Simulation''}\\[0.5em]
+{\normalsize Document type: Working paper (pre-submission)}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Reviewer: Claude Opus 4.6 (1M context)}\\
+{\normalsize Review standard: Strict (Journal of Financial Economics / Review of Financial Studies level)}\\
+{\normalsize Source experiment: K827v3 (fixed liquidity, 500 sims)}
+\end{center}
+
+\vspace{1em}
+
+%=================================================================
+\section*{Review Summary}
+%=================================================================
+
+\begin{tabular}{ll}
+\textcolor{errorred}{Serious issues (must fix)} & 5 items \\
+\textcolor{warncolor}{Moderate issues (should fix)} & 9 items \\
+Minor issues (optional fix) & 8 items \\
+Overall assessment & \textbf{Promising but needs revision (Major Revision)} \\
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{One-paragraph verdict.}
+The paper tackles a timely and important question---at what adoption level does volatility targeting become self-defeating?---and provides the first quantitative threshold estimate via agent-based simulation. The fixed-liquidity design (K827v3) is a genuine improvement over the original, and the honesty about the mechanism being encoded rather than discovered is commendable. However, the paper suffers from (1) a mismatch between the paper's VIX equation and the code implementation (the code uses an asymmetric $\max(0,\cdot)$ term not shown in the paper), (2) the ``27 parameter combinations'' language implying a full-factorial design when the actual design is one-at-a-time, (3) incomplete discussion of the VT Sharpe computation (no risk-free rate, VT portfolio returns use market returns weighted by VT weights despite VT agents not being the only price-movers), and (4) several missing citations that are standard for ABM finance and VT literature. The recently corrected t-test values (from K827v3 rather than K827v2) are now verified as correct. With these revisions, the paper would be suitable for a computational finance or financial stability journal.
+
+%=================================================================
+\section*{I. Logic Structure}
+%=================================================================
+
+\HIGH\ \textbf{I-1. Sensitivity analysis design mischaracterized as ``3$\times$3$\times$3 grid.''}
+
+Section 2.4 describes ``a $3 \times 3 \times 3$ sensitivity grid ($\lambda$, $\gamma$, $\kappa$ each at $\pm 50\%$ of baseline)'' producing ``27 parameter combinations.'' This language strongly implies a \emph{full factorial} design---all $3^3 = 27$ unique combinations of parameter settings tested simultaneously. The actual implementation (verified in \texttt{k827v3\_abm\_fixed\_liquidity.py}, lines 394--426) is \textbf{one-at-a-time (OAT)}: each parameter is varied at 3 levels while the other two are held at baseline, yielding 9 unique parameter settings tested at 3 adoption levels = 27 cells. Table~3's footnote correctly says ``varies one parameter,'' but the main text contradicts this.
+
+\textbf{Impact}: A full-factorial design would allow testing interaction effects (e.g., does high $\lambda$ combined with high $\gamma$ produce a lower threshold than either alone?). The OAT design cannot detect such interactions. Claiming ``27 parameter combinations'' overstates the design's power.
+
+\textbf{Fix}: Replace ``$3 \times 3 \times 3$ sensitivity grid'' and ``27 parameter combinations'' with ``one-at-a-time sensitivity analysis: 3 parameters $\times$ 3 levels $\times$ 3 adoption rates = 27 cells, with each parameter varied independently while others are held at baseline.'' Add a limitations sentence acknowledging that interaction effects are not tested.
+
+\medskip
+
+\MED\ \textbf{I-2. Sell pressure equation (Eq.~3) omits the cap and uses the wrong $N$.}
+
+The paper writes:
+\[
+\text{Sell pressure} \propto \phi \cdot N \cdot \left(\frac{12}{\text{VIX}_{t-1}} - \frac{12}{\text{VIX}_{t-2}}\right).
+\]
+The actual code (line 153--156) computes demand as:
+\[
+\text{Demand}_t = n_{\text{VT}} \cdot \left(\min\!\left(\frac{12}{\text{VIX}_{t-1}},\, 1.5\right) - w_{t-1}^{\text{VT}}\right),
+\]
+where $n_{\text{VT}} = \phi \cdot N_{\text{BH+VT}} = \phi \cdot 800$ (not $\phi \cdot N = \phi \cdot 1000$). The equation also omits the 1.5 cap.
+
+\textbf{Fix}: Either present the exact formula with the cap and correct agent pool size, or clearly state ``ignoring the position cap for expositional clarity'' and use $N_{\text{BH+VT}}$ instead of $N$.
+
+\medskip
+
+\LOW\ \textbf{I-3. The logic chain from abstract to conclusion is sound.}
+
+The paper follows a clear arc: motivation (VT is growing) $\to$ gap (no quantitative threshold) $\to$ model (ABM with Kyle microstructure) $\to$ results (nonlinear tipping point) $\to$ robustness (sensitivity analysis + design validation) $\to$ limitations. The ``encoded vs.\ discovered'' distinction is appropriately emphasized throughout. No circular reasoning detected.
+
+
+%=================================================================
+\section*{II. Research Motivation \& Contribution}
+%=================================================================
+
+\MED\ \textbf{II-1. The ``USD~2 trillion'' claim needs clarification.}
+
+The introduction states ``short-volatility and volatility-sensitive strategies collectively manage over USD~2 trillion'' citing Bouchaud et al.\ (2018). However, Bouchaud et al.\ (2018) is a textbook on market microstructure, not an industry AUM survey. The USD~2 trillion figure likely comes from JPMorgan or Marko Kolanovic estimates (circa 2017--2018). The citation is either wrong or should be supplemented with the actual source.
+
+\textbf{Fix}: Cite the original industry source (e.g., Kolanovic \& Kulkarni, JPMorgan report, 2017) or qualify with ``industry estimates'' without attributing to a specific academic source.
+
+\medskip
+
+\LOW\ \textbf{II-2. Contribution framing is appropriately cautious.}
+
+The paper correctly describes its contributions as ``preliminary and model-dependent'' (Introduction, final sentence). The fourfold contribution claim is reasonable: (1) quantitative tipping point, (2) threshold behavior quantification (not mechanism discovery), (3) market-level consequences, (4) sensitivity analysis. This is honest and well-calibrated for a working paper.
+
+
+%=================================================================
+\section*{III. Literature Review}
+%=================================================================
+
+\HIGH\ \textbf{III-1. Several important ABM/VT citations are missing.}
+
+The paper's reference list has only 11 entries, which is thin for the breadth of literatures it engages:
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{ABM in finance}: LeBaron (2006, \emph{Handbook of Computational Economics}) is the standard survey of agent-based computational finance. Farmer \& Foley (2009, \emph{Nature}) advocate ABM for economics. Hommes (2006) surveys heterogeneous agent models. None are cited.
+  \item \textbf{VT empirical performance}: Cederburg et al.\ (2020, \emph{Journal of Financial Economics}) provide a comprehensive out-of-sample test of VT. Fleming et al.\ (2001, 2003) are early VT references.
+  \item \textbf{Crowding measurement}: Kinlaw et al.\ (2019, \emph{Journal of Portfolio Management}) provide quantitative crowding measures. Lou \& Polk (2022, \emph{Review of Financial Studies}) on co-momentum as crowding.
+  \item \textbf{Procyclicality}: Danielsson et al.\ (2012, \emph{Journal of Financial Economics}) on procyclical leverage and endogenous risk.
+  \item \textbf{Portfolio insurance / 1987 parallel}: Jacklin et al.\ (1992, \emph{Financial Analysts Journal}) directly connect portfolio insurance to market instability.
+\end{enumerate}
+
+\textbf{Fix}: Add at least the references in (a)--(e) above. The ABM literature expects engagement with LeBaron (2006) and Farmer \& Foley (2009) at minimum.
+
+\medskip
+
+\MED\ \textbf{III-2. The literature review is embedded in the Introduction---no separate section.}
+
+For a journal submission, a dedicated Section~2 (Literature Review) is expected, covering: (1) VT strategy literature, (2) crowding/procyclicality, (3) ABM in finance, (4) 1987 crash parallels. The current Introduction briefly touches each but does not provide critical analysis of how existing work informs the modeling choices.
+
+\textbf{Fix}: Expand into a dedicated literature review section, or at minimum add a subsection 1.1 ``Related Literature'' that organizes existing work into these themes and explains how the paper builds on each.
+
+
+%=================================================================
+\section*{IV. Model Specification}
+%=================================================================
+
+\HIGH\ \textbf{IV-1. VIX equation mismatch between paper and code (asymmetric response).}
+
+The paper presents Eq.~(2) as:
+\[
+\text{VIX}_t = \text{VIX}_{t-1} + \kappa\!\left(\bar{V} + \gamma \cdot \Delta\sigma^{\text{real}}_t - \text{VIX}_{t-1}\right) + \eta_t,
+\]
+where $\Delta\sigma^{\text{real}}_t$ is described as ``deviations of 20-day realized volatility from 16\%.'' This suggests a symmetric response: VIX rises when realized vol exceeds 16\% and falls when it is below 16\%.
+
+The actual code (line 144) implements:
+\begin{verbatim}
+vix_target = VIX_MEAN + vix_vol_sensitivity * max(0, realized_vol_20d - 0.16)
+\end{verbatim}
+
+The \texttt{max(0, ...)} makes the response \textbf{asymmetric}: the VIX target only increases above $\bar{V}$ when realized vol exceeds 16\%; it never decreases below $\bar{V}$ due to low realized vol. This is a substantively different model than what the equation shows.
+
+\textbf{Impact}: The asymmetric specification biases the VIX upward when VT adoption is high (since VT selling increases realized vol, which increases VIX via the $\max(0,\cdot)$ term, but VT buying during low-vol periods does not decrease VIX below the mean). This asymmetry likely amplifies the feedback loop and may shift the tipping point. Without it, the feedback would be weaker and the threshold might be higher.
+
+\textbf{Fix}: Either (a) change Eq.~(2) to match the code: use $\max(0, \Delta\sigma^{\text{real}}_t)$ or define $\Delta\sigma^{\text{real}}_t \equiv \max(0,\, \hat{\sigma}^{(20)}_t - 0.16)$, and discuss the asymmetry as a modeling choice; or (b) change the code to be symmetric and re-run. Option (a) is recommended since the asymmetry is actually more realistic (VIX does respond more to vol increases than decreases).
+
+\medskip
+
+\HIGH\ \textbf{IV-2. VT strategy Sharpe ratio definition is unclear and potentially misleading.}
+
+The code (lines 216--220) computes VT Sharpe as:
+\begin{verbatim}
+vt_w = np.minimum(12.0 / vix_series[:-1], VT_CAP)
+vt_port_returns = vt_w * valid_returns
+vt_sharpe = mean(vt_port_returns) * 252 / (std(vt_port_returns) * sqrt(252))
+\end{verbatim}
+
+This computes the Sharpe ratio of a portfolio that weights market returns by the VT rule. Three concerns:
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{No risk-free rate}: $\text{Sharpe} = \bar{r}/\sigma$ rather than $(\bar{r} - r_f)/\sigma$. Since $r_f$ is zero in the simulation, this is technically correct but should be stated.
+  \item \textbf{VT weights applied to total market return}: The market return $r_t$ is driven by \emph{all} agents' order flow (VT + BH + noise). The VT Sharpe thus reflects VT agents' \emph{own} trading impact on prices, which is circular when $\phi$ is large. This is inherent to the model's purpose but deserves explicit discussion.
+  \item \textbf{Leverage}: VT weights can exceed 1.0 (up to cap 1.5), meaning VT agents are levered. The paper does not clarify whether the Sharpe accounts for borrowing costs or leverage risk. In a zero-$r_f$ simulation this is moot, but should be acknowledged.
+\end{enumerate}
+
+\textbf{Fix}: Add a brief paragraph in Section 2 (or a footnote to Table 1) defining the VT Sharpe precisely: ``The VT Sharpe ratio is computed as $\bar{r}^{\text{VT}} / \sigma^{\text{VT}}$ where $r^{\text{VT}}_t = w^{\text{VT}}_t \cdot r_t$ and $r_t$ is the market return. The risk-free rate is zero in the simulation. Weights can exceed 1.0 (up to the 1.5 cap), implying leverage.''
+
+\medskip
+
+\MED\ \textbf{IV-3. Kyle's lambda is exogenous, contradicting Kyle (1985).}
+
+The paper correctly notes this in Limitations (Section 4.3, first paragraph) but does not adequately discuss the direction of bias. In Kyle (1985), lambda is inversely related to market depth. During VT crowding episodes, market depth would likely \emph{decrease} (market makers face adverse selection from informed-like correlated trading), which would \emph{increase} lambda endogenously. This means the true tipping point might be lower than the paper estimates. The paper mentions ``liquidity evaporates during stress'' but does not make the connection to the simulation's underestimate of the feedback.
+
+\textbf{Fix}: Add a sentence in Limitations or the Discussion clarifying the bias direction: ``Because our exogenous $\lambda$ does not increase during stress, our simulation likely \emph{underestimates} the feedback severity, suggesting that the true tipping point may be lower than 50\%.''
+
+\medskip
+
+\LOW\ \textbf{IV-4. Noise trader specification is minimal.}
+
+Noise traders use $\Delta w \sim N(0, 0.02)$ clipped to $[0, 1.5]$, but their initial weight is hard-coded to 0.5 in the simulation (line 129). This is not stated in the paper. The clipping creates an absorbing boundary at 0 (once a noise trader hits $w=0$, they can only increase), which slightly biases noise demand upward over time.
+
+\textbf{Fix}: State the initial noise weight (0.5) and acknowledge the boundary effect in a footnote.
+
+
+%=================================================================
+\section*{V. Equations \& Derivations}
+%=================================================================
+
+\MED\ \textbf{V-1. $\Delta\sigma^{\text{real}}_t$ is not defined.}
+
+Eq.~(2) uses $\Delta\sigma^{\text{real}}_t$ without defining it. The text says ``$\gamma = 200$ amplifies deviations of 20-day realized volatility from 16\%,'' suggesting $\Delta\sigma^{\text{real}}_t \equiv \hat{\sigma}^{(20)}_t - 0.16$ (annualized). But as noted in IV-1, the code uses $\max(0, \hat{\sigma}^{(20)}_t - 0.16)$, and neither version is explicit in the equation.
+
+\textbf{Fix}: Define $\Delta\sigma^{\text{real}}_t$ explicitly, e.g., $\Delta\sigma^{\text{real}}_t \equiv \max\!\left(0,\, \hat{\sigma}^{(20)}_t - 0.16\right)$ where $\hat{\sigma}^{(20)}_t$ is the annualized standard deviation of the most recent 20 daily returns.
+
+\medskip
+
+\LOW\ \textbf{V-2. Eq.~(1) mixes notation.}
+
+The return equation uses $N(0, \sigma_f)$ for the fundamental shock, but $N(\cdot)$ is not a standard econometric notation (it could mean normal distribution or number of agents---the paper uses $N$ for both). Consider $\varepsilon_t \sim \mathcal{N}(0, \sigma_f^2)$ with $\mathcal{N}$ to distinguish from $N$ (agent count). Also note that the variance of a normal distribution is $\sigma^2$, not $\sigma$, so $\varepsilon_t \sim N(0, \sigma_f)$ should technically be $\varepsilon_t \sim \mathcal{N}(0, \sigma_f^2)$.
+
+\medskip
+
+\LOW\ \textbf{V-3. The realized volatility computation in the code uses a rolling buffer, not a clean 20-day window.}
+
+The code (line 142) computes \texttt{np.std(ret\_buffer)} where \texttt{ret\_buffer} is a circular buffer of size 20. For $t < 20$, this buffer contains zeros for unfilled entries, which biases the realized vol estimate downward for the first 20 days. This is a minor warm-up effect that likely does not affect the 2,520-day averages.
+
+
+%=================================================================
+\section*{VI. Research Methods}
+%=================================================================
+
+\MED\ \textbf{VI-1. No formal power analysis or simulation convergence check.}
+
+The paper uses 500 simulations per adoption level but does not report whether this is sufficient for the desired precision. The bootstrap CIs are narrow (e.g., $[0.44, 0.50]$ for the 10\% Sharpe), suggesting adequate power, but this should be explicitly verified. Standard practice for ABM papers is to show convergence plots: mean $\pm$ CI width as a function of the number of simulations.
+
+\textbf{Fix}: Add a figure or footnote showing that the key metrics (Sharpe, kurtosis) stabilize well before 500 simulations.
+
+\medskip
+
+\MED\ \textbf{VI-2. The t-test comparison groups are not clearly defined.}
+
+Section 3.3 reports ``10\% versus 30\%'' and ``50\% versus 10\%'' but does not clearly state that the 500 Sharpe ratios (one per simulation) at each adoption level are the paired observations. Are these unpaired (different random seeds) or could they be paired (same seeds across adoption levels)?
+
+Looking at the code, the random seeds are constructed as \texttt{vt\_frac * 10000 + sim\_idx + 42} (line 349--352), meaning different adoption levels use \emph{different} seeds. This means the comparisons are unpaired, and the Welch $t$-test is appropriate. However, using the \emph{same} seeds across adoption levels would enable paired comparisons with much higher power (the ``common random numbers'' technique in simulation). This is a missed opportunity.
+
+\textbf{Fix}: (a) Clarify that comparisons are unpaired Welch $t$-tests on $500 + 500$ independent observations. (b) Consider re-running with common random numbers for a paired design, which would dramatically increase statistical power and likely produce tighter CIs.
+
+\medskip
+
+\LOW\ \textbf{VI-3. Flash crash frequency definition could be misleading at 100\%.}
+
+The paper correctly notes (Table 1, footnote a) that the flash crash frequency at 100\% is moderate despite extreme conditions because the $3\sigma$ threshold itself is inflated. However, an alternative metric---such as the frequency of returns exceeding a fixed threshold (e.g., $|r| > 5\%$)---would be more informative for cross-adoption comparison. Consider reporting both.
+
+
+%=================================================================
+\section*{VII. Data \& Sample Design}
+%=================================================================
+
+\MED\ \textbf{VII-1. No calibration to real market data.}
+
+The model parameters ($\lambda = 0.005$, $\sigma_f = 0.16$, $\bar{V} = 18$, $\kappa = 0.03$, $\gamma = 200$) are stated without justification for their specific values. While the sensitivity analysis partially addresses this, a reviewer would ask: ``Do these parameters produce realistic baseline market dynamics?'' A brief calibration check---showing that the 0\% adoption scenario produces realistic annual volatility ($\sim$16\%), reasonable kurtosis ($\sim$0), and VIX distribution comparable to historical S\&P 500 data---would strengthen credibility.
+
+The 0\% adoption results (Table 2: Ann Vol = 16.0\%, VIX Mean = 19.4, Kurtosis $\approx$ 0, Skewness $\approx$ 0) are actually quite realistic for a log-normal baseline, which is a strength that should be highlighted explicitly.
+
+\textbf{Fix}: Add a brief paragraph in Section 2 or Section 3 comparing 0\%-adoption statistics to historical S\&P 500 statistics (e.g., ``The baseline model produces annualized volatility of 16.0\% and near-zero excess kurtosis, consistent with a Gaussian benchmark. Historical S\&P 500 data exhibit similar volatility but higher kurtosis ($\sim$3--5), reflecting fat tails not captured by our Gaussian fundamental shocks.'')
+
+\medskip
+
+\LOW\ \textbf{VII-2. Number verification: all values verified against K827v3.}
+
+Per the audit report (\texttt{audit\_step1\_2.md}), all 48 values in Table 1, all 42 values in Table 2, and all 36 values in Table 3 trace correctly to K827v3 experiment data. Only 4 minor rounding discrepancies exist (100\% dVol: 119.1 vs 119.0; 100\% Kurtosis: 61.4 vs 61.35; 10\% Skewness: 0.001 vs 0.000; 100\% Skewness: -4.73 vs -4.734). None are material.
+
+\medskip
+
+\LOW\ \textbf{VII-3. The t-test correction (K827v2 $\to$ K827v3) is now verified.}
+
+Section 3.3 was corrected from:
+\begin{itemize}
+  \item $t = 3.64$ (10\% vs 30\%), K827v2 scaled liquidity $\to$ $t = 0.05$, K827v3 fixed liquidity
+  \item $t = 17.82$ (50\% vs 10\%), K827v2 $\to$ $t = 7.12$, K827v3
+\end{itemize}
+
+Verification against \texttt{k827v3\_abm\_fixed\_liquidity\_results.json}:
+\begin{itemize}
+  \item \texttt{significance\_tests.30\%.t\_stat} = 0.0505 $\to$ Paper says 0.05. \textcolor{okgreen}{Correct.}
+  \item \texttt{significance\_tests.30\%.p\_value} = 0.9597 $\to$ Paper says $p = 0.96$. \textcolor{okgreen}{Correct.}
+  \item \texttt{significance\_tests.50\%.t\_stat} = 7.1250 $\to$ Paper says 7.12. \textcolor{okgreen}{Correct.}
+  \item \texttt{significance\_tests.50\%.p\_value} = $1.99 \times 10^{-12}$ $\to$ Paper says $p < 0.001$. \textcolor{okgreen}{Correct.}
+\end{itemize}
+
+The corrected narrative---``10\% and 30\% are statistically indistinguishable'' ($t = 0.05$, $p = 0.96$)---is actually \emph{stronger} evidence for the paper's ``safe zone below 30\%'' claim than the old K827v2 values were. The old $t = 3.64$ suggested a marginal difference, which weakened the safe-zone argument. The fix is substantively beneficial.
+
+
+%=================================================================
+\section*{VIII. Expected Contributions \& Claims}
+%=================================================================
+
+\MED\ \textbf{VIII-1. The ``5\% current adoption'' claim lacks a source.}
+
+The abstract and Discussion state ``current real-world VT adoption is estimated below 5\%'' without citation. This is a critical claim for the paper's policy relevance. If no source exists, it should be qualified as ``our rough estimate'' with an explanation of how it was derived.
+
+\textbf{Fix}: Either cite a source (industry report, regulatory filing) or explicitly derive the estimate (e.g., ``VT-related AUM of approximately USD~200--400 billion relative to global equity market capitalization of~USD~100 trillion implies adoption below 0.5\%; even including indirect VT exposure through structured products, adoption is likely below 5\%.'')
+
+\medskip
+
+\LOW\ \textbf{VIII-2. The ``order-of-magnitude estimates'' qualifier is appropriate.}
+
+The Limitations section correctly states that ``quantitative thresholds (50--70\%) should be interpreted as order-of-magnitude estimates rather than precise critical values.'' This is commendable intellectual honesty and appropriate for a simulation study.
+
+
+%=================================================================
+\section*{IX. Citation \& Reference Audit}
+%=================================================================
+
+\HIGH\ \textbf{IX-1. Citations in text vs.\ bibliography.}
+
+All 11 citations in the text match entries in the bibliography. No orphan references detected. However:
+
+\begin{enumerate}[label=(\alph*)]
+  \item \textbf{Perchet et al.\ (2015) vs.\ (2016)}: The \texttt{bibitem} label is \texttt{perchet2016} but the entry says ``(2015)''. The year in the citation key and the actual publication year are inconsistent. The paper was published in 2015 in JAI 18(3).
+  \item \textbf{Harvey et al.\ (2016)}: First citation in Section 3.3 uses the Harvey threshold correctly.
+  \item \textbf{ECB (2020)}: Cited as \texttt{[ECB,][]\{ecb2020\}}---the comma and extra brackets in the \texttt{citet} call may produce formatting artifacts depending on the natbib version. Verify the compiled output.
+\end{enumerate}
+
+\textbf{Fix}: (a) Change \texttt{perchet2016} to \texttt{perchet2015} or change the entry year to 2016 if the issue was published in 2016. (b) Verify ECB citation renders correctly.
+
+\medskip
+
+\MED\ \textbf{IX-2. Only 11 references for a paper spanning 4 literatures.}
+
+As noted in III-1, the reference list should be expanded to at least 20--25 entries for a paper that engages with VT, crowding, ABM, and market microstructure literatures. Top-tier journal submissions in this area typically cite 30--50 references.
+
+
+%=================================================================
+\section*{X. Writing Quality \& Exposition}
+%=================================================================
+
+\LOW\ \textbf{X-1. The paper is well-written with clear, precise language.}
+
+The writing is concise and avoids unnecessary jargon. The distinction between ``encoded'' and ``discovered'' feedback is consistently maintained. Technical terms are defined upon first use. The Limitations section is unusually thorough and honest, which will be appreciated by reviewers.
+
+\medskip
+
+\LOW\ \textbf{X-2. Some phrasing could be tightened.}
+
+\begin{itemize}
+  \item Abstract: ``A design validation comparing fixed versus scaled liquidity shows that approximately half the degradation observed in a na\"ive design is attributable to liquidity evaporation rather than crowding per se.'' This is 28 words; consider shortening.
+  \item Section 3.1: ``The nonlinearity is striking'' is editorializing. Let the numbers speak.
+  \item Section 3.4: ``This is economically intuitive'' could be ``This is consistent with the model structure.''
+\end{itemize}
+
+
+%=================================================================
+\section*{XI. Presentation (Tables, Figures, Formatting)}
+%=================================================================
+
+\MED\ \textbf{XI-1. No figures in the paper.}
+
+The paper contains 3 tables and 0 figures. For a paper about nonlinear threshold behavior, a figure showing the Sharpe ratio as a function of adoption ($\phi$) would be far more effective than Table~1 alone. The ``phase transition'' pattern would be visually compelling. Additional useful figures:
+
+\begin{enumerate}[label=(\alph*)]
+  \item Sharpe ratio vs.\ $\phi$ with bootstrap CIs (the ``tipping point'' figure)
+  \item Market kurtosis vs.\ $\phi$ (showing the explosion)
+  \item Sensitivity heatmap: Sharpe as a function of parameter value and $\phi$
+  \item Example price paths at different $\phi$ levels (illustrating the progressive instability)
+\end{enumerate}
+
+\textbf{Fix}: Add at least figures (a) and (b). These would become the paper's most memorable contribution---the ``VT crowding curve.''
+
+\medskip
+
+\LOW\ \textbf{XI-2. Table column alignment is inconsistent.}
+
+Table 1 uses \texttt{@\{\}} to suppress column padding, which is fine, but the mix of decimal-aligned numbers and percentage signs makes some columns hard to scan. Consider using the \texttt{siunitx} package with \texttt{S} columns for decimal alignment.
+
+
+%=================================================================
+\section*{XII. Reproducibility \& Replication}
+%=================================================================
+
+\LOW\ \textbf{XII-1. Replication materials are ``available upon request.''}
+
+The paper states ``Simulation code and replication data available upon request'' in the acknowledgments footnote. Modern standards expect a public repository (GitHub/Zenodo) with the simulation code, parameter files, and post-processing scripts. The code is well-documented (docstrings, comments, clear variable names) and would benefit from public release.
+
+\textbf{Fix}: Prepare a replication package with: (1) \texttt{k827v3\_abm\_fixed\_liquidity.py}, (2) the JSON results, (3) a \texttt{README.md} with instructions. Upload to Zenodo for a DOI.
+
+\medskip
+
+\LOW\ \textbf{XII-2. Random seed strategy enables replication.}
+
+The code uses deterministic seeds (\texttt{np.random.RandomState(seed)}) with seed = $f(\phi, \text{sim\_idx})$, ensuring exact reproducibility given the same NumPy version. This is good practice.
+
+
+%=================================================================
+\section*{Consolidated Issue List}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{Serious Issues (5)}}
+
+\begin{enumerate}
+  \item \HIGH\ \textbf{I-1}: Sensitivity analysis mischaracterized as ``$3\times3\times3$'' full factorial; actual design is OAT (9 settings $\times$ 3 adoption levels).
+  \item \HIGH\ \textbf{III-1}: Missing critical citations: LeBaron (2006), Farmer \& Foley (2009), Cederburg et al.\ (2020), Danielsson et al.\ (2012), Kinlaw et al.\ (2019).
+  \item \HIGH\ \textbf{IV-1}: VIX equation (Eq.~2) does not match code---code uses $\max(0, \cdot)$ asymmetric response; paper shows symmetric equation.
+  \item \HIGH\ \textbf{IV-2}: VT Sharpe ratio definition (no $r_f$, leverage, circularity of weighting market returns) is not stated in the paper.
+  \item \HIGH\ \textbf{IX-1a}: Perchet et al.\ citation year mismatch (bibitem says 2015, key says 2016).
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{Moderate Issues (9)}}
+
+\begin{enumerate}
+  \item \MED\ \textbf{I-2}: Sell pressure equation (Eq.~3) omits cap and uses $N$ instead of $N_{\text{BH+VT}}$.
+  \item \MED\ \textbf{II-1}: ``USD~2 trillion'' AUM claim attributed to Bouchaud et al.\ (2018), likely wrong source.
+  \item \MED\ \textbf{III-2}: No dedicated literature review section.
+  \item \MED\ \textbf{IV-3}: Direction of bias from exogenous $\lambda$ not discussed.
+  \item \MED\ \textbf{V-1}: $\Delta\sigma^{\text{real}}_t$ not explicitly defined.
+  \item \MED\ \textbf{VI-1}: No simulation convergence analysis (how many sims are ``enough'').
+  \item \MED\ \textbf{VI-2}: Paired vs.\ unpaired t-test not discussed; common random numbers not used.
+  \item \MED\ \textbf{VIII-1}: ``5\% current adoption'' claim has no source.
+  \item \MED\ \textbf{IX-2}: Only 11 references; far below journal norms for this topic breadth.
+  \item \MED\ \textbf{XI-1}: No figures---the ``tipping point curve'' figure would be the paper's most impactful visual.
+\end{enumerate}
+
+\subsection*{Minor Issues (8)}
+
+\begin{enumerate}
+  \item \LOW\ \textbf{IV-4}: Noise trader initial weight (0.5) and boundary effects not stated.
+  \item \LOW\ \textbf{V-2}: $N$ vs.\ $\mathcal{N}$ notation conflict; $N(0, \sigma_f)$ should be $\mathcal{N}(0, \sigma_f^2)$.
+  \item \LOW\ \textbf{V-3}: Circular buffer warm-up bias for $t < 20$.
+  \item \LOW\ \textbf{VI-3}: Flash crash metric inflated by $3\sigma$ at high adoption.
+  \item \LOW\ \textbf{VII-2}: Four minor rounding discrepancies (100\% dVol, 100\% Kurt, 10\% Skew, 100\% Skew).
+  \item \LOW\ \textbf{X-2}: Minor phrasing tightening opportunities.
+  \item \LOW\ \textbf{XI-2}: Table decimal alignment could be improved with \texttt{siunitx}.
+  \item \LOW\ \textbf{XII-1}: Replication materials should be publicly available (Zenodo/GitHub), not ``upon request.''
+\end{enumerate}
+
+
+%=================================================================
+\section*{Revision Priority}
+%=================================================================
+
+\begin{enumerate}
+  \item \textbf{Fix VIX equation mismatch} (IV-1): Either update Eq.~(2) to match code or re-run. This is the single most important fix because it affects the model's scientific description.
+  \item \textbf{Correct sensitivity analysis description} (I-1): Change ``$3\times3\times3$'' to OAT. This is a straightforward text fix.
+  \item \textbf{Add missing citations} (III-1, IX-2): Expand reference list to $\geq$20 entries covering ABM, VT, crowding, and microstructure literatures.
+  \item \textbf{Add figures} (XI-1): At minimum, a Sharpe-vs-$\phi$ figure and a kurtosis-vs-$\phi$ figure.
+  \item \textbf{Define VT Sharpe precisely} (IV-2): A brief definition paragraph in Section~2.
+  \item \textbf{Define $\Delta\sigma^{\text{real}}_t$} (V-1): One equation, matching the code's $\max(0,\cdot)$.
+  \item \textbf{Source the ``5\% adoption'' and ``USD~2 trillion'' claims} (II-1, VIII-1).
+  \item \textbf{Add a dedicated literature review section} (III-2): Expand Introduction or add Section~2.
+  \item \textbf{Fix Perchet citation year} (IX-1a): Trivial.
+  \item \textbf{Add sell pressure equation corrections} (I-2): Footnote the cap and correct $N$.
+\end{enumerate}
+
+
+%=================================================================
+\section*{Overall Assessment}
+%=================================================================
+
+\textbf{Verdict: Major Revision (Revise and Resubmit)}
+
+The paper addresses a genuinely important and timely question. The fixed-liquidity design is a clever identification strategy. The intellectual honesty about the feedback mechanism being ``encoded rather than discovered'' is exemplary. The recently corrected t-test values (K827v3) are verified as accurate and actually \emph{strengthen} the paper's narrative.
+
+The main weaknesses are: (1) a paper-code mismatch in the VIX equation that undermines the model's scientific description, (2) a thin reference list, (3) the absence of figures for a paper whose central finding is a nonlinear curve, and (4) the sensitivity analysis design being overstated. All of these are fixable without re-running the simulations (except potentially the VIX equation, depending on whether the asymmetry is intentional).
+
+\textbf{Target journals}: After revision, the paper would be appropriate for \emph{Journal of Economic Dynamics and Control} (ABM focus), \emph{Journal of Financial Stability} (systemic risk), or \emph{Quantitative Finance} (computational methods). For \emph{Journal of Financial Economics} or \emph{Review of Financial Studies}, the paper would additionally need empirical validation and a richer model (endogenous $\lambda$, heterogeneous agents).
+
+\end{document}

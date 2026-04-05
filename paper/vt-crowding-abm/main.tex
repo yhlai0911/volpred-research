@@ -51,7 +51,7 @@ Volatility targeting (VT) strategies---which scale equity exposure inversely to 
 \label{sec:intro}
 %=================================================================
 
-Volatility targeting (VT) has become a ubiquitous tool in dynamic portfolio management. The canonical framework, formalized by \citet{moreira2017}, prescribes scaling equity exposure as $w_t = \sigma^*/\hat{\sigma}_t$, where $\sigma^*$ is the target volatility and $\hat{\sigma}_t$ is a conditional volatility estimate. \citet{harvey2018} demonstrate that such strategies meaningfully reduce tail risk across asset classes, and the approach has been widely adopted by pension funds, insurance companies, and target-date funds. Industry estimates suggest that short-volatility and volatility-sensitive strategies collectively manage over USD~2 trillion in assets \citep{bouchaud2018}.
+Volatility targeting (VT) has become a ubiquitous tool in dynamic portfolio management. The canonical framework, formalized by \citet{moreira2017}, prescribes scaling equity exposure as $w_t = \sigma^*/\hat{\sigma}_t$, where $\sigma^*$ is the target volatility and $\hat{\sigma}_t$ is a conditional volatility estimate. \citet{harvey2018} demonstrate that such strategies meaningfully reduce tail risk across asset classes, and the approach has been widely adopted by pension funds, insurance companies, and target-date funds. Industry estimates suggest that short-volatility and volatility-sensitive strategies collectively manage over USD~2 trillion in assets \citep{cole2017}.
 
 Despite individual-level benefits, VT strategies embed a fundamentally procyclical mechanism: when volatility rises, all VT investors simultaneously reduce equity exposure, creating correlated selling pressure. The crowding risk literature warns of such procyclical dynamics---\citet{baltas2019} document crowding effects in alternative risk premia, and the European Central Bank \citep[ECB,][]{ecb2020} explicitly flagged VT procyclicality as a source of market fragility---but no study provides a quantitative threshold for VT crowding. Several commentators have drawn parallels to the portfolio insurance strategies implicated in the 1987 crash \citep{gennotte1990}. \citet{bookstaber2014} use agent-based modeling to study financial system fragility but do not specifically examine VT crowding.
 
@@ -87,7 +87,7 @@ Price formation follows a simplified \citet{kyle1985} model:
 \end{equation}
 where $\mu = 0.08/252$ is the daily drift, $\lambda = 0.005$ is the Kyle lambda (price impact per unit of normalized order flow), $\text{NOF}_t$ is the aggregate net order flow from all agents, and $\sigma_f = 0.16/\sqrt{252}$ is the fundamental volatility. The VIX evolves endogenously:
 \begin{equation}
-  \text{VIX}_t = \text{VIX}_{t-1} + \kappa(\bar{V} + \gamma \cdot \Delta\sigma^{\text{real}}_t - \text{VIX}_{t-1}) + \eta_t,
+  \text{VIX}_t = \max\!\Big(0,\; \text{VIX}_{t-1} + \kappa\big(\bar{V} + \gamma \cdot \Delta\sigma^{\text{real}}_t - \text{VIX}_{t-1}\big) + \eta_t\Big),
   \label{eq:vix}
 \end{equation}
 where $\kappa = 0.03$ is the mean-reversion speed, $\bar{V} = 18$ is the long-run mean, $\gamma = 200$ amplifies deviations of 20-day realized volatility from 16\%, and $\eta_t \sim N(0, 0.3)$. The VIX is bounded to $[9, 80]$.
@@ -98,7 +98,7 @@ The model is designed to embed a positive feedback loop: when VT agents sell (be
 
 \subsection{Simulation Design}
 
-For each of the 7 adoption levels, we run $M = 500$ independent Monte Carlo simulations with different random seeds, producing a total of 3{,}500 simulations $\times$ 2{,}520 days = 8.82 million agent-day observations. Bootstrap 95\% confidence intervals (2{,}000 replications) are reported for all key metrics. For each simulation we compute: annualized market volatility, VT strategy Sharpe ratio, maximum drawdown, excess kurtosis, skewness, flash crash frequency (daily returns exceeding $3\sigma$), and VIX dynamics. We additionally run 200 simulations per cell across a $3 \times 3 \times 3$ sensitivity grid ($\lambda$, $\gamma$, $\kappa$ each at $\pm 50\%$ of baseline) at three adoption levels (10\%, 30\%, 50\%) to test threshold robustness.
+For each of the 7 adoption levels, we run $M = 500$ independent Monte Carlo simulations with different random seeds, producing a total of 3{,}500 simulations $\times$ 2{,}520 days = 8.82 million agent-day observations. Bootstrap 95\% confidence intervals (2{,}000 replications) are reported for all key metrics. For each simulation we compute: annualized market volatility, VT strategy Sharpe ratio, maximum drawdown, excess kurtosis, skewness, flash crash frequency (daily returns exceeding $3\sigma$), and VIX dynamics. We additionally run 200 simulations per cell across a one-at-a-time (OAT) sensitivity analysis varying $\lambda$, $\gamma$, and $\kappa$ each at $\pm 50\%$ of baseline (9 parameter configurations) at three adoption levels (10\%, 30\%, 50\%) to test threshold robustness.
 
 %=================================================================
 \section{Results}
@@ -329,8 +329,13 @@ Moreira, A. and Muir, T. (2017).
 
 \bibitem[Perchet et~al.(2015)]{perchet2016}
 Perchet, R., de~Carvalho, R.~L., Heckel, T., and Moulin, P. (2015).
-\newblock Inter- and intra-asset diversification in risk-based portfolios with the 1/VIX rule.
-\newblock \emph{Journal of Alternative Investments}, 18(3), 48--64.
+\newblock Predicting the success of volatility targeting strategies: Application to equities and other asset classes.
+\newblock \emph{Journal of Alternative Investments}, 18(3), 21--38.
+
+\bibitem[Cole(2017)]{cole2017}
+Cole, C. (2017).
+\newblock Volatility and the alchemy of risk.
+\newblock Artemis Capital Management, Research Report.
 
 \end{thebibliography}
 
