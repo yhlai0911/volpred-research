@@ -1,0 +1,259 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{enumitem}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report --- Round 1}\\[0.5em]
+{\large ``Can Anything Beat VIX? A Systematic Out-of-Sample Evaluation of Eleven Signal Families for Equity Volatility Forecasting and Volatility Timing''}\\[0.5em]
+{\normalsize Document type: Journal paper (targeting \textit{Journal of Forecasting})}\\
+{\normalsize Version audited: \texttt{main\_v2.tex}}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Reviewer: Claude Opus 4.6 (1M context)}\\
+{\normalsize Standard: Strict (top-tier submission readiness)}
+\end{center}
+
+\bigskip
+
+%=================================================================
+\section*{Review Summary}
+%=================================================================
+
+\begin{tabular}{ll}
+\textcolor{errorred}{Severe issues (must fix)} & 4 items \\
+\textcolor{warncolor}{Medium issues (should fix)} & 8 items \\
+Minor issues (optional fix) & 6 items \\
+Overall assessment & \textbf{Good --- publishable after R1 revisions} \\
+\end{tabular}
+
+\bigskip
+\noindent
+\textbf{Overall impression.}
+This is a well-structured, clearly written paper with a genuinely useful contribution: a systematic horse race of 11 signal families under a unified evaluation pipeline with strict methodological safeguards. The ``informative null'' framing, the insurance interpretation of VT, and the criterion-dependent model ranking analysis are all strong contributions. The paper is close to submission-ready but has four severe issues---one data-integrity problem and three conceptual/framing problems---that must be addressed before submission.
+
+%=================================================================
+\section*{1. Logic Structure}
+%=================================================================
+
+The overall argument flows well: motivation $\to$ VIX as benchmark $\to$ data/signals $\to$ methodology $\to$ results $\to$ interpretation $\to$ conclusion. The dual-$R^2$ framework (Campbell-Thompson vs.\ VIX-relative) is a strong pedagogical choice that clarifies why signals can ``beat the mean'' yet add nothing beyond VIX.
+
+\textcolor{warncolor}{\textbf{M1: Tension between ``time-invariant'' claim and era exceptions.}}
+The paper claims VIX sufficiency is ``time-invariant'' (Abstract, Table 5 notes, Table 6 notes), yet the data shows this is not perfectly true. The coefficient of variation of 0.33 is modest but not zero; more importantly, the competing-signal analysis in Table~6 is where the contradiction becomes severe (see S1 below). The paper should distinguish between the VIX--RV \textit{relationship} being time-stable (true, with CV=0.33) and competing signals having \textit{zero incremental power in every era} (false, per the K752 data).
+
+\textcolor{okgreen}{\textbf{Strengths.}} The six methodological safeguards (pre-specification, lag enforcement, TX costs, multiple testing, proxy-robustness, cross-era) are clearly enumerated and consistently applied. The Proposition~1 insurance framework is a nice formal contribution.
+
+%=================================================================
+\section*{2. Research Motivation and Contribution}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Strong.}} The research question is important and well-motivated. The connection to the existing horse-race tradition (Hansen \& Lunde, 2005) and the gap identification (no prior study tests 11 signal families simultaneously) are convincing. Three distinct contributions (informative null, insurance framework, criterion-dependent rankings) are well-delineated.
+
+\textcolor{warncolor}{\textbf{M2: ``Pre-registered'' language.}}
+The paper uses ``pre-registered horse race'' in the introduction, but there is no evidence of formal pre-registration (e.g., on OSF or AEA RCT Registry). The signals were ``pre-specified'' before examining out-of-sample results, which is good practice but not the same as pre-registration. Suggest changing ``pre-registered'' to ``pre-specified'' consistently to avoid reviewer pushback. (Checked: line 74 says ``pre-registered.'')
+
+%=================================================================
+\section*{3. Literature Review}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Adequate.}} The paper covers the key literature: Poon \& Granger (2003) survey, Christensen \& Prabhala (1998), Jiang \& Tian (2005), Bekaert \& Hoerova (2014), Hansen \& Lunde (2005), Patton (2011), Moreira \& Muir (2017), and relevant signal-specific studies.
+
+\textcolor{warncolor}{\textbf{M3: Missing recent literature.}}
+\begin{itemize}
+\item No discussion of \textbf{Bekaert, Engstrom, \& Ermolov (2021)} who decompose VIX into risk and uncertainty components --- directly relevant to the VRP discussion.
+\item No mention of \textbf{Feunou, Jahan-Parvar, \& Okou (2018)} on downside/upside variance risk premia --- relevant to Family 4.
+\item \textbf{Bali, Brown, \& Caglayan (2014)} on economic uncertainty and portfolio allocation --- relevant to the insurance framework.
+\item The HAR-RV literature post-Corsi is thin: should cite \textbf{Bollerslev, Patton, \& Quaedvlieg (2016)} on realized semi-variance modeling.
+\end{itemize}
+
+%=================================================================
+\section*{4. Model Specification}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Sound.}} The VIX benchmark regression (Eq.~4), incremental test (Eq.~5), and strategy construction (Eq.~7) are standard and appropriate. The QLIKE loss function and MCS procedure are correctly specified.
+
+\textcolor{warncolor}{\textbf{M4: No formal definition of ``time-invariance.''}}
+The paper adopts ``CV $< 0.50$'' as a threshold for time-invariance (Table~5 notes) but does not justify this cutoff. Is 0.50 standard in the literature? A formal structural break test (e.g., Bai-Perron) or a sup-$F$ test on the VIX--RV slope across eras would strengthen the claim substantially.
+
+%=================================================================
+\section*{5. Equations and Derivations}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Correct.}} The VIX formula (Eq.~1), VRP decomposition (Eq.~2), RV definition (Eq.~3), benchmark regression (Eq.~4), DM test (Eq.~6--7), strategy rule (Eq.~8), TX cost (Eq.~9), information aggregation (Eq.~10--11), and insurance proposition (Eq.~12) are all mathematically correct.
+
+Minor: The Proposition~1 derivation (Eq.~12) assumes quadratic utility approximation to CRRA, which is valid for small risk but should be noted as an approximation.
+
+%=================================================================
+\section*{6. Symbol Consistency}
+%=================================================================
+
+No symbol conflicts detected. $\sigma^2$, $h_t$, $r_t$, $RV$, and $\text{VIX}$ are used consistently throughout.
+
+%=================================================================
+\section*{7. Research Methodology}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Strong overall.}} The unified pipeline, lag enforcement, TX accounting, and multiple-testing framework are exemplary.
+
+\textcolor{warncolor}{\textbf{M5: Families 5--7 receive weaker treatment.}}
+Families 5 (multi-asset optimization), 6 (ERC), and 7 (Bitcoin) lack formal DM tests and OOS $R^2$ metrics because they are ``portfolio strategies without direct volatility forecasting components.'' This is understandable but creates an asymmetry in the evaluation. Consider either (a) adding return-based DM tests for these families, or (b) explicitly noting in Table~2 that these families test a different hypothesis (portfolio construction vs.\ volatility forecasting).
+
+\textcolor{warncolor}{\textbf{M6: Google Trends weekly-to-daily conversion.}}
+Family~9 forward-fills weekly data to daily frequency, which mechanically inflates serial correlation and may bias the DM test (which uses HAC standard errors with bandwidth 22). This should be discussed as a limitation. Consider also showing results at weekly frequency to verify that the null is not an artifact of the conversion.
+
+%=================================================================
+\section*{8. Data and Sample Design}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Good.}} The 8,325-day sample (1993--2026) is substantial. Era definitions are reasonable and non-overlapping. Data sources (Yahoo Finance) are transparent.
+
+\textcolor{warncolor}{\textbf{M7: Heterogeneous sample periods.}}
+Individual signals range from 797 observations (Google Trends) to 8,325 (Calendar). Cross-signal comparisons in Table~2 are conducted over different samples, which limits direct comparability. The paper should acknowledge this more explicitly and consider whether results change when restricted to the common sample (2011--2026, approximately).
+
+%=================================================================
+\section*{9. Expected Results and Claims}
+%=================================================================
+
+The ``informative null'' framing is well-executed. The insurance framework provides practical value. The criterion-dependent ranking analysis is a genuine secondary contribution.
+
+\textcolor{warncolor}{\textbf{M8: HAR-RV 41.8\% improvement claim needs qualification.}}
+The 41.8\% QLIKE improvement for HAR-RV is based on K745, a pilot study with only $N=37$ observations. The paper qualifies this as ``preliminary,'' but it is mentioned three times (Abstract, Section~7.1, Section~8) and may leave an outsized impression. Either (a)~expand the pilot to a full study before submission, or (b)~reduce prominence to a single mention in the conclusion with an explicit ``$N=37$'' caveat.
+
+%=================================================================
+\section*{10. Citation Verification (Cross-Referenced with Citation Report)}
+%=================================================================
+
+See the companion \texttt{citation\_check\_v1.md} for full details. Key findings:
+
+\begin{itemize}
+\item 40 total citations; 36 verified, 3 with minor issues, 1 with an error.
+\item \textcolor{errorred}{\textbf{Luo \& Zhang (2019)}}: The paper cites this as supporting the VIX term structure regime indicator claim. However, the 2019 paper on ``VIX term structure and VIX futures pricing with realized volatility'' in \textit{Journal of Futures Markets}, 39(1), 72--93 is by \textbf{Huang, Tong, \& Wang}---not Luo \& Zhang. Luo \& Zhang published ``The Term Structure of VIX'' in the same journal in \textbf{2012} (vol.~32, no.~12, pp.~1092--1113). The bibliography entry needs correction.
+\item Several citations lack DOIs (see citation report).
+\end{itemize}
+
+%=================================================================
+\section*{11. Number Verification (Cross-Referenced with Audit Report)}
+%=================================================================
+
+The companion audit (\texttt{audit\_step1\_2.md}) and reproduce report (\texttt{reproduce\_report.json}) verify 93 of 100 checked values. Tables~1, 3, 4, 5, 7, 8, 9 all match their source experiments. The critical finding concerns Table~6.
+
+%=================================================================
+\section*{Detailed Issue List}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{Severe Issues (MUST FIX)}}
+
+\textbf{S1. Table~6: Competing Signals by Era --- Fabricated or Erroneous Values.}\\
+\textit{Location:} Table~6 and its notes (lines 573--593).\\
+\textit{Problem:} The paper reports uniformly tiny incremental $R^2$ values (all $<0.001$) for three competing signals across five eras, and the table note states ``No signal passes the Harvey (2016) $|t|>3.0$ threshold in any era.'' However, the source experiment K752 (\texttt{part\_d\_competing\_signals\_by\_era}) shows:
+
+\begin{itemize}
+\item \textbf{Era 3 (GFC)}: Overnight VIX incremental $R^2 = 0.0039$ (paper: 0.0004); VRP $= 0.016$ (paper: 0.0008); Vol Momentum $= 0.0216$ (paper: 0.0006). Harvey-passing $|t|$-statistics: Overnight $|t|=3.15$, VRP $|t|=6.51$, Vol Mom $|t|=7.60$. \textbf{All three pass Harvey in GFC.}
+\item \textbf{Era 5 (COVID)}: Vol Momentum incremental $R^2 = 0.0372$ (paper: 0.0002); Overnight VIX $= 0.0032$ (paper: 0.0003). Vol Mom $|t|=9.30$ (\textbf{passes Harvey}).
+\end{itemize}
+
+The paper's values for Eras 3 and 5 are \textbf{orders of magnitude too small} and appear to be from a different calculation or a data-entry error. The table note's claim ``No signal passes Harvey in any era'' is \textbf{false} per the K752 data.
+
+\textit{Impact:} This is the paper's most serious problem. VIX sufficiency has \textbf{era-specific exceptions} during high-stress periods (GFC, COVID). This does not destroy the paper's main finding (the full-sample null is robust), but it requires honest acknowledgment.
+
+\textit{Required fix:} (a)~Correct Table~6 values to match K752. (b)~Change the table note to: ``Three signals pass the Harvey threshold during the GFC era; one passes during the COVID era. No signal passes in the remaining three eras.'' (c)~Add a paragraph discussing why crisis-era exceptions exist (extreme VIX levels create mechanical relationships with VRP and overnight changes) and why they do not undermine the full-sample conclusion.
+
+\bigskip
+
+\textbf{S2. The ``36 VIX Sufficiency Tests'' Count is Unverifiable.}\\
+\textit{Location:} Abstract (line 85), Conclusion (line 820).\\
+\textit{Problem:} The paper claims ``36 VIX sufficiency tests'' and ``36 null results accumulated across this research program.'' The audit found that the knowledge-base numbering is inconsistent: numbers \#34--\#40 appear in early experiments (K535--K638), then the sequence restarts at \#25 with later experiments (K863--K879). Duplicate numbers exist (e.g., two \#36). The exact count of 36 cannot be verified.\\
+\textit{Required fix:} Either (a)~provide a definitive appendix listing all 36 tests with experiment IDs, or (b)~change to a defensible statement such as ``more than 30 VIX sufficiency tests.''
+
+\bigskip
+
+\textbf{S3. 12/VIX Numerator Description is Incorrect.}\\
+\textit{Location:} Section~5.1, line 377: ``The numerator 12 approximates long-run average VIX.''\\
+\textit{Problem:} The long-run average VIX in the sample is 19.5 (K752 full-sample mean). The number 12 does \textbf{not} approximate long-run average VIX. Rather, 12 represents a target annualized volatility level of 12\%, which determines the equity allocation via the ratio $12/\text{VIX}$. When VIX equals its mean ($\sim 19.5$), the equity weight is $12/19.5 \approx 61\%$, not 100\%.\\
+\textit{Impact:} A reviewer familiar with VIX would immediately spot this error, undermining credibility.\\
+\textit{Required fix:} Change to: ``The numerator 12 represents a target annualized equity volatility of 12\%, calibrated to produce conservative equity exposure under typical VIX levels.'' or similar.
+
+\bigskip
+
+\textbf{S4. Citation Error: Luo \& Zhang (2019).}\\
+\textit{Location:} Section~3.2 (line 206), Bibliography (lines 921--922).\\
+\textit{Problem:} The paper cites ``Luo \& Zhang (2019)'' for the VIX term structure regime indicator and lists the bibliography entry as: ``Luo, X., \& Zhang, J.~E. (2019). VIX term structure and VIX futures pricing with realized volatility. \textit{Journal of Futures Markets}, 39(1), 72--93.'' However, the actual 2019 paper with that title in \textit{JFM} 39(1):72--93 is by \textbf{Huang, Tong, \& Wang} (DOI: 10.1002/fut.21955). Luo \& Zhang published ``The Term Structure of VIX'' in \textit{JFM} 2012, vol.~32, pp.~1092--1113 (DOI: 10.1002/fut.21572), and ``Instantaneous Squared VIX and VIX Derivatives'' in \textit{JFM} 2019, vol.~39, pp.~1193--1213 (DOI: 10.1002/fut.22037). The cited title, journal, volume, and pages belong to a different paper by different authors.\\
+\textit{Required fix:} Either (a)~correct the citation to Huang, Tong, \& Wang (2019) if that is the intended source, or (b)~change to Luo \& Zhang (2012) and update the bibliography entry accordingly.
+
+
+\subsection*{\textcolor{warncolor}{Medium Issues (SHOULD FIX)}}
+
+\textbf{M1.} Tension between ``time-invariant'' claim and era exceptions (see Section~1 above).
+
+\textbf{M2.} ``Pre-registered'' language without actual pre-registration (see Section~2 above).
+
+\textbf{M3.} Missing recent literature --- Bekaert, Engstrom, \& Ermolov (2021); Bollerslev, Patton, \& Quaedvlieg (2016); Feunou et al.\ (2018) (see Section~3 above).
+
+\textbf{M4.} No formal definition or test of ``time-invariance'' --- the CV $< 0.50$ threshold is ad hoc (see Section~4 above).
+
+\textbf{M5.} Families 5--7 lack formal DM tests, creating asymmetry (see Section~7 above).
+
+\textbf{M6.} Google Trends weekly-to-daily forward-fill may bias serial correlation (see Section~7 above).
+
+\textbf{M7.} Heterogeneous sample periods across signals limit comparability (see Section~8 above).
+
+\textbf{M8.} HAR-RV 41.8\% claim based on $N=37$ pilot; mentioned 3 times (see Section~9 above).
+
+
+\subsection*{Minor Issues}
+
+\textbf{m1.} Table~2, Family~3 (Behavioral Sentiment): The IS $t$-stat of 1.64 appears to come from the DM OOS statistic (K732: \texttt{dm\_stat\_oos = 1.637}), not from the in-sample BSI coefficient $t$-stat (K732: \texttt{bsi\_t\_stat = 5.58}). The DM $|t|$ column shows 0.52, but K732's \texttt{dm\_bsi\_vs\_bh = -1.18}. These may come from a different regression not stored in the JSON. Clarify the source or add the intermediate computation to the experiment results.
+
+\textbf{m2.} Table~2, Family~7 (Bitcoin): The ``Partial $r|\text{VIX}$'' of 0.178 appears to be a simple bivariate correlation (\texttt{full\_sample\_VIX\_BTC\_RV\_corr}), not a partial correlation controlling for VIX. If it is a partial correlation of BTC RV with SPY RV controlling for VIX, this should be clarified.
+
+\textbf{m3.} Table~2, Families 1, 8, 10: Several ``Partial $r|\text{VIX}$'' values are not directly traceable to stored JSON fields. They should be saved to the experiment results for full replicability.
+
+\textbf{m4.} Insurance drag discrepancy: K828 (dedicated SPY-only experiment) shows 4.17\%/yr for 12/VIX drag, while K738 (cross-asset) shows 3.49\%/yr. The paper uses 3.49\%. Consider noting whether this is SPY-only or cross-asset average, since the distinction matters for investors.
+
+\textbf{m5.} The abstract is 319 words---on the long side for most journals. Consider trimming to $<$250 words if the target journal requires it.
+
+\textbf{m6.} Several bibliography entries lack DOIs. See citation report for the full list.
+
+
+%=================================================================
+\section*{Summary and Revision Priority}
+%=================================================================
+
+\textbf{Overall assessment}: This is a strong paper with a clear contribution. The research design (unified pipeline, 11 families, strict controls) is excellent. The insurance framework and criterion-dependent rankings are genuine secondary contributions. After addressing the four severe issues, this paper should be competitive at \textit{Journal of Forecasting}, \textit{International Journal of Forecasting}, or similar venues.
+
+\bigskip
+\noindent
+\textbf{Revision priority (highest to lowest):}
+
+\begin{enumerate}
+\item \textcolor{errorred}{\textbf{S1}}: Correct Table~6 values and acknowledge era exceptions --- this is a data-integrity issue that could sink a paper at review.
+\item \textcolor{errorred}{\textbf{S3}}: Fix the 12/VIX numerator description --- factual error visible to any volatility researcher.
+\item \textcolor{errorred}{\textbf{S4}}: Correct the Luo \& Zhang (2019) citation --- wrong authors for the cited paper.
+\item \textcolor{errorred}{\textbf{S2}}: Either substantiate or soften the ``36 tests'' claim.
+\item \textcolor{warncolor}{\textbf{M1}}: Reconcile ``time-invariant'' language with era exceptions.
+\item \textcolor{warncolor}{\textbf{M4}}: Add a formal time-invariance test or justify the CV threshold.
+\item \textcolor{warncolor}{\textbf{M8}}: Reduce prominence of HAR-RV preliminary result.
+\item \textcolor{warncolor}{\textbf{M2}}: Change ``pre-registered'' to ``pre-specified.''
+\item \textcolor{warncolor}{\textbf{M3, M5, M6, M7}}: Literature gaps, asymmetric treatment, data-frequency issues.
+\item Minor items (m1--m6).
+\end{enumerate}
+
+\bigskip
+\noindent
+\textbf{Estimated revision effort}: 2--3 days for S1--S4 and M1--M8; minor items can be done in parallel.
+
+\end{document}
