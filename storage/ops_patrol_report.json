@@ -1,36 +1,58 @@
 {
-  "timestamp": "2026-04-05T12:31:11Z",
+  "timestamp": "2026-04-05T17:35:12.015152+00:00",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "16 draft articles in pool (threshold: <3). Total articles: 764."
+      "detail": "16 draft articles in pool (threshold: 3)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified ~16 seconds ago (well within 26h threshold)."
+      "detail": "strategy_metrics.json age: ~0.0 hours (updated 2026-04-05T17:34:17, threshold: 26h)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "4 entries dated 2026-04-04 (yesterday), all resolved: (1) Badge 不一致（Feed vs 文章頁）— fixed via classify_audience() + resolveBadge(); (2) Paper pages=None — fixed by adding pymupdf to pyproject.toml; (3) 文章圖片 404 (K838/K840) — fixed by adding remote_filename param to upload_chart(); (4) 論文 abstract 空白 — fixed by adding LaTeX abstract auto-extraction. No entries dated 2026-04-05 (today)."
+      "detail": "4 entries dated 2026-04-04 (yesterday), all marked resolved. No entries dated 2026-04-05.",
+      "recent_entries": [
+        {
+          "date": "2026-04-04",
+          "issue": "Badge 不一致（Feed vs 文章頁）",
+          "status": "resolved"
+        },
+        {
+          "date": "2026-04-04",
+          "issue": "Paper pages=None",
+          "status": "resolved"
+        },
+        {
+          "date": "2026-04-04",
+          "issue": "文章圖片 404 (K838/K840)",
+          "status": "resolved"
+        },
+        {
+          "date": "2026-04-04",
+          "issue": "論文 abstract 空白",
+          "status": "resolved"
+        }
+      ]
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "14 strategies checked. Each has exactly 1 null in last 3 entries — today's entry (2026-04-05) not yet filled, expected before daily_update at 22:03 UTC. No strategy exceeds threshold of >2 nulls."
+      "detail": "All 14 strategies: last entry 2026-04-02, 1/3 nulls each (last entry pending daily update). No strategy exceeds 2/3 nulls threshold."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50). Working tree clean."
+      "detail": "0 uncommitted files (threshold: 50)"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1642 entries in storage/memory/knowledge.json."
+      "detail": "1642 entries in storage/memory/knowledge.json"
     }
   ],
   "alerts": []
