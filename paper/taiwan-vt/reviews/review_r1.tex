@@ -1,0 +1,350 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report (R1)}\\[0.5em]
+{\large Volatility Targeting in the Taiwan Stock Market:\\Leverage Amplification, Model Selection, and Practical Implementation}\\[0.5em]
+{\normalsize Document type: Journal paper (target: JBF / IRFA)}\\
+{\normalsize Version reviewed: body\_v2.tex + section5\_hf\_draft.tex + main\_v2.tex}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (JBF-level)}\\
+{\normalsize Inputs: K892 gamma verification, Step 1+2 audit}
+\end{center}
+
+\bigskip
+
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{Severe problems (must fix)} & 6 items \\
+\textcolor{warncolor}{Medium problems (should fix)} & 8 items \\
+Minor problems (optional fix) & 7 items \\
+Overall assessment & \textbf{Major revision required} \\
+\end{tabular}
+
+\bigskip
+
+\noindent\textbf{Executive summary.} This paper makes a genuinely interesting three-part contribution: (1) documenting the diversification amplification of the leverage effect in Taiwan, (2) adapting VT strategies for the Taiwan market with VIX-proxy calibration, and (3) a high-frequency analysis from TAIFEX tick data revealing a prediction--VaR paradox. The high-frequency section (Section~5) is exceptionally well-executed, with nearly all numbers verified against experiment JSON files to 3+ decimal places. However, the daily-frequency sections (Sections~2--4, 6, Appendix) suffer from \textbf{severe data integrity problems}: the core gamma parameter table contains values that conflict with both the knowledge base and an independent re-estimation (K892), multiple strategy performance tables have no traceable experiment source, and there are internal inconsistencies where the same parameter differs between sections of the paper. These issues must be fully resolved before submission.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{I. Logic Structure}
+% ════════════════════════════════════════════════════════════════════
+
+The paper follows a clear logical arc: leverage effect documentation $\to$ VT strategy evaluation $\to$ high-frequency evidence that reframes model selection $\to$ practical implications. The structure is sound and the narrative thread is maintained throughout.
+
+\textcolor{warncolor}{M1. Scope creep and length.} The paper attempts to cover too many topics for a single journal article: leverage amplification, VT backtesting, VIX proxy calibration, conditional leverage, SSVS variable selection, HAR-RV vs GARCH, the prediction--VaR paradox, Realized GARCH, night session analysis, overnight gap decomposition, macroeconomic indicators (27-indicator sweep), ex-dividend effects, TSMC concentration, cross-market validation, time-zone momentum, and currency risk. At the current length ($\sim$50+ pages with appendix), this reads more as a monograph chapter than a focused journal paper. A JBF-tier submission should have 2--3 tightly connected contributions, not 15 loosely related findings.
+
+\textit{Recommendation:} Split into two papers: (A) ``VT in Taiwan'' covering Sections 1--4, 7--8 plus the appendix, and (B) ``High-Frequency Volatility and the Prediction--VaR Paradox'' covering Section 5 plus Realized GARCH. Alternatively, demote Sections~6 (macro), 4.5 (TSMC), 4.4 (conditional leverage), and the ex-dividend analysis to a supplementary online appendix.
+
+\textcolor{okgreen}{Positive:} The paper is commendably honest about null results (Section~6 macro indicators, calendar anomalies) and about correcting prior upward-biased Sharpe ratios (Section~4.3, VIX-proxy strategy). This intellectual honesty is rare and appreciated.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{II. Research Motivation and Contribution}
+% ════════════════════════════════════════════════════════════════════
+
+\textcolor{okgreen}{Positive:} The motivation is strong and well-articulated. The absence of VT literature for Asian emerging markets is a genuine gap. The three contributions are clearly stated and non-trivial.
+
+\textcolor{warncolor}{M2. Overclaiming in the abstract and introduction.} Several phrases overstate the evidence:
+\begin{itemize}[nosep]
+\item ``HAR-RV crushes GJR-GARCH'' (Introduction, Contribution 3a) --- ``crushes'' is informal and inappropriate for an academic paper. Use ``significantly outperforms.''
+\item ``fundamentally alter the model selection landscape'' --- this is a strong claim for a single-market study. Use ``provide new evidence on.''
+\item The 5.0$\times$ amplification ratio is presented as a point estimate throughout but is based on only $N=9$ stocks with a 90\% CI of $[2.8, 8.1]$. The headline figure should always be accompanied by the CI, not just in the ``caveat'' paragraphs.
+\end{itemize}
+
+\textcolor{okgreen}{Positive:} The paper does include appropriate caveats (small $N$, CI includes U.S.\ benchmark) in the body text, though these should be propagated to the abstract and conclusion.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{III. Literature Review}
+% ════════════════════════════════════════════════════════════════════
+
+The literature citations are accurate and well-chosen. All 30 references were verified against original sources (see companion citation\_check\_r1.md). No fabricated or misattributed citations were found.
+
+\textcolor{warncolor}{M3. Missing bibliography entry for Christoffersen (1998).} The VaR Trinity test references ``Christoffersen independence'' (Section~5.7, Table~\ref{tab:var_paradox} footnotes) but the bibliography does not include the Christoffersen (1998) reference.
+
+\textit{Fix:} Add: Christoffersen, P.F.\ (1998). Evaluating interval forecasts. \textit{International Economic Review}, 39(4), 841--862.
+
+Minor: Page numbers are missing for Whaley (2000) and Whaley (2009) in the bibliography.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{IV. Model Specification}
+% ════════════════════════════════════════════════════════════════════
+
+The model specifications (GJR-GARCH, EWMA, HAR-RV, Realized GARCH) are correctly stated and properly referenced. Equations are mathematically correct.
+
+\textcolor{okgreen}{Positive:} The paper is careful about the VT weight timing convention ($w_{t-1}$ applied to $r_t$), explicitly addressing look-ahead bias. The lag structure is correctly stated in Equations~(5)--(6).
+
+Minor: The EWMA equation (Eq.~2) uses $\lambda = 0.94$ from RiskMetrics. While standard, the paper should note that this value was calibrated for developed-market foreign exchange; the optimal $\lambda$ for Taiwanese equities could differ. A sensitivity check with $\lambda \in [0.90, 0.97]$ would strengthen the claim.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{V. Equations and Derivations}
+% ════════════════════════════════════════════════════════════════════
+
+All equations checked; no mathematical errors found. Symbol definitions are consistent throughout.
+
+Minor: The persistence formula in the Table~2 footnote states ``Persistence $= \alpha + \beta + \gamma/2$'', which is the correct unconditional variance persistence for GJR-GARCH under symmetric innovation distribution. This should be noted explicitly (it differs under skewed distributions).
+
+Minor: Equation~(8) for bipower variation uses a $\pi/2$ scaling factor. While correct for BPV based on consecutive absolute returns, the paper should clarify whether this is $\mu_1^{-2}$ where $\mu_1 = \sqrt{2/\pi}$ (the convention of Barndorff-Nielsen and Shephard, 2004).
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{VI. Research Methods}
+% ════════════════════════════════════════════════════════════════════
+
+\textcolor{errorred}{S1. Missing Expected Shortfall (ES) analysis.} The paper evaluates VaR at the 1\% level but does not compute Expected Shortfall. Since Basel III (2016/2019) mandates ES as the primary tail-risk metric, and the paper explicitly references ``Basel III Green Zone,'' the omission of ES is a significant gap. For a risk-management-focused paper in 2026, VaR-only analysis is incomplete.
+
+\textit{Fix:} Add ES backtest using Acerbi-Szekely (2014) Z-test and Fissler-Ziegel joint scoring. This is particularly important for the prediction--VaR paradox section: does the paradox also hold for ES?
+
+\textcolor{warncolor}{M4. HAR-RV evaluated on RV target, GARCH on $r^2$ target --- different native metrics conflated.} While the paper correctly acknowledges in Section~5 that HAR-RV and GARCH target different quantities, the headline claim ``HAR-RV crushes GJR-GARCH'' (DM $t = -11.14$) evaluates both models on HAR-RV's \textit{native} target ($\text{RV}^{(\text{day})}$). This is expected: HAR directly predicts RV while GARCH predicts $\sigma^2$ from daily returns. The paper's controlled ablation (Section~5.5, HAR beats GJR even on $r^2$ with DM $t = -5.14$) is more informative for the ``proxy ceiling'' argument. The paper should lead with the proxy-ceiling ablation rather than the native-target comparison.
+
+\textit{Recommendation:} Reorder Section 5.4 and 5.5 so the ablation (fair comparison) precedes the headline result.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{VII. Data and Sample}
+% ════════════════════════════════════════════════════════════════════
+
+\textcolor{errorred}{S2. Critical gamma parameter conflict: Table~2 vs K892 verification.}
+
+The paper's Table~2 reports 0050.TW $\gamma = 0.087$ ($t = 2.20$). Independent re-estimation (K892, 2026-04-05) reveals:
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Estimation & $\gamma$ & $t$-stat & $n$ & Notes \\
+\midrule
+K892 full sample (2008--2026, Normal) & 0.097 & 3.60 & 4,219 & \textbf{Recommended} \\
+K892 full sample (Student-$t$) & 0.080 & 3.48 & 4,219 & Slightly lower \\
+K892 last-2000 window (2018--2026) & 0.136 & 2.19 & 2,000 & Matches N120 $t$-stat \\
+K892 expanding 2009--2023 & 0.083 & 3.24 & 3,677 & Closest to paper's 0.087 \\
+Paper Table~2 & 0.087 & 2.20 & Unknown & \textcolor{errorred}{No source JSON} \\
+N120 knowledge entry & 0.147 & 2.20 & $\sim$2,000 & Rolling $w=2000$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Diagnosis.} The paper's $\gamma = 0.087$ with $t = 2.20$ cannot be reproduced from any single estimation configuration. The $t = 2.20$ matches the last-2000 window ($\gamma = 0.136$, $t = 2.19$), but the $\gamma = 0.087$ is closer to the full-sample expanding estimate through 2023 ($\gamma = 0.083$, $t = 3.24$). \textbf{The paper appears to mix the gamma from one estimation window with the $t$-stat from a different window.} This is a serious data integrity problem.
+
+\textit{Fix:} Re-estimate with a single clearly defined configuration (recommend full sample Normal: $\gamma = 0.097$, $t = 3.60$, $n = 4{,}219$) and update all occurrences. Then update the amplification ratio accordingly: $0.272 / 0.097 = 2.8\times$ (for TAIEX vs 0050.TW) or $0.097 / 0.054 = 1.8\times$ (for 0050.TW vs individual stocks). The 5.0$\times$ headline figure (TAIEX/individual) would remain unchanged.
+
+\bigskip
+
+\textcolor{errorred}{S3. Internal inconsistency: Section~4.5 vs Table~2 gamma values.}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Asset & Table 2 $\gamma$ & Table 2 $t$ & Section 4.5 $\gamma$ & Section 4.5 $t$ \\
+\midrule
+0050.TW & 0.087 & 2.20 & 0.124 & 2.46 \\
+TSMC (2330.TW) & 0.039 & 0.87 & 0.054 & 1.07 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The same assets report different parameter values in different sections without explanation. K892 shows TSMC full-sample $\gamma = 0.052$ ($t = 3.98$), which is closer to Section~4.5's value (0.054) than Table~2's value (0.039). The Section~4.5 values may come from a different sample period (possibly 2008--2026 full sample while Table~2 uses $w=2000$), but this is not stated.
+
+\textit{Fix:} Either (a) use consistent estimation windows throughout and report a single $\gamma$ per asset, or (b) explicitly state the estimation window for each table/section if they intentionally differ, and explain why different windows are appropriate.
+
+\bigskip
+
+\textcolor{errorred}{S4. TSMC gamma mismatch.}
+
+Table~2 reports TSMC $\gamma = 0.039$ ($t = 0.87$). K892 full-sample (Normal) yields $\gamma = 0.052$ ($t = 3.98$, $n = 6{,}525$). N121 knowledge entry reports 0.057. The paper's value of 0.039 is not reproduced by any known estimation and has no source JSON.
+
+\textit{Fix:} Use the K892-verified value ($\gamma = 0.052$, $t = 3.98$) or re-run with the exact paper specification and document in a results JSON.
+
+\bigskip
+
+\textcolor{errorred}{S5. VT strategy performance tables have no experiment source.}
+
+Tables~4 and~5 (VT results, common-period comparison) contain 30+ numerical values (Sharpe ratios, MDD, returns, vol, turnover) that have \textbf{no traceable experiment JSON}. The audit found:
+\begin{itemize}[nosep]
+\item Buy \& Hold Sharpe 0.729 vs K553's 0.472 (different period?)
+\item EWMA VT Sharpe 0.796 --- no source found
+\item GJR VT Sharpe 1.108 --- no source found
+\item Common-period table --- entirely without source
+\item Conditional leverage Sharpe +0.162 vs K553 +0.019 --- \textcolor{errorred}{order-of-magnitude mismatch}
+\end{itemize}
+
+\textit{Fix:} Create a dedicated replication experiment (e.g., \texttt{k8XX\_taiwan\_vt\_performance.py}) that produces all Table~4 and Table~5 values in a single results JSON, with the exact specification (sample period, transaction cost, rebalancing frequency, target vol) documented.
+
+\bigskip
+
+\textcolor{errorred}{S6. SSVS PIP value conflict.}
+
+Table~3 reports ``Lagged own return PIP = 0.312'' for 0050.TW. Experiment K461 reports AR(1) PIP = 0.9994 for the same asset. The paper value (0.312) may refer to a different variable specification (e.g., a separate ``own lagged daily return'' regressor distinct from the AR(1) term), but this is not explained. A PIP of 0.312 vs 0.9994 for ostensibly the same concept is a critical discrepancy.
+
+\textit{Fix:} Clarify the precise variable definitions in K461's SSVS. If ``lagged own return'' and ``AR(1)'' are indeed the same, use the K461 value (0.9994). If they differ, explain the distinction in the text.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{VIII. Results Verification}
+% ════════════════════════════════════════════════════════════════════
+
+\textcolor{okgreen}{Section~5 (High-Frequency): Excellent.} Out of $\sim$85 numerical claims in Section~5, approximately 80 are verified to 3+ decimal places against K848, K849, K850, K852, K853, K854 experiment JSONs. This is the strongest section of the paper.
+
+\textcolor{warncolor}{M5. GJR+Normal violations: paper says 9/481, K852 says 11/481.} This is a discrepancy in Table~\ref{tab:var_paradox}. While the qualitative conclusion (Yellow Zone FAIL) is unchanged, the correct number should be used.
+
+\textcolor{warncolor}{M6. GJR QLIKE minor mismatch: paper says 0.220, K852 says 0.217.} Small but the correct value should be used.
+
+\textcolor{warncolor}{M7. Ex-dividend volatility increase: paper says +32\% for 0050.TW, K512 data suggests +41\%.} The methodology for computing the increase should be documented (which baseline? which post-event window?).
+
+\textcolor{warncolor}{M8. Section~6 (Macro indicators), Section~4.5 (TSMC concentration), and Appendix (Time-zone momentum) are entirely without traceable experiment JSONs.} All numerical claims in these sections need dedicated experiment scripts and results files before submission.
+
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+Section & Claims & Verified & Knowledge-only & Untraceable & Mismatch \\
+\midrule
+2 (Data) & 25 & 5 & 10 & 5 & 5 \\
+3 (Leverage) & 20 & 3 & 8 & 4 & 5 \\
+4 (VT Strategies) & 30 & 0 & 2 & 25 & 3 \\
+5 (High-Frequency) & 85 & 80 & 0 & 3 & 2 \\
+6 (Macro) & 10 & 0 & 0 & 10 & 0 \\
+7 (VaR) & 8 & 5 & 0 & 3 & 0 \\
+Appendix (TZ) & 15 & 0 & 1 & 14 & 0 \\
+\midrule
+\textbf{Total} & \textbf{$\sim$193} & \textbf{93} (48\%) & \textbf{21} (11\%) & \textbf{64} (33\%) & \textbf{15} (8\%) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{IX. Expected Results / Practical Implications}
+% ════════════════════════════════════════════════════════════════════
+
+The practical implications (Section~8) are well-considered and actionable. The VIX step rule, $8.63/\text{VIX}$ formula, and insurance cost quantification are useful for practitioners.
+
+\textcolor{warncolor}{M9. VT evaluation periods are inconsistent.} Table~4 mixes strategies evaluated over different periods (2010--2026, 2016--2026, 2020--2026). While the paper acknowledges this and provides Table~5 for a common-period comparison, the initial presentation in Table~4 is misleading. Referees will flag this.
+
+\textit{Recommendation:} Lead with the common-period Table~5; relegate the mixed-period Table~4 to a robustness appendix.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{X. Citation Verification}
+% ════════════════════════════════════════════════════════════════════
+
+All 30 references were verified via web search against original sources. See companion report \texttt{citation\_check\_r1.md} for full details.
+
+\begin{itemize}[nosep]
+\item \textbf{26/30} fully verified (correct author, year, journal, volume, pages, content claim)
+\item \textbf{4/30} minor issues (missing page numbers for 2 entries, 1 slightly overstated content claim, 1 missing bibliography entry)
+\item \textbf{0/30} errors or fabrications
+\item Missing: Christoffersen (1998) referenced in text but absent from bibliography
+\end{itemize}
+
+Citation quality: \textcolor{okgreen}{Excellent}.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Specific Problem List}
+% ════════════════════════════════════════════════════════════════════
+
+\subsection*{\textcolor{errorred}{Severe Problems (6 items)}}
+
+\begin{enumerate}[label=\textcolor{errorred}{S\arabic*}]
+\item \textbf{Missing Expected Shortfall analysis.} VaR-only risk assessment is incomplete for a 2026 paper referencing Basel III. Add ES backtest with Acerbi-Szekely Z-test.
+
+\item \textbf{0050.TW gamma conflict.} Table~2 reports $\gamma = 0.087$ ($t = 2.20$); K892 full-sample yields $\gamma = 0.097$ ($t = 3.60$). The paper's values appear to mix gamma from one window with $t$-stat from another. No source JSON exists. \textit{Location: Table~2, Section~3.1, Abstract, Conclusion.}
+
+\item \textbf{Internal gamma inconsistency.} Section~4.5 reports 0050.TW $\gamma = 0.124$ ($t = 2.46$) and TSMC $\gamma = 0.054$ ($t = 1.07$), contradicting Table~2's $\gamma = 0.087$ and $\gamma = 0.039$ respectively. No explanation or different-window disclaimer. \textit{Location: Section~4.5 vs Table~2.}
+
+\item \textbf{TSMC gamma untraceable.} Table~2 reports $\gamma = 0.039$ ($t = 0.87$); K892 yields $\gamma = 0.052$ ($t = 3.98$); N121 knowledge says 0.057. No source JSON. \textit{Location: Table~2.}
+
+\item \textbf{VT performance tables without source.} Tables~4 and~5 (30+ data points including core Sharpe ratios and MDD) have no traceable experiment. The conditional leverage improvement ($+0.162$) conflicts with K553 ($+0.019$) by an order of magnitude. \textit{Location: Tables~4--5, Section~4.4.}
+
+\item \textbf{SSVS PIP conflict.} Table~3 reports own-return PIP = 0.312; K461 shows AR(1) PIP = 0.9994. Either these are different variables (unexplained) or the paper value is wrong. \textit{Location: Table~3.}
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{Medium Problems (8 items)}}
+
+\begin{enumerate}[label=\textcolor{warncolor}{M\arabic*}]
+\item \textbf{Scope creep / excessive length.} Paper covers 15+ distinct analyses. Split into two papers or demote peripheral sections to online appendix.
+
+\item \textbf{Overclaiming language.} ``Crushes,'' ``fundamentally alter,'' and 5.0$\times$ headline without CI in abstract/conclusion.
+
+\item \textbf{Missing Christoffersen (1998) bibliography entry.} Referenced in VaR Trinity but not in the reference list.
+
+\item \textbf{HAR-RV headline result on native target.} Lead with the proxy-ceiling ablation (fair comparison) rather than the native-target headline.
+
+\item \textbf{GJR+Normal violation count mismatch.} Paper: 9/481; K852: 11/481.
+
+\item \textbf{GJR QLIKE minor mismatch.} Paper: 0.220; K852: 0.217.
+
+\item \textbf{Ex-dividend vol increase.} Paper: +32\%; K512 computation: +41\%.
+
+\item \textbf{Sections 6, 4.5, and Appendix entirely untraceable.} All need dedicated experiment JSONs.
+
+\item \textbf{Mixed evaluation periods in Table~4.} Lead with common-period comparison.
+\end{enumerate}
+
+\subsection*{Minor Problems (7 items)}
+
+\begin{enumerate}[label=m\arabic*]
+\item Missing page numbers for Whaley (2000) and Whaley (2009) in bibliography.
+\item EWMA $\lambda = 0.94$ sensitivity not reported; the RiskMetrics default may not be optimal for Taiwan.
+\item Persistence formula $\alpha + \beta + \gamma/2$ should note the symmetric-distribution assumption.
+\item BPV scaling factor $\pi/2$ should be clarified as $\mu_1^{-2}$.
+\item Hwang and Valls Pereira (2006) content claim slightly overstated (``windows below 500 induce substantial persistence bias'' is stronger than the source).
+\item Figure~1 caption describes OLS Engle-Ng specification for $\gamma$, but Table~2 uses MLE GJR-GARCH. The figure and table use different estimation methods for the same parameter. This should be reconciled or clearly flagged.
+\item The paper mentions Student-$t$(df$=5$) for VaR but also reports estimated df $= 5.2$ from skewed-$t$ ML. These should be distinguished more clearly.
+\end{enumerate}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Summary and Revision Priorities}
+% ════════════════════════════════════════════════════════════════════
+
+\textbf{Overall assessment:} The paper has a strong conceptual framework and the high-frequency section is publication-ready. However, the daily-frequency sections contain data integrity problems that must be resolved before any submission. The gamma parameter is the foundation of Contribution~1 (diversification amplification) and its values are currently unreliable.
+
+\bigskip
+\textbf{Revision priorities (ordered):}
+
+\begin{enumerate}
+\item \textbf{[CRITICAL]} Create a single, canonical gamma estimation experiment that covers all assets in Table~2 with a clearly defined specification. Save results JSON. Update Table~2, Section~3, Section~4.5, Abstract, Conclusion with consistent values.
+
+\item \textbf{[CRITICAL]} Create VT strategy performance experiment for Tables~4--5. Resolve the conditional leverage $+0.162$ vs $+0.019$ discrepancy. Save results JSON.
+
+\item \textbf{[CRITICAL]} Resolve SSVS PIP discrepancy (Table~3: 0.312 vs K461: 0.9994). Clarify variable definitions.
+
+\item \textbf{[HIGH]} Add Expected Shortfall (ES) analysis alongside VaR in Section~7 and the prediction--VaR paradox table. Use Acerbi-Szekely Z-test.
+
+\item \textbf{[HIGH]} Create experiment JSONs for Sections~6 (macro), 4.5 (TSMC), and Appendix (time-zone). Every table should have a traceable source.
+
+\item \textbf{[HIGH]} Fix minor numerical mismatches (GJR+Normal violations, GJR QLIKE, ex-dividend vol increase) and add Christoffersen (1998) to bibliography.
+
+\item \textbf{[MEDIUM]} Tighten language: remove ``crushes,'' ``fundamentally,'' and always pair the 5.0$\times$ figure with its CI.
+
+\item \textbf{[MEDIUM]} Consider restructuring: lead with common-period Table~5; demote mixed-period Table~4. Consider splitting the paper or moving peripheral sections to online appendix.
+
+\item \textbf{[LOW]} Fix minor citation issues (page numbers, persistence formula caveat, BPV scaling clarification, Figure~1 vs Table~2 estimation method reconciliation).
+\end{enumerate}
+
+\bigskip
+\noindent\textbf{Conditional recommendation:} \textit{Major revision.} If the gamma values, VT performance tables, and SSVS PIP are corrected with full traceability (priorities 1--3), the ES analysis is added (priority 4), and the remaining traceable experiments are created (priority 5), the paper has strong potential for JBF or IRFA. The high-frequency contribution (prediction--VaR paradox, Realized GARCH bridging) is novel and well-executed.
+
+\end{document}
