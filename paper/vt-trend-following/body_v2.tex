@@ -380,12 +380,12 @@ $\beta_{\text{BAB}}$ & --- & --- & --- & --- & $-$0.022$^{***}$ \\
 $R^2$    & 0.787 & 0.849 & 0.852 & 0.852 & 0.853 \\
 $\Delta R^2$ & --- & +0.063 & +0.002 & +0.000 & +0.001 \\
 AIC     & $-$45339 & $-$47092 & $-$47160 & $-$47171 & $-$47213 \\
-$N$     & 5,049 & 5,049 & 5,049 & 5,049 & 3,740$^{\dagger}$ \\
+$N$     & 5,049 & 5,049 & 5,049 & 5,049 & 5,049 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes:} Nested factor model regressions for the SPY 12/VIX strategy (January 2005--March 2026). TSMOM$^{\perp}$ is orthogonalized to MKT. FF5 factors (SMB, HML, RMW, CMA) are from Kenneth French's library. MOM is the Fama--French momentum factor. BAB is proxied by SPLV$-$SPHB; this ETF-based proxy is available only from May 2011. $^{\dagger}$M5 is estimated over the post-2011 subsample ($N = 3{,}740$). All $t$-statistics are Newey--West HAC. $^{***}$, $^{**}$, $^{*}$ denote significance at the 1\%, 5\%, 10\% levels.
+\item \textit{Notes:} Nested factor model regressions for the SPY 12/VIX strategy (January 2005--March 2026). TSMOM$^{\perp}$ is orthogonalized to MKT. FF5 factors (SMB, HML, RMW, CMA) are from Kenneth French's library. MOM is the Fama--French momentum factor. BAB is the \citet{frazzini2014} betting-against-beta factor from AQR (available for the full sample). All $t$-statistics are Newey--West HAC. $^{***}$, $^{**}$, $^{*}$ denote significance at the 1\%, 5\%, 10\% levels.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
@@ -545,6 +545,9 @@ Barroso, P., \& Santa-Clara, P. (2015). Momentum has its moments. \textit{Journa
 
 \bibitem[Black(1976)]{black1976}
 Black, F. (1976). Studies of stock price volatility changes. \textit{Proceedings of the 1976 Meetings of the American Statistical Association, Business and Economic Statistics Section}, 177--181.
+
+\bibitem[Frazzini and Pedersen(2014)]{frazzini2014}
+Frazzini, A. and Pedersen, L.~H. (2014). Betting against beta. \textit{Journal of Financial Economics}, 111(1), 1--25.
 
 \bibitem[Bozovic(2024)]{bozovic2024}
 Bozovic, M. (2024). VIX-managed portfolios. \textit{International Review of Financial Analysis}, 95, 103353. \url{https://doi.org/10.1016/j.irfa.2024.103353}
