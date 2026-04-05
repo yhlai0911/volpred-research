@@ -104,9 +104,9 @@
 
 | 論文 | Step 1 | Step 2 | Step 3 | Step 4 | Step 5 | Step 6 | Step 7 | 完成 |
 |------|--------|--------|--------|--------|--------|--------|--------|------|
-| prg-periodic-garch | ❌ | ❌ | ✅ 完成 | ✅ 完成 | ❌ | ❌ | ❌ | |
-| vt-insurance-cost | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
-| vt-crowding-abm | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
+| vt-insurance-cost | ✅ | ✅ | ✅ R3 | ✅ R3 S=0 | ✅ | ❌ PDF | ✅ v1.4 | ✅ |
+| vt-crowding-abm | ✅ | ✅ | ✅ R2 | 🔄 R3 | ✅ | ❌ PDF | ✅ v1.5 | 🔄 |
+| prg-periodic-garch | ❌ 需重做 | ❌ 需重做 | ✅ R1 | ✅ R1 | ❌ | ❌ | ❌ 需重寫 | |
 | leverage-direction | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
 | taiwan-vt | ❌ | ❌ | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ | |
 | vt-trend-following | ❌ | ❌ | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ | |
