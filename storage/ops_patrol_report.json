@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-04-05T00:27:36Z",
+  "timestamp": "2026-04-05T12:31:11Z",
   "all_ok": true,
   "checks": [
     {
@@ -10,7 +10,7 @@
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json last modified ~19 seconds ago (well within 26h threshold)."
+      "detail": "storage/strategy_metrics.json last modified ~16 seconds ago (well within 26h threshold)."
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All active strategies have 0 null portfolio_return in last 3 entries. No gaps detected."
+      "detail": "14 strategies checked. Each has exactly 1 null in last 3 entries — today's entry (2026-04-05) not yet filled, expected before daily_update at 22:03 UTC. No strategy exceeds threshold of >2 nulls."
     },
     {
       "name": "GIT_STATUS",
