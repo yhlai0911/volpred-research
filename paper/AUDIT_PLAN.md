@@ -111,4 +111,4 @@
 | taiwan-vt | ✅ K892 | ✅ K896/K900 | ✅ R3 0S | ✅ R3 S=0 | ✅ | ✅ PDF | ✅ 需整合文字 | ✅ |
 | vt-trend-following | ✅ ~50%無源 | ✅ 3H | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ 需補實驗 | |
 | vix-sufficiency | ✅ 6/9驗證 | ✅ T6修正 | ✅ R1 | ✅ R2 S=0 | ✅ | ✅ PDF | ✅ T6+S3+S4修正 | ✅ |
-| volatility-absorption | ✅ 核心OK/63+無源 | ✅ T6差異 | ✅ R1 5S | ✅ R1 5S | ✅ | ✅ PDF | ❌ 需null sim+T9-10 | |
+| volatility-absorption | ✅ K903查明 | ✅ K903復現 | ✅ R2 3S | ✅ R2 S1/S5修 | ✅ | ✅ PDF | ⚠️ 2020-26符號翻轉 | |
