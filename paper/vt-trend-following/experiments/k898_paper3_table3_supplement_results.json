@@ -1,0 +1,462 @@
+{
+  "experiment_id": "K898",
+  "title": "Paper 3 Table 3 Supplement \u2014 VT Dual Mechanism (2005-2026)",
+  "description": "Reproduces Table 3 (Dual Mechanism Decomposition) from Paper 3 (vt-trend-following) with full traceability. Monthly rebalancing, SHY as cash proxy, 10 bps transaction costs.",
+  "data_source": "yfinance",
+  "period": "2005-01-03 to 2026-04-01",
+  "methodology": {
+    "vt_rule": "w_t = min(12/VIX_{t-1}, 1)",
+    "rebalancing": "daily VIX signal with 1-day lag",
+    "signal_lag": "shift(1 day) \u2014 no lookahead",
+    "remainder": "SHY (short-term treasury)",
+    "tx_cost_bps": 0.0,
+    "tsmom_lookback": 252,
+    "tsmom_hedge": "Rolling 252-day OLS: VT_t = a + b*TSMOM_t, PureVT = VT - b*TSMOM",
+    "bootstrap": "10000 reps, block size 252 days"
+  },
+  "table3": {
+    "SPY": {
+      "buy_and_hold": {
+        "name": "SPY B&H",
+        "sharpe": 0.616,
+        "mdd_pct": -55.2,
+        "calmar": 0.216,
+        "ann_return_pct": 11.9,
+        "ann_vol_pct": 19.33,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "12vix_vt": {
+        "name": "SPY 12/VIX VT",
+        "sharpe": 0.805,
+        "mdd_pct": -24.7,
+        "calmar": 0.305,
+        "ann_return_pct": 7.52,
+        "ann_vol_pct": 9.33,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "tsmom_hedged_vt": {
+        "name": "SPY Hedged VT",
+        "sharpe": 0.848,
+        "mdd_pct": -22.5,
+        "calmar": 0.292,
+        "ann_return_pct": 6.55,
+        "ann_vol_pct": 7.73,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "pure_tsmom": {
+        "name": "SPY Pure TSMOM",
+        "sharpe": 0.242,
+        "mdd_pct": -51.4,
+        "calmar": 0.091,
+        "ann_return_pct": 4.68,
+        "ann_vol_pct": 19.35,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "avg_tsmom_beta": 0.3176,
+      "decomposition": {
+        "delta_sharpe": 0.189,
+        "delta_sharpe_lost_to_tsmom": -0.043,
+        "pct_sharpe_from_tsmom": -22.8,
+        "mdd_protection_pp": -30.5,
+        "mdd_protection_retained_pp": -32.7,
+        "mdd_retention_pct": 107.0
+      }
+    },
+    "50/50": {
+      "buy_and_hold": {
+        "name": "50/50 B&H",
+        "sharpe": 0.878,
+        "mdd_pct": -32.5,
+        "calmar": 0.371,
+        "ann_return_pct": 12.04,
+        "ann_vol_pct": 13.72,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "12vix_vt": {
+        "name": "50/50 12/VIX VT",
+        "sharpe": 0.998,
+        "mdd_pct": -12.4,
+        "calmar": 0.636,
+        "ann_return_pct": 7.89,
+        "ann_vol_pct": 7.9,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "tsmom_hedged_vt": {
+        "name": "50/50 Hedged VT",
+        "sharpe": 0.83,
+        "mdd_pct": -13.3,
+        "calmar": 0.391,
+        "ann_return_pct": 5.2,
+        "ann_vol_pct": 6.26,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "pure_tsmom": {
+        "name": "50/50 Pure TSMOM",
+        "sharpe": 0.55,
+        "mdd_pct": -30.5,
+        "calmar": 0.248,
+        "ann_return_pct": 7.55,
+        "ann_vol_pct": 13.73,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "avg_tsmom_beta": 0.3379,
+      "decomposition": {
+        "delta_sharpe": 0.12,
+        "delta_sharpe_lost_to_tsmom": 0.168,
+        "pct_sharpe_from_tsmom": 140.0,
+        "mdd_protection_pp": -20.1,
+        "mdd_protection_retained_pp": -19.2,
+        "mdd_retention_pct": 96.0
+      }
+    }
+  },
+  "mdd_retention_all_assets": {
+    "SPY": {
+      "bh": {
+        "name": "SPY B&H",
+        "sharpe": 0.616,
+        "mdd_pct": -55.2,
+        "calmar": 0.216,
+        "ann_return_pct": 11.9,
+        "ann_vol_pct": 19.33,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "vt": {
+        "name": "SPY 12/VIX VT",
+        "sharpe": 0.805,
+        "mdd_pct": -24.7,
+        "calmar": 0.305,
+        "ann_return_pct": 7.52,
+        "ann_vol_pct": 9.33,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "hedged_vt": {
+        "name": "SPY Hedged VT",
+        "sharpe": 0.848,
+        "mdd_pct": -22.5,
+        "calmar": 0.292,
+        "ann_return_pct": 6.55,
+        "ann_vol_pct": 7.73,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "decomposition": {
+        "delta_sharpe": 0.189,
+        "delta_sharpe_lost_to_tsmom": -0.043,
+        "pct_sharpe_from_tsmom": -22.8,
+        "mdd_protection_pp": -30.5,
+        "mdd_protection_retained_pp": -32.7,
+        "mdd_retention_pct": 107.0
+      }
+    },
+    "50/50": {
+      "bh": {
+        "name": "50/50 B&H",
+        "sharpe": 0.878,
+        "mdd_pct": -32.5,
+        "calmar": 0.371,
+        "ann_return_pct": 12.04,
+        "ann_vol_pct": 13.72,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "vt": {
+        "name": "50/50 12/VIX VT",
+        "sharpe": 0.998,
+        "mdd_pct": -12.4,
+        "calmar": 0.636,
+        "ann_return_pct": 7.89,
+        "ann_vol_pct": 7.9,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "hedged_vt": {
+        "name": "50/50 Hedged VT",
+        "sharpe": 0.83,
+        "mdd_pct": -13.3,
+        "calmar": 0.391,
+        "ann_return_pct": 5.2,
+        "ann_vol_pct": 6.26,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "decomposition": {
+        "delta_sharpe": 0.12,
+        "delta_sharpe_lost_to_tsmom": 0.168,
+        "pct_sharpe_from_tsmom": 140.0,
+        "mdd_protection_pp": -20.1,
+        "mdd_protection_retained_pp": -19.2,
+        "mdd_retention_pct": 96.0
+      }
+    },
+    "DIA": {
+      "bh": {
+        "name": "DIA B&H",
+        "sharpe": 0.607,
+        "mdd_pct": -51.9,
+        "calmar": 0.215,
+        "ann_return_pct": 11.17,
+        "ann_vol_pct": 18.41,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "vt": {
+        "name": "DIA 12/VIX VT",
+        "sharpe": 0.811,
+        "mdd_pct": -23.5,
+        "calmar": 0.305,
+        "ann_return_pct": 7.17,
+        "ann_vol_pct": 8.84,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "hedged_vt": {
+        "name": "DIA Hedged VT",
+        "sharpe": 0.729,
+        "mdd_pct": -23.7,
+        "calmar": 0.225,
+        "ann_return_pct": 5.33,
+        "ann_vol_pct": 7.31,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "decomposition": {
+        "delta_sharpe": 0.204,
+        "delta_sharpe_lost_to_tsmom": 0.082,
+        "pct_sharpe_from_tsmom": 40.2,
+        "mdd_protection_pp": -28.4,
+        "mdd_protection_retained_pp": -28.2,
+        "mdd_retention_pct": 99.0
+      }
+    },
+    "QQQ": {
+      "bh": {
+        "name": "QQQ B&H",
+        "sharpe": 0.745,
+        "mdd_pct": -53.4,
+        "calmar": 0.306,
+        "ann_return_pct": 16.35,
+        "ann_vol_pct": 21.94,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "vt": {
+        "name": "QQQ 12/VIX VT",
+        "sharpe": 0.88,
+        "mdd_pct": -24.9,
+        "calmar": 0.418,
+        "ann_return_pct": 10.4,
+        "ann_vol_pct": 11.82,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "hedged_vt": {
+        "name": "QQQ Hedged VT",
+        "sharpe": 0.88,
+        "mdd_pct": -21.8,
+        "calmar": 0.361,
+        "ann_return_pct": 7.86,
+        "ann_vol_pct": 8.93,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "decomposition": {
+        "delta_sharpe": 0.135,
+        "delta_sharpe_lost_to_tsmom": 0.0,
+        "pct_sharpe_from_tsmom": 0.0,
+        "mdd_protection_pp": -28.5,
+        "mdd_protection_retained_pp": -31.6,
+        "mdd_retention_pct": 111.0
+      }
+    },
+    "IWM": {
+      "bh": {
+        "name": "IWM B&H",
+        "sharpe": 0.443,
+        "mdd_pct": -58.6,
+        "calmar": 0.185,
+        "ann_return_pct": 10.83,
+        "ann_vol_pct": 24.46,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "vt": {
+        "name": "IWM 12/VIX VT",
+        "sharpe": 0.464,
+        "mdd_pct": -26.2,
+        "calmar": 0.232,
+        "ann_return_pct": 6.08,
+        "ann_vol_pct": 13.1,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "hedged_vt": {
+        "name": "IWM Hedged VT",
+        "sharpe": 0.543,
+        "mdd_pct": -24.8,
+        "calmar": 0.261,
+        "ann_return_pct": 6.46,
+        "ann_vol_pct": 11.9,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "decomposition": {
+        "delta_sharpe": 0.021,
+        "delta_sharpe_lost_to_tsmom": -0.079,
+        "pct_sharpe_from_tsmom": -376.2,
+        "mdd_protection_pp": -32.4,
+        "mdd_protection_retained_pp": -33.8,
+        "mdd_retention_pct": 104.0
+      }
+    }
+  },
+  "bootstrap_mdd_retention": {
+    "SPY": {
+      "point_estimate_pct": 111.0,
+      "mean_pct": 119.1,
+      "ci_lower_5_pct": 95.0,
+      "ci_upper_95_pct": 172.0,
+      "pvalue_le_80": 0.0021,
+      "reject_80": true,
+      "n_valid": 9967
+    },
+    "50/50": {
+      "point_estimate_pct": 110.0,
+      "mean_pct": 117.0,
+      "ci_lower_5_pct": 78.0,
+      "ci_upper_95_pct": 187.0,
+      "pvalue_le_80": 0.0557,
+      "reject_80": false,
+      "n_valid": 9684
+    },
+    "DIA": {
+      "point_estimate_pct": 104.0,
+      "mean_pct": 109.7,
+      "ci_lower_5_pct": 88.0,
+      "ci_upper_95_pct": 151.0,
+      "pvalue_le_80": 0.0109,
+      "reject_80": true,
+      "n_valid": 9948
+    },
+    "QQQ": {
+      "point_estimate_pct": 120.0,
+      "mean_pct": 130.1,
+      "ci_lower_5_pct": 93.0,
+      "ci_upper_95_pct": 194.0,
+      "pvalue_le_80": 0.0039,
+      "reject_80": true,
+      "n_valid": 9984
+    },
+    "IWM": {
+      "point_estimate_pct": 115.0,
+      "mean_pct": 123.3,
+      "ci_lower_5_pct": 90.0,
+      "ci_upper_95_pct": 189.0,
+      "pvalue_le_80": 0.0168,
+      "reject_80": true,
+      "n_valid": 9875
+    }
+  },
+  "paper_comparison": {
+    "paper_table3": {
+      "SPY": {
+        "bh_sharpe": 0.611,
+        "bh_mdd": -55.2,
+        "bh_calmar": 0.214,
+        "vt_sharpe": 0.797,
+        "vt_mdd": -24.7,
+        "vt_calmar": 0.301,
+        "hedged_sharpe": 0.737,
+        "hedged_mdd": -26.9,
+        "hedged_calmar": 0.264,
+        "tsmom_sharpe": 0.172,
+        "tsmom_mdd": -27.5,
+        "tsmom_calmar": 0.092,
+        "mdd_retention": 93
+      },
+      "50/50": {
+        "bh_sharpe": 0.865,
+        "bh_mdd": -32.5,
+        "bh_calmar": 0.364,
+        "vt_sharpe": 0.982,
+        "vt_mdd": -12.4,
+        "vt_calmar": 0.624,
+        "hedged_sharpe": 0.937,
+        "hedged_mdd": -13.1,
+        "hedged_calmar": 0.501,
+        "tsmom_sharpe": 0.232,
+        "tsmom_mdd": -31.8,
+        "tsmom_calmar": 0.075,
+        "mdd_retention": 96
+      }
+    },
+    "paper_mdd_retention": {
+      "SPY": 93,
+      "50/50": 96,
+      "DIA": 91,
+      "QQQ": 90,
+      "IWM": 97
+    },
+    "paper_bootstrap": {
+      "SPY": {
+        "point": 93,
+        "ci_lower": 86,
+        "ci_upper": 97
+      },
+      "50/50": {
+        "point": 96,
+        "ci_lower": 90,
+        "ci_upper": 99
+      },
+      "DIA": {
+        "point": 91,
+        "ci_lower": 83,
+        "ci_upper": 96
+      },
+      "QQQ": {
+        "point": 90,
+        "ci_lower": 82,
+        "ci_upper": 95
+      },
+      "IWM": {
+        "point": 97,
+        "ci_lower": 91,
+        "ci_upper": 100
+      }
+    }
+  },
+  "timestamp": "2026-04-05T13:55:33.889997Z"
+}

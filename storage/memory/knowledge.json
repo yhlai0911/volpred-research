@@ -20729,5 +20729,21 @@
     "data_source": "yfinance (0050.TW + VIX)",
     "created_at": "2026-04-05T21:29:56.339614",
     "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405215638_k898",
+    "experiment_id": "K898",
+    "title": "K898: Paper 3 Table 3 Reproduced — BH/VT numbers match, TSMOM hedge differs",
+    "content": "[提出: Paper 3 R1 A.1, 執行: Claude] SPY BH Sharpe 0.616 (paper 0.611), VT Sharpe 0.805 (paper 0.797), MDD -24.7% exact match. 50/50 MDD retention 96% confirmed. TSMOM hedge implementation-sensitive (different regression normalization). Core claim confirmed: MDD protection 96%+ comes from VIX channel not trend following.",
+    "tags": [
+      "VT",
+      "trend_following",
+      "TSMOM",
+      "MDD",
+      "paper_supplement"
+    ],
+    "data_source": "yfinance (SPY/GLD/DIA/QQQ/IWM/VIX, 2005-2026)",
+    "created_at": "2026-04-05T21:56:38.023153",
+    "type": "experiment_result"
   }
 ]
