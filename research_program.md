@@ -443,7 +443,7 @@
 ### 衍生方向（2026-04-03 session，K825-K827+K811v2+K814v2）
 → 已完成項目詳見 `docs/research_archive/completed_session_2026-04-03.md`
 - K829/K836(CF-VaR)/K830(BTC)/K839/K840/K828 全完成
-- [ ] **K827 衍生：Heterogeneous ABM**：自適應 agents + 不同 VT 參數
+- [x] ~~K827 衍生：Heterogeneous ABM~~ → **K864 完成 ★★ 反直覺**。策略異質性讓擁擠**更嚴重**（flash crashes +592%, vol +53%）！多波賣壓（Type A 先賣→EWMA 延遲賣→Risk Parity 再賣）比同步衝擊更具破壞力。但個別 VT 的 Sharpe 反而更好（0.376 vs 0.083）。Paper 5 可直接引用。
 
 ### 新發現（2026-04-01 文獻搜尋）
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。

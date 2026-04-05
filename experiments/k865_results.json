@@ -1,0 +1,2280 @@
+{
+  "experiment_id": "K865",
+  "title": "Volatility Spillover Network \u2014 2026 Tariff Crisis Update",
+  "methodology": "Diebold-Yilmaz (2012) FEVD spillover + Granger causality",
+  "data_source": "yfinance",
+  "assets": [
+    "SPY",
+    "QQQ",
+    "GLD",
+    "TLT",
+    "EEM",
+    "OIL",
+    "BTC"
+  ],
+  "period": "2020-01-24 to 2026-04-03",
+  "total_observations": 2239,
+  "parameters": {
+    "rv_window": 22,
+    "var_lags": 5,
+    "fevd_horizon": 10,
+    "rolling_window": 63
+  },
+  "window_analysis": {
+    "covid_crisis": {
+      "window": "covid_crisis",
+      "period": "2020-01-02 to 2020-06-30",
+      "n_obs": 136,
+      "descriptive_stats": {
+        "SPY": {
+          "mean_rv": 1.9433,
+          "max_rv": 7.4116,
+          "std_rv": 2.4926
+        },
+        "QQQ": {
+          "mean_rv": 1.4466,
+          "max_rv": 6.5837,
+          "std_rv": 2.372
+        },
+        "GLD": {
+          "mean_rv": 0.4855,
+          "max_rv": 3.2043,
+          "std_rv": 1.3153
+        },
+        "TLT": {
+          "mean_rv": 1.4131,
+          "max_rv": 7.911,
+          "std_rv": 2.7219
+        },
+        "EEM": {
+          "mean_rv": 2.1199,
+          "max_rv": 8.1928,
+          "std_rv": 2.5607
+        },
+        "OIL": {
+          "mean_rv": 2.1179,
+          "max_rv": 7.637,
+          "std_rv": 2.5942
+        },
+        "BTC": {
+          "mean_rv": 1.1177,
+          "max_rv": 6.4988,
+          "std_rv": 2.286
+        }
+      },
+      "spillover": {
+        "total_spillover_index": 90.89,
+        "from_others": {
+          "SPY": 95.65,
+          "QQQ": 94.91,
+          "GLD": 92.36,
+          "TLT": 91.44,
+          "EEM": 81.63,
+          "OIL": 89.16,
+          "BTC": 63.75
+        },
+        "to_others": {
+          "SPY": 53.09,
+          "QQQ": 33.34,
+          "GLD": 34.58,
+          "TLT": 42.33,
+          "EEM": 84.61,
+          "OIL": 31.43,
+          "BTC": 329.51
+        },
+        "net_spillover": {
+          "SPY": -42.56,
+          "QQQ": -61.57,
+          "GLD": -57.78,
+          "TLT": -49.11,
+          "EEM": 2.98,
+          "OIL": -57.73,
+          "BTC": 265.76
+        },
+        "top_transmitters": [
+          [
+            "BTC",
+            265.76
+          ],
+          [
+            "EEM",
+            2.98
+          ],
+          [
+            "SPY",
+            -42.56
+          ]
+        ],
+        "top_receivers": [
+          [
+            "QQQ",
+            -61.57
+          ],
+          [
+            "GLD",
+            -57.78
+          ],
+          [
+            "OIL",
+            -57.73
+          ]
+        ]
+      },
+      "granger_causality": {
+        "total_pairs": 42,
+        "significant_005": 31,
+        "significant_pairs": {
+          "BTC->QQQ": {
+            "p_value": 0.0,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "QQQ->TLT": {
+            "p_value": 0.0,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->TLT": {
+            "p_value": 0.0,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "BTC->EEM": {
+            "p_value": 0.0,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->BTC": {
+            "p_value": 0.0,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "OIL->BTC": {
+            "p_value": 2e-06,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->TLT": {
+            "p_value": 4e-06,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "BTC->TLT": {
+            "p_value": 5e-06,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "BTC->SPY": {
+            "p_value": 3.9e-05,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "QQQ->OIL": {
+            "p_value": 7.3e-05,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->BTC": {
+            "p_value": 0.000157,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->OIL": {
+            "p_value": 0.000209,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->BTC": {
+            "p_value": 0.00024,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "GLD->OIL": {
+            "p_value": 0.000345,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "QQQ->EEM": {
+            "p_value": 0.000732,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "QQQ->BTC": {
+            "p_value": 0.000744,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->QQQ": {
+            "p_value": 0.001011,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->EEM": {
+            "p_value": 0.001215,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "OIL->QQQ": {
+            "p_value": 0.003369,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->GLD": {
+            "p_value": 0.003604,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "QQQ->GLD": {
+            "p_value": 0.003956,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "OIL->TLT": {
+            "p_value": 0.005208,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->EEM": {
+            "p_value": 0.005235,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->OIL": {
+            "p_value": 0.006758,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->SPY": {
+            "p_value": 0.009929,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->GLD": {
+            "p_value": 0.013495,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "TLT->OIL": {
+            "p_value": 0.013766,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "OIL->SPY": {
+            "p_value": 0.025874,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "BTC->OIL": {
+            "p_value": 0.026687,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "BTC->GLD": {
+            "p_value": 0.028227,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "QQQ->SPY": {
+            "p_value": 0.029654,
+            "significant_005": "True",
+            "significant_001": "False"
+          }
+        }
+      },
+      "spillover_matrix": [
+        [
+          4.35,
+          3.65,
+          7.19,
+          1.95,
+          8.7,
+          1.13,
+          73.03
+        ],
+        [
+          4.32,
+          5.09,
+          7.3,
+          2.66,
+          11.18,
+          0.68,
+          68.76
+        ],
+        [
+          4.51,
+          6.69,
+          7.64,
+          7.93,
+          11.7,
+          0.63,
+          60.9
+        ],
+        [
+          9.84,
+          5.49,
+          5.79,
+          8.56,
+          15.51,
+          7.89,
+          46.93
+        ],
+        [
+          11.43,
+          5.61,
+          5.11,
+          8.35,
+          18.37,
+          9.83,
+          41.31
+        ],
+        [
+          11.89,
+          5.87,
+          4.78,
+          8.95,
+          19.08,
+          10.84,
+          38.58
+        ],
+        [
+          11.1,
+          6.03,
+          4.4,
+          12.49,
+          18.44,
+          11.27,
+          36.25
+        ]
+      ],
+      "matrix_labels": [
+        "SPY",
+        "QQQ",
+        "GLD",
+        "TLT",
+        "EEM",
+        "OIL",
+        "BTC"
+      ]
+    },
+    "post_covid_recovery": {
+      "window": "post_covid_recovery",
+      "period": "2020-07-01 to 2021-12-31",
+      "n_obs": 549,
+      "descriptive_stats": {
+        "SPY": {
+          "mean_rv": -0.2505,
+          "max_rv": 1.3278,
+          "std_rv": 0.4345
+        },
+        "QQQ": {
+          "mean_rv": -0.2159,
+          "max_rv": 1.3387,
+          "std_rv": 0.6312
+        },
+        "GLD": {
+          "mean_rv": -0.2016,
+          "max_rv": 2.1671,
+          "std_rv": 0.6437
+        },
+        "TLT": {
+          "mean_rv": -0.3736,
+          "max_rv": 0.7943,
+          "std_rv": 0.4806
+        },
+        "EEM": {
+          "mean_rv": -0.1172,
+          "max_rv": 1.1167,
+          "std_rv": 0.3926
+        },
+        "OIL": {
+          "mean_rv": -0.1822,
+          "max_rv": 1.307,
+          "std_rv": 0.5106
+        },
+        "BTC": {
+          "mean_rv": 0.4589,
+          "max_rv": 2.7078,
+          "std_rv": 0.8806
+        }
+      },
+      "spillover": {
+        "total_spillover_index": 90.52,
+        "from_others": {
+          "SPY": 95.91,
+          "QQQ": 99.87,
+          "GLD": 99.71,
+          "TLT": 99.87,
+          "EEM": 98.51,
+          "OIL": 99.45,
+          "BTC": 11.85
+        },
+        "to_others": {
+          "SPY": 44.99,
+          "QQQ": 1.52,
+          "GLD": 1.9,
+          "TLT": 0.55,
+          "EEM": 6.42,
+          "OIL": 1.67,
+          "BTC": 548.12
+        },
+        "net_spillover": {
+          "SPY": -50.92,
+          "QQQ": -98.35,
+          "GLD": -97.81,
+          "TLT": -99.32,
+          "EEM": -92.09,
+          "OIL": -97.78,
+          "BTC": 536.27
+        },
+        "top_transmitters": [
+          [
+            "BTC",
+            536.27
+          ],
+          [
+            "SPY",
+            -50.92
+          ],
+          [
+            "EEM",
+            -92.09
+          ]
+        ],
+        "top_receivers": [
+          [
+            "TLT",
+            -99.32
+          ],
+          [
+            "QQQ",
+            -98.35
+          ],
+          [
+            "GLD",
+            -97.81
+          ]
+        ]
+      },
+      "granger_causality": {
+        "total_pairs": 42,
+        "significant_005": 10,
+        "significant_pairs": {
+          "QQQ->TLT": {
+            "p_value": 0.000421,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->TLT": {
+            "p_value": 0.001196,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "GLD->SPY": {
+            "p_value": 0.002608,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->TLT": {
+            "p_value": 0.00402,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->EEM": {
+            "p_value": 0.004717,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "BTC->TLT": {
+            "p_value": 0.023007,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "EEM->SPY": {
+            "p_value": 0.028838,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "TLT->BTC": {
+            "p_value": 0.035124,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "GLD->TLT": {
+            "p_value": 0.040613,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "TLT->GLD": {
+            "p_value": 0.047333,
+            "significant_005": "True",
+            "significant_001": "False"
+          }
+        }
+      },
+      "spillover_matrix": [
+        [
+          4.09,
+          0.11,
+          0.69,
+          0.02,
+          0.26,
+          0.1,
+          94.73
+        ],
+        [
+          4.71,
+          0.13,
+          0.39,
+          0.01,
+          0.64,
+          0.08,
+          94.04
+        ],
+        [
+          6.28,
+          0.11,
+          0.29,
+          0.02,
+          1.2,
+          0.06,
+          92.04
+        ],
+        [
+          7.33,
+          0.13,
+          0.23,
+          0.13,
+          1.63,
+          0.38,
+          90.18
+        ],
+        [
+          8.53,
+          0.31,
+          0.21,
+          0.14,
+          1.49,
+          0.5,
+          88.82
+        ],
+        [
+          9.0,
+          0.41,
+          0.19,
+          0.16,
+          1.39,
+          0.55,
+          88.3
+        ],
+        [
+          9.13,
+          0.46,
+          0.19,
+          0.19,
+          1.32,
+          0.55,
+          88.15
+        ]
+      ],
+      "matrix_labels": [
+        "SPY",
+        "QQQ",
+        "GLD",
+        "TLT",
+        "EEM",
+        "OIL",
+        "BTC"
+      ]
+    },
+    "rate_hike": {
+      "window": "rate_hike",
+      "period": "2022-01-01 to 2023-06-30",
+      "n_obs": 546,
+      "descriptive_stats": {
+        "SPY": {
+          "mean_rv": 0.3268,
+          "max_rv": 1.783,
+          "std_rv": 0.5538
+        },
+        "QQQ": {
+          "mean_rv": 0.4694,
+          "max_rv": 2.311,
+          "std_rv": 0.6591
+        },
+        "GLD": {
+          "mean_rv": -0.1886,
+          "max_rv": 1.0816,
+          "std_rv": 0.4403
+        },
+        "TLT": {
+          "mean_rv": 0.5219,
+          "max_rv": 1.5552,
+          "std_rv": 0.5398
+        },
+        "EEM": {
+          "mean_rv": 0.1094,
+          "max_rv": 2.3421,
+          "std_rv": 0.619
+        },
+        "OIL": {
+          "mean_rv": 0.1574,
+          "max_rv": 2.3762,
+          "std_rv": 0.5688
+        },
+        "BTC": {
+          "mean_rv": 0.0215,
+          "max_rv": 1.9858,
+          "std_rv": 0.754
+        }
+      },
+      "spillover": {
+        "total_spillover_index": 89.9,
+        "from_others": {
+          "SPY": 87.12,
+          "QQQ": 99.87,
+          "GLD": 97.73,
+          "TLT": 99.51,
+          "EEM": 99.47,
+          "OIL": 99.65,
+          "BTC": 15.62
+        },
+        "to_others": {
+          "SPY": 51.55,
+          "QQQ": 3.26,
+          "GLD": 18.86,
+          "TLT": 3.06,
+          "EEM": 2.45,
+          "OIL": 1.4,
+          "BTC": 518.38
+        },
+        "net_spillover": {
+          "SPY": -35.57,
+          "QQQ": -96.61,
+          "GLD": -78.87,
+          "TLT": -96.45,
+          "EEM": -97.02,
+          "OIL": -98.25,
+          "BTC": 502.76
+        },
+        "top_transmitters": [
+          [
+            "BTC",
+            502.76
+          ],
+          [
+            "SPY",
+            -35.57
+          ],
+          [
+            "GLD",
+            -78.87
+          ]
+        ],
+        "top_receivers": [
+          [
+            "OIL",
+            -98.25
+          ],
+          [
+            "EEM",
+            -97.02
+          ],
+          [
+            "QQQ",
+            -96.61
+          ]
+        ]
+      },
+      "granger_causality": {
+        "total_pairs": 42,
+        "significant_005": 14,
+        "significant_pairs": {
+          "BTC->QQQ": {
+            "p_value": 0.000182,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "BTC->OIL": {
+            "p_value": 0.000261,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "BTC->SPY": {
+            "p_value": 0.002252,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "QQQ->TLT": {
+            "p_value": 0.004676,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->TLT": {
+            "p_value": 0.005106,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "GLD->EEM": {
+            "p_value": 0.0114,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "SPY->EEM": {
+            "p_value": 0.011871,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "TLT->OIL": {
+            "p_value": 0.012975,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "EEM->OIL": {
+            "p_value": 0.014732,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "TLT->GLD": {
+            "p_value": 0.016614,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "SPY->BTC": {
+            "p_value": 0.01966,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "QQQ->EEM": {
+            "p_value": 0.023495,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "QQQ->BTC": {
+            "p_value": 0.025496,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "OIL->BTC": {
+            "p_value": 0.042605,
+            "significant_005": "True",
+            "significant_001": "False"
+          }
+        }
+      },
+      "spillover_matrix": [
+        [
+          12.88,
+          0.26,
+          0.79,
+          0.97,
+          0.48,
+          0.11,
+          84.5
+        ],
+        [
+          9.71,
+          0.13,
+          1.42,
+          0.57,
+          0.24,
+          0.13,
+          87.8
+        ],
+        [
+          8.21,
+          0.22,
+          2.27,
+          0.5,
+          0.17,
+          0.27,
+          88.36
+        ],
+        [
+          8.66,
+          0.78,
+          2.75,
+          0.49,
+          0.19,
+          0.2,
+          86.91
+        ],
+        [
+          8.39,
+          0.74,
+          3.94,
+          0.39,
+          0.53,
+          0.28,
+          85.74
+        ],
+        [
+          8.22,
+          0.66,
+          4.71,
+          0.33,
+          0.65,
+          0.35,
+          85.07
+        ],
+        [
+          8.36,
+          0.6,
+          5.24,
+          0.31,
+          0.71,
+          0.41,
+          84.38
+        ]
+      ],
+      "matrix_labels": [
+        "SPY",
+        "QQQ",
+        "GLD",
+        "TLT",
+        "EEM",
+        "OIL",
+        "BTC"
+      ]
+    },
+    "calm_2024_25": {
+      "window": "calm_2024_25",
+      "period": "2024-01-01 to 2026-02-28",
+      "n_obs": 790,
+      "descriptive_stats": {
+        "SPY": {
+          "mean_rv": -0.2669,
+          "max_rv": 3.7355,
+          "std_rv": 0.7239
+        },
+        "QQQ": {
+          "mean_rv": -0.2944,
+          "max_rv": 3.7089,
+          "std_rv": 0.7666
+        },
+        "GLD": {
+          "mean_rv": 0.2397,
+          "max_rv": 6.2235,
+          "std_rv": 1.2696
+        },
+        "TLT": {
+          "mean_rv": -0.4235,
+          "max_rv": 1.0469,
+          "std_rv": 0.4946
+        },
+        "EEM": {
+          "mean_rv": -0.3263,
+          "max_rv": 2.4403,
+          "std_rv": 0.5822
+        },
+        "OIL": {
+          "mean_rv": -0.3556,
+          "max_rv": 0.9265,
+          "std_rv": 0.3594
+        },
+        "BTC": {
+          "mean_rv": -0.3498,
+          "max_rv": 1.4283,
+          "std_rv": 0.6087
+        }
+      },
+      "spillover": {
+        "total_spillover_index": 90.55,
+        "from_others": {
+          "SPY": 92.0,
+          "QQQ": 99.63,
+          "GLD": 99.68,
+          "TLT": 99.19,
+          "EEM": 99.9,
+          "OIL": 99.49,
+          "BTC": 15.58
+        },
+        "to_others": {
+          "SPY": 54.36,
+          "QQQ": 1.6,
+          "GLD": 9.23,
+          "TLT": 3.54,
+          "EEM": 0.36,
+          "OIL": 1.28,
+          "BTC": 535.1
+        },
+        "net_spillover": {
+          "SPY": -37.64,
+          "QQQ": -98.03,
+          "GLD": -90.45,
+          "TLT": -95.65,
+          "EEM": -99.54,
+          "OIL": -98.21,
+          "BTC": 519.52
+        },
+        "top_transmitters": [
+          [
+            "BTC",
+            519.52
+          ],
+          [
+            "SPY",
+            -37.64
+          ],
+          [
+            "GLD",
+            -90.45
+          ]
+        ],
+        "top_receivers": [
+          [
+            "EEM",
+            -99.54
+          ],
+          [
+            "OIL",
+            -98.21
+          ],
+          [
+            "QQQ",
+            -98.03
+          ]
+        ]
+      },
+      "granger_causality": {
+        "total_pairs": 42,
+        "significant_005": 18,
+        "significant_pairs": {
+          "TLT->SPY": {
+            "p_value": 0.0,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->QQQ": {
+            "p_value": 0.0,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->TLT": {
+            "p_value": 2e-06,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "QQQ->TLT": {
+            "p_value": 2e-05,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "OIL->EEM": {
+            "p_value": 2.5e-05,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->EEM": {
+            "p_value": 7.4e-05,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->EEM": {
+            "p_value": 0.000648,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "BTC->EEM": {
+            "p_value": 0.00076,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->TLT": {
+            "p_value": 0.000878,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->SPY": {
+            "p_value": 0.001948,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->BTC": {
+            "p_value": 0.004472,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->QQQ": {
+            "p_value": 0.005127,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "OIL->TLT": {
+            "p_value": 0.005376,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "GLD->BTC": {
+            "p_value": 0.008229,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "QQQ->EEM": {
+            "p_value": 0.012368,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "EEM->GLD": {
+            "p_value": 0.013389,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "GLD->OIL": {
+            "p_value": 0.033756,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "BTC->QQQ": {
+            "p_value": 0.035881,
+            "significant_005": "True",
+            "significant_001": "False"
+          }
+        }
+      },
+      "spillover_matrix": [
+        [
+          8.0,
+          0.63,
+          0.04,
+          0.36,
+          0.01,
+          0.0,
+          90.96
+        ],
+        [
+          7.03,
+          0.37,
+          0.16,
+          0.24,
+          0.01,
+          0.08,
+          92.1
+        ],
+        [
+          7.86,
+          0.24,
+          0.32,
+          0.8,
+          0.02,
+          0.06,
+          90.7
+        ],
+        [
+          9.09,
+          0.22,
+          1.17,
+          0.81,
+          0.05,
+          0.1,
+          88.57
+        ],
+        [
+          9.8,
+          0.17,
+          1.9,
+          0.71,
+          0.1,
+          0.33,
+          87.0
+        ],
+        [
+          10.13,
+          0.16,
+          2.61,
+          0.69,
+          0.13,
+          0.51,
+          85.78
+        ],
+        [
+          10.46,
+          0.18,
+          3.34,
+          0.74,
+          0.15,
+          0.71,
+          84.42
+        ]
+      ],
+      "matrix_labels": [
+        "SPY",
+        "QQQ",
+        "GLD",
+        "TLT",
+        "EEM",
+        "OIL",
+        "BTC"
+      ]
+    },
+    "tariff_crisis_narrow": {
+      "window": "tariff_crisis_narrow",
+      "period": "2026-03-01 to 2026-04-04",
+      "n_obs": 34,
+      "descriptive_stats": {
+        "SPY": {
+          "mean_rv": -0.2434,
+          "max_rv": 0.3178,
+          "std_rv": 0.2467
+        },
+        "QQQ": {
+          "mean_rv": -0.3137,
+          "max_rv": 0.2237,
+          "std_rv": 0.2182
+        },
+        "GLD": {
+          "mean_rv": 2.1512,
+          "max_rv": 3.2259,
+          "std_rv": 0.5266
+        },
+        "TLT": {
+          "mean_rv": -0.634,
+          "max_rv": -0.0582,
+          "std_rv": 0.3587
+        },
+        "EEM": {
+          "mean_rv": 1.1504,
+          "max_rv": 1.711,
+          "std_rv": 0.4288
+        },
+        "OIL": {
+          "mean_rv": 1.7521,
+          "max_rv": 2.7539,
+          "std_rv": 0.8912
+        },
+        "BTC": {
+          "mean_rv": -0.2061,
+          "max_rv": 0.0311,
+          "std_rv": 0.1998
+        }
+      },
+      "note": "Too few observations for VAR/FEVD analysis"
+    },
+    "tariff_crisis_extended": {
+      "window": "tariff_crisis_extended",
+      "period": "2025-10-01 to 2026-04-04",
+      "n_obs": 185,
+      "descriptive_stats": {
+        "SPY": {
+          "mean_rv": -0.3908,
+          "max_rv": 0.3178,
+          "std_rv": 0.2596
+        },
+        "QQQ": {
+          "mean_rv": -0.4223,
+          "max_rv": 0.2237,
+          "std_rv": 0.3177
+        },
+        "GLD": {
+          "mean_rv": 1.6823,
+          "max_rv": 6.2235,
+          "std_rv": 1.9276
+        },
+        "TLT": {
+          "mean_rv": -0.9438,
+          "max_rv": -0.0582,
+          "std_rv": 0.2496
+        },
+        "EEM": {
+          "mean_rv": -0.057,
+          "max_rv": 1.711,
+          "std_rv": 0.708
+        },
+        "OIL": {
+          "mean_rv": 0.0123,
+          "max_rv": 2.7539,
+          "std_rv": 0.9325
+        },
+        "BTC": {
+          "mean_rv": -0.3078,
+          "max_rv": 1.4283,
+          "std_rv": 0.6875
+        }
+      },
+      "spillover": {
+        "total_spillover_index": 90.89,
+        "from_others": {
+          "SPY": 81.61,
+          "QQQ": 99.25,
+          "GLD": 99.33,
+          "TLT": 97.89,
+          "EEM": 99.89,
+          "OIL": 86.84,
+          "BTC": 44.09
+        },
+        "to_others": {
+          "SPY": 95.98,
+          "QQQ": 26.35,
+          "GLD": 18.52,
+          "TLT": 12.57,
+          "EEM": 0.85,
+          "OIL": 30.19,
+          "BTC": 424.44
+        },
+        "net_spillover": {
+          "SPY": 14.37,
+          "QQQ": -72.9,
+          "GLD": -80.81,
+          "TLT": -85.32,
+          "EEM": -99.04,
+          "OIL": -56.65,
+          "BTC": 380.35
+        },
+        "top_transmitters": [
+          [
+            "BTC",
+            380.35
+          ],
+          [
+            "SPY",
+            14.37
+          ],
+          [
+            "OIL",
+            -56.65
+          ]
+        ],
+        "top_receivers": [
+          [
+            "EEM",
+            -99.04
+          ],
+          [
+            "TLT",
+            -85.32
+          ],
+          [
+            "GLD",
+            -80.81
+          ]
+        ]
+      },
+      "granger_causality": {
+        "total_pairs": 42,
+        "significant_005": 14,
+        "significant_pairs": {
+          "OIL->TLT": {
+            "p_value": 2.3e-05,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "BTC->EEM": {
+            "p_value": 0.000101,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "GLD->BTC": {
+            "p_value": 0.000277,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->OIL": {
+            "p_value": 0.002071,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->SPY": {
+            "p_value": 0.003211,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->OIL": {
+            "p_value": 0.004073,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "EEM->TLT": {
+            "p_value": 0.008965,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "SPY->OIL": {
+            "p_value": 0.009356,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "TLT->QQQ": {
+            "p_value": 0.009671,
+            "significant_005": "True",
+            "significant_001": "True"
+          },
+          "OIL->SPY": {
+            "p_value": 0.010035,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "SPY->EEM": {
+            "p_value": 0.011754,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "QQQ->EEM": {
+            "p_value": 0.018412,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "EEM->SPY": {
+            "p_value": 0.040267,
+            "significant_005": "True",
+            "significant_001": "False"
+          },
+          "QQQ->OIL": {
+            "p_value": 0.044595,
+            "significant_005": "True",
+            "significant_001": "False"
+          }
+        }
+      },
+      "spillover_matrix": [
+        [
+          18.39,
+          1.61,
+          0.0,
+          0.73,
+          0.18,
+          0.0,
+          79.09
+        ],
+        [
+          17.29,
+          0.75,
+          0.61,
+          1.86,
+          0.15,
+          0.02,
+          79.32
+        ],
+        [
+          18.1,
+          3.9,
+          0.67,
+          2.23,
+          0.1,
+          0.98,
+          74.01
+        ],
+        [
+          17.32,
+          4.93,
+          2.27,
+          2.11,
+          0.09,
+          4.25,
+          69.03
+        ],
+        [
+          15.74,
+          5.36,
+          3.41,
+          2.56,
+          0.11,
+          9.32,
+          63.5
+        ],
+        [
+          14.36,
+          5.44,
+          4.71,
+          2.66,
+          0.17,
+          13.16,
+          59.5
+        ],
+        [
+          13.17,
+          5.12,
+          7.5,
+          2.53,
+          0.16,
+          15.6,
+          55.91
+        ]
+      ],
+      "matrix_labels": [
+        "SPY",
+        "QQQ",
+        "GLD",
+        "TLT",
+        "EEM",
+        "OIL",
+        "BTC"
+      ]
+    }
+  },
+  "rolling_spillover_stats": {
+    "mean": 91.78,
+    "std": 1.61,
+    "min": 85.36,
+    "max": 97.02,
+    "min_date": "2025-11-13",
+    "max_date": "2022-11-24",
+    "mean_2026": 90.96,
+    "max_2026": 93.09,
+    "max_date_2026": "2026-03-08",
+    "latest": 92.11,
+    "latest_date": "2026-04-02"
+  },
+  "tariff_impact": {
+    "march_2026_returns_pct": {
+      "SPY": -4.94,
+      "QQQ": -4.84,
+      "GLD": -11.05,
+      "TLT": -4.23,
+      "EEM": -9.25,
+      "OIL": 51.27,
+      "BTC": 3.8
+    },
+    "tariff_week_returns_pct": {
+      "SPY": 0.84,
+      "QQQ": 1.35,
+      "GLD": -0.2,
+      "TLT": 0.52,
+      "EEM": -0.35,
+      "OIL": 10.02,
+      "BTC": -1.91
+    },
+    "full_tariff_period_returns_pct": {
+      "SPY": -4.14,
+      "QQQ": -3.55,
+      "GLD": -11.23,
+      "TLT": -3.74,
+      "EEM": -9.57,
+      "OIL": 66.43,
+      "BTC": 1.81
+    },
+    "max_rv_tariff_period": {
+      "SPY": 0.1702,
+      "QQQ": 0.2046,
+      "GLD": 0.3459,
+      "TLT": 0.125,
+      "EEM": 0.3118,
+      "OIL": 0.9034,
+      "BTC": 0.4701
+    },
+    "mean_rv_tariff_period": {
+      "SPY": 0.1153,
+      "QQQ": 0.1499,
+      "GLD": 0.2753,
+      "TLT": 0.0915,
+      "EEM": 0.2612,
+      "OIL": 0.6909,
+      "BTC": 0.4181
+    },
+    "rv_ratio_tariff_vs_calm": {
+      "SPY": 1.02,
+      "QQQ": 0.99,
+      "GLD": 1.84,
+      "TLT": 0.88,
+      "EEM": 2.04,
+      "OIL": 2.83,
+      "BTC": 1.08
+    },
+    "worst_single_day": {
+      "SPY": {
+        "date": "2026-03-26",
+        "return_pct": -1.8
+      },
+      "QQQ": {
+        "date": "2026-03-26",
+        "return_pct": -2.42
+      },
+      "GLD": {
+        "date": "2026-03-03",
+        "return_pct": -4.56
+      },
+      "TLT": {
+        "date": "2026-03-20",
+        "return_pct": -1.92
+      },
+      "EEM": {
+        "date": "2026-03-03",
+        "return_pct": -5.14
+      },
+      "OIL": {
+        "date": "2026-03-10",
+        "return_pct": -12.72
+      },
+      "BTC": {
+        "date": "2026-03-06",
+        "return_pct": -3.89
+      }
+    }
+  },
+  "crisis_comparison": {
+    "covid_crisis": {
+      "total_spillover_index": 90.89,
+      "n_significant_granger": 31,
+      "top_transmitter": [
+        "BTC",
+        265.76
+      ],
+      "top_receiver": [
+        "QQQ",
+        -61.57
+      ]
+    },
+    "post_covid_recovery": {
+      "total_spillover_index": 90.52,
+      "n_significant_granger": 10,
+      "top_transmitter": [
+        "BTC",
+        536.27
+      ],
+      "top_receiver": [
+        "TLT",
+        -99.32
+      ]
+    },
+    "rate_hike": {
+      "total_spillover_index": 89.9,
+      "n_significant_granger": 14,
+      "top_transmitter": [
+        "BTC",
+        502.76
+      ],
+      "top_receiver": [
+        "OIL",
+        -98.25
+      ]
+    },
+    "calm_2024_25": {
+      "total_spillover_index": 90.55,
+      "n_significant_granger": 18,
+      "top_transmitter": [
+        "BTC",
+        519.52
+      ],
+      "top_receiver": [
+        "EEM",
+        -99.54
+      ]
+    },
+    "tariff_crisis_extended": {
+      "total_spillover_index": 90.89,
+      "n_significant_granger": 14,
+      "top_transmitter": [
+        "BTC",
+        380.35
+      ],
+      "top_receiver": [
+        "EEM",
+        -99.04
+      ]
+    }
+  },
+  "connectivity_change": {
+    "calm_granger_fraction": 0.429,
+    "tariff_granger_fraction": 0.333,
+    "calm_tsi": 90.55,
+    "tariff_tsi": 90.89,
+    "rolling_tsi_ttest": {
+      "calm_mean": 91.57,
+      "tariff_mean": 92.21,
+      "calm_n": 158,
+      "tariff_n": 7,
+      "t_stat": 0.924,
+      "p_value": 0.178309,
+      "significant_harvey": "False"
+    }
+  },
+  "traditional_asset_network": {
+    "covid_crisis": {
+      "total_spillover_index": 90.47,
+      "from_others": {
+        "SPY": 98.96,
+        "QQQ": 96.84,
+        "GLD": 93.64,
+        "TLT": 88.35,
+        "EEM": 77.57,
+        "OIL": 49.3
+      },
+      "to_others": {
+        "SPY": 5.02,
+        "QQQ": 20.8,
+        "GLD": 26.2,
+        "TLT": 47.49,
+        "EEM": 108.65,
+        "OIL": 296.5
+      },
+      "net_spillover": {
+        "SPY": -93.94,
+        "QQQ": -76.04,
+        "GLD": -67.44,
+        "TLT": -40.86,
+        "EEM": 31.08,
+        "OIL": 247.2
+      },
+      "top_transmitters": [
+        [
+          "OIL",
+          247.2
+        ],
+        [
+          "EEM",
+          31.08
+        ],
+        [
+          "TLT",
+          -40.86
+        ]
+      ],
+      "top_receivers": [
+        [
+          "SPY",
+          -93.94
+        ],
+        [
+          "QQQ",
+          -76.04
+        ],
+        [
+          "GLD",
+          -67.44
+        ]
+      ]
+    },
+    "calm_2024_25": {
+      "total_spillover_index": 90.31,
+      "from_others": {
+        "SPY": 90.38,
+        "QQQ": 100.0,
+        "GLD": 99.88,
+        "TLT": 99.42,
+        "EEM": 98.7,
+        "OIL": 14.68
+      },
+      "to_others": {
+        "SPY": 60.04,
+        "QQQ": 0.98,
+        "GLD": 1.44,
+        "TLT": 3.93,
+        "EEM": 6.27,
+        "OIL": 430.4
+      },
+      "net_spillover": {
+        "SPY": -30.34,
+        "QQQ": -99.02,
+        "GLD": -98.44,
+        "TLT": -95.49,
+        "EEM": -92.43,
+        "OIL": 415.72
+      },
+      "top_transmitters": [
+        [
+          "OIL",
+          415.72
+        ],
+        [
+          "SPY",
+          -30.34
+        ],
+        [
+          "EEM",
+          -92.43
+        ]
+      ],
+      "top_receivers": [
+        [
+          "QQQ",
+          -99.02
+        ],
+        [
+          "GLD",
+          -98.44
+        ],
+        [
+          "TLT",
+          -95.49
+        ]
+      ]
+    },
+    "tariff_crisis_extended": {
+      "total_spillover_index": 90.42,
+      "from_others": {
+        "SPY": 98.47,
+        "QQQ": 97.63,
+        "GLD": 98.05,
+        "TLT": 97.14,
+        "EEM": 70.04,
+        "OIL": 42.87
+      },
+      "to_others": {
+        "SPY": 3.04,
+        "QQQ": 11.2,
+        "GLD": 9.68,
+        "TLT": 12.86,
+        "EEM": 82.08,
+        "OIL": 385.34
+      },
+      "net_spillover": {
+        "SPY": -95.43,
+        "QQQ": -86.43,
+        "GLD": -88.37,
+        "TLT": -84.28,
+        "EEM": 12.04,
+        "OIL": 342.47
+      },
+      "top_transmitters": [
+        [
+          "OIL",
+          342.47
+        ],
+        [
+          "EEM",
+          12.04
+        ],
+        [
+          "TLT",
+          -84.28
+        ]
+      ],
+      "top_receivers": [
+        [
+          "SPY",
+          -95.43
+        ],
+        [
+          "GLD",
+          -88.37
+        ],
+        [
+          "QQQ",
+          -86.43
+        ]
+      ]
+    }
+  },
+  "rv_correlation_by_period": {
+    "calm_2024_25": {
+      "SPY-TLT": 0.476,
+      "QQQ-SPY": 0.979,
+      "QQQ-TLT": 0.472,
+      "GLD-SPY": 0.226,
+      "GLD-QQQ": 0.213,
+      "GLD-TLT": -0.089,
+      "GLD-OIL": 0.249,
+      "EEM-SPY": 0.831,
+      "EEM-QQQ": 0.829,
+      "EEM-GLD": 0.309,
+      "EEM-TLT": 0.382,
+      "EEM-OIL": 0.577,
+      "OIL-SPY": 0.429,
+      "OIL-QQQ": 0.392,
+      "OIL-TLT": 0.222,
+      "mean_offdiag": 0.377
+    },
+    "tariff_crisis_narrow": {
+      "SPY-TLT": 0.814,
+      "QQQ-SPY": 0.987,
+      "QQQ-TLT": 0.737,
+      "GLD-SPY": 0.73,
+      "GLD-QQQ": 0.727,
+      "GLD-TLT": 0.512,
+      "GLD-OIL": -0.073,
+      "EEM-SPY": 0.661,
+      "EEM-QQQ": 0.619,
+      "EEM-GLD": 0.271,
+      "EEM-TLT": 0.657,
+      "EEM-OIL": 0.829,
+      "OIL-SPY": 0.492,
+      "OIL-QQQ": 0.42,
+      "OIL-TLT": 0.654,
+      "mean_offdiag": 0.286
+    },
+    "tariff_crisis_extended": {
+      "SPY-TLT": 0.625,
+      "QQQ-SPY": 0.955,
+      "QQQ-TLT": 0.483,
+      "GLD-SPY": 0.348,
+      "GLD-QQQ": 0.321,
+      "GLD-TLT": 0.381,
+      "GLD-OIL": 0.267,
+      "EEM-SPY": 0.584,
+      "EEM-QQQ": 0.457,
+      "EEM-GLD": 0.432,
+      "EEM-TLT": 0.749,
+      "EEM-OIL": 0.875,
+      "OIL-SPY": 0.371,
+      "OIL-QQQ": 0.224,
+      "OIL-TLT": 0.749,
+      "mean_offdiag": 0.484
+    }
+  },
+  "spy_role_change": {
+    "covid_crisis": {
+      "net_spillover": -42.56,
+      "role": "receiver",
+      "to_others": 53.09,
+      "from_others": 95.65
+    },
+    "post_covid_recovery": {
+      "net_spillover": -50.92,
+      "role": "receiver",
+      "to_others": 44.99,
+      "from_others": 95.91
+    },
+    "rate_hike": {
+      "net_spillover": -35.57,
+      "role": "receiver",
+      "to_others": 51.55,
+      "from_others": 87.12
+    },
+    "calm_2024_25": {
+      "net_spillover": -37.64,
+      "role": "receiver",
+      "to_others": 54.36,
+      "from_others": 92.0
+    },
+    "tariff_crisis_extended": {
+      "net_spillover": 14.37,
+      "role": "transmitter",
+      "to_others": 95.98,
+      "from_others": 81.61
+    }
+  },
+  "rolling_tsi_series": {
+    "2020-03-26": 92.39,
+    "2020-03-31": 91.2,
+    "2020-04-05": 90.41,
+    "2020-04-10": 93.66,
+    "2020-04-15": 93.28,
+    "2020-05-13": 93.74,
+    "2020-05-18": 93.43,
+    "2020-05-23": 92.29,
+    "2020-05-28": 93.02,
+    "2020-06-02": 91.38,
+    "2020-06-07": 90.71,
+    "2020-06-12": 90.95,
+    "2020-06-17": 89.79,
+    "2020-06-22": 92.21,
+    "2020-06-27": 90.43,
+    "2020-07-02": 91.87,
+    "2020-07-07": 91.67,
+    "2020-07-12": 91.68,
+    "2020-07-17": 92.01,
+    "2020-07-22": 93.67,
+    "2020-07-27": 93.62,
+    "2020-08-01": 94.3,
+    "2020-08-06": 91.61,
+    "2020-08-11": 91.33,
+    "2020-08-16": 90.35,
+    "2020-08-21": 89.49,
+    "2020-08-26": 90.48,
+    "2020-08-31": 91.01,
+    "2020-09-05": 91.67,
+    "2020-09-10": 90.64,
+    "2020-09-15": 91.7,
+    "2020-09-20": 92.12,
+    "2020-09-25": 91.34,
+    "2020-09-30": 89.37,
+    "2020-10-05": 90.44,
+    "2020-10-10": 90.32,
+    "2020-10-15": 90.59,
+    "2020-10-20": 89.58,
+    "2020-10-25": 91.41,
+    "2020-10-30": 94.34,
+    "2020-11-04": 93.65,
+    "2020-11-09": 92.85,
+    "2020-11-14": 93.24,
+    "2020-11-19": 93.98,
+    "2020-11-24": 94.65,
+    "2020-11-29": 92.67,
+    "2020-12-04": 93.45,
+    "2020-12-09": 91.7,
+    "2020-12-14": 91.6,
+    "2020-12-19": 89.71,
+    "2020-12-24": 88.5,
+    "2020-12-29": 90.59,
+    "2021-01-03": 89.95,
+    "2021-01-08": 90.3,
+    "2021-01-13": 90.59,
+    "2021-01-18": 91.13,
+    "2021-01-23": 91.7,
+    "2021-01-28": 94.11,
+    "2021-02-02": 93.47,
+    "2021-02-07": 92.21,
+    "2021-02-12": 93.27,
+    "2021-02-17": 93.16,
+    "2021-02-22": 92.57,
+    "2021-02-27": 92.9,
+    "2021-03-04": 90.2,
+    "2021-03-09": 90.0,
+    "2021-03-14": 90.44,
+    "2021-03-19": 92.75,
+    "2021-03-24": 92.88,
+    "2021-03-29": 93.62,
+    "2021-04-03": 94.92,
+    "2021-04-08": 91.58,
+    "2021-04-13": 90.22,
+    "2021-04-18": 90.99,
+    "2021-04-23": 90.85,
+    "2021-04-28": 91.05,
+    "2021-05-03": 91.71,
+    "2021-05-08": 91.59,
+    "2021-05-13": 89.67,
+    "2021-05-18": 91.8,
+    "2021-05-23": 90.53,
+    "2021-05-28": 90.76,
+    "2021-06-02": 91.93,
+    "2021-06-07": 91.9,
+    "2021-06-12": 91.2,
+    "2021-06-17": 91.99,
+    "2021-06-22": 92.22,
+    "2021-06-27": 93.36,
+    "2021-07-02": 92.54,
+    "2021-07-07": 91.64,
+    "2021-07-12": 91.68,
+    "2021-07-17": 91.56,
+    "2021-07-22": 92.93,
+    "2021-07-27": 94.36,
+    "2021-08-01": 94.11,
+    "2021-08-06": 91.43,
+    "2021-08-11": 91.94,
+    "2021-08-16": 90.54,
+    "2021-08-21": 91.43,
+    "2021-08-26": 91.11,
+    "2021-08-31": 92.48,
+    "2021-09-05": 91.87,
+    "2021-09-10": 92.44,
+    "2021-09-15": 92.13,
+    "2021-09-20": 91.34,
+    "2021-09-25": 90.71,
+    "2021-09-30": 91.2,
+    "2021-10-05": 90.5,
+    "2021-10-10": 90.53,
+    "2021-10-15": 90.34,
+    "2021-10-20": 90.67,
+    "2021-10-25": 92.21,
+    "2021-10-30": 90.78,
+    "2021-11-04": 91.76,
+    "2021-11-09": 93.36,
+    "2021-11-14": 93.67,
+    "2021-11-19": 93.41,
+    "2021-11-24": 94.46,
+    "2021-11-29": 92.24,
+    "2021-12-04": 92.76,
+    "2021-12-09": 92.12,
+    "2021-12-14": 91.67,
+    "2021-12-19": 91.57,
+    "2021-12-24": 92.34,
+    "2021-12-29": 91.6,
+    "2022-01-03": 91.26,
+    "2022-01-08": 92.36,
+    "2022-01-13": 91.33,
+    "2022-01-18": 90.59,
+    "2022-01-23": 92.14,
+    "2022-01-28": 92.81,
+    "2022-02-02": 92.58,
+    "2022-02-07": 93.39,
+    "2022-02-12": 91.86,
+    "2022-02-17": 91.17,
+    "2022-02-22": 91.86,
+    "2022-02-27": 91.8,
+    "2022-03-04": 92.47,
+    "2022-03-09": 95.97,
+    "2022-03-14": 94.6,
+    "2022-03-19": 92.34,
+    "2022-03-24": 92.62,
+    "2022-03-29": 92.51,
+    "2022-04-03": 91.41,
+    "2022-04-08": 93.47,
+    "2022-04-13": 94.26,
+    "2022-04-18": 93.93,
+    "2022-04-23": 94.43,
+    "2022-04-28": 91.04,
+    "2022-05-03": 91.72,
+    "2022-05-08": 91.31,
+    "2022-05-13": 91.71,
+    "2022-05-18": 92.21,
+    "2022-05-23": 91.97,
+    "2022-05-28": 94.67,
+    "2022-06-02": 93.72,
+    "2022-06-07": 92.75,
+    "2022-06-12": 92.07,
+    "2022-06-17": 88.89,
+    "2022-06-22": 88.29,
+    "2022-06-27": 90.55,
+    "2022-07-02": 90.1,
+    "2022-07-07": 90.56,
+    "2022-07-12": 90.06,
+    "2022-07-17": 90.2,
+    "2022-07-22": 90.47,
+    "2022-07-27": 91.8,
+    "2022-08-01": 90.87,
+    "2022-08-06": 91.11,
+    "2022-08-11": 92.99,
+    "2022-08-16": 92.27,
+    "2022-08-21": 91.71,
+    "2022-08-26": 90.5,
+    "2022-08-31": 89.33,
+    "2022-09-05": 90.24,
+    "2022-09-10": 90.55,
+    "2022-09-15": 90.66,
+    "2022-09-20": 90.67,
+    "2022-09-25": 91.03,
+    "2022-09-30": 91.52,
+    "2022-10-05": 87.91,
+    "2022-10-10": 88.59,
+    "2022-10-15": 90.09,
+    "2022-10-20": 89.82,
+    "2022-10-25": 90.38,
+    "2022-10-30": 91.13,
+    "2022-11-04": 89.76,
+    "2022-11-09": 91.28,
+    "2022-11-14": 95.25,
+    "2022-11-19": 96.73,
+    "2022-11-24": 97.02,
+    "2022-11-29": 95.74,
+    "2022-12-04": 93.58,
+    "2022-12-09": 95.06,
+    "2022-12-14": 95.46,
+    "2022-12-19": 93.19,
+    "2022-12-24": 93.54,
+    "2022-12-29": 92.56,
+    "2023-01-03": 91.25,
+    "2023-01-08": 93.0,
+    "2023-01-13": 92.28,
+    "2023-01-18": 93.0,
+    "2023-01-23": 90.56,
+    "2023-01-28": 90.74,
+    "2023-02-02": 91.2,
+    "2023-02-07": 91.54,
+    "2023-02-12": 92.59,
+    "2023-02-17": 91.44,
+    "2023-02-22": 91.54,
+    "2023-02-27": 92.39,
+    "2023-03-04": 90.81,
+    "2023-03-09": 91.3,
+    "2023-03-14": 92.14,
+    "2023-03-19": 93.88,
+    "2023-03-24": 91.77,
+    "2023-03-29": 91.23,
+    "2023-04-03": 90.89,
+    "2023-04-08": 90.98,
+    "2023-04-13": 91.02,
+    "2023-04-18": 90.37,
+    "2023-04-23": 92.45,
+    "2023-04-28": 91.29,
+    "2023-05-03": 92.19,
+    "2023-05-08": 92.43,
+    "2023-05-13": 91.88,
+    "2023-05-18": 89.39,
+    "2023-05-23": 89.67,
+    "2023-05-28": 90.18,
+    "2023-06-02": 90.68,
+    "2023-06-07": 89.48,
+    "2023-06-12": 89.72,
+    "2023-06-17": 90.28,
+    "2023-06-22": 90.4,
+    "2023-06-27": 90.49,
+    "2023-07-02": 91.56,
+    "2023-07-07": 91.82,
+    "2023-07-12": 91.37,
+    "2023-07-17": 92.19,
+    "2023-07-22": 94.11,
+    "2023-07-27": 92.95,
+    "2023-08-01": 93.03,
+    "2023-08-06": 92.93,
+    "2023-08-11": 93.06,
+    "2023-08-16": 92.91,
+    "2023-08-21": 91.79,
+    "2023-08-26": 91.93,
+    "2023-08-31": 91.58,
+    "2023-09-05": 92.29,
+    "2023-09-10": 93.37,
+    "2023-09-15": 93.96,
+    "2023-09-20": 93.13,
+    "2023-09-25": 92.0,
+    "2023-09-30": 93.43,
+    "2023-10-05": 93.42,
+    "2023-10-10": 93.99,
+    "2023-10-15": 91.16,
+    "2023-10-20": 90.08,
+    "2023-10-25": 91.52,
+    "2023-10-30": 91.84,
+    "2023-11-04": 92.61,
+    "2023-11-09": 91.61,
+    "2023-11-14": 91.39,
+    "2023-11-19": 95.89,
+    "2023-11-24": 90.99,
+    "2023-11-29": 92.01,
+    "2023-12-04": 91.0,
+    "2023-12-09": 92.4,
+    "2023-12-14": 94.27,
+    "2023-12-19": 92.17,
+    "2023-12-24": 91.98,
+    "2023-12-29": 91.79,
+    "2024-01-03": 90.85,
+    "2024-01-08": 94.38,
+    "2024-01-13": 93.33,
+    "2024-01-18": 92.91,
+    "2024-01-23": 93.08,
+    "2024-01-28": 93.28,
+    "2024-02-02": 91.43,
+    "2024-02-07": 91.67,
+    "2024-02-12": 91.89,
+    "2024-02-17": 92.21,
+    "2024-02-22": 91.68,
+    "2024-02-27": 93.66,
+    "2024-03-03": 92.51,
+    "2024-03-08": 92.85,
+    "2024-03-13": 91.35,
+    "2024-03-18": 91.08,
+    "2024-03-23": 92.99,
+    "2024-03-28": 94.41,
+    "2024-04-02": 93.64,
+    "2024-04-07": 96.47,
+    "2024-04-12": 94.37,
+    "2024-04-17": 92.97,
+    "2024-04-22": 94.14,
+    "2024-04-27": 94.31,
+    "2024-05-02": 94.48,
+    "2024-05-07": 93.45,
+    "2024-05-12": 92.26,
+    "2024-05-17": 92.82,
+    "2024-05-22": 93.48,
+    "2024-05-27": 90.93,
+    "2024-06-01": 91.35,
+    "2024-06-06": 90.74,
+    "2024-06-11": 90.23,
+    "2024-06-16": 89.31,
+    "2024-06-21": 89.07,
+    "2024-06-26": 89.07,
+    "2024-07-01": 89.95,
+    "2024-07-06": 89.75,
+    "2024-07-11": 91.15,
+    "2024-07-16": 91.93,
+    "2024-07-21": 90.76,
+    "2024-07-26": 91.18,
+    "2024-07-31": 93.19,
+    "2024-08-05": 95.5,
+    "2024-08-10": 91.87,
+    "2024-08-15": 92.25,
+    "2024-08-20": 91.95,
+    "2024-08-25": 93.52,
+    "2024-08-30": 93.11,
+    "2024-09-04": 93.34,
+    "2024-09-09": 92.19,
+    "2024-09-14": 90.94,
+    "2024-09-19": 92.62,
+    "2024-09-24": 92.2,
+    "2024-09-29": 92.65,
+    "2024-10-04": 93.59,
+    "2024-10-09": 92.39,
+    "2024-10-14": 92.39,
+    "2024-10-19": 90.63,
+    "2024-10-24": 90.35,
+    "2024-10-29": 91.14,
+    "2024-11-03": 90.58,
+    "2024-11-08": 90.78,
+    "2024-11-13": 92.87,
+    "2024-11-18": 92.66,
+    "2024-11-23": 92.46,
+    "2024-11-28": 93.33,
+    "2024-12-03": 92.8,
+    "2024-12-08": 93.37,
+    "2024-12-13": 91.67,
+    "2024-12-18": 92.25,
+    "2024-12-23": 90.77,
+    "2024-12-28": 89.59,
+    "2025-01-02": 90.76,
+    "2025-01-07": 91.49,
+    "2025-01-12": 91.49,
+    "2025-01-17": 92.09,
+    "2025-01-22": 91.92,
+    "2025-01-27": 90.39,
+    "2025-02-01": 90.83,
+    "2025-02-06": 88.8,
+    "2025-02-11": 89.39,
+    "2025-02-16": 90.83,
+    "2025-02-21": 90.34,
+    "2025-02-26": 91.86,
+    "2025-03-03": 89.77,
+    "2025-03-08": 93.83,
+    "2025-03-13": 94.83,
+    "2025-03-18": 94.18,
+    "2025-03-23": 93.48,
+    "2025-03-28": 93.17,
+    "2025-04-02": 93.59,
+    "2025-04-07": 91.93,
+    "2025-04-12": 91.12,
+    "2025-04-17": 92.0,
+    "2025-04-22": 92.01,
+    "2025-04-27": 91.85,
+    "2025-05-02": 91.75,
+    "2025-05-07": 90.88,
+    "2025-05-12": 91.16,
+    "2025-05-17": 90.87,
+    "2025-05-22": 92.41,
+    "2025-05-27": 92.96,
+    "2025-06-01": 92.2,
+    "2025-06-06": 93.26,
+    "2025-06-11": 92.06,
+    "2025-06-16": 93.28,
+    "2025-06-21": 94.25,
+    "2025-06-26": 91.81,
+    "2025-07-01": 91.69,
+    "2025-07-06": 93.26,
+    "2025-07-11": 93.08,
+    "2025-07-16": 91.95,
+    "2025-07-21": 92.54,
+    "2025-07-26": 93.53,
+    "2025-07-31": 93.18,
+    "2025-08-05": 94.0,
+    "2025-08-10": 92.52,
+    "2025-08-15": 91.21,
+    "2025-08-20": 91.2,
+    "2025-08-25": 91.39,
+    "2025-08-30": 90.82,
+    "2025-09-04": 91.31,
+    "2025-09-09": 89.35,
+    "2025-09-14": 90.01,
+    "2025-09-19": 91.31,
+    "2025-09-24": 91.26,
+    "2025-09-29": 91.66,
+    "2025-10-04": 90.26,
+    "2025-10-09": 91.26,
+    "2025-10-14": 89.44,
+    "2025-10-19": 88.19,
+    "2025-10-24": 89.83,
+    "2025-10-29": 89.0,
+    "2025-11-03": 89.38,
+    "2025-11-08": 86.26,
+    "2025-11-13": 85.36,
+    "2025-11-18": 85.86,
+    "2025-11-23": 88.5,
+    "2025-11-28": 86.26,
+    "2025-12-03": 87.51,
+    "2025-12-08": 89.52,
+    "2025-12-13": 90.38,
+    "2025-12-18": 90.54,
+    "2025-12-23": 90.66,
+    "2025-12-28": 90.76,
+    "2026-01-02": 90.58,
+    "2026-01-07": 90.96,
+    "2026-01-12": 92.08,
+    "2026-01-17": 91.31,
+    "2026-01-22": 90.37,
+    "2026-01-27": 90.01,
+    "2026-02-01": 91.13,
+    "2026-02-06": 89.13,
+    "2026-02-11": 89.25,
+    "2026-02-16": 88.62,
+    "2026-02-21": 89.21,
+    "2026-02-26": 90.08,
+    "2026-03-03": 90.94,
+    "2026-03-08": 93.09,
+    "2026-03-13": 92.64,
+    "2026-03-18": 92.58,
+    "2026-03-23": 92.16,
+    "2026-03-28": 91.95,
+    "2026-04-02": 92.11
+  },
+  "runtime_seconds": 3.8,
+  "references": [
+    "Diebold & Yilmaz (2012) IJF 28(1)",
+    "K7: Vol spillover Granger network",
+    "K356: Vol causal directed graph",
+    "K422: Commodity vol spillover"
+  ],
+  "timestamp": "2026-04-05T09:58:53.501669"
+}

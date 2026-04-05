@@ -20041,5 +20041,45 @@
     "category": "knowledge",
     "created_at": "2026-04-05T09:12:09.513788",
     "updated_at": "2026-04-05T09:12:09.513795"
+  },
+  {
+    "id": "K864",
+    "experiment_id": "K864",
+    "title": "K864: Heterogeneous ABM ★★ — Strategy Diversity AMPLIFIES Crowding (Flash Crashes +592%, Vol +53%), Opposite of Hypothesis",
+    "content": "[提出: Claude, 執行: Claude] K864 tests whether strategy heterogeneity reduces VT crowding (K827 extension). 1000 agents, 200 noise fixed, 4 VT types (12/VIX, Floor+Cap, Risk Parity, EWMA), 2600 sims. SHOCKING RESULT: Heterogeneity makes crowding WORSE. At 50% adoption: flash crashes +592% (3.2/yr vs 0.46/yr), market vol +53% (0.29 vs 0.19), MDD -31% worse. Tipping point unchanged at 50%. MECHANISM: Diverse strategies create asynchronous multi-wave selling cascades — Type A sells first (aggressive), then Type D days later (EWMA lag), then Type C (risk parity reacts to realized vol). Persistent sequential selling is harder for market to absorb than one sharp simultaneous impact. PARADOX: Individual VT agents have BETTER Sharpe in heterogeneous regime (0.376 vs 0.083 at 70%) because diverse responses smooth individual portfolios even as they destroy the market. PAPER 5 IMPLICATION: This was Limitation #4 of K827v3. Relaxing homogeneity assumption makes crowding WORSE — 'diverse strategies cancel out' intuition is WRONG.",
+    "tags": [
+      "ABM",
+      "crowding",
+      "heterogeneous",
+      "VT策略",
+      "flash_crash",
+      "Paper_5",
+      "counterintuitive"
+    ],
+    "data_source": "Monte Carlo simulation (2600 sims, 1000 agents, 2520 days)",
+    "category": "knowledge",
+    "created_at": "2026-04-05T09:37:56.269321",
+    "updated_at": "2026-04-05T09:37:56.269328"
+  },
+  {
+    "id": "K865",
+    "experiment_id": "K865",
+    "title": "K865: Vol Spillover Network — SPY Flipped from Receiver to Transmitter During Tariff Crisis (TSI Stable ~90%)",
+    "content": "[提出: Claude, 執行: Claude] K865 updates K356 vol spillover network with 2026 tariff data. Diebold-Yilmaz VAR(5) on 7 assets (SPY/QQQ/GLD/TLT/EEM/OIL/BTC), 2020-2026. KEY FINDING: Total Spillover Index stable ~90% across ALL periods (COVID 90.9%, calm 90.5%, tariff 90.9%, t=0.92 NS). Network connectivity is structural, not crisis-dependent. BUT: SPY flipped from net vol RECEIVER (-35 to -51 in prior periods) to net TRANSMITTER (+14.4) during tariff crisis — US policy uncertainty now EXPORTS vol. Asymmetric impact: OIL RV 2.83x, EEM 2.04x, GLD 1.84x vs SPY only 1.02x — EM and commodities absorbed the shock. BTC dominates as transmitter in ALL periods. COVID had 31/42 Granger links vs tariff only 14/42 — tariff is sector-specific, not systemic. LIMITATION: data ends 04/02, April 3 crash not captured.",
+    "tags": [
+      "network",
+      "spillover",
+      "Diebold_Yilmaz",
+      "tariff",
+      "contagion",
+      "VIX",
+      "SPY",
+      "EEM",
+      "BTC"
+    ],
+    "data_source": "yfinance (SPY, QQQ, GLD, TLT, EEM, CL=F, BTC-USD), 2020-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T09:59:30.259688",
+    "updated_at": "2026-04-05T09:59:30.259696"
   }
 ]
