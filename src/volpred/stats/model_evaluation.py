@@ -162,11 +162,13 @@ def model_confidence_set(
     """MCS wrapper — uses volpred.stats.mcs if available, else simple version."""
     try:
         from volpred.stats.mcs import model_confidence_set as mcs_proper
-        result = mcs_proper(losses_dict, alpha=alpha, B=n_boot, seed=seed)
+        result = mcs_proper(losses_dict, alpha=alpha, n_boot=n_boot, seed=seed)
+        # mcs_proper returns dict with 'mcs_models', 'eliminated', 'p_values'
+        members = result.get('mcs_models', result.get('members', []))
         return {
-            "members": result.members,
-            "p_values": result.p_values,
-            "size": len(result.members),
+            "members": members,
+            "p_values": result.get('p_values', {}),
+            "size": len(members),
             "method": "HLN2011_stationary_bootstrap",
         }
     except ImportError:
