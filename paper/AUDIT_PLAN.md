@@ -111,4 +111,4 @@
 | taiwan-vt | ✅ 嚴重gamma衝突 | ✅ 多處mismatch | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ 需重估 | |
 | vt-trend-following | ✅ ~50%無源 | ✅ 3H | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ 需補實驗 | |
 | vix-sufficiency | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
-| volatility-absorption | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | |
+| volatility-absorption | ✅ 核心OK/63+無源 | ✅ T6差異 | ❌ | ❌ | ❌ 無腳本 | ❌ | ❌ 需補腳本+T9-10 | |

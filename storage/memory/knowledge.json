@@ -20662,5 +20662,22 @@
     "data_source": "yfinance (SPY/GLD)",
     "created_at": "2026-04-05T20:06:53.379303",
     "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405202756_k892",
+    "experiment_id": "K892",
+    "title": "K892: 0050.TW Gamma Verification — Paper 2 mixed windows (gamma=0.087 from early, t=2.20 from recent)",
+    "content": "[提出: Audit, 執行: Claude] Resolved Paper 2 gamma conflict. Paper says gamma=0.087 t=2.20, N120 says 0.147 t=2.20. Truth: gamma=0.087 matches early w=2000 (2009-17, t=3.81), t=2.20 matches recent w=2000 (2018-26, gamma=0.136). Paper incorrectly paired values from different windows. Full sample: gamma=0.097 t=3.60. SPY control: gamma=0.189-0.220 (consistent with known 0.211). TWII: paper says 0.272 but re-estimation gives 0.129 (also window-dependent).",
+    "tags": [
+      "0050.TW",
+      "gamma",
+      "GJR",
+      "verification",
+      "paper_audit",
+      "taiwan"
+    ],
+    "data_source": "yfinance (0050.TW, TWII, TSMC, SPY)",
+    "created_at": "2026-04-05T20:27:56.835099",
+    "type": "experiment_result"
   }
 ]
