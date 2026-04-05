@@ -20287,8 +20287,8 @@
   {
     "id": "K874c",
     "experiment_id": "K874c",
-    "title": "K874c: Periodic Realized GARCH ★★ — Cross-Recursion Validated (DM t=-4.15 vs Separate), but HAR Still Wins Total",
-    "content": "[提出: 用戶(PRS概念), 執行: Claude] K874c implements proper periodic realized GARCH with cross-session recursion (h_{n-1} carries between sessions). 2102 days TAIFEX TX (volume-selected). CORE RESULT: PRG vs Separate GARCH DM t=-4.15 Harvey PASS (QLIKE -36.7%). Cross-recursion IS valuable — validates Lai et al. (2024) PRS insight. BUT: HAR vs PRG DM t=11.04, HAR dominates on total daily QLIKE (0.119 vs 0.333). HAR's log-space + 5-min RV advantage too large. PRG parameters: overnight α=0.457 β=0.629 (reactive), intraday α=0.131 β=0.791 (persistent). Leverage fixes overnight persistence>1. PRACTICAL VALUE: PRG gives session-level forecasts (useful for session-specific VaR), HAR only gives daily total.",
+    "title": "K874c: Periodic Realized GARCH ★★ — Cross-Recursion Validated (DM t=-4.15 vs Separate). HAR比較無效(target不同).",
+    "content": "[提出: 用戶(PRS概念), 執行: Claude] K874c implements proper periodic realized GARCH with cross-session recursion (h_{n-1} carries between sessions). 2102 days TAIFEX TX (volume-selected). CORE RESULT: PRG vs Separate GARCH DM t=-4.15 Harvey PASS (QLIKE -36.7%). Cross-recursion IS valuable — validates Lai et al. (2024) PRS insight. BUT: ⚠️ HAR vs PRG 比較無效：HAR 預測完整 RV_total（含夜盤 5-min RV），PRG 只預測 gap r² + 日盤 RV（缺夜盤 5-min 成分）。target 不同不能比 QLIKE. HAR's log-space + 5-min RV advantage too large. PRG parameters: overnight α=0.457 β=0.629 (reactive), intraday α=0.131 β=0.791 (persistent). Leverage fixes overnight persistence>1. PRACTICAL VALUE: PRG gives session-level forecasts (useful for session-specific VaR), HAR only gives daily total.",
     "tags": [
       "periodic_GARCH",
       "cross_recursion",
