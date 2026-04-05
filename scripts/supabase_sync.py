@@ -46,7 +46,7 @@ HEADERS = {
 }
 
 _ARTICLE_ID_CACHE: dict[str, str] = {}
-_TAG_ID_CACHE: dict[str, str] = {}
+_TAG_ID_CACHE: dict[str, int | str] = {}
 _STRATEGY_SIGNAL_CACHE_BY_KEY: dict[str, dict] = {}
 _STRATEGY_SIGNAL_CACHE_BY_NAME: dict[str, dict] = {}
 _STRATEGY_SIGNAL_CACHE_LOADED = False
@@ -63,7 +63,7 @@ CONFLICT_KEYS = {
     "feature_flags": "feature",
     "strategy_signals": "strategy_name",
     "paper_trades": "strategy,trade_date",  # requires migration 018
-
+    "market_status": "id",  # single-row table (id='current')
 }
 
 
@@ -233,7 +233,7 @@ def _get_article_id(slug: str) -> str | None:
     return None
 
 
-def _get_tag_ids(tag_names: list[str]) -> dict[str, str]:
+def _get_tag_ids(tag_names: list[str]) -> dict[str, int | str]:
     normalized = [name.strip() for name in tag_names if isinstance(name, str) and name.strip()]
     missing = [name for name in normalized if name not in _TAG_ID_CACHE]
     if missing:
@@ -242,7 +242,7 @@ def _get_tag_ids(tag_names: list[str]) -> dict[str, str]:
             for row in rows:
                 name = row.get("name")
                 tag_id = row.get("id")
-                if isinstance(name, str) and name and isinstance(tag_id, str) and tag_id:
+                if isinstance(name, str) and name and tag_id is not None:
                     _TAG_ID_CACHE[name] = tag_id
         except Exception as e:
             print(f"  WARNING _get_tag_ids: {e}")
@@ -338,42 +338,121 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         "updated_at": item.get("updated_at") or datetime.now(_tz.utc).isoformat(),
     }
     ok = _post("articles", row)
-    if ok:
-        # Sync tags
-        tags = item.get("tags") or []
-        if tags:
-            _sync_article_tags(row["slug"], tags)
+    # Tags are now synced in bulk by sync_full() → _sync_all_article_tags()
+    # instead of per-article to prevent silent data loss.
     return ok
 
 
 def _sync_article_tags(slug: str, tags: list[str]) -> None:
-    """Sync tags for an article."""
-    tag_names = list(dict.fromkeys(tag.strip() for tag in tags if isinstance(tag, str) and tag.strip()))
-    if not tag_names:
-        return
+    """Sync tags for a single article. Prefer _sync_all_article_tags() for bulk."""
+    _sync_all_article_tags({slug: tags})
 
-    # Upsert tags
-    tag_rows = [{"name": tag_name} for tag_name in tag_names]
-    _post("tags", tag_rows)
 
-    try:
-        article_id = _get_article_id(slug)
+def _sync_all_article_tags(slug_tags: dict[str, list[str]]) -> int:
+    """Batch-sync tags for multiple articles at once.
+
+    Architecture: pre-cache all IDs, batch-upsert in chunks of 50.
+    This replaces the old one-by-one POST approach that silently lost tags.
+
+    Returns number of article_tags rows synced.
+    """
+    if not slug_tags or not SUPABASE_KEY:
+        return 0
+
+    # Step 1: Collect all unique tag names (sanitize double-encoded JSON artifacts)
+    all_tag_names: set[str] = set()
+    cleaned: dict[str, list[str]] = {}
+    for slug, tags in slug_tags.items():
+        names = list(dict.fromkeys(
+            t.strip().strip('[').strip(']').strip('"').strip("'").strip()
+            for t in tags if isinstance(t, str) and t.strip()
+        ))
+        names = [n for n in names if n]  # remove empty after stripping
+        if names:
+            cleaned[slug] = names
+            all_tag_names.update(names)
+
+    if not cleaned:
+        return 0
+
+    # Step 2: Batch-upsert all tag names (chunks of 50)
+    tag_name_list = sorted(all_tag_names)
+    for i in range(0, len(tag_name_list), 50):
+        batch = [{"name": n} for n in tag_name_list[i:i + 50]]
+        _post("tags", batch)
+
+    # Step 3: Fetch tag name→ID map (paginated)
+    # Note: tags.id can be int (serial) or str (uuid) depending on DB schema
+    tag_name_to_id: dict[str, int | str] = {}
+    for offset in range(0, len(tag_name_list), 200):
+        chunk = tag_name_list[offset:offset + 200]
+        try:
+            rows = _select_rows_in("tags", "name", chunk, select="id,name")
+            for row in rows:
+                name = row.get("name")
+                tid = row.get("id")
+                if isinstance(name, str) and tid is not None:
+                    tag_name_to_id[name] = tid
+        except Exception as e:
+            print(f"  WARNING _sync_all_article_tags tag lookup: {e}")
+
+    # Step 4: Fetch slug→article_id map (paginated)
+    slugs = list(cleaned.keys())
+    slug_to_aid: dict[str, str] = {}
+    for offset in range(0, len(slugs), 200):
+        chunk = slugs[offset:offset + 200]
+        try:
+            rows = _select_rows_in("articles", "slug", chunk, select="id,slug")
+            for row in rows:
+                s = row.get("slug")
+                aid = row.get("id")
+                if isinstance(s, str) and isinstance(aid, str):
+                    slug_to_aid[s] = aid
+        except Exception as e:
+            print(f"  WARNING _sync_all_article_tags article lookup: {e}")
+
+    # Step 5: Delete existing article_tags for all articles being synced,
+    # then re-insert clean ones. This prevents stale/broken tags from persisting.
+    all_article_ids = list(slug_to_aid.values())
+    for i in range(0, len(all_article_ids), 50):
+        chunk = all_article_ids[i:i + 50]
+        for aid in chunk:
+            _delete_where("article_tags", {"article_id": aid})
+
+    # Step 6: Build article_tags rows
+    at_rows: list[dict] = []
+    for slug, names in cleaned.items():
+        article_id = slug_to_aid.get(slug)
         if not article_id:
-            return
-        tag_map = _get_tag_ids(tag_names)
-
-        # Upsert article_tags — one by one (batch POST silently fails on conflicts)
-        for tag_name in tag_names:
-            tag_id = tag_map.get(tag_name)
+            continue
+        for tag_name in names:
+            tag_id = tag_name_to_id.get(tag_name)
             if tag_id:
-                _post("article_tags", {"article_id": article_id, "tag_id": tag_id})
-    except Exception as e:
-        print(f"  article_tags sync error for {slug}: {e}")
+                at_rows.append({"article_id": article_id, "tag_id": tag_id})
+
+    # Step 7: Batch-insert article_tags (chunks of 50)
+    synced = 0
+    for i in range(0, len(at_rows), 50):
+        batch = at_rows[i:i + 50]
+        if _post("article_tags", batch):
+            synced += len(batch)
+
+    return synced
 
 
 def sync_risk_forecast(data: dict) -> bool:
     """Sync risk forecast to Supabase."""
     return _post("risk_forecasts", {"data": data})
+
+
+def sync_market_status(data: dict) -> bool:
+    """Sync market status to Supabase (single-row upsert, id='current')."""
+    from datetime import datetime, timezone
+    return _post("market_status", {
+        "id": "current",
+        "data": data,
+        "updated_at": datetime.now(timezone.utc).isoformat(),
+    })
 
 
 def sync_strategy_signal(
@@ -571,6 +650,17 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
                 )
         else:
             counts["articles"] = 0  # skipped, unchanged
+
+    # Article tags — always sync ALL published articles' tags in bulk.
+    # This is decoupled from article sync to prevent tag loss when article
+    # upsert fails or incremental sync skips an article.
+    if feed:
+        slug_tags = {
+            item["id"]: item.get("tags", [])
+            for item in feed
+            if item.get("tags")
+        }
+        counts["article_tags"] = _sync_all_article_tags(slug_tags)
 
     # Risk forecast — always sync (small, 1 row)
     rf_path = storage / "risk_forecast.json"

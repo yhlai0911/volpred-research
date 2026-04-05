@@ -266,15 +266,16 @@ uv run python -m volpred.cli ops send-daily-digest --target-date YYYY-MM-DD
 每篇文章必須包含 `tags` 欄位（JSON array），用於搜尋和分類：
 
 ```json
-"tags": ["VaR", "Cornish-Fisher", "SPY", "QQQ", "GLD", "TLT", "EEM", "風險管理"]
+"tags": ["一般讀者", "VaR", "Cornish-Fisher", "SPY", "QQQ", "GLD", "TLT", "EEM", "風險管理"]
 ```
 
 Tag 規則：
+- **受眾分類 tag（必填，放第一個）**：`一般讀者` / `研究` / `每日建議` / `會員提問`（對應 audience 欄位，前端篩選依賴此 tag）
 - 涉及的**資產代碼**（SPY, QQQ, 0050.TW...）
 - **方法/模型**（GARCH, CF-VaR, EVT, MIDAS...）
 - **主題分類**（波動率預測, 風險管理, 投資策略, 避險, 危機分析...）
 - **研究階段**（Phase_O, Phase_N...）
-- 3-8 個 tags 為宜
+- 4-8 個 tags 為宜（含受眾分類）
 
 ## 品質檢查清單
 

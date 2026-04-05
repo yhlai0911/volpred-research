@@ -20810,5 +20810,109 @@
     "data_source": "yfinance (SPY)",
     "created_at": "2026-04-06T01:21:28.863423",
     "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405173949_k906",
+    "experiment_id": "K906",
+    "title": "K906: SPY HAR-RV Preliminary — GJR Wins on Unified Targets (Overnight 50% of Total Vol)",
+    "content": "[提出: Claude, 執行: Claude] PRELIMINARY (29 OOS days). SPY 5-min data (55 days, Jan-Apr 2026). HAR-RV vs GJR-GARCH fair comparison using Patton (2011) QLIKE on r² and Hansen & Lunde (2005) RV_total. GJR wins both unified targets by enormous margin: QLIKE on r² = 1.14 vs HAR 41,845; QLIKE on RV_total = 0.28 vs HAR 26,126. Root cause: SPY overnight variance accounts for ~50% of total vol — HAR only captures intraday. VaR: GJR 2/29 violations (OK), HAR 6/29 (20.7%, Kupiec FAIL). Spearman correlations all weak (max 0.24). Consistent with K782 correction (HAR loses on r² target) and extends it: even on RV_total, HAR loses because overnight is too large. Contradicts K849 (HAR crushed GJR on RV-only target, which is mechanical). GJR persistence=0.989, gamma=0.306, nu=6.04. For SPY, overnight adjustment (Hansen & Lunde 2005) is essential before HAR can compete on full-day vol. Need 252+ OOS days for publishable results.",
+    "tags": [
+      "HAR-RV",
+      "GJR-GARCH",
+      "SPY",
+      "5-min",
+      "realized volatility",
+      "overnight variance",
+      "Patton 2011",
+      "Hansen Lunde 2005",
+      "preliminary"
+    ],
+    "data_source": "yfinance 5-min intraday + daily",
+    "category": "experiment",
+    "confidence": 0.5,
+    "created_at": "2026-04-05T17:39:49.300244+00:00"
+  },
+  {
+    "id": "know_20260405174640_k907",
+    "experiment_id": "K907",
+    "title": "K907: Volatility Spillover Network — TCI ≠ VIX (r=0.001), Genuinely New Risk Dimension ★★",
+    "content": "[提出: Claude, 執行: Claude] Diebold-Yilmaz (2012/2014) connectedness analysis on 9 assets (SPY/QQQ/IWM/EFA/EEM/0050.TW/GLD/TLT/USO), 4476 trading days (2009-2026). Garman-Klass vol proxy. VAR(5) + GFEVD (H=10). Rolling 250-day windows (4227 windows). KEY FINDING: Total Connectedness Index (TCI) = 50.0% — half of vol forecast error is cross-asset spillover. TCI-VIX Pearson r = 0.001 (p=0.93) — near zero! TCI captures fundamentally different info from VIX: network structure vs vol level. During COVID TCI-VIX r=0.74 but normally diverge. SPY is dominant net transmitter (NET=+34.8%), Taiwan 0050.TW is clear net receiver (NET=-18.4%, receives 27.9% from others mainly SPY, transmits 9.4%). USO most isolated (TO=1.9%). GLD relatively isolated (NET=-5.5%), supporting diversifier role. Robust across lag orders (50.0-50.7%), horizons (47.5-50.9%), windows (46.4-48.0%). This is NOT a VIX sufficiency confirmation — TCI is orthogonal to VIX, a genuinely new dimension. Potential: TCI as VT overlay (reduces when connected?), portfolio construction timing.",
+    "tags": [
+      "Diebold-Yilmaz",
+      "connectedness",
+      "spillover",
+      "network",
+      "VAR",
+      "GFEVD",
+      "TCI",
+      "VIX",
+      "cross-asset",
+      "Taiwan",
+      "Face G"
+    ],
+    "data_source": "yfinance",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-05T17:46:40.849414+00:00"
+  },
+  {
+    "id": "know_20260405175912_k908",
+    "experiment_id": "K908",
+    "title": "K908: MF-GJR + Student-t/HistSim — Complete VaR/ES Solution ★★★",
+    "content": "[提出: 用戶, 執行: Claude] Fills K889 VaR gap. 5 model-distribution combos (GJR+Normal, GJR+Student-t, MF-GJR+Normal, MF-GJR+Student-t, MF-GJR+HistSim) on SPY/QQQ/0050.TW. Student-t df re-estimated each 63d refit with sqrt((df-2)/df) scale correction. RESULTS: MF-GJR+Student-t achieves 1% Trinity PASS for SPY (22/1821=1.21%, Kupiec p=0.387) and 0050.TW (17/1754=0.97%, p=0.896), but FAILS QQQ (30/1821=1.65%). MF-GJR+HistSim achieves 1% Trinity PASS for ALL 3 assets (6/6 pass) — universal solution. SPY Student-t df~6-9, QQQ 6-11, 0050.TW 4.7-6.6 (heaviest tails, Student-t most effective). ES Acerbi-Szekely: SPY p=0.059 marginal. Fissler-Ziegel confirms MF-GJR+HistSim ranks #1 overall. KEY INSIGHT: Best prediction model (MF-GJR, K889) + correct tail distribution (HistSim) = complete solution for both forecasting AND risk management. Two orthogonal dimensions independently optimized.",
+    "tags": [
+      "MF-GJR",
+      "Student-t",
+      "HistSim",
+      "VaR",
+      "ES",
+      "Trinity",
+      "risk management",
+      "SPY",
+      "QQQ",
+      "0050.TW",
+      "complete solution"
+    ],
+    "data_source": "yfinance",
+    "category": "experiment",
+    "confidence": 0.9,
+    "created_at": "2026-04-05T17:59:12.169630+00:00"
+  },
+  {
+    "id": "know_20260405180725_k909",
+    "experiment_id": "K909",
+    "title": "K909: MF-GJR Extended Factors — No Harvey PASS Beyond VIX (VIX Sufficiency #26)",
+    "content": "[提出: 用戶, 執行: Claude] Tested 3 additional long-run factors in MF-GJR multiplicative framework: (1) VIX term structure slope (log(VIX3M/VIX)), (2) Corwin-Schultz OHLC spread, (3) Parkinson range. τ_t = exp(θ₀ + θ₁×logVIX + θ₂×X). SPY/QQQ/0050.TW, OOS 2019-2026. NO factor achieves Harvey |t|>3.0 vs MF-GJR(VIX). VIX Slope strongest: SPY t=-2.88 (close but NS), QLIKE -7.59% vs GJR. CS Spread: SPY t=-2.11 NS, theta_2 hits bound (scaling issue). Range: t=-0.36 NS. VIX Slope negative coefficient = backwardation predicts higher vol beyond VIX level (economically intuitive). MCS for SPY: only VIX+Slope survives (eliminates VIX-only). But Harvey threshold not met. VIX sufficiency confirmed #26. MF-GJR(VIX) remains the recommended model — adding complexity does not reliably improve.",
+    "tags": [
+      "MF-GJR",
+      "VIX sufficiency",
+      "VIX term structure",
+      "Corwin-Schultz",
+      "Parkinson range",
+      "extended factors",
+      "null result"
+    ],
+    "data_source": "yfinance",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-05T18:07:25.691358+00:00"
+  },
+  {
+    "id": "know_20260405183116_k910",
+    "experiment_id": "K910",
+    "title": "K910: TCI as VT Overlay — NULL (Structural Descriptor, Not Trading Signal)",
+    "content": "[提出: Claude, 執行: Claude] Tested K907 TCI as VT strategy overlay. 4 strategies (TCI Defensive, TCI+VIX Combined, Smooth TCI, TCI Div Timing) vs 3 baselines (BH SPY, BH 50/50, 12/VIX). OOS 2009-2026 (~16yr). RESULT: 0/4 strategies pass Harvey DM test vs any baseline. TCI+VIX Combined Sharpe 0.992 vs 50/50 0.973 but DM t=-0.28 (NS). TCI vs next-day return r=0.005 (p=0.77, zero directional prediction). TCI vs 21d vol r=0.067 (p<0.001, weak vol prediction). CONCLUSION: TCI is a structural descriptor of cross-asset connectedness, NOT a trading signal. Consistent with K697 (VIX predicts vol magnitude not direction). TCI value is in understanding market structure (who transmits, who receives), not in timing strategies.",
+    "tags": [
+      "TCI",
+      "connectedness",
+      "VT overlay",
+      "null result",
+      "structural",
+      "network"
+    ],
+    "data_source": "yfinance",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-05T18:31:16.387106+00:00"
   }
 ]

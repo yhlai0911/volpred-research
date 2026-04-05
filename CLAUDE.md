@@ -8,7 +8,15 @@
 1. **不可造假、不可虛構**：所有數據、統計量、圖表必須來自實際計算，不可編造數字或偽造結果
 2. **數據來源透明**：每個實驗必須標明數據來源（yfinance、FRED、CBOE 等）、資料期間、樣本數量。不可用模擬數據冒充實證數據
 3. **實驗必須有對應檔案 + 知識庫記錄 + 經驗記錄**：每個實驗完成後，**必須同時產出三項**：
-   - **檔案**：`experiments/<experiment_id>.py`（腳本）+ `experiments/<experiment_id>_results.json`（結果）。Agent worktree 完成後複製到主分支
+   - **檔案**：每個實驗必須有專屬資料夾 `experiments/<experiment_id>/`，所有相關檔案放在裡面：
+     - `experiments/<experiment_id>/README.md`（**必備：計劃、問題描述、動機、方法、預期、結論**）
+     - `experiments/<experiment_id>/<experiment_id>.py`（腳本）
+     - `experiments/<experiment_id>/<experiment_id>_results.json`（結果）
+     - `experiments/<experiment_id>/*.png`（圖表）
+     - `experiments/<experiment_id>/references/`（參考文獻，如有）
+     - `experiments/<experiment_id>/data/`（實驗專屬數據，如有）
+     - Agent worktree 完成後複製整個資料夾到主分支
+     - **README.md 是必備的**——打開資料夾就能知道在做什麼、為什麼、怎麼做、結論是什麼
    - **知識庫**（`storage/memory/knowledge.json`）：含 experiment_id、title、content 摘要（200-300字）、tags、data_source。記錄**發現了什麼**（結論、數據、統計量）
    - **經驗庫**（`storage/memory/experiment_experiences.json`，Exxx 編號）：記錄**學到了什麼**（為什麼成功/失敗、踩了什麼坑、下次該怎麼做）。每 5-10 個實驗彙整一條經驗記錄
    - 不可只存 results JSON 而不進知識庫——2026-03 曾發現 85/124 實驗只有 results 但不在知識庫中
@@ -55,6 +63,7 @@
    - **實驗代碼寫完後、執行前，必須先讓 Codex 審查代碼**。不是跑完出結果才審。流程：寫代碼 → Codex 審 → 修正 → 才跑 → 記錄 → 才發文
    - **代碼中必須有明確的 `signal.shift(1)`**——lag 驗證靠代碼結構，不靠事後記憶
    - **Sharpe > 2x baseline = 幾乎一定有 bug**——先停下來檢查，不要先歡呼
+   - **所有模擬或隨機值生成必須設定固定 seed**：`np.random.seed(42)` 或 `rng = np.random.default_rng(42)`。適用：Bootstrap、Monte Carlo、ABM、permutation test、random sampling、MCMC、train/test split、任何用到 `np.random`/`random` 的操作。沒有固定 seed 的結果無法重現，違反可追溯原則
 12. **自我修正後回溯更新**：每次推翻或修正先前結論時，必須立即：
    - 搜尋已發佈文章中引用該結論的內容（用 grep 搜尋關鍵詞）
    - 在受影響文章頂部加入 `⚠️ 更正聲明（日期）`，說明修正內容
@@ -539,10 +548,16 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 | **論文審查** | 指示 agent 讀取：(1) `latex-academic-reviewer` skill 完整內容 (2) `citation-verifier` skill (3) 論文本身 + 實驗結果 JSON |
 | **Feed 文章** | 指示 agent 讀取：(1) `feed-publisher` skill (2) 實驗結果 JSON (3) 已有文章（避免重複） |
 
+**通用原則（適用所有 agent 任務）：**
+- **主 agent 判斷需要哪些 skill**，在 prompt 中指示 subagent 讀取對應的 skill 文件路徑（`.claude/skills/<name>/SKILL.md`）
+- **完整傳遞必要資訊**：相關 K 編號+結論、error log 防錯規則、檔案路徑、統計門檻、研究背景
+- **Agent prompt = 完整 brief**：像寫給剛加入團隊的聰明同事，不是一行指令
+
 **絕對禁止**：
 - 在 prompt 中給 agent 「摘要數字」然後讓它寫論文 → 必須讓 agent 自己讀 JSON
 - 不告訴 agent 讀 skill 就讓它寫學術文件 → agent 不知道學術規範
 - 假設 agent「應該知道」某件事 → 它什麼都不知道，必須明確指示
+- 只說「參考 XXX skill」但不給路徑 → agent 找不到，必須給完整路徑
 
 ## 自動化排程
 ### 永久任務（系統 crontab — 無人值守也會跑）
@@ -563,7 +578,7 @@ platform-ops-patrol: 0 */6 * * *  # 平台巡檢（已遷移至雲端 trigger tr
 #### 最小啟動集
 ```
 CronCreate(cron="13 */6 * * *", prompt="會員問題研究")
-CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit")
+CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉")
 CronCreate(cron="7 * * * *", prompt="知識索引更新")
 ```
 

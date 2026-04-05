@@ -4,6 +4,19 @@ import os
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+def _sanitize_tags(tags: list) -> list[str]:
+    """Clean tags: fix double-encoded JSON, strip quotes/brackets, dedupe."""
+    cleaned: list[str] = []
+    for t in tags:
+        if not isinstance(t, str):
+            t = str(t)
+        # Strip JSON artifacts from double-encoding: '["研究"' → '研究'
+        t = t.strip().strip('[').strip(']').strip('"').strip("'").strip()
+        if t and t not in cleaned:
+            cleaned.append(t)
+    return cleaned
+
+
 class Publisher:
     """Publishes research results to storage/reports/ for Web platform consumption.
 
@@ -215,7 +228,7 @@ class Publisher:
         now = datetime.now(timezone.utc).isoformat()
         normalized_status = status if status in {'published', 'draft', 'scheduled', 'unpublished', 'archived'} else 'published'
         # Determine audience and category — explicit params take priority
-        tag_list = tags or []
+        tag_list = _sanitize_tags(tags or [])
         if audience is None:
             if '一般讀者' in tag_list:
                 audience = 'general'

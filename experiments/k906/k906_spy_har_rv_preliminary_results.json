@@ -1,0 +1,189 @@
+{
+  "experiment_id": "K906",
+  "title": "SPY HAR-RV Preliminary Horse Race",
+  "data_source": "yfinance 5-min intraday (55 days) + daily (2500+ days)",
+  "sample_period": "2026-01-14 to 2026-04-02",
+  "oos_days": 29,
+  "oos_period": "2026-02-23 to 2026-04-02",
+  "status": "PRELIMINARY \u2014 OOS < 252-day minimum",
+  "models": {
+    "har_rv": {
+      "specification": "Corsi (2009) HAR-RV: RV_{t+1} = b0 + b1*RV_t + b5*RV^(w) + b22*RV^(m)",
+      "estimation": "Expanding window OLS, 22-day warm-up",
+      "native_target": "5-min RV (intraday)"
+    },
+    "gjr_garch": {
+      "specification": "GJR-GARCH(1,1) with Student-t innovations",
+      "estimation": "Fit on 2799 daily returns, recursive OOS",
+      "native_target": "r\u00b2 (squared daily return)",
+      "params": {
+        "omega": 0.03145137592341706,
+        "alpha": 0.0017755130141949638,
+        "gamma": 0.30569281598691783,
+        "beta": 0.834265484563499,
+        "nu": 6.040827986535905,
+        "persistence": 0.988887405571153,
+        "train_days": 2799
+      }
+    }
+  },
+  "comparison": {
+    "n_oos": 29,
+    "oos_start": "2026-02-23",
+    "oos_end": "2026-04-02",
+    "native_target": {
+      "har_on_rv_intraday": 16549.291088769714,
+      "gjr_on_r2": 1.1372123109733114,
+      "note": "These are on DIFFERENT targets \u2014 not directly comparable (mechanical advantage)"
+    },
+    "qlike_on_r2": {
+      "har": 41844.77476336244,
+      "gjr": 1.1372123109733114,
+      "winner": "GJR",
+      "note": "Patton (2011) proxy-robust: r\u00b2 is unbiased for \u03c3\u00b2, ranking consistent"
+    },
+    "qlike_on_rv_total": {
+      "har": 26125.9238769182,
+      "gjr": 0.2818254295391803,
+      "winner": "GJR",
+      "note": "RV_total = RV_intraday + overnight_r\u00b2 (Hansen & Lunde 2005)"
+    },
+    "spearman": {
+      "har_vs_rv_intraday": {
+        "rho": 0.23672866296079362,
+        "p": 0.2163050115923827
+      },
+      "gjr_vs_rv_intraday": {
+        "rho": 0.13990147783251228,
+        "p": 0.4691735820801067
+      },
+      "har_vs_r2": {
+        "rho": -0.08917354421624067,
+        "p": 0.6455095925246294
+      },
+      "gjr_vs_r2": {
+        "rho": 0.06995073891625614,
+        "p": 0.7184219787053095
+      },
+      "har_vs_rv_total": {
+        "rho": 0.10075132481890176,
+        "p": 0.6030475021647145
+      },
+      "gjr_vs_rv_total": {
+        "rho": 0.16108374384236449,
+        "p": 0.403843309836382
+      }
+    },
+    "dm_test": {
+      "on_r2": {
+        "t_stat": 1.1261139575375474,
+        "p_value": 0.26967691819369444,
+        "better": "GJR",
+        "significant_harvey": false
+      },
+      "on_rv_total": {
+        "t_stat": 1.1233699136611874,
+        "p_value": 0.27082027711744794,
+        "better": "GJR",
+        "significant_harvey": false
+      },
+      "on_rv_intraday": {
+        "t_stat": 1.087372115211398,
+        "p_value": 0.28614444316274157,
+        "better": "GJR",
+        "significant_harvey": false,
+        "note": "HAR winning here is MECHANICAL (native target), not empirical"
+      },
+      "warning": "PRELIMINARY: N too small for reliable DM test. Need 200+ OOS days."
+    },
+    "mse_mae": {
+      "on_r2": {
+        "mse_har": 2.858767627167384e-08,
+        "mse_gjr": 2.3630848764184115e-08,
+        "mae_har": 9.996091378515479e-05,
+        "mae_gjr": 0.00011054619688967222
+      },
+      "on_rv_total": {
+        "mse_har": 1.189293682951379e-08,
+        "mse_gjr": 8.491504416910105e-09,
+        "mae_har": 7.701825112101934e-05,
+        "mae_gjr": 6.681891426867627e-05
+      }
+    },
+    "descriptive": {
+      "rv_intraday_mean": 6.479364550437674e-05,
+      "rv_intraday_std": 2.775259810459642e-05,
+      "rv_total_mean": 0.00012910024758829058,
+      "rv_total_std": 8.670668876496923e-05,
+      "r2_mean": 0.00011030999186449168,
+      "r2_std": 0.00016223600940726892,
+      "har_fcast_mean": 6.716749272161016e-05,
+      "har_fcast_std": 3.104034258103155e-05,
+      "gjr_fcast_mean": 0.0001197368065408233,
+      "gjr_fcast_std": 4.884508292554038e-05,
+      "overnight_share_of_total": 0.49811370067230215
+    },
+    "model_correlation": {
+      "pearson": 0.2065499611834646,
+      "spearman": 0.19091021206515615
+    }
+  },
+  "var_backtest": {
+    "5%": {
+      "expected_violations": 1.4500000000000002,
+      "gjr": {
+        "violations": 2,
+        "violation_rate": 0.06896551724137931,
+        "kupiec_lr": 0.19738833840175007,
+        "kupiec_p": 0.6568372141018401
+      },
+      "har": {
+        "violations": 6,
+        "violation_rate": 0.20689655172413793,
+        "kupiec_lr": 8.738968248737272,
+        "kupiec_p": 0.0031148071213410455
+      },
+      "note": "N=29 too small for reliable 5% VaR backtest"
+    },
+    "1%": {
+      "expected_violations": 0.29,
+      "gjr": {
+        "violations": 0,
+        "violation_rate": 0.0,
+        "kupiec_lr": null,
+        "kupiec_p": null
+      },
+      "har": {
+        "violations": 1,
+        "violation_rate": 0.034482758620689655,
+        "kupiec_lr": 1.0734536103681893,
+        "kupiec_p": 0.3001666580096992
+      },
+      "note": "N=29 too small for reliable 1% VaR backtest"
+    }
+  },
+  "conclusion": "GJR preliminarily better on both unified targets",
+  "limitations": [
+    "Only 29 OOS days \u2014 far below 252-day minimum",
+    "HAR warm-up uses 22 of 55 available days, leaving small OOS",
+    "DM test unreliable with N < 50",
+    "VaR backtest statistically meaningless with ~30 observations",
+    "HAR on Normal innovations (no HAR residual distribution fitting with this sample)",
+    "No ES backtest (sample too small)",
+    "Single asset (SPY only)"
+  ],
+  "references": [
+    "Corsi (2009) 'A Simple Approximate Long-Memory Model of Realized Volatility' J. Fin. Econometrics",
+    "Patton (2011) 'Volatility Forecast Comparison Using Imperfect Volatility Proxies' J. Econometrics",
+    "Hansen & Lunde (2005) 'A Forecast Comparison of Volatility Models' J. Applied Econometrics",
+    "Harvey (2016) 'Testing for Predictability' \u2014 |t| > 3.0 threshold"
+  ],
+  "next_steps": [
+    "Extend 5-min data collection to 252+ trading days",
+    "Add log-HAR variant",
+    "Fit HAR residual distribution for proper VaR",
+    "Include EGARCH in the horse race",
+    "Test on 0050.TW with TAIFEX data for cross-market validation"
+  ],
+  "timestamp": "2026-04-05T17:38:55.056333+00:00"
+}

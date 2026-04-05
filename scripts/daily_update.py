@@ -929,7 +929,7 @@ def main():
     # --- Sync to Supabase (v2 website) ---
     try:
         from article_backups import ensure_local_article_backups
-        from supabase_sync import sync_article, sync_risk_forecast, sync_strategy_signal, sync_paper_trade
+        from supabase_sync import sync_article, sync_risk_forecast, sync_strategy_signal, sync_paper_trade, sync_market_status
         backup_audit = ensure_local_article_backups("storage", repair=True)
         if backup_audit.get("created_count"):
             print(f"  Local article backups: repaired {backup_audit['created_count']} missing report files")
@@ -966,6 +966,17 @@ def main():
         if rf_path.exists():
             sync_risk_forecast(json.loads(rf_path.read_text()))
             print("  Supabase: risk_forecast synced")
+        # Generate and sync market status (NYSE + TWSE open/close with reasons)
+        try:
+            from volpred.market_calendar import save_market_status
+            ms_path = save_market_status(storage)
+            ms_data = json.loads(ms_path.read_text())
+            sync_market_status(ms_data)
+            any_closed = ms_data.get("any_closed", False)
+            summary = ms_data.get("summary", "")
+            print(f"  Supabase: market_status synced — {summary}")
+        except Exception as e:
+            print(f"  Market status skipped: {e}")
         # Sync ALL 7 strategy signals
         # Names MUST match strategyNames in portfolio page.tsx
         # Sync all strategies to Supabase using STRATEGY_REGISTRY as single source of truth

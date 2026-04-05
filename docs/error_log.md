@@ -41,6 +41,9 @@
 | 2026-03-25 | 所有文章 category=milestone, audience=null | 前端 badge 全顯示 milestone，一般讀者 tab 靠 tags fallback | `publish_milestone()` 硬編碼 category='milestone'，沒有 audience 參數 | 根本修正：(1) `publisher.py` 加 `audience`/`category` 參數（明確傳入優先，fallback 從 tags 推斷）(2) `content.py` ops 層也加參數 (3) 批次修正 518 篇文章 (4) content 欄位同時寫入。教訓：**文章類型應在寫作前決定，不是事後推斷** |
 | 2026-03-25 | 誤報「8 小時沒發文」但實際文章正常釋出 | 檢查用 datetime.now()（本地 UTC+8）和 UTC 的 published_at 比較，差 8 小時是時區差 | CLAUDE.md 第 144 行已寫「published_at 存 UTC」但手動檢查時沒遵守 | 根本修正：CLAUDE.md 加強提醒「比較時間必須用 UTC：datetime.now(timezone.utc)」。教訓：**已寫的規則也要遵守** |
 
+| 2026-04-05 | Tags 雙重編碼（JSON array 被 comma-split） | tags 顯示 `["研究"` 而非 `研究` | `cli.py:_parse_tags` 只做 `raw.split(",")` 不處理 JSON array 輸入 `'["研究","VIX"]'`，加上 publisher 沒有防護直接寫入 | 三層修復：(1) `_parse_tags` 偵測 JSON array 格式先 `json.loads` (2) `publisher.py` 加 `_sanitize_tags` 防護（strip brackets/quotes） (3) `_sync_all_article_tags` 也加 sanitize。教訓：**輸入解析和輸出寫入都要做 sanitization，不能假設上游是乾淨的** |
+| 2026-04-05 | article_tags 大量丟失（80%） | 前端 tag 篩選失效，文章詳情頁不顯示 tags | `_sync_article_tags` 和 `_get_tag_ids` 用 `isinstance(tag_id, str)` 檢查 tag ID 型別，但 Supabase tags 表的 ID 是 integer（serial），不是 UUID string → tag ID 查詢永遠返回空 map → article_tags 永遠不寫入。另外 tags 逐筆 POST（每個 tag 一次 HTTP）容易靜默失敗，且 tag sync 耦合在 article sync 內（文章 upsert 失敗就不同步 tags） | 根本修正三層：(1) `_get_tag_ids` 和 `_sync_all_article_tags` 改為 `tag_id is not None` 取代 `isinstance(tag_id, str)` (2) 新增 `_sync_all_article_tags` 批量函式（chunk 50 筆一次 POST）取代逐筆 POST (3) 將 tag sync 從 `sync_article` 解耦，改在 `sync_full` 中獨立執行（不依賴文章 upsert 結果）。教訓：**型別假設必須匹配實際 DB schema（int vs uuid）；同步步驟不可耦合（A 失敗不應阻止 B）；批量操作取代逐筆（50x 減少 HTTP 往返）** |
+
 ---
 
 ## Paper Trading 頁面 AbortError + 重複資料（2026-03-28）

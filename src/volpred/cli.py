@@ -52,6 +52,17 @@ def _parse_json_input(raw: str | None, *, default: object) -> object:
 def _parse_tags(raw: str | None) -> list[str]:
     if not raw:
         return []
+    # Handle JSON array input: '["研究","VIX"]'
+    stripped = raw.strip()
+    if stripped.startswith("["):
+        import json as _json
+        try:
+            parsed = _json.loads(stripped)
+            if isinstance(parsed, list):
+                return [str(t).strip() for t in parsed if str(t).strip()]
+        except (ValueError, TypeError):
+            pass
+    # Fallback: comma-separated
     return [tag.strip() for tag in raw.split(",") if tag.strip()]
 
 
