@@ -157,6 +157,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **K848：夜盤 vol 佔比 24%→57%**（2017→2026）——台灣市場正在全球化
 - **K844：TX 期貨 VT 空頭期全勝**——交易成本省 97%，機構投資人應用期貨執行
 - **模型評估 target 必須匹配**：GARCH 用 r² 評估、HAR-RV 用 5-min RV 評估。跨模型公平比較用 Patton (2011) QLIKE on r² 或 Hansen & Lunde (2005) 最優加權 RV_total
+- **⚠️ 風險管理評估必須同時做 VaR + ES（不可只做 VaR）**：VaR 1%+5% Trinity（Kupiec+CC+Basel）+ ES Acerbi-Szekely Z-test + Fissler-Ziegel joint scoring。Basel III 已要求 ES 取代 VaR 作為主要風控指標，只做 VaR 不完整
 
 ### 注意事項
 - Feed 發文要用 `feed-publisher` skill（thinking ≠ content）

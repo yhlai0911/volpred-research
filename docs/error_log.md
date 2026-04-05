@@ -327,3 +327,19 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 
 **受影響實驗**：K849, K851, K852b, K868
 **根因**：實驗前 checklist 沒有「期貨轉倉處理」這一條。preamble 也沒提及。
+
+## K880 缺少 ES 評估（2026-04-05 用戶指出）
+
+**問題**：K880（SPY PRG 驗證）只做了 VaR backtesting，沒做 ES（Expected Shortfall）。
+
+**根因**：
+1. CLAUDE.md 沒有明確寫 ES 是必做
+2. research_program.md 第 86 行只列了名字（Acerbi-Szekely, Fissler-Ziegel）但沒標「必做」
+3. experiment preamble 在 K880 發出後才加入 VaR+ES 評估表
+4. Agent prompt 沒包含 ES 規則，agent 自然不做
+
+**修正**：
+1. CLAUDE.md 加入「VaR + ES 都是必做」規則
+2. research_program.md ES 改為「必做 + Basel III 依據」
+3. experiment preamble 已有完整 VaR+ES 表
+4. K880b 補做 ES 評估

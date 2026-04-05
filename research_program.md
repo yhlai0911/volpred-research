@@ -83,7 +83,7 @@
 
 ### 評估指標
 - **統計性**：QLIKE (主), MSE, MAE, HMSE, Mincer-Zarnowitz R², DM test, MCS, GW test
-- **風險管理**：Trinity test (Kupiec+CC+DQ), Fissler-Ziegel, Acerbi-Szekely ES, Basel traffic light
+- **風險管理（VaR + ES 都是必做，不可只做 VaR）**：VaR 1%+5%: Trinity test (Kupiec+CC+Basel)。ES: Acerbi-Szekely (2014) Z-test + Fissler-Ziegel (2016) joint VaR-ES scoring。**ES 不是選做——Basel III 已要求 ES 取代 VaR 作為主要風控指標。**
 - **經濟性**：Sharpe (Harvey t>3), MDD (bootstrap p<0.001), Calmar, Sortino, CRRA utility, CE return, Net Sharpe (after TX), Turnover
 - **跨模型**：CCS Score, FDR audit, Cross-OOS 5 periods, Weight StdΔw
 - 每個實驗必須 re-estimate each window（no lookahead）
