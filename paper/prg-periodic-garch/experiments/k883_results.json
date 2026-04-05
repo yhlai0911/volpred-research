@@ -1,1 +1,496 @@
-../../experiments/k883_results.json
+{
+  "experiment_id": "K883",
+  "title": "TAIFEX Tick-Level PRG \u2014 True Session-Frequency with Volume-Based Rollover",
+  "date": "2026-04-05T16:16:36.468210",
+  "data_source": "TAIFEX TX tick data (volume-based rollover)",
+  "data_period": "2017-05-15 to 2025-12-31",
+  "n_trading_days": 2107,
+  "n_sessions": 4214,
+  "is_days": 1264,
+  "oos_days": 843,
+  "refit_freq_sessions": 126,
+  "descriptive_stats": {
+    "overnight": {
+      "n": 2107,
+      "r_mean": 0.0004786914223739828,
+      "r_std": 0.0090470751447534,
+      "r_skew": -0.8763339895792058,
+      "r_kurt": 18.611324565916178,
+      "x_mean": 7.919525912360853e-05,
+      "x_median": 3.1191438575471574e-05,
+      "x_std": 0.0003305652195312924
+    },
+    "intraday": {
+      "n": 2107,
+      "r_mean": 2.5564022184419342e-05,
+      "r_std": 0.007597601980601139,
+      "r_skew": -0.7694771307655901,
+      "r_kurt": 8.362836240793401,
+      "x_mean": 5.0652189015744356e-05,
+      "x_median": 3.197585122095147e-05,
+      "x_std": 0.00010124830217907112
+    }
+  },
+  "parameters": {
+    "PRG_Basic": {
+      "omega_0": 1e-08,
+      "alpha_0": 0.33916050575573015,
+      "beta_0": 0.6911565280230058,
+      "omega_1": 4.747570822809575e-06,
+      "alpha_1": 0.33987537675300816,
+      "beta_1": 0.6411514100743779,
+      "persistence_ov": 1.030317033778736,
+      "persistence_in": 0.9810267868273861,
+      "loglik": 9115.433490239575
+    },
+    "PRG_Extended": {
+      "omega_0": 1e-08,
+      "alpha_0": 0.3434928643134441,
+      "beta_0": 0.6915400614902731,
+      "omega_1": 4.913816611299255e-06,
+      "alpha_1": 0.2721461652600997,
+      "beta_1": 0.615653882589151,
+      "gamma_0": 0.1284975335603958,
+      "gamma_1": 0.03606646903694801,
+      "persistence_ov": 1.0350329258037172,
+      "persistence_in": 0.8878000478492507,
+      "loglik": 9121.714278798869
+    },
+    "Separate_GARCH_overnight": {
+      "omega": 2.2110503917070654e-06,
+      "alpha": 0.391725152051397,
+      "beta": 0.6526454053225372,
+      "persistence": 1.0443705573739344,
+      "loglik": 4546.919803724185
+    },
+    "Separate_GARCH_intraday": {
+      "omega": 5.184338168019927e-06,
+      "alpha": 0.5337699207028763,
+      "beta": 0.45544806570469165,
+      "persistence": 0.989217986407568,
+      "loglik": 4524.000978132274
+    }
+  },
+  "model_results": {
+    "PRG_Basic": {
+      "n_oos": 843,
+      "qlike_fullday": 0.13548570355561335,
+      "mse_fullday": 1.4083890939438396e-07,
+      "mae_fullday": 8.110091849111096e-05,
+      "hmse_fullday": 0.3021916312568163,
+      "spearman_fullday": 0.7803800418973035,
+      "spearman_p": 1.1491268486275287e-173,
+      "var_backtest_1pct": {
+        "alpha": 0.01,
+        "n_obs": 843,
+        "n_violations": 1,
+        "violation_rate": 0.0011862396204033216,
+        "expected_rate": 0.01,
+        "kupiec_LR": 10.662358742222402,
+        "kupiec_p": 0.0010933787141095275,
+        "christoffersen_LR": 0.002379531795905573,
+        "christoffersen_p": 0.9610942663998726,
+        "acerbi_szekely_Z2": NaN,
+        "acerbi_szekely_p": NaN,
+        "basel_traffic_light": "GREEN"
+      },
+      "var_backtest_5pct": {
+        "alpha": 0.05,
+        "n_obs": 843,
+        "n_violations": 11,
+        "violation_rate": 0.013048635824436536,
+        "expected_rate": 0.05,
+        "kupiec_LR": 33.94273821599882,
+        "kupiec_p": 5.6758130417833286e-09,
+        "christoffersen_LR": 2.3070790180415597,
+        "christoffersen_p": 0.1287858617642157,
+        "acerbi_szekely_Z2": 1.2413721540488023,
+        "acerbi_szekely_p": 0.521,
+        "basel_traffic_light": "GREEN"
+      },
+      "dm_tests": {
+        "PRG_Basic_vs_PRG_Extended": {
+          "t_stat": 2.6626451310516135,
+          "p_value": 0.007900859171187768,
+          "significant_harvey": false,
+          "winner": "PRG_Extended"
+        },
+        "PRG_Basic_vs_Separate_GARCH": {
+          "t_stat": -3.21236692525919,
+          "p_value": 0.0013664789411811373,
+          "significant_harvey": true,
+          "winner": "PRG_Basic"
+        },
+        "PRG_Basic_vs_GJR_GARCH": {
+          "t_stat": -3.746499892813349,
+          "p_value": 0.0001915409203829821,
+          "significant_harvey": true,
+          "winner": "PRG_Basic"
+        },
+        "PRG_Basic_vs_HAR_RV": {
+          "t_stat": -2.374965422709872,
+          "p_value": 0.01777370980688331,
+          "significant_harvey": false,
+          "winner": "PRG_Basic"
+        }
+      },
+      "qlike_series_summary": {
+        "mean": 0.13548570355561335,
+        "median": 0.06274755363994844,
+        "std": 0.24870875168642062,
+        "n": 843
+      }
+    },
+    "PRG_Extended": {
+      "n_oos": 843,
+      "qlike_fullday": 0.12093172883376502,
+      "mse_fullday": 9.672006837807518e-08,
+      "mae_fullday": 7.659967061990056e-05,
+      "hmse_fullday": 0.26767280387623327,
+      "spearman_fullday": 0.7985703269325323,
+      "spearman_p": 1.3112915411515938e-187,
+      "var_backtest_1pct": {
+        "alpha": 0.01,
+        "n_obs": 843,
+        "n_violations": 1,
+        "violation_rate": 0.0011862396204033216,
+        "expected_rate": 0.01,
+        "kupiec_LR": 10.662358742222402,
+        "kupiec_p": 0.0010933787141095275,
+        "christoffersen_LR": 0.002379531795905573,
+        "christoffersen_p": 0.9610942663998726,
+        "acerbi_szekely_Z2": NaN,
+        "acerbi_szekely_p": NaN,
+        "basel_traffic_light": "GREEN"
+      },
+      "var_backtest_5pct": {
+        "alpha": 0.05,
+        "n_obs": 843,
+        "n_violations": 9,
+        "violation_rate": 0.010676156583629894,
+        "expected_rate": 0.05,
+        "kupiec_LR": 39.86146229771933,
+        "kupiec_p": 2.7262958557372485e-10,
+        "christoffersen_LR": 3.0660930973668177,
+        "christoffersen_p": 0.07994138016187091,
+        "acerbi_szekely_Z2": 1.1961361276178895,
+        "acerbi_szekely_p": 0.529,
+        "basel_traffic_light": "GREEN"
+      },
+      "dm_tests": {
+        "PRG_Extended_vs_PRG_Basic": {
+          "t_stat": -2.6626451310516135,
+          "p_value": 0.007900859171187768,
+          "significant_harvey": false,
+          "winner": "PRG_Extended"
+        },
+        "PRG_Extended_vs_Separate_GARCH": {
+          "t_stat": -3.3034558891216146,
+          "p_value": 0.000995306084529135,
+          "significant_harvey": true,
+          "winner": "PRG_Extended"
+        },
+        "PRG_Extended_vs_GJR_GARCH": {
+          "t_stat": -4.000094460077973,
+          "p_value": 6.888517626091328e-05,
+          "significant_harvey": true,
+          "winner": "PRG_Extended"
+        },
+        "PRG_Extended_vs_HAR_RV": {
+          "t_stat": -2.4673396068841464,
+          "p_value": 0.013810054802558147,
+          "significant_harvey": false,
+          "winner": "PRG_Extended"
+        }
+      },
+      "qlike_series_summary": {
+        "mean": 0.12093172883376502,
+        "median": 0.052103353278888376,
+        "std": 0.23385922255503647,
+        "n": 843
+      }
+    },
+    "Separate_GARCH": {
+      "n_oos": 843,
+      "qlike_fullday": 0.24858105927579333,
+      "mse_fullday": 2.0034567400632378e-07,
+      "mae_fullday": 0.00011144628907464529,
+      "hmse_fullday": 2.0989896557872996,
+      "spearman_fullday": 0.6964639480358381,
+      "spearman_p": 2.4485626780364786e-123,
+      "var_backtest_1pct": {
+        "alpha": 0.01,
+        "n_obs": 843,
+        "n_violations": 2,
+        "violation_rate": 0.002372479240806643,
+        "expected_rate": 0.01,
+        "kupiec_LR": 7.154815255151927,
+        "kupiec_p": 0.00747629952657769,
+        "christoffersen_LR": 0.009526641779489827,
+        "christoffersen_p": 0.9222463374228447,
+        "acerbi_szekely_Z2": NaN,
+        "acerbi_szekely_p": NaN,
+        "basel_traffic_light": "GREEN"
+      },
+      "var_backtest_5pct": {
+        "alpha": 0.05,
+        "n_obs": 843,
+        "n_violations": 13,
+        "violation_rate": 0.01542111506524318,
+        "expected_rate": 0.05,
+        "kupiec_LR": 28.764963211077685,
+        "kupiec_p": 8.17161197597116e-08,
+        "christoffersen_LR": 1.7159617529872526,
+        "christoffersen_p": 0.1902136869749137,
+        "acerbi_szekely_Z2": 1.3157074711180872,
+        "acerbi_szekely_p": 0.512,
+        "basel_traffic_light": "GREEN"
+      },
+      "dm_tests": {
+        "Separate_GARCH_vs_PRG_Basic": {
+          "t_stat": 3.21236692525919,
+          "p_value": 0.0013664789411811373,
+          "significant_harvey": true,
+          "winner": "PRG_Basic"
+        },
+        "Separate_GARCH_vs_PRG_Extended": {
+          "t_stat": 3.3034558891216146,
+          "p_value": 0.000995306084529135,
+          "significant_harvey": true,
+          "winner": "PRG_Extended"
+        },
+        "Separate_GARCH_vs_GJR_GARCH": {
+          "t_stat": -0.29998448878247685,
+          "p_value": 0.7642630293995869,
+          "significant_harvey": false,
+          "winner": "Separate_GARCH"
+        },
+        "Separate_GARCH_vs_HAR_RV": {
+          "t_stat": -1.2304100994882299,
+          "p_value": 0.21888720060809796,
+          "significant_harvey": false,
+          "winner": "Separate_GARCH"
+        }
+      },
+      "qlike_series_summary": {
+        "mean": 0.24858105927579333,
+        "median": 0.09149402238511906,
+        "std": 1.1590979624426916,
+        "n": 843
+      }
+    },
+    "GJR_GARCH": {
+      "n_oos": 843,
+      "qlike_fullday": 0.25418033731608486,
+      "mse_fullday": 1.633686560523248e-07,
+      "mae_fullday": 0.00010198739659121435,
+      "hmse_fullday": 2.0921722995575007,
+      "spearman_fullday": 0.6253164321663061,
+      "spearman_p": 1.169220633905139e-92,
+      "var_backtest_1pct": {
+        "alpha": 0.01,
+        "n_obs": 843,
+        "n_violations": 3,
+        "violation_rate": 0.0035587188612099642,
+        "expected_rate": 0.01,
+        "kupiec_LR": 4.696146177455123,
+        "kupiec_p": 0.03023032982705809,
+        "christoffersen_LR": 0.021458397684766206,
+        "christoffersen_p": 0.8835370688751936,
+        "acerbi_szekely_Z2": 1.3208861284213134,
+        "acerbi_szekely_p": 0.55,
+        "basel_traffic_light": "GREEN"
+      },
+      "var_backtest_5pct": {
+        "alpha": 0.05,
+        "n_obs": 843,
+        "n_violations": 16,
+        "violation_rate": 0.018979833926453145,
+        "expected_rate": 0.05,
+        "kupiec_LR": 22.14805516046644,
+        "kupiec_p": 2.5241154278932143e-06,
+        "christoffersen_LR": 1.0525528573171947,
+        "christoffersen_p": 0.3049198726815169,
+        "acerbi_szekely_Z2": 1.351958300535658,
+        "acerbi_szekely_p": 0.507,
+        "basel_traffic_light": "GREEN"
+      },
+      "dm_tests": {
+        "GJR_GARCH_vs_PRG_Basic": {
+          "t_stat": 3.746499892813349,
+          "p_value": 0.0001915409203829821,
+          "significant_harvey": true,
+          "winner": "PRG_Basic"
+        },
+        "GJR_GARCH_vs_PRG_Extended": {
+          "t_stat": 4.000094460077973,
+          "p_value": 6.888517626091328e-05,
+          "significant_harvey": true,
+          "winner": "PRG_Extended"
+        },
+        "GJR_GARCH_vs_Separate_GARCH": {
+          "t_stat": 0.29998448878247685,
+          "p_value": 0.7642630293995869,
+          "significant_harvey": false,
+          "winner": "Separate_GARCH"
+        },
+        "GJR_GARCH_vs_HAR_RV": {
+          "t_stat": -0.7261856766844415,
+          "p_value": 0.46792676057861504,
+          "significant_harvey": false,
+          "winner": "GJR_GARCH"
+        }
+      },
+      "qlike_series_summary": {
+        "mean": 0.25418033731608486,
+        "median": 0.09230305971331809,
+        "std": 1.1260912972803394,
+        "n": 843
+      }
+    },
+    "HAR_RV": {
+      "n_oos": 843,
+      "qlike_fullday": 0.28479355691734265,
+      "mse_fullday": 2.0457020818451832e-07,
+      "mae_fullday": 8.27929723902427e-05,
+      "hmse_fullday": 5.15629696085946,
+      "spearman_fullday": 0.7230550265967473,
+      "spearman_p": 2.951381114916596e-137,
+      "var_backtest_1pct": {
+        "alpha": 0.01,
+        "n_obs": 843,
+        "n_violations": 4,
+        "violation_rate": 0.004744958481613286,
+        "expected_rate": 0.01,
+        "kupiec_LR": 2.919454199882888,
+        "kupiec_p": 0.08751746190898357,
+        "christoffersen_LR": 0.03819196250552136,
+        "christoffersen_p": 0.8450581801018321,
+        "acerbi_szekely_Z2": 1.5275782725849747,
+        "acerbi_szekely_p": 0.547,
+        "basel_traffic_light": "GREEN"
+      },
+      "var_backtest_5pct": {
+        "alpha": 0.05,
+        "n_obs": 843,
+        "n_violations": 15,
+        "violation_rate": 0.017793594306049824,
+        "expected_rate": 0.05,
+        "kupiec_LR": 24.214662216331476,
+        "kupiec_p": 8.617374089858743e-07,
+        "christoffersen_LR": 1.2486168697818487,
+        "christoffersen_p": 0.26381681215393127,
+        "acerbi_szekely_Z2": 1.4117563733940601,
+        "acerbi_szekely_p": 0.519,
+        "basel_traffic_light": "GREEN"
+      },
+      "dm_tests": {
+        "HAR_RV_vs_PRG_Basic": {
+          "t_stat": 2.374965422709872,
+          "p_value": 0.01777370980688331,
+          "significant_harvey": false,
+          "winner": "PRG_Basic"
+        },
+        "HAR_RV_vs_PRG_Extended": {
+          "t_stat": 2.4673396068841464,
+          "p_value": 0.013810054802558147,
+          "significant_harvey": false,
+          "winner": "PRG_Extended"
+        },
+        "HAR_RV_vs_Separate_GARCH": {
+          "t_stat": 1.2304100994882299,
+          "p_value": 0.21888720060809796,
+          "significant_harvey": false,
+          "winner": "Separate_GARCH"
+        },
+        "HAR_RV_vs_GJR_GARCH": {
+          "t_stat": 0.7261856766844415,
+          "p_value": 0.46792676057861504,
+          "significant_harvey": false,
+          "winner": "GJR_GARCH"
+        }
+      },
+      "qlike_series_summary": {
+        "mean": 0.28479355691734265,
+        "median": 0.05151087489098494,
+        "std": 1.9207784512552488,
+        "n": 843
+      }
+    }
+  },
+  "dm_tests": {
+    "PRG_Basic_vs_PRG_Extended": {
+      "t_stat": 2.6626451310516135,
+      "p_value": 0.007900859171187768,
+      "significant_harvey": false,
+      "winner": "PRG_Extended"
+    },
+    "PRG_Basic_vs_Separate_GARCH": {
+      "t_stat": -3.21236692525919,
+      "p_value": 0.0013664789411811373,
+      "significant_harvey": true,
+      "winner": "PRG_Basic"
+    },
+    "PRG_Basic_vs_GJR_GARCH": {
+      "t_stat": -3.746499892813349,
+      "p_value": 0.0001915409203829821,
+      "significant_harvey": true,
+      "winner": "PRG_Basic"
+    },
+    "PRG_Basic_vs_HAR_RV": {
+      "t_stat": -2.374965422709872,
+      "p_value": 0.01777370980688331,
+      "significant_harvey": false,
+      "winner": "PRG_Basic"
+    },
+    "PRG_Extended_vs_Separate_GARCH": {
+      "t_stat": -3.3034558891216146,
+      "p_value": 0.000995306084529135,
+      "significant_harvey": true,
+      "winner": "PRG_Extended"
+    },
+    "PRG_Extended_vs_GJR_GARCH": {
+      "t_stat": -4.000094460077973,
+      "p_value": 6.888517626091328e-05,
+      "significant_harvey": true,
+      "winner": "PRG_Extended"
+    },
+    "PRG_Extended_vs_HAR_RV": {
+      "t_stat": -2.4673396068841464,
+      "p_value": 0.013810054802558147,
+      "significant_harvey": false,
+      "winner": "PRG_Extended"
+    },
+    "Separate_GARCH_vs_GJR_GARCH": {
+      "t_stat": -0.29998448878247685,
+      "p_value": 0.7642630293995869,
+      "significant_harvey": false,
+      "winner": "Separate_GARCH"
+    },
+    "Separate_GARCH_vs_HAR_RV": {
+      "t_stat": -1.2304100994882299,
+      "p_value": 0.21888720060809796,
+      "significant_harvey": false,
+      "winner": "Separate_GARCH"
+    },
+    "GJR_GARCH_vs_HAR_RV": {
+      "t_stat": -0.7261856766844415,
+      "p_value": 0.46792676057861504,
+      "significant_harvey": false,
+      "winner": "GJR_GARCH"
+    }
+  },
+  "winner_qlike": "PRG_Extended",
+  "conclusion": "QLIKE winner: PRG_Extended. QLIKE scores: PRG_Extended=0.120932, PRG_Basic=0.135486, Separate_GARCH=0.248581, GJR_GARCH=0.254180, HAR_RV=0.284794. Based on TAIFEX TX tick data with volume-based rollover (NOT TX1), 2-session PRG (overnight + intraday) with 5-min realized variance.",
+  "elapsed_seconds": 57.278496980667114,
+  "references": [
+    "Lai et al. (2024): Periodic GARCH with regime switching",
+    "Bollerslev & Ghysels (1996): Periodic GARCH",
+    "Corsi (2009): HAR-RV model",
+    "Hansen & Lunde (2005): Realized GARCH",
+    "Patton (2011): QLIKE proxy-robust loss",
+    "Kupiec (1995): VaR back-testing",
+    "Christoffersen (1998): Conditional coverage",
+    "Acerbi & Szekely (2014): ES back-testing"
+  ]
+}

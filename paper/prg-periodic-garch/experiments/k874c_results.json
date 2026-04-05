@@ -1,1 +1,210 @@
-../../experiments/k874c_results.json
+{
+  "experiment_id": "K874c",
+  "title": "Periodic Realized GARCH \u2014 Unified Recursive System with Session Switching",
+  "date": "2026-04-05",
+  "data_source": "TAIFEX TX tick (volume-selected contract, 2017-05 to 2025-12)",
+  "data_period": "2017-05-16T00:00:00.000000 to 2025-12-31T00:00:00.000000",
+  "n_sessions": 4214,
+  "n_days": 2107,
+  "is_sessions": 2528,
+  "oos_sessions": 1686,
+  "is_days": 1264,
+  "oos_days": 843,
+  "methodology": {
+    "PRG_Basic": "h_n = \u03c9_{s_n} + \u03b1_{s_n}\u00b7x_{n-1} + \u03b2_{s_n}\u00b7h_{n-1} (6 params)",
+    "PRG_Extended": "h_n = \u03c9_{s_n} + \u03b1_{s_n}\u00b7x_{n-1} + \u03b3_{s_n}\u00b7x_{n-1}\u00b7I(r<0) + \u03b2_{s_n}\u00b7h_{n-1} (8 params)",
+    "Separate_GARCH": "Independent GARCH per session (no cross-recursion, 3+3=6 params)",
+    "HAR_RV": "Standard HAR-RV on log(RV_total) (daily)",
+    "GJR_GARCH": "GJR-GARCH(1,1) on close-to-close returns (daily)",
+    "key_feature": "h_{n-1} carries over between session types \u2014 overnight info feeds intraday and vice versa",
+    "refit_freq_sessions": 126,
+    "refit_freq_daily": 63
+  },
+  "descriptive_stats": {
+    "overnight": {
+      "n": 2107,
+      "r_mean": 0.0004786914223739828,
+      "r_std": 0.0090470751447534,
+      "r_skew": -0.8763339895792058,
+      "r_kurt": 18.611324565916178,
+      "x_mean": 8.20787141526692e-05,
+      "x_median": 1.5991698061622124e-05,
+      "x_std": 0.00037002026900607944
+    },
+    "intraday": {
+      "n": 2107,
+      "r_mean": 2.5564022184419342e-05,
+      "r_std": 0.007597601980601139,
+      "r_skew": -0.7694771307655901,
+      "r_kurt": 8.362836240793401,
+      "x_mean": 5.0652189015744356e-05,
+      "x_median": 3.197585122095147e-05,
+      "x_std": 0.00010124830217907112
+    }
+  },
+  "parameter_estimates": {
+    "PRG_Basic": {
+      "omega_0": 1e-08,
+      "alpha_0": 0.4572349511055004,
+      "beta_0": 0.6288207142132566,
+      "omega_1": 3.6390602496416615e-06,
+      "alpha_1": 0.13116364909012454,
+      "beta_1": 0.7914109515574155,
+      "persistence_overnight": 1.086055665318757,
+      "persistence_intraday": 0.92257460064754,
+      "log_likelihood": 9108.20068631018
+    },
+    "PRG_Extended": {
+      "omega_0": 1e-08,
+      "alpha_0": 0.23555152917953867,
+      "beta_0": 0.7230325109039776,
+      "omega_1": 4.298142497154924e-06,
+      "alpha_1": 0.11094478187202061,
+      "beta_1": 0.7264897321091512,
+      "gamma_0": 0.2954744733930562,
+      "gamma_1": 0.0635985817428945,
+      "persistence_overnight": 0.9585840400835163,
+      "persistence_intraday": 0.8374345139811719,
+      "log_likelihood": 9118.80761585884
+    }
+  },
+  "oos_results": {
+    "PRG_Basic": {
+      "qlike_session_all": 0.9650833873888189,
+      "qlike_overnight": 1.780282078947026,
+      "qlike_intraday": 0.14891537515099473,
+      "spearman_overnight": 0.241501246867133,
+      "spearman_intraday": 0.6281187396273745,
+      "n_oos_sessions": 1686,
+      "qlike_total": 0.3327607183852123,
+      "spearman_total": 0.596913263784392,
+      "mse_total": 2.140537246588283e-07,
+      "mae_total": 0.00011881086642280417
+    },
+    "PRG_Extended": {
+      "qlike_session_all": 0.9756983488122237,
+      "qlike_overnight": 1.787553393980283,
+      "qlike_intraday": 0.16287795876287087,
+      "spearman_overnight": 0.23968374871058362,
+      "spearman_intraday": 0.6127767796828124,
+      "n_oos_sessions": 1686,
+      "qlike_total": 0.32159086368274237,
+      "spearman_total": 0.6064047164452505,
+      "mse_total": 1.8935001883827844e-07,
+      "mae_total": 0.00012141460203578957
+    },
+    "Separate_GARCH": {
+      "qlike_session_all": 0.9359530492106738,
+      "qlike_overnight": 1.7163101570622816,
+      "qlike_intraday": 0.1546680494353426,
+      "spearman_overnight": 0.20477156914084432,
+      "spearman_intraday": 0.6545242225847437,
+      "n_oos_sessions": 1686,
+      "qlike_total": 0.5259024191903277,
+      "spearman_total": 0.4441634362599284,
+      "mse_total": 2.6719781790424084e-07,
+      "mae_total": 0.00014373848226019177
+    },
+    "HAR_RV": {
+      "qlike_total": 0.11869448106768603,
+      "spearman_total": 0.7794989253655359,
+      "mse_total": 3.3848598636150435e-08,
+      "mae_total": 4.607156341931001e-05,
+      "qlike_overnight": null,
+      "qlike_intraday": null,
+      "n_oos_days": 843
+    },
+    "GJR_GARCH": {
+      "qlike_total": 0.1756114294785886,
+      "spearman_total": 0.6534362443042812,
+      "mse_total": 3.83336499346785e-08,
+      "mae_total": 7.825702402780083e-05,
+      "qlike_overnight": null,
+      "qlike_intraday": null,
+      "n_oos_days": 843
+    }
+  },
+  "dm_tests": {
+    "PRG_Basic_vs_PRG_Extended": {
+      "t_stat": 0.9682,
+      "p_value": 0.333204,
+      "significant": false,
+      "winner": "PRG_Extended"
+    },
+    "PRG_Basic_vs_Separate_GARCH": {
+      "t_stat": -4.1482,
+      "p_value": 3.7e-05,
+      "significant": true,
+      "winner": "PRG_Basic"
+    },
+    "PRG_Basic_vs_HAR_RV": {
+      "t_stat": 11.0388,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "HAR_RV"
+    },
+    "PRG_Basic_vs_GJR_GARCH": {
+      "t_stat": 7.5728,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "GJR_GARCH"
+    },
+    "PRG_Extended_vs_Separate_GARCH": {
+      "t_stat": -4.0657,
+      "p_value": 5.2e-05,
+      "significant": true,
+      "winner": "PRG_Extended"
+    },
+    "PRG_Extended_vs_HAR_RV": {
+      "t_stat": 7.9055,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "HAR_RV"
+    },
+    "PRG_Extended_vs_GJR_GARCH": {
+      "t_stat": 5.8584,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "GJR_GARCH"
+    },
+    "Separate_GARCH_vs_HAR_RV": {
+      "t_stat": 7.7149,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "HAR_RV"
+    },
+    "Separate_GARCH_vs_GJR_GARCH": {
+      "t_stat": 5.7042,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "GJR_GARCH"
+    },
+    "HAR_RV_vs_GJR_GARCH": {
+      "t_stat": -3.0477,
+      "p_value": 0.002378,
+      "significant": true,
+      "winner": "HAR_RV"
+    }
+  },
+  "conclusions": {
+    "best_model_total_qlike": "HAR_RV",
+    "best_qlike": 0.11869448106768603,
+    "all_qlike": {
+      "PRG_Basic": 0.3327607183852123,
+      "PRG_Extended": 0.32159086368274237,
+      "Separate_GARCH": 0.5259024191903277,
+      "HAR_RV": 0.11869448106768603,
+      "GJR_GARCH": 0.1756114294785886
+    },
+    "cross_recursion_improvement_pct": 36.73,
+    "cross_recursion_significant": true,
+    "cross_recursion_dm_t": -4.1482
+  },
+  "references": [
+    "Lai et al. (2024): PRS model (inspiration for periodic recursion)",
+    "Corsi (2009): HAR-RV model",
+    "Hansen & Lunde (2005): Realized GARCH",
+    "Patton (2011): QLIKE proxy-robust loss",
+    "Bollerslev & Ghysels (1996): Periodic GARCH"
+  ]
+}

@@ -1,1 +1,2174 @@
-../../experiments/k881b_results.json
+{
+  "experiment_id": "K881b",
+  "title": "ES Supplement for QQQ, GLD, EEM (PRG Multi-Asset)",
+  "type": "empirical",
+  "data_source": "yfinance",
+  "assets_tested": [
+    "QQQ",
+    "GLD",
+    "EEM"
+  ],
+  "is_fraction": 0.7,
+  "models": [
+    "GJR",
+    "HAR",
+    "PRG_Basic",
+    "PRG_Extended",
+    "Separate"
+  ],
+  "es_methods": [
+    "Parametric Normal",
+    "Filtered Historical Simulation (FHS)"
+  ],
+  "alpha_levels": [
+    0.01,
+    0.05
+  ],
+  "per_asset_results": {
+    "QQQ": {
+      "ticker": "QQQ",
+      "description": "Tech equity (Nasdaq-100)",
+      "period": "2000-01-04 to 2026-04-02",
+      "oos_period": "2018-05-16 to 2026-04-02",
+      "n_total": 6601,
+      "n_is": 4620,
+      "n_oos": 1981,
+      "es_results": {
+        "GJR": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.03646958007679271,
+              "acerbi_szekely": {
+                "Z2": 3.492359683063042,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 44,
+                "violation_rate": 0.02221100454316002,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -2.969563596464585,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.757461454056914,
+              "es_mean": -0.05210533282171256,
+              "acerbi_szekely": {
+                "Z2": 2.7439144797238892,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 44,
+                "violation_rate": 0.02221100454316002,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.0407985877451327,
+                "n": 1981
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.028225224574652555,
+              "acerbi_szekely": {
+                "Z2": 2.269206526989085,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 111,
+                "violation_rate": 0.05603230691569914,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.479340425043233,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.4645782327922157,
+              "es_mean": -0.033888918239879995,
+              "acerbi_szekely": {
+                "Z2": 2.057714203248916,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 111,
+                "violation_rate": 0.05603230691569914,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.492292417287637,
+                "n": 1981
+              }
+            }
+          }
+        },
+        "HAR": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.024326320835220478,
+              "acerbi_szekely": {
+                "Z2": 8.763650187711745,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 121,
+                "violation_rate": 0.06108026249369006,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -1.4857044845645986,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -4.516828026361378,
+              "es_mean": -0.03926269583989917,
+              "acerbi_szekely": {
+                "Z2": 5.845502788758736,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 121,
+                "violation_rate": 0.06108026249369006,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -2.245494724600145,
+                "n": 1981
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.01882708457852722,
+              "acerbi_szekely": {
+                "Z2": 4.177601362723079,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 243,
+                "violation_rate": 0.1226653205451792,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.0283442911724836,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.9148790570308614,
+              "es_mean": -0.025106694789448703,
+              "acerbi_szekely": {
+                "Z2": 3.396280950099658,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 243,
+                "violation_rate": 0.1226653205451792,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.237791877292616,
+                "n": 1981
+              }
+            }
+          }
+        },
+        "PRG_Basic": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.03774822219728042,
+              "acerbi_szekely": {
+                "Z2": 2.5571918542265437,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 28,
+                "violation_rate": 0.014134275618374558,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.171531530625106,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.6782987617690637,
+              "es_mean": -0.053290699043985194,
+              "acerbi_szekely": {
+                "Z2": 2.1055077036305576,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 28,
+                "violation_rate": 0.014134275618374558,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.1754795572702434,
+                "n": 1981
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.029214815376778117,
+              "acerbi_szekely": {
+                "Z2": 2.1329797716274035,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 107,
+                "violation_rate": 0.05401312468450278,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.555146482751495,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.3996198346484032,
+              "es_mean": -0.0344609321383528,
+              "acerbi_szekely": {
+                "Z2": 1.9616029554064194,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 107,
+                "violation_rate": 0.05401312468450278,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.5523686262707885,
+                "n": 1981
+              }
+            }
+          }
+        },
+        "PRG_Extended": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.0374678047362768,
+              "acerbi_szekely": {
+                "Z2": 2.590641737240717,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 29,
+                "violation_rate": 0.01463907117617365,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.1893819010606936,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.6596545420964715,
+              "es_mean": -0.05261491566421128,
+              "acerbi_szekely": {
+                "Z2": 2.135002819277295,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 29,
+                "violation_rate": 0.01463907117617365,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.190701621063786,
+                "n": 1981
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.0289977894117186,
+              "acerbi_szekely": {
+                "Z2": 2.1164065471322537,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 105,
+                "violation_rate": 0.053003533568904596,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.5628571705209207,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.399970714188649,
+              "es_mean": -0.03423199335651975,
+              "acerbi_szekely": {
+                "Z2": 1.946355345634295,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 105,
+                "violation_rate": 0.053003533568904596,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.560032557439855,
+                "n": 1981
+              }
+            }
+          }
+        },
+        "Separate": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.03749137097000918,
+              "acerbi_szekely": {
+                "Z2": 3.194907663188441,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 39,
+                "violation_rate": 0.019687026754164564,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.0072043949591953,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.734732722766247,
+              "es_mean": -0.0534092708439102,
+              "acerbi_szekely": {
+                "Z2": 2.538887144183484,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 39,
+                "violation_rate": 0.019687026754164564,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.055791984294672,
+                "n": 1981
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.029016028235364904,
+              "acerbi_szekely": {
+                "Z2": 2.114529466246256,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 98,
+                "violation_rate": 0.04946996466431095,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.4898539582540637,
+                "n": 1981
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.433904049432561,
+              "es_mean": -0.03462062146606749,
+              "acerbi_szekely": {
+                "Z2": 1.934543034083808,
+                "p_value": 1.0,
+                "n": 1981,
+                "n_violations": 98,
+                "violation_rate": 0.04946996466431095,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.4948913797473664,
+                "n": 1981
+              }
+            }
+          }
+        }
+      },
+      "fz_dm_tests": {
+        "1pct": {
+          "parametric": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 2.959289732862162,
+              "p_value": 0.003120086168273861,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 2.9943742183032453,
+              "p_value": 0.0027841620369903897,
+              "n": 1981,
+              "winner": "PRG_Basic",
+              "harvey_pass": false
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 2.8367929200419595,
+              "p_value": 0.0046032787725180935,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 0.5731968884416259,
+              "p_value": 0.5665764813458352,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 0.9189069619142971,
+              "p_value": 0.3582561640750921,
+              "n": 1981,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -5.861235636077136,
+              "p_value": 5.3689959145231114e-09,
+              "n": 1981,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 5.919017976790824,
+              "p_value": 3.807652415588336e-09,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          },
+          "fhs": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 2.930575559378783,
+              "p_value": 0.0034220961082205292,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 2.901899128703376,
+              "p_value": 0.0037500625808155608,
+              "n": 1981,
+              "winner": "PRG_Basic",
+              "harvey_pass": false
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 3.058980526325585,
+              "p_value": 0.0022506802250712443,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 0.6948668620287071,
+              "p_value": 0.48722027246969235,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 0.520610024309776,
+              "p_value": 0.602696674497404,
+              "n": 1981,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -5.104229827341809,
+              "p_value": 3.6393244440269257e-07,
+              "n": 1981,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 5.279504393198519,
+              "p_value": 1.4374164392094713e-07,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          }
+        },
+        "5pct": {
+          "parametric": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 3.1212938495894016,
+              "p_value": 0.0018265752678048308,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 2.86676941886356,
+              "p_value": 0.0041906833675435795,
+              "n": 1981,
+              "winner": "PRG_Basic",
+              "harvey_pass": false
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 3.2461153558082363,
+              "p_value": 0.0011894423495142359,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 0.5944039369021015,
+              "p_value": 0.5523098864545597,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 0.7488136184232291,
+              "p_value": 0.45405849324087333,
+              "n": 1981,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -5.90751257139053,
+              "p_value": 4.078301696353037e-09,
+              "n": 1981,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 6.0691971469858546,
+              "p_value": 1.5364760574954062e-09,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          },
+          "fhs": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 3.0822957989260926,
+              "p_value": 0.0020824151550662418,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 2.783532753759149,
+              "p_value": 0.005428120551130622,
+              "n": 1981,
+              "winner": "PRG_Basic",
+              "harvey_pass": false
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 3.511683469844693,
+              "p_value": 0.000455251714049032,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 0.711946058947227,
+              "p_value": 0.4765820536012786,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 0.21931883658438472,
+              "p_value": 0.8264242954338985,
+              "n": 1981,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -4.571975872254795,
+              "p_value": 5.129936043957173e-06,
+              "n": 1981,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 4.962539809518263,
+              "p_value": 7.552551575251698e-07,
+              "n": 1981,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          }
+        }
+      }
+    },
+    "GLD": {
+      "ticker": "GLD",
+      "description": "Gold ETF (no leverage effect)",
+      "period": "2004-11-19 to 2026-04-02",
+      "oos_period": "2019-10-31 to 2026-04-02",
+      "n_total": 5375,
+      "n_is": 3762,
+      "n_oos": 1613,
+      "es_results": {
+        "GJR": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.028379212393119673,
+              "acerbi_szekely": {
+                "Z2": 2.951484636519798,
+                "p_value": 0.9999999999998516,
+                "n": 1613,
+                "n_violations": 25,
+                "violation_rate": 0.015499070055796652,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.1322096603341905,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.9094390768523732,
+              "es_mean": -0.04154465557372779,
+              "acerbi_szekely": {
+                "Z2": 2.333247058508756,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 25,
+                "violation_rate": 0.015499070055796652,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.2155762189439834,
+                "n": 1613
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.021963774777798595,
+              "acerbi_szekely": {
+                "Z2": 2.0958627567304213,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 77,
+                "violation_rate": 0.04773713577185369,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.728015229413366,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.387141538331624,
+              "es_mean": -0.02552613190097755,
+              "acerbi_szekely": {
+                "Z2": 1.9422968954550766,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 77,
+                "violation_rate": 0.04773713577185369,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.7352529073699965,
+                "n": 1613
+              }
+            }
+          }
+        },
+        "HAR": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.017424199586286184,
+              "acerbi_szekely": {
+                "Z2": 9.42207886309711,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 102,
+                "violation_rate": 0.06323620582765034,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -1.3145093733256192,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -4.855494179976271,
+              "es_mean": -0.029443589961143664,
+              "acerbi_szekely": {
+                "Z2": 6.031271438622274,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 102,
+                "violation_rate": 0.06323620582765034,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -2.3063179959005837,
+                "n": 1613
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.013485264851444016,
+              "acerbi_szekely": {
+                "Z2": 4.1234606122509145,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 182,
+                "violation_rate": 0.11283323000619963,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.224729220021144,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.933238101445046,
+              "es_mean": -0.01786903221396585,
+              "acerbi_szekely": {
+                "Z2": 3.3756083444096876,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 182,
+                "violation_rate": 0.11283323000619963,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.453463140451473,
+                "n": 1613
+              }
+            }
+          }
+        },
+        "PRG_Basic": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.02678370344900155,
+              "acerbi_szekely": {
+                "Z2": 2.949771771314755,
+                "p_value": 0.9999999999999984,
+                "n": 1613,
+                "n_violations": 28,
+                "violation_rate": 0.01735895846249225,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.3547753077272704,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.7894936647291453,
+              "es_mean": -0.03858157403661166,
+              "acerbi_szekely": {
+                "Z2": 2.350056702574042,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 28,
+                "violation_rate": 0.01735895846249225,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.388710917826645,
+                "n": 1613
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.020728948433108713,
+              "acerbi_szekely": {
+                "Z2": 2.0893951335130376,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 78,
+                "violation_rate": 0.04835709857408556,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.8028816295876564,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.3750577058342652,
+              "es_mean": -0.02402733965288148,
+              "acerbi_szekely": {
+                "Z2": 1.9393328382887898,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 78,
+                "violation_rate": 0.04835709857408556,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.8081215465652907,
+                "n": 1613
+              }
+            }
+          }
+        },
+        "PRG_Extended": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.027130621728537793,
+              "acerbi_szekely": {
+                "Z2": 2.7155217800287685,
+                "p_value": 0.9999999999999906,
+                "n": 1613,
+                "n_violations": 24,
+                "violation_rate": 0.014879107253564786,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.3587412764257065,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.7757123311095433,
+              "es_mean": -0.03915963367590579,
+              "acerbi_szekely": {
+                "Z2": 2.183193978772394,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 24,
+                "violation_rate": 0.014879107253564786,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.3874975186582024,
+                "n": 1613
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.020997441964658685,
+              "acerbi_szekely": {
+                "Z2": 2.051120144302201,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 76,
+                "violation_rate": 0.047117172969621826,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.807552972590613,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.3607248253915953,
+              "es_mean": -0.0243323874285834,
+              "acerbi_szekely": {
+                "Z2": 1.9055846587906446,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 76,
+                "violation_rate": 0.047117172969621826,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.8103691828181208,
+                "n": 1613
+              }
+            }
+          }
+        },
+        "Separate": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.027277586316404923,
+              "acerbi_szekely": {
+                "Z2": 2.99197802369553,
+                "p_value": 0.9999999999999389,
+                "n": 1613,
+                "n_violations": 26,
+                "violation_rate": 0.016119032858028518,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.1789912346434495,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.904720743317181,
+              "es_mean": -0.03987758003418203,
+              "acerbi_szekely": {
+                "Z2": 2.3616893970201507,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 26,
+                "violation_rate": 0.016119032858028518,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.258223862062206,
+                "n": 1613
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.021111183567614808,
+              "acerbi_szekely": {
+                "Z2": 2.141837759333411,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 80,
+                "violation_rate": 0.04959702417854929,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.744863708932335,
+                "n": 1613
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.3952604405636775,
+              "es_mean": -0.024574702024056684,
+              "acerbi_szekely": {
+                "Z2": 1.980945010140815,
+                "p_value": 1.0,
+                "n": 1613,
+                "n_violations": 80,
+                "violation_rate": 0.04959702417854929,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.7543433278994365,
+                "n": 1613
+              }
+            }
+          }
+        }
+      },
+      "fz_dm_tests": {
+        "1pct": {
+          "parametric": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 3.2051124555840884,
+              "p_value": 0.0013765293765564124,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 3.486117909703136,
+              "p_value": 0.0005032232191757302,
+              "n": 1613,
+              "winner": "PRG_Basic",
+              "harvey_pass": true
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 2.884959455528703,
+              "p_value": 0.0039666807371725454,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 0.15207656673179898,
+              "p_value": 0.879145576780032,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 1.3896635924009106,
+              "p_value": 0.16482294521028384,
+              "n": 1613,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -5.7460337697580925,
+              "p_value": 1.0902981628646558e-08,
+              "n": 1613,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 5.738589231245787,
+              "p_value": 1.1383101572448595e-08,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          },
+          "fhs": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 3.5957834172834326,
+              "p_value": 0.00033316282695716737,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 4.048657231590585,
+              "p_value": 5.395583113898539e-05,
+              "n": 1613,
+              "winner": "PRG_Basic",
+              "harvey_pass": true
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 3.0715052387009094,
+              "p_value": 0.0021654452551032044,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": -0.06700013872163907,
+              "p_value": 0.9465899013564458,
+              "n": 1613,
+              "winner": "PRG_Basic",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 1.8482739970300748,
+              "p_value": 0.0647457641782403,
+              "n": 1613,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -4.945758115403136,
+              "p_value": 8.376449365243843e-07,
+              "n": 1613,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 5.185138783208752,
+              "p_value": 2.431371259881132e-07,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          }
+        },
+        "5pct": {
+          "parametric": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 3.762455037548724,
+              "p_value": 0.00017427665586677854,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 4.041110442573967,
+              "p_value": 5.570407301980218e-05,
+              "n": 1613,
+              "winner": "PRG_Basic",
+              "harvey_pass": true
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 3.5526567371064757,
+              "p_value": 0.000392341221015835,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 0.5099480380322968,
+              "p_value": 0.6101576759069216,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 1.5173389149769367,
+              "p_value": 0.12937721344202813,
+              "n": 1613,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -5.3007958083477025,
+              "p_value": 1.3124798381447533e-07,
+              "n": 1613,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 5.667946546577541,
+              "p_value": 1.7090652670859185e-08,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          },
+          "fhs": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 4.132691188442169,
+              "p_value": 3.7695562803419236e-05,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 4.585113509265479,
+              "p_value": 4.887474152281968e-06,
+              "n": 1613,
+              "winner": "PRG_Basic",
+              "harvey_pass": true
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 3.7333452854335856,
+              "p_value": 0.00019551999814515497,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 0.28443478517539833,
+              "p_value": 0.7761137372405114,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 1.9801800447477746,
+              "p_value": 0.047853101995520175,
+              "n": 1613,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -4.1000521898051305,
+              "p_value": 4.3363034750720786e-05,
+              "n": 1613,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 4.782745590954613,
+              "p_value": 1.8869495572726436e-06,
+              "n": 1613,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          }
+        }
+      }
+    },
+    "EEM": {
+      "ticker": "EEM",
+      "description": "Emerging markets ETF",
+      "period": "2003-04-15 to 2026-04-02",
+      "oos_period": "2019-05-10 to 2026-04-02",
+      "n_total": 5779,
+      "n_is": 4045,
+      "n_oos": 1734,
+      "es_results": {
+        "GJR": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.03404556729356634,
+              "acerbi_szekely": {
+                "Z2": 2.7313912341799185,
+                "p_value": 0.9999999999999994,
+                "n": 1734,
+                "n_violations": 27,
+                "violation_rate": 0.015570934256055362,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.1925869712085504,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.8972590343243434,
+              "es_mean": -0.05164701402757827,
+              "acerbi_szekely": {
+                "Z2": 2.1347502727822354,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 27,
+                "violation_rate": 0.015570934256055362,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.200939492440914,
+                "n": 1734
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.026349186928089945,
+              "acerbi_szekely": {
+                "Z2": 2.025580183774601,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 81,
+                "violation_rate": 0.04671280276816609,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.6159724780847258,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.3219863460403105,
+              "es_mean": -0.030108657890136836,
+              "acerbi_szekely": {
+                "Z2": 1.8985648373605613,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 81,
+                "violation_rate": 0.04671280276816609,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.6171739434406347,
+                "n": 1734
+              }
+            }
+          }
+        },
+        "HAR": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.02257047943766413,
+              "acerbi_szekely": {
+                "Z2": 7.628940948788256,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 93,
+                "violation_rate": 0.05363321799307959,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -2.016964003738956,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -4.538161790738522,
+              "es_mean": -0.03802585467765691,
+              "acerbi_szekely": {
+                "Z2": 4.951433147539449,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 93,
+                "violation_rate": 0.05363321799307959,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -2.6312395887443762,
+                "n": 1734
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.017468170720480458,
+              "acerbi_szekely": {
+                "Z2": 3.7196509815055676,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 185,
+                "violation_rate": 0.10668973471741638,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.2780787670652853,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.7691336616122117,
+              "es_mean": -0.022218676525247432,
+              "acerbi_szekely": {
+                "Z2": 3.1420458111758616,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 185,
+                "violation_rate": 0.10668973471741638,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.4188025351987985,
+                "n": 1734
+              }
+            }
+          }
+        },
+        "PRG_Basic": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.03297991739269752,
+              "acerbi_szekely": {
+                "Z2": 2.0264054806466993,
+                "p_value": 0.9999999999999991,
+                "n": 1734,
+                "n_violations": 17,
+                "violation_rate": 0.00980392156862745,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.424516221976317,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.8229744402641623,
+              "es_mean": -0.04940820904205094,
+              "acerbi_szekely": {
+                "Z2": 1.680424396922014,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 17,
+                "violation_rate": 0.00980392156862745,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.3677039300343585,
+                "n": 1734
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.025524439077781715,
+              "acerbi_szekely": {
+                "Z2": 2.019245879484613,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 87,
+                "violation_rate": 0.050173010380622836,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.7078123154951714,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.294575451735715,
+              "es_mean": -0.02890481280573728,
+              "acerbi_szekely": {
+                "Z2": 1.9009797628009588,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 87,
+                "violation_rate": 0.050173010380622836,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.702403945242912,
+                "n": 1734
+              }
+            }
+          }
+        },
+        "PRG_Extended": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.03333596634939796,
+              "acerbi_szekely": {
+                "Z2": 1.8628706955837133,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 15,
+                "violation_rate": 0.00865051903114187,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.4849315950564668,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.7871495287385697,
+              "es_mean": -0.04980845959397241,
+              "acerbi_szekely": {
+                "Z2": 1.5778720493834135,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 15,
+                "violation_rate": 0.00865051903114187,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.407928934931217,
+                "n": 1734
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.025799999195043267,
+              "acerbi_szekely": {
+                "Z2": 1.854291344084356,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 74,
+                "violation_rate": 0.04267589388696655,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.750755467084475,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.260584410370811,
+              "es_mean": -0.028987132172904637,
+              "acerbi_szekely": {
+                "Z2": 1.7608346561455308,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 74,
+                "violation_rate": 0.04267589388696655,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.7412842438832437,
+                "n": 1734
+              }
+            }
+          }
+        },
+        "Separate": {
+          "1pct": {
+            "parametric": {
+              "es_mean": -0.03394989114803795,
+              "acerbi_szekely": {
+                "Z2": 2.5030208913110954,
+                "p_value": 0.9999999999999968,
+                "n": 1734,
+                "n_violations": 23,
+                "violation_rate": 0.0132641291810842,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.217199524636137,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -3.9129023474587634,
+              "es_mean": -0.051676783613113716,
+              "acerbi_szekely": {
+                "Z2": 1.9831910207538397,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 23,
+                "violation_rate": 0.0132641291810842,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.21623885210567,
+                "n": 1734
+              }
+            }
+          },
+          "5pct": {
+            "parametric": {
+              "es_mean": -0.026275139442807974,
+              "acerbi_szekely": {
+                "Z2": 2.0401894996093137,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 84,
+                "violation_rate": 0.04844290657439446,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.626548682050688,
+                "n": 1734
+              }
+            },
+            "fhs": {
+              "z_es_factor": -2.3190288732142443,
+              "es_mean": -0.03004033686759852,
+              "acerbi_szekely": {
+                "Z2": 1.9103113527609181,
+                "p_value": 1.0,
+                "n": 1734,
+                "n_violations": 84,
+                "violation_rate": 0.04844290657439446,
+                "reject_H0_at_5pct": false
+              },
+              "fz_score": {
+                "FZ_score": -3.626138196571502,
+                "n": 1734
+              }
+            }
+          }
+        }
+      },
+      "fz_dm_tests": {
+        "1pct": {
+          "parametric": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 4.045711216554525,
+              "p_value": 5.44570622729168e-05,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 3.983510971658027,
+              "p_value": 7.07158875463687e-05,
+              "n": 1734,
+              "winner": "PRG_Basic",
+              "harvey_pass": true
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 3.3810030348397575,
+              "p_value": 0.0007382620445457455,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 1.6584422846084734,
+              "p_value": 0.0974091926265701,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 0.8108231871380452,
+              "p_value": 0.4175785514564636,
+              "n": 1734,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -4.470284039605025,
+              "p_value": 8.317869381713194e-06,
+              "n": 1734,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 4.595070721622663,
+              "p_value": 4.638529078171416e-06,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          },
+          "fhs": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 4.3961576532573154,
+              "p_value": 1.1687188838260809e-05,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 4.36647993693277,
+              "p_value": 1.3372841887404618e-05,
+              "n": 1734,
+              "winner": "PRG_Basic",
+              "harvey_pass": true
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 3.769127537991188,
+              "p_value": 0.0001693064572787506,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 1.6227300746047582,
+              "p_value": 0.10482900202229395,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": false
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 0.7610575815253672,
+              "p_value": 0.4467262165746375,
+              "n": 1734,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -3.6775549577310325,
+              "p_value": 0.0002426633408325607,
+              "n": 1734,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 4.075186629536696,
+              "p_value": 4.805553373632421e-05,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          }
+        },
+        "5pct": {
+          "parametric": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 6.530758284802869,
+              "p_value": 8.574030374575159e-11,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 5.713657142260988,
+              "p_value": 1.2989646247518749e-08,
+              "n": 1734,
+              "winner": "PRG_Basic",
+              "harvey_pass": true
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 5.479958943694787,
+              "p_value": 4.879301829241456e-08,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 3.30741794950182,
+              "p_value": 0.0009608696456631094,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 1.0292739310358066,
+              "p_value": 0.30349459925077005,
+              "n": 1734,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -4.1610449318543195,
+              "p_value": 3.323164324764427e-05,
+              "n": 1734,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 4.939794472086464,
+              "p_value": 8.573960945668091e-07,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          },
+          "fhs": {
+            "GJR_vs_PRG_Extended": {
+              "t_stat": 6.975882067096335,
+              "p_value": 4.309441692385008e-12,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_PRG_Basic": {
+              "t_stat": 6.066160130940905,
+              "p_value": 1.6049133133577698e-09,
+              "n": 1734,
+              "winner": "PRG_Basic",
+              "harvey_pass": true
+            },
+            "Separate_vs_PRG_Extended": {
+              "t_stat": 5.900073027946446,
+              "p_value": 4.360136252046232e-09,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "PRG_Basic_vs_PRG_Extended": {
+              "t_stat": 3.3805602765748923,
+              "p_value": 0.0007394446528519172,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            },
+            "GJR_vs_Separate": {
+              "t_stat": 0.9773777833299773,
+              "p_value": 0.3285185703281941,
+              "n": 1734,
+              "winner": "Separate",
+              "harvey_pass": false
+            },
+            "GJR_vs_HAR": {
+              "t_stat": -3.1318894871892455,
+              "p_value": 0.0017658761330237027,
+              "n": 1734,
+              "winner": "GJR",
+              "harvey_pass": true
+            },
+            "HAR_vs_PRG_Extended": {
+              "t_stat": 4.279929909283956,
+              "p_value": 1.9717209175373895e-05,
+              "n": 1734,
+              "winner": "PRG_Extended",
+              "harvey_pass": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "cross_asset_summary": {
+    "fz_rankings": {
+      "1pct": {
+        "QQQ": {
+          "parametric": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.1893819010606936
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.171531530625106
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.0072043949591953
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -2.969563596464585
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -1.4857044845645986
+            }
+          ],
+          "fhs": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.190701621063786
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.1754795572702434
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.055791984294672
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.0407985877451327
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -2.245494724600145
+            }
+          ]
+        },
+        "GLD": {
+          "parametric": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.3587412764257065
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.3547753077272704
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.1789912346434495
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.1322096603341905
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -1.3145093733256192
+            }
+          ],
+          "fhs": [
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.388710917826645
+            },
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.3874975186582024
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.258223862062206
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.2155762189439834
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -2.3063179959005837
+            }
+          ]
+        },
+        "EEM": {
+          "parametric": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.4849315950564668
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.424516221976317
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.217199524636137
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.1925869712085504
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -2.016964003738956
+            }
+          ],
+          "fhs": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.407928934931217
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.3677039300343585
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.21623885210567
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.200939492440914
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -2.6312395887443762
+            }
+          ]
+        }
+      },
+      "5pct": {
+        "QQQ": {
+          "parametric": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.5628571705209207
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.555146482751495
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.4898539582540637
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.479340425043233
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -3.0283442911724836
+            }
+          ],
+          "fhs": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.560032557439855
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.5523686262707885
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.4948913797473664
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.492292417287637
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -3.237791877292616
+            }
+          ]
+        },
+        "GLD": {
+          "parametric": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.807552972590613
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.8028816295876564
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.744863708932335
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.728015229413366
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -3.224729220021144
+            }
+          ],
+          "fhs": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.8103691828181208
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.8081215465652907
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.7543433278994365
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.7352529073699965
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -3.453463140451473
+            }
+          ]
+        },
+        "EEM": {
+          "parametric": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.750755467084475
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.7078123154951714
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.626548682050688
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.6159724780847258
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -3.2780787670652853
+            }
+          ],
+          "fhs": [
+            {
+              "model": "PRG_Extended",
+              "FZ_score": -3.7412842438832437
+            },
+            {
+              "model": "PRG_Basic",
+              "FZ_score": -3.702403945242912
+            },
+            {
+              "model": "Separate",
+              "FZ_score": -3.626138196571502
+            },
+            {
+              "model": "GJR",
+              "FZ_score": -3.6171739434406347
+            },
+            {
+              "model": "HAR",
+              "FZ_score": -3.4188025351987985
+            }
+          ]
+        }
+      }
+    },
+    "key_dm_prg_vs_gjr": {
+      "QQQ": {
+        "1pct": {
+          "parametric": {
+            "t_stat": 2.959289732862162,
+            "p_value": 0.003120086168273861,
+            "n": 1981,
+            "winner": "PRG_Extended",
+            "harvey_pass": false
+          },
+          "fhs": {
+            "t_stat": 2.930575559378783,
+            "p_value": 0.0034220961082205292,
+            "n": 1981,
+            "winner": "PRG_Extended",
+            "harvey_pass": false
+          }
+        },
+        "5pct": {
+          "parametric": {
+            "t_stat": 3.1212938495894016,
+            "p_value": 0.0018265752678048308,
+            "n": 1981,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          },
+          "fhs": {
+            "t_stat": 3.0822957989260926,
+            "p_value": 0.0020824151550662418,
+            "n": 1981,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          }
+        }
+      },
+      "GLD": {
+        "1pct": {
+          "parametric": {
+            "t_stat": 3.2051124555840884,
+            "p_value": 0.0013765293765564124,
+            "n": 1613,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          },
+          "fhs": {
+            "t_stat": 3.5957834172834326,
+            "p_value": 0.00033316282695716737,
+            "n": 1613,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          }
+        },
+        "5pct": {
+          "parametric": {
+            "t_stat": 3.762455037548724,
+            "p_value": 0.00017427665586677854,
+            "n": 1613,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          },
+          "fhs": {
+            "t_stat": 4.132691188442169,
+            "p_value": 3.7695562803419236e-05,
+            "n": 1613,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          }
+        }
+      },
+      "EEM": {
+        "1pct": {
+          "parametric": {
+            "t_stat": 4.045711216554525,
+            "p_value": 5.44570622729168e-05,
+            "n": 1734,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          },
+          "fhs": {
+            "t_stat": 4.3961576532573154,
+            "p_value": 1.1687188838260809e-05,
+            "n": 1734,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          }
+        },
+        "5pct": {
+          "parametric": {
+            "t_stat": 6.530758284802869,
+            "p_value": 8.574030374575159e-11,
+            "n": 1734,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          },
+          "fhs": {
+            "t_stat": 6.975882067096335,
+            "p_value": 4.309441692385008e-12,
+            "n": 1734,
+            "winner": "PRG_Extended",
+            "harvey_pass": true
+          }
+        }
+      }
+    },
+    "prg_ext_win_count": {
+      "parametric": {
+        "1pct": 3,
+        "5pct": 3
+      },
+      "fhs": {
+        "1pct": 2,
+        "5pct": 3
+      }
+    },
+    "acerbi_szekely_pass_count": {
+      "1pct": {
+        "GJR": {
+          "parametric": 3,
+          "fhs": 3
+        },
+        "HAR": {
+          "parametric": 3,
+          "fhs": 3
+        },
+        "PRG_Basic": {
+          "parametric": 3,
+          "fhs": 3
+        },
+        "PRG_Extended": {
+          "parametric": 3,
+          "fhs": 3
+        },
+        "Separate": {
+          "parametric": 3,
+          "fhs": 3
+        }
+      },
+      "5pct": {
+        "GJR": {
+          "parametric": 3,
+          "fhs": 3
+        },
+        "HAR": {
+          "parametric": 3,
+          "fhs": 3
+        },
+        "PRG_Basic": {
+          "parametric": 3,
+          "fhs": 3
+        },
+        "PRG_Extended": {
+          "parametric": 3,
+          "fhs": 3
+        },
+        "Separate": {
+          "parametric": 3,
+          "fhs": 3
+        }
+      }
+    }
+  },
+  "key_findings": [
+    "QQQ 1% FZ best (param): PRG_Extended (-3.1894)",
+    "GLD 1% FZ best (param): PRG_Extended (-3.3587)",
+    "EEM 1% FZ best (param): PRG_Extended (-3.4849)",
+    "PRG_Ext vs GJR Harvey PASS count: 5/6 (across assets x alphas, parametric)",
+    "PRG_Ext vs GJR Harvey PASS count (FHS): 5/6",
+    "PRG_Ext vs Separate Harvey PASS (PRG wins): 4/6 (parametric)"
+  ],
+  "runtime_seconds": 19.782455,
+  "references": [
+    "Acerbi & Szekely (2014): Backtesting Expected Shortfall. Risk.",
+    "Fissler & Ziegel (2016): Higher order elicitability. Ann. Stat.",
+    "McNeil & Frey (2000): Estimation of tail-related risk measures. J. Empirical Finance.",
+    "Patton, Ziegel & Chen (2019): Dynamic semiparametric models for ES. J. Econometrics.",
+    "Basel Committee (2019): MAR 99. Minimum capital requirements for market risk.",
+    "K880b: ES Supplement for SPY PRG Validation",
+    "K881: PRG Multi-Asset Validation (QQQ, GLD, EEM)"
+  ]
+}

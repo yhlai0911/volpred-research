@@ -1,1 +1,355 @@
-../../experiments/k846_rebalancing_premium_results.json
+{
+  "experiment_id": "K846",
+  "title": "Rebalancing Premium Quantification \u2014 50/50 SPY/GLD",
+  "data_source": "yfinance",
+  "period": "2006-01-04 to 2024-12-31",
+  "n_days": 4780,
+  "tx_cost_bps": 1,
+  "part1_theoretical": {
+    "w_spy": 0.5,
+    "w_gld": 0.5,
+    "sigma_spy_ann": 19.38,
+    "sigma_gld_ann": 17.76,
+    "correlation": 0.0572,
+    "theoretical_premium_ann_pct": 0.8146,
+    "theoretical_premium_ann_bps": 81.46
+  },
+  "part1_empirical": {
+    "rebalance_freq": "monthly",
+    "w_spy": 0.5,
+    "rebal_cagr": 10.0234,
+    "rebal_sharpe": 0.7813,
+    "rebal_mdd": -33.38,
+    "bh_cagr": 9.4867,
+    "bh_sharpe": 0.7305,
+    "bh_mdd": -31.52,
+    "premium_cagr_pct": 0.5367,
+    "premium_cagr_bps": 53.67,
+    "n_rebalances": 228,
+    "annual_turnover_pct": 14.66,
+    "tx_drag_bps": 0.29,
+    "rebal_final_value": 6.1346,
+    "bh_final_value": 5.5906
+  },
+  "part2_frequency": {
+    "daily": {
+      "rebalance_freq": "daily",
+      "w_spy": 0.5,
+      "rebal_cagr": 10.2662,
+      "rebal_sharpe": 0.7919,
+      "rebal_mdd": -32.51,
+      "bh_cagr": 9.4867,
+      "bh_sharpe": 0.7305,
+      "bh_mdd": -31.52,
+      "premium_cagr_pct": 0.7795,
+      "premium_cagr_bps": 77.95,
+      "n_rebalances": 4780,
+      "annual_turnover_pct": 69.0,
+      "tx_drag_bps": 1.38,
+      "rebal_final_value": 6.3969,
+      "bh_final_value": 5.5906
+    },
+    "weekly": {
+      "rebalance_freq": "weekly",
+      "w_spy": 0.5,
+      "rebal_cagr": 10.1682,
+      "rebal_sharpe": 0.7859,
+      "rebal_mdd": -32.8,
+      "bh_cagr": 9.4867,
+      "bh_sharpe": 0.7305,
+      "bh_mdd": -31.52,
+      "premium_cagr_pct": 0.6815,
+      "premium_cagr_bps": 68.15,
+      "n_rebalances": 992,
+      "annual_turnover_pct": 31.27,
+      "tx_drag_bps": 0.63,
+      "rebal_final_value": 6.2898,
+      "bh_final_value": 5.5906
+    },
+    "monthly": {
+      "rebalance_freq": "monthly",
+      "w_spy": 0.5,
+      "rebal_cagr": 10.0234,
+      "rebal_sharpe": 0.7813,
+      "rebal_mdd": -33.38,
+      "bh_cagr": 9.4867,
+      "bh_sharpe": 0.7305,
+      "bh_mdd": -31.52,
+      "premium_cagr_pct": 0.5367,
+      "premium_cagr_bps": 53.67,
+      "n_rebalances": 228,
+      "annual_turnover_pct": 14.66,
+      "tx_drag_bps": 0.29,
+      "rebal_final_value": 6.1346,
+      "bh_final_value": 5.5906
+    },
+    "quarterly": {
+      "rebalance_freq": "quarterly",
+      "w_spy": 0.5,
+      "rebal_cagr": 9.9951,
+      "rebal_sharpe": 0.781,
+      "rebal_mdd": -33.97,
+      "bh_cagr": 9.4867,
+      "bh_sharpe": 0.7305,
+      "bh_mdd": -31.52,
+      "premium_cagr_pct": 0.5085,
+      "premium_cagr_bps": 50.85,
+      "n_rebalances": 76,
+      "annual_turnover_pct": 7.86,
+      "tx_drag_bps": 0.16,
+      "rebal_final_value": 6.1048,
+      "bh_final_value": 5.5906
+    },
+    "annual": {
+      "rebalance_freq": "annual",
+      "w_spy": 0.5,
+      "rebal_cagr": 10.0326,
+      "rebal_sharpe": 0.7888,
+      "rebal_mdd": -32.63,
+      "bh_cagr": 9.4867,
+      "bh_sharpe": 0.7305,
+      "bh_mdd": -31.52,
+      "premium_cagr_pct": 0.5459,
+      "premium_cagr_bps": 54.59,
+      "n_rebalances": 19,
+      "annual_turnover_pct": 3.7,
+      "tx_drag_bps": 0.07,
+      "rebal_final_value": 6.1444,
+      "bh_final_value": 5.5906
+    }
+  },
+  "part3_correlation": {
+    "quintile_premium": {
+      "Q1 (lowest)": {
+        "avg_correlation": -0.2121,
+        "avg_premium_ann_pct": 0.6608,
+        "avg_premium_ann_bps": 66.08,
+        "n_days": 906
+      },
+      "Q2": {
+        "avg_correlation": -0.0683,
+        "avg_premium_ann_pct": 0.9353,
+        "avg_premium_ann_bps": 93.53,
+        "n_days": 906
+      },
+      "Q3": {
+        "avg_correlation": 0.043,
+        "avg_premium_ann_pct": 1.279,
+        "avg_premium_ann_bps": 127.9,
+        "n_days": 905
+      },
+      "Q4": {
+        "avg_correlation": 0.1813,
+        "avg_premium_ann_pct": 0.7685,
+        "avg_premium_ann_bps": 76.85,
+        "n_days": 906
+      },
+      "Q5 (highest)": {
+        "avg_correlation": 0.2839,
+        "avg_premium_ann_pct": 0.4945,
+        "avg_premium_ann_bps": 49.45,
+        "n_days": 906
+      }
+    },
+    "regression": {
+      "slope": -0.354856,
+      "intercept": 0.843695,
+      "r_squared": 0.0069,
+      "p_value": 0.0
+    },
+    "regime_performance": {
+      "Low": {
+        "ann_return_pct": 2.96,
+        "ann_vol_pct": 13.98,
+        "sharpe": 0.2117,
+        "n_days": 1510
+      },
+      "Mid": {
+        "ann_return_pct": 14.58,
+        "ann_vol_pct": 14.29,
+        "sharpe": 1.0198,
+        "n_days": 1509
+      },
+      "High": {
+        "ann_return_pct": 13.71,
+        "ann_vol_pct": 12.16,
+        "sharpe": 1.1281,
+        "n_days": 1510
+      }
+    }
+  },
+  "part4_weight_sweep": {
+    "30/70": {
+      "w_spy": 0.3,
+      "theoretical_premium_bps": 68.43,
+      "empirical_premium_bps": 44.32,
+      "rebal_cagr": 9.4883,
+      "rebal_sharpe": 0.7187,
+      "rebal_mdd": -29.87,
+      "bh_cagr": 9.0451,
+      "bh_sharpe": 0.6671
+    },
+    "35/65": {
+      "w_spy": 0.35,
+      "theoretical_premium_bps": 74.13,
+      "empirical_premium_bps": 48.23,
+      "rebal_cagr": 9.6408,
+      "rebal_sharpe": 0.7426,
+      "rebal_mdd": -30.6,
+      "bh_cagr": 9.1586,
+      "bh_sharpe": 0.6866
+    },
+    "40/60": {
+      "w_spy": 0.4,
+      "theoretical_premium_bps": 78.2,
+      "empirical_premium_bps": 51.1,
+      "rebal_cagr": 9.7809,
+      "rebal_sharpe": 0.7617,
+      "rebal_mdd": -31.48,
+      "bh_cagr": 9.2699,
+      "bh_sharpe": 0.7041
+    },
+    "45/55": {
+      "w_spy": 0.45,
+      "theoretical_premium_bps": 80.65,
+      "empirical_premium_bps": 52.91,
+      "rebal_cagr": 9.9084,
+      "rebal_sharpe": 0.7748,
+      "rebal_mdd": -32.36,
+      "bh_cagr": 9.3793,
+      "bh_sharpe": 0.719
+    },
+    "50/50": {
+      "w_spy": 0.5,
+      "theoretical_premium_bps": 81.46,
+      "empirical_premium_bps": 53.67,
+      "rebal_cagr": 10.0234,
+      "rebal_sharpe": 0.7813,
+      "rebal_mdd": -33.38,
+      "bh_cagr": 9.4867,
+      "bh_sharpe": 0.7305
+    },
+    "55/45": {
+      "w_spy": 0.55,
+      "theoretical_premium_bps": 80.65,
+      "empirical_premium_bps": 53.34,
+      "rebal_cagr": 10.1257,
+      "rebal_sharpe": 0.781,
+      "rebal_mdd": -34.42,
+      "bh_cagr": 9.5922,
+      "bh_sharpe": 0.7379
+    },
+    "60/40": {
+      "w_spy": 0.6,
+      "theoretical_premium_bps": 78.2,
+      "empirical_premium_bps": 51.93,
+      "rebal_cagr": 10.2153,
+      "rebal_sharpe": 0.7743,
+      "rebal_mdd": -35.75,
+      "bh_cagr": 9.696,
+      "bh_sharpe": 0.7407
+    },
+    "65/35": {
+      "w_spy": 0.65,
+      "theoretical_premium_bps": 74.13,
+      "empirical_premium_bps": 49.41,
+      "rebal_cagr": 10.2921,
+      "rebal_sharpe": 0.762,
+      "rebal_mdd": -37.09,
+      "bh_cagr": 9.798,
+      "bh_sharpe": 0.7387
+    },
+    "70/30": {
+      "w_spy": 0.7,
+      "theoretical_premium_bps": 68.43,
+      "empirical_premium_bps": 45.78,
+      "rebal_cagr": 10.3562,
+      "rebal_sharpe": 0.7453,
+      "rebal_mdd": -38.87,
+      "bh_cagr": 9.8984,
+      "bh_sharpe": 0.7318
+    }
+  },
+  "part5_comparison": {
+    "50_50_rebalanced": {
+      "cagr": 10.0234,
+      "sharpe": 0.7813,
+      "mdd": -33.38,
+      "source_of_edge": "Structural rebalancing premium (no prediction needed)"
+    },
+    "50_50_buy_and_hold": {
+      "cagr": 9.4867,
+      "sharpe": 0.7305,
+      "mdd": -31.52,
+      "source_of_edge": "Diversification only (no rebalancing)"
+    },
+    "12_vix_vt": {
+      "cagr": 7.104,
+      "sharpe": 0.7196,
+      "mdd": -25.67,
+      "source_of_edge": "VIX-based timing (requires prediction signal)"
+    }
+  },
+  "sub_period_analysis": {
+    "2006-2009 (GFC)": {
+      "n_days": 1006,
+      "correlation": 0.0605,
+      "sigma_spy": 26.35,
+      "sigma_gld": 24.42,
+      "theoretical_premium_bps": 151.55,
+      "empirical_premium_bps": -95.27,
+      "rebal_cagr": 9.5244,
+      "rebal_sharpe": 0.5886,
+      "bh_cagr": 10.4771,
+      "bh_sharpe": 0.6419
+    },
+    "2010-2014 (Recovery)": {
+      "n_days": 1258,
+      "correlation": 0.0732,
+      "sigma_spy": 15.88,
+      "sigma_gld": 17.97,
+      "theoretical_premium_bps": 66.67,
+      "empirical_premium_bps": -55.55,
+      "rebal_cagr": 8.6263,
+      "rebal_sharpe": 0.7319,
+      "bh_cagr": 9.1818,
+      "bh_sharpe": 0.7807
+    },
+    "2015-2019 (Bull)": {
+      "n_days": 1258,
+      "correlation": -0.168,
+      "sigma_spy": 13.42,
+      "sigma_gld": 12.56,
+      "theoretical_premium_bps": 49.33,
+      "empirical_premium_bps": 25.14,
+      "rebal_cagr": 8.6091,
+      "rebal_sharpe": 1.0357,
+      "bh_cagr": 8.3577,
+      "bh_sharpe": 0.9805
+    },
+    "2020-2024 (COVID+)": {
+      "n_days": 1258,
+      "correlation": 0.1583,
+      "sigma_spy": 20.99,
+      "sigma_gld": 15.52,
+      "theoretical_premium_bps": 72.31,
+      "empirical_premium_bps": 49.75,
+      "rebal_cagr": 13.3443,
+      "rebal_sharpe": 0.9735,
+      "bh_cagr": 12.8468,
+      "bh_sharpe": 0.9467
+    }
+  },
+  "summary": {
+    "rebalancing_premium_exists": true,
+    "theoretical_premium_5050_bps": 81.46,
+    "empirical_premium_monthly_bps": 53.67,
+    "best_frequency": "daily",
+    "best_frequency_net_premium_bps": 76.57,
+    "correlation_effect": "Low corr (-0.2121): 66 bps vs High corr (+0.2839): 49 bps",
+    "best_weight_allocation": "50/50",
+    "rebal_vs_vt": "50/50 rebal Sharpe=0.7813 vs 12/VIX Sharpe=0.7196",
+    "explains_why_5050_hard_to_beat": true,
+    "explanation": "50/50 SPY/GLD combines THREE structural edges: (1) Diversification (low correlation reduces portfolio vol), (2) Rebalancing premium (systematic buy-low-sell-high), (3) Gold's crisis alpha (negative correlation during crashes). VT strategies must overcome all three simultaneously, which is nearly impossible without genuine directional forecasting ability."
+  }
+}

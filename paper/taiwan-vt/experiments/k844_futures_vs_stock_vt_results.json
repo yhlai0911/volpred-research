@@ -1,1 +1,251 @@
-../../experiments/k844_futures_vs_stock_vt_results.json
+{
+  "experiment_id": "K844",
+  "title": "TX Futures VT vs 0050.TW Stock VT",
+  "date": "2026-04-03",
+  "data_source": "TAIFEX TX tick data + yfinance (^VIX, 0050.TW)",
+  "period": "2017-05-16 to 2026-04-02",
+  "n_days": 2152,
+  "return_decomposition": {
+    "night_session_annualized_bp": 1195.7101482354592,
+    "gap_annualized_bp": 247.6330208125374,
+    "day_session_annualized_bp": 171.90450753903588,
+    "full_day_annualized_bp": 1618.6947379393573,
+    "tw50_c2c_annualized_bp": 1982.0883684708047,
+    "night_pct_of_full": 73.7321123477853,
+    "gap_pct_of_full": 15.586416252742227,
+    "day_pct_of_full": 10.468516162801198
+  },
+  "correlation": {
+    "tx_c2c_vs_tw50_c2c": 0.9458171016264985,
+    "tx_fullday_vs_tw50_c2c": 0.9457073427668825
+  },
+  "performance": {
+    "S0: BH 0050.TW": {
+      "n_days": 2152,
+      "ann_return": 0.19820883684708046,
+      "ann_vol": 0.1974992601978739,
+      "sharpe": 1.003592806618595,
+      "mdd": -0.3382764727237615,
+      "cagr": 0.19554988998503386,
+      "total_return": 3.596249186400719,
+      "calmar": 0.578077122569269,
+      "avg_daily_turnover": 0.0
+    },
+    "S0b: BH TX Full-Day": {
+      "n_days": 2152,
+      "ann_return": 0.16186947379393574,
+      "ann_vol": 0.1864763552922064,
+      "sharpe": 0.8680428869402131,
+      "mdd": -0.29190826487256927,
+      "cagr": 0.15526516594349937,
+      "total_return": 2.42990140000326,
+      "calmar": 0.5318971218964267,
+      "avg_daily_turnover": 0.0
+    },
+    "S1: 8.63/VIX on 0050.TW": {
+      "n_days": 2152,
+      "ann_return": 0.11810491024272662,
+      "ann_vol": 0.0862272280876846,
+      "sharpe": 1.3696939222333062,
+      "mdd": -0.11088232931164188,
+      "cagr": 0.12115996249591388,
+      "total_return": 1.6554942713084602,
+      "calmar": 1.0926895497963978,
+      "avg_daily_turnover": 0.026270656949948287
+    },
+    "S2: 8.63/VIX on TX Full-Day": {
+      "n_days": 2152,
+      "ann_return": 0.11613716738051923,
+      "ann_vol": 0.07927921511201128,
+      "sharpe": 1.4649131833158595,
+      "mdd": -0.10658417850481794,
+      "cagr": 0.1195939674709181,
+      "total_return": 1.6239860398965669,
+      "calmar": 1.1220611646925822,
+      "avg_daily_turnover": 0.026270656949948287
+    },
+    "S3: 8.63/VIX on TX Night": {
+      "n_days": 2152,
+      "ann_return": 0.04980363997263095,
+      "ann_vol": 0.0487864904003206,
+      "sharpe": 1.0208490006959727,
+      "mdd": -0.05332093806545235,
+      "cagr": 0.04980929347753982,
+      "total_return": 0.5145242301555235,
+      "calmar": 0.934141357685757,
+      "avg_daily_turnover": 0.026282398925039925
+    },
+    "S4: Split VT (Day+Night)": {
+      "n_days": 2152,
+      "ann_return": 0.0766477038332902,
+      "ann_vol": 0.08120199853193856,
+      "sharpe": 0.9439140072783178,
+      "mdd": -0.15585380418709438,
+      "cagr": 0.07608788974204694,
+      "total_return": 0.8705512963301028,
+      "calmar": 0.48820040126006414,
+      "avg_daily_turnover": 0.05255305587498821
+    }
+  },
+  "dm_tests": {
+    "S2 vs S1": {
+      "dm_stat": 0.21649701632327806,
+      "p_value": 0.8286208802558976,
+      "harvey_pass": false
+    },
+    "S4 vs S1": {
+      "dm_stat": 4.345063750980131,
+      "p_value": 1.457130680249108e-05,
+      "harvey_pass": true
+    },
+    "S0b vs S0": {
+      "dm_stat": 1.9241824697686043,
+      "p_value": 0.05446350853665427,
+      "harvey_pass": false
+    },
+    "S2 vs S0": {
+      "dm_stat": 1.7915228395996818,
+      "p_value": 0.07334996257324922,
+      "harvey_pass": false
+    },
+    "S3 vs S1": {
+      "dm_stat": 2.972146918778872,
+      "p_value": 0.002990066923131085,
+      "harvey_pass": false
+    }
+  },
+  "cross_oos": {
+    "2018-01 to 2019-12": {
+      "S0: BH 0050.TW": {
+        "sharpe": 0.8225918713884708,
+        "mdd": -0.16980886109481286
+      },
+      "S0b: BH TX Full-Day": {
+        "sharpe": 0.8329379530503133,
+        "mdd": -0.14851095505246192
+      },
+      "S1: 8.63/VIX on 0050.TW": {
+        "sharpe": 1.078079652355622,
+        "mdd": -0.08820190157362684
+      },
+      "S2: 8.63/VIX on TX Full-Day": {
+        "sharpe": 1.4340178574160114,
+        "mdd": -0.0707107251828224
+      },
+      "S3: 8.63/VIX on TX Night": {
+        "sharpe": 1.0899178169317831,
+        "mdd": -0.04344630707626207
+      },
+      "S4: Split VT (Day+Night)": {
+        "sharpe": 0.7885567711867371,
+        "mdd": -0.08907098700106797
+      }
+    },
+    "2020-01 to 2021-12": {
+      "S0: BH 0050.TW": {
+        "sharpe": 1.1448689598852884,
+        "mdd": -0.28217649482293716
+      },
+      "S0b: BH TX Full-Day": {
+        "sharpe": 1.1936102799187613,
+        "mdd": -0.27811854000578395
+      },
+      "S1: 8.63/VIX on 0050.TW": {
+        "sharpe": 1.2636752100725515,
+        "mdd": -0.07291253825366684
+      },
+      "S2: 8.63/VIX on TX Full-Day": {
+        "sharpe": 1.5732377955508738,
+        "mdd": -0.06817824043165621
+      },
+      "S3: 8.63/VIX on TX Night": {
+        "sharpe": 1.6526309826074383,
+        "mdd": -0.04724133721440826
+      },
+      "S4: Split VT (Day+Night)": {
+        "sharpe": 1.1633806490071898,
+        "mdd": -0.07878601347346437
+      }
+    },
+    "2022-01 to 2023-12": {
+      "S0: BH 0050.TW": {
+        "sharpe": 0.02964051473297071,
+        "mdd": -0.33827647272376093
+      },
+      "S0b: BH TX Full-Day": {
+        "sharpe": 0.1553229794898378,
+        "mdd": -0.2804774263889054
+      },
+      "S1: 8.63/VIX on 0050.TW": {
+        "sharpe": 0.373747798792646,
+        "mdd": -0.11088232931164166
+      },
+      "S2: 8.63/VIX on TX Full-Day": {
+        "sharpe": 0.7058760416433255,
+        "mdd": -0.07831471241636512
+      },
+      "S3: 8.63/VIX on TX Night": {
+        "sharpe": 0.7084834923785142,
+        "mdd": -0.04794274294802903
+      },
+      "S4: Split VT (Day+Night)": {
+        "sharpe": 0.2790789046385761,
+        "mdd": -0.1041989647853726
+      }
+    },
+    "2024-01 to 2025-12": {
+      "S0: BH 0050.TW": {
+        "sharpe": 1.429232659627059,
+        "mdd": -0.2748499058114334
+      },
+      "S0b: BH TX Full-Day": {
+        "sharpe": 0.8494345634243785,
+        "mdd": -0.2919082648725686
+      },
+      "S1: 8.63/VIX on 0050.TW": {
+        "sharpe": 1.992291745427908,
+        "mdd": -0.10489482511612847
+      },
+      "S2: 8.63/VIX on TX Full-Day": {
+        "sharpe": 1.5051026227760835,
+        "mdd": -0.10658417850481883
+      },
+      "S3: 8.63/VIX on TX Night": {
+        "sharpe": 0.8212706222269901,
+        "mdd": -0.05332093806545224
+      },
+      "S4: Split VT (Day+Night)": {
+        "sharpe": 0.9240145229767119,
+        "mdd": -0.15585380418709394
+      }
+    }
+  },
+  "cross_oos_summary": {
+    "s2_beats_s1": "3/4",
+    "s4_beats_s1": "0/4"
+  },
+  "tx_cost_analysis": {
+    "total_tc_s1_stock_pct": 19.22171427713816,
+    "total_tc_s2_futures_pct": 0.5653445375628872,
+    "annualized_saving_bps": 218.46678319576995
+  },
+  "basis_analysis": {
+    "final_cumulative_drift_pct": -25.376078169312997,
+    "annualized_drift_pct": -2.9715481871128606,
+    "note": "Basis drift is primarily driven by dividend yield gap: yfinance 0050.TW uses adjusted close (total return including dividends ~2-3%/yr), while TX futures prices do NOT include dividends. This is NOT roll cost decay — it is the expected futures vs spot total return difference."
+  },
+  "return_decomposition_insights": {
+    "night_session_dominance": "73.7% of TX full-day return comes from night session (15:00-05:00), confirming K817's finding that most US->TW alpha is in overnight gap",
+    "day_session_marginal": "Only 10.5% of return from day session — trading hours are NOT where the action is",
+    "gap_meaningful": "15.6% from gap (night close to day open) — a non-trivial structural component"
+  },
+  "vix_regime_insight": "S2 (TX) outperforms S1 (0050) in Medium VIX (15-25): 1220 vs 1156 bp, and High VIX (>25): -945 vs -1203 bp. S1 outperforms in Low VIX (<15): 2438 vs 2142 bp. TX futures advantage is strongest during volatility — exactly when VT scaling matters most.",
+  "conclusion": "TX futures improve VT Sharpe ratio (1.465 vs 1.370, +0.095) with slightly better MDD (-10.7% vs -11.1%), but DM test Harvey FAIL (t=0.216). The Sharpe improvement comes from: (1) Lower volatility in TX VT returns (7.93% vs 8.62%), (2) Massive TX cost saving (218 bp/yr), (3) Better crisis protection (S2 loses less in high-VIX regime). However, TX full-day RETURN is lower than 0050.TW due to dividend yield gap (~3%/yr). Net conclusion: For a VT strategy, TX futures are MARGINALLY better (higher Sharpe, better MDD) but NOT statistically significant. The real advantage is for HIGH-FREQUENCY rebalancers who benefit from 34x lower transaction costs. For monthly rebalancers, 0050.TW is simpler and captures dividends.",
+  "limitations": [
+    "0050.TW uses yfinance adjusted close (includes dividends); TX futures do not — return comparison is total return vs price return",
+    "TX roll costs (monthly expiry switch) not explicitly modeled — estimated at 1-2 ticks per roll (~12 rolls/year)",
+    "Night session liquidity is ~57% of day session — large positions may face slippage",
+    "Only 2017-05 to 2026-04 (8.5 years) — no GFC-era data",
+    "VIX(T-2) for night session weight is conservative — more sophisticated intraday VIX tracking could improve S3/S4"
+  ]
+}
