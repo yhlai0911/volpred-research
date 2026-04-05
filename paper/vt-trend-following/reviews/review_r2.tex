@@ -1,0 +1,502 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% --- Severity colors --------------------------------------------------------
+\definecolor{highsev}{RGB}{204,0,0}
+\definecolor{medsev}{RGB}{204,102,0}
+\definecolor{lowsev}{RGB}{0,102,204}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{fixedblue}{RGB}{0,80,180}
+
+\newcommand{\HIGH}{\textcolor{highsev}{\textbf{[HIGH]}}}
+\newcommand{\MEDIUM}{\textcolor{medsev}{\textbf{[MEDIUM]}}}
+\newcommand{\LOW}{\textcolor{lowsev}{\textbf{[LOW]}}}
+\newcommand{\OK}{\textcolor{okgreen}{\textbf{[OK]}}}
+\newcommand{\DATAREADY}{\textcolor{fixedblue}{\textbf{[DATA READY]}}}
+
+% --- Title ------------------------------------------------------------------
+\title{Review R2: Academic Review + Audit Follow-up\\[6pt]
+\Large ``Is Volatility Targeting Just Trend Following?\\
+Decomposing the Benefits of Volatility Targeting''\\[6pt]
+\normalsize Lai (2026) --- body\_v2.tex, $\sim$33 pages, 18 citations\\
+\normalsize Targeting \textit{Journal of Portfolio Management} / \textit{Financial Analysts Journal}}
+
+\author{VolPred Research System\\
+\small Claude Opus 4.6 (1M context)\\[3pt]
+\small Inputs: R1 review, K898 Table~3 supplement, body\_v2.tex (unchanged)}
+
+\date{April 5, 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Executive Summary}
+% =============================================================================
+
+This R2 review assesses the status of 7 HIGH, 11 MEDIUM, and 7 LOW issues identified in R1, given that one supplementary experiment (K898) has been completed since R1.
+
+\medskip
+\noindent\textbf{Issue Summary:}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+& R1 & R2 & Change \\
+\midrule
+HIGH    & 7 & 4 & $-3$ (A.1 data ready, A.3 data ready, B.1 text fix needed) \\
+MEDIUM  & 11 & 13 & $+2$ (A.1, A.3 downgraded from HIGH) \\
+LOW     & 7 & 7 & $\pm 0$ \\
+\midrule
+Paper text changes made & --- & 0 & No edits to body\_v2.tex \\
+New experiment data & --- & K898 & Table~3 + bootstrap for 5 assets \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Overall Assessment:} The paper text remains unchanged from R1. K898 provides traceable data for Table~3 (dual mechanism decomposition) and Table~6 (MDD bootstrap), resolving the data gap for two of the four HIGH-severity traceability issues. However, \textbf{K898 data conflicts with the paper's current numbers in several places}, requiring careful reconciliation before integration. Tables~5 (international, 13 markets) and the split-sample results remain untraceable. The 1.4\% misleading average issue (B.1) persists in the text. After addressing the remaining 4 HIGH issues, the paper should be competitive at JPM, FAJ, or JEF.
+
+
+% =============================================================================
+\section{R1 HIGH Issues: Detailed Status}
+\label{sec:high}
+% =============================================================================
+
+\subsection{\DATAREADY\ A.1: Table~3 (Dual Mechanism) --- Data Now Available via K898}
+
+\textbf{R1 status:} Table~3 entirely untraceable; no JSON matches the paper's numbers.\\
+\textbf{R2 status:} K898 (\texttt{k898\_paper3\_table3\_supplement\_results.json}) provides a complete reproduction. However, \textbf{the K898 numbers differ from the paper in several cells}.
+
+\medskip
+\noindent\textbf{K898 vs Paper Table~3 Reconciliation:}
+
+\begin{center}
+\small
+\begin{tabular}{llccc}
+\toprule
+Asset & Metric & Paper Table~3 & K898 & Match? \\
+\midrule
+\multicolumn{5}{l}{\textit{SPY}} \\
+& B\&H Sharpe & 0.611 & 0.616 & $\approx$ (rounding) \\
+& B\&H MDD & $-55.2\%$ & $-55.2\%$ & \checkmark \\
+& VT Sharpe & 0.797 & 0.805 & $\approx$ (rounding) \\
+& VT MDD & $-24.7\%$ & $-24.7\%$ & \checkmark \\
+& Hedged Sharpe & 0.737 & 0.848 & \textcolor{highsev}{\textbf{MISMATCH}} \\
+& Hedged MDD & $-26.9\%$ & $-22.5\%$ & \textcolor{highsev}{\textbf{MISMATCH}} \\
+& TSMOM Sharpe & 0.172 & 0.242 & \textcolor{highsev}{\textbf{MISMATCH}} \\
+& TSMOM MDD & $-27.5\%$ & $-51.4\%$ & \textcolor{highsev}{\textbf{MISMATCH}} \\
+& MDD Retention & 93\% & 107\% & \textcolor{highsev}{\textbf{MISMATCH}} \\
+\midrule
+\multicolumn{5}{l}{\textit{50/50 SPY/GLD}} \\
+& B\&H Sharpe & 0.865 & 0.878 & $\approx$ \\
+& VT Sharpe & 0.982 & 0.998 & $\approx$ \\
+& Hedged Sharpe & 0.937 & 0.830 & \textcolor{highsev}{\textbf{MISMATCH}} \\
+& MDD Retention & 96\% & 96\% & \checkmark \\
+\midrule
+\multicolumn{5}{l}{\textit{MDD Retention (other assets)}} \\
+DIA & & 91\% & 99\% & \textcolor{highsev}{\textbf{MISMATCH}} \\
+QQQ & & 90\% & 111\% & \textcolor{highsev}{\textbf{MISMATCH}} \\
+IWM & & 97\% & 104\% & \textcolor{medsev}{Differs} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Critical finding:} K898 produces MDD retention values of 96--111\% for all five assets, substantially higher than the paper's 90--97\%. Several K898 values \textbf{exceed 100\%}, meaning the hedged VT achieves \textit{better} MDD protection than unhedged VT---which implies TSMOM exposure actually \textit{hurts} MDD protection for some assets.
+
+The discrepancies likely arise from differences in TSMOM hedging methodology:
+\begin{itemize}[nosep]
+\item K898 uses daily VIX signal with 1-day lag (per its metadata), while the paper may use monthly rebalancing.
+\item K898's TSMOM hedge uses rolling 252-day OLS: $\text{VT}_t = a + b \times \text{TSMOM}_t$, with PureVT $= \text{VT} - b \times \text{TSMOM}$. The paper's Equation~(5) uses the same formulation.
+\item K898 uses SHY as cash proxy; the paper uses SHY as well.
+\item K898 reports 0 bps transaction costs in the methodology block but claims 10 bps in the description---this should be clarified.
+\item K898 period is 2005-01-03 to 2026-04-01 ($N = 5{,}092$); paper says ``2005--2026'' but some numbers may derive from a slightly different end date.
+\end{itemize}
+
+\noindent\textbf{The hedged VT and TSMOM numbers differ substantially.} This suggests the TSMOM construction or hedging regression differs between the paper's original (untraceable) computation and K898. The buy-and-hold and VT numbers approximately match (within rounding tolerance), confirming that the divergence is specifically in the TSMOM hedging component.
+
+\noindent\textbf{Action required:}
+\begin{enumerate}[nosep]
+\item Investigate the TSMOM hedging specification: does the paper's original computation use expanding-window (not rolling) OLS? Or a different lookback? Or monthly rather than daily TSMOM signal?
+\item Once the specification is reconciled, update Table~3 with the verified K898 numbers.
+\item If MDD retention exceeds 100\% for some assets (as K898 suggests), this actually \textit{strengthens} the paper's thesis---discuss this finding explicitly.
+\item The paper's text currently says ``90--97\%'' in the abstract, introduction, and conclusion. If K898's 96--111\% values are correct, this claim needs updating.
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{fixedblue}{Downgraded from HIGH to MEDIUM.} Data exists but reconciliation is needed before text integration.
+
+\bigskip
+
+
+\subsection{\HIGH\ A.2: Table~5 (International Evidence, 13 markets) --- STILL UNTRACEABLE}
+
+\textbf{R1 status:} No JSON for the 13-market international results.\\
+\textbf{R2 status:} \textcolor{highsev}{No change.} No new experiment has been created.
+
+The specific untraceable numbers remain:
+\begin{itemize}[nosep]
+\item 13 market-level rows with VIX Sensitivity, Sharpe (B\&H and VT), MDD (B\&H and VT), $\Delta$Sharpe, $\Delta$MDD
+\item Cross-sectional statistics: $\Delta$MDD average = 28.7 pp, $t = 15.70$
+\item VIX sensitivity vs $\Delta$MDD: $r = -0.770$, $p = 0.002$; $\rho = -0.720$, $p = 0.006$
+\end{itemize}
+
+\textbf{Action required:} Create \texttt{k9XX\_international\_vt\_13markets.py} and results JSON.
+
+\textbf{Severity:} \textcolor{highsev}{Remains HIGH.}
+
+\bigskip
+
+
+\subsection{\DATAREADY\ A.3: Table~6 (MDD Bootstrap, 5 assets) --- Data Available via K898}
+
+\textbf{R1 status:} No JSON for bootstrap results.\\
+\textbf{R2 status:} K898 includes bootstrap results. However, \textbf{the K898 bootstrap results conflict with the paper's Table~6 values.}
+
+\begin{center}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+& \multicolumn{3}{c}{Paper Table~6} & \multicolumn{3}{c}{K898 Bootstrap} \\
+\cmidrule(lr){2-4} \cmidrule(lr){5-7}
+Asset & Point & 90\% CI Low & 90\% CI High & Point & 90\% CI Low & 90\% CI High \\
+\midrule
+SPY  & 93  & 86 & 97  & 111 & 95  & 172 \\
+50/50 & 96 & 90 & 99  & 110 & 78  & 187 \\
+DIA  & 91  & 83 & 96  & 104 & 88  & 151 \\
+QQQ  & 90  & 82 & 95  & 120 & 93  & 194 \\
+IWM  & 97  & 91 & 100 & 115 & 90  & 189 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The K898 bootstrap CIs are dramatically wider than the paper's (e.g., SPY: $[95, 172]$ vs paper's $[86, 97]$), and the point estimates are substantially higher (96--120\% vs 90--97\%). This is consistent with the MDD retention mismatch in A.1---the underlying TSMOM hedging specification produces different results.
+
+\textbf{Key discrepancy:} The paper's bootstrap CIs are remarkably tight (ranges of 8--11 percentage points), while K898's CIs span 63--109 percentage points. Either the paper's bootstrap used a much smaller block size, or the TSMOM hedging specification produces more stable results than K898's version.
+
+\textbf{Action required:}
+\begin{enumerate}[nosep]
+\item Resolve the TSMOM hedging specification discrepancy (same root cause as A.1).
+\item Once resolved, update Table~6 with verified bootstrap CIs.
+\item The paper's $H_0$: Retention $\leq 80\%$ test should be re-evaluated with the correct CIs. Under K898, 50/50 fails ($p = 0.056 > 0.05$) while the other four assets still reject.
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{fixedblue}{Downgraded from HIGH to MEDIUM.} Data exists but reconciliation needed.
+
+\bigskip
+
+
+\subsection{\HIGH\ A.4: Split-sample results ($r = 0.487$) --- STILL UNTRACEABLE}
+
+\textbf{R1 status:} No JSON for split-sample cross-sectional results.\\
+\textbf{R2 status:} \textcolor{highsev}{No change.}
+
+The v2 addition of split-sample results (Pearson $r = 0.487$, $p = 0.021$; bootstrap CI $[0.114, 0.737]$; Spearman $\rho = 0.461$, $p = 0.031$) remains without a traceable experiment file.
+
+\textbf{Action required:} Re-run split-sample estimation and save to JSON. This should be straightforward given that the full-sample results (Table~2) are fully verified against \texttt{vt\_tsmom\_final\_n22.json}.
+
+\textbf{Severity:} \textcolor{highsev}{Remains HIGH.}
+
+\bigskip
+
+
+\subsection{\HIGH\ B.1: ``1.4\% TSMOM contribution'' misleading average --- TEXT UNCHANGED}
+
+\textbf{R1 status:} The 1.4\% is a cross-asset average pulled to near-zero by negative values (EEM, EFA). For SPY it is 7.1\%. Table~3 implies 7.5\% ($0.060/0.797$).\\
+\textbf{R2 status:} \textcolor{highsev}{No change in paper text.}
+
+K898 provides updated decomposition data. For SPY, K898 shows:
+\begin{itemize}[nosep]
+\item $\Delta$Sharpe lost to TSMOM: $-0.043$ (K898) vs $-0.060$ (paper)
+\item \% Sharpe from TSMOM: $-22.8\%$ (K898, negative means TSMOM hedging \textit{reduces} Sharpe) vs $32\%$ (paper, positive means TSMOM \textit{contributes} to Sharpe)
+\end{itemize}
+
+The sign difference is striking and relates to the decomposition interpretation. K898's negative percentage for SPY means removing TSMOM \textit{improves} the hedged portfolio's Sharpe---further weakening the ``TSMOM explains VT'' narrative and strengthening the paper's thesis.
+
+\textbf{Action required:}
+\begin{enumerate}[nosep]
+\item Replace ``approximately 1.4\%'' with per-asset reporting (as recommended in R1).
+\item State clearly: ``For SPY, the TSMOM contribution to total VT Sharpe is approximately 7\% (based on the full VT-minus-B\&H improvement); the cross-asset average is near zero because non-equity and emerging-market assets show zero or negative TSMOM contributions.''
+\item Update Table~1 footnote accordingly.
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{highsev}{Remains HIGH} until the paper text is corrected.
+
+\bigskip
+
+
+\subsection{\HIGH\ B.2: Table~4 M5 $N = 3{,}740$ vs JSON $N = 5{,}049$ --- TEXT UNCHANGED}
+
+\textbf{R1 status:} JSON shows $N = 5{,}049$ for M5, but paper says $N = 3{,}740$ (SPLV subsample). Evidence suggests AQR BAB was actually used.\\
+\textbf{R2 status:} \textcolor{highsev}{No change in paper text.}
+
+The M5 AIC ($-47{,}213$) in the paper matches the JSON, strongly suggesting the reported coefficients come from the full-sample ($N = 5{,}049$) AQR BAB run, not the SPLV subsample.
+
+\textbf{Action required:}
+\begin{enumerate}[nosep]
+\item If AQR BAB was used (most likely): change Table~4 footnote to ``M5 uses AQR BAB factor data ($N = 5{,}049$, full sample)''. Remove SPLV/SPHB discussion.
+\item Add Frazzini \& Pedersen (2014) citation (also D.1).
+\item If SPLV was used: re-run M5 and save JSON.
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{highsev}{Remains HIGH.}
+
+\bigskip
+
+
+\subsection{\HIGH\ C.1: MDD retention for only 5 US equity assets --- NOT EXPANDED}
+
+\textbf{R1 status:} The 90--97\% claim is based on 5 highly correlated US equity assets (effectively 1--2 independent observations).\\
+\textbf{R2 status:} \textcolor{highsev}{No change.}
+
+K898 confirms the same 5 assets (SPY, 50/50, DIA, QQQ, IWM) but does not add non-equity or international assets. K79 JSON shows MDD preservation for EEM (90.28\%), EFA (94.02\%), GLD (96.56\%)---which \textit{support} the paper's claim but are not reported.
+
+\textbf{Action required:} Report MDD retention for at minimum 8--10 assets spanning equity, commodity, and bond classes. The data appears to already exist in K79.
+
+\textbf{Severity:} \textcolor{highsev}{Remains HIGH.} The 90--97\% range appears in the abstract 3 times; it must be based on more than 5 correlated assets.
+
+
+% =============================================================================
+\section{R1 MEDIUM Issues: Status}
+\label{sec:medium}
+% =============================================================================
+
+\begin{enumerate}[label=\textbf{M\arabic*}., start=1]
+
+\item \MEDIUM\ \textbf{Sector analysis ($r = 0.163$, $N = 11$): No source JSON.} \textit{No change. OPEN.}
+
+\item \MEDIUM\ \textbf{Inconsistent sample periods across tables.} \textit{No change. The rationalization table in Section~2.1 partially addresses this, but the underlying issue persists. OPEN.}
+
+\item \MEDIUM\ \textbf{K687/K697/K688 not incorporated.} \textit{No change.} The paper's strongest supporting evidence (K687: no VT beats BH 50/50 on Sharpe; K697: VIX predicts magnitude not direction; K688: CRRA $\gamma \geq 5$ favors VT) remains absent. The Cederburg (2020) rebuttal is still hand-waving. \textit{OPEN.}
+
+\item \LOW\ $\to$ \MEDIUM\ \textbf{Table~3 Calmar column discussed nowhere.} Upgraded because the K898 reconciliation will involve revising Table~3 text anyway---the Calmar column should either be discussed or removed at that point. \textit{OPEN.}
+
+\item \MEDIUM\ \textbf{Block bootstrap block size ($b = 252$) sensitivity.} \textit{No change.} K898 also uses $b = 252$. A sensitivity check with $b \in \{63, 126, 252\}$ would strengthen the result, especially given the dramatically wider K898 CIs. \textit{OPEN.}
+
+\item \MEDIUM\ \textbf{Full-sample TSMOM orthogonalization look-ahead.} \textit{No change. OPEN.}
+
+\item \MEDIUM\ \textbf{No placebo test for international VIX channel.} \textit{No change. OPEN.}
+
+\item \LOW\ \textbf{No GJR-GARCH convergence diagnostics for 22 assets.} \textit{No change. OPEN.}
+
+\item \MEDIUM\ \textbf{Missing Frazzini \& Pedersen (2014) for BAB.} \textit{No change. OPEN.}
+
+\item \MEDIUM\ \textbf{Missing trend-following references.} Hurst et al.\ (2017), Liu et al.\ (2019), Jegadeesh \& Titman (1993). \textit{No change. OPEN.}
+
+\item \MEDIUM\ \textbf{Hood \& Raughtigan (2025) lacks identification.} No SSRN link or institutional affiliation. \textit{No change. OPEN.}
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{R1 LOW Issues: Status}
+\label{sec:low}
+% =============================================================================
+
+\begin{enumerate}[label=\textbf{L\arabic*}., start=1]
+
+\item \LOW\ \textbf{Lai (2026a) suffix.} \textit{No change. OPEN.}
+
+\item \LOW\ \textbf{Several citations lack DOIs.} \textit{No change. OPEN.}
+
+\item \LOW\ \textbf{``$\sim$4\%/year Sharpe drag'' conflates units.} \textit{No change. OPEN.} Should be ``$\sim$0.05 Sharpe ratio units.''
+
+\item \LOW\ \textbf{JPM needs more practitioner content.} \textit{No change. OPEN.}
+
+\item \LOW\ \textbf{Paper length ($\sim$33 pages) may exceed FAJ norms.} \textit{No change. OPEN.}
+
+\item \LOW\ \textbf{``strategies eliminates'' grammatical error.} \textit{No change. OPEN.}
+
+\item \LOW\ \textbf{Sub-period stability has no summary table.} \textit{No change. OPEN.}
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{New Findings from K898 Reconciliation}
+\label{sec:k898}
+% =============================================================================
+
+The K898 experiment reveals systematic differences from the paper's reported numbers that go beyond simple rounding. These differences cluster in the TSMOM-hedged portfolio and pure TSMOM results, suggesting a specification difference in how the TSMOM hedge is constructed or applied.
+
+\subsection{Hypothesis: TSMOM Construction Differences}
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+Parameter & Paper (inferred) & K898 \\
+\midrule
+VT signal frequency & Monthly rebalancing & Daily signal, 1-day lag \\
+TSMOM lookback & 252 days & 252 days \\
+TSMOM hedge & Rolling 252-day OLS & Rolling 252-day OLS \\
+Cash proxy & SHY & SHY \\
+Transaction costs & 10 bps & 0 bps (metadata) / 10 bps (description) \\
+Period & 2005--2026 & 2005-01-03 to 2026-04-01 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The most likely source of divergence is the \textbf{daily vs monthly signal frequency}. The paper's Equation~(1) defines $w_t = \min(12/\text{VIX}_t, 1.0)$ with ``lagged weights: VIX at the end of month $t$ determines the allocation for month $t+1$,'' while K898 uses daily VIX with a 1-day lag. Monthly rebalancing produces smoother weight changes and lower turnover, which affects the hedged portfolio differently than daily rebalancing.
+
+\subsection{Recommendation}
+
+\begin{enumerate}[nosep]
+\item Re-run K898 with \textbf{monthly rebalancing} (matching the paper's specification) to determine whether this resolves the discrepancy.
+\item If monthly rebalancing matches the paper's numbers: update Table~3 with the verified monthly results, keeping K898 daily results as a robustness check.
+\item If neither specification matches: the paper's original computation must be recreated and documented.
+\end{enumerate}
+
+
+% =============================================================================
+\section{Consolidated Issue List (R2)}
+\label{sec:consolidated}
+% =============================================================================
+
+\subsection*{\textcolor{highsev}{HIGH (4 items)}}
+
+\begin{enumerate}[label=\textcolor{highsev}{\textbf{H\arabic*}}]
+
+\item \textbf{Table~5 (International, 13 markets): Entirely untraceable.} No experiment JSON. Create dedicated script. \textit{[Was A.2]}
+
+\item \textbf{Split-sample cross-sectional results ($r = 0.487$): Untraceable.} Re-run and save JSON. \textit{[Was A.4]}
+
+\item \textbf{Table~4 M5: $N = 3{,}740$ vs $N = 5{,}049$.} Likely AQR BAB was used (full sample). Clarify and update footnote. Add Frazzini \& Pedersen (2014). \textit{[Was B.2]}
+
+\item \textbf{MDD retention based on only 5 correlated US equity assets.} Expand to 8--10 assets across equity/commodity/bond. K79 data suggests non-equity MDD retention also high. \textit{[Was C.1]}
+
+\end{enumerate}
+
+\subsection*{\textcolor{medsev}{MEDIUM (13 items)}}
+
+\begin{enumerate}[label=\textcolor{medsev}{\textbf{M\arabic*}}]
+
+\item \textbf{Table~3 / Table~6: K898 data available but needs reconciliation.} Resolve daily-vs-monthly specification mismatch. Update tables with verified numbers. K898's MDD retention $>100\%$ may strengthen the thesis. \textit{[Was A.1 + A.3]}
+
+\item \textbf{``1.4\% TSMOM contribution'' misleading.} Replace with per-asset reporting. \textit{[Was B.1]}
+
+\item \textbf{Sector analysis ($r = 0.163$): No source JSON.} \textit{[Was M in A.5]}
+
+\item \textbf{K687/K697/K688 not incorporated.} Paper's strongest supporting evidence absent. \textit{[Was v2 A.1]}
+
+\item \textbf{Inconsistent sample periods across tables.} Consider unifying to 2007 start. \textit{[Was B.3]}
+
+\item \textbf{Table~3 Calmar column undiscussed.} Discuss or remove. \textit{[Was B.4, upgraded]}
+
+\item \textbf{Block bootstrap sensitivity ($b = 63, 126, 252$) not tested.} \textit{[Was C.2]}
+
+\item \textbf{Full-sample TSMOM orthogonalization look-ahead.} Add footnote. \textit{[Was C.3]}
+
+\item \textbf{No placebo test for international VIX channel.} \textit{[Was C.4]}
+
+\item \textbf{Missing Frazzini \& Pedersen (2014) citation.} \textit{[Was D.1]}
+
+\item \textbf{Missing trend-following references.} Hurst et al.\ (2017), Liu et al.\ (2019). \textit{[Was D.2]}
+
+\item \textbf{Hood \& Raughtigan (2025) lacks identification.} \textit{[Was D.3]}
+
+\item \textbf{``$\sim$4\%/year Sharpe drag'' conflates units.} Should be ``$\sim$0.05 Sharpe units.'' \textit{[Was E.1]}
+
+\end{enumerate}
+
+\subsection*{\textcolor{lowsev}{LOW (7 items)}}
+
+\begin{enumerate}[label=\textcolor{lowsev}{\textbf{L\arabic*}}]
+\item Lai (2026a) suffix implies companion paper.
+\item Several citations lack DOIs.
+\item JPM needs more practitioner content.
+\item Paper length ($\sim$33 pages) may exceed FAJ norms.
+\item ``strategies eliminates'' grammatical error (Section~1, paragraph~2).
+\item Sub-period stability has no summary table.
+\item No GJR-GARCH convergence diagnostics for 22 assets.
+\end{enumerate}
+
+
+% =============================================================================
+\section{Revision Priorities (R2, ordered)}
+\label{sec:priorities}
+% =============================================================================
+
+\begin{enumerate}
+
+\item \textbf{[CRITICAL]} \textbf{Reconcile K898 with paper's TSMOM specification.} Re-run K898 with monthly rebalancing. Determine which specification is correct. Update Tables~3 and~6. This is the prerequisite for closing A.1, A.3, and the 1.4\% issue (B.1). \textit{Estimated effort: 1--2 hours.}
+
+\item \textbf{[CRITICAL]} \textbf{Create international experiment (13 markets)} for Table~5 (H1). \textit{Estimated effort: 2--3 hours.}
+
+\item \textbf{[CRITICAL]} \textbf{Save split-sample results to JSON} (H2). Re-run the split-sample cross-sectional analysis and save structured results. \textit{Estimated effort: 30 minutes.}
+
+\item \textbf{[HIGH]} \textbf{Resolve Table~4 M5 $N$ discrepancy} (H3). Determine whether AQR BAB or SPLV was used. Update footnote. Add Frazzini \& Pedersen (2014). \textit{Estimated effort: 30 minutes.}
+
+\item \textbf{[HIGH]} \textbf{Expand MDD retention to 8--10 diverse assets} (H4). K79 data may already contain the needed numbers (EEM: 90.28\%, EFA: 94.02\%, GLD: 96.56\%). Extract and add to Table~3/Table~6. \textit{Estimated effort: 1--2 hours.}
+
+\item \textbf{[HIGH]} \textbf{Fix ``1.4\%'' misleading average} (M2). Replace with per-asset reporting in text and Table~1 footnote. \textit{Estimated effort: 30 minutes.}
+
+\item \textbf{[HIGH]} \textbf{Incorporate K687/K697/K688} (M4). Add K688's $\gamma \geq 5$ to Cederburg rebuttal. Add K697's magnitude-vs-direction evidence. Cite K687 for insurance interpretation. \textit{Estimated effort: 1 hour.}
+
+\item \textbf{[MEDIUM]} Address remaining citation issues (Frazzini \& Pedersen, Hood identification, trend-following references).
+
+\item \textbf{[MEDIUM]} Add placebo test for international VIX channel.
+
+\item \textbf{[LOW]} Fix grammar, DOIs, length, Calmar discussion.
+
+\end{enumerate}
+
+\bigskip
+\noindent\textbf{Estimated total effort:} 8--12 hours of focused work.
+
+
+% =============================================================================
+\section{Progress Assessment}
+\label{sec:progress}
+% =============================================================================
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+& R1 & R2 & Assessment \\
+\midrule
+Paper text & body\_v2.tex & unchanged & No edits made \\
+Tables verified (of 7) & 2 (Table~1, 2) & 2 & No change \\
+Tables with data ready & 0 & 2 (Table~3, 6 via K898) & Improved \\
+Tables fully untraceable & 5 & 3 (Table~5, split-sample, sector) & Improved \\
+HIGH issues & 7 & 4 & Improved \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{What improved since R1:}
+\begin{itemize}[nosep]
+\item K898 provides traceable data for Table~3 and Table~6 (the paper's two most important empirical tables after Table~1).
+\item The TSMOM hedging specification discrepancy is now visible and diagnosable.
+\end{itemize}
+
+\noindent\textbf{What did not improve:}
+\begin{itemize}[nosep]
+\item Zero text changes to body\_v2.tex.
+\item Table~5 (international), split-sample, and sector results remain untraceable.
+\item The 1.4\% misleading statistic, the M5 $N$ discrepancy, and the MDD asset diversity issue are all unchanged.
+\item K687/K697/K688 still not incorporated (the paper's strongest supporting evidence).
+\end{itemize}
+
+\bigskip
+
+\noindent\textbf{Conditional recommendation:} \textit{Major revision, modestly improved from R1.} The K898 data is a meaningful step forward but introduces a reconciliation challenge. Once the TSMOM specification is resolved, the paper's core empirical tables (1--4, 6) will be traceable. Table~5 (international) and the expanded MDD analysis (H4) remain the primary data gaps. The K687/K697/K688 incorporation (M4) would meaningfully strengthen the theoretical framework. After all HIGH issues are resolved, the paper should be competitive at JPM, FAJ, or JEF.
+
+\end{document}

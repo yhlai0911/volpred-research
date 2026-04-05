@@ -1,0 +1,379 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{fixedblue}{RGB}{0,80,180}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report (R2)}\\[0.5em]
+{\large Volatility Targeting in the Taiwan Stock Market:\\Leverage Amplification, Model Selection, and Practical Implementation}\\[0.5em]
+{\normalsize Document type: Journal paper (target: JBF / IRFA)}\\
+{\normalsize Version reviewed: body\_v2.tex + main\_v2.tex (unchanged since R1)}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (JBF-level)}\\
+{\normalsize Inputs: R1 review, K892 gamma verification, K896 ES supplement}
+\end{center}
+
+\bigskip
+
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+R1 issue count & 6 Severe, 8 Medium, 7 Minor \\
+R2 issue count & 4 Severe, 8 Medium, 6 Minor \\
+Resolved since R1 & 2 Severe resolved (data ready, pending text integration) \\
+New issues found in R2 & 0 \\
+Overall assessment & \textbf{Major revision required (improved from R1)} \\
+\end{tabular}
+
+\bigskip
+
+\noindent\textbf{Executive summary.} Since R1, two supplementary experiments have been completed that address the two most critical gaps: K892 (gamma verification) provides canonical parameter estimates for all assets, and K896 (Expected Shortfall analysis) provides full ES backtesting with Acerbi-Szekely Z-test and Fissler-Ziegel scoring. However, \textbf{the paper text has not been updated}---body\_v2.tex remains identical to the version reviewed in R1. The K892 and K896 data are ready for integration but the actual text changes (Table~2 gamma values, new ES section/table, updated amplification ratios, Christoffersen reference) have not been made. Additionally, the VT performance tables (S5) and SSVS PIP conflict (S6) remain fully unresolved with no new experiment data. This review provides a precise status assessment of each R1 issue and specifies exactly what text changes are needed to close each item.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{R1 Severe Issues: Status Assessment}
+% ════════════════════════════════════════════════════════════════════
+
+\subsection*{\textcolor{fixedblue}{S1. Missing Expected Shortfall (ES) analysis --- DATA READY, TEXT NOT UPDATED}}
+
+\textbf{R1 status:} No ES analysis anywhere in the paper.\\
+\textbf{R2 status:} K896 (\texttt{k896\_taiwan\_es\_supplement\_results.json}) provides complete ES backtesting.
+
+\medskip
+\noindent\textbf{K896 key findings (verified):}
+
+\begin{center}
+\small
+\begin{tabular}{lccccc}
+\toprule
+Model & VaR Trinity & ES (AS Z2) & FZ Score & Both PASS & Level \\
+\midrule
+\multicolumn{6}{l}{\textit{1\% Level (N = 1,756 OOS days)}} \\
+GJR+HistSim & PASS & PASS ($p = 0.460$) & 4.011 & \textcolor{okgreen}{Yes} & 1\% \\
+GJR+Student-$t$ & PASS & PASS ($p = 0.548$) & 4.025 & \textcolor{okgreen}{Yes} & 1\% \\
+GJR+Cornish-Fisher & FAIL (Kupiec) & PASS ($p = 0.539$) & 3.913 & No & 1\% \\
+GJR+Normal & FAIL (Kupiec) & PASS ($p = 0.516$) & 4.055 & No & 1\% \\
+8.63/VIX VT & FAIL (Kup+CC) & PASS ($p = 0.413$) & 4.517 & No & 1\% \\
+\midrule
+\multicolumn{6}{l}{\textit{5\% Level}} \\
+GJR+Cornish-Fisher & PASS & PASS ($p = 0.558$) & 4.281 & \textcolor{okgreen}{Yes} & 5\% \\
+GJR+Student-$t$ & PASS & PASS ($p = 0.525$) & 4.381 & \textcolor{okgreen}{Yes} & 5\% \\
+GJR+HistSim & PASS & PASS ($p = 0.500$) & 4.401 & \textcolor{okgreen}{Yes} & 5\% \\
+GJR+Normal & PASS & PASS ($p = 0.500$) & 4.474 & \textcolor{okgreen}{Yes} & 5\% \\
+8.63/VIX VT & FAIL (Kupiec) & PASS ($p = 0.456$) & 5.132 & No & 5\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Notable findings from K896:}
+\begin{itemize}[nosep]
+\item All models PASS the Acerbi-Szekely ES test at both 1\% and 5\% levels---ES is less discriminating than VaR Trinity for these models.
+\item GJR+HistSim and GJR+Student-$t$ are the only two models achieving \textbf{joint VaR+ES PASS} at 1\%.
+\item The 8.63/VIX VT strategy FAILS VaR at both levels but PASSES ES, suggesting the VIX proxy produces adequate tail coverage on average but with clustering violations.
+\item Fissler-Ziegel joint scoring ranks GJR+Cornish-Fisher best at 1\% (3.913) and at 5\% (4.281), despite its Kupiec failure at 1\% from too-conservative VaR.
+\end{itemize}
+
+\noindent\textbf{Text changes required to close S1:}
+\begin{enumerate}[nosep]
+\item Add a new subsection or extend Section~7 with an ES analysis table reporting the K896 results above.
+\item Add Acerbi \& Szekely (2014) and Fissler \& Ziegel (2016) to the bibliography.
+\item In the prediction--VaR paradox discussion (Section~5/7), extend to ask: ``Does the paradox also hold for ES?'' Answer: partially---all models pass ES, so the paradox is VaR-specific, not tail-risk-generic.
+\item Update the abstract to mention ES (e.g., ``VaR Trinity and Expected Shortfall backtesting'').
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{fixedblue}{Downgraded from SEVERE to MEDIUM} (data exists; only text integration remains).
+
+\bigskip
+
+\subsection*{\textcolor{fixedblue}{S2. 0050.TW gamma conflict --- DATA READY, TEXT NOT UPDATED}}
+
+\textbf{R1 status:} Table~2 reports $\gamma = 0.087$ ($t = 2.20$); K892 full-sample yields $\gamma = 0.097$ ($t = 3.60$).\\
+\textbf{R2 status:} K892 provides canonical estimates. Paper text unchanged.
+
+\medskip
+\noindent\textbf{K892 canonical values (recommended for paper):}
+
+\begin{center}
+\small
+\begin{tabular}{lccccl}
+\toprule
+Asset & $\gamma$ & $t$-stat & $n$ & Dist & Notes \\
+\midrule
+0050.TW (full, Normal) & 0.097 & 3.60 & 4,219 & Normal & \textbf{Recommended for Table~2} \\
+0050.TW (full, Student-$t$) & 0.080 & 3.48 & 4,219 & $t$ & Alternative \\
+TAIEX (2008--2026) & 0.129 & 4.63 & 4,461 & Normal & For amplification ratio \\
+TAIEX (full 1997--2026) & 0.109 & 5.62 & 7,044 & Normal & Longest sample \\
+TSMC (full, Normal) & 0.052 & 3.98 & 6,525 & Normal & \textbf{Recommended for Table~2} \\
+TSMC (2008--2026) & 0.047 & 2.58 & 4,470 & Normal & Matched period \\
+SPY (full, Normal) & 0.189 & 6.88 & 6,601 & Normal & Control \\
+SPY (2008--2026) & 0.220 & 6.94 & 4,592 & Normal & Matched period \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{R1 diagnosis confirmed:} The paper's $\gamma = 0.087$ with $t = 2.20$ mixes the gamma from an expanding window ($\gamma \approx 0.083$, 2009--2023) with the $t$-stat from a last-2000 window ($t \approx 2.19$). This mixing is confirmed by K892.
+
+\noindent\textbf{Text changes required to close S2:}
+\begin{enumerate}[nosep]
+\item Decide on estimation specification: recommend full-sample Normal (consistent across all assets).
+\item Update Table~2 (Table~\ref{tab:gamma} in the paper): 0050.TW $\gamma = 0.097$ ($t = 3.60$), TSMC $\gamma = 0.052$ ($t = 3.98$).
+\item Update the Table~2 footnote to state: ``Full-sample GJR-GARCH(1,1) with Normal innovations. Source: K892.''
+\item Update the Summary Statistics table (Table~1): match gamma and $t$-stat columns to Table~2.
+\item Update amplification ratio throughout: $0.109 / 0.097 = 1.12\times$ (TAIEX 2008--2026 / 0050.TW), or using the TAIEX full-sample $0.272 / 0.097 = 2.8\times$ if the original TAIEX estimate is retained. The 5.0$\times$ headline (TAIEX / individual stocks) requires re-checking with full-sample individual-stock gammas.
+\item Update Abstract, Section~3.1, and Conclusion with consistent values.
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{fixedblue}{Downgraded from SEVERE to MEDIUM} (data exists; only text integration remains).
+
+\bigskip
+
+\subsection*{\textcolor{fixedblue}{S3. Internal gamma inconsistency (Section~4.5 vs Table~2) --- PARTIALLY RESOLVED}}
+
+\textbf{R1 status:} Section~4.5 reports 0050.TW $\gamma = 0.124$ ($t = 2.46$) and TSMC $\gamma = 0.054$ ($t = 1.07$), contradicting Table~2's values.\\
+\textbf{R2 status:} K892 reveals the likely explanation.
+
+\medskip
+\noindent\textbf{Diagnosis from K892:}
+\begin{itemize}[nosep]
+\item Section~4.5's 0050.TW $\gamma = 0.124$ is closest to the rolling $w=2000$ mean ($\gamma_{\text{mean}} = 0.106$, $\gamma_{\text{median}} = 0.103$) or possibly a specific rolling window.
+\item Table~2's $\gamma = 0.087$ is closest to the 2009--2023 expanding estimate ($\gamma = 0.083$).
+\item Section~4.5's TSMC $\gamma = 0.054$ matches K892 full-sample ($\gamma = 0.052$) better than Table~2's $\gamma = 0.039$.
+\end{itemize}
+
+The inconsistency arises from using different estimation windows in different sections without disclosure. K892 data makes it possible to use a \textbf{single, consistent specification throughout}.
+
+\noindent\textbf{Text changes required:}
+\begin{enumerate}[nosep]
+\item Choose one specification (full-sample Normal recommended) and use it in \textbf{both} Table~2 and Section~4.5.
+\item If Section~4.5 intentionally uses a different window (e.g., rolling $w=2000$), state this explicitly with a footnote explaining why.
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{fixedblue}{Downgraded from SEVERE to MEDIUM} (will be automatically resolved when S2 is addressed).
+
+\bigskip
+
+\subsection*{\textcolor{fixedblue}{S4. TSMC gamma untraceable --- RESOLVED (data ready)}}
+
+\textbf{R1 status:} Table~2 TSMC $\gamma = 0.039$ ($t = 0.87$); K892 yields $\gamma = 0.052$ ($t = 3.98$).\\
+\textbf{R2 status:} K892 provides the canonical estimate. This will be resolved when Table~2 is updated per S2.
+
+K892 full-sample Normal: TSMC $\gamma = 0.052$ ($t = 3.98$, $n = 6{,}525$).\\
+K892 2008--2026 matched period: TSMC $\gamma = 0.047$ ($t = 2.58$, $n = 4{,}470$).
+
+\textbf{Important consequence:} With K892's TSMC $\gamma = 0.052$ (significant at 1\%), the narrative changes: TSMC \textbf{does} exhibit a significant leverage effect, contrary to the current paper text which presents $\gamma = 0.039$ ($t = 0.87$) as ``insignificant.'' The Section~4.5 discussion of ``TSMC's weak leverage effect'' needs revision.
+
+\textbf{Severity:} \textcolor{okgreen}{Downgraded from SEVERE to RESOLVED} (pending text update as part of S2).
+
+\bigskip
+
+\subsection*{\textcolor{errorred}{S5. VT performance tables without source --- STILL UNRESOLVED}}
+
+\textbf{R1 status:} Tables~4 and~5 (30+ data points) have no traceable experiment JSON.\\
+\textbf{R2 status:} \textcolor{errorred}{No change.} No new experiment has been created to reproduce Tables~4--5.
+
+The specific discrepancies flagged in R1 remain:
+\begin{itemize}[nosep]
+\item Buy \& Hold Sharpe 0.729 --- no source JSON
+\item EWMA VT Sharpe 0.796 --- no source JSON
+\item GJR VT Sharpe 1.108 --- no source JSON
+\item Common-period table (Table~5) --- entirely without source
+\item Conditional leverage Sharpe $+0.162$ vs K553 $+0.019$ --- order-of-magnitude mismatch still unexplained
+\end{itemize}
+
+\textbf{Action required:} Create a dedicated replication experiment (\texttt{k9XX\_taiwan\_vt\_performance.py}) that produces all Table~4 and Table~5 values from raw data, with exact specification documented (sample period, transaction cost, rebalancing frequency, target vol, rolling window). Save to \texttt{k9XX\_taiwan\_vt\_performance\_results.json}.
+
+\textbf{Severity:} \textcolor{errorred}{Remains SEVERE.} This is now the \textbf{most critical remaining issue}---the paper's core VT results are not reproducible.
+
+\bigskip
+
+\subsection*{\textcolor{errorred}{S6. SSVS PIP conflict --- STILL UNRESOLVED}}
+
+\textbf{R1 status:} Table~3 reports own-return PIP = 0.312; K461 reports AR(1) PIP = 0.9994.\\
+\textbf{R2 status:} \textcolor{errorred}{No change.} The discrepancy remains unexplained.
+
+Two possible explanations:
+\begin{enumerate}[nosep]
+\item ``Lagged own return'' in Table~3 refers to a different variable than K461's AR(1) term (e.g., a separate daily return regressor vs.\ the GARCH mean equation AR(1) coefficient). If so, the paper must explain the distinction.
+\item The paper value (0.312) is from a different SSVS specification than K461. If so, the experiment file and results JSON are needed.
+\end{enumerate}
+
+\textbf{Action required:} Either (a) use K461's value (PIP = 0.9994) and note that the AR(1) term is strongly selected, or (b) create a new experiment that precisely matches Table~3's specification and save the results.
+
+\textbf{Severity:} \textcolor{errorred}{Remains SEVERE.}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{R1 Medium Issues: Status Assessment}
+% ════════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[label=\textcolor{warncolor}{M\arabic*}]
+
+\item \textbf{Scope creep / excessive length.} \textcolor{warncolor}{No change.} The paper still covers 15+ distinct analyses. The recommendation to split or demote peripheral sections stands. \textit{Status: OPEN.}
+
+\item \textbf{Overclaiming language.} \textcolor{warncolor}{No change.} ``Crushes'' and ``fundamentally alter'' remain in the text. The 5.0$\times$ amplification ratio is still presented without CI in the abstract. \textit{Status: OPEN.}
+
+\item \textbf{Missing Christoffersen (1998) bibliography entry.} \textcolor{warncolor}{No change.} Still referenced in text but absent from bibliography. \textit{Status: OPEN.}
+
+\item \textbf{HAR-RV headline result on native target.} \textcolor{warncolor}{No change.} The recommendation to lead with the proxy-ceiling ablation still applies. \textit{Status: OPEN.}
+
+\item \textbf{GJR+Normal violation count mismatch.} \textcolor{warncolor}{No change.} Paper: 9/481; K852: 11/481. \textit{Status: OPEN.}
+
+\item \textbf{GJR QLIKE minor mismatch.} \textcolor{warncolor}{No change.} Paper: 0.220; K852: 0.217. \textit{Status: OPEN.}
+
+\item \textbf{Ex-dividend vol increase.} \textcolor{warncolor}{No change.} Paper: +32\%; K512: +41\%. \textit{Status: OPEN.}
+
+\item \textbf{Sections 6, 4.5, and Appendix entirely untraceable.} \textcolor{warncolor}{Partially improved.} K892 now provides traceable gamma values for Section~4.5 (TSMC concentration). Sections~6 (macro) and Appendix (time-zone) remain without experiment JSONs. \textit{Status: PARTIALLY ADDRESSED.}
+
+\item \textbf{Mixed evaluation periods in Table~4.} \textcolor{warncolor}{No change.} \textit{Status: OPEN.}
+
+\end{enumerate}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{R1 Minor Issues: Status Assessment}
+% ════════════════════════════════════════════════════════════════════
+
+All 7 minor issues from R1 remain open (no text changes have been made):
+
+\begin{enumerate}[label=m\arabic*]
+\item Missing page numbers for Whaley (2000) and Whaley (2009). \textit{OPEN.}
+\item EWMA $\lambda = 0.94$ sensitivity not reported. \textit{OPEN.}
+\item Persistence formula symmetric-distribution assumption not noted. \textit{OPEN.}
+\item BPV scaling factor $\pi/2$ clarification. \textit{OPEN.}
+\item Hwang \& Valls Pereira (2006) content claim slightly overstated. \textit{OPEN.}
+\item Figure~1 (OLS Engle-Ng) vs Table~2 (MLE GJR) estimation method reconciliation. \textit{OPEN.}
+\item Student-$t$(df$=5$) vs estimated df$=5.2$ distinction. \textit{OPEN.} \\
+\textit{Note: m6 will become more important after S2 is resolved, since the figure and table will use different estimation methods. If Table~2 switches to full-sample MLE (K892), Figure~1's rolling OLS estimates will differ more visibly. Consider regenerating Figure~1 using MLE estimates for consistency, or adding a clear note that the figure uses the Engle-Ng specification while the table uses MLE.}
+\end{enumerate}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Consolidated Issue List (R2)}
+% ════════════════════════════════════════════════════════════════════
+
+\subsection*{\textcolor{errorred}{Severe Problems (2 items remaining)}}
+
+\begin{enumerate}[label=\textcolor{errorred}{S\arabic*}]
+\setcounter{enumi}{4}
+
+\item \textbf{VT performance tables without source (Tables~4--5).} No experiment JSON exists for the core VT strategy results. The conditional leverage improvement ($+0.162$ vs K553's $+0.019$) remains unexplained. \textit{Location: Tables~4--5, Section~4.}
+
+\item \textbf{SSVS PIP conflict.} Table~3 reports own-return PIP = 0.312; K461 shows 0.9994. No explanation or new experiment. \textit{Location: Table~3.}
+
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{Medium Problems (8 items)}}
+
+\begin{enumerate}[label=\textcolor{warncolor}{M\arabic*}]
+
+\item \textbf{Scope creep / excessive length.} 15+ analyses for a single paper.
+
+\item \textbf{Overclaiming language.} ``Crushes,'' ``fundamentally alter,'' 5.0$\times$ without CI in abstract.
+
+\item \textbf{Missing Christoffersen (1998) bibliography entry.}
+
+\item \textbf{HAR-RV headline on native target.} Lead with proxy-ceiling ablation.
+
+\item \textbf{GJR+Normal violation count: 9/481 vs 11/481.}
+
+\item \textbf{GJR QLIKE: 0.220 vs 0.217.}
+
+\item \textbf{Integrate K892 gamma values into paper text.} Data is ready (K892 JSON); Table~2, Table~1 (summary stats), Section~3.1, Section~4.5, Abstract, and Conclusion need updating. S2/S3/S4 are resolved at the data level but the text integration is a non-trivial editing task.
+
+\item \textbf{Integrate K896 ES results into paper text.} Data is ready (K896 JSON); a new ES subsection, bibliography additions (Acerbi-Szekely, Fissler-Ziegel), and abstract update are needed.
+
+\end{enumerate}
+
+\subsection*{Minor Problems (6 items)}
+
+\begin{enumerate}[label=m\arabic*]
+\item Missing page numbers for Whaley references.
+\item EWMA $\lambda = 0.94$ sensitivity.
+\item Persistence formula symmetric-distribution caveat.
+\item BPV scaling clarification.
+\item Figure~1 vs Table~2 estimation method reconciliation (will become more visible after S2 fix).
+\item Student-$t$ df distinction.
+\end{enumerate}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Revision Priorities (R2, ordered)}
+% ════════════════════════════════════════════════════════════════════
+
+\begin{enumerate}
+
+\item \textbf{[CRITICAL]} Create VT strategy performance experiment for Tables~4--5 (S5). This is now the single most important action item. All 30+ data points in the core results tables must be traceable. Resolve the conditional leverage $+0.162$ vs $+0.019$ discrepancy.
+
+\item \textbf{[CRITICAL]} Resolve SSVS PIP discrepancy (S6). Either use K461's value or create a matching experiment.
+
+\item \textbf{[HIGH]} Integrate K892 gamma values into paper text (M7). Update Table~2 ($\gamma = 0.097$, $t = 3.60$ for 0050.TW; $\gamma = 0.052$, $t = 3.98$ for TSMC), Table~1 (summary stats), Section~3.1 (amplification narrative), Section~4.5 (TSMC discussion---note that TSMC now has a \textit{significant} leverage effect), Abstract, and Conclusion. Add source attribution: ``Source: K892.''
+
+\item \textbf{[HIGH]} Integrate K896 ES results into paper text (M8). Add ES analysis section/table. Add Acerbi-Szekely and Fissler-Ziegel citations. Address whether the prediction--VaR paradox extends to ES (answer from K896: it does not---all models pass ES).
+
+\item \textbf{[HIGH]} Create experiment JSONs for remaining untraceable sections: Section~6 (macro indicators), Appendix (time-zone momentum). Section~4.5 (TSMC) is now partially traceable via K892.
+
+\item \textbf{[HIGH]} Fix numerical mismatches: GJR+Normal violations (11 not 9), GJR QLIKE (0.217 not 0.220), ex-dividend increase methodology. Add Christoffersen (1998) to bibliography.
+
+\item \textbf{[MEDIUM]} Tighten language: remove ``crushes,'' ``fundamentally,'' pair 5.0$\times$ with CI $[2.8, 8.1]$ in abstract and conclusion.
+
+\item \textbf{[MEDIUM]} Consider restructuring: lead with common-period Table~5; demote mixed-period Table~4.
+
+\item \textbf{[LOW]} Fix minor issues (Whaley page numbers, EWMA sensitivity, persistence caveat, Figure~1 reconciliation).
+
+\end{enumerate}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Progress Assessment}
+% ════════════════════════════════════════════════════════════════════
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Category & R1 & R2 & Change \\
+\midrule
+Severe issues & 6 & 2 & $-4$ (S1--S4 data resolved) \\
+Medium issues & 8 (+1 renumbered) & 8 & $\pm 0$ (S1--S3 downgraded to M; no M closed) \\
+Minor issues & 7 & 6 & $-1$ (m7 merged into S2 fix) \\
+Paper text changes & 0 made & 0 made & No text edits since R1 \\
+Experiment data & K892, K896 created & Ready & Integration pending \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Key risk:} The gamma and ES data are ready, but if text integration is delayed further, the paper accumulates ``stale'' data---K892 and K896 were run on data through April 2026; if the paper's sample period extends (e.g., to June 2026 data), the experiments may need re-running.
+
+\bigskip
+
+\noindent\textbf{Estimated effort to close all issues:}
+\begin{itemize}[nosep]
+\item S5 (VT performance tables): 1 new experiment $+$ table updates $\approx$ 2--3 hours
+\item S6 (SSVS PIP): 1 experiment or text clarification $\approx$ 30 minutes
+\item M7 (K892 integration): text editing across 6+ locations $\approx$ 1--2 hours
+\item M8 (K896 integration): new subsection $+$ bibliography $\approx$ 1--2 hours
+\item Remaining M and minor: text edits $\approx$ 1--2 hours
+\item Total: approximately 6--10 hours of focused work
+\end{itemize}
+
+\bigskip
+
+\noindent\textbf{Conditional recommendation:} \textit{Major revision, improved from R1.} The data foundation is strengthening (K892, K896). Once Tables~4--5 are made traceable (S5), the SSVS PIP is resolved (S6), and the K892/K896 data are integrated into the text, the paper will have resolved all SEVERE issues. The high-frequency section remains publication-ready. The daily-frequency sections need the text updates described above, after which the paper should be competitive for JBF or IRFA.
+
+\end{document}
