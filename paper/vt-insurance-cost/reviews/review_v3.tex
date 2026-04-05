@@ -1,0 +1,343 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{fixedblue}{RGB}{0,80,180}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Third-Round Review Report}\\[0.5em]
+{\large The True Cost of Volatility Targeting: Decomposing the Insurance Premium\\into Opportunity and Transaction Components}\\[0.5em]
+{\normalsize Document type: Journal paper (target: Journal of Portfolio Management / Financial Analysts Journal)}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (focused re-review of Round~2 items)}\\
+{\normalsize Reviewer: Claude Opus 4.6 (1M context)}\\[0.3em]
+{\normalsize Previous reviews: review\_v1.tex (Round~1), review\_v2.tex (Round~2)}
+\end{center}
+
+\bigskip
+
+%=================================================================
+\section*{Review Summary}
+%=================================================================
+
+\begin{tabular}{ll}
+\textcolor{errorred}{\textbf{SEVERE issues (must fix)}} & \textbf{1 item} (unchanged: E3 sensitivity data) \\
+\textcolor{warncolor}{\textbf{MEDIUM issues (should fix)}} & \textbf{2 items} (down from 6 in Round~2) \\
+Minor issues (optional) & 3 items (down from 5) \\
+Overall assessment & \textbf{Good --- near submission-ready} \\
+\end{tabular}
+
+\bigskip
+
+This revision makes substantial progress on the Round~2 issue list. Of the 6 medium items from Round~2, four have been resolved: W3/W10 (VoV literature: Bekaert \& Hoerova 2014 and Todorov 2010 added), W7 (DM test footnote added with full specification), N2 (sub-period numbers now provided: $\rho = 0.04$, rebalancing premium 48~bps), and C2/C3/C4/C5 (citation corrections). The single remaining blocker is \textbf{E3}: the sensitivity analysis numbers in the paper (64\%, 57\%, 65\% opp share; 62--76\% total reduction) still cannot be traced to any recorded JSON file. The user indicates that three separate per-threshold JSON files (\texttt{k811v2\_th0\_5/1\_0/1\_5\_results.json}) were intended but \textbf{do not yet exist} in the experiments directory.
+
+%=================================================================
+\section*{Part A: Round~2 Priority Issue Resolution}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{E3: Sensitivity numbers --- STILL NOT FIXED (SEVERE)}}
+
+\textbf{Round~2 complaint}: Paper claims opp shares of 64\%, 57\%, 65\% at thresholds 0.5, 1.0, 1.5. Existing JSONs (\texttt{k811v2\_sensitivity\_results.json}, \texttt{k811v2\_sensitivity\_sweep.json}) show opp shares of 81--89\% and total reductions of $-8\%$ to $-31\%$.
+
+\textbf{What was done}: The paper text is unchanged at line~196. The user states that three separate JSON files (\texttt{k811v2\_th0\_5\_results.json}, \texttt{k811v2\_th1\_0\_results.json}, \texttt{k811v2\_th1\_5\_results.json}) were intended to contain the per-threshold results using the \emph{main-analysis decomposition methodology}. However, these files \textbf{do not exist} in \texttt{experiments/}.
+
+\textbf{Analysis of the discrepancy}: The confusion arises from two different definitions of ``opp share'':
+
+\begin{itemize}[leftmargin=2em]
+\item \textbf{Main-analysis definition} (used in Table~2): $\text{OppShare}(S_i) = \text{IP}_{\text{opp}}^{S_i} / \text{IP}_{\text{total}}^{S_i}$. For S2 at threshold 1.0: $0.696 / 1.218 = 57.1\%$. This is what the paper reports.
+\item \textbf{Sweep-JSON definition}: appears to compute something different---the sweep JSON reports \texttt{s2\_opp\_share} = 85.0\% at threshold 1.0, which cannot be $0.696/1.218$.
+\end{itemize}
+
+The paper's 57\% for threshold 1.0 \emph{is consistent} with the main results JSON (\texttt{k811v2\_insurance\_premium\_vov\_fixed\_results.json}), which reports S2 opp = 0.696\%/yr, total = 1.218\%/yr. The 64\% (threshold 0.5) and 65\% (threshold 1.5) presumably come from re-running the identical decomposition at those thresholds---but those runs were never saved.
+
+\textbf{Required action}:
+\begin{enumerate}[leftmargin=2em]
+\item Run the main K811v2 decomposition code with \texttt{vov\_threshold} set to 0.5, 1.0, and 1.5 separately.
+\item Save each run to its own JSON file (e.g., \texttt{k811v2\_th0\_5\_results.json}, etc.).
+\item Verify the paper's numbers (64\%, 57\%, 65\% opp share; 62--76\% total reduction) match the JSON outputs.
+\item If they match: the blocker is resolved. If they don't: update the paper.
+\end{enumerate}
+
+\textbf{Conditional assessment}: If the 64/57/65\% numbers are confirmed by proper JSON files using the main-analysis definition, then E3 is resolved and the paper becomes submission-ready. The main-analysis definition is the correct one for the paper's narrative (``what fraction of S2's own premium is opportunity cost?''). The sweep JSONs appear to use a different calculation and are not relevant to the paper's claims.
+
+\textbf{Verdict}: \textcolor{errorred}{SEVERE until JSONs are created and verified.} Likely resolvable in $<1$ hour.
+
+\bigskip
+
+%=================================================================
+\section*{Part B: Round~2 MEDIUM Issue Resolution}
+%=================================================================
+
+\begin{longtable}{p{0.6cm}p{2.5cm}p{2cm}p{8cm}}
+\toprule
+\# & Issue & Status & Comment \\
+\midrule
+M1 & E1 residual: 5-day window \& S3 blend 0.5 & \textcolor{warncolor}{Not fixed} & Still no justification for the 5-day VIX-rising window or the 0.5 blending coefficient. These are minor for practitioner journals but would be flagged in academic review. \\
+\midrule
+M2 & W7: DM test details & \textcolor{okgreen}{FIXED} & A footnote now appears at line~193 with full specification: ``DM tests use QLIKE loss on squared returns as the loss function, with Newey-West HAC standard errors (bandwidth $= \lfloor 4(T/100)^{2/9} \rfloor$). We report two-sided $t$-statistics and apply the Harvey (2016) multiple-testing threshold of $|t| > 3.0$.'' This is complete and correct. \\
+\midrule
+M3 & C2: Huang reference & \textcolor{okgreen}{FIXED} & Line~263 now reads: ``Huang, D., Schlag, C., Shaliastovich, I., Thimme, J., 2019. Volatility-of-volatility risk. \textit{JFQA} 54, 2423--2452.'' All 4 authors, correct journal, correct year. The bibkey remains \texttt{huang2015} internally but displays as ``Huang et al. (2019)'' via \texttt{\textbackslash bibitem[Huang et al.(2019)]\{huang2015\}}, which is cosmetically acceptable. \\
+\midrule
+M4 & C5: Cederburg characterization & \textcolor{okgreen}{FIXED} & Line~56 now reads: ``\texttt{cederburg2020} document poor out-of-sample performance across 103 volatility-managed strategies.'' This accurately describes their primary finding (OOS failure) rather than the previous overstatement about transaction costs. \\
+\midrule
+M5 & N2: Sub-period claim & \textcolor{okgreen}{FIXED} & The footnote at line~183 now provides concrete numbers: ``The 2012--2024 sub-period yields $\rho = 0.04$ and a rebalancing premium of 48~bps, broadly consistent with the full-sample estimates.'' This replaces the unsubstantiated ``both estimates are stable across sub-periods'' assertion. \\
+\midrule
+M6 & W3/W10: VoV literature & \textcolor{okgreen}{FIXED} & Two key references added to the bibliography: Bekaert \& Hoerova (2014, \textit{Journal of Econometrics} 183, 181--190) and Todorov (2010, \textit{Review of Financial Studies} 23, 345--383). Both are cited at line~205 alongside the existing Bollerslev et al.\ (2009) and Huang et al.\ (2019). The VoV literature section is now adequately covered for a practitioner journal. \\
+\bottomrule
+\end{longtable}
+
+\textbf{Summary}: 5 of 6 Round~2 medium issues resolved. Only M1 (5-day window and S3 blend justification) remains, and it is minor.
+
+%=================================================================
+\section*{Part C: Citation Check Resolution}
+%=================================================================
+
+\begin{longtable}{p{0.6cm}p{3cm}p{2cm}p{7.8cm}}
+\toprule
+\# & Issue & Status & Comment \\
+\midrule
+C1 & Bongaerts content claim & \textcolor{okgreen}{Fixed (R1)} & ``conditioning on volatility states'' --- correct since Round~1 revision. \\
+\midrule
+C2 & Huang 2015 WP $\to$ 2019 JFQA & \textcolor{okgreen}{FIXED} & Now shows 4 authors, 2019, JFQA 54, 2423--2452 (line~263). Internal bibkey still \texttt{huang2015} but display text correct. \\
+\midrule
+C3 & Perchet pages 21--36 $\to$ 21--38 & \textcolor{okgreen}{FIXED} & Line~273 now reads ``21--38.'' \\
+\midrule
+C4 & Liu ``smooth sailing'' quotes & \textcolor{okgreen}{FIXED} & Line~205 now reads ``smooth sailing environments'' without LaTeX quotation marks (\texttt{``...''} removed). The phrase is now clearly the authors' paraphrase rather than a direct quotation. \\
+\midrule
+C5 & Cederburg characterization & \textcolor{okgreen}{FIXED} & See M4 above. \\
+\bottomrule
+\end{longtable}
+
+\textbf{All 5 citation-check items from Round~2 are now resolved.}
+
+%=================================================================
+\section*{Part D: Full Re-Check of Key Claims Against Data}
+%=================================================================
+
+\subsection*{D1: Main decomposition numbers (Table~2)}
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{Paper (Table~2)} & \multicolumn{2}{c}{JSON (\texttt{insurance\_cost\_summary})} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+Strategy & Opp (\%/yr) & Direct (\%/yr) & Opp (\%/yr) & Direct (\%/yr) \\
+\midrule
+S1 & 4.20 & 0.43 & 4.195 & 0.428 \\
+S2 & 0.70 & 0.52 & 0.696 & 0.522 \\
+S3 & 2.85 & 0.46 & 2.854 & 0.456 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textcolor{okgreen}{\textbf{All match}} within rounding (paper rounds to 2 decimal places).
+
+\bigskip
+
+\subsection*{D2: Performance metrics (Table~1)}
+
+Spot-checked against \texttt{full\_period\_metrics} in the main results JSON:
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+ & \multicolumn{2}{c}{Paper} & \multicolumn{2}{c}{JSON} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+ & CAGR & Sharpe & CAGR & Sharpe \\
+\midrule
+S0 (BH) & 12.51 & 0.60 & 12.506 & 0.5984 \\
+S1 & 7.11 & 0.54 & 7.111 & 0.5353 \\
+S2 & 11.14 & 0.63 & 11.144 & 0.6335 \\
+S3 & 8.84 & 0.57 & 8.842 & 0.5699 \\
+S4 & 7.89 & 0.50 & 7.888 & 0.5013 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textcolor{okgreen}{\textbf{All match.}}
+
+\bigskip
+
+\subsection*{D3: DM test statistics}
+
+Paper (line~193) reports: ``S1 vs.\ S0: $t = 2.42$; S2 vs.\ S0: $t = 0.75$.''
+
+JSON (\texttt{dm\_tests}): S1 vs S0 $t = 2.42$ (matches); S2 vs S0 $t = 0.75$ (matches). \textcolor{okgreen}{\textbf{Match.}}
+
+\bigskip
+
+\subsection*{D4: Cross-OOS}
+
+Paper: ``S2 outperforms BH SPY in only 1 of 4 periods.'' JSON: \texttt{s2\_wins\_s0: 1}. \textcolor{okgreen}{\textbf{Match.}}
+
+\bigskip
+
+\subsection*{D5: Sensitivity analysis (E3 --- THE BLOCKER)}
+
+Paper (line~196): opp shares 64\%, 57\%, 65\%; total reduction 62--76\%.
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Threshold & Paper Opp Share & \texttt{sensitivity\_results} & \texttt{sweep} (s2\_opp\_share) & Main JSON (S2) \\
+\midrule
+0.5 & 64\% & 81.7\% & 81.4\% & --- \\
+1.0 & 57\% & 85.5\% & 85.0\% & \textbf{57.1\%} \\
+1.5 & 65\% & 89.1\% & 89.1\% & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The paper's 57\% at threshold 1.0 \emph{matches} the main-analysis decomposition ($0.696/1.218 = 57.1\%$), confirming the paper uses the ``share of S2's own premium'' definition. The sweep/sensitivity JSONs use a \emph{different} definition (likely share of S1-equivalent premium at that threshold). The 64\% and 65\% values are not recorded in any existing JSON.
+
+\textbf{For the total reduction}:
+\begin{itemize}[leftmargin=2em]
+\item The paper implies S2 at threshold 0.5 reduces total cost by 62\% (and at 1.5 by 76\%) relative to S1.
+\item The sweep JSON shows total\_reduction = $-30.5\%$ (threshold 0.5), $-13.1\%$ (1.0), $-8.5\%$ (1.5) --- these are in the \emph{wrong direction} (S2 costs \emph{more} at each threshold in the sweep), confirming the sweep uses a different methodology.
+\item The main analysis shows S2 total = 1.218\%/yr vs S1 total = 4.623\%/yr, giving a reduction of $1 - 1.218/4.623 = 73.7\%$, matching the paper's ``74\%'' claim. But reductions at thresholds 0.5 and 1.5 are not recorded.
+\end{itemize}
+
+\textcolor{errorred}{\textbf{Verdict: The paper's numbers are plausible and use a consistent definition, but the threshold-0.5 and threshold-1.5 runs have not been saved.}} Three new JSON files are needed to close this item.
+
+%=================================================================
+\section*{Part E: New Reference Verification}
+%=================================================================
+
+Two new references were added. Verification:
+
+\subsection*{Bekaert and Hoerova (2014) --- \texttt{bekaert2014}}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Field & Paper & Verified \\
+\midrule
+Authors & Bekaert, G., Hoerova, M. & Geert Bekaert, Marie Hoerova \checkmark \\
+Year & 2014 & 2014 \checkmark \\
+Title & The VIX, the variance premium and stock market volatility & Correct \checkmark \\
+Journal & \textit{Journal of Econometrics} & Journal of Econometrics \checkmark \\
+Volume & 183 & 183(2) \checkmark \\
+Pages & 181--190 & 181--190 \checkmark \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Content claim}: Cited at line~205 as part of the VoV risk literature. Bekaert \& Hoerova decompose VIX$^2$ into expected variance and variance risk premium, directly relevant to VoV discussion. \textcolor{okgreen}{\textbf{PASS.}}
+
+\subsection*{Todorov (2010) --- \texttt{todorov2010}}
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Field & Paper & Verified \\
+\midrule
+Authors & Todorov, V. & Viktor Todorov \checkmark \\
+Year & 2010 & 2010 \checkmark \\
+Title & Variance risk-premium dynamics: The role of jumps & Correct \checkmark \\
+Journal & \textit{Review of Financial Studies} & Review of Financial Studies \checkmark \\
+Volume & 23 & 23(1) \checkmark \\
+Pages & 345--383 & 345--383 \checkmark \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Content claim}: Cited at line~205 as VoV risk literature. Todorov studies variance risk premium dynamics with jumps---directly relevant. \textcolor{okgreen}{\textbf{PASS.}}
+
+%=================================================================
+\section*{Part F: Remaining Issues (Consolidated)}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{SEVERE (must fix before submission)}}
+
+\begin{longtable}{p{0.6cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & Location & Description \\
+\midrule
+E3 & Sec 3.5, line 196 & \textbf{Sensitivity analysis numbers lack JSON backing.} Paper claims opp shares of 64\%, 57\%, 65\% and total reduction 62--76\%. Only the 57\% (threshold 1.0) can be traced to the main results JSON. The 64\% (threshold 0.5) and 65\% (threshold 1.5) have no recorded source. Create three per-threshold JSON files by re-running the main decomposition code. If the numbers match: resolved. If not: update paper. \\
+\bottomrule
+\end{longtable}
+
+\subsection*{\textcolor{warncolor}{MEDIUM (should fix)}}
+
+\begin{longtable}{p{0.6cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & Location & Description \\
+\midrule
+M1 & Sec 2.2 & \textbf{S3 blend coefficient 0.5}: Still presented without justification. One sentence acknowledging this as a heuristic choice (``we select 0.5 as a simple midpoint; sensitivity to this parameter is left for future work'') would suffice. \\
+\midrule
+M7 & Sec 2.2 & \textbf{5-day VIX-rising window}: No explanation of why 5 days rather than 10 or 20. Add a brief note (e.g., ``we use a 5-day window to capture short-term momentum in VIX, corresponding to one trading week''). \\
+\bottomrule
+\end{longtable}
+
+\subsection*{Minor (optional)}
+
+\begin{longtable}{p{0.6cm}p{2.5cm}p{10.5cm}}
+\toprule
+\# & Location & Description \\
+\midrule
+L1 & Eq (3) / Sec 2.3 & $N$ symbol conflict: Eq.~(3) uses $N$ for years, but text uses $N = 3{,}262$ for trading days. Use $T$ for years. \\
+\midrule
+L6 & References & Bibkey \texttt{huang2015} displays correctly as ``Huang et al.\ (2019)'' but the internal key is misleading. Consider renaming to \texttt{huang2019} for maintenance clarity. Not visible to readers. \\
+\midrule
+L5 & Throughout & ``apples-to-apples'' appears twice (Sec~3.3 and Sec~4). Mildly colloquial for academic prose; consider replacing one instance with ``directly comparable.'' \\
+\bottomrule
+\end{longtable}
+
+%=================================================================
+\section*{Progress Summary Across Three Rounds}
+%=================================================================
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Category & Round~1 & Round~2 & Round~3 \\
+\midrule
+SEVERE & 5 & 1 & 1 \\
+MEDIUM & 8 & 6 & 2 \\
+Minor & 7 & 5 & 3 \\
+\midrule
+\textbf{Total} & \textbf{20} & \textbf{12} & \textbf{6} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\textbf{Issues resolved this round}: W3/W10 (VoV literature), W7 (DM footnote), N2 (sub-period numbers), C2 (Huang $\to$ 2019), C3 (Perchet pages), C4 (smooth sailing quotes), C5 (Cederburg characterization).
+
+\textbf{Issues resolved in previous rounds}: E1 (partially), E2, E4, E5, W1, W4, W5, W8, W9, C1.
+
+\textbf{Still open}: E3 (sensitivity JSONs), M1 (S3 blend), M7 (5-day window), L1/L5/L6 (minor notation/style).
+
+%=================================================================
+\section*{Overall Assessment}
+%=================================================================
+
+\textbf{This paper is substantively strong and nearly submission-ready.} The core contribution---91\% of VT's insurance premium is opportunity cost, not transaction cost---is novel, clearly stated, and fully verified against the main experiment JSON. The VoV conditioning finding is appropriately hedged as preliminary. The literature is now adequate with the addition of Bekaert \& Hoerova (2014) and Todorov (2010). All citation errors have been corrected. The DM test specification is now complete.
+
+\textbf{The single blocker} is E3: three sensitivity runs at thresholds 0.5, 1.0, and 1.5 need to be saved to JSON files so the paper's sensitivity claims are traceable. The paper's numbers (64\%, 57\%, 65\%) are \emph{plausible}---the 57\% matches the main analysis exactly, and the definition is consistent---but ``plausible'' is not ``verified.'' Once the JSONs exist and confirm, the paper can be submitted.
+
+\textbf{Estimated effort to reach submission-ready}:
+\begin{enumerate}
+\item \textcolor{errorred}{\textbf{E3}}: Re-run threshold sweep with main decomposition, save 3 JSONs, verify. \textbf{$\sim$30 minutes.}
+\item \textcolor{warncolor}{\textbf{M1 + M7}}: Add one sentence each for S3 blend and 5-day window justification. \textbf{$\sim$10 minutes.}
+\item Minor (L1/L5/L6): Notation and bibkey cleanup. \textbf{$\sim$10 minutes.}
+\end{enumerate}
+
+\textbf{Target journal recommendation}: \textbf{Journal of Portfolio Management} (primary) or \textbf{Financial Analysts Journal} (secondary). The practitioner-oriented framing, clear decomposition, and actionable implications are well-suited to these venues. For JFE/RFS, additional work would be needed: formal hypothesis testing, walk-forward validation, and a more extensive theoretical framework connecting VoV conditioning to the variance risk premium literature.
+
+\end{document}

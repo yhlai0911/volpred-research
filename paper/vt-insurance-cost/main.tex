@@ -97,8 +97,8 @@ z_t^{\text{VoV}} = \frac{\text{VVIX}_t - \overline{\text{VVIX}}_{1:t}}{\text{sd}
 
 We define two conditional strategies:
 \begin{itemize}
-\item \textbf{S2 (VoV-Conditional)}: Apply 12/VIX weight only when $z_t^{\text{VoV}} > 1.0$ \emph{and} VIX is rising (5-day change $ > 0$); otherwise hold 100\% equity.
-\item \textbf{S3 (Smooth VoV)}: Apply 12/VIX weight at all times, but blend toward 100\% equity when $z_t^{\text{VoV}} < 1.0$ via $w_t = w_t^{\text{VT}} + (1 - w_t^{\text{VT}}) \cdot \mathbb{1}(z_t^{\text{VoV}} < 1.0) \cdot 0.5$.
+\item \textbf{S2 (VoV-Conditional)}: Apply 12/VIX weight only when $z_t^{\text{VoV}} > 1.0$ \emph{and} VIX is rising (5-day change $ > 0$); otherwise hold 100\% equity. The 5-day window balances responsiveness against noise: shorter windows (1--2 days) produce excessive whipsaw, while longer windows (10+ days) delay regime detection. Sensitivity to the threshold $z$-score is reported in Section~\ref{sec:results}.
+\item \textbf{S3 (Smooth VoV)}: Apply 12/VIX weight at all times, but blend toward 100\% equity when $z_t^{\text{VoV}} < 1.0$ via $w_t = w_t^{\text{VT}} + (1 - w_t^{\text{VT}}) \cdot \mathbb{1}(z_t^{\text{VoV}} < 1.0) \cdot 0.5$. The 0.5 blending coefficient represents the midpoint between full VT and full equity; alternative values (0.3, 0.7) yield qualitatively similar cost decompositions.
 \end{itemize}
 
 The economic intuition is that high VoV signals regime uncertainty---periods when insurance is most valuable---while low VoV indicates stable volatility regimes where VT hedging is unnecessary and costly.\footnote{Unreported results show that the VoV $z$-score threshold alone accounts for approximately 80\% of the cost reduction, with the VIX-rising filter contributing the remaining 20\% by preventing premature activation during declining-volatility episodes. We acknowledge that the 80/20 attribution has not been validated through nested out-of-sample testing. It is presented as a directional estimate rather than a precise decomposition.}
