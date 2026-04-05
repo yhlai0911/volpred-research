@@ -1,0 +1,389 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report R1}\\[0.5em]
+{\large Leverage Direction Matters: Cross-Asset Evidence on\\GARCH Model Selection and Volatility Targeting}\\[0.5em]
+{\normalsize Author: Yi-Hao Lai}\\[0.3em]
+{\normalsize Document Type: Journal Paper (targeting JBF)}\\
+{\normalsize Document Version: \texttt{main\_v2.tex} + \texttt{body\_v2.tex} (March 2026)}\\
+{\normalsize Review Date: 2026-04-05}\\
+{\normalsize Review Standard: Strict (JBF Referee Standard)}\\
+{\normalsize Audit Reference: \texttt{audit\_step1\_2.md} (2026-04-05)}
+\end{center}
+
+\bigskip
+
+%% ============================================================
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{Critical Issues (must fix before submission)} & 5 items \\
+\textcolor{warncolor}{Major Issues (strongly recommended)} & 8 items \\
+Minor Issues (suggested improvements) & 12 items \\
+Overall Assessment & \textbf{Revise and Resubmit (Major)} \\
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{Overall impression.} This is an ambitious and wide-ranging paper that proposes a leverage-direction taxonomy based on the GJR-GARCH $\gamma$ parameter, linking it to model selection, VaR compliance, and the economic mechanism of volatility targeting. The breadth is impressive---covering seven primary assets, 26 in validation, multiple VaR methods, VT strategies, timing tests, and a complexity ceiling analysis. The core idea that $\gamma$ sign varies systematically across asset classes and determines optimal model specification is well-supported and genuinely useful.
+
+However, the paper suffers from five categories of problems: (1)~internal numerical contradictions that undermine credibility; (2)~overclaiming relative to the statistical evidence, particularly regarding out-of-sample predictive power with $N=6$; (3)~scope inflation that dilutes the two stated contributions; (4)~traceability gaps where reported numbers lack reproducible experiment sources; and (5)~a partial conflation of mechanical and empirical results. A focused revision addressing these issues would produce a strong JBF submission.
+
+\bigskip
+
+%% ============================================================
+\section*{1. Logic Structure and Argument Quality}
+
+\textcolor{okgreen}{\textbf{Strengths.}} The paper's two-contribution structure (v2 revision) is a clear improvement. The flow from leverage taxonomy $\to$ model selection $\to$ VaR $\to$ VT is logically coherent. The complexity ceiling framing ties the findings together effectively.
+
+\textcolor{errorred}{\textbf{Critical: Internal contradiction on Henriksson-Merton $\gamma_{HM}$.}} The paper reports two different values for the same test:
+\begin{itemize}[nosep]
+\item Section 4.7 / additions\_jk.tex: $\hat{\gamma}_{HM} = -0.035$, $t = -0.39$, $p = 0.70$ $\to$ ``no directional timing''
+\item Section 5.4 / body\_v2.tex line 436: $\hat{\gamma}_{HM} = -0.043$, $t = -4.06$, $p < 0.001$ $\to$ ``significant negative''
+\end{itemize}
+These cannot both be correct for the same regression on the same data. The $t$-statistics differ by an order of magnitude ($0.39$ vs.\ $4.06$), yielding opposite conclusions. This is the single most damaging issue in the manuscript. A referee will view this as either carelessness or---worse---selective reporting. \textbf{Resolution}: Determine which specification produces each number (different sample? different controls? different strategy variant?), report both with explicit specification labels, and ensure the narrative does not contradict itself.
+
+\textcolor{warncolor}{\textbf{Major: Scope inflation.}} The abstract promises ``two contributions'' but the paper actually presents at least eight distinct analyses: leverage taxonomy, model selection rule, VaR attribution, VaR orthogonality, VT cross-asset, complexity ceiling, HAR paradox, and TZ momentum (appendix). At 62 pages, this reads as a research monograph rather than a focused journal article. JBF referees will request splitting or substantial trimming. \textbf{Recommendation}: The core paper should be Contributions 1 (taxonomy + model selection) and 2 (VT mechanism). The complexity ceiling, HAR paradox, VIX sufficient statistic tests, TZ momentum, and diversification amplification analyses should be relegated to supplementary material or a companion paper.
+
+\textcolor{warncolor}{\textbf{Major: Mechanical vs.\ empirical conflation in Proposition 1.}} The Spearman $\rho = 1.000$ between $\gamma$ and $\beta^{\text{trend}}$ for $N = 7$ assets is partly mechanical: both quantities derive from the same GJR specification. The paper acknowledges this (line 467--468) but then claims ``genuine predictive content'' based on $\rho = 0.821$ from 2010--2017 $\gamma$ predicting 2018--2026 $\beta^{\text{trend}}$. With $N = 7$, even a modest rank-preserving correlation exceeds 0.80. The critical test (line 468) that $\rho$ degrades to $-0.448$ ($p = 0.14$) for 12 diverse assets is actually the more informative result---the proposition fails outside equities. \textbf{Recommendation}: Lead with the domain restriction (equity-type only), present the $\rho = 1.000$ as a mechanical illustration rather than empirical evidence, and frame the proposition's contribution as formalizing \textit{when} VT acts as trend-following vs.\ contrarian, not as a universal prediction.
+
+\bigskip
+
+%% ============================================================
+\section*{2. Research Motivation and Contribution Claims}
+
+\textcolor{okgreen}{\textbf{Strengths.}} The motivation that leverage direction has been overlooked as a cross-asset model selection criterion is genuine. The connection to Hood and Raughtigan (2025) is well-articulated and timely.
+
+\textcolor{warncolor}{\textbf{Major: Overclaiming on OOS predictive power.}} The abstract states ``6/6 correct out-of-sample predictions.'' Section 4.3.2 appropriately caveats that random classification achieves 100\% with $P = 2^{-6} \approx 1.6\%$. However, the abstract omits this caveat entirely, leaving a misleading impression. With $N = 6$, this is suggestive evidence at best, not a validated prediction rule. \textbf{Recommendation}: Revise the abstract to include the caveat: ``6/6 correct OOS classifications, though the small cross-section ($N = 6$) limits statistical power (random baseline: 1.6\%).''
+
+\textcolor{warncolor}{\textbf{Major: ``Complexity ceiling'' contribution not clearly delineated from prior work.}} Hansen and Lunde (2005) already established that ``nothing beats a GARCH(1,1)'' for exchange rate volatility. The VIX sufficient statistic finding echoes Bozovic (2024). The novel element---that the ceiling applies across three orthogonal domains (equation, distribution, signal)---should be stated more precisely as the contribution, distinguishing it from the general observation that simple models are hard to beat.
+
+\bigskip
+
+%% ============================================================
+\section*{3. Literature Review}
+
+\textcolor{okgreen}{\textbf{Strengths.}} The literature review covers the key areas (GARCH/leverage, commodity volatility, VaR/Basel, VT, deep learning) with appropriate depth. The connection between Chevallier and Ielpo (2017) for commodity inverted leverage and Baur and McDermott (2010) / Chang et al.\ (2021) for gold's safe-haven role is well-drawn.
+
+\textcolor{warncolor}{\textbf{Major: Missing key references.}}
+\begin{itemize}[nosep]
+\item \textbf{Bekaert and Wu (2000)}, ``Asymmetric Volatility and Risk in Equity Markets,'' RFS---the definitive study decomposing leverage effect vs.\ volatility feedback. Essential for Section 5.1's economic interpretation.
+\item \textbf{Figlewski and Wang (2000)}, ``Is the `Leverage Effect' a Leverage Effect?''---challenges the Christie (1982) capital-structure interpretation that the paper adopts uncritically.
+\item \textbf{Avramov, Cheng, and Metzker (2023)}, ``Machine Learning and the Cross-Section of Expected Returns''---relevant for the deep learning comparison given the null results.
+\item \textbf{Bollerslev, Litvinova, and Tauchen (2006)}, ``Leverage and Volatility Feedback Effects''---high-frequency evidence on the leverage mechanism.
+\end{itemize}
+
+Minor: The paper cites ``Campbell et al., 2017'' for the stock-bond correlation discussion but the bibitem format is inconsistent (uses ``et~al.'' in the key vs.\ standard author-year format elsewhere).
+
+\bigskip
+
+%% ============================================================
+\section*{4. Model Specification}
+
+\textcolor{okgreen}{\textbf{Strengths.}} The GJR-GARCH(1,1) specification is standard and well-justified. The zero-mean specification is defended with appropriate citations. The rolling estimation approach with $w = 504$ is reasonable.
+
+Minor issues:
+\begin{itemize}[nosep]
+\item The paper uses quasi-MLE (Normal) for estimation but Student-$t$ for VaR. This is standard practice but should be explicitly justified---QML consistency requires finite fourth moments of innovations, which Student-$t$(5) barely satisfies.
+\item The paper does not estimate EGARCH separately but only reports sign alignment with GJR. For a taxonomy paper, fitting EGARCH and reporting its parameters would strengthen the claim that the taxonomy is model-invariant.
+\item The indicator function in Eq.~(1) uses $\mathbf{1}_{\varepsilon_{t-1}<0}$. Strictly, some implementations use $\mathbf{1}_{\varepsilon_{t-1}\leq 0}$. Clarify which convention the \texttt{arch} package implements.
+\end{itemize}
+
+\bigskip
+
+%% ============================================================
+\section*{5. Equations and Symbol Consistency}
+
+\textcolor{okgreen}{\textbf{Strengths.}} Equations are generally well-presented. The QLIKE definition (Eq.~2) with the footnote on alternative conventions is helpful.
+
+Issues:
+\begin{itemize}[nosep]
+\item Eq.~(3) defines the VT weight as $w_t = \sigma_{\text{target}} / \hat{\sigma}_t$. However, the paper also uses ``12/VIX'' which is $w_t = 12 / \text{VIX}_t$. The paper should clarify the units: VIX is annualized (\%), so $12/\text{VIX}_t$ yields a leverage ratio only when $\sigma_{\text{target}} = 12\%$. This is stated in Section 5.7 but should be formalized in Section 3.5.
+\item The Henriksson-Merton regression (Eq.~5 in additions\_jk.tex) uses $\gamma_{HM}$ for the timing coefficient. The GJR-GARCH leverage parameter is also called $\gamma$. While the subscripts differ, using the same Greek letter for fundamentally different quantities invites confusion. Consider using $\delta_{HM}$ or $\phi_{HM}$.
+\item The MDD utility function (Eq.~4) is novel but ad hoc. The paper should acknowledge that this is not a standard utility specification and discuss its relationship to CRRA utility (mentioned for the $\gamma \approx 4.5$ breakeven).
+\end{itemize}
+
+\bigskip
+
+%% ============================================================
+\section*{6. Research Methods}
+
+\textcolor{okgreen}{\textbf{Strengths.}} The Patton (2011) QLIKE framework, DM tests with HAC standard errors, and VaR backtesting trinity (Kupiec + Christoffersen + Basel) are all appropriate. The overlapping-window treatment (Section 4.2.3) with HAC correction, block bootstrap, and non-overlapping verification is thorough.
+
+\textcolor{warncolor}{\textbf{Major: Harvey (2016) $t > 3.0$ threshold applied inconsistently.}} The paper invokes the Harvey threshold in multiple places but then reports DM results with $p < 0.05$ as ``significant.'' For example:
+\begin{itemize}[nosep]
+\item K799 DM stat for GJR vs.\ GARCH: $t = -2.93$ (does \textit{not} pass Harvey $t > 3.0$)
+\item K802 DM stat: $t = -3.25$ (passes Harvey)
+\item Table 3 SPY 2023--2024: reported $p = 0.001$
+\end{itemize}
+The paper should either consistently apply $t > 3.0$ throughout (which would weaken several claims) or explicitly state when the standard 5\% threshold is used vs.\ the Harvey correction, and why.
+
+\textcolor{warncolor}{\textbf{Major: No Expected Shortfall (ES) analysis.}} Basel III (BCBS, 2019) replaced VaR with ES as the primary risk measure. The paper's extensive VaR analysis without any ES backtesting is a significant omission for a paper targeting a banking/finance journal. At minimum, report ES violation rates for the key configurations (Table 5 / Table 6).
+
+Minor:
+\begin{itemize}[nosep]
+\item The DM test with 5 NW lags is mentioned but the lag selection criterion is not. Standard practice is $\lfloor T^{1/3} \rfloor$ or $\lfloor 4(T/100)^{2/9} \rfloor$. For $T = 502$, this gives 7--8 lags, not 5.
+\item The VT weight clipping to $[0, 1.5]$ is mentioned but not justified. Why 1.5 rather than 2.0 or 1.0?
+\item Transaction cost analysis (Section 5.1, mentioned as ``post-hoc'') should be integrated into the main VT analysis, not relegated to discussion.
+\end{itemize}
+
+\bigskip
+
+%% ============================================================
+\section*{7. Data and Sample Design}
+
+\textcolor{okgreen}{\textbf{Strengths.}} The data source justification (Section 3.1) is unusually thorough for Yahoo Finance data, citing Bali et al.\ (2016) and Hou et al.\ (2020) as precedents. The sample period justification (addressing the short-sample concern) is well-argued. The three validation checks (Bloomberg spot-check, VIX/FRED concordance, distribution matching) are commendable.
+
+\textcolor{errorred}{\textbf{Critical: Table 1 descriptive statistics are untraceable.}} The audit found no experiment JSON backing Table 1's values. For a paper emphasizing reproducibility, the fundamental descriptive statistics must have a traceable source script. \textbf{Action required}: Create \texttt{paper1\_table1\_descriptive.py} and \texttt{\_results.json}.
+
+\textcolor{errorred}{\textbf{Critical: Table 3 QLIKE values for non-SPY assets are untraceable.}} Only SPY 2023--2024 is verified against K799/K802. The remaining 8 of 10 rows (QQQ, GLD, TLT, EEM, BTC across two periods) have no traceable experiment JSON. \textbf{Action required}: Create a single comprehensive experiment producing all Table 3 values.
+
+\textcolor{warncolor}{\textbf{Major: BTC sample inconsistency.}} Table 1 reports $N = 3285$ for BTC versus $N = 2260$ for all other assets. This means BTC starts circa 2013 while others start 2017. The rolling gamma analysis and VT comparison use overlapping periods, but this discrepancy is never explicitly addressed. Are the BTC $\gamma$ estimates comparable when estimated on a longer history?
+
+\textcolor{warncolor}{\textbf{Major: Table 11 kurtosis inconsistency.}} Table 11 reports BH excess kurtosis of 14.71 for SPY (2014--2026), while Table 1 reports kurtosis 14.6 for SPY (2017--2025). The different periods explain the discrepancy, but the paper does not note this. A referee will flag it as an internal contradiction. \textbf{Fix}: Add a footnote to Table 11 noting the different sample period, or use consistent periods.
+
+\bigskip
+
+%% ============================================================
+\section*{8. Results and Claims Assessment}
+
+\subsection*{8a. Leverage Taxonomy (Contribution 1)}
+
+\textcolor{okgreen}{\textbf{Well-supported.}} Gold's inverted leverage (93\% negative $\gamma$, HAC $t = -5.79$) is robustly documented with overlapping and non-overlapping windows, block bootstrap, and extended sample. The regime-dependence finding (bull $\gamma = -0.043$ vs.\ bear $\gamma = +0.048$, $t = -4.71$) is economically intuitive and statistically strong.
+
+\textcolor{warncolor}{\textbf{Overclaim: ``not been documented in the prior GARCH literature as a systematic cross-asset phenomenon'' (line 169).}} Chevallier and Ielpo (2017) already document inverted leverage for gold, wheat, coffee, and cocoa. Chang et al.\ (2021) link it to regimes. The paper's contribution is the \textit{taxonomy linking $\gamma$ sign to model selection}, not the documentation of inverted leverage per se. Tone down the novelty claim.
+
+\subsection*{8b. VaR Analysis}
+
+\textcolor{okgreen}{\textbf{Strong.}} The orthogonality finding (Table 5)---that GJR wins QLIKE but fails VaR under Normal, while distributional fixes restore compliance independently---is a clean, practical result with immediate implications.
+
+\textcolor{errorred}{\textbf{Critical: Table 5 Kupiec $p$-values are rounded incorrectly.}} The audit documents:
+\begin{itemize}[nosep]
+\item GJR + Student-$t$(5): Paper reports Kupiec $p = 0.60$; K802 shows $p = 0.6698$. Correct rounding to 2 d.p.\ is 0.67.
+\item GJR + Hist.\ Sim.: Paper reports $p = 0.60$; K824v2 shows $p = 0.6353$. Correct rounding is 0.64.
+\end{itemize}
+Reporting both as 0.60 creates the false impression of identical Kupiec performance. This is not standard rounding---it is truncation. A referee familiar with Kupiec test mechanics will notice immediately. \textbf{Fix}: Report to 2 decimal places: 0.67 and 0.64.
+
+\textcolor{errorred}{\textbf{Critical: Table 5 mixes experiment sources.}} Row 1 (GARCH Normal, 7 violations) comes from K802. Row 2 (GJR Normal, 10 violations) comes from K799 (which uses a different refit schedule and shows 10/502), while K802 shows 9/502 for the same configuration. Row 4 (GJR HistSim, 4 violations) comes from K824v2, while K802 FHS shows 5/502. The paper cherry-picks the most favorable count from each experiment rather than running all four configurations with identical settings. \textbf{Fix}: Re-run all four configurations with identical refit parameters and report from one source.
+
+\subsection*{8c. DM $p$-value for SPY GARCH vs.\ GJR}
+
+The audit flagged Table 3's $p = 0.001$ against K799's $p = 0.004$. Upon deeper investigation: K802 reports DM $t = -3.2475$, $p = 0.0012$, which rounds to $p = 0.001$ at 3 decimal places. K799 reports DM $t = -2.9326$, $p = 0.0035$. The discrepancy arises because K802 uses a different refit schedule. The paper's $p = 0.001$ is defensible if sourced from K802, but the paper should document which experiment source is used. Under the Harvey $t > 3.0$ threshold: K802 passes ($|t| = 3.25$), K799 does not ($|t| = 2.93$). This matters.
+
+\subsection*{8d. VT and Gamma-Mechanism (Contribution 2)}
+
+\textcolor{okgreen}{\textbf{The framing is insightful.}} Connecting $\gamma$ to whether VT acts as trend-following vs.\ contrarian is a genuine contribution. The domain restriction (equity-type only) is honestly reported.
+
+Issues:
+\begin{itemize}[nosep]
+\item The $\rho = 1.000$ for $N = 7$ is largely mechanical (see Section 1 above).
+\item The paper reports MDD improvement correlation with base volatility as $\rho = 0.944$ ($N = 5$) and $\rho = 0.83$ ($N = 14$). The large drop from 5 to 14 assets suggests the relationship is driven by BTC as an outlier in the $N = 5$ sample. Report without BTC to assess sensitivity.
+\item Table 7 BTC numbers (BH MDD = $-76.6\%$) conflict with knowledge base ($-83.7\%$). The audit notes ``different period'' but the paper does not specify which period Table 7 covers for each asset.
+\end{itemize}
+
+\subsection*{8e. Hybrid VT Sharpe Rounding}
+
+Table 9 reports Hybrid VT Sharpe = 0.99. The knowledge base records 0.985. Rounding 0.985 to 0.99 is aggressive---standard rounding to 2 d.p.\ gives 0.98 (since the third decimal is 5, banker's rounding gives 0.98; even standard rounding gives 0.99 only under the ``round half up'' convention). The issue is optics: 0.99 is psychologically close to 1.00 and may appear as ``p-hacking adjacent'' rounding. \textbf{Recommendation}: Report 0.98 or 0.985.
+
+\bigskip
+
+%% ============================================================
+\section*{9. Citation and Reference Audit}
+
+\subsection*{9a. Citations Verified}
+
+\begin{itemize}[nosep]
+\item \textbf{Hood and Raughtigan (2025)}: Confirmed. ``Volatility Targeting Is Trendy,'' JPM, early access 2025. DOI matches. Content claim (VT alpha from implicit trend-following via leverage effect) accurately represents the paper.
+\item \textbf{DeMiguel, Martin-Utrera, and Uppal (2024)}: Confirmed. JoF 79(6), 3859--3891. ``13\% Sharpe improvement'' verified from abstract. However, this is for a conditional multifactor portfolio, not a ``hybrid implied-realized framework'' as the paper states (line 46). \textcolor{warncolor}{\textbf{Content mischaracterization.}}
+\item \textbf{Xu (2024)}: Confirmed. CFR forthcoming. ``197 equity factors'' matches.
+\item \textbf{Bozovic (2024)}: Confirmed. IRFA 95, 103353. Content matches.
+\item \textbf{Cederburg et al.\ (2020)}: Confirmed. JFE 138(1), 95--117. However, the claim ``4.9\% alpha'' attributed to VIX scaling could not be verified from abstracts/search results. The paper's main finding is that VT does \textit{not} systematically outperform---the opposite impression from the citation context. \textcolor{warncolor}{\textbf{Verify the 4.9\% figure against the original paper.}}
+\item \textbf{Chevallier and Ielpo (2017)}: Confirmed. RIBAF 39, 763--778. DOI 10.1016/j.ribaf.2014.09.010. Note: the DOI suggests 2014 online availability; 2017 is the print volume year. Both are acceptable for citation.
+\item \textbf{Chang et al.\ (2021)}: Confirmed. PBFJ 67, 101522. Content on Markov-switching GJR and gold's regime-dependent inverted asymmetry matches.
+\item \textbf{Harri and Brorsen (2009)}: Confirmed. QQASS 3(3), 78--115. Content on overlapping data bias matches.
+\item \textbf{Nelson (2025)}: Confirmed on SSRN (5931154). Working paper by Ryan Nelson. The citation characterizes it as supporting ``non-predictive risk control'' for volatility scaling---verify this specific claim against the paper.
+\item \textbf{Moreira and Muir (2017)}: Standard reference, JoF 72(4), 1611--1644. Verified.
+\item \textbf{Patton (2011)}: Standard reference, J.\ Econometrics 160(1), 246--256. Verified.
+\end{itemize}
+
+\subsection*{9b. Citation Issues}
+
+\begin{enumerate}[nosep]
+\item \textcolor{warncolor}{\textbf{DeMiguel et al.\ (2024) mischaracterization.}} Line 46: ``achieve 13\% Sharpe improvement via a hybrid implied-realized framework.'' DeMiguel et al.\ propose a conditional multifactor portfolio, not a ``hybrid implied-realized framework.'' The 13\% improvement is correct but the mechanism description is inaccurate.
+\item \textcolor{warncolor}{\textbf{Cederburg et al.\ (2020) potentially misattributed figure.}} The ``4.9\% alpha'' attributed to VIX scaling may come from Bozovic (2024) rather than Cederburg et al., whose main finding is negative (VT does not outperform out-of-sample). Verify.
+\item \textbf{Campbell et al.\ (2017)}: The bibitem key format (``campbell2017'') is inconsistent with the rest of the bibliography which uses ``[Author(Year)]'' format. The in-text citation is ``\texttt{\textbackslash citet\{campbell2017\}}'', which should work, but the bibitem definition uses a different format: ``Campbell, J.Y., Sunderam, A., and Viceira, L.M.'' instead of ``Campbell, J.~Y., Sunderam, A., \& Viceira, L.~M.'' matching other entries. Standardize.
+\item \textbf{Missing self-citations to K-experiments.} The paper references specific experiments (K799, K802, K824v2) in internal notes but does not cite them in the manuscript. While not standard for journal publication, the ``Data and replication code available upon request'' statement in the title footnote should be strengthened with a replication package commitment.
+\end{enumerate}
+
+\subsection*{9c. Orphan References Check}
+
+The bibliography contains 54 entries. A quick scan reveals no obvious orphan references (all appear cited in text). However, the following references are cited only once each and could potentially be dropped to shorten the paper:
+
+\begin{itemize}[nosep]
+\item Kim and Kim (2019): cited only in Section 2.5 (deep learning), which is one paragraph.
+\item Araya et al.\ (2024): same paragraph.
+\item If Section 2.5 is cut (recommended for length), both can be removed.
+\end{itemize}
+
+\bigskip
+
+%% ============================================================
+\section*{10. Number Verification Against Audit}
+
+The audit (audit\_step1\_2.md) identified 20 MATCH, 8 MISMATCH, and 19 UNTRACEABLE values. My assessment:
+
+\begin{longtable}{p{4cm}p{3cm}p{2cm}p{5cm}}
+\toprule
+\textbf{Item} & \textbf{Audit Status} & \textbf{R1 Severity} & \textbf{R1 Assessment} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Item} & \textbf{Audit Status} & \textbf{R1 Severity} & \textbf{R1 Assessment} \\
+\midrule
+\endhead
+HM $\gamma$ conflict (Sec 4.7 vs 5.4) & CONFLICT & \textcolor{errorred}{CRITICAL} & Must resolve; two different numbers for same test \\
+Table 5 Kupiec $p$-values & MISMATCH & \textcolor{errorred}{CRITICAL} & Non-standard rounding; fix to 2 d.p. \\
+Table 5 mixed sources & MISMATCH & \textcolor{errorred}{CRITICAL} & Cherry-picks best count from different experiments \\
+Table 1 all values & UNTRACEABLE & \textcolor{errorred}{CRITICAL} & No source experiment; create one \\
+Table 3 non-SPY QLIKE & UNTRACEABLE & \textcolor{errorred}{CRITICAL} & 8/10 rows have no traceable source \\
+Hybrid VT Sharpe 0.99 & MISMATCH & \textcolor{warncolor}{MAJOR} & 0.985 $\to$ 0.99 is aggressive \\
+Table 3 DM $p = 0.001$ & MISMATCH* & \textcolor{warncolor}{MAJOR} & K802 gives 0.0012 (defensible); K799 gives 0.004 (not). Document source. \\
+Table 11 kurtosis 14.71 & MISMATCH & \textcolor{warncolor}{MAJOR} & Different period from Table 1; add footnote \\
+BTC MDD discrepancy & DISCREPANCY & \textcolor{warncolor}{MAJOR} & Knowledge says $-83.7\%$; Table 7 says $-76.6\%$ \\
+Table 7 TLT/EEM & UNTRACEABLE & Minor & No single JSON \\
+Table 8 all values & UNTRACEABLE & Minor & No single JSON \\
+Table 14 QLIKE ceiling & UNTRACEABLE & Minor & No JSON for 14-model comparison \\
+All 7 figures & UNTRACEABLE & Minor & No source generation scripts \\
+``6/6 OOS'' claim & UNTRACEABLE & Minor & No experiment JSON \\
+$\rho = 0.83$, $N = 14$ & UNTRACEABLE & Minor & No JSON \\
+\bottomrule
+\end{longtable}
+
+\bigskip
+
+%% ============================================================
+\section*{11. Specific Problem List}
+
+\subsection*{\textcolor{errorred}{Critical Issues (5)}}
+
+\begin{enumerate}[label=C\arabic*.]
+\item \textbf{HM $\gamma$ internal contradiction.} Section 4.7: $\gamma_{HM} = -0.035$ ($t = -0.39$). Section 5.4: $\gamma_{HM} = -0.043$ ($t = -4.06$). These are contradictory. Resolve by identifying the different specifications and labeling them clearly.
+
+\item \textbf{Table 5 Kupiec $p$-values falsely equalized.} Both Student-$t$ and HistSim reported as $p = 0.60$. Actual values: 0.67 and 0.64. Report accurately.
+
+\item \textbf{Table 5 cherry-picks from multiple experiments.} GJR+Normal (K799: 10/502), GJR+Student-$t$ (K802: 6/502), GJR+HistSim (K824v2: 4/502). Re-run all from one experiment with identical settings.
+
+\item \textbf{Table 1 descriptive statistics untraceable.} Create a dedicated experiment script producing all values in Table 1.
+
+\item \textbf{Table 3 QLIKE values untraceable for 8/10 rows.} Create a comprehensive cross-asset QLIKE experiment.
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{Major Issues (8)}}
+
+\begin{enumerate}[label=M\arabic*.]
+\item \textbf{Paper length (62 pages).} Cut to $\leq 45$ pages by moving complexity ceiling details, HAR paradox, VIX sufficiency tests, TZ momentum, and diversification amplification to supplementary material.
+
+\item \textbf{Abstract overclaims on ``6/6 OOS.''} Add caveat about $N = 6$ statistical power.
+
+\item \textbf{Proposition 1 mechanical confound.} Reframe $\rho = 1.000$ as illustration, not evidence. Lead with domain restriction.
+
+\item \textbf{Harvey (2016) $t > 3.0$ applied inconsistently.} Clarify when standard vs.\ Harvey thresholds are used and why.
+
+\item \textbf{No Expected Shortfall analysis.} Add ES backtesting for key configurations (at least Table 5 equivalent).
+
+\item \textbf{DeMiguel et al.\ (2024) mischaracterized.} Correct ``hybrid implied-realized framework'' to ``conditional multifactor portfolio.''
+
+\item \textbf{Hybrid VT Sharpe rounding.} Report 0.98 or 0.985, not 0.99.
+
+\item \textbf{Missing key references.} Add Bekaert and Wu (2000), Figlewski and Wang (2000) at minimum.
+\end{enumerate}
+
+\subsection*{Minor Issues (12)}
+
+\begin{enumerate}[label=m\arabic*.]
+\item Table 11 kurtosis 14.71 vs.\ Table 1's 14.6: add footnote on sample period difference.
+\item BTC MDD ($-76.6\%$ in Table 7 vs.\ $-83.7\%$ in knowledge base): specify period in Table 7.
+\item Symbol conflict: $\gamma$ used for both GJR leverage and HM timing coefficient. Use different symbol for HM.
+\item DM test NW lags: justify 5 lags vs.\ the standard $T^{1/3}$ formula.
+\item VT weight clip $[0, 1.5]$: justify the upper bound.
+\item Transaction costs: integrate into main analysis rather than post-hoc discussion.
+\item QML consistency assumption: note that Student-$t$(5) innovations barely satisfy finite fourth-moment requirement.
+\item Eq.~(4) MDD utility: acknowledge non-standard nature and relate to CRRA.
+\item Section 2.5 (deep learning): consider cutting entirely for length.
+\item BTC sample size ($N = 3285$ vs.\ $N = 2260$): address explicitly.
+\item Campbell et al.\ (2017) bibitem format inconsistency.
+\item Figure source scripts: save alongside paper for replication.
+\end{enumerate}
+
+\bigskip
+
+%% ============================================================
+\section*{12. Fair Comparison Assessment: K687/K697 Consistency}
+
+The CLAUDE.md records that K687 showed ``no VT strategy beats BH 50/50 in Sharpe after correct lag'' and K697 showed ``VIX predicts vol magnitude (corr 0.57) but not direction (corr 0.04).'' The paper's claims are broadly consistent:
+
+\begin{itemize}[nosep]
+\item The paper does \textit{not} claim VT beats buy-and-hold in Sharpe for SPY ($+0.03$, Table 7---negligible).
+\item The paper correctly frames VT as drawdown insurance (Section 5.6), consistent with K688 (CRRA utility framework).
+\item The ``12/VIX Sharpe 0.856 vs.\ GARCH VT 0.826'' comparison (Section 5.7) is for \textit{single-asset SPY}, not the 50/50 portfolio. This is an important distinction---the paper does not compare against the 50/50 BH baseline that K687 found superior.
+\item \textbf{Recommendation}: Add a row to Table 7 or Table 9 showing 50/50 SPY/GLD BH as a baseline, since the paper already mentions it in Section 5.6 ($-18.2\%$ MDD, Sharpe 0.66). This would be the fairest comparison and is consistent with K846's finding that 50/50 has a ``triple moat.''
+\end{itemize}
+
+\bigskip
+
+%% ============================================================
+\section*{13. Summary and Revision Priority}
+
+\textbf{Overall Assessment: Major Revision.} The paper contains a strong core contribution (leverage taxonomy for model selection) diluted by excessive scope and undermined by internal contradictions and traceability gaps. A focused revision can produce a publishable JBF paper.
+
+\bigskip
+
+\textbf{Revision Priority (ordered by importance):}
+
+\begin{enumerate}
+\item \textbf{Fix the HM $\gamma$ contradiction} (C1). This is the single most damaging issue. A referee finding two conflicting values for the same test will lose confidence in all other numbers.
+
+\item \textbf{Create traceable experiment scripts} for Tables 1, 3, 5, 7, 8, 11 (C4, C5). Run all Table 5 configurations from a single experiment (C3).
+
+\item \textbf{Fix Table 5 Kupiec $p$-values} (C2). Report actual values (0.67, 0.64), not 0.60.
+
+\item \textbf{Cut paper length to $\leq 45$ pages} (M1). Move secondary analyses to supplementary material.
+
+\item \textbf{Add ES backtesting} (M5). At minimum for Table 5 configurations.
+
+\item \textbf{Temper overclaims}: abstract (M2), Proposition 1 (M3), novelty of inverted leverage documentation.
+
+\item \textbf{Standardize Harvey threshold usage} (M4).
+
+\item \textbf{Fix citation issues}: DeMiguel characterization (M6), Cederburg 4.9\% attribution, Campbell bibitem format.
+
+\item \textbf{Add missing references}: Bekaert and Wu (2000), Figlewski and Wang (2000) (M8).
+
+\item Address all minor issues (m1--m12).
+\end{enumerate}
+
+\bigskip
+
+\noindent\textit{Reviewer: Claude Opus 4.6 (1M context), acting as JBF referee. 2026-04-05.}
+
+\end{document}
