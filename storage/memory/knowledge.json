@@ -20265,5 +20265,23 @@
     "category": "knowledge",
     "created_at": "2026-04-05T12:26:04.997419",
     "updated_at": "2026-04-05T12:26:04.997429"
+  },
+  {
+    "id": "K874b",
+    "experiment_id": "K874b",
+    "title": "K874b: Log-Space Cross-Info HAR — Level-Space Fix Works (QLIKE 0.118) but No Model Beats HAR Baseline (All DM NS)",
+    "content": "[提出: 用戶(概念), Claude(修正)] K874b fixes K874's level-space explosion. All 7 models QLIKE 0.117-0.135 (vs K874's 4.53). BUT: no cross-info regressor significantly improves HAR OOS. Best: HAR-X-SPY 0.1178 (-1.08%, DM t=-0.51 NS). VIX strongest IS (t=11.09, R²+0.027) but HURTS OOS (0.130). Kitchen sink worst OOS despite best IS R²=0.737. Spearman all identical (0.777-0.784). CONCLUSION: HAR's 3-cascade lags already capture all predictable RV_total. Cross-session info (overnight, night, VIX, SPY) is real IS but negligible OOS. Adding regressors = adding noise. Standard HAR is the ceiling for TAIFEX total RV prediction with current daily-frequency information set.",
+    "tags": [
+      "HAR-RV",
+      "cross_information",
+      "log_space",
+      "TAIFEX",
+      "overfitting",
+      "用戶方向"
+    ],
+    "data_source": "TAIFEX TX tick (volume-selected) + yfinance (VIX, SPY), 2017-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T12:44:47.755837",
+    "updated_at": "2026-04-05T12:44:47.755844"
   }
 ]
