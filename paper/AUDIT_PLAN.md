@@ -108,7 +108,7 @@
 | vt-crowding-abm | ✅ | ✅ | ✅ R3 0err | ✅ R3 S=0 | ✅ | ✅ PDF | ✅ v1.5 | ✅ |
 | prg-periodic-garch | ✅ K880/881/886/874d | ✅ 復現OK | ✅ R2 | ✅ R2 S=0 | ✅ reproduce.py | ❌ PDF | ✅ v1.1 (14p/19ref/6mkt) | 🔄 |
 | leverage-direction | ✅ 多數部分驗證 | ✅ 2 mismatch | ❌ | ❌ | ❌ | ❌ | ❌ 需補JSON | |
-| taiwan-vt | ✅ gamma衝突(K892) | ✅ 6 mismatch | ✅ R1 6S | ✅ R1 6S | ✅ | ✅ PDF | ❌ 需修gamma+加ES | |
+| taiwan-vt | ✅ K892 | ✅ K896/K900 | ✅ R3 0S | ✅ R3 S=0 | ✅ | ✅ PDF | ✅ 需整合文字 | ✅ |
 | vt-trend-following | ✅ ~50%無源 | ✅ 3H | ✅ 舊版 | ✅ 舊版 | ❌ | ❌ | ❌ 需補實驗 | |
 | vix-sufficiency | ✅ 6/9驗證 | ✅ T6修正 | ✅ R1 | ✅ R2 S=0 | ✅ | ✅ PDF | ✅ T6+S3+S4修正 | ✅ |
 | volatility-absorption | ✅ 核心OK/63+無源 | ✅ T6差異 | ✅ R1 5S | ✅ R1 5S | ✅ | ✅ PDF | ❌ 需null sim+T9-10 | |
