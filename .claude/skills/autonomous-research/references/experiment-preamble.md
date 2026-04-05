@@ -46,6 +46,21 @@
 
 **Sharpe > 2x baseline = 幾乎一定有 bug，先停下來檢查。**
 
+## 3b. 風險管理評估標準（VaR + ES）
+
+模型比較必須涵蓋 VaR 和 ES 兩個維度：
+
+| 評估 | 方法 | 門檻 | 依據 |
+|------|------|------|------|
+| **VaR unconditional** | Kupiec (1995) LR test | p > 0.05 | 違約率是否符合目標 |
+| **VaR conditional** | Christoffersen (1998) CC test | p > 0.05 | 違約是否獨立 |
+| **VaR Basel** | Traffic light (Green/Yellow/Red) | Green | 250天內違約次數 |
+| **Trinity** | Kupiec + CC + Basel 全過 | 全 PASS | 三重把關 |
+| **ES backtest** | Acerbi & Szekely (2014) Z-test | p > 0.05 | ES 是否充分覆蓋尾部 |
+| **Joint VaR-ES** | Fissler & Ziegel (2016) scoring | 越低越好 | 唯一 strictly consistent joint loss |
+
+**VaR 和 ES 必須同時在 1% 和 5% 信心水準評估。只測 1% 不夠。**
+
 ## 4. 防錯規則
 
 - **DM test**：用 `from volpred.stats.model_evaluation import strategy_dm_test`，不自己寫
