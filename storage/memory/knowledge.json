@@ -20321,5 +20321,44 @@
     "category": "knowledge",
     "created_at": "2026-04-05T13:11:56.453123",
     "updated_at": "2026-04-05T13:11:56.453130"
+  },
+  {
+    "id": "K877",
+    "experiment_id": "K877",
+    "title": "K877: Gold-Silver Ratio — Different Risk Dimension (VIX corr 0.08), IS t=14.0 but OOS DM NS. VIX Sufficiency #27.",
+    "content": "[提出: Claude, 執行: Claude] K877 tests gold-silver ratio (GLD/SLV) for vol prediction. GS-VIX corr only 0.08 — genuinely different dimension. IS partial corr controlling VIX: GS_zscore r=0.25 t=14.0. BUT OOS: max DM |t|=2.67, fails Harvey. Period instability: GS-RV corr flips sign (0.55 GFC, -0.22 2011-15, 0.44 COVID). Helps in low-VIX regime (+98.8% QLIKE) but hurts in high-VIX. VIX sufficiency #27.",
+    "tags": [
+      "gold_silver_ratio",
+      "GLD",
+      "SLV",
+      "VIX_sufficiency",
+      "null_result",
+      "risk_indicator"
+    ],
+    "data_source": "yfinance (GLD, SLV, SPY, ^VIX), 2006-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T13:24:50.472655",
+    "updated_at": "2026-04-05T13:24:50.472666"
+  },
+  {
+    "id": "K874d",
+    "experiment_id": "K874d",
+    "title": "K874d ★★★ Fair Comparison: PRG Wins (DM t=5.10 vs GJR), HAR vs GJR NS (t=0.57). Prior HAR>>GJR Was Artifact.",
+    "content": "[提出: 用戶(公平比較要求), 執行: Claude] K874d establishes fair comparison: common target σ²_fullday = r²_gap + RV_intra + RV_night. ALL models evaluated on SAME target. RESULTS: PRG Extended QLIKE 0.198 (best), PRG Basic 0.207, HAR(RV_total) 0.415, GJR 0.448. PRG vs GJR: DM t=5.10 Harvey PASS. HAR vs GJR: DM t=0.57 NS — prior K849/K874c claim 'HAR>>GJR' was TARGET MISMATCH ARTIFACT. Gap variance share 27%→50% (non-stationary). PRG VaR: 0.95% violation (near perfect). User's PRS concept (simplified as PRG) is the TRUE winner when evaluated fairly. This is the definitive model comparison for TAIFEX.",
+    "tags": [
+      "fair_comparison",
+      "PRG",
+      "Hansen_Lunde",
+      "HAR-RV",
+      "GJR",
+      "TAIFEX",
+      "Harvey_PASS",
+      "用戶方向",
+      "definitive"
+    ],
+    "data_source": "TAIFEX TX tick (volume-selected) + yfinance, 2017-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T13:28:00.874697",
+    "updated_at": "2026-04-05T13:28:00.874706"
   }
 ]
