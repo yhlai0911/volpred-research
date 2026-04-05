@@ -20399,5 +20399,22 @@
     "category": "knowledge",
     "created_at": "2026-04-05T13:48:14.832321",
     "updated_at": "2026-04-05T13:48:14.832331"
+  },
+  {
+    "id": "K879",
+    "experiment_id": "K879",
+    "title": "K879: VIX/VIX3M Reversion Speed NULL — Half-Life Partial r=0.014 (p=0.41) After VIX Control. Sufficiency #29.",
+    "content": "[提出: Claude, 執行: Claude] K879 tests VIX/VIX3M mean-reversion speed (half-life) as vol predictor. Half-life mean 4.8d. Slow reversion → higher vol (16.2% vs 12.8%, t=12.0) but VIX captures this entirely. Partial corr half_life|VIX = 0.014 (p=0.41). OOS R² unchanged (0.316). All DM NS. VIX sufficiency #29.",
+    "tags": [
+      "VIX_term_structure",
+      "mean_reversion",
+      "half_life",
+      "VIX_sufficiency",
+      "null_result"
+    ],
+    "data_source": "yfinance (^VIX, ^VIX3M, SPY), 2011-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T13:56:56.450566",
+    "updated_at": "2026-04-05T13:56:56.450577"
   }
 ]
