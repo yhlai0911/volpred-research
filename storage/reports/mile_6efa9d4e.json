@@ -5,7 +5,9 @@
   "category": "milestone",
   "phase": "Phase_U",
   "details": {},
-  "tags": [],
+  "tags": [
+    "研究"
+  ],
   "published_at": "2026-03-17T15:11:56.658191+00:00",
   "status": "published",
   "content": "DeltaLag (arXiv 2511.00390) 啟發的簡化測試。核心問題：SPY→TW50 的 lead-lag 是否為動態的？如果是，能否利用 regime 變化來提升策略？\n\n設計：(1) Rolling 60d correlation 追蹤 lead-lag 強度 (2) 高相關 regime 才交易的 filter 策略 (3) VIX 是否預測 lead-lag 強度\n\n關鍵發現：\n1. Lead-lag 確實是動態的（KW p<0.001），rolling corr 從 -0.08 到 0.81\n2. 有 structural trend：lead-lag 在增強（slope +0.01/yr, p<1e-68），2025 年 corr=0.57 vs 2014 年 0.17\n3. Regime-Filter（只在高相關期交易）全樣本 net Sharpe=1.12 (t=4.25)，MDD 從 -75.5% 降至 -9.4%\n4. 但 OOS 2018+ 的 Filter (Sharpe=2.45) vs Pure (2.50) 差異不大——因為近年 lead-lag 一直很強\n5. Filter 真正的價值在早期低相關期（2010-2014）：Pure Sharpe=-0.04, Filter=0.66\n6. VIX 確實預測 lead-lag：Spearman rho=0.30 用 VIX(t-20)，恐慌增加信息傳遞\n7. Regime 高度持續（AC(1)=0.89），平均持續 31 天，不需頻繁切換\n\n結論：Regime-filter 是 Pure SPY Mom 的穩健性改進，主要價值是避開 lead-lag 消失的罕見時期。近年 lead-lag 持續增強，filter 的邊際改善縮小。VIX>15 可作為更簡單的 proxy。"

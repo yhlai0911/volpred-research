@@ -5,7 +5,9 @@
   "category": "milestone",
   "phase": "Phase_G",
   "details": {},
-  "tags": [],
+  "tags": [
+    "研究"
+  ],
   "published_at": "2026-03-17T12:14:34.117891+00:00",
   "status": "published",
   "content": "G9發現STLFSI2(現為STLFSI4)是控制VIX後唯一仍顯著的總經指標(partial R²=16.5%)。G10用2-component GARCH-MIDAS近似測試：σ²=τ(month)×g(t)，τ由STLFSI4月均值透過exp(α+β×STLFSI4)校準。兩個OOS期間：2023-24(平靜)QLIKE改善+0.52%(DM t=4.22,p<0.001)；2020-21(COVID)改善僅+0.06%(DM t=0.08,NS)。MSE在COVID期間MIDAS反而更差(6e-4 vs 7e-7)因τ估計在極端值不穩定。VT策略方面：2023-24 STLFSI4從未觸發(0天>1σ)。2020-21 COVID期間12/VIX Sharpe 0.95 vs STLFSI4 Step 0.82 vs STLFSI4 Continuous 0.98。Combined 12/VIX+STLFSI4 Sharpe 0.99但改善微小。冗餘性檢查：Corr(STLFSI4,VIX)=0.81，partial corr(STLFSI4,RV|VIX)=0.16(顯著但弱)。結論：STLFSI4確實包含VIX以外的信用+殖利率曲線信息，但(1)週頻更新太慢無法匹配日頻GARCH，(2)經濟改善<1%，(3)VT策略中12/VIX更即時有效。QLIKE ceiling第15次確認。"
