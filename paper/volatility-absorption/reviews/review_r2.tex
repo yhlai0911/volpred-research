@@ -1,0 +1,263 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{resolved}{RGB}{0,100,180}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report R2}\\[0.5em]
+{\large Volatility Absorption: The Diminishing Marginal Impact of Market Fear}\\[0.5em]
+{\normalsize Document type: Empirical finance paper (target: JBF / JFQA)}\\
+{\normalsize File: \texttt{paper/volatility-absorption/main\_v2.tex}}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (journal-referee level)}\\
+{\normalsize Reference: R1 review dated 2026-04-05; K897 null simulation experiment}
+\end{center}
+
+\bigskip
+
+%% ============================================================
+\section*{R2 Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{okgreen}{R1 SEVERE issues resolved} & 2 of 5 \\
+\textcolor{errorred}{R1 SEVERE issues still open} & 3 of 5 \\
+\textcolor{warncolor}{New issues identified in R2} & 1 item \\
+Overall Assessment & \textbf{Major Revision (reduced scope)} \\
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{Overall R2 impression.} The v2 revision has made two important improvements: (1)~the null simulation (S1), which was the single most critical issue in R1, has been addressed with a thorough GARCH simulation exercise using K897 data, decisively rejecting the mechanical-correlation null ($p = 0.002$); and (2)~the orphan reference \texttt{chernov2018} (S5) has been removed. These resolve the two most damaging identification and citation issues. However, three SEVERE issues remain open: Table~5's sample-size inconsistency (S2), Tables~9--10's untraceability (S3), and the NFP table discrepancies (S4). The revision also adds valuable robustness content (alternative thresholds, sub-period stability, RV normalization, controlled regression) that was previously missing, though the traceability of these new tables to experiment files remains unclear.
+
+\bigskip
+
+%% ============================================================
+\section*{Status of R1 SEVERE Issues}
+
+\subsection*{S1: Identification --- No Null Simulation \hfill \textcolor{okgreen}{RESOLVED}}
+
+\textbf{R1 finding:} The paper acknowledged the mechanical-correlation problem with NSI but did not provide a simulation showing the SAR decline cannot arise from a standard GARCH process. This was the single most important methodological gap.
+
+\textbf{R2 assessment:} Section~7.1 of main\_v2.tex now presents a comprehensive null simulation exercise based on K897. The implementation is thorough:
+
+\begin{itemize}[nosep]
+\item \textbf{Design:} 10,000 return paths simulated from a GJR-GARCH(1,1) fitted to SPY (persistence $= 0.982$, leverage $\gamma = 0.244$, Student-$t$ innovations $\nu = 5.65$). SAR computed across VIX-equivalent regime bins for each path.
+\item \textbf{Core result:} Empirical SAR ranges 2.33--3.15$\times$; simulated GARCH SAR ranges only 1.01--1.23$\times$. Cohen's $d = 3.9$ to $19.7$. The empirical SAR lies outside the simulated 95\% CI in all five regime bins.
+\item \textbf{SAR decline test:} Empirical decline (calm-to-high) $= 0.816$. Simulated decline $= 0.173 \pm 0.211$, $p = 0.002$ (two-sided). Even at persistence $= 0.99$, simulated decline reaches only 0.15.
+\item \textbf{Persistence sensitivity:} Four persistence levels tested (0.90, 0.95, 0.97, 0.99). None produces a SAR decline remotely close to the empirical 0.816.
+\item \textbf{GJR vs.\ symmetric comparison:} GJR produces slightly larger mean decline (0.169 vs.\ 0.127, $t = 6.38$), but both are far below the empirical value.
+\end{itemize}
+
+\textbf{Verification against K897 JSON:}
+\begin{itemize}[nosep]
+\item Paper: ``SAR ranges from 2.33$\times$ to 3.15$\times$'' $\to$ K897: calm SAR $= 3.1487$, high SAR $= 2.3325$. \textcolor{okgreen}{Match} (rounding).
+\item Paper: ``simulated SAR is only 1.01--1.23$\times$'' $\to$ K897: sim means $= 1.012$--$1.233$. \textcolor{okgreen}{Match}.
+\item Paper: ``Cohen's $d = 3.9$ to 19.7'' $\to$ K897: $d = 3.88$ (crisis) to $19.67$ (calm). \textcolor{okgreen}{Match}.
+\item Paper: ``$p = 0.002$'' $\to$ K897: $p = 0.002257$. \textcolor{okgreen}{Match}.
+\item Paper: ``0.173 $\pm$ 0.211'' $\to$ K897: mean $= 0.1734$, std $= 0.2105$. \textcolor{okgreen}{Match}.
+\end{itemize}
+
+All numbers trace cleanly to the experiment JSON. This is a model implementation of the R1 recommendation.
+
+\textbf{Quality assessment:} The null simulation is well-designed and conclusive. The effect sizes (Cohen's $d > 3.8$ in all bins) are enormous, leaving no room for the mechanical-explanation alternative. The persistence sensitivity analysis is a valuable addition. The only minor omission is that the paper does not discuss the GJR-vs-symmetric comparison from K897 (mean decline 0.169 vs.\ 0.127, $t = 6.38$)---this would further strengthen the argument by showing that leverage asymmetry contributes marginally to the simulated SAR decline but cannot explain the empirical magnitude.
+
+
+\subsection*{S2: Table~5 Sample-Size Inconsistency \hfill \textcolor{errorred}{STILL OPEN}}
+
+\textbf{R1 finding:} Table~5 reports $N = 127$ (rate), $N = 203$ (risk-off), $N = 89$ (geopolitical). K721 stores $n_{\text{low}} + n_{\text{high}} = 79$ (rate), $182$ (risk-off), $146$ (geopolitical). None of these match. The geopolitical count in K721 (146) exceeds the paper's $N$ (89).
+
+\textbf{R2 assessment:} The current Table~5 (\texttt{tab:shock\_types}) in main\_v2.tex still reports $N = 127$, $203$, $89$. The table notes say ``$N$ is the number of shock days of each type over the full sample,'' but K721's numbers represent only the calm/high VIX subsets. \textbf{No reconciliation has been performed, and the counting methodology remains undocumented.}
+
+The $t$-statistics (2.87, 1.94, $-0.68$) and absorption coefficients ($+0.019$, $+0.007$, $-0.003$) from the table notes state they come from ``bootstrap tests with 10,000 replications,'' but no K721 JSON field stores these exact values. The numbers may have been computed during paper writing but not recorded.
+
+\textbf{Action required:}
+\begin{enumerate}[nosep]
+\item Clarify how $N = 127$, $203$, $89$ are computed. Are they: (a)~total shock days of each type across all VIX regimes? (b)~only those in the calm and high bins? (c)~a third definition?
+\item Reconcile with K721 or create a new experiment that documents the exact counting methodology.
+\item Ensure the $t$-statistics and absorption coefficients are stored in a JSON file.
+\end{enumerate}
+
+
+\subsection*{S3: Tables~9--10 Untraceable \hfill \textcolor{resolved}{PARTIALLY ADDRESSED}}
+
+\textbf{R1 finding:} No experiment JSON, no Python script, no knowledge-base entry existed for the alternative-threshold or sub-period robustness results. The numbers in these tables could not be verified.
+
+\textbf{R2 assessment:} The revised paper now includes \textbf{new inline tables} for robustness:
+\begin{itemize}[nosep]
+\item Table~\ref{tab:robust_threshold}: Alternative shock thresholds ($\tau = 1, 1.5, 2, 2.5, 3$), with $N_{\text{shock}}$, $\hat{\beta}$, $t$-stat, and $p$-value for each.
+\item Table~\ref{tab:robust_subperiod}: Sub-period stability (2006--2012, 2013--2019, 2020--2026), same columns.
+\item In-text: RV normalization result ($\hat{\beta}^{\text{RV}} = -0.0031$, $t = -2.76$).
+\item In-text: Controlled regression ($\hat{\beta} = -0.00025$, $t = -3.14$).
+\end{itemize}
+
+These are the results that were untraceable in R1. The numbers are now \textbf{in the paper}, which is an improvement. However, \textbf{no experiment JSON or replication script has been created to back these tables}. If these numbers were generated during the paper-writing revision, they need to be captured in a formal experiment file (e.g., \texttt{k9XX\_robustness\_absorption\_results.json}).
+
+\textbf{Partial credit:} The numbers are present and the robustness analysis is now substantive. But the traceability requirement---every number must have a source file---is not yet met. This downgrades from SEVERE to MEDIUM given the content improvement, but a replication script is still needed.
+
+
+\subsection*{S4: NFP Table Discrepancies with K741 \hfill \textcolor{errorred}{STILL OPEN}}
+
+\textbf{R1 finding:} Table~6 numbers (overall ratio 1.17, $p = 0.037$; low VIX $n = 63$; medium VIX $n = 76$, $|r| = 0.784$; elevated $|r| = 1.053$; high $|r| = 1.523$) did not match K741 JSON values.
+
+\textbf{R2 assessment:} The current Table~6 (\texttt{tab:nfp}) still reports:
+\begin{itemize}[nosep]
+\item Low VIX: $n = 63$, $|r| = 0.499$, ratio $= 1.24$, $t = 1.85$, $p = 0.069$
+\item Medium VIX: $n = 76$, $|r| = 0.784$, ratio $= 1.30$, $t = 2.69$, $p = 0.009$
+\item Elevated VIX: $n = 27$, $|r| = 1.053$, ratio $= 1.18$, $t = 1.10$, $p = 0.279$
+\item High VIX: $n = 28$, $|r| = 1.523$, ratio $= 0.95$, $t = -0.29$, $p = 0.777$
+\end{itemize}
+
+A detailed footnote has been added (line~71) specifying the sample: ``195 NFP release dates over 4,081 SPY trading days (January 2010 to March 2026), using Bureau of Labor Statistics release calendar dates.'' The paper now includes a ``Limitation: absence of surprise control'' paragraph that honestly acknowledges the binary dummy limitation and cites \citet{andersen2003} and \citet{balduzzi2001}.
+
+\textbf{However:} The R1-flagged discrepancies between the paper's numbers and K741 JSON have not been formally reconciled. The paper's $n = 63$ (low VIX) vs.\ K741's $n = 62$, and the elevated-VIX $|r| = 1.053$ vs.\ K741's $1.022$, remain unexplained. The overall $p = 0.037$ still does not match K741's $p = 0.081$ or $0.061$.
+
+The paper's footnote suggests these are from a computation separate from K741, but no experiment file documents this separate computation. \textbf{Action required:} Either update K741 to match the paper's methodology (if the paper uses a corrected NFP date list) and verify the numbers, or create a new experiment file documenting the exact computation.
+
+The addition of the surprise-control limitation paragraph is commendable and addresses one of R1's implicit concerns. The suggested future specification ($|r_t^{\text{SPY}}| = \alpha + \beta_1 |\text{surprise}_t| + \beta_2 V_t + \beta_3 (|\text{surprise}_t| \times V_t) + \varepsilon_t$) is methodologically sound.
+
+
+\subsection*{S5: Orphan Reference \texttt{chernov2018} \hfill \textcolor{okgreen}{RESOLVED}}
+
+\textbf{R1 finding:} \texttt{chernov2018} appeared in the bibliography but was never cited, and the bibitem year (2018) conflicted with the actual publication year (2022).
+
+\textbf{R2 assessment:} The reference has been completely removed from the bibliography. A search for ``chernov'' in main\_v2.tex returns zero matches. Clean resolution.
+
+
+\bigskip
+
+%% ============================================================
+\section*{Status of R1 MEDIUM Issues}
+
+\begin{longtable}{p{1cm}p{5cm}p{2.5cm}p{5.5cm}}
+\toprule
+\textbf{ID} & \textbf{R1 Issue} & \textbf{R2 Status} & \textbf{Assessment} \\
+\midrule
+\endfirsthead
+M1 & Novelty positioning (MS-GARCH comparison) & \textcolor{warncolor}{UNCHANGED} & The paper does not test whether a well-specified MS-GARCH can replicate the declining SAR. However, K897's null simulation partially addresses this by showing that even a highly persistent GJR-GARCH cannot produce the SAR pattern. A MS-GARCH comparison would still sharpen the novelty claim. \\
+\addlinespace
+M2 & Missing literatures (VVIX, HAR-RV, etc.) & \textcolor{warncolor}{UNCHANGED} & VVIX, Corsi (2009) HAR-RV, Bakshi et al.\ (2003) option-implied skewness, and microstructure noise are still not discussed. \\
+\addlinespace
+M3 & Danielsson et al.\ (2018) citation context & \textcolor{okgreen}{IMPROVED} & The text now more carefully distinguishes ``stability is destabilizing'' from contemporaneous absorption: ``This endogenous/exogenous distinction connects to Danielsson et al.'s (2018) analysis of how financial crises generate endogenous risk dynamics and has, to our knowledge, not been documented in the context of contemporaneous shock absorption.'' This is adequate. \\
+\addlinespace
+M4 & Table~1 (descriptive stats) untraceable & \textcolor{warncolor}{UNCHANGED} & No replication script created. \\
+\addlinespace
+M5 & 767 vs.\ 893 sample-size discrepancy & \textcolor{warncolor}{UNCHANGED} & Not addressed. The ``126 days excluded'' footnote remains vague. \\
+\addlinespace
+M6 & \texttt{lin2020} unverifiable & \textcolor{warncolor}{UNCHANGED} & Still in bibliography. Not verified. \\
+\addlinespace
+M7 & \texttt{bekaert2022} end page & \textcolor{warncolor}{UNCHANGED} & Not checked. \\
+\addlinespace
+M8 & Replication scripts for K716--K721 & \textcolor{warncolor}{UNCHANGED} & No .py scripts created. K897 has a script but is a new experiment, not one of the original core experiments. \\
+\bottomrule
+\end{longtable}
+
+
+\bigskip
+
+%% ============================================================
+\section*{New Issues Identified in R2}
+
+\subsection*{\textcolor{warncolor}{N1 (NEW MEDIUM): Robustness Tables Lack Experiment JSON}}
+
+The new Tables~\ref{tab:robust_threshold} and~\ref{tab:robust_subperiod} present 8 rows of regression results that did not exist in the R1 version. These are exactly the robustness checks R1 requested (S3). However, the numbers are not backed by any experiment JSON. If these were computed as part of the paper-writing process, they should be captured in a formal experiment file to satisfy the reproducibility standard.
+
+\textbf{The RV normalization result} ($\hat{\beta}^{\text{RV}} = -0.0031$, $t = -2.76$) and the \textbf{controlled regression} ($\hat{\beta} = -0.00025$, $t = -3.14$) are presented only as in-text claims. They should appear in a table (even a small one) for proper documentation.
+
+\textbf{Recommendation:} Create a single comprehensive robustness experiment (\texttt{k9XX\_absorption\_robustness\_results.json}) that stores all robustness results: 5 threshold variations, 3 sub-periods, RV normalization, and the controlled regression. This would resolve both S3 and N1 simultaneously.
+
+
+\bigskip
+
+%% ============================================================
+\section*{What the Revision Did Well}
+
+\begin{enumerate}
+\item \textbf{S1 null simulation is exemplary.} The K897 experiment is comprehensive (10,000 simulations, 5 regime bins, persistence sensitivity, GJR vs.\ symmetric comparison), the numbers trace cleanly to the JSON, and the $p = 0.002$ result is decisive. This transforms the paper's identification from ``possible mechanical artifact'' to ``demonstrated genuine phenomenon.''
+
+\item \textbf{S5 orphan reference cleanly removed.} No residual traces in the manuscript.
+
+\item \textbf{NFP limitation paragraph is commendable.} The honest acknowledgment that the binary dummy cannot distinguish between smaller surprises and genuine absorption, plus the explicit specification for future work ($\beta_3$ interaction term), shows intellectual maturity.
+
+\item \textbf{Danielsson et al.\ citation context improved (M3).} The revised framing is now precise about the distinction between ``stability is destabilizing'' and contemporaneous absorption.
+
+\item \textbf{Robustness section is now substantive.} Five alternative thresholds, three sub-periods, RV normalization, and controlled regression---the section went from essentially empty (R1: ``untraceable'') to providing genuine reassurance about the core finding.
+\end{enumerate}
+
+
+\bigskip
+
+%% ============================================================
+\section*{R2 Revision Priority}
+
+\textbf{Priority 1 (must fix before submission):}
+\begin{enumerate}
+\item \textbf{Reconcile Table~5 (shock types) sample sizes with K721 or create a new experiment.} Document the exact counting methodology. Explain why $N = 89$ (geopolitical) vs.\ K721's $146$. Store the bootstrap $t$-statistics and absorption coefficients in a JSON file. \textit{[Addresses S2]}
+
+\item \textbf{Reconcile NFP table (Table~6) with K741 or create a new experiment.} The overall $p$-value discrepancy ($0.037$ vs.\ $0.061$/$0.081$) is concerning. Re-run the NFP analysis with the corrected date list and update both the JSON and the paper. \textit{[Addresses S4]}
+
+\item \textbf{Create a robustness experiment JSON} containing all results from the new Tables and in-text claims. A single file (\texttt{k9XX\_absorption\_robustness\_results.json}) would resolve both S3 and N1. \textit{[Addresses S3, N1]}
+\end{enumerate}
+
+\textbf{Priority 2 (strongly recommended):}
+\begin{enumerate}[resume]
+\item \textbf{Create replication scripts for K716--K721.} At minimum, create .py scripts that reproduce the core SAR table (K716) and cross-asset slopes (K718). Without these, the ``Data and replication code available upon request'' claim is not credible. \textit{[Addresses M8]}
+
+\item \textbf{Create Table~1 replication script.} Trivial to implement; strengthens reproducibility. \textit{[Addresses M4]}
+
+\item \textbf{Add missing literatures:} VVIX as a market-based absorption measure; HAR-RV (Corsi 2009) for cleaner variance proxy; Bakshi et al.\ (2003) for option-implied skewness beyond VRP. \textit{[Addresses M2]}
+
+\item \textbf{Verify \texttt{lin2020} citation.} If the paper cannot be located, replace with an alternative verifiable reference. \textit{[Addresses M6]}
+
+\item \textbf{Explain the 767 vs.\ 893 sample-size gap.} Specify whether the 126 excluded days are 0050.TW calendar gaps, and report $N$ separately per asset if so. \textit{[Addresses M5]}
+\end{enumerate}
+
+\textbf{Priority 3 (desirable):}
+\begin{enumerate}[resume]
+\item Mention the GJR-vs-symmetric comparison from K897 ($t = 6.38$) in the null simulation section---it adds nuance by showing leverage asymmetry has a small but significant contribution.
+
+\item Test whether MS-GARCH produces a declining SAR (M1). K897 shows standard GARCH cannot; MS-GARCH with regime-dependent parameters is the next natural null.
+
+\item Present the RV normalization and controlled-regression results in a small table rather than in-text only.
+
+\item Check \texttt{bekaert2022} end page (3995 vs.\ 4004). \textit{[Addresses M7]}
+\end{enumerate}
+
+
+\bigskip
+
+%% ============================================================
+\section*{Overall Assessment}
+
+\textbf{Verdict: Major Revision (reduced scope).}
+
+The revision has made critical progress on the identification front. K897's null simulation decisively rejects the mechanical-correlation alternative, which was R1's primary concern. The orphan reference is fixed. The robustness section is now substantive. These improvements move the paper from ``potentially fatally flawed identification'' to ``sound methodology with data-integrity issues.''
+
+The remaining problems are mechanical rather than conceptual: sample-size reconciliation (S2), NFP number verification (S4), and creation of replication files (S3/N1/M8). None of these threaten the paper's core finding or methodology. A focused effort of 2--3 days creating experiment scripts and reconciling numbers would resolve all open issues.
+
+The paper's core contribution---the SAR measure, the endogenous/exogenous decomposition, and the now-validated identification via null simulation---represents a publishable contribution to JBF or JFQA once the data-integrity items are resolved.
+
+\bigskip
+
+\noindent\textit{Reviewer: Claude Opus 4.6 (1M context), acting as JBF/JFQA referee. R2 review, 2026-04-05.}\\
+\noindent\textit{R1 reference: \texttt{paper/volatility-absorption/reviews/review\_r1.tex}}\\
+\noindent\textit{K897 source: \texttt{paper/volatility-absorption/experiments/k897\_sar\_null\_simulation\_results.json}}
+
+\end{document}
