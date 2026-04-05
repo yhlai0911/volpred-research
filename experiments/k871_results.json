@@ -1,0 +1,564 @@
+{
+  "experiment_id": "K871",
+  "title": "Yield Curve Slope as Volatility Predictor",
+  "date": "2026-04-05",
+  "data_source": "FRED (T10Y2Y, T10Y3M, DGS10) + yfinance (SPY, ^VIX)",
+  "period": "2000-02-07 to 2026-02-27",
+  "sample_size": 6554,
+  "IS_period": "2000-02-07 to 2018-12-31 (n=4755)",
+  "OOS_period": "2019-01-02 to 2026-02-27 (n=1799)",
+  "verdict": "marginal",
+  "conclusion": "YIELD CURVE SHOWS MARGINAL SIGNAL (partial r=-0.0874) BUT NOT HARVEY-SIGNIFICANT. VIX remains sufficient.",
+  "regression_models": {
+    "A_vix_only": {
+      "features": [
+        "vix_lag1"
+      ],
+      "coefficients": {
+        "vix_lag1": 0.009066426493942209
+      },
+      "intercept": -0.015877542826538554,
+      "IS_R2": 0.565,
+      "IS_RMSE": 0.0687,
+      "OOS_R2": 0.2751,
+      "OOS_RMSE": 0.0934,
+      "OOS_corr": 0.5333
+    },
+    "B_vix_slope": {
+      "features": [
+        "vix_lag1",
+        "slope_10y2y_lag1"
+      ],
+      "coefficients": {
+        "vix_lag1": 0.009354188813490125,
+        "slope_10y2y_lag1": -0.010076505938529205
+      },
+      "intercept": -0.0076358824500998845,
+      "IS_R2": 0.5719,
+      "IS_RMSE": 0.0681,
+      "OOS_R2": 0.2639,
+      "OOS_RMSE": 0.0941,
+      "OOS_corr": 0.5404
+    },
+    "C_vix_slope_lvl": {
+      "features": [
+        "vix_lag1",
+        "slope_10y2y_lag1",
+        "level_10y_lag1"
+      ],
+      "coefficients": {
+        "vix_lag1": 0.009194940828797012,
+        "slope_10y2y_lag1": -0.007393257011641907,
+        "level_10y_lag1": 0.005017919883407502
+      },
+      "intercept": -0.025684899409263495,
+      "IS_R2": 0.5748,
+      "IS_RMSE": 0.0679,
+      "OOS_R2": 0.2765,
+      "OOS_RMSE": 0.0933,
+      "OOS_corr": 0.5368
+    },
+    "D_slope_only": {
+      "features": [
+        "slope_10y2y_lag1"
+      ],
+      "coefficients": {
+        "slope_10y2y_lag1": 0.014766643324561323
+      },
+      "intercept": 0.1422267560858745,
+      "IS_R2": 0.0161,
+      "IS_RMSE": 0.1033,
+      "OOS_R2": -0.0352,
+      "OOS_RMSE": 0.1116,
+      "OOS_corr": -0.0126
+    },
+    "E_vix_dslope": {
+      "features": [
+        "vix_lag1",
+        "delta_slope_22_lag1"
+      ],
+      "coefficients": {
+        "vix_lag1": 0.008992663191571406,
+        "delta_slope_22_lag1": 0.02620470813297291
+      },
+      "intercept": -0.014422831076596504,
+      "IS_R2": 0.5672,
+      "IS_RMSE": 0.0685,
+      "OOS_R2": 0.2689,
+      "OOS_RMSE": 0.0938,
+      "OOS_corr": 0.5286
+    },
+    "F_slope3m_only": {
+      "features": [
+        "slope_10y3m_lag1"
+      ],
+      "coefficients": {
+        "slope_10y3m_lag1": 0.013299452492895185
+      },
+      "intercept": 0.13789236666029014,
+      "IS_R2": 0.0208,
+      "IS_RMSE": 0.103,
+      "OOS_R2": -0.0223,
+      "OOS_RMSE": 0.1109,
+      "OOS_corr": 0.1738
+    },
+    "G_vix_slope3m": {
+      "features": [
+        "vix_lag1",
+        "slope_10y3m_lag1"
+      ],
+      "coefficients": {
+        "vix_lag1": 0.009248602264051081,
+        "slope_10y3m_lag1": -0.005287445801470351
+      },
+      "intercept": -0.009638433294259618,
+      "IS_R2": 0.5681,
+      "IS_RMSE": 0.0684,
+      "OOS_R2": 0.2629,
+      "OOS_RMSE": 0.0942,
+      "OOS_corr": 0.533
+    }
+  },
+  "dm_tests_mse": {
+    "A_vix_only_vs_B_vix_slope": {
+      "t_stat": -0.5798,
+      "p_value": 0.5621,
+      "significant_Harvey": false,
+      "better": "A_vix_only"
+    },
+    "A_vix_only_vs_C_vix_slope_lvl": {
+      "t_stat": 0.1451,
+      "p_value": 0.8847,
+      "significant_Harvey": false,
+      "better": "C_vix_slope_lvl"
+    },
+    "A_vix_only_vs_D_slope_only": {
+      "t_stat": -1.6135,
+      "p_value": 0.1068,
+      "significant_Harvey": false,
+      "better": "A_vix_only"
+    },
+    "A_vix_only_vs_E_vix_dslope": {
+      "t_stat": -1.852,
+      "p_value": 0.0642,
+      "significant_Harvey": false,
+      "better": "A_vix_only"
+    },
+    "A_vix_only_vs_G_vix_slope3m": {
+      "t_stat": -0.7723,
+      "p_value": 0.4401,
+      "significant_Harvey": false,
+      "better": "A_vix_only"
+    },
+    "D_slope_only_vs_F_slope3m_only": {
+      "t_stat": 0.7338,
+      "p_value": 0.4632,
+      "significant_Harvey": false,
+      "better": "F_slope3m_only"
+    }
+  },
+  "dm_tests_qlike": {
+    "A_vix_only_vs_B_vix_slope": {
+      "t_stat": 1.0555,
+      "p_value": 0.2913,
+      "significant_Harvey": false,
+      "better": "B_vix_slope"
+    },
+    "A_vix_only_vs_C_vix_slope_lvl": {
+      "t_stat": 0.2698,
+      "p_value": 0.7874,
+      "significant_Harvey": false,
+      "better": "C_vix_slope_lvl"
+    },
+    "A_vix_only_vs_D_slope_only": {
+      "t_stat": -1.7373,
+      "p_value": 0.0825,
+      "significant_Harvey": false,
+      "better": "A_vix_only"
+    },
+    "A_vix_only_vs_E_vix_dslope": {
+      "t_stat": -1.0959,
+      "p_value": 0.2733,
+      "significant_Harvey": false,
+      "better": "A_vix_only"
+    },
+    "A_vix_only_vs_G_vix_slope3m": {
+      "t_stat": 0.9896,
+      "p_value": 0.3225,
+      "significant_Harvey": false,
+      "better": "G_vix_slope3m"
+    },
+    "D_slope_only_vs_F_slope3m_only": {
+      "t_stat": -0.6467,
+      "p_value": 0.5179,
+      "significant_Harvey": false,
+      "better": "D_slope_only"
+    }
+  },
+  "partial_correlations": {
+    "full_slope_10y2y": {
+      "r": -0.0874,
+      "p": 0.0
+    },
+    "IS_slope_10y2y": {
+      "r": -0.1263,
+      "p": 0.0
+    },
+    "OOS_slope_10y2y": {
+      "r": -0.1271,
+      "p": 0.0
+    },
+    "full_slope_10y3m": {
+      "r": -0.0409,
+      "p": 0.0009
+    },
+    "full_delta_slope22": {
+      "r": 0.0265,
+      "p": 0.0317
+    }
+  },
+  "event_analysis": {
+    "n_inversion_days": 1012,
+    "n_episodes": 20,
+    "episodes": [
+      {
+        "start": "2000-02-02",
+        "end": "2000-02-10",
+        "duration_days": 8,
+        "mean_vix": 22.27,
+        "fwd_rv22_at_start": 0.2121,
+        "fwd_rv22_1m": 0.2596,
+        "fwd_rv22_3m": 0.237,
+        "fwd_rv22_6m": 0.1106,
+        "fwd_rv22_12m": 0.1968
+      },
+      {
+        "start": "2000-02-11",
+        "end": "2000-12-27",
+        "duration_days": 320,
+        "mean_vix": 23.3,
+        "fwd_rv22_at_start": 0.2345,
+        "fwd_rv22_1m": 0.3109,
+        "fwd_rv22_3m": 0.2112,
+        "fwd_rv22_6m": 0.1354,
+        "fwd_rv22_12m": 0.2536
+      },
+      {
+        "start": "2000-12-28",
+        "end": "2000-12-29",
+        "duration_days": 1,
+        "mean_vix": 26.57,
+        "fwd_rv22_at_start": 0.2444,
+        "fwd_rv22_1m": 0.1936,
+        "fwd_rv22_3m": 0.2501,
+        "fwd_rv22_6m": 0.1704,
+        "fwd_rv22_12m": 0.1804
+      },
+      {
+        "start": "2005-12-27",
+        "end": "2005-12-28",
+        "duration_days": 1,
+        "mean_vix": 11.57,
+        "fwd_rv22_at_start": 0.1077,
+        "fwd_rv22_1m": 0.1007,
+        "fwd_rv22_3m": 0.0911,
+        "fwd_rv22_6m": 0.124,
+        "fwd_rv22_12m": 0.0785
+      },
+      {
+        "start": "2005-12-29",
+        "end": "2006-01-03",
+        "duration_days": 5,
+        "mean_vix": 11.84,
+        "fwd_rv22_at_start": 0.1117,
+        "fwd_rv22_1m": 0.0973,
+        "fwd_rv22_3m": 0.0929,
+        "fwd_rv22_6m": 0.124,
+        "fwd_rv22_12m": 0.0782
+      },
+      {
+        "start": "2006-01-31",
+        "end": "2006-03-08",
+        "duration_days": 36,
+        "mean_vix": 12.42,
+        "fwd_rv22_at_start": 0.0987,
+        "fwd_rv22_1m": 0.077,
+        "fwd_rv22_3m": 0.1477,
+        "fwd_rv22_6m": 0.0718,
+        "fwd_rv22_12m": 0.1682
+      },
+      {
+        "start": "2006-03-21",
+        "end": "2006-03-30",
+        "duration_days": 9,
+        "mean_vix": 11.31,
+        "fwd_rv22_at_start": 0.0857,
+        "fwd_rv22_1m": 0.1132,
+        "fwd_rv22_3m": 0.1433,
+        "fwd_rv22_6m": 0.061,
+        "fwd_rv22_12m": 0.0692
+      },
+      {
+        "start": "2006-06-08",
+        "end": "2006-06-29",
+        "duration_days": 21,
+        "mean_vix": 17.7,
+        "fwd_rv22_at_start": 0.1399,
+        "fwd_rv22_1m": 0.124,
+        "fwd_rv22_3m": 0.0685,
+        "fwd_rv22_6m": 0.0659,
+        "fwd_rv22_12m": 0.1413
+      },
+      {
+        "start": "2006-06-30",
+        "end": "2006-07-27",
+        "duration_days": 27,
+        "mean_vix": 15.3,
+        "fwd_rv22_at_start": 0.1273,
+        "fwd_rv22_1m": 0.0659,
+        "fwd_rv22_3m": 0.0537,
+        "fwd_rv22_6m": 0.0769,
+        "fwd_rv22_12m": 0.1866
+      },
+      {
+        "start": "2006-08-02",
+        "end": "2006-08-04",
+        "duration_days": 2,
+        "mean_vix": 14.4,
+        "fwd_rv22_at_start": 0.0659,
+        "fwd_rv22_1m": 0.0805,
+        "fwd_rv22_3m": 0.0853,
+        "fwd_rv22_6m": 0.1836,
+        "fwd_rv22_12m": 0.2139
+      },
+      {
+        "start": "2006-08-07",
+        "end": "2006-08-08",
+        "duration_days": 1,
+        "mean_vix": 15.23,
+        "fwd_rv22_at_start": 0.0749,
+        "fwd_rv22_1m": 0.0693,
+        "fwd_rv22_3m": 0.0803,
+        "fwd_rv22_6m": 0.1857,
+        "fwd_rv22_12m": 0.2031
+      },
+      {
+        "start": "2006-08-14",
+        "end": "2006-08-16",
+        "duration_days": 2,
+        "mean_vix": 13.84,
+        "fwd_rv22_at_start": 0.0763,
+        "fwd_rv22_1m": 0.0679,
+        "fwd_rv22_3m": 0.0796,
+        "fwd_rv22_6m": 0.1948,
+        "fwd_rv22_12m": 0.1639
+      },
+      {
+        "start": "2006-08-17",
+        "end": "2007-03-21",
+        "duration_days": 216,
+        "mean_vix": 11.77,
+        "fwd_rv22_at_start": 0.0636,
+        "fwd_rv22_1m": 0.0684,
+        "fwd_rv22_3m": 0.081,
+        "fwd_rv22_6m": 0.1379,
+        "fwd_rv22_12m": 0.1827
+      },
+      {
+        "start": "2007-05-03",
+        "end": "2007-05-22",
+        "duration_days": 19,
+        "mean_vix": 13.29,
+        "fwd_rv22_at_start": 0.0804,
+        "fwd_rv22_1m": 0.1471,
+        "fwd_rv22_3m": 0.2094,
+        "fwd_rv22_6m": 0.2579,
+        "fwd_rv22_12m": 0.133
+      },
+      {
+        "start": "2007-05-30",
+        "end": "2007-06-06",
+        "duration_days": 7,
+        "mean_vix": 13.12,
+        "fwd_rv22_at_start": 0.1433,
+        "fwd_rv22_1m": 0.1691,
+        "fwd_rv22_3m": 0.1417,
+        "fwd_rv22_6m": 0.1834,
+        "fwd_rv22_12m": 0.1853
+      },
+      {
+        "start": "2019-08-27",
+        "end": "2019-08-30",
+        "duration_days": 3,
+        "mean_vix": 19.18,
+        "fwd_rv22_at_start": 0.093,
+        "fwd_rv22_1m": 0.1315,
+        "fwd_rv22_3m": 0.078,
+        "fwd_rv22_6m": 0.9074,
+        "fwd_rv22_12m": 0.2383
+      },
+      {
+        "start": "2022-04-01",
+        "end": "2022-04-05",
+        "duration_days": 4,
+        "mean_vix": 19.1,
+        "fwd_rv22_at_start": 0.2671,
+        "fwd_rv22_1m": 0.2984,
+        "fwd_rv22_3m": 0.1893,
+        "fwd_rv22_6m": 0.3078,
+        "fwd_rv22_12m": 0.1372
+      },
+      {
+        "start": "2022-07-06",
+        "end": "2024-08-27",
+        "duration_days": 783,
+        "mean_vix": 18.04,
+        "fwd_rv22_at_start": 0.1921,
+        "fwd_rv22_1m": 0.2025,
+        "fwd_rv22_3m": 0.2423,
+        "fwd_rv22_6m": 0.1634,
+        "fwd_rv22_12m": 0.0957
+      },
+      {
+        "start": "2024-09-03",
+        "end": "2024-09-04",
+        "duration_days": 1,
+        "mean_vix": 20.72,
+        "fwd_rv22_at_start": 0.1116,
+        "fwd_rv22_1m": 0.1106,
+        "fwd_rv22_3m": 0.1512,
+        "fwd_rv22_6m": 0.4984,
+        "fwd_rv22_12m": 0.0585
+      },
+      {
+        "start": "2024-09-05",
+        "end": "2024-09-06",
+        "duration_days": 1,
+        "mean_vix": 19.9,
+        "fwd_rv22_at_start": 0.1189,
+        "fwd_rv22_1m": 0.1362,
+        "fwd_rv22_3m": 0.1581,
+        "fwd_rv22_6m": 0.5015,
+        "fwd_rv22_12m": 0.0623
+      }
+    ],
+    "mean_rv22_inverted": 0.1543,
+    "mean_rv22_normal": 0.1648,
+    "difference_pct": -1.04,
+    "ttest": {
+      "t": -2.8937,
+      "p": 0.0038
+    },
+    "mann_whitney": {
+      "U": 2815782.0,
+      "p": 0.9985
+    }
+  },
+  "lead_lag_analysis": {
+    "lag_0": {
+      "corr_slope_vix": 0.2037,
+      "p_slope_vix": 0.0,
+      "corr_slope_rv22": 0.0794,
+      "p_slope_rv22": 0.0
+    },
+    "lag_5": {
+      "corr_slope_vix": 0.1992,
+      "p_slope_vix": 0.0,
+      "corr_slope_rv22": 0.0748,
+      "p_slope_rv22": 0.0
+    },
+    "lag_10": {
+      "corr_slope_vix": 0.1941,
+      "p_slope_vix": 0.0,
+      "corr_slope_rv22": 0.0703,
+      "p_slope_rv22": 0.0
+    },
+    "lag_22": {
+      "corr_slope_vix": 0.1815,
+      "p_slope_vix": 0.0,
+      "corr_slope_rv22": 0.0624,
+      "p_slope_rv22": 0.0
+    },
+    "lag_44": {
+      "corr_slope_vix": 0.1628,
+      "p_slope_vix": 0.0,
+      "corr_slope_rv22": 0.0571,
+      "p_slope_rv22": 0.0
+    },
+    "lag_66": {
+      "corr_slope_vix": 0.1492,
+      "p_slope_vix": 0.0,
+      "corr_slope_rv22": 0.0531,
+      "p_slope_rv22": 0.0
+    },
+    "lag_132": {
+      "corr_slope_vix": 0.1043,
+      "p_slope_vix": 0.0,
+      "corr_slope_rv22": 0.0332,
+      "p_slope_rv22": 0.0079
+    },
+    "lag_252": {
+      "corr_slope_vix": -0.0213,
+      "p_slope_vix": 0.0916,
+      "corr_slope_rv22": -0.0725,
+      "p_slope_rv22": 0.0
+    }
+  },
+  "regime_analysis": {
+    "Elevated(20-25)": {
+      "n": 1247,
+      "corr_slope_rv22": -0.1845,
+      "p_corr": 0.0,
+      "partial_corr_given_vix": -0.187,
+      "p_partial": 0.0
+    },
+    "High(>25)": {
+      "n": 1252,
+      "corr_slope_rv22": 0.0734,
+      "p_corr": 0.0093,
+      "partial_corr_given_vix": -0.0603,
+      "p_partial": 0.0328
+    },
+    "Normal(15-20)": {
+      "n": 1958,
+      "corr_slope_rv22": -0.0814,
+      "p_corr": 0.0003,
+      "partial_corr_given_vix": -0.0852,
+      "p_partial": 0.0002
+    },
+    "Low(<15)": {
+      "n": 2097,
+      "corr_slope_rv22": 0.0039,
+      "p_corr": 0.859,
+      "partial_corr_given_vix": -0.0226,
+      "p_partial": 0.3013
+    }
+  },
+  "regime_transition": {
+    "prob_spike_given_inverted": 0.6077,
+    "prob_spike_given_normal": 0.6555,
+    "lift": 0.93,
+    "chi2": 8.36,
+    "chi_p": 0.0038
+  },
+  "key_findings": {
+    "Q1_slope_adds_to_vix": "OOS R2 improvement: -0.0112, partial r=-0.0874",
+    "Q2_inversion_predicts_regime": "P(spike|inverted)=0.6077, lift=0.93x",
+    "Q3_leading_indicator": "corr(slope_lag252, VIX)=-0.0213"
+  },
+  "references": [
+    "Estrella & Mishkin (1998) \u2014 yield curve as recession predictor",
+    "Copeland & Copeland (1999) \u2014 VIX market timing",
+    "Harvey et al. (2016) \u2014 t > 3.0 multiple testing threshold",
+    "Patton (2011) \u2014 proxy-robust loss (QLIKE)",
+    "K503: GARCH-MIDAS with T10Y2Y -> theta~0",
+    "G5: 5 sentiment/financial indicators null after VIX control"
+  ],
+  "limitations": [
+    "Forward RV22 uses daily close-to-close returns, not intraday RV",
+    "FRED data forward-filled on non-trading days",
+    "OOS period (2019-2026) includes COVID crash \u2014 may inflate vol differences",
+    "Inversion episodes are few (small N), limiting statistical power",
+    "Yield curve slope affected by QE/QT (may distort natural signal)"
+  ]
+}

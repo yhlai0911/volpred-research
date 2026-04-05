@@ -20175,5 +20175,23 @@
     "category": "knowledge",
     "created_at": "2026-04-05T11:13:09.758896",
     "updated_at": "2026-04-05T11:13:09.758909"
+  },
+  {
+    "id": "K871",
+    "experiment_id": "K871",
+    "title": "K871: Yield Curve Slope NULL — Partial r=-0.087 After VIX Control, OOS R² Degrades. Inversion ≠ Vol Spike.",
+    "content": "[提出: Claude, 執行: Claude] K871 tests yield curve (T10Y2Y/T10Y3M from FRED) as vol predictor. 6,554 days (2000-2026). Partial corr slope→fwd_rv|VIX = -0.087 (tiny). OOS: adding slope REDUCES R² from 0.275 to 0.264. DM all NS. Counterintuitive: inverted periods have LOWER mean fwd vol (15.4% vs 16.5%) — 2022-2024 long inversion was moderate-vol. P(VIX>25|inverted)=60.8% < P(VIX>25|normal)=65.5%. No lead-lag pattern. CONCLUSION: yield curve inversion predicts recessions but NOT vol spikes. VIX already captures all relevant information.",
+    "tags": [
+      "yield_curve",
+      "T10Y2Y",
+      "FRED",
+      "VIX_sufficiency",
+      "null_result",
+      "interest_rate"
+    ],
+    "data_source": "FRED (T10Y2Y, T10Y3M, DGS10) + yfinance (SPY, ^VIX), 2000-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T11:31:35.753494",
+    "updated_at": "2026-04-05T11:31:35.753500"
   }
 ]

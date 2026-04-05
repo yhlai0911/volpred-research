@@ -176,6 +176,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **⚠️ 0050.TW 數據品質**：Yahoo Finance 1:4 分割只回溯到 2014，2013 前未調整。**所有 0050.TW 實驗必須 `from volpred.utils import clean_tw50_data`**
 - **5-min 數據回補**：`collect_5min_data.py` 自動偵測 gap 回補（上限 59 天）
 - **TAIFEX 格式陷阱**：2012 是 9 欄/2014 起 10 欄、時間格式 2017 夜盤前後不同、2011 特殊編碼。**必須用 header 判斷，不可硬編碼 index**。詳見 skill
+- **⚠️ TAIFEX 期貨轉倉（必須處理）**：不要直接用 TX1，要用 **TX（全合約），每日按成交量選最活躍的合約月份**。TX1 在結算日（每月第三個週三）自動切換合約有 roll gap ~0.5-1.0%。正確做法：讀 TX → 按「到期月份」分群 → 選當日成交量最大的合約 → 只用該合約 tick 算 return/RV。K849/K851/K852b/K868 未處理
 - **Paper trading 多日回補**：daily_update.py 自動回填所有 `portfolio_return=None` 的歷史條目（利用相鄰條目價差）
 - **frontend-v2-fix 已部署**：`volpred.zeabur.app` 綁定到 volpred-v3 服務（frontend-v2-fix），前端修改只需改 `frontend-v2-fix/`
 

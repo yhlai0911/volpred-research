@@ -309,3 +309,21 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 1. CLAUDE.md Step 0 加入「模型-Target 匹配」和「結果是否為設計必然」檢查
 2. 修正所有 proxy ceiling paradigm shift 敘事
 3. K849 真正有價值的部分：K850 prediction-VaR paradox、K852 RealGARCH、夜盤 decomposition
+
+## TAIFEX TX1 轉倉 Roll Gap 未處理（2026-04-05 用戶指出）
+
+**問題**：K849/K851/K852b/K868 使用 TX1（近月合約）tick 數據計算 5-min RV，但沒有處理每月第三個週三的轉倉（rollover）。
+
+**影響**：
+- 每月結算日，TX1 從到期月合約切換到下月合約
+- 例：2020/01/15 TX1=202001 price=12174 → 01/16 TX1=202002 price=12067（roll gap -107 點 = -0.88%）
+- 這個價差不是真實波動，但被計入 RV 計算
+- 每年 12 次轉倉，每次可能 0.5-1.0% 假波動→RV 被系統性高估
+
+**正確處理方式**：
+1. **排除轉倉日**：偵測「到期月份」欄位變化的交易日，該日跨合約 return 不計入 RV
+2. **用同合約銜接**：轉倉前用舊合約最後價格，轉倉後用新合約第一價格，不跨合約算 return
+3. **比例調整**：ratio-adjusted continuous futures
+
+**受影響實驗**：K849, K851, K852b, K868
+**根因**：實驗前 checklist 沒有「期貨轉倉處理」這一條。preamble 也沒提及。
