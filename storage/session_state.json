@@ -1,7 +1,8 @@
 {
-  "saved_at": "2026-04-05T04:51:43.680306+00:00",
+  "saved_at": "2026-04-05T05:06:51.938142+00:00",
   "reason": "pre-compact auto-save",
   "recent_commits": [
+    "7a4d9d4 K874c ★★ Periodic Realized GARCH — cross-recursion validated (DM t=-4.15 Harvey PASS)",
     "fe114bf K874b Log-Space Cross-Info HAR — fixes level-space explosion, but HAR ceiling confirmed",
     "2ec55c2 K874 Joint HAR+Overnight (cross-info t=8.08 but QLIKE fails) + K875 Earnings NULL",
     "4a2d6cc K873 Weekend Vol NULL + TAIFEX rollover fix + Lai PRS paper analysis",
@@ -30,14 +31,13 @@
     "61263bc Paper 2 v3: All 4 new references verified correct (DOIs confirmed)",
     "455cb22 Paper 2: Update VaR paradox to common 450-day sample (K854 evidence)",
     "c1250ff K854: Paradox confirmed on 450-day common sample — all Codex issues resolved",
-    "90f48cf Paper 2: Proxy ceiling refined with K853 ablation evidence",
-    "370582e K853: Proxy ablation — r² mutes HAR advantage 4x but doesn't reverse ranking"
+    "90f48cf Paper 2: Proxy ceiling refined with K853 ablation evidence"
   ],
-  "knowledge_count": 1666,
-  "last_experiment": "K874b",
-  "uncommitted_files": 3,
-  "draft_count": 8,
-  "metrics_age_hours": 38.8,
+  "knowledge_count": 1667,
+  "last_experiment": "K874c",
+  "uncommitted_files": 8,
+  "draft_count": 7,
+  "metrics_age_hours": 39.0,
   "next_priorities": "## Next Session Priorities（2026-03-31 起）\n\n### P0: 時間敏感\n\n| 項目 | 說明 | 截止日 |\n|------|------|--------|\n| **NFP 04/03 事後文章** | 非農數據發布後 1 天內發解讀文（K661 數據已備） | 04/04 |\n| **TSMC 營收 04/10** | 預告+解讀文 | 04/08, 04/11 |\n| **HAR-RV 正式實驗** | 5-min 數據 ETA 04/11 達 60 天門檻 | 04/11 |\n| **TSMC 法說 04/16** | 預告+解讀文 | 04/14, 04/17 |\n| **FOMC 04/28-29** | 預告文 04/26，事後解讀 04/30 | 04/26, 04/30 |\n| **K804 跨資產 GJR+SkewT** | 驗證 K802 雙冠是否跨資產普遍 | 進行中 |\n\n### P1: 高價值\n\n**論文修正：**\n- [ ] **Leverage-Direction**（K628 已瘦身 64→52p）：加入「VT is insurance」框架\n- [ ] **Taiwan VT**：K636 修正 amplification（gamma vs vol level）、TX cost 已修正\n\n**平台經營方向（基於 analytics：192 views, 3 users, 10 reactions）：**\n- [x] **SEO 完成**：Google Search Console 驗證 + sitemap + 6 頁 metadata + FAQ/Article/Breadcrumb schema + admin noindex + /portfolio 公開路由 ✅ 2026-03-31\n- [x] **分享按鈕**：LINE/Facebook/X/Twitter + 複製連結 ✅ 2026-03-31\n- [x] **首頁預設「一般讀者」tab** ✅ 2026-03-31\n- [ ] **加強入門內容**：「從零開始」是最熱門文章之一，應建立 /guide 頁面\n- [ ] **減少學術文章比例，增加實務操作指南**：收藏(7)>按讚(3) = 讀者當工具書用\n- [x] K705 GAP-03：StrategySelector CAGR 降級，突出 Sharpe/MDD ✅ 2026-03-31\n- [x] **Umami Analytics** 上線（cloud.umami.is，免費方案） ✅ 2026-03-31\n- [ ] **Umami API 自動化**：寫 scripts/analytics.py 包裝 Umami REST API，方便終端查看訪客數據（**2026-04-04 週五檢視數據後決定**）\n\n### P2: 研究新方向\n\n**高優先（有明確下一步）：**\n- [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較\n- [ ] **Paper 6: Crypto Fear Channel**：K746b + **K855 悖論發現**：BTC-ETF 後 Granger 弱化（p=0.32）但 shock 傳導放大",
   "pending_events": [
     "NFP 04/03 — post-event article template ready (mile_nfp_040326)",

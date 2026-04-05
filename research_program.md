@@ -273,7 +273,15 @@
 - 基於：K827 → K827v2（敏感度）→ K827v3（固定流動性，Codex 致命缺陷修正）
 - 狀態：**v1.2 submission-ready**（Codex 3H 修正：流動性隔離 + 量化非發現 + 敏感度驗證）
 
-**未來可能的第六篇：VIX Sufficient Statistic**
+**未來可能的第六篇：Periodic Realized GARCH — Simpler Alternative to PRS**
+- K874c ★★：跨 session 遞迴 DM t=-4.15 Harvey PASS（vs separate GARCH）
+- 簡化 Lai et al. (2024 APFM) PRS：6-8 參數 vs PRS 的幾十個，無需 Markov switching
+- 核心貢獻：驗證遞迴結構本身（不是 regressor）攜帶跨 session 資訊
+- HAR 仍勝 total daily（log-space 優勢），但 PRG 在 session-level VaR 有獨特價值
+- 基於：K874→K874b→K874c 系列 + K848/K851/K868 高頻發現
+- 可投：Asia-Pacific Financial Markets（延伸 Lai 2024）或 J. Futures Markets
+
+**未來可能的第七篇：VIX Sufficient Statistic**
 - 23+ 個指標全被 VIX 吸收的 comprehensive study
 - 適合 Journal of Financial Economics 或 Review of Financial Studies
 - 需要更多跨市場驗證（目前只有 US + Taiwan）
