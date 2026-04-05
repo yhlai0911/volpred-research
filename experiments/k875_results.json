@@ -1,0 +1,171 @@
+{
+  "experiment_id": "K875",
+  "title": "K875: Earnings Season Aggregate Volatility",
+  "status": "NULL RESULT",
+  "timestamp": "2026-04-05T12:25:38.959867",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "period": "2005-01-03 to 2026-04-02",
+  "n_observations": 5346,
+  "methodology": "OLS regression + HAR + OOS QLIKE + DM test",
+  "references": [
+    "K498: GARCH-X earnings dummy (null result)",
+    "K570: VT should not adjust during earnings season",
+    "Savor & Wilson (2016, JFE): Earnings Announcements and Systematic Risk",
+    "Patton (2011): Volatility forecast comparison using imperfect volatility proxies",
+    "Harvey (2016): ...and the Cross-Section of Expected Returns"
+  ],
+  "unconditional_test": {
+    "earnings_vol_mean": 0.14396660755240726,
+    "non_earnings_vol_mean": 0.1485862057630106,
+    "welch_t": -0.9306169243672311,
+    "welch_p": 0.352228866541914,
+    "mann_whitney_p": 0.07678230381611631,
+    "cohens_d": -0.03482690224935469,
+    "harvey_pass": false
+  },
+  "quarter_specific": {
+    "Q1 (Jan)": {
+      "earn_mean": 0.12525384932115877,
+      "nonearn_mean": 0.14135909119907572,
+      "t_stat": -2.080900960461284,
+      "p_value": 0.038024471229623005,
+      "cohens_d": -0.1983883561175503,
+      "n_earn": 230,
+      "n_nonearn": 210
+    },
+    "Q2 (Apr)": {
+      "earn_mean": 0.15734896117643535,
+      "nonearn_mean": 0.1563582811299984,
+      "t_stat": 0.0745150056834331,
+      "p_value": 0.9406355814983821,
+      "cohens_d": 0.007153923182488892,
+      "n_earn": 232,
+      "n_nonearn": 204
+    },
+    "Q3 (Jul)": {
+      "earn_mean": 0.11580313483165186,
+      "nonearn_mean": 0.12196976711660938,
+      "t_stat": -1.0539575473408136,
+      "p_value": 0.29252205387868596,
+      "cohens_d": -0.10096345740429018,
+      "n_earn": 241,
+      "n_nonearn": 202
+    },
+    "Q4 (Oct)": {
+      "earn_mean": 0.1771061315279869,
+      "nonearn_mean": 0.16781232481723524,
+      "t_stat": 0.5181642694231923,
+      "p_value": 0.6046016784057962,
+      "cohens_d": 0.04793091716164287,
+      "n_earn": 241,
+      "n_nonearn": 222
+    }
+  },
+  "regression_full_sample": {
+    "model1_vix_R2": 0.6630502886229926,
+    "model2_vix_earn_R2": 0.6630546471508512,
+    "earn_coef_vix_model": 0.0006963789860222262,
+    "earn_t_vix_model": 0.2622548374654057,
+    "model3_HAR_R2": 0.8477181175798502,
+    "model4_HAR_earn_R2": 0.847744011454643,
+    "earn_coef_har_model": -0.001697142355761409,
+    "earn_t_har_model": -0.9507426236084732
+  },
+  "oos_results": {
+    "is_period": "2005-02-09 to 2018-12-31",
+    "oos_period": "2019-01-02 to 2026-04-02",
+    "n_is": 3497,
+    "n_oos": 1823,
+    "fixed_split": {
+      "model1_vix": {
+        "MSE": 0.006013858590286977,
+        "MAE": 0.05070670951782051,
+        "QLIKE": 0.0914652176728242,
+        "R2": 0.6354227146843698
+      },
+      "model2_vix_earn": {
+        "MSE": 0.006047153729159721,
+        "MAE": 0.05091686972087835,
+        "QLIKE": 0.09204213837729339,
+        "R2": 0.6334042682639572
+      },
+      "model3_HAR": {
+        "MSE": 0.002325792364407272,
+        "MAE": 0.027842472530936843,
+        "QLIKE": 0.042757716349011314,
+        "R2": 0.8590038236361388
+      },
+      "model4_HAR_earn": {
+        "MSE": 0.0023278146938646147,
+        "MAE": 0.027854566974366397,
+        "QLIKE": 0.04277850998914952,
+        "R2": 0.8588812242479917
+      }
+    },
+    "dm_tests_qlike": {
+      "vix_vs_vix_earn": {
+        "t": -1.4928429212420238,
+        "p": 0.13565144179858812,
+        "harvey_pass": false
+      },
+      "har_vs_har_earn": {
+        "t": -0.9153208874474866,
+        "p": 0.36014431847060635,
+        "harvey_pass": false
+      },
+      "vix_vs_har": {
+        "t": 8.34242586825672,
+        "p": 2.220446049250313e-16
+      }
+    },
+    "dm_tests_mse": {
+      "vix_vs_vix_earn": {
+        "t": -1.6726255555897007,
+        "p": 0.09457271472252282
+      },
+      "har_vs_har_earn": {
+        "t": -2.6146230094064253,
+        "p": 0.009006241165967266
+      }
+    },
+    "robustness_r2_target": {
+      "qlike_m1": 43098.137141005835,
+      "qlike_m2": 40757.847302319,
+      "qlike_m3": 80357.79888046993,
+      "qlike_m4": 86613.01373589948,
+      "dm_vix_vs_vix_earn": {
+        "t": 0.9741824035352463,
+        "p": 0.33009529620827505
+      },
+      "dm_har_vs_har_earn": {
+        "t": -0.8540404211238595,
+        "p": 0.39319486363245293
+      }
+    },
+    "expanding_window": {
+      "refit_freq": 63,
+      "n_oos": 1823,
+      "qlike": {
+        "m1": 0.09189858494859852,
+        "m2": 0.092178946088131,
+        "m3": 0.042997731756995575,
+        "m4": 0.043000274877364845
+      },
+      "mse": {
+        "m1": 0.00606040407762431,
+        "m2": 0.006081086349484613,
+        "m3": 0.002325568874521177,
+        "m4": 0.002325013063692021
+      },
+      "dm_vix_vs_vix_earn": {
+        "t": -1.6916214150194457,
+        "p": 0.09088918383993927
+      },
+      "dm_har_vs_har_earn": {
+        "t": -0.07543239009070428,
+        "p": 0.939878970150883
+      }
+    }
+  },
+  "conclusion": "NULL RESULT. Earnings season (mid-month Jan/Apr/Jul/Oct) shows no statistically significant effect on SPY 5-day realized vol (Welch t=-0.931, Cohen's d=-0.0348). Earnings dummy does not improve OOS vol forecasting beyond VIX (DM t=-1.493) or beyond HAR (DM t=-0.915), both failing Harvey |t|>3.0. Consistent with K498/K570: index diversification absorbs individual stock earnings effects. Limitations: (1) uses calendar dates not actual reporting dates, (2) 5-day RV from daily returns only, (3) no sector-level decomposition."
+}
