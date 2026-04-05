@@ -286,3 +286,26 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 | 2026-04-04 | Paper pages=None | 新論文頁數不顯示 | papers.py 用 subprocess 呼叫 python3 import fitz，但 pymupdf 只在系統 Python 有，不在 .venv。except:pass 靜默吞錯。之前靠碰巧系統 PATH 先找到系統 python3 才成功。 | 把 pymupdf 加入 pyproject.toml（uv add pymupdf），確保 .venv 內也有。教訓：所有 import 的套件必須在 pyproject.toml 宣告，不能靠系統安裝。 |
 | 2026-04-04 | 文章圖片 404 | K838/K840 文章圖表顯示破圖 | Agent 呼叫 upload_chart(path, "custom.png") 但第二參數是 bucket 不是 filename，導致上傳到錯誤 bucket。另外 worktree agent 的圖片路徑和主分支不同。 | 新增 remote_filename 參數到 upload_chart()。重新上傳 3 張圖。310/310 恢復。 |
 | 2026-04-04 | 論文 abstract 空白 | Paper 4/5 在前端無摘要 | _count_tex_metrics 只提取 pages+citations 不提取 abstract。update_paper_full 不傳 abstract。 | 加入 LaTeX abstract 自動提取（regex）+ 傳給 upsert。7 篇論文全更新。 |
+
+## K849 "Proxy Ceiling Paradigm Shift" 過度宣稱（2026-04-05 發現）
+
+**問題**：K849 將 HAR-RV 在 RV target 上勝過 GJR 宣稱為「paradigm shift」和「800 個實驗用錯 target」。
+
+**根因**：
+1. GARCH 預測 close-to-close σ²，用 r² 評估是**正確的**
+2. HAR-RV 預測日內 RV，用 5-min RV 評估是**正確的**
+3. 不同模型在各自原生 target 上贏是**設計的必然**，不是「發現」
+4. research_program.md 第 24-36 行早就寫了「不同模型預測不同 target」的公平比較標準
+5. 第 749-753 行早就寫了 Hansen & Lunde (2005) 的調整方法
+6. 但 K849 實驗前沒有回讀這些方法論約束，agent prompt 也沒引用
+
+**流程失敗點**：
+- 實驗前 checklist 沒有「結果是否為模型設計的必然」這一條
+- agent prompt 沒引用 research_program.md 的方法論標準
+- Codex adversarial review 只查代碼 bug，沒質疑框架合理性
+- 結果出來後興奮過頭，沒自問「這跟我們已知的矛盾嗎？」
+
+**修正**：
+1. CLAUDE.md Step 0 加入「模型-Target 匹配」和「結果是否為設計必然」檢查
+2. 修正所有 proxy ceiling paradigm shift 敘事
+3. K849 真正有價值的部分：K850 prediction-VaR paradox、K852 RealGARCH、夜盤 decomposition

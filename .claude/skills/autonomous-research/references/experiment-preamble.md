@@ -1,0 +1,65 @@
+# Experiment Agent Preamble（實驗 Agent 必讀）
+
+**此文件必須附加在每個實驗 agent prompt 的開頭。不可省略。**
+
+## 1. 模型-Target 匹配規則（最重要）
+
+不同波動率模型預測不同的東西，評估必須在各自的原生 target 上進行：
+
+| 模型類型 | 預測標的 | 正確評估 target | 不可用的 target |
+|---------|---------|----------------|----------------|
+| GARCH/GJR/EGARCH | close-to-close σ²（全日，含隔夜）| r²（squared daily return）| 日內 RV |
+| HAR-RV | 日內 realized variance（僅交易時段）| 5-min RV | r² |
+| MEM | |r| 或 r² | 各自原生 | 混用 |
+| Range (Parkinson/GK/RS) | 日內 high-low range | range-based vol | r² |
+
+**跨模型公平比較的唯一正確方式**：
+1. Patton (2011): QLIKE on r²（proxy-robust，排名一致性有理論保證）
+2. Hansen & Lunde (2005): 最優加權 RV_total = w₁×RV_intraday + w₂×r²_overnight
+3. Spearman rank correlation（分配無關）
+
+**絕對禁止**：
+- 用 RV target 評估 GARCH 然後說 HAR 贏（HAR 本來就預測 RV）
+- 用 r² target 評估 HAR 然後說 GARCH 贏（GARCH 本來就預測 σ²）
+- 把「模型在自己 target 上贏」宣稱為「發現」——這是設計的必然，不是實證結果
+
+## 2. Mechanical vs Empirical 區分
+
+如果結果可以從模型定義直接推導，它是 **mechanical result**，不是 empirical finding：
+- Mechanical: HAR 在 RV 上贏 GARCH（定義使然）
+- Empirical: HAR-RV 經 Hansen & Lunde 調整後在全日 vol 上仍勝 GARCH（需要實證驗證）
+- Mechanical: gamma > 0 implies VT de-levers after negative returns（GJR 方程式使然）
+- Empirical: cross-sectional gamma-VT correlation exceeds mechanical prediction（需要數據）
+
+**不可把 mechanical result 宣稱為 contribution 或 discovery。**
+
+## 3. 統計門檻
+
+| 檢定 | 門檻 | 依據 |
+|------|------|------|
+| DM test | Harvey (2016) \|t\| > 3.0 | 多重檢定校正 |
+| Sharpe 差異 | SE ≈ 1/√N_years | 19 年 SE=0.23 |
+| Cross-sectional | N ≥ 7 | Spearman 穩定性 |
+| Bootstrap | ≥ 1000 reps | CI 精確度 |
+| GARCH window | ≥ 500（建議 2000）| Hwang & Valls Pereira (2006) |
+| OOS 期間 | ≥ 252 天 | 至少涵蓋 1 年 |
+
+**Sharpe > 2x baseline = 幾乎一定有 bug，先停下來檢查。**
+
+## 4. 防錯規則
+
+- **DM test**：用 `from volpred.stats.model_evaluation import strategy_dm_test`，不自己寫
+- **0050.TW**：必須 `from volpred.utils import clean_tw50_data`
+- **Lookahead**：`signal = signal.shift(1)` 寫在代碼裡，不靠記憶
+- **GARCH OOS**：逐日遞迴 h[t]=f(h[t-1],r²[t-1])，不用 stale variance
+- **Student-t**：考慮 scale term sqrt((df-2)/df)
+- **Basel/統計檢定**：用標準實作，不自定義閾值
+
+## 5. 結果自我質疑（實驗完成後必做）
+
+在記錄結論前，問自己：
+1. 這個結果是 mechanical 還是 empirical？
+2. 這跟 research_program.md 已有的方法論標準矛盾嗎？
+3. 如果用不同的 target/proxy，結論會改變嗎？
+4. Sharpe > 2x baseline 嗎？（如果是，90% 有 bug）
+5. 這個結論的強度是否超過證據支持的範圍？

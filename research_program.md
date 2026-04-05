@@ -407,7 +407,7 @@
 - K838/K841/K842 全 NULL（日頻信號太慢）
 - **★★★ K844**：TX VT 空頭全勝，夜盤 73.7%，TX cost 97% 低
 - **★★★ K847**：隔夜 gap 61% 可交易（R²=0.83）
-- **★★★ K849**：HAR-RV 勝 GJR（DM t=-11.14），proxy ceiling 確認
+- **K849**：HAR-RV 在 RV target 上勝 GJR（DM t=-11.14）——預期結果（HAR 本來預測日內 RV）。真正有價值的是 K850 prediction-VaR paradox 和 K852 RealGARCH 橋接
 - K845：上架 FAIL，建議在 taiwan_8.63vix 加註期貨執行
 
 ### 期貨避險方法論
@@ -425,14 +425,14 @@
 - [ ] **K832: Jump Decomposition**：需 5-min 數據
 
 ### 衍生方向（2026-04-03~04 TAIFEX paradigm shift，K847-K849）
-- [ ] **K849 衍生：SPY HAR-RV**：用 yfinance 5-min 數據（04/11 ETA）在 SPY 上重現 K849，驗證 proxy ceiling 是否跨資產通用
+- [ ] **K849 衍生：SPY HAR-RV**：用 yfinance 5-min 數據（04/11 ETA）在 SPY 上測試 HAR-RV，並用 Hansen & Lunde (2005) 調整為全日波動率後與 GARCH 公平比較
 - [ ] **K849 衍生：HAR-RV-Night 成分分析**：K848 發現夜盤 vol 57%。HAR 模型分開 RV_night 和 RV_day 做 regressors 是否更好（K849 Track B 初步驗證 R² 0.17→0.58）
 - [x] ~~K849 衍生：HAR-RV based VaR~~ → **K850 悖論**：HAR 預測好 54% 但 VaR 更差（17/450 vs GJR+CF 2/481）。**Better prediction ≠ better VaR。** GJR+CF 仍是 0050.TW 冠軍。
 - [x] ~~K849 衍生：Realized GARCH~~ → **K852 ★★ 部分解決悖論**。RealGARCH-Log+CF: Trinity PASS (3 viol) + Spearman 0.790（最佳 rank ordering）。唯一在預測和 VaR 兩維度都好的模型。
 - [ ] **K847 衍生：Paper 2 更新（高優先）**：Taiwan VT 論文需加入：
   - K844: TX 期貨 VT 空頭全勝（return 分解 73.7% 夜盤）
   - K847: 隔夜 gap 61% 可交易（R²=0.83）
-  - K848/K849: 5-min RV 從 TAIFEX tick（proxy ceiling, HAR 勝 GJR t=-11.14）
+  - K848/K849: 5-min RV 從 TAIFEX tick（HAR 在 RV target 上勝 GJR，需 Hansen & Lunde 調整後才能公平比較全日 vol）
   - K850: HAR 預測好但 VaR 差（悖論）
   - K852: RealGARCH-Log+CF 兩維度最佳
   - 這些發現根本改變了 Paper 2 的貢獻和結論

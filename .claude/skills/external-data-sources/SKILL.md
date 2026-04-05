@@ -232,7 +232,6 @@ df = pd.read_csv(path, encoding='big5')
 - K847: 隔夜 gap 61% 可交易（R²=0.83）
 - K844: TX VT 空頭全勝，夜盤 return 73.7%
 - K848: 74.9% 天有 jump，夜盤 vol 佔比 24%→57%（2017→2026）
-- **台灣 vol 模型評估必須用 5-min RV 做 target，不能用 r²**
 
 ---
 

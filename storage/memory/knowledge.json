@@ -20081,5 +20081,45 @@
     "category": "knowledge",
     "created_at": "2026-04-05T09:59:30.259688",
     "updated_at": "2026-04-05T09:59:30.259696"
+  },
+  {
+    "id": "K866",
+    "experiment_id": "K866",
+    "title": "K866: VIX Term Structure Slope — IS Significant (slope_3m t=-7.66) but OOS NULL, VIX Sufficiency #26",
+    "content": "[提出: Claude, 執行: Claude] K866 tests VIX term structure slope (VIX/VIX3M/VIX9D) for forward 22d RV prediction. Data: 3,812 days (2011-2026), OOS 1,296 days. slope_3m partial r=-0.138 (p<0.001), slope_9d partial r=-0.092 — both IS significant. BUT: OOS no model beats VIX-only (all DM |t|<0.3). Backwardation (7.6% of days) predicts 1.91x higher vol (t=11.87) but this is simultaneity not prediction. slope_3m is stronger than slope_9d. Kitchen sink R²=0.347 but VIX dominates (t=17.2). High-VIX regime: VIX-only wins (Spearman 0.513 vs 0.454 for VIX+slope). CONCLUSION: Term structure slopes are noisy nonlinear transforms of VIX level itself. VIX sufficiency #26.",
+    "tags": [
+      "VIX_term_structure",
+      "VIX3M",
+      "VIX9D",
+      "contango",
+      "backwardation",
+      "VIX_sufficiency",
+      "null_result"
+    ],
+    "data_source": "yfinance (^VIX, ^VIX3M, ^VIX9D, SPY), 2011-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T10:08:48.573339",
+    "updated_at": "2026-04-05T10:08:48.573347"
+  },
+  {
+    "id": "K867",
+    "experiment_id": "K867",
+    "title": "K867: Tail Dependence — SPY-GLD NOT Asymmetric (bootstrap p>0.4), 50/50 Robust. BTC Crashes Together (Clayton).",
+    "content": "[提出: Claude, 執行: Claude] K867 tests tail dependence asymmetry. SPY-GLD: lambda_L=0.127, lambda_U=0.142, diff NS (t=-0.70). No hidden crash co-movement. Bear-day corr=-0.012. Gumbel copula best (upper tail). SPY-BTC: Clayton best (LOWER tail), lambda_L=0.214 — crashes together. SPY-TLT: Frank (symmetric). 4/10 crises had negative SPY-GLD corr (gold rallied). 2022 rate hike was the exception (gold failed). Gold is probabilistic hedge (~40% crisis), not guaranteed, but critically does NOT crash with stocks. K846 triple moat validated.",
+    "tags": [
+      "tail_dependence",
+      "copula",
+      "Clayton",
+      "Gumbel",
+      "SPY",
+      "GLD",
+      "BTC",
+      "diversification",
+      "50/50"
+    ],
+    "data_source": "yfinance (SPY, GLD, TLT, BTC-USD), 2005-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T10:30:53.895183",
+    "updated_at": "2026-04-05T10:30:53.895192"
   }
 ]

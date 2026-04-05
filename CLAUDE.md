@@ -151,12 +151,12 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——這是最可靠的設計原則**
 - K846：50/50 的三重護城河（分散化 r=0.057 + 再平衡溢酬 54bps/yr + 黃金危機 alpha）
 
-**★★★ Proxy Ceiling Paradigm Shift（2026-04-03~04 K847-K849）**
-- **K849：HAR-RV 壓倒 GJR（DM t=-11.14）**——之前 800+ 實驗說 GJR 不可動搖是 proxy ceiling 不是 model ceiling。r² 只捕捉 29% true vol（K848）
+**TAIFEX 高頻數據發現（2026-04-03~04 K847-K849）**
+- **K849：HAR-RV 在 RV target 上勝 GJR（DM t=-11.14）**——這是預期結果（HAR 本來就預測日內 RV，GARCH 預測 close-to-close σ²）。不同模型適合不同評估標的，不是誰「錯」了。要用 RV 模型做全日預測需 Hansen & Lunde (2005) 調整
 - **K847：隔夜 gap 61% 可交易**——用 TAIFEX 夜盤期貨可捕捉。Slot C（美股時段）佔 39.8%
 - **K848：夜盤 vol 佔比 24%→57%**（2017→2026）——台灣市場正在全球化
 - **K844：TX 期貨 VT 空頭期全勝**——交易成本省 97%，機構投資人應用期貨執行
-- **台灣 vol 模型評估必須用 5-min RV 做 target，不能用 r²**
+- **模型評估 target 必須匹配**：GARCH 用 r² 評估、HAR-RV 用 5-min RV 評估。跨模型公平比較用 Patton (2011) QLIKE on r² 或 Hansen & Lunde (2005) 最優加權 RV_total
 
 ### 注意事項
 - Feed 發文要用 `feed-publisher` skill（thinking ≠ content）
@@ -381,7 +381,10 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
    - **分配 fit**：Student-t 必須考慮 scale term sqrt((df-2)/df)
    - **Basel/統計檢定**：用標準實作，不自定義閾值
    - **Sharpe > 2x baseline**：幾乎一定有 bug，先停下來檢查
+   - **模型-Target 匹配**：GARCH 預測 close-to-close σ²（用 r² 評估）、HAR-RV 預測日內 RV（用 5-min RV 評估）、MEM 預測 |r|。**不同模型在各自原生 target 上贏是預期結果，不是發現**。跨 target 比較必須用 Patton (2011) proxy-robust QLIKE on r² 或 Hansen & Lunde (2005) 最優加權 RV_total
+   - **結果是否為模型設計的必然？**：如果結果可以從模型定義直接推導（如 HAR 在 RV 上贏 GARCH），這是 mechanical result 不是 empirical finding，不可宣稱為「發現」或「paradigm shift」
 1. 在 agent prompt 中**明確寫出**：「此實驗需注意的 error log 規則：XXX」
+2. **每個實驗 agent prompt 必須附上方法論 preamble**：讀取 `.claude/skills/autonomous-research/references/experiment-preamble.md` 的內容，附加在 agent prompt 開頭。不可省略。此文件包含模型-target 匹配規則、mechanical vs empirical 區分、統計門檻、防錯規則。**agent 看不到 CLAUDE.md 和 research_program.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。**
 
 **Step 1: 知識庫搜尋（過去成果）**
 1. `grep -i '關鍵詞' storage/memory/knowledge.json | grep title | head -10`
