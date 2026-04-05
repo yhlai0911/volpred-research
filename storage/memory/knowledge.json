@@ -20416,5 +20416,23 @@
     "category": "knowledge",
     "created_at": "2026-04-05T13:56:56.450566",
     "updated_at": "2026-04-05T13:56:56.450577"
+  },
+  {
+    "id": "K880",
+    "experiment_id": "K880",
+    "title": "K880 ★★★ PRG Cross-Market SPY Validated — DM t=6.00 vs GJR, t=-6.69 vs Separate (Both Harvey PASS)",
+    "content": "[提出: Claude, 執行: Claude] K880 validates PRG on SPY with daily OHLC proxies (2000-2026, 6601 days, OOS 1823). PRG Extended QLIKE 0.748 >> GJR 0.854 (DM t=6.00 Harvey PASS). Cross-recursion: PRG vs Separate DM t=-6.69 PASS. PRG best in ALL metrics (QLIKE/MSE/MAE/MZ-R²/Spearman). VaR 1%: PRG 0.93% perfect (Kupiec p=0.77), GJR+Separate FAIL. HAR catastrophic with OHLC proxies (6% violations). MZ-b=1.02 (unbiased). CROSS-MARKET CONFIRMED: TAIFEX t=5.10 + SPY t=6.00. Paper-ready.",
+    "tags": [
+      "PRG",
+      "SPY",
+      "cross_market",
+      "Harvey_PASS",
+      "VaR",
+      "paper_ready"
+    ],
+    "data_source": "yfinance (SPY), 2000-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T14:44:46.865787",
+    "updated_at": "2026-04-05T14:44:46.865796"
   }
 ]
