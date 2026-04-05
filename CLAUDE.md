@@ -535,7 +535,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 | 任務類型 | Agent prompt 必須包含 |
 |---------|---------------------|
 | **實驗** | 讀取 `experiment-preamble.md`（模型-target 匹配、統計門檻、防錯規則、VaR+ES 標準、periodic model 注意事項） |
-| **論文寫作** | 指示 agent 讀取：(1) `paper-writing-process.md`（12 步流程）(2) `finance-paper-quality` skill (3) 相關已發表論文 PDF (4) 實驗結果 JSON（不是摘要數字）(5) 參考文獻原文 |
+| **論文寫作** | **⚠️ 禁止用 agent 寫論文。** 必須在主對話串中直接進行（保留完整 context）。可用 `run_in_background` 做長時間編譯或數據提取，但寫作本身不可委派。原因：對話中的方法論決策、用戶糾正、模型理解無法傳遞給 agent。 |
 | **論文審查** | 指示 agent 讀取：(1) `latex-academic-reviewer` skill 完整內容 (2) `citation-verifier` skill (3) 論文本身 + 實驗結果 JSON |
 | **Feed 文章** | 指示 agent 讀取：(1) `feed-publisher` skill (2) 實驗結果 JSON (3) 已有文章（避免重複） |
 
