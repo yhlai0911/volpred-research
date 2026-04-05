@@ -20679,5 +20679,21 @@
     "data_source": "yfinance (0050.TW, TWII, TSMC, SPY)",
     "created_at": "2026-04-05T20:27:56.835099",
     "type": "experiment_result"
+  },
+  {
+    "id": "know_20260405204321_k893",
+    "experiment_id": "K893",
+    "title": "K893: Regime-Weighted Conformal VaR — Modest improvement (3-4% tighter, same coverage)",
+    "content": "[提出: arXiv:2602.03903, 執行: Claude] RWC λ=0.05: 3/3 Trinity PASS (same as HistSim) but 3-4% tighter VaR intervals. λ=0.1 also works. λ=0.2 too aggressive (2/3 FAIL). Student-t fails QQQ 1%. HistSim remains robust baseline (no tuning needed). RWC is useful refinement, not paradigm shift.",
+    "tags": [
+      "conformal",
+      "regime",
+      "VaR",
+      "RWC",
+      "HistSim"
+    ],
+    "data_source": "yfinance (SPY/QQQ/0050.TW + VIX)",
+    "created_at": "2026-04-05T20:43:21.529593",
+    "type": "experiment_result"
   }
 ]
