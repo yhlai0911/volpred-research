@@ -20121,5 +20121,41 @@
     "category": "knowledge",
     "created_at": "2026-04-05T10:30:53.895183",
     "updated_at": "2026-04-05T10:30:53.895192"
+  },
+  {
+    "id": "K868",
+    "experiment_id": "K868",
+    "title": "K868: HAR Day/Night Decomposition NULL — Night RV Info Already Captured by Total RV, Night Share 42.9%",
+    "content": "[提出: Claude, 執行: Claude] K868 tests day/night RV decomposition for TAIFEX TX1 (2,081 days, 2017-2026). HAR-DN (6 regressors) overfits (QLIKE 33.6 OOS blowup). HAR-DN-Ratio (night_ratio) NS (t=-0.66 IS, DM t=1.22 OOS). Night share mean 42.9% (23.9%→53.9% 2017→2025). Standard HAR-RV remains best (QLIKE 0.119). Night RV daily component IS significant (t=7.55) but weekly/monthly not — info already in total RV. Cross-model on r² (Patton 2011): GJR marginally beats HAR (1.316 vs 1.36) but DM NS. PREAMBLE VALIDATION: agent correctly reported both native-target and r²-target results without over-claiming.",
+    "tags": [
+      "HAR-RV",
+      "day_night",
+      "TAIFEX",
+      "Taiwan",
+      "null_result",
+      "preamble_validated"
+    ],
+    "data_source": "TAIFEX TX1 tick (Dropbox), 2017-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T10:45:27.239688",
+    "updated_at": "2026-04-05T10:45:27.239698"
+  },
+  {
+    "id": "K869",
+    "experiment_id": "K869",
+    "title": "K869: VIX Sector Rotation NULL — Timing Alpha NEGATIVE (-0.028), Static Defensive Best (Sharpe 0.675)",
+    "content": "[提出: Claude, 執行: Claude] K869 tests VIX-based sector rotation (9 ETFs, 2005-2026). Static Defensive (XLV/XLU/XLP/XLE) Sharpe 0.675 beats all VIX-timed strategies. Alpha decomposition: selection alpha +0.041, timing alpha -0.028 (NEGATIVE). VIX rotation 3-tier (0.647) marginally > EW (0.633) but DM |t|=0.87 NS. All DM vs SPY fail Harvey. OOS: SPY dominates (tech bull). VIX timing hurts in crisis: by the time VIX signals 'rotate to defensive,' growth recovery already starting. CONCLUSION: VIX predicts vol magnitude not direction — timing rotations add noise. Static sector selection > VIX timing.",
+    "tags": [
+      "sector_rotation",
+      "VIX",
+      "defensive",
+      "timing",
+      "null_result",
+      "alpha_decomposition"
+    ],
+    "data_source": "yfinance (9 sector ETFs, SPY, ^VIX), 2005-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T10:56:59.307134",
+    "updated_at": "2026-04-05T10:56:59.307144"
   }
 ]
