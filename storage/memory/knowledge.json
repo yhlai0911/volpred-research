@@ -20360,5 +20360,44 @@
     "category": "knowledge",
     "created_at": "2026-04-05T13:28:00.874697",
     "updated_at": "2026-04-05T13:28:00.874706"
+  },
+  {
+    "id": "K878",
+    "experiment_id": "K878",
+    "title": "K878: Dollar Index (DXY) NULL — IS F=26.1 but OOS DM t=0.39 (Textbook Overfitting). VIX Sufficiency #28.",
+    "content": "[提出: Claude, 執行: Claude] K878 tests DXY as vol predictor. DXY vol unconditional corr 0.45 with fwd RV but VIX captures it all. IS incremental F=26.1 (p<1e-16) but OOS best DM t=0.39 NS. DXY-VIX lag-0 corr=0.086 (contemporaneous, not leading). DXY alone: negative OOS R². Regime: DXY hurts in both high and low VIX. Classic IS→OOS overfitting. VIX sufficiency #28.",
+    "tags": [
+      "DXY",
+      "dollar_index",
+      "VIX_sufficiency",
+      "null_result",
+      "overfitting"
+    ],
+    "data_source": "yfinance (DX-Y.NYB, SPY, ^VIX), 2005-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T13:39:16.007544",
+    "updated_at": "2026-04-05T13:39:16.007552"
+  },
+  {
+    "id": "K874e",
+    "experiment_id": "K874e",
+    "title": "K874e ★★★ 6-Layer Fair Comparison: PRG Extended Wins ALL Dimensions (MCS eliminates GJR+HAR, VT Sharpe 1.66)",
+    "content": "[提出: 用戶(完整比較要求), 執行: Claude] K874e: 6-layer comparison on common target σ²_fullday. PRG Extended wins 8/9 dimensions. Layer1: QLIKE 0.198 best (MSE/MAE/MZ-R² also best, HMSE PRG Basic wins). Layer2: MCS eliminates GJR+HAR, only PRG models survive (α=0.10). Layer3: Spearman 0.727 [0.688,0.757]. Layer4: VaR PRG Basic best calibrated 1% Normal (VR=0.95%, Kupiec p=0.88). Layer5: ES all pass Acerbi-Szekely, Fissler-Ziegel PRG Extended best (-1.450). Layer6: VT Sharpe 1.66, MDD -11.5% (vs BH -31.7%), CRRA CE 6.80bps/day. DM PRG_Ext vs GJR t=5.10 Harvey PASS. DEFINITIVE: user's PRS concept (simplified as PRG) is the best model for TAIFEX full-day vol across ALL evaluation dimensions.",
+    "tags": [
+      "fair_comparison",
+      "6_layer",
+      "PRG",
+      "MCS",
+      "VaR",
+      "ES",
+      "CRRA",
+      "TAIFEX",
+      "definitive",
+      "用戶方向"
+    ],
+    "data_source": "TAIFEX TX tick (volume-selected) + yfinance, 2017-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T13:48:14.832321",
+    "updated_at": "2026-04-05T13:48:14.832331"
   }
 ]
