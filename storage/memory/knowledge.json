@@ -20020,5 +20020,26 @@
     "category": "knowledge",
     "created_at": "2026-04-05T08:56:57.136023",
     "updated_at": "2026-04-05T08:56:57.136030"
+  },
+  {
+    "id": "K863",
+    "experiment_id": "K863",
+    "title": "K863: Phase Transition Detection NULL — Physics Indicators AUC 0.514 < VIX 0.555, VIX Sufficiency #25",
+    "content": "[提出: Claude, 執行: Claude] K863 tests physics-inspired phase transition indicators for crash prediction. Data: SPY/QQQ/GLD/TLT/EEM/VIX 2005-2026 (5,346 days, 15 crashes). 3 indicators: cross-asset correlation order parameter (AUC 0.506), Shannon entropy (AUC 0.440 wrong direction), critical slowing down VIX AR1 (AUC 0.517). All worse than VIX level (AUC 0.631). OOS composite: 0.514 vs VIX-only 0.555 — physics indicators HURT by adding noise. Lead-lag shows indicators DO rise before crashes, but VIX rises faster. Trading test: no phase strategy beats 12/VIX (DM t=-4.55). Precision 23.5% at 90th pct threshold (76.5% false alarms). Confirms K98. VIX SUFFICIENCY #25. Cross-discipline approach explored but VIX remains the sufficient statistic.",
+    "tags": [
+      "phase_transition",
+      "physics",
+      "regime",
+      "VIX_sufficiency",
+      "order_parameter",
+      "entropy",
+      "critical_slowing_down",
+      "跳躍式探索",
+      "null_result"
+    ],
+    "data_source": "yfinance (SPY, QQQ, GLD, TLT, EEM, ^VIX), 2005-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T09:12:09.513788",
+    "updated_at": "2026-04-05T09:12:09.513795"
   }
 ]

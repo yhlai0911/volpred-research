@@ -1,8 +1,8 @@
 {
   "id": "mile_41bc451f",
-  "title": "2026-04-01 \u672c\u65e5\u6301\u5009\u6bd4\u7387\u5efa\u8b70\uff08\u4f9d\u64da 2026-03-31 \u6536\u76e4\u6578\u64da\uff09",
-  "description": "## \u7b56\u7565\u5efa\u8b70\uff082026-03-31 \u6578\u64da \u2192 \u9810\u6e2c\u4e0b\u4e00\u4ea4\u6613\u65e5\uff09\n\n\u03c3 = 21.6% \u00b7 VIX = 25.25\n\n| \u7b56\u7565 | \u914d\u7f6e | \u73fe\u91d1 |\n|------|------|------|\n| GARCH VT (SPY) | **SPY 55%** | 45% |\n| Risk Parity (SPY+GLD) | **SPY 39%** + **GLD 21%** | 40% |\n| 12/VIX (SPY) | **SPY 48%** | 52% |\n| 50/50 SPY/GLD | **SPY 24%** + **GLD 24%** | 52% |\n| \u53f0\u7063 VT (0050.TW) | **0050.TW 34%** | 66% |\n| VIX+\u666f\u6c23\u9818\u5148 (0050.TW) | **0050.TW 24%** | 76% |\n| VIX \u689d\u4ef6\u69d3\u687f\uff08\u6708\u983b\uff09 | **SPY 24%** + **GLD 24%** | 52% |\n| \u53f0\u80a1\u6df7\u5408\u69d3\u687f | **0050.TW 34%** | 66% |\n| \u4fdd\u5b88\u578b VT\uff08Piecewise\uff09 | **CASH 100%** | 100% |\n| \u6050\u614c\u52a0\u78bc\u5b9a\u671f\u5b9a\u984d | **SPY 150%** | 0% |\n| \u81ea\u9069\u61c9\u4e09\u968e VT | **CASH 100%** | 100% |\n\n---\n\n### Overnight Gap \u8b66\u5831 (I4)\n\ud83d\udfe1 YELLOW ALERT: |gap| = 1.10% (>1%) \u2014 VaR Lift 3.1x\uff0c\u6ce8\u610f\u89c0\u5bdf\n\n",
-  "content": "## \u7b56\u7565\u5efa\u8b70\uff082026-03-31 \u6578\u64da \u2192 \u9810\u6e2c\u4e0b\u4e00\u4ea4\u6613\u65e5\uff09\n\n\u03c3 = 21.6% \u00b7 VIX = 25.25\n\n| \u7b56\u7565 | \u914d\u7f6e | \u73fe\u91d1 |\n|------|------|------|\n| GARCH VT (SPY) | **SPY 55%** | 45% |\n| Risk Parity (SPY+GLD) | **SPY 39%** + **GLD 21%** | 40% |\n| 12/VIX (SPY) | **SPY 48%** | 52% |\n| 50/50 SPY/GLD | **SPY 24%** + **GLD 24%** | 52% |\n| \u53f0\u7063 VT (0050.TW) | **0050.TW 34%** | 66% |\n| VIX+\u666f\u6c23\u9818\u5148 (0050.TW) | **0050.TW 24%** | 76% |\n| VIX \u689d\u4ef6\u69d3\u687f\uff08\u6708\u983b\uff09 | **SPY 24%** + **GLD 24%** | 52% |\n| \u53f0\u80a1\u6df7\u5408\u69d3\u687f | **0050.TW 34%** | 66% |\n| \u4fdd\u5b88\u578b VT\uff08Piecewise\uff09 | **CASH 100%** | 100% |\n| \u6050\u614c\u52a0\u78bc\u5b9a\u671f\u5b9a\u984d | **SPY 150%** | 0% |\n| \u81ea\u9069\u61c9\u4e09\u968e VT | **CASH 100%** | 100% |\n\n---\n\n### Overnight Gap \u8b66\u5831 (I4)\n\ud83d\udfe1 YELLOW ALERT: |gap| = 1.10% (>1%) \u2014 VaR Lift 3.1x\uff0c\u6ce8\u610f\u89c0\u5bdf\n\n",
+  "title": "2026-04-01 本日持倉比率建議（依據 2026-03-31 收盤數據）",
+  "description": "## 策略建議（2026-03-31 數據 → 預測下一交易日）\n\nσ = 21.6% · VIX = 25.25\n\n| 策略 | 配置 | 現金 |\n|------|------|------|\n| GARCH VT (SPY) | **SPY 55%** | 45% |\n| Risk Parity (SPY+GLD) | **SPY 39%** + **GLD 21%** | 40% |\n| 12/VIX (SPY) | **SPY 48%** | 52% |\n| 50/50 SPY/GLD | **SPY 24%** + **GLD 24%** | 52% |\n| 台灣 VT (0050.TW) | **0050.TW 34%** | 66% |\n| VIX+景氣領先 (0050.TW) | **0050.TW 24%** | 76% |\n| VIX 條件槓桿（月頻） | **SPY 24%** + **GLD 24%** | 52% |\n| 台股混合槓桿 | **0050.TW 34%** | 66% |\n| 保守型 VT（Piecewise） | **CASH 100%** | 100% |\n| 恐慌加碼定期定額 | **SPY 150%** | 0% |\n| 自適應三階 VT | **CASH 100%** | 100% |\n\n---\n\n### Overnight Gap 警報 (I4)\n🟡 YELLOW ALERT: |gap| = 1.10% (>1%) — VaR Lift 3.1x，注意觀察\n\n",
+  "content": "## 策略建議（2026-03-31 數據 → 預測下一交易日）\n\nσ = 21.6% · VIX = 25.25\n\n| 策略 | 配置 | 現金 |\n|------|------|------|\n| GARCH VT (SPY) | **SPY 55%** | 45% |\n| Risk Parity (SPY+GLD) | **SPY 39%** + **GLD 21%** | 40% |\n| 12/VIX (SPY) | **SPY 48%** | 52% |\n| 50/50 SPY/GLD | **SPY 24%** + **GLD 24%** | 52% |\n| 台灣 VT (0050.TW) | **0050.TW 34%** | 66% |\n| VIX+景氣領先 (0050.TW) | **0050.TW 24%** | 76% |\n| VIX 條件槓桿（月頻） | **SPY 24%** + **GLD 24%** | 52% |\n| 台股混合槓桿 | **0050.TW 34%** | 66% |\n| 保守型 VT（Piecewise） | **CASH 100%** | 100% |\n| 恐慌加碼定期定額 | **SPY 150%** | 0% |\n| 自適應三階 VT | **CASH 100%** | 100% |\n\n---\n\n### Overnight Gap 警報 (I4)\n🟡 YELLOW ALERT: |gap| = 1.10% (>1%) — VaR Lift 3.1x，注意觀察\n\n",
   "category": "milestone",
   "audience": "daily",
   "phase": "daily_update",
@@ -69,13 +69,13 @@
     }
   },
   "tags": [
-    "\u6301\u5009\u5efa\u8b70",
+    "持倉建議",
     "daily-update",
     "12/VIX",
     "SPY",
     "GLD",
     "0050.TW",
-    "VT\u7b56\u7565"
+    "VT策略"
   ],
   "created_at": "2026-03-31T22:03:08.076124+00:00",
   "published_at": "2026-03-31T22:03:08.076124+00:00",

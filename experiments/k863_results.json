@@ -1,0 +1,420 @@
+{
+  "experiment_id": "K863",
+  "title": "Phase Transition Detection in Financial Markets (v2)",
+  "timestamp": "2026-04-05T01:11:31.113339+00:00",
+  "runtime_seconds": 10.3,
+  "data_source": "yfinance",
+  "period": "2005-01-03 to 2026-04-02",
+  "n_observations": 4687,
+  "n_crash_episodes": 15,
+  "crash_episodes": [
+    {
+      "start": "2008-01-08",
+      "end": "2008-03-31",
+      "max_drawdown": -0.15387077450519673
+    },
+    {
+      "start": "2008-06-27",
+      "end": "2008-08-08",
+      "max_drawdown": -0.14998149483118678
+    },
+    {
+      "start": "2008-09-15",
+      "end": "2009-04-03",
+      "max_drawdown": -0.41710803739860797
+    },
+    {
+      "start": "2010-05-20",
+      "end": "2010-07-22",
+      "max_drawdown": -0.1569965887378747
+    },
+    {
+      "start": "2011-08-04",
+      "end": "2011-10-18",
+      "max_drawdown": -0.18366789296238986
+    },
+    {
+      "start": "2015-08-24",
+      "end": "2015-08-26",
+      "max_drawdown": -0.11910260727875552
+    },
+    {
+      "start": "2015-09-28",
+      "end": "2015-09-30",
+      "max_drawdown": -0.11102363070165662
+    },
+    {
+      "start": "2016-01-15",
+      "end": "2016-02-16",
+      "max_drawdown": -0.12688306697764723
+    },
+    {
+      "start": "2018-02-08",
+      "end": "2018-02-09",
+      "max_drawdown": -0.10101858600814571
+    },
+    {
+      "start": "2018-12-14",
+      "end": "2019-01-09",
+      "max_drawdown": -0.1920320468029453
+    },
+    {
+      "start": "2020-02-27",
+      "end": "2020-05-21",
+      "max_drawdown": -0.3371724840941361
+    },
+    {
+      "start": "2022-02-22",
+      "end": "2022-03-16",
+      "max_drawdown": -0.1286553576743372
+    },
+    {
+      "start": "2022-04-29",
+      "end": "2022-07-21",
+      "max_drawdown": -0.20561169257390083
+    },
+    {
+      "start": "2022-09-20",
+      "end": "2022-11-10",
+      "max_drawdown": -0.1668034477501741
+    },
+    {
+      "start": "2025-03-13",
+      "end": "2025-04-25",
+      "max_drawdown": -0.18755246925491081
+    }
+  ],
+  "prior_work": "K98: AUC=0.560 (physics) vs 0.694 (VIX). 81% false alarm rate.",
+  "methodology": {
+    "indicators": {
+      "order_parameter": "Mean absolute 22-day rolling pairwise correlation of 5 assets",
+      "susceptibility": "63-day rolling variance of order parameter",
+      "order_param_roc": "22-day rate of change of order parameter",
+      "spy_entropy": "Shannon entropy of 63-day return distribution (10 bins)",
+      "entropy_change": "22-day change in entropy",
+      "vix_ar1": "63-day rolling AR(1) of VIX (critical slowing down)",
+      "vix_variance": "63-day rolling variance of VIX",
+      "spy_ret_var": "63-day rolling variance of SPY returns",
+      "vix_level": "VIX level (benchmark)"
+    },
+    "crash_definition": "SPY drawdown > 10% within 63 trading days",
+    "pre_crash_window": "63 trading days before crash start",
+    "composite": "Logistic regression + equal-weight (70/30 train/test split)",
+    "trading_test": "signal.shift(1), no lookahead",
+    "references": [
+      "Sornette (2003) Why Stock Markets Crash",
+      "Scheffer et al. (2009) Nature, Early-warning signals for critical transitions",
+      "Harmon et al. (2015) Anticipating Economic Market Crises",
+      "K98 (prior experiment, AUC=0.560)"
+    ]
+  },
+  "individual_indicators": {
+    "order_parameter": {
+      "mean_precrash": 0.4556584230309292,
+      "mean_calm": 0.45572784319379606,
+      "ratio": 0.9998476718859651,
+      "t_stat": -0.017280638744697135,
+      "p_value": 0.9862156299311791,
+      "auc": 0.5059915794363659,
+      "passes_harvey": "False"
+    },
+    "susceptibility": {
+      "mean_precrash": 0.005554920619713764,
+      "mean_calm": 0.005722064193883412,
+      "ratio": 0.9707896366579887,
+      "t_stat": -1.1818610607348332,
+      "p_value": 0.2374501378998625,
+      "auc": 0.5379758103420551,
+      "passes_harvey": "False"
+    },
+    "order_param_roc": {
+      "mean_precrash": 0.05912394339627723,
+      "mean_calm": 0.028442413624019332,
+      "ratio": 2.078724547706727,
+      "t_stat": 2.623331316125497,
+      "p_value": 0.00882810370040713,
+      "auc": 0.5180426975412158,
+      "passes_harvey": "False"
+    },
+    "spy_entropy": {
+      "mean_precrash": 2.8176317854831856,
+      "mean_calm": 2.767703823044635,
+      "ratio": 1.0180394889159876,
+      "t_stat": 5.52435510396992,
+      "p_value": 4.054190415525508e-08,
+      "auc": 0.4403504590598271,
+      "passes_harvey": "True"
+    },
+    "entropy_change": {
+      "mean_precrash": 0.0014817213364498164,
+      "mean_calm": -0.0026375548503523535,
+      "ratio": -0.5617783972347995,
+      "t_stat": 0.43575424989231853,
+      "p_value": 0.6631046026191724,
+      "auc": 0.4807905094453761,
+      "passes_harvey": "False"
+    },
+    "vix_ar1": {
+      "mean_precrash": 0.827708431000027,
+      "mean_calm": 0.8229351910945423,
+      "ratio": 1.005800262228592,
+      "t_stat": 1.5356008811971864,
+      "p_value": 0.12489571541064304,
+      "auc": 0.5166091725181798,
+      "passes_harvey": "False"
+    },
+    "vix_variance": {
+      "mean_precrash": 10.794763939748009,
+      "mean_calm": 9.257278546802025,
+      "ratio": 1.1660839506095575,
+      "t_stat": 3.5107426952600593,
+      "p_value": 0.0004564664390593214,
+      "auc": 0.6137493969814616,
+      "passes_harvey": "True"
+    },
+    "spy_ret_var": {
+      "mean_precrash": 9.979446112073381e-05,
+      "mean_calm": 9.4668013391166e-05,
+      "ratio": 1.054151846499466,
+      "t_stat": 1.7279094915507442,
+      "p_value": 0.08414773162172762,
+      "auc": 0.596684929513833,
+      "passes_harvey": "False"
+    },
+    "vix_level": {
+      "mean_precrash": 18.83933170007007,
+      "mean_calm": 16.91450888891139,
+      "ratio": 1.1137971444397379,
+      "t_stat": 9.946060654886226,
+      "p_value": 1.8838043464187846e-22,
+      "auc": 0.6311231906253271,
+      "passes_harvey": "True"
+    }
+  },
+  "lead_lag_analysis": {
+    "order_parameter": {
+      "n_episodes": 15,
+      "slope_last63": 0.009942654727224854,
+      "r_squared": 0.6095491353848592,
+      "p_value": 4.502497211264779e-14,
+      "mean_first_half": -0.09938268913446686,
+      "mean_last_half": 0.09938268913446574,
+      "rising_before_crash": "True"
+    },
+    "susceptibility": {
+      "n_episodes": 15,
+      "slope_last63": 0.0034226971302553856,
+      "r_squared": 0.07818338548111574,
+      "p_value": 0.026460276066509858,
+      "mean_first_half": -0.020418610319345575,
+      "mean_last_half": 0.020418610319345474,
+      "rising_before_crash": "True"
+    },
+    "order_param_roc": {
+      "n_episodes": 15,
+      "slope_last63": 0.005198632098852301,
+      "r_squared": 0.1980225032748489,
+      "p_value": 0.00025796764712790964,
+      "mean_first_half": -0.1065977447696118,
+      "mean_last_half": 0.1065977447696118,
+      "rising_before_crash": "True"
+    },
+    "spy_entropy": {
+      "n_episodes": 15,
+      "slope_last63": 0.000503168827525516,
+      "r_squared": 0.004400795224210397,
+      "p_value": 0.6054556567198929,
+      "mean_first_half": 0.06563468457832188,
+      "mean_last_half": -0.06563468457832332,
+      "rising_before_crash": "True"
+    },
+    "entropy_change": {
+      "n_episodes": 15,
+      "slope_last63": -0.002785210813140764,
+      "r_squared": 0.0603399996914435,
+      "p_value": 0.05231587212803224,
+      "mean_first_half": 0.022894337578324615,
+      "mean_last_half": -0.022894337578324604,
+      "rising_before_crash": "False"
+    },
+    "vix_ar1": {
+      "n_episodes": 15,
+      "slope_last63": 0.004229291457364428,
+      "r_squared": 0.20914385722735324,
+      "p_value": 0.00016450612531290247,
+      "mean_first_half": -0.17345461905017076,
+      "mean_last_half": 0.17345461905017096,
+      "rising_before_crash": "True"
+    },
+    "vix_variance": {
+      "n_episodes": 15,
+      "slope_last63": 0.009524402575851194,
+      "r_squared": 0.5741125987957064,
+      "p_value": 6.554081769986687e-13,
+      "mean_first_half": 0.019955853335930314,
+      "mean_last_half": -0.01995585333593035,
+      "rising_before_crash": "True"
+    },
+    "spy_ret_var": {
+      "n_episodes": 15,
+      "slope_last63": 0.013936967659946323,
+      "r_squared": 0.5223035293071259,
+      "p_value": 2.2728611164117937e-11,
+      "mean_first_half": -0.027569195551146577,
+      "mean_last_half": 0.027569195551146584,
+      "rising_before_crash": "True"
+    },
+    "vix_level": {
+      "n_episodes": 15,
+      "slope_last63": 0.017021349077092067,
+      "r_squared": 0.38426843566253444,
+      "p_value": 6.041967226654561e-08,
+      "mean_first_half": -0.0967225545845809,
+      "mean_last_half": 0.09672255458458061,
+      "rising_before_crash": "True"
+    }
+  },
+  "composite_results": {
+    "auc_vix_full": 0.6311231906253271,
+    "auc_equal_weight_full": 0.5477613016522069,
+    "auc_logistic_train": 0.7359197828387001,
+    "auc_logistic_oos": 0.5140667963248607,
+    "auc_logistic_oos_ci": [
+      0.4698368398176048,
+      0.557912213125747
+    ],
+    "auc_vix_only_oos": 0.5554255247803634,
+    "auc_physics_no_vix_oos": 0.4920629065790357,
+    "incremental_auc_over_vix": -0.0413587284555027,
+    "bootstrap_auc_diff": {
+      "mean": -0.04125866739781643,
+      "ci_95": [
+        -0.0720519837020737,
+        -0.010204988711257629
+      ],
+      "pct_positive": 0.5,
+      "significant": false
+    },
+    "correlation_composite_vix": 0.5293004618884976,
+    "logistic_coefficients": {
+      "order_parameter": -0.4740373090271015,
+      "susceptibility": 0.30192339039556515,
+      "order_param_roc": 0.12137718733517432,
+      "spy_entropy": -0.5436990077432484,
+      "entropy_change": 0.11492962884906256,
+      "vix_ar1": -0.2450146713258038,
+      "vix_variance": 1.077558096668636,
+      "spy_ret_var": -0.8434530110643577,
+      "vix_level": 0.7701616744178571
+    }
+  },
+  "false_positive_analysis": {
+    "p80": {
+      "threshold_pct": 80,
+      "threshold_value": 0.34998498455570237,
+      "true_positives": 173,
+      "false_positives": 765,
+      "precision": 0.18443496801705758,
+      "recall": 0.2141089108910891,
+      "false_positive_rate": 0.19721577726218098,
+      "signal_days": 938
+    },
+    "p85": {
+      "threshold_pct": 85,
+      "threshold_value": 0.4585613083947155,
+      "true_positives": 138,
+      "false_positives": 565,
+      "precision": 0.19630156472261737,
+      "recall": 0.1707920792079208,
+      "false_positive_rate": 0.14565609693219903,
+      "signal_days": 703
+    },
+    "p90": {
+      "threshold_pct": 90,
+      "threshold_value": 0.5847769686961694,
+      "true_positives": 110,
+      "false_positives": 359,
+      "precision": 0.2345415778251599,
+      "recall": 0.13613861386138615,
+      "false_positive_rate": 0.0925496261923176,
+      "signal_days": 469
+    },
+    "p95": {
+      "threshold_pct": 95,
+      "threshold_value": 0.8174195140584565,
+      "true_positives": 57,
+      "false_positives": 178,
+      "precision": 0.2425531914893617,
+      "recall": 0.07054455445544554,
+      "false_positive_rate": 0.04588811549368394,
+      "signal_days": 235
+    }
+  },
+  "strategy_metrics": {
+    "phase_binary_90": {
+      "name": "phase_binary_90",
+      "ann_return": 0.13109670847086868,
+      "ann_vol": 0.128539085772976,
+      "sharpe": 1.0198976263329735,
+      "max_dd": -0.17346063439570178,
+      "calmar": 0.7557721031494,
+      "n_obs": 4687
+    },
+    "phase_binary_80": {
+      "name": "phase_binary_80",
+      "ann_return": 0.116954639061467,
+      "ann_vol": 0.12028236004458791,
+      "sharpe": 0.9723340897045307,
+      "max_dd": -0.14934256557722062,
+      "calmar": 0.7831299710797671,
+      "n_obs": 4687
+    },
+    "phase_continuous": {
+      "name": "phase_continuous",
+      "ann_return": 0.07910381279195992,
+      "ann_vol": 0.08462068381337892,
+      "sharpe": 0.9348046981801067,
+      "max_dd": -0.11877301785372504,
+      "calmar": 0.6660082754601744,
+      "n_obs": 4686
+    },
+    "vix_12vix": {
+      "name": "vix_12vix",
+      "ann_return": 0.08896199327112453,
+      "ann_vol": 0.08954604140468682,
+      "sharpe": 0.9934776778023856,
+      "max_dd": -0.12457747721493509,
+      "calmar": 0.7141097673509417,
+      "n_obs": 4686
+    },
+    "buy_hold": {
+      "name": "buy_hold",
+      "ann_return": 0.14897005015771034,
+      "ann_vol": 0.13865851780877886,
+      "sharpe": 1.0743663823318226,
+      "max_dd": -0.17286876508132207,
+      "calmar": 0.8617522667419465,
+      "n_obs": 4687
+    }
+  },
+  "crash_episode_performance": {},
+  "conclusions": {
+    "headline": "Phase transition indicators do NOT improve upon VIX for crash prediction (OOS AUC 0.514 vs 0.555). VIX remains sufficient.",
+    "findings": [
+      "Best individual indicator: vix_level (AUC=0.631), vs VIX AUC=0.631",
+      "Composite OOS AUC: 0.514 vs VIX-only OOS AUC: 0.555 (incremental: -0.041, significant=False)",
+      "Physics indicators without VIX: OOS AUC=0.492 (below random)",
+      "Best phase strategy: phase_binary_90 (Sharpe=1.020) vs 12/VIX (Sharpe=0.993) vs BH (Sharpe=1.074)",
+      "False positive rate at 90th pct: 9.3%, precision: 23.5%",
+      "Harvey |t|>3.0 survivors: ['spy_entropy', 'vix_variance', 'vix_level']"
+    ],
+    "vs_k98": "K98 found AUC=0.560 for physics indicators vs VIX 0.694. K863 with improved methodology: composite OOS AUC=0.514 vs VIX 0.555. Confirms K98 conclusion that VIX is sufficient.",
+    "limitations": [
+      "Small sample: only 15 crash episodes in 20 years",
+      "In-sample bias: crash definition is backward-looking",
+      "Physics analogy may not hold: markets have reflexive agents, not inert particles",
+      "Composite overfit risk despite train/test split (limited crash events in test set)",
+      "Transaction costs not modeled in trading test"
+    ]
+  }
+}

@@ -229,7 +229,7 @@
 - **加密 DeFi**：AMM 池的 impermanent loss 與波動率的關係、DeFi yield 策略的風險管理
 - **氣候金融**：~~極端天氣事件~~ → **K861 完成（油價代理）**：油價下跌衝擊驅動股市 vol（+4.8pp, t=5.82 Harvey PASS），上漲衝擊無效（t=0.70）。強非對稱性。但逆向 Granger 更強（SPY→Oil），是共同宏觀風險而非因果。需直接氣候數據延伸。
 - **行為金融**：~~投資人對 VT 的心理接受度~~ → **K860 完成 ★★**：PT(λ=1.52) 即翻轉 VT 評價。Robust VT CE 勝 BH 50/50 達 +0.17pp。Sharpe 低估 VT 價值。可延伸：為什麼知道 VT 有效卻不用？（status quo bias + complexity aversion）
-- **跨學科方法**：物理學的相變模型、生態學的 regime shift detection、複雜系統理論
+- **跨學科方法**：~~物理學相變模型~~ → **K863 完成 NULL**（order parameter AUC 0.506, entropy 0.440, CSD 0.517，全輸 VIX 0.631。OOS composite 0.514 < VIX 0.555。VIX sufficiency #25）。可延伸：生態學 regime shift detection、複雜系統理論
 
 ### 面向 H: 論文撰寫與投稿
 **第一篇：Leverage Direction Matters**
