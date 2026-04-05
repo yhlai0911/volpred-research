@@ -47,17 +47,45 @@
 
 ## Phase 3: 品質保證
 
-### Step 8: 自我審查
-- /latex-academic-reviewer（完整 13 步）
-- /citation-verifier（每筆引用驗證）
-- 兩個都必須產出 PDF 報告
+### Step 8: 自我審查（兩個 skill 都是必做，缺一不可）
+
+**審查 subagent 分派標準流程（每次都要照做）：**
+
+```
+每一輪審查必須同時啟動兩個 agent：
+
+Agent 1: latex-academic-reviewer
+  prompt 必須包含：
+  - 「先讀 .claude/skills/latex-academic-reviewer/SKILL.md」
+  - 「讀前一輪審查報告 paper/<name>/reviews/review_vN.tex」（如有）
+  - 「讀審計結果 paper/<name>/reviews/audit_step1_2.md」（如有）
+  - 「讀論文 paper/<name>/main.tex」
+  - 「用 skill 指定的 LaTeX 模板（含顏色標記）產出 review_vN+1.tex」
+  - 「用 xelatex 編譯成 PDF」
+
+Agent 2: citation-verifier
+  prompt 必須包含：
+  - 「先讀 .claude/skills/citation-verifier/SKILL.md」
+  - 「讀前一輪引用檢查 paper/<name>/reviews/citation_check_vN.md」（如有）
+  - 「讀論文 paper/<name>/main.tex」
+  - 「每筆引用用 WebSearch 驗證」
+  - 「產出 citation_check_vN+1.md」
+```
+
+**審查循環規則：**
+1. 修正後必須重跑兩個 skill
+2. 每輪產出有版本號（review_v1 → review_v2 → ...）
+3. 循環直到**嚴重問題 = 0**
+4. 前一輪的報告必須傳給下一輪的 agent（讓它確認修正是否到位）
 
 ### Step 9: Codex Adversarial Review
 - 必須在 prompt 中說明模型的 information set 和時間結構
 - 不可盲目接受 Codex 結果——要用自己的理解判斷
+- 對 periodic model：說明「前一 session 已實現資訊用於預測下一 session 不是 lookahead」
 
 ### Step 10: 修正循環
 - 修正所有嚴重和中度問題
+- **在主對話中修正**（不用 agent 寫論文）
 - 重跑 Step 8-9 直到嚴重問題 = 0
 - 每次修正產生版本號（v1.1, v1.2...）和差異報告
 
