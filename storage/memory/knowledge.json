@@ -20513,5 +20513,22 @@
     "category": "knowledge",
     "created_at": "2026-04-05T15:12:52.508742",
     "updated_at": "2026-04-05T15:12:52.508748"
+  },
+  {
+    "id": "K880v2",
+    "experiment_id": "K880v2",
+    "title": "K880v2: PRG Without Session-Boundary Update — DM Collapses to -0.57 (Proves Session Update IS the Value)",
+    "content": "[提出: Codex(誤判), 執行: Claude] K880v2 removes r_overnight_t from h_intraday_t (Codex called it 'lookahead'). Result: DM drops 6.00→-0.57. BUT user clarified: using just-completed session info for next session is NOT lookahead — it's the core PRS design (Lai 2024). K880v2 actually proves the VALUE of session-boundary updates: without them PRG = GJR. The 6.00→-0.57 gap IS the information value of periodic switching. K880 original was correct.",
+    "tags": [
+      "PRG",
+      "session_boundary",
+      "information_value",
+      "Codex_error",
+      "PRS"
+    ],
+    "data_source": "yfinance (SPY), 2000-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T15:30:23.495847",
+    "updated_at": "2026-04-05T15:30:23.495856"
   }
 ]
