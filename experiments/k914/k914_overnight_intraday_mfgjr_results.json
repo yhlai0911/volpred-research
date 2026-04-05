@@ -1,0 +1,270 @@
+{
+  "experiment_id": "K914",
+  "title": "Overnight-Intraday Decomposed MF-GJR (K914)",
+  "timestamp": "2026-04-05T22:34:35.684345+00:00",
+  "runtime_seconds": 172.6,
+  "methodology": {
+    "models": {
+      "Model_A": "MF-GJR baseline: tau = exp(theta0 + theta1*logVIX_{t-1})",
+      "Model_B": "MF-GJR + overnight: tau = exp(theta0 + theta1*logVIX_{t-1} + theta2*r^2_overnight,{t-1})",
+      "Model_C": "Separate MF-GJR on overnight + intraday returns, sigma^2 = sigma^2_ON + sigma^2_ID",
+      "Model_D": "MF-GJR + ratio: tau = exp(theta0 + theta1*logVIX_{t-1} + theta2*overnight_ratio_{t-1})"
+    },
+    "estimation": "Rolling window (w=2000), refit every 63 days, MLE with multi-start",
+    "evaluation": "QLIKE on r^2 (Patton 2011), DM test (Harvey t>3.0), Spearman, VaR Trinity"
+  },
+  "data": {
+    "source": "yfinance",
+    "asset": "SPY",
+    "period": "2005-01-01 to 2026-04-01",
+    "oos_start": "2019-01-01",
+    "oos_end": "2026-03-31",
+    "n_oos": 1821,
+    "n_refits": 29,
+    "window": 2000,
+    "refit_every": 63
+  },
+  "decomposition_analysis": {
+    "overnight_var_pct": 36.24,
+    "intraday_var_pct": 60.11,
+    "covariance_pct": 3.65,
+    "corr_overnight_intraday": 0.0391,
+    "corr_vix_r2_total": 0.3689,
+    "corr_vix_r2_overnight": 0.2927,
+    "corr_vix_r2_intraday": 0.3538,
+    "granger_overnight_to_intraday": {
+      "F": 49.296,
+      "p": 0.0
+    },
+    "granger_intraday_to_overnight": {
+      "F": 20.191,
+      "p": 0.0
+    },
+    "overnight_ratio_mean": 0.4178,
+    "overnight_ratio_std": 0.348,
+    "descriptive_stats": {
+      "Total": {
+        "mean": 0.000389,
+        "std": 0.011981,
+        "var": 0.000144,
+        "skewness": -0.301249,
+        "kurtosis": 14.681308,
+        "n": 5343
+      },
+      "Overnight": {
+        "mean": 0.000301,
+        "std": 0.007212,
+        "var": 5.2e-05,
+        "skewness": -1.471397,
+        "kurtosis": 26.976504,
+        "n": 5343
+      },
+      "Intraday": {
+        "mean": 8.8e-05,
+        "std": 0.009289,
+        "var": 8.6e-05,
+        "skewness": -0.225725,
+        "kurtosis": 12.638926,
+        "n": 5343
+      }
+    }
+  },
+  "results": {
+    "qlike": {
+      "Model_A_MF-GJR": 1.409426,
+      "Model_B_+Overnight": 1.409407,
+      "Model_C_Separate": 1.404363,
+      "Model_D_+Ratio": 1.413329
+    },
+    "qlike_pct_vs_model_a": {
+      "Model_A_MF-GJR": 0.0,
+      "Model_B_+Overnight": -0.001,
+      "Model_C_Separate": -0.359,
+      "Model_D_+Ratio": 0.277
+    },
+    "spearman": {
+      "Model_A_MF-GJR": {
+        "rho": 0.4216,
+        "p": 0.0
+      },
+      "Model_B_+Overnight": {
+        "rho": 0.4216,
+        "p": 0.0
+      },
+      "Model_C_Separate": {
+        "rho": 0.4226,
+        "p": 0.0
+      },
+      "Model_D_+Ratio": {
+        "rho": 0.4185,
+        "p": 0.0
+      }
+    },
+    "dm_vs_model_a": {
+      "Model_A_MF-GJR": {
+        "t": 0.0,
+        "p": 1.0,
+        "significant_harvey": false
+      },
+      "Model_B_+Overnight": {
+        "t": -0.73,
+        "p": 0.4654,
+        "significant_harvey": false
+      },
+      "Model_C_Separate": {
+        "t": -0.923,
+        "p": 0.3562,
+        "significant_harvey": false
+      },
+      "Model_D_+Ratio": {
+        "t": 2.776,
+        "p": 0.0056,
+        "significant_harvey": false
+      }
+    },
+    "var": {
+      "0.01": {
+        "Model_A_MF-GJR": {
+          "violations": 34,
+          "total": 1821,
+          "rate": 0.0187,
+          "expected_rate": 0.01,
+          "kupiec_p": 0.0009,
+          "cc_p": 1.0,
+          "basel": "RED",
+          "trinity": "False"
+        },
+        "Model_B_+Overnight": {
+          "violations": 34,
+          "total": 1821,
+          "rate": 0.0187,
+          "expected_rate": 0.01,
+          "kupiec_p": 0.0009,
+          "cc_p": 1.0,
+          "basel": "RED",
+          "trinity": "False"
+        },
+        "Model_C_Separate": {
+          "violations": 27,
+          "total": 1821,
+          "rate": 0.0148,
+          "expected_rate": 0.01,
+          "kupiec_p": 0.0534,
+          "cc_p": 0.1114,
+          "basel": "RED",
+          "trinity": false
+        },
+        "Model_D_+Ratio": {
+          "violations": 34,
+          "total": 1821,
+          "rate": 0.0187,
+          "expected_rate": 0.01,
+          "kupiec_p": 0.0009,
+          "cc_p": 1.0,
+          "basel": "RED",
+          "trinity": "False"
+        }
+      },
+      "0.05": {
+        "Model_A_MF-GJR": {
+          "violations": 97,
+          "total": 1821,
+          "rate": 0.0533,
+          "expected_rate": 0.05,
+          "kupiec_p": 0.5265,
+          "cc_p": 0.8157,
+          "basel": "YELLOW",
+          "trinity": false
+        },
+        "Model_B_+Overnight": {
+          "violations": 97,
+          "total": 1821,
+          "rate": 0.0533,
+          "expected_rate": 0.05,
+          "kupiec_p": 0.5265,
+          "cc_p": 0.8157,
+          "basel": "YELLOW",
+          "trinity": false
+        },
+        "Model_C_Separate": {
+          "violations": 96,
+          "total": 1821,
+          "rate": 0.0527,
+          "expected_rate": 0.05,
+          "kupiec_p": 0.5977,
+          "cc_p": 0.7938,
+          "basel": "YELLOW",
+          "trinity": false
+        },
+        "Model_D_+Ratio": {
+          "violations": 95,
+          "total": 1821,
+          "rate": 0.0522,
+          "expected_rate": 0.05,
+          "kupiec_p": 0.6731,
+          "cc_p": 0.9147,
+          "basel": "GREEN",
+          "trinity": true
+        }
+      }
+    }
+  },
+  "parameters": {
+    "Model_A": {
+      "theta_0": -16.221875224963302,
+      "theta_1": 2.3416378622113103,
+      "alpha": 0.0001,
+      "gamma": 0.09282187858335142,
+      "beta": 0.8689180982890745,
+      "persistence_g": 0.9154290375807502
+    },
+    "Model_B": {
+      "theta_0": -16.22398004372864,
+      "theta_1": 2.3424830438246604,
+      "theta_2_overnight": -5.0,
+      "alpha": 0.0001,
+      "gamma": 0.09298019733905931,
+      "beta": 0.868775147588635,
+      "persistence_g": 0.9153652462581647
+    },
+    "Model_C_overnight": {
+      "theta_0": -18.128770225405116,
+      "theta_1": 2.6580056920388584,
+      "alpha": 0.012184468030764154,
+      "gamma": 0.02704444566899846,
+      "beta": 0.9358861283056529,
+      "persistence_g": 0.9615928191709162
+    },
+    "Model_C_intraday": {
+      "theta_0": -17.900438467041482,
+      "theta_1": 2.882561818698383,
+      "alpha": 0.012360826849300365,
+      "gamma": 0.0,
+      "beta": 0.9863905376226743,
+      "persistence_g": 0.9987513644719747
+    },
+    "Model_D": {
+      "theta_0": -16.149988555479975,
+      "theta_1": 2.3292057928912144,
+      "theta_2_ratio": -0.08478598027702813,
+      "alpha": 0.0001,
+      "gamma": 0.09228379088614908,
+      "beta": 0.8704519863087362,
+      "persistence_g": 0.9166938817518108
+    }
+  },
+  "conclusion": {
+    "any_significant_vs_model_a": false,
+    "significant_models": [],
+    "best_model": "Model_C_Separate",
+    "null_result": true,
+    "interpretation": "SPY overnight variance share = 36.2% of total (intraday 60.1%, 2*cov 3.7%). VIX correlates with overnight r\u00b2 (0.293) less than intraday r\u00b2 (0.354). No decomposed model significantly beats standard MF-GJR (Harvey |t| > 3.0 threshold). NULL RESULT: overnight-intraday decomposition does NOT improve MF-GJR forecasts. The VIX elasticity in tau already implicitly captures overnight/intraday volatility structure. Best model QLIKE improvement: -0.359% vs Model A. "
+  },
+  "references": [
+    "Engle, Ghysels & Sohn (2013) RES 95(3):776-797",
+    "Conrad & Engle (2025) Two-factor GARCH, J Applied Econometrics",
+    "Patton (2011) J Econometrics 160:246-256",
+    "Harvey et al. (2016) JBES 34:92-104",
+    "Hansen & Lunde (2005) J Econometrics 127(1-2):255-285"
+  ]
+}

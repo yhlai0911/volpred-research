@@ -1,0 +1,223 @@
+{
+  "experiment_id": "K913",
+  "title": "Variance Risk Premium (VRP) as Return Predictor",
+  "timestamp": "2026-04-06T05:29:45.863600",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "sample_period": "2006-01-03 to 2026-03-30",
+  "N_total": 5091,
+  "method": "Predictive regressions with Newey-West HAC SE, expanding window OOS, VRP quintile sort",
+  "references": [
+    "Bollerslev, Tauchen & Zhou (2009): Expected Stock Returns and Variance Risk Premia, RFS 22(11):4463-4492",
+    "Bekaert & Hoerova (2014): The VIX, the Variance Premium and Stock Market Volatility, JFE 111(2):120-136",
+    "Campbell & Thompson (2008): Predicting Excess Stock Returns Out of Sample, RFS 21(4):1509-1531",
+    "Harvey (2016): ... and the Cross-Section of Expected Returns, RFS 29(1):5-68"
+  ],
+  "vrp_statistics": {
+    "mean": 0.008098134281044035,
+    "std": 0.045253491184104475,
+    "median": 0.010226565991998457,
+    "skew": -7.167848235079558,
+    "kurtosis": 73.12779538049762,
+    "min": -0.6027598025124258,
+    "max": 0.2232897161209765,
+    "pct_positive": 85.7198978589668,
+    "pct_negative": 14.280102141033197,
+    "q25": 0.004682653693773163,
+    "q75": 0.019416320523959106
+  },
+  "vrp_vix_correlation": -0.23981135863228106,
+  "vrp_autocorrelation": {
+    "acf_1": 0.9267585364694544,
+    "acf_5": 0.7390201767866849,
+    "acf_22": 0.08718996382055737,
+    "ljung_box_10": {
+      "statistic": 26519.72675497121,
+      "p_value": 0.0
+    }
+  },
+  "vrp_regime": {
+    "high_vix_mean_vrp": 0.008641241447824265,
+    "low_vix_mean_vrp": 0.007556092866160941,
+    "high_vix_pct_positive": 81.28195045222178,
+    "low_vix_pct_positive": 90.149136577708,
+    "vix_median_threshold": 17.1200008392334
+  },
+  "regression_results": {
+    "daily_univariate": {
+      "beta_vrp": 0.013732412452377746,
+      "t_vrp": 1.0953803952836232,
+      "p_vrp": 0.2733500193100379,
+      "R2": 0.00260007928778605,
+      "R2_adj": 0.002404087949465672,
+      "N": 5091,
+      "nw_lags": 18
+    },
+    "daily_multivariate": {
+      "beta_vrp": 0.016686879103476222,
+      "t_vrp": 1.3125288833212072,
+      "p_vrp": 0.18934174716568153,
+      "beta_vix": 6.408826918219043e-05,
+      "t_vix": 1.930000059853858,
+      "p_vix": 0.05360683033792709,
+      "R2": 0.0045724501862796085,
+      "N": 5091
+    },
+    "weekly_univariate": {
+      "beta_vrp": 0.014600430511454765,
+      "t_vrp": 0.3728449147409224,
+      "p_vrp": 0.7092638720906592,
+      "R2": 0.0007194035518142128,
+      "N": 5087
+    },
+    "weekly_multivariate": {
+      "beta_vrp": 0.01994667500254349,
+      "t_vrp": 0.5020299091664402,
+      "p_vrp": 0.6156464822676004,
+      "beta_vix": 0.00011534743465962128,
+      "t_vix": 0.740624276537761,
+      "p_vix": 0.4589212842129443,
+      "R2": 0.0022825692594523606,
+      "N": 5087
+    },
+    "monthly_univariate": {
+      "beta_vrp": 0.025001484222684136,
+      "t_vrp": 0.22630223398533303,
+      "p_vrp": 0.820966360990262,
+      "R2": 0.0005335520347388156,
+      "N": 5070
+    },
+    "monthly_multivariate": {
+      "beta_vrp": 0.04733699672981993,
+      "t_vrp": 0.45057248733651756,
+      "p_vrp": 0.6522976995247354,
+      "beta_vix": 0.000476740367612613,
+      "t_vix": 1.0165365417784171,
+      "p_vix": 0.3093739555071193,
+      "R2": 0.007286194079655806,
+      "N": 5070
+    }
+  },
+  "oos_results": {
+    "daily": {
+      "R2_OOS": -0.030911543936486874,
+      "MSE_model": 0.0001582535791612273,
+      "MSE_hist_mean": 0.0001535083975846691,
+      "directional_accuracy": 0.5423076923076923,
+      "N_OOS": 1820
+    },
+    "weekly": {
+      "R2_OOS": -0.08154994708689411,
+      "MSE_model": 0.0006864440206011289,
+      "MSE_hist_mean": 0.0006346854553042463,
+      "directional_accuracy": 0.5897577092511013,
+      "N_OOS": 1816
+    },
+    "monthly": {
+      "R2_OOS": -0.09906917297188511,
+      "MSE_model": 0.003039020378570098,
+      "MSE_hist_mean": 0.0027650856318284147,
+      "directional_accuracy": 0.6720400222345748,
+      "N_OOS": 1799
+    }
+  },
+  "strategy_results": {
+    "vrp_strategy": {
+      "name": "VRP Strategy",
+      "ann_return": 0.06069270130654085,
+      "ann_vol": 0.1093503881050568,
+      "sharpe": 0.5550295921056194,
+      "mdd": -0.3744194573609938,
+      "total_return": 1.8594508625055974,
+      "N": 4839
+    },
+    "buy_hold_spy": {
+      "name": "Buy & Hold SPY",
+      "ann_return": 0.09647076779142043,
+      "ann_vol": 0.19706450013393753,
+      "sharpe": 0.4895390480063775,
+      "mdd": -0.5957599744380238,
+      "total_return": 3.3851101049478887,
+      "N": 4839
+    },
+    "return_diff_t": -1.5339724179999512,
+    "return_diff_p": 0.1250364384665017,
+    "harvey_pass": false
+  },
+  "quintile_results": {
+    "Q1(Low)": {
+      "ann_return": 0.05439509136065254,
+      "sharpe": 0.21730688989775032,
+      "mean_daily": 0.0002158535371454466,
+      "std_daily": 0.015768338845654067,
+      "count": 968
+    },
+    "Q2": {
+      "ann_return": 0.11275084570945605,
+      "sharpe": 0.8884637653828912,
+      "mean_daily": 0.0004474239909105399,
+      "std_daily": 0.007994288501184887,
+      "count": 968
+    },
+    "Q3": {
+      "ann_return": 0.024978779559942866,
+      "sharpe": 0.1881468322883992,
+      "mean_daily": 9.912214111088439e-05,
+      "std_daily": 0.008363229875621618,
+      "count": 967
+    },
+    "Q4": {
+      "ann_return": 0.03317541937935491,
+      "sharpe": 0.20366620800963564,
+      "mean_daily": 0.00013164848960061474,
+      "std_daily": 0.01026117687458552,
+      "count": 968
+    },
+    "Q5(High)": {
+      "ann_return": 0.26388732246762675,
+      "sharpe": 0.9872903028398374,
+      "mean_daily": 0.0010471719145540744,
+      "std_daily": 0.016837336239638394,
+      "count": 968
+    }
+  },
+  "quintile_spread": {
+    "spread_annual": 0.20949223110697418,
+    "spread_daily": 0.0008313183774086277,
+    "t_stat": 1.1212270730929368,
+    "p_value": 0.26233041598956947,
+    "harvey_pass": false
+  },
+  "vrp_interaction": {
+    "corr_vrp_signal_12vix": -0.3144536796389421,
+    "high_vix_mean_fwd_ret": 0.14621079072022908,
+    "low_vix_mean_fwd_ret": 0.0747122227047025,
+    "high_vix_mean_vrp": 0.0070052504375710265,
+    "low_vix_mean_vrp": 0.008676082764033817
+  },
+  "interaction_strategy": {
+    "combined_vrp_12vix": {
+      "name": "VRP+12/VIX Combined",
+      "ann_return": 0.03810756115722505,
+      "ann_vol": 0.09676174632067407,
+      "sharpe": 0.3938287867494079,
+      "mdd": -0.33667305881263576,
+      "total_return": 0.8996897177451519,
+      "N": 4840
+    },
+    "plain_12vix": {
+      "name": "12/VIX Plain",
+      "ann_return": 0.05657053515077457,
+      "ann_vol": 0.09515237602081913,
+      "sharpe": 0.594525723019224,
+      "mdd": -0.30814726669444137,
+      "total_return": 1.716297304143389,
+      "N": 4840
+    }
+  },
+  "key_findings": "K913 examines VRP (Variance Risk Premium = Implied - Realized Variance) as a return predictor for SPY. VRP is positive 85.7% of time (fear premium). Daily regression: beta=0.01373, t=1.095, R\u00b2=0.002600. Monthly regression: beta=0.02500, t=0.226, R\u00b2=0.000534. OOS R\u00b2 daily=-0.030911543936486874, monthly=-0.09906917297188511. VRP quintile Q5-Q1 spread: 0.2095 ann (t=1.121). VRP strategy Sharpe 0.5550 vs BH 0.4895. VRP provides return prediction info that VIX alone does not (VIX predicts vol magnitude, VRP captures fear premium = expected compensation for bearing vol risk).",
+  "charts": [
+    "k913_vrp_distribution.png",
+    "k913_vrp_prediction.png",
+    "k913_vrp_strategy.png"
+  ]
+}

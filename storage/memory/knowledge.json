@@ -20950,5 +20950,41 @@
     "category": "experiment",
     "confidence": 0.85,
     "created_at": "2026-04-05T20:31:19.219726+00:00"
+  },
+  {
+    "id": "know_20260405213130_k913",
+    "experiment_id": "K913",
+    "title": "K913: VRP Return Prediction — NULL at All Horizons (OOS R² Negative)",
+    "content": "[提出: Claude, 執行: Claude] Variance Risk Premium (VRP = VIX² - RV_22d) as SPY return predictor. 2006-2026, IS/OOS split 2019. VRP positive 85.7% (fear premium persistent), mean=0.0081, VRP-VIX r=-0.24 (distinct). RESULT NULL: No horizon significant — daily t=1.10, weekly t=0.37, monthly t=0.23 (all fail Harvey). OOS R² all negative (daily -0.031, weekly -0.082, monthly -0.099) — worse than historical mean. Q5-Q1 spread 20.9% but t=1.12 NS. VRP strategy Sharpe 0.555 vs BH 0.490 but DM t=-1.53 NS. MDD improvement -37.4% vs -59.6% (risk reduction, not alpha). VRP does NOT improve 12/VIX (combined 0.39 vs plain 0.59). CONCLUSION: VRP exists as structural options market premium but cannot be reliably timed. Consistent with K697 (direction unpredictable). VRP benefit = risk reduction = drawdown insurance (same as VT). Bollerslev et al. (2009) in-sample result does not survive our strict OOS + Harvey criteria.",
+    "tags": [
+      "VRP",
+      "return prediction",
+      "variance risk premium",
+      "null result",
+      "OOS",
+      "Bollerslev"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-05T21:31:30.186761+00:00"
+  },
+  {
+    "id": "know_20260405223520_k914",
+    "experiment_id": "K914",
+    "title": "K914: Overnight-Intraday Decomposed MF-GJR — NULL (VIX Already Captures Structure)",
+    "content": "[提出: Claude, 執行: Claude] Decomposed SPY returns into overnight (close→open) and intraday (open→close). Overnight variance share 36.2%, intraday 60.1%, cov 3.7%. Nearly uncorrelated (r=0.039). VIX correlates more with intraday r² (0.354) than overnight (0.293). Strong bidirectional Granger causality. 4 models tested: A=standard MF-GJR, B=+overnight r² regressor, C=separate overnight+intraday MF-GJR, D=+overnight ratio. OOS 2019-2026 (1821d). RESULT NULL: No model passes Harvey. B: t=-0.73 NS (theta2 hits bound). C: -0.36% QLIKE but t=-0.92 NS. D: WORSE (+0.28%, t=+2.78 wrong direction). CONCLUSION: VIX elasticity in MF-GJR tau already implicitly captures overnight/intraday structure. Adding explicit decomposition is redundant. VIX is forward-looking and integrates all vol sources. MF-GJR(VIX) remains optimal — cannot be improved by decomposing what VIX already knows.",
+    "tags": [
+      "MF-GJR",
+      "overnight",
+      "intraday",
+      "decomposition",
+      "VIX sufficiency",
+      "null result"
+    ],
+    "data_source": "yfinance (SPY OHLC, ^VIX)",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-05T22:35:20.608540+00:00"
   }
 ]
