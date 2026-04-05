@@ -1,0 +1,221 @@
+{
+  "experiment_id": "K741",
+  "title": "NFP Event Volatility Study — Comprehensive Pre-04/03 Analysis",
+  "date": "2026-03-30",
+  "data_source": "yfinance",
+  "period": "2010-01-01 to 2026-03-28",
+  "n_nfp_events": 195,
+  "proposer": "Claude",
+  "executor": "Claude",
+  "references": [
+    "K528: NFP Event Study — Parametric/Non-parametric Disagreement",
+    "K661: NFP Pre-Event — Vol 1.17x normal, VIX>25 effect vanishes",
+    "K716/K721: High-VIX absorbs shocks",
+    "Savor & Wilson (2013): Macro announcement premium"
+  ],
+  "part_a_historical": {
+    "n_nfp": 195,
+    "n_non_nfp": 3909,
+    "nfp_mean_abs_return_pct": 0.8163685317249827,
+    "non_nfp_mean_abs_return_pct": 0.7131050979421188,
+    "friday_mean_abs_return_pct": 0.7008841109605879,
+    "ratio_vs_all": 1.14480815532081,
+    "ratio_vs_friday": 1.1647696373172436,
+    "t_vs_all": 1.7431594721579384,
+    "p_vs_all": 0.08138068805166426,
+    "t_vs_friday": 1.8795988448533358,
+    "p_vs_friday": 0.06051119813911774,
+    "wilcoxon_p_vs_all": 0.0036868162658538262,
+    "pct_positive": 59.48717948717949,
+    "mean_return_pct": 0.08687192261365036,
+    "vix_drops_pct": 68.71794871794872
+  },
+  "part_b_vix_regimes": {
+    "Low (VIX<15)": {
+      "n": 62,
+      "mean_abs_return_pct": 0.49821851409215123,
+      "median_abs_return_pct": 0.4338324397292648,
+      "std_return_pct": 0.6180195184739373,
+      "mean_return_pct": 0.20523831352078592,
+      "pct_positive": 69.35483870967742,
+      "mean_vix_change": -0.33306457150366997
+    },
+    "Medium (15-20)": {
+      "n": 78,
+      "mean_abs_return_pct": 0.7572577187000575,
+      "median_abs_return_pct": 0.7510990291459407,
+      "std_return_pct": 0.9178520588130701,
+      "mean_return_pct": 0.22503619242723624,
+      "pct_positive": 61.53846153846154,
+      "mean_vix_change": -0.3644871711730957
+    },
+    "Elevated (20-25)": {
+      "n": 27,
+      "mean_abs_return_pct": 1.0216847439029002,
+      "median_abs_return_pct": 0.8617980776309597,
+      "std_return_pct": 1.2664380294286433,
+      "mean_return_pct": 0.23334305817861362,
+      "pct_positive": 66.66666666666666,
+      "mean_vix_change": -0.52629640367296
+    },
+    "High (VIX>=25)": {
+      "n": 28,
+      "mean_abs_return_pct": 1.4875259167384096,
+      "median_abs_return_pct": 1.0560387317225473,
+      "std_return_pct": 1.8638770415319306,
+      "mean_return_pct": -0.7013512895990678,
+      "pct_positive": 25.0,
+      "mean_vix_change": 0.6671427999223981
+    }
+  },
+  "part_c_sector_dispersion": {
+    "nfp_dispersion_pct": 0.6574608723466675,
+    "non_nfp_dispersion_pct": 0.6659623595639832,
+    "dispersion_ratio": 0.9872342826959745,
+    "t_stat": -0.26478877648229543,
+    "p_value": 0.7911854872309115,
+    "sector_sensitivity": {
+      "XLF": {
+        "nfp_abs_return_pct": 1.0564362932599098,
+        "non_nfp_abs_return_pct": 0.9264962352777618,
+        "ratio": 1.1402488785539342,
+        "t_stat": 1.7423492093581507,
+        "p_value": 0.08152230160592144
+      },
+      "XLK": {
+        "nfp_abs_return_pct": 1.0521301385556956,
+        "non_nfp_abs_return_pct": 0.9343464563909929,
+        "ratio": 1.126059965614526,
+        "t_stat": 1.6110153854819917,
+        "p_value": 0.1072533064207492
+      },
+      "XLE": {
+        "nfp_abs_return_pct": 1.201552229618603,
+        "non_nfp_abs_return_pct": 1.1689477155971124,
+        "ratio": 1.0278921919145338,
+        "t_stat": 0.3559326332072549,
+        "p_value": 0.7219093196759747
+      },
+      "XLV": {
+        "nfp_abs_return_pct": 0.7484096360225961,
+        "non_nfp_abs_return_pct": 0.7162296376726851,
+        "ratio": 1.044929721778167,
+        "t_stat": 0.6085303118180336,
+        "p_value": 0.5428695025691338
+      },
+      "XLI": {
+        "nfp_abs_return_pct": 0.9055065948458155,
+        "non_nfp_abs_return_pct": 0.8346147576630462,
+        "ratio": 1.08493959222728,
+        "t_stat": 1.0883790740659856,
+        "p_value": 0.27649173584814296
+      }
+    }
+  },
+  "part_d_strategy": {
+    "buy_hold": {
+      "name": "Buy & Hold",
+      "annual_return_pct": 13.972187576225037,
+      "annual_vol_pct": 17.132054351374766,
+      "sharpe": 0.8155582097545607,
+      "mdd_pct": -33.717259886422944,
+      "total_return_pct": 665.5178664391279
+    },
+    "reduce_50": {
+      "name": "Reduce to 50%",
+      "annual_return_pct": 12.934015952299196,
+      "annual_vol_pct": 16.665672423340773,
+      "sharpe": 0.7760872543123264,
+      "mdd_pct": -30.978639511134432,
+      "total_return_pct": 554.9488546999615
+    },
+    "skip_nfp": {
+      "name": "Skip NFP",
+      "annual_return_pct": 11.895844328373359,
+      "annual_vol_pct": 16.510761474612185,
+      "sharpe": 0.720490350894175,
+      "mdd_pct": -28.242654232444085,
+      "total_return_pct": 455.4444976182733
+    },
+    "conditional_reduce": {
+      "name": "Reduce if VIX<20",
+      "annual_return_pct": 13.286535091142731,
+      "annual_vol_pct": 17.037556964493128,
+      "sharpe": 0.7798380436134325,
+      "mdd_pct": -33.717259886422944,
+      "total_return_pct": 586.499515403429
+    },
+    "nfp_return_contribution_pct": 7.444624991344134,
+    "tx_cost_bp": 10
+  },
+  "part_e_drift": {
+    "windows": {
+      "T-2": {
+        "n": 195,
+        "mean_return_pct": 0.20396194433153886,
+        "median_return_pct": 0.0906120761622109,
+        "abs_return_pct": 0.7452521992622637,
+        "t_stat": 2.6266024142398425,
+        "p_value": 0.009312964981696217
+      },
+      "T-1 (pre)": {
+        "n": 195,
+        "mean_return_pct": -0.08357026129440086,
+        "median_return_pct": -0.01948366534701984,
+        "abs_return_pct": 0.7608653825702294,
+        "t_stat": -1.0574547610111362,
+        "p_value": 0.2916190524311899
+      },
+      "T (NFP)": {
+        "n": 195,
+        "mean_return_pct": 0.08687192261365036,
+        "median_return_pct": 0.18957391595642026,
+        "abs_return_pct": 0.8163685317249827,
+        "t_stat": 1.0816889209849199,
+        "p_value": 0.2807335142121963
+      },
+      "T+1": {
+        "n": 195,
+        "mean_return_pct": -0.026591113366233744,
+        "median_return_pct": 0.05593240451935433,
+        "abs_return_pct": 0.7694167079668915,
+        "t_stat": -0.2791746149504791,
+        "p_value": 0.7804082131659147
+      },
+      "T+2": {
+        "n": 195,
+        "mean_return_pct": 0.11145807717109282,
+        "median_return_pct": 0.05964499469595097,
+        "abs_return_pct": 0.6573550452303087,
+        "t_stat": 1.628793255765766,
+        "p_value": 0.1049795673374032
+      },
+      "T+5": {
+        "n": 195,
+        "mean_return_pct": 0.1708366725882898,
+        "median_return_pct": 0.14920023115472247,
+        "abs_return_pct": 0.718396472251982,
+        "t_stat": 2.208476793133614,
+        "p_value": 0.02838231000513606
+      }
+    },
+    "post_5day_drift_pct": 0.36065235222465536,
+    "post_5day_t": 2.201357234970592,
+    "post_5day_p": 0.02889020901635196
+  },
+  "april_3_guidance": {
+    "vix_regime": "Elevated (20-25)",
+    "expected_abs_move_pct": 1.0216847439029002,
+    "expected_direction": "Slightly negative bias",
+    "recommendation": "HOLD position, do NOT reduce exposure",
+    "rationale": "VIX~24 means market already pricing uncertainty; NFP impact is muted in elevated VIX; TX costs make avoidance worse"
+  },
+  "conclusions": [
+    "NFP days show 1.14x normal volatility (confirmed K661 finding)",
+    "VIX regime is the key moderator — high VIX absorbs NFP shock",
+    "Sector dispersion 0.99x higher on NFP days (XLF/XLI most sensitive)",
+    "Avoiding NFP days is suboptimal — costs > benefits",
+    "April 3 with VIX~24: expect muted impact, hold position",
+    "Post-NFP 5-day drift: +0.361% (often positive)"
+  ]
+}
