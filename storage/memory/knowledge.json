@@ -20283,5 +20283,25 @@
     "category": "knowledge",
     "created_at": "2026-04-05T12:44:47.755837",
     "updated_at": "2026-04-05T12:44:47.755844"
+  },
+  {
+    "id": "K874c",
+    "experiment_id": "K874c",
+    "title": "K874c: Periodic Realized GARCH ★★ — Cross-Recursion Validated (DM t=-4.15 vs Separate), but HAR Still Wins Total",
+    "content": "[提出: 用戶(PRS概念), 執行: Claude] K874c implements proper periodic realized GARCH with cross-session recursion (h_{n-1} carries between sessions). 2102 days TAIFEX TX (volume-selected). CORE RESULT: PRG vs Separate GARCH DM t=-4.15 Harvey PASS (QLIKE -36.7%). Cross-recursion IS valuable — validates Lai et al. (2024) PRS insight. BUT: HAR vs PRG DM t=11.04, HAR dominates on total daily QLIKE (0.119 vs 0.333). HAR's log-space + 5-min RV advantage too large. PRG parameters: overnight α=0.457 β=0.629 (reactive), intraday α=0.131 β=0.791 (persistent). Leverage fixes overnight persistence>1. PRACTICAL VALUE: PRG gives session-level forecasts (useful for session-specific VaR), HAR only gives daily total.",
+    "tags": [
+      "periodic_GARCH",
+      "cross_recursion",
+      "PRS",
+      "HAR-RV",
+      "TAIFEX",
+      "Harvey_PASS",
+      "用戶方向",
+      "session_level"
+    ],
+    "data_source": "TAIFEX TX tick (volume-selected) + yfinance, 2017-2026",
+    "category": "knowledge",
+    "created_at": "2026-04-05T13:04:50.247327",
+    "updated_at": "2026-04-05T13:04:50.247335"
   }
 ]
