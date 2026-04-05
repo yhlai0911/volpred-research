@@ -580,7 +580,7 @@
 **中優先（新研究主題）：**
 - [x] ~~Robust VT 設計~~ → **K859 完成**。Floor(0.3)+Cap(0.9)+EWMA(10)+月頻 = Sharpe 0.579（baseline 0.566），turnover -30%（0.96x vs 1.39x）。週頻反而更差（-0.024 Sharpe, 3x turnover）。DM 全 NS（Harvey）。**實用建議：Floor+Cap+EWMA 是更便宜的保險（少交易、同保護）**
 - [ ] **VIX Regime 轉換預測**：K752 發現不同 era 的 VIX R² 差異大（0.24-0.64）。能否預測 VIX regime 何時轉換？
-- [ ] **Drawdown Recovery 修正版**：K735 被 Codex 推翻（fake OOS + timing misalign）。修正方法論後重做
+- [x] ~~Drawdown Recovery 修正版~~ → **K870 完成**。VT 減深度（-9pp, p=0.016）但不加速恢復（ratio 0.77, p=0.20 NS）。50/50 才是恢復加速器（ratio 0.50, p=0.016, 7/7 勝）。**VT = depth insurance, 50/50 = speed insurance**
 - [ ] **跨國 VIX sufficiency**：K752 證明 US 33 年成立。在其他市場（VSTOXX、VNKY、VIXTWN proxy）驗證？
 - [ ] **Alternative data**：K750 Google Trends 是反應式。嘗試 Reddit/Twitter 情緒或 options flow
 - [ ] **Intraday alpha**：5-min 數據就緒後，測試日內 VIX-equity lead-lag（K751 overnight 有 +0.45% R²）
