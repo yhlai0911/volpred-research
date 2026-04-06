@@ -157,6 +157,36 @@ MANDATORY — 每篇文章必須包含：
 
    禁止用 ASCII art 或純文字表格替代真正的圖表。
    每張圖表必須在文章中有對應的文字解讀（不是放了圖就完事）。
+
+## 數學方程式（LaTeX via KaTeX）
+
+前端支援 KaTeX 渲染（remark-math + rehype-katex）。所有數學必須用 LaTeX：
+
+**Display math（獨立行）**：
+```
+$$\sigma_t^2 = \tau_t \times g_t$$
+```
+
+**Inline math（正文中）**：
+```
+長期成分 $\tau_t$ 由 VIX 驅動
+```
+
+**⚠️ 絕對禁止：**
+- 不可用 Unicode 數學符號（σ、τ、α、θ 等）代替 LaTeX
+- 不可寫 `$$$$`（空的 math block，會讓 KaTeX 吃掉後續內容）
+- 不可在 `$$` 區塊內放圖片、表格、標題（`##`）或水平線（`---`）
+- `$$` 前後必須有空行，不可和其他內容黏在一起
+- 正文中提到數學符號一律用 inline LaTeX：`$\sigma^2$` 不是 `σ²`
+
+**正確範例**：
+```markdown
+MF-GJR 將波動率分解為兩個成分：
+
+$$\sigma_t^2 = \tau_t \times g_t$$
+
+其中 $\tau_t = \exp(\theta_0 + \theta_1 \log \text{VIX}_{t-1})$ 是長期成分。
+```
 2. 數據來源標注（文末）：
    *本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
    數據來源：yfinance，期間：YYYY-YYYY。*
