@@ -449,7 +449,7 @@
 
 ### K933-K934 衍生方向（2026-04-06）
 - [x] ~~Gap-Adjusted CARR~~ → **K935 ★**。Yang-Zhang CARR 勝 Parkinson CARR 8.04%（DM t=-3.28 Harvey✓）。CARR_YZ(1.556) 甚至勝 GARCH(1.603) 但 DM t=-2.68 未達 Harvey。隔夜成分是關鍵修復。MF-GJR(VIX) 仍最佳
-- [ ] **CARR + GARCH Ensemble**：K934 顯示 CARR 排序好（ρ=0.474）但校準差，GARCH 校準好但排序差（ρ=0.383）。兩者互補？→ K937 進行中
+- [x] ~~CARR + GARCH Ensemble~~ → **K937 NULL**。4 種 ensemble 都不勝 MF-GJR(VIX)。OLS Stacking 最接近（DM t=-1.73 NS）。Rank-Level Hybrid 最差（DM t=-3.92 vs EQ）。VIX sufficient，加 CARR 到 ensemble 只增 noise
 - [x] ~~Yang-Zhang CARR Cross-Asset~~ → **K938 ★★**。4/4 資產全勝 Parkinson（Harvey✓），改善與 gap ratio 相關 (r=0.80)。0050.TW gap=84% 改善 37.3%，GLD gap=50% 改善 27.5%。CARR_YZ 在 SPY/QQQ 甚至勝 GARCH
 - [x] ~~K934: CARR Range-Based Vol~~ → 排序能力最強（ρ=0.474）但 Parkinson 轉換偏差。GARCH 顯著勝 CARR on QLIKE (DM t=4.44)。VIX 改善所有模型
 

@@ -21412,5 +21412,24 @@
     "data_source": "yfinance (SPY, GLD, QQQ, 0050.TW, ^VIX)",
     "created_at": "2026-04-06T09:24:23.872087+00:00",
     "star_rating": 2
+  },
+  {
+    "id": "know_20260406093111_k937",
+    "experiment_id": "K937",
+    "title": "K937: CARR-GARCH Ensemble NULL — 沒有ensemble能打敗MF-GJR(VIX)，VIX資訊sufficient",
+    "content": "[提出: Claude, 執行: Claude] 測試4種ensemble方法組合CARR_YZ和GARCH/GJR/MF-GJR(VIX)。SPY OOS 2017-2025 (2262天)。Equal Weight(QLIKE=1.494)、Inverse QLIKE(1.492)、OLS Stacking(1.497)、Rank-Level Hybrid(1.558)。MF-GJR(VIX)單獨(1.462)仍為最佳，無ensemble能達Harvey顯著差異。OLS Stacking分配41.7%給MF-GJR但僅15.4%給CARR_YZ。Rank-Level Hybrid最差(DM t=-3.92 vs EQ)——CARR排序優勢無法轉移到GARCH校準尺度。Combination puzzle部分確認：inverse QLIKE略勝equal weight但差異微小。結論：VIX sufficient，加CARR到ensemble只增加noise不增signal。",
+    "tags": [
+      "volatility",
+      "ensemble",
+      "CARR",
+      "GARCH",
+      "MF-GJR",
+      "VIX-sufficiency",
+      "null-result",
+      "combination-puzzle"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T09:31:11.491359+00:00",
+    "star_rating": 0
   }
 ]
