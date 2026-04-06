@@ -1,0 +1,707 @@
+{
+  "experiment_id": "K923",
+  "title": "Copula-Based Optimal Hedge Ratio -- SPY Hedged with GLD",
+  "date": "2026-04-06",
+  "data_source": "yfinance",
+  "data_period": "2005-01-04 to 2026-04-02",
+  "oos_start": "2019-01-01",
+  "n_obs": 5345,
+  "n_is": 3522,
+  "n_oos": 1823,
+  "descriptive_stats": {
+    "GLD": {
+      "n_obs": 5345,
+      "mean": 0.0004958852923487099,
+      "std": 0.011418908401080301,
+      "skew": -0.3095399376991336,
+      "kurtosis": 6.747931915237938,
+      "min": -0.10274245274560045,
+      "max": 0.11290530102327678,
+      "adf_stat": -73.9053,
+      "adf_pval": 0.0,
+      "arch_lm_stat": 385.6808,
+      "arch_lm_pval": 0.0,
+      "pearson_corr": 0.0583
+    },
+    "SPY": {
+      "n_obs": 5345,
+      "mean": 0.00046218490141944997,
+      "std": 0.011971543995032138,
+      "skew": 0.0014824737299651994,
+      "kurtosis": 15.36754947407709,
+      "min": -0.10942352787716525,
+      "max": 0.14519731819525794,
+      "adf_stat": -18.2839,
+      "adf_pval": 0.0,
+      "arch_lm_stat": 1358.0381,
+      "arch_lm_pval": 0.0,
+      "pearson_corr": 0.0583
+    }
+  },
+  "garch_marginals": {
+    "SPY": {
+      "params": {
+        "omega": 0.02207874503404862,
+        "alpha": 1.965985250443765e-10,
+        "gamma": 0.2501643240456109,
+        "beta": 0.8577116689986195,
+        "nu": 5.978489808358356
+      },
+      "persistence": 0.9828,
+      "converged": true
+    },
+    "GLD": {
+      "params": {
+        "omega": 0.008488944813855015,
+        "alpha": 0.06646430524451057,
+        "gamma": -0.03842761570104119,
+        "beta": 0.9489235352996196,
+        "nu": 5.418664879618273
+      },
+      "persistence": 0.9962,
+      "converged": true
+    }
+  },
+  "hedge_ratio_summaries": {
+    "OLS": {
+      "mean": 0.0538,
+      "std": 0.0243,
+      "min": -0.0597,
+      "max": 0.1354
+    },
+    "Rolling_OLS": {
+      "mean": 0.05,
+      "std": 0.1716,
+      "min": -0.3776,
+      "max": 0.5198
+    },
+    "DCC": {
+      "mean": 0.0671,
+      "std": 0.0703,
+      "min": -0.299,
+      "max": 0.5724
+    },
+    "Copula": {
+      "mean": 0.1048,
+      "std": 0.0646,
+      "min": 0.0143,
+      "max": 0.5918
+    },
+    "Copula_Quantile": {
+      "mean": 0.1082,
+      "std": 0.0911,
+      "min": -0.17,
+      "max": 0.4
+    }
+  },
+  "in_sample_results": {
+    "OLS": {
+      "period": "IS_OLS",
+      "n_obs": 3522,
+      "HE": -0.002153,
+      "var_hedged": 0.00013883,
+      "var_unhedged": 0.00013853,
+      "VaR_5pct_unhedged": -0.017738,
+      "VaR_5pct_hedged": -0.017689,
+      "VaR_5pct_reduction": 0.9973,
+      "ES_5pct_unhedged": -0.028863,
+      "ES_5pct_hedged": -0.028872,
+      "ES_5pct_reduction": 1.0003,
+      "VaR_1pct_unhedged": -0.035424,
+      "VaR_1pct_hedged": -0.035693,
+      "VaR_1pct_reduction": 1.0076,
+      "ES_1pct_unhedged": -0.05015,
+      "ES_1pct_hedged": -0.050632,
+      "ES_1pct_reduction": 1.0096,
+      "mean_return_hedged": 0.00032791,
+      "mean_return_unhedged": 0.00035692,
+      "utility": {
+        "gamma_3": {
+          "hedged": 0.00011966994623167996,
+          "unhedged": 0.0001491218395227317,
+          "improvement": -2.945189329105175e-05
+        },
+        "gamma_5": {
+          "hedged": -1.915847611125987e-05,
+          "unhedged": 1.0591700213833863e-05,
+          "improvement": -2.975017632509373e-05
+        },
+        "gamma_10": {
+          "hedged": -0.0003662295319686094,
+          "unhedged": -0.0003357336480584107,
+          "improvement": -3.0495883910198682e-05
+        }
+      },
+      "turnover": 0.000465,
+      "mean_hedge_ratio": 0.0572,
+      "std_hedge_ratio": 0.0282
+    },
+    "Rolling_OLS": {
+      "period": "IS_Rolling_OLS",
+      "n_obs": 3522,
+      "HE": -0.008301,
+      "var_hedged": 0.00013968,
+      "var_unhedged": 0.00013853,
+      "VaR_5pct_unhedged": -0.017738,
+      "VaR_5pct_hedged": -0.017633,
+      "VaR_5pct_reduction": 0.9941,
+      "ES_5pct_unhedged": -0.028863,
+      "ES_5pct_hedged": -0.028923,
+      "ES_5pct_reduction": 1.0021,
+      "VaR_1pct_unhedged": -0.035424,
+      "VaR_1pct_hedged": -0.03673,
+      "VaR_1pct_reduction": 1.0369,
+      "ES_1pct_unhedged": -0.05015,
+      "ES_1pct_hedged": -0.050631,
+      "ES_1pct_reduction": 1.0096,
+      "mean_return_hedged": 0.00028789,
+      "mean_return_unhedged": 0.00035692,
+      "utility": {
+        "gamma_3": {
+          "hedged": 7.836934161824124e-05,
+          "unhedged": 0.0001491218395227317,
+          "improvement": -7.075249790449047e-05
+        },
+        "gamma_5": {
+          "hedged": -6.131074947947546e-05,
+          "unhedged": 1.0591700213833863e-05,
+          "improvement": -7.190244969330933e-05
+        },
+        "gamma_10": {
+          "hedged": -0.0004105109772237672,
+          "unhedged": -0.0003357336480584107,
+          "improvement": -7.477732916535648e-05
+        }
+      },
+      "turnover": 0.003922,
+      "mean_hedge_ratio": 0.0264,
+      "std_hedge_ratio": 0.1527
+    },
+    "DCC": {
+      "period": "IS_DCC",
+      "n_obs": 3522,
+      "HE": 0.022991,
+      "var_hedged": 0.00013535,
+      "var_unhedged": 0.00013853,
+      "VaR_5pct_unhedged": -0.017738,
+      "VaR_5pct_hedged": -0.017731,
+      "VaR_5pct_reduction": 0.9996,
+      "ES_5pct_unhedged": -0.028863,
+      "ES_5pct_hedged": -0.028724,
+      "ES_5pct_reduction": 0.9952,
+      "VaR_1pct_unhedged": -0.035424,
+      "VaR_1pct_hedged": -0.035614,
+      "VaR_1pct_reduction": 1.0053,
+      "ES_1pct_unhedged": -0.05015,
+      "ES_1pct_hedged": -0.04993,
+      "ES_1pct_reduction": 0.9956,
+      "mean_return_hedged": 0.00030755,
+      "mean_return_unhedged": 0.00035692,
+      "utility": {
+        "gamma_3": {
+          "hedged": 0.00010452938222750801,
+          "unhedged": 0.0001491218395227317,
+          "improvement": -4.45924572952237e-05
+        },
+        "gamma_5": {
+          "hedged": -3.081584976736759e-05,
+          "unhedged": 1.0591700213833863e-05,
+          "improvement": -4.1407549981201455e-05
+        },
+        "gamma_10": {
+          "hedged": -0.00036917892975455656,
+          "unhedged": -0.0003357336480584107,
+          "improvement": -3.344528169614585e-05
+        }
+      },
+      "turnover": 0.008995,
+      "mean_hedge_ratio": 0.0606,
+      "std_hedge_ratio": 0.0645
+    },
+    "Copula": {
+      "period": "IS_Copula",
+      "n_obs": 3522,
+      "HE": -0.028974,
+      "var_hedged": 0.00014254,
+      "var_unhedged": 0.00013853,
+      "VaR_5pct_unhedged": -0.017738,
+      "VaR_5pct_hedged": -0.017889,
+      "VaR_5pct_reduction": 1.0085,
+      "ES_5pct_unhedged": -0.028863,
+      "ES_5pct_hedged": -0.029317,
+      "ES_5pct_reduction": 1.0157,
+      "VaR_1pct_unhedged": -0.035424,
+      "VaR_1pct_hedged": -0.035664,
+      "VaR_1pct_reduction": 1.0068,
+      "ES_1pct_unhedged": -0.05015,
+      "ES_1pct_hedged": -0.052692,
+      "ES_1pct_reduction": 1.0507,
+      "mean_return_hedged": 0.00029653,
+      "mean_return_unhedged": 0.00035692,
+      "utility": {
+        "gamma_3": {
+          "hedged": 8.27186393853479e-05,
+          "unhedged": 0.0001491218395227317,
+          "improvement": -6.64032001373838e-05
+        },
+        "gamma_5": {
+          "hedged": -5.9825325161490294e-05,
+          "unhedged": 1.0591700213833863e-05,
+          "improvement": -7.041702537532416e-05
+        },
+        "gamma_10": {
+          "hedged": -0.00041618523652858574,
+          "unhedged": -0.0003357336480584107,
+          "improvement": -8.045158847017503e-05
+        }
+      },
+      "turnover": 0.00951,
+      "mean_hedge_ratio": 0.1219,
+      "std_hedge_ratio": 0.0693
+    },
+    "Copula_Quantile": {
+      "period": "IS_Copula_Quantile",
+      "n_obs": 3522,
+      "HE": -0.020565,
+      "var_hedged": 0.00014138,
+      "var_unhedged": 0.00013853,
+      "VaR_5pct_unhedged": -0.017738,
+      "VaR_5pct_hedged": -0.017729,
+      "VaR_5pct_reduction": 0.9995,
+      "ES_5pct_unhedged": -0.028863,
+      "ES_5pct_hedged": -0.028972,
+      "ES_5pct_reduction": 1.0038,
+      "VaR_1pct_unhedged": -0.035424,
+      "VaR_1pct_hedged": -0.035294,
+      "VaR_1pct_reduction": 0.9963,
+      "ES_1pct_unhedged": -0.05015,
+      "ES_1pct_hedged": -0.051773,
+      "ES_1pct_reduction": 1.0324,
+      "mean_return_hedged": 0.00032183,
+      "mean_return_unhedged": 0.00035692,
+      "utility": {
+        "gamma_3": {
+          "hedged": 0.0001097645377936145,
+          "unhedged": 0.0001491218395227317,
+          "improvement": -3.9357301729117206e-05
+        },
+        "gamma_5": {
+          "hedged": -3.161444313699754e-05,
+          "unhedged": 1.0591700213833863e-05,
+          "improvement": -4.2206143350831404e-05
+        },
+        "gamma_10": {
+          "hedged": -0.0003850618954635276,
+          "unhedged": -0.0003357336480584107,
+          "improvement": -4.9328247405116914e-05
+        }
+      },
+      "turnover": 0.001059,
+      "mean_hedge_ratio": 0.1264,
+      "std_hedge_ratio": 0.0829
+    }
+  },
+  "out_of_sample_results": {
+    "OLS": {
+      "period": "OOS_OLS",
+      "n_obs": 1823,
+      "HE": 0.007058,
+      "var_hedged": 0.00015151,
+      "var_unhedged": 0.00015259,
+      "VaR_5pct_unhedged": -0.017608,
+      "VaR_5pct_hedged": -0.017653,
+      "VaR_5pct_reduction": 1.0026,
+      "ES_5pct_unhedged": -0.02947,
+      "ES_5pct_hedged": -0.029489,
+      "ES_5pct_reduction": 1.0006,
+      "VaR_1pct_unhedged": -0.034106,
+      "VaR_1pct_hedged": -0.033681,
+      "VaR_1pct_reduction": 0.9875,
+      "ES_1pct_unhedged": -0.051986,
+      "ES_1pct_hedged": -0.051782,
+      "ES_1pct_reduction": 0.9961,
+      "mean_return_hedged": 0.00062552,
+      "mean_return_unhedged": 0.00066556,
+      "utility": {
+        "gamma_3": {
+          "hedged": 0.00039825394131737815,
+          "unhedged": 0.00043668137141314006,
+          "improvement": -3.8427430095761906e-05
+        },
+        "gamma_5": {
+          "hedged": 0.0002467449917581399,
+          "unhedged": 0.00028409540936053895,
+          "improvement": -3.735041760239907e-05
+        },
+        "gamma_10": {
+          "hedged": -0.0001320273821399558,
+          "unhedged": -9.736949577096381e-05,
+          "improvement": -3.465788636899199e-05
+        }
+      },
+      "turnover": 0.00014,
+      "mean_hedge_ratio": 0.0473,
+      "std_hedge_ratio": 0.0116
+    },
+    "Rolling_OLS": {
+      "period": "OOS_Rolling_OLS",
+      "n_obs": 1823,
+      "HE": -0.007025,
+      "var_hedged": 0.00015366,
+      "var_unhedged": 0.00015259,
+      "VaR_5pct_unhedged": -0.017608,
+      "VaR_5pct_hedged": -0.018222,
+      "VaR_5pct_reduction": 1.0349,
+      "ES_5pct_unhedged": -0.02947,
+      "ES_5pct_hedged": -0.029687,
+      "ES_5pct_reduction": 1.0074,
+      "VaR_1pct_unhedged": -0.034106,
+      "VaR_1pct_hedged": -0.03445,
+      "VaR_1pct_reduction": 1.0101,
+      "ES_1pct_unhedged": -0.051986,
+      "ES_1pct_hedged": -0.053319,
+      "ES_1pct_reduction": 1.0256,
+      "mean_return_hedged": 0.00058077,
+      "mean_return_unhedged": 0.00066556,
+      "utility": {
+        "gamma_3": {
+          "hedged": 0.00035028736307968244,
+          "unhedged": 0.00043668137141314006,
+          "improvement": -8.639400833345762e-05
+        },
+        "gamma_5": {
+          "hedged": 0.00019662952893155993,
+          "unhedged": 0.00028409540936053895,
+          "improvement": -8.746588042897902e-05
+        },
+        "gamma_10": {
+          "hedged": -0.00018751505643874633,
+          "unhedged": -9.736949577096381e-05,
+          "improvement": -9.014556066778252e-05
+        }
+      },
+      "turnover": 0.005713,
+      "mean_hedge_ratio": 0.0954,
+      "std_hedge_ratio": 0.1952
+    },
+    "DCC": {
+      "period": "OOS_DCC",
+      "n_obs": 1823,
+      "HE": 0.026861,
+      "var_hedged": 0.00014849,
+      "var_unhedged": 0.00015259,
+      "VaR_5pct_unhedged": -0.017608,
+      "VaR_5pct_hedged": -0.017863,
+      "VaR_5pct_reduction": 1.0145,
+      "ES_5pct_unhedged": -0.02947,
+      "ES_5pct_hedged": -0.029672,
+      "ES_5pct_reduction": 1.0068,
+      "VaR_1pct_unhedged": -0.034106,
+      "VaR_1pct_hedged": -0.033607,
+      "VaR_1pct_reduction": 0.9854,
+      "ES_1pct_unhedged": -0.051986,
+      "ES_1pct_hedged": -0.052479,
+      "ES_1pct_reduction": 1.0095,
+      "mean_return_hedged": 0.00057094,
+      "mean_return_unhedged": 0.00066556,
+      "utility": {
+        "gamma_3": {
+          "hedged": 0.00034820466125299243,
+          "unhedged": 0.00043668137141314006,
+          "improvement": -8.847671016014763e-05
+        },
+        "gamma_5": {
+          "hedged": 0.0001997172691958094,
+          "unhedged": 0.00028409540936053895,
+          "improvement": -8.437814016472957e-05
+        },
+        "gamma_10": {
+          "hedged": -0.00017150121094714832,
+          "unhedged": -9.736949577096381e-05,
+          "improvement": -7.413171517618451e-05
+        }
+      },
+      "turnover": 0.011292,
+      "mean_hedge_ratio": 0.0797,
+      "std_hedge_ratio": 0.0788
+    },
+    "Copula": {
+      "period": "OOS_Copula",
+      "n_obs": 1823,
+      "HE": 0.017617,
+      "var_hedged": 0.0001499,
+      "var_unhedged": 0.00015259,
+      "VaR_5pct_unhedged": -0.017608,
+      "VaR_5pct_hedged": -0.017648,
+      "VaR_5pct_reduction": 1.0023,
+      "ES_5pct_unhedged": -0.02947,
+      "ES_5pct_hedged": -0.029662,
+      "ES_5pct_reduction": 1.0065,
+      "VaR_1pct_unhedged": -0.034106,
+      "VaR_1pct_hedged": -0.034839,
+      "VaR_1pct_reduction": 1.0215,
+      "ES_1pct_unhedged": -0.051986,
+      "ES_1pct_hedged": -0.051534,
+      "ES_1pct_reduction": 0.9913,
+      "mean_return_hedged": 0.00059873,
+      "mean_return_unhedged": 0.00066556,
+      "utility": {
+        "gamma_3": {
+          "hedged": 0.00037388279666299856,
+          "unhedged": 0.00043668137141314006,
+          "improvement": -6.27985747501415e-05
+        },
+        "gamma_5": {
+          "hedged": 0.00022398487175387817,
+          "unhedged": 0.00028409540936053895,
+          "improvement": -6.011053760666079e-05
+        },
+        "gamma_10": {
+          "hedged": -0.00015075994051892293,
+          "unhedged": -9.736949577096381e-05,
+          "improvement": -5.339044474795911e-05
+        }
+      },
+      "turnover": 0.006253,
+      "mean_hedge_ratio": 0.0718,
+      "std_hedge_ratio": 0.036
+    },
+    "Copula_Quantile": {
+      "period": "OOS_Copula_Quantile",
+      "n_obs": 1823,
+      "HE": 3.1e-05,
+      "var_hedged": 0.00015258,
+      "var_unhedged": 0.00015259,
+      "VaR_5pct_unhedged": -0.017608,
+      "VaR_5pct_hedged": -0.01778,
+      "VaR_5pct_reduction": 1.0098,
+      "ES_5pct_unhedged": -0.02947,
+      "ES_5pct_hedged": -0.029416,
+      "ES_5pct_reduction": 0.9982,
+      "VaR_1pct_unhedged": -0.034106,
+      "VaR_1pct_hedged": -0.032574,
+      "VaR_1pct_reduction": 0.9551,
+      "ES_1pct_unhedged": -0.051986,
+      "ES_1pct_hedged": -0.051887,
+      "ES_1pct_reduction": 0.9981,
+      "mean_return_hedged": 0.00060611,
+      "mean_return_unhedged": 0.00066556,
+      "utility": {
+        "gamma_3": {
+          "hedged": 0.00037723690729517647,
+          "unhedged": 0.00043668137141314006,
+          "improvement": -5.944446411796359e-05
+        },
+        "gamma_5": {
+          "hedged": 0.00022465565272392334,
+          "unhedged": 0.00028409540936053895,
+          "improvement": -5.943975663661561e-05
+        },
+        "gamma_10": {
+          "hedged": -0.00015679748370420958,
+          "unhedged": -9.736949577096381e-05,
+          "improvement": -5.942798793324576e-05
+        }
+      },
+      "turnover": 0.001592,
+      "mean_hedge_ratio": 0.073,
+      "std_hedge_ratio": 0.0959
+    }
+  },
+  "dm_tests_oos": {
+    "OLS_vs_Rolling_OLS": {
+      "t_stat": -1.0166,
+      "p_value": 0.309477,
+      "n": 1823,
+      "mean_loss_diff": -2.0937e-06,
+      "comparison": "OLS vs Rolling_OLS",
+      "interpretation": "Negative t: {name1} better",
+      "harvey_significant": "False"
+    },
+    "OLS_vs_DCC": {
+      "t_stat": 2.3715,
+      "p_value": 0.017822,
+      "n": 1823,
+      "mean_loss_diff": 3.0852e-06,
+      "comparison": "OLS vs DCC",
+      "interpretation": "Positive t: {name2} better",
+      "harvey_significant": "False"
+    },
+    "OLS_vs_Copula": {
+      "t_stat": 1.2107,
+      "p_value": 0.226166,
+      "n": 1823,
+      "mean_loss_diff": 1.6429e-06,
+      "comparison": "OLS vs Copula",
+      "interpretation": "Positive t: {name2} better",
+      "harvey_significant": "False"
+    },
+    "OLS_vs_Copula_Quantile": {
+      "t_stat": -1.1894,
+      "p_value": 0.234423,
+      "n": 1823,
+      "mean_loss_diff": -1.0478e-06,
+      "comparison": "OLS vs Copula_Quantile",
+      "interpretation": "Negative t: {name1} better",
+      "harvey_significant": "False"
+    },
+    "DCC_vs_Copula": {
+      "t_stat": -1.2736,
+      "p_value": 0.202967,
+      "n": 1823,
+      "mean_loss_diff": -1.4423e-06,
+      "comparison": "DCC vs Copula",
+      "interpretation": "Negative t: {name1} better",
+      "harvey_significant": "False"
+    },
+    "DCC_vs_Copula_Quantile": {
+      "t_stat": -2.3712,
+      "p_value": 0.017832,
+      "n": 1823,
+      "mean_loss_diff": -4.133e-06,
+      "comparison": "DCC vs Copula_Quantile",
+      "interpretation": "Negative t: {name1} better",
+      "harvey_significant": "False"
+    },
+    "Copula_vs_Copula_Quantile": {
+      "t_stat": -1.336,
+      "p_value": 0.181723,
+      "n": 1823,
+      "mean_loss_diff": -2.6907e-06,
+      "comparison": "Copula vs Copula_Quantile",
+      "interpretation": "Negative t: {name1} better",
+      "harvey_significant": "False"
+    },
+    "Rolling_OLS_vs_DCC": {
+      "t_stat": 2.4901,
+      "p_value": 0.012858,
+      "n": 1823,
+      "mean_loss_diff": 5.1789e-06,
+      "comparison": "Rolling_OLS vs DCC",
+      "interpretation": "Positive t: {name2} better",
+      "harvey_significant": "False"
+    },
+    "Rolling_OLS_vs_Copula": {
+      "t_stat": 1.3597,
+      "p_value": 0.174079,
+      "n": 1823,
+      "mean_loss_diff": 3.7367e-06,
+      "comparison": "Rolling_OLS vs Copula",
+      "interpretation": "Positive t: {name2} better",
+      "harvey_significant": "False"
+    }
+  },
+  "tail_event_analysis_full": {
+    "OLS": {
+      "n_tail_events": 141,
+      "mean_unhedged_loss": -0.036953,
+      "mean_hedged_loss": -0.036996,
+      "loss_reduction_pct": -0.12,
+      "variance_ratio": 1.0108,
+      "worst_hedged": -0.109125,
+      "worst_unhedged": -0.109424
+    },
+    "Rolling_OLS": {
+      "n_tail_events": 141,
+      "mean_unhedged_loss": -0.036953,
+      "mean_hedged_loss": -0.036677,
+      "loss_reduction_pct": 0.75,
+      "variance_ratio": 1.1437,
+      "worst_hedged": -0.110833,
+      "worst_unhedged": -0.109424
+    },
+    "DCC": {
+      "n_tail_events": 141,
+      "mean_unhedged_loss": -0.036953,
+      "mean_hedged_loss": -0.036794,
+      "loss_reduction_pct": 0.43,
+      "variance_ratio": 1.0188,
+      "worst_hedged": -0.108286,
+      "worst_unhedged": -0.109424
+    },
+    "Copula": {
+      "n_tail_events": 141,
+      "mean_unhedged_loss": -0.036953,
+      "mean_hedged_loss": -0.03736,
+      "loss_reduction_pct": -1.1,
+      "variance_ratio": 1.109,
+      "worst_hedged": -0.106637,
+      "worst_unhedged": -0.109424
+    },
+    "Copula_Quantile": {
+      "n_tail_events": 141,
+      "mean_unhedged_loss": -0.036953,
+      "mean_hedged_loss": -0.036777,
+      "loss_reduction_pct": 0.47,
+      "variance_ratio": 1.1624,
+      "worst_hedged": -0.11011,
+      "worst_unhedged": -0.109424
+    }
+  },
+  "tail_event_analysis_oos": {
+    "OLS": {
+      "n_tail_events": 46,
+      "mean_unhedged_loss": -0.038434,
+      "mean_hedged_loss": -0.038363,
+      "loss_reduction_pct": 0.19,
+      "variance_ratio": 0.9862,
+      "worst_hedged": -0.109125,
+      "worst_unhedged": -0.109424
+    },
+    "Rolling_OLS": {
+      "n_tail_events": 46,
+      "mean_unhedged_loss": -0.038434,
+      "mean_hedged_loss": -0.038049,
+      "loss_reduction_pct": 1.0,
+      "variance_ratio": 1.2243,
+      "worst_hedged": -0.110833,
+      "worst_unhedged": -0.109424
+    },
+    "DCC": {
+      "n_tail_events": 46,
+      "mean_unhedged_loss": -0.038434,
+      "mean_hedged_loss": -0.038476,
+      "loss_reduction_pct": -0.11,
+      "variance_ratio": 1.0592,
+      "worst_hedged": -0.108286,
+      "worst_unhedged": -0.109424
+    },
+    "Copula": {
+      "n_tail_events": 46,
+      "mean_unhedged_loss": -0.038434,
+      "mean_hedged_loss": -0.038485,
+      "loss_reduction_pct": -0.13,
+      "variance_ratio": 0.902,
+      "worst_hedged": -0.106637,
+      "worst_unhedged": -0.109424
+    },
+    "Copula_Quantile": {
+      "n_tail_events": 46,
+      "mean_unhedged_loss": -0.038434,
+      "mean_hedged_loss": -0.038242,
+      "loss_reduction_pct": 0.5,
+      "variance_ratio": 1.0371,
+      "worst_hedged": -0.11011,
+      "worst_unhedged": -0.109424
+    }
+  },
+  "key_findings": "K923 Copula-Based Hedge Ratio Analysis (SPY hedged with GLD). Data: 2005-01-04 to 2026-04-02, 5345 obs. OOS: 2019-01-01 onward (1823 obs). SPY-GLD Pearson correlation: 0.0583 (very weak). All methods produce low HE due to weak SPY-GLD correlation. OOS best HE: DCC (0.0269). OOS best VaR5% reduction: Copula (1.0023). OOS best ES5% reduction: Copula_Quantile (0.9982). DCC vs Copula DM t-stat: -1.2736, Harvey significant: False. Copula Quantile Hedge designed to minimize tail risk, tail event analysis shows its effectiveness during 2\u03c3+ drops.",
+  "references": [
+    "Ederington (1979): The Hedging Performance of the New Futures Markets, JF",
+    "Lai & Sheu (2010): Copula-based hedging",
+    "Hsu, Tseng & Wang (2008): Dynamic Hedging with Futures, JFM",
+    "Patton (2006): Modelling Asymmetric Exchange Rate Dependence, IER",
+    "K920: Student-t copula, lambda=0.14, nu=3.05",
+    "K915: DCC-GARCH dynamic correlation",
+    "K918: BEKK no cross-spillover"
+  ],
+  "methodology_notes": {
+    "hedge_portfolio": "R_h = R_SPY - h * R_GLD",
+    "lookahead_prevention": "All hedge ratios use shift(1) -- yesterday ratio for today",
+    "copula_refit": "Every 63 trading days (expanding window)",
+    "copula_type": "Student-t copula (best in K920)",
+    "quantile_hedge": "Simulates 10000 draws, minimizes 5% VaR over h in [-0.5, 1.5]",
+    "student_t_scale": "Applied sqrt((nu-2)/nu) scaling for Student-t marginals",
+    "evaluation": "Hedging metrics (HE, VaR, ES, Utility), NOT trading metrics (Sharpe, CAGR)"
+  }
+}

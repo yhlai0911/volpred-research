@@ -17,8 +17,12 @@ Copula-based hedge ratio 是否優於 OLS/DCC？尤其在尾部事件中？
 ## 結論
 SPY-GLD 是分散化配對（r=0.058），不是避險配對。Copula hedging 的優勢在高相關資產對（spot-futures r>0.90）。
 
-## 注意
-腳本檔案因 worktree 清理意外遺失，需重新執行。結果基於 agent 回報。
+## 檔案
+- `k923_copula_hedge_ratio.py` — 實驗腳本（2026-04-06 從 worktree 救回）
+- `k923_copula_hedge_ratio_results.json` — 結果 JSON
+- `k923_hedge_comparison.png` — 避險方法比較圖
+- `k923_hedge_ratios_ts.png` — 避險比率時序圖
+- `k923_tail_hedging.png` — 尾部避險效果圖
 
 ## 數據來源
 yfinance (SPY, GLD)
