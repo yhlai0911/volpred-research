@@ -731,5 +731,14 @@
       "K929",
       "K930"
     ]
+  },
+  {
+    "id": "E051",
+    "title": "E051: CARR Research Chain + VIX Dominance Closure (K932-K942)",
+    "experiments": "K932,K933,K934,K935,K936,K937,K938,K939,K940,K941,K942",
+    "content": "Session 2026-04-06: 12 experiments in one session. Key lessons:\n\n1. **Worktree script loss is a process bug, not a one-time accident** (K923/K924/K932). Fix: merge_worktree.sh with 5-layer defense. Never use git worktree remove --force.\n\n2. **Research chains produce the best results**: K934(discover problem)→K935(fix it)→K938(cross-validate)→K939(combine with VIX). Each step builds on the previous. K938 ★★ was the most impactful.\n\n3. **VIX sufficiency is now proven from 6 angles**: long memory(K933), Hurst(K936), range info(K939), ML features(K940), ensemble(K937), subsample stability(K942). All fail to beat MF-GJR(VIX). This is a closed question.\n\n4. **Different tasks need different models** (K941): point prediction → MF-GJR(VIX), interval prediction → CAViaR-SAV. Don't assume one model fits all.\n\n5. **MLP catastrophically fails on daily r²** (K940): skewness=15.7, kurtosis=347 makes gradient-based learning unstable. RF works but doesn't beat MF-GJR. ML needs higher-frequency data or better architectures.\n\n6. **Yang-Zhang is the correct range estimator** (K935/K938): Parkinson assumes continuous paths, overnight gaps violate this. Gap ratio explains 80% of cross-asset improvement variation (r=0.80).\n\n7. **VIX is a regime indicator, not a level predictor** (K942): highest info value at extreme regimes (Low: +8.7%, High: +17.3%), near zero in normal range (+0.5%).\n\n8. **Asymmetry doesn't help range models** (K939): range already captures both directions. Adding leverage effect (gamma) to CARR adds noise.",
+    "created_at": "2026-04-06T11:12:45.968292+00:00",
+    "lesson_type": "methodology + process",
+    "applicable_to": "future model comparison, worktree management, paper writing"
   }
 ]
