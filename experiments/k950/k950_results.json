@@ -1,0 +1,312 @@
+{
+  "experiment_id": "K950",
+  "title": "Monthly Regime VT Cross-Asset Validation",
+  "description": "Cross-market validation of K946 Monthly Regime VT strategy across 5 equity+gold pairs",
+  "data_source": "yfinance",
+  "period": "2008-01-01 to 2025-12-31",
+  "methodology": {
+    "strategy": "Monthly Regime VT: VIX<15\u219280% eq, VIX\u226525\u219230% eq, else 50%",
+    "baseline": "BH 50/50 (annual rebalance)",
+    "cost": "10bps single-side per weight change",
+    "vix_signal": "Month-start ^VIX, shift(1) for daily lag"
+  },
+  "markets": {
+    "SPY+GLD": {
+      "market": "SPY+GLD",
+      "label": "US Broad",
+      "equity": "SPY",
+      "safe": "GLD",
+      "bh_5050": {
+        "label": "BH 50/50 (SPY+GLD)",
+        "cagr": 10.93,
+        "sharpe": 0.833,
+        "mdd": -32.49,
+        "ann_vol": 13.6,
+        "crra_utility_gamma5": -62.933212,
+        "n_days": 4391,
+        "n_years": 17.4
+      },
+      "regime_vt_gross": {
+        "label": "Regime VT gross (SPY+GLD)",
+        "cagr": 10.57,
+        "sharpe": 0.822,
+        "mdd": -30.86,
+        "ann_vol": 13.19,
+        "crra_utility_gamma5": -62.935359,
+        "n_days": 4390,
+        "n_years": 17.4
+      },
+      "regime_vt_net": {
+        "label": "Regime VT net (SPY+GLD)",
+        "cagr": 10.34,
+        "sharpe": 0.806,
+        "mdd": -30.94,
+        "ann_vol": 13.19,
+        "crra_utility_gamma5": -62.937476,
+        "n_days": 4390,
+        "n_years": 17.4
+      },
+      "weight_changes": 69,
+      "ann_turnover_pct": 105.62,
+      "regime_distribution": {
+        "calm_80pct": 30.1,
+        "normal_50pct": 50.9,
+        "stress_30pct": 19.0
+      },
+      "sharpe_diff_net": -0.027,
+      "vt_wins_sharpe": "False"
+    },
+    "QQQ+GLD": {
+      "market": "QQQ+GLD",
+      "label": "US Tech",
+      "equity": "QQQ",
+      "safe": "GLD",
+      "bh_5050": {
+        "label": "BH 50/50 (QQQ+GLD)",
+        "cagr": 13.02,
+        "sharpe": 0.919,
+        "mdd": -33.51,
+        "ann_vol": 14.49,
+        "crra_utility_gamma5": -62.919492,
+        "n_days": 4391,
+        "n_years": 17.4
+      },
+      "regime_vt_gross": {
+        "label": "Regime VT gross (QQQ+GLD)",
+        "cagr": 12.88,
+        "sharpe": 0.901,
+        "mdd": -30.77,
+        "ann_vol": 14.45,
+        "crra_utility_gamma5": -62.922313,
+        "n_days": 4390,
+        "n_years": 17.4
+      },
+      "regime_vt_net": {
+        "label": "Regime VT net (QQQ+GLD)",
+        "cagr": 12.64,
+        "sharpe": 0.886,
+        "mdd": -30.85,
+        "ann_vol": 14.45,
+        "crra_utility_gamma5": -62.924428,
+        "n_days": 4390,
+        "n_years": 17.4
+      },
+      "weight_changes": 69,
+      "ann_turnover_pct": 105.62,
+      "regime_distribution": {
+        "calm_80pct": 30.1,
+        "normal_50pct": 50.9,
+        "stress_30pct": 19.0
+      },
+      "sharpe_diff_net": -0.033,
+      "vt_wins_sharpe": "False"
+    },
+    "0050+GLD": {
+      "market": "0050+GLD",
+      "label": "Taiwan",
+      "equity": "0050.TW",
+      "safe": "GLD",
+      "bh_5050": {
+        "label": "BH 50/50 (0050+GLD)",
+        "cagr": 11.52,
+        "sharpe": 0.924,
+        "mdd": -22.98,
+        "ann_vol": 13.05,
+        "crra_utility_gamma5": -62.922118,
+        "n_days": 3767,
+        "n_years": 14.9
+      },
+      "regime_vt_gross": {
+        "label": "Regime VT gross (0050+GLD)",
+        "cagr": 11.4,
+        "sharpe": 0.909,
+        "mdd": -21.36,
+        "ann_vol": 12.83,
+        "crra_utility_gamma5": -62.924743,
+        "n_days": 3766,
+        "n_years": 14.9
+      },
+      "regime_vt_net": {
+        "label": "Regime VT net (0050+GLD)",
+        "cagr": 11.14,
+        "sharpe": 0.89,
+        "mdd": -22.07,
+        "ann_vol": 12.83,
+        "crra_utility_gamma5": -62.927134,
+        "n_days": 3766,
+        "n_years": 14.9
+      },
+      "weight_changes": 66,
+      "ann_turnover_pct": 119.11,
+      "regime_distribution": {
+        "calm_80pct": 32.0,
+        "normal_50pct": 49.5,
+        "stress_30pct": 18.5
+      },
+      "sharpe_diff_net": -0.034,
+      "vt_wins_sharpe": "False"
+    },
+    "EWJ+GLD": {
+      "market": "EWJ+GLD",
+      "label": "Japan",
+      "equity": "EWJ",
+      "safe": "GLD",
+      "bh_5050": {
+        "label": "BH 50/50 (EWJ+GLD)",
+        "cagr": 7.3,
+        "sharpe": 0.569,
+        "mdd": -30.46,
+        "ann_vol": 14.21,
+        "crra_utility_gamma5": -62.969623,
+        "n_days": 4391,
+        "n_years": 17.4
+      },
+      "regime_vt_gross": {
+        "label": "Regime VT gross (EWJ+GLD)",
+        "cagr": 6.66,
+        "sharpe": 0.516,
+        "mdd": -30.45,
+        "ann_vol": 14.3,
+        "crra_utility_gamma5": -62.977466,
+        "n_days": 4390,
+        "n_years": 17.4
+      },
+      "regime_vt_net": {
+        "label": "Regime VT net (EWJ+GLD)",
+        "cagr": 6.43,
+        "sharpe": 0.501,
+        "mdd": -30.5,
+        "ann_vol": 14.3,
+        "crra_utility_gamma5": -62.979587,
+        "n_days": 4390,
+        "n_years": 17.4
+      },
+      "weight_changes": 69,
+      "ann_turnover_pct": 105.62,
+      "regime_distribution": {
+        "calm_80pct": 30.1,
+        "normal_50pct": 50.9,
+        "stress_30pct": 19.0
+      },
+      "sharpe_diff_net": -0.068,
+      "vt_wins_sharpe": "False"
+    },
+    "FEZ+GLD": {
+      "market": "FEZ+GLD",
+      "label": "Eurozone",
+      "equity": "FEZ",
+      "safe": "GLD",
+      "bh_5050": {
+        "label": "BH 50/50 (FEZ+GLD)",
+        "cagr": 7.87,
+        "sharpe": 0.535,
+        "mdd": -38.08,
+        "ann_vol": 16.91,
+        "crra_utility_gamma5": -62.981217,
+        "n_days": 4391,
+        "n_years": 17.4
+      },
+      "regime_vt_gross": {
+        "label": "Regime VT gross (FEZ+GLD)",
+        "cagr": 6.06,
+        "sharpe": 0.437,
+        "mdd": -36.58,
+        "ann_vol": 16.35,
+        "crra_utility_gamma5": -62.995748,
+        "n_days": 4390,
+        "n_years": 17.4
+      },
+      "regime_vt_net": {
+        "label": "Regime VT net (FEZ+GLD)",
+        "cagr": 5.84,
+        "sharpe": 0.424,
+        "mdd": -36.66,
+        "ann_vol": 16.36,
+        "crra_utility_gamma5": -62.99788,
+        "n_days": 4390,
+        "n_years": 17.4
+      },
+      "weight_changes": 69,
+      "ann_turnover_pct": 105.62,
+      "regime_distribution": {
+        "calm_80pct": 30.1,
+        "normal_50pct": 50.9,
+        "stress_30pct": 19.0
+      },
+      "sharpe_diff_net": -0.111,
+      "vt_wins_sharpe": "False"
+    }
+  },
+  "cross_market_summary": {
+    "n_markets": 5,
+    "n_vt_wins_sharpe": 0,
+    "vt_win_rate": 0.0,
+    "best_improvement": {
+      "market": "SPY+GLD",
+      "sharpe_diff": -0.027
+    },
+    "worst_improvement": {
+      "market": "FEZ+GLD",
+      "sharpe_diff": -0.111
+    },
+    "avg_annual_turnover_pct": 108.3
+  },
+  "summary_table": [
+    {
+      "market": "SPY+GLD",
+      "bh_sharpe": 0.833,
+      "vt_sharpe_net": 0.806,
+      "sharpe_diff": -0.027,
+      "bh_mdd": -32.49,
+      "vt_mdd_net": -30.94,
+      "weight_changes": 69,
+      "ann_turnover": 105.62,
+      "vt_wins": "False"
+    },
+    {
+      "market": "QQQ+GLD",
+      "bh_sharpe": 0.919,
+      "vt_sharpe_net": 0.886,
+      "sharpe_diff": -0.033,
+      "bh_mdd": -33.51,
+      "vt_mdd_net": -30.85,
+      "weight_changes": 69,
+      "ann_turnover": 105.62,
+      "vt_wins": "False"
+    },
+    {
+      "market": "0050+GLD",
+      "bh_sharpe": 0.924,
+      "vt_sharpe_net": 0.89,
+      "sharpe_diff": -0.034,
+      "bh_mdd": -22.98,
+      "vt_mdd_net": -22.07,
+      "weight_changes": 66,
+      "ann_turnover": 119.11,
+      "vt_wins": "False"
+    },
+    {
+      "market": "EWJ+GLD",
+      "bh_sharpe": 0.569,
+      "vt_sharpe_net": 0.501,
+      "sharpe_diff": -0.068,
+      "bh_mdd": -30.46,
+      "vt_mdd_net": -30.5,
+      "weight_changes": 69,
+      "ann_turnover": 105.62,
+      "vt_wins": "False"
+    },
+    {
+      "market": "FEZ+GLD",
+      "bh_sharpe": 0.535,
+      "vt_sharpe_net": 0.424,
+      "sharpe_diff": -0.111,
+      "bh_mdd": -38.08,
+      "vt_mdd_net": -36.66,
+      "weight_changes": 69,
+      "ann_turnover": 105.62,
+      "vt_wins": "False"
+    }
+  ],
+  "conclusion": "Monthly Regime VT does NOT robustly generalize: wins only 0/5 markets. The K946 SPY+GLD result may be market-specific."
+}
