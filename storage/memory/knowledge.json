@@ -21508,5 +21508,24 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T11:05:28.483536+00:00",
     "star_rating": 1
+  },
+  {
+    "id": "know_20260406113834_k943",
+    "experiment_id": "K943",
+    "title": "K943: Multi-Horizon MF-GJR ★★ — h=5週頻最佳(+18.4% t=-4.12)，h=22月頻退化",
+    "content": "[提出: Claude, 執行: Claude] MF-GJR(VIX)多步預測能力(h=1,5,22)。SPY OOS 2016-2025。h=1(日)：+6.37% t=-5.40 Harvey✓。h=5(週)：+18.42% t=-4.12 Harvey✓——VIX因子在週頻達到峰值效能。h=22(月)：-5.66% t=+0.52 NS——constant-tau假設在月頻崩潰，簡單GARCH反而更好。Inverted-U pattern：VIX優勢先增後減，h=5是sweet spot。與K143一致(R²在h=5達峰)。原因：(1)h=5的信噪比最優(信號∝h¹, 噪音∝h²) (2)VIX是前瞻性的，5天範圍內VIX level穩定 (3)h=22時VIX已變化太多，constant-tau假設失效。實務：日到週用MF-GJR(VIX)，月頻用GARCH(1,1)。論文重要補充。",
+    "tags": [
+      "volatility",
+      "MF-GJR",
+      "multi-horizon",
+      "h-step",
+      "weekly",
+      "monthly",
+      "SPY",
+      "paper-ready"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T11:38:34.067331+00:00",
+    "star_rating": 2
   }
 ]
