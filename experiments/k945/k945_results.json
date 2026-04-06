@@ -1,0 +1,552 @@
+{
+  "experiment_id": "K945",
+  "title": "Quadratic vs Minimum-Variance Hedging under GARCH",
+  "date": "2026-04-06",
+  "data_source": "yfinance",
+  "data_period": "2014-01-01 to 2025-12-31",
+  "oos_period": "2016-01-01 to 2025-12-31",
+  "rolling_window": 252,
+  "methods": [
+    "Static OLS",
+    "Rolling OLS",
+    "MV-GARCH",
+    "QH-GARCH",
+    "Naive 1:1"
+  ],
+  "pairs": {
+    "SPY-QQQ": {
+      "pair": "SPY-QQQ",
+      "spot": "SPY",
+      "hedge": "QQQ",
+      "description": "US Equity (Large-cap vs Tech)",
+      "oos_correlation": 0.9333,
+      "oos_n": 2513,
+      "metrics": {
+        "Static OLS": {
+          "HE": 0.869948,
+          "Var_hedged": 1.7e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.644317,
+          "ES_5_reduction": 0.668286,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.006055,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.009336,
+          "Turnover": 0.000191,
+          "Mean_annual_return": 5e-06,
+          "Std_annual": 0.065099,
+          "Mean_hedge_ratio": 0.76087,
+          "N_obs": 2512.0
+        },
+        "Rolling OLS": {
+          "HE": 0.870887,
+          "Var_hedged": 1.7e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.644514,
+          "ES_5_reduction": 0.658141,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.006052,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.009622,
+          "Turnover": 0.001485,
+          "Mean_annual_return": 0.000125,
+          "Std_annual": 0.064864,
+          "Mean_hedge_ratio": 0.717328,
+          "N_obs": 2512.0
+        },
+        "MV-GARCH": {
+          "HE": 0.870887,
+          "Var_hedged": 1.7e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.644514,
+          "ES_5_reduction": 0.658141,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.006052,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.009622,
+          "Turnover": 0.001485,
+          "Mean_annual_return": 0.000125,
+          "Std_annual": 0.064864,
+          "Mean_hedge_ratio": 0.717328,
+          "N_obs": 2512.0
+        },
+        "QH-GARCH": {
+          "HE": 0.871101,
+          "Var_hedged": 1.7e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.644954,
+          "ES_5_reduction": 0.658543,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.006044,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.009611,
+          "Turnover": 0.001472,
+          "Mean_annual_return": 9.4e-05,
+          "Std_annual": 0.06481,
+          "Mean_hedge_ratio": 0.717743,
+          "N_obs": 2512.0
+        },
+        "Naive 1:1": {
+          "HE": 0.777054,
+          "Var_hedged": 2.9e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.51156,
+          "ES_5_reduction": 0.593478,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.008315,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.011442,
+          "Turnover": 0.0,
+          "Mean_annual_return": -0.041229,
+          "Std_annual": 0.085235,
+          "Mean_hedge_ratio": 1.0,
+          "N_obs": 2512.0
+        }
+      },
+      "dm_tests": {
+        "QH-GARCH_vs_MV-GARCH": {
+          "dm_stat": -2.1079,
+          "p_value": 0.035,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Rolling OLS": {
+          "dm_stat": -2.1079,
+          "p_value": 0.035,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Static OLS": {
+          "dm_stat": -0.1929,
+          "p_value": 0.847,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Naive 1:1": {
+          "dm_stat": -10.2553,
+          "p_value": 0.0,
+          "significant_harvey": "True"
+        },
+        "MV-GARCH_vs_Rolling OLS": {
+          "dm_stat": 0.4323,
+          "p_value": 0.6655,
+          "significant_harvey": "False"
+        },
+        "MV-GARCH_vs_Naive 1:1": {
+          "dm_stat": -10.2458,
+          "p_value": 0.0,
+          "significant_harvey": "True"
+        },
+        "Rolling OLS_vs_Static OLS": {
+          "dm_stat": -0.1552,
+          "p_value": 0.8766,
+          "significant_harvey": "False"
+        }
+      },
+      "qh_mv_difference": {
+        "mean": 0.000415,
+        "std": 0.001859,
+        "max_abs": 0.008209,
+        "corr_qh_mv": 0.99988
+      }
+    },
+    "GLD-SLV": {
+      "pair": "GLD-SLV",
+      "spot": "GLD",
+      "hedge": "SLV",
+      "description": "Precious Metals (Gold vs Silver)",
+      "oos_correlation": 0.7613,
+      "oos_n": 2513,
+      "metrics": {
+        "Static OLS": {
+          "HE": 0.574598,
+          "Var_hedged": 3.7e-05,
+          "Var_unhedged": 8.7e-05,
+          "VaR_5_reduction": 0.35618,
+          "ES_5_reduction": 0.350018,
+          "VaR_5_unhedged": -0.014914,
+          "VaR_5_hedged": -0.009602,
+          "ES_5_unhedged": -0.021393,
+          "ES_5_hedged": -0.013905,
+          "Turnover": 0.000205,
+          "Mean_annual_return": 0.062639,
+          "Std_annual": 0.096629,
+          "Mean_hedge_ratio": 0.460306,
+          "N_obs": 2512.0
+        },
+        "Rolling OLS": {
+          "HE": 0.578535,
+          "Var_hedged": 3.7e-05,
+          "Var_unhedged": 8.7e-05,
+          "VaR_5_reduction": 0.350965,
+          "ES_5_reduction": 0.350572,
+          "VaR_5_unhedged": -0.014914,
+          "VaR_5_hedged": -0.00968,
+          "ES_5_unhedged": -0.021393,
+          "ES_5_hedged": -0.013893,
+          "Turnover": 0.00166,
+          "Mean_annual_return": 0.065056,
+          "Std_annual": 0.096181,
+          "Mean_hedge_ratio": 0.439486,
+          "N_obs": 2512.0
+        },
+        "MV-GARCH": {
+          "HE": 0.578535,
+          "Var_hedged": 3.7e-05,
+          "Var_unhedged": 8.7e-05,
+          "VaR_5_reduction": 0.350965,
+          "ES_5_reduction": 0.350572,
+          "VaR_5_unhedged": -0.014914,
+          "VaR_5_hedged": -0.00968,
+          "ES_5_unhedged": -0.021393,
+          "ES_5_hedged": -0.013893,
+          "Turnover": 0.00166,
+          "Mean_annual_return": 0.065056,
+          "Std_annual": 0.096181,
+          "Mean_hedge_ratio": 0.439486,
+          "N_obs": 2512.0
+        },
+        "QH-GARCH": {
+          "HE": 0.578214,
+          "Var_hedged": 3.7e-05,
+          "Var_unhedged": 8.7e-05,
+          "VaR_5_reduction": 0.351078,
+          "ES_5_reduction": 0.350118,
+          "VaR_5_unhedged": -0.014914,
+          "VaR_5_hedged": -0.009678,
+          "ES_5_unhedged": -0.021393,
+          "ES_5_hedged": -0.013903,
+          "Turnover": 0.001658,
+          "Mean_annual_return": 0.06476,
+          "Std_annual": 0.096218,
+          "Mean_hedge_ratio": 0.439942,
+          "N_obs": 2512.0
+        },
+        "Naive 1:1": {
+          "HE": -0.635511,
+          "Var_hedged": 0.000142,
+          "Var_unhedged": 8.7e-05,
+          "VaR_5_reduction": -0.246672,
+          "ES_5_reduction": -0.362582,
+          "VaR_5_unhedged": -0.014914,
+          "VaR_5_hedged": -0.018593,
+          "ES_5_unhedged": -0.021393,
+          "ES_5_hedged": -0.029149,
+          "Turnover": 0.0,
+          "Mean_annual_return": -0.030029,
+          "Std_annual": 0.189468,
+          "Mean_hedge_ratio": 1.0,
+          "N_obs": 2512.0
+        }
+      },
+      "dm_tests": {
+        "QH-GARCH_vs_MV-GARCH": {
+          "dm_stat": 1.0153,
+          "p_value": 0.31,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Rolling OLS": {
+          "dm_stat": 1.0153,
+          "p_value": 0.31,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Static OLS": {
+          "dm_stat": -0.5571,
+          "p_value": 0.5775,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Naive 1:1": {
+          "dm_stat": -8.1916,
+          "p_value": 0.0,
+          "significant_harvey": "True"
+        },
+        "MV-GARCH_vs_Rolling OLS": {
+          "dm_stat": -0.0899,
+          "p_value": 0.9284,
+          "significant_harvey": "False"
+        },
+        "MV-GARCH_vs_Naive 1:1": {
+          "dm_stat": -8.1875,
+          "p_value": 0.0,
+          "significant_harvey": "True"
+        },
+        "Rolling OLS_vs_Static OLS": {
+          "dm_stat": -0.6106,
+          "p_value": 0.5415,
+          "significant_harvey": "False"
+        }
+      },
+      "qh_mv_difference": {
+        "mean": 0.000456,
+        "std": 0.001409,
+        "max_abs": 0.007349,
+        "corr_qh_mv": 0.99971
+      }
+    },
+    "SPY-IWM": {
+      "pair": "SPY-IWM",
+      "spot": "SPY",
+      "hedge": "IWM",
+      "description": "US Equity (Large vs Small cap)",
+      "oos_correlation": 0.8684,
+      "oos_n": 2513,
+      "metrics": {
+        "Static OLS": {
+          "HE": 0.752721,
+          "Var_hedged": 3.2e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.456576,
+          "ES_5_reduction": 0.536895,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.009251,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.013034,
+          "Turnover": 0.000253,
+          "Mean_annual_return": 0.07161,
+          "Std_annual": 0.089766,
+          "Mean_hedge_ratio": 0.693938,
+          "N_obs": 2512.0
+        },
+        "Rolling OLS": {
+          "HE": 0.75194,
+          "Var_hedged": 3.2e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.463698,
+          "ES_5_reduction": 0.529776,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.00913,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.013235,
+          "Turnover": 0.002026,
+          "Mean_annual_return": 0.067321,
+          "Std_annual": 0.089908,
+          "Mean_hedge_ratio": 0.656272,
+          "N_obs": 2512.0
+        },
+        "MV-GARCH": {
+          "HE": 0.75194,
+          "Var_hedged": 3.2e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.463698,
+          "ES_5_reduction": 0.529776,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.00913,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.013235,
+          "Turnover": 0.002026,
+          "Mean_annual_return": 0.067321,
+          "Std_annual": 0.089908,
+          "Mean_hedge_ratio": 0.656272,
+          "N_obs": 2512.0
+        },
+        "QH-GARCH": {
+          "HE": 0.751947,
+          "Var_hedged": 3.2e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.463034,
+          "ES_5_reduction": 0.529943,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.009141,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.01323,
+          "Turnover": 0.002011,
+          "Mean_annual_return": 0.067395,
+          "Std_annual": 0.089906,
+          "Mean_hedge_ratio": 0.657113,
+          "N_obs": 2512.0
+        },
+        "Naive 1:1": {
+          "HE": 0.583078,
+          "Var_hedged": 5.4e-05,
+          "Var_unhedged": 0.000129,
+          "VaR_5_reduction": 0.314829,
+          "ES_5_reduction": 0.393408,
+          "VaR_5_unhedged": -0.017023,
+          "VaR_5_hedged": -0.011664,
+          "ES_5_unhedged": -0.028146,
+          "ES_5_hedged": -0.017073,
+          "Turnover": 0.0,
+          "Mean_annual_return": 0.04532,
+          "Std_annual": 0.116559,
+          "Mean_hedge_ratio": 1.0,
+          "N_obs": 2512.0
+        }
+      },
+      "dm_tests": {
+        "QH-GARCH_vs_MV-GARCH": {
+          "dm_stat": -0.0546,
+          "p_value": 0.9564,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Rolling OLS": {
+          "dm_stat": -0.0546,
+          "p_value": 0.9564,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Static OLS": {
+          "dm_stat": 0.0955,
+          "p_value": 0.9239,
+          "significant_harvey": "False"
+        },
+        "QH-GARCH_vs_Naive 1:1": {
+          "dm_stat": -7.633,
+          "p_value": 0.0,
+          "significant_harvey": "True"
+        },
+        "MV-GARCH_vs_Rolling OLS": {
+          "dm_stat": 1.1152,
+          "p_value": 0.2647,
+          "significant_harvey": "False"
+        },
+        "MV-GARCH_vs_Naive 1:1": {
+          "dm_stat": -7.631,
+          "p_value": 0.0,
+          "significant_harvey": "True"
+        },
+        "Rolling OLS_vs_Static OLS": {
+          "dm_stat": 0.0959,
+          "p_value": 0.9236,
+          "significant_harvey": "False"
+        }
+      },
+      "qh_mv_difference": {
+        "mean": 0.00084,
+        "std": 0.001783,
+        "max_abs": 0.008311,
+        "corr_qh_mv": 0.999959
+      }
+    }
+  },
+  "monthly_analysis": {
+    "SPY-QQQ": {
+      "mu_spot": 0.011502,
+      "mu_hedge": 0.014867,
+      "var_hedge": 0.002794,
+      "mu_squared_over_var": 0.079105,
+      "h_MV": 0.753644,
+      "h_QH": 0.755114,
+      "h_diff": 0.00147,
+      "HE_MV": 0.835963,
+      "HE_QH": 0.83596,
+      "E_Rh2_MV": 0.000309,
+      "E_Rh2_QH": 0.000309,
+      "QH_improvement_pct": 0.0021,
+      "N_months": 120
+    },
+    "GLD-SLV": {
+      "mu_spot": 0.011409,
+      "mu_hedge": 0.013786,
+      "var_hedge": 0.006636,
+      "mu_squared_over_var": 0.028641,
+      "h_MV": 0.35073,
+      "h_QH": 0.364005,
+      "h_diff": 0.013276,
+      "HE_MV": 0.501985,
+      "HE_QH": 0.501265,
+      "E_Rh2_MV": 0.000846,
+      "E_Rh2_QH": 0.000845,
+      "QH_improvement_pct": 0.1433,
+      "N_months": 120
+    },
+    "SPY-IWM": {
+      "mu_spot": 0.011502,
+      "mu_hedge": 0.00766,
+      "var_hedge": 0.00362,
+      "mu_squared_over_var": 0.016207,
+      "h_MV": 0.630369,
+      "h_QH": 0.644266,
+      "h_diff": 0.013897,
+      "HE_MV": 0.757718,
+      "HE_QH": 0.757349,
+      "E_Rh2_MV": 0.000501,
+      "E_Rh2_QH": 0.0005,
+      "QH_improvement_pct": 0.1431,
+      "N_months": 120
+    }
+  },
+  "regime_analysis": {
+    "SPY-QQQ": {
+      "High Vol": {
+        "N": 1227,
+        "ann_vol": 0.2321,
+        "h_MV": 0.778629,
+        "h_QH": 0.778595,
+        "h_diff": -3.4e-05,
+        "HE_MV": 0.8874,
+        "HE_QH": 0.8874,
+        "E_Rh2_MV": 2.405e-05,
+        "E_Rh2_QH": 2.405e-05
+      },
+      "Low Vol": {
+        "N": 1227,
+        "ann_vol": 0.106,
+        "h_MV": 0.657737,
+        "h_QH": 0.658328,
+        "h_diff": 0.000591,
+        "HE_MV": 0.8161,
+        "HE_QH": 0.8161,
+        "E_Rh2_MV": 8.2e-06,
+        "E_Rh2_QH": 8.2e-06
+      }
+    },
+    "GLD-SLV": {
+      "High Vol": {
+        "N": 1227,
+        "ann_vol": 0.1752,
+        "h_MV": 0.410046,
+        "h_QH": 0.410274,
+        "h_diff": 0.000228,
+        "HE_MV": 0.5901,
+        "HE_QH": 0.5901,
+        "E_Rh2_MV": 4.988e-05,
+        "E_Rh2_QH": 4.988e-05
+      },
+      "Low Vol": {
+        "N": 1227,
+        "ann_vol": 0.1115,
+        "h_MV": 0.390155,
+        "h_QH": 0.390866,
+        "h_diff": 0.000711,
+        "HE_MV": 0.5632,
+        "HE_QH": 0.5632,
+        "E_Rh2_MV": 2.166e-05,
+        "E_Rh2_QH": 2.166e-05
+      }
+    },
+    "SPY-IWM": {
+      "High Vol": {
+        "N": 1227,
+        "ann_vol": 0.2321,
+        "h_MV": 0.736346,
+        "h_QH": 0.736576,
+        "h_diff": 0.00023,
+        "HE_MV": 0.8063,
+        "HE_QH": 0.8063,
+        "E_Rh2_MV": 4.138e-05,
+        "E_Rh2_QH": 4.138e-05
+      },
+      "Low Vol": {
+        "N": 1227,
+        "ann_vol": 0.106,
+        "h_MV": 0.49969,
+        "h_QH": 0.500343,
+        "h_diff": 0.000653,
+        "HE_MV": 0.5977,
+        "HE_QH": 0.5977,
+        "E_Rh2_MV": 1.814e-05,
+        "E_Rh2_QH": 1.814e-05
+      }
+    }
+  },
+  "conclusions": {
+    "main_finding": "QH and MV produce nearly identical hedge ratios at daily frequency because daily mean returns are negligible relative to variance.",
+    "daily_mu_squared_over_var": "mu^2/Var ratio is O(10^-4) at daily frequency, making QH correction term negligible",
+    "monthly_difference": "At monthly frequency, the mean return becomes more relevant but the QH-MV difference remains economically small",
+    "high_correlation_pairs": "All methods achieve HE > 80% for highly correlated pairs (SPY-QQQ, SPY-IWM)",
+    "medium_correlation_pairs": "GLD-SLV shows lower HE due to imperfect gold-silver correlation",
+    "practical_implication": "For daily hedging, MV is sufficient. QH adds complexity without meaningful improvement. The mean correction only matters with substantial expected returns (e.g., monthly+ horizons with strong trends)",
+    "dm_test_result": "No statistically significant difference between QH and MV at Harvey |t| > 3.0 threshold"
+  },
+  "references": [
+    "Ederington (1979) - The hedging performance of the new futures markets",
+    "Baillie & Myers (1991) - Bivariate GARCH estimation of the optimal commodity futures hedge",
+    "Ma (2026) - Quadratic hedging under GARCH, Journal of Futures Markets"
+  ]
+}
