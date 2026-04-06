@@ -1,0 +1,175 @@
+{
+  "experiment_id": "K936",
+  "title": "Time-Varying Hurst Exponent via Rolling Estimation",
+  "date": "2026-04-06T08:57:11.959876+00:00",
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "data_period": "2005-01-04 to 2026-04-02",
+  "oos_period": "2016-01-04 to 2026-04-02",
+  "oos_days": 2577,
+  "window": 2000,
+  "refit_every": 63,
+  "hurst_window_rs": 63,
+  "hurst_window_var": 63,
+  "n_refits": 41,
+  "elapsed_seconds": 401.3,
+  "diagnostics": {
+    "SPY": {
+      "mean": 0.0003904071975541809,
+      "std": 0.01197871245762645,
+      "skewness": -0.3015888265243125,
+      "kurtosis": 14.685727423051034,
+      "n": 5345
+    },
+    "JB": {
+      "stat": 48112.66411204905,
+      "p": 0.0
+    },
+    "ARCH_LM": 1463.4621972473713
+  },
+  "hurst_descriptive": {
+    "RS": {
+      "mean": 0.5759007073548924,
+      "std": 0.06716013504263602,
+      "min": 0.3963940841419577,
+      "max": 0.746265823325149
+    },
+    "DFA": {
+      "mean": 0.6855804287769859,
+      "std": 0.18562031246190308,
+      "min": 0.039244970775804126,
+      "max": 1.4118880157149378
+    },
+    "correlation_RS_DFA": 0.179934631675465,
+    "correlation_HRS_logVIX": 0.12128141666914886
+  },
+  "qlike_results": {
+    "GARCH": 1.586764774402201,
+    "GJR": 1.5691105058672827,
+    "MF-GJR(VIX)": 1.47098957188295,
+    "MF-GJR(H_RS)": 1.567473926178155,
+    "MF-GJR(H_DFA)": 1.5665893543298595,
+    "MF-GJR(VIX,H_RS)": 1.475405012731368,
+    "MF-GJR(VIX,H_DFA)": 1.4712322601031496
+  },
+  "qlike_pct_vs_gjr": {
+    "GARCH": 1.1251131433321484,
+    "GJR": 0.0,
+    "MF-GJR(VIX)": -6.253283858430296,
+    "MF-GJR(H_RS)": -0.10429983630905633,
+    "MF-GJR(H_DFA)": -0.16067393137679456,
+    "MF-GJR(VIX,H_RS)": -5.971886160058661,
+    "MF-GJR(VIX,H_DFA)": -6.237817247296657
+  },
+  "spearman_results": {
+    "GARCH": {
+      "rho": 0.3755544484979516,
+      "p": 4.0759778935202e-87
+    },
+    "GJR": {
+      "rho": 0.39904504544554986,
+      "p": 4.091523596693915e-99
+    },
+    "MF-GJR(VIX)": {
+      "rho": 0.45409034967508066,
+      "p": 2.618976035636943e-131
+    },
+    "MF-GJR(H_RS)": {
+      "rho": 0.4028061388240457,
+      "p": 3.967575599675441e-101
+    },
+    "MF-GJR(H_DFA)": {
+      "rho": 0.40621621739824887,
+      "p": 5.629403749445238e-103
+    },
+    "MF-GJR(VIX,H_RS)": {
+      "rho": 0.4518530411972733,
+      "p": 7.017454704637863e-130
+    },
+    "MF-GJR(VIX,H_DFA)": {
+      "rho": 0.4537148001002301,
+      "p": 4.556025365002487e-131
+    }
+  },
+  "dm_vs_gjr": {
+    "GARCH": {
+      "t": 1.5252247618752606,
+      "p": 0.1273258038450651
+    },
+    "GJR": {
+      "t": 0.0,
+      "p": 1.0
+    },
+    "MF-GJR(VIX)": {
+      "t": -4.491170711852014,
+      "p": 7.395319314484894e-06
+    },
+    "MF-GJR(H_RS)": {
+      "t": -0.11929581419814854,
+      "p": 0.9050503017885272
+    },
+    "MF-GJR(H_DFA)": {
+      "t": -0.20245624955429808,
+      "p": 0.8395760457484465
+    },
+    "MF-GJR(VIX,H_RS)": {
+      "t": -4.222666223766324,
+      "p": 2.4980321413403672e-05
+    },
+    "MF-GJR(VIX,H_DFA)": {
+      "t": -4.454166042457007,
+      "p": 8.781245985689523e-06
+    }
+  },
+  "parameters": {
+    "MF-GJR(VIX)": {
+      "theta_0": -16.166388038202566,
+      "theta_1_VIX": 2.3237763050042943,
+      "alpha": 0.0001,
+      "gamma": 0.09483145532624496,
+      "beta": 0.8683311699835745,
+      "persistence": 0.915846897646697
+    },
+    "MF-GJR(H_RS)": {
+      "theta_0": -10.757551041178502,
+      "theta_2_Hurst": 3.3279421836189154,
+      "alpha": 0.01607388187784944,
+      "gamma": 0.2506175967627982,
+      "beta": 0.8257131531298849,
+      "persistence": 0.9670958333891335
+    },
+    "MF-GJR(VIX,H_RS)": {
+      "theta_0": -16.68325236155527,
+      "theta_1_VIX": 2.244734186101707,
+      "theta_2_Hurst": 1.2899885812805416,
+      "alpha": 0.0001,
+      "gamma": 0.10199729797175827,
+      "beta": 0.8654801818000135,
+      "persistence": 0.9165788307858926
+    }
+  },
+  "conclusions": {
+    "hurst_adds_to_vix": false,
+    "hurst_alone_beats_garch": false,
+    "hurst_alone_beats_gjr": false,
+    "best_model": "MF-GJR(VIX)",
+    "interpretation": "Best model by QLIKE: MF-GJR(VIX); H(t) does NOT add significant information beyond VIX; Hurst alone does NOT significantly beat GJR; CONCLUSION: Daily-frequency Hurst has no meaningful predictive power for volatility",
+    "hurst_adds_to_vix_RS": false,
+    "dm_vs_mfgjr_vix_RS": {
+      "t": 1.7677360187271163,
+      "p": 0.07722340698845365
+    },
+    "hurst_adds_to_vix_DFA": false,
+    "dm_vs_mfgjr_vix_DFA": {
+      "t": 0.17195981332262775,
+      "p": 0.8634826301178267
+    }
+  },
+  "references": [
+    "Gatheral, Jaisson & Rosenbaum (2018). Volatility is rough. QF 18(6):933-949.",
+    "arXiv:2509.05820: EWMA-driven time-varying H in rBergomi",
+    "Patton (2011). J Econometrics 160:246-256.",
+    "Harvey et al. (2016). JBES 34:92-104.",
+    "Engle, Ghysels & Sohn (2013). RES 95(3):776-797."
+  ]
+}
