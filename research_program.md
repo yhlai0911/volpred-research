@@ -422,7 +422,7 @@
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。
 
 ### Gemini 第 3 次建議（2026-04-06）[提出: Gemini]
-- [ ] **G3-1: Diurnal Asymmetric Spillover Networks (DASN)**：拆解 K907 的 TCI 為「隔夜 gap 傳導」vs「日內擴散傳導」。用 TAIFEX tick + SPY 5-min 建立雙變量 lead-lag 網絡。測試 SPY→台灣的傳導是在開盤 gap 還是日內趨勢跟隨。學術：市場微結構 × 國際傳染
+- [x] ~~G3-1: Diurnal Asymmetric Spillover Networks (DASN)~~ → **K919 完成 ★★**。Gap channel 完全主導 SPY→台灣傳導（R²=0.355, t=42.98, 佔 99.7%）。Intraday 近零（R²=0.002, 微弱反轉）。高 VIX gap R²=0.408。夜盤後 gap R² 增加 0.331→0.363。**實務：台灣投資人看美股收盤即可，盤中追隨無效。**
 - [x] ~~G3-2: Quantile Connectedness~~ → **K911 完成**。Left-tail TCI(τ=0.05) ≈ Mean TCI (r=0.952)——尾部不能拯救 TCI。Right-tail TCI(τ=0.95) 獨立 (r=0.017) 但恆定 (~70%)。AUC=0.581（弱）。**TCI 無論哪個 quantile 都是結構性描述，不是交易信號。**
 - [ ] **G3-3: Fractional Jump-Diffusion MF-GJR**：用 power-law（fractional）kernel 替代線性 MIDAS。K906 的 50% 隔夜 gap 建模為 point-mass jump，日內 RV 為 fractionally integrated diffusion。不是找更多指標（K909 已確認無用），而是優化 VIX 信號的吸收方式。需理論推導
 

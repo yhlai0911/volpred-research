@@ -21087,5 +21087,26 @@
     "category": "experiment",
     "confidence": 0.9,
     "created_at": "2026-04-06T01:33:16.304970+00:00"
+  },
+  {
+    "id": "know_20260406021829_k920",
+    "experiment_id": "K920",
+    "title": "K920: Copula-GARCH SPY/GLD ★★ — Student-t Best, λ=0.14 Symmetric, But Gold Decouples in Crises",
+    "content": "[提出: Claude, 執行: Claude] Copula-GARCH on SPY/GLD (2005-2026). 5 copulas tested: Gaussian/Student-t/Clayton/Gumbel/Frank. Student-t dominates by AIC (delta>195 vs Clayton). KEY: Symmetric tail dependence λ_L=λ_U≈0.14 (copula df≈3.0, much lower than marginal GARCH dfs 5-6). SPY-GLD have meaningful non-linear co-movement in extremes. BUT crisis behavior is diversification-friendly: GFC Clayton λ_L=0.007, COVID Student-t ρ=-0.147 and λ dropped to 0.068. Gold decouples precisely when needed most. 2022 rate hike anomalous: positive corr (0.194) but lowest λ (0.049). VaR 5% passes all tests; 1% too liberal (1.7% violations, Basel Red). CONCLUSION: 50/50 moat is NUANCED — statistical λ=0.14 means imperfect diversification in tails, but behavioral/structural decoupling in crises means the moat is real. The moat is not statistical independence but crisis-conditional independence.",
+    "tags": [
+      "copula",
+      "GARCH",
+      "tail dependence",
+      "Student-t",
+      "SPY",
+      "GLD",
+      "50/50",
+      "diversification",
+      "crisis"
+    ],
+    "data_source": "yfinance (SPY, GLD)",
+    "category": "experiment",
+    "confidence": 0.9,
+    "created_at": "2026-04-06T02:18:29.139186+00:00"
   }
 ]
