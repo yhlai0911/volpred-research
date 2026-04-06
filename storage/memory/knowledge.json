@@ -21149,5 +21149,24 @@
     "category": "experiment",
     "confidence": 0.9,
     "created_at": "2026-04-06T03:10:20.797088+00:00"
+  },
+  {
+    "id": "know_20260406035150_k924",
+    "experiment_id": "K924",
+    "title": "K924: Bayesian SSVS Mean Equation — NULL (All 10 Variables PIP<0.5, SPY Return Unpredictable)",
+    "content": "[提出: 用戶 K433, 執行: Claude] SSVS for GJR-GARCH mean equation on SPY. 10 candidates (VIX/VRP/momentum/credit spread/GLD/TLT/term spread/VIX slope). MCMC 20000 iter, burn-in 5000. RESULT NULL: All PIP<0.5. Highest VRP=0.312, GLD_ret=0.294, mom_5d=0.165. 15 expanding-window refits all selected 0 variables. OOS R²=0.7% (near zero). Confirms K913 (VRP null frequentist). SPY daily returns unpredictable by standard macro/market variables in both Bayesian and frequentist frameworks. Bayesian closure of return prediction question. Note: script lost in worktree cleanup, results from agent report.",
+    "tags": [
+      "Bayesian",
+      "SSVS",
+      "mean equation",
+      "return prediction",
+      "PIP",
+      "null result",
+      "K433"
+    ],
+    "data_source": "yfinance + FRED",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-06T03:51:50.010574+00:00"
   }
 ]
