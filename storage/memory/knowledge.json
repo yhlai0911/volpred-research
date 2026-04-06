@@ -21582,5 +21582,23 @@
     "data_source": "yfinance (SPY, GLD, ^VIX)",
     "created_at": "2026-04-06T14:28:29.144370+00:00",
     "star_rating": 1
+  },
+  {
+    "id": "know_20260406174348_k947",
+    "experiment_id": "K947",
+    "title": "K947: Threshold GARCH NULL — Smooth MF勝Discrete Threshold，regime切換不穩定",
+    "content": "[提出: Claude, 執行: Claude] Threshold GARCH with VIX as threshold variable vs MF-GJR smooth multiplicative。SPY OOS 2016-2025。Grid search c={15,18,20,22,25}。MF-GJR(1.478) > T-MF best c=25(1.504) > T-GJR best c=18(1.517) > GJR(1.564) > GARCH(1.588)。MF-GJR vs T-MF: DM t=-1.83 NS。MF-GJR vs T-GJR: DM t=-3.00(borderline)。核心insight：smooth beats discrete——MF-GJR的smooth multiplicative結構(exp(θ₀+θ₁·logVIX))比hard threshold switching更好處理regime transitions。Threshold模型有兩個缺陷：(1)abrupt parameter jumps在regime邊界 (2)每個regime的estimation sample較小導致參數不穩定。T-MF在high VIX regime略勝MF-GJR(+16.1% vs +15.4%)但medium regime不穩定(MSE>1000)抵銷優勢。結論：MF-GJR的log-linear VIX factor是capturing regime的最佳方式。",
+    "tags": [
+      "volatility",
+      "threshold-GARCH",
+      "MF-GJR",
+      "VIX-regime",
+      "smooth-vs-discrete",
+      "SPY",
+      "null-result"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T17:43:48.118238+00:00",
+    "star_rating": 0
   }
 ]
