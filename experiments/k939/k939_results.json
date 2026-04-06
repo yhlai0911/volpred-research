@@ -1,0 +1,237 @@
+{
+  "experiment_id": "K939",
+  "title": "CARR_YZ-MF(VIX) — Range + VIX Ultimate Combination",
+  "date": "2026-04-06",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "period": "2004-01-05 ~ 2025-12-31",
+  "oos_period": "2016-01-04 ~ 2025-12-31",
+  "oos_days": 2514,
+  "window": 2000,
+  "refit_every": 21,
+  "n_refits": 120,
+  "models": {
+    "GARCH": "GARCH(1,1) baseline",
+    "GJR": "GJR(1,1,1) asymmetric baseline",
+    "MF_GJR": "MF-GJR(VIX) — current best (K889)",
+    "CARR_YZ": "CARR(1,1) on Yang-Zhang variance (K935)",
+    "CARR_YZ_MF": "CARR_YZ with VIX multiplicative factor (NEW)",
+    "CARR_YZ_MF_A": "CARR_YZ-MF(VIX) + asymmetric return effect (NEW)"
+  },
+  "references": [
+    "Yang & Zhang (2000) 'Drift Independent Volatility Estimation'",
+    "Chou (2005) 'Forecasting Financial Volatilities with Extreme Values'",
+    "Engle & Rangel (2008) 'The Spline-GARCH Model'",
+    "Patton (2011) J. Econometrics 160",
+    "Harvey et al. (2016) 'Tests for Forecast Encompassing'"
+  ],
+  "model_parameters_last_fit": {
+    "GARCH": {
+      "omega": 3.02e-06,
+      "alpha": 0.08094181,
+      "beta": 0.8868281,
+      "persistence": 0.96776991,
+      "converged": true,
+      "loglik": 6372.45453473
+    },
+    "GJR": {
+      "omega": 6.68e-06,
+      "alpha": 0.08333458,
+      "gamma": 0.1527789,
+      "beta": 0.77742947,
+      "persistence": 0.93715351,
+      "converged": true,
+      "loglik": 6417.89141349
+    },
+    "MF_GJR": {
+      "theta0": -10.2523154,
+      "theta1": 2.4952716,
+      "omega": 0.00020765,
+      "alpha": 0.0,
+      "gamma": 0.21793541,
+      "beta": 0.78021205,
+      "persistence": 0.88917975,
+      "converged": true,
+      "loglik": 6572.43757411
+    },
+    "CARR_YZ": {
+      "omega": 2.56e-06,
+      "alpha": 0.10304498,
+      "beta": 0.86674729,
+      "persistence": 0.96979227,
+      "converged": true,
+      "loglik": 16336.44528171
+    },
+    "CARR_YZ_MF": {
+      "theta0": -17.34856051,
+      "theta1": 3.0,
+      "omega": 0.00558452,
+      "alpha": 0.04701345,
+      "beta": 0.94060123,
+      "persistence": 0.98761468,
+      "converged": true,
+      "loglik": 16621.95524116
+    },
+    "CARR_YZ_MF_A": {
+      "theta0": -10.21233421,
+      "theta1": 1.62241616,
+      "omega": 0.00571173,
+      "alpha": 0.0,
+      "gamma": 0.3479432,
+      "beta": 0.58695117,
+      "persistence": 0.76092277,
+      "converged": true,
+      "loglik": 16549.99393412
+    }
+  },
+  "layer1_native_target_qlike": {
+    "GARCH": 1.603726,
+    "GJR": 1.583368,
+    "MF_GJR": 1.480115,
+    "CARR_YZ": 0.467337,
+    "CARR_YZ_MF": 0.372338,
+    "CARR_YZ_MF_A": 0.381062
+  },
+  "layer2_qlike_on_r2": {
+    "GARCH": 1.603726,
+    "GJR": 1.583368,
+    "MF_GJR": 1.480115,
+    "CARR_YZ": 1.554991,
+    "CARR_YZ_MF": 1.462188,
+    "CARR_YZ_MF_A": 1.472427
+  },
+  "layer2_ranking": [
+    {
+      "rank": 1,
+      "model": "CARR_YZ_MF",
+      "qlike": 1.462188
+    },
+    {
+      "rank": 2,
+      "model": "CARR_YZ_MF_A",
+      "qlike": 1.472427
+    },
+    {
+      "rank": 3,
+      "model": "MF_GJR",
+      "qlike": 1.480115
+    },
+    {
+      "rank": 4,
+      "model": "CARR_YZ",
+      "qlike": 1.554991
+    },
+    {
+      "rank": 5,
+      "model": "GJR",
+      "qlike": 1.583368
+    },
+    {
+      "rank": 6,
+      "model": "GARCH",
+      "qlike": 1.603726
+    }
+  ],
+  "layer3_spearman": {
+    "GARCH": {
+      "rho": 0.3777,
+      "pval": 0.0
+    },
+    "GJR": {
+      "rho": 0.3927,
+      "pval": 0.0
+    },
+    "MF_GJR": {
+      "rho": 0.4583,
+      "pval": 0.0
+    },
+    "CARR_YZ": {
+      "rho": 0.4177,
+      "pval": 0.0
+    },
+    "CARR_YZ_MF": {
+      "rho": 0.4606,
+      "pval": 0.0
+    },
+    "CARR_YZ_MF_A": {
+      "rho": 0.4573,
+      "pval": 0.0
+    }
+  },
+  "layer4_dm_tests": {
+    "CARR_YZ_MF vs MF_GJR": {
+      "t_stat": -1.5916,
+      "p_value": 0.111605,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_YZ_MF_A vs MF_GJR": {
+      "t_stat": -0.708,
+      "p_value": 0.478982,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_YZ_MF vs CARR_YZ": {
+      "t_stat": -5.9038,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "CARR_YZ_MF"
+    },
+    "CARR_YZ_MF_A vs CARR_YZ_MF": {
+      "t_stat": 1.3268,
+      "p_value": 0.184688,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "MF_GJR vs GJR": {
+      "t_stat": -4.3345,
+      "p_value": 1.5e-05,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "MF_GJR vs GARCH": {
+      "t_stat": -5.2356,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "CARR_YZ vs GARCH": {
+      "t_stat": -2.8185,
+      "p_value": 0.004862,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_YZ_MF vs GARCH": {
+      "t_stat": -6.4321,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "CARR_YZ_MF"
+    }
+  },
+  "key_comparisons": {
+    "CARR_YZ_MF_vs_MF_GJR": {
+      "carr_yz_mf_qlike": 1.462188,
+      "mf_gjr_qlike": 1.480115,
+      "difference_pct": -1.21,
+      "dm_t_stat": -1.5916,
+      "dm_significant": false
+    },
+    "CARR_YZ_MF_A_vs_MF_GJR": {
+      "carr_yz_mf_a_qlike": 1.472427,
+      "mf_gjr_qlike": 1.480115,
+      "difference_pct": -0.52
+    },
+    "VIX_effect_on_CARR_YZ": {
+      "carr_yz_qlike": 1.554991,
+      "carr_yz_mf_qlike": 1.462188,
+      "improvement_pct": 5.97
+    }
+  },
+  "conclusions": {
+    "H1_CARR_YZ_MF_beats_MF_GJR": true,
+    "H1_statistically_significant": false,
+    "H0_VIX_dominates": true,
+    "best_model": "CARR_YZ_MF",
+    "best_qlike": 1.462188,
+    "interpretation": "CARR_YZ-MF(VIX) has lower QLIKE (1.4622) than MF-GJR(VIX) (1.4801), but the difference is not statistically significant (Harvey |t|>3.0). Range adds marginal improvement, VIX is the main driver."
+  }
+}
