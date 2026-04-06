@@ -21600,5 +21600,22 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T17:43:48.118238+00:00",
     "star_rating": 0
+  },
+  {
+    "id": "know_20260406183010_k948",
+    "experiment_id": "K948",
+    "title": "K948: Weekly Return Predictability NULL — 週頻return也不可預測，vol targeting是正確方向",
+    "content": "[提出: Claude, 執行: Claude] 測試週頻(h=5)return可預測性。SPY OOS 2016-2026, 514個non-overlapping weeks。5模型：OLS/Ridge/LASSO/RF/Historical Mean。所有線性模型OOS R²<0（比historical mean差）。RF R²=0.0097但DM t=-1.06 NS。Directional accuracy最佳也只有53.7%（市場62%時間為正）。RF Sharpe=0.99但97% long只31次交易——不是預測力而是市場上漲趨勢。結論：週頻return也不可預測，與Welch & Goyal(2008)一致。K943的vol週頻改善(+18.4%)不translate到return predictability。這reinforces vol-targeting(not return-targeting)是正確方向。Vol可預測但return不可→用vol管理風險，不用prediction做方向。",
+    "tags": [
+      "return-prediction",
+      "weekly",
+      "efficient-market",
+      "Welch-Goyal",
+      "SPY",
+      "null-result"
+    ],
+    "data_source": "yfinance (SPY, ^VIX, TLT)",
+    "created_at": "2026-04-06T18:30:10.489716+00:00",
+    "star_rating": 0
   }
 ]
