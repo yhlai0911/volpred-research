@@ -1,0 +1,248 @@
+{
+  "experiment_id": "K943",
+  "title": "Multi-Horizon MF-GJR(VIX) \u2014 Multi-step Forecasting Ability",
+  "timestamp": "2026-04-06T11:36:52.301366+00:00",
+  "runtime_seconds": 454.06469774246216,
+  "config": {
+    "asset": "SPY",
+    "data_start": "2006-01-01",
+    "data_end": "2026-04-01",
+    "oos_start": "2016-01-01",
+    "window": 2000,
+    "refit_every": 21,
+    "horizons": [
+      1,
+      5,
+      22
+    ],
+    "n_refits": 123,
+    "data_source": "yfinance"
+  },
+  "diagnostics": {
+    "descriptive_stats": {
+      "mean": 0.00039461864075654023,
+      "std": 0.012186048096969106,
+      "skewness": -0.3006286374174748,
+      "kurtosis": 14.324128655844927,
+      "n": 5091
+    },
+    "jarque_bera": {
+      "stat": 43600.63324817229,
+      "p_value": 0.0
+    },
+    "arch_lm": {
+      "stat": 1389.8700898770194,
+      "lags": 10
+    }
+  },
+  "results_by_horizon": {
+    "1": {
+      "horizon": 1,
+      "n_valid": 2575,
+      "qlike": {
+        "GARCH": 1.6666489571913623,
+        "GJR": 1.634127042668301,
+        "MF-GJR": 1.5299594365911557
+      },
+      "r2_oos": {
+        "GARCH": 0.25466104008437285,
+        "GJR": 0.25789964343523253,
+        "MF-GJR": -0.09896829958633568
+      },
+      "spearman": {
+        "GARCH": {
+          "rho": 0.36048045886448155,
+          "p_value": 7.324319572445607e-80
+        },
+        "GJR": {
+          "rho": 0.38759266264299636,
+          "p_value": 4.517161281621097e-93
+        },
+        "MF-GJR": {
+          "rho": 0.45255035801388405,
+          "p_value": 3.1763407242495103e-130
+        }
+      },
+      "dm_tests": {
+        "MF-GJR_vs_GJR": {
+          "t_stat": -5.4004446930952055,
+          "p_value": 7.255837219943828e-08,
+          "harvey_pass": true
+        },
+        "MF-GJR_vs_GARCH": {
+          "t_stat": -6.458112055085906,
+          "p_value": 1.2630541057490063e-10,
+          "harvey_pass": true
+        },
+        "GJR_vs_GARCH": {
+          "t_stat": -3.9806484293043587,
+          "p_value": 7.06290428114098e-05,
+          "harvey_pass": true
+        }
+      },
+      "qlike_improvement_mfgjr_vs_gjr": 6.374510876893274
+    },
+    "5": {
+      "horizon": 5,
+      "n_valid": 2571,
+      "qlike": {
+        "GARCH": 0.5183059206908031,
+        "GJR": 0.4930569615601184,
+        "MF-GJR": 0.4022421923634822
+      },
+      "r2_oos": {
+        "GARCH": 0.3333893291986243,
+        "GJR": 0.35739454910087665,
+        "MF-GJR": -0.1668383539821463
+      },
+      "spearman": {
+        "GARCH": {
+          "rho": 0.5957748873894015,
+          "p_value": 7.019368243606074e-247
+        },
+        "GJR": {
+          "rho": 0.6299982417044777,
+          "p_value": 2.039678666220771e-284
+        },
+        "MF-GJR": {
+          "rho": 0.7168303954183567,
+          "p_value": 0.0
+        }
+      },
+      "dm_tests": {
+        "MF-GJR_vs_GJR": {
+          "t_stat": -4.1172893786469125,
+          "p_value": 3.9544608765096356e-05,
+          "harvey_pass": true
+        },
+        "MF-GJR_vs_GARCH": {
+          "t_stat": -5.222164368901824,
+          "p_value": 1.9100649062409047e-07,
+          "harvey_pass": true
+        },
+        "GJR_vs_GARCH": {
+          "t_stat": -3.2076620784416083,
+          "p_value": 0.0013546332907605763,
+          "harvey_pass": true
+        }
+      },
+      "qlike_improvement_mfgjr_vs_gjr": 18.41871756749614
+    },
+    "22": {
+      "horizon": 22,
+      "n_valid": 2554,
+      "qlike": {
+        "GARCH": 0.49597507881082487,
+        "GJR": 0.5019839138820292,
+        "MF-GJR": 0.53041769761776
+      },
+      "r2_oos": {
+        "GARCH": 0.11248466622038722,
+        "GJR": 0.058992179609802076,
+        "MF-GJR": -0.9690255826804317
+      },
+      "spearman": {
+        "GARCH": {
+          "rho": 0.5280436827294855,
+          "p_value": 2.144333104513507e-183
+        },
+        "GJR": {
+          "rho": 0.5314516452198156,
+          "p_value": 3.5236710419018977e-186
+        },
+        "MF-GJR": {
+          "rho": 0.6762184577807386,
+          "p_value": 0.0
+        }
+      },
+      "dm_tests": {
+        "MF-GJR_vs_GJR": {
+          "t_stat": 0.5207384728018981,
+          "p_value": 0.6025941281986564,
+          "harvey_pass": false
+        },
+        "MF-GJR_vs_GARCH": {
+          "t_stat": 0.5956117641508373,
+          "p_value": 0.5514874105187961,
+          "harvey_pass": false
+        },
+        "GJR_vs_GARCH": {
+          "t_stat": 0.5179380467007962,
+          "p_value": 0.6045463737179735,
+          "harvey_pass": false
+        }
+      },
+      "qlike_improvement_mfgjr_vs_gjr": -5.6642818523489575
+    }
+  },
+  "summary_table": [
+    {
+      "horizon": 1,
+      "best_qlike": "MF-GJR",
+      "best_r2": "GJR",
+      "mfgjr_qlike": 1.5299594365911557,
+      "gjr_qlike": 1.634127042668301,
+      "garch_qlike": 1.6666489571913623,
+      "mfgjr_r2": -0.09896829958633568,
+      "gjr_r2": 0.25789964343523253,
+      "garch_r2": 0.25466104008437285,
+      "dm_mfgjr_vs_gjr_t": -5.4004446930952055,
+      "dm_mfgjr_vs_gjr_pass": true,
+      "qlike_improvement_pct": 6.374510876893274
+    },
+    {
+      "horizon": 5,
+      "best_qlike": "MF-GJR",
+      "best_r2": "GJR",
+      "mfgjr_qlike": 0.4022421923634822,
+      "gjr_qlike": 0.4930569615601184,
+      "garch_qlike": 0.5183059206908031,
+      "mfgjr_r2": -0.1668383539821463,
+      "gjr_r2": 0.35739454910087665,
+      "garch_r2": 0.3333893291986243,
+      "dm_mfgjr_vs_gjr_t": -4.1172893786469125,
+      "dm_mfgjr_vs_gjr_pass": true,
+      "qlike_improvement_pct": 18.41871756749614
+    },
+    {
+      "horizon": 22,
+      "best_qlike": "GARCH",
+      "best_r2": "GARCH",
+      "mfgjr_qlike": 0.53041769761776,
+      "gjr_qlike": 0.5019839138820292,
+      "garch_qlike": 0.49597507881082487,
+      "mfgjr_r2": -0.9690255826804317,
+      "gjr_r2": 0.058992179609802076,
+      "garch_r2": 0.11248466622038722,
+      "dm_mfgjr_vs_gjr_t": 0.5207384728018981,
+      "dm_mfgjr_vs_gjr_pass": false,
+      "qlike_improvement_pct": -5.6642818523489575
+    }
+  ],
+  "conclusion": {
+    "vix_advantage_grows_with_horizon": false,
+    "improvements": {
+      "h1": "6.37%",
+      "h5": "18.42%",
+      "h22": "-5.66%"
+    },
+    "harvey_pass": {
+      "h1": true,
+      "h5": true,
+      "h22": false
+    },
+    "best_model_by_horizon": {
+      "h1": "MF-GJR",
+      "h5": "MF-GJR",
+      "h22": "GARCH"
+    },
+    "interpretation": "MF-GJR(VIX) improves over GJR by 6.37% (h=1), 18.42% (h=5), -5.66% (h=22). VIX advantage does not grow with horizon. Harvey PASS: h=1=True, h=5=True, h=22=False."
+  },
+  "references": [
+    "Engle, Ghysels & Sohn (2013) Stock market volatility and macroeconomic fundamentals, RES 95(3):776-797",
+    "Conrad & Engle (2025) Two-factor GARCH, J Applied Econometrics",
+    "Patton (2011) Volatility forecast comparison using imperfect proxies, J Econometrics 160:246-256",
+    "Harvey et al. (2016) Tests for forecast encompassing, JBES 34:92-104",
+    "Bollerslev, Engle & Nelson (1994) ARCH models, Handbook of Econometrics vol 4"
+  ]
+}
