@@ -1,0 +1,233 @@
+{
+  "experiment_id": "K949",
+  "title": "Cross-Market MF-GJR: Is VIX a Global Risk Factor?",
+  "timestamp": "2026-04-07T04:56:27.932351",
+  "data_source": "yfinance",
+  "assets": [
+    "SPY",
+    "FEZ",
+    "EWG",
+    "EWJ",
+    "EWU"
+  ],
+  "oos_period": "2016-01-01 to 2025-12-31",
+  "window": 2000,
+  "refit_every": 21,
+  "models": [
+    "GARCH(1,1)",
+    "GJR(1,1,1)",
+    "MF-GJR(VIX)"
+  ],
+  "evaluation": "QLIKE on r\u00b2, Spearman rank, DM test (Harvey |t|>3.0)",
+  "results": {
+    "SPY": {
+      "GARCH": {
+        "QLIKE": 0.7606183768627968,
+        "Spearman_rho": 0.3804924604643521,
+        "Spearman_pval": 2.227665850296105e-87
+      },
+      "GJR": {
+        "QLIKE": 0.7371268561979586,
+        "Spearman_rho": 0.41198834755204866,
+        "Spearman_pval": 1.4562885673670415e-103
+      },
+      "MF-GJR": {
+        "QLIKE": 0.6550929777308057,
+        "Spearman_rho": 0.45646386225921215,
+        "Spearman_pval": 1.3931230237137027e-129
+      },
+      "DM_MFvsGJR": {
+        "t_stat": 3.4375116369063785,
+        "t_harvey": 3.436827895260127,
+        "significant_harvey3": true,
+        "mean_loss_diff": 0.08203387846715306
+      },
+      "QLIKE_improvement": {
+        "MF_vs_GARCH_pct": 13.873632604991107,
+        "MF_vs_GJR_pct": 11.128868494939544
+      },
+      "theta1_VIX_elasticity": 1.7942747040307563,
+      "theta0": -0.029951332408962746,
+      "mf_params": {
+        "omega_g": 1.216431036207331,
+        "alpha": 0.004951529606305292,
+        "gamma": 0.3440564521404316,
+        "beta": 0.8227916514424463,
+        "theta0": -0.029951332408962746,
+        "theta1": 1.7942747040307563
+      },
+      "n_oos": 2513,
+      "oos_period": "2016-01-04 to 2025-12-30"
+    },
+    "FEZ": {
+      "GARCH": {
+        "QLIKE": 1.2510264918482352,
+        "Spearman_rho": 0.28451654491758854,
+        "Spearman_pval": 5.228946188625356e-48
+      },
+      "GJR": {
+        "QLIKE": 1.2445143215553465,
+        "Spearman_rho": 0.3004205100904612,
+        "Spearman_pval": 1.4050201270963214e-53
+      },
+      "MF-GJR": {
+        "QLIKE": 1.1898205870398095,
+        "Spearman_rho": 0.3352895528287752,
+        "Spearman_pval": 4.4697984216669566e-67
+      },
+      "DM_MFvsGJR": {
+        "t_stat": 3.842243077811006,
+        "t_harvey": 3.8414788326578795,
+        "significant_harvey3": true,
+        "mean_loss_diff": 0.05469373451553729
+      },
+      "QLIKE_improvement": {
+        "MF_vs_GARCH_pct": 4.89245473275323,
+        "MF_vs_GJR_pct": 4.394785465159035
+      },
+      "theta1_VIX_elasticity": 2.2782452271396365,
+      "theta0": -5.0,
+      "mf_params": {
+        "omega_g": 0.25461162675968924,
+        "alpha": 0.0134063143494946,
+        "gamma": 0.07209524061913111,
+        "beta": 0.9143999819296775,
+        "theta0": -5.0,
+        "theta1": 2.2782452271396365
+      },
+      "n_oos": 2513,
+      "oos_period": "2016-01-04 to 2025-12-30"
+    },
+    "EWG": {
+      "GARCH": {
+        "QLIKE": 1.2490929600227678,
+        "Spearman_rho": 0.2701267749241332,
+        "Spearman_pval": 2.8535555086780918e-43
+      },
+      "GJR": {
+        "QLIKE": 1.236781529042872,
+        "Spearman_rho": 0.29268127082758005,
+        "Spearman_pval": 8.000323937273634e-51
+      },
+      "MF-GJR": {
+        "QLIKE": 1.185701035696328,
+        "Spearman_rho": 0.3284259695867894,
+        "Spearman_pval": 2.8219777120332572e-64
+      },
+      "DM_MFvsGJR": {
+        "t_stat": 3.4782021042696805,
+        "t_harvey": 3.4775102690458413,
+        "significant_harvey3": true,
+        "mean_loss_diff": 0.05108049334654394
+      },
+      "QLIKE_improvement": {
+        "MF_vs_GARCH_pct": 5.075036554948187,
+        "MF_vs_GJR_pct": 4.130114506648119
+      },
+      "theta1_VIX_elasticity": 2.1427150552651444,
+      "theta0": -5.0,
+      "mf_params": {
+        "omega_g": 0.37672874015657093,
+        "alpha": 0.012947115299833454,
+        "gamma": 0.047331495003247036,
+        "beta": 0.9381216716251405,
+        "theta0": -5.0,
+        "theta1": 2.1427150552651444
+      },
+      "n_oos": 2513,
+      "oos_period": "2016-01-04 to 2025-12-30"
+    },
+    "EWJ": {
+      "GARCH": {
+        "QLIKE": 0.9806070870420098,
+        "Spearman_rho": 0.26870673964907155,
+        "Spearman_pval": 8.08192391319196e-43
+      },
+      "GJR": {
+        "QLIKE": 0.9739267994135776,
+        "Spearman_rho": 0.2723094472460055,
+        "Spearman_pval": 5.689933074420149e-44
+      },
+      "MF-GJR": {
+        "QLIKE": 0.9286891858828488,
+        "Spearman_rho": 0.30298259260961946,
+        "Spearman_pval": 1.6468817645936194e-54
+      },
+      "DM_MFvsGJR": {
+        "t_stat": 4.219568201793729,
+        "t_harvey": 4.218728904414255,
+        "significant_harvey3": true,
+        "mean_loss_diff": 0.04523761353072874
+      },
+      "QLIKE_improvement": {
+        "MF_vs_GARCH_pct": 5.29446521906861,
+        "MF_vs_GJR_pct": 4.644867926210409
+      },
+      "theta1_VIX_elasticity": 1.977040568642376,
+      "theta0": -5.0,
+      "mf_params": {
+        "omega_g": 0.4798198745682962,
+        "alpha": 0.025575793526461006,
+        "gamma": 0.011478921208656453,
+        "beta": 0.9560362981907512,
+        "theta0": -5.0,
+        "theta1": 1.977040568642376
+      },
+      "n_oos": 2513,
+      "oos_period": "2016-01-04 to 2025-12-30"
+    },
+    "EWU": {
+      "GARCH": {
+        "QLIKE": 0.9647697187876468,
+        "Spearman_rho": 0.28237208310389467,
+        "Spearman_pval": 2.769670973481375e-47
+      },
+      "GJR": {
+        "QLIKE": 0.9575457558036716,
+        "Spearman_rho": 0.29440264099804814,
+        "Spearman_pval": 1.984245525531744e-51
+      },
+      "MF-GJR": {
+        "QLIKE": 0.8840345391981581,
+        "Spearman_rho": 0.34227588440199125,
+        "Spearman_pval": 5.316387041516195e-70
+      },
+      "DM_MFvsGJR": {
+        "t_stat": 2.4014069689766075,
+        "t_harvey": 2.400929314752354,
+        "significant_harvey3": false,
+        "mean_loss_diff": 0.07351121660551357
+      },
+      "QLIKE_improvement": {
+        "MF_vs_GARCH_pct": 8.368336818338632,
+        "MF_vs_GJR_pct": 7.677044794983743
+      },
+      "theta1_VIX_elasticity": 2.285091930748619,
+      "theta0": -5.0,
+      "mf_params": {
+        "omega_g": 0.17094198136724825,
+        "alpha": 0.024311356256533356,
+        "gamma": 0.053265613079842455,
+        "beta": 0.8901465501910196,
+        "theta0": -5.0,
+        "theta1": 2.285091930748619
+      },
+      "n_oos": 2513,
+      "oos_period": "2016-01-04 to 2025-12-30"
+    }
+  },
+  "summary": {
+    "n_markets": 5,
+    "n_significant_harvey3": 4,
+    "theta1_mean": 2.0954734971653064,
+    "theta1_std": 0.18779749305479349,
+    "theta1_by_market": {
+      "SPY": 1.7942747040307563,
+      "FEZ": 2.2782452271396365,
+      "EWG": 2.1427150552651444,
+      "EWJ": 1.977040568642376,
+      "EWU": 2.285091930748619
+    }
+  },
+  "conclusion": "VIX is a GLOBAL risk factor: MF-GJR(VIX) significantly improves vol forecasts in 4/5 markets (Harvey |t|>3.0). theta1 mean=2.095."
+}
