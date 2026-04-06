@@ -21431,5 +21431,25 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T09:31:11.491359+00:00",
     "star_rating": 0
+  },
+  {
+    "id": "know_20260406100601_k940",
+    "experiment_id": "K940",
+    "title": "K940: Neural Network Vol Predictor — ML首測NULL，MLP災難失敗，RF可行但不勝MF-GJR",
+    "content": "[提出: Claude, 執行: Claude] 首次ML波動率預測實驗。MLP(32,16)/Random Forest/Ridge vs GARCH/GJR/MF-GJR(VIX)。SPY OOS 2016-2025 (2514天)。Features: σ²_GARCH, log(VIX), r², |r|, YZ, lagged r², GARCH-VIX ratio, rolling σ²。結果：MF-GJR(VIX)仍最佳(QLIKE=1.458, ρ=0.457)。RF唯一可行ML(QLIKE=1.524, ρ=0.421)，介於GJR和GARCH之間。MLP災難失敗(QLIKE=651,520)——daily r²太noisy(skew=15.7, kurt=347)導致梯度不穩。Ridge也失敗(QLIKE=40,278)。RF feature importance: log_VIX=35.1%最重要，YZ=14.7%次之。結論：MF-GJR的multiplicative結構已捕捉relevant nonlinearities，簡單ML無法超越。需要更sophisticated的ML(deeper/regularized)或更高頻數據。",
+    "tags": [
+      "volatility",
+      "ML",
+      "neural-network",
+      "MLP",
+      "random-forest",
+      "Ridge",
+      "feature-importance",
+      "SPY",
+      "null-result"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T10:06:01.358252+00:00",
+    "star_rating": 0
   }
 ]
