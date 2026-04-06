@@ -401,7 +401,7 @@
 
 ### Rough Volatility & Hurst
 - [ ] ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。
-- [ ] Time-Varying Hurst via EWMA — arXiv:2509.05820
+- [x] ~~Time-Varying Hurst via EWMA~~ → **K936 NULL**。R/S 和 DFA 兩種方法，H(t) 不勝 GARCH（DM NS），加到 VIX 上也無增量（DM t=+1.77 NS）。日頻 Hurst 無法改善預測，需 5-min 數據
 - [ ] Adaptive Fractal Dynamics — Frontiers Applied Math 2025
 - [ ] Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437
 
@@ -448,7 +448,7 @@
 - [ ] **G3-3: Fractional Jump-Diffusion MF-GJR**：用 power-law（fractional）kernel 替代線性 MIDAS。K906 的 50% 隔夜 gap 建模為 point-mass jump，日內 RV 為 fractionally integrated diffusion。不是找更多指標（K909 已確認無用），而是優化 VIX 信號的吸收方式。需理論推導
 
 ### K933-K934 衍生方向（2026-04-06）
-- [ ] **Gap-Adjusted CARR**：K934 發現 Parkinson 轉換因隔夜 gap 失效。用 Yang-Zhang(1999) 或 Garman-Klass(1980) 替代 Parkinson，加入隔夜 return 成分
+- [x] ~~Gap-Adjusted CARR~~ → **K935 ★**。Yang-Zhang CARR 勝 Parkinson CARR 8.04%（DM t=-3.28 Harvey✓）。CARR_YZ(1.556) 甚至勝 GARCH(1.603) 但 DM t=-2.68 未達 Harvey。隔夜成分是關鍵修復。MF-GJR(VIX) 仍最佳
 - [ ] **CARR + GARCH Ensemble**：K934 顯示 CARR 排序好（ρ=0.474）但校準差，GARCH 校準好但排序差（ρ=0.383）。兩者互補？用 CARR rank + GARCH level 的混合模型
 - [x] ~~K934: CARR Range-Based Vol~~ → 排序能力最強（ρ=0.474）但 Parkinson 轉換偏差。GARCH 顯著勝 CARR on QLIKE (DM t=4.44)。VIX 改善所有模型
 

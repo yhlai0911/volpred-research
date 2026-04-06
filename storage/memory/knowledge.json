@@ -21336,5 +21336,41 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T08:23:29.489584+00:00",
     "star_rating": 1
+  },
+  {
+    "id": "know_20260406085851_k936",
+    "experiment_id": "K936",
+    "title": "K936: Time-Varying Hurst Exponent — 日頻H(t)無預測力，VIX已包含所有資訊",
+    "content": "[提出: Claude, 執行: Claude] EWMA-driven time-varying Hurst exponent (arXiv:2509.05820方向)。SPY 2006-2026, OOS 2016-2025。R/S和DFA兩種方法估計H(t)。7個模型：GARCH/GJR/MF-GJR(VIX)/MF-GJR(H_RS)/MF-GJR(H_DFA)/MF-GJR(VIX,H_RS)/MF-GJR(VIX,H_DFA)。結果：H alone不勝GARCH (DM t=-0.80/-0.87 NS)。H+VIX不勝VIX alone (DM t=+1.77/+0.17 NS)。加Hurst反而略微惡化QLIKE (+0.30%)。H_RS mean=0.576 (mild persistence), H_DFA mean=0.686。H與VIX相關性弱(r=0.121)，是不同資訊但無用資訊。MF-GJR(VIX)仍為最佳(QLIKE=1.471, DM t=-4.49)。結論：daily-frequency Hurst無法改善波動率預測。可能需要5-min數據才能捕捉rough vol特徵。",
+    "tags": [
+      "volatility",
+      "Hurst-exponent",
+      "rough-volatility",
+      "EWMA",
+      "SPY",
+      "null-result",
+      "MF-GJR"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T08:58:51.835607+00:00",
+    "star_rating": 0
+  },
+  {
+    "id": "know_20260406090027_k935",
+    "experiment_id": "K935",
+    "title": "K935: Gap-Adjusted CARR ★ — Yang-Zhang勝Parkinson 8%，首次range模型勝GARCH校準",
+    "content": "[提出: Claude, 執行: Claude] 修復K934發現的Parkinson CARR隔夜gap偏差。4種range estimator: Parkinson/Garman-Klass/Rogers-Satchell/Yang-Zhang 各自建CARR(1,1)。SPY 2006-2026, OOS 2016-2025。QLIKE on r²排名：MF-GJR(1.480) > CARR_YZ(1.556) > GARCH(1.603) > CARR_RS(1.608) > CARR_GK(1.670) > CARR_Parkinson(1.692)。Yang-Zhang CARR顯著勝Parkinson CARR (DM t=-3.28 Harvey✓)，改善8.04%。CARR_YZ甚至勝GARCH 2.95%（DM t=-2.68, 接近Harvey但未達）。原因：Yang-Zhang包含隔夜return + 開盤jump + 日內range三個成分。但calibration-ranking trade-off：YZ Spearman ρ=0.4147 vs GK ρ=0.4283（隔夜成分加了校準但損排序）。MF-GJR(VIX)仍為最佳。",
+    "tags": [
+      "volatility",
+      "CARR",
+      "Yang-Zhang",
+      "range-based",
+      "gap-adjustment",
+      "SPY",
+      "positive-result"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T09:00:27.118922+00:00",
+    "star_rating": 1
   }
 ]
