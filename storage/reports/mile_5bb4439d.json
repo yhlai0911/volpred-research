@@ -19,5 +19,5 @@
     "VT策略",
     "SPY"
   ],
-  "content": "## VIX Recovery Boost 策略\n\n**規則**：VIX 從 >25 開始下降（5 日 MA 連續 2 天下降）→ 加碼 50% 持續 22 天\n\nSPY 2010-2025：\n\n| 策略 | Sharpe | MaxDD | 年化報酬 |\n|------|--------|-------|---------|\n| Standard VT | 0.598 | -26.3% | 7.8% |\n| **VT + VIX Boost** | **0.633** | -27.4% | **9.6%** |\n| Buy & Hold | 0.654 | -36.1% | 11.3% |\n\n**Sharpe 改善 +5.9%**，MaxDD 只增加 1.1pp。觸發 288 天（7.5%）。\n\n## 為什麼有效？\n\nVIX 是 **mean-reverting** 的——飆高後幾乎必然回落，代表市場恢復信心。標準 VT 在 VIX 高時減碼，錯過了均值回歸的利潤。Recovery boost 在拐點加碼，捕捉反彈。\n\n## 注意\n\n需要 OOS 驗證（IS 2020-2022, OOS 2023-2025），避免 overfitting。"
+  "content": "## VIX Recovery Boost 策略\n\n**規則**：VIX 從 >25 開始下降（5 日 MA 連續 2 天下降）→ 加碼 50% 持續 22 天\n\nSPY 2010-2025：\n\n| 策略 | Sharpe | MaxDD | 年化報酬 |\n|------|--------|-------|---|\n| Standard VT | 0.598 | -26.3% | 7.8% |\n| **VT + VIX Boost** | **0.633** | -27.4% | **9.6%** |\n| Buy & Hold | 0.654 | -36.1% | 11.3% |\n\n**Sharpe 改善 +5.9%**，MaxDD 只增加 1.1pp。觸發 288 天（7.5%）。\n\n## 為什麼有效？\n\nVIX 是 **mean-reverting** 的——飆高後幾乎必然回落，代表市場恢復信心。標準 VT 在 VIX 高時減碼，錯過了均值回歸的利潤。Recovery boost 在拐點加碼，捕捉反彈。\n\n## 注意\n\n需要 OOS 驗證（IS 2020-2022, OOS 2023-2025），避免 overfitting。"
 }

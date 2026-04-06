@@ -13,5 +13,5 @@
     "VT策略",
     "投資策略"
   ],
-  "content": "## 背景 Agent 團隊執行成果\n\n### 論文修正（3 agent）\n\n| 問題 | Agent | 狀態 |\n|------|-------|------|\n| E5 Unicode/符號 | 62 處修正 | ✅ |\n| E7 數字不一致 | 17→18, 1507→1508, QLIKE footnote | ✅ |\n| E2/E3 Overclaiming | \"100%\" → \"consistent\", \"cannot\" → \"is not improved\" | ✅ (earlier) |\n\n### 研究分析（3 agent）\n\n| 分析 | 核心結果 |\n|------|---------|\n| **多頻率 VT** | ★★★ w=2000 Daily Sharpe **1.064** >> Monthly 0.255。SNR 決定最佳頻率！ |\n| Regime-adaptive window | Null result：fixed w=2000 = VIX-adaptive（14 violations 完全相同） |\n| Proxy 比較 | Parkinson QLIKE 最佳但 model ranking 不受影響 |\n\n### 審查進度\n**7/8 嚴重問題修正**（E2✅ E3✅ E4✅ E5✅ E6✅ E7✅ E8✅）\n剩餘：E1（論文結構）"
+  "content": "## 背景 Agent 團隊執行成果\n\n### 論文修正（3 agent）\n\n| 問題 | Agent | 狀態 |\n|------|-------|------|\n| E5 Unicode/符號 | 62 處修正 | ✅ |\n| E7 數字不一致 | 17→18, 1507→1508, QLIKE footnote | ✅ |\n| E2/E3 Overclaiming | \"100%\" → \"consistent\", \"cannot\" → \"is not improved\" | ✅ (earlier) |\n\n### 研究分析（3 agent）\n\n| 分析 | 核心結果 |\n|------|---|\n| **多頻率 VT** | ★★★ w=2000 Daily Sharpe **1.064** >> Monthly 0.255。SNR 決定最佳頻率！ |\n| Regime-adaptive window | Null result：fixed w=2000 = VIX-adaptive（14 violations 完全相同） |\n| Proxy 比較 | Parkinson QLIKE 最佳但 model ranking 不受影響 |\n\n### 審查進度\n**7/8 嚴重問題修正**（E2✅ E3✅ E4✅ E5✅ E6✅ E7✅ E8✅）\n剩餘：E1（論文結構）"
 }

@@ -13,5 +13,5 @@
     "波動率預測",
     "風險管理"
   ],
-  "content": "## Codex 最致命批評的回應\n\n### 問題\n> \"alpha 是否只是 repackaged short-vol premium？\"\n\n### 測試\n控制 Market + VIX change + VIX level（VRP proxy）的迴歸\n\n| 模型 | Alpha (年化) | t-stat | VRP 係數 |\n|------|-------------|--------|---------|\n| Market only | +2.70% | — | — |\n| + VIX Δ | +5.38% | 3.62 | -0.016 (t=-16) |\n| + VIX Δ + VIX level | **+8.77%** | **2.05** | -0.0006 (t=-0.84, **不顯著**) |\n\n### 結論\n- Alpha **存活** VRP 控制（t=2.05, p≈0.04）\n- VIX level 係數不顯著 → **不是 short-vol carry**\n- 但 t=2.05 只是 borderline，需要 bootstrap CI 確認"
+  "content": "## Codex 最致命批評的回應\n\n### 問題\n> \"alpha 是否只是 repackaged short-vol premium？\"\n\n### 測試\n控制 Market + VIX change + VIX level（VRP proxy）的迴歸\n\n| 模型 | Alpha (年化) | t-stat | VRP 係數 |\n|------|-------|--------|---|\n| Market only | +2.70% | — | — |\n| + VIX Δ | +5.38% | 3.62 | -0.016 (t=-16) |\n| + VIX Δ + VIX level | **+8.77%** | **2.05** | -0.0006 (t=-0.84, **不顯著**) |\n\n### 結論\n- Alpha **存活** VRP 控制（t=2.05, p≈0.04）\n- VIX level 係數不顯著 → **不是 short-vol carry**\n- 但 t=2.05 只是 borderline，需要 bootstrap CI 確認"
 }

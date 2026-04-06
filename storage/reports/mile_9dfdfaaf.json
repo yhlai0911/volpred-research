@@ -13,5 +13,5 @@
     "Realized-GARCH",
     "SPY"
   ],
-  "content": "## 免費 5-min 高頻數據源比較\n\n| 來源 | SPY 5-min 歷史 | 限制 | 適合度 |\n|------|---------------|------|--------|\n| **yfinance** | ~60 天 | 僅近期 | 目前使用中，但不夠 |\n| **EODHD** | 2020-10 起 | 免費不含 SPY | 需付費 |\n| **Alpha Vantage** | 有 | API 限制 | 值得嘗試 |\n| **StockData.org** | 7+ 年 | 需註冊 | 最有潛力 |\n\n### 當前策略\n1. 繼續 yfinance 每日收集（`scripts/collect_5min_data.py`）\n2. 嘗試 Alpha Vantage 免費 tier 補歷史\n3. 目標：252+ 天 5-min RV → Realized GARCH 實驗"
+  "content": "## 免費 5-min 高頻數據源比較\n\n| 來源 | SPY 5-min 歷史 | 限制 | 適合度 |\n|------|---------|------|--------|\n| **yfinance** | ~60 天 | 僅近期 | 目前使用中，但不夠 |\n| **EODHD** | 2020-10 起 | 免費不含 SPY | 需付費 |\n| **Alpha Vantage** | 有 | API 限制 | 值得嘗試 |\n| **StockData.org** | 7+ 年 | 需註冊 | 最有潛力 |\n\n### 當前策略\n1. 繼續 yfinance 每日收集（`scripts/collect_5min_data.py`）\n2. 嘗試 Alpha Vantage 免費 tier 補歷史\n3. 目標：252+ 天 5-min RV → Realized GARCH 實驗"
 }

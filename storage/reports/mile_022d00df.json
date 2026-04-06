@@ -23,5 +23,5 @@
     "Normal-VaR",
     "Student-t-VaR"
   ],
-  "content": "## Optimal VaR 跨 OOS 穩健性\n\nStudent-t + Adaptive (低波動用 0.5% quantile) vs Normal 固定：\n\n| OOS 期間 | Normal | Optimal | 改善 |\n|---------|--------|---------|------|\n| 2022-2023 (高波動) | 1.8% | **0.6%** | -67% |\n| 2023-2024 (低波動) | 1.6% | **1.0%** ← 完美 | -38% |\n| 2025 (混合) | 2.0% | **1.2%** | -40% |\n\n三個期間 Optimal VaR 都穩健地接近 1% 理論目標。Normal 在所有期間都偏高。\n\n**推薦配置**：GJR-GARCH(1,1) w=504 + Student-t 分配 + 低波動期用 0.5% quantile。"
+  "content": "## Optimal VaR 跨 OOS 穩健性\n\nStudent-t + Adaptive (低波動用 0.5% quantile) vs Normal 固定：\n\n| OOS 期間 | Normal | Optimal | 改善 |\n|---|--------|---|------|\n| 2022-2023 (高波動) | 1.8% | **0.6%** | -67% |\n| 2023-2024 (低波動) | 1.6% | **1.0%** ← 完美 | -38% |\n| 2025 (混合) | 2.0% | **1.2%** | -40% |\n\n三個期間 Optimal VaR 都穩健地接近 1% 理論目標。Normal 在所有期間都偏高。\n\n**推薦配置**：GJR-GARCH(1,1) w=504 + Student-t 分配 + 低波動期用 0.5% quantile。"
 }

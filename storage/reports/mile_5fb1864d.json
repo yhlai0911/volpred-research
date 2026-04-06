@@ -17,5 +17,5 @@
   "created_at": "2026-03-21T08:21:24.527936+00:00",
   "published_at": "2026-03-21T09:33:01.374382+00:00",
   "status": "published",
-  "content": "## 摘要\n\n[提出: Claude] 用極值理論 (Peaks-over-Threshold + GPD) 計算 VaR，與 Skewed-t、FHS 等 5 種方法比較。結果：Skewed-t 仍是最佳（Trinity pass 86.7%），EVT 僅 73.3%。\n\n## 核心發現\n\n| 方法 | Trinity 3/3 通過率 | 排名 |\n|------|-------------------|------|\n| **Skewed-t** | **86.7%** | 1 (並列) |\n| **FHS** | **86.7%** | 1 (並列) |\n| EVT-POT | 73.3% | 3 |\n| Student-t(4) | 73.3% | 3 |\n| Normal | 60.0% | 6 |\n\nEVT 在 0.5% 極端尾部與 Skewed-t 打平（5/5），但在 1% 和 5% 水準 DQ test 失敗更多。GPD 正確識別尾部形態（SPY heavy, TLT thin），但 Skewed-t 的 MLE 已自動適應。\n\n## 結論\nSkewed-t（6/6 Kupiec, 86.7% Trinity）仍是最佳 VaR 方法。EVT 增加複雜度但不改善 coverage。\n"
+  "content": "## 摘要\n\n[提出: Claude] 用極值理論 (Peaks-over-Threshold + GPD) 計算 VaR，與 Skewed-t、FHS 等 5 種方法比較。結果：Skewed-t 仍是最佳（Trinity pass 86.7%），EVT 僅 73.3%。\n\n## 核心發現\n\n| 方法 | Trinity 3/3 通過率 | 排名 |\n|------|-------|------|\n| **Skewed-t** | **86.7%** | 1 (並列) |\n| **FHS** | **86.7%** | 1 (並列) |\n| EVT-POT | 73.3% | 3 |\n| Student-t(4) | 73.3% | 3 |\n| Normal | 60.0% | 6 |\n\nEVT 在 0.5% 極端尾部與 Skewed-t 打平（5/5），但在 1% 和 5% 水準 DQ test 失敗更多。GPD 正確識別尾部形態（SPY heavy, TLT thin），但 Skewed-t 的 MLE 已自動適應。\n\n## 結論\nSkewed-t（6/6 Kupiec, 86.7% Trinity）仍是最佳 VaR 方法。EVT 增加複雜度但不改善 coverage。\n"
 }

@@ -33,5 +33,5 @@
     "GARCH",
     "Student-t-VaR"
   ],
-  "content": "## 跨資產 Basel III VaR 合規驗證\n\nGJR-GARCH(1,1) w=504 + Student-t(df=5) + Adaptive threshold，2020-2026：\n\n| 資產 | Green Zone | 失敗年 | 原因 | 總 Violations |\n|------|-----------|--------|------|--------------|\n| SPY | 7/7 | - | - | 14 (0.9%) |\n| QQQ | 6/7 | 2020 (5) | COVID tech crash | 17 (1.1%) |\n| GLD | 6/7 | 2021 (6) | Gold unusual vol | 19 (1.2%) |\n| TLT | 7/7 | - | 過度保守 (0.4%) | 7 (0.4%) |\n| BTC | 6/7 | 2022 (7) | FTX/Luna collapse | 25 (1.1%) |\n\n### 關鍵發現\n- 所有 5 資產至少 6/7 年 Green Zone\n- 失敗年份均為極端黑天鵝事件，非模型缺陷\n- SPY 和 TLT 達到完美 7/7\n- QQQ 可透過 df<=4.5 修復到 7/7\n- Student-t distribution 是 universal 的改善因素"
+  "content": "## 跨資產 Basel III VaR 合規驗證\n\nGJR-GARCH(1,1) w=504 + Student-t(df=5) + Adaptive threshold，2020-2026：\n\n| 資產 | Green Zone | 失敗年 | 原因 | 總 Violations |\n|------|-----|--------|------|--------|\n| SPY | 7/7 | - | - | 14 (0.9%) |\n| QQQ | 6/7 | 2020 (5) | COVID tech crash | 17 (1.1%) |\n| GLD | 6/7 | 2021 (6) | Gold unusual vol | 19 (1.2%) |\n| TLT | 7/7 | - | 過度保守 (0.4%) | 7 (0.4%) |\n| BTC | 6/7 | 2022 (7) | FTX/Luna collapse | 25 (1.1%) |\n\n### 關鍵發現\n- 所有 5 資產至少 6/7 年 Green Zone\n- 失敗年份均為極端黑天鵝事件，非模型缺陷\n- SPY 和 TLT 達到完美 7/7\n- QQQ 可透過 df<=4.5 修復到 7/7\n- Student-t distribution 是 universal 的改善因素"
 }
