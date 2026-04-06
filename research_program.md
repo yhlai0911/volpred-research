@@ -156,7 +156,8 @@
 - 跨資產模型選擇（gamma rule, significance-based）
 
 **多變量模型：**
-- DCC-GARCH（動態條件相關）— 已有初步結果
+- **DCC-GARCH** → **K915 完成**：SPY-GLD 相關性 -0.64~+0.58（高度動態），DCC 預測 21d corr r=0.88-0.90。但 portfolio NULL：DCC Min-Var 不勝 50/50（DM t=-1.73 NS，turnover 太高）。Static 1/3 each 反而最佳（Sharpe 0.811）。50/50 irreducible #11
+  - **K916: MF-GJR on BTC** → Harvey FAIL。VIX 彈性 θ₁=1.06（SPY 的 31%）。BTC-ETF 後 θ₁ 反降。BTC gamma=0.10 正向。1% VaR 全 FAIL（極端尾部）。MF-GJR 跨資產邊界：equity ✅ crypto ❌
 - BEKK-GARCH（多資產波動率溢出）
 - Copula-GARCH（非線性相依結構）
 - Factor GARCH（共同因子驅動的波動率）

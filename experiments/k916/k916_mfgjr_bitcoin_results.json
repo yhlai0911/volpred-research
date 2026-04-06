@@ -1,0 +1,890 @@
+{
+  "experiment_id": "K916",
+  "title": "MF-GJR on Bitcoin: Cross-Asset Universality Test",
+  "timestamp": "2026-04-06T00:19:59.064769+00:00",
+  "runtime_seconds": 92.3,
+  "methodology": {
+    "models": [
+      "GARCH(1,1)",
+      "GJR-GARCH(1,1)",
+      "MF-GARCH(VIX)",
+      "MF-GJR(VIX)",
+      "EWMA(0.94)"
+    ],
+    "mf_long_run": "tau_t = exp(theta_0 + theta_1 * log(VIX_{t-1}))",
+    "mf_short_run_garch": "g_t = (1-a-b) + a*u^2_{t-1} + b*g_{t-1}, u=r/sqrt(tau)",
+    "mf_short_run_gjr": "g_t = (1-a-g/2-b) + a*u^2_{t-1} + g*u^2_{t-1}*I(u<0) + b*g_{t-1}",
+    "estimation": "Rolling window (w=1000), refit every 63 days, MLE multi-start",
+    "evaluation": "QLIKE on r^2 (Patton 2011), DM test (Harvey t>3.0), Spearman, MCS (HLN 2011), VaR Trinity (Normal + HistSim)",
+    "etf_date": "2024-01-11"
+  },
+  "data": {
+    "source": "yfinance",
+    "assets": [
+      "BTC-USD",
+      "SPY"
+    ],
+    "period": "2015-01-01 to 2026-04-01",
+    "oos_start": "2021-01-01",
+    "window": 1000,
+    "refit_every": 63,
+    "btc_note": "Only business days where VIX available (weekends dropped)"
+  },
+  "diagnostics": {
+    "BTC-USD": {
+      "mean": 0.0014993383574429693,
+      "std": 0.03847138226340027,
+      "annual_vol": 0.6107142603711498,
+      "skewness": -0.7934639605774241,
+      "kurtosis": 11.687142276871082,
+      "min": -0.46473017533977296,
+      "max": 0.22511895434132784,
+      "n": 2827,
+      "jb_stat": 16385.720152303074,
+      "jb_p": 0.0,
+      "adf_stat": -25.185117670642008,
+      "adf_p": 0.0,
+      "arch_lm": 67.44385174610399,
+      "arch_lm_p": 1.3778400642650013e-10,
+      "corr_ret_logvix": -0.04139292959152047,
+      "corr_absret_logvix": 0.055514188870057976,
+      "leverage_corr": -0.0565691245205608
+    },
+    "SPY": {
+      "mean": 0.00047450874168271075,
+      "std": 0.011187181499601665,
+      "annual_vol": 0.17759100071813183,
+      "skewness": -0.5723988822248474,
+      "kurtosis": 14.457670569123408,
+      "min": -0.11588638168213429,
+      "max": 0.09986284608912066,
+      "n": 2826,
+      "jb_stat": 24766.922724349075,
+      "jb_p": 0.0,
+      "adf_stat": -17.239825653211582,
+      "adf_p": 6.11728534824284e-30,
+      "arch_lm": 842.6591500126692,
+      "arch_lm_p": 0.0,
+      "corr_ret_logvix": -0.15247954591394985,
+      "corr_absret_logvix": 0.5466036559192254,
+      "leverage_corr": -0.08590320071084012
+    }
+  },
+  "vol_ratio_btc_spy": 3.44,
+  "results": {
+    "BTC-USD": {
+      "ticker": "BTC-USD",
+      "n_oos": 1316,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-03-31",
+      "n_refits": 21,
+      "qlike": {
+        "GARCH": 1.659697,
+        "GJR": 1.6548,
+        "MF-GARCH": 1.607408,
+        "MF-GJR": 1.610993,
+        "EWMA": 1.654962
+      },
+      "qlike_pct_vs_garch": {
+        "GARCH": 0.0,
+        "GJR": -0.295,
+        "MF-GARCH": -3.151,
+        "MF-GJR": -2.934,
+        "EWMA": -0.285
+      },
+      "spearman": {
+        "GARCH": {
+          "rho": 0.183,
+          "p": 0.0
+        },
+        "GJR": {
+          "rho": 0.1767,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.2264,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.2118,
+          "p": 0.0
+        },
+        "EWMA": {
+          "rho": 0.2379,
+          "p": 0.0
+        }
+      },
+      "dm_vs_garch": {
+        "GARCH": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "GJR": {
+          "t": -0.969,
+          "p": 0.333,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -2.788,
+          "p": 0.0054,
+          "significant_harvey": false
+        },
+        "MF-GJR": {
+          "t": -2.814,
+          "p": 0.005,
+          "significant_harvey": false
+        },
+        "EWMA": {
+          "t": -0.139,
+          "p": 0.8897,
+          "significant_harvey": false
+        }
+      },
+      "mcs": {
+        "best_model": "MF-GARCH",
+        "survived": [
+          "GARCH",
+          "GJR",
+          "MF-GARCH",
+          "MF-GJR",
+          "EWMA"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "GARCH": 0.15,
+          "GJR": 0.15,
+          "MF-GARCH": 0.15,
+          "MF-GJR": 0.15,
+          "EWMA": 0.15
+        }
+      },
+      "var": {
+        "0.01": {
+          "GARCH": {
+            "normal": {
+              "violations": 15,
+              "total": 1316,
+              "rate": 0.0114,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.618,
+              "cc_p": 0.3301,
+              "basel": "RED",
+              "trinity": false
+            },
+            "histsim": {
+              "violations": 15,
+              "total": 1064,
+              "rate": 0.0141,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.2058,
+              "cc_p": 0.2003,
+              "basel": "RED",
+              "trinity": false
+            }
+          },
+          "GJR": {
+            "normal": {
+              "violations": 16,
+              "total": 1316,
+              "rate": 0.0122,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.4466,
+              "cc_p": 0.3126,
+              "basel": "RED",
+              "trinity": false
+            },
+            "histsim": {
+              "violations": 14,
+              "total": 1064,
+              "rate": 0.0132,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.3234,
+              "cc_p": 0.2436,
+              "basel": "RED",
+              "trinity": false
+            }
+          },
+          "MF-GARCH": {
+            "normal": {
+              "violations": 19,
+              "total": 1316,
+              "rate": 0.0144,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.1292,
+              "cc_p": 0.1743,
+              "basel": "RED",
+              "trinity": false
+            },
+            "histsim": {
+              "violations": 15,
+              "total": 1064,
+              "rate": 0.0141,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.2058,
+              "cc_p": 0.2003,
+              "basel": "RED",
+              "trinity": false
+            }
+          },
+          "MF-GJR": {
+            "normal": {
+              "violations": 18,
+              "total": 1316,
+              "rate": 0.0137,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.2041,
+              "cc_p": 0.2262,
+              "basel": "RED",
+              "trinity": false
+            },
+            "histsim": {
+              "violations": 15,
+              "total": 1064,
+              "rate": 0.0141,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.2058,
+              "cc_p": 0.2003,
+              "basel": "RED",
+              "trinity": false
+            }
+          },
+          "EWMA": {
+            "normal": {
+              "violations": 29,
+              "total": 1316,
+              "rate": 0.022,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.0002,
+              "cc_p": 0.0003,
+              "basel": "RED",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 18,
+              "total": 1064,
+              "rate": 0.0169,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.0391,
+              "cc_p": 0.0127,
+              "basel": "RED",
+              "trinity": "False"
+            }
+          }
+        },
+        "0.05": {
+          "GARCH": {
+            "normal": {
+              "violations": 40,
+              "total": 1316,
+              "rate": 0.0304,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.0005,
+              "cc_p": 0.0017,
+              "basel": "GREEN",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 55,
+              "total": 1064,
+              "rate": 0.0517,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.8011,
+              "cc_p": 0.7666,
+              "basel": "GREEN",
+              "trinity": true
+            }
+          },
+          "GJR": {
+            "normal": {
+              "violations": 40,
+              "total": 1316,
+              "rate": 0.0304,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.0005,
+              "cc_p": 0.0017,
+              "basel": "GREEN",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 56,
+              "total": 1064,
+              "rate": 0.0526,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.6961,
+              "cc_p": 0.7666,
+              "basel": "GREEN",
+              "trinity": true
+            }
+          },
+          "MF-GARCH": {
+            "normal": {
+              "violations": 57,
+              "total": 1316,
+              "rate": 0.0433,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.2551,
+              "cc_p": 0.4937,
+              "basel": "GREEN",
+              "trinity": true
+            },
+            "histsim": {
+              "violations": 54,
+              "total": 1064,
+              "rate": 0.0508,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.9106,
+              "cc_p": 0.9809,
+              "basel": "GREEN",
+              "trinity": true
+            }
+          },
+          "MF-GJR": {
+            "normal": {
+              "violations": 57,
+              "total": 1316,
+              "rate": 0.0433,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.2551,
+              "cc_p": 0.4937,
+              "basel": "GREEN",
+              "trinity": true
+            },
+            "histsim": {
+              "violations": 56,
+              "total": 1064,
+              "rate": 0.0526,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.6961,
+              "cc_p": 0.9261,
+              "basel": "GREEN",
+              "trinity": true
+            }
+          },
+          "EWMA": {
+            "normal": {
+              "violations": 67,
+              "total": 1316,
+              "rate": 0.0509,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.8797,
+              "cc_p": 0.9604,
+              "basel": "GREEN",
+              "trinity": true
+            },
+            "histsim": {
+              "violations": 59,
+              "total": 1064,
+              "rate": 0.0555,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.4223,
+              "cc_p": 0.7152,
+              "basel": "YELLOW",
+              "trinity": false
+            }
+          }
+        }
+      },
+      "component_analysis": {
+        "MF-GARCH": {
+          "tau_var_pct": 108.8,
+          "g_var_pct": 74.6,
+          "g_autocorr_1": 0.9556,
+          "g_autocorr_5": 0.8001,
+          "tau_mean": 0.00210993,
+          "g_mean": 0.7667
+        },
+        "MF-GJR": {
+          "tau_var_pct": 63.3,
+          "g_var_pct": 45.6,
+          "g_autocorr_1": 0.9339,
+          "g_autocorr_5": 0.7284,
+          "tau_mean": 0.00165891,
+          "g_mean": 0.8219
+        }
+      },
+      "parameters": {
+        "GARCH": {
+          "omega": 8.078737463846165e-05,
+          "alpha": 0.09459578719652607,
+          "beta": 0.8197845739092829,
+          "persistence": 0.914380361105809
+        },
+        "GJR": {
+          "omega": 9.604768751300388e-05,
+          "alpha": 0.053473058795385844,
+          "gamma": 0.10118164431212297,
+          "beta": 0.796140065502189,
+          "persistence": 0.9002039464536363
+        },
+        "MF-GARCH": {
+          "theta_0": -10.419749463313414,
+          "theta_1": 1.160066619057133,
+          "alpha": 0.07884644551655746,
+          "beta": 0.7971981063411714,
+          "persistence_g": 0.8760445518577289
+        },
+        "MF-GJR": {
+          "theta_0": -10.121355499296465,
+          "theta_1": 1.0602624266827438,
+          "alpha": 0.0675812464951859,
+          "gamma": 0.032908657552525,
+          "beta": 0.7858610573456885,
+          "persistence_g": 0.8698966326171369
+        }
+      },
+      "theta1_pre_post_etf": {
+        "MF-GARCH": {
+          "pre_etf_mean": 1.2707,
+          "post_etf_mean": 0.9324,
+          "pre_etf_n": 13,
+          "post_etf_n": 8,
+          "ttest_t": 2.906,
+          "ttest_p": 0.0091
+        },
+        "MF-GJR": {
+          "pre_etf_mean": 1.1439,
+          "post_etf_mean": 0.9615,
+          "pre_etf_n": 13,
+          "post_etf_n": 8,
+          "ttest_t": 2.29,
+          "ttest_p": 0.0336
+        }
+      },
+      "etf_subsample_qlike": {
+        "pre_etf": {
+          "n": 760,
+          "qlike": {
+            "GARCH": 1.780026,
+            "GJR": 1.781299,
+            "MF-GARCH": 1.70713,
+            "MF-GJR": 1.715943,
+            "EWMA": 1.755166
+          }
+        },
+        "post_etf": {
+          "n": 556,
+          "qlike": {
+            "GARCH": 1.495219,
+            "GJR": 1.481888,
+            "MF-GARCH": 1.471097,
+            "MF-GJR": 1.467537,
+            "EWMA": 1.517993
+          }
+        }
+      }
+    },
+    "SPY": {
+      "ticker": "SPY",
+      "n_oos": 1316,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-03-31",
+      "n_refits": 21,
+      "qlike": {
+        "GARCH": 1.520943,
+        "GJR": 1.479464,
+        "MF-GARCH": 1.409927,
+        "MF-GJR": 1.416914,
+        "EWMA": 1.532425
+      },
+      "qlike_pct_vs_garch": {
+        "GARCH": 0.0,
+        "GJR": -2.727,
+        "MF-GARCH": -7.299,
+        "MF-GJR": -6.84,
+        "EWMA": 0.755
+      },
+      "spearman": {
+        "GARCH": {
+          "rho": 0.2765,
+          "p": 0.0
+        },
+        "GJR": {
+          "rho": 0.327,
+          "p": 0.0
+        },
+        "MF-GARCH": {
+          "rho": 0.3729,
+          "p": 0.0
+        },
+        "MF-GJR": {
+          "rho": 0.374,
+          "p": 0.0
+        },
+        "EWMA": {
+          "rho": 0.262,
+          "p": 0.0
+        }
+      },
+      "dm_vs_garch": {
+        "GARCH": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "GJR": {
+          "t": -2.932,
+          "p": 0.0034,
+          "significant_harvey": false
+        },
+        "MF-GARCH": {
+          "t": -5.266,
+          "p": 0.0,
+          "significant_harvey": true
+        },
+        "MF-GJR": {
+          "t": -4.779,
+          "p": 0.0,
+          "significant_harvey": true
+        },
+        "EWMA": {
+          "t": 0.781,
+          "p": 0.4349,
+          "significant_harvey": false
+        }
+      },
+      "mcs": {
+        "best_model": "MF-GARCH",
+        "survived": [
+          "MF-GARCH"
+        ],
+        "eliminated": [
+          "GARCH",
+          "EWMA",
+          "GJR",
+          "MF-GJR"
+        ],
+        "p_values": {
+          "GARCH": 0.0,
+          "EWMA": 0.0014,
+          "GJR": 0.0014,
+          "MF-GJR": 0.091,
+          "MF-GARCH": 1.0
+        }
+      },
+      "var": {
+        "0.01": {
+          "GARCH": {
+            "normal": {
+              "violations": 25,
+              "total": 1316,
+              "rate": 0.019,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.0035,
+              "cc_p": 0.011,
+              "basel": "RED",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 14,
+              "total": 1064,
+              "rate": 0.0132,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.3234,
+              "cc_p": 0.2436,
+              "basel": "RED",
+              "trinity": false
+            }
+          },
+          "GJR": {
+            "normal": {
+              "violations": 24,
+              "total": 1316,
+              "rate": 0.0182,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.0071,
+              "cc_p": 0.0197,
+              "basel": "RED",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 13,
+              "total": 1064,
+              "rate": 0.0122,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.4822,
+              "cc_p": 1.0,
+              "basel": "RED",
+              "trinity": false
+            }
+          },
+          "MF-GARCH": {
+            "normal": {
+              "violations": 23,
+              "total": 1316,
+              "rate": 0.0175,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.0137,
+              "cc_p": 0.0345,
+              "basel": "RED",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 17,
+              "total": 1064,
+              "rate": 0.016,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.0714,
+              "cc_p": 1.0,
+              "basel": "RED",
+              "trinity": false
+            }
+          },
+          "MF-GJR": {
+            "normal": {
+              "violations": 22,
+              "total": 1316,
+              "rate": 0.0167,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.0255,
+              "cc_p": 0.0561,
+              "basel": "RED",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 15,
+              "total": 1064,
+              "rate": 0.0141,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.2058,
+              "cc_p": 1.0,
+              "basel": "RED",
+              "trinity": false
+            }
+          },
+          "EWMA": {
+            "normal": {
+              "violations": 27,
+              "total": 1316,
+              "rate": 0.0205,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.0008,
+              "cc_p": 0.0031,
+              "basel": "RED",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 14,
+              "total": 1064,
+              "rate": 0.0132,
+              "expected_rate": 0.01,
+              "kupiec_p": 0.3234,
+              "cc_p": 0.2436,
+              "basel": "RED",
+              "trinity": false
+            }
+          }
+        },
+        "0.05": {
+          "GARCH": {
+            "normal": {
+              "violations": 76,
+              "total": 1316,
+              "rate": 0.0578,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.2075,
+              "cc_p": 0.4452,
+              "basel": "RED",
+              "trinity": false
+            },
+            "histsim": {
+              "violations": 62,
+              "total": 1064,
+              "rate": 0.0583,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.2272,
+              "cc_p": 0.2992,
+              "basel": "YELLOW",
+              "trinity": false
+            }
+          },
+          "GJR": {
+            "normal": {
+              "violations": 72,
+              "total": 1316,
+              "rate": 0.0547,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.4395,
+              "cc_p": 0.6566,
+              "basel": "YELLOW",
+              "trinity": false
+            },
+            "histsim": {
+              "violations": 56,
+              "total": 1064,
+              "rate": 0.0526,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.6961,
+              "cc_p": 0.7661,
+              "basel": "GREEN",
+              "trinity": true
+            }
+          },
+          "MF-GARCH": {
+            "normal": {
+              "violations": 71,
+              "total": 1316,
+              "rate": 0.054,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.5158,
+              "cc_p": 0.8065,
+              "basel": "YELLOW",
+              "trinity": false
+            },
+            "histsim": {
+              "violations": 54,
+              "total": 1064,
+              "rate": 0.0508,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.9106,
+              "cc_p": 0.8793,
+              "basel": "GREEN",
+              "trinity": true
+            }
+          },
+          "MF-GJR": {
+            "normal": {
+              "violations": 73,
+              "total": 1316,
+              "rate": 0.0555,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.3705,
+              "cc_p": 0.2439,
+              "basel": "YELLOW",
+              "trinity": false
+            },
+            "histsim": {
+              "violations": 55,
+              "total": 1064,
+              "rate": 0.0517,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.8011,
+              "cc_p": 0.9643,
+              "basel": "GREEN",
+              "trinity": true
+            }
+          },
+          "EWMA": {
+            "normal": {
+              "violations": 83,
+              "total": 1316,
+              "rate": 0.0631,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.0362,
+              "cc_p": 0.1039,
+              "basel": "RED",
+              "trinity": "False"
+            },
+            "histsim": {
+              "violations": 58,
+              "total": 1064,
+              "rate": 0.0545,
+              "expected_rate": 0.05,
+              "kupiec_p": 0.5055,
+              "cc_p": 0.7972,
+              "basel": "YELLOW",
+              "trinity": false
+            }
+          }
+        }
+      },
+      "component_analysis": {
+        "MF-GARCH": {
+          "tau_var_pct": 118.4,
+          "g_var_pct": 27.1,
+          "g_autocorr_1": 0.991,
+          "g_autocorr_5": 0.9591,
+          "tau_mean": 0.00011913,
+          "g_mean": 1.1745
+        },
+        "MF-GJR": {
+          "tau_var_pct": 135.1,
+          "g_var_pct": 45.2,
+          "g_autocorr_1": 0.9726,
+          "g_autocorr_5": 0.8872,
+          "tau_mean": 0.00015165,
+          "g_mean": 1.0711
+        }
+      },
+      "parameters": {
+        "GARCH": {
+          "omega": 3.0022943127886e-06,
+          "alpha": 0.10411737296292706,
+          "beta": 0.8708113432734382,
+          "persistence": 0.9749287162363653
+        },
+        "GJR": {
+          "omega": 3.3460024328688175e-06,
+          "alpha": 0.0671891986023435,
+          "gamma": 0.1016035902631392,
+          "beta": 0.8577880009832511,
+          "persistence": 0.9757789947171642
+        },
+        "MF-GARCH": {
+          "theta_0": -17.72891604404397,
+          "theta_1": 2.8785911186711197,
+          "alpha": 0.010441714941096095,
+          "beta": 0.9466282288063229,
+          "persistence_g": 0.957069943747419
+        },
+        "MF-GJR": {
+          "theta_0": -19.303843463169883,
+          "theta_1": 3.4324378240501825,
+          "alpha": 0.0047126247505805486,
+          "gamma": -0.016906060944554897,
+          "beta": 0.999,
+          "persistence_g": 0.9952595942783031
+        }
+      },
+      "theta1_pre_post_etf": {
+        "MF-GARCH": {
+          "pre_etf_mean": 2.935,
+          "post_etf_mean": 2.9389,
+          "pre_etf_n": 13,
+          "post_etf_n": 8,
+          "ttest_t": -0.05,
+          "ttest_p": 0.9604
+        },
+        "MF-GJR": {
+          "pre_etf_mean": 2.9399,
+          "post_etf_mean": 2.8341,
+          "pre_etf_n": 13,
+          "post_etf_n": 8,
+          "ttest_t": 0.488,
+          "ttest_p": 0.6311
+        }
+      },
+      "etf_subsample_qlike": {
+        "pre_etf": {
+          "n": 760,
+          "qlike": {
+            "GARCH": 1.396179,
+            "GJR": 1.378661,
+            "MF-GARCH": 1.313113,
+            "MF-GJR": 1.318286,
+            "EWMA": 1.374752
+          }
+        },
+        "post_etf": {
+          "n": 556,
+          "qlike": {
+            "GARCH": 1.691035,
+            "GJR": 1.61689,
+            "MF-GARCH": 1.541914,
+            "MF-GJR": 1.551374,
+            "EWMA": 1.747382
+          }
+        }
+      }
+    }
+  },
+  "key_findings": "1. BTC GJR gamma=0.1012 (positive, SPY=0.1016)\n2. VIX elasticity: BTC theta_1=1.0603 vs SPY theta_1=3.4324 (ratio=0.31x)\n3. MF-GJR QLIKE: BTC -2.934% vs SPY -6.840% (BTC DM t=-2.814, Harvey=FAIL)\n4. ETF structural break: theta_1 pre=1.1439 post=0.9615 (t=2.29)",
+  "references": [
+    "Engle, Ghysels & Sohn (2013) RES 95(3):776-797",
+    "Engle & Rangel (2008) RFS 21(3):1187-1222",
+    "Conrad & Engle (2025) Two-factor GARCH, J Applied Econometrics",
+    "Patton (2011) J Econometrics 160:246-256",
+    "Harvey et al. (2016) JBES 34:92-104",
+    "Hansen, Lunde & Nason (2011) Econometrica 79(2):453-497"
+  ]
+}

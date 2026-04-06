@@ -1,0 +1,256 @@
+{
+  "experiment_id": "K915",
+  "title": "DCC-GARCH Dynamic Correlation \u2014 SPY/GLD/TLT Portfolio",
+  "timestamp": "2026-04-05T23:42:34.841432",
+  "data_source": "yfinance",
+  "data_period": "2005-01-01 to 2026-04-01",
+  "sample_size": 5343,
+  "assets": [
+    "SPY",
+    "GLD",
+    "TLT"
+  ],
+  "method": "DCC-GARCH(1,1) with GJR-GARCH(1,1) univariate stage",
+  "references": [
+    "Engle (2002): Dynamic Conditional Correlation, JBES 20(3):339-350",
+    "Engle & Sheppard (2001): Theoretical and Empirical Properties of DCC"
+  ],
+  "dcc_parameters": {
+    "a": 0.03236397281791926,
+    "b": 0.9552916910507186,
+    "persistence": 0.9876556638686379
+  },
+  "garch_parameters": {
+    "SPY": {
+      "omega": 0.02257378947824636,
+      "alpha": 0.0,
+      "gamma": 0.24661661137549484,
+      "beta": 0.8574146538524459,
+      "nu": 5.846712777381742,
+      "persistence": 0.9807229595401933,
+      "convergence": 0
+    },
+    "GLD": {
+      "omega": 0.008387214665964352,
+      "alpha": 0.06799149265179417,
+      "gamma": -0.040857537489664725,
+      "beta": 0.949176124493837,
+      "nu": 5.356688284616538,
+      "persistence": 0.9967388484007988,
+      "convergence": 0
+    },
+    "TLT": {
+      "omega": 0.004979752997007878,
+      "alpha": 0.06035215302156032,
+      "gamma": -0.01566042313751049,
+      "beta": 0.9423929458679425,
+      "nu": 16.264251819912918,
+      "persistence": 0.9949148873207476,
+      "convergence": 0
+    }
+  },
+  "unconditional_correlation": {
+    "SPY-GLD": 0.07241338671745025,
+    "SPY-TLT": -0.24599336293969504,
+    "GLD-TLT": 0.1874476026122224
+  },
+  "dynamic_correlation_stats": {
+    "SPY-GLD": {
+      "mean": 0.06916515509890372,
+      "std": 0.1988760896613725,
+      "min": -0.6395849502794725,
+      "max": 0.5787306126558985,
+      "autocorr_1": 0.9847347192845759
+    },
+    "SPY-TLT": {
+      "mean": -0.24466849689657122,
+      "std": 0.22464531353591619,
+      "min": -0.7286929930098172,
+      "max": 0.3303114581219344,
+      "autocorr_1": 0.9892157069894932
+    },
+    "GLD-TLT": {
+      "mean": 0.19139691320088667,
+      "std": 0.17605976651952346,
+      "min": -0.3665847345143534,
+      "max": 0.6098095933022701,
+      "autocorr_1": 0.9816338749920104
+    }
+  },
+  "regime_correlation_stats": {
+    "Low (VIX<15)": {
+      "count": 1989,
+      "SPY-GLD_mean": 0.03230860124002772,
+      "SPY-GLD_std": 0.18307688671211927,
+      "SPY-TLT_mean": -0.1924464721227544,
+      "SPY-TLT_std": 0.21030755180241625,
+      "GLD-TLT_mean": 0.23405142011675475,
+      "GLD-TLT_std": 0.17536844579546979
+    },
+    "Medium (15-25)": {
+      "count": 2473,
+      "SPY-GLD_mean": 0.10257435275452469,
+      "SPY-GLD_std": 0.20508682743012044,
+      "SPY-TLT_mean": -0.25274139353884917,
+      "SPY-TLT_std": 0.22637390315867995,
+      "GLD-TLT_mean": 0.16727867145258296,
+      "GLD-TLT_std": 0.17515165471564628
+    },
+    "High (25-35)": {
+      "count": 628,
+      "SPY-GLD_mean": 0.09414171310161173,
+      "SPY-GLD_std": 0.1966049141069549,
+      "SPY-TLT_mean": -0.2985482247142115,
+      "SPY-TLT_std": 0.23161169184966948,
+      "GLD-TLT_mean": 0.16490736910815298,
+      "GLD-TLT_std": 0.16568190517281947
+    },
+    "Extreme (VIX>35)": {
+      "count": 253,
+      "SPY-GLD_mean": -0.029643297876380544,
+      "SPY-GLD_std": 0.17950030008200624,
+      "SPY-TLT_mean": -0.4425691483166906,
+      "SPY-TLT_std": 0.12644450212199898,
+      "GLD-TLT_mean": 0.15756304473499796,
+      "GLD-TLT_std": 0.14922726710257597
+    }
+  },
+  "crisis_correlation_stats": {
+    "GFC 2008-2009": {
+      "SPY-GLD": {
+        "mean": -0.01165002747543012,
+        "std": 0.18019346109470172,
+        "min": -0.28626171782748555,
+        "max": 0.339285791539906
+      },
+      "SPY-TLT": {
+        "mean": -0.4412026452677001,
+        "std": 0.09888650845180334,
+        "min": -0.6325912336634012,
+        "max": -0.2199272310611572
+      },
+      "GLD-TLT": {
+        "mean": 0.06764420095259226,
+        "std": 0.12659062279674332,
+        "min": -0.13765359006956462,
+        "max": 0.41441576105873223
+      }
+    },
+    "COVID 2020": {
+      "SPY-GLD": {
+        "mean": -0.06564651926799342,
+        "std": 0.14266829070873877,
+        "min": -0.39791013726450664,
+        "max": 0.08495565747746624
+      },
+      "SPY-TLT": {
+        "mean": -0.4987650447771346,
+        "std": 0.04778742286052138,
+        "min": -0.6017890159502637,
+        "max": -0.4372464584083278
+      },
+      "GLD-TLT": {
+        "mean": 0.21364455951223546,
+        "std": 0.13411038847560633,
+        "min": -0.0013045490484087949,
+        "max": 0.5533995116569627
+      }
+    },
+    "Rate Hike 2022": {
+      "SPY-GLD": {
+        "mean": 0.1382852717078087,
+        "std": 0.23345164741299465,
+        "min": -0.35035966786038547,
+        "max": 0.4767830903794215
+      },
+      "SPY-TLT": {
+        "mean": -0.026493487876196667,
+        "std": 0.1336652416985768,
+        "min": -0.36762590074450324,
+        "max": 0.21654305746228242
+      },
+      "GLD-TLT": {
+        "mean": 0.3129301207681071,
+        "std": 0.07022722317823729,
+        "min": 0.16279927329763277,
+        "max": 0.4671256255592941
+      }
+    }
+  },
+  "portfolio_metrics": {
+    "50/50 SPY/GLD": {
+      "name": "50/50 SPY/GLD",
+      "ann_return": 0.10326940124418652,
+      "ann_vol": 0.13527349651150558,
+      "sharpe": 0.7634119314377522,
+      "mdd": -0.36121235464976453,
+      "calmar": 0.2858966475394167,
+      "crra_utility_gamma5": 0.05709243597783878,
+      "avg_turnover": 0.00018716077110237696,
+      "total_turnover": 1.0
+    },
+    "1/3 Each": {
+      "name": "1/3 Each",
+      "ann_return": 0.07923038719340901,
+      "ann_vol": 0.09773246096553469,
+      "sharpe": 0.8106865048793724,
+      "mdd": -0.239852613891671,
+      "calmar": 0.3303294715361879,
+      "crra_utility_gamma5": 0.05524675954702111,
+      "avg_turnover": 0.00018716077110237696,
+      "total_turnover": 1.0
+    },
+    "DCC Min-Var (2 asset)": {
+      "name": "DCC Min-Var (2 asset)",
+      "ann_return": 0.07912859889165748,
+      "ann_vol": 0.12416247742337587,
+      "sharpe": 0.6372988082530001,
+      "mdd": -0.3613425654413379,
+      "calmar": 0.21898499224693083,
+      "crra_utility_gamma5": 0.040320888044221945,
+      "avg_turnover": 0.07288943942491076,
+      "total_turnover": 389.3753854078733
+    },
+    "DCC Min-Var (3 asset)": {
+      "name": "DCC Min-Var (3 asset)",
+      "ann_return": 0.05985891025863577,
+      "ann_vol": 0.08513444620167682,
+      "sharpe": 0.7031103499144719,
+      "mdd": -0.26898275944117667,
+      "calmar": 0.22253809271269,
+      "crra_utility_gamma5": 0.04170781420464445,
+      "avg_turnover": 0.07244568400996827,
+      "total_turnover": 387.00484398125053
+    },
+    "DCC Risk Parity (3 asset)": {
+      "name": "DCC Risk Parity (3 asset)",
+      "ann_return": 0.06914945298034329,
+      "ann_vol": 0.08844432244612782,
+      "sharpe": 0.781841627227828,
+      "mdd": -0.24169516947163955,
+      "calmar": 0.2861019238882938,
+      "crra_utility_gamma5": 0.049542434656037,
+      "avg_turnover": 0.0342013046954211,
+      "total_turnover": 182.7033696829395
+    }
+  },
+  "dm_test_vs_5050": {
+    "1/3 Each": {
+      "t_stat": -1.582486563534702,
+      "p_value": 0.11359773530320871
+    },
+    "DCC Min-Var (2 asset)": {
+      "t_stat": -1.8828452331427616,
+      "p_value": 0.05977564813739966
+    },
+    "DCC Min-Var (3 asset)": {
+      "t_stat": -1.8516750879369022,
+      "p_value": 0.0641276477591588
+    },
+    "DCC Risk Parity (3 asset)": {
+      "t_stat": -1.7339296963857025,
+      "p_value": 0.08298826120719793
+    }
+  },
+  "key_findings": "DCC-GARCH(1,1) estimated on SPY/GLD/TLT (2005-2026, 5343 obs). DCC parameters: a=0.0324, b=0.9553, persistence=0.9877. SPY-GLD dynamic correlation: mean=0.069, std=0.199, range [-0.640, 0.579]. SPY-TLT: mean=-0.245. Correlations shift significantly across VIX regimes and crisis periods. Portfolio: 50/50 SPY/GLD Sharpe=0.763, best DCC strategy (DCC Risk Parity (3 asset)) Sharpe=0.782 (net of 10bps). DM test: no significant improvement over 50/50 at Harvey |t|>3.0 threshold. DCC captures meaningful correlation dynamics but static 50/50 remains competitive due to low turnover and rebalancing premium."
+}

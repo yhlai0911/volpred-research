@@ -659,5 +659,29 @@
       "Paper 4 的 91/9 分解被 Codex 質疑為「算術恆等式」——修正為「empirical magnitude not previously documented」是正確的定位。貢獻不在數學而在量化。"
     ],
     "timestamp": "2026-04-04T05:51:12.413209+00:00"
+  },
+  {
+    "id": "E48",
+    "title": "E48: MF-GJR Consolidation Series (K889-K914) — 9 Experiments, 3 Positive",
+    "content": "Session 2026-04-06 做了 9 個實驗（K906-K914），圍繞 MF-GJR 和 TCI 兩條主線。\n\n**成功模式（3 個 positive）：**\n1. K907 TCI Network (★★)：用完全不同的方法論（Diebold-Yilmaz VAR）發現 TCI 與 VIX 正交（r=0.001）。成功因為：(a) 方向完全不同（Face G 跳躍式探索）(b) 不預設結果\n2. K908 MF-GJR+HistSim (★★★)：補上 K889 的 VaR 缺口。成功因為：(a) 明確的缺口（VaR 全 FAIL）(b) 已知解法（K802 Student-t）(c) 簡單組合\n3. K912 Regime Decomposition (★★)：反直覺發現（低 VIX 優勢最強）。成功因為：分析已有數據的新維度，不需新模型\n\n**失敗模式（6 個 null）：**\n1. K909/K914：試圖在 MF-GJR 的 VIX 因子上加東西（第二因子/隔夜分解）→ VIX sufficiency 再次確認。教訓：VIX 的乘法框架已接近 ceiling，加更多因子是 diminishing returns\n2. K910/K911：TCI 不是交易信號（mean 和 tail 都不行）。教訓：結構性描述指標 ≠ 交易信號。預測 vol magnitude ≠ 預測 direction\n3. K913：VRP 報酬預測 OOS 全負。教訓：in-sample 學術結果（Bollerslev 2009）不一定過我們的嚴格 OOS + Harvey 標準\n4. K906：HAR-RV 初步 NULL（隔夜 50%）。但這是 preliminary，需更多數據\n\n**流程改善（本 session 建立）：**\n- experiments/kNNN/ 專屬資料夾 + 必備 README.md\n- 固定 seed 規則（np.random.seed(42)）\n- Gemini 第 3 次建議（DASN/QDVC/Fractional MF-GJR）\n\n**下次該做什麼：**\n- 停止嘗試改善 MF-GJR——它已接近 ceiling（3 次 null 確認）\n- 轉向：(a) PRG 論文撰寫 (b) G3-1 DASN 隔夜 spillover (c) 多變量模型（DCC-GARCH, Copula）\n- 連續 4 個 null 後必須換方向（K909→K910→K911→K913→K914）",
+    "tags": [
+      "MF-GJR",
+      "TCI",
+      "VIX sufficiency",
+      "session summary",
+      "process improvement"
+    ],
+    "created_at": "2026-04-05T23:35:56.796325+00:00",
+    "experiments_covered": [
+      "K906",
+      "K907",
+      "K908",
+      "K909",
+      "K910",
+      "K911",
+      "K912",
+      "K913",
+      "K914"
+    ]
   }
 ]

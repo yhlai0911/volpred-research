@@ -20986,5 +20986,64 @@
     "category": "experiment",
     "confidence": 0.85,
     "created_at": "2026-04-05T22:35:20.608540+00:00"
+  },
+  {
+    "id": "know_20260405234356_k915",
+    "experiment_id": "K915",
+    "title": "K915: DCC-GARCH Dynamic Correlation — Real Dynamics but Portfolio NULL (50/50 Irreducible #11)",
+    "content": "[提出: Claude, 執行: Claude] DCC-GARCH(1,1) on SPY/GLD/TLT (2005-2026). DCC params: a=0.032, b=0.955, persistence=0.988. POSITIVE: SPY-GLD correlation swings -0.64 to +0.58 (mean 0.069), not constant. SPY-TLT hedge deepens in crises (-0.19 low VIX → -0.44 extreme). 2022 anomalous: SPY-TLT near zero (stocks+bonds fell together). DCC predicts 21d rolling corr with r=0.88-0.90. PORTFOLIO NULL: No DCC strategy beats static 50/50 (Sharpe 0.763) at Harvey. Best: Risk Parity 0.782 (DM t=-1.73 NS). High turnover kills (3-7% daily vs 0.02% static). Static 1/3 each best Sharpe (0.811) and lowest MDD (-24.0%). CONCLUSION: DCC captures real dynamics but cannot be profitably exploited due to turnover. 50/50 irreducible #11. But DCC as analytical tool is valuable — reveals 2022 as structural break in stock-bond correlation.",
+    "tags": [
+      "DCC-GARCH",
+      "dynamic correlation",
+      "SPY",
+      "GLD",
+      "TLT",
+      "portfolio",
+      "50/50 irreducible",
+      "multivariate"
+    ],
+    "data_source": "yfinance (SPY, GLD, TLT, ^VIX)",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-05T23:43:56.187617+00:00"
+  },
+  {
+    "id": "know_20260406002112_k916",
+    "experiment_id": "K916",
+    "title": "K916: MF-GJR on Bitcoin — VIX Elasticity 31% of SPY, Harvey FAIL but Meaningful Null",
+    "content": "[提出: Claude, 執行: Claude] MF-GJR on BTC-USD (2015-2026, OOS 2021-2026). BTC vol 61.1% (3.44x SPY). VIX-BTC correlation only 0.055 (SPY: 0.547, 10x stronger). BTC theta_1=1.06 (SPY: 3.43, ratio 0.31x). MF-GJR QLIKE -2.93% vs GARCH for BTC (DM t=-2.81 Harvey FAIL) vs SPY -6.84% (t=-4.78 PASS). BTC gamma=0.10 positive (leverage effect exists, same magnitude as SPY). Post-ETF theta_1=0.96 (decreased, t=2.29 marginal) — contrary to hypothesis that ETF would increase VIX coupling. All 1% VaR FAIL for BTC (even HistSim) — extreme fat tails. 5% VaR: MF-GARCH/MF-GJR Trinity PASS. MCS: all 5 models survive for BTC (cannot distinguish). CONCLUSION: Multiplicative VIX structure does not transfer to crypto with same strength. VIX is not BTC primary fear factor. BTC needs its own fear index (BVIV or crypto-specific). Meaningful null: cross-asset MF-GJR boundary identified.",
+    "tags": [
+      "MF-GJR",
+      "Bitcoin",
+      "BTC",
+      "crypto",
+      "VIX",
+      "cross-asset",
+      "null result",
+      "theta_1"
+    ],
+    "data_source": "yfinance (BTC-USD, SPY, ^VIX)",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-06T00:21:12.331811+00:00"
+  },
+  {
+    "id": "know_20260406003214_k917",
+    "experiment_id": "K917",
+    "title": "K917: Taiwan Ex-Dividend Season Vol Effect — NULL (Summer Vol Actually Lower, VIX Sufficiency #27)",
+    "content": "[提出: 用戶, 執行: Claude] 0050.TW 除權息季節(6-8月) vol effect. 2006-2026, 204 months. RESULT NULL: Summer RV=0.169 vs other months 0.185 (actually LOWER). Welch t=-1.03 p=0.303, Cohen d=-0.12 negligible. Kruskal-Wallis p=0.722. Permutation p=0.489. VIX regression: summer dummy t=-0.10 p=0.92 after VIX control (VIX R²=0.44, t=4.42). 24 ex-div events: slight post-event vol increase (0.148→0.172) but paired t p=0.17 NS. Fill gap median=0 days, 87.5% within 5 days. Summer vol higher only 9/17 years (53%, random). 0056.TW also NS (t=0.09). CONCLUSION: No ex-dividend season vol effect. 8.63/VIX needs no seasonal override. VIX sufficiency #27. Practical: investors need not worry about 除權息 increasing vol.",
+    "tags": [
+      "Taiwan",
+      "0050.TW",
+      "ex-dividend",
+      "除權息",
+      "seasonal",
+      "VIX sufficiency",
+      "null result"
+    ],
+    "data_source": "yfinance (0050.TW, 0056.TW, ^VIX)",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-06T00:32:14.191094+00:00"
   }
 ]
