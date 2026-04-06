@@ -21470,5 +21470,24 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T10:43:21.351689+00:00",
     "star_rating": 1
+  },
+  {
+    "id": "know_20260406105732_k942",
+    "experiment_id": "K942",
+    "title": "K942: MF-GJR Subsample Stability ★★ — 13/13全勝，VIX在極端regime最有價值",
+    "content": "[提出: Claude, 執行: Claude] MF-GJR(VIX)分期穩定性測試（論文robustness）。SPY OOS 2016-2025。Full OOS: +6.26% vs GJR (DM t=-4.565 Harvey✓)。時間分期5/5勝（2016-17 +8.29% t=-4.69、2018-19 +3.35% t=-1.36、2020-21 +8.04% t=-1.32、2022-23 +3.99% t=-2.94、2024-25 +7.08% t=-3.65）。VIX regime 3/3勝：Low(<15) +8.69% t=-8.12、Medium(15-25) +0.52% NS、High(≥25) +17.33% t=-2.66。Volatility quintile 5/5勝，單調遞增Q1(+4.4%)到Q5(+9.3%)。Rolling 63-day: 83.3%窗口勝。關鍵insight：VIX在極端regime（低+高）最有增量價值，normal range最小。VIX是regime indicator而非level predictor。論文Table直接可用。",
+    "tags": [
+      "volatility",
+      "MF-GJR",
+      "VIX",
+      "robustness",
+      "subsample",
+      "regime",
+      "paper-ready",
+      "SPY"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T10:57:32.385915+00:00",
+    "star_rating": 2
   }
 ]
