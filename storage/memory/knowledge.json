@@ -21045,5 +21045,25 @@
     "category": "experiment",
     "confidence": 0.85,
     "created_at": "2026-04-06T00:32:14.191094+00:00"
+  },
+  {
+    "id": "know_20260406012510_k918",
+    "experiment_id": "K918",
+    "title": "K918: BEKK-GARCH SPY-GLD — No Cross-Spillover (LR p=0.112), Independence IS Diversification",
+    "content": "[提出: Claude, 執行: Claude] Full BEKK(1,1) vs Diagonal BEKK on SPY+GLD (2005-2026). LR test stat=7.50, p=0.112 — Diagonal preferred (no cross-spillover needed). Cross-spillover negligible: a12=-0.009 (SPY→GLD, 2.6% of own ARCH), a21=0.001 (GLD→SPY, 0.5%). Confirms K907 GLD as volatility isolator. BEKK conditional corr mean=0.071 (matches DCC K915: 0.069), wider range (std=0.240 vs 0.199). Corr rises with VIX: Low=0.034→High=0.120, but drops at Extreme=0.037. Portfolio NULL: MinVar Sharpe 0.782 vs 50/50 0.759, but worse MDD (-37.5% vs -36.1%) and 7.4x turnover. 50/50 irreducible #12. KEY INSIGHT: The independence IS the diversification — SPY and GLD vols are driven by their own dynamics, not by each other. This is precisely why static 50/50 is irreducible.",
+    "tags": [
+      "BEKK-GARCH",
+      "spillover",
+      "SPY",
+      "GLD",
+      "cross-spillover",
+      "independence",
+      "50/50 irreducible",
+      "multivariate"
+    ],
+    "data_source": "yfinance (SPY, GLD)",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-06T01:25:10.388141+00:00"
   }
 ]

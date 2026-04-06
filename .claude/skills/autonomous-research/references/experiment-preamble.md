@@ -60,6 +60,7 @@
 | **Joint VaR-ES** | Fissler & Ziegel (2016) scoring | 越低越好 | 唯一 strictly consistent joint loss |
 
 **VaR 和 ES 必須同時在 1% 和 5% 信心水準評估。只測 1% 不夠。**
+**VaR/ES 評估必須分 In-Sample 和 Out-of-Sample 分別報告。** IS PASS + OOS PASS = 可信；IS PASS + OOS FAIL = overfitting。只報一種沒有說服力。
 
 ## 4. 防錯規則
 
