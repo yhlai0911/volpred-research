@@ -21128,5 +21128,26 @@
     "category": "experiment",
     "confidence": 0.85,
     "created_at": "2026-04-06T02:49:15.721114+00:00"
+  },
+  {
+    "id": "know_20260406031020_k922",
+    "experiment_id": "K922",
+    "title": "K922: Copula SPY-0050.TW ★★ — Higher Corr but Lower Tail Dep (λ=0.078), COVID Amplified (0.364)",
+    "content": "[提出: Claude, 執行: Claude] Copula-GARCH on SPY/0050.TW (2006-2026). Student-t copula best (same as K920 SPY-GLD). KEY: SPY-0050.TW ρ=0.219 (2.3x SPY-GLD 0.094) but λ=0.078 (HALF of SPY-GLD 0.140). Higher ν=5.75 (vs 3.05) = thinner joint tails despite stronger average correlation. CRISIS: COVID λ=0.364, ρ=0.452 (SPY-GLD: λ=0.068, ρ=-0.147) — 0050.TW AMPLIFIES co-crashes in global events. BUT GFC λ=0.000 and Rate Hike λ=0.000 — 0050.TW actually decoupled in US-originated crises (contradicts hypothesis). COPULA MOAT EXPLANATION: GLD decouples from SPY in crises (K920), 0050.TW amplifies during global events but decouples during US-specific events. SPY/GLD preferred over SPY/0050.TW because GLD provides CONSISTENT crisis protection while 0050.TW is unpredictable. Portfolio VaR: SPY/TW historical tail -2.68% vs SPY/GLD -2.39% (worse). Directly supports Paper 2 Taiwan VT.",
+    "tags": [
+      "copula",
+      "GARCH",
+      "0050.TW",
+      "Taiwan",
+      "SPY",
+      "tail dependence",
+      "cross-market",
+      "crisis",
+      "Paper 2"
+    ],
+    "data_source": "yfinance (SPY, 0050.TW)",
+    "category": "experiment",
+    "confidence": 0.9,
+    "created_at": "2026-04-06T03:10:20.797088+00:00"
   }
 ]

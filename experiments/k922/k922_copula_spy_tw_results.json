@@ -1,0 +1,515 @@
+{
+  "experiment_id": "K922",
+  "title": "Copula-GARCH SPY-0050.TW Cross-Market Tail Dependence",
+  "date": "2026-04-06",
+  "data_source": "yfinance",
+  "data_period": "2009-01-05 to 2026-04-02",
+  "oos_start": "2019-01-01",
+  "n_obs": 4081,
+  "n_is": 2384,
+  "n_oos": 1697,
+  "descriptive_stats": {
+    "SPY": {
+      "name": "SPY",
+      "n_obs": 4081,
+      "mean": 0.000631,
+      "std": 0.011251,
+      "skew": -0.2128,
+      "kurtosis": 10.9166,
+      "min": -0.109424,
+      "max": 0.105019,
+      "adf_stat": -23.5579,
+      "adf_pval": 0.0,
+      "arch_lm_stat": 1077.243,
+      "arch_lm_pval": 0.0,
+      "jb_stat": 20294.99,
+      "jb_pval": 0.0
+    },
+    "0050.TW": {
+      "name": "0050.TW",
+      "n_obs": 4081,
+      "mean": 0.000625,
+      "std": 0.01342,
+      "skew": 0.2936,
+      "kurtosis": 18.0327,
+      "min": -0.119223,
+      "max": 0.165453,
+      "adf_stat": -13.3588,
+      "adf_pval": 0.0,
+      "arch_lm_stat": 931.7717,
+      "arch_lm_pval": 0.0,
+      "jb_stat": 55352.5,
+      "jb_pval": 0.0
+    }
+  },
+  "pearson_correlation": 0.1404,
+  "spearman_correlation": {
+    "rho": 0.1453,
+    "p_value": 0.0
+  },
+  "pit_uniformity": {
+    "SPY": {
+      "ks_stat": 0.056,
+      "ks_pval": 0.0
+    },
+    "0050.TW": {
+      "ks_stat": 0.0578,
+      "ks_pval": 0.0
+    }
+  },
+  "garch_marginals": {
+    "SPY": {
+      "omega": 0.026693,
+      "alpha": 0.007322,
+      "gamma": 0.261616,
+      "beta": 0.842544,
+      "nu": 5.78,
+      "persistence": 0.9807,
+      "converged": true
+    },
+    "0050.TW": {
+      "omega": 0.032028,
+      "alpha": 0.021675,
+      "gamma": 0.08915,
+      "beta": 0.911338,
+      "nu": 4.96,
+      "persistence": 0.9776,
+      "converged": true
+    }
+  },
+  "copula_full_sample": [
+    {
+      "name": "Student-t",
+      "params": {
+        "rho": 0.2193,
+        "nu": 5.75
+      },
+      "log_likelihood": 79.81,
+      "k": 2,
+      "AIC": -155.62,
+      "BIC": -142.99,
+      "lambda_L": 0.0776,
+      "lambda_U": 0.0776,
+      "converged": true
+    },
+    {
+      "name": "Gaussian",
+      "params": {
+        "rho": 0.2521
+      },
+      "log_likelihood": 58.01,
+      "k": 1,
+      "AIC": -114.02,
+      "BIC": -107.71,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Clayton",
+      "params": {
+        "theta": 0.2751
+      },
+      "log_likelihood": 56.99,
+      "k": 1,
+      "AIC": -111.98,
+      "BIC": -105.66,
+      "lambda_L": 0.0805,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Frank",
+      "params": {
+        "theta": 1.2836
+      },
+      "log_likelihood": 50.66,
+      "k": 1,
+      "AIC": -99.32,
+      "BIC": -93.01,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Gumbel",
+      "params": {
+        "theta": 1.0587
+      },
+      "log_likelihood": 22.01,
+      "k": 1,
+      "AIC": -42.02,
+      "BIC": -35.7,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0754,
+      "converged": true
+    }
+  ],
+  "copula_is": [
+    {
+      "name": "Student-t",
+      "params": {
+        "rho": 0.2281,
+        "nu": 4.17
+      },
+      "log_likelihood": 63.07,
+      "k": 2,
+      "AIC": -122.15,
+      "BIC": -110.6,
+      "lambda_L": 0.1294,
+      "lambda_U": 0.1294,
+      "converged": true
+    },
+    {
+      "name": "Gaussian",
+      "params": {
+        "rho": 0.2942
+      },
+      "log_likelihood": 41.4,
+      "k": 1,
+      "AIC": -80.79,
+      "BIC": -75.01,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Clayton",
+      "params": {
+        "theta": 0.3219
+      },
+      "log_likelihood": 41.24,
+      "k": 1,
+      "AIC": -80.48,
+      "BIC": -74.7,
+      "lambda_L": 0.1161,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Frank",
+      "params": {
+        "theta": 1.4402
+      },
+      "log_likelihood": 32.81,
+      "k": 1,
+      "AIC": -63.61,
+      "BIC": -57.84,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Gumbel",
+      "params": {
+        "theta": 1.0682
+      },
+      "log_likelihood": 16.22,
+      "k": 1,
+      "AIC": -30.43,
+      "BIC": -24.65,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0866,
+      "converged": true
+    }
+  ],
+  "copula_oos": [
+    {
+      "name": "Student-t",
+      "params": {
+        "rho": 0.2001,
+        "nu": 11.41
+      },
+      "log_likelihood": 21.71,
+      "k": 2,
+      "AIC": -39.43,
+      "BIC": -28.55,
+      "lambda_L": 0.0135,
+      "lambda_U": 0.0135,
+      "converged": true
+    },
+    {
+      "name": "Gaussian",
+      "params": {
+        "rho": 0.2058
+      },
+      "log_likelihood": 18.98,
+      "k": 1,
+      "AIC": -35.95,
+      "BIC": -30.52,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Frank",
+      "params": {
+        "theta": 1.1142
+      },
+      "log_likelihood": 18.71,
+      "k": 1,
+      "AIC": -35.42,
+      "BIC": -29.99,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Clayton",
+      "params": {
+        "theta": 0.2203
+      },
+      "log_likelihood": 17.4,
+      "k": 1,
+      "AIC": -32.8,
+      "BIC": -27.37,
+      "lambda_L": 0.043,
+      "lambda_U": 0.0,
+      "converged": true
+    },
+    {
+      "name": "Gumbel",
+      "params": {
+        "theta": 1.0472
+      },
+      "log_likelihood": 6.47,
+      "k": 1,
+      "AIC": -10.93,
+      "BIC": -5.5,
+      "lambda_L": 0.0,
+      "lambda_U": 0.0616,
+      "converged": true
+    }
+  ],
+  "best_copula_full": {
+    "name": "Student-t",
+    "params": {
+      "rho": 0.2193,
+      "nu": 5.75
+    },
+    "log_likelihood": 79.81,
+    "k": 2,
+    "AIC": -155.62,
+    "BIC": -142.99,
+    "lambda_L": 0.0776,
+    "lambda_U": 0.0776,
+    "converged": true
+  },
+  "best_copula_is": {
+    "name": "Student-t",
+    "params": {
+      "rho": 0.2281,
+      "nu": 4.17
+    },
+    "log_likelihood": 63.07,
+    "k": 2,
+    "AIC": -122.15,
+    "BIC": -110.6,
+    "lambda_L": 0.1294,
+    "lambda_U": 0.1294,
+    "converged": true
+  },
+  "best_copula_oos": {
+    "name": "Student-t",
+    "params": {
+      "rho": 0.2001,
+      "nu": 11.41
+    },
+    "log_likelihood": 21.71,
+    "k": 2,
+    "AIC": -39.43,
+    "BIC": -28.55,
+    "lambda_L": 0.0135,
+    "lambda_U": 0.0135,
+    "converged": true
+  },
+  "rolling_tail_dependence": {
+    "lambda_L_clayton": {
+      "mean": 0.1071,
+      "std": 0.0763,
+      "min": 0.002,
+      "max": 0.3008
+    },
+    "lambda_sym_student_t": {
+      "mean": 0.0982,
+      "std": 0.0928,
+      "min": 0.0,
+      "max": 0.279
+    },
+    "rho_student_t": {
+      "mean": 0.2206,
+      "std": 0.0663
+    }
+  },
+  "crisis_tail_dependence": {
+    "GFC_2008": {
+      "lambda_L_clayton": 0.1441,
+      "lambda_sym_t": 0.0,
+      "rho_t": 0.0285,
+      "n_days": 53
+    },
+    "COVID_2020": {
+      "lambda_L_clayton": 0.3669,
+      "lambda_sym_t": 0.3644,
+      "rho_t": 0.452,
+      "n_days": 59
+    },
+    "Rate_Hike_2022": {
+      "lambda_L_clayton": 0.0104,
+      "lambda_sym_t": 0.0,
+      "rho_t": 0.0247,
+      "n_days": 195
+    }
+  },
+  "var_backtest": {
+    "IS": {
+      "VaR_1pct": {
+        "alpha": 0.01,
+        "n_obs": 1884,
+        "kupiec": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "n_violations": 0,
+          "violation_rate": 0.0
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0
+        },
+        "basel_traffic_light": "Green",
+        "violation_rate": 0.0,
+        "expected_rate": 0.01
+      },
+      "VaR_5pct": {
+        "alpha": 0.05,
+        "n_obs": 1884,
+        "kupiec": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "n_violations": 0,
+          "violation_rate": 0.0
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0
+        },
+        "basel_traffic_light": "Green",
+        "violation_rate": 0.0,
+        "expected_rate": 0.05
+      },
+      "n_days": 1884
+    },
+    "OOS": {
+      "VaR_1pct": {
+        "alpha": 0.01,
+        "n_obs": 1697,
+        "kupiec": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "n_violations": 0,
+          "violation_rate": 0.0
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0
+        },
+        "basel_traffic_light": "Green",
+        "violation_rate": 0.0,
+        "expected_rate": 0.01
+      },
+      "VaR_5pct": {
+        "alpha": 0.05,
+        "n_obs": 1697,
+        "kupiec": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "n_violations": 0,
+          "violation_rate": 0.0
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0
+        },
+        "basel_traffic_light": "Green",
+        "violation_rate": 0.0,
+        "expected_rate": 0.05
+      },
+      "n_days": 1697
+    }
+  },
+  "historical_var": {
+    "IS": {
+      "VaR_1pct": -0.026646,
+      "ES_1pct": -0.039164,
+      "VaR_5pct": -0.012416,
+      "ES_5pct": -0.021421
+    },
+    "OOS": {
+      "VaR_1pct": -0.026786,
+      "ES_1pct": -0.040593,
+      "VaR_5pct": -0.014031,
+      "ES_5pct": -0.022239
+    }
+  },
+  "copula_var_simulation": {
+    "VaR_1pct": -0.020026,
+    "ES_1pct": -0.023286,
+    "VaR_5pct": -0.013423,
+    "ES_5pct": -0.017461
+  },
+  "comparison_with_k920": {
+    "metric": {},
+    "SPY_GLD_K920": {
+      "best_copula": "Student-t",
+      "rho": 0.094,
+      "nu": 3.05,
+      "lambda_L": 0.1399,
+      "lambda_U": 0.1399,
+      "pearson_corr": 0.0583,
+      "spearman_corr": 0.0613,
+      "crisis": {
+        "GFC_2008": {
+          "lambda_sym_t": 0.112,
+          "rho_t": 0.0795
+        },
+        "COVID_2020": {
+          "lambda_sym_t": 0.0682,
+          "rho_t": -0.1474
+        },
+        "Rate_Hike_2022": {
+          "lambda_sym_t": 0.0489,
+          "rho_t": 0.1943
+        }
+      },
+      "copula_var": {
+        "VaR_1pct": -0.019735,
+        "ES_1pct": -0.023767,
+        "VaR_5pct": -0.012098,
+        "ES_5pct": -0.016822
+      }
+    },
+    "SPY_0050TW_K922": {
+      "best_copula": "Student-t",
+      "rho": 0.2193,
+      "nu": 5.75,
+      "lambda_L": 0.0776,
+      "lambda_U": 0.0776,
+      "pearson_corr": 0.1404,
+      "spearman_corr": 0.1453
+    }
+  },
+  "references": [
+    "Patton (2006): Modelling Asymmetric Exchange Rate Dependence, IER",
+    "Joe (1997): Multivariate Models and Dependence Concepts",
+    "Kupiec (1995): Techniques for Verifying VaR, Journal of Derivatives",
+    "Christoffersen (1998): Evaluating Interval Forecasts, IER",
+    "Cherubini, Luciano & Vecchiato (2004): Copula Methods in Finance"
+  ],
+  "key_findings": "SPY-0050.TW copula analysis (2006-2026, 4081 common trading days): Best copula = Student-t (AIC=-155.6). Student-t copula: rho=0.2193 (vs SPY-GLD 0.0940), nu=5.75 (vs SPY-GLD 3.05), lambda=0.0776 (vs SPY-GLD 0.1399). Pearson corr=0.1404 (vs SPY-GLD 0.0583). Rolling Student-t lambda mean=0.0982. GFC_2008: SPY-TW lambda=0.0, rho=0.0285 (vs SPY-GLD lambda=0.112, rho=0.0795). COVID_2020: SPY-TW lambda=0.3644, rho=0.452 (vs SPY-GLD lambda=0.0682, rho=-0.1474). Rate_Hike_2022: SPY-TW lambda=0.0, rho=0.0247 (vs SPY-GLD lambda=0.0489, rho=0.1943). Copula VaR 1% (50/50 SPY/TW): -0.020026 (vs SPY/GLD: -0.019735).",
+  "plots": [
+    "k922_copula_comparison.png",
+    "k922_tail_dependence.png",
+    "k922_crisis_analysis.png",
+    "k922_copula_var.png"
+  ]
+}

@@ -683,5 +683,29 @@
       "K913",
       "K914"
     ]
+  },
+  {
+    "id": "E49",
+    "title": "E49: Multivariate & Cross-Market Series (K915-K921) — Copula Is User Expertise Sweet Spot",
+    "content": "Session 2026-04-06 後半段做了 7 個實驗（K915-K921），從 DCC 到 BEKK 到 Copula 到跨市場 DASN。\n\n**成功模式（3 positive）：**\n1. K919 DASN (★★)：Gap channel 佔 SPY→台灣傳導 99.7%。成功因為：(a) Gemini G3-1 建議方向好 (b) 用日頻 OHLC 就能做 (c) 結果有強實務意義\n2. K920 Copula (★★)：Student-t copula 最佳，λ=0.14 但危機解耦。成功因為：(a) 用戶專長領域 (b) 提供 50/50 護城河的微觀基礎 (c) 危機條件獨立是新概念\n3. K915 DCC (Structural)：相關性預測 r=0.88 但 portfolio NULL。分析工具有價值\n\n**失敗/部分 null：**\n1. K918 BEKK：No cross-spillover，但「獨立性=分散化」是好的結構性發現\n2. K916 BTC：MF-GJR equity ✅ crypto ❌。VIX 彈性僅 31%——有邊界意義\n3. K917 除權息：完全 null，VIX sufficiency #27\n4. K921 Time-varying copula：動態 copula 更好但預警 1/3 only。VIX 驅動 λ\n\n**方法論教訓：**\n- Copula 是用戶專長（copula-GARCH/hedging），產出品質和學術價值最高\n- 多變量模型（DCC/BEKK/Copula）的 portfolio application 幾乎都 NULL（turnover 太高），但分析價值高\n- 跨市場研究（K919 DASN, K922 Copula-TW）直接服務 Paper 2\n- Gemini G3 建議 3/3 已執行：G3-1 ★★，G3-2 null，G3-3 未做（理論重）\n\n**下次該做什麼：**\n- Copula 系列可以整理成論文（SPY-GLD-0050.TW 三角 copula 結構）\n- 停止 portfolio optimization 嘗試（50/50 已確認 12 次不可超越）\n- 轉向論文撰寫：(a) MF-GJR paper (b) Copula paper (c) Paper 2 更新",
+    "tags": [
+      "multivariate",
+      "copula",
+      "DCC",
+      "BEKK",
+      "cross-market",
+      "DASN",
+      "session summary"
+    ],
+    "created_at": "2026-04-06T03:09:19.612472+00:00",
+    "experiments_covered": [
+      "K915",
+      "K916",
+      "K917",
+      "K918",
+      "K919",
+      "K920",
+      "K921"
+    ]
   }
 ]
