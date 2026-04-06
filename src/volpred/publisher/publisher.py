@@ -200,8 +200,11 @@ class Publisher:
             print(f"  → Proceeding with publish, but consider if this adds new value.")
         # Sanitize description
         if isinstance(description, str):
-            # Fix double-escaped newlines from various input sources
-            description = description.replace('\\n', '\n').replace('\\t', '\t')
+            # Fix double-escaped newlines from CLI input, but preserve LaTeX commands.
+            # \\n → newline ONLY when NOT followed by a letter (avoid destroying \nu, \nabla, \newcommand, etc.)
+            # \\t → NEVER replace (destroys \tau, \times, \theta, \text{}, etc.)
+            import re
+            description = re.sub(r'\\n(?![a-zA-Z])', '\n', description)
             # Remove leaked agent metadata (JSONL fragments from agent output files)
             import re
             metadata_pattern = re.search(r'\{"parentUuid":', description)
