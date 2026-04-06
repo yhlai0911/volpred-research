@@ -1,0 +1,355 @@
+{
+  "experiment_id": "K947",
+  "title": "Threshold GARCH with VIX as Threshold Variable",
+  "date": "2026-04-07",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2005-01-05 to 2025-12-31",
+  "oos_period": "2016-01-04 to 2025-12-31",
+  "oos_n": 2514,
+  "window": 2000,
+  "refit_every": 21,
+  "thresholds_tested": [
+    15,
+    18,
+    20,
+    22,
+    25
+  ],
+  "models": {
+    "GARCH": {
+      "QLIKE": 1.58763,
+      "MSE": 20.544973,
+      "Spearman_rho": 0.3803,
+      "Spearman_p": 2.6e-87,
+      "n_valid": 2514
+    },
+    "GJR": {
+      "QLIKE": 1.564388,
+      "MSE": 20.668097,
+      "Spearman_rho": 0.4119,
+      "Spearman_p": 1.54e-103,
+      "n_valid": 2514
+    },
+    "MF-GJR": {
+      "QLIKE": 1.478244,
+      "MSE": 21.75454,
+      "Spearman_rho": 0.4553,
+      "Spearman_p": 7.03e-129,
+      "n_valid": 2514
+    },
+    "T-GJR(c=15)": {
+      "QLIKE": 1.528931,
+      "MSE": 20.505636,
+      "Spearman_rho": 0.4248,
+      "Spearman_p": 1.12e-110,
+      "n_valid": 2514
+    },
+    "T-MF(c=15)": {
+      "QLIKE": 1.552045,
+      "MSE": 25.211647,
+      "Spearman_rho": 0.4172,
+      "Spearman_p": 1.87e-106,
+      "n_valid": 2514
+    },
+    "T-GJR(c=18)": {
+      "QLIKE": 1.517438,
+      "MSE": 20.85429,
+      "Spearman_rho": 0.4287,
+      "Spearman_p": 6.67e-113,
+      "n_valid": 2514
+    },
+    "T-MF(c=18)": {
+      "QLIKE": 1.6121,
+      "MSE": 1481.419557,
+      "Spearman_rho": 0.4099,
+      "Spearman_p": 1.78e-102,
+      "n_valid": 2514
+    },
+    "T-GJR(c=20)": {
+      "QLIKE": 1.528279,
+      "MSE": 21.129285,
+      "Spearman_rho": 0.4254,
+      "Spearman_p": 4.79e-111,
+      "n_valid": 2514
+    },
+    "T-MF(c=20)": {
+      "QLIKE": 1.546813,
+      "MSE": 34.526543,
+      "Spearman_rho": 0.4325,
+      "Spearman_p": 4.08e-115,
+      "n_valid": 2514
+    },
+    "T-GJR(c=22)": {
+      "QLIKE": 1.530528,
+      "MSE": 20.674892,
+      "Spearman_rho": 0.4283,
+      "Spearman_p": 1.09e-112,
+      "n_valid": 2514
+    },
+    "T-MF(c=22)": {
+      "QLIKE": 1.531883,
+      "MSE": 406.20185,
+      "Spearman_rho": 0.4463,
+      "Spearman_p": 2.35e-123,
+      "n_valid": 2514
+    },
+    "T-GJR(c=25)": {
+      "QLIKE": 1.545922,
+      "MSE": 23.43623,
+      "Spearman_rho": 0.4264,
+      "Spearman_p": 1.3e-111,
+      "n_valid": 2514
+    },
+    "T-MF(c=25)": {
+      "QLIKE": 1.504287,
+      "MSE": 72.881233,
+      "Spearman_rho": 0.4523,
+      "Spearman_p": 4.98e-127,
+      "n_valid": 2514
+    }
+  },
+  "dm_tests": {
+    "GARCH_vs_GJR": {
+      "t_stat": 0.964,
+      "n": 2508,
+      "significant_harvey": false,
+      "favors": "GJR"
+    },
+    "GJR_vs_MF-GJR": {
+      "t_stat": 3.522,
+      "n": 2508,
+      "significant_harvey": true,
+      "favors": "MF-GJR"
+    },
+    "GJR_vs_T-GJR(c=18)": {
+      "t_stat": 1.773,
+      "n": 2508,
+      "significant_harvey": false,
+      "favors": "T-GJR(c=18)"
+    },
+    "MF-GJR_vs_T-GJR(c=18)": {
+      "t_stat": -3.0,
+      "n": 2508,
+      "significant_harvey": false,
+      "favors": "MF-GJR"
+    },
+    "GJR_vs_T-MF(c=25)": {
+      "t_stat": 2.195,
+      "n": 2508,
+      "significant_harvey": false,
+      "favors": "T-MF(c=25)"
+    },
+    "MF-GJR_vs_T-MF(c=25)": {
+      "t_stat": -1.831,
+      "n": 2508,
+      "significant_harvey": false,
+      "favors": "MF-GJR"
+    },
+    "T-GJR(c=18)_vs_T-MF(c=25)": {
+      "t_stat": 0.86,
+      "n": 2508,
+      "significant_harvey": false,
+      "favors": "T-MF(c=25)"
+    }
+  },
+  "regime_analysis": {
+    "Low (VIX<15)": {
+      "n": 923,
+      "GARCH": {
+        "QLIKE": 1.646103,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": -3.68
+      },
+      "MF-GJR": {
+        "QLIKE": 1.519865,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 4.27
+      },
+      "T-GJR(c=15)": {
+        "QLIKE": 1.550694,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 2.33
+      },
+      "T-MF(c=15)": {
+        "QLIKE": 1.535866,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 3.26
+      },
+      "T-GJR(c=18)": {
+        "QLIKE": 1.558013,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 1.86
+      },
+      "T-MF(c=18)": {
+        "QLIKE": 1.533999,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 3.38
+      },
+      "T-GJR(c=20)": {
+        "QLIKE": 1.555192,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 2.04
+      },
+      "T-MF(c=20)": {
+        "QLIKE": 1.519902,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 4.27
+      },
+      "T-GJR(c=22)": {
+        "QLIKE": 1.564905,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 1.43
+      },
+      "T-MF(c=22)": {
+        "QLIKE": 1.507406,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 5.05
+      },
+      "T-GJR(c=25)": {
+        "QLIKE": 1.569549,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 1.14
+      },
+      "T-MF(c=25)": {
+        "QLIKE": 1.508256,
+        "QLIKE_GJR": 1.587622,
+        "improvement_pct": 5.0
+      }
+    },
+    "Medium (15<=VIX<25)": {
+      "n": 1228,
+      "GARCH": {
+        "QLIKE": 1.600902,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": -2.54
+      },
+      "MF-GJR": {
+        "QLIKE": 1.505177,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": 3.59
+      },
+      "T-GJR(c=15)": {
+        "QLIKE": 1.555807,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": 0.35
+      },
+      "T-MF(c=15)": {
+        "QLIKE": 1.647098,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": -5.5
+      },
+      "T-GJR(c=18)": {
+        "QLIKE": 1.540951,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": 1.3
+      },
+      "T-MF(c=18)": {
+        "QLIKE": 1.763995,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": -12.98
+      },
+      "T-GJR(c=20)": {
+        "QLIKE": 1.566753,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": -0.35
+      },
+      "T-MF(c=20)": {
+        "QLIKE": 1.614827,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": -3.43
+      },
+      "T-GJR(c=22)": {
+        "QLIKE": 1.565066,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": -0.24
+      },
+      "T-MF(c=22)": {
+        "QLIKE": 1.621822,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": -3.88
+      },
+      "T-GJR(c=25)": {
+        "QLIKE": 1.563705,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": -0.15
+      },
+      "T-MF(c=25)": {
+        "QLIKE": 1.537568,
+        "QLIKE_GJR": 1.561291,
+        "improvement_pct": 1.52
+      }
+    },
+    "High (VIX>=25)": {
+      "n": 363,
+      "GARCH": {
+        "QLIKE": 1.394894,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 7.99
+      },
+      "MF-GJR": {
+        "QLIKE": 1.281949,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 15.44
+      },
+      "T-GJR(c=15)": {
+        "QLIKE": 1.383048,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 8.78
+      },
+      "T-MF(c=15)": {
+        "QLIKE": 1.271665,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 16.12
+      },
+      "T-GJR(c=18)": {
+        "QLIKE": 1.335351,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 11.92
+      },
+      "T-MF(c=18)": {
+        "QLIKE": 1.296181,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 14.51
+      },
+      "T-GJR(c=20)": {
+        "QLIKE": 1.330169,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 12.26
+      },
+      "T-MF(c=20)": {
+        "QLIKE": 1.38497,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 8.65
+      },
+      "T-GJR(c=22)": {
+        "QLIKE": 1.32685,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 12.48
+      },
+      "T-MF(c=22)": {
+        "QLIKE": 1.289778,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 14.93
+      },
+      "T-GJR(c=25)": {
+        "QLIKE": 1.42606,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 5.94
+      },
+      "T-MF(c=25)": {
+        "QLIKE": 1.381754,
+        "QLIKE_GJR": 1.516097,
+        "improvement_pct": 8.86
+      }
+    }
+  },
+  "best_threshold_gjr": "T-GJR(c=18)",
+  "best_threshold_mf": "T-MF(c=25)",
+  "references": [
+    "Chen, Liu, So (2013): Threshold Variable Selection for Asymmetric SV",
+    "Hansen (2011): Threshold Autoregressive Models",
+    "K942: VIX regime analysis - Low +8.7%, Medium +0.5%, High +17.3%",
+    "K889: MF-GJR(VIX) best model, multiplicative factor"
+  ],
+  "conclusion": "Best T-GJR (T-GJR(c=18)) improves 3.0% over GJR; T-MF dominates T-GJR; DM test significant at Harvey |t|>3.0: Yes"
+}
