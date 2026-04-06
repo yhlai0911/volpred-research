@@ -21372,5 +21372,24 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T09:00:27.118922+00:00",
     "star_rating": 1
+  },
+  {
+    "id": "know_20260406090841_k933",
+    "experiment_id": "K933",
+    "title": "K933: FIGARCH-MF(VIX) — 長記憶被VIX包含，FIGARCH-MF數值不穩定",
+    "content": "[提出: Gemini G3-3, 執行: Claude] 測試FIGARCH(1,d,1)與VIX multiplicative factor的組合。SPY 2006-2026, OOS 2016-2025, w=2000。5模型：GARCH/GJR/FIGARCH/MF-GJR(VIX)/FIGARCH-MF(VIX)。結果：(1) MF-GJR(VIX)仍為最佳(QLIKE=1.5024, DM t=4.20 Harvey✓)。(2) FIGARCH alone不改善OOS(QLIKE=1.5928 vs GARCH 1.5876, DM t=-0.55 NS)，確認K442。d≈0.5-0.6確認長記憶存在但OOS無幫助。(3) FIGARCH-MF(VIX)數值不穩定——long memory filter的lambda係數在VIX-normalized return上放大參數誤差，OOS發散。(4) 結論Accept H0：VIX已包含長記憶資訊。前瞻性隱含波動率通過options市場期望自然吸收了persistent volatility regime。G3-3方向關閉。",
+    "tags": [
+      "volatility",
+      "FIGARCH",
+      "long-memory",
+      "MF-GJR",
+      "VIX",
+      "null-result",
+      "Gemini-suggestion",
+      "numerical-instability"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T09:08:41.939272+00:00",
+    "star_rating": 0
   }
 ]
