@@ -108,10 +108,19 @@ Publisher 會自動在文章末尾附加「延伸閱讀」區塊，列出同 aud
 ## 結論
 重申核心發現，指出限制和未來方向。
 
-## 圖表（必須，不可省略）
-![核心發現的視覺化圖表](supabase_storage_url)
+## 圖表（必須，數量依文章類型）
+
+**一般讀者文章：至少 1 張，建議 2 張。研究文章：至少 2 張，建議 3 張。**
+
+![圖表1：核心發現](supabase_url_1)
+*圖1說明文字*
+
+![圖表2：比較/趨勢/分佈](supabase_url_2)
+*圖2說明文字*
+
 用 matplotlib 生成 PNG，上傳 Supabase Storage article-images bucket。
 禁止用 ASCII art 或純文字表格替代真正的圖表。
+每張圖表必須有說明文字（caption），解釋讀者應該看到什麼。
 
 ## 數據來源
 *本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
@@ -129,12 +138,25 @@ Include: summary, method table, key findings with interpretation, practical impl
 
 MANDATORY — 每篇文章必須包含：
 1. 真正的圖表（使用 volpred.charts 模組）：
-   from volpred.charts import generate_bar_chart, upload_chart, embed_chart
-   path = generate_bar_chart(labels=[...], values=[...], title='...', ylabel='...')
-   url = upload_chart(path)
-   content = embed_chart(content, url, '圖表描述')
-   可用函式：generate_bar_chart, generate_grouped_bar_chart, generate_line_chart, generate_heatmap
+   from volpred.charts import generate_bar_chart, generate_grouped_bar_chart, generate_line_chart, generate_heatmap, upload_chart, embed_chart
+
+   **一般讀者文章至少 2 張圖表，研究文章至少 3 張圖表。**
+   每張圖表用以下流程生成並嵌入：
+   path1 = generate_bar_chart(labels=[...], values=[...], title='...', ylabel='...')
+   url1 = upload_chart(path1)
+   content = embed_chart(content, url1, '圖1：核心發現的視覺化')
+
+   path2 = generate_line_chart(x=[...], y=[...], title='...', xlabel='...', ylabel='...')
+   url2 = upload_chart(path2)
+   content = embed_chart(content, url2, '圖2：趨勢或比較')
+
+   # 研究文章再加第 3 張：
+   path3 = generate_heatmap(data=[[...]], row_labels=[...], col_labels=[...], title='...')
+   url3 = upload_chart(path3)
+   content = embed_chart(content, url3, '圖3：詳細分佈或相關性')
+
    禁止用 ASCII art 或純文字表格替代真正的圖表。
+   每張圖表必須在文章中有對應的文字解讀（不是放了圖就完事）。
 2. 數據來源標注（文末）：
    *本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
    數據來源：yfinance，期間：YYYY-YYYY。*
