@@ -21636,5 +21636,23 @@
     "data_source": "yfinance (SPY, FEZ, EWG, EWJ, EWU, ^VIX)",
     "created_at": "2026-04-06T20:57:35.463138+00:00",
     "star_rating": 2
+  },
+  {
+    "id": "know_20260406222808_k950",
+    "experiment_id": "K950",
+    "title": "K950: Monthly Regime VT Cross-Asset — Sharpe 0/5但MDD 4/5改善，VT=drawdown insurance",
+    "content": "[提出: Claude, 執行: Claude] K946 Monthly Regime VT跨市場驗證。5配對：SPY+GLD/QQQ+GLD/0050.TW+GLD/EWJ+GLD/FEZ+GLD。OOS 2008-2025。Sharpe: 0/5市場VT勝BH（SPY -0.027, QQQ -0.033, 0050 -0.034, EWJ -0.068, FEZ -0.111）。MDD: 4/5市場VT改善（SPY -1.6pp, QQQ -2.6pp, 0050 -0.9pp, FEZ -1.4pp, EWJ平）。FEZ Sharpe差距最大(-0.111)，VIX對歐洲regime shifts捕捉較差。策略低頻(~69次/18年=3.8次/年)。結論：跨市場再確認VT是drawdown insurance不是alpha generator(K687/K688)。CRRA gamma>=5時VT仍有價值（風險厭惡投資人受益）。",
+    "tags": [
+      "strategy",
+      "VT",
+      "cross-asset",
+      "monthly-regime",
+      "drawdown-insurance",
+      "MDD",
+      "null-Sharpe"
+    ],
+    "data_source": "yfinance (SPY, QQQ, 0050.TW, EWJ, FEZ, GLD, ^VIX)",
+    "created_at": "2026-04-06T22:28:08.054566+00:00",
+    "star_rating": 0
   }
 ]
