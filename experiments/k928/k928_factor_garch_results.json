@@ -1,0 +1,275 @@
+{
+  "experiment_id": "K928",
+  "title": "Factor GARCH \u2014 Common Volatility Factor Across SPY/QQQ/GLD",
+  "data_source": "yfinance",
+  "data_period": "2006-01-04 to 2026-04-02",
+  "n_total": 5093,
+  "assets": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "GLD",
+    "TLT"
+  ],
+  "target_assets": [
+    "SPY",
+    "QQQ",
+    "GLD"
+  ],
+  "pca": {
+    "explained_variance": [
+      0.5908019138388482,
+      0.18703033434788338,
+      0.164389806503584,
+      0.043088939815128166,
+      0.01468900549455634
+    ],
+    "pc1_explained_pct": 59.08019138388482,
+    "pc1_vix_pearson": 0.5426960736372456,
+    "pc1_vix_spearman": 0.47964603592419963,
+    "pc1_autocorr": {
+      "lag1": 0.3744550291697606,
+      "lag5": 0.34382858660223714,
+      "lag22": 0.14620099737067543
+    },
+    "loadings": {
+      "PC1": {
+        "SPY": 0.5494876982275511,
+        "QQQ": 0.5426613203307421,
+        "IWM": 0.5337019188014841,
+        "GLD": 0.18132600161766904,
+        "TLT": 0.2930274798008649
+      },
+      "PC2": {
+        "SPY": -0.11253302165276553,
+        "QQQ": -0.11785788982909111,
+        "IWM": -0.05841111432008947,
+        "GLD": 0.982256717361504,
+        "TLT": -0.07215067404272955
+      },
+      "PC3": {
+        "SPY": -0.21821731487272625,
+        "QQQ": -0.2128079375054076,
+        "IWM": -0.08454153076201763,
+        "GLD": 0.014113036696021536,
+        "TLT": 0.9485502290316857
+      },
+      "PC4": {
+        "SPY": -0.2686890261596818,
+        "QQQ": -0.47778425460265933,
+        "IWM": 0.829779915453304,
+        "GLD": -0.04569823585123521,
+        "TLT": -0.0943683020168058
+      },
+      "PC5": {
+        "SPY": 0.7520551836437172,
+        "QQQ": -0.6465780672203504,
+        "IWM": -0.12676129171881145,
+        "GLD": 0.0022618069885499597,
+        "TLT": 0.01662115805637202
+      }
+    },
+    "rolling_explained_mean": 0.5732870398028163,
+    "rolling_explained_std": 0.06604987757422794
+  },
+  "oos_results": {
+    "SPY": {
+      "n_oos": 2487,
+      "oos_start": "2016-05-05",
+      "oos_end": "2026-04-02",
+      "qlike": {
+        "GJR": 1.5760398426936362,
+        "GJR-X(VIX)": 1.6002137289650042,
+        "GJR-X(PC1)": 1.6110665917279314,
+        "GJR-X(VIX+PC1)": 1.6581786482694603
+      },
+      "dm_vs_gjr": {
+        "GJR-X(VIX)": {
+          "t_stat": 1.1549327510333653,
+          "p_value": 0.24822896545427575,
+          "significant": false,
+          "direction": "worse"
+        },
+        "GJR-X(PC1)": {
+          "t_stat": 1.28336233942184,
+          "p_value": 0.19948477878383364,
+          "significant": false,
+          "direction": "worse"
+        },
+        "GJR-X(VIX+PC1)": {
+          "t_stat": 1.3970247945007508,
+          "p_value": 0.16253079850016938,
+          "significant": false,
+          "direction": "worse"
+        }
+      },
+      "dm_pc1_vs_vix": {
+        "t_stat": 0.3084369831832108,
+        "p_value": 0.7577756865377343
+      },
+      "dm_incremental_pc1": {
+        "t_stat": 1.069632700393349,
+        "p_value": 0.28488851247782376
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.41409465567774384,
+          "p_value": 1.2062150866254808e-103
+        },
+        "GJR-X(VIX)": {
+          "rho": 0.43631860829778757,
+          "p_value": 4.0472748703328596e-116
+        },
+        "GJR-X(PC1)": {
+          "rho": 0.408028612950125,
+          "p_value": 2.11873222845709e-100
+        },
+        "GJR-X(VIX+PC1)": {
+          "rho": 0.4389881963222674,
+          "p_value": 1.108844561337238e-117
+        }
+      }
+    },
+    "QQQ": {
+      "n_oos": 2490,
+      "oos_start": "2016-05-05",
+      "oos_end": "2026-04-02",
+      "qlike": {
+        "GJR": 1.5426232947718954,
+        "GJR-X(VIX)": 1.559215673240002,
+        "GJR-X(PC1)": 1.5536039644835757,
+        "GJR-X(VIX+PC1)": 1.5743628335795776
+      },
+      "dm_vs_gjr": {
+        "GJR-X(VIX)": {
+          "t_stat": 1.1169001185622234,
+          "p_value": 0.2641448373620907,
+          "significant": false,
+          "direction": "worse"
+        },
+        "GJR-X(PC1)": {
+          "t_stat": 2.5693700524189707,
+          "p_value": 0.01024611009492804,
+          "significant": false,
+          "direction": "worse"
+        },
+        "GJR-X(VIX+PC1)": {
+          "t_stat": 1.5169761510143858,
+          "p_value": 0.1293996961875885,
+          "significant": false,
+          "direction": "worse"
+        }
+      },
+      "dm_pc1_vs_vix": {
+        "t_stat": -0.34685487206896287,
+        "p_value": 0.7287296730439103
+      },
+      "dm_incremental_pc1": {
+        "t_stat": 1.2658033240933628,
+        "p_value": 0.20570197225788478
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.3956482595379934,
+          "p_value": 4.28082064686477e-94
+        },
+        "GJR-X(VIX)": {
+          "rho": 0.4103136919012702,
+          "p_value": 9.802460931727424e-102
+        },
+        "GJR-X(PC1)": {
+          "rho": 0.38915021638684794,
+          "p_value": 7.858223217837975e-91
+        },
+        "GJR-X(VIX+PC1)": {
+          "rho": 0.4105311233302752,
+          "p_value": 7.50151319091767e-102
+        }
+      }
+    },
+    "GLD": {
+      "n_oos": 2485,
+      "oos_start": "2016-05-04",
+      "oos_end": "2026-04-02",
+      "qlike": {
+        "GJR": 1.4814577520071108,
+        "GJR-X(VIX)": 1.4724567659359635,
+        "GJR-X(PC1)": 1.4800108171831496,
+        "GJR-X(VIX+PC1)": 1.4773601585694358
+      },
+      "dm_vs_gjr": {
+        "GJR-X(VIX)": {
+          "t_stat": -0.6903595650857898,
+          "p_value": 0.49003259536343746,
+          "significant": false,
+          "direction": "better"
+        },
+        "GJR-X(PC1)": {
+          "t_stat": -0.4828791708740067,
+          "p_value": 0.6292240851898885,
+          "significant": false,
+          "direction": "better"
+        },
+        "GJR-X(VIX+PC1)": {
+          "t_stat": -0.30665684913872066,
+          "p_value": 0.7591302797808437,
+          "significant": false,
+          "direction": "better"
+        }
+      },
+      "dm_pc1_vs_vix": {
+        "t_stat": 0.6168292104081597,
+        "p_value": 0.5374039120739922
+      },
+      "dm_incremental_pc1": {
+        "t_stat": 1.9368173831486903,
+        "p_value": 0.05288093852624565
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.23727672426684504,
+          "p_value": 3.823728592644459e-33
+        },
+        "GJR-X(VIX)": {
+          "rho": 0.23503806348454068,
+          "p_value": 1.5499572563637646e-32
+        },
+        "GJR-X(PC1)": {
+          "rho": 0.2366820453934132,
+          "p_value": 5.5535760009582456e-33
+        },
+        "GJR-X(VIX+PC1)": {
+          "rho": 0.232212546873657,
+          "p_value": 8.880320272842851e-32
+        }
+      }
+    }
+  },
+  "methodology": {
+    "garch_window": 2000,
+    "pca_window": 250,
+    "refit_freq": 63,
+    "oos_start_idx": 2500,
+    "model": "GJR-GARCH(1,1,1) with Student-t innovations",
+    "augmentation": "Multiplicative: h_aug = h_gjr * exp(delta * X_{t-1})",
+    "loss_function": "QLIKE on r\u00b2 (Patton 2011 proxy-robust)",
+    "dm_threshold": "Harvey (2016) |t| > 3.0"
+  },
+  "references": [
+    "Engle, Ng & Rothschild (1990): Factor ARCH, JoE",
+    "Patton (2011): Volatility forecast comparison using imperfect proxies, JoE",
+    "Harvey (2016): ...and the cross-section of expected returns, RFS",
+    "Engle & Rangel (2008): Spline-GARCH, multiplicative decomposition"
+  ],
+  "timestamp": "2026-04-06T13:51:45.619577",
+  "conclusion": [
+    "PC1 explains 59.1% of cross-asset daily r\u00b2 variation (cf. T24: 76.6% on 22d RV)",
+    "PC1-VIX correlation: Pearson 0.543, Spearman 0.480",
+    "Rolling PC1 explained variance: 57.3% +/- 6.6%",
+    "Factor-augmented GJR does NOT significantly beat baseline GJR (Harvey |t|<3.0)",
+    "Confirms VIX sufficiency at daily frequency \u2014 cross-asset vol factor is redundant",
+    "PC1 provides NO incremental value beyond VIX \u2014 VIX already captures the common factor",
+    "Even VIX augmentation does not significantly improve baseline GJR"
+  ],
+  "is_null_result": true
+}

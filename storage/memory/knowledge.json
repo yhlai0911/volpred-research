@@ -21225,5 +21225,23 @@
     "category": "experiment",
     "confidence": 0.85,
     "created_at": "2026-04-06T05:03:43.428341+00:00"
+  },
+  {
+    "id": "know_20260406055329_k928",
+    "experiment_id": "K928",
+    "title": "K928: Factor GARCH — NULL (PC1 59.1% Cross-Asset but Zero Incremental Beyond VIX)",
+    "content": "[提出: Claude, 執行: Claude] PCA on 5-asset (SPY/QQQ/IWM/GLD/TLT) daily r². PC1 explains 59.1%. PC2=GLD factor (0.982), PC3=TLT factor (0.949). PC1-VIX Pearson r=0.543. OOS 2016-2026: GJR baseline wins or ties all assets on QLIKE. Factor augmentation worsens SPY/QQQ. All DM |t|<2.0 vs VIX. PC1 provides ZERO incremental value beyond VIX at daily frequency. VIX sufficiency confirmed again. Consistent with K909 (no second factor) and K927 (macro lags VIX).",
+    "tags": [
+      "Factor GARCH",
+      "PCA",
+      "common factor",
+      "VIX sufficiency",
+      "null result",
+      "cross-asset"
+    ],
+    "data_source": "yfinance (SPY, QQQ, IWM, GLD, TLT, ^VIX)",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-06T05:53:29.619729+00:00"
   }
 ]
