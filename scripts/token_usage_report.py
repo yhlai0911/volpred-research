@@ -270,8 +270,8 @@ def get_git_log(since, until, repo_dir=None):
     """取得 git log（one-line + date）"""
     cmd = [
         "git", "log", "--oneline", "--format=%h %ai %s",
-        f"--since={since.isoformat()}",
-        f"--until={until.isoformat()}",
+        f"--since={since.isoformat()}T00:00:00",
+        f"--until={until.isoformat()}T00:00:00",
     ]
     result = subprocess.run(
         cmd, capture_output=True, text=True,
