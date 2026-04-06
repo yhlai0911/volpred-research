@@ -21262,5 +21262,23 @@
     "category": "experiment",
     "confidence": 0.85,
     "created_at": "2026-04-06T06:05:29.367387+00:00"
+  },
+  {
+    "id": "know_20260406065334_k930",
+    "experiment_id": "K930",
+    "title": "K930: MF-GJR Parameter Stability ★ — θ₁ Stable (CV<15%) but Trending Up, COVID Break Confirmed",
+    "content": "[提出: Claude, 執行: Claude] Rolling MF-GJR parameter estimation on SPY/QQQ/0050.TW (144 refits). theta_1 (VIX elasticity) CV<15% within asset = moderately stable. But significant upward TREND for SPY/QQQ (p<0.001) — VIX influence strengthening. ADF: non-stationary for SPY/0050.TW. COVID Chow test p<0.01 all assets. SPY theta_1 rose 2.1→2.6 post-COVID. SPY alpha stuck at lower bound (0.0001) — model relies on gamma+beta only. beta/persistence most stable (cross-asset CV=0.02). KEY: No theta_1-performance correlation (all p>0.05) — model robust regardless of exact parameter. Cross-asset: SPY(2.42)>QQQ(1.84)>0050.TW(1.44). Paper: claim stable with COVID break caveat.",
+    "tags": [
+      "MF-GJR",
+      "parameter stability",
+      "theta_1",
+      "COVID",
+      "structural break",
+      "robustness"
+    ],
+    "data_source": "yfinance (SPY, QQQ, 0050.TW, ^VIX)",
+    "category": "experiment",
+    "confidence": 0.9,
+    "created_at": "2026-04-06T06:53:34.265265+00:00"
   }
 ]
