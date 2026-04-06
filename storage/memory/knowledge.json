@@ -21563,5 +21563,24 @@
     "data_source": "yfinance (SPY, QQQ, IWM, GLD, SLV)",
     "created_at": "2026-04-06T12:20:32.223212+00:00",
     "star_rating": 0
+  },
+  {
+    "id": "know_20260406142829_k946",
+    "experiment_id": "K946",
+    "title": "K946: VIX Regime-Conditional Rebalancing ★ — Monthly Regime最佳但僅微勝50/50",
+    "content": "[提出: Claude, 執行: Claude] 基於K942 regime insight設計策略：只在VIX極端區域行動。5策略：BH 50/50、12/VIX、Regime-Only VT、Smooth Regime、Monthly Regime。SPY+GLD 2006-2026。Monthly Regime VT net Sharpe=0.878（最高），BH 50/50=0.857，差異僅0.02（SE~0.23內）。12/VIX turnover=8.028年化（4591次變動）→cost殺死0.14 Sharpe。Regime-Only VT MDD最佳(-28.76%，改善3.7pp)。Monthly Regime只有80次weight changes（19年）。CRRA utility gamma=3/5/7 Monthly Regime全勝。核心insight：normal VIX佔48%時間，這段時間不做事，只在月初檢查極端regime才動作。12/VIX的高頻交易是其致命缺陷。但統計上50/50仍不可超越。",
+    "tags": [
+      "strategy",
+      "VIX-regime",
+      "rebalancing",
+      "turnover",
+      "50-50",
+      "SPY",
+      "GLD",
+      "CRRA-utility"
+    ],
+    "data_source": "yfinance (SPY, GLD, ^VIX)",
+    "created_at": "2026-04-06T14:28:29.144370+00:00",
+    "star_rating": 1
   }
 ]
