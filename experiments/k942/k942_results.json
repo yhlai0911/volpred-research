@@ -1,0 +1,248 @@
+{
+  "experiment_id": "K942",
+  "title": "MF-GJR(VIX) Subsample Stability \u2014 Paper Robustness",
+  "timestamp": "2026-04-06T10:55:51.142685+00:00",
+  "runtime_seconds": 468.34820890426636,
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance",
+    "data_period": "2005-01-01 to 2026-01-01",
+    "oos_period": "2016-01-01 to 2025-12-31",
+    "n_oos": 2508,
+    "window": 2000,
+    "refit_every": 21,
+    "n_refits": 120,
+    "seed": 42
+  },
+  "full_oos": {
+    "qlike_garch": 1.5882382228305614,
+    "qlike_gjr": 1.5673560214330213,
+    "qlike_mfgjr": 1.4692584682333678,
+    "improvement_mfgjr_vs_gjr_pct": 6.258791994811983,
+    "improvement_mfgjr_vs_garch_pct": 7.491304068047651,
+    "dm_mfgjr_vs_gjr": {
+      "t_stat": -4.56480893708299,
+      "p_value": 5.2407482449279286e-06,
+      "significant_harvey": true
+    },
+    "dm_mfgjr_vs_garch": {
+      "t_stat": -6.374920357962416,
+      "p_value": 2.1717383447139582e-10,
+      "significant_harvey": true
+    },
+    "dm_gjr_vs_garch": {
+      "t_stat": -1.7996308690649607,
+      "p_value": 0.07203913841331522
+    }
+  },
+  "time_periods": {
+    "2016-2017": {
+      "n_obs": 501,
+      "qlike_garch": 1.833740015776153,
+      "qlike_gjr": 1.809408770719432,
+      "qlike_mfgjr": 1.6593385449589213,
+      "improvement_vs_gjr_pct": 8.293881857378297,
+      "improvement_vs_garch_pct": 9.510697771592998,
+      "dm_mfgjr_vs_gjr_t": -4.690045250993646,
+      "dm_mfgjr_vs_gjr_p": 3.5291149587113324e-06,
+      "dm_mfgjr_vs_garch_t": -4.820567050453026,
+      "dm_mfgjr_vs_garch_p": 1.9021527657425708e-06,
+      "mfgjr_wins": true
+    },
+    "2018-2019": {
+      "n_obs": 501,
+      "qlike_garch": 1.6124439753441615,
+      "qlike_gjr": 1.5558471725081433,
+      "qlike_mfgjr": 1.5037025117194864,
+      "improvement_vs_gjr_pct": 3.351528460510407,
+      "improvement_vs_garch_pct": 6.743890968457691,
+      "dm_mfgjr_vs_gjr_t": -1.354636231979243,
+      "dm_mfgjr_vs_gjr_p": 0.17614526803402897,
+      "dm_mfgjr_vs_garch_t": -2.3451848446298,
+      "dm_mfgjr_vs_garch_p": 0.019407705296017097,
+      "mfgjr_wins": true
+    },
+    "2020-2021": {
+      "n_obs": 505,
+      "qlike_garch": 1.4187742173378857,
+      "qlike_gjr": 1.4469593896540585,
+      "qlike_mfgjr": 1.3305605814644184,
+      "improvement_vs_gjr_pct": 8.04437284293576,
+      "improvement_vs_garch_pct": 6.217595075768067,
+      "dm_mfgjr_vs_gjr_t": -1.3198680184533373,
+      "dm_mfgjr_vs_gjr_p": 0.18747825696348897,
+      "dm_mfgjr_vs_garch_t": -1.6087465943320078,
+      "dm_mfgjr_vs_garch_p": 0.1082979402680806,
+      "mfgjr_wins": true
+    },
+    "2022-2023": {
+      "n_obs": 499,
+      "qlike_garch": 1.3924218720646522,
+      "qlike_gjr": 1.377554863290396,
+      "qlike_mfgjr": 1.3225711285336266,
+      "improvement_vs_gjr_pct": 3.991400721814922,
+      "improvement_vs_garch_pct": 5.016492841171223,
+      "dm_mfgjr_vs_gjr_t": -2.938370330839065,
+      "dm_mfgjr_vs_gjr_p": 0.00345246976264435,
+      "dm_mfgjr_vs_garch_t": -2.9130752104374897,
+      "dm_mfgjr_vs_garch_p": 0.0037396723826363942,
+      "mfgjr_wins": true
+    },
+    "2024-2025": {
+      "n_obs": 502,
+      "qlike_garch": 1.684190815521667,
+      "qlike_gjr": 1.6470543937047704,
+      "qlike_mfgjr": 1.5305190879593484,
+      "improvement_vs_gjr_pct": 7.075376878312771,
+      "improvement_vs_garch_pct": 9.124365609054799,
+      "dm_mfgjr_vs_gjr_t": -3.6477843146486,
+      "dm_mfgjr_vs_gjr_p": 0.000292219010108008,
+      "dm_mfgjr_vs_garch_t": -4.079734348880615,
+      "dm_mfgjr_vs_garch_p": 5.2449822518951805e-05,
+      "mfgjr_wins": true
+    }
+  },
+  "vix_regimes": {
+    "Low (VIX<15)": {
+      "n_obs": 920,
+      "qlike_garch": 1.6045491754800572,
+      "qlike_gjr": 1.5629049202277416,
+      "qlike_mfgjr": 1.4271316194395791,
+      "improvement_vs_gjr_pct": 8.687239961364895,
+      "improvement_vs_garch_pct": 11.057159154215224,
+      "dm_mfgjr_vs_gjr_t": -8.114839396856317,
+      "dm_mfgjr_vs_gjr_p": 1.5543122344752192e-15,
+      "dm_mfgjr_vs_garch_t": -9.26173097914647,
+      "dm_mfgjr_vs_garch_p": 0.0,
+      "mfgjr_wins": true
+    },
+    "Medium (15-25)": {
+      "n_obs": 1225,
+      "qlike_garch": 1.537391572020127,
+      "qlike_gjr": 1.5098813642853257,
+      "qlike_mfgjr": 1.502027092841765,
+      "improvement_vs_gjr_pct": 0.5201912964386073,
+      "improvement_vs_garch_pct": 2.300290948771968,
+      "dm_mfgjr_vs_gjr_t": -0.33148902410213177,
+      "dm_mfgjr_vs_gjr_p": 0.7403318764081597,
+      "dm_mfgjr_vs_garch_t": -1.3863031091584406,
+      "dm_mfgjr_vs_garch_p": 0.16590683473468704,
+      "mfgjr_wins": true
+    },
+    "High (VIX>=25)": {
+      "n_obs": 363,
+      "qlike_garch": 1.7184891065915704,
+      "qlike_gjr": 1.7725942256059783,
+      "qlike_mfgjr": 1.4654434151892877,
+      "improvement_vs_gjr_pct": 17.327756458852743,
+      "improvement_vs_garch_pct": 14.724893537682664,
+      "dm_mfgjr_vs_gjr_t": -2.6598963715746895,
+      "dm_mfgjr_vs_gjr_p": 0.008163993854839902,
+      "dm_mfgjr_vs_garch_t": -2.8369404142829406,
+      "dm_mfgjr_vs_garch_p": 0.004811125521677395,
+      "mfgjr_wins": true
+    }
+  },
+  "volatility_quintiles": {
+    "Q1 (Lowest)": {
+      "n_obs": 502,
+      "rvol_range": "3.2%-8.2%",
+      "qlike_garch": 1.6560057038319773,
+      "qlike_gjr": 1.6172463613169776,
+      "qlike_mfgjr": 1.545651631178353,
+      "improvement_vs_gjr_pct": 4.426952618420031,
+      "improvement_vs_garch_pct": 6.663870323530063,
+      "dm_mfgjr_vs_gjr_t": -2.544374239416308,
+      "dm_mfgjr_vs_gjr_p": 0.011246405948376337,
+      "dm_mfgjr_vs_garch_t": -3.7180926401701107,
+      "dm_mfgjr_vs_garch_p": 0.00022338961453249873,
+      "mfgjr_wins": true
+    },
+    "Q2": {
+      "n_obs": 501,
+      "rvol_range": "8.2%-10.7%",
+      "qlike_garch": 1.454108309505507,
+      "qlike_gjr": 1.4314637717322607,
+      "qlike_mfgjr": 1.394175368899422,
+      "improvement_vs_gjr_pct": 2.604914184290862,
+      "improvement_vs_garch_pct": 4.121628369379586,
+      "dm_mfgjr_vs_gjr_t": -1.0246201726999171,
+      "dm_mfgjr_vs_gjr_p": 0.3060378951881353,
+      "dm_mfgjr_vs_garch_t": -1.5480230503313537,
+      "dm_mfgjr_vs_garch_p": 0.12224943314285763,
+      "mfgjr_wins": true
+    },
+    "Q3": {
+      "n_obs": 502,
+      "rvol_range": "10.7%-14.2%",
+      "qlike_garch": 1.7735989830835555,
+      "qlike_gjr": 1.7158405715692815,
+      "qlike_mfgjr": 1.5998466734636811,
+      "improvement_vs_gjr_pct": 6.760179239701396,
+      "improvement_vs_garch_pct": 9.796595018214934,
+      "dm_mfgjr_vs_gjr_t": -2.678935388560761,
+      "dm_mfgjr_vs_gjr_p": 0.007628490490368511,
+      "dm_mfgjr_vs_garch_t": -3.452689047901142,
+      "dm_mfgjr_vs_garch_p": 0.0006020219451770004,
+      "mfgjr_wins": true
+    },
+    "Q4": {
+      "n_obs": 501,
+      "rvol_range": "14.2%-20.1%",
+      "qlike_garch": 1.5277085028013384,
+      "qlike_gjr": 1.526999843389834,
+      "qlike_mfgjr": 1.4052297670427552,
+      "improvement_vs_gjr_pct": 7.9744655426262305,
+      "improvement_vs_garch_pct": 8.017153503694956,
+      "dm_mfgjr_vs_gjr_t": -2.6462193897625346,
+      "dm_mfgjr_vs_gjr_p": 0.00839621171859406,
+      "dm_mfgjr_vs_garch_t": -3.656460058990949,
+      "dm_mfgjr_vs_garch_p": 0.00028281437949284616,
+      "mfgjr_wins": true
+    },
+    "Q5 (Highest)": {
+      "n_obs": 502,
+      "rvol_range": "20.1%-93.9%",
+      "qlike_garch": 1.5293818467364975,
+      "qlike_gjr": 1.5448784666712054,
+      "qlike_mfgjr": 1.401111785442139,
+      "improvement_vs_gjr_pct": 9.306018844242459,
+      "improvement_vs_garch_pct": 8.387052688513991,
+      "dm_mfgjr_vs_gjr_t": -1.8894186943831301,
+      "dm_mfgjr_vs_gjr_p": 0.05941289925621107,
+      "dm_mfgjr_vs_garch_t": -2.3306736282756986,
+      "dm_mfgjr_vs_garch_p": 0.020166563835686047,
+      "mfgjr_wins": true
+    }
+  },
+  "rolling_qlike": {
+    "window_days": 63,
+    "mfgjr_win_fraction": 0.832719836400818
+  },
+  "robustness_summary": {
+    "time_period_wins": "5/5",
+    "time_period_sig_wins": 2,
+    "regime_wins": "3/3",
+    "regime_sig_wins": 1,
+    "quintile_wins": "5/5",
+    "quintile_sig_wins": 0,
+    "total_wins": "13/13",
+    "total_sig_wins": 3,
+    "rolling_win_pct": 83.2719836400818,
+    "robust_time": true,
+    "robust_regime": true,
+    "robust_overall": true
+  },
+  "conclusion": "MF-GJR(VIX) wins in 13/13 subsamples (3 significant at Harvey |t|>3.0). Time periods: 5/5, VIX regimes: 3/3, Vol quintiles: 5/5. Rolling 63-day win rate: 83.3%. Overall assessment: ROBUST.",
+  "references": [
+    "Engle, Ghysels & Sohn (2013) Stock market volatility and macroeconomic fundamentals, RES 95(3):776-797",
+    "Conrad & Engle (2025) Two-factor GARCH, J Applied Econometrics",
+    "Patton (2011) Volatility forecast comparison using imperfect volatility proxies, J Econometrics 160:246-256",
+    "Harvey, Leybourne, Newbold (2016) Tests for forecast encompassing, JBES 34:92-104"
+  ],
+  "figures": [
+    "k942_subsample.png",
+    "k942_regime.png",
+    "k942_summary.png"
+  ]
+}
