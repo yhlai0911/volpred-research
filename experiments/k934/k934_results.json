@@ -1,0 +1,201 @@
+{
+  "experiment_id": "K934",
+  "title": "CARR Conditional Autoregressive Range Model vs GARCH/GJR",
+  "date": "2026-04-06",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "period": "2004-01-01 ~ 2025-12-31",
+  "oos_period": "2016-01-01 ~ 2025-12-31",
+  "oos_days": 2514,
+  "window": 2000,
+  "refit_every": 21,
+  "n_refits": 120,
+  "reference": "Chou (2005) \"Forecasting Financial Volatilities with Extreme Values\"; Patton (2011) J. Econometrics 160; Parkinson (1980)",
+  "descriptive_stats": {
+    "log_range_mean": 0.012243,
+    "log_range_std": 0.010117,
+    "r2_mean": 0.00014,
+    "r2_std": 0.000576,
+    "parkinson_var_mean": 9.1e-05,
+    "corr_parkinson_r2": 0.7114
+  },
+  "model_parameters_first_fit": {
+    "CARR": {
+      "omega": 0.00039602,
+      "alpha": 0.25071842,
+      "beta": 0.71953678,
+      "persistence": 0.9702552,
+      "converged": true,
+      "loglik": 6746.2155889
+    },
+    "CARR_MF": {
+      "theta0": -9.37130778,
+      "theta1": 1.58874449,
+      "omega": 0.02324449,
+      "alpha": 0.07965175,
+      "beta": 0.90175102,
+      "persistence": 0.98140277,
+      "converged": true,
+      "loglik": 6783.38776148
+    },
+    "GARCH": {
+      "omega": 1.85e-06,
+      "alpha": 0.08280052,
+      "beta": 0.90030372,
+      "persistence": 0.98310424,
+      "converged": true,
+      "loglik": 6276.51032765
+    },
+    "GJR": {
+      "omega": 2.88e-06,
+      "alpha": 1e-08,
+      "gamma": 0.23345004,
+      "beta": 0.86623963,
+      "persistence": 0.98296466,
+      "converged": true,
+      "loglik": 6340.03250681
+    },
+    "MF_GJR": {
+      "theta0": -22.42112568,
+      "theta1": 2.55955483,
+      "omega": 18.65964508,
+      "alpha": 1e-08,
+      "gamma": 0.14928319,
+      "beta": 0.86255633,
+      "persistence": 0.93719794,
+      "converged": true,
+      "loglik": 6440.42028216
+    }
+  },
+  "layer1_native_target_qlike": {
+    "CARR_on_range": 0.099359,
+    "CARR_MF_on_range": 0.088976,
+    "GARCH_on_r2": 1.60243,
+    "GJR_on_r2": 1.561764,
+    "MF_GJR_on_r2": 1.474856
+  },
+  "layer2_qlike_on_r2_patton": {
+    "CARR": 1.815374,
+    "CARR_MF": 1.699389,
+    "GARCH": 1.60243,
+    "GJR": 1.561764,
+    "MF_GJR": 1.474856
+  },
+  "layer2_ranking": [
+    {
+      "rank": 1,
+      "model": "MF_GJR",
+      "qlike": 1.474856
+    },
+    {
+      "rank": 2,
+      "model": "GJR",
+      "qlike": 1.561764
+    },
+    {
+      "rank": 3,
+      "model": "GARCH",
+      "qlike": 1.60243
+    },
+    {
+      "rank": 4,
+      "model": "CARR_MF",
+      "qlike": 1.699389
+    },
+    {
+      "rank": 5,
+      "model": "CARR",
+      "qlike": 1.815374
+    }
+  ],
+  "layer3_spearman": {
+    "CARR": {
+      "rho": 0.4418,
+      "pval": 0.0
+    },
+    "CARR_MF": {
+      "rho": 0.4743,
+      "pval": 0.0
+    },
+    "GARCH": {
+      "rho": 0.3825,
+      "pval": 0.0
+    },
+    "GJR": {
+      "rho": 0.4074,
+      "pval": 0.0
+    },
+    "MF_GJR": {
+      "rho": 0.4573,
+      "pval": 0.0
+    }
+  },
+  "layer4_dm_tests": {
+    "CARR vs CARR_MF": {
+      "t_stat": 3.1469,
+      "p_value": 0.00167,
+      "significant": true,
+      "winner": "CARR_MF"
+    },
+    "CARR vs GARCH": {
+      "t_stat": 4.443,
+      "p_value": 9e-06,
+      "significant": true,
+      "winner": "GARCH"
+    },
+    "CARR vs GJR": {
+      "t_stat": 5.3572,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "GJR"
+    },
+    "CARR vs MF_GJR": {
+      "t_stat": 6.6174,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "CARR_MF vs GARCH": {
+      "t_stat": 2.447,
+      "p_value": 0.014472,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_MF vs GJR": {
+      "t_stat": 3.6765,
+      "p_value": 0.000241,
+      "significant": true,
+      "winner": "GJR"
+    },
+    "CARR_MF vs MF_GJR": {
+      "t_stat": 6.8924,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "GARCH vs GJR": {
+      "t_stat": 3.2613,
+      "p_value": 0.001124,
+      "significant": true,
+      "winner": "GJR"
+    },
+    "GARCH vs MF_GJR": {
+      "t_stat": 5.3251,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "GJR vs MF_GJR": {
+      "t_stat": 4.0602,
+      "p_value": 5.1e-05,
+      "significant": true,
+      "winner": "MF_GJR"
+    }
+  },
+  "supplementary_qlike_on_parkinson": {
+    "CARR": 0.446993,
+    "CARR_MF": 0.396331,
+    "GARCH": 0.56795,
+    "GJR": 0.530148,
+    "MF_GJR": 0.453094
+  }
+}
