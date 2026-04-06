@@ -1,0 +1,289 @@
+{
+  "experiment_id": "K935",
+  "title": "Gap-Adjusted CARR — Fixing Parkinson Overnight Bias",
+  "date": "2026-04-06",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "period": "2004-01-01 ~ 2025-12-31",
+  "oos_period": "2016-01-04 ~ 2025-12-31",
+  "oos_days": 2514,
+  "window": 2000,
+  "refit_every": 21,
+  "n_refits": 120,
+  "references": [
+    "Parkinson (1980) 'The Extreme Value Method for Estimating the Variance of the Rate of Return'",
+    "Garman & Klass (1980) 'On the Estimation of Security Price Volatilities from Historical Data'",
+    "Rogers & Satchell (1991) 'Estimating Variance from High, Low and Closing Prices'",
+    "Yang & Zhang (2000) 'Drift Independent Volatility Estimation'",
+    "Chou (2005) 'Forecasting Financial Volatilities with Extreme Values'",
+    "Patton (2011) J. Econometrics 160"
+  ],
+  "range_estimator_stats": {
+    "negative_values": {
+      "GK": 0,
+      "RS": 2,
+      "YZ": 0
+    },
+    "correlations_with_r2": {
+      "Parkinson": 0.7114,
+      "GK": 0.5973,
+      "RS": 0.5362,
+      "YZ": 0.6875
+    },
+    "means": {
+      "Parkinson": 9.097e-05,
+      "GK": 9.341e-05,
+      "RS": 9.664e-05,
+      "YZ": 0.00015494
+    }
+  },
+  "model_parameters_first_fit": {
+    "CARR_Parkinson": {
+      "omega": 1.67e-06,
+      "alpha": 0.10242339,
+      "beta": 0.86332863,
+      "persistence": 0.96575202,
+      "converged": true,
+      "loglik": 17397.86340045
+    },
+    "CARR_GK": {
+      "omega": 1.53e-06,
+      "alpha": 0.10279802,
+      "beta": 0.8653891,
+      "persistence": 0.96818712,
+      "converged": true,
+      "loglik": 17399.7173882
+    },
+    "CARR_RS": {
+      "omega": 1.57e-06,
+      "alpha": 0.10306291,
+      "beta": 0.866846,
+      "persistence": 0.96990891,
+      "converged": true,
+      "loglik": 17359.72607604
+    },
+    "CARR_YZ": {
+      "omega": 2.56e-06,
+      "alpha": 0.10304499,
+      "beta": 0.86674732,
+      "persistence": 0.9697923,
+      "converged": true,
+      "loglik": 16336.44546885
+    },
+    "GARCH": {
+      "omega": 3.02e-06,
+      "alpha": 0.08094182,
+      "beta": 0.8868282,
+      "persistence": 0.96777003,
+      "converged": true,
+      "loglik": 6372.45477898
+    },
+    "MF_GJR": {
+      "theta0": -16.05104424,
+      "theta1": 2.84098544,
+      "omega": 0.00593267,
+      "alpha": 0.0,
+      "gamma": 0.10000891,
+      "beta": 0.92879499,
+      "persistence": 0.97879945,
+      "converged": true,
+      "loglik": 6590.94489048
+    }
+  },
+  "layer1_native_target_qlike": {
+    "CARR_Parkinson": 0.454355,
+    "CARR_GK": 0.418222,
+    "CARR_RS": 0.510885,
+    "CARR_YZ": 0.457937,
+    "GARCH": 1.603322,
+    "MF_GJR": 1.479812
+  },
+  "layer2_qlike_on_r2_patton": {
+    "CARR_Parkinson": 1.692067,
+    "CARR_GK": 1.688786,
+    "CARR_RS": 1.67009,
+    "CARR_YZ": 1.55597,
+    "GARCH": 1.603322,
+    "MF_GJR": 1.479812
+  },
+  "layer2_ranking": [
+    {
+      "rank": 1,
+      "model": "MF_GJR",
+      "qlike": 1.479812
+    },
+    {
+      "rank": 2,
+      "model": "CARR_YZ",
+      "qlike": 1.55597
+    },
+    {
+      "rank": 3,
+      "model": "GARCH",
+      "qlike": 1.603322
+    },
+    {
+      "rank": 4,
+      "model": "CARR_RS",
+      "qlike": 1.67009
+    },
+    {
+      "rank": 5,
+      "model": "CARR_GK",
+      "qlike": 1.688786
+    },
+    {
+      "rank": 6,
+      "model": "CARR_Parkinson",
+      "qlike": 1.692067
+    }
+  ],
+  "layer3_spearman": {
+    "CARR_Parkinson": {
+      "rho": 0.4271,
+      "pval": 0.0
+    },
+    "CARR_GK": {
+      "rho": 0.4283,
+      "pval": 0.0
+    },
+    "CARR_RS": {
+      "rho": 0.4206,
+      "pval": 0.0
+    },
+    "CARR_YZ": {
+      "rho": 0.4147,
+      "pval": 0.0
+    },
+    "GARCH": {
+      "rho": 0.378,
+      "pval": 0.0
+    },
+    "MF_GJR": {
+      "rho": 0.4582,
+      "pval": 0.0
+    }
+  },
+  "layer4_dm_tests": {
+    "MF_GJR vs CARR_YZ": {
+      "t_stat": -3.6057,
+      "p_value": 0.000317,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "MF_GJR vs GARCH": {
+      "t_stat": -5.0469,
+      "p_value": 0.0,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "MF_GJR vs CARR_RS": {
+      "t_stat": -4.2987,
+      "p_value": 1.8e-05,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "MF_GJR vs CARR_GK": {
+      "t_stat": -4.681,
+      "p_value": 3e-06,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "MF_GJR vs CARR_Parkinson": {
+      "t_stat": -4.7628,
+      "p_value": 2e-06,
+      "significant": true,
+      "winner": "MF_GJR"
+    },
+    "CARR_YZ vs GARCH": {
+      "t_stat": -2.6824,
+      "p_value": 0.007357,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_YZ vs CARR_RS": {
+      "t_stat": -2.898,
+      "p_value": 0.003789,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_YZ vs CARR_GK": {
+      "t_stat": -3.2563,
+      "p_value": 0.001144,
+      "significant": true,
+      "winner": "CARR_YZ"
+    },
+    "CARR_YZ vs CARR_Parkinson": {
+      "t_stat": -3.2847,
+      "p_value": 0.001035,
+      "significant": true,
+      "winner": "CARR_YZ"
+    },
+    "GARCH vs CARR_RS": {
+      "t_stat": -1.9316,
+      "p_value": 0.053526,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "GARCH vs CARR_GK": {
+      "t_stat": -2.3374,
+      "p_value": 0.019496,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "GARCH vs CARR_Parkinson": {
+      "t_stat": -2.5241,
+      "p_value": 0.011662,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_RS vs CARR_GK": {
+      "t_stat": -1.1793,
+      "p_value": 0.238372,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_RS vs CARR_Parkinson": {
+      "t_stat": -0.9668,
+      "p_value": 0.33373,
+      "significant": false,
+      "winner": "n.s."
+    },
+    "CARR_GK vs CARR_Parkinson": {
+      "t_stat": -0.1987,
+      "p_value": 0.842549,
+      "significant": false,
+      "winner": "n.s."
+    }
+  },
+  "supplementary_qlike_on_parkinson_var": {
+    "CARR_Parkinson": 0.454355,
+    "CARR_GK": 0.460234,
+    "CARR_RS": 0.477883,
+    "CARR_YZ": 0.56981,
+    "GARCH": 0.568896,
+    "MF_GJR": 0.453869
+  },
+  "key_comparison_vs_parkinson_carr": {
+    "GK": {
+      "qlike_r2": 1.688786,
+      "improvement_pct": 0.19,
+      "spearman_rho": 0.4283
+    },
+    "RS": {
+      "qlike_r2": 1.67009,
+      "improvement_pct": 1.3,
+      "spearman_rho": 0.4206
+    },
+    "YZ": {
+      "qlike_r2": 1.55597,
+      "improvement_pct": 8.04,
+      "spearman_rho": 0.4147
+    }
+  },
+  "conclusions": {
+    "H1_gap_adjusted_better_than_parkinson": true,
+    "H2_approaches_garch_calibration": "-2.95% gap to GARCH",
+    "best_carr_variant": "CARR_YZ",
+    "overall_best": "MF_GJR"
+  }
+}
