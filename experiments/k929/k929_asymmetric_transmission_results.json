@@ -1,0 +1,344 @@
+{
+  "experiment_id": "K929",
+  "title": "K929: Asymmetric Volatility Transmission SPY\u21920050.TW \u2014 Fear Contagion vs Greed Diffusion",
+  "timestamp": "2026-04-06T06:01:19.282985",
+  "data_source": "yfinance (SPY, 0050.TW, ^VIX)",
+  "period": "2012-01-05 to 2026-04-02",
+  "n_observations": 3471,
+  "conclusion": "NULL: No statistically significant asymmetry detected",
+  "references": [
+    "Engle & Ng (1993) - News Impact Curves",
+    "Glosten, Jagannathan & Runkle (1993) - GJR-GARCH",
+    "Baele (2005) - Volatility spillover in equity markets",
+    "Bekaert, Ehrmann, Fratzscher & Mehl (2014) - Global crises and equity market contagion"
+  ],
+  "descriptive_statistics": {
+    "spy_ret_prev": {
+      "mean": 0.0006407948108691548,
+      "std": 0.010395333669429819,
+      "skew": -0.5243551986905095,
+      "kurtosis": 15.743279286596806,
+      "min": -0.11588662966871573,
+      "max": 0.09986278391659298,
+      "n": 3471,
+      "adf_stat": -13.875774161950805,
+      "adf_pvalue": 6.34272652154983e-26
+    },
+    "tw_gap": {
+      "mean": 0.0005561912619899275,
+      "std": 0.008318433369014699,
+      "skew": -0.007447866148589171,
+      "kurtosis": 23.39352432109982,
+      "min": -0.10536052549570103,
+      "max": 0.09518583209906496,
+      "n": 3471,
+      "adf_stat": -29.430582725795443,
+      "adf_pvalue": 0.0
+    },
+    "correlation": 0.5628627385424321
+  },
+  "symmetric_regression": {
+    "alpha": 0.00026757247711210595,
+    "alpha_se": 0.00011742662975324637,
+    "alpha_t": 2.2786354140825424,
+    "alpha_p": 0.022688746941135526,
+    "beta": 0.4504074939157945,
+    "beta_se": 0.02455832592123887,
+    "beta_t": 18.340317469533495,
+    "beta_p": 3.944867002786762e-75,
+    "r_squared": 0.3168144624394865,
+    "adj_r_squared": 0.31661752224416784,
+    "n_obs": 3471
+  },
+  "asymmetric_regression": {
+    "alpha": 0.00020381410996457564,
+    "alpha_se": 0.00026121100673095305,
+    "alpha_t": 0.7802661630354033,
+    "beta_pos": 0.4601162851374368,
+    "beta_pos_se": 0.05642068630392695,
+    "beta_pos_t": 8.155099047517472,
+    "beta_pos_p": 3.4889382706038264e-16,
+    "beta_neg": 0.4415714269632192,
+    "beta_neg_se": 0.03450073055267144,
+    "beta_neg_t": 12.798900773683117,
+    "beta_neg_p": 1.6628835957330493e-37,
+    "asymmetry_diff": -0.018544858174217582,
+    "asymmetry_ratio": 0.959695279708089,
+    "wald_f": 0.056770506594893196,
+    "wald_p": 0.8116750833151165,
+    "r_squared": 0.31689069561155325,
+    "adj_r_squared": 0.3164967456090224,
+    "n_obs": 3471
+  },
+  "bootstrap": {
+    "boot_mean_diff": -0.015228608876935655,
+    "boot_std_diff": 0.07272794627346399,
+    "ci_95_lower": -0.160744107567317,
+    "ci_95_upper": 0.12453535538344147,
+    "prop_neg_greater": 0.4233,
+    "n_boot": 10000
+  },
+  "quintile_analysis": {
+    "Q1(worst)": {
+      "n": 695,
+      "spy_mean": -0.012954219822841947,
+      "tw_gap_mean": -0.00591725426971241,
+      "tw_gap_median": -0.004547371700202023,
+      "tw_gap_std": 0.009060109390036632,
+      "transmission_ratio": 0.4567819869227956
+    },
+    "Q2": {
+      "n": 694,
+      "spy_mean": -0.0024876796923273465,
+      "tw_gap_mean": -0.0009600409935855068,
+      "tw_gap_median": -0.0003647334517945196,
+      "tw_gap_std": 0.006219281290277894,
+      "transmission_ratio": 0.3859182500651205
+    },
+    "Q3": {
+      "n": 694,
+      "spy_mean": 0.0008614379312340634,
+      "tw_gap_mean": 0.0007699646334096305,
+      "tw_gap_median": 1.4201905198028356e-07,
+      "tw_gap_std": 0.004573041001324672,
+      "transmission_ratio": 0.8938132458441994
+    },
+    "Q4": {
+      "n": 694,
+      "spy_mean": 0.0044919543651155336,
+      "tw_gap_mean": 0.0021158408284771358,
+      "tw_gap_median": 0.0014932630686490993,
+      "tw_gap_std": 0.006737807786254963,
+      "transmission_ratio": 0.4710290124291403
+    },
+    "Q5(best)": {
+      "n": 694,
+      "spy_mean": 0.013312070631427302,
+      "tw_gap_mean": 0.006781773842674478,
+      "tw_gap_median": 0.005462353502987046,
+      "tw_gap_std": 0.008582678439744054,
+      "transmission_ratio": 0.5094454522096648
+    }
+  },
+  "quintile_monotonicity": {
+    "spearman_r": 0.9999999999999999,
+    "spearman_p": 1.4042654220543602e-24,
+    "q1_q5_ratio_ratio": 0.8966258996749367
+  },
+  "extreme_events": {
+    "1.0sigma": {
+      "n_down": 359,
+      "n_up": 347,
+      "gap_down_mean": -0.008718820137984308,
+      "gap_down_median": -0.007273078343851266,
+      "gap_down_std": 0.01033151925608929,
+      "gap_up_mean": 0.008305716992055963,
+      "gap_up_median": 0.00706712940764803,
+      "gap_up_std": 0.009517130128084693,
+      "abs_gap_ratio": 1.0497372046655888,
+      "ks_stat": 0.08382233710354571,
+      "ks_p": 0.15490324861581412,
+      "ttest_stat": 1.4084369646883663,
+      "ttest_p": 0.15944319368304172
+    },
+    "1.5sigma": {
+      "n_down": 185,
+      "n_up": 132,
+      "gap_down_mean": -0.011010911008278636,
+      "gap_down_median": -0.009708630769501844,
+      "gap_down_std": 0.011780266133192049,
+      "gap_up_mean": 0.011514074365846415,
+      "gap_up_median": 0.009569484082626228,
+      "gap_up_std": 0.011153503415887509,
+      "abs_gap_ratio": 0.95630014696967,
+      "ks_stat": 0.062285012285012285,
+      "ks_p": 0.9015565519204902,
+      "ttest_stat": 0.5542068891341885,
+      "ttest_p": 0.5798930156621219
+    },
+    "2.0sigma": {
+      "n_down": 97,
+      "n_up": 61,
+      "gap_down_mean": -0.012977291000926185,
+      "gap_down_median": -0.012391769508259516,
+      "gap_down_std": 0.01407216834269758,
+      "gap_up_mean": 0.014182979470337868,
+      "gap_up_median": 0.013214284219567645,
+      "gap_up_std": 0.014641864924377268,
+      "abs_gap_ratio": 0.914990466429621,
+      "ks_stat": 0.0900794321446679,
+      "ks_p": 0.8857765611277215,
+      "ttest_stat": 0.30067288444397894,
+      "ttest_p": 0.7642433637928245
+    },
+    "2.5sigma": {
+      "n_down": 54,
+      "n_up": 26,
+      "gap_down_mean": -0.013446018807859426,
+      "gap_down_median": -0.013213850021052902,
+      "gap_down_std": 0.01690921127256332,
+      "gap_up_mean": 0.01719982975141329,
+      "gap_up_median": 0.014008508998277918,
+      "gap_up_std": 0.020184338503524014,
+      "abs_gap_ratio": 0.7817530174538259,
+      "ks_stat": 0.1581196581196581,
+      "ks_p": 0.7074410889118432,
+      "ttest_stat": -0.10352580820298829,
+      "ttest_p": 0.9181363504048066
+    },
+    "3.0sigma": {
+      "n_down": 32,
+      "n_up": 16,
+      "gap_down_mean": -0.01653921492942035,
+      "gap_down_median": -0.013213850021052902,
+      "gap_down_std": 0.013414484934427044,
+      "gap_up_mean": 0.01887959377545305,
+      "gap_up_median": 0.015500420564971926,
+      "gap_up_std": 0.024707267461951985,
+      "abs_gap_ratio": 0.8760365888234511,
+      "ks_stat": 0.15625,
+      "ks_p": 0.9513836885799609,
+      "ttest_stat": -0.4721518048461413,
+      "ttest_p": 0.6421604237245364
+    }
+  },
+  "piecewise_regression": {
+    "extreme_neg": {
+      "n": 336,
+      "beta": 0.33095357618712246,
+      "beta_se": 0.06427046972824699,
+      "beta_t": 5.149387853962856,
+      "r_squared": 0.12593801985451725
+    },
+    "normal": {
+      "n": 2737,
+      "beta": 0.48033146955703754,
+      "beta_se": 0.027497489690027008,
+      "beta_t": 17.468193459537787,
+      "r_squared": 0.12165442724311681
+    },
+    "extreme_pos": {
+      "n": 398,
+      "beta": 0.39348253191352567,
+      "beta_se": 0.18866546107626928,
+      "beta_t": 2.0856097860670837,
+      "r_squared": 0.16704859076464407
+    },
+    "extreme_ratio": 0.8410883567757844
+  },
+  "vix_regime_asymmetry": {
+    "Low": {
+      "n": 868,
+      "vix_min": 9.140000343322754,
+      "vix_max": 13.420000076293945,
+      "vix_mean": 12.06942396010122,
+      "beta_pos": 0.48227760033917866,
+      "beta_neg": 0.48842057485271706,
+      "asymmetry_diff": 0.006142974513538402,
+      "asymmetry_ratio": 1.0127374244817053,
+      "wald_p": 0.9641713354464408,
+      "r_squared": 0.21795977913139142
+    },
+    "Med-Low": {
+      "n": 869,
+      "vix_min": 13.430000305175781,
+      "vix_max": 16.030000686645508,
+      "vix_mean": 14.657663978559102,
+      "beta_pos": 0.5040353461186464,
+      "beta_neg": 0.4489808375590505,
+      "asymmetry_diff": -0.05505450855959593,
+      "asymmetry_ratio": 0.8907725242216714,
+      "wald_p": 0.5428236190855829,
+      "r_squared": 0.24422966974649007
+    },
+    "Med-High": {
+      "n": 868,
+      "vix_min": 16.040000915527344,
+      "vix_max": 20.079999923706055,
+      "vix_mean": 17.7694700566305,
+      "beta_pos": 0.4329746244523108,
+      "beta_neg": 0.6310290778923374,
+      "asymmetry_diff": 0.19805445344002665,
+      "asymmetry_ratio": 1.4574273924033185,
+      "wald_p": 0.018615729743700866,
+      "r_squared": 0.291916088975991
+    },
+    "High": {
+      "n": 866,
+      "vix_min": 20.09000015258789,
+      "vix_max": 82.69000244140625,
+      "vix_mean": 26.265230978333648,
+      "beta_pos": 0.43238656930733754,
+      "beta_neg": 0.4273332509419161,
+      "asymmetry_diff": -0.005053318365421444,
+      "asymmetry_ratio": 0.9883129617704902,
+      "wald_p": 0.9685328689634871,
+      "r_squared": 0.36444780453965897
+    }
+  },
+  "structural_breaks": {
+    "night_session_pre": {
+      "n": 1310,
+      "period": "2012-01-05 to 2017-05-12",
+      "beta_pos": 0.44057343728339576,
+      "beta_neg": 0.3985056496650799,
+      "asymmetry_diff": -0.042067787618315866,
+      "asymmetry_ratio": 0.9045158330976362,
+      "r_squared": 0.3190004703248249,
+      "symmetric_beta": 0.419351096049668
+    },
+    "night_session_post": {
+      "n": 2161,
+      "period": "2017-05-15 to 2026-04-02",
+      "beta_pos": 0.4637561504884227,
+      "beta_neg": 0.4543097764072743,
+      "asymmetry_diff": -0.009446374081148401,
+      "asymmetry_ratio": 0.9796307303499919,
+      "r_squared": 0.31704562926658264,
+      "symmetric_beta": 0.45876207904530236
+    },
+    "covid_pre": {
+      "n": 1990,
+      "period": "2012-01-05 to 2020-02-27",
+      "beta_pos": 0.4300842022256394,
+      "beta_neg": 0.4339447618573765,
+      "asymmetry_diff": 0.0038605596317370927,
+      "asymmetry_ratio": 1.0089762879263156,
+      "r_squared": 0.3271090240247151,
+      "symmetric_beta": 0.43214259897090324
+    },
+    "covid_post": {
+      "n": 1481,
+      "period": "2020-03-02 to 2026-04-02",
+      "beta_pos": 0.46718117383945634,
+      "beta_neg": 0.45315156794135825,
+      "asymmetry_diff": -0.014029605898098096,
+      "asymmetry_ratio": 0.9699696676927326,
+      "r_squared": 0.3127292340533192,
+      "symmetric_beta": 0.4598984254539853
+    },
+    "night_session_change": {
+      "asymmetry_change": 0.032621413537167465,
+      "pre_diff": -0.042067787618315866,
+      "post_diff": -0.009446374081148401
+    },
+    "covid_change": {
+      "asymmetry_change": -0.01789016552983519,
+      "pre_diff": 0.0038605596317370927,
+      "post_diff": -0.014029605898098096
+    }
+  },
+  "rolling_asymmetry_summary": {
+    "mean_diff": -0.009434020403371485,
+    "std_diff": 0.15725198530038995,
+    "pct_neg_greater": 0.5352112676056338,
+    "n_windows": 142
+  },
+  "limitations": [
+    "Uses daily close-to-close SPY return as proxy for overnight news",
+    "0050.TW gap includes both US-driven and local overnight news",
+    "Forward-fill SPY returns on TW-only trading days may introduce noise",
+    "No control for local Taiwan macro/political events",
+    "Split adjustment for 0050.TW via clean_tw50_data (pre-2014 issue)"
+  ]
+}
