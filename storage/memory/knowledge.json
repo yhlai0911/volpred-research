@@ -21451,5 +21451,24 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T10:06:01.358252+00:00",
     "star_rating": 0
+  },
+  {
+    "id": "know_20260406104321_k941",
+    "experiment_id": "K941",
+    "title": "K941: Conditional Quantile Vol ★ — CAViaR-SAV最佳分位數模型，GARCH parametric意外competitive",
+    "content": "[提出: Claude, 執行: Claude] 首次quantile volatility forecasting實驗。5模型：CAViaR-SAV/QR-GARCH/Quantile RF/GARCH parametric(Student-t)/MF-GJR parametric。SPY OOS 2016-2025 (2513天)。CAViaR-SAV全面勝出：mean pinball loss=0.000040、calibration MAD=0.006、coverage=91.2%、Winkler=0.000902。GARCH parametric意外接近(pinball=0.000041, Winkler≈同)——Student-t分配假設對SPY adequate。QR-GARCH coverage不足(84.6% vs 90%目標)。MF-GJR區間過寬(width=0.000809, 1.7x CAViaR)——VIX factor改善點預測但惡化區間估計（過度保守）。Quantile RF coverage=90.0%（完美）但pinball較高。結論：quantile預測的最佳模型(CAViaR)與點預測的最佳模型(MF-GJR)不同——不同任務需不同工具。",
+    "tags": [
+      "volatility",
+      "quantile-forecasting",
+      "CAViaR",
+      "prediction-interval",
+      "pinball-loss",
+      "Winkler-score",
+      "SPY",
+      "positive-result"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T10:43:21.351689+00:00",
+    "star_rating": 1
   }
 ]
