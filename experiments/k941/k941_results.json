@@ -1,0 +1,192 @@
+{
+  "experiment_id": "K941",
+  "title": "Conditional Quantile Volatility Forecasting",
+  "timestamp": "2026-04-06T10:40:43.664695+00:00",
+  "elapsed_seconds": 80.5,
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance",
+    "period": "2006-01-04 ~ 2025-12-30",
+    "n_total": 5029,
+    "oos_start": "2016-01-01",
+    "n_oos": "2513",
+    "target": "r^2 (squared daily return)"
+  },
+  "models": [
+    "CAViaR-SAV",
+    "QR-GARCH",
+    "Quantile RF",
+    "GARCH Param",
+    "MF-GJR Param"
+  ],
+  "quantiles": [
+    0.05,
+    0.25,
+    0.5,
+    0.75,
+    0.95
+  ],
+  "pinball_loss": {
+    "caviar_sav": {
+      "0.05": 6.4494027784670965e-06,
+      "0.25": 3.159696164586318e-05,
+      "0.5": 5.767509246239295e-05,
+      "0.75": 6.789930302874692e-05,
+      "0.95": 3.866913944784473e-05
+    },
+    "qr_garch": {
+      "0.05": 6.449426798385874e-06,
+      "0.25": 3.1681870299430664e-05,
+      "0.5": 5.886604427177874e-05,
+      "0.75": 7.232879763736205e-05,
+      "0.95": 5.505120667111884e-05
+    },
+    "qrf": {
+      "0.05": 6.4504556561859834e-06,
+      "0.25": 3.158073789294692e-05,
+      "0.5": 5.860012982583607e-05,
+      "0.75": 7.112461275616819e-05,
+      "0.95": 4.7385933375474805e-05
+    },
+    "garch_param": {
+      "0.05": 6.451871255150466e-06,
+      "0.25": 3.156168917521675e-05,
+      "0.5": 5.771681758549195e-05,
+      "0.75": 6.839960231124394e-05,
+      "0.95": 3.866971888635557e-05
+    },
+    "mfgjr_param": {
+      "0.05": 6.46244438928649e-06,
+      "0.25": 3.12197174052119e-05,
+      "0.5": 6.0280415156286585e-05,
+      "0.75": 7.44012019463248e-05,
+      "0.95": 4.716509342526282e-05
+    }
+  },
+  "mean_pinball_loss": {
+    "caviar_sav": 4.045797987266297e-05,
+    "qr_garch": 4.4875469135615236e-05,
+    "qrf": 4.302837390132239e-05,
+    "garch_param": 4.055993984269174e-05,
+    "mfgjr_param": 4.390577446447451e-05
+  },
+  "coverage_90pct": {
+    "caviar_sav": 0.9116593712693991,
+    "qr_garch": 0.8463987266215679,
+    "qrf": 0.8997214484679665,
+    "garch_param": 0.8873855949064863,
+    "mfgjr_param": 0.892558694787107
+  },
+  "interval_width_90pct": {
+    "caviar_sav": 0.00047077165743579795,
+    "qr_garch": 0.0004574076610501544,
+    "qrf": 0.00045448560859726316,
+    "garch_param": 0.000500822273042414,
+    "mfgjr_param": 0.0008085794958950454
+  },
+  "winkler_score_90pct": {
+    "caviar_sav": 0.0009023708445262363,
+    "qr_garch": 0.001230012669390094,
+    "qrf": 0.0010767277806332156,
+    "garch_param": 0.0009024318028301205,
+    "mfgjr_param": 0.0010725507562909858
+  },
+  "calibration": {
+    "caviar_sav": {
+      "0.05": 0.03939514524472742,
+      "0.25": 0.25387982491046557,
+      "0.5": 0.5089534421010744,
+      "0.75": 0.7449263828093912,
+      "0.95": 0.9510545165141265
+    },
+    "qr_garch": {
+      "0.05": 0.05372065260644648,
+      "0.25": 0.24353362514922403,
+      "0.5": 0.4966175885395941,
+      "0.75": 0.7202546756864305,
+      "0.95": 0.8989255869478711
+    },
+    "qrf": {
+      "0.05": 0.050537206526064464,
+      "0.25": 0.2618384401114206,
+      "0.5": 0.530441703143653,
+      "0.75": 0.76283326701154,
+      "0.95": 0.9502586549940311
+    },
+    "garch_param": {
+      "0.05": 0.06486271388778353,
+      "0.25": 0.27656187823318745,
+      "0.5": 0.532033426183844,
+      "0.75": 0.7413450059689614,
+      "0.95": 0.9522483087942698
+    },
+    "mfgjr_param": {
+      "0.05": 0.06327099084759252,
+      "0.25": 0.2904894548348587,
+      "0.5": 0.5487465181058496,
+      "0.75": 0.7795463589335455,
+      "0.95": 0.9558296856346996
+    }
+  },
+  "calibration_mad": {
+    "caviar_sav": 0.005913251094309594,
+    "qr_garch": 0.018877835256665344,
+    "qrf": 0.011181854357341831,
+    "garch_param": 0.01687226422602469,
+    "mfgjr_param": 0.02757660167130921
+  },
+  "ranking": [
+    {
+      "rank": 1,
+      "model": "CAViaR-SAV",
+      "mean_pinball": 4.045797987266297e-05
+    },
+    {
+      "rank": 2,
+      "model": "GARCH Param",
+      "mean_pinball": 4.055993984269174e-05
+    },
+    {
+      "rank": 3,
+      "model": "Quantile RF",
+      "mean_pinball": 4.302837390132239e-05
+    },
+    {
+      "rank": 4,
+      "model": "MF-GJR Param",
+      "mean_pinball": 4.390577446447451e-05
+    },
+    {
+      "rank": 5,
+      "model": "QR-GARCH",
+      "mean_pinball": 4.4875469135615236e-05
+    }
+  ],
+  "garch_params": {
+    "alpha": 0.1869983679169999,
+    "beta": 0.7996217622060722,
+    "nu": 9.502254027697521,
+    "persistence": 0.986620130123072
+  },
+  "mfgjr_params": {
+    "theta": 2.5490579091355237,
+    "alpha": 0.0001,
+    "beta": 0.8681530341966869,
+    "gamma": 0.14473445984824915,
+    "nu": 15.69552812269552
+  },
+  "references": [
+    "Engle & Manganelli (2004) JBES 22(4):367-381",
+    "Koenker & Bassett (1978) Econometrica 46:33-50",
+    "Meinshausen (2006) JMLR 7:983-999",
+    "Patton (2011) J Econometrics 160:246-256"
+  ],
+  "conclusion": "K941: Conditional quantile vol forecasting on SPY r^2 (OOS 2016-01-01~2025-12-31, N_OOS=2513). Best overall pinball loss: CAViaR-SAV (0.000040). Best calibration: CAViaR-SAV (MAD=0.0059). 90% coverage: CAViaR-SAV=0.912, QR-GARCH=0.846, Quantile RF=0.900, GARCH Param=0.887, MF-GJR Param=0.893. Winkler: CAViaR-SAV=0.000902, QR-GARCH=0.001230, Quantile RF=0.001077, GARCH Param=0.000902, MF-GJR Param=0.001073. Non-parametric methods capture asymmetric quantile dynamics; parametric models with Student-t provide competitive performance with interpretability advantage.",
+  "limitations": [
+    "Target is r^2 (noisy proxy for sigma^2)",
+    "CAViaR-SAV is simplified (no asymmetric slope)",
+    "Single asset (SPY)",
+    "QRF quantile estimation via leaf membership",
+    "No formal DM tests between quantile models"
+  ]
+}
