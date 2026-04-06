@@ -21617,5 +21617,24 @@
     "data_source": "yfinance (SPY, ^VIX, TLT)",
     "created_at": "2026-04-06T18:30:10.489716+00:00",
     "star_rating": 0
+  },
+  {
+    "id": "know_20260406205735_k949",
+    "experiment_id": "K949",
+    "title": "K949: Cross-Market MF-GJR ★★ — VIX是全球風險因子，4/5市場Harvey顯著",
+    "content": "[提出: Claude, 執行: Claude] MF-GJR(VIX)跨市場驗證：SPY/FEZ(歐元區)/EWG(德國)/EWJ(日本)/EWU(英國)。OOS 2016-2025。4/5市場Harvey顯著：SPY +11.1%(t=3.44)、FEZ +4.4%(t=3.84)、EWG +4.1%(t=3.48)、EWJ +4.6%(t=4.22)、EWU +7.7%(t=2.40 borderline)。VIX elasticity(θ₁)跨市場穩定：mean=2.10, std=0.19。非美市場θ₁反而更高(2.1-2.3 vs SPY 1.8)——VIX驅動非美市場long-run vol更強。日本DM t=4.22最高，顯示US risk transmission最強。局限：ETF在美國交易所，更嚴格測試需用本地指數+本地VIX(VSTOXX/JNIV)。結論：VIX是global risk sufficient statistic，Paper 7重要證據。",
+    "tags": [
+      "volatility",
+      "MF-GJR",
+      "VIX",
+      "cross-market",
+      "global-risk",
+      "Europe",
+      "Japan",
+      "paper-ready"
+    ],
+    "data_source": "yfinance (SPY, FEZ, EWG, EWJ, EWU, ^VIX)",
+    "created_at": "2026-04-06T20:57:35.463138+00:00",
+    "star_rating": 2
   }
 ]
