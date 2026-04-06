@@ -401,9 +401,9 @@
 
 ### Rough Volatility & Hurst
 - [ ] ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。
-- [x] ~~Time-Varying Hurst via EWMA~~ → **K936 NULL**。R/S 和 DFA 兩種方法，H(t) 不勝 GARCH（DM NS），加到 VIX 上也無增量（DM t=+1.77 NS）。日頻 Hurst 無法改善預測，需 5-min 數據
+- [x] ~~Time-Varying Hurst~~ → K936 NULL（日頻無效，見 archive 2026-04-06）
 - [ ] Adaptive Fractal Dynamics — Frontiers Applied Math 2025
-- [ ] Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437
+- [ ] Non-Gaussian Rough Vol — arXiv:2507.15437
 
 ### Tail Risk & Conformal Prediction
 - [ ] Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)
@@ -442,16 +442,10 @@
 ### 新發現（2026-04-01 文獻搜尋）
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。
 
-### Gemini 第 3 次建議（2026-04-06）[提出: Gemini]
-- [x] ~~G3-1: Diurnal Asymmetric Spillover Networks (DASN)~~ → **K919 完成 ★★**。Gap channel 完全主導 SPY→台灣傳導（R²=0.355, t=42.98, 佔 99.7%）。Intraday 近零（R²=0.002, 微弱反轉）。高 VIX gap R²=0.408。夜盤後 gap R² 增加 0.331→0.363。**實務：台灣投資人看美股收盤即可，盤中追隨無效。**
-- [x] ~~G3-2: Quantile Connectedness~~ → **K911 完成**。Left-tail TCI(τ=0.05) ≈ Mean TCI (r=0.952)——尾部不能拯救 TCI。Right-tail TCI(τ=0.95) 獨立 (r=0.017) 但恆定 (~70%)。AUC=0.581（弱）。**TCI 無論哪個 quantile 都是結構性描述，不是交易信號。**
-- [x] ~~G3-3: Fractional Jump-Diffusion MF-GJR~~ → **K933 NULL**。FIGARCH(1,d,1) alone 不改善 OOS（DM t=-0.55 NS）。FIGARCH-MF(VIX) 數值不穩定（lambda 係數放大誤差）。**VIX 已包含長記憶**：前瞻性隱含波動率自然吸收 persistent regime。G3-3 關閉
-
-### K933-K934 衍生方向（2026-04-06）
-- [x] ~~Gap-Adjusted CARR~~ → **K935 ★**。Yang-Zhang CARR 勝 Parkinson CARR 8.04%（DM t=-3.28 Harvey✓）。CARR_YZ(1.556) 甚至勝 GARCH(1.603) 但 DM t=-2.68 未達 Harvey。隔夜成分是關鍵修復。MF-GJR(VIX) 仍最佳
-- [x] ~~CARR + GARCH Ensemble~~ → **K937 NULL**。4 種 ensemble 都不勝 MF-GJR(VIX)。OLS Stacking 最接近（DM t=-1.73 NS）。Rank-Level Hybrid 最差（DM t=-3.92 vs EQ）。VIX sufficient，加 CARR 到 ensemble 只增 noise
-- [x] ~~Yang-Zhang CARR Cross-Asset~~ → **K938 ★★**。4/4 資產全勝 Parkinson（Harvey✓），改善與 gap ratio 相關 (r=0.80)。0050.TW gap=84% 改善 37.3%，GLD gap=50% 改善 27.5%。CARR_YZ 在 SPY/QQQ 甚至勝 GARCH
-- [x] ~~K934: CARR Range-Based Vol~~ → 排序能力最強（ρ=0.474）但 Parkinson 轉換偏差。GARCH 顯著勝 CARR on QLIKE (DM t=4.44)。VIX 改善所有模型
+### Gemini G3 + CARR + ML + Hedging（2026-04-06 完成）
+→ 15 實驗詳見 `docs/research_archive/completed_session_2026-04-06.md`
+- 核心發現：K935(YZ CARR ★)、K938(跨資產 ★★)、K941(CAViaR ★)、K942(13/13 ★★)、K943(h=5 ★★)
+- VIX sufficiency 從 6 新角度確認。ML(MLP/KAN)全敗。QH≈MV。GARCH 遞迴不可替代
 
 ### 其他
 - [ ] Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting）
