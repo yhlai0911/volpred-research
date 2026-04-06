@@ -707,5 +707,29 @@
       "K920",
       "K921"
     ]
+  },
+  {
+    "id": "E50",
+    "title": "E50: Copula + Cross-Market + Stability Series (K922-K930)",
+    "content": "K922-K930 共 9 實驗。\n\n**正面結果：**\n- K922 Copula SPY-0050.TW (★★)：跨市場尾部結構不同於 SPY-GLD，COVID 放大但 GFC 解耦\n- K926 TSMC event (mixed)：月營收顯著(1.24x)，季報 NS。Beta 事件日反降\n- K930 Parameter Stability (★)：θ₁ CV<15% 穩定，COVID 斷裂但參數不影響績效（robust）\n\n**Null 結果：**\n- K923 Copula hedge：SPY-GLD r=0.058 太低，HE<3%。Copula hedging 需 r>0.90 配對\n- K924 Bayesian SSVS：10 變數全 PIP<0.5。Return 不可預測（Bayesian closure）\n- K925 CPI event：|ret| ratio 1.06x NS。非事件\n- K927 Macro regime：宏觀指標滯後 VIX 9-20 天。加 macro 反而更差\n- K928 Factor GARCH：PC1 59.1% 但 VIX 控制後零增量\n- K929 Asymmetric transmission：β_pos≈β_neg (p=0.812)，對稱傳導\n\n**LaTeX 渲染修復（重大教訓）：**\npublisher.py 的 \\t→TAB 破壞了 LaTeX。連鎖修復製造更多問題（Unicode conversion → 3679236792 artifacts → URL corruption）。\n教訓：**批量字串替換極度危險，每次改動必須在測試文章驗證後再批量執行。不可連續多輪 regex 替換不驗證中間結果。**\n\n**MF-GJR 論文準備就緒：**\nK889/K889b/K894/K908/K909/K912/K914/K916/K930 = 完整 9 實驗證據鏈。\n可投 Journal of Applied Econometrics 或 Journal of Forecasting。",
+    "tags": [
+      "copula",
+      "cross-market",
+      "parameter stability",
+      "LaTeX bug",
+      "MF-GJR paper"
+    ],
+    "created_at": "2026-04-06T06:54:33.256290+00:00",
+    "experiments_covered": [
+      "K922",
+      "K923",
+      "K924",
+      "K925",
+      "K926",
+      "K927",
+      "K928",
+      "K929",
+      "K930"
+    ]
   }
 ]
