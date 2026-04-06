@@ -21,5 +21,5 @@
     "GLD",
     "QQQ"
   ],
-  "content": "## True Out-of-Sample Validation\n\n**方法**：用 2023 年底估計的 γ 決定 2024-2025 用 GARCH 還是 GJR。\n\n| 資產 | γ(2023) | t-stat | 推薦 | 實際 | DM p | 正確？ |\n|------|---------|--------|------|------|------|--------|\n| SPY | +0.08 | 1.23 | GARCH | GJR | 0.002 | ✗ |\n| QQQ | +0.04 | 2.10 | GJR | GJR | 0.006 | ✓ |\n| GLD | -0.14 | -1.91 | GARCH | - | 0.785 | ✓ |\n| TLT | +0.03 | 2.30 | GJR | - | 0.306 | ✓ |\n| BTC | -0.05 | -0.21 | GARCH | - | 0.358 | ✓ |\n| EEM | +0.11 | 2.42 | GJR | GJR | 0.158 | ✓ |\n\n### 結果：5/6 正確 (83%)\n\n唯一的 miss 是 SPY——2023 年 γ 暫時偏低（平靜年份），但 2024-2025 回升。錯誤方向是保守的（推薦 GARCH 而非 GJR）。\n\n### 改進方向\n使用多 window γ 平均值而非 single point estimate。"
+  "content": "## True Out-of-Sample Validation\n\n**方法**：用 2023 年底估計的 \\gamma 決定 2024-2025 用 GARCH 還是 GJR。\n\n| 資產 | \\gamma(2023) | t-stat | 推薦 | 實際 | DM p | 正確？ |\n|------|---------|--------|------|------|------|--------|\n| SPY | +0.08 | 1.23 | GARCH | GJR | 0.002 | ✗ |\n| QQQ | +0.04 | 2.10 | GJR | GJR | 0.006 | ✓ |\n| GLD | -0.14 | -1.91 | GARCH | - | 0.785 | ✓ |\n| TLT | +0.03 | 2.30 | GJR | - | 0.306 | ✓ |\n| BTC | -0.05 | -0.21 | GARCH | - | 0.358 | ✓ |\n| EEM | +0.11 | 2.42 | GJR | GJR | 0.158 | ✓ |\n\n### 結果：5/6 正確 (83%)\n\n唯一的 miss 是 SPY——2023 年 \\gamma 暫時偏低（平靜年份），但 2024-2025 回升。錯誤方向是保守的（推薦 GARCH 而非 GJR）。\n\n### 改進方向\n使用多 window \\gamma 平均值而非 single point estimate。"
 }

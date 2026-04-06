@@ -14,5 +14,5 @@
     "GJR-GARCH",
     "SPY"
   ],
-  "content": "## Diversification Amplifies Leverage Effect\n\n### 20 隻個股 vs SPY\n\n| 指標 | SPY (ETF) | 20 隻個股平均 | 倍數 |\n|------|-----------|-------------|------|\n| **γ** | **0.211** | 0.079 | **2.7x** |\n| t-stat | — | -10.68 | p<0.0001 |\n| SPY γ > 個股 | 20/20 | — | **100%** |\n\n### 機制：Correlation Asymmetry\n下跌時所有股票的相關性增加 → ETF 的 portfolio volatility 在下跌時比上漲時增加更多 → GJR γ 被放大。\n\n### 含義\n1. **GJR 對 ETF 比對個股更重要**（γ 更大更顯著）\n2. 很多個股 γ < 0.10 → 用 GARCH 就好\n3. 這是 leverage effect 文獻中 ETF vs 個股差異的新量化證據"
+  "content": "## Diversification Amplifies Leverage Effect\n\n### 20 隻個股 vs SPY\n\n| 指標 | SPY (ETF) | 20 隻個股平均 | 倍數 |\n|------|-----------|-------------|------|\n| **\\gamma** | **0.211** | 0.079 | **2.7x** |\n| t-stat | — | -10.68 | p<0.0001 |\n| SPY \\gamma > 個股 | 20/20 | — | **100%** |\n\n### 機制：Correlation Asymmetry\n下跌時所有股票的相關性增加 → ETF 的 portfolio volatility 在下跌時比上漲時增加更多 → GJR \\gamma 被放大。\n\n### 含義\n1. **GJR 對 ETF 比對個股更重要**（\\gamma 更大更顯著）\n2. 很多個股 \\gamma < 0.10 → 用 GARCH 就好\n3. 這是 leverage effect 文獻中 ETF vs 個股差異的新量化證據"
 }

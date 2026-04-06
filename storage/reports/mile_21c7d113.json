@@ -16,5 +16,5 @@
     "GJR-GARCH",
     "SPY"
   ],
-  "content": "## Forecast Encompassing Test（SPY 2023-2024）\n\nRV_t = α + β₁ σ²_GJR + β₂ σ²_GARCH + ε_t\n\n| 檢定 | β_other | p-value | 結論 |\n|------|---------|---------|------|\n| GJR encompasses GARCH? | β_GARCH = -0.61 | 0.062 | ✓ GJR 包含 GARCH |\n| GARCH encompasses GJR? | β_GJR = +1.11 | 0.001 | ✗ GARCH 不包含 GJR |\n\nGJR 的 asymmetry (γ) 參數提供了 GARCH 無法複製的額外預測信息。"
+  "content": "## Forecast Encompassing Test（SPY 2023-2024）\n\nRV_t = \\alpha + \\beta_1 \\sigma^2_GJR + \\beta₂ \\sigma^2_GARCH + \\epsilon_t\n\n| 檢定 | \\beta_other | p-value | 結論 |\n|------|---------|---------|------|\n| GJR encompasses GARCH? | \\beta_GARCH = -0.61 | 0.062 | ✓ GJR 包含 GARCH |\n| GARCH encompasses GJR? | \\beta_GJR = +1.11 | 0.001 | ✗ GARCH 不包含 GJR |\n\nGJR 的 asymmetry (\\gamma) 參數提供了 GARCH 無法複製的額外預測信息。"
 }

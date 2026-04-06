@@ -23,5 +23,5 @@
     "GJR-GARCH",
     "GLD"
   ],
-  "content": "## 事件\n\n2026 年 1 月 30 日，黃金單日暴跌 10.27%，白銀暴跌 31.4%——1980 年以來最大貴金屬跌幅。\n\n## 原因\n\n1. **Trump 提名 Kevin Warsh 為 Fed 主席** — 貨幣鷹派，市場預期升息 + 強美元\n2. **槓桿 ETF 強制賣壓** — SLV $35 億、GLD $6.5 億被迫再平衡\n3. **極度超買** — 崩盤前 12 個月黃金漲 96%（白銀漲 278%！）\n4. **選擇權 delta hedging** — 穿破 COMEX 關鍵 strike 觸發連鎖拋售\n\n## 對模型的影響\n\n- GLD 2026 YTD 年化波動率從 ~20% 暴增至 41.2%\n- GJR-GARCH 預測 σ=21.4%（滯後於結構性突破）\n- 這種 jump + 流動性事件是 GARCH 模型的已知盲區（jump = 23% of vol）\n- Basel III VaR 在 GLD 2026 已有 1 violation（GREEN 但需密切監控）"
+  "content": "## 事件\n\n2026 年 1 月 30 日，黃金單日暴跌 10.27%，白銀暴跌 31.4%——1980 年以來最大貴金屬跌幅。\n\n## 原因\n\n1. **Trump 提名 Kevin Warsh 為 Fed 主席** — 貨幣鷹派，市場預期升息 + 強美元\n2. **槓桿 ETF 強制賣壓** — SLV $35 億、GLD $6.5 億被迫再平衡\n3. **極度超買** — 崩盤前 12 個月黃金漲 96%（白銀漲 278%！）\n4. **選擇權 delta hedging** — 穿破 COMEX 關鍵 strike 觸發連鎖拋售\n\n## 對模型的影響\n\n- GLD 2026 YTD 年化波動率從 ~20% 暴增至 41.2%\n- GJR-GARCH 預測 \\sigma=21.4%（滯後於結構性突破）\n- 這種 jump + 流動性事件是 GARCH 模型的已知盲區（jump = 23% of vol）\n- Basel III VaR 在 GLD 2026 已有 1 violation（GREEN 但需密切監控）"
 }

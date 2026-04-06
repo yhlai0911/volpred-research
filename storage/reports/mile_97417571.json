@@ -16,5 +16,5 @@
     "GARCH",
     "GJR-GARCH"
   ],
-  "content": "## 個股 Volatility Targeting：GARCH vs GJR\n\n### 結果（OOS 2023-2024）\n\n| 股票 | γ | GARCH Sharpe | GJR Sharpe | 贏家 |\n|------|-----|-------------|------------|------|\n| AAPL | +0.158 | 0.955 | 0.926 | GARCH |\n| TSLA | +0.012 | -0.027 | -0.031 | TIE |\n| NVDA | +0.132 | 0.333 | 0.416 | GJR |\n| JPM | +0.130 | 0.121 | 0.024 | GARCH |\n| XOM | +0.034 | 2.156 | 2.156 | TIE |\n\n### 結論\n- 個股 VT 用 **GARCH 就夠了**——GJR 的 QLIKE 優勢不一定轉化為 VT Sharpe\n- **GJR VT 的真正價值在 ETF**（diversification amplification, γ 2.7 倍）\n- 個股 γ 太弱且不穩定 → GJR 增加估計噪音"
+  "content": "## 個股 Volatility Targeting：GARCH vs GJR\n\n### 結果（OOS 2023-2024）\n\n| 股票 | \\gamma | GARCH Sharpe | GJR Sharpe | 贏家 |\n|------|-----|-------------|------------|------|\n| AAPL | +0.158 | 0.955 | 0.926 | GARCH |\n| TSLA | +0.012 | -0.027 | -0.031 | TIE |\n| NVDA | +0.132 | 0.333 | 0.416 | GJR |\n| JPM | +0.130 | 0.121 | 0.024 | GARCH |\n| XOM | +0.034 | 2.156 | 2.156 | TIE |\n\n### 結論\n- 個股 VT 用 **GARCH 就夠了**——GJR 的 QLIKE 優勢不一定轉化為 VT Sharpe\n- **GJR VT 的真正價值在 ETF**（diversification amplification, \\gamma 2.7 倍）\n- 個股 \\gamma 太弱且不穩定 → GJR 增加估計噪音"
 }
