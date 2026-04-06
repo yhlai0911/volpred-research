@@ -21546,5 +21546,22 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T12:14:48.704010+00:00",
     "star_rating": 0
+  },
+  {
+    "id": "know_20260406122032_k945",
+    "experiment_id": "K945",
+    "title": "K945: Quadratic vs MV Hedging NULL — 日頻均值太小，QH≈MV（corr>0.9999）",
+    "content": "[提出: Claude, 執行: Claude] Quadratic hedging(QH)vs minimum-variance(MV)在GARCH動態下的比較。3對高相關ETF：SPY-QQQ(r=0.933)、SPY-IWM(r=0.868)、GLD-SLV(r=0.761)。OOS 2016-2025。結果：QH和MV的hedge ratio correlation>0.9999，mean absolute difference<0.001。DM test全NS。原因：QH修正項=(mu_S*mu_F)/(Var_F+mu_F^2)，日頻mean return~O(10^-5)而variance~O(10^-4)，mu^2/Var~O(10^-4)可忽略。月頻差異略增(QH改善0.14%)但仍不顯著。HE結果：SPY-QQQ 87.1%、SPY-IWM 75.2%、GLD-SLV 57.9%。結論：日頻避險中QH=MV，quadratic hedging的理論優勢在低頻才有可能顯現。",
+    "tags": [
+      "hedging",
+      "quadratic-hedging",
+      "minimum-variance",
+      "GARCH",
+      "ETF-pairs",
+      "null-result"
+    ],
+    "data_source": "yfinance (SPY, QQQ, IWM, GLD, SLV)",
+    "created_at": "2026-04-06T12:20:32.223212+00:00",
+    "star_rating": 0
   }
 ]
