@@ -18,5 +18,5 @@
     "GLD",
     "SPY"
   ],
-  "content": "## Gold Leverage Direction 隨 Market Regime 翻轉\n\n正式統計檢定確認（N=77 quarterly estimates, 2005-2026）：\n\n| Regime | N | \\gamma mean | Direction | 機制 |\n|--------|---|--------|-----|------|\n| Bull (252d ret > 0) | 54 | -0.043 | Inverted | 恐慌買入→不確定性↑ |\n| Bear (252d ret ≤ 0) | 23 | +0.048 | Standard | 清算賣出→風險↑ |\n\nt-test: t=-4.71, p<0.0001\n\n### SPY 不翻轉\nSPY 在 bull/bear 中 \\gamma 完全相同（+0.24 vs +0.24, p=0.95）。股票 leverage 來自 capital structure，不依賴 market direction。\n\n### 實務意義\n- 固定的 asset-class 模型選擇不夠——必須 monitor current \\gamma\n- 如果黃金進入熊市 → 從 GARCH 切換到 GJR\n- 這是 dynamic model selection 的理論基礎"
+  "content": "## Gold Leverage Direction 隨 Market Regime 翻轉\n\n正式統計檢定確認（N=77 quarterly estimates, 2005-2026）：\n\n| Regime | N | $\\gamma$ mean | Direction | 機制 |\n|--------|---|--------|-----|------|\n| Bull (252d ret > 0) | 54 | -0.043 | Inverted | 恐慌買入→不確定性↑ |\n| Bear (252d ret ≤ 0) | 23 | +0.048 | Standard | 清算賣出→風險↑ |\n\nt-test: t=-4.71, p<0.0001\n\n### SPY 不翻轉\nSPY 在 bull/bear 中 $\\gamma$ 完全相同（+0.24 vs +0.24, p=0.95）。股票 leverage 來自 capital structure，不依賴 market direction。\n\n### 實務意義\n- 固定的 asset-class 模型選擇不夠——必須 monitor current $\\gamma$\n- 如果黃金進入熊市 → 從 GARCH 切換到 GJR\n- 這是 dynamic model selection 的理論基礎"
 }

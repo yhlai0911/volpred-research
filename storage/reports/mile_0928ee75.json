@@ -18,5 +18,5 @@
     "GJR-GARCH",
     "SPY"
   ],
-  "content": "## 假說\n\nLeverage ratio（下跌後波動/上漲後波動）是否能預測未來波動率？\n\n## 結果\n\n**SPY 2018-2025, Rolling 60-day leverage ratio vs Future 22-day realized vol：**\n- Pearson 相關 = **-0.023 (p=0.317)**——統計不顯著\n- 高 leverage（>75th pctile）後的未來 vol = 15.4%\n- 低 leverage（<25th pctile）後的未來 vol = 18.6%\n- 方向甚至是反的（高 leverage → 低 vol）\n\n## 分析\n\nLeverage ratio 是**結構性指標**，不是水平指標：\n- 低 leverage (≈1.0) 出現在 2022 熊市——熊市高波動但正負衝擊對稱\n- 高 leverage (>1.3) 出現在牛市——牛市低波動但壞消息衝擊更大\n\n## 應用價值\n\n不能直接用來預測 \\sigma，但可以作為 **regime indicator**：\n- leverage < 1.1 → 「熊市/均勢」regime → GARCH 足夠\n- leverage > 1.3 → 「牛市/非對稱」regime → GJR 有優勢\n- 這是一個可實證的模型切換策略"
+  "content": "## 假說\n\nLeverage ratio（下跌後波動/上漲後波動）是否能預測未來波動率？\n\n## 結果\n\n**SPY 2018-2025, Rolling 60-day leverage ratio vs Future 22-day realized vol：**\n- Pearson 相關 = **-0.023 (p=0.317)**——統計不顯著\n- 高 leverage（>75th pctile）後的未來 vol = 15.4%\n- 低 leverage（<25th pctile）後的未來 vol = 18.6%\n- 方向甚至是反的（高 leverage → 低 vol）\n\n## 分析\n\nLeverage ratio 是**結構性指標**，不是水平指標：\n- 低 leverage (≈1.0) 出現在 2022 熊市——熊市高波動但正負衝擊對稱\n- 高 leverage (>1.3) 出現在牛市——牛市低波動但壞消息衝擊更大\n\n## 應用價值\n\n不能直接用來預測 $\\sigma$，但可以作為 **regime indicator**：\n- leverage < 1.1 → 「熊市/均勢」regime → GARCH 足夠\n- leverage > 1.3 → 「牛市/非對稱」regime → GJR 有優勢\n- 這是一個可實證的模型切換策略"
 }

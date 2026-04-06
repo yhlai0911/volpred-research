@@ -16,5 +16,5 @@
     "GJR-GARCH",
     "波動率預測"
   ],
-  "content": "## Monte Carlo Simulation: \\gamma-Based Model Selection Rule\n\n100 simulations × 3 known DGPs, N=504 observations each:\n\n| DGP | True \\gamma | Correct | Rate |\n|-----|--------|---|------|\n| Standard leverage | +0.20 | 95/100 | **95%** |\n| No leverage | 0 | 91/100 | **91%** |\n| Inverted leverage | -0.10 | 100/100 | **100%** |\n| **Overall** | | **286/300** | **95%** |\n\n### 解讀\n- 95% power：如果真的有 standard leverage，規則有 95% 機率正確推薦 GJR\n- 91% specificity：如果沒有 leverage，只有 9% false positive（推薦了不需要的 GJR）\n- 100%：inverted leverage 完美識別（推薦 GARCH）\n\nt-stat > 1.65 threshold 在統計上 well-calibrated。"
+  "content": "## Monte Carlo Simulation: $\\gamma$-Based Model Selection Rule\n\n100 simulations × 3 known DGPs, N=504 observations each:\n\n| DGP | True $\\gamma$ | Correct | Rate |\n|-----|--------|---|------|\n| Standard leverage | +0.20 | 95/100 | **95%** |\n| No leverage | 0 | 91/100 | **91%** |\n| Inverted leverage | -0.10 | 100/100 | **100%** |\n| **Overall** | | **286/300** | **95%** |\n\n### 解讀\n- 95% power：如果真的有 standard leverage，規則有 95% 機率正確推薦 GJR\n- 91% specificity：如果沒有 leverage，只有 9% false positive（推薦了不需要的 GJR）\n- 100%：inverted leverage 完美識別（推薦 GARCH）\n\nt-stat > 1.65 threshold 在統計上 well-calibrated。"
 }

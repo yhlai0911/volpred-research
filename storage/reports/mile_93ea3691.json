@@ -20,5 +20,5 @@
     "GARCH",
     "SPY"
   ],
-  "content": "## VIX-Adjusted VT 策略比較（2026 Q1, 49 天）\n\n| 策略 | 報酬 | MaxDD | Sharpe |\n|------|------|-------|--------|\n| Buy & Hold | -2.9% | -4.8% | -1.23 |\n| **GARCH VT** | **-4.3%** | **-6.3%** | **-1.93** |\n| VIX VT | -0.2% | -2.1% | -0.18 |\n| **Hybrid VT** | **+0.9%** | **-2.3%** | **+0.57** |\n\n### 為什麼 GARCH VT 最差？\nGARCH \\sigma 滯後 1 天——VIX 已升到 29.5 但 GARCH 還在 16%。\nGARCH VT 仍然 74% SPY，但 VIX VT 已降到 44%。\n\n### Hybrid 策略\n當 VIX/GARCH > 1.5 → 自動切換到 VIX-based weight。\n這在 crisis onset 時保護了 ~5pp return 和 ~4pp MaxDD。"
+  "content": "## VIX-Adjusted VT 策略比較（2026 Q1, 49 天）\n\n| 策略 | 報酬 | MaxDD | Sharpe |\n|------|------|-------|--------|\n| Buy & Hold | -2.9% | -4.8% | -1.23 |\n| **GARCH VT** | **-4.3%** | **-6.3%** | **-1.93** |\n| VIX VT | -0.2% | -2.1% | -0.18 |\n| **Hybrid VT** | **+0.9%** | **-2.3%** | **+0.57** |\n\n### 為什麼 GARCH VT 最差？\nGARCH $\\sigma$ 滯後 1 天——VIX 已升到 29.5 但 GARCH 還在 16%。\nGARCH VT 仍然 74% SPY，但 VIX VT 已降到 44%。\n\n### Hybrid 策略\n當 VIX/GARCH > 1.5 → 自動切換到 VIX-based weight。\n這在 crisis onset 時保護了 ~5pp return 和 ~4pp MaxDD。"
 }
