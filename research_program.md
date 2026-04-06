@@ -158,8 +158,12 @@
 **多變量模型：**
 - **DCC-GARCH** → **K915 完成**：SPY-GLD 相關性 -0.64~+0.58（高度動態），DCC 預測 21d corr r=0.88-0.90。但 portfolio NULL：DCC Min-Var 不勝 50/50（DM t=-1.73 NS，turnover 太高）。Static 1/3 each 反而最佳（Sharpe 0.811）。50/50 irreducible #11
   - **K916: MF-GJR on BTC** → Harvey FAIL。VIX 彈性 θ₁=1.06（SPY 的 31%）。BTC-ETF 後 θ₁ 反降。BTC gamma=0.10 正向。1% VaR 全 FAIL（極端尾部）。MF-GJR 跨資產邊界：equity ✅ crypto ❌
-- BEKK-GARCH（多資產波動率溢出）
-- Copula-GARCH（非線性相依結構）
+- **BEKK-GARCH** → **K918 完成**：SPY-GLD 無 cross-spillover（LR p=0.112, a12=-0.009, a21=0.001）。獨立性=分散化。50/50 irreducible #12
+- **Copula-GARCH** → **K920/K921/K922/K923 完成 ★★**：
+  - K920: Student-t copula 最佳，λ=0.14 但危機解耦（GFC λ=0.007, COVID ρ=-0.15）。50/50 moat = 危機條件獨立
+  - K921: Time-varying copula (Patton 2006) AIC -143.6 勝靜態。但預警 1/3 only。VIX 驅動 λ
+  - K922: SPY-0050.TW ρ=0.219（2.3x GLD）但 λ=0.078（半）。COVID 放大 λ=0.364。GLD 一致保護 vs 0050 不可預測
+  - K923: Copula hedge NULL——SPY-GLD r=0.058 太低，HE<3%。Copula hedging 需 r>0.90 的避險配對
 - Factor GARCH（共同因子驅動的波動率）
 - 跨資產 Granger 因果（vol spillover）
 
@@ -345,7 +349,7 @@
 - **不要輕易上架**——交易策略必須多次確認（cross-OOS + out-of-sample + sensitivity），避免上架後發現是錯誤
 
 ### Bayesian Subset Selection 方法論（用戶指定，2026-03-26）
-- [ ] K433: **Bayesian SSVS for ARX-GARCH** — So, Chen, Liu (2006) JRSS-C, 55(2), 201-224. **進行中**
+- [x] ~~K433: Bayesian SSVS for ARX-GARCH~~ → **K924 完成 NULL**。10 候選變數全 PIP<0.5（最高 VRP=0.312）。15 次 refit 都選 0 個。OOS R²=0.7%。SPY daily return 不可預測（Bayesian + Frequentist 雙重確認）
 - [ ] Bayesian Subset Selection for TARMA — Chen, Liu, Gerlach (2011) Computational Statistics, 26, 1-30
 - [ ] Threshold Variable Selection for Asymmetric SV — Chen, Liu, So (2013) Computational Statistics, 28, 2415-2447
 - [ ] Threshold GARCH with Bayesian Model Selection — 結合 2006+2013 方法
@@ -592,9 +596,9 @@
 
 ## 待深入研究主題
 
-### 除權息研究方向（用戶指定）
-- [ ] 除權息前後波動率是否系統性改變？（類似 K498 earnings 但用台股個股/ETF）
-- [ ] 高股息 ETF（0056/00878/00919）除息日前後的價格行為
+### 除權息研究方向（用戶指定）→ **K917 完成 NULL**
+- [x] ~~除權息前後波動率是否系統性改變~~ → K917 NULL。夏季 RV=0.169 < 其他 0.185。Welch t=-1.03 p=0.30。VIX 控制後 t=-0.10 p=0.92。填息中位 0 天。VIX sufficiency #27
+- [x] ~~高股息 ETF 除息日前後~~ → K917: 0056.TW 也 NS (t=0.09 p=0.93)
 - [ ] 「填息率」與波動率的關係——填息快的股票 vol 是否較低？
 - [ ] 除息日對 0050.TW 的 vol 影響（0050 成分股集中除息期間）
 
