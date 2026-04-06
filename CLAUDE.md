@@ -15,7 +15,7 @@
      - `experiments/<experiment_id>/*.png`（圖表）
      - `experiments/<experiment_id>/references/`（參考文獻，如有）
      - `experiments/<experiment_id>/data/`（實驗專屬數據，如有）
-     - Agent worktree 完成後複製整個資料夾到主分支
+     - **Agent worktree 完成後必須用 `bash scripts/merge_worktree.sh` 合併到主分支**（⚠️ 絕對禁止 `git worktree remove --force`）
      - **README.md 是必備的**——打開資料夾就能知道在做什麼、為什麼、怎麼做、結論是什麼
    - **知識庫**（`storage/memory/knowledge.json`）：含 experiment_id、title、content 摘要（200-300字）、tags、data_source。記錄**發現了什麼**（結論、數據、統計量）
    - **經驗庫**（`storage/memory/experiment_experiences.json`，Exxx 編號）：記錄**學到了什麼**（為什麼成功/失敗、踩了什麼坑、下次該怎麼做）。每 5-10 個實驗彙整一條經驗記錄
@@ -167,6 +167,14 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **K844：TX 期貨 VT 空頭期全勝**——交易成本省 97%，機構投資人應用期貨執行
 - **模型評估 target 必須匹配**：GARCH 用 r² 評估、HAR-RV 用 5-min RV 評估。跨模型公平比較用 Patton (2011) QLIKE on r² 或 Hansen & Lunde (2005) 最優加權 RV_total
 - **⚠️ 風險管理評估必須同時做 VaR + ES（不可只做 VaR）**：VaR 1%+5% Trinity（Kupiec+CC+Basel）+ ES Acerbi-Szekely Z-test + Fissler-Ziegel joint scoring。Basel III 已要求 ES 取代 VaR 作為主要風控指標，只做 VaR 不完整
+
+### Token 節約規則（必須遵守）
+- **⚠️ 禁止整檔讀取 `feed.json`（5.4MB = 135 萬 tokens）**。任何情況都不可 `Read("storage/reports/feed.json")`：
+  - **批量文字修復**（LaTeX/Unicode/escape）：用 `jq` / `python -c` / `sed` 處理，不用 Claude 讀取
+  - **主題查重**：用 `grep -i '關鍵詞' storage/reports/feed.json | head`
+  - **需要理解語義才能修的情況**：先用 `jq` 篩出需要修的那幾篇 ID，再只讀個別 `storage/reports/{id}.json`
+  - **發佈/同步**：已由 Python 腳本處理，不需要 Claude 讀取
+- 同理，`knowledge.json`（1.3MB）也禁止整檔讀取，用 `grep` 或 `jq` 查詢
 
 ### 注意事項
 - Feed 發文要用 `feed-publisher` skill（thinking ≠ content）
@@ -552,12 +560,16 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 - **主 agent 判斷需要哪些 skill**，在 prompt 中指示 subagent 讀取對應的 skill 文件路徑（`.claude/skills/<name>/SKILL.md`）
 - **完整傳遞必要資訊**：相關 K 編號+結論、error log 防錯規則、檔案路徑、統計門檻、研究背景
 - **Agent prompt = 完整 brief**：像寫給剛加入團隊的聰明同事，不是一行指令
+- **⚠️ Worktree agent 必須 commit**：每個 worktree agent 的 prompt 結尾必須包含：
+  > 在完成所有工作後，必須執行 `git add -A && git commit -m "K9XX: description"` 保存所有新檔案。不 commit = 檔案在 worktree 清理時永久遺失。
+- **Agent 返回後**：主對話必須執行 `bash scripts/merge_worktree.sh` 合併變更到 main
 
 **絕對禁止**：
 - 在 prompt 中給 agent 「摘要數字」然後讓它寫論文 → 必須讓 agent 自己讀 JSON
 - 不告訴 agent 讀 skill 就讓它寫學術文件 → agent 不知道學術規範
 - 假設 agent「應該知道」某件事 → 它什麼都不知道，必須明確指示
 - 只說「參考 XXX skill」但不給路徑 → agent 找不到，必須給完整路徑
+- **`git worktree remove --force`** → 用 `bash scripts/merge_worktree.sh` 替代（K923/K924/K932 教訓）
 
 ## 自動化排程
 ### 永久任務（系統 crontab — 無人值守也會跑）
@@ -578,14 +590,15 @@ platform-ops-patrol: 0 */6 * * *  # 平台巡檢（已遷移至雲端 trigger tr
 #### 最小啟動集
 ```
 CronCreate(cron="13 */6 * * *", prompt="會員問題研究")
-CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉")
-CronCreate(cron="7 * * * *", prompt="知識索引更新")
+CronCreate(cron="47 */4 * * *", prompt="每4小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉")
+CronCreate(cron="7 */3 * * *", prompt="知識索引更新")
+CronCreate(cron="43 22 * * *", prompt="Token 用量日報：(1) python scripts/token_usage_report.py --detailed (2) 週五額外 --weekly (3) 摘要告訴用戶 (4) >40% 標記高消耗警告")
 ```
 
 #### 全速模式（確認穩定後加入）
 ```
-CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動 (3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出")
-CronCreate(cron="5 0-7 * * *", prompt="繼續研究（夜間）：讀 research_program.md 未完成項目，啟動 1 個低強度任務。不可空轉。")
+CronCreate(cron="5,35 8-23 * * *", prompt="繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動 (3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出")
+CronCreate(cron="5 1,4,7 * * *", prompt="繼續研究（夜間）：讀 research_program.md 未完成項目，啟動 1 個低強度任務。不可空轉。")
 ```
 
 #### 反空轉規則（2026-03-31 教訓）

@@ -4,6 +4,7 @@
 
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
+| 2026-04-06 | **Worktree 腳本遺失（3次）** | K923/K924/K932 的 .py 腳本在 worktree 清理時永久遺失 | Agent 在 worktree 寫檔案但沒 commit → `git worktree remove --force` 刪除一切 | (1) 建立 `scripts/merge_worktree.sh` 安全合併腳本 (2) 禁止 `--force` remove (3) Agent prompt 必須包含 commit 指令 (4) 更新 SKILL.md + CLAUDE.md |
 | 2026-03-16 | Thinking page crash | experiment_ids undefined → 頁面閃退 | experiment_ids 欄位在部分 entry 不存在 | 加 optional chaining `?.` + `&&` guard |
 | 2026-03-16 | Feed 文章缺 content | 網頁顯示空白文章 | `record_and_publish.py` 只用 `--thinking` 當 content | 個別檔案 + feed.json 都要有完整 Markdown content |
 | 2026-03-16 | Citation errors | 論文引用 6 處錯誤 | Cederburg fabricated, Kim wrong, etc. | `/citation-verifier` + WebSearch 驗證每筆引用 |

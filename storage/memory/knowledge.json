@@ -21317,5 +21317,24 @@
     "category": "experiment",
     "confidence": 0.9,
     "created_at": "2026-04-06T07:38:23.243130+00:00"
+  },
+  {
+    "id": "know_20260406082329_k934",
+    "experiment_id": "K934",
+    "title": "K934: CARR Range-Based Vol — Best Rank但Parkinson轉換偏差導致QLIKE輸GARCH",
+    "content": "[提出: Claude, 執行: Claude] CARR(1,1) conditional autoregressive range model (Chou 2005) 用 high-low range 預測波動率。SPY 2006-2026, OOS 2016-2025 (2514天)。5模型比較：GARCH/GJR/MF-GJR(VIX)/CARR/CARR-MF(VIX)。QLIKE on r² 排名：MF-GJR(1.475) > GJR(1.562) > GARCH(1.602) > CARR-MF(1.699) > CARR(1.815)。GARCH顯著勝CARR (DM t=4.44)。但Spearman排序：CARR-MF(0.474) > MF-GJR(0.457) > CARR(0.442) > GJR(0.407) > GARCH(0.383)。CARR排序能力最強但Parkinson variance轉換(σ²=λ²/4ln2)假設連續價格路徑，被隔夜gap違反導致systematic calibration bias。VIX改善所有模型：CARR-MF vs CARR (DM t=3.15)，MF-GJR vs GJR (DM t=4.06)。結論：range資訊有ranking value但需更好的gap-adjusted轉換方式。",
+    "tags": [
+      "volatility",
+      "CARR",
+      "range-based",
+      "Chou-2005",
+      "Parkinson",
+      "calibration-bias",
+      "SPY",
+      "model-comparison"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T08:23:29.489584+00:00",
+    "star_rating": 1
   }
 ]

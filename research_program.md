@@ -447,6 +447,11 @@
 - [x] ~~G3-2: Quantile Connectedness~~ → **K911 完成**。Left-tail TCI(τ=0.05) ≈ Mean TCI (r=0.952)——尾部不能拯救 TCI。Right-tail TCI(τ=0.95) 獨立 (r=0.017) 但恆定 (~70%)。AUC=0.581（弱）。**TCI 無論哪個 quantile 都是結構性描述，不是交易信號。**
 - [ ] **G3-3: Fractional Jump-Diffusion MF-GJR**：用 power-law（fractional）kernel 替代線性 MIDAS。K906 的 50% 隔夜 gap 建模為 point-mass jump，日內 RV 為 fractionally integrated diffusion。不是找更多指標（K909 已確認無用），而是優化 VIX 信號的吸收方式。需理論推導
 
+### K933-K934 衍生方向（2026-04-06）
+- [ ] **Gap-Adjusted CARR**：K934 發現 Parkinson 轉換因隔夜 gap 失效。用 Yang-Zhang(1999) 或 Garman-Klass(1980) 替代 Parkinson，加入隔夜 return 成分
+- [ ] **CARR + GARCH Ensemble**：K934 顯示 CARR 排序好（ρ=0.474）但校準差，GARCH 校準好但排序差（ρ=0.383）。兩者互補？用 CARR rank + GARCH level 的混合模型
+- [x] ~~K934: CARR Range-Based Vol~~ → 排序能力最強（ρ=0.474）但 Parkinson 轉換偏差。GARCH 顯著勝 CARR on QLIKE (DM t=4.44)。VIX 改善所有模型
+
 ### 其他
 - [ ] Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting）
 - [ ] 「HAR ceiling」驗證 — Los Flamingos 2025

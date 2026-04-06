@@ -86,3 +86,11 @@
 - **Session 收盤價可交易性**：session 收盤價可能無法即時交易。Robustness check 應使用收盤前 n 分鐘（n=1,5,10）的價格重算 session return 和 RV，確認結果穩健。
 - **Information set 說明**：PRG/PRS 使用「前一 session 已實現的資訊」預測「下一 session」。這不是 lookahead——隔夜 session 在日盤開盤前已結束，日盤 session 在夜盤開盤前已結束。論文必須明確標註每個模型的 information set。
 - **公平比較**：PRG 在 session 邊界有更多資訊（剛完成的 session）。與 GJR（日頻）比較時，PRG 的優勢包含「模型結構」+「資訊即時性」兩個成分。要隔離純模型結構價值，可比 PRG vs GJR-X(r²_overnight)。
+
+## 7. Worktree 保存規則（必做）
+
+**在完成所有工作後，必須執行以下命令保存檔案：**
+```bash
+git add -A && git commit -m "K9XX: description"
+```
+不 commit = 檔案在 worktree 清理時永久遺失。K923/K924/K932 都因此遺失過腳本。
