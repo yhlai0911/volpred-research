@@ -21205,5 +21205,25 @@
     "category": "experiment",
     "confidence": 0.85,
     "created_at": "2026-04-06T04:47:26.818308+00:00"
+  },
+  {
+    "id": "know_20260406050343_k927",
+    "experiment_id": "K927",
+    "title": "K927: Macro Regime VIX — NULL (Macro LAGS VIX 9-20d, Adding Macro Hurts OOS AUC)",
+    "content": "[提出: Claude, 執行: Claude] Probit models predicting VIX regime escalation (calm→normal/high) using 4 macro vars (term spread, BAA10Y, NFCI, initial claims). OOS 2019-2026. RESULT NULL: VIX-only AUC best at all horizons. Adding macro HURTS: h=5d -0.022, h=10d -0.027, h=22d -0.029. All 4 macro vars LAG VIX by 9-20 days (none lead). Granger: BAA10Y F=16.3, NFCI F=26.2 significant IS but no OOS improvement (overfitting). IS macro beats VIX in 71% rolling windows but fails OOS boundary. VIX is a faster, more efficient aggregator of macro risk. VIX sufficiency confirmed for regime prediction. Consistent with K259/K504/K856.",
+    "tags": [
+      "macro",
+      "regime",
+      "VIX",
+      "yield curve",
+      "credit spread",
+      "NFCI",
+      "VIX sufficiency",
+      "null result"
+    ],
+    "data_source": "yfinance (^VIX) + FRED (GS10, GS2, BAA10Y, NFCI, ICSA)",
+    "category": "experiment",
+    "confidence": 0.85,
+    "created_at": "2026-04-06T05:03:43.428341+00:00"
   }
 ]
