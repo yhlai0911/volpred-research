@@ -21489,5 +21489,24 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T10:57:32.385915+00:00",
     "star_rating": 2
+  },
+  {
+    "id": "know_20260406110528_k939",
+    "experiment_id": "K939",
+    "title": "K939: CARR_YZ-MF(VIX) — 最低QLIKE但不顯著勝MF-GJR，VIX主導兩個channel",
+    "content": "[提出: Claude, 執行: Claude] CARR_YZ + VIX multiplicative factor的終極測試。SPY OOS 2016-2025 (2514天)。6模型排名：CARR_YZ-MF(VIX)(1.462) > CARR_YZ-MF-A(1.472) > MF-GJR(VIX)(1.480) > CARR_YZ(1.555) > GJR(1.583) > GARCH(1.604)。CARR_YZ-MF vs MF-GJR: -1.21%改善但DM t=-1.59 NS。H1方向正確但統計不顯著。VIX加入CARR_YZ改善6.0%(DM t=-5.90 Harvey✓✓)。Asymmetry不幫助range模型(CARR_YZ-MF-A反而更差)——range已自然捕捉上下波動。結論：VIX dominates both channels (range和return)。模型結構選擇(range vs return)遠不如包含VIX重要。這進一步確認VIX sufficiency。",
+    "tags": [
+      "volatility",
+      "CARR",
+      "Yang-Zhang",
+      "MF-GJR",
+      "VIX",
+      "VIX-sufficiency",
+      "SPY",
+      "marginal-result"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T11:05:28.483536+00:00",
+    "star_rating": 1
   }
 ]
