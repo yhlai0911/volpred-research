@@ -1,0 +1,265 @@
+{
+  "experiment_id": "K925",
+  "title": "CPI Announcement Volatility Event Study -- SPY",
+  "proposed_by": "Claude (event calendar)",
+  "executed_by": "Claude",
+  "timestamp": "2026-04-06T04:17:14.327309+00:00",
+  "data_source": "yfinance (SPY, ^VIX), FRED (CPIAUCSL)",
+  "period": "2015-01-02 to 2026-03-31",
+  "n_trading_days": 2827,
+  "n_cpi_days": 135,
+  "references": [
+    "Lucca & Moench (2015) \"The Pre-FOMC Announcement Drift\" JF",
+    "Savor & Wilson (2013) \"How Much Do Investors Care About Macroeconomic Risk?\" RFS",
+    "K513: FOMC/NFP/CPI macro event vol study",
+    "K773: CPI date approximation bug",
+    "K801: VIX shock guard NULL"
+  ],
+  "cpi_release_date_source": "BLS official schedule (manually compiled)",
+  "event_day_statistics": {
+    "n_cpi_days": 135,
+    "n_non_cpi_days": 2692,
+    "cpi_mean_absret": 0.007716838076110204,
+    "non_cpi_mean_absret": 0.007281192666267036,
+    "absret_ratio": 1.0598316003724864,
+    "absret_t_stat": 0.5454632104607111,
+    "absret_p_value": 0.5862684760964978,
+    "absret_bootstrap_ci_2.5": 0.8642680657744191,
+    "absret_bootstrap_ci_97.5": 1.2844708601129742,
+    "mannwhitney_u": 185376.0,
+    "mannwhitney_p": 0.6920481508305748,
+    "cpi_mean_vix": 18.176074126914695,
+    "non_cpi_mean_vix": 18.387908628755657,
+    "vix_level_t_stat": -0.3576383939331133,
+    "vix_level_p_value": 0.7211181437761136,
+    "cpi_mean_vix_change": -0.23385182839852792,
+    "vix_change_t_stat": -1.5561199007296407,
+    "vix_change_p_value": 0.12203827192573144,
+    "cpi_mean_return": 0.0004929675080522819,
+    "cpi_return_t_stat": 0.4801574193393172,
+    "cpi_return_p_value": 0.6318983489412493,
+    "cpi_std_return": 0.011884667906288187,
+    "non_cpi_std_return": 0.011126121036007429,
+    "cpi_median_absret": 0.005220165319855807,
+    "non_cpi_median_absret": 0.004913583397481769
+  },
+  "event_window": {
+    "-5": {
+      "mean_abs_return": 0.007866362846734322,
+      "median_abs_return": 0.005419463056600904,
+      "mean_return": -0.00016513371905534904,
+      "mean_vix_change": -0.03392592536078559,
+      "mean_vix_level": 18.301185169926395,
+      "std_return": 0.011560552767543057,
+      "n": 135
+    },
+    "-4": {
+      "mean_abs_return": 0.007824976400271473,
+      "median_abs_return": 0.005575546846393831,
+      "mean_return": 0.0006776672301179066,
+      "mean_vix_change": 0.07570372687445746,
+      "mean_vix_level": 18.376888896800853,
+      "std_return": 0.012426390751039332,
+      "n": 135
+    },
+    "-3": {
+      "mean_abs_return": 0.00684141095312614,
+      "median_abs_return": 0.004640943993835522,
+      "mean_return": 0.0011304920829181134,
+      "mean_vix_change": -0.014222180401837384,
+      "mean_vix_level": 18.362666716399016,
+      "std_return": 0.009260033732484579,
+      "n": 135
+    },
+    "-2": {
+      "mean_abs_return": 0.006672581442984784,
+      "median_abs_return": 0.004348627991149545,
+      "mean_return": 1.2046387951296315e-05,
+      "mean_vix_change": 0.1798518145525897,
+      "mean_vix_level": 18.542518530951607,
+      "std_return": 0.011169006027169415,
+      "n": 135
+    },
+    "-1": {
+      "mean_abs_return": 0.007379945659681101,
+      "median_abs_return": 0.004096236599379521,
+      "mean_return": 0.0024115003725459746,
+      "mean_vix_change": -0.13259257563838253,
+      "mean_vix_level": 18.409925955313224,
+      "std_return": 0.013154109769396235,
+      "n": 135
+    },
+    "0": {
+      "mean_abs_return": 0.007716838076110204,
+      "median_abs_return": 0.005220165319855807,
+      "mean_return": 0.0004929675080522819,
+      "mean_vix_change": -0.23385182839852792,
+      "mean_vix_level": 18.176074126914695,
+      "std_return": 0.011884667906288187,
+      "n": 135
+    },
+    "1": {
+      "mean_abs_return": 0.007977302071113085,
+      "median_abs_return": 0.004439615866679292,
+      "mean_return": -0.00039249261969292396,
+      "mean_vix_change": 0.14281468568024813,
+      "mean_vix_level": 18.318888812594942,
+      "std_return": 0.013602413850043954,
+      "n": 135
+    },
+    "2": {
+      "mean_abs_return": 0.006864840957062942,
+      "median_abs_return": 0.003951215985324108,
+      "mean_return": 0.0015389376320950844,
+      "mean_vix_change": -0.28733323415120443,
+      "mean_vix_level": 18.03155557844374,
+      "std_return": 0.011394918744558644,
+      "n": 135
+    },
+    "3": {
+      "mean_abs_return": 0.007055109112516358,
+      "median_abs_return": 0.004596925294342968,
+      "mean_return": -0.00010614512997227727,
+      "mean_vix_change": 0.18518522757071035,
+      "mean_vix_level": 18.21674080601445,
+      "std_return": 0.012792372886249383,
+      "n": 135
+    },
+    "4": {
+      "mean_abs_return": 0.007432262694217294,
+      "median_abs_return": 0.005625131788916438,
+      "mean_return": 0.0002870007557168638,
+      "mean_vix_change": 0.07488892873128256,
+      "mean_vix_level": 18.291629734745733,
+      "std_return": 0.010653356654853596,
+      "n": 135
+    },
+    "5": {
+      "mean_abs_return": 0.006403915240319665,
+      "median_abs_return": 0.003863199783587179,
+      "mean_return": -0.0011228585602182466,
+      "mean_vix_change": 0.05674064777515553,
+      "mean_vix_level": 18.348370382520887,
+      "std_return": 0.009824689119637084,
+      "n": 135
+    }
+  },
+  "inflation_regime_comparison": {
+    "low_inflation_2015_2020": {
+      "n_cpi_days": 72,
+      "n_non_cpi_days": 1439,
+      "cpi_mean_absret": 0.006430366736200613,
+      "non_cpi_mean_absret": 0.0070924940599595395,
+      "absret_ratio": 0.9066439367927079,
+      "t_stat": -0.768509621303932,
+      "p_value": 0.4443430778673965,
+      "cpi_yoy_range": "-0.2% - 2.9%",
+      "cpi_mean_return": 0.0002565893414401539,
+      "cpi_std_return": 0.009540999840382473
+    },
+    "high_inflation_2021_2023": {
+      "n_cpi_days": 36,
+      "n_non_cpi_days": 717,
+      "cpi_mean_absret": 0.010516351963171158,
+      "non_cpi_mean_absret": 0.008136466799473881,
+      "absret_ratio": 1.2924961438853488,
+      "t_stat": 1.1595345917373912,
+      "p_value": 0.2538310624064794,
+      "cpi_yoy_range": "1.4% - 9.0%",
+      "cpi_mean_return": 0.001129319111258082,
+      "cpi_std_return": 0.016173187189323437
+    },
+    "post_peak_2024_2026": {
+      "n_cpi_days": 27,
+      "n_non_cpi_days": 536,
+      "cpi_mean_absret": 0.00741474313312117,
+      "non_cpi_mean_absret": 0.006643703377026697,
+      "absret_ratio": 1.1160557165692642,
+      "t_stat": 0.4540272879711482,
+      "p_value": 0.6532978032898287,
+      "cpi_yoy_range": "2.3% - 3.5%",
+      "cpi_mean_return": 0.0002748404814102229,
+      "cpi_std_return": 0.011485838385938653
+    }
+  },
+  "cpi_surprise_analysis": {
+    "positive_surprise": {
+      "n": 49,
+      "mean_return": 0.0019675198686875815,
+      "mean_abs_return": 0.008396317644671582,
+      "mean_vix_change": -0.4373468671526228,
+      "std_return": 0.012497147350972565,
+      "median_abs_return": 0.005251780920699112
+    },
+    "negative_surprise": {
+      "n": 47,
+      "mean_return": -0.0024515679090025737,
+      "mean_abs_return": 0.009652635835364185,
+      "mean_vix_change": 0.23255321827340633,
+      "std_return": 0.014246064142413532,
+      "median_abs_return": 0.006526180291989259
+    },
+    "neutral": {
+      "n": 38,
+      "mean_return": 0.0022318271878433013,
+      "mean_abs_return": 0.00463482349519503,
+      "mean_vix_change": -0.5605263459055048,
+      "std_return": 0.005730231664006073,
+      "median_abs_return": 0.00458981123076313
+    },
+    "hot_vs_cool_absret_t": -0.600102194073946,
+    "hot_vs_cool_absret_p": 0.5499237408657017,
+    "hot_vs_cool_return_t": 1.596088962632738,
+    "hot_vs_cool_return_p": 0.1139251995445742
+  },
+  "vix_pre_post_cpi": {
+    "pre_cpi_vix_change": {
+      "mean": 0.10874078538682726,
+      "median": 0.05000019073486328,
+      "std": 3.0944357314321125,
+      "t_stat": 0.40678356429676676,
+      "p_value": 0.6848159539671477,
+      "pct_positive": 0.5333333333333333,
+      "n": 135
+    },
+    "post_cpi_vix_change": {
+      "mean": 0.17229625560619213,
+      "median": -0.15000057220458984,
+      "std": 3.6941301349874056,
+      "t_stat": 0.5399033821166498,
+      "p_value": 0.5901597788656822,
+      "pct_negative": 0.5555555555555556,
+      "n": 135
+    },
+    "uncertainty_resolution": "False"
+  },
+  "twelve_vix_auto_adaptation": {
+    "cpi_day_mean_weight": 0.7199985080315064,
+    "non_cpi_day_mean_weight": 0.7142075194259097,
+    "weight_diff_t_stat": 0.33974699561131433,
+    "weight_diff_p_value": 0.7345285898038867,
+    "weight_trajectory": {
+      "-5": 0.7107363114386837,
+      "-4": 0.7107085360953165,
+      "-3": 0.7119644222664689,
+      "-2": 0.7087333653930357,
+      "-1": 0.7075822650848516,
+      "0": 0.7199985080315064,
+      "1": 0.7244502324662387,
+      "2": 0.7281297123546326,
+      "3": 0.727326352725104,
+      "4": 0.720185379268813,
+      "5": 0.7185575082335333
+    },
+    "cpi_day_mean_portret": 0.0006589777959804331,
+    "non_cpi_mean_portret": 0.00029470232553923515,
+    "auto_derisking": false
+  },
+  "key_findings": "CPI day |return| ratio = 1.060x (NS, p=0.586). Confirms K513 null result with official BLS dates. High-inflation era (2021-2023): CPI |ret| ratio = 1.292x (p=0.254) vs low-inflation (2015-2020): 0.907x (p=0.444). VIX uncertainty resolution pattern: NOT supported. Pre-CPI DVIX = 0.109 (p=0.685), Post-CPI DVIX = 0.172 (p=0.590). 12/VIX auto de-risking: No. CPI day weight = 0.7200 vs non-CPI = 0.7142 (p=0.735). Hot CPI (above trend): |ret| = 84bp, Cool CPI: |ret| = 97bp (p=0.550).",
+  "plots": [
+    "k925_event_window.png",
+    "k925_cpi_vs_normal.png",
+    "k925_vix_around_cpi.png",
+    "k925_regime_comparison.png"
+  ]
+}
