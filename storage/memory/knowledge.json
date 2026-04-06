@@ -21391,5 +21391,26 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T09:08:41.939272+00:00",
     "star_rating": 0
+  },
+  {
+    "id": "know_20260406092423_k938",
+    "experiment_id": "K938",
+    "title": "K938: Yang-Zhang CARR Cross-Asset ★★ — 4/4資產全勝Parkinson，改善與gap ratio相關(r=0.80)",
+    "content": "[提出: Claude, 執行: Claude] K935的Yang-Zhang CARR跨資產驗證。SPY/GLD/QQQ/0050.TW，OOS 2016-2025。Yang-Zhang CARR在全部4個資產顯著勝Parkinson CARR (Harvey✓)：SPY +9.1%(t=3.47)、GLD +27.5%(t=8.65)、QQQ +9.6%(t=4.03)、0050.TW +37.3%(t=6.38)。改善幅度與隔夜gap ratio高度相關(r=0.80)。Gap ratio: 0050.TW=0.84(最大)、GLD=0.50(意外高)、SPY=0.36、QQQ=0.33。GLD gap ratio意外高（24h交易但ETF有收盤時間）。CARR_YZ甚至勝GARCH on SPY(t=3.16)和QQQ(t=4.05)，但0050.TW GJR仍最佳。Parkinson bias在高gap市場是災難性的：0050.TW CARR_P QLIKE=2.40 vs CARR_YZ=1.50。結論：Yang-Zhang的隔夜成分是range-based模型的必要修正，效果與market microstructure一致。",
+    "tags": [
+      "volatility",
+      "CARR",
+      "Yang-Zhang",
+      "cross-asset",
+      "overnight-gap",
+      "SPY",
+      "GLD",
+      "QQQ",
+      "0050.TW",
+      "positive-result"
+    ],
+    "data_source": "yfinance (SPY, GLD, QQQ, 0050.TW, ^VIX)",
+    "created_at": "2026-04-06T09:24:23.872087+00:00",
+    "star_rating": 2
   }
 ]
