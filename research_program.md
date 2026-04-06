@@ -88,6 +88,23 @@
 - **跨模型**：CCS Score, FDR audit, Cross-OOS 5 periods, Weight StdΔw
 - 每個實驗必須 re-estimate each window（no lookahead）
 
+### 多變量資產配置方法（多資產實驗必做）
+**多變量模型（DCC/BEKK/Copula）做資產配置時，必須比較以下 5 種方法：**
+
+| # | 方法 | 目標函數 | 說明 |
+|---|------|---------|------|
+| 1 | **Static Baseline** | 等權（50/50 或 1/N） | 無需估計，benchmark |
+| 2 | **Min-Variance** | $\min w'\Sigma_t w$ | 只需 $\Sigma$，不需 $E[r]$ |
+| 3 | **Min-CVaR** | $\min \text{CVaR}_{\alpha}(w'r)$ | 考慮尾部風險（用模擬或歷史） |
+| 4 | **Max CRRA Utility** | $\max E[W^{1-\gamma}/(1-\gamma)]$，$\gamma=5$ | 考慮投資人風險偏好 |
+| 5 | **Risk Parity** | $w_i \propto 1/\sigma_i$ | 等風險貢獻 |
+
+**評估規則**：
+- 必須計算 **turnover** 和 **Net Sharpe**（扣除假設 10bps 單邊交易成本）
+- 動態方法的 signal 必須 `shift(1)`（防 lookahead）
+- IS 和 OOS **分開報告**
+- 如果 dynamic gross Sharpe 勝但 net Sharpe 輸 → turnover 太高，不可宣稱優勝
+
 ### 研究多元化原則
 
 **不要停留在模型舒適區。** 已驗證的結論（VIX sufficiency 23 次、50/50 不可動搖 8 次）不需要繼續堆積 null results。研究應同時在兩條軸推進：
