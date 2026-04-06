@@ -2,160 +2,104 @@
   "report_type": "daily",
   "date": "2026-04-06",
   "week_range": "2026-04-03 → 2026-04-10",
-  "total_commits": 83,
-  "total_estimated_tokens": 956898,
+  "total_commits": 210,
+  "total_estimated_tokens": 3996532,
   "categories": {
-    "latex_content_fix": {
-      "emoji": "🔧",
-      "description": "LaTeX/內容批量修復（讀寫大型 JSON）",
-      "commits": 9,
-      "lines_changed": 6466,
-      "estimated_tokens": 307048,
-      "percentage": 32.1,
-      "commit_messages": [
-        "K930: MF-GJR parameter stability ★ + error log + LaTeX skill rules",
-        "Error log + feed-publisher LaTeX rules (prevent future math rendering bugs)",
-        "Remove empty $$$$ math blocks that broke KaTeX parsing (19 articles)",
-        "Fix Unicode minus in image URLs + remove duplicate images (16 articles)",
-        "Wrap 174 bare inline LaTeX in $...$ for KaTeX rendering",
-        "Fix 80789--- artifacts and Unicode minus signs in 535 articles",
-        "Final LaTeX equation fix: 193 feed entries + individual JSONs restored",
-        "Restore LaTeX in 95 articles + fix JSON escaping + error log",
-        "Fix LaTeX rendering: root cause in publisher.py + binary fix for 9 articles"
-      ]
-    },
-    "other": {
-      "emoji": "❔",
-      "description": "其他",
-      "commits": 48,
-      "lines_changed": 41803,
-      "estimated_tokens": 263212,
-      "percentage": 27.5,
-      "commit_messages": [
-        "K946 VIX Regime Rebalancing — Monthly best but marginal vs 50/50",
-        "K946: VIX Regime-Conditional Rebalancing",
-        "Update cron schedule + storage sync",
-        "K945 Quadratic vs MV Hedging NULL — QH=MV at daily frequency",
-        "Merge agent worktree agent-a483c387 (1 commits)",
-        "K945: Quadratic vs MV Hedging under GARCH",
-        "K944 KAN B-spline NULL — GARCH recursive dynamics irreplaceable",
-        "Merge agent worktree agent-ad9dee21 (1 commits)",
-        "K944: KAN-inspired nonlinear vol prediction — MF-GJR(VIX) still dominant",
-        "K943 Multi-Horizon MF-GJR — h=5 weekly optimal, h=22 degrades",
-        "Merge agent worktree agent-a00ede52 (1 commits)",
-        "K943: Multi-Horizon MF-GJR(VIX) — h=5 is optimal, h=22 degrades",
-        "K939 CARR_YZ-MF(VIX) ★ — lowest QLIKE but not significant vs MF-GJR",
-        "Merge agent worktree agent-a5b2d35b (1 commits)",
-        "K939: CARR_YZ-MF(VIX) — range + VIX ultimate test",
-        "K942 MF-GJR Subsample Stability ★★ — 13/13 all win, paper robustness",
-        "Merge agent worktree agent-a80c32df (1 commits)",
-        "K942: MF-GJR subsample stability — paper robustness",
-        "K941 Quantile Vol ★ — CAViaR-SAV best for intervals, GARCH parametric competitiv",
-        "Merge agent worktree agent-a33c8905 (1 commits)",
-        "K941: Conditional Quantile Volatility Forecasting",
-        "K940 Neural Net Vol NULL — MLP fails, RF viable but loses to MF-GJR",
-        "K937 CARR-GARCH Ensemble NULL — VIX sufficient, no ensemble beats MF-GJR",
-        "Merge agent worktree agent-aade1e20 (1 commits)",
-        "K937: CARR-GARCH Rank-Calibration Ensemble",
-        "K938 Cross-Asset CARR ★★ — YZ beats Parkinson on all 4 assets",
-        "Merge agent worktree agent-ab1f5399 (1 commits)",
-        "K938: Yang-Zhang CARR cross-asset validation (SPY/GLD/QQQ/0050.TW)",
-        "Periodic sync: storage state + K934 article + knowledge 1726",
-        "K933 FIGARCH-MF(VIX) NULL — VIX subsumes long memory, G3-3 closed",
-        "Merge agent worktree agent-a80934f6 (1 commits)",
-        "Auto-commit: save agent work before worktree merge",
-        "K935 Gap-Adjusted CARR ★ + K936 Hurst NULL + knowledge 1725",
-        "Merge agent worktree agent-a58a609c (1 commits)",
-        "K935: Gap-Adjusted CARR — Yang-Zhang beats Parkinson by 8%, surpasses GARCH",
-        "K936: Time-Varying Hurst Exponent — daily H(t) has no predictive power beyond VI",
-        "Merge agent worktree agent-a7928f58 (1 commits)",
-        "Auto-commit: save agent work before worktree merge",
-        "K932: Utility allocation NULL — 50/50 irreducible #14 (README only, script lost)",
-        "K931: Copula hedge 0050-TSMC ★★ — HE=0.855, confirms high-corr hypothesis",
-        "K929: Asymmetric transmission NULL — gap channel is symmetric (p=0.812)",
-        "K928: Factor GARCH NULL (PC1 59.1% but zero beyond VIX) + K912 article",
-        "K927: Macro regime VIX prediction NULL — macro lags VIX 9-20d, adding macro hurt",
-        "K925: CPI event vol study — NULL (non-event for SPY daily vol)",
-        "K923-K924: Copula hedge NULL + Bayesian SSVS NULL (READMEs only, scripts lost)",
-        "K919-K920: DASN gap channel ★★ + Copula-GARCH tail dependence ★★",
-        "K919: DASN overnight spillover ★★ — gap channel dominates 99.7%",
-        "K918: BEKK-GARCH no cross-spillover + K916 BTC article + process updates"
-      ]
+    "paper_review": {
+      "emoji": "📝",
+      "description": "論文審查/修訂（讀寫完整 LaTeX，多輪 review）",
+      "commits": 58,
+      "lines_changed": 85953,
+      "estimated_tokens": 1428000,
+      "percentage": 35.7
     },
     "experiment": {
       "emoji": "🔬",
       "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
-      "commits": 7,
-      "lines_changed": 6422,
-      "estimated_tokens": 198440,
-      "percentage": 20.7,
-      "commit_messages": [
-        "E051: CARR chain + VIX dominance lessons (K932-K942, 12 experiments)",
-        "K940: Neural Network vol predictor — first ML experiment",
-        "Fix worktree script loss (K923/K924/K932) + K934 CARR experiment + K932 rebuild",
-        "Copy experiment files from worktree agent-a26c5500 (merge conflict fallback)",
-        "Copy experiment files from worktree agent-afe78d3d (merge conflict fallback)",
-        "K930 article (mile_30477865) + E50 experience log",
-        "K922: Copula SPY-0050.TW ★★ + E49 experience log + K918 article"
-      ]
+      "commits": 21,
+      "lines_changed": 127135,
+      "estimated_tokens": 710000,
+      "percentage": 17.8
+    },
+    "paper_writing": {
+      "emoji": "📄",
+      "description": "論文撰寫/組織",
+      "commits": 10,
+      "lines_changed": 23466,
+      "estimated_tokens": 620000,
+      "percentage": 15.5
+    },
+    "other": {
+      "emoji": "❔",
+      "description": "其他",
+      "commits": 74,
+      "lines_changed": 92515,
+      "estimated_tokens": 518060,
+      "percentage": 13.0
+    },
+    "latex_content_fix": {
+      "emoji": "🔧",
+      "description": "LaTeX/內容批量修復（讀寫大型 JSON）",
+      "commits": 10,
+      "lines_changed": 8852,
+      "estimated_tokens": 387856,
+      "percentage": 9.7
     },
     "article_writing": {
       "emoji": "✍️",
       "description": "文章撰寫與發佈",
-      "commits": 12,
-      "lines_changed": 4128,
-      "estimated_tokens": 162048,
-      "percentage": 16.9,
-      "commit_messages": [
-        "Add general article: AI/ML failure vs GARCH for vol prediction (K940/K944)",
-        "K943 multi-horizon research article: MF-GJR(VIX) Inverted-U pattern",
-        "K942-K943 VIX regime general article",
-        "K940 ML research article: MLP catastrophic failure diagnosis",
-        "CARR series general article: 隔夜跳空風險 (mile_dcddf425, draft)",
-        "K934 research article: Range-Based 波動率模型的意外發現",
-        "K932 general article: why 'optimal' portfolios lose to simple 50/50",
-        "K927 macro general article + knowledge index update",
-        "K926 TSMC article (mile_57ac7e6c) — 3 counterintuitive findings",
-        "CPI 04/10 pre-event article published (mile_4e797e4b) + K922 research article",
-        "K922 copula Taiwan research article (mile_612a534c)",
-        "K920-K921: Copula-GARCH series + K920 general article"
-      ]
+      "commits": 15,
+      "lines_changed": 6605,
+      "estimated_tokens": 225680,
+      "percentage": 5.6
+    },
+    "codex_review": {
+      "emoji": "🤖",
+      "description": "Codex 審查",
+      "commits": 4,
+      "lines_changed": 1735,
+      "estimated_tokens": 29880,
+      "percentage": 0.7
     },
     "research_program": {
       "emoji": "📋",
       "description": "研究計畫/規範更新",
-      "commits": 3,
-      "lines_changed": 1423,
-      "estimated_tokens": 11692,
-      "percentage": 1.2,
-      "commit_messages": [
-        "Archive K932-K945 session + trim research_program.md",
-        "K931 copula hedge article + research_program allocation methods + memory cleanup",
-        "K926: TSMC earnings vol + research_program.md bulk update"
-      ]
+      "commits": 6,
+      "lines_changed": 2792,
+      "estimated_tokens": 23168,
+      "percentage": 0.6
     },
     "feed_ops": {
       "emoji": "📡",
       "description": "Feed 發佈/同步操作",
-      "commits": 2,
-      "lines_changed": 148,
-      "estimated_tokens": 9184,
-      "percentage": 1.0,
-      "commit_messages": [
-        "Periodic commit: feed articles content sync, release/supabase state",
-        "Periodic commit: feed-publisher skill updated (multi-chart requirement), sync st"
-      ]
+      "commits": 3,
+      "lines_changed": 457,
+      "estimated_tokens": 15656,
+      "percentage": 0.4
     },
     "knowledge_index": {
       "emoji": "📚",
       "description": "知識索引建立/更新",
-      "commits": 1,
-      "lines_changed": 10,
-      "estimated_tokens": 4080,
-      "percentage": 0.4,
-      "commit_messages": [
-        "Periodic commit: sync state + knowledge index 4536"
-      ]
+      "commits": 3,
+      "lines_changed": 303,
+      "estimated_tokens": 14424,
+      "percentage": 0.4
+    },
+    "ops_patrol": {
+      "emoji": "🛡️",
+      "description": "平台巡檢",
+      "commits": 2,
+      "lines_changed": 99,
+      "estimated_tokens": 13188,
+      "percentage": 0.3
+    },
+    "skill_process": {
+      "emoji": "⚙️",
+      "description": "流程/技能規範更新",
+      "commits": 3,
+      "lines_changed": 71,
+      "estimated_tokens": 9426,
+      "percentage": 0.2
     },
     "periodic_sync": {
       "emoji": "🔄",
@@ -163,10 +107,7 @@
       "commits": 1,
       "lines_changed": 97,
       "estimated_tokens": 1194,
-      "percentage": 0.1,
-      "commit_messages": [
-        "Periodic commit: storage state sync + notification + release settings"
-      ]
+      "percentage": 0.0
     }
   }
 }
