@@ -21527,5 +21527,24 @@
     "data_source": "yfinance (SPY, ^VIX)",
     "created_at": "2026-04-06T11:38:34.067331+00:00",
     "star_rating": 2
+  },
+  {
+    "id": "know_20260406121448_k944",
+    "experiment_id": "K944",
+    "title": "K944: KAN/B-spline Vol NULL — 非線性basis expansion不勝GARCH遞迴結構",
+    "content": "[提出: Claude, 執行: Claude] KAN-inspired B-spline非線性波動率預測。SPY OOS 2016-2025。BSpline-Ridge(KAN proxy) QLIKE=3.453、BSpline-GBR=1.669、RF=1.498、GJR=1.546、GARCH=1.581、MF-GJR(VIX)=1.385(最佳)。B-spline basis expansion比plain RF更差——KAN的per-feature learnable nonlinearity對noisy daily r²無效。VIX在所有ML中feature importance 30-77%主導。關鍵insight：GARCH的遞迴方差動態h[t]=f(h[t-1],r²[t-1])對vol clustering不可替代，ML缺少此autoregressive結構。結合K940(MLP失敗)和K944(KAN失敗)：daily frequency的signal-to-noise對所有前饋ML架構都太低。需要：(1)更高頻數據 (2)recurrent架構(LSTM/GRU) (3)或直接用GARCH embedding作ML輸入。",
+    "tags": [
+      "volatility",
+      "KAN",
+      "B-spline",
+      "ML",
+      "neural-network",
+      "SPY",
+      "null-result",
+      "GARCH-irreplaceable"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-06T12:14:48.704010+00:00",
+    "star_rating": 0
   }
 ]
