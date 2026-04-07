@@ -1,0 +1,132 @@
+{
+  "experiment_id": "K978",
+  "title": "Congressional Trading vs SPY Volatility",
+  "timestamp": "2026-04-07T13:45:42.320887+00:00",
+  "data_sources": {
+    "congressional_trades": "data/congressional_trades_house.csv",
+    "spy_vix": "yfinance"
+  },
+  "sample": {
+    "congress_records": 15674,
+    "congress_date_range": "2020-01-02 to 2022-10-30",
+    "merged_observations": 1562,
+    "merged_date_range": "2020-01-09 to 2026-03-27",
+    "disclosure_delay_mean_days": 58.5,
+    "disclosure_delay_median_days": 28,
+    "days_with_disclosures": 585,
+    "days_without_disclosures": 977,
+    "high_activity_days": 51,
+    "high_activity_threshold": 60.3
+  },
+  "correlations": {
+    "volume_fwd_rv5": {
+      "r": 0.1039,
+      "p": 0.0
+    },
+    "net_fwd_rv5": {
+      "r": 0.0184,
+      "p": 0.4676
+    },
+    "vix_fwd_rv5": {
+      "r": 0.7003,
+      "p": 0.0
+    },
+    "partial_volume_fwd_rv5_given_vix": {
+      "r": -0.0576,
+      "p": 0.0228
+    },
+    "partial_net_fwd_rv5_given_vix": {
+      "r": -0.0067,
+      "p": 0.7909
+    }
+  },
+  "granger_causality": {
+    "volume_rv5_lag1": {
+      "F": 1.971,
+      "p": 0.1606
+    },
+    "volume_rv5_lag2": {
+      "F": 2.344,
+      "p": 0.0963
+    },
+    "volume_rv5_lag3": {
+      "F": 2.147,
+      "p": 0.0925
+    },
+    "volume_rv5_lag4": {
+      "F": 2.226,
+      "p": 0.0641
+    },
+    "volume_rv5_lag5": {
+      "F": 1.911,
+      "p": 0.0895
+    }
+  },
+  "regressions": {
+    "model1_vix_only": {
+      "R2": 0.4905,
+      "AIC": -2883.6,
+      "vix_t": 7.419,
+      "vix_p": 0.0
+    },
+    "model2_vix_volume": {
+      "R2": 0.4922,
+      "AIC": -2886.8,
+      "volume_t": -1.871,
+      "volume_p": 0.0613
+    },
+    "model3_vix_net": {
+      "R2": 0.4905,
+      "AIC": -2881.7,
+      "net_t": -0.421,
+      "net_p": 0.6736
+    },
+    "model4_full": {
+      "R2": 0.4922,
+      "AIC": -2885.1,
+      "coefficients": {
+        "const": {
+          "coef": -0.093296,
+          "t": -3.109,
+          "p": 0.0019
+        },
+        "vix": {
+          "coef": 0.01224,
+          "t": 7.538,
+          "p": 0.0
+        },
+        "daily_volume": {
+          "coef": -0.000224,
+          "t": -1.999,
+          "p": 0.0457
+        },
+        "daily_net": {
+          "coef": -0.000109,
+          "t": -0.618,
+          "p": 0.5364
+        }
+      }
+    }
+  },
+  "event_analysis": {
+    "high_activity_fwd_rv5_mean": 0.2189,
+    "normal_activity_fwd_rv5_mean": 0.1947,
+    "no_activity_fwd_rv5_mean": 0.1407
+  },
+  "rolling_correlation": {
+    "volume_fwd_rv5_60d_mean": 0.0123,
+    "volume_fwd_rv5_60d_std": 0.1528,
+    "net_fwd_rv5_60d_mean": 0.0434,
+    "net_fwd_rv5_60d_std": 0.1437
+  },
+  "conclusion": "Congressional trading shows weak partial correlation with future SPY volatility after controlling for VIX (partial r=-0.0576 for volume, partial r=-0.0067 for net). However, regression coefficients fail the Harvey (2016) threshold (|t| > 3.0): volume t=-1.871, net t=-0.421. No reliable predictive signal detected.",
+  "limitations": [
+    "Short sample period (~4 years of congressional data)",
+    "Disclosure delay (median ~30 days) reduces signal timeliness",
+    "Cannot distinguish informed trading from routine portfolio management",
+    "Many zero-activity days dilute signal",
+    "Amount data is range-based, using midpoint is an approximation",
+    "No control for market-wide factors beyond VIX"
+  ],
+  "passes_harvey_threshold": false
+}
