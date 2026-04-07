@@ -1,0 +1,173 @@
+{
+  "experiment_id": "K981",
+  "title": "HAR + Wavelet Decomposition — Multi-Scale Volatility",
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "period": "2006-01-04 to 2026-04-06",
+  "is_period": "2006 to 2018 (3270 obs)",
+  "oos_period": "2019 to 2026-04",
+  "wavelet": "db4 (Daubechies-4)",
+  "decomposition_levels": 5,
+  "window_size": 64,
+  "seed": 42,
+  "models": {
+    "AR(1)": {
+      "n_oos": 1823,
+      "qlike": 1.7368471948117836,
+      "mse": 30.2436028624536,
+      "mae": 1.7177919108332185,
+      "r2_oos": 0.19764756551093388,
+      "mz_alpha": 0.1489333954775407,
+      "mz_beta": 0.8960837497755136,
+      "mz_r2": 0.20034561828406228,
+      "correlation": 0.4475998416935179
+    },
+    "HAR": {
+      "n_oos": 1823,
+      "qlike": 1.5407730279613707,
+      "mse": 29.301449627351616,
+      "mae": 1.6465180703808848,
+      "r2_oos": 0.22264256843051988,
+      "mz_alpha": 0.2317170752547939,
+      "mz_beta": 0.83530687768306,
+      "mz_r2": 0.23166534631789204,
+      "correlation": 0.4813162643396668
+    },
+    "WHAR_db4": {
+      "n_oos": 1823,
+      "qlike": 1.8010784357316976,
+      "mse": 38.74712119005284,
+      "mae": 1.9732272970800626,
+      "r2_oos": -0.027947865790735937,
+      "mz_alpha": 0.7864004884460049,
+      "mz_beta": 0.43207186199692993,
+      "mz_r2": 0.03697255751223272,
+      "correlation": 0.19228249403477318
+    },
+    "WHAR_haar": {
+      "n_oos": 1823,
+      "qlike": 50.19355934341777,
+      "mse": 37.97998859722363,
+      "mae": 1.9863112967704797,
+      "r2_oos": -0.0075961006180569335,
+      "mz_alpha": 0.702125354663692,
+      "mz_beta": 0.47849747217887223,
+      "mz_r2": 0.034441981924644094,
+      "correlation": 0.1855855110849008
+    },
+    "WHAR_HAR_db4": {
+      "n_oos": 1823,
+      "qlike": 474.483910082088,
+      "mse": 31.078091480913436,
+      "mae": 1.6859453594899827,
+      "r2_oos": 0.1755088680277087,
+      "mz_alpha": 0.4176552946963088,
+      "mz_beta": 0.7145170523570529,
+      "mz_r2": 0.2088754959157081,
+      "correlation": 0.45702898804748476
+    },
+    "GJR-GARCH": {
+      "n_oos": 1823,
+      "qlike": 1.5307621810075307,
+      "mse": 28.076439830262217,
+      "mae": 1.6048222918147905,
+      "r2_oos": 0.2551416591452661,
+      "mz_alpha": 0.25895983642155507,
+      "mz_beta": 0.7646663249847535,
+      "mz_r2": 0.28236148355519375,
+      "correlation": 0.5313769693496262
+    }
+  },
+  "wavelet_component_importance": {
+    "D1 (1-2d)": {
+      "coefficient": 0.002114957627682862,
+      "t_stat": 1.137852496884194
+    },
+    "D2 (2-4d)": {
+      "coefficient": 0.009513115253239765,
+      "t_stat": 4.113655586342423
+    },
+    "D3 (4-8d)": {
+      "coefficient": -0.005950608900754984,
+      "t_stat": -3.1573873443875655
+    },
+    "D4 (8-16d)": {
+      "coefficient": 0.0071229743809921794,
+      "t_stat": 3.299510035294187
+    },
+    "D5 (16-32d)": {
+      "coefficient": 0.010075214917704961,
+      "t_stat": 7.857092642146922
+    },
+    "A5 (>32d)": {
+      "coefficient": -8.991727086544825e-05,
+      "t_stat": -2.490815213822752
+    }
+  },
+  "dm_tests": {
+    "HAR": {
+      "t_stat": -3.300578802371086,
+      "p_value": 0.0009835049661879314
+    },
+    "WHAR_db4": {
+      "t_stat": 1.059137054250311,
+      "p_value": 0.2896779094276489
+    },
+    "WHAR_haar": {
+      "t_stat": 1.0441508225630525,
+      "p_value": 0.29655427942504997
+    },
+    "WHAR_HAR_db4": {
+      "t_stat": 1.9411891330266877,
+      "p_value": 0.05238953086567033
+    },
+    "GJR-GARCH": {
+      "t_stat": -2.649961482286685,
+      "p_value": 0.008119803291519956
+    }
+  },
+  "references": [
+    "Corsi (2009) A Simple Approximate Long-Memory Model of Realized Volatility, JFE",
+    "Percival & Walden (2000) Wavelet Methods for Time Series Analysis, Cambridge UP",
+    "Patton (2011) Volatility Forecast Comparison Using Imperfect Volatility Proxies, JoE"
+  ],
+  "ranking_by_qlike": [
+    {
+      "rank": 1,
+      "model": "GJR-GARCH",
+      "qlike": 1.5307621810075307
+    },
+    {
+      "rank": 2,
+      "model": "HAR",
+      "qlike": 1.5407730279613707
+    },
+    {
+      "rank": 3,
+      "model": "AR(1)",
+      "qlike": 1.7368471948117836
+    },
+    {
+      "rank": 4,
+      "model": "WHAR_db4",
+      "qlike": 1.8010784357316976
+    },
+    {
+      "rank": 5,
+      "model": "WHAR_haar",
+      "qlike": 50.19355934341777
+    },
+    {
+      "rank": 6,
+      "model": "WHAR_HAR_db4",
+      "qlike": 474.483910082088
+    }
+  ],
+  "summary": {
+    "best_model": "GJR-GARCH",
+    "best_qlike": 1.5307621810075307,
+    "har_qlike": 1.5407730279613707,
+    "whar_vs_har": "HAR better",
+    "conclusion": "HAR outperforms WHAR (db4) by 16.9% in QLIKE. Fixed-window averages remain a robust choice; wavelet energy features do not capture additional predictive information for daily r² forecasting with this proxy."
+  }
+}
