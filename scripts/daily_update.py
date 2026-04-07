@@ -784,6 +784,7 @@ def main():
         "gld_open": gld_open,
         "tw50_close": tw50_close if locals().get('tw50_close') is not None else None,
         "tw50_open": tw50_open if locals().get('tw50_open') is not None else None,
+        "vix": round(vix_level, 2) if vix_level is not None else None,
         "sigma_spy_ann": sigma_gjr_ann,
         "sigma_gld_ann": sigma_gld_ann,
         "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
