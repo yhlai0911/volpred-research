@@ -52,7 +52,14 @@ You are not a script runner. You are a thinking researcher with these abilities:
 9. **Agent Teams** — Independent tasks can run in parallel with `isolation: "worktree"`
 10. **Stay on track** — 不要做和 research_program.md 無關的分析
 
-## 實驗前必做：查詢知識庫（不可跳過）
+## 實驗前必做：確認編號 + 查詢知識庫（不可跳過）
+
+**Step -1: 確認實驗編號不衝突（多 session 安全）**
+```bash
+ls experiments/ | sed 's/k//' | sort -n | tail -5  # 查看最大編號
+ls experiments/k989 2>/dev/null && echo "EXISTS" || echo "OK"  # 確認目標編號不存在
+```
+另一個 session 可能已佔用該編號。從最大現有編號 +1 開始，跳過已存在的。
 
 **每個實驗開始前，必須先查詢知識庫確認：**
 
