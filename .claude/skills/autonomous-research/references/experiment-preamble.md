@@ -94,3 +94,19 @@
 git add -A && git commit -m "K9XX: description"
 ```
 不 commit = 檔案在 worktree 清理時永久遺失。K923/K924/K932 都因此遺失過腳本。
+
+## 8. Worktree 共享狀態禁令（必遵守）
+
+**Worktree agent 禁止直接修改以下共享狀態檔案：**
+- `storage/reports/feed.json`（由主線程透過 publish_milestone 統一寫入）
+- `storage/memory/knowledge.json`（由主線程在 agent 完成後統一記錄）
+- `storage/memory/thinking_journal.json`（同上）
+- `storage/memory/experiment_experiences.json`（同上）
+- 禁止呼叫 `supabase_sync.py`、`_sync_to_remote()` 或任何寫入 Supabase/Mirror 的操作
+
+**原因**：Worktree 是隔離的 git 分支。若 worktree 和主線程同時修改這些 JSON 陣列檔案，git merge 無法自動合併 → 資料遺失。若同時 sync 到 Supabase，兩邊會互相覆蓋。
+
+**Worktree agent 只應產出：**
+- `experiments/kXXX/` 下的所有檔案（腳本 `.py`、結果 `_results.json`、圖表 `.png`、`README.md`）
+- 結果透過 agent 返回值傳回主線程
+- **主線程負責**：記錄 knowledge、發佈文章、sync 到 Supabase

@@ -574,6 +574,12 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 - **⚠️ Worktree agent 必須 commit**：每個 worktree agent 的 prompt 結尾必須包含：
   > 在完成所有工作後，必須執行 `git add -A && git commit -m "K9XX: description"` 保存所有新檔案。不 commit = 檔案在 worktree 清理時永久遺失。
 - **Agent 返回後**：主對話必須執行 `bash scripts/merge_worktree.sh` 合併變更到 main
+- **⚠️ Worktree agent 禁止修改共享狀態**：Worktree 是隔離的 git 分支，與 main 同時修改 JSON 陣列會導致 merge 衝突和資料遺失。規則：
+  - **禁止寫入**：`storage/reports/feed.json`、`storage/memory/knowledge.json`、`storage/memory/thinking_journal.json`、`storage/memory/experiment_experiences.json`
+  - **禁止呼叫**：`supabase_sync.py`、`_sync_to_remote()`、任何寫入 Supabase/Mirror 的操作
+  - **Worktree agent 只應產出**：`experiments/kXXX/` 下的檔案（腳本、結果 JSON、圖表、README）
+  - **主線程負責**：agent 完成後，由主線程記錄 knowledge、發佈文章、sync 到 Supabase
+  - 詳見 `experiment-preamble.md` 第 8 節
 
 **絕對禁止**：
 - 在 prompt 中給 agent 「摘要數字」然後讓它寫論文 → 必須讓 agent 自己讀 JSON
