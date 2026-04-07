@@ -21973,5 +21973,21 @@
     "data_source": "yfinance ^SKEW + ^VIX + SPY 2010-2026",
     "created_at": "2026-04-07T13:47:20.358881+00:00",
     "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407135653_k980",
+    "experiment_id": "K980",
+    "title": "K980: Threshold GJR-GARCH — NULL OOS, regime params differ but discrete switching hurts",
+    "content": "[提出: Chen Liu Gerlach 2011, 執行: Claude] SPY 2006-2026, IS 3268, OOS 1824。VIX regime switching GJR（c=14 by grid search）。參數確實在 regime 間顯著不同：low-VIX persistence=0.42 gamma=0.20 vs high-VIX persistence=0.97 gamma=0.05。但 OOS TGJR QLIKE=1.503 vs GJR 1.499（無改善，DM p=0.748）。Regime-conditional：TGJR 在 calm market 幫助 (1.57 vs 1.65) 但在 stressed market 更差 (1.49 vs 1.47)。85% OOS 在 high-VIX regime → 淨效果負。GJR+Dummy 同樣無效 (1.505)。結論：VIX 信息通過 MF2 連續乘法方式（K970）比離散 regime switching 更有效。分開估計 regime 損失 h_t 的時間連續性。",
+    "tags": [
+      "threshold-GARCH",
+      "regime-switching",
+      "VIX-regime",
+      "NULL",
+      "Bayesian"
+    ],
+    "data_source": "yfinance SPY + ^VIX 2006-2026",
+    "created_at": "2026-04-07T13:56:53.370595+00:00",
+    "experiment_date": "2026-04-07"
   }
 ]

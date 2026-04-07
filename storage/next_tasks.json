@@ -1,30 +1,30 @@
 {
-  "updated_at": "2026-04-07T14:30:00Z",
+  "updated_at": "2026-04-07T15:00:00Z",
   "note": "Cron 讀此檔取最高優先任務。完成後補充新任務。空了才讀 research_program.md 全文。",
   "tasks": [
     {
-      "id": "K976",
-      "topic": "VIX Slope + MF2-GARCH 整合 — slope 作為額外長期成分 (K970+K975 synthesis)",
-      "source": "K975 ★ slope 顯著 vol predictor + K970 MF2 framework",
+      "id": "K980",
+      "topic": "Threshold GARCH with Bayesian Model Selection — TARMA (Chen, Liu, Gerlach 2011)",
+      "source": "research_program.md Bayesian 方向 line 378-380",
       "priority": 1,
-      "note": "K975 slope +2.2% R² + K970 MF2-VIX -9.55% → 合併可能更強"
+      "note": "學術新方向，結合 threshold + Bayesian variable selection"
     },
     {
-      "id": "K977",
-      "topic": "KAN-GARCH-MIDAS (J.Applied Economics 2025) — Kolmogorov-Arnold Network",
-      "source": "文獻搜尋 ML-GARCH 混合",
+      "id": "K981",
+      "topic": "HAR + Wavelet Decomposition — 多尺度波動率分解",
+      "source": "research_program.md HAR 進階方向 line 390",
       "priority": 2
     },
     {
-      "id": "K978",
-      "topic": "Congressional Trading vs SPY Vol — 國會交易數據分析",
-      "source": "data/congressional_trades_house.csv 已有數據",
+      "id": "K982",
+      "topic": "Dispersion / Correlation-Regime Trading — sector ETF 相關結構",
+      "source": "research_program.md Codex #5 line 368",
       "priority": 3
     },
     {
-      "id": "K979",
-      "topic": "SKEW Index as Vol Predictor — CBOE SKEW vs VIX 增量",
-      "source": "research_program.md CBOE 方向",
+      "id": "K983",
+      "topic": "跨資產 Return Prediction — SPY/QQQ/0050.TW 互相預測",
+      "source": "research_program.md line 372",
       "priority": 4
     }
   ]
