@@ -156,11 +156,11 @@ Codex 驅動的自主研究系統，用於尋找給定資產的最佳波動率�
 - Feed 發文要用 `feed-publisher` skill（thinking ≠ content）
 - **Zeabur reverse proxy 陷阱**：詳見 `docs/zeabur-oauth-gotcha.md`
 - Paper trading 用 `portfolio_return`（加權後組合報酬），不是單一資產 return
-- 時間處理：`published_at` 存 UTC，前端用 `timeZone: 'Asia/Taipei'` 顯示。詳見 `.claude/skills/autonomous-research/references/data-timing.md`
+- 時間處理：`published_at` 存 UTC，前端用 `timeZone: 'Asia/Taipei'` 顯示。詳見 `.agents/skills/autonomous-research/references/data-timing.md`
   - **⚠️ 比較時間必須用 UTC**：`datetime.now(timezone.utc)` 不是 `datetime.now()`。後者是本地台灣時間（UTC+8），會差 8 小時
   - 檢查「多久沒發文」的正確寫法：`(datetime.now(timezone.utc) - datetime.fromisoformat(pub_at).replace(tzinfo=timezone.utc))`
 - 跨市場策略注意 VIX lag（台股用前一天 VIX）
-- **外部數據來源**：→ 完整操作手冊見 `.claude/skills/external-data-sources/SKILL.md`
+- **外部數據來源**：→ 完整操作手冊見 `.agents/skills/external-data-sources/SKILL.md`
   - **yfinance**：股價/ETF/VIX（免費，無需 key）
   - **FRED**：`pandas_datareader` 讀取數千個總經指標（免費，無需 key）
   - **TAIFEX tick**：台指期日內 tick（`~/Dropbox/TAIFEXDATA/TAIFEXDATA/python/`，✅ 本地 33G；選擇權 41G ❌ 僅雲端）
@@ -365,7 +365,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 **Step 0: Error Log 防錯 + Preamble（最重要）**
 0. **讀 `docs/error_log.md`**，在 agent prompt 中明確列出「此實驗需注意的 error log 規則：XXX」
-1. **附上 preamble**：每個實驗 agent prompt 必須讀取 `.claude/skills/autonomous-research/references/experiment-preamble.md` 附加在開頭。**Agent 看不到 CLAUDE.md 和 research_program.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。** Preamble 包含：模型-target 匹配、mechanical vs empirical 區分、統計門檻、防錯規則、VaR+ES 標準、worktree 禁令。
+1. **附上 preamble**：每個實驗 agent prompt 必須讀取 `.agents/skills/autonomous-research/references/experiment-preamble.md` 附加在開頭。**Agent 看不到 AGENTS.md 和 research_program.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。** Preamble 包含：模型-target 匹配、mechanical vs empirical 區分、統計門檻、防錯規則、VaR+ES 標準、worktree 禁令。
 
 **Step 1: 知識庫搜尋（過去成果）**
 1. `grep -i '關鍵詞' storage/memory/knowledge.json | grep title | head -10`
@@ -426,15 +426,15 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ## 活文件原則
 以下文件會隨研究推展持續演化，應主動修改以反映最新狀態：
-- **`CLAUDE.md`**：架構變更、新模型/策略、新發現 → 立即更新
+- **`AGENTS.md`**：架構變更、新模型/策略、新發現 → 立即更新
 - **`research_program.md`**：目標調整、新研究面向、約束修正 → 及時更新
-- **`.claude/skills/`**：發現反覆出錯的流程 → 建立或修正 skill
+- **`.agents/skills/`**：發現反覆出錯的流程 → 建立或修正 skill
 - **`research_findings.md`**：新的具體發現和數據 → 實驗後立即記錄
 - **Memory files**：thinking/knowledge/questions → 每個發現後同步
 
 修改原則：
 - **新增補充內容**可以先做，但要記錄修改原因。
-- **刪除或改寫既有治理內容**（`CLAUDE.md`、`research_program.md`、`.claude/skills/`、`docs/` 的既有規範）前，必須先取得使用者同意。
+- **刪除或改寫既有治理內容**（`AGENTS.md`、`research_program.md`、`.agents/skills/`、`docs/` 的既有規範）前，必須先取得使用者同意。
 
 ## 署名與歸屬
 所有研究成果、發現、策略建議必須標注發起者：
@@ -519,8 +519,8 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 | **Feed 文章** | 指示 agent 讀取：(1) `feed-publisher` skill (2) 實驗結果 JSON (3) 已有文章（避免重複） |
 
 **通用原則（適用所有 agent 任務）：**
-- **使用標準化模板**：agent brief 必須按照 `.claude/skills/autonomous-research/references/agent-brief-template.md` 格式填寫（WHAT + WHY + 約束 + 成功標準 + 相關知識）。agent 回報必須按照 `agent-result-template.md` 格式（結果 + 數字 + 異常 + 與動機關聯 + 後續）
-- **主 agent 判斷需要哪些 skill**，在 prompt 中指示 subagent 讀取對應的 skill 文件路徑（`.claude/skills/<name>/SKILL.md`）
+- **使用標準化模板**：agent brief 必須按照 `.agents/skills/autonomous-research/references/agent-brief-template.md` 格式填寫（WHAT + WHY + 約束 + 成功標準 + 相關知識）。agent 回報必須按照 `agent-result-template.md` 格式（結果 + 數字 + 異常 + 與動機關聯 + 後續）
+- **主 agent 判斷需要哪些 skill**，在 prompt 中指示 subagent 讀取對應的 skill 文件路徑（`.agents/skills/<name>/SKILL.md`）
 - **完整傳遞必要資訊**：相關 K 編號+結論、error log 防錯規則、檔案路徑、統計門檻、研究背景
 - **Agent prompt = 完整 brief**：像寫給剛加入團隊的聰明同事，不是一行指令
 - **主線程做 synthesis**：agent 回報後，主線程必須先「解讀」（連回動機）再「行動」（記 knowledge/寫文章）。不是照搬 agent 的結論
@@ -587,13 +587,13 @@ CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：(1) python sc
 
 **所有模型清單、策略績效數字、參數估計結果、評估指標定義 → 見 `research_program.md`**
 
-CLAUDE.md 不放具體的 Sharpe/MDD 數字或模型參數值——這些會隨數據更新而過時。
+AGENTS.md 不放具體的 Sharpe/MDD 數字或模型參數值——這些會隨數據更新而過時。
 研究約束（統計門檻、OOS 規範、Harvey threshold）見 `research_program.md` 約束區。
 
 ## 研究成果
 **所有研究發現、實驗結果、Phase 進度、AI 協作建議 → 見 `research_program.md`（北極星文件）。**
 
-CLAUDE.md 不重複研究內容。需要查閱研究結論時直接讀 `research_program.md`。
+AGENTS.md 不重複研究內容。需要查閱研究結論時直接讀 `research_program.md`。
 知識細節在 `storage/memory/knowledge.json`（1000+ 筆，含完整實驗條件和數據）。
 
 ## 網站優化待辦
