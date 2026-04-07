@@ -350,4 +350,6 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 - `references/publishing-guide.md` — Publishing formats, Signal card, API endpoints
 - `references/strategies.md` — Trading strategies, Hybrid VT details, transaction costs, advanced techniques
 - `references/models.md` — Model descriptions, parameters, sample size requirements, cross-asset rules
-- `research_program.md` — **Core research direction, progress, and findings** (highest priority)
+- `references/agent-brief-template.md` — Agent 任務單模板（WHAT + WHY + 約束 + 成功標準）
+- `references/agent-result-template.md` — Agent 結果回報模板
+- `research_program.md` — **研究北極星（必讀）**：方法論約束（統計門檻、Patton 2011、VaR/ES 規格）+ 研究面向 + 待辦 + 成果。CLAUDE.md 的技術細節指向此處。

@@ -473,13 +473,10 @@
 - 之前的 null result 可能因條件改變而翻轉
 
 ## 發佈規範
-- 每個發現即時記錄（thinking + knowledge + feed）
-- Feed 文章用 `feed-publisher` skill，確保品質
-- 平台型發佈（文章池、排程、節奏釋出、下架、重釋出）轉交 `admin-ops`
-- 預設可先進文章池（`draft` / `scheduled`），再依節奏釋出，不必每次都立即公開
+→ 內容產出規則（文章類型/數量/圖表/發佈節奏）見 `CLAUDE.md`「每日文章產出要求」段。
 - 所有議題標注發起者（Gemini/Codex/Claude/用戶）
 - 具體發現存 `research_findings.md`（加入 embedding）
-- Claude 應定期讀取平台摘要（尤其 analytics / questions summary），把讀者回饋與高分會員問題納入研究來源
+- Claude 應定期讀取平台摘要（analytics / questions），把讀者回饋與高分會員問題納入研究來源
 
 ## 研究發現與成果
 詳見 `research_findings.md`（已加入知識索引 embedding）
