@@ -1,0 +1,142 @@
+{
+  "experiment_id": "K971",
+  "title": "CAViaR-based Volatility Targeting vs GARCH-VT",
+  "timestamp": "2026-04-07T21:04:58.803596",
+  "data_source": "yfinance",
+  "data_period": "2006-01-01 to 2026-04-07",
+  "oos_period": "2015-01-02 to 2026-04-07",
+  "config": {
+    "sigma_target": 0.15,
+    "w_min": 0.2,
+    "w_max": 1.5,
+    "refit_months": 3,
+    "garch_window": 2000,
+    "caviar_alpha": 0.05,
+    "seed": 42
+  },
+  "oos_metrics": {
+    "Buy & Hold": {
+      "name": "Buy & Hold",
+      "ann_return": 0.1362835775268871,
+      "ann_vol": 0.1771383736245456,
+      "sharpe": 0.7693622490615588,
+      "sortino": 0.9398078565729563,
+      "mdd": -0.33717266428472714,
+      "calmar": 0.40419521498279515,
+      "var_5pct": -0.016730132306434668,
+      "es_5pct": -0.026978237793752996,
+      "n_days": 2830
+    },
+    "GARCH-VT": {
+      "name": "GARCH-VT",
+      "ann_return": 0.11694902869798962,
+      "ann_vol": 0.15038772296216812,
+      "sharpe": 0.7776501059691527,
+      "sortino": 0.9726845512937531,
+      "mdd": -0.19722432308820692,
+      "calmar": 0.5929746740501431,
+      "var_5pct": -0.015389570645442495,
+      "es_5pct": -0.023365915173684252,
+      "n_days": 2830,
+      "turnover": 0.06619772072849879
+    },
+    "CAViaR-VT": {
+      "name": "CAViaR-VT",
+      "ann_return": 0.10783424956008929,
+      "ann_vol": 0.14672330508261838,
+      "sharpe": 0.7349497034528286,
+      "sortino": 0.9102736239425933,
+      "mdd": -0.21673191357414368,
+      "calmar": 0.4975467054287755,
+      "var_5pct": -0.014670348632138595,
+      "es_5pct": -0.022987690693875525,
+      "n_days": 2830,
+      "turnover": 0.08754010125829972
+    },
+    "12/VIX": {
+      "name": "12/VIX",
+      "ann_return": 0.08154497872541608,
+      "ann_vol": 0.09420729665641887,
+      "sharpe": 0.8655909002761938,
+      "sortino": 1.1529763489939369,
+      "mdd": -0.14350805968726665,
+      "calmar": 0.5682257770268738,
+      "var_5pct": -0.010278832533643237,
+      "es_5pct": -0.014278282482469507,
+      "n_days": 2830,
+      "turnover": 0.037910462382606515
+    }
+  },
+  "dm_tests": {
+    "CAViaR-VT vs GARCH-VT": {
+      "t_stat": -4.716888538506596,
+      "p_value": 2.5109573125181583e-06
+    },
+    "CAViaR-VT vs 12/VIX": {
+      "t_stat": 14.347791848651275,
+      "p_value": 0.0
+    },
+    "CAViaR-VT vs B&H": {
+      "t_stat": -4.538947279202263,
+      "p_value": 5.889554693494503e-06
+    },
+    "GARCH-VT vs 12/VIX": {
+      "t_stat": 16.731138586253678,
+      "p_value": 0.0
+    }
+  },
+  "crisis_analysis": {
+    "COVID Crash (2020-02 to 2020-03)": {
+      "bh_return": -0.33400359733027585,
+      "garch_vt_return": -0.16012335662112698,
+      "caviar_vt_return": -0.1631227566011575,
+      "vix_12_return": -0.12527957542871382,
+      "avg_garch_w": 0.517893825047524,
+      "avg_caviar_w": 0.5292418962777775,
+      "avg_vix_w": 0.36758566039670204,
+      "n_days": 24
+    },
+    "2022 Bear Market (2022-01 to 2022-10)": {
+      "bh_return": -0.24059196654776127,
+      "garch_vt_return": -0.19080371269511243,
+      "caviar_vt_return": -0.20766058709556057,
+      "vix_12_return": -0.14005221184140282,
+      "avg_garch_w": 0.7192932646258873,
+      "avg_caviar_w": 0.7100256055873805,
+      "avg_vix_w": 0.4762450619440464,
+      "n_days": 196
+    },
+    "2018 Q4 Selloff": {
+      "bh_return": -0.1892251445276224,
+      "garch_vt_return": -0.18509500076153373,
+      "caviar_vt_return": -0.17827067722349033,
+      "vix_12_return": -0.12170480540834161,
+      "avg_garch_w": 0.8145006659133122,
+      "avg_caviar_w": 0.7832719270436457,
+      "avg_vix_w": 0.6205098726722956,
+      "n_days": 59
+    },
+    "Aug 2024 Japan Carry Unwind": {
+      "bh_return": -0.0760904886694409,
+      "garch_vt_return": -0.07929293950987226,
+      "caviar_vt_return": -0.07361874727239659,
+      "vix_12_return": -0.05324527305703308,
+      "avg_garch_w": 1.0241492562535237,
+      "avg_caviar_w": 0.96725200388633,
+      "avg_vix_w": 0.7535400900699416,
+      "n_days": 16
+    }
+  },
+  "vol_stats": {
+    "caviar_sigma_mean": 0.1562559375754939,
+    "caviar_sigma_std": 0.09452256622781442,
+    "garch_sigma_mean": 0.1527255923624248,
+    "garch_sigma_std": 0.09785538730791614,
+    "sigma_correlation": 0.9667507733343135
+  },
+  "references": [
+    "Engle & Manganelli (2004) 'CAViaR: Conditional Autoregressive Value at Risk', JBES",
+    "Glosten, Jagannathan & Runkle (1993) 'On the Relation between Expected Value and Volatility', JoF",
+    "K967: CAViaR AS beats GARCH Student-t on VaR (DM t=3.079 at alpha=0.95)"
+  ]
+}
