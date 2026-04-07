@@ -2,425 +2,210 @@
   "report_type": "daily",
   "date": "2026-04-07",
   "week_range": "2026-04-03 → 2026-04-10",
-  "total": {
-    "input_tokens": 64045,
-    "output_tokens": 214012,
-    "cache_creation": 6123111,
-    "cache_read": 177586646,
-    "total_tokens": 183987814,
-    "api_calls": 894,
-    "cost_usd": 398.1999
-  },
-  "by_model": {
-    "claude-opus-4-6": {
-      "input_tokens": 64045,
-      "output_tokens": 214012,
-      "cache_creation": 6123111,
-      "cache_read": 177586646,
-      "total_tokens": 183987814,
-      "api_calls": 894,
-      "cost_usd": 398.1999
-    }
-  },
-  "by_category": {
-    "web_search": {
-      "label": "🌐 文獻/搜尋",
-      "turns": 1,
-      "api_calls": 261,
-      "total_tokens": 50677100,
-      "cost_usd": 96.0562,
-      "percentage": 24.1
-    },
-    "research_cron": {
-      "label": "🔬 研究 cron",
-      "turns": 7,
-      "api_calls": 75,
-      "total_tokens": 23731912,
-      "cost_usd": 72.4417,
-      "percentage": 18.2
-    },
+  "total_commits": 82,
+  "total_estimated_tokens": 497564,
+  "categories": {
     "other": {
-      "label": "❔ 其他",
-      "turns": 6,
-      "api_calls": 164,
-      "total_tokens": 26572352,
-      "cost_usd": 53.3772,
-      "percentage": 13.4
-    },
-    "exploration": {
-      "label": "🔍 探索/查詢",
-      "turns": 12,
-      "api_calls": 68,
-      "total_tokens": 16109848,
-      "cost_usd": 46.8928,
-      "percentage": 11.8
-    },
-    "agent_result": {
-      "label": "🤖 Agent 結果處理",
-      "turns": 10,
-      "api_calls": 73,
-      "total_tokens": 21465852,
-      "cost_usd": 34.0115,
-      "percentage": 8.5
-    },
-    "knowledge_index": {
-      "label": "📚 知識索引",
-      "turns": 4,
-      "api_calls": 48,
-      "total_tokens": 6811359,
-      "cost_usd": 25.8518,
-      "percentage": 6.5
-    },
-    "article": {
-      "label": "✍️ 文章",
-      "turns": 1,
-      "api_calls": 32,
-      "total_tokens": 12617839,
-      "cost_usd": 19.943,
-      "percentage": 5.0
-    },
-    "agent_dispatch": {
-      "label": "🚀 Agent 派遣",
-      "turns": 4,
-      "api_calls": 77,
-      "total_tokens": 7701914,
-      "cost_usd": 18.9407,
-      "percentage": 4.8
-    },
-    "bugfix": {
-      "label": "🐛 修復",
-      "turns": 3,
-      "api_calls": 38,
-      "total_tokens": 7183946,
-      "cost_usd": 12.3273,
-      "percentage": 3.1
-    },
-    "git_sync": {
-      "label": "🔄 Git sync",
-      "turns": 3,
-      "api_calls": 16,
-      "total_tokens": 3760899,
-      "cost_usd": 5.852,
-      "percentage": 1.5
-    },
-    "token_report": {
-      "label": "📊 Token 報告",
-      "turns": 4,
-      "api_calls": 17,
-      "total_tokens": 3218574,
-      "cost_usd": 5.1812,
-      "percentage": 1.3
+      "emoji": "❔",
+      "description": "其他",
+      "commits": 56,
+      "lines_changed": 39048,
+      "estimated_tokens": 268192,
+      "percentage": 53.9,
+      "commit_messages": [
+        "K981: HAR + Wavelet — NULL, IS overfit, HAR fixed windows more robust",
+        "Merge agent worktree agent-a0ab8a7a (1 commits)",
+        "K981: HAR + Wavelet decomposition — multi-scale volatility",
+        "K980: Threshold GJR-GARCH — NULL, discrete switching < MF2 continuous",
+        "Merge agent worktree agent-a95fb3ea (1 commits)",
+        "K980: Threshold GJR-GARCH with VIX regime switching",
+        "K978-K979: Congressional trading + SKEW index — both NULL",
+        "Merge agent worktree agent-aeb6d008 (1 commits)",
+        "Merge agent worktree agent-a18b2ccf (1 commits)",
+        "K979: CBOE SKEW index as vol predictor",
+        "K978: Congressional trading vs SPY volatility",
+        "K976: MF2+VIX slope — NULL at daily freq (horizon mismatch)",
+        "Merge agent worktree agent-ae907c2f (1 commits)",
+        "K976: MF2-GARCH + VIX slope integration",
+        "K975: VIX term structure slope ★ — significant vol predictor",
+        "Merge agent worktree agent-aefd691f (1 commits)",
+        "K975: VIX term structure slope — predictive power and strategy",
+        "K973: Time-varying Hurst — NULL at daily freq, confirms K34",
+        "Merge agent worktree agent-a9bda5d6 (1 commits)",
+        "K973: Time-varying Hurst exponent for vol forecasting",
+        "K972: MF2-VIX Taiwan — VIX lead-lag NOT confirmed, EMA best for TW",
+        "Merge agent worktree agent-ab28b876 (1 commits)",
+        "K972: MF2-VIX Taiwan validation — 0050.TW with VIX lead-lag",
+        "K971: CAViaR-VT vs GARCH-VT — partial NULL, 12/VIX still best",
+        "Merge agent worktree agent-a4a94301 (1 commits)",
+        "K971: CAViaR-based volatility targeting vs GARCH-VT",
+        "Merge agent worktree agent-aebaf85b (1 commits)",
+        "K970: MF2-GARCH mixed-frequency volatility model",
+        "Merge agent worktree agent-a8a170fc (1 commits)",
+        "K969: Bespoke RV — optimal daily vol proxy weighting",
+        "Merge agent worktree agent-ad709f8d (1 commits)",
+        "Merge agent worktree agent-a0449cfb (1 commits)",
+        "K967: Probabilistic quantile forecasting — GARCH vs CAViaR vs QR",
+        "K964: Earnings season volatility patterns — SPY 20yr analysis",
+        "Merge agent worktree agent-a05e71a3 (1 commits)",
+        "K966: HAR-PD path-dependent RV with 5-min data (pilot)",
+        "Merge branch 'worktree-agent-a03e796a'",
+        "K965: Wild Bootstrap OHR — SPY/ES futures hedging",
+        "Merge branch 'worktree-agent-a93730c7'",
+        "Token optimization: reduce per-cron context consumption ~20k tokens",
+        "E052: VIX global + DeFi + Codex discipline lessons (K943-K954)",
+        "Phase 4: Add structured context handoff templates",
+        "Phase 2-2: Prohibit worktree agents from modifying shared state",
+        "Phase 2-1: merge_worktree.sh handles storage/ conflicts",
+        "Phase 1: Remove duplicate I/O in publisher and memory system",
+        "Merge agent worktree agent-a70641cb (1 commits)",
+        "K954: DeFi Impermanent Loss and Vol Prediction",
+        "K953 HAR-RV Pilot PRELIMINARY — 56 days too few, R²=0.033",
+        "Merge agent worktree agent-a6a41996 (1 commits)",
+        "Fix VIX inconsistency: phase mismatch + VIX update logic",
+        "K953: HAR-RV pilot with 56 days 5-min SPY data (PRELIMINARY)",
+        "K952: Threshold ARMA for vol (Chen et al. 2011) — null result, GJR/MF-GJR still ",
+        "Periodic sync: storage state + released articles + token reports",
+        "K951 Copula Hedge ETF NULL — ETF diversification kills tail dependence",
+        "Merge agent worktree agent-a7e02939 (1 commits)",
+        "K951: Copula-GARCH hedge high-corr ETF pairs — copula does NOT add value"
+      ]
     },
     "experiment": {
-      "label": "🔬 研究實驗",
-      "turns": 2,
-      "api_calls": 10,
-      "total_tokens": 2139637,
-      "cost_usd": 3.6415,
-      "percentage": 0.9
+      "emoji": "🔬",
+      "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
+      "commits": 3,
+      "lines_changed": 3329,
+      "estimated_tokens": 96580,
+      "percentage": 19.4,
+      "commit_messages": [
+        "Add K967 + K970 research articles to draft pool",
+        "K964-K970: 5 experiments + K970 Codex fix",
+        "K960: HAR-RV formal experiment with SPY 5-min data (56 days)"
+      ]
     },
-    "paper": {
-      "label": "📄 論文",
-      "turns": 1,
-      "api_calls": 8,
-      "total_tokens": 1285797,
-      "cost_usd": 2.2054,
-      "percentage": 0.6
+    "article_writing": {
+      "emoji": "✍️",
+      "description": "文章撰寫與發佈",
+      "commits": 3,
+      "lines_changed": 905,
+      "estimated_tokens": 38480,
+      "percentage": 7.7,
+      "commit_messages": [
+        "K954 DeFi IL general article",
+        "K951 copula ETF general article (recreated after worktree loss)",
+        "K949 cross-market research article"
+      ]
     },
-    "maintenance": {
-      "label": "🧹 維護/優化",
-      "turns": 1,
-      "api_calls": 5,
-      "total_tokens": 525651,
-      "cost_usd": 1.17,
-      "percentage": 0.3
+    "research_program": {
+      "emoji": "📋",
+      "description": "研究計畫/規範更新",
+      "commits": 6,
+      "lines_changed": 5061,
+      "estimated_tokens": 32244,
+      "percentage": 6.5,
+      "commit_messages": [
+        "Fix AGENTS.md: .claude/ → .agents/, CLAUDE.md → AGENTS.md",
+        "Sync AGENTS.md with CLAUDE.md (all today's changes)",
+        "Clarify CLAUDE.md ↔ research_program.md responsibilities",
+        "CLAUDE.md: deduplicate + point to research_program.md for details",
+        "Fix outdated info in CLAUDE.md (6 corrections)",
+        "Error log: VIX missing from _market_daily + timezone fix"
+      ]
     },
-    "member_qa": {
-      "label": "❓ 會員問答",
-      "turns": 1,
-      "api_calls": 2,
-      "total_tokens": 185134,
-      "cost_usd": 0.3075,
-      "percentage": 0.1
+    "latex_content_fix": {
+      "emoji": "🔧",
+      "description": "LaTeX/內容批量修復（讀寫大型 JSON）",
+      "commits": 1,
+      "lines_changed": 16,
+      "estimated_tokens": 14448,
+      "percentage": 2.9,
+      "commit_messages": [
+        "Fix GARCH equation rendering in K940 article (mile_0976c5cc)"
+      ]
+    },
+    "codex_review": {
+      "emoji": "🤖",
+      "description": "Codex 審查",
+      "commits": 3,
+      "lines_changed": 49,
+      "estimated_tokens": 12392,
+      "percentage": 2.5,
+      "commit_messages": [
+        "K954 DeFi IL (Codex reviewed) — IL approx perfect but prediction fails",
+        "K952 TARMA NULL (Codex reviewed) — GARCH recursion beats TARMA",
+        "Codex review K940/K944: GARCH-feature contamination + K944 VIX lookahead"
+      ]
+    },
+    "knowledge_index": {
+      "emoji": "📚",
+      "description": "知識索引建立/更新",
+      "commits": 2,
+      "lines_changed": 440,
+      "estimated_tokens": 11520,
+      "percentage": 2.3,
+      "commit_messages": [
+        "Phase 3-1: Targeted source loading in knowledge index update",
+        "Periodic sync: token report + storage state + knowledge index 4600"
+      ]
+    },
+    "ops_patrol": {
+      "emoji": "🛡️",
+      "description": "平台巡檢",
+      "commits": 1,
+      "lines_changed": 71,
+      "estimated_tokens": 6852,
+      "percentage": 1.4,
+      "commit_messages": [
+        "Fix paper count mismatch: add 3 missing papers to research_program.md + health c"
+      ]
+    },
+    "daily_update": {
+      "emoji": "📊",
+      "description": "每日策略更新/績效重算",
+      "commits": 2,
+      "lines_changed": 14,
+      "estimated_tokens": 6084,
+      "percentage": 1.2,
+      "commit_messages": [
+        "Fix daily_update timing (22:03→00:03 UTC) + codex:rescue usage guide",
+        "Fix: add VIX to _market_daily in daily_update.py"
+      ]
+    },
+    "feed_ops": {
+      "emoji": "📡",
+      "description": "Feed 發佈/同步操作",
+      "commits": 1,
+      "lines_changed": 12,
+      "estimated_tokens": 4096,
+      "percentage": 0.8,
+      "commit_messages": [
+        "Phase 3-2: Avoid loading full feed.json for failed sync retry"
+      ]
+    },
+    "periodic_sync": {
+      "emoji": "🔄",
+      "description": "定期狀態同步（低 token）",
+      "commits": 3,
+      "lines_changed": 278,
+      "estimated_tokens": 3556,
+      "percentage": 0.7,
+      "commit_messages": [
+        "Session state update + notifications",
+        "Resolve session_state conflict",
+        "Resolve session_state merge conflict"
+      ]
+    },
+    "skill_process": {
+      "emoji": "⚙️",
+      "description": "流程/技能規範更新",
+      "commits": 1,
+      "lines_changed": 20,
+      "estimated_tokens": 3120,
+      "percentage": 0.6,
+      "commit_messages": [
+        "Clarify brief vs preamble relationship, remove overlap"
+      ]
     }
-  },
-  "sessions": [
-    {
-      "input_tokens": 381,
-      "output_tokens": 57915,
-      "cache_creation": 4002896,
-      "cache_read": 98674402,
-      "total_tokens": 102735594,
-      "api_calls": 270,
-      "cost_usd": 227.4152,
-      "session_id": "123b11a3",
-      "start": "2026-04-07T00:18:45.134000+00:00",
-      "end": "2026-04-07T08:26:51.110000+00:00",
-      "duration_min": 488.1
-    },
-    {
-      "input_tokens": 52751,
-      "output_tokens": 69296,
-      "cache_creation": 809912,
-      "cache_read": 43418707,
-      "total_tokens": 44350666,
-      "api_calls": 266,
-      "cost_usd": 86.3024,
-      "session_id": "6ac56565",
-      "start": "2026-04-07T06:16:58.324000+00:00",
-      "end": "2026-04-07T07:25:34.871000+00:00",
-      "duration_min": 68.6
-    },
-    {
-      "input_tokens": 6387,
-      "output_tokens": 45452,
-      "cache_creation": 760403,
-      "cache_read": 16641827,
-      "total_tokens": 17454069,
-      "api_calls": 192,
-      "cost_usd": 42.725,
-      "session_id": "11ffc667",
-      "start": "2026-04-07T08:39:22.887000+00:00",
-      "end": "2026-04-07T11:47:22.113000+00:00",
-      "duration_min": 188.0
-    },
-    {
-      "input_tokens": 4520,
-      "output_tokens": 41291,
-      "cache_creation": 482678,
-      "cache_read": 18828416,
-      "total_tokens": 19356905,
-      "api_calls": 164,
-      "cost_usd": 40.4575,
-      "session_id": "f8481e78",
-      "start": "2026-04-07T07:31:48.725000+00:00",
-      "end": "2026-04-07T08:43:00.683000+00:00",
-      "duration_min": 71.2
-    },
-    {
-      "input_tokens": 6,
-      "output_tokens": 58,
-      "cache_creation": 67222,
-      "cache_read": 23294,
-      "total_tokens": 90580,
-      "api_calls": 2,
-      "cost_usd": 1.2998,
-      "session_id": "3c49abbd",
-      "start": "2026-04-07T07:30:26.670000+00:00",
-      "end": "2026-04-07T07:30:33.075000+00:00",
-      "duration_min": 0.1
-    }
-  ],
-  "top_turns": [
-    {
-      "prompt": "",
-      "category": "🌐 文獻/搜尋",
-      "api_calls": 261,
-      "total_tokens": 50677100,
-      "cost_usd": 96.0562,
-      "tools": [
-        "Bash",
-        "CronList",
-        "Edit",
-        "Grep",
-        "Read",
-        "RemoteTrigger",
-        "ToolSearch",
-        "WebSearch",
-        "Write"
-      ],
-      "timestamp": ""
-    },
-    {
-      "prompt": "繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動 (3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出",
-      "category": "🔬 研究 cron",
-      "api_calls": 5,
-      "total_tokens": 2080904,
-      "cost_usd": 31.986,
-      "tools": [
-        "Agent"
-      ],
-      "timestamp": "2026-04-07T06:24"
-    },
-    {
-      "prompt": "為什麼vix在投資建議面板和文章內的數值不同？\n從底層邏輯、流程、程式去檢討修正",
-      "category": "✍️ 文章",
-      "api_calls": 32,
-      "total_tokens": 12617839,
-      "cost_usd": 19.943,
-      "tools": [
-        "Bash",
-        "Edit",
-        "Grep",
-        "Read"
-      ],
-      "timestamp": "2026-04-07T04:31"
-    },
-    {
-      "prompt": "繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動 (3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出",
-      "category": "🔬 研究 cron",
-      "api_calls": 30,
-      "total_tokens": 10228003,
-      "cost_usd": 16.2597,
-      "tools": [
-        "Agent",
-        "Bash",
-        "Edit",
-        "Grep",
-        "Read"
-      ],
-      "timestamp": "2026-04-07T00:24"
-    },
-    {
-      "prompt": "目前的 @CLAUDE.md 是不是有重複的指示？資訊是不是有過時而非最新？是不是需要明確分類指示？ 但前提是不能漏失任何要求\\\n@research_program.md 是不是也有重複或過時或需要明確分類的需求？當然前提也是不能漏失資訊和",
-      "category": "❔ 其他",
-      "api_calls": 34,
-      "total_tokens": 6125758,
-      "cost_usd": 14.3955,
-      "tools": [
-        "Bash",
-        "Grep",
-        "Read",
-        "TaskCreate",
-        "TaskUpdate",
-        "ToolSearch",
-        "Write"
-      ],
-      "timestamp": "2026-04-07T06:51"
-    },
-    {
-      "prompt": "https://volpred.zeabur.app/reports/mile_0976c5cc\n\nGarch方程式渲染錯誤",
-      "category": "🔍 探索/查詢",
-      "api_calls": 13,
-      "total_tokens": 4935117,
-      "cost_usd": 14.2255,
-      "tools": [
-        "Bash",
-        "Read"
-      ],
-      "timestamp": "2026-04-07T04:22"
-    },
-    {
-      "prompt": "為什麼crontab沒執行？ 資料沒下載更新？",
-      "category": "🔍 探索/查詢",
-      "api_calls": 3,
-      "total_tokens": 968620,
-      "cost_usd": 12.6385,
-      "tools": [
-        "Bash"
-      ],
-      "timestamp": "2026-04-07T00:18"
-    },
-    {
-      "prompt": "你確定不影響運行與可控性？",
-      "category": "❔ 其他",
-      "api_calls": 33,
-      "total_tokens": 7321590,
-      "cost_usd": 12.4465,
-      "tools": [
-        "AskUserQuestion",
-        "Bash",
-        "Edit",
-        "Grep",
-        "Read",
-        "ToolSearch"
-      ],
-      "timestamp": "2026-04-07T07:03"
-    },
-    {
-      "prompt": "查查看程式碼 看看執行過程最可能重複或大量的部分\n\n\n\n\n適用於 1m 49s\n我看完程式碼後，最可能重複或大量執行的熱點主要不是前端頁面本身，而是「文章發佈/同步」、「memory 寫入」、「知識索引」、「daily update fan",
-      "category": "📚 知識索引",
-      "api_calls": 37,
-      "total_tokens": 2866581,
-      "cost_usd": 12.4186,
-      "tools": [
-        "Agent",
-        "Bash",
-        "ExitPlanMode",
-        "Grep",
-        "Read",
-        "ToolSearch",
-        "Write"
-      ],
-      "timestamp": "2026-04-07T06:16"
-    },
-    {
-      "prompt": "知識索引更新",
-      "category": "📚 知識索引",
-      "api_calls": 7,
-      "total_tokens": 3018685,
-      "cost_usd": 12.0051,
-      "tools": [
-        "Bash"
-      ],
-      "timestamp": "2026-04-07T07:37"
-    },
-    {
-      "prompt": "好 但在那之前 @AGENTS.md 中出現了 CLAUDE.md的文字 應該修正",
-      "category": "🐛 修復",
-      "api_calls": 22,
-      "total_tokens": 5739870,
-      "cost_usd": 9.2839,
-      "tools": [
-        "Bash",
-        "Edit",
-        "ExitPlanMode",
-        "Grep",
-        "Read"
-      ],
-      "timestamp": "2026-04-07T07:23"
-    },
-    {
-      "prompt": "建立詳細計劃 並在建立明確回滾點後執行",
-      "category": "❔ 其他",
-      "api_calls": 29,
-      "total_tokens": 3774825,
-      "cost_usd": 9.2838,
-      "tools": [
-        "Bash",
-        "Edit",
-        "ExitPlanMode",
-        "Grep",
-        "Read",
-        "ToolSearch",
-        "Write"
-      ],
-      "timestamp": "2026-04-07T08:25"
-    },
-    {
-      "prompt": "繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動 (3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出",
-      "category": "🔬 研究 cron",
-      "api_calls": 12,
-      "total_tokens": 5226660,
-      "cost_usd": 8.2183,
-      "tools": [
-        "Agent",
-        "Bash"
-      ],
-      "timestamp": "2026-04-07T08:24"
-    },
-    {
-      "prompt": "資料時間不對",
-      "category": "🔍 探索/查詢",
-      "api_calls": 15,
-      "total_tokens": 4950224,
-      "cost_usd": 8.0966,
-      "tools": [
-        "Bash"
-      ],
-      "timestamp": "2026-04-07T00:20"
-    },
-    {
-      "prompt": "繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 啟動 agent 執行 (3) 完成後從 research_program.md 補充 next_tasks (4) next_tasks 空了才",
-      "category": "🔬 研究 cron",
-      "api_calls": 14,
-      "total_tokens": 1191595,
-      "cost_usd": 8.0039,
-      "tools": [
-        "Agent",
-        "Bash"
-      ],
-      "timestamp": "2026-04-07T10:21"
-    }
-  ]
+  }
 }
