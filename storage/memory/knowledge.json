@@ -22041,5 +22041,38 @@
     "data_source": "yfinance SPY/QQQ/GLD/0050.TW/VIX 2010-2026",
     "created_at": "2026-04-07T14:52:37.712105+00:00",
     "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407171555_k984",
+    "experiment_id": "K984",
+    "title": "K984: SPY→TW50 Lead-Lag Strategy — NULL, 台股交易成本殺死 alpha",
+    "content": "[提出: K983 follow-up, 執行: Claude] K983 發現 SPY→TW50 r=0.40 OOS R²=15.9%。K984 測試能否轉化為交易策略。結果：所有 lead-lag 策略扣除台股成本（~0.585% round trip）後全敗。OOS Sharpe: VT Only 1.710, B&H 1.208, Proportional 0.782, Threshold 0.655, VT+Overlay 0.534, Binary -0.139。Root cause：日頻信號 → 122-2700 筆交易 vs VT 僅 78 筆。Binary MDD -97.8%。結論：Lead-lag 統計上真實但經濟上不可交易（台股成本太高）。Smooth-weight（8.63/VIX）再次確認為高成本市場最優設計。Lead-lag 可能在期貨市場（TX 成本低）有價值。",
+    "tags": [
+      "lead-lag",
+      "SPY",
+      "0050.TW",
+      "transaction-cost",
+      "NULL",
+      "smooth-weight"
+    ],
+    "data_source": "yfinance SPY + 0050.TW 2010-2026",
+    "created_at": "2026-04-07T17:15:55.034798+00:00",
+    "experiment_date": "2026-04-08"
+  },
+  {
+    "id": "know_20260407171555_k987",
+    "experiment_id": "K987",
+    "title": "K987: VIX² Nonlinearity ★ — Quadratic OOS R²=0.258 vs Linear 0.202, Spline QLIKE=1.464 best",
+    "content": "[提出: K979 side finding, 執行: Claude] SPY 2006-2026, IS 3269, OOS 1824。系統測試 VIX 非線性形式。★ 核心發現：(1) M2 Quadratic（VIX+VIX²）OOS R²=0.258 最高，顯著優於 linear 0.202。(2) M5 Spline QLIKE=1.464 最低（最佳 proxy-robust 指標）。(3) M7 MF2-VIX² QLIKE=1.486 接近 spline。(4) M1/M3/M6 的 QLIKE 異常大（45k/31k/16k），可能因低 VIX 期預測值太小導致 log 爆炸——需後續檢查。(5) RESET test 全部拒絕線性（p<1e-16），確認非線性存在。結論：VIX-vol 關係是凸性的，VIX² 項有顯著增量。最佳形式：spline 或 quadratic。建議整合到 vol forecasting pipeline。",
+    "tags": [
+      "VIX-nonlinearity",
+      "quadratic",
+      "spline",
+      "convexity",
+      "significant"
+    ],
+    "data_source": "yfinance SPY + ^VIX 2006-2026",
+    "created_at": "2026-04-07T17:15:55.034798+00:00",
+    "experiment_date": "2026-04-08"
   }
 ]
