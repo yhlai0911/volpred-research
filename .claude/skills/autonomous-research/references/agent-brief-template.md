@@ -19,14 +19,15 @@ Agent 完成後，主線程根據動機和結果做解讀，不是照搬 agent �
 - 如果結果是正面/負面，分別代表什麼？
 - 用戶的關切是什麼？（如果有）
 
-## 已知約束
+## 此實驗特有的約束
 
-[從 error_log/preamble 提取的適用規則——明確列出，不要說「參考 error_log」]
+[只列「這次實驗」需要特別注意的規則，不重複 preamble 的通用規則]
+[通用方法論（模型-target 匹配、統計門檻、防錯規則）已在 experiment-preamble.md 中，不需重複]
 
 例：
-- 此實驗需注意的 error log 規則：DM test 用 `strategy_dm_test`、0050.TW 必須 `clean_tw50_data`
-- 統計門檻：Harvey (2016) t>3.0
-- 模型-Target 匹配：GARCH 用 r² 評估、HAR 用 RV 評估
+- 此實驗用 0050.TW → 必須 `clean_tw50_data`（preamble 沒有這條，是資產特有的）
+- 此實驗做期貨避險 → 注意 roll gap 處理（preamble 第 4 節有，但此處強調因為本實驗會碰到）
+- 此實驗的 baseline 是 K687 的 BH 50/50（Sharpe 0.545）→ 超過 1.09 就可疑
 
 ## 成功標準
 
@@ -50,5 +51,12 @@ Agent 完成後，主線程根據動機和結果做解讀，不是照搬 agent �
 
 [列出 agent 必須讀取的檔案路徑]
 
-- `.claude/skills/autonomous-research/references/experiment-preamble.md`（方法論規則）
+- `.claude/skills/autonomous-research/references/experiment-preamble.md`（通用方法論規則——模型-target 匹配、統計門檻、防錯規則。此模板的「特有約束」是補充，不是替代）
 - [其他相關的 skill 或參考文件路徑]
+
+---
+
+**本模板與 experiment-preamble.md 的關係：**
+- **Preamble**（靜態）= agent 必須遵守的通用方法論規則（不隨實驗變化）
+- **Brief**（動態）= 這次實驗的具體任務 + 動機 + 特有約束（每次不同）
+- Agent prompt 的結構：`[preamble 全文] + [填好的 brief] + [結尾提醒用 result-template 格式回報]`
