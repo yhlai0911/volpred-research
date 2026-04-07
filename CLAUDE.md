@@ -510,6 +510,17 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 **使用原則**：針對特定目標，不掃全專案。不要用 `--scope working-tree`。不要無目標地「讓 Codex 看看」。
 
+**`/codex:rescue` 使用時機（必須遵守）**：
+- **Bug 改很多次還是錯** → 停下來，用 `/codex:rescue` 換 Codex 接手重新分析
+- **程式越修越壞** → 不要再修，直接 `/codex:rescue`
+- **多檔案/邏輯複雜** → 用 Codex 的全局視角
+- **Token 快用完**（避免思路斷掉）→ 趁還有 context 讓 Codex 接手
+- **ML/非標準模型代碼審查** → 實驗完成後必須 `/codex:rescue` 審查再記錄 knowledge
+
+**一句話：卡住 or 快沒 token → 直接 `/codex:rescue`，不要繼續自己掙扎**
+
+記得開啟 `--full-auto` 模式讓 Codex 自主修復。
+
 ### 研究主題來源（必須多元）
 1. **Codex/Gemini 建議**：每 5-10 個實驗主動問一次
 2. **用戶指定**：優先執行，必須立刻寫入 research_program.md
@@ -576,7 +587,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 ```
 0 15 * * 1-5   collect_tw_data.py      # 台股收盤後 15:00
 30 5 * * 2-6   collect_us_data.py      # 美股收盤後 05:30
-3 22 * * 1-5   daily_update.py         # 美股收盤後 22:03 UTC（台灣 06:03），用當日收盤數據
+3 0 * * 2-6    daily_update.py         # 美股收盤後 00:03 UTC（台灣 08:03），確保 yfinance 數據已 finalize
 3 */2 * * *    release-pool-by-settings # 文章池定時釋出：每 2 小時 1 篇
 ```
 
