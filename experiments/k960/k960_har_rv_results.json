@@ -1,0 +1,133 @@
+{
+  "experiment_id": "K960",
+  "title": "HAR-RV Formal Experiment with SPY 5-min Realized Variance",
+  "date": "2026-04-07",
+  "data_source": "yfinance 5-min intraday (SPY)",
+  "data_period": "2026-01-14 to 2026-04-06",
+  "n_days": 56,
+  "n_oos": 19,
+  "references": [
+    "Corsi (2009) J.Fin.Econometrics 7(2):174-196",
+    "Patton (2011) J.Econometrics 160(1):246-256",
+    "K188: HAR on daily data loses to GARCH",
+    "K744: RV AC(1)=0.423 vs daily r\u00b2 AC(1)=0.076"
+  ],
+  "part_a_descriptive": {
+    "rv_mean": 5.565089824674222e-05,
+    "rv_std": 3.082651666010423e-05,
+    "rv_min": 4.108004105062668e-06,
+    "rv_max": 0.00012435853062227694,
+    "rv_skew": 0.3443489531711797,
+    "rv_kurtosis": -0.5581726268583691,
+    "mean_annualized_vol_pct": 11.296218962396534,
+    "rv_ac1": 0.29081577427034305,
+    "rv_ac5": 0.11239923005488002,
+    "r2_ac1": -0.040056858190523494,
+    "rv_to_r2_ac_ratio": -7.260074489295398,
+    "ljung_box_lag5_pvalue": 0.20738141507974153,
+    "adf_statistic": -5.379883727613292,
+    "adf_pvalue": 3.7327978913693006e-06,
+    "rv_stationary": true
+  },
+  "part_b_har_estimation": {
+    "method": "OLS (HAR-RV is linear regression)",
+    "intercept": 1.6490520372723254e-05,
+    "beta_d": -0.035457902033910506,
+    "beta_w": -0.19730621786757566,
+    "beta_m": 1.0587259522141073,
+    "insample_r2": 0.07677381115293325,
+    "t_stats": {
+      "Intercept": 0.43841545952977057,
+      "beta_d": -0.18434102734039048,
+      "beta_w": -0.46717550512788814,
+      "beta_m": 1.5524655928638482
+    },
+    "p_values": {
+      "Intercept": 0.6643338534802079,
+      "beta_d": 0.8550289631909453,
+      "beta_w": 0.6438655877678654,
+      "beta_m": 0.13139716309904004
+    }
+  },
+  "part_c_oos_evaluation": {
+    "oos_period": "2026-03-09 to 2026-04-02",
+    "n_oos": 19,
+    "har_rv": {
+      "MSE": 1.2413826778696636e-09,
+      "RMSE": 3.5233260959917744e-05,
+      "MAE": 2.970463273053196e-05,
+      "QLIKE": 0.11810172487033486,
+      "OOS_R2_vs_naive": 0.2430458784252124,
+      "MZ_alpha": 9.330592601303108e-05,
+      "MZ_beta": -0.3583070828586048,
+      "MZ_R2": 0.049372530952435545,
+      "spearman_rho": -0.15438596491228068,
+      "spearman_pvalue": 0.5279958428489309
+    },
+    "naive": {
+      "MSE": 1.6399708284658757e-09,
+      "RMSE": 4.04965532911861e-05,
+      "MAE": 2.9991846441957376e-05,
+      "QLIKE": 0.17981201374906985
+    }
+  },
+  "part_d_cross_model": {
+    "n_common_obs": 19,
+    "patton_qlike_on_r2": {
+      "HAR_RV": 1.4548772052660233,
+      "GARCH": 1.6306399134952574,
+      "GJR_GARCH": 1.7915077479130708,
+      "ranking": [
+        "HAR-RV",
+        "GARCH",
+        "GJR-GARCH"
+      ]
+    },
+    "spearman_on_r2": {
+      "HAR_RV": -0.10526315789473684,
+      "GARCH": -0.019298245614035085,
+      "GJR_GARCH": 0.0543859649122807
+    },
+    "dm_test": {
+      "HAR_vs_GARCH": {
+        "DM_stat": -1.3548958409152023,
+        "p_value": 0.19221278052930701
+      },
+      "HAR_vs_GJR": {
+        "DM_stat": -1.3268189451818673,
+        "p_value": 0.20115571796587672
+      },
+      "caveat": "Only 19 observations \u2014 DM test has very low power"
+    }
+  },
+  "part_e_vt_pilot": {
+    "n_days": 18,
+    "sigma_target": 0.15,
+    "mean_weight": 1.075333062564943,
+    "vt_cum_return_pct": -4.076269831329194,
+    "bh_cum_return_pct": -3.4290495597851023,
+    "vt_sharpe": -2.6971102028747844,
+    "bh_sharpe": -2.5412423496925376,
+    "vt_ann_vol_pct": 20.77901397455795,
+    "bh_ann_vol_pct": 18.5301182287575,
+    "caveat": "NOT a valid backtest \u2014 only a directional pilot with very short sample"
+  },
+  "limitations": [
+    "56 days of 5-min data is extremely small for robust inference",
+    "OOS period is only 19 days (ideal: >= 252)",
+    "HAR monthly component estimated from only 22 days of history",
+    "IS for OLS initially only 14 observations \u2014 parameter estimates unstable",
+    "DM test with this sample size has very low power \u2014 cannot meet Harvey (2016) |t|>3.0 threshold",
+    "VT strategy pilot is directional only, not a valid backtest",
+    "No microstructure noise correction (e.g., Hansen-Lunde subsampling) applied to RV",
+    "Single asset (SPY) \u2014 generalizability unknown"
+  ],
+  "conclusions": [
+    "RV AC(1)=0.291 confirms strong persistence in intraday volatility (vs r\u00b2 AC(1)=-0.040)",
+    "HAR-RV full-sample R\u00b2=0.077, OOS R\u00b2 vs naive=0.243",
+    "HAR-RV QLIKE=0.1181 vs Naive QLIKE=0.1798",
+    "Cross-model Patton QLIKE on r\u00b2: HAR-RV best (1.4549)",
+    "All results carry severe small-sample caveat (56 days, ~19 OOS obs)",
+    "Need 1+ year of 5-min data for publishable HAR-RV results"
+  ]
+}
