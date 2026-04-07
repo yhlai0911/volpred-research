@@ -4,6 +4,8 @@
 
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
+| 2026-04-07 | **VIX 未寫入 _market_daily** | 網站策略面板 VIX 數值過時/不更新 | `daily_update.py` 寫入 `_market_daily` 時漏了 VIX 欄位，前端讀到 null 就顯示舊值 | 加入 `"vix": round(vix_level, 2)` 到 `_market_daily` dict。教訓：**先查根因再修，不要先手動 re-run** |
+| 2026-04-07 | **時區缺失** | StrategyPanel 時間未顯示台灣時區 | `toLocaleString` 缺少 `timeZone: 'Asia/Taipei'` | 加入 timeZone 參數，同時修 FeedBrowser |
 | 2026-04-06 | **Worktree 腳本遺失（3次）** | K923/K924/K932 的 .py 腳本在 worktree 清理時永久遺失 | Agent 在 worktree 寫檔案但沒 commit → `git worktree remove --force` 刪除一切 | (1) 建立 `scripts/merge_worktree.sh` 安全合併腳本 (2) 禁止 `--force` remove (3) Agent prompt 必須包含 commit 指令 (4) 更新 SKILL.md + CLAUDE.md |
 | 2026-03-16 | Thinking page crash | experiment_ids undefined → 頁面閃退 | experiment_ids 欄位在部分 entry 不存在 | 加 optional chaining `?.` + `&&` guard |
 | 2026-03-16 | Feed 文章缺 content | 網頁顯示空白文章 | `record_and_publish.py` 只用 `--thinking` 當 content | 個別檔案 + feed.json 都要有完整 Markdown content |
