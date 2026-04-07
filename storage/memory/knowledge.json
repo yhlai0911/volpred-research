@@ -21989,5 +21989,22 @@
     "data_source": "yfinance SPY + ^VIX 2006-2026",
     "created_at": "2026-04-07T13:56:53.370595+00:00",
     "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407140801_k981",
+    "experiment_id": "K981",
+    "title": "K981: HAR + Wavelet — NULL, wavelet IS significant but OOS zero (overfitting)",
+    "content": "[提出: ScienceDirect 2026 wavelet vol, 執行: Claude] SPY 2006-2026。Haar 和 Daubechies-4 wavelet 分解 r² 為 5 個頻率帶（D1~D5 + A5）。IS: D2/D4/D5 wavelet energy |t|>3 顯著。OOS: WHAR_db4 QLIKE=1.801 vs HAR 1.541（DM t=5.98 顯著更差）。WHAR+HAR 混合更差（474.48）。Haar wavelet 更差（50.19）。原因：(1) wavelet dyadic scales (2/4/8/16/32 天) 不匹配金融日曆 (1/5/22 天) (2) IS 能量特徵 overfit (3) HAR 的 fixed-window averaging 本身就是最穩健的多尺度方法。GJR-GARCH 仍是日頻 r² 最佳 (QLIKE=1.531)。結論：HAR > WHAR。簡單勝複雜。",
+    "tags": [
+      "wavelet",
+      "HAR",
+      "multi-scale",
+      "NULL",
+      "overfitting",
+      "Daubechies"
+    ],
+    "data_source": "yfinance SPY 2006-2026",
+    "created_at": "2026-04-07T14:08:01.988239+00:00",
+    "experiment_date": "2026-04-07"
   }
 ]
