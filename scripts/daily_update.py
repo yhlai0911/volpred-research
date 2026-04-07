@@ -794,21 +794,45 @@ def main():
     pt_file.write_text(json.dumps(pt, indent=2, ensure_ascii=False))
 
     # --- Check if data is fresh (skip publish if spy_date unchanged since last run) ---
+    # Also check VIX consistency: if VIX changed, update existing article
     feed_path = Path("storage/reports/feed.json")
     last_spy_date = None
+    last_vix = None
     if feed_path.exists():
         feed = json.loads(feed_path.read_text())
         for p in feed:
-            if p.get("phase") == "daily_update" and p.get("details", {}).get("spy_date"):
+            if p.get("phase") == "daily_recommendation" and p.get("details", {}).get("spy_date"):
                 last_spy_date = p["details"]["spy_date"]
+                last_vix = p["details"].get("vix_level")
                 break
         if last_spy_date == spy_date:
-            print(f"  ⚠️ 數據未更新（spy_date={spy_date} 與上次相同），跳過發布")
+            # Check if VIX changed — if so, update existing article in-place
+            if last_vix is not None and vix_level is not None and abs(last_vix - round(vix_level, 2)) > 0.01:
+                print(f"  ⚠️ VIX 已更新（{last_vix}→{round(vix_level, 2)}），更新現有文章")
+                for p in feed:
+                    if p.get("phase") == "daily_recommendation" and p.get("details", {}).get("spy_date") == spy_date:
+                        # Update title and details with new VIX
+                        regime_name, _, _ = _vix_regime(vix_level)
+                        vix_display = round(vix_level, 2)
+                        p["title"] = f"每日策略建議：VIX {vix_display}（{regime_name}）— {today}"
+                        p["details"]["vix_level"] = vix_display
+                        # Update individual report JSON too
+                        report_path = Path(f"storage/reports/{p['id']}.json")
+                        if report_path.exists():
+                            report = json.loads(report_path.read_text())
+                            report["title"] = p["title"]
+                            if "details" in report:
+                                report["details"]["vix_level"] = vix_display
+                            report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False))
+                        break
+                feed_path.write_text(json.dumps(feed, indent=2, ensure_ascii=False))
+            else:
+                print(f"  ⚠️ 數據未更新（spy_date={spy_date}，VIX={last_vix}），跳過發布")
             # Still do Supabase sync + metrics recalc, just skip feed publish
             feed = feed  # keep existing
         else:
             # Remove old daily_update for today
-            feed = [p for p in feed if not (p.get("phase") == "daily_update" and today in p.get("title", ""))]
+            feed = [p for p in feed if not (p.get("phase") == "daily_recommendation" and today in p.get("title", ""))]
             feed_path.write_text(json.dumps(feed, indent=2, ensure_ascii=False))
     else:
         feed = []
