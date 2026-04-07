@@ -141,9 +141,11 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
             git merge --abort 2>/dev/null || true
 
             # 嘗試用 checkout 方式複製檔案
-            echo "  [ACTION] 嘗試直接複製 experiments/ 檔案..."
+            echo "  [ACTION] 嘗試直接複製 experiments/ 和 storage/ 檔案..."
             local exp_files
             exp_files=$(cd "$wt_path" && git diff --name-only "$main_branch" -- experiments/ 2>/dev/null || true)
+
+            local copied_any=false
 
             if [[ -n "$exp_files" ]]; then
                 echo "$exp_files" | while IFS= read -r f; do
@@ -155,17 +157,81 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
                     fi
                 done
                 git add experiments/ 2>/dev/null || true
-                git commit -m "Copy experiment files from worktree $wt_name (merge conflict fallback)
+                copied_any=true
+            fi
+
+            # --- Merge storage/reports/{id}.json (individual reports, safe to copy) ---
+            local report_files
+            report_files=$(cd "$wt_path" && git diff --name-only "$main_branch" -- storage/reports/ 2>/dev/null | grep -v 'feed\.json' || true)
+            if [[ -n "$report_files" ]]; then
+                echo "  [ACTION] 複製 individual report JSON..."
+                echo "$report_files" | while IFS= read -r f; do
+                    if [[ -f "$wt_path/$f" ]]; then
+                        local dir=$(dirname "$f")
+                        mkdir -p "$MAIN_DIR/$dir"
+                        cp "$wt_path/$f" "$MAIN_DIR/$f"
+                        echo "      Copied: $f"
+                    fi
+                done
+                git add storage/reports/ 2>/dev/null || true
+                copied_any=true
+            fi
+
+            # --- Merge storage/memory/ JSON arrays (knowledge, experiments, etc.) ---
+            # Strategy: use jq to union both sides by unique key, avoiding data loss
+            local memory_files
+            memory_files=$(cd "$wt_path" && git diff --name-only "$main_branch" -- storage/memory/ 2>/dev/null || true)
+            if [[ -n "$memory_files" ]] && command -v jq &>/dev/null; then
+                echo "  [ACTION] 合併 storage/memory/ JSON 檔案..."
+                echo "$memory_files" | while IFS= read -r f; do
+                    local main_file="$MAIN_DIR/$f"
+                    local wt_file="$wt_path/$f"
+                    if [[ -f "$wt_file" ]] && [[ -f "$main_file" ]]; then
+                        # Detect unique key: item_id for knowledge, id for others, entry_id for log
+                        local key="id"
+                        if jq -e '.[0].item_id' "$main_file" &>/dev/null; then
+                            key="item_id"
+                        elif jq -e '.[0].entry_id' "$main_file" &>/dev/null; then
+                            key="entry_id"
+                        fi
+                        # Union: main entries + worktree entries not already in main
+                        local merged
+                        merged=$(jq -s --arg key "$key" '
+                            (.[0] | map(.[$key]) | map(select(. != null))) as $existing_ids |
+                            .[0] + [.[1][] | select(.[$key] as $id | ($existing_ids | index($id)) == null)]
+                        ' "$main_file" "$wt_file" 2>/dev/null) || true
+                        if [[ -n "$merged" ]]; then
+                            echo "$merged" > "$main_file"
+                            echo "      Merged: $f (union by .$key)"
+                        else
+                            echo "      [WARN] jq merge failed for $f, keeping main version"
+                        fi
+                    elif [[ -f "$wt_file" ]] && [[ ! -f "$main_file" ]]; then
+                        local dir=$(dirname "$f")
+                        mkdir -p "$MAIN_DIR/$dir"
+                        cp "$wt_file" "$main_file"
+                        echo "      Copied (new): $f"
+                    fi
+                done
+                git add storage/memory/ 2>/dev/null || true
+                copied_any=true
+            elif [[ -n "$memory_files" ]]; then
+                echo "  [WARN] jq not found, skipping storage/memory/ merge"
+                echo "         Install jq to enable safe JSON array merging"
+            fi
+
+            if $copied_any; then
+                git commit -m "Copy experiment + storage files from worktree $wt_name (merge conflict fallback)
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/null || true
-                echo "  [OK] 檔案複製成功"
+                echo "  [OK] 檔案複製/合併成功"
 
                 # 現在安全移除
                 git worktree remove --force "$wt_path" 2>/dev/null || true
                 git branch -D "$branch" 2>/dev/null || true
                 echo "  [DONE] 已移除 worktree"
             else
-                echo "  [SKIP] 沒有 experiments/ 檔案，保留 worktree 待手動處理"
+                echo "  [SKIP] 沒有可複製的檔案，保留 worktree 待手動處理"
             fi
         fi
     else
