@@ -503,8 +503,8 @@ def build_index():
     print(f"  Storage: {LANCE_DIR}")
 
 
-def _load_all_docs() -> list[dict]:
-    """Load all documents from all sources (shared by build and update)."""
+def _load_all_docs(only_sources: set[str] | None = None) -> list[dict]:
+    """Load documents from sources. If only_sources is set, skip others."""
     all_docs = []
     loaders = [
         ("knowledge", load_knowledge),
@@ -523,14 +523,23 @@ def _load_all_docs() -> list[dict]:
         ("research_archive", load_research_archive),
     ]
     for name, loader in loaders:
+        if only_sources is not None and name not in only_sources:
+            continue
         docs = loader()
         print(f"  {name}: {len(docs)} docs")
         all_docs.extend(docs)
+    if only_sources is not None:
+        skipped = len(loaders) - (len(only_sources) if only_sources else 0)
+        print(f"  (skipped {skipped} unchanged sources)")
     return all_docs
 
 
-def update_index():
-    """Incremental update: only embed and add NEW documents."""
+def update_index(changed_sources: set[str] | None = None):
+    """Incremental update: only embed and add NEW documents.
+
+    If changed_sources is provided, only load and check those sources.
+    Stale detection is also scoped to changed sources only.
+    """
     db = lancedb.connect(str(LANCE_DIR))
 
     # Check if table exists
@@ -551,21 +560,49 @@ def update_index():
         build_index()
         return
 
-    existing_hashes = set(existing_df["doc_hash"].tolist())
-    print(f"  Existing index: {len(existing_hashes)} documents")
+    # Scope existing hashes to changed sources only (if specified)
+    if changed_sources is not None and "source" in existing_df.columns:
+        # Map loader names to source values in the index
+        # Some loaders produce docs with different source names
+        source_values = set()
+        source_mapping = {
+            "knowledge": {"knowledge"},
+            "thinking": {"thinking"},
+            "experiments": {"experiment"},
+            "storage_experiments": {"experiment"},
+            "experiences": {"experience"},
+            "questions": {"question"},
+            "research_log": {"research_log"},
+            "feed": {"feed"},
+            "references": {"reference"},
+            "paper": {"paper"},
+            "notifications": {"notification"},
+            "research_program": {"research_program"},
+            "strategy_data": {"strategy"},
+            "research_archive": {"archive"},
+        }
+        for src in changed_sources:
+            source_values.update(source_mapping.get(src, {src}))
+        scoped_df = existing_df[existing_df["source"].isin(source_values)]
+        existing_hashes = set(scoped_df["doc_hash"].tolist())
+        print(f"  Existing index: {len(existing_df)} total, {len(existing_hashes)} in changed sources")
+    else:
+        existing_hashes = set(existing_df["doc_hash"].tolist())
+        print(f"  Existing index: {len(existing_hashes)} documents")
 
-    # Load all current documents
+    # Load current documents (only changed sources if specified)
     print("Loading current documents...")
-    all_docs = _load_all_docs()
-    print(f"  Total current docs: {len(all_docs)}")
+    all_docs = _load_all_docs(only_sources=changed_sources)
+    print(f"  Loaded docs: {len(all_docs)}")
 
-    # Compute current hashes for all docs
+    # Compute current hashes for loaded docs
     current_hashes = {}
     for doc in all_docs:
         h = compute_doc_hash(doc["text"])
         current_hashes[h] = doc
 
     # Delete stale rows (docs that were edited/removed — old hash no longer exists)
+    # Only check within the scope of changed sources
     stale_hashes = existing_hashes - set(current_hashes.keys())
     if stale_hashes:
         print(f"\n  Removing {len(stale_hashes)} stale entries (edited/deleted docs)...")
@@ -796,7 +833,35 @@ if __name__ == "__main__":
         if current != prev:
             changed = [k for k in current if current.get(k) != prev.get(k)]
             print(f"Changes detected in: {', '.join(changed)}")
-            update_index()
+            # Map changed file names to loader source names
+            file_to_source = {
+                "knowledge.json": "knowledge",
+                "thinking_journal.json": "thinking",
+                "experiments.json": "storage_experiments",
+                "experiment_experiences.json": "experiences",
+                "open_questions.json": "questions",
+                "research_log.json": "research_log",
+                "feed.json": "feed",
+                "research_program.md": "research_program",
+                "notifications.json": "notifications",
+            }
+            changed_sources = set()
+            for fname in changed:
+                if fname in file_to_source:
+                    changed_sources.add(file_to_source[fname])
+                elif fname.endswith(".md"):
+                    # Reference files or paper files
+                    changed_sources.add("references")
+                    changed_sources.add("paper")
+                else:
+                    # Unknown file changed — fall back to full scan
+                    changed_sources = None
+                    break
+            if changed_sources is not None:
+                print(f"Targeted sources: {', '.join(sorted(changed_sources))}")
+            else:
+                print("Unknown changed file — full scan")
+            update_index(changed_sources=changed_sources)
             state_file.write_text(json.dumps(current))
         else:
             print("No changes detected. Skipping index rebuild.")
