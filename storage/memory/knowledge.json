@@ -22006,5 +22006,40 @@
     "data_source": "yfinance SPY 2006-2026",
     "created_at": "2026-04-07T14:08:01.988239+00:00",
     "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407145237_k982",
+    "experiment_id": "K982",
+    "title": "K982: Sector Dispersion/Correlation — NULL, VIX sufficiency #35",
+    "content": "[提出: Codex #5, 執行: Claude] 11 SPDR sector ETFs 2015-2026。Cross-sectional dispersion 和 avg pairwise correlation 對 SPY vol 無 VIX 外增量。OOS R² 加入 disp/corr 後反而下降（0.265→0.256）。DM 全不顯著 (p>0.12)。高相關 regime (corr>0.6) vol 確實 +63%（t=13.73），但 VIX 已反映（mean VIX 27.2 vs 16.5）。Standalone：disp OOS R²=-0.19，corr OOS R²=-0.10。Correlation overlay on 12/VIX: MDD 微降（-15.2%→-12.7%）但 Sharpe 也降（0.805→0.785）。VIX sufficiency 第 35 次確認。",
+    "tags": [
+      "dispersion",
+      "correlation-regime",
+      "sector-ETF",
+      "NULL",
+      "VIX-sufficiency"
+    ],
+    "data_source": "yfinance 11 SPDR sectors + SPY + VIX 2015-2026",
+    "created_at": "2026-04-07T14:52:37.712105+00:00",
+    "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407145237_k983",
+    "experiment_id": "K983",
+    "title": "K983: Cross-Asset Lead-Lag ★★ — SPY→0050.TW r=0.40, OOS R²=15.9%, unidirectional",
+    "content": "[提出: research_program.md 跨資產, 執行: Claude] SPY/QQQ/GLD/0050.TW 2010-2026 (4087 obs)。★★ 核心發現：(1) SPY(t)→TW50(t+1) 相關 r=0.4037（t=28.2），QQQ→TW50 r=0.4124。反向 TW→US 幾乎為零 (r=0.008)。(2) Return prediction OOS R²=15.9%（SPY→TW），QQQ 17.4%。VIX 在 SPY 控制後無增量。(3) Vol spillover：SPY vol Granger-cause TW50 vol (F=543)，加入 SPY RV 後 TW50 vol OOS R² 從 1.7%→13.6%。(4) 條件 return：SPY 跌 >2% → TW50 次日 mean -1.19%, win rate 17.8%。SPY 漲 >2% → TW50 +1.19%, win rate 82.2%（全部 p<0.001）。(5) GLD 對 SPY 無預測力。結論：美→台 lead-lag 非常強且單向，有明確策略含義。台股投資人可用前日 SPY signal。",
+    "tags": [
+      "cross-asset",
+      "lead-lag",
+      "SPY",
+      "0050.TW",
+      "QQQ",
+      "return-prediction",
+      "significant",
+      "strategy"
+    ],
+    "data_source": "yfinance SPY/QQQ/GLD/0050.TW/VIX 2010-2026",
+    "created_at": "2026-04-07T14:52:37.712105+00:00",
+    "experiment_date": "2026-04-07"
   }
 ]
