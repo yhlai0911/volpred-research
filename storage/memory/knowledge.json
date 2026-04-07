@@ -21874,5 +21874,22 @@
     "data_source": "yfinance SPY + ^VIX 2006-2026",
     "created_at": "2026-04-07T13:06:22.575522+00:00",
     "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407131358_k972",
+    "experiment_id": "K972",
+    "title": "K972: MF2-VIX Taiwan — VIX lead-lag NOT confirmed, EMA best for TW",
+    "content": "[提出: K970 follow-up 跨市場, 執行: Claude] 0050.TW 2006-2026 (IS 2006-18, OOS 2019-26) MF2-GARCH 跨市場驗證。假設：VIX → 台股 lead-lag 會讓 MF2-VIX 在台股效果更強。結果相反：(1) MF2-VIX 僅 +1.07% QLIKE 改善（SPY 是 -9.55%），額外 lag（total 2 天）稀釋信號。(2) MF2-EMA 是台股最佳（-3.71%），台股自身 EMA 比跨市場 VIX 更有效。(3) 無模型通過 Harvey 門檻，最佳 MF2-EMA DM t=2.566。(4) MF2-RV 在台股 +1.18%（SPY -4.49%），反轉——RV 平滑對高峰態（18.0）噪音有幫助。(5) 全部通過 VaR Kupiec。結論：跨市場 VIX 信號因時滯增加而衰減，台股自身歷史波動（EMA）更有用。MF2 框架本身有潛力但需要市場特定的 tau 選擇。",
+    "tags": [
+      "MF2-GARCH",
+      "Taiwan",
+      "0050.TW",
+      "VIX-lead-lag",
+      "cross-market",
+      "partial-NULL"
+    ],
+    "data_source": "yfinance 0050.TW + ^VIX 2006-2026",
+    "created_at": "2026-04-07T13:13:58.325061+00:00",
+    "experiment_date": "2026-04-07"
   }
 ]
