@@ -1,30 +1,32 @@
 {
-  "updated_at": "2026-04-08T03:30:00Z",
+  "updated_at": "2026-04-08T05:00:00Z",
   "note": "Cron 讀此檔取最高優先任務。完成後補充新任務。空了才讀 research_program.md 全文。⚠️ 分配編號前必須先 ls experiments/ 確認該編號不存在。",
   "tasks": [
     {
-      "id": "K989",
-      "topic": "MF2-VIX + VIX² — 結合 K970 MF2 框架與 K987 VIX² 凸性",
-      "source": "K970 ★ MF2-VIX + K987 ★ VIX² nonlinearity synthesis",
-      "priority": 1,
-      "note": "MF2 tau = (VIX/sqrt(252))² 已有 9.55% 改善，加入 VIX² 凸性可能更強"
-    },
-    {
-      "id": "K990",
-      "topic": "SPY→0050.TW Lead-Lag 月頻策略 — 用月度 SPY momentum 調整台股配置",
-      "source": "K984 follow-up: 日頻不行但月頻成本低",
-      "priority": 2
-    },
-    {
       "id": "K991",
-      "topic": "GJR-GARCH + VIX² 外生變數 — GARCH-X with quadratic VIX",
-      "source": "K986 GJR 仍是 QLIKE champion + K987 VIX² significant",
-      "priority": 3
+      "topic": "台股 VT 策略 sensitivity analysis — 8.63/VIX 參數 +-20% 穩定性",
+      "source": "上架檢驗 #4 需求",
+      "priority": 1,
+      "note": "策略上架必要檢驗，參數敏感度測試"
     },
     {
       "id": "K992",
-      "topic": "台股 VT 策略 sensitivity analysis — 8.63/VIX 參數 +-20% 穩定性",
-      "source": "上架檢驗 #4 需求",
+      "topic": "MF2-VIX 整合到 VT 策略 — 用 MF2 vol 替代 GARCH vol 做 VT",
+      "source": "K970 ★ MF2-VIX 最佳 vol 預測 + K971 CAViaR-VT 教訓",
+      "priority": 2,
+      "note": "K971 證明 better VaR ≠ better VT，但 MF2 是 vol level 改善（不同性質）"
+    },
+    {
+      "id": "K993",
+      "topic": "VIX Term Structure 中頻策略 — 5-22天 horizon slope signal",
+      "source": "K975 ★ slope +2.2% R² at 5d + K976 日頻 NULL",
+      "priority": 3,
+      "note": "K975 slope 預測力在 5-22 天 horizon，K976 日頻無效，中頻可能是甜蜜點"
+    },
+    {
+      "id": "K994",
+      "topic": "Regime-Dependent VT — 不同 VIX regime 用不同 VT 目標波動率",
+      "source": "K980 regime 參數不同 + K970 MF2 + 實務需求",
       "priority": 4
     }
   ]
