@@ -568,9 +568,11 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 | **Feed 文章** | 指示 agent 讀取：(1) `feed-publisher` skill (2) 實驗結果 JSON (3) 已有文章（避免重複） |
 
 **通用原則（適用所有 agent 任務）：**
+- **使用標準化模板**：agent brief 必須按照 `.claude/skills/autonomous-research/references/agent-brief-template.md` 格式填寫（WHAT + WHY + 約束 + 成功標準 + 相關知識）。agent 回報必須按照 `agent-result-template.md` 格式（結果 + 數字 + 異常 + 與動機關聯 + 後續）
 - **主 agent 判斷需要哪些 skill**，在 prompt 中指示 subagent 讀取對應的 skill 文件路徑（`.claude/skills/<name>/SKILL.md`）
 - **完整傳遞必要資訊**：相關 K 編號+結論、error log 防錯規則、檔案路徑、統計門檻、研究背景
 - **Agent prompt = 完整 brief**：像寫給剛加入團隊的聰明同事，不是一行指令
+- **主線程做 synthesis**：agent 回報後，主線程必須先「解讀」（連回動機）再「行動」（記 knowledge/寫文章）。不是照搬 agent 的結論
 - **⚠️ Worktree agent 必須 commit**：每個 worktree agent 的 prompt 結尾必須包含：
   > 在完成所有工作後，必須執行 `git add -A && git commit -m "K9XX: description"` 保存所有新檔案。不 commit = 檔案在 worktree 清理時永久遺失。
 - **Agent 返回後**：主對話必須執行 `bash scripts/merge_worktree.sh` 合併變更到 main
