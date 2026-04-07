@@ -740,5 +740,14 @@
     "created_at": "2026-04-06T11:12:45.968292+00:00",
     "lesson_type": "methodology + process",
     "applicable_to": "future model comparison, worktree management, paper writing"
+  },
+  {
+    "id": "E052",
+    "title": "E052: VIX Global + DeFi + Codex Discipline (K943-K954)",
+    "experiments": "K943,K944,K945,K946,K947,K948,K949,K950,K951,K952,K953,K954",
+    "content": "Session 2026-04-06~07 continued: 12 more experiments (K943-K954). Key lessons:\n\n1. **Codex review is NOT optional for ML** (K940/K944). Both had bugs Codex caught. K940 GARCH-feature training contamination, K944 VIX lookahead + same bug. Even NULL results need review — code quality matters for credibility.\n\n2. **yfinance data is NOT finalized at market close** (VIX bug). Crontab at 22:03 UTC got VIX=24.69 instead of official close 24.17. Fix: moved to 00:03 UTC (4h after close). Lesson: always verify data source timing.\n\n3. **Phase mismatch = dead code** (daily_update bug). Article used phase=\"daily_recommendation\" but skip check used \"daily_update\" — never matched, so articles were never deduplicated. String constants need centralized definition.\n\n4. **VIX is global** (K949 ★★). 4/5 international markets Harvey-significant. theta1 stable at 2.10±0.19. This is Paper 7's strongest evidence.\n\n5. **Multi-horizon Inverted-U** (K943 ★★). VIX best at h=5 weekly (+18.4%), degrades at h=22 monthly. Constant-tau assumption breaks at longer horizons.\n\n6. **Smooth > Discrete** (K947). MF-GJR's log-linear VIX factor beats threshold switching. Abrupt parameter jumps at regime boundaries hurt.\n\n7. **Asset type determines copula value, not correlation** (K951). ETF diversification kills tail dependence (nu→30). Copula works for individual stocks only.\n\n8. **DeFi IL ≈ -σ²/8 but unpredictable** (K954). Perfect approximation formula but GARCH can't predict daily IL (R²<0). LP risk is in tail events, not mean IL.\n\n9. **Article worktree still fragile**. K951 article agent \"committed\" but merge_worktree found 0 commits. Need to investigate why some agents fail to commit despite prompt instructions.",
+    "created_at": "2026-04-07T08:25:34.759752+00:00",
+    "lesson_type": "methodology + process + bugs",
+    "applicable_to": "Codex discipline, data timing, cross-market research, DeFi"
   }
 ]
