@@ -291,18 +291,26 @@
 - 基於：K827 → K827v2（敏感度）→ K827v3（固定流動性，Codex 致命缺陷修正）
 - 狀態：**v1.2 submission-ready**（Codex 3H 修正：流動性隔離 + 量化非發現 + 敏感度驗證）
 
-**未來可能的第六篇：Periodic Realized GARCH — Simpler Alternative to PRS**
-- K874c ★★：跨 session 遞迴 DM t=-4.15 Harvey PASS（vs separate GARCH）
-- 簡化 Lai et al. (2024 APFM) PRS：6-8 參數 vs PRS 的幾十個，無需 Markov switching
-- 核心貢獻：驗證遞迴結構本身（不是 regressor）攜帶跨 session 資訊
-- HAR 仍勝 total daily（log-space 優勢），但 PRG 在 session-level VaR 有獨特價值
-- 基於：K874→K874b→K874c 系列 + K848/K851/K868 高頻發現
-- 可投：Asia-Pacific Financial Markets（延伸 Lai 2024）或 J. Futures Markets
+**第六篇：Periodic Realized GARCH (PRG)**
+- `paper/prg-periodic-garch/main.tex`（14 頁）
+- 目標：Finance Research Letters 或 Asia-Pacific Financial Markets
+- 核心貢獻：單一 GARCH 遞迴 + session-specific 參數，DM t=-4.15~-6.63 Harvey PASS
+- 基於：K874→K874c 系列 + TAIFEX tick data
+- 狀態：Supabase 已上架，working
 
-**未來可能的第七篇：VIX Sufficient Statistic**
-- 23+ 個指標全被 VIX 吸收的 comprehensive study
-- 適合 Journal of Financial Economics 或 Review of Financial Studies
-- 需要更多跨市場驗證（目前只有 US + Taiwan）
+**第七篇：Volatility Absorption Hypothesis**
+- `paper/volatility-absorption/main_v2.tex`（39 頁）
+- 目標：Journal of Financial Economics
+- 核心貢獻：恐慌對 realized return 的邊際影響隨 VIX 上升而遞減（SAR 從 3.16 降到 2.32）
+- 基於：VIX regime × shock type 交叉分析
+- 狀態：Supabase 已上架，working
+
+**第八篇：VIX Sufficiency — Can Anything Beat VIX?**
+- `paper/vix-sufficiency/main_v2.tex`（39 頁）
+- 目標：Journal of Forecasting
+- 核心貢獻：11 個 signal family 全部 OOS 無法勝過 VIX，Holm-Bonferroni 校正後仍成立
+- 基於：32 次 VIX sufficiency 確認 + cross-era 驗證
+- 狀態：Supabase 已上架，working
 
 ### 面向 I: 期貨避險（Futures Hedging）
 **動機**：K341 建立框架（ES=F r=0.978, VIX>25 tail hedge 資本效率最高），需深化為完整研究路線。
