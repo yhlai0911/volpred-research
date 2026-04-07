@@ -1,0 +1,114 @@
+{
+  "report_type": "daily",
+  "date": "2026-04-07",
+  "week_range": "2026-04-03 → 2026-04-10",
+  "total_commits": 35,
+  "total_estimated_tokens": 192256,
+  "categories": {
+    "other": {
+      "emoji": "❔",
+      "description": "其他",
+      "commits": 24,
+      "lines_changed": 15185,
+      "estimated_tokens": 108740,
+      "percentage": 56.6,
+      "commit_messages": [
+        "K953 HAR-RV Pilot PRELIMINARY — 56 days too few, R²=0.033",
+        "Merge agent worktree agent-a6a41996 (1 commits)",
+        "Fix VIX inconsistency: phase mismatch + VIX update logic",
+        "K953: HAR-RV pilot with 56 days 5-min SPY data (PRELIMINARY)",
+        "K952: Threshold ARMA for vol (Chen et al. 2011) — null result, GJR/MF-GJR still ",
+        "Periodic sync: storage state + released articles + token reports",
+        "K951 Copula Hedge ETF NULL — ETF diversification kills tail dependence",
+        "Merge agent worktree agent-a7e02939 (1 commits)",
+        "K951: Copula-GARCH hedge high-corr ETF pairs — copula does NOT add value",
+        "K950 Monthly Regime VT Cross-Asset — 0/5 Sharpe, 4/5 MDD improve",
+        "Merge agent worktree agent-a32dc04a (1 commits)",
+        "K950: Monthly Regime VT cross-asset — 0/5 Sharpe wins, 4/5 MDD improvement",
+        "Periodic sync: storage state + notifications",
+        "K949 Cross-Market MF-GJR — VIX global risk factor 4/5 Harvey pass",
+        "Merge agent worktree agent-a592af4c (1 commits)",
+        "K949: Cross-market MF-GJR VIX sufficiency — 4/5 markets significant",
+        "K948 Weekly Return NULL — vol predictable but returns are not",
+        "Merge agent worktree agent-a206d391 (1 commits)",
+        "K948: Weekly return predictability test — NULL result, consistent with Welch & G",
+        "TSMC 04/16 pre-event article (published)",
+        "K947 Threshold GARCH NULL — smooth MF beats discrete threshold",
+        "Merge agent worktree agent-a8bf8098 (1 commits)",
+        "K947: Threshold GARCH with VIX as Threshold Variable",
+        "Periodic sync: token reports + storage state + released articles"
+      ]
+    },
+    "article_writing": {
+      "emoji": "✍️",
+      "description": "文章撰寫與發佈",
+      "commits": 4,
+      "lines_changed": 1222,
+      "estimated_tokens": 51552,
+      "percentage": 26.8,
+      "commit_messages": [
+        "K949 cross-market research article",
+        "K949 global VIX general article",
+        "K948 return prediction general article",
+        "K946 general article: doing nothing is smartest (mile_3f4e1a52)"
+      ]
+    },
+    "latex_content_fix": {
+      "emoji": "🔧",
+      "description": "LaTeX/內容批量修復（讀寫大型 JSON）",
+      "commits": 1,
+      "lines_changed": 16,
+      "estimated_tokens": 14448,
+      "percentage": 7.5,
+      "commit_messages": [
+        "Fix GARCH equation rendering in K940 article (mile_0976c5cc)"
+      ]
+    },
+    "codex_review": {
+      "emoji": "🤖",
+      "description": "Codex 審查",
+      "commits": 2,
+      "lines_changed": 30,
+      "estimated_tokens": 8240,
+      "percentage": 4.3,
+      "commit_messages": [
+        "K952 TARMA NULL (Codex reviewed) — GARCH recursion beats TARMA",
+        "Codex review K940/K944: GARCH-feature contamination + K944 VIX lookahead"
+      ]
+    },
+    "daily_update": {
+      "emoji": "📊",
+      "description": "每日策略更新/績效重算",
+      "commits": 2,
+      "lines_changed": 14,
+      "estimated_tokens": 6084,
+      "percentage": 3.2,
+      "commit_messages": [
+        "Fix daily_update timing (22:03→00:03 UTC) + codex:rescue usage guide",
+        "Fix: add VIX to _market_daily in daily_update.py"
+      ]
+    },
+    "research_program": {
+      "emoji": "📋",
+      "description": "研究計畫/規範更新",
+      "commits": 1,
+      "lines_changed": 2,
+      "estimated_tokens": 2008,
+      "percentage": 1.0,
+      "commit_messages": [
+        "Error log: VIX missing from _market_daily + timezone fix"
+      ]
+    },
+    "periodic_sync": {
+      "emoji": "🔄",
+      "description": "定期狀態同步（低 token）",
+      "commits": 1,
+      "lines_changed": 92,
+      "estimated_tokens": 1184,
+      "percentage": 0.6,
+      "commit_messages": [
+        "Resolve session_state merge conflict"
+      ]
+    }
+  }
+}
