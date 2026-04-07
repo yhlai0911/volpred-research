@@ -34,21 +34,7 @@
    - **結果異常時**：HE < 0、相關係數不穩定、parameter 在邊界上 → 必須啟動覆查，不能直接報告
    - **期貨避險特別注意**：spot-futures 相關性穩定性（rolling correlation）、共整合檢定、ETF 結構問題（如 USO contango roll）
 6. **方法論嚴謹**：每個結論必須經過正規統計檢定（DM test、t-test、bootstrap），不可僅憑觀察就下結論。遵守 Harvey (2016) t>3.0 門檻
-6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型（GARCH 預測 σ²、MEM/HAR 預測 |r| 或 RV）必須在公平框架下比較，**不可只用單一 target**。每次模型比較實驗必須包含：
-   - **各模型在原生 target 上的表現**（GARCH on r²、MEM on |r|、HAR on RV）——展示各自最佳表現
-   - **QLIKE on r²**（Patton 2011 proxy-robust：r² 是 σ² 的無偏估計，排名一致性有理論保證）
-   - **Spearman rank correlation**（分配無關，不需轉換假設）
-   - **DM test + Harvey t>3.0**（每對模型）
-   - 如有日內數據：**QLIKE on 5-min RV**（Hansen & Lunde 2005 gold standard）
-   - 如有多模型：**MCS（Model Confidence Set）**（控制多重比較）
-   - **不可只報告對自己有利的 target**——必須報告所有 target 的結果，包括模型表現差的
-   - **經濟顯著性（VaR/ES）評估**：每個模型預測不同東西，轉換到 VaR 時**必須做適當處理**：
-     - GARCH（σ²）→ VaR = σ × z_α（z_α 取決於創新分配：Normal/Student-t/Skewed-t）
-     - MEM(|r|) → 先轉 σ = E[|r|] / C（C 來自 MEM 的 Gamma 分配，非 Normal 的 √(2/π)），再 VaR = σ × z_α
-     - HAR-RV → σ = √RV，VaR 需考慮 HAR 殘差分配（通常 log-normal 或 F）
-     - **不可直接把模型預測值當 VaR**——必須經過正確的分配轉換
-     - VaR backtesting: Kupiec + Christoffersen + Basel traffic light
-     - 如有日內數據：Hansen & Lunde (2005) 最優加權 RV_total 作為真實 σ² 的最佳估計
+6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型必須在公平框架下比較，不可只用單一 target，不可只報告對自己有利的結果。VaR/ES 評估必須做正確的分配轉換，不可直接把預測值當 VaR。**技術細節（評估層次、VaR 轉換公式、backtesting 規格）見 `research_program.md` 的「模型比較公平性標準」和「經濟顯著性評估」段。**
 7. **區分實證與理論**：明確標示每項分析屬於「實證分析（真實數據）」、「理論推導」或「模擬實驗」。不可混淆
 8. **Null result 如實報告**：負面結果同樣重要，必須完整記錄。不可只報告成功、隱藏失敗
 9. **發佈內容真實不虛**：Feed 文章、研究摘要、知識記錄的每一項數據和結論都必須可追溯到具體實驗腳本和數據
@@ -151,22 +137,12 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 
 ### 重要研究結論
 
-**VT 策略是 drawdown insurance，不是 alpha generator（K687/K697/K700）。**
-- K697：VIX 預測 vol magnitude（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 不可能
-- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）
-- K688：但 VT 在 CRRA utility 框架 gamma>=5 時勝出（風險厭惡投資人受益）
-- K702：50/50 SPY/GLD 是最佳靜態配置（grid search 確認）
-- K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
-- **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——這是最可靠的設計原則**
-- K846：50/50 的三重護城河（分散化 r=0.057 + 再平衡溢酬 54bps/yr + 黃金危機 alpha）
+→ **所有研究結論、K 編號詳情見 `research_program.md`「重大研究結論」和「最終工具指南」。** 以下僅列影響日常操作的核心結論：
 
-**TAIFEX 高頻數據發現（2026-04-03~04 K847-K849）**
-- **K849：HAR-RV 在 RV target 上勝 GJR（DM t=-11.14）**——這是預期結果（HAR 本來就預測日內 RV，GARCH 預測 close-to-close σ²）。不同模型適合不同評估標的，不是誰「錯」了。要用 RV 模型做全日預測需 Hansen & Lunde (2005) 調整
-- **K847：隔夜 gap 61% 可交易**——用 TAIFEX 夜盤期貨可捕捉。Slot C（美股時段）佔 39.8%
-- **K848：夜盤 vol 佔比 24%→57%**（2017→2026）——台灣市場正在全球化
-- **K844：TX 期貨 VT 空頭期全勝**——交易成本省 97%，機構投資人應用期貨執行
-- **模型評估 target 必須匹配**：GARCH 用 r² 評估、HAR-RV 用 5-min RV 評估。跨模型公平比較用 Patton (2011) QLIKE on r² 或 Hansen & Lunde (2005) 最優加權 RV_total
-- **⚠️ 風險管理評估必須同時做 VaR + ES（不可只做 VaR）**：VaR 1%+5% Trinity（Kupiec+CC+Basel）+ ES Acerbi-Szekely Z-test + Fissler-Ziegel joint scoring。Basel III 已要求 ES 取代 VaR 作為主要風控指標，只做 VaR 不完整
+- **VT = drawdown insurance，不是 alpha generator**（K687/K697）。50/50 SPY/GLD 不可動搖（K846 三重護城河）
+- **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——最可靠的設計原則**
+- **模型評估 target 必須匹配**：GARCH 用 r²、HAR-RV 用 5-min RV。跨模型用 Patton (2011) QLIKE
+- **⚠️ 風險管理評估必須同時做 VaR + ES（不可只做 VaR）**。詳見 `research_program.md` 評估指標段
 
 ### Token 節約規則（必須遵守）
 - **⚠️ 禁止整檔讀取 `feed.json`（5.4MB = 135 萬 tokens）**。任何情況都不可 `Read("storage/reports/feed.json")`：
@@ -387,21 +363,9 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 ### 實驗前必做：防錯 + 查詢知識庫 + 搜尋文獻（不可跳過，違反即無效）
 **每個實驗/新主題路線開始前，必須完成以下步驟，缺一不可：**
 
-**Step 0: Error Log 防錯檢查（最重要，必須在 agent prompt 中包含）**
-0. **讀 `docs/error_log.md` 的常見錯誤**，在 agent prompt 中明確列出適用的防錯規則：
-   - **DM test**：必須用 `from volpred.stats.model_evaluation import strategy_dm_test`，不自己寫
-   - **0050.TW**：必須呼叫 `from volpred.utils import clean_tw50_data`
-   - **跨市場**：必須用 open-to-close return（不是 close-to-close）
-   - **GARCH OOS**：必須逐日遞迴 h[t]=f(h[t-1],r²[t-1])，不能用 stale variance
-   - **Bayesian prior**：必須允許否證（不能用 HalfNormal 然後說 P(>0)=1.0）
-   - **Sanity check**：必須實際計算（shift(0) lookahead vs shift(1)），絕不 hard-code
-   - **分配 fit**：Student-t 必須考慮 scale term sqrt((df-2)/df)
-   - **Basel/統計檢定**：用標準實作，不自定義閾值
-   - **Sharpe > 2x baseline**：幾乎一定有 bug，先停下來檢查
-   - **模型-Target 匹配**：GARCH 預測 close-to-close σ²（用 r² 評估）、HAR-RV 預測日內 RV（用 5-min RV 評估）、MEM 預測 |r|。**不同模型在各自原生 target 上贏是預期結果，不是發現**。跨 target 比較必須用 Patton (2011) proxy-robust QLIKE on r² 或 Hansen & Lunde (2005) 最優加權 RV_total
-   - **結果是否為模型設計的必然？**：如果結果可以從模型定義直接推導（如 HAR 在 RV 上贏 GARCH），這是 mechanical result 不是 empirical finding，不可宣稱為「發現」或「paradigm shift」
-1. 在 agent prompt 中**明確寫出**：「此實驗需注意的 error log 規則：XXX」
-2. **每個實驗 agent prompt 必須附上方法論 preamble**：讀取 `.claude/skills/autonomous-research/references/experiment-preamble.md` 的內容，附加在 agent prompt 開頭。不可省略。此文件包含模型-target 匹配規則、mechanical vs empirical 區分、統計門檻、防錯規則。**agent 看不到 CLAUDE.md 和 research_program.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。**
+**Step 0: Error Log 防錯 + Preamble（最重要）**
+0. **讀 `docs/error_log.md`**，在 agent prompt 中明確列出「此實驗需注意的 error log 規則：XXX」
+1. **附上 preamble**：每個實驗 agent prompt 必須讀取 `.claude/skills/autonomous-research/references/experiment-preamble.md` 附加在開頭。**Agent 看不到 CLAUDE.md 和 research_program.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。** Preamble 包含：模型-target 匹配、mechanical vs empirical 區分、統計門檻、防錯規則、VaR+ES 標準、worktree 禁令。
 
 **Step 1: 知識庫搜尋（過去成果）**
 1. `grep -i '關鍵詞' storage/memory/knowledge.json | grep title | head -10`
@@ -458,13 +422,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **2026-03-29 教訓**：93 個實驗中 8 個被推翻（10%），全部因為跳過「Codex 先審代碼」這一步。如果每個實驗都先審再跑，推翻率應該趨近 0%。
 
 ### 研究多元化（必須遵守）
-**不要停留在模型舒適區。** 已收斂的結論不需要繼續堆積 null results。
-
-- **每個 session 至少 1 個「完全不同方向」的實驗**（不是又一個 VT overlay 測試）
-- 漸進式延伸（從已知自然衍生）和跳躍式探索（進入未知領域）要並行
-- 跳躍方向包括：NLP 情緒、替代數據、市場微結構、網絡模型、因果推論、DeFi、氣候金融、行為金融、跨學科方法
-- 連續 3 個 null result → 必須換方向
-- 詳見 `research_program.md` 的「研究多元化原則」和「面向 G: 跳躍式探索」
+**不要停留在模型舒適區。** 每個 session 至少 1 個完全不同方向。連續 3 個 null result → 必須換方向。**具體跳躍方向和判斷清單見 `research_program.md`「研究多元化原則」。**
 
 ## 活文件原則
 以下文件會隨研究推展持續演化，應主動修改以反映最新狀態：
@@ -520,12 +478,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 記得開啟 `--full-auto` 模式讓 Codex 自主修復。
 
 ### 研究主題來源（必須多元）
-1. **Codex/Gemini 建議**：每 5-10 個實驗主動問一次
-2. **用戶指定**：優先執行，必須立刻寫入 research_program.md
-3. **會員問題**：每 6 小時 cron 自動評估
-4. **文獻搜索**：WebSearch arXiv/SSRN 前沿方向
-5. **Claude 自選**：基於 research_program.md 待探索方向
-6. **跨 AI 交叉驗證**：一個 AI 提出假說 → 另一個 AI 設計實驗 → Claude 執行
+研究主題不可只靠 Claude 自選。必須來自：用戶指定（最高優先）、Codex/Gemini 建議、會員問題、文獻搜索、跨 AI 交叉驗證。**完整流程和頻率表見 `research_program.md`「研究主題來源」段。**
 
 ## 硬體資源與 Agent Team
 → 完整 Agent 設定對照表見 `docs/hardware.md`
