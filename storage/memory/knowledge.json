@@ -21891,5 +21891,21 @@
     "data_source": "yfinance 0050.TW + ^VIX 2006-2026",
     "created_at": "2026-04-07T13:13:58.325061+00:00",
     "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407132133_k973",
+    "experiment_id": "K973",
+    "title": "K973: Time-Varying Hurst — NULL at daily freq, H=0.502 (random walk), confirms K34",
+    "content": "[提出: arXiv:2509.05820, 執行: Claude] SPY 2006-2026, IS=3267, OOS=1798。R/S Hurst 日頻=0.502（centered on 0.5, 隨機遊走），Variogram Hurst=0.009（太 noisy）。Gatheral (2018) rough vol (H<<0.5) 在日頻 close-to-close 不可測。加入 H 到 HAR 後 OOS QLIKE 微幅惡化（1.5275 vs 1.5264），IS 係數 t-stat 0.39/0.62 完全不顯著。HAR 顯著勝 GJR (QLIKE 1.53 vs 2.45, DM p=0.0002)。結論：Rough vol 特徵需要 5-min 或 tick 數據，日頻 Hurst 不是有用的預測特徵。與 K34 一致（H~0.01 太 noisy）。",
+    "tags": [
+      "Hurst",
+      "rough-vol",
+      "NULL",
+      "daily-frequency",
+      "HAR"
+    ],
+    "data_source": "yfinance SPY 2006-2026",
+    "created_at": "2026-04-07T13:21:33.444744+00:00",
+    "experiment_date": "2026-04-07"
   }
 ]
