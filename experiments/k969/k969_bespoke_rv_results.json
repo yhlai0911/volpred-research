@@ -1,0 +1,280 @@
+{
+  "experiment_id": "K969",
+  "title": "Bespoke RV \u2014 Optimal Daily Volatility Proxy Weighting",
+  "date": "2026-04-07",
+  "data_source": "yfinance (SPY)",
+  "sample_period": "2006-01-04 to 2026-04-06",
+  "n_total": 5094,
+  "n_is": 3270,
+  "n_oos": 1824,
+  "is_period": "2006-01-04 to 2018-12-31",
+  "oos_period": "2019-01-02 to 2026-04-06",
+  "target": "r2 (close-to-close squared return)",
+  "seed": 42,
+  "method": "Daily-frequency Bespoke Volatility (Patton & Zhang 2026 concept)",
+  "references": [
+    "Patton & Zhang (2026), Bespoke Realized Volatility, Journal of Econometrics",
+    "Patton (2011), Volatility forecast comparison using imperfect volatility proxies, JoE",
+    "Garman & Klass (1980), On the estimation of security price volatilities",
+    "Yang & Zhang (2000), Drift independent volatility estimation"
+  ],
+  "proxy_descriptive_stats": {
+    "r2": {
+      "mean": 0.00014858348530287854,
+      "std": 0.000599236351896269,
+      "annualized_vol_pct": 19.350203693068813
+    },
+    "parkinson": {
+      "mean": 9.573760958084725e-05,
+      "std": 0.0002698865301607494,
+      "annualized_vol_pct": 15.532507078502656
+    },
+    "gk": {
+      "mean": 9.845125848437985e-05,
+      "std": 0.00029276222953641913,
+      "annualized_vol_pct": 15.75110064029296
+    },
+    "rs": {
+      "mean": 0.00010203673541968684,
+      "std": 0.0003319827578515125,
+      "annualized_vol_pct": 16.035353855079435
+    },
+    "yz": {
+      "mean": 0.0001550675273615677,
+      "std": 0.0005172799305618017,
+      "annualized_vol_pct": 19.767907551158533
+    }
+  },
+  "proxy_correlations": {
+    "r2": {
+      "r2": 1.0,
+      "parkinson": 0.7104853840643869,
+      "gk": 0.596165801747376,
+      "rs": 0.5350375872295784,
+      "yz": 0.6973278012504743
+    },
+    "parkinson": {
+      "r2": 0.7104853840643869,
+      "parkinson": 1.0,
+      "gk": 0.9525766051569783,
+      "rs": 0.889119796480874,
+      "yz": 0.8079653865004077
+    },
+    "gk": {
+      "r2": 0.596165801747376,
+      "parkinson": 0.9525766051569783,
+      "gk": 1.0,
+      "rs": 0.979698186223318,
+      "yz": 0.8619530632845174
+    },
+    "rs": {
+      "r2": 0.5350375872295784,
+      "parkinson": 0.889119796480874,
+      "gk": 0.979698186223318,
+      "rs": 1.0,
+      "yz": 0.8745754636339446
+    },
+    "yz": {
+      "r2": 0.6973278012504743,
+      "parkinson": 0.8079653865004077,
+      "gk": 0.8619530632845174,
+      "rs": 0.8745754636339446,
+      "yz": 1.0
+    }
+  },
+  "oos_results": {
+    "AR1_r2": {
+      "qlike": 1.7646825189977045,
+      "mse": 3.2670382730838934e-07,
+      "mz_intercept": -6.426669166315467e-05,
+      "mz_slope": 1.4169986402666221,
+      "mz_r2": 0.1454127270436416,
+      "mz_t_stat_b1": 5.181582185015372,
+      "mz_p_value_b1": 2.4440783308321556e-07
+    },
+    "AR1_parkinson": {
+      "qlike": 1.608269765310392,
+      "mse": 3.093707690618384e-07,
+      "mz_intercept": -3.95039220447276e-05,
+      "mz_slope": 2.1121119241020883,
+      "mz_r2": 0.26158721092225734,
+      "mz_t_stat_b1": 13.377174857931465,
+      "mz_p_value_b1": 0.0
+    },
+    "AR1_gk": {
+      "qlike": 1.5799959249827404,
+      "mse": 3.0470696425362944e-07,
+      "mz_intercept": -5.50117573495554e-05,
+      "mz_slope": 2.210560331039309,
+      "mz_r2": 0.2863774751785423,
+      "mz_t_stat_b1": 14.807897702811902,
+      "mz_p_value_b1": 0.0
+    },
+    "AR1_rs": {
+      "qlike": 1.6033721624183799,
+      "mse": 3.046703050789748e-07,
+      "mz_intercept": -6.387722665650208e-05,
+      "mz_slope": 2.1961664709561637,
+      "mz_r2": 0.2832006678692206,
+      "mz_t_stat_b1": 14.613320012079646,
+      "mz_p_value_b1": 0.0
+    },
+    "AR1_yz": {
+      "qlike": 1.5619592499716561,
+      "mse": 3.08692363031085e-07,
+      "mz_intercept": 3.5059925472103525e-05,
+      "mz_slope": 0.7364603197090835,
+      "mz_r2": 0.20731762647619323,
+      "mz_t_stat_b1": -7.811588590248003,
+      "mz_p_value_b1": 9.325873406851315e-15
+    },
+    "Equal_Weight": {
+      "qlike": 1.5444891198626662,
+      "mse": 2.83553974788476e-07,
+      "mz_intercept": -9.941415737038184e-06,
+      "mz_slope": 1.3684109301627092,
+      "mz_r2": 0.27000150649276633,
+      "mz_t_stat_b1": 6.988955417883388,
+      "mz_p_value_b1": 3.870459508448221e-12
+    },
+    "Bespoke_OLS": {
+      "qlike": 14009.383910712406,
+      "mse": 3.1472679571578486e-07,
+      "mz_intercept": 3.598137639051014e-05,
+      "mz_slope": 0.834725773432444,
+      "mz_r2": 0.17177415045946354,
+      "mz_t_stat_b1": -3.848929982483829,
+      "mz_p_value_b1": 0.0001227270109473988
+    },
+    "Bespoke_Ridge": {
+      "qlike": 1.9731446304215805,
+      "mse": 3.7641020579718095e-07,
+      "mz_intercept": -0.0006007231647819539,
+      "mz_slope": 4.9184392727239405,
+      "mz_r2": 0.002415372924681858,
+      "mz_t_stat_b1": 1.6733131195822692,
+      "mz_p_value_b1": 0.09443733014663169
+    },
+    "HAR_Bespoke": {
+      "qlike": 1.447722364075275,
+      "mse": 2.7912196924030237e-07,
+      "mz_intercept": 1.4660763003250857e-05,
+      "mz_slope": 0.9583154662631128,
+      "mz_r2": 0.25980652274973803,
+      "mz_t_stat_b1": -1.100000887155693,
+      "mz_p_value_b1": 0.27147704885173596
+    }
+  },
+  "best_model_qlike": "HAR_Bespoke",
+  "best_model_mse": "HAR_Bespoke",
+  "dm_tests_vs_best": {
+    "AR1_r2": {
+      "dm_stat": 7.469146019629675,
+      "p_value": 8.08242361927114e-14,
+      "significant_10pct": true,
+      "significant_5pct": true
+    },
+    "AR1_parkinson": {
+      "dm_stat": 4.889425767156896,
+      "p_value": 1.0113054964566714e-06,
+      "significant_10pct": true,
+      "significant_5pct": true
+    },
+    "AR1_gk": {
+      "dm_stat": 4.269859927667712,
+      "p_value": 1.955957674604214e-05,
+      "significant_10pct": true,
+      "significant_5pct": true
+    },
+    "AR1_rs": {
+      "dm_stat": 4.6853340334063125,
+      "p_value": 2.7950371024321186e-06,
+      "significant_10pct": true,
+      "significant_5pct": true
+    },
+    "AR1_yz": {
+      "dm_stat": 6.4898171153444935,
+      "p_value": 8.594058797939397e-11,
+      "significant_10pct": true,
+      "significant_5pct": true
+    },
+    "Equal_Weight": {
+      "dm_stat": 5.032074540109771,
+      "p_value": 4.85200527977625e-07,
+      "significant_10pct": true,
+      "significant_5pct": true
+    },
+    "Bespoke_OLS": {
+      "dm_stat": 1.0027391791200668,
+      "p_value": 0.31598672107919246,
+      "significant_10pct": false,
+      "significant_5pct": false
+    },
+    "Bespoke_Ridge": {
+      "dm_stat": 6.6341635133265004,
+      "p_value": 3.263478376425155e-11,
+      "significant_10pct": true,
+      "significant_5pct": true
+    }
+  },
+  "dm_bespoke_ols_vs_ar1_r2": {
+    "dm_stat": -1.0027164803003719,
+    "p_value": 0.3159976760140255,
+    "interpretation": "Positive DM stat means AR1_r2 has higher loss (Bespoke better)"
+  },
+  "dm_bespoke_ols_vs_equal_weight": {
+    "dm_stat": -1.002732241985236,
+    "p_value": 0.31599006906206006
+  },
+  "ols_weights": {
+    "intercept": 4.205843426312993e-05,
+    "weights": {
+      "r2": -0.15588965021641668,
+      "parkinson": -0.10469323822180582,
+      "gk": 1.9475351845218352,
+      "rs": -0.9709833802803638,
+      "yz": 0.3034530329472166
+    },
+    "r2_is": 0.27618608840015646
+  },
+  "ridge_weights": {
+    "intercept": 0.00014828693394879707,
+    "weights": {
+      "r2": 0.0004962513077642562,
+      "parkinson": 0.00039561009094213464,
+      "gk": 0.0004564759393114862,
+      "rs": 0.0005030621936148174,
+      "yz": 0.0007313335337812948
+    },
+    "r2_is": 0.0015326988107453587
+  },
+  "rolling_weight_stability": {
+    "r2": {
+      "mean": -0.12562120557159176,
+      "std": 0.4594182346892236
+    },
+    "parkinson": {
+      "mean": -0.12249115254520442,
+      "std": 2.2545245219269696
+    },
+    "gk": {
+      "mean": 1.6917290530406255,
+      "std": 4.266533276795695
+    },
+    "rs": {
+      "mean": -1.4193549562231644,
+      "std": 3.1065347525244476
+    },
+    "yz": {
+      "mean": 0.5018210888552369,
+      "std": 1.2840608844737873
+    }
+  },
+  "conclusions": [
+    "Bespoke OLS does NOT improve over AR1(r\u00b2) in QLIKE",
+    "Best individual proxy: AR1_yz (QLIKE=1.5620)",
+    "Largest OLS weight: gk (1.9475)",
+    "Ridge (1.9731) outperforms OLS (14009.3839) \u2014 regularization helps",
+    "Bespoke vs AR1(r\u00b2) is NOT statistically significant (DM p=0.3160)"
+  ]
+}
