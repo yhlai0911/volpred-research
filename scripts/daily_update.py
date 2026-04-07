@@ -966,17 +966,11 @@ def main():
         if failed_path.exists():
             failed_ids = json.loads(failed_path.read_text())
             if failed_ids:
-                feed_all = json.loads(Path("storage/reports/feed.json").read_text())
-                feed_map = {item['id']: item for item in feed_all}
                 retried = 0
                 for fid in failed_ids:
-                    if fid in feed_map:
-                        report_path = Path(f"storage/reports/{fid}.json")
-                        article = feed_map[fid]
-                        if report_path.exists():
-                            report = json.loads(report_path.read_text())
-                            if report.get('description'):
-                                article['content'] = report['description']
+                    report_path = Path(f"storage/reports/{fid}.json")
+                    if report_path.exists():
+                        article = json.loads(report_path.read_text())
                         if sync_article(article):
                             retried += 1
                 if retried:
