@@ -22124,5 +22124,38 @@
     "data_source": "yfinance SPY + 0050.TW 2006-2026",
     "created_at": "2026-04-07T20:50:36.160146+00:00",
     "experiment_date": "2026-04-08"
+  },
+  {
+    "id": "know_20260407224624_k991",
+    "experiment_id": "K991",
+    "title": "K991: Taiwan VT Sensitivity ★ — PASS, k+-20% Sharpe 僅降 2.2%, 極穩健",
+    "content": "[提出: 上架檢驗 #4, 執行: Claude] 0050.TW 2006-2026, k/VIX 策略 k=[5-16] grid。★ 上架檢驗通過：k=8.63 +-20% (6.90-10.36) Sharpe 最大降幅 2.2%（全樣本）/ 0.5%（OOS），遠低於 30% 門檻。Sharpe vs k 曲線極平坦（k=5-10 range: 0.81-0.85）。Optimal k ≈ 6.0-6.5 但改善 < 2%。MDD 與 k 線性：-9.5%(k=5) → -29.5%(k=16)，8.63 為 -15.9%。SPY optimal k=12-14（低 amplification），台股 k=8.63 合理（高波動市場）。結論：台股 VT 參數極穩健，支持上架。",
+    "tags": [
+      "sensitivity",
+      "Taiwan-VT",
+      "0050.TW",
+      "parameter-robustness",
+      "listing-test",
+      "PASS"
+    ],
+    "data_source": "yfinance 0050.TW + ^VIX 2006-2026",
+    "created_at": "2026-04-07T22:46:24.161976+00:00",
+    "experiment_date": "2026-04-08"
+  },
+  {
+    "id": "know_20260407224624_k993",
+    "experiment_id": "K993",
+    "title": "K993: VIX Slope Medium-Freq Strategy — NULL, vol prediction ≠ return alpha",
+    "content": "[提出: K975+K976 follow-up, 執行: Claude] SPY+VIX+VIX3M 2010-2026。K975 slope 5d RV +2.2% R²，K976 日頻 NULL。K993 測試中頻（weekly/monthly rebalance）。結果全部 NULL：Slope+12/VIX Sharpe 0.485-0.493 < Daily 12/VIX 0.531。DM 全未達 Harvey 門檻。2022 bear 暴露致命缺陷：slow grind bear 時 slope 仍在 contango (avg 0.93)→策略 signal risk-on→大虧 -25.3%。核心洞見：slope 預測 vol level 不是 return direction。高 predicted RV 可能是 crash 也可能是 high-vol rally。Vol prediction R² ≠ return alpha。K975/K976/K993 系列結論：slope 是統計上真實的 vol predictor 但不可轉化為交易策略。",
+    "tags": [
+      "VIX-slope",
+      "medium-frequency",
+      "NULL",
+      "vol-vs-return",
+      "strategy"
+    ],
+    "data_source": "yfinance SPY + ^VIX + ^VIX3M 2010-2026",
+    "created_at": "2026-04-07T22:46:24.161976+00:00",
+    "experiment_date": "2026-04-08"
   }
 ]
