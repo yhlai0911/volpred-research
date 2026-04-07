@@ -1,30 +1,30 @@
 {
-  "updated_at": "2026-04-07T13:30:00Z",
+  "updated_at": "2026-04-07T14:30:00Z",
   "note": "Cron 讀此檔取最高優先任務。完成後補充新任務。空了才讀 research_program.md 全文。",
   "tasks": [
     {
-      "id": "K972",
-      "topic": "MF2-VIX 台股驗證 — 0050.TW + 前日 VIX 作為長期成分",
-      "source": "K970 ★ MF2-VIX follow-up，跨市場驗證",
+      "id": "K976",
+      "topic": "VIX Slope + MF2-GARCH 整合 — slope 作為額外長期成分 (K970+K975 synthesis)",
+      "source": "K975 ★ slope 顯著 vol predictor + K970 MF2 framework",
       "priority": 1,
-      "note": "K970 修正後 SPY MF2-VIX -9.55%，台股可能更強（VIX→0050 lead-lag）"
+      "note": "K975 slope +2.2% R² + K970 MF2-VIX -9.55% → 合併可能更強"
     },
     {
-      "id": "K973",
-      "topic": "Time-Varying Hurst EWMA (arXiv:2509.05820) — Rough Vol 日頻",
-      "source": "文獻搜尋 Rough Vol 方向",
+      "id": "K977",
+      "topic": "KAN-GARCH-MIDAS (J.Applied Economics 2025) — Kolmogorov-Arnold Network",
+      "source": "文獻搜尋 ML-GARCH 混合",
       "priority": 2
     },
     {
-      "id": "K974",
-      "topic": "KAN-GARCH-MIDAS (J.Applied Economics 2025) — Kolmogorov-Arnold Network",
-      "source": "文獻搜尋 ML-GARCH 混合",
+      "id": "K978",
+      "topic": "Congressional Trading vs SPY Vol — 國會交易數據分析",
+      "source": "data/congressional_trades_house.csv 已有數據",
       "priority": 3
     },
     {
-      "id": "K975",
-      "topic": "VIX Term Structure Slope 策略 — VIX vs VIX3M contango/backwardation",
-      "source": "research_program.md VIX 策略方向",
+      "id": "K979",
+      "topic": "SKEW Index as Vol Predictor — CBOE SKEW vs VIX 增量",
+      "source": "research_program.md CBOE 方向",
       "priority": 4
     }
   ]

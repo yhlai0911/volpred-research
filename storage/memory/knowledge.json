@@ -21925,5 +21925,21 @@
     "data_source": "yfinance ^VIX + ^VIX3M + SPY 2010-2026",
     "created_at": "2026-04-07T13:28:57.287341+00:00",
     "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407133843_k976",
+    "experiment_id": "K976",
+    "title": "K976: MF2+VIX Slope — NULL, slope 無日頻增量（horizon mismatch）",
+    "content": "[提出: K970+K975 synthesis, 執行: Claude] SPY+VIX+VIX3M 2010-2026。測試 VIX slope 加入 MF2-GARCH 框架。結果：(1) MF2-2Factor QLIKE 改善 GJR 1.22%，但 vs MF2-VIX DM t=1.42 不顯著。(2) MF2-VIX-Slope 乘法調整 calibrated k=0（slope 無 benefit）。(3) MF2-VIX+EMA 顯著更差 (DM t=-4.81)。原因：K975 的 slope 預測力在 5 天 horizon（mean reversion 需要多天展開），日頻 GARCH 無法利用。VIX level 在日頻已包含 slope 的相關信息。結論：MF2-VIX 仍是最佳日頻 tau 規格，加入 slope 複雜度不合理。Slope 的價值在中頻（5-22 天）策略，不在日頻模型。",
+    "tags": [
+      "MF2-GARCH",
+      "VIX-slope",
+      "horizon-mismatch",
+      "NULL",
+      "frequency-dependency"
+    ],
+    "data_source": "yfinance SPY + ^VIX + ^VIX3M 2010-2026",
+    "created_at": "2026-04-07T13:38:43.416311+00:00",
+    "experiment_date": "2026-04-07"
   }
 ]
