@@ -21857,5 +21857,22 @@
     "data_source": "yfinance SPY + ^VIX 2006-2026",
     "created_at": "2026-04-07T12:38:44.144514+00:00",
     "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407130622_k971",
+    "experiment_id": "K971",
+    "title": "K971: CAViaR-VT vs GARCH-VT — Partial NULL, better VaR ≠ better VT",
+    "content": "[提出: K967 follow-up, 執行: Claude] K967 發現 CAViaR 的 VaR 預測勝 GARCH（DM t=3.079）。K971 測試 CAViaR-VT 是否比 GARCH-VT 更好。OOS 2015-2026 (2830 天)。結果：CAViaR-VT Sharpe=0.735 vs GARCH-VT 0.778 vs 12/VIX 0.866（最佳）。CAViaR-VT MDD=-21.7% vs GARCH-VT -19.7%。兩者 vol 估計相關 0.967，COVID 期間表現幾乎相同（-16.3% vs -16.0%）。CAViaR turnover 更高（0.088 vs 0.066）。核心結論：CAViaR 擅長分位數（尾部）預測，但 VT 需要的是 vol 水準估計——在此任務上 CAViaR 和 GARCH 提取相同信號。更簡單的 GARCH 足夠。12/VIX smooth-weight 原則再次確認為最優（Sharpe 0.866, MDD -14.4%, 最低 turnover 0.038）。",
+    "tags": [
+      "CAViaR",
+      "VT",
+      "GARCH",
+      "12/VIX",
+      "strategy-comparison",
+      "partial-NULL"
+    ],
+    "data_source": "yfinance SPY + ^VIX 2006-2026",
+    "created_at": "2026-04-07T13:06:22.575522+00:00",
+    "experiment_date": "2026-04-07"
   }
 ]
