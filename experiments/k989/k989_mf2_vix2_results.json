@@ -1,0 +1,384 @@
+{
+  "experiment_id": "K989",
+  "title": "MF2-VIX + VIX\u00b2 Convexity Synthesis",
+  "date": "2026-04-08",
+  "method": "MF2-GARCH with VIX\u00b2 convexity-enhanced tau variants",
+  "builds_on": [
+    "K970 (MF2-VIX)",
+    "K987 (VIX\u00b2 nonlinearity)",
+    "K986 (LASSO VIX\u00b2 selection)"
+  ],
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2006-01-05 to 2026-04-06",
+  "sample_sizes": {
+    "total": 5093,
+    "IS": 3269,
+    "OOS": 1824
+  },
+  "IS_period": "2006-01-05 to 2018-12-31",
+  "OOS_period": "2019-01-02 to 2026-04-06",
+  "tau_calibration": {
+    "MF2-VIX": "tau = (VIX_{t-1}/sqrt(252))^2, no calibration needed",
+    "MF2-VIX2": {
+      "formula": "tau = alpha + beta1*VIX^2/252 + beta2*VIX^4/252^2",
+      "alpha": 0.16421286342204872,
+      "beta1": 0.4283361413620309,
+      "beta2": 0.061381190740145086
+    },
+    "MF2-Poly": {
+      "formula": "tau = a + b1*VIX/sqrt(252) + b2*VIX^2/252",
+      "a": 2.4832709314491175,
+      "b1": -4.337005723938379,
+      "b2": 2.3482352334473626
+    },
+    "MF2-Piecewise": {
+      "formula": "tau = (VIX/sqrt(252))^2 * (1 + delta*max(VIX-20,0))",
+      "delta": 0.001
+    }
+  },
+  "models": {
+    "GJR": {
+      "params": {
+        "omega": 0.022533406871819837,
+        "alpha[1]": 1.7435952835598298e-09,
+        "gamma[1]": 0.2700699482002377,
+        "beta[1]": 0.8596515074631185,
+        "nu": 5.712624713867045
+      },
+      "persistence": 0.9946864833068326
+    },
+    "MF2-VIX": {
+      "params": {
+        "omega": 0.04370777486526116,
+        "alpha[1]": 0.0,
+        "gamma[1]": 0.11267756298088119,
+        "beta[1]": 0.8738334718260328,
+        "nu": 7.0208423852438475
+      },
+      "persistence_short": 0.9301722533164734
+    },
+    "MF2-VIX2": {
+      "params": {
+        "omega": 0.06424363688176371,
+        "alpha[1]": 2.0709510458503067e-09,
+        "gamma[1]": 0.12191390458757712,
+        "beta[1]": 0.8683988990597308,
+        "nu": 6.805876301915852
+      },
+      "persistence_short": 0.9293558534244704
+    },
+    "MF2-Poly": {
+      "params": {
+        "omega": 0.05110991311592401,
+        "alpha[1]": 2.4156346455884337e-09,
+        "gamma[1]": 0.16631275392297268,
+        "beta[1]": 0.871595619822428,
+        "nu": 5.798745099260827
+      },
+      "persistence_short": 0.9547519991995489
+    },
+    "MF2-Piecewise": {
+      "params": {
+        "omega": 0.04401933808047091,
+        "alpha[1]": 0.0,
+        "gamma[1]": 0.11200193638499685,
+        "beta[1]": 0.8733795254612927,
+        "nu": 7.026344416692076
+      },
+      "persistence_short": 0.9293804936537912
+    },
+    "GJR-X": {
+      "params": {
+        "omega": 1e-06,
+        "alpha": 1e-06,
+        "gamma": 0.2918404017442873,
+        "beta": 0.7506183973342166,
+        "delta": 0.08345329128341335,
+        "nu": 6.556285648115357
+      },
+      "persistence": 0.8965395982063603
+    }
+  },
+  "evaluation": {
+    "GJR": {
+      "QLIKE": 0.9380483109473867,
+      "MSE": 28.125333582835182,
+      "OOS_R2": 0.25345835362103675,
+      "MZ_R2": 0.2888310471961326,
+      "MZ_intercept": 0.2719585613698977,
+      "MZ_slope": 0.7427510847707652
+    },
+    "MF2-VIX": {
+      "QLIKE": 0.8487047290244266,
+      "MSE": 29.21695213157337,
+      "OOS_R2": 0.22448309876076467,
+      "MZ_R2": 0.2843391918224214,
+      "MZ_intercept": 0.4116475992625841,
+      "MZ_slope": 0.6859908468712635
+    },
+    "MF2-VIX2": {
+      "QLIKE": 0.854926996345065,
+      "MSE": 68.43902479222976,
+      "OOS_R2": -0.8166036002553783,
+      "MZ_R2": 0.22775656472366912,
+      "MZ_intercept": 0.8993135057292652,
+      "MZ_slope": 0.3189124135107409
+    },
+    "MF2-Poly": {
+      "QLIKE": 0.8923385225611725,
+      "MSE": 74.82814257878059,
+      "OOS_R2": -0.986192433654735,
+      "MZ_R2": 0.29052492786400397,
+      "MZ_intercept": 0.7652138092033216,
+      "MZ_slope": 0.3245670698449982
+    },
+    "MF2-Piecewise": {
+      "QLIKE": 0.8485873044435446,
+      "MSE": 29.63221525118597,
+      "OOS_R2": 0.21346060858894123,
+      "MZ_R2": 0.282329387742537,
+      "MZ_intercept": 0.4323577725852991,
+      "MZ_slope": 0.669916007691997
+    },
+    "GJR-X": {
+      "QLIKE": 0.8750628199020009,
+      "MSE": 26.260128807383456,
+      "OOS_R2": 0.30296720797110377,
+      "MZ_R2": 0.3044835976611098,
+      "MZ_intercept": 0.08406990234237986,
+      "MZ_slope": 0.9342563585305823
+    }
+  },
+  "dm_tests": {
+    "GJR vs MF2-VIX": {
+      "t_stat": 2.8173457138340656,
+      "p_value": 0.004842237309588215
+    },
+    "GJR vs MF2-VIX2": {
+      "t_stat": 2.731052101335949,
+      "p_value": 0.006313249015053257
+    },
+    "MF2-VIX vs MF2-VIX2": {
+      "t_stat": -2.264576023666487,
+      "p_value": 0.023538709625715803
+    },
+    "GJR vs MF2-Poly": {
+      "t_stat": 1.6682505843700461,
+      "p_value": 0.0952659930552262
+    },
+    "MF2-VIX vs MF2-Poly": {
+      "t_stat": -3.7827069451340014,
+      "p_value": 0.00015513202097650058
+    },
+    "GJR vs MF2-Piecewise": {
+      "t_stat": 2.811270644591649,
+      "p_value": 0.004934625826165995
+    },
+    "MF2-VIX vs MF2-Piecewise": {
+      "t_stat": 0.8147332322190542,
+      "p_value": 0.41522502660256966
+    },
+    "GJR vs GJR-X": {
+      "t_stat": 2.125401339877014,
+      "p_value": 0.03355313858387965
+    },
+    "MF2-VIX vs GJR-X": {
+      "t_stat": -4.449474503466846,
+      "p_value": 8.608064764770162e-06
+    }
+  },
+  "var_backtesting": {
+    "GJR_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 28,
+      "n_total": 1824,
+      "violation_rate": 0.015350877192982455,
+      "expected_rate": 0.01,
+      "kupiec_stat": 4.533748809905152,
+      "kupiec_p": 0.03323274237969098,
+      "christoffersen_stat": 0.0,
+      "christoffersen_p": 1.0,
+      "es_excess_mean": -0.1949417461907055,
+      "es_t_stat": -1.108880380183904,
+      "es_p_value": 0.2674817887606109
+    },
+    "MF2-VIX_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 21,
+      "n_total": 1824,
+      "violation_rate": 0.011513157894736841,
+      "expected_rate": 0.01,
+      "kupiec_stat": 0.4022496809301952,
+      "kupiec_p": 0.5259297091472155,
+      "christoffersen_stat": 0.0,
+      "christoffersen_p": 1.0,
+      "es_excess_mean": -0.11165881313284483,
+      "es_t_stat": -0.7731841588080957,
+      "es_p_value": 0.43941339987069505
+    },
+    "MF2-VIX2_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 25,
+      "n_total": 1824,
+      "violation_rate": 0.013706140350877192,
+      "expected_rate": 0.01,
+      "kupiec_stat": 2.2682802238897075,
+      "kupiec_p": 0.1320463605436717,
+      "christoffersen_stat": 0.0,
+      "christoffersen_p": 1.0,
+      "es_excess_mean": -0.05196318834071386,
+      "es_t_stat": -0.3759924363636354,
+      "es_p_value": 0.7069225190685287
+    },
+    "MF2-Poly_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 31,
+      "n_total": 1824,
+      "violation_rate": 0.01699561403508772,
+      "expected_rate": 0.01,
+      "kupiec_stat": 7.453332454161675,
+      "kupiec_p": 0.00633191110509701,
+      "christoffersen_stat": 0.0,
+      "christoffersen_p": 1.0,
+      "es_excess_mean": -0.10684339059245081,
+      "es_t_stat": -0.9336481651441058,
+      "es_p_value": 0.35048541136137734
+    },
+    "MF2-Piecewise_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 22,
+      "n_total": 1824,
+      "violation_rate": 0.01206140350877193,
+      "expected_rate": 0.01,
+      "kupiec_stat": 0.7345552319125588,
+      "kupiec_p": 0.39141063360822603,
+      "christoffersen_stat": 0.0,
+      "christoffersen_p": 1.0,
+      "es_excess_mean": -0.05111847857658694,
+      "es_t_stat": -0.3413641689925598,
+      "es_p_value": 0.7328294458128217
+    },
+    "GJR-X_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 24,
+      "n_total": 1824,
+      "violation_rate": 0.013157894736842105,
+      "expected_rate": 0.01,
+      "kupiec_stat": 1.6713613662150557,
+      "kupiec_p": 0.1960762898764311,
+      "christoffersen_stat": 0.0,
+      "christoffersen_p": 1.0,
+      "es_excess_mean": -0.07914073372806453,
+      "es_t_stat": -0.5228866772410319,
+      "es_p_value": 0.6010531163759487
+    },
+    "GJR_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 112,
+      "n_total": 1824,
+      "violation_rate": 0.06140350877192982,
+      "expected_rate": 0.05,
+      "kupiec_stat": 4.670132101904713,
+      "kupiec_p": 0.030691566655225655,
+      "christoffersen_stat": 0.0023259285080854397,
+      "christoffersen_p": 0.9615346301916041,
+      "es_excess_mean": -0.006961054665814517,
+      "es_t_stat": -0.08802018420604843,
+      "es_p_value": 0.9298606337281745
+    },
+    "MF2-VIX_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 110,
+      "n_total": 1824,
+      "violation_rate": 0.06030701754385965,
+      "expected_rate": 0.05,
+      "kupiec_stat": 3.838315255573008,
+      "kupiec_p": 0.05009383233077935,
+      "christoffersen_stat": 0.07136970790963915,
+      "christoffersen_p": 0.7893528280534823,
+      "es_excess_mean": 0.05454239306463938,
+      "es_t_stat": 0.7965393245396823,
+      "es_p_value": 0.425718628155352
+    },
+    "MF2-VIX2_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 113,
+      "n_total": 1824,
+      "violation_rate": 0.06195175438596491,
+      "expected_rate": 0.05,
+      "kupiec_stat": 5.1146590316340905,
+      "kupiec_p": 0.023724527912904803,
+      "christoffersen_stat": 3.1253355672333782e-06,
+      "christoffersen_p": 0.9985894510484883,
+      "es_excess_mean": 0.02200240938237186,
+      "es_t_stat": 0.33970764490835664,
+      "es_p_value": 0.7340767039803664
+    },
+    "MF2-Poly_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 113,
+      "n_total": 1824,
+      "violation_rate": 0.06195175438596491,
+      "expected_rate": 0.05,
+      "kupiec_stat": 5.1146590316340905,
+      "kupiec_p": 0.023724527912904803,
+      "christoffersen_stat": 3.1253355672333782e-06,
+      "christoffersen_p": 0.9985894510484883,
+      "es_excess_mean": -0.01805002713904184,
+      "es_t_stat": -0.24936863936437084,
+      "es_p_value": 0.8030756411927917
+    },
+    "MF2-Piecewise_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 111,
+      "n_total": 1824,
+      "violation_rate": 0.06085526315789474,
+      "expected_rate": 0.05,
+      "kupiec_stat": 4.244630776665787,
+      "kupiec_p": 0.03937463062397428,
+      "christoffersen_stat": 0.009673292499343233,
+      "christoffersen_p": 0.9216520754055679,
+      "es_excess_mean": 0.062350038720861777,
+      "es_t_stat": 0.9113384305162018,
+      "es_p_value": 0.3621170834315266
+    },
+    "GJR-X_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 111,
+      "n_total": 1824,
+      "violation_rate": 0.06085526315789474,
+      "expected_rate": 0.05,
+      "kupiec_stat": 4.244630776665787,
+      "kupiec_p": 0.03937463062397428,
+      "christoffersen_stat": 0.2458396415504609,
+      "christoffersen_p": 0.6200198694097881,
+      "es_excess_mean": 0.03590389778453107,
+      "es_t_stat": 0.49979230163760374,
+      "es_p_value": 0.6172213318286404
+    }
+  },
+  "improvements_vs_gjr_pct": {
+    "MF2-VIX": 9.524411576705157,
+    "MF2-VIX2": 8.861091015490764,
+    "MF2-Poly": 4.872860795415682,
+    "MF2-Piecewise": 9.536929544011494,
+    "GJR-X": 6.714525287271542
+  },
+  "improvements_vs_mf2vix_pct": {
+    "GJR": -10.52705126618762,
+    "MF2-VIX2": -0.7331486567525971,
+    "MF2-Poly": -5.14122191670857,
+    "MF2-Piecewise": 0.013835740142159873,
+    "GJR-X": -3.10568445964387
+  },
+  "best_model": "MF2-Piecewise",
+  "conclusion": "Best model by QLIKE: MF2-Piecewise (0.8486); GJR baseline QLIKE: 0.9380; MF2-Piecewise: 9.54% improvement over GJR; MF2-VIX: 9.52% improvement over GJR; MF2-VIX2: 8.86% improvement over GJR; GJR-X: 6.71% improvement over GJR; MF2-Poly: 4.87% improvement over GJR; --- vs MF2-VIX ---; MF2-Piecewise: 0.01% improvement over MF2-VIX; MF2-VIX2: 0.73% worse over MF2-VIX; GJR-X: 3.11% worse over MF2-VIX; MF2-Poly: 5.14% worse over MF2-VIX; DM significant (|t|>3.0): MF2-VIX vs MF2-Poly, MF2-VIX vs GJR-X",
+  "references": [
+    "Conrad, C. & Engle, R. (2025). Two-component GARCH. J. Applied Econometrics.",
+    "Patton, A.J. (2011). Volatility forecast comparison. J. Econometrics, 160(1), 246-256.",
+    "Harvey, C.R., Liu, Y., & Zhu, H. (2016). ...and cross-section. RFS.",
+    "McNeil, A.J. & Frey, R. (2000). Estimation of tail-related risk measures. J. Empirical Finance."
+  ],
+  "seed": 42,
+  "timestamp": "2026-04-08T04:48:41.336885"
+}
