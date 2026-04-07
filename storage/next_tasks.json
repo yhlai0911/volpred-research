@@ -1,36 +1,30 @@
 {
-  "updated_at": "2026-04-07T12:00:00Z",
+  "updated_at": "2026-04-07T12:15:00Z",
   "note": "Cron 讀此檔取最高優先任務。完成後補充新任務。空了才讀 research_program.md 全文。",
   "tasks": [
     {
-      "id": "K960",
-      "topic": "HAR-RV 正式實驗（SPY 5-min 達 60 天門檻）",
-      "source": "research_program.md P2 高優先",
+      "id": "K968",
+      "topic": "TXO Put-Call Ratio Mean-Reversion (TAIFEX 數據)",
+      "source": "research_program.md Gemini #1 建議",
       "priority": 1
     },
     {
-      "id": "K961",
-      "topic": "Transfer Entropy VT Budgeting (TE-VT)，FRED 數據可得",
-      "source": "research_program.md Gemini 建議，詳見 docs/research_archive/detailed_research_topics.md",
+      "id": "K969",
+      "topic": "Bespoke RV (Patton & Zhang JoE 2026) — ML 最優化 RV 加重日末數據",
+      "source": "文獻搜尋 2026-04 HAR-RV 新方法",
       "priority": 2
     },
     {
-      "id": "K962",
-      "topic": "Copula-based GARCH Hedge（Hsu et al.）",
-      "source": "research_program.md 期貨避險方法論",
+      "id": "K970",
+      "topic": "MF2-GARCH (Conrad & Engle JAE 2025) — 短期 GJR + 長期 MEM 混頻模型",
+      "source": "文獻搜尋 ML-GARCH 混合方向",
       "priority": 3
     },
     {
-      "id": "K963",
-      "topic": "Bayesian Subset Selection for TARMA — Chen, Liu, Gerlach (2011)",
-      "source": "research_program.md Bayesian 方法論",
+      "id": "K971",
+      "topic": "CAViaR 策略整合 — 用 CAViaR 替代 GARCH 做 VT 風險管理 (K967 follow-up)",
+      "source": "K967 ★ CAViaR beats GARCH VaR 發現",
       "priority": 4
-    },
-    {
-      "id": "K964",
-      "topic": "SEC Filing 語調分析（Loughran-McDonald）",
-      "source": "docs/research_archive/detailed_research_topics.md SEC Filings",
-      "priority": 5
     }
   ]
 }

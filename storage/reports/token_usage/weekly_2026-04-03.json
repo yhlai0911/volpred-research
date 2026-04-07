@@ -1,150 +1,81 @@
 {
   "report_type": "weekly",
   "week_range": "2026-04-03 → 2026-04-10",
-  "total_commits": 272,
-  "total_estimated_tokens": 4603766,
-  "daily_breakdown": {
-    "2026-04-03": {
-      "commits": 37,
-      "estimated_tokens": 563174,
-      "weekday": "Friday"
+  "total": {
+    "input_tokens": 107828,
+    "output_tokens": 1854175,
+    "cache_creation": 21291758,
+    "cache_read": 2640198178,
+    "total_tokens": 2663451939,
+    "api_calls": 7828,
+    "cost_usd": 4500.1983
+  },
+  "by_model": {
+    "<synthetic>": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_creation": 0,
+      "cache_read": 0,
+      "total_tokens": 0,
+      "api_calls": 74,
+      "cost_usd": 0.0
     },
-    "2026-04-04": {
-      "commits": 74,
-      "estimated_tokens": 1097776,
-      "weekday": "Saturday"
-    },
-    "2026-04-05": {
-      "commits": 121,
-      "estimated_tokens": 5581162,
-      "weekday": "Sunday"
-    },
-    "2026-04-06": {
-      "commits": 40,
-      "estimated_tokens": 1520170,
-      "weekday": "Monday"
+    "claude-opus-4-6": {
+      "input_tokens": 107828,
+      "output_tokens": 1854175,
+      "cache_creation": 21291758,
+      "cache_read": 2640198178,
+      "total_tokens": 2663451939,
+      "api_calls": 7754,
+      "cost_usd": 4500.1983
     }
   },
-  "categories": {
-    "paper_review": {
-      "emoji": "📝",
-      "description": "論文審查/修訂（讀寫完整 LaTeX，多輪 review）",
-      "commits": 73,
-      "lines_changed": 87501,
-      "estimated_tokens": 1668000,
-      "percentage": 36.2
+  "daily_breakdown": {
+    "2026-04-03": {
+      "input_tokens": 2118,
+      "output_tokens": 261629,
+      "cache_creation": 2762970,
+      "cache_read": 356579087,
+      "total_tokens": 359605804,
+      "api_calls": 1142,
+      "cost_usd": 606.3283
     },
-    "experiment": {
-      "emoji": "🔬",
-      "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
-      "commits": 24,
-      "lines_changed": 135736,
-      "estimated_tokens": 740000,
-      "percentage": 16.1
+    "2026-04-04": {
+      "input_tokens": 30423,
+      "output_tokens": 294664,
+      "cache_creation": 1583174,
+      "cache_read": 788842094,
+      "total_tokens": 790750355,
+      "api_calls": 1549,
+      "cost_usd": 1235.5038
     },
-    "paper_writing": {
-      "emoji": "📄",
-      "description": "論文撰寫/組織",
-      "commits": 14,
-      "lines_changed": 41460,
-      "estimated_tokens": 668000,
-      "percentage": 14.5
+    "2026-04-05": {
+      "input_tokens": 5381,
+      "output_tokens": 732433,
+      "cache_creation": 4788512,
+      "cache_read": 992134425,
+      "total_tokens": 997660751,
+      "api_calls": 2991,
+      "cost_usd": 1632.9994
     },
-    "other": {
-      "emoji": "❔",
-      "description": "其他",
-      "commits": 75,
-      "lines_changed": 107830,
-      "estimated_tokens": 581320,
-      "percentage": 12.6
+    "2026-04-06": {
+      "input_tokens": 5916,
+      "output_tokens": 366361,
+      "cache_creation": 6075716,
+      "cache_read": 331574768,
+      "total_tokens": 338022761,
+      "api_calls": 1301,
+      "cost_usd": 638.8476
     },
-    "latex_content_fix": {
-      "emoji": "🔧",
-      "description": "LaTeX/內容批量修復（讀寫大型 JSON）",
-      "commits": 12,
-      "lines_changed": 8883,
-      "estimated_tokens": 416724,
-      "percentage": 9.1
-    },
-    "article_writing": {
-      "emoji": "✍️",
-      "description": "文章撰寫與發佈",
-      "commits": 21,
-      "lines_changed": 7890,
-      "estimated_tokens": 294240,
-      "percentage": 6.4
-    },
-    "ops_patrol": {
-      "emoji": "🛡️",
-      "description": "平台巡檢",
-      "commits": 10,
-      "lines_changed": 220,
-      "estimated_tokens": 62640,
-      "percentage": 1.4
-    },
-    "feed_ops": {
-      "emoji": "📡",
-      "description": "Feed 發佈/同步操作",
-      "commits": 7,
-      "lines_changed": 1460,
-      "estimated_tokens": 39680,
-      "percentage": 0.9
-    },
-    "research_program": {
-      "emoji": "📋",
-      "description": "研究計畫/規範更新",
-      "commits": 13,
-      "lines_changed": 2976,
-      "estimated_tokens": 37904,
-      "percentage": 0.8
-    },
-    "codex_review": {
-      "emoji": "🤖",
-      "description": "Codex 審查",
-      "commits": 4,
-      "lines_changed": 1735,
-      "estimated_tokens": 29880,
-      "percentage": 0.6
-    },
-    "bugfix": {
-      "emoji": "🐛",
-      "description": "Bug 修復/程式碼改善",
-      "commits": 4,
-      "lines_changed": 85,
-      "estimated_tokens": 25020,
-      "percentage": 0.5
-    },
-    "knowledge_index": {
-      "emoji": "📚",
-      "description": "知識索引建立/更新",
-      "commits": 4,
-      "lines_changed": 367,
-      "estimated_tokens": 18936,
-      "percentage": 0.4
-    },
-    "skill_process": {
-      "emoji": "⚙️",
-      "description": "流程/技能規範更新",
-      "commits": 4,
-      "lines_changed": 107,
-      "estimated_tokens": 12642,
-      "percentage": 0.3
-    },
-    "periodic_sync": {
-      "emoji": "🔄",
-      "description": "定期狀態同步（低 token）",
-      "commits": 6,
-      "lines_changed": 344,
-      "estimated_tokens": 6688,
-      "percentage": 0.1
-    },
-    "experience_log": {
-      "emoji": "📝",
-      "description": "經驗記錄/Session 總結",
-      "commits": 1,
-      "lines_changed": 23,
-      "estimated_tokens": 2092,
-      "percentage": 0.0
+    "2026-04-07": {
+      "input_tokens": 63990,
+      "output_tokens": 199088,
+      "cache_creation": 6081386,
+      "cache_read": 171067804,
+      "total_tokens": 177412268,
+      "api_calls": 845,
+      "cost_usd": 386.5191
     }
-  }
+  },
+  "session_count": 19
 }

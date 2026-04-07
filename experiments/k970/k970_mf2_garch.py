@@ -72,18 +72,21 @@ print(f"VIX aligned: {vix_close.notna().sum()} obs")
 # ============================================================
 
 def compute_tau_rv(r2, window=22):
-    """Rolling 22-day realized variance (average of r^2)."""
-    tau = r2.rolling(window=window, min_periods=window).mean()
+    """Rolling 22-day realized variance (average of r^2).
+    Shifted by 1 to avoid using r2[t] when forecasting r2[t]."""
+    tau = r2.rolling(window=window, min_periods=window).mean().shift(1)
     return tau
 
 def compute_tau_vix(vix_level):
-    """VIX-based long-run component: (VIX/sqrt(252))^2 = daily implied variance."""
-    tau = (vix_level / np.sqrt(252)) ** 2
+    """VIX-based long-run component: (VIX/sqrt(252))^2 = daily implied variance.
+    Shifted by 1 — use yesterday's closing VIX for today's forecast."""
+    tau = ((vix_level / np.sqrt(252)) ** 2).shift(1)
     return tau
 
 def compute_tau_ema(r2, halflife=22):
-    """EMA of squared returns."""
-    tau = r2.ewm(halflife=halflife, min_periods=22).mean()
+    """EMA of squared returns.
+    Shifted by 1 to avoid data leakage."""
+    tau = r2.ewm(halflife=halflife, min_periods=22).mean().shift(1)
     return tau
 
 # Compute all tau variants
@@ -169,8 +172,14 @@ all_ret = spy['ret'].values
 is_n = len(spy_is)
 oos_n = len(spy_oos)
 
-# Initial variance from IS fitted values
-initial_var_gjr = res_gjr.conditional_volatility.iloc[-1] ** 2
+# Compute proper one-step-ahead forecast from last IS day
+last_is_h = res_gjr.conditional_volatility.iloc[-1] ** 2
+last_is_r = spy_is['ret'].iloc[-1]
+last_is_r2 = last_is_r ** 2
+last_is_ind = 1.0 if last_is_r < 0 else 0.0
+initial_var_gjr = (params_gjr['omega'] + params_gjr['alpha[1]'] * last_is_r2
+                   + params_gjr['gamma[1]'] * last_is_r2 * last_is_ind
+                   + params_gjr['beta[1]'] * last_is_h)
 
 # Run recursion on full OOS period
 oos_h_gjr = gjr_recursion(params_gjr, spy_oos['ret'], initial_var_gjr)
@@ -208,7 +217,14 @@ for name, tau_col in tau_variants.items():
     tau_oos = spy_oos[tau_col].values
     r_tilde_oos = spy_oos['ret'].values / np.sqrt(tau_oos)
 
-    initial_var_mf2 = res_mf2.conditional_volatility.iloc[-1] ** 2
+    # Compute proper one-step-ahead forecast for short-run component
+    last_is_g = res_mf2.conditional_volatility.iloc[-1] ** 2
+    last_is_rtilde = r_tilde_is[-1]
+    last_is_rtilde2 = last_is_rtilde ** 2
+    last_is_ind_mf2 = 1.0 if last_is_rtilde < 0 else 0.0
+    initial_var_mf2 = (params_mf2['omega'] + params_mf2['alpha[1]'] * last_is_rtilde2
+                       + params_mf2['gamma[1]'] * last_is_rtilde2 * last_is_ind_mf2
+                       + params_mf2['beta[1]'] * last_is_g)
     r_tilde_series_oos = pd.Series(r_tilde_oos, index=spy_oos.index)
     oos_g = gjr_recursion(params_mf2, r_tilde_series_oos, initial_var_mf2)
 

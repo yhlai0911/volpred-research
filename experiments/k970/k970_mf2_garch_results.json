@@ -3,110 +3,110 @@
   "title": "MF2-GARCH: Mixed-Frequency Squared GARCH",
   "method": "Conrad & Engle (2025) MF2-GARCH simplified implementation",
   "data_source": "yfinance (SPY, ^VIX)",
-  "data_period": "2006-02-03 to 2026-04-06",
+  "data_period": "2006-02-06 to 2026-04-06",
   "sample_sizes": {
-    "total": 5073,
-    "IS": 3249,
+    "total": 5072,
+    "IS": 3248,
     "OOS": 1824
   },
-  "IS_period": "2006-02-03 to 2018-12-31",
+  "IS_period": "2006-02-06 to 2018-12-31",
   "OOS_period": "2019-01-02 to 2026-04-06",
   "models": {
     "GJR": {
       "params": {
-        "omega": 0.02264431749430353,
+        "omega": 0.02265449447746716,
         "alpha[1]": 0.0,
-        "gamma[1]": 0.27214542424034416,
-        "beta[1]": 0.8587659126984177,
-        "nu": 5.781009605953971
+        "gamma[1]": 0.2721264461697924,
+        "beta[1]": 0.8587805651509035,
+        "nu": 5.777834514142653
       },
-      "persistence": 0.9948386248185899
+      "persistence": 0.9948437882357997
     },
     "MF2-RV": {
       "params": {
-        "omega": 0.21325452823371427,
-        "alpha[1]": 5.7042100227247544e-11,
-        "gamma[1]": 0.21682617753231592,
-        "beta[1]": 0.6962143877882364,
-        "nu": 10.236279968531267
+        "omega": 0.2848760942512211,
+        "alpha[1]": 1.0127735567397488e-09,
+        "gamma[1]": 0.254539227095738,
+        "beta[1]": 0.6652912049843084,
+        "nu": 4.669457784795906
       },
-      "persistence_short": 0.8046274766114365
+      "persistence_short": 0.792560819544951
     },
     "MF2-VIX": {
       "params": {
-        "omega": 0.03810464854501287,
-        "alpha[1]": 1.471928705565465e-08,
-        "gamma[1]": 0.16116534200115798,
-        "beta[1]": 0.8694924468804494,
-        "nu": 12.992347608876685
+        "omega": 0.04426742447608179,
+        "alpha[1]": 0.0,
+        "gamma[1]": 0.11457342400778757,
+        "beta[1]": 0.8719465165352276,
+        "nu": 7.1025579790136355
       },
-      "persistence_short": 0.9500751326003154
+      "persistence_short": 0.9292332285391214
     },
     "MF2-EMA": {
       "params": {
-        "omega": 0.11012352871929201,
-        "alpha[1]": 0.0,
-        "gamma[1]": 0.23443884958283856,
-        "beta[1]": 0.7772952647638409,
-        "nu": 8.571246590010817
+        "omega": 0.13596933858266724,
+        "alpha[1]": 7.042883692090422e-10,
+        "gamma[1]": 0.25974436816252255,
+        "beta[1]": 0.7578263499846819,
+        "nu": 5.357670874054913
       },
-      "persistence_short": 0.8945146895552603
+      "persistence_short": 0.8876985347702315
     }
   },
   "evaluation": {
     "GJR": {
-      "QLIKE": 0.938641944616835,
-      "MSE": 28.144841491397074,
-      "MZ_R2": 0.28915491250756964,
-      "MZ_intercept": 0.27274929208804044,
-      "MZ_slope": 0.7406495518382626
+      "QLIKE": 0.9383219490919632,
+      "MSE": 28.143681855177874,
+      "MZ_R2": 0.28914964678672006,
+      "MZ_intercept": 0.27397567571334525,
+      "MZ_slope": 0.7407073300005742
     },
     "MF2-RV": {
-      "QLIKE": 0.8050593818111673,
-      "MSE": 24.74352819888117,
-      "MZ_R2": 0.37732757835384045,
-      "MZ_intercept": 0.14596376181223503,
-      "MZ_slope": 0.7736333127061185
+      "QLIKE": 0.9804847608732884,
+      "MSE": 34.78218788903098,
+      "MZ_R2": 0.2929238680338693,
+      "MZ_intercept": 0.31677136519663157,
+      "MZ_slope": 0.5455643156645511
     },
     "MF2-VIX": {
-      "QLIKE": 0.7722141209525556,
-      "MSE": 21.705366995522873,
-      "MZ_R2": 0.4249694309734944,
-      "MZ_intercept": -0.001852128682283895,
-      "MZ_slope": 1.050111849358661
+      "QLIKE": 0.8487365350889838,
+      "MSE": 29.2899129849062,
+      "MZ_R2": 0.2842651395397129,
+      "MZ_intercept": 0.4160496150233346,
+      "MZ_slope": 0.6826562187409019
     },
     "MF2-EMA": {
-      "QLIKE": 0.8342085968487379,
-      "MSE": 23.988913724758245,
-      "MZ_R2": 0.4049202042850121,
-      "MZ_intercept": 0.15245638717783627,
-      "MZ_slope": 0.7617964857184274
+      "QLIKE": 0.9266567368303545,
+      "MSE": 35.85544491980946,
+      "MZ_R2": 0.30865136644196456,
+      "MZ_intercept": 0.4216114651606449,
+      "MZ_slope": 0.5256441323065373
     }
   },
   "dm_tests": {
     "GJR vs MF2-RV": {
-      "t_stat": 3.9116407149106367,
-      "p_value": 9.16712190468516e-05
+      "t_stat": -1.5853156491266926,
+      "p_value": 0.11289463523783527
     },
     "GJR vs MF2-VIX": {
-      "t_stat": 4.1714399405654,
-      "p_value": 3.0268083944129387e-05
+      "t_stat": 2.93896349540236,
+      "p_value": 0.003293118581728871
     },
     "GJR vs MF2-EMA": {
-      "t_stat": 2.901403594882914,
-      "p_value": 0.0037149506802272025
+      "t_stat": 0.33444978542866927,
+      "p_value": 0.7380401767268459
     },
     "MF2-RV vs MF2-VIX": {
-      "t_stat": 1.9615595620858801,
-      "p_value": 0.04981378412283277
+      "t_stat": 5.354807773005538,
+      "p_value": 8.564742071115461e-08
     },
     "MF2-RV vs MF2-EMA": {
-      "t_stat": -3.1264505859595255,
-      "p_value": 0.0017693023543745579
+      "t_stat": 2.981931828409702,
+      "p_value": 0.0028643577294191758
     },
     "MF2-VIX vs MF2-EMA": {
-      "t_stat": -3.666152514262754,
-      "p_value": 0.00024622711034449907
+      "t_stat": -4.79197192504649,
+      "p_value": 1.6515001737271717e-06
     }
   },
   "var_backtesting": {
@@ -123,34 +123,34 @@
     },
     "MF2-RV_VaR1": {
       "alpha": 0.01,
-      "n_violations": 24,
+      "n_violations": 28,
       "n_total": 1824,
-      "violation_rate": 0.013157894736842105,
+      "violation_rate": 0.015350877192982455,
       "expected_rate": 0.01,
-      "kupiec_stat": 1.6713613662150557,
-      "kupiec_p": 0.1960762898764311,
+      "kupiec_stat": 4.533748809905152,
+      "kupiec_p": 0.03323274237969098,
       "christoffersen_stat": 0.0,
       "christoffersen_p": 1.0
     },
     "MF2-VIX_VaR1": {
       "alpha": 0.01,
-      "n_violations": 13,
+      "n_violations": 22,
       "n_total": 1824,
-      "violation_rate": 0.00712719298245614,
+      "violation_rate": 0.01206140350877193,
       "expected_rate": 0.01,
-      "kupiec_stat": 1.6898325709544206,
-      "kupiec_p": 0.19362304147239262,
+      "kupiec_stat": 0.7345552319125588,
+      "kupiec_p": 0.39141063360822603,
       "christoffersen_stat": 0.0,
       "christoffersen_p": 1.0
     },
     "MF2-EMA_VaR1": {
       "alpha": 0.01,
-      "n_violations": 23,
+      "n_violations": 25,
       "n_total": 1824,
-      "violation_rate": 0.012609649122807017,
+      "violation_rate": 0.013706140350877192,
       "expected_rate": 0.01,
-      "kupiec_stat": 1.1589110824576174,
-      "kupiec_p": 0.2816914868524941,
+      "kupiec_stat": 2.2682802238897075,
+      "kupiec_p": 0.13204636054367125,
       "christoffersen_stat": 0.0,
       "christoffersen_p": 1.0
     },
@@ -161,46 +161,46 @@
       "violation_rate": 0.06140350877192982,
       "expected_rate": 0.05,
       "kupiec_stat": 4.670132101904713,
-      "kupiec_p": 0.030691566655225655,
+      "kupiec_p": 0.030691566655225544,
       "christoffersen_stat": 0.0023259285080854397,
       "christoffersen_p": 0.9615346301916041
     },
     "MF2-RV_VaR5": {
       "alpha": 0.05,
-      "n_violations": 106,
+      "n_violations": 93,
       "n_total": 1824,
-      "violation_rate": 0.0581140350877193,
+      "violation_rate": 0.05098684210526316,
       "expected_rate": 0.05,
-      "kupiec_stat": 2.4082193288604543,
-      "kupiec_p": 0.12069959132416508,
-      "christoffersen_stat": 0.964163811293453,
-      "christoffersen_p": 0.32614003336287267
+      "kupiec_stat": 0.03716532344323875,
+      "kupiec_p": 0.8471288398674606,
+      "christoffersen_stat": 0.13628705324697776,
+      "christoffersen_p": 0.7120004458222391
     },
     "MF2-VIX_VaR5": {
       "alpha": 0.05,
-      "n_violations": 83,
+      "n_violations": 109,
       "n_total": 1824,
-      "violation_rate": 0.04550438596491228,
+      "violation_rate": 0.05975877192982456,
       "expected_rate": 0.05,
-      "kupiec_stat": 0.799171160642036,
-      "kupiec_p": 0.3713412944402704,
-      "christoffersen_stat": 0.18852382986109717,
-      "christoffersen_p": 0.6641480712608097
+      "kupiec_stat": 3.451348664318168,
+      "kupiec_p": 0.06320018074028277,
+      "christoffersen_stat": 0.047567378693777584,
+      "christoffersen_p": 0.8273516105591915
     },
     "MF2-EMA_VaR5": {
       "alpha": 0.05,
-      "n_violations": 108,
+      "n_violations": 102,
       "n_total": 1824,
-      "violation_rate": 0.05921052631578947,
+      "violation_rate": 0.05592105263157895,
       "expected_rate": 0.05,
-      "kupiec_stat": 3.0838971351442126,
-      "kupiec_p": 0.07907085270409919,
-      "christoffersen_stat": 0.3701537460505442,
-      "christoffersen_p": 0.5429204753019532
+      "kupiec_stat": 1.298708209444488,
+      "kupiec_p": 0.2544493188722361,
+      "christoffersen_stat": 0.10212962567139527,
+      "christoffersen_p": 0.749288814282645
     }
   },
   "best_model": "MF2-VIX",
-  "conclusion": "Best model by QLIKE: MF2-VIX (0.7722); GJR baseline QLIKE: 0.9386; MF2-RV: 14.23% improvement over GJR; MF2-VIX: 17.73% improvement over GJR; MF2-EMA: 11.13% improvement over GJR; Significant DM pairs (|t|>3.0): GJR vs MF2-RV, GJR vs MF2-VIX, MF2-RV vs MF2-EMA, MF2-VIX vs MF2-EMA",
+  "conclusion": "Best model by QLIKE: MF2-VIX (0.8487); GJR baseline QLIKE: 0.9383; MF2-RV: 4.49% worse over GJR; MF2-VIX: 9.55% improvement over GJR; MF2-EMA: 1.24% improvement over GJR; Significant DM pairs (|t|>3.0): MF2-RV vs MF2-VIX, MF2-VIX vs MF2-EMA",
   "references": [
     "Conrad, C. & Engle, R. (2025). Two-component GARCH models with exogenous long-run dynamics. J. Applied Econometrics.",
     "Engle, R., Ghysels, E., & Sohn, B. (2013). Stock market volatility and macroeconomic fundamentals. Review of Economics and Statistics.",
@@ -208,10 +208,10 @@
     "Harvey, C.R., Liu, Y., & Zhu, H. (2016). ...and the cross-section of expected returns. Review of Financial Studies."
   ],
   "seed": 42,
-  "timestamp": "2026-04-07T20:37:20.784070",
+  "timestamp": "2026-04-07T20:45:32.933263",
   "qlike_improvements_pct": {
-    "MF2-RV": 14.231471709928512,
-    "MF2-VIX": 17.73070387688857,
-    "MF2-EMA": 11.126004795228713
+    "MF2-RV": -4.49342699721851,
+    "MF2-VIX": 9.54740684577115,
+    "MF2-EMA": 1.2431993382332542
   }
 }

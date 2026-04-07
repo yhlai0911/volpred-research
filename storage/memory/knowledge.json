@@ -21728,5 +21728,134 @@
     "data_source": "yfinance (ETH-USD)",
     "created_at": "2026-04-07T06:35:16.502815+00:00",
     "star_rating": 1
+  },
+  {
+    "id": "know_20260407084856_k960",
+    "experiment_id": "K960",
+    "title": "K960: HAR-RV Formal Pilot ★ — OOS R²=0.243, QLIKE beats GARCH but 19-day sample insufficient",
+    "content": "[提出: research_program.md P2, 執行: Claude] K960: HAR-RV 正式先導實驗。數據: SPY 5-min intraday 56天 (2026-01-14~04-06), 19天 OOS。RV persistence 確認: AC(1)=0.291 vs daily r² AC(1)=-0.040。HAR-RV OOS: R²=0.243 (vs naive), QLIKE=0.118 vs naive 0.180 (改善34%)。Patton (2011) 跨模型公平比較 QLIKE on r²: HAR-RV(1.455) < GARCH(1.631) < GJR(1.792), HAR 方向性勝出。但 DM test t=-1.36 p=0.19 不顯著（僅19天OOS）。Full-sample R²=0.077 (33 obs), 只有 monthly component β_m=1.059 接近顯著。MZ beta=-0.36 (偏差大)。VT pilot 18天熊市不具結論性。★ 核心結論: HAR-RV 預測能力存在但嚴重受限於樣本量。需累積至 252+ OOS 天再重測。繼續每日收集 5-min 數據。",
+    "category": "experiment",
+    "tags": [
+      "har-rv",
+      "realized-variance",
+      "5-min-data",
+      "intraday",
+      "spy",
+      "small-sample",
+      "pilot"
+    ],
+    "data_source": "yfinance 5-min via collect_5min_data.py",
+    "evidence": [
+      "k960_har_rv_results.json"
+    ],
+    "created_at": "2026-04-07T08:48:56.061468Z"
+  },
+  {
+    "id": "know_20260407102910_k965",
+    "experiment_id": "K965",
+    "title": "K965: Wild Bootstrap OHR — SPY/ES HE=0.94, Bootstrap adds CI not better point estimate",
+    "content": "[提出: JRFM 2024, 執行: Claude] K965: Wild Bootstrap Optimal Hedge Ratio。數據: SPY+ES=F 4084天 (2010-2026), corr=0.974。6個方法 OOS 比較: WB-75th HE=0.9437, OLS Static 0.9435, WB-50th 0.9436, WB-25th 0.9420, Rolling-OLS 0.9396, DCC-GARCH 0.9344。DM test: 所有 WB vs OLS |t|<1.0 不顯著。DCC-GARCH 最差 (DM=-1.86 p=0.064)。Bootstrap 分布很窄 (std=0.0087, 95%CI=[0.940,0.968])。Cross-OOS 5期: WB-25th 最穩定 (std=0.011)。結論: 高相關 spot-futures (ρ>0.97) 靜態 OLS 已近最優。Wild Bootstrap 價值在不確定性量化（信賴區間）而非更好的點估計。DCC-GARCH 引入噪音反而更差。方法論意義: 低相關配對（跨品種避險、商品）可能有更大改善空間——這是下一步方向。",
+    "category": "experiment",
+    "tags": [
+      "wild-bootstrap",
+      "hedge-ratio",
+      "futures-hedging",
+      "dcc-garch",
+      "spy",
+      "es-futures",
+      "hedging-effectiveness"
+    ],
+    "data_source": "yfinance SPY + ES=F",
+    "evidence": [
+      "k965_wild_bootstrap_ohr_results.json"
+    ],
+    "created_at": "2026-04-07T10:29:10.514487Z"
+  },
+  {
+    "id": "know_20260407121117_k966",
+    "experiment_id": "K966",
+    "title": "K966: HAR-PD Path-Dependent RV (5-min pilot) — NULL confirmed, 13.8% worse QLIKE OOS",
+    "content": "[提出: arXiv 2503.00851 + K624 follow-up, 執行: Claude] K624 在日頻 r² proxy 測試 HAR-PD → NULL（88% worse）。K966 用 56 天 SPY 5-min RV 重測。Best λ: λ₁=0.01, λ₂=0.20。IS: HAR-PD R²=0.841 vs HAR 0.575（典型過擬合）。OOS: HAR-PD QLIKE=0.377 vs HAR 0.331（worse 13.8%）。R1-only/R2-only/R1+R2 全部 OOS 更差。DM t=-1.37 p=0.19（不顯著，N_OOS=17）。Bootstrap: HAR-PD 僅 10.6% reps 勝出。與 K624 對比：日頻 88% worse → 5-min 13.8% worse，高頻數據減少損害但未反轉方向。結論：path-dependent features（Guyon & Lekeufack 2023）在 HAR 框架下過擬合，標準 HAR 的 5d/22d 平均已捕捉大部分路徑信息。需 200+ 天數據才能確定結論。",
+    "tags": [
+      "HAR-RV",
+      "HAR-PD",
+      "path-dependent",
+      "5-min RV",
+      "pilot",
+      "NULL",
+      "overfitting"
+    ],
+    "data_source": "yfinance SPY 5-min intraday",
+    "created_at": "2026-04-07T12:11:17.713553+00:00",
+    "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407122017_k964",
+    "experiment_id": "K964",
+    "title": "K964: Earnings Season Vol Pattern — NULL, VIX sufficiency confirmed again",
+    "content": "[提出: research_program.md SEC Filings, 執行: Claude] SPY 2006-2026（5075 obs）財報季 vs 非財報季波動率分析。41% 天數屬於財報季。結果：(1) 財報季 |return| ratio=0.981（略低，非更高）。(2) Welch t=-0.557 p=0.578 不顯著。(3) OLS with VIX 控制後 earnings dummy t=1.795 p=0.073 不顯著（Harvey 門檻 3.0）。R²=0.61 VIX 解釋大部分變異。(4) 各季度異質：Q4 earnings 較低 vol（t=-4.19），Q1 較高（t=+4.34），但互相抵消——反映日曆季節性非 earnings 特定效應。(5) Rolling 5yr 效應不穩定（2006-13 正、2016-24 負）。結論：Index-level earnings season vol overlay 不合理，VIX 已吸收 aggregate earnings uncertainty。VIX sufficiency 第 33 次確認。",
+    "tags": [
+      "earnings-season",
+      "volatility-seasonality",
+      "VIX-sufficiency",
+      "NULL",
+      "SPY"
+    ],
+    "data_source": "yfinance SPY + ^VIX 2006-2026",
+    "created_at": "2026-04-07T12:20:17.077242+00:00",
+    "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407122017_k967",
+    "experiment_id": "K967",
+    "title": "K967: Quantile Forecasting ★ — CAViaR beats GARCH VaR, VIX significant at 1% tail",
+    "content": "[提出: arXiv:2508.15922 + research_program.md, 執行: Claude] SPY 2006-2026, IS=3775, OOS=1319, 6 分位數水準。CAViaR（Asymmetric Slope）在全部 6 個分位數勝出（pinball loss 最低），coverage accuracy 最佳（所有 Kupiec p>0.35）。GARCH-t VaR 有 coverage 問題：5%/10%（lower）和 95%/99%（upper）Kupiec 拒絕。DM 顯著：GARCH vs CAViaR at α=0.95 t=3.079（Harvey 通過）。VIX 增量：加入 VIX 到 QR 在 1% 水準改善 pinball loss 5.09%，DM t=3.595 顯著。5%/10% 改善不顯著。結論：(1) CAViaR 直接建模 VaR 動態優於 GARCH 分配假設 (2) VIX 對極端分位數有增量預測力 (3) GARCH Student-t 在尾部覆蓋不準確。★ 有策略含義：VT 風險管理可用 CAViaR 替代 GARCH VaR。",
+    "tags": [
+      "CAViaR",
+      "quantile-regression",
+      "VaR",
+      "GARCH",
+      "pinball-loss",
+      "VIX",
+      "tail-risk"
+    ],
+    "data_source": "yfinance SPY + ^VIX 2006-2026",
+    "created_at": "2026-04-07T12:20:17.077242+00:00",
+    "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407123218_k969",
+    "experiment_id": "K969",
+    "title": "K969: Bespoke RV ★ — HAR-Bespoke best, temporal aggregation > cross-proxy weighting",
+    "content": "[提出: Patton & Zhang JoE 2026 Bespoke RV, 執行: Claude] SPY OHLCV 2006-2026 (5094 天), IS=3270, OOS=1824。用 5 種日頻 vol proxy (r², Parkinson, GK, RS, Yang-Zhang) 測試最優加權。(1) HAR-Bespoke 最佳 QLIKE=1.448，顯著勝出所有 AR(1) (DM p<0.001)。(2) Bespoke OLS 因多重共線性失敗 (QLIKE=14009)：range-based proxies 相關>0.89，GK 權重 -6.9~+21.7 極端不穩。(3) Equal-weight averaging (QLIKE=1.545) 勝過所有單一 proxy AR(1)。(4) Range-based > close-to-close：AR1_GK(1.580) 顯著優於 AR1_r²(1.765)。(5) Ridge 正則化改善 OLS 但不足(1.973)。★ 核心結論：HAR 時間結構（日/週/月平均）是主要驅動力，cross-proxy 最優加權在日頻數據無增量。簡單 equal-weight diversification across estimators 即為最優實踐。建議未來用 5-min intraday bespoke 才能發揮原論文優勢。",
+    "tags": [
+      "Bespoke-RV",
+      "HAR",
+      "range-based-vol",
+      "Patton-Zhang",
+      "multicollinearity",
+      "vol-proxy"
+    ],
+    "data_source": "yfinance SPY OHLCV 2006-2026",
+    "created_at": "2026-04-07T12:32:18.795283+00:00",
+    "experiment_date": "2026-04-07"
+  },
+  {
+    "id": "know_20260407123844_k970",
+    "experiment_id": "K970",
+    "title": "K970: MF2-GARCH ★ — VIX 長期成分改善 GJR 9.55% (修正後), DM t=2.94 接近 Harvey",
+    "content": "[提出: Conrad & Engle JAE 2025, 執行: Claude] SPY 2006-2026, IS=3249, OOS=1824。σ²=τ×g 乘法分解。⚠️ Codex 審查發現 tau 數據洩漏（tau_rv/ema 包含當天 r²）→ 修正 shift(1)。修正後結果：(1) MF2-VIX 仍勝 QLIKE 0.849 vs GJR 0.939（-9.55%），DM t=2.94 接近但未達 Harvey 3.0。(2) MF2-RV 修正後更差 +4.49%（原始 -14.2% 完全是 leakage）。(3) MF2-EMA 僅 -1.24%（原始 -11.1%）。(4) VaR: MF2-VIX 通過 Kupiec 1% (p=0.39)，GJR 1% 失敗 (p=0.03)。★ 修正後結論：VIX 作為外生長期成分有方向性改善但未達統計顯著。MF2-RV/EMA 的改善完全是 tau 洩漏 artifact。教訓：使用 r² 構建 tau 預測 r² 時必須 shift(1) 防洩漏。VIX 因外生性不受影響但改善減半。",
+    "tags": [
+      "MF2-GARCH",
+      "mixed-frequency",
+      "VIX",
+      "GJR",
+      "Conrad-Engle",
+      "data-leakage-fix",
+      "Codex-caught"
+    ],
+    "data_source": "yfinance SPY + ^VIX 2006-2026",
+    "created_at": "2026-04-07T12:38:44.144514+00:00",
+    "experiment_date": "2026-04-07"
   }
 ]
