@@ -1,0 +1,316 @@
+{
+  "experiment_id": "K964",
+  "title": "Earnings Season Volatility Patterns — SPY 20yr Analysis",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "period": "2006-02-01 to 2026-04-06",
+  "n_obs": 5075,
+  "n_earnings_days": 2079,
+  "n_non_earnings_days": 2996,
+  "earnings_pct": 40.96551724137931,
+  "descriptive_stats": {
+    "|Return|": {
+      "earnings_mean": 0.007719607169948731,
+      "earnings_median": 0.005109958115781854,
+      "earnings_std": 0.009127741028862846,
+      "non_earnings_mean": 0.007867455195190285,
+      "non_earnings_median": 0.005082166211189121,
+      "non_earnings_std": 0.009547387486866274,
+      "ratio": 0.9812076431865873
+    },
+    "Return^2": {
+      "earnings_mean": 0.00014286791627755968,
+      "earnings_median": 2.6111671945044837e-05,
+      "earnings_std": 0.0006626177400321123,
+      "non_earnings_mean": 0.0001530190343037306,
+      "non_earnings_median": 2.5828415878390926e-05,
+      "non_earnings_std": 0.0005745222978986461,
+      "ratio": 0.9336610763990201
+    },
+    "5d RV (ann)": {
+      "earnings_mean": 0.03721248456541535,
+      "earnings_median": 0.01470339692913374,
+      "earnings_std": 0.10810287974327451,
+      "non_earnings_mean": 0.0377106747519941,
+      "non_earnings_median": 0.014516156545296813,
+      "non_earnings_std": 0.09864231740437647,
+      "ratio": 0.9867891468435631
+    },
+    "20d RV (ann)": {
+      "earnings_mean": 0.037028712219924924,
+      "earnings_median": 0.016859313261183725,
+      "earnings_std": 0.08761868470427588,
+      "non_earnings_mean": 0.0377581226511606,
+      "non_earnings_median": 0.017169678536788628,
+      "non_earnings_std": 0.08070431307691323,
+      "ratio": 0.980682026011342
+    },
+    "VIX": {
+      "earnings_mean": 19.21930254715575,
+      "earnings_median": 17.030000686645508,
+      "earnings_std": 8.4547708518527,
+      "non_earnings_mean": 19.70551736237051,
+      "non_earnings_median": 17.234999656677246,
+      "non_earnings_std": 8.864271059020655,
+      "ratio": 0.9753259553518127
+    }
+  },
+  "quarter_stats": {
+    "Q4_earnings": {
+      "n": 516,
+      "mean_abs_return": 0.007465404044743782,
+      "mean_rv20": 0.025858953408385357,
+      "mean_vix": 19.173662784487703
+    },
+    "Q1_earnings": {
+      "n": 506,
+      "mean_abs_return": 0.0074595776417009,
+      "mean_rv20": 0.040655051240268684,
+      "mean_vix": 18.771719363367133
+    },
+    "Q2_earnings": {
+      "n": 530,
+      "mean_abs_return": 0.006919038950059764,
+      "mean_rv20": 0.022340148357166578,
+      "mean_vix": 17.79832075946736
+    },
+    "Q3_earnings": {
+      "n": 527,
+      "mean_abs_return": 0.009023297702093529,
+      "mean_rv20": 0.05925567018903762,
+      "mean_vix": 21.122808346033548
+    }
+  },
+  "statistical_tests": {
+    "welch_t_abs_return": {
+      "t": -0.5568292998518979,
+      "p": 0.5776711883311896,
+      "significant_3": false
+    },
+    "welch_t_rv20": {
+      "t": -0.3011466781347672,
+      "p": 0.7633174561611653,
+      "significant_3": false
+    },
+    "welch_t_vix": {
+      "t": -1.9749470309737103,
+      "p": 0.048333859313093266,
+      "significant_3": false
+    },
+    "mannwhitney_abs_return": {
+      "U": 3121888.0,
+      "p": 0.8831313899532739
+    },
+    "mannwhitney_rv20": {
+      "U": 3059891.0,
+      "p": 0.2887807709635457
+    },
+    "ols_regression": {
+      "const": {
+        "coef": -0.11022445663859558,
+        "t": -19.802732299414583,
+        "p": 2.819767834605639e-87
+      },
+      "is_earnings": {
+        "coef": 0.002797553783232781,
+        "t": 1.7954410333433353,
+        "p": 0.07258345973655884
+      },
+      "vix_lag1": {
+        "coef": 0.007512970781273455,
+        "t": 24.60739173041626,
+        "p": 1.0528181848750178e-133
+      },
+      "r_squared": 0.6110694169755737,
+      "r_squared_adj": 0.6109160229377018,
+      "n_obs": 5074
+    },
+    "per_quarter_regression": {
+      "is_Q4_earnings": {
+        "coef": -0.00790821135590239,
+        "t": -4.1912931372896844,
+        "p": 2.773690143099259e-05
+      },
+      "is_Q1_earnings": {
+        "coef": 0.009543900406511653,
+        "t": 4.337853857675754,
+        "p": 1.438807695917335e-05
+      },
+      "is_Q2_earnings": {
+        "coef": -0.0010360655433521533,
+        "t": -0.7101977604738325,
+        "p": 0.47758150945228917
+      },
+      "is_Q3_earnings": {
+        "coef": 0.010590594365544184,
+        "t": 2.7645747994186185,
+        "p": 0.0056997037811210806
+      }
+    }
+  },
+  "conditional_analysis": {
+    "high_vix": {
+      "n_earnings": 677,
+      "n_non": 1088,
+      "mean_earnings": 0.012930211317095062,
+      "mean_non": 0.012898116353628095,
+      "ratio": 1.0024883450100013,
+      "t": 0.04986987867710286,
+      "p": 0.9602329474146215
+    },
+    "low_vix": {
+      "n_earnings": 1402,
+      "n_non": 1908,
+      "mean_earnings": 0.005203502314301038,
+      "mean_non": 0.004998818224341053,
+      "ratio": 1.0409464959064332,
+      "t": 1.2691242722014824,
+      "p": 0.2044967848234311
+    }
+  },
+  "rolling_effects": [
+    {
+      "window": "2006-2011",
+      "ratio": 1.0738904668484106,
+      "t": 0.9614621079429783,
+      "p": 0.3365624264550515,
+      "n_earnings": 501
+    },
+    {
+      "window": "2007-2012",
+      "ratio": 1.0707132370259431,
+      "t": 0.9968745112239754,
+      "p": 0.3190730510199303,
+      "n_earnings": 514
+    },
+    {
+      "window": "2008-2013",
+      "ratio": 1.0719818079273205,
+      "t": 0.9943071203619898,
+      "p": 0.32032219406507684,
+      "n_earnings": 512
+    },
+    {
+      "window": "2009-2014",
+      "ratio": 1.0156498307556643,
+      "t": 0.25351515456410534,
+      "p": 0.7999192563181379,
+      "n_earnings": 513
+    },
+    {
+      "window": "2010-2015",
+      "ratio": 1.0552925653048986,
+      "t": 0.8874947184524506,
+      "p": 0.37502497250181954,
+      "n_earnings": 516
+    },
+    {
+      "window": "2011-2016",
+      "ratio": 0.9650743835163611,
+      "t": -0.6036779248725735,
+      "p": 0.5461861878630477,
+      "n_earnings": 517
+    },
+    {
+      "window": "2012-2017",
+      "ratio": 0.9426917791495854,
+      "t": -1.1181922245979559,
+      "p": 0.26371120157818223,
+      "n_earnings": 516
+    },
+    {
+      "window": "2013-2018",
+      "ratio": 0.918582227399746,
+      "t": -1.5219784517695603,
+      "p": 0.1282788226575453,
+      "n_earnings": 517
+    },
+    {
+      "window": "2014-2019",
+      "ratio": 0.9871315360238448,
+      "t": -0.21717458759491062,
+      "p": 0.8281103706717023,
+      "n_earnings": 517
+    },
+    {
+      "window": "2015-2020",
+      "ratio": 0.9518296302988372,
+      "t": -0.8218707195548035,
+      "p": 0.41131809590925983,
+      "n_earnings": 519
+    },
+    {
+      "window": "2016-2021",
+      "ratio": 0.8253156367319215,
+      "t": -2.635747660213524,
+      "p": 0.008501267991520362,
+      "n_earnings": 519
+    },
+    {
+      "window": "2017-2022",
+      "ratio": 0.807998914757265,
+      "t": -2.994361186180421,
+      "p": 0.002805629464453013,
+      "n_earnings": 517
+    },
+    {
+      "window": "2018-2023",
+      "ratio": 0.8716154260310732,
+      "t": -2.213059124072794,
+      "p": 0.02707281242341381,
+      "n_earnings": 515
+    },
+    {
+      "window": "2019-2024",
+      "ratio": 0.8537909994424827,
+      "t": -2.575265749662101,
+      "p": 0.010130306667933164,
+      "n_earnings": 515
+    },
+    {
+      "window": "2020-2025",
+      "ratio": 0.8967663737157978,
+      "t": -1.7967347734947803,
+      "p": 0.07261897239955338,
+      "n_earnings": 516
+    },
+    {
+      "window": "2021-2026",
+      "ratio": 1.0545106666641448,
+      "t": 0.9372660570148014,
+      "p": 0.34881705278362807,
+      "n_earnings": 518
+    },
+    {
+      "window": "2022-2027",
+      "ratio": 1.0769114456812172,
+      "t": 1.198667907682242,
+      "p": 0.23094419258705276,
+      "n_earnings": 442
+    }
+  ],
+  "monthly_avg_abs_return": {
+    "Jan": 0.0074720426406122645,
+    "Feb": 0.0073585550726580785,
+    "Mar": 0.009922233296142077,
+    "Apr": 0.007899702415500228,
+    "May": 0.007387847336895153,
+    "Jun": 0.00735959180671089,
+    "Jul": 0.006290913707951214,
+    "Aug": 0.007367589854166723,
+    "Sep": 0.0076614715541066716,
+    "Oct": 0.00919556352005022,
+    "Nov": 0.008449456099696433,
+    "Dec": 0.00707758741778051
+  },
+  "conclusion": "NOT SIGNIFICANT: No systematic earnings season volatility effect (VIX sufficiency confirmed)",
+  "strategy_implication": "Calendar-based VT overlay NOT justified — VIX already captures earnings season vol",
+  "vix_controlled_significant": false,
+  "unconditional_significant": false,
+  "references": [
+    "Patell & Wolfson (1984) - Earnings announcements and intraday volatility",
+    "Savor & Wilson (2016) - Earnings announcements and systematic risk",
+    "Dubinsky et al. (2019) - Aggregate earnings surprises and market volatility",
+    "Harvey (2016) - |t| > 3.0 threshold for multiple testing"
+  ],
+  "timestamp": "2026-04-07 20:15:38"
+}
