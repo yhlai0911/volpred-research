@@ -1,0 +1,140 @@
+{
+  "experiment_id": "K952",
+  "title": "Threshold ARMA for Volatility \u2014 Chen et al. (2011)",
+  "date": "2026-04-07",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2004-01-05 to 2026-04-02",
+  "oos_period": "2016-01-04 to 2026-04-02",
+  "n_oos": 2577,
+  "window": 2000,
+  "refit_every": 21,
+  "target": "|r_t| (absolute return)",
+  "seed": 42,
+  "models": [
+    "AR(5)",
+    "ARMA(2,1)",
+    "TARMA(|r|)",
+    "TARMA(VIX)",
+    "GJR(1,1,1)",
+    "MF-GJR(VIX)"
+  ],
+  "evaluation": {
+    "AR(5)": {
+      "MSE": 5.699291718300468e-05,
+      "MAE": 0.004992604694240179,
+      "Spearman_rho": 0.33909135070897034,
+      "Spearman_p": 2.318152471890016e-70,
+      "QLIKE_r2": 1.782939369767387
+    },
+    "ARMA(2,1)": {
+      "MSE": 5.572249583899754e-05,
+      "MAE": 0.004939045369851661,
+      "Spearman_rho": 0.3539915752586898,
+      "Spearman_p": 6.075165219921204e-77,
+      "QLIKE_r2": 1.76621476263308
+    },
+    "TARMA(|r|)": {
+      "MSE": 5.544383236032617e-05,
+      "MAE": 0.004930981844991474,
+      "Spearman_rho": 0.35745349554364014,
+      "Spearman_p": 1.5946335596961945e-78,
+      "QLIKE_r2": 1.756157798340132
+    },
+    "TARMA(VIX)": {
+      "MSE": 5.81434337019583e-05,
+      "MAE": 0.004932210168903943,
+      "Spearman_rho": 0.38418796464826427,
+      "Spearman_p": 2.061440199502392e-91,
+      "QLIKE_r2": 1.7153428168900007
+    },
+    "GJR(1,1,1)": {
+      "MSE": 5.2237062264502e-05,
+      "MAE": 0.004851060959742685,
+      "Spearman_rho": 0.4145400530661389,
+      "Spearman_p": 1.4057189738518938e-107,
+      "QLIKE_r2": 1.6650383984224852
+    },
+    "MF-GJR(VIX)": {
+      "MSE": 7.490143153323732e-05,
+      "MAE": 0.005066590780636997,
+      "Spearman_rho": 0.45544360564950054,
+      "Spearman_p": 3.5413823934757177e-132,
+      "QLIKE_r2": 1.590133126742683
+    }
+  },
+  "dm_tests_vs_baseline": {
+    "ARMA(2,1)": {
+      "DM_stat": 2.331827099176485,
+      "DM_pval": 0.019685983765636905,
+      "significant_Harvey": "False",
+      "better_than_baseline": "True"
+    },
+    "TARMA(|r|)": {
+      "DM_stat": 1.8967864904061882,
+      "DM_pval": 0.0578075341849793,
+      "significant_Harvey": "False",
+      "better_than_baseline": "True"
+    },
+    "TARMA(VIX)": {
+      "DM_stat": -0.5259621290710164,
+      "DM_pval": 0.598843595863463,
+      "significant_Harvey": "False",
+      "better_than_baseline": "False"
+    },
+    "GJR(1,1,1)": {
+      "DM_stat": 2.216501072884067,
+      "DM_pval": 0.02662778972873836,
+      "significant_Harvey": "False",
+      "better_than_baseline": "True"
+    },
+    "MF-GJR(VIX)": {
+      "DM_stat": -1.005680676876164,
+      "DM_pval": 0.31447528986177486,
+      "significant_Harvey": "False",
+      "better_than_baseline": "False"
+    }
+  },
+  "pairwise_dm_tests": {
+    "TARMA(|r|)_vs_GJR(1,1,1)": {
+      "DM_stat": -1.879157999106114,
+      "DM_pval": 0.06022292266940976,
+      "significant_Harvey": "False",
+      "winner": "GJR(1,1,1)"
+    },
+    "TARMA(VIX)_vs_GJR(1,1,1)": {
+      "DM_stat": -1.4590106102783738,
+      "DM_pval": 0.14456218739836202,
+      "significant_Harvey": "False",
+      "winner": "GJR(1,1,1)"
+    },
+    "TARMA(|r|)_vs_MF-GJR(VIX)": {
+      "DM_stat": 1.0539490764640325,
+      "DM_pval": 0.29190623226828816,
+      "significant_Harvey": "False",
+      "winner": "TARMA(|r|)"
+    },
+    "TARMA(VIX)_vs_MF-GJR(VIX)": {
+      "DM_stat": 1.0117685672675023,
+      "DM_pval": 0.3116487223404727,
+      "significant_Harvey": "False",
+      "winner": "TARMA(VIX)"
+    },
+    "TARMA(VIX)_vs_TARMA(|r|)": {
+      "DM_stat": -0.9337341284618663,
+      "DM_pval": 0.35044105572735695,
+      "significant_Harvey": "False",
+      "winner": "TARMA(|r|)"
+    },
+    "ARMA(2,1)_vs_GJR(1,1,1)": {
+      "DM_stat": -1.7722208559656938,
+      "DM_pval": 0.07635790288800526,
+      "significant_Harvey": "False",
+      "winner": "GJR(1,1,1)"
+    }
+  },
+  "references": [
+    "Chen, Liu, Gerlach (2011): Bayesian Subset Selection for TARMA, Computational Statistics, 26, 1-30",
+    "Patton (2011): Volatility forecast comparison using imperfect volatility proxies"
+  ],
+  "conclusion": "Best MSE: GJR(1,1,1) (0.00005224); Best MAE: GJR(1,1,1) (0.004851); Best Spearman: MF-GJR(VIX) (0.4554); Best QLIKE(r\u00b2): MF-GJR(VIX) (1.5901); TARMA does not significantly beat GARCH-family models at Harvey |t|>3.0 threshold."
+}
