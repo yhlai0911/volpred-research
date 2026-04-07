@@ -561,7 +561,7 @@ platform-ops-patrol: 0 */6 * * *  # 平台巡檢（已遷移至雲端 trigger tr
 ```
 CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 啟動 agent 執行 (3) 完成後從 research_program.md 補充 next_tasks (4) next_tasks 空了才讀 research_program.md 全文。絕對不可只 check status。")
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
-CronCreate(cron="47 */4 * * *", prompt="每4小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉")
+CronCreate(cron="47 */4 * * *", prompt="每4小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --no-rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉。用 merge 不用 rebase，避免多 session 並行時 rebase 衝突")
 CronCreate(cron="7 */3 * * *", prompt="知識索引更新")
 CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：(1) python scripts/token_usage_report.py --detailed (2) 將結果存檔到 storage/token_reports/ (3) 週五額外 --weekly (4) >40% 標記高消耗警告 (5) 摘要告訴用戶")
 ```

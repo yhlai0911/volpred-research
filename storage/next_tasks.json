@@ -1,30 +1,30 @@
 {
-  "updated_at": "2026-04-07T15:00:00Z",
+  "updated_at": "2026-04-07T16:00:00Z",
   "note": "Cron 讀此檔取最高優先任務。完成後補充新任務。空了才讀 research_program.md 全文。",
   "tasks": [
     {
-      "id": "K980",
-      "topic": "Threshold GARCH with Bayesian Model Selection — TARMA (Chen, Liu, Gerlach 2011)",
-      "source": "research_program.md Bayesian 方向 line 378-380",
+      "id": "K984",
+      "topic": "SPY→0050.TW Lead-Lag 策略回測 — 用前日 SPY signal 交易台股 (K983 follow-up)",
+      "source": "K983 ★★ cross-asset lead-lag 發現",
       "priority": 1,
-      "note": "學術新方向，結合 threshold + Bayesian variable selection"
+      "note": "r=0.40, OOS R²=15.9%, 有明確策略含義"
     },
     {
-      "id": "K981",
-      "topic": "HAR + Wavelet Decomposition — 多尺度波動率分解",
-      "source": "research_program.md HAR 進階方向 line 390",
+      "id": "K985",
+      "topic": "SPY→0050.TW Lead-Lag + VT 整合 — 台股 VT 策略加 SPY signal overlay",
+      "source": "K983 + 台股 VT 策略",
       "priority": 2
     },
     {
-      "id": "K982",
-      "topic": "Dispersion / Correlation-Regime Trading — sector ETF 相關結構",
-      "source": "research_program.md Codex #5 line 368",
+      "id": "K986",
+      "topic": "Adaptive Multi-Factor HAR — 287 高頻因子動態選擇 (Cinquetti FoFI 2026)",
+      "source": "research_program.md line 389",
       "priority": 3
     },
     {
-      "id": "K983",
-      "topic": "跨資產 Return Prediction — SPY/QQQ/0050.TW 互相預測",
-      "source": "research_program.md line 372",
+      "id": "K987",
+      "topic": "VIX² Nonlinearity in GARCH — K979 發現 VIX² OOS R²=0.198 vs VIX 0.139",
+      "source": "K979 side finding",
       "priority": 4
     }
   ]
