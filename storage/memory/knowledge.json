@@ -21673,5 +21673,24 @@
     "data_source": "yfinance (SPY, QQQ, GLD, SLV, EWG)",
     "created_at": "2026-04-07T00:34:27.187981+00:00",
     "star_rating": 1
+  },
+  {
+    "id": "know_20260407023753_k952",
+    "experiment_id": "K952",
+    "title": "K952: Threshold ARMA (Chen et al. 2011) NULL — GARCH遞迴結構仍勝TARMA",
+    "content": "[提出: Claude, 執行: Claude] TARMA(2,1)對|r_t|建模 vs GARCH/MF-GJR。SPY OOS 2016-2025 (2577 obs)。6模型：AR(5)/ARMA(2,1)/TARMA(|r|)/TARMA(VIX)/GJR/MF-GJR。GJR勝MSE(5.224e-5)/MAE(0.00485)，MF-GJR勝Spearman(0.455)/QLIKE(1.590)。TARMA介於AR和GARCH之間。無DM test達Harvey門檻。結論：GARCH的h[t]=f(h[t-1],r²[t-1])遞迴比直接對|r_t|建ARMA更強。Codex審查(2026-04-07): 1 HIGH(rolling vs expanding — 設計選擇,與K889一致) + 1 MEDIUM(ARMA residual break timing — 微影響)。結論不受影響。",
+    "tags": [
+      "volatility",
+      "TARMA",
+      "threshold",
+      "Chen-Liu-Gerlach",
+      "ARMA",
+      "SPY",
+      "null-result",
+      "codex-reviewed"
+    ],
+    "data_source": "yfinance (SPY, ^VIX)",
+    "created_at": "2026-04-07T02:37:53.414312+00:00",
+    "star_rating": 0
   }
 ]
