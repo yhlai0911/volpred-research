@@ -275,7 +275,7 @@ class Publisher:
         with open(report_file, 'w') as f:
             json.dump(item, f, indent=2, default=str)
 
-        self._append_to_feed(item)
+        self._append_to_feed(item, existing_feed=feed)
         self._sync_to_remote(title, description, phase, details)
         self._sync_report_to_remote(pub_id, item)
 
@@ -348,7 +348,7 @@ class Publisher:
             print(f"  WARNING publisher: {e}")
         return True
 
-    def _append_to_feed(self, item: dict):
+    def _append_to_feed(self, item: dict, existing_feed: list | None = None):
         # Ensure both timestamp fields exist (frontend uses published_at, legacy uses created_at)
         now = datetime.now(timezone.utc).isoformat()
         if 'created_at' not in item:
@@ -369,16 +369,13 @@ class Publisher:
         # Ensure content is not empty (use description as fallback)
         if not item.get('content') and item.get('description'):
             item['content'] = item['description']
-        feed = self._load_feed()
+        feed = existing_feed if existing_feed is not None else self._load_feed()
         feed.append(item)
         # Sort newest first — use published_at (consistent with frontend display)
         feed.sort(key=lambda x: x.get('published_at') or x.get('created_at') or '', reverse=True)
         with open(self._feed_file, 'w') as f:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
         self._sync_feed_to_remote()
-        # Also sync the individual report JSON
-        if item.get('id'):
-            self._sync_report_to_remote(item['id'], item)
 
     def get_report(self, pub_id: str) -> dict | None:
         report_file = self.reports_dir / f"{pub_id}.json"

@@ -206,7 +206,6 @@ class MemorySystem:
             "created_at": datetime.now().isoformat(),
         }
         self._append_to_index("knowledge.json", item)
-        self._sync_to_remote("knowledge.json")
         return item["item_id"]
 
     def get_knowledge(self, category: str | None = None) -> list[dict]:
