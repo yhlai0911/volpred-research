@@ -1,30 +1,30 @@
 {
-  "updated_at": "2026-04-07T16:00:00Z",
-  "note": "Cron 讀此檔取最高優先任務。完成後補充新任務。空了才讀 research_program.md 全文。",
+  "updated_at": "2026-04-08T03:30:00Z",
+  "note": "Cron 讀此檔取最高優先任務。完成後補充新任務。空了才讀 research_program.md 全文。⚠️ 分配編號前必須先 ls experiments/ 確認該編號不存在。",
   "tasks": [
     {
-      "id": "K984",
-      "topic": "SPY→0050.TW Lead-Lag 策略回測 — 用前日 SPY signal 交易台股 (K983 follow-up)",
-      "source": "K983 ★★ cross-asset lead-lag 發現",
+      "id": "K989",
+      "topic": "MF2-VIX + VIX² — 結合 K970 MF2 框架與 K987 VIX² 凸性",
+      "source": "K970 ★ MF2-VIX + K987 ★ VIX² nonlinearity synthesis",
       "priority": 1,
-      "note": "r=0.40, OOS R²=15.9%, 有明確策略含義"
+      "note": "MF2 tau = (VIX/sqrt(252))² 已有 9.55% 改善，加入 VIX² 凸性可能更強"
     },
     {
-      "id": "K985",
-      "topic": "SPY→0050.TW Lead-Lag + VT 整合 — 台股 VT 策略加 SPY signal overlay",
-      "source": "K983 + 台股 VT 策略",
+      "id": "K990",
+      "topic": "SPY→0050.TW Lead-Lag 月頻策略 — 用月度 SPY momentum 調整台股配置",
+      "source": "K984 follow-up: 日頻不行但月頻成本低",
       "priority": 2
     },
     {
-      "id": "K986",
-      "topic": "Adaptive Multi-Factor HAR — 287 高頻因子動態選擇 (Cinquetti FoFI 2026)",
-      "source": "research_program.md line 389",
+      "id": "K991",
+      "topic": "GJR-GARCH + VIX² 外生變數 — GARCH-X with quadratic VIX",
+      "source": "K986 GJR 仍是 QLIKE champion + K987 VIX² significant",
       "priority": 3
     },
     {
-      "id": "K987",
-      "topic": "VIX² Nonlinearity in GARCH — K979 發現 VIX² OOS R²=0.198 vs VIX 0.139",
-      "source": "K979 side finding",
+      "id": "K992",
+      "topic": "台股 VT 策略 sensitivity analysis — 8.63/VIX 參數 +-20% 穩定性",
+      "source": "上架檢驗 #4 需求",
       "priority": 4
     }
   ]
