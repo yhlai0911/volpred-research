@@ -64,7 +64,7 @@
    - **代碼中必須有明確的 `signal.shift(1)`**——lag 驗證靠代碼結構，不靠事後記憶
    - **Sharpe > 2x baseline = 幾乎一定有 bug**——先停下來檢查，不要先歡呼
    - **所有模擬或隨機值生成必須設定固定 seed**：`np.random.seed(42)` 或 `rng = np.random.default_rng(42)`。適用：Bootstrap、Monte Carlo、ABM、permutation test、random sampling、MCMC、train/test split、任何用到 `np.random`/`random` 的操作。沒有固定 seed 的結果無法重現，違反可追溯原則
-12. **自我修正後回溯更新**：每次推翻或修正先前結論時，必須立即：
+13. **自我修正後回溯更新**：每次推翻或修正先前結論時，必須立即：
    - 搜尋已發佈文章中引用該結論的內容（用 grep 搜尋關鍵詞）
    - 在受影響文章頂部加入 `⚠️ 更正聲明（日期）`，說明修正內容
    - 更新 feed.json 和個別 report JSON 的 content/description
@@ -105,7 +105,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
   - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
   - **Paper trades 同步**：自動剝離市場數據，只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾
-- `scripts/daily_update.py` → 每日 22:03 UTC（台灣 06:03）美股收盤後計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇
+- `scripts/daily_update.py` → 每日 00:03 UTC（台灣 08:03）美股收盤後計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
@@ -209,7 +209,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 | **每日建議** (daily) | 所有讀者 | 1 篇 | 當日策略權重、VIX regime、持倉建議。由 `daily_update.py` 自動產生 | `每日建議` |
 
 **執行規則**：
-- **非時效性文章**一律 `status=draft` 進文章池，由每小時 cron 按節奏釋出
+- **非時效性文章**一律 `status=draft` 進文章池，由每 2 小時 cron 按節奏釋出
 - **⚠️ 事件驅動文章（NFP/FOMC/CPI/TSMC 營收等）必須立即 `status=published`** + Supabase sync。延遲 = 過期（2026-04-03 教訓：NFP 文章延遲 10 小時釋出）
 - **每篇文章必須附真正的圖表（不可用 ASCII/文字表格替代）**：
   - 使用共用模組 `from volpred.charts import generate_bar_chart, upload_chart, embed_chart`
@@ -285,8 +285,6 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 | 3 | **Codex 審查** | 無 HIGH severity bug（lag/lookahead/TX） | `/codex:rescue` 或 `codex exec -s read-only` |
 | 4 | **Sensitivity** | 參數 +-20% 變動後 Sharpe 不降 > 30% | 回測腳本 |
 | 5 | **MDD 可接受** | 同期間 MDD **< -20%** | `evaluate_new_strategy.py` 輸出 |
-
-### 新策略上線標準程序
 
 ## 快速指令
 → 完整指令見 `docs/quick-commands.md`
@@ -378,7 +376,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ## 自主研究模式
 **研究永不停止。** 完成任何任務後**立刻執行下一個任務**，不需要回報等待、不需要徵求同意。在同一個 turn 中連續做多個實驗（用 agent team 並行 + 主線串行）。不要做完一個實驗就停下來——連續鏈式執行直到使用者主動中斷。
-**透過 session cron 每 15 分鐘自動觸發 autonomous-research 繼續研究。**
+**透過 session cron 每 2 小時自動觸發 autonomous-research 繼續研究。**
 
 **⚠️ 反空轉原則（2026-03-31 教訓）：**
 - **「方向窮盡」是假象** — research_program.md 永遠有 100+ 未完成項目。不要靠腦中判斷「沒事做」，要讀文件。
@@ -451,7 +449,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 **實驗後必做（跑完後、記錄前）：**
 1. **Codex 審查代碼**（不是審結果——審代碼本身有沒有 bug）
-   - `/codex-cli -s read-only "Review experiments/kXXX.py for lag, TX, baseline bugs"`
+   - `codex exec -s read-only "Review experiments/kXXX.py for lag, TX, baseline bugs"` 或 `/codex:rescue`
 2. **結果合理性檢查**：Sharpe > 2x baseline → 90% 有 bug，先停下來
 3. **Codex 通過後才記錄** knowledge
 4. **Knowledge 記錄後才寫文章**
