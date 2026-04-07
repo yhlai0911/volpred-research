@@ -21709,5 +21709,24 @@
     "data_source": "yfinance 5-min (SPY)",
     "created_at": "2026-04-07T04:52:17.130591+00:00",
     "star_rating": 0
+  },
+  {
+    "id": "know_20260407063516_k954",
+    "experiment_id": "K954",
+    "title": "K954: DeFi Impermanent Loss ★ — IL≈-σ²/8完美近似，但GARCH預測IL失敗(R²<0)",
+    "content": "[提出: Claude, 執行: Claude] 首次DeFi實驗。ETH-USD AMM impermanent loss。IL近似公式IL≈-σ²/8與精確公式corr=0.9999。Mean daily IL=-0.023%，30d cumulative=-0.70%。GJR/GARCH/EWMA OOS R²全<0（預測IL=預測r²，太noisy）。ETH無leverage effect（gamma=-0.032，確認K916）。Selective LP策略失敗（fee 0.03%>IL 0.023%，所有模型預測IL<0.5%門檻）。Codex審查(2026-04-07): 2 BUG (fee income無volume/TVL不真實 + payoff混合relative/absolute) + 1 WARNING (rolling IL用sum非cumprod)。結論方向不變但DeFi細節需改善。實務：DeFi LP的風險在tail events(>10%moves)不在mean IL。",
+    "tags": [
+      "DeFi",
+      "impermanent-loss",
+      "AMM",
+      "ETH",
+      "GARCH",
+      "crypto",
+      "null-result",
+      "codex-reviewed"
+    ],
+    "data_source": "yfinance (ETH-USD)",
+    "created_at": "2026-04-07T06:35:16.502815+00:00",
+    "star_rating": 1
   }
 ]
