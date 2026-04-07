@@ -1,0 +1,21 @@
+{
+  "id": "mile_1d5823a2",
+  "title": "ETF 避險的真相：複雜的數學模型為什麼輸給最簡單的方法？",
+  "summary": "Copula 是學術界最先進的尾部相依模型，但在 3 對 ETF 避險上全敗給最簡單的 Rolling OLS。原因：ETF 內部分散化消滅了尾部結構。",
+  "description": "Copula 是學術界最先進的尾部相依模型，但在 3 對 ETF 避險上全敗給最簡單的 Rolling OLS。原因：ETF 內部分散化消滅了尾部結構。",
+  "content": "# ETF 避險的真相：複雜的數學模型為什麼輸給最簡單的方法？\n\n[提出: Claude, 執行: Claude]\n\n你可能聽過「Copula」這個名字——它是金融數學中捕捉「尾部風險」的最先進工具。2008 年金融海嘯後，它因為被誤用而聲名狼藉，但它本身是一個強大的統計方法。\n\n然而，我們的實驗（K951）發現了一個令人意外的結果：**在 ETF 避險上，最簡單的 Rolling OLS 全面擊敗了 Copula。**\n\n## 實驗設計\n\n我們測試了 3 對高相關 ETF 配對：\n- SPY-QQQ（美國大盤 vs 科技，相關性 0.94）\n- GLD-SLV（黃金 vs 白銀，相關性 0.76）\n- SPY-EWG（美國 vs 德國，相關性 0.79）\n\n4 種避險方法：OLS、Rolling OLS(252天)、DCC-GARCH、Copula-GARCH\n\n## 結果：簡單全勝\n\n| 配對 | Rolling OLS | Copula-GARCH | 差異 |\n|------|-----------|-------------|------|\n| SPY-QQQ | HE=87.9% | HE=82.1% | Rolling OLS 勝 |\n| GLD-SLV | HE=57.0% | HE=44.2% | Rolling OLS 勝 |\n| SPY-EWG | HE=62.5% | HE=56.1% | Rolling OLS 勝 |\n\n三對配對的 DM 檢定都達到 Harvey 門檻——**Copula 統計顯著地更差**。\n\n## 為什麼 Copula 在 ETF 上失敗？\n\n關鍵在於 **ETF 的內部分散化**。\n\nETF 包含數十到數百支個股。這種分散化把個股層面的「尾部相依性」——那些極端事件中的非線性共動——給平滑掉了。\n\n我們發現 Student-t copula 的自由度參數 $\\nu$ 趨近 30（接近常態分佈），這意味著 ETF 之間**根本沒有有意義的尾部相依性**。Copula 的核心優勢不存在了。\n\n更糟的是，Copula 還**高估了相關性**（0.86-0.95 vs 實際 rolling），導致系統性的過度避險。\n\n## 但在個股對上，Copula 確實有效\n\n同樣的方法用在 0050.TW-TSMC（個股對，相關性 >0.9），Copula 達到 HE=85.5%（K931 實驗）。因為個股之間有真正的 firm-specific 尾部相依性。\n\n## 給投資人的啟示\n\n1. **ETF 避險用 Rolling OLS 就夠了**——不需要複雜的 Copula 模型\n2. **不是越複雜越好**——模型複雜度要匹配問題的複雜度\n3. **Copula 的主場是個股**——如果你需要避險的是個股持倉，Copula 值得考慮\n4. **分散化是雙面刃**——它降低了風險，但也讓進階風險模型失去用武之地\n\n*本文基於實驗 K951 的實證結果（數據來源：yfinance，期間：2019-2025）*\n",
+  "tags": [
+    "一般讀者",
+    "避險",
+    "Copula",
+    "ETF",
+    "Rolling OLS",
+    "風險管理"
+  ],
+  "status": "draft",
+  "audience": "general",
+  "phase": "research_finding",
+  "proposer": "Claude",
+  "published_at": "2026-04-07T06:27:32.968515+00:00",
+  "category": "general"
+}
