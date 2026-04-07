@@ -1,0 +1,235 @@
+{
+  "experiment_id": "K972",
+  "title": "MF2-VIX Taiwan Validation: 0050.TW with VIX Lead-Lag",
+  "method": "Conrad & Engle (2025) MF2-GARCH applied to Taiwan ETF with cross-market VIX",
+  "data_source": "yfinance (0050.TW, ^VIX)",
+  "data_period": "2009-02-13 to 2026-04-02",
+  "asset": "0050.TW",
+  "baseline_asset_k970": "SPY",
+  "sample_sizes": {
+    "total": 4197,
+    "IS": 2441,
+    "OOS": 1756
+  },
+  "IS_period": "2009-02-13 to 2018-12-28",
+  "OOS_period": "2019-01-02 to 2026-04-02",
+  "descriptive_stats": {
+    "mean_ret_pct": 0.06330475027794247,
+    "std_ret_pct": 1.343156982801327,
+    "skewness": 0.06871801741138726,
+    "kurtosis": 18.020638983031162,
+    "adf_stat": -15.93982074829341,
+    "adf_p": 7.562876429275104e-29,
+    "arch_lm_stat": 1209.7706944717436,
+    "arch_lm_p": 1.1245769611254932e-253
+  },
+  "vix_alignment": {
+    "method": "VIX[t-1] shifted + ffill to Taiwan trading days",
+    "total_lag_days": 2,
+    "rationale": "Taiwan opens at 09:00 when US is closed; use prior US close VIX + shift(1) for tau"
+  },
+  "models": {
+    "GJR": {
+      "params": {
+        "omega": 0.01516804801775516,
+        "alpha[1]": 0.0,
+        "gamma[1]": 0.06739184779914026,
+        "beta[1]": 0.951312828357914,
+        "nu": 5.158605729148231
+      },
+      "persistence": 0.9850087522574841
+    },
+    "MF2-RV": {
+      "params": {
+        "omega": 0.5391301395389865,
+        "alpha[1]": 1.6445813567618162e-10,
+        "gamma[1]": 0.06009199654386936,
+        "beta[1]": 0.5370804341873618,
+        "nu": 4.234851765666774
+      },
+      "persistence_short": 0.5671264326237546
+    },
+    "MF2-VIX": {
+      "params": {
+        "omega": 0.06080179538847476,
+        "alpha[1]": 7.921532615449704e-12,
+        "gamma[1]": 0.023869007383453524,
+        "beta[1]": 0.9139000427094466,
+        "nu": 5.322901591353716
+      },
+      "persistence_short": 0.9258345464090949
+    },
+    "MF2-EMA": {
+      "params": {
+        "omega": 0.15282574927694964,
+        "alpha[1]": 0.0,
+        "gamma[1]": 0.06953349235985655,
+        "beta[1]": 0.8181770309934079,
+        "nu": 4.710769292454735
+      },
+      "persistence_short": 0.8529437771733361
+    }
+  },
+  "evaluation": {
+    "GJR": {
+      "QLIKE": 1.4551140592392815,
+      "MSE": 26.584116842690676,
+      "MZ_R2": 0.07749100075351245,
+      "MZ_intercept": 0.13328801442781285,
+      "MZ_slope": 1.1205472928208582
+    },
+    "MF2-RV": {
+      "QLIKE": 1.4380160549614067,
+      "MSE": 28.919295127118396,
+      "MZ_R2": 0.06520988577988385,
+      "MZ_intercept": 0.6595810124965187,
+      "MZ_slope": 0.49730706424803767
+    },
+    "MF2-VIX": {
+      "QLIKE": 1.4396037082017352,
+      "MSE": 24.579093623701876,
+      "MZ_R2": 0.1437779024392033,
+      "MZ_intercept": 0.11124264047040212,
+      "MZ_slope": 1.009357175937864
+    },
+    "MF2-EMA": {
+      "QLIKE": 1.4010696338494246,
+      "MSE": 26.664801045897843,
+      "MZ_R2": 0.09200572696648557,
+      "MZ_intercept": 0.4452719138280418,
+      "MZ_slope": 0.6792572988339584
+    }
+  },
+  "dm_tests": {
+    "GJR vs MF2-RV": {
+      "t_stat": 0.6262447857296765,
+      "p_value": 0.5311543958461331
+    },
+    "GJR vs MF2-VIX": {
+      "t_stat": 0.538906939803229,
+      "p_value": 0.5899510684602096
+    },
+    "GJR vs MF2-EMA": {
+      "t_stat": 2.5662492029836907,
+      "p_value": 0.010280493919866407
+    },
+    "MF2-RV vs MF2-VIX": {
+      "t_stat": -0.04657216267927255,
+      "p_value": 0.9628542189116023
+    },
+    "MF2-RV vs MF2-EMA": {
+      "t_stat": 2.7435977824792315,
+      "p_value": 0.006076994645306533
+    },
+    "MF2-VIX vs MF2-EMA": {
+      "t_stat": 1.2746338187123933,
+      "p_value": 0.20243888156705325
+    }
+  },
+  "qlike_improvements_pct": {
+    "MF2-RV": 1.17502845700037,
+    "MF2-VIX": 1.0659199489595288,
+    "MF2-EMA": 3.7141023445344716
+  },
+  "var_backtesting": {
+    "GJR_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 24,
+      "n_total": 1756,
+      "violation_rate": 0.01366742596810934,
+      "expected_rate": 0.01,
+      "kupiec_stat": 2.1405379275268785,
+      "kupiec_p": 0.1434515823338287,
+      "christoffersen_stat": 0.9234038954150225,
+      "christoffersen_p": 0.3365828048920605
+    },
+    "MF2-RV_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 17,
+      "n_total": 1756,
+      "violation_rate": 0.00968109339407745,
+      "expected_rate": 0.01,
+      "kupiec_stat": 0.01823207112355485,
+      "kupiec_p": 0.8925911698512345,
+      "christoffersen_stat": 0.0,
+      "christoffersen_p": 1.0
+    },
+    "MF2-VIX_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 22,
+      "n_total": 1756,
+      "violation_rate": 0.012528473804100227,
+      "expected_rate": 0.01,
+      "kupiec_stat": 1.049779554936542,
+      "kupiec_p": 0.30555786279550023,
+      "christoffersen_stat": 1.1769837201133848,
+      "christoffersen_p": 0.2779709066858358
+    },
+    "MF2-EMA_VaR1": {
+      "alpha": 0.01,
+      "n_violations": 19,
+      "n_total": 1756,
+      "violation_rate": 0.01082004555808656,
+      "expected_rate": 0.01,
+      "kupiec_stat": 0.1161779794774529,
+      "kupiec_p": 0.7332173278986924,
+      "christoffersen_stat": 1.6425610928973038,
+      "christoffersen_p": 0.1999744378810685
+    },
+    "GJR_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 106,
+      "n_total": 1756,
+      "violation_rate": 0.06036446469248292,
+      "expected_rate": 0.05,
+      "kupiec_stat": 3.735337203330488,
+      "kupiec_p": 0.05327291286519509,
+      "christoffersen_stat": 2.0738791189855945,
+      "christoffersen_p": 0.1498399823475105
+    },
+    "MF2-RV_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 77,
+      "n_total": 1756,
+      "violation_rate": 0.043849658314350795,
+      "expected_rate": 0.05,
+      "kupiec_stat": 1.4563331395012398,
+      "kupiec_p": 0.22751445893591338,
+      "christoffersen_stat": 0.11872521680845338,
+      "christoffersen_p": 0.7304212283210179
+    },
+    "MF2-VIX_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 89,
+      "n_total": 1756,
+      "violation_rate": 0.050683371298405465,
+      "expected_rate": 0.05,
+      "kupiec_stat": 0.01719011111442681,
+      "kupiec_p": 0.8956874488784263,
+      "christoffersen_stat": 5.68507692320641,
+      "christoffersen_p": 0.01710978943393604
+    },
+    "MF2-EMA_VaR5": {
+      "alpha": 0.05,
+      "n_violations": 81,
+      "n_total": 1756,
+      "violation_rate": 0.04612756264236902,
+      "expected_rate": 0.05,
+      "kupiec_stat": 0.5684808661270946,
+      "kupiec_p": 0.45086321193381307,
+      "christoffersen_stat": 0.027484939003855402,
+      "christoffersen_p": 0.8683255035793811
+    }
+  },
+  "best_model": "MF2-EMA",
+  "cross_market_comparison": {},
+  "conclusion": "Best model by QLIKE: MF2-EMA (1.4011); GJR baseline QLIKE: 1.4551; MF2-RV: 1.18% improvement over GJR; MF2-VIX: 1.07% improvement over GJR; MF2-EMA: 3.71% improvement over GJR; No pairs pass Harvey (2016) |t|>3.0 threshold",
+  "references": [
+    "Conrad, C. & Engle, R. (2025). Two-component GARCH models with exogenous long-run dynamics. J. Applied Econometrics.",
+    "Engle, R., Ghysels, E., & Sohn, B. (2013). Stock market volatility and macroeconomic fundamentals. Review of Economics and Statistics.",
+    "Patton, A.J. (2011). Volatility forecast comparison using imperfect volatility proxies. J. Econometrics, 160(1), 246-256.",
+    "Harvey, C.R., Liu, Y., & Zhu, H. (2016). ...and the cross-section of expected returns. Review of Financial Studies."
+  ],
+  "seed": 42,
+  "timestamp": "2026-04-07T21:12:37.386303"
+}
