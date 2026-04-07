@@ -1,0 +1,269 @@
+{
+  "experiment_id": "K982",
+  "title": "Sector Dispersion & Correlation Regime Analysis",
+  "timestamp": "2026-04-07T22:46:13.256020",
+  "data_source": "yfinance",
+  "period": "2015-01-01 to 2026-04-07",
+  "n_observations": 1913,
+  "is_period": "2018-07-24 to 2020-12-31",
+  "oos_period": "2021-01-04 to 2026-03-04",
+  "is_n": 616,
+  "oos_n": 1297,
+  "sectors_used": [
+    "XLK",
+    "XLF",
+    "XLV",
+    "XLC",
+    "XLY",
+    "XLI",
+    "XLP",
+    "XLE",
+    "XLU",
+    "XLRE",
+    "XLB"
+  ],
+  "descriptive_stats": {
+    "rv_22": {
+      "mean": 0.16389016498401499,
+      "std": 0.10892090800650935,
+      "min": 0.05053564641922646,
+      "max": 0.91492639013776,
+      "skew": 3.580550894399575,
+      "kurtosis": 18.140404041037343
+    },
+    "vix": {
+      "mean": 19.991678004107797,
+      "std": 7.482384286134392,
+      "min": 10.850000381469727,
+      "max": 82.69000244140625,
+      "skew": 2.7356576256160503,
+      "kurtosis": 13.241091121780572
+    },
+    "dispersion": {
+      "mean": 0.008108797394968142,
+      "std": 0.004030396510011236,
+      "min": 0.001650996327065626,
+      "max": 0.04987578602276083,
+      "skew": 2.463381650937988,
+      "kurtosis": 13.519861747264256
+    },
+    "avg_corr": {
+      "mean": 0.49280473935394237,
+      "std": 0.17193158771782022,
+      "min": 0.09190377007368701,
+      "max": 0.9403551383746726,
+      "skew": 0.2687424445053973,
+      "kurtosis": -0.4742089355938677
+    }
+  },
+  "unconditional_correlations": {
+    "rv_22": {
+      "rv_22": 1.0,
+      "vix": 0.8029405245589155,
+      "dispersion": 0.4410521197803979,
+      "avg_corr": 0.7351637129902531
+    },
+    "vix": {
+      "rv_22": 0.8029405245589155,
+      "vix": 1.0,
+      "dispersion": 0.5348789348804667,
+      "avg_corr": 0.578750756321762
+    },
+    "dispersion": {
+      "rv_22": 0.4410521197803979,
+      "vix": 0.5348789348804667,
+      "dispersion": 1.0,
+      "avg_corr": 0.2695298430966883
+    },
+    "avg_corr": {
+      "rv_22": 0.7351637129902531,
+      "vix": 0.578750756321762,
+      "dispersion": 0.2695298430966883,
+      "avg_corr": 1.0
+    }
+  },
+  "regression_results": {
+    "M1: VIX only": {
+      "coefs": {
+        "vix_lag": 0.0071946314743318515
+      },
+      "intercept": 0.03283422059659019,
+      "t_stats": {
+        "vix_lag": 31.209347601949688
+      },
+      "r2_is": 0.23880710790067172,
+      "r2_oos": 0.2649231376803578,
+      "mse_is": 0.018692068285361112,
+      "mse_oos": 0.003945174436091345
+    },
+    "M2: VIX + Dispersion": {
+      "coefs": {
+        "vix_lag": 0.006727394140264664,
+        "disp_lag": 1.5053932500002616
+      },
+      "intercept": 0.030516170933654635,
+      "t_stats": {
+        "vix_lag": 11.715315323446337,
+        "disp_lag": 1.0533195083034963
+      },
+      "r2_is": 0.24013912184514297,
+      "r2_oos": 0.25821322742594455,
+      "mse_is": 0.018659358973614332,
+      "mse_oos": 0.003981186678839189
+    },
+    "M3: VIX + Avg Correlation": {
+      "coefs": {
+        "vix_lag": 0.007451793186892195,
+        "corr_lag": -0.019781255914007916
+      },
+      "intercept": 0.0376723706311691,
+      "t_stats": {
+        "vix_lag": 10.493540088160868,
+        "corr_lag": -0.6524711858563946
+      },
+      "r2_is": 0.23914699237810821,
+      "r2_oos": 0.2631381025771631,
+      "mse_is": 0.018683721985852383,
+      "mse_oos": 0.003954754760568471
+    },
+    "M4: VIX + Disp + Corr": {
+      "coefs": {
+        "vix_lag": 0.0069764092300196095,
+        "disp_lag": 1.484485211875477,
+        "corr_lag": -0.018655435823431654
+      },
+      "intercept": 0.035111159842443646,
+      "t_stats": {
+        "vix_lag": 8.180893850649143,
+        "disp_lag": 1.0344722962723993,
+        "corr_lag": -0.6132379722937245
+      },
+      "r2_is": 0.24044116229913592,
+      "r2_oos": 0.2562888423205958,
+      "mse_is": 0.018651941982665548,
+      "mse_oos": 0.0039915148979846795
+    },
+    "M5: Dispersion only": {
+      "coefs": {
+        "disp_lag": 10.83791677976433
+      },
+      "intercept": 0.09826802690867807,
+      "t_stats": {
+        "disp_lag": 17.580774219664413
+      },
+      "r2_is": 0.12124312406502191,
+      "r2_oos": -0.19342733720819827,
+      "mse_is": 0.02157900277537511,
+      "mse_oos": 0.006405151982649391
+    },
+    "M6: Avg Correlation only": {
+      "coefs": {
+        "corr_lag": 0.2513637326351244
+      },
+      "intercept": 0.055535978693475124,
+      "t_stats": {
+        "corr_lag": 23.54257694550984
+      },
+      "r2_is": 0.10414706491693704,
+      "r2_oos": -0.09607797743123814,
+      "mse_is": 0.02199881844670284,
+      "mse_oos": 0.005882675728465625
+    }
+  },
+  "dm_tests_vs_m1": {
+    "M2: VIX + Dispersion": {
+      "dm_stat": -1.5169086983008881,
+      "p_value": 0.1292897371906796
+    },
+    "M3: VIX + Avg Correlation": {
+      "dm_stat": -0.3350644008566112,
+      "p_value": 0.7375765061995763
+    },
+    "M4: VIX + Disp + Corr": {
+      "dm_stat": -1.0485339051223903,
+      "p_value": 0.2943926896565483
+    },
+    "M5: Dispersion only": {
+      "dm_stat": -8.79524031604015,
+      "p_value": 0.0
+    },
+    "M6: Avg Correlation only": {
+      "dm_stat": -4.4961827069412115,
+      "p_value": 6.918429322544384e-06
+    }
+  },
+  "correlation_regime_analysis": {
+    "thresholds": {
+      "high": 0.6,
+      "low": 0.4
+    },
+    "regime_counts": {
+      "medium": 851,
+      "low": 609,
+      "high": 453
+    },
+    "regime_mean_rv": {
+      "high": 0.22229768979752978,
+      "low": 0.13643207484761818,
+      "medium": 0.15399515084990342
+    },
+    "high_vs_low_t_test": {
+      "t_stat": 13.731649210781233,
+      "p_value": 1.2967257747339751e-39
+    },
+    "correlation_spike_test": {
+      "spike_mean_rv": 0.1948834695609752,
+      "normal_mean_rv": 0.1614714343055895,
+      "t_stat": 4.048449594574166,
+      "p_value": 5.362075373201302e-05
+    }
+  },
+  "strategy_backtest": {
+    "period": "2021-01-04 to 2026-03-04",
+    "n_days": 1297,
+    "metrics": {
+      "Buy & Hold": {
+        "name": "Buy & Hold",
+        "ann_return": 0.13105423180467415,
+        "ann_vol": 0.1693821820496037,
+        "sharpe": 0.7737191138929526,
+        "mdd": -0.262151269829184
+      },
+      "12/VIX": {
+        "name": "12/VIX",
+        "ann_return": 0.07551842441996709,
+        "ann_vol": 0.09381479084694766,
+        "sharpe": 0.8049735413594875,
+        "mdd": -0.15244564674948513
+      },
+      "12/VIX + Corr Overlay": {
+        "name": "12/VIX + Corr Overlay",
+        "ann_return": 0.06705684774194183,
+        "ann_vol": 0.08546033380724893,
+        "sharpe": 0.7846546433247599,
+        "mdd": -0.12654911279685122
+      }
+    },
+    "signal_lag": "shift(1) applied to all signals"
+  },
+  "conclusions": [
+    "VIX alone explains 26.5% of OOS future RV variance (OOS R2).",
+    "Adding dispersion to VIX changes OOS R2 from 0.2649 to 0.2582 (delta=-0.0067).",
+    "Adding avg correlation to VIX changes OOS R2 from 0.2649 to 0.2631 (delta=-0.0018).",
+    "Full model (VIX+Disp+Corr) OOS R2 = 0.2563 (delta vs VIX-only = -0.0086).",
+    "High-corr regime has significantly higher future RV than low-corr regime (t=13.732, passes Harvey threshold).",
+    "Correlation overlay on 12/VIX: Sharpe changes from 0.805 to 0.785 in OOS period."
+  ],
+  "limitations": [
+    "XLC only available from 2018, XLRE from 2015 -- sector count varies early in sample",
+    "Equal-weighted dispersion, not market-cap weighted",
+    "22-day rolling window -- sensitive to window choice",
+    "OOS period includes COVID crash (high correlation) and 2022 rate hikes",
+    "No transaction cost in strategy backtest"
+  ],
+  "references": [
+    "Solnik & Roulet (2000), Dispersion as cross-sectional volatility, FAJ",
+    "Pollet & Wilson (2010), Average correlation and stock market returns, JFE",
+    "Stivers (2003), Firm-level return dispersion and the future volatility, JFQA"
+  ]
+}
