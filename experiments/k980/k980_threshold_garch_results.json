@@ -1,0 +1,230 @@
+{
+  "experiment_id": "K980",
+  "title": "Threshold GJR-GARCH with VIX Regime Switching",
+  "date": "2026-04-07",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2006-01-05 to 2026-04-06",
+  "total_obs": 5093,
+  "is_obs": 3269,
+  "oos_obs": 1824,
+  "is_period": "2006-01-05 to 2018-12-31",
+  "oos_period": "2019-01-02 to 2026-04-06",
+  "seed": 42,
+  "methodology": {
+    "description": "Threshold GJR-GARCH where GARCH parameters switch based on VIX_{t-1} regime",
+    "threshold_variable": "VIX_{t-1} (lagged, no lookahead)",
+    "threshold_grid": [
+      14,
+      16,
+      18,
+      20,
+      22,
+      24,
+      26,
+      28
+    ],
+    "best_threshold": 14,
+    "regime_constraint": "Each regime >= 20% of IS observations",
+    "models": [
+      "GJR (baseline)",
+      "Threshold GJR (TGJR)",
+      "GJR + VIX Dummy"
+    ]
+  },
+  "parameters": {
+    "gjr_baseline": {
+      "omega": 2.497241322808327e-06,
+      "alpha": 0.08269084228779365,
+      "gamma": 0.08270360229568209,
+      "beta": 0.8544176591314239,
+      "persistence": 0.9784603025670586,
+      "loglik": 10781.757228654636
+    },
+    "tgjr_low_regime": {
+      "omega": 1.6685756495139515e-05,
+      "alpha": 0.016428323463393197,
+      "gamma": 0.19778430846131959,
+      "beta": 0.302412599180672,
+      "persistence": 0.41773307687472494,
+      "loglik": 4234.945855917482
+    },
+    "tgjr_high_regime": {
+      "omega": 3.4821437844598056e-06,
+      "alpha": 0.049942720808097495,
+      "gamma": 0.049942720462825815,
+      "beta": 0.8989803935344416,
+      "persistence": 0.973894474573952,
+      "loglik": 6600.748676961946
+    },
+    "gjr_dummy": {
+      "omega": 1.6859619543345559e-06,
+      "alpha": 0.04935289908450321,
+      "gamma": 0.049352886546135996,
+      "beta": 0.8884813281355274,
+      "delta": 2.218233388968174e-06
+    }
+  },
+  "param_comparison": {
+    "omega": {
+      "low_regime": 1.6685756495139515e-05,
+      "high_regime": 3.4821437844598056e-06,
+      "ratio": 0.20868959615191185
+    },
+    "alpha": {
+      "low_regime": 0.016428323463393197,
+      "high_regime": 0.049942720808097495,
+      "ratio": 3.0400375862688334
+    },
+    "gamma": {
+      "low_regime": 0.19778430846131959,
+      "high_regime": 0.049942720462825815,
+      "ratio": 0.252511035133978
+    },
+    "beta": {
+      "low_regime": 0.302412599180672,
+      "high_regime": 0.8989803935344416,
+      "ratio": 2.972694907454431
+    },
+    "persistence": {
+      "low_regime": 0.41773307687472494,
+      "high_regime": 0.973894474573952,
+      "ratio": 2.331379841548951
+    }
+  },
+  "oos_evaluation": {
+    "GJR": {
+      "QLIKE": 1.4988919784179369,
+      "MSE": 2.7474517764090274e-07,
+      "MAE": 0.00015600425434060118,
+      "MZ_intercept": 1.0585852480980087e-05,
+      "MZ_slope": 0.9506160052101735,
+      "MZ_R2": 0.27149297730598354
+    },
+    "TGJR": {
+      "QLIKE": 1.5032044387427792,
+      "MSE": 2.8783399326636035e-07,
+      "MAE": 0.00015477464855723284,
+      "MZ_intercept": -7.232292818779773e-06,
+      "MZ_slope": 1.1237838076884714,
+      "MZ_R2": 0.2391844427031974
+    },
+    "GJR+Dummy": {
+      "QLIKE": 1.5048094447257248,
+      "MSE": 2.869546811056908e-07,
+      "MAE": 0.0001517379266603135,
+      "MZ_intercept": -1.6491474806223654e-05,
+      "MZ_slope": 1.251123428283534,
+      "MZ_R2": 0.24918908180114674
+    }
+  },
+  "regime_conditional_evaluation": {
+    "Low VIX": {
+      "GJR": {
+        "QLIKE": 1.6452776016290054,
+        "MSE": 2.6279485513421255e-09
+      },
+      "TGJR": {
+        "QLIKE": 1.5732975463197465,
+        "MSE": 2.2571087202704425e-09
+      },
+      "GJR+Dummy": {
+        "QLIKE": 1.6600465355006497,
+        "MSE": 2.6764209534391933e-09
+      }
+    },
+    "High VIX": {
+      "GJR": {
+        "QLIKE": 1.4723453628097118,
+        "MSE": 3.2409286167268836e-07
+      },
+      "TGJR": {
+        "QLIKE": 1.490493253430894,
+        "MSE": 3.396225474586564e-07
+      },
+      "GJR+Dummy": {
+        "QLIKE": 1.476657640699184,
+        "MSE": 3.3850773346490744e-07
+      }
+    }
+  },
+  "dm_tests": {
+    "GJR_vs_TGJR": {
+      "DM_stat": -0.3219249017117267,
+      "p_value": 0.747509587753121
+    },
+    "GJR_vs_GJR+Dummy": {
+      "DM_stat": -0.5735227707804696,
+      "p_value": 0.5662907858262809
+    },
+    "TGJR_vs_GJR+Dummy": {
+      "DM_stat": -0.1702584964840967,
+      "p_value": 0.8648068496533587
+    }
+  },
+  "var_backtesting": {
+    "VaR_0.01": {
+      "GJR": {
+        "violations": 26,
+        "violation_rate": 0.01425438596491228,
+        "expected_rate": 0.01,
+        "kupiec_LR": 2.9463321573576025,
+        "kupiec_p": 0.08607270366773934
+      },
+      "TGJR": {
+        "violations": 29,
+        "violation_rate": 0.015899122807017545,
+        "expected_rate": 0.01,
+        "kupiec_LR": 5.437616478095066,
+        "kupiec_p": 0.019707544877049177
+      },
+      "GJR+Dummy": {
+        "violations": 25,
+        "violation_rate": 0.013706140350877192,
+        "expected_rate": 0.01,
+        "kupiec_LR": 2.2682802238896898,
+        "kupiec_p": 0.13204636054367358
+      }
+    },
+    "VaR_0.05": {
+      "GJR": {
+        "violations": 121,
+        "violation_rate": 0.06633771929824561,
+        "expected_rate": 0.05,
+        "kupiec_LR": 9.337478781749269,
+        "kupiec_p": 0.0022451419609432754
+      },
+      "TGJR": {
+        "violations": 111,
+        "violation_rate": 0.06085526315789474,
+        "expected_rate": 0.05,
+        "kupiec_LR": 4.244630776666099,
+        "kupiec_p": 0.039374630623966955
+      },
+      "GJR+Dummy": {
+        "violations": 114,
+        "violation_rate": 0.0625,
+        "expected_rate": 0.05,
+        "kupiec_LR": 5.578054214569306,
+        "kupiec_p": 0.01818691819975038
+      }
+    }
+  },
+  "references": [
+    "Chen, Liu & Gerlach (2011, Computational Statistics): TARMA with Bayesian variable selection",
+    "Chen, Liu & So (2013, Computational Statistics): Threshold Asymmetric SV",
+    "Patton (2011): Volatility forecast comparison using imperfect proxies",
+    "Hansen & Lunde (2005): Forecast comparison of volatility models"
+  ],
+  "conclusions": {
+    "best_model_qlike": "GJR",
+    "best_qlike_value": 1.4988919784179369,
+    "optimal_threshold": 14,
+    "regime_parameters_differ": true,
+    "tgjr_vs_gjr": {
+      "dm_stat": -0.3219249017117267,
+      "p_value": 0.747509587753121,
+      "significant_at_5pct": "False"
+    },
+    "key_finding": "Threshold GJR (c=14) worsens OOS QLIKE by 0.29% vs baseline GJR. Difference is not statistically significant (DM p=0.7475). High-VIX regime shows omega 0.2x, alpha 3.0x, gamma 0.3x vs low-VIX regime."
+  }
+}
