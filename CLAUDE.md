@@ -364,7 +364,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **每個實驗/新主題路線開始前，必須完成以下步驟，缺一不可：**
 
 **Step 0: Error Log 防錯 + Preamble（最重要）**
-0. **讀 `docs/error_log.md`**，在 agent prompt 中明確列出「此實驗需注意的 error log 規則：XXX」
+0. **讀 `docs/error_log.md` 前 30 行（快速索引表）**，在 agent prompt 中列出「此實驗需注意的 error log 規則：XXX」。只有需要細節時才讀對應的詳細記錄段落
 1. **附上 preamble**：每個實驗 agent prompt 必須讀取 `.claude/skills/autonomous-research/references/experiment-preamble.md` 附加在開頭。**Agent 看不到 CLAUDE.md 和 research_program.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。** Preamble 包含：模型-target 匹配、mechanical vs empirical 區分、統計門檻、防錯規則、VaR+ES 標準、worktree 禁令。
 
 **Step 1: 知識庫搜尋（過去成果）**
@@ -559,7 +559,7 @@ platform-ops-patrol: 0 */6 * * *  # 平台巡檢（已遷移至雲端 trigger tr
 
 #### 標準啟動集
 ```
-CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動 (3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出")
+CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 啟動 agent 執行 (3) 完成後從 research_program.md 補充 next_tasks (4) next_tasks 空了才讀 research_program.md 全文。絕對不可只 check status。")
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
 CronCreate(cron="47 */4 * * *", prompt="每4小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉")
 CronCreate(cron="7 */3 * * *", prompt="知識索引更新")

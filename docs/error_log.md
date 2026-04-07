@@ -2,6 +2,27 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
+## 快速索引（agent 只需讀到這裡）
+
+| 類型 | 核心規則 | 常見錯誤 |
+|------|---------|---------|
+| **Lookahead/Lag** | `signal.shift(1)` 必須在代碼中；Sharpe > 2x baseline = 幾乎一定有 bug | K679 VIX Percentile 1.68→0.355；K812 fabricated sanity check |
+| **GARCH state** | OOS 必須逐日遞迴 h[t]=f(h[t-1],r²[t-1])，不用 stale variance | K813/K816 DM 從 2.96→0.64 |
+| **ML 審查** | 所有 ML 實驗必須 Codex 審查再記錄 knowledge | K618 KAN「差 113%」→修正後差 0.3% |
+| **Student-t** | logpdf 需 scale term sqrt((df-2)/df) | K824 df 偏向薄尾 |
+| **統計門檻** | N≥15 cross-sectional, N≥500 GARCH window, Harvey t>3.0 | N=12 rho=-0.87→N=21 rho=-0.086 |
+| **數據** | force_refresh=True；0050.TW 用 clean_tw50_data；TX 用全合約按量選月 | 風險預報停在 3/20 |
+| **發佈** | thinking≠content；tags sanitize（JSON array vs comma-split）| 388 篇 content 空；tags 雙重編碼 |
+| **前端** | 先 build 再部署，一次只改一處；Safari 避免 window.open | badge 壞 tag filter |
+| **同步** | 增量 sync 必須覆蓋有更新的歷史條目；不手動改 JSON status | portfolio_return 全 None |
+| **Bayesian** | prior 必須允許否證（用 Normal 不用 HalfNormal 測 γ>0）| K814 P(γ>0)=1.0 是 tautology |
+| **時區** | 比較時間用 UTC：`datetime.now(timezone.utc)` | 誤報「8 小時沒發文」|
+| **字串替換** | 批量 regex 替換極危險，每輪驗證中間結果 | `\\t`→TAB 吃掉 `\tau` |
+
+---
+
+## 詳細記錄
+
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
 | 2026-04-07 | **ML 實驗跳過 Codex 審查** | K940/K944 的 ML 代碼未經 Codex 審查就記錄 knowledge + 發文 | 違反 SOP「寫代碼→Codex審→修正→跑→記錄」| Codex 發現：(1) GARCH-feature training contamination (2) K944 MF-GJR VIX lookahead。結論方向不變但代碼品質有瑕疵。**教訓：ML 實驗更需要審查，不能因為結論是 NULL 就跳過** |
