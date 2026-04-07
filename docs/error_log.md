@@ -4,6 +4,7 @@
 
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
+| 2026-04-07 | **ML 實驗跳過 Codex 審查** | K940/K944 的 ML 代碼未經 Codex 審查就記錄 knowledge + 發文 | 違反 SOP「寫代碼→Codex審→修正→跑→記錄」| Codex 發現：(1) GARCH-feature training contamination (2) K944 MF-GJR VIX lookahead。結論方向不變但代碼品質有瑕疵。**教訓：ML 實驗更需要審查，不能因為結論是 NULL 就跳過** |
 | 2026-04-07 | **VIX 未寫入 _market_daily** | 網站策略面板 VIX 數值過時/不更新 | `daily_update.py` 寫入 `_market_daily` 時漏了 VIX 欄位，前端讀到 null 就顯示舊值 | 加入 `"vix": round(vix_level, 2)` 到 `_market_daily` dict。教訓：**先查根因再修，不要先手動 re-run** |
 | 2026-04-07 | **時區缺失** | StrategyPanel 時間未顯示台灣時區 | `toLocaleString` 缺少 `timeZone: 'Asia/Taipei'` | 加入 timeZone 參數，同時修 FeedBrowser |
 | 2026-04-06 | **Worktree 腳本遺失（3次）** | K923/K924/K932 的 .py 腳本在 worktree 清理時永久遺失 | Agent 在 worktree 寫檔案但沒 commit → `git worktree remove --force` 刪除一切 | (1) 建立 `scripts/merge_worktree.sh` 安全合併腳本 (2) 禁止 `--force` remove (3) Agent prompt 必須包含 commit 指令 (4) 更新 SKILL.md + CLAUDE.md |
