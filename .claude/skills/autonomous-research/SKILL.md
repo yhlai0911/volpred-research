@@ -56,10 +56,16 @@ You are not a script runner. You are a thinking researcher with these abilities:
 
 **Step -1: 確認實驗編號不衝突（多 session 安全）**
 ```bash
-ls experiments/ | sed 's/k//' | sort -n | tail -5  # 查看最大編號
-ls experiments/k989 2>/dev/null && echo "EXISTS" || echo "OK"  # 確認目標編號不存在
+# 1. 檢查實驗目錄
+ls experiments/ | sed 's/k//' | sort -n | tail -5
+# 2. 檢查 next_tasks.json 已排定的編號
+grep '"id"' storage/next_tasks.json
+# 3. 檢查其他 session 的 worktree agent
+ls .claude/worktrees/ 2>/dev/null
+# 4. 確認目標編號三處都不存在
+ls experiments/k989 2>/dev/null && echo "EXISTS" || echo "OK"
 ```
-另一個 session 可能已佔用該編號。從最大現有編號 +1 開始，跳過已存在的。
+另一個 session 可能已佔用該編號。從最大現有編號 +1 開始，跳過所有已佔用的。
 
 **每個實驗開始前，必須先查詢知識庫確認：**
 

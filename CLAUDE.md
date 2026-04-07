@@ -364,9 +364,12 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **每個實驗/新主題路線開始前，必須完成以下步驟，缺一不可：**
 
 **Step -1: 確認實驗編號不衝突（多 session 安全）**
-- **分配新 K 編號前，必須先 `ls experiments/ | sort` 確認該編號目錄不存在**
+- **分配新 K 編號前，必須檢查以下三處確認該編號未被佔用：**
+  1. `ls experiments/ | sort` — 已完成/進行中的實驗目錄
+  2. `cat storage/next_tasks.json` — 已排定但未開始的任務
+  3. `ls .claude/worktrees/ 2>/dev/null` — 其他 session 正在跑的 worktree agent
 - 另一個 session 可能已經用了該編號（2026-04-08 教訓：K988 被另一個 session 佔用）
-- 從最大現有編號 +1 開始，跳過已存在的
+- 從最大現有編號 +1 開始，跳過所有已佔用的
 
 **Step 0: Error Log 防錯 + Preamble（最重要）**
 0. **讀 `docs/error_log.md` 前 30 行（快速索引表）**，在 agent prompt 中列出「此實驗需注意的 error log 規則：XXX」。只有需要細節時才讀對應的詳細記錄段落
