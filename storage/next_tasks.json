@@ -1,20 +1,26 @@
 [
   {
-    "id": "K1001",
-    "title": "K1001: Conrad & Loch (2015) 比較 — 宏觀 GARCH-X vs VIX GARCH-X",
-    "priority": 2,
-    "description": "research_program.md 待做：與 Conrad & Loch (2015) 比較，他們用宏觀變數驅動 τ"
+    "id": "K1004",
+    "title": "K1004: VIX9D-driven A4f（K1003 最佳 VIX 變體的完整驗證）",
+    "priority": 1,
+    "description": "K1003 發現 VIX9D t=+5.15 最強。做完整 OOS + VaR/ES + 跨資產驗證"
   },
   {
-    "id": "K1002",
-    "title": "K1002: Paper 5 統一 pipeline（MF-GJR-X + HAR-RV + GJR benchmark）",
+    "id": "K1005",
+    "title": "K1005: Proxy-Reliance Conformal VaR（arXiv:2603.22569）",
     "priority": 2,
-    "description": "Paper 5 草稿需要統一 pipeline 比較所有模型"
+    "description": "新文獻方法：校準 VaR 時控制 proxy 依賴。與 Patton (2011) proxy-robust 框架直接相關"
   },
   {
-    "id": "K996",
-    "title": "K996: GARCH-MIDAS fixed-span 深度測試",
-    "priority": 3,
-    "description": "K988b C1-C3 較差，但未 tuning Beta weight 參數"
+    "id": "K1006",
+    "title": "K1006: 台指期 Overnight Gap Strategy 正式回測",
+    "priority": 2,
+    "description": "K515 延伸：93% alpha 在隔夜。用 TAIFEX tick 做正式回測"
+  },
+  {
+    "id": "Paper_MF",
+    "title": "MF-GJR-X 論文撰寫（主線程，不用 agent）",
+    "priority": 1,
+    "description": "K988-K1003 素材完整，開始撰寫論文"
   }
 ]
