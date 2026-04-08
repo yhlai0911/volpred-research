@@ -1,0 +1,88 @@
+{
+  "models": {
+    "B0_GJR": {
+      "qlike": -8.270501645642458,
+      "spearman": 0.3653121549407857,
+      "n_valid": 1825
+    },
+    "A3f_tau_t1_free_omega": {
+      "qlike": -8.349522319740435,
+      "spearman": 0.4163349730522347,
+      "n_valid": 1825
+    },
+    "A2n_logexp_samplenorm": {
+      "qlike": -8.35410780793728,
+      "spearman": 0.4200503918505759,
+      "n_valid": 1825
+    },
+    "A4n_vix2_samplenorm": {
+      "qlike": -8.354872418904186,
+      "spearman": 0.4157850052710277,
+      "n_valid": 1825
+    },
+    "C1_MIDAS_FS_K6": {
+      "qlike": -8.309158245018024,
+      "spearman": 0.399825426961743,
+      "n_valid": 1825
+    },
+    "C2_MIDAS_FS_K12": {
+      "qlike": -8.30189876966312,
+      "spearman": 0.3963326375550373,
+      "n_valid": 1825
+    },
+    "C3_MIDAS_FS_K24": {
+      "qlike": -8.3073763561497,
+      "spearman": 0.3967253044409032,
+      "n_valid": 1825
+    }
+  },
+  "dm_tests": {
+    "A3f_tau_t1_free_omega_vs_GJR": {
+      "dm_t": 3.0908972659007996,
+      "significant": "True"
+    },
+    "A2n_logexp_samplenorm_vs_GJR": {
+      "dm_t": 3.2575129757242354,
+      "significant": "True"
+    },
+    "A4n_vix2_samplenorm_vs_GJR": {
+      "dm_t": 3.5539193990868005,
+      "significant": "True"
+    },
+    "C1_MIDAS_FS_K6_vs_GJR": {
+      "dm_t": 3.5451266226800904,
+      "significant": "True"
+    },
+    "C2_MIDAS_FS_K12_vs_GJR": {
+      "dm_t": 2.334054042222531,
+      "significant": "False"
+    },
+    "C3_MIDAS_FS_K24_vs_GJR": {
+      "dm_t": 2.848888254487206,
+      "significant": "False"
+    }
+  },
+  "vrp_corr_A4n_vix2_samplenorm": {
+    "spearman": 0.5447453331711852,
+    "p": 1.502034503792587e-141
+  },
+  "vrp_corr_A2n_logexp_samplenorm": {
+    "spearman": 0.6179467137738871,
+    "p": 1.1402603430671416e-192
+  },
+  "vrp_corr_A3f_tau_t1_free_omega": {
+    "spearman": 0.6294613434402223,
+    "p": 5.521721713294224e-202
+  },
+  "vrp_corr_raw_ratio": {
+    "spearman": 0.17293368803897527,
+    "p": 1.016190335568993e-13
+  },
+  "metadata": {
+    "experiment_id": "K988b",
+    "elapsed": 536.4215230941772,
+    "timestamp": "2026-04-07T23:38:21.405152+00:00",
+    "n_oos": 1825,
+    "n_refits": 29
+  }
+}

@@ -1,0 +1,203 @@
+{
+  "models": {
+    "B0_GJR": {
+      "qlike": -8.277222480688362,
+      "mse": 2.704189793588864e-07,
+      "spearman_rho": 0.36851220196798484,
+      "spearman_p": 8.450147864659987e-60,
+      "n_valid": 1825
+    },
+    "A1_K889_original": {
+      "qlike": -8.347754318875856,
+      "mse": 5.90466761724259e-07,
+      "spearman_rho": 0.4240278807555193,
+      "spearman_p": 1.517230726832178e-80,
+      "n_valid": 1825
+    },
+    "A2_consistent_tau_t": {
+      "qlike": -8.354616682228864,
+      "mse": 3.3558340239216434e-07,
+      "spearman_rho": 0.42145658028067734,
+      "spearman_p": 1.7042776244689558e-79,
+      "n_valid": 1825
+    },
+    "A3_consistent_tau_t1": {
+      "qlike": -8.349873988686854,
+      "mse": 3.9057267420868816e-07,
+      "spearman_rho": 0.418282081471137,
+      "spearman_p": 3.280332342830302e-78,
+      "n_valid": 1825
+    },
+    "A4_vix_squared": {
+      "qlike": -8.357732280707172,
+      "mse": 2.692182903557463e-07,
+      "spearman_rho": 0.42019525030392696,
+      "spearman_p": 5.540109195465224e-79,
+      "n_valid": 1825
+    },
+    "A5_vix_level": {
+      "qlike": -8.33148242835715,
+      "mse": 0.028390310976058417,
+      "spearman_rho": 0.4336149970039504,
+      "spearman_p": 1.5239587423755765e-84,
+      "n_valid": 1825
+    },
+    "A2f_free_omega": {
+      "qlike": -8.353101821129133,
+      "mse": 3.403760012769582e-07,
+      "spearman_rho": 0.4186631064561039,
+      "spearman_p": 2.30402126846731e-78,
+      "n_valid": 1825
+    },
+    "A4f_vix2_free_omega": {
+      "qlike": -8.360769450776205,
+      "mse": 2.68454812761989e-07,
+      "spearman_rho": 0.42033078951135744,
+      "spearman_p": 4.882106847773262e-79,
+      "n_valid": 1825
+    },
+    "B1_MIDAS_K22": {
+      "qlike": -8.35362967116312,
+      "mse": 3.3937132425033893e-07,
+      "spearman_rho": 0.4230404009807865,
+      "spearman_p": 3.850885927507551e-80,
+      "n_valid": 1825
+    },
+    "B2_MIDAS_K65": {
+      "qlike": -8.341008129028957,
+      "mse": 2.9234818571899653e-07,
+      "spearman_rho": 0.4139429059295827,
+      "spearman_p": 1.7754141712867035e-76,
+      "n_valid": 1825
+    },
+    "B3_MIDAS_K125": {
+      "qlike": -8.33715007436808,
+      "mse": 2.7553460318037016e-07,
+      "spearman_rho": 0.41106125215833245,
+      "spearman_p": 2.434430559625434e-75,
+      "n_valid": 1825
+    }
+  },
+  "dm_tests": {
+    "A1_K889_original_vs_GJR": {
+      "dm_t": 3.06380161288467,
+      "dm_p": 0.0021854378273773456,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "A2_consistent_tau_t_vs_GJR": {
+      "dm_t": 3.382628030949189,
+      "dm_p": 0.0007179580347653758,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "A3_consistent_tau_t1_vs_GJR": {
+      "dm_t": 3.164697655220887,
+      "dm_p": 0.0015524417804311241,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "A4_vix_squared_vs_GJR": {
+      "dm_t": 4.1673496831222465,
+      "dm_p": 3.081615886291189e-05,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "A5_vix_level_vs_GJR": {
+      "dm_t": 1.8396453722103803,
+      "dm_p": 0.06582031849864522,
+      "significant_harvey": "False",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "A2f_free_omega_vs_GJR": {
+      "dm_t": 3.303998846873709,
+      "dm_p": 0.0009531622429714837,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "A4f_vix2_free_omega_vs_GJR": {
+      "dm_t": 4.482553559343101,
+      "dm_p": 7.375512342644441e-06,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "B1_MIDAS_K22_vs_GJR": {
+      "dm_t": 3.3494976784383357,
+      "dm_p": 0.0008095823412881398,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "B2_MIDAS_K65_vs_GJR": {
+      "dm_t": 3.108247740462714,
+      "dm_p": 0.0018820023413175235,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "B3_MIDAS_K125_vs_GJR": {
+      "dm_t": 3.2349880536597713,
+      "dm_p": 0.001216478204299598,
+      "significant_harvey": "True",
+      "n_compared": 1825,
+      "direction": "model_better"
+    },
+    "A2_consistent_tau_t_vs_A1_K889_original": {
+      "dm_t": 2.054894586038357,
+      "significant_harvey": "False",
+      "winner": "A2_consistent_tau_t"
+    },
+    "A2_consistent_tau_t_vs_A3_consistent_tau_t1": {
+      "dm_t": 2.1400322524257724,
+      "significant_harvey": "False",
+      "winner": "A2_consistent_tau_t"
+    },
+    "A4_vix_squared_vs_A2_consistent_tau_t": {
+      "dm_t": 0.5038984273532031,
+      "significant_harvey": "False",
+      "winner": "A4_vix_squared"
+    },
+    "B1_MIDAS_K22_vs_A2_consistent_tau_t": {
+      "dm_t": -0.20935319136382724,
+      "significant_harvey": "False",
+      "winner": "A2_consistent_tau_t"
+    },
+    "B2_MIDAS_K65_vs_A2_consistent_tau_t": {
+      "dm_t": -2.2081332725207945,
+      "significant_harvey": "False",
+      "winner": "A2_consistent_tau_t"
+    },
+    "B3_MIDAS_K125_vs_A2_consistent_tau_t": {
+      "dm_t": -2.2395776934644656,
+      "significant_harvey": "False",
+      "winner": "A2_consistent_tau_t"
+    }
+  },
+  "metadata": {
+    "experiment_id": "K988",
+    "asset": "SPY",
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-08",
+    "oos_start": "2019-01-01",
+    "n_total": 5347,
+    "n_oos": 1825,
+    "window": 2000,
+    "refit_every": 63,
+    "n_refits": 29,
+    "elapsed_seconds": 827.093649148941,
+    "timestamp": "2026-04-07T19:15:37.384062+00:00",
+    "references": [
+      "Engle, Ghysels & Sohn (2013). Stock Market Volatility and Macroeconomic Fundamentals. RES 95(3):776-797.",
+      "Engle & Rangel (2008). Spline-GARCH. RFS 21(3):1187-1222.",
+      "Conrad & Loch (2015). Anticipating Long-Term Stock Market Volatility. JBES 33(3):338-358.",
+      "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256."
+    ]
+  }
+}

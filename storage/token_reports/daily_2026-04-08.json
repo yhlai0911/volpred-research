@@ -1,0 +1,234 @@
+{
+  "report_type": "daily",
+  "date": "2026-04-07",
+  "week_range": "2026-04-03 → 2026-04-10",
+  "total_commits": 105,
+  "total_estimated_tokens": 624780,
+  "categories": {
+    "other": {
+      "emoji": "❔",
+      "description": "其他",
+      "commits": 76,
+      "lines_changed": 53176,
+      "estimated_tokens": 364704,
+      "percentage": 58.4,
+      "commit_messages": [
+        "Token usage daily report 2026-04-07",
+        "K982-K983: Sector dispersion NULL + Cross-asset lead-lag ★★",
+        "Merge agent worktree agent-ae0eeaba (1 commits)",
+        "K983: Cross-asset return and volatility prediction",
+        "K982: Sector dispersion and correlation regime analysis",
+        "K981: HAR + Wavelet — NULL, IS overfit, HAR fixed windows more robust",
+        "Merge agent worktree agent-a0ab8a7a (1 commits)",
+        "K981: HAR + Wavelet decomposition — multi-scale volatility",
+        "K980: Threshold GJR-GARCH — NULL, discrete switching < MF2 continuous",
+        "Merge agent worktree agent-a95fb3ea (1 commits)",
+        "K980: Threshold GJR-GARCH with VIX regime switching",
+        "K978-K979: Congressional trading + SKEW index — both NULL",
+        "Merge agent worktree agent-aeb6d008 (1 commits)",
+        "Merge agent worktree agent-a18b2ccf (1 commits)",
+        "K979: CBOE SKEW index as vol predictor",
+        "K978: Congressional trading vs SPY volatility",
+        "K976: MF2+VIX slope — NULL at daily freq (horizon mismatch)",
+        "Merge agent worktree agent-ae907c2f (1 commits)",
+        "K976: MF2-GARCH + VIX slope integration",
+        "K975: VIX term structure slope ★ — significant vol predictor",
+        "Merge agent worktree agent-aefd691f (1 commits)",
+        "K975: VIX term structure slope — predictive power and strategy",
+        "K973: Time-varying Hurst — NULL at daily freq, confirms K34",
+        "Merge agent worktree agent-a9bda5d6 (1 commits)",
+        "K973: Time-varying Hurst exponent for vol forecasting",
+        "K972: MF2-VIX Taiwan — VIX lead-lag NOT confirmed, EMA best for TW",
+        "Merge agent worktree agent-ab28b876 (1 commits)",
+        "K972: MF2-VIX Taiwan validation — 0050.TW with VIX lead-lag",
+        "K971: CAViaR-VT vs GARCH-VT — partial NULL, 12/VIX still best",
+        "Merge agent worktree agent-a4a94301 (1 commits)",
+        "K971: CAViaR-based volatility targeting vs GARCH-VT",
+        "Merge agent worktree agent-aebaf85b (1 commits)",
+        "K970: MF2-GARCH mixed-frequency volatility model",
+        "Merge agent worktree agent-a8a170fc (1 commits)",
+        "K969: Bespoke RV — optimal daily vol proxy weighting",
+        "Merge agent worktree agent-ad709f8d (1 commits)",
+        "Merge agent worktree agent-a0449cfb (1 commits)",
+        "K967: Probabilistic quantile forecasting — GARCH vs CAViaR vs QR",
+        "K964: Earnings season volatility patterns — SPY 20yr analysis",
+        "Merge agent worktree agent-a05e71a3 (1 commits)",
+        "K966: HAR-PD path-dependent RV with 5-min data (pilot)",
+        "Merge branch 'worktree-agent-a03e796a'",
+        "K965: Wild Bootstrap OHR — SPY/ES futures hedging",
+        "Merge branch 'worktree-agent-a93730c7'",
+        "Token optimization: reduce per-cron context consumption ~20k tokens",
+        "E052: VIX global + DeFi + Codex discipline lessons (K943-K954)",
+        "Phase 4: Add structured context handoff templates",
+        "Phase 2-2: Prohibit worktree agents from modifying shared state",
+        "Phase 2-1: merge_worktree.sh handles storage/ conflicts",
+        "Phase 1: Remove duplicate I/O in publisher and memory system",
+        "Merge agent worktree agent-a70641cb (1 commits)",
+        "K954: DeFi Impermanent Loss and Vol Prediction",
+        "K953 HAR-RV Pilot PRELIMINARY — 56 days too few, R²=0.033",
+        "Merge agent worktree agent-a6a41996 (1 commits)",
+        "Fix VIX inconsistency: phase mismatch + VIX update logic",
+        "K953: HAR-RV pilot with 56 days 5-min SPY data (PRELIMINARY)",
+        "K952: Threshold ARMA for vol (Chen et al. 2011) — null result, GJR/MF-GJR still ",
+        "Periodic sync: storage state + released articles + token reports",
+        "K951 Copula Hedge ETF NULL — ETF diversification kills tail dependence",
+        "Merge agent worktree agent-a7e02939 (1 commits)",
+        "K951: Copula-GARCH hedge high-corr ETF pairs — copula does NOT add value",
+        "K950 Monthly Regime VT Cross-Asset — 0/5 Sharpe, 4/5 MDD improve",
+        "Merge agent worktree agent-a32dc04a (1 commits)",
+        "K950: Monthly Regime VT cross-asset — 0/5 Sharpe wins, 4/5 MDD improvement",
+        "Periodic sync: storage state + notifications",
+        "K949 Cross-Market MF-GJR — VIX global risk factor 4/5 Harvey pass",
+        "Merge agent worktree agent-a592af4c (1 commits)",
+        "K949: Cross-market MF-GJR VIX sufficiency — 4/5 markets significant",
+        "K948 Weekly Return NULL — vol predictable but returns are not",
+        "Merge agent worktree agent-a206d391 (1 commits)",
+        "K948: Weekly return predictability test — NULL result, consistent with Welch & G",
+        "TSMC 04/16 pre-event article (published)",
+        "K947 Threshold GARCH NULL — smooth MF beats discrete threshold",
+        "Merge agent worktree agent-a8bf8098 (1 commits)",
+        "K947: Threshold GARCH with VIX as Threshold Variable",
+        "Periodic sync: token reports + storage state + released articles"
+      ]
+    },
+    "experiment": {
+      "emoji": "🔬",
+      "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
+      "commits": 3,
+      "lines_changed": 3329,
+      "estimated_tokens": 96580,
+      "percentage": 15.5,
+      "commit_messages": [
+        "Add K967 + K970 research articles to draft pool",
+        "K964-K970: 5 experiments + K970 Codex fix",
+        "K960: HAR-RV formal experiment with SPY 5-min data (56 days)"
+      ]
+    },
+    "article_writing": {
+      "emoji": "✍️",
+      "description": "文章撰寫與發佈",
+      "commits": 6,
+      "lines_changed": 1324,
+      "estimated_tokens": 69184,
+      "percentage": 11.1,
+      "commit_messages": [
+        "K954 DeFi IL general article",
+        "K951 copula ETF general article (recreated after worktree loss)",
+        "K949 cross-market research article",
+        "K949 global VIX general article",
+        "K948 return prediction general article",
+        "K946 general article: doing nothing is smartest (mile_3f4e1a52)"
+      ]
+    },
+    "research_program": {
+      "emoji": "📋",
+      "description": "研究計畫/規範更新",
+      "commits": 6,
+      "lines_changed": 5061,
+      "estimated_tokens": 32244,
+      "percentage": 5.2,
+      "commit_messages": [
+        "Fix AGENTS.md: .claude/ → .agents/, CLAUDE.md → AGENTS.md",
+        "Sync AGENTS.md with CLAUDE.md (all today's changes)",
+        "Clarify CLAUDE.md ↔ research_program.md responsibilities",
+        "CLAUDE.md: deduplicate + point to research_program.md for details",
+        "Fix outdated info in CLAUDE.md (6 corrections)",
+        "Error log: VIX missing from _market_daily + timezone fix"
+      ]
+    },
+    "latex_content_fix": {
+      "emoji": "🔧",
+      "description": "LaTeX/內容批量修復（讀寫大型 JSON）",
+      "commits": 1,
+      "lines_changed": 16,
+      "estimated_tokens": 14448,
+      "percentage": 2.3,
+      "commit_messages": [
+        "Fix GARCH equation rendering in K940 article (mile_0976c5cc)"
+      ]
+    },
+    "codex_review": {
+      "emoji": "🤖",
+      "description": "Codex 審查",
+      "commits": 3,
+      "lines_changed": 49,
+      "estimated_tokens": 12392,
+      "percentage": 2.0,
+      "commit_messages": [
+        "K954 DeFi IL (Codex reviewed) — IL approx perfect but prediction fails",
+        "K952 TARMA NULL (Codex reviewed) — GARCH recursion beats TARMA",
+        "Codex review K940/K944: GARCH-feature contamination + K944 VIX lookahead"
+      ]
+    },
+    "knowledge_index": {
+      "emoji": "📚",
+      "description": "知識索引建立/更新",
+      "commits": 2,
+      "lines_changed": 440,
+      "estimated_tokens": 11520,
+      "percentage": 1.8,
+      "commit_messages": [
+        "Phase 3-1: Targeted source loading in knowledge index update",
+        "Periodic sync: token report + storage state + knowledge index 4600"
+      ]
+    },
+    "ops_patrol": {
+      "emoji": "🛡️",
+      "description": "平台巡檢",
+      "commits": 1,
+      "lines_changed": 71,
+      "estimated_tokens": 6852,
+      "percentage": 1.1,
+      "commit_messages": [
+        "Fix paper count mismatch: add 3 missing papers to research_program.md + health c"
+      ]
+    },
+    "daily_update": {
+      "emoji": "📊",
+      "description": "每日策略更新/績效重算",
+      "commits": 2,
+      "lines_changed": 14,
+      "estimated_tokens": 6084,
+      "percentage": 1.0,
+      "commit_messages": [
+        "Fix daily_update timing (22:03→00:03 UTC) + codex:rescue usage guide",
+        "Fix: add VIX to _market_daily in daily_update.py"
+      ]
+    },
+    "feed_ops": {
+      "emoji": "📡",
+      "description": "Feed 發佈/同步操作",
+      "commits": 1,
+      "lines_changed": 12,
+      "estimated_tokens": 4096,
+      "percentage": 0.7,
+      "commit_messages": [
+        "Phase 3-2: Avoid loading full feed.json for failed sync retry"
+      ]
+    },
+    "periodic_sync": {
+      "emoji": "🔄",
+      "description": "定期狀態同步（低 token）",
+      "commits": 3,
+      "lines_changed": 278,
+      "estimated_tokens": 3556,
+      "percentage": 0.6,
+      "commit_messages": [
+        "Session state update + notifications",
+        "Resolve session_state conflict",
+        "Resolve session_state merge conflict"
+      ]
+    },
+    "skill_process": {
+      "emoji": "⚙️",
+      "description": "流程/技能規範更新",
+      "commits": 1,
+      "lines_changed": 20,
+      "estimated_tokens": 3120,
+      "percentage": 0.5,
+      "commit_messages": [
+        "Clarify brief vs preamble relationship, remove overlap"
+      ]
+    }
+  }
+}

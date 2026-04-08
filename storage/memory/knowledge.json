@@ -22157,5 +22157,46 @@
     "data_source": "yfinance SPY + ^VIX + ^VIX3M 2010-2026",
     "created_at": "2026-04-07T22:46:24.161976+00:00",
     "experiment_date": "2026-04-08"
+  },
+  {
+    "id": "know_20260408003813_k988",
+    "experiment_id": "K988",
+    "title": "K988: Multiplicative GARCH-X vs GARCH-MIDAS(VIX) — 17規格系統比較 ★★★",
+    "content": "[提出: 賴奕豪, 執行: Claude] 系統比較17種VIX驅動乘法波動率模型規格。核心發現：(1) A4f（τ=θ₀+θ₁VIX², free ω）為冠軍，QLIKE=-8.3608, DM t=+4.48 vs GJR（Harvey門檻）；(2) 日頻GARCH-X全面勝過GARCH-MIDAS（rolling window和fixed-span），因VIX資訊集中在近期，MIDAS加權稀釋信號；(3) VIX²是最佳τ函數型式（維度直接對應variance）；(4) τ_t分母>τ_{t-1}分母，Engle et al. (2013) Eq.4邏輯在日頻下仍成立；(5) free ω改善VIX²模型（VRP≠0時E(g)=1不合理）；(6) 方案B（sample mean標準化）表現接近free ω但保持ω=1-α-γ/2-β簡潔性；(7) VRP驗證：g與獨立VRP的Spearman ρ=0.55-0.63（遠高於raw r²/VIX²的0.17），GARCH動態大幅提升VRP捕捉能力。自洽框架：σ²=τ×g, τ≈VIX²吸收implied vol水準, g的GARCH動態追蹤VRP偏離其長期均值。數據：SPY 2005-2026, OOS 2019-2026 (1825obs), refit/63d。待做：跨資產驗證、VaR/ES評估。",
+    "tags": [
+      "GARCH-X",
+      "GARCH-MIDAS",
+      "VIX",
+      "multiplicative",
+      "VRP",
+      "model-comparison",
+      "specification-test",
+      "tau-function",
+      "free-omega",
+      "SPY"
+    ],
+    "data_source": "yfinance (SPY + ^VIX)",
+    "created_at": "2026-04-08T00:38:13.522821+00:00",
+    "category": "knowledge"
+  },
+  {
+    "id": "know_20260408012822_k994",
+    "experiment_id": "K994",
+    "title": "K994: MF-GJR-X(A4f) 跨資產驗證 — 僅 QQQ 顯著，泛化有限",
+    "content": "[提出: 賴奕豪, 執行: Claude] K988 最佳規格 A4f（τ=θ₀+θ₁VIX², free ω）在 QQQ/EEM/GLD/0050.TW 的跨資產驗證。結果：(1) QQQ DM t=-3.71 通過 Harvey 門檻（唯一通過的非 SPY 資產），VIX-r² corr=0.494；(2) EEM DM t=-2.47 接近但未達，corr=0.499；(3) GLD DM t=-1.08 最弱，VIX 對黃金波動解釋力僅 corr=0.126；(4) 0050.TW DM t=-1.44，台股用前日 VIX lag 多一天，corr=0.275。Free ω vs 約束 ω 在跨資產無差異。結論：A4f 泛化限於 US equity（VIX 直接反映標的波動），跨市場需要本地 fear index（VXEEM, TVIX 等）。數據：yfinance 2005-2026, OOS 2019-2026, refit/63d。",
+    "tags": [
+      "GARCH-X",
+      "cross-asset",
+      "VIX",
+      "QQQ",
+      "EEM",
+      "GLD",
+      "0050.TW",
+      "generalization",
+      "limited"
+    ],
+    "data_source": "yfinance",
+    "created_at": "2026-04-08T01:28:22.705194+00:00",
+    "category": "knowledge"
   }
 ]

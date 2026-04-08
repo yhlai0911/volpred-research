@@ -516,11 +516,12 @@
 | **VaR (complete)** | **MF-GJR + HistSim ★★★** (K908: 1% Trinity PASS, universal) | MF-GJR + HistSim (K908: QQQ Trinity PASS) | GJR + any (K829 GLD all PASS) | **MF-GJR + Student-t ★★★** (K908: 1% Trinity PASS, df~4.7-6.6) |
 | **VT Strategy** | 12/VIX（#9 irreducible） | 12/VIX adapted | Asset-specific | 8.63/VIX |
 
-**★★★ 最終結論（K799-K908）：MF-GJR + HistSim = Complete Solution**
+**★★★ 最終結論（K799-K908, K988 更新）：MF-GJR + HistSim = Complete Solution**
 - **預測**：MF-GJR(VIX)（K889: -6.6% QLIKE, 5/5 cross-OOS Harvey PASS）
+  - **K988 規格優化**：τ=VIX² + free ω + τ_t 分母 → DM t=+4.48（最佳規格）。模型本質是 Multiplicative GARCH-X，不是 GARCH-MIDAS（賴教授指正）
 - **風險管理**：HistSim（K908: 3/3 資產 1%+5% Trinity PASS = universal solution）
 - **兩個維度獨立優化**。預測精度和風險管理是正交問題（K799 發現）
-- 待驗證：更多跨資產 + 整合進 Paper 1/5
+- 待驗證：更多跨資產 + 整合進 Paper 1/5 + K988 規格的 VaR/ES 驗證
 
 ## 重大研究結論
 → VT = drawdown insurance（K687/K697/K700/K701）、50/50 不可動搖（K846 三重護城河）、MF-GJR+HistSim 最佳方案（K908）。詳見 CLAUDE.md「重要研究結論」。
@@ -551,6 +552,32 @@
 ### P2: 研究新方向
 
 **高優先（有明確下一步）：**
+- [ ] **★ Paper: Multiplicative GARCH-X(VIX) — 規格比較與 VRP 解釋**（K988 發現）：
+  - **核心發現**：K988 比較 11 個 model 規格。A4f（VIX² + free ω）冠軍，DM t=+4.48 vs GJR
+  - **關鍵結論**：(1) τ=VIX² 最佳（維度一致 variance↔variance）(2) τ_t 分母 > τ_{t-1}（修正 K889 bug 後翻轉）(3) GARCH-MIDAS 不比單一 lag VIX 好 (4) free ω 改善 VIX² 模型
+  - **理論框架**：σ²=τ×g 不是 long/short-run 分解，而是 source decomposition（外生 VIX level × 內生 GARCH dynamics）。E(g)=1 約束下 τ 自動校正 VRP → g 反映 VRP 偏離動態
+  - **K988 已完成的規格（11 個）**：
+    - A1 K889-original（estimation τ_t / OOS τ_{t-1} 不一致）
+    - A2 consistent_tau_t（log-exp τ, τ_t 分母, ω 約束）
+    - A3 consistent_tau_t1（log-exp τ, τ_{t-1} 分母, ω 約束）
+    - A4 vix_squared（τ=θ₀+θ₁VIX², τ_t 分母, ω 約束）★ 第 2 名
+    - A5 vix_level（exp(θ₀+θ₁VIX), τ_t 分母, ω 約束）
+    - A2f free_omega（log-exp τ, τ_t 分母, ω 自由）
+    - A4f vix2_free_omega（VIX², τ_t 分母, ω 自由）★★★ 冠軍 DM t=+4.48
+    - B1-B3 GARCH-MIDAS rolling window K=22/65/125
+    - B0 GJR benchmark
+  - **K988b 待補做的規格**：
+    - [ ] **A3f**（τ_{t-1} 分母 + free ω）：完整交叉比較需要
+    - [ ] **方案 B：sample mean 標準化**：ũ_t = u_t / √(mean(r²/τ))，使 E(ũ²)=1 後再跑 GARCH，保持 ω=1-α-γ/2-β 但不假設 E(VRP)=0。A2n（log-exp）和 A4n（VIX²）
+    - [ ] **GARCH-MIDAS fixed-span（月頻 τ）**：τ_t 在月內不變，由 MIDAS 加權過去 K 個月的月均 VIX 驅動。原論文最基本的版本，K=6/12/24 月
+    - [ ] **VRP 驗證**：計算獨立 VRP = VIX² - realized_var，驗證 g 與 VRP 的 Spearman 相關
+  - **後續研究待做**：
+    - [x] 跨資產驗證（K994：QQQ DM t=-3.71 PASS，EEM/GLD/0050.TW 不顯著，需本地 fear index）
+    - [ ] VaR/ES 評估（Trinity test + Acerbi-Szekely ES backtest）
+    - [ ] 正式推導 E(g)=1 的自洽框架（τ 校正 VRP → g 反映 VRP 偏離）
+    - [ ] Codex 審 free omega 代碼
+    - [ ] 與 Conrad & Loch (2015)、Engle & Rangel (2008) 比較
+  - **論文定位**：可單獨一篇（J. Empirical Finance / J. Forecasting），或作為 Paper 5 的核心 section
 - [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較
 - [ ] **Paper 6: Crypto Fear Channel**：K746b + **K855 悖論發現**：BTC-ETF 後 Granger 弱化（p=0.32）但 shock 傳導放大 2.5x。機構化讓 channel 從「線性可預測」變成「事件驅動非線性」。BTC 已非分散化工具（corr>0.3 佔 76% 時間）。論文角度：「institutional adoption amplified shock transmission but destroyed linear predictability」
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package

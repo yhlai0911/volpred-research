@@ -1,33 +1,32 @@
-{
-  "updated_at": "2026-04-08T05:00:00Z",
-  "note": "Cron 讀此檔取最高優先任務。完成後補充新任務。空了才讀 research_program.md 全文。⚠️ 分配編號前必須先 ls experiments/ 確認該編號不存在。",
-  "tasks": [
-    {
-      "id": "K991",
-      "topic": "台股 VT 策略 sensitivity analysis — 8.63/VIX 參數 +-20% 穩定性",
-      "source": "上架檢驗 #4 需求",
-      "priority": 1,
-      "note": "策略上架必要檢驗，參數敏感度測試"
-    },
-    {
-      "id": "K992",
-      "topic": "MF2-VIX 整合到 VT 策略 — 用 MF2 vol 替代 GARCH vol 做 VT",
-      "source": "K970 ★ MF2-VIX 最佳 vol 預測 + K971 CAViaR-VT 教訓",
-      "priority": 2,
-      "note": "K971 證明 better VaR ≠ better VT，但 MF2 是 vol level 改善（不同性質）"
-    },
-    {
-      "id": "K993",
-      "topic": "VIX Term Structure 中頻策略 — 5-22天 horizon slope signal",
-      "source": "K975 ★ slope +2.2% R² at 5d + K976 日頻 NULL",
-      "priority": 3,
-      "note": "K975 slope 預測力在 5-22 天 horizon，K976 日頻無效，中頻可能是甜蜜點"
-    },
-    {
-      "id": "K994",
-      "topic": "Regime-Dependent VT — 不同 VIX regime 用不同 VT 目標波動率",
-      "source": "K980 regime 參數不同 + K970 MF2 + 實務需求",
-      "priority": 4
-    }
-  ]
-}
+[
+  {
+    "id": "K995",
+    "title": "K995: MF-GJR-X VaR/ES 評估（Trinity test + Acerbi-Szekely）",
+    "priority": 1,
+    "description": "K988 A4f 的 VaR/ES backtesting，必做項目（論文必備）"
+  },
+  {
+    "id": "K996",
+    "title": "K996: GARCH-MIDAS fixed-span 深度測試（月頻 τ + 不同 MIDAS weighting）",
+    "priority": 3,
+    "description": "K988b C1-C3 結果較差，但 K 值和 Beta weight 可能需要更多 tuning"
+  },
+  {
+    "id": "K997",
+    "title": "K997: MF-GJR-X 用 VXEEM/local fear index（跨市場改進）",
+    "priority": 2,
+    "description": "K994 顯示 US VIX 對 EEM/GLD/0050.TW 無效，改用本地 fear index 測試"
+  },
+  {
+    "id": "K998",
+    "title": "K998: g 成分的 VRP 預測能力（Fama-MacBeth / Panel regression）",
+    "priority": 2,
+    "description": "K988b VRP 驗證 ρ=0.63，進一步測試 g 是否能預測未來 VRP"
+  },
+  {
+    "id": "K999",
+    "title": "K999: Codex 審查 K988/K988b 代碼",
+    "priority": 1,
+    "description": "K988 系列必須經 Codex 審查，特別是 free omega 估計和 OOS 遞迴"
+  }
+]
