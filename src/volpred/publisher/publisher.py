@@ -245,7 +245,7 @@ class Publisher:
             'category': category,
             'audience': audience,
             'phase': phase,
-            'details': details or {},
+            'details': {k: v for k, v in (details or {}).items() if k not in ('content', 'description', 'title')},
             'tags': tag_list,
             'related_articles': related_articles,
             'created_at': now,
