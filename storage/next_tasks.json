@@ -1,17 +1,5 @@
 [
   {
-    "id": "K995",
-    "title": "K995: MF-GJR-X VaR/ES 評估（Trinity test + Acerbi-Szekely）",
-    "priority": 1,
-    "description": "K988 A4f 的 VaR/ES backtesting，必做項目（論文必備）"
-  },
-  {
-    "id": "K996",
-    "title": "K996: GARCH-MIDAS fixed-span 深度測試（月頻 τ + 不同 MIDAS weighting）",
-    "priority": 3,
-    "description": "K988b C1-C3 結果較差，但 K 值和 Beta weight 可能需要更多 tuning"
-  },
-  {
     "id": "K997",
     "title": "K997: MF-GJR-X 用 VXEEM/local fear index（跨市場改進）",
     "priority": 2,
@@ -24,9 +12,15 @@
     "description": "K988b VRP 驗證 ρ=0.63，進一步測試 g 是否能預測未來 VRP"
   },
   {
-    "id": "K999",
-    "title": "K999: Codex 審查 K988/K988b 代碼",
+    "id": "K996",
+    "title": "K996: GARCH-MIDAS fixed-span 深度測試（月頻 τ + 不同 MIDAS weighting）",
+    "priority": 3,
+    "description": "K988b C1-C3 結果較差，但 K 值和 Beta weight 可能需要更多 tuning"
+  },
+  {
+    "id": "K988c",
+    "title": "K988c: 重跑 K988b A2n/A4n（Codex 修正 normalization bug）",
     "priority": 1,
-    "description": "K988 系列必須經 Codex 審查，特別是 free omega 估計和 OOS 遞迴"
+    "description": "Codex K999 發現 sample-mean normalization off-by-one，已修正，需重跑確認結果變化"
   }
 ]

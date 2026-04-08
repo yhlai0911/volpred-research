@@ -60,13 +60,13 @@ K889 引入了 MF-GJR(VIX) 模型：$\sigma^2_t = \tau_t \times g_t$，聲稱基
 | 1 | **A4f_vix2_free_omega** | **-8.3608** | **+4.48** | GARCH-X, VIX², free ω |
 | 2 | A4_vix_squared | -8.3577 | +4.17 | GARCH-X, VIX², ω 約束 |
 | 3 | A2_consistent_tau_t | -8.3564 | +3.46 | GARCH-X, log-exp, τ_t |
-| 4 | A4n_vix2_samplenorm | -8.3549 | +3.55 | GARCH-X, VIX², 方案B |
-| 5 | A2n_logexp_samplenorm | -8.3541 | +3.26 | GARCH-X, log-exp, 方案B |
+| 4 | A4n_vix2_samplenorm | -8.3484 | +3.71 | GARCH-X, VIX², 方案B (Codex fix) |
+| 5 | A2n_logexp_samplenorm | -8.3496 | +3.41 | GARCH-X, log-exp, 方案B (Codex fix) |
 | 6 | B1_MIDAS_RW_K22 | -8.3538 | +3.37 | MIDAS rolling, K=22 |
 | 7 | A2f_free_omega | -8.3531 | +3.30 | GARCH-X, log-exp, free ω |
 | 8 | A3_consistent_tau_t1 | -8.3522 | +3.25 | GARCH-X, τ_{t-1} 分母 |
 | 9 | A1_K889_original | -8.3501 | +3.17 | K889 bug 重現 |
-| 10 | A3f_tau_t1_free_omega | -8.3495 | +3.09 | GARCH-X, τ_{t-1}, free ω |
+| 10 | A3f_tau_t1_free_omega | -8.3495 | +3.38 | GARCH-X, τ_{t-1}, free ω (Codex fix) |
 | 11 | B2_MIDAS_RW_K65 | -8.3417 | +3.15 | MIDAS rolling, K=65 |
 | 12 | B3_MIDAS_RW_K125 | -8.3373 | +3.26 | MIDAS rolling, K=125 |
 | 13 | A5_vix_level | -8.3317 | +1.84 | GARCH-X, VIX level |
@@ -75,14 +75,16 @@ K889 引入了 MF-GJR(VIX) 模型：$\sigma^2_t = \tau_t \times g_t$，聲稱基
 | 16 | C2_MIDAS_FS_K12 | -8.3019 | +2.33 | MIDAS fixed-span, K=12m |
 | 17 | B0_GJR | -8.2772 | ref | Benchmark |
 
-### VRP 驗證
+### VRP 驗證（Codex K999 修正 VIX lag 後）
 
 | 指標 | Spearman ρ | p-value |
 |------|-----------|---------|
-| g_proxy (A3f) vs VRP | **0.630** | 0.000 |
-| g_proxy (A2n) vs VRP | **0.618** | 0.000 |
-| g_proxy (A4n) vs VRP | **0.545** | 0.000 |
-| Raw r²/VIX² vs VRP | 0.173 | 0.000 |
+| g_proxy (A3f) vs VRP | **0.819** | 0.000 |
+| g_proxy (A2n) vs VRP | **0.801** | 0.000 |
+| g_proxy (A4n) vs VRP | **0.778** | 0.000 |
+| Raw r²/VIX² vs VRP | 0.151 | 0.000 |
+
+Note: 修正前用同日 VIX_t，修正後用正確的 VIX_{t-1}。ρ 從 0.55-0.63 提升至 0.78-0.82。
 
 ## 結論
 

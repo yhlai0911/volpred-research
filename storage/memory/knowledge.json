@@ -22198,5 +22198,42 @@
     "data_source": "yfinance",
     "created_at": "2026-04-08T01:28:22.705194+00:00",
     "category": "knowledge"
+  },
+  {
+    "id": "know_20260408044125_k995",
+    "experiment_id": "K995",
+    "title": "K995: MF-GJR-X(A4f) VaR/ES Backtesting ★★ — A4f_t 最佳風險管理模型",
+    "content": "[提出: 賴奕豪, 執行: Claude] K988 A4f 的 VaR/ES backtesting。A4f_t（VIX² tau + free ω + Student-t）scorecard 3/4，遠勝 GJR 的 1/4。(1) 1% VaR: A4f_t violation 1.42%（UC p=0.087 PASS），GJR_Normal 2.30%（fail）；(2) 5% VaR: A4f_t 5.15%（UC p=0.769 PASS）；(3) ES: Acerbi-Szekely Z1/Z2 均 PASS；(4) 2.5% VaR DQ test 仍 reject（violation clustering 未完全捕捉）；(5) Student-t 分配是關鍵——A4f_Normal 在 1% VaR 仍 fail（1.92%），加 t 修正後才通過；(6) df 估計：GJR_t ~5.94, A4f ~8.12（VIX² 已吸收部分尾部風險）。結論：K988 QLIKE 優勢成功轉化為風險管理優勢。數據：SPY 2005-2026, OOS 2019-2026。",
+    "tags": [
+      "VaR",
+      "ES",
+      "backtesting",
+      "GARCH-X",
+      "VIX",
+      "risk-management",
+      "Student-t",
+      "A4f"
+    ],
+    "data_source": "yfinance (SPY + ^VIX)",
+    "created_at": "2026-04-08T04:41:25.117667+00:00",
+    "category": "knowledge"
+  },
+  {
+    "id": "know_20260408050440_k998",
+    "experiment_id": "K998",
+    "title": "K998: g 成分的 VRP 預測能力 — NULL, g 是同期成分非前瞻預測器",
+    "content": "[提出: 賴奕豪, 執行: Claude] 測試 K988 A4f 的 g 成分能否預測未來 VRP。結果：(1) Granger causality in-sample 顯著（h=1,5,10 F>13），但控制 VRP lag 後 Newey-West t 最高僅 2.34（未達 Harvey 3.0）；(2) OOS R² 為負（in-sample overfitting）；(3) g-based variance swap strategy Sharpe=-0.64（反向指標），遠不如 naive sell variance 的 0.85；(4) 同期 Spearman(g, VRP)=0.008，遠低於 K988b 報告的 0.63-0.82——差異來自 VRP 定義不一致。結論：g 是同期 variance decomposition 成分，追蹤當前 variance state，不是前瞻 VRP 預測器。日頻 VRP autocorrelation 僅 0.20，本質上難以預測。數據：SPY 2005-2026。",
+    "tags": [
+      "VRP",
+      "predictability",
+      "GARCH-X",
+      "NULL",
+      "g-component",
+      "Granger",
+      "variance-swap"
+    ],
+    "data_source": "yfinance (SPY + ^VIX)",
+    "created_at": "2026-04-08T05:04:40.679153+00:00",
+    "category": "knowledge"
   }
 ]

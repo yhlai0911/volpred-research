@@ -1,88 +1,88 @@
 {
   "models": {
     "B0_GJR": {
-      "qlike": -8.270501645642458,
-      "spearman": 0.3653121549407857,
-      "n_valid": 1825
+      "qlike": -8.273289245333821,
+      "spearman": 0.36566568906125896,
+      "n_valid": 1824
     },
     "A3f_tau_t1_free_omega": {
-      "qlike": -8.349522319740435,
-      "spearman": 0.4163349730522347,
-      "n_valid": 1825
+      "qlike": -8.351279000028734,
+      "spearman": 0.41907591613522993,
+      "n_valid": 1824
     },
     "A2n_logexp_samplenorm": {
-      "qlike": -8.35410780793728,
-      "spearman": 0.4200503918505759,
-      "n_valid": 1825
+      "qlike": -8.349604477462002,
+      "spearman": 0.4196910800211723,
+      "n_valid": 1824
     },
     "A4n_vix2_samplenorm": {
-      "qlike": -8.354872418904186,
-      "spearman": 0.4157850052710277,
-      "n_valid": 1825
+      "qlike": -8.348414641992441,
+      "spearman": 0.4161818358071552,
+      "n_valid": 1824
     },
     "C1_MIDAS_FS_K6": {
-      "qlike": -8.309158245018024,
-      "spearman": 0.399825426961743,
-      "n_valid": 1825
+      "qlike": -8.309387468860516,
+      "spearman": 0.40076243711232595,
+      "n_valid": 1824
     },
     "C2_MIDAS_FS_K12": {
-      "qlike": -8.30189876966312,
-      "spearman": 0.3963326375550373,
-      "n_valid": 1825
+      "qlike": -8.300919418793107,
+      "spearman": 0.3973482600942952,
+      "n_valid": 1824
     },
     "C3_MIDAS_FS_K24": {
-      "qlike": -8.3073763561497,
-      "spearman": 0.3967253044409032,
-      "n_valid": 1825
+      "qlike": -8.306012304305641,
+      "spearman": 0.3969894180371046,
+      "n_valid": 1824
     }
   },
   "dm_tests": {
     "A3f_tau_t1_free_omega_vs_GJR": {
-      "dm_t": 3.0908972659007996,
+      "dm_t": 3.3787296835891736,
       "significant": "True"
     },
     "A2n_logexp_samplenorm_vs_GJR": {
-      "dm_t": 3.2575129757242354,
+      "dm_t": 3.4045541034379267,
       "significant": "True"
     },
     "A4n_vix2_samplenorm_vs_GJR": {
-      "dm_t": 3.5539193990868005,
+      "dm_t": 3.7114563296408196,
       "significant": "True"
     },
     "C1_MIDAS_FS_K6_vs_GJR": {
-      "dm_t": 3.5451266226800904,
-      "significant": "True"
+      "dm_t": 2.8485835413649325,
+      "significant": "False"
     },
     "C2_MIDAS_FS_K12_vs_GJR": {
-      "dm_t": 2.334054042222531,
+      "dm_t": 1.7108524047353222,
       "significant": "False"
     },
     "C3_MIDAS_FS_K24_vs_GJR": {
-      "dm_t": 2.848888254487206,
+      "dm_t": 2.1888682855895767,
       "significant": "False"
     }
   },
   "vrp_corr_A4n_vix2_samplenorm": {
-    "spearman": 0.5447453331711852,
-    "p": 1.502034503792587e-141
+    "spearman": 0.7780480727514051,
+    "p": 0.0
   },
   "vrp_corr_A2n_logexp_samplenorm": {
-    "spearman": 0.6179467137738871,
-    "p": 1.1402603430671416e-192
+    "spearman": 0.8008446882164573,
+    "p": 0.0
   },
   "vrp_corr_A3f_tau_t1_free_omega": {
-    "spearman": 0.6294613434402223,
-    "p": 5.521721713294224e-202
+    "spearman": 0.8190692153176923,
+    "p": 0.0
   },
   "vrp_corr_raw_ratio": {
-    "spearman": 0.17293368803897527,
-    "p": 1.016190335568993e-13
+    "spearman": 0.1508960438175109,
+    "p": 9.34290744533996e-11
   },
   "metadata": {
     "experiment_id": "K988b",
-    "elapsed": 536.4215230941772,
-    "timestamp": "2026-04-07T23:38:21.405152+00:00",
-    "n_oos": 1825,
+    "elapsed": 527.1842660903931,
+    "timestamp": "2026-04-08T04:51:15.910828+00:00",
+    "n_oos": 1824,
     "n_refits": 29
   }
 }

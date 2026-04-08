@@ -167,8 +167,12 @@ def fit_mfgjr_x(returns, log_vix_v, vix_v, tau_func='log_exp', denom_mode='tau_t
             if omega_g <= 0: return 1e10
 
         # Sample-mean normalization factor
+        # Codex K999 fix: match pairing with recursion u_{t-1} = r_{t-1}/sqrt(tau_t)
         if sample_norm:
-            mean_r2_over_tau = np.mean(returns**2 / tau)
+            if denom_mode == 'tau_t':
+                mean_r2_over_tau = np.mean(returns[:-1]**2 / tau[1:])
+            else:
+                mean_r2_over_tau = np.mean(returns[:-1]**2 / tau[:-1])
             norm_factor = np.sqrt(max(mean_r2_over_tau, 1e-16))
         else:
             norm_factor = 1.0
@@ -414,10 +418,13 @@ for t_idx, abs_idx in enumerate(oos_indices):
                 v_lag = np.exp(lv_lag)
                 tau_tr = compute_tau(p, lv_lag, v_lag, tf)
 
-                # Compute normalization factor
+                # Compute normalization factor (Codex K999 fix: match r_{t-1}/tau_t pairing)
                 nf = 1.0
                 if sn:
-                    mean_r2_tau = np.mean(tr_ret**2 / tau_tr)
+                    if dm == 'tau_t':
+                        mean_r2_tau = np.mean(tr_ret[:-1]**2 / tau_tr[1:])
+                    else:
+                        mean_r2_tau = np.mean(tr_ret[:-1]**2 / tau_tr[:-1])
                     nf = np.sqrt(max(mean_r2_tau, 1e-16))
                 states[name]['norm_factor'] = nf
 
@@ -625,7 +632,9 @@ print(f"\n[4] VRP validation...")
 
 # Compute g series for A4f (best model from K988) and correlate with independent VRP
 # VRP = VIX²_{t-1}/252 - r²_t (simplified daily VRP proxy)
-vix_var = (vix[oos_indices] ** 2) / 252  # annualized VIX² → daily
+# Codex K999 fix: use VIX_{t-1} (lagged) not same-day VIX_t
+vix_lag_oos = vix[oos_indices - 1]  # VIX_{t-1} for each OOS day
+vix_var = (vix_lag_oos ** 2) / 252  # annualized VIX²_{t-1} → daily
 oos_ret_sq = r2[oos_indices]
 
 # Simple VRP proxy: implied - realized (positive = seller premium)
