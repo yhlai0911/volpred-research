@@ -1,0 +1,425 @@
+{
+  "experiment_id": "K1000",
+  "title": "MF-GJR-X(A4f) + Student-t Joint MLE — 5-Model OOS Comparison",
+  "date": "2026-04-08",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "data_period": "2004-01-05 to 2026-04-06",
+  "oos_period": "2019-01-02 to 2026-04-06",
+  "n_total": 5598,
+  "n_oos": 1824,
+  "window": 2000,
+  "refit_every": 63,
+  "seed": 42,
+  "models": {
+    "GJR_N": {
+      "qlike": -8.260228,
+      "params": {
+        "omega": 2e-06,
+        "alpha": 0.049168,
+        "gamma": 0.049168,
+        "beta": 0.893346
+      },
+      "persistence": 0.9671,
+      "converged": true,
+      "var_es": {
+        "0.01": {
+          "alpha": 0.01,
+          "T": 1824,
+          "violations": 46,
+          "violation_rate": 2.52,
+          "expected_rate": 1.0,
+          "UC_stat": 30.011,
+          "UC_p": 0.0,
+          "CC_stat": 0.53,
+          "CC_p": 0.4666,
+          "DQ_stat": 44.6,
+          "DQ_p": 0.0,
+          "Basel": "RED",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "1/4"
+        },
+        "0.025": {
+          "alpha": 0.025,
+          "T": 1824,
+          "violations": 73,
+          "violation_rate": 4.0,
+          "expected_rate": 2.5,
+          "UC_stat": 14.325,
+          "UC_p": 0.0002,
+          "CC_stat": 0.002,
+          "CC_p": 0.9626,
+          "DQ_stat": 17.02,
+          "DQ_p": 0.0007,
+          "Basel": "YELLOW",
+          "ES_Z1": 2.9305,
+          "ES_Z1_p": 0.502,
+          "ES_Z2": 0.7022,
+          "ES_Z2_p": 0.537,
+          "scorecard": "3/6"
+        },
+        "0.05": {
+          "alpha": 0.05,
+          "T": 1824,
+          "violations": 111,
+          "violation_rate": 6.09,
+          "expected_rate": 5.0,
+          "UC_stat": 4.245,
+          "UC_p": 0.0394,
+          "CC_stat": 0.246,
+          "CC_p": 0.62,
+          "DQ_stat": 4.913,
+          "DQ_p": 0.1783,
+          "Basel": "GREEN",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "3/4"
+        }
+      }
+    },
+    "GJR_t": {
+      "qlike": -8.274974,
+      "params": {
+        "omega": 1e-06,
+        "alpha": 0.050279,
+        "gamma": 0.050279,
+        "beta": 0.90223,
+        "df": 8.027881
+      },
+      "persistence": 0.9776,
+      "converged": true,
+      "var_es": {
+        "0.01": {
+          "alpha": 0.01,
+          "T": 1824,
+          "violations": 31,
+          "violation_rate": 1.7,
+          "expected_rate": 1.0,
+          "UC_stat": 7.453,
+          "UC_p": 0.0063,
+          "CC_stat": 0.35,
+          "CC_p": 0.5543,
+          "DQ_stat": 15.013,
+          "DQ_p": 0.0018,
+          "Basel": "YELLOW",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "1/4"
+        },
+        "0.025": {
+          "alpha": 0.025,
+          "T": 1824,
+          "violations": 60,
+          "violation_rate": 3.29,
+          "expected_rate": 2.5,
+          "UC_stat": 4.249,
+          "UC_p": 0.0393,
+          "CC_stat": 0.622,
+          "CC_p": 0.4304,
+          "DQ_stat": 6.082,
+          "DQ_p": 0.1077,
+          "Basel": "GREEN",
+          "ES_Z1": 2.4344,
+          "ES_Z1_p": 0.489,
+          "ES_Z2": 0.4369,
+          "ES_Z2_p": 0.537,
+          "scorecard": "5/6"
+        },
+        "0.05": {
+          "alpha": 0.05,
+          "T": 1824,
+          "violations": 112,
+          "violation_rate": 6.14,
+          "expected_rate": 5.0,
+          "UC_stat": 4.67,
+          "UC_p": 0.0307,
+          "CC_stat": 0.002,
+          "CC_p": 0.9612,
+          "DQ_stat": 5.537,
+          "DQ_p": 0.1364,
+          "Basel": "GREEN",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "3/4"
+        }
+      }
+    },
+    "A4f_N": {
+      "qlike": -8.361948,
+      "params": {
+        "theta0": -5.3e-05,
+        "theta1": 0.01,
+        "omega": 0.048141,
+        "alpha": 1e-06,
+        "gamma": 0.149793,
+        "beta": 0.790004
+      },
+      "persistence": 0.8649,
+      "converged": true,
+      "var_es": {
+        "0.01": {
+          "alpha": 0.01,
+          "T": 1824,
+          "violations": 32,
+          "violation_rate": 1.75,
+          "expected_rate": 1.0,
+          "UC_stat": 8.561,
+          "UC_p": 0.0034,
+          "CC_stat": 0,
+          "CC_p": 1.0,
+          "DQ_stat": 13.833,
+          "DQ_p": 0.0031,
+          "Basel": "YELLOW",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "1/4"
+        },
+        "0.025": {
+          "alpha": 0.025,
+          "T": 1824,
+          "violations": 54,
+          "violation_rate": 2.96,
+          "expected_rate": 2.5,
+          "UC_stat": 1.5,
+          "UC_p": 0.2207,
+          "CC_stat": 0.274,
+          "CC_p": 0.601,
+          "DQ_stat": 2.986,
+          "DQ_p": 0.3938,
+          "Basel": "GREEN",
+          "ES_Z1": 2.3499,
+          "ES_Z1_p": 0.475,
+          "ES_Z2": 0.5972,
+          "ES_Z2_p": 0.536,
+          "scorecard": "6/6"
+        },
+        "0.05": {
+          "alpha": 0.05,
+          "T": 1824,
+          "violations": 92,
+          "violation_rate": 5.04,
+          "expected_rate": 5.0,
+          "UC_stat": 0.007,
+          "UC_p": 0.9316,
+          "CC_stat": 0.103,
+          "CC_p": 0.7481,
+          "DQ_stat": 0.331,
+          "DQ_p": 0.954,
+          "Basel": "GREEN",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "4/4"
+        }
+      }
+    },
+    "A4f_t_2step": {
+      "qlike": -8.361948,
+      "params": {
+        "theta0": -5.3e-05,
+        "theta1": 0.01,
+        "omega": 0.048141,
+        "alpha": 1e-06,
+        "gamma": 0.149793,
+        "beta": 0.790004,
+        "df": 7.828328
+      },
+      "persistence": 0.8649,
+      "converged": true,
+      "var_es": {
+        "0.01": {
+          "alpha": 0.01,
+          "T": 1824,
+          "violations": 22,
+          "violation_rate": 1.21,
+          "expected_rate": 1.0,
+          "UC_stat": 0.735,
+          "UC_p": 0.3914,
+          "CC_stat": 0,
+          "CC_p": 1.0,
+          "DQ_stat": 1.404,
+          "DQ_p": 0.7046,
+          "Basel": "GREEN",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "4/4"
+        },
+        "0.025": {
+          "alpha": 0.025,
+          "T": 1824,
+          "violations": 51,
+          "violation_rate": 2.8,
+          "expected_rate": 2.5,
+          "UC_stat": 0.632,
+          "UC_p": 0.4266,
+          "CC_stat": 0.15,
+          "CC_p": 0.6984,
+          "DQ_stat": 1.66,
+          "DQ_p": 0.6458,
+          "Basel": "GREEN",
+          "ES_Z1": 2.1759,
+          "ES_Z1_p": 0.473,
+          "ES_Z2": 0.4504,
+          "ES_Z2_p": 0.537,
+          "scorecard": "6/6"
+        },
+        "0.05": {
+          "alpha": 0.05,
+          "T": 1824,
+          "violations": 99,
+          "violation_rate": 5.43,
+          "expected_rate": 5.0,
+          "UC_stat": 0.684,
+          "UC_p": 0.4082,
+          "CC_stat": 0.428,
+          "CC_p": 0.5128,
+          "DQ_stat": 1.842,
+          "DQ_p": 0.6059,
+          "Basel": "GREEN",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "4/4"
+        }
+      }
+    },
+    "A4f_t_joint": {
+      "qlike": -8.361411,
+      "params": {
+        "theta0": -5.9e-05,
+        "theta1": 0.010054,
+        "omega": 0.048702,
+        "alpha": 1e-06,
+        "gamma": 0.145835,
+        "beta": 0.793294,
+        "df": 8.00136
+      },
+      "persistence": 0.8662,
+      "converged": true,
+      "var_es": {
+        "0.01": {
+          "alpha": 0.01,
+          "T": 1824,
+          "violations": 22,
+          "violation_rate": 1.21,
+          "expected_rate": 1.0,
+          "UC_stat": 0.735,
+          "UC_p": 0.3914,
+          "CC_stat": 0,
+          "CC_p": 1.0,
+          "DQ_stat": 1.397,
+          "DQ_p": 0.7062,
+          "Basel": "GREEN",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "4/4"
+        },
+        "0.025": {
+          "alpha": 0.025,
+          "T": 1824,
+          "violations": 51,
+          "violation_rate": 2.8,
+          "expected_rate": 2.5,
+          "UC_stat": 0.632,
+          "UC_p": 0.4266,
+          "CC_stat": 0.15,
+          "CC_p": 0.6984,
+          "DQ_stat": 1.615,
+          "DQ_p": 0.656,
+          "Basel": "GREEN",
+          "ES_Z1": 2.1777,
+          "ES_Z1_p": 0.474,
+          "ES_Z2": 0.4473,
+          "ES_Z2_p": 0.535,
+          "scorecard": "6/6"
+        },
+        "0.05": {
+          "alpha": 0.05,
+          "T": 1824,
+          "violations": 99,
+          "violation_rate": 5.43,
+          "expected_rate": 5.0,
+          "UC_stat": 0.684,
+          "UC_p": 0.4082,
+          "CC_stat": 0.03,
+          "CC_p": 0.8622,
+          "DQ_stat": 0.857,
+          "DQ_p": 0.8358,
+          "Basel": "GREEN",
+          "ES_Z1": null,
+          "ES_Z1_p": null,
+          "ES_Z2": null,
+          "ES_Z2_p": null,
+          "scorecard": "4/4"
+        }
+      }
+    }
+  },
+  "dm_tests": {
+    "GJR_N_vs_GJR_t": {
+      "t_stat": 1.228,
+      "p_val": 0.2193
+    },
+    "GJR_N_vs_A4f_N": {
+      "t_stat": 4.444,
+      "p_val": 0.0
+    },
+    "GJR_N_vs_A4f_t_2step": {
+      "t_stat": 4.444,
+      "p_val": 0.0
+    },
+    "GJR_N_vs_A4f_t_joint": {
+      "t_stat": 4.35,
+      "p_val": 0.0
+    },
+    "GJR_t_vs_A4f_N": {
+      "t_stat": 4.301,
+      "p_val": 0.0
+    },
+    "GJR_t_vs_A4f_t_2step": {
+      "t_stat": 4.301,
+      "p_val": 0.0
+    },
+    "GJR_t_vs_A4f_t_joint": {
+      "t_stat": 4.241,
+      "p_val": 0.0
+    },
+    "A4f_N_vs_A4f_t_2step": {
+      "t_stat": 0.0,
+      "p_val": 1.0
+    },
+    "A4f_N_vs_A4f_t_joint": {
+      "t_stat": -0.372,
+      "p_val": 0.7097
+    },
+    "A4f_t_2step_vs_A4f_t_joint": {
+      "t_stat": -0.372,
+      "p_val": 0.7097
+    }
+  },
+  "references": [
+    "Engle & Rangel (2008) Spline-GARCH",
+    "Patton (2011) QLIKE loss",
+    "Kupiec (1995) UC test",
+    "Christoffersen (1998) CC test",
+    "Engle & Manganelli (2004) DQ test",
+    "Acerbi & Szekely (2014) ES backtest",
+    "Harvey (2016) t>3.0 threshold"
+  ]
+}
