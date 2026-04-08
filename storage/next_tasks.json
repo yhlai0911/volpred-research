@@ -1,26 +1,26 @@
 [
   {
-    "id": "K1004",
-    "title": "K1004: VIX9D-driven A4f（K1003 最佳 VIX 變體的完整驗證）",
-    "priority": 1,
-    "description": "K1003 發現 VIX9D t=+5.15 最強。做完整 OOS + VaR/ES + 跨資產驗證"
-  },
-  {
-    "id": "K1005",
-    "title": "K1005: Proxy-Reliance Conformal VaR（arXiv:2603.22569）",
-    "priority": 2,
-    "description": "新文獻方法：校準 VaR 時控制 proxy 依賴。與 Patton (2011) proxy-robust 框架直接相關"
-  },
-  {
-    "id": "K1006",
-    "title": "K1006: 台指期 Overnight Gap Strategy 正式回測",
-    "priority": 2,
-    "description": "K515 延伸：93% alpha 在隔夜。用 TAIFEX tick 做正式回測"
-  },
-  {
     "id": "Paper_MF",
-    "title": "MF-GJR-X 論文撰寫（主線程，不用 agent）",
+    "title": "MF-GJR-X 論文撰寫（主線程）",
     "priority": 1,
-    "description": "K988-K1003 素材完整，開始撰寫論文"
+    "description": "K988-K1006 素材完整"
+  },
+  {
+    "id": "K1008",
+    "title": "K1008: Regime-Weighted Conformal VaR（arXiv:2602.03903）",
+    "priority": 2,
+    "description": "結合 K1005 conformal 發現 + VIX regime，控制非定態 VaR 超限率"
+  },
+  {
+    "id": "K1009",
+    "title": "K1009: TXO Put-Call Ratio 散戶恐慌指標",
+    "priority": 2,
+    "description": "台指選擇權 P/C ratio 作為散戶恐慌指標，極端值做反向操作"
+  },
+  {
+    "id": "K1010",
+    "title": "K1010: Probabilistic RV Quantile Forecasting",
+    "priority": 2,
+    "description": "arXiv:2508.15922，從 GARCH/HAR 點預測到條件分位數"
   }
 ]
