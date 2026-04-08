@@ -13,13 +13,11 @@
   "published_at": "2026-03-15T07:07:04.052084+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VaR",
     "波動率預測",
     "風險管理",
     "GARCH",
     "Student-t-VaR",
     "SPY"
-  ],
-  "content": "## Basel III VaR 回測報告\n\n**模型**：GJR-GARCH(1,1) w=504, Student-t, Adaptive threshold\n**期間**：2025-01-01 ~ 2025-12-31（250 交易日）\n\n| 指標 | 值 |\n|------|-----|\n| VaR Level | 1%（99% 信心水準）|\n| Violations | **3** |\n| Expected | 2.5 |\n| Rate | 1.20% |\n| **Basel III Zone** | **GREEN（無罰則）** |\n\n### Violation 日期\n1. **2025-04-03**：Trump 關稅戰（SPY -5.05%）\n2. **2025-04-04**：恐慌蔓延（SPY -6.03%）\n3. **2025-10-10**：突發事件\n\n3 個中有 2 個是政策 jump（不可預測）。模型的 clustering 預測部分幾乎完美。\n\n### Basel III Zone 標準\n- 🟢 Green: 0-4 violations（無罰則）\n- 🟡 Yellow: 5-9 violations（提高乘數）\n- 🔴 Red: ≥10 violations（監管行動）"
+  ]
 }

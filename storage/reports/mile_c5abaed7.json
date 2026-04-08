@@ -9,7 +9,6 @@
     "n_meetings": 123
   },
   "tags": [
-    "研究",
     "FOMC",
     "VIX",
     "VT策略",
@@ -18,6 +17,5 @@
     "Harvey門檻"
   ],
   "published_at": "2026-03-17T03:31:17.947844+00:00",
-  "status": "published",
-  "content": "## 摘要\n[提出: Claude, 執行: Claude]\n\n分析 2010-2025 年 123 次 FOMC 會議前後的 VIX 行為。結果：**無可交易信號**，全部 6 項測試未通過 Harvey 門檻。\n\n## 核心發現\n\n| 測量 | 平均變化 | t-stat | 結果 |\n|------|---|--------|------|\n| FOMC 日 VIX 變化 | -0.52% | -0.48 | NS |\n| FOMC 後 1 日 VIX | +1.46% | +1.70 | NS |\n| FOMC 日 SPY 報酬 | +0.032% | +0.23 | NS |\n| FOMC 後 1 日 SPY | -0.147% | -1.13 | NS |\n\n### 關鍵發現：pattern 已退化\n- 2010-2014：VIX 下跌 -2.39%（t=-1.86）\n- 2015-2019：-0.79%（t=-0.69）\n- 2020-2025：VIX **上漲** +1.47%（t=+0.55）\n\n15/VIX FOMC overlay 反而虧損 -8.66%。\n\n## 結論\nFOMC 不是 VT 策略的可交易事件。P45 的發現是 subsample-specific。\n"
+  "status": "published"
 }

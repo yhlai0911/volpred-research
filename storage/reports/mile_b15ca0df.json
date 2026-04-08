@@ -8,10 +8,8 @@
   "published_at": "2026-03-16T02:58:59.652410+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "Hybrid-VT",
     "VT策略",
     "GARCH"
-  ],
-  "content": "## Hybrid VT + VIX Term Structure 增強\n\n### 策略比較\n\n| 策略 | Sharpe | 差異 |\n|------|--------|------|\n| Hybrid VT (baseline) | 0.985 | — |\n| + Term Structure 增強 | 0.974 | -0.012 |\n\n### 增強邏輯\nBackwardation (VIX > VIX3M) 時額外減碼 30%（VIX weight × 1.3）\n\n### 結論\nNO IMPROVEMENT。基準 Hybrid VT 已經足夠好，term structure 沒有增量改善。可能因為 VIX/GARCH ratio 已經捕捉了大部分 stress information。"
+  ]
 }

@@ -5,9 +5,7 @@
   "category": "milestone",
   "phase": "Phase_T",
   "details": {},
-  "tags": [
-    "研究"
-  ],
+  "tags": [],
   "published_at": "2026-03-17T17:11:08.604415+00:00",
   "status": "published",
   "content": "G28/I1 showed intraday GARCH improves QLIKE by +10.3% for vol prediction. Tested whether this translates to better VT strategy. Intraday GARCH VT Sharpe=1.36 vs Total GARCH VT 1.06 (DM p=0.005, bootstrap p=0.011). BUT: this is accidental leverage — intraday sigma is 83% of total sigma, so weights are systematically +16.6% higher. In 2023-2024 bull market this = higher returns. Evidence: (1) QLIKE is WORSE (+7.8%) for predicting total return vol, (2) MDD is worse (-11.7% vs -10.3%), (3) up-day gain +11.1 bps exactly offset by down-day loss -9.6 bps, (4) gap adjustment only triggers 5% of days — negligible. Verdict: NULL. Intraday GARCH improves vol prediction quality but the VT benefit is a leverage artifact, not genuine risk-adjusted improvement."

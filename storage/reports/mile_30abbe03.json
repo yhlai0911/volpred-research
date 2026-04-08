@@ -8,11 +8,9 @@
   "published_at": "2026-03-16T06:07:27.659044+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VRP",
     "Hybrid-VT",
     "VT策略",
     "GARCH"
-  ],
-  "content": "Tested Hybrid VT threshold sensitivity with 0.1 step from 0.8 to 2.5 (2014-2025). Peak Sharpe at threshold 1.4 (0.914), consistent with VRP median 1.31 (N25). Plateau [1.0, 1.6] all within 4% of peak. All thresholds 0.8-2.5 beat pure GARCH VT (0.780). MaxDD monotonically worsens as threshold rises (less VIX protection). At 1.3: 50.3% VIX mode (confirming N26 50/50 split). Below 1.0: nearly always VIX mode (>86%), still works but not optimal. Above 2.0: rarely VIX (<5%), approaches pure GARCH. Th"
+  ]
 }

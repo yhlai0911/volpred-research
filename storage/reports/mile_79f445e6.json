@@ -7,9 +7,8 @@
   "details": {},
   "published_at": "2026-03-16T04:24:10.731240+00:00",
   "status": "published",
-  "content": "## VIX Momentum 信號：+0.052 Sharpe\n\n### 假說\nVIX 的 5 日動量（快速上升 vs 下降）可能包含 level 之外的動態信息。\n\n### 測試方法\n- VIX 5 日漲幅 > 5%：額外減碼 30%\n- VIX 5 日跌幅 > 5%：額外加碼 10%（不對稱，保守加碼）\n\n### 初步結果\n\n| 指標 | Standard HVT | VIX Momentum |\n|------|-------|--------|\n| Sharpe | 0.985 | 1.038 (+0.052) |\n| MaxDD | -11.4% | -10.2% |\n\n### 跨期驗證結果（Rule 16）\n**未通過**。3/3 時期方向正確但 delta 極小（avg +0.005），不具經濟意義。MA(5) 平滑已捕捉大部分動態效果。\n\n**結論**：VIX Momentum 是 null result。Standard HVT 不需要此增強。",
+  "content": "## VIX Momentum 信號：+0.052 Sharpe\n\n### 假說\nVIX 的 5 日動量（快速上升 vs 下降）可能包含 level 之外的動態信息。\n\n### 測試方法\n- VIX 5 日漲幅 > 5%：額外減碼 30%\n- VIX 5 日跌幅 > 5%：額外加碼 10%（不對稱，保守加碼）\n\n### 初步結果\n\n| 指標 | Standard HVT | VIX Momentum |\n|------|-------------|--------------|\n| Sharpe | 0.985 | 1.038 (+0.052) |\n| MaxDD | -11.4% | -10.2% |\n\n### 跨期驗證結果（Rule 16）\n**未通過**。3/3 時期方向正確但 delta 極小（avg +0.005），不具經濟意義。MA(5) 平滑已捕捉大部分動態效果。\n\n**結論**：VIX Momentum 是 null result。Standard HVT 不需要此增強。",
   "tags": [
-    "研究",
     "Hybrid-VT",
     "投資策略",
     "風險管理"

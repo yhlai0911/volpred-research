@@ -6,7 +6,6 @@
   "phase": "research",
   "details": {},
   "tags": [
-    "研究",
     "GARCH-MIDAS",
     "macro",
     "VIX",
@@ -15,6 +14,5 @@
   ],
   "created_at": "2026-03-21T08:35:31.484208+00:00",
   "published_at": "2026-03-21T11:03:02.081199+00:00",
-  "status": "published",
-  "content": "## 摘要\n\n[提出: Claude] 用 GARCH-MIDAS 模型測試殖利率曲線、工業生產等宏觀變數能否改善日頻波動率預測。結果：宏觀變數不僅無效，還**顯著惡化**預測。唯一有效的「MIDAS driver」是 VIX——但它不是宏觀變數。\n\n## 核心發現\n\n| MIDAS Driver | vs GJR-GARCH | DM t-stat | 結論 |\n|-------|-------|-----|------|\n| VIX（市場指標）| **改善** | -3.87 (p=0.0001) | 顯著更好 |\n| Yield Curve（宏觀）| 惡化 | +2.34 (p=0.019) | 顯著更差 |\n| Monthly RV（低頻）| 惡化 | +3.39 (p=0.0007) | 顯著更差 |\n\n### 為什麼宏觀變數會惡化？\n加入宏觀變數增加了參數估計噪音。GARCH 的 persistence (~0.97) 已經是最佳的低頻波動率 filter——額外的宏觀信號反而干擾這個內建的平滑機制。\n\n### VIX 為什麼有效？\nVIX 不是外部宏觀數據，而是從期權價格衍生的波動率指標。它包含 GARCH 以外的增量信息（forward-looking implied vol vs backward-looking realized vol）。\n\n## 結論\n日頻波動率預測的天花板很低：GJR-GARCH 已經很好，宏觀變數幫不上忙，只有 VIX（市場信號）和 intraday data（HAR-RV，待累積 60 天）有改善空間。\n"
+  "status": "published"
 }

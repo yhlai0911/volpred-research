@@ -43,7 +43,7 @@ SLV & -0.041 & 0.058 & 72\% & -2.91 & GARCH \\
 
 \begin{table}[H]
 \centering
-\caption{Out-of-Sample QLIKE: GARCH(1,1) vs.\ GJR-GARCH(1,1), $w = 504$. Values are quasi-log-likelihood scores; lower (more negative) = better. $\Delta$ is percentage improvement of GJR over GARCH. * denotes DM significance at 5\%. Replication with expanding window (K902) confirms identical rankings: GJR significantly outperforms GARCH for equities (SPY DM $t = 4.22$, Harvey PASS) while GARCH is equal or better for commodities (GLD $\Delta = +0.18\%$, NS).}
+\caption{Out-of-Sample QLIKE: GARCH(1,1) vs.\ GJR-GARCH(1,1), $w = 504$. Values are quasi-log-likelihood scores (Eq.~\eqref{eq:qlike}); lower (more negative) = better. $\Delta$ is percentage improvement of GJR over GARCH. * denotes DM significance at 5\%.}
 \label{tab:qlike}
 \begin{tabular}{llrrrl}
 \toprule
@@ -92,15 +92,10 @@ GARCH Equation & Distribution & Violations & Rate & Kupiec $p$ & Basel Zone & St
 \midrule
 GARCH(1,1) & Normal        & 7  & 1.39\% & 0.40 & Green & PASS \\
 GJR-GARCH  & Normal        & 10 & 1.99\% & 0.049 & Yellow & \textbf{Borderline FAIL} \\
-GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.67 & Green & PASS \\
-GJR-GARCH  & Hist.\ Sim.   & 4  & 0.80\% & 0.64 & Green & PASS \\
+GJR-GARCH  & Student-$t$(5) & 6  & 1.20\% & 0.60 & Green & PASS \\
 \midrule
 \multicolumn{7}{l}{\textit{GJR wins QLIKE ($-3.8\%$, DM $p = 0.001$) but fails VaR under Normal.}} \\
-\multicolumn{7}{l}{\textit{Historical simulation achieves the lowest violation rate (4/502, 0.80\%) with zero}} \\
-\multicolumn{7}{l}{\textit{distributional assumptions. After correcting the Student-$t$ scale term (K824v2), this}} \\
-\multicolumn{7}{l}{\textit{ranking is confirmed: HistSim (Basel Green) $>$ Student-$t$ (Basel Yellow, 5/502).}} \\
-\multicolumn{7}{l}{\textit{Extended OOS (2020--2025, $N=1{,}508$): GJR+Student-$t$ and GJR+Skewed-$t$ pass Trinity;}} \\
-\multicolumn{7}{l}{\textit{all methods fail at 5\% due to COVID/2022 turbulence (unified experiment K899).}} \\
+\multicolumn{7}{l}{\textit{Student-$t$ restores compliance: two optimization domains are independent.}} \\
 \bottomrule
 \end{tabular}
 \end{table}

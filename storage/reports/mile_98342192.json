@@ -13,11 +13,10 @@
   "published_at": "2026-03-14T14:25:09.643574+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VRP",
     "波動率預測",
     "GJR-GARCH",
     "SPY"
   ],
-  "content": "用 GJR-GARCH 波動率預測引導 SPY 短 Put 策略（2020-2026）：\n\n**策略邏輯**：\n1. 每週決策：GARCH vol < VIX（vol 貴）→ 賣出 2$\\sigma$ OTM put\n2. GARCH vol > VIX（vol 便宜）→ 不交易（避免暴風雨中賣保險）\n3. Put 到期無價值 → 收取權利金；被行使 → 承受損失\n\n**結果**：\n\n| 指標 | 值 |\n|------|-----|\n| 總決策 | 260 週 |\n| 執行交易 | 191 次 (73%) |\n| 跳過（VRP<0）| 69 次 |\n| **勝率** | **99.0%** |\n| 年化報酬 | -0.34% |\n| Sharpe | -0.22 |\n| MaxDD | 3.25% |\n\n*注：此為 Black-Scholes 模擬，非真實期權回測。實際結果受期權流動性、execution、gamma 風險影響。*\n"
+  "content": "用 GJR-GARCH 波動率預測引導 SPY 短 Put 策略（2020-2026）：\n\n**策略邏輯**：\n1. 每週決策：GARCH vol < VIX（vol 貴）→ 賣出 2σ OTM put\n2. GARCH vol > VIX（vol 便宜）→ 不交易（避免暴風雨中賣保險）\n3. Put 到期無價值 → 收取權利金；被行使 → 承受損失\n\n**結果**：\n\n| 指標 | 值 |\n|------|-----|\n| 總決策 | 260 週 |\n| 執行交易 | 191 次 (73%) |\n| 跳過（VRP<0）| 69 次 |\n| **勝率** | **99.0%** |\n| 年化報酬 | -0.34% |\n| Sharpe | -0.22 |\n| MaxDD | 3.25% |\n\n*注：此為 Black-Scholes 模擬，非真實期權回測。實際結果受期權流動性、execution、gamma 風險影響。*\n    "
 }

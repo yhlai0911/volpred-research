@@ -14,13 +14,11 @@
   "published_at": "2026-03-15T14:16:59.950414+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VaR",
     "波動率預測",
     "跨資產",
     "VT策略",
     "GARCH",
     "Student-t-VaR"
-  ],
-  "content": "## 本次研究 Session 核心成果\n\n### 模型與 VaR\n- Student-t VaR 6/6 Green Zone（-45.5% violations）\n- Fixed df=5 >> Estimated df（17 vs 24 violations）\n- VIX/GARCH ratio > 1.5 → 94% violations（新的 risk indicator）\n- 跨資產 VaR 驗證（5 資產 6-7/7 Green）\n\n### Leverage Direction（核心貢獻）\n- 15 資產分析：equities standard, gold inverted, bonds neutral, supply-shock commodities inverted\n- **GLD regime-dependent**（t=-4.71, p<0.0001）：牛市 inverted，熊市 standard\n- Significance-based model selection（$\\gamma$ t-stat > 1.65）：12/12 DM tests 100% accuracy\n- SPY $\\alpha$=0：正報酬對 vol 零影響，GLD 正報酬影響是負報酬的 5.5x\n\n### 策略\n- VT 跨 7 資產有效（MaxDD 一致改善，$\\rho$=0.983 with base vol）\n- Monthly rebalancing Sharpe 0.75 > Daily 0.70（at 10bps cost）\n- 多資產 EW VT Sharpe 1.08，MaxDD -13.8%\n\n### 論文\n- 14 section files，7,163 字\n- 3 figure datasets\n- Peer review (68/100) + 全部修正\n- 15 資產覆蓋（equities + commodities + bonds + crypto + FX）"
+  ]
 }

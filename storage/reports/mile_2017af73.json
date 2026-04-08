@@ -8,10 +8,8 @@
   "published_at": "2026-03-16T03:14:38.385882+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "Hybrid-VT",
     "VT策略"
-  ],
-  "content": "## w=2000 Daily Hybrid VT 的 Harvey-Liu 調整\n\n| 指標 | 數值 |\n|------|------|\n| 報告 Sharpe | 1.064 |\n| 嘗試策略數 | 15 |\n| Haircut | 0.042 |\n| **調整後 Sharpe** | **1.022** |\n| 95% CI | [0.50, 1.63] |\n\n### Rule 16 自我質疑\n- 調整後仍 > BH (0.75) ✓\n- 但 w=2000 daily 來自跟 w=504 monthly **同一搜索過程**\n- SNR 機制（大窗口 → daily 更好）是**真正的 insight**\n- Rebalancing 頻率 sweep 有 data mining 成分"
+  ]
 }

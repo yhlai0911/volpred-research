@@ -1,0 +1,259 @@
+\documentclass[12pt,a4paper]{article}
+
+% ─── Packages ────────────────────────────────────────────────
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\definecolor{errorred}{RGB}{180,30,30}
+\definecolor{warncolor}{RGB}{200,120,0}
+\definecolor{infocolor}{RGB}{40,80,160}
+
+\newcommand{\HIGH}[1]{\textcolor{errorred}{\textbf{[HIGH]} #1}}
+\newcommand{\MEDIUM}[1]{\textcolor{warncolor}{\textbf{[MEDIUM]} #1}}
+\newcommand{\LOW}[1]{\textcolor{infocolor}{\textbf{[LOW]} #1}}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% ─── Title ───────────────────────────────────────────────────
+\title{Academic Review Report (v1)\\[6pt]
+\large Paper: \textit{Volatility Targeting in the Taiwan Stock Market:\\
+Leverage Amplification, Model Selection, and Practical Implementation}\\[4pt]
+\normalsize Author: Yi-Hao Lai (Da-Yeh University)\\
+Date: March 2026}
+
+\author{Reviewer: VolPred Research System (Claude Opus 4.6)}
+\date{Review Date: March 30, 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+% ════════════════════════════════════════════════════════════════
+\section{Review Summary}
+% ════════════════════════════════════════════════════════════════
+
+\subsection{Overall Assessment}
+
+This paper examines volatility targeting (VT) strategies in the Taiwan stock market using the 0050.TW ETF (2008--2026). It makes three claimed contributions: (1) documenting the leverage effect and its ``diversification amplification'' in Taiwan, (2) evaluating multiple VT strategies including a VIX-proxy approach, and (3) analyzing cross-market information transmission from U.S.\ to Asian equity markets. The paper is well-written, methodologically careful (particularly in its treatment of look-ahead bias and the c2c vs.\ o2o distinction), and covers a genuinely under-studied market. However, several issues---ranging from non-comparable evaluation periods to scope overreach---should be addressed before submission.
+
+\subsection{Issue Count by Severity}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+Severity & Count & Description \\
+\midrule
+\textcolor{errorred}{\textbf{HIGH}} & 7 & Issues that could lead to rejection or major revision \\
+\textcolor{warncolor}{\textbf{MEDIUM}} & 12 & Issues that weaken the paper but are addressable \\
+\textcolor{infocolor}{\textbf{LOW}} & 9 & Minor polish, style, or presentation issues \\
+\midrule
+\textbf{Total} & \textbf{28} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 1: Logic Structure}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \HIGH{Scope overreach: three loosely connected contributions.} The paper attempts three distinct contributions (leverage amplification, VT strategies, time-zone information transmission), each of which could sustain an independent paper. The connections between them are asserted rather than demonstrated rigorously. The TZ section (Section 5) in particular reads like a separate paper grafted onto the VT paper. \textbf{Recommendation:} Either (a) tighten the narrative by showing how each contribution directly feeds the next (e.g., leverage amplification $\to$ model selection $\to$ VT performance $\to$ cross-market VIX proxy justification), or (b) split the TZ information transmission into a separate paper and focus this paper on contributions 1 and 2.
+
+\item \MEDIUM{Non-linear section flow.} The paper presents Sections 6 (Macro Indicators) and 7 (VaR) after the TZ section, but these are logically extensions of Sections 3--4 (leverage and VT), not of Section 5 (TZ). The macro indicator results (particularly the leading indicator momentum in Section 6.3) feed directly into the VT discussion but are separated from it by the entire TZ analysis. \textbf{Recommendation:} Move Sections 6 and 7 before Section 5, or integrate the macro-VT combination results into Section 4.
+
+\item \LOW{Section 8 (Discussion) repeats substantial material.} The discussion section reiterates findings from earlier sections (e.g., the TSMC concentration analysis in Section 8.5, the cross-validation in Section 8.6, and the Sharpe reconciliation table in Section 8.7). These would be better placed in their respective methodological sections. The discussion should focus on interpretation, limitations, and implications---not new results.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 2: Research Motivation}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \LOW{Motivation is clear but could be sharpened.} The introduction effectively motivates the study by highlighting Taiwan's distinctive features (retail dominance, TSMC concentration, absence of a deep VIXTWN). However, the argument for \textit{why} these features should affect VT performance differently from U.S.\ markets could be more specific. The paper implicitly assumes that higher retail participation $\to$ stronger leverage effect, but the theoretical channel is never spelled out.
+
+\item \MEDIUM{Practical motivation vs.\ academic contribution tension.} The paper oscillates between targeting academic readers (DM tests, Harvey thresholds, QLIKE) and practitioner readers (step rules, monthly rebalancing instructions). This dual audience creates tonal inconsistency. For a journal like PBFJ, the academic framing should dominate; practical implications can be confined to a brief subsection. The ``VIX Step Rule'' (Section 8.3) reads more like a blog post than a journal article.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 3: Literature Review}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \MEDIUM{No standalone literature review section.} The paper weaves literature citations into the introduction and methodology sections, but there is no dedicated literature review. For a 45-page paper targeting PBFJ, a structured literature review (even a brief one) would strengthen the paper's positioning. Key strands to cover: (a) VT literature (Moreira \& Muir 2017, Harvey et al.\ 2018, Fleming et al.\ 2001, Bozovic 2024), (b) leverage effect in Asian markets, (c) cross-market information transmission (Eun \& Shim 1989, Hamao et al.\ 1990, Lin et al.\ 1994, Rapach et al.\ 2013).
+
+\item \MEDIUM{Missing key references.} Several important references are absent:
+\begin{itemize}
+\item Hsu et al.\ (various) on Taiwan GARCH applications
+\item Caporin \& McAleer (2012) on DCC-GARCH for Asian markets
+\item Liu et al.\ (2019) on VIX as a global fear gauge for emerging markets
+\item Baele (2005) on volatility spillovers to emerging markets
+\item Moskowitz et al.\ (2012) on time-series momentum (relevant to TZ momentum)
+\item Jegadeesh \& Titman (1993) --- while not directly cited, the TZ momentum section invokes momentum concepts without referencing this foundational work
+\end{itemize}
+
+\item \LOW{Rapach et al.\ (2013) is cited but under-discussed.} This paper is the closest antecedent to the TZ finding (U.S.\ returns predict international returns), yet it receives only a single paragraph in the Discussion. A more thorough comparison---what they find, how our approach differs (c2c vs.\ o2o decomposition, opening-gap analysis)---would strengthen the contribution claim.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 4: Research Gap and Contribution}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \HIGH{``Diversification amplification'' contribution is weakened by small sample.} The 4.6$\times$ amplification ratio is based on only 10 individual stocks (and one of them, 0056.TW, is itself an ETF, not a stock). The paper acknowledges this limitation but still headlines the 4.6$\times$ figure prominently in the abstract. A ratio computed from $N=10$ (effectively $N=9$ stocks) has wide confidence intervals. \textbf{Recommendation:} Either (a) expand to all 50 constituents of 0050.TW (data is available via Yahoo Finance), or (b) present the result with explicit confidence intervals and downgrade the language from ``contribution'' to ``suggestive evidence.''
+
+\item \MEDIUM{The VT contribution is incremental.} The main VT finding---that EWMA VT improves Sharpe from 0.729 to 0.796 while halving MDD---is consistent with well-known U.S.\ results. The Taiwan-specific adaptation ($8.63/\text{VIX}$) is a straightforward ratio adjustment. The paper is honest about this, but the contribution could be more clearly articulated as a \textit{generalization test} rather than a \textit{new methodology}.
+
+\item \HIGH{TZ information transmission: c2c result is strong but o2o result fails Harvey threshold.} The paper's third contribution hinges on the c2c-to-o2o gap as evidence of efficient price discovery. While this framing is intellectually honest, the \textit{implementable} result (o2o Sharpe 0.87, $t = 2.22$) does not pass the paper's own stated significance standard (Harvey $t > 3.0$). The contribution is therefore reframed as ``the opening auction is efficient,'' which is a microstructure finding rather than a VT finding. This pivot, while valid, may confuse referees who expect the paper's contributions to be about VT.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 5: Model Specification}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \MEDIUM{No EGARCH.} The paper tests GARCH, GJR-GARCH, and EWMA, but omits EGARCH (Nelson 1991), which is cited in the literature review for the leverage effect. EGARCH is a natural comparator for asymmetric volatility modeling, and its absence is notable. At minimum, justify why EGARCH is excluded.
+
+\item \LOW{Rolling window $w=2000$ rationale.} The paper cites Hwang \& Valls Pereira (2006) for the choice of $w=2000$, noting that ``windows below 500 induce substantial persistence bias.'' This is a valid concern, but $w=2000$ is unusually long (approximately 8 years). Most VT papers use $w=504$ or $w=1000$. The robustness check to $w=504$ and $w=1000$ is mentioned but results are not shown. Report them.
+
+\item \LOW{EWMA $\lambda = 0.94$ not re-estimated for Taiwan.} The paper uses the RiskMetrics default $\lambda = 0.94$, which was calibrated for U.S./European markets. Taiwan's higher baseline volatility and different autocorrelation structure may warrant a different $\lambda$. A brief sensitivity analysis ($\lambda \in \{0.90, 0.92, 0.94, 0.96, 0.98\}$) would strengthen the result.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 6: Equations and Symbols}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \MEDIUM{Symbol overloading: $\gamma$ used for two different quantities.} In the GJR-GARCH specification (Eq.~1), $\gamma$ denotes the leverage parameter. In the Discussion section (Section 8.3), $\gamma$ is used to denote the CRRA risk-aversion coefficient (``$\gamma \geq 5$''). These are fundamentally different quantities sharing the same symbol. \textbf{Recommendation:} Use $\gamma_{\text{GJR}}$ for the leverage parameter (already partially done in some tables) and $\gamma_{\text{CRRA}}$ or $\rho$ for risk aversion.
+
+\item \LOW{Equation numbering gap.} Equations 1--6 are numbered, but the VaR equation (Eq.~7 in Section 7) introduces $q_{0.01}^{t(5)}$ without defining the superscript notation clearly. Is the $t$ in $q_{0.01}^{t(5)}$ the Student-$t$ distribution label, or time $t$? Clarify.
+
+\item \LOW{Inconsistent weight notation.} The VT weight is denoted $w_t$ in Eq.~4 and Eq.~5, but in the VIX-proxy equation (Eq.~6) the same concept uses $w_t$ again. However, in the discussion of transaction costs (Section 2.6), weights are described qualitatively without referencing the equation. Maintain consistent notation throughout.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 7: Methodology}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \HIGH{Non-comparable evaluation periods across strategies (Table 3).} This is a critical issue. Table 3 reports Sharpe ratios for different strategies over different periods: Buy \& Hold and EWMA VT use 2010--2026; GARCH and GJR VT use 2020--2026; $8.63/\text{VIX}$ uses 2016--2026. The table note acknowledges this, but the strategies are still presented in a single comparison table, inviting direct comparison. \textbf{The GJR VT Sharpe of 1.108 vs.\ EWMA VT Sharpe of 0.796 may reflect the different sample periods (2020--2026 was a strong bull market) rather than model superiority.} \textbf{Recommendation:} Re-run all strategies over a \textit{common} evaluation period (e.g., 2020--2026) and report the results in a separate panel. If this is not possible due to data constraints, add a prominent warning or remove the cross-strategy comparison entirely.
+
+\item \HIGH{Conditional leverage: potential data snooping.} The hybrid conditional leverage rule (Section 4.4) uses two thresholds---$\text{RV}_{22} < 20\%$ and VIX below the 30th percentile---that appear to be chosen ex post. While the 18/18 cross-OOS and bootstrap results are encouraging, the thresholds themselves are not derived from theory or independent calibration. The Harvey $t = 4.79$ is impressive, but the number of researcher degrees of freedom (choice of leverage multiplier, RV window, VIX percentile, ``and'' vs.\ ``or'' logic) is not accounted for. \textbf{Recommendation:} (a) Report the full grid of thresholds tested and the corresponding $t$-statistics, (b) apply a Bonferroni or White's reality check correction, or (c) derive the thresholds from a training sub-sample and validate on a held-out test sample.
+
+\item \MEDIUM{Steiger $Z = 16.2$ for VIX vs.\ VXEEM correlation difference seems implausibly large.} A $Z$-statistic of 16.2 for the difference between $\rho = 0.595$ and $\rho = 0.459$ with 64 months of data is suspect. Even with daily-frequency observations within the 64-month window (approximately 1,300 observations), a $Z$ of 16.2 would require very high precision. Verify this calculation and clarify whether the test uses daily or monthly observations. If daily, note that serial correlation in residuals inflates the effective sample size.
+
+\item \MEDIUM{Missing formal test for VT Sharpe improvement.} The paper reports that EWMA VT improves Sharpe from 0.729 to 0.796, but the only formal test mentioned is a bootstrap $p$-value for MDD improvement ($p = 0.0004$). A formal test for the Sharpe ratio difference (e.g., Ledoit \& Wolf 2008, or the Jobson-Korkie test) is needed. The paper notes $t = 0.33$ for Sharpe improvement, which is insignificant---this should be stated more prominently.
+
+\item \MEDIUM{DM test for QLIKE: one-sided or two-sided?} The DM test for GJR vs.\ GARCH yields $t = -0.17$, $p = 0.86$. A $p$-value of 0.86 with $t = -0.17$ is consistent with a two-sided test. However, the null is that GARCH and GJR have equal QLIKE, and the alternative (for a paper advocating GJR) should be one-sided (GJR has lower QLIKE). Clarify the test specification.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 8: Data and Sample}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \HIGH{0056.TW is classified as ``individual stock'' but is an ETF.} Table 1 and the text include 0056.TW (Yuanta High Dividend ETF) as one of the ``ten individual Taiwanese stocks'' used to compute the average $\gamma = 0.060$. But 0056.TW is itself a diversified ETF (30+ stocks), which means it already exhibits some diversification amplification. Including it as an ``individual stock'' biases the average $\gamma$ upward (0056's $\gamma = 0.112$ is the second highest among the ten), which in turn \textit{deflates} the amplification ratio. While the direction of bias is conservative (it makes the 4.6$\times$ claim \textit{smaller} than it would be without 0056), the classification is factually incorrect. \textbf{Recommendation:} Either exclude 0056.TW from the individual-stock average, or relabel the group as ``ten individual securities (including one ETF).''
+
+\item \MEDIUM{VIXTWN sample is very short (64 months).} The VIXTWN-to-VIX ratio of 1.39 (CV 10\%) is based on only 64 months (November 2020--March 2026). This period includes highly unusual regimes (COVID recovery, Fed tightening cycle, AI boom). The stability of the 1.39 ratio across different regimes is untested. \textbf{Recommendation:} Report the ratio in sub-samples (e.g., 2020--2022 vs.\ 2023--2026) and discuss whether the ratio is regime-dependent.
+
+\item \LOW{Data source transparency.} The paper states data is from ``Yahoo Finance and TWSE'' but does not specify which variables come from which source. VIXTWN, for example, is from TAIFEX (Taiwan Futures Exchange), not TWSE. Clarify.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 9: Results Reasonability}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \HIGH{GJR VT Sharpe 1.108 vs.\ 8.63/VIX Sharpe 0.690: period mismatch explains the gap.} The GJR VT Sharpe (1.108) covers 2020--2026, a period of strong recovery and AI-driven bull market. The $8.63/\text{VIX}$ Sharpe (0.690) covers 2016--2026, which includes the flat 2018--2019 period. This period mismatch likely explains a substantial portion of the 0.418 Sharpe gap. Until all strategies are evaluated over a common period, the relative ranking is unreliable.
+
+\item \MEDIUM{MDD of $-41.3\%$ for Buy \& Hold (2010--2026) seems low.} The 2008 GFC caused 0050.TW to decline by approximately $-55\%$ to $-60\%$ from peak. If the sample starts in January 2008, the MDD should reflect this. If it starts at the trough (March 2009), the MDD would be lower. The 2010--2026 evaluation period avoids the GFC entirely, which makes the MDD figure period-dependent. Clarify.
+
+\item \LOW{$t$-statistic for TSMC $\gamma$ is 0.87 (insignificant), but text says ``weak'' leverage effect.} The language should be ``statistically insignificant'' rather than ``weak.'' A $t$-stat of 0.87 is not evidence of a weak effect---it is evidence of no detectable effect at conventional significance levels.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Dimension 10: Citation Norms}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \LOW{Citation format inconsistency.} Some bibliography entries use ``\&'' (e.g., Ang \& Chen), while others use ``and'' implicitly through natbib formatting. The \texttt{et~al.} spacing is inconsistent (some use \texttt{et al.} without tilde). Standardize to the target journal's format.
+
+\item \LOW{Self-citation of internal experiments.} The paper references ``Experiment K472'' and ``K461'' in footnotes. These are internal experiment identifiers from the VolPred Research System. For a journal submission, these should be either (a) removed entirely, (b) replaced with ``supplementary analysis'' language, or (c) provided as supplementary material with proper formatting.
+
+\item \LOW{Codex-R6-fix comments in source.} The LaTeX source contains inline comments like \texttt{\% Codex-R6-fix: weaken ``remarkably efficient'' auction claim}. These should be removed before submission.
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Top 5 HIGH-Severity Issues (Action Required)}
+% ════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[leftmargin=2em]
+
+\item \textbf{H1 --- Non-comparable evaluation periods (Table 3).} Strategies are compared across different time periods (2010--2026 vs.\ 2020--2026 vs.\ 2016--2026), making relative Sharpe comparisons unreliable. \textit{Fix: Re-run all strategies on a common period.}
+
+\item \textbf{H2 --- Scope overreach / three loosely connected contributions.} The paper tries to be three papers in one. The TZ section especially reads as an independent paper. \textit{Fix: Tighten the narrative thread connecting all three contributions, or split the TZ analysis into a separate paper.}
+
+\item \textbf{H3 --- Diversification amplification based on $N=10$ (including 1 ETF).} The headline 4.6$\times$ ratio is computed from too few securities, one of which is misclassified. \textit{Fix: Expand to all 50 constituents of 0050.TW, or add confidence intervals and weaken the claim.}
+
+\item \textbf{H4 --- TZ o2o result fails Harvey threshold ($t = 2.22 < 3.0$).} The implementable version of the TZ strategy does not pass the paper's own stated significance standard. The reframing as ``evidence of efficient price discovery'' is valid but constitutes a different contribution than the one implied by the abstract. \textit{Fix: Be explicit in the abstract that the o2o result is insignificant and the contribution is about price discovery, not about a trading strategy.}
+
+\item \textbf{H5 --- Conditional leverage: potential data snooping.} The hybrid leverage thresholds (RV$_{22} < 20\%$, VIX $<$ 30th percentile) are not derived from theory or training/test split. The high Harvey $t$ may reflect overfitting. \textit{Fix: Report the full grid of tested thresholds, apply multiple-testing correction, or use train/test split.}
+
+\end{enumerate}
+
+% ════════════════════════════════════════════════════════════════
+\section{Additional Recommendations}
+% ════════════════════════════════════════════════════════════════
+
+\begin{itemize}[leftmargin=2em]
+
+\item \textbf{Add a formal test for Sharpe ratio improvement.} The Ledoit \& Wolf (2008) test for comparing Sharpe ratios is the current standard. Cite and apply it.
+
+\item \textbf{Report economic significance alongside statistical significance.} For VT strategies, report the certainty-equivalent return or CRRA utility improvement (as referenced in Section 8.3) as a formal table, not just a passing mention.
+
+\item \textbf{Clarify the target journal.} The paper's length (45 pages), scope, and methodology suggest PBFJ or Pacific Economic Review. If targeting PBFJ, the paper should emphasize the Taiwan-specific findings and reduce the general VT review material. If targeting a broader journal (e.g., IRFA), the cross-market dimension should be strengthened.
+
+\item \textbf{Abstract length.} At approximately 250 words, the abstract is at the upper bound for most finance journals. Consider tightening to 150--200 words, removing implementation details (e.g., the $8.63/\text{VIX}$ formula) from the abstract.
+
+\item \textbf{Remove all internal experiment references and Codex comments} before submission.
+
+\end{itemize}
+
+% ════════════════════════════════════════════════════════════════
+\section{Conclusion}
+% ════════════════════════════════════════════════════════════════
+
+The paper addresses an important gap in the VT literature by extending the analysis to the Taiwan market. The core findings---modest Sharpe improvement but substantial MDD reduction, the ``diversification amplification'' concept, and the c2c-to-o2o decomposition of cross-market information transmission---are all valuable contributions. The methodological care (explicit lag protocols, c2c vs.\ o2o distinction, multiple robustness tests) is commendable. However, the paper needs to address (1) the non-comparable evaluation periods that undermine cross-strategy comparisons, (2) the scope overreach that dilutes each individual contribution, and (3) the small sample underlying the headline amplification ratio. With these revisions, the paper would be a strong candidate for a regional finance journal (PBFJ, Pacific Economic Review) or a specialized journal (International Review of Financial Analysis).
+
+\end{document}

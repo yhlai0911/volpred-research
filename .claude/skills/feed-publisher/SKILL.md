@@ -108,19 +108,10 @@ Publisher 會自動在文章末尾附加「延伸閱讀」區塊，列出同 aud
 ## 結論
 重申核心發現，指出限制和未來方向。
 
-## 圖表（必須，數量依文章類型）
-
-**一般讀者文章：至少 1 張，建議 2 張。研究文章：至少 2 張，建議 3 張。**
-
-![圖表1：核心發現](supabase_url_1)
-*圖1說明文字*
-
-![圖表2：比較/趨勢/分佈](supabase_url_2)
-*圖2說明文字*
-
+## 圖表（必須，不可省略）
+![核心發現的視覺化圖表](supabase_storage_url)
 用 matplotlib 生成 PNG，上傳 Supabase Storage article-images bucket。
 禁止用 ASCII art 或純文字表格替代真正的圖表。
-每張圖表必須有說明文字（caption），解釋讀者應該看到什麼。
 
 ## 數據來源
 *本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
@@ -138,55 +129,12 @@ Include: summary, method table, key findings with interpretation, practical impl
 
 MANDATORY — 每篇文章必須包含：
 1. 真正的圖表（使用 volpred.charts 模組）：
-   from volpred.charts import generate_bar_chart, generate_grouped_bar_chart, generate_line_chart, generate_heatmap, upload_chart, embed_chart
-
-   **一般讀者文章至少 2 張圖表，研究文章至少 3 張圖表。**
-   每張圖表用以下流程生成並嵌入：
-   path1 = generate_bar_chart(labels=[...], values=[...], title='...', ylabel='...')
-   url1 = upload_chart(path1)
-   content = embed_chart(content, url1, '圖1：核心發現的視覺化')
-
-   path2 = generate_line_chart(x=[...], y=[...], title='...', xlabel='...', ylabel='...')
-   url2 = upload_chart(path2)
-   content = embed_chart(content, url2, '圖2：趨勢或比較')
-
-   # 研究文章再加第 3 張：
-   path3 = generate_heatmap(data=[[...]], row_labels=[...], col_labels=[...], title='...')
-   url3 = upload_chart(path3)
-   content = embed_chart(content, url3, '圖3：詳細分佈或相關性')
-
+   from volpred.charts import generate_bar_chart, upload_chart, embed_chart
+   path = generate_bar_chart(labels=[...], values=[...], title='...', ylabel='...')
+   url = upload_chart(path)
+   content = embed_chart(content, url, '圖表描述')
+   可用函式：generate_bar_chart, generate_grouped_bar_chart, generate_line_chart, generate_heatmap
    禁止用 ASCII art 或純文字表格替代真正的圖表。
-   每張圖表必須在文章中有對應的文字解讀（不是放了圖就完事）。
-
-## 數學方程式（LaTeX via KaTeX）
-
-前端支援 KaTeX 渲染（remark-math + rehype-katex）。所有數學必須用 LaTeX：
-
-**Display math（獨立行）**：
-```
-$$\sigma_t^2 = \tau_t \times g_t$$
-```
-
-**Inline math（正文中）**：
-```
-長期成分 $\tau_t$ 由 VIX 驅動
-```
-
-**⚠️ 絕對禁止：**
-- 不可用 Unicode 數學符號（σ、τ、α、θ 等）代替 LaTeX
-- 不可寫 `$$$$`（空的 math block，會讓 KaTeX 吃掉後續內容）
-- 不可在 `$$` 區塊內放圖片、表格、標題（`##`）或水平線（`---`）
-- `$$` 前後必須有空行，不可和其他內容黏在一起
-- 正文中提到數學符號一律用 inline LaTeX：`$\sigma^2$` 不是 `σ²`
-
-**正確範例**：
-```markdown
-MF-GJR 將波動率分解為兩個成分：
-
-$$\sigma_t^2 = \tau_t \times g_t$$
-
-其中 $\tau_t = \exp(\theta_0 + \theta_1 \log \text{VIX}_{t-1})$ 是長期成分。
-```
 2. 數據來源標注（文末）：
    *本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
    數據來源：yfinance，期間：YYYY-YYYY。*
@@ -204,15 +152,12 @@ Working directory: /Users/yhlai0911/Desktop/volpred-research
 
 ## 平台層發佈決策
 
-### 核心規則：非時效性文章 `status=draft`，事件文章立即發佈
+### 核心規則：所有文章一律 `status=draft`，由文章池節奏釋出
 
-- **一般/研究文章**：`status=draft`，進文章池由 cron 節奏釋出
-- **⚠️ 事件驅動文章必須立即發佈**：NFP/FOMC/CPI/TSMC 營收/法說/重大市場事件等時效性內容
-  - 使用 `status=published` + `published_at=datetime.now(timezone.utc).isoformat()`
-  - 寫完後立即 `uv run python scripts/supabase_sync.py full` 確保上線
-  - **延遲 = 過期**：NFP 文章延遲 10 小時釋出已無價值（2026-04-03 教訓）
-- **判斷標準**：如果讀者在 3 小時後讀到這篇文章會覺得「過時」→ 立即發佈
-- 文章池每 **1 小時**自動釋出 1 篇（system cron 驅動）
+- **永遠用 `status=draft`**：不論 research 或 general，所有文章先進文章池
+- **禁止直接 `status=published`**：除非用戶明確說「立即發布這篇」
+- **Agent prompt 必須指定 `status="draft"`**：不可省略
+- 文章池每 **15 分鐘**自動釋出 1 篇（session cron 驅動）
 - CLI 指令：`uv run python -m volpred.cli ops release-pool --include-drafts --limit 1 --storage-dir storage`
 
 ### 文章類型寫作模板（寫作前必須選定類型）
@@ -318,16 +263,15 @@ uv run python -m volpred.cli ops send-daily-digest --target-date YYYY-MM-DD
 每篇文章必須包含 `tags` 欄位（JSON array），用於搜尋和分類：
 
 ```json
-"tags": ["一般讀者", "VaR", "Cornish-Fisher", "SPY", "QQQ", "GLD", "TLT", "EEM", "風險管理"]
+"tags": ["VaR", "Cornish-Fisher", "SPY", "QQQ", "GLD", "TLT", "EEM", "風險管理"]
 ```
 
 Tag 規則：
-- **受眾分類 tag（必填，放第一個）**：`一般讀者` / `研究` / `每日建議` / `會員提問`（對應 audience 欄位，前端篩選依賴此 tag）
 - 涉及的**資產代碼**（SPY, QQQ, 0050.TW...）
 - **方法/模型**（GARCH, CF-VaR, EVT, MIDAS...）
 - **主題分類**（波動率預測, 風險管理, 投資策略, 避險, 危機分析...）
 - **研究階段**（Phase_O, Phase_N...）
-- 4-8 個 tags 為宜（含受眾分類）
+- 3-8 個 tags 為宜
 
 ## 品質檢查清單
 

@@ -8,10 +8,8 @@
   "published_at": "2026-03-16T02:33:36.097379+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "GARCH",
     "SPY"
-  ],
-  "content": "## SPY 波動率的 Hurst Exponent 時間序列\n\n### 基本統計\n\n| 指標 | 數值 | 解讀 |\n|------|------|------|\n| 平均 H | 0.732 | 長記憶（H > 0.5） |\n| 標準差 | 0.087 | 隨時間變化 |\n| H > 0.5 比例 | 100% | 大部分時間是長記憶 |\n| H → 20d future vol | corr = 0.336 | 有預測力 |\n\n### 含義\n- SPY 波動率有 **persistent long memory** (H ≈ 0.73)\n- Hurst exponent 隨時間變化 → rough volatility 框架適用\n- 2025 文獻顯示 time-varying H 可改善 GARCH 12% RMSE\n- 下一步：用 H 作為 GARCH-X 的額外 regressor"
+  ]
 }

@@ -5,9 +5,7 @@
   "category": "milestone",
   "phase": "Phase_G",
   "details": {},
-  "tags": [
-    "研究"
-  ],
+  "tags": [],
   "published_at": "2026-03-17T12:58:43.911874+00:00",
   "status": "published",
   "content": "G5 只測了 AAII 作為 VT overlay，結果 null。但 AAII 有 39 年歷史，可能 G5 測法太窄。設計三個實驗：(A) Bull-Bear Spread 極端值的 contrarian forward return (B) 8w MA regime 策略回測 (C) AAII-VIX divergence 信號。結果：A 顯示 AAII 在 12-26 週有真實的 contrarian 信號（特別是 greed>30 的 26w t=-3.96），但 B 顯示無法轉化為有效策略（所有配置 Sharpe 都劣於 B&H），C 發現 AAII_bear+VIX_high 的 double fear combo 有驚人的 12w excess（+5.98%, t=3.65），interaction term 也顯著（t=-4.07），但 partial correlation 顯示 AAII 控制 VIX 後僅 marginal（26w t=-2.36，未達 Harvey 門檻）。核心問題：信號真實但 R² 太低（<3%），週頻交易成本吃掉邊際收益。"

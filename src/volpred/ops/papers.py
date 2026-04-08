@@ -221,11 +221,11 @@ def upload_paper_pdf(
 
 
 def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
-    """Auto-extract pages, citations, abstract from .tex files in a paper directory."""
+    """Auto-extract pages, citations from .tex files in a paper directory."""
     import re
     import subprocess
 
-    metrics: dict[str, Any] = {}
+    metrics: dict[str, int | None] = {}
 
     # Find the best tex file (v2 preferred over v1)
     for name in ["main_v2.tex", "main.tex"]:
@@ -249,31 +249,6 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     if citations > 0:
         metrics["citations"] = citations
 
-    # Extract abstract from \begin{abstract}...\end{abstract}
-    all_tex = content
-    for body_name in ["body_v2.tex", "body.tex"]:
-        body = paper_dir / body_name
-        if body.exists():
-            all_tex += "\n" + body.read_text(errors="ignore")
-    abs_match = re.search(
-        r"\\begin\{abstract\}(.*?)\\end\{abstract\}",
-        all_tex, re.DOTALL
-    )
-    if abs_match:
-        raw_abstract = abs_match.group(1).strip()
-        # Remove LaTeX comment lines (% ...)
-        lines = [l for l in raw_abstract.split("\n") if not l.strip().startswith("%")]
-        raw_abstract = "\n".join(lines)
-        # Remove \noindent, \medskip, \textbf{Keywords:}... and everything after
-        raw_abstract = re.split(r"\\textbf\{Keywords|\\medskip|\\textbf\{JEL", raw_abstract)[0]
-        # Clean LaTeX commands for plain text display
-        clean = re.sub(r"\\[a-zA-Z]+\{([^}]*)\}", r"\1", raw_abstract)
-        clean = re.sub(r"\\[a-zA-Z]+", "", clean)
-        clean = re.sub(r"[{}$~]", "", clean)
-        clean = re.sub(r"\s+", " ", clean).strip()
-        if len(clean) > 50:
-            metrics["abstract"] = clean
-
     # Count pages from PDF
     pdf_name = tex.stem + ".pdf"
     pdf = paper_dir / pdf_name
@@ -285,8 +260,8 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
             )
             if result.returncode == 0 and result.stdout.strip().isdigit():
                 metrics["pages"] = int(result.stdout.strip())
-        except Exception as e:
-            print(f"  WARNING: PDF page count failed: {e}")
+        except Exception:
+            pass
 
     return metrics
 
@@ -336,8 +311,6 @@ def update_paper_full(
         kwargs["pages"] = metrics["pages"]
     if "citations" in metrics:
         kwargs["citations"] = metrics["citations"]
-    if "abstract" in metrics:
-        kwargs["abstract"] = metrics["abstract"]
 
     if len(kwargs) > 1:  # has something beyond paper_id
         paper = upsert_paper_metadata(**kwargs)

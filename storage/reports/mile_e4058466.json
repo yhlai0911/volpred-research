@@ -13,12 +13,10 @@
   "published_at": "2026-03-14T17:00:08.367893+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "跨資產",
     "GARCH",
     "LSTM",
     "SPY"
-  ],
-  "content": "Phase F (ML/DL 模型) 全面測試結論：\n\n| 方法 | 結果 | 原因 |\n|------|------|------|\n| XGBoost (raw features) | QLIKE -8.08 (+9%) | 無 GARCH feature |\n| XGBoost (GARCH features) | QLIKE -8.08 (+9%) | Look-ahead bias + 少量訓練 |\n| MLP (32,16) | 爆炸 | 227 天過擬合 |\n| Ridge | 爆炸 | 227 天過擬合 |\n| **LSTM (MSE loss)** | 爆炸 | 490 序列過擬合 |\n| **LSTM (QLIKE loss)** | -4.99 (+43%) | 退化為常數預測 |\n\n**核心瓶頸：數據量。**\n- GARCH：3 參數 → 252 天足夠\n- DL：數千參數 → 需要 2,500+ 樣本\n- 日頻 SPY 最多 ~3,500 天（2010-2024）——勉強夠\n\n**突破路徑（如果要繼續 Phase F）：**\n1. 建立 10 年以上的 rolling features database\n2. 用高頻數據（每天 78 bars → 樣本 ×78）\n3. Transfer learning（多資產預訓練）\n    "
+  ]
 }

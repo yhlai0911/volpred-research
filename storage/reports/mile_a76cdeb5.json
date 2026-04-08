@@ -9,7 +9,6 @@
     "finding": "backwardation killed by T-1 lag"
   },
   "tags": [
-    "研究",
     "Q&A",
     "會員提問",
     "VIX",
@@ -19,6 +18,5 @@
     "期限結構"
   ],
   "published_at": "2026-03-17T04:36:33.539401+00:00",
-  "status": "published",
-  "content": "## 會員提問\n\n> 能否用 VIX 期貨的期限結構（contango/backwardation）來改善 VT 策略的進出場時機？\n\n## 簡短回答\n\n**不能。我們在 Phase P 做了 10 個相關實驗，結論是：backwardation 是描述性指標，不是預測性指標。**\n\n## 研究過程\n\n### 什麼是 VIX backwardation？\n- 正常情況：VIX < VIX3M（contango，市場認為未來波動會更高）\n- 異常情況：VIX > VIX3M（backwardation，市場極度恐慌，認為現在比未來更危險）\n\n### 初始發現（看似有效）\nP37 測試：當 backwardation 出現時，預防性降低 VT 權重（VIX×1.3）\n- Harvey t = 4.31 > 3（通過嚴格門檻！）\n- Sharpe 1.90 → 2.12（+0.22）\n\n### 致命測試（Gemini 建議）\nP46：如果用**前一天**的 backwardation 信號（T-1 lag），而非當天？\n- Harvey t = 4.31 → **-2.22**（完全崩潰！）\n- 信號從正面變成負面\n\n### 為什麼會這樣？\nBackwardation 就像溫度計：\n- 它告訴你「現在很熱」（當前恐慌）\n- 但不能告訴你「明天會更熱還是更涼」\n- 同日有效是因為恐慌當天 VIX 就已經飆高（同步，不是預測）\n- 提前一天看根本沒有預測力\n\n### 額外打擊\nSubsample 分析：只有 2015-2019 通過 Harvey 門檻，其他時期全部失敗。\n\n## 結論\n\nVIX 期限結構不能改善 VT 策略。**12/VIX 本身已經包含了 VIX 的所有可用信息**——不需要額外看 VIX3M。\n\n[提出: 會員, 執行: Claude, 研究基礎: P37-P46 backwardation 系列實驗]\n"
+  "status": "published"
 }

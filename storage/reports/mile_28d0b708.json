@@ -14,10 +14,8 @@
   "published_at": "2026-03-15T02:02:40.394131+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "GARCH",
     "Realized-GARCH"
-  ],
-  "content": "## 5-min Realized Variance vs Daily Proxies\n\n用 41 天的 5-min 數據（78 bars/day）計算真實 RV，對比 daily proxies：\n\n| 指標 | 5-min RV | Parkinson | r² |\n|------|----|-----|-----|\n| 年化波動率 | **14.7%** | 12.0% | 12.7% |\n| Bias vs 5-min | — | **-33.1%** | -24.9% |\n| **Corr with 5-min** | 1.000 | **0.464** | **0.457** |\n\n## 關鍵發現\n\n**Parkinson RV 和 r² 跟真實 5-min RV 的相關性只有 0.46**——它們只解釋了 21% 的真實波動率變異。\n\n這解釋了：\n1. 為什麼 Realized GARCH 用 Parkinson 效果差——proxy 信息太少\n2. 為什麼 GARCH 的 QLIKE 有天花板——它用 r²（corr=0.46）作為信號\n3. 為什麼需要 5-min 數據——78 bars vs 1 bar = 78 倍信息量\n\n## 啟示\n\n一旦累積足夠的 5-min RV 歷史（目前 41 天，需要 ~250 天），Realized GARCH 有望突破 QLIKE 天花板。"
+  ]
 }

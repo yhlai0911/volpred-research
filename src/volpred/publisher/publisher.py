@@ -4,19 +4,6 @@ import os
 from datetime import date, datetime, timezone
 from pathlib import Path
 
-def _sanitize_tags(tags: list) -> list[str]:
-    """Clean tags: fix double-encoded JSON, strip quotes/brackets, dedupe."""
-    cleaned: list[str] = []
-    for t in tags:
-        if not isinstance(t, str):
-            t = str(t)
-        # Strip JSON artifacts from double-encoding: '["研究"' → '研究'
-        t = t.strip().strip('[').strip(']').strip('"').strip("'").strip()
-        if t and t not in cleaned:
-            cleaned.append(t)
-    return cleaned
-
-
 class Publisher:
     """Publishes research results to storage/reports/ for Web platform consumption.
 
@@ -120,8 +107,8 @@ class Publisher:
                 item,
                 reason='publish_experiment',
             )
-        except Exception as e:
-            print(f"  WARNING publisher: {e}")
+        except Exception:
+            pass
 
         return item['id']
 
@@ -156,8 +143,8 @@ class Publisher:
                 item,
                 reason='publish_comparison',
             )
-        except Exception as e:
-            print(f"  WARNING publisher: {e}")
+        except Exception:
+            pass
         return pub_id
 
     def publish_milestone(self, title: str, description: str,
@@ -188,8 +175,8 @@ class Publisher:
                     if dtparse(existing_time) > cutoff_exact:
                         print(f"  ⚠️ Duplicate title within 24h: '{title[:50]}' (existing: {existing['id']}). Skipping.")
                         return existing['id']
-                except Exception as e:
-                    print(f"  WARNING publisher: {e}")
+                except Exception:
+                    pass
 
         # --- Similar topic check: warn if >60% keyword overlap with existing ---
         similar = self._find_similar_articles(title, feed, audience)
@@ -200,11 +187,8 @@ class Publisher:
             print(f"  → Proceeding with publish, but consider if this adds new value.")
         # Sanitize description
         if isinstance(description, str):
-            # Fix double-escaped newlines from CLI input, but preserve LaTeX commands.
-            # \\n → newline ONLY when NOT followed by a letter (avoid destroying \nu, \nabla, \newcommand, etc.)
-            # \\t → NEVER replace (destroys \tau, \times, \theta, \text{}, etc.)
-            import re
-            description = re.sub(r'\\n(?![a-zA-Z])', '\n', description)
+            # Fix double-escaped newlines from various input sources
+            description = description.replace('\\n', '\n').replace('\\t', '\t')
             # Remove leaked agent metadata (JSONL fragments from agent output files)
             import re
             metadata_pattern = re.search(r'\{"parentUuid":', description)
@@ -231,7 +215,7 @@ class Publisher:
         now = datetime.now(timezone.utc).isoformat()
         normalized_status = status if status in {'published', 'draft', 'scheduled', 'unpublished', 'archived'} else 'published'
         # Determine audience and category — explicit params take priority
-        tag_list = _sanitize_tags(tags or [])
+        tag_list = tags or []
         if audience is None:
             if '一般讀者' in tag_list:
                 audience = 'general'
@@ -275,7 +259,7 @@ class Publisher:
         with open(report_file, 'w') as f:
             json.dump(item, f, indent=2, default=str)
 
-        self._append_to_feed(item, existing_feed=feed)
+        self._append_to_feed(item)
         self._sync_to_remote(title, description, phase, details)
         self._sync_report_to_remote(pub_id, item)
 
@@ -301,8 +285,8 @@ class Publisher:
                     item,
                     reason='publish_milestone',
                 )
-            except Exception as e:
-                print(f"  WARNING publisher: {e}")
+            except Exception:
+                pass
 
         return pub_id
 
@@ -344,11 +328,11 @@ class Publisher:
             sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent.parent / "scripts"))
             from supabase_sync import sync_article
             sync_article(target_item, storage_dir=self.reports_dir.parent)
-        except Exception as e:
-            print(f"  WARNING publisher: {e}")
+        except Exception:
+            pass
         return True
 
-    def _append_to_feed(self, item: dict, existing_feed: list | None = None):
+    def _append_to_feed(self, item: dict):
         # Ensure both timestamp fields exist (frontend uses published_at, legacy uses created_at)
         now = datetime.now(timezone.utc).isoformat()
         if 'created_at' not in item:
@@ -369,13 +353,16 @@ class Publisher:
         # Ensure content is not empty (use description as fallback)
         if not item.get('content') and item.get('description'):
             item['content'] = item['description']
-        feed = existing_feed if existing_feed is not None else self._load_feed()
+        feed = self._load_feed()
         feed.append(item)
         # Sort newest first — use published_at (consistent with frontend display)
         feed.sort(key=lambda x: x.get('published_at') or x.get('created_at') or '', reverse=True)
         with open(self._feed_file, 'w') as f:
             json.dump(feed, f, indent=2, default=str, ensure_ascii=False)
         self._sync_feed_to_remote()
+        # Also sync the individual report JSON
+        if item.get('id'):
+            self._sync_report_to_remote(item['id'], item)
 
     def get_report(self, pub_id: str) -> dict | None:
         report_file = self.reports_dir / f"{pub_id}.json"
@@ -444,8 +431,8 @@ class Publisher:
                 method="PUT",
             )
             urllib.request.urlopen(req, timeout=5)
-        except Exception as e:
-            print(f"  WARNING publisher: {e}")
+        except Exception:
+            pass
 
     def _sync_feed_to_remote(self):
         """PUT full feed.json to remote for consistency."""

@@ -1,9 +1,41 @@
 {
   "id": "crisis_protection_20260316_002220",
+  "type": "milestone",
+  "timestamp": "2026-03-16T00:22:20.924574",
   "title": "Hybrid VT 危機保護：10/10 歷史危機全部有效",
-  "content": "Hybrid VT 在 2008-2026 年 10 場歷史危機中全部提供保護，平均 +8.7 百分點。保護力隨危機嚴重度放大：COVID +23.5pp、GFC +16.3pp、2022升息 +10.9pp。機制：VIX 前瞻性飆升而 GARCH 回顧性滯後 → ratio > 1.3 → 自動減倉。",
+  "description": "Hybrid VT 在 2008-2026 年 10 場歷史危機中全部提供保護，平均 +8.7 百分點。保護力隨危機嚴重度放大：COVID +23.5pp、GFC +16.3pp、2022升息 +10.9pp。機制：VIX 前瞻性飆升而 GARCH 回顧性滯後 → ratio > 1.3 → 自動減倉。",
+  "details": {
+    "crises_tested": 10,
+    "protection_rate": "10/10 (100%)",
+    "avg_protection_pp": 8.7,
+    "top_3_protections": [
+      {
+        "crisis": "2020 COVID",
+        "bh": "-33.4%",
+        "hybrid_vt": "-9.9%",
+        "protection": "+23.5pp"
+      },
+      {
+        "crisis": "2008 GFC",
+        "bh": "-21.7%",
+        "hybrid_vt": "-5.4%",
+        "protection": "+16.3pp"
+      },
+      {
+        "crisis": "2022 Rate Hike",
+        "bh": "-24.1%",
+        "hybrid_vt": "-13.2%",
+        "protection": "+10.9pp"
+      }
+    ],
+    "mechanism": "VIX/GARCH ratio > 1.3 → VIX-based weight → automatic deleveraging",
+    "implication": "Type-agnostic universal crisis protection — works for financial, pandemic, oil shock, trade war"
+  },
+  "published_at": "2026-03-15T16:22:20.924574+00:00",
+  "category": "milestone",
+  "status": "published",
+  "created_at": "2026-03-15T16:22:20.924574+00:00",
   "tags": [
-    "研究",
     "2022升息",
     "COVID",
     "危機分析",

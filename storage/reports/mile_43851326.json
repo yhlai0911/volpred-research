@@ -23,11 +23,9 @@
   "published_at": "2026-03-16T03:06:59.173993+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "風險管理",
     "GJR-GARCH",
     "SPY"
-  ],
-  "content": "Compared 3 volatility proxies for QLIKE evaluation using SPY GJR-GARCH (w=2000, OOS 2023-2024, 101 sampled days).\n\nResults:\n- Squared return (r²): QLIKE = -8.377815\n- Parkinson RV (in %%²): QLIKE = 0.219865\n- Corrected RV (Parkinson + overnight gap², in %%²): QLIKE = 0.679739\n\nBest proxy: Squared return (r²)\n\nKey finding: Range-based proxies (Parkinson, Corrected) have much lower noise than squared returns, making QLIKE more discriminative for model ranking. The overnight gap correction adds marginal information."
+  ]
 }

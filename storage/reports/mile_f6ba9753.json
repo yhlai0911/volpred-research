@@ -6,7 +6,6 @@
   "phase": "Phase_K",
   "details": {},
   "tags": [
-    "研究",
     "波動率預測",
     "MDH",
     "Volume",
@@ -20,5 +19,5 @@
   "created_at": "2026-03-23T03:08:57.116605+00:00",
   "published_at": "2026-03-23T03:33:00.843038+00:00",
   "status": "published",
-  "content": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\n測試成交量能否改善 GJR-GARCH 波動率預測。經典的 MDH（Mixture of Distributions Hypothesis）預測成交量和波動率由同一資訊流驅動。結果：同時期高度相關（r=0.31-0.43），但滯後預測力極弱（partial|VIX r<0.08）。OOS 僅 GLD 顯著（-0.81%），改善微乎其微。GARCH 的自迴歸結構本身就是 volume-volatility 關係的學習機制。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY, GLD, TLT, QQQ, BTC-USD |\n| 期間 | 2005-01 ~ 2026-03 |\n| 指標 | 異常成交量 = log(Volume / MA20) |\n| 模型 | GJR $\\sigma^2$ × (1 + $\\beta$ × lag_abnvol) |\n| OOS | 2023-01-01 ~ 2026-03 (N=806) |\n\n## 核心發現\n\n### 發現一：MDH 完美驗證\n同時期相關極高：SPY 0.31、GLD 0.43、TLT 0.41、QQQ 0.31。波動率暴增時成交量必然暴增——兩者被同一個市場事件驅動。\n\n### 發現二：滯後預測力被 VIX 吸收\n控制 VIX 後的偏相關：SPY 0.039、GLD 0.060、TLT 0.078。統計顯著但 R² 增量 < 1%。VIX 已經包含了成交量的預測資訊。\n\n### 發現三：OOS 幾乎沒有改善\n\n| 資產 | QLIKE Δ | DM p |\n|------|---|------|\n| SPY | -0.10% | 0.528 NS |\n| GLD | -0.81% | 0.016 ★ |\n| TLT | -0.62% | 0.071 NS |\n\nGLD 是唯一顯著改善的資產，可能因為 GLD 的 gamma ≈ 0，GARCH 自迴歸較弱，成交量提供了微弱的補充信號。\n\n### 發現四：BTC 成交量完全無用\nBTC 的成交量與 GARCH 殘差相關 r=0.012（p=0.53），可能受到刷單（wash trading）影響，數據品質堪憂。\n\n## 實務意義\n\n1. **不要用成交量「預測」波動率**——它們是同步反映，不是領先指標\n2. **GARCH 的自迴歸結構已經學會了 MDH 關係**——波動率叢集 = 成交量叢集\n3. **QLIKE ceiling 第 21 次確認**——variance、correlation、volume 全部飽和\n\n## 結論\n\n成交量是波動率的鏡像，不是其先驅。GARCH 的自迴歸機制完美捕捉了兩者共同的潛在資訊流。日頻波動率預測的天花板再次確認。\n"
+  "content": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\n測試成交量能否改善 GJR-GARCH 波動率預測。經典的 MDH（Mixture of Distributions Hypothesis）預測成交量和波動率由同一資訊流驅動。結果：同時期高度相關（r=0.31-0.43），但滯後預測力極弱（partial|VIX r<0.08）。OOS 僅 GLD 顯著（-0.81%），改善微乎其微。GARCH 的自迴歸結構本身就是 volume-volatility 關係的學習機制。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY, GLD, TLT, QQQ, BTC-USD |\n| 期間 | 2005-01 ~ 2026-03 |\n| 指標 | 異常成交量 = log(Volume / MA20) |\n| 模型 | GJR σ² × (1 + β × lag_abnvol) |\n| OOS | 2023-01-01 ~ 2026-03 (N=806) |\n\n## 核心發現\n\n### 發現一：MDH 完美驗證\n同時期相關極高：SPY 0.31、GLD 0.43、TLT 0.41、QQQ 0.31。波動率暴增時成交量必然暴增——兩者被同一個市場事件驅動。\n\n### 發現二：滯後預測力被 VIX 吸收\n控制 VIX 後的偏相關：SPY 0.039、GLD 0.060、TLT 0.078。統計顯著但 R² 增量 < 1%。VIX 已經包含了成交量的預測資訊。\n\n### 發現三：OOS 幾乎沒有改善\n\n| 資產 | QLIKE Δ | DM p |\n|------|---------|------|\n| SPY | -0.10% | 0.528 NS |\n| GLD | -0.81% | 0.016 ★ |\n| TLT | -0.62% | 0.071 NS |\n\nGLD 是唯一顯著改善的資產，可能因為 GLD 的 gamma ≈ 0，GARCH 自迴歸較弱，成交量提供了微弱的補充信號。\n\n### 發現四：BTC 成交量完全無用\nBTC 的成交量與 GARCH 殘差相關 r=0.012（p=0.53），可能受到刷單（wash trading）影響，數據品質堪憂。\n\n## 實務意義\n\n1. **不要用成交量「預測」波動率**——它們是同步反映，不是領先指標\n2. **GARCH 的自迴歸結構已經學會了 MDH 關係**——波動率叢集 = 成交量叢集\n3. **QLIKE ceiling 第 21 次確認**——variance、correlation、volume 全部飽和\n\n## 結論\n\n成交量是波動率的鏡像，不是其先驅。GARCH 的自迴歸機制完美捕捉了兩者共同的潛在資訊流。日頻波動率預測的天花板再次確認。\n"
 }

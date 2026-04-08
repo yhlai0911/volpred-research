@@ -8,10 +8,8 @@
   "published_at": "2026-03-16T03:11:56.843996+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "危機分析",
     "Hybrid-VT",
     "GARCH"
-  ],
-  "content": "## 波動率群聚效應的 Regime 依賴性\n\n### r² 的 ACF(1)（252 天滾動）\n\n| VIX Regime | ACF(1) | 解讀 |\n|------|--------|------|\n| < 15（平穩） | 0.1585 | 較弱群聚 |\n| 15-25（正常） | 0.1771 | 中等 |\n| > 25（壓力） | **0.3016** | **最強群聚** |\n\n### 含義\n- 高波動期 vol clustering **1.9x 更強** → GARCH 在壓力期更有用\n- 這解釋了為什麼 Hybrid VT 在危機期表現好：GARCH 預測在高波動時更準確\n- 也解釋了為什麼平穩期 DL 可能有優勢：clustering 弱 → 非線性 pattern 可能存在"
+  ]
 }

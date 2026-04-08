@@ -14,11 +14,9 @@
   "published_at": "2026-03-14T21:16:17.022178+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VaR",
     "波動率預測",
     "SPY",
     "TLT"
-  ],
-  "content": "## 發現\n\nTLT（長期美國國債 ETF）在 2025 OOS 的最佳 window 是 252 天，不是 SPY 的 504 天：\n\n| 資產 | 最佳 Window | QLIKE | 原因 |\n|------|-----|-------|------|\n| SPY | 504 | -8.818 | 波動結構 2-4 年穩定 |\n| **TLT** | **252** | **-9.243** | 利率轉折 1 年內就改變結構 |\n\nTLT w=252 的 QLIKE 比 w=504 好 0.7%，而且 **VaR 5% 從 FAIL 變 PASS**。\n\n## 原因\n\n2024-2025 是利率轉折期：Fed 從加息轉降息，債券波動率快速下降。w=504 包含了 2023 的高利率環境，讓模型過度保守。w=252 更快適應新環境。\n\n## 啟示\n\n最佳 window size 不是固定的——它取決於資產的 **regime change 頻率**。可以用 CUSUM 檢定或 rolling parameter stability test 自動偵測並調整。"
+  ]
 }

@@ -8,12 +8,10 @@
   "published_at": "2026-03-16T02:29:33.205244+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "Gamma效應",
     "避險",
     "GJR-GARCH",
     "GLD",
     "TLT"
-  ],
-  "content": "## 外匯市場 Leverage Effect 分析\n\n| 貨幣對 | 類型 | $\\gamma$ | t-stat | 模型 |\n|--------|------|-----|--------|------|\n| EUR/USD | Major | -0.0111 | -0.66 | GARCH |\n| GBP/USD | Major | +0.0415 | 1.84 | GJR |\n| USD/JPY | Safe-haven | +0.0299 | 1.23 | GARCH |\n| USD/CHF | Safe-haven | +0.0447 | 0.78 | GARCH |\n| AUD/USD | Carry | +0.0130 | 0.62 | GARCH |\n| NZD/USD | Carry | +0.0104 | 0.51 | GARCH |\n\n### 觀察\n- 所有 FX 的 $\\gamma$ 都接近零或不顯著——跟 TLT（$\\gamma$≈0）類似\n- FX 市場沒有明確的 leverage effect（不像 equity/gold）\n- 可能因為：匯率變動不改變 underlying 的 credit risk（類似 bonds）"
+  ]
 }

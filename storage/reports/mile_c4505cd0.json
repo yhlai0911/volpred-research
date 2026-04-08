@@ -13,13 +13,11 @@
   "published_at": "2026-03-15T15:42:37.960539+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VaR",
     "危機分析",
     "Hormuz危機",
     "VT策略",
     "GARCH",
     "SPY"
-  ],
-  "content": "## 當前市場壓力測試\n\nVIX/GARCH ratio = **1.68**（> 1.5 門檻），VaR 可能不可靠。\n\n### 1 月 MaxDD 預測（10000 次 Monte Carlo 模擬）\n\n| 場景 | $\\sigma_ann$ | 預期 MaxDD | 95th Percentile |\n|------|-------|-----|----------|\n| GARCH 估計 | 16.2% | -4.6% | -9.1% |\n| **VIX implied** | **27.2%** | **-7.7%** | **-14.9%** |\n| 危機擴大 | 50% | -14.7% | -27.4% |\n\n### VT 配置建議\n- GARCH-based: 74% SPY（可能過於樂觀）\n- **VIX-based: 44% SPY**（Iran 危機期間建議使用）\n\n當 VIX/GARCH > 1.5 時，GARCH 嚴重滯後——建議用 VIX-implied vol 做配置決策。"
+  ]
 }

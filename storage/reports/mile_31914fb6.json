@@ -13,12 +13,10 @@
   "published_at": "2026-03-14T20:52:09.481334+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "GARCH",
     "GJR-GARCH",
     "LSTM",
     "SPY"
-  ],
-  "content": "## Ljung-Box 檢定\n\nGJR-GARCH 標準化殘差 z² 的自相關檢定（SPY 2020-2024, ~1250 obs）：\n\n| Lag | LB Statistic | p-value | 結論 |\n|-----|-------|---|------|\n| 5 | 2.60 | 0.762 | 不顯著 |\n| 10 | 4.24 | 0.936 | 不顯著 |\n| 22 | 11.03 | 0.974 | 不顯著 |\n\n|z| 的 Ljung-Box 也不顯著（lag22 p=0.324）。\n\n## 意義\n\n**GJR-GARCH 已經捕捉了 SPY 日頻波動率的所有可學結構。** 殘差接近 iid，DL 無法在殘差中找到改善空間。\n\nPhase F 的 DL 失敗不是「數據太少」，而是「**信號已被 GARCH 用完**」。GARCH-LSTM hybrid 的 LSTM factor 不穩定（std=1.16）正是因為在噪音上過擬合。\n\n## 啟示\n\nDL 在日頻波動率預測上可能根本不適用（至少對 SPY 而言），除非：\n1. 納入 GARCH 看不到的外部資訊\n2. 改做日內高頻預測（5-min 數據結構更豐富）\n3. 用 DL 做 meta-learning（預測最佳 window/分配）\n\n**GARCH(1,1) 的日頻波動率預測天花板可能就是 QLIKE ≈ -9.034。**"
+  ]
 }

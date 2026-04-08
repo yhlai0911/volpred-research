@@ -6,7 +6,7 @@ from typing import Any
 from scripts.supabase_sync import _patch_where, _post, _select_rows
 from volpred.memory.system import MemorySystem
 
-from .common import dump_json, load_json, project_path, write_ops_snapshot
+from .common import load_json, project_path, write_ops_snapshot
 
 
 def _utc_now() -> str:

@@ -14,13 +14,11 @@
   "published_at": "2026-03-14T12:42:34.758041+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "COVID",
     "VaR",
     "波動率預測",
     "跨資產",
     "GJR-GARCH",
     "Normal-VaR"
-  ],
-  "content": "經過 28+ 個實驗、7 個模型（含 3 個原創設計）、\n跨 2 個 OOS 期間的穩健性測試，得出以下結論：\n\n### 核心發現\n「最佳模型」取決於你的目標：\n\n| 目標 | 最佳模型 | QLIKE | 說明 |\n|------|---|-------|------|\n| 最高精度（忽略 VaR）| GJR-arch/Normal | -9.034 | VaR 1% 失敗 |\n| 精度 + VaR（特定環境）| GJR/GED | -9.032 | 簡潔，但高波動期 VaR 5% 失敗 |\n| 跨環境穩健性 | GJR-HAR 或 70/30 組合 | -9.027 | 兩個 OOS 皆通過所有 VaR |\n\n### 原創貢獻\n- **GJR-HAR**：多尺度 GARCH — 不存在於現成套件\n- **GJR-Floor**：波動率底線 — 修復 VaR 壓縮\n- **Multi-start MLE**：改善自建模型 0.25-0.48%\n- **Parkinson bias 分析**：發現 37% 系統性低估\n\n### 研究紀錄\n- 28 個思考日誌條目（含即時推理和假說驗證）\n- 10 個知識庫條目\n- 13 個 Web 平台發佈\n- 6 個 open questions（3 已回答）\n\n### 未來方向\n多資產驗證、更長 OOS（含 COVID）、VIX 外部因子、Regime-switching 模型。\n    "
+  ]
 }

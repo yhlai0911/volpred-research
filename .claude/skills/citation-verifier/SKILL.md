@@ -1,6 +1,16 @@
 ---
 name: citation-verifier
-description: Conduct rigorous verification of academic citations in financial econometrics research (papers, grant proposals, methodology sections). This skill verifies citation accuracy including APA format compliance, DOI correctness, author names, publication details, and whether quoted content accurately reflects original sources. Uses web search to verify all information against real sources. This skill should be used proactively after completing manuscript draft sections, or manually when reviewing citations in academic finance writing (futures hedging, jump-diffusion models, GMM estimation, financial contagion, systemic risk).
+description: >
+  This skill should be used when verifying academic citations in financial econometrics
+  manuscripts, grant proposals, or methodology sections. It checks APA format, DOI
+  correctness, author names, publication details, and whether quoted content accurately
+  reflects original sources via web search.
+  Trigger phrases: 'verify citations', '驗證引用', 'check references', '檢查參考文獻',
+  '/citation-verifier', or after completing a manuscript draft section.
+  Trigger situations: reviewing literature sections, adding new references, preparing
+  submission, or when citation accuracy is questioned.
+  This skill should NOT be used for: general paper quality review (use finance-paper-quality),
+  LaTeX formatting review (use latex-academic-reviewer), or writing new content.
 ---
 
 # Citation Verifier

@@ -8,10 +8,8 @@
   "published_at": "2026-03-15T19:11:21.830585+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "Hybrid-VT",
     "VT策略",
     "GARCH"
-  ],
-  "content": "## VIX1D vs 30-day VIX 作為 Hybrid VT 信號\n\n### Codex 批評\n> \"VIX(30日) vs GARCH(日) 有 horizon mismatch\"\n\n### 實證測試（2023-12 至 2026-03, n=561）\n\n| 信號 | Sharpe | MaxDD | VIX 均值 | VIX 波動 |\n|------|--------|-------|---|---|\n| **30-day VIX ratio** | **1.118** | -9.3% | 17.3 | 4.7 |\n| VIX1D ratio | 0.919 | -9.2% | 14.5 | 7.5 |\n\n### 結論\n- 30-day VIX **更好**，因為捕捉持續性風險認知（不是短期交易噪音）\n- VIX1D 太 noisy（std 7.5 vs 4.7），position sizing 需要穩定信號\n- Codex 的 horizon mismatch 理論上正確，但 30-day VIX 實證上勝出\n- **又一個 null result**——原始設計的正確性被驗證"
+  ]
 }

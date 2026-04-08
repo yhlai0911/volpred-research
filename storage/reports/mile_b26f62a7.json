@@ -6,7 +6,6 @@
   "phase": "Phase_K",
   "details": {},
   "tags": [
-    "研究",
     "波動率預測",
     "Dispersion",
     "VIX",
@@ -17,6 +16,5 @@
   ],
   "created_at": "2026-03-23T03:40:56.879848+00:00",
   "published_at": "2026-03-23T05:03:01.159145+00:00",
-  "status": "published",
-  "content": "## 摘要\n\n[提出: Codex R6#3, 執行: Claude]\n\nRealized Dispersion（行業波動率 vs 指數波動率的差異）在日頻看似打破了 VIX sufficient statistic（partial r=0.56★），但經月頻非重疊驗證後確認為**重疊窗口自相關膨脹的 artifact**。月頻 F-test p=0.49，OOS DM p=0.66。VIX sufficient statistic 在日頻和月頻都成立，第 23 次確認。\n\n## 研究背景\n\nK164 發現 dispersion 控制 VIX 後仍有 r=0.56 的偏相關——如果為真，將是 22 個指標中第一個突破 VIX sufficient 的。但科學的本質是自我質疑：這個結果可靠嗎？\n\n## K164 的「突破」\n\n| 測試 | 數值 |\n|------|------|\n| 日頻 partial corr(dispersion, RV \\| VIX) | r=0.560★ |\n| 日頻 GARCH 殘差 | r=-0.024 NS |\n| 日頻 OOS QLIKE | +0.051% NS |\n\n看似矛盾：partial r 極強，但 GARCH 殘差和 OOS 都無改善。為什麼？\n\n## K165 的修正\n\n**問題出在 overlapping windows。** 日頻 22 天 rolling RV 之間有 21 天數據重疊。假設 dispersion 和 RV 各有 100 個獨立月度觀測，rolling 後變成 2000 個「觀測」但只有 100 個獨立資訊點。自相關膨脹了 t-statistic。\n\n非重疊月頻驗證：\n\n| 模型 | In-sample R² | OOS R² |\n|------|-------|--------|\n| VIX only | 0.016 | -0.347 |\n| VIX + Dispersion | 0.021 (ΔR²=+0.005) | -0.323 |\n| F-test (Disp增量) | F=0.47, **p=0.49 NS** | — |\n| DM test | — | **p=0.66 NS** |\n\nDispersion 的增量 ΔR²=0.5%——統計和經濟上都不顯著。\n\n## 方法論教訓\n\n**Overlapping rolling windows 是統計研究中最常見的陷阱之一。** 當用 22 天 rolling 計算月度 RV 然後做回歸，N 看似很大（數千筆），但獨立觀測只有 N/22 筆。這會：\n1. 膨脹 t-statistic（可達 4-5 倍）\n2. 讓微弱信號看起來極顯著\n3. 如果不修正（Newey-West HAC 或非重疊採樣），會得到假陽性\n\n## 結論\n\nVIX sufficient statistic 第 23 次確認，現在涵蓋：\n- 22 個日頻指標全部被吸收\n- 月頻 dispersion 也被吸收\n- 日頻和月頻都成立\n\nVIX 是唯一需要的波動率指標——這個結論越來越堅不可摧。\n"
+  "status": "published"
 }

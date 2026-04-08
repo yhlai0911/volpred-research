@@ -5,9 +5,7 @@
   "category": "milestone",
   "phase": "Phase_I",
   "details": {},
-  "tags": [
-    "研究"
-  ],
+  "tags": [],
   "published_at": "2026-03-17T17:24:24.046709+00:00",
   "status": "published",
   "content": "I4a/b/c 三合一實驗：overnight gap 不適合做 VT 信號（I3 已確認），但作為危機偵測器有清楚的統計支撐。\n\nI4a: SPY gap < -1.5% 共 78 次（4.8/year），涵蓋所有主要危機。COVID 期間集中 13 次。前瞻報酬有 mean reversion 趨勢但不顯著（1d +0.24%, t=0.65）。\n\nI4b: 連續 2 天 gap < -0.5% 共 94 次（5.8/year）。5/5 主要危機被偵測到。Vol escalation: normal 10.6% → single 17.0% → consec 21.7%。20d drawdown >10% rate 從 1.2% 升至 3.3%（OR=2.82, p=0.10）。\n\nI4c: |gap|>1.5% 後隔日 VaR violation rate = 9.93%（正常 2.29%，OR=4.70, p<0.0001）。同日 |gap|>2% 的 VaR violation = 33.3%（lift=16.5x）。\n\n關鍵發現：Gap + EWMA Z>1.5 組合 violation rate = 18.84%。但 surprise gap（EWMA Z<=1.5）只有 1.61%（接近正常）。這表示 gap 在已知高波動期最有力，surprise gap 多為 one-off。\n\nSpeed test: EWMA Z>1.5 通常比 gap 早 1-4 天。Gap 不是更即時的信號，而是 confirmation signal。"

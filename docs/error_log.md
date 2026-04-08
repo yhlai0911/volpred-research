@@ -2,33 +2,8 @@
 
 每次根本修正後更新此檔案。格式：日期 / 問題 / 現象 / 過程 / 解決方法。
 
-## 快速索引（agent 只需讀到這裡）
-
-| 類型 | 核心規則 | 常見錯誤 |
-|------|---------|---------|
-| **Lookahead/Lag** | `signal.shift(1)` 必須在代碼中；Sharpe > 2x baseline = 幾乎一定有 bug | K679 VIX Percentile 1.68→0.355；K812 fabricated sanity check |
-| **GARCH state** | OOS 必須逐日遞迴 h[t]=f(h[t-1],r²[t-1])，不用 stale variance | K813/K816 DM 從 2.96→0.64 |
-| **ML 審查** | 所有 ML 實驗必須 Codex 審查再記錄 knowledge | K618 KAN「差 113%」→修正後差 0.3% |
-| **Student-t** | logpdf 需 scale term sqrt((df-2)/df) | K824 df 偏向薄尾 |
-| **統計門檻** | N≥15 cross-sectional, N≥500 GARCH window, Harvey t>3.0 | N=12 rho=-0.87→N=21 rho=-0.086 |
-| **數據** | force_refresh=True；0050.TW 用 clean_tw50_data；TX 用全合約按量選月 | 風險預報停在 3/20 |
-| **發佈** | thinking≠content；tags sanitize（JSON array vs comma-split）| 388 篇 content 空；tags 雙重編碼 |
-| **前端** | 先 build 再部署，一次只改一處；Safari 避免 window.open | badge 壞 tag filter |
-| **同步** | 增量 sync 必須覆蓋有更新的歷史條目；不手動改 JSON status | portfolio_return 全 None |
-| **Bayesian** | prior 必須允許否證（用 Normal 不用 HalfNormal 測 γ>0）| K814 P(γ>0)=1.0 是 tautology |
-| **時區** | 比較時間用 UTC：`datetime.now(timezone.utc)` | 誤報「8 小時沒發文」|
-| **字串替換** | 批量 regex 替換極危險，每輪驗證中間結果 | `\\t`→TAB 吃掉 `\tau` |
-
----
-
-## 詳細記錄
-
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
-| 2026-04-07 | **ML 實驗跳過 Codex 審查** | K940/K944 的 ML 代碼未經 Codex 審查就記錄 knowledge + 發文 | 違反 SOP「寫代碼→Codex審→修正→跑→記錄」| Codex 發現：(1) GARCH-feature training contamination (2) K944 MF-GJR VIX lookahead。結論方向不變但代碼品質有瑕疵。**教訓：ML 實驗更需要審查，不能因為結論是 NULL 就跳過** |
-| 2026-04-07 | **VIX 未寫入 _market_daily** | 網站策略面板 VIX 數值過時/不更新 | `daily_update.py` 寫入 `_market_daily` 時漏了 VIX 欄位，前端讀到 null 就顯示舊值 | 加入 `"vix": round(vix_level, 2)` 到 `_market_daily` dict。教訓：**先查根因再修，不要先手動 re-run** |
-| 2026-04-07 | **時區缺失** | StrategyPanel 時間未顯示台灣時區 | `toLocaleString` 缺少 `timeZone: 'Asia/Taipei'` | 加入 timeZone 參數，同時修 FeedBrowser |
-| 2026-04-06 | **Worktree 腳本遺失（3次）** | K923/K924/K932 的 .py 腳本在 worktree 清理時永久遺失 | Agent 在 worktree 寫檔案但沒 commit → `git worktree remove --force` 刪除一切 | (1) 建立 `scripts/merge_worktree.sh` 安全合併腳本 (2) 禁止 `--force` remove (3) Agent prompt 必須包含 commit 指令 (4) 更新 SKILL.md + CLAUDE.md |
 | 2026-03-16 | Thinking page crash | experiment_ids undefined → 頁面閃退 | experiment_ids 欄位在部分 entry 不存在 | 加 optional chaining `?.` + `&&` guard |
 | 2026-03-16 | Feed 文章缺 content | 網頁顯示空白文章 | `record_and_publish.py` 只用 `--thinking` 當 content | 個別檔案 + feed.json 都要有完整 Markdown content |
 | 2026-03-16 | Citation errors | 論文引用 6 處錯誤 | Cederburg fabricated, Kim wrong, etc. | `/citation-verifier` + WebSearch 驗證每筆引用 |
@@ -46,16 +21,6 @@
 | 2026-03-18 | Daily update 3 個系統性問題 | (1) yfinance 快取永不更新 (2) Supabase updated_at 不自動刷新 (3) 策略 metadata 散落三處 | DataManager.get_price_data 的 cache-first 邏輯讓 collect_us_data.py 永遠讀舊快取；sync_strategy_signal 沒傳 updated_at；feed 文章用 internal key + 沒過濾 TZ | (1) collect/daily_update 加 force_refresh=True (2) sync_strategy_signal 明確傳 updated_at (3) 建立 STRATEGY_REGISTRY 單一來源，驅動 feed 文章 + Supabase + paper trading。教訓：資料收集腳本必須 force refresh；metadata 不能 hardcode 在多處 |
 | 2026-03-20 | 5-min 數據不會回補 | 0050.TW 只有 7 天 5-min 數據（應有 60 天） | `collect_5min_data.py` 硬寫 `days_back=7`，沒有 gap detection。paper trading 也只回填前一天 | (1) 加 `_detect_gap_days()` 自動偵測最後收集日期，回補至 59 天 (2) 0050.TW 立即回補到 34 天 (3) daily_update.py 改為回填所有 `portfolio_return=None` 的條目。教訓：資料收集腳本必須考慮停機回補 |
 | 2026-03-21 | DB interval_hours 不支援 15 分鐘 | 用 session cron 繞過 DB integer 限制 | DB `interval_hours` 是 integer，存不了 0.25。Claude 用 cron `--include-drafts` 繞過 | 根本修正：(1) DB migration `interval_hours`→`interval_minutes` (integer) (2) Python+TS normalize 改為 minutes (min=5) (3) `timedelta(minutes=)` 取代 `timedelta(hours=)`。教訓：**絕不用 workaround 繞過系統限制，改底層設計** |
-| 2026-04-01 | DM test 自行實作（E40）| K795/K807/K808 各自寫 DM test，非標準 HAC | 已有 `model_evaluation.py` 但 agent 不用 | 建 `strategy_dm_test()` 標準函式。K809+ 開始使用。教訓：統計檢定必須用標準模組 |
-| 2026-04-01 | Agent fabricated sanity check | K812 hard-code `lookahead_sharpe=1.938` 假裝計算結果 | Codex 發現代碼中無 shift(0) backtest，數字是造假 | K812v2 實際計算所有 sanity checks。教訓：**Codex 審查必須在記錄 knowledge 之前** |
-| 2026-04-01 | GJR state propagation bug | K813/K816 OOS 間 variance 未逐日遞迴 | refit 後用 stale conditional_volatility，不是 h[t]=f(h[t-1],r²[t-1]) | K816v2 修正：逐日遞迴 GJR state。修正後 DM 從 2.96→0.64。教訓：GARCH OOS 必須逐日傳播 state |
-| 2026-04-01 | Bayesian prior tautology | K814 P(γ>0)=1.0000 因 HalfNormal prior 強制 γ>0 | Prior support = [0,∞)，後驗不可能有 γ<0 | 正確做法：用 Normal prior 允許 γ<0，看後驗 mass。教訓：先驗必須允許否證 |
-| 2026-04-01 | Student-t df 估計缺 scale term | K824 t_dist.logpdf 沒除 sqrt((df-2)/df) | unit-variance 殘差 fit 到 Student-t 不 rescale → df 偏向薄尾 → violations 被高估 | K824v2 修正中。教訓：分配 fit 必須考慮 scale parameter |
-| 2026-04-01 | 非標準 Basel traffic light | K824 用自定義閾值，Student-t 通過 Kupiec 但被標 fail | 自行實作的 Basel 規則與標準不同 | 用標準 Basel 250 天回溯（Green<5, Yellow 5-9, Red≥10）。教訓：與 DM 同理——用標準不自己寫 |
-| 2026-04-01 | question_articles 連結反覆被覆蓋 | 手動修正 3 次都被 revert | 前端 syncQuestionArticleLinks 讀 details.question_id 重建連結 | 根因：舊文章有 details.question_id，新文章沒有。修正：answer_internal_question 自動寫 details.question_id。5 層保護 |
-| 2026-04-01 | 孤兒 Supabase 草稿 | 後台 18 篇 draft 永遠發不出 | 存在 Supabase 但不在本地 feed.json，release_pool 只讀本地 | sync_full 自動清理孤兒 draft（設為 unpublished）。教訓：每次 sync 清理不一致的狀態 |
-| 2026-04-02 | Safari 分享按鈕失靈 | Facebook 分享跳轉後未啟動 | `window.open()` 被 Safari iOS 攔截為 popup | 改用 `<a target="_blank">` 標籤。教訓：手機瀏覽器避免 window.open |
-| 2026-04-02 | 每日文章重複 | 一天出 2-3 篇每日分析 | daily_update.py 產出「持倉建議」+「策略建議」兩篇 | 合併為一篇。cron 改到 UTC 22:03（美股收盤後）。教訓：同源數據只產出一篇 |
 | 2026-03-21 | 手動改 status 導致前端看不到文章 | 前端只看到 2 篇（本地有 10 篇） | 手動改 `feed.json` 的 `status=published` 不觸發 Supabase sync。`release-pool-by-settings` 內建 sync 但被繞過 | 根本修正：(1) feed-publisher skill 規定所有文章一律 `status=draft` (2) 只透過 `release-pool-by-settings` 釋出（內建 sync）(3) 禁止手動改 JSON status。教訓：**修改資料的唯一合法途徑是透過 ops 層 CLI/API，不是直接改檔案** |
 | 2026-03-24 | Zeabur deploy 缺 .env.production | Build failed: Missing .env.production | frontend-v2-fix/.gitignore 排除了 .env.production，Zeabur deploy 遵循 .gitignore 所以不上傳 | deploy-zeabur-safe.sh 加入 sed 刪除 stage dir .gitignore 中的 .env.production 行 |
 | 2026-03-24 | 風險預報數據停在 3/20 | QQQ/EEM 的 last_date 是 3/20 而非 3/23 | `risk_forecast.py` 呼叫 `dm.get_model_data()` 沒加 `force_refresh=True`，DataManager cache 回傳舊數據。daily_update.py 06:03 執行時 yfinance 可能尚未更新某些 ETF，但 cache 會持續回傳過時數據 | 根本修正：(1) `risk_forecast.py` 加 `force_refresh=True` (2) `daily_update.py` 所有 `get_model_data()` 呼叫加 `force_refresh=True`。教訓：**每日更新腳本必須強制刷新數據，不可依賴 cache** |
@@ -65,10 +30,6 @@
 | 2026-03-25 | 4 篇已發佈文章含過時/錯誤宣稱 | K320 content audit 發現 TSMOM claim, 91% trend following, withdrawal rate 矛盾 | 自我修正（K255/K53/K87）後沒有回溯更新已發佈文章 | 根本修正：(1) 修正 4 篇文章並加 ⚠️ 更正聲明 (2) CLAUDE.md 第 9 條研究誠實原則：「自我修正後必須回溯更新已發佈內容」(3) 同步 Supabase。教訓：**自我修正不只是記錄新結論，還要回頭修正舊內容** |
 | 2026-03-25 | 所有文章 category=milestone, audience=null | 前端 badge 全顯示 milestone，一般讀者 tab 靠 tags fallback | `publish_milestone()` 硬編碼 category='milestone'，沒有 audience 參數 | 根本修正：(1) `publisher.py` 加 `audience`/`category` 參數（明確傳入優先，fallback 從 tags 推斷）(2) `content.py` ops 層也加參數 (3) 批次修正 518 篇文章 (4) content 欄位同時寫入。教訓：**文章類型應在寫作前決定，不是事後推斷** |
 | 2026-03-25 | 誤報「8 小時沒發文」但實際文章正常釋出 | 檢查用 datetime.now()（本地 UTC+8）和 UTC 的 published_at 比較，差 8 小時是時區差 | CLAUDE.md 第 144 行已寫「published_at 存 UTC」但手動檢查時沒遵守 | 根本修正：CLAUDE.md 加強提醒「比較時間必須用 UTC：datetime.now(timezone.utc)」。教訓：**已寫的規則也要遵守** |
-
-| 2026-04-05 | Tags 雙重編碼（JSON array 被 comma-split） | tags 顯示 `["研究"` 而非 `研究` | `cli.py:_parse_tags` 只做 `raw.split(",")` 不處理 JSON array 輸入 `'["研究","VIX"]'`，加上 publisher 沒有防護直接寫入 | 三層修復：(1) `_parse_tags` 偵測 JSON array 格式先 `json.loads` (2) `publisher.py` 加 `_sanitize_tags` 防護（strip brackets/quotes） (3) `_sync_all_article_tags` 也加 sanitize。教訓：**輸入解析和輸出寫入都要做 sanitization，不能假設上游是乾淨的** |
-| 2026-04-05 | article_tags 大量丟失（80%） | 前端 tag 篩選失效，文章詳情頁不顯示 tags | `_sync_article_tags` 和 `_get_tag_ids` 用 `isinstance(tag_id, str)` 檢查 tag ID 型別，但 Supabase tags 表的 ID 是 integer（serial），不是 UUID string → tag ID 查詢永遠返回空 map → article_tags 永遠不寫入。另外 tags 逐筆 POST（每個 tag 一次 HTTP）容易靜默失敗，且 tag sync 耦合在 article sync 內（文章 upsert 失敗就不同步 tags） | 根本修正三層：(1) `_get_tag_ids` 和 `_sync_all_article_tags` 改為 `tag_id is not None` 取代 `isinstance(tag_id, str)` (2) 新增 `_sync_all_article_tags` 批量函式（chunk 50 筆一次 POST）取代逐筆 POST (3) 將 tag sync 從 `sync_article` 解耦，改在 `sync_full` 中獨立執行（不依賴文章 upsert 結果）。教訓：**型別假設必須匹配實際 DB schema（int vs uuid）；同步步驟不可耦合（A 失敗不應阻止 B）；批量操作取代逐筆（50x 減少 HTTP 往返）** |
-| 2026-04-06 | LaTeX 方程式渲染壞掉（`au_t imes g_t`） | 前端 KaTeX 應渲染 `\tau_t \times g_t` 但顯示 `au_t imes g_t` | `publisher.py` L204: `description.replace('\\t', '\t')` 把 JSON 中的 `\tau` → TAB+au。修復過程中產生連鎖問題：(1) 錯誤地把 LaTeX 轉 Unicode (2) 產生 `$$$$` 空 math block (3) Unicode minus `−` 進入 URLs (4) inline math 沒包 `$...$` | 根本修正五層：(1) `publisher.py` 移除 `\\t`→TAB (2) 還原 95 篇 Unicode→LaTeX (3) 清除 19 篇 `$$$$` 空 math block (4) 修復 16 篇 URL Unicode minus (5) 包裝 174 篇 bare inline LaTeX 進 `$...$`。教訓：**批量字串替換極度危險——每次改動都可能產生新問題。應該先在測試文章驗證，確認無誤再批量執行。不可連續做多輪 regex 替換而不驗證中間結果** |
 
 ---
 
@@ -311,108 +272,3 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **「沒事做」是不存在的** — research_program.md 是北極星，永遠有未完成項目
 - **Cron prompt 要具體到操作步驟**，不能只是「繼續研究」這種模糊指令
 - **流程完整性**：實驗 → 記錄 → 衍生方向 → archive → 下一個。少一步就會斷鏈
-| 2026-04-04 | Badge 不一致（Feed vs 文章頁） | Feed 顯示「一般讀者」但文章內頁顯示「milestone」或「general」 | 三層問題：(1) supabase_sync category 預設 "milestone" (2) 前端 Feed 用 tags、文章頁用 category 兩個不同 data source (3) force-full sync 用舊代碼沒修正既有資料 | (1) sync 改為 classify_audience() (2) 前端統一用 resolveBadge(tags, audience) 函式 (3) force-full sync 重跑 |
-| 2026-04-04 | Paper pages=None | 新論文頁數不顯示 | papers.py 用 subprocess 呼叫 python3 import fitz，但 pymupdf 只在系統 Python 有，不在 .venv。except:pass 靜默吞錯。之前靠碰巧系統 PATH 先找到系統 python3 才成功。 | 把 pymupdf 加入 pyproject.toml（uv add pymupdf），確保 .venv 內也有。教訓：所有 import 的套件必須在 pyproject.toml 宣告，不能靠系統安裝。 |
-| 2026-04-04 | 文章圖片 404 | K838/K840 文章圖表顯示破圖 | Agent 呼叫 upload_chart(path, "custom.png") 但第二參數是 bucket 不是 filename，導致上傳到錯誤 bucket。另外 worktree agent 的圖片路徑和主分支不同。 | 新增 remote_filename 參數到 upload_chart()。重新上傳 3 張圖。310/310 恢復。 |
-| 2026-04-04 | 論文 abstract 空白 | Paper 4/5 在前端無摘要 | _count_tex_metrics 只提取 pages+citations 不提取 abstract。update_paper_full 不傳 abstract。 | 加入 LaTeX abstract 自動提取（regex）+ 傳給 upsert。7 篇論文全更新。 |
-
-## K849 "Proxy Ceiling Paradigm Shift" 過度宣稱（2026-04-05 發現）
-
-**問題**：K849 將 HAR-RV 在 RV target 上勝過 GJR 宣稱為「paradigm shift」和「800 個實驗用錯 target」。
-
-**根因**：
-1. GARCH 預測 close-to-close σ²，用 r² 評估是**正確的**
-2. HAR-RV 預測日內 RV，用 5-min RV 評估是**正確的**
-3. 不同模型在各自原生 target 上贏是**設計的必然**，不是「發現」
-4. research_program.md 第 24-36 行早就寫了「不同模型預測不同 target」的公平比較標準
-5. 第 749-753 行早就寫了 Hansen & Lunde (2005) 的調整方法
-6. 但 K849 實驗前沒有回讀這些方法論約束，agent prompt 也沒引用
-
-**流程失敗點**：
-- 實驗前 checklist 沒有「結果是否為模型設計的必然」這一條
-- agent prompt 沒引用 research_program.md 的方法論標準
-- Codex adversarial review 只查代碼 bug，沒質疑框架合理性
-- 結果出來後興奮過頭，沒自問「這跟我們已知的矛盾嗎？」
-
-**修正**：
-1. CLAUDE.md Step 0 加入「模型-Target 匹配」和「結果是否為設計必然」檢查
-2. 修正所有 proxy ceiling paradigm shift 敘事
-3. K849 真正有價值的部分：K850 prediction-VaR paradox、K852 RealGARCH、夜盤 decomposition
-
-## TAIFEX TX1 轉倉 Roll Gap 未處理（2026-04-05 用戶指出）
-
-**問題**：K849/K851/K852b/K868 使用 TX1（近月合約）tick 數據計算 5-min RV，但沒有處理每月第三個週三的轉倉（rollover）。
-
-**影響**：
-- 每月結算日，TX1 從到期月合約切換到下月合約
-- 例：2020/01/15 TX1=202001 price=12174 → 01/16 TX1=202002 price=12067（roll gap -107 點 = -0.88%）
-- 這個價差不是真實波動，但被計入 RV 計算
-- 每年 12 次轉倉，每次可能 0.5-1.0% 假波動→RV 被系統性高估
-
-**正確處理方式**：
-1. **排除轉倉日**：偵測「到期月份」欄位變化的交易日，該日跨合約 return 不計入 RV
-2. **用同合約銜接**：轉倉前用舊合約最後價格，轉倉後用新合約第一價格，不跨合約算 return
-3. **比例調整**：ratio-adjusted continuous futures
-
-**受影響實驗**：K849, K851, K852b, K868
-**根因**：實驗前 checklist 沒有「期貨轉倉處理」這一條。preamble 也沒提及。
-
-## K880 缺少 ES 評估（2026-04-05 用戶指出）
-
-**問題**：K880（SPY PRG 驗證）只做了 VaR backtesting，沒做 ES（Expected Shortfall）。
-
-**根因**：
-1. CLAUDE.md 沒有明確寫 ES 是必做
-2. research_program.md 第 86 行只列了名字（Acerbi-Szekely, Fissler-Ziegel）但沒標「必做」
-3. experiment preamble 在 K880 發出後才加入 VaR+ES 評估表
-4. Agent prompt 沒包含 ES 規則，agent 自然不做
-
-**修正**：
-1. CLAUDE.md 加入「VaR + ES 都是必做」規則
-2. research_program.md ES 改為「必做 + Basel III 依據」
-3. experiment preamble 已有完整 VaR+ES 表
-4. K880b 補做 ES 評估
-
-## K880 PRG Lookahead + VaR Cov 缺失 + MLE 約束不足（2026-04-05 Codex 審查）
-
-**問題**：Codex adversarial review 發現 K880 PRG 實作有 3 個嚴重問題。
-
-**[CRITICAL] Lookahead**：
-- PRG 的 h_intraday_t 用了 r2_overnight[t]（當天隔夜 return）
-- 但 GJR/HAR 沒有這個當天資訊
-- PRG 的 DM t=6.00 可能是 lookahead artifact（見 K679 前例）
-- 修正：h_total_t 必須只用 t-1 close 的資訊集
-
-**[HIGH] VaR Cov 缺失**：
-- σ²_fullday = Var(overnight) + Var(intraday) + 2×Cov(overnight,intraday)
-- 代碼只用 Var(overnight) + Var(intraday)，假設 Cov=0
-- 修正：估計 Cov 或在相同 target 上評估
-
-**[HIGH] MLE 參數約束不足**：
-- 沒有 periodic stationarity 約束
-- h <= 0 時 clip 到 1e-12 而非 reject
-- 修正：重參數化或加非線性約束
-
-**受影響**：K880, K881, K874c/d/e（所有 PRG 實驗）
-**狀態**：需修正後重跑，所有 PRG DM 結果暫時標記為 UNVERIFIED
-
-## Codex 誤判 PRG Lookahead（2026-04-05 用戶糾正）
-
-**問題**：Codex adversarial review 將 PRG 使用 r_overnight_t 預測 h_intraday_t 判定為 lookahead。
-
-**為什麼 Codex 是錯的**：
-- PRG/PRS 是 **session 頻率模型**，不是日頻模型
-- 在日盤開盤（8:45）時，隔夜 session 已經結束，r_overnight_t 是已實現的資訊
-- 用已完成 session 的資訊預測下一個 session 是 periodic switching 的核心設計
-- 這跟「8:45 的交易者已經看到隔夜 gap」完全一致
-- 參見 Lai, Wang & Chang (2024 APFM) PRS 模型的 Section 2
-
-**根因**：
-1. Codex 用日頻思維（「day-t 的所有資訊都是未來」）審查 session 頻率模型
-2. 我沒有在 Codex prompt 中說明 periodic model 的 information set
-3. 我讀了用戶的 PRS 論文但沒有內化其核心機制就去實作
-
-**教訓**：
-- Codex review 也可能出錯——特別是對非標準模型結構
-- 要在 Codex prompt 中明確說明模型的 information set 和時間結構
-- **讀論文要讀懂，不是掃過就行**

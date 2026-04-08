@@ -12,12 +12,10 @@
   "published_at": "2026-03-15T00:00:54.003700+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "GARCH",
     "GJR-GARCH",
     "HAR-RV",
     "LSTM"
-  ],
-  "content": "## 三重確認：為什麼深度學習無法超越 GARCH\n\n*2026-03-15 Phase H 研究教學*\n\n---\n\n### 前言\n\n「用 AI 預測股市」是一個有吸引力的敘事。但當我們嚴謹地測試時，發現 1986 年 Bollerslev 的 GARCH(1,1)——一個只有 3 個參數的模型——在**日頻波動率預測**上至今無法被超越。\n\n本文記錄我們如何用三種完全不同的方法得出相同結論。\n\n### 方法一：Ljung-Box 殘差檢定\n\n如果 GARCH 已經捕捉了所有波動率的結構，那它的標準化殘差 z² 應該是 iid（獨立同分佈）。\n\n我們對 GJR-GARCH 的 z² 做 Ljung-Box 檢定：\n\n| Lag | p-value | 結論 |\n|-----|---|------|\n| 5 | 0.762 | 不顯著 |\n| 10 | 0.936 | 不顯著 |\n| 22 | 0.974 | 不顯著 |\n\n**結果**：z² 完全是 iid。沒有任何自相關結構留給 DL 學習。\n\n### 方法二：GARCH-LSTM Hybrid\n\n即使如此，我們仍然實作了文獻推薦的 hybrid 架構：先用 GJR 提取 conditional variance，再用 LSTM 學殘差結構。\n\n**結果**：LSTM 的調整因子平均 1.31（放大 31%），標準差 1.16（極度不穩定）。QLIKE 比基準差 3%。LSTM 在噪音上過擬合。\n\n### 方法三：Ridge Stacking\n\n使用 6 個 features（3 個 GARCH 變體的 conditional variance + 3 個 HAR-style 統計量），用 Ridge 回歸找最佳組合。\n\n**結果**：Ridge 把**所有 6 個 coefficient 設為零**，只用 intercept（常數預測）。\n\n這是最有說服力的證據——一個正規化的線性模型選擇了「忽略所有 features」作為最優解。\n\n### 為什麼？\n\n日頻波動率的本質是：**一天只有一個收盤價**。\n\n從這一個數據點（r_t），GARCH 已經最優地提取了波動率信息。$\\alpha$ 控制新信息的吸收速度，$\\beta$ 控制歷史記憶的衰減。這個 trade-off 用 MLE 精確估計後，剩下的就是**純粹的隨機性**。\n\nDL 需要**結構**才能學習。但日頻波動率的結構（volatility clustering）已經被 $\\alpha$+$\\beta$ 的指數衰減完美描述。\n\n### 什麼時候 DL 可能有用？\n\n1. **高頻數據**：每天 78 個 5-min bar，有日內 U-shape、開盤效應、微觀結構——遠比日頻豐富\n2. **多模態數據**：結合新聞情緒、社群媒體、選擇權市場資訊\n3. **非波動率任務**：方向性預測、regime detection、portfolio optimization\n\n### 結論\n\n三個完全不同的方法——統計檢定（Ljung-Box）、深度學習（LSTM hybrid）、機器學習（Ridge stacking）——都指向同一個結論：\n\n**GJR-GARCH(1,1) 是日頻 SPY 波動率預測的最終答案。**\n\n不是因為 GARCH 很好，而是因為**日頻數據的信息量只夠支撐 3 個參數**。在這個信息約束下，GARCH 已經是最佳的。"
+  ]
 }

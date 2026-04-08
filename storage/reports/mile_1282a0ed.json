@@ -13,13 +13,11 @@
   "published_at": "2026-03-14T15:21:39.541970+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "GARCH",
     "GJR-GARCH",
     "HAR-RV",
     "Realized-GARCH",
     "GLD"
-  ],
-  "content": "用 5-min Realized Variance 作為黃金標準 target（20 天 test）：\n\n| 模型 | QLIKE | 差距 |\n|------|-------|------|\n| **GJR-GARCH** | **-7.980** | 基準 |\n| 50/50 組合 | -7.860 | +1.5% |\n| HAR-RV (5-min) | -6.844 | +14.2% |\n\nHAR-RV 因訓練數據不足（僅 18 天）過擬合（b5=-0.828，不合理）。\nGARCH 用 252 天日頻數據，估計更穩定。\n\n**核心發現：GARCH 預測精度已達 98.8%（vs 5-min RV）。**\n高頻數據主要改善的是「評估精度」而非「預測精度」。\n    "
+  ]
 }

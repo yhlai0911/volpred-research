@@ -52,20 +52,7 @@ You are not a script runner. You are a thinking researcher with these abilities:
 9. **Agent Teams** — Independent tasks can run in parallel with `isolation: "worktree"`
 10. **Stay on track** — 不要做和 research_program.md 無關的分析
 
-## 實驗前必做：確認編號 + 查詢知識庫（不可跳過）
-
-**Step -1: 確認實驗編號不衝突（多 session 安全）**
-```bash
-# 1. 檢查實驗目錄
-ls experiments/ | sed 's/k//' | sort -n | tail -5
-# 2. 檢查 next_tasks.json 已排定的編號
-grep '"id"' storage/next_tasks.json
-# 3. 檢查其他 session 的 worktree agent
-ls .claude/worktrees/ 2>/dev/null
-# 4. 確認目標編號三處都不存在
-ls experiments/k989 2>/dev/null && echo "EXISTS" || echo "OK"
-```
-另一個 session 可能已佔用該編號。從最大現有編號 +1 開始，跳過所有已佔用的。
+## 實驗前必做：查詢知識庫（不可跳過）
 
 **每個實驗開始前，必須先查詢知識庫確認：**
 
@@ -163,14 +150,10 @@ uv run python scripts/build_knowledge_index.py build
 系統 crontab 已設定永久任務（5-min 數據收集 + daily update）。
 但以下 session-only cron 需要每次新 session 重新建立：
 
-#### 雲端觸發（RemoteTrigger，無需 session）
-```
-platform-ops-patrol: 0 */6 * * *  # 平台巡檢（雲端 trigger，不再用 session cron）
-```
-
 #### 最小啟動集（保守模式）
 ```
 CronCreate(cron="13 */6 * * *", prompt="會員問題研究")               # :13 每6小時
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢")                   # :37 每6小時
 CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit")        # :47
 CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07
 ```
@@ -179,6 +162,7 @@ CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07
 ```
 CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究")         # 08-23時 每15分鐘
 CronCreate(cron="5 0-7 * * *", prompt="繼續研究")                   # 00-07時 每小時
+CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")   # :37 每2小時
 ```
 
 也可以安排**單次性提醒**避免忘記（範例格式，日期需依實際事件更新）：
@@ -311,25 +295,17 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 20. **Harvey (2016) 框架：防止過度解讀** — (1) 多重檢定要用 Bonferroni/FDR 校正 (2) 報告的 Sharpe 需 50-75% haircut (3) 新因子 t-stat 門檻 > 3.0 不是 1.96 (4) 把 descriptive findings 當 causal claims 是最大陷阱 (5) Mechanism 要用數據 TEST 不是 ASSERT (6) 從大量搜索中挑出的最佳結果一定有 selection bias
 21. **樣本期間必須明確標示** — 所有實驗結果必須像學術論文一樣標明：(1) **Estimation window**（樣本內估計期間，如 w=2000 rolling）(2) **OOS period**（樣本外評估期間，如 2020-01-01 ~ 2025-12-31）(3) **Total OOS observations**（如 1507 trading days）(4) 任何中間計算（如 skewness/kurtosis）是從哪個期間的數據計算的。不得混淆 in-sample 和 OOS 結果
 22. **研究標的多元化** — 不要只研究 SPY。每個新方法/模型必須在多種資產類型上驗證：(1) 美股 ETF（SPY, QQQ）(2) 商品（GLD, USO）(3) 債券（TLT）(4) 新興市場（EEM）(5) 台灣（0050.TW）。跨資產驗證才能確認方法的通用性
-23. **Agent worktree 管理（防止腳本遺失）** — ⚠️ **絕對禁止** `git worktree remove --force`！K923/K924/K932 腳本都因 force remove 遺失。
-    
-    **正確流程（三步，缺一不可）**：
+23. **Agent worktree 清理** — 使用 `isolation: "worktree"` 的 agent 完成後，worktree 會累積佔用磁碟空間（每個 ~800MB）。每完成一批實驗（5-10 個 agent）後，必須清理：
     ```bash
-    # Step 1: Agent 完成後，先合併變更到 main
-    bash scripts/merge_worktree.sh              # 自動合併所有 agent worktrees
-    # 或指定單一 worktree
-    bash scripts/merge_worktree.sh agent-xxx    # 只合併指定的
-    
-    # Step 2: 確認檔案已在 main
-    ls experiments/k932/k932.py                 # 確認腳本存在
-    
-    # Step 3: merge_worktree.sh 會在合併成功後自動清理
+    # 列出所有 worktrees
+    git worktree list
+    # 移除所有 agent worktrees 並刪除對應分支
+    for wt in $(git worktree list --porcelain | grep "^worktree.*\.claude/worktrees" | sed 's/^worktree //'); do
+      branch=$(git worktree list --porcelain | grep -A2 "^worktree $wt" | grep "^branch" | sed 's/^branch refs\/heads\///')
+      git worktree remove --force "$wt" 2>/dev/null && git branch -D "$branch" 2>/dev/null
+    done
     ```
-    
-    **Agent prompt 必須包含的指令**：
-    > 在完成所有工作後，必須 `git add -A && git commit -m "K9XX: description"` 保存所有新檔案。不 commit = 檔案遺失。
-    
-    **為什麼不能 force remove**：worktree 中的實驗腳本(.py)、結果(.json)、圖表(.png) 是可重現性的基礎。knowledge.json 只有摘要，不能替代原始腳本。
+    **前提**：所有實驗結果已記錄到 knowledge/experiments/thinking 中。Worktree 只是臨時工作區，結果在主分支的 memory 檔案中。
 
 ## Available Tools
 
@@ -363,6 +339,4 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 - `references/publishing-guide.md` — Publishing formats, Signal card, API endpoints
 - `references/strategies.md` — Trading strategies, Hybrid VT details, transaction costs, advanced techniques
 - `references/models.md` — Model descriptions, parameters, sample size requirements, cross-asset rules
-- `references/agent-brief-template.md` — Agent 任務單模板（WHAT + WHY + 約束 + 成功標準）
-- `references/agent-result-template.md` — Agent 結果回報模板
-- `research_program.md` — **研究北極星（必讀）**：方法論約束（統計門檻、Patton 2011、VaR/ES 規格）+ 研究面向 + 待辦 + 成果。CLAUDE.md 的技術細節指向此處。
+- `research_program.md` — **Core research direction, progress, and findings** (highest priority)

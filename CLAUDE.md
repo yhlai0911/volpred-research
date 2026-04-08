@@ -8,15 +8,7 @@
 1. **不可造假、不可虛構**：所有數據、統計量、圖表必須來自實際計算，不可編造數字或偽造結果
 2. **數據來源透明**：每個實驗必須標明數據來源（yfinance、FRED、CBOE 等）、資料期間、樣本數量。不可用模擬數據冒充實證數據
 3. **實驗必須有對應檔案 + 知識庫記錄 + 經驗記錄**：每個實驗完成後，**必須同時產出三項**：
-   - **檔案**：每個實驗必須有專屬資料夾 `experiments/<experiment_id>/`，所有相關檔案放在裡面：
-     - `experiments/<experiment_id>/README.md`（**必備：計劃、問題描述、動機、方法、預期、結論**）
-     - `experiments/<experiment_id>/<experiment_id>.py`（腳本）
-     - `experiments/<experiment_id>/<experiment_id>_results.json`（結果）
-     - `experiments/<experiment_id>/*.png`（圖表）
-     - `experiments/<experiment_id>/references/`（參考文獻，如有）
-     - `experiments/<experiment_id>/data/`（實驗專屬數據，如有）
-     - **Agent worktree 完成後必須用 `bash scripts/merge_worktree.sh` 合併到主分支**（⚠️ 絕對禁止 `git worktree remove --force`）
-     - **README.md 是必備的**——打開資料夾就能知道在做什麼、為什麼、怎麼做、結論是什麼
+   - **檔案**：`experiments/<experiment_id>.py`（腳本）+ `experiments/<experiment_id>_results.json`（結果）。Agent worktree 完成後複製到主分支
    - **知識庫**（`storage/memory/knowledge.json`）：含 experiment_id、title、content 摘要（200-300字）、tags、data_source。記錄**發現了什麼**（結論、數據、統計量）
    - **經驗庫**（`storage/memory/experiment_experiences.json`，Exxx 編號）：記錄**學到了什麼**（為什麼成功/失敗、踩了什麼坑、下次該怎麼做）。每 5-10 個實驗彙整一條經驗記錄
    - 不可只存 results JSON 而不進知識庫——2026-03 曾發現 85/124 實驗只有 results 但不在知識庫中
@@ -34,7 +26,21 @@
    - **結果異常時**：HE < 0、相關係數不穩定、parameter 在邊界上 → 必須啟動覆查，不能直接報告
    - **期貨避險特別注意**：spot-futures 相關性穩定性（rolling correlation）、共整合檢定、ETF 結構問題（如 USO contango roll）
 6. **方法論嚴謹**：每個結論必須經過正規統計檢定（DM test、t-test、bootstrap），不可僅憑觀察就下結論。遵守 Harvey (2016) t>3.0 門檻
-6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型必須在公平框架下比較，不可只用單一 target，不可只報告對自己有利的結果。VaR/ES 評估必須做正確的分配轉換，不可直接把預測值當 VaR。**技術細節（評估層次、VaR 轉換公式、backtesting 規格）見 `research_program.md` 的「模型比較公平性標準」和「經濟顯著性評估」段。**
+6b. **模型比較必須公平（Patton 2011 標準）**：不同類型的波動率模型（GARCH 預測 σ²、MEM/HAR 預測 |r| 或 RV）必須在公平框架下比較，**不可只用單一 target**。每次模型比較實驗必須包含：
+   - **各模型在原生 target 上的表現**（GARCH on r²、MEM on |r|、HAR on RV）——展示各自最佳表現
+   - **QLIKE on r²**（Patton 2011 proxy-robust：r² 是 σ² 的無偏估計，排名一致性有理論保證）
+   - **Spearman rank correlation**（分配無關，不需轉換假設）
+   - **DM test + Harvey t>3.0**（每對模型）
+   - 如有日內數據：**QLIKE on 5-min RV**（Hansen & Lunde 2005 gold standard）
+   - 如有多模型：**MCS（Model Confidence Set）**（控制多重比較）
+   - **不可只報告對自己有利的 target**——必須報告所有 target 的結果，包括模型表現差的
+   - **經濟顯著性（VaR/ES）評估**：每個模型預測不同東西，轉換到 VaR 時**必須做適當處理**：
+     - GARCH（σ²）→ VaR = σ × z_α（z_α 取決於創新分配：Normal/Student-t/Skewed-t）
+     - MEM(|r|) → 先轉 σ = E[|r|] / C（C 來自 MEM 的 Gamma 分配，非 Normal 的 √(2/π)），再 VaR = σ × z_α
+     - HAR-RV → σ = √RV，VaR 需考慮 HAR 殘差分配（通常 log-normal 或 F）
+     - **不可直接把模型預測值當 VaR**——必須經過正確的分配轉換
+     - VaR backtesting: Kupiec + Christoffersen + Basel traffic light
+     - 如有日內數據：Hansen & Lunde (2005) 最優加權 RV_total 作為真實 σ² 的最佳估計
 7. **區分實證與理論**：明確標示每項分析屬於「實證分析（真實數據）」、「理論推導」或「模擬實驗」。不可混淆
 8. **Null result 如實報告**：負面結果同樣重要，必須完整記錄。不可只報告成功、隱藏失敗
 9. **發佈內容真實不虛**：Feed 文章、研究摘要、知識記錄的每一項數據和結論都必須可追溯到具體實驗腳本和數據
@@ -49,8 +55,7 @@
    - **實驗代碼寫完後、執行前，必須先讓 Codex 審查代碼**。不是跑完出結果才審。流程：寫代碼 → Codex 審 → 修正 → 才跑 → 記錄 → 才發文
    - **代碼中必須有明確的 `signal.shift(1)`**——lag 驗證靠代碼結構，不靠事後記憶
    - **Sharpe > 2x baseline = 幾乎一定有 bug**——先停下來檢查，不要先歡呼
-   - **所有模擬或隨機值生成必須設定固定 seed**：`np.random.seed(42)` 或 `rng = np.random.default_rng(42)`。適用：Bootstrap、Monte Carlo、ABM、permutation test、random sampling、MCMC、train/test split、任何用到 `np.random`/`random` 的操作。沒有固定 seed 的結果無法重現，違反可追溯原則
-13. **自我修正後回溯更新**：每次推翻或修正先前結論時，必須立即：
+12. **自我修正後回溯更新**：每次推翻或修正先前結論時，必須立即：
    - 搜尋已發佈文章中引用該結論的內容（用 grep 搜尋關鍵詞）
    - 在受影響文章頂部加入 `⚠️ 更正聲明（日期）`，說明修正內容
    - 更新 feed.json 和個別 report JSON 的 content/description
@@ -91,7 +96,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
   - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
   - **Paper trades 同步**：自動剝離市場數據，只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾
-- `scripts/daily_update.py` → 每日 00:03 UTC（台灣 08:03）美股收盤後計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇
+- `scripts/daily_update.py` → 每日 06:03 計算策略權重 + 同步 Supabase + 重算績效指標
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
@@ -135,22 +140,15 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **research_program.md**：研究策略文件（北極星）
 - **paper/**：學術論文（按子目錄組織）
 
-### 重要研究結論
+### 重要研究結論（2026-03-29 K687/K697/K700）
 
-→ **所有研究結論、K 編號詳情見 `research_program.md`「重大研究結論」和「最終工具指南」。** 以下僅列影響日常操作的核心結論：
-
-- **VT = drawdown insurance，不是 alpha generator**（K687/K697）。50/50 SPY/GLD 不可動搖（K846 三重護城河）
-- **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——最可靠的設計原則**
-- **模型評估 target 必須匹配**：GARCH 用 r²、HAR-RV 用 5-min RV。跨模型用 Patton (2011) QLIKE
-- **⚠️ 風險管理評估必須同時做 VaR + ES（不可只做 VaR）**。詳見 `research_program.md` 評估指標段
-
-### Token 節約規則（必須遵守）
-- **⚠️ 禁止整檔讀取 `feed.json`（5.4MB = 135 萬 tokens）**。任何情況都不可 `Read("storage/reports/feed.json")`：
-  - **批量文字修復**（LaTeX/Unicode/escape）：用 `jq` / `python -c` / `sed` 處理，不用 Claude 讀取
-  - **主題查重**：用 `grep -i '關鍵詞' storage/reports/feed.json | head`
-  - **需要理解語義才能修的情況**：先用 `jq` 篩出需要修的那幾篇 ID，再只讀個別 `storage/reports/{id}.json`
-  - **發佈/同步**：已由 Python 腳本處理，不需要 Claude 讀取
-- 同理，`knowledge.json`（1.3MB）也禁止整檔讀取，用 `grep` 或 `jq` 查詢
+**VT 策略是 drawdown insurance，不是 alpha generator。**
+- K697：VIX 預測 vol magnitude（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 不可能
+- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）
+- K688：但 VT 在 CRRA utility 框架 gamma>=5 時勝出（風險厭惡投資人受益）
+- K702：50/50 SPY/GLD 是最佳靜態配置（grid search 確認）
+- K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
+- **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——這是最可靠的設計原則**
 
 ### 注意事項
 - Feed 發文要用 `feed-publisher` skill（thinking ≠ content）
@@ -160,17 +158,8 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
   - **⚠️ 比較時間必須用 UTC**：`datetime.now(timezone.utc)` 不是 `datetime.now()`。後者是本地台灣時間（UTC+8），會差 8 小時
   - 檢查「多久沒發文」的正確寫法：`(datetime.now(timezone.utc) - datetime.fromisoformat(pub_at).replace(tzinfo=timezone.utc))`
 - 跨市場策略注意 VIX lag（台股用前一天 VIX）
-- **外部數據來源**：→ 完整操作手冊見 `.claude/skills/external-data-sources/SKILL.md`
-  - **yfinance**：股價/ETF/VIX（免費，無需 key）
-  - **FRED**：`pandas_datareader` 讀取數千個總經指標（免費，無需 key）
-  - **TAIFEX tick**：台指期日內 tick（`~/Dropbox/TAIFEXDATA/TAIFEXDATA/python/`，✅ 本地 33G；選擇權 41G ❌ 僅雲端）
-  - **CBOE**：VIX/VVIX/VIX3M/SKEW（透過 yfinance）
-  - **DGBAS 主計總處**：台灣 GDP/CPI/就業（需 Chrome 自動化，見 `taiwan-macro-data` skill）
-  - **Congressional trades**：`data/congressional_trades_house.csv`
-- **⚠️ 0050.TW 數據品質**：Yahoo Finance 1:4 分割只回溯到 2014，2013 前未調整。**所有 0050.TW 實驗必須 `from volpred.utils import clean_tw50_data`**
-- **5-min 數據回補**：`collect_5min_data.py` 自動偵測 gap 回補（上限 59 天）
-- **TAIFEX 格式陷阱**：2012 是 9 欄/2014 起 10 欄、時間格式 2017 夜盤前後不同、2011 特殊編碼。**必須用 header 判斷，不可硬編碼 index**。詳見 skill
-- **⚠️ TAIFEX 期貨轉倉（必須處理）**：不要直接用 TX1，要用 **TX（全合約），每日按成交量選最活躍的合約月份**。TX1 在結算日（每月第三個週三）自動切換合約有 roll gap ~0.5-1.0%。正確做法：讀 TX → 按「到期月份」分群 → 選當日成交量最大的合約 → 只用該合約 tick 算 return/RV。K849/K851/K852b/K868 未處理
+- **⚠️ 0050.TW 數據品質**：Yahoo Finance 把 2025-06-18 的 1:4 分割回溯應用到歷史數據，但只從 2014-01-02 起——**2013 年以前的數據未調整**，造成 2014-01-02 假 -75% 回報（58.70→14.64）。yfinance `splits` metadata 完全沒記錄此分割，`repair=True` 也無法修復。**所有使用 0050.TW 的實驗必須呼叫 `from volpred.utils import clean_tw50_data`**。目前市價 ~73 元（分割後）是正確的
+- **5-min 數據回補**：收集腳本自動偵測 gap 並回補（上限 59 天 = yfinance 免費版限制）。macOS 休眠時 cron 不執行，醒來後自動回補
 - **Paper trading 多日回補**：daily_update.py 自動回填所有 `portfolio_return=None` 的歷史條目（利用相鄰條目價差）
 - **frontend-v2-fix 已部署**：`volpred.zeabur.app` 綁定到 volpred-v3 服務（frontend-v2-fix），前端修改只需改 `frontend-v2-fix/`
 
@@ -185,8 +174,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 | **每日建議** (daily) | 所有讀者 | 1 篇 | 當日策略權重、VIX regime、持倉建議。由 `daily_update.py` 自動產生 | `每日建議` |
 
 **執行規則**：
-- **非時效性文章**一律 `status=draft` 進文章池，由每 2 小時 cron 按節奏釋出
-- **⚠️ 事件驅動文章（NFP/FOMC/CPI/TSMC 營收等）必須立即 `status=published`** + Supabase sync。延遲 = 過期（2026-04-03 教訓：NFP 文章延遲 10 小時釋出）
+- 所有文章一律 `status=draft` 進文章池，由每小時 cron 按節奏釋出
 - **每篇文章必須附真正的圖表（不可用 ASCII/文字表格替代）**：
   - 使用共用模組 `from volpred.charts import generate_bar_chart, upload_chart, embed_chart`
   - 可用函式：`generate_bar_chart`、`generate_grouped_bar_chart`、`generate_line_chart`、`generate_heatmap`
@@ -262,6 +250,8 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 | 4 | **Sensitivity** | 參數 +-20% 變動後 Sharpe 不降 > 30% | 回測腳本 |
 | 5 | **MDD 可接受** | 同期間 MDD **< -20%** | `evaluate_new_strategy.py` 輸出 |
 
+### 新策略上線標準程序
+
 ## 快速指令
 → 完整指令見 `docs/quick-commands.md`
 
@@ -313,7 +303,6 @@ uv run volpred ops publish-milestone --title "標題" --description "Markdown �
 uv run volpred ops release-pool-by-settings --storage-dir storage
 uv run volpred ops send-article-notification mile_xxxxxxxx
 uv run volpred ops send-daily-digest --target-date 2026-03-21
-uv run volpred ops edit-article mile_xxxxxxxx --title "新標題" --content "新內容" --audience research
 uv run volpred ops unpublish mile_xxxxxxxx
 uv run volpred ops cleanup-post mile_xxxxxxxx --hard-delete
 
@@ -352,7 +341,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ## 自主研究模式
 **研究永不停止。** 完成任何任務後**立刻執行下一個任務**，不需要回報等待、不需要徵求同意。在同一個 turn 中連續做多個實驗（用 agent team 並行 + 主線串行）。不要做完一個實驗就停下來——連續鏈式執行直到使用者主動中斷。
-**透過 session cron 每 2 小時自動觸發 autonomous-research 繼續研究。**
+**透過 session cron 每 15 分鐘自動觸發 autonomous-research 繼續研究。**
 
 **⚠️ 反空轉原則（2026-03-31 教訓）：**
 - **「方向窮盡」是假象** — research_program.md 永遠有 100+ 未完成項目。不要靠腦中判斷「沒事做」，要讀文件。
@@ -360,20 +349,8 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 - **實驗衍生方向必須寫回** — 每個實驗完成後，提取 2-3 個新方向寫入 research_program.md。不寫 = 知識流失。
 - **完成項目必須 archive** — 移到 `docs/research_archive/`，保持 research_program.md < 700 行。
 
-### 實驗前必做：防錯 + 查詢知識庫 + 搜尋文獻（不可跳過，違反即無效）
+### 實驗前必做：查詢知識庫 + 搜尋文獻（不可跳過，違反即無效）
 **每個實驗/新主題路線開始前，必須完成以下步驟，缺一不可：**
-
-**Step -1: 確認實驗編號不衝突（多 session 安全）**
-- **分配新 K 編號前，必須檢查以下三處確認該編號未被佔用：**
-  1. `ls experiments/ | sort` — 已完成/進行中的實驗目錄
-  2. `cat storage/next_tasks.json` — 已排定但未開始的任務
-  3. `ls .claude/worktrees/ 2>/dev/null` — 其他 session 正在跑的 worktree agent
-- 另一個 session 可能已經用了該編號（2026-04-08 教訓：K988 被另一個 session 佔用）
-- 從最大現有編號 +1 開始，跳過所有已佔用的
-
-**Step 0: Error Log 防錯 + Preamble（最重要）**
-0. **讀 `docs/error_log.md` 前 30 行（快速索引表）**，在 agent prompt 中列出「此實驗需注意的 error log 規則：XXX」。只有需要細節時才讀對應的詳細記錄段落
-1. **附上 preamble**：每個實驗 agent prompt 必須讀取 `.claude/skills/autonomous-research/references/experiment-preamble.md` 附加在開頭。**Agent 看不到 CLAUDE.md 和 research_program.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。** Preamble 包含：模型-target 匹配、mechanical vs empirical 區分、統計門檻、防錯規則、VaR+ES 標準、worktree 禁令。
 
 **Step 1: 知識庫搜尋（過去成果）**
 1. `grep -i '關鍵詞' storage/memory/knowledge.json | grep title | head -10`
@@ -421,7 +398,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 **實驗後必做（跑完後、記錄前）：**
 1. **Codex 審查代碼**（不是審結果——審代碼本身有沒有 bug）
-   - `codex exec -s read-only "Review experiments/kXXX.py for lag, TX, baseline bugs"` 或 `/codex:rescue`
+   - `/codex-cli -s read-only "Review experiments/kXXX.py for lag, TX, baseline bugs"`
 2. **結果合理性檢查**：Sharpe > 2x baseline → 90% 有 bug，先停下來
 3. **Codex 通過後才記錄** knowledge
 4. **Knowledge 記錄後才寫文章**
@@ -430,7 +407,13 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **2026-03-29 教訓**：93 個實驗中 8 個被推翻（10%），全部因為跳過「Codex 先審代碼」這一步。如果每個實驗都先審再跑，推翻率應該趨近 0%。
 
 ### 研究多元化（必須遵守）
-**不要停留在模型舒適區。** 每個 session 至少 1 個完全不同方向。連續 3 個 null result → 必須換方向。**具體跳躍方向和判斷清單見 `research_program.md`「研究多元化原則」。**
+**不要停留在模型舒適區。** 已收斂的結論不需要繼續堆積 null results。
+
+- **每個 session 至少 1 個「完全不同方向」的實驗**（不是又一個 VT overlay 測試）
+- 漸進式延伸（從已知自然衍生）和跳躍式探索（進入未知領域）要並行
+- 跳躍方向包括：NLP 情緒、替代數據、市場微結構、網絡模型、因果推論、DeFi、氣候金融、行為金融、跨學科方法
+- 連續 3 個 null result → 必須換方向
+- 詳見 `research_program.md` 的「研究多元化原則」和「面向 G: 跳躍式探索」
 
 ## 活文件原則
 以下文件會隨研究推展持續演化，應主動修改以反映最新狀態：
@@ -474,19 +457,13 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 **使用原則**：針對特定目標，不掃全專案。不要用 `--scope working-tree`。不要無目標地「讓 Codex 看看」。
 
-**`/codex:rescue` 使用時機（必須遵守）**：
-- **Bug 改很多次還是錯** → 停下來，用 `/codex:rescue` 換 Codex 接手重新分析
-- **程式越修越壞** → 不要再修，直接 `/codex:rescue`
-- **多檔案/邏輯複雜** → 用 Codex 的全局視角
-- **Token 快用完**（避免思路斷掉）→ 趁還有 context 讓 Codex 接手
-- **ML/非標準模型代碼審查** → 實驗完成後必須 `/codex:rescue` 審查再記錄 knowledge
-
-**一句話：卡住 or 快沒 token → 直接 `/codex:rescue`，不要繼續自己掙扎**
-
-記得開啟 `--full-auto` 模式讓 Codex 自主修復。
-
 ### 研究主題來源（必須多元）
-研究主題不可只靠 Claude 自選。必須來自：用戶指定（最高優先）、Codex/Gemini 建議、會員問題、文獻搜索、跨 AI 交叉驗證。**完整流程和頻率表見 `research_program.md`「研究主題來源」段。**
+1. **Codex/Gemini 建議**：每 5-10 個實驗主動問一次
+2. **用戶指定**：優先執行，必須立刻寫入 research_program.md
+3. **會員問題**：每 6 小時 cron 自動評估
+4. **文獻搜索**：WebSearch arXiv/SSRN 前沿方向
+5. **Claude 自選**：基於 research_program.md 待探索方向
+6. **跨 AI 交叉驗證**：一個 AI 提出假說 → 另一個 AI 設計實驗 → Claude 執行
 
 ## 硬體資源與 Agent Team
 → 完整 Agent 設定對照表見 `docs/hardware.md`
@@ -515,63 +492,30 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **規則：研究、分析、程式等精確性與專業性工作，務必使用 opus 模型。不確定時預設 opus。**
 **優先使用 agent team 並行分派任務**，同時推進 3-4 個方向以最大化效率。
 
-### Agent Prompt 必備內容（不可省略）
-
-**Agent 是空白的 Claude，只知道 prompt 裡寫的東西。** 不要假設 agent 知道任何事。
-
-| 任務類型 | Agent prompt 必須包含 |
-|---------|---------------------|
-| **實驗** | 讀取 `experiment-preamble.md`（模型-target 匹配、統計門檻、防錯規則、VaR+ES 標準、periodic model 注意事項） |
-| **論文寫作** | **⚠️ 禁止用 agent 寫論文。** 必須在主對話串中直接進行（保留完整 context）。可用 `run_in_background` 做長時間編譯或數據提取，但寫作本身不可委派。原因：對話中的方法論決策、用戶糾正、模型理解無法傳遞給 agent。 |
-| **論文審查** | 指示 agent 讀取：(1) `latex-academic-reviewer` skill 完整內容 (2) `citation-verifier` skill (3) 論文本身 + 實驗結果 JSON |
-| **Feed 文章** | 指示 agent 讀取：(1) `feed-publisher` skill (2) 實驗結果 JSON (3) 已有文章（避免重複） |
-
-**通用原則（適用所有 agent 任務）：**
-- **使用標準化模板**：agent brief 必須按照 `.claude/skills/autonomous-research/references/agent-brief-template.md` 格式填寫（WHAT + WHY + 約束 + 成功標準 + 相關知識）。agent 回報必須按照 `agent-result-template.md` 格式（結果 + 數字 + 異常 + 與動機關聯 + 後續）
-- **主 agent 判斷需要哪些 skill**，在 prompt 中指示 subagent 讀取對應的 skill 文件路徑（`.claude/skills/<name>/SKILL.md`）
-- **完整傳遞必要資訊**：相關 K 編號+結論、error log 防錯規則、檔案路徑、統計門檻、研究背景
-- **Agent prompt = 完整 brief**：像寫給剛加入團隊的聰明同事，不是一行指令
-- **主線程做 synthesis**：agent 回報後，主線程必須先「解讀」（連回動機）再「行動」（記 knowledge/寫文章）。不是照搬 agent 的結論
-- **⚠️ Worktree agent 必須 commit**：每個 worktree agent 的 prompt 結尾必須包含：
-  > 在完成所有工作後，必須執行 `git add -A && git commit -m "K9XX: description"` 保存所有新檔案。不 commit = 檔案在 worktree 清理時永久遺失。
-- **Agent 返回後**：主對話必須執行 `bash scripts/merge_worktree.sh` 合併變更到 main
-- **⚠️ Worktree agent 禁止修改共享狀態**：Worktree 是隔離的 git 分支，與 main 同時修改 JSON 陣列會導致 merge 衝突和資料遺失。規則：
-  - **禁止寫入**：`storage/reports/feed.json`、`storage/memory/knowledge.json`、`storage/memory/thinking_journal.json`、`storage/memory/experiment_experiences.json`
-  - **禁止呼叫**：`supabase_sync.py`、`_sync_to_remote()`、任何寫入 Supabase/Mirror 的操作
-  - **Worktree agent 只應產出**：`experiments/kXXX/` 下的檔案（腳本、結果 JSON、圖表、README）
-  - **主線程負責**：agent 完成後，由主線程記錄 knowledge、發佈文章、sync 到 Supabase
-  - 詳見 `experiment-preamble.md` 第 8 節
-
-**絕對禁止**：
-- 在 prompt 中給 agent 「摘要數字」然後讓它寫論文 → 必須讓 agent 自己讀 JSON
-- 不告訴 agent 讀 skill 就讓它寫學術文件 → agent 不知道學術規範
-- 假設 agent「應該知道」某件事 → 它什麼都不知道，必須明確指示
-- 只說「參考 XXX skill」但不給路徑 → agent 找不到，必須給完整路徑
-- **`git worktree remove --force`** → 用 `bash scripts/merge_worktree.sh` 替代（K923/K924/K932 教訓）
-
 ## 自動化排程
 ### 永久任務（系統 crontab — 無人值守也會跑）
 ```
 0 15 * * 1-5   collect_tw_data.py      # 台股收盤後 15:00
 30 5 * * 2-6   collect_us_data.py      # 美股收盤後 05:30
-3 0 * * 2-6    daily_update.py         # 美股收盤後 00:03 UTC（台灣 08:03），確保 yfinance 數據已 finalize
-3 */2 * * *    release-pool-by-settings # 文章池定時釋出：每 2 小時 1 篇
+3 6 * * 2-6    daily_update.py         # 所有數據就緒 06:03
+3 * * * *      release-pool-by-settings # 文章池定時釋出：每 1 小時 1 篇
 ```
 
 ### Session Cron（每次新 session 重建，需 Claude 活躍）
 
-#### 雲端觸發（RemoteTrigger，無需 session 活躍）
+#### 最小啟動集
 ```
-platform-ops-patrol: 0 */6 * * *  # 平台巡檢（已遷移至雲端 trigger trig_01HzWX2ZUmsGHnzwciGpHeNz）
+CronCreate(cron="13 */6 * * *", prompt="會員問題研究")
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢")
+CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit")
+CronCreate(cron="7 * * * *", prompt="知識索引更新")
 ```
 
-#### 標準啟動集
+#### 全速模式（確認穩定後加入）
 ```
-CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 分配編號前先 ls experiments/ 確認該編號目錄不存在，已存在則跳到下一個可用編號 (3) 啟動 agent 執行 (4) 完成後從 research_program.md 補充 next_tasks (5) next_tasks 空了才讀 research_program.md 全文。絕對不可只 check status。")
-CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
-CronCreate(cron="47 */4 * * *", prompt="每4小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --no-rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉。用 merge 不用 rebase，避免多 session 並行時 rebase 衝突")
-CronCreate(cron="7 */3 * * *", prompt="知識索引更新")
-CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：(1) python scripts/token_usage_report.py --detailed (2) 將結果存檔到 storage/token_reports/ (3) 週五額外 --weekly (4) >40% 標記高消耗警告 (5) 摘要告訴用戶")
+CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究：(1) 讀 research_program.md 的未完成項目 (2) 從中選一個啟動 (3) 絕對不可只 check status 就結束——必須有 agent 在跑或有實際產出")
+CronCreate(cron="5 0-7 * * *", prompt="繼續研究（夜間）：讀 research_program.md 未完成項目，啟動 1 個低強度任務。不可空轉。")
+CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")
 ```
 
 #### 反空轉規則（2026-03-31 教訓）

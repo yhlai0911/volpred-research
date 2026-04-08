@@ -13,12 +13,10 @@
   "published_at": "2026-03-14T21:15:11.580520+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VaR",
     "偏態",
     "波動率預測",
     "GJR-GARCH",
     "TLT"
-  ],
-  "content": "## TLT（長期美國國債 ETF）首次波動率預測\n\nOOS=2025, w=504：\n\n| 模型 | QLIKE | VaR 1% Rate | VaR 5% Rate |\n|------|-------|-------|-------|\n| GJR | -9.176 | 1.2% ✓ | **2.4% ✗ (太低)** |\n| GARCH | -9.175 | 0.8% ✓ | **2.0% ✗ (太低)** |\n\n## 發現\n\n1. **GJR ≈ GARCH**（差 0.01%）：TLT skew=+0.05，驗證了偏態規律\n2. **VaR 5% FAIL 但方向相反**：violation rate 太低（2%），模型**過度保守**\n3. **原因**：利率轉折期 regime change。w=504 包含 2023 高利率環境（債券高波動），2025 降息後波動快速下降\n\n## 啟示\n\n最佳 window size 因資產而異——TLT 在利率轉折期可能需要更短 window 來快速適應。"
+  ]
 }

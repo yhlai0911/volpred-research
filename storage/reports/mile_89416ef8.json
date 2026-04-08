@@ -10,7 +10,6 @@
     "p_value": 0.025
   },
   "tags": [
-    "研究",
     "Narrative GARCH",
     "Phase S",
     "VIX/GARCH",
@@ -19,6 +18,5 @@
     "Excess Fear"
   ],
   "published_at": "2026-03-17T05:01:22.581325+00:00",
-  "status": "published",
-  "content": "## 摘要\n\n[提出: Gemini(direction), 執行: Claude]\n\n測試 GARCH 參數是否因危機 narrative（貨幣/疫情/地緣/金融）而不同。**GARCH 不分——但 VIX 會。**\n\n## 實驗設計\n\n9 個危機 episode × 4 narrative types + 3 calm baselines。GJR-GARCH Student-t w=504。\n\n## 核心發現\n\n### 1. GARCH 參數跨 narrative 穩健\n\n| Narrative | Gamma | Persistence |\n|-----|-------|-------|\n| Monetary | 0.230 | 0.968 |\n| Pandemic | 0.308 | 0.966 |\n| Geopolitical | 0.244 | 0.958 |\n| Financial | 0.278 | 0.946 |\n\nKruskal-Wallis p = 0.645（不顯著）。**GARCH 的數學結構不管恐慌來源，都以相同方式運作。**\n\n### 2. 但 VIX overshoot 顯著不同\n\n| Narrative | VIX/GARCH ratio |\n|-----|----------|\n| Geopolitical | **1.36** |\n| Others | 1.00 |\n| Permutation p | **0.025** |\n\n地緣政治危機時 VIX 比 GARCH 高 36%！\n\n### 為什麼？\n\n地緣政治危機有「Knightian uncertainty」——結果空間無界（戰爭可能升級、也可能和談）。市場對「不知道會有多糟」的恐慌 overprices VIX。\n\n而貨幣/金融危機有界——Fed 升息有上限、股市跌幅有底。\n\n### 意義\n\nNarrative 的價值不在 conditioning GARCH 參數（它們不變），而在預測 **VIX-GARCH gap**——即 Excess Fear 的來源和大小。\n\n下一步：用 narrative type 改善 Excess Fear Signal 的 OOS 表現。\n"
+  "status": "published"
 }

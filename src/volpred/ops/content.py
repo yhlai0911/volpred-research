@@ -504,69 +504,6 @@ def _cleanup_question_article_links(article_slug: str) -> int:
         return 0
 
 
-def edit_article(
-    pub_id: str,
-    *,
-    title: str | None = None,
-    content: str | None = None,
-    tags: list[str] | None = None,
-    audience: str | None = None,
-    storage_dir: str = "storage",
-) -> dict:
-    """Edit an existing article's content/title/tags. Updates local feed.json + report JSON
-    with updated_at timestamp, then syncs to Supabase. This is the correct way to modify
-    published articles — never edit feed.json directly without updating updated_at."""
-    storage = Path(storage_dir)
-    feed_path = storage / "reports" / "feed.json"
-    feed = load_json(feed_path, [])
-
-    found = False
-    for item in feed:
-        if item.get("id") == pub_id:
-            found = True
-            if title is not None:
-                item["title"] = title
-            if content is not None:
-                item["content"] = content
-                item["description"] = content
-            if tags is not None:
-                item["tags"] = tags
-            if audience is not None:
-                item["audience"] = audience
-            item["updated_at"] = datetime.now(timezone.utc).isoformat()
-            break
-
-    if not found:
-        return {"id": pub_id, "found": False}
-
-    dump_json(feed_path, feed)
-
-    # Also update individual report file if it exists
-    report_path = storage / "reports" / f"{pub_id}.json"
-    if report_path.exists():
-        report = load_json(report_path, {})
-        if title is not None:
-            report["title"] = title
-        if content is not None:
-            report["content"] = content
-            report["description"] = content
-        if tags is not None:
-            report["tags"] = tags
-        if audience is not None:
-            report["audience"] = audience
-        report["updated_at"] = datetime.now(timezone.utc).isoformat()
-        dump_json(report_path, report)
-
-    # Sync to Supabase — the updated_at ensures incremental sync picks it up
-    synced = False
-    for item in feed:
-        if item.get("id") == pub_id:
-            synced = sync_article(item, storage_dir=storage_dir)
-            break
-
-    return {"id": pub_id, "found": True, "synced": synced}
-
-
 def unpublish_article(pub_id: str, storage_dir: str = "storage") -> dict:
     publisher = Publisher(storage_dir=storage_dir)
     success = publisher.unpublish(pub_id)

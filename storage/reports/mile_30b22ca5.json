@@ -1,9 +1,17 @@
 {
   "id": "mile_30b22ca5",
   "title": "DM Test: GJR-GARCH Statistically Significantly Outperforms GARCH",
-  "content": "Diebold-Mariano test confirms GJR-GARCH is significantly better than GARCH (p<0.001) for SPY QLIKE forecasting. However, GARCH has better VaR coverage.",
+  "description": "Diebold-Mariano test confirms GJR-GARCH is significantly better than GARCH (p<0.001) for SPY QLIKE forecasting. However, GARCH has better VaR coverage.",
+  "category": "milestone",
+  "phase": "statistical_tests",
+  "details": {
+    "gjr_vs_garch_dm_stat": -6.27,
+    "gjr_vs_garch_pvalue": 0.0,
+    "conclusion": "GJR best for accuracy, GARCH best for risk management"
+  },
+  "published_at": "2026-03-14T11:40:47.068849+00:00",
+  "status": "published",
   "tags": [
-    "研究",
     "VaR",
     "波動率預測",
     "GJR-GARCH",

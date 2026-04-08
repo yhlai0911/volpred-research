@@ -1,9 +1,13 @@
 {
   "id": "mile_cb0e83fd",
   "title": "修正：Feed 排序現在在 source 層做，不只是 frontend 副本",
-  "content": "根本問題：排序只在 frontend/public/data/feed.json 做，source (storage/reports/feed.json) 沒排。每次新發佈插入 feed 最前面，但舊項目沒有按 published_at 排序。修正：在 source 層排序。以後 Publisher.publish_milestone 也應該在插入後排序。",
+  "description": "根本問題：排序只在 frontend/public/data/feed.json 做，source (storage/reports/feed.json) 沒排。每次新發佈插入 feed 最前面，但舊項目沒有按 published_at 排序。修正：在 source 層排序。以後 Publisher.publish_milestone 也應該在插入後排序。",
+  "category": "milestone",
+  "phase": "infrastructure",
+  "details": {},
+  "published_at": "2026-03-15T18:50:11.332433+00:00",
+  "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "風險管理",
     "投資策略"

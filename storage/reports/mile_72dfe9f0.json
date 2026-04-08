@@ -8,7 +8,6 @@
     "finding": "S2 rejected, monetary anti-signal t=-5.0"
   },
   "tags": [
-    "研究",
     "Phase S",
     "Narrative",
     "Excess Fear",
@@ -17,6 +16,5 @@
     "Harvey門檻"
   ],
   "published_at": "2026-03-17T05:31:51.436565+00:00",
-  "status": "published",
-  "content": "## 摘要\n\n[提出: Gemini→Claude(S1→S2), 執行: Claude]\n\n測試 narrative type 能否改善 Excess Fear Signal。結論：不能。但意外發現 Monetary Anti-Signal。\n\n## 核心發現\n\n### 1. Narrative 調整不改善信號\n- Baseline Z>1.5: OOS t=0.84（弱）\n- Narrative-adjusted (geo>2.0, others>1.0): t=-0.59（更差！）\n- Best: Z>2.0 unconditional: t=2.57（14 episodes, 仍低於 Harvey 3）\n\n### 2. ★ Monetary Anti-Signal\n升息期間 VIX/GARCH Z-score 高 → **負**報酬（t=-5.0）\n\n這跟「excess fear」完全相反：升息時市場恐慌是**理性的**（Fed 在收緊，經濟真的在減速）。\n\n### 3. Narrative 是排除工具，不是放大工具\nS1 + S2 的綜合結論：\n- 知道 narrative type **不能**幫你找到更好的買入時機\n- 但**可以**幫你排除不該買的時機（升息期的「恐慌」不是「過度恐慌」）\n\n## Phase S 總結\n\n| Exp | Finding |\n|-----|---|\n| S1 | GARCH 不分 narrative，VIX overshoot 分（geo +36%）|\n| S2 | Narrative 不改善交易信號，但 monetary anti-signal 有價值 |\n"
+  "status": "published"
 }

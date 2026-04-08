@@ -8,10 +8,8 @@
   "published_at": "2026-03-16T04:12:59.926906+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "波動率預測",
     "風險管理",
     "跨資產"
-  ],
-  "content": "## 研究系統自我優化\n\n### 問題\n每次記錄發現需要 15 行 boilerplate：\n- `m.think()`\n- `m.add_knowledge()`\n- `pub.publish_milestone()`\n- `shutil.copy2()` × 2\n\n容易忘記某個步驟（用戶多次提醒 feed 沒更新）。\n\n### 解法\n```python\nfrom research_helper import record_finding\nrecord_finding(title=\"標題\", thinking=\"推理\", knowledge=\"知識\", description=\"Feed 內容\")\n```\n\n一行搞定。再也不會忘記更新任何系統。\n\n### 其他優化進行中\n- Incremental knowledge index（agent 在實作中）\n- 目標：rebuild 從 115s 降到 ~5s"
+  ]
 }

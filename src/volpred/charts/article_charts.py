@@ -218,13 +218,8 @@ def generate_heatmap(
 
 # ─── Supabase upload ─────────────────────────────────────────
 
-def upload_chart(png_path: str, remote_filename: str | None = None, bucket: str = "article-images") -> str:
+def upload_chart(png_path: str, bucket: str = "article-images") -> str:
     """Upload PNG to Supabase Storage, return public URL.
-
-    Args:
-        png_path: Local path to the PNG file.
-        remote_filename: Optional custom filename in storage. If None, uses the local filename.
-        bucket: Supabase Storage bucket name (default: article-images).
 
     Requires SUPABASE_URL and SUPABASE_KEY in environment or .env file.
     """
@@ -256,7 +251,7 @@ def upload_chart(png_path: str, remote_filename: str | None = None, bucket: str 
 
     import requests
 
-    filename = remote_filename or Path(png_path).name
+    filename = Path(png_path).name
     storage_path = f"{bucket}/{filename}"
 
     with open(png_path, "rb") as f:

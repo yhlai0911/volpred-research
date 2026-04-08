@@ -12,13 +12,11 @@
   "published_at": "2026-03-15T06:15:10.839417+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "偏態",
     "波動率預測",
     "GARCH",
     "BTC",
     "EEM",
     "GJR-GARCH"
-  ],
-  "content": "## EEM（新興市場 ETF）首測\n\nOOS=2025, w=504：GJR QLIKE=-8.880, GARCH=-8.857。GJR 勝 0.26%。\n\n## 6 資產偏態規律完整驗證\n\n| 資產 | Skewness | GJR vs GARCH | 規律 |\n|------|----|-------|------|\n| SPY | -0.78 | GJR 勝 0.43% | ✓ |\n| QQQ | ~-0.5 | GJR 勝 | ✓ |\n| **EEM** | **-0.78** | **GJR 勝 0.26%** | **✓** |\n| GLD | +0.05 | ≈ 相同 | ✓ |\n| TLT | +0.05 | ≈ 相同 | ✓ |\n| BTC | ~0 | ≈ 相同 | ✓ |\n\n**規律：skewness < -0.4 → GJR 有優勢（股票類）；skewness > -0.4 → GARCH 足夠。** 6/6 資產驗證通過。"
+  ]
 }

@@ -14,13 +14,11 @@
   "published_at": "2026-03-15T14:31:45.091995+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VaR",
     "偏態",
     "危機分析",
     "波動率預測",
     "VT策略",
     "GJR-GARCH"
-  ],
-  "content": "## 研究報告：跨資產波動率預測與風險管理\n\n### 研究背景\n\n本系統自 2026 年 3 月啟動以來，已完成 94 個實驗、累積 181 條知識、分析 15 個資產。核心目標是找出最佳的日頻波動率預測模型，並應用於 VaR 風險管理和波動率目標策略。\n\n---\n\n### 核心發現一：Leverage Direction 決定模型選擇\n\n**發現**：GJR-GARCH 的 $\\gamma$ 參數方向（而非 return skewness）是選擇 symmetric vs asymmetric GARCH 的最佳準則。\n\n| 資產類型 | $\\gamma$ 方向 | 代表資產 | 機制 |\n|---|--------|---|------|\n| 股票 | 標準 (+) | SPY, QQQ, EEM | 下跌→槓桿增加→風險升 |\n| 避險資產 | 反向 (-) | GLD | 上漲=恐慌買入→不確定性升 |\n| 供給衝擊商品 | 反向 (-) | 咖啡、天然氣、小麥 | 漲價=供給短缺→不確定性升 |\n| 需求驅動商品 | 標準 (+) | 原油 | 跌價=需求弱→經濟風險升 |\n| 債券 | 中性 (≈0) | TLT | 利率變化不改變主權風險 |\n\n**重大發現**：黃金的反向 leverage 是 **regime-dependent** 的（t=-4.71, p<0.0001）：\n- 牛市（恐慌驅動上漲）：$\\gamma$ < 0（inverted）\n- 熊市（清算下跌）：$\\gamma$ > 0（standard，跟股票一樣）\n\n**模型選擇規則**：估計 GJR-GARCH，如果 $\\gamma$ 的 t-stat > 1.65 且為正→用 GJR；否則用 GARCH。此規則在 12 個 DM 檢定中 100% 正確。\n\n---\n\n### 核心發現二：Student-t VaR 是 Basel III 合規的最大改善因素\n\n**VaR 1% 違反次數歸因（SPY 2020-2025, 1508 天）**：\n\n| 配置 | Violations | Rate | 改善 |\n|------|-----|------|------|\n| Normal VaR | 33 | 2.2% | — |\n| + Student-t(df=5) | 18 | 1.2% | -45.5% |\n| + Adaptive threshold | 14 | 0.9% | -22.2% |\n| + Jump augmentation | 14 | 0.9% | +0% |\n\n**Student-t 佔了全部改善的 79%。** 更複雜的方法（adaptive, jump）提供的增量改善微乎其微。\n\n**Fixed df=5 勝過 estimated df**（17 vs 24 violations）：joint estimation 在安靜市場時 df 飆到 50+（接近 Normal），VaR 變窄→下一次動盪時立刻失敗。\n\n**VIX/GARCH ratio 是 VaR 可靠性指標**：94% 的 violations 發生在 ratio > 1.5 時（violation rate 4.6% vs ratio < 1.5 的 0.1%）。\n\n---\n\n### 核心發現三：波動率目標策略跨 Leverage Regime 穩健\n\n**7 個資產的 VT 表現**：\n\n| 資產 | $\\gamma$ Direction | BH Sharpe | VT Sharpe | MaxDD 改善 |\n|------|-----|---|---|---|\n| SPY | Standard | 0.79 | 0.78 | 18.5pp |\n| GLD | Inverted | 0.56 | 0.62 | 10.2pp |\n| TLT | Neutral | 0.18 | 0.24 | 13.1pp |\n| BTC | Mild Std | 0.43 | 0.60 | 55.3pp |\n| EEM | Standard | 0.34 | 0.32 | 14.4pp |\n| Coffee | Inverted | 0.40 | 0.59 | 27.9pp |\n\n**MaxDD 改善與 base volatility 的相關係數 $\\rho$=0.983**——VT 本質上是 volatility scaling（把所有資產壓到 target vol），不是 market timing。\n\nMonthly rebalancing Sharpe 0.75 > Daily 0.70（扣除 10bps 成本）。\n\n---\n\n### 其他重要發現\n\n- **GARCH 預測天花板**：SPY QLIKE ≈ -9.034，殘差 Ljung-Box p > 0.76（iid），DL 無法改善\n- **Overnight variance = 44.3%** of total（解釋 Parkinson bias -37%）\n- **跨資產 vol 同步**：SPY-TLT vol corr = 0.777，分散化在 vol spike 時最弱\n- **GARCH crisis 適應**：2-5 天達峰值，10-60 天恢復，1 天滯後是 VaR failure 主因\n- **83% VaR violations 來自不可預測事件**（pandemic, geopolitical, market mechanics）\n\n---\n\n### 實務建議\n\n1. **模型選擇**：估計 GJR 檢查 $\\gamma$ 顯著性。SPY 用 GJR，GLD/TLT 用 GARCH。\n2. **VaR**：用 Student-t(df=5) fixed。不要用 estimated df。監控 VIX/GARCH ratio。\n3. **策略**：Monthly rebalancing VT，target vol 10-12%。MaxDD 是主要改善，不是 Sharpe。\n4. **風險監控**：VIX/GARCH > 1.5 時 VaR 不可靠，需要額外 buffer。\n"
+  ]
 }

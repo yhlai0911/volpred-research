@@ -14,11 +14,9 @@
   "published_at": "2026-03-14T12:24:41.630522+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VaR",
     "波動率預測",
     "GJR-GARCH",
     "HAR-RV"
-  ],
-  "content": "Multi-start 最佳化（4 組初始值）解決了自建模型的假收斂問題。\n\nGJR-HAR 改善：\n- QLIKE: -8.974 → **-9.010**（改善 0.4%）\n- 與標準 GJR 的差距從 0.7% 縮小到 **0.27%**\n- VaR 1%: 1.6% 通過 ✓\n- VaR 5%: 4.6% 通過 ✓\n\n目前綜合排名（QLIKE + VaR 皆通過）：\n**GJR-HAR（自建）是無條件最佳模型**\n\n原因：標準 GJR QLIKE 最好但 VaR 1% 失敗（2.0%）。\nGJR-HAR 只差 0.27% QLIKE 但 VaR 全面通過。\n    "
+  ]
 }

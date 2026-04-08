@@ -83,27 +83,10 @@
 
 ### 評估指標
 - **統計性**：QLIKE (主), MSE, MAE, HMSE, Mincer-Zarnowitz R², DM test, MCS, GW test
-- **風險管理（VaR + ES 都是必做，不可只做 VaR）**：VaR 1%+5%: Trinity test (Kupiec+CC+Basel)。ES: Acerbi-Szekely (2014) Z-test + Fissler-Ziegel (2016) joint VaR-ES scoring。**ES 不是選做——Basel III 已要求 ES 取代 VaR 作為主要風控指標。**
+- **風險管理**：Trinity test (Kupiec+CC+DQ), Fissler-Ziegel, Acerbi-Szekely ES, Basel traffic light
 - **經濟性**：Sharpe (Harvey t>3), MDD (bootstrap p<0.001), Calmar, Sortino, CRRA utility, CE return, Net Sharpe (after TX), Turnover
 - **跨模型**：CCS Score, FDR audit, Cross-OOS 5 periods, Weight StdΔw
 - 每個實驗必須 re-estimate each window（no lookahead）
-
-### 多變量資產配置方法（多資產實驗必做）
-**多變量模型（DCC/BEKK/Copula）做資產配置時，必須比較以下 5 種方法：**
-
-| # | 方法 | 目標函數 | 說明 |
-|---|------|---------|------|
-| 1 | **Static Baseline** | 等權（50/50 或 1/N） | 無需估計，benchmark |
-| 2 | **Min-Variance** | $\min w'\Sigma_t w$ | 只需 $\Sigma$，不需 $E[r]$ |
-| 3 | **Min-CVaR** | $\min \text{CVaR}_{\alpha}(w'r)$ | 考慮尾部風險（用模擬或歷史） |
-| 4 | **Max CRRA Utility** | $\max E[W^{1-\gamma}/(1-\gamma)]$，$\gamma=5$ | 考慮投資人風險偏好 |
-| 5 | **Risk Parity** | $w_i \propto 1/\sigma_i$ | 等風險貢獻 |
-
-**評估規則**：
-- 必須計算 **turnover** 和 **Net Sharpe**（扣除假設 10bps 單邊交易成本）
-- 動態方法的 signal 必須 `shift(1)`（防 lookahead）
-- IS 和 OOS **分開報告**
-- 如果 dynamic gross Sharpe 勝但 net Sharpe 輸 → turnover 太高，不可宣稱優勝
 
 ### 研究多元化原則
 
@@ -173,14 +156,9 @@
 - 跨資產模型選擇（gamma rule, significance-based）
 
 **多變量模型：**
-- **DCC-GARCH** → **K915 完成**：SPY-GLD 相關性 -0.64~+0.58（高度動態），DCC 預測 21d corr r=0.88-0.90。但 portfolio NULL：DCC Min-Var 不勝 50/50（DM t=-1.73 NS，turnover 太高）。Static 1/3 each 反而最佳（Sharpe 0.811）。50/50 irreducible #11
-  - **K916: MF-GJR on BTC** → Harvey FAIL。VIX 彈性 θ₁=1.06（SPY 的 31%）。BTC-ETF 後 θ₁ 反降。BTC gamma=0.10 正向。1% VaR 全 FAIL（極端尾部）。MF-GJR 跨資產邊界：equity ✅ crypto ❌
-- **BEKK-GARCH** → **K918 完成**：SPY-GLD 無 cross-spillover（LR p=0.112, a12=-0.009, a21=0.001）。獨立性=分散化。50/50 irreducible #12
-- **Copula-GARCH** → **K920/K921/K922/K923 完成 ★★**：
-  - K920: Student-t copula 最佳，λ=0.14 但危機解耦（GFC λ=0.007, COVID ρ=-0.15）。50/50 moat = 危機條件獨立
-  - K921: Time-varying copula (Patton 2006) AIC -143.6 勝靜態。但預警 1/3 only。VIX 驅動 λ
-  - K922: SPY-0050.TW ρ=0.219（2.3x GLD）但 λ=0.078（半）。COVID 放大 λ=0.364。GLD 一致保護 vs 0050 不可預測
-  - K923: Copula hedge NULL——SPY-GLD r=0.058 太低，HE<3%。Copula hedging 需 r>0.90 的避險配對
+- DCC-GARCH（動態條件相關）— 已有初步結果
+- BEKK-GARCH（多資產波動率溢出）
+- Copula-GARCH（非線性相依結構）
 - Factor GARCH（共同因子驅動的波動率）
 - 跨資產 Granger 因果（vol spillover）
 
@@ -207,7 +185,7 @@
 - **利率 regime**（K62: 高利率保險費僅 1.8%/yr vs 低利率 6.10%）
 - **退休情境**（K85→K87: VT 不翻倍提領率，只提供更穩定的 4% 存活）
 - **稅務**（K86: 保險費佔 71-80% 成本，稅佔 20-29%。台灣 0% 資本利得稅 = 結構優勢）
-- **50/50 SPY/GLD 不可動搖**（K2/K16/K19/K24/K54/K63/K64/K89 — 10+ 次驗證 + K534 理論解釋 + **K846 根本解釋：三重護城河** = 分散化(r=0.057) + 再平衡溢酬(54bps/yr) + 黃金危機alpha。VT alpha ≈ 再平衡溢酬 → 打平已是最好結果）
+- **50/50 SPY/GLD 不可動搖**（K2/K16/K19/K24/K54/K63/K64/K89 — 8 次驗證 + K534 理論解釋：correlation dynamics 不可預測）
 - **5% BTC 唯一統計顯著改善但尾部風險代價**（K66: p=0.014, 但 coskewness -0.50）
 - **Sector VT uniform**（K58: gamma 不預測行業 VT 效果）
 - **International VT universal**（K68: 13/13 市場 MDD 改善，US VIX 通用）
@@ -244,14 +222,14 @@
 
 - **NLP 情緒分析**：用 FinBERT/LLM 分析財經新聞情緒，預測次日波動率或報酬
 - **替代數據**：Google Trends 搜尋量（已測 null for VT overlay，但可用於報酬預測）、衛星停車場數據、航運追蹤
-- **市場微結構**：K862 完成（CS spread US 有增量 t=3.68，台股無效）。可延伸：order flow imbalance（需 tick 數據）
-- **網絡/傳染模型**：K907/K910 完成。TCI 與 VIX 正交（r=0.001），是全新風險維度但非交易信號（K910 NULL）
-- **因果推論**：K856 完成 NULL（Fed DiD/RDD 4 方法全 NS）。可延伸：其他政策事件
-- **Agent-Based Simulation**：K827/K864 完成。VT 擁擠臨界點 30-50%，異質性讓擁擠更嚴重（K864）
+- **市場微結構**：order flow imbalance → 短期波動率預測、bid-ask spread dynamics
+- **網絡/傳染模型**：用圖模型分析波動率在資產間的傳播路徑（beyond linear Granger）
+- **因果推論**：用 DiD / RDD 分析政策事件（例如 Fed 升息）對波動率的因果影響
+- **Agent-Based Simulation**：模擬不同比例投資人使用 VT 對市場穩定性的影響（如果所有人都用 12/VIX 會怎樣？）
 - **加密 DeFi**：AMM 池的 impermanent loss 與波動率的關係、DeFi yield 策略的風險管理
-- **氣候金融**：K861 完成（油價代理，非對稱性 t=5.82 但逆向 Granger 更強）。需直接氣候數據延伸
-- **行為金融**：K860 完成 ★★（PT λ=1.52 翻轉 VT 評價）。可延伸：status quo bias + complexity aversion
-- **跨學科方法**：K863 完成 NULL（物理相變全輸 VIX，#25）。可延伸：生態學 regime shift detection
+- **氣候金融**：極端天氣事件對商品/保險公司波動率的影響
+- **行為金融**：投資人對 VT 的心理接受度實驗、為什麼知道 VT 有效卻不用？
+- **跨學科方法**：物理學的相變模型、生態學的 regime shift detection、複雜系統理論
 
 ### 面向 H: 論文撰寫與投稿
 **第一篇：Leverage Direction Matters**
@@ -266,51 +244,25 @@
 - `paper/taiwan-vt/main.tex`（34 頁）
 - 目標：Pacific-Basin Finance Journal 或 Emerging Markets Review
 - 初稿、Codex 審查、引用驗證已完成（見 archive）
+- [x] Gemini 審查 → gemini_review_v1.md（3 weaknesses: TX tax、linear scaling、TSMC endogeneity）
 - [ ] `/latex-academic-reviewer` 全面審查
-- [ ] 修正 Gemini 指出的 3 弱點（TX tax、linear scaling、TSMC endogeneity，見 gemini_review_v1.md）
+- [ ] 修正 Gemini 指出的 3 弱點
 
 **第三篇：Is Volatility Targeting Just Trend Following?**
 - `paper/vt-trend-following/main.tex`（29 頁）
 - 目標：Journal of Portfolio Management 或 Financial Analysts Journal
 - 核心貢獻：分解 VT 的 alpha 來源（K46→K53→K79: r=0.564, VT alpha = trend following）
-- [ ] 修正 review_v2 的 5 HIGH（見 review_v2.tex）
+- [x] `/latex-academic-reviewer` 全面審查 → review_v2.tex（5H/12M/6L）
+  - HIGH: 樣本期間不一致、BAB proxy（SPLV→AQR）、MDD 只有 5 美股、1.4% 數字不可驗證、需引用 K687/K697/K688
+  - K687 分析：**不矛盾**——VT 打敗 BH(SPY) 但打不過 BH(50/50)，支持 insurance 論述
+- [ ] 修正 review_v2 的 5 HIGH
 - [ ] Gemini 審查
 - [ ] `/citation-verifier` 引用驗證
 
-**第四篇：The True Cost of Volatility Targeting — Insurance Premium Decomposition**
-- `paper/vt-insurance-cost/` (FRL target)
-- 目標：Finance Research Letters（< 2500 words, $200 submission fee）
-- 核心貢獻：首次將 VT 保險費分解為 opportunity cost (91%) + direct cost (9%)
-- 基於：K811v2 + K846 (rebalancing premium)
-- 文獻缺口：Moreira & Muir (2017), Harvey et al. (2018) 都沒做 cost decomposition
-- 狀態：**v1.2 submission-ready**（學術審查 + 引用驗證 + Codex adversarial 全通過）
-
-**第五篇：When Volatility Targeting Crowds — Quantifying the Tipping Point via ABM**
-- `paper/vt-crowding-abm/` (FRL target)
-- 核心貢獻：ABM 量化 VT 擁擠臨界點 50-70%（K827v3 修正流動性混淆後）
-- 基於：K827 → K827v2（敏感度）→ K827v3（固定流動性，Codex 致命缺陷修正）
-- 狀態：**v1.2 submission-ready**（Codex 3H 修正：流動性隔離 + 量化非發現 + 敏感度驗證）
-
-**第六篇：Periodic Realized GARCH (PRG)**
-- `paper/prg-periodic-garch/main.tex`（14 頁）
-- 目標：Finance Research Letters 或 Asia-Pacific Financial Markets
-- 核心貢獻：單一 GARCH 遞迴 + session-specific 參數，DM t=-4.15~-6.63 Harvey PASS
-- 基於：K874→K874c 系列 + TAIFEX tick data
-- 狀態：Supabase 已上架，working
-
-**第七篇：Volatility Absorption Hypothesis**
-- `paper/volatility-absorption/main_v2.tex`（39 頁）
-- 目標：Journal of Financial Economics
-- 核心貢獻：恐慌對 realized return 的邊際影響隨 VIX 上升而遞減（SAR 從 3.16 降到 2.32）
-- 基於：VIX regime × shock type 交叉分析
-- 狀態：Supabase 已上架，working
-
-**第八篇：VIX Sufficiency — Can Anything Beat VIX?**
-- `paper/vix-sufficiency/main_v2.tex`（39 頁）
-- 目標：Journal of Forecasting
-- 核心貢獻：11 個 signal family 全部 OOS 無法勝過 VIX，Holm-Bonferroni 校正後仍成立
-- 基於：32 次 VIX sufficiency 確認 + cross-era 驗證
-- 狀態：Supabase 已上架，working
+**未來可能的第四篇：VIX Sufficient Statistic**
+- 23+ 個指標全被 VIX 吸收的 comprehensive study
+- 適合 Journal of Financial Economics 或 Review of Financial Studies
+- 需要更多跨市場驗證（目前只有 US + Taiwan）
 
 ### 面向 I: 期貨避險（Futures Hedging）
 **動機**：K341 建立框架（ES=F r=0.978, VIX>25 tail hedge 資本效率最高），需深化為完整研究路線。
@@ -355,34 +307,72 @@
 **開放議題：**
 - [ ] VIXTWN 數據累積到 252 天後驗證 ratio 穩定性（Q6）
 - [ ] 台灣 5-min 數據 HAR-RV（0050.TW 35 天，ETA 2026 Q2）
-- [x] 金融股早期預警系統 → K887 完成（Harvey PASS 但策略 overlay NS）
+- [ ] **金融股早期預警系統**：K757 發現 Fubon→TSMC Granger (F=6.11)。可建立金融股壓力指標作為 TSMC vol 早期預警
 
 **論文**：第二篇 `paper/taiwan-vt/main.tex`（34 頁）涵蓋台灣 VT + TZ 資訊傳遞
 
 ## Codex/Gemini/用戶建議（統一區）
 
-### Codex/Gemini/用戶建議（開放方向）
-→ 完成項目見 archive
-- [ ] **Conditional Dispersion Trade**（Codex #7）：⚠️ BLOCKED 需 sector ETF options
-- [ ] **Options surface state variables**（Codex #5）：⚠️ BLOCKED 需 options 歷史數據
-- [ ] **Dispersion / correlation-regime trading**（Codex #5）
-- [ ] **Retail Reflexivity & Gamma-Driven Skew**（Gemini #2）：⚠️ BLOCKED 需 order flow 數據
-- [ ] **Path Signatures for Rough Volatility**（Gemini #2）：需 5-min 數據（可用 TAIFEX tick）
-- [ ] **TXO Put-Call Ratio Mean-Reversion**（Gemini #1）：TAIFEX 網站數據
+### Codex 第 7 次建議：從預測轉向策略（2026-03-27）[提出: Codex GPT-5.4]
+**核心洞見**：瓶頸不是預測 RV，而是判斷何時 forecast 值得交易。
+- [ ] **Conditional Dispersion Trade**：預測 correlation risk premium mispricing → index vs sector options。需 sector ETF options data。
+（已完成項目見 archive：K730 Cross-Asset Vol Momentum, K763 Regime-Switched Carry Filter, K760 Alt Risk Premia Rotation, K762 Action-First ML）
+
+### Codex 第 8 次建議（2026-03-31）[提出: Codex GPT-5.4]
+**5/5 全 NULL**。詳見 `docs/research_archive/completed_session_2026-04-01.md`。
+核心結論：VIX-based 風險管理工具無法改善 50/50 baseline。連續調整 >> binary 切換。
+
+### Codex 第 5 次建議（2026-03-26）[提出: Codex]
+- [x] ~~Decision-focused policy learning~~ → **K798 NULL**。DM 全 NS。12/VIX irreducible #7。
+- [x] ~~Two-clock decomposition~~ → **K791 NULL**。隔夜/盤中分解不改善預測。
+- [ ] **Options surface state variables**：⚠️ BLOCKED: 需 options 歷史數據
+- [ ] **Dispersion / correlation-regime trading**：sector dispersion, correlation breakdown trades
+- [x] ~~Event-surprise strategies~~ → **K801 NULL**。|ΔVIX|>2σ 多餘，12/VIX 自帶 shock guard。#8 irreducible。
+
+Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decomposition (3) Dispersion trading
+
+### Gemini 第 2 次建議（2026-03-31，行為金融 + 方法論 + 實務工具）[提出: Gemini]
+- [ ] **Retail Reflexivity & Gamma-Driven Skew**：0DTE 散戶 flow 導致 delta-hedging 連鎖反應，可能打破 VIX sufficiency。量化 "Volatility Gap"（VIX-implied vs flow-induced realized move）。⚠️ BLOCKED: 需 order flow 數據
+- [ ] **Path Signatures for Rough Volatility**：用 rough path theory 的 signature transform 編碼日內價格路徑的幾何特性，捕捉 HAR 遺漏的路徑依賴性。需 5-min 數據（ETA 04/11）
+- [x] ~~Convexity-Adjusted Insurance Premium Tool~~ → **K811 完成 混合結果**（⚠️ Codex 2 HIGH: VVIX pre-2012 + cost calc mislabel）。VoV-cond 方向可信（減少保險費、smooth 優於 binary），但 40% 數字需 K811v2 修正。
+
+### Gemini 第 1 次建議（2026-03-26，台灣特色 + 免費數據）[提出: Gemini]
+- [x] ~~Taiwan Price Limit Latent Volatility~~ → **K790v2 完成 NULL**：>5% 天數僅 0.9%，GJR asymmetry 已捕捉。DM 全 NS。
+- [x] ~~FRED STLFSI4 Macro Stress Regime~~ → **K795 完成 NULL**（⚠️ Codex 2 HIGH：pre-2004 GLD + DM 實作錯誤，數字不可靠但方向正確）。Binary Sharpe 0.466 vs 0.313 但 DM 未通過。VIX sufficiency #24（方向確認，精確統計待 K795v2）。
+- [x] ~~VIX→Taiwan Vol Spillover Strategy~~ → **K817 完成 NULL**。Spillover 存在（r=0.376）但 OTC return 不可交易（77-93% alpha 在隔夜 gap）。DM 全 NS。8.63/VIX 仍最佳。
+- [ ] **TXO Put-Call Ratio Mean-Reversion**：台指選擇權 P/C ratio 作為散戶恐慌指標，極端值做反向操作。Data: TAIFEX 網站
+- [x] ~~EWT vs 0050.TW Vol Arbitrage Spread~~ → **K792 完成**：Granger YES (F=28.4) 但方向反（高 ratio → vol 下降）。Trading 虧損。Mean reversion 陷阱。
+
+### 用戶提出方向
+- [x] ~~什麼是好的交易策略？~~ → **K793 完成**：8 維度評估 6 策略。BH 50/50 #1 (75.4), Risk Parity #2 (73.7), Piecewise #3 (54.0，唯一正 stress)。單一 Sharpe 遺漏大量 tradeoffs。
+- [x] **HAR-RV with 5-day RV** [提出: 用戶, 2026-03-31] → **K782 完成**：GJR-GARCH multi-step 在 5d/22d/66d 全勝 HAR。日頻 squared returns 做的 RV 不足以讓 HAR 發揮優勢——需等 5-min 數據。
+- [x] ~~MEM（Multiplicative Error Model）~~ [提出: 用戶] → **K805 完成**：AMEM-r² 數值最佳（QLIKE 1.4689 vs GJR 1.4824）但 DM=-2.19 未通過 Harvey t>3.0。非對稱性（leverage）比模型類別更重要。MEM 不提供超過 GJR 的統計顯著改善。
+- [x] ~~K501/K818: SSVS for Return Prediction~~ [提出: 用戶] → **K818 完成 NULL for SPY**。OOS R²=-1.47%（EMH barrier）。SSVS 選出 HYG(0.93)+VIX_change(0.78)。台灣 hit 62.1% 但 c2c gap artifact。SSVS 更適合 vol 非 return。
+- [ ] Return prediction → trading strategy pipeline：如果方向準確度 > 55% → 可做 long/short 策略
 - [ ] 跨資產 return prediction：SPY、0050.TW、QQQ
+- [x] ~~K502/K812v2: US→Taiwan Lead-Lag Strategy~~ [提出: 用戶] → **K812v2 完成 乾淨 NULL**。OtC direction accuracy 50.2%（硬幣），lead-lag beta t=-0.25 (NS)。C2C Sharpe 3.51 → OtC -0.17（100% 信號在隔夜 gap）。方向正式關閉。
+- [x] ~~K503/K810: VIX Mean-Reversion Strategy~~ [提出: 用戶] → **K810 完成 NULL**。12/VIX 本身就是 MR 交易。顯式 MR 策略增加 vol 和 MDD，得不償失。VIX spike 93.5% 回復但短期 NS。50/50 不可動搖 #10。
 - 策略上架前必須：Cross-OOS ≥ 5 periods、3 年回測、Net Sharpe (after TX) > 0
 - **不要輕易上架**——交易策略必須多次確認（cross-OOS + out-of-sample + sensitivity），避免上架後發現是錯誤
 
 ### Bayesian Subset Selection 方法論（用戶指定，2026-03-26）
-- [x] K433 Bayesian SSVS → K924 NULL（10 變數全 PIP<0.5，SPY return 不可預測）
-- [ ] Bayesian Subset Selection for TARMA — Chen, Liu, Gerlach (2011) Computational Statistics, 26, 1-30
-- [ ] Threshold Variable Selection for Asymmetric SV — Chen, Liu, So (2013) Computational Statistics, 28, 2415-2447
-- [ ] Threshold GARCH with Bayesian Model Selection — 結合 2006+2013 方法
+- [ ] K433: **Bayesian SSVS for ARX-GARCH** — So, Chen, Liu (2006) JRSS-C, 55(2), 201-224. Latent binary indicator δ_i + MCMC 從 2^(p+q) 子集空間搜索最優外生變數組合。比 K113 逐一測試更有力。**進行中**
+- [x] ~~K431/K813: Smooth Transition GARCH~~ → **K813 完成 NS**。In-sample LR=252 強烈顯著但 OOS DM=-0.11 NS。11 參數不優於 5 參數 GJR。結構發現：低 VIX 高 leverage(0.50)/低 persistence(0.39)，高 VIX 相反。QLIKE ceiling 持續。
+- [x] ~~K432/K814: Bayesian MCMC GARCH~~ → **K814 完成**（⚠️ Codex 3 HIGH：P(γ>0) 是先驗 tautology、OOS h[0] leak、ESS/Geweke 錯誤）。框架有價值但數字不可靠。需 K814v2 修正 prior + 初始化 + 診斷。
+- [ ] Bayesian Subset Selection for TARMA — Chen, Liu, Gerlach (2011) Computational Statistics, 26, 1-30. 擴展 SSVS 到 threshold + MA terms，16M+ 可能子集
+- [ ] Threshold Variable Selection for Asymmetric SV — Chen, Liu, So (2013) Computational Statistics, 28, 2415-2447. Combined threshold variable Z_t = Σω_i Z_i，同時選 threshold 變數和模型結構。五個亞洲市場實證
+- [x] ~~SSVS for Variance Equation~~ → **K821 完成 NULL**。0/8 外生變數 PIP>0.5。GJR variance equation 自足。VIX_level PIP=0.039。與 K484 internal（4/5 PIP=1.0）形成鮮明對比。
+- [ ] Threshold GARCH with Bayesian Model Selection — 結合 2006+2013 方法：threshold GARCH + SSVS 同時選 regime 結構和變數子集
 
 ## 前沿文獻方向（2025-2026）
 
 ### 即刻可行動（不需新數據）
-- [ ] VIX-Managed Portfolio 文獻引用整理 — Int. Rev. Financial Analysis 2024（支持 Paper 3）
+1. ★ ~~Window Size Sensitivity~~ → **K783 完成**：expanding window 以 QLIKE=0.529 勝 w=2000 的 0.560（DM=-3.23 Harvey PASS）。w=2000 不是最優。
+   - [x] **K783b 完成**：最優 window 因資產而異。QQQ 偏好 504（DM=+3.59 PASS），GLD 偏好 3000，0050 偏好 1000，BTC 偏好 2000。**w=2000 仍是合理預設。**
+   - [x] **K783c 完成**：regime-dependent。危機→w=2000，中波動→w=504，平靜→w=252。1/14 DM 通過 Harvey。w=504 是跨 regime 最佳折衷。
+2. ★ ~~MF2-GARCH~~ → **K785 完成 NULL**：GJR baseline 仍勝（QLIKE 0.529），MF2-EWMA 0.533 (NS)，MF2-MEM 0.599（worse）。Expanding GJR 已隱式捕捉長期趨勢。
+3. KAN-GARCH-MIDAS（結構化 NN 可能突破 ML ceiling）— J. Applied Economics 2025
+4. VIX-Managed Portfolio 文獻引用整理 — Int. Rev. Financial Analysis 2024（支持 Paper 3）
 
 ### 需 5-min 數據（ETA 2026 Q2）
 - [ ] HAR-PD (Path-Dependent) — arXiv:2503.00851
@@ -400,6 +390,9 @@
 - [ ] Vision Transformer for RV — arXiv:2511.03046（需 IV surface 圖像）
 
 ### ML-GARCH 混合
+- [x] ~~GARCH-Informed NN (GINN)~~ → **K816v2 完成 NULL**。修正 GJR state propagation 後 DM=2.96→0.64（完全 NS）。GJR baseline 改善 8.56%，DM 是 artifact。**ML ceiling 第 6 次確認**。
+- [x] ★ ~~GARCH-GRU~~ → **K784 完成 NULL**：QLIKE 排 #1 但 vs GJR DM=-0.51 不顯著。ML 額外複雜度不帶來改善。
+- [x] ~~HAR Directional Prediction~~ → **K787 完成**：67.9% 方向準確率(z=8.03)但無經濟價值（timing +33% vs B&H +58%）。VIX 對方向無用(49.6%)。
 - [ ] **Probabilistic RV Quantile Forecasting** — arXiv:2508.15922（從 HAR/GARCH 點預測到條件分位數）
 - [ ] Sentiment-Augmented GARCH-LSTM — Computational Economics 2025
 - [ ] KAN for VIX Forecasting — Expert Systems with Applications 2025
@@ -408,21 +401,19 @@
 - [ ] ML Risk-Based Allocation — Scientific Reports 2025（LSTM + regime switching，Sharpe 1.38）
 
 ### Rough Volatility & Hurst
+- [x] ~~Multivariate fBm for RV~~ → **K806 完成 NULL**（⚠️ Codex 1 HIGH: 0050.TW 未清洗，跨資產 H 不可信；SPY 自身結果可信）。自身 H(t) 改善 NS (DM=-0.09)。5 資產全 rough (H<<0.5)。日頻 variogram 不夠精確。
 - [ ] ★ **Multivariate Rough Volatility Model** — arXiv:2412.14353 (Feb 2026)。多變量 fractional OU + GMM 估計。跨資產 rough vol 的正式框架。
-- [x] Time-Varying Hurst → K936 NULL（日頻無效）
+- [ ] Time-Varying Hurst via EWMA — arXiv:2509.05820
 - [ ] Adaptive Fractal Dynamics — Frontiers Applied Math 2025
-- [ ] Non-Gaussian Rough Vol — arXiv:2507.15437
+- [ ] Non-Gaussian Rough Vol（α-stable increments）— arXiv:2507.15437
 
 ### Tail Risk & Conformal Prediction
-- [ ] Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)
-- [ ] Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333
-- [ ] **Online Conformal via Universal Portfolio** — arXiv:2602.03168 (2026)
+- [ ] Regime-Weighted Conformal VaR (RWC) — arXiv:2602.03903 (2026)。控制非定態 portfolio VaR 超限率。regime-structured vol clustering。
+- [ ] Conformal Predictive Portfolio Selection (CPPS) — arXiv:2410.16333。預測區間 → 選最佳投資組合。
+- [ ] ★ **Proxy-Reliance Control in Conformal VaR** — arXiv:2603.22569 (2026)。校準 one-sided VaR 時控制 proxy 依賴。直接相關我們的 Patton (2011) proxy-robust 框架。
+- [ ] **Online Conformal via Universal Portfolio** — arXiv:2602.03168 (2026)。在線 conformal prediction + portfolio theory 交叉。
 - [ ] **KOWCPI (Kernel-Optimally-Weighted Conformal)** — arXiv:2405.16828。自適應權重 conformal prediction interval，適合波動率聚集。
 - [ ] Risk Parity + Heavy-Tailed + Regime-Switching DCC — Paolella (2025, JTSA)
-
-### 台股期貨夜盤策略（用戶提出 2026-04-03）
-→ 8 實驗詳見 `docs/research_archive/completed_session_2026-04-03.md`
-- 核心發現：K844（TX VT 空頭全勝）、K847（gap 61% 可交易）、K849（HAR-RV 勝 GJR on RV target）、K852（RealGARCH 橋接悖論）
 
 ### 期貨避險方法論
 - [ ] Quadratic Hedging under GARCH — Ma, J. Futures Markets 2026
@@ -431,35 +422,15 @@
 - [ ] Partial Cointegration Hedging — RQFA 2023
 - [ ] Regime-Switching Correlation Hedging
 
-### Codex 第 9 次建議（2026-04-03）[提出: Codex GPT-5.4]
-→ 完成項目見 `docs/research_archive/completed_session_2026-04-03.md`
-- [ ] **K833 衍生：Real Options P&L Validation**：⚠️ BLOCKED 需 OptionMetrics
-- [ ] **K831: SPY 5-Min RV Horse Race**：SPY 55 天已收集，~04/07 達 60 天門檻
-- [ ] **K832: Jump Decomposition**：需 5-min 數據
-
-### 衍生方向（TAIFEX K847-K849 系列）
-→ 完成項目（K906/K850/K852/K851/K852b）見 knowledge.json
-- [ ] **K849 衍生：HAR-RV-Night 成分分析**：夜盤 vol 57%，分開 RV_night/RV_day 做 regressors
-- [ ] **K847 衍生：Paper 2 更新（高優先）**：加入 K844/K847/K848-K852 發現
-- [ ] **K906 衍生：HAR-RV + Overnight Adjustment**：Hansen & Lunde (2005) RV_total。等 252+ OOS 天（~2026-11 月）
-- [ ] **K851 衍生：Day/Night Continuous Decomposition**：分開 C_day 和 C_night 做 regressors
-
-### 衍生方向（2026-04-03 session）
-→ 完成項目見 `docs/research_archive/completed_session_2026-04-03.md`
-
 ### 新發現（2026-04-01 文獻搜尋）
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。
-
-### Gemini G3 + CARR + ML + Hedging（2026-04-06 完成）
-→ 15 實驗詳見 `docs/research_archive/completed_session_2026-04-06.md`
-- 核心發現：K935(YZ CARR ★)、K938(跨資產 ★★)、K941(CAViaR ★)、K942(13/13 ★★)、K943(h=5 ★★)
-- VIX sufficiency 從 6 新角度確認。ML(MLP/KAN)全敗。QH≈MV。GARCH 遞迴不可替代
 
 ### 其他
 - [ ] Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting）
 - [ ] 「HAR ceiling」驗證 — Los Flamingos 2025
 - [ ] Financial Innovation 2025 review — realized volatility forecasting 綜述
 - [ ] RGARCH-CARR-SK（Realized GARCH + CARR + 高階動差）— 2025
+- [ ] Multiplicative Volatility Factor (MVF) — ScienceDirect 2025, J. Econometrics
 - [ ] VOLARE 平台（HAR/HAR-Q/MEM/AMEM 標準化比較框架）— arXiv:2602.19732
 - [ ] Multi-Transformer Vol Forecast — Engineering App AI 2024
 
@@ -481,10 +452,13 @@
 - 之前的 null result 可能因條件改變而翻轉
 
 ## 發佈規範
-→ 內容產出規則（文章類型/數量/圖表/發佈節奏）見 `CLAUDE.md`「每日文章產出要求」段。
+- 每個發現即時記錄（thinking + knowledge + feed）
+- Feed 文章用 `feed-publisher` skill，確保品質
+- 平台型發佈（文章池、排程、節奏釋出、下架、重釋出）轉交 `admin-ops`
+- 預設可先進文章池（`draft` / `scheduled`），再依節奏釋出，不必每次都立即公開
 - 所有議題標注發起者（Gemini/Codex/Claude/用戶）
 - 具體發現存 `research_findings.md`（加入 embedding）
-- Claude 應定期讀取平台摘要（analytics / questions），把讀者回饋與高分會員問題納入研究來源
+- Claude 應定期讀取平台摘要（尤其 analytics / questions summary），把讀者回饋與高分會員問題納入研究來源
 
 ## 研究發現與成果
 詳見 `research_findings.md`（已加入知識索引 embedding）
@@ -508,23 +482,39 @@
 **Phase O~K(K507) 共 ~340 個實驗，詳見 `docs/research_archive/completed_phases_2026-03.md`。**
 核心成果：GJR-X(VIX9D) best forecaster, MCS 5-model set, VIX sufficiency 32x, 50/50 irreducible, Prediction≠Application 4x。
 
-### 最終工具指南（K426-K908, cross-OOS validated）
+### 最終工具指南（K426-K495, cross-OOS validated）
 | 任務 | SPY | Other equity | Non-equity | Taiwan |
 |------|-----|-------------|------------|--------|
-| **Forecasting (日頻 r²)** | **MF-GJR(VIX) ★★★** (K889: -6.6% QLIKE, 5/5 cross-OOS) | MF-GJR(VIX) (K889: QQQ -5.2%) | GARCH(1,1) | GJR alone (MF-GJR NS for 0050.TW) |
-| **Forecasting (5-min RV)** | HAR-RV (K906 preliminary, 需隔夜調整) | HAR-RV (未測) | HAR-RV (未測) | **HAR-RV ★★★** (K849: DM t=-11.14 勝 GJR on RV target) |
-| **VaR (complete)** | **MF-GJR + HistSim ★★★** (K908: 1% Trinity PASS, universal) | MF-GJR + HistSim (K908: QQQ Trinity PASS) | GJR + any (K829 GLD all PASS) | **MF-GJR + Student-t ★★★** (K908: 1% Trinity PASS, df~4.7-6.6) |
+| **Forecasting** | **GJR-X(VIX9D) ★★★** | GJR+HAR ensemble | GARCH(1,1) | GJR alone |
+| **VaR** | **GJR + Student-t ★★★** | GJR + Student-t | GJR + Student-t | GJR + Student-t |
 | **VT Strategy** | 12/VIX（#9 irreducible） | 12/VIX adapted | Asset-specific | 8.63/VIX |
 
-**★★★ 最終結論（K799-K908, K988 更新）：MF-GJR + HistSim = Complete Solution**
-- **預測**：MF-GJR(VIX)（K889: -6.6% QLIKE, 5/5 cross-OOS Harvey PASS）
-  - **K988 規格優化**：τ=VIX² + free ω + τ_t 分母 → DM t=+4.48（最佳規格）。模型本質是 Multiplicative GARCH-X，不是 GARCH-MIDAS（賴教授指正）
-- **風險管理**：HistSim（K908: 3/3 資產 1%+5% Trinity PASS = universal solution）
-- **兩個維度獨立優化**。預測精度和風險管理是正交問題（K799 發現）
-- 待驗證：更多跨資產 + 整合進 Paper 1/5 + K988 規格的 VaR/ES 驗證
+**★★★ K799-K804 最終結論（2026-04-01）：**
+- **預測選模型**：GJR-GARCH（QLIKE #1，DM vs GARCH t=-3.25 Harvey PASS）
+- **風險管理選分配**：Student-t/Skewed-t（VaR Trinity PASS，df=5-8 for equity）
+- **兩個維度獨立選擇** — 預測精度和風險管理是正交問題
+- K804 跨資產驗證：equity/commodity 3/4 PASS，BTC 例外（右偏需不同分配）
+- K800 conformal 是 artifact（Codex 抓到），K802 分配修正才是正解
+- K799：六層評估發現 GJR QLIKE #1 但 VaR Normal FAIL（1.79%）。MCS 含全部 5 模型。
+- K800：Conformal heuristic 看似修復（0.80%）→ K800v2 推翻（artifact，Codex 抓到）
+- **K802：正確解法 = GJR + Skewed-t/Student-t 分配**。QLIKE 不變 + VaR 1.20% Trinity PASS。
+- **結論**：預測選模型（GJR），風險管理選分配（Skewed-t）。兩個維度獨立。
+- 待驗證：跨資產 + 整合進 Paper 1/5
 
-## 重大研究結論
-→ VT = drawdown insurance（K687/K697/K700/K701）、50/50 不可動搖（K846 三重護城河）、MF-GJR+HistSim 最佳方案（K908）。詳見 CLAUDE.md「重要研究結論」。
+**K801 完成（2026-04-01）：Event-Surprise VIX Shock Guard — NULL**
+- VIX shock guard（|ΔVIX|>2σ → 減倉 5 天）不顯著改善 12/VIX（DM |t|<1.3，全部 FAIL Harvey）
+- 原因：VIX 水位已吸收 ΔVIX 資訊——12/VIX 本身即動態 shock-guard
+- 衍生方向（可探索，有差異化）：VRP = VIX - realized vol（恐懼溢價 vs 實現波動差異）、VIX term structure（VX1-VX2 期貨 contango/backwardation）、跨資產 shock（VIX+DXY 同時跳=更強信號）
+
+## 重大研究結論更新（2026-03-29 K687/K697/K700/K701）
+
+**VT 策略是 drawdown insurance，不是 alpha generator。**
+- K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）
+- K697：VIX 預測 vol（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 理論不可能
+- K701：weekly/monthly 也一樣（direction corr 全部<0.04）
+- K688：VT 在 CRRA utility γ≥5 時勝出——drawdown protection 對風險厭惡投資人有價值
+- K693：歷史 paper_trading 9935 筆修正 same-day→next-day return
+- K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
 
 ## Next Session Priorities（2026-03-31 起）
 
@@ -532,11 +522,12 @@
 
 | 項目 | 說明 | 截止日 |
 |------|------|--------|
+| **NFP 04/03 事後文章** | 非農數據發布後 1 天內發解讀文（K661 數據已備） | 04/04 |
 | **TSMC 營收 04/10** | 預告+解讀文 | 04/08, 04/11 |
 | **HAR-RV 正式實驗** | 5-min 數據 ETA 04/11 達 60 天門檻 | 04/11 |
 | **TSMC 法說 04/16** | 預告+解讀文 | 04/14, 04/17 |
 | **FOMC 04/28-29** | 預告文 04/26，事後解讀 04/30 | 04/26, 04/30 |
-| **GDP Q1 Advance 04/30** | 搭配 FOMC 解讀 | 04/28 預告 |
+| **K804 跨資產 GJR+SkewT** | 驗證 K802 雙冠是否跨資產普遍 | 進行中 |
 
 ### P1: 高價值
 
@@ -544,10 +535,15 @@
 - [ ] **Leverage-Direction**（K628 已瘦身 64→52p）：加入「VT is insurance」框架
 - [ ] **Taiwan VT**：K636 修正 amplification（gamma vs vol level）、TX cost 已修正
 
-**平台經營方向：**
+**平台經營方向（基於 analytics：192 views, 3 users, 10 reactions）：**
+- [x] **SEO 完成**：Google Search Console 驗證 + sitemap + 6 頁 metadata + FAQ/Article/Breadcrumb schema + admin noindex + /portfolio 公開路由 ✅ 2026-03-31
+- [x] **分享按鈕**：LINE/Facebook/X/Twitter + 複製連結 ✅ 2026-03-31
+- [x] **首頁預設「一般讀者」tab** ✅ 2026-03-31
 - [ ] **加強入門內容**：「從零開始」是最熱門文章之一，應建立 /guide 頁面
 - [ ] **減少學術文章比例，增加實務操作指南**：收藏(7)>按讚(3) = 讀者當工具書用
-- [ ] **Umami API 自動化**：寫 scripts/analytics.py 包裝 Umami REST API
+- [x] K705 GAP-03：StrategySelector CAGR 降級，突出 Sharpe/MDD ✅ 2026-03-31
+- [x] **Umami Analytics** 上線（cloud.umami.is，免費方案） ✅ 2026-03-31
+- [ ] **Umami API 自動化**：寫 scripts/analytics.py 包裝 Umami REST API，方便終端查看訪客數據（**2026-04-04 週五檢視數據後決定**）
 
 ### P2: 研究新方向
 
@@ -580,18 +576,21 @@
     - [ ] Student-t df 聯合估計（目前 A4f 用 Normal，K995 顯示加 t 大幅改善 VaR）
   - **論文定位**：可單獨一篇（J. Empirical Finance / J. Forecasting），或作為 Paper 5 的核心 section
 - [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較
-- [ ] **Paper 6: Crypto Fear Channel**：K746b + **K855 悖論發現**：BTC-ETF 後 Granger 弱化（p=0.32）但 shock 傳導放大 2.5x。機構化讓 channel 從「線性可預測」變成「事件驅動非線性」。BTC 已非分散化工具（corr>0.3 佔 76% 時間）。論文角度：「institutional adoption amplified shock transmission but destroyed linear predictability」
+- [ ] **Paper 6: Crypto Fear Channel**：K746b 確認 BTC vol asymmetrically Granger-causes VIX。結合 coupling 增加 + tail dependence，可寫成「加密貨幣市場對傳統金融的波動率溢出」論文
 - [ ] **Paper 5 正式撰寫**：草稿 31p 已完成。Codex 建議 J. Forecasting。需要：統一 pipeline（不只 VIX，含 HAR-RV/GARCH benchmark）、多重檢定控制、replication package
 
 **中優先（新研究主題）：**
-- [ ] **VIX Regime 轉換預測**：K752 發現不同 era 的 VIX R² 差異大（0.24-0.64）
-- [ ] **跨國 VIX sufficiency**：在 VSTOXX、VNKY、VIXTWN proxy 驗證
+- [ ] **Robust VT 設計**：K743 的 floor(30%)/cap(90%) + EWMA 平滑 + 週頻 rebalance 組合。修正 Codex 找到的 bug 後重跑
+- [ ] **VIX Regime 轉換預測**：K752 發現不同 era 的 VIX R² 差異大（0.24-0.64）。能否預測 VIX regime 何時轉換？
+- [ ] **Drawdown Recovery 修正版**：K735 被 Codex 推翻（fake OOS + timing misalign）。修正方法論後重做
+- [ ] **跨國 VIX sufficiency**：K752 證明 US 33 年成立。在其他市場（VSTOXX、VNKY、VIXTWN proxy）驗證？
 - [ ] **Alternative data**：K750 Google Trends 是反應式。嘗試 Reddit/Twitter 情緒或 options flow
 - [ ] **Intraday alpha**：5-min 數據就緒後，測試日內 VIX-equity lead-lag（K751 overnight 有 +0.45% R²）
 
 **低優先（長期探索）：**
 - [ ] **VT 與 ESG 整合**：ESG 評分高的公司是否有不同的 gamma？
-- [ ] **Agent-Based Model 正式版**：正式 ABM 可模擬異質投資人
+- [ ] **Agent-Based Model 正式版**：K742 用簡化 Kyle's lambda。正式 ABM 可模擬異質投資人
+- [ ] **因果推論**：用 DiD/RDD 分析 Fed 升息決議對 VIX regime 的因果影響
 - [ ] **Climate vol**：極端天氣事件頻率增加是否改變 vol 動態？
 
 ### P3: 長期待辦
@@ -607,34 +606,22 @@
 - [ ] Email/LINE 訂閱（W3.1）
 
 ## 重要事件日曆（當月+下月，每月更新覆蓋）
-**最後更新：2026-04-06。下次更新：2026-05-01。**
+**最後更新：2026-03-26。下次更新：2026-04-01。**
 
-### 美股事件（4 月）
+### 美股事件
 | 日期 | 事件 | 研究安排 | 文章安排 |
 |------|------|---------|---------|
-| **04/10 (五)** | **CPI 通膨數據** | CPI surprise vs option-implied | 04/08 預告 |
-| **04/28-29** | **FOMC 利率決議 + Powell 記者會** | FOMC 對 VIX/vol regime 影響 | 04/26 預告 |
-| **04/30 (四)** | **GDP Q1 Advance Estimate** | GDP surprise | 搭配 FOMC 解讀 |
+| **04/03 (五)** | **NFP 非農就業** | 就業數據與波動率關係 | 「非農報告前後該怎麼操作？」(general) |
+| **04/09 (四)** | **GDP 第三估 + Personal Income** | GDP surprise 對 vol 影響 | 「GDP 數據出爐那天該注意什麼」(general) |
+| **04/10 (五)** | **CPI 通膨數據** | CPI surprise vs option-implied（Codex event-surprise 建議） | 「通膨數據——歷史告訴我們市場怎麼反應」(general) |
+| **04/28-29** | **FOMC 利率決議 + Powell 記者會** | FOMC 對 VIX/vol regime 影響 | 「Fed 決策對投資組合意味什麼」(general) |
 
-### 美股事件（5 月）
+### 台股事件
 | 日期 | 事件 | 研究安排 | 文章安排 |
 |------|------|---------|---------|
-| **05/01 (五)** | **NFP 非農就業（4月）** | 就業-vol 關係 | 預告+解讀 |
-| **05/13 (三)** | **CPI 通膨數據（4月）** | CPI surprise | 預告+解讀 |
-| **05/29 (五)** | **GDP Q1 Second Estimate** | GDP 修正 | 搭配文章 |
-| **06/09-10** | **FOMC 利率決議** | Fed 政策路徑 | 預告+解讀 |
-
-### 台股事件（4 月）
-| 日期 | 事件 | 研究安排 | 文章安排 | 狀態 |
-|------|------|---------|---------|------|
-| **04/10 (五)** | **TSMC 3月營收公告**（每月10日前） | TSMC 營收 surprise 對 0050 vol | 「台積電營收公告前後台股怎麼走？」(general) | ⚠️ 04/08 預告 |
-| **04/16 (四)** | **TSMC Q1 法說會**（Q1 rev ~$35.2B, +38% YoY） | TSMC earnings 對 0050.TW vol | 「台積電法說前後台股波動」(general+research) | 04/14 預告 |
-| **04/17 (五)** | **中經院台灣經濟預測** | 經濟預測修正對台股 sentiment | 搭配法說會文章 | |
-
-### 台股事件（5 月）
-| 日期 | 事件 | 研究安排 | 文章安排 |
-|------|------|---------|---------|
-| **05/10 前** | **TSMC 4月營收公告** | 營收 surprise | 預告+解讀 |
+| **04/10 (五)** | **TSMC 3月營收公告**（每月10日前） | TSMC 營收 surprise 對 0050 vol | 「台積電營收公告前後台股怎麼走？」(general) |
+| **04/16 (四)** | **TSMC Q1 法說會** | TSMC earnings 對 0050.TW vol | 「台積電法說前後台股波動」(general+research) |
+| **04/17 (五)** | **中經院台灣經濟預測** | 經濟預測修正對台股 sentiment | 搭配法說會文章 |
 | **06月~** | **台股除權息旺季開始** | 除權息對 vol/return 的系統性影響研究 | 「除權息季節該參加還是避開？」系列文章 |
 
 ### 事件執行原則
@@ -645,19 +632,124 @@
 - **每月 1 日更新此日曆，覆蓋而非累積**
 
 ## 待深入研究主題
-→ 各主題的完整細項清單見 `docs/research_archive/detailed_research_topics.md`
 
-### 除權息（用戶指定）→ K917 NULL，剩 2 個未完成
-### SEC Filings（用戶提出）→ 4 類 ×4-5 項 + 5 篇文章方向，待啟動
-### 經濟政治不確定性 & 搜尋趨勢（用戶提出）→ VIX sufficiency 限制，作為內容題材
-### 成交量（用戶提出）→ 多 null（K113/K135/K418/K527）。TX overnight gap 待測（t=4.06）
+### 除權息研究方向（用戶指定）
+- [ ] 除權息前後波動率是否系統性改變？（類似 K498 earnings 但用台股個股/ETF）
+- [ ] 高股息 ETF（0056/00878/00919）除息日前後的價格行為
+- [ ] 「填息率」與波動率的關係——填息快的股票 vol 是否較低？
+- [ ] 除息日對 0050.TW 的 vol 影響（0050 成分股集中除息期間）
+
+### SEC Filings 研究與文章方向（用戶提出）
+美股的 10-K（年報）、10-Q（季報）、8-K（重大事件即時揭露）是重要的資訊來源和內容題材：
+
+*文字探勘 (Text Mining)*
+- [ ] SEC filing 語調分析：用 Loughran-McDonald 金融情緒詞典對 10-K/10-Q MD&A 段落做正負情緒打分，看情緒變化是否預測後續 vol/return
+- [ ] 10-K 可讀性（Fog Index / 文件長度）與後續 vol 的關係
+- [ ] 8-K filing 文字 surprise：用 TF-IDF 或 embedding 計算 8-K 與前次 filing 的文字差異度
+- [ ] Risk factor section 的年度變化：新增風險因子 vs 刪除風險因子 → 對 vol 的預測力
+
+*情緒 (Sentiment)*
+- [ ] Management tone（管理層語調）：法說會逐字稿 vs 10-K 書面語調的差異
+- [ ] Forward-looking statements 的情緒：MD&A 中「expect」「believe」「risk」的頻率變化趨勢
+- [ ] 跨公司情緒傳染：SPY 前 10 大成分股的 filing sentiment 彙總 → 是否預測 index vol？
+
+*財務 (Financial)*
+- [ ] 10-K/10-Q filing 前後 SPY vol 是否有系統性模式？
+- [ ] 8-K filing（unexpected events）對個股和 index vol 的 surprise 效果
+- [ ] Accruals quality（應計品質）vs 後續 vol：低品質 earnings → 高未來 vol？
+- [ ] 財務比率的年度變化（debt/equity, current ratio）vs 後續 vol
+
+*管理 (Governance & Management)*
+- [ ] CEO/CFO turnover 的 8-K 揭露 → 對 vol 的即時和延遲影響
+- [ ] 審計意見變更（going concern, material weakness）→ vol spike 預測
+- [ ] 內部人交易揭露（Form 4）與後續 vol/return 的關係
+- [ ] TSMC 20-F（外國公司年報）filing 對 TSM/0050.TW 的影響
+
+*台灣重大訊息（MOPS 公開資訊觀測站）*
+- [ ] MOPS 重大訊息公告：台灣上市櫃公司的即時揭露，包括營收公告、董事會決議、私募、合併、訴訟等
+- [ ] 台股重大訊息公告頻率/內容 vs 後續 vol/return
+- [ ] 0050 成分股重大訊息的彙總 sentiment → 是否預測 0050 vol？
+- [ ] 法說會逐字稿語調分析
+
+*文章方向（一般讀者）：*
+- [ ] 「10-K、10-Q、8-K 是什麼？散戶為什麼該關心美股年報」(general 教育文)
+- [ ] 「財報季前後的波動規律——數據告訴你什麼時候最危險」(general)
+- [ ] 「如何從 SEC filing 讀出公司的真實風險」(general 教學文)
+- [ ] 「CEO 換人了——股價會怎樣？8-K 告訴你的事」(general)
+- [ ] 「年報越厚越危險？文件可讀性與股價波動的關係」(general)
+
+### 經濟政治不確定性 & 搜尋趨勢（用戶提出，持續議題）
+過去研究：G14 Google Trends (partial r sig but 反轉)、J3 (IS r=0.634 but VT null)、K446 GPR (reversed causality)、K473 (OOS null)。
+這些主題作為 vol research 已被 VIX sufficiency 限制，但作為讀者內容和市場解讀仍然重要：
+
+*定期文章（每月至少 1 篇）：*
+- [ ] 「本月 Google 搜尋趨勢告訴你什麼？」
+- [ ] 「經濟政策不確定性指數（EPU）最新動態」
+- [ ] 「地緣政治風險現在有多高？」
+- [ ] 「恐懼與貪婪指數解讀」
+
+*研究更新（當重大事件發生時）：*
+- [ ] 特定事件的 Google Trends spike → VIX 反應速度和幅度分析（event study）
+- [ ] EPU/GPR 在 tariff/sanction/election 期間的特殊行為
+- [ ] 台灣選舉/兩岸關係事件 → VIXTWN/0050 vol 反應（需更長 VIXTWN 數據）
+
+### 成交量作為波動率預測因子（用戶提出）
+**文獻基礎**：Lamoureux & Lastrapes (1990), Clark (1973) MDH, Tauchen & Pitts (1983)
+
+**過去研究**：K113 null, K135 OOS null, K136 BTC 有效, K418 Taiwan null, K527 OOS 失敗（MDH = contemporaneous）
+
+#### ⚠️ K519 上架暫停（K521 data alignment bug）
+K519-K521 + K527 完成結果：見 archive。
+**結論**：上架暫停——需要找到在 5AM-9AM 之間可執行的交易機制才能重啟。
+
+#### 台指期貨 Overnight Gap Strategy（K515 延伸，高優先）
+- [ ] K515 發現 overnight gap alpha 真實（SPY-conditioned 10.73bp/day, t=4.06）但 ETF TX 18.55bp 致命（K625 更正）
+- [ ] **台指期貨（TX futures）TX cost 只有 ~2-3bp** → 可能可行！
+- [ ] 需要：台指期貨歷史日頻數據（TAIFEX 或 yfinance TWF=F?）
+- [ ] 測試：buy TX futures at close, sell at open, SPY-conditioned
+- [ ] 如果 Net Sharpe > 0.5 + cross-OOS 4/5 → 第一個可能上架的新策略
 
 ## Codex 論文審查記錄
-→ 詳見 `docs/research_archive/codex_paper_reviews.md`
 
-#### MEM 模型文獻（5 項：基礎/AMEM/DMEM/Vector/AMEM-MV）→ 詳見 archive
-#### Gemini 建議（3 項：WVD 需 5-min / Gamma-Trap BLOCKED / TE-VT 可行）→ 詳見 archive
-#### 用戶方向（2 項：統一 forecast target / Overnight vol component）→ 詳見 archive
+### Codex 第6次審查：Taiwan VT 論文（2026-03-27）
+1. ⚠️ 4.6x amplification 用 10 個股票樣本太小，機制解釋過強
+2. ⚠️ Opening auction "remarkably efficient" 語氣太強
+3. ⚠️ TZ alpha 用不可交易的 c2c headline，o2o Sharpe 低於 Harvey
+4. ⚠️ Table 3 策略比較混用不同期間——not apples-to-apples
+5. ⚠️ 29 switches/year × 0.1855%/switch — 需修正論文中的 0.3% 引用
+6. 語氣過於 promotional → 需 tone down
+
+### Codex 第6次審查：Leverage-Direction 論文（2026-03-27）
+1. ⚠️ TZ arbitrage 在 intro 說 "tradable alpha" Sharpe 1.61，但 appendix 承認 78% 不可捕捉
+2. ⚠️ gamma>0.10 model selection rule 看似 post-hoc（12 cases 太少）
+3. ⚠️ Proposition 1 的 rank correlation 接近 mechanical
+4. 🔴 日期不一致：data section 說 2017-2025 但引用 2026-03 驗證
+5. 🔴 gamma window 先說 "non-overlapping" 後說 "504-day stepped by 63 days"（矛盾）
+6. 裁判最可能批評：heavily searched design overstates OOS results
+
+### Codex 審查：VT-Trend-Following 論文（2026-03-27）
+1. ⚠️ "almost entirely independent of trend following" 語氣過強
+2. ⚠️ gamma "mechanical explanation" 過於因果（N=22）
+3. ⚠️ "irreducible" / "VT≠TF" 的 trend strategy 比較缺表格
+4. 🔴 L164 "mechanically zero" vs Table 1 報非零 Δalpha（矛盾）
+5. 🔴 Table 3 M5 描述含 MOM+BAB 但 β_MOM 空白
+6. 🔴 L352 說 EWT 改善但表格是 EWJ（text/table mismatch）
+
+#### MEM 模型文獻（2026-03-31 搜尋，配合用戶提出方向）
+- [ ] **基礎 MEM**：Engle & Gallo (2006) 原始 MEM。非負值序列（RV, volume）的條件期望×隨機擾動。[提出: 用戶 + 文獻]
+- [ ] **AMEM（Asymmetric MEM）**：加入不對稱效果（正負衝擊不同影響）。VOLARE 平台已實作 [提出: 文獻]
+- [ ] **DMEM（Doubly MEM）**：長短期雙成分（Spline-MEM, Component-MEM, MEM-MIDAS）。ScienceDirect 2023 [提出: 文獻]
+- [ ] **Vector MEM**：多變量 MEM（Cipollini, Engle & Gallo）。跨資產 vol 聯合建模 [提出: 文獻]
+- [ ] **AMEM-MV**：分解 RV 為 base + meaningful volatility events 成分。2025 [提出: 文獻]
+
+#### Gemini 建議（2026-03-31）[提出: Gemini 2.5 Pro]
+- [ ] **Wasserstein Volatility Drift (WVD)**：用 2-Wasserstein 距離測量日內 RV 分布漂移。假說：WVD 領先 VIX regime shift 1-3 天。需 5-min 數據（ETA 04/11）[提出: Gemini]
+- [ ] **Gamma-Trap 零售回饋迴路**：0DTE option flow → MM hedging → vol pin/explosion。假說：NRGE 顯著負值時 realized-implied gap 縮小 >20%。需 option flow 數據（BLOCKED）[提出: Gemini]
+- [ ] **Transfer Entropy VT Budgeting (TE-VT)**：用 Fed liquidity → VIX 的 transfer entropy 動態調整 VT 保險。假說：TE-VT Sortino +15% vs static γ=4.5。FRED 數據可得 [提出: Gemini]
+
+#### 用戶提出方向（2026-03-31 追加）
+- [ ] **K770 修正版：統一 forecast target**：MEM/HAR 預測 |r| 但 GARCH 預測 σ。需統一到同一 target（close-to-close RV = intraday + overnight）。Hansen & Lunde (2005) 提出最優加權方案。[提出: 用戶]
+- [ ] **Overnight volatility component**：隔夜波動約佔全日 20%（Hansen & Lunde 2005）。加入隔夜 r² 到 HAR/MEM 作為額外 regressor。文獻：ScienceDirect 2014 "Overnight information flow and RV forecasting"。[提出: 用戶]
 
 ### Hansen & Lunde (2005) Gold Standard 比較（等 5-min 數據就緒）
 - [ ] **K779（ETA ~04/07）**：用 Hansen & Lunde 最優加權 RV_total = w₁×RV_intraday + w₂×r²_overnight 作為「真實 σ²」proxy，所有模型（GARCH/MEM/HAR）都跟 RV_total 比。這是學術最高標準。需 5-min 數據 ≥60 天。[提出: 用戶]

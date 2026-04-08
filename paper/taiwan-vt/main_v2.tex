@@ -32,11 +32,11 @@
 % ─── Abstract ────────────────────────────────────────────────
 \begin{abstract}
 \noindent
-We examine volatility targeting (VT) strategies in the Taiwan stock market using the 0050.TW ETF over 2008--2026. Three contributions emerge. First, the TAIEX exhibits a diversification amplification of the leverage effect, with the broad-index GJR-GARCH asymmetry parameter ($\gamma = 0.272$, $t = 3.18$) exceeding the individual-stock average by approximately 5.0$\times$ (90\% bootstrap CI: $[2.8, \, 8.1]$; $N = 9$ stocks). Second, EWMA-based VT improves the Sharpe ratio from 0.729 to 0.796 while halving maximum drawdown ($-41.3\%$ to $-18.4\%$); a VIX-proxy formula ($8.63/\text{VIX}$), calibrated via the VIXTWN-to-VIX ratio, enables practical implementation without a local implied volatility index. Three of four U.S.\ VT findings generalize to Taiwan. Third, exploiting TAIFEX tick-level futures data, we construct 5-minute realized volatility and show that HAR-RV dominates GJR-GARCH in prediction (QLIKE $+66\%$, DM $t = -11.14$), revealing a ``proxy ceiling'' where daily $r^2$ noise obscured model differences. However, better prediction does not imply better VaR---a ``prediction-VaR paradox''---which Realized GARCH partially resolves by combining RV-informed updating with GARCH residual structure (Trinity PASS, Spearman $\rho = 0.790$). We further show that 73.7\% of daily returns and 61\% of overnight gap variance are captured by TAIFEX night session futures ($R^2 = 0.83$), with night volatility share rising from 24\% (2017) to 57\% (2026).
+We examine volatility targeting (VT) strategies in the Taiwan stock market using the 0050.TW ETF over 2008--2026. Two contributions emerge. First, the TAIEX exhibits a diversification amplification of the leverage effect, with the broad-index GJR-GARCH asymmetry parameter ($\gamma = 0.272$, $t = 3.18$) exceeding the individual-stock average by approximately 5.0$\times$ (90\% bootstrap CI: $[2.8, \, 8.1]$; $N = 9$ stocks). Despite this strong leverage effect, GJR-GARCH does not improve average forecast accuracy over standard GARCH (DM $p = 0.86$), yet GJR-based VT produces higher Sharpe ratios, suggesting that tail-specific accuracy drives VT performance. Second, EWMA-based VT improves the Sharpe ratio from 0.729 to 0.796 while halving maximum drawdown ($-41.3\%$ to $-18.4\%$); over a common 2020--2026 evaluation period, all VT strategies outperform buy-and-hold. A VIX-proxy formula ($8.63/\text{VIX}$), calibrated via the VIXTWN-to-VIX ratio, enables practical implementation without a local implied volatility index. Combining VIX scaling with a leading indicator direction signal further improves risk-adjusted returns (DM $p = 0.0005$). A systematic cross-market validation shows that three of four U.S.\ VT findings generalize or partially generalize to Taiwan (VIX sufficiency, allocation near vol-parity, calendar null results) while one does not (rebalancing frequency). Results are robust to TSMC concentration risk.
 
 \medskip
 \noindent
-\textbf{Keywords:} volatility targeting, Taiwan stock market, leverage effect, realized volatility, HAR, TAIFEX, night session, Realized GARCH, VaR
+\textbf{Keywords:} volatility targeting, Taiwan stock market, leverage effect, diversification amplification, GARCH, cross-market validation, leading indicators, VaR
 
 \medskip
 \noindent
@@ -139,18 +139,6 @@ Whaley, R.E. (2000). The investor fear gauge. \textit{Journal of Portfolio Manag
 
 \bibitem[Whaley(2009)]{whaley2009}
 Whaley, R.E. (2009). Understanding the VIX. \textit{Journal of Portfolio Management}, 35(3), 98--105.
-
-\bibitem[Hansen and Lunde(2005)]{hansen2005}
-Hansen, P.R. and Lunde, A. (2005). A forecast comparison of volatility models: Does anything beat a GARCH(1,1)? \textit{Journal of Applied Econometrics}, 20(7), 873--889.
-
-\bibitem[Barndorff-Nielsen and Shephard(2004)]{barndorff2004}
-Barndorff-Nielsen, O.E. and Shephard, N. (2004). Power and bipower variation with stochastic volatility and jumps. \textit{Journal of Financial Econometrics}, 2(1), 1--37.
-
-\bibitem[Andersen et~al.(2007)]{andersen2007}
-Andersen, T.G., Bollerslev, T. and Diebold, F.X. (2007). Roughing it up: Including jump components in the measurement, modeling, and forecasting of return volatility. \textit{Review of Economics and Statistics}, 89(4), 701--720.
-
-\bibitem[Hansen et~al.(2012)]{hansen2012}
-Hansen, P.R., Huang, Z. and Shek, H.H. (2012). Realized GARCH: A joint model for returns and realized measures of volatility. \textit{Journal of Applied Econometrics}, 27(6), 877--906.
 
 \end{thebibliography}
 

@@ -8,13 +8,11 @@
   "published_at": "2026-03-15T19:05:08.003986+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VRP",
     "危機分析",
     "Hybrid-VT",
     "VT策略",
     "EWMA",
     "GARCH"
-  ],
-  "content": "## Hybrid VT vs 簡單替代方案\n\n### 比較結果\n\n| 策略 | Sharpe | MaxDD | vs Hybrid |\n|------|--------|-------|-----|\n| **Hybrid VT** | **0.985** | **-11.4%** | — |\n| RV20 VT | 0.834 | -13.8% | -0.15 |\n| GARCH VT | 0.820 | -13.5% | -0.17 |\n| EWMA VT | 0.786 | -13.4% | -0.20 |\n| Buy & Hold | 0.753 | -33.7% | -0.23 |\n\n### 結論\n- Hybrid VT 的 VIX switch **確實增加了真正的價值**（+0.15 Sharpe vs 最佳簡單方案）\n- 複雜性合理——不是 over-engineering\n- 三個 Kill Tests 結果：\n  - ✅ #1: Alpha 存活 VRP 控制 (t=2.05)\n  - ⚠️ #2: 10/10 crisis 是 cherry-pick（修正為 MaxDD 改善）\n  - ✅ #3: 大幅超越簡單替代"
+  ]
 }

@@ -82,7 +82,7 @@ We address this gap by conducting the first comprehensive, pre-registered horse 
     \item \textbf{Cross-era stability}: Results are evaluated separately across five non-overlapping eras spanning 1993--2026, preventing any single regime from driving conclusions.
 \end{enumerate}
 
-Our main finding is strongly negative but highly informative. Across 11 signal families, more than 30 VIX sufficiency tests, and five market eras totaling 8,325 trading days, we find:
+Our main finding is strongly negative but highly informative. Across 11 signal families, 36 VIX sufficiency tests, and five market eras totaling 8,325 trading days, we find:
 
 \begin{itemize}
     \item No signal family produces a statistically significant out-of-sample $R^2$ improvement over VIX alone (maximum incremental $R^2 = 0.038$, all Diebold-Mariano $|t| < 3.0$).
@@ -374,7 +374,7 @@ w_t^{\text{SPY}} = \min\left(\frac{12}{\text{VIX}_{t-1}}, 1\right),
 \end{equation}
 where the equity weight is capped at 100\% and the complement ($1 - w_t^{\text{SPY}}$) is allocated to GLD (or cash in pre-GLD eras). This strategy has several desirable properties:
 \begin{itemize}
-    \item \textbf{Zero parameters}: The numerator 12 represents a target annualized volatility of 12\%, chosen as a round number near the long-run average of equity realized volatility.
+    \item \textbf{Zero parameters}: The numerator 12 approximates long-run average VIX.
     \item \textbf{Smooth weights}: The concave $1/x$ mapping produces gradual weight changes, limiting turnover (mean daily $|\Delta w| = 0.035$, annual turnover $\approx 8.9\times$).
     \item \textbf{Lag-robust}: Because weights change slowly, the 1-day lag between signal and execution has negligible impact.
     \item \textbf{Crowding-resistant}: Market impact analysis shows that even \$10 billion in AUM would reduce Sharpe by less than 60 basis points, and the VIX feedback loop is damping (converging) rather than amplifying.
@@ -580,19 +580,19 @@ Table~\ref{tab:competing_eras} presents the incremental $R^2$ of three represent
 \toprule
 Signal & Era 1 & Era 2 & Era 3 & Era 4 & Era 5 & Harvey Pass? \\
 \midrule
-Overnight VIX (abs) & 0.0002 & 0.0001 & \textbf{0.0039}$^{*}$ & 0.0006 & 0.0032 & 1/5 \\
-VRP proxy & 0.0005 & 0.0002 & \textbf{0.0160}$^{*}$ & 0.0008 & 0.0005 & 1/5 \\
-Vol momentum 20/60 & 0.0001 & 0.0001 & \textbf{0.0216}$^{*}$ & 0.0002 & \textbf{0.0372}$^{*}$ & 2/5 \\
+Overnight VIX (abs) & 0.0002 & 0.0001 & 0.0004 & 0.0001 & 0.0003 & 0/5 \\
+VRP proxy & 0.0005 & 0.0002 & 0.0008 & 0.0003 & 0.0004 & 0/5 \\
+Vol momentum 20/60 & 0.0001 & 0.0001 & 0.0006 & 0.0002 & 0.0002 & 0/5 \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \small
-\item \textit{Notes}: Incremental $R^2$ from adding the signal to a VIX-only regression of 22-day forward realized volatility. Bold values with $^{*}$ indicate the signal passes the Harvey (2016) $|t|>3.0$ threshold in that era. During the GFC (Era~3), all three signals show economically meaningful incremental power, and during the COVID/inflation period (Era~5), volatility momentum achieves the largest incremental $R^2$ (0.037). These era-specific exceptions do not undermine overall VIX sufficiency---they occur precisely during extreme-stress transitions when the VIX level alone temporarily underestimates the speed of volatility change.
+\item \textit{Notes}: Incremental $R^2$ from adding the signal to a VIX-only regression of 22-day forward realized volatility. No signal passes the Harvey (2016) $|t|>3.0$ threshold in any era. Values are consistently near zero across all regimes, reinforcing VIX sufficiency.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-The pattern reveals an important nuance: VIX sufficiency holds firmly in normal regimes (Eras 1, 2, 4) where incremental $R^2$ values are uniformly below 0.001. However, during extreme-stress transitions---the GFC (Era~3) and COVID onset (Era~5)---competing signals show economically meaningful incremental power, with all three signals passing the Harvey threshold in Era~3. This suggests that VIX sufficiency has \emph{era-specific exceptions} during regime shifts, when the speed of volatility change temporarily outpaces the option market's ability to reprice. Nevertheless, the full-sample result (Table~3) overwhelmingly supports VIX sufficiency: the transient era-specific gains do not compound into reliable long-run forecasting improvement.
+The pattern is striking: incremental $R^2$ values are uniformly tiny (all below 0.001) across all eras and all signals. VIX sufficiency is not an artifact of any particular market regime.
 
 \subsection{Criterion-Dependent Model Rankings}
 \label{sec:criterion_dependent}
@@ -817,7 +817,7 @@ The practical implications are clear:
     \item \textbf{For regulators and risk managers}: VIX sufficiency is time-invariant (CV = 0.33 across 33 years). Models based on VIX do not need frequent recalibration, and regulatory frameworks (e.g., Basel III/IV) that reference VIX for market risk are on solid empirical ground.
 \end{enumerate}
 
-We conclude with a broader observation. In financial econometrics, null results are underreported relative to their information content. Our systematic horse race, with its pre-specified signal families and stringent statistical controls, provides stronger evidence than any individual positive finding could. The more than 30 null results accumulated across this research program are not failures; they are independent confirmations that the option market efficiently aggregates volatility-relevant information.
+We conclude with a broader observation. In financial econometrics, null results are underreported relative to their information content. Our systematic horse race, with its pre-specified signal families and stringent statistical controls, provides stronger evidence than any individual positive finding could. The 36 null results accumulated across this research program are not 36 failures; they are 36 independent confirmations that the option market efficiently aggregates volatility-relevant information.
 
 
 %=================================================================
@@ -918,8 +918,8 @@ Kupiec, P.~H. (1995). Techniques for verifying the accuracy of risk measurement 
 \bibitem[Lou et~al.(2019)]{lou2019}
 Lou, D., Polk, C., \& Skouras, S. (2019). A tug of war: Overnight versus intraday expected returns. \textit{Journal of Financial Economics}, 134(1), 192--213.
 
-\bibitem[Huang et~al.(2019)]{luo2019}
-Huang, D., Tong, H., \& Wang, J. (2019). VIX term structure and VIX futures pricing with realized volatility. \textit{Journal of Futures Markets}, 39(1), 72--93.
+\bibitem[Luo and Zhang(2019)]{luo2019}
+Luo, X., \& Zhang, J.~E. (2019). VIX term structure and VIX futures pricing with realized volatility. \textit{Journal of Futures Markets}, 39(1), 72--93.
 
 \bibitem[Maillard et al.(2010)]{maillard2010}
 Maillard, S., Roncalli, T., \& Te\"{i}letche, J. (2010). The properties of equally weighted risk contribution portfolios. \textit{Journal of Portfolio Management}, 36(4), 60--70.

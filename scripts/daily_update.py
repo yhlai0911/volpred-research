@@ -784,7 +784,6 @@ def main():
         "gld_open": gld_open,
         "tw50_close": tw50_close if locals().get('tw50_close') is not None else None,
         "tw50_open": tw50_open if locals().get('tw50_open') is not None else None,
-        "vix": round(vix_level, 2) if vix_level is not None else None,
         "sigma_spy_ann": sigma_gjr_ann,
         "sigma_gld_ann": sigma_gld_ann,
         "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
@@ -794,45 +793,21 @@ def main():
     pt_file.write_text(json.dumps(pt, indent=2, ensure_ascii=False))
 
     # --- Check if data is fresh (skip publish if spy_date unchanged since last run) ---
-    # Also check VIX consistency: if VIX changed, update existing article
     feed_path = Path("storage/reports/feed.json")
     last_spy_date = None
-    last_vix = None
     if feed_path.exists():
         feed = json.loads(feed_path.read_text())
         for p in feed:
-            if p.get("phase") == "daily_recommendation" and p.get("details", {}).get("spy_date"):
+            if p.get("phase") == "daily_update" and p.get("details", {}).get("spy_date"):
                 last_spy_date = p["details"]["spy_date"]
-                last_vix = p["details"].get("vix_level")
                 break
         if last_spy_date == spy_date:
-            # Check if VIX changed — if so, update existing article in-place
-            if last_vix is not None and vix_level is not None and abs(last_vix - round(vix_level, 2)) > 0.01:
-                print(f"  ⚠️ VIX 已更新（{last_vix}→{round(vix_level, 2)}），更新現有文章")
-                for p in feed:
-                    if p.get("phase") == "daily_recommendation" and p.get("details", {}).get("spy_date") == spy_date:
-                        # Update title and details with new VIX
-                        regime_name, _, _ = _vix_regime(vix_level)
-                        vix_display = round(vix_level, 2)
-                        p["title"] = f"每日策略建議：VIX {vix_display}（{regime_name}）— {today}"
-                        p["details"]["vix_level"] = vix_display
-                        # Update individual report JSON too
-                        report_path = Path(f"storage/reports/{p['id']}.json")
-                        if report_path.exists():
-                            report = json.loads(report_path.read_text())
-                            report["title"] = p["title"]
-                            if "details" in report:
-                                report["details"]["vix_level"] = vix_display
-                            report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False))
-                        break
-                feed_path.write_text(json.dumps(feed, indent=2, ensure_ascii=False))
-            else:
-                print(f"  ⚠️ 數據未更新（spy_date={spy_date}，VIX={last_vix}），跳過發布")
+            print(f"  ⚠️ 數據未更新（spy_date={spy_date} 與上次相同），跳過發布")
             # Still do Supabase sync + metrics recalc, just skip feed publish
             feed = feed  # keep existing
         else:
             # Remove old daily_update for today
-            feed = [p for p in feed if not (p.get("phase") == "daily_recommendation" and today in p.get("title", ""))]
+            feed = [p for p in feed if not (p.get("phase") == "daily_update" and today in p.get("title", ""))]
             feed_path.write_text(json.dumps(feed, indent=2, ensure_ascii=False))
     else:
         feed = []
@@ -869,11 +844,25 @@ def main():
 {strat_table}
 {gap_section}
 """
-        # NOTE: 「本日持倉比率建議」已合併到 generate_daily_article() 的完整版文章中。
-        # 不再單獨發佈簡潔版，避免一天出現兩篇高度重疊的每日文章。
-        # 合併決定：2026-04-03，用戶要求。
+        pub.publish_milestone(
+            title=f"{today} 本日持倉比率建議（依據 {spy_date} 收盤數據）",
+            tags=["持倉建議", "daily-update", "12/VIX", "SPY", "GLD", "0050.TW", "VT策略"],
+            description=desc,
+            phase="daily_update",
+            details={
+                "date": today,
+                "spy_date": spy_date,
+                "spy_close": spy_close,
+                "gld_close": gld_close,
+                "sigma_annual": sigma_gjr_ann,
+                "vix_level": round(vix_level, 2) if vix_level else None,
+                "overnight_gap": round(overnight_gap, 6) if overnight_gap is not None else None,
+                "gap_alert_level": gap_alert_level,
+                "strategies": {sid: dict(w_info) for sid, w_info in strat_list},
+            },
+        )
 
-        # --- Auto-generate 每日建議 article (rich content + chart + 持倉表) ---
+        # --- Auto-generate 每日建議 article (rich content + chart) ---
         try:
             generate_daily_article(
                 pub=pub,
@@ -954,7 +943,7 @@ def main():
     # --- Sync to Supabase (v2 website) ---
     try:
         from article_backups import ensure_local_article_backups
-        from supabase_sync import sync_article, sync_risk_forecast, sync_strategy_signal, sync_paper_trade, sync_market_status
+        from supabase_sync import sync_article, sync_risk_forecast, sync_strategy_signal, sync_paper_trade
         backup_audit = ensure_local_article_backups("storage", repair=True)
         if backup_audit.get("created_count"):
             print(f"  Local article backups: repaired {backup_audit['created_count']} missing report files")
@@ -966,11 +955,17 @@ def main():
         if failed_path.exists():
             failed_ids = json.loads(failed_path.read_text())
             if failed_ids:
+                feed_all = json.loads(Path("storage/reports/feed.json").read_text())
+                feed_map = {item['id']: item for item in feed_all}
                 retried = 0
                 for fid in failed_ids:
-                    report_path = Path(f"storage/reports/{fid}.json")
-                    if report_path.exists():
-                        article = json.loads(report_path.read_text())
+                    if fid in feed_map:
+                        report_path = Path(f"storage/reports/{fid}.json")
+                        article = feed_map[fid]
+                        if report_path.exists():
+                            report = json.loads(report_path.read_text())
+                            if report.get('description'):
+                                article['content'] = report['description']
                         if sync_article(article):
                             retried += 1
                 if retried:
@@ -985,17 +980,6 @@ def main():
         if rf_path.exists():
             sync_risk_forecast(json.loads(rf_path.read_text()))
             print("  Supabase: risk_forecast synced")
-        # Generate and sync market status (NYSE + TWSE open/close with reasons)
-        try:
-            from volpred.market_calendar import save_market_status
-            ms_path = save_market_status(storage)
-            ms_data = json.loads(ms_path.read_text())
-            sync_market_status(ms_data)
-            any_closed = ms_data.get("any_closed", False)
-            summary = ms_data.get("summary", "")
-            print(f"  Supabase: market_status synced — {summary}")
-        except Exception as e:
-            print(f"  Market status skipped: {e}")
         # Sync ALL 7 strategy signals
         # Names MUST match strategyNames in portfolio page.tsx
         # Sync all strategies to Supabase using STRATEGY_REGISTRY as single source of truth

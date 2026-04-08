@@ -46,7 +46,7 @@ HEADERS = {
 }
 
 _ARTICLE_ID_CACHE: dict[str, str] = {}
-_TAG_ID_CACHE: dict[str, int | str] = {}
+_TAG_ID_CACHE: dict[str, str] = {}
 _STRATEGY_SIGNAL_CACHE_BY_KEY: dict[str, dict] = {}
 _STRATEGY_SIGNAL_CACHE_BY_NAME: dict[str, dict] = {}
 _STRATEGY_SIGNAL_CACHE_LOADED = False
@@ -63,7 +63,7 @@ CONFLICT_KEYS = {
     "feature_flags": "feature",
     "strategy_signals": "strategy_name",
     "paper_trades": "strategy,trade_date",  # requires migration 018
-    "market_status": "id",  # single-row table (id='current')
+
 }
 
 
@@ -109,8 +109,7 @@ def _patch(table: str, conflict_key: str, data: list | dict) -> bool:
         req = Request(url, data=payload, headers=patch_headers, method="PATCH")
         try:
             urlopen(req, timeout=15)
-        except Exception as e:
-            print(f"  PATCH {table} error: {e}")
+        except Exception:
             ok = False
     return ok
 
@@ -233,7 +232,7 @@ def _get_article_id(slug: str) -> str | None:
     return None
 
 
-def _get_tag_ids(tag_names: list[str]) -> dict[str, int | str]:
+def _get_tag_ids(tag_names: list[str]) -> dict[str, str]:
     normalized = [name.strip() for name in tag_names if isinstance(name, str) and name.strip()]
     missing = [name for name in normalized if name not in _TAG_ID_CACHE]
     if missing:
@@ -242,10 +241,10 @@ def _get_tag_ids(tag_names: list[str]) -> dict[str, int | str]:
             for row in rows:
                 name = row.get("name")
                 tag_id = row.get("id")
-                if isinstance(name, str) and name and tag_id is not None:
+                if isinstance(name, str) and name and isinstance(tag_id, str) and tag_id:
                     _TAG_ID_CACHE[name] = tag_id
-        except Exception as e:
-            print(f"  WARNING _get_tag_ids: {e}")
+        except Exception:
+            pass
     return {name: _TAG_ID_CACHE[name] for name in normalized if name in _TAG_ID_CACHE}
 
 
@@ -321,7 +320,6 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
                 content = report["content"]
     if not content:
         content = item.get("description") or ""
-    from datetime import datetime, timezone as _tz
     row = {
         "slug": item.get("id", ""),
         "title": item.get("title", ""),
@@ -330,129 +328,52 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         "audience": classify_audience(item),
         "phase": item.get("phase"),
         "status": item.get("status", "published"),
-        "category": item.get("category") or classify_audience(item),
+        "category": item.get("category", "milestone"),
         "proposer": extract_proposer(item),
         "author_id": "claude",
         "details": item.get("details"),
         "published_at": item.get("published_at"),
-        "updated_at": item.get("updated_at") or datetime.now(_tz.utc).isoformat(),
     }
     ok = _post("articles", row)
-    # Tags are now synced in bulk by sync_full() → _sync_all_article_tags()
-    # instead of per-article to prevent silent data loss.
+    if ok:
+        # Sync tags
+        tags = item.get("tags") or []
+        if tags:
+            _sync_article_tags(row["slug"], tags)
     return ok
 
 
 def _sync_article_tags(slug: str, tags: list[str]) -> None:
-    """Sync tags for a single article. Prefer _sync_all_article_tags() for bulk."""
-    _sync_all_article_tags({slug: tags})
+    """Sync tags for an article."""
+    tag_names = list(dict.fromkeys(tag.strip() for tag in tags if isinstance(tag, str) and tag.strip()))
+    if not tag_names:
+        return
 
+    # Upsert tags
+    tag_rows = [{"name": tag_name} for tag_name in tag_names]
+    _post("tags", tag_rows)
 
-def _sync_all_article_tags(slug_tags: dict[str, list[str]]) -> int:
-    """Batch-sync tags for multiple articles at once.
-
-    Architecture: pre-cache all IDs, batch-upsert in chunks of 50.
-    This replaces the old one-by-one POST approach that silently lost tags.
-
-    Returns number of article_tags rows synced.
-    """
-    if not slug_tags or not SUPABASE_KEY:
-        return 0
-
-    # Step 1: Collect all unique tag names (sanitize double-encoded JSON artifacts)
-    all_tag_names: set[str] = set()
-    cleaned: dict[str, list[str]] = {}
-    for slug, tags in slug_tags.items():
-        names = list(dict.fromkeys(
-            t.strip().strip('[').strip(']').strip('"').strip("'").strip()
-            for t in tags if isinstance(t, str) and t.strip()
-        ))
-        names = [n for n in names if n]  # remove empty after stripping
-        if names:
-            cleaned[slug] = names
-            all_tag_names.update(names)
-
-    if not cleaned:
-        return 0
-
-    # Step 2: Batch-upsert all tag names (chunks of 50)
-    tag_name_list = sorted(all_tag_names)
-    for i in range(0, len(tag_name_list), 50):
-        batch = [{"name": n} for n in tag_name_list[i:i + 50]]
-        _post("tags", batch)
-
-    # Step 3: Fetch tag name→ID map (paginated)
-    # Note: tags.id can be int (serial) or str (uuid) depending on DB schema
-    tag_name_to_id: dict[str, int | str] = {}
-    for offset in range(0, len(tag_name_list), 200):
-        chunk = tag_name_list[offset:offset + 200]
-        try:
-            rows = _select_rows_in("tags", "name", chunk, select="id,name")
-            for row in rows:
-                name = row.get("name")
-                tid = row.get("id")
-                if isinstance(name, str) and tid is not None:
-                    tag_name_to_id[name] = tid
-        except Exception as e:
-            print(f"  WARNING _sync_all_article_tags tag lookup: {e}")
-
-    # Step 4: Fetch slug→article_id map (paginated)
-    slugs = list(cleaned.keys())
-    slug_to_aid: dict[str, str] = {}
-    for offset in range(0, len(slugs), 200):
-        chunk = slugs[offset:offset + 200]
-        try:
-            rows = _select_rows_in("articles", "slug", chunk, select="id,slug")
-            for row in rows:
-                s = row.get("slug")
-                aid = row.get("id")
-                if isinstance(s, str) and isinstance(aid, str):
-                    slug_to_aid[s] = aid
-        except Exception as e:
-            print(f"  WARNING _sync_all_article_tags article lookup: {e}")
-
-    # Step 5: Delete existing article_tags for all articles being synced,
-    # then re-insert clean ones. This prevents stale/broken tags from persisting.
-    all_article_ids = list(slug_to_aid.values())
-    for i in range(0, len(all_article_ids), 50):
-        chunk = all_article_ids[i:i + 50]
-        for aid in chunk:
-            _delete_where("article_tags", {"article_id": aid})
-
-    # Step 6: Build article_tags rows
-    at_rows: list[dict] = []
-    for slug, names in cleaned.items():
-        article_id = slug_to_aid.get(slug)
+    try:
+        article_id = _get_article_id(slug)
         if not article_id:
-            continue
-        for tag_name in names:
-            tag_id = tag_name_to_id.get(tag_name)
+            return
+        tag_map = _get_tag_ids(tag_names)
+
+        # Upsert article_tags
+        at_rows = []
+        for tag_name in tag_names:
+            tag_id = tag_map.get(tag_name)
             if tag_id:
                 at_rows.append({"article_id": article_id, "tag_id": tag_id})
-
-    # Step 7: Batch-insert article_tags (chunks of 50)
-    synced = 0
-    for i in range(0, len(at_rows), 50):
-        batch = at_rows[i:i + 50]
-        if _post("article_tags", batch):
-            synced += len(batch)
-
-    return synced
+        if at_rows:
+            _post("article_tags", at_rows)
+    except Exception:
+        pass  # Non-critical
 
 
 def sync_risk_forecast(data: dict) -> bool:
     """Sync risk forecast to Supabase."""
     return _post("risk_forecasts", {"data": data})
-
-
-def sync_market_status(data: dict) -> bool:
-    """Sync market status to Supabase (single-row upsert, id='current')."""
-    from datetime import datetime, timezone
-    return _post("market_status", {
-        "id": "current",
-        "data": data,
-        "updated_at": datetime.now(timezone.utc).isoformat(),
-    })
 
 
 def sync_strategy_signal(
@@ -622,16 +543,9 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
         last_feed_sync = state.get("feed_mtime", 0)
         if feed_mtime > last_feed_sync:
             last_sync_ts = state.get("articles_last_ts", "")
-            # Sync articles published/updated/modified after last sync
-            # Compare max(published_at, created_at, updated_at) to catch content edits
-            def _article_latest_ts(item: dict) -> str:
-                return max(
-                    item.get("published_at") or "",
-                    item.get("created_at") or "",
-                    item.get("updated_at") or "",
-                )
+            # Sync articles published/updated after last sync, OR drafts with created_at after last sync
             to_sync = [item for item in feed
-                       if _article_latest_ts(item) > last_sync_ts
+                       if (item.get("published_at") or item.get("created_at") or "") > last_sync_ts
                        or not last_sync_ts]
             ok = 0
             for item in to_sync:
@@ -646,21 +560,10 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
             state["feed_mtime"] = feed_mtime
             if feed:
                 state["articles_last_ts"] = max(
-                    _article_latest_ts(item) for item in feed
+                    (item.get("published_at") or item.get("created_at") or "") for item in feed
                 )
         else:
             counts["articles"] = 0  # skipped, unchanged
-
-    # Article tags — always sync ALL published articles' tags in bulk.
-    # This is decoupled from article sync to prevent tag loss when article
-    # upsert fails or incremental sync skips an article.
-    if feed:
-        slug_tags = {
-            item["id"]: item.get("tags", [])
-            for item in feed
-            if item.get("tags")
-        }
-        counts["article_tags"] = _sync_all_article_tags(slug_tags)
 
     # Risk forecast — always sync (small, 1 row)
     rf_path = storage / "risk_forecast.json"
@@ -692,20 +595,6 @@ def sync_full(storage_dir: str | Path = "storage") -> dict:
                     ok += 1
             counts[mem_type] = ok
             state[f"{mem_type}_count"] = len(entries)
-
-    # Clean up orphan drafts in Supabase (exist in DB but not in local feed)
-    # These accumulate when articles are removed from local feed.json but not cleaned in DB.
-    if feed:
-        local_slugs = {a.get("id") for a in feed if isinstance(a, dict) and a.get("id")}
-        try:
-            db_drafts = _select_rows("articles", select="slug", status="draft")
-            orphans = [r["slug"] for r in db_drafts if r.get("slug") and r["slug"] not in local_slugs]
-            if orphans:
-                for slug in orphans:
-                    _patch_where("articles", {"slug": slug}, {"status": "unpublished"})
-                counts["orphan_drafts_cleaned"] = len(orphans)
-        except Exception as e:
-            print(f"  WARNING sync error: {e}")
 
     _save_sync_state(storage, state)
     return counts

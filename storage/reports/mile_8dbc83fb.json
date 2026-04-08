@@ -11,13 +11,11 @@
   "published_at": "2026-03-15T07:10:39.738461+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "COVID",
     "VaR",
     "波動率預測",
     "風險管理",
     "GARCH",
     "Student-t-VaR"
-  ],
-  "content": "## 年度 Basel III VaR 回測報告\n\nGJR-GARCH(1,1) w=504, Student-t, Adaptive threshold：\n\n| Year | Violations | Days | Rate | Zone |\n|------|-----|------|------|------|\n| 2020 | 5 | 251 | 2.0% | YELLOW |\n| 2021 | 3 | 252 | 1.2% | GREEN |\n| 2022 | 3 | 251 | 1.2% | GREEN |\n| 2023 | 0 | 250 | 0.0% | GREEN |\n| 2024 | 5 | 252 | 2.0% | YELLOW |\n| 2025 | 3 | 250 | 1.2% | GREEN |\n\n**6 年全部通過 Green Zone**（≤4 violations/年）。\n\n最多 violations 在 2020（COVID）和 2022（加息），都只有 3-4 個——全是突發政策/經濟事件（jump），不是模型失效。\n\nStudent-t + Adaptive 門檻是穩健的 Basel III 合規配置。"
+  ]
 }

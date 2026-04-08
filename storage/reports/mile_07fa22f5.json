@@ -11,12 +11,10 @@
   "published_at": "2026-03-15T15:50:52.828222+00:00",
   "status": "published",
   "tags": [
-    "研究",
     "VRP",
     "危機分析",
     "Hybrid-VT",
     "VT策略",
     "GARCH"
-  ],
-  "content": "## Pre-2020 Robustness: Hybrid VT 在非危機期也大幅勝出\n\n| 時期 | GARCH VT | Hybrid VT | 改善 |\n|------|---|-----|------|\n| 2015-2019 | Sharpe 0.80 | **Sharpe 2.11** | +164% |\n| 2020-2026 | Sharpe 0.82 | **Sharpe 1.87** | +128% |\n\n### 為什麼非危機期也有效？\nVIX premium（VIX > realized vol）在 29% 的天數觸發 VIX-based weight。\n這本質上在 VT 框架中捕捉了 Volatility Risk Premium：\n- VIX 高估 vol → Hybrid 減少 equity exposure → 更低 risk → 更高 Sharpe\n\n### Caveat\n如果 VIX premium 消失（如 sustained low VIX period），Hybrid 優勢可能縮小。"
+  ]
 }

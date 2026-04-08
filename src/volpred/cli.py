@@ -52,17 +52,6 @@ def _parse_json_input(raw: str | None, *, default: object) -> object:
 def _parse_tags(raw: str | None) -> list[str]:
     if not raw:
         return []
-    # Handle JSON array input: '["研究","VIX"]'
-    stripped = raw.strip()
-    if stripped.startswith("["):
-        import json as _json
-        try:
-            parsed = _json.loads(stripped)
-            if isinstance(parsed, list):
-                return [str(t).strip() for t in parsed if str(t).strip()]
-        except (ValueError, TypeError):
-            pass
-    # Fallback: comma-separated
     return [tag.strip() for tag in raw.split(",") if tag.strip()]
 
 
@@ -735,26 +724,6 @@ def ops_paper_migrate_storage(paper_id: str, file_path: str | None) -> None:
     paper = migrate_paper_pdf_to_storage(paper_id=paper_id, file_path=file_path)
     console.print(f"[green]Migrated paper PDF to storage[/green] {paper_id}")
     _print_json({"action": "paper_migrate_storage", "item": paper})
-
-
-@ops.command("edit-article")
-@click.argument("pub_id")
-@click.option("--title", default=None, help="New title")
-@click.option("--content", default=None, help="New content (markdown)")
-@click.option("--audience", default=None, help="New audience: general, research, daily, member_qa")
-@click.option("--tags", default=None, help="JSON array of tags, e.g. '[\"研究\",\"VIX\"]'")
-@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
-def ops_edit_article(pub_id: str, title: str | None, content: str | None, audience: str | None, tags: str | None, storage_dir: str) -> None:
-    """Edit an existing article (title/content/tags/audience) and sync to Supabase."""
-    import json as _json
-    from volpred.ops import edit_article
-
-    parsed_tags = _json.loads(tags) if tags else None
-    result = edit_article(pub_id, title=title, content=content, audience=audience, tags=parsed_tags, storage_dir=storage_dir)
-    if not result["found"]:
-        raise click.ClickException(f"Article not found: {pub_id}")
-    console.print(f"[green]Edited[/green] {pub_id} (synced={result.get('synced')})")
-    _print_json(result)
 
 
 @ops.command("unpublish")
