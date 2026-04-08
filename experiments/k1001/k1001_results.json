@@ -1,0 +1,274 @@
+{
+  "experiment_id": "K1001",
+  "title": "Conrad-Loch Macro GARCH-X vs VIX GARCH-X",
+  "date": "2026-04-08T09:34:52.630518+00:00",
+  "proposer": "賴奕豪",
+  "executor": "Claude",
+  "references": [
+    "Conrad & Loch (2015). JAE 30(7):1090-1114.",
+    "Engle, Ghysels & Sohn (2013). RES 95(3):776-797.",
+    "Patton (2011). J Econometrics 160:246-256.",
+    "Harvey et al. (2016). t > 3.0 threshold.",
+    "K988: VIX GARCH-X A4f champion (DM t=+4.48 vs GJR)"
+  ],
+  "config": {
+    "asset": "SPY",
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-08",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "n_total": 5283,
+    "n_oos": 1779,
+    "n_valid": 1777,
+    "macro_lag": "30 calendar days (use previous month value)",
+    "macro_sources": {
+      "GS10": "FRED 10-Year Treasury Constant Maturity",
+      "TB3MS": "FRED 3-Month Treasury Bill Secondary Market",
+      "UNRATE": "FRED Civilian Unemployment Rate"
+    }
+  },
+  "models": {
+    "GJR_N": "GJR-GARCH(1,1) Normal — benchmark",
+    "A4f_VIX": "τ = θ₀ + θ₁·VIX²_{t-1}, free ω (K988 champion)",
+    "Macro_TermSpread": "τ = exp(θ₀ + θ₁·TermSpread_{t-1})",
+    "Macro_Unemployment": "τ = exp(θ₀ + θ₁·UnempRate_{t-1})",
+    "Macro_Combined": "τ = exp(θ₀ + θ₁·TermSpread + θ₂·UnempRate)",
+    "VIX_Macro": "τ = θ₀ + θ₁·VIX² + θ₂·TermSpread"
+  },
+  "qlike_scores": {
+    "GJR_N": 1.4973986416509761,
+    "A4f_VIX": 1.4025934136083948,
+    "Macro_TermSpread": 1.5010560548452438,
+    "Macro_Unemployment": 1.4920597805159383,
+    "Macro_Combined": 1.4745596331565687,
+    "VIX_Macro": 1.4149367300651015
+  },
+  "qlike_ranking": [
+    {
+      "rank": 1,
+      "model": "A4f_VIX",
+      "qlike": 1.4025934136083948
+    },
+    {
+      "rank": 2,
+      "model": "VIX_Macro",
+      "qlike": 1.4149367300651015
+    },
+    {
+      "rank": 3,
+      "model": "Macro_Combined",
+      "qlike": 1.4745596331565687
+    },
+    {
+      "rank": 4,
+      "model": "Macro_Unemployment",
+      "qlike": 1.4920597805159383
+    },
+    {
+      "rank": 5,
+      "model": "GJR_N",
+      "qlike": 1.4973986416509761
+    },
+    {
+      "rank": 6,
+      "model": "Macro_TermSpread",
+      "qlike": 1.5010560548452438
+    }
+  ],
+  "spearman_scores": {
+    "GJR_N": {
+      "rho": 0.3719128448766563,
+      "p": 2.1148979934336985e-59
+    },
+    "A4f_VIX": {
+      "rho": 0.4275830748669382,
+      "p": 6.663793899175825e-80
+    },
+    "Macro_TermSpread": {
+      "rho": 0.3873559257749855,
+      "p": 1.0638046695557213e-64
+    },
+    "Macro_Unemployment": {
+      "rho": 0.39638309391199555,
+      "p": 6.239760806924034e-68
+    },
+    "Macro_Combined": {
+      "rho": 0.3996975617690216,
+      "p": 3.829131821428539e-69
+    },
+    "VIX_Macro": {
+      "rho": 0.418296742455171,
+      "p": 3.315385329165228e-76
+    }
+  },
+  "dm_tests": {
+    "GJR_N_vs_A4f_VIX": {
+      "t_stat": 4.769536242887684,
+      "p_value": 1.9972756546415837e-06,
+      "mean_diff": 0.09480522804258137,
+      "interpretation": "model2 better"
+    },
+    "GJR_N_vs_Macro_TermSpread": {
+      "t_stat": -0.1330990018999819,
+      "p_value": 0.8941301630723506,
+      "mean_diff": -0.003657413194267582,
+      "interpretation": "model1 better"
+    },
+    "GJR_N_vs_Macro_Unemployment": {
+      "t_stat": 0.26344252637504867,
+      "p_value": 0.7922400770907303,
+      "mean_diff": 0.005338861135037651,
+      "interpretation": "model2 better"
+    },
+    "GJR_N_vs_Macro_Combined": {
+      "t_stat": 1.4791337835505334,
+      "p_value": 0.13928190257584427,
+      "mean_diff": 0.022839008494407405,
+      "interpretation": "model2 better"
+    },
+    "GJR_N_vs_VIX_Macro": {
+      "t_stat": 4.258133010138233,
+      "p_value": 2.169157618325812e-05,
+      "mean_diff": 0.0824619115858746,
+      "interpretation": "model2 better"
+    },
+    "A4f_VIX_vs_Macro_TermSpread": {
+      "t_stat": -2.7171304496474002,
+      "p_value": 0.0066489993101221945,
+      "mean_diff": -0.09846264123684897,
+      "interpretation": "model1 better"
+    },
+    "A4f_VIX_vs_Macro_Unemployment": {
+      "t_stat": -3.1210550220820137,
+      "p_value": 0.0018310505455465531,
+      "mean_diff": -0.08946636690754374,
+      "interpretation": "model1 better"
+    },
+    "A4f_VIX_vs_Macro_Combined": {
+      "t_stat": -3.2839273331069423,
+      "p_value": 0.0010436139224381247,
+      "mean_diff": -0.07196621954817398,
+      "interpretation": "model1 better"
+    },
+    "A4f_VIX_vs_VIX_Macro": {
+      "t_stat": -3.029759339959057,
+      "p_value": 0.0024828017090048338,
+      "mean_diff": -0.012343316456706775,
+      "interpretation": "model1 better"
+    },
+    "Macro_TermSpread_vs_Macro_Unemployment": {
+      "t_stat": 0.7589890994362636,
+      "p_value": 0.4479597953772252,
+      "mean_diff": 0.008996274329305238,
+      "interpretation": "model2 better"
+    },
+    "Macro_TermSpread_vs_Macro_Combined": {
+      "t_stat": 1.4074013637964744,
+      "p_value": 0.15948339407511303,
+      "mean_diff": 0.026496421688674984,
+      "interpretation": "model2 better"
+    },
+    "Macro_TermSpread_vs_VIX_Macro": {
+      "t_stat": 2.289951788652479,
+      "p_value": 0.02214089132915875,
+      "mean_diff": 0.08611932478014217,
+      "interpretation": "model2 better"
+    },
+    "Macro_Unemployment_vs_Macro_Combined": {
+      "t_stat": 2.055548212203834,
+      "p_value": 0.03997200466924178,
+      "mean_diff": 0.017500147359369746,
+      "interpretation": "model2 better"
+    },
+    "Macro_Unemployment_vs_VIX_Macro": {
+      "t_stat": 2.57169244146076,
+      "p_value": 0.01020096585543806,
+      "mean_diff": 0.07712305045083696,
+      "interpretation": "model2 better"
+    },
+    "Macro_Combined_vs_VIX_Macro": {
+      "t_stat": 2.5721574293341183,
+      "p_value": 0.010187326416206455,
+      "mean_diff": 0.05962290309146719,
+      "interpretation": "model2 better"
+    }
+  },
+  "param_history_last": {
+    "GJR_N": {
+      "omega": 4.215694477626274e-06,
+      "alpha": 0.08682314727483159,
+      "gamma": 0.10853106901603811,
+      "beta": 0.8256188222111003,
+      "persist": 0.9667075039939509
+    },
+    "A4f_VIX": {
+      "theta": [
+        -0.007409212531132097,
+        6.579984204508612e-05
+      ],
+      "omega_g": 4.7842899032768004e-05,
+      "alpha": 0.02564979746621854,
+      "gamma": 0.018131800763321847,
+      "beta": 0.9625261721327668,
+      "persist": 0.9972418699806462
+    },
+    "Macro_TermSpread": {
+      "theta": [
+        -10.920056394253546,
+        0.03477468034724688
+      ],
+      "omega_g": 0.2584647455257993,
+      "alpha": 0.02878450139433462,
+      "gamma": 0.22534688815912798,
+      "beta": 0.8259055121704155,
+      "persist": 0.9673634576443142
+    },
+    "Macro_Unemployment": {
+      "theta": [
+        -10.898346145299293,
+        0.1596556878948451
+      ],
+      "omega_g": 0.13171702976852362,
+      "alpha": 0.0001,
+      "gamma": 0.27359996131397435,
+      "beta": 0.8265033590073387,
+      "persist": 0.9634033396643259
+    },
+    "Macro_Combined": {
+      "theta": [
+        -11.252677614209478,
+        -0.09761898444110836,
+        0.17186789592203155
+      ],
+      "omega_g": 0.1770764746079774,
+      "alpha": 0.0001,
+      "gamma": 0.2763822395820165,
+      "beta": 0.8269026312075469,
+      "persist": 0.9651937509985552
+    },
+    "VIX_Macro": {
+      "theta": [
+        -0.0008409422299835615,
+        7.593637262794613e-06,
+        1e-08
+      ],
+      "omega_g": 0.0007321386240348707,
+      "alpha": 0.02732716707177402,
+      "gamma": 0.03224240334419856,
+      "beta": 0.9513281059066097,
+      "persist": 0.9947764746504829
+    }
+  },
+  "key_findings": {
+    "vix_vs_gjr_pct": -6.33,
+    "Macro_TermSpread_vs_gjr_pct": 0.24,
+    "vix_vs_Macro_TermSpread_pct": -6.56,
+    "Macro_Unemployment_vs_gjr_pct": -0.36,
+    "vix_vs_Macro_Unemployment_pct": -6.0,
+    "Macro_Combined_vs_gjr_pct": -1.53,
+    "vix_vs_Macro_Combined_pct": -4.88,
+    "best_macro_model": "Macro_Combined"
+  },
+  "elapsed_seconds": 1492.6
+}
