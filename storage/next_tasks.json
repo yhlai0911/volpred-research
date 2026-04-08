@@ -1,26 +1,20 @@
 [
   {
-    "id": "K997",
-    "title": "K997: MF-GJR-X 用 VXEEM/local fear index（跨市場改進）",
+    "id": "K1001",
+    "title": "K1001: Conrad & Loch (2015) 比較 — 宏觀 GARCH-X vs VIX GARCH-X",
     "priority": 2,
-    "description": "K994 顯示 US VIX 對 EEM/GLD/0050.TW 無效，改用本地 fear index 測試"
+    "description": "research_program.md 待做：與 Conrad & Loch (2015) 比較，他們用宏觀變數驅動 τ"
   },
   {
-    "id": "K998",
-    "title": "K998: g 成分的 VRP 預測能力（Fama-MacBeth / Panel regression）",
+    "id": "K1002",
+    "title": "K1002: Paper 5 統一 pipeline（MF-GJR-X + HAR-RV + GJR benchmark）",
     "priority": 2,
-    "description": "K988b VRP 驗證 ρ=0.63，進一步測試 g 是否能預測未來 VRP"
+    "description": "Paper 5 草稿需要統一 pipeline 比較所有模型"
   },
   {
     "id": "K996",
-    "title": "K996: GARCH-MIDAS fixed-span 深度測試（月頻 τ + 不同 MIDAS weighting）",
+    "title": "K996: GARCH-MIDAS fixed-span 深度測試",
     "priority": 3,
-    "description": "K988b C1-C3 結果較差，但 K 值和 Beta weight 可能需要更多 tuning"
-  },
-  {
-    "id": "K988c",
-    "title": "K988c: 重跑 K988b A2n/A4n（Codex 修正 normalization bug）",
-    "priority": 1,
-    "description": "Codex K999 發現 sample-mean normalization off-by-one，已修正，需重跑確認結果變化"
+    "description": "K988b C1-C3 較差，但未 tuning Beta weight 參數"
   }
 ]

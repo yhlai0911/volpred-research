@@ -1,0 +1,267 @@
+{
+  "assets": {
+    "EEM": {
+      "status": "completed",
+      "label": "Emerging Markets ETF",
+      "n_total": 5327,
+      "n_oos": 1824,
+      "diagnostics": {
+        "oos_vol_ann": 0.2116,
+        "vix_r2_corr_oos": 0.4991,
+        "own_rv_r2_corr_oos": 0.4176
+      },
+      "models": {
+        "A4f_VIX": {
+          "status": "completed",
+          "n_valid": 1812,
+          "qlike": 1.306224,
+          "qlike_gjr": 1.337207,
+          "qlike_improvement": 0.030982,
+          "spearman_rho": 0.2672,
+          "spearman_rho_gjr": 0.2184,
+          "dm_t_vs_gjr": -2.5217,
+          "dm_p_vs_gjr": 0.0117653270910818,
+          "significant_harvey": false,
+          "model_better": true
+        },
+        "A4f_OwnRV": {
+          "status": "completed",
+          "n_valid": 1812,
+          "qlike": 1.339375,
+          "qlike_gjr": 1.337207,
+          "qlike_improvement": -0.002168,
+          "spearman_rho": 0.2167,
+          "spearman_rho_gjr": 0.2184,
+          "dm_t_vs_gjr": 0.6036,
+          "dm_p_vs_gjr": 0.5462018880361699,
+          "significant_harvey": false,
+          "model_better": false
+        },
+        "A4f_VIX_RV": {
+          "status": "completed",
+          "n_valid": 1812,
+          "qlike": 1.306284,
+          "qlike_gjr": 1.337207,
+          "qlike_improvement": 0.030923,
+          "spearman_rho": 0.2658,
+          "spearman_rho_gjr": 0.2184,
+          "dm_t_vs_gjr": -2.5996,
+          "dm_p_vs_gjr": 0.00940959662644314,
+          "significant_harvey": false,
+          "model_better": true
+        }
+      }
+    },
+    "GLD": {
+      "status": "completed",
+      "label": "Gold ETF",
+      "n_total": 5327,
+      "n_oos": 1824,
+      "diagnostics": {
+        "oos_vol_ann": 0.1733,
+        "vix_r2_corr_oos": 0.1264,
+        "own_rv_r2_corr_oos": 0.3556,
+        "gvz_r2_corr_oos": 0.3805,
+        "n_gvz_obs": 1824
+      },
+      "models": {
+        "A4f_VIX": {
+          "status": "completed",
+          "n_valid": 1820,
+          "qlike": 1.512976,
+          "qlike_gjr": 1.529601,
+          "qlike_improvement": 0.016624,
+          "spearman_rho": 0.1913,
+          "spearman_rho_gjr": 0.189,
+          "dm_t_vs_gjr": -1.0836,
+          "dm_p_vs_gjr": 0.2786723400772215,
+          "significant_harvey": false,
+          "model_better": true
+        },
+        "A4f_OwnRV": {
+          "status": "completed",
+          "n_valid": 1820,
+          "qlike": 1.523338,
+          "qlike_gjr": 1.529601,
+          "qlike_improvement": 0.006262,
+          "spearman_rho": 0.1883,
+          "spearman_rho_gjr": 0.189,
+          "dm_t_vs_gjr": -0.6514,
+          "dm_p_vs_gjr": 0.5148979320290463,
+          "significant_harvey": false,
+          "model_better": true
+        },
+        "A4f_VIX_RV": {
+          "status": "completed",
+          "n_valid": 1820,
+          "qlike": 1.519025,
+          "qlike_gjr": 1.529601,
+          "qlike_improvement": 0.010575,
+          "spearman_rho": 0.1909,
+          "spearman_rho_gjr": 0.189,
+          "dm_t_vs_gjr": -0.6874,
+          "dm_p_vs_gjr": 0.49194527574781044,
+          "significant_harvey": false,
+          "model_better": true
+        },
+        "A4f_GVZ": {
+          "status": "completed",
+          "n_valid": 1820,
+          "qlike": 1.457399,
+          "qlike_gjr": 1.529601,
+          "qlike_improvement": 0.072202,
+          "spearman_rho": 0.2191,
+          "spearman_rho_gjr": 0.189,
+          "dm_t_vs_gjr": -3.173,
+          "dm_p_vs_gjr": 0.0015339465873889235,
+          "significant_harvey": true,
+          "model_better": true
+        },
+        "A4f_VIX_GVZ": {
+          "status": "completed",
+          "n_valid": 1820,
+          "qlike": 1.456514,
+          "qlike_gjr": 1.529601,
+          "qlike_improvement": 0.073086,
+          "spearman_rho": 0.2252,
+          "spearman_rho_gjr": 0.189,
+          "dm_t_vs_gjr": -3.3854,
+          "dm_p_vs_gjr": 0.000725814777330358,
+          "significant_harvey": true,
+          "model_better": true
+        }
+      }
+    },
+    "0050.TW": {
+      "status": "completed",
+      "label": "Taiwan ETF",
+      "n_total": 4063,
+      "n_oos": 1697,
+      "diagnostics": {
+        "oos_vol_ann": 0.2112,
+        "vix_r2_corr_oos": 0.2751,
+        "own_rv_r2_corr_oos": 0.3184
+      },
+      "models": {
+        "A4f_VIX": {
+          "status": "completed",
+          "n_valid": 1638,
+          "qlike": 1.430577,
+          "qlike_gjr": 1.459042,
+          "qlike_improvement": 0.028465,
+          "spearman_rho": 0.2507,
+          "spearman_rho_gjr": 0.212,
+          "dm_t_vs_gjr": -1.677,
+          "dm_p_vs_gjr": 0.09374147835775481,
+          "significant_harvey": false,
+          "model_better": true
+        },
+        "A4f_OwnRV": {
+          "status": "completed",
+          "n_valid": 1638,
+          "qlike": 1.459728,
+          "qlike_gjr": 1.459042,
+          "qlike_improvement": -0.000686,
+          "spearman_rho": 0.2141,
+          "spearman_rho_gjr": 0.212,
+          "dm_t_vs_gjr": 0.1603,
+          "dm_p_vs_gjr": 0.8726624229477149,
+          "significant_harvey": false,
+          "model_better": false
+        },
+        "A4f_VIX_RV": {
+          "status": "completed",
+          "n_valid": 1638,
+          "qlike": 1.430393,
+          "qlike_gjr": 1.459042,
+          "qlike_improvement": 0.02865,
+          "spearman_rho": 0.2527,
+          "spearman_rho_gjr": 0.212,
+          "dm_t_vs_gjr": -1.6952,
+          "dm_p_vs_gjr": 0.0902345993389686,
+          "significant_harvey": false,
+          "model_better": true
+        },
+        "A4f_VIX_lag2": {
+          "status": "completed",
+          "n_valid": 1638,
+          "qlike": 1.439916,
+          "qlike_gjr": 1.459042,
+          "qlike_improvement": 0.019126,
+          "spearman_rho": 0.2381,
+          "spearman_rho_gjr": 0.212,
+          "dm_t_vs_gjr": -1.547,
+          "dm_p_vs_gjr": 0.12205692545228963,
+          "significant_harvey": false,
+          "model_better": true
+        }
+      }
+    }
+  },
+  "summary": {
+    "n_assets_tested": 3,
+    "significant_wins": [
+      "GLD/A4f_GVZ (DM t=-3.17)",
+      "GLD/A4f_VIX_GVZ (DM t=-3.39)"
+    ],
+    "n_significant_wins": 2,
+    "best_per_asset": {
+      "EEM": {
+        "model": "A4f_VIX_RV",
+        "dm_t": -2.5996
+      },
+      "GLD": {
+        "model": "A4f_VIX_GVZ",
+        "dm_t": -3.3854
+      },
+      "0050.TW": {
+        "model": "A4f_VIX_RV",
+        "dm_t": -1.6952
+      }
+    },
+    "conclusion": "Partial success: 2/3 significant improvements. Local fear indices help some but not all markets."
+  },
+  "metadata": {
+    "experiment_id": "K997",
+    "base_experiments": "K988/K994",
+    "research_question": "Can local fear indices improve MF-GJR-X for non-US assets where US VIX fails?",
+    "model_spec": "A4f: τ=θ₀+θ₁X², free ω; dual: τ=θ₀+θ₁X₁²+θ₂X₂²",
+    "fear_indices_tested": {
+      "EEM": [
+        "US VIX",
+        "own 20d RV",
+        "VIX+RV dual",
+        "VXEEM (if available)",
+        "VIX+VXEEM dual"
+      ],
+      "GLD": [
+        "US VIX",
+        "own 20d RV",
+        "VIX+RV dual",
+        "GVZ (if available)",
+        "VIX+GVZ dual"
+      ],
+      "0050.TW": [
+        "US VIX (lag+1)",
+        "own 20d RV",
+        "VIX+RV dual",
+        "VIX lag+2"
+      ]
+    },
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-08",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "rv_window": 20,
+    "evaluation": "QLIKE on r² (Patton 2011), DM test (Harvey t>3.0)",
+    "elapsed_seconds": 856.1,
+    "timestamp": "2026-04-08T05:58:04.450570+00:00",
+    "references": [
+      "Engle, Ghysels & Sohn (2013). Stock Market Volatility and Macroeconomic Fundamentals. RES 95(3):776-797.",
+      "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256.",
+      "Harvey et al. (2016). t > 3.0 threshold.",
+      "Conrad & Loch (2015). Anticipating Long-Term Stock Market Volatility. JBES 33(3):338-358."
+    ]
+  }
+}

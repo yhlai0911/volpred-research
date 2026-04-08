@@ -567,16 +567,17 @@
     - B1-B3 GARCH-MIDAS rolling window K=22/65/125
     - B0 GJR benchmark
   - **K988b 待補做的規格**：
-    - [ ] **A3f**（τ_{t-1} 分母 + free ω）：完整交叉比較需要
-    - [ ] **方案 B：sample mean 標準化**：ũ_t = u_t / √(mean(r²/τ))，使 E(ũ²)=1 後再跑 GARCH，保持 ω=1-α-γ/2-β 但不假設 E(VRP)=0。A2n（log-exp）和 A4n（VIX²）
-    - [ ] **GARCH-MIDAS fixed-span（月頻 τ）**：τ_t 在月內不變，由 MIDAS 加權過去 K 個月的月均 VIX 驅動。原論文最基本的版本，K=6/12/24 月
-    - [ ] **VRP 驗證**：計算獨立 VRP = VIX² - realized_var，驗證 g 與 VRP 的 Spearman 相關
+    - [x] **A3f**（K988b 完成，DM t=+3.38）
+    - [x] **方案 B：sample mean 標準化**（K988b A2n/A4n 完成，Codex K999 修正 off-by-one 後 DM t=+3.41/+3.71）
+    - [x] **GARCH-MIDAS fixed-span**（K988b C1-C3 完成，QLIKE -8.30~-8.31，遠不如 GARCH-X -8.36）
+    - [x] **VRP 驗證**（K988b ρ=0.78-0.82；K998 NULL — g 無前瞻 VRP 預測能力）
   - **後續研究待做**：
-    - [x] 跨資產驗證（K994：QQQ DM t=-3.71 PASS，EEM/GLD/0050.TW 不顯著，需本地 fear index）
-    - [ ] VaR/ES 評估（Trinity test + Acerbi-Szekely ES backtest）
+    - [x] 跨資產驗證（K994：QQQ PASS t=-3.71；K997：GLD+GVZ PASS t=-3.39；EEM/0050.TW 仍不顯著）
+    - [x] VaR/ES 評估（K995：A4f_t scorecard 3/4，1%/5% VaR PASS，ES PASS）
+    - [x] Codex 審 free omega 代碼（K999：1 HIGH bug 修正，OOS 遞迴正確）
     - [ ] 正式推導 E(g)=1 的自洽框架（τ 校正 VRP → g 反映 VRP 偏離）
-    - [ ] Codex 審 free omega 代碼
     - [ ] 與 Conrad & Loch (2015)、Engle & Rangel (2008) 比較
+    - [ ] Student-t df 聯合估計（目前 A4f 用 Normal，K995 顯示加 t 大幅改善 VaR）
   - **論文定位**：可單獨一篇（J. Empirical Finance / J. Forecasting），或作為 Paper 5 的核心 section
 - [ ] **HAR-RV 正式實驗**：K744 驗證數據 94% clean，K745 pipeline 通過。SPY 51 天（ETA 60 天 ~04/07），需 100+ OOS days ~05 月。到時重跑 HAR-RV vs HAR-ABS vs GJR 的完整比較
 - [ ] **Paper 6: Crypto Fear Channel**：K746b + **K855 悖論發現**：BTC-ETF 後 Granger 弱化（p=0.32）但 shock 傳導放大 2.5x。機構化讓 channel 從「線性可預測」變成「事件驅動非線性」。BTC 已非分散化工具（corr>0.3 佔 76% 時間）。論文角度：「institutional adoption amplified shock transmission but destroyed linear predictability」

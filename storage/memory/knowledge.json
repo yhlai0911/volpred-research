@@ -22235,5 +22235,43 @@
     "data_source": "yfinance (SPY + ^VIX)",
     "created_at": "2026-04-08T05:04:40.679153+00:00",
     "category": "knowledge"
+  },
+  {
+    "id": "know_20260408055829_k997",
+    "experiment_id": "K997",
+    "title": "K997: 本地 Fear Index 跨市場 MF-GJR-X ★ — GLD+GVZ 顯著，EEM/TW 仍不顯著",
+    "content": "[提出: 賴奕豪, 執行: Claude] K994 發現 US VIX 對 EEM/GLD/0050.TW 無效，本實驗測試本地 fear index 替代。結果：(1) GLD+GVZ（Gold VIX）DM t=-3.17 PASS，VIX+GVZ 雙因子 t=-3.39 PASS——本地 implied vol 對黃金有效；(2) EEM 最佳為 VIX+OwnRV 雙因子 t=-2.60，接近但未達 Harvey 門檻；VXEEM 數據可能不足；(3) 0050.TW 最佳為 VIX+TW_RV 雙因子 t=-1.70，台股 VIX 相關性太低（0.275）；VIX_lag2 無改善。結論：乘法結構需要高品質的 asset-specific implied vol 指標才能顯著。GLD 從 K994 的 t=-1.08 提升至 t=-3.39，證明正確 fear index 的重要性。SPY+QQQ+GLD 三個市場已通過。數據：yfinance 2005-2026。",
+    "tags": [
+      "GARCH-X",
+      "cross-asset",
+      "local-fear-index",
+      "GVZ",
+      "VXEEM",
+      "GLD",
+      "EEM",
+      "0050.TW",
+      "partial-success"
+    ],
+    "data_source": "yfinance",
+    "created_at": "2026-04-08T05:58:29.853400+00:00",
+    "category": "knowledge"
+  },
+  {
+    "id": "know_20260408072207_k1000",
+    "experiment_id": "K1000",
+    "title": "K1000: A4f-t Joint MLE ★★ — 6/6 VaR/ES scorecard + QLIKE 冠軍",
+    "content": "[提出: 賴奕豪, 執行: Claude] A4f + Student-t 聯合 MLE vs 2-step 比較。結果：(1) 三個 A4f 變體均達 VaR/ES scorecard 6/6（UC+CC+DQ+Basel+ES_Z1+ES_Z2 全 PASS）；(2) Student-t 改善 1% VaR violation（1.75%→1.21%），但不改善 QLIKE；(3) 2-step vs joint 幾乎無差（df~7.8-8.0）；(4) A4f vs GJR DM |t|>4.2 顯著；(5) GJR_N 只 3/6，GJR_t 5/6。結論：A4f_t 是完整解——QLIKE 冠軍（K988）+ VaR/ES 完美。波動預測（τ×g structure）和尾部校準（t-distribution）是正交的改善維度。df~8 確認 SPY 日報酬有厚尾。數據：SPY 2005-2026, OOS 2019-2026。",
+    "tags": [
+      "GARCH-X",
+      "Student-t",
+      "joint-MLE",
+      "VaR",
+      "ES",
+      "perfect-score",
+      "A4f"
+    ],
+    "data_source": "yfinance (SPY + ^VIX)",
+    "created_at": "2026-04-08T07:22:07.923995+00:00",
+    "category": "knowledge"
   }
 ]
