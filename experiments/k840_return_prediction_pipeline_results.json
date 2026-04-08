@@ -1,0 +1,281 @@
+{
+  "experiment_id": "K840",
+  "title": "Return Prediction \u2192 Trading Strategy Pipeline",
+  "date": "2026-04-03",
+  "attribution": "[\u63d0\u51fa: research_program.md, \u57f7\u884c: Claude]",
+  "data_source": "yfinance",
+  "assets": [
+    "SPY",
+    "^VIX"
+  ],
+  "data_range": "2005-01-05 to 2024-12-31",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "n_observations": 5031,
+  "n_oos": 502,
+  "methodology": {
+    "signals": {
+      "VIX_Change": "VIX dropped >1% yesterday \u2192 long SPY",
+      "Momentum": "SPY 5-day cumulative return > 0 \u2192 long SPY",
+      "Mean_Reversion": "SPY dropped >1% yesterday \u2192 long SPY (bounce)",
+      "Combined": "Majority vote of 3 signals"
+    },
+    "lag": "signal.shift(1) \u2014 all signals use t-1 info for t decision",
+    "tx_cost": "5bps per weight change",
+    "weight_mapping": "+1\u2192100% SPY, -1\u21920% SPY, 0\u219250% SPY"
+  },
+  "hit_rate_results": {
+    "VIX Change": {
+      "full_sample": {
+        "hit_rate": 0.5086976962858486,
+        "n_signals": 4254,
+        "z_stat": 1.1345743917018358,
+        "p_value": 0.2565536878512802,
+        "significant": false
+      },
+      "oos": {
+        "hit_rate": 0.5563725490196079,
+        "n_signals": 408,
+        "z_stat": 2.277339348846352,
+        "p_value": 0.022765968903080136,
+        "significant": true
+      }
+    },
+    "Momentum": {
+      "full_sample": {
+        "hit_rate": 0.49730807577268193,
+        "n_signals": 5015,
+        "z_stat": -0.3812661908367651,
+        "p_value": 0.7030057382027364,
+        "significant": false
+      },
+      "oos": {
+        "hit_rate": 0.5189620758483033,
+        "n_signals": 501,
+        "z_stat": 0.8488573980566612,
+        "p_value": 0.3959606468313166,
+        "significant": false
+      }
+    },
+    "Mean Reversion": {
+      "full_sample": {
+        "hit_rate": 0.5093023255813953,
+        "n_signals": 1290,
+        "z_stat": 0.6682152556676434,
+        "p_value": 0.5039961986959207,
+        "significant": false
+      },
+      "oos": {
+        "hit_rate": 0.39814814814814814,
+        "n_signals": 108,
+        "z_stat": -2.116950987028628,
+        "p_value": 0.03426400773486904,
+        "significant": true
+      }
+    },
+    "Combined": {
+      "full_sample": {
+        "hit_rate": 0.5017832647462277,
+        "n_signals": 3645,
+        "z_stat": 0.21532506449997835,
+        "p_value": 0.8295138892796405,
+        "significant": false
+      },
+      "oos": {
+        "hit_rate": 0.5417789757412399,
+        "n_signals": 371,
+        "z_stat": 1.6094398081186116,
+        "p_value": 0.10752020668334161,
+        "significant": false
+      }
+    }
+  },
+  "oos_performance": {
+    "BH_SPY": {
+      "annual_return": 0.23657389724555802,
+      "annual_vol": 0.12811007349054337,
+      "sharpe": 1.8466455509684885,
+      "cagr": 0.25643238086622633,
+      "mdd": -0.0997431024080117,
+      "total_return": 0.5757649010001791,
+      "n_days": 502
+    },
+    "VIX_Change": {
+      "annual_return": 0.10076216083391579,
+      "annual_vol": 0.0858638938209495,
+      "sharpe": 1.1735102654910268,
+      "cagr": 0.1019306093836585,
+      "mdd": -0.08112052620158035,
+      "total_return": 0.21331603324439885,
+      "n_days": 502
+    },
+    "Momentum": {
+      "annual_return": 0.07091178565292211,
+      "annual_vol": 0.09712417403170197,
+      "sharpe": 0.7301146842162698,
+      "cagr": 0.06843108083665261,
+      "mdd": -0.0958299350213201,
+      "total_return": 0.14094544676599807,
+      "n_days": 502
+    },
+    "Mean_Rev": {
+      "annual_return": 0.057376242577093346,
+      "annual_vol": 0.07255208413520216,
+      "sharpe": 0.7908283168016462,
+      "cagr": 0.05626542849089944,
+      "mdd": -0.06716573322636146,
+      "total_return": 0.11521205685404201,
+      "n_days": 502
+    },
+    "Combined": {
+      "annual_return": 0.08198012653455154,
+      "annual_vol": 0.0873347737646164,
+      "sharpe": 0.9386882567017734,
+      "cagr": 0.08129658480153168,
+      "mdd": -0.07047618580073856,
+      "total_return": 0.16847724460489144,
+      "n_days": 502
+    }
+  },
+  "full_sample_performance": {
+    "BH_SPY": {
+      "annual_return": 0.11939922852331053,
+      "annual_vol": 0.1938457306673849,
+      "sharpe": 0.6159497457706959,
+      "cagr": 0.10579884938611461,
+      "mdd": -0.5518945466346236,
+      "total_return": 5.739587474912476,
+      "n_days": 4781
+    },
+    "VIX_Change": {
+      "annual_return": -0.0291603538652236,
+      "annual_vol": 0.12881273610025515,
+      "sharpe": -0.226377878058021,
+      "cagr": -0.03680699267506027,
+      "mdd": -0.7096486443066307,
+      "total_return": -0.5090858993181393,
+      "n_days": 4781
+    },
+    "Momentum": {
+      "annual_return": 0.0023992652431064046,
+      "annual_vol": 0.12096942607402905,
+      "sharpe": 0.019833649881401755,
+      "cagr": -0.0049541966935425785,
+      "mdd": -0.4498715830343867,
+      "total_return": -0.08992268376118351,
+      "n_days": 4781
+    },
+    "Mean_Rev": {
+      "annual_return": 0.07220715513650117,
+      "annual_vol": 0.13137019397472832,
+      "sharpe": 0.5496464072390093,
+      "cagr": 0.06569534396299148,
+      "mdd": -0.2490520563357483,
+      "total_return": 2.343957223982148,
+      "n_days": 4781
+    },
+    "Combined": {
+      "annual_return": 0.002352794536484712,
+      "annual_vol": 0.11741890760328103,
+      "sharpe": 0.02003761220836778,
+      "cagr": -0.00455395853354168,
+      "mdd": -0.5398647481998642,
+      "total_return": -0.08295252930411412,
+      "n_days": 4781
+    }
+  },
+  "dm_tests_vs_bh": {
+    "VIX_Change": {
+      "t_stat": -2.3322233279946616,
+      "p_value": 0.02008421676835881,
+      "harvey_significant": false
+    },
+    "Momentum": {
+      "t_stat": -3.088434012365258,
+      "p_value": 0.0021237868128911597,
+      "harvey_significant": true
+    },
+    "Mean_Rev": {
+      "t_stat": -3.7664881666541308,
+      "p_value": 0.00018522110355867483,
+      "harvey_significant": true
+    },
+    "Combined": {
+      "t_stat": -3.168512334687323,
+      "p_value": 0.0016257954401210917,
+      "harvey_significant": true
+    }
+  },
+  "weight_distribution": {
+    "VIX_Change": {
+      "pct_long": 0.45219123505976094,
+      "pct_cash": 0.36254980079681276,
+      "pct_half": 0.1852589641434263,
+      "turnover": 252.0
+    },
+    "Momentum": {
+      "pct_long": 0.649402390438247,
+      "pct_cash": 0.350597609561753,
+      "pct_half": 0.0,
+      "turnover": 101.0
+    },
+    "Mean_Rev": {
+      "pct_long": 0.09362549800796813,
+      "pct_cash": 0.12151394422310757,
+      "pct_half": 0.7848605577689243,
+      "turnover": 94.5
+    },
+    "Combined": {
+      "pct_long": 0.4760956175298805,
+      "pct_cash": 0.26294820717131473,
+      "pct_half": 0.26095617529880477,
+      "turnover": 170.5
+    }
+  },
+  "regime_analysis": {
+    "BH_SPY": {
+      "high_vol_sharpe": -0.3896948542749104,
+      "low_vol_sharpe": 5.687643439972214
+    },
+    "VIX_Change": {
+      "high_vol_sharpe": -1.020304344329795,
+      "low_vol_sharpe": 4.4172192036283935
+    },
+    "Momentum": {
+      "high_vol_sharpe": -2.111600942362051,
+      "low_vol_sharpe": 4.363539372735512
+    },
+    "Mean_Rev": {
+      "high_vol_sharpe": -1.5380612617829994,
+      "low_vol_sharpe": 5.139927054333179
+    },
+    "Combined": {
+      "high_vol_sharpe": -2.0939833426652146,
+      "low_vol_sharpe": 4.766910200775316
+    }
+  },
+  "sanity_check": {
+    "vix_change_shift0_sharpe": 7.810360466870225,
+    "vix_change_shift1_sharpe": 1.173510265491027,
+    "lookahead_detected": true
+  },
+  "conclusions": {
+    "emh_holds": true,
+    "best_oos_hit_rate": 0.5563725490196079,
+    "above_55pct": true,
+    "summary": "Simple direction signals (VIX change, momentum, mean reversion) fail to beat BH SPY in OOS period 2023-2024. Hit rates cluster around 50%, confirming EMH barrier for daily SPY return prediction. This validates K818 SSVS null result: daily return prediction for SPY is not economically viable with standard signals."
+  },
+  "references": [
+    "Welch & Goyal (2008) RFS \u2014 equity premium prediction (most predictors fail OOS)",
+    "Rapach, Strauss & Zhou (2010) RFS \u2014 combination forecasts",
+    "Campbell & Thompson (2008) RFS \u2014 beating historical average",
+    "K818: SSVS return prediction NULL for SPY (OOS R\u00b2=-1.47%)",
+    "K697: VIX predicts vol magnitude but NOT direction"
+  ],
+  "limitations": [
+    "Only tested SPY \u2014 other assets (small-cap, EM, crypto) may differ",
+    "OOS period (2023-2024) was strong bull market \u2014 may not generalize",
+    "Only 3 simple signals tested \u2014 ML/NLP signals not explored",
+    "No short selling \u2014 only long/cash strategy",
+    "5bps TX cost assumption \u2014 actual costs vary"
+  ]
+}

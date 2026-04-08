@@ -1,0 +1,326 @@
+% ─── Section 5: High-Frequency Volatility Evidence ────────────────────
+% Draft: 2026-04-03
+% Based on experiments K848, K849, K850, K852
+
+\section{High-Frequency Volatility Evidence from TAIFEX}
+\label{sec:hf}
+
+The preceding sections evaluate volatility models using daily squared returns $r_t^2$ as the volatility proxy---the default in the GARCH literature when intraday data are unavailable. However, $r_t^2$ is a notoriously noisy estimator of the latent conditional variance $\sigma_t^2$: it is unbiased but has enormous sampling variance, and its noise can distort both model rankings and loss-function values \citep{patton2011}. In this section, we exploit five-minute intraday data from the Taiwan Futures Exchange (TAIFEX) to construct realized volatility (RV) measures that serve as a substantially more precise proxy for latent volatility. This allows us to re-evaluate the model comparisons of Section~\ref{sec:vt} using what \citet{hansen2005} term the ``gold standard'' volatility measure, and to uncover a striking paradox: superior volatility \textit{prediction} does not imply superior Value-at-Risk \textit{protection}.
+
+
+\subsection{TAIFEX 5-Minute Realized Volatility Construction}
+\label{sec:hf_rv}
+
+We construct realized volatility from tick-level data for the TX futures contract (the near-month TAIEX futures, denoted TX1) traded on TAIFEX. The sample spans May 16, 2017---the date TAIFEX extended after-hours trading to create a continuous night session (15:00--05:00 local time the following morning)---through April 2, 2026, yielding 2,163 trading days.
+
+Tick data are aggregated into 5-minute bars using the last-tick-in-interval convention. Daily realized volatility is computed as
+\begin{equation}
+\text{RV}_t^{(\text{day})} = \sum_{i=1}^{M} r_{t,i}^2, \qquad
+\text{RV}_t^{(\text{night})} = \sum_{j=1}^{N} r_{t,j}^2, \qquad
+\text{RV}_t^{(\text{total})} = \text{RV}_t^{(\text{day})} + \text{RV}_t^{(\text{night})}
+\label{eq:rv}
+\end{equation}
+where $r_{t,i}$ denotes the $i$-th intraday 5-minute log return, and $M \approx 60$ (day session, 09:00--13:30) and $N \approx 168$ (night session, 15:00--05:00) are the number of intervals per session. Following \citet{hansen2005}, the 5-minute frequency balances the trade-off between microstructure noise (which inflates RV at very high frequencies) and discretization bias (which attenuates RV at low frequencies).
+
+We additionally compute bipower variation (BPV) to separate the continuous and jump components of total variation \citep{barndorff2004}:
+\begin{equation}
+\text{BPV}_t = \frac{\pi}{2} \sum_{i=2}^{M+N} |r_{t,i}| \cdot |r_{t,i-1}|, \qquad
+J_t = \max(\text{RV}_t^{(\text{total})} - \text{BPV}_t, \, 0)
+\label{eq:bpv}
+\end{equation}
+
+Table~\ref{tab:rv_stats} reports descriptive statistics for the RV measures. Annualized volatility estimated from $\text{RV}^{(\text{total})}$ averages 16.2\%, compared to 11.5\% for the day session alone---indicating that the night session contributes substantially to total volatility. The jump component $J_t$ is non-zero on 74.9\% of trading days but accounts for only 7.6\% of total realized variance on average, consistent with the dominance of the continuous diffusive component documented in developed markets.
+
+\begin{table}[H]
+\centering
+\caption{Descriptive Statistics for TAIFEX 5-Minute Realized Volatility (2017--2026)}
+\label{tab:rv_stats}
+\begin{tabular}{lcccccc}
+\toprule
+Measure & Mean ($\times 10^{-5}$) & Median ($\times 10^{-5}$) & Std ($\times 10^{-4}$) & Skew & Kurt & Ann.\ Vol (\%) \\
+\midrule
+$\text{RV}^{(\text{day})}$ & 5.21 & 3.26 & 1.01 & 14.4 & 317.7 & 11.5 \\
+$\text{RV}^{(\text{night})}$ & 5.27 & 2.52 & 1.46 & 13.2 & 227.9 & 11.5 \\
+$\text{RV}^{(\text{total})}$ & 10.47 & 6.14 & 2.14 & 9.9 & 125.0 & 16.2 \\
+BPV & 9.81 & 5.72 & 1.97 & 9.6 & 117.8 & 15.7 \\
+Jump ($J_t$) & 0.81 & 0.27 & 0.39 & 21.9 & 546.4 & 4.5 \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\small \textit{Notes:} $N = 2{,}163$ trading days. Annualized volatility is $\sqrt{252 \times \text{mean}} \times 100\%$. BPV and Jump use the combined day + night session. All measures use 5-minute sampling frequency on TAIFEX TX1 near-month futures. Day session: 09:00--13:30 ($\sim$60 bars). Night session: 15:00--05:00 ($\sim$168 bars).
+\end{flushleft}
+\end{table}
+
+An important caveat is that TX futures prices and 0050.TW ETF prices are not identical: the futures contract trades with a time-varying basis, and the leverage embedded in futures amplifies returns relative to the cash index. We therefore use $\text{RV}^{(\text{total})}$ from TX as a \textit{proxy} for the latent variance of the underlying TAIEX, acknowledging that basis risk introduces a source of measurement error that is not present when RV is computed directly from the traded asset. For the GJR-GARCH models, we continue to use 0050.TW daily returns, maintaining consistency with Sections~\ref{sec:leverage}--\ref{sec:vt}.
+
+
+\subsection{Return Decomposition: Night Session Dominance}
+\label{sec:hf_return}
+
+The TAIFEX night session (15:00--05:00) overlaps with U.S.\ market trading hours, creating a channel through which global information is reflected in Taiwan futures prices before the cash equity market opens. Using the full TX tick-level data (2017--2026, $N = 2{,}152$ days), we decompose the total daily TX return into three components: night session return (15:00 to 05:00), overnight gap (05:00 to 08:45), and day session return (08:45 to 13:45).
+
+Table~\ref{tab:return_decomp} reports that the night session accounts for \textbf{73.7\%} of the total daily return, with the overnight gap contributing 15.6\% and the day session only 10.5\%. This decomposition reveals that the majority of price discovery for Taiwan equities occurs \textit{outside} the cash market's trading hours. The TX futures VT strategy ($8.63/\text{VIX}$ applied to TX full-day returns) achieves a Sharpe ratio of 1.465 versus 1.370 for the equivalent 0050.TW strategy, with cross-OOS analysis showing TX outperforms in 3 of 4 sub-periods---particularly during bear markets (2022--2023: TX Sharpe 0.706 vs.\ 0050.TW 0.374). Transaction costs for TX futures are approximately 97\% lower than for 0050.TW ETF trades.
+
+\begin{table}[H]
+\centering
+\caption{TX Futures Return Decomposition (2017--2026)}
+\label{tab:return_decomp}
+\begin{tabular}{lcccc}
+\toprule
+Component & Time Window & Return Share & Correlation w/ 0050 gap \\
+\midrule
+Night Session & 15:00--05:00 & 73.7\% & 0.777 \\
+Overnight Gap & 05:00--08:45 & 15.6\% & --- \\
+Day Session & 08:45--13:45 & 10.5\% & --- \\
+\midrule
+Total & 15:00--13:45 & 100\% & 0.946 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+\subsection{Overnight Gap Decomposition: 61\% Is Tradable}
+\label{sec:hf_gap}
+
+A key finding from Appendix~\ref{app:tz} is that approximately 78\% of the 0050.TW close-to-close return is absorbed by the overnight gap, which was previously considered untradable. Using TAIFEX tick data, we decompose this gap into five time slots: Gap~A (13:45--15:00, no futures trading), Slot~B (15:00--21:30, pre-U.S.\ session), Slot~C (21:30--04:00, U.S.\ trading hours), Slot~D (04:00--05:00, pre-close), and Gap~E (05:00--08:45, no trading).
+
+Table~\ref{tab:gap_decomp} shows that the three tradable slots (B+C+D) account for \textbf{61.3\%} of the overnight gap variance and 69.2\% of its mean return, with a Sharpe ratio of 1.008. Slot~C (U.S.\ hours) is the largest single contributor at 39.8\% of variance and exhibits the highest correlation with SPY returns ($r = 0.641$). A regression of the stock gap on all five slot returns yields $R^2 = 0.83$, indicating that TAIFEX tick data explain 83\% of the previously opaque overnight gap.
+
+\begin{table}[H]
+\centering
+\caption{Overnight Gap Slot Decomposition ($N = 2{,}151$ days)}
+\label{tab:gap_decomp}
+\begin{tabular}{llccc}
+\toprule
+Slot & Time Window & Variance Share & Tradable? & Corr(SPY) \\
+\midrule
+Gap A & 13:45--15:00 & 5.1\% & No & --- \\
+Slot B & 15:00--21:30 & 16.2\% & Yes & 0.097 \\
+Slot C & 21:30--04:00 & 39.8\% & Yes & 0.641 \\
+Slot D & 04:00--05:00 & 5.3\% & Yes & --- \\
+Gap E & 05:00--08:45 & 23.6\% & No & --- \\
+\midrule
+Tradable (B+C+D) & & 61.3\% & & \\
+Non-tradable (A+E) & & 28.7\% & & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Slot~B (pre-U.S.) is surprisingly important, contributing 35.6\% of the mean gap return despite preceding U.S.\ market opening. This suggests significant price discovery occurs in the TAIFEX night session even before the primary information source (U.S.\ equities) begins trading, consistent with Asian traders processing overnight news and global futures movements. For Taiwan-based investors, these findings indicate that the overnight gap---previously viewed as untradable---is largely accessible via TAIFEX night session futures, though this channel is specific to markets with extended-hours futures trading that overlaps with U.S.\ equity hours.
+
+
+\subsection{HAR-RV Versus GARCH: Forecast Comparison}
+\label{sec:hf_har}
+
+The Heterogeneous Autoregressive model of Realized Volatility (HAR-RV) of \citet{corsi2009} exploits the well-documented long-memory properties of realized volatility by using three temporal aggregation horizons:
+\begin{equation}
+\text{RV}_t = \beta_0 + \beta_d \, \text{RV}_{t-1} + \beta_w \, \text{RV}_{t-1:5} + \beta_m \, \text{RV}_{t-1:22} + \varepsilon_t
+\label{eq:har}
+\end{equation}
+where $\text{RV}_{t-1:5} = \frac{1}{5}\sum_{j=1}^{5}\text{RV}_{t-j}$ and $\text{RV}_{t-1:22} = \frac{1}{22}\sum_{j=1}^{22}\text{RV}_{t-j}$ denote the weekly and monthly realized volatility averages. We also estimate the HAR-RV-J variant of \citet{andersen2007}, which adds the jump component $J_t$ as a fourth regressor. Both models are estimated by OLS with Newey-West standard errors.
+
+We evaluate forecasts on two parallel tracks that exploit different portions of the intraday data history:
+
+\textbf{Track A} (day-session only, 14 years: 2012--2025). This track uses $\text{RV}^{(\text{day})}$ as the target, leveraging the longer history of daytime tick data available before the night session was introduced. The in-sample period is 2012--2019 ($N = 1{,}945$), with out-of-sample evaluation over 2020--2025 ($N_{\text{OOS}} = 1{,}456$).
+
+\textbf{Track B} (full day + night, 8 years: 2017--2025). This track uses $\text{RV}^{(\text{total})}$, the more complete volatility measure incorporating both sessions. The in-sample period is 2017--2021 ($N = 1{,}116$), with out-of-sample evaluation over 2022--2025 ($N_{\text{OOS}} = 969$).
+
+GJR-GARCH and EWMA forecasts are computed using expanding estimation windows (starting from a minimum of 500 days) with refitting every 63 trading days.\footnote{Section~\ref{sec:vt} uses $w = 2{,}000$ rolling windows for daily-frequency evaluation over the longer 2006--2026 sample. Here we use expanding windows starting from a 500-day minimum because the TAIFEX night session sample begins only in May 2017, providing approximately 1,400 in-sample days before the OOS period starts in 2020. An expanding window maximizes the training data available at each refit point while maintaining strict out-of-sample discipline. Sensitivity analysis (not reported) confirms that results are qualitatively unchanged with $w = 1{,}000$ rolling windows.} Crucially, GARCH produces a $\hat{\sigma}_t^2$ forecast that targets the conditional variance of daily returns; when evaluated against 5-minute RV, any systematic scale mismatch is absorbed by QLIKE's scale-invariant property \citep{patton2011}.
+
+Table~\ref{tab:har_comparison} reports the out-of-sample forecast comparison. On both tracks, HAR-RV dominates GJR-GARCH by a wide margin. On Track A ($\text{RV}^{(\text{day})}$ target), HAR-RV achieves QLIKE of 0.181 versus 0.531 for GJR-GARCH---a 66\% improvement, with a Diebold-Mariano $t$-statistic of $-11.14$ (well above the \citealt{harvey2016} threshold of $|t| > 3.0$). On Track B ($\text{RV}^{(\text{total})}$ target), HAR-RV achieves QLIKE of 0.110 versus 0.202 for GJR-GARCH (46\% improvement, DM $t = -5.50$). The Spearman rank correlations tell the same story: HAR-RV achieves $\rho = 0.647$ (Track A) and $\rho = 0.767$ (Track B), compared to 0.421 and 0.677 for GJR-GARCH, respectively.
+
+\begin{table}[H]
+\centering
+\caption{Out-of-Sample Forecast Comparison: HAR-RV vs.\ GJR-GARCH}
+\label{tab:har_comparison}
+\begin{tabular}{lcccc}
+\toprule
+Model & QLIKE & Spearman $\rho$ & DM $t$ vs.\ HAR-RV & Cross-OOS wins \\
+\midrule
+\multicolumn{5}{l}{\textit{Track A: $\text{RV}^{(\text{day})}$, 14 years (2012--2025)}} \\
+HAR-RV     & 0.181 & 0.647 & ---     & 2/5 \\
+HAR-RV-J   & 0.180 & 0.647 & $+0.83$ & 3/5 \\
+EWMA       & 0.224 & 0.595 & $-4.09$ & 0/5 \\
+GJR-GARCH  & 0.531 & 0.421 & $-11.14$& 0/5 \\
+\midrule
+\multicolumn{5}{l}{\textit{Track B: $\text{RV}^{(\text{total})}$, 8 years (2017--2025)}} \\
+HAR-RV     & 0.110 & 0.767 & ---     & 3/5 \\
+HAR-RV-J   & 0.116 & 0.763 & $-1.01$ & 2/5 \\
+GJR-GARCH  & 0.202 & 0.677 & $-5.50$ & 0/5 \\
+EWMA       & 0.530 & 0.645 & $-3.43$ & 0/5 \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\small \textit{Notes:} QLIKE evaluated against 5-minute RV (Track A: day-session RV; Track B: day + night RV). DM $t$-statistics use Newey-West HAC standard errors; negative values indicate HAR-RV is superior. Cross-OOS: number of non-overlapping 2-year folds (5 total) where the model achieves the lowest QLIKE. HAR-RV and HAR-RV-J are estimated by OLS with periodic refit every 63 days. GJR-GARCH uses a 500-day rolling window with recursive out-of-sample $h_t$ propagation.
+\end{flushleft}
+\end{table}
+
+The cross-OOS validation reinforces these results. In five non-overlapping evaluation periods, the HAR family (HAR-RV or HAR-RV-J) achieves the lowest QLIKE in every fold on both tracks, while GJR-GARCH and EWMA win 0/5 folds in all configurations. The jump component provides negligible incremental value: HAR-RV-J does not significantly outperform HAR-RV on either track (DM $t = 0.83$ on Track A, $t = -1.01$ on Track B), consistent with the finding that jumps account for only 7.6\% of total RV on average.
+
+A notable result is that while HAR-RV's \textit{percentage} QLIKE improvement appears larger on Track A (66\%) than Track B (46\%), this reflects the different baseline scales: GJR-GARCH's QLIKE is 0.531 on Track A versus 0.202 on Track B, and the absolute improvement (0.350 vs.\ 0.092) confirms that Track A benefits more from HAR-RV. The interpretation is straightforward: when the target variable includes night-session volatility---information that is entirely invisible to GJR-GARCH, which conditions only on daily close-to-close returns---HAR-RV's advantage is amplified because it directly incorporates the night-session component through its RV input.
+
+
+\subsection{The Proxy Ceiling: Why $r^2$ Flatters GARCH}
+\label{sec:hf_proxy}
+
+A key question raised by Section~\ref{sec:vt} is why GJR-GARCH appears invincible in the daily-return framework: no GARCH-X specification, no realized volatility component, and no macroeconomic variable has dislodged GJR-GARCH from its position as the best (or at least not-significantly-worse) model when evaluated against $r_t^2$. The intraday evidence provides a clear explanation.
+
+Table~\ref{tab:proxy_ratio} compares the information content of $r_t^2$ and $\text{RV}^{(\text{total})}_t$ as volatility proxies. The median ratio $r_t^2 / \text{RV}_t^{(\text{total})}$ is 0.292---that is, a single daily squared return captures less than 30\% of the total realized variance measured at 5-minute frequency. The mean ratio (0.649) is higher due to occasional days where a single large return produces $r_t^2 > \text{RV}_t^{(\text{total})}$, but the median is the more informative statistic given the extreme right-skewness of both quantities.
+
+\begin{table}[H]
+\centering
+\caption{Daily Squared Return as a Proxy for Realized Volatility}
+\label{tab:proxy_ratio}
+\begin{tabular}{lccc}
+\toprule
+Statistic & $r_t^2 / \text{RV}^{(\text{day})}$ & $r_t^2 / \text{RV}^{(\text{total})}$ \\
+\midrule
+Mean & 1.135 & 0.649 \\
+Median & 0.553 & 0.292 \\
+Std & 1.487 & 0.917 \\
+Pearson corr ($r_t^2$ vs.\ RV) & 0.647 & 0.511 \\
+Spearman corr ($r_t^2$ vs.\ RV) & 0.351 & 0.316 \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\small \textit{Notes:} $N = 2{,}163$. Ratios computed for days where $\text{RV} > 0$. $r_t^2$ is the squared close-to-close log return of 0050.TW; RV is from TAIFEX TX1 5-minute data.
+\end{flushleft}
+\end{table}
+
+The implication is that $r_t^2$ is so noisy that the QLIKE loss function, despite its theoretical robustness to proxy noise \citep{patton2011}, cannot discriminate between models that differ in their ability to forecast the true latent variance. Patton's (2011) result guarantees that QLIKE preserves the \textit{ranking} of any two forecasts regardless of proxy noise---but it does not guarantee sufficient \textit{power} to detect ranking differences when the proxy signal-to-noise ratio is low. In our setting, the Spearman correlation between $r_t^2$ and $\text{RV}^{(\text{total})}$ is only 0.316, implying that $r_t^2$ ranks days by volatility magnitude with substantial error. Under this level of noise, the DM test has low power to distinguish between models that produce similar forecasts (e.g., GARCH vs.\ GJR-GARCH with similar persistence structures), even when one model is genuinely superior.
+
+To isolate whether the proxy itself drives model rankings, we conduct a controlled ablation that holds the estimation sample, window, and refit frequency fixed while varying only the evaluation target across three conditions: (A)~$r_t^2$, (B)~$\text{RV}^{(\text{day})}$, and (C)~$\text{RV}^{(\text{total})}$. The results are instructive: HAR-RV outperforms GJR-GARCH on \textit{both} $r_t^2$ (DM $t = -5.14$) and $\text{RV}^{(\text{day})}$ (DM $t = -11.14$). The noisy proxy does not reverse the ranking; rather, it compresses the QLIKE advantage from 66\% (under RV) to 16\% (under $r_t^2$)---a fourfold muting of the signal. This explains the ``GARCH ceiling'' documented in Section~\ref{sec:vt}: GJR-GARCH's apparent invincibility reflects not the market's dynamics but the low statistical power of DM tests conducted under a noisy proxy. We term this a \textit{proxy ceiling}---the noise in $r_t^2$ does not bias the ranking but severely attenuates the researcher's ability to detect true differences. Researchers should interpret insignificant DM results under $r_t^2$ with appropriate caution, particularly when sample sizes are moderate.
+
+
+\subsection{Night Session Volatility Share}
+\label{sec:hf_night}
+
+A distinctive structural feature of the TAIFEX is the growing importance of its after-hours trading session. The night session (15:00--05:00 local time) was extended to its current format on May 16, 2017, allowing Taiwan futures to trade during the overlap with U.S.\ and European market hours. Table~\ref{tab:night_share} reports the annual night-session share of total realized volatility. The trend is striking: the night share has increased from 24\% in 2017 to 57\% in the first quarter of 2026, meaning that more than half of TAIFEX volatility now originates outside the regular day session.
+
+\begin{table}[H]
+\centering
+\caption{Night-Session Volatility Share by Year}
+\label{tab:night_share}
+\begin{tabular}{lccc}
+\toprule
+Year & Night Share (\%) & Ann.\ Vol (\%) & $N$ \\
+\midrule
+2017 & 23.9 & 7.8 & 159 \\
+2018 & 36.6 & 12.8 & 244 \\
+2019 & 41.1 & 9.5 & 242 \\
+2020 & 39.4 & 20.8 & 245 \\
+2021 & 32.1 & 16.8 & 243 \\
+2022 & 54.2 & 17.5 & 246 \\
+2023 & 47.0 & 11.4 & 239 \\
+2024 & 51.4 & 18.4 & 242 \\
+2025 & 53.9 & 19.6 & 242 \\
+2026 (Q1) & 56.5 & 27.9 & 56 \\
+\midrule
+Full sample & 43.3 & 16.2 & 2,158 \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\small \textit{Notes:} Night share $= \text{RV}^{(\text{night})}/\text{RV}^{(\text{total})}$. Annualized volatility $= \sqrt{252 \times \overline{\text{RV}^{(\text{total})}}} \times 100\%$. 2017 begins May 16. The dip in 2021 coincides with a period of low global volatility (VIX annual average near 20), during which relatively more information was generated during domestic trading hours.
+\end{flushleft}
+\end{table}
+
+The structural increase in the night-session volatility share has two important implications. First, it fundamentally undermines the information content of close-to-close daily returns for volatility measurement. A daily $r_t^2$ observation captures only the price change between the 13:30 close of one day and the 13:30 close of the next---a period dominated by the overnight gap, which is itself a single price jump rather than a sum of high-frequency increments. As the night session accounts for an increasing share of total variation, $r_t^2$ becomes an increasingly poor proxy for $\sigma_t^2$, widening the ``proxy ceiling'' documented in Section~\ref{sec:hf_proxy}.
+
+Second, the growing night share reflects Taiwan's deepening integration into the global 24-hour trading ecosystem. The night session's volatility is driven primarily by U.S.\ market movements---consistent with the unidirectional spillover channel documented in Section~\ref{sec:spillover}---and its increasing contribution to total volatility implies that the VIX-proxy approach of Section~\ref{sec:vt} may become \textit{more} relevant over time, as a larger fraction of Taiwan volatility is generated during hours when VIX is being actively priced.
+
+Interestingly, the day-session and night-session annualized volatilities are now nearly identical at 11.5\% each. The fact that $\sqrt{11.5^2 + 11.5^2} = 16.3\%$ is close to the observed total annualized volatility of 16.2\% confirms that the two sessions contribute approximately independent volatility, a result consistent with the non-overlapping time zones and the absence of significant volatility spillback from Taiwan to U.S.\ markets documented in Section~\ref{sec:spillover}.
+
+
+\subsection{The Prediction--VaR Paradox}
+\label{sec:hf_paradox}
+
+The preceding subsections establish that HAR-RV is a significantly better volatility predictor than GJR-GARCH when evaluated against 5-minute RV. A natural expectation is that this superior prediction should translate into superior risk management---specifically, more accurate Value-at-Risk estimates. We now show that this expectation is dramatically wrong.
+
+Table~\ref{tab:var_paradox} reports VaR backtest results at the 1\% level over a common 450-day out-of-sample window (2023-03 to 2024-12), where all models---including HAR variants that require a 22-day burn-in---are evaluated on identical dates.\footnote{Results are qualitatively unchanged when GJR-based methods are evaluated on their full 481-day OOS window; the common-sample restriction ensures a like-for-like comparison.} GJR-GARCH combined with the Cornish-Fisher expansion (GJR+CF) passes the full ``Trinity'' of VaR backtests: Kupiec unconditional coverage ($p = 0.37$), Christoffersen independence ($p = 1.00$), and Basel Green Zone (3 violations in 250 days). It produces only 3 violations in 450 days (0.67\%).
+
+By contrast, every HAR-RV-based VaR method fails catastrophically at the 1\% level. HAR+Normal produces 15 violations in 450 days (3.3\%), HAR+CF produces 17 violations (3.8\%), and even the best HAR variant---HAR+HistSim (historical simulation of standardized residuals)---produces 9 violations (2.0\%). All three are in the Basel Red or Yellow Zone, and both HAR+Normal and HAR+CF fail the Kupiec test ($p < 0.001$).
+
+\begin{table}[H]
+\centering
+\caption{The Prediction--VaR Paradox: 1\% VaR Backtest Results (2023--2024)}
+\label{tab:var_paradox}
+\begin{tabular}{lcccccc}
+\toprule
+Method & QLIKE & Viol.\ Rate & $N_{\text{viol}}$ & Kupiec $p$ & Basel & Trinity \\
+\midrule
+GJR+CF & 0.220 & 0.62\% & 3/481 & 0.37 & Green & PASS \\
+GJR+Normal & 0.220 & 1.87\% & 9/481 & 0.09 & Yellow & FAIL \\
+HAR+HistSim & 0.101 & 2.00\% & 9/450 & 0.06 & Yellow & FAIL \\
+HAR+Normal & 0.101 & 3.33\% & 15/450 & $<$0.001 & Red & FAIL \\
+HAR+CF & 0.101 & 3.78\% & 17/450 & $<$0.001 & Red & FAIL \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\small \textit{Notes:} QLIKE evaluated against $\text{RV}^{(\text{total})}$ from TAIFEX 5-minute data. VaR: $\text{VaR}_{1\%,t} = \hat{\sigma}_t \times q_{0.01}$, where $q_{0.01}$ depends on the distributional assumption (Normal, Cornish-Fisher, or Historical Simulation of standardized residuals). Average 1\% VaR: GJR+CF $= -3.83\%$, HAR+Normal $= -2.09\%$. Trinity PASS requires: Kupiec ($p > 0.05$) + Christoffersen ($p > 0.05$) + Basel Green Zone.
+\end{flushleft}
+\end{table}
+
+This result---HAR-RV QLIKE 54\% better than GJR-GARCH, yet HAR produces nearly 6$\times$ more VaR violations---constitutes a prediction--VaR paradox. The resolution lies in two distinct mechanisms:
+
+The first mechanism is a dimension mismatch. HAR-RV predicts \textit{realized volatility}, which aggregates variance over all intraday intervals including the night session, whereas GJR-GARCH predicts the conditional variance of \textit{close-to-close returns}---the relevant quantity for VaR defined over the close-to-close holding period. Because the night session contributes 43\% of total RV (Section~\ref{sec:hf_night}), HAR's RV forecast is systematically larger than the realized close-to-close variance, but the excess is concentrated in non-overlapping hours. The VaR violation occurs when $|r_t^{\text{c2c}}| > \hat{\sigma}_t \times |q_{0.01}|$, where $r_t^{\text{c2c}}$ is the close-to-close return. Converting HAR's $\text{RV}^{(\text{total})}$ forecast to a close-to-close $\sigma$ estimate requires knowledge of the night-to-day volatility ratio, which is time-varying (Section~\ref{sec:hf_night}), introducing a source of systematic error that inflates the violation rate.
+
+The second mechanism is a distributional mismatch. When HAR-RV's $\hat{\sigma}_t = \sqrt{\widehat{\text{RV}}_t}$ is used to standardize daily returns, the resulting standardized residuals exhibit heavier tails (kurtosis 3.96) than the GJR-GARCH standardized residuals (kurtosis 3.61). The heavier tails arise because HAR's variance forecast, being the ``correct'' volatility measure, produces residuals that reflect genuine tail behavior rather than GARCH's smoothed version. Paradoxically, the \textit{better} volatility estimate produces \textit{worse} standardized residuals for parametric VaR, because the Normal and Cornish-Fisher distributional assumptions are more severely violated.
+
+The average 1\% VaR values quantify the conservatism gap: GJR+CF produces a VaR of $-3.83\%$, while HAR+Normal produces only $-2.09\%$---a difference of 1.74 percentage points. GJR's conditional variance, being estimated from close-to-close returns and conditioned on the full GARCH recursive structure, produces a naturally larger $\hat{\sigma}_t$ in the tails due to the persistence mechanism ($\beta = 0.82$) and the leverage effect ($\gamma = 0.12$). In contrast, HAR's $\hat{\sigma}_t$, while a better \textit{predictor} of tomorrow's intraday variance magnitude, does not incorporate the GARCH mechanism that amplifies $\hat{\sigma}_t$ precisely when large losses have occurred---the very moments when VaR protection is most needed.
+
+The practical implication is unambiguous: for VaR applications in the Taiwan market, GJR-GARCH with Cornish-Fisher remains the preferred method despite its inferior volatility prediction accuracy.\footnote{Section~\ref{sec:var} notes that the Cornish-Fisher expansion can diverge when applied to standardized residuals from very long rolling windows ($w = 2{,}000$), and recommends the skewed Student-$t$ distribution as an alternative. The CF results reported here use expanding-window residuals with shorter effective training periods, where the CF expansion converges reliably. When using $w = 2{,}000$ rolling windows as in Section~\ref{sec:var}, the skewed-$t$ VaR should be preferred; with expanding windows as used here, CF performs well.} Volatility forecasting and risk management are related but distinct objectives that reward different model properties.
+
+
+\subsection{Realized GARCH: Bridging Both Dimensions}
+\label{sec:hf_realgarch}
+
+The prediction--VaR paradox motivates a natural question: is there a model that performs well on \textit{both} dimensions---accurate volatility prediction (as measured by QLIKE on RV) and reliable VaR coverage? The Realized GARCH framework of \citet{hansen2012} offers a principled approach by incorporating realized volatility directly into the GARCH recursion, combining the structural advantages of GARCH (recursive variance updating, natural distributional framework for VaR) with the informational advantages of high-frequency data.
+
+We implement two Realized GARCH specifications:
+
+\textbf{RealGARCH-Simple.} Replaces $r_{t-1}^2$ in the GJR-GARCH variance equation with $\text{RV}_{t-1}^{(\text{total})}$:
+\begin{equation}
+h_t = \omega + (\alpha + \gamma \cdot \mathbb{1}_{r_{t-1}<0}) \, \text{RV}_{t-1}^{(\text{total})} + \beta \, h_{t-1}
+\label{eq:realgarch_simple}
+\end{equation}
+
+\textbf{RealGARCH-Log.} Uses the log-linear specification of \citet{hansen2012}, which ensures positivity without parameter constraints:
+\begin{equation}
+\log h_t = \omega + \beta \log h_{t-1} + \delta \log \text{RV}_{t-1}^{(\text{total})}
+\label{eq:realgarch_log}
+\end{equation}
+
+Both models are estimated by quasi-maximum likelihood with the same rolling window and refitting schedule as GJR-GARCH.
+
+Table~\ref{tab:realgarch} reports the results across both dimensions. On the volatility prediction dimension (QLIKE on $\text{RV}^{(\text{total})}$), HAR-RV remains the best model (QLIKE $= 0.101$), followed by RealGARCH-Simple (0.183), RealGARCH-Log (0.209), and GJR-GARCH (0.217). RealGARCH-Simple improves upon GJR-GARCH by 15.6\%, though this improvement is not statistically significant at the Harvey threshold (DM $t = 1.91$, $p = 0.056$). However, on the Spearman rank correlation---a distribution-free measure---RealGARCH-Log achieves the \textit{highest} value among all models ($\rho = 0.790$), exceeding even HAR-RV ($\rho = 0.776$). This suggests that the log-linear specification captures the \textit{ordinal ranking} of volatile versus calm days with remarkable accuracy, even though its point forecasts are less precise in QLIKE terms.
+
+\begin{table}[H]
+\centering
+\caption{Realized GARCH Performance Across Both Dimensions}
+\label{tab:realgarch}
+\begin{tabular}{lcccccc}
+\toprule
+Model & \multicolumn{2}{c}{Vol Prediction} & \multicolumn{4}{c}{1\% VaR (with Cornish-Fisher)} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-7}
+& QLIKE & Spearman $\rho$ & Viol. & Rate & Kupiec $p$ & Trinity \\
+\midrule
+HAR-RV         & 0.101 & 0.776 & 17/450 & 3.78\% & $<$0.001 & FAIL \\
+RealGARCH-Simple+CF & 0.183 & 0.768 & 4/481  & 0.83\% & 0.70    & FAIL$^{a}$ \\
+RealGARCH-Log+CF   & 0.209 & 0.790 & 3/481  & 0.62\% & 0.37    & PASS \\
+GJR-GARCH+CF   & 0.217 & 0.671 & 3/481  & 0.62\% & 0.37    & PASS \\
+\bottomrule
+\end{tabular}
+\begin{flushleft}
+\small \textit{Notes:} QLIKE and Spearman evaluated against $\text{RV}^{(\text{total})}$. VaR uses Cornish-Fisher expansion with rolling skewness and kurtosis of standardized residuals. $^{a}$RealGARCH-Simple+CF fails Trinity because of Christoffersen independence test ($p = 0.020 < 0.05$) despite passing Kupiec and Basel Green Zone; the 4 violations include 2 in close proximity, triggering the clustering penalty.
+\end{flushleft}
+\end{table}
+
+The critical finding is in the VaR column. RealGARCH-Log+CF achieves a full Trinity PASS: 3 violations in 481 days (0.62\%), with Kupiec $p = 0.37$, Christoffersen $p = 1.00$, and Basel Green Zone. It matches GJR-GARCH+CF on VaR performance (also 3 violations, Trinity PASS) while substantially improving volatility prediction (Spearman $\rho = 0.790$ vs.\ 0.671). RealGARCH-Log+CF therefore matches GJR+CF on VaR (both achieve 3 violations and Trinity PASS) while offering improved rank-order prediction accuracy (Spearman $\rho = 0.790$ vs.\ 0.671), though the VaR improvement over GJR is not statistically distinguishable at these low violation counts.
+
+RealGARCH-Simple+CF narrowly fails Trinity due to violation clustering: while its 4 violations pass the Kupiec unconditional coverage test ($p = 0.70$), two violations occur in close succession, failing the Christoffersen independence test ($p = 0.020$). This result illustrates the stringency of the Trinity criterion and suggests that minor specification differences can tip the balance between PASS and FAIL at low violation counts.
+
+The mechanism underlying RealGARCH-Log's dual success is its ability to combine the informational richness of 5-minute RV (which provides a precise volatility signal) with the GARCH recursion (which provides the persistent, self-exciting variance dynamics needed for conservative VaR estimates). The log-linear specification additionally stabilizes parameter estimates and prevents the occasionally extreme variance forecasts that can occur in the level specification when large RV values propagate through the recursion.
+
+\paragraph{Limitations and practical considerations.} The Realized GARCH approach requires access to intraday tick data, which may not be freely available for all markets or all sample periods. In the Taiwan context, TAIFEX tick data are available from 2012 (day session) and 2017 (including night session), limiting the out-of-sample evaluation window relative to the daily GARCH models evaluated over 2008--2026 in Section~\ref{sec:vt}. Furthermore, the TX futures are not identical to the 0050.TW ETF: basis risk, leverage, and different tick sizes introduce measurement error that would be absent if intraday data for 0050.TW itself were available. Finally, real-time implementation requires infrastructure for processing tick data and computing RV before the market opens---a non-trivial operational requirement compared to the simplicity of daily GARCH updates.
+
+These caveats notwithstanding, the Realized GARCH results suggest---at least for the Taiwan/TAIFEX setting---that the prediction--VaR paradox documented in Section~\ref{sec:hf_paradox} may be mitigated by channeling intraday information through a GARCH-compatible framework rather than a pure HAR specification. Whether this finding generalizes beyond Taiwan's specific market microstructure (particularly the night session overlap with U.S.\ trading hours) remains an open question for future research.

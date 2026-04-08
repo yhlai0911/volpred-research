@@ -1,0 +1,319 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{mathptmx}
+\usepackage[T1]{fontenc}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report}\\[0.5em]
+{\large Periodic Realized GARCH: Session-Boundary Information Transfers\\
+and Volatility Forecasting}\\[0.5em]
+{\normalsize Document Type: Journal Paper (target: Finance Research Letters)}\\
+{\normalsize Review Date: 2026-04-05}\\
+{\normalsize Review Standard: Strict (pre-submission)}
+\end{center}
+
+\bigskip
+
+%% =====================================================================
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{Severe issues (must fix)} & 3 items \\
+\textcolor{warncolor}{Medium issues (should fix)} & 8 items \\
+Minor issues (optional fix) & 9 items \\
+Overall assessment & \textbf{Good --- publishable after addressing severe issues} \\
+\end{tabular}
+
+\medskip
+\noindent
+\textbf{Executive summary.}
+The paper proposes the Periodic Realized GARCH (PRG), a parsimonious model with session-specific parameters that exploits overnight-to-intraday information transfer through a single GARCH recursion. The contribution is well-motivated, the ablation design is elegant, and the cross-market evidence is extensive. However, three severe issues must be resolved before submission: (1) a numerical discrepancy in Table~2, (2) a mislabeled VaR row in Table~4, and (3) missing bibliography entries for methods cited in the text. The remaining issues are presentation improvements that would strengthen the paper for FRL reviewers.
+
+%% =====================================================================
+\section*{1.\ Logic Structure}
+
+The paper follows a clear and effective structure: Introduction (motivation + literature + contributions) $\to$ Methodology (model + benchmarks + evaluation) $\to$ Data $\to$ Results (statistical + ablation + VaR/ES + economic) $\to$ Discussion $\to$ Conclusion.
+
+\textcolor{okgreen}{Strengths:}
+\begin{itemize}[nosep]
+\item The progression from model specification to ablation to economic significance is logically tight.
+\item The ablation study (Section 4.2) is the paper's strongest structural element: it directly isolates the session-boundary mechanism and provides a compelling ``single variable removed'' test.
+\item The Discussion section (Section 5) honestly acknowledges the frequency-mismatch between PRG and GJR, and correctly identifies the PRG-vs-Separate comparison as the cleanest test of the cross-session bridge.
+\end{itemize}
+
+\textcolor{warncolor}{Concerns:}
+\begin{itemize}[nosep]
+\item The abstract claims ``an ablation study removing the session-boundary update causes the advantage to collapse entirely (DM $t = 6.00 \to -0.57$)'' but the ablation table is only for SPY. The paper should clarify that the ablation is single-market (or extend it).
+\item The third contribution (``fair comparison framework reveals HAR dominance is a target-mismatch artifact'') is supported only by the TAIFEX result (DM $t = 0.57$). For the five OHLC markets, GJR significantly \emph{beats} HAR on the common target (all $|t| > 4$). The claim should be narrowed to the tick-data market.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{2.\ Research Motivation and Contributions}
+
+\textcolor{okgreen}{The motivation is strong.} The paper builds on the well-documented overnight/intraday asymmetry (Blanc et al.\ 2014) and identifies a genuine gap: existing session-decomposition models are complex (12+ parameters, continuous-time estimation), while standard GARCH ignores session boundaries entirely.
+
+\textcolor{warncolor}{Contribution refinement needed:}
+\begin{itemize}[nosep]
+\item \textbf{Contribution 1} (session-boundary information bridge with 6--8 parameters) is clear and well-supported.
+\item \textbf{Contribution 2} (fair comparison framework) is somewhat overstated. The idea that QLIKE on $r^2$ is proxy-robust is Patton (2011), and the idea of converting all forecasts to a common target is standard. The specific insight that HAR-vs-GJR rankings change when using a common target is interesting but limited to TAIFEX. Recommend reframing as ``we provide cross-model evidence that target choice matters'' rather than ``we develop a fair comparison framework.''
+\item \textbf{Contribution 3} (cross-asset evidence across six markets) is well-supported by the data.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{3.\ Literature Review}
+
+The introduction covers the key references well: Bollerslev and Ghysels (1996) for periodic GARCH, Blanc et al.\ (2014) for overnight/intraday feedback asymmetry, Linton and Wu (2020) for coupled DCS-EGARCH, Kim et al.\ (2023) for Overnight GARCH-It\^{o}, Todorova and Soucek (2014) for RV forecasting with overnight info, and Opschoor and Lucas (2021) for score-driven models.
+
+\textcolor{warncolor}{Gaps in the literature review:}
+\begin{itemize}[nosep]
+\item \textbf{Hansen et al.\ (2012) Realized GARCH:} This is in the bibliography but never cited in the text. Since the PRG name includes ``Realized GARCH,'' the relationship to Hansen et al.'s Realized GARCH framework should be explicitly discussed. The PRG uses squared returns (or RV) as a \emph{proxy} $x_n$ in the variance equation, similar in spirit to the measurement equation in Realized GARCH. Clarifying the distinction (PRG uses a direct GARCH recursion with proxy input vs.\ Realized GARCH's joint return-RV system) would preempt reviewer confusion.
+\item \textbf{Engle (1982) ARCH:} The foundational ARCH paper is not cited. While not strictly necessary, citing it alongside Bollerslev (1986) grounds the GARCH lineage.
+\item \textbf{Andersen and Bollerslev (1998):} The seminal paper on realized volatility is not cited. Since PRG uses RV for TAIFEX, this is a relevant reference.
+\item \textbf{Taylor and Xu (1997) or similar:} For overnight variance contribution decomposition.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{4.\ Model Specification}
+
+\textcolor{okgreen}{The PRG model specification (Eqs.\ 3--4) is clean, intuitive, and well-identified.} The session-by-session conditioning is clearly explained: when $n$ indexes an intraday session, $\mathcal{F}_{n-1}$ includes the completed overnight return, so $x_{n-1} = r^2_{n-1}$ is realized (not forecast). This is the core design insight and it is \textbf{not} lookahead.
+
+\textcolor{okgreen}{The stationarity condition} $\rho_0 \cdot \rho_1 < 1$ (Eq.\ 5) correctly follows Bollerslev and Ghysels (1996) for periodic GARCH. The unconditional variance formula (Eq.\ 6) is correctly derived.
+
+\textcolor{warncolor}{Model specification issues:}
+\begin{itemize}[nosep]
+\item \textbf{Persistence definition:} The paper defines $\rho_s = \alpha_s + 0.5\gamma_s + \beta_s$. The $0.5$ factor on $\gamma_s$ assumes $P(r_{n-1} < 0) = 0.5$, which is approximately true for daily returns but may not hold precisely for session-level returns (especially overnight, where the distribution can be skewed). This approximation should be acknowledged.
+\item \textbf{Innovation distribution:} The paper does not specify the conditional distribution of $r_n | \mathcal{F}_{n-1}$. For MLE estimation and VaR calculation, this matters. GJR is estimated with Student-$t$ innovations (Section~2.3), but the PRG's distributional assumption is never stated. Is it Normal? Student-$t$? This must be specified.
+\item \textbf{The PRG-to-full-day conversion:} Eq.\ (8) sums the two session forecasts $\hat{h}_{d,0} + \hat{h}_{d,1}$. This assumes zero correlation between overnight and intraday returns. The paper acknowledges this in the data section (``uncorrelated assumption,'' Eq.\ 3) but does not test it. A brief mention of the empirical correlation between $r_{d,0}$ and $r_{d,1}$ would be helpful.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{5.\ Equations and Derivations}
+
+\textcolor{okgreen}{All equations are mathematically correct.} The PRG Basic (Eq.\ 3), PRG Extended (Eq.\ 4), stationarity condition (Eq.\ 5), unconditional variance (Eq.\ 6), and full-day forecast (Eq.\ 8) are properly specified.
+
+\textcolor{warncolor}{Issues:}
+\begin{itemize}[nosep]
+\item \textbf{Log-likelihood:} The paper never writes the log-likelihood function. For a methodology paper proposing a new model, this is an important omission. Even a single equation showing $\ell = \sum_{n} [-\frac{1}{2}\log h_n - \frac{r_n^2}{2h_n}]$ (for Gaussian) or the Student-$t$ version would help reproducibility.
+\item \textbf{The ``Separate GARCH'' benchmark:} Section~2.3 describes it as ``independent GARCH(1,1) models for each session with no cross-session linkage.'' It should be clarified whether these are standard GARCH(1,1) (without leverage) or GJR-GARCH(1,1). The current text says ``GARCH(1,1)'' for the Separate model but ``GJR-GARCH(1,1)'' for the main benchmark. If Separate uses GARCH without leverage and PRG Extended uses leverage, the comparison confounds leverage with the cross-session bridge.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{6.\ Symbol Definition and Consistency}
+
+\textcolor{okgreen}{Symbols are generally well-defined at first use.} The session index $s_n$, return $r_n$, proxy $x_n$, conditional variance $h_n$, and information set $\mathcal{F}_{n-1}$ are all clearly introduced.
+
+\textcolor{warncolor}{Minor inconsistencies:}
+\begin{itemize}[nosep]
+\item $\rho$ is used for both session persistence ($\rho_s$) and Spearman rank correlation (Table~2). This dual usage could confuse readers. Consider using a different symbol for one.
+\item The notation switches between day-indexed ($d$) and session-indexed ($n$) without a clear mapping. Eq.\ (8) uses $\hat{h}_{d,0}$ and $\hat{h}_{d,1}$ (day-indexed with session subscript), while Eq.\ (3) uses $h_n$ (sequential index). A brief note like ``$h_{d,0} \equiv h_{2d-1}$ and $h_{d,1} \equiv h_{2d}$'' would help.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{7.\ Research Methods}
+
+\textcolor{okgreen}{Strengths:}
+\begin{itemize}[nosep]
+\item The evaluation framework is comprehensive: QLIKE (Patton 2011), DM test with Harvey correction, MCS, Spearman, VaR (Kupiec + Christoffersen + Basel), ES (Fissler--Ziegel + Acerbi--Szekely).
+\item The common target $\sigma^2_{\text{full}} = r^2_{\text{overnight}} + r^2_{\text{intraday}}$ is a principled choice.
+\item The ablation design (PRG vs.\ Separate GARCH) cleanly isolates the cross-session bridge effect.
+\end{itemize}
+
+\textcolor{warncolor}{Concerns:}
+\begin{itemize}[nosep]
+\item \textbf{Refit frequency asymmetry:} GJR and HAR are refitted every 63 days, but PRG and Separate every 126--252 days. This could bias results: less frequent refitting may be either better (more stable) or worse (slower adaptation). A sensitivity check with equal refit frequencies would strengthen the paper.
+\item \textbf{HAR log-space estimation:} The paper says HAR is ``estimated in log-space \ldots forecasts are converted to levels via the Duan (1995) smearing correction.'' The Duan (1995) smearing estimator was developed for option pricing under GARCH, not for log-RV forecasting. The standard approach for converting log-HAR forecasts to levels uses the variance of residuals: $\hat{\text{RV}}_t = \exp(\hat{y}_t + 0.5\hat{\sigma}^2_\varepsilon)$. If a different correction is used, please specify; if it is the standard exponential smearing, cite Corsi (2009) or the original Duan reference. Currently, Duan (1995) has \textbf{no bibliography entry} (see Section~11).
+\item \textbf{VT strategy without transaction costs:} The paper acknowledges this limitation but still draws strong conclusions (``64\% improvement in risk-adjusted returns''). With average daily turnover of 5--7\%, transaction costs could meaningfully erode returns. Even a rough adjustment (e.g., 2 bps per round-trip) would strengthen credibility.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{8.\ Data and Sample Design}
+
+\textcolor{okgreen}{The data coverage is a strength:} six markets spanning equities, commodities, and emerging markets, with both tick-level (TAIFEX) and daily OHLC data. The overnight variance share varies from 28\% to 53\%, providing natural variation for testing PRG's advantage.
+
+\textcolor{warncolor}{Issues:}
+\begin{itemize}[nosep]
+\item \textbf{Inconsistent OOS periods:} The OOS periods differ substantially across markets (2018/05 to 2026/04 for QQQ vs.\ 2022/07 to 2025/12 for TAIFEX). While this reflects the data availability, it means results are not directly comparable across markets. The OOS periods overlap with different macro regimes (COVID, 2022 rate hikes, etc.).
+\item \textbf{Table~1 ON var range for TAIFEX:} The table shows ``27--50\%'' rather than a single number, reflecting non-stationarity in the variance decomposition. This deserves brief explanation in the text (the TAIFEX overnight share shifts over time as the night session was extended).
+\item \textbf{0050.TW data quality:} The paper mentions ``cleaned for the 2014 stock split following standard procedures'' but does not specify what these procedures are. Given the known Yahoo Finance issue where pre-2014 prices are 4x too high, this should be more explicit (e.g., ``prices before 2014-01-02 are divided by 4 following the 1:4 stock split'').
+\end{itemize}
+
+
+%% =====================================================================
+\section*{9.\ Results and Claims}
+
+\textcolor{okgreen}{The core results are strong and well-supported:}
+\begin{itemize}[nosep]
+\item PRG Extended beats GJR in all six markets with DM $t \in [4.26, 6.63]$ --- all above Harvey (2016) $|t| > 3.0$.
+\item The ablation study is clean: removing the cross-session update collapses DM from 6.00 to $-0.57$ on SPY.
+\item Economic significance: PRG Extended Sharpe 1.66 vs.\ BH 1.01 on TAIFEX, with MDD reduced from 31.7\% to 11.5\%.
+\end{itemize}
+
+\textcolor{warncolor}{Concerns:}
+\begin{itemize}[nosep]
+\item \textbf{MCS results are weak for OHLC markets:} All five models survive the MCS for all five OHLC markets (Table~2, ``All'' in MCS column). Only TAIFEX has a discriminating MCS (``PRG only''). This means the MCS cannot distinguish models in the majority of cases, likely due to proxy noise. The paper should discuss this more explicitly rather than focusing on the TAIFEX MCS as if it were representative.
+\item \textbf{The ``consistent ranking'' claim:} Section~4.3 states ``The consistent ranking---PRG Extended $>$ PRG Basic $>$ Separate $>$ GJR $>$ HAR---holds across all six markets for both VaR and ES evaluations.'' This is not fully accurate for VaR. On EEM at 1\%, PRG Extended has VR = 0.40\% (too conservative, Kupiec rejects), while Separate has VR = 1.33\% (Kupiec passes). A model that rejects Kupiec because it is \emph{too conservative} should not be ranked above one that passes.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{10.\ Citation and Reference Audit}
+
+\textcolor{errorred}{Missing bibliography entries for cited methods:}
+\begin{enumerate}[nosep]
+\item \textbf{Duan (1995):} Cited in Section~2.3 (``Duan (1995) smearing correction'') but has no \texttt{bibitem} entry.
+\item \textbf{Kupiec (1995):} Referenced in Section~2.4 and Table~4 but not in the bibliography.
+\item \textbf{Christoffersen (1998):} Referenced in Section~2.4 but not in the bibliography.
+\item \textbf{Acerbi--Szekely:} Mentioned by name in Section~4.3 but not formally cited and not in the bibliography.
+\end{enumerate}
+
+\textcolor{warncolor}{Orphan bibliography entries (in bibliography, never cited):}
+\begin{enumerate}[nosep]
+\item \texttt{Bollerslev1986}: Bollerslev (1986) GARCH paper --- foundational but not cited in text.
+\item \texttt{Hansen2016RealizedGARCH}: Hansen and Huang (2016) Exponential GARCH with realized measures --- not cited.
+\item \texttt{Hansen2012}: Hansen, Huang, and Shek (2012) Realized GARCH --- not cited.
+\item \texttt{Tsiakas2008}: Tsiakas (2008) overnight information and SV --- not cited.
+\end{enumerate}
+
+\noindent These should either be cited in the text or removed from the bibliography.
+
+
+%% =====================================================================
+\section*{11.\ Writing and Presentation}
+
+\textcolor{okgreen}{The writing quality is high for a finance paper:} clear, concise, and well-organized. The paper reads efficiently at approximately 14 pages (appropriate for FRL).
+
+\textcolor{warncolor}{Minor writing issues:}
+\begin{itemize}[nosep]
+\item The abstract is dense (190+ words). FRL typically prefers 100--150 words. Consider shortening.
+\item ``The PRG model makes three contributions'' in the introduction --- consider ``This paper makes three contributions'' for consistency with the formal tone.
+\item Section~5 (Discussion) opens with an insightful observation (overnight share correlates with PRG advantage) but does not test it formally (e.g., cross-sectional regression of DM $t$-statistic on overnight share). With six data points this is admittedly limited, but a scatter plot or Spearman rank correlation would elevate the claim.
+\end{itemize}
+
+
+%% =====================================================================
+\section*{12.\ Specific Issue List}
+
+\subsection*{\textcolor{errorred}{Severe Issues (Must Fix)}}
+
+\begin{enumerate}[label=\textbf{S\arabic*}]
+
+\item \textbf{Table~2 numerical discrepancy: 0050.TW ``PRG vs HAR'' reports $t = 7.42$ but experiment data shows $t = 4.51$.}
+
+The experiment file \texttt{k886\_prg\_0050tw\_results.json} records HAR\_vs\_PRG\_Extended $t = 4.513$ (Harvey PASS). The paper reports 7.42, which does not match any DM test in the JSON. This must be corrected. The true value ($t = 4.51$) still exceeds the Harvey threshold, so the qualitative conclusion is unchanged, but the number itself is wrong.
+
+\item \textbf{Table~2 numerical discrepancy: TAIFEX ``PRG vs Sep'' reports $t = -4.15$ but experiment data shows $t = -3.30$.}
+
+The experiment file \texttt{k883\_results.json} (which includes the Separate GARCH benchmark for TAIFEX) records PRG\_Extended\_vs\_Separate\_GARCH $t = -3.30$ (Harvey PASS). The paper reports $-4.15$, which does not match. This must be corrected. Since $|-3.30| > 3.0$, the Harvey threshold is still passed, but the reported number is wrong.
+
+\item \textbf{Missing bibliography entries for cited methods (Section~10).}
+
+Four methods are referenced in the text (Duan 1995, Kupiec 1995, Christoffersen 1998, Acerbi--Szekely 2014) but have no corresponding \texttt{bibitem} entries. This will produce unresolved citation warnings and is a basic submission requirement. Add the missing entries.
+
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{Medium Issues (Should Fix)}}
+
+\begin{enumerate}[label=\textbf{M\arabic*}]
+
+\item \textbf{Table~4 TAIFEX PRG Ext VaR numbers appear to come from PRG Basic, not PRG Extended.}
+
+Table~4 reports TAIFEX (PRG Ext) VR = 0.95\%, Kupiec $p$ = 0.88, Basel Green. The experiment file \texttt{k874e\_results.json} shows these numbers match \textbf{PRG Basic} (Normal quantile): VR = 0.949\%, Kupiec $p$ = 0.881. The PRG \textbf{Extended} (Normal) results are: VR = 0.24\%, Kupiec $p$ = 0.008. Either the label should be changed to PRG Basic, or the correct PRG Extended numbers should be used. This affects the paper's VaR narrative.
+
+\item \textbf{Innovation distribution not specified for PRG.}
+
+The GJR benchmark uses Student-$t$ innovations, but the PRG's conditional distribution is never stated. For MLE estimation and VaR/ES computation, this is essential. Add a brief statement (e.g., ``PRG is estimated under Gaussian innovations'' or ``Student-$t$'').
+
+\item \textbf{Contribution 2 is overstated.}
+
+The ``fair comparison framework'' is positioned as a major contribution, but the key finding (HAR dominance is a target-mismatch artifact) only holds for TAIFEX. For the five OHLC markets, GJR significantly beats HAR on the common target. Suggest reframing as an empirical finding rather than a methodological contribution.
+
+\item \textbf{Log-likelihood not provided.}
+
+A new model paper should include the log-likelihood function to enable replication. Even one equation would suffice.
+
+\item \textbf{Separate GARCH leverage ambiguity.}
+
+The text says the Separate benchmark uses ``GARCH(1,1)'' but PRG Extended uses leverage ($\gamma_s$). If Separate lacks leverage, the PRG-vs-Separate comparison confounds the cross-session bridge with the leverage term. Clarify whether Separate uses leverage, or compare PRG Basic (no leverage) against Separate.
+
+\item \textbf{Orphan bibliography entries.}
+
+Four entries appear in the bibliography but are never cited: Bollerslev (1986), Hansen and Huang (2016), Hansen et al.\ (2012), Tsiakas (2008). Either cite them in the text or remove them.
+
+\item \textbf{EEM VaR interpretation.}
+
+PRG Extended achieves VR = 0.40\% at the 1\% level (Kupiec $p < 0.01$, rejecting $H_0$: VR = 1\%). This means the model is \emph{too conservative}. Ranking it ``1st'' is misleading because VaR accuracy means being close to the target rate, not having the fewest violations. Discuss this nuance.
+
+\item \textbf{Refit frequency asymmetry not addressed.}
+
+GJR/HAR refit every 63 days; PRG every 126--252 days. This introduces a potential confound. Even a brief argument for why this is acceptable (e.g., ``PRG parameters are more stable'') would help.
+
+\end{enumerate}
+
+\subsection*{Minor Issues (Optional Fix)}
+
+\begin{enumerate}[label=\textbf{m\arabic*}]
+
+\item \textbf{Abstract length:} Consider shortening to 100--150 words for FRL format.
+
+\item \textbf{$\rho$ dual usage:} $\rho_s$ for persistence and Spearman $\rho$ in Table~2. Use $\rho^{\text{Sp}}$ or $r_s$ for Spearman to avoid ambiguity.
+
+\item \textbf{Notation bridge:} Add a mapping between day-index $d$ and sequential index $n$ (e.g., $h_{d,0} = h_{2d-1}$).
+
+\item \textbf{Transaction costs in VT:} Even a rough cost adjustment (e.g., 2 bps per trade, applied to average turnover) would meaningfully strengthen the economic significance claims.
+
+\item \textbf{Test overnight--intraday correlation:} The additivity assumption $\sigma^2_{\text{full}} = r^2_{d,0} + r^2_{d,1}$ relies on zero correlation. Report the sample correlation.
+
+\item \textbf{Persistence definition with $P(r<0) = 0.5$:} Acknowledge this approximation.
+
+\item \textbf{Section~5 cross-sectional test:} A scatter plot of DM $t$ vs.\ overnight variance share across the six markets would elegantly visualize the claimed relationship.
+
+\item \textbf{0050.TW cleaning:} Specify the data cleaning procedure more explicitly.
+
+\item \textbf{Harvey (2016) citation format:} The \texttt{bibitem} lists only ``Harvey, C.~R., Liu, Y., and Zhu, H.'' but in text it is sometimes cited as just ``Harvey (2016)''. The APA format for three authors requires all three at first mention.
+
+\end{enumerate}
+
+
+%% =====================================================================
+\section*{13.\ Summary and Recommendations}
+
+\textbf{Overall assessment:} This is a well-conceived paper with a clean model, strong empirical results, and a clever ablation design. The PRG model is a genuine and useful contribution to the volatility forecasting literature. The cross-market evidence is compelling, and the writing quality is high.
+
+\textbf{Key strength:} The ablation study is the paper's ``killer argument'' --- the $6.57\sigma$ gap between full PRG and ablated PRG is a clean, convincing demonstration that the session-boundary information bridge is the mechanism.
+
+\textbf{Revision priority:}
+\begin{enumerate}
+\item \textbf{[S1--S2]} Fix the numerical discrepancies in Table~2 (0050.TW PRG-vs-HAR and TAIFEX PRG-vs-Sep). These are straightforward corrections that do not change qualitative conclusions.
+\item \textbf{[S3]} Add missing bibliography entries (Duan, Kupiec, Christoffersen, Acerbi--Szekely).
+\item \textbf{[M1]} Correct or relabel the TAIFEX VaR row in Table~4.
+\item \textbf{[M2]} Specify the PRG innovation distribution.
+\item \textbf{[M3--M4]} Reframe Contribution~2 and add the log-likelihood.
+\item \textbf{[M5--M8]} Address the remaining medium issues.
+\end{enumerate}
+
+\noindent
+After addressing the three severe issues and the most important medium issues, this paper should be competitive for Finance Research Letters.
+
+\end{document}

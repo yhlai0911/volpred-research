@@ -1,0 +1,157 @@
+{
+  "experiment_id": "K965",
+  "title": "Wild Bootstrap Optimal Hedge Ratio — SPY/ES=F",
+  "date": "2026-04-07",
+  "data_source": "yfinance",
+  "asset_pair": "SPY/ES=F",
+  "spot": "SPY",
+  "futures": "ES=F",
+  "sample_period": "2010-01-05 to 2026-04-02",
+  "n_total": 4084,
+  "n_train": 2450,
+  "n_test": 1634,
+  "is_period": "2010-01-05 to 2019-10-01",
+  "oos_period": "2019-10-02 to 2026-04-02",
+  "correlation": 0.9740562385903913,
+  "method": "Wild Bootstrap (Mammen 1993 two-point)",
+  "reference": "JRFM 2024, Vol 17, Issue 7, Article 310",
+  "bootstrap_reps": 10000,
+  "seed": 42,
+  "ols_hedge_ratio": 0.9550150278986853,
+  "bootstrap_percentiles": {
+    "5": 0.9396420357687655,
+    "10": 0.9433572093572398,
+    "25": 0.9492390645217929,
+    "50": 0.9554818553411251,
+    "75": 0.9613254621337982,
+    "90": 0.9660107763382786,
+    "95": 0.9684461304613866
+  },
+  "bootstrap_mean": 0.95501239888542,
+  "bootstrap_std": 0.008721983306821569,
+  "dcc_params": {
+    "a": 0.08,
+    "b": 0.8
+  },
+  "oos_results": {
+    "Naive (h=1)": {
+      "HE": 0.9425683650991789,
+      "Downside_HE": 0.9304179431649694,
+      "VaR_5pct_hedged": -0.0014600303128955664,
+      "VaR_5pct_unhedged": -0.01788024313155461,
+      "VaR_reduction": 0.918343934019614,
+      "Ann_mean_hedged": 0.013153324988692247,
+      "Ann_mean_unhedged": 0.14161797158639455,
+      "Ann_std_hedged": 0.04848534634019823,
+      "Ann_std_unhedged": 0.20231818135613483
+    },
+    "OLS Static": {
+      "HE": 0.9435497467656705,
+      "Downside_HE": 0.9322913301235294,
+      "VaR_5pct_hedged": -0.0017043085261472907,
+      "VaR_5pct_unhedged": -0.01788024313155461,
+      "VaR_reduction": 0.9046820273299545,
+      "Ann_mean_hedged": 0.018932303531895133,
+      "Ann_mean_unhedged": 0.14161797158639455,
+      "Ann_std_hedged": 0.04806930684840143,
+      "Ann_std_unhedged": 0.20231818135613483
+    },
+    "Rolling OLS (252d)": {
+      "HE": 0.9401535671212755,
+      "Downside_HE": 0.928274349626228,
+      "VaR_5pct_hedged": -0.0015966865828163776,
+      "VaR_5pct_unhedged": -0.01788024313155461,
+      "VaR_reduction": 0.9107010698306118,
+      "Ann_mean_hedged": 0.018738167086563916,
+      "Ann_mean_unhedged": 0.14161797158639455,
+      "Ann_std_hedged": 0.04949417017937489,
+      "Ann_std_unhedged": 0.20231818135613483
+    },
+    "DCC-GARCH": {
+      "HE": 0.9343561831275211,
+      "Downside_HE": 0.9246971016515876,
+      "VaR_5pct_hedged": -0.0017894335824798573,
+      "VaR_5pct_unhedged": -0.01788024313155461,
+      "VaR_reduction": 0.8999211828768755,
+      "Ann_mean_hedged": 0.016897450048327132,
+      "Ann_mean_unhedged": 0.14161797158639455,
+      "Ann_std_hedged": 0.051836041047017535,
+      "Ann_std_unhedged": 0.20231818135613483
+    },
+    "WB 25th pct": {
+      "HE": 0.9433796841809953,
+      "Downside_HE": 0.9329346564498866,
+      "VaR_5pct_hedged": -0.001758670150263947,
+      "VaR_5pct_unhedged": -0.01788024313155461,
+      "VaR_reduction": 0.9016417093814407,
+      "Ann_mean_hedged": 0.019674310625868892,
+      "Ann_mean_unhedged": 0.14161797158639455,
+      "Ann_std_hedged": 0.048141659428694354,
+      "Ann_std_unhedged": 0.20231818135613483
+    },
+    "WB 50th pct": {
+      "HE": 0.9435605487417363,
+      "Downside_HE": 0.9320939238438692,
+      "VaR_5pct_hedged": -0.0016938378757612698,
+      "VaR_5pct_unhedged": -0.01788024313155461,
+      "VaR_reduction": 0.9052676262118591,
+      "Ann_mean_hedged": 0.018872332709479998,
+      "Ann_mean_unhedged": 0.14161797158639455,
+      "Ann_std_hedged": 0.0480647075037172,
+      "Ann_std_unhedged": 0.20231818135613483
+    },
+    "WB 75th pct": {
+      "HE": 0.9436585271960953,
+      "Downside_HE": 0.9319010492670078,
+      "VaR_5pct_hedged": -0.001562828900920662,
+      "VaR_5pct_unhedged": -0.01788024313155461,
+      "VaR_reduction": 0.9125946504517816,
+      "Ann_mean_hedged": 0.018121635828003312,
+      "Ann_mean_unhedged": 0.14161797158639455,
+      "Ann_std_hedged": 0.048022969399864134,
+      "Ann_std_unhedged": 0.20231818135613483
+    }
+  },
+  "cross_oos": {
+    "OLS Static": {
+      "mean_HE": 0.9518215952583757,
+      "std_HE": 0.011693593604519726,
+      "n_periods": 5
+    },
+    "Rolling OLS (252d)": {
+      "mean_HE": 0.9515210770561817,
+      "std_HE": 0.012000357353359284,
+      "n_periods": 5
+    },
+    "DCC-GARCH": {
+      "mean_HE": 0.9450090755524887,
+      "std_HE": 0.01737027615962394,
+      "n_periods": 5
+    },
+    "WB 25th pct": {
+      "mean_HE": 0.9518902431264047,
+      "std_HE": 0.011142851003556857,
+      "n_periods": 5
+    },
+    "WB 50th pct": {
+      "mean_HE": 0.9517187900743748,
+      "std_HE": 0.011899211890727818,
+      "n_periods": 5
+    },
+    "WB 75th pct": {
+      "mean_HE": 0.95150395739041,
+      "std_HE": 0.012198986485311527,
+      "n_periods": 5
+    },
+    "Naive (h=1)": {
+      "mean_HE": 0.9497684453782824,
+      "std_HE": 0.013362255069491335,
+      "n_periods": 5
+    }
+  },
+  "conclusion": "Wild Bootstrap OHR experiment on SPY/ES=F (4084 days, OOS=1634 days). Best HE: WB 75th pct (0.9437), Best Downside HE: WB 25th pct (0.9329). OLS static HR=0.9550, Bootstrap 50th=0.9555 (diff=0.0005). Bootstrap std=0.0087, 95% CI: [0.9396, 0.9684]. WB 50th outperforms OLS Static by 0.0000 HE points.",
+  "best_method_HE": "WB 75th pct",
+  "best_HE": 0.9436585271960953,
+  "best_method_Downside_HE": "WB 25th pct",
+  "best_Downside_HE": 0.9329346564498866
+}

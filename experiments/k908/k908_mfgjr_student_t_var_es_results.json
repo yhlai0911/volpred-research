@@ -1,0 +1,1600 @@
+{
+  "experiment_id": "K908",
+  "title": "MF-GJR + Student-t Distribution \u2014 VaR/ES Complete Evaluation",
+  "timestamp": "2026-04-05T17:58:10.739304+00:00",
+  "runtime_seconds": 101.5,
+  "methodology": {
+    "volatility_models": [
+      "GJR-GARCH(1,1)",
+      "MF-GJR (Engle-Ghysels-Sohn 2013)"
+    ],
+    "distributions": [
+      "Normal",
+      "Student-t (MLE, per-refit)",
+      "Historical Simulation"
+    ],
+    "var_models": [
+      "GJR+Normal",
+      "GJR+Student-t",
+      "MF-GJR+Normal",
+      "MF-GJR+Student-t",
+      "MF-GJR+HistSim"
+    ],
+    "mf_long_run": "tau_t = exp(theta_0 + theta_1 * log(VIX_{t-1}))",
+    "mf_short_run_gjr": "g_t = (1-a-g/2-b) + a*u^2_{t-1} + g*u^2_{t-1}*I(u<0) + b*g_{t-1}",
+    "student_t_var": "VaR = sigma * |t_ppf(alpha, df)| * sqrt((df-2)/df)",
+    "student_t_es": "ES = sigma * [pdf/alpha] * [(df+q^2)/(df-1)] * sqrt((df-2)/df)",
+    "estimation": "Rolling window (w=2000), refit every 63 days, MLE with multi-start",
+    "var_evaluation": "Kupiec (1995) + Christoffersen (1998) + Basel traffic light = Trinity",
+    "es_evaluation": "Acerbi & Szekely (2014) Z-test + Fissler & Ziegel (2016) joint scoring"
+  },
+  "data": {
+    "source": "yfinance",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "0050.TW"
+    ],
+    "period": "2005-01-01 to 2026-04-01",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63
+  },
+  "results": {
+    "SPY": {
+      "ticker": "SPY",
+      "n_oos": 1821,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 29,
+      "qlike": {
+        "GJR": 1.48632,
+        "MF-GJR": 1.409427
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GJR": -5.173
+      },
+      "dm_mfgjr_vs_gjr": {
+        "t": -3.243,
+        "p": 0.0012,
+        "significant_harvey": true
+      },
+      "student_t_df": {
+        "GJR": {
+          "mean_df": 6.1,
+          "min_df": 5.4,
+          "max_df": 7.04,
+          "final_df": 6.9,
+          "all_estimates": [
+            {
+              "refit": 1,
+              "date": "2019-01-02",
+              "df": 5.86
+            },
+            {
+              "refit": 2,
+              "date": "2019-04-03",
+              "df": 5.94
+            },
+            {
+              "refit": 3,
+              "date": "2019-07-03",
+              "df": 5.62
+            },
+            {
+              "refit": 4,
+              "date": "2019-10-02",
+              "df": 5.6
+            },
+            {
+              "refit": 5,
+              "date": "2020-01-02",
+              "df": 5.88
+            },
+            {
+              "refit": 6,
+              "date": "2020-04-02",
+              "df": 5.82
+            },
+            {
+              "refit": 7,
+              "date": "2020-07-02",
+              "df": 5.4
+            },
+            {
+              "refit": 8,
+              "date": "2020-10-01",
+              "df": 5.83
+            },
+            {
+              "refit": 9,
+              "date": "2020-12-31",
+              "df": 6.06
+            },
+            {
+              "refit": 10,
+              "date": "2021-04-05",
+              "df": 5.79
+            },
+            {
+              "refit": 11,
+              "date": "2021-07-02",
+              "df": 5.87
+            },
+            {
+              "refit": 12,
+              "date": "2021-10-01",
+              "df": 5.91
+            },
+            {
+              "refit": 13,
+              "date": "2021-12-31",
+              "df": 6.04
+            },
+            {
+              "refit": 14,
+              "date": "2022-04-01",
+              "df": 6.11
+            },
+            {
+              "refit": 15,
+              "date": "2022-07-05",
+              "df": 5.99
+            },
+            {
+              "refit": 16,
+              "date": "2022-10-03",
+              "df": 6.07
+            },
+            {
+              "refit": 17,
+              "date": "2023-01-03",
+              "df": 5.82
+            },
+            {
+              "refit": 18,
+              "date": "2023-04-04",
+              "df": 6.13
+            },
+            {
+              "refit": 19,
+              "date": "2023-07-06",
+              "df": 6.09
+            },
+            {
+              "refit": 20,
+              "date": "2023-10-04",
+              "df": 6.25
+            },
+            {
+              "refit": 21,
+              "date": "2024-01-04",
+              "df": 6.19
+            },
+            {
+              "refit": 22,
+              "date": "2024-04-05",
+              "df": 6.05
+            },
+            {
+              "refit": 23,
+              "date": "2024-07-08",
+              "df": 6.39
+            },
+            {
+              "refit": 24,
+              "date": "2024-10-04",
+              "df": 6.67
+            },
+            {
+              "refit": 25,
+              "date": "2025-01-06",
+              "df": 6.46
+            },
+            {
+              "refit": 26,
+              "date": "2025-04-08",
+              "df": 6.51
+            },
+            {
+              "refit": 27,
+              "date": "2025-07-10",
+              "df": 6.67
+            },
+            {
+              "refit": 28,
+              "date": "2025-10-08",
+              "df": 7.04
+            },
+            {
+              "refit": 29,
+              "date": "2026-01-08",
+              "df": 6.9
+            }
+          ]
+        },
+        "MF-GJR": {
+          "mean_df": 7.95,
+          "min_df": 7.53,
+          "max_df": 9.09,
+          "final_df": 8.78,
+          "all_estimates": [
+            {
+              "refit": 1,
+              "date": "2019-01-02",
+              "df": 7.73
+            },
+            {
+              "refit": 2,
+              "date": "2019-04-03",
+              "df": 7.83
+            },
+            {
+              "refit": 3,
+              "date": "2019-07-03",
+              "df": 7.58
+            },
+            {
+              "refit": 4,
+              "date": "2019-10-02",
+              "df": 7.53
+            },
+            {
+              "refit": 5,
+              "date": "2020-01-02",
+              "df": 7.64
+            },
+            {
+              "refit": 6,
+              "date": "2020-04-02",
+              "df": 7.84
+            },
+            {
+              "refit": 7,
+              "date": "2020-07-02",
+              "df": 7.54
+            },
+            {
+              "refit": 8,
+              "date": "2020-10-01",
+              "df": 7.59
+            },
+            {
+              "refit": 9,
+              "date": "2020-12-31",
+              "df": 7.74
+            },
+            {
+              "refit": 10,
+              "date": "2021-04-05",
+              "df": 7.94
+            },
+            {
+              "refit": 11,
+              "date": "2021-07-02",
+              "df": 7.68
+            },
+            {
+              "refit": 12,
+              "date": "2021-10-01",
+              "df": 7.54
+            },
+            {
+              "refit": 13,
+              "date": "2021-12-31",
+              "df": 7.64
+            },
+            {
+              "refit": 14,
+              "date": "2022-04-01",
+              "df": 7.97
+            },
+            {
+              "refit": 15,
+              "date": "2022-07-05",
+              "df": 7.98
+            },
+            {
+              "refit": 16,
+              "date": "2022-10-03",
+              "df": 7.88
+            },
+            {
+              "refit": 17,
+              "date": "2023-01-03",
+              "df": 7.78
+            },
+            {
+              "refit": 18,
+              "date": "2023-04-04",
+              "df": 7.98
+            },
+            {
+              "refit": 19,
+              "date": "2023-07-06",
+              "df": 8.11
+            },
+            {
+              "refit": 20,
+              "date": "2023-10-04",
+              "df": 8.22
+            },
+            {
+              "refit": 21,
+              "date": "2024-01-04",
+              "df": 7.82
+            },
+            {
+              "refit": 22,
+              "date": "2024-04-05",
+              "df": 7.63
+            },
+            {
+              "refit": 23,
+              "date": "2024-07-08",
+              "df": 8.06
+            },
+            {
+              "refit": 24,
+              "date": "2024-10-04",
+              "df": 8.53
+            },
+            {
+              "refit": 25,
+              "date": "2025-01-06",
+              "df": 8.12
+            },
+            {
+              "refit": 26,
+              "date": "2025-04-08",
+              "df": 8.13
+            },
+            {
+              "refit": 27,
+              "date": "2025-07-10",
+              "df": 8.68
+            },
+            {
+              "refit": 28,
+              "date": "2025-10-08",
+              "df": 9.09
+            },
+            {
+              "refit": 29,
+              "date": "2026-01-08",
+              "df": 8.78
+            }
+          ]
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR+Normal": {
+            "violations": 43,
+            "total": 1821,
+            "rate": 0.0236,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 0.0,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "GJR+Student-t": {
+            "violations": 30,
+            "total": 1821,
+            "rate": 0.0165,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0111,
+            "cc_p": 1.0,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "MF-GJR+Normal": {
+            "violations": 34,
+            "total": 1821,
+            "rate": 0.0187,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0009,
+            "cc_p": 1.0,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "MF-GJR+Student-t": {
+            "violations": 22,
+            "total": 1821,
+            "rate": 0.0121,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.3874,
+            "cc_p": 1.0,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+HistSim": {
+            "violations": 18,
+            "total": 1821,
+            "rate": 0.0099,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.9605,
+            "cc_p": 1.0,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        },
+        "0.05": {
+          "GJR+Normal": {
+            "violations": 113,
+            "total": 1821,
+            "rate": 0.0621,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0227,
+            "cc_p": 0.0684,
+            "basel": "GREEN",
+            "trinity": false
+          },
+          "GJR+Student-t": {
+            "violations": 119,
+            "total": 1821,
+            "rate": 0.0653,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.004,
+            "cc_p": 0.0159,
+            "basel": "GREEN",
+            "trinity": false
+          },
+          "MF-GJR+Normal": {
+            "violations": 97,
+            "total": 1821,
+            "rate": 0.0533,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.5265,
+            "cc_p": 0.8157,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+Student-t": {
+            "violations": 104,
+            "total": 1821,
+            "rate": 0.0571,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.1729,
+            "cc_p": 0.3572,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+HistSim": {
+            "violations": 89,
+            "total": 1821,
+            "rate": 0.0489,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.8249,
+            "cc_p": 0.9602,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        }
+      },
+      "es": {
+        "0.01": {
+          "GJR+Normal": {
+            "acerbi_szekely_z": -0.2122,
+            "acerbi_szekely_p": 0.0001,
+            "fissler_ziegel_score": -3.834366
+          },
+          "GJR+Student-t": {
+            "acerbi_szekely_z": -0.0922,
+            "acerbi_szekely_p": 0.0404,
+            "fissler_ziegel_score": -3.720938
+          },
+          "MF-GJR+Normal": {
+            "acerbi_szekely_z": -0.1138,
+            "acerbi_szekely_p": 0.0014,
+            "fissler_ziegel_score": -3.794884
+          },
+          "MF-GJR+Student-t": {
+            "acerbi_szekely_z": -0.056,
+            "acerbi_szekely_p": 0.0591,
+            "fissler_ziegel_score": -3.707547
+          },
+          "MF-GJR+HistSim": {
+            "acerbi_szekely_z": 0.0577,
+            "acerbi_szekely_p": 0.9592,
+            "fissler_ziegel_score": -3.56865
+          }
+        },
+        "0.05": {
+          "GJR+Normal": {
+            "acerbi_szekely_z": -0.1635,
+            "acerbi_szekely_p": 0.0,
+            "fissler_ziegel_score": -4.151361
+          },
+          "GJR+Student-t": {
+            "acerbi_szekely_z": -0.0676,
+            "acerbi_szekely_p": 0.0325,
+            "fissler_ziegel_score": -4.161045
+          },
+          "MF-GJR+Normal": {
+            "acerbi_szekely_z": -0.1037,
+            "acerbi_szekely_p": 0.0005,
+            "fissler_ziegel_score": -4.114764
+          },
+          "MF-GJR+Student-t": {
+            "acerbi_szekely_z": -0.0251,
+            "acerbi_szekely_p": 0.1907,
+            "fissler_ziegel_score": -4.118636
+          },
+          "MF-GJR+HistSim": {
+            "acerbi_szekely_z": 0.0252,
+            "acerbi_szekely_p": 0.8118,
+            "fissler_ziegel_score": -4.061657
+          }
+        }
+      },
+      "best_var_model": {
+        "0.01": "MF-GJR+HistSim",
+        "0.05": "MF-GJR+HistSim"
+      },
+      "best_es_model": {
+        "0.01": "MF-GJR+Student-t",
+        "0.05": "MF-GJR+Student-t"
+      },
+      "core_question": {
+        "mfgjr_student_t_1pct_trinity": true,
+        "mfgjr_student_t_5pct_trinity": true,
+        "complete_solution": true
+      }
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "n_oos": 1821,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 29,
+      "qlike": {
+        "GJR": 1.497524,
+        "MF-GJR": 1.419679
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GJR": -5.198
+      },
+      "dm_mfgjr_vs_gjr": {
+        "t": -2.652,
+        "p": 0.0081,
+        "significant_harvey": false
+      },
+      "student_t_df": {
+        "GJR": {
+          "mean_df": 6.46,
+          "min_df": 5.46,
+          "max_df": 8.47,
+          "final_df": 8.41,
+          "all_estimates": [
+            {
+              "refit": 1,
+              "date": "2019-01-02",
+              "df": 5.72
+            },
+            {
+              "refit": 2,
+              "date": "2019-04-03",
+              "df": 5.97
+            },
+            {
+              "refit": 3,
+              "date": "2019-07-03",
+              "df": 5.56
+            },
+            {
+              "refit": 4,
+              "date": "2019-10-02",
+              "df": 5.65
+            },
+            {
+              "refit": 5,
+              "date": "2020-01-02",
+              "df": 5.68
+            },
+            {
+              "refit": 6,
+              "date": "2020-04-02",
+              "df": 5.99
+            },
+            {
+              "refit": 7,
+              "date": "2020-07-02",
+              "df": 5.68
+            },
+            {
+              "refit": 8,
+              "date": "2020-10-01",
+              "df": 5.55
+            },
+            {
+              "refit": 9,
+              "date": "2020-12-31",
+              "df": 5.5
+            },
+            {
+              "refit": 10,
+              "date": "2021-04-05",
+              "df": 5.46
+            },
+            {
+              "refit": 11,
+              "date": "2021-07-02",
+              "df": 5.46
+            },
+            {
+              "refit": 12,
+              "date": "2021-10-01",
+              "df": 5.66
+            },
+            {
+              "refit": 13,
+              "date": "2021-12-31",
+              "df": 6.05
+            },
+            {
+              "refit": 14,
+              "date": "2022-04-01",
+              "df": 6.24
+            },
+            {
+              "refit": 15,
+              "date": "2022-07-05",
+              "df": 6.47
+            },
+            {
+              "refit": 16,
+              "date": "2022-10-03",
+              "df": 6.27
+            },
+            {
+              "refit": 17,
+              "date": "2023-01-03",
+              "df": 6.15
+            },
+            {
+              "refit": 18,
+              "date": "2023-04-04",
+              "df": 6.48
+            },
+            {
+              "refit": 19,
+              "date": "2023-07-06",
+              "df": 6.62
+            },
+            {
+              "refit": 20,
+              "date": "2023-10-04",
+              "df": 6.8
+            },
+            {
+              "refit": 21,
+              "date": "2024-01-04",
+              "df": 6.92
+            },
+            {
+              "refit": 22,
+              "date": "2024-04-05",
+              "df": 6.82
+            },
+            {
+              "refit": 23,
+              "date": "2024-07-08",
+              "df": 7.37
+            },
+            {
+              "refit": 24,
+              "date": "2024-10-04",
+              "df": 7.51
+            },
+            {
+              "refit": 25,
+              "date": "2025-01-06",
+              "df": 7.42
+            },
+            {
+              "refit": 26,
+              "date": "2025-04-08",
+              "df": 7.58
+            },
+            {
+              "refit": 27,
+              "date": "2025-07-10",
+              "df": 7.95
+            },
+            {
+              "refit": 28,
+              "date": "2025-10-08",
+              "df": 8.47
+            },
+            {
+              "refit": 29,
+              "date": "2026-01-08",
+              "df": 8.41
+            }
+          ]
+        },
+        "MF-GJR": {
+          "mean_df": 7.83,
+          "min_df": 6.36,
+          "max_df": 10.89,
+          "final_df": 10.89,
+          "all_estimates": [
+            {
+              "refit": 1,
+              "date": "2019-01-02",
+              "df": 6.45
+            },
+            {
+              "refit": 2,
+              "date": "2019-04-03",
+              "df": 6.64
+            },
+            {
+              "refit": 3,
+              "date": "2019-07-03",
+              "df": 6.36
+            },
+            {
+              "refit": 4,
+              "date": "2019-10-02",
+              "df": 6.44
+            },
+            {
+              "refit": 5,
+              "date": "2020-01-02",
+              "df": 6.49
+            },
+            {
+              "refit": 6,
+              "date": "2020-04-02",
+              "df": 6.66
+            },
+            {
+              "refit": 7,
+              "date": "2020-07-02",
+              "df": 6.51
+            },
+            {
+              "refit": 8,
+              "date": "2020-10-01",
+              "df": 6.62
+            },
+            {
+              "refit": 9,
+              "date": "2020-12-31",
+              "df": 6.69
+            },
+            {
+              "refit": 10,
+              "date": "2021-04-05",
+              "df": 6.79
+            },
+            {
+              "refit": 11,
+              "date": "2021-07-02",
+              "df": 6.8
+            },
+            {
+              "refit": 12,
+              "date": "2021-10-01",
+              "df": 6.71
+            },
+            {
+              "refit": 13,
+              "date": "2021-12-31",
+              "df": 7.14
+            },
+            {
+              "refit": 14,
+              "date": "2022-04-01",
+              "df": 7.48
+            },
+            {
+              "refit": 15,
+              "date": "2022-07-05",
+              "df": 7.78
+            },
+            {
+              "refit": 16,
+              "date": "2022-10-03",
+              "df": 7.69
+            },
+            {
+              "refit": 17,
+              "date": "2023-01-03",
+              "df": 7.54
+            },
+            {
+              "refit": 18,
+              "date": "2023-04-04",
+              "df": 8.05
+            },
+            {
+              "refit": 19,
+              "date": "2023-07-06",
+              "df": 8.15
+            },
+            {
+              "refit": 20,
+              "date": "2023-10-04",
+              "df": 8.28
+            },
+            {
+              "refit": 21,
+              "date": "2024-01-04",
+              "df": 8.45
+            },
+            {
+              "refit": 22,
+              "date": "2024-04-05",
+              "df": 8.46
+            },
+            {
+              "refit": 23,
+              "date": "2024-07-08",
+              "df": 9.2
+            },
+            {
+              "refit": 24,
+              "date": "2024-10-04",
+              "df": 9.3
+            },
+            {
+              "refit": 25,
+              "date": "2025-01-06",
+              "df": 8.97
+            },
+            {
+              "refit": 26,
+              "date": "2025-04-08",
+              "df": 9.43
+            },
+            {
+              "refit": 27,
+              "date": "2025-07-10",
+              "df": 10.38
+            },
+            {
+              "refit": 28,
+              "date": "2025-10-08",
+              "df": 10.72
+            },
+            {
+              "refit": 29,
+              "date": "2026-01-08",
+              "df": 10.89
+            }
+          ]
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR+Normal": {
+            "violations": 45,
+            "total": 1821,
+            "rate": 0.0247,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 1.0,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "GJR+Student-t": {
+            "violations": 34,
+            "total": 1821,
+            "rate": 0.0187,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0009,
+            "cc_p": 1.0,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "MF-GJR+Normal": {
+            "violations": 35,
+            "total": 1821,
+            "rate": 0.0192,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0004,
+            "cc_p": 1.0,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "MF-GJR+Student-t": {
+            "violations": 30,
+            "total": 1821,
+            "rate": 0.0165,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0111,
+            "cc_p": 1.0,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "MF-GJR+HistSim": {
+            "violations": 17,
+            "total": 1821,
+            "rate": 0.0093,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.7732,
+            "cc_p": 1.0,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        },
+        "0.05": {
+          "GJR+Normal": {
+            "violations": 112,
+            "total": 1821,
+            "rate": 0.0615,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0294,
+            "cc_p": 0.0872,
+            "basel": "GREEN",
+            "trinity": false
+          },
+          "GJR+Student-t": {
+            "violations": 124,
+            "total": 1821,
+            "rate": 0.0681,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0008,
+            "cc_p": 0.003,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "MF-GJR+Normal": {
+            "violations": 106,
+            "total": 1821,
+            "rate": 0.0582,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.1168,
+            "cc_p": 0.2557,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+Student-t": {
+            "violations": 110,
+            "total": 1821,
+            "rate": 0.0604,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0482,
+            "cc_p": 0.1105,
+            "basel": "GREEN",
+            "trinity": false
+          },
+          "MF-GJR+HistSim": {
+            "violations": 94,
+            "total": 1821,
+            "rate": 0.0516,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.7523,
+            "cc_p": 0.8708,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        }
+      },
+      "es": {
+        "0.01": {
+          "GJR+Normal": {
+            "acerbi_szekely_z": -0.1581,
+            "acerbi_szekely_p": 0.0017,
+            "fissler_ziegel_score": -3.551589
+          },
+          "GJR+Student-t": {
+            "acerbi_szekely_z": -0.0117,
+            "acerbi_szekely_p": 0.4137,
+            "fissler_ziegel_score": -3.443065
+          },
+          "MF-GJR+Normal": {
+            "acerbi_szekely_z": -0.1118,
+            "acerbi_szekely_p": 0.0001,
+            "fissler_ziegel_score": -3.540277
+          },
+          "MF-GJR+Student-t": {
+            "acerbi_szekely_z": 0.0235,
+            "acerbi_szekely_p": 0.8164,
+            "fissler_ziegel_score": -3.449443
+          },
+          "MF-GJR+HistSim": {
+            "acerbi_szekely_z": 0.0224,
+            "acerbi_szekely_p": 0.8108,
+            "fissler_ziegel_score": -3.313789
+          }
+        },
+        "0.05": {
+          "GJR+Normal": {
+            "acerbi_szekely_z": -0.1596,
+            "acerbi_szekely_p": 0.0,
+            "fissler_ziegel_score": -3.868061
+          },
+          "GJR+Student-t": {
+            "acerbi_szekely_z": -0.0504,
+            "acerbi_szekely_p": 0.0691,
+            "fissler_ziegel_score": -3.876801
+          },
+          "MF-GJR+Normal": {
+            "acerbi_szekely_z": -0.1,
+            "acerbi_szekely_p": 0.0001,
+            "fissler_ziegel_score": -3.858954
+          },
+          "MF-GJR+Student-t": {
+            "acerbi_szekely_z": -0.0288,
+            "acerbi_szekely_p": 0.1278,
+            "fissler_ziegel_score": -3.86374
+          },
+          "MF-GJR+HistSim": {
+            "acerbi_szekely_z": 0.0281,
+            "acerbi_szekely_p": 0.873,
+            "fissler_ziegel_score": -3.797655
+          }
+        }
+      },
+      "best_var_model": {
+        "0.01": "MF-GJR+HistSim",
+        "0.05": "MF-GJR+HistSim"
+      },
+      "best_es_model": {
+        "0.01": "MF-GJR+HistSim",
+        "0.05": "MF-GJR+Normal"
+      },
+      "core_question": {
+        "mfgjr_student_t_1pct_trinity": false,
+        "mfgjr_student_t_5pct_trinity": false,
+        "complete_solution": false
+      }
+    },
+    "0050.TW": {
+      "ticker": "0050.TW",
+      "n_oos": 1754,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 28,
+      "qlike": {
+        "GJR": 1.455007,
+        "MF-GJR": 1.459284
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GJR": 0.294
+      },
+      "dm_mfgjr_vs_gjr": {
+        "t": 0.193,
+        "p": 0.8471,
+        "significant_harvey": false
+      },
+      "student_t_df": {
+        "GJR": {
+          "mean_df": 5.03,
+          "min_df": 4.72,
+          "max_df": 5.64,
+          "final_df": 4.85,
+          "all_estimates": [
+            {
+              "refit": 1,
+              "date": "2019-01-02",
+              "df": 4.76
+            },
+            {
+              "refit": 2,
+              "date": "2019-04-16",
+              "df": 4.87
+            },
+            {
+              "refit": 3,
+              "date": "2019-07-16",
+              "df": 4.82
+            },
+            {
+              "refit": 4,
+              "date": "2019-10-21",
+              "df": 4.94
+            },
+            {
+              "refit": 5,
+              "date": "2020-01-17",
+              "df": 4.87
+            },
+            {
+              "refit": 6,
+              "date": "2020-04-29",
+              "df": 4.84
+            },
+            {
+              "refit": 7,
+              "date": "2020-07-30",
+              "df": 4.79
+            },
+            {
+              "refit": 8,
+              "date": "2020-10-30",
+              "df": 4.86
+            },
+            {
+              "refit": 9,
+              "date": "2021-01-28",
+              "df": 5.08
+            },
+            {
+              "refit": 10,
+              "date": "2021-05-13",
+              "df": 4.93
+            },
+            {
+              "refit": 11,
+              "date": "2021-08-11",
+              "df": 5.14
+            },
+            {
+              "refit": 12,
+              "date": "2021-11-11",
+              "df": 5.01
+            },
+            {
+              "refit": 13,
+              "date": "2022-02-18",
+              "df": 5.07
+            },
+            {
+              "refit": 14,
+              "date": "2022-05-24",
+              "df": 5.2
+            },
+            {
+              "refit": 15,
+              "date": "2022-08-22",
+              "df": 5.31
+            },
+            {
+              "refit": 16,
+              "date": "2022-11-21",
+              "df": 5.24
+            },
+            {
+              "refit": 17,
+              "date": "2023-03-03",
+              "df": 5.44
+            },
+            {
+              "refit": 18,
+              "date": "2023-06-06",
+              "df": 5.4
+            },
+            {
+              "refit": 19,
+              "date": "2023-09-06",
+              "df": 5.42
+            },
+            {
+              "refit": 20,
+              "date": "2023-12-07",
+              "df": 5.64
+            },
+            {
+              "refit": 21,
+              "date": "2024-03-18",
+              "df": 5.12
+            },
+            {
+              "refit": 22,
+              "date": "2024-06-19",
+              "df": 5.02
+            },
+            {
+              "refit": 23,
+              "date": "2024-09-19",
+              "df": 4.84
+            },
+            {
+              "refit": 24,
+              "date": "2024-12-23",
+              "df": 4.89
+            },
+            {
+              "refit": 25,
+              "date": "2025-04-02",
+              "df": 4.95
+            },
+            {
+              "refit": 26,
+              "date": "2025-07-04",
+              "df": 4.72
+            },
+            {
+              "refit": 27,
+              "date": "2025-10-02",
+              "df": 4.83
+            },
+            {
+              "refit": 28,
+              "date": "2026-01-06",
+              "df": 4.85
+            }
+          ]
+        },
+        "MF-GJR": {
+          "mean_df": 5.84,
+          "min_df": 5.04,
+          "max_df": 6.56,
+          "final_df": 5.15,
+          "all_estimates": [
+            {
+              "refit": 1,
+              "date": "2019-01-02",
+              "df": 5.89
+            },
+            {
+              "refit": 2,
+              "date": "2019-04-16",
+              "df": 6.08
+            },
+            {
+              "refit": 3,
+              "date": "2019-07-16",
+              "df": 6.12
+            },
+            {
+              "refit": 4,
+              "date": "2019-10-21",
+              "df": 6.24
+            },
+            {
+              "refit": 5,
+              "date": "2020-01-17",
+              "df": 6.03
+            },
+            {
+              "refit": 6,
+              "date": "2020-04-29",
+              "df": 5.84
+            },
+            {
+              "refit": 7,
+              "date": "2020-07-30",
+              "df": 5.67
+            },
+            {
+              "refit": 8,
+              "date": "2020-10-30",
+              "df": 5.63
+            },
+            {
+              "refit": 9,
+              "date": "2021-01-28",
+              "df": 5.94
+            },
+            {
+              "refit": 10,
+              "date": "2021-05-13",
+              "df": 5.72
+            },
+            {
+              "refit": 11,
+              "date": "2021-08-11",
+              "df": 5.91
+            },
+            {
+              "refit": 12,
+              "date": "2021-11-11",
+              "df": 5.89
+            },
+            {
+              "refit": 13,
+              "date": "2022-02-18",
+              "df": 5.91
+            },
+            {
+              "refit": 14,
+              "date": "2022-05-24",
+              "df": 6.06
+            },
+            {
+              "refit": 15,
+              "date": "2022-08-22",
+              "df": 6.29
+            },
+            {
+              "refit": 16,
+              "date": "2022-11-21",
+              "df": 6.05
+            },
+            {
+              "refit": 17,
+              "date": "2023-03-03",
+              "df": 6.33
+            },
+            {
+              "refit": 18,
+              "date": "2023-06-06",
+              "df": 6.28
+            },
+            {
+              "refit": 19,
+              "date": "2023-09-06",
+              "df": 6.3
+            },
+            {
+              "refit": 20,
+              "date": "2023-12-07",
+              "df": 6.56
+            },
+            {
+              "refit": 21,
+              "date": "2024-03-18",
+              "df": 5.79
+            },
+            {
+              "refit": 22,
+              "date": "2024-06-19",
+              "df": 5.55
+            },
+            {
+              "refit": 23,
+              "date": "2024-09-19",
+              "df": 5.31
+            },
+            {
+              "refit": 24,
+              "date": "2024-12-23",
+              "df": 5.35
+            },
+            {
+              "refit": 25,
+              "date": "2025-04-02",
+              "df": 5.49
+            },
+            {
+              "refit": 26,
+              "date": "2025-07-04",
+              "df": 5.04
+            },
+            {
+              "refit": 27,
+              "date": "2025-10-02",
+              "df": 5.15
+            },
+            {
+              "refit": 28,
+              "date": "2026-01-06",
+              "df": 5.15
+            }
+          ]
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR+Normal": {
+            "violations": 30,
+            "total": 1754,
+            "rate": 0.0171,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0066,
+            "cc_p": 0.0208,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "GJR+Student-t": {
+            "violations": 20,
+            "total": 1754,
+            "rate": 0.0114,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.5637,
+            "cc_p": 0.4053,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+Normal": {
+            "violations": 23,
+            "total": 1754,
+            "rate": 0.0131,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.2111,
+            "cc_p": 0.2716,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+Student-t": {
+            "violations": 17,
+            "total": 1754,
+            "rate": 0.0097,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.8964,
+            "cc_p": 0.3612,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+HistSim": {
+            "violations": 20,
+            "total": 1754,
+            "rate": 0.0114,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.5637,
+            "cc_p": 0.4053,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        },
+        "0.05": {
+          "GJR+Normal": {
+            "violations": 89,
+            "total": 1754,
+            "rate": 0.0507,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.887,
+            "cc_p": 0.9626,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "GJR+Student-t": {
+            "violations": 94,
+            "total": 1754,
+            "rate": 0.0536,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.4949,
+            "cc_p": 0.7921,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+Normal": {
+            "violations": 76,
+            "total": 1754,
+            "rate": 0.0433,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.19,
+            "cc_p": 0.278,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+Student-t": {
+            "violations": 81,
+            "total": 1754,
+            "rate": 0.0462,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.4574,
+            "cc_p": 0.6138,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR+HistSim": {
+            "violations": 84,
+            "total": 1754,
+            "rate": 0.0479,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.6832,
+            "cc_p": 0.5746,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        }
+      },
+      "es": {
+        "0.01": {
+          "GJR+Normal": {
+            "acerbi_szekely_z": -0.195,
+            "acerbi_szekely_p": 0.0037,
+            "fissler_ziegel_score": -3.652179
+          },
+          "GJR+Student-t": {
+            "acerbi_szekely_z": -0.0237,
+            "acerbi_szekely_p": 0.3748,
+            "fissler_ziegel_score": -3.514609
+          },
+          "MF-GJR+Normal": {
+            "acerbi_szekely_z": -0.3193,
+            "acerbi_szekely_p": 0.0019,
+            "fissler_ziegel_score": -3.652057
+          },
+          "MF-GJR+Student-t": {
+            "acerbi_szekely_z": -0.1644,
+            "acerbi_szekely_p": 0.0642,
+            "fissler_ziegel_score": -3.532701
+          },
+          "MF-GJR+HistSim": {
+            "acerbi_szekely_z": -0.1341,
+            "acerbi_szekely_p": 0.0991,
+            "fissler_ziegel_score": -3.593669
+          }
+        },
+        "0.05": {
+          "GJR+Normal": {
+            "acerbi_szekely_z": -0.1483,
+            "acerbi_szekely_p": 0.0004,
+            "fissler_ziegel_score": -3.971579
+          },
+          "GJR+Student-t": {
+            "acerbi_szekely_z": -0.0396,
+            "acerbi_szekely_p": 0.1576,
+            "fissler_ziegel_score": -3.989288
+          },
+          "MF-GJR+Normal": {
+            "acerbi_szekely_z": -0.1566,
+            "acerbi_szekely_p": 0.0049,
+            "fissler_ziegel_score": -3.974045
+          },
+          "MF-GJR+Student-t": {
+            "acerbi_szekely_z": -0.0542,
+            "acerbi_szekely_p": 0.1556,
+            "fissler_ziegel_score": -3.985239
+          },
+          "MF-GJR+HistSim": {
+            "acerbi_szekely_z": -0.0825,
+            "acerbi_szekely_p": 0.0663,
+            "fissler_ziegel_score": -4.016396
+          }
+        }
+      },
+      "best_var_model": {
+        "0.01": "MF-GJR+Student-t",
+        "0.05": "GJR+Normal"
+      },
+      "best_es_model": {
+        "0.01": "MF-GJR+Normal",
+        "0.05": "MF-GJR+HistSim"
+      },
+      "core_question": {
+        "mfgjr_student_t_1pct_trinity": true,
+        "mfgjr_student_t_5pct_trinity": true,
+        "complete_solution": true
+      }
+    }
+  },
+  "conclusion": {
+    "student_t_fixes_1pct_var": {
+      "SPY": true,
+      "QQQ": false,
+      "0050.TW": false
+    },
+    "histsim_fixes_1pct_var": {
+      "SPY": true,
+      "QQQ": true,
+      "0050.TW": false
+    },
+    "complete_solution_found": {
+      "SPY": true,
+      "QQQ": false,
+      "0050.TW": true
+    },
+    "best_overall_var_model": {
+      "SPY": {
+        "0.01": "MF-GJR+HistSim",
+        "0.05": "MF-GJR+HistSim"
+      },
+      "QQQ": {
+        "0.01": "MF-GJR+HistSim",
+        "0.05": "MF-GJR+HistSim"
+      },
+      "0050.TW": {
+        "0.01": "MF-GJR+Student-t",
+        "0.05": "GJR+Normal"
+      }
+    },
+    "best_overall_es_model": {
+      "SPY": {
+        "0.01": "MF-GJR+Student-t",
+        "0.05": "MF-GJR+Student-t"
+      },
+      "QQQ": {
+        "0.01": "MF-GJR+HistSim",
+        "0.05": "MF-GJR+Normal"
+      },
+      "0050.TW": {
+        "0.01": "MF-GJR+Normal",
+        "0.05": "MF-GJR+HistSim"
+      }
+    }
+  },
+  "references": [
+    "Engle, Ghysels & Sohn (2013) RES 95(3):776-797",
+    "Patton (2011) J Econometrics 160:246-256",
+    "Harvey et al. (2016) JBES 34:92-104",
+    "McNeil & Frey (2000) J Empirical Finance 7:271-300",
+    "Acerbi & Szekely (2014) Risk Magazine",
+    "Fissler & Ziegel (2016) JASA 111:1048-1059",
+    "Kupiec (1995) J Derivatives 3(2):73-84",
+    "Christoffersen (1998) Int Economic Review 39(4):841-862",
+    "Hansen, Lunde & Nason (2011) Econometrica 79(2):453-497"
+  ]
+}

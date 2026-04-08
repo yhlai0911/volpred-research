@@ -1,0 +1,133 @@
+{
+  "paper": "vix-sufficiency",
+  "paper_version": "v2",
+  "total_checks": 100,
+  "matches": 93,
+  "mismatches": 5,
+  "untraceable": 2,
+  "verification_rate": "93.0%",
+  "critical_flags": [
+    "Table 6 era exceptions: GFC and COVID eras show Harvey-passing signals"
+  ],
+  "experiments_loaded": [
+    "K730",
+    "K731",
+    "K732",
+    "K734",
+    "K736",
+    "K738",
+    "K742",
+    "K745",
+    "K746",
+    "K746b",
+    "K747",
+    "K748",
+    "K749",
+    "K750",
+    "K751",
+    "K752",
+    "K778",
+    "K780",
+    "K799",
+    "K821",
+    "K824v2",
+    "K828"
+  ],
+  "experiments_missing": [],
+  "table_details": {
+    "T2": {
+      "total": 16,
+      "match": 14,
+      "mismatch": 0,
+      "untraceable": 2,
+      "issues": []
+    },
+    "T3": {
+      "total": 4,
+      "match": 4,
+      "mismatch": 0,
+      "untraceable": 0,
+      "issues": []
+    },
+    "T4": {
+      "total": 3,
+      "match": 3,
+      "mismatch": 0,
+      "untraceable": 0,
+      "issues": []
+    },
+    "T5": {
+      "total": 20,
+      "match": 20,
+      "mismatch": 0,
+      "untraceable": 0,
+      "issues": []
+    },
+    "T6": {
+      "total": 15,
+      "match": 10,
+      "mismatch": 5,
+      "untraceable": 0,
+      "issues": [
+        {
+          "field": "Overnight_VIX_Abs Era3_GFC incr_R2",
+          "paper": 0.0004,
+          "source": 0.0039,
+          "exp": "K752"
+        },
+        {
+          "field": "Overnight_VIX_Abs Era5_COVID_Inflation incr_R2",
+          "paper": 0.0003,
+          "source": 0.0032,
+          "exp": "K752"
+        },
+        {
+          "field": "VRP_Proxy Era3_GFC incr_R2",
+          "paper": 0.0008,
+          "source": 0.016,
+          "exp": "K752"
+        },
+        {
+          "field": "Vol_Momentum_20_60 Era3_GFC incr_R2",
+          "paper": 0.0006,
+          "source": 0.0216,
+          "exp": "K752"
+        },
+        {
+          "field": "Vol_Momentum_20_60 Era5_COVID_Inflation incr_R2",
+          "paper": 0.0002,
+          "source": 0.0372,
+          "exp": "K752"
+        }
+      ]
+    },
+    "T7": {
+      "total": 15,
+      "match": 15,
+      "mismatch": 0,
+      "untraceable": 0,
+      "issues": []
+    },
+    "T8": {
+      "total": 19,
+      "match": 19,
+      "mismatch": 0,
+      "untraceable": 0,
+      "issues": []
+    },
+    "T9": {
+      "total": 4,
+      "match": 4,
+      "mismatch": 0,
+      "untraceable": 0,
+      "issues": []
+    },
+    "Text": {
+      "total": 4,
+      "match": 4,
+      "mismatch": 0,
+      "untraceable": 0,
+      "issues": []
+    }
+  }
+}

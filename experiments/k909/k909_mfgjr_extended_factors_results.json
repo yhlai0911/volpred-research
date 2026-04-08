@@ -1,0 +1,998 @@
+{
+  "experiment_id": "K909",
+  "title": "MF-GJR with Extended Long-Run Factors",
+  "timestamp": "2026-04-05T18:05:21.593884+00:00",
+  "runtime_seconds": 751.3,
+  "methodology": {
+    "models": [
+      "GJR-GARCH(1,1)",
+      "MF-GJR(VIX) \u2014 baseline",
+      "MF-GJR(VIX+Slope) \u2014 VIX term structure slope",
+      "MF-GJR(VIX+Spread) \u2014 Corwin-Schultz bid-ask spread",
+      "MF-GJR(VIX+Range) \u2014 Parkinson log range"
+    ],
+    "mf_long_run_baseline": "tau_t = exp(theta_0 + theta_1 * log(VIX_{t-1}))",
+    "mf_long_run_extended": "tau_t = exp(theta_0 + theta_1 * log(VIX_{t-1}) + theta_2 * X_{t-1})",
+    "factors": {
+      "VIX Slope": "log(VIX3M / VIX) \u2014 term structure slope (contango vs backwardation)",
+      "CS Spread": "Corwin-Schultz (2012) bid-ask spread from OHLC \u2014 liquidity/microstructure",
+      "Park Range": "log(Parkinson 1980 range) = log(log(H/L)) \u2014 intraday price range"
+    },
+    "estimation": "Rolling window (w=2000), refit every 63 days, MLE with multi-start",
+    "evaluation": "QLIKE on r^2 (Patton 2011), DM test (Harvey t>3.0), Spearman, MCS (HLN 2011), VaR Trinity"
+  },
+  "data": {
+    "source": "yfinance",
+    "assets": [
+      "SPY",
+      "QQQ",
+      "0050.TW"
+    ],
+    "period": "2005-01-01 to 2026-04-01",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "vix3m_note": "VIX3M available from ~2007, ffilled for alignment"
+  },
+  "results": {
+    "SPY": {
+      "ticker": "SPY",
+      "n_oos": 1821,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 29,
+      "qlike": {
+        "GJR": 1.4956,
+        "MF-GJR(VIX)": 1.409425,
+        "MF-GJR(VIX+Slope)": 1.382093,
+        "MF-GJR(VIX+Spread)": 1.407804,
+        "MF-GJR(VIX+Range)": 1.40764
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GJR(VIX)": -5.762,
+        "MF-GJR(VIX+Slope)": -7.589,
+        "MF-GJR(VIX+Spread)": -5.87,
+        "MF-GJR(VIX+Range)": -5.881
+      },
+      "qlike_pct_vs_mfgjr_vix": {
+        "GJR": 6.114,
+        "MF-GJR(VIX)": 0.0,
+        "MF-GJR(VIX+Slope)": -1.939,
+        "MF-GJR(VIX+Spread)": -0.115,
+        "MF-GJR(VIX+Range)": -0.127
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.3709,
+          "p": 0.0
+        },
+        "MF-GJR(VIX)": {
+          "rho": 0.4215,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Slope)": {
+          "rho": 0.4361,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Spread)": {
+          "rho": 0.4226,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Range)": {
+          "rho": 0.4235,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX)": {
+          "t": -3.205,
+          "p": 0.0014,
+          "significant_harvey": true
+        },
+        "MF-GJR(VIX+Slope)": {
+          "t": -4.285,
+          "p": 0.0,
+          "significant_harvey": true
+        },
+        "MF-GJR(VIX+Spread)": {
+          "t": -3.255,
+          "p": 0.0012,
+          "significant_harvey": true
+        },
+        "MF-GJR(VIX+Range)": {
+          "t": -3.284,
+          "p": 0.001,
+          "significant_harvey": true
+        }
+      },
+      "dm_vs_mfgjr_vix": {
+        "GJR": {
+          "t": 3.205,
+          "p": 0.0014,
+          "significant_harvey": true
+        },
+        "MF-GJR(VIX)": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Slope)": {
+          "t": -2.88,
+          "p": 0.004,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Spread)": {
+          "t": -2.114,
+          "p": 0.0346,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Range)": {
+          "t": -0.362,
+          "p": 0.7174,
+          "significant_harvey": false
+        }
+      },
+      "mcs": {
+        "best_model": "MF-GJR(VIX+Slope)",
+        "survived": [
+          "MF-GJR(VIX+Slope)"
+        ],
+        "eliminated": [
+          "GJR",
+          "MF-GJR(VIX)",
+          "MF-GJR(VIX+Spread)",
+          "MF-GJR(VIX+Range)"
+        ],
+        "p_values": {
+          "GJR": 0.0044,
+          "MF-GJR(VIX)": 0.032,
+          "MF-GJR(VIX+Spread)": 0.0514,
+          "MF-GJR(VIX+Range)": 0.0514,
+          "MF-GJR(VIX+Slope)": 1.0
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR": {
+            "violations": 40,
+            "total": 1821,
+            "rate": 0.022,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 0.0001,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX)": {
+            "violations": 34,
+            "total": 1821,
+            "rate": 0.0187,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0009,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX+Slope)": {
+            "violations": 35,
+            "total": 1821,
+            "rate": 0.0192,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0004,
+            "cc_p": 0.002,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX+Spread)": {
+            "violations": 34,
+            "total": 1821,
+            "rate": 0.0187,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0009,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX+Range)": {
+            "violations": 26,
+            "total": 1821,
+            "rate": 0.0143,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0847,
+            "cc_p": 0.1551,
+            "basel": "RED",
+            "trinity": false
+          }
+        },
+        "0.05": {
+          "GJR": {
+            "violations": 113,
+            "total": 1821,
+            "rate": 0.0621,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0227,
+            "cc_p": 0.0684,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX)": {
+            "violations": 97,
+            "total": 1821,
+            "rate": 0.0533,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.5265,
+            "cc_p": 0.8157,
+            "basel": "YELLOW",
+            "trinity": false
+          },
+          "MF-GJR(VIX+Slope)": {
+            "violations": 102,
+            "total": 1821,
+            "rate": 0.056,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.2476,
+            "cc_p": 0.5086,
+            "basel": "RED",
+            "trinity": false
+          },
+          "MF-GJR(VIX+Spread)": {
+            "violations": 94,
+            "total": 1821,
+            "rate": 0.0516,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.7523,
+            "cc_p": 0.9491,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR(VIX+Range)": {
+            "violations": 95,
+            "total": 1821,
+            "rate": 0.0522,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.6731,
+            "cc_p": 0.9147,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        }
+      },
+      "parameters": {
+        "GJR": {
+          "omega": 3.5979232750946857e-06,
+          "alpha": 0.07506491885161302,
+          "gamma": 0.09551371161296339,
+          "beta": 0.8466575906984727,
+          "persistence": 0.9694793653565674
+        },
+        "MF-GJR(VIX)": {
+          "theta_0": -16.2219699164247,
+          "theta_1": 2.3416772962733945,
+          "alpha": 0.0001,
+          "gamma": 0.09282448984329227,
+          "beta": 0.86891197068884,
+          "persistence_g": 0.9154242156104861
+        },
+        "MF-GJR(VIX+Slope)": {
+          "theta_0": -14.486127625338302,
+          "theta_1_vix": 1.919151422115762,
+          "theta_2_factor": -5.0,
+          "alpha": 0.005386998341014362,
+          "gamma": 0.0,
+          "beta": 0.9851039011555971,
+          "persistence_g": 0.9904908994966115
+        },
+        "MF-GJR(VIX+Spread)": {
+          "theta_0": -16.179776509412598,
+          "theta_1_vix": 2.322400969978506,
+          "theta_2_factor": 5.0,
+          "alpha": 0.0001,
+          "gamma": 0.09160439385713874,
+          "beta": 0.8698599804757204,
+          "persistence_g": 0.9157621774042898
+        },
+        "MF-GJR(VIX+Range)": {
+          "theta_0": -14.476322143940205,
+          "theta_1_vix": 2.114453430370629,
+          "theta_2_factor": 0.23855905621612242,
+          "alpha": 0.0001,
+          "gamma": 0.06819718722769175,
+          "beta": 0.8846934050667097,
+          "persistence_g": 0.9188919986805556
+        }
+      },
+      "theta2_summary": {
+        "MF-GJR(VIX+Slope)": {
+          "theta_2": -5.0,
+          "theta_1": 1.919151422115762,
+          "ratio_theta2_theta1": 2.605318132994304,
+          "sign": "negative"
+        },
+        "MF-GJR(VIX+Spread)": {
+          "theta_2": 5.0,
+          "theta_1": 2.322400969978506,
+          "ratio_theta2_theta1": 2.1529443298700808,
+          "sign": "positive"
+        },
+        "MF-GJR(VIX+Range)": {
+          "theta_2": 0.23855905621612242,
+          "theta_1": 2.114453430370629,
+          "ratio_theta2_theta1": 0.11282303634103066,
+          "sign": "positive"
+        }
+      },
+      "is_oos_comparison": {
+        "GJR": {
+          "avg_is_loglik": 6750.827,
+          "oos_qlike": 1.4956
+        },
+        "MF-GJR(VIX)": {
+          "avg_is_loglik": 6838.9283,
+          "oos_qlike": 1.4094
+        },
+        "MF-GJR(VIX+Slope)": {
+          "avg_is_loglik": 6859.9529,
+          "oos_qlike": 1.3821
+        },
+        "MF-GJR(VIX+Spread)": {
+          "avg_is_loglik": 6839.4478,
+          "oos_qlike": 1.4078
+        },
+        "MF-GJR(VIX+Range)": {
+          "avg_is_loglik": 6843.5176,
+          "oos_qlike": 1.4076
+        }
+      }
+    },
+    "QQQ": {
+      "ticker": "QQQ",
+      "n_oos": 1821,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 29,
+      "qlike": {
+        "GJR": 1.493075,
+        "MF-GJR(VIX)": 1.419676,
+        "MF-GJR(VIX+Slope)": 1.421943,
+        "MF-GJR(VIX+Spread)": 1.416912,
+        "MF-GJR(VIX+Range)": 1.413503
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GJR(VIX)": -4.916,
+        "MF-GJR(VIX+Slope)": -4.764,
+        "MF-GJR(VIX+Spread)": -5.101,
+        "MF-GJR(VIX+Range)": -5.329
+      },
+      "qlike_pct_vs_mfgjr_vix": {
+        "GJR": 5.17,
+        "MF-GJR(VIX)": 0.0,
+        "MF-GJR(VIX+Slope)": 0.16,
+        "MF-GJR(VIX+Spread)": -0.195,
+        "MF-GJR(VIX+Range)": -0.435
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.3308,
+          "p": 0.0
+        },
+        "MF-GJR(VIX)": {
+          "rho": 0.3758,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Slope)": {
+          "rho": 0.3756,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Spread)": {
+          "rho": 0.3781,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Range)": {
+          "rho": 0.3786,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX)": {
+          "t": -2.927,
+          "p": 0.0035,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Slope)": {
+          "t": -3.288,
+          "p": 0.001,
+          "significant_harvey": true
+        },
+        "MF-GJR(VIX+Spread)": {
+          "t": -3.038,
+          "p": 0.0024,
+          "significant_harvey": true
+        },
+        "MF-GJR(VIX+Range)": {
+          "t": -3.058,
+          "p": 0.0023,
+          "significant_harvey": true
+        }
+      },
+      "dm_vs_mfgjr_vix": {
+        "GJR": {
+          "t": 2.927,
+          "p": 0.0035,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX)": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Slope)": {
+          "t": 0.202,
+          "p": 0.84,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Spread)": {
+          "t": -2.541,
+          "p": 0.0111,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Range)": {
+          "t": -1.085,
+          "p": 0.2779,
+          "significant_harvey": false
+        }
+      },
+      "mcs": {
+        "best_model": "MF-GJR(VIX+Range)",
+        "survived": [
+          "MF-GJR(VIX)",
+          "MF-GJR(VIX+Slope)",
+          "MF-GJR(VIX+Spread)",
+          "MF-GJR(VIX+Range)"
+        ],
+        "eliminated": [
+          "GJR"
+        ],
+        "p_values": {
+          "GJR": 0.041,
+          "MF-GJR(VIX)": 0.7526,
+          "MF-GJR(VIX+Slope)": 0.7526,
+          "MF-GJR(VIX+Spread)": 0.7526,
+          "MF-GJR(VIX+Range)": 0.7526
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR": {
+            "violations": 45,
+            "total": 1821,
+            "rate": 0.0247,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX)": {
+            "violations": 35,
+            "total": 1821,
+            "rate": 0.0192,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0004,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX+Slope)": {
+            "violations": 42,
+            "total": 1821,
+            "rate": 0.0231,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX+Spread)": {
+            "violations": 35,
+            "total": 1821,
+            "rate": 0.0192,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0004,
+            "cc_p": 1.0,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX+Range)": {
+            "violations": 32,
+            "total": 1821,
+            "rate": 0.0176,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0033,
+            "cc_p": 0.0117,
+            "basel": "RED",
+            "trinity": "False"
+          }
+        },
+        "0.05": {
+          "GJR": {
+            "violations": 115,
+            "total": 1821,
+            "rate": 0.0632,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0132,
+            "cc_p": 0.0406,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX)": {
+            "violations": 106,
+            "total": 1821,
+            "rate": 0.0582,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.1168,
+            "cc_p": 0.2557,
+            "basel": "RED",
+            "trinity": false
+          },
+          "MF-GJR(VIX+Slope)": {
+            "violations": 116,
+            "total": 1821,
+            "rate": 0.0637,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0099,
+            "cc_p": 0.035,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX+Spread)": {
+            "violations": 102,
+            "total": 1821,
+            "rate": 0.056,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.2476,
+            "cc_p": 0.4864,
+            "basel": "RED",
+            "trinity": false
+          },
+          "MF-GJR(VIX+Range)": {
+            "violations": 108,
+            "total": 1821,
+            "rate": 0.0593,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.0763,
+            "cc_p": 0.1722,
+            "basel": "RED",
+            "trinity": false
+          }
+        }
+      },
+      "parameters": {
+        "GJR": {
+          "omega": 4.9828229869717654e-06,
+          "alpha": 0.07303449048859405,
+          "gamma": 0.10808729094478134,
+          "beta": 0.8560248373083231,
+          "persistence": 0.9831029732693078
+        },
+        "MF-GJR(VIX)": {
+          "theta_0": -14.349200473799202,
+          "theta_1": 1.9101203587539046,
+          "alpha": 0.006237567771272826,
+          "gamma": 0.08010353371469359,
+          "beta": 0.8987139550078974,
+          "persistence_g": 0.945003289636517
+        },
+        "MF-GJR(VIX+Slope)": {
+          "theta_0": -12.676918320262505,
+          "theta_1_vix": 1.4554113428851987,
+          "theta_2_factor": -3.3546883687262548,
+          "alpha": 0.020206734872097416,
+          "gamma": 0.02729277378707203,
+          "beta": 0.928612069642266,
+          "persistence_g": 0.9624651914078994
+        },
+        "MF-GJR(VIX+Spread)": {
+          "theta_0": -14.294924992227251,
+          "theta_1_vix": 1.8850715441603232,
+          "theta_2_factor": 5.0,
+          "alpha": 0.007024389369971756,
+          "gamma": 0.07725464903131962,
+          "beta": 0.9003059140913193,
+          "persistence_g": 0.9459576279769509
+        },
+        "MF-GJR(VIX+Range)": {
+          "theta_0": -12.55684355911918,
+          "theta_1_vix": 1.686899283916305,
+          "theta_2_factor": 0.2705620858801264,
+          "alpha": 0.0001,
+          "gamma": 0.06405145634006017,
+          "beta": 0.9145752142750799,
+          "persistence_g": 0.94670094244511
+        }
+      },
+      "theta2_summary": {
+        "MF-GJR(VIX+Slope)": {
+          "theta_2": -3.3546883687262548,
+          "theta_1": 1.4554113428851987,
+          "ratio_theta2_theta1": 2.3049761052953874,
+          "sign": "negative"
+        },
+        "MF-GJR(VIX+Spread)": {
+          "theta_2": 5.0,
+          "theta_1": 1.8850715441603232,
+          "ratio_theta2_theta1": 2.6524192227553756,
+          "sign": "positive"
+        },
+        "MF-GJR(VIX+Range)": {
+          "theta_2": 0.2705620858801264,
+          "theta_1": 1.686899283916305,
+          "ratio_theta2_theta1": 0.1603901836107189,
+          "sign": "positive"
+        }
+      },
+      "is_oos_comparison": {
+        "GJR": {
+          "avg_is_loglik": 6215.3147,
+          "oos_qlike": 1.4931
+        },
+        "MF-GJR(VIX)": {
+          "avg_is_loglik": 6275.7888,
+          "oos_qlike": 1.4197
+        },
+        "MF-GJR(VIX+Slope)": {
+          "avg_is_loglik": 6286.2054,
+          "oos_qlike": 1.4219
+        },
+        "MF-GJR(VIX+Spread)": {
+          "avg_is_loglik": 6276.8836,
+          "oos_qlike": 1.4169
+        },
+        "MF-GJR(VIX+Range)": {
+          "avg_is_loglik": 6284.0292,
+          "oos_qlike": 1.4135
+        }
+      }
+    },
+    "0050.TW": {
+      "ticker": "0050.TW",
+      "n_oos": 1754,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-03-31",
+      "n_refits": 28,
+      "qlike": {
+        "GJR": 1.453211,
+        "MF-GJR(VIX)": 1.459283,
+        "MF-GJR(VIX+Slope)": 1.45356,
+        "MF-GJR(VIX+Spread)": 1.458352,
+        "MF-GJR(VIX+Range)": 1.461393
+      },
+      "qlike_pct_vs_gjr": {
+        "GJR": 0.0,
+        "MF-GJR(VIX)": 0.418,
+        "MF-GJR(VIX+Slope)": 0.024,
+        "MF-GJR(VIX+Spread)": 0.354,
+        "MF-GJR(VIX+Range)": 0.563
+      },
+      "qlike_pct_vs_mfgjr_vix": {
+        "GJR": -0.416,
+        "MF-GJR(VIX)": 0.0,
+        "MF-GJR(VIX+Slope)": -0.392,
+        "MF-GJR(VIX+Spread)": -0.064,
+        "MF-GJR(VIX+Range)": 0.145
+      },
+      "spearman": {
+        "GJR": {
+          "rho": 0.2075,
+          "p": 0.0
+        },
+        "MF-GJR(VIX)": {
+          "rho": 0.2571,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Slope)": {
+          "rho": 0.2599,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Spread)": {
+          "rho": 0.2602,
+          "p": 0.0
+        },
+        "MF-GJR(VIX+Range)": {
+          "rho": 0.2583,
+          "p": 0.0
+        }
+      },
+      "dm_vs_gjr": {
+        "GJR": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX)": {
+          "t": 0.261,
+          "p": 0.7938,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Slope)": {
+          "t": 0.016,
+          "p": 0.9871,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Spread)": {
+          "t": 0.213,
+          "p": 0.831,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Range)": {
+          "t": 0.341,
+          "p": 0.7335,
+          "significant_harvey": false
+        }
+      },
+      "dm_vs_mfgjr_vix": {
+        "GJR": {
+          "t": -0.261,
+          "p": 0.7938,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX)": {
+          "t": 0.0,
+          "p": 1.0,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Slope)": {
+          "t": -2.211,
+          "p": 0.0272,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Spread)": {
+          "t": -1.336,
+          "p": 0.1817,
+          "significant_harvey": false
+        },
+        "MF-GJR(VIX+Range)": {
+          "t": 0.731,
+          "p": 0.4646,
+          "significant_harvey": false
+        }
+      },
+      "mcs": {
+        "best_model": "GJR",
+        "survived": [
+          "GJR",
+          "MF-GJR(VIX)",
+          "MF-GJR(VIX+Slope)",
+          "MF-GJR(VIX+Spread)",
+          "MF-GJR(VIX+Range)"
+        ],
+        "eliminated": [],
+        "p_values": {
+          "GJR": 0.5644,
+          "MF-GJR(VIX)": 0.5644,
+          "MF-GJR(VIX+Slope)": 0.5644,
+          "MF-GJR(VIX+Spread)": 0.5644,
+          "MF-GJR(VIX+Range)": 0.5644
+        }
+      },
+      "var": {
+        "0.01": {
+          "GJR": {
+            "violations": 32,
+            "total": 1754,
+            "rate": 0.0182,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.0019,
+            "cc_p": 0.007,
+            "basel": "RED",
+            "trinity": "False"
+          },
+          "MF-GJR(VIX)": {
+            "violations": 23,
+            "total": 1754,
+            "rate": 0.0131,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.2111,
+            "cc_p": 0.2716,
+            "basel": "RED",
+            "trinity": false
+          },
+          "MF-GJR(VIX+Slope)": {
+            "violations": 23,
+            "total": 1754,
+            "rate": 0.0131,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.2111,
+            "cc_p": 0.2716,
+            "basel": "RED",
+            "trinity": false
+          },
+          "MF-GJR(VIX+Spread)": {
+            "violations": 23,
+            "total": 1754,
+            "rate": 0.0131,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.2111,
+            "cc_p": 0.2716,
+            "basel": "RED",
+            "trinity": false
+          },
+          "MF-GJR(VIX+Range)": {
+            "violations": 24,
+            "total": 1754,
+            "rate": 0.0137,
+            "expected_rate": 0.01,
+            "kupiec_p": 0.1421,
+            "cc_p": 0.2147,
+            "basel": "RED",
+            "trinity": false
+          }
+        },
+        "0.05": {
+          "GJR": {
+            "violations": 88,
+            "total": 1754,
+            "rate": 0.0502,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.9738,
+            "cc_p": 0.982,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR(VIX)": {
+            "violations": 76,
+            "total": 1754,
+            "rate": 0.0433,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.19,
+            "cc_p": 0.278,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR(VIX+Slope)": {
+            "violations": 75,
+            "total": 1754,
+            "rate": 0.0428,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.1541,
+            "cc_p": 0.3279,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR(VIX+Spread)": {
+            "violations": 76,
+            "total": 1754,
+            "rate": 0.0433,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.19,
+            "cc_p": 0.278,
+            "basel": "GREEN",
+            "trinity": true
+          },
+          "MF-GJR(VIX+Range)": {
+            "violations": 74,
+            "total": 1754,
+            "rate": 0.0422,
+            "expected_rate": 0.05,
+            "kupiec_p": 0.1234,
+            "cc_p": 0.1802,
+            "basel": "GREEN",
+            "trinity": true
+          }
+        }
+      },
+      "parameters": {
+        "GJR": {
+          "omega": 9.644428739948259e-06,
+          "alpha": 0.05210911936758305,
+          "gamma": 0.100946866861015,
+          "beta": 0.8389144847139961,
+          "persistence": 0.9414970375120867
+        },
+        "MF-GJR(VIX)": {
+          "theta_0": -12.34309664081869,
+          "theta_1": 1.205813649662564,
+          "alpha": 0.040088466443542546,
+          "gamma": 0.06762552268339966,
+          "beta": 0.8541524380264827,
+          "persistence_g": 0.9280536658117251
+        },
+        "MF-GJR(VIX+Slope)": {
+          "theta_0": -10.999004196994626,
+          "theta_1_vix": 0.8193672092421103,
+          "theta_2_factor": -2.2202060602357996,
+          "alpha": 0.040733071370209074,
+          "gamma": 0.045741604316799564,
+          "beta": 0.8705466204053137,
+          "persistence_g": 0.9341504939339226
+        },
+        "MF-GJR(VIX+Spread)": {
+          "theta_0": -12.34142173166747,
+          "theta_1_vix": 1.2019564499399678,
+          "theta_2_factor": 5.0,
+          "alpha": 0.04009057792763259,
+          "gamma": 0.06762808644099255,
+          "beta": 0.8536594638647205,
+          "persistence_g": 0.9275640850128494
+        },
+        "MF-GJR(VIX+Range)": {
+          "theta_0": -11.945239524940634,
+          "theta_1_vix": 1.1690552492816477,
+          "theta_2_factor": 0.06280211195545399,
+          "alpha": 0.03777281414825549,
+          "gamma": 0.0689303174577021,
+          "beta": 0.8529198481054101,
+          "persistence_g": 0.9251578209825166
+        }
+      },
+      "theta2_summary": {
+        "MF-GJR(VIX+Slope)": {
+          "theta_2": -2.2202060602357996,
+          "theta_1": 0.8193672092421103,
+          "ratio_theta2_theta1": 2.7096593995864473,
+          "sign": "negative"
+        },
+        "MF-GJR(VIX+Spread)": {
+          "theta_2": 5.0,
+          "theta_1": 1.2019564499399678,
+          "ratio_theta2_theta1": 4.1598844951909255,
+          "sign": "positive"
+        },
+        "MF-GJR(VIX+Range)": {
+          "theta_2": 0.06280211195545399,
+          "theta_1": 1.1690552492816477,
+          "ratio_theta2_theta1": 0.05372039687092989,
+          "sign": "positive"
+        }
+      },
+      "is_oos_comparison": {
+        "GJR": {
+          "avg_is_loglik": 6411.0797,
+          "oos_qlike": 1.4532
+        },
+        "MF-GJR(VIX)": {
+          "avg_is_loglik": 6462.787,
+          "oos_qlike": 1.4593
+        },
+        "MF-GJR(VIX+Slope)": {
+          "avg_is_loglik": 6463.8804,
+          "oos_qlike": 1.4536
+        },
+        "MF-GJR(VIX+Spread)": {
+          "avg_is_loglik": 6464.1772,
+          "oos_qlike": 1.4584
+        },
+        "MF-GJR(VIX+Range)": {
+          "avg_is_loglik": 6464.7853,
+          "oos_qlike": 1.4614
+        }
+      }
+    }
+  },
+  "key_findings": {
+    "any_factor_beats_mfgjr_vix_harvey": false,
+    "significant_improvements": [],
+    "conclusion": "No extended factor provides Harvey PASS improvement beyond VIX. VIX sufficiency confirmed for the 26th+ time."
+  },
+  "references": [
+    "Engle, Ghysels & Sohn (2013) Stock Market Volatility and Macroeconomic Fundamentals, RES 95(3):776-797",
+    "Engle & Rangel (2008) The Spline-GARCH Model, RFS 21(3):1187-1222",
+    "Conrad & Engle (2025) Two-factor GARCH, J Applied Econometrics",
+    "Patton (2011) Volatility forecast comparison using imperfect proxies, J Econometrics 160:246-256",
+    "Harvey et al. (2016) Testing for multiple bubbles, JBES 34:92-104",
+    "Hansen, Lunde & Nason (2011) The Model Confidence Set, Econometrica 79(2):453-497",
+    "Corwin & Schultz (2012) A simple way to estimate bid-ask spreads, J Finance 67(2):719-760",
+    "Parkinson (1980) The extreme value method for estimating the variance, J Business 53(1):61-65"
+  ]
+}

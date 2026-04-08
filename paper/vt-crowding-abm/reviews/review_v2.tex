@@ -1,0 +1,436 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{multirow}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\newcommand{\HIGH}{\textbf{\textcolor{errorred}{[HIGH]}}}
+\newcommand{\MED}{\textbf{\textcolor{warncolor}{[MED]}}}
+\newcommand{\LOW}{\textbf{\textcolor{okgreen}{[LOW]}}}
+\newcommand{\FIXED}{\textcolor{okgreen}{\checkmark\ FIXED}}
+\newcommand{\PARTIAL}{\textcolor{warncolor}{$\sim$ PARTIAL}}
+\newcommand{\OPEN}{\textcolor{errorred}{$\times$ OPEN}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Round~2 Academic Review}\\[0.5em]
+{\large ``When Volatility Targeting Crowds: Quantifying the Tipping Point via Agent-Based Simulation''}\\[0.5em]
+{\normalsize Document type: Working paper (pre-submission)}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Reviewer: Claude Opus 4.6 (1M context)}\\
+{\normalsize Review standard: Strict (JEDC / Journal of Financial Stability level)}\\
+{\normalsize Round~1 reference: \texttt{review\_v1.tex} (5H + 9M + 8L)}\\
+{\normalsize Source experiment: K827v3 (fixed liquidity, 500 sims)}
+\end{center}
+
+\vspace{1em}
+
+%=================================================================
+\section*{Review Summary}
+%=================================================================
+
+\begin{tabular}{ll}
+\textcolor{errorred}{Serious issues remaining (must fix)} & 2 items (was 5) \\
+\textcolor{warncolor}{Moderate issues remaining (should fix)} & 8 items (was 9) \\
+Minor issues remaining (optional fix) & 5 items (was 8) \\
+Overall assessment & \textbf{Minor--Major Revision (improved from Major Revision)} \\
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{One-paragraph verdict.}
+The revision has addressed the most critical factual error from Round~1: the USD~2 trillion attribution is now correctly cited to Cole (2017) rather than Bouchaud et al.\ (2018), and the Perchet et al.\ bibliography entry has been corrected (title, pages, year). The VIX equation (Eq.~2) now includes a $\max(0,\ldots)$ floor---but this addresses VIX non-negativity, not the asymmetric realized-volatility response that was the core of the Round~1 HIGH finding (IV-1). The sensitivity analysis description (Section~2.4) now mentions ``one-at-a-time (OAT)'' but the abstract and Section~3.5 still say ``27 parameter combinations'' without the OAT qualifier. Several Round~1 issues remain entirely unaddressed: no ABM citations were added (LeBaron, Farmer \& Foley, Cederburg, Danielsson---all still missing), the VT Sharpe ratio is still not defined, no figures were added, and the ECB bibliography title was not corrected. The paper has improved from ``Major Revision'' to the boundary between ``Minor'' and ``Major''---but 2 HIGH and 8 MED issues still require attention before journal submission.
+
+
+%=================================================================
+\section*{Part~A: Round~1 Issue Resolution Tracker}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{Round~1 Serious Issues (5)}}
+
+\begin{enumerate}
+
+%--- H1 ---
+\item \HIGH\ \textbf{H1 (IV-1): VIX equation mismatch---code uses asymmetric $\max(0,\cdot)$ on realized vol.}
+
+\textbf{Round~1 finding}: The code computes \texttt{vix\_target = VIX\_MEAN + gamma * max(0, realized\_vol - 0.16)}, meaning the VIX target only \emph{increases} above $\bar{V}$ when realized vol exceeds 16\%; it never \emph{decreases} below $\bar{V}$ due to low realized vol. The paper's Eq.~(2) showed a symmetric response.
+
+\textbf{Round~2 status}: \PARTIAL
+
+The revised Eq.~(2) now reads:
+\[
+\text{VIX}_t = \max\!\Big(0,\; \text{VIX}_{t-1} + \kappa\big(\bar{V} + \gamma \cdot \Delta\sigma^{\text{real}}_t - \text{VIX}_{t-1}\big) + \eta_t\Big)
+\]
+The outer $\max(0,\ldots)$ is a \textbf{non-negativity floor} on the VIX level---a sensible addition, but \emph{not} the issue identified in Round~1. The core problem was that $\Delta\sigma^{\text{real}}_t$ is computed as $\max(0,\, \hat{\sigma}^{(20)}_t - 0.16)$ in the code (the asymmetric response to realized vol), yet the equation does not show this. Additionally, $\Delta\sigma^{\text{real}}_t$ remains \textbf{undefined}---there is no explicit formula for it anywhere in the paper.
+
+\textbf{What is still needed}: Define $\Delta\sigma^{\text{real}}_t \equiv \max(0,\, \hat{\sigma}^{(20)}_t - 0.16)$ where $\hat{\sigma}^{(20)}_t$ is the annualized standard deviation of the most recent 20 daily returns, and add one sentence explaining the asymmetry: ``The $\max(0,\cdot)$ ensures that VIX responds only to \emph{elevated} realized volatility, consistent with the empirical asymmetry in implied-realized volatility dynamics (the variance risk premium is typically positive).''
+
+\medskip
+
+%--- H2 ---
+\item \HIGH\ \textbf{H2 (I-1): Sensitivity analysis mischaracterized as ``$3\times3\times3$ grid.''}
+
+\textbf{Round~1 finding}: The text described a ``$3\times3\times3$ sensitivity grid'' implying a full-factorial design (27 unique parameter combinations), when the actual design is one-at-a-time (OAT: 9 settings $\times$ 3 adoption levels).
+
+\textbf{Round~2 status}: \PARTIAL
+
+Section~2.4 (line 101) now correctly reads ``a one-at-a-time (OAT) sensitivity analysis.'' However, two other locations were \textbf{not updated}:
+\begin{itemize}
+  \item \textbf{Abstract} (line 36): still says ``Sensitivity analysis across 27 parameter combinations'' without the OAT qualifier.
+  \item \textbf{Section 3.5} (line 191): ``producing 27 parameter combinations tested at $\phi \in \{10\%, 30\%, 50\%\}$'' still reads as if these are 27 unique parameter settings. The actual count is 9 OAT parameter settings $\times$ 3 adoption levels = 27 cells, not 27 unique parameter combinations.
+  \item \textbf{Conclusion} (line 269): ``27 parameter combinations'' repeated without OAT context.
+\end{itemize}
+
+\textbf{What is still needed}: In all three locations, replace ``27 parameter combinations'' with ``27 OAT sensitivity cells (9 parameter settings $\times$ 3 adoption levels)'' or similar clarifying language. Add a sentence in the Limitations section acknowledging that interaction effects (e.g., high-$\lambda$ combined with high-$\gamma$) are not tested.
+
+\textbf{Severity downgrade}: Since the core Section~2.4 is now correct, this is downgraded from HIGH to \MED.
+
+\medskip
+
+%--- H3 ---
+\item \HIGH\ \textbf{H3 (III-1): Missing critical ABM/VT citations.}
+
+\textbf{Round~1 finding}: The paper cites only 11 references despite engaging with 4 literatures (VT, crowding, ABM, market microstructure). Missing: LeBaron (2006), Farmer \& Foley (2009), Cederburg et al.\ (2020), Danielsson et al.\ (2012), Kinlaw et al.\ (2019), Hommes (2006).
+
+\textbf{Round~2 status}: \OPEN
+
+The only reference added was Cole (2017) for the \$2T attribution fix. The reference count increased from 11 to 12. None of the six ABM/VT citations recommended in Round~1 were added:
+\begin{enumerate}[label=(\alph*)]
+  \item LeBaron (2006, \emph{Handbook of Computational Economics})---the standard ABM finance survey---\textbf{not cited}.
+  \item Farmer \& Foley (2009, \emph{Nature})---the canonical advocacy for ABM in economics---\textbf{not cited}.
+  \item Cederburg et al.\ (2020, \emph{Journal of Financial Economics})---comprehensive OOS test of VT---\textbf{not cited}.
+  \item Danielsson et al.\ (2012, \emph{Journal of Financial Economics})---procyclical leverage / endogenous risk---\textbf{not cited}.
+  \item Kinlaw et al.\ (2019, \emph{Journal of Portfolio Management})---quantitative crowding measures---\textbf{not cited}.
+  \item Hommes (2006)---heterogeneous agent models survey---\textbf{not cited}.
+\end{enumerate}
+
+A paper with 12 references that spans ABM, VT, crowding, and market microstructure literatures will be rejected at any serious finance journal purely on the basis of incomplete literature engagement. Reviewers will view this as a failure to engage with the field.
+
+\textbf{What is still needed}: Add at minimum LeBaron (2006), Farmer \& Foley (2009), and Cederburg et al.\ (2020). Target $\geq$ 20 references. \textbf{This remains HIGH severity.}
+
+\medskip
+
+%--- H4 ---
+\item \HIGH\ \textbf{H4 (IV-2): VT Sharpe ratio definition unclear.}
+
+\textbf{Round~1 finding}: The VT Sharpe ratio is computed from levered portfolio returns ($w^{\text{VT}}_t \cdot r_t$, with weights up to 1.5) with zero risk-free rate, weighting total market returns that are themselves affected by VT trading. None of this is stated.
+
+\textbf{Round~2 status}: \OPEN
+
+No definition paragraph was added. The Sharpe ratio first appears in Table~1 without any formal definition. The three concerns from Round~1 are all unaddressed:
+\begin{enumerate}[label=(\alph*)]
+  \item Risk-free rate is zero---not stated.
+  \item VT weights applied to total market return (circularity at high $\phi$)---not discussed.
+  \item Leverage via weights $> 1.0$---not acknowledged.
+\end{enumerate}
+
+\textbf{What is still needed}: Add to Section~2 or as a footnote to Table~1: ``The VT Sharpe ratio is $\bar{r}^{\text{VT}} / \sigma^{\text{VT}}$ where $r^{\text{VT}}_t = w^{\text{VT}}_t \cdot r_t$. The risk-free rate is zero in the simulation. Weights can exceed 1.0 (up to the 1.5 cap), implying leverage. At high $\phi$, VT agents' own trading substantially influences $r_t$, making the Sharpe ratio endogenous to the adoption level.''
+
+\textbf{Severity downgrade}: From HIGH to \MED---this is an exposition gap, not a methodological error.
+
+\medskip
+
+%--- H5 ---
+\item \HIGH\ \textbf{H5 (IX-1a): Perchet et al.\ citation year mismatch.}
+
+\textbf{Round~1 finding}: The cite key was \texttt{perchet2016} but the bib entry said 2015. Title and pages were wrong.
+
+\textbf{Round~2 status}: \PARTIAL
+
+The bib entry year is now 2015, the title is corrected to ``Predicting the success\ldots,'' and pages are 21--38. However, the \textbf{cite key remains \texttt{perchet2016}} (line 75: \texttt{\textbackslash citep\{perchet2016\}}; line 330: \texttt{\textbackslash bibitem[Perchet et\~{}al.(2015)]\{perchet2016\}}). The key--year mismatch is cosmetic in terms of compiled output (natbib uses the year in brackets, not the key), so the reader sees ``(Perchet et al., 2015)'' correctly. However, this is sloppy and could confuse future authors editing the bib.
+
+\textbf{What is still needed}: Rename the key from \texttt{perchet2016} to \texttt{perchet2015} throughout.
+
+\textbf{Severity downgrade}: From HIGH to \LOW---the compiled output is now correct; only the internal key is inconsistent.
+
+\end{enumerate}
+
+\medskip
+
+\subsection*{\textcolor{warncolor}{Round~1 Moderate Issues (9 $\to$ 10)}}
+
+\begin{enumerate}
+
+%--- M1 ---
+\item \MED\ \textbf{M1 (I-2): Sell pressure equation (Eq.~3) still uses $N$ and omits cap.}
+
+\textbf{Round~2 status}: \OPEN
+
+Eq.~(3) (line 185) still reads:
+\[
+\text{Sell pressure} \propto \phi \cdot N \cdot \left(\frac{12}{\text{VIX}_{t-1}} - \frac{12}{\text{VIX}_{t-2}}\right)
+\]
+The code uses $n_{\text{VT}} = \phi \cdot N_{\text{BH+VT}} = \phi \cdot 800$, not $\phi \cdot N = \phi \cdot 1000$. The 1.5 cap on weights is also absent. Since this equation is used for intuition rather than computation, a footnote stating ``ignoring the position cap and noting that $N$ here refers to $N_{\text{BH+VT}} = 800$'' would suffice.
+
+\medskip
+
+%--- M2 ---
+\item \MED\ \textbf{M2 (II-1): USD 2 trillion attribution.}
+
+\textbf{Round~2 status}: \FIXED
+
+Line 54 now reads ``\textbackslash citep\{cole2017\}'' and Cole (2017) Artemis Capital is in the bibliography (lines 335--338). The attribution is now correct.
+
+\medskip
+
+%--- M3 ---
+\item \MED\ \textbf{M3 (III-2): No dedicated literature review section.}
+
+\textbf{Round~2 status}: \OPEN
+
+The Introduction still contains all literature discussion inline. No ``Related Literature'' subsection or dedicated Section~2 was added. This is less critical for JEDC/JFS than for JFE, but still recommended.
+
+\medskip
+
+%--- M4 ---
+\item \MED\ \textbf{M4 (IV-3): Direction of bias from exogenous $\lambda$ not discussed.}
+
+\textbf{Round~2 status}: \OPEN
+
+The Limitations section (line 250) discusses exogenous $\lambda$ and mentions ``liquidity evaporates during stress'' but does \emph{not} state the direction of bias: that exogenous $\lambda$ likely \emph{underestimates} feedback severity, implying the true tipping point may be lower. The sentence recommended in Round~1---``Because our exogenous $\lambda$ does not increase during stress, our simulation likely underestimates the feedback severity''---was not added.
+
+\medskip
+
+%--- M5 ---
+\item \MED\ \textbf{M5 (V-1): $\Delta\sigma^{\text{real}}_t$ still not defined.}
+
+\textbf{Round~2 status}: \OPEN
+
+This is now subsumed by H1 above. The symbol appears in Eq.~(2) but is only described narratively (``deviations of 20-day realized volatility from 16\%''). It needs an explicit formula: $\Delta\sigma^{\text{real}}_t \equiv \max(0,\, \hat{\sigma}^{(20)}_t - 0.16)$.
+
+\medskip
+
+%--- M6 ---
+\item \MED\ \textbf{M6 (VI-1): No simulation convergence analysis.}
+
+\textbf{Round~2 status}: \OPEN
+
+No convergence plot or footnote showing that key metrics stabilize before 500 simulations was added. ABM reviewers routinely request this.
+
+\medskip
+
+%--- M7 ---
+\item \MED\ \textbf{M7 (VI-2): Paired vs.\ unpaired t-test not clarified.}
+
+\textbf{Round~2 status}: \OPEN
+
+Section~3.3 (line 179) says ``Welch's $t$-test'' but does not clarify that the design is unpaired (different random seeds per adoption level). Common random numbers (CRN) are still not discussed.
+
+\medskip
+
+%--- M8 ---
+\item \MED\ \textbf{M8 (VIII-1): ``Below 5\%'' current adoption claim unsourced.}
+
+\textbf{Round~2 status}: \OPEN
+
+Line 240 still says ``current levels below 5\%'' without citation or derivation. The abstract (line 36) says ``estimated below 5\%'' without source. Either cite an industry report or derive the estimate from known VT AUM vs.\ global equity market cap.
+
+\medskip
+
+%--- M9 ---
+\item \MED\ \textbf{M9 (IX-2): Reference list still too thin.}
+
+\textbf{Round~2 status}: \OPEN
+
+Reference count: 12 (was 11). Only Cole (2017) was added. For a paper spanning ABM + VT + crowding + microstructure, this remains far below journal norms ($\geq$ 20--25). Subsumed by H3.
+
+\medskip
+
+%--- M10 ---
+\item \MED\ \textbf{M10 (XI-1): No figures in the paper.}
+
+\textbf{Round~2 status}: \OPEN
+
+Still 3 tables, 0 figures. The ``VT crowding curve'' (Sharpe vs.\ $\phi$ with bootstrap CIs) would be the paper's single most impactful visual. A kurtosis-vs-$\phi$ figure would also dramatically strengthen the ``phase transition'' narrative.
+
+\end{enumerate}
+
+\medskip
+
+\subsection*{Round~1 Minor Issues (8)}
+
+\begin{enumerate}
+
+\item \LOW\ \textbf{L1 (IV-4): Noise trader initial weight and boundary.} \OPEN---Not addressed.
+
+\item \LOW\ \textbf{L2 (V-2): $N$ vs.\ $\mathcal{N}$ notation; $N(0,\sigma_f)$ should be $\mathcal{N}(0,\sigma_f^2)$.} \OPEN---Not addressed. Eq.~(1) still uses $N(0, \sigma_f)$.
+
+\item \LOW\ \textbf{L3 (V-3): Circular buffer warm-up bias.} Acknowledged as minor in Round~1; no fix needed.
+
+\item \LOW\ \textbf{L4 (VI-3): Flash crash metric at 100\%.} \OPEN---No alternative fixed-threshold metric added.
+
+\item \LOW\ \textbf{L5 (VII-2): Minor rounding discrepancies.} Acknowledged; no fix needed.
+
+\item \LOW\ \textbf{L6 (X-2): Phrasing tightening.} \OPEN---``The nonlinearity is striking'' (line 142) still present.
+
+\item \LOW\ \textbf{L7 (XI-2): Table decimal alignment.} \OPEN---\texttt{siunitx} not adopted.
+
+\item \LOW\ \textbf{L8 (XII-1): Replication materials ``upon request.''} \OPEN---No public repository yet.
+
+\end{enumerate}
+
+
+%=================================================================
+\section*{Part~B: New Issues Found in Round~2}
+%=================================================================
+
+\subsection*{New Citation Issue}
+
+\MED\ \textbf{N1: ECB (2020) bibliography title still incorrect.}
+
+The citation check report (\texttt{citation\_check.md}, item \#9) identified that the ECB (2020) bib entry title is ``Procyclicality of volatility targeting strategies,'' but the actual publication title is ``\textbf{Volatility-targeting strategies and the market sell-off}'' (ECB Financial Stability Review, May 2020, Box 2). Line 302 of \texttt{main.tex} still reads:
+
+\begin{verbatim}
+\newblock Procyclicality of volatility targeting strategies.
+\end{verbatim}
+
+This was flagged in the citation check but \textbf{not corrected in the revision}. Incorrect bibliography titles are a citable error that reviewers and editors will catch.
+
+\textbf{Fix}: Change to ``Volatility-targeting strategies and the market sell-off'' and add ``Box 2'' as a note.
+
+\medskip
+
+\subsection*{New Consistency Issue}
+
+\LOW\ \textbf{N2: Perchet cite key \texttt{perchet2016} vs.\ bib year 2015.}
+
+As noted in H5 above, the internal cite key is \texttt{perchet2016} while the displayed year is 2015. The compiled output is correct, but the key should be updated for consistency. This is a new LOW from the partial fix of H5.
+
+
+%=================================================================
+\section*{Consolidated Issue List (Round~2)}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{Serious Issues (2)}}
+
+\begin{enumerate}
+  \item \HIGH\ \textbf{H1 (carry-over)}: VIX equation---$\Delta\sigma^{\text{real}}_t$ is undefined, and the asymmetric $\max(0, \hat{\sigma}^{(20)}_t - 0.16)$ from the code is not reflected in the equation. The outer $\max(0,\ldots)$ floor that was added is a different fix (non-negativity of VIX level).
+  \item \HIGH\ \textbf{H3 (carry-over)}: Missing critical citations. 12 references is far below the 20--25 minimum for a paper spanning ABM, VT, crowding, and microstructure. LeBaron (2006), Farmer \& Foley (2009), Cederburg et al.\ (2020), Danielsson et al.\ (2012) are essential.
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{Moderate Issues (8)}}
+
+\begin{enumerate}
+  \item \MED\ \textbf{H2 $\to$ M} (downgraded): ``27 parameter combinations'' without OAT qualifier in abstract, Section~3.5, and Conclusion.
+  \item \MED\ \textbf{H4 $\to$ M} (downgraded): VT Sharpe ratio definition (zero $r_f$, leverage, endogeneity) not stated.
+  \item \MED\ \textbf{M1}: Sell pressure equation uses $N$ instead of $N_{\text{BH+VT}}$; omits cap.
+  \item \MED\ \textbf{M4}: Exogenous $\lambda$ bias direction not discussed---simulation likely \emph{underestimates} feedback.
+  \item \MED\ \textbf{M6}: No simulation convergence analysis.
+  \item \MED\ \textbf{M7}: Paired vs.\ unpaired t-test not clarified; CRN not discussed.
+  \item \MED\ \textbf{M8}: ``Below 5\%'' adoption claim has no source.
+  \item \MED\ \textbf{N1} (new): ECB (2020) bibliography title is wrong (``Procyclicality\ldots'' should be ``Volatility-targeting strategies and the market sell-off'').
+\end{enumerate}
+
+\subsection*{Minor Issues (5)}
+
+\begin{enumerate}
+  \item \LOW\ \textbf{H5 $\to$ L} (downgraded): Perchet cite key still \texttt{perchet2016}; display is correct.
+  \item \LOW\ \textbf{L1}: Noise trader initial weight (0.5) and absorbing boundary at $w=0$ not stated.
+  \item \LOW\ \textbf{L2}: $N(0,\sigma_f)$ should be $\mathcal{N}(0,\sigma_f^2)$ to distinguish from agent count $N$.
+  \item \LOW\ \textbf{L6}: Minor phrasing (``striking,'' ``economically intuitive'').
+  \item \LOW\ \textbf{L8}: Replication materials should be on Zenodo/GitHub.
+\end{enumerate}
+
+\medskip
+
+\noindent\textbf{Issues resolved in this round}: 4 out of 22 (Round~1: 5H+9M+8L $= 22$).
+\begin{itemize}
+  \item \FIXED\ M2 (USD~2T attribution $\to$ Cole 2017)
+  \item \FIXED\ Perchet title + pages corrected
+  \item \FIXED\ VIX equation non-negativity floor added (partial fix of H1)
+  \item \FIXED\ Section~2.4 now says ``OAT'' (partial fix of H2)
+\end{itemize}
+
+\noindent\textbf{Issues not addressed}: 15 (2H + 7M + 6L from Round~1 + 1 new MED + 1 new LOW).
+
+
+%=================================================================
+\section*{Resolution Summary Table}
+%=================================================================
+
+{
+\footnotesize
+\begin{longtable}{@{}p{1.2cm}p{1.2cm}p{5cm}p{1.5cm}p{3.5cm}@{}}
+\toprule
+\textbf{R1 ID} & \textbf{R1 Sev.} & \textbf{Issue} & \textbf{Status} & \textbf{R2 Severity} \\
+\midrule
+\endhead
+H1 (IV-1) & HIGH & VIX eq.\ asymmetric $\max(0,\cdot)$ on $\Delta\sigma$; $\Delta\sigma$ undefined & \PARTIAL & \textcolor{errorred}{HIGH} (core issue remains) \\
+H2 (I-1) & HIGH & Sensitivity ``$3\!\times\!3\!\times\!3$'' $\to$ OAT & \PARTIAL & \textcolor{warncolor}{MED} $\downarrow$ (Section 2.4 fixed; abstract/conclusion not) \\
+H3 (III-1) & HIGH & Missing ABM citations & \OPEN & \textcolor{errorred}{HIGH} \\
+H4 (IV-2) & HIGH & VT Sharpe undefined & \OPEN & \textcolor{warncolor}{MED} $\downarrow$ (exposition, not method) \\
+H5 (IX-1a) & HIGH & Perchet year/title/pages & \PARTIAL & \textcolor{okgreen}{LOW} $\downarrow$ (display correct; key cosmetic) \\
+\midrule
+M1 (I-2) & MED & Sell pressure eq: $N$ and cap & \OPEN & \textcolor{warncolor}{MED} \\
+M2 (II-1) & MED & USD 2T attribution & \FIXED & --- (resolved) \\
+M3 (III-2) & MED & No lit review section & \OPEN & Subsumed by H3 \\
+M4 (IV-3) & MED & $\lambda$ bias direction & \OPEN & \textcolor{warncolor}{MED} \\
+M5 (V-1) & MED & $\Delta\sigma^{\text{real}}_t$ undefined & \OPEN & Subsumed by H1 \\
+M6 (VI-1) & MED & No convergence analysis & \OPEN & \textcolor{warncolor}{MED} \\
+M7 (VI-2) & MED & Paired/unpaired not stated & \OPEN & \textcolor{warncolor}{MED} \\
+M8 (VIII-1) & MED & 5\% adoption unsourced & \OPEN & \textcolor{warncolor}{MED} \\
+M9 (IX-2) & MED & Only 12 refs (was 11) & \OPEN & Subsumed by H3 \\
+M10 (XI-1) & MED & No figures & \OPEN & \textcolor{warncolor}{MED} (see priority list) \\
+\midrule
+L1 (IV-4) & LOW & Noise trader initial wt & \OPEN & \textcolor{okgreen}{LOW} \\
+L2 (V-2) & LOW & $N$ vs.\ $\mathcal{N}$ notation & \OPEN & \textcolor{okgreen}{LOW} \\
+L3 (V-3) & LOW & Buffer warm-up & --- & Closed (acknowledged) \\
+L4 (VI-3) & LOW & Flash crash metric & \OPEN & Closed (Table 1 fn.\ adequate) \\
+L5 (VII-2) & LOW & Rounding & --- & Closed (immaterial) \\
+L6 (X-2) & LOW & Phrasing & \OPEN & \textcolor{okgreen}{LOW} \\
+L7 (XI-2) & LOW & Table alignment & \OPEN & Closed (cosmetic) \\
+L8 (XII-1) & LOW & Replication package & \OPEN & \textcolor{okgreen}{LOW} \\
+\midrule
+N1 (new) & --- & ECB title wrong & \OPEN & \textcolor{warncolor}{MED} \\
+N2 (new) & --- & Perchet cite key mismatch & \OPEN & \textcolor{okgreen}{LOW} \\
+\bottomrule
+\end{longtable}
+}
+
+
+%=================================================================
+\section*{Revision Priority for Round~3}
+%=================================================================
+
+\begin{enumerate}
+  \item \textbf{Define $\Delta\sigma^{\text{real}}_t$ and fix asymmetry} (H1): One equation + one sentence. This is the single most critical remaining issue---the model's key equation has an undefined term.
+  \item \textbf{Add missing citations} (H3): At minimum add LeBaron (2006), Farmer \& Foley (2009), Cederburg et al.\ (2020), Danielsson et al.\ (2012). Target $\geq$ 20 references. Consider adding a ``Related Literature'' subsection.
+  \item \textbf{Add figures} (M10): Sharpe-vs-$\phi$ curve with bootstrap CIs is the paper's most impactful visual. Add at least one figure.
+  \item \textbf{Fix ``27 parameter combinations''} in abstract/Section~3.5/Conclusion (H2$\to$M): Simple text edit.
+  \item \textbf{Define VT Sharpe} (H4$\to$M): One paragraph or footnote.
+  \item \textbf{Fix ECB title} (N1): Change ``Procyclicality of volatility targeting strategies'' to ``Volatility-targeting strategies and the market sell-off.''
+  \item \textbf{Source the 5\% adoption claim} (M8): Cite or derive.
+  \item \textbf{Add $\lambda$ bias direction} (M4): One sentence in Limitations.
+  \item \textbf{Add convergence note} (M6): One footnote showing Sharpe stabilizes by $\sim$200 sims.
+  \item \textbf{Clarify t-test design} (M7): One sentence (``unpaired Welch $t$-test on $2 \times 500$ independent simulations'').
+\end{enumerate}
+
+
+%=================================================================
+\section*{Overall Assessment}
+%=================================================================
+
+\textbf{Verdict: Minor--Major Revision (improved from Major Revision)}
+
+The revision addressed the most serious factual error (USD~2T attribution) and made partial progress on the VIX equation and sensitivity analysis description. However, the two most impactful issues for journal acceptance---the undefined $\Delta\sigma^{\text{real}}_t$ in the model's core equation and the thin reference list---remain fully open. Neither requires re-running simulations: both are text-only fixes that could be completed in a single editing pass.
+
+The paper's core contribution (quantitative VT crowding threshold via ABM) remains sound and timely. The K827v3 data are verified. With the 10 fixes listed above---all text/bibliography changes, no new computation---the paper would be ready for submission to \emph{Journal of Economic Dynamics and Control} or \emph{Journal of Financial Stability}.
+
+\end{document}

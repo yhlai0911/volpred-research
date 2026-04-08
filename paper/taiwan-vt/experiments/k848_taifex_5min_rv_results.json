@@ -1,0 +1,289 @@
+{
+  "experiment_id": "K848",
+  "title": "TAIFEX TX 5-Min Realized Volatility vs GJR-GARCH Daily Forecast",
+  "date": "2026-04-03",
+  "data_source": "TAIFEX TX tick data (TX1 near-month) + 0050.TW (yfinance, clean_tw50_data applied)",
+  "data_period": "2017-05-16 to 2026-04-02",
+  "n_trading_days": 2163,
+  "methodology": {
+    "5min_bars": "Last-tick close per 5-min interval",
+    "rv": "RV = Σ(5min_log_return²)",
+    "bpv": "BPV = (π/2) × Σ|r_i|×|r_{i-1}| (Barndorff-Nielsen & Shephard 2004)",
+    "jump": "J = max(RV - BPV, 0)",
+    "garch": "GJR-GARCH(1,1) with Student-t innovations on 0050.TW daily log returns",
+    "qlike": "QLIKE = mean(target/σ² - log(target/σ²) - 1) (Patton 2011)",
+    "oos": "Rolling 500-day window, refit every 63 days, daily h[t] propagation"
+  },
+  "descriptive_stats": {
+    "rv_day": {
+      "mean": 5.214e-05,
+      "std": 0.00010125,
+      "median": 3.26e-05,
+      "skew": 14.39081212,
+      "kurtosis": 317.70619121,
+      "min": 0.0,
+      "max": 0.00286011,
+      "q25": 1.992e-05,
+      "q75": 5.376e-05,
+      "n": 2163,
+      "ann_vol_mean_pct": 11.46311082,
+      "ann_vol_median_pct": 9.06345476
+    },
+    "rv_night": {
+      "mean": 5.271e-05,
+      "std": 0.0001458,
+      "median": 2.52e-05,
+      "skew": 13.16763474,
+      "kurtosis": 227.89827972,
+      "min": 5.8e-07,
+      "max": 0.00331311,
+      "q25": 1.216e-05,
+      "q75": 5.029e-05,
+      "n": 2158,
+      "ann_vol_mean_pct": 11.52468611,
+      "ann_vol_median_pct": 7.96844059
+    },
+    "rv_total": {
+      "mean": 0.00010473,
+      "std": 0.00021428,
+      "median": 6.14e-05,
+      "skew": 9.8804452,
+      "kurtosis": 124.96335919,
+      "min": 4.67e-06,
+      "max": 0.00403527,
+      "q25": 3.539e-05,
+      "q75": 0.00010619,
+      "n": 2163,
+      "ann_vol_mean_pct": 16.24543863,
+      "ann_vol_median_pct": 12.43867613
+    },
+    "bpv_total": {
+      "mean": 9.813e-05,
+      "std": 0.00019689,
+      "median": 5.72e-05,
+      "skew": 9.58659077,
+      "kurtosis": 117.78972019,
+      "min": 3.8e-06,
+      "max": 0.00346471,
+      "q25": 3.3e-05,
+      "q75": 9.953e-05,
+      "n": 2163,
+      "ann_vol_mean_pct": 15.72505984,
+      "ann_vol_median_pct": 12.00647278
+    },
+    "jump": {
+      "mean": 8.11e-06,
+      "std": 3.949e-05,
+      "median": 2.71e-06,
+      "skew": 21.85204626,
+      "kurtosis": 546.43330307,
+      "min": 0.0,
+      "max": 0.00111021,
+      "q25": 0.0,
+      "q75": 7.66e-06,
+      "n": 2163,
+      "ann_vol_mean_pct": 4.52142691,
+      "ann_vol_median_pct": 2.61523137
+    }
+  },
+  "night_vs_day": {
+    "n_days": 2158,
+    "night_share_mean": 0.4326371120422372,
+    "night_share_median": 0.4312775596142615,
+    "night_share_std": 0.17287199054424598,
+    "day_share_mean": 0.5673628879577628,
+    "day_share_median": 0.5687224403857385,
+    "rv_day_mean": 5.221509246126484e-05,
+    "rv_night_mean": 5.2705710307859e-05,
+    "rv_total_mean": 0.00010492080276912384,
+    "ann_vol_day_pct": 11.470921192405926,
+    "ann_vol_night_pct": 11.524686111812532,
+    "ann_vol_total_pct": 16.260394305741546,
+    "yearly": {
+      "2017": {
+        "night_share_mean": 0.2393,
+        "n_days": 159,
+        "ann_vol_total_pct": 7.76
+      },
+      "2018": {
+        "night_share_mean": 0.3658,
+        "n_days": 244,
+        "ann_vol_total_pct": 12.84
+      },
+      "2019": {
+        "night_share_mean": 0.4107,
+        "n_days": 242,
+        "ann_vol_total_pct": 9.52
+      },
+      "2020": {
+        "night_share_mean": 0.3943,
+        "n_days": 245,
+        "ann_vol_total_pct": 20.75
+      },
+      "2021": {
+        "night_share_mean": 0.3213,
+        "n_days": 243,
+        "ann_vol_total_pct": 16.82
+      },
+      "2022": {
+        "night_share_mean": 0.5421,
+        "n_days": 246,
+        "ann_vol_total_pct": 17.48
+      },
+      "2023": {
+        "night_share_mean": 0.4702,
+        "n_days": 239,
+        "ann_vol_total_pct": 11.39
+      },
+      "2024": {
+        "night_share_mean": 0.5139,
+        "n_days": 242,
+        "ann_vol_total_pct": 18.38
+      },
+      "2025": {
+        "night_share_mean": 0.5394,
+        "n_days": 242,
+        "ann_vol_total_pct": 19.62
+      },
+      "2026": {
+        "night_share_mean": 0.5646,
+        "n_days": 56,
+        "ann_vol_total_pct": 27.88
+      }
+    }
+  },
+  "rv_vs_r2": {
+    "RV_day": {
+      "corr_pearson_vs_r2": 0.6467,
+      "corr_spearman_vs_r2": 0.3509,
+      "spearman_p": 1.0829367752977651e-63,
+      "ratio_r2_over_rv_mean": 1.135,
+      "ratio_r2_over_rv_median": 0.5531,
+      "ratio_r2_over_rv_std": 1.4867
+    },
+    "RV_total": {
+      "corr_pearson_vs_r2": 0.5111,
+      "corr_spearman_vs_r2": 0.3156,
+      "spearman_p": 3.1460830467937327e-51,
+      "ratio_r2_over_rv_mean": 0.6485,
+      "ratio_r2_over_rv_median": 0.2924,
+      "ratio_r2_over_rv_std": 0.9168
+    },
+    "noise_ratio": {
+      "description": "r²/RV_total distribution: if r² were perfect, ratio≈1",
+      "mean": 0.6485,
+      "median": 0.2924
+    }
+  },
+  "garch_comparison": {
+    "in_sample": {
+      "r_squared": {
+        "qlike": 1.430757,
+        "mse": 2.293717796460505e-07,
+        "mae": 0.00017478942203624505,
+        "corr_pearson": 0.3294,
+        "corr_spearman": 0.2196,
+        "spearman_p": 3.4364111080891695e-24,
+        "r_squared": 0.1084,
+        "mean_ratio_sigma2_over_target": 0.9894,
+        "n_obs": 2085,
+        "mean_target": 0.00016093837766085456,
+        "mean_sigma2": 0.00015922477307630752
+      },
+      "rv_day": {
+        "qlike": 0.642968,
+        "mse": 3.229529354838579e-08,
+        "mae": 0.00011203220721530885,
+        "corr_pearson": 0.4844,
+        "corr_spearman": 0.6133,
+        "spearman_p": 7.389741190365995e-223,
+        "r_squared": -2.1422,
+        "mean_ratio_sigma2_over_target": 3.0028,
+        "n_obs": 2155,
+        "mean_target": 5.230021988485152e-05,
+        "mean_sigma2": 0.00015704780902712058
+      },
+      "rv_total": {
+        "qlike": 0.294447,
+        "mse": 2.8789836460388525e-08,
+        "mae": 8.406595419922562e-05,
+        "corr_pearson": 0.6701,
+        "corr_spearman": 0.7429,
+        "spearman_p": 0.0,
+        "r_squared": 0.3742,
+        "mean_ratio_sigma2_over_target": 1.5044,
+        "n_obs": 2157,
+        "mean_target": 0.00010494873155173774,
+        "mean_sigma2": 0.00015788660219482904
+      }
+    },
+    "out_of_sample": {
+      "r_squared": {
+        "qlike": 1.518706,
+        "corr_pearson": 0.218,
+        "corr_spearman": 0.2039,
+        "n_obs": 1601,
+        "mean_target": 0.00018478016807115896,
+        "mean_sigma2": 0.00016232595548272164
+      },
+      "rv_day": {
+        "qlike": 0.592829,
+        "corr_pearson": 0.3115,
+        "corr_spearman": 0.5351,
+        "n_obs": 1655,
+        "mean_target": 5.912027378795305e-05,
+        "mean_sigma2": 0.00016056566328733133
+      },
+      "rv_total": {
+        "qlike": 0.260835,
+        "corr_pearson": 0.4646,
+        "corr_spearman": 0.6692,
+        "n_obs": 1657,
+        "mean_target": 0.00012212835254002787,
+        "mean_sigma2": 0.00016110353012089603
+      }
+    },
+    "model_params": {
+      "omega": 0.06776160634604202,
+      "alpha": 0.0427231629728667,
+      "gamma": 0.09653288496688957,
+      "beta": 0.8649528385408406,
+      "persistence": 0.9559424439971521,
+      "nu": 4.916334554112091
+    },
+    "oos_window": 500,
+    "oos_refit_interval": 63
+  },
+  "jump_analysis": {
+    "n_total": 2163,
+    "n_jump_days": 1619,
+    "jump_frequency": 0.7485,
+    "jump_share_mean": 0.0763,
+    "jump_share_median": 0.0581,
+    "jump_rv_mean": 1.0838274830813626e-05,
+    "continuous_rv_mean": 9.812599481977617e-05,
+    "ann_continuous_vol_pct": 15.73,
+    "ann_jump_vol_pct": 4.52
+  },
+  "bar_stats": {
+    "mean_day_bars": 60.1,
+    "mean_night_bars": 167.5,
+    "mean_day_ticks": 60106.0,
+    "mean_night_ticks": 29563.0
+  },
+  "references": [
+    "Hansen & Lunde (2005): A forecast comparison of volatility models: Does anything beat a GARCH(1,1)?",
+    "Patton (2011): Volatility forecast comparison using imperfect volatility proxies. JoE 160(1)",
+    "Andersen & Bollerslev (1998): Answering the Skeptics: Yes, Standard Volatility Models Do Provide Accurate Forecasts. IER 39(4)",
+    "Barndorff-Nielsen & Shephard (2004): Power and bipower variation with stochastic volatility and jumps. JFE 2(1)"
+  ],
+  "limitations": [
+    "TX futures != 0050.TW ETF (basis risk, leverage, different tick sizes)",
+    "Night session ticks can be thin (01:00-04:00), affecting bar quality",
+    "Microstructure noise not corrected (kernel-based RV would be more robust)",
+    "BPV assumes no consecutive jumps",
+    "TX1 rollover not modeled (near-month switches monthly)",
+    "Only 8.8 years of night session data (since 2017-05-16)"
+  ],
+  "conclusion": "Night session accounts for 43.3% of total RV (consistent with K844 return finding) | r² is very noisy proxy: r²/RV_total ratio mean=0.65 (should be ~1 if perfect) | In-sample QLIKE: on r²=1.4308, on RV_total=0.2944 (RV better) | OOS QLIKE: on r²=1.5187, on RV_total=0.2608 (RV better) | Jump component: 7.6% of total RV, frequency=74.9%"
+}

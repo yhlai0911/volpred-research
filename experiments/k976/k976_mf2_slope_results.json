@@ -1,0 +1,227 @@
+{
+  "experiment_id": "K976",
+  "title": "MF2-GARCH + VIX Slope Integration",
+  "date": "2026-04-07",
+  "data_source": "yfinance (SPY, ^VIX, ^VIX3M)",
+  "sample_period": "2010-01-05 to 2026-04-06",
+  "n_observations": 4087,
+  "is_period": "start to 2018-12-31",
+  "oos_period": "2019-01-02 to 2026-04-06",
+  "oos_n": 1824,
+  "seed": 42,
+  "calibrated_parameters": {
+    "slope_adjustment_k": 0.0,
+    "ols_2factor": {
+      "alpha": 7.635116375374859e-05,
+      "beta": 0.0002941612027486462,
+      "gamma": 1.6200922479615387e-05
+    },
+    "vix_ema_weights": {
+      "w1_vix": 0.0,
+      "w2_ema": 1.0
+    }
+  },
+  "gjr_parameters": {
+    "omega": 0.03638709199850849,
+    "alpha": 0.0,
+    "gamma": 0.28219115449237386,
+    "beta": 0.8241309027825156,
+    "persistence": 0.9652264800287025
+  },
+  "evaluation": {
+    "GJR": {
+      "n_obs": 1824,
+      "QLIKE": -8.274081203890592,
+      "MSE": 2.6837009411279084e-07,
+      "MZ_intercept": 2.7633812854765456e-05,
+      "MZ_slope": 0.8450556700016404,
+      "MZ_R2": 0.2977216500128838,
+      "MZ_p_slope": 5.0593577993478075e-142
+    },
+    "MF2-VIX": {
+      "n_obs": 1824,
+      "QLIKE": -8.36114649527022,
+      "MSE": 2.7839104041710333e-07,
+      "MZ_intercept": 3.6811217350542075e-05,
+      "MZ_slope": 0.7815716771658062,
+      "MZ_R2": 0.2832270674053205,
+      "MZ_p_slope": 6.274412350994974e-134
+    },
+    "MF2-VIX-Slope": {
+      "n_obs": 1824,
+      "QLIKE": -8.36114649527022,
+      "MSE": 2.7839104041710333e-07,
+      "MZ_intercept": 3.6811217350542075e-05,
+      "MZ_slope": 0.7815716771658062,
+      "MZ_R2": 0.2832270674053205,
+      "MZ_p_slope": 6.274412350994974e-134
+    },
+    "MF2-2Factor": {
+      "n_obs": 1824,
+      "QLIKE": -8.375377426175794,
+      "MSE": 2.5129236739138447e-07,
+      "MZ_intercept": 1.7976987260253453e-05,
+      "MZ_slope": 0.9247949523970767,
+      "MZ_R2": 0.3353334272949716,
+      "MZ_p_slope": 7.952313387690974e-164
+    },
+    "MF2-VIX+EMA": {
+      "n_obs": 1824,
+      "QLIKE": -8.279478380378947,
+      "MSE": 3.0099640632099536e-07,
+      "MZ_intercept": 2.8896595485785806e-05,
+      "MZ_slope": 0.6346138993514506,
+      "MZ_R2": 0.30803942920054017,
+      "MZ_p_slope": 6.932313125374805e-148
+    }
+  },
+  "dm_tests": {
+    "MF2-VIX vs GJR": {
+      "t_stat": 2.7204021060002064,
+      "p_value": 0.0065202574713556505,
+      "model_better": true
+    },
+    "MF2-VIX-Slope vs GJR": {
+      "t_stat": 2.7204021060002064,
+      "p_value": 0.0065202574713556505,
+      "model_better": true
+    },
+    "MF2-2Factor vs GJR": {
+      "t_stat": 3.2648726744182506,
+      "p_value": 0.0010951329268253929,
+      "model_better": true
+    },
+    "MF2-VIX+EMA vs GJR": {
+      "t_stat": 0.1390898883800745,
+      "p_value": 0.8893791184616293,
+      "model_better": true
+    },
+    "MF2-VIX-Slope vs MF2-VIX": {
+      "t_stat": 0.0,
+      "p_value": 1.0,
+      "model_better": false
+    },
+    "MF2-2Factor vs MF2-VIX": {
+      "t_stat": 1.4195862381117075,
+      "p_value": 0.15572817422220453,
+      "model_better": true
+    },
+    "MF2-VIX+EMA vs MF2-VIX": {
+      "t_stat": -4.804807668199654,
+      "p_value": 1.5490033524745428e-06,
+      "model_better": false
+    }
+  },
+  "var_backtesting": {
+    "GJR": {
+      "VaR_1pct": {
+        "expected_rate": 0.01,
+        "actual_rate": 0.022478070175438597,
+        "n_violations": 41,
+        "n_total": 1824,
+        "kupiec_stat": 21.18439920048049,
+        "kupiec_pval": 4.171462703372875e-06
+      },
+      "VaR_5pct": {
+        "expected_rate": 0.05,
+        "actual_rate": 0.06469298245614036,
+        "n_violations": 118,
+        "n_total": 1824,
+        "kupiec_stat": 7.617266021262289,
+        "kupiec_pval": 0.005781206734612576
+      }
+    },
+    "MF2-VIX": {
+      "VaR_1pct": {
+        "expected_rate": 0.01,
+        "actual_rate": 0.020833333333333332,
+        "n_violations": 38,
+        "n_total": 1824,
+        "kupiec_stat": 16.478679320145332,
+        "kupiec_pval": 4.920024455723482e-05
+      },
+      "VaR_5pct": {
+        "expected_rate": 0.05,
+        "actual_rate": 0.05866228070175439,
+        "n_violations": 107,
+        "n_total": 1824,
+        "kupiec_stat": 2.73612989034012,
+        "kupiec_pval": 0.09810209447573959
+      }
+    },
+    "MF2-VIX-Slope": {
+      "VaR_1pct": {
+        "expected_rate": 0.01,
+        "actual_rate": 0.020833333333333332,
+        "n_violations": 38,
+        "n_total": 1824,
+        "kupiec_stat": 16.478679320145332,
+        "kupiec_pval": 4.920024455723482e-05
+      },
+      "VaR_5pct": {
+        "expected_rate": 0.05,
+        "actual_rate": 0.05866228070175439,
+        "n_violations": 107,
+        "n_total": 1824,
+        "kupiec_stat": 2.73612989034012,
+        "kupiec_pval": 0.09810209447573959
+      }
+    },
+    "MF2-2Factor": {
+      "VaR_1pct": {
+        "expected_rate": 0.01,
+        "actual_rate": 0.022478070175438597,
+        "n_violations": 41,
+        "n_total": 1824,
+        "kupiec_stat": 21.18439920048049,
+        "kupiec_pval": 4.171462703372875e-06
+      },
+      "VaR_5pct": {
+        "expected_rate": 0.05,
+        "actual_rate": 0.05921052631578947,
+        "n_violations": 108,
+        "n_total": 1824,
+        "kupiec_stat": 3.083897135144312,
+        "kupiec_pval": 0.07907085270409464
+      }
+    },
+    "MF2-VIX+EMA": {
+      "VaR_1pct": {
+        "expected_rate": 0.01,
+        "actual_rate": 0.019736842105263157,
+        "n_violations": 36,
+        "n_total": 1824,
+        "kupiec_stat": 13.60818920111344,
+        "kupiec_pval": 0.00022520100364353812
+      },
+      "VaR_5pct": {
+        "expected_rate": 0.05,
+        "actual_rate": 0.05263157894736842,
+        "n_violations": 96,
+        "n_total": 1824,
+        "kupiec_stat": 0.26162121571175945,
+        "kupiec_pval": 0.6090085393642886
+      }
+    }
+  },
+  "conclusions": {
+    "best_model": "MF2-2Factor",
+    "best_qlike": -8.375377426175794,
+    "improvement_over_gjr_pct": -1.2242594650578298,
+    "slope_adds_value": false,
+    "vix_ema_diversification": false,
+    "ranking": [
+      "MF2-2Factor",
+      "MF2-VIX",
+      "MF2-VIX-Slope",
+      "MF2-VIX+EMA",
+      "GJR"
+    ]
+  },
+  "references": [
+    "Engle & Rangel (2008) Spline-GARCH",
+    "Patton (2011) QLIKE loss function",
+    "K970: MF2-VIX baseline",
+    "K975: VIX Slope analysis"
+  ]
+}

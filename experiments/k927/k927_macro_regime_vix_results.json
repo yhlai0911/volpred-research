@@ -1,0 +1,450 @@
+{
+  "experiment_id": "K927",
+  "title": "Macro Regime Detection \u2014 VIX Regime Prediction with Macro Variables",
+  "timestamp": "2026-04-06T05:02:34.561599",
+  "data_sources": {
+    "VIX": "yfinance (^VIX)",
+    "macro": "FRED (GS10, GS2, BAA10Y, NFCI, ICSA)"
+  },
+  "data_period": "2006-01-03 to 2026-03-30",
+  "n_observations": 5091,
+  "regime_distribution": {
+    "calm_pct": 34.5,
+    "normal_pct": 48.2,
+    "high_pct": 17.3
+  },
+  "transitions": {
+    "total": 471,
+    "escalations": 236,
+    "de_escalations": 234,
+    "calm_to_trouble": 135
+  },
+  "descriptive_stats_by_regime": {
+    "0": {
+      "mean": {
+        "TERM_SPREAD": 0.7582868525896415,
+        "BAA10Y": 2.1351280591918043,
+        "NFCI": -0.5577328229937393,
+        "ICSA": 272355.15082527034
+      },
+      "std": {
+        "TERM_SPREAD": 0.8935174481772624,
+        "BAA10Y": 0.4543891843541385,
+        "NFCI": 0.12530866876271218,
+        "ICSA": 48377.91614988334
+      },
+      "n": 1757
+    },
+    "1": {
+      "mean": {
+        "TERM_SPREAD": 1.0637856560717196,
+        "BAA10Y": 2.377330888345558,
+        "NFCI": -0.3719870334148329,
+        "ICSA": 339535.45232273836
+      },
+      "std": {
+        "TERM_SPREAD": 0.9738769193685193,
+        "BAA10Y": 0.5702880517890198,
+        "NFCI": 0.3201070191246471,
+        "ICSA": 149500.26063980258
+      },
+      "n": 2454
+    },
+    "2": {
+      "mean": {
+        "TERM_SPREAD": 1.2786250000000001,
+        "BAA10Y": 3.2832727272727276,
+        "NFCI": 0.35368510227272726,
+        "ICSA": 651277.2727272727
+      },
+      "std": {
+        "TERM_SPREAD": 0.9129244139001215,
+        "BAA10Y": 1.176464872240073,
+        "NFCI": 1.0008837725067476,
+        "ICSA": 841333.3479904325
+      },
+      "n": 880
+    }
+  },
+  "granger_causality": {
+    "TERM_SPREAD": {
+      "best_lag": "1",
+      "F_stat": 2.346,
+      "p_value": 0.125673,
+      "significant": "False"
+    },
+    "BAA10Y": {
+      "best_lag": "1",
+      "F_stat": 16.266,
+      "p_value": 5.6e-05,
+      "significant": "True"
+    },
+    "NFCI": {
+      "best_lag": "5",
+      "F_stat": 26.219,
+      "p_value": 0.0,
+      "significant": "True"
+    },
+    "ICSA": {
+      "best_lag": "4",
+      "F_stat": 3.172,
+      "p_value": 0.012988,
+      "significant": "True"
+    }
+  },
+  "probit_models": {
+    "h5": {
+      "horizon": 5,
+      "n_is": 3271,
+      "n_oos": 1820,
+      "base_rate_is": 0.1458,
+      "base_rate_oos": 0.1549,
+      "macro_only": {
+        "AUC_oos": 0.5443,
+        "Brier_oos": 0.1323,
+        "Precision_oos": 0.1566,
+        "Recall_oos": 0.7908,
+        "coefficients": {
+          "const": {
+            "coef": -1.0711,
+            "se": 0.0276,
+            "z": -38.7962,
+            "p": 0.0
+          },
+          "TERM_SPREAD": {
+            "coef": 0.1318,
+            "se": 0.0442,
+            "z": 2.9842,
+            "p": 0.002843
+          },
+          "BAA10Y": {
+            "coef": -0.1182,
+            "se": 0.0598,
+            "z": -1.9768,
+            "p": 0.048069
+          },
+          "NFCI": {
+            "coef": 0.0201,
+            "se": 0.0612,
+            "z": 0.3283,
+            "p": 0.742675
+          },
+          "ICSA": {
+            "coef": -0.1549,
+            "se": 0.0485,
+            "z": -3.194,
+            "p": 0.001403
+          }
+        }
+      },
+      "vix_only": {
+        "AUC_oos": 0.6039,
+        "Brier_oos": 0.1291,
+        "Precision_oos": 0.3494,
+        "Recall_oos": 0.5142
+      },
+      "vix_plus_macro": {
+        "AUC_oos": 0.5822,
+        "Brier_oos": 0.1314,
+        "Precision_oos": 0.1761,
+        "Recall_oos": 0.8191,
+        "delta_AUC_vs_vix": -0.0217,
+        "LR_test_chi2": 11.23,
+        "LR_test_pval": 0.024096,
+        "coefficients": {
+          "const": {
+            "coef": -1.0784,
+            "z": -38.6325,
+            "p": 0.0
+          },
+          "TERM_SPREAD": {
+            "coef": 0.1385,
+            "z": 3.1405,
+            "p": 0.001686
+          },
+          "BAA10Y": {
+            "coef": -0.0827,
+            "z": -1.3657,
+            "p": 0.172026
+          },
+          "NFCI": {
+            "coef": 0.159,
+            "z": 2.1966,
+            "p": 0.028046
+          },
+          "ICSA": {
+            "coef": -0.1232,
+            "z": -2.4887,
+            "p": 0.01282
+          },
+          "VIX": {
+            "coef": -0.2325,
+            "z": -3.5669,
+            "p": 0.000361
+          }
+        }
+      },
+      "naive_baseline": {
+        "Brier_oos": 0.131
+      }
+    },
+    "h10": {
+      "horizon": 10,
+      "n_is": 3271,
+      "n_oos": 1820,
+      "base_rate_is": 0.232,
+      "base_rate_oos": 0.2473,
+      "macro_only": {
+        "AUC_oos": 0.5458,
+        "Brier_oos": 0.1912,
+        "Precision_oos": 0.2607,
+        "Recall_oos": 0.7711,
+        "coefficients": {
+          "const": {
+            "coef": -0.7564,
+            "se": 0.025,
+            "z": -30.3115,
+            "p": 0.0
+          },
+          "TERM_SPREAD": {
+            "coef": 0.1599,
+            "se": 0.0399,
+            "z": 4.0052,
+            "p": 6.2e-05
+          },
+          "BAA10Y": {
+            "coef": -0.1211,
+            "se": 0.0541,
+            "z": -2.2403,
+            "p": 0.025072
+          },
+          "NFCI": {
+            "coef": -0.0097,
+            "se": 0.0556,
+            "z": -0.1747,
+            "p": 0.861347
+          },
+          "ICSA": {
+            "coef": -0.2155,
+            "se": 0.0439,
+            "z": -4.9068,
+            "p": 1e-06
+          }
+        }
+      },
+      "vix_only": {
+        "AUC_oos": 0.6376,
+        "Brier_oos": 0.1797,
+        "Precision_oos": 0.5253,
+        "Recall_oos": 0.4844
+      },
+      "vix_plus_macro": {
+        "AUC_oos": 0.6106,
+        "Brier_oos": 0.1871,
+        "Precision_oos": 0.3846,
+        "Recall_oos": 0.1333,
+        "delta_AUC_vs_vix": -0.027,
+        "LR_test_chi2": 23.37,
+        "LR_test_pval": 0.000107,
+        "coefficients": {
+          "const": {
+            "coef": -0.7706,
+            "z": -30.2669,
+            "p": 0.0
+          },
+          "TERM_SPREAD": {
+            "coef": 0.1686,
+            "z": 4.2291,
+            "p": 2.3e-05
+          },
+          "BAA10Y": {
+            "coef": -0.0614,
+            "z": -1.1171,
+            "p": 0.263958
+          },
+          "NFCI": {
+            "coef": 0.202,
+            "z": 3.0682,
+            "p": 0.002154
+          },
+          "ICSA": {
+            "coef": -0.1641,
+            "z": -3.6416,
+            "p": 0.000271
+          },
+          "VIX": {
+            "coef": -0.368,
+            "z": -6.0421,
+            "p": 0.0
+          }
+        }
+      },
+      "naive_baseline": {
+        "Brier_oos": 0.1864
+      }
+    },
+    "h22": {
+      "horizon": 22,
+      "n_is": 3271,
+      "n_oos": 1820,
+      "base_rate_is": 0.3632,
+      "base_rate_oos": 0.406,
+      "macro_only": {
+        "AUC_oos": 0.56,
+        "Brier_oos": 0.2565,
+        "Precision_oos": 0.4106,
+        "Recall_oos": 0.774,
+        "coefficients": {
+          "const": {
+            "coef": -0.3867,
+            "se": 0.0235,
+            "z": -16.4543,
+            "p": 0.0
+          },
+          "TERM_SPREAD": {
+            "coef": 0.2754,
+            "se": 0.0378,
+            "z": 7.2907,
+            "p": 0.0
+          },
+          "BAA10Y": {
+            "coef": -0.2796,
+            "se": 0.0516,
+            "z": -5.4224,
+            "p": 0.0
+          },
+          "NFCI": {
+            "coef": 0.048,
+            "se": 0.0521,
+            "z": 0.9207,
+            "p": 0.357194
+          },
+          "ICSA": {
+            "coef": -0.3118,
+            "se": 0.0414,
+            "z": -7.5235,
+            "p": 0.0
+          }
+        }
+      },
+      "vix_only": {
+        "AUC_oos": 0.6887,
+        "Brier_oos": 0.2222,
+        "Precision_oos": 0.7687,
+        "Recall_oos": 0.4317
+      },
+      "vix_plus_macro": {
+        "AUC_oos": 0.6597,
+        "Brier_oos": 0.2468,
+        "Precision_oos": 0.5948,
+        "Recall_oos": 0.2801,
+        "delta_AUC_vs_vix": -0.029,
+        "LR_test_chi2": 76.15,
+        "LR_test_pval": 0.0,
+        "coefficients": {
+          "const": {
+            "coef": -0.4192,
+            "z": -17.0532,
+            "p": 0.0
+          },
+          "TERM_SPREAD": {
+            "coef": 0.29,
+            "z": 7.6605,
+            "p": 0.0
+          },
+          "BAA10Y": {
+            "coef": -0.1663,
+            "z": -3.1455,
+            "p": 0.001658
+          },
+          "NFCI": {
+            "coef": 0.4201,
+            "z": 6.6811,
+            "p": 0.0
+          },
+          "ICSA": {
+            "coef": -0.2126,
+            "z": -4.9449,
+            "p": 1e-06
+          },
+          "VIX": {
+            "coef": -0.683,
+            "z": -11.0583,
+            "p": 0.0
+          }
+        }
+      },
+      "naive_baseline": {
+        "Brier_oos": 0.243
+      }
+    }
+  },
+  "lead_lag_analysis": {
+    "TERM_SPREAD": {
+      "best_lag": -9,
+      "best_corr": 0.198,
+      "interpretation": "macro lags"
+    },
+    "BAA10Y": {
+      "best_lag": -12,
+      "best_corr": 0.471,
+      "interpretation": "macro lags"
+    },
+    "NFCI": {
+      "best_lag": -9,
+      "best_corr": 0.5057,
+      "interpretation": "macro lags"
+    },
+    "ICSA": {
+      "best_lag": -20,
+      "best_corr": 0.3183,
+      "interpretation": "macro lags"
+    }
+  },
+  "vix_sufficiency": {
+    "TERM_SPREAD": {
+      "r_full": 0.2049,
+      "p_full": 0.0,
+      "r_partial_given_VIX": 0.0542,
+      "p_partial": 0.000108,
+      "vix_absorbs": "False"
+    },
+    "BAA10Y": {
+      "r_full": 0.3955,
+      "p_full": 0.0,
+      "r_partial_given_VIX": -0.15,
+      "p_partial": 0.0,
+      "vix_absorbs": "False"
+    },
+    "NFCI": {
+      "r_full": 0.5542,
+      "p_full": 0.0,
+      "r_partial_given_VIX": -0.3266,
+      "p_partial": 0.0,
+      "vix_absorbs": "False"
+    },
+    "ICSA": {
+      "r_full": 0.327,
+      "p_full": 0.0,
+      "r_partial_given_VIX": -0.1337,
+      "p_partial": 0.0,
+      "vix_absorbs": "False"
+    }
+  },
+  "rolling_auc": {
+    "n_windows": 73,
+    "macro_wins_pct": 71.2,
+    "mean_delta_auc": 0.0408
+  },
+  "conclusion": "MIXED: Some macro variables show statistical significance but limited practical incremental value over VIX alone.",
+  "references": [
+    "Hamilton (1989) A New Approach to Economic Analysis of Nonstationary Time Series, Econometrica",
+    "Estrella & Mishkin (1998) Predicting U.S. Recessions, REStat",
+    "Adrian, Boyarchenko & Giannone (2019) Vulnerable Growth, AER",
+    "Moreira & Muir (2017) Volatility-Managed Portfolios, JF"
+  ],
+  "charts": [
+    "k927_regime_transitions.png",
+    "k927_prediction_roc.png"
+  ]
+}

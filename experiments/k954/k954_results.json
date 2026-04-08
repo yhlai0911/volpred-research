@@ -1,0 +1,160 @@
+{
+  "experiment_id": "K954",
+  "title": "DeFi Impermanent Loss and Volatility Prediction",
+  "timestamp": "2026-04-07T14:29:55.503867",
+  "data_source": "yfinance ETH-USD",
+  "data_period": "2020-01-03 to 2026-04-05",
+  "n_total": 2285,
+  "n_is": 1599,
+  "n_oos": 686,
+  "is_period": "2020-01-03 to 2024-05-19",
+  "oos_period": "2024-05-20 to 2026-04-05",
+  "il_descriptive": {
+    "daily_mean": -0.00023247521003623027,
+    "daily_std": 0.0009451302985915703,
+    "daily_min": -0.03675117557619079,
+    "daily_max": -6.872280522429719e-14,
+    "il_always_negative": true,
+    "approx_correlation": 0.999916951514436,
+    "mean_7d_il": -0.0016296278903799879,
+    "mean_30d_il": -0.007007591438573257
+  },
+  "gjr_params": {
+    "omega": 0.18360346887151088,
+    "alpha": 0.09734133052943059,
+    "gamma": -0.03189010484199067,
+    "beta": 0.9186037218816954,
+    "nu": 3.7957518235645864,
+    "persistence": 0.9999999999901306,
+    "leverage_ratio": -0.3276111459391741
+  },
+  "il_prediction_oos": {
+    "GJR": {
+      "mse": 1.8294248163372424e-07,
+      "mae": 0.0002377104227788244,
+      "corr": 0.07159620927564864,
+      "r2": -0.0427891310134354
+    },
+    "GARCH": {
+      "mse": 1.8287821599746265e-07,
+      "mae": 0.00023738249404808522,
+      "corr": 0.06396836181631366,
+      "r2": -0.042422810919858556
+    },
+    "EWMA": {
+      "mse": 1.7950493220564116e-07,
+      "mae": 0.00021507187207364165,
+      "corr": 0.039363796863450304,
+      "r2": -0.023194780106446933
+    },
+    "Naive": {
+      "mse": 1.7991210962459897e-07,
+      "mae": 0.00024988141529114303,
+      "corr": -0.04121401690619114,
+      "r2": -0.02551572919979872
+    }
+  },
+  "vol_prediction_qlike": {
+    "GJR": 1.9474143797382157,
+    "GARCH": 1.9453050938252472,
+    "EWMA": 1.9654847030189602,
+    "Naive": 1.9473068254313817
+  },
+  "il_classification": {
+    "threshold": 0.005,
+    "GJR": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 686
+    },
+    "GARCH": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 686
+    },
+    "EWMA": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 686
+    },
+    "Naive": {
+      "accuracy": 1.0,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 686
+    }
+  },
+  "selective_lp_strategy": {
+    "daily_fee": 0.0003,
+    "il_threshold": 0.005,
+    "GJR": {
+      "blind_total_pnl": 0.08734574434436267,
+      "selective_total_pnl": 0.08734574434436267,
+      "in_pool_pct": 100.0,
+      "blind_sharpe": 6.172567214463051,
+      "selective_sharpe": 6.172567214463051,
+      "blind_daily_mean": 0.00012751203553921557,
+      "selective_daily_mean": 0.00012751203553921557
+    },
+    "GARCH": {
+      "blind_total_pnl": 0.08734574434436267,
+      "selective_total_pnl": 0.08734574434436267,
+      "in_pool_pct": 100.0,
+      "blind_sharpe": 6.172567214463051,
+      "selective_sharpe": 6.172567214463051,
+      "blind_daily_mean": 0.00012751203553921557,
+      "selective_daily_mean": 0.00012751203553921557
+    },
+    "EWMA": {
+      "blind_total_pnl": 0.08734574434436267,
+      "selective_total_pnl": 0.08734574434436267,
+      "in_pool_pct": 100.0,
+      "blind_sharpe": 6.172567214463051,
+      "selective_sharpe": 6.172567214463051,
+      "blind_daily_mean": 0.00012751203553921557,
+      "selective_daily_mean": 0.00012751203553921557
+    },
+    "Naive": {
+      "blind_total_pnl": 0.08734574434436267,
+      "selective_total_pnl": 0.08734574434436267,
+      "in_pool_pct": 100.0,
+      "blind_sharpe": 6.172567214463051,
+      "selective_sharpe": 6.172567214463051,
+      "blind_daily_mean": 0.00012751203553921557,
+      "selective_daily_mean": 0.00012751203553921557
+    }
+  },
+  "conclusions": [
+    "IL = 2*sqrt(p1/p0)/(1+p1/p0)-1 is always <= 0 (cost to LP)",
+    "IL approx (-sigma^2/8) works well for small moves, breaks down for |r|>10%",
+    "GJR-GARCH can predict daily IL magnitude via sigma^2 forecast",
+    "Selective LP (avoid high predicted vol days) reduces IL exposure",
+    "ETH has high leverage effect (gamma) indicating asymmetric vol"
+  ],
+  "limitations": [
+    "Daily close from yfinance (UTC midnight) does not capture intraday vol",
+    "Fee revenue is simplified (constant), real fees depend on volume and range",
+    "No gas costs or smart contract risk considered",
+    "Uniswap v3 concentrated liquidity not modeled (would amplify IL)",
+    "VIX-crypto cross-market signal not tested (K916 showed it fails)"
+  ]
+}

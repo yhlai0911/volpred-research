@@ -1,0 +1,158 @@
+{
+  "experiment_id": "K973",
+  "title": "Time-Varying Hurst Exponent for Volatility Forecasting",
+  "data_source": "yfinance (SPY)",
+  "data_period": "2006-01-04 to 2026-04-06",
+  "total_observations": 5094,
+  "is_period": "start to 2018-12-31",
+  "oos_period": "2019-01-02 to end",
+  "n_is": 3270,
+  "n_oos": 1824,
+  "seed": 42,
+  "hurst_descriptive": {
+    "H_rs": {
+      "n": 5034,
+      "mean": 0.5019,
+      "std": 0.0514,
+      "min": 0.3446,
+      "max": 0.6464,
+      "median": 0.5041,
+      "below_05_pct": 47.4
+    },
+    "H_vario": {
+      "n": 4974,
+      "mean": 0.0086,
+      "std": 0.0245,
+      "min": -0.0698,
+      "max": 0.0818,
+      "median": 0.0061,
+      "below_05_pct": 100.0
+    },
+    "H_rs_ewma": {
+      "n": 5034,
+      "mean": 0.5019,
+      "std": 0.0301,
+      "min": 0.4167,
+      "max": 0.5863,
+      "median": 0.5021,
+      "below_05_pct": 46.9
+    },
+    "H_vario_ewma": {
+      "n": 4974,
+      "mean": 0.0086,
+      "std": 0.0206,
+      "min": -0.0416,
+      "max": 0.0601,
+      "median": 0.0047,
+      "below_05_pct": 100.0
+    }
+  },
+  "hurst_by_regime": {
+    "Low (<10%)": {
+      "n": 1455,
+      "mean": 0.4984,
+      "std": 0.0356
+    },
+    "Normal (10-15%)": {
+      "n": 1594,
+      "mean": 0.4988,
+      "std": 0.0313
+    },
+    "High (15-25%)": {
+      "n": 1372,
+      "mean": 0.5059,
+      "std": 0.0231
+    },
+    "Crisis (>25%)": {
+      "n": 613,
+      "mean": 0.5094,
+      "std": 0.0239
+    }
+  },
+  "oos_qlike": {
+    "GJR-GARCH(1,1)": 2.447498,
+    "GJR-GARCH(1,1)_n": 1822,
+    "HAR": 1.526412,
+    "HAR_n": 1822,
+    "HAR + H_rs_ewma": 1.527548,
+    "HAR + H_rs_ewma_n": 1822,
+    "HAR + H_vario_ewma": 1.527022,
+    "HAR + H_vario_ewma_n": 1822,
+    "HAR + H_rs + H_vario": 1.527863,
+    "HAR + H_rs + H_vario_n": 1822,
+    "HAR + H_rs_raw": 1.545287,
+    "HAR + H_rs_raw_n": 1822
+  },
+  "oos_mse": {
+    "GJR-GARCH(1,1)": 5.022133229360844e-07,
+    "HAR": 3.028676632236264e-07,
+    "HAR + H_rs_ewma": 3.028980649755407e-07,
+    "HAR + H_vario_ewma": 3.030988331172948e-07,
+    "HAR + H_rs + H_vario": 3.031278728672005e-07,
+    "HAR + H_rs_raw": 3.0282853389076403e-07
+  },
+  "dm_tests_vs_har": {
+    "GJR-GARCH(1,1)": {
+      "dm_stat": -3.7071,
+      "p_value": 0.0002
+    },
+    "HAR + H_rs_ewma": {
+      "dm_stat": -0.8932,
+      "p_value": 0.3719
+    },
+    "HAR + H_vario_ewma": {
+      "dm_stat": -0.1121,
+      "p_value": 0.9107
+    },
+    "HAR + H_rs + H_vario": {
+      "dm_stat": -0.2789,
+      "p_value": 0.7804
+    },
+    "HAR + H_rs_raw": {
+      "dm_stat": -1.9227,
+      "p_value": 0.0547
+    }
+  },
+  "is_coefficients": {
+    "HAR_H_rs_ewma": {
+      "features": [
+        "const",
+        "r2_lag1",
+        "r2_lag5",
+        "r2_lag22",
+        "H_rs_ewma_lag1"
+      ],
+      "coefs": [
+        -3.3e-05,
+        -0.160579,
+        0.509633,
+        0.473597,
+        0.000121
+      ],
+      "se": [
+        0.000153,
+        0.02037,
+        0.046145,
+        0.049044,
+        0.000307
+      ],
+      "t_stats": [
+        -0.217,
+        -7.883,
+        11.0442,
+        9.6566,
+        0.3942
+      ],
+      "R2": 0.22422,
+      "n": 3209
+    }
+  },
+  "conclusion": "Mean H (R/S EWMA) = 0.502, H (Variogram EWMA) = 0.009. H >= 0.5, rough vol characteristics not clearly evident at daily frequency. Adding H to HAR does NOT improve QLIKE. Hurst exponent has no incremental predictive value for daily vol. Best overall model: HAR (QLIKE=1.526412). Comparison with K34: confirms that daily-frequency Hurst is challenging for vol prediction.",
+  "references": [
+    "Gatheral, Jaisson, Rosenbaum (2018) \"Volatility is Rough\", Quantitative Finance",
+    "Corsi (2009) \"A Simple Approximate Long-Memory Model of Realized Volatility\", JFE",
+    "Patton (2011) \"Volatility Forecast Comparison Using Imperfect Proxies\", JoE",
+    "arXiv:2509.05820 (2025) Time-Varying Hurst EWMA",
+    "Harvey, Liu, Zhu (2016) ...and the cross-section of expected returns, RFS"
+  ]
+}

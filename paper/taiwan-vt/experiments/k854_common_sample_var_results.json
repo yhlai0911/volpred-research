@@ -1,0 +1,430 @@
+{
+  "experiment_id": "K854",
+  "title": "K854: Common Sample VaR — Fix K850 Unfair 450 vs 481 Comparison",
+  "proposer": "[提出: Codex H2, 執行: Claude]",
+  "method": "7 models on identical OOS window (truly common sample)",
+  "asset": "0050.TW",
+  "rv_source": "TAIFEX TX1 tick data (5-min RV)",
+  "oos_period": "2023-03-01 to 2024-12-31",
+  "oos_period_requested": "2023-01-01 to 2024-12-31",
+  "n_truly_common_oos": 450,
+  "n_oos_before_common_filter": 481,
+  "n_oos_original_full": 481,
+  "n_days_trimmed": 31,
+  "common_sample_start": "2023-03-01",
+  "common_sample_end": "2024-12-31",
+  "per_method_valid_counts": {
+    "GJR+Normal": 481,
+    "GJR+CF": 481,
+    "GJR+Skewed-t": 481,
+    "HAR+Normal": 450,
+    "HAR+CF": 450,
+    "HAR+HistSim": 450,
+    "RGL+CF": 481
+  },
+  "refit_every": 63,
+  "alpha_levels": [
+    0.01,
+    0.05
+  ],
+  "models": [
+    "GJR+Normal",
+    "GJR+CF",
+    "GJR+Skewed-t",
+    "HAR+Normal",
+    "HAR+CF",
+    "HAR+HistSim",
+    "RGL+CF"
+  ],
+  "data_source": "TAIFEX TX tick data (5-min RV) + yfinance (0050.TW returns)",
+  "error_log_rules": [
+    "0050.TW: clean_tw50_data applied",
+    "HAR: RV_{t-1}, RV_{t-1:5}, RV_{t-1:22} (no lookahead)",
+    "GJR OOS: recursive h[t]=f(h[t-1], r^2[t-1])",
+    "RealGARCH-Log: log(h[t]) = omega + beta*log(h[t-1]) + delta*log(RV[t-1])",
+    "Skewed-t: Fernandez-Steel (1998), fitted to GJR std residuals",
+    "Date alignment: inner join (TX RV intersect 0050.TW returns)",
+    "COMMON SAMPLE: All models evaluated on identical dates"
+  ],
+  "references": [
+    "Corsi (2009) - HAR-RV model, J Financial Econometrics",
+    "Hansen & Lunde (2005) - 5-min RV gold standard",
+    "Hansen, Huang & Shek (2012) - Realized GARCH, J Applied Econometrics",
+    "Cornish & Fisher (1938) - CF expansion",
+    "Fernandez & Steel (1998) - Skewed-t distribution, JASA",
+    "Patton (2011) - QLIKE proxy-robust, J Econometrics",
+    "K850: GJR+CF Trinity PASS on 481d, HAR 450d (UNFAIR)",
+    "K852: RealGARCH-Log+CF also Trinity PASS on 481d"
+  ],
+  "timestamp": "2026-04-04T14:18:18.121310+00:00",
+  "elapsed_sec": 64.7,
+  "n_common_dates": 2185,
+  "n_gjr_refits": 8,
+  "n_rgl_refits": 8,
+  "oos_stats_common_sample": {
+    "mean": 0.0012877116099660015,
+    "std": 0.012798887344095981,
+    "skewness": -0.817729811467405,
+    "kurtosis": 8.114548785904786,
+    "min": -0.09129929932826675,
+    "max": 0.05511806086874138,
+    "n": 450
+  },
+  "oos_stats_full_481": {
+    "mean": 0.0014134644648599289,
+    "std": 0.012862864661314307,
+    "skewness": -0.6812467119843095,
+    "kurtosis": 7.668149552131704,
+    "min": -0.09129929932826675,
+    "max": 0.05511806086874138,
+    "n_oos": 481
+  },
+  "var_results": {
+    "1%": {
+      "GJR+Normal": {
+        "violation_rate": 0.022222,
+        "expected_rate": 0.01,
+        "n_violations": 10,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 5.0383,
+          "p_value": 0.0248,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 1.5775,
+          "p_value": 0.2091,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 9,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "GJR+CF": {
+        "violation_rate": 0.006667,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 0.5723,
+          "p_value": 0.4494,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 3,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "GJR+Skewed-t": {
+        "violation_rate": 0.02,
+        "expected_rate": 0.01,
+        "n_violations": 9,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 3.5223,
+          "p_value": 0.0605,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 1.9448,
+          "p_value": 0.1631,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+Normal": {
+        "violation_rate": 0.033333,
+        "expected_rate": 0.01,
+        "n_violations": 15,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 15.3686,
+          "p_value": 0.0001,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.4194,
+          "p_value": 0.5172,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 12,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+CF": {
+        "violation_rate": 0.037778,
+        "expected_rate": 0.01,
+        "n_violations": 17,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 20.5447,
+          "p_value": 0.0,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.1844,
+          "p_value": 0.6676,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 10,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+HistSim": {
+        "violation_rate": 0.02,
+        "expected_rate": 0.01,
+        "n_violations": 9,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 3.5223,
+          "p_value": 0.0605,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 1.9448,
+          "p_value": 0.1631,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "RGL+CF": {
+        "violation_rate": 0.006667,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 0.5723,
+          "p_value": 0.4494,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 3,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      }
+    },
+    "5%": {
+      "GJR+Normal": {
+        "violation_rate": 0.046667,
+        "expected_rate": 0.05,
+        "n_violations": 21,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 0.1076,
+          "p_value": 0.7429,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0004,
+          "p_value": 0.985,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "GJR+CF": {
+        "violation_rate": 0.046667,
+        "expected_rate": 0.05,
+        "n_violations": 21,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 0.1076,
+          "p_value": 0.7429,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0004,
+          "p_value": 0.985,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "GJR+Skewed-t": {
+        "violation_rate": 0.042222,
+        "expected_rate": 0.05,
+        "n_violations": 19,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 0.6037,
+          "p_value": 0.4372,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0486,
+          "p_value": 0.8254,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 13,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "HAR+Normal": {
+        "violation_rate": 0.066667,
+        "expected_rate": 0.05,
+        "n_violations": 30,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 2.3933,
+          "p_value": 0.1219,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 1.838,
+          "p_value": 0.1752,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 21,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+CF": {
+        "violation_rate": 0.102222,
+        "expected_rate": 0.05,
+        "n_violations": 46,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 20.1078,
+          "p_value": 0.0,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.4091,
+          "p_value": 0.5224,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 27,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HAR+HistSim": {
+        "violation_rate": 0.057778,
+        "expected_rate": 0.05,
+        "n_violations": 26,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 0.547,
+          "p_value": 0.4596,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 1.3396,
+          "p_value": 0.2471,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 18,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "RGL+CF": {
+        "violation_rate": 0.042222,
+        "expected_rate": 0.05,
+        "n_violations": 19,
+        "n_total": 450,
+        "kupiec": {
+          "stat": 0.6037,
+          "p_value": 0.4372,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0486,
+          "p_value": 0.8254,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      }
+    }
+  },
+  "qlike_results": {
+    "HAR-RV": {
+      "qlike": 0.10042681289693563,
+      "n_valid": 450
+    },
+    "GJR-GARCH": {
+      "qlike": 0.20464913907810145,
+      "n_valid": 450
+    },
+    "RealGARCH-Log": {
+      "qlike": 0.20929846129016716,
+      "n_valid": 450
+    }
+  },
+  "dm_test": {
+    "HAR-RV_vs_GJR-GARCH": {
+      "t_stat": -4.9822,
+      "p_value": 1e-06,
+      "n_obs": 450,
+      "significant": true,
+      "interpretation": "HAR-RV better"
+    },
+    "HAR-RV_vs_RealGARCH-Log": {
+      "t_stat": -9.7183,
+      "p_value": 0.0,
+      "n_obs": 450,
+      "significant": true,
+      "interpretation": "HAR-RV better"
+    },
+    "GJR-GARCH_vs_RealGARCH-Log": {
+      "t_stat": -0.2766,
+      "p_value": 0.782198,
+      "n_obs": 450,
+      "significant": false,
+      "interpretation": "no sig diff"
+    }
+  },
+  "avg_var_1pct": {
+    "GJR+Normal": -0.025782052347110902,
+    "GJR+CF": -0.036953191841388,
+    "GJR+Skewed-t": -0.0286008237982655,
+    "HAR+Normal": -0.0209085269237424,
+    "HAR+CF": -0.021379378161719084,
+    "HAR+HistSim": -0.025188385889670664,
+    "RGL+CF": -0.0378544055345156
+  },
+  "best_method_1pct": "GJR+CF",
+  "conclusions": [
+    "Common sample: 450 days (K850 used 481 GJR / 450 HAR)",
+    "1% VaR Trinity PASS: GJR+CF, RGL+CF",
+    "1% VaR Trinity FAIL: GJR+Normal, GJR+Skewed-t, HAR+Normal, HAR+CF, HAR+HistSim",
+    "QLIKE: HAR=0.1004 vs GJR=0.2046 (+50.9% better)",
+    "PARADOX PERSISTS: GJR+CF passes, HAR methods fail, even on common sample",
+    "  -> Better vol prediction (HAR) != better VaR (GJR has better residual tails)",
+    "Best 1% VaR: GJR+CF (3 violations)"
+  ],
+  "k850_comparison": {
+    "k850_gjr_cf_1pct": "2 violations / 481 days (Trinity PASS)",
+    "k850_har_histsim_1pct": "9 violations / 450 days (Trinity FAIL)",
+    "k850_unfairness": "GJR had 31 more days than HAR",
+    "k854_fix": "All 7 models now on 450 truly common days"
+  }
+}

@@ -1,0 +1,276 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{resolved}{RGB}{0,100,180}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report R2}\\[0.5em]
+{\large Leverage Direction Matters: Cross-Asset Evidence on\\GARCH Model Selection and Volatility Targeting}\\[0.5em]
+{\normalsize Author: Yi-Hao Lai}\\[0.3em]
+{\normalsize Document Type: Journal Paper (targeting JBF)}\\
+{\normalsize Document Version: \texttt{main\_v2.tex} + \texttt{body\_v2.tex} (April 2026 revision)}\\
+{\normalsize Review Date: 2026-04-05}\\
+{\normalsize Review Standard: Strict (JBF Referee Standard)}\\
+{\normalsize Reference: R1 review dated 2026-04-05; K899 unified VaR experiment}
+\end{center}
+
+\bigskip
+
+%% ============================================================
+\section*{R2 Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{resolved}{R1 Critical Issues resolved} & 1 of 5 \\
+\textcolor{errorred}{R1 Critical Issues still open} & 4 of 5 \\
+\textcolor{warncolor}{New issues identified in R2} & 2 items \\
+Overall Assessment & \textbf{Major Revision (reduced scope)} \\
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{Overall R2 impression.} The v2 revision has successfully resolved the most damaging R1 issue---the Henriksson-Merton gamma contradiction (C1)---by explicitly labeling the two estimates as coming from different strategies and different sample periods. The revised text at Section~5.4 is now clear and internally consistent. However, four of the five original Critical issues remain unaddressed, and K899---a unified VaR experiment that was specifically designed to fix C3 (Table~5 cherry-picking)---has not yet been incorporated into the paper's tables. The revision also introduces a new concern: the K899 results substantially differ from the numbers currently in the paper's Table~5, creating a fresh traceability problem.
+
+\bigskip
+
+%% ============================================================
+\section*{Status of R1 Critical Issues}
+
+\subsection*{C1: HM $\gamma$ Internal Contradiction \hfill \textcolor{okgreen}{RESOLVED}}
+
+\textbf{R1 finding:} Section~4.7 reported $\hat{\gamma}_{HM} = -0.035$ ($t = -0.39$) while Section~5.4 reported $\hat{\gamma}_{HM} = -0.043$ ($t = -4.06$), creating an apparent contradiction for the same test.
+
+\textbf{R2 assessment:} The revised body\_v2.tex now clearly distinguishes:
+\begin{itemize}[nosep]
+\item \textbf{Section~4.6} (line~376): Baseline 12/VIX strategy, full 2005--2026 sample. $\hat{\gamma}_{HM} = -0.035$, $t = -0.39$, $p = 0.70$. No timing.
+\item \textbf{Section~5.4} (line~436): Hybrid VT strategy, 2014--2026 subsample ($N \approx 3{,}100$). $\hat{\gamma}_{HM} = -0.043$, $t = -4.06$, $p < 0.001$. Significant negative.
+\end{itemize}
+The text explicitly states: ``The significant negative $\gamma_{HM}$ for Hybrid VT---contrasting with the insignificant $-0.035$ for the baseline 12/VIX strategy---reflects Hybrid VT's more aggressive volatility scaling in the shorter, higher-volatility 2014--2026 subsample.'' This is a clean resolution. The different magnitudes are explained by (a)~different strategies (12/VIX vs.\ Hybrid), (b)~different sample periods (21 years vs.\ 12 years), and (c)~different volatility regimes covered. No further action needed.
+
+\textbf{Minor residual:} The additions\_jk.tex file (not included in main\_v2.tex) still contains the old Section~4.7 text with $\hat{\gamma}_{HM} = -0.035$. Since it is no longer compiled, this is not a paper issue, but the file should be marked as superseded or removed to avoid future confusion.
+
+
+\subsection*{C2: Table~5 Kupiec $p$-values Falsely Equalized \hfill \textcolor{errorred}{STILL OPEN}}
+
+\textbf{R1 finding:} Both GJR+Student-$t$ and GJR+HistSim reported Kupiec $p = 0.60$. Actual values from K802/K824v2 were 0.67 and 0.64 respectively.
+
+\textbf{R2 assessment:} Table~\ref{tab:var_ortho} in tables.tex (line~95--96) \textbf{still reports $p = 0.60$ for both rows}. This has not been corrected.
+
+\textbf{Compounding problem from K899:} The new unified experiment K899 covers a much longer OOS period (2020--2025, $N = 1508$) compared to the paper's 2023--2024 window ($N = 502$). K899 reports:
+\begin{itemize}[nosep]
+\item GJR + Student-$t$: 23 violations (1.53\%), Kupiec $p = 0.057$, Basel \textbf{Green}
+\item GJR + HistSim: 19 violations (1.26\%), Kupiec $p = 0.330$, Basel \textbf{Yellow} (5 in rolling 250-day window)
+\end{itemize}
+These numbers differ dramatically from both the paper's current Table~5 and the R1-flagged K802/K824v2 values, because K899 uses a 6-year evaluation window rather than 2 years. \textbf{The author must decide which OOS period to use and update Table~5 accordingly.} If the 2023--2024 window is retained, the $p$-values must be corrected to 0.67 and 0.64. If K899's longer window is adopted, the entire table must be rewritten.
+
+
+\subsection*{C3: Table~5 Cherry-Picks from Multiple Experiments \hfill \textcolor{errorred}{PARTIALLY ADDRESSED}}
+
+\textbf{R1 finding:} Table~5 mixed results from K799, K802, and K824v2 with different refit schedules, cherry-picking the most favorable count from each.
+
+\textbf{R2 assessment:} K899 was explicitly designed to fix this (its title: ``Unified VaR/ES for Paper 1, replaces cherry-picked Table~5''). K899 runs all seven VaR configurations with identical settings (expanding window, refit every 63 days, HS window = 500). However, \textbf{the paper's Table~5 has not been updated to use K899 data}. The current table still shows the old mixed-source numbers.
+
+Furthermore, K899 reveals important differences:
+\begin{itemize}[nosep]
+\item K899 GJR+Normal: 34 violations (2.25\%, Kupiec $p = 0.000$) vs.\ paper's 10 violations (1.99\%, $p = 0.049$)
+\item K899 GJR+Student-$t$: 23 violations (1.53\%, $p = 0.057$) vs.\ paper's 6 violations (1.20\%, $p = 0.60$)
+\item K899 GJR+HistSim: 19 violations (1.26\%, $p = 0.330$) vs.\ paper's 4 violations (0.80\%, $p = 0.60$)
+\end{itemize}
+The discrepancies are large and arise from K899 covering 6 years (including 2020 COVID) vs.\ the paper's 2 years (2023--2024 only). The qualitative finding---that distributional upgrades improve VaR compliance---survives, but the specific numbers change substantially. Notably, under K899's longer window, GJR+HistSim achieves the only ES pass (Acerbi-Szekely $z = 1.64$, $p = 0.10$), strengthening the paper's narrative that HistSim is the most robust choice.
+
+\textbf{K899 also provides new ES data} (Acerbi-Szekely test + Fissler-Ziegel scores), which directly addresses R1 Major Issue M5 (no Expected Shortfall analysis). Only GJR+HistSim passes the ES test. This is a significant finding that should be incorporated.
+
+\textbf{Action required:}
+\begin{enumerate}[nosep]
+\item Decide on OOS window: 2023--2024 (simpler narrative) or 2020--2025 (more powerful, addresses short-sample concern)
+\item Rewrite Table~5 with K899 data for the chosen window
+\item Add ES results (at minimum the Acerbi-Szekely pass/fail column)
+\item Document K899 as the single source for all Table~5 values
+\end{enumerate}
+
+
+\subsection*{C4: Table~1 Descriptive Statistics Untraceable \hfill \textcolor{errorred}{STILL OPEN}}
+
+\textbf{R1 finding:} No experiment JSON backing Table~1's values.
+
+\textbf{R2 assessment:} No new experiment script or results JSON for Table~1 has been created. The descriptive statistics remain untraceable. This is the lowest-priority Critical among the five, but it still violates the reproducibility standard. Creating a simple \texttt{paper1\_table1\_descriptive.py} script would resolve it in under 30 minutes.
+
+
+\subsection*{C5: Table~3 Non-SPY QLIKE Values Untraceable \hfill \textcolor{errorred}{STILL OPEN}}
+
+\textbf{R1 finding:} Only SPY 2023--2024 QLIKE values were verified against K799/K802. The remaining 8 of 10 rows (QQQ, GLD, TLT, EEM, BTC across two periods) had no traceable source.
+
+\textbf{R2 assessment:} No comprehensive cross-asset QLIKE experiment has been created. This remains a significant reproducibility gap for what is arguably the paper's most important empirical table.
+
+
+\bigskip
+
+%% ============================================================
+\section*{Status of R1 Major Issues}
+
+\begin{longtable}{p{1cm}p{5cm}p{2.5cm}p{5.5cm}}
+\toprule
+\textbf{ID} & \textbf{R1 Issue} & \textbf{R2 Status} & \textbf{Assessment} \\
+\midrule
+\endfirsthead
+M1 & Paper length (62 pages) & \textcolor{warncolor}{UNCHANGED} & body\_v2.tex remains extensive. Complexity ceiling, HAR paradox, VIX sufficiency tests, and TZ momentum are all still in the main body rather than supplementary material. \\
+\addlinespace
+M2 & Abstract overclaims ``6/6 OOS'' & \textcolor{okgreen}{IMPROVED} & Introduction now says ``correctly classifying all nine DM comparisons'' and adds the caveat ``though the small cross-section ($N = 6$) limits statistical power.'' The abstract-level overclaim is reduced. \\
+\addlinespace
+M3 & Proposition~1 mechanical confound & \textcolor{okgreen}{IMPROVED} & The body now states ``This correlation is partly mechanical'' (line~468) and leads with the domain restriction. The framing is more honest. However, the $\rho = 1.000$ still appears prominently in the figure caption without the mechanical caveat. \\
+\addlinespace
+M4 & Harvey $t > 3.0$ inconsistency & \textcolor{warncolor}{UNCHANGED} & The paper still reports some DM results with $p < 0.05$ as ``significant'' without noting they fail the Harvey threshold (e.g., K799 DM $t = -2.93$). \\
+\addlinespace
+M5 & No Expected Shortfall analysis & \textcolor{resolved}{ADDRESSABLE} & K899 now provides ES data (Acerbi-Szekely + Fissler-Ziegel). Only GJR+HistSim passes ES ($z = 1.64$, $p = 0.10$). All other methods fail ($p < 0.05$). This data exists but has not been incorporated into the paper. \\
+\addlinespace
+M6 & DeMiguel et al.\ (2024) mischaracterized & \textcolor{warncolor}{UNCHANGED} & Line~46 still reads ``hybrid implied-realized framework.'' Should be ``conditional multifactor portfolio.'' \\
+\addlinespace
+M7 & Hybrid VT Sharpe rounding (0.99) & \textcolor{warncolor}{UNCHANGED} & Not checked in current tables. \\
+\addlinespace
+M8 & Missing references (Bekaert \& Wu 2000, Figlewski \& Wang 2000) & \textcolor{warncolor}{UNCHANGED} & Neither reference has been added to the bibliography. \\
+\bottomrule
+\end{longtable}
+
+
+\bigskip
+
+%% ============================================================
+\section*{New Issues Identified in R2}
+
+\subsection*{\textcolor{warncolor}{N1 (NEW MAJOR): K899 Results Diverge Significantly from Paper's Table~5}}
+
+K899 was run over 2020--2025 ($N = 1508$), but Table~5 covers 2023--2024 ($N = 502$). The violation counts, rates, and Kupiec $p$-values differ by factors of 2--5$\times$. If K899 is adopted as the source, Table~5's narrative about ``4 violations (0.80\%)'' for HistSim becomes ``19 violations (1.26\%),'' and the ``borderline failure'' for GJR+Normal (10 violations) becomes a decisive failure (34 violations). The qualitative conclusions survive but the quantitative story changes substantially.
+
+\textbf{This is not a data error}---it reflects the well-known sensitivity of VaR backtesting to the evaluation window. The longer window includes the extreme 2020 COVID period and the 2022 rate-hiking cycle, both of which stress-test the VaR models more severely. The longer window is arguably more informative but tells a less clean story.
+
+\textbf{Recommendation:} Use K899 data but restrict to a well-motivated subperiod. Options:
+\begin{enumerate}[nosep]
+\item \textbf{Full K899 (2020--2025)}: Most powerful, includes multiple regimes, addresses the short-sample concern. But violation counts are high for all methods.
+\item \textbf{K899 subset (2023--2025)}: Matches the paper's primary OOS better. Would need re-extraction from K899.
+\item \textbf{Keep 2023--2024 but cite K899 for robustness}: Present the 502-day results in the main table, with a footnote or appendix showing the K899 6-year results confirm the qualitative ranking.
+\end{enumerate}
+
+Option~3 is the most pragmatic: it preserves the clean narrative while adding the longer-sample evidence as robustness. But the $p$-values in the main table \textbf{must} be corrected regardless of which option is chosen.
+
+
+\subsection*{\textcolor{warncolor}{N2 (NEW MAJOR): K899 ES Results Reveal a Starker Picture Than the Paper Acknowledges}}
+
+K899's Acerbi-Szekely ES backtest shows that \textbf{only GJR+HistSim passes} ($z = 1.64$, $p = 0.10$). All other methods---including GJR+Student-$t$ ($z = 2.56$, $p = 0.01$), GJR+Skewed-$t$ ($z = 2.32$, $p = 0.02$), and both GARCH variants---fail the ES test. This is a dramatically stronger result than the VaR analysis alone: while Student-$t$ and Skewed-$t$ pass Kupiec, they systematically underestimate the magnitude of tail losses.
+
+The Fissler-Ziegel joint VaR-ES scores confirm: GJR+HistSim achieves the best (least negative) score at both 1\% and 5\% levels, consistent with its zero-parameter design adapting to the empirical tail shape.
+
+If the paper adds ES analysis (strongly recommended per R1-M5 and Basel III requirements), the HistSim dominance becomes even more compelling---\textbf{upgrading the paper's practical recommendation from ``HistSim is slightly better'' to ``HistSim is the only method that passes both VaR and ES.''} This would significantly strengthen the orthogonality narrative and the complexity ceiling argument.
+
+
+\bigskip
+
+%% ============================================================
+\section*{Specific Verification: K899 Against Paper Numbers}
+
+\begin{longtable}{p{3.5cm}p{2.5cm}p{2.5cm}p{2cm}p{3cm}}
+\toprule
+\textbf{Configuration} & \textbf{Paper Table~5} & \textbf{K899 (1508 days)} & \textbf{Match?} & \textbf{Note} \\
+\midrule
+\endfirsthead
+GARCH Normal viol. & 7 (1.39\%) & 32 (2.12\%) & No & Different period \\
+GJR Normal viol. & 10 (1.99\%) & 34 (2.25\%) & No & Different period \\
+GJR Student-$t$ viol. & 6 (1.20\%) & 23 (1.53\%) & No & Different period \\
+GJR Student-$t$ Kupiec $p$ & 0.60 & 0.057 & No & Period + rounding \\
+GJR HistSim viol. & 4 (0.80\%) & 19 (1.26\%) & No & Different period \\
+GJR HistSim Kupiec $p$ & 0.60 & 0.330 & No & Period + rounding \\
+GJR HistSim Basel & Green & Yellow & No & 5 in 250-day window \\
+\midrule
+\multicolumn{5}{l}{\textit{All discrepancies arise from K899's 6-year window vs.\ the paper's 2-year window.}} \\
+\multicolumn{5}{l}{\textit{The qualitative ranking (HistSim $>$ Student-$t$ $>$ Normal) is preserved in K899.}} \\
+\bottomrule
+\end{longtable}
+
+
+\bigskip
+
+%% ============================================================
+\section*{R2 Revision Priority}
+
+\textbf{Priority 1 (must fix before submission):}
+\begin{enumerate}
+\item \textbf{Update Table~5 with corrected numbers.} Either: (a)~rerun the 2023--2024 window from K899's codebase to get unified results for the original period, then correct the Kupiec $p$-values to actual values; or (b)~adopt K899's 2020--2025 results and rewrite the surrounding narrative. Either way, all four rows must come from a single experiment with identical settings. \textit{[Addresses C2, C3]}
+
+\item \textbf{Add ES column to Table~5.} K899 provides Acerbi-Szekely results. At minimum, add a Pass/Fail column. The finding that only HistSim passes ES is the paper's strongest practical result and directly addresses R1-M5 (no ES analysis) and the Basel III requirement. \textit{[Addresses M5, N2]}
+
+\item \textbf{Create traceable experiments for Tables~1 and~3.} Simple Python scripts that reproduce the exact numbers. Without these, the ``replication code available upon request'' claim in the title footnote is hollow. \textit{[Addresses C4, C5]}
+\end{enumerate}
+
+\textbf{Priority 2 (strongly recommended):}
+\begin{enumerate}[resume]
+\item \textbf{Fix DeMiguel et al.\ (2024) characterization} (line~46). Replace ``hybrid implied-realized framework'' with ``conditional multifactor portfolio.'' \textit{[Addresses M6]}
+
+\item \textbf{Add Bekaert and Wu (2000) and Figlewski and Wang (2000)} to the bibliography and cite appropriately in Section~5.1. \textit{[Addresses M8]}
+
+\item \textbf{Standardize Harvey threshold usage.} Either consistently apply $t > 3.0$ throughout (noting which results fail), or explicitly state when the standard 5\% threshold is used and justify the choice. \textit{[Addresses M4]}
+
+\item \textbf{Move secondary analyses to supplementary material} to reduce paper length below 50 pages. Candidates: complexity ceiling details (Table~10), HAR paradox (Section~5.6), VIX sufficiency tests, TZ momentum appendix, diversification amplification. \textit{[Addresses M1]}
+\end{enumerate}
+
+\textbf{Priority 3 (desirable):}
+\begin{enumerate}[resume]
+\item Add a note to Figure~\ref{fig:gamma_mechanism} caption acknowledging the partly mechanical nature of $\rho = 1.000$. \textit{[Residual from M3]}
+
+\item Clean up or remove \texttt{additions\_jk.tex} to avoid confusion with the superseded Section~4.7 text.
+
+\item Report Hybrid VT Sharpe as 0.985 or 0.98 rather than 0.99. \textit{[Addresses M7]}
+\end{enumerate}
+
+
+\bigskip
+
+%% ============================================================
+\section*{What the Revision Did Well}
+
+\begin{enumerate}
+\item \textbf{C1 resolution is exemplary.} The revised text clearly labels the two HM gamma estimates as coming from different strategies (12/VIX vs.\ Hybrid VT) and different periods (2005--2026 vs.\ 2014--2026), with an explicit sentence explaining why the magnitudes differ. This is exactly what R1 requested.
+
+\item \textbf{OOS caveat strengthened.} The introduction now acknowledges that ``the small cross-section ($N = 6$) limits statistical power'' for the OOS classification test, and the 9/9 in-sample classification is correctly labeled as partly in-sample. The ``6/6 correct OOS predictions'' framing has been replaced with the more accurate ``correctly classifying all nine DM comparisons.''
+
+\item \textbf{Proposition~1 domain restriction is now explicit.} The text leads with the equity-type restriction ($\rho = 0.886$, $p = 0.019$, $N = 6$) and explicitly states that the mapping ``does not extend to diverse asset classes'' ($\rho = -0.448$). This is a substantial improvement in intellectual honesty.
+
+\item \textbf{Overlapping-window discussion expanded.} Section~4.2.4 now includes HAC correction, block bootstrap CI, and non-overlapping 5-year window verification---a thorough three-pronged defense against the overlap concern.
+
+\item \textbf{K899 experiment created.} The unified VaR/ES experiment with 7 methods, 1508 OOS days, both VaR and ES tests, and Fissler-Ziegel joint scores is exactly the kind of comprehensive, single-source experiment that R1 requested. It now needs to be \textit{incorporated} into the paper.
+\end{enumerate}
+
+
+\bigskip
+
+%% ============================================================
+\section*{Overall Assessment}
+
+\textbf{Verdict: Major Revision (reduced scope).}
+
+The revision has addressed the most damaging issue (C1) and improved the framing of several overclaims (M2, M3). However, the traceability problems (C2--C5) remain open, and the new K899 experiment---while excellent---has not been integrated into the manuscript. The paper cannot be submitted until Table~5 is updated with unified data and the Kupiec $p$-values are corrected.
+
+The good news is that all remaining issues are mechanical (table updates, script creation, reference additions) rather than conceptual. The core argument is sound. A focused revision of 1--2 days addressing Priority~1 items would bring the paper to a submittable state. Adding ES results from K899 would significantly strengthen the practical contribution.
+
+\bigskip
+
+\noindent\textit{Reviewer: Claude Opus 4.6 (1M context), acting as JBF referee. R2 review, 2026-04-05.}\\
+\noindent\textit{R1 reference: \texttt{paper/leverage-direction/reviews/review\_r1.tex}}\\
+\noindent\textit{K899 source: \texttt{experiments/k899\_unified\_var\_paper1\_results.json}}
+
+\end{document}

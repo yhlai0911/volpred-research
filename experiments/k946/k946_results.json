@@ -1,0 +1,189 @@
+{
+  "experiment_id": "K946",
+  "title": "VIX Regime-Conditional Rebalancing",
+  "date": "2026-04-06",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "period": "2006-01-03 to 2026-04-02",
+  "n_obs": 5094,
+  "lag": "VIX_{t-1} via shift(1)",
+  "transaction_cost": "10bps single-side per weight change",
+  "strategies": {
+    "BH 50/50": {
+      "ann_ret_gross": 0.1175,
+      "ann_ret_net": 0.1175,
+      "ann_vol": 0.1372,
+      "sharpe_gross": 0.8566,
+      "sharpe_net": 0.8566,
+      "mdd": -0.3249,
+      "calmar": 0.3618,
+      "crra_3": 0.092199,
+      "crra_5": 0.073202,
+      "crra_7": 0.054096,
+      "ann_turnover": 0.0,
+      "weight_changes": 0
+    },
+    "12/VIX (Daily)": {
+      "ann_ret_gross": 0.1111,
+      "ann_ret_net": 0.0934,
+      "ann_vol": 0.1289,
+      "sharpe_gross": 0.8615,
+      "sharpe_net": 0.7243,
+      "mdd": -0.3203,
+      "calmar": 0.3468,
+      "crra_3": 0.088596,
+      "crra_5": 0.071806,
+      "crra_7": 0.054925,
+      "ann_turnover": 8.0282,
+      "weight_changes": 4591
+    },
+    "Regime-Only VT": {
+      "ann_ret_gross": 0.1161,
+      "ann_ret_net": 0.1028,
+      "ann_vol": 0.1298,
+      "sharpe_gross": 0.8948,
+      "sharpe_net": 0.7923,
+      "mdd": -0.2876,
+      "calmar": 0.4037,
+      "crra_3": 0.092915,
+      "crra_5": 0.075925,
+      "crra_7": 0.058848,
+      "ann_turnover": 5.992,
+      "weight_changes": 471
+    },
+    "Smooth Regime VT": {
+      "ann_ret_gross": 0.1029,
+      "ann_ret_net": 0.0948,
+      "ann_vol": 0.1327,
+      "sharpe_gross": 0.7755,
+      "sharpe_net": 0.7143,
+      "mdd": -0.2661,
+      "calmar": 0.3867,
+      "crra_3": 0.08026,
+      "crra_5": 0.062493,
+      "crra_7": 0.044633,
+      "ann_turnover": 3.6961,
+      "weight_changes": 249
+    },
+    "Monthly Regime VT": {
+      "ann_ret_gross": 0.1177,
+      "ann_ret_net": 0.1154,
+      "ann_vol": 0.1315,
+      "sharpe_gross": 0.8956,
+      "sharpe_net": 0.8776,
+      "mdd": -0.3081,
+      "calmar": 0.3821,
+      "crra_3": 0.093925,
+      "crra_5": 0.076493,
+      "crra_7": 0.058978,
+      "ann_turnover": 1.0587,
+      "weight_changes": 80
+    }
+  },
+  "regime_stats": {
+    "Calm": {
+      "n_days": 1757,
+      "pct": 34.5,
+      "ann_spy_ret": 0.0969,
+      "ann_gld_ret": 0.0694,
+      "ann_spy_vol": 0.0888
+    },
+    "Normal": {
+      "n_days": 2456,
+      "pct": 48.2,
+      "ann_spy_ret": 0.0807,
+      "ann_gld_ret": 0.1464,
+      "ann_spy_vol": 0.1552
+    },
+    "Stress": {
+      "n_days": 881,
+      "pct": 17.3,
+      "ann_spy_ret": 0.2722,
+      "ann_gld_ret": 0.1575,
+      "ann_spy_vol": 0.365
+    }
+  },
+  "sub_period_sharpes": {
+    "GFC Recovery (2008-2012)": {
+      "BH 50/50": {
+        "sharpe": 0.5389,
+        "ann_ret": 0.094,
+        "mdd": -0.3249
+      },
+      "12/VIX (Daily)": {
+        "sharpe": 0.5089,
+        "ann_ret": 0.0844,
+        "mdd": -0.3203
+      },
+      "Regime-Only VT": {
+        "sharpe": 0.6075,
+        "ann_ret": 0.1032,
+        "mdd": -0.2876
+      },
+      "Smooth Regime VT": {
+        "sharpe": 0.5752,
+        "ann_ret": 0.0996,
+        "mdd": -0.2661
+      },
+      "Monthly Regime VT": {
+        "sharpe": 0.5967,
+        "ann_ret": 0.1002,
+        "mdd": -0.3081
+      }
+    },
+    "Bull Market (2013-2019)": {
+      "BH 50/50": {
+        "sharpe": 0.7235,
+        "ann_ret": 0.0665,
+        "mdd": -0.1205
+      },
+      "12/VIX (Daily)": {
+        "sharpe": 1.2537,
+        "ann_ret": 0.1155,
+        "mdd": -0.1172
+      },
+      "Regime-Only VT": {
+        "sharpe": 1.104,
+        "ann_ret": 0.0941,
+        "mdd": -0.1314
+      },
+      "Smooth Regime VT": {
+        "sharpe": 0.6256,
+        "ann_ret": 0.0568,
+        "mdd": -0.1347
+      },
+      "Monthly Regime VT": {
+        "sharpe": 0.8582,
+        "ann_ret": 0.0812,
+        "mdd": -0.1429
+      }
+    },
+    "COVID+ Era (2020-2025)": {
+      "BH 50/50": {
+        "sharpe": 1.2613,
+        "ann_ret": 0.1769,
+        "mdd": -0.2032
+      },
+      "12/VIX (Daily)": {
+        "sharpe": 1.148,
+        "ann_ret": 0.1488,
+        "mdd": -0.1989
+      },
+      "Regime-Only VT": {
+        "sharpe": 1.2502,
+        "ann_ret": 0.1616,
+        "mdd": -0.1917
+      },
+      "Smooth Regime VT": {
+        "sharpe": 1.2518,
+        "ann_ret": 0.1632,
+        "mdd": -0.2123
+      },
+      "Monthly Regime VT": {
+        "sharpe": 1.2172,
+        "ann_ret": 0.1608,
+        "mdd": -0.1927
+      }
+    }
+  },
+  "conclusion": "BH 50/50 Sharpe(net)=0.8566 vs Regime-Only VT=0.7923; BH 50/50 still wins on Sharpe (net of costs); Turnover: BH=0.0000 vs Regime-Only=5.9920; MDD: BH=-32.49% vs Regime-Only=-28.76%; CRRA winners: gamma=3→Monthly Regime VT, gamma=5→Monthly Regime VT, gamma=7→Monthly Regime VT"
+}

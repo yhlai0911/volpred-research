@@ -1,0 +1,318 @@
+{
+  "experiment_id": "K890",
+  "title": "Path Signatures for Volatility Forecasting (TAIFEX)",
+  "timestamp": "2026-04-05T19:14:32.813288",
+  "data": {
+    "source": "TAIFEX TX tick data (volume-based contract selection)",
+    "period": "2017-05-16 to 2025-12-31",
+    "n_days": 2107,
+    "night_session_start": "2017-05-15"
+  },
+  "oos_config": {
+    "is_fraction": 0.6,
+    "is_end_idx": 1264,
+    "oos_start": "2022-07-14",
+    "oos_end": "2025-12-31",
+    "n_oos": 843,
+    "refit_freq": 63
+  },
+  "target": "sigma2_fullday = r2_gap + RV_intra + RV_night",
+  "model_results": [
+    {
+      "label": "GJR-GARCH",
+      "n_oos": 843,
+      "qlike": 0.44746947843923107,
+      "mse": 3.1469379696051257e-07,
+      "mae": 0.00014227859611371538,
+      "spearman": 0.5369793519310591
+    },
+    {
+      "label": "HAR-RV",
+      "n_oos": 843,
+      "qlike": 0.425225600603716,
+      "mse": 3.946697000672064e-07,
+      "mae": 0.00013765280077758402,
+      "spearman": 0.6169864276245136
+    },
+    {
+      "label": "HAR-Sig",
+      "n_oos": 843,
+      "qlike": 0.4290129225615594,
+      "mse": 4.0130288772973044e-07,
+      "mae": 0.00013961427233055132,
+      "spearman": 0.6156128929855249
+    },
+    {
+      "label": "HAR-Sig-Full",
+      "n_oos": 843,
+      "qlike": 0.6590213019951059,
+      "mse": 0.2669771783658851,
+      "mae": 0.026004866329810583,
+      "spearman": 0.5522036306215597
+    },
+    {
+      "label": "Sig-Only",
+      "n_oos": 843,
+      "qlike": 0.6430198130299208,
+      "mse": 0.0002427973651127713,
+      "mae": 0.0010044409314200699,
+      "spearman": 0.5797405253231666
+    }
+  ],
+  "dm_tests": [
+    {
+      "model_1": "GJR-GARCH",
+      "model_2": "HAR-RV",
+      "dm_t": 0.6311387410533694,
+      "dm_p": 0.5281210957028659,
+      "significant": false,
+      "better_model": "No significant difference",
+      "n_valid": 843
+    },
+    {
+      "model_1": "GJR-GARCH",
+      "model_2": "HAR-Sig",
+      "dm_t": 0.5106371854059569,
+      "dm_p": 0.6097389792949897,
+      "significant": false,
+      "better_model": "No significant difference",
+      "n_valid": 843
+    },
+    {
+      "model_1": "GJR-GARCH",
+      "model_2": "HAR-Sig-Full",
+      "dm_t": -1.147347185280828,
+      "dm_p": 0.25156406080277716,
+      "significant": false,
+      "better_model": "No significant difference",
+      "n_valid": 843
+    },
+    {
+      "model_1": "GJR-GARCH",
+      "model_2": "Sig-Only",
+      "dm_t": -2.006839727507519,
+      "dm_p": 0.0450859856452166,
+      "significant": false,
+      "better_model": "No significant difference",
+      "n_valid": 843
+    },
+    {
+      "model_1": "HAR-RV",
+      "model_2": "HAR-Sig",
+      "dm_t": -1.742973942189586,
+      "dm_p": 0.08170320882870441,
+      "significant": false,
+      "better_model": "No significant difference",
+      "n_valid": 843
+    },
+    {
+      "model_1": "HAR-RV",
+      "model_2": "HAR-Sig-Full",
+      "dm_t": -1.3411826675374832,
+      "dm_p": 0.18022280622791786,
+      "significant": false,
+      "better_model": "No significant difference",
+      "n_valid": 843
+    },
+    {
+      "model_1": "HAR-RV",
+      "model_2": "Sig-Only",
+      "dm_t": -3.0684545406884096,
+      "dm_p": 0.0022206192522400414,
+      "significant": true,
+      "better_model": "HAR-RV",
+      "n_valid": 843
+    },
+    {
+      "model_1": "HAR-Sig",
+      "model_2": "HAR-Sig-Full",
+      "dm_t": -1.3225082318969565,
+      "dm_p": 0.1863580697928433,
+      "significant": false,
+      "better_model": "No significant difference",
+      "n_valid": 843
+    },
+    {
+      "model_1": "HAR-Sig",
+      "model_2": "Sig-Only",
+      "dm_t": -3.0447062102338505,
+      "dm_p": 0.0024015724914816516,
+      "significant": true,
+      "better_model": "HAR-Sig",
+      "n_valid": 843
+    },
+    {
+      "model_1": "HAR-Sig-Full",
+      "model_2": "Sig-Only",
+      "dm_t": 0.08908858586192953,
+      "dm_p": 0.9290326938037539,
+      "significant": false,
+      "better_model": "No significant difference",
+      "n_valid": 843
+    }
+  ],
+  "incremental_analysis": {
+    "har_vs_har_sig": {
+      "qlike_improvement_pct": -0.8906617928145207,
+      "signatures_add_value": false,
+      "dm_t": -1.742973942189586,
+      "dm_p": 0.08170320882870441
+    },
+    "har_vs_sig_only": {
+      "sig_only_competitive": "False",
+      "dm_t": -3.0684545406884096,
+      "dm_p": 0.0022206192522400414
+    }
+  },
+  "signature_correlations": {
+    "sig_S_return": {
+      "spearman": -0.14053859494630952,
+      "p_value": 9.305368761729089e-11,
+      "n": 2106
+    },
+    "sig_S_quadvar": {
+      "spearman": 0.7234364269883244,
+      "p_value": 0.0,
+      "n": 2106
+    },
+    "sig_S2_serial": {
+      "spearman": -0.08894639972519724,
+      "p_value": 4.35980755881426e-05,
+      "n": 2106
+    },
+    "sig_S_cubicvar": {
+      "spearman": -0.08873293046713396,
+      "p_value": 4.5486104502986205e-05,
+      "n": 2106
+    },
+    "sig_S_quarticvar": {
+      "spearman": 0.6555942533704704,
+      "p_value": 5.767936688339465e-259,
+      "n": 2106
+    },
+    "sig_S2_area": {
+      "spearman": -0.012088806569595071,
+      "p_value": 0.5792637757515968,
+      "n": 2106
+    },
+    "sig_S_return_5d": {
+      "spearman": -0.21624488648625703,
+      "p_value": 1.1566554391926709e-23,
+      "n": 2102
+    },
+    "sig_S_return_22d": {
+      "spearman": -0.2414430711803819,
+      "p_value": 4.8852529284618593e-29,
+      "n": 2085
+    },
+    "sig_S_quadvar_5d": {
+      "spearman": 0.7269006607009166,
+      "p_value": 0.0,
+      "n": 2102
+    },
+    "sig_S_quadvar_22d": {
+      "spearman": 0.6511659662687641,
+      "p_value": 7.854977654522768e-252,
+      "n": 2085
+    },
+    "sig_S2_serial_5d": {
+      "spearman": 0.04767958562572486,
+      "p_value": 0.0288202715780157,
+      "n": 2102
+    },
+    "sig_S2_serial_22d": {
+      "spearman": 0.08081879080773378,
+      "p_value": 0.00022061270687552062,
+      "n": 2085
+    },
+    "sig_S_cubicvar_5d": {
+      "spearman": -0.13049772819689048,
+      "p_value": 1.911658841430858e-09,
+      "n": 2102
+    },
+    "sig_S_cubicvar_22d": {
+      "spearman": -0.1484057362623288,
+      "p_value": 9.749585950077248e-12,
+      "n": 2085
+    },
+    "sig_S_quarticvar_5d": {
+      "spearman": 0.6916580908610269,
+      "p_value": 4.1026732387762905e-299,
+      "n": 2102
+    },
+    "sig_S_quarticvar_22d": {
+      "spearman": 0.6374106107796541,
+      "p_value": 4.1093963684801195e-238,
+      "n": 2085
+    },
+    "sig_S2_area_5d": {
+      "spearman": -0.018434048497961274,
+      "p_value": 0.39826415296602974,
+      "n": 2102
+    },
+    "sig_S2_area_22d": {
+      "spearman": -0.07267169667008005,
+      "p_value": 0.0008978497830960104,
+      "n": 2085
+    }
+  },
+  "signature_feature_summary": {
+    "sig_S_return": {
+      "mean": 0.0004086623216361516,
+      "std": 0.009773860065680243,
+      "min": -0.06815466985918306,
+      "max": 0.0758099929413909
+    },
+    "sig_S_quadvar": {
+      "mean": 9.931409458045369e-05,
+      "std": 0.00020681297308591245,
+      "min": 4.666542546897683e-06,
+      "max": 0.0040352745179060585
+    },
+    "sig_S2_serial": {
+      "mean": 1.9694794064444365e-06,
+      "std": 8.421209994657374e-05,
+      "min": -0.0009896488368876077,
+      "max": 0.001429148418039501
+    },
+    "sig_S_cubicvar": {
+      "mean": 1.919578543526341e-08,
+      "std": 1.2762154521744395e-06,
+      "min": -1.715355194260094e-05,
+      "max": 5.262383228973042e-05
+    },
+    "sig_S_quarticvar": {
+      "mean": 3.250060845387265e-09,
+      "std": 5.8503440852272944e-08,
+      "min": 6.853564079901984e-13,
+      "max": 2.0703874134061236e-06
+    },
+    "sig_S2_area": {
+      "mean": -0.00010629045984582967,
+      "std": 0.006205967190944371,
+      "min": -0.047644116449893414,
+      "max": 0.04583898512879145
+    }
+  },
+  "conclusion": "Path signature features do NOT significantly improve HAR-RV volatility forecasting on TAIFEX TX futures at the Harvey (2016) |t|>3.0 threshold. The standard HAR-RV model using lag structure (daily/weekly/monthly RV) already captures most of the predictable variation in full-day variance. Signature features may require nonlinear models to unlock their potential.",
+  "limitations": [
+    "Single asset (TAIFEX TX) — needs cross-asset validation",
+    "Signature depth truncated at 2 (higher depths may capture more info)",
+    "Linear regression model — nonlinear methods (neural nets, random forests) may better exploit signatures",
+    "No jump component in signature models (HAR-RV-J not tested as base)",
+    "Night session data only from 2017-05 — shorter sample than desired"
+  ],
+  "references": [
+    "Lyons (1998): Differential equations driven by rough signals",
+    "Chevyrev & Kormilitzin (2016): A primer on the signature method",
+    "Kidger & Lyons (2021): Signatory: differentiable computations of the signature",
+    "Perez Arribas et al. (2020): Signatures in finance",
+    "Corsi (2009): HAR-RV model",
+    "Patton (2011): QLIKE proxy-robust loss",
+    "Hansen & Lunde (2005): 5-min RV as gold standard"
+  ],
+  "charts": [
+    "qlike_comparison.png",
+    "spearman_comparison.png"
+  ]
+}

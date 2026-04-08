@@ -1,0 +1,647 @@
+{
+  "experiment_id": "K829",
+  "title": "K829: Cross-Asset VaR Validation (QQQ, GLD, BTC-USD, 0050.TW)",
+  "method": "GJR-GARCH(1,1) expanding window + Normal/Student-t/HistSim VaR",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "refit_every": 63,
+  "alpha_levels": [
+    0.01,
+    0.05
+  ],
+  "data_source": "yfinance",
+  "error_log_rules": [
+    "0050.TW: clean_tw50_data applied",
+    "Student-t: scale=sqrt((df-2)/df) per-refit",
+    "Basel: standard 250-day window",
+    "GARCH OOS: recursive h[t]=f(h[t-1], r\u00b2[t-1])"
+  ],
+  "references": [
+    "K824v2: SPY HistSim(4/502, Trinity PASS), Student-t(6/502)",
+    "K804: Cross-asset 3/4 PASS, BTC exception",
+    "Kupiec (1995), Christoffersen (1998)",
+    "Basel Committee (1996, 2019)"
+  ],
+  "timestamp": "2026-04-03T09:26:12.429942+00:00",
+  "elapsed_total_sec": 4.5,
+  "assets": {
+    "QQQ": {
+      "ticker": "QQQ",
+      "name": "Invesco QQQ (Nasdaq-100)",
+      "n_oos": 502,
+      "n_refits": 8,
+      "oos_stats": {
+        "mean": 0.001389415084251182,
+        "std": 0.011284586752987824,
+        "skewness": -0.16299668675674034,
+        "kurtosis": 0.4244093029321907,
+        "min": -0.03607698886052557,
+        "max": 0.03589004552853692
+      },
+      "var_results": {
+        "1%": {
+          "Normal": {
+            "violation_rate": 0.01992,
+            "expected_rate": 0.01,
+            "n_violations": 10,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 3.8732,
+              "p_value": 0.0491,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "yellow",
+            "basel_violations_in_window": 8,
+            "basel_window_size": 250,
+            "trinity_pass": false
+          },
+          "Student-t": {
+            "violation_rate": 0.011952,
+            "expected_rate": 0.01,
+            "n_violations": 6,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 0.1819,
+              "p_value": 0.6698,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "yellow",
+            "basel_violations_in_window": 5,
+            "basel_window_size": 250,
+            "trinity_pass": false
+          },
+          "HistSim": {
+            "violation_rate": 0.00996,
+            "expected_rate": 0.01,
+            "n_violations": 5,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 0.0001,
+              "p_value": 0.9928,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 4,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          }
+        },
+        "5%": {
+          "Normal": {
+            "violation_rate": 0.055777,
+            "expected_rate": 0.05,
+            "n_violations": 28,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 0.3405,
+              "p_value": 0.5595,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 16,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "Student-t": {
+            "violation_rate": 0.055777,
+            "expected_rate": 0.05,
+            "n_violations": 28,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 0.3405,
+              "p_value": 0.5595,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 16,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "HistSim": {
+            "violation_rate": 0.045817,
+            "expected_rate": 0.05,
+            "n_violations": 23,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 0.19,
+              "p_value": 0.6629,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 13,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          }
+        }
+      },
+      "elapsed_sec": 1.8
+    },
+    "GLD": {
+      "ticker": "GLD",
+      "name": "SPDR Gold Trust",
+      "n_oos": 502,
+      "n_refits": 8,
+      "oos_stats": {
+        "mean": 0.0007490679506250955,
+        "std": 0.008948917178009205,
+        "skewness": -0.17565787105160569,
+        "kurtosis": 1.0796745372186871,
+        "min": -0.03568330143379639,
+        "max": 0.03214825984540237
+      },
+      "var_results": {
+        "1%": {
+          "Normal": {
+            "violation_rate": 0.00996,
+            "expected_rate": 0.01,
+            "n_violations": 5,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 0.0001,
+              "p_value": 0.9928,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 4,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "Student-t": {
+            "violation_rate": 0.007968,
+            "expected_rate": 0.01,
+            "n_violations": 4,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 0.225,
+              "p_value": 0.6353,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 4,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "HistSim": {
+            "violation_rate": 0.007968,
+            "expected_rate": 0.01,
+            "n_violations": 4,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 0.225,
+              "p_value": 0.6353,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 4,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          }
+        },
+        "5%": {
+          "Normal": {
+            "violation_rate": 0.037849,
+            "expected_rate": 0.05,
+            "n_violations": 19,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 1.6974,
+              "p_value": 0.1926,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.7116,
+              "p_value": 0.1908,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 11,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "Student-t": {
+            "violation_rate": 0.039841,
+            "expected_rate": 0.05,
+            "n_violations": 20,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 1.1689,
+              "p_value": 0.2796,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.4267,
+              "p_value": 0.2323,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 12,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "HistSim": {
+            "violation_rate": 0.037849,
+            "expected_rate": 0.05,
+            "n_violations": 19,
+            "n_total": 502,
+            "kupiec": {
+              "stat": 1.6974,
+              "p_value": 0.1926,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 1.7116,
+              "p_value": 0.1908,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 11,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          }
+        }
+      },
+      "elapsed_sec": 0.9
+    },
+    "BTC-USD": {
+      "ticker": "BTC-USD",
+      "name": "Bitcoin",
+      "n_oos": 731,
+      "n_refits": 12,
+      "oos_stats": {
+        "mean": 0.0026937683140765617,
+        "std": 0.025565949688907137,
+        "skewness": 0.6193436512135061,
+        "kurtosis": 2.538033116411513,
+        "min": -0.08343356981432348,
+        "max": 0.12144256099404904
+      },
+      "var_results": {
+        "1%": {
+          "Normal": {
+            "violation_rate": 0.004104,
+            "expected_rate": 0.01,
+            "n_violations": 3,
+            "n_total": 731,
+            "kupiec": {
+              "stat": 3.3018,
+              "p_value": 0.0692,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 1,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "Student-t": {
+            "violation_rate": 0.001368,
+            "expected_rate": 0.01,
+            "n_violations": 1,
+            "n_total": 731,
+            "kupiec": {
+              "stat": 8.6964,
+              "p_value": 0.0032,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 0,
+            "basel_window_size": 250,
+            "trinity_pass": false
+          },
+          "HistSim": {
+            "violation_rate": 0.001368,
+            "expected_rate": 0.01,
+            "n_violations": 1,
+            "n_total": 731,
+            "kupiec": {
+              "stat": 8.6964,
+              "p_value": 0.0032,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 0,
+            "basel_window_size": 250,
+            "trinity_pass": false
+          }
+        },
+        "5%": {
+          "Normal": {
+            "violation_rate": 0.030096,
+            "expected_rate": 0.05,
+            "n_violations": 22,
+            "n_total": 731,
+            "kupiec": {
+              "stat": 7.0666,
+              "p_value": 0.0079,
+              "pass": false
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 8,
+            "basel_window_size": 250,
+            "trinity_pass": false
+          },
+          "Student-t": {
+            "violation_rate": 0.045144,
+            "expected_rate": 0.05,
+            "n_violations": 33,
+            "n_total": 731,
+            "kupiec": {
+              "stat": 0.3747,
+              "p_value": 0.5405,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.1993,
+              "p_value": 0.6553,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 12,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "HistSim": {
+            "violation_rate": 0.038304,
+            "expected_rate": 0.05,
+            "n_violations": 28,
+            "n_total": 731,
+            "kupiec": {
+              "stat": 2.2821,
+              "p_value": 0.1309,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0056,
+              "p_value": 0.9402,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 10,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          }
+        }
+      },
+      "elapsed_sec": 1.0
+    },
+    "0050.TW": {
+      "ticker": "0050.TW",
+      "name": "Taiwan 50 ETF",
+      "n_oos": 481,
+      "n_refits": 8,
+      "oos_stats": {
+        "mean": 0.0014134645321667982,
+        "std": 0.01286286986151343,
+        "skewness": -0.6812467109456161,
+        "kurtosis": 7.668124995518134,
+        "min": -0.09129921715209832,
+        "max": 0.05511806086874138
+      },
+      "var_results": {
+        "1%": {
+          "Normal": {
+            "violation_rate": 0.018711,
+            "expected_rate": 0.01,
+            "n_violations": 9,
+            "n_total": 481,
+            "kupiec": {
+              "stat": 2.9345,
+              "p_value": 0.0867,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 2.0593,
+              "p_value": 0.1513,
+              "pass": true
+            },
+            "basel_traffic_light": "yellow",
+            "basel_violations_in_window": 8,
+            "basel_window_size": 250,
+            "trinity_pass": false
+          },
+          "Student-t": {
+            "violation_rate": 0.012474,
+            "expected_rate": 0.01,
+            "n_violations": 6,
+            "n_total": 481,
+            "kupiec": {
+              "stat": 0.2757,
+              "p_value": 0.5995,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "yellow",
+            "basel_violations_in_window": 5,
+            "basel_window_size": 250,
+            "trinity_pass": false
+          },
+          "HistSim": {
+            "violation_rate": 0.012474,
+            "expected_rate": 0.01,
+            "n_violations": 6,
+            "n_total": 481,
+            "kupiec": {
+              "stat": 0.2757,
+              "p_value": 0.5995,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0,
+              "p_value": 1.0,
+              "pass": true
+            },
+            "basel_traffic_light": "yellow",
+            "basel_violations_in_window": 5,
+            "basel_window_size": 250,
+            "trinity_pass": false
+          }
+        },
+        "5%": {
+          "Normal": {
+            "violation_rate": 0.047817,
+            "expected_rate": 0.05,
+            "n_violations": 23,
+            "n_total": 481,
+            "kupiec": {
+              "stat": 0.0489,
+              "p_value": 0.8249,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0107,
+              "p_value": 0.9175,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 14,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "Student-t": {
+            "violation_rate": 0.054054,
+            "expected_rate": 0.05,
+            "n_violations": 26,
+            "n_total": 481,
+            "kupiec": {
+              "stat": 0.1623,
+              "p_value": 0.687,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.2491,
+              "p_value": 0.6177,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 17,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          },
+          "HistSim": {
+            "violation_rate": 0.049896,
+            "expected_rate": 0.05,
+            "n_violations": 24,
+            "n_total": 481,
+            "kupiec": {
+              "stat": 0.0001,
+              "p_value": 0.9917,
+              "pass": true
+            },
+            "christoffersen": {
+              "stat": 0.0389,
+              "p_value": 0.8436,
+              "pass": true
+            },
+            "basel_traffic_light": "green",
+            "basel_violations_in_window": 15,
+            "basel_window_size": 250,
+            "trinity_pass": true
+          }
+        }
+      },
+      "elapsed_sec": 0.7
+    }
+  },
+  "summary_trinity": {
+    "QQQ": {
+      "1%": {
+        "Normal": "FAIL",
+        "Student-t": "FAIL",
+        "HistSim": "PASS"
+      },
+      "5%": {
+        "Normal": "PASS",
+        "Student-t": "PASS",
+        "HistSim": "PASS"
+      }
+    },
+    "GLD": {
+      "1%": {
+        "Normal": "PASS",
+        "Student-t": "PASS",
+        "HistSim": "PASS"
+      },
+      "5%": {
+        "Normal": "PASS",
+        "Student-t": "PASS",
+        "HistSim": "PASS"
+      }
+    },
+    "BTC-USD": {
+      "1%": {
+        "Normal": "PASS",
+        "Student-t": "FAIL",
+        "HistSim": "FAIL"
+      },
+      "5%": {
+        "Normal": "FAIL",
+        "Student-t": "PASS",
+        "HistSim": "PASS"
+      }
+    },
+    "0050.TW": {
+      "1%": {
+        "Normal": "FAIL",
+        "Student-t": "FAIL",
+        "HistSim": "FAIL"
+      },
+      "5%": {
+        "Normal": "PASS",
+        "Student-t": "PASS",
+        "HistSim": "PASS"
+      }
+    }
+  },
+  "pass_rates": {
+    "Normal": "5/8",
+    "Student-t": "5/8",
+    "HistSim": "6/8"
+  }
+}

@@ -1,0 +1,224 @@
+{
+  "experiment_id": "K866",
+  "title": "VIX Term Structure Slope as Forward Volatility Predictor",
+  "timestamp": "2026-04-05T10:08:12.961426",
+  "data_source": "yfinance (^VIX, ^VIX3M, ^VIX9D, SPY)",
+  "period": "2011-01-04 to 2026-03-03",
+  "n_total": 3812,
+  "n_is": 2516,
+  "n_oos": 1296,
+  "is_period": "2011-2020",
+  "oos_period": "2021-2026",
+  "refit_interval": 63,
+  "correlations": {
+    "vix_level": {
+      "pearson_r": 0.5724,
+      "pearson_p": 0.0,
+      "spearman_r": 0.5919,
+      "spearman_p": 0.0
+    },
+    "slope_3m": {
+      "pearson_r": -0.4605,
+      "pearson_p": 0.0,
+      "spearman_r": -0.4242,
+      "spearman_p": 0.0
+    },
+    "slope_9d": {
+      "pearson_r": -0.3077,
+      "pearson_p": 0.0,
+      "spearman_r": -0.3007,
+      "spearman_p": 0.0
+    },
+    "curvature": {
+      "pearson_r": 0.1133,
+      "pearson_p": 0.0,
+      "spearman_r": 0.0342,
+      "spearman_p": 0.034653
+    }
+  },
+  "partial_correlations": {
+    "slope_3m": {
+      "partial_r": -0.1381,
+      "partial_p": 0.0
+    },
+    "slope_9d": {
+      "partial_r": -0.0924,
+      "partial_p": 0.0
+    },
+    "curvature": {
+      "partial_r": 0.0339,
+      "partial_p": 0.036454
+    }
+  },
+  "oos_evaluation": {
+    "VIX_only": {
+      "QLIKE": 0.252041,
+      "MSE": 0.003661,
+      "MAE": 0.039192,
+      "Spearman_r": 0.6014,
+      "Spearman_p": 0.0
+    },
+    "VIX+slope3m": {
+      "QLIKE": 0.251329,
+      "MSE": 0.003659,
+      "MAE": 0.039488,
+      "Spearman_r": 0.5886,
+      "Spearman_p": 0.0
+    },
+    "VIX+slope9d": {
+      "QLIKE": 0.253078,
+      "MSE": 0.003646,
+      "MAE": 0.039265,
+      "Spearman_r": 0.5889,
+      "Spearman_p": 0.0
+    },
+    "kitchen_sink": {
+      "QLIKE": 0.247119,
+      "MSE": 0.003648,
+      "MAE": 0.03947,
+      "Spearman_r": 0.5964,
+      "Spearman_p": 0.0
+    },
+    "slope_only": {
+      "QLIKE": 0.412625,
+      "MSE": 0.004549,
+      "MAE": 0.046764,
+      "Spearman_r": 0.4191,
+      "Spearman_p": 0.0
+    }
+  },
+  "dm_tests_vs_vix_only": {
+    "VIX+slope3m": {
+      "DM_stat": 0.0226,
+      "DM_pval": 0.981974,
+      "sig_Harvey": "False",
+      "better_than_baseline": "True"
+    },
+    "VIX+slope9d": {
+      "DM_stat": 0.267,
+      "DM_pval": 0.789531,
+      "sig_Harvey": "False",
+      "better_than_baseline": "True"
+    },
+    "kitchen_sink": {
+      "DM_stat": 0.142,
+      "DM_pval": 0.887065,
+      "sig_Harvey": "False",
+      "better_than_baseline": "True"
+    },
+    "slope_only": {
+      "DM_stat": -2.6463,
+      "DM_pval": 0.008236,
+      "sig_Harvey": "False",
+      "better_than_baseline": "False"
+    }
+  },
+  "regime_analysis": {
+    "high_VIX": {
+      "VIX_only": {
+        "MAE": 0.0516,
+        "Spearman_r": 0.5133,
+        "n": 648
+      },
+      "VIX+slope3m": {
+        "MAE": 0.053,
+        "Spearman_r": 0.4544,
+        "n": 648
+      },
+      "VIX+slope9d": {
+        "MAE": 0.0518,
+        "Spearman_r": 0.4957,
+        "n": 648
+      },
+      "kitchen_sink": {
+        "MAE": 0.053,
+        "Spearman_r": 0.4576,
+        "n": 648
+      },
+      "slope_only": {
+        "MAE": 0.0616,
+        "Spearman_r": 0.2428,
+        "n": 648
+      }
+    },
+    "low_VIX": {
+      "VIX_only": {
+        "MAE": 0.0268,
+        "Spearman_r": 0.183,
+        "n": 648
+      },
+      "VIX+slope3m": {
+        "MAE": 0.026,
+        "Spearman_r": 0.2061,
+        "n": 648
+      },
+      "VIX+slope9d": {
+        "MAE": 0.0267,
+        "Spearman_r": 0.1496,
+        "n": 648
+      },
+      "kitchen_sink": {
+        "MAE": 0.0259,
+        "Spearman_r": 0.2281,
+        "n": 648
+      },
+      "slope_only": {
+        "MAE": 0.0319,
+        "Spearman_r": 0.1348,
+        "n": 648
+      }
+    }
+  },
+  "backwardation_analysis": {
+    "backwardation_pct": 7.58,
+    "n_backwardation": 289,
+    "n_contango": 3522,
+    "rv_mean_backwardation": 0.2614,
+    "rv_mean_contango": 0.1366,
+    "rv_ratio": 1.91,
+    "welch_t": 11.867,
+    "welch_p": 0.0,
+    "p_above_median_backwardation": 0.83,
+    "p_above_median_contango": 0.473
+  },
+  "is_coefficients": {
+    "vix_level": {
+      "coef": 0.00549,
+      "se": 0.000318,
+      "t_stat": 17.237
+    },
+    "slope_3m": {
+      "coef": -0.327915,
+      "se": 0.042784,
+      "t_stat": -7.664
+    },
+    "slope_9d": {
+      "coef": 0.145598,
+      "se": 0.038255,
+      "t_stat": 3.806
+    },
+    "curvature": {
+      "coef": 0.010304,
+      "se": 0.002082,
+      "t_stat": 4.95
+    }
+  },
+  "is_r_squared": 0.3467,
+  "best_oos_model": {
+    "by_MAE": "VIX_only",
+    "by_QLIKE": "kitchen_sink",
+    "by_Spearman": "VIX_only"
+  },
+  "any_model_significantly_better_than_vix_only": false,
+  "conclusions": {
+    "Q1_slope_adds_to_vix": "See partial correlations and DM tests",
+    "Q2_backwardation_predicts_spikes": "YES \u2014 1.9x higher RV, p<0.001",
+    "Q3_9d_vs_3m_slope": "See model comparison"
+  },
+  "references": [
+    "Chang (2016) - VIX backwardation predicts returns",
+    "Wang & Yen (2017) - Term structure and future returns",
+    "Patton (2011) - QLIKE loss for volatility evaluation",
+    "Harvey (2016) - t>3.0 threshold for multiple testing"
+  ]
+}

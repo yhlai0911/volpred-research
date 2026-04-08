@@ -1,0 +1,246 @@
+{
+  "experiment_id": "K918",
+  "title": "BEKK-GARCH Volatility Spillover -- SPY <-> GLD Direct Transmission",
+  "timestamp": "2026-04-06T01:05:35.490169+00:00",
+  "data_source": "yfinance",
+  "data_period": "2004-11-19 to 2026-04-02",
+  "sample_size": 5375,
+  "assets": [
+    "SPY",
+    "GLD"
+  ],
+  "method": "BEKK(1,1) -- Full and Diagonal",
+  "references": [
+    "Engle & Kroner (1995): Multivariate Simultaneous Generalized ARCH, Econometric Theory",
+    "Baba, Engle, Kraft & Kroner (1990): BEKK original formulation"
+  ],
+  "prior_experiments": {
+    "K907": "TCI network: SPY transmitter (NET=+34.8), GLD isolator (NET=-5.5)",
+    "K915": "DCC-GARCH: SPY-GLD dynamic corr mean=0.069, std=0.199, portfolio NULL"
+  },
+  "full_bekk_params": {
+    "C": [
+      [
+        0.16313410525443828,
+        0.0
+      ],
+      [
+        -0.04089066002808279,
+        0.1068921001541724
+      ]
+    ],
+    "CC": [
+      [
+        0.028284782374698395,
+        -0.004370888527092039
+      ],
+      [
+        -0.004370888527092039,
+        0.011425921075369624
+      ]
+    ],
+    "A": [
+      [
+        0.3516208285015498,
+        -0.00904232014874386
+      ],
+      [
+        0.0010313058260727564,
+        0.22160675355732232
+      ]
+    ],
+    "B": [
+      [
+        0.9235750559384132,
+        0.005711955241250857
+      ],
+      [
+        0.004576470909240948,
+        0.9709614343647783
+      ]
+    ],
+    "loglik": -14801.66954698233,
+    "n_params": 11,
+    "convergence": true,
+    "max_persistence": 0.993739809785621,
+    "a12_SPY_to_GLD": -0.00904232014874386,
+    "a21_GLD_to_SPY": 0.0010313058260727564,
+    "b12_SPY_to_GLD": 0.005711955241250857,
+    "b21_GLD_to_SPY": 0.004576470909240948
+  },
+  "diagonal_bekk_params": {
+    "C": [
+      [
+        0.17009326048897438,
+        0.0
+      ],
+      [
+        0.012536435154434178,
+        0.10584398085976787
+      ]
+    ],
+    "CC": [
+      [
+        0.02908887947015143,
+        0.0013269062025356522
+      ],
+      [
+        0.0013269062025356522,
+        0.011202948284242908
+      ]
+    ],
+    "A": [
+      [
+        0.35297091315819207,
+        0.0
+      ],
+      [
+        0.0,
+        0.22086310673121648
+      ]
+    ],
+    "B": [
+      [
+        0.9229274582102724,
+        0.0
+      ],
+      [
+        0.0,
+        0.9715228659934276
+      ]
+    ],
+    "loglik": -14805.4170477463,
+    "n_params": 7,
+    "convergence": true,
+    "max_persistence": 0.9926371910630483
+  },
+  "lr_test": {
+    "statistic": 7.495001527939166,
+    "df": 4,
+    "p_value": 0.11192990639701694,
+    "conclusion": "Diagonal BEKK sufficient"
+  },
+  "information_criteria": {
+    "full_bekk_aic": 29625.33909396466,
+    "full_bekk_bic": 29697.823746347614,
+    "diagonal_bekk_aic": 29624.8340954926,
+    "diagonal_bekk_bic": 29670.96069246357,
+    "preferred_by_aic": "Diagonal",
+    "preferred_by_bic": "Diagonal"
+  },
+  "spillover_analysis": {
+    "a12_SPY_shock_to_GLD_vol": -0.00904232014874386,
+    "a21_GLD_shock_to_SPY_vol": 0.0010313058260727564,
+    "a12_relative_to_own": 0.025716110695939633,
+    "a21_relative_to_own": 0.004653765327625684,
+    "b12_SPY_persistence_to_GLD": 0.005711955241250857,
+    "b21_GLD_persistence_to_SPY": 0.004576470909240948
+  },
+  "conditional_correlation": {
+    "full_bekk": {
+      "mean": 0.07049051032171479,
+      "std": 0.24022532336165037,
+      "min": -0.7426731768456243,
+      "max": 0.7406004904920019
+    },
+    "diagonal_bekk": {
+      "mean": 0.06050698210920396,
+      "std": 0.2354680748778231,
+      "min": -0.7297145400527695,
+      "max": 0.7310835199968359
+    },
+    "dcc_k915_reference": {
+      "mean": 0.069,
+      "std": 0.199
+    }
+  },
+  "regime_analysis": {
+    "Low (VIX<15)": {
+      "count": 2019,
+      "rho_mean": 0.03414346532894781,
+      "rho_std": 0.19027757792745237,
+      "h_SPY_mean": 0.5087645723104721,
+      "h_GLD_mean": 0.9992948103117036,
+      "h_cross_mean": 0.04216046428728467
+    },
+    "Medium (15-25)": {
+      "count": 2475,
+      "rho_mean": 0.0909695473330326,
+      "rho_std": 0.2518665287834704,
+      "h_SPY_mean": 0.9972728497785497,
+      "h_GLD_mean": 1.2719982709736797,
+      "h_cross_mean": 0.09484402238545153
+    },
+    "High (25-35)": {
+      "count": 628,
+      "rho_mean": 0.1201020325305065,
+      "rho_std": 0.277161353176803,
+      "h_SPY_mean": 2.3874312773055757,
+      "h_GLD_mean": 1.512310720458835,
+      "h_cross_mean": 0.18362914072995704
+    },
+    "Extreme (VIX>35)": {
+      "count": 253,
+      "rho_mean": 0.0370637565282906,
+      "rho_std": 0.3237903448145746,
+      "h_SPY_mean": 10.024373431020074,
+      "h_GLD_mean": 3.9796886670474803,
+      "h_cross_mean": 0.49882946731888483
+    }
+  },
+  "spillover_asymmetry": {
+    "rho_SPY_up": 0.06712910977301621,
+    "rho_SPY_down": 0.07461358696823363,
+    "rho_GLD_up": 0.07533103396902485,
+    "rho_GLD_down": 0.06498597846036018,
+    "gld_vol_after_spy_crash": 2.1124190552934468,
+    "gld_vol_after_spy_surge": 2.160036215248363,
+    "gld_vol_unconditional": 1.325091034026111,
+    "spy_vol_after_gld_drop": 3.0187130096998938,
+    "spy_vol_after_gld_surge": 2.812087486049904,
+    "spy_vol_unconditional": 1.4011012641660896
+  },
+  "hedge_ratio": {
+    "mean": 0.06001460700495139,
+    "std": 0.26211888576813847,
+    "min": -1.5118997552153544,
+    "max": 2.1031224907963306,
+    "median": 0.05877072568998729
+  },
+  "portfolio_metrics": {
+    "50/50 Static": {
+      "name": "50/50 Static",
+      "ann_return": 0.10253739305312477,
+      "ann_vol": 0.13503268604331817,
+      "sharpe": 0.7593523913182844,
+      "mdd": -0.36121235512367555,
+      "ann_turnover": 0.0
+    },
+    "BEKK MinVar": {
+      "name": "BEKK MinVar",
+      "ann_return": 0.09686986205549634,
+      "ann_vol": 0.12381040609765076,
+      "sharpe": 0.7824048487418248,
+      "mdd": -0.37479547404197455,
+      "ann_turnover": 7.397582914708235
+    },
+    "BEKK HR-Based": {
+      "name": "BEKK HR-Based",
+      "ann_return": 0.11209636567806452,
+      "ann_vol": 0.1601612404485434,
+      "sharpe": 0.6998969623619944,
+      "mdd": -0.463175537879107,
+      "ann_turnover": 4.722723694690074
+    }
+  },
+  "bekk_minvar_avg_weights": {
+    "SPY": 0.5602274996264598,
+    "GLD": 0.43977250037354015
+  },
+  "key_findings": "Diagonal BEKK sufficient (LR=7.50, p=0.1119): no significant cross-spillover | SPY->GLD spillover (a12=-0.0090): 2.6% of own ARCH effect | GLD->SPY spillover (a21=0.0010): 0.5% of own ARCH effect | BEKK correlation: mean=0.0705 (vs DCC K915: 0.069) | BEKK MinVar outperforms 50/50: Sharpe 0.782 vs 0.759",
+  "plots": [
+    "k918_spillover_dynamics.png",
+    "k918_hedge_ratio.png",
+    "k918_regime_analysis.png"
+  ]
+}

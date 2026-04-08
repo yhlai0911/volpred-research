@@ -1,0 +1,815 @@
+{
+  "experiment_id": "K888",
+  "title": "Congressional Stock Trading — Copy vs Contrarian Strategy Backtest",
+  "question": "如果把美國國會議員比較大的持股項目和變化，在公告後逆向操作呢？",
+  "data_source": "congressional_trades_house.csv (House 2021-2022) + yfinance",
+  "data_period": "2021-01 to 2022-12 (disclosure dates)",
+  "n_total_trades": 14127,
+  "n_tickers_analyzed": 46,
+  "methodology": {
+    "signal_timing": "Trades placed on disclosure_date (public information only)",
+    "holding_period": "21 trading days (default)",
+    "transaction_cost": "0.1% per trade (0.2% round-trip)",
+    "short_cost": "0.5% annual borrowing cost",
+    "weighting": "Equal-weight across simultaneous positions",
+    "no_lookahead": "Only uses disclosure_date, NOT transaction_date for signals"
+  },
+  "literature": {
+    "Eggers_Hainmueller_2013": "Congressional portfolios UNDERPERFORM by 2-3%",
+    "STOCK_Act_2012": "Requires disclosure within 45 days",
+    "Karadas_2019": "House buys underperform by 26 bps/6mo"
+  },
+  "strategy_results": {
+    "copy_congress": {
+      "name": "Copy Congress",
+      "n_trades": 3031,
+      "mean_return": -0.002944299085179345,
+      "median_return": -0.002,
+      "std_return": 0.08936697880789624,
+      "t_stat": -1.8138351595019189,
+      "p_value": 0.06980198453966477,
+      "win_rate": 0.48300890795117124,
+      "long_trades": 1599,
+      "long_mean": 0.016895712517823517,
+      "short_trades": 1432,
+      "short_mean": -0.02509805505808547,
+      "best_trades": [
+        {
+          "ticker": "NFLX",
+          "trade_return": 0.4910211877638504,
+          "disclosure_date": "2022-04-12T00:00:00",
+          "representative": "Hon. James R. Langevin"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": 0.4494117400396107,
+          "disclosure_date": "2022-10-14T00:00:00",
+          "representative": "Hon. Thomas Suozzi"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": 0.4494117400396107,
+          "disclosure_date": "2022-10-14T00:00:00",
+          "representative": "Hon. Thomas Suozzi"
+        },
+        {
+          "ticker": "NFLX",
+          "trade_return": 0.43358213498596165,
+          "disclosure_date": "2022-04-17T00:00:00",
+          "representative": "Hon. Josh Gottheimer"
+        },
+        {
+          "ticker": "GNRC",
+          "trade_return": 0.3973537214882096,
+          "disclosure_date": "2022-10-06T00:00:00",
+          "representative": "Hon. James R. Langevin"
+        }
+      ],
+      "worst_trades": [
+        {
+          "ticker": "NFLX",
+          "trade_return": -0.5239253018680726,
+          "disclosure_date": "2022-04-10T00:00:00",
+          "representative": "Hon. Alan S. Lowenthal"
+        },
+        {
+          "ticker": "NFLX",
+          "trade_return": -0.5239253018680726,
+          "disclosure_date": "2022-04-10T00:00:00",
+          "representative": "Hon. Alan S. Lowenthal"
+        },
+        {
+          "ticker": "NFLX",
+          "trade_return": -0.49543214666796,
+          "disclosure_date": "2022-04-12T00:00:00",
+          "representative": "Hon. James R. Langevin"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": -0.4538363975738573,
+          "disclosure_date": "2022-10-14T00:00:00",
+          "representative": "Hon. Nancy Pelosi"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": -0.4043152713568212,
+          "disclosure_date": "2022-10-16T00:00:00",
+          "representative": "Hon. Josh Gottheimer"
+        }
+      ]
+    },
+    "contrarian": {
+      "name": "Contrarian",
+      "n_trades": 3031,
+      "mean_return": -0.0014704290889844351,
+      "median_return": -0.002410958904109589,
+      "std_return": 0.08936665901409392,
+      "t_stat": -0.9058609360412703,
+      "p_value": 0.365081488854952,
+      "win_rate": 0.488617617947872,
+      "long_trades": 1432,
+      "long_mean": 0.020683719326854123,
+      "short_trades": 1599,
+      "short_mean": -0.02131079214807188,
+      "best_trades": [
+        {
+          "ticker": "NFLX",
+          "trade_return": 0.519514342963963,
+          "disclosure_date": "2022-04-10T00:00:00",
+          "representative": "Hon. Alan S. Lowenthal"
+        },
+        {
+          "ticker": "NFLX",
+          "trade_return": 0.519514342963963,
+          "disclosure_date": "2022-04-10T00:00:00",
+          "representative": "Hon. Alan S. Lowenthal"
+        },
+        {
+          "ticker": "NFLX",
+          "trade_return": 0.4910211877638504,
+          "disclosure_date": "2022-04-12T00:00:00",
+          "representative": "Hon. James R. Langevin"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": 0.4494117400396107,
+          "disclosure_date": "2022-10-14T00:00:00",
+          "representative": "Hon. Nancy Pelosi"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": 0.39991801108284863,
+          "disclosure_date": "2022-10-16T00:00:00",
+          "representative": "Hon. Josh Gottheimer"
+        }
+      ],
+      "worst_trades": [
+        {
+          "ticker": "NFLX",
+          "trade_return": -0.49543214666796,
+          "disclosure_date": "2022-04-12T00:00:00",
+          "representative": "Hon. James R. Langevin"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": -0.4538363975738573,
+          "disclosure_date": "2022-10-14T00:00:00",
+          "representative": "Hon. Thomas Suozzi"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": -0.4538363975738573,
+          "disclosure_date": "2022-10-14T00:00:00",
+          "representative": "Hon. Thomas Suozzi"
+        },
+        {
+          "ticker": "NFLX",
+          "trade_return": -0.43797939525993423,
+          "disclosure_date": "2022-04-17T00:00:00",
+          "representative": "Hon. Josh Gottheimer"
+        },
+        {
+          "ticker": "GNRC",
+          "trade_return": -0.40175098176218216,
+          "disclosure_date": "2022-10-06T00:00:00",
+          "representative": "Hon. James R. Langevin"
+        }
+      ]
+    },
+    "large_trade_contrarian": {
+      "name": "Large-Trade Contrarian",
+      "n_trades": 429,
+      "mean_return": -0.0010011251443090635,
+      "median_return": 0.004393540949350271,
+      "std_return": 0.08452199801627429,
+      "t_stat": -0.2453280803509236,
+      "p_value": 0.8063199990833125,
+      "win_rate": 0.5104895104895105,
+      "long_trades": 177,
+      "long_mean": 0.016983372309804373,
+      "short_trades": 252,
+      "short_mean": -0.013633093594222075,
+      "best_trades": [
+        {
+          "ticker": "TSLA",
+          "trade_return": 0.30080363877961247,
+          "disclosure_date": "2020-12-21T00:00:00",
+          "representative": "Hon. Michael Garcia"
+        },
+        {
+          "ticker": "DIS",
+          "trade_return": 0.21039289321034893,
+          "disclosure_date": "2020-06-10T00:00:00",
+          "representative": "Hon. Nicholas Van Taylor"
+        },
+        {
+          "ticker": "TSLA",
+          "trade_return": 0.20476857093360357,
+          "disclosure_date": "2020-03-08T00:00:00",
+          "representative": "Hon. Kim Schrier"
+        },
+        {
+          "ticker": "TSLA",
+          "trade_return": 0.20476857093360357,
+          "disclosure_date": "2020-03-08T00:00:00",
+          "representative": "Hon. Kim Schrier"
+        },
+        {
+          "ticker": "TSLA",
+          "trade_return": 0.19941638465792974,
+          "disclosure_date": "2021-04-15T00:00:00",
+          "representative": "Hon. Marie Newman"
+        }
+      ],
+      "worst_trades": [
+        {
+          "ticker": "TSLA",
+          "trade_return": -0.3438783184892992,
+          "disclosure_date": "2022-04-21T00:00:00",
+          "representative": "Hon. Kim Dr Schrier"
+        },
+        {
+          "ticker": "TSLA",
+          "trade_return": -0.3438783184892992,
+          "disclosure_date": "2022-04-21T00:00:00",
+          "representative": "Hon. Kim Dr Schrier"
+        },
+        {
+          "ticker": "PYPL",
+          "trade_return": -0.29844380022617,
+          "disclosure_date": "2022-04-07T00:00:00",
+          "representative": "Hon. Kathy Manning"
+        },
+        {
+          "ticker": "USAC",
+          "trade_return": -0.21971263277689035,
+          "disclosure_date": "2020-12-12T00:00:00",
+          "representative": "Hon. Mark Green"
+        },
+        {
+          "ticker": "NVDA",
+          "trade_return": -0.21948023374182804,
+          "disclosure_date": "2022-07-14T00:00:00",
+          "representative": "Hon. Nancy Pelosi"
+        }
+      ]
+    }
+  },
+  "portfolio_metrics": {
+    "copy_congress": {
+      "name": "Copy Congress",
+      "ann_return": 0.031042641549414083,
+      "ann_vol": 0.05387286159205244,
+      "sharpe": 0.5762203943143356,
+      "mdd": -0.041003368922242295,
+      "win_rate": 0.4370015948963317,
+      "n_days": 627,
+      "cum_return": 0.07640708351405645
+    },
+    "contrarian": {
+      "name": "Contrarian",
+      "ann_return": -0.031042641549414083,
+      "ann_vol": 0.05387286159205244,
+      "sharpe": -0.5762203943143356,
+      "mdd": -0.12778893985966394,
+      "win_rate": 0.3652312599681021,
+      "n_days": 627,
+      "cum_return": -0.07766627008493987
+    },
+    "spy_benchmark": {
+      "name": "SPY Buy & Hold",
+      "ann_return": 0.08543877103467923,
+      "ann_vol": 0.18538289241054973,
+      "sharpe": 0.4608773221936044,
+      "mdd": -0.24496392800105699,
+      "win_rate": 0.5119617224880383,
+      "n_days": 627,
+      "cum_return": 0.1851062273941806
+    }
+  },
+  "representative_analysis": {
+    "n_active_reps": 60,
+    "n_significant_5pct": 13,
+    "n_significant_1pct": 7,
+    "best_reps": [
+      {
+        "representative": "Hon. Kim Dr Schrier",
+        "n_trades": 10,
+        "mean_return": 0.1228596466007614,
+        "win_rate": 0.8,
+        "total_amount": 3105500.0,
+        "t_stat": 2.970010168252431,
+        "p_value": 0.015702166078608446
+      },
+      {
+        "representative": "Hon. Mark Green",
+        "n_trades": 82,
+        "mean_return": 0.05805855593474601,
+        "win_rate": 0.6463414634146342,
+        "total_amount": 4705500.0,
+        "t_stat": 6.37752697278732,
+        "p_value": 1.0416664439911721e-08
+      },
+      {
+        "representative": "Hon. Richard W. Allen",
+        "n_trades": 16,
+        "mean_return": 0.030549950270861284,
+        "win_rate": 0.625,
+        "total_amount": 317500.0,
+        "t_stat": 1.5198253222654834,
+        "p_value": 0.14935075245749546
+      },
+      {
+        "representative": "None Marie Newman",
+        "n_trades": 18,
+        "mean_return": 0.029168847754598968,
+        "win_rate": 0.6666666666666666,
+        "total_amount": 476000.0,
+        "t_stat": 1.4347958971567922,
+        "p_value": 0.16948692410796132
+      },
+      {
+        "representative": "Hon. Dwight Evans",
+        "n_trades": 16,
+        "mean_return": 0.02898565937427302,
+        "win_rate": 0.625,
+        "total_amount": 128000.0,
+        "t_stat": 1.2666876473740472,
+        "p_value": 0.2245832533044526
+      },
+      {
+        "representative": "Hon. Lois Frankel",
+        "n_trades": 33,
+        "mean_return": 0.026453202193782267,
+        "win_rate": 0.696969696969697,
+        "total_amount": 264000.0,
+        "t_stat": 2.0823874223196346,
+        "p_value": 0.04538512117700888
+      },
+      {
+        "representative": "None Kathy Manning",
+        "n_trades": 15,
+        "mean_return": 0.022954522282361677,
+        "win_rate": 0.5333333333333333,
+        "total_amount": 144500.0,
+        "t_stat": 0.9635575405118514,
+        "p_value": 0.3516171047253396
+      },
+      {
+        "representative": "Hon. Cindy Axne",
+        "n_trades": 62,
+        "mean_return": 0.02008267604062211,
+        "win_rate": 0.5161290322580645,
+        "total_amount": 496000.0,
+        "t_stat": 2.117207401867974,
+        "p_value": 0.038327773362400036
+      },
+      {
+        "representative": "Hon. Earl Blumenauer",
+        "n_trades": 31,
+        "mean_return": 0.017561910022507017,
+        "win_rate": 0.6451612903225806,
+        "total_amount": 297000.0,
+        "t_stat": 0.9429643801721697,
+        "p_value": 0.35323154365136367
+      },
+      {
+        "representative": "Hon. James R. Langevin",
+        "n_trades": 96,
+        "mean_return": 0.017522351274410732,
+        "win_rate": 0.5625,
+        "total_amount": 3260500.0,
+        "t_stat": 0.9874060231140098,
+        "p_value": 0.32595184343167244
+      },
+      {
+        "representative": "Hon. Marjorie Taylor Greene",
+        "n_trades": 34,
+        "mean_return": 0.01703033862343232,
+        "win_rate": 0.5588235294117647,
+        "total_amount": 394500.0,
+        "t_stat": 1.450219723420595,
+        "p_value": 0.1564361830942898
+      },
+      {
+        "representative": "Hon. Daniel Crenshaw",
+        "n_trades": 10,
+        "mean_return": 0.01672918898905141,
+        "win_rate": 0.7,
+        "total_amount": 80000.0,
+        "t_stat": 0.9491204628509718,
+        "p_value": 0.36734744582721995
+      },
+      {
+        "representative": "Hon. Kevin Hern",
+        "n_trades": 115,
+        "mean_return": 0.016633781112441823,
+        "win_rate": 0.6086956521739131,
+        "total_amount": 8011000.0,
+        "t_stat": 2.702682504739293,
+        "p_value": 0.00793009902067386
+      },
+      {
+        "representative": "Hon. John Curtis",
+        "n_trades": 49,
+        "mean_return": 0.015141433799158287,
+        "win_rate": 0.5918367346938775,
+        "total_amount": 563500.0,
+        "t_stat": 1.8168051659676356,
+        "p_value": 0.07549346459229452
+      },
+      {
+        "representative": "Hon. Rohit Khanna",
+        "n_trades": 47,
+        "mean_return": 0.01503442503146229,
+        "win_rate": 0.6170212765957447,
+        "total_amount": 449500.0,
+        "t_stat": 1.544693368692348,
+        "p_value": 0.12927298220571323
+      },
+      {
+        "representative": "Hon. Virginia Foxx",
+        "n_trades": 43,
+        "mean_return": 0.014054370423279306,
+        "win_rate": 0.5116279069767442,
+        "total_amount": 1300500.0,
+        "t_stat": 1.3637121091001163,
+        "p_value": 0.17992304251956892
+      },
+      {
+        "representative": "Hon. Roger W. Marshall",
+        "n_trades": 18,
+        "mean_return": 0.013090101518064196,
+        "win_rate": 0.5555555555555556,
+        "total_amount": 144000.0,
+        "t_stat": 0.559417699781908,
+        "p_value": 0.5831726063191657
+      },
+      {
+        "representative": "Hon. Thomas Suozzi",
+        "n_trades": 23,
+        "mean_return": 0.012527842620360479,
+        "win_rate": 0.43478260869565216,
+        "total_amount": 862000.0,
+        "t_stat": 0.3736334343099718,
+        "p_value": 0.7122534679085183
+      },
+      {
+        "representative": "Hon. Mark Dr Green",
+        "n_trades": 100,
+        "mean_return": 0.011376124136840549,
+        "win_rate": 0.55,
+        "total_amount": 23991000.0,
+        "t_stat": 1.2244242779862669,
+        "p_value": 0.22369789798487258
+      },
+      {
+        "representative": "Hon. Gilbert Cisneros",
+        "n_trades": 67,
+        "mean_return": 0.011313277502138829,
+        "win_rate": 0.5522388059701493,
+        "total_amount": 1351500.0,
+        "t_stat": 1.079206342106445,
+        "p_value": 0.2844240182217795
+      }
+    ],
+    "worst_reps": [
+      {
+        "representative": "Hon. Mikie Sherrill",
+        "n_trades": 28,
+        "mean_return": -0.010171374944633235,
+        "win_rate": 0.42857142857142855,
+        "total_amount": 395500.0,
+        "t_stat": -0.9780174740626205,
+        "p_value": 0.3367480050087061
+      },
+      {
+        "representative": "Hon. Michael T. McCaul",
+        "n_trades": 30,
+        "mean_return": -0.011259251742362612,
+        "win_rate": 0.43333333333333335,
+        "total_amount": 2220000.0,
+        "t_stat": -0.813559159442487,
+        "p_value": 0.42252734075848464
+      },
+      {
+        "representative": "Hon. Patrick Fallon",
+        "n_trades": 28,
+        "mean_return": -0.012089214712180186,
+        "win_rate": 0.4642857142857143,
+        "total_amount": 2895000.0,
+        "t_stat": -1.244287598076,
+        "p_value": 0.22408751171015678
+      },
+      {
+        "representative": "Hon. Ed Perlmutter",
+        "n_trades": 31,
+        "mean_return": -0.012790194425477911,
+        "win_rate": 0.4838709677419355,
+        "total_amount": 248000.0,
+        "t_stat": -0.8778892126431984,
+        "p_value": 0.3869807248160767
+      },
+      {
+        "representative": "Hon. Josh Gottheimer",
+        "n_trades": 293,
+        "mean_return": -0.013019736876814732,
+        "win_rate": 0.45733788395904434,
+        "total_amount": 105040500.0,
+        "t_stat": -2.5334993088446542,
+        "p_value": 0.01181615750099849
+      },
+      {
+        "representative": "Hon. Kenny Marchant",
+        "n_trades": 22,
+        "mean_return": -0.014833379194114916,
+        "win_rate": 0.45454545454545453,
+        "total_amount": 1060500.0,
+        "t_stat": -1.2743146712432645,
+        "p_value": 0.21647371641661511
+      },
+      {
+        "representative": "Hon. Christopher L. Jacobs",
+        "n_trades": 21,
+        "mean_return": -0.014895531088829642,
+        "win_rate": 0.5238095238095238,
+        "total_amount": 339500.0,
+        "t_stat": -0.8010935580338933,
+        "p_value": 0.4324921138884103
+      },
+      {
+        "representative": "Hon. Zoe Lofgren",
+        "n_trades": 56,
+        "mean_return": -0.015298846989230936,
+        "win_rate": 0.39285714285714285,
+        "total_amount": 448000.0,
+        "t_stat": -1.3337011586664331,
+        "p_value": 0.18779886920013367
+      },
+      {
+        "representative": "Hon. William R. Timmons",
+        "n_trades": 12,
+        "mean_return": -0.015460079822731588,
+        "win_rate": 0.4166666666666667,
+        "total_amount": 96000.0,
+        "t_stat": -0.8851025297941035,
+        "p_value": 0.3950373804546599
+      },
+      {
+        "representative": "Hon. John A. Yarmuth",
+        "n_trades": 28,
+        "mean_return": -0.017582214219752982,
+        "win_rate": 0.39285714285714285,
+        "total_amount": 224000.0,
+        "t_stat": -1.2721370567624146,
+        "p_value": 0.21417216160861202
+      },
+      {
+        "representative": "Hon. Nancy Pelosi",
+        "n_trades": 51,
+        "mean_return": -0.020831489504101065,
+        "win_rate": 0.37254901960784315,
+        "total_amount": 66216000.0,
+        "t_stat": -1.5471647426258976,
+        "p_value": 0.12813025633241584
+      },
+      {
+        "representative": "Mr. Peter Meijer",
+        "n_trades": 43,
+        "mean_return": -0.02425132725953032,
+        "win_rate": 0.37209302325581395,
+        "total_amount": 1212500.0,
+        "t_stat": -2.3251965129351566,
+        "p_value": 0.024966142349922147
+      },
+      {
+        "representative": "Hon. Michael Garcia",
+        "n_trades": 19,
+        "mean_return": -0.03127487806978718,
+        "win_rate": 0.3684210526315789,
+        "total_amount": 629000.0,
+        "t_stat": -0.6479144897344589,
+        "p_value": 0.5252193360816133
+      },
+      {
+        "representative": "Hon. Michael John Gallagher",
+        "n_trades": 10,
+        "mean_return": -0.03271842551995494,
+        "win_rate": 0.2,
+        "total_amount": 153500.0,
+        "t_stat": -1.9567139200221444,
+        "p_value": 0.08207670531944852
+      },
+      {
+        "representative": "Hon. Alan S. Lowenthal",
+        "n_trades": 179,
+        "mean_return": -0.05620171522716786,
+        "win_rate": 0.24022346368715083,
+        "total_amount": 1817500.0,
+        "t_stat": -7.654479863433672,
+        "p_value": 1.1849092165151236e-12
+      },
+      {
+        "representative": "Hon. Scott Franklin",
+        "n_trades": 22,
+        "mean_return": -0.0562289737729764,
+        "win_rate": 0.36363636363636365,
+        "total_amount": 1038000.0,
+        "t_stat": -3.3772700907571043,
+        "p_value": 0.002845844415975344
+      },
+      {
+        "representative": "Hon. Mo Brooks",
+        "n_trades": 10,
+        "mean_return": -0.06373621781989224,
+        "win_rate": 0.1,
+        "total_amount": 104500.0,
+        "t_stat": -2.850263496027904,
+        "p_value": 0.01908098348365774
+      },
+      {
+        "representative": "Hon. Steve Cohen",
+        "n_trades": 18,
+        "mean_return": -0.06446749074503005,
+        "win_rate": 0.3333333333333333,
+        "total_amount": 168500.0,
+        "t_stat": -3.0249972814530453,
+        "p_value": 0.0076363893624457665
+      },
+      {
+        "representative": "Hon. Nicholas Van Taylor",
+        "n_trades": 14,
+        "mean_return": -0.07441208399852263,
+        "win_rate": 0.07142857142857142,
+        "total_amount": 1588000.0,
+        "t_stat": -5.354474693531374,
+        "p_value": 0.00013098229004798062
+      },
+      {
+        "representative": "Hon. Kim Schrier",
+        "n_trades": 10,
+        "mean_return": -0.10875839284382913,
+        "win_rate": 0.0,
+        "total_amount": 8100000.0,
+        "t_stat": -6.4981375096631036,
+        "p_value": 0.00011169247314631694
+      }
+    ]
+  },
+  "amount_bucket_analysis": [
+    {
+      "bucket": "$1k-$15k",
+      "n_trades": 2118,
+      "copy_mean_return": -0.0027982934101509417,
+      "copy_t_stat": -1.4442391048096124,
+      "copy_p_value": 0.1488197048073126,
+      "contrarian_mean_return": -0.0016161839334272617,
+      "contrarian_t_stat": -0.8341393629612561,
+      "contrarian_p_value": 0.40429656603735126
+    },
+    {
+      "bucket": "$15k-$50k",
+      "n_trades": 484,
+      "copy_mean_return": -0.0031673652018364834,
+      "copy_t_stat": -0.7377900129192094,
+      "copy_p_value": 0.46100034822606445,
+      "contrarian_mean_return": -0.0012485750223229209,
+      "contrarian_t_stat": -0.2908387696764315,
+      "contrarian_p_value": 0.7712994747333648
+    },
+    {
+      "bucket": "$50k-$100k",
+      "n_trades": 136,
+      "copy_mean_return": -0.004848771921984783,
+      "copy_t_stat": -0.6446110606219335,
+      "copy_p_value": 0.5202731046834912,
+      "contrarian_mean_return": 0.0004343883603409462,
+      "contrarian_t_stat": 0.0577478745342931,
+      "contrarian_p_value": 0.9540348469873559
+    },
+    {
+      "bucket": "$100k-$250k",
+      "n_trades": 122,
+      "copy_mean_return": -0.0036363730899854506,
+      "copy_t_stat": -0.4449931863882357,
+      "copy_p_value": 0.6571196994436211,
+      "contrarian_mean_return": -0.0007785157489995027,
+      "contrarian_t_stat": -0.09526738437465841,
+      "contrarian_p_value": 0.9242600408520091
+    },
+    {
+      "bucket": "$250k+",
+      "n_trades": 171,
+      "copy_mean_return": -0.0021129229732274116,
+      "copy_t_stat": -0.35455180183588214,
+      "copy_p_value": 0.7233648139285918,
+      "contrarian_mean_return": -0.00230164083354981,
+      "contrarian_t_stat": -0.38622552701925533,
+      "contrarian_p_value": 0.6998125995561235
+    }
+  ],
+  "holding_period_analysis": [
+    {
+      "holding_days": 5,
+      "n_trades": 3031,
+      "copy_mean_return": 0.0007984425131822243,
+      "copy_t_stat": 0.9223921870213604,
+      "copy_p_value": 0.3563974831707233,
+      "contrarian_mean_return": -0.004896416417540389,
+      "contrarian_t_stat": -5.656567135627071,
+      "contrarian_p_value": 1.6881652229627175e-08
+    },
+    {
+      "holding_days": 10,
+      "n_trades": 3031,
+      "copy_mean_return": 0.0005804783260779852,
+      "copy_t_stat": 0.4792715828392003,
+      "copy_p_value": 0.6317800229399665,
+      "contrarian_mean_return": -0.0047761188082191515,
+      "contrarian_t_stat": -3.943411370168348,
+      "contrarian_p_value": 8.214955262821798e-05
+    },
+    {
+      "holding_days": 21,
+      "n_trades": 3031,
+      "copy_mean_return": -0.002944299085179345,
+      "copy_t_stat": -1.8138351595019189,
+      "copy_p_value": 0.06980198453966477,
+      "contrarian_mean_return": -0.0014704290889844351,
+      "contrarian_t_stat": -0.9058609360412703,
+      "contrarian_p_value": 0.365081488854952
+    },
+    {
+      "holding_days": 42,
+      "n_trades": 3031,
+      "copy_mean_return": -0.0011961076015069023,
+      "copy_t_stat": -0.5245583949749613,
+      "copy_p_value": 0.5999285883256866,
+      "contrarian_mean_return": -0.00364744961321043,
+      "contrarian_t_stat": -1.5996131248307002,
+      "contrarian_p_value": 0.10978869173676167
+    },
+    {
+      "holding_days": 63,
+      "n_trades": 3031,
+      "copy_mean_return": 0.008685624016002164,
+      "copy_t_stat": 2.9395383698188895,
+      "copy_p_value": 0.003311866160263849,
+      "contrarian_mean_return": -0.01394362919535886,
+      "contrarian_t_stat": -4.719041371312702,
+      "contrarian_p_value": 2.4769669549548437e-06
+    }
+  ],
+  "disclosure_lag_analysis": [
+    {
+      "disclosure_lag_days": 0,
+      "n_trades": 3031,
+      "mean_return": -0.0014726806991078962,
+      "t_stat": -0.8987097500153428,
+      "p_value": 0.3688786924342605
+    },
+    {
+      "disclosure_lag_days": 7,
+      "n_trades": 3031,
+      "mean_return": -0.0015341035498263168,
+      "t_stat": -0.9365759243319984,
+      "p_value": 0.34905138159249516
+    },
+    {
+      "disclosure_lag_days": 14,
+      "n_trades": 3031,
+      "mean_return": -0.0005049586652881809,
+      "t_stat": -0.3119453531202221,
+      "p_value": 0.7551035174591034
+    },
+    {
+      "disclosure_lag_days": 28,
+      "n_trades": 3031,
+      "mean_return": -0.002530952763860488,
+      "t_stat": -1.5383536745760795,
+      "p_value": 0.12406657810697576
+    },
+    {
+      "disclosure_lag_days": 45,
+      "n_trades": 3031,
+      "mean_return": -0.0028889234398136805,
+      "t_stat": -1.7998557047548425,
+      "p_value": 0.07198286441987647
+    },
+    {
+      "disclosure_lag_days": 60,
+      "n_trades": 3031,
+      "mean_return": -0.005324725063252275,
+      "t_stat": -3.057682626529593,
+      "p_value": 0.0022500362069863443
+    }
+  ],
+  "conclusions": [
+    "Copy Congress: NO significant edge (mean=-0.294%, p=0.0698)",
+    "Contrarian: NO significant edge (mean=-0.147%, p=0.3651)",
+    "Large-trade contrarian: no significant edge either (mean=-0.100%, p=0.8063)",
+    "Consistent with Eggers & Hainmueller (2013): congressional trades do NOT provide reliable edge",
+    "The 28-day median disclosure lag makes any potential signal stale by the time it's public"
+  ],
+  "member_answer": "實證結果：不論是跟單（Copy Congress）還是逆向操作（Contrarian），在考慮交易成本和公告延遲後，都無法產生統計上顯著的超額報酬。這與學術文獻一致：Eggers & Hainmueller (2013) 發現國會議員的投資組合實際上是跑輸大盤的。28天的中位公告延遲使任何潛在信號在公開時已經失效。建議：與其追蹤國會交易，不如使用低成本指數基金（SPY）配合簡單的風險管理策略。"
+}

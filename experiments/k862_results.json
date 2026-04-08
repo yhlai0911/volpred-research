@@ -1,0 +1,290 @@
+{
+  "experiment_id": "K862",
+  "title": "Market Microstructure: OHLC Bid-Ask Spread as Volatility Predictor",
+  "data_source": "yfinance (SPY, QQQ, 0050.TW, ^VIX)",
+  "period": "2010-01 to 2026-04",
+  "references": [
+    "Corwin & Schultz (2012) Journal of Finance",
+    "Abdi & Ranaldo (2017) RFS",
+    "Patton (2011) JoE",
+    "Harvey (2016) RFS"
+  ],
+  "methodology": "Corwin-Schultz OHLC spread estimator \u2192 vol prediction regressions",
+  "assets": {
+    "SPY": {
+      "n_obs": 4077,
+      "n_valid": 4076,
+      "is_size": 2853,
+      "oos_size": 1223,
+      "descriptive": {
+        "spread_raw_mean": 0.0022917873195058896,
+        "spread_raw_std": 0.004122785257079756,
+        "spread_5d_mean": 0.002291266945750854,
+        "spread_5d_std": 0.00234795172847599,
+        "r_sq_mean": 0.0001174067568169752,
+        "abs_ret_mean": 0.007197006950349621
+      },
+      "correlations": {
+        "spread_vs_vix": 0.5698066741322818,
+        "spread_vs_absret": 0.35382453308920886,
+        "spread_vs_rsq": 0.34445493309273967
+      },
+      "regressions": {
+        "univariate_spread": {
+          "beta": 0.08021972534321258,
+          "t_stat": 3.6808775795519306,
+          "p_value": 0.00023674009414187402
+        },
+        "bivariate_spread_vix": {
+          "beta_spread": 0.03886588283871457,
+          "t_spread": 3.0063112328187946,
+          "p_spread": 0.0026674579720238345,
+          "beta_vix": 2.1474293582645985e-05,
+          "t_vix": 3.2126988459726733,
+          "p_vix": 0.0013295941783022514
+        },
+        "vix_only": {
+          "beta_vix": 2.885171527363212e-05,
+          "t_vix": 3.4059671499672275,
+          "p_vix": 0.0006684280616082727
+        },
+        "har_baseline": {
+          "t_rv1": 1.2602936372910585,
+          "t_rv5": 2.4656642595889875,
+          "t_rv22": 0.6092367233792166
+        },
+        "har_s": {
+          "beta_spread": 0.02228637503244184,
+          "t_spread": 1.3788413980298333,
+          "p_spread": 0.16805194105397758
+        }
+      },
+      "oos_qlike": {
+        "naive": 1.7498540667581461,
+        "spread_only": 160571.8877972229,
+        "vix_only": 45296.8856650158,
+        "spread_vix": 56713.46318717043,
+        "har": 1.5207476651126295,
+        "har_s": 740.5184463640519
+      },
+      "oos_spearman": {
+        "spread_only": 0.23130072679193578,
+        "vix_only": 0.37396637797825355,
+        "spread_vix": 0.37707124678627496,
+        "har": 0.26423284628970467,
+        "har_s": 0.29164008988569223
+      },
+      "dm_tests": {
+        "hars_vs_har": {
+          "t": 1.0328471667227914,
+          "p": 0.3018801237477855
+        },
+        "spread_vix_vs_vix": {
+          "t": 1.4925379676686987,
+          "p": 0.13581671300302256
+        },
+        "spread_vs_naive": {
+          "t": 4.310151350362912,
+          "p": 1.762761643275823e-05
+        },
+        "har_vs_naive": {
+          "t": -2.6118490885102403,
+          "p": 0.009115950436722642
+        }
+      }
+    },
+    "QQQ": {
+      "n_obs": 4077,
+      "n_valid": 4076,
+      "is_size": 2853,
+      "oos_size": 1223,
+      "descriptive": {
+        "spread_raw_mean": 0.00293804887968713,
+        "spread_raw_std": 0.004841532842158236,
+        "spread_5d_mean": 0.002939151916013391,
+        "spread_5d_std": 0.0026244331369431957,
+        "r_sq_mean": 0.00016928433739906245,
+        "abs_ret_mean": 0.009015471609408843
+      },
+      "correlations": {
+        "spread_vs_vix": 0.5416431988281187,
+        "spread_vs_absret": 0.29656526534231475,
+        "spread_vs_rsq": 0.3023596434707266
+      },
+      "regressions": {
+        "univariate_spread": {
+          "beta": 0.06850619133102366,
+          "t_stat": 3.305277275040121,
+          "p_value": 0.0009605696275905018
+        },
+        "bivariate_spread_vix": {
+          "beta_spread": 0.026414555400304823,
+          "t_spread": 3.150744529270754,
+          "p_spread": 0.0016454362531199695,
+          "beta_vix": 2.5047351040494283e-05,
+          "t_vix": 3.600024042081528,
+          "p_vix": 0.00032361235015199163
+        },
+        "vix_only": {
+          "beta_vix": 3.0125867748387126e-05,
+          "t_vix": 3.5449996059623534,
+          "p_vix": 0.00039892795463059016
+        },
+        "har_baseline": {
+          "t_rv1": 1.6368887884034202,
+          "t_rv5": 1.795003211926375,
+          "t_rv22": 1.2258553566067487
+        },
+        "har_s": {
+          "beta_spread": 0.019759424414032514,
+          "t_spread": 2.6408764862835747,
+          "p_spread": 0.008314356092866237
+        }
+      },
+      "oos_qlike": {
+        "naive": 1.728806835060889,
+        "spread_only": 88450.23294929333,
+        "vix_only": 28451.796998620513,
+        "spread_vix": 41991.89958027638,
+        "har": 1.5418899348052695,
+        "har_s": 1.5437016859824015
+      },
+      "oos_spearman": {
+        "spread_only": 0.24901862648986922,
+        "vix_only": 0.33275717293300133,
+        "spread_vix": 0.3444486670559652,
+        "har": 0.2265336125363531,
+        "har_s": 0.2670995252861179
+      },
+      "dm_tests": {
+        "hars_vs_har": {
+          "t": 0.09816190912508545,
+          "p": 0.921819839918292
+        },
+        "spread_vix_vs_vix": {
+          "t": 1.719971104505146,
+          "p": 0.08569109156775445
+        },
+        "spread_vs_naive": {
+          "t": 3.7055816730051387,
+          "p": 0.00022034536394510695
+        },
+        "har_vs_naive": {
+          "t": -2.2210851995128214,
+          "p": 0.026528080875062754
+        }
+      }
+    },
+    "0050.TW": {
+      "n_obs": 3961,
+      "n_valid": 3960,
+      "is_size": 2772,
+      "oos_size": 1188,
+      "descriptive": {
+        "spread_raw_mean": 0.0015739521036418442,
+        "spread_raw_std": 0.002634375330668056,
+        "spread_5d_mean": 0.0015730611372582802,
+        "spread_5d_std": 0.001249907001330401,
+        "r_sq_mean": 0.00013140027051378037,
+        "abs_ret_mean": 0.007966148596003336
+      },
+      "correlations": {
+        "spread_vs_vix": 0.1864760403106244,
+        "spread_vs_absret": 0.013034189551908612,
+        "spread_vs_rsq": 0.01730733013605309
+      },
+      "regressions": {
+        "univariate_spread": {
+          "beta": 0.02843091817617379,
+          "t_stat": 2.332227621819937,
+          "p_value": 0.01976002674231192
+        },
+        "bivariate_spread_vix": {
+          "beta_spread": 0.011860032056203819,
+          "t_spread": 1.9536262404698146,
+          "p_spread": 0.05084599517308952,
+          "beta_vix": 1.1846857667510583e-05,
+          "t_vix": 3.045410752785979,
+          "p_vix": 0.002345511624202601
+        },
+        "vix_only": {
+          "beta_vix": 1.234821719607159e-05,
+          "t_vix": 3.069813804764236,
+          "p_vix": 0.0021626882007903525
+        },
+        "har_baseline": {
+          "t_rv1": 1.3500044373704008,
+          "t_rv5": 2.442964964742603,
+          "t_rv22": 2.115049759038819
+        },
+        "har_s": {
+          "beta_spread": 0.01994596481072338,
+          "t_spread": 2.198796181449047,
+          "p_spread": 0.027974907511036706
+        }
+      },
+      "oos_qlike": {
+        "naive": 1.8215360497284476,
+        "spread_only": 2.0253131421176214,
+        "vix_only": 1.7340499208607365,
+        "spread_vix": 1.7604786775833883,
+        "har": 1.5151195755732754,
+        "har_s": 1.546426577466741
+      },
+      "oos_spearman": {
+        "spread_only": 0.08631140183858291,
+        "vix_only": 0.20010852895106887,
+        "spread_vix": 0.21570489217177075,
+        "har": 0.13506109949325365,
+        "har_s": 0.15372083959118304
+      },
+      "dm_tests": {
+        "hars_vs_har": {
+          "t": 1.860158662024239,
+          "p": 0.0631191165208147
+        },
+        "spread_vix_vs_vix": {
+          "t": 0.7967589855629702,
+          "p": 0.4257560496639825
+        },
+        "spread_vs_naive": {
+          "t": 1.4807363681852697,
+          "p": 0.13895170602635254
+        },
+        "har_vs_naive": {
+          "t": -1.9189668312387624,
+          "p": 0.055236683041650414
+        }
+      }
+    }
+  },
+  "conclusions": [
+    "SPY: Spread IS significant univariate predictor (|t|=3.68 > 3.0)",
+    "QQQ: Spread IS significant univariate predictor (|t|=3.31 > 3.0)",
+    "0050.TW: Spread NOT significant univariate predictor (|t|=2.33 < 3.0)",
+    "SPY: Spread adds info beyond VIX (bivariate |t|=3.01 > 3.0)",
+    "QQQ: Spread adds info beyond VIX (bivariate |t|=3.15 > 3.0)",
+    "0050.TW: Spread DOES NOT add beyond VIX (bivariate |t|=1.95 < 3.0)",
+    "SPY: HAR-S does NOT significantly improve over HAR (DM t=1.03)",
+    "QQQ: HAR-S does NOT significantly improve over HAR (DM t=0.10)",
+    "0050.TW: HAR-S does NOT significantly improve over HAR (DM t=1.86)"
+  ],
+  "overall_assessment": [
+    "OHLC spread has some predictive power for next-day vol (passes Harvey threshold in at least one asset)",
+    "Spread provides incremental information beyond VIX in at least one asset",
+    "HAR-S does NOT improve over HAR \u2014 spread adds nothing to RV forecasting"
+  ],
+  "notes": [
+    "QLIKE values for spread-only, VIX-only, and spread+VIX models are extremely large for SPY/QQQ because simple linear OLS for r^2 can produce near-zero or negative predictions OOS (clipped to 1e-10), causing QLIKE ratio to explode. This is a known instability of unconstrained linear vol forecasts — the Spearman rank correlations and IS t-statistics are the reliable metrics here.",
+    "HAR and HAR-S models have sensible QLIKE because their RV-based regressors keep predictions well-anchored in positive territory.",
+    "The IS t-statistics use Newey-West HAC standard errors (lag=10) for robustness to heteroskedasticity and autocorrelation.",
+    "All predictors are lagged by 1 day (shift(1)) to prevent lookahead bias."
+  ],
+  "limitations": [
+    "Corwin-Schultz spread is estimated from daily OHLC, which is a noisy proxy for true bid-ask spread",
+    "r^2 (squared daily return) is a very noisy proxy for true volatility — 5-min RV would be better",
+    "Simple linear OLS is used; nonlinear models (e.g., log-linear, quantile regression) might capture spread-vol relationship better",
+    "IS period (2010-2020) includes post-GFC low-vol era; OOS (2020-2026) includes COVID and its aftermath",
+    "No transaction cost or implementability analysis — this is pure statistical predictability"
+  ]
+}

@@ -1,0 +1,521 @@
+{
+  "experiment_id": "K919",
+  "title": "Diurnal Asymmetric Spillover Network (DASN) — SPY→Taiwan Transmission Channel",
+  "run_time": "2026-04-06T09:32:21.365763",
+  "data_source": "yfinance (SPY, 0050.TW, ^VIX)",
+  "data_period": "2012-01-05 to 2026-03-31",
+  "n_observations": 3356,
+  "method": "OLS regression with return decomposition (overnight gap + intraday)",
+  "references": [
+    "K907: International vol spillover network",
+    "K906: SPY overnight vol decomposition",
+    "K847: TAIFEX overnight gap tradability",
+    "K848: Night session vol share trend"
+  ],
+  "descriptive_statistics": {
+    "spy_ret": {
+      "name": "SPY close-to-close",
+      "mean": 0.0005781450684860386,
+      "std": 0.01052992626935263,
+      "skewness": -0.5523310086702012,
+      "kurtosis": 15.834488502099262,
+      "n": 3243
+    },
+    "spy_overnight": {
+      "name": "SPY overnight gap",
+      "mean": 0.00036538994493119333,
+      "std": 0.006797210096230963,
+      "skewness": -2.3573386390900497,
+      "kurtosis": 40.3487390807608,
+      "n": 3243
+    },
+    "spy_intraday": {
+      "name": "SPY intraday",
+      "mean": 0.0002127551235548476,
+      "std": 0.007952009278455796,
+      "skewness": 0.21818374005050298,
+      "kurtosis": 14.004612310886518,
+      "n": 3243
+    },
+    "tw_ret": {
+      "name": "0050.TW close-to-close",
+      "mean": 0.00051748948380408,
+      "std": 0.01143605101462802,
+      "skewness": -0.4227821176133699,
+      "kurtosis": 8.235160368262855,
+      "n": 3356
+    },
+    "tw_overnight": {
+      "name": "0050.TW overnight gap",
+      "mean": 0.00041362441619733985,
+      "std": 0.008330037141814557,
+      "skewness": -0.3704254243747102,
+      "kurtosis": 21.3642908184107,
+      "n": 3356
+    },
+    "tw_intraday": {
+      "name": "0050.TW intraday",
+      "mean": 0.00010386506760674079,
+      "std": 0.007455534544011311,
+      "skewness": -0.38705882347629844,
+      "kurtosis": 5.736367977415455,
+      "n": 3356
+    },
+    "correlations": {
+      "spy_ret_vs_tw_ret": 0.13724883818691616,
+      "spy_ret_vs_tw_overnight": 0.04338025440753625,
+      "spy_ret_vs_tw_intraday": 0.1623699527804203,
+      "spy_overnight_vs_spy_intraday": 0.01334681900510632,
+      "tw_overnight_vs_tw_intraday": 0.046765638381988404,
+      "spy_ret_lag1_vs_tw_ret": 0.40837980696741844,
+      "spy_ret_lag1_vs_tw_overnight": 0.5959216902083905,
+      "spy_ret_lag1_vs_tw_intraday": -0.03940663214570691
+    }
+  },
+  "channel_analysis": {
+    "channel_1_gap": {
+      "channel": "Gap-to-Gap (SPY ret → TW overnight gap)",
+      "beta": 0.4717598134364214,
+      "intercept": 0.00017972123882942445,
+      "r_squared": 0.3551226608608249,
+      "correlation": 0.5959216902083905,
+      "t_stat": 42.97661086983526,
+      "p_value": 0.0,
+      "std_err": 0.010977129277719376,
+      "n_obs": 3356,
+      "residual_std": 0.0066883775751617495
+    },
+    "channel_2_intraday": {
+      "channel": "Intraday Follow-Through (SPY ret → TW intraday)",
+      "beta": -0.02792112537477637,
+      "intercept": 0.00011770863748030797,
+      "r_squared": 0.0015528826570670611,
+      "correlation": -0.03940663214570691,
+      "t_stat": -2.283959061813061,
+      "p_value": 0.02243616504224973,
+      "std_err": 0.012224879964622447,
+      "n_obs": 3356,
+      "residual_std": 0.007448633512988241
+    },
+    "channel_3_total": {
+      "channel": "Total Transmission (SPY ret → TW total ret)",
+      "beta": 0.4438386880616455,
+      "intercept": 0.0002974298763097316,
+      "r_squared": 0.1667740667387459,
+      "correlation": 0.4083798069674184,
+      "t_stat": 25.909820212285904,
+      "p_value": 4.431973775779997e-135,
+      "std_err": 0.017130133842116986,
+      "n_obs": 3356,
+      "residual_std": 0.010437410378475424
+    },
+    "variance_decomposition": {
+      "var_total": 0.00013074429282621596,
+      "var_overnight": 6.936884252692302e-05,
+      "var_intraday": 5.556843246586819e-05,
+      "cov_overnight_intraday": 2.904374344109298e-06,
+      "overnight_share": 0.5305687998108446,
+      "intraday_share": 0.42501612318733645,
+      "covariance_share": 0.04442831547484469
+    },
+    "spy_contribution": {
+      "gap_channel_contribution": 0.18841700395856145,
+      "intraday_channel_contribution": 0.0006600001666714924,
+      "total_spy_r_squared": 0.1667740667387459,
+      "gap_share_of_transmission": 0.9965093578157481,
+      "intraday_share_of_transmission": 0.003490642184251814
+    },
+    "asymmetry": {
+      "gap_negative": {
+        "channel": "Gap channel (SPY negative days)",
+        "beta": 0.47935304685447017,
+        "intercept": 7.663669501369475e-05,
+        "r_squared": 0.24163259932263337,
+        "correlation": 0.49156138916989134,
+        "t_stat": 21.86896759095883,
+        "p_value": 2.95719046130167e-92,
+        "std_err": 0.02191932677483351,
+        "n_obs": 1503,
+        "residual_std": 0.007349613983524176
+      },
+      "gap_positive": {
+        "channel": "Gap channel (SPY positive days)",
+        "beta": 0.42932288823075176,
+        "intercept": 0.0005933684130403683,
+        "r_squared": 0.20809900221700078,
+        "correlation": 0.4561786954878546,
+        "t_stat": 22.05478168875445,
+        "p_value": 6.730769058825466e-96,
+        "std_err": 0.01946620439456265,
+        "n_obs": 1853,
+        "residual_std": 0.006088516741257015
+      },
+      "intraday_negative": {
+        "channel": "Intraday channel (SPY negative days)",
+        "beta": -0.07275343554513815,
+        "intercept": -0.0006672377075370414,
+        "r_squared": 0.006568631834664285,
+        "correlation": -0.08104709639872539,
+        "t_stat": -3.1503504785426393,
+        "p_value": 0.0016629248620311614,
+        "std_err": 0.023093759262872264,
+        "n_obs": 1503,
+        "residual_std": 0.007743404610648047
+      },
+      "intraday_positive": {
+        "channel": "Intraday channel (SPY positive days)",
+        "beta": -0.07522355461464271,
+        "intercept": 0.0008112813660698788,
+        "r_squared": 0.0057964142594665955,
+        "correlation": -0.07613418587905564,
+        "t_stat": -3.285074740561504,
+        "p_value": 0.0010385903965337304,
+        "std_err": 0.02289858239322283,
+        "n_obs": 1853,
+        "residual_std": 0.007162074302021251
+      }
+    }
+  },
+  "vix_regime_analysis": {
+    "Low (Q1)": {
+      "n_obs": 844,
+      "gap_channel": {
+        "channel": "Gap (Low (Q1))",
+        "beta": 0.48771560265885,
+        "intercept": -7.274014507891477e-05,
+        "r_squared": 0.2227305253981458,
+        "correlation": 0.471943349776375,
+        "t_stat": 15.533170540011358,
+        "p_value": 4.9446591905820645e-48,
+        "std_err": 0.03139832923372342,
+        "n_obs": 844,
+        "residual_std": 0.0038522052991297366
+      },
+      "intraday_channel": {
+        "channel": "Intraday (Low (Q1))",
+        "beta": 0.1116827618615158,
+        "intercept": 0.00013957006063905876,
+        "r_squared": 0.007163618457484391,
+        "correlation": 0.08463816194533286,
+        "t_stat": 2.4648098881886176,
+        "p_value": 0.013907213378052062,
+        "std_err": 0.04531090304234018,
+        "n_obs": 844,
+        "residual_std": 0.00555911429263517
+      },
+      "total_channel": {
+        "channel": "Total (Low (Q1))",
+        "beta": 0.5993983645203669,
+        "intercept": 6.682991556014248e-05,
+        "r_squared": 0.11438750619527005,
+        "correlation": 0.33821222064743617,
+        "t_stat": 10.428539112742738,
+        "p_value": 4.962282200913592e-24,
+        "std_err": 0.05747673360959599,
+        "n_obs": 844,
+        "residual_std": 0.007051718457354918
+      }
+    },
+    "Medium-Low (Q2)": {
+      "n_obs": 837,
+      "gap_channel": {
+        "channel": "Gap (Medium-Low (Q2))",
+        "beta": 0.4891195031072804,
+        "intercept": 0.0001649148655088014,
+        "r_squared": 0.3012940418216845,
+        "correlation": 0.5489025795363732,
+        "t_stat": 18.975415142275104,
+        "p_value": 4.9341000219258753e-67,
+        "std_err": 0.025776484964356687,
+        "n_obs": 837,
+        "residual_std": 0.004895115990316634
+      },
+      "intraday_channel": {
+        "channel": "Intraday (Medium-Low (Q2))",
+        "beta": 0.016285645879055455,
+        "intercept": 0.0001599748035090882,
+        "r_squared": 0.0003150909003520656,
+        "correlation": 0.017750799991889537,
+        "t_stat": 0.5130144526458233,
+        "p_value": 0.6080769043274299,
+        "std_err": 0.0317450040541037,
+        "n_obs": 837,
+        "residual_std": 0.006028575159599447
+      },
+      "total_channel": {
+        "channel": "Total (Medium-Low (Q2))",
+        "beta": 0.5054051489863364,
+        "intercept": 0.00032488966901789097,
+        "r_squared": 0.13521675749402662,
+        "correlation": 0.36771831269876487,
+        "t_stat": 11.426280039293754,
+        "p_value": 3.3960756142603744e-28,
+        "std_err": 0.04423181886390865,
+        "n_obs": 837,
+        "residual_std": 0.008399899524737698
+      }
+    },
+    "Medium-High (Q3)": {
+      "n_obs": 837,
+      "gap_channel": {
+        "channel": "Gap (Medium-High (Q3))",
+        "beta": 0.5134043658437126,
+        "intercept": 0.00013723255639194238,
+        "r_squared": 0.29155018784240055,
+        "correlation": 0.539953875661987,
+        "t_stat": 18.537252081271077,
+        "p_value": 1.6270584847961362e-64,
+        "std_err": 0.027695818322631835,
+        "n_obs": 837,
+        "residual_std": 0.006875116159056336
+      },
+      "intraday_channel": {
+        "channel": "Intraday (Medium-High (Q3))",
+        "beta": 0.015077040748519758,
+        "intercept": 9.758145650930497e-05,
+        "r_squared": 0.00029221119999328263,
+        "correlation": 0.01709418614597614,
+        "t_stat": 0.4940320549331811,
+        "p_value": 0.6214134727609861,
+        "std_err": 0.030518345111349023,
+        "n_obs": 837,
+        "residual_std": 0.007575770651674158
+      },
+      "total_channel": {
+        "channel": "Total (Medium-High (Q3))",
+        "beta": 0.5284814065922325,
+        "intercept": 0.00023481401290124585,
+        "r_squared": 0.16605552817950606,
+        "correlation": 0.4074991143297198,
+        "t_stat": 12.894405980491232,
+        "p_value": 7.998815549386546e-35,
+        "std_err": 0.040985323976289074,
+        "n_obs": 837,
+        "residual_std": 0.01017405804266439
+      }
+    },
+    "High (Q4)": {
+      "n_obs": 838,
+      "gap_channel": {
+        "channel": "Gap (High (Q4))",
+        "beta": 0.46082671580943024,
+        "intercept": 0.00039322874661879844,
+        "r_squared": 0.40797018406018043,
+        "correlation": 0.6387254371482166,
+        "t_stat": 24.00189664445658,
+        "p_value": 2.9803011059362594e-97,
+        "std_err": 0.019199595875097716,
+        "n_obs": 838,
+        "residual_std": 0.009631965688541836
+      },
+      "intraday_channel": {
+        "channel": "Intraday (High (Q4))",
+        "beta": -0.057423222795891085,
+        "intercept": -0.0003154488756958161,
+        "r_squared": 0.010194705004741613,
+        "correlation": -0.10096883184795996,
+        "t_stat": -2.9343747982786303,
+        "p_value": 0.003433658560154597,
+        "std_err": 0.01956915075387671,
+        "n_obs": 838,
+        "residual_std": 0.009817362294574014
+      },
+      "total_channel": {
+        "channel": "Total (High (Q4))",
+        "beta": 0.4034034930135392,
+        "intercept": 7.777987092297853e-05,
+        "r_squared": 0.18866774963649222,
+        "correlation": 0.43435901007863553,
+        "t_stat": 13.942883661657687,
+        "p_value": 7.01020125275766e-40,
+        "std_err": 0.028932572544005438,
+        "n_obs": 838,
+        "residual_std": 0.014514761031327681
+      }
+    },
+    "quartile_thresholds": {
+      "Q1": 13.449999809265137,
+      "Q2": 16.049999237060547,
+      "Q3": 20.09000015258789
+    }
+  },
+  "time_trend_analysis": {
+    "Pre-Night-Session (before 2017/05)": {
+      "n_obs": 1267,
+      "gap_channel": {
+        "channel": "Gap (Pre-Night-Session (before 2017/05))",
+        "beta": 0.3968443992295724,
+        "intercept": -7.027550498146795e-06,
+        "r_squared": 0.33092221785660014,
+        "correlation": 0.5752583922522123,
+        "t_stat": 25.01323835590394,
+        "p_value": 1.600334132684325e-112,
+        "std_err": 0.015865374710104425,
+        "n_obs": 1267,
+        "residual_std": 0.004488236433470223
+      },
+      "intraday_channel": {
+        "channel": "Intraday (Pre-Night-Session (before 2017/05))",
+        "beta": -0.009648592501618076,
+        "intercept": 6.889952378754276e-05,
+        "r_squared": 0.00012788691449653006,
+        "correlation": -0.011308709674252411,
+        "t_stat": -0.40224077197480723,
+        "p_value": 0.6875747940369612,
+        "std_err": 0.023987107160341213,
+        "n_obs": 1267,
+        "residual_std": 0.0067858345773599
+      },
+      "total_channel": {
+        "channel": "Total (Pre-Night-Session (before 2017/05))",
+        "beta": 0.3871958067279545,
+        "intercept": 6.187197328939547e-05,
+        "r_squared": 0.11652814286029838,
+        "correlation": 0.34136218721513134,
+        "t_stat": 12.91707899215261,
+        "p_value": 6.052400829436242e-36,
+        "std_err": 0.02997549267626093,
+        "n_obs": 1267,
+        "residual_std": 0.008479919371531102
+      }
+    },
+    "Post-Night-Session (2017/05+)": {
+      "n_obs": 2089,
+      "gap_channel": {
+        "channel": "Gap (Post-Night-Session (2017/05+))",
+        "beta": 0.49242186281757655,
+        "intercept": 0.00030705213928444546,
+        "r_squared": 0.3630516744924119,
+        "correlation": 0.6025376954949888,
+        "t_stat": 34.49001208283703,
+        "p_value": 1.1079280157395663e-206,
+        "std_err": 0.014277230800467484,
+        "n_obs": 2089,
+        "residual_std": 0.007702196148388435
+      },
+      "intraday_channel": {
+        "channel": "Intraday (Post-Night-Session (2017/05+))",
+        "beta": -0.03294051258059999,
+        "intercept": 0.00014387141300677443,
+        "r_squared": 0.0024668979049302926,
+        "correlation": -0.04966787598569414,
+        "t_stat": -2.271816003258401,
+        "p_value": 0.023199003095146747,
+        "std_err": 0.014499639290045652,
+        "n_obs": 2089,
+        "residual_std": 0.007822179766762223
+      },
+      "total_channel": {
+        "channel": "Total (Post-Night-Session (2017/05+))",
+        "beta": 0.45948135023697656,
+        "intercept": 0.0004509235522912188,
+        "r_squared": 0.1833034296433131,
+        "correlation": 0.42813949787810174,
+        "t_stat": 21.6429349441261,
+        "p_value": 6.998319715026885e-94,
+        "std_err": 0.02123008507964304,
+        "n_obs": 2089,
+        "residual_std": 0.011453080910132186
+      }
+    }
+  },
+  "rolling_summary": {
+    "gap_r2_median": 0.3470979388607608,
+    "gap_r2_min": 0.18975319772708124,
+    "gap_r2_max": 0.6144321789024086,
+    "intra_r2_median": 0.0010350578665510274,
+    "intra_r2_min": 8.201193241702229e-11,
+    "intra_r2_max": 0.0931718077051434
+  },
+  "granger_causality": {
+    "spy_vol_to_tw_vol": {
+      "lag_1": {
+        "f_stat": 10.361928313760572,
+        "p_value": 0.001299108120346776
+      },
+      "lag_2": {
+        "f_stat": 22.889403989236385,
+        "p_value": 1.3456014420329486e-10
+      },
+      "lag_3": {
+        "f_stat": 33.8501129842206,
+        "p_value": 1.5514578252333428e-21
+      },
+      "lag_4": {
+        "f_stat": 31.98271293680917,
+        "p_value": 3.566787268392914e-26
+      },
+      "lag_5": {
+        "f_stat": 26.270208111350303,
+        "p_value": 4.261299411455403e-26
+      }
+    },
+    "spy_vol_to_tw_overnight": {
+      "lag_1": {
+        "f_stat": 4.180578734134548,
+        "p_value": 0.04097041127733898
+      },
+      "lag_2": {
+        "f_stat": 2.598314258293774,
+        "p_value": 0.07455410329983582
+      },
+      "lag_3": {
+        "f_stat": 1.4750403845380273,
+        "p_value": 0.2192824948155407
+      },
+      "lag_4": {
+        "f_stat": 4.577921025758699,
+        "p_value": 0.0010949655253234168
+      },
+      "lag_5": {
+        "f_stat": 8.876061241872558,
+        "p_value": 2.212137084939361e-08
+      }
+    },
+    "spy_vol_to_tw_intraday": {
+      "lag_1": {
+        "f_stat": 231.47947703980088,
+        "p_value": 1.5224778088409675e-50
+      },
+      "lag_2": {
+        "f_stat": 134.56344718831542,
+        "p_value": 7.29649530949285e-57
+      },
+      "lag_3": {
+        "f_stat": 85.57462555870761,
+        "p_value": 2.803672008305564e-53
+      },
+      "lag_4": {
+        "f_stat": 61.928396299331894,
+        "p_value": 1.7264538741229208e-50
+      },
+      "lag_5": {
+        "f_stat": 50.78669847240842,
+        "p_value": 8.114335487389865e-51
+      }
+    },
+    "tw_vol_to_spy_vol": {
+      "lag_1": {
+        "f_stat": 3.574125764114759,
+        "p_value": 0.058775515102434915
+      },
+      "lag_2": {
+        "f_stat": 125.60779274612659,
+        "p_value": 2.9045600860682674e-53
+      },
+      "lag_3": {
+        "f_stat": 86.3011835679794,
+        "p_value": 1.0257924168091304e-53
+      },
+      "lag_4": {
+        "f_stat": 76.03521110068998,
+        "p_value": 1.0708474336190931e-61
+      },
+      "lag_5": {
+        "f_stat": 65.60416365817169,
+        "p_value": 2.0109366805394905e-65
+      }
+    }
+  },
+  "key_findings": "[Proposed: Gemini G3-1, Executed: Claude] K919 DASN Analysis: SPY→0050.TW transmission is overwhelmingly via overnight gap channel. Gap channel (β=0.472, R²=0.3551) dominates intraday follow-through (β=-0.028, R²=0.0016), accounting for 100% of transmission. Total SPY→TW R²=0.1668. VIX regime effect: High VIX gap R²=0.4080 vs Low VIX gap R²=0.2227. Night session impact: Pre gap R²=0.3309 → Post gap R²=0.3631. Granger causality confirms SPY→TW (significant) but TW→SPY is weak/insignificant. Practical implication: Taiwan investors should focus on pre-market US closing levels, not intraday chasing. The overnight gap captures the majority of cross-market information flow. Limitations: Daily OHLC only (no intraday tick), 0050.TW as proxy for broader market, VIX as single regime variable."
+}

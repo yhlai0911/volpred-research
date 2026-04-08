@@ -1,0 +1,51 @@
+{
+  "id": "mile_dc22093c",
+  "title": "K934: Range-Based 波動率模型的意外發現——排序最強但校準最差",
+  "description": "CARR(1,1) 在 Spearman 排序相關係數上以 ρ=0.474 領先全部模型，但 QLIKE on r² 卻是最差的（1.815 vs GARCH 1.602）。根源在於 Parkinson 轉換假設連續路徑，被隔夜缺口違反。VIX multiplicative factor 改善所有模型類型（DM |t|>3.0）。MF-GJR 仍是最佳模型（QLIKE=1.475）。",
+  "content": "## 摘要\n\n[提出: Claude, 執行: Claude]\n\nK934 實驗在 SPY 上以 Patton (2011) 標準框架系統性比較 CARR(1,1)、CARR-MF(VIX)、GARCH(1,1)、GJR(1,1,1) 和 MF-GJR(VIX) 五個模型，OOS 期間 2016-2025（2,514 個交易日）。核心矛盾發現：**Range-based 模型在 Spearman 排序相關係數上勝出，但在 Patton-robust QLIKE on $r^2$ 上敬陪末座**。原因追溯到 Parkinson 轉換假設被隔夜缺口所違反。\n\n## 研究背景\n\n### 從 K464 到 K934：Range 訊號的演進\n\nK464 曾展示 HAR log-range 在亞洲市場有效；K468 探索 Yang-Zhang 估計量。然而這兩個實驗都未將 range 用作動態預測模型——CARR（Conditional Autoregressive Range）正是填補這個缺口的方法。\n\nChou (2005) 提出 CARR 的理論動機很吸引人：Parkinson (1980) 的理論推導顯示，High-Low range 的效率比 squared return 高約 5 倍。若這個訊號能被動態模型正確使用，理應在公平的 QLIKE 競賽中勝出。\n\n這個實驗的目的是**實證驗證 range 優勢是否能在 OOS 轉化為預測優勢**。\n\n## 方法與數據\n\n| 項目 | 設定 |\n|------|------|\n| 資產 | SPY（S&P 500 ETF） |\n| 數據 | yfinance OHLCV（含高低點，用於 range 計算） |\n| 訓練期 | 2004-01-01 起，滾動窗口 2,000 天 |\n| OOS 期間 | 2016-01-01 ~ 2025-12-31（2,514 天） |\n| Refit | 每 21 天重估一次（共 120 次） |\n| 外部變數 | VIX 前一日收盤值 |\n| 固定 seed | `np.random.seed(42)` |\n\n### 五個模型\n\n| 模型 | 方程 | 原生 Target |\n|------|------|-------------|\n| CARR(1,1) | $\\lambda_t = \\omega + \u0007lpha \\cdot \\text{Range}_{t-1} + \\beta \\lambda_{t-1}$ | Range |\n| CARR-MF(VIX) | $\\lambda_t = \\tau_t \\cdot g_t$，$\\tau_t = \\exp(\\theta_0 + \\theta_1 \\log \\text{VIX}_{t-1})$ | Range |\n| GARCH(1,1) | $h_t = \\omega + \\alpha r^2_{t-1} + \\beta h_{t-1}$ | $\\sigma^2$ |\n| GJR(1,1,1) | $h_t = \\omega + (\\alpha + \\gamma I_{t-1}) r^2_{t-1} + \\beta h_{t-1}$ | $\\sigma^2$ |\n| MF-GJR(VIX) | MIDAS 長期成分 $\\tau_t$ + GJR 短期成分 $g_t$ | $\\sigma^2$ |\n\nCARR 預測的 range $\\lambda_t$ 轉換為方差時使用 Parkinson 公式：\n\n$$\\sigma^2 = \\frac{\\lambda^2}{4 \\ln 2}$$\n\n### 四層評估框架（Patton 2011 標準）\n\n1. **Layer 1**：各模型在原生 target 上的 QLIKE（展示各自最佳表現）\n2. **Layer 2**：QLIKE on $r^2$（Patton 2011 proxy-robust，**主要排名依據**）\n3. **Layer 3**：Spearman 排序相關係數（分佈無關）\n4. **Layer 4**：DM test（Harvey 2016 門檻：$|t| > 3.0$）\n\n## 核心發現\n\n### 發現一：排序悖論——排序最強，校準最差\n\nLayer 2 與 Layer 3 的結果形成鮮明矛盾：\n\n**QLIKE on $r^2$（主要排名，越低越好）：**\n\n| 排名 | 模型 | QLIKE on $r^2$ |\n|------|------|----------------|\n| 1 | MF-GJR(VIX) | **1.4749** |\n| 2 | GJR | 1.5618 |\n| 3 | GARCH | 1.6024 |\n| 4 | CARR-MF(VIX) | 1.6994 |\n| 5 | CARR | **1.8154** |\n\n**Spearman 排序相關係數（越高越好）：**\n\n| 排名 | 模型 | $\\rho$ |\n|------|------|---------|\n| 1 | **CARR-MF(VIX)** | **0.4743** |\n| 2 | MF-GJR(VIX) | 0.4573 |\n| 3 | **CARR** | **0.4418** |\n| 4 | GJR | 0.4074 |\n| 5 | GARCH | 0.3825 |\n\nCARR-MF 在排序上領先（$\\rho = 0.474$），但在絕對水準的損失函數上落後（QLIKE=1.699 vs GARCH=1.602）。這不是模型設計的機械結果——CARR 預測的是 range，而 $r^2$ 是完全不同的量，轉換依賴 Parkinson 假設。\n\n### 發現二：Parkinson 轉換的系統性偏誤\n\nCARR 在 QLIKE/$r^2$ 上的劣勢，根源在於 Parkinson 轉換：\n\n$$\\sigma^2 = \\frac{\\lambda^2}{4 \\ln 2}$$\n\n這個公式假設**連續樣本路徑**（no overnight gaps）。但 SPY 每天有隔夜缺口——開盤價不等於前日收盤價。隔夜缺口無法被 range 捕捉，卻完整地反映在 $r^2$ 中。\n\n當 CARR 的 range 預測通過 Parkinson 公式轉換為 $\\sigma^2$ 時，這個量系統性地低估真實方差，導致 QLIKE 損失上升。\n\n**佐證**：若改用 Parkinson variance 作為 target，CARR-MF 立刻成為最佳模型（QLIKE=0.396 vs MF-GJR=0.453）。這正好說明問題不在 CARR 本身，而在於 Parkinson 轉換與隔夜缺口的相互作用。\n\n### 發現三：VIX 改善所有類型的模型\n\nVIX multiplicative factor 對兩類模型都帶來顯著改善：\n\n| 比較對 | DM t-stat | $|t| > 3.0$？ | 勝者 |\n|--------|-----------|--------------|------|\n| CARR vs CARR-MF | 3.15 | 是 | CARR-MF |\n| GJR vs MF-GJR | 4.06 | 是 | MF-GJR |\n\n這再次確認 K847-K930 系列的一致結論：**VIX 攜帶了獨立於價格歷史之外的波動率資訊**，無論底層模型使用 range 還是 return，都能從 VIX 受益。\n\n### 發現四：CARR-MF 與 GARCH 不顯著\n\nCARR-MF vs GARCH 的 DM t=2.45，未達 Harvey (2016) $|t| > 3.0$ 門檻，結果不顯著（n.s.）。\n\n解釋：range + VIX 的資訊組合，其實與單純的 GARCH（基於 $r^2$）在統計上等價。Range 的理論效率優勢被 Parkinson 轉換偏誤所抵消，兩者達到平衡。\n\n### 發現五：MF-GJR 仍是最佳模型\n\nDM test 完整結果：\n\n| 比較對 | t-stat | 顯著 | 勝者 |\n|--------|--------|------|------|\n| CARR vs GARCH | 4.44 | 是 | GARCH |\n| CARR vs GJR | 5.36 | 是 | GJR |\n| CARR vs MF-GJR | 6.62 | 是 | MF-GJR |\n| CARR-MF vs GARCH | 2.45 | 否 | n.s. |\n| CARR-MF vs GJR | 3.68 | 是 | GJR |\n| CARR-MF vs MF-GJR | 6.89 | 是 | MF-GJR |\n| GARCH vs GJR | 3.26 | 是 | GJR |\n| GJR vs MF-GJR | 4.06 | 是 | MF-GJR |\n\nMF-GJR 以 $|t| > 3.0$ 顯著擊敗所有競爭對手，確認其最佳地位。\n\n## 模型參數解讀\n\n| 模型 | Persistence | 關鍵參數 |\n|------|-------------|---------|\n| CARR | 0.970 | $\\alpha=0.251, \\beta=0.720$ |\n| CARR-MF | 0.981 | $\\theta_1=1.589$（VIX 彈性） |\n| GARCH | 0.983 | $\\alpha=0.083, \\beta=0.900$ |\n| GJR | 0.983 | $\\gamma=0.233$（強烈不對稱） |\n| MF-GJR | 0.937 | $\\theta_1=2.560, \\gamma=0.149$ |\n\nCARR-MF 的 VIX 彈性 $\\theta_1 = 1.589$ 意味著：VIX 每增加 1%，預測 range 上升約 1.6%。MF-GJR 的 $\\theta_1 = 2.560$ 則代表更強的 VIX 敏感性，反映 MIDAS 框架能更有效地利用 VIX 的長期趨勢資訊。\n\n## 理論意涵\n\n### 為什麼 Range 排序好但校準差？\n\nRange 包含每個交易時段的**高低極值資訊**，這些資訊直接反映日內波動率的峰值和谷底。Parkinson (1980) 在連續時間框架下證明 range 的效率比 close-to-close return 高 5 倍，這解釋了為何 CARR 在**排序層面**（Spearman $\\rho$）能領先——它對「今天比昨天更波動」的方向判斷更準確。\n\n但效率優勢的前提是**連續樣本路徑**。美國股市每天有隔夜缺口，開盤跳空常在重要事件（如 FOMC 決議、非農報告）後特別明顯。這些跳空對真實方差 $\\sigma^2$ 有實質貢獻，卻完全不在 range 的捕捉範圍內。Parkinson 轉換無法還原這個缺失，導致 CARR 對真實波動率的**水準估計**系統性偏低。\n\n### 不同 Target 的正確解讀\n\n這個結果不是 CARR 「失敗」——而是兩個模型擅長的任務不同：\n\n| 任務 | 最適模型 | 原因 |\n|------|---------|------|\n| 預測「今天波動比昨天高/低」（排序） | CARR-MF | Range 資訊直接、充足 |\n| 預測日終 close-to-close 方差（水準） | MF-GJR | 不受隔夜缺口轉換偏誤影響 |\n| 預測日內 intraday RV（若有 5min 數據） | CARR-MF 或 HAR-RV | Range 接近 intraday 現實 |\n\n## 實務意義\n\n對於以**排名訊號**驅動策略的系統（例如：波動率最高的 10 支個股做空）：CARR-MF 可能是更合適的工具，因為其 Spearman 排序相關係數最高。\n\n對於需要**精確水準估計**的風險管理應用（VaR/ES 計算、組合波動率預算）：MF-GJR 在 QLIKE/$r^2$ 和全部 DM test 中勝出，是更可靠的選擇。\n\n對於**隔夜缺口頻繁的資產**（例如個股而非 ETF）：Parkinson 轉換的偏誤問題會更嚴重，CARR 的劣勢可能更明顯。\n\n## 研究限制\n\n1. **單一資產**：僅在 SPY 測試，結論需跨資產驗證\n2. **無日內數據**：缺乏 5-min RV 作為 gold-standard target（Hansen & Lunde 2005）\n3. **CARR 分佈假設**：本實驗使用指數分佈作為 CARR 創新項，Weibull 或 Gamma 可能改善擬合\n4. **無 VaR/ES 評估**：本實驗專注於預測比較，未做風險管理評估\n\n## 結論\n\nK934 確認了一個有趣的悖論：**Range-based 模型在 Spearman 排序上最強，但在 Patton-robust QLIKE on $r^2$ 上最弱**。這個矛盾有明確的機制解釋——Parkinson 轉換在隔夜缺口存在時產生系統性偏誤，使 range 的理論效率優勢無法完全轉化為日頻方差預測。\n\nVIX multiplicative factor 對所有模型都有顯著改善（$|t| > 3.0$），與過去系列實驗一致。MF-GJR 在主要排名上仍是冠軍。若未來有日內數據（5-min RV），重新以 Hansen & Lunde (2005) 最優加權 RV 作為 gold-standard target，CARR-MF 的真實優勢可能得到更充分的展現。\n\n---\n\n*實驗腳本: experiments/k934/k934.py，數據來源：yfinance (SPY, ^VIX)，OOS 期間：2016-2025*\n",
+  "category": "milestone",
+  "audience": "research",
+  "phase": "Phase_K9",
+  "details": {
+    "experiment_id": "K934",
+    "data_source": "yfinance",
+    "assets": [
+      "SPY",
+      "^VIX"
+    ],
+    "oos_period": "2016-2025",
+    "oos_days": 2514,
+    "models": [
+      "CARR",
+      "CARR-MF",
+      "GARCH",
+      "GJR",
+      "MF-GJR"
+    ],
+    "best_model": "MF-GJR",
+    "best_qlike": 1.4749,
+    "carr_mf_spearman_rho": 0.4743,
+    "references": [
+      "Chou (2005)",
+      "Parkinson (1980)",
+      "Patton (2011)",
+      "Harvey (2016)"
+    ]
+  },
+  "tags": [
+    "研究",
+    "GARCH",
+    "GJR",
+    "CARR",
+    "波動率預測",
+    "SPY",
+    "VIX",
+    "Patton2011",
+    "range-based"
+  ],
+  "related_articles": [],
+  "created_at": "2026-04-06T08:26:51.222474+00:00",
+  "published_at": "2026-04-06T16:03:01.197927+00:00",
+  "status": "published",
+  "proposer": "Claude"
+}

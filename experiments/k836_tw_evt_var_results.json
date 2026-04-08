@@ -1,0 +1,524 @@
+{
+  "experiment_id": "K836",
+  "title": "K836: 0050.TW EVT-POT VaR — Extreme Value Theory for Taiwan Equity Tail Risk",
+  "method": "GJR-GARCH(1,1) + EVT-POT + Cornish-Fisher + Safety margin",
+  "asset": "0050.TW",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "refit_every": 63,
+  "evt_thresholds": [
+    5,
+    10,
+    15
+  ],
+  "safety_margin": 0.1,
+  "alpha_levels": [
+    0.01,
+    0.05
+  ],
+  "data_source": "yfinance",
+  "error_log_rules": [
+    "0050.TW: clean_tw50_data applied",
+    "Student-t: scale=sqrt((df-2)/df) per-refit",
+    "Basel: standard 250-day window",
+    "GARCH OOS: recursive h[t]=f(h[t-1], r²[t-1])",
+    "GPD: ξ > -0.5 checked, per-refit parameters"
+  ],
+  "references": [
+    "McNeil & Frey (2000) J Empirical Finance — EVT-POT for GARCH residuals",
+    "Gilli & Kellezi (2006) Computational Economics — EVT for financial risk",
+    "Cornish & Fisher (1938) — CF expansion for non-Normal quantiles",
+    "K829: 0050.TW Normal 9/481, Student-t 6/481, HistSim 6/481 — all FAIL",
+    "K824v2: SPY HistSim(4/502, Trinity PASS)",
+    "Kupiec (1995), Christoffersen (1998), Basel Committee (1996, 2019)"
+  ],
+  "timestamp": "2026-04-03T12:16:33.236681+00:00",
+  "elapsed_sec": 2.0,
+  "n_oos": 481,
+  "n_refits": 8,
+  "oos_stats": {
+    "mean": 0.001413464677569659,
+    "std": 0.01286286807818722,
+    "skewness": -0.6812473443156541,
+    "kurtosis": 7.668137416246941,
+    "min": -0.09129929932826675,
+    "max": 0.05511806086874138
+  },
+  "full_sample_stats": {
+    "mean": 0.000698974028980851,
+    "std": 0.013379443284603327,
+    "skewness": 0.48773612596849486,
+    "kurtosis": 19.645024868223903,
+    "n_obs": 4162
+  },
+  "var_results": {
+    "1%": {
+      "Normal": {
+        "violation_rate": 0.018711,
+        "expected_rate": 0.01,
+        "n_violations": 9,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 2.9345,
+          "p_value": 0.0867,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 2.0593,
+          "p_value": 0.1513,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 8,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "Student-t": {
+        "violation_rate": 0.012474,
+        "expected_rate": 0.01,
+        "n_violations": 6,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.2757,
+          "p_value": 0.5995,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 5,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "HistSim": {
+        "violation_rate": 0.012474,
+        "expected_rate": 0.01,
+        "n_violations": 6,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.2757,
+          "p_value": 0.5995,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 5,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "EVT-POT(5%)": {
+        "violation_rate": 0.014553,
+        "expected_rate": 0.01,
+        "n_violations": 7,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.8831,
+          "p_value": 0.3474,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 3.0145,
+          "p_value": 0.0825,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 6,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "EVT-POT(10%)": {
+        "violation_rate": 0.012474,
+        "expected_rate": 0.01,
+        "n_violations": 6,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.2757,
+          "p_value": 0.5995,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 5,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "EVT-POT(15%)": {
+        "violation_rate": 0.012474,
+        "expected_rate": 0.01,
+        "n_violations": 6,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.2757,
+          "p_value": 0.5995,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 5,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "Cornish-Fisher": {
+        "violation_rate": 0.006237,
+        "expected_rate": 0.01,
+        "n_violations": 3,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.7944,
+          "p_value": 0.3728,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 3,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "EVT-POT+Safety": {
+        "violation_rate": 0.008316,
+        "expected_rate": 0.01,
+        "n_violations": 4,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.1462,
+          "p_value": 0.7022,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 3,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      }
+    },
+    "5%": {
+      "Normal": {
+        "violation_rate": 0.047817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.0489,
+          "p_value": 0.8249,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0107,
+          "p_value": 0.9175,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "Student-t": {
+        "violation_rate": 0.047817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.0489,
+          "p_value": 0.8249,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0107,
+          "p_value": 0.9175,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "HistSim": {
+        "violation_rate": 0.047817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.0489,
+          "p_value": 0.8249,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0107,
+          "p_value": 0.9175,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "EVT-POT(5%)": {
+        "violation_rate": 0.047817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.0489,
+          "p_value": 0.8249,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0107,
+          "p_value": 0.9175,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "EVT-POT(10%)": {
+        "violation_rate": 0.047817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.0489,
+          "p_value": 0.8249,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0107,
+          "p_value": 0.9175,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "EVT-POT(15%)": {
+        "violation_rate": 0.047817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.0489,
+          "p_value": 0.8249,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0107,
+          "p_value": 0.9175,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "Cornish-Fisher": {
+        "violation_rate": 0.047817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 0.0489,
+          "p_value": 0.8249,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0107,
+          "p_value": 0.9175,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 14,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "EVT-POT+Safety": {
+        "violation_rate": 0.037422,
+        "expected_rate": 0.05,
+        "n_violations": 18,
+        "n_total": 481,
+        "kupiec": {
+          "stat": 1.7483,
+          "p_value": 0.1861,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.1486,
+          "p_value": 0.6999,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 12,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      }
+    }
+  },
+  "gpd_params_history": [
+    {
+      "refit_idx": 0,
+      "xi": 0.06760834496853771,
+      "beta": 0.6024065857473099,
+      "threshold_u": -1.171989153453408,
+      "n_exceedances": 344,
+      "n_total": 3437
+    },
+    {
+      "refit_idx": 63,
+      "xi": 0.06359948621452044,
+      "beta": 0.5981535261828959,
+      "threshold_u": -1.1531557571692737,
+      "n_exceedances": 350,
+      "n_total": 3500
+    },
+    {
+      "refit_idx": 126,
+      "xi": 0.06892569565954067,
+      "beta": 0.6156732846382786,
+      "threshold_u": -1.1378161223943346,
+      "n_exceedances": 357,
+      "n_total": 3563
+    },
+    {
+      "refit_idx": 189,
+      "xi": 0.07490127359003376,
+      "beta": 0.5948451096424809,
+      "threshold_u": -1.1525815089007285,
+      "n_exceedances": 363,
+      "n_total": 3626
+    },
+    {
+      "refit_idx": 252,
+      "xi": 0.06007409836926998,
+      "beta": 0.6118855865867427,
+      "threshold_u": -1.156779976313053,
+      "n_exceedances": 369,
+      "n_total": 3689
+    },
+    {
+      "refit_idx": 315,
+      "xi": 0.06795500097376649,
+      "beta": 0.59044522793942,
+      "threshold_u": -1.1395750325676877,
+      "n_exceedances": 376,
+      "n_total": 3752
+    },
+    {
+      "refit_idx": 378,
+      "xi": 0.06204107364867836,
+      "beta": 0.5924927966317206,
+      "threshold_u": -1.138941158419038,
+      "n_exceedances": 382,
+      "n_total": 3815
+    },
+    {
+      "refit_idx": 441,
+      "xi": 0.06073837493005712,
+      "beta": 0.6168339164234706,
+      "threshold_u": -1.1228368249923821,
+      "n_exceedances": 388,
+      "n_total": 3878
+    }
+  ],
+  "gpd_summary": {
+    "mean_xi": 0.06573041854430058,
+    "mean_beta": 0.6028420042240399,
+    "all_xi_valid": true,
+    "n_heavy_tail": 8,
+    "n_refits_with_gpd": 8
+  },
+  "trinity_summary": {
+    "1%": {
+      "Normal": "FAIL",
+      "Student-t": "FAIL",
+      "HistSim": "FAIL",
+      "EVT-POT(5%)": "FAIL",
+      "EVT-POT(10%)": "FAIL",
+      "EVT-POT(15%)": "FAIL",
+      "Cornish-Fisher": "PASS",
+      "EVT-POT+Safety": "PASS"
+    },
+    "5%": {
+      "Normal": "PASS",
+      "Student-t": "PASS",
+      "HistSim": "PASS",
+      "EVT-POT(5%)": "PASS",
+      "EVT-POT(10%)": "PASS",
+      "EVT-POT(15%)": "PASS",
+      "Cornish-Fisher": "PASS",
+      "EVT-POT+Safety": "PASS"
+    }
+  },
+  "k829_comparison": {
+    "Normal": {
+      "violations_k836": 9,
+      "violations_k829": 9,
+      "basel_k836": "yellow",
+      "trinity_k836": "FAIL"
+    },
+    "Student-t": {
+      "violations_k836": 6,
+      "violations_k829": 6,
+      "basel_k836": "yellow",
+      "trinity_k836": "FAIL"
+    },
+    "HistSim": {
+      "violations_k836": 6,
+      "violations_k829": 6,
+      "basel_k836": "yellow",
+      "trinity_k836": "FAIL"
+    },
+    "EVT-POT(5%)": {
+      "violations_k836": 7,
+      "violations_k829": null,
+      "basel_k836": "yellow",
+      "trinity_k836": "FAIL"
+    },
+    "EVT-POT(10%)": {
+      "violations_k836": 6,
+      "violations_k829": null,
+      "basel_k836": "yellow",
+      "trinity_k836": "FAIL"
+    },
+    "EVT-POT(15%)": {
+      "violations_k836": 6,
+      "violations_k829": null,
+      "basel_k836": "yellow",
+      "trinity_k836": "FAIL"
+    },
+    "Cornish-Fisher": {
+      "violations_k836": 3,
+      "violations_k829": null,
+      "basel_k836": "green",
+      "trinity_k836": "PASS"
+    },
+    "EVT-POT+Safety": {
+      "violations_k836": 4,
+      "violations_k829": null,
+      "basel_k836": "green",
+      "trinity_k836": "PASS"
+    }
+  }
+}

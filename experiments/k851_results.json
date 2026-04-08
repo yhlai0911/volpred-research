@@ -1,0 +1,525 @@
+{
+  "experiment_id": "K851",
+  "title": "Jump Dynamics from TAIFEX Tick Data -- HAR-CJ Model Comparison",
+  "date": "2026-04-05",
+  "data_source": "TAIFEX TX1 tick data (Big5 CSV)",
+  "data_period": "2017-05-16 to 2025-12-31",
+  "n_trading_days": 2107,
+  "methodology": {
+    "jump_test": "Barndorff-Nielsen & Shephard (2006) bipower variation, alpha=0.001",
+    "models": {
+      "HAR-RV": "Corsi (2009): log(RV_t) ~ log(RV_d, RV_w, RV_m)",
+      "HAR-CJ": "ABD (2007): log(RV_t) ~ log(C_d, C_w, C_m) + sqrt(J_d, J_w, J_m)",
+      "HAR-CJ-A": "HAR-CJ + asymmetric negative jump component",
+      "HAR-CJ-Night": "HAR-CJ + separate night session jump component"
+    },
+    "target": "5-min Realized Volatility (full session, day+night)",
+    "metrics": "QLIKE (Patton 2011), MSE, MAE, Spearman rank correlation",
+    "dm_test": "Newey-West HAC, Harvey (2016) threshold |t|>3.0",
+    "refit_freq": "63 trading days",
+    "oos_split": "70/30 (IS/OOS)",
+    "log_transform": "All models estimated in log space for normality"
+  },
+  "references": [
+    "Andersen, Bollerslev, Diebold (2007) \"Roughing it up\" - Review of Economics and Statistics",
+    "Barndorff-Nielsen & Shephard (2004, 2006) \"Power and bipower variation\" - J. Financial Econometrics",
+    "Corsi (2009) \"A simple approximate long-memory model of realized volatility\" - J. Financial Econometrics",
+    "Patton (2011) \"Volatility forecast comparison using imperfect volatility proxies\" - J. Econometrics",
+    "Hansen & Lunde (2005) \"A forecast comparison of volatility models\" - J. Applied Econometrics",
+    "Huang & Tauchen (2005) \"The relative contribution of jumps to total price variance\" - J. Financial Econometrics"
+  ],
+  "jump_statistics": {
+    "n_jump_days": 213,
+    "n_total_days": 2107,
+    "jump_pct": 10.1,
+    "z_stat_mean": 1.051,
+    "z_stat_median": 0.748,
+    "jump_contribution_pct": 2.5,
+    "mean_C": 9.678335927729183e-05,
+    "mean_J": 2.530735303161853e-06,
+    "mean_RV": 9.931409458045369e-05,
+    "ann_vol_C_pct": 15.6,
+    "ann_vol_J_pct": 2.5,
+    "ann_vol_RV_pct": 15.8,
+    "mean_J_pos": 1.209973671638036e-06,
+    "mean_J_neg": 1.3207616315238174e-06,
+    "night_jump_share_pct": 62.5,
+    "P_jump_given_jump": 0.113,
+    "P_jump_given_no_jump": 0.1,
+    "jump_clustering_ratio": 1.13,
+    "jump_magnitude_AC1": -0.0078,
+    "jump_size_on_jump_days": {
+      "mean": "2.50e-05",
+      "median": "1.31e-05",
+      "std": "6.09e-05",
+      "skew": 9.706,
+      "kurtosis": 111.645
+    }
+  },
+  "yearly_stats": [
+    {
+      "year": 2017,
+      "n_days": 161,
+      "n_jumps": 30,
+      "jump_pct": 18.6,
+      "j_share_pct": 3.9,
+      "ann_vol_pct": 7.7
+    },
+    {
+      "year": 2018,
+      "n_days": 247,
+      "n_jumps": 21,
+      "jump_pct": 8.5,
+      "j_share_pct": 1.9,
+      "ann_vol_pct": 12.8
+    },
+    {
+      "year": 2019,
+      "n_days": 242,
+      "n_jumps": 23,
+      "jump_pct": 9.5,
+      "j_share_pct": 2.3,
+      "ann_vol_pct": 9.5
+    },
+    {
+      "year": 2020,
+      "n_days": 245,
+      "n_jumps": 22,
+      "jump_pct": 9.0,
+      "j_share_pct": 1.5,
+      "ann_vol_pct": 20.8
+    },
+    {
+      "year": 2021,
+      "n_days": 243,
+      "n_jumps": 20,
+      "jump_pct": 8.2,
+      "j_share_pct": 1.9,
+      "ann_vol_pct": 16.8
+    },
+    {
+      "year": 2022,
+      "n_days": 246,
+      "n_jumps": 24,
+      "jump_pct": 9.8,
+      "j_share_pct": 2.6,
+      "ann_vol_pct": 17.5
+    },
+    {
+      "year": 2023,
+      "n_days": 239,
+      "n_jumps": 18,
+      "jump_pct": 7.5,
+      "j_share_pct": 1.9,
+      "ann_vol_pct": 11.4
+    },
+    {
+      "year": 2024,
+      "n_days": 242,
+      "n_jumps": 26,
+      "jump_pct": 10.7,
+      "j_share_pct": 2.3,
+      "ann_vol_pct": 18.4
+    },
+    {
+      "year": 2025,
+      "n_days": 242,
+      "n_jumps": 29,
+      "jump_pct": 12.0,
+      "j_share_pct": 4.8,
+      "ann_vol_pct": 19.6
+    }
+  ],
+  "insample_diagnostics": {
+    "HAR-RV": {
+      "model": "HAR-RV",
+      "n": 1452,
+      "R2": 0.693574,
+      "coefficients": {
+        "const": {
+          "estimate": -0.77063,
+          "se": 0.189574,
+          "t_stat": -4.0651
+        },
+        "log_rv_d": {
+          "estimate": 0.505235,
+          "se": 0.037094,
+          "t_stat": 13.6204
+        },
+        "log_rv_w": {
+          "estimate": 0.324166,
+          "se": 0.044732,
+          "t_stat": 7.2469
+        },
+        "log_rv_m": {
+          "estimate": 0.091554,
+          "se": 0.036884,
+          "t_stat": 2.4822
+        }
+      }
+    },
+    "HAR-CJ": {
+      "model": "HAR-CJ",
+      "n": 1452,
+      "R2": 0.693991,
+      "coefficients": {
+        "const": {
+          "estimate": -0.785659,
+          "se": 0.208315,
+          "t_stat": -3.7715
+        },
+        "log_C_d": {
+          "estimate": 0.500529,
+          "se": 0.036427,
+          "t_stat": 13.7404
+        },
+        "log_C_w": {
+          "estimate": 0.315655,
+          "se": 0.045491,
+          "t_stat": 6.9389
+        },
+        "log_C_m": {
+          "estimate": 0.099732,
+          "se": 0.037086,
+          "t_stat": 2.6892
+        },
+        "sqrt_J_d": {
+          "estimate": 9.778523,
+          "se": 9.33911,
+          "t_stat": 1.0471
+        },
+        "sqrt_J_w": {
+          "estimate": 32.369271,
+          "se": 29.307626,
+          "t_stat": 1.1045
+        },
+        "sqrt_J_m": {
+          "estimate": -70.985214,
+          "se": 53.007915,
+          "t_stat": -1.3391
+        }
+      }
+    },
+    "HAR-CJ-A": {
+      "model": "HAR-CJ-A",
+      "n": 1452,
+      "R2": 0.695161,
+      "coefficients": {
+        "const": {
+          "estimate": -0.757524,
+          "se": 0.20813,
+          "t_stat": -3.6397
+        },
+        "log_C_d": {
+          "estimate": 0.499419,
+          "se": 0.036596,
+          "t_stat": 13.6468
+        },
+        "log_C_w": {
+          "estimate": 0.320141,
+          "se": 0.046348,
+          "t_stat": 6.9073
+        },
+        "log_C_m": {
+          "estimate": 0.099555,
+          "se": 0.037147,
+          "t_stat": 2.68
+        },
+        "sqrt_J_d": {
+          "estimate": 0.239195,
+          "se": 9.673548,
+          "t_stat": 0.0247
+        },
+        "sqrt_J_w": {
+          "estimate": 10.067803,
+          "se": 27.105465,
+          "t_stat": 0.3714
+        },
+        "sqrt_J_m": {
+          "estimate": -64.031454,
+          "se": 54.405596,
+          "t_stat": -1.1769
+        },
+        "sqrt_Jneg_d": {
+          "estimate": 29.150235,
+          "se": 17.693115,
+          "t_stat": 1.6475
+        },
+        "sqrt_Jneg_w": {
+          "estimate": 53.276089,
+          "se": 53.88195,
+          "t_stat": 0.9888
+        }
+      }
+    },
+    "HAR-CJ-Night": {
+      "model": "HAR-CJ-Night",
+      "n": 1432,
+      "R2": 0.695866,
+      "coefficients": {
+        "const": {
+          "estimate": -0.743655,
+          "se": 0.211072,
+          "t_stat": -3.5232
+        },
+        "log_C_d": {
+          "estimate": 0.513234,
+          "se": 0.035595,
+          "t_stat": 14.4187
+        },
+        "log_C_w": {
+          "estimate": 0.302737,
+          "se": 0.044702,
+          "t_stat": 6.7723
+        },
+        "log_C_m": {
+          "estimate": 0.102756,
+          "se": 0.036068,
+          "t_stat": 2.849
+        },
+        "sqrt_J_d": {
+          "estimate": 15.328496,
+          "se": 10.456035,
+          "t_stat": 1.466
+        },
+        "sqrt_J_w": {
+          "estimate": 48.168391,
+          "se": 31.28332,
+          "t_stat": 1.5397
+        },
+        "sqrt_J_m": {
+          "estimate": -73.432669,
+          "se": 53.52597,
+          "t_stat": -1.3719
+        },
+        "sqrt_Jnight_d": {
+          "estimate": -17.047623,
+          "se": 13.258392,
+          "t_stat": -1.2858
+        },
+        "sqrt_Jnight_w": {
+          "estimate": -43.450037,
+          "se": 30.394675,
+          "t_stat": -1.4295
+        }
+      }
+    }
+  },
+  "oos_split": {
+    "IS": "2017-05-16 to 2023-05-26",
+    "OOS": "2023-05-29 to 2025-12-31",
+    "n_is": 1474,
+    "n_oos": 633
+  },
+  "oos_metrics": {
+    "HAR-RV": {
+      "QLIKE": 0.12106,
+      "MSE": "4.4099e-08",
+      "MAE": "5.0556e-05",
+      "Spearman": 0.7951,
+      "Spearman_p": 0.0,
+      "n_oos": 633
+    },
+    "HAR-CJ": {
+      "QLIKE": 0.121638,
+      "MSE": "4.3728e-08",
+      "MAE": "5.0211e-05",
+      "Spearman": 0.7964,
+      "Spearman_p": 0.0,
+      "n_oos": 633
+    },
+    "HAR-CJ-A": {
+      "QLIKE": 0.115531,
+      "MSE": "4.4155e-08",
+      "MAE": "5.1103e-05",
+      "Spearman": 0.7961,
+      "Spearman_p": 0.0,
+      "n_oos": 633
+    },
+    "HAR-CJ-Night": {
+      "QLIKE": 0.12658,
+      "MSE": "4.5576e-08",
+      "MAE": "5.0592e-05",
+      "Spearman": 0.7963,
+      "Spearman_p": 0.0,
+      "n_oos": 633
+    }
+  },
+  "qlike_improvement_vs_HAR_RV_pct": {
+    "HAR-RV": 0.0,
+    "HAR-CJ": -0.48,
+    "HAR-CJ-A": 4.57,
+    "HAR-CJ-Night": -4.56
+  },
+  "dm_tests": {
+    "HAR-RV vs HAR-CJ": {
+      "t_stat": -0.5145,
+      "p_value": 0.607065,
+      "winner": "HAR-RV",
+      "significant_harvey": false
+    },
+    "HAR-RV vs HAR-CJ-A": {
+      "t_stat": 1.1022,
+      "p_value": 0.270779,
+      "winner": "HAR-CJ-A",
+      "significant_harvey": false
+    },
+    "HAR-RV vs HAR-CJ-Night": {
+      "t_stat": -0.8729,
+      "p_value": 0.383027,
+      "winner": "HAR-RV",
+      "significant_harvey": false
+    },
+    "HAR-CJ vs HAR-CJ-A": {
+      "t_stat": 1.0612,
+      "p_value": 0.288998,
+      "winner": "HAR-CJ-A",
+      "significant_harvey": false
+    },
+    "HAR-CJ vs HAR-CJ-Night": {
+      "t_stat": -0.8937,
+      "p_value": 0.371805,
+      "winner": "HAR-CJ",
+      "significant_harvey": false
+    },
+    "HAR-CJ-A vs HAR-CJ-Night": {
+      "t_stat": -0.985,
+      "p_value": 0.325007,
+      "winner": "HAR-CJ-A",
+      "significant_harvey": false
+    }
+  },
+  "cross_oos_stability": {
+    "HAR-RV": [
+      {
+        "fold": 1,
+        "n": 126,
+        "QLIKE": 0.050591,
+        "Spearman": 0.6017
+      },
+      {
+        "fold": 2,
+        "n": 126,
+        "QLIKE": 0.09891,
+        "Spearman": 0.6617
+      },
+      {
+        "fold": 3,
+        "n": 126,
+        "QLIKE": 0.161623,
+        "Spearman": 0.5894
+      },
+      {
+        "fold": 4,
+        "n": 126,
+        "QLIKE": 0.20094,
+        "Spearman": 0.6394
+      },
+      {
+        "fold": 5,
+        "n": 129,
+        "QLIKE": 0.093884,
+        "Spearman": 0.5264
+      }
+    ],
+    "HAR-CJ": [
+      {
+        "fold": 1,
+        "n": 126,
+        "QLIKE": 0.049833,
+        "Spearman": 0.6013
+      },
+      {
+        "fold": 2,
+        "n": 126,
+        "QLIKE": 0.097423,
+        "Spearman": 0.6616
+      },
+      {
+        "fold": 3,
+        "n": 126,
+        "QLIKE": 0.163459,
+        "Spearman": 0.5912
+      },
+      {
+        "fold": 4,
+        "n": 126,
+        "QLIKE": 0.207704,
+        "Spearman": 0.6373
+      },
+      {
+        "fold": 5,
+        "n": 129,
+        "QLIKE": 0.090513,
+        "Spearman": 0.5434
+      }
+    ],
+    "HAR-CJ-A": [
+      {
+        "fold": 1,
+        "n": 126,
+        "QLIKE": 0.050347,
+        "Spearman": 0.6026
+      },
+      {
+        "fold": 2,
+        "n": 126,
+        "QLIKE": 0.098009,
+        "Spearman": 0.6618
+      },
+      {
+        "fold": 3,
+        "n": 126,
+        "QLIKE": 0.163907,
+        "Spearman": 0.5945
+      },
+      {
+        "fold": 4,
+        "n": 126,
+        "QLIKE": 0.176152,
+        "Spearman": 0.6401
+      },
+      {
+        "fold": 5,
+        "n": 129,
+        "QLIKE": 0.089852,
+        "Spearman": 0.5494
+      }
+    ],
+    "HAR-CJ-Night": [
+      {
+        "fold": 1,
+        "n": 126,
+        "QLIKE": 0.050645,
+        "Spearman": 0.5972
+      },
+      {
+        "fold": 2,
+        "n": 126,
+        "QLIKE": 0.096064,
+        "Spearman": 0.6592
+      },
+      {
+        "fold": 3,
+        "n": 126,
+        "QLIKE": 0.162643,
+        "Spearman": 0.5869
+      },
+      {
+        "fold": 4,
+        "n": 126,
+        "QLIKE": 0.233761,
+        "Spearman": 0.6435
+      },
+      {
+        "fold": 5,
+        "n": 129,
+        "QLIKE": 0.090641,
+        "Spearman": 0.54
+      }
+    ]
+  },
+  "best_model": "HAR-CJ-A",
+  "conclusion": "BNS jump test (alpha=0.001) detects significant jumps on 10.1% of trading days. Jumps contribute 2.5% of total realized variance. Jump clustering ratio = 1.13x (P(jump|jump)=0.113 vs P(jump|no_jump)=0.100). Night jump share = 62.5%. HAR-CJ QLIKE=0.121638 vs HAR-RV QLIKE=0.121060 (-0.48% improvement). DM test HAR-RV vs HAR-CJ: t=-0.5145 (not significant at Harvey t>3.0). Best OOS model: HAR-CJ-A (QLIKE=0.115531).",
+  "elapsed_seconds": 54.3
+}

@@ -1,0 +1,414 @@
+{
+  "experiment_id": "K874b",
+  "title": "Log-Space Cross-Information HAR — Fix K874 Level-Space Failure",
+  "date": "2026-04-05",
+  "data_source": "TAIFEX TX tick (volume-selected contract) + yfinance (^VIX, SPY)",
+  "data_period": "2017-06-15 to 2025-12-31",
+  "n_days": 2086,
+  "is_period": "2017-06-15 to 2022-07-25",
+  "oos_period": "2022-07-26 to 2025-12-31",
+  "is_n": 1251,
+  "oos_n": 835,
+  "methodology": {
+    "target": "log(RV_total_{t+1})",
+    "all_models_in_log_space": true,
+    "conversion_to_level": "exp(log_pred) for QLIKE evaluation",
+    "refit_freq": 63,
+    "min_train": 250,
+    "models": {
+      "HAR_baseline": "β₀ + β₁·log(RV_d) + β₅·log(RV_5d) + β₂₂·log(RV_22d)",
+      "HAR_X_Overnight": "HAR + β_gap·log(r²_overnight + ε)",
+      "HAR_X_Night": "HAR + β_night·log(RV_night)",
+      "HAR_X_NightRatio": "HAR + β_ratio·night_ratio",
+      "HAR_X_VIX": "HAR + β_vix·log(VIX)",
+      "HAR_X_SPY": "HAR + β_spy·|SPY_ret|",
+      "HAR_X_Cross": "HAR + log(r²_overnight) + log(RV_night) + log(VIX)"
+    }
+  },
+  "descriptive_stats": {
+    "rv_total": {
+      "mean": 0.00010017,
+      "std": 0.00020767,
+      "median": 6.021e-05,
+      "skewness": 10.5965,
+      "kurtosis": 141.4047,
+      "n": 2086
+    },
+    "rv_night": {
+      "mean": 4.92e-05,
+      "std": 0.00013809,
+      "median": 2.469e-05,
+      "skewness": 14.4796,
+      "kurtosis": 273.1147,
+      "n": 2082
+    },
+    "r2_overnight": {
+      "mean": 8.281e-05,
+      "std": 0.00037189,
+      "median": 1.631e-05,
+      "skewness": 20.361,
+      "kurtosis": 535.3817,
+      "n": 2086
+    },
+    "night_ratio": {
+      "mean": 0.43027319,
+      "std": 0.17178973,
+      "median": 0.42723504,
+      "skewness": 0.1113,
+      "kurtosis": -0.4944,
+      "n": 2082
+    }
+  },
+  "in_sample_stats": {
+    "HAR_baseline": {
+      "n_obs": 1251,
+      "R2": 0.705,
+      "adj_R2": 0.7043,
+      "coefficients": {
+        "intercept": {
+          "beta": -0.758036,
+          "t_stat": -3.968
+        },
+        "log_rv_d": {
+          "beta": 0.53647,
+          "t_stat": 16.561
+        },
+        "log_rv_5d": {
+          "beta": 0.29998,
+          "t_stat": 6.463
+        },
+        "log_rv_22d": {
+          "beta": 0.085912,
+          "t_stat": 2.403
+        }
+      }
+    },
+    "HAR_X_Overnight": {
+      "n_obs": 1251,
+      "R2": 0.7068,
+      "adj_R2": 0.7058,
+      "coefficients": {
+        "intercept": {
+          "beta": -0.76436,
+          "t_stat": -4.011
+        },
+        "log_rv_d": {
+          "beta": 0.523886,
+          "t_stat": 16.055
+        },
+        "log_rv_5d": {
+          "beta": 0.297823,
+          "t_stat": 6.432
+        },
+        "log_rv_22d": {
+          "beta": 0.081969,
+          "t_stat": 2.297
+        },
+        "log_r2_overnight_lag": {
+          "beta": 0.015288,
+          "t_stat": 2.755
+        }
+      }
+    },
+    "HAR_X_Night": {
+      "n_obs": 1247,
+      "R2": 0.7066,
+      "adj_R2": 0.7057,
+      "coefficients": {
+        "intercept": {
+          "beta": -0.746304,
+          "t_stat": -3.884
+        },
+        "log_rv_d": {
+          "beta": 0.555447,
+          "t_stat": 13.998
+        },
+        "log_rv_5d": {
+          "beta": 0.297135,
+          "t_stat": 6.284
+        },
+        "log_rv_22d": {
+          "beta": 0.084435,
+          "t_stat": 2.364
+        },
+        "log_rv_night_lag": {
+          "beta": -0.011945,
+          "t_stat": -0.436
+        }
+      }
+    },
+    "HAR_X_NightRatio": {
+      "n_obs": 1247,
+      "R2": 0.7068,
+      "adj_R2": 0.7059,
+      "coefficients": {
+        "intercept": {
+          "beta": -0.67237,
+          "t_stat": -3.212
+        },
+        "log_rv_d": {
+          "beta": 0.544063,
+          "t_stat": 16.703
+        },
+        "log_rv_5d": {
+          "beta": 0.300097,
+          "t_stat": 6.389
+        },
+        "log_rv_22d": {
+          "beta": 0.083937,
+          "t_stat": 2.352
+        },
+        "night_ratio_lag": {
+          "beta": -0.08322,
+          "t_stat": -0.969
+        }
+      }
+    },
+    "HAR_X_VIX": {
+      "n_obs": 1251,
+      "R2": 0.7315,
+      "adj_R2": 0.7306,
+      "coefficients": {
+        "intercept": {
+          "beta": -5.755833,
+          "t_stat": -11.836
+        },
+        "log_rv_d": {
+          "beta": 0.454192,
+          "t_stat": 14.284
+        },
+        "log_rv_5d": {
+          "beta": 0.240503,
+          "t_stat": 5.389
+        },
+        "log_rv_22d": {
+          "beta": -0.081129,
+          "t_stat": -2.175
+        },
+        "log_vix_lag": {
+          "beta": 0.676448,
+          "t_stat": 11.086
+        }
+      }
+    },
+    "HAR_X_SPY": {
+      "n_obs": 1251,
+      "R2": 0.7152,
+      "adj_R2": 0.7143,
+      "coefficients": {
+        "intercept": {
+          "beta": -1.390352,
+          "t_stat": -6.611
+        },
+        "log_rv_d": {
+          "beta": 0.507081,
+          "t_stat": 15.775
+        },
+        "log_rv_5d": {
+          "beta": 0.26662,
+          "t_stat": 5.809
+        },
+        "log_rv_22d": {
+          "beta": 0.092261,
+          "t_stat": 2.625
+        },
+        "abs_spy_ret_lag": {
+          "beta": 9.901587,
+          "t_stat": 6.678
+        }
+      }
+    },
+    "HAR_X_Cross": {
+      "n_obs": 1247,
+      "R2": 0.7367,
+      "adj_R2": 0.7354,
+      "coefficients": {
+        "intercept": {
+          "beta": -6.161833,
+          "t_stat": -12.221
+        },
+        "log_rv_d": {
+          "beta": 0.541605,
+          "t_stat": 14.355
+        },
+        "log_rv_5d": {
+          "beta": 0.267342,
+          "t_stat": 5.953
+        },
+        "log_rv_22d": {
+          "beta": -0.096724,
+          "t_stat": -2.598
+        },
+        "log_r2_overnight_lag": {
+          "beta": 0.011432,
+          "t_stat": 2.156
+        },
+        "log_rv_night_lag": {
+          "beta": -0.119879,
+          "t_stat": -4.356
+        },
+        "log_vix_lag": {
+          "beta": 0.744393,
+          "t_stat": 11.515
+        }
+      }
+    }
+  },
+  "oos_metrics": {
+    "HAR_baseline": {
+      "n_oos": 835,
+      "QLIKE_mean": 0.119119,
+      "QLIKE_median": 0.035665,
+      "MSE_log": 0.198552,
+      "MSE_level": 3.4e-08,
+      "MAE_level": 4.589e-05,
+      "Spearman_rho": 0.7783,
+      "Spearman_p": 0.0
+    },
+    "HAR_X_Overnight": {
+      "n_oos": 835,
+      "QLIKE_mean": 0.118183,
+      "QLIKE_median": 0.036198,
+      "MSE_log": 0.198261,
+      "MSE_level": 3.37e-08,
+      "MAE_level": 4.574e-05,
+      "Spearman_rho": 0.7766,
+      "Spearman_p": 0.0
+    },
+    "HAR_X_Night": {
+      "n_oos": 835,
+      "QLIKE_mean": 0.119744,
+      "QLIKE_median": 0.036182,
+      "MSE_log": 0.198594,
+      "MSE_level": 3.4e-08,
+      "MAE_level": 4.584e-05,
+      "Spearman_rho": 0.7783,
+      "Spearman_p": 0.0
+    },
+    "HAR_X_NightRatio": {
+      "n_oos": 835,
+      "QLIKE_mean": 0.120482,
+      "QLIKE_median": 0.036201,
+      "MSE_log": 0.198313,
+      "MSE_level": 3.41e-08,
+      "MAE_level": 4.579e-05,
+      "Spearman_rho": 0.7787,
+      "Spearman_p": 0.0
+    },
+    "HAR_X_VIX": {
+      "n_oos": 835,
+      "QLIKE_mean": 0.130015,
+      "QLIKE_median": 0.039708,
+      "MSE_log": 0.20407,
+      "MSE_level": 3.38e-08,
+      "MAE_level": 4.61e-05,
+      "Spearman_rho": 0.7808,
+      "Spearman_p": 0.0
+    },
+    "HAR_X_SPY": {
+      "n_oos": 835,
+      "QLIKE_mean": 0.117832,
+      "QLIKE_median": 0.035664,
+      "MSE_log": 0.192249,
+      "MSE_level": 3e-08,
+      "MAE_level": 4.375e-05,
+      "Spearman_rho": 0.7835,
+      "Spearman_p": 0.0
+    },
+    "HAR_X_Cross": {
+      "n_oos": 835,
+      "QLIKE_mean": 0.134802,
+      "QLIKE_median": 0.042691,
+      "MSE_log": 0.208479,
+      "MSE_level": 3.37e-08,
+      "MAE_level": 4.626e-05,
+      "Spearman_rho": 0.7807,
+      "Spearman_p": 0.0
+    }
+  },
+  "dm_tests_vs_baseline": {
+    "HAR_X_Overnight": {
+      "vs_baseline": "HAR_baseline",
+      "t_stat": -0.8879,
+      "p_value": 0.374874,
+      "significant_Harvey": false,
+      "stars": "",
+      "better": "model",
+      "n_valid": 835
+    },
+    "HAR_X_Night": {
+      "vs_baseline": "HAR_baseline",
+      "t_stat": 2.5752,
+      "p_value": 0.01019,
+      "significant_Harvey": false,
+      "stars": "**",
+      "better": "baseline",
+      "n_valid": 835
+    },
+    "HAR_X_NightRatio": {
+      "vs_baseline": "HAR_baseline",
+      "t_stat": 1.5573,
+      "p_value": 0.119771,
+      "significant_Harvey": false,
+      "stars": "",
+      "better": "baseline",
+      "n_valid": 835
+    },
+    "HAR_X_VIX": {
+      "vs_baseline": "HAR_baseline",
+      "t_stat": 1.7921,
+      "p_value": 0.073475,
+      "significant_Harvey": false,
+      "stars": "",
+      "better": "baseline",
+      "n_valid": 835
+    },
+    "HAR_X_SPY": {
+      "vs_baseline": "HAR_baseline",
+      "t_stat": -0.5141,
+      "p_value": 0.607338,
+      "significant_Harvey": false,
+      "stars": "",
+      "better": "model",
+      "n_valid": 835
+    },
+    "HAR_X_Cross": {
+      "vs_baseline": "HAR_baseline",
+      "t_stat": 2.4163,
+      "p_value": 0.015891,
+      "significant_Harvey": false,
+      "stars": "*",
+      "better": "baseline",
+      "n_valid": 835
+    }
+  },
+  "summary": {
+    "best_model": "HAR_X_SPY",
+    "best_QLIKE": 0.117832,
+    "baseline_QLIKE": 0.119119,
+    "improvement_pct": 1.08,
+    "significant_improvements": [],
+    "k874_comparison": {
+      "k874_joint_sum_QLIKE": 4.528,
+      "k874_har_baseline_QLIKE": 0.119,
+      "k874b_best_QLIKE": 0.117832,
+      "k874b_har_baseline_QLIKE": 0.119119,
+      "log_space_fixed_explosion": true,
+      "note": "K874 level-space additive combination caused QLIKE explosion (4.53 vs 0.119). K874b keeps everything in log-space."
+    }
+  },
+  "charts": [
+    "qlike_comparison.png",
+    "dm_test_comparison.png",
+    "rolling_qlike.png",
+    "spearman_comparison.png"
+  ],
+  "runtime_seconds": 55.3,
+  "references": [
+    "Corsi (2009): HAR-RV model",
+    "Patton (2011): QLIKE proxy-robust loss",
+    "Hansen & Lunde (2005): RV with optimal weighting",
+    "K874: Joint HAR-Overnight (level-space failure)",
+    "K849: HAR-RV crushes GJR (DM t=-11.14)"
+  ]
+}

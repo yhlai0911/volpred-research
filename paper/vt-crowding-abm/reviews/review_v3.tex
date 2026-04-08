@@ -1,0 +1,397 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{array}
+\usepackage{multirow}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\newcommand{\HIGH}{\textbf{\textcolor{errorred}{[HIGH]}}}
+\newcommand{\MED}{\textbf{\textcolor{warncolor}{[MED]}}}
+\newcommand{\LOW}{\textbf{\textcolor{okgreen}{[LOW]}}}
+\newcommand{\FIXED}{\textcolor{okgreen}{\checkmark\ FIXED}}
+\newcommand{\PARTIAL}{\textcolor{warncolor}{$\sim$ PARTIAL}}
+\newcommand{\OPEN}{\textcolor{errorred}{$\times$ OPEN}}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Round~3 Academic Review}\\[0.5em]
+{\large ``When Volatility Targeting Crowds: Quantifying the Tipping Point via Agent-Based Simulation''}\\[0.5em]
+{\normalsize Document type: Working paper (pre-submission)}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Reviewer: Claude Opus 4.6 (1M context)}\\
+{\normalsize Review standard: Strict (JEDC / Journal of Financial Stability level)}\\
+{\normalsize Round~2 reference: \texttt{reviews/review\_v2.tex} (2H + 8M + 5L)}\\
+{\normalsize Source experiment: K827v3 (fixed liquidity, 500 sims)}
+\end{center}
+
+\vspace{1em}
+
+%=================================================================
+\section*{Review Summary}
+%=================================================================
+
+\begin{tabular}{ll}
+\textcolor{errorred}{Serious issues remaining (must fix)} & \textbf{0 items} (was 2) \\
+\textcolor{warncolor}{Moderate issues remaining (should fix)} & 5 items (was 8) \\
+Minor issues remaining (optional fix) & 4 items (was 5) \\
+Overall assessment & \textbf{Minor Revision (improved from Minor--Major)} \\
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{One-paragraph verdict.}
+The revision has addressed both remaining HIGH-severity issues from Round~2: the VIX equation now explicitly defines $\Delta\sigma^{\text{real}}_t \equiv \max(0,\, \hat{\sigma}^{20d}_t - 0.16)$ with a clear narrative explanation of the asymmetry, and the reference list has been expanded from 12 to 13 with the addition of LeBaron (2006) and Danielsson et al.\ (2012)---the two most critical ABM/systemic-risk citations. The ECB bibliography title has been corrected. The ``27 parameter combinations'' language has been replaced throughout with ``9 one-at-a-time (OAT) parameter variations.'' A VT Sharpe ratio definition is now provided in Section~2.4. All numerical values in Tables~1--3 have been verified against the K827v3 experiment JSON: every Sharpe ratio, return, kurtosis, confidence interval, t-statistic, sensitivity value, and market stability metric matches the source data within rounding tolerance. Zero data discrepancies were found. The paper has \textbf{no remaining HIGH-severity issues}. Five MEDIUM issues remain---all are text-only improvements (no new computation needed) that would strengthen the paper for submission to JEDC or Journal of Financial Stability. Four LOW issues are cosmetic.
+
+\bigskip
+
+%=================================================================
+\section*{Part~A: Data Verification}
+%=================================================================
+
+\noindent All numerical values in the manuscript were verified against \texttt{k827v3\_abm\_fixed\_liquidity\_results.json}. The verification covers every number in Tables~1, 2, and~3 plus the in-text statistical tests.
+
+\subsection*{Table~1: VT Strategy and Market Outcomes}
+
+\begin{center}
+\footnotesize
+\begin{tabular}{@{}lccccl@{}}
+\toprule
+$\phi$ & Paper Sharpe & JSON mean & Paper CI & JSON CI & Status \\
+\midrule
+10\% & 0.47 & 0.4675 & [0.44, 0.50] & [0.440, 0.496] & \FIXED \\
+20\% & 0.50 & 0.4956 & [0.47, 0.52] & [0.471, 0.522] & \FIXED \\
+30\% & 0.47 & 0.4664 & [0.44, 0.50] & [0.439, 0.495] & \FIXED \\
+50\% & 0.34 & 0.3357 & [0.31, 0.36] & [0.313, 0.358] & \FIXED \\
+70\% & 0.08 & 0.0844 & [0.07, 0.10] & [0.066, 0.102] & \FIXED \\
+100\% & $-$0.27 & $-$0.2670 & [$-$0.28, $-$0.26] & [$-$0.278, $-$0.256] & \FIXED \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Returns, $\Delta$Sharpe percentages, $\Delta$Vol, kurtosis (with CIs), and flash crash frequencies all verified. Representative checks:
+
+\begin{itemize}[nosep]
+  \item Ret 50\%: Paper 3.46\%, JSON \texttt{vt\_return.mean} = 0.03457 $\to$ 3.46\%. \FIXED
+  \item $\Delta$Sharpe 70\%: Paper $-$82\%, JSON \texttt{degradation\_by\_level.70\%.sharpe\_degradation\_pct} = 81.96\%. \FIXED
+  \item Kurt 100\%: Paper 61.4, JSON 61.35. CI Paper [59.2, 63.4], JSON [59.2, 63.4]. \FIXED
+  \item Flash 70\%: Paper 1.09/yr, JSON 1.087. \FIXED
+\end{itemize}
+
+\subsection*{Table~2: Market Microstructure Effects}
+
+\begin{itemize}[nosep]
+  \item Ann.\ Vol all 7 rows verified (0\%: 16.01\% $\to$ 16.0\%; 100\%: 35.08\% $\to$ 35.1\%). \FIXED
+  \item VIX Mean/Std all verified (e.g., 70\%: JSON mean 27.35, std 3.39 $\to$ Paper 27.4, 3.39). \FIXED
+  \item MDD all 7 rows verified (e.g., 100\%: JSON $-$91.31\% $\to$ Paper $-$91.3\%). \FIXED
+  \item VIX Spike \% all verified (50\%: JSON 0.34\% $\to$ 0.3\%; 70\%: 16.16\% $\to$ 16.2\%; 100\%: 90.02\% $\to$ 90.0\%). \FIXED
+  \item Skewness all verified (70\%: JSON $-$0.321 $\to$ Paper $-$0.321; 100\%: JSON $-$4.73 $\to$ Paper $-$4.73). \FIXED
+\end{itemize}
+
+\subsection*{Table~3: Sensitivity Analysis}
+
+All 27 cells (9 OAT parameter settings $\times$ 3 adoption levels) verified:
+
+\begin{itemize}[nosep]
+  \item $\lambda$: 0.0025/10\%: JSON 0.517 $\to$ Paper 0.52; 0.0075/50\%: JSON 0.227 $\to$ Paper 0.23. \FIXED
+  \item $\gamma$: 100/30\%: JSON 0.511 $\to$ Paper 0.51; 300/50\%: JSON 0.313 $\to$ Paper 0.31. \FIXED
+  \item $\kappa$: 0.015/50\%: JSON 0.319 $\to$ Paper 0.32; 0.045/10\%: JSON 0.510 $\to$ Paper 0.51. \FIXED
+\end{itemize}
+
+\subsection*{Statistical Tests}
+
+\begin{itemize}[nosep]
+  \item 10\% vs.\ 30\%: Paper $t = 0.05$, $p = 0.96$. JSON $t = 0.0505$, $p = 0.960$. \FIXED
+  \item 10\% vs.\ 50\%: Paper $t = 7.12$, $p < 0.001$. JSON $t = 7.125$, $p = 2.0 \times 10^{-12}$. \FIXED
+\end{itemize}
+
+\medskip
+
+\noindent\textbf{Conclusion}: \textcolor{okgreen}{\textbf{Zero data discrepancies found.}} All values in the manuscript match the experiment source data within standard rounding conventions ($\pm 1$ in the last displayed digit). The t-test values are from the correct experiment (K827v3, fixed liquidity).
+
+
+%=================================================================
+\section*{Part~B: Round~2 Issue Resolution Tracker}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{Round~2 Serious Issues (2 $\to$ 0)}}
+
+\begin{enumerate}
+
+%--- H1 ---
+\item \HIGH\ \textbf{H1: VIX equation---$\Delta\sigma^{\text{real}}_t$ undefined, asymmetric $\max(0,\cdot)$ missing.}
+
+\textbf{R2 finding}: Eq.~(2) used $\Delta\sigma^{\text{real}}_t$ without defining it, and the asymmetric response was not shown.
+
+\textbf{R3 status}: \FIXED
+
+The revised text (lines 92--93) now reads: ``$\Delta\sigma^{\text{real}}_t = \max(0,\, \hat{\sigma}^{20d}_t - 0.16)$ is the positive part of the deviation of 20-day realized volatility from the baseline annualized volatility of 16\%.'' This is followed by: ``The asymmetric $\max(0, \cdot)$ ensures that VIX responds to volatility increases but not decreases, capturing the empirical observation that VIX rises faster than it falls.''
+
+This addresses all three Round~1/Round~2 concerns: (a) the formula is now explicit, (b) the asymmetry is stated, and (c) the economic motivation is provided. The equation-text correspondence now matches the code implementation.
+
+\medskip
+
+%--- H3 ---
+\item \HIGH\ \textbf{H3: Missing critical ABM/VT citations.}
+
+\textbf{R2 finding}: Only 12 references. LeBaron (2006), Danielsson et al.\ (2012) not cited.
+
+\textbf{R3 status}: \FIXED\ (with caveats---see M1 below)
+
+Two key citations have been added:
+\begin{itemize}[nosep]
+  \item \textbf{LeBaron (2006)}: Correctly cited as the Handbook of Computational Economics chapter (lines 340--343). Used in Introduction (line 56). Verified: author, title, volume, pages, publisher all correct.
+  \item \textbf{Danielsson et al.\ (2012)}: Correctly cited as the LSE working paper on procyclical leverage (lines 335--338). Used alongside LeBaron in Introduction (line 56). Verified: authors, title, year match the SSRN version.
+\end{itemize}
+
+Reference count is now 13 (up from 12). While still below the ideal 20--25 for a journal spanning four literatures, the two most critical omissions (the ABM survey and the endogenous risk paper) have been filled. The remaining reference gap is downgraded to MEDIUM (M1 below).
+
+\end{enumerate}
+
+\medskip
+
+\subsection*{\textcolor{warncolor}{Round~2 Moderate Issues (8 $\to$ 5)}}
+
+\begin{enumerate}
+
+%--- Former H2 (now M) ---
+\item \MED\ \textbf{H2 $\to$ M: ``27 parameter combinations'' without OAT qualifier.}
+
+\textbf{R2 finding}: Abstract, Section~3.5, and Conclusion still said ``27 parameter combinations'' without clarifying the OAT design.
+
+\textbf{R3 status}: \FIXED
+
+All three locations now read ``9 one-at-a-time (OAT) parameter variations'':
+\begin{itemize}[nosep]
+  \item Abstract (line 36): ``Sensitivity analysis across 9 one-at-a-time (OAT) parameter variations confirms\ldots''
+  \item Section~3.5 (line 191): ``we vary $\lambda$\ldots each by $\pm 50\%$, producing 9 one-at-a-time (OAT) parameter variations tested at\ldots''
+  \item Conclusion (line 269): ``Sensitivity analysis across 9 one-at-a-time (OAT) parameter variations confirms\ldots''
+\end{itemize}
+
+The language is now consistent throughout and accurately describes the design.
+
+\medskip
+
+%--- Former H4 (now M) ---
+\item \MED\ \textbf{H4 $\to$ M: VT Sharpe ratio definition.}
+
+\textbf{R2 finding}: The VT Sharpe ratio was never defined (zero risk-free rate, leverage via $w > 1$, endogeneity not stated).
+
+\textbf{R3 status}: \PARTIAL
+
+Section~2.4 (line 101) now includes a parenthetical definition: ``VT strategy Sharpe ratio (annualized mean excess return over risk-free rate divided by annualized standard deviation of daily returns).'' This is a welcome addition but remains incomplete:
+\begin{itemize}[nosep]
+  \item The risk-free rate being zero in the simulation is not explicitly stated.
+  \item The fact that VT weights can exceed 1.0 (up to the 1.5 cap), implying leverage, is not acknowledged in the Sharpe context.
+  \item The endogeneity at high $\phi$ (VT agents' own trading substantially influences $r_t$) is not discussed.
+\end{itemize}
+
+\textbf{Recommended fix}: Add a footnote to Table~1: ``The risk-free rate is zero in the simulation. VT weights can reach 1.5 (implicit leverage). At high $\phi$, VT trading endogenously affects the market return from which the Sharpe ratio is computed.''
+
+\medskip
+
+%--- M1 ---
+\item \MED\ \textbf{M1 (carry-over + expanded): Reference list and Eq.~(3) pool size.}
+
+\textbf{M1a (Eq.~3 pool size)}: Eq.~(3) at line 185 still uses $\phi \cdot N$ when the actual VT agent count is $\phi \cdot N_{\text{BH+VT}} = \phi \cdot 800$. The 1.5 cap is also omitted. Since this equation is for intuition, a footnote clarifying ``$N$ here refers to $N_{\text{BH+VT}} = 800$; the position cap is omitted for clarity'' would suffice.
+
+\textbf{M1b (Reference count)}: With 13 references (up from 12), the bibliography is substantially stronger but still lean. Two recommended citations from Round~1 remain absent:
+\begin{itemize}[nosep]
+  \item Cederburg et al.\ (2020, \emph{JFE})---the most comprehensive OOS test of volatility-managed portfolios.
+  \item Farmer \& Foley (2009, \emph{Nature})---the canonical advocacy for ABM in economics, widely expected by reviewers of any ABM paper.
+\end{itemize}
+Additional candidates: Hommes (2006, heterogeneous agent survey), Kinlaw et al.\ (2019, crowding measures), Thurner et al.\ (2012, leverage and ABM). Target $\geq 18$--20 references for comfortable journal submission.
+
+\medskip
+
+%--- M4 ---
+\item \MED\ \textbf{M4: Exogenous $\lambda$ bias direction not discussed.}
+
+\textbf{R3 status}: \OPEN
+
+The Limitations section (lines 248--250) discusses exogenous $\lambda$ and mentions that ``liquidity evaporates during stress as market makers widen spreads, which would amplify the feedback loop and potentially lower the tipping point.'' This is directionally correct but hedges with ``potentially.'' The direction of the bias is theoretically unambiguous: a stress-responsive $\lambda$ would make the feedback loop more severe.
+
+\textbf{Recommended fix}: Change ``potentially lower the tipping point'' to ``would likely lower the tipping point, making the 50--70\% threshold reported here an upper bound.''
+
+\medskip
+
+%--- M8 ---
+\item \MED\ \textbf{M8: ``Below 5\%'' current VT adoption claim has no source.}
+
+\textbf{R3 status}: \OPEN
+
+The abstract (line 36) says ``estimated below 5\%'' and the Discussion (line 240) says ``current levels below 5\%,'' but neither provides a citation or derivation. This claim is central to the paper's ``safe for now'' conclusion.
+
+\textbf{Recommended fix}: Add a footnote: ``Based on Cole (2017), short-volatility and vol-sensitive strategies manage approximately USD~2 trillion against a global equity market capitalization of roughly USD~100 trillion, implying an adoption rate of approximately 2\%.''
+
+\end{enumerate}
+
+\medskip
+
+\noindent\textbf{Three R2 MEDIUMs reassessed and downgraded to LOW:}
+
+\begin{itemize}
+  \item \textbf{M6 (convergence analysis)}: Downgraded to LOW. With 500 simulations and tight bootstrap CIs (e.g., Sharpe at 50\%: [0.31, 0.36]), convergence is de facto demonstrated. A formal convergence plot would strengthen the appendix but is not a submission blocker.
+  \item \textbf{M7 (paired/unpaired t-test)}: Downgraded to LOW. The Welch $t$-test is stated; the ``different random seeds'' detail is implicit from ``500 independent Monte Carlo simulations'' (line 101). One sentence clarifying ``unpaired (independent seeds per adoption level)'' would be ideal but is minor.
+  \item \textbf{M10 (no figures)}: Downgraded to LOW. The paper remains all-tables with no figures, which is uncommon but acceptable for a short-form (FRL-length) paper. A Sharpe-vs-$\phi$ curve with bootstrap CIs would be the single most impactful addition, but is not required for submission.
+\end{itemize}
+
+
+\subsection*{Round~2 Minor Issues (5)}
+
+\begin{enumerate}
+
+\item \LOW\ \textbf{H5 $\to$ L: Perchet cite key \texttt{perchet2016} vs.\ bib year 2015.}
+
+\textbf{R3 status}: \OPEN---cosmetic only. Compiled output shows ``(Perchet et al., 2015)'' correctly.
+
+\item \LOW\ \textbf{L1: Noise trader initial weight and boundary.}
+
+\textbf{R3 status}: \OPEN---not addressed, minor.
+
+\item \LOW\ \textbf{L2: $N(0,\sigma_f)$ should be $\mathcal{N}(0,\sigma_f^2)$.}
+
+\textbf{R3 status}: \OPEN---Eq.~(1) still uses $N(0, \sigma_f)$ which could be confused with agent count $N$ and should use $\sigma_f^2$ for a variance parameterization.
+
+\item \LOW\ \textbf{L6: Phrasing (``striking,'' ``economically intuitive'').}
+
+\textbf{R3 status}: \OPEN---still present (lines 142, 224). Minor style preference.
+
+\item \LOW\ \textbf{L8: Replication materials ``upon request.''}
+
+\textbf{R3 status}: \OPEN---no public repository. Increasingly expected by journals.
+
+\end{enumerate}
+
+
+%=================================================================
+\section*{Part~C: New Issues Found in Round~3}
+%=================================================================
+
+No new substantive issues were identified in this round. The following is a minor observation:
+
+\LOW\ \textbf{N1: Danielsson et al.\ citation context---not strictly ABM.}
+
+Line 56 groups Danielsson et al.\ (2012) with LeBaron (2006) under ``ABMs have proven effective for studying feedback-driven market dynamics.'' Danielsson et al.\ uses an analytical equilibrium model, not an ABM. The sentence is defensible since it speaks of ``feedback-driven market dynamics'' broadly, and the ABM qualifier applies primarily to LeBaron. A careful ABM specialist might note the imprecision. The citation check report (v3) suggests an optional rephrase to separate the ABM reference from the analytical model reference. This is purely optional and unlikely to be flagged by a reviewer.
+
+
+%=================================================================
+\section*{Consolidated Issue List (Round~3)}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{Serious Issues: 0}}
+
+\noindent\textbf{None.} All HIGH issues from Rounds~1--2 have been resolved.
+
+\subsection*{\textcolor{warncolor}{Moderate Issues (5)}}
+
+\begin{enumerate}
+  \item \MED\ \textbf{H4 $\to$ M (carry-over)}: VT Sharpe definition incomplete---zero $r_f$, leverage, endogeneity not stated. One footnote.
+  \item \MED\ \textbf{M1a (carry-over)}: Sell pressure Eq.~(3) uses $N$ instead of $N_{\text{BH+VT}} = 800$; omits 1.5 cap. One footnote.
+  \item \MED\ \textbf{M1b (carry-over)}: Reference count still lean (13). Missing Cederburg et al.\ (2020) and Farmer \& Foley (2009). Target $\geq 18$.
+  \item \MED\ \textbf{M4 (carry-over)}: Exogenous $\lambda$ bias direction---``potentially lower'' should be ``would likely lower.'' One word change.
+  \item \MED\ \textbf{M8 (carry-over)}: ``Below 5\%'' adoption claim has no source. One footnote or citation.
+\end{enumerate}
+
+\subsection*{Minor Issues (4)}
+
+\begin{enumerate}
+  \item \LOW\ \textbf{L2}: $N(0,\sigma_f)$ in Eq.~(1) should be $\mathcal{N}(0,\sigma_f^2)$.
+  \item \LOW\ \textbf{L-cite}: Perchet cite key cosmetic (\texttt{perchet2016} vs.\ 2015); Danielsson citation context.
+  \item \LOW\ \textbf{L6}: Minor phrasing (``striking,'' ``economically intuitive'').
+  \item \LOW\ \textbf{L8}: Replication package should be public (Zenodo/GitHub).
+\end{enumerate}
+
+
+%=================================================================
+\section*{Resolution Summary Table}
+%=================================================================
+
+{
+\footnotesize
+\begin{longtable}{@{}p{1.2cm}p{1.2cm}p{4.5cm}p{1.5cm}p{3.5cm}@{}}
+\toprule
+\textbf{R2 ID} & \textbf{R2 Sev.} & \textbf{Issue} & \textbf{Status} & \textbf{R3 Severity} \\
+\midrule
+\endhead
+H1 & HIGH & VIX eq.\ $\Delta\sigma$ undefined + asymmetry & \FIXED & --- (resolved) \\
+H3 & HIGH & Missing ABM/VT citations & \FIXED & \textcolor{warncolor}{MED} (partial: 13 refs, need $\geq$18) \\
+\midrule
+H2$\to$M & MED & ``27 combinations'' $\to$ OAT & \FIXED & --- (resolved) \\
+H4$\to$M & MED & VT Sharpe undefined & \PARTIAL & \textcolor{warncolor}{MED} (definition added, details missing) \\
+M1 & MED & Sell pressure eq: $N$ and cap & \OPEN & \textcolor{warncolor}{MED} \\
+M4 & MED & $\lambda$ bias direction & \OPEN & \textcolor{warncolor}{MED} \\
+M6 & MED & No convergence analysis & \OPEN & \textcolor{okgreen}{LOW} $\downarrow$ (de facto shown by tight CIs) \\
+M7 & MED & Paired/unpaired not stated & \OPEN & \textcolor{okgreen}{LOW} $\downarrow$ (implicit from ``independent'') \\
+M8 & MED & 5\% adoption unsourced & \OPEN & \textcolor{warncolor}{MED} \\
+N1 & MED & ECB title wrong & \FIXED & --- (resolved) \\
+M10 & MED & No figures & \OPEN & \textcolor{okgreen}{LOW} $\downarrow$ (acceptable for FRL-length) \\
+\midrule
+H5$\to$L & LOW & Perchet cite key & \OPEN & \textcolor{okgreen}{LOW} (cosmetic) \\
+L1 & LOW & Noise trader initial wt & \OPEN & Closed (below threshold) \\
+L2 & LOW & $N$ vs.\ $\mathcal{N}$ notation & \OPEN & \textcolor{okgreen}{LOW} \\
+L6 & LOW & Phrasing & \OPEN & \textcolor{okgreen}{LOW} \\
+L8 & LOW & Replication package & \OPEN & \textcolor{okgreen}{LOW} \\
+\midrule
+N1 (R3) & --- & Danielsson not ABM & --- & \textcolor{okgreen}{LOW} \\
+\bottomrule
+\end{longtable}
+}
+
+
+%=================================================================
+\section*{Revision Priority for Final Polish}
+%=================================================================
+
+All five remaining MEDIUMs are text-only changes requiring no new computation:
+
+\begin{enumerate}
+  \item \textbf{Sharpe footnote} (H4$\to$M): Add to Table~1 footnotes: ``The risk-free rate is zero. VT weights up to 1.5 imply leverage. At high $\phi$, VT trading endogenously affects $r_t$.'' [1 sentence]
+  \item \textbf{Eq.~(3) footnote} (M1a): Add: ``$N$ here denotes $N_{\text{BH+VT}} = 800$; the 1.5 weight cap is omitted for clarity.'' [1 sentence]
+  \item \textbf{Add 5+ references} (M1b): Cederburg et al.\ (2020, JFE), Farmer \& Foley (2009, Nature), plus 3 optional (Hommes 2006, Kinlaw et al.\ 2019, Thurner et al.\ 2012). [Bibliography only]
+  \item \textbf{Strengthen $\lambda$ bias} (M4): Change ``potentially lower the tipping point'' to ``would likely lower the tipping point, making the 50--70\% threshold an upper bound.'' [2 words]
+  \item \textbf{Source the 5\% claim} (M8): Add footnote deriving from Cole (2017): \$2T / \$100T $\approx$ 2\%. [1 footnote]
+\end{enumerate}
+
+\noindent Estimated effort: 30--60 minutes of editing. No re-running of simulations.
+
+
+%=================================================================
+\section*{Overall Assessment}
+%=================================================================
+
+\textbf{Verdict: Minor Revision}
+
+The paper has progressed substantially across three review rounds:
+\begin{itemize}[nosep]
+  \item \textbf{Round~1}: 5 HIGH + 9 MED + 8 LOW = 22 issues. Verdict: Major Revision.
+  \item \textbf{Round~2}: 2 HIGH + 8 MED + 5 LOW = 15 issues. Verdict: Minor--Major.
+  \item \textbf{Round~3}: \textbf{0 HIGH} + 5 MED + 4 LOW = 9 issues. Verdict: \textbf{Minor Revision}.
+\end{itemize}
+
+\noindent The core scientific contribution---a quantitative VT crowding tipping point via ABM---is sound, well-documented, and now accurately represented in the text. The K827v3 data have been exhaustively verified with zero discrepancies. The model specification matches the code. The sensitivity analysis is correctly described. The citations are clean (13/13 one-to-one match, zero orphans, zero phantoms).
+
+\medskip
+
+\noindent The five remaining MEDIUMs are all minor exposition improvements that can be completed in a single editing pass. None of them cast doubt on the results, methodology, or conclusions. With these fixes applied, the paper is ready for submission to \emph{Journal of Economic Dynamics and Control}, \emph{Journal of Financial Stability}, or \emph{Finance Research Letters}.
+
+\medskip
+
+\noindent\textbf{No further review rounds are needed} unless new content (figures, references, or text revisions beyond the five items above) is added.
+
+\end{document}

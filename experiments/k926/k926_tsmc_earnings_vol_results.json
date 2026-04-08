@@ -1,0 +1,207 @@
+{
+  "experiment_id": "K926",
+  "title": "TSMC Earnings/Revenue Announcement Volatility on 0050.TW",
+  "timestamp": "2026-04-06T04:45:57.320794+00:00",
+  "data_source": {
+    "etf": "0050.TW (yfinance)",
+    "stock": "2330.TW (yfinance)",
+    "period": "2014-01-02 to 2026-04-02",
+    "n_trading_days": 2982
+  },
+  "event_counts": {
+    "quarterly_earnings": 46,
+    "monthly_revenue_total": 135,
+    "monthly_revenue_excl_overlap": 113
+  },
+  "event_day_analysis": {
+    "quarterly_earnings_vs_non_event": {
+      "n_event": 91,
+      "n_non_event": 2664,
+      "mean_event_abs_ret": 0.009144793047819318,
+      "mean_non_event_abs_ret": 0.00789158360268068,
+      "ratio": 1.1588032907251895,
+      "t_stat": 1.3194520778295984,
+      "p_value": 0.19018009074140188,
+      "cohens_d": 0.1460394719638195,
+      "significant_5pct": false
+    },
+    "monthly_revenue_vs_non_event": {
+      "n_event": 226,
+      "n_non_event": 2664,
+      "mean_event_abs_ret": 0.00975028655076571,
+      "mean_non_event_abs_ret": 0.00789158360268068,
+      "ratio": 1.2355297797838256,
+      "t_stat": 2.4089548759094326,
+      "p_value": 0.01673587101899245,
+      "cohens_d": 0.18760834856258493,
+      "significant_5pct": true
+    },
+    "all_tsmc_events_vs_non_event": {
+      "n_event": 317,
+      "n_non_event": 2664,
+      "mean_event_abs_ret": 0.009576469803863117,
+      "mean_non_event_abs_ret": 0.00789158360268068,
+      "ratio": 1.213504194596646,
+      "t_stat": 2.7097972791332974,
+      "p_value": 0.007052987936071247,
+      "cohens_d": 0.17661739898724882,
+      "significant_5pct": true
+    }
+  },
+  "tsmc_own_event_analysis": {
+    "tsmc_earnings": {
+      "n_event": 91,
+      "n_non_event": 2663,
+      "mean_event_abs_ret": 0.018251103384244995,
+      "mean_non_event_abs_ret": 0.011880651429590185,
+      "ratio": 1.5362039272348682,
+      "t_stat": 3.6643272238836944,
+      "p_value": 0.0004127923665024558,
+      "cohens_d": 0.455515747677904,
+      "significant_5pct": true
+    },
+    "tsmc_revenue": {
+      "n_event": 226,
+      "n_non_event": 2663,
+      "mean_event_abs_ret": 0.014151597760019985,
+      "mean_non_event_abs_ret": 0.011880651429590185,
+      "ratio": 1.1911466171605485,
+      "t_stat": 2.4353064310989385,
+      "p_value": 0.015578314927946398,
+      "cohens_d": 0.18342791817804796,
+      "significant_5pct": true
+    }
+  },
+  "tsmc_to_0050_transmission": {
+    "overall_beta": 0.6162896110765885,
+    "overall_corr": 0.8794067426019058,
+    "earnings_beta": 0.4554378237739654,
+    "earnings_corr": 0.8607134396349267,
+    "revenue_beta": 0.7041714529173295,
+    "revenue_corr": 0.9159486114551176,
+    "non_event_beta": 0.6190959578718243,
+    "non_event_corr": 0.8781516624184289,
+    "beta_diff_earnings_vs_non": {
+      "mean": -0.16600291911243448,
+      "ci_95": [
+        -0.2521187670509133,
+        -0.08065547648634586
+      ],
+      "significant": true
+    }
+  },
+  "directional_analysis": {
+    "n_total": 46,
+    "n_positive": 27,
+    "n_negative": 18,
+    "pct_positive": 58.69565217391305,
+    "mean_return_pct": 0.1498816874550639,
+    "binomial_p_value": 0.3019956131896606
+  },
+  "pre_post_event_drift": {
+    "pre_event_car_mean_pct": 0.9488695308833397,
+    "pre_event_t_stat": 2.253815265117311,
+    "pre_event_p_value": 0.029240012790308138,
+    "post_event_car_mean_pct": 0.3343739064125282,
+    "post_event_t_stat": 0.8793763609763964,
+    "post_event_p_value": 0.38397476835863237
+  },
+  "yearly_analysis": [
+    {
+      "year": 2015,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.007150889693530935,
+      "mean_non_abs_ret": 0.007808044987209618,
+      "ratio": 0.9158361286653481
+    },
+    {
+      "year": 2016,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.004331468514641945,
+      "mean_non_abs_ret": 0.0068176999656686735,
+      "ratio": 0.6353269484508797
+    },
+    {
+      "year": 2017,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.006436628554304061,
+      "mean_non_abs_ret": 0.004482228391777851,
+      "ratio": 1.4360331495180698
+    },
+    {
+      "year": 2018,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.010433955323044086,
+      "mean_non_abs_ret": 0.006854712499629179,
+      "ratio": 1.5221579787056765
+    },
+    {
+      "year": 2019,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.002918585441189628,
+      "mean_non_abs_ret": 0.005979670551501297,
+      "ratio": 0.4880846555094691
+    },
+    {
+      "year": 2020,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.009148307334969283,
+      "mean_non_abs_ret": 0.010363137658652157,
+      "ratio": 0.882773889173554
+    },
+    {
+      "year": 2021,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.009254332761496203,
+      "mean_non_abs_ret": 0.007910710358334499,
+      "ratio": 1.1698485145200774
+    },
+    {
+      "year": 2022,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.010572653491059611,
+      "mean_non_abs_ret": 0.010444687096512247,
+      "ratio": 1.012251816963487
+    },
+    {
+      "year": 2023,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.005727605109620795,
+      "mean_non_abs_ret": 0.006590308673516999,
+      "ratio": 0.8690951203298022
+    },
+    {
+      "year": 2024,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.021282000549152608,
+      "mean_non_abs_ret": 0.010466953856276237,
+      "ratio": 2.033256364877486
+    },
+    {
+      "year": 2025,
+      "n_earnings_days": 8,
+      "mean_earn_abs_ret": 0.011715280805800726,
+      "mean_non_abs_ret": 0.010010288194922645,
+      "ratio": 1.1703240284073817
+    },
+    {
+      "year": 2026,
+      "n_earnings_days": 3,
+      "mean_earn_abs_ret": 0.013467502240359641,
+      "mean_non_abs_ret": 0.013743378523320107,
+      "ratio": 0.9799266037464986
+    }
+  ],
+  "key_findings": "TSMC earnings/revenue event study on 0050.TW (2014-2026, 46 earnings + 113 revenue events). Quarterly earnings: |return| ratio 1.16x vs non-event (not significant, t=1.32, p=0.1902, Cohen's d=0.146). Monthly revenue: ratio 1.24x (significant, t=2.41, p=0.0167). TSMC→0050 beta: earnings days 0.46 vs non-event 0.62 (diff significant, 95% CI [-0.25, -0.08]). Directional: 59% positive on earnings days (binomial p=0.302). Pre-event CAR [-5,-1]: 0.949% (p=0.029), post-event CAR [0,+4]: 0.334% (p=0.384). TSMC itself: earnings |return| 1.54x (significant).",
+  "limitations": [
+    "Earnings dates are manually compiled; some may differ from actual announcement",
+    "Monthly revenue dates approximated as 10th (may vary by 1-2 days)",
+    "Event window overlap may occur between consecutive months",
+    "0050.TW weight of TSMC has changed over time (from ~25% to ~50%+)",
+    "No control for concurrent macro events (e.g., Fed decisions, US earnings)"
+  ],
+  "references": [
+    "MacKinlay (1997) Event studies in economics and finance, JEL",
+    "Patell & Wolfson (1984) The intraday speed of adjustment"
+  ]
+}

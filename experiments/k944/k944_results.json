@@ -1,0 +1,192 @@
+{
+  "experiment_id": "K944",
+  "title": "KAN-Inspired Nonlinear Vol Prediction (BSpline Basis + GBR)",
+  "timestamp": "2026-04-06T20:13:08.253961",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "period": "2004-02-02 ~ 2025-12-31",
+  "oos_period": "2016-01-04 ~ 2025-12-31",
+  "n_oos": 2514,
+  "n_refits": 40,
+  "refit_every": 63,
+  "window_type": "expanding (from 2004)",
+  "seed": 42,
+  "models": {
+    "traditional": [
+      "GARCH(1,1)",
+      "GJR(1,1,1)",
+      "MF-GJR(VIX)"
+    ],
+    "ml": [
+      "BSpline-Ridge (KAN proxy)",
+      "BSpline-GBR",
+      "GBR",
+      "RF"
+    ]
+  },
+  "kan_implementation_note": "pykan 0.0.5 installed in Python 3.9 (anaconda) but experiment runs on Python 3.12. KAN concept implemented via sklearn SplineTransformer (B-spline basis expansion) + Ridge/GBR. This captures the key KAN idea: learnable per-feature nonlinearity via B-spline basis.",
+  "features": [
+    "garch_var",
+    "log_VIX",
+    "r2",
+    "abs_r",
+    "range_yz",
+    "rolling_var_20"
+  ],
+  "bspline_config": {
+    "n_knots": 5,
+    "degree": 3,
+    "n_basis_per_feature": 6,
+    "total_spline_features": 36
+  },
+  "ml_config": {
+    "BSpline-Ridge": {
+      "alpha": 1.0,
+      "n_spline_features": 36
+    },
+    "BSpline-GBR": {
+      "n_estimators": 100,
+      "max_depth": 3,
+      "lr": 0.05,
+      "min_samples_leaf": 20
+    },
+    "GBR": {
+      "n_estimators": 100,
+      "max_depth": 3,
+      "lr": 0.05,
+      "min_samples_leaf": 20
+    },
+    "RF": {
+      "n_estimators": 100,
+      "max_depth": 5,
+      "min_samples_leaf": 10
+    }
+  },
+  "results": {
+    "qlike": {
+      "GARCH(1,1)": 1.5813,
+      "GJR(1,1,1)": 1.5459,
+      "MF-GJR(VIX)": 1.3848,
+      "BSpline-Ridge": 3.4529,
+      "BSpline-GBR": 1.6686,
+      "GBR": 2.7063,
+      "RF": 1.4977
+    },
+    "mse": {
+      "GARCH(1,1)": 2.1500552328671118e-07,
+      "GJR(1,1,1)": 2.0941966883242369e-07,
+      "MF-GJR(VIX)": 1.8499286066068463e-07,
+      "BSpline-Ridge": 2.420647980333079e-07,
+      "BSpline-GBR": 2.116207491526702e-07,
+      "GBR": 1.992817965978048e-07,
+      "RF": 2.0053009447522713e-07
+    },
+    "spearman_rho": {
+      "GARCH(1,1)": 0.3833,
+      "GJR(1,1,1)": 0.4177,
+      "MF-GJR(VIX)": 0.4781,
+      "BSpline-Ridge": 0.4441,
+      "BSpline-GBR": 0.3921,
+      "GBR": 0.4193,
+      "RF": 0.4362
+    }
+  },
+  "dm_tests_vs_mfgjr": {
+    "GARCH(1,1)": {
+      "dm_stat": -8.745,
+      "dm_pval": 0.0,
+      "significant_harvey": true,
+      "winner": "MF-GJR(VIX)"
+    },
+    "GJR(1,1,1)": {
+      "dm_stat": -7.0551,
+      "dm_pval": 0.0,
+      "significant_harvey": true,
+      "winner": "MF-GJR(VIX)"
+    },
+    "BSpline-Ridge": {
+      "dm_stat": -10.8647,
+      "dm_pval": 0.0,
+      "significant_harvey": true,
+      "winner": "MF-GJR(VIX)"
+    },
+    "BSpline-GBR": {
+      "dm_stat": -3.6997,
+      "dm_pval": 0.000221,
+      "significant_harvey": true,
+      "winner": "MF-GJR(VIX)"
+    },
+    "GBR": {
+      "dm_stat": -1.1559,
+      "dm_pval": 0.247825,
+      "significant_harvey": false,
+      "winner": "MF-GJR(VIX)"
+    },
+    "RF": {
+      "dm_stat": -6.9097,
+      "dm_pval": 0.0,
+      "significant_harvey": true,
+      "winner": "MF-GJR(VIX)"
+    }
+  },
+  "pairwise_dm": {
+    "BSpline-Ridge_vs_RF": {
+      "dm_stat": 10.6404,
+      "dm_pval": 0.0
+    },
+    "BSpline-Ridge_vs_GBR": {
+      "dm_stat": 0.6365,
+      "dm_pval": 0.524539
+    },
+    "BSpline-GBR_vs_RF": {
+      "dm_stat": 2.492,
+      "dm_pval": 0.012766
+    },
+    "BSpline-GBR_vs_GBR": {
+      "dm_stat": -0.9087,
+      "dm_pval": 0.363599
+    },
+    "GBR_vs_RF": {
+      "dm_stat": 1.0565,
+      "dm_pval": 0.290821
+    }
+  },
+  "feature_importance": {
+    "BSpline-Ridge": {
+      "garch_var": 0.2005,
+      "log_VIX": 0.3003,
+      "r2": 0.0706,
+      "abs_r": 0.1155,
+      "range_yz": 0.2056,
+      "rolling_var_20": 0.1075
+    },
+    "GBR": {
+      "garch_var": 0.1357,
+      "log_VIX": 0.5015,
+      "r2": 0.0394,
+      "abs_r": 0.0362,
+      "range_yz": 0.1617,
+      "rolling_var_20": 0.1255
+    },
+    "RF": {
+      "garch_var": 0.0571,
+      "log_VIX": 0.635,
+      "r2": 0.0336,
+      "abs_r": 0.0222,
+      "range_yz": 0.1467,
+      "rolling_var_20": 0.1054
+    }
+  },
+  "conclusion": "Best ML model: RF (QLIKE=1.4977). MF-GJR(VIX) QLIKE=1.3848. MF-GJR(VIX) still dominant. KAN-style nonlinear methods do not improve over parametric models for daily vol prediction.",
+  "hypotheses": {
+    "H1": "BSpline-Ridge (KAN proxy) captures nonlinearities missed by MF-GJR \u2192 beats in QLIKE",
+    "H2": "ML approx MF-GJR \u2192 parametric structure already sufficient",
+    "H3": "ML < GARCH \u2192 overfitting on daily SNR"
+  },
+  "references": [
+    "Liu et al. (2024) KAN: Kolmogorov-Arnold Networks, arXiv:2404.19756",
+    "Patton (2011) Volatility Forecast Comparison Using Imperfect Volatility Proxies, JoE",
+    "Harvey et al. (2016) Tests for Forecast Encompassing",
+    "Christensen et al. (2023) A Machine Learning Approach to Volatility Forecasting",
+    "Bucci (2020) Realized Volatility Forecasting with Neural Networks, JIMF"
+  ]
+}

@@ -1,0 +1,461 @@
+{
+  "experiment_id": "K938",
+  "title": "Yang-Zhang CARR Cross-Asset Validation",
+  "date": "2026-04-06 17:22:59",
+  "data_source": "yfinance",
+  "oos_start": "2016-01-01",
+  "refit_every": 21,
+  "references": [
+    "Parkinson (1980) JoB",
+    "Yang & Zhang (2000) JoB",
+    "Chou (2005) JFE",
+    "Patton (2011) J. Econometrics 160"
+  ],
+  "assets": {
+    "SPY": {
+      "asset_info": {
+        "name": "S&P 500 ETF",
+        "start": "2004-01-01",
+        "window": 2000
+      },
+      "n_total": 5534,
+      "n_oos": "2514",
+      "oos_start": "2016-01-01",
+      "gap_analysis": {
+        "gap_ratio": 0.3593546408759084,
+        "var_overnight": 5.029317945022198e-05,
+        "var_total": 0.000139954167080283,
+        "mean_abs_overnight": 0.00435525323472282,
+        "mean_abs_total": 0.00758727986959473
+      },
+      "evaluations": {
+        "GARCH": {
+          "qlike": 1.60089346464291,
+          "spearman_rho": 0.3806239877719883,
+          "spearman_p": 1.7774663239290833e-87
+        },
+        "GJR": {
+          "qlike": 1.5578244646851918,
+          "spearman_rho": 0.40787261703624555,
+          "spearman_p": 2.1852773610960744e-101
+        },
+        "CARR_Parkinson": {
+          "qlike": 1.7001283993266023,
+          "spearman_rho": 0.4311163122143133,
+          "spearman_p": 2.533644747149385e-114
+        },
+        "CARR_YZ": {
+          "qlike": 1.54469721412552,
+          "spearman_rho": 0.41893461833337137,
+          "spearman_p": 2.0431043180566948e-107
+        }
+      },
+      "dm_tests": {
+        "CARR_YZ_vs_GARCH": {
+          "dm_t": 3.1642557129693105,
+          "dm_p": 0.0015733848030798914,
+          "yz_better": true,
+          "significant_harvey": true
+        },
+        "CARR_YZ_vs_GJR": {
+          "dm_t": 0.7236550824538663,
+          "dm_p": 0.4693448696958229,
+          "yz_better": true,
+          "significant_harvey": false
+        },
+        "CARR_YZ_vs_CARR_Parkinson": {
+          "dm_t": 3.4721625258238884,
+          "dm_p": 0.0005250030711305698,
+          "yz_better": true,
+          "significant_harvey": true
+        },
+        "GJR_vs_GARCH": {
+          "dm_t": 3.361489915680847,
+          "dm_p": 0.000786830423042062,
+          "gjr_better": true,
+          "significant_harvey": true
+        }
+      },
+      "yz_improvement_pct": 9.142320383721989,
+      "model_params": {
+        "GARCH": {
+          "omega": 3.017324018028085e-06,
+          "alpha": 0.08094183946190373,
+          "beta": 0.8868283168983389,
+          "persistence": 0.9677701563602426,
+          "converged": true,
+          "loglik": 6372.453893177268
+        },
+        "GJR": {
+          "omega": 4.917483276278024e-06,
+          "alpha": 0.03070065915863645,
+          "gamma": 0.23789445784206098,
+          "beta": 0.8185899552037745,
+          "persistence": 0.9682378432834415,
+          "converged": true,
+          "loglik": 6428.811810124825
+        },
+        "CARR_Parkinson": {
+          "omega": 1.6729279953093393e-06,
+          "alpha": 0.10242339071193582,
+          "beta": 0.8633286218166616,
+          "persistence": 0.9657520125285974,
+          "converged": true,
+          "loglik": 17397.863400457027
+        },
+        "CARR_YZ": {
+          "omega": 2.5635457600215825e-06,
+          "alpha": 0.10304501413591514,
+          "beta": 0.8667474521043023,
+          "persistence": 0.9697924662402174,
+          "converged": true,
+          "loglik": 16336.445908639545
+        }
+      }
+    },
+    "GLD": {
+      "asset_info": {
+        "name": "Gold ETF",
+        "start": "2004-11-18",
+        "window": 2000
+      },
+      "n_total": 5312,
+      "n_oos": "2514",
+      "oos_start": "2016-01-01",
+      "gap_analysis": {
+        "gap_ratio": 0.49720978142416256,
+        "var_overnight": 6.161982974319744e-05,
+        "var_total": 0.00012393125003836247,
+        "mean_abs_overnight": 0.005593846337107805,
+        "mean_abs_total": 0.007895008882894594
+      },
+      "evaluations": {
+        "GARCH": {
+          "qlike": 1.472870401310807,
+          "spearman_rho": 0.19811558649188785,
+          "spearman_p": 1.1471323727875691e-23
+        },
+        "GJR": {
+          "qlike": 1.4918515962126317,
+          "spearman_rho": 0.15915959387400816,
+          "spearman_p": 9.949338869716003e-16
+        },
+        "CARR_Parkinson": {
+          "qlike": 2.0058816016435963,
+          "spearman_rho": 0.20977787942883963,
+          "spearman_p": 2.126711575263037e-26
+        },
+        "CARR_YZ": {
+          "qlike": 1.4545401841858492,
+          "spearman_rho": 0.20838962996570962,
+          "spearman_p": 4.5885647252163624e-26
+        }
+      },
+      "dm_tests": {
+        "CARR_YZ_vs_GARCH": {
+          "dm_t": 2.2431159843974675,
+          "dm_p": 0.024976150019485388,
+          "yz_better": true,
+          "significant_harvey": false
+        },
+        "CARR_YZ_vs_GJR": {
+          "dm_t": 3.4887498361151064,
+          "dm_p": 0.000493628806414792,
+          "yz_better": true,
+          "significant_harvey": true
+        },
+        "CARR_YZ_vs_CARR_Parkinson": {
+          "dm_t": 8.645776549570394,
+          "dm_p": 0.0,
+          "yz_better": true,
+          "significant_harvey": true
+        },
+        "GJR_vs_GARCH": {
+          "dm_t": -2.6808405478790593,
+          "dm_p": 0.007391732983885513,
+          "gjr_better": false,
+          "significant_harvey": false
+        }
+      },
+      "yz_improvement_pct": 27.486239317713686,
+      "model_params": {
+        "GARCH": {
+          "omega": 3.3306249186613492e-06,
+          "alpha": 0.08028673033859766,
+          "beta": 0.8820787911552377,
+          "persistence": 0.9623655214938354,
+          "converged": true,
+          "loglik": 6559.171825106344
+        },
+        "GJR": {
+          "omega": 7.566285526742235e-06,
+          "alpha": 0.11432474786145398,
+          "gamma": 0.08205856402953945,
+          "beta": 0.7759396731598907,
+          "persistence": 0.9312937030361144,
+          "converged": true,
+          "loglik": 6543.277794427029
+        },
+        "CARR_Parkinson": {
+          "omega": 8.435158895696331e-07,
+          "alpha": 0.10409732570121313,
+          "beta": 0.8725352934817316,
+          "persistence": 0.9766326191829448,
+          "converged": true,
+          "loglik": 18655.569997387858
+        },
+        "CARR_YZ": {
+          "omega": 2.724952784482604e-06,
+          "alpha": 0.10286522730714512,
+          "beta": 0.8657587506768715,
+          "persistence": 0.9686239779840166,
+          "converged": true,
+          "loglik": 16816.487432213566
+        }
+      }
+    },
+    "QQQ": {
+      "asset_info": {
+        "name": "Nasdaq 100 ETF",
+        "start": "2004-01-01",
+        "window": 2000
+      },
+      "n_total": 5534,
+      "n_oos": "2514",
+      "oos_start": "2016-01-01",
+      "gap_analysis": {
+        "gap_ratio": 0.3297572222718633,
+        "var_overnight": 6.033569515793628e-05,
+        "var_total": 0.0001829700491235744,
+        "mean_abs_overnight": 0.005061789800352709,
+        "mean_abs_total": 0.009331655379700026
+      },
+      "evaluations": {
+        "GARCH": {
+          "qlike": 1.5680509617087879,
+          "spearman_rho": 0.36010613115499734,
+          "spearman_p": 7.644047611443782e-78
+        },
+        "GJR": {
+          "qlike": 1.5288090632875364,
+          "spearman_rho": 0.3909324401956275,
+          "spearman_p": 1.3837033235479427e-92
+        },
+        "CARR_Parkinson": {
+          "qlike": 1.6653122410206629,
+          "spearman_rho": 0.4068949711000116,
+          "spearman_p": 7.269468371379411e-101
+        },
+        "CARR_YZ": {
+          "qlike": 1.5060135492377549,
+          "spearman_rho": 0.39492137636746955,
+          "spearman_p": 1.3017892415156552e-94
+        }
+      },
+      "dm_tests": {
+        "CARR_YZ_vs_GARCH": {
+          "dm_t": 4.048932307291689,
+          "dm_p": 5.3008489501182865e-05,
+          "yz_better": true,
+          "significant_harvey": true
+        },
+        "CARR_YZ_vs_GJR": {
+          "dm_t": 1.4771180577651004,
+          "dm_p": 0.1397692967433879,
+          "yz_better": true,
+          "significant_harvey": false
+        },
+        "CARR_YZ_vs_CARR_Parkinson": {
+          "dm_t": 4.02879463231343,
+          "dm_p": 5.7727627941428494e-05,
+          "yz_better": true,
+          "significant_harvey": true
+        },
+        "GJR_vs_GARCH": {
+          "dm_t": 3.8544585318356086,
+          "dm_p": 0.00011889320097902001,
+          "gjr_better": true,
+          "significant_harvey": true
+        }
+      },
+      "yz_improvement_pct": 9.565695120650437,
+      "model_params": {
+        "GARCH": {
+          "omega": 7.690349012281038e-06,
+          "alpha": 0.12320122855881467,
+          "beta": 0.8340390724916448,
+          "persistence": 0.9572403010504594,
+          "converged": true,
+          "loglik": 5813.654438285639
+        },
+        "GJR": {
+          "omega": 4.915096851198648e-06,
+          "alpha": 0.030540015176258258,
+          "gamma": 0.1018000800102142,
+          "beta": 0.8904398457475355,
+          "persistence": 0.9718799009289009,
+          "converged": true,
+          "loglik": 5840.803313816938
+        },
+        "CARR_Parkinson": {
+          "omega": 2.5259829706613213e-06,
+          "alpha": 0.10329726834839749,
+          "beta": 0.8681349288454264,
+          "persistence": 0.9714321971938239,
+          "converged": true,
+          "loglik": 16300.279028948858
+        },
+        "CARR_YZ": {
+          "omega": 4.2212968822683875e-06,
+          "alpha": 0.10325426521460923,
+          "beta": 0.8678977299034882,
+          "persistence": 0.9711519951180975,
+          "converged": true,
+          "loglik": 15295.918711259379
+        }
+      }
+    },
+    "0050.TW": {
+      "asset_info": {
+        "name": "Taiwan Top 50 ETF",
+        "start": "2006-01-01",
+        "window": 500
+      },
+      "n_total": 4160,
+      "n_oos": "2431",
+      "oos_start": "2016-01-01",
+      "gap_analysis": {
+        "gap_ratio": 0.8376637137150932,
+        "var_overnight": 0.00014930261734274247,
+        "var_total": 0.00017823694031173396,
+        "mean_abs_overnight": 0.0060520312357087895,
+        "mean_abs_total": 0.008487810308792868
+      },
+      "evaluations": {
+        "GARCH": {
+          "qlike": 1.4881515564815346,
+          "spearman_rho": 0.18968407783436375,
+          "spearman_p": 3.971575156536692e-21
+        },
+        "GJR": {
+          "qlike": 1.4523963000556783,
+          "spearman_rho": 0.21883910369002046,
+          "spearman_p": 9.567169278355807e-28
+        },
+        "CARR_Parkinson": {
+          "qlike": 2.398677696995584,
+          "spearman_rho": 0.20053914331811054,
+          "spearman_p": 1.7888339592030646e-23
+        },
+        "CARR_YZ": {
+          "qlike": 1.5041543757341158,
+          "spearman_rho": 0.2246145985548578,
+          "spearman_p": 3.539191840714153e-29
+        }
+      },
+      "dm_tests": {
+        "CARR_YZ_vs_GARCH": {
+          "dm_t": -0.18562962122129445,
+          "dm_p": 0.8527507156531182,
+          "yz_better": false,
+          "significant_harvey": false
+        },
+        "CARR_YZ_vs_GJR": {
+          "dm_t": -1.444014542278423,
+          "dm_p": 0.14886379715068632,
+          "yz_better": false,
+          "significant_harvey": false
+        },
+        "CARR_YZ_vs_CARR_Parkinson": {
+          "dm_t": 6.376187195524144,
+          "dm_p": 2.165723156366539e-10,
+          "yz_better": true,
+          "significant_harvey": true
+        },
+        "GJR_vs_GARCH": {
+          "dm_t": 1.6882624978250178,
+          "dm_p": 0.09148916411020847,
+          "gjr_better": true,
+          "significant_harvey": false
+        }
+      },
+      "yz_improvement_pct": 37.29235163114601,
+      "model_params": {
+        "GARCH": {
+          "omega": 3.0602050367532386e-05,
+          "alpha": 0.16016715714982827,
+          "beta": 0.7140539150969923,
+          "persistence": 0.8742210722468207,
+          "converged": true,
+          "loglik": 1386.0881649690696
+        },
+        "GJR": {
+          "omega": 3.693208868877903e-05,
+          "alpha": 1e-08,
+          "gamma": 0.3513502879663964,
+          "beta": 0.687766947167464,
+          "persistence": 0.8634421011506622,
+          "converged": true,
+          "loglik": 1402.4358251314102
+        },
+        "CARR_Parkinson": {
+          "omega": 1.2809315258295227e-05,
+          "alpha": 0.2505793865261661,
+          "beta": 0.5247770635210132,
+          "persistence": 0.7753564500471792,
+          "converged": true,
+          "loglik": 4337.515966768968
+        },
+        "CARR_YZ": {
+          "omega": 2.305299986490804e-05,
+          "alpha": 0.2162651971591194,
+          "beta": 0.690135359955984,
+          "persistence": 0.9064005571151034,
+          "converged": true,
+          "loglik": 3736.162606828515
+        }
+      }
+    }
+  },
+  "cross_asset_analysis": {
+    "gap_vs_improvement_corr": 0.7999999999999999,
+    "gap_vs_improvement_p": 0.2000000000000001,
+    "assets": [
+      "SPY",
+      "GLD",
+      "QQQ",
+      "0050.TW"
+    ],
+    "gap_ratios": [
+      0.3593546408759084,
+      0.49720978142416256,
+      0.3297572222718633,
+      0.8376637137150932
+    ],
+    "yz_improvements": [
+      9.142320383721989,
+      27.486239317713686,
+      9.565695120650437,
+      37.29235163114601
+    ]
+  },
+  "conclusions": {
+    "h1_gap_predicts_yz_improvement": {
+      "supported": true,
+      "correlation": 0.7999999999999999,
+      "interpretation": "Positive correlation between gap ratio and YZ improvement"
+    },
+    "h2_0050tw_largest_improvement": {
+      "supported": true,
+      "tw_improvement": 37.29235163114601,
+      "max_improvement": 37.29235163114601,
+      "max_asset": "0050.TW"
+    },
+    "h3_gld_smallest_improvement": {
+      "supported": false,
+      "gld_improvement": 27.486239317713686,
+      "min_improvement": 9.142320383721989,
+      "min_asset": "SPY"
+    }
+  }
+}

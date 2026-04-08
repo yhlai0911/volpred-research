@@ -1,0 +1,570 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% --- Severity colors --------------------------------------------------------
+\definecolor{highsev}{RGB}{204,0,0}
+\definecolor{medsev}{RGB}{204,102,0}
+\definecolor{lowsev}{RGB}{0,102,204}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\newcommand{\HIGH}{\textcolor{highsev}{\textbf{[HIGH]}}}
+\newcommand{\MEDIUM}{\textcolor{medsev}{\textbf{[MEDIUM]}}}
+\newcommand{\LOW}{\textcolor{lowsev}{\textbf{[LOW]}}}
+\newcommand{\OK}{\textcolor{okgreen}{\textbf{[OK]}}}
+
+% --- Title ------------------------------------------------------------------
+\title{Review R1: Combined Academic Review + Audit Reconciliation\\[6pt]
+\Large ``Is Volatility Targeting Just Trend Following?\\
+Decomposing the Benefits of Volatility Targeting''\\[6pt]
+\normalsize Lai (2026) --- body\_v2.tex, $\sim$33 pages, 18 citations\\
+\normalsize Targeting \textit{Journal of Portfolio Management} / \textit{Financial Analysts Journal}}
+
+\author{VolPred Research System\\
+\small Claude Opus 4.6 (1M context)\\[3pt]
+\small Incorporates: 13-step academic review, citation verification,\\
+\small number audit reconciliation (audit\_step1\_2.md), v2 review follow-up}
+
+\date{April 5, 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Executive Summary}
+% =============================================================================
+
+This review consolidates three analyses into a single document:
+\begin{enumerate}
+    \item A full 13-step academic review of body\_v2.tex (the current manuscript).
+    \item A number-level audit reconciliation using \texttt{audit\_step1\_2.md}, which traced every number in the paper to its source JSON file and found 159 MATCH, 4 MISMATCH, and 34 UNTRACEABLE data points.
+    \item A status check on the 5 HIGH-severity issues from review\_v2.tex.
+\end{enumerate}
+
+\medskip
+\noindent\textbf{Issue Summary:}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Category & HIGH & MEDIUM & LOW \\
+\midrule
+A. Data Traceability \& Reproducibility   & 4 & 1 & 0 \\
+B. Internal Consistency \& Numbers         & 2 & 2 & 1 \\
+C. Methodology \& Statistical Rigor        & 1 & 3 & 1 \\
+D. Literature \& Citations                 & 0 & 3 & 2 \\
+E. Presentation \& Journal Targeting       & 0 & 2 & 3 \\
+\midrule
+\textbf{Total}                             & \textbf{7} & \textbf{11} & \textbf{7} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Overall Assessment:} The paper presents an original and economically important decomposition of VT benefits into Sharpe and MDD channels. The 22-asset alpha decomposition (Table~1) and cross-sectional test (Table~2) are fully verified against source JSON files. However, approximately \textbf{50\% of the paper's tables} (Tables~3, 5, 6, plus split-sample and sector results) have \textbf{no traceable source experiment files}. This is the single most critical issue: without reproducible audit trails for the core novel results, the paper cannot be submitted to any peer-reviewed journal. Additionally, the ``1.4\%'' statistic is a misleading average, the BAB factor should use AQR data rather than an ETF proxy, and the paper fails to incorporate its own strongest supporting evidence (K687/K697/K688).
+
+After addressing the 7 HIGH-severity issues, the paper should be competitive at JPM, FAJ, or JEF.
+
+
+% =============================================================================
+\section{Category A: Data Traceability \& Reproducibility}
+\label{sec:traceability}
+% =============================================================================
+
+This is the most critical category. The audit (\texttt{audit\_step1\_2.md}) systematically traced every number in the paper to a source experiment JSON file. The results reveal a severe traceability gap.
+
+\begin{enumerate}[label=\textbf{A.\arabic*}]
+
+\item \HIGH\ \textbf{Table~3 (Dual Mechanism Decomposition): Entirely untraceable.}
+
+Table~3 is the paper's central empirical contribution. It reports Sharpe, MDD, and Calmar for 4 strategies $\times$ 2 assets (SPY, 50/50 SPY/GLD), plus MDD retention for DIA, QQQ, and IWM. The table notes state ``Full-sample results over 2005--2026.''
+
+\textit{No JSON file in the repository matches these numbers.} The closest candidate is \texttt{paper3\_fixes.json} (K79), but it uses the 2007--2026 period and tests a different asset set (SPY/QQQ/EEM/EFA/GLD instead of SPY/50-50/DIA/QQQ/IWM):
+
+\begin{center}
+\small
+\begin{tabular}{lcc}
+\toprule
+Metric & Paper Table~3 & K79 JSON (2007--2026) \\
+\midrule
+SPY B\&H Sharpe & 0.611 & 0.541 \\
+SPY VT Sharpe & 0.797 & 0.618 \\
+SPY MDD retention & 93\% & 92.13\% \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The numbers are \textbf{completely different} because of the period difference (2005 vs.\ 2007). The figures script (\texttt{generate\_figures.py}) uses hard-coded numbers from the paper text rather than reading from JSON. For DIA/QQQ/IWM, the figure script \textit{estimates} MDD total protection values with a comment acknowledging ``We estimate from Table~1 B\&H MDD context'' (line~113).
+
+\textbf{Action required:} Create \texttt{experiments/kXXX\_dual\_mechanism\_2005.py} and \texttt{kXXX\_dual\_mechanism\_2005\_results.json} that computes all Table~3 numbers from raw data for the 2005--2026 period, covering SPY, 50/50, DIA, QQQ, and IWM. Update \texttt{generate\_figures.py} to read from this JSON instead of using hard-coded values.
+
+
+\item \HIGH\ \textbf{Table~5 (International Evidence, 13 markets): No exact source JSON.}
+
+Table~5 reports specific numbers for 13 international ETFs (Sharpe, MDD, VIX Sensitivity, $\Delta$Sharpe, $\Delta$MDD). The knowledge base references K567 (International VT Leverage), but K567 tested only 6 markets with a different asset set. No single JSON file contains all 13 markets' results as presented.
+
+The cross-sectional statistics ($\Delta$MDD average = 28.7 pp, $t = 15.70$; VIX sensitivity vs.\ $\Delta$MDD $r = -0.770$) also have no traceable source.
+
+\textbf{Action required:} Create a dedicated experiment script and results JSON for the 13-market international analysis.
+
+
+\item \HIGH\ \textbf{Table~6 (MDD Bootstrap, 5 assets): No source JSON.}
+
+The block bootstrap results (10,000 replications, block size 252) are critical to the paper's statistical inference. Point estimates, 90\% CIs, and $p$-values for 5 assets are reported. \textbf{No JSON file containing bootstrap results exists anywhere in the repository.}
+
+\textbf{Action required:} Re-run the bootstrap, save structured results to JSON.
+
+
+\item \HIGH\ \textbf{Split-sample cross-sectional results ($r = 0.487$): No source JSON.}
+
+Section~3.2 reports split-sample Pearson $r = 0.487$ ($p = 0.021$), bootstrap CI $[0.114, 0.737]$, Spearman $\rho = 0.461$ ($p = 0.031$). These were likely computed during the v1-to-v2 revision but the results were not saved. The full-sample results in \texttt{vt\_tsmom\_final\_n22.json} are verified, but the split-sample is a v2 addition with no audit trail.
+
+\textbf{Action required:} Re-run and save split-sample results to a traceable JSON file.
+
+
+\item \MEDIUM\ \textbf{Sector analysis ($\gamma$ range, $r = 0.163$): No source JSON.}
+
+Section~3.4 reports 11 SPDR sector ETFs with gamma range $[0.077, 0.160]$ and $r = 0.163$ (NS). No sector-level JSON file was found.
+
+\textbf{Action required:} Create experiment file for sector analysis.
+
+\end{enumerate}
+
+\medskip
+\noindent\textbf{Traceability Summary:}
+
+\begin{center}
+\small
+\begin{tabular}{llcl}
+\toprule
+Table & Content & Status & Source File \\
+\midrule
+Table~1 & Alpha decomposition (22 assets) & \OK\ Verified & vt\_tsmom\_final\_n22.json \\
+Table~2 & Cross-sectional ($N = 22$) & \OK\ Full-sample verified & vt\_tsmom\_final\_n22.json \\
+Table~2 & Split-sample ($r = 0.487$) & \HIGH\ Untraceable & --- \\
+Table~3 & Dual mechanism decomposition & \HIGH\ Untraceable & --- \\
+Table~4 & Factor model controls & \OK\ Verified & ff5\_factor\_controls.json \\
+Table~5 & International (13 markets) & \HIGH\ Untraceable & --- \\
+Table~6 & MDD bootstrap & \HIGH\ Untraceable & --- \\
+Section~3.4 & Sector analysis & \MEDIUM\ Untraceable & --- \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+
+% =============================================================================
+\section{Category B: Internal Consistency \& Numbers}
+\label{sec:consistency}
+% =============================================================================
+
+\begin{enumerate}[label=\textbf{B.\arabic*}]
+
+\item \HIGH\ \textbf{The ``1.4\% TSMOM contribution'' is a misleading cross-asset average.}
+
+The paper states (Section~3.3, Table~1 notes): ``The TSMOM contribution to Sharpe improvement is approximately 1.4\% of total strategy Sharpe.''
+
+The source is \texttt{paper3\_fixes.json}: \texttt{mean\_tsmom\_sharpe\_contribution\_pct = 1.39\%}. This is the arithmetic mean of:
+\begin{itemize}
+    \item SPY: \textbf{7.10\%}
+    \item QQQ: \textbf{5.30\%}
+    \item EEM: \textbf{$-$0.61\%} (negative: hedging \textit{increases} Sharpe)
+    \item EFA: \textbf{$-$5.01\%} (strongly negative)
+    \item GLD: \textbf{0.18\%}
+\end{itemize}
+
+The 1.4\% is pulled down by negative values for EEM and EFA (where VIX is a poor match for local volatility). For SPY specifically---the paper's primary asset---the TSMOM contribution is 7.1\%.
+
+Furthermore, the paper's own Table~3 implies a different number: $\Delta\text{Sharpe}_\text{TSMOM} / \text{Sharpe}_\text{VT} = 0.060 / 0.797 = 7.5\%$ for SPY. The text says ``1.4\%'' but the table implies 7.5\%---an internal inconsistency.
+
+The 1.4\% comes from the 2007--2026 K79 sample; Table~3 uses 2005--2026. Even controlling for this, the cross-asset average is misleading because it conflates assets where TSMOM hedging helps, hurts, or is irrelevant.
+
+\textbf{Recommendation:} Report per-asset TSMOM Sharpe contribution explicitly. State: ``For SPY, TSMOM explains approximately 7\% of VT's Sharpe ratio; the cross-asset average of 1.4\% is driven to near zero by non-equity assets (EEM, EFA) where VIX is a poor local volatility proxy.'' This is more informative and consistent with Table~3.
+
+
+\item \HIGH\ \textbf{Table~4 M5 sample size: JSON says $N = 5{,}049$, paper says $N = 3{,}740$.}
+
+Table~4 footnote: ``$^\dagger$M5 is estimated over the post-2011 subsample ($N = 3{,}740$).'' However, \texttt{ff5\_factor\_controls.json} shows M5 with \textbf{$N = 5{,}049$}---identical to M1--M4. This means the JSON used the full sample (likely with AQR BAB data available from 1926), not the SPLV-SPHB subsample.
+
+Either: (a) the JSON actually used AQR BAB (making the paper's SPLV claim incorrect), or (b) a different run was done for M5 that was not saved to the JSON.
+
+\textbf{Consequence:} If AQR BAB was actually used ($N = 5{,}049$), the paper should drop the SPLV discussion entirely---this resolves the v2 review issue B.2. If SPLV was used ($N = 3{,}740$), the JSON is wrong. Either way, the M5 AIC ($-47{,}213$) in the paper matches the JSON, suggesting the full-sample ($N = 5{,}049$) run is the one that produced the reported coefficients.
+
+\textbf{Recommendation:} Clarify which BAB data was used. If AQR BAB ($N = 5{,}049$), update the paper text to remove the SPLV discussion and report $N = 5{,}049$ for M5. This is the cleanest resolution and eliminates the sample truncation problem.
+
+
+\item \MEDIUM\ \textbf{Inconsistent sample periods across tables.}
+
+Despite the new Table ``Sample Periods by Analysis'' (Section~2.1), the actual numbers still span different periods:
+\begin{itemize}
+    \item Table~1: January 2007--March 2026 ($N = 4{,}579$ in K55 JSON)
+    \item Table~3: 2005--2026 (untraceable)
+    \item Table~4: January 2005--March 2026 ($N = 5{,}049$ in K54 JSON)
+    \item Table~5: January 2007--March 2026 (untraceable)
+    \item Sector: December 1998--March 2026 (untraceable)
+\end{itemize}
+
+The rationalization table is helpful, but a referee at JPM/FAJ will still question why SPY appears with Sharpe 0.552 in Table~1 (2007 start), Sharpe 0.611 in Table~3 (2005 start), and different again in Table~4 (2005 start).
+
+\textbf{Recommendation:} When the untraceable tables are regenerated (Issue A.1--A.4), strongly consider unifying to a single start date (2007, the latest common ETF availability) for all core analyses, using 2005 only for SPY/GLD robustness checks reported separately.
+
+
+\item \MEDIUM\ \textbf{K687/K697/K688 not incorporated (v2 review issue A.1, still unaddressed).}
+
+The paper's research system has produced three experiments that directly support the paper's thesis:
+\begin{itemize}
+    \item \textbf{K687}: No VT beats BH 50/50 on Sharpe after lag correction $\Rightarrow$ supports ``VT = insurance not alpha''
+    \item \textbf{K697}: VIX predicts vol magnitude ($r = 0.57$) but not direction ($r = 0.04$) $\Rightarrow$ directly validates VIX-level mechanism
+    \item \textbf{K688}: CRRA utility $\gamma \geq 5$ favors VT $\Rightarrow$ formal answer to Cederburg (2020) critique
+\end{itemize}
+
+The paper currently handles the Cederburg rebuttal with hand-waving (``utility tests may underweight the MDD channel''). K688 provides the specific breakeven parameter ($\gamma \approx 5$), which is much stronger. K697 provides direct empirical evidence for the VIX-level mechanism that the paper claims but does not formally test.
+
+The v2 review (A.1) rated this HIGH. It remains the paper's ``main weakness'' per the review's own assessment.
+
+\textbf{Recommendation:} Add (a) a footnote citing K687 as confirming VT Sharpe improvement vanishes against optimal baseline, reinforcing insurance interpretation; (b) a paragraph in Section~4.2 citing K697 magnitude-vs-direction evidence; (c) K688's $\gamma \geq 5$ breakeven in the Cederburg rebuttal paragraph.
+
+
+\item \LOW\ \textbf{Table~3 Calmar column never discussed.}
+
+Table~3 includes Calmar ratios for all four strategies, but the text never refers to them. Either discuss (they support the MDD narrative: VT Calmar 0.301 vs.\ B\&H 0.214) or remove.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Category C: Methodology \& Statistical Rigor}
+\label{sec:methodology}
+% =============================================================================
+
+\begin{enumerate}[label=\textbf{C.\arabic*}]
+
+\item \HIGH\ \textbf{MDD retention reported for only 5 highly correlated US equity assets.}
+
+The 90--97\% MDD retention claim is the paper's strongest result and appears prominently in the abstract, introduction, and conclusion. However, it is based on SPY, 50/50, DIA, QQQ, and IWM---all US large-cap equity (plus a blend). These have pairwise correlations $\rho > 0.85$, making this effectively 1--2 independent observations.
+
+If MDD retention is 70\% for EEM or 50\% for GLD, the narrative changes substantially. The paper has 22 assets available from Table~1 but tests only 5 for MDD decomposition.
+
+\textbf{From the K79 JSON}, we can see partial evidence: MDD preservation for EEM is 90.28\%, EFA is 94.02\%, GLD is 96.56\% (2007--2026 period). These actually \textit{support} the paper's claim but are not reported. Including non-equity assets would strengthen the paper.
+
+\textbf{Recommendation:} Report MDD retention for at minimum 8--10 assets spanning equity, commodity, and bond classes. If retention varies by asset class, this is a valuable finding (boundary condition).
+
+
+\item \MEDIUM\ \textbf{Block bootstrap block size ($b = 252$) may be excessive.}
+
+The MDD bootstrap uses blocks of 252 trading days (one year). With $T \approx 5{,}000$ days, each bootstrap sample contains $\sim$20 blocks, giving an effective sample size of only $\sim$20. The standard $b \approx T^{1/3}$ rule (Lahiri, 2003) gives $b \approx 17$ days.
+
+The large block size is defensible for MDD (which requires path dependence), but the paper should acknowledge the trade-off and provide a sensitivity check.
+
+\textbf{Recommendation:} Add a sensitivity test with $b \in \{63, 126, 252\}$. If CIs are robust to block size, this strengthens the result; if they widen with smaller blocks, the paper should discuss.
+
+
+\item \MEDIUM\ \textbf{Full-sample TSMOM orthogonalization introduces mild look-ahead.}
+
+Equation~(3) orthogonalizes TSMOM using $\hat{\beta}_\text{MKT}$ estimated over the entire sample. This is standard practice in factor model estimation but introduces mild look-ahead bias.
+
+\textbf{Recommendation:} Add a one-sentence footnote: ``An expanding-window orthogonalization yields qualitatively identical results (available upon request).''
+
+
+\item \MEDIUM\ \textbf{No placebo test for international VIX channel.}
+
+Table~5 shows US VIX provides MDD protection globally, but there is no test of whether a \textit{randomized} VIX signal produces similar results. Since global equity markets tend to draw down simultaneously (contagion), the MDD improvement might partly reflect mechanical ``cash drag during crises'' rather than the VIX signal specifically.
+
+\textbf{Recommendation:} Implement a placebo test: apply 12/VIX using a time-shuffled VIX series (preserving the unconditional distribution but breaking the timing). If placebo MDD improvement is near zero, the VIX timing channel is confirmed.
+
+
+\item \LOW\ \textbf{No GJR-GARCH convergence diagnostics for 22 assets.}
+
+Standard practice requires confirming stationarity for all estimated models. The paper reports $\gamma$ for 22 assets but no persistence summary.
+
+\textbf{Recommendation:} Add footnote: ``All 22 GJR-GARCH models converge with persistence $\alpha + \beta + \gamma/2 \in [x, y]$.''
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Category D: Literature \& Citations}
+\label{sec:citations}
+% =============================================================================
+
+The paper has 18 citations. The v2 revision fixed 3 orphan entries. Remaining issues:
+
+\begin{enumerate}[label=\textbf{D.\arabic*}]
+
+\item \MEDIUM\ \textbf{Missing Frazzini \& Pedersen (2014) for BAB.}
+
+The BAB factor is used in Table~4 (M5) as a control variable. The original ``Betting Against Beta'' paper (Frazzini \& Pedersen, 2014, \textit{JFE}) is never cited. This is a conspicuous omission---the factor's creators must be cited when using their factor.
+
+\textbf{Recommendation:} Add citation. If using AQR BAB data directly (see Issue B.2), this becomes even more essential.
+
+
+\item \MEDIUM\ \textbf{Missing key trend-following references.}
+
+The paper's core question is whether VT replicates trend following, but the literature review omits important trend-following references:
+\begin{itemize}
+    \item \textbf{Hurst, Ooi \& Pedersen (2017)}: ``A Century of Evidence on Trend-Following Investing.'' The longest trend-following backtest, directly relevant to Section~4.1.
+    \item \textbf{Liu et al.\ (2019)}: ``Volatility-managed portfolios revisited.'' A direct challenge to Moreira \& Muir that questions VT benefits.
+    \item \textbf{Jegadeesh \& Titman (1993)}: The canonical cross-sectional momentum paper, relevant when discussing MOM factor in Table~4.
+\end{itemize}
+
+\textbf{Recommendation:} Add at minimum Frazzini \& Pedersen (2014) and one trend-following survey. Liu et al.\ (2019) would strengthen the Cederburg discussion.
+
+
+\item \MEDIUM\ \textbf{Hood \& Raughtigan (2025) lacks identification.}
+
+This is the paper's primary interlocutor. The bibliography entry remains: ``Hood, M., \& Raughtigan, J. (2025). Volatility targeting alpha is trend following alpha. \textit{Working Paper}.'' An SSRN link, institutional affiliation, or conference presentation venue is needed for readers to locate this paper.
+
+
+\item \LOW\ \textbf{Lai (2026a) suffix implies a companion paper.}
+
+The ``a'' suffix implies a (2026b) exists. If this paper will be (2026b), add a self-citation. Otherwise, remove the suffix.
+
+
+\item \LOW\ \textbf{Several citations lack DOIs.}
+
+Black (1976), Hood \& Raughtigan (2025), Baltas \& Kosowski (2013), and Lai (2026a) lack DOIs. The first is a conference proceeding (DOI unlikely), but the others should be checked. APA 7th edition requires DOIs when available.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Category E: Presentation \& Journal Targeting}
+\label{sec:presentation}
+% =============================================================================
+
+\begin{enumerate}[label=\textbf{E.\arabic*}]
+
+\item \MEDIUM\ \textbf{The ``$\sim$4\%/year Sharpe drag'' conflates units.}
+
+The abstract and Section~4.3 repeatedly state VT costs ``$\sim$4\%/year Sharpe drag.'' The source is the international average $\Delta$Sharpe $= -0.048$. However:
+\begin{itemize}
+    \item $-0.048$ is a Sharpe ratio \textit{difference}, not a percentage.
+    \item Calling it ``4\%/year'' conflates Sharpe units with return units.
+    \item For SPY, $\Delta$Sharpe is \textit{positive} ($+0.186$), contradicting the ``drag'' narrative for US assets.
+\end{itemize}
+
+\textbf{Recommendation:} Replace ``$\sim$4\%/year Sharpe drag'' with ``$\sim$0.05 Sharpe ratio units'' throughout, and clarify this is the international average (excluding SPY).
+
+
+\item \MEDIUM\ \textbf{For JPM: needs more practitioner content.}
+
+JPM publishes for portfolio managers and institutional investors. The paper is academic in style. JPM reviewers will want: (a) a clear ``what should I do?'' section, (b) implementation details (rebalancing costs for a typical institution), (c) comparison with actual CTA products (DBMF, KMLM).
+
+\textbf{Recommendation:} If targeting JPM, add a ``Practical Implementation'' subsection. If the paper is naturally academic, consider \textit{Journal of Empirical Finance} instead.
+
+
+\item \LOW\ \textbf{Paper length ($\sim$33 pages) may exceed FAJ norms.}
+
+FAJ articles are typically 15--20 pages. Condensation would require moving sector analysis, full alpha decomposition, and factor controls to an online appendix.
+
+
+\item \LOW\ \textbf{``strategies eliminates'' grammatical error.}
+
+Section~1, paragraph~2: ``volatility-scaling momentum strategies eliminates momentum crashes'' should be ``strategies \textit{eliminate}.''
+
+
+\item \LOW\ \textbf{Sub-period stability has no summary table.}
+
+Section~3.6 references an Online Appendix for sub-period results. A compact 4-row table in the main text would strengthen this claim.
+
+\end{enumerate}
+
+
+% =============================================================================
+\section{Status of v2 Review Issues}
+\label{sec:v2_status}
+% =============================================================================
+
+The v2 review identified 5 HIGH-severity issues. We assess their current status:
+
+\begin{center}
+\small
+\begin{tabular}{clll}
+\toprule
+\# & Issue & v2 Status & R1 Status \\
+\midrule
+A.1 & K687/K697/K688 reconciliation & Not addressed & \HIGH\ Still not addressed (B.4) \\
+B.1 & Inconsistent sample periods & Partially addressed & \MEDIUM\ Sample Periods table helps (B.3) \\
+B.2 & BAB proxy (SPLV $\to$ AQR) & Ambiguous & \HIGH\ JSON shows $N = 5{,}049$ (B.2) \\
+B.3 & MDD retention only 5 US equity & Not addressed & \HIGH\ Still 5 assets (C.1) \\
+C.1 & ``1.4\%'' number unverifiable & Source found & \HIGH\ Misleading average (B.1) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection{v2 Fixes Assessment}
+
+Three v2 fixes were implemented:
+
+\begin{itemize}
+    \item \textbf{H1 (Endogeneity / Split-sample):} \textcolor{okgreen}{\textbf{WELL EXECUTED}}---but the split-sample results have no traceable JSON (A.4).
+    \item \textbf{H2 (MDD Bootstrap):} \textcolor{okgreen}{\textbf{WELL EXECUTED}}---but the bootstrap results have no traceable JSON (A.3).
+    \item \textbf{H4 (Orphan references):} \textcolor{okgreen}{\textbf{FULLY RESOLVED}}---all 18 entries are now cited.
+\end{itemize}
+
+The irony is that the v2 fixes addressed genuine statistical concerns but introduced a new problem: the new analyses (split-sample, bootstrap) were computed without saving results to experiment files, violating research reproducibility standards.
+
+
+% =============================================================================
+\section{Number Verification: Verified Claims}
+\label{sec:verified}
+% =============================================================================
+
+The following numbers are \textbf{fully verified} against source JSON files:
+
+\subsection{Table~1 (Alpha Decomposition, $N = 22$)}
+
+Source: \texttt{vt\_tsmom\_final\_n22.json} (K55)
+
+\begin{itemize}
+    \item SPY $\gamma = 0.261$: JSON = 0.26107 \checkmark
+    \item SPY M1 $\alpha = 1.35\%$, $t = 1.44$: JSON = 0.01348, $t = 1.4426$ \checkmark
+    \item SPY M1 $R^2 = 0.802$: JSON = 0.802 \checkmark
+    \item SPY TSMOM$^\perp = 0.121$, $t = 7.65$: JSON = 0.1208, $t = 7.6452$ \checkmark
+    \item SPY M2 $R^2 = 0.867$: JSON = 0.8667 \checkmark
+    \item SPY $\Delta\alpha = 26.9\%$: JSON = 26.85\% \checkmark
+    \item GLD $\gamma = -0.037$, TSMOM $= -0.073$, $t = -3.18$: JSON matches \checkmark
+    \item TLT $\gamma = -0.015$, TSMOM $= -0.078$, $t = -4.55$: JSON matches \checkmark
+    \item 17/22 significant TSMOM loadings: verified from JSON \checkmark
+\end{itemize}
+
+\subsection{Table~2 (Cross-Sectional, $N = 22$, Full Sample)}
+
+Source: \texttt{vt\_tsmom\_final\_n22.json} (K55)
+
+\begin{itemize}
+    \item Pearson $r = 0.564$, $p = 0.006$: JSON = 0.5644, $p = 0.006216$ \checkmark
+    \item Spearman $\rho = 0.544$, $p = 0.009$: JSON = 0.5438, $p = 0.008902$ \checkmark
+    \item Bootstrap 95\% CI $[0.263, 0.772]$: JSON matches \checkmark
+    \item CS regression: $\gamma_1 = 0.568$, $t = 3.06$, $R^2 = 0.319$: JSON = 0.5681, $t = 3.0575$, $R^2 = 0.3185$ \checkmark
+    \item Equity mean TSMOM $= 0.087$, Non-Equity $= 0.012$: JSON = 0.0872, 0.0121 \checkmark
+    \item Welch $t = 1.98$, $p = 0.080$: JSON = 1.978, $p = 0.0802$ \checkmark
+\end{itemize}
+
+\subsection{Table~4 (Factor Models, Coefficients)}
+
+Source: \texttt{ff5\_factor\_controls.json} (K54)
+
+\begin{itemize}
+    \item M1 $\alpha = 1.45\%$, $t = 1.60$: JSON = 1.445\%, $t = 1.604$ \checkmark
+    \item M2 TSMOM $= 0.121$, $t = 8.89$: JSON = 0.1212, $t = 8.892$ \checkmark
+    \item M5 $\alpha = 1.28\%$, $t = 1.50$: JSON = 1.276\%, $t = 1.496$ \checkmark
+    \item M5 TSMOM $= 0.117$, $t = 8.07$: JSON = 0.1166, $t = 8.068$ \checkmark
+    \item M5 BAB $= -0.022$, $t = -3.31$: JSON = $-0.0217$, $t = -3.312$ \checkmark
+    \item $R^2$: 0.787, 0.849, 0.852, 0.852, 0.853: all match \checkmark
+    \item AIC: $-45339$, $-47092$, $-47160$, $-47171$, $-47213$: all match \checkmark
+    \item M1--M4 $N = 5{,}049$: JSON = 5,049 \checkmark
+    \item \textbf{M5 $N$}: Paper says 3,740; JSON says 5,049 \textbf{MISMATCH} (see B.2)
+\end{itemize}
+
+\subsection{Other Verified Claims}
+
+\begin{itemize}
+    \item VIX thresholds 8--20 all significant ($t = 7.98$--$10.91$): verified against K79 JSON \checkmark
+    \item K518: 5 trend strategies all fail Harvey $t > 3.0$: verified against K518 JSON \checkmark
+    \item K518: Golden Cross Sharpe 0.51, $t = 0.94$, cross-OOS 3/5: JSON = 0.5104, $t = 0.9402$ \checkmark
+    \item K568: 427 VT configurations, 12/VIX return-optimal: verified \checkmark
+    \item K79: MDD preservation range $[90.28\%, 96.56\%]$ for 5 assets (2007 period): JSON verified \checkmark
+\end{itemize}
+
+
+% =============================================================================
+\section{Detailed Audit: Figures}
+\label{sec:figures}
+% =============================================================================
+
+Both figures are generated by \texttt{figures/generate\_figures.py} using \textbf{hard-coded data} from the paper text:
+
+\begin{enumerate}
+    \item \textbf{Figure~1 (Return Decomposition):}
+    \begin{itemize}
+        \item Panel~(a): Sharpe numbers from Table~3 (hard-coded, untraceable)
+        \item Panel~(b): MDD numbers use hard-coded retention rates from text, but for DIA/QQQ/IWM the total MDD protection (pp) values are \textit{estimated} because the paper only gives retention percentages. The script comments: ``We estimate from Table~1 B\&H MDD context'' (line~113). This means Panel~(b) bars for DIA/QQQ/IWM are based on guesswork.
+    \end{itemize}
+
+    \item \textbf{Figure~2 (Cross-Asset Scatter):}
+    \begin{itemize}
+        \item All 13 data points are hard-coded from Table~5 (line~171--187)
+        \item Since Table~5 itself is untraceable, the figure inherits that problem
+    \end{itemize}
+\end{enumerate}
+
+\textbf{Recommendation:} When experiment JSONs are created for Tables~3 and~5, update \texttt{generate\_figures.py} to read from JSON rather than hard-coding values.
+
+
+% =============================================================================
+\section{Summary of Recommendations by Priority}
+\label{sec:recommendations}
+% =============================================================================
+
+\subsection*{Must Fix Before Submission (HIGH --- 7 issues)}
+
+\begin{enumerate}
+    \item[\textbf{A.1}] Create traceable experiment scripts + JSON for Table~3 (dual mechanism, 2005--2026)
+    \item[\textbf{A.2}] Create traceable experiment + JSON for Table~5 (13 international markets)
+    \item[\textbf{A.3}] Create traceable experiment + JSON for Table~6 (MDD bootstrap)
+    \item[\textbf{A.4}] Create traceable experiment + JSON for split-sample ($r = 0.487$)
+    \item[\textbf{B.1}] Fix the ``1.4\%'' statistic: report per-asset TSMOM Sharpe contribution
+    \item[\textbf{B.2}] Resolve Table~4 M5 sample size ($N = 5{,}049$ vs.\ $3{,}740$); if AQR BAB, update text
+    \item[\textbf{C.1}] Extend MDD retention to non-equity assets (at minimum EEM, EFA, GLD from K79)
+\end{enumerate}
+
+\subsection*{Should Fix (MEDIUM --- 11 issues)}
+
+Key items:
+\begin{itemize}
+    \item Incorporate K687/K697/K688 findings (B.4)
+    \item Create sector analysis JSON (A.5)
+    \item Unify or clearly rationalize sample periods (B.3)
+    \item Bootstrap block-size sensitivity (C.2)
+    \item TSMOM orthogonalization footnote (C.3)
+    \item VIX placebo test for international evidence (C.4)
+    \item Add Frazzini \& Pedersen (2014), trend-following references (D.1, D.2)
+    \item Hood \& Raughtigan identification details (D.3)
+    \item Fix ``4\%/year Sharpe drag'' unit confusion (E.1)
+    \item Practitioner content for JPM targeting (E.2)
+\end{itemize}
+
+\subsection*{Nice to Fix (LOW --- 7 issues)}
+
+Table~3 Calmar discussion, DOI completeness, Lai suffix, grammar fix, sub-period table, GJR convergence footnote, FAJ length.
+
+
+% =============================================================================
+\section{Overall Verdict}
+\label{sec:verdict}
+% =============================================================================
+
+\textbf{Core thesis:} The paper presents an original and economically important decomposition. The finding that VT contains asset-specific TSMOM through the leverage effect, but its primary value (MDD insurance) is orthogonal to trend following, resolves an open question in the literature. The cross-sectional evidence linking $\gamma$ to TSMOM loading ($r = 0.564$, $p = 0.006$, $N = 22$) is novel and well-executed.
+
+\textbf{Critical weakness:} Approximately 50\% of the paper's tables have no reproducible audit trail. This is not a question of whether the numbers are correct---the verified portions are accurate to 2--3 significant figures---but whether a referee or replicator could verify them. This must be resolved before submission.
+
+\textbf{Secondary weakness:} The paper does not incorporate its own strongest supporting evidence (K687/K697/K688), leaving the Cederburg rebuttal as hand-waving when a formal answer ($\gamma \geq 5$) is available.
+
+\textbf{After addressing the 7 HIGH-severity issues:}
+\begin{itemize}
+    \item \textbf{Journal of Portfolio Management}: Best fit if practitioner content is added. The ``VT $\neq$ trend following'' question is directly relevant to institutional allocators.
+    \item \textbf{Financial Analysts Journal}: Good fit if condensed to $\sim$20 pages. Broader CFA audience.
+    \item \textbf{Journal of Empirical Finance}: Good fit at current length. More technical audience.
+\end{itemize}
+
+The core insight---that alpha absorption does not imply economic value destruction when the value operates through a different channel---is both original and practically important.
+
+
+\end{document}

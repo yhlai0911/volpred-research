@@ -1,0 +1,139 @@
+{
+  "experiment_id": "K948",
+  "title": "Weekly Return Predictability — daily unpredictable, what about weekly?",
+  "date": "2026-04-07",
+  "data_source": "yfinance (SPY, ^VIX, TLT)",
+  "data_period": "2004-01-05 to 2026-03-31",
+  "oos_period": "2016-01-05 to 2026-03-19",
+  "n_weekly_samples_total": 1018,
+  "n_oos_samples": 514,
+  "target": "5-day cumulative log return (non-overlapping)",
+  "features": [
+    "log_vix",
+    "vix_change_5d",
+    "mom_20d",
+    "mom_5d",
+    "vix_ma20_ratio",
+    "garch_var",
+    "realized_vol_5d",
+    "tlt_ret_5d"
+  ],
+  "feature_lag": 1,
+  "retrain_interval": "~21 trading days (4 weekly samples)",
+  "transaction_cost_bps": 10,
+  "results": {
+    "OLS": {
+      "oos_r2": -0.015721276063577427,
+      "mse": 0.0005580375127913986,
+      "directional_accuracy": 0.5389105058365758,
+      "sharpe_gross": 0.6410176850988344,
+      "sharpe_net": 0.4961884683974338,
+      "bh_sharpe": 0.8104678581976328,
+      "mean_pred": 0.0014265326335510117,
+      "std_pred": 0.00605461710654978,
+      "n_trades": 243,
+      "pct_long": 0.6712062256809338
+    },
+    "Ridge": {
+      "oos_r2": -0.01552660557415142,
+      "mse": 0.0005579305607777968,
+      "directional_accuracy": 0.5350194552529183,
+      "sharpe_gross": 0.5553081806945348,
+      "sharpe_net": 0.41296477162179285,
+      "bh_sharpe": 0.8104678581976328,
+      "mean_pred": 0.0014261743953217032,
+      "std_pred": 0.006035857870796824,
+      "n_trades": 239,
+      "pct_long": 0.6750972762645915
+    },
+    "LASSO": {
+      "oos_r2": -0.012851466560359404,
+      "mse": 0.0005564608387617206,
+      "directional_accuracy": 0.5719844357976653,
+      "sharpe_gross": 0.7675452661624339,
+      "sharpe_net": 0.6627472980165942,
+      "bh_sharpe": 0.8104678581976328,
+      "mean_pred": 0.0015825273298020195,
+      "std_pred": 0.0032438965202079653,
+      "n_trades": 175,
+      "pct_long": 0.77431906614786
+    },
+    "RandomForest": {
+      "oos_r2": 0.009707729256196784,
+      "mse": 0.0005440668111670311,
+      "directional_accuracy": 0.6089494163424124,
+      "sharpe_gross": 1.0054916067606636,
+      "sharpe_net": 0.9882274182162646,
+      "bh_sharpe": 0.8104678581976328,
+      "mean_pred": 0.0016774554973443647,
+      "std_pred": 0.00483848097444758,
+      "n_trades": 31,
+      "pct_long": 0.9669260700389105
+    },
+    "HistMean": {
+      "oos_r2": 0.0,
+      "mse": 0.0005494002399497528,
+      "directional_accuracy": 0.6186770428015564,
+      "sharpe_gross": 0.8104678581976328,
+      "sharpe_net": 0.8100988099484701,
+      "bh_sharpe": 0.8104678581976328,
+      "mean_pred": 0.0017386692725466512,
+      "std_pred": 0.00020555201049558792,
+      "n_trades": 1,
+      "pct_long": 1.0
+    }
+  },
+  "dm_tests_vs_hist_mean": {
+    "OLS": {
+      "t_stat": 0.5302159176929989,
+      "p_value": 0.59596223596709
+    },
+    "Ridge": {
+      "t_stat": 0.5249200717143041,
+      "p_value": 0.5996387555720388
+    },
+    "LASSO": {
+      "t_stat": 0.5393788132318652,
+      "p_value": 0.589625497021907
+    },
+    "RandomForest": {
+      "t_stat": -1.0596504494558747,
+      "p_value": 0.2893036530569342
+    }
+  },
+  "ols_standardized_coefficients": {
+    "log_vix": 0.00310328195110827,
+    "vix_change_5d": 0.0016658799846739308,
+    "mom_20d": -0.0026392700906510812,
+    "mom_5d": -0.0037937113976385943,
+    "vix_ma20_ratio": -0.00226880156462813,
+    "garch_var": 0.0012149431689431327,
+    "realized_vol_5d": -0.007005671082978031,
+    "tlt_ret_5d": 0.0017034339273668763
+  },
+  "rf_feature_importance": {
+    "log_vix": 0.13105502649143488,
+    "vix_change_5d": 0.04238870729215507,
+    "mom_20d": 0.10308868526741144,
+    "mom_5d": 0.14498530254444225,
+    "vix_ma20_ratio": 0.020674081931778773,
+    "garch_var": 0.06390240214870196,
+    "realized_vol_5d": 0.3412511743767983,
+    "tlt_ret_5d": 0.1526546199472773
+  },
+  "descriptive_stats_oos": {
+    "mean_weekly_ret": 0.0026306460488908284,
+    "std_weekly_ret": 0.02340605891013565,
+    "skew": -1.1402110771672755,
+    "kurt": 7.6121342278160276,
+    "min": -0.15718884824470458,
+    "max": 0.10497373854933018,
+    "pct_positive": 0.6186770428015564
+  },
+  "conclusion": "NULL: Weekly returns largely unpredictable OOS. Best OOS R²=0.0097 (RF) but DM t=-1.06 (not significant at Harvey 3.0 threshold). Best model DA=60.9% (RF) barely above base rate 61.9% (market is positive 62% of weeks). No model strategy Sharpe (best=0.99 RF, net of TC) statistically significantly beats BH (0.81). RF's edge comes from being almost always long (97% long) with rare well-timed shorts — not robust predictability. OLS/Ridge/LASSO all have negative OOS R². Consistent with Welch & Goyal (2008): standard predictors fail OOS even at weekly horizon.",
+  "references": [
+    "Fama & French (1988) - Dividend yields and expected stock returns, JFE",
+    "Campbell & Shiller (1988) - Stock prices, earnings, and expected dividends, JF",
+    "Welch & Goyal (2008) - A comprehensive look at the empirical performance of equity premium prediction, RFS"
+  ]
+}

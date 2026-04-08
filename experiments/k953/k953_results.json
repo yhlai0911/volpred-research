@@ -1,0 +1,107 @@
+{
+  "experiment_id": "K953",
+  "title": "HAR-RV Pilot with 56 Days 5-Min SPY Data",
+  "status": "PRELIMINARY",
+  "warning": "56 days < 252 day formal OOS threshold. All results are preliminary.",
+  "data_source": "yfinance 5-min SPY",
+  "period": "2026-01-14 to 2026-04-06",
+  "n_trading_days": 56,
+  "avg_obs_per_day": 74.82142857142857,
+  "descriptive_stats": {
+    "mean_daily_rv": 5.565089824674222e-05,
+    "std_daily_rv": 3.1105495347916285e-05,
+    "median_daily_rv": 5.479362654203371e-05,
+    "skewness": 0.3443489531711797,
+    "kurtosis": -0.5581726268583691,
+    "min_rv": 4.108004105062668e-06,
+    "max_rv": 0.00012435853062227694,
+    "mean_ann_vol_pct": 11.296218962396534,
+    "std_ann_vol_pct": 3.5868427270726584
+  },
+  "autocorrelation": {
+    "lag_1": 0.29012276623000205,
+    "lag_2": 0.14551540049713058,
+    "lag_3": -0.07338909975716945,
+    "lag_5": 0.09628235658837096,
+    "lag_10": 0.18279676015912608
+  },
+  "rv_vs_r2": {
+    "pearson_corr": 0.2801683040667746,
+    "spearman_corr": 0.22886002886002893,
+    "mean_r2_minus_rv": 3.42288844563433e-05
+  },
+  "har_rv_insample": {
+    "R2": 0.03249535516154989,
+    "adj_R2": -0.06425510932229517,
+    "coefficients": {
+      "const": 4.602228171005647e-05,
+      "RV_d": 0.05257755817103804,
+      "RV_w": -0.32478526332803326,
+      "RV_m": 0.6191479215573638
+    },
+    "p_values": {
+      "const": 0.22468557866504493,
+      "RV_d": 0.7935718076766457,
+      "RV_w": 0.4691819590552732,
+      "RV_m": 0.3763881720737434
+    },
+    "n_obs": 34
+  },
+  "har_rv_oos": {
+    "train_days": 30,
+    "test_days": 4,
+    "MSE": 2.782546729587976e-09,
+    "MAE": 5.2328004257055575e-05,
+    "QLIKE_on_RV": 0.2710706168931225
+  },
+  "cross_model_comparison": {
+    "HAR-RV_qlike_rv": 0.109440027886068,
+    "HAR-RV_mse_rv": 7.444407413461878e-10,
+    "HAR-RV_corr_rv": 0.21618371636252606,
+    "HAR-RV_rankcorr_rv": 0.20688502673796794,
+    "GJR_qlike_rv": 0.19442728373699805,
+    "GJR_mse_rv": 2.9189492091003655e-09,
+    "GJR_corr_rv": 0.2356690003359778,
+    "GJR_rankcorr_rv": 0.1891711229946524,
+    "EWMA_qlike_rv": 0.12596447417238127,
+    "EWMA_mse_rv": 1.022523293847144e-09,
+    "EWMA_corr_rv": 0.14810322206180204,
+    "EWMA_rankcorr_rv": 0.06383689839572193,
+    "MF-GJR(VIX)_qlike_rv": 0.501059276592095,
+    "MF-GJR(VIX)_mse_rv": 3.487353853484296e-08,
+    "MF-GJR(VIX)_corr_rv": 0.22810019254919098,
+    "MF-GJR(VIX)_rankcorr_rv": 0.37566844919786097,
+    "HAR-RV_qlike_r2": 1.295762077357222,
+    "HAR-RV_mse_r2": 2.4883111123317307e-08,
+    "HAR-RV_corr_r2": 0.25800574581409075,
+    "HAR-RV_rankcorr_r2": 0.16878342245989306,
+    "GJR_qlike_r2": 1.1387490188415343,
+    "GJR_mse_r2": 2.145912231638976e-08,
+    "GJR_corr_r2": 0.3465124565543246,
+    "GJR_rankcorr_r2": 0.059826203208556146,
+    "EWMA_qlike_r2": 1.260100865947621,
+    "EWMA_mse_r2": 2.4519014545333318e-08,
+    "EWMA_corr_r2": 0.14538470782797105,
+    "EWMA_rankcorr_r2": 0.016377005347593582,
+    "MF-GJR(VIX)_qlike_r2": 1.2745766318533682,
+    "MF-GJR(VIX)_mse_r2": 3.783278175868756e-08,
+    "MF-GJR(VIX)_corr_r2": 0.34442988963348026,
+    "MF-GJR(VIX)_rankcorr_r2": 0.26771390374331555
+  },
+  "cross_model_common_days": 33,
+  "gjr_params": {
+    "omega": 0.04623986431457309,
+    "alpha": 4.74004184265753e-11,
+    "gamma": 0.2125922442795204,
+    "beta": 0.829933224873855,
+    "persistence": 0.9362293470610157
+  },
+  "methodology_notes": [
+    "HAR-RV predicts intraday RV (its native target)",
+    "GJR/EWMA/MF-GJR predict close-to-close \u03c3\u00b2 (their native target is r\u00b2)",
+    "HAR winning on RV target is MECHANICAL (expected by design)",
+    "Fair cross-model comparison uses QLIKE on r\u00b2 (Patton 2011)",
+    "No formal DM test due to small sample size (56 days)"
+  ],
+  "timestamp": "2026-04-07T12:33:39.252696"
+}

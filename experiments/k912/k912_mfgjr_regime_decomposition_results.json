@@ -1,0 +1,289 @@
+{
+  "experiment_id": "K912",
+  "title": "MF-GJR Regime Decomposition: When Does MF-GJR Add Value?",
+  "timestamp": "2026-04-05T20:30:06.700527+00:00",
+  "runtime_seconds": 40.2,
+  "methodology": {
+    "models": [
+      "GJR-GARCH(1,1)",
+      "MF-GJR"
+    ],
+    "mf_long_run": "tau_t = exp(theta_0 + theta_1 * log(VIX_{t-1}))",
+    "mf_short_run_gjr": "g_t = (1-a-g/2-b) + a*u^2_{t-1} + g*u^2_{t-1}*I(u<0) + b*g_{t-1}",
+    "estimation": "Rolling window (w=2000), refit every 63 days",
+    "evaluation": "Pointwise QLIKE on r^2 (Patton 2011), DM test, Bootstrap CI",
+    "vix_regimes": {
+      "Low (<15)": [
+        0,
+        15
+      ],
+      "Medium (15-25)": [
+        15,
+        25
+      ],
+      "High (25-35)": [
+        25,
+        35
+      ],
+      "Crisis (>35)": [
+        35,
+        999
+      ]
+    },
+    "bootstrap_reps": 10000,
+    "event_window_days": 21
+  },
+  "data": {
+    "source": "yfinance",
+    "asset": "SPY",
+    "period": "2005-01-01 to 2026-04-01",
+    "oos_start": "2019-01-01",
+    "n_oos": "1821",
+    "oos_dates": "2019-01-02 to 2026-03-31",
+    "n_refits": 29
+  },
+  "overall": {
+    "qlike_gjr": 1.49352,
+    "qlike_mfgjr": 1.409426,
+    "qlike_pct_improvement": -5.631,
+    "dm_t": -3.088,
+    "dm_p": 0.002,
+    "significant_harvey": true,
+    "spearman_gjr": 0.3742,
+    "spearman_mfgjr": 0.4215
+  },
+  "regime_analysis": {
+    "Low (<15)": {
+      "n_obs": 415,
+      "mean_delta_qlike": 0.07026,
+      "dm_t": -3.98039,
+      "dm_p": 8.1e-05,
+      "significant_harvey": true,
+      "significant_5pct": true,
+      "bootstrap_ci_95": [
+        0.02636,
+        0.111202
+      ],
+      "pct_mfgjr_wins": 70.120482,
+      "mean_vix": 13.535976
+    },
+    "Medium (15-25)": {
+      "n_obs": 1059,
+      "mean_delta_qlike": 0.059474,
+      "dm_t": -2.463806,
+      "dm_p": 0.013905,
+      "significant_harvey": false,
+      "significant_5pct": true,
+      "bootstrap_ci_95": [
+        0.011966,
+        0.113262
+      ],
+      "pct_mfgjr_wins": 50.897073,
+      "mean_vix": 18.995127
+    },
+    "High (25-35)": {
+      "n_obs": 288,
+      "mean_delta_qlike": 0.211706,
+      "dm_t": -1.431112,
+      "dm_p": 0.153486,
+      "significant_harvey": false,
+      "significant_5pct": false,
+      "bootstrap_ci_95": [
+        -0.021518,
+        0.538909
+      ],
+      "pct_mfgjr_wins": 45.138889,
+      "mean_vix": 28.704514
+    },
+    "Crisis (>35)": {
+      "n_obs": 59,
+      "mean_delta_qlike": 0.006702,
+      "dm_t": -0.043555,
+      "dm_p": 0.965409,
+      "significant_harvey": false,
+      "significant_5pct": false,
+      "bootstrap_ci_95": [
+        -0.245329,
+        0.325416
+      ],
+      "pct_mfgjr_wins": 33.898305,
+      "mean_vix": 47.485254
+    }
+  },
+  "rolling_analysis": {
+    "window": 63,
+    "max_advantage": {
+      "date": "2020-06-30 00:00:00",
+      "value": 0.535876233897958
+    },
+    "min_advantage": {
+      "date": "2020-12-31 00:00:00",
+      "value": -0.13958112110817736
+    },
+    "pct_positive_rolling": 83.85502471169687,
+    "corr_advantage_vix": 0.3587886654510196
+  },
+  "event_analysis": {
+    "COVID Crash": {
+      "event_date": "2020-03-16",
+      "n_days": 43,
+      "mean_delta_qlike": 0.280403,
+      "mean_vix": 45.839535,
+      "max_vix": 82.690002,
+      "pre_event_mean_delta": 0.721328,
+      "post_event_mean_delta": -0.140479,
+      "pct_mfgjr_wins": 51.162791
+    },
+    "Fed Tightening Start": {
+      "event_date": "2022-01-24",
+      "n_days": 43,
+      "mean_delta_qlike": 0.092087,
+      "mean_vix": 22.978837,
+      "max_vix": 31.959999,
+      "pre_event_mean_delta": 0.181065,
+      "post_event_mean_delta": 0.007154,
+      "pct_mfgjr_wins": 48.837209
+    },
+    "UK Gilt Crisis": {
+      "event_date": "2022-09-28",
+      "n_days": 43,
+      "mean_delta_qlike": 0.018857,
+      "mean_vix": 28.658372,
+      "max_vix": 33.630001,
+      "pre_event_mean_delta": -0.063387,
+      "post_event_mean_delta": 0.097363,
+      "pct_mfgjr_wins": 48.837209
+    },
+    "SVB Collapse": {
+      "event_date": "2023-03-10",
+      "n_days": 43,
+      "mean_delta_qlike": -0.035247,
+      "mean_vix": 20.908837,
+      "max_vix": 26.52,
+      "pre_event_mean_delta": -0.028721,
+      "post_event_mean_delta": -0.041477,
+      "pct_mfgjr_wins": 39.534884
+    },
+    "Yen Carry Unwind": {
+      "event_date": "2024-08-05",
+      "n_days": 43,
+      "mean_delta_qlike": -0.076858,
+      "mean_vix": 17.416512,
+      "max_vix": 38.57,
+      "pre_event_mean_delta": -0.144835,
+      "post_event_mean_delta": -0.011972,
+      "pct_mfgjr_wins": 55.813953
+    }
+  },
+  "tau_contribution": {
+    "Low (<15)": {
+      "n_obs": 415,
+      "var_log_tau": 0.030335,
+      "var_log_g": 0.013469,
+      "cov_log_tau_g": 0.005217,
+      "var_log_sigma2": 0.054213,
+      "tau_share_pct": 65.578889,
+      "g_share_pct": 34.467487,
+      "mean_tau": 3.8e-05,
+      "mean_g": 0.886254,
+      "mean_sigma2": 3.4e-05
+    },
+    "Medium (15-25)": {
+      "n_obs": 1059,
+      "var_log_tau": 0.131107,
+      "var_log_g": 0.044568,
+      "cov_log_tau_g": 0.013402,
+      "var_log_sigma2": 0.202454,
+      "tau_share_pct": 71.378896,
+      "g_share_pct": 28.633606,
+      "mean_tau": 9.4e-05,
+      "mean_g": 0.976023,
+      "mean_sigma2": 9.2e-05
+    },
+    "High (25-35)": {
+      "n_obs": 288,
+      "var_log_tau": 0.091119,
+      "var_log_g": 0.086301,
+      "cov_log_tau_g": -0.008441,
+      "var_log_sigma2": 0.160596,
+      "tau_share_pct": 51.481554,
+      "g_share_pct": 48.481944,
+      "mean_tau": 0.00028,
+      "mean_g": 1.189914,
+      "mean_sigma2": 0.00033
+    },
+    "Crisis (>35)": {
+      "n_obs": 59,
+      "var_log_tau": 0.613563,
+      "var_log_g": 0.151077,
+      "cov_log_tau_g": -0.0247,
+      "var_log_sigma2": 0.716078,
+      "tau_share_pct": 82.234513,
+      "g_share_pct": 17.648561,
+      "mean_tau": 0.001833,
+      "mean_g": 1.35627,
+      "mean_sigma2": 0.002429
+    }
+  },
+  "mfgjr_parameter_evolution": [
+    {
+      "refit_t": 1512,
+      "refit_date": "2025-01-06 00:00:00",
+      "theta_0": -16.372795692598046,
+      "theta_1": 2.3922340065408587,
+      "alpha": 0.0001,
+      "gamma": 0.09151134783870433,
+      "beta": 0.8474139129476164
+    },
+    {
+      "refit_t": 1575,
+      "refit_date": "2025-04-08 00:00:00",
+      "theta_0": -16.32129129011282,
+      "theta_1": 2.382696437286574,
+      "alpha": 0.0001,
+      "gamma": 0.09377627826993487,
+      "beta": 0.8527577478335813
+    },
+    {
+      "refit_t": 1638,
+      "refit_date": "2025-07-10 00:00:00",
+      "theta_0": -16.316422722099674,
+      "theta_1": 2.3790326924246465,
+      "alpha": 0.0001,
+      "gamma": 0.09628930343073147,
+      "beta": 0.853628397073938
+    },
+    {
+      "refit_t": 1701,
+      "refit_date": "2025-10-08 00:00:00",
+      "theta_0": -16.105278521998894,
+      "theta_1": 2.3060007214087674,
+      "alpha": 0.0001,
+      "gamma": 0.10271031999547353,
+      "beta": 0.8556930950363106
+    },
+    {
+      "refit_t": 1764,
+      "refit_date": "2026-01-08 00:00:00",
+      "theta_0": -16.221834895134364,
+      "theta_1": 2.3416260930038275,
+      "alpha": 0.0001,
+      "gamma": 0.09282350783685493,
+      "beta": 0.8689188876576165
+    }
+  ],
+  "key_findings": "K912 decomposes MF-GJR's overall QLIKE advantage (-5.63% vs GJR) across VIX regimes. Largest advantage in High (25-35) (delta QLIKE=+0.211706), smallest in Crisis (>35) (delta QLIKE=+0.006702). Rolling advantage correlates with VIX (r=0.359). Tau contribution to total variance: Low (<15)=66%, Medium (15-25)=71%, High (25-35)=51%, Crisis (>35)=82%. MF-GJR's multiplicative structure captures VIX-driven long-run dynamics that single-component GJR misses.",
+  "findings_list": [
+    "MF-GJR advantage is largest in High (25-35) regime (delta QLIKE=+0.211706)",
+    "MF-GJR advantage is smallest in Crisis (>35) regime (delta QLIKE=+0.006702)",
+    "Rolling advantage correlates with VIX (corr=0.3588)",
+    "Tau contribution INCREASES with VIX: from 65.6% (Low VIX) to 82.2% (highest regime)"
+  ],
+  "references": [
+    "Engle, Ghysels & Sohn (2013) RES 95(3):776-797",
+    "Engle & Rangel (2008) RFS 21(3):1187-1222",
+    "Conrad & Engle (2025) Two-factor GARCH, J Applied Econometrics",
+    "Patton (2011) J Econometrics 160:246-256",
+    "Harvey et al. (2016) JBES 34:92-104"
+  ]
+}

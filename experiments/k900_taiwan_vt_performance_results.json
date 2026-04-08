@@ -1,0 +1,741 @@
+{
+  "experiment_id": "K900",
+  "title": "Taiwan VT Performance Tables for Paper 2 (S5 Resolution)",
+  "purpose": "Generate definitive experiment JSON backing Paper 2 Tables 4-5 (VT strategy performance)",
+  "data_source": "yfinance (0050.TW, ^TWII, ^VIX) with clean_tw50_data split correction",
+  "data_period": "2009-01-02 to 2026-03-30",
+  "oos_period": "2019-01-01 to 2026-03-31",
+  "common_period": "2020-01-01 to 2026-03-31",
+  "n_tw_trading_days": 4217,
+  "n_twii_trading_days": 4457,
+  "n_vix_days": 4589,
+  "configuration": {
+    "ewma_lambda": 0.94,
+    "target_vol": 0.1,
+    "garch_window": 2000,
+    "tx_cost_roundtrip": 0.00186,
+    "tx_cost_description": "ETF tax 0.10% + commission 0.04275%×2 = 0.186%",
+    "vix_lag": "Previous US trading day close (strictly < Taiwan date)",
+    "rebalancing": "Monthly for VIX strategies, daily for GARCH/EWMA with monthly gate"
+  },
+  "table_vt_results": {
+    "buy_hold": {
+      "name": "Buy & Hold 0050.TW",
+      "n_days": 1753,
+      "n_years": 6.96,
+      "period": "2019-01-02 to 2026-03-30",
+      "ann_return_pct": 25.97,
+      "ann_vol_pct": 20.83,
+      "sharpe": 1.2469,
+      "sortino": 1.6788,
+      "mdd_pct": -33.83,
+      "calmar": 0.7678,
+      "var_1pct": -3.6333,
+      "var_5pct": -1.8668,
+      "es_1pct": -5.1036,
+      "es_5pct": -2.9407,
+      "ann_turnover_pct": 0.0,
+      "ann_tx_drag_bps": 0.0
+    },
+    "vix_863": {
+      "name": "8.63/VIX (monthly)",
+      "n_days": 1753,
+      "n_years": 6.96,
+      "period": "2019-01-02 to 2026-03-30",
+      "ann_return_pct": 12.15,
+      "ann_vol_pct": 9.65,
+      "sharpe": 1.2592,
+      "sortino": 1.6697,
+      "mdd_pct": -13.71,
+      "calmar": 0.8858,
+      "var_1pct": -1.6174,
+      "var_5pct": -0.848,
+      "es_1pct": -2.4688,
+      "es_5pct": -1.3688,
+      "ann_turnover_pct": 98.5,
+      "ann_tx_drag_bps": 18.3
+    },
+    "vix_12": {
+      "name": "12/VIX (monthly)",
+      "n_days": 1753,
+      "n_years": 6.96,
+      "period": "2019-01-02 to 2026-03-30",
+      "ann_return_pct": 16.96,
+      "ann_vol_pct": 13.41,
+      "sharpe": 1.265,
+      "sortino": 1.677,
+      "mdd_pct": -18.63,
+      "calmar": 0.9107,
+      "var_1pct": -2.249,
+      "var_5pct": -1.1792,
+      "es_1pct": -3.4329,
+      "es_5pct": -1.9033,
+      "ann_turnover_pct": 136.4,
+      "ann_tx_drag_bps": 25.4
+    },
+    "gjr_vt": {
+      "name": "GJR-GARCH VT (10%)",
+      "n_days": 1752,
+      "n_years": 6.95,
+      "period": "2019-01-03 to 2026-03-30",
+      "ann_return_pct": 14.37,
+      "ann_vol_pct": 11.13,
+      "sharpe": 1.2915,
+      "sortino": 1.8751,
+      "mdd_pct": -22.21,
+      "calmar": 0.6472,
+      "var_1pct": -1.7733,
+      "var_5pct": -1.0691,
+      "es_1pct": -2.3497,
+      "es_5pct": -1.5259,
+      "ann_turnover_pct": 676.5,
+      "ann_tx_drag_bps": 125.8
+    },
+    "ewma_vt": {
+      "name": "EWMA VT (10%)",
+      "n_days": 1753,
+      "n_years": 6.96,
+      "period": "2019-01-02 to 2026-03-30",
+      "ann_return_pct": 12.87,
+      "ann_vol_pct": 10.66,
+      "sharpe": 1.2076,
+      "sortino": 1.6917,
+      "mdd_pct": -21.17,
+      "calmar": 0.6082,
+      "var_1pct": -1.7365,
+      "var_5pct": -0.9845,
+      "es_1pct": -2.3274,
+      "es_5pct": -1.4949,
+      "ann_turnover_pct": 468.4,
+      "ann_tx_drag_bps": 87.1
+    },
+    "static_5050": {
+      "name": "50/50 0050.TW/Cash",
+      "n_days": 1753,
+      "n_years": 6.96,
+      "period": "2019-01-02 to 2026-03-30",
+      "ann_return_pct": 12.85,
+      "ann_vol_pct": 10.42,
+      "sharpe": 1.234,
+      "sortino": 1.6613,
+      "mdd_pct": -18.28,
+      "calmar": 0.7029,
+      "var_1pct": -1.8167,
+      "var_5pct": -0.9334,
+      "es_1pct": -2.5518,
+      "es_5pct": -1.4703,
+      "ann_turnover_pct": 0.0,
+      "ann_tx_drag_bps": 0.0
+    }
+  },
+  "table_common_period": {
+    "buy_hold": {
+      "name": "Buy & Hold 0050.TW",
+      "n_days": 1512,
+      "n_years": 6.0,
+      "period": "2020-01-02 to 2026-03-30",
+      "ann_return_pct": 24.55,
+      "ann_vol_pct": 21.87,
+      "sharpe": 1.1223,
+      "sortino": 1.5186,
+      "mdd_pct": -33.83,
+      "calmar": 0.7257,
+      "var_1pct": -3.7489,
+      "var_5pct": -1.9897,
+      "es_1pct": -5.2814,
+      "es_5pct": -3.1009,
+      "ann_turnover_pct": 0.0,
+      "ann_tx_drag_bps": 0.0
+    },
+    "vix_863": {
+      "name": "8.63/VIX (monthly)",
+      "n_days": 1512,
+      "n_years": 6.0,
+      "period": "2020-01-02 to 2026-03-30",
+      "ann_return_pct": 11.31,
+      "ann_vol_pct": 9.99,
+      "sharpe": 1.1324,
+      "sortino": 1.4956,
+      "mdd_pct": -13.71,
+      "calmar": 0.8251,
+      "var_1pct": -1.791,
+      "var_5pct": -0.8574,
+      "es_1pct": -2.5701,
+      "es_5pct": -1.4281,
+      "ann_turnover_pct": 94.4,
+      "ann_tx_drag_bps": 17.6
+    },
+    "vix_12": {
+      "name": "12/VIX (monthly)",
+      "n_days": 1512,
+      "n_years": 6.0,
+      "period": "2020-01-02 to 2026-03-30",
+      "ann_return_pct": 15.75,
+      "ann_vol_pct": 13.89,
+      "sharpe": 1.1341,
+      "sortino": 1.4978,
+      "mdd_pct": -18.63,
+      "calmar": 0.8458,
+      "var_1pct": -2.4904,
+      "var_5pct": -1.1922,
+      "es_1pct": -3.5738,
+      "es_5pct": -1.9858,
+      "ann_turnover_pct": 131.2,
+      "ann_tx_drag_bps": 24.4
+    },
+    "gjr_vt": {
+      "name": "GJR-GARCH VT (10%)",
+      "n_days": 1512,
+      "n_years": 6.0,
+      "period": "2020-01-02 to 2026-03-30",
+      "ann_return_pct": 12.28,
+      "ann_vol_pct": 11.33,
+      "sharpe": 1.0835,
+      "sortino": 1.5597,
+      "mdd_pct": -22.21,
+      "calmar": 0.5529,
+      "var_1pct": -1.7803,
+      "var_5pct": -1.0868,
+      "es_1pct": -2.4214,
+      "es_5pct": -1.5665,
+      "ann_turnover_pct": 689.2,
+      "ann_tx_drag_bps": 128.2
+    },
+    "ewma_vt": {
+      "name": "EWMA VT (10%)",
+      "n_days": 1512,
+      "n_years": 6.0,
+      "period": "2020-01-02 to 2026-03-30",
+      "ann_return_pct": 10.96,
+      "ann_vol_pct": 10.77,
+      "sharpe": 1.0182,
+      "sortino": 1.4106,
+      "mdd_pct": -21.17,
+      "calmar": 0.5179,
+      "var_1pct": -1.758,
+      "var_5pct": -0.9903,
+      "es_1pct": -2.4001,
+      "es_5pct": -1.5214,
+      "ann_turnover_pct": 447.9,
+      "ann_tx_drag_bps": 83.3
+    },
+    "static_5050": {
+      "name": "50/50 0050.TW/Cash",
+      "n_days": 1512,
+      "n_years": 6.0,
+      "period": "2020-01-02 to 2026-03-30",
+      "ann_return_pct": 12.27,
+      "ann_vol_pct": 10.94,
+      "sharpe": 1.1223,
+      "sortino": 1.5186,
+      "mdd_pct": -18.28,
+      "calmar": 0.6713,
+      "var_1pct": -1.8745,
+      "var_5pct": -0.9948,
+      "es_1pct": -2.6407,
+      "es_5pct": -1.5504,
+      "ann_turnover_pct": 0.0,
+      "ann_tx_drag_bps": 0.0
+    }
+  },
+  "var_trinity_tests": {
+    "buy_hold": {
+      "var_1pct": {
+        "n_obs": 1503,
+        "n_violations": 25,
+        "violation_rate_pct": 1.663,
+        "expected_rate_pct": 1.0,
+        "kupiec_lr": 5.568,
+        "kupiec_p": 0.0183,
+        "kupiec_pass": true,
+        "cc_lr": 7.253,
+        "cc_p": 0.0071,
+        "cc_pass": false,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "var_5pct": {
+        "n_obs": 1503,
+        "n_violations": 91,
+        "violation_rate_pct": 6.055,
+        "expected_rate_pct": 5.0,
+        "kupiec_lr": 3.307,
+        "kupiec_p": 0.069,
+        "kupiec_pass": true,
+        "cc_lr": 13.309,
+        "cc_p": 0.0003,
+        "cc_pass": false,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "es_1pct": {
+        "n_violations": 25,
+        "mean_severity_ratio": 1.5866,
+        "z1_stat": 0.5866,
+        "z_stat": 5.1047,
+        "p_value": 0.0,
+        "pass": false
+      },
+      "es_5pct": {
+        "n_violations": 91,
+        "mean_severity_ratio": 1.6726,
+        "z1_stat": 0.6726,
+        "z_stat": 7.597,
+        "p_value": 0.0,
+        "pass": false
+      }
+    },
+    "vix_863": {
+      "var_1pct": {
+        "n_obs": 1503,
+        "n_violations": 28,
+        "violation_rate_pct": 1.863,
+        "expected_rate_pct": 1.0,
+        "kupiec_lr": 9.014,
+        "kupiec_p": 0.0027,
+        "kupiec_pass": false,
+        "cc_lr": 2.581,
+        "cc_p": 0.1082,
+        "cc_pass": true,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "var_5pct": {
+        "n_obs": 1503,
+        "n_violations": 84,
+        "violation_rate_pct": 5.589,
+        "expected_rate_pct": 5.0,
+        "kupiec_lr": 1.059,
+        "kupiec_p": 0.3036,
+        "kupiec_pass": true,
+        "cc_lr": 9.331,
+        "cc_p": 0.0023,
+        "cc_pass": false,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "es_1pct": {
+        "n_violations": 28,
+        "mean_severity_ratio": 1.4187,
+        "z1_stat": 0.4187,
+        "z_stat": 4.4361,
+        "p_value": 0.0,
+        "pass": false
+      },
+      "es_5pct": {
+        "n_violations": 84,
+        "mean_severity_ratio": 1.6565,
+        "z1_stat": 0.6565,
+        "z_stat": 7.8539,
+        "p_value": 0.0,
+        "pass": false
+      }
+    },
+    "vix_12": {
+      "var_1pct": {
+        "n_obs": 1503,
+        "n_violations": 28,
+        "violation_rate_pct": 1.863,
+        "expected_rate_pct": 1.0,
+        "kupiec_lr": 9.014,
+        "kupiec_p": 0.0027,
+        "kupiec_pass": false,
+        "cc_lr": 2.581,
+        "cc_p": 0.1082,
+        "cc_pass": true,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "var_5pct": {
+        "n_obs": 1503,
+        "n_violations": 84,
+        "violation_rate_pct": 5.589,
+        "expected_rate_pct": 5.0,
+        "kupiec_lr": 1.059,
+        "kupiec_p": 0.3036,
+        "kupiec_pass": true,
+        "cc_lr": 9.331,
+        "cc_p": 0.0023,
+        "cc_pass": false,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "es_1pct": {
+        "n_violations": 28,
+        "mean_severity_ratio": 1.4187,
+        "z1_stat": 0.4187,
+        "z_stat": 4.4361,
+        "p_value": 0.0,
+        "pass": false
+      },
+      "es_5pct": {
+        "n_violations": 84,
+        "mean_severity_ratio": 1.6565,
+        "z1_stat": 0.6565,
+        "z_stat": 7.8539,
+        "p_value": 0.0,
+        "pass": false
+      }
+    },
+    "gjr_vt": {
+      "var_1pct": {
+        "n_obs": 1502,
+        "n_violations": 22,
+        "violation_rate_pct": 1.465,
+        "expected_rate_pct": 1.0,
+        "kupiec_lr": 2.866,
+        "kupiec_p": 0.0905,
+        "kupiec_pass": true,
+        "cc_lr": 4.213,
+        "cc_p": 0.0401,
+        "cc_pass": true,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": true
+      },
+      "var_5pct": {
+        "n_obs": 1502,
+        "n_violations": 79,
+        "violation_rate_pct": 5.26,
+        "expected_rate_pct": 5.0,
+        "kupiec_lr": 0.21,
+        "kupiec_p": 0.6469,
+        "kupiec_pass": true,
+        "cc_lr": 6.829,
+        "cc_p": 0.009,
+        "cc_pass": false,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "es_1pct": {
+        "n_violations": 22,
+        "mean_severity_ratio": 1.3563,
+        "z1_stat": 0.3563,
+        "z_stat": 3.6374,
+        "p_value": 0.0003,
+        "pass": false
+      },
+      "es_5pct": {
+        "n_violations": 79,
+        "mean_severity_ratio": 1.5177,
+        "z1_stat": 0.5177,
+        "z_stat": 7.4036,
+        "p_value": 0.0,
+        "pass": false
+      }
+    },
+    "ewma_vt": {
+      "var_1pct": {
+        "n_obs": 1503,
+        "n_violations": 25,
+        "violation_rate_pct": 1.663,
+        "expected_rate_pct": 1.0,
+        "kupiec_lr": 5.568,
+        "kupiec_p": 0.0183,
+        "kupiec_pass": true,
+        "cc_lr": 3.322,
+        "cc_p": 0.0683,
+        "cc_pass": true,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": true
+      },
+      "var_5pct": {
+        "n_obs": 1503,
+        "n_violations": 78,
+        "violation_rate_pct": 5.19,
+        "expected_rate_pct": 5.0,
+        "kupiec_lr": 0.112,
+        "kupiec_p": 0.7374,
+        "kupiec_pass": true,
+        "cc_lr": 0.922,
+        "cc_p": 0.3368,
+        "cc_pass": true,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": true
+      },
+      "es_1pct": {
+        "n_violations": 25,
+        "mean_severity_ratio": 1.3577,
+        "z1_stat": 0.3577,
+        "z_stat": 3.5651,
+        "p_value": 0.0004,
+        "pass": false
+      },
+      "es_5pct": {
+        "n_violations": 78,
+        "mean_severity_ratio": 1.5992,
+        "z1_stat": 0.5992,
+        "z_stat": 7.5648,
+        "p_value": 0.0,
+        "pass": false
+      }
+    },
+    "static_5050": {
+      "var_1pct": {
+        "n_obs": 1503,
+        "n_violations": 25,
+        "violation_rate_pct": 1.663,
+        "expected_rate_pct": 1.0,
+        "kupiec_lr": 5.568,
+        "kupiec_p": 0.0183,
+        "kupiec_pass": true,
+        "cc_lr": 7.253,
+        "cc_p": 0.0071,
+        "cc_pass": false,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "var_5pct": {
+        "n_obs": 1503,
+        "n_violations": 91,
+        "violation_rate_pct": 6.055,
+        "expected_rate_pct": 5.0,
+        "kupiec_lr": 3.307,
+        "kupiec_p": 0.069,
+        "kupiec_pass": true,
+        "cc_lr": 13.309,
+        "cc_p": 0.0003,
+        "cc_pass": false,
+        "basel_zone": "GREEN",
+        "basel_pass": true,
+        "trinity_pass": false
+      },
+      "es_1pct": {
+        "n_violations": 25,
+        "mean_severity_ratio": 1.5866,
+        "z1_stat": 0.5866,
+        "z_stat": 5.1047,
+        "p_value": 0.0,
+        "pass": false
+      },
+      "es_5pct": {
+        "n_violations": 91,
+        "mean_severity_ratio": 1.6726,
+        "z1_stat": 0.6726,
+        "z_stat": 7.597,
+        "p_value": 0.0,
+        "pass": false
+      }
+    }
+  },
+  "dm_tests": {
+    "buy_hold_vs_vix_863": {
+      "strategy_1": "Buy & Hold 0050.TW",
+      "strategy_2": "8.63/VIX (monthly)",
+      "t_stat": -2.503,
+      "p_value": 0.0124,
+      "harvey_significant": false,
+      "better": "buy_hold",
+      "n_obs": 1512
+    },
+    "buy_hold_vs_vix_12": {
+      "strategy_1": "Buy & Hold 0050.TW",
+      "strategy_2": "12/VIX (monthly)",
+      "t_stat": -2.206,
+      "p_value": 0.0276,
+      "harvey_significant": false,
+      "better": "buy_hold",
+      "n_obs": 1512
+    },
+    "buy_hold_vs_gjr_vt": {
+      "strategy_1": "Buy & Hold 0050.TW",
+      "strategy_2": "GJR-GARCH VT (10%)",
+      "t_stat": -2.801,
+      "p_value": 0.0052,
+      "harvey_significant": false,
+      "better": "buy_hold",
+      "n_obs": 1512
+    },
+    "buy_hold_vs_ewma_vt": {
+      "strategy_1": "Buy & Hold 0050.TW",
+      "strategy_2": "EWMA VT (10%)",
+      "t_stat": -2.887,
+      "p_value": 0.004,
+      "harvey_significant": false,
+      "better": "buy_hold",
+      "n_obs": 1512
+    },
+    "buy_hold_vs_static_5050": {
+      "strategy_1": "Buy & Hold 0050.TW",
+      "strategy_2": "50/50 0050.TW/Cash",
+      "t_stat": -2.714,
+      "p_value": 0.0067,
+      "harvey_significant": false,
+      "better": "buy_hold",
+      "n_obs": 1512
+    },
+    "vix_863_vs_vix_12": {
+      "strategy_1": "8.63/VIX (monthly)",
+      "strategy_2": "12/VIX (monthly)",
+      "t_stat": 2.771,
+      "p_value": 0.0057,
+      "harvey_significant": false,
+      "better": "vix_12",
+      "n_obs": 1512
+    },
+    "vix_863_vs_gjr_vt": {
+      "strategy_1": "8.63/VIX (monthly)",
+      "strategy_2": "GJR-GARCH VT (10%)",
+      "t_stat": 0.486,
+      "p_value": 0.6272,
+      "harvey_significant": false,
+      "better": "gjr_vt",
+      "n_obs": 1512
+    },
+    "vix_863_vs_ewma_vt": {
+      "strategy_1": "8.63/VIX (monthly)",
+      "strategy_2": "EWMA VT (10%)",
+      "t_stat": -0.134,
+      "p_value": 0.8931,
+      "harvey_significant": false,
+      "better": "vix_863",
+      "n_obs": 1512
+    },
+    "vix_863_vs_static_5050": {
+      "strategy_1": "8.63/VIX (monthly)",
+      "strategy_2": "50/50 0050.TW/Cash",
+      "t_stat": 0.708,
+      "p_value": 0.4789,
+      "harvey_significant": false,
+      "better": "static_5050",
+      "n_obs": 1512
+    },
+    "vix_12_vs_gjr_vt": {
+      "strategy_1": "12/VIX (monthly)",
+      "strategy_2": "GJR-GARCH VT (10%)",
+      "t_stat": -1.584,
+      "p_value": 0.1135,
+      "harvey_significant": false,
+      "better": "vix_12",
+      "n_obs": 1512
+    },
+    "vix_12_vs_ewma_vt": {
+      "strategy_1": "12/VIX (monthly)",
+      "strategy_2": "EWMA VT (10%)",
+      "t_stat": -2.238,
+      "p_value": 0.0254,
+      "harvey_significant": false,
+      "better": "vix_12",
+      "n_obs": 1512
+    },
+    "vix_12_vs_static_5050": {
+      "strategy_1": "12/VIX (monthly)",
+      "strategy_2": "50/50 0050.TW/Cash",
+      "t_stat": -1.805,
+      "p_value": 0.0712,
+      "harvey_significant": false,
+      "better": "vix_12",
+      "n_obs": 1512
+    },
+    "gjr_vt_vs_ewma_vt": {
+      "strategy_1": "GJR-GARCH VT (10%)",
+      "strategy_2": "EWMA VT (10%)",
+      "t_stat": -1.457,
+      "p_value": 0.1454,
+      "harvey_significant": false,
+      "better": "gjr_vt",
+      "n_obs": 1512
+    },
+    "gjr_vt_vs_static_5050": {
+      "strategy_1": "GJR-GARCH VT (10%)",
+      "strategy_2": "50/50 0050.TW/Cash",
+      "t_stat": -0.03,
+      "p_value": 0.9763,
+      "harvey_significant": false,
+      "better": "gjr_vt",
+      "n_obs": 1512
+    },
+    "ewma_vt_vs_static_5050": {
+      "strategy_1": "EWMA VT (10%)",
+      "strategy_2": "50/50 0050.TW/Cash",
+      "t_stat": 0.863,
+      "p_value": 0.3884,
+      "harvey_significant": false,
+      "better": "static_5050",
+      "n_obs": 1512
+    }
+  },
+  "amplification": {
+    "gamma_0050": {
+      "name": "0050.TW",
+      "n_estimates": 3964,
+      "mean_gamma": 0.1546,
+      "std_gamma": 0.1228,
+      "median_gamma": 0.1248,
+      "pct_negative": 5.0,
+      "hac_t_stat": 19.857,
+      "hac_p_value": 0.0,
+      "significant_5pct": true
+    },
+    "gamma_twii": {
+      "name": "^TWII",
+      "n_estimates": 4205,
+      "mean_gamma": 0.193,
+      "std_gamma": 0.1429,
+      "median_gamma": 0.1431,
+      "pct_negative": 2.4,
+      "hac_t_stat": 21.239,
+      "hac_p_value": 0.0,
+      "significant_5pct": true
+    },
+    "cross_sectional": {
+      "n_common_dates": 3958,
+      "correlation": 0.7714,
+      "mean_diff_0050_minus_twii": -0.0475,
+      "paired_t_stat": -32.75,
+      "paired_p_value": 0.0,
+      "0050_higher": false
+    }
+  },
+  "sanity_check_lag": {
+    "no_lag_sharpe": 1.3394,
+    "lagged_sharpe": 1.2592,
+    "inflation_pct": 6.4,
+    "conclusion": "Lag matters"
+  },
+  "descriptive_stats": {
+    "tw50_returns": {
+      "n": 4217,
+      "mean_daily_pct": 0.0724,
+      "std_daily_pct": 1.3442,
+      "skewness": 0.473,
+      "kurtosis": 19.054
+    },
+    "twii_returns": {
+      "n": 4457,
+      "mean_daily_pct": 0.0376,
+      "std_daily_pct": 1.18,
+      "skewness": -0.395,
+      "kurtosis": 5.935
+    }
+  },
+  "references": [
+    "Moreira & Muir (2017) JF — Volatility-managed portfolios",
+    "Harvey et al. (2016) RFS — t>3.0 threshold",
+    "Kupiec (1995) — VaR proportion of failures test",
+    "Christoffersen (1998) — VaR independence test",
+    "Acerbi & Szekely (2014) — ES backtesting",
+    "K739bv2 — Taiwan VT cross-validation (clean 0050.TW data)",
+    "K738v2 — VT insurance cost-benefit analysis (clean data)"
+  ],
+  "limitations": [
+    "0050.TW uses yfinance daily close data; pre-2014 split correction applied",
+    "VIX used as Taiwan proxy; actual VIXTWN only available since 2020-11",
+    "GJR-GARCH uses rolling 2000-day window; OOS starts when first window fills",
+    "Transaction costs based on ETF rate (0.186% round-trip); actual slippage may differ",
+    "Monthly rebalancing for VIX strategies; daily for GARCH/EWMA with monthly gate"
+  ],
+  "proposer": "User (Paper 2 S5 resolution)",
+  "executor": "Claude",
+  "timestamp": "2026-04-05T22:51:23.268389"
+}

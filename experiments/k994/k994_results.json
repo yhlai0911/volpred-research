@@ -1,0 +1,317 @@
+{
+  "assets": {
+    "QQQ": {
+      "status": "completed",
+      "label": "High-beta tech",
+      "n_total": 5347,
+      "n_oos": 1825,
+      "n_valid": 1824,
+      "vix_r2_corr_oos": 0.4936,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.1911,
+        "oos_vol_ann": 0.2405,
+        "oos_skewness": -0.373,
+        "oos_kurtosis": 7.525
+      },
+      "models": {
+        "GJR": {
+          "qlike": 1.480611,
+          "spearman_rho": 0.3316,
+          "spearman_p": 4.472997760981302e-48,
+          "params": [
+            3.64e-06,
+            0.03702831,
+            0.0857268,
+            0.88309766
+          ]
+        },
+        "A4": {
+          "qlike": 1.423289,
+          "spearman_rho": 0.3715,
+          "spearman_p": 8.417912331902867e-61,
+          "params": [
+            1.6e-06,
+            4.5e-07,
+            0.02997426,
+            0.07993121,
+            0.87967282
+          ]
+        },
+        "A4f": {
+          "qlike": 1.419541,
+          "spearman_rho": 0.3743,
+          "spearman_p": 9.498146336770202e-62,
+          "params": [
+            2.79e-06,
+            2.1e-07,
+            0.10027492,
+            0.02999087,
+            0.0800672,
+            0.87988392
+          ]
+        }
+      },
+      "dm_tests": {
+        "A4_vs_GJR": {
+          "dm_t": -3.7484,
+          "dm_p": 0.00018348335761197987,
+          "significant_harvey": "True",
+          "direction": "gjr_better"
+        },
+        "A4f_vs_GJR": {
+          "dm_t": -3.7081,
+          "dm_p": 0.00021506202200050062,
+          "significant_harvey": "True",
+          "direction": "gjr_better"
+        },
+        "A4f_vs_A4": {
+          "dm_t": -1.3254,
+          "dm_p": 0.18520000230411426,
+          "significant_harvey": "False"
+        }
+      },
+      "elapsed_seconds": 200.9
+    },
+    "EEM": {
+      "status": "completed",
+      "label": "Emerging markets",
+      "n_total": 5347,
+      "n_oos": 1825,
+      "n_valid": 1813,
+      "vix_r2_corr_oos": 0.4989,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.0752,
+        "oos_vol_ann": 0.2116,
+        "oos_skewness": -0.861,
+        "oos_kurtosis": 11.622
+      },
+      "models": {
+        "GJR": {
+          "qlike": 1.337534,
+          "spearman_rho": 0.2184,
+          "spearman_p": 5.226594054750879e-21,
+          "params": [
+            4.09e-06,
+            0.04327993,
+            0.0908207,
+            0.88585302
+          ]
+        },
+        "A4": {
+          "qlike": 1.305478,
+          "spearman_rho": 0.2669,
+          "spearman_p": 6.032475161446704e-31,
+          "params": [
+            1.217e-05,
+            6.3e-07,
+            0.03008902,
+            0.07997366,
+            0.88003923
+          ]
+        },
+        "A4f": {
+          "qlike": 1.306908,
+          "spearman_rho": 0.2665,
+          "spearman_p": 7.318627019072401e-31,
+          "params": [
+            8.15e-06,
+            3e-07,
+            0.10006507,
+            0.02999784,
+            0.07999422,
+            0.8800086
+          ]
+        }
+      },
+      "dm_tests": {
+        "A4_vs_GJR": {
+          "dm_t": -2.5458,
+          "dm_p": 0.010984372975083145,
+          "significant_harvey": "False",
+          "direction": "gjr_better"
+        },
+        "A4f_vs_GJR": {
+          "dm_t": -2.4677,
+          "dm_p": 0.013689541991037446,
+          "significant_harvey": "False",
+          "direction": "gjr_better"
+        },
+        "A4f_vs_A4": {
+          "dm_t": 1.1376,
+          "dm_p": 0.25542427234038856,
+          "significant_harvey": "False"
+        }
+      },
+      "elapsed_seconds": 154.5
+    },
+    "GLD": {
+      "status": "completed",
+      "label": "Gold (low VIX corr)",
+      "n_total": 5347,
+      "n_oos": 1825,
+      "n_valid": 1821,
+      "vix_r2_corr_oos": 0.1263,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.1754,
+        "oos_vol_ann": 0.1733,
+        "oos_skewness": -0.824,
+        "oos_kurtosis": 8.354
+      },
+      "models": {
+        "GJR": {
+          "qlike": 1.529083,
+          "spearman_rho": 0.1895,
+          "spearman_p": 3.450510494134382e-16,
+          "params": [
+            2.59e-06,
+            0.05012157,
+            0.05012157,
+            0.9009745
+          ]
+        },
+        "A4": {
+          "qlike": 1.513385,
+          "spearman_rho": 0.1934,
+          "spearman_p": 8.340631467721052e-17,
+          "params": [
+            7.03e-05,
+            1.4e-07,
+            0.04970149,
+            0.04970149,
+            0.89760711
+          ]
+        },
+        "A4f": {
+          "qlike": 1.51257,
+          "spearman_rho": 0.1918,
+          "spearman_p": 1.4847526470697171e-16,
+          "params": [
+            3.481e-05,
+            7e-08,
+            0.05012424,
+            0.050124,
+            0.050124,
+            0.90099397
+          ]
+        }
+      },
+      "dm_tests": {
+        "A4_vs_GJR": {
+          "dm_t": -1.0394,
+          "dm_p": 0.2987408979186861,
+          "significant_harvey": "False",
+          "direction": "gjr_better"
+        },
+        "A4f_vs_GJR": {
+          "dm_t": -1.0771,
+          "dm_p": 0.28156706537419707,
+          "significant_harvey": "False",
+          "direction": "gjr_better"
+        },
+        "A4f_vs_A4": {
+          "dm_t": -0.3887,
+          "dm_p": 0.6975658401265483,
+          "significant_harvey": "False"
+        }
+      },
+      "elapsed_seconds": 151.2
+    },
+    "0050.TW": {
+      "status": "completed",
+      "label": "Taiwan ETF (VIX lag+1)",
+      "n_total": 4081,
+      "n_oos": 1697,
+      "n_valid": 1638,
+      "vix_r2_corr_oos": 0.2751,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.2121,
+        "oos_vol_ann": 0.2112,
+        "oos_skewness": -0.35,
+        "oos_kurtosis": 7.506
+      },
+      "models": {
+        "GJR": {
+          "qlike": 1.458086,
+          "spearman_rho": 0.2121,
+          "spearman_p": 4.059674150142411e-18,
+          "params": [
+            3.98e-06,
+            0.03541343,
+            0.08441094,
+            0.88238592
+          ]
+        },
+        "A4": {
+          "qlike": 1.446546,
+          "spearman_rho": 0.2556,
+          "spearman_p": 7.512325628562112e-26,
+          "params": [
+            2.112e-05,
+            3.2e-07,
+            0.03043712,
+            0.07987065,
+            0.88019266
+          ]
+        },
+        "A4f": {
+          "qlike": 1.431764,
+          "spearman_rho": 0.2496,
+          "spearman_p": 1.0866024620194036e-24,
+          "params": [
+            1.061e-05,
+            1.6e-07,
+            0.10051976,
+            0.03015593,
+            0.08012705,
+            0.88006872
+          ]
+        }
+      },
+      "dm_tests": {
+        "A4_vs_GJR": {
+          "dm_t": -0.5528,
+          "dm_p": 0.5805086875826226,
+          "significant_harvey": "False",
+          "direction": "gjr_better"
+        },
+        "A4f_vs_GJR": {
+          "dm_t": -1.4388,
+          "dm_p": 0.1504025304483494,
+          "significant_harvey": "False",
+          "direction": "gjr_better"
+        },
+        "A4f_vs_A4": {
+          "dm_t": -1.7167,
+          "dm_p": 0.08622054878615493,
+          "significant_harvey": "False"
+        }
+      },
+      "elapsed_seconds": 136.8
+    }
+  },
+  "summary": {
+    "n_assets_tested": 4,
+    "a4f_significant_wins": 1,
+    "a4_significant_wins": 1,
+    "conclusion": "A4f shows limited generalization — significant in only 1/4 assets"
+  },
+  "metadata": {
+    "experiment_id": "K994",
+    "base_experiment": "K988/K988b",
+    "model_spec": "A4f: τ=θ₀+θ₁VIX², free ω, GJR g_t, τ_t denominator",
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-08",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "evaluation": "QLIKE on r² (Patton 2011)",
+    "elapsed_seconds": 668.1,
+    "timestamp": "2026-04-08T01:26:19.964472+00:00",
+    "references": [
+      "Engle, Ghysels & Sohn (2013). Stock Market Volatility and Macroeconomic Fundamentals. RES 95(3):776-797.",
+      "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256.",
+      "Harvey et al. (2016). t > 3.0 threshold.",
+      "Conrad & Loch (2015). Anticipating Long-Term Stock Market Volatility. JBES 33(3):338-358."
+    ]
+  }
+}

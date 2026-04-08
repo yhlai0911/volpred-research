@@ -1,0 +1,571 @@
+{
+  "experiment_id": "K825",
+  "title": "K825: Proxy-Reliance Control in Conformal VaR",
+  "description": "Tests 3 conformal VaR calibration methods against K824v2 baselines. C1: Naive conformal (quantile of conformity scores). C2: Proxy-robust conformal (QLIKE-based scores, Patton 2011). C3: Split conformal with exchangeability guard (runs test). Baselines: Normal, Student-t, HistSim (K824v2 champion).",
+  "asset": "SPY",
+  "oos_period": "2023-01-01 to 2024-12-31",
+  "n_oos": 502,
+  "n_valid": 502,
+  "refit_every": 63,
+  "alpha_levels": [
+    0.01,
+    0.05
+  ],
+  "methods": {
+    "baselines": [
+      "B1_Normal",
+      "B2_StudentT",
+      "B3_HistSim"
+    ],
+    "conformal": [
+      "C1_Naive_Conformal",
+      "C2_Proxy_Robust",
+      "C3_Exch_Conformal"
+    ]
+  },
+  "data_source": "yfinance (SPY, 2006-01-01 to 2025-12-31)",
+  "method": "GJR-GARCH(1,1) expanding window + 3 conformal calibrations",
+  "conformal_details": {
+    "C1_Naive_Conformal": "Split conformal using conformity score c_t = -r_t/sigma_t. VaR = -sigma * q_{1-alpha}(c). Lookback=252, min_calib=50.",
+    "C2_Proxy_Robust": "Proxy-robust conformal using QLIKE ratios r\u00b2_t/h_t. VaR correction via sqrt of (1-alpha) quantile of variance ratios. Patton (2011) theory: QLIKE consistent under proxy noise.",
+    "C3_Exch_Conformal": "Same as C1 but with Wald-Wolfowitz runs test for exchangeability. Falls back to raw Normal VaR when exchangeability rejected."
+  },
+  "references": [
+    "Patton (2011) J. Econometrics 160 \u2014 QLIKE proxy-robust loss",
+    "Vovk, Gammerman, Shafer (2005) \u2014 Conformal prediction",
+    "arXiv:2603.22569 (2026) \u2014 Proxy-reliance in conformal VaR",
+    "Kupiec (1995) \u2014 Unconditional VaR coverage",
+    "Christoffersen (1998) \u2014 Conditional VaR independence",
+    "Basel Committee (1996, 2019) \u2014 Traffic light framework",
+    "K824v2 \u2014 HistSim best (4/502, Basel Green, Trinity PASS)",
+    "K800/K800v2 \u2014 Conformal artifact lesson"
+  ],
+  "backtest_results": {
+    "1pct": {
+      "B1_Normal": {
+        "violation_rate": 0.017928,
+        "expected_rate": 0.01,
+        "n_violations": 9,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 2.5803,
+          "p_value": 0.1082,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 6,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "B2_StudentT": {
+        "violation_rate": 0.013944,
+        "expected_rate": 0.01,
+        "n_violations": 7,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.7026,
+          "p_value": 0.4019,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "yellow",
+        "basel_violations_in_window": 5,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "B3_HistSim": {
+        "violation_rate": 0.007968,
+        "expected_rate": 0.01,
+        "n_violations": 4,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.225,
+          "p_value": 0.6353,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 4,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "C1_Naive_Conformal": {
+        "violation_rate": 0.011952,
+        "expected_rate": 0.01,
+        "n_violations": 6,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.1819,
+          "p_value": 0.6698,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 4,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      },
+      "C2_Proxy_Robust": {
+        "violation_rate": 0.0,
+        "expected_rate": 0.01,
+        "n_violations": 0,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 10.0905,
+          "p_value": 0.0015,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 0,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "C3_Exch_Conformal": {
+        "violation_rate": 0.011952,
+        "expected_rate": 0.01,
+        "n_violations": 6,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.1819,
+          "p_value": 0.6698,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 4,
+        "basel_window_size": 250,
+        "trinity_pass": true
+      }
+    },
+    "5pct": {
+      "B1_Normal": {
+        "violation_rate": 0.051793,
+        "expected_rate": 0.05,
+        "n_violations": 26,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.0336,
+          "p_value": 0.8546,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.1096,
+          "p_value": 0.7407,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 13,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "B2_StudentT": {
+        "violation_rate": 0.057769,
+        "expected_rate": 0.05,
+        "n_violations": 29,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.6088,
+          "p_value": 0.4352,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.3558,
+          "p_value": 0.5509,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 15,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "B3_HistSim": {
+        "violation_rate": 0.045817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.19,
+          "p_value": 0.6629,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 11,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "C1_Naive_Conformal": {
+        "violation_rate": 0.045817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.19,
+          "p_value": 0.6629,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 11,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "C2_Proxy_Robust": {
+        "violation_rate": 0.011952,
+        "expected_rate": 0.05,
+        "n_violations": 6,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 21.7816,
+          "p_value": 0.0,
+          "pass": false
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "green",
+        "basel_violations_in_window": 1,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      },
+      "C3_Exch_Conformal": {
+        "violation_rate": 0.045817,
+        "expected_rate": 0.05,
+        "n_violations": 23,
+        "n_total": 502,
+        "kupiec": {
+          "stat": 0.19,
+          "p_value": 0.6629,
+          "pass": true
+        },
+        "christoffersen": {
+          "stat": 0.0,
+          "p_value": 1.0,
+          "pass": true
+        },
+        "basel_traffic_light": "red",
+        "basel_violations_in_window": 11,
+        "basel_window_size": 250,
+        "trinity_pass": false
+      }
+    }
+  },
+  "pinball_loss": {
+    "1pct": {
+      "B1_Normal": 0.00026649,
+      "B2_StudentT": 0.00026455,
+      "B3_HistSim": 0.00026744,
+      "C1_Naive_Conformal": 0.00026624,
+      "C2_Proxy_Robust": 0.00047346,
+      "C3_Exch_Conformal": 0.0002662
+    },
+    "5pct": {
+      "B1_Normal": 0.0009243,
+      "B2_StudentT": 0.00092558,
+      "B3_HistSim": 0.00092811,
+      "C1_Naive_Conformal": 0.00093705,
+      "C2_Proxy_Robust": 0.00132112,
+      "C3_Exch_Conformal": 0.00093704
+    }
+  },
+  "dm_tests": {
+    "1pct": {
+      "C1_Naive_Conformal_vs_B1_Normal": {
+        "dm_stat": -0.0217,
+        "p_value": 0.982672,
+        "harvey_pass": false,
+        "winner": "C1_Naive_Conformal"
+      },
+      "C1_Naive_Conformal_vs_B3_HistSim": {
+        "dm_stat": -0.137,
+        "p_value": 0.891012,
+        "harvey_pass": false,
+        "winner": "C1_Naive_Conformal"
+      },
+      "C2_Proxy_Robust_vs_B1_Normal": {
+        "dm_stat": 6.0559,
+        "p_value": 0.0,
+        "harvey_pass": true,
+        "winner": "B1_Normal"
+      },
+      "C2_Proxy_Robust_vs_B3_HistSim": {
+        "dm_stat": 7.2697,
+        "p_value": 0.0,
+        "harvey_pass": true,
+        "winner": "B3_HistSim"
+      },
+      "C3_Exch_Conformal_vs_B1_Normal": {
+        "dm_stat": -0.0251,
+        "p_value": 0.980008,
+        "harvey_pass": false,
+        "winner": "C3_Exch_Conformal"
+      },
+      "C3_Exch_Conformal_vs_B3_HistSim": {
+        "dm_stat": -0.1415,
+        "p_value": 0.887463,
+        "harvey_pass": false,
+        "winner": "C3_Exch_Conformal"
+      },
+      "B3_HistSim_vs_B1_Normal": {
+        "dm_stat": 0.0796,
+        "p_value": 0.936585,
+        "harvey_pass": false,
+        "winner": "B1_Normal"
+      },
+      "B3_HistSim_vs_B2_StudentT": {
+        "dm_stat": 0.5429,
+        "p_value": 0.587168,
+        "harvey_pass": false,
+        "winner": "B2_StudentT"
+      }
+    },
+    "5pct": {
+      "C1_Naive_Conformal_vs_B1_Normal": {
+        "dm_stat": 2.1839,
+        "p_value": 0.028969,
+        "harvey_pass": false,
+        "winner": "B1_Normal"
+      },
+      "C1_Naive_Conformal_vs_B3_HistSim": {
+        "dm_stat": 1.9601,
+        "p_value": 0.049982,
+        "harvey_pass": false,
+        "winner": "B3_HistSim"
+      },
+      "C2_Proxy_Robust_vs_B1_Normal": {
+        "dm_stat": 8.5437,
+        "p_value": 0.0,
+        "harvey_pass": true,
+        "winner": "B1_Normal"
+      },
+      "C2_Proxy_Robust_vs_B3_HistSim": {
+        "dm_stat": 8.9764,
+        "p_value": 0.0,
+        "harvey_pass": true,
+        "winner": "B3_HistSim"
+      },
+      "C3_Exch_Conformal_vs_B1_Normal": {
+        "dm_stat": 2.1832,
+        "p_value": 0.029024,
+        "harvey_pass": false,
+        "winner": "B1_Normal"
+      },
+      "C3_Exch_Conformal_vs_B3_HistSim": {
+        "dm_stat": 1.9593,
+        "p_value": 0.050081,
+        "harvey_pass": false,
+        "winner": "B3_HistSim"
+      },
+      "B3_HistSim_vs_B1_Normal": {
+        "dm_stat": 0.8721,
+        "p_value": 0.38318,
+        "harvey_pass": false,
+        "winner": "B1_Normal"
+      },
+      "B3_HistSim_vs_B2_StudentT": {
+        "dm_stat": 0.3172,
+        "p_value": 0.751122,
+        "harvey_pass": false,
+        "winner": "B2_StudentT"
+      }
+    }
+  },
+  "var_width": {
+    "1pct": {
+      "B1_Normal": 0.01886,
+      "B2_StudentT": 0.020629,
+      "B3_HistSim": 0.022278,
+      "C1_Naive_Conformal": 0.021224,
+      "C2_Proxy_Robust": 0.046407,
+      "C3_Exch_Conformal": 0.02122
+    },
+    "5pct": {
+      "B1_Normal": 0.013335,
+      "B2_StudentT": 0.012943,
+      "B3_HistSim": 0.013867,
+      "C1_Naive_Conformal": 0.013898,
+      "C2_Proxy_Robust": 0.024764,
+      "C3_Exch_Conformal": 0.013898
+    }
+  },
+  "exchangeability_summary": {
+    "1pct": {
+      "n_test_points": 10,
+      "n_exchangeable": 10,
+      "n_rejected": 0,
+      "avg_p_value": 0.493,
+      "rejection_rate": 0.0
+    },
+    "5pct": {
+      "n_test_points": 10,
+      "n_exchangeable": 10,
+      "n_rejected": 0,
+      "avg_p_value": 0.493,
+      "rejection_rate": 0.0
+    }
+  },
+  "exchangeability_log": {
+    "1pct": [
+      {
+        "oos_day": 50,
+        "is_exchangeable": true,
+        "runs_test_p": 0.3913,
+        "n_scores": 50
+      },
+      {
+        "oos_day": 100,
+        "is_exchangeable": true,
+        "runs_test_p": 0.1594,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 150,
+        "is_exchangeable": true,
+        "runs_test_p": 0.8407,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 200,
+        "is_exchangeable": true,
+        "runs_test_p": 0.5465,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 250,
+        "is_exchangeable": true,
+        "runs_test_p": 0.2278,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 300,
+        "is_exchangeable": true,
+        "runs_test_p": 0.6877,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 350,
+        "is_exchangeable": true,
+        "runs_test_p": 0.6877,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 400,
+        "is_exchangeable": true,
+        "runs_test_p": 0.5465,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 450,
+        "is_exchangeable": true,
+        "runs_test_p": 0.4214,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 500,
+        "is_exchangeable": true,
+        "runs_test_p": 0.4214,
+        "n_scores": 100
+      }
+    ],
+    "5pct": [
+      {
+        "oos_day": 50,
+        "is_exchangeable": true,
+        "runs_test_p": 0.3913,
+        "n_scores": 50
+      },
+      {
+        "oos_day": 100,
+        "is_exchangeable": true,
+        "runs_test_p": 0.1594,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 150,
+        "is_exchangeable": true,
+        "runs_test_p": 0.8407,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 200,
+        "is_exchangeable": true,
+        "runs_test_p": 0.5465,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 250,
+        "is_exchangeable": true,
+        "runs_test_p": 0.2278,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 300,
+        "is_exchangeable": true,
+        "runs_test_p": 0.6877,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 350,
+        "is_exchangeable": true,
+        "runs_test_p": 0.6877,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 400,
+        "is_exchangeable": true,
+        "runs_test_p": 0.5465,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 450,
+        "is_exchangeable": true,
+        "runs_test_p": 0.4214,
+        "n_scores": 100
+      },
+      {
+        "oos_day": 500,
+        "is_exchangeable": true,
+        "runs_test_p": 0.4214,
+        "n_scores": 100
+      }
+    ]
+  },
+  "timestamp": "2026-04-03T07:12:49.061740+00:00",
+  "elapsed_seconds": 2.4
+}

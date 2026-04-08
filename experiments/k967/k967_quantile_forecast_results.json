@@ -1,0 +1,395 @@
+{
+  "experiment_id": "K967",
+  "title": "Probabilistic Volatility Quantile Forecasting: GARCH vs CAViaR vs QR",
+  "date": "2026-04-07",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2006-01-04 to 2026-04-06",
+  "is_period": "2006-01-04 to 2020-12-31",
+  "oos_period": "2021-01-04 to 2026-04-06",
+  "n_is": 3775,
+  "n_oos": 1319,
+  "seed": 42,
+  "methods": {
+    "GARCH": "GJR-GARCH(1,1) with Student-t, fixed parameters recursive forecast",
+    "CAViaR": "SAV and AS variants, best selected by IS pinball loss (Engle & Manganelli 2004)",
+    "QR": "Quantile Regression with lagged |r|(1-5) + VIX (statsmodels QuantReg)"
+  },
+  "garch_params": {
+    "omega": 0.02165646008772068,
+    "alpha1": 2.0100214888119882e-10,
+    "gamma1": 0.26449525822181397,
+    "beta1": 0.8528796446470346,
+    "nu": 5.258699814304262,
+    "persistence": 0.9851272739589437,
+    "convergence": 0
+  },
+  "quantile_levels": [
+    0.01,
+    0.05,
+    0.1,
+    0.9,
+    0.95,
+    0.99
+  ],
+  "results": {
+    "GARCH": {
+      "0.01": {
+        "pinball_loss": 0.0003557437525059481,
+        "coverage": 0.015163002274450341,
+        "target_coverage": 0.01,
+        "kupiec_lr": 3.066509371021761,
+        "kupiec_pvalue": 0.0799209089887184,
+        "christoffersen_lr": null,
+        "christoffersen_pvalue": null,
+        "n_obs": 1319,
+        "n_violations": 20
+      },
+      "0.05": {
+        "pinball_loss": 0.0011754973633755757,
+        "coverage": 0.07429871114480667,
+        "target_coverage": 0.05,
+        "kupiec_lr": 14.356679240477582,
+        "kupiec_pvalue": 0.00015124220207984873,
+        "christoffersen_lr": 0.873139385440993,
+        "christoffersen_pvalue": 0.350087657753824,
+        "n_obs": 1319,
+        "n_violations": 98
+      },
+      "0.1": {
+        "pinball_loss": 0.001920112307243543,
+        "coverage": 0.12661106899166036,
+        "target_coverage": 0.1,
+        "kupiec_lr": 9.655431868010467,
+        "kupiec_pvalue": 0.0018879250432188854,
+        "christoffersen_lr": 0.5950640454160521,
+        "christoffersen_pvalue": 0.440467537860063,
+        "n_obs": 1319,
+        "n_violations": 167
+      },
+      "0.9": {
+        "pinball_loss": 0.001590924846731765,
+        "coverage": 0.1023502653525398,
+        "target_coverage": 0.09999999999999998,
+        "kupiec_lr": 0.08039646750117946,
+        "kupiec_pvalue": 0.7767608477142156,
+        "christoffersen_lr": 4.924260776908682,
+        "christoffersen_pvalue": 0.026482129515611463,
+        "n_obs": 1319,
+        "n_violations": 135
+      },
+      "0.95": {
+        "pinball_loss": 0.0009619423594329855,
+        "coverage": 0.03335860500379075,
+        "target_coverage": 0.050000000000000044,
+        "kupiec_lr": 8.668040538478593,
+        "kupiec_pvalue": 0.0032383921472242116,
+        "christoffersen_lr": null,
+        "christoffersen_pvalue": null,
+        "n_obs": 1319,
+        "n_violations": 44
+      },
+      "0.99": {
+        "pinball_loss": 0.0002771586938582487,
+        "coverage": 0.004548900682335102,
+        "target_coverage": 0.010000000000000009,
+        "kupiec_lr": 4.967122864755389,
+        "kupiec_pvalue": 0.025833585852268692,
+        "christoffersen_lr": null,
+        "christoffersen_pvalue": null,
+        "n_obs": 1319,
+        "n_violations": 6
+      }
+    },
+    "CAViaR": {
+      "0.01": {
+        "pinball_loss": 0.000341668265454212,
+        "coverage": 0.012130401819560273,
+        "target_coverage": 0.01,
+        "kupiec_lr": 0.5662034165872036,
+        "kupiec_pvalue": 0.4517715339724383,
+        "christoffersen_lr": 1.749955435749314,
+        "christoffersen_pvalue": 0.18588233481061922,
+        "n_obs": 1319,
+        "n_violations": 16
+      },
+      "0.05": {
+        "pinball_loss": 0.0011636421122814009,
+        "coverage": 0.047763457164518575,
+        "target_coverage": 0.05,
+        "kupiec_lr": 0.1409083610849109,
+        "kupiec_pvalue": 0.7073796432488819,
+        "christoffersen_lr": 0.38599733469214925,
+        "christoffersen_pvalue": 0.5344109123934535,
+        "n_obs": 1319,
+        "n_violations": 63
+      },
+      "0.1": {
+        "pinball_loss": 0.0018980175545044173,
+        "coverage": 0.10765731614859743,
+        "target_coverage": 0.1,
+        "kupiec_lr": 0.8405482500056429,
+        "kupiec_pvalue": 0.35924001812489703,
+        "christoffersen_lr": 1.572299982873119,
+        "christoffersen_pvalue": 0.20987331460490855,
+        "n_obs": 1319,
+        "n_violations": 142
+      },
+      "0.9": {
+        "pinball_loss": 0.0015566019099637518,
+        "coverage": 0.10765731614859743,
+        "target_coverage": 0.09999999999999998,
+        "kupiec_lr": 0.8405482500057602,
+        "kupiec_pvalue": 0.3592400181248635,
+        "christoffersen_lr": 0.9496258216314573,
+        "christoffersen_pvalue": 0.32981455948036753,
+        "n_obs": 1319,
+        "n_violations": 142
+      },
+      "0.95": {
+        "pinball_loss": 0.0009276444765258386,
+        "coverage": 0.05458680818802123,
+        "target_coverage": 0.050000000000000044,
+        "kupiec_lr": 0.568028390372799,
+        "kupiec_pvalue": 0.45104344686946574,
+        "christoffersen_lr": 3.3841464164925696,
+        "christoffersen_pvalue": 0.06582625534982378,
+        "n_obs": 1319,
+        "n_violations": 72
+      },
+      "0.99": {
+        "pinball_loss": 0.00027480218557544763,
+        "coverage": 0.009097801364670205,
+        "target_coverage": 0.010000000000000009,
+        "kupiec_lr": 0.1118285251190021,
+        "kupiec_pvalue": 0.7380719125215699,
+        "christoffersen_lr": null,
+        "christoffersen_pvalue": null,
+        "n_obs": 1319,
+        "n_violations": 12
+      }
+    },
+    "QR": {
+      "0.01": {
+        "pinball_loss": 0.0003444616455972124,
+        "coverage": 0.0075815011372251705,
+        "target_coverage": 0.01,
+        "kupiec_lr": 0.8503091279512844,
+        "kupiec_pvalue": 0.3564649016867183,
+        "christoffersen_lr": 3.487523560254118,
+        "christoffersen_pvalue": 0.06183301792479079,
+        "n_obs": 1319,
+        "n_violations": 10
+      },
+      "0.05": {
+        "pinball_loss": 0.0011713541347969805,
+        "coverage": 0.043214556482183475,
+        "target_coverage": 0.05,
+        "kupiec_lr": 1.3373746715195018,
+        "kupiec_pvalue": 0.2474974813071108,
+        "christoffersen_lr": 0.10198298185804333,
+        "christoffersen_pvalue": 0.7494628316840425,
+        "n_obs": 1319,
+        "n_violations": 57
+      },
+      "0.1": {
+        "pinball_loss": 0.0019053914292947477,
+        "coverage": 0.09476876421531463,
+        "target_coverage": 0.1,
+        "kupiec_lr": 0.4074480553829183,
+        "kupiec_pvalue": 0.5232676217471155,
+        "christoffersen_lr": 0.15519724745684016,
+        "christoffersen_pvalue": 0.6936173500750974,
+        "n_obs": 1319,
+        "n_violations": 125
+      },
+      "0.9": {
+        "pinball_loss": 0.0015817010286147465,
+        "coverage": 0.08946171341925702,
+        "target_coverage": 0.09999999999999998,
+        "kupiec_lr": 1.681299698435172,
+        "kupiec_pvalue": 0.1947518426583409,
+        "christoffersen_lr": 6.1852913900251,
+        "christoffersen_pvalue": 0.012881648913440347,
+        "n_obs": 1319,
+        "n_violations": 118
+      },
+      "0.95": {
+        "pinball_loss": 0.0009493136175267292,
+        "coverage": 0.03639120545868082,
+        "target_coverage": 0.050000000000000044,
+        "kupiec_lr": 5.657112136810234,
+        "kupiec_pvalue": 0.017384724866840617,
+        "christoffersen_lr": 0.403700849929578,
+        "christoffersen_pvalue": 0.5251841465221918,
+        "n_obs": 1319,
+        "n_violations": 48
+      },
+      "0.99": {
+        "pinball_loss": 0.0002756172550320869,
+        "coverage": 0.01061410159211524,
+        "target_coverage": 0.010000000000000009,
+        "kupiec_lr": 0.049256711488334215,
+        "kupiec_pvalue": 0.8243617351170336,
+        "christoffersen_lr": null,
+        "christoffersen_pvalue": null,
+        "n_obs": 1319,
+        "n_violations": 14
+      }
+    }
+  },
+  "dm_tests": {
+    "0.01": {
+      "GARCH_vs_CAViaR": {
+        "t_stat": 1.437167851506079,
+        "p_value": 0.1506703053823848,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      },
+      "GARCH_vs_QR": {
+        "t_stat": 0.46704794282111745,
+        "p_value": 0.6404655774997527,
+        "significant_harvey": false,
+        "better_model": "QR"
+      },
+      "CAViaR_vs_QR": {
+        "t_stat": -0.14449725220308607,
+        "p_value": 0.8851078261062402,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      }
+    },
+    "0.05": {
+      "GARCH_vs_CAViaR": {
+        "t_stat": 0.826855662037535,
+        "p_value": 0.408318876541502,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      },
+      "GARCH_vs_QR": {
+        "t_stat": 0.16753530870798833,
+        "p_value": 0.8669488677830901,
+        "significant_harvey": false,
+        "better_model": "QR"
+      },
+      "CAViaR_vs_QR": {
+        "t_stat": -0.37557590938334956,
+        "p_value": 0.7072322032494516,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      }
+    },
+    "0.1": {
+      "GARCH_vs_CAViaR": {
+        "t_stat": 1.467075226046841,
+        "p_value": 0.1423555925903992,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      },
+      "GARCH_vs_QR": {
+        "t_stat": 0.56655674729839,
+        "p_value": 0.5710153681593326,
+        "significant_harvey": false,
+        "better_model": "QR"
+      },
+      "CAViaR_vs_QR": {
+        "t_stat": -0.3007733123190406,
+        "p_value": 0.7635873603058698,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      }
+    },
+    "0.9": {
+      "GARCH_vs_CAViaR": {
+        "t_stat": 2.4242532167872213,
+        "p_value": 0.015339905315362223,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      },
+      "GARCH_vs_QR": {
+        "t_stat": 0.4419790934064457,
+        "p_value": 0.6585043346611941,
+        "significant_harvey": false,
+        "better_model": "QR"
+      },
+      "CAViaR_vs_QR": {
+        "t_stat": -1.1910953053677074,
+        "p_value": 0.2336161726554955,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      }
+    },
+    "0.95": {
+      "GARCH_vs_CAViaR": {
+        "t_stat": 3.079345696407607,
+        "p_value": 0.00207455804578216,
+        "significant_harvey": true,
+        "better_model": "CAViaR"
+      },
+      "GARCH_vs_QR": {
+        "t_stat": 0.7845440942707784,
+        "p_value": 0.43272091925112965,
+        "significant_harvey": false,
+        "better_model": "QR"
+      },
+      "CAViaR_vs_QR": {
+        "t_stat": -1.3147788192272771,
+        "p_value": 0.18858424788443107,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      }
+    },
+    "0.99": {
+      "GARCH_vs_CAViaR": {
+        "t_stat": 0.07963933172278263,
+        "p_value": 0.9365241123566899,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      },
+      "GARCH_vs_QR": {
+        "t_stat": 0.06977801243654867,
+        "p_value": 0.9443703480459107,
+        "significant_harvey": false,
+        "better_model": "QR"
+      },
+      "CAViaR_vs_QR": {
+        "t_stat": -0.06259033957413,
+        "p_value": 0.9500927222382034,
+        "significant_harvey": false,
+        "better_model": "CAViaR"
+      }
+    }
+  },
+  "best_models": {
+    "0.01": {
+      "model": "CAViaR",
+      "pinball_loss": 0.000341668265454212
+    },
+    "0.05": {
+      "model": "CAViaR",
+      "pinball_loss": 0.0011636421122814009
+    },
+    "0.1": {
+      "model": "CAViaR",
+      "pinball_loss": 0.0018980175545044173
+    },
+    "0.9": {
+      "model": "CAViaR",
+      "pinball_loss": 0.0015566019099637518
+    },
+    "0.95": {
+      "model": "CAViaR",
+      "pinball_loss": 0.0009276444765258386
+    },
+    "0.99": {
+      "model": "CAViaR",
+      "pinball_loss": 0.00027480218557544763
+    }
+  },
+  "references": [
+    "Engle & Manganelli (2004) CAViaR: Conditional Autoregressive Value at Risk by Regression Quantiles. JBE 22, 367-381",
+    "Xiao & Koenker (2009) Conditional Quantile Estimation for GARCH Models. JASA 104(488), 1696-1712",
+    "Patton (2011) Volatility Forecast Comparison Using Imperfect Proxies. JoE 160, 246-256",
+    "Kupiec (1995) Techniques for Verifying the Accuracy of Risk Measurement Models. Journal of Derivatives",
+    "Christoffersen (1998) Evaluating Interval Forecasts. International Economic Review 39, 841-862"
+  ]
+}

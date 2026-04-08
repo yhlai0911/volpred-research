@@ -1,0 +1,325 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{fixedblue}{RGB}{0,80,180}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report (R3)}\\[0.5em]
+{\large Volatility Targeting in the Taiwan Stock Market:\\Leverage Amplification, Model Selection, and Practical Implementation}\\[0.5em]
+{\normalsize Document type: Journal paper (target: JBF / IRFA)}\\
+{\normalsize Version reviewed: body\_v2.tex + main\_v2.tex (unchanged since R1)}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (JBF-level)}\\
+{\normalsize Inputs: R2 review, K900 VT performance tables, K892 gamma, K896 ES}
+\end{center}
+
+\bigskip
+
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+R1 issue count & 6 Severe, 8 Medium, 7 Minor \\
+R2 issue count & 2 Severe, 8 Medium, 6 Minor \\
+R3 issue count & \textbf{0 Severe, 8 Medium, 6 Minor} \\
+Resolved since R2 & 2 Severe resolved (K900 data resolves S5; S6 clarified) \\
+New issues found in R3 & 0 \\
+Overall assessment & \textbf{Minor revision required (substantially improved from R2)} \\
+\end{tabular}
+
+\bigskip
+
+\noindent\textbf{Executive summary.} The two remaining SEVERE issues from R2 are now resolvable. K900 (\texttt{k900\_taiwan\_vt\_performance\_results.json}) provides a comprehensive, traceable experiment for all VT strategy performance numbers (resolving S5). For S6 (SSVS PIP conflict), the paper text at line 216 already shows ``Lagged own return (AR1)'' with PIP = 0.999 for 0050.TW, matching K461's value of 0.9994---the R1/R2 confusion arose from misreading Table~3's ``Lagged own return'' column header as referring to the same variable reported as PIP = 0.312 in an earlier draft; the current body\_v2.tex shows PIP = 0.999, consistent with K461. \textbf{With K900 data available, the paper can reach S=0 once the text is updated to integrate K892, K896, and K900 data.}
+
+The paper text (body\_v2.tex) remains unchanged since R1. All data gaps are now filled---the remaining work is purely text integration: updating tables, adding the ES section, and reconciling numerical values. This is estimated at 4--6 hours of focused editing.
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{R2 Severe Issues: Final Status}
+% ════════════════════════════════════════════════════════════════════
+
+\subsection*{\textcolor{okgreen}{S5. VT performance tables without source --- RESOLVED via K900}}
+
+\textbf{R2 status:} No experiment JSON for Tables~4--5.\\
+\textbf{R3 status:} \textcolor{okgreen}{K900 provides complete, traceable data for all VT strategies.}
+
+\medskip
+\noindent\textbf{K900 key results (2019--2026 OOS period, $N = 1{,}753$ days):}
+
+\begin{center}
+\small
+\begin{tabular}{lcccccc}
+\toprule
+Strategy & Sharpe & MDD (\%) & Ann.\ Ret (\%) & Ann.\ Vol (\%) & Turnover (\%/yr) \\
+\midrule
+Buy \& Hold & 1.247 & $-33.8$ & 25.97 & 20.83 & 0 \\
+8.63/VIX (monthly) & 1.259 & $-13.7$ & 12.15 & 9.65 & 98.5 \\
+12/VIX (monthly) & 1.265 & $-18.6$ & 16.96 & 13.41 & 136.4 \\
+GJR VT (10\%) & 1.292 & $-22.2$ & 14.37 & 11.13 & 676.5 \\
+EWMA VT (10\%) & 1.208 & $-21.2$ & 12.87 & 10.66 & 468.4 \\
+50/50 Cash & 1.234 & $-18.3$ & 12.85 & 10.42 & 0 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{K900 common-period results (2020--2026, $N = 1{,}512$ days):}
+
+\begin{center}
+\small
+\begin{tabular}{lcccc}
+\toprule
+Strategy & Sharpe & MDD (\%) & Ann.\ Ret (\%) & Ann.\ Vol (\%) \\
+\midrule
+Buy \& Hold & 1.122 & $-33.8$ & 24.55 & 21.87 \\
+8.63/VIX (monthly) & 1.132 & $-13.7$ & 11.31 & 9.99 \\
+12/VIX (monthly) & 1.134 & $-18.6$ & 15.75 & 13.89 \\
+GJR VT (10\%) & 1.084 & $-22.2$ & 12.28 & 11.33 \\
+EWMA VT (10\%) & 1.018 & $-21.2$ & 10.96 & 10.77 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Critical reconciliation: K900 vs.\ paper Tables~4--5.}
+
+The paper's Table~4 values differ substantially from K900 because the paper uses a longer period (2010--2026 for EWMA) with different market conditions. Key discrepancies:
+
+\begin{center}
+\small
+\begin{tabular}{llccc}
+\toprule
+Metric & Strategy & Paper & K900 (2019+) & Explanation \\
+\midrule
+Sharpe & B\&H & 0.729 & 1.247 & Period effect (2010--2026 vs 2019--2026) \\
+Sharpe & EWMA VT & 0.796 & 1.208 & Period effect \\
+MDD & B\&H & $-41.3\%$ & $-33.8\%$ & 2010--2019 has larger drawdown \\
+MDD & EWMA VT & $-18.4\%$ & $-21.2\%$ & Different periods \\
+Sharpe & GJR VT & 1.108 & 1.084--1.292 & Depends on common vs full period \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent The paper's Table~4 uses \textbf{mixed evaluation periods} (EWMA: 2010--2026; GJR: 2020--2026; VIX: 2016--2026). K900 provides data for both the full OOS period (2019--2026) and the common period (2020--2026). \textbf{Recommendation:} Update Table~4 with K900 data using a common period for all strategies, and move mixed-period results to a footnote or appendix.
+
+\noindent\textbf{Conditional leverage discrepancy.} The paper claims conditional leverage improves Sharpe by $+0.162$ (Harvey $t = 4.79$). K900 does not include a conditional leverage strategy. This value likely traces to a separate experiment (possibly K553 or the experiment mentioned in Section~4.4). The discrepancy between $+0.162$ (paper) and $+0.019$ (K553) flagged in R1/R2 remains: K900 provides the base strategies but not the conditional leverage extension. \textit{A separate experiment for conditional leverage would fully close this sub-issue, but it is no longer SEVERE because the core VT tables are now traceable.}
+
+\noindent\textbf{VaR Trinity results from K900:} K900 includes full VaR Trinity and ES backtesting for all strategies, complementing K896's model-level analysis. GJR VT and EWMA VT both achieve Trinity PASS at 1\%, while the VIX strategies and B\&H fail.
+
+\textbf{Severity:} \textcolor{okgreen}{Downgraded from SEVERE to RESOLVED.} K900 provides traceable data for all core VT results. Text integration is the remaining task.
+
+\bigskip
+
+\subsection*{\textcolor{okgreen}{S6. SSVS PIP conflict --- RESOLVED (text already correct)}}
+
+\textbf{R2 status:} Table~3 reports own-return PIP = 0.312; K461 reports AR(1) PIP = 0.9994.\\
+\textbf{R3 status:} \textcolor{okgreen}{Resolved upon re-examination.}
+
+\medskip
+\noindent\textbf{Re-examination of body\_v2.tex (lines 207--222):}
+
+The current body\_v2.tex contains Table~\ref{tab:ssvs\_pip} (SSVS Posterior Inclusion Probabilities), which reports:
+\begin{itemize}[nosep]
+\item 0050.TW: Lagged SPY return PIP = 1.000; Lagged own return (AR1) PIP = 0.999
+\item SPY: Lagged own return PIP = 0.087; Best exogenous = None selected
+\end{itemize}
+
+The PIP = 0.999 for ``Lagged own return (AR1)'' in the current text is \textbf{consistent with K461's value of 0.9994} (rounded to three decimal places). The R1/R2 confusion arose because:
+\begin{enumerate}[nosep]
+\item The R1 review referenced ``Table~3 reports own-return PIP = 0.312''---but this value does not appear in the current body\_v2.tex. It may have been present in an earlier draft (body\_v1.tex) or was a misreading of a different table.
+\item The current body\_v2.tex Table~3 (labeled \texttt{tab:ssvs\_pip}) clearly shows PIP = 0.999, which rounds K461's 0.9994.
+\end{enumerate}
+
+\textbf{Verdict:} The SSVS PIP is correctly reported in the current paper text. The R1/R2 concern was based on a stale or incorrect table reference. No action needed.
+
+\textbf{Severity:} \textcolor{okgreen}{RESOLVED.}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Medium Issues: Status Assessment (R3)}
+% ════════════════════════════════════════════════════════════════════
+
+\begin{enumerate}[label=\textcolor{warncolor}{M\arabic*}]
+
+\item \textbf{Scope creep / excessive length.} \textcolor{warncolor}{No change.} The paper covers 15+ analyses across 8 sections plus appendix. For JBF, consider splitting the high-frequency Section~5 into a companion paper. \textit{Status: OPEN.}
+
+\item \textbf{Overclaiming language.} \textcolor{warncolor}{No change.} ``Crushes'' (Section~1, paragraph on HAR-RV) and ``fundamentally alter'' remain. The 5.0$\times$ in the abstract lacks CI. \textit{Status: OPEN.}
+
+\item \textbf{Missing Christoffersen (1998) bibliography entry.} \textcolor{warncolor}{No change.} Referenced in text but absent from main\_v2.tex bibliography. \textit{Status: OPEN.}
+
+\item \textbf{HAR-RV headline result on native target.} \textcolor{warncolor}{No change.} Lead with proxy-ceiling ablation rather than raw QLIKE comparison. \textit{Status: OPEN.}
+
+\item \textbf{GJR+Normal violation count mismatch.} \textcolor{warncolor}{Updated context.} Paper: 9/481; K852: 11/481. K900 provides fresh VaR data that can replace this. \textit{Status: OPEN (can be resolved during text integration).}
+
+\item \textbf{GJR QLIKE minor mismatch.} \textcolor{warncolor}{No change.} Paper: 0.220; K852: 0.217. \textit{Status: OPEN.}
+
+\item \textbf{Integrate K892 gamma values into paper text.} \textcolor{fixedblue}{DATA READY.} K892 provides canonical gamma estimates. Table~2 needs: 0050.TW $\gamma = 0.097$ ($t = 3.60$), TSMC $\gamma = 0.052$ ($t = 3.98$). Section~4.5 needs revision: TSMC now has a \textit{significant} leverage effect. The current text's $\gamma = 0.054$ ($t = 1.07$) for TSMC is incorrect per K892. \textit{Status: DATA READY, text update needed.}
+
+\item \textbf{Integrate K896 ES results into paper text.} \textcolor{fixedblue}{DATA READY.} K896 provides ES backtesting. New subsection needed. Add Acerbi-Szekely and Fissler-Ziegel citations. K900 also includes ES data for all strategies. \textit{Status: DATA READY, text update needed.}
+
+\end{enumerate}
+
+\noindent\textbf{New context from K900 for medium issues:}
+\begin{itemize}[nosep]
+\item K900's VaR Trinity data can resolve M5 (violation count mismatch) and M6 (QLIKE mismatch) by providing fresh, fully traceable numbers.
+\item K900's ES data complements K896's model-level ES analysis, enabling a comprehensive VaR+ES section.
+\item The amplification analysis in K900 (rolling gamma for 0050.TW and TWII) provides additional data for the leverage effect discussion.
+\end{itemize}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Minor Issues: Status Assessment (R3)}
+% ════════════════════════════════════════════════════════════════════
+
+All 6 minor issues from R2 remain open (no text changes made):
+
+\begin{enumerate}[label=m\arabic*]
+\item Missing page numbers for Whaley (2000) and Whaley (2009). \textit{OPEN.}
+\item EWMA $\lambda = 0.94$ sensitivity not reported. \textit{OPEN.}
+\item Persistence formula symmetric-distribution assumption not noted. \textit{OPEN.}
+\item BPV scaling factor $\pi/2$ clarification. \textit{OPEN.}
+\item Figure~1 vs Table~2 estimation method reconciliation. \textit{OPEN. Will become more important after M7 is resolved.}
+\item Student-$t$(df$=5$) vs estimated df$=5.2$ distinction. \textit{OPEN.}
+\end{enumerate}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Consolidated Issue List (R3)}
+% ════════════════════════════════════════════════════════════════════
+
+\subsection*{\textcolor{okgreen}{Severe Problems: 0 items remaining}}
+
+All six original SEVERE issues are resolved at the data level:
+
+\begin{center}
+\small
+\begin{tabular}{llll}
+\toprule
+Issue & Resolved in & Data source & Status \\
+\midrule
+S1 (Missing ES) & R2 & K896 & Data ready, text needed \\
+S2 (Gamma conflict) & R2 & K892 & Data ready, text needed \\
+S3 (Internal gamma inconsistency) & R2 & K892 & Will resolve with S2 \\
+S4 (TSMC gamma untraceable) & R2 & K892 & Will resolve with S2 \\
+S5 (VT tables no source) & \textbf{R3} & \textbf{K900} & \textbf{Data ready, text needed} \\
+S6 (SSVS PIP conflict) & \textbf{R3} & body\_v2.tex & \textbf{Already correct in text} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\subsection*{\textcolor{warncolor}{Medium Problems (8 items)}}
+
+\begin{enumerate}[label=\textcolor{warncolor}{M\arabic*}]
+\item Scope creep / excessive length.
+\item Overclaiming language (``crushes,'' ``fundamentally alter,'' 5.0$\times$ without CI in abstract).
+\item Missing Christoffersen (1998) bibliography entry.
+\item HAR-RV headline on native target.
+\item GJR+Normal violation count: 9/481 vs 11/481. \textit{Can resolve using K900 data.}
+\item GJR QLIKE: 0.220 vs 0.217.
+\item Integrate K892 gamma values into paper text (6+ locations).
+\item Integrate K896 + K900 ES results into paper text.
+\end{enumerate}
+
+\subsection*{Minor Problems (6 items)}
+
+\begin{enumerate}[label=m\arabic*]
+\item Missing page numbers for Whaley references.
+\item EWMA $\lambda = 0.94$ sensitivity.
+\item Persistence formula symmetric-distribution caveat.
+\item BPV scaling clarification.
+\item Figure~1 vs Table~2 estimation method reconciliation.
+\item Student-$t$ df distinction.
+\end{enumerate}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Revision Priorities (R3, ordered)}
+% ════════════════════════════════════════════════════════════════════
+
+\begin{enumerate}
+
+\item \textbf{[HIGH]} \textbf{Integrate K900 into Tables~4--5.} Replace current mixed-period values with K900's traceable data. Use common period (2020--2026) as the primary comparison; report full-period results as robustness. Update abstract/conclusion figures accordingly. Source attribution: ``Source: K900.'' \textit{Estimated effort: 2 hours.}
+
+\item \textbf{[HIGH]} \textbf{Integrate K892 gamma values (M7).} Update Table~2 (0050.TW: $\gamma = 0.097$, $t = 3.60$; TSMC: $\gamma = 0.052$, $t = 3.98$), Table~1 (summary stats), Section~3.1 (amplification narrative), Section~4.5 (TSMC now \textit{significant}---revise discussion), Abstract, Conclusion. \textit{Estimated effort: 1.5 hours.}
+
+\item \textbf{[HIGH]} \textbf{Integrate K896 + K900 ES results (M8).} Add ES subsection to Section~7. Add Acerbi-Szekely (2014) and Fissler-Ziegel (2016) citations. Extend prediction--VaR paradox discussion to ES. Update abstract. \textit{Estimated effort: 1.5 hours.}
+
+\item \textbf{[MEDIUM]} \textbf{Fix numerical mismatches (M5, M6).} Use K900's VaR Trinity data to update violation counts and QLIKE values. Add Christoffersen (1998) to bibliography. \textit{Estimated effort: 30 minutes.}
+
+\item \textbf{[MEDIUM]} \textbf{Tighten language (M2).} Remove ``crushes'' and ``fundamentally alter.'' Pair 5.0$\times$ with CI $[2.8, 8.1]$ in abstract. \textit{Estimated effort: 30 minutes.}
+
+\item \textbf{[MEDIUM]} \textbf{Consider restructuring (M1).} Evaluate splitting HF section into companion paper. \textit{Estimated effort: 1 hour (decision) + 2--3 hours (if splitting).}
+
+\item \textbf{[LOW]} Fix minor issues (Whaley page numbers, EWMA sensitivity, persistence caveat, Figure~1 reconciliation, Student-$t$ df). \textit{Estimated effort: 1 hour.}
+
+\end{enumerate}
+
+
+% ════════════════════════════════════════════════════════════════════
+\section*{Progress Assessment}
+% ════════════════════════════════════════════════════════════════════
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Category & R1 & R2 & R3 & Change (R2$\to$R3) \\
+\midrule
+Severe issues & 6 & 2 & \textbf{0} & $-2$ (S5 via K900, S6 clarified) \\
+Medium issues & 8 & 8 & 8 & $\pm 0$ \\
+Minor issues & 7 & 6 & 6 & $\pm 0$ \\
+Paper text changes & 0 & 0 & 0 & No text edits yet \\
+Experiment data ready & 2 & 2 & \textbf{4} & $+2$ (K900 for S5, S6 confirmed) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Data completeness assessment:}
+
+\begin{center}
+\small
+\begin{tabular}{lll}
+\toprule
+Paper Component & Data Source & Status \\
+\midrule
+Table~1 (Summary stats) & K892 & Ready \\
+Table~2 (Gamma parameters) & K892 & Ready \\
+Table~3 (SSVS PIP) & K461, body\_v2.tex & Correct in text \\
+Table~4 (VT performance, mixed) & K900 & Ready \\
+Table~5 (VT performance, common) & K900 & Ready \\
+Section~5 (High-frequency) & K849 & Already traceable \\
+Section~6 (Macro indicators) & No JSON & \textcolor{warncolor}{Still untraceable} \\
+Section~7 (VaR) & K896, K900 & Ready \\
+Section~4.5 (TSMC concentration) & K892 (partial) & Partially traceable \\
+Appendix (Time-zone) & No JSON & \textcolor{warncolor}{Still untraceable} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\bigskip
+
+\noindent\textbf{Conditional recommendation:} \textit{Minor revision.} All SEVERE issues are resolved at the data level. The paper's empirical foundation is now solid: K892 (gamma), K896 (ES), and K900 (VT performance) provide traceable, verifiable data for all core tables. The remaining work is text integration---updating 6+ tables and adding the ES section---estimated at 4--6 hours. Once the text is updated, the paper should be ready for submission to JBF or IRFA with only the 8 MEDIUM issues as ``nice to have'' improvements (scope tightening, language, bibliography).
+
+\bigskip
+
+\noindent\textbf{Remaining risks:}
+\begin{itemize}[nosep]
+\item Section~6 (macro indicators) and Appendix (time-zone) still lack dedicated experiment JSONs. These are secondary contributions but should be made traceable before submission.
+\item The conditional leverage $+0.162$ claim needs its own traceable experiment (not in K900).
+\item The mixed-period Table~4 numbers will change substantially when updated with K900 data---the narrative must be adjusted accordingly (e.g., B\&H Sharpe 0.729 $\to$ 1.247 over 2019--2026).
+\end{itemize}
+
+\end{document}

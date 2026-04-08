@@ -1,0 +1,362 @@
+\documentclass[12pt,a4paper]{article}
+
+% --- Packages ---------------------------------------------------------------
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{longtable}
+\usepackage{fontspec}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+\onehalfspacing
+
+% --- Severity colors --------------------------------------------------------
+\definecolor{highsev}{RGB}{204,0,0}
+\definecolor{medsev}{RGB}{204,102,0}
+\definecolor{lowsev}{RGB}{0,102,204}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{fixedblue}{RGB}{0,80,180}
+
+\newcommand{\HIGH}{\textcolor{highsev}{\textbf{[HIGH]}}}
+\newcommand{\MEDIUM}{\textcolor{medsev}{\textbf{[MEDIUM]}}}
+\newcommand{\LOW}{\textcolor{lowsev}{\textbf{[LOW]}}}
+\newcommand{\OK}{\textcolor{okgreen}{\textbf{[OK]}}}
+\newcommand{\DATAREADY}{\textcolor{fixedblue}{\textbf{[DATA READY]}}}
+
+% --- Title ------------------------------------------------------------------
+\title{Review R3: Academic Review + Audit Follow-up\\[6pt]
+\Large ``Is Volatility Targeting Just Trend Following?\\
+Decomposing the Benefits of Volatility Targeting''\\[6pt]
+\normalsize Lai (2026) --- body\_v2.tex, $\sim$33 pages, 18 citations\\
+\normalsize Targeting \textit{Journal of Portfolio Management} / \textit{Financial Analysts Journal}}
+
+\author{VolPred Research System\\
+\small Claude Opus 4.6 (1M context)\\[3pt]
+\small Inputs: R2 review, K898 Table~3/6 supplement, K901 13-market international data, body\_v2.tex}
+
+\date{April 5, 2026}
+
+\begin{document}
+\maketitle
+
+\tableofcontents
+\newpage
+
+% =============================================================================
+\section{Executive Summary}
+% =============================================================================
+
+This R3 review assesses the status of R2's 4 HIGH, 13 MEDIUM, and 7 LOW issues, given that one new experiment (K901, 13-market international VT) has been completed since R2, and the K898 reconciliation issues have been further analyzed.
+
+\medskip
+\noindent\textbf{Issue Summary:}
+
+\begin{center}
+\begin{tabular}{lcccl}
+\toprule
+& R1 & R2 & R3 & Change (R2$\to$R3) \\
+\midrule
+HIGH    & 7 & 4 & \textbf{2} & $-2$ (A.2 resolved via K901, B.2 resolvable) \\
+MEDIUM  & 11 & 13 & 13 & $\pm 0$ (C.1 partially addressed by K901) \\
+LOW     & 7 & 7 & 7 & $\pm 0$ \\
+\midrule
+Paper text changes & --- & 0 & 0 & No edits to body\_v2.tex \\
+New experiment data & --- & K898 & K901 & 13-market international VT \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{Overall Assessment:} K901 resolves the most critical remaining data gap: Table~5 (international evidence, 13 markets) is now fully traceable. However, K901 data \textbf{diverges from the paper's reported numbers} in important ways that require careful reconciliation. The split-sample results (A.4) and B.1 (misleading 1.4\% average) remain as the two HIGH issues. After these are resolved, the paper should be competitive at JPM/FAJ. The paper text remains unchanged---all improvements are at the data level.
+
+
+% =============================================================================
+\section{R2 HIGH Issues: Detailed Status}
+\label{sec:high}
+% =============================================================================
+
+\subsection{\OK\ A.2: Table~5 (International Evidence, 13 markets) --- RESOLVED via K901}
+
+\textbf{R2 status:} No JSON for the 13-market international results.\\
+\textbf{R3 status:} \textcolor{okgreen}{K901 provides complete 13-market data with per-market VT results, GJR gamma, bootstrap inference, and cross-sectional statistics.}
+
+\medskip
+\noindent\textbf{K901 key results:}
+
+\begin{center}
+\small
+\begin{tabular}{llccccc}
+\toprule
+Ticker & Region & B\&H Sharpe & VT Sharpe & $\Delta$Sharpe & $\Delta$MDD (pp) & $\gamma_{\text{GJR}}$ \\
+\midrule
+SPY & DM & 0.305 & 0.162 & $-0.143$ & 28.2 & 0.206 \\
+EWJ & DM & 0.063 & $-0.092$ & $-0.156$ & 25.5 & 0.095 \\
+EWG & DM & 0.109 & $-0.043$ & $-0.152$ & 27.3 & 0.117 \\
+EWU & DM & $-0.012$ & $-0.255$ & $-0.243$ & 22.6 & 0.135 \\
+EWA & DM & 0.083 & $-0.149$ & $-0.231$ & 20.2 & 0.093 \\
+EWC & DM & 0.180 & 0.054 & $-0.126$ & 22.7 & 0.114 \\
+EFA & DM & 0.054 & $-0.171$ & $-0.225$ & 29.5 & 0.137 \\
+EWZ & EM & 0.153 & $-0.033$ & $-0.185$ & 5.8 & 0.079 \\
+EEM & EM & 0.153 & $-0.107$ & $-0.260$ & 14.1 & 0.113 \\
+FXI & EM & 0.137 & $-0.044$ & $-0.181$ & 5.1 & 0.065 \\
+EWH & EM & 0.082 & $-0.150$ & $-0.232$ & 20.5 & 0.072 \\
+EWT & EM & 0.173 & $-0.036$ & $-0.209$ & 27.4 & 0.055 \\
+EWY & EM & 0.245 & 0.050 & $-0.195$ & 27.6 & 0.068 \\
+\midrule
+\textbf{Mean} & & 0.133 & $-0.062$ & $-0.195$ & \textbf{21.3} & 0.104 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{K901 cross-sectional statistics:}
+\begin{itemize}[nosep]
+\item MDD improved in \textbf{13/13} markets (100\%) --- matches the paper's claim
+\item Sharpe improved in \textbf{0/13} markets --- \textcolor{highsev}{paper claims ``only 2 of 13 show Sharpe improvement''; K901 shows 0/13}
+\item Spearman($\gamma$, $\Delta$MDD) = 0.401 ($p = 0.174$) --- \textcolor{highsev}{paper claims $r = -0.770$, $p = 0.002$}
+\item No market passes Harvey $t > 3.0$ threshold for DM test
+\item Average $\Delta$MDD = 21.3 pp --- \textcolor{highsev}{paper claims 28.7 pp with $t = 15.70$}
+\end{itemize}
+
+\medskip
+\noindent\textbf{Critical reconciliation issues between K901 and paper:}
+
+\begin{center}
+\small
+\begin{tabular}{lcc}
+\toprule
+Statistic & Paper Table~5 & K901 \\
+\midrule
+Average $\Delta$MDD & 28.7 pp ($t = 15.70$) & 21.3 pp \\
+VIX sensitivity vs $\Delta$MDD & $r = -0.770$, $p = 0.002$ & $\rho = 0.401$, $p = 0.174$ \\
+Sharpe improvement & 2/13 & 0/13 \\
+Markets included & 7 DM + 6 EM & 7 DM + 6 EM \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The discrepancies are substantial and likely arise from differences in:
+\begin{enumerate}[nosep]
+\item \textbf{VIX sensitivity definition:} The paper's $r = -0.770$ is between ``VIX sensitivity'' and $\Delta$MDD. K901 computes Spearman($\gamma$, $\Delta$MDD) = 0.401 instead. These are different variables---the paper's ``VIX sensitivity'' may be the correlation between VIX changes and local market returns (a different measure from $\gamma$). The $r = -0.770$ relationship would need a dedicated VIX sensitivity measure per market.
+\item \textbf{Market composition:} The paper lists INDA and MCHI; K901 uses EWH and EWY instead. Different market sets produce different averages.
+\item \textbf{Period and methodology:} K901 uses 2005--2026 with SHY cash; the paper's specification may differ.
+\item \textbf{Sharpe improvement:} K901's 0/13 vs.\ paper's 2/13 may reflect the longer sample (2005--2026 vs.\ possibly 2007--2026) and different cash proxy assumptions.
+\end{enumerate}
+
+\noindent\textbf{Action required:}
+\begin{enumerate}[nosep]
+\item Re-run K901 with exactly the paper's 13 markets (EFA, EWJ, EWG, EWU, EWA, EWC, VGK for DM; EEM, FXI, EWZ, INDA, EWT, MCHI for EM) and period (Jan 2007--Mar 2026).
+\item Compute ``VIX sensitivity'' per market as defined in the paper (likely: correlation between VIX and local market returns, or regression $\beta$), not just GJR $\gamma$.
+\item Update Table~5 with the reconciled K901 data.
+\item If the cross-sectional correlation changes significantly, update the abstract and conclusion.
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{okgreen}{Downgraded from HIGH to MEDIUM.} Data exists in K901, but reconciliation is needed. The core finding (13/13 MDD improvement) is confirmed. The quantitative details need alignment.
+
+\bigskip
+
+
+\subsection{\HIGH\ A.4: Split-sample results ($r = 0.487$) --- STILL UNTRACEABLE}
+
+\textbf{R2 status:} No JSON for split-sample cross-sectional results.\\
+\textbf{R3 status:} \textcolor{highsev}{No change.}
+
+The split-sample results (Pearson $r = 0.487$, $p = 0.021$; bootstrap CI $[0.114, 0.737]$; Spearman $\rho = 0.461$, $p = 0.031$) remain without a traceable experiment file. This is a key robustness test for the paper's central cross-sectional claim.
+
+\textbf{Action required:} Run the split-sample analysis (gamma from 2007--2016, TSMOM loading from 2017--2026) and save results to JSON. This should be straightforward given the full-sample infrastructure in \texttt{vt\_tsmom\_final\_n22.json}.
+
+\textbf{Severity:} \textcolor{highsev}{Remains HIGH.}
+
+\bigskip
+
+
+\subsection{\DATAREADY\ B.1: ``1.4\% TSMOM contribution'' misleading --- TEXT UNCHANGED}
+
+\textbf{R2 status:} Text unchanged despite K898 providing per-asset data.\\
+\textbf{R3 status:} \textcolor{highsev}{Text still unchanged.}
+
+The paper states ``approximately 1.4\%'' as a cross-asset average TSMOM contribution to total strategy Sharpe. K898 shows this average is driven by large cross-asset variation: SPY shows 7.1\% (or $-22.8\%$ depending on decomposition interpretation), while EEM shows $-0.6\%$. The 1.4\% average is misleading because:
+
+\begin{itemize}[nosep]
+\item It masks sign-changing variation across assets
+\item For SPY (the flagship asset), the true contribution is $\sim$7\%---five times the reported average
+\item The average is dominated by near-zero non-equity contributions
+\end{itemize}
+
+\textbf{Action required:} Replace the ``1.4\%'' claim with per-asset reporting in the abstract, introduction, and Table~1 footnote. This is a text edit, not a data issue.
+
+\textbf{Severity:} \textcolor{highsev}{Remains HIGH.} The misleading statistic appears 3 times (abstract, introduction, Section~3.3 footnote).
+
+\bigskip
+
+
+\subsection{\DATAREADY\ B.2: Table~4 M5 $N = 3{,}740$ vs $N = 5{,}049$ --- RESOLVABLE}
+
+\textbf{R2 status:} Text unchanged. JSON shows $N = 5{,}049$, paper says $N = 3{,}740$.\\
+\textbf{R3 status:} \textcolor{fixedblue}{Diagnosis confirmed, text fix straightforward.}
+
+The M5 AIC ($-47{,}213$) in the paper matches the JSON with $N = 5{,}049$, conclusively establishing that AQR BAB full-sample data was used, not the SPLV subsample ($N = 3{,}740$). The fix is a simple footnote correction.
+
+\textbf{Action required:}
+\begin{enumerate}[nosep]
+\item Change Table~4 footnote: ``M5 uses AQR BAB factor data ($N = 5{,}049$, full sample)''
+\item Remove or relocate the SPLV/SPHB discussion
+\item Add Frazzini \& Pedersen (2014) citation
+\end{enumerate}
+
+\textbf{Severity:} \textcolor{fixedblue}{Downgraded from HIGH to MEDIUM.} The diagnosis is clear and the fix is a simple text edit (no new experiment needed).
+
+\bigskip
+
+
+\subsection{Summary: C.1 MDD for only 5 assets --- PARTIALLY ADDRESSED by K901}
+
+\textbf{R2 status:} Only 5 correlated US equity assets for MDD retention claim.\\
+\textbf{R3 status:} K901 provides MDD data for 13 international markets, though these are VT MDD (not TSMOM-hedged MDD retention).
+
+K901 confirms 13/13 markets achieve MDD improvement under VT. However, the paper's 90--97\% MDD \textit{retention} (after TSMOM removal) is still based on only 5 US equity assets. K901 does not include TSMOM hedging decomposition per market.
+
+\textbf{Partial improvement:} K901 demonstrates that VT's MDD protection is universal across 13 diverse markets (DM and EM), strengthening the generalizability argument even though it does not directly test MDD retention after TSMOM removal.
+
+\textbf{Recommendation:} Report K901's 13-market MDD improvement as supporting evidence. Acknowledge that the 90--97\% retention figure is based on the 5-asset subsample. K79 data (EEM: 90.28\%, EFA: 94.02\%, GLD: 96.56\%) can extend the retention analysis to 8 assets without new experiments.
+
+\textbf{Severity:} Remains in consolidated MEDIUM list (was HIGH, now partially addressed).
+
+
+% =============================================================================
+\section{Consolidated Issue List (R3)}
+\label{sec:consolidated}
+% =============================================================================
+
+\subsection*{\textcolor{highsev}{HIGH (2 items)}}
+
+\begin{enumerate}[label=\textcolor{highsev}{\textbf{H\arabic*}}]
+
+\item \textbf{Split-sample results ($r = 0.487$): Untraceable.} Re-run and save JSON. \textit{[Was A.4]}
+
+\item \textbf{``1.4\% TSMOM contribution'' misleading average.} Replace with per-asset reporting. Text edit only (K898 data available). \textit{[Was B.1]}
+
+\end{enumerate}
+
+\subsection*{\textcolor{medsev}{MEDIUM (13 items)}}
+
+\begin{enumerate}[label=\textcolor{medsev}{\textbf{M\arabic*}}]
+
+\item \textbf{Table~5 (International): K901 data needs reconciliation.} Market composition, VIX sensitivity measure, and quantitative details differ from paper. Re-run with paper's exact 13 markets and compute VIX sensitivity (not just $\gamma$). \textit{[Was A.2, downgraded]}
+
+\item \textbf{Table~4 M5: $N = 3{,}740 \to 5{,}049$.} Fix footnote to ``AQR BAB full sample.'' Add Frazzini \& Pedersen (2014). \textit{[Was B.2, downgraded]}
+
+\item \textbf{Table~3 / Table~6: K898 data needs reconciliation.} Daily vs monthly TSMOM specification. Update tables with verified numbers. \textit{[Was M1 in R2]}
+
+\item \textbf{MDD retention based on 5--8 correlated assets.} Extend to 8+ using K79 data. K901 provides supporting 13-market evidence. \textit{[Was C.1]}
+
+\item \textbf{Sector analysis ($r = 0.163$): No source JSON.} \textit{[Unchanged]}
+
+\item \textbf{K687/K697/K688 not incorporated.} Paper's strongest supporting evidence still absent. \textit{[Unchanged]}
+
+\item \textbf{Inconsistent sample periods across tables.} \textit{[Unchanged]}
+
+\item \textbf{Table~3 Calmar column undiscussed.} \textit{[Unchanged]}
+
+\item \textbf{Block bootstrap sensitivity ($b = 63, 126, 252$) not tested.} \textit{[Unchanged]}
+
+\item \textbf{Full-sample TSMOM orthogonalization look-ahead.} \textit{[Unchanged]}
+
+\item \textbf{No placebo test for international VIX channel.} \textit{[Unchanged]}
+
+\item \textbf{Missing citations: Frazzini \& Pedersen (2014), Hurst et al.\ (2017), Liu et al.\ (2019).} \textit{[Unchanged]}
+
+\item \textbf{Hood \& Raughtigan (2025) lacks identification.} \textit{[Unchanged]}
+
+\end{enumerate}
+
+\subsection*{\textcolor{lowsev}{LOW (7 items)}}
+
+\begin{enumerate}[label=\textcolor{lowsev}{\textbf{L\arabic*}}]
+\item Lai (2026a) suffix implies companion paper.
+\item Several citations lack DOIs.
+\item ``$\sim$4\%/year Sharpe drag'' conflates units.
+\item JPM needs more practitioner content.
+\item Paper length ($\sim$33 pages) may exceed FAJ norms.
+\item ``strategies eliminates'' grammatical error.
+\item Sub-period stability has no summary table.
+\end{enumerate}
+
+
+% =============================================================================
+\section{Revision Priorities (R3, ordered)}
+\label{sec:priorities}
+% =============================================================================
+
+\begin{enumerate}
+
+\item \textbf{[CRITICAL]} \textbf{Save split-sample results to JSON} (H1). Re-run the split-sample cross-sectional analysis ($\gamma$ from 2007--2016, $\beta_{\text{TSMOM}}^{\perp}$ from 2017--2026) and save structured results. This is the paper's most important robustness test. \textit{Estimated effort: 30--60 minutes.}
+
+\item \textbf{[CRITICAL]} \textbf{Fix ``1.4\%'' misleading average} (H2). Replace with per-asset reporting. Text edit: ``For SPY, the TSMOM contribution is approximately 7\%; the cross-asset average is near zero because non-equity and EM assets show negative TSMOM contributions.'' Update abstract (3 locations). \textit{Estimated effort: 30 minutes.}
+
+\item \textbf{[HIGH]} \textbf{Reconcile K901 with paper's Table~5 specification} (M1). Re-run with the paper's exact 13 markets (including INDA, MCHI, VGK instead of EWH, EWY, EWC) and period (2007--2026). Compute ``VIX sensitivity'' as the correlation between VIX changes and local market returns. Update cross-sectional statistics. \textit{Estimated effort: 1--2 hours.}
+
+\item \textbf{[HIGH]} \textbf{Reconcile K898 with paper's TSMOM specification} (M3). Re-run K898 with monthly rebalancing. Update Tables~3 and~6. \textit{Estimated effort: 1--2 hours.}
+
+\item \textbf{[HIGH]} \textbf{Fix Table~4 M5 footnote} (M2). Change to ``AQR BAB full sample ($N = 5{,}049$).'' Add Frazzini \& Pedersen (2014). \textit{Estimated effort: 15 minutes.}
+
+\item \textbf{[HIGH]} \textbf{Expand MDD retention to 8+ assets} (M4). Extract K79 data for EEM, EFA, GLD. Report alongside the existing 5-asset results. \textit{Estimated effort: 1 hour.}
+
+\item \textbf{[MEDIUM]} \textbf{Incorporate K687/K697/K688} (M6). Add K688's CRRA $\gamma \geq 5$ to Cederburg rebuttal. \textit{Estimated effort: 1 hour.}
+
+\item \textbf{[MEDIUM]} Address remaining citation and text issues.
+
+\item \textbf{[LOW]} Fix grammar, DOIs, length, Calmar discussion.
+
+\end{enumerate}
+
+\bigskip
+\noindent\textbf{Estimated total effort:} 6--9 hours (down from 8--12 in R2).
+
+
+% =============================================================================
+\section{Progress Assessment}
+\label{sec:progress}
+% =============================================================================
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+& R1 & R2 & R3 & Trajectory \\
+\midrule
+Paper text & body\_v2.tex & unchanged & unchanged & No edits made \\
+Tables verified (of 7) & 2 & 2 & 2 & No change \\
+Tables with data ready & 0 & 2 (Table~3, 6) & \textbf{3} (+ Table~5) & Improving \\
+Tables fully untraceable & 5 & 3 & \textbf{2} (split-sample, sector) & Improving \\
+HIGH issues & 7 & 4 & \textbf{2} & Improving \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent\textbf{What improved since R2:}
+\begin{itemize}[nosep]
+\item K901 provides 13-market international VT data, resolving the largest remaining data gap (Table~5).
+\item B.2 ($N$ discrepancy) diagnosis is confirmed---simple text fix.
+\item C.1 (MDD breadth) partially addressed by K901's 13-market evidence.
+\item The paper's core empirical claim (13/13 MDD improvement) is \textbf{confirmed by K901}.
+\end{itemize}
+
+\noindent\textbf{What did not improve:}
+\begin{itemize}[nosep]
+\item Zero text changes to body\_v2.tex.
+\item Split-sample results still untraceable.
+\item The 1.4\% misleading average persists in 3 locations.
+\item K898 reconciliation (daily vs monthly TSMOM) unresolved.
+\item K687/K697/K688 still not incorporated.
+\end{itemize}
+
+\bigskip
+
+\noindent\textbf{Conditional recommendation:} \textit{Major revision, significantly improved from R2.} The data foundation is now nearly complete. Two HIGH issues remain: (1) the split-sample results need a traceable JSON (30--60 minutes of work), and (2) the 1.4\% claim needs text correction (30 minutes). K901 confirms the paper's central international finding (universal MDD improvement) but reveals quantitative discrepancies that require reconciliation. Once the two HIGH issues are resolved and K901 is reconciled, the paper will have 0 HIGH issues and should be ready for submission to JPM/FAJ with the remaining MEDIUM items as ``revise and resubmit'' material.
+
+\end{document}

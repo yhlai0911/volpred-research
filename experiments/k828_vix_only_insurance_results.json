@@ -1,0 +1,460 @@
+{
+  "data": {
+    "backtest_start": "2006-01-04",
+    "backtest_end": "2024-12-31",
+    "n_days": 4780,
+    "n_years": 18.97,
+    "vix_mean": 19.49,
+    "vix_std": 8.88
+  },
+  "full_period_metrics": {
+    "S0_BH_SPY": {
+      "label": "S0_BH_SPY",
+      "cagr": 10.455,
+      "ann_vol": 19.384,
+      "sharpe": 0.4362,
+      "mdd": -55.19,
+      "calmar": 0.1894,
+      "sortino": 0.5301,
+      "crra_gamma5": -0.249907,
+      "cum_return": 559.19
+    },
+    "S1_Always_12VIX": {
+      "label": "S1_Always_12VIX",
+      "cagr": 6.284,
+      "ann_vol": 9.468,
+      "sharpe": 0.4525,
+      "mdd": -29.03,
+      "calmar": 0.2164,
+      "sortino": 0.6026,
+      "crra_gamma5": -0.24983,
+      "cum_return": 217.64
+    },
+    "S2_VIX_Pctile_Cond": {
+      "label": "S2_VIX_Pctile_Cond",
+      "cagr": 6.305,
+      "ann_vol": 9.486,
+      "sharpe": 0.4538,
+      "mdd": -29.06,
+      "calmar": 0.2169,
+      "sortino": 0.6013,
+      "crra_gamma5": -0.249829,
+      "cum_return": 218.83
+    },
+    "S3_VIX_Smooth": {
+      "label": "S3_VIX_Smooth",
+      "cagr": 4.721,
+      "ann_vol": 7.711,
+      "sharpe": 0.3529,
+      "mdd": -27.51,
+      "calmar": 0.1716,
+      "sortino": 0.4553,
+      "crra_gamma5": -0.249864,
+      "cum_return": 139.85
+    },
+    "S4_5050_SPY_GLD": {
+      "label": "S4_5050_SPY_GLD",
+      "cagr": 10.272,
+      "ann_vol": 13.515,
+      "sharpe": 0.6121,
+      "mdd": -32.49,
+      "calmar": 0.3162,
+      "sortino": 0.7866,
+      "crra_gamma5": -0.249758,
+      "cum_return": 538.77
+    }
+  },
+  "weight_stats": {
+    "S1_Always_12VIX": {
+      "avg_weight": 69.65,
+      "std_weight": 21.28,
+      "pct_fully_invested": 10.9,
+      "pct_half_or_less": 20.6,
+      "annualized_turnover_pct": 795.75
+    },
+    "S2_VIX_Pctile_Cond": {
+      "avg_weight": 67.23,
+      "std_weight": 16.67,
+      "pct_fully_invested": 0.0,
+      "pct_half_or_less": 19.1,
+      "annualized_turnover_pct": 571.51
+    },
+    "S3_VIX_Smooth": {
+      "avg_weight": 50.52,
+      "std_weight": 9.64,
+      "pct_fully_invested": 0.0,
+      "pct_half_or_less": 38.8,
+      "annualized_turnover_pct": 353.37
+    }
+  },
+  "vix_regime_analysis": {
+    "Low (<20th)": {
+      "n_days": 713,
+      "pct_time": 14.92,
+      "S0_BH_SPY_ann_pct": 51.236,
+      "S1_Always_12VIX_ann_pct": 48.152,
+      "S2_VIX_Pctile_Cond_ann_pct": 41.223,
+      "S3_VIX_Smooth_ann_pct": 28.671,
+      "S4_5050_SPY_GLD_ann_pct": 29.659,
+      "S1_Always_12VIX_insurance_cost": 3.084,
+      "S2_VIX_Pctile_Cond_insurance_cost": 10.013,
+      "S3_VIX_Smooth_insurance_cost": 22.565
+    },
+    "Mid-Low (20-50th)": {
+      "n_days": 1565,
+      "pct_time": 32.75,
+      "S0_BH_SPY_ann_pct": 32.051,
+      "S1_Always_12VIX_ann_pct": 20.052,
+      "S2_VIX_Pctile_Cond_ann_pct": 23.698,
+      "S3_VIX_Smooth_ann_pct": 16.89,
+      "S4_5050_SPY_GLD_ann_pct": 19.362,
+      "S1_Always_12VIX_insurance_cost": 11.999,
+      "S2_VIX_Pctile_Cond_insurance_cost": 8.353,
+      "S3_VIX_Smooth_insurance_cost": 15.161
+    },
+    "Mid-High (50-80th)": {
+      "n_days": 1403,
+      "pct_time": 29.36,
+      "S0_BH_SPY_ann_pct": 14.0,
+      "S1_Always_12VIX_ann_pct": -1.078,
+      "S2_VIX_Pctile_Cond_ann_pct": -1.16,
+      "S3_VIX_Smooth_ann_pct": 3.397,
+      "S4_5050_SPY_GLD_ann_pct": 13.444,
+      "S1_Always_12VIX_insurance_cost": 15.078,
+      "S2_VIX_Pctile_Cond_insurance_cost": 15.16,
+      "S3_VIX_Smooth_insurance_cost": 10.603
+    },
+    "High (>80th)": {
+      "n_days": 1098,
+      "pct_time": 22.98,
+      "S0_BH_SPY_ann_pct": -45.365,
+      "S1_Always_12VIX_ann_pct": -29.989,
+      "S2_VIX_Pctile_Cond_ann_pct": -30.487,
+      "S3_VIX_Smooth_ann_pct": -25.656,
+      "S4_5050_SPY_GLD_ann_pct": -17.488,
+      "S1_Always_12VIX_insurance_cost": -15.376,
+      "S2_VIX_Pctile_Cond_insurance_cost": -14.878,
+      "S3_VIX_Smooth_insurance_cost": -19.709
+    }
+  },
+  "insurance_cost_summary": {
+    "S1_Always_12VIX": 4.171,
+    "S2_VIX_Pctile_Cond": 4.15,
+    "S3_VIX_Smooth": 5.734,
+    "S2_VIX_Pctile_Cond_cost_reduction_vs_S1_pct": 0.5,
+    "S3_VIX_Smooth_cost_reduction_vs_S1_pct": -37.5
+  },
+  "dm_tests": {
+    "S2 vs S0 (BH SPY)": {
+      "t_stat": 2.6287,
+      "p_value": 0.008598,
+      "significant": false,
+      "better": "S2_VIX_Pctile_Cond"
+    },
+    "S2 vs S1 (Always VT)": {
+      "t_stat": -0.1142,
+      "p_value": 0.909075,
+      "significant": false,
+      "better": "S1_Always_12VIX"
+    },
+    "S3 vs S0 (BH SPY)": {
+      "t_stat": 3.1067,
+      "p_value": 0.001903,
+      "significant": true,
+      "better": "S3_VIX_Smooth"
+    },
+    "S3 vs S1 (Always VT)": {
+      "t_stat": 3.0972,
+      "p_value": 0.001965,
+      "significant": true,
+      "better": "S3_VIX_Smooth"
+    },
+    "S3 vs S4 (50/50)": {
+      "t_stat": 2.7937,
+      "p_value": 0.005232,
+      "significant": false,
+      "better": "S3_VIX_Smooth"
+    },
+    "S2 vs S4 (50/50)": {
+      "t_stat": 1.9243,
+      "p_value": 0.054372,
+      "significant": false,
+      "better": "S2_VIX_Pctile_Cond"
+    },
+    "S1 vs S0 (BH SPY)": {
+      "t_stat": 2.6027,
+      "p_value": 0.009279,
+      "significant": false,
+      "better": "S1_Always_12VIX"
+    },
+    "S2 vs S3": {
+      "t_stat": -3.3356,
+      "p_value": 0.000858,
+      "significant": true,
+      "better": "S3_VIX_Smooth"
+    }
+  },
+  "vix_predictive_power": {
+    "vix_to_fwd_mdd_pearson": -0.4414,
+    "vix_to_fwd_mdd_spearman": -0.422,
+    "vix_spearman_pval": 1.83e-204,
+    "pctile_to_fwd_mdd_pearson": -0.3634,
+    "pctile_to_fwd_mdd_spearman": -0.4158,
+    "pctile_spearman_pval": 6.38e-198,
+    "quintile_analysis": {
+      "Q1(Low)": {
+        "avg_vix_pctile": 0.133,
+        "avg_fwd_mdd_30": -3.053,
+        "std_fwd_mdd_30": 2.511
+      },
+      "Q2": {
+        "avg_vix_pctile": 0.342,
+        "avg_fwd_mdd_30": -3.781,
+        "std_fwd_mdd_30": 3.119
+      },
+      "Q3": {
+        "avg_vix_pctile": 0.527,
+        "avg_fwd_mdd_30": -4.242,
+        "std_fwd_mdd_30": 4.153
+      },
+      "Q4": {
+        "avg_vix_pctile": 0.731,
+        "avg_fwd_mdd_30": -5.421,
+        "std_fwd_mdd_30": 4.289
+      },
+      "Q5(High)": {
+        "avg_vix_pctile": 0.917,
+        "avg_fwd_mdd_30": -7.857,
+        "std_fwd_mdd_30": 6.131
+      }
+    },
+    "monotonicity": true
+  },
+  "rolling_2yr_insurance_cost": {
+    "S1_Always_12VIX": {
+      "mean": 5.324,
+      "median": 5.436,
+      "std": 4.863,
+      "min": -16.174,
+      "max": 24.717,
+      "pct_free": 8.4
+    },
+    "S2_VIX_Pctile_Cond": {
+      "mean": 5.244,
+      "median": 4.815,
+      "std": 4.691,
+      "min": -16.104,
+      "max": 24.696,
+      "pct_free": 8.2
+    },
+    "S3_VIX_Smooth": {
+      "mean": 6.806,
+      "median": 7.2,
+      "std": 5.436,
+      "min": -16.886,
+      "max": 25.627,
+      "pct_free": 8.0
+    }
+  },
+  "cross_oos": {
+    "periods": {
+      "2007-01-01~2008-12-31": {
+        "S0_BH_SPY": -0.5598,
+        "S1_Always_12VIX": -0.995,
+        "S2_VIX_Pctile_Cond": -1.0015,
+        "S3_VIX_Smooth": -0.9827,
+        "S4_5050_SPY_GLD": -0.0093
+      },
+      "2011-01-01~2012-12-31": {
+        "S0_BH_SPY": 0.4366,
+        "S1_Always_12VIX": 0.1078,
+        "S2_VIX_Pctile_Cond": 0.1745,
+        "S3_VIX_Smooth": 0.0973,
+        "S4_5050_SPY_GLD": 0.5848
+      },
+      "2015-01-01~2016-12-31": {
+        "S0_BH_SPY": 0.371,
+        "S1_Always_12VIX": -0.0358,
+        "S2_VIX_Pctile_Cond": 0.1182,
+        "S3_VIX_Smooth": 0.1182,
+        "S4_5050_SPY_GLD": 0.1423
+      },
+      "2019-01-01~2020-12-31": {
+        "S0_BH_SPY": 0.9189,
+        "S1_Always_12VIX": 1.1533,
+        "S2_VIX_Pctile_Cond": 1.1309,
+        "S3_VIX_Smooth": 1.0499,
+        "S4_5050_SPY_GLD": 1.3478
+      },
+      "2023-01-01~2024-12-31": {
+        "S0_BH_SPY": 1.6905,
+        "S1_Always_12VIX": 1.5466,
+        "S2_VIX_Pctile_Cond": 1.5064,
+        "S3_VIX_Smooth": 1.482,
+        "S4_5050_SPY_GLD": 1.8873
+      }
+    },
+    "s2_wins_s0": 1,
+    "s3_wins_s0": 1,
+    "total_periods": 5,
+    "s2_wins_s4": 0,
+    "s3_wins_s4": 0
+  },
+  "oos_metrics": {
+    "S0_BH_SPY": {
+      "label": "S0_BH_SPY_OOS",
+      "cagr": 25.643,
+      "ann_vol": 12.811,
+      "sharpe": 1.8455,
+      "mdd": -9.97,
+      "calmar": 2.5709,
+      "sortino": 2.7016,
+      "crra_gamma5": -0.249226,
+      "cum_return": 57.58
+    },
+    "S1_Always_12VIX": {
+      "label": "S1_Always_12VIX_OOS",
+      "cagr": 17.134,
+      "ann_vol": 9.209,
+      "sharpe": 1.6433,
+      "mdd": -7.81,
+      "calmar": 2.1927,
+      "sortino": 2.4177,
+      "crra_gamma5": -0.24944,
+      "cum_return": 37.03
+    },
+    "S2_VIX_Pctile_Cond": {
+      "label": "S2_VIX_Pctile_Cond_OOS",
+      "cagr": 16.728,
+      "ann_vol": 9.226,
+      "sharpe": 1.5964,
+      "mdd": -7.69,
+      "calmar": 2.1753,
+      "sortino": 2.3303,
+      "crra_gamma5": -0.249454,
+      "cum_return": 36.09
+    },
+    "S3_VIX_Smooth": {
+      "label": "S3_VIX_Smooth_OOS",
+      "cagr": 12.411,
+      "ann_vol": 6.697,
+      "sharpe": 1.5545,
+      "mdd": -5.48,
+      "calmar": 2.2666,
+      "sortino": 2.2713,
+      "crra_gamma5": -0.249572,
+      "cum_return": 26.24
+    },
+    "S4_5050_SPY_GLD": {
+      "label": "S4_5050_SPY_GLD_OOS",
+      "cagr": 23.045,
+      "ann_vol": 10.209,
+      "sharpe": 2.0615,
+      "mdd": -7.45,
+      "calmar": 3.0931,
+      "sortino": 2.9646,
+      "crra_gamma5": -0.249261,
+      "cum_return": 51.15
+    }
+  },
+  "k811v2_comparison": {
+    "note": "Sharpe comparison NOT apples-to-apples: K811 used 2006-2026 (includes 2025-2026), K828 uses 2006-2024. Insurance cost difference also partially period-driven. Cross-OOS periods are comparable.",
+    "K811v2_VVIX": {
+      "period": "2006-01-03 ~ 2026-03-31",
+      "S2_sharpe": 0.2462,
+      "S3_sharpe": 0.3099,
+      "S2_insurance_cost": 2.202,
+      "S3_insurance_cost": 2.236,
+      "S2_cross_oos_wins": 1,
+      "S3_cross_oos_wins": 1
+    },
+    "K828_VIX_Only": {
+      "period": "2006-01-04 ~ 2024-12-31",
+      "S2_sharpe": 0.4538,
+      "S3_sharpe": 0.3529,
+      "S2_insurance_cost": 4.15,
+      "S3_insurance_cost": 5.734,
+      "S2_cross_oos_wins": 1,
+      "S3_cross_oos_wins": 1
+    }
+  },
+  "sensitivity_analysis": {
+    "10-90": {
+      "low_threshold": 0.1,
+      "high_threshold": 0.9,
+      "sharpe": 0.4861,
+      "cagr": 6.681,
+      "mdd": -29.24,
+      "insurance_cost": 3.774
+    },
+    "15-85": {
+      "low_threshold": 0.15,
+      "high_threshold": 0.85,
+      "sharpe": 0.484,
+      "cagr": 6.621,
+      "mdd": -29.14,
+      "insurance_cost": 3.834
+    },
+    "20-80 (base)": {
+      "low_threshold": 0.2,
+      "high_threshold": 0.8,
+      "sharpe": 0.4813,
+      "cagr": 6.565,
+      "mdd": -29.06,
+      "insurance_cost": 3.89
+    },
+    "25-75": {
+      "low_threshold": 0.25,
+      "high_threshold": 0.75,
+      "sharpe": 0.479,
+      "cagr": 6.519,
+      "mdd": -28.99,
+      "insurance_cost": 3.936
+    },
+    "30-70": {
+      "low_threshold": 0.3,
+      "high_threshold": 0.7,
+      "sharpe": 0.4779,
+      "cagr": 6.488,
+      "mdd": -28.99,
+      "insurance_cost": 3.967
+    }
+  },
+  "experiment": "K828",
+  "title": "VIX-Only Insurance Premium Conditioning",
+  "proposed_by": "Claude (K811v2 follow-up)",
+  "executed_by": "Claude",
+  "data_source": "yfinance (SPY, GLD, ^VIX daily)",
+  "methodology": {
+    "vix_percentile": "Expanding window percentile (no lookahead)",
+    "s2_high_threshold": 0.8,
+    "s2_low_threshold": 0.2,
+    "s2_minimal_weight": 0.8,
+    "s3_scaling": "0.5 + 0.5 * VIX_percentile",
+    "lag": "All signals shifted by 1 day (signal.shift(1))",
+    "tx_cost": "5 bps per unit weight change",
+    "vt_target": "12/VIX"
+  },
+  "references": [
+    "K811v2: VVIX conditioning \u2014 VIX r=-0.327 > VVIX r=-0.148 for MDD",
+    "K41: VT = ~4%/yr constant insurance",
+    "K229: VT Insurance Pricing \u2014 3.05%/yr expected cost",
+    "K687: No VT beats BH 50/50 on Sharpe after correct lag",
+    "K688: VT wins under CRRA utility gamma >= 5",
+    "Harvey, Liu, Zhu (2016) t>3.0 threshold"
+  ],
+  "conclusions": {
+    "summary": "VIX-percentile conditioning provides negligible improvement over always-VT (S1). S2 Sharpe 0.4538 vs S1 0.4525 — statistically indistinguishable. S3 (smooth scaling) is significantly WORSE. Neither S2 nor S3 beats BH SPY or 50/50 on Sharpe.",
+    "key_findings": [
+      "S2 VIX-Pctile Cond reduces insurance cost by only 0.5% vs S1 — economically negligible",
+      "S3 VIX-Smooth INCREASES insurance cost by 37.5% vs S1 — over-scaling down",
+      "VIX percentile monotonically predicts forward 30d MDD (Q1=-3.1% to Q5=-7.9%)",
+      "Cross-OOS: S2 beats BH only 1/5, S3 beats BH only 1/5 — both fail Cross-OOS",
+      "No VT strategy beats 50/50 SPY/GLD in any OOS period (0/5)",
+      "DM test: S3 vs S0 t=3.11 (significant), but S3 has LOWER Sharpe — significance is for volatility reduction, not better Sharpe",
+      "Sensitivity: Sharpe varies only 1% across threshold range 10-90 to 30-70 — very robust but also means thresholds don't matter",
+      "K811v2 VVIX conditioning achieved lower insurance cost (2.2% vs 4.2%) but used different period — not directly comparable"
+    ],
+    "implication": "VIX percentile is a good MDD predictor but conditioning on it does NOT materially reduce VT insurance cost. The problem is that VIX is already embedded in 12/VIX — high VIX automatically reduces equity weight. Adding a percentile overlay on top is redundant. This confirms VIX sufficiency from yet another angle."
+  }
+}

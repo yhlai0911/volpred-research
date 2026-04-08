@@ -1,0 +1,401 @@
+{
+  "experiment_id": "k857",
+  "title": "TSMC Earnings Vol 2026 Update — VIX Regime Interaction",
+  "date": "2026-04-05 05:25:00",
+  "data_source": "yfinance (0050.TW, 2330.TW, ^VIX)",
+  "period": "2015-01 to 2026-04",
+  "methodology": "Event study with VIX regime interaction, bootstrap CI",
+  "references": [
+    "K617: Original TSMC event study (134 events)",
+    "Patell & Wolfson (1984) JFE",
+    "Dubinsky & Johannes (2006) Columbia WP"
+  ],
+  "summary": {
+    "total_events": 135,
+    "event_vol_pct": 0.9993,
+    "non_event_vol_pct": 0.811,
+    "vol_ratio": 1.232,
+    "vol_ratio_ci_95": [
+      0.994,
+      1.523
+    ],
+    "t_stat_event_vs_nonevent": 1.693,
+    "p_val_event_vs_nonevent": 0.0927,
+    "regime_interaction_t": 1.415,
+    "regime_interaction_p": 0.1753,
+    "tsmc_amplification": 2.183,
+    "tsmc_amplification_ci_95": [
+      1.726,
+      2.727
+    ],
+    "neg_vs_pos_surprise_asymmetry": 0.665
+  },
+  "regime_results": {
+    "low": {
+      "n_events": 61,
+      "mean_event_vol_pct": 0.7721,
+      "mean_pre_vol_pct": 0.6593,
+      "mean_post_vol_pct": 0.6631,
+      "vol_ratio_event_vs_pre": 1.533,
+      "tsmc_amplification": 2.053,
+      "mean_vix": 13.53
+    },
+    "medium": {
+      "n_events": 57,
+      "mean_event_vol_pct": 1.0535,
+      "mean_pre_vol_pct": 0.9633,
+      "mean_post_vol_pct": 0.8503,
+      "vol_ratio_event_vs_pre": 1.432,
+      "tsmc_amplification": 2.11,
+      "mean_vix": 19.93
+    },
+    "high": {
+      "n_events": 17,
+      "mean_event_vol_pct": 1.6321,
+      "mean_pre_vol_pct": 1.4197,
+      "mean_post_vol_pct": 1.1851,
+      "vol_ratio_event_vs_pre": 1.115,
+      "tsmc_amplification": 2.881,
+      "mean_vix": 30.68
+    }
+  },
+  "yearly_trend": {
+    "2015": {
+      "n_events": 12,
+      "mean_event_vol_pct": 0.5885,
+      "mean_vix": 16.5
+    },
+    "2016": {
+      "n_events": 12,
+      "mean_event_vol_pct": 1.0917,
+      "mean_vix": 16.8
+    },
+    "2017": {
+      "n_events": 12,
+      "mean_event_vol_pct": 0.5603,
+      "mean_vix": 11.5
+    },
+    "2018": {
+      "n_events": 12,
+      "mean_event_vol_pct": 1.12,
+      "mean_vix": 17.1
+    },
+    "2019": {
+      "n_events": 12,
+      "mean_event_vol_pct": 0.7291,
+      "mean_vix": 15.6
+    },
+    "2020": {
+      "n_events": 12,
+      "mean_event_vol_pct": 0.7088,
+      "mean_vix": 26.9
+    },
+    "2021": {
+      "n_events": 12,
+      "mean_event_vol_pct": 1.0119,
+      "mean_vix": 19.3
+    },
+    "2022": {
+      "n_events": 12,
+      "mean_event_vol_pct": 1.5723,
+      "mean_vix": 25.9
+    },
+    "2023": {
+      "n_events": 12,
+      "mean_event_vol_pct": 0.6152,
+      "mean_vix": 17.0
+    },
+    "2024": {
+      "n_events": 12,
+      "mean_event_vol_pct": 0.9649,
+      "mean_vix": 15.4
+    },
+    "2025": {
+      "n_events": 12,
+      "mean_event_vol_pct": 1.8636,
+      "mean_vix": 19.9
+    },
+    "2026": {
+      "n_events": 3,
+      "mean_event_vol_pct": 1.6619,
+      "mean_vix": 19.3
+    }
+  },
+  "cumulative_return_pattern": {
+    "overall": {
+      "day_labels": [
+        -3,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      "avg_cum_ret_pct": [
+        0.1929,
+        0.2797,
+        0.3218,
+        0.5381,
+        0.713,
+        0.8277,
+        0.8874
+      ]
+    },
+    "by_regime": {
+      "low": {
+        "n": 61,
+        "cum_ret_day_labels": [
+          -3,
+          -2,
+          -1,
+          0,
+          1,
+          2,
+          3
+        ],
+        "cum_ret_pct": [
+          0.2151,
+          0.4412,
+          0.4434,
+          0.7281,
+          0.9618,
+          1.0418,
+          1.1131
+        ]
+      },
+      "medium": {
+        "n": 57,
+        "cum_ret_day_labels": [
+          -3,
+          -2,
+          -1,
+          0,
+          1,
+          2,
+          3
+        ],
+        "cum_ret_pct": [
+          0.3043,
+          0.3015,
+          0.5699,
+          0.6383,
+          0.897,
+          1.0861,
+          1.1358
+        ]
+      },
+      "high": {
+        "n": 17,
+        "cum_ret_day_labels": [
+          -3,
+          -2,
+          -1,
+          0,
+          1,
+          2,
+          3
+        ],
+        "cum_ret_pct": [
+          -0.2605,
+          -0.3732,
+          -0.9469,
+          -0.4796,
+          -0.7964,
+          -0.8072,
+          -0.755
+        ]
+      }
+    }
+  },
+  "vol_profile_by_regime": {
+    "low": {
+      "day_labels": [
+        -3,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      "avg_vol_pct": [
+        0.5812,
+        0.8099,
+        0.5867,
+        0.7721,
+        0.7811,
+        0.5422,
+        0.6659
+      ]
+    },
+    "medium": {
+      "day_labels": [
+        -3,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      "avg_vol_pct": [
+        0.9256,
+        0.9594,
+        1.0051,
+        1.0535,
+        0.873,
+        0.8926,
+        0.7853
+      ]
+    },
+    "high": {
+      "day_labels": [
+        -3,
+        -2,
+        -1,
+        0,
+        1,
+        2,
+        3
+      ],
+      "avg_vol_pct": [
+        1.7295,
+        1.2548,
+        1.2748,
+        1.6321,
+        1.3104,
+        1.2042,
+        1.0407
+      ]
+    }
+  },
+  "surprise_analysis": {
+    "positive": {
+      "n": 69,
+      "mean_ret_pct": 1.1253,
+      "mean_vol_pct": 1.195
+    },
+    "negative": {
+      "n": 66,
+      "mean_ret_pct": -0.7338,
+      "mean_vol_pct": 0.7946
+    },
+    "neg_vs_pos_vol_t": -1.849,
+    "neg_vs_pos_vol_p": 0.0667
+  },
+  "april_10_prediction": {
+    "current_vix": 23.87,
+    "expected_event_vol_pct": 1.6321,
+    "non_event_baseline_pct": 0.811,
+    "n_historical_vix_ge_30": 6,
+    "historical_vix_ge_30_mean_vol_pct": 3.1833
+  },
+  "high_vix_recent_events": [
+    {
+      "date": "2025-04-10",
+      "vix": 40.7,
+      "etf_abs_ret_pct": 9.986,
+      "tsmc_abs_ret_pct": 9.936,
+      "etf_ret_pct": 9.986
+    },
+    {
+      "date": "2025-03-10",
+      "vix": 27.9,
+      "etf_abs_ret_pct": 0.59,
+      "tsmc_abs_ret_pct": 0.697,
+      "etf_ret_pct": -0.59
+    },
+    {
+      "date": "2022-12-12",
+      "vix": 25.0,
+      "etf_abs_ret_pct": 0.957,
+      "tsmc_abs_ret_pct": 1.35,
+      "etf_ret_pct": -0.957
+    },
+    {
+      "date": "2022-10-11",
+      "vix": 33.6,
+      "etf_abs_ret_pct": 5.179,
+      "tsmc_abs_ret_pct": 8.333,
+      "etf_ret_pct": -5.179
+    },
+    {
+      "date": "2022-07-11",
+      "vix": 26.2,
+      "etf_abs_ret_pct": 0.883,
+      "tsmc_abs_ret_pct": 1.071,
+      "etf_ret_pct": -0.883
+    },
+    {
+      "date": "2022-06-10",
+      "vix": 27.8,
+      "etf_abs_ret_pct": 1.012,
+      "tsmc_abs_ret_pct": 2.033,
+      "etf_ret_pct": -1.012
+    },
+    {
+      "date": "2022-05-10",
+      "vix": 33.0,
+      "etf_abs_ret_pct": 0.442,
+      "tsmc_abs_ret_pct": 0.385,
+      "etf_ret_pct": -0.442
+    },
+    {
+      "date": "2022-03-10",
+      "vix": 30.2,
+      "etf_abs_ret_pct": 2.906,
+      "tsmc_abs_ret_pct": 3.345,
+      "etf_ret_pct": 2.906
+    },
+    {
+      "date": "2020-10-12",
+      "vix": 25.1,
+      "etf_abs_ret_pct": 0.8,
+      "tsmc_abs_ret_pct": 1.545,
+      "etf_ret_pct": 0.8
+    },
+    {
+      "date": "2020-09-10",
+      "vix": 29.7,
+      "etf_abs_ret_pct": 0.88,
+      "tsmc_abs_ret_pct": 1.874,
+      "etf_ret_pct": 0.88
+    },
+    {
+      "date": "2020-07-10",
+      "vix": 27.3,
+      "etf_abs_ret_pct": 0.838,
+      "tsmc_abs_ret_pct": 1.014,
+      "etf_ret_pct": -0.838
+    },
+    {
+      "date": "2020-06-10",
+      "vix": 27.6,
+      "etf_abs_ret_pct": 0.949,
+      "tsmc_abs_ret_pct": 1.097,
+      "etf_ret_pct": 0.949
+    },
+    {
+      "date": "2020-05-11",
+      "vix": 27.6,
+      "etf_abs_ret_pct": 0.83,
+      "tsmc_abs_ret_pct": 1.176,
+      "etf_ret_pct": 0.83
+    },
+    {
+      "date": "2020-04-10",
+      "vix": 41.7,
+      "etf_abs_ret_pct": 0.063,
+      "tsmc_abs_ret_pct": 1.237,
+      "etf_ret_pct": 0.063
+    },
+    {
+      "date": "2020-03-10",
+      "vix": 47.3,
+      "etf_abs_ret_pct": 0.524,
+      "tsmc_abs_ret_pct": 0.491,
+      "etf_ret_pct": 0.524
+    }
+  ]
+}

@@ -1,0 +1,297 @@
+{
+  "experiment_id": "K910",
+  "title": "TCI (Total Connectedness Index) as VT Strategy Overlay",
+  "date": "2026-04-05T18:30:10.208307+00:00",
+  "data_source": "yfinance",
+  "sample_period": "2009-01-02 to 2026-04-02",
+  "oos_period": "2009-12-17 to 2026-04-02",
+  "n_trading_days": 4477,
+  "assets_for_tci": [
+    "SPY",
+    "QQQ",
+    "IWM",
+    "EFA",
+    "EEM",
+    "TW50",
+    "GLD",
+    "TLT",
+    "USO"
+  ],
+  "tci_config": {
+    "rolling_window": 250,
+    "var_lag": 5,
+    "forecast_horizon": 10,
+    "vol_proxy": "Garman-Klass (OHLC)"
+  },
+  "tci_stats": {
+    "mean": 47.3192,
+    "std": 28.4881,
+    "min": 0.0,
+    "max": 88.8889,
+    "median": 59.4361,
+    "n_obs": 4228,
+    "period": "2009-12-17 to 2026-04-02"
+  },
+  "strategy_metrics": {
+    "BH SPY": {
+      "name": "BH SPY",
+      "ann_return": 0.141929,
+      "ann_vol": 0.171561,
+      "sharpe": 0.8273,
+      "mdd": -0.337173,
+      "calmar": 0.4209,
+      "crra_gamma5": 0.068347,
+      "sortino": 1.0188,
+      "n_obs": 4097,
+      "n_years": 16.26
+    },
+    "BH 50/50": {
+      "name": "BH 50/50",
+      "ann_return": 0.119286,
+      "ann_vol": 0.122636,
+      "sharpe": 0.9727,
+      "mdd": -0.203151,
+      "calmar": 0.5872,
+      "crra_gamma5": 0.081687,
+      "sortino": 1.2441,
+      "n_obs": 4097,
+      "n_years": 16.26
+    },
+    "12/VIX": {
+      "name": "12/VIX",
+      "ann_return": 0.08232,
+      "ann_vol": 0.092624,
+      "sharpe": 0.8888,
+      "mdd": -0.143508,
+      "calmar": 0.5736,
+      "crra_gamma5": 0.060872,
+      "sortino": 1.1816,
+      "n_obs": 4097,
+      "n_years": 16.26
+    },
+    "TCI Defensive": {
+      "name": "TCI Defensive",
+      "ann_return": 0.110197,
+      "ann_vol": 0.131848,
+      "sharpe": 0.8358,
+      "mdd": -0.228135,
+      "calmar": 0.483,
+      "crra_gamma5": 0.066737,
+      "sortino": 1.0242,
+      "n_obs": 4097,
+      "n_years": 16.26
+    },
+    "TCI+VIX Combined": {
+      "name": "TCI+VIX Combined",
+      "ann_return": 0.118961,
+      "ann_vol": 0.119978,
+      "sharpe": 0.9915,
+      "mdd": -0.179326,
+      "calmar": 0.6634,
+      "crra_gamma5": 0.082974,
+      "sortino": 1.2911,
+      "n_obs": 4096,
+      "n_years": 16.25
+    },
+    "Smooth TCI": {
+      "name": "Smooth TCI",
+      "ann_return": 0.075537,
+      "ann_vol": 0.107178,
+      "sharpe": 0.7048,
+      "mdd": -0.228713,
+      "calmar": 0.3303,
+      "crra_gamma5": 0.046819,
+      "sortino": 0.8272,
+      "n_obs": 3075,
+      "n_years": 12.2
+    },
+    "TCI Div Timing": {
+      "name": "TCI Div Timing",
+      "ann_return": 0.12215,
+      "ann_vol": 0.172845,
+      "sharpe": 0.7067,
+      "mdd": -0.329809,
+      "calmar": 0.3704,
+      "crra_gamma5": 0.047462,
+      "sortino": 0.8828,
+      "n_obs": 4096,
+      "n_years": 16.25
+    }
+  },
+  "dm_tests": [
+    {
+      "comparison": "TCI Defensive vs BH SPY",
+      "dm_stat": -2.6108,
+      "p_value": 0.009033,
+      "significant_harvey": false,
+      "direction": "baseline better",
+      "n_common": 4096
+    },
+    {
+      "comparison": "TCI Defensive vs BH 50/50",
+      "dm_stat": -0.4706,
+      "p_value": 0.637941,
+      "significant_harvey": false,
+      "direction": "baseline better",
+      "n_common": 4096
+    },
+    {
+      "comparison": "TCI Defensive vs 12/VIX",
+      "dm_stat": 2.2725,
+      "p_value": 0.023059,
+      "significant_harvey": false,
+      "direction": "strategy better",
+      "n_common": 4096
+    },
+    {
+      "comparison": "TCI+VIX Combined vs BH SPY",
+      "dm_stat": -0.7637,
+      "p_value": 0.445071,
+      "significant_harvey": false,
+      "direction": "baseline better",
+      "n_common": 4096
+    },
+    {
+      "comparison": "TCI+VIX Combined vs BH 50/50",
+      "dm_stat": -0.2762,
+      "p_value": 0.782375,
+      "significant_harvey": false,
+      "direction": "baseline better",
+      "n_common": 4096
+    },
+    {
+      "comparison": "TCI+VIX Combined vs 12/VIX",
+      "dm_stat": 1.4469,
+      "p_value": 0.147929,
+      "significant_harvey": false,
+      "direction": "strategy better",
+      "n_common": 4096
+    },
+    {
+      "comparison": "Smooth TCI vs BH SPY",
+      "dm_stat": -3.3185,
+      "p_value": 0.000905,
+      "significant_harvey": true,
+      "direction": "baseline better",
+      "n_common": 3075
+    },
+    {
+      "comparison": "Smooth TCI vs BH 50/50",
+      "dm_stat": -2.3175,
+      "p_value": 0.020476,
+      "significant_harvey": false,
+      "direction": "baseline better",
+      "n_common": 3075
+    },
+    {
+      "comparison": "Smooth TCI vs 12/VIX",
+      "dm_stat": -0.3676,
+      "p_value": 0.713204,
+      "significant_harvey": false,
+      "direction": "baseline better",
+      "n_common": 3075
+    },
+    {
+      "comparison": "TCI Div Timing vs BH SPY",
+      "dm_stat": -2.5927,
+      "p_value": 0.009523,
+      "significant_harvey": false,
+      "direction": "baseline better",
+      "n_common": 4096
+    },
+    {
+      "comparison": "TCI Div Timing vs BH 50/50",
+      "dm_stat": 0.0523,
+      "p_value": 0.958292,
+      "significant_harvey": false,
+      "direction": "strategy better",
+      "n_common": 4096
+    },
+    {
+      "comparison": "TCI Div Timing vs 12/VIX",
+      "dm_stat": 2.0681,
+      "p_value": 0.03863,
+      "significant_harvey": false,
+      "direction": "strategy better",
+      "n_common": 4096
+    }
+  ],
+  "tci_predictive_power": {
+    "tci_vs_next_return": {
+      "pearson_r": 0.004489,
+      "p_value": 0.773929,
+      "n_obs": 4096
+    },
+    "tci_vs_next_abs_return": {
+      "pearson_r": 0.033361,
+      "p_value": 0.03276,
+      "n_obs": 4096
+    },
+    "tci_vs_next_5d_return": {
+      "pearson_r": -0.005101,
+      "p_value": 0.744238,
+      "n_obs": 4093
+    },
+    "tci_vs_next_21d_return": {
+      "pearson_r": -0.024139,
+      "p_value": 0.123309,
+      "n_obs": 4077
+    },
+    "tci_vs_next_21d_vol": {
+      "pearson_r": 0.067422,
+      "p_value": 1.6e-05,
+      "n_obs": 4077
+    },
+    "quintile_analysis": {
+      "Q1": {
+        "mean_return_ann": 0.170471,
+        "vol_ann": 0.147234,
+        "sharpe": 1.1578,
+        "n_days": 1639
+      },
+      "Q2": {
+        "mean_return_ann": 0.053322,
+        "vol_ann": 0.155116,
+        "sharpe": 0.3438,
+        "n_days": 819
+      },
+      "Q3": {
+        "mean_return_ann": 0.07331,
+        "vol_ann": 0.176247,
+        "sharpe": 0.416,
+        "n_days": 819
+      },
+      "Q4": {
+        "mean_return_ann": 0.241915,
+        "vol_ann": 0.220664,
+        "sharpe": 1.0963,
+        "n_days": 820
+      }
+    }
+  },
+  "any_significant_improvement": false,
+  "conclusion": "NULL RESULT: No TCI-based strategy significantly outperforms baselines at Harvey (2016) |t|>3.0 threshold. TCI\u2192next-day return r=0.0045. TCI\u219221d vol r=0.0674. This is consistent with K907: TCI is a structural/descriptive measure of cross-asset connectedness, not a directional trading signal. Like VIX (K697: predicts vol magnitude r=0.57 but not direction r=0.04), TCI may describe market state without generating tradeable alpha.",
+  "charts": [
+    "k910_tci_returns.png",
+    "k910_strategy_comparison.png",
+    "k910_tci_regimes.png",
+    "k910_drawdown_comparison.png"
+  ],
+  "references": [
+    "K907: Volatility Spillover Network (TCI-VIX r=0.001)",
+    "K687/K697: VT is drawdown insurance, not alpha generator",
+    "K700: Codex audit prevents false breakthroughs",
+    "Diebold & Yilmaz (2012): Better to give than to receive, IJF",
+    "Diebold & Yilmaz (2014): Network topology of variance decompositions, JFE",
+    "Harvey (2016): ... and the cross-section of expected returns, RFS"
+  ],
+  "limitations": [
+    "TCI uses Garman-Klass vol (noisy proxy); 5-min RV would be more precise",
+    "250-day rolling window = ~1 year lag in regime detection",
+    "Only 9 assets in network; larger universe might give different TCI dynamics",
+    "0050.TW has limited trading hours vs US markets (ffill alignment)",
+    "TCI computation is expensive (~70s for full rolling); not suitable for live trading at daily freq without caching",
+    "VT strategies are insurance, not alpha \u2014 Sharpe improvement is not expected (K687/K697)"
+  ],
+  "runtime_seconds": 16.16
+}

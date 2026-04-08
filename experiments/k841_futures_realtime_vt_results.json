@@ -1,0 +1,309 @@
+{
+  "experiment_id": "K841",
+  "title": "TAIFEX Night Session Real-time VT Hedging",
+  "date": "2026-04-03",
+  "data_source": "TAIFEX TX tick data + yfinance (VIX, 0050.TW)",
+  "data_period": "2017-05-16 to 2026-04-02",
+  "n_trading_days": 2157,
+  "strategies": {
+    "S0": "Buy & Hold 0050.TW",
+    "S1": "8.63/VIX next-day adjustment on 0050.TW",
+    "S2": "8.63/VIX + TX night session hedge (always)",
+    "S3": "VIX spike guard (hedge when VIX > +2)",
+    "S4": "Conditional night hedge (VIX > 20 only)",
+    "S5": "Full VT: S1 day scaling + S2 night hedge"
+  },
+  "metrics": {
+    "s0": {
+      "name": "S0: BH 0050.TW",
+      "n": 2157,
+      "cagr": 0.1947,
+      "ann_vol": 0.1974,
+      "sharpe": 1.0006,
+      "mdd": -0.3383,
+      "calmar": 0.5757,
+      "sortino": 1.3039,
+      "total_return": 3.5858
+    },
+    "s1": {
+      "name": "S1: 8.63/VIX Next-Day",
+      "n": 2157,
+      "cagr": 0.1199,
+      "ann_vol": 0.0861,
+      "sharpe": 1.3589,
+      "mdd": -0.1232,
+      "calmar": 0.9737,
+      "sortino": 2.0499,
+      "total_return": 1.6369
+    },
+    "s2": {
+      "name": "S2: Night Hedge (always)",
+      "n": 2157,
+      "cagr": 0.1234,
+      "ann_vol": 0.1706,
+      "sharpe": 0.7683,
+      "mdd": -0.358,
+      "calmar": 0.3448,
+      "sortino": 0.9173,
+      "total_return": 1.7082
+    },
+    "s3": {
+      "name": "S3: VIX Spike Guard",
+      "n": 2157,
+      "cagr": 0.1705,
+      "ann_vol": 0.1929,
+      "sharpe": 0.9133,
+      "mdd": -0.3341,
+      "calmar": 0.5103,
+      "sortino": 1.1558,
+      "total_return": 2.8479
+    },
+    "s4": {
+      "name": "S4: Night Hedge (VIX>20 only)",
+      "n": 2157,
+      "cagr": 0.1348,
+      "ann_vol": 0.1818,
+      "sharpe": 0.7875,
+      "mdd": -0.3591,
+      "calmar": 0.3755,
+      "sortino": 0.9449,
+      "total_return": 1.9526
+    },
+    "s5": {
+      "name": "S5: Full VT (day+night)",
+      "n": 2157,
+      "cagr": 0.061,
+      "ann_vol": 0.0843,
+      "sharpe": 0.744,
+      "mdd": -0.1776,
+      "calmar": 0.3431,
+      "sortino": 0.9711,
+      "total_return": 0.6594
+    }
+  },
+  "dm_tests": {
+    "s2_vs_s1": {
+      "t_stat": 10.8213,
+      "p_value": 0.0,
+      "significant_at_5pct": "True",
+      "harvey_significant": "True"
+    },
+    "s2_vs_s0": {
+      "t_stat": -7.1306,
+      "p_value": 0.0,
+      "significant_at_5pct": "True",
+      "harvey_significant": "True"
+    },
+    "s3_vs_s0": {
+      "t_stat": -1.9712,
+      "p_value": 0.0488,
+      "significant_at_5pct": "True",
+      "harvey_significant": "False"
+    },
+    "s3_vs_s1": {
+      "t_stat": 14.0087,
+      "p_value": 0.0,
+      "significant_at_5pct": "True",
+      "harvey_significant": "True"
+    },
+    "s4_vs_s0": {
+      "t_stat": -4.432,
+      "p_value": 0.0,
+      "significant_at_5pct": "True",
+      "harvey_significant": "True"
+    },
+    "s4_vs_s1": {
+      "t_stat": 12.1384,
+      "p_value": 0.0,
+      "significant_at_5pct": "True",
+      "harvey_significant": "True"
+    },
+    "s5_vs_s1": {
+      "t_stat": -0.7583,
+      "p_value": 0.4483,
+      "significant_at_5pct": "False",
+      "harvey_significant": "False"
+    }
+  },
+  "covid_analysis": {
+    "s0": {
+      "total_return": -0.0717,
+      "max_drawdown": -0.2525,
+      "worst_day": -0.0584,
+      "best_day": 0.0795,
+      "volatility": 0.3844,
+      "n_days": 48
+    },
+    "s1": {
+      "total_return": -0.0208,
+      "max_drawdown": -0.0508,
+      "worst_day": -0.0072,
+      "best_day": 0.0083,
+      "volatility": 0.0588,
+      "n_days": 48
+    },
+    "s2": {
+      "total_return": 0.0131,
+      "max_drawdown": -0.1467,
+      "worst_day": -0.0523,
+      "best_day": 0.0771,
+      "volatility": 0.3528,
+      "n_days": 48
+    },
+    "s3": {
+      "total_return": -0.0449,
+      "max_drawdown": -0.2162,
+      "worst_day": -0.0584,
+      "best_day": 0.0795,
+      "volatility": 0.3845,
+      "n_days": 48
+    },
+    "s4": {
+      "total_return": 0.0048,
+      "max_drawdown": -0.1535,
+      "worst_day": -0.0523,
+      "best_day": 0.0771,
+      "volatility": 0.3523,
+      "n_days": 48
+    },
+    "s5": {
+      "total_return": 0.066,
+      "max_drawdown": -0.0483,
+      "worst_day": -0.0294,
+      "best_day": 0.0416,
+      "volatility": 0.1717,
+      "n_days": 48
+    },
+    "hedge_stats": {
+      "days_hedged": 48,
+      "avg_hedge_ratio": 0.7832,
+      "avg_night_return": -0.00248,
+      "avg_hedge_pnl": 0.001774,
+      "total_hedge_pnl": 0.0852
+    }
+  },
+  "vix_regime_analysis": {
+    "low_vix": {
+      "n_days": 691,
+      "avg_vix": 12.68,
+      "s0_mean_ret": 0.3969,
+      "s0_vol": 0.1334,
+      "s1_mean_ret": 0.254,
+      "s1_vol": 0.0892,
+      "s2_mean_ret": 0.3174,
+      "s2_vol": 0.1235,
+      "s3_mean_ret": 0.3972,
+      "s3_vol": 0.1334,
+      "s4_mean_ret": 0.3969,
+      "s4_vol": 0.1334,
+      "s5_mean_ret": 0.1865,
+      "s5_vol": 0.0808
+    },
+    "mid_vix": {
+      "n_days": 1114,
+      "avg_vix": 19.01,
+      "s0_mean_ret": 0.2772,
+      "s0_vol": 0.1939,
+      "s1_mean_ret": 0.1125,
+      "s1_vol": 0.0871,
+      "s2_mean_ret": 0.1707,
+      "s2_vol": 0.1677,
+      "s3_mean_ret": 0.251,
+      "s3_vol": 0.1914,
+      "s4_mean_ret": 0.1517,
+      "s4_vol": 0.184,
+      "s5_mean_ret": 0.0187,
+      "s5_vol": 0.0725
+    },
+    "high_vix": {
+      "n_days": 292,
+      "avg_vix": 28.61,
+      "s0_mean_ret": -0.254,
+      "s0_vol": 0.243,
+      "s1_mean_ret": -0.1063,
+      "s1_vol": 0.073,
+      "s2_mean_ret": -0.2681,
+      "s2_vol": 0.1779,
+      "s3_mean_ret": -0.303,
+      "s3_vol": 0.2241,
+      "s4_mean_ret": -0.2845,
+      "s4_vol": 0.178,
+      "s5_mean_ret": -0.1109,
+      "s5_vol": 0.0943
+    },
+    "extreme_vix": {
+      "n_days": 60,
+      "avg_vix": 46.76,
+      "s0_mean_ret": -1.3808,
+      "s0_vol": 0.4455,
+      "s1_mean_ret": -0.2901,
+      "s1_vol": 0.078,
+      "s2_mean_ret": -0.8091,
+      "s2_vol": 0.4354,
+      "s3_mean_ret": -1.4289,
+      "s3_vol": 0.4418,
+      "s4_mean_ret": -0.8565,
+      "s4_vol": 0.4396,
+      "s5_mean_ret": 0.3001,
+      "s5_vol": 0.1973
+    }
+  },
+  "basis_analysis": {
+    "spot_futures_corr": 0.9461,
+    "tracking_error_ann": 0.0645,
+    "night_ret_mean": 0.000458,
+    "night_ret_std": 0.007178,
+    "night_sessions": 2139,
+    "pct_with_night_data": 99.2
+  },
+  "trading_stats": {
+    "s2_hedged_days": 2157,
+    "s2_hedged_pct": 100.0,
+    "s2_avg_hedge_ratio": 0.4966,
+    "s3_spike_days": 175,
+    "s3_spike_pct": 8.1,
+    "night_session_coverage": 99.8
+  },
+  "parameters": {
+    "vix_anchor": 8.63,
+    "futures_tx_cost": 0.0001,
+    "weight_change_threshold": 0.05,
+    "night_session_start_date": "20170516"
+  },
+  "conclusions": {
+    "q1_night_hedge_improves_mdd_vs_s1": "False",
+    "q1_mdd_s2_minus_s1": -0.2348,
+    "q2_covid_s5_best_crisis": "True",
+    "q2_covid_mdd": {
+      "s0": -0.2525,
+      "s1": -0.0508,
+      "s2": -0.1467,
+      "s5": -0.0483
+    },
+    "q3_dm_s5_vs_s1": {
+      "t_stat": -0.7583,
+      "p_value": 0.4483,
+      "significant_at_5pct": "False",
+      "harvey_significant": "False"
+    },
+    "main_finding": "Night session hedge DOES NOT improve on S1 (8.63/VIX day adjustment). S1 remains the best Taiwan VT strategy. Night hedge costs positive drift (~+0.046%/night) during normal times, destroying returns. S5 (day+night combined) achieves best crisis performance (COVID MDD -4.8% vs S1 -5.1%) but sacrifices too much return in normal times (Sharpe 0.74 vs S1 1.36). The timing constraint is fundamental: VIX information is 1-day stale by the time the night session starts (VIX T-2 vs night T-1 to T). Conclusion: TAIFEX night session is NOT a viable real-time hedge channel for VIX-based strategies due to the 1-day information lag.",
+    "sharpe_ranking": {
+      "s0": 1.0006,
+      "s1": 1.3589,
+      "s2": 0.7683,
+      "s3": 0.9133,
+      "s4": 0.7875,
+      "s5": 0.744
+    },
+    "mdd_ranking": {
+      "s0": -0.3383,
+      "s1": -0.1232,
+      "s2": -0.358,
+      "s3": -0.3341,
+      "s4": -0.3591,
+      "s5": -0.1776
+    },
+    "timing_issue": "Night session starts at 15:00 Taiwan time, before US market opens. Most recent available VIX is T-2 (2 trading days old). This makes \"real-time\" hedging impossible with daily VIX data. Would need intraday VIX or VIX futures for true real-time response.",
+    "positive_findings": "S2 hedge PnL was positive during COVID (+8.5% cumulative). S5 had best COVID MDD (-4.8%) and positive extreme VIX return (+30% ann). Night session return negative during high VIX (as expected). Futures-spot correlation 0.946, tracking error 6.5% ann. Night session data coverage 99.2%, liquidity sufficient for hedging."
+  }
+}

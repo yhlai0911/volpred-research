@@ -1,0 +1,349 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report (R1)}\\[0.5em]
+{\large Volatility Absorption: The Diminishing Marginal Impact of Market Fear}\\[0.5em]
+{\normalsize Document type: Empirical finance paper (target: JBF / JFQA)}\\
+{\normalsize File: \texttt{paper/volatility-absorption/main\_v2.tex} (38 pages, 37 references)}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (journal-referee level)}\\
+{\normalsize Combined: 13-step academic review + citation verification + number audit}
+\end{center}
+
+\bigskip
+
+% ============================================================
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{SEVERE issues (must fix before submission)} & 5 items \\
+\textcolor{warncolor}{MEDIUM issues (strongly recommended)} & 8 items \\
+Minor issues (optional / cosmetic) & 6 items \\
+Overall assessment & \textbf{Major Revision} \\
+\end{tabular}
+
+\bigskip
+
+\noindent\textbf{One-paragraph verdict.}
+The paper proposes a novel empirical concept---``volatility absorption''---that the marginal impact of fear shocks diminishes as ambient fear rises.  The idea is intuitive, economically relevant, and potentially publishable.  However, the manuscript suffers from \textbf{five severe problems}: (1)~a mechanical-correlation identification threat that is acknowledged but not adequately resolved; (2)~the core endogenous/exogenous decomposition has sample-size inconsistencies that undermine the central table; (3)~the NFP event study has systematic numerical discrepancies between the paper and the underlying experiment; (4)~the robustness tables (9--10) and several text claims are entirely untraceable to any experiment file; and (5)~6 of the 7 core experiments lack replication scripts.  These issues require a major revision focused on reproducibility, identification, and data integrity before the paper is suitable for a top-tier finance journal.
+
+% ============================================================
+\section*{1. Logic Structure and Argument Quality}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item The paper follows a clear structure: Introduction $\to$ Literature $\to$ Methodology $\to$ Data $\to$ Results $\to$ Implications $\to$ Robustness $\to$ Conclusion.
+  \item The logical chain from ``VIX shock $\to$ SAR declines with VIX level $\to$ endogenous shocks absorbed more $\to$ implications for VT'' is well-articulated.
+  \item The abstract is informative and accurately reflects the paper's content.
+  \item The limitations section (Sec.~8.1) is commendably thorough and transparent.
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item \textcolor{errorred}{\textbf{S1 (SEVERE): Identification remains circular.}} The paper acknowledges the mechanical-correlation problem with NSI ($= |r_t|/V_t$) but claims the SAR resolves it.  However, the SAR itself is not free of mechanical contamination: higher-VIX regimes mechanically have higher \emph{baseline} absolute returns (the denominator of SAR), and the numerator (shock-day $|r|$) may not scale proportionally, producing a declining SAR even absent genuine absorption.  The paper needs a formal null simulation: generate returns from a standard GARCH(1,1) with \emph{no} absorption mechanism, compute the SAR across VIX bins, and show that the SAR does \emph{not} decline under the null.  Without this, a referee can argue the entire effect is mechanical.
+  \item The VT ``Proposition'' (Sec.~6.3) is stated informally and is not a formal mathematical proposition.  Either formalize it with proof or relabel it as ``Observation'' or ``Remark.''
+  \item The crisis-regime non-monotonicity (SAR rises from 2.32 to 2.43) is discussed but not statistically tested.  Is the difference 2.43 vs.\ 2.32 significant?  A bootstrap test would clarify.
+\end{itemize}
+
+% ============================================================
+\section*{2. Research Motivation and Contribution}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item The opening example (2008 GFC, 2-point VIX increase at different levels) is vivid and motivating.
+  \item The endogenous/exogenous decomposition is genuinely novel and potentially the paper's best contribution.
+  \item Practical implications for hedging and VT design are clearly stated.
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item \textcolor{warncolor}{\textbf{M1 (MEDIUM): Novelty claim needs sharper positioning.}}  The paper says the phenomenon ``has received surprisingly little systematic empirical attention.''  However, regime-switching GARCH models (Hamilton 1989, Haas et al.\ 2004) and the TGARCH news-impact-curve literature implicitly allow for regime-dependent shock impacts.  The paper should explicitly test whether a well-specified MS-GARCH or GJR-GARCH with interaction terms can replicate the declining SAR pattern.  If it can, the contribution becomes ``documenting and naming'' rather than ``discovering.''
+  \item The ``volatility absorption'' terminology may overlap with the physics/engineering concept of absorption.  A brief footnote distinguishing the usage would be helpful.
+\end{itemize}
+
+% ============================================================
+\section*{3. Literature Review}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item Comprehensive coverage of GARCH, VRP, leverage effect, and behavioral literatures.
+  \item Good integration of JBF-published work (Vlastakis \& Markellos 2012).
+  \item Appropriate citations of seminal works (Engle 1982, Bollerslev 1986, etc.).
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item \textcolor{warncolor}{\textbf{M2 (MEDIUM): Missing key literatures.}}  The paper does not discuss:
+  \begin{itemize}[nosep]
+    \item The \emph{volatility-of-volatility} (VVIX) literature, which directly measures how ``sensitive VIX is to shocks'' and would provide a natural market-based test of absorption.
+    \item The \emph{realized volatility} and HAR-RV literature (Corsi 2009, Andersen et al.\ 2003 JASA), which offers cleaner variance proxies than $r^2$.
+    \item The \emph{option-implied skewness} literature (Bakshi, Kapadia, Madan 2003), which characterizes the distribution of fear shocks beyond the VRP.
+    \item The \emph{market microstructure noise} concern: daily $|r_t|$ is a noisy proxy for volatility, and the noise properties change with VIX level (bid-ask spreads widen during crises).
+  \end{itemize}
+  \item \textcolor{warncolor}{\textbf{M3 (MEDIUM): Danielsson et al.\ (2018) citation context is imprecise.}}  The paper cites Danielsson et al.\ for ``endogenous risk dynamics.''  However, Danielsson et al.\ (2018) is about \emph{low} volatility predicting crises (``stability is destabilizing''), not about contemporaneous shock absorption.  The endogenous/exogenous framing in this paper is related but distinct.  The citation should note the distinction more clearly.
+\end{itemize}
+
+% ============================================================
+\section*{4. Model Specification}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item The SAR measure is simple, transparent, and avoids the denominator problem.
+  \item The shock-type classification with priority ordering is well-designed and clearly documented.
+  \item Hypothesis 1 (endogenous absorption) is falsifiable.
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item \textcolor{errorred}{\textbf{S2 (SEVERE): Shock-type sample sizes are inconsistent (Table 5).}}  The paper reports $N = 127$ (rate), $N = 203$ (risk-off), $N = 89$ (geopolitical).  But the underlying experiment (K721) stores $n_{\text{low}} + n_{\text{high}} = 23 + 56 = 79$ (rate), $38 + 144 = 182$ (risk-off), $29 + 117 = 146$ (geopolitical).  None of these sums match the paper's $N$ values.  Moreover, the geopolitical count in K721 (146) \emph{exceeds} the paper's stated $N$ (89).  The paper claims $N$ is ``the number of shock days of each type over the full sample,'' but K721's numbers represent only the calm/high VIX subsets used for the absorption calculation.  \textbf{The $N$ column appears to use a different counting methodology that is not documented in any experiment file.}  This must be reconciled and the counting methodology must be explicitly stated.
+  \item The GLD threshold for geopolitical shocks ($r_t^{\text{GLD}} > 0.5\%$) is ad hoc.  Why 0.5\%?  A sensitivity analysis across thresholds (0.3\%, 0.5\%, 1.0\%) should be provided.
+  \item The shock-type classification is non-exhaustive: days with $r_t^{\text{SPY}} < 0$, $|\Delta V_t| > 2$, $r_t^{\text{TLT}} = 0$, and $r_t^{\text{GLD}} < 0.5\%$ are excluded.  How many days are excluded?  Does their inclusion change results?
+\end{itemize}
+
+% ============================================================
+\section*{5. Equations and Derivations}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item Equations are clearly numbered and correctly referenced.
+  \item The VRP formula (Eq.~7) is standard.
+  \item Symbol definitions are consistent throughout.
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item Equation~7 (VRP formula): The paper writes $\text{VRP}_t = \text{VIX}_t^2 / 252 - RV_t^{(22)} / 22$.  The first term converts annualized implied variance to daily; the second divides 22-day realized variance by 22 to get daily.  This is correct but non-standard.  Most VRP literature computes VRP in annualized terms: $\text{VRP}_t = \text{VIX}_t^2 - 252 \times RV_t^{(22)} / 22$.  The choice of daily scale should be noted explicitly.
+  \item The ``Proposition'' in Section~6.3 is not a formal mathematical statement.  It says VT weight and absorption are ``both inversely proportional to VIX,'' but the absorption regression slope is a constant ($-0.00028$), not inversely proportional to VIX.  The parallel is qualitative, not mathematical.
+  \item Minor: Appendix Table A1 defines $RV_t^{(h)} = \sum_{i=1}^{h} r_{t-h+i}^2$ (line 781), which is correct, but the text (Eq.~8) writes it identically---redundant.
+\end{itemize}
+
+% ============================================================
+\section*{6. Symbol Consistency}
+
+No significant issues detected.  All symbols are defined on first use.  $V_t$ consistently denotes VIX level, $r_t$ denotes log returns, $\tau$ denotes the shock threshold.
+
+Minor: The paper uses both $|r_t|$ and $\overline{|r|}$ without always distinguishing individual-day from regime-average.  Adding subscripts (e.g., $|r_t|$ for day $t$, $\overline{|r|}_j$ for regime $j$) would improve clarity.
+
+% ============================================================
+\section*{7. Research Method Feasibility and Rigor}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item The SAR methodology is simple and reproducible.
+  \item Newey-West standard errors with 10 lags are appropriate for daily financial data.
+  \item Bootstrap tests (10,000 replications) are mentioned for the SAR differences.
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item \textcolor{errorred}{\textbf{S1 (cont'd): No null simulation.}}  As noted above, the paper does not provide a simulation under the null of no absorption.  This is the single most important methodological gap.
+  \item The Newey-West lag choice of 10 is not justified.  The standard approach is to use a data-driven bandwidth selector (e.g., Andrews 1991, Newey-West automatic bandwidth).
+  \item The bootstrap methodology is not described in detail.  Is it a block bootstrap (to preserve serial correlation)?  What block length?  Or is it a standard i.i.d.\ bootstrap applied to residuals?
+\end{itemize}
+
+% ============================================================
+\section*{8. Data and Sample Design}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item 20-year sample (2006--2026) covering multiple crises is excellent.
+  \item Four assets spanning equities, bonds, gold, and non-US equities.
+  \item Descriptive statistics are thorough (Table 1).
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item \textcolor{warncolor}{\textbf{M4 (MEDIUM): Table 1 is untraceable.}}  The descriptive statistics (SPY mean 0.040\%, std 1.194\%, etc.) are not stored in any experiment results file.  They appear to have been generated during the paper-writing process.  A replication file should compute these.
+  \item \textcolor{warncolor}{\textbf{M5 (MEDIUM): Sample-size discrepancy between SAR and regression.}}  Table 2 reports 767 total shock days for the SAR analysis, while the regression (Table A2) reports $N = 893$.  The footnote in Table 2 explains this (126 days excluded due to ``missing or misaligned data''), but the explanation is vague.  What exactly causes the 126-day discrepancy?  Are they 0050.TW calendar gaps?  If so, the SAR analysis should report $N$ separately for each asset.
+  \item The 0050.TW data quality issue is not discussed.  Yahoo Finance data for 0050.TW has a known 1:4 split adjustment problem pre-2014.  The paper should confirm that split-adjusted data is used.
+\end{itemize}
+
+% ============================================================
+\section*{9. Robustness Analysis}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item Alternative shock thresholds ($\tau = 1, 1.5, 2.5, 3$) are tested.
+  \item Sub-period stability (3 periods) is examined.
+  \item Alternative normalization (realized volatility) is used.
+  \item Return-autocorrelation control is included.
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item \textcolor{errorred}{\textbf{S3 (SEVERE): Tables 9--10 are entirely untraceable.}}  No experiment JSON, no Python script, no knowledge-base entry exists for the alternative-threshold or sub-period robustness results.  The numbers in these tables cannot be verified against any source file.  They may have been generated during the paper-writing process without being recorded.  \textbf{All 10 data rows (5 thresholds + 3 sub-periods + controlled regression + RV normalization) need replication files.}
+  \item The RV normalization robustness ($\hat{\beta}^{\text{RV}} = -0.0031$, $t = -2.76$) is only mentioned in one sentence with no table.  This result should be presented in a table with full regression output.
+  \item Missing robustness checks that a referee would likely request:
+  \begin{enumerate}[nosep]
+    \item Cross-asset SAR tables (not just regression slopes).
+    \item Asymmetric analysis: does absorption differ for positive vs.\ negative VIX shocks?
+    \item Controlling for day-of-week and month-of-year effects.
+    \item A longer horizon: does absorption hold for weekly or monthly returns?
+  \end{enumerate}
+\end{itemize}
+
+% ============================================================
+\section*{10. Results: Expected Outcomes and Reasonableness}
+
+\textbf{Strengths.}
+\begin{itemize}[nosep]
+  \item The SAR results (Table 3) are internally consistent and match K716 perfectly (21/21 cells verified).
+  \item The cross-asset slopes (Table 4) match K718 slopes (4/4 verified).
+  \item The endogenous/exogenous decomposition results are economically intuitive and well-interpreted.
+  \item The VRP compression narrative is consistent with the literature.
+\end{itemize}
+
+\textbf{Weaknesses.}
+\begin{itemize}[nosep]
+  \item \textcolor{errorred}{\textbf{S4 (SEVERE): NFP table has systematic discrepancies.}}  Table 6 reports:
+  \begin{itemize}[nosep]
+    \item Overall ratio: 1.17$\times$ (paper) vs.\ 1.145 (K741 JSON, vs.\ all non-NFP) or 1.165 (vs.\ Friday).  Neither matches 1.17.
+    \item Overall $p$-value: 0.037 (paper) vs.\ 0.081 (K741, vs.\ all) or 0.061 (vs.\ Friday).  \textbf{Neither matches 0.037.}
+    \item Low VIX $n$: 63 (paper) vs.\ 62 (K741).
+    \item Medium VIX $n$: 76 (paper) vs.\ 78 (K741).
+    \item Medium VIX $|r|$: 0.784 (paper) vs.\ 0.757 (K741).
+    \item Elevated VIX $|r|$: 1.053 (paper) vs.\ 1.022 (K741).
+    \item High VIX $|r|$: 1.523 (paper) vs.\ 1.488 (K741).
+  \end{itemize}
+  The Codex review of K741 also flagged a holiday-date identification bug affecting approximately 5--10 of 195 dates.  The paper's numbers appear to come from a separate, unrecorded computation.  \textbf{The K741 results must be reconciled with the paper, and the paper must be updated to match the corrected experiment.}
+  \item The regime-specific NFP ratios (1.24, 1.30, 1.18, 0.95) and associated $t$-statistics are not stored in K741 JSON and cannot be verified.
+\end{itemize}
+
+% ============================================================
+\section*{11. Citation Verification}
+
+A full citation check was performed (see companion file \texttt{citation\_check\_r1.md}).  Key findings:
+
+\begin{itemize}[nosep]
+  \item \textcolor{errorred}{\textbf{S5 (SEVERE): Orphan reference.}}  \texttt{chernov2018} (Chernov, Lochstoer, \& Lundeby) appears in the bibliography but is \textbf{never cited in the text}.  Additionally, the bibitem label says ``2018'' but the entry body says ``2022.''  The correct publication year is 2022 (RFS, Vol.\ 35, No.\ 3, pp.\ 1310--1347).
+  \item \textcolor{warncolor}{\textbf{M6 (MEDIUM): \texttt{lin2020} could not be independently verified.}}  Extensive web searches could not locate ``Does VIX or volume improve the prediction of intraday returns for the Taiwan stock market?'' in Pacific-Basin Finance Journal Vol.\ 61 (2020), article 101316.  The paper should verify the exact bibliographic details or replace with an alternative verifiable citation.
+  \item \textcolor{warncolor}{\textbf{M7 (MEDIUM): \texttt{bekaert2022} end page.}}  The bibitem says pp.\ 3975--3995, but some databases list pp.\ 3975--4004.  Verify against the actual journal issue.
+  \item All other 34 references verified: correct authors, years, journals, volume/issue/page numbers.
+\end{itemize}
+
+% ============================================================
+\section*{12. Data Integrity and Reproducibility (Number Audit)}
+
+Based on the Step 1--2 audit (\texttt{audit\_step1\_2.md}), the following verification scorecard was produced:
+
+\bigskip
+
+\begin{tabular}{lrrrr}
+\toprule
+Category & Verified & Partially & Untraceable & Discrepant \\
+\midrule
+Table 3 (SAR core)             & 20 & 0 &  0 & 0 \\
+Table 4 (Cross-asset slopes)   &  4 & 0 &  4 & 0 \\
+Table 5 (Shock types)          &  3 & 0 &  6 & N mismatch \\
+Table 6 (NFP)                  &  3 & 4 &  8 & 6 \\
+Table 7 (VRP)                  &  2 & 0 &  7 & 0 \\
+Table 8 (Hedge CB)             &  2 & 0 &  7 & 0 \\
+Tables 9--10 (Robustness)      &  0 & 0 & 18 & 0 \\
+Table A2 (Full regression)     &  4 & 1 & 11 & 0 \\
+Text claims                    &  1 & 0 &  5+ & 0 \\
+\midrule
+\textbf{TOTAL}                 & \textbf{39} & \textbf{5} & \textbf{63+} & \textbf{6+} \\
+\bottomrule
+\end{tabular}
+
+\bigskip
+
+\noindent\textbf{Critical finding:} 63+ numerical claims in the paper are untraceable to any experiment JSON.  This is a serious reproducibility concern.  No Python scripts exist for 6 of the 7 core experiments (K716--K722; only K741 has a script).
+
+% ============================================================
+\section*{13. Specific Issue Inventory}
+
+\subsection*{\textcolor{errorred}{SEVERE Issues (Must Fix)}}
+
+\begin{enumerate}[label=\textbf{S\arabic*.}, leftmargin=2em]
+  \item \textbf{Identification: no null simulation.}  The paper must provide a simulation exercise showing that the SAR decline does \emph{not} arise mechanically from a standard GARCH(1,1) with no absorption.  Without this, the core finding is not identified.  Reference: The paper itself suggests using ``simulation exercises'' in Section~8.2 (Future Research)---this should be done \emph{in the paper}, not left for future work.
+
+  \item \textbf{Table 5 sample-size inconsistency.}  The $N$ column (127, 203, 89) does not match K721 JSON ($n_{\text{low}}+n_{\text{high}}$ = 79, 182, 146).  The geopolitical total in K721 (146) \emph{exceeds} the paper's 89.  Reconcile, document the counting methodology, and update the table or the JSON.
+
+  \item \textbf{Tables 9--10 and text claims are untraceable.}  Create replication scripts for: (a) alternative-threshold robustness (5 rows), (b) sub-period stability (3 rows), (c) RV normalization ($\beta^{\text{RV}} = -0.0031$), (d) controlled regression ($\beta = -0.00025$).  Store results in experiment JSON files.
+
+  \item \textbf{NFP table (Table 6) discrepancies with K741.}  Re-run K741 with corrected NFP date identification (per Codex review), reconcile all numbers, and update the paper.  The overall $p$-value discrepancy (0.037 vs.\ 0.061/0.081) is particularly concerning as it affects the statistical significance claim.
+
+  \item \textbf{Orphan reference + year error.}  Remove or fix \texttt{chernov2018}.
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{MEDIUM Issues (Strongly Recommended)}}
+
+\begin{enumerate}[label=\textbf{M\arabic*.}, leftmargin=2em]
+  \item \textbf{Novelty positioning.}  Test whether a GJR-GARCH or MS-GARCH with standard specifications produces a declining SAR, to sharpen the claim of novelty.
+
+  \item \textbf{Missing literatures.}  Add discussion of VVIX, HAR-RV (Corsi 2009), option-implied skewness, and market microstructure noise.
+
+  \item \textbf{Danielsson et al.\ (2018) citation context.}  Note more precisely how ``stability is destabilizing'' differs from contemporaneous absorption.
+
+  \item \textbf{Table 1 (Descriptive Statistics) untraceable.}  Create a replication script or include computation in existing scripts.
+
+  \item \textbf{767 vs.\ 893 sample-size discrepancy.}  Provide a clearer explanation of which 126 observations are excluded and why.
+
+  \item \textbf{\texttt{lin2020} unverifiable.}  Verify exact bibliographic details or replace.
+
+  \item \textbf{\texttt{bekaert2022} end page.}  Check 3995 vs.\ 4004.
+
+  \item \textbf{Replication scripts.}  Create .py scripts for K716, K718, K720, K721 (core experiments).  This is essential for the ``Data and replication code available upon request'' claim in the title footnote.
+\end{enumerate}
+
+\subsection*{Minor Issues}
+
+\begin{enumerate}[label=\textbf{m\arabic*.}, leftmargin=2em]
+  \item The ``Proposition'' in Section~6.3 is informal.  Relabel as ``Observation'' or provide a formal proof.
+
+  \item The VRP formula uses daily scale, which is non-standard.  Add a note.
+
+  \item The bootstrap methodology (block vs.\ i.i.d., block length) is not described.
+
+  \item The Newey-West bandwidth (10 lags) is not justified.  Use a data-driven selector or justify the choice.
+
+  \item Add DOIs to the reference list (currently no DOIs for any entry).
+
+  \item The GLD threshold (0.5\%) for geopolitical shock classification is ad hoc.  Provide a sensitivity check.
+\end{enumerate}
+
+% ============================================================
+\section*{Overall Assessment and Revision Priority}
+
+\textbf{Overall verdict: Major Revision.}
+
+The paper presents an interesting empirical finding with clear practical relevance.  The SAR methodology is a good contribution.  However, the identification concern (mechanical SAR decline) and the data-integrity issues (untraceable numbers, NFP discrepancies, sample-size mismatches) are serious enough to warrant rejection at a top-5 finance journal in the current form.  With a major revision addressing the five severe issues, the paper has a realistic chance at JBF or JFQA.
+
+\bigskip
+
+\textbf{Revision priority (in order):}
+\begin{enumerate}
+  \item \textbf{Null simulation} (S1): This is the single most important fix.  Simulate returns from GARCH(1,1) with realistic parameters, compute SAR and NSI under the null of no absorption, and show the observed effect is statistically larger than the mechanical component.
+  \item \textbf{Reproducibility overhaul} (S3, S4, M8): Create replication scripts for all experiments.  Reconcile all numbers between paper and JSON.  Re-run K741 with corrected NFP dates.
+  \item \textbf{Table 5 reconciliation} (S2): Document the exact counting methodology for the $N$ column and reconcile with K721.
+  \item \textbf{Citation cleanup} (S5, M6, M7): Fix orphan reference, verify Lin et al., check Bekaert et al.\ page range.
+  \item \textbf{Literature and robustness} (M1, M2): Add VVIX discussion, GJR-GARCH comparison, cross-asset SAR tables, asymmetric absorption test.
+\end{enumerate}
+
+\bigskip
+
+\noindent\textit{Review performed 2026-04-05 by Claude Code (Opus 4.6, 1M context).}\\
+\noindent\textit{Companion files: \texttt{audit\_step1\_2.md} (number audit), \texttt{citation\_check\_r1.md} (citation verification).}
+
+\end{document}

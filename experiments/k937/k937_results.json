@@ -1,0 +1,137 @@
+{
+  "experiment_id": "K937",
+  "title": "CARR-GARCH Rank-Calibration Ensemble",
+  "timestamp": "2026-04-06 17:29:04",
+  "data_source": "yfinance (SPY + ^VIX)",
+  "period": "2004-01-01 ~ 2025-12-31",
+  "oos_period": "2017-01-03 ~ 2025-12-31",
+  "oos_days": 2262,
+  "window": 2000,
+  "refit_every": 21,
+  "n_refits": 120,
+  "seed": 42,
+  "base_models": {
+    "GARCH": {
+      "qlike": 1.5856372445552638,
+      "spearman_rho": 0.3898432333756849,
+      "mse": 2.480199912864232e-07
+    },
+    "GJR": {
+      "qlike": 1.5380908225772483,
+      "spearman_rho": 0.4221235378816131,
+      "mse": 2.2916522153437245e-07
+    },
+    "MF-GJR(VIX)": {
+      "qlike": 1.462395234172057,
+      "spearman_rho": 0.46192091104524796,
+      "mse": 2.913253507310178e-07
+    },
+    "CARR_YZ": {
+      "qlike": 1.5336777436696118,
+      "spearman_rho": 0.43051224433836777,
+      "mse": 2.316109894568547e-07
+    }
+  },
+  "ensemble_methods": {
+    "EQ_Weight": {
+      "qlike": 1.4936813892909946,
+      "spearman_rho": 0.4464113998730133,
+      "mse": 2.2545332587009804e-07,
+      "dm_vs_mfgjr": {
+        "t_stat": -2.17788018758869,
+        "p_val": 0.029517993934901066,
+        "direction": "MF-GJR better"
+      }
+    },
+    "Inv_QLIKE": {
+      "qlike": 1.4923652805608165,
+      "spearman_rho": 0.4470662229750345,
+      "mse": 2.2575645230756002e-07,
+      "mean_weights": {
+        "GARCH": 0.24148792422005005,
+        "GJR": 0.2484935346977194,
+        "MF-GJR": 0.2608592406216609,
+        "CARR_YZ": 0.24915930046056972
+      },
+      "dm_vs_mfgjr": {
+        "t_stat": -2.1227274707856445,
+        "p_val": 0.0338850891834892,
+        "direction": "MF-GJR better"
+      }
+    },
+    "Rank_Hybrid": {
+      "qlike": 1.55826155487472,
+      "spearman_rho": 0.4226297039120606,
+      "mse": 2.5024151490155803e-07,
+      "dm_vs_mfgjr": {
+        "t_stat": -3.7174841628793955,
+        "p_val": 0.00020610615718452685,
+        "direction": "MF-GJR better"
+      }
+    },
+    "OLS_Stack": {
+      "qlike": 1.4969124483066498,
+      "spearman_rho": 0.4518752536197151,
+      "mse": 2.1929274916375965e-07,
+      "mean_weights": {
+        "GARCH": 0.11418542302553053,
+        "GJR": 0.31504286195523723,
+        "MF-GJR": 0.41721098860783756,
+        "CARR_YZ": 0.15356072641139462
+      },
+      "dm_vs_mfgjr": {
+        "t_stat": -1.7276383120637644,
+        "p_val": 0.08418964336360069,
+        "direction": "MF-GJR better"
+      }
+    }
+  },
+  "dm_tests_ensemble_vs_ensemble": {
+    "EQ Weight vs Inv QLIKE": {
+      "t_stat": 4.030007012513672,
+      "p_val": 5.7619480622772556e-05,
+      "better": "Inv QLIKE"
+    },
+    "EQ Weight vs Rank Hybrid": {
+      "t_stat": -3.9175989818969192,
+      "p_val": 9.208885767586494e-05,
+      "better": "EQ Weight"
+    },
+    "EQ Weight vs OLS Stack": {
+      "t_stat": -0.2123105600602318,
+      "p_val": 0.8318838950201448,
+      "better": "EQ Weight"
+    },
+    "Inv QLIKE vs Rank Hybrid": {
+      "t_stat": -3.953071519351968,
+      "p_val": 7.952384113929511e-05,
+      "better": "Inv QLIKE"
+    },
+    "Inv QLIKE vs OLS Stack": {
+      "t_stat": -0.29635368176906257,
+      "p_val": 0.7669872116914047,
+      "better": "Inv QLIKE"
+    },
+    "Rank Hybrid vs OLS Stack": {
+      "t_stat": 3.027184386944473,
+      "p_val": 0.0024963001684510377,
+      "better": "OLS Stack"
+    }
+  },
+  "best_qlike_model": "MF-GJR(VIX)",
+  "best_spearman_model": "MF-GJR(VIX)",
+  "any_ensemble_beats_mfgjr_sig": false,
+  "conclusions": [
+    "No ensemble significantly beats MF-GJR(VIX) at Harvey t>3.0 -- VIX information is sufficient",
+    "Best ensemble Inv QLIKE (QLIKE=1.4924) beats Equal Weight (1.4937)",
+    "Rank-Level Hybrid: QLIKE=1.5583, Spearman=0.4226 -- improves ranking vs GARCH",
+    "MF-GJR(VIX) QLIKE=1.4624 remains benchmark. Best overall: MF-GJR(VIX) (QLIKE=1.4624)"
+  ],
+  "references": [
+    "Chou (2005) Forecasting Financial Volatilities with Extreme Values, JoE",
+    "Patton (2011) Volatility Forecast Comparison Using Imperfect Volatility Proxies, JoE 160",
+    "Timmermann (2006) Forecast Combinations, Handbook of Economic Forecasting",
+    "Yang & Zhang (2000) Drift Independent Volatility Estimation, JoF 55(3)",
+    "Harvey et al. (2016) Tests for Forecast Encompassing, JBES"
+  ]
+}

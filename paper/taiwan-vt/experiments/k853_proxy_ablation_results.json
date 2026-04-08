@@ -1,0 +1,272 @@
+{
+  "experiment_id": "K853",
+  "title": "Proxy Ceiling Ablation: Isolate proxy choice effect on HAR vs GJR ranking",
+  "date": "2026-04-03",
+  "data_source": "TAIFEX TX1 tick data (5-min RV) + 0050.TW (yfinance, clean_tw50_data applied)",
+  "data_period": "2012-01-01 to 2025-12-31",
+  "methodology": {
+    "design": "Ablation: fix all conditions, only vary evaluation target",
+    "fixed_conditions": {
+      "IS": "2012-01-01 to 2019-12-31",
+      "OOS": "2020-01-01 to 2025-12-31",
+      "window": "expanding (min 500 days)",
+      "refit": "every 63 trading days",
+      "models": "HAR-RV (Corsi 2009) on RV_day, GJR-GARCH(1,1) Student-t on 0050.TW, EWMA lambda=0.94"
+    },
+    "variable": "Evaluation target: r\u00b2 (Condition A), RV_day (B), RV_total (C)",
+    "causal_question": "Does proxy choice (r\u00b2 vs RV) flip the HAR vs GJR ranking?",
+    "metrics": "QLIKE (Patton 2011), MSE, MAE, Spearman",
+    "dm_test": "Newey-West HAC, Harvey (2016) |t|>3.0"
+  },
+  "references": [
+    "Corsi (2009) - HAR-RV model, J. Financial Econometrics",
+    "Hansen & Lunde (2005) - Forecast comparison with 5-min RV, J. Applied Econometrics",
+    "Patton (2011) - QLIKE proxy-robust, J. Econometrics",
+    "Harvey, Leybourne, Newbold (2016) - DM test threshold"
+  ],
+  "descriptive_stats": {
+    "rv_day": {
+      "n": 3424,
+      "mean": 4.740915062577733e-05,
+      "std": 8.976350685488792e-05,
+      "median": 3.131271195222774e-05
+    },
+    "rv_total": {
+      "n": 3424,
+      "mean": 7.735384543443462e-05,
+      "std": 0.0001697574111945836,
+      "median": 4.617283823438008e-05
+    },
+    "day_return": {
+      "n": 3424,
+      "mean": 4.9700804201382484e-05,
+      "std": 0.00737493853298389,
+      "median": 0.00027931393144215534,
+      "r2_mean": 5.437630368757541e-05,
+      "r2_std": 0.0001606380832103476
+    }
+  },
+  "n_common_oos": 1456,
+  "oos_date_range": "2020-01-02 to 2025-12-31",
+  "conditions": {
+    "A_r_squared": {
+      "condition": "A: r\u00b2 (squared return)",
+      "n_eval": 1448,
+      "metrics": {
+        "HAR-RV": {
+          "QLIKE": 1.339003,
+          "MSE": 4.3165e-08,
+          "MAE": 6.8786e-05,
+          "Spearman": 0.2255,
+          "Spearman_p": 0.0,
+          "n_eval": 1448
+        },
+        "GJR-GARCH": {
+          "QLIKE": 1.597344,
+          "MSE": 5.8674e-08,
+          "MAE": 0.00013346,
+          "Spearman": 0.1403,
+          "Spearman_p": 0.0,
+          "n_eval": 1448
+        },
+        "EWMA": {
+          "QLIKE": 1.692725,
+          "MSE": 7.2802e-08,
+          "MAE": 0.00015976,
+          "Spearman": 0.1194,
+          "Spearman_p": 5e-06,
+          "n_eval": 1448
+        }
+      },
+      "dm_tests": {
+        "HAR-RV vs GJR-GARCH": {
+          "t_stat": -5.1371,
+          "p_value": 0.0,
+          "winner": "HAR-RV",
+          "significant_harvey": true
+        },
+        "HAR-RV vs EWMA": {
+          "t_stat": -6.509,
+          "p_value": 0.0,
+          "winner": "HAR-RV",
+          "significant_harvey": true
+        },
+        "GJR-GARCH vs EWMA": {
+          "t_stat": -6.7082,
+          "p_value": 0.0,
+          "winner": "GJR-GARCH",
+          "significant_harvey": true
+        }
+      },
+      "ranking": {
+        "HAR-RV": 1,
+        "GJR-GARCH": 2,
+        "EWMA": 3
+      }
+    },
+    "B_rv_day": {
+      "condition": "B: RV_day (5-min day RV)",
+      "n_eval": 1454,
+      "metrics": {
+        "HAR-RV": {
+          "QLIKE": 0.180754,
+          "MSE": 1.0637e-08,
+          "MAE": 2.9088e-05,
+          "Spearman": 0.653,
+          "Spearman_p": 0.0,
+          "n_eval": 1454
+        },
+        "GJR-GARCH": {
+          "QLIKE": 0.531411,
+          "MSE": 3.0955e-08,
+          "MAE": 0.00010581,
+          "Spearman": 0.4264,
+          "Spearman_p": 0.0,
+          "n_eval": 1454
+        },
+        "EWMA": {
+          "QLIKE": 0.629672,
+          "MSE": 4.5353e-08,
+          "MAE": 0.00013559,
+          "Spearman": 0.4383,
+          "Spearman_p": 0.0,
+          "n_eval": 1454
+        }
+      },
+      "dm_tests": {
+        "HAR-RV vs GJR-GARCH": {
+          "t_stat": -11.1385,
+          "p_value": 0.0,
+          "winner": "HAR-RV",
+          "significant_harvey": true
+        },
+        "HAR-RV vs EWMA": {
+          "t_stat": -12.7135,
+          "p_value": 0.0,
+          "winner": "HAR-RV",
+          "significant_harvey": true
+        },
+        "GJR-GARCH vs EWMA": {
+          "t_stat": -7.1244,
+          "p_value": 0.0,
+          "winner": "GJR-GARCH",
+          "significant_harvey": true
+        }
+      },
+      "ranking": {
+        "HAR-RV": 1,
+        "GJR-GARCH": 2,
+        "EWMA": 3
+      }
+    },
+    "C_rv_total": {
+      "condition": "C: RV_total (5-min day+night RV)",
+      "n_eval": 1456,
+      "metrics": {
+        "HAR-RV": {
+          "QLIKE": 0.521061,
+          "MSE": 5.1009e-08,
+          "MAE": 7.0937e-05,
+          "Spearman": 0.6736,
+          "Spearman_p": 0.0,
+          "n_eval": 1456
+        },
+        "GJR-GARCH": {
+          "QLIKE": 0.221888,
+          "MSE": 4.3731e-08,
+          "MAE": 8.5977e-05,
+          "Spearman": 0.5965,
+          "Spearman_p": 0.0,
+          "n_eval": 1456
+        },
+        "EWMA": {
+          "QLIKE": 0.278499,
+          "MSE": 5.4407e-08,
+          "MAE": 0.00011017,
+          "Spearman": 0.567,
+          "Spearman_p": 0.0,
+          "n_eval": 1456
+        }
+      },
+      "dm_tests": {
+        "HAR-RV vs GJR-GARCH": {
+          "t_stat": 4.0197,
+          "p_value": 6.1e-05,
+          "winner": "GJR-GARCH",
+          "significant_harvey": true
+        },
+        "HAR-RV vs EWMA": {
+          "t_stat": 3.2376,
+          "p_value": 0.001233,
+          "winner": "EWMA",
+          "significant_harvey": true
+        },
+        "GJR-GARCH vs EWMA": {
+          "t_stat": -5.3332,
+          "p_value": 0.0,
+          "winner": "GJR-GARCH",
+          "significant_harvey": true
+        }
+      },
+      "ranking": {
+        "GJR-GARCH": 1,
+        "EWMA": 2,
+        "HAR-RV": 3
+      }
+    }
+  },
+  "causal_analysis": {
+    "har_vs_gjr_by_condition": {
+      "A": {
+        "har_rank": 1,
+        "gjr_rank": 2,
+        "har_qlike": 1.339003,
+        "gjr_qlike": 1.597344,
+        "delta_pct": 16.17,
+        "dm_t": -5.1371,
+        "dm_p": 0.0,
+        "dm_significant": true,
+        "dm_winner": "HAR-RV",
+        "har_wins": true
+      },
+      "B": {
+        "har_rank": 1,
+        "gjr_rank": 2,
+        "har_qlike": 0.180754,
+        "gjr_qlike": 0.531411,
+        "delta_pct": 65.99,
+        "dm_t": -11.1385,
+        "dm_p": 0.0,
+        "dm_significant": true,
+        "dm_winner": "HAR-RV",
+        "har_wins": true
+      },
+      "C": {
+        "har_rank": 3,
+        "gjr_rank": 1,
+        "har_qlike": 0.521061,
+        "gjr_qlike": 0.221888,
+        "delta_pct": -134.83,
+        "dm_t": 4.0197,
+        "dm_p": 6.1e-05,
+        "dm_significant": true,
+        "dm_winner": "GJR-GARCH",
+        "har_wins": false
+      }
+    },
+    "margins_pct": {
+      "A": 16.17,
+      "B": 65.99,
+      "C": -134.83
+    },
+    "proxy_ceiling_confirmed": false,
+    "conclusion": "NUANCED: HAR beats GJR on BOTH r\u00b2 AND RV_day (DM t=-5.14, -11.14), so proxy is NOT the cause of HAR's advantage for day-session vol. But GJR wins on RV_total (DM t=+4.02) because HAR trained on day-only RV cannot predict overnight vol. This is target mismatch, not proxy ceiling.",
+    "nuance": {
+      "condition_A_r2": "HAR beats GJR significantly (DM t=-5.14). Proxy ceiling REJECTED for day vol.",
+      "condition_B_rv_day": "HAR dominance amplified (DM t=-11.14, delta=+66%). RV target reveals the TRUE gap -- r\u00b2 noise compressed a 66% advantage to 16%.",
+      "condition_C_rv_total": "GJR wins (DM t=+4.02). Not proxy ceiling -- HAR trained on day-only RV misses overnight vol. Target mismatch.",
+      "insight": "The 'proxy ceiling' is real but in a different sense: r\u00b2 doesn't FLIP rankings, but it COMPRESSES the margin (16% vs 66%). Noisy proxy understates HAR's true advantage by 4x."
+    }
+  },
+  "runtime_seconds": 76.7
+}

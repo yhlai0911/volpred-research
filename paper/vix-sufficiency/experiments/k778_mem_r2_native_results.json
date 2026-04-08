@@ -1,0 +1,549 @@
+{
+  "experiment_id": "K778",
+  "title": "MEM/AMEM Native r\u00b2 \u2014 Pure \u03c3\u00b2 Space Comparison per Patton (2011)",
+  "proposer": "\u7528\u6236",
+  "executor": "Claude",
+  "timestamp": "2026-03-31T12:48:56.699051+00:00",
+  "data_source": "yfinance SPY 2007-2026",
+  "n_oos": 4589,
+  "n_refits": 73,
+  "min_window": 500,
+  "refit_freq": 63,
+  "oos_period": "2008-01-02 00:00:00 to 2026-03-30 00:00:00",
+  "diagnostics": {
+    "n_obs": 5090,
+    "mean_r2": 0.00014837393390189685,
+    "std_r2": 0.0006111079164603896,
+    "skewness_r2": 16.707824609531674,
+    "kurtosis_r2": 408.51353917937803,
+    "mean_abs_r": 0.0077917770329202244,
+    "empirical_r2_over_abs2": 2.443906456019467,
+    "theoretical_normal_ratio": 1.5707963267948966
+  },
+  "metrics": {
+    "mem_r2": {
+      "qlike": 1.5761966229568973,
+      "mse": 3.243611091955105e-07,
+      "spearman_r": 0.3759669033868803,
+      "spearman_p": 5.0296134318127606e-154
+    },
+    "amem_r2": {
+      "qlike": 1.558550554872182,
+      "mse": 3.175996337616287e-07,
+      "spearman_r": 0.3979632234328815,
+      "spearman_p": 5.379012759098543e-174
+    },
+    "gjr": {
+      "qlike": 1.5267799048367399,
+      "mse": 3.084567012644215e-07,
+      "spearman_r": 0.41819401699615294,
+      "spearman_p": 9.414607728214505e-194
+    },
+    "garch": {
+      "qlike": 1.5764374721377254,
+      "mse": 3.246738668095934e-07,
+      "spearman_r": 0.37333523629581356,
+      "spearman_p": 9.759397562692858e-152
+    },
+    "har_r2": {
+      "qlike": 1.64910907499006,
+      "mse": 3.480700583449171e-07,
+      "spearman_r": 0.36197346827055576,
+      "spearman_p": 4.219784648628114e-142
+    },
+    "ewma_r2": {
+      "qlike": 1.6239937491230307,
+      "mse": 3.396265462068326e-07,
+      "spearman_r": 0.3563754614012772,
+      "spearman_p": 1.7013964390332018e-137
+    }
+  },
+  "ranking_qlike": [
+    "gjr",
+    "amem_r2",
+    "mem_r2",
+    "garch",
+    "ewma_r2",
+    "har_r2"
+  ],
+  "ranking_spearman": [
+    "gjr",
+    "amem_r2",
+    "mem_r2",
+    "garch",
+    "har_r2",
+    "ewma_r2"
+  ],
+  "dm_tests_all_pairs": {
+    "mem_r2_vs_amem_r2": {
+      "dm_stat": 2.7522825294220543,
+      "p_value": 0.005941407612447325,
+      "harvey_pass": false,
+      "better": "amem_r2"
+    },
+    "mem_r2_vs_gjr": {
+      "dm_stat": 4.881809941864484,
+      "p_value": 1.086858201881924e-06,
+      "harvey_pass": true,
+      "better": "gjr"
+    },
+    "mem_r2_vs_garch": {
+      "dm_stat": -0.0632305297554888,
+      "p_value": 0.9495856886430056,
+      "harvey_pass": false,
+      "better": "mem_r2"
+    },
+    "mem_r2_vs_har_r2": {
+      "dm_stat": -3.478242860124675,
+      "p_value": 0.0005094006980910226,
+      "harvey_pass": true,
+      "better": "mem_r2"
+    },
+    "mem_r2_vs_ewma_r2": {
+      "dm_stat": -3.402261610460793,
+      "p_value": 0.0006740227821573352,
+      "harvey_pass": true,
+      "better": "mem_r2"
+    },
+    "amem_r2_vs_gjr": {
+      "dm_stat": 3.7781902423003917,
+      "p_value": 0.00015997509538911991,
+      "harvey_pass": true,
+      "better": "gjr"
+    },
+    "amem_r2_vs_garch": {
+      "dm_stat": -2.8530649356867928,
+      "p_value": 0.004349360144878078,
+      "harvey_pass": false,
+      "better": "amem_r2"
+    },
+    "amem_r2_vs_har_r2": {
+      "dm_stat": -3.9770162569873095,
+      "p_value": 7.086028147296197e-05,
+      "harvey_pass": true,
+      "better": "amem_r2"
+    },
+    "amem_r2_vs_ewma_r2": {
+      "dm_stat": -4.112121735524057,
+      "p_value": 3.9889875133924946e-05,
+      "harvey_pass": true,
+      "better": "amem_r2"
+    },
+    "gjr_vs_garch": {
+      "dm_stat": -4.7570267188886675,
+      "p_value": 2.0249542933559184e-06,
+      "harvey_pass": true,
+      "better": "gjr"
+    },
+    "gjr_vs_har_r2": {
+      "dm_stat": -4.919009050404486,
+      "p_value": 9.002595739993069e-07,
+      "harvey_pass": true,
+      "better": "gjr"
+    },
+    "gjr_vs_ewma_r2": {
+      "dm_stat": -5.284700444784257,
+      "p_value": 1.317483442342393e-07,
+      "harvey_pass": true,
+      "better": "gjr"
+    },
+    "garch_vs_har_r2": {
+      "dm_stat": -3.559468993706837,
+      "p_value": 0.00037536900802992434,
+      "harvey_pass": true,
+      "better": "garch"
+    },
+    "garch_vs_ewma_r2": {
+      "dm_stat": -3.7182976430326065,
+      "p_value": 0.00020296389290996864,
+      "harvey_pass": true,
+      "better": "garch"
+    },
+    "har_r2_vs_ewma_r2": {
+      "dm_stat": 1.4960575962298392,
+      "p_value": 0.1347074282039944,
+      "harvey_pass": false,
+      "better": "ewma_r2"
+    }
+  },
+  "key_comparisons": {
+    "amem_r2_vs_gjr": {
+      "dm_stat": 3.7781902423003917,
+      "p_value": 0.00015997509538911991,
+      "harvey_pass": true,
+      "better": "gjr",
+      "description": "AMEM-r\u00b2 vs GJR-GARCH (both asymmetric)"
+    },
+    "mem_r2_vs_garch": {
+      "dm_stat": -0.0632305297554888,
+      "p_value": 0.9495856886430056,
+      "harvey_pass": false,
+      "better": "mem_r2",
+      "description": "MEM-r\u00b2 vs GARCH(1,1) (both symmetric)"
+    },
+    "amem_r2_vs_garch": {
+      "dm_stat": -2.8530649356867928,
+      "p_value": 0.004349360144878078,
+      "harvey_pass": false,
+      "better": "amem_r2",
+      "description": "AMEM-r\u00b2 vs GARCH(1,1) (asym MEM vs sym GARCH)"
+    },
+    "mem_r2_vs_gjr": {
+      "dm_stat": 4.881809941864484,
+      "p_value": 1.086858201881924e-06,
+      "harvey_pass": true,
+      "better": "gjr",
+      "description": "MEM-r\u00b2 vs GJR-GARCH (sym MEM vs asym GARCH)"
+    },
+    "amem_r2_vs_mem_r2": {
+      "dm_stat": -2.7522825294220543,
+      "p_value": 0.005941407612447325,
+      "harvey_pass": false,
+      "better": "amem_r2",
+      "description": "AMEM-r\u00b2 vs MEM-r\u00b2 (asymmetry value in MEM)"
+    },
+    "gjr_vs_garch": {
+      "dm_stat": -4.7570267188886675,
+      "p_value": 2.0249542933559184e-06,
+      "harvey_pass": true,
+      "better": "gjr",
+      "description": "GJR vs GARCH (asymmetry value in GARCH)"
+    }
+  },
+  "model_confidence_set": {
+    "alpha": 0.1,
+    "n_boot": 5000,
+    "mcs_members": [
+      "gjr"
+    ],
+    "mcs_size": 1
+  },
+  "sub_period_analysis": {
+    "first_half": {
+      "n_obs": 2294,
+      "metrics": {
+        "mem_r2": {
+          "qlike": 1.5948623326403146,
+          "spearman_r": 0.3648725382204992
+        },
+        "amem_r2": {
+          "qlike": 1.5752259668077335,
+          "spearman_r": 0.3853344525178353
+        },
+        "gjr": {
+          "qlike": 1.5367653513852497,
+          "spearman_r": 0.4123210383460255
+        },
+        "garch": {
+          "qlike": 1.5934305072276769,
+          "spearman_r": 0.35865573879921886
+        },
+        "har_r2": {
+          "qlike": 1.6574042078542446,
+          "spearman_r": 0.34934564127538525
+        },
+        "ewma_r2": {
+          "qlike": 1.6245557439474216,
+          "spearman_r": 0.3409504622856237
+        }
+      },
+      "ranking": [
+        "gjr",
+        "amem_r2",
+        "garch",
+        "mem_r2",
+        "ewma_r2",
+        "har_r2"
+      ]
+    },
+    "second_half": {
+      "n_obs": 2295,
+      "metrics": {
+        "mem_r2": {
+          "qlike": 1.557571650309018,
+          "spearman_r": 0.38522436111215935
+        },
+        "amem_r2": {
+          "qlike": 1.541911536240724,
+          "spearman_r": 0.4102922076507914
+        },
+        "gjr": {
+          "qlike": 1.516816251056778,
+          "spearman_r": 0.4238796685263362
+        },
+        "garch": {
+          "qlike": 1.5594815235494983,
+          "spearman_r": 0.38608549107247836
+        },
+        "har_r2": {
+          "qlike": 1.6408320458641217,
+          "spearman_r": 0.37553799570336915
+        },
+        "ewma_r2": {
+          "qlike": 1.6234329808259735,
+          "spearman_r": 0.3691748821161513
+        }
+      },
+      "ranking": [
+        "gjr",
+        "amem_r2",
+        "mem_r2",
+        "garch",
+        "ewma_r2",
+        "har_r2"
+      ]
+    },
+    "crisis_2020": {
+      "n_obs": 104,
+      "metrics": {
+        "mem_r2": {
+          "qlike": 1.5777310041361159,
+          "spearman_r": 0.4974394537501334
+        },
+        "amem_r2": {
+          "qlike": 1.7356628074065925,
+          "spearman_r": 0.4873146271204524
+        },
+        "gjr": {
+          "qlike": 1.5829945896653972,
+          "spearman_r": 0.5300330737223942
+        },
+        "garch": {
+          "qlike": 1.600658059283837,
+          "spearman_r": 0.49201963085458233
+        },
+        "har_r2": {
+          "qlike": 1.7764083963382977,
+          "spearman_r": 0.4778192681105303
+        },
+        "ewma_r2": {
+          "qlike": 1.863643750189668,
+          "spearman_r": 0.3768697322095381
+        }
+      },
+      "ranking": [
+        "mem_r2",
+        "gjr",
+        "garch",
+        "amem_r2",
+        "har_r2",
+        "ewma_r2"
+      ]
+    },
+    "post_covid": {
+      "n_obs": 503,
+      "metrics": {
+        "mem_r2": {
+          "qlike": 1.3792398825899619,
+          "spearman_r": 0.3427251893684375
+        },
+        "amem_r2": {
+          "qlike": 1.3697474576527073,
+          "spearman_r": 0.37247035714002835
+        },
+        "gjr": {
+          "qlike": 1.3506888888722268,
+          "spearman_r": 0.3968380949363579
+        },
+        "garch": {
+          "qlike": 1.3740525751006292,
+          "spearman_r": 0.34434353846565835
+        },
+        "har_r2": {
+          "qlike": 1.374962753183035,
+          "spearman_r": 0.362860590205683
+        },
+        "ewma_r2": {
+          "qlike": 1.3785660304570624,
+          "spearman_r": 0.3291773736258224
+        }
+      },
+      "ranking": [
+        "gjr",
+        "amem_r2",
+        "garch",
+        "har_r2",
+        "ewma_r2",
+        "mem_r2"
+      ]
+    },
+    "recent_2024_2026": {
+      "n_obs": 562,
+      "metrics": {
+        "mem_r2": {
+          "qlike": 1.6559332229379238,
+          "spearman_r": 0.17708625967969602
+        },
+        "amem_r2": {
+          "qlike": 1.6171718296144615,
+          "spearman_r": 0.223789065973958
+        },
+        "gjr": {
+          "qlike": 1.5907448907728483,
+          "spearman_r": 0.25230472011506505
+        },
+        "garch": {
+          "qlike": 1.6568993566014882,
+          "spearman_r": 0.177549551258535
+        },
+        "har_r2": {
+          "qlike": 1.6448277007289795,
+          "spearman_r": 0.17365554937014688
+        },
+        "ewma_r2": {
+          "qlike": 1.7335278349733207,
+          "spearman_r": 0.14076901331772307
+        }
+      },
+      "ranking": [
+        "gjr",
+        "amem_r2",
+        "har_r2",
+        "mem_r2",
+        "garch",
+        "ewma_r2"
+      ]
+    }
+  },
+  "parameter_diagnostics": {
+    "mem_r2": {
+      "omega": {
+        "mean": 3.036338120860906e-06,
+        "std": 7.304736121732705e-07,
+        "min": 2.1420745798291974e-06,
+        "max": 4.151821866378619e-06
+      },
+      "alpha": {
+        "mean": 0.13065101861995387,
+        "std": 0.029080921393885392,
+        "min": 0.07040590926481725,
+        "max": 0.1465700125636638
+      },
+      "beta": {
+        "mean": 0.84833036384102,
+        "std": 0.027858607804834047,
+        "min": 0.8333827083341321,
+        "max": 0.9026552596632629
+      },
+      "k": {
+        "mean": 0.40736622126634947,
+        "std": 0.005849355197484545,
+        "min": 0.3977347924055634,
+        "max": 0.4140527102736538
+      },
+      "persistence": {
+        "mean": 0.9789813824609739,
+        "std": 0.0027250520527157362,
+        "min": 0.9730611689280801,
+        "max": 0.9828826681188789
+      }
+    },
+    "amem_r2": {
+      "omega": {
+        "mean": 3.7011451281903044e-06,
+        "std": 1.044423303380064e-06,
+        "min": 1.6332773651791507e-06,
+        "max": 4.775130776199543e-06
+      },
+      "alpha": {
+        "mean": 0.06524916797918984,
+        "std": 0.02252654125508068,
+        "min": 0.04726278286802856,
+        "max": 0.0974987447611547
+      },
+      "beta": {
+        "mean": 0.8562296974864658,
+        "std": 0.026322844393655533,
+        "min": 0.8114901602768108,
+        "max": 0.8895517818044513
+      },
+      "gamma": {
+        "mean": 0.07189297886874245,
+        "std": 0.05545774925907713,
+        "min": 0.009995485240629846,
+        "max": 0.18195562905227175
+      },
+      "k": {
+        "mean": 0.4153067157197774,
+        "std": 0.005169077147787315,
+        "min": 0.4047300933810039,
+        "max": 0.4209969185505754
+      },
+      "persistence": {
+        "mean": 0.9574253549000268,
+        "std": 0.028822803358447117,
+        "min": 0.931326958115003,
+        "max": 0.9999667195641013
+      }
+    },
+    "gjr": {
+      "omega": {
+        "mean": 2.4888112950043247e-06,
+        "std": 3.012932845706644e-07,
+        "min": 1.9694329580277857e-06,
+        "max": 2.934746463647668e-06
+      },
+      "alpha": {
+        "mean": 0.00611941989131877,
+        "std": 0.005632522476086597,
+        "min": 0.0,
+        "max": 0.01490655691402968
+      },
+      "beta": {
+        "mean": 0.879438957567458,
+        "std": 0.0183226442332775,
+        "min": 0.8549060576719364,
+        "max": 0.9048554606349941
+      },
+      "gamma": {
+        "mean": 0.19237852459028482,
+        "std": 0.043808647281422176,
+        "min": 0.12612143210258048,
+        "max": 0.24144396311671848
+      },
+      "persistence": {
+        "mean": 0.9817476397539193,
+        "std": 0.0069297963094017935,
+        "min": 0.9667679321843993,
+        "max": 0.9899402652732716
+      }
+    },
+    "garch": {
+      "omega": {
+        "mean": 2.1560120335546153e-06,
+        "std": 4.038956624711572e-07,
+        "min": 1.5885276803250285e-06,
+        "max": 2.8193083868457823e-06
+      },
+      "alpha": {
+        "mean": 0.09905043833801669,
+        "std": 0.028018683768577465,
+        "min": 0.060005804880933926,
+        "max": 0.136236739425285
+      },
+      "beta": {
+        "mean": 0.8823826956179788,
+        "std": 0.027448550989260405,
+        "min": 0.8436722260479225,
+        "max": 0.9134619613397614
+      },
+      "persistence": {
+        "mean": 0.9814331339559954,
+        "std": 0.005278546422286082,
+        "min": 0.9734677662206953,
+        "max": 0.9922757881370171
+      }
+    }
+  },
+  "references": [
+    "Engle & Gallo (2006) J.Econometrics 131, MEM framework",
+    "Glosten, Jagannathan, Runkle (1993) JoF 48, GJR-GARCH",
+    "Bollerslev (1986) J.Econometrics 31, GARCH(1,1)",
+    "Corsi (2009) J.Financial Econometrics 7, HAR model",
+    "Patton (2011) J.Econometrics 160, QLIKE proxy-robust loss",
+    "Hansen, Lunde, Nason (2011) Econometrica 79, Model Confidence Set",
+    "K770: MEM on |r| \u2014 OVERTURNED",
+    "K777: Multi-target fair \u2014 AMEM vs GJR NS on r\u00b2 (converted)",
+    "K778: This \u2014 native MEM-r\u00b2, no conversion"
+  ]
+}

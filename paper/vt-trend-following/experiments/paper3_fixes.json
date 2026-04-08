@@ -1,0 +1,716 @@
+{
+  "experiment": "Paper 3 Fixes: VIX Threshold Sensitivity + Dual Mechanism Generalization",
+  "description": "Fix 1 (Codex K77 + Gemini K76): Show TSMOM decomposition holds across VIX targets 8-20. Fix 2 (Codex K77): Generalize dual mechanism to SPY/QQQ/EEM/EFA/GLD. Both raw and orthogonalized TSMOM reported.",
+  "proposed_by": "Codex K77 + Gemini K76",
+  "executed_by": "Claude",
+  "timestamp": "2026-03-21T17:56:33.113866",
+  "config": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "EEM",
+      "EFA",
+      "GLD"
+    ],
+    "vix_thresholds": [
+      8,
+      10,
+      12,
+      15,
+      18,
+      20
+    ],
+    "start": "2007-01-01",
+    "data_start": "2005-01-01",
+    "tsmom_lookbacks": [
+      21,
+      63,
+      252
+    ],
+    "rolling_window": 252,
+    "nw_lags": 10,
+    "monthly_rebalance": true,
+    "lagged_weights": true
+  },
+  "fix1_threshold_sensitivity": {
+    "description": "TSMOM decomposition for SPY across VIX thresholds (8,10,12,15,18,20). Both raw TSMOM (alpha absorption) and orth TSMOM (net significance) reported.",
+    "results": {
+      "8": {
+        "threshold": 8,
+        "avg_weight": 0.4707,
+        "vt_metrics": {
+          "ann_return": 0.041337,
+          "ann_vol": 0.06959,
+          "sharpe": 0.594,
+          "mdd": -0.1861,
+          "n_obs": 4834
+        },
+        "model1_capm": {
+          "const_beta": 3.26e-05,
+          "const_t": 1.3557,
+          "const_p": 0.175196,
+          "MKT_beta": 0.32337127,
+          "MKT_t": 20.2393,
+          "MKT_p": 0.0,
+          "r2": 0.837318,
+          "n_obs": 4834
+        },
+        "model2_raw_tsmom": {
+          "const_beta": 1.139e-05,
+          "const_t": 0.6394,
+          "const_p": 0.522587,
+          "MKT_beta": 0.35055115,
+          "MKT_t": 40.3416,
+          "MKT_p": 0.0,
+          "TSMOM_beta": 0.11671907,
+          "TSMOM_t": 10.9146,
+          "TSMOM_p": 0.0,
+          "r2": 0.897895,
+          "n_obs": 4834
+        },
+        "model3_orth_tsmom": {
+          "const_beta": 3.26e-05,
+          "const_t": 1.8012,
+          "const_p": 0.071678,
+          "MKT_beta": 0.32337127,
+          "MKT_t": 33.598,
+          "MKT_p": 0.0,
+          "TSMOM_orth_beta": 0.11671907,
+          "TSMOM_orth_t": 10.9146,
+          "TSMOM_orth_p": 0.0,
+          "r2": 0.897895,
+          "n_obs": 4834
+        },
+        "alpha_reduction_pct": 65.07
+      },
+      "10": {
+        "threshold": 10,
+        "avg_weight": 0.5882,
+        "vt_metrics": {
+          "ann_return": 0.051611,
+          "ann_vol": 0.086981,
+          "sharpe": 0.5934,
+          "mdd": -0.2287,
+          "n_obs": 4834
+        },
+        "model1_capm": {
+          "const_beta": 4.052e-05,
+          "const_t": 1.3485,
+          "const_p": 0.1775,
+          "MKT_beta": 0.4041986,
+          "MKT_t": 20.2401,
+          "MKT_p": 0.0,
+          "r2": 0.837393,
+          "n_obs": 4834
+        },
+        "model2_raw_tsmom": {
+          "const_beta": 1.401e-05,
+          "const_t": 0.6295,
+          "const_p": 0.529024,
+          "MKT_beta": 0.43816521,
+          "MKT_t": 40.3409,
+          "MKT_p": 0.0,
+          "TSMOM_beta": 0.14586345,
+          "TSMOM_t": 10.9121,
+          "TSMOM_p": 0.0,
+          "r2": 0.89795,
+          "n_obs": 4834
+        },
+        "model3_orth_tsmom": {
+          "const_beta": 4.052e-05,
+          "const_t": 1.7918,
+          "const_p": 0.073169,
+          "MKT_beta": 0.4041986,
+          "MKT_t": 33.5963,
+          "MKT_p": 0.0,
+          "TSMOM_orth_beta": 0.14586345,
+          "TSMOM_orth_t": 10.9121,
+          "TSMOM_orth_p": 0.0,
+          "r2": 0.89795,
+          "n_obs": 4834
+        },
+        "alpha_reduction_pct": 65.43
+      },
+      "12": {
+        "threshold": 12,
+        "avg_weight": 0.6988,
+        "vt_metrics": {
+          "ann_return": 0.060915,
+          "ann_vol": 0.103923,
+          "sharpe": 0.5862,
+          "mdd": -0.2697,
+          "n_obs": 4834
+        },
+        "model1_capm": {
+          "const_beta": 4.504e-05,
+          "const_t": 1.2688,
+          "const_p": 0.204499,
+          "MKT_beta": 0.48390238,
+          "MKT_t": 20.3118,
+          "MKT_p": 0.0,
+          "r2": 0.840776,
+          "n_obs": 4834
+        },
+        "model2_raw_tsmom": {
+          "const_beta": 1.366e-05,
+          "const_t": 0.5209,
+          "const_p": 0.602428,
+          "MKT_beta": 0.52411347,
+          "MKT_t": 40.5118,
+          "MKT_p": 0.0,
+          "TSMOM_beta": 0.17267924,
+          "TSMOM_t": 10.8395,
+          "TSMOM_p": 0.0,
+          "r2": 0.900229,
+          "n_obs": 4834
+        },
+        "model3_orth_tsmom": {
+          "const_beta": 4.504e-05,
+          "const_t": 1.6879,
+          "const_p": 0.091433,
+          "MKT_beta": 0.48390238,
+          "MKT_t": 33.5787,
+          "MKT_p": 0.0,
+          "TSMOM_orth_beta": 0.17267924,
+          "TSMOM_orth_t": 10.8395,
+          "TSMOM_orth_p": 0.0,
+          "r2": 0.900229,
+          "n_obs": 4834
+        },
+        "alpha_reduction_pct": 69.67
+      },
+      "15": {
+        "threshold": 15,
+        "avg_weight": 0.8194,
+        "vt_metrics": {
+          "ann_return": 0.073885,
+          "ann_vol": 0.125376,
+          "sharpe": 0.5893,
+          "mdd": -0.3276,
+          "n_obs": 4834
+        },
+        "model1_capm": {
+          "const_beta": 5.289e-05,
+          "const_t": 1.3287,
+          "const_p": 0.183941,
+          "MKT_beta": 0.59121705,
+          "MKT_t": 21.1436,
+          "MKT_p": 0.0,
+          "r2": 0.862286,
+          "n_obs": 4834
+        },
+        "model2_raw_tsmom": {
+          "const_beta": 1.712e-05,
+          "const_t": 0.5913,
+          "const_p": 0.554289,
+          "MKT_beta": 0.63705479,
+          "MKT_t": 42.6622,
+          "MKT_p": 0.0,
+          "TSMOM_beta": 0.19684187,
+          "TSMOM_t": 10.395,
+          "TSMOM_p": 0.0,
+          "r2": 0.915366,
+          "n_obs": 4834
+        },
+        "model3_orth_tsmom": {
+          "const_beta": 5.289e-05,
+          "const_t": 1.7837,
+          "const_p": 0.074467,
+          "MKT_beta": 0.59121705,
+          "MKT_t": 34.5505,
+          "MKT_p": 0.0,
+          "TSMOM_orth_beta": 0.19684187,
+          "TSMOM_orth_t": 10.395,
+          "TSMOM_orth_p": 0.0,
+          "r2": 0.915366,
+          "n_obs": 4834
+        },
+        "alpha_reduction_pct": 67.64
+      },
+      "18": {
+        "threshold": 18,
+        "avg_weight": 0.8921,
+        "vt_metrics": {
+          "ann_return": 0.08238,
+          "ann_vol": 0.142252,
+          "sharpe": 0.5791,
+          "mdd": -0.3776,
+          "n_obs": 4834
+        },
+        "model1_capm": {
+          "const_beta": 5.011e-05,
+          "const_t": 1.2184,
+          "const_p": 0.22306,
+          "MKT_beta": 0.68100577,
+          "MKT_t": 22.5211,
+          "MKT_p": 0.0,
+          "r2": 0.888732,
+          "n_obs": 4834
+        },
+        "model2_raw_tsmom": {
+          "const_beta": 1.471e-05,
+          "const_t": 0.4875,
+          "const_p": 0.625933,
+          "MKT_beta": 0.72636438,
+          "MKT_t": 44.5368,
+          "MKT_p": 0.0,
+          "TSMOM_beta": 0.19478433,
+          "TSMOM_t": 9.0009,
+          "TSMOM_p": 0.0,
+          "r2": 0.929107,
+          "n_obs": 4834
+        },
+        "model3_orth_tsmom": {
+          "const_beta": 5.011e-05,
+          "const_t": 1.606,
+          "const_p": 0.108266,
+          "MKT_beta": 0.68100577,
+          "MKT_t": 34.8161,
+          "MKT_p": 0.0,
+          "TSMOM_orth_beta": 0.19478433,
+          "TSMOM_orth_t": 9.0009,
+          "TSMOM_orth_p": 0.0,
+          "r2": 0.929107,
+          "n_obs": 4834
+        },
+        "alpha_reduction_pct": 70.65
+      },
+      "20": {
+        "threshold": 20,
+        "avg_weight": 0.9209,
+        "vt_metrics": {
+          "ann_return": 0.086076,
+          "ann_vol": 0.150994,
+          "sharpe": 0.5701,
+          "mdd": -0.4003,
+          "n_obs": 4834
+        },
+        "model1_capm": {
+          "const_beta": 4.488e-05,
+          "const_t": 1.1244,
+          "const_p": 0.260826,
+          "MKT_beta": 0.72995317,
+          "MKT_t": 23.8085,
+          "MKT_p": 0.0,
+          "r2": 0.906266,
+          "n_obs": 4834
+        },
+        "model2_raw_tsmom": {
+          "const_beta": 1.152e-05,
+          "const_t": 0.3915,
+          "const_p": 0.695422,
+          "MKT_beta": 0.77269787,
+          "MKT_t": 45.813,
+          "MKT_p": 0.0,
+          "TSMOM_beta": 0.18355939,
+          "TSMOM_t": 7.9791,
+          "TSMOM_p": 0.0,
+          "r2": 0.93809,
+          "n_obs": 4834
+        },
+        "model3_orth_tsmom": {
+          "const_beta": 4.488e-05,
+          "const_t": 1.4636,
+          "const_p": 0.143298,
+          "MKT_beta": 0.72995317,
+          "MKT_t": 35.1281,
+          "MKT_p": 0.0,
+          "TSMOM_orth_beta": 0.18355939,
+          "TSMOM_orth_t": 7.9791,
+          "TSMOM_orth_p": 0.0,
+          "r2": 0.93809,
+          "n_obs": 4834
+        },
+        "alpha_reduction_pct": 74.33
+      }
+    },
+    "summary": {
+      "all_beta_tsmom_significant_raw": true,
+      "alpha_reduction_range": [
+        65.07,
+        74.33
+      ],
+      "mean_alpha_reduction": 68.8
+    }
+  },
+  "fix2_cross_asset": {
+    "description": "Dual mechanism (alpha absorption + MDD preservation) generalized across 5 assets with 12/VIX.",
+    "results": {
+      "SPY": {
+        "regression_decomposition": {
+          "model1_capm": {
+            "const_beta": 4.504e-05,
+            "const_t": 1.2688,
+            "const_p": 0.204499,
+            "MKT_beta": 0.48390238,
+            "MKT_t": 20.3118,
+            "MKT_p": 0.0,
+            "r2": 0.840776,
+            "n_obs": 4834
+          },
+          "model2_raw_tsmom": {
+            "const_beta": 1.366e-05,
+            "const_t": 0.5209,
+            "const_p": 0.602428,
+            "MKT_beta": 0.52411347,
+            "MKT_t": 40.5118,
+            "MKT_p": 0.0,
+            "TSMOM_beta": 0.17267924,
+            "TSMOM_t": 10.8395,
+            "TSMOM_p": 0.0,
+            "r2": 0.900229,
+            "n_obs": 4834
+          },
+          "model3_orth_tsmom": {
+            "const_beta": 4.504e-05,
+            "const_t": 1.6879,
+            "const_p": 0.091433,
+            "MKT_beta": 0.48390238,
+            "MKT_t": 33.5787,
+            "MKT_p": 0.0,
+            "TSMOM_orth_beta": 0.17267924,
+            "TSMOM_orth_t": 10.8395,
+            "TSMOM_orth_p": 0.0,
+            "r2": 0.900229,
+            "n_obs": 4834
+          },
+          "alpha_reduction_pct": 69.67,
+          "r2_increase_raw": 0.059454,
+          "r2_increase_orth": 0.059454
+        },
+        "hedged_vt_analysis": {
+          "rolling_beta_tsmom_mean": 0.0953,
+          "rolling_beta_tsmom_std": 0.0448,
+          "pct_positive_beta": 98.5,
+          "buy_and_hold": {
+            "ann_return": 0.107468,
+            "ann_vol": 0.198807,
+            "sharpe": 0.5406,
+            "mdd": -0.525,
+            "n_obs": 4582
+          },
+          "vt_12_vix": {
+            "ann_return": 0.063988,
+            "ann_vol": 0.103521,
+            "sharpe": 0.6181,
+            "mdd": -0.2275,
+            "n_obs": 4582
+          },
+          "tsmom_hedged_vt": {
+            "ann_return": 0.062579,
+            "ann_vol": 0.108977,
+            "sharpe": 0.5742,
+            "mdd": -0.2509,
+            "n_obs": 4582
+          },
+          "sharpe_change_from_hedging_pct": -7.1,
+          "tsmom_sharpe_contribution_pct": 7.1,
+          "mdd_preservation_pct": 92.13
+        }
+      },
+      "QQQ": {
+        "regression_decomposition": {
+          "model1_capm": {
+            "const_beta": 5.25e-05,
+            "const_t": 1.2835,
+            "const_p": 0.199331,
+            "MKT_beta": 0.53002826,
+            "MKT_t": 25.733,
+            "MKT_p": 0.0,
+            "r2": 0.859761,
+            "n_obs": 4834
+          },
+          "model2_raw_tsmom": {
+            "const_beta": 1.7e-05,
+            "const_t": 0.5075,
+            "const_p": 0.611822,
+            "MKT_beta": 0.5350682,
+            "MKT_t": 35.3102,
+            "MKT_p": 0.0,
+            "TSMOM_beta": 0.15322211,
+            "TSMOM_t": 9.0354,
+            "TSMOM_p": 0.0,
+            "r2": 0.897666,
+            "n_obs": 4834
+          },
+          "model3_orth_tsmom": {
+            "const_beta": 5.25e-05,
+            "const_t": 1.5332,
+            "const_p": 0.125227,
+            "MKT_beta": 0.53002826,
+            "MKT_t": 34.4185,
+            "MKT_p": 0.0,
+            "TSMOM_orth_beta": 0.15322211,
+            "TSMOM_orth_t": 9.0354,
+            "TSMOM_orth_p": 0.0,
+            "r2": 0.897666,
+            "n_obs": 4834
+          },
+          "alpha_reduction_pct": 67.62,
+          "r2_increase_raw": 0.037905,
+          "r2_increase_orth": 0.037905
+        },
+        "hedged_vt_analysis": {
+          "rolling_beta_tsmom_mean": 0.0847,
+          "rolling_beta_tsmom_std": 0.0499,
+          "pct_positive_beta": 93.9,
+          "buy_and_hold": {
+            "ann_return": 0.154658,
+            "ann_vol": 0.22403,
+            "sharpe": 0.6903,
+            "mdd": -0.5006,
+            "n_obs": 4582
+          },
+          "vt_12_vix": {
+            "ann_return": 0.094701,
+            "ann_vol": 0.126796,
+            "sharpe": 0.7469,
+            "mdd": -0.2384,
+            "n_obs": 4582
+          },
+          "tsmom_hedged_vt": {
+            "ann_return": 0.089725,
+            "ann_vol": 0.126856,
+            "sharpe": 0.7073,
+            "mdd": -0.2559,
+            "n_obs": 4582
+          },
+          "sharpe_change_from_hedging_pct": -5.3,
+          "tsmom_sharpe_contribution_pct": 5.3,
+          "mdd_preservation_pct": 93.33
+        }
+      },
+      "EEM": {
+        "regression_decomposition": {
+          "model1_capm": {
+            "const_beta": -1.433e-05,
+            "const_t": -0.2978,
+            "const_p": 0.765838,
+            "MKT_beta": 0.49000619,
+            "MKT_t": 17.3183,
+            "MKT_p": 0.0,
+            "r2": 0.830418,
+            "n_obs": 4834
+          },
+          "model2_raw_tsmom": {
+            "const_beta": -2.398e-05,
+            "const_t": -0.5618,
+            "const_p": 0.574268,
+            "MKT_beta": 0.53921539,
+            "MKT_t": 35.7348,
+            "MKT_p": 0.0,
+            "TSMOM_beta": 0.15099059,
+            "TSMOM_t": 7.3438,
+            "TSMOM_p": 0.0,
+            "r2": 0.873563,
+            "n_obs": 4834
+          },
+          "model3_orth_tsmom": {
+            "const_beta": -1.433e-05,
+            "const_t": -0.3332,
+            "const_p": 0.738985,
+            "MKT_beta": 0.49000619,
+            "MKT_t": 25.7588,
+            "MKT_p": 0.0,
+            "TSMOM_orth_beta": 0.15099059,
+            "TSMOM_orth_t": 7.3438,
+            "TSMOM_orth_p": 0.0,
+            "r2": 0.873563,
+            "n_obs": 4834
+          },
+          "alpha_reduction_pct": -67.39,
+          "r2_increase_raw": 0.043146,
+          "r2_increase_orth": 0.043146
+        },
+        "hedged_vt_analysis": {
+          "rolling_beta_tsmom_mean": 0.0618,
+          "rolling_beta_tsmom_std": 0.0753,
+          "pct_positive_beta": 80.2,
+          "buy_and_hold": {
+            "ann_return": 0.052607,
+            "ann_vol": 0.276646,
+            "sharpe": 0.1902,
+            "mdd": -0.6452,
+            "n_obs": 4582
+          },
+          "vt_12_vix": {
+            "ann_return": 0.019033,
+            "ann_vol": 0.144505,
+            "sharpe": 0.1317,
+            "mdd": -0.3211,
+            "n_obs": 4582
+          },
+          "tsmom_hedged_vt": {
+            "ann_return": 0.020128,
+            "ann_vol": 0.151878,
+            "sharpe": 0.1325,
+            "mdd": -0.3526,
+            "n_obs": 4582
+          },
+          "sharpe_change_from_hedging_pct": 0.61,
+          "tsmom_sharpe_contribution_pct": -0.61,
+          "mdd_preservation_pct": 90.28
+        }
+      },
+      "EFA": {
+        "regression_decomposition": {
+          "model1_capm": {
+            "const_beta": -5.51e-06,
+            "const_t": -0.1484,
+            "const_p": 0.882024,
+            "MKT_beta": 0.49028892,
+            "MKT_t": 20.9273,
+            "MKT_p": 0.0,
+            "r2": 0.84383,
+            "n_obs": 4834
+          },
+          "model2_raw_tsmom": {
+            "const_beta": -1.861e-05,
+            "const_t": -0.6033,
+            "const_p": 0.546279,
+            "MKT_beta": 0.54371141,
+            "MKT_t": 44.7047,
+            "MKT_p": 0.0,
+            "TSMOM_beta": 0.16512917,
+            "TSMOM_t": 9.87,
+            "TSMOM_p": 0.0,
+            "r2": 0.894249,
+            "n_obs": 4834
+          },
+          "model3_orth_tsmom": {
+            "const_beta": -5.51e-06,
+            "const_t": -0.1768,
+            "const_p": 0.859652,
+            "MKT_beta": 0.49028892,
+            "MKT_t": 33.1666,
+            "MKT_p": 0.0,
+            "TSMOM_orth_beta": 0.16512917,
+            "TSMOM_orth_t": 9.87,
+            "TSMOM_orth_p": 0.0,
+            "r2": 0.894249,
+            "n_obs": 4834
+          },
+          "alpha_reduction_pct": -237.81,
+          "r2_increase_raw": 0.050419,
+          "r2_increase_orth": 0.050419
+        },
+        "hedged_vt_analysis": {
+          "rolling_beta_tsmom_mean": 0.0835,
+          "rolling_beta_tsmom_std": 0.0471,
+          "pct_positive_beta": 96.8,
+          "buy_and_hold": {
+            "ann_return": 0.050284,
+            "ann_vol": 0.218624,
+            "sharpe": 0.23,
+            "mdd": -0.5881,
+            "n_obs": 4582
+          },
+          "vt_12_vix": {
+            "ann_return": 0.022045,
+            "ann_vol": 0.114985,
+            "sharpe": 0.1917,
+            "mdd": -0.2804,
+            "n_obs": 4582
+          },
+          "tsmom_hedged_vt": {
+            "ann_return": 0.024493,
+            "ann_vol": 0.12168,
+            "sharpe": 0.2013,
+            "mdd": -0.2988,
+            "n_obs": 4582
+          },
+          "sharpe_change_from_hedging_pct": 5.01,
+          "tsmom_sharpe_contribution_pct": -5.01,
+          "mdd_preservation_pct": 94.02
+        }
+      },
+      "GLD": {
+        "regression_decomposition": {
+          "model1_capm": {
+            "const_beta": -1.265e-05,
+            "const_t": -0.3756,
+            "const_p": 0.707196,
+            "MKT_beta": 0.60096799,
+            "MKT_t": 35.1092,
+            "MKT_p": 0.0,
+            "r2": 0.889837,
+            "n_obs": 4834
+          },
+          "model2_raw_tsmom": {
+            "const_beta": -1.182e-05,
+            "const_t": -0.3566,
+            "const_p": 0.721419,
+            "MKT_beta": 0.60784382,
+            "MKT_t": 29.0273,
+            "MKT_p": 0.0,
+            "TSMOM_beta": -0.02368803,
+            "TSMOM_t": -0.9218,
+            "TSMOM_p": 0.356613,
+            "r2": 0.890539,
+            "n_obs": 4834
+          },
+          "model3_orth_tsmom": {
+            "const_beta": -1.265e-05,
+            "const_t": -0.3795,
+            "const_p": 0.704291,
+            "MKT_beta": 0.60096799,
+            "MKT_t": 34.8091,
+            "MKT_p": 0.0,
+            "TSMOM_orth_beta": -0.02368803,
+            "TSMOM_orth_t": -0.9218,
+            "TSMOM_orth_p": 0.356613,
+            "r2": 0.890539,
+            "n_obs": 4834
+          },
+          "alpha_reduction_pct": 6.52,
+          "r2_increase_raw": 0.000702,
+          "r2_increase_orth": 0.000702
+        },
+        "hedged_vt_analysis": {
+          "rolling_beta_tsmom_mean": -0.011,
+          "rolling_beta_tsmom_std": 0.0653,
+          "pct_positive_beta": 46.7,
+          "buy_and_hold": {
+            "ann_return": 0.089983,
+            "ann_vol": 0.179484,
+            "sharpe": 0.5013,
+            "mdd": -0.4566,
+            "n_obs": 4582
+          },
+          "vt_12_vix": {
+            "ann_return": 0.050931,
+            "ann_vol": 0.113076,
+            "sharpe": 0.4504,
+            "mdd": -0.3694,
+            "n_obs": 4582
+          },
+          "tsmom_hedged_vt": {
+            "ann_return": 0.049901,
+            "ann_vol": 0.110988,
+            "sharpe": 0.4496,
+            "mdd": -0.3724,
+            "n_obs": 4582
+          },
+          "sharpe_change_from_hedging_pct": -0.18,
+          "tsmom_sharpe_contribution_pct": 0.18,
+          "mdd_preservation_pct": 96.56
+        }
+      }
+    },
+    "summary": {
+      "mean_alpha_reduction_pct": -32.28,
+      "mean_mdd_preservation_pct": 93.26,
+      "mean_tsmom_sharpe_contribution_pct": 1.39,
+      "n_significant_beta_tsmom": 4,
+      "n_total_assets": 5,
+      "alpha_reduction_range": [
+        -237.81,
+        69.67
+      ],
+      "mdd_preservation_range": [
+        90.28,
+        96.56
+      ]
+    }
+  }
+}

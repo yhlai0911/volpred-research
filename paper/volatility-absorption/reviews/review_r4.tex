@@ -1,0 +1,308 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{resolved}{RGB}{0,100,180}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report R4}\\[0.5em]
+{\large Volatility Absorption: The Diminishing Marginal Impact of Market Fear}\\[0.5em]
+{\normalsize Document type: Empirical finance paper (target: JBF / JFQA)}\\
+{\normalsize File: \texttt{paper/volatility-absorption/main\_v2.tex}}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (journal-referee level)}\\
+{\normalsize Reference: R3 review (2026-04-05); K904 fresh reproduction of Tables~5 and~6}
+\end{center}
+
+\bigskip
+
+%% ============================================================
+\section*{R4 Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{okgreen}{R1 SEVERE issues resolved} & 4 of 5 (S1, S2, S4, S5) \\
+\textcolor{resolved}{R1 SEVERE downgraded} & 1 of 5 (S3 $\to$ MEDIUM in R3) \\
+\textcolor{errorred}{R1 SEVERE issues still open} & 0 \\
+\textcolor{errorred}{New SEVERE issues} & 0 \\
+\textcolor{warncolor}{New/elevated issues} & 1 (N3: geopolitical narrative reversal) \\
+Overall Assessment & \textbf{Minor Revision (conditional on Table~5 text update)} \\
+\end{tabular}
+
+\bigskip
+
+%% ============================================================
+\section*{R4 Scorecard}
+
+\begin{tabular}{lll}
+\toprule
+\textbf{Issue} & \textbf{R4 Status} & \textbf{Severity} \\
+\midrule
+S1: No null simulation        & \textcolor{okgreen}{RESOLVED (R2, K897)} & --- \\
+S2: Table~5 sample-size inconsistency & \textcolor{okgreen}{RESOLVED (K904)} & --- \\
+S3: Tables 9--10 untraceable  & \textcolor{resolved}{DOWNGRADED (R3)} & MEDIUM \\
+S4: NFP table discrepancies   & \textcolor{okgreen}{RESOLVED (K904)} & --- \\
+S5: Orphan reference          & \textcolor{okgreen}{RESOLVED (R2)} & --- \\
+\addlinespace
+N1: Robustness tables lack JSON & \textcolor{warncolor}{UNCHANGED} & MEDIUM \\
+N2: 2020--2026 sign reversal    & \textcolor{warncolor}{OPEN (not tested by K904)} & MAJOR \\
+N3 (NEW): Geopolitical narrative reversal & \textcolor{warncolor}{NEW} & MAJOR \\
+\bottomrule
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{SEVERE count: 0} (down from 2 in R3, 3 in R2, 5 in R1).\\[0.3em]
+\textbf{Overall assessment: Minor Revision (conditional).}
+K904 resolves both remaining SEVERE issues by providing a fully documented, reproducible computation of Tables~5 and~6 with traceable methodology.
+However, K904 introduces a narrative complication (N3): the geopolitical shock type now shows \textit{significant} absorption ($t = 2.36$, $p = 0.018$), reversing the paper's central ``endogenous absorbed / exogenous not absorbed'' distinction.
+This does not re-open S2 (the data integrity problem is resolved), but it requires the paper to update its interpretive framing.
+
+\bigskip
+
+%% ============================================================
+\section*{Resolution of S2: Table~5 Shock-Type Sample Sizes}
+
+\textbf{R3 status:} SEVERE --- paper reports $N = 127 / 203 / 89$; K721 stores $79 / 182 / 146$; neither reproducible.
+
+\textbf{K904 resolution:} A fresh experiment (\texttt{k904\_paper8\_shock\_nfp\_fix\_results.json}) implements the \textbf{exact Section~3.3 methodology} of \texttt{main\_v2.tex}:
+
+\begin{itemize}[nosep]
+\item Priority ordering: Geopolitical $\to$ Risk-off $\to$ Rate (matching paper).
+\item Geopolitical: $r_{\text{SPY}} < 0$ AND $r_{\text{GLD}} > 0.5\%$.
+\item Risk-off: $r_{\text{SPY}} < 0$ AND $r_{\text{TLT}} > 0$ (not already geo).
+\item Rate: $r_{\text{SPY}} < 0$ AND $r_{\text{TLT}} < 0$ (residual).
+\item Threshold: $|\Delta\text{VIX}| > 2$. Sample: 2006-01-03 to 2026-04-02.
+\end{itemize}
+
+\medskip
+\noindent K904 results:
+
+\begin{tabular}{lrrrrl}
+\toprule
+\textbf{Shock Type} & \textbf{K904 $N$} & \textbf{Paper $N$} & \textbf{Absorption} & \textbf{$t$-stat} & \textbf{$p$-value} \\
+\midrule
+Rate         &  87 & 127 & $+0.000445$ & 4.22 & 0.0002 \\
+Risk-off     & 186 & 203 & $+0.000134$ & 1.68 & 0.084 \\
+Geopolitical & 150 &  89 & $+0.000201$ & 2.36 & 0.018 \\
+\bottomrule
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{Root cause of $N$ discrepancy (K904 diagnosis):}
+The original K721 likely used a different priority ordering (rate $\to$ risk-off $\to$ geo) or different sign thresholds.
+With the paper's documented geo-first ordering, geopolitical captures 150 days (up from 89) and rate shrinks to 87 (down from 127).
+This is a \textbf{classification-ordering effect}, not a data-quality issue.
+
+\medskip
+
+\noindent\textbf{Verdict on S2:} \textcolor{okgreen}{RESOLVED.}
+K904 provides a reproducible computation with documented methodology and stored results.
+The paper must update Table~5 to use K904 values ($N = 87 / 186 / 150$; absorption $= +0.000445 / +0.000134 / +0.000201$; $t = 4.22 / 1.68 / 2.36$).
+Once the table text is updated, S2 is fully closed.
+
+\bigskip
+
+%% ============================================================
+\section*{Resolution of S4: NFP $p$-Value Discrepancy}
+
+\textbf{R3 status:} SEVERE --- paper reports overall $p = 0.037$; K741 gives $p \approx 0.06$--$0.08$.
+
+\textbf{K904 resolution:} Fresh computation with the paper's exact methodology (NFP vs.\ ALL non-NFP days, Welch's $t$-test):
+
+\begin{tabular}{lrr}
+\toprule
+\textbf{Statistic} & \textbf{Paper} & \textbf{K904} \\
+\midrule
+Total NFP days       & 195  & 196 \\
+Overall ratio        & 1.17 & 1.14 \\
+Overall $p$-value    & 0.037 & \textbf{0.074} \\
+Low VIX ($n$)        & 63   & 62 \\
+Low VIX $p$          & 0.069 & 0.087 \\
+Medium VIX ($n$)     & 76   & 77 \\
+Medium VIX $p$       & 0.009 & 0.092 \\
+High VIX ($n$)       & 28   & 28 \\
+High VIX $p$         & 0.777 & 0.926 \\
+\bottomrule
+\end{tabular}
+
+\medskip
+
+\noindent The overall effect is \textbf{not significant at 5\%} ($p = 0.074$).
+The medium-VIX regime, previously the strongest result ($p = 0.009$), weakens to $p = 0.092$.
+K904 identifies the root cause: K741 compared NFP days against non-NFP \textit{Fridays} only ($p = 0.068$), while the paper compared against all non-NFP days.
+Data-vintage differences (1 extra NFP day, minor VIX-boundary shifts) account for the remainder.
+
+\medskip
+
+\noindent\textbf{Required paper changes:}
+\begin{enumerate}[nosep]
+\item Report overall $p = 0.074$ (not significant at 5\%).
+\item Weaken the NFP claim to ``directionally consistent but not statistically significant at conventional levels.''
+\item Update Table~6 regime-specific values to K904 numbers.
+\item The existing limitation paragraph (surprise controls) already provides appropriate hedging; combine with the weaker $p$-value for an honest presentation.
+\end{enumerate}
+
+\noindent\textbf{Impact on core contribution:} Minimal.
+The paper already describes NFP evidence as ``supplementary'' and ``directionally supportive.''
+The SAR analysis (Tables~3--4) and endogenous/exogenous decomposition (Table~5) are the primary contributions; they do not depend on the NFP result.
+
+\medskip
+
+\noindent\textbf{Verdict on S4:} \textcolor{okgreen}{RESOLVED.}
+The discrepancy is explained and the correct value ($p = 0.074$) is documented in K904.
+Once the paper updates the text and table, S4 is fully closed.
+
+\bigskip
+
+%% ============================================================
+\section*{N3 (NEW): Geopolitical Shock Narrative Reversal \hfill \textcolor{warncolor}{MAJOR}}
+
+\textbf{Finding:} K904 shows geopolitical shocks are now \textbf{significantly absorbed} ($t = 2.36$, $p = 0.018$, $N = 150$).
+The paper currently states they are ``not absorbed'' ($t = -0.68$, $p > 0.10$, $N = 89$).
+
+\textbf{Why this matters:}
+The endogenous/exogenous distinction is described as ``the paper's most important result'' (line~397).
+The core claim is: endogenous risks (rate, risk-off) are absorbed; exogenous risks (geopolitical) are not.
+K904 shows \textbf{all three shock types exhibit positive absorption}, with rate strongest ($t = 4.22$), geopolitical second ($t = 2.36$), and risk-off weakest ($t = 1.68$, marginally significant).
+
+\textbf{What caused the reversal:}
+The priority-ordering change (geo-first rather than rate-first) reclassifies shock days.
+With geo checked first and a $>0.5\%$ GLD threshold, the geopolitical category expands from 89 to 150 days.
+Many of these additional days include crisis episodes (2008 GFC, 2020 COVID) where gold rallied as a safe haven while VIX was high --- precisely the high-VIX regime where absorption is measured.
+The larger, more representative sample reveals absorption that the smaller sample lacked power to detect.
+
+\textbf{Why this is MAJOR but not SEVERE:}
+\begin{itemize}[nosep]
+\item The core SAR finding (Table~3) is \textbf{unaffected}. Absorption exists.
+\item The shock-type decomposition is \textbf{internally consistent} --- all three types show absorption, with rate strongest. The ordering (rate $>$ geo $>$ risk-off) still has economic content.
+\item The problem is \textbf{narrative}, not empirical. The data are correct; the interpretation needs updating.
+\item The fix is straightforward: reframe from ``exogenous shocks are not absorbed'' to ``all shock types show absorption, with endogenous rate shocks most absorbed and exogenous geopolitical shocks less absorbed but still significantly so.'' This is a weaker but more honest claim.
+\end{itemize}
+
+\textbf{Required paper changes:}
+\begin{enumerate}[nosep]
+\item Update Table~5 with K904 numbers (all three positive, all documented).
+\item Rewrite Section~5.4 narrative: drop the binary ``absorbed / not absorbed'' framing. Replace with a \textit{gradient}: rate shocks (most absorbed, $t = 4.22$) $>$ geopolitical ($t = 2.36$) $>$ risk-off ($t = 1.68$, marginally significant).
+\item Update Hypothesis~2 (endogenous/exogenous) to predict \textit{differential} absorption rather than binary absorption/non-absorption.
+\item Update the Abstract and Conclusion (lines 42, 621) which currently state geopolitical shocks are ``not absorbed.''
+\item Discuss: the expanded geopolitical sample ($N = 150$ vs.\ 89) now has sufficient power; the original null result was likely a power problem, not a true zero effect.
+\item The Danielsson (2018) endogenous/exogenous framing remains relevant but shifts from binary to continuous: endogenous risks are \textit{more} absorbed than exogenous risks, not exclusively absorbed.
+\end{enumerate}
+
+\textbf{Silver lining:} The gradient interpretation is arguably \textit{more} publishable than the binary version.
+A gradient of absorption across shock types is a richer finding than a simple ``yes/no'' dichotomy, and it avoids the vulnerability of relying on a single null result ($t = -0.68$) for the paper's central claim.
+
+\bigskip
+
+%% ============================================================
+\section*{Status of Other Open Issues}
+
+\begin{longtable}{p{1cm}p{4.5cm}p{2.5cm}p{6cm}}
+\toprule
+\textbf{ID} & \textbf{Issue} & \textbf{R4 Status} & \textbf{Assessment} \\
+\midrule
+\endfirsthead
+N1 & Robustness tables lack JSON & \textcolor{warncolor}{UNCHANGED} & Create experiment JSON for threshold and sub-period tables. \\
+\addlinespace
+N2 & 2020--2026 sign reversal & \textcolor{warncolor}{OPEN} & K904 did not test sub-periods. Remains open. Should be investigated but not blocking. \\
+\addlinespace
+M1 & Novelty positioning (MS-GARCH) & \textcolor{warncolor}{UNCHANGED} & Desirable, not required. \\
+\addlinespace
+M2 & Missing literatures (VVIX, HAR-RV) & \textcolor{warncolor}{UNCHANGED} & \\
+\addlinespace
+M4 & Table~1 replication script & \textcolor{warncolor}{UNCHANGED} & \\
+\addlinespace
+M5 & 767 vs.\ 893 sample-size gap & \textcolor{okgreen}{ADEQUATE} & Paper footnote (line~283) explains the difference. \\
+\addlinespace
+M6 & \texttt{lin2020} unverifiable & \textcolor{warncolor}{UNCHANGED} & \\
+\addlinespace
+M8 & Replication scripts K716--K721 & \textcolor{warncolor}{UNCHANGED} & K904 partially supersedes K721. \\
+\bottomrule
+\end{longtable}
+
+\bigskip
+
+%% ============================================================
+\section*{Path to Submission}
+
+\textbf{SEVERE = 0.} The paper can proceed toward submission once the following text updates are made:
+
+\subsection*{Must-Do (before submission)}
+\begin{enumerate}
+\item \textbf{Update Table~5} with K904 values: $N = 87/186/150$, absorption coefficients, $t$-statistics. Cite K904 as the backing experiment.
+\item \textbf{Update Table~6} with K904 NFP values. Report $p = 0.074$. Change ``$p = 0.037$'' to ``$p = 0.074$, not significant at 5\%.''
+\item \textbf{Rewrite the endogenous/exogenous narrative} (Section~5.4, Abstract, Conclusion). All three shock types show absorption. Reframe as a gradient, not a binary.
+\item \textbf{Investigate N2} (2020--2026 sub-period). Run a formal experiment. If reversal confirmed, report honestly and discuss structural explanations. If data-vintage artifact, document and pin the dataset.
+\end{enumerate}
+
+\subsection*{Strongly Recommended}
+\begin{enumerate}[resume]
+\item Create experiment JSON for robustness tables (N1).
+\item Pin dataset with documented download date.
+\item Add VVIX/HAR-RV literature (M2).
+\end{enumerate}
+
+\subsection*{Desirable}
+\begin{enumerate}[resume]
+\item MS-GARCH null test (M1).
+\item Verify \texttt{lin2020} (M6).
+\item Replication package for all tables.
+\end{enumerate}
+
+\bigskip
+
+%% ============================================================
+\section*{What the Paper Does Well}
+
+\begin{enumerate}
+\item \textbf{K897 null simulation remains exemplary.} Cohen's $d > 3.8$, $p = 0.002$. SAR decline is not a GARCH artifact.
+\item \textbf{SAR measure is clean.} No mechanical denominator problem.
+\item \textbf{K904 shock-type analysis is now fully reproducible.} Methodology documented, priority ordering explicit, bootstrap $t$-statistics stored. This was the single biggest gap in R1--R3 and is now closed.
+\item \textbf{NFP limitation paragraph is honest.} Combined with the corrected $p = 0.074$, the paper appropriately hedges the supplementary evidence.
+\item \textbf{Rate shocks as most absorbed ($t = 4.22$) is a strong result.} Survives the methodology change and is robust.
+\item \textbf{Robustness section is substantive.} Threshold monotonicity, sub-period stability (pending N2), RV normalization, controlled regression.
+\end{enumerate}
+
+\bigskip
+
+%% ============================================================
+\section*{Overall Assessment}
+
+\textbf{Verdict: Minor Revision (conditional on text updates).}
+
+The paper has reached SEVERE = 0 after four review rounds.
+The methodological foundation (SAR, K897 null simulation) is sound.
+The data-integrity problems that plagued R1--R3 (untraceable $N$ values, mismatched $p$-values) are resolved by K904's reproducible fresh computation.
+
+The main outstanding work is \textbf{narrative}: the paper must update its central framing from ``exogenous shocks are not absorbed'' to ``all shock types show absorption, with endogenous shocks most absorbed.''
+This is a text revision, not a methodological one.
+The N2 sub-period issue requires investigation but does not block submission if treated honestly.
+
+With these updates, the paper is submittable to JBF or JFQA.
+The core contribution---SAR as identification, differential absorption across shock types, null-simulation falsification of the GARCH mechanical explanation---is publishable.
+
+\bigskip
+
+\noindent\textit{Reviewer: Claude Opus 4.6 (1M context), acting as JBF/JFQA referee. R4 review, 2026-04-05.}\\
+\noindent\textit{R3 reference: \texttt{paper/volatility-absorption/reviews/review\_r3.tex}}\\
+\noindent\textit{K904 source: \texttt{experiments/k904\_paper8\_shock\_nfp\_fix\_results.json}}
+
+\end{document}

@@ -1,0 +1,160 @@
+{
+  "experiment_id": "K858",
+  "title": "Congressional Trading Alpha \u2014 Aggregate Portfolio Performance",
+  "question": "Does following aggregate congressional stock trades generate alpha, even with disclosure delay?",
+  "data_source": "data/congressional_trades_house.csv (House financial disclosures)",
+  "price_source": "yfinance",
+  "period": "2020-02-03 to 2022-09-30",
+  "n_trades_raw": 15674,
+  "n_trades_cleaned": 13401,
+  "n_tickers_available": 132,
+  "n_members": 165,
+  "methodology": {
+    "portfolio_construction": "Monthly rebalanced, equal-weight top-10 net-bought tickers",
+    "lookback_window": "60 days trailing",
+    "signal_method": "Net dollar buying (purchases - sales) by all members",
+    "realistic_entry": "disclosure_date + 1 business day (public information)",
+    "perfect_info_entry": "transaction_date + 1 business day (upper bound)",
+    "benchmark": "SPY buy-and-hold",
+    "no_lookahead": "Entry strictly after signal date (disclosure or transaction)"
+  },
+  "disclosure_lag": {
+    "mean_days": 37.8,
+    "median_days": 27.0,
+    "p10_days": 9.0,
+    "p90_days": 52.0,
+    "p95_days": 93.0
+  },
+  "performance": {
+    "Congressional (Realistic, Disclosure+1)": {
+      "name": "Congressional (Realistic, Disclosure+1)",
+      "total_return": 0.3156160184471999,
+      "cagr": 0.10834108470819781,
+      "annual_vol": 0.288325417377046,
+      "sharpe": 0.5019174340661711,
+      "max_drawdown": -0.3515290247390166,
+      "monthly_win_vs_spy": 0.5,
+      "positive_months": 0.625,
+      "n_days": 672,
+      "n_months": 32
+    },
+    "Congressional (Perfect Info, Transaction+1)": {
+      "name": "Congressional (Perfect Info, Transaction+1)",
+      "total_return": 0.29165613710203653,
+      "cagr": 0.10072819729180238,
+      "annual_vol": 0.2974884755836263,
+      "sharpe": 0.47243662970016004,
+      "max_drawdown": -0.3500457048011558,
+      "monthly_win_vs_spy": 0.46875,
+      "positive_months": 0.59375,
+      "n_days": 672,
+      "n_months": 32
+    },
+    "Congressional (Count-based, Disclosure+1)": {
+      "name": "Congressional (Count-based, Disclosure+1)",
+      "total_return": 0.4491897843718051,
+      "cagr": 0.1492697452842069,
+      "annual_vol": 0.2993117816779038,
+      "sharpe": 0.6154549886303755,
+      "max_drawdown": -0.3664547731587796,
+      "monthly_win_vs_spy": 0.53125,
+      "positive_months": 0.625,
+      "n_days": 672,
+      "n_months": 32
+    },
+    "SPY Buy & Hold": {
+      "name": "SPY Buy & Hold",
+      "total_return": 0.33516663345107656,
+      "cagr": 0.11448903875582661,
+      "annual_vol": 0.34136566465579216,
+      "sharpe": 0.4882008542674216,
+      "max_drawdown": -0.36164598760488464,
+      "monthly_win_vs_spy": 0.0,
+      "positive_months": 0.65625,
+      "n_days": 672,
+      "n_months": 32
+    },
+    "Most-Sold Tickers": {
+      "name": "Most-Sold Tickers (Disclosure+1)",
+      "total_return": 0.3340824723180449,
+      "cagr": 0.11414958886775639,
+      "annual_vol": 0.3003749239980559,
+      "sharpe": 0.5112571997604217,
+      "max_drawdown": -0.3741400295544025,
+      "monthly_win_vs_spy": 0.53125,
+      "positive_months": 0.65625,
+      "n_days": 672,
+      "n_months": 32
+    }
+  },
+  "alpha_analysis": {
+    "realistic_alpha_vs_spy_annual": -0.61,
+    "perfect_info_alpha_vs_spy_annual": -1.38,
+    "alpha_lost_to_delay_annual": -0.76,
+    "pct_alpha_lost_to_delay": -55.3
+  },
+  "statistical_significance": {
+    "realistic_t_stat": -0.153,
+    "realistic_p_value": 0.8787,
+    "realistic_significant_5pct": false,
+    "realistic_harvey_t3": false,
+    "perfect_info_t_stat": -0.181,
+    "perfect_info_p_value": 0.8564,
+    "perfect_info_significant_5pct": false
+  },
+  "sensitivity_top_n": {
+    "5": {
+      "cagr": 2.76,
+      "sharpe": 0.243,
+      "mdd": -36.74
+    },
+    "10": {
+      "cagr": 10.83,
+      "sharpe": 0.502,
+      "mdd": -35.15
+    },
+    "15": {
+      "cagr": 14.57,
+      "sharpe": 0.624,
+      "mdd": -34.17
+    },
+    "20": {
+      "cagr": 13.03,
+      "sharpe": 0.579,
+      "mdd": -35.1
+    },
+    "30": {
+      "cagr": 13.66,
+      "sharpe": 0.595,
+      "mdd": -39.66
+    }
+  },
+  "conclusions": [
+    "Congressional aggregate portfolio UNDERPERFORMED SPY by 0.61% CAGR",
+    "The excess return is NOT statistically significant at 5% level",
+    "FAILS Harvey (2016) t>3.0 threshold \u2014 could be data mining",
+    "Disclosure delay costs approximately -0.76% annual alpha",
+    "Median disclosure lag: 27 days"
+  ],
+  "limitations": [
+    "Data covers only 2020-2022 (House disclosures) \u2014 includes COVID crash & recovery, atypical period",
+    "Amount ranges (e.g. $1,001-$15,000) provide imprecise dollar weighting",
+    "No transaction costs deducted (monthly rebalancing of 10 stocks would cost ~0.1-0.3% p.a.)",
+    "Survivorship bias: some tickers may have been delisted",
+    "Small sample: ~2 years of returns limits statistical power",
+    "Only House members \u2014 Senate data would expand the sample"
+  ],
+  "references": [
+    "Eggers & Hainmueller (2014) 'Capitol Losses' JoP \u2014 found mediocre performance for individual portfolios",
+    "Ziobrowski et al. (2004) 'Abnormal Returns from U.S. Senate' JFQA \u2014 found ~12% annual excess for Senators",
+    "Karadas (2019) 'Trading on Private Information' EL \u2014 found significant abnormal returns around committee-relevant trades"
+  ],
+  "charts": [
+    "experiments/k858_charts/cumulative_returns.png",
+    "experiments/k858_charts/disclosure_lag.png",
+    "experiments/k858_charts/monthly_alpha.png",
+    "experiments/k858_charts/top_tickers.png",
+    "experiments/k858_charts/buy_vs_sell.png"
+  ],
+  "timestamp": "2026-04-04T22:50:38.131579+00:00"
+}

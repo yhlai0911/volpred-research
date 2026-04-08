@@ -1,0 +1,709 @@
+{
+  "experiment_id": "K984",
+  "title": "SPY→0050.TW Lead-Lag Trading Strategy",
+  "description": "Tests whether K983 lead-lag finding (SPY→TW50 corr=0.40) can be converted to profitable trading strategies after Taiwan transaction costs (~0.585% round trip)",
+  "data_source": "yfinance (SPY, 0050.TW, ^VIX)",
+  "period": "2010-01-01 to 2026-04-07",
+  "is_period": "2010-01-01 to 2018-12-31",
+  "oos_period": "2019-01-01 to 2026-04-07",
+  "n_days_aligned": 3970,
+  "methodology": {
+    "signal_lag": "signal.shift(1) — yesterday SPY return determines today TW50 weight",
+    "tx_cost": "0.585% round trip (Taiwan: 0.1425% buy + 0.1425% sell + 0.3% tax)",
+    "trade_threshold": "10% weight change triggers cost",
+    "proportional_k": 26.55,
+    "vt_base": "8.63/VIX"
+  },
+  "strategies": {
+    "Buy&Hold TW50": {
+      "type": "benchmark",
+      "full": {
+        "ann_return": 0.1513,
+        "ann_vol": 0.1817,
+        "sharpe": 0.8329,
+        "sortino": 1.1328,
+        "mdd": -0.3383,
+        "win_rate": 0.5076,
+        "turnover": 0.0,
+        "n_trades": 1,
+        "n_days": 3970
+      },
+      "is": {
+        "ann_return": 0.071,
+        "ann_vol": 0.1565,
+        "sharpe": 0.4539
+      },
+      "oos": {
+        "ann_return": 0.2526,
+        "ann_vol": 0.209,
+        "sharpe": 1.2083,
+        "mdd": -0.3383
+      }
+    },
+    "Binary Signal": {
+      "type": "strategy",
+      "full": {
+        "ann_return": -0.1948,
+        "ann_vol": 0.1368,
+        "sharpe": -1.4247,
+        "sortino": -2.4088,
+        "mdd": -0.9779,
+        "win_rate": 0.2912,
+        "turnover": 122.6,
+        "n_trades": 1931,
+        "n_days": 3970
+      },
+      "is": {
+        "ann_return": -0.3325,
+        "ann_vol": 0.1221,
+        "sharpe": -2.7243
+      },
+      "oos": {
+        "ann_return": -0.0212,
+        "ann_vol": 0.1526,
+        "sharpe": -0.139,
+        "mdd": -0.5636
+      }
+    },
+    "Proportional Signal": {
+      "type": "strategy",
+      "full": {
+        "ann_return": 0.0142,
+        "ann_vol": 0.1135,
+        "sharpe": 0.125,
+        "sortino": 0.2178,
+        "mdd": -0.5297,
+        "win_rate": 0.4069,
+        "turnover": 63.31,
+        "n_trades": 2744,
+        "n_days": 3969
+      },
+      "is": {
+        "ann_return": -0.0579,
+        "ann_vol": 0.0935,
+        "sharpe": -0.619
+      },
+      "oos": {
+        "ann_return": 0.105,
+        "ann_vol": 0.1343,
+        "sharpe": 0.7816,
+        "mdd": -0.2198
+      }
+    },
+    "Threshold Signal": {
+      "type": "strategy",
+      "full": {
+        "ann_return": -0.0444,
+        "ann_vol": 0.1491,
+        "sharpe": -0.2981,
+        "sortino": -0.5171,
+        "mdd": -0.8378,
+        "win_rate": 0.3874,
+        "turnover": 94.58,
+        "n_trades": 2548,
+        "n_days": 3970
+      },
+      "is": {
+        "ann_return": -0.1675,
+        "ann_vol": 0.1307,
+        "sharpe": -1.2818
+      },
+      "oos": {
+        "ann_return": 0.1107,
+        "ann_vol": 0.169,
+        "sharpe": 0.6551,
+        "mdd": -0.3051
+      }
+    },
+    "VT Only (8.63/VIX)": {
+      "type": "benchmark",
+      "full": {
+        "ann_return": 0.0995,
+        "ann_vol": 0.0832,
+        "sharpe": 1.1957,
+        "sortino": 1.7307,
+        "mdd": -0.1351,
+        "win_rate": 0.5074,
+        "turnover": 6.6,
+        "n_trades": 78,
+        "n_days": 3969
+      },
+      "is": {
+        "ann_return": 0.0572,
+        "ann_vol": 0.0779,
+        "sharpe": 0.7344
+      },
+      "oos": {
+        "ann_return": 0.1527,
+        "ann_vol": 0.0893,
+        "sharpe": 1.7098,
+        "mdd": -0.1076
+      }
+    },
+    "VT + Lead-Lag": {
+      "type": "strategy",
+      "full": {
+        "ann_return": -0.0768,
+        "ann_vol": 0.102,
+        "sharpe": -0.7532,
+        "sortino": -1.2505,
+        "mdd": -0.8505,
+        "win_rate": 0.388,
+        "turnover": 69.23,
+        "n_trades": 1986,
+        "n_days": 3969
+      },
+      "is": {
+        "ann_return": -0.1833,
+        "ann_vol": 0.097,
+        "sharpe": -1.8897
+      },
+      "oos": {
+        "ann_return": 0.0573,
+        "ann_vol": 0.1074,
+        "sharpe": 0.5336,
+        "mdd": -0.2473
+      }
+    }
+  },
+  "annual_returns": {
+    "Buy&Hold TW50": {
+      "2010": {
+        "return": 0.0915,
+        "vol": 0.1633,
+        "sharpe": 0.5607
+      },
+      "2011": {
+        "return": -0.1901,
+        "vol": 0.2159,
+        "sharpe": -0.8804
+      },
+      "2012": {
+        "return": 0.0905,
+        "vol": 0.1563,
+        "sharpe": 0.5789
+      },
+      "2013": {
+        "return": 0.1216,
+        "vol": 0.1226,
+        "sharpe": 0.9916
+      },
+      "2014": {
+        "return": 0.2438,
+        "vol": 0.1409,
+        "sharpe": 1.7306
+      },
+      "2015": {
+        "return": -0.0528,
+        "vol": 0.1654,
+        "sharpe": -0.3194
+      },
+      "2016": {
+        "return": 0.197,
+        "vol": 0.1528,
+        "sharpe": 1.2893
+      },
+      "2017": {
+        "return": 0.1774,
+        "vol": 0.0952,
+        "sharpe": 1.8639
+      },
+      "2018": {
+        "return": -0.038,
+        "vol": 0.1671,
+        "sharpe": -0.2277
+      },
+      "2019": {
+        "return": 0.3102,
+        "vol": 0.1245,
+        "sharpe": 2.4909
+      },
+      "2020": {
+        "return": 0.3059,
+        "vol": 0.2326,
+        "sharpe": 1.315
+      },
+      "2021": {
+        "return": 0.2217,
+        "vol": 0.1796,
+        "sharpe": 1.2344
+      },
+      "2022": {
+        "return": -0.22,
+        "vol": 0.2208,
+        "sharpe": -0.9963
+      },
+      "2023": {
+        "return": 0.2665,
+        "vol": 0.1426,
+        "sharpe": 1.869
+      },
+      "2024": {
+        "return": 0.4448,
+        "vol": 0.2511,
+        "sharpe": 1.771
+      },
+      "2025": {
+        "return": 0.3563,
+        "vol": 0.2479,
+        "sharpe": 1.4373
+      },
+      "2026": {
+        "return": 0.6344,
+        "vol": 0.2929,
+        "sharpe": 2.1661
+      }
+    },
+    "Binary Signal": {
+      "2010": {
+        "return": -0.2942,
+        "vol": 0.1228,
+        "sharpe": -2.3954
+      },
+      "2011": {
+        "return": -0.2307,
+        "vol": 0.1661,
+        "sharpe": -1.3891
+      },
+      "2012": {
+        "return": -0.3136,
+        "vol": 0.1219,
+        "sharpe": -2.5728
+      },
+      "2013": {
+        "return": -0.3472,
+        "vol": 0.099,
+        "sharpe": -3.508
+      },
+      "2014": {
+        "return": -0.3009,
+        "vol": 0.1225,
+        "sharpe": -2.4564
+      },
+      "2015": {
+        "return": -0.3386,
+        "vol": 0.1277,
+        "sharpe": -2.6523
+      },
+      "2016": {
+        "return": -0.4245,
+        "vol": 0.1319,
+        "sharpe": -3.2175
+      },
+      "2017": {
+        "return": -0.4901,
+        "vol": 0.0844,
+        "sharpe": -5.8058
+      },
+      "2018": {
+        "return": -0.2569,
+        "vol": 0.1051,
+        "sharpe": -2.445
+      },
+      "2019": {
+        "return": -0.1878,
+        "vol": 0.1064,
+        "sharpe": -1.7657
+      },
+      "2020": {
+        "return": -0.2125,
+        "vol": 0.1691,
+        "sharpe": -1.2567
+      },
+      "2021": {
+        "return": -0.1732,
+        "vol": 0.1403,
+        "sharpe": -1.2348
+      },
+      "2022": {
+        "return": -0.0357,
+        "vol": 0.1417,
+        "sharpe": -0.252
+      },
+      "2023": {
+        "return": -0.1397,
+        "vol": 0.1072,
+        "sharpe": -1.3022
+      },
+      "2024": {
+        "return": 0.3758,
+        "vol": 0.1631,
+        "sharpe": 2.304
+      },
+      "2025": {
+        "return": 0.0859,
+        "vol": 0.206,
+        "sharpe": 0.417
+      },
+      "2026": {
+        "return": 0.5705,
+        "vol": 0.1765,
+        "sharpe": 3.2323
+      }
+    },
+    "Proportional Signal": {
+      "2010": {
+        "return": -0.0494,
+        "vol": 0.0878,
+        "sharpe": -0.5632
+      },
+      "2011": {
+        "return": -0.1023,
+        "vol": 0.1523,
+        "sharpe": -0.6717
+      },
+      "2012": {
+        "return": -0.06,
+        "vol": 0.0854,
+        "sharpe": -0.7025
+      },
+      "2013": {
+        "return": -0.1011,
+        "vol": 0.0656,
+        "sharpe": -1.5412
+      },
+      "2014": {
+        "return": 0.0317,
+        "vol": 0.0885,
+        "sharpe": 0.3582
+      },
+      "2015": {
+        "return": -0.1295,
+        "vol": 0.1,
+        "sharpe": -1.2947
+      },
+      "2016": {
+        "return": -0.0223,
+        "vol": 0.0924,
+        "sharpe": -0.241
+      },
+      "2017": {
+        "return": -0.0019,
+        "vol": 0.0512,
+        "sharpe": -0.0375
+      },
+      "2018": {
+        "return": -0.0859,
+        "vol": 0.0846,
+        "sharpe": -1.0151
+      },
+      "2019": {
+        "return": 0.0361,
+        "vol": 0.0751,
+        "sharpe": 0.4802
+      },
+      "2020": {
+        "return": -0.0741,
+        "vol": 0.1562,
+        "sharpe": -0.4746
+      },
+      "2021": {
+        "return": 0.0191,
+        "vol": 0.0981,
+        "sharpe": 0.1951
+      },
+      "2022": {
+        "return": 0.0053,
+        "vol": 0.1487,
+        "sharpe": 0.0359
+      },
+      "2023": {
+        "return": 0.0444,
+        "vol": 0.0855,
+        "sharpe": 0.5197
+      },
+      "2024": {
+        "return": 0.3408,
+        "vol": 0.1251,
+        "sharpe": 2.7242
+      },
+      "2025": {
+        "return": 0.2638,
+        "vol": 0.1971,
+        "sharpe": 1.3384
+      },
+      "2026": {
+        "return": 0.5376,
+        "vol": 0.1645,
+        "sharpe": 3.2684
+      }
+    },
+    "Threshold Signal": {
+      "2010": {
+        "return": -0.1193,
+        "vol": 0.13,
+        "sharpe": -0.9174
+      },
+      "2011": {
+        "return": -0.1938,
+        "vol": 0.1838,
+        "sharpe": -1.0542
+      },
+      "2012": {
+        "return": -0.1501,
+        "vol": 0.1307,
+        "sharpe": -1.1483
+      },
+      "2013": {
+        "return": -0.1874,
+        "vol": 0.0999,
+        "sharpe": -1.8757
+      },
+      "2014": {
+        "return": -0.0679,
+        "vol": 0.1331,
+        "sharpe": -0.5101
+      },
+      "2015": {
+        "return": -0.2612,
+        "vol": 0.1368,
+        "sharpe": -1.9094
+      },
+      "2016": {
+        "return": -0.1833,
+        "vol": 0.1384,
+        "sharpe": -1.3249
+      },
+      "2017": {
+        "return": -0.1765,
+        "vol": 0.0822,
+        "sharpe": -2.1457
+      },
+      "2018": {
+        "return": -0.17,
+        "vol": 0.1176,
+        "sharpe": -1.4454
+      },
+      "2019": {
+        "return": 0.0155,
+        "vol": 0.1085,
+        "sharpe": 0.1425
+      },
+      "2020": {
+        "return": -0.007,
+        "vol": 0.1863,
+        "sharpe": -0.0377
+      },
+      "2021": {
+        "return": -0.0142,
+        "vol": 0.1491,
+        "sharpe": -0.0954
+      },
+      "2022": {
+        "return": -0.0769,
+        "vol": 0.1703,
+        "sharpe": -0.4516
+      },
+      "2023": {
+        "return": -0.0142,
+        "vol": 0.1192,
+        "sharpe": -0.1195
+      },
+      "2024": {
+        "return": 0.5044,
+        "vol": 0.1823,
+        "sharpe": 2.767
+      },
+      "2025": {
+        "return": 0.2386,
+        "vol": 0.2244,
+        "sharpe": 1.0634
+      },
+      "2026": {
+        "return": 0.6689,
+        "vol": 0.2086,
+        "sharpe": 3.206
+      }
+    },
+    "VT Only (8.63/VIX)": {
+      "2010": {
+        "return": 0.0563,
+        "vol": 0.0622,
+        "sharpe": 0.9039
+      },
+      "2011": {
+        "return": -0.0431,
+        "vol": 0.0753,
+        "sharpe": -0.5724
+      },
+      "2012": {
+        "return": 0.0591,
+        "vol": 0.075,
+        "sharpe": 0.7874
+      },
+      "2013": {
+        "return": 0.0661,
+        "vol": 0.0732,
+        "sharpe": 0.903
+      },
+      "2014": {
+        "return": 0.1631,
+        "vol": 0.0819,
+        "sharpe": 1.9912
+      },
+      "2015": {
+        "return": -0.0563,
+        "vol": 0.083,
+        "sharpe": -0.6785
+      },
+      "2016": {
+        "return": 0.11,
+        "vol": 0.0846,
+        "sharpe": 1.2992
+      },
+      "2017": {
+        "return": 0.1449,
+        "vol": 0.076,
+        "sharpe": 1.9063
+      },
+      "2018": {
+        "return": 0.0159,
+        "vol": 0.0871,
+        "sharpe": 0.1824
+      },
+      "2019": {
+        "return": 0.1891,
+        "vol": 0.069,
+        "sharpe": 2.7403
+      },
+      "2020": {
+        "return": 0.1058,
+        "vol": 0.0738,
+        "sharpe": 1.4331
+      },
+      "2021": {
+        "return": 0.113,
+        "vol": 0.0759,
+        "sharpe": 1.4885
+      },
+      "2022": {
+        "return": -0.0369,
+        "vol": 0.0736,
+        "sharpe": -0.5012
+      },
+      "2023": {
+        "return": 0.1411,
+        "vol": 0.0725,
+        "sharpe": 1.9458
+      },
+      "2024": {
+        "return": 0.2904,
+        "vol": 0.1312,
+        "sharpe": 2.2127
+      },
+      "2025": {
+        "return": 0.2098,
+        "vol": 0.1022,
+        "sharpe": 2.0529
+      },
+      "2026": {
+        "return": 0.4102,
+        "vol": 0.1202,
+        "sharpe": 3.4123
+      }
+    },
+    "VT + Lead-Lag": {
+      "2010": {
+        "return": -0.0921,
+        "vol": 0.0768,
+        "sharpe": -1.1989
+      },
+      "2011": {
+        "return": -0.1302,
+        "vol": 0.0957,
+        "sharpe": -1.361
+      },
+      "2012": {
+        "return": -0.1265,
+        "vol": 0.0931,
+        "sharpe": -1.3593
+      },
+      "2013": {
+        "return": -0.1955,
+        "vol": 0.0904,
+        "sharpe": -2.1623
+      },
+      "2014": {
+        "return": -0.1387,
+        "vol": 0.109,
+        "sharpe": -1.2725
+      },
+      "2015": {
+        "return": -0.2623,
+        "vol": 0.1024,
+        "sharpe": -2.562
+      },
+      "2016": {
+        "return": -0.2175,
+        "vol": 0.1111,
+        "sharpe": -1.9589
+      },
+      "2017": {
+        "return": -0.3253,
+        "vol": 0.0976,
+        "sharpe": -3.3323
+      },
+      "2018": {
+        "return": -0.1651,
+        "vol": 0.0933,
+        "sharpe": -1.7704
+      },
+      "2019": {
+        "return": -0.0332,
+        "vol": 0.0905,
+        "sharpe": -0.3667
+      },
+      "2020": {
+        "return": -0.066,
+        "vol": 0.0934,
+        "sharpe": -0.7072
+      },
+      "2021": {
+        "return": -0.0364,
+        "vol": 0.0932,
+        "sharpe": -0.391
+      },
+      "2022": {
+        "return": -0.0287,
+        "vol": 0.0777,
+        "sharpe": -0.3687
+      },
+      "2023": {
+        "return": -0.0082,
+        "vol": 0.0873,
+        "sharpe": -0.0943
+      },
+      "2024": {
+        "return": 0.3517,
+        "vol": 0.1507,
+        "sharpe": 2.3345
+      },
+      "2025": {
+        "return": 0.1227,
+        "vol": 0.1318,
+        "sharpe": 0.9309
+      },
+      "2026": {
+        "return": 0.4874,
+        "vol": 0.1284,
+        "sharpe": 3.7971
+      }
+    }
+  },
+  "key_findings": {
+    "best_strategy_oos": "Proportional Signal",
+    "best_sharpe_oos": 0.7816,
+    "bh_sharpe_oos": 1.2083,
+    "alpha_after_costs": false,
+    "vt_overlay_improvement": -1.1762,
+    "vt_overlay_helps": false,
+    "conclusion": "NULL RESULT: Lead-lag strategies do not generate alpha after Taiwan transaction costs in OOS period"
+  },
+  "references": [
+    "K983: SPY→0050.TW lead-lag correlation (corr=0.40, OOS R²=15.9%)",
+    "Eun & Shim (1989): International transmission of stock market movements, JFE",
+    "Hamao, Masulis & Ng (1990): Correlations in price changes, RFS"
+  ],
+  "seed": 42,
+  "timestamp": "2026-04-08T00:44:31.919091"
+}

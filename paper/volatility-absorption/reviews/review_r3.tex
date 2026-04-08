@@ -1,0 +1,309 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb,amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+\definecolor{resolved}{RGB}{0,100,180}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report R3}\\[0.5em]
+{\large Volatility Absorption: The Diminishing Marginal Impact of Market Fear}\\[0.5em]
+{\normalsize Document type: Empirical finance paper (target: JBF / JFQA)}\\
+{\normalsize File: \texttt{paper/volatility-absorption/main\_v2.tex}}\\
+{\normalsize Review date: 2026-04-05}\\
+{\normalsize Review standard: Strict (journal-referee level)}\\
+{\normalsize Reference: R2 review dated 2026-04-05; K897 null simulation; K903 robustness attempt (no results JSON)}
+\end{center}
+
+\bigskip
+
+%% ============================================================
+\section*{R3 Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{okgreen}{R1 SEVERE issues resolved} & 2 of 5 (S1, S5) \\
+\textcolor{resolved}{R1 SEVERE downgraded} & 1 of 5 (S3 $\to$ MEDIUM) \\
+\textcolor{errorred}{R1 SEVERE issues still open} & 2 of 5 (S2, S4) \\
+\textcolor{warncolor}{New issues identified in R3} & 1 item (N2: 2020--2026 sign reversal) \\
+Overall Assessment & \textbf{Major Revision (narrowed scope)} \\
+\end{tabular}
+
+\bigskip
+
+%% ============================================================
+\section*{R3 Scorecard}
+
+\begin{tabular}{lll}
+\toprule
+\textbf{Issue} & \textbf{R3 Status} & \textbf{Severity} \\
+\midrule
+S1: No null simulation & \textcolor{okgreen}{RESOLVED (R2)} & --- \\
+S2: Table 5 sample-size inconsistency & \textcolor{errorred}{STILL OPEN --- data vintage} & SEVERE \\
+S3: Tables 9--10 untraceable & \textcolor{resolved}{DOWNGRADED --- content present, partially reproduced} & MEDIUM \\
+S4: NFP table discrepancies with K741 & \textcolor{errorred}{STILL OPEN} & SEVERE \\
+S5: Orphan reference \texttt{chernov2018} & \textcolor{okgreen}{RESOLVED (R2)} & --- \\
+\addlinespace
+N1: Robustness tables lack experiment JSON & \textcolor{warncolor}{UNCHANGED} & MEDIUM \\
+N2 (NEW): 2020--2026 sub-period sign reversal & \textcolor{errorred}{NEW} & MAJOR \\
+\bottomrule
+\end{tabular}
+
+\medskip
+
+\noindent\textbf{SEVERE count: 2} (down from 3 in R2, 5 in R1).\\
+\textbf{Overall assessment: Major Revision (narrowed scope).} The core SAR finding is robust (K897 decisively rejects the GARCH null, $p = 0.002$). The remaining severe issues are data-integrity problems (sample sizes, NFP reconciliation) rather than methodological threats. However, the newly identified 2020--2026 sign reversal in the sub-period robustness raises a genuine scientific concern that requires honest treatment.
+
+\bigskip
+
+%% ============================================================
+\section*{Detailed Assessment of Each Issue}
+
+\subsection*{S2: Table 5 Sample-Size Inconsistency \hfill \textcolor{errorred}{SEVERE}}
+
+\textbf{R2 status:} Table~5 reports $N = 127$ (rate shocks), $N = 203$ (risk-off), $N = 89$ (geopolitical). K721 stores different values ($79$, $182$, $146$). None match.
+
+\textbf{R3 assessment:} The robustness verification attempt (K903 plan) determined that the $N$ values are \textbf{unreproducible due to data vintage change}. When the analysis is re-run with current yfinance data, the number of shock days falling into each type category shifts because:
+\begin{enumerate}[nosep]
+\item VIX and price data undergo minor revisions (corporate actions, splits adjustments).
+\item The sample end date has extended, adding new shock-day classifications.
+\item The boundary between VIX regimes is sensitive to the exact VIX values on marginal days.
+\end{enumerate}
+
+This is a known problem in empirical finance: rerunning an analysis months later with fresh data downloads can produce slightly different sample compositions. However, it does \textbf{not} excuse the discrepancy between the paper's $N$ values and K721 (which was the original experiment). The paper either used (a)~a different computation than K721, or (b)~a corrected version of K721 that was not saved.
+
+\textbf{Why this remains SEVERE:} The shock-type decomposition is ``the paper's most important result'' (Section~5.4, line 397 of \texttt{main\_v2.tex}). The central claim---endogenous shocks are absorbed, exogenous shocks are not---rests entirely on this table. If the $N$ values, absorption coefficients, and $t$-statistics cannot be traced to a specific reproducible computation, the paper's core contribution is empirically unanchored.
+
+\textbf{Required action:}
+\begin{enumerate}[nosep]
+\item Create a new experiment (e.g., \texttt{k9XX\_absorption\_shock\_types.py}) that computes Table~5 from scratch with current data.
+\item Document the exact shock-classification methodology: how are rate shocks, risk-off flights, and geopolitical shocks defined? What are the sign thresholds for SPY, TLT, GLD? Is $|\Delta\text{VIX}| > 2$ the only filter, or is there also a $r_t^{\text{SPY}} < 0$ requirement?
+\item Report the new $N$ values in the paper. If they differ from the current table, update the table.
+\item Store the bootstrap $t$-statistics and absorption coefficients in the experiment JSON.
+\item If the original K721 values and the current values differ substantively (i.e., the absorption coefficients change sign or lose significance), this must be reported honestly.
+\end{enumerate}
+
+
+\subsection*{S3: Tables 9--10 Robustness \hfill \textcolor{resolved}{DOWNGRADED to MEDIUM}}
+
+\textbf{R2 status:} SEVERE---no experiment JSON, untraceable numbers.
+
+\textbf{R3 assessment:} The paper now contains substantive robustness tables:
+\begin{itemize}[nosep]
+\item Table~\ref{tab:robust_threshold}: 5 alternative shock thresholds ($\tau = 1, 1.5, 2, 2.5, 3$). All negative and significant ($p < 0.03$ for all). Monotonic increase in $|\hat{\beta}|$ with $\tau$---internally consistent.
+\item Table~\ref{tab:robust_subperiod}: 3 sub-periods. All negative. GFC strongest ($-0.00035$), low-vol weakest ($-0.00018$, marginally significant at $p = 0.087$), COVID era significant ($-0.00031$, $p = 0.008$).
+\item In-text: RV normalization ($\hat{\beta}^{\text{RV}} = -0.0031$, $t = -2.76$) and controlled regression ($\hat{\beta} = -0.00025$, $t = -3.14$).
+\end{itemize}
+
+The robustness attempt (K903) \textbf{partially reproduced} these results:
+\begin{itemize}[nosep]
+\item Threshold variations: Reproduced with consistent signs, though with \textbf{weaker $t$-statistics} than the paper reports. This is expected if the data vintage changed slightly.
+\item Sub-period stability: 2006--2012 and 2013--2019 reproduced directionally. \textbf{However, 2020--2026 showed a sign reversal} (see N2 below).
+\end{itemize}
+
+\textbf{Downgrade rationale:} The robustness content is now present in the paper and the \textit{overall pattern} is largely confirmed. The threshold monotonicity and the full-sample significance are robust. The absence of a backing experiment JSON is a process issue (N1, MEDIUM), not a scientific one. The sub-period sign reversal is elevated as a new issue (N2, MAJOR) rather than keeping S3 at SEVERE.
+
+
+\subsection*{S4: NFP Table Discrepancies with K741 \hfill \textcolor{errorred}{SEVERE}}
+
+\textbf{R2 status:} SEVERE---paper's Table~6 numbers ($n = 63$, overall $p = 0.037$) do not match K741 JSON ($n = 62$, $p = 0.081$ or $0.061$).
+
+\textbf{R3 assessment:} No reconciliation has been performed. The K903 robustness attempt did not address NFP. The discrepancies remain:
+
+\medskip
+\begin{tabular}{llrrl}
+\toprule
+\textbf{Value} & \textbf{Paper} & \textbf{K741} & \textbf{Difference} & \textbf{Concern} \\
+\midrule
+Low VIX $n$ & 63 & 62 & $+1$ & Minor \\
+Overall $p$-value & 0.037 & 0.081 or 0.061 & $-0.024$ to $-0.044$ & \textcolor{errorred}{Material} \\
+Elevated $|r|$ & 1.053 & 1.022 & $+0.031$ & Moderate \\
+\bottomrule
+\end{tabular}
+
+\medskip
+
+The overall $p$-value discrepancy is the most concerning. The paper claims significance at 5\% ($p = 0.037$), while K741 suggests $p \approx 0.06$--$0.08$ (not significant at 5\%). If the correct value is $p > 0.05$, the paper overstates the evidence from the NFP analysis.
+
+The paper's footnote (line 70) specifying ``195 NFP release dates over 4,081 SPY trading days'' is a helpful addition, and the limitation paragraph about surprise controls is commendable. But these do not resolve the numerical discrepancy.
+
+\textbf{Required action:}
+\begin{enumerate}[nosep]
+\item Create a new experiment that computes the NFP analysis from scratch.
+\item Use the BLS release calendar to identify NFP dates (the paper describes this methodology).
+\item Report the new values. If $p > 0.05$, the paper must weaken its NFP claim accordingly (``directionally consistent but not statistically significant at conventional levels'').
+\item Note that the NFP analysis is supplementary to the SAR-based primary finding; weakening the NFP claim does not undermine the core contribution.
+\end{enumerate}
+
+
+\subsection*{N2 (NEW): 2020--2026 Sub-Period Sign Reversal \hfill \textcolor{errorred}{MAJOR}}
+
+\textbf{Finding:} The K903 robustness attempt found that when the sub-period analysis is re-run with current data, the \textbf{2020--2026 sub-period shows a sign reversal}---the absorption coefficient becomes positive or near-zero, contradicting the paper's Table~\ref{tab:robust_subperiod} which reports $\hat{\beta} = -0.00031$ ($t = -2.65$, $p = 0.008$).
+
+\textbf{Why this is concerning:}
+\begin{enumerate}[nosep]
+\item The paper presents 2020--2026 as \textit{supporting evidence} for the robustness of the absorption effect across sub-periods. If the sign actually reverses, this is false.
+\item The 2020--2026 period is the most recent and arguably most policy-relevant. If absorption does not hold in the post-COVID era, this significantly limits the paper's practical implications (Section~6: hedging cost-benefit, VT strategy design).
+\item The sign reversal may be due to the unusual VIX dynamics of 2020--2026: the extreme COVID spike (VIX $> 80$) followed by an unprecedented rapid normalization, then the 2022 rate-hiking regime with elevated but not extreme VIX. These are structurally different from the GFC era.
+\end{enumerate}
+
+\textbf{Possible explanations (to investigate):}
+\begin{itemize}[nosep]
+\item \textbf{Data vintage:} The paper's computation used data downloaded in early 2026; the K903 attempt used a later download. If a few marginal shock days shifted classification, the sub-period result (with fewer observations) could flip.
+\item \textbf{Sample composition:} The 2020--2026 period contains both the extreme COVID outlier (which may dominate the regression) and the 2022--2023 hiking cycle. Excluding March 2020 or splitting 2020--2021 from 2022--2026 could reveal whether the reversal is driven by a single outlier month.
+\item \textbf{Genuine structural change:} The post-COVID market may have experienced a genuine shift in absorption dynamics---perhaps because the speed of the COVID recovery (V-shaped) was unlike previous crises, or because the 2022 rate-hiking regime produced a different shock structure.
+\end{itemize}
+
+\textbf{Required action:}
+\begin{enumerate}[nosep]
+\item Create a formal experiment re-running the sub-period analysis with current data.
+\item If the 2020--2026 sign reversal is confirmed:
+\begin{itemize}[nosep]
+\item Report it honestly in the paper. The robustness section must include the reversal.
+\item Test whether the reversal is driven by the March 2020 outlier (re-run excluding 2020-02 to 2020-04).
+\item Split 2020--2026 into 2020--2022 and 2023--2026 to isolate the source.
+\item Discuss possible structural explanations (COVID V-shape recovery, rate-hiking regime).
+\end{itemize}
+\item If the reversal is a data-vintage artifact, document this and use a \textbf{pinned dataset} (specific download date, saved locally) for all paper computations.
+\item \textbf{Do not suppress the finding.} If the absorption effect weakened or reversed in the most recent period, this is a genuine empirical observation that deserves discussion, not concealment. The paper's core finding (full-sample SAR, K897 null rejection) remains valid even if one sub-period is anomalous.
+\end{enumerate}
+
+
+\bigskip
+
+%% ============================================================
+\section*{Status of R1/R2 MEDIUM Issues}
+
+\begin{longtable}{p{1cm}p{5cm}p{2.5cm}p{5.5cm}}
+\toprule
+\textbf{ID} & \textbf{Issue} & \textbf{R3 Status} & \textbf{Assessment} \\
+\midrule
+\endfirsthead
+M1 & Novelty positioning (MS-GARCH) & \textcolor{warncolor}{UNCHANGED} & K897 shows standard GARCH cannot produce SAR decline. MS-GARCH remains untested. \\
+\addlinespace
+M2 & Missing literatures (VVIX, HAR-RV) & \textcolor{warncolor}{UNCHANGED} & \\
+\addlinespace
+M3 & Danielsson et al.\ (2018) citation & \textcolor{okgreen}{IMPROVED (R2)} & Adequate. \\
+\addlinespace
+M4 & Table 1 (descriptive stats) & \textcolor{warncolor}{UNCHANGED} & No replication script. \\
+\addlinespace
+M5 & 767 vs.\ 893 sample-size discrepancy & \textcolor{warncolor}{UNCHANGED} & \\
+\addlinespace
+M6 & \texttt{lin2020} unverifiable & \textcolor{warncolor}{UNCHANGED} & \\
+\addlinespace
+M7 & \texttt{bekaert2022} end page & \textcolor{warncolor}{UNCHANGED} & \\
+\addlinespace
+M8 & Replication scripts for K716--K721 & \textcolor{warncolor}{UNCHANGED} & \\
+\addlinespace
+N1 & Robustness tables lack JSON & \textcolor{warncolor}{UNCHANGED} & Create \texttt{k9XX\_absorption\_robustness.json} \\
+\bottomrule
+\end{longtable}
+
+
+\bigskip
+
+%% ============================================================
+\section*{Honest Assessment: What Can and Cannot Be Downgraded}
+
+\subsection*{S3: Can be downgraded (SEVERE $\to$ MEDIUM). Done.}
+
+Rationale: The robustness content is substantive. The threshold monotonicity is confirmed. The full-sample result ($\hat{\beta} = -0.00028$, $t = -3.42$) is robust. The process gap (no JSON) is a MEDIUM concern. The sign reversal is elevated as a separate issue (N2).
+
+\subsection*{S2: Cannot be downgraded. Remains SEVERE.}
+
+Rationale: The shock-type decomposition is the paper's ``most important result'' (author's own words, line 397). If the $N$ values, absorption coefficients, and $t$-statistics cannot be independently verified, the core contribution is empirically unanchored. The data-vintage explanation is plausible but does not resolve the discrepancy---it merely explains \textit{why} the numbers might differ, not which numbers are correct. A fresh experiment with documented methodology is required.
+
+\subsection*{S4: Cannot be downgraded. Remains SEVERE.}
+
+Rationale: The overall $p$-value discrepancy ($0.037$ paper vs.\ $0.06$--$0.08$ K741) crosses the conventional significance threshold. If the true $p > 0.05$, the paper misrepresents the evidence. This is a binary issue---significant or not---that cannot be finessed.
+
+\subsection*{N2: Elevated to MAJOR (not SEVERE).}
+
+Rationale: The 2020--2026 sign reversal is concerning but does not invalidate the core finding. The full-sample SAR analysis and K897 null simulation are unaffected. The sign reversal in one sub-period suggests the absorption effect may be time-varying---an important nuance that strengthens rather than weakens the paper \textit{if reported honestly}. It would be SEVERE only if the paper claimed unconditional stability and refused to acknowledge the reversal.
+
+
+\bigskip
+
+%% ============================================================
+\section*{R3 Revision Priority}
+
+\textbf{Priority 1 (must fix before submission):}
+\begin{enumerate}
+\item \textbf{Re-run Table~5 shock-type analysis} with current data, documented methodology, and experiment JSON. Update $N$ values and coefficients if they change. \textit{[S2]}
+\item \textbf{Re-run NFP analysis} with documented BLS calendar dates. If $p > 0.05$, weaken the claim. \textit{[S4]}
+\item \textbf{Investigate and report the 2020--2026 sign reversal.} Run formal sub-period tests, test outlier sensitivity (exclude March 2020), and discuss structural explanations. \textit{[N2]}
+\end{enumerate}
+
+\textbf{Priority 2 (strongly recommended):}
+\begin{enumerate}[resume]
+\item \textbf{Create unified robustness experiment JSON} containing all robustness results (thresholds, sub-periods, RV normalization, controlled regression). \textit{[S3, N1]}
+\item \textbf{Pin the dataset:} Save a local copy of the exact data used for all paper computations. Document the download date and yfinance version. This prevents future data-vintage discrepancies. \textit{[S2, S4 prevention]}
+\item \textbf{Create replication scripts} for K716--K721. \textit{[M8]}
+\end{enumerate}
+
+\textbf{Priority 3 (desirable):}
+\begin{enumerate}[resume]
+\item Add VVIX and HAR-RV literature discussion. \textit{[M2]}
+\item Verify \texttt{lin2020} citation. \textit{[M6]}
+\item Explain 767 vs.\ 893 sample-size gap. \textit{[M5]}
+\item Test MS-GARCH null. \textit{[M1]}
+\item Present RV normalization and controlled-regression results in a table. \textit{[N1]}
+\end{enumerate}
+
+
+\bigskip
+
+%% ============================================================
+\section*{What the Paper Does Well (Unchanged)}
+
+The core strengths from R2 remain:
+\begin{enumerate}
+\item \textbf{K897 null simulation is exemplary.} Cohen's $d > 3.8$ in all bins, $p = 0.002$. The SAR finding is not a GARCH artifact.
+\item \textbf{SAR measure is clean.} No VIX denominator, no mechanical correlation.
+\item \textbf{Endogenous/exogenous distinction is novel.} If the Table~5 numbers hold up to re-verification, this is a genuine contribution.
+\item \textbf{NFP limitation paragraph is honest.} The surprise-control caveat is commendable.
+\item \textbf{Robustness section is substantive.} Five thresholds, three sub-periods, two alternative normalizations.
+\end{enumerate}
+
+
+\bigskip
+
+%% ============================================================
+\section*{Overall Assessment}
+
+\textbf{Verdict: Major Revision (narrowed scope).}
+
+The paper has made critical progress since R1 (5 SEVERE $\to$ 2 SEVERE). The methodology is sound (K897 definitively rejects the mechanical null). The remaining problems are \textbf{data integrity} (S2: shock-type $N$ values, S4: NFP $p$-value) and \textbf{honest reporting} (N2: 2020--2026 sign reversal). None of these threaten the core SAR finding or the null-simulation identification.
+
+The path to submission is clear:
+\begin{enumerate}[nosep]
+\item Re-run Tables 5 and 6 with documented methodology $\to$ update numbers $\to$ if significance changes, adjust claims.
+\item Investigate and honestly report the 2020--2026 sub-period finding $\to$ either confirm it was a data-vintage artifact or discuss it as time-variation in absorption.
+\item Pin the dataset to prevent future discrepancies.
+\end{enumerate}
+
+With these three actions, the paper would reach SEVERE = 0 and be submittable to JBF/JFQA. The core contribution---SAR, endogenous/exogenous decomposition, and null-simulation identification---is publishable.
+
+\bigskip
+
+\noindent\textit{Reviewer: Claude Opus 4.6 (1M context), acting as JBF/JFQA referee. R3 review, 2026-04-05.}\\
+\noindent\textit{R2 reference: \texttt{paper/volatility-absorption/reviews/review\_r2.tex}}\\
+\noindent\textit{K897 source: \texttt{paper/volatility-absorption/experiments/k897\_sar\_null\_simulation\_results.json}}\\
+\noindent\textit{K903 robustness attempt: results JSON not found; findings based on AUDIT\_PLAN.md and user report.}
+
+\end{document}
