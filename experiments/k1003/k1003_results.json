@@ -1,0 +1,285 @@
+{
+  "experiment_id": "K1003",
+  "timestamp": "2026-04-08T10:59:48.183037+00:00",
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "oos_start": "2019-01-01",
+  "model": "A4f (\u03c4=\u03b8\u2080+\u03b8\u2081X\u00b2, free \u03c9)",
+  "benchmark": "GJR-GARCH(1,1)",
+  "refit_frequency": {
+    "refit_21d": {
+      "qlike_gjr": 1.5001123058462797,
+      "qlike_a4f": 1.4085204138031302,
+      "qlike_improvement": 0.09159189204314955,
+      "dm_t": 4.291958943420063,
+      "dm_p": 1.8640448249174213e-05,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 260.7
+    },
+    "refit_63d": {
+      "qlike_gjr": 1.4975183619654535,
+      "qlike_a4f": 1.4080563217480504,
+      "qlike_improvement": 0.08946204021740312,
+      "dm_t": 3.9172509463079064,
+      "dm_p": 9.286916074802143e-05,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 85.1
+    },
+    "refit_126d": {
+      "qlike_gjr": 1.500932384363553,
+      "qlike_a4f": 1.4082388852296446,
+      "qlike_improvement": 0.09269349913390834,
+      "dm_t": 3.3633752038665885,
+      "dm_p": 0.0007859056189445379,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 41.9
+    },
+    "refit_252d": {
+      "qlike_gjr": 1.5089350466943159,
+      "qlike_a4f": 1.4098162119105637,
+      "qlike_improvement": 0.09911883478375216,
+      "dm_t": 3.315865793404341,
+      "dm_p": 0.0009315421303994764,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 21.0
+    }
+  },
+  "estimation_window": {
+    "window_1000": {
+      "qlike_gjr": 1.4781136800786274,
+      "qlike_a4f": 1.4181824349233403,
+      "qlike_improvement": 0.05993124515528714,
+      "dm_t": 3.1792337081726605,
+      "dm_p": 0.0015014541687670135,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 39.6
+    },
+    "window_1500": {
+      "qlike_gjr": 1.4898522773252296,
+      "qlike_a4f": 1.4075268193009227,
+      "qlike_improvement": 0.08232545802430691,
+      "dm_t": 3.488551865081932,
+      "dm_p": 0.0004971823918862306,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 60.0
+    },
+    "window_2000": {
+      "qlike_gjr": 1.4975183619654535,
+      "qlike_a4f": 1.4080563217480504,
+      "qlike_improvement": 0.08946204021740312,
+      "dm_t": 3.9172509463079064,
+      "dm_p": 9.286916074802143e-05,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 84.8
+    },
+    "window_2500": {
+      "qlike_gjr": 1.4914490645993128,
+      "qlike_a4f": 1.4023078143579977,
+      "qlike_improvement": 0.08914125024131514,
+      "dm_t": 5.127173032634464,
+      "dm_p": 3.2537603922300207e-07,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 98.3
+    },
+    "window_3000": {
+      "qlike_gjr": 1.4866158128831402,
+      "qlike_a4f": 1.4022352736299906,
+      "qlike_improvement": 0.08438053925314959,
+      "dm_t": 4.93615340330099,
+      "dm_p": 8.694534423536737e-07,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 104.2
+    }
+  },
+  "subperiod_stability": {
+    "2019-2020_COVID": {
+      "qlike_gjr": 1.5220790528231962,
+      "qlike_a4f": 1.4077811661001818,
+      "qlike_improvement": 0.11429788672301444,
+      "dm_t": 1.5948458078870877,
+      "dm_p": 0.11137357263549186,
+      "n_valid": 505,
+      "robust": false
+    },
+    "2021-2022_PostCOVID_Hike": {
+      "qlike_gjr": 1.3844155457064744,
+      "qlike_a4f": 1.303187629639137,
+      "qlike_improvement": 0.08122791606733748,
+      "dm_t": 2.4946798042649228,
+      "dm_p": 0.012928062133347407,
+      "n_valid": 502,
+      "robust": false
+    },
+    "2023-2026_Stable": {
+      "qlike_gjr": 1.5518988336307076,
+      "qlike_a4f": 1.4727414161608545,
+      "qlike_improvement": 0.07915741746985305,
+      "dm_t": 4.519978434610275,
+      "dm_p": 7.100434316065218e-06,
+      "n_valid": 816,
+      "robust": true
+    }
+  },
+  "vix_variants": {
+    "VIX": {
+      "qlike_gjr": 1.4975183619654535,
+      "qlike_a4f": 1.4080563217480504,
+      "qlike_improvement": 0.08946204021740312,
+      "dm_t": 3.9172509463079064,
+      "dm_p": 9.286916074802143e-05,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 84.9
+    },
+    "VIX9D": {
+      "qlike_gjr": 1.4975183619654535,
+      "qlike_a4f": 1.3802492452942026,
+      "qlike_improvement": 0.11726911667125095,
+      "dm_t": 5.148397216681692,
+      "dm_p": 2.9110598309678437e-07,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 103.1
+    },
+    "VIX3M": {
+      "qlike_gjr": 1.4975183619654535,
+      "qlike_a4f": 1.4360826637472834,
+      "qlike_improvement": 0.061435698218170076,
+      "dm_t": 2.5937860692027317,
+      "dm_p": 0.009568608415850832,
+      "n_valid": 1823,
+      "robust": false,
+      "elapsed_s": 85.2
+    },
+    "VIX_VIX3M_ratio": {
+      "qlike_gjr": 1.4975183619654535,
+      "qlike_a4f": 1.4459992282699106,
+      "qlike_improvement": 0.05151913369554295,
+      "dm_t": 3.5336212696362512,
+      "dm_p": 0.0004201288580305551,
+      "n_valid": 1823,
+      "robust": true,
+      "elapsed_s": 80.6
+    }
+  },
+  "summary": {
+    "total_tests": 16,
+    "robust_count": 13,
+    "robust_pct": 81.2,
+    "table": [
+      {
+        "dimension": "refit",
+        "setting": "refit_21d",
+        "dm_t": 4.291958943420063,
+        "robust": true
+      },
+      {
+        "dimension": "refit",
+        "setting": "refit_63d",
+        "dm_t": 3.9172509463079064,
+        "robust": true
+      },
+      {
+        "dimension": "refit",
+        "setting": "refit_126d",
+        "dm_t": 3.3633752038665885,
+        "robust": true
+      },
+      {
+        "dimension": "refit",
+        "setting": "refit_252d",
+        "dm_t": 3.315865793404341,
+        "robust": true
+      },
+      {
+        "dimension": "window",
+        "setting": "window_1000",
+        "dm_t": 3.1792337081726605,
+        "robust": true
+      },
+      {
+        "dimension": "window",
+        "setting": "window_1500",
+        "dm_t": 3.488551865081932,
+        "robust": true
+      },
+      {
+        "dimension": "window",
+        "setting": "window_2000",
+        "dm_t": 3.9172509463079064,
+        "robust": true
+      },
+      {
+        "dimension": "window",
+        "setting": "window_2500",
+        "dm_t": 5.127173032634464,
+        "robust": true
+      },
+      {
+        "dimension": "window",
+        "setting": "window_3000",
+        "dm_t": 4.93615340330099,
+        "robust": true
+      },
+      {
+        "dimension": "subperiod",
+        "setting": "2019-2020_COVID",
+        "dm_t": 1.5948458078870877,
+        "robust": false
+      },
+      {
+        "dimension": "subperiod",
+        "setting": "2021-2022_PostCOVID_Hike",
+        "dm_t": 2.4946798042649228,
+        "robust": false
+      },
+      {
+        "dimension": "subperiod",
+        "setting": "2023-2026_Stable",
+        "dm_t": 4.519978434610275,
+        "robust": true
+      },
+      {
+        "dimension": "vix_variant",
+        "setting": "VIX",
+        "dm_t": 3.9172509463079064,
+        "robust": true
+      },
+      {
+        "dimension": "vix_variant",
+        "setting": "VIX9D",
+        "dm_t": 5.148397216681692,
+        "robust": true
+      },
+      {
+        "dimension": "vix_variant",
+        "setting": "VIX3M",
+        "dm_t": 2.5937860692027317,
+        "robust": false
+      },
+      {
+        "dimension": "vix_variant",
+        "setting": "VIX_VIX3M_ratio",
+        "dm_t": 3.5336212696362512,
+        "robust": true
+      }
+    ]
+  },
+  "limitations": [
+    "Single asset (SPY only)",
+    "OOS period 2019-2026 includes extreme COVID regime",
+    "VIX9D series may have shorter history",
+    "VIX/VIX3M ratio amplifies noise when VIX3M is small",
+    "Sub-period DM test has reduced power due to smaller n"
+  ],
+  "elapsed_total_s": 1235.9
+}
