@@ -1,0 +1,675 @@
+{
+  "experiment_id": "K1004",
+  "title": "VIX9D-Driven A4f Full Validation (QLIKE + VaR/ES + Cross-Asset)",
+  "date": "2026-04-08",
+  "data_source": "yfinance (SPY, QQQ, ^VIX, ^VIX9D)",
+  "seed": 42,
+  "window": 2000,
+  "refit_every": 63,
+  "motivation": "K1003 found VIX9D DM t=+5.15 > VIX t=+4.29. Full validation needed.",
+  "assets": {
+    "SPY": {
+      "asset": "SPY",
+      "oos_period": "2019-01-02 to 2026-04-07",
+      "n_oos": 1825,
+      "models": {
+        "A4f-VIX9D-N": {
+          "qlike": -8.393042,
+          "params": {
+            "theta0": -2.3e-05,
+            "theta1": 0.01,
+            "omega": 0.045566,
+            "alpha": 1e-06,
+            "gamma": 0.118552,
+            "beta": 0.798943
+          },
+          "persistence": 0.8582,
+          "converged": true,
+          "var_es": {
+            "0.01": {
+              "alpha": 0.01,
+              "T": 1825,
+              "violations": 31,
+              "violation_rate": 1.7,
+              "expected_rate": 1.0,
+              "UC_stat": 7.439,
+              "UC_p": 0.0064,
+              "CC_stat": 0.35,
+              "CC_p": 0.554,
+              "DQ_stat": 10.744,
+              "DQ_p": 0.0132,
+              "Basel": "YELLOW",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "1/4"
+            },
+            "0.025": {
+              "alpha": 0.025,
+              "T": 1825,
+              "violations": 54,
+              "violation_rate": 2.96,
+              "expected_rate": 2.5,
+              "UC_stat": 1.491,
+              "UC_p": 0.2221,
+              "CC_stat": 0.273,
+              "CC_p": 0.6014,
+              "DQ_stat": 2.977,
+              "DQ_p": 0.3952,
+              "Basel": "GREEN",
+              "ES_Z1": 2.358,
+              "ES_Z1_p": 0.504,
+              "ES_Z2": 0.6348,
+              "ES_Z2_p": 0.532,
+              "scorecard": "6/6"
+            },
+            "0.05": {
+              "alpha": 0.05,
+              "T": 1825,
+              "violations": 97,
+              "violation_rate": 5.32,
+              "expected_rate": 5.0,
+              "UC_stat": 0.374,
+              "UC_p": 0.5408,
+              "CC_stat": 0.146,
+              "CC_p": 0.7021,
+              "DQ_stat": 1.021,
+              "DQ_p": 0.7962,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "4/4"
+            }
+          },
+          "vix_driver": "vix9d2"
+        },
+        "A4f-VIX9D-t": {
+          "qlike": -8.394681,
+          "params": {
+            "theta0": -2.7e-05,
+            "theta1": 0.01,
+            "omega": 0.039224,
+            "alpha": 1e-06,
+            "gamma": 0.152948,
+            "beta": 0.816619,
+            "df": 8.016377
+          },
+          "persistence": 0.8931,
+          "converged": true,
+          "var_es": {
+            "0.01": {
+              "alpha": 0.01,
+              "T": 1825,
+              "violations": 25,
+              "violation_rate": 1.37,
+              "expected_rate": 1.0,
+              "UC_stat": 2.261,
+              "UC_p": 0.1327,
+              "CC_stat": 0,
+              "CC_p": 1.0,
+              "DQ_stat": 3.324,
+              "DQ_p": 0.3443,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "4/4"
+            },
+            "0.025": {
+              "alpha": 0.025,
+              "T": 1825,
+              "violations": 49,
+              "violation_rate": 2.68,
+              "expected_rate": 2.5,
+              "UC_stat": 0.25,
+              "UC_p": 0.617,
+              "CC_stat": 0.087,
+              "CC_p": 0.7677,
+              "DQ_stat": 1.15,
+              "DQ_p": 0.765,
+              "Basel": "GREEN",
+              "ES_Z1": 2.1466,
+              "ES_Z1_p": 0.5,
+              "ES_Z2": 0.4722,
+              "ES_Z2_p": 0.53,
+              "scorecard": "6/6"
+            },
+            "0.05": {
+              "alpha": 0.05,
+              "T": 1825,
+              "violations": 102,
+              "violation_rate": 5.59,
+              "expected_rate": 5.0,
+              "UC_stat": 1.286,
+              "UC_p": 0.2567,
+              "CC_stat": 0.934,
+              "CC_p": 0.3338,
+              "DQ_stat": 2.759,
+              "DQ_p": 0.4304,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "4/4"
+            }
+          },
+          "vix_driver": "vix9d2"
+        },
+        "A4f-VIX-t": {
+          "qlike": -8.361372,
+          "params": {
+            "theta0": -5.9e-05,
+            "theta1": 0.010054,
+            "omega": 0.048713,
+            "alpha": 1e-06,
+            "gamma": 0.145847,
+            "beta": 0.793257,
+            "df": 8.001392
+          },
+          "persistence": 0.8662,
+          "converged": true,
+          "var_es": {
+            "0.01": {
+              "alpha": 0.01,
+              "T": 1825,
+              "violations": 23,
+              "violation_rate": 1.26,
+              "expected_rate": 1.0,
+              "UC_stat": 1.154,
+              "UC_p": 0.2828,
+              "CC_stat": 0,
+              "CC_p": 1.0,
+              "DQ_stat": 2.089,
+              "DQ_p": 0.5542,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "4/4"
+            },
+            "0.025": {
+              "alpha": 0.025,
+              "T": 1825,
+              "violations": 52,
+              "violation_rate": 2.85,
+              "expected_rate": 2.5,
+              "UC_stat": 0.875,
+              "UC_p": 0.3496,
+              "CC_stat": 0.187,
+              "CC_p": 0.6656,
+              "DQ_stat": 1.739,
+              "DQ_p": 0.6282,
+              "Basel": "GREEN",
+              "ES_Z1": 2.1967,
+              "ES_Z1_p": 0.501,
+              "ES_Z2": 0.4483,
+              "ES_Z2_p": 0.528,
+              "scorecard": "6/6"
+            },
+            "0.05": {
+              "alpha": 0.05,
+              "T": 1825,
+              "violations": 99,
+              "violation_rate": 5.42,
+              "expected_rate": 5.0,
+              "UC_stat": 0.675,
+              "UC_p": 0.4113,
+              "CC_stat": 0.03,
+              "CC_p": 0.8633,
+              "DQ_stat": 0.846,
+              "DQ_p": 0.8383,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "4/4"
+            }
+          },
+          "vix_driver": "vix2"
+        },
+        "GJR-t": {
+          "qlike": -8.271973,
+          "params": {
+            "omega": 3e-06,
+            "alpha": 0.079018,
+            "gamma": 0.186751,
+            "beta": 0.796921,
+            "df": 7.313189
+          },
+          "persistence": 0.9693,
+          "converged": true,
+          "var_es": {
+            "0.01": {
+              "alpha": 0.01,
+              "T": 1825,
+              "violations": 32,
+              "violation_rate": 1.75,
+              "expected_rate": 1.0,
+              "UC_stat": 8.545,
+              "UC_p": 0.0035,
+              "CC_stat": 0.29,
+              "CC_p": 0.5903,
+              "DQ_stat": 12.468,
+              "DQ_p": 0.0059,
+              "Basel": "YELLOW",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "1/4"
+            },
+            "0.025": {
+              "alpha": 0.025,
+              "T": 1825,
+              "violations": 62,
+              "violation_rate": 3.4,
+              "expected_rate": 2.5,
+              "UC_stat": 5.429,
+              "UC_p": 0.0198,
+              "CC_stat": 0.006,
+              "CC_p": 0.9383,
+              "DQ_stat": 6.175,
+              "DQ_p": 0.1034,
+              "Basel": "GREEN",
+              "ES_Z1": 2.4758,
+              "ES_Z1_p": 0.51,
+              "ES_Z2": 0.4543,
+              "ES_Z2_p": 0.521,
+              "scorecard": "5/6"
+            },
+            "0.05": {
+              "alpha": 0.05,
+              "T": 1825,
+              "violations": 121,
+              "violation_rate": 6.63,
+              "expected_rate": 5.0,
+              "UC_stat": 9.303,
+              "UC_p": 0.0023,
+              "CC_stat": 0.131,
+              "CC_p": 0.7175,
+              "DQ_stat": 11.077,
+              "DQ_p": 0.0113,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "2/4"
+            }
+          },
+          "vix_driver": "vix2"
+        }
+      },
+      "dm_tests": {
+        "A4f-VIX9D-N_vs_A4f-VIX9D-t": {
+          "t_stat": 0.899,
+          "p_val": 0.3688
+        },
+        "A4f-VIX9D-N_vs_A4f-VIX-t": {
+          "t_stat": -4.662,
+          "p_val": 0.0
+        },
+        "A4f-VIX9D-N_vs_GJR-t": {
+          "t_stat": -6.128,
+          "p_val": 0.0
+        },
+        "A4f-VIX9D-t_vs_A4f-VIX-t": {
+          "t_stat": -4.588,
+          "p_val": 0.0
+        },
+        "A4f-VIX9D-t_vs_GJR-t": {
+          "t_stat": -6.18,
+          "p_val": 0.0
+        },
+        "A4f-VIX-t_vs_GJR-t": {
+          "t_stat": -4.414,
+          "p_val": 0.0
+        }
+      }
+    },
+    "QQQ": {
+      "asset": "QQQ",
+      "oos_period": "2019-01-02 to 2026-04-07",
+      "n_oos": 1825,
+      "models": {
+        "A4f-VIX9D-N": {
+          "qlike": -7.785651,
+          "params": {
+            "theta0": 4.1e-05,
+            "theta1": 0.01,
+            "omega": 0.02506,
+            "alpha": 1e-06,
+            "gamma": 0.115108,
+            "beta": 0.879891
+          },
+          "persistence": 0.9374,
+          "converged": true,
+          "var_es": {
+            "0.01": {
+              "alpha": 0.01,
+              "T": 1825,
+              "violations": 39,
+              "violation_rate": 2.14,
+              "expected_rate": 1.0,
+              "UC_stat": 17.972,
+              "UC_p": 0.0,
+              "CC_stat": 0.033,
+              "CC_p": 0.8568,
+              "DQ_stat": 25.991,
+              "DQ_p": 0.0,
+              "Basel": "RED",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "1/4"
+            },
+            "0.025": {
+              "alpha": 0.025,
+              "T": 1825,
+              "violations": 64,
+              "violation_rate": 3.51,
+              "expected_rate": 2.5,
+              "UC_stat": 6.759,
+              "UC_p": 0.0093,
+              "CC_stat": 0.03,
+              "CC_p": 0.8627,
+              "DQ_stat": 8.964,
+              "DQ_p": 0.0298,
+              "Basel": "GREEN",
+              "ES_Z1": 2.5699,
+              "ES_Z1_p": 0.52,
+              "ES_Z2": 0.4341,
+              "ES_Z2_p": 0.54,
+              "scorecard": "4/6"
+            },
+            "0.05": {
+              "alpha": 0.05,
+              "T": 1825,
+              "violations": 104,
+              "violation_rate": 5.7,
+              "expected_rate": 5.0,
+              "UC_stat": 1.798,
+              "UC_p": 0.18,
+              "CC_stat": 0.788,
+              "CC_p": 0.3748,
+              "DQ_stat": 2.887,
+              "DQ_p": 0.4094,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "4/4"
+            }
+          },
+          "vix_driver": "vix9d2"
+        },
+        "A4f-VIX9D-t": {
+          "qlike": -7.786479,
+          "params": {
+            "theta0": 3e-06,
+            "theta1": 0.01,
+            "omega": 0.023563,
+            "alpha": 1e-06,
+            "gamma": 0.140221,
+            "beta": 0.898632,
+            "df": 5.012456
+          },
+          "persistence": 0.9687,
+          "converged": true,
+          "var_es": {
+            "0.01": {
+              "alpha": 0.01,
+              "T": 1825,
+              "violations": 30,
+              "violation_rate": 1.64,
+              "expected_rate": 1.0,
+              "UC_stat": 6.399,
+              "UC_p": 0.0114,
+              "CC_stat": 0,
+              "CC_p": 1.0,
+              "DQ_stat": 13.842,
+              "DQ_p": 0.0031,
+              "Basel": "YELLOW",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "1/4"
+            },
+            "0.025": {
+              "alpha": 0.025,
+              "T": 1825,
+              "violations": 59,
+              "violation_rate": 3.23,
+              "expected_rate": 2.5,
+              "UC_stat": 3.686,
+              "UC_p": 0.0549,
+              "CC_stat": 0.005,
+              "CC_p": 0.9457,
+              "DQ_stat": 7.003,
+              "DQ_p": 0.0718,
+              "Basel": "GREEN",
+              "ES_Z1": 2.3338,
+              "ES_Z1_p": 0.509,
+              "ES_Z2": 0.2823,
+              "ES_Z2_p": 0.54,
+              "scorecard": "6/6"
+            },
+            "0.05": {
+              "alpha": 0.05,
+              "T": 1825,
+              "violations": 108,
+              "violation_rate": 5.92,
+              "expected_rate": 5.0,
+              "UC_stat": 3.064,
+              "UC_p": 0.08,
+              "CC_stat": 2.48,
+              "CC_p": 0.1153,
+              "DQ_stat": 5.66,
+              "DQ_p": 0.1294,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "4/4"
+            }
+          },
+          "vix_driver": "vix9d2"
+        },
+        "A4f-VIX-t": {
+          "qlike": -7.768298,
+          "params": {
+            "theta0": -2.7e-05,
+            "theta1": 0.01,
+            "omega": 0.02819,
+            "alpha": 1e-06,
+            "gamma": 0.152384,
+            "beta": 0.878538,
+            "df": 6.07378
+          },
+          "persistence": 0.9547,
+          "converged": true,
+          "var_es": {
+            "0.01": {
+              "alpha": 0.01,
+              "T": 1825,
+              "violations": 29,
+              "violation_rate": 1.59,
+              "expected_rate": 1.0,
+              "UC_stat": 5.426,
+              "UC_p": 0.0198,
+              "CC_stat": 0,
+              "CC_p": 1.0,
+              "DQ_stat": 11.633,
+              "DQ_p": 0.0088,
+              "Basel": "YELLOW",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "1/4"
+            },
+            "0.025": {
+              "alpha": 0.025,
+              "T": 1825,
+              "violations": 56,
+              "violation_rate": 3.07,
+              "expected_rate": 2.5,
+              "UC_stat": 2.259,
+              "UC_p": 0.1328,
+              "CC_stat": 0.046,
+              "CC_p": 0.8293,
+              "DQ_stat": 4.264,
+              "DQ_p": 0.2343,
+              "Basel": "GREEN",
+              "ES_Z1": 2.2482,
+              "ES_Z1_p": 0.521,
+              "ES_Z2": 0.2596,
+              "ES_Z2_p": 0.535,
+              "scorecard": "6/6"
+            },
+            "0.05": {
+              "alpha": 0.05,
+              "T": 1825,
+              "violations": 100,
+              "violation_rate": 5.48,
+              "expected_rate": 5.0,
+              "UC_stat": 0.858,
+              "UC_p": 0.3544,
+              "CC_stat": 0.049,
+              "CC_p": 0.8251,
+              "DQ_stat": 1.029,
+              "DQ_p": 0.7943,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "4/4"
+            }
+          },
+          "vix_driver": "vix2"
+        },
+        "GJR-t": {
+          "qlike": -7.689791,
+          "params": {
+            "omega": 2e-06,
+            "alpha": 0.051015,
+            "gamma": 0.051015,
+            "beta": 0.908118,
+            "df": 5.040588
+          },
+          "persistence": 0.9846,
+          "converged": true,
+          "var_es": {
+            "0.01": {
+              "alpha": 0.01,
+              "T": 1825,
+              "violations": 31,
+              "violation_rate": 1.7,
+              "expected_rate": 1.0,
+              "UC_stat": 7.439,
+              "UC_p": 0.0064,
+              "CC_stat": 0,
+              "CC_p": 1.0,
+              "DQ_stat": 10.384,
+              "DQ_p": 0.0156,
+              "Basel": "YELLOW",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "1/4"
+            },
+            "0.025": {
+              "alpha": 0.025,
+              "T": 1825,
+              "violations": 66,
+              "violation_rate": 3.62,
+              "expected_rate": 2.5,
+              "UC_stat": 8.218,
+              "UC_p": 0.0041,
+              "CC_stat": 0.072,
+              "CC_p": 0.7889,
+              "DQ_stat": 10.5,
+              "DQ_p": 0.0148,
+              "Basel": "GREEN",
+              "ES_Z1": 2.5038,
+              "ES_Z1_p": 0.525,
+              "ES_Z2": 0.2499,
+              "ES_Z2_p": 0.529,
+              "scorecard": "4/6"
+            },
+            "0.05": {
+              "alpha": 0.05,
+              "T": 1825,
+              "violations": 115,
+              "violation_rate": 6.3,
+              "expected_rate": 5.0,
+              "UC_stat": 6.033,
+              "UC_p": 0.014,
+              "CC_stat": 0.259,
+              "CC_p": 0.6107,
+              "DQ_stat": 8.576,
+              "DQ_p": 0.0355,
+              "Basel": "GREEN",
+              "ES_Z1": null,
+              "ES_Z1_p": null,
+              "ES_Z2": null,
+              "ES_Z2_p": null,
+              "scorecard": "2/4"
+            }
+          },
+          "vix_driver": "vix2"
+        }
+      },
+      "dm_tests": {
+        "A4f-VIX9D-N_vs_A4f-VIX9D-t": {
+          "t_stat": 0.502,
+          "p_val": 0.6154
+        },
+        "A4f-VIX9D-N_vs_A4f-VIX-t": {
+          "t_stat": -2.287,
+          "p_val": 0.0222
+        },
+        "A4f-VIX9D-N_vs_GJR-t": {
+          "t_stat": -5.026,
+          "p_val": 0.0
+        },
+        "A4f-VIX9D-t_vs_A4f-VIX-t": {
+          "t_stat": -2.331,
+          "p_val": 0.0197
+        },
+        "A4f-VIX9D-t_vs_GJR-t": {
+          "t_stat": -5.002,
+          "p_val": 0.0
+        },
+        "A4f-VIX-t_vs_GJR-t": {
+          "t_stat": -3.696,
+          "p_val": 0.0002
+        }
+      }
+    }
+  },
+  "references": [
+    "Engle & Rangel (2008) Spline-GARCH",
+    "Patton (2011) QLIKE loss",
+    "Kupiec (1995) UC test",
+    "Christoffersen (1998) CC test",
+    "Engle & Manganelli (2004) DQ test",
+    "Acerbi & Szekely (2014) ES backtest",
+    "Harvey (2016) t>3.0 threshold",
+    "CBOE VIX9D: 9-day expected volatility"
+  ],
+  "conclusion": "SPY: VIX9D significantly better (DM t=-4.588); QQQ: VIX9D improvement not significant (DM t=-2.331); SPY A4f-VIX9D-t 2.5% scorecard: 6/6; QQQ A4f-VIX9D-t 2.5% scorecard: 6/6"
+}
