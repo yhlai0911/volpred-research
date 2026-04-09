@@ -2,66 +2,62 @@
   "report_type": "daily",
   "date": "2026-04-08",
   "week_range": "2026-04-03 → 2026-04-10",
-  "total_commits": 19,
-  "total_estimated_tokens": 568380,
+  "total_commits": 25,
+  "total_estimated_tokens": 193560,
   "categories": {
     "other": {
       "emoji": "❔",
       "description": "其他",
-      "commits": 16,
-      "lines_changed": 499608,
-      "estimated_tokens": 532000,
-      "percentage": 93.6,
+      "commits": 21,
+      "lines_changed": 25536,
+      "estimated_tokens": 144144,
+      "percentage": 74.5,
       "commit_messages": [
-        "Merge branch 'main' of https://github.com/yhlai0911/volpred-research",
-        "K1002-K1004 knowledge records + next_tasks update",
-        "Merge agent worktree agent-aed2e4ae (K1001)",
-        "K1001: Conrad-Loch macro GARCH-X vs VIX GARCH-X comparison",
-        "Resolve remaining merge conflicts (accept remote storage updates)",
-        "Resolve merge conflict (keep local K988-K1000 updates)",
-        "K1000: MF-GJR-X(A4f) + Student-t joint MLE — 5-model OOS comparison",
-        "Merge origin/main (unrelated histories) — local research takes priority",
-        "K998 VRP predictability NULL + K988b Codex fix + K995 VaR/ES knowledge",
-        "Merge agent worktree agent-ad0cce34 (1 commits)",
-        "Auto-commit: save agent work before worktree merge",
-        "Merge agent worktree agent-a8f782fa (1 commits)",
         "K995: VaR/ES backtesting for MF-GJR-X(A4f) vs GJR",
         "K988/K988b: MF-GJR-X vs GARCH-MIDAS 17-spec comparison + K994 cross-asset valida",
         "Merge agent worktree agent-a37cb1a6 (1 commits)",
-        "K994: Cross-asset MF-GJR-X validation (QQQ/EEM/GLD/0050.TW)"
-      ]
-    },
-    "frontend_deploy": {
-      "emoji": "🌐",
-      "description": "前端開發/部署",
-      "commits": 1,
-      "lines_changed": 1147,
-      "estimated_tokens": 26352,
-      "percentage": 4.6,
-      "commit_messages": [
-        "K998: VRP predictability from MF-GJR-X g component — NULL result"
-      ]
-    },
-    "ops_patrol": {
-      "emoji": "🛡️",
-      "description": "平台巡檢",
-      "commits": 1,
-      "lines_changed": 29,
-      "estimated_tokens": 6348,
-      "percentage": 1.1,
-      "commit_messages": [
-        "Ops patrol report 2026-04-08T12:20Z"
+        "K994: Cross-asset MF-GJR-X validation (QQQ/EEM/GLD/0050.TW)",
+        "K991+K993: Taiwan VT sensitivity PASS + VIX slope medium-freq NULL",
+        "Merge agent worktree agent-abf6fd80 (1 commits)",
+        "K993: VIX slope medium-frequency strategy (weekly/monthly)",
+        "K991: Taiwan VT sensitivity analysis — k/VIX parameter stability",
+        "K989-K990: VIX² convexity NULL + monthly lead-lag NULL",
+        "Merge agent worktree agent-ace08b5a (1 commits)",
+        "Merge agent worktree agent-aa2bb007 (1 commits)",
+        "K989: MF2-VIX + VIX² convexity synthesis",
+        "K990: Monthly SPY→TW50 lead-lag strategy",
+        "K986: Adaptive HAR — GJR dominates QLIKE, LASSO picks all 10 factors",
+        "K986: Adaptive multi-factor HAR with LASSO/Ridge",
+        "Resolve token report merge conflict (keep local)",
+        "K984+K987: Lead-lag strategy NULL + VIX² nonlinearity ★",
+        "Merge agent worktree agent-a83417ee (1 commits)",
+        "Auto-commit: save agent work before worktree merge",
+        "Merge agent worktree agent-a452eb2f (1 commits)",
+        "K984: SPY→0050.TW lead-lag trading strategy"
       ]
     },
     "research_program": {
       "emoji": "📋",
       "description": "研究計畫/規範更新",
-      "commits": 1,
-      "lines_changed": 420,
-      "estimated_tokens": 3680,
-      "percentage": 0.6,
+      "commits": 2,
+      "lines_changed": 6179,
+      "estimated_tokens": 28716,
+      "percentage": 14.8,
       "commit_messages": [
-        "K997 results + K1000 knowledge + research_program update"
+        "Session sync: skills update + article releases + next_tasks",
+        "Session sync: CLAUDE.md git pull --no-rebase + daily ops updates"
+      ]
+    },
+    "experiment": {
+      "emoji": "🔬",
+      "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
+      "commits": 2,
+      "lines_changed": 35,
+      "estimated_tokens": 20700,
+      "percentage": 10.7,
+      "commit_messages": [
+        "Expand K-ID collision check: experiments/ + next_tasks + worktrees",
+        "Add experiment ID collision check for multi-session safety"
       ]
     }
   }
