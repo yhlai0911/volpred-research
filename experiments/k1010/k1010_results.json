@@ -1,0 +1,693 @@
+{
+  "experiment_id": "K1010",
+  "title": "Probabilistic Volatility Quantile Forecasting",
+  "timestamp": "2026-04-08T18:52:03.081993+00:00",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2005-01-04 to 2026-04-07",
+  "n_total": 5347,
+  "n_oos": 1825,
+  "n_eval": 1325,
+  "config": {
+    "window": 2000,
+    "refit_every": 63,
+    "qr_window": 500,
+    "oos_start": "2019-01-01",
+    "taus": [
+      0.025,
+      0.05,
+      0.1,
+      0.25,
+      0.5,
+      0.75,
+      0.9,
+      0.95,
+      0.975
+    ]
+  },
+  "point_forecasts": {
+    "qlike_gjr": -8.290512,
+    "qlike_a4f": -8.361903,
+    "qlike_a4f_t": -8.361903,
+    "dm_gjr_vs_a4f": {
+      "t_stat": 3.687,
+      "p_value": 0.0002
+    }
+  },
+  "calibration": {
+    "GJR_Normal": {
+      "0.025": {
+        "coverage": 0.0264,
+        "target": 0.025,
+        "deviation": 0.0014,
+        "se": 0.0044,
+        "n_valid": 1325
+      },
+      "0.05": {
+        "coverage": 0.0672,
+        "target": 0.05,
+        "deviation": 0.0172,
+        "se": 0.0069,
+        "n_valid": 1325
+      },
+      "0.1": {
+        "coverage": 0.1208,
+        "target": 0.1,
+        "deviation": 0.0208,
+        "se": 0.009,
+        "n_valid": 1325
+      },
+      "0.25": {
+        "coverage": 0.2898,
+        "target": 0.25,
+        "deviation": 0.0398,
+        "se": 0.0125,
+        "n_valid": 1325
+      },
+      "0.5": {
+        "coverage": 0.5358,
+        "target": 0.5,
+        "deviation": 0.0358,
+        "se": 0.0137,
+        "n_valid": 1325
+      },
+      "0.75": {
+        "coverage": 0.7577,
+        "target": 0.75,
+        "deviation": 0.0077,
+        "se": 0.0118,
+        "n_valid": 1325
+      },
+      "0.9": {
+        "coverage": 0.9034,
+        "target": 0.9,
+        "deviation": 0.0034,
+        "se": 0.0081,
+        "n_valid": 1325
+      },
+      "0.95": {
+        "coverage": 0.9457,
+        "target": 0.95,
+        "deviation": -0.0043,
+        "se": 0.0062,
+        "n_valid": 1325
+      },
+      "0.975": {
+        "coverage": 0.9645,
+        "target": 0.975,
+        "deviation": -0.0105,
+        "se": 0.0051,
+        "n_valid": 1325
+      }
+    },
+    "GJR_QR": {
+      "0.025": {
+        "coverage": 0.0687,
+        "target": 0.025,
+        "deviation": 0.0437,
+        "se": 0.0069,
+        "n_valid": 1325
+      },
+      "0.05": {
+        "coverage": 0.08,
+        "target": 0.05,
+        "deviation": 0.03,
+        "se": 0.0075,
+        "n_valid": 1325
+      },
+      "0.1": {
+        "coverage": 0.1215,
+        "target": 0.1,
+        "deviation": 0.0215,
+        "se": 0.009,
+        "n_valid": 1325
+      },
+      "0.25": {
+        "coverage": 0.2498,
+        "target": 0.25,
+        "deviation": -0.0002,
+        "se": 0.0119,
+        "n_valid": 1325
+      },
+      "0.5": {
+        "coverage": 0.4883,
+        "target": 0.5,
+        "deviation": -0.0117,
+        "se": 0.0137,
+        "n_valid": 1325
+      },
+      "0.75": {
+        "coverage": 0.7298,
+        "target": 0.75,
+        "deviation": -0.0202,
+        "se": 0.0122,
+        "n_valid": 1325
+      },
+      "0.9": {
+        "coverage": 0.8898,
+        "target": 0.9,
+        "deviation": -0.0102,
+        "se": 0.0086,
+        "n_valid": 1325
+      },
+      "0.95": {
+        "coverage": 0.9457,
+        "target": 0.95,
+        "deviation": -0.0043,
+        "se": 0.0062,
+        "n_valid": 1325
+      },
+      "0.975": {
+        "coverage": 0.9691,
+        "target": 0.975,
+        "deviation": -0.0059,
+        "se": 0.0048,
+        "n_valid": 1325
+      }
+    },
+    "A4f_Normal": {
+      "0.025": {
+        "coverage": 0.0264,
+        "target": 0.025,
+        "deviation": 0.0014,
+        "se": 0.0044,
+        "n_valid": 1325
+      },
+      "0.05": {
+        "coverage": 0.0642,
+        "target": 0.05,
+        "deviation": 0.0142,
+        "se": 0.0067,
+        "n_valid": 1325
+      },
+      "0.1": {
+        "coverage": 0.12,
+        "target": 0.1,
+        "deviation": 0.02,
+        "se": 0.0089,
+        "n_valid": 1325
+      },
+      "0.25": {
+        "coverage": 0.283,
+        "target": 0.25,
+        "deviation": 0.033,
+        "se": 0.0124,
+        "n_valid": 1325
+      },
+      "0.5": {
+        "coverage": 0.5426,
+        "target": 0.5,
+        "deviation": 0.0426,
+        "se": 0.0137,
+        "n_valid": 1325
+      },
+      "0.75": {
+        "coverage": 0.7758,
+        "target": 0.75,
+        "deviation": 0.0258,
+        "se": 0.0115,
+        "n_valid": 1325
+      },
+      "0.9": {
+        "coverage": 0.9162,
+        "target": 0.9,
+        "deviation": 0.0162,
+        "se": 0.0076,
+        "n_valid": 1325
+      },
+      "0.95": {
+        "coverage": 0.9509,
+        "target": 0.95,
+        "deviation": 0.0009,
+        "se": 0.0059,
+        "n_valid": 1325
+      },
+      "0.975": {
+        "coverage": 0.9751,
+        "target": 0.975,
+        "deviation": 0.0001,
+        "se": 0.0043,
+        "n_valid": 1325
+      }
+    },
+    "A4f_QR": {
+      "0.025": {
+        "coverage": 0.0755,
+        "target": 0.025,
+        "deviation": 0.0505,
+        "se": 0.0073,
+        "n_valid": 1325
+      },
+      "0.05": {
+        "coverage": 0.0883,
+        "target": 0.05,
+        "deviation": 0.0383,
+        "se": 0.0078,
+        "n_valid": 1325
+      },
+      "0.1": {
+        "coverage": 0.1238,
+        "target": 0.1,
+        "deviation": 0.0238,
+        "se": 0.009,
+        "n_valid": 1325
+      },
+      "0.25": {
+        "coverage": 0.2211,
+        "target": 0.25,
+        "deviation": -0.0289,
+        "se": 0.0114,
+        "n_valid": 1325
+      },
+      "0.5": {
+        "coverage": 0.4672,
+        "target": 0.5,
+        "deviation": -0.0328,
+        "se": 0.0137,
+        "n_valid": 1325
+      },
+      "0.75": {
+        "coverage": 0.7079,
+        "target": 0.75,
+        "deviation": -0.0421,
+        "se": 0.0125,
+        "n_valid": 1325
+      },
+      "0.9": {
+        "coverage": 0.8589,
+        "target": 0.9,
+        "deviation": -0.0411,
+        "se": 0.0096,
+        "n_valid": 1325
+      },
+      "0.95": {
+        "coverage": 0.9343,
+        "target": 0.95,
+        "deviation": -0.0157,
+        "se": 0.0068,
+        "n_valid": 1325
+      },
+      "0.975": {
+        "coverage": 0.963,
+        "target": 0.975,
+        "deviation": -0.012,
+        "se": 0.0052,
+        "n_valid": 1325
+      }
+    },
+    "A4f_t": {
+      "0.025": {
+        "coverage": 0.0226,
+        "target": 0.025,
+        "deviation": -0.0024,
+        "se": 0.0041,
+        "n_valid": 1325
+      },
+      "0.05": {
+        "coverage": 0.0596,
+        "target": 0.05,
+        "deviation": 0.0096,
+        "se": 0.0065,
+        "n_valid": 1325
+      },
+      "0.1": {
+        "coverage": 0.1049,
+        "target": 0.1,
+        "deviation": 0.0049,
+        "se": 0.0084,
+        "n_valid": 1325
+      },
+      "0.25": {
+        "coverage": 0.2604,
+        "target": 0.25,
+        "deviation": 0.0104,
+        "se": 0.0121,
+        "n_valid": 1325
+      },
+      "0.5": {
+        "coverage": 0.4958,
+        "target": 0.5,
+        "deviation": -0.0042,
+        "se": 0.0137,
+        "n_valid": 1325
+      },
+      "0.75": {
+        "coverage": 0.7442,
+        "target": 0.75,
+        "deviation": -0.0058,
+        "se": 0.012,
+        "n_valid": 1325
+      },
+      "0.9": {
+        "coverage": 0.9087,
+        "target": 0.9,
+        "deviation": 0.0087,
+        "se": 0.0079,
+        "n_valid": 1325
+      },
+      "0.95": {
+        "coverage": 0.9562,
+        "target": 0.95,
+        "deviation": 0.0062,
+        "se": 0.0056,
+        "n_valid": 1325
+      },
+      "0.975": {
+        "coverage": 0.9804,
+        "target": 0.975,
+        "deviation": 0.0054,
+        "se": 0.0038,
+        "n_valid": 1325
+      }
+    },
+    "Direct_QR": {
+      "0.025": {
+        "coverage": 0.0672,
+        "target": 0.025,
+        "deviation": 0.0422,
+        "se": 0.0069,
+        "n_valid": 1325
+      },
+      "0.05": {
+        "coverage": 0.083,
+        "target": 0.05,
+        "deviation": 0.033,
+        "se": 0.0076,
+        "n_valid": 1325
+      },
+      "0.1": {
+        "coverage": 0.1155,
+        "target": 0.1,
+        "deviation": 0.0155,
+        "se": 0.0088,
+        "n_valid": 1325
+      },
+      "0.25": {
+        "coverage": 0.2242,
+        "target": 0.25,
+        "deviation": -0.0258,
+        "se": 0.0115,
+        "n_valid": 1325
+      },
+      "0.5": {
+        "coverage": 0.4747,
+        "target": 0.5,
+        "deviation": -0.0253,
+        "se": 0.0137,
+        "n_valid": 1325
+      },
+      "0.75": {
+        "coverage": 0.7125,
+        "target": 0.75,
+        "deviation": -0.0375,
+        "se": 0.0124,
+        "n_valid": 1325
+      },
+      "0.9": {
+        "coverage": 0.8823,
+        "target": 0.9,
+        "deviation": -0.0177,
+        "se": 0.0089,
+        "n_valid": 1325
+      },
+      "0.95": {
+        "coverage": 0.9374,
+        "target": 0.95,
+        "deviation": -0.0126,
+        "se": 0.0067,
+        "n_valid": 1325
+      },
+      "0.975": {
+        "coverage": 0.9668,
+        "target": 0.975,
+        "deviation": -0.0082,
+        "se": 0.0049,
+        "n_valid": 1325
+      }
+    }
+  },
+  "calibration_deviation_mad": {
+    "GJR_Normal": 0.0157,
+    "GJR_QR": 0.0164,
+    "A4f_Normal": 0.0171,
+    "A4f_QR": 0.0317,
+    "A4f_t": 0.0064,
+    "Direct_QR": 0.0242
+  },
+  "sharpness": {
+    "GJR_Normal": {
+      "95%": 0.00055084,
+      "90%": 0.00042084,
+      "80%": 0.00029497
+    },
+    "GJR_QR": {
+      "95%": 0.00069088,
+      "90%": 0.0004459,
+      "80%": 0.00028547
+    },
+    "A4f_Normal": {
+      "95%": 0.00060575,
+      "90%": 0.0004628,
+      "80%": 0.00032438
+    },
+    "A4f_QR": {
+      "95%": 0.00052994,
+      "90%": 0.00037368,
+      "80%": 0.00026625
+    },
+    "A4f_t": {
+      "95%": 0.00068468,
+      "90%": 0.0004806,
+      "80%": 0.00031124
+    },
+    "Direct_QR": {
+      "95%": 0.00055273,
+      "90%": 0.00039668,
+      "80%": 0.00028163
+    }
+  },
+  "winkler_scores": {
+    "GJR_Normal": {
+      "95%": 0.00109859,
+      "90%": 0.00080771,
+      "80%": 0.00057608
+    },
+    "GJR_QR": {
+      "95%": 0.00143813,
+      "90%": 0.00091973,
+      "80%": 0.00060163
+    },
+    "A4f_Normal": {
+      "95%": 0.00091288,
+      "90%": 0.00072528,
+      "80%": 0.0005462
+    },
+    "A4f_QR": {
+      "95%": 0.00125808,
+      "90%": 0.00087287,
+      "80%": 0.00061495
+    },
+    "A4f_t": {
+      "95%": 0.000938,
+      "90%": 0.00072584,
+      "80%": 0.00054532
+    },
+    "Direct_QR": {
+      "95%": 0.00105092,
+      "90%": 0.00074818,
+      "80%": 0.00060271
+    }
+  },
+  "var_es_backtest": {
+    "GJR_Normal_alpha0.01": {
+      "method": "GJR_Normal",
+      "alpha": 0.01,
+      "T": 1325,
+      "violations": 28,
+      "violation_rate": 2.11,
+      "expected_rate": 1.0,
+      "UC_p": 0.0004,
+      "CC_p": 0.6209,
+      "DQ_p": 0.0,
+      "Basel": "RED",
+      "pass_count": "1"
+    },
+    "A4f_Normal_alpha0.01": {
+      "method": "A4f_Normal",
+      "alpha": 0.01,
+      "T": 1325,
+      "violations": 22,
+      "violation_rate": 1.66,
+      "expected_rate": 1.0,
+      "UC_p": 0.0274,
+      "CC_p": 1.0,
+      "DQ_p": 0.0072,
+      "Basel": "YELLOW",
+      "pass_count": "1"
+    },
+    "A4f_t_alpha0.01": {
+      "method": "A4f_t",
+      "alpha": 0.01,
+      "T": 1325,
+      "violations": 14,
+      "violation_rate": 1.06,
+      "expected_rate": 1.0,
+      "UC_p": 0.8374,
+      "CC_p": 1.0,
+      "DQ_p": 0.6218,
+      "Basel": "GREEN",
+      "pass_count": "4"
+    },
+    "A4f_QR_med_alpha0.01": {
+      "method": "A4f_QR_med",
+      "alpha": 0.01,
+      "T": 1325,
+      "violations": 120,
+      "violation_rate": 9.06,
+      "expected_rate": 1.0,
+      "UC_p": 0.0,
+      "CC_p": 0.0124,
+      "DQ_p": 0.0,
+      "Basel": "RED",
+      "pass_count": "0"
+    },
+    "GJR_Normal_alpha0.025": {
+      "method": "GJR_Normal",
+      "alpha": 0.025,
+      "T": 1325,
+      "violations": 46,
+      "violation_rate": 3.47,
+      "expected_rate": 2.5,
+      "UC_p": 0.0322,
+      "CC_p": 0.6,
+      "DQ_p": 0.0869,
+      "Basel": "GREEN",
+      "pass_count": "3",
+      "ES_Z1": 2.6202,
+      "ES_Z1_p": 0.5
+    },
+    "A4f_Normal_alpha0.025": {
+      "method": "A4f_Normal",
+      "alpha": 0.025,
+      "T": 1325,
+      "violations": 40,
+      "violation_rate": 3.02,
+      "expected_rate": 2.5,
+      "UC_p": 0.2411,
+      "CC_p": 0.8405,
+      "DQ_p": 0.408,
+      "Basel": "GREEN",
+      "pass_count": "4",
+      "ES_Z1": 2.3339,
+      "ES_Z1_p": 0.508
+    },
+    "A4f_t_alpha0.025": {
+      "method": "A4f_t",
+      "alpha": 0.025,
+      "T": 1325,
+      "violations": 36,
+      "violation_rate": 2.72,
+      "expected_rate": 2.5,
+      "UC_p": 0.6178,
+      "CC_p": 0.9821,
+      "DQ_p": 0.5764,
+      "Basel": "GREEN",
+      "pass_count": "4",
+      "ES_Z1": 2.1196,
+      "ES_Z1_p": 0.509
+    },
+    "A4f_QR_med_alpha0.025": {
+      "method": "A4f_QR_med",
+      "alpha": 0.025,
+      "T": 1325,
+      "violations": 154,
+      "violation_rate": 11.62,
+      "expected_rate": 2.5,
+      "UC_p": 0.0,
+      "CC_p": 0.0213,
+      "DQ_p": 0.0,
+      "Basel": "RED",
+      "pass_count": "0",
+      "ES_Z1": 235114.1389,
+      "ES_Z1_p": 0.537
+    },
+    "GJR_Normal_alpha0.05": {
+      "method": "GJR_Normal",
+      "alpha": 0.05,
+      "T": 1325,
+      "violations": 77,
+      "violation_rate": 5.81,
+      "expected_rate": 5.0,
+      "UC_p": 0.186,
+      "CC_p": 0.8073,
+      "DQ_p": 0.5795,
+      "Basel": "GREEN",
+      "pass_count": "4"
+    },
+    "A4f_Normal_alpha0.05": {
+      "method": "A4f_Normal",
+      "alpha": 0.05,
+      "T": 1325,
+      "violations": 69,
+      "violation_rate": 5.21,
+      "expected_rate": 5.0,
+      "UC_p": 0.7305,
+      "CC_p": 0.7335,
+      "DQ_p": 0.9598,
+      "Basel": "GREEN",
+      "pass_count": "4"
+    },
+    "A4f_t_alpha0.05": {
+      "method": "A4f_t",
+      "alpha": 0.05,
+      "T": 1325,
+      "violations": 75,
+      "violation_rate": 5.66,
+      "expected_rate": 5.0,
+      "UC_p": 0.2796,
+      "CC_p": 0.5002,
+      "DQ_p": 0.5918,
+      "Basel": "GREEN",
+      "pass_count": "4"
+    },
+    "A4f_QR_med_alpha0.05": {
+      "method": "A4f_QR_med",
+      "alpha": 0.05,
+      "T": 1325,
+      "violations": 193,
+      "violation_rate": 14.57,
+      "expected_rate": 5.0,
+      "UC_p": 0.0,
+      "CC_p": 0.8486,
+      "DQ_p": 0.0,
+      "Basel": "RED",
+      "pass_count": "1"
+    }
+  },
+  "student_t_df_median": 8.0,
+  "elapsed_seconds": 160.4,
+  "references": [
+    "Koenker & Bassett (1978). Regression Quantiles. Econometrica 46:33-50.",
+    "Christoffersen (1998). Evaluating Interval Forecasts. Int Econ Rev 39:841-862.",
+    "Gneiting & Raftery (2007). JASA 102:359-378.",
+    "Winkler (1972). JASA 67:187-191.",
+    "Patton (2011). J Econometrics 160:246-256.",
+    "Engle, Ghysels & Sohn (2013). RES 95(3):776-797.",
+    "Kupiec (1995). J Derivatives 3:73-84.",
+    "Acerbi & Szekely (2014). Risk Magazine.",
+    "Harvey et al. (2016). t > 3.0 threshold."
+  ],
+  "conclusions": {
+    "best_calibrated_method": "A4f_t",
+    "best_calibration_mad": 0.0064,
+    "qr_improves_gjr_calibration": false,
+    "qr_improves_a4f_calibration": false,
+    "a4f_beats_gjr_qlike": "True",
+    "dm_significant_harvey": "True",
+    "best_winkler_95%": "A4f_Normal",
+    "best_winkler_95%_score": 0.00091288,
+    "best_winkler_90%": "A4f_Normal",
+    "best_winkler_90%_score": 0.00072528,
+    "best_winkler_80%": "A4f_t",
+    "best_winkler_80%_score": 0.00054532
+  }
+}
