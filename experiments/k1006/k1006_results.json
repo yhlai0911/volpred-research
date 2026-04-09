@@ -1,0 +1,303 @@
+{
+  "experiment_id": "K1006",
+  "title": "TAIFEX Overnight Gap Strategy Backtest",
+  "date": "2026-04-08",
+  "data_source": "TAIFEX tick data (TX most-active contract)",
+  "period": "2012-01-04 to 2026-04-08",
+  "n_trading_days": 3480,
+  "overnight_gap_statistics": {
+    "mean_points": 7.01,
+    "std_points": 150.51,
+    "mean_return_pct": 0.0437,
+    "std_return_pct": 0.8139,
+    "positive_pct": 55.9,
+    "negative_pct": 43.0,
+    "overnight_share_of_total_return": 83.6,
+    "overnight_variance_share": 53.6
+  },
+  "strategy_metrics": {
+    "naive_overnight_gross": {
+      "name": "Naive Overnight (gross)",
+      "n_days": 3480,
+      "n_trades": 3480,
+      "n_years": 13.8,
+      "total_points": 24393.0,
+      "total_twd": 4878600.0,
+      "annual_return_pct": 192.0,
+      "annual_vol_pct": 259.7,
+      "sharpe": 0.739,
+      "mdd_pct": -558.59,
+      "mdd_twd": -1027800.0,
+      "win_rate": 55.9
+    },
+    "naive_overnight_net": {
+      "name": "Naive Overnight (net)",
+      "n_days": 3480,
+      "n_trades": 3480,
+      "n_years": 13.8,
+      "total_points": 10473.0,
+      "total_twd": 2094600.0,
+      "annual_return_pct": 82.43,
+      "annual_vol_pct": 259.7,
+      "sharpe": 0.317,
+      "mdd_pct": -873.26,
+      "mdd_twd": -1606800.0,
+      "win_rate": 52.9
+    },
+    "vix20_overnight_gross": {
+      "name": "VIX>20 Overnight (gross)",
+      "n_days": 3480,
+      "n_trades": 879,
+      "n_years": 13.8,
+      "total_points": -3155.0,
+      "total_twd": -631000.0,
+      "annual_return_pct": -24.83,
+      "annual_vol_pct": 209.5,
+      "sharpe": -0.119,
+      "mdd_pct": -1007.72,
+      "mdd_twd": -1854200.0,
+      "win_rate": 52.0
+    },
+    "vix20_overnight_net": {
+      "name": "VIX>20 Overnight (net)",
+      "n_days": 3480,
+      "n_trades": 878,
+      "n_years": 13.8,
+      "total_points": -6675.0,
+      "total_twd": -1335000.0,
+      "annual_return_pct": -52.54,
+      "annual_vol_pct": 209.56,
+      "sharpe": -0.251,
+      "mdd_pct": -1248.91,
+      "mdd_twd": -2298000.0,
+      "win_rate": 50.9
+    },
+    "vix25_overnight_gross": {
+      "name": "VIX>25 Overnight (gross)",
+      "n_days": 3480,
+      "n_trades": 382,
+      "n_years": 13.8,
+      "total_points": -4239.0,
+      "total_twd": -847800.0,
+      "annual_return_pct": -33.37,
+      "annual_vol_pct": 164.91,
+      "sharpe": -0.202,
+      "mdd_pct": -812.61,
+      "mdd_twd": -1495200.0,
+      "win_rate": 49.7
+    },
+    "vix25_overnight_net": {
+      "name": "VIX>25 Overnight (net)",
+      "n_days": 3480,
+      "n_trades": 382,
+      "n_years": 13.8,
+      "total_points": -5771.0,
+      "total_twd": -1154200.0,
+      "annual_return_pct": -45.42,
+      "annual_vol_pct": 165.0,
+      "sharpe": -0.275,
+      "mdd_pct": -977.83,
+      "mdd_twd": -1799200.0,
+      "win_rate": 48.4
+    },
+    "gap_fade_gross": {
+      "name": "Gap-Fade Intraday (gross)",
+      "n_days": 3480,
+      "n_trades": 3480,
+      "n_years": 13.8,
+      "total_points": -12381.0,
+      "total_twd": -2476200.0,
+      "annual_return_pct": -97.45,
+      "annual_vol_pct": 193.64,
+      "sharpe": -0.503,
+      "mdd_pct": -1744.78,
+      "mdd_twd": -3210400.0,
+      "win_rate": 49.1
+    },
+    "gap_fade_net": {
+      "name": "Gap-Fade Intraday (net)",
+      "n_days": 3480,
+      "n_trades": 3480,
+      "n_years": 13.8,
+      "total_points": -26301.0,
+      "total_twd": -5260200.0,
+      "annual_return_pct": -207.02,
+      "annual_vol_pct": 193.64,
+      "sharpe": -1.069,
+      "mdd_pct": -3243.04,
+      "mdd_twd": -5967200.0,
+      "win_rate": 47.2
+    },
+    "buy_hold": {
+      "name": "Buy & Hold TX",
+      "n_days": 3480,
+      "n_trades": 3480,
+      "n_years": 13.8,
+      "total_return_pct": 396.47,
+      "annual_return_pct": 13.17,
+      "annual_vol_pct": 17.64,
+      "sharpe": 0.747,
+      "mdd_pct": -31.51,
+      "win_rate": 54.4
+    }
+  },
+  "vix_regime_analysis": {
+    "Low (<15)": {
+      "n": 1428,
+      "mean_gap_pts": 9.14,
+      "std_gap_pts": 71.9,
+      "positive_pct": 59.3
+    },
+    "Mid (15-20)": {
+      "n": 1172,
+      "mean_gap_pts": 12.37,
+      "std_gap_pts": 130.74,
+      "positive_pct": 54.9
+    },
+    "High (20-25)": {
+      "n": 497,
+      "mean_gap_pts": 2.18,
+      "std_gap_pts": 198.3,
+      "positive_pct": 53.7
+    },
+    "VHigh (>25)": {
+      "n": 383,
+      "mean_gap_pts": -11.07,
+      "std_gap_pts": 288.23,
+      "positive_pct": 49.6
+    }
+  },
+  "yearly_performance": {
+    "2012": {
+      "naive_net_pts": -669.0,
+      "vix20_net_pts": -380.0,
+      "mean_gap_pts": 1.3,
+      "vix20_trade_days": 46
+    },
+    "2013": {
+      "naive_net_pts": -714.0,
+      "vix20_net_pts": -186.0,
+      "mean_gap_pts": 1.1,
+      "vix20_trade_days": 4
+    },
+    "2014": {
+      "naive_net_pts": -748.0,
+      "vix20_net_pts": -88.0,
+      "mean_gap_pts": 0.98,
+      "vix20_trade_days": 9
+    },
+    "2015": {
+      "naive_net_pts": -798.0,
+      "vix20_net_pts": -351.0,
+      "mean_gap_pts": 0.73,
+      "vix20_trade_days": 42
+    },
+    "2016": {
+      "naive_net_pts": -452.0,
+      "vix20_net_pts": -728.0,
+      "mean_gap_pts": 2.15,
+      "vix20_trade_days": 37
+    },
+    "2017": {
+      "naive_net_pts": 332.0,
+      "vix20_net_pts": 0.0,
+      "mean_gap_pts": 5.35,
+      "vix20_trade_days": 0
+    },
+    "2018": {
+      "naive_net_pts": -1800.0,
+      "vix20_net_pts": -1609.0,
+      "mean_gap_pts": -3.29,
+      "vix20_trade_days": 56
+    },
+    "2019": {
+      "naive_net_pts": 384.0,
+      "vix20_net_pts": -613.0,
+      "mean_gap_pts": 5.59,
+      "vix20_trade_days": 16
+    },
+    "2020": {
+      "naive_net_pts": 1507.0,
+      "vix20_net_pts": 1942.0,
+      "mean_gap_pts": 10.15,
+      "vix20_trade_days": 214
+    },
+    "2021": {
+      "naive_net_pts": 2620.0,
+      "vix20_net_pts": -216.0,
+      "mean_gap_pts": 14.78,
+      "vix20_trade_days": 84
+    },
+    "2022": {
+      "naive_net_pts": -2341.0,
+      "vix20_net_pts": -2708.0,
+      "mean_gap_pts": -5.52,
+      "vix20_trade_days": 222
+    },
+    "2023": {
+      "naive_net_pts": 1831.0,
+      "vix20_net_pts": -516.0,
+      "mean_gap_pts": 11.66,
+      "vix20_trade_days": 40
+    },
+    "2024": {
+      "naive_net_pts": 2598.0,
+      "vix20_net_pts": -1287.0,
+      "mean_gap_pts": 14.74,
+      "vix20_trade_days": 22
+    },
+    "2025": {
+      "naive_net_pts": 4828.0,
+      "vix20_net_pts": -2293.0,
+      "mean_gap_pts": 23.95,
+      "vix20_trade_days": 60
+    },
+    "2026": {
+      "naive_net_pts": 3895.0,
+      "vix20_net_pts": 2358.0,
+      "mean_gap_pts": 71.16,
+      "vix20_trade_days": 28
+    }
+  },
+  "statistical_tests": {
+    "overnight_gap_vs_zero": {
+      "t_stat": 2.7474,
+      "p_value": 0.006039,
+      "significant_harvey": "False"
+    },
+    "overnight_return_vs_zero": {
+      "t_stat": 3.1691,
+      "p_value": 0.001543,
+      "significant_harvey": "True"
+    },
+    "naive_net_vs_zero": {
+      "t_stat": 1.1796,
+      "p_value": 0.238256,
+      "significant_harvey": "False"
+    },
+    "gap_intraday_correlation": {
+      "pearson_r": -0.0353,
+      "p_value": 0.037452
+    }
+  },
+  "conclusions": [
+    "Naive overnight strategy has positive Sharpe (0.317) after costs",
+    "Overnight gap is NOT statistically significant at Harvey (2016) threshold (t=2.75)",
+    "VIX-conditional (>20) does NOT improve over naive (Sharpe -0.251 vs 0.317)",
+    "Overnight gap accounts for 83.6% of total return, confirming K515 findings",
+    "Transaction costs (4 pts RT) significantly erode overnight gap profits"
+  ],
+  "limitations": [
+    "Transaction cost assumed 4 points round-trip (may vary)",
+    "Slippage at open/close not modeled (market orders may get worse fills)",
+    "No margin cost / financing cost included",
+    "VIX signal uses US previous close (timezone lag assumed correct)",
+    "Single contract analysis - no position sizing optimization",
+    "No consideration of night session (post-2017) trading opportunities"
+  ],
+  "references": [
+    "K515: 77-93% of TAIFEX alpha comes from overnight gap",
+    "Berkman et al. (2012): Overnight returns and firm-specific investor sentiment, JFE",
+    "Lou et al. (2019): A tug of war: Overnight versus intraday expected returns, JFE"
+  ]
+}
