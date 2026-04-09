@@ -1,0 +1,365 @@
+{
+  "experiment_id": "K1009",
+  "title": "TXO Put-Call Ratio Fear Indicator for Taiwan Market",
+  "date": "2026-04-09",
+  "data_source": "yfinance (0050.TW, ^VIX)",
+  "data_period": "2013-02-04 to 2026-04-07",
+  "sample_size": 3204,
+  "oos_start": "2019-01-01",
+  "methodology": "Since TAIFEX P/C ratio is not easily downloadable, we use proxy fear indicators: (1) 20-day down-day ratio, (2) RV z-score, (3) VIX z-score, (4) combined average. Test contrarian strategies (high fear = buy) and smooth weight strategies. Also test fear as volatility predictor (AR1 + fear vs AR1 baseline).",
+  "strategies": [
+    {
+      "name": "Down-Day Ratio Contrarian",
+      "n_obs": 3202,
+      "n_years": 12.7,
+      "strategy": {
+        "ann_return": 0.1249,
+        "ann_vol": 0.14,
+        "sharpe": 0.8917,
+        "mdd": -0.2698
+      },
+      "buy_hold": {
+        "ann_return": 0.1878,
+        "ann_vol": 0.1825,
+        "sharpe": 1.0293,
+        "mdd": -0.3383
+      },
+      "sharpe_diff": {
+        "mean": -0.137,
+        "se": 0.0597,
+        "t_stat": -2.297,
+        "ci_95": [
+          -0.2558,
+          -0.0233
+        ],
+        "significant_harvey": "False"
+      },
+      "weight_distribution": {
+        "pct_full": 7.1,
+        "pct_normal": 86.3,
+        "pct_reduced": 6.6
+      }
+    },
+    {
+      "name": "RV Z-Score Contrarian",
+      "n_obs": 3202,
+      "n_years": 12.7,
+      "strategy": {
+        "ann_return": 0.1393,
+        "ann_vol": 0.1424,
+        "sharpe": 0.9776,
+        "mdd": -0.2606
+      },
+      "buy_hold": {
+        "ann_return": 0.1878,
+        "ann_vol": 0.1825,
+        "sharpe": 1.0293,
+        "mdd": -0.3383
+      },
+      "sharpe_diff": {
+        "mean": -0.0512,
+        "se": 0.0537,
+        "t_stat": -0.9533,
+        "ci_95": [
+          -0.1572,
+          0.054
+        ],
+        "significant_harvey": "False"
+      },
+      "weight_distribution": {
+        "pct_full": 11.3,
+        "pct_normal": 83.6,
+        "pct_reduced": 5.1
+      }
+    },
+    {
+      "name": "VIX Contrarian (Global Fear)",
+      "n_obs": 3202,
+      "n_years": 12.7,
+      "strategy": {
+        "ann_return": 0.1355,
+        "ann_vol": 0.1452,
+        "sharpe": 0.933,
+        "mdd": -0.3124
+      },
+      "buy_hold": {
+        "ann_return": 0.1878,
+        "ann_vol": 0.1825,
+        "sharpe": 1.0293,
+        "mdd": -0.3383
+      },
+      "sharpe_diff": {
+        "mean": -0.0972,
+        "se": 0.0553,
+        "t_stat": -1.7565,
+        "ci_95": [
+          -0.2058,
+          0.0072
+        ],
+        "significant_harvey": "False"
+      },
+      "weight_distribution": {
+        "pct_full": 16.3,
+        "pct_normal": 75.1,
+        "pct_reduced": 8.6
+      }
+    },
+    {
+      "name": "Combined Fear Contrarian",
+      "n_obs": 3202,
+      "n_years": 12.7,
+      "strategy": {
+        "ann_return": 0.1324,
+        "ann_vol": 0.1463,
+        "sharpe": 0.9055,
+        "mdd": -0.2759
+      },
+      "buy_hold": {
+        "ann_return": 0.1878,
+        "ann_vol": 0.1825,
+        "sharpe": 1.0293,
+        "mdd": -0.3383
+      },
+      "sharpe_diff": {
+        "mean": -0.1228,
+        "se": 0.0572,
+        "t_stat": -2.1456,
+        "ci_95": [
+          -0.2351,
+          -0.0117
+        ],
+        "significant_harvey": "False"
+      },
+      "weight_distribution": {
+        "pct_full": 11.2,
+        "pct_normal": 82.5,
+        "pct_reduced": 6.3
+      }
+    },
+    {
+      "name": "Smooth Combined Fear",
+      "n_obs": 2951,
+      "n_years": 11.7,
+      "strategy": {
+        "ann_return": 0.1264,
+        "ann_vol": 0.1808,
+        "sharpe": 0.6992,
+        "mdd": -0.3603
+      },
+      "buy_hold": {
+        "ann_return": 0.1968,
+        "ann_vol": 0.1865,
+        "sharpe": 1.055,
+        "mdd": -0.3383
+      },
+      "sharpe_diff": {
+        "mean": -0.3573,
+        "se": 0.1064,
+        "t_stat": -3.358,
+        "ci_95": [
+          -0.5693,
+          -0.1537
+        ],
+        "significant_harvey": "True"
+      },
+      "weight_distribution": {
+        "mean": 0.7205,
+        "std": 0.2841,
+        "min": 0.1,
+        "max": 1.5
+      }
+    },
+    {
+      "name": "Smooth RV Fear",
+      "n_obs": 2951,
+      "n_years": 11.7,
+      "strategy": {
+        "ann_return": 0.1503,
+        "ann_vol": 0.1703,
+        "sharpe": 0.8825,
+        "mdd": -0.3273
+      },
+      "buy_hold": {
+        "ann_return": 0.1968,
+        "ann_vol": 0.1865,
+        "sharpe": 1.055,
+        "mdd": -0.3383
+      },
+      "sharpe_diff": {
+        "mean": -0.1733,
+        "se": 0.1095,
+        "t_stat": -1.5829,
+        "ci_95": [
+          -0.3988,
+          0.0378
+        ],
+        "significant_harvey": "False"
+      },
+      "weight_distribution": {
+        "mean": 0.72,
+        "std": 0.2808,
+        "min": 0.1,
+        "max": 1.5
+      }
+    },
+    {
+      "name": "Smooth VIX Fear",
+      "n_obs": 2951,
+      "n_years": 11.7,
+      "strategy": {
+        "ann_return": 0.1256,
+        "ann_vol": 0.1758,
+        "sharpe": 0.7147,
+        "mdd": -0.3554
+      },
+      "buy_hold": {
+        "ann_return": 0.1968,
+        "ann_vol": 0.1865,
+        "sharpe": 1.055,
+        "mdd": -0.3383
+      },
+      "sharpe_diff": {
+        "mean": -0.3413,
+        "se": 0.1061,
+        "t_stat": -3.2155,
+        "ci_95": [
+          -0.5495,
+          -0.137
+        ],
+        "significant_harvey": "True"
+      },
+      "weight_distribution": {
+        "mean": 0.706,
+        "std": 0.274,
+        "min": 0.162,
+        "max": 1.5
+      }
+    }
+  ],
+  "predictive_regressions": {
+    "down_ratio_20": {
+      "predictor": "Down-Day Ratio",
+      "slope": -0.001471,
+      "intercept": 0.00139,
+      "t_stat": -0.8215,
+      "p_value": 0.411416,
+      "r_squared": 0.000211,
+      "oos_r_squared": 9.2e-05,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "n_obs": 3203
+    },
+    "rv_zscore": {
+      "predictor": "RV Z-Score",
+      "slope": 0.000304,
+      "intercept": 0.000722,
+      "t_stat": 1.8974,
+      "p_value": 0.057868,
+      "r_squared": 0.001123,
+      "oos_r_squared": -0.000174,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "n_obs": 3203
+    },
+    "vix_zscore": {
+      "predictor": "VIX Z-Score",
+      "slope": 6e-05,
+      "intercept": 0.000747,
+      "t_stat": 0.3717,
+      "p_value": 0.710136,
+      "r_squared": 4.3e-05,
+      "oos_r_squared": -0.000709,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "n_obs": 3203
+    },
+    "combined_fear": {
+      "predictor": "Combined Fear",
+      "slope": 0.000172,
+      "intercept": 0.000744,
+      "t_stat": 0.7637,
+      "p_value": 0.445073,
+      "r_squared": 0.000182,
+      "oos_r_squared": -0.000837,
+      "significant_5pct": "False",
+      "significant_harvey": "False",
+      "n_obs": 3203
+    }
+  },
+  "volatility_prediction": {
+    "baseline_model": "AR(1) RV20",
+    "enhanced_model": "AR(1) RV20 + Combined Fear",
+    "oos_period": "2019-01-02 to 2026-03-06",
+    "n_oos": 1736,
+    "baseline_mse": 0.010988,
+    "enhanced_mse": 0.009964,
+    "baseline_qlike": -2.043087,
+    "enhanced_qlike": -1.708093,
+    "mse_improvement_pct": 9.31,
+    "dm_t_stat": 0.4208,
+    "dm_significant_harvey": false,
+    "coefficients": {
+      "rv20": -0.0691,
+      "combined_fear": 0.0217,
+      "intercept": 0.1451
+    }
+  },
+  "cross_oos": {
+    "periods": [
+      {
+        "period": "2014-01-01 to 2015-12-31",
+        "n_obs": 492,
+        "strategy_sharpe": 0.7191,
+        "bh_sharpe": 0.6757,
+        "beats_bh": "True"
+      },
+      {
+        "period": "2016-01-01 to 2017-12-31",
+        "n_obs": 485,
+        "strategy_sharpe": 1.586,
+        "bh_sharpe": 1.6025,
+        "beats_bh": "False"
+      },
+      {
+        "period": "2018-01-01 to 2019-12-31",
+        "n_obs": 484,
+        "strategy_sharpe": 0.6415,
+        "bh_sharpe": 0.8628,
+        "beats_bh": "False"
+      },
+      {
+        "period": "2020-01-01 to 2021-12-31",
+        "n_obs": 486,
+        "strategy_sharpe": 1.305,
+        "bh_sharpe": 1.2557,
+        "beats_bh": "True"
+      },
+      {
+        "period": "2022-01-01 to 2023-12-31",
+        "n_obs": 483,
+        "strategy_sharpe": -0.0846,
+        "bh_sharpe": 0.0279,
+        "beats_bh": "False"
+      }
+    ],
+    "wins": 2,
+    "total": 5,
+    "pass_3_of_5": false
+  },
+  "conclusion": "NULL RESULT: Fear proxies (down-day ratio, RV z-score, VIX, combined) do not significantly predict 0050.TW returns or improve trading strategies at Harvey (2016) |t|>3.0 threshold. Some smooth fear strategies actually significantly UNDERPERFORM Buy & Hold, suggesting contrarian fear-based timing destroys value in Taiwan's structurally bullish ETF market. While there may be weak directional effects, they are not economically or statistically significant after proper multiple testing correction.",
+  "is_null_result": true,
+  "limitations": [
+    "Proxy fear indicators used instead of actual TXO P/C ratio data",
+    "Down-day ratio and RV z-score are return-based, may have overlap with target variable",
+    "VIX is a global (not local) fear measure",
+    "Transaction costs assumed 10bps single-leg for ETF",
+    "No leverage or short-selling considered"
+  ],
+  "references": [
+    "Pan & Poteshman (2006) The Information in Option Volume for Future Stock Prices, RFS",
+    "Chang et al. (2009) P/C ratio and the future stock returns, JFE",
+    "Simon & Wiggins (2001) S&P futures returns and contrary sentiment indicators",
+    "Harvey (2016) ... and the Cross-Section of Expected Returns, RFS"
+  ],
+  "seed": 42
+}
