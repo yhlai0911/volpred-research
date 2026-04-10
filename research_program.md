@@ -580,6 +580,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **K1024: Refit insensitive ★**。QLIKE spread 0.021%，63d 最佳
 - [x] **K1025: Crypto Fear Channel ★★★**。BTC down-vol→VIX asymmetric
 - [x] **K1026: Conformal VaR ★★**。92% pass rate vs parametric 58-83%。不是 K800 artifact
+- [x] **K1027: Drawdown Recovery K735 修正** — K735 rho=-0.49 確認為 artifact（IS=0.00, OOS=-0.14）。VIX reactive not predictive。Protection overlay 不如 12/VIX
+- [x] **K1028: DCC-A4f Multivariate** — DCC-A4f 勝 DCC-GJR（DM t=2.58）但 DCC≈CCC（SPY-QQQ 相關太穩定）。A4f 共用 VIX 因子=隱式 common factor
 
 **中優先（新研究主題）：**
 - [ ] **K1016b: HAR+vix_gap 修正版**：修正 M4/M5 bug，重新評估 vix_gap 在正確 QLIKE 下的效果
