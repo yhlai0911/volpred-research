@@ -1,0 +1,271 @@
+{
+  "experiment_id": "K1016",
+  "title": "HAR + vix_gap Parsimonious Volatility Model",
+  "date": "2026-04-10",
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance",
+    "period": "2004-02-04 to 2026-04-08",
+    "total_obs": 5579,
+    "eval_obs": 3567,
+    "eval_period": "2012-01-13 to 2026-04-08"
+  },
+  "config": {
+    "har_window": 1000,
+    "garch_window": 2000,
+    "refit_every": 63,
+    "seed": 42
+  },
+  "descriptive_stats": {
+    "abs_ret": {
+      "mean": 0.007587107720175487,
+      "std": 0.009069468702976993,
+      "skew": 4.058922058970503,
+      "kurtosis": 30.297555114368336,
+      "min": 0.0,
+      "max": 0.13557705623361474,
+      "N": 5579
+    },
+    "r2": {
+      "mean": 0.0001398047223831011,
+      "std": 0.000573667917719989,
+      "skew": 15.834043663960946,
+      "kurtosis": 351.7884868677539,
+      "min": 0.0,
+      "max": 0.018381138176972733,
+      "N": 5579
+    },
+    "VIX": {
+      "mean": 19.00952859171874,
+      "std": 8.474171891474924,
+      "skew": 2.6066053903887796,
+      "kurtosis": 10.155674083144651,
+      "min": 9.140000343322754,
+      "max": 82.69000244140625,
+      "N": 5579
+    },
+    "vix_gap": {
+      "mean": 0.0022512101506787017,
+      "std": 0.003270564633525778,
+      "skew": -2.5531801610862583,
+      "kurtosis": 16.751654746450576,
+      "min": -0.028105911724769686,
+      "max": 0.01600286492000453,
+      "N": 5579
+    },
+    "vix_level": {
+      "mean": 0.1900952859171874,
+      "std": 0.08474171891474924,
+      "skew": 2.60660539038878,
+      "kurtosis": 10.155674083144653,
+      "min": 0.09140000343322754,
+      "max": 0.8269000244140625,
+      "N": 5579
+    }
+  },
+  "models": {
+    "M1": {
+      "name": "HAR(1,5,22)",
+      "type": "HAR",
+      "extra_regressors": null
+    },
+    "M2": {
+      "name": "HAR+vix_gap",
+      "type": "HAR",
+      "extra_regressors": [
+        "vix_gap"
+      ]
+    },
+    "M3": {
+      "name": "HAR+VIX_level",
+      "type": "HAR",
+      "extra_regressors": [
+        "VIX_level"
+      ]
+    },
+    "M4": {
+      "name": "A4f-VIX9D",
+      "type": "GARCH-X",
+      "extra_regressors": [
+        "VIX9D"
+      ]
+    },
+    "M5": {
+      "name": "GJR-t",
+      "type": "GARCH",
+      "extra_regressors": null
+    }
+  },
+  "evaluation": {
+    "M1: HAR(1,5,22)": {
+      "QLIKE_r2": 1.6163892180390744,
+      "Spearman_r2": 0.3233927558710535,
+      "Spearman_r2_pval": 1.260033827434889e-87,
+      "Spearman_abs_r": 0.3233927558710535,
+      "Spearman_abs_r_pval": 1.260033827434889e-87,
+      "MSE_abs_r": 4.8718916009643324e-05
+    },
+    "M2: HAR+vix_gap": {
+      "QLIKE_r2": 1.8312329153001687,
+      "Spearman_r2": 0.38414927161506557,
+      "Spearman_r2_pval": 8.694724762469207e-126,
+      "Spearman_abs_r": 0.38414927161506557,
+      "Spearman_abs_r_pval": 8.694724762469207e-126,
+      "MSE_abs_r": 4.616565423607901e-05
+    },
+    "M3: HAR+VIX_level": {
+      "QLIKE_r2": 1.6236277333842546,
+      "Spearman_r2": 0.3926881682100847,
+      "Spearman_r2_pval": 7.62340646690118e-132,
+      "Spearman_abs_r": 0.3926881682100847,
+      "Spearman_abs_r_pval": 7.62340646690118e-132,
+      "MSE_abs_r": 4.55047192649005e-05
+    },
+    "M4: A4f-VIX9D": {
+      "QLIKE_r2": 1.5372587578620611,
+      "Spearman_r2": 0.3857856677122656,
+      "Spearman_r2_pval": 6.199845545935914e-127,
+      "Spearman_abs_r": 0.3857856677122656,
+      "Spearman_abs_r_pval": 6.199845545935914e-127
+    },
+    "M5: GJR-t": {
+      "QLIKE_r2": 1.5372587578620611,
+      "Spearman_r2": 0.3857856677122656,
+      "Spearman_r2_pval": 6.199845545935914e-127,
+      "Spearman_abs_r": 0.3857856677122656,
+      "Spearman_abs_r_pval": 6.199845545935914e-127
+    }
+  },
+  "dm_tests_qlike_r2": {
+    "M2_vs_M1": {
+      "t_stat": 1.5828040171355973,
+      "p_value": 0.11346614083847406
+    },
+    "M2_vs_M3": {
+      "t_stat": 1.5607313095678856,
+      "p_value": 0.11858716062645058
+    },
+    "M3_vs_M1": {
+      "t_stat": 0.16021598891564276,
+      "p_value": 0.8727109347576907
+    },
+    "M2_vs_M4": {
+      "t_stat": 2.076830025284829,
+      "p_value": 0.03781724995484814
+    },
+    "M2_vs_M5": {
+      "t_stat": 2.076830025284829,
+      "p_value": 0.03781724995484814
+    },
+    "M1_vs_M5": {
+      "t_stat": 3.0412689502994215,
+      "p_value": 0.002355832949293868
+    }
+  },
+  "dm_tests_mse_abs": {
+    "M2_vs_M1_abs": {
+      "t_stat": -2.868911073666932,
+      "p_value": 0.004118875835624758
+    },
+    "M2_vs_M3_abs": {
+      "t_stat": 1.16424807269327,
+      "p_value": 0.24432349364469985
+    }
+  },
+  "in_sample_coefficients": {
+    "M2_HAR_vixgap": {
+      "const": {
+        "coef": -0.0026346053985353874,
+        "se": 0.00027100425942510676,
+        "t_stat": -9.721638339280318
+      },
+      "|r_1|": {
+        "coef": -0.09502722150012868,
+        "se": 0.015505788230932252,
+        "t_stat": -6.128499892095803
+      },
+      "avg|r_5|": {
+        "coef": 0.3897946300508049,
+        "se": 0.03371991663767257,
+        "t_stat": 11.559774427654382
+      },
+      "avg|r_22|": {
+        "coef": 0.8252709761251802,
+        "se": 0.04170254508290681,
+        "t_stat": 19.789463076761837
+      },
+      "vix_gap": {
+        "coef": 0.7697374459064615,
+        "se": 0.04177507425118122,
+        "t_stat": 18.425758893407515
+      }
+    },
+    "M3_HAR_VIXlevel": {
+      "const": {
+        "coef": -0.003549846073623423,
+        "se": 0.00028354717621184214,
+        "t_stat": -12.519419593765527
+      },
+      "|r_1|": {
+        "coef": -0.09987129729996495,
+        "se": 0.015375712472245446,
+        "t_stat": -6.4953931390328545
+      },
+      "avg|r_5|": {
+        "coef": 0.3193974964075224,
+        "se": 0.03412010785378476,
+        "t_stat": 9.360975580037428
+      },
+      "avg|r_22|": {
+        "coef": -0.1719950058001003,
+        "se": 0.040563048698846076,
+        "t_stat": -4.240189318042881
+      },
+      "VIX_level": {
+        "coef": 0.056684477371078394,
+        "se": 0.0026894803822285636,
+        "t_stat": 21.076367667760554
+      }
+    }
+  },
+  "rolling_vixgap_coef": {
+    "n_refits": 73,
+    "mean": 0.9184174439197622,
+    "std": 0.20544213427214628,
+    "min": 0.5613122633664409,
+    "max": 1.2738374078814203,
+    "pct_positive": 100.0
+  },
+  "rolling_dm_m2_vs_m1": {
+    "window": 504,
+    "pct_significant_negative": 3.525954946131244,
+    "mean_t_stat": -0.3576374985620274
+  },
+  "charts": [
+    "k1016_qlike_comparison.png",
+    "k1016_rolling_dm.png",
+    "k1016_vixgap_coef_evolution.png"
+  ],
+  "conclusions": [
+    "vix_gap does NOT significantly improve HAR at Harvey threshold on QLIKE r² (DM t=+1.583, positive=M2 worse, |t|<3.0)",
+    "On native |r| target, vix_gap significantly improves HAR (DM t=-2.869, p=0.004) but fails Harvey t>3.0",
+    "No significant difference between vix_gap and VIX_level on QLIKE r² (DM t=1.561)",
+    "GJR-t beats all HAR variants on QLIKE r² (1.537 vs 1.616-1.831) — confirms K782 finding",
+    "HAR+vix_gap actually WORSENS QLIKE r² vs HAR baseline (1.831 vs 1.616) despite better |r| MSE",
+    "Stark in-sample vs OOS divergence: vix_gap in-sample t=18.43 but OOS QLIKE worse — overfitting signal",
+    "In-sample vix_gap coefficient t-stat = 18.426 (highly significant), 100% positive across 73 rolling refits",
+    "M4 (A4f-VIX9D) identical to M5 (GJR-t) due to arch library GARCH-X fallback — M4 not a valid comparison",
+    "HAR baseline (M1) significantly worse than GJR on QLIKE r² (DM t=3.041, passes Harvey) — reconfirms K782",
+    "VIX_level (M3) improves Spearman ranking (0.393 vs 0.323) but not QLIKE vs HAR baseline"
+  ],
+  "references": [
+    "Corsi (2009): HAR-RV model, Journal of Financial Econometrics",
+    "Patton (2011): Volatility Models and Their Use in Prediction, J. Financial Econometrics",
+    "Bollerslev et al. (2009): Expected Stock Returns and Variance Risk Premia, RFS",
+    "Harvey (2016): Multiple testing threshold t > 3.0",
+    "K1014: HAR-PD vix_gap t=7.27 (only significant path feature)",
+    "K530: HAR-ABS DM=-15.45 vs GJR on |r| target",
+    "K782: HAR loses to GJR on r² target",
+    "K1004: A4f-VIX9D QLIKE=-8.395 (best GARCH-X on r²)"
+  ]
+}
