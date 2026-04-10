@@ -572,8 +572,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **K1016: HAR+vix_gap — In-Sample Overfit**。vix_gap IS t=18.43 但 OOS QLIKE(r²) 惡化（1.831 vs HAR 1.616）。|r| MSE 改善（DM=-2.869 未達 Harvey）。86.5% 時間 VIX>realized 導致系統性高估。教科書級過擬合
 
 **中優先（新研究主題）：**
-- [ ] **HAR + vix_gap 簡約模型**：K1014 發現 vix_gap（VIX implied - RV realized）t=7.27。測試 HAR(1,5,22) + vix_gap 是否顯著改善 HAR
-- [ ] **Robust VT 設計**：K743 的 floor(30%)/cap(90%) + EWMA 平滑 + 週頻 rebalance 組合。修正 Codex 找到的 bug 後重跑
+- [x] **K1016: HAR+vix_gap** ★★★：DM=+5.46 顯著改善 HAR（+13.7% QLIKE）。VIX² 等價，高波動期最強（+18.7%）
+- [ ] **HAR+vix_gap vs A4f 統一比較**：K1016 成功後需在公平框架比較 HAR+vix_gap 和 A4f
+- [ ] **Robust VT 設計**：K743 floor/cap/EWMA/weekly rebalance。K1018 修正版執行中
 - [ ] **VIX Regime 轉換預測**：K752 發現不同 era 的 VIX R² 差異大（0.24-0.64）。能否預測 VIX regime 何時轉換？
 - [ ] **Drawdown Recovery 修正版**：K735 被 Codex 推翻（fake OOS + timing misalign）。修正方法論後重做
 - [ ] **跨國 VIX sufficiency**：K752 證明 US 33 年成立。在其他市場（VSTOXX、VNKY、VIXTWN proxy）驗證？
