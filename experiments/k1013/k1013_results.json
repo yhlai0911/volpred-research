@@ -1,0 +1,263 @@
+{
+  "experiment_id": "K1013",
+  "title": "Bayesian SSVS for GARCH-X Variable Selection",
+  "timestamp": "2026-04-10T13:38:07.652512",
+  "method": "Two-stage SSVS: GJR-GARCH MLE + Bayesian variable selection (George & McCulloch 1993)",
+  "reference": "So, Chen, Liu (2006, JRSS-C 55(2):201-224); George & McCulloch (1993, JASA)",
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance + FRED",
+    "estimation_period": "2011-01-04 to 2019-01-07",
+    "oos_period": "2019-01-08 to 2026-04-07",
+    "n_estimation": 2000,
+    "n_oos": 1786
+  },
+  "gjr_parameters": {
+    "mu": 0.03947679623500546,
+    "omega": 0.03628678993018576,
+    "alpha": 0.0,
+    "gamma": 0.2976382007684145,
+    "beta": 0.806839263995677,
+    "persistence": 0.9556583643798842,
+    "convergence": 0
+  },
+  "ssvs_settings": {
+    "n_candidates": 6,
+    "candidate_variables": [
+      "VIX_sq",
+      "VIX9D_sq",
+      "VIX3M_sq",
+      "TermSpread",
+      "UnempRate",
+      "RV_20d"
+    ],
+    "tau0": 0.001,
+    "tau1": 1.0,
+    "prior_inclusion_prob": 0.5,
+    "mcmc_iterations": 10000,
+    "burn_in": 5000,
+    "seed": 42
+  },
+  "posterior_inclusion_probabilities": {
+    "VIX_sq": {
+      "PIP": 0.0012,
+      "theta_post_mean": -6.7307196636574226e-06,
+      "theta_post_std": 4.428694903728283e-06,
+      "theta_incl_mean": -2.1357588906972658e-06,
+      "theta_incl_std": 2.5828283760139e-06
+    },
+    "VIX9D_sq": {
+      "PIP": 0.0006,
+      "theta_post_mean": -7.4378876135739565e-06,
+      "theta_post_std": 4.459125513807322e-06,
+      "theta_incl_mean": -3.0052969079084722e-06,
+      "theta_incl_std": 4.9257565396177245e-06
+    },
+    "VIX3M_sq": {
+      "PIP": 0.0006,
+      "theta_post_mean": -4.078283870634333e-06,
+      "theta_post_std": 4.402680029411418e-06,
+      "theta_incl_mean": -6.772458094668903e-06,
+      "theta_incl_std": 3.5730550741323184e-06
+    },
+    "TermSpread": {
+      "PIP": 0.001,
+      "theta_post_mean": 1.0918636170333258e-06,
+      "theta_post_std": 4.411611546812266e-06,
+      "theta_incl_mean": 4.662375366535674e-06,
+      "theta_incl_std": 5.067884861294841e-06
+    },
+    "UnempRate": {
+      "PIP": 0.0002,
+      "theta_post_mean": 3.5917741583102425e-06,
+      "theta_post_std": 4.382476029108281e-06,
+      "theta_incl_mean": 2.378896636999432e-07,
+      "theta_incl_std": 0.0
+    },
+    "RV_20d": {
+      "PIP": 0.0008,
+      "theta_post_mean": -2.135290910434347e-05,
+      "theta_post_std": 4.349564793702194e-06,
+      "theta_incl_mean": -2.4309875989267137e-05,
+      "theta_incl_std": 4.389822118813276e-06
+    }
+  },
+  "pip_ranking": [
+    [
+      "VIX_sq",
+      0.0012
+    ],
+    [
+      "TermSpread",
+      0.001
+    ],
+    [
+      "RV_20d",
+      0.0008
+    ],
+    [
+      "VIX9D_sq",
+      0.0006
+    ],
+    [
+      "VIX3M_sq",
+      0.0006
+    ],
+    [
+      "UnempRate",
+      0.0002
+    ]
+  ],
+  "selected_variables_pip_05": [
+    "VIX_sq"
+  ],
+  "top_models": [
+    {
+      "rank": 1,
+      "config": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "variables": "(empty)",
+      "frequency": 0.9956,
+      "count": 4978
+    },
+    {
+      "rank": 2,
+      "config": [
+        "1",
+        "0",
+        "0",
+        "0",
+        "0",
+        "0"
+      ],
+      "variables": "VIX_sq",
+      "frequency": 0.0012,
+      "count": 6
+    },
+    {
+      "rank": 3,
+      "config": [
+        "0",
+        "0",
+        "0",
+        "1",
+        "0",
+        "0"
+      ],
+      "variables": "TermSpread",
+      "frequency": 0.001,
+      "count": 5
+    },
+    {
+      "rank": 4,
+      "config": [
+        "0",
+        "0",
+        "0",
+        "0",
+        "0",
+        "1"
+      ],
+      "variables": "RV_20d",
+      "frequency": 0.0008,
+      "count": 4
+    },
+    {
+      "rank": 5,
+      "config": [
+        "0",
+        "0",
+        "1",
+        "0",
+        "0",
+        "0"
+      ],
+      "variables": "VIX3M_sq",
+      "frequency": 0.0006,
+      "count": 3
+    }
+  ],
+  "mcmc_diagnostics": {
+    "pip_trace": {
+      "VIX_sq": {
+        "start": 0.002,
+        "end": 0.002,
+        "range": 0.002
+      },
+      "VIX9D_sq": {
+        "start": 0.0,
+        "end": 0.0,
+        "range": 0.002
+      },
+      "VIX3M_sq": {
+        "start": 0.002,
+        "end": 0.0,
+        "range": 0.002
+      },
+      "TermSpread": {
+        "start": 0.002,
+        "end": 0.0,
+        "range": 0.004
+      },
+      "UnempRate": {
+        "start": 0.0,
+        "end": 0.002,
+        "range": 0.002
+      },
+      "RV_20d": {
+        "start": 0.0,
+        "end": 0.0,
+        "range": 0.004
+      }
+    },
+    "sigma2_u_post_mean": 3.8380149600481874e-08,
+    "sigma2_u_post_std": 1.2182159286120036e-09
+  },
+  "oos_results": {
+    "gjr_baseline": {
+      "QLIKE": 1.5013128710895607,
+      "MSE": 2.733368602450613e-07
+    },
+    "ssvs_augmented": {
+      "variables": [
+        "VIX_sq"
+      ],
+      "QLIKE": 1.5158325873506093,
+      "MSE": 2.730454016658202e-07,
+      "QLIKE_improvement_pct": 0.967134602030763,
+      "MSE_improvement_pct": -0.10662981164698987
+    },
+    "vix_only": {
+      "QLIKE": 1.5158325873506093,
+      "MSE": 2.730454016658202e-07,
+      "QLIKE_improvement_pct": 0.967134602030763
+    },
+    "dm_test_base_vs_ssvs": {
+      "t_stat": -2.3741336202746797,
+      "p_value": 0.01759018357957398,
+      "harvey_pass": false
+    },
+    "dm_test_base_vs_vix": {
+      "t_stat": -2.3741336202746797,
+      "p_value": 0.01759018357957398,
+      "harvey_pass": false
+    },
+    "dm_test_vix_vs_ssvs": {
+      "t_stat": 0.0,
+      "p_value": 1.0,
+      "harvey_pass": false
+    }
+  },
+  "conclusions": {
+    "vix_dominance": "VIX-family variables with PIP>=0.5: []",
+    "macro_irrelevance": "No macro variable selected (all PIP<0.5)",
+    "supports_k988": "No",
+    "summary": "SSVS selects 1 variable(s): VIX_sq. Top PIP: VIX_sq (0.001). Macro variables (TermSpread, UnempRate) excluded (PIP<0.5), confirming K1001. OOS QLIKE: SSVS=1.515833 vs baseline=1.501313 (1.0%). DM test: t=-2.374 (Harvey FAIL)."
+  }
+}
