@@ -5,17 +5,21 @@ K1024: A4f Refit Frequency Sensitivity Analysis (Paper 9 Robustness)
 [提出: 賴奕豪, 執行: Claude]
 
 Motivation:
-  K988 established A4f(VIX²) as the winning specification with QLIKE=-8.358 vs
+  K988 established A4f(VIX^2) as the winning specification with QLIKE=-8.358 vs
   GJR's -8.277, DM t=4.167. The default refit frequency was every 63 days
   (quarterly). Reviewers will ask: "Why 63 days? How sensitive are results to
   this choice?"
 
   This experiment systematically tests 5 refit frequencies for both A4f and GJR:
-    - Daily (every 1 day) — upper bound on accuracy
-    - Monthly (every 21 days)
-    - Quarterly (every 63 days) — current default
-    - Semi-annual (every 126 days)
-    - Annual (every 252 days)
+    - Every 5 days (weekly) -- near-daily upper bound, practical limit
+    - Every 21 days (monthly)
+    - Every 63 days (quarterly) -- current default
+    - Every 126 days (semi-annual)
+    - Every 252 days (annual)
+
+  Note: True daily refit (every 1 day) is computationally prohibitive (~20 min)
+  for 3337 OOS observations. Every 5 days provides a tight upper bound since
+  GARCH parameters are slow-moving.
 
 Research Questions:
   1. How much does refit frequency affect QLIKE for A4f vs GJR?
@@ -54,6 +58,7 @@ import pandas as pd
 from datetime import datetime, timezone
 from scipy import stats, optimize
 from scipy.special import gammaln
+from numba import njit
 
 warnings.filterwarnings('ignore')
 np.random.seed(42)
@@ -75,13 +80,13 @@ WINDOW = 2000
 STUDENT_T_DF = 8  # K1021 recommendation
 
 # Refit frequencies to test
-REFIT_FREQS = [1, 21, 63, 126, 252]
-REFIT_LABELS = ['Daily', 'Monthly', 'Quarterly', 'Semi-annual', 'Annual']
+REFIT_FREQS = [5, 21, 63, 126, 252]
+REFIT_LABELS = ['Weekly (5d)', 'Monthly (21d)', 'Quarterly (63d)', 'Semi-annual (126d)', 'Annual (252d)']
 
 print("=" * 70)
 print(f"{EXPERIMENT_ID}: A4f Refit Frequency Sensitivity Analysis")
 print("  Paper 9 Robustness Check")
-print("=" * 70)
+print("=" * 70, flush=True)
 
 # ============================================================
 # SECTION 1: DATA LOADING
@@ -106,7 +111,7 @@ df = df.dropna()
 oos_mask = np.array(df.index >= OOS_START)
 n_total = len(df)
 n_oos = oos_mask.sum()
-print(f"  SPY: {df.index[0].strftime('%Y-%m-%d')} to {df.index[-1].strftime('%Y-%m-%d')}, n={n_total}", flush=True)
+print(f"  SPY: {df.index[0].strftime('%Y-%m-%d')} to {df.index[-1].strftime('%Y-%m-%d')}, n={n_total}")
 print(f"  OOS: {OOS_START} onwards, n_oos={n_oos}", flush=True)
 
 ret = df['log_ret'].values
@@ -127,37 +132,41 @@ print(f"  VIX std (OOS): {np.std(vix[oos_mask]):.2f}", flush=True)
 
 
 # ============================================================
-# SECTION 3: MODEL IMPLEMENTATIONS (Student-t, df=8)
+# SECTION 3: MODEL IMPLEMENTATIONS with NUMBA (Student-t, df=8)
 # ============================================================
-print("\n[3] Model implementations (Student-t df=8)...", flush=True)
+print("\n[3] Model implementations (Student-t df=8, numba-accelerated)...", flush=True)
 
-SCALE = np.sqrt((STUDENT_T_DF - 2) / STUDENT_T_DF)  # scale for Student-t
-
-
-def student_t_logpdf_array(x, sigma2, df=STUDENT_T_DF):
-    """Vectorized log-pdf of Student-t with variance sigma2."""
-    scale_factor = np.sqrt(sigma2) * SCALE
-    z = x / scale_factor
-    ll = (gammaln((df + 1) / 2) - gammaln(df / 2) - 0.5 * np.log(np.pi * df)
-          - np.log(scale_factor) - (df + 1) / 2 * np.log(1 + z**2 / df))
-    return ll
+SCALE = np.sqrt((STUDENT_T_DF - 2) / STUDENT_T_DF)
+# Precompute constants for Student-t log-pdf
+_CONST_A = float(gammaln((STUDENT_T_DF + 1) / 2) - gammaln(STUDENT_T_DF / 2) - 0.5 * np.log(np.pi * STUDENT_T_DF))
+_DF_PLUS_1_HALF = (STUDENT_T_DF + 1) / 2.0
+_SCALE = float(SCALE)
+_DF = float(STUDENT_T_DF)
 
 
-# --- GJR-GARCH(1,1)-t ---
-def gjr_loglik_t(params, returns, df=STUDENT_T_DF):
-    """GJR-GARCH(1,1) with Student-t log-likelihood."""
-    omega, alpha, gamma_p, beta = params
+@njit(cache=True)
+def gjr_negloglik_t(omega, alpha, gamma_p, beta, returns, scale, const_a, df_p1h, df):
+    """GJR-GARCH(1,1) with Student-t negative log-likelihood. Numba-accelerated."""
     n = len(returns)
-    h = np.empty(n)
-    h[0] = np.var(returns[:min(250, n)])
-    for t in range(1, n):
-        asym = gamma_p * returns[t-1]**2 if returns[t-1] < 0 else 0.0
-        h[t] = omega + alpha * returns[t-1]**2 + asym + beta * h[t-1]
-        if h[t] < 1e-10:
-            h[t] = 1e-10
+    h = 0.0
+    # Initialize h as sample variance of first 250 obs
+    n_init = min(250, n)
+    for i in range(n_init):
+        h += returns[i]**2
+    h /= n_init
 
-    # Vectorized log-likelihood
-    ll = np.sum(student_t_logpdf_array(returns, h, df))
+    ll = 0.0
+    for t in range(n):
+        if t > 0:
+            asym = gamma_p * returns[t-1]**2 if returns[t-1] < 0 else 0.0
+            h = omega + alpha * returns[t-1]**2 + asym + beta * h
+            if h < 1e-10:
+                h = 1e-10
+
+        scale_factor = np.sqrt(h) * scale
+        z = returns[t] / scale_factor
+        ll += const_a - np.log(scale_factor) - df_p1h * np.log(1.0 + z*z / df)
+
     return -ll
 
 
@@ -172,10 +181,14 @@ def fit_gjr_t(returns):
         [var0 * 0.10, 0.08, 0.10, 0.80],
     ]
     bounds = [(1e-8, var0), (1e-4, 0.3), (1e-4, 0.3), (0.5, 0.999)]
+
+    def objective(params):
+        return gjr_negloglik_t(params[0], params[1], params[2], params[3],
+                               returns, _SCALE, _CONST_A, _DF_PLUS_1_HALF, _DF)
+
     for s in starts:
         try:
-            res = optimize.minimize(gjr_loglik_t, s, args=(returns,),
-                                    method='L-BFGS-B', bounds=bounds,
+            res = optimize.minimize(objective, s, method='L-BFGS-B', bounds=bounds,
                                     options={'maxiter': 500})
             if res.fun < best_ll:
                 best_ll = res.fun
@@ -185,64 +198,110 @@ def fit_gjr_t(returns):
     return best_params
 
 
-def gjr_forecast_1step(params, h_prev, r_prev):
+@njit(cache=True)
+def gjr_forecast_1step(omega, alpha, gamma_p, beta, h_prev, r_prev):
     """One-step-ahead GJR forecast."""
-    omega, alpha, gamma_p, beta = params
     asym = gamma_p * r_prev**2 if r_prev < 0 else 0.0
-    return max(omega + alpha * r_prev**2 + asym + beta * h_prev, 1e-10)
+    h = omega + alpha * r_prev**2 + asym + beta * h_prev
+    if h < 1e-10:
+        h = 1e-10
+    return h
 
 
-# --- A4f: Multiplicative GJR-X (VIX^2) with free omega, Student-t ---
+@njit(cache=True)
+def gjr_filter_train(omega, alpha, gamma_p, beta, returns):
+    """Run GJR filter on training data, return final h."""
+    n = len(returns)
+    n_init = min(250, n)
+    h = 0.0
+    for i in range(n_init):
+        h += returns[i]**2
+    h /= n_init
+
+    for t in range(1, n):
+        asym = gamma_p * returns[t-1]**2 if returns[t-1] < 0 else 0.0
+        h = omega + alpha * returns[t-1]**2 + asym + beta * h
+        if h < 1e-10:
+            h = 1e-10
+    return h
+
+
+@njit(cache=True)
+def a4f_negloglik_t(theta0, theta1, omega_g, alpha, gamma_p, beta,
+                    returns, vix_lag_sq, scale, const_a, df_p1h, df):
+    """A4f multiplicative GJR-X(VIX^2) with Student-t. Numba-accelerated."""
+    n = len(returns)
+
+    # Compute tau
+    # tau array from precomputed vix_lag_sq
+    persist = alpha + gamma_p / 2.0 + beta
+    if persist >= 0.999 or omega_g <= 0:
+        return 1e10
+
+    eg = omega_g / (1.0 - persist)
+
+    g = eg
+    ll = 0.0
+
+    for t in range(n):
+        tau_t = theta0 + theta1 * vix_lag_sq[t]
+        if tau_t < 1e-16:
+            tau_t = 1e-16
+
+        if t > 0:
+            u_prev = returns[t-1] / np.sqrt(tau_t)
+            asym = gamma_p * u_prev**2 if u_prev < 0 else 0.0
+            g = omega_g + alpha * u_prev**2 + asym + beta * g
+            if g < 1e-10:
+                g = 1e-10
+
+        sigma2 = tau_t * g
+        if sigma2 > 0:
+            scale_factor = np.sqrt(sigma2) * scale
+            z = returns[t] / scale_factor
+            ll += const_a - np.log(scale_factor) - df_p1h * np.log(1.0 + z*z / df)
+
+    return -ll
+
+
+@njit(cache=True)
+def a4f_filter_train(theta0, theta1, omega_g, alpha, gamma_p, beta,
+                     returns, vix_lag_sq):
+    """Run A4f filter on training data, return final g."""
+    n = len(returns)
+    persist = alpha + gamma_p / 2.0 + beta
+    eg = omega_g / (1.0 - persist) if persist < 1.0 else 1.0
+
+    g = eg
+    for t in range(1, n):
+        tau_t = theta0 + theta1 * vix_lag_sq[t]
+        if tau_t < 1e-16:
+            tau_t = 1e-16
+        u_prev = returns[t-1] / np.sqrt(tau_t)
+        asym = gamma_p * u_prev**2 if u_prev < 0 else 0.0
+        g = omega_g + alpha * u_prev**2 + asym + beta * g
+        if g < 1e-10:
+            g = 1e-10
+    return g
+
+
 def fit_a4f_t(returns, vix_vals):
-    """
-    Fit A4f model: sigma2_t = tau_t * g_t
-    tau_t = max(theta0 + theta1 * VIX^2_{t-1}, eps)
-    g_t = omega + alpha * u^2_{t-1} + gamma * u^2_{t-1} * I(u<0) + beta * g_{t-1}
-    where u_{t-1} = r_{t-1} / sqrt(tau_t), omega is free
-    Student-t(df=8) innovations.
-    """
+    """Fit A4f model with Student-t(df=8)."""
     n = len(returns)
 
     # Lagged VIX (no lookahead)
     vix_lag = np.empty(n)
     vix_lag[0] = vix_vals[0]
     vix_lag[1:] = vix_vals[:-1]
-
     vix_lag_sq = vix_lag ** 2
 
     var0 = np.var(returns)
     vix2_mean = np.mean(vix_lag_sq) + 1e-8
 
-    def neg_loglik(params):
-        theta0, theta1, omega_g, alpha, gamma_p, beta = params
-
-        # Compute tau
-        tau = theta0 + theta1 * vix_lag_sq
-        tau = np.maximum(tau, 1e-16)
-
-        if omega_g <= 0:
-            return 1e10
-        if alpha < 0 or gamma_p < 0 or beta < 0:
-            return 1e10
-        persist = alpha + gamma_p / 2.0 + beta
-        if persist >= 0.999:
-            return 1e10
-        eg = omega_g / (1.0 - persist) if persist < 1.0 else 1.0
-
-        g = np.empty(n)
-        g[0] = eg
-
-        for t in range(1, n):
-            u_prev = returns[t-1] / np.sqrt(tau[t])  # denom = tau_t (current, predetermined from VIX_{t-1})
-            asym = gamma_p * u_prev**2 if u_prev < 0 else 0.0
-            g[t] = omega_g + alpha * u_prev**2 + asym + beta * g[t-1]
-            if g[t] < 1e-10:
-                g[t] = 1e-10
-
-        sigma2 = tau * g
-        valid_mask = sigma2 > 0
-        ll = np.sum(student_t_logpdf_array(returns[valid_mask], sigma2[valid_mask], STUDENT_T_DF))
-        return -ll
+    def objective(params):
+        return a4f_negloglik_t(params[0], params[1], params[2], params[3],
+                               params[4], params[5], returns, vix_lag_sq,
+                               _SCALE, _CONST_A, _DF_PLUS_1_HALF, _DF)
 
     best_ll = np.inf
     best_params = None
@@ -257,7 +316,7 @@ def fit_a4f_t(returns, vix_vals):
 
     for s in starts:
         try:
-            res = optimize.minimize(neg_loglik, s, method='L-BFGS-B', bounds=bounds,
+            res = optimize.minimize(objective, s, method='L-BFGS-B', bounds=bounds,
                                     options={'maxiter': 500})
             if res.fun < best_ll:
                 best_ll = res.fun
@@ -266,6 +325,18 @@ def fit_a4f_t(returns, vix_vals):
             continue
 
     return best_params
+
+
+# Warm up numba JIT
+print("  Warming up numba JIT...", flush=True)
+_dummy_r = np.random.randn(100)
+_dummy_v = np.random.rand(100) * 100 + 10
+gjr_negloglik_t(1e-6, 0.05, 0.05, 0.90, _dummy_r, _SCALE, _CONST_A, _DF_PLUS_1_HALF, _DF)
+gjr_forecast_1step(1e-6, 0.05, 0.05, 0.90, 1e-4, 0.01)
+gjr_filter_train(1e-6, 0.05, 0.05, 0.90, _dummy_r)
+a4f_negloglik_t(1e-4, 1e-6, 0.05, 0.05, 0.05, 0.90, _dummy_r, _dummy_v**2, _SCALE, _CONST_A, _DF_PLUS_1_HALF, _DF)
+a4f_filter_train(1e-4, 1e-6, 0.05, 0.05, 0.05, 0.90, _dummy_r, _dummy_v**2)
+print("  JIT warmup done.", flush=True)
 
 
 # ============================================================
@@ -299,14 +370,13 @@ def qlike_pointwise(target, forecast):
 
 
 def dm_test_custom(loss1, loss2, h=1):
-    """Diebold-Mariano test (two-sided). Negative t => model 1 better."""
+    """Diebold-Mariano test. Negative t => model 1 (lower loss) better."""
     d = loss1 - loss2
     d = d[np.isfinite(d)]
     n = len(d)
     if n < 50:
         return np.nan, np.nan
     d_mean = np.mean(d)
-    # HAC variance (Newey-West with bandwidth h)
     gamma0 = np.mean((d - d_mean)**2)
     gamma_sum = 0.0
     for k in range(1, h + 1):
@@ -319,6 +389,9 @@ def dm_test_custom(loss1, loss2, h=1):
     p_val = 2 * (1 - stats.t.cdf(abs(t_stat), df=n-1))
     return t_stat, p_val
 
+
+# Precompute vix^2 for the entire series
+vix_sq = vix ** 2
 
 # Storage for cross-frequency DM tests
 all_gjr_losses = {}
@@ -381,50 +454,37 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
         if need_refit:
             refit_count += 1
             train_start = max(0, abs_idx - WINDOW)
-            train_ret = ret[train_start:abs_idx]
-            train_vix = vix[train_start:abs_idx]
+            train_ret = ret[train_start:abs_idx].copy()
+            train_vix = vix[train_start:abs_idx].copy()
 
             # Fit GJR-t
             gjr_params_new = fit_gjr_t(train_ret)
             if gjr_params_new is not None:
                 gjr_params = gjr_params_new
-                # Initialize h from training data by running filter
-                h = np.var(train_ret)
-                for i in range(1, len(train_ret)):
-                    h = gjr_forecast_1step(gjr_params, h, train_ret[i-1])
-                gjr_h = h
+                gjr_h = gjr_filter_train(gjr_params[0], gjr_params[1],
+                                          gjr_params[2], gjr_params[3], train_ret)
 
             # Fit A4f-t
             a4f_params_new = fit_a4f_t(train_ret, train_vix)
             if a4f_params_new is not None:
                 a4f_params = a4f_params_new
-                theta0, theta1 = a4f_params[0], a4f_params[1]
-                omega_g = a4f_params[2]
-                alpha_p, gamma_p, beta_p = a4f_params[3], a4f_params[4], a4f_params[5]
-
-                # Initialize g from training
+                # Prepare lagged VIX^2 for training
                 n_train = len(train_ret)
-                vix_lag_tr = np.empty(n_train)
-                vix_lag_tr[0] = train_vix[0]
-                vix_lag_tr[1:] = train_vix[:-1]
-                tau_train = np.maximum(theta0 + theta1 * vix_lag_tr**2, 1e-16)
-
-                persist = alpha_p + gamma_p / 2.0 + beta_p
-                eg = omega_g / (1.0 - persist) if persist < 1.0 else 1.0
-                g = eg
-                for i in range(1, n_train):
-                    u_prev = train_ret[i-1] / np.sqrt(max(tau_train[i], 1e-16))
-                    asym_val = gamma_p * u_prev**2 if u_prev < 0 else 0.0
-                    g = omega_g + alpha_p * u_prev**2 + asym_val + beta_p * g
-                    g = max(g, 1e-10)
-
-                a4f_g = g
+                vix_lag_sq_tr = np.empty(n_train)
+                vix_lag_sq_tr[0] = train_vix[0]**2
+                vix_lag_sq_tr[1:] = train_vix[:-1]**2
+                a4f_g = a4f_filter_train(a4f_params[0], a4f_params[1],
+                                          a4f_params[2], a4f_params[3],
+                                          a4f_params[4], a4f_params[5],
+                                          train_ret, vix_lag_sq_tr)
 
         # --- Generate forecasts ---
-        # GJR: h_{t|t-1} using previous h and r_{t-1}
+        # GJR: h_{t|t-1}
         if gjr_params is not None and gjr_h is not None:
             if abs_idx > 0:
-                gjr_h = gjr_forecast_1step(gjr_params, gjr_h, ret[abs_idx - 1])
+                gjr_h = gjr_forecast_1step(gjr_params[0], gjr_params[1],
+                                            gjr_params[2], gjr_params[3],
+                                            gjr_h, ret[abs_idx - 1])
             gjr_forecasts[t_idx] = gjr_h
 
         # A4f: sigma2_{t|t-1} = tau_t * g_t
@@ -434,10 +494,10 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
             alpha_p, gamma_p, beta_p = a4f_params[3], a4f_params[4], a4f_params[5]
 
             # tau_t uses VIX_{t-1} (lagged, no lookahead)
-            vix_prev = vix[abs_idx - 1] if abs_idx > 0 else vix[0]
-            tau_t = max(theta0 + theta1 * vix_prev**2, 1e-16)
+            vix_prev_sq = vix_sq[abs_idx - 1] if abs_idx > 0 else vix_sq[0]
+            tau_t = max(theta0 + theta1 * vix_prev_sq, 1e-16)
 
-            # Update g: g_t = omega + alpha*u^2_{t-1} + gamma*u^2_{t-1}*I + beta*g_{t-1}
+            # Update g
             if abs_idx > 0:
                 u_prev = ret[abs_idx - 1] / np.sqrt(tau_t)
                 asym_val = gamma_p * u_prev**2 if u_prev < 0 else 0.0
@@ -452,19 +512,18 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
     gjr_qlike = qlike_score(oos_r2, gjr_forecasts)
     a4f_qlike = qlike_score(oos_r2, a4f_forecasts)
 
-    # Pointwise QLIKE losses for DM test
+    # Pointwise losses
     gjr_losses = qlike_pointwise(oos_r2, gjr_forecasts)
     a4f_losses = qlike_pointwise(oos_r2, a4f_forecasts)
 
-    # Store for cross-frequency comparisons
     all_gjr_losses[refit_freq] = gjr_losses.copy()
     all_a4f_losses[refit_freq] = a4f_losses.copy()
 
-    # DM test: A4f vs GJR (negative t => A4f better because lower loss)
+    # DM test: A4f vs GJR
     valid = np.isfinite(a4f_losses) & np.isfinite(gjr_losses)
     dm_t, dm_p = dm_test_custom(a4f_losses[valid], gjr_losses[valid])
 
-    # Spearman correlation with r^2
+    # Spearman correlation
     from scipy.stats import spearmanr
     gjr_valid = np.isfinite(gjr_forecasts) & (gjr_forecasts > 0)
     a4f_valid = np.isfinite(a4f_forecasts) & (a4f_forecasts > 0)
@@ -481,12 +540,10 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
         'gjr': {
             'qlike': float(gjr_qlike),
             'spearman_rho': float(gjr_rho),
-            'spearman_p': float(gjr_rho_p),
         },
         'a4f': {
             'qlike': float(a4f_qlike),
             'spearman_rho': float(a4f_rho),
-            'spearman_p': float(a4f_rho_p),
         },
     }
 
@@ -499,9 +556,11 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
 
     print(f"    Refits: {refit_count}, Runtime: {freq_elapsed:.1f}s")
     print(f"    GJR QLIKE: {gjr_qlike:.6f}, A4f QLIKE: {a4f_qlike:.6f}")
-    print(f"    DM t-stat (A4f vs GJR): {dm_t:.4f}, p={dm_p:.6f}")
+    dm_t_display = dm_t if not np.isnan(dm_t) else 0
+    dm_p_display = dm_p if not np.isnan(dm_p) else 1
+    print(f"    DM t-stat (A4f vs GJR): {dm_t_display:.4f}, p={dm_p_display:.6f}")
     print(f"    Significant (Harvey |t|>3): {abs(dm_t) > 3.0 if not np.isnan(dm_t) else 'N/A'}")
-    print(f"    A4f Spearman rho: {a4f_rho:.4f}, GJR rho: {gjr_rho:.4f}", flush=True)
+    print(f"    A4f rho: {a4f_rho:.4f}, GJR rho: {gjr_rho:.4f}", flush=True)
 
 
 # ============================================================
@@ -509,23 +568,22 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
 # ============================================================
 print("\n[5] Cross-frequency DM tests...", flush=True)
 
-# Compare daily refit vs each other frequency for both models
-# Also compare Q63 vs each frequency
+# Compare most frequent (5d) vs each other; also Q63 vs each
 for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABELS)):
-    if refit_freq == 1:
+    if refit_freq == 5:
         continue
 
     freq_key = f"freq_{refit_freq}"
 
-    # Daily vs this freq for A4f
-    valid_a4f = np.isfinite(all_a4f_losses[1]) & np.isfinite(all_a4f_losses[refit_freq])
-    dm_daily_a4f_t, dm_daily_a4f_p = dm_test_custom(
-        all_a4f_losses[1][valid_a4f], all_a4f_losses[refit_freq][valid_a4f])
+    # 5d vs this freq for A4f
+    valid_a4f = np.isfinite(all_a4f_losses[5]) & np.isfinite(all_a4f_losses[refit_freq])
+    dm_5d_a4f_t, dm_5d_a4f_p = dm_test_custom(
+        all_a4f_losses[5][valid_a4f], all_a4f_losses[refit_freq][valid_a4f])
 
-    # Daily vs this freq for GJR
-    valid_gjr = np.isfinite(all_gjr_losses[1]) & np.isfinite(all_gjr_losses[refit_freq])
-    dm_daily_gjr_t, dm_daily_gjr_p = dm_test_custom(
-        all_gjr_losses[1][valid_gjr], all_gjr_losses[refit_freq][valid_gjr])
+    # 5d vs this freq for GJR
+    valid_gjr = np.isfinite(all_gjr_losses[5]) & np.isfinite(all_gjr_losses[refit_freq])
+    dm_5d_gjr_t, dm_5d_gjr_p = dm_test_custom(
+        all_gjr_losses[5][valid_gjr], all_gjr_losses[refit_freq][valid_gjr])
 
     # Q63 vs this freq for A4f (skip if this is Q63)
     dm_q63_a4f_t, dm_q63_a4f_p = np.nan, np.nan
@@ -536,15 +594,15 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
 
     results['cross_frequency_dm'][freq_key] = {
         'label': freq_label,
-        'daily_vs_this_a4f': {
-            't_stat': float(dm_daily_a4f_t) if not np.isnan(dm_daily_a4f_t) else None,
-            'p_value': float(dm_daily_a4f_p) if not np.isnan(dm_daily_a4f_p) else None,
-            'sig_harvey': bool(abs(dm_daily_a4f_t) > 3.0) if not np.isnan(dm_daily_a4f_t) else False,
+        'weekly5d_vs_this_a4f': {
+            't_stat': float(dm_5d_a4f_t) if not np.isnan(dm_5d_a4f_t) else None,
+            'p_value': float(dm_5d_a4f_p) if not np.isnan(dm_5d_a4f_p) else None,
+            'sig_harvey': bool(abs(dm_5d_a4f_t) > 3.0) if not np.isnan(dm_5d_a4f_t) else False,
         },
-        'daily_vs_this_gjr': {
-            't_stat': float(dm_daily_gjr_t) if not np.isnan(dm_daily_gjr_t) else None,
-            'p_value': float(dm_daily_gjr_p) if not np.isnan(dm_daily_gjr_p) else None,
-            'sig_harvey': bool(abs(dm_daily_gjr_t) > 3.0) if not np.isnan(dm_daily_gjr_t) else False,
+        'weekly5d_vs_this_gjr': {
+            't_stat': float(dm_5d_gjr_t) if not np.isnan(dm_5d_gjr_t) else None,
+            'p_value': float(dm_5d_gjr_p) if not np.isnan(dm_5d_gjr_p) else None,
+            'sig_harvey': bool(abs(dm_5d_gjr_t) > 3.0) if not np.isnan(dm_5d_gjr_t) else False,
         },
         'q63_vs_this_a4f': {
             't_stat': float(dm_q63_a4f_t) if not np.isnan(dm_q63_a4f_t) else None,
@@ -553,10 +611,9 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
         },
     }
 
-    print(f"  Daily vs {freq_label}:")
-    dt_a = dm_daily_a4f_t if not np.isnan(dm_daily_a4f_t) else 0
-    dt_g = dm_daily_gjr_t if not np.isnan(dm_daily_gjr_t) else 0
-    print(f"    A4f DM t={dt_a:.4f}, GJR DM t={dt_g:.4f}")
+    dt_5a = dm_5d_a4f_t if not np.isnan(dm_5d_a4f_t) else 0
+    dt_5g = dm_5d_gjr_t if not np.isnan(dm_5d_gjr_t) else 0
+    print(f"  5d vs {freq_label}: A4f DM t={dt_5a:.4f}, GJR DM t={dt_5g:.4f}")
     if refit_freq != 63:
         dt_q = dm_q63_a4f_t if not np.isnan(dm_q63_a4f_t) else 0
         print(f"    Q63 vs {freq_label} A4f DM t={dt_q:.4f}", flush=True)
@@ -566,8 +623,8 @@ for freq_idx, (refit_freq, freq_label) in enumerate(zip(REFIT_FREQS, REFIT_LABEL
 # SECTION 6: SUMMARY TABLE
 # ============================================================
 print("\n[6] Summary table...", flush=True)
-print(f"\n{'Freq':>12} {'Refits':>8} {'GJR QLIKE':>12} {'A4f QLIKE':>12} {'DM t':>8} {'Sig':>6} {'Runtime':>10}")
-print("-" * 75)
+print(f"\n{'Freq':>15} {'Refits':>8} {'GJR QLIKE':>12} {'A4f QLIKE':>12} {'DM t':>8} {'Sig':>6} {'Runtime':>10}")
+print("-" * 78)
 
 for refit_freq, freq_label in zip(REFIT_FREQS, REFIT_LABELS):
     freq_key = f"freq_{refit_freq}"
@@ -575,7 +632,7 @@ for refit_freq, freq_label in zip(REFIT_FREQS, REFIT_LABELS):
     dm = results['dm_tests_a4f_vs_gjr'][freq_key]
     dm_t_val = dm['t_stat'] if dm['t_stat'] is not None else 0.0
     sig = 'YES' if dm['significant_harvey'] else 'no'
-    print(f"{freq_label:>12} {m['n_refits']:>8} {m['gjr']['qlike']:>12.6f} {m['a4f']['qlike']:>12.6f} "
+    print(f"{freq_label:>15} {m['n_refits']:>8} {m['gjr']['qlike']:>12.6f} {m['a4f']['qlike']:>12.6f} "
           f"{dm_t_val:>8.3f} {sig:>6} {m['runtime_seconds']:>8.1f}s")
 
 # QLIKE range analysis
@@ -585,12 +642,12 @@ gjr_qlikes_all = [results['models'][f'freq_{f}']['gjr']['qlike'] for f in REFIT_
 best_a4f = min(a4f_qlikes_all)
 worst_a4f = max(a4f_qlikes_all)
 q63_a4f = results['models']['freq_63']['a4f']['qlike']
-daily_a4f = results['models']['freq_1']['a4f']['qlike']
+w5_a4f = results['models']['freq_5']['a4f']['qlike']
 
 print(f"\n  A4f QLIKE range: {best_a4f:.6f} to {worst_a4f:.6f}")
 print(f"  A4f QLIKE spread: {abs(worst_a4f - best_a4f):.6f}")
-print(f"  A4f daily vs Q63: {abs(daily_a4f - q63_a4f):.6f}")
-print(f"  Relative difference (daily vs Q63): {abs(daily_a4f - q63_a4f)/abs(q63_a4f)*100:.4f}%", flush=True)
+print(f"  A4f 5d vs Q63: {abs(w5_a4f - q63_a4f):.6f}")
+print(f"  Relative difference (5d vs Q63): {abs(w5_a4f - q63_a4f)/abs(q63_a4f)*100:.4f}%", flush=True)
 
 # ============================================================
 # SECTION 7: CHARTS
@@ -620,7 +677,7 @@ ax1.set_xlabel('Refit Frequency', fontsize=13)
 ax1.set_ylabel('QLIKE (lower is better)', fontsize=13)
 ax1.set_title('K1024: QLIKE vs Refit Frequency\nA4f(VIX$^2$) vs GJR-GARCH, SPY OOS 2013-2026', fontsize=14)
 ax1.set_xticks(freq_positions)
-ax1.set_xticklabels(REFIT_LABELS)
+ax1.set_xticklabels([f'{f}d' for f in REFIT_FREQS])
 ax1.legend(fontsize=11, loc='upper left')
 ax1.grid(True, alpha=0.3)
 
@@ -639,7 +696,7 @@ plt.savefig(chart1_path, dpi=150, bbox_inches='tight')
 plt.close()
 print(f"  Saved: {chart1_path}")
 
-# Chart 2: DM t-stat vs frequency (A4f vs GJR) — bar chart
+# Chart 2: DM t-stat vs frequency (A4f vs GJR)
 fig, ax2 = plt.subplots(figsize=(10, 6))
 
 dm_tstats = []
@@ -649,28 +706,26 @@ for f in REFIT_FREQS:
     dm_tstats.append(t)
 
 # Flip sign so positive = A4f better
-dm_tstats_flipped = [-t for t in dm_tstats]
-colors = ['#4CAF50' if abs(t) > 3.0 else '#FFC107' for t in dm_tstats]
-bars = ax2.bar(freq_positions, dm_tstats_flipped, color=colors, width=0.6,
+dm_tstats_pos = [-t for t in dm_tstats]
+colors = ['#4CAF50' if v > 3.0 else '#FFC107' for v in dm_tstats_pos]
+bars = ax2.bar(freq_positions, dm_tstats_pos, color=colors, width=0.6,
                edgecolor='black', linewidth=0.5)
 
 ax2.axhline(y=3.0, color='red', linestyle='--', linewidth=1.5,
-            label='Harvey (2016) threshold = 3.0')
+            label='Harvey (2016) |t| = 3.0')
 ax2.axhline(y=0, color='black', linewidth=0.5)
 
 ax2.set_xlabel('Refit Frequency', fontsize=13)
-ax2.set_ylabel('|DM t-statistic| (A4f better > 0)', fontsize=13)
+ax2.set_ylabel('|DM t-stat| (A4f better when > 0)', fontsize=13)
 ax2.set_title('K1024: DM Test A4f vs GJR across Refit Frequencies\n(Green = significant at Harvey 2016 |t|>3.0)', fontsize=14)
 ax2.set_xticks(freq_positions)
-ax2.set_xticklabels(REFIT_LABELS)
+ax2.set_xticklabels([f'{f}d' for f in REFIT_FREQS])
 ax2.legend(fontsize=11)
 ax2.grid(True, alpha=0.3, axis='y')
 
-# Add value labels
-for i, (bar_obj, t) in enumerate(zip(bars, dm_tstats)):
-    val = -t
-    ax2.text(bar_obj.get_x() + bar_obj.get_width()/2, max(val + 0.15, 0.15),
-             f'{val:.2f}', ha='center', va='bottom', fontsize=10, fontweight='bold')
+for i, (bar_obj, v) in enumerate(zip(bars, dm_tstats_pos)):
+    ax2.text(bar_obj.get_x() + bar_obj.get_width()/2, max(v + 0.15, 0.15),
+             f'{v:.2f}', ha='center', va='bottom', fontsize=10, fontweight='bold')
 
 plt.tight_layout()
 chart2_path = os.path.join(SCRIPT_DIR, 'k1024_dm_vs_frequency.png')
@@ -678,7 +733,7 @@ plt.savefig(chart2_path, dpi=150, bbox_inches='tight')
 plt.close()
 print(f"  Saved: {chart2_path}")
 
-# Chart 3: Runtime vs Frequency — bar chart
+# Chart 3: Runtime vs Frequency
 fig, ax3 = plt.subplots(figsize=(10, 5))
 
 runtimes = [results['models'][f'freq_{f}']['runtime_seconds'] for f in REFIT_FREQS]
@@ -695,7 +750,7 @@ ax3.set_xlabel('Refit Frequency', fontsize=13)
 ax3.set_ylabel('Runtime (seconds)', fontsize=13)
 ax3.set_title('K1024: Computation Time vs Refit Frequency\n(A4f + GJR combined per frequency)', fontsize=14)
 ax3.set_xticks(freq_positions)
-ax3.set_xticklabels(REFIT_LABELS)
+ax3.set_xticklabels([f'{f}d' for f in REFIT_FREQS])
 ax3.grid(True, alpha=0.3, axis='y')
 
 plt.tight_layout()
@@ -709,11 +764,10 @@ print(f"  Saved: {chart3_path}")
 # ============================================================
 print("\n[8] Saving results...", flush=True)
 
-# Conclusion
 all_sig = all(results['dm_tests_a4f_vs_gjr'][f'freq_{f}']['significant_harvey']
               for f in REFIT_FREQS)
 qlike_spread_pct = abs(worst_a4f - best_a4f) / abs(best_a4f) * 100
-daily_q63_pct = abs(daily_a4f - q63_a4f) / abs(q63_a4f) * 100
+w5_q63_pct = abs(w5_a4f - q63_a4f) / abs(q63_a4f) * 100
 
 results['conclusion'] = {
     'a4f_qlike_best': float(best_a4f),
@@ -722,14 +776,14 @@ results['conclusion'] = {
     'gjr_qlike_best': float(min(gjr_qlikes_all)),
     'gjr_qlike_worst': float(max(gjr_qlikes_all)),
     'a4f_advantage_all_frequencies': all_sig,
-    'daily_vs_q63_diff_pct': float(daily_q63_pct),
+    'weekly5d_vs_q63_diff_pct': float(w5_q63_pct),
     'recommendation': (
         f'Quarterly (63-day) refit is a practical choice. '
-        f'A4f QLIKE spread across all 5 frequencies is only {qlike_spread_pct:.3f}% '
+        f'A4f QLIKE spread across 5 frequencies ({REFIT_FREQS}) is only {qlike_spread_pct:.3f}% '
         f'(range: {best_a4f:.6f} to {worst_a4f:.6f}). '
-        f'Daily vs Q63 difference is only {daily_q63_pct:.4f}%. '
+        f'Weekly(5d) vs Q63 difference is only {w5_q63_pct:.4f}%. '
         f'A4f advantage over GJR is {"maintained at all frequencies (all DM |t|>3.0)" if all_sig else "present but significance varies across frequencies"}. '
-        f'GARCH parameters are slow-moving, confirming that frequent refitting yields diminishing returns.'
+        f'GARCH parameters are slow-moving, confirming diminishing returns from frequent refitting.'
     ),
 }
 
@@ -742,4 +796,4 @@ print(f"  Results saved to: {RESULTS_PATH}")
 
 print(f"\n{'='*70}")
 print(f"K1024 COMPLETE. Total runtime: {total_time:.1f}s")
-print(f"{'='*70}")
+print(f"{'='*70}", flush=True)

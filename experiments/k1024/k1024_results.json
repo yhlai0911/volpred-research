@@ -1,0 +1,224 @@
+{
+  "experiment_id": "K1024",
+  "metadata": {
+    "asset": "SPY",
+    "data_source": "yfinance",
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-09",
+    "oos_start": "2013-01-01",
+    "n_total": 5349,
+    "n_oos": 3337,
+    "window": 2000,
+    "student_t_df": 8,
+    "refit_frequencies": [
+      5,
+      21,
+      63,
+      126,
+      252
+    ],
+    "refit_labels": [
+      "Weekly (5d)",
+      "Monthly (21d)",
+      "Quarterly (63d)",
+      "Semi-annual (126d)",
+      "Annual (252d)"
+    ],
+    "timestamp": "2026-04-10T09:23:15.491058+00:00",
+    "references": [
+      "Patton (2011). J Econometrics 160:246-256.",
+      "Harvey et al. (2016). ...Tests for Forecast Comparison.",
+      "Engle, Ghysels & Sohn (2013). RES 95(3):776-797.",
+      "Conrad & Loch (2015). JBES 33(3):338-358."
+    ],
+    "total_runtime_seconds": 70.28
+  },
+  "models": {
+    "freq_5": {
+      "refit_frequency": 5,
+      "label": "Weekly (5d)",
+      "n_refits": 668,
+      "runtime_seconds": 48.96,
+      "gjr": {
+        "qlike": -8.543428120752266,
+        "spearman_rho": 0.3736079980612694
+      },
+      "a4f": {
+        "qlike": -8.637442570184351,
+        "spearman_rho": 0.43523527215131425
+      }
+    },
+    "freq_21": {
+      "refit_frequency": 21,
+      "label": "Monthly (21d)",
+      "n_refits": 159,
+      "runtime_seconds": 11.74,
+      "gjr": {
+        "qlike": -8.540396443072307,
+        "spearman_rho": 0.3721125642579627
+      },
+      "a4f": {
+        "qlike": -8.637958462402615,
+        "spearman_rho": 0.435390569425874
+      }
+    },
+    "freq_63": {
+      "refit_frequency": 63,
+      "label": "Quarterly (63d)",
+      "n_refits": 53,
+      "runtime_seconds": 3.87,
+      "gjr": {
+        "qlike": -8.54139311616642,
+        "spearman_rho": 0.37370249089322133
+      },
+      "a4f": {
+        "qlike": -8.639140900038846,
+        "spearman_rho": 0.4357089440811676
+      }
+    },
+    "freq_126": {
+      "refit_frequency": 126,
+      "label": "Semi-annual (126d)",
+      "n_refits": 27,
+      "runtime_seconds": 1.86,
+      "gjr": {
+        "qlike": -8.536195288733298,
+        "spearman_rho": 0.37050253212584644
+      },
+      "a4f": {
+        "qlike": -8.63812106513143,
+        "spearman_rho": 0.4353379255047265
+      }
+    },
+    "freq_252": {
+      "refit_frequency": 252,
+      "label": "Annual (252d)",
+      "n_refits": 14,
+      "runtime_seconds": 0.96,
+      "gjr": {
+        "qlike": -8.535031250806425,
+        "spearman_rho": 0.37085725129589026
+      },
+      "a4f": {
+        "qlike": -8.637304318945812,
+        "spearman_rho": 0.43536868424426106
+      }
+    }
+  },
+  "dm_tests_a4f_vs_gjr": {
+    "freq_5": {
+      "t_stat": -6.471409493711296,
+      "p_value": 1.1133627353387965e-10,
+      "significant_harvey": true,
+      "direction": "A4f_better"
+    },
+    "freq_21": {
+      "t_stat": -6.666419900861974,
+      "p_value": 3.056577213556011e-11,
+      "significant_harvey": true,
+      "direction": "A4f_better"
+    },
+    "freq_63": {
+      "t_stat": -6.868373104983777,
+      "p_value": 7.717382288774388e-12,
+      "significant_harvey": true,
+      "direction": "A4f_better"
+    },
+    "freq_126": {
+      "t_stat": -6.661478389372798,
+      "p_value": 3.159761341464673e-11,
+      "significant_harvey": true,
+      "direction": "A4f_better"
+    },
+    "freq_252": {
+      "t_stat": -6.088747645535892,
+      "p_value": 1.2677490168755412e-09,
+      "significant_harvey": true,
+      "direction": "A4f_better"
+    }
+  },
+  "cross_frequency_dm": {
+    "freq_21": {
+      "label": "Monthly (21d)",
+      "weekly5d_vs_this_a4f": {
+        "t_stat": 0.506288730171701,
+        "p_value": 0.6126875198676809,
+        "sig_harvey": false
+      },
+      "weekly5d_vs_this_gjr": {
+        "t_stat": -1.2978905246798793,
+        "p_value": 0.19441492880465217,
+        "sig_harvey": false
+      },
+      "q63_vs_this_a4f": {
+        "t_stat": -1.1990826990140744,
+        "p_value": 0.2305811842114942,
+        "sig_harvey": false
+      }
+    },
+    "freq_63": {
+      "label": "Quarterly (63d)",
+      "weekly5d_vs_this_a4f": {
+        "t_stat": 1.1472980466199754,
+        "p_value": 0.2513409570363214,
+        "sig_harvey": false
+      },
+      "weekly5d_vs_this_gjr": {
+        "t_stat": -0.7180676761301521,
+        "p_value": 0.47276597828806777,
+        "sig_harvey": false
+      },
+      "q63_vs_this_a4f": {
+        "t_stat": null,
+        "p_value": null,
+        "sig_harvey": false
+      }
+    },
+    "freq_126": {
+      "label": "Semi-annual (126d)",
+      "weekly5d_vs_this_a4f": {
+        "t_stat": 0.5167824997443458,
+        "p_value": 0.6053423473083799,
+        "sig_harvey": false
+      },
+      "weekly5d_vs_this_gjr": {
+        "t_stat": -2.0104542557934018,
+        "p_value": 0.04446368761365971,
+        "sig_harvey": false
+      },
+      "q63_vs_this_a4f": {
+        "t_stat": -0.8324017186498542,
+        "p_value": 0.4052419772831899,
+        "sig_harvey": false
+      }
+    },
+    "freq_252": {
+      "label": "Annual (252d)",
+      "weekly5d_vs_this_a4f": {
+        "t_stat": -0.11045894477616908,
+        "p_value": 0.9120520702702835,
+        "sig_harvey": false
+      },
+      "weekly5d_vs_this_gjr": {
+        "t_stat": -1.7131966824380416,
+        "p_value": 0.08676952500689916,
+        "sig_harvey": false
+      },
+      "q63_vs_this_a4f": {
+        "t_stat": -1.3394409114642092,
+        "p_value": 0.18051866872167754,
+        "sig_harvey": false
+      }
+    }
+  },
+  "conclusion": {
+    "a4f_qlike_best": -8.639140900038846,
+    "a4f_qlike_worst": -8.637304318945812,
+    "a4f_qlike_spread_pct": 0.021258839441151214,
+    "gjr_qlike_best": -8.543428120752266,
+    "gjr_qlike_worst": -8.535031250806425,
+    "a4f_advantage_all_frequencies": true,
+    "weekly5d_vs_q63_diff_pct": 0.01965855024412661,
+    "recommendation": "Quarterly (63-day) refit is a practical choice. A4f QLIKE spread across 5 frequencies ([5, 21, 63, 126, 252]) is only 0.021% (range: -8.639141 to -8.637304). Weekly(5d) vs Q63 difference is only 0.0197%. A4f advantage over GJR is maintained at all frequencies (all DM |t|>3.0). GARCH parameters are slow-moving, confirming diminishing returns from frequent refitting."
+  }
+}
