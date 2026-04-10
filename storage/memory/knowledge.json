@@ -22991,5 +22991,24 @@
       "K1000",
       "K1034"
     ]
+  },
+  {
+    "id": "know_20260410182451_k1036",
+    "title": "K1036: ★★ A4f + CF-Rolling VaR — CF-Rolling 使模型選擇對 VaR 無關",
+    "content": "[提出: 賴奕豪, 執行: Claude] K1036 factorial design (2 model × 3 VaR method). Trinity PASS: GJR+Normal 0/6, GJR+t 1/6, GJR+CF 6/6, A4f+Normal 1/6, A4f+t 5/6, A4f+CF 6/6. 核心發現：(1) CF-Rolling 是 VaR 王者——不管用 GJR 或 A4f，CF-Rolling 都 6/6 PASS (2) A4f 對 Student-t 有巨大改善（1/6→5/6），但 CF-Rolling 已把 GJR 修到 6/6 (3) CF-Rolling 讓模型選擇對 VaR 無關——GJR+CF = A4f+CF (4) A4f 真正價值在 QLIKE 預測精度而非 VaR。SPY/QQQ/GLD 三資產，OOS 2019-2026，w=2000，refit=63d。",
+    "tags": [
+      "VaR",
+      "CF-Rolling",
+      "A4f",
+      "GJR",
+      "Trinity",
+      "factorial",
+      "interaction"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1036",
+    "data_source": "yfinance",
+    "confidence": 0.95,
+    "created_at": "2026-04-10T18:24:51.776712+00:00"
   }
 ]
