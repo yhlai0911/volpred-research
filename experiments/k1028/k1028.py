@@ -1,1006 +1,934 @@
 """
-K1028: Financial Stock Early Warning System - Fubon/Financial ETF -> TSMC/0050.TW Vol Transmission
+K1028: DCC-A4f Multivariate Extension for Portfolio Risk
 
-Research Questions:
-1. Do Taiwan financial stocks (2881 Fubon, 0055 Financial ETF) volatility lead 0050.TW/TSMC?
-2. Can financial stress indicators serve as regime overlay for Taiwan VT?
-3. How much overlap with VIX information?
+Extends the A4f multiplicative GARCH-X framework (τ×g with τ=VIX²)
+to bivariate DCC for portfolio variance forecasting.
 
-Related: K757 (Fubon->TSMC Granger F=6.11), K55/K82/K88 (Taiwan VT guide)
+Two-step DCC (Engle 2002):
+  Step 1: Fit univariate A4f (or GJR) to each asset → standardised residuals
+  Step 2: Fit scalar DCC(1,1) to the pair of standardised residuals
 
-Data: yfinance 2015-2026
+Evaluation:
+  - Portfolio QLIKE on r² (50/50 SPY/QQQ)
+  - DM test: DCC-A4f vs DCC-GJR
+  - Dynamic correlation plot
+
 References:
-- Granger (1969) causality framework
-- Engle & Kroner (1995) BEKK for volatility transmission
-- Patton (2011) QLIKE for model evaluation
+  - Engle, R. (2002). Dynamic Conditional Correlation. JBES 20(3).
+  - Patton, A. (2011). Volatility forecast comparison using imperfect proxies. JoE 160(1).
+  - A4f: multiplicative τ×g framework from Paper 9
 
-Author: VolPred Research System (Claude)
-Date: 2026-04-10
+Data: yfinance SPY, QQQ, ^VIX, 2005-2026
+OOS: 2019-2026, window=2000, refit/63d
+seed=42
 """
 
 import numpy as np
-import pandas as pd
-import yfinance as yf
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib.gridspec import GridSpec
 import json
+import time
 import warnings
-import os
-from datetime import datetime, timezone
-from scipy import stats
-from statsmodels.tsa.stattools import grangercausalitytests
-from arch import arch_model
+from datetime import datetime
+from numba import njit
+import math
 
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 np.random.seed(42)
 
 # ============================================================
-# CONFIGURATION
+# 1. Data
 # ============================================================
-SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-TICKERS = {
-    '0050.TW': 'Taiwan 50 ETF',
-    '2330.TW': 'TSMC',
-    '2881.TW': 'Fubon Financial',
-    '0055.TW': 'Yuanta Financial ETF',
-    '^VIX': 'VIX'
-}
-START_DATE = '2015-01-01'
-END_DATE = '2026-04-09'
-GRANGER_MAX_LAG = 5
-FINSTRESS_WINDOW = 22  # ~1 month rolling window
-FINSTRESS_PERCENTILE = 80
-VT_SIGMA = 8.63  # K55 standard
+def load_data():
+    import yfinance as yf
+    tickers = ["SPY", "QQQ", "^VIX"]
+    raw = yf.download(tickers, start="2004-01-01", end="2026-12-31",
+                       auto_adjust=True, progress=False)
+    close = raw["Close"][["SPY", "QQQ"]].dropna()
+    vix = raw["Close"]["^VIX"].reindex(close.index).ffill().bfill()
 
-# ============================================================
-# STEP 0: DATA COLLECTION
-# ============================================================
-print("=" * 70)
-print("K1028: Financial Stock Early Warning System")
-print("=" * 70)
-
-print("\n[Step 0] Downloading data...")
-data = {}
-for ticker, name in TICKERS.items():
-    try:
-        df = yf.download(ticker, start=START_DATE, end=END_DATE, progress=False)
-        if isinstance(df.columns, pd.MultiIndex):
-            df.columns = df.columns.droplevel(1)
-        data[ticker] = df
-        print(f"  {ticker} ({name}): {len(df)} rows, {df.index[0].date()} to {df.index[-1].date()}")
-    except Exception as e:
-        print(f"  ERROR downloading {ticker}: {e}")
-
-# Build returns DataFrame using pct_change (avoids split issues per CLAUDE.md)
-returns = pd.DataFrame()
-for ticker in TICKERS:
-    if ticker in data and len(data[ticker]) > 0:
-        returns[ticker] = data[ticker]['Close'].pct_change()
-
-returns = returns.dropna()
-print(f"\nCommon sample: {len(returns)} days, {returns.index[0].date()} to {returns.index[-1].date()}")
-
-# Compute realized vol (squared returns) for each asset
-sq_returns = returns ** 2
-
-# ============================================================
-# STEP 1: DESCRIPTIVE STATISTICS & DATA DIAGNOSTICS
-# ============================================================
-print("\n" + "=" * 70)
-print("[Step 1] Descriptive Statistics")
-print("=" * 70)
-
-desc_stats = {}
-for col in returns.columns:
-    r = returns[col].dropna()
-    desc_stats[col] = {
-        'N': len(r),
-        'mean': float(r.mean()),
-        'std': float(r.std()),
-        'skew': float(r.skew()),
-        'kurtosis': float(r.kurtosis()),
-        'min': float(r.min()),
-        'max': float(r.max()),
-        'ann_vol': float(r.std() * np.sqrt(252))
-    }
-    print(f"\n  {col} ({TICKERS.get(col, '')}):")
-    print(f"    N={desc_stats[col]['N']}, Mean={desc_stats[col]['mean']:.6f}, "
-          f"Std={desc_stats[col]['std']:.4f}")
-    print(f"    Skew={desc_stats[col]['skew']:.3f}, Kurt={desc_stats[col]['kurtosis']:.3f}")
-    print(f"    Ann Vol={desc_stats[col]['ann_vol']:.4f}")
-
-# Check liquidity for 0055.TW
-if '0055.TW' in data:
-    vol_0055 = data['0055.TW']['Volume']
-    avg_vol = vol_0055.mean()
-    min_vol = vol_0055.min()
-    zero_vol_days = (vol_0055 == 0).sum()
-    print(f"\n  0055.TW Liquidity Check:")
-    print(f"    Avg daily volume: {avg_vol:,.0f}")
-    print(f"    Min daily volume: {min_vol:,.0f}")
-    print(f"    Zero-volume days: {zero_vol_days}")
-
-# ADF test for stationarity
-from statsmodels.tsa.stattools import adfuller
-print("\n  ADF Tests (returns):")
-adf_results = {}
-for col in returns.columns:
-    result = adfuller(returns[col].dropna(), maxlag=10, autolag='AIC')
-    adf_results[col] = {'stat': result[0], 'pvalue': result[1]}
-    print(f"    {col}: ADF={result[0]:.4f}, p={result[1]:.6f} {'***' if result[1]<0.01 else ''}")
-
-# Contemporaneous correlations
-print("\n  Contemporaneous Return Correlations:")
-corr_matrix = returns.corr()
-print(corr_matrix.round(3).to_string())
-
-# ============================================================
-# STEP 2: GRANGER CAUSALITY TESTS
-# ============================================================
-print("\n" + "=" * 70)
-print("[Step 2] Granger Causality Tests")
-print("=" * 70)
-
-# Use squared returns (volatility proxy) for Granger tests
-granger_pairs = [
-    ('2881.TW', '0050.TW', 'Fubon -> 0050'),
-    ('0055.TW', '0050.TW', 'FinETF -> 0050'),
-    ('2881.TW', '2330.TW', 'Fubon -> TSMC'),
-    ('0055.TW', '2330.TW', 'FinETF -> TSMC'),
-    ('^VIX', '0050.TW', 'VIX -> 0050'),
-    ('0050.TW', '2881.TW', '0050 -> Fubon (reverse)'),
-]
-
-granger_results = {}
-for cause, effect, label in granger_pairs:
-    if cause not in sq_returns.columns or effect not in sq_returns.columns:
-        print(f"  SKIP {label}: missing data")
-        continue
-
-    # Granger test on squared returns (volatility proxy)
-    test_data = pd.DataFrame({
-        'y': sq_returns[effect],
-        'x': sq_returns[cause]
+    ret_spy = np.log(close["SPY"] / close["SPY"].shift(1))
+    ret_qqq = np.log(close["QQQ"] / close["QQQ"].shift(1))
+    import pandas as pd
+    df = pd.DataFrame({
+        "ret_spy": ret_spy,
+        "ret_qqq": ret_qqq,
+        "vix": vix,
+        "vix2": (vix / 100.0) ** 2 / 252.0,     # annualised VIX → daily variance scale
+        "r2_spy": ret_spy ** 2,
+        "r2_qqq": ret_qqq ** 2,
     }).dropna()
+    return df
 
-    print(f"\n  {label} (on r^2, N={len(test_data)}):")
-    try:
-        gc = grangercausalitytests(test_data[['y', 'x']], maxlag=GRANGER_MAX_LAG, verbose=False)
-        best_lag = None
-        best_f = 0
-        best_p = 1
-        lag_results = {}
-        for lag in range(1, GRANGER_MAX_LAG + 1):
-            f_stat = gc[lag][0]['ssr_ftest'][0]
-            p_val = gc[lag][0]['ssr_ftest'][1]
-            lag_results[lag] = {'F': float(f_stat), 'p': float(p_val)}
-            sig = '***' if p_val < 0.01 else ('**' if p_val < 0.05 else ('*' if p_val < 0.10 else ''))
-            print(f"    Lag {lag}: F={f_stat:.3f}, p={p_val:.4f} {sig}")
-            if f_stat > best_f:
-                best_f = f_stat
-                best_p = p_val
-                best_lag = lag
+# ============================================================
+# 2. Numba kernels
+# ============================================================
+@njit
+def gjr_recursion(omega, alpha, gamma, beta, returns):
+    T = len(returns)
+    h = np.empty(T)
+    h[0] = np.var(returns[:min(100, T)])
+    if h[0] < 1e-16:
+        h[0] = 1e-6
+    for t in range(1, T):
+        r2 = returns[t-1] ** 2
+        ind = 1.0 if returns[t-1] < 0.0 else 0.0
+        h[t] = omega + alpha * r2 + gamma * r2 * ind + beta * h[t-1]
+        if h[t] < 1e-16:
+            h[t] = 1e-16
+    return h
 
-        granger_results[label] = {
-            'cause': cause,
-            'effect': effect,
-            'best_lag': best_lag,
-            'best_F': float(best_f),
-            'best_p': float(best_p),
-            'all_lags': lag_results,
-            'significant_at_5pct': best_p < 0.05
+@njit
+def gjr_nll(omega, alpha, gamma, beta, returns):
+    h = gjr_recursion(omega, alpha, gamma, beta, returns)
+    T = len(returns)
+    ll = 0.0
+    for t in range(T):
+        ll += np.log(h[t]) + returns[t]**2 / h[t]
+    return 0.5 * ll
+
+@njit
+def a4f_recursion(theta0, theta1, omega, alpha, gamma, beta, returns, vix2):
+    T = len(returns)
+    tau = np.empty(T)
+    g = np.empty(T)
+    h = np.empty(T)
+    tau[0] = theta0 + theta1 * vix2[0]
+    if tau[0] < 1e-16:
+        tau[0] = 1e-16
+    g[0] = 1.0
+    h[0] = tau[0] * g[0]
+    for t in range(1, T):
+        tau[t] = theta0 + theta1 * vix2[t-1]     # τ uses lagged VIX²
+        if tau[t] < 1e-16:
+            tau[t] = 1e-16
+        u_prev = returns[t-1] / np.sqrt(tau[t])
+        u2 = u_prev ** 2
+        ind = 1.0 if returns[t-1] < 0.0 else 0.0
+        g[t] = omega + alpha * u2 + gamma * u2 * ind + beta * g[t-1]
+        if g[t] < 1e-16:
+            g[t] = 1e-16
+        h[t] = tau[t] * g[t]
+        if h[t] < 1e-16:
+            h[t] = 1e-16
+    return h, tau, g
+
+@njit
+def a4f_nll(theta0, theta1, omega, alpha, gamma, beta, returns, vix2):
+    h, _, _ = a4f_recursion(theta0, theta1, omega, alpha, gamma, beta, returns, vix2)
+    T = len(returns)
+    ll = 0.0
+    for t in range(T):
+        ll += np.log(h[t]) + returns[t]**2 / h[t]
+    return 0.5 * ll
+
+@njit
+def dcc_qbar_and_filter(eps1, eps2, a, b):
+    """
+    Scalar DCC(1,1) filter.
+    Q_t = (1-a-b)*Qbar + a * eps_{t-1}eps_{t-1}' + b * Q_{t-1}
+    rho_t = Q12_t / sqrt(Q11_t * Q22_t)
+    """
+    T = len(eps1)
+    # Qbar = unconditional correlation matrix of standardised residuals
+    mean1 = 0.0
+    mean2 = 0.0
+    for t in range(T):
+        mean1 += eps1[t]
+        mean2 += eps2[t]
+    mean1 /= T
+    mean2 /= T
+    qbar11 = 0.0
+    qbar22 = 0.0
+    qbar12 = 0.0
+    for t in range(T):
+        e1 = eps1[t] - mean1
+        e2 = eps2[t] - mean2
+        qbar11 += e1 * e1
+        qbar22 += e2 * e2
+        qbar12 += e1 * e2
+    qbar11 /= T
+    qbar22 /= T
+    qbar12 /= T
+
+    q11 = np.empty(T)
+    q22 = np.empty(T)
+    q12 = np.empty(T)
+    rho = np.empty(T)
+
+    q11[0] = qbar11
+    q22[0] = qbar22
+    q12[0] = qbar12
+    denom = np.sqrt(q11[0] * q22[0])
+    rho[0] = q12[0] / denom if denom > 1e-20 else 0.0
+
+    c = 1.0 - a - b
+    for t in range(1, T):
+        q11[t] = c * qbar11 + a * eps1[t-1] * eps1[t-1] + b * q11[t-1]
+        q22[t] = c * qbar22 + a * eps2[t-1] * eps2[t-1] + b * q22[t-1]
+        q12[t] = c * qbar12 + a * eps1[t-1] * eps2[t-1] + b * q12[t-1]
+        denom = np.sqrt(q11[t] * q22[t])
+        if denom > 1e-20:
+            rho[t] = q12[t] / denom
+            # clamp
+            if rho[t] > 0.9999:
+                rho[t] = 0.9999
+            elif rho[t] < -0.9999:
+                rho[t] = -0.9999
+        else:
+            rho[t] = 0.0
+    return rho, qbar12
+
+@njit
+def dcc_loglik(eps1, eps2, a, b):
+    """
+    DCC log-likelihood (second stage only).
+    L_DCC = -0.5 * sum[ log(1-rho²) + (eps1² + eps2² - 2*rho*eps1*eps2)/(1-rho²) - eps1² - eps2² ]
+    """
+    rho, _ = dcc_qbar_and_filter(eps1, eps2, a, b)
+    T = len(eps1)
+    ll = 0.0
+    for t in range(T):
+        r = rho[t]
+        r2 = r * r
+        if r2 > 0.9998:
+            r2 = 0.9998
+        det = 1.0 - r2
+        e1 = eps1[t]
+        e2 = eps2[t]
+        # bivariate normal (conditional on marginals):
+        # additional loglik = -0.5 * [log(1-rho²) + (rho²*(e1²+e2²) - 2*rho*e1*e2)/(1-rho²)]
+        ll += -0.5 * (np.log(det) + (r2 * (e1*e1 + e2*e2) - 2.0*r*e1*e2) / det)
+    return ll
+
+# ============================================================
+# 3. Model fitting wrappers
+# ============================================================
+from scipy.optimize import minimize
+
+def fit_gjr(returns):
+    bounds = [(1e-8, 0.01), (1e-6, 0.5), (1e-6, 0.5), (0.5, 0.999)]
+    def obj(p):
+        if p[1] + 0.5*p[2] + p[3] >= 1.0:
+            return 1e10
+        try:
+            v = gjr_nll(p[0], p[1], p[2], p[3], returns)
+            return v if np.isfinite(v) else 1e10
+        except:
+            return 1e10
+    best_res, best_nll = None, 1e10
+    for omega_init in [1e-6, 5e-6, 1e-5]:
+        for alpha_init in [0.03, 0.06]:
+            x0 = [omega_init, alpha_init, 0.08, 0.88]
+            try:
+                res = minimize(obj, x0, method='L-BFGS-B', bounds=bounds,
+                               options={'maxiter': 300})
+                if res.fun < best_nll:
+                    best_nll = res.fun
+                    best_res = res
+            except:
+                continue
+    if best_res is None:
+        x0 = [5e-6, 0.04, 0.08, 0.88]
+        best_res = minimize(obj, x0, method='L-BFGS-B', bounds=bounds)
+    h = gjr_recursion(*best_res.x, returns)
+    return {'params': best_res.x, 'h': h, 'converged': best_res.success}
+
+def fit_a4f(returns, vix2):
+    bounds = [(-0.01, 0.01), (0.01, 5.0), (1e-6, 1.0),
+              (1e-6, 0.5), (1e-6, 0.5), (0.5, 0.999)]
+    def obj(p):
+        if p[3] + 0.5*p[4] + p[5] >= 1.0:
+            return 1e10
+        try:
+            v = a4f_nll(p[0], p[1], p[2], p[3], p[4], p[5], returns, vix2)
+            return v if np.isfinite(v) else 1e10
+        except:
+            return 1e10
+    best_res, best_nll = None, 1e10
+    for theta1_init in [0.3, 0.8, 2.0]:
+        for omega_init in [0.02, 0.08]:
+            x0 = [1e-5, theta1_init, omega_init, 0.04, 0.06, 0.90]
+            try:
+                res = minimize(obj, x0, method='L-BFGS-B', bounds=bounds,
+                               options={'maxiter': 300})
+                if res.fun < best_nll:
+                    best_nll = res.fun
+                    best_res = res
+            except:
+                continue
+    if best_res is None:
+        x0 = [1e-5, 0.5, 0.05, 0.04, 0.06, 0.90]
+        best_res = minimize(obj, x0, method='L-BFGS-B', bounds=bounds)
+    h, tau, g = a4f_recursion(*best_res.x, returns, vix2)
+    return {'params': best_res.x, 'h': h, 'tau': tau, 'g': g,
+            'converged': best_res.success}
+
+def fit_dcc(eps1, eps2):
+    """Fit scalar DCC(1,1) by maximising 2nd-stage loglik."""
+    bounds = [(1e-6, 0.3), (0.5, 0.999)]
+    def obj(p):
+        a, b = p
+        if a + b >= 0.999:
+            return 1e10
+        try:
+            ll = dcc_loglik(eps1, eps2, a, b)
+            return -ll if np.isfinite(ll) else 1e10
+        except:
+            return 1e10
+    best_res, best_nll = None, 1e10
+    for a_init in [0.01, 0.05, 0.1]:
+        for b_init in [0.85, 0.92, 0.95]:
+            if a_init + b_init >= 0.999:
+                continue
+            x0 = [a_init, b_init]
+            try:
+                res = minimize(obj, x0, method='L-BFGS-B', bounds=bounds,
+                               options={'maxiter': 200})
+                if res.fun < best_nll:
+                    best_nll = res.fun
+                    best_res = res
+            except:
+                continue
+    if best_res is None:
+        best_res = minimize(obj, [0.05, 0.90], method='L-BFGS-B', bounds=bounds)
+    rho, qbar12 = dcc_qbar_and_filter(eps1, eps2, best_res.x[0], best_res.x[1])
+    return {'a': float(best_res.x[0]), 'b': float(best_res.x[1]),
+            'rho': rho, 'qbar12': float(qbar12), 'converged': best_res.success}
+
+# ============================================================
+# 4. OOS DCC Forecasting (rolling)
+# ============================================================
+def oos_dcc_forecast(df, model_type, oos_start_date, window=2000, refit_every=63):
+    """
+    OOS portfolio variance forecast using DCC.
+
+    Steps at each refit:
+      1. Fit univariate model to each asset on training window
+      2. Compute standardised residuals
+      3. Fit DCC on standardised residuals
+    Then produce one-step-ahead h1, h2, rho → portfolio variance.
+
+    Returns:
+      portfolio_var_forecast: array of shape (T,)  [NaN before OOS]
+      rho_forecast: array of shape (T,)
+      h1_forecast, h2_forecast: individual variance forecasts
+    """
+    import pandas as pd
+    oos_idx = np.where(df.index >= oos_start_date)[0][0]
+    T = len(df)
+    ret_spy = df['ret_spy'].values
+    ret_qqq = df['ret_qqq'].values
+    vix2 = df['vix2'].values
+
+    pvar = np.full(T, np.nan)
+    rho_out = np.full(T, np.nan)
+    h1_out = np.full(T, np.nan)
+    h2_out = np.full(T, np.nan)
+
+    last_fit_idx = -refit_every
+    # state variables for recursive forecasting between refits
+    gjr1_p = gjr2_p = a4f1_p = a4f2_p = None
+    dcc_a = dcc_b = 0.0
+    h1_prev = h2_prev = np.nan
+    g1_prev = g2_prev = np.nan
+    q11_prev = q22_prev = q12_prev = 0.0
+    qbar11 = qbar22 = qbar12 = 0.0
+    use_a4f = (model_type == 'a4f')
+
+    for t in range(oos_idx, T):
+        if t - last_fit_idx >= refit_every or last_fit_idx < 0:
+            # --- Refit ---
+            s = max(0, t - window)
+            tr1 = ret_spy[s:t]
+            tr2 = ret_qqq[s:t]
+            tv = vix2[s:t]
+
+            if use_a4f:
+                fit1 = fit_a4f(tr1, tv)
+                fit2 = fit_a4f(tr2, tv)
+                eps1 = tr1 / np.sqrt(fit1['h'])
+                eps2 = tr2 / np.sqrt(fit2['h'])
+                a4f1_p = fit1['params']
+                a4f2_p = fit2['params']
+                g1_prev = fit1['g'][-1]
+                g2_prev = fit2['g'][-1]
+            else:
+                fit1 = fit_gjr(tr1)
+                fit2 = fit_gjr(tr2)
+                eps1 = tr1 / np.sqrt(fit1['h'])
+                eps2 = tr2 / np.sqrt(fit2['h'])
+                gjr1_p = fit1['params']
+                gjr2_p = fit2['params']
+                h1_prev = fit1['h'][-1]
+                h2_prev = fit2['h'][-1]
+
+            dcc_fit = fit_dcc(eps1, eps2)
+            dcc_a = dcc_fit['a']
+            dcc_b = dcc_fit['b']
+            # Compute Qbar from full training sample eps
+            n = len(eps1)
+            m1 = np.mean(eps1)
+            m2 = np.mean(eps2)
+            e1c = eps1 - m1
+            e2c = eps2 - m2
+            qbar11 = np.mean(e1c**2)
+            qbar22 = np.mean(e2c**2)
+            qbar12 = np.mean(e1c * e2c)
+            # Initialise Q at end of training
+            q11_prev = qbar11
+            q22_prev = qbar22
+            q12_prev = qbar12
+            # Run DCC filter over training sample to get Q_{T-1}
+            c = 1.0 - dcc_a - dcc_b
+            qt11, qt22, qt12 = qbar11, qbar22, qbar12
+            for k in range(1, n):
+                qt11 = c * qbar11 + dcc_a * eps1[k-1]**2 + dcc_b * qt11
+                qt22 = c * qbar22 + dcc_a * eps2[k-1]**2 + dcc_b * qt22
+                qt12 = c * qbar12 + dcc_a * eps1[k-1]*eps2[k-1] + dcc_b * qt12
+            q11_prev = qt11
+            q22_prev = qt22
+            q12_prev = qt12
+
+            last_fit_idx = t
+
+        # --- One-step-ahead forecast ---
+        # Univariate h_{t|t-1}
+        if use_a4f:
+            p1 = a4f1_p
+            tau1 = max(p1[0] + p1[1] * vix2[t-1], 1e-16)
+            u1_prev = ret_spy[t-1] / np.sqrt(tau1)
+            ind1 = 1.0 if ret_spy[t-1] < 0 else 0.0
+            g1 = p1[2] + p1[3]*u1_prev**2 + p1[4]*u1_prev**2*ind1 + p1[5]*g1_prev
+            g1 = max(g1, 1e-16)
+            h1 = tau1 * g1
+            g1_prev = g1
+
+            p2 = a4f2_p
+            tau2 = max(p2[0] + p2[1] * vix2[t-1], 1e-16)
+            u2_prev = ret_qqq[t-1] / np.sqrt(tau2)
+            ind2 = 1.0 if ret_qqq[t-1] < 0 else 0.0
+            g2 = p2[2] + p2[3]*u2_prev**2 + p2[4]*u2_prev**2*ind2 + p2[5]*g2_prev
+            g2 = max(g2, 1e-16)
+            h2 = tau2 * g2
+            g2_prev = g2
+        else:
+            p1 = gjr1_p
+            r2_1 = ret_spy[t-1]**2
+            ind1 = 1.0 if ret_spy[t-1] < 0 else 0.0
+            h1 = p1[0] + p1[1]*r2_1 + p1[2]*r2_1*ind1 + p1[3]*h1_prev
+            h1 = max(h1, 1e-16)
+            h1_prev = h1
+
+            p2 = gjr2_p
+            r2_2 = ret_qqq[t-1]**2
+            ind2 = 1.0 if ret_qqq[t-1] < 0 else 0.0
+            h2 = p2[0] + p2[1]*r2_2 + p2[2]*r2_2*ind2 + p2[3]*h2_prev
+            h2 = max(h2, 1e-16)
+            h2_prev = h2
+
+        # Standardised residuals for DCC update
+        e1 = ret_spy[t-1] / np.sqrt(max(h1_out[t-1] if t > oos_idx and np.isfinite(h1_out[t-1]) else h1, 1e-16))
+        e2 = ret_qqq[t-1] / np.sqrt(max(h2_out[t-1] if t > oos_idx and np.isfinite(h2_out[t-1]) else h2, 1e-16))
+
+        # DCC Q update
+        c = 1.0 - dcc_a - dcc_b
+        q11 = c * qbar11 + dcc_a * e1**2 + dcc_b * q11_prev
+        q22 = c * qbar22 + dcc_a * e2**2 + dcc_b * q22_prev
+        q12 = c * qbar12 + dcc_a * e1*e2 + dcc_b * q12_prev
+        q11_prev = q11
+        q22_prev = q22
+        q12_prev = q12
+
+        denom = np.sqrt(q11 * q22)
+        rho_t = q12 / denom if denom > 1e-20 else 0.0
+        rho_t = max(min(rho_t, 0.9999), -0.9999)
+
+        # Portfolio variance: w'Hw for 50/50
+        # H = [[h1, rho*sqrt(h1*h2)], [rho*sqrt(h1*h2), h2]]
+        # w = [0.5, 0.5]
+        # pvar = 0.25*h1 + 0.25*h2 + 0.5*rho*sqrt(h1*h2)
+        cov12 = rho_t * np.sqrt(h1 * h2)
+        pv = 0.25 * h1 + 0.25 * h2 + 0.5 * cov12
+        pv = max(pv, 1e-16)
+
+        pvar[t] = pv
+        rho_out[t] = rho_t
+        h1_out[t] = h1
+        h2_out[t] = h2
+
+    return pvar, rho_out, h1_out, h2_out
+
+# ============================================================
+# 5. Constant-correlation benchmark
+# ============================================================
+def oos_ccc_forecast(df, model_type, oos_start_date, window=2000, refit_every=63):
+    """
+    CCC (constant conditional correlation) variant:
+    Same univariate models, but rho = sample correlation of standardised residuals.
+    """
+    oos_idx = np.where(df.index >= oos_start_date)[0][0]
+    T = len(df)
+    ret_spy = df['ret_spy'].values
+    ret_qqq = df['ret_qqq'].values
+    vix2 = df['vix2'].values
+
+    pvar = np.full(T, np.nan)
+    rho_out = np.full(T, np.nan)
+
+    last_fit_idx = -refit_every
+    gjr1_p = gjr2_p = a4f1_p = a4f2_p = None
+    h1_prev = h2_prev = np.nan
+    g1_prev = g2_prev = np.nan
+    rho_const = 0.0
+    use_a4f = (model_type == 'a4f')
+
+    for t in range(oos_idx, T):
+        if t - last_fit_idx >= refit_every or last_fit_idx < 0:
+            s = max(0, t - window)
+            tr1 = ret_spy[s:t]
+            tr2 = ret_qqq[s:t]
+            tv = vix2[s:t]
+
+            if use_a4f:
+                fit1 = fit_a4f(tr1, tv)
+                fit2 = fit_a4f(tr2, tv)
+                eps1 = tr1 / np.sqrt(fit1['h'])
+                eps2 = tr2 / np.sqrt(fit2['h'])
+                a4f1_p = fit1['params']
+                a4f2_p = fit2['params']
+                g1_prev = fit1['g'][-1]
+                g2_prev = fit2['g'][-1]
+            else:
+                fit1 = fit_gjr(tr1)
+                fit2 = fit_gjr(tr2)
+                eps1 = tr1 / np.sqrt(fit1['h'])
+                eps2 = tr2 / np.sqrt(fit2['h'])
+                gjr1_p = fit1['params']
+                gjr2_p = fit2['params']
+                h1_prev = fit1['h'][-1]
+                h2_prev = fit2['h'][-1]
+
+            rho_const = float(np.corrcoef(eps1, eps2)[0, 1])
+            last_fit_idx = t
+
+        # Univariate forecast (same logic as DCC)
+        if use_a4f:
+            p1 = a4f1_p
+            tau1 = max(p1[0] + p1[1]*vix2[t-1], 1e-16)
+            u1_prev = ret_spy[t-1] / np.sqrt(tau1)
+            ind1 = 1.0 if ret_spy[t-1] < 0 else 0.0
+            g1 = p1[2] + p1[3]*u1_prev**2 + p1[4]*u1_prev**2*ind1 + p1[5]*g1_prev
+            g1 = max(g1, 1e-16)
+            h1 = tau1 * g1
+            g1_prev = g1
+
+            p2 = a4f2_p
+            tau2 = max(p2[0] + p2[1]*vix2[t-1], 1e-16)
+            u2_prev = ret_qqq[t-1] / np.sqrt(tau2)
+            ind2 = 1.0 if ret_qqq[t-1] < 0 else 0.0
+            g2 = p2[2] + p2[3]*u2_prev**2 + p2[4]*u2_prev**2*ind2 + p2[5]*g2_prev
+            g2 = max(g2, 1e-16)
+            h2 = tau2 * g2
+            g2_prev = g2
+        else:
+            p1 = gjr1_p
+            r2_1 = ret_spy[t-1]**2
+            ind1 = 1.0 if ret_spy[t-1] < 0 else 0.0
+            h1 = p1[0] + p1[1]*r2_1 + p1[2]*r2_1*ind1 + p1[3]*h1_prev
+            h1 = max(h1, 1e-16)
+            h1_prev = h1
+
+            p2 = gjr2_p
+            r2_2 = ret_qqq[t-1]**2
+            ind2 = 1.0 if ret_qqq[t-1] < 0 else 0.0
+            h2 = p2[0] + p2[1]*r2_2 + p2[2]*r2_2*ind2 + p2[3]*h2_prev
+            h2 = max(h2, 1e-16)
+            h2_prev = h2
+
+        cov12 = rho_const * np.sqrt(h1 * h2)
+        pv = 0.25*h1 + 0.25*h2 + 0.5*cov12
+        pv = max(pv, 1e-16)
+        pvar[t] = pv
+        rho_out[t] = rho_const
+
+    return pvar, rho_out
+
+# ============================================================
+# 6. Evaluation
+# ============================================================
+def qlike(actual, forecast):
+    """QLIKE loss: mean(actual/forecast + log(forecast))."""
+    mask = np.isfinite(actual) & np.isfinite(forecast) & (forecast > 0) & (actual >= 0)
+    a = actual[mask]
+    f = forecast[mask]
+    return float(np.mean(a / f + np.log(f)))
+
+def dm_test(loss1, loss2):
+    """Diebold-Mariano test: is loss1 significantly different from loss2?"""
+    d = loss1 - loss2
+    d = d[np.isfinite(d)]
+    n = len(d)
+    if n < 10:
+        return {'t_stat': 0.0, 'p_value': 1.0, 'n': n}
+    d_bar = np.mean(d)
+    # HAC variance (Newey-West with ~n^(1/3) lags)
+    max_lag = max(1, int(n ** (1.0/3.0)))
+    gamma0 = np.mean((d - d_bar)**2)
+    gamma_sum = 0.0
+    for k in range(1, max_lag+1):
+        w = 1.0 - k / (max_lag + 1.0)
+        gk = np.mean((d[k:] - d_bar) * (d[:-k] - d_bar))
+        gamma_sum += 2.0 * w * gk
+    var_d = (gamma0 + gamma_sum) / n
+    if var_d <= 0:
+        return {'t_stat': 0.0, 'p_value': 1.0, 'n': n}
+    t_stat = d_bar / np.sqrt(var_d)
+    from scipy import stats
+    p_value = 2.0 * (1.0 - stats.t.cdf(abs(t_stat), df=n-1))
+    return {'t_stat': float(t_stat), 'p_value': float(p_value), 'n': int(n)}
+
+def qlike_losses(actual, forecast):
+    """Element-wise QLIKE losses."""
+    mask = np.isfinite(actual) & np.isfinite(forecast) & (forecast > 0) & (actual >= 0)
+    out = np.full(len(actual), np.nan)
+    a = actual[mask]
+    f = forecast[mask]
+    out[mask] = a / f + np.log(f)
+    return out
+
+# ============================================================
+# 7. Main
+# ============================================================
+def main():
+    t0 = time.time()
+    print("K1028: DCC-A4f Multivariate Extension")
+    print("=" * 60)
+
+    # --- Load data ---
+    print("Loading data...")
+    df = load_data()
+    print(f"  Samples: {len(df)}, from {df.index[0].date()} to {df.index[-1].date()}")
+
+    oos_start = "2019-01-02"
+    oos_idx = np.where(df.index >= oos_start)[0][0]
+    print(f"  OOS start: {oos_start} (index {oos_idx}), OOS days: {len(df) - oos_idx}")
+
+    # Portfolio actual r²
+    port_ret = 0.5 * df['ret_spy'].values + 0.5 * df['ret_qqq'].values
+    port_r2 = port_ret ** 2
+
+    # Descriptive stats
+    print(f"\n  SPY: mean={df['ret_spy'].mean()*252:.4f}, std={df['ret_spy'].std()*np.sqrt(252):.4f}")
+    print(f"  QQQ: mean={df['ret_qqq'].mean()*252:.4f}, std={df['ret_qqq'].std()*np.sqrt(252):.4f}")
+    print(f"  Correlation: {df['ret_spy'].corr(df['ret_qqq']):.4f}")
+
+    # --- Run OOS forecasts ---
+    print("\n--- DCC-GJR ---")
+    pvar_dcc_gjr, rho_dcc_gjr, _, _ = oos_dcc_forecast(df, 'gjr', oos_start, window=2000, refit_every=63)
+    print(f"  Done. OOS forecasts: {np.sum(np.isfinite(pvar_dcc_gjr[oos_idx:]))}")
+
+    print("--- DCC-A4f ---")
+    pvar_dcc_a4f, rho_dcc_a4f, _, _ = oos_dcc_forecast(df, 'a4f', oos_start, window=2000, refit_every=63)
+    print(f"  Done. OOS forecasts: {np.sum(np.isfinite(pvar_dcc_a4f[oos_idx:]))}")
+
+    print("--- CCC-GJR ---")
+    pvar_ccc_gjr, rho_ccc_gjr = oos_ccc_forecast(df, 'gjr', oos_start, window=2000, refit_every=63)
+    print(f"  Done. OOS forecasts: {np.sum(np.isfinite(pvar_ccc_gjr[oos_idx:]))}")
+
+    print("--- CCC-A4f ---")
+    pvar_ccc_a4f, rho_ccc_a4f = oos_ccc_forecast(df, 'a4f', oos_start, window=2000, refit_every=63)
+    print(f"  Done. OOS forecasts: {np.sum(np.isfinite(pvar_ccc_a4f[oos_idx:]))}")
+
+    # --- QLIKE ---
+    print("\n=== Portfolio QLIKE (lower is better) ===")
+    oos_r2 = port_r2[oos_idx:]
+    ql_dcc_gjr = qlike(oos_r2, pvar_dcc_gjr[oos_idx:])
+    ql_dcc_a4f = qlike(oos_r2, pvar_dcc_a4f[oos_idx:])
+    ql_ccc_gjr = qlike(oos_r2, pvar_ccc_gjr[oos_idx:])
+    ql_ccc_a4f = qlike(oos_r2, pvar_ccc_a4f[oos_idx:])
+    print(f"  DCC-GJR:  {ql_dcc_gjr:.6f}")
+    print(f"  DCC-A4f:  {ql_dcc_a4f:.6f}")
+    print(f"  CCC-GJR:  {ql_ccc_gjr:.6f}")
+    print(f"  CCC-A4f:  {ql_ccc_a4f:.6f}")
+
+    # --- DM tests ---
+    print("\n=== Diebold-Mariano Tests ===")
+    loss_dcc_gjr = qlike_losses(port_r2, pvar_dcc_gjr)
+    loss_dcc_a4f = qlike_losses(port_r2, pvar_dcc_a4f)
+    loss_ccc_gjr = qlike_losses(port_r2, pvar_ccc_gjr)
+    loss_ccc_a4f = qlike_losses(port_r2, pvar_ccc_a4f)
+
+    # Use only OOS
+    lo_dcc_gjr = loss_dcc_gjr[oos_idx:]
+    lo_dcc_a4f = loss_dcc_a4f[oos_idx:]
+    lo_ccc_gjr = loss_ccc_gjr[oos_idx:]
+    lo_ccc_a4f = loss_ccc_a4f[oos_idx:]
+
+    dm1 = dm_test(lo_dcc_gjr, lo_dcc_a4f)
+    print(f"  DCC-GJR vs DCC-A4f: t={dm1['t_stat']:.4f}, p={dm1['p_value']:.4f}")
+    print(f"    → {'A4f better' if dm1['t_stat'] > 0 else 'GJR better'}")
+
+    dm2 = dm_test(lo_ccc_gjr, lo_ccc_a4f)
+    print(f"  CCC-GJR vs CCC-A4f: t={dm2['t_stat']:.4f}, p={dm2['p_value']:.4f}")
+
+    dm3 = dm_test(lo_dcc_a4f, lo_ccc_a4f)
+    print(f"  DCC-A4f vs CCC-A4f: t={dm3['t_stat']:.4f}, p={dm3['p_value']:.4f}")
+    print(f"    → {'CCC better (DCC unnecessary)' if dm3['t_stat'] > 0 else 'DCC adds value'}")
+
+    dm4 = dm_test(lo_dcc_gjr, lo_ccc_gjr)
+    print(f"  DCC-GJR vs CCC-GJR: t={dm4['t_stat']:.4f}, p={dm4['p_value']:.4f}")
+
+    # --- Correlation stats ---
+    rho_dcc_a4f_oos = rho_dcc_a4f[oos_idx:]
+    rho_dcc_gjr_oos = rho_dcc_gjr[oos_idx:]
+    mask_a = np.isfinite(rho_dcc_a4f_oos)
+    mask_g = np.isfinite(rho_dcc_gjr_oos)
+    print(f"\n=== Dynamic Correlation Stats (OOS) ===")
+    print(f"  DCC-A4f rho: mean={np.mean(rho_dcc_a4f_oos[mask_a]):.4f}, "
+          f"std={np.std(rho_dcc_a4f_oos[mask_a]):.4f}, "
+          f"min={np.min(rho_dcc_a4f_oos[mask_a]):.4f}, "
+          f"max={np.max(rho_dcc_a4f_oos[mask_a]):.4f}")
+    print(f"  DCC-GJR rho: mean={np.mean(rho_dcc_gjr_oos[mask_g]):.4f}, "
+          f"std={np.std(rho_dcc_gjr_oos[mask_g]):.4f}, "
+          f"min={np.min(rho_dcc_gjr_oos[mask_g]):.4f}, "
+          f"max={np.max(rho_dcc_gjr_oos[mask_g]):.4f}")
+
+    # --- VaR evaluation (portfolio, 5% level) ---
+    print("\n=== Portfolio VaR Backtest (5%) ===")
+    from scipy import stats
+    z_05 = stats.norm.ppf(0.05)
+    port_ret_oos = port_ret[oos_idx:]
+    n_oos = len(port_ret_oos)
+
+    for name, pv in [("DCC-GJR", pvar_dcc_gjr), ("DCC-A4f", pvar_dcc_a4f),
+                      ("CCC-GJR", pvar_ccc_gjr), ("CCC-A4f", pvar_ccc_a4f)]:
+        sigma_oos = np.sqrt(pv[oos_idx:])
+        var5 = z_05 * sigma_oos   # negative
+        violations = np.sum(port_ret_oos < var5)
+        vrate = violations / n_oos
+        # Kupiec LR
+        p0 = 0.05
+        if 0 < violations < n_oos:
+            lr = 2.0 * (violations * np.log(vrate/p0) + (n_oos-violations)*np.log((1-vrate)/(1-p0)))
+            pval = 1.0 - stats.chi2.cdf(lr, 1)
+        else:
+            lr = np.nan
+            pval = np.nan
+        print(f"  {name}: violations={violations}/{n_oos} ({vrate:.4f}), "
+              f"Kupiec LR={lr:.2f}, p={pval:.4f}")
+
+    # --- Plot ---
+    print("\nGenerating correlation plot...")
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as plt
+    import matplotlib.dates as mdates
+
+    dates = df.index[oos_idx:]
+    fig, axes = plt.subplots(2, 1, figsize=(14, 8), sharex=True)
+
+    # Panel 1: Dynamic correlation
+    ax1 = axes[0]
+    ax1.plot(dates, rho_dcc_a4f[oos_idx:], label='DCC-A4f', color='#2196F3', alpha=0.8, linewidth=0.8)
+    ax1.plot(dates, rho_dcc_gjr[oos_idx:], label='DCC-GJR', color='#FF5722', alpha=0.7, linewidth=0.8)
+    ax1.axhline(y=np.mean(rho_dcc_a4f_oos[mask_a]), color='#2196F3', linestyle='--', alpha=0.4, linewidth=0.6)
+    ax1.axhline(y=np.mean(rho_dcc_gjr_oos[mask_g]), color='#FF5722', linestyle='--', alpha=0.4, linewidth=0.6)
+    ax1.set_ylabel('Dynamic Correlation (ρ)')
+    ax1.set_title('K1028: DCC-A4f vs DCC-GJR — SPY/QQQ Dynamic Correlation (OOS 2019-2026)')
+    ax1.legend(loc='lower right')
+    ax1.grid(True, alpha=0.3)
+
+    # Panel 2: Portfolio variance forecast vs actual
+    ax2 = axes[1]
+    ax2.plot(dates, port_r2[oos_idx:], label='Actual r²', color='gray', alpha=0.3, linewidth=0.5)
+    ax2.plot(dates, pvar_dcc_a4f[oos_idx:], label='DCC-A4f forecast', color='#2196F3', alpha=0.8, linewidth=0.8)
+    ax2.plot(dates, pvar_dcc_gjr[oos_idx:], label='DCC-GJR forecast', color='#FF5722', alpha=0.7, linewidth=0.8)
+    ax2.set_ylabel('Portfolio Variance')
+    ax2.set_xlabel('Date')
+    ax2.set_title('Portfolio Variance Forecast (50/50 SPY/QQQ)')
+    ax2.legend(loc='upper right')
+    ax2.grid(True, alpha=0.3)
+    ax2.set_yscale('log')
+    ax2.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+    ax2.xaxis.set_major_locator(mdates.YearLocator())
+
+    plt.tight_layout()
+    plt.savefig('experiments/k1028/k1028_dcc_correlation.png', dpi=150, bbox_inches='tight')
+    plt.close()
+    print("  Saved: k1028_dcc_correlation.png")
+
+    # --- Fit one full-sample DCC to report parameters ---
+    print("\n--- Full-sample DCC parameter estimates ---")
+    full_ret1 = df['ret_spy'].values
+    full_ret2 = df['ret_qqq'].values
+    full_vix2 = df['vix2'].values
+    fit1_full = fit_a4f(full_ret1, full_vix2)
+    fit2_full = fit_a4f(full_ret2, full_vix2)
+    eps1_full = full_ret1 / np.sqrt(fit1_full['h'])
+    eps2_full = full_ret2 / np.sqrt(fit2_full['h'])
+    dcc_full = fit_dcc(eps1_full, eps2_full)
+    print(f"  A4f-SPY params: theta0={fit1_full['params'][0]:.6f}, theta1={fit1_full['params'][1]:.4f}, "
+          f"omega={fit1_full['params'][2]:.4f}, alpha={fit1_full['params'][3]:.4f}, "
+          f"gamma={fit1_full['params'][4]:.4f}, beta={fit1_full['params'][5]:.4f}")
+    print(f"  A4f-QQQ params: theta0={fit2_full['params'][0]:.6f}, theta1={fit2_full['params'][1]:.4f}, "
+          f"omega={fit2_full['params'][2]:.4f}, alpha={fit2_full['params'][3]:.4f}, "
+          f"gamma={fit2_full['params'][4]:.4f}, beta={fit2_full['params'][5]:.4f}")
+    print(f"  DCC: a={dcc_full['a']:.6f}, b={dcc_full['b']:.6f}, "
+          f"persistence={dcc_full['a']+dcc_full['b']:.6f}")
+
+    fit1g_full = fit_gjr(full_ret1)
+    fit2g_full = fit_gjr(full_ret2)
+    eps1g_full = full_ret1 / np.sqrt(fit1g_full['h'])
+    eps2g_full = full_ret2 / np.sqrt(fit2g_full['h'])
+    dcc_gjr_full = fit_dcc(eps1g_full, eps2g_full)
+    print(f"  GJR-SPY params: omega={fit1g_full['params'][0]:.6f}, alpha={fit1g_full['params'][1]:.4f}, "
+          f"gamma={fit1g_full['params'][2]:.4f}, beta={fit1g_full['params'][3]:.4f}")
+    print(f"  GJR-QQQ params: omega={fit2g_full['params'][0]:.6f}, alpha={fit2g_full['params'][1]:.4f}, "
+          f"gamma={fit2g_full['params'][2]:.4f}, beta={fit2g_full['params'][3]:.4f}")
+    print(f"  DCC(GJR): a={dcc_gjr_full['a']:.6f}, b={dcc_gjr_full['b']:.6f}, "
+          f"persistence={dcc_gjr_full['a']+dcc_gjr_full['b']:.6f}")
+
+    elapsed = time.time() - t0
+
+    # --- Results JSON ---
+    results = {
+        "experiment_id": "K1028",
+        "title": "DCC-A4f Multivariate Extension for Portfolio Risk",
+        "data_source": "yfinance",
+        "assets": ["SPY", "QQQ"],
+        "exogenous": "^VIX",
+        "portfolio": "50/50 SPY/QQQ",
+        "oos_start": oos_start,
+        "oos_days": int(len(df) - oos_idx),
+        "window": 2000,
+        "refit_every": 63,
+        "seed": 42,
+        "descriptive_stats": {
+            "spy_annual_mean": float(df['ret_spy'].mean() * 252),
+            "spy_annual_std": float(df['ret_spy'].std() * np.sqrt(252)),
+            "qqq_annual_mean": float(df['ret_qqq'].mean() * 252),
+            "qqq_annual_std": float(df['ret_qqq'].std() * np.sqrt(252)),
+            "unconditional_corr": float(df['ret_spy'].corr(df['ret_qqq'])),
+            "n_obs": len(df),
+            "date_range": f"{df.index[0].date()} to {df.index[-1].date()}"
+        },
+        "portfolio_qlike": {
+            "DCC_GJR": ql_dcc_gjr,
+            "DCC_A4f": ql_dcc_a4f,
+            "CCC_GJR": ql_ccc_gjr,
+            "CCC_A4f": ql_ccc_a4f,
+            "best": min([(ql_dcc_gjr, "DCC-GJR"), (ql_dcc_a4f, "DCC-A4f"),
+                         (ql_ccc_gjr, "CCC-GJR"), (ql_ccc_a4f, "CCC-A4f")],
+                        key=lambda x: x[0])[1]
+        },
+        "dm_tests": {
+            "DCC_GJR_vs_DCC_A4f": {
+                "t_stat": dm1['t_stat'], "p_value": dm1['p_value'],
+                "interpretation": "positive t → A4f better" if dm1['t_stat'] > 0 else "negative t → GJR better"
+            },
+            "CCC_GJR_vs_CCC_A4f": {
+                "t_stat": dm2['t_stat'], "p_value": dm2['p_value']
+            },
+            "DCC_A4f_vs_CCC_A4f": {
+                "t_stat": dm3['t_stat'], "p_value": dm3['p_value'],
+                "interpretation": "positive t → CCC better (DCC unnecessary)" if dm3['t_stat'] > 0 else "negative t → DCC adds value"
+            },
+            "DCC_GJR_vs_CCC_GJR": {
+                "t_stat": dm4['t_stat'], "p_value": dm4['p_value']
+            }
+        },
+        "dcc_params_full_sample": {
+            "A4f": {
+                "a": dcc_full['a'], "b": dcc_full['b'],
+                "persistence": dcc_full['a'] + dcc_full['b'],
+                "converged": dcc_full['converged'],
+                "qbar12": dcc_full['qbar12']
+            },
+            "GJR": {
+                "a": dcc_gjr_full['a'], "b": dcc_gjr_full['b'],
+                "persistence": dcc_gjr_full['a'] + dcc_gjr_full['b'],
+                "converged": dcc_gjr_full['converged'],
+                "qbar12": dcc_gjr_full['qbar12']
+            }
+        },
+        "univariate_params_full_sample": {
+            "A4f_SPY": {f"p{i}": float(v) for i, v in enumerate(fit1_full['params'])},
+            "A4f_QQQ": {f"p{i}": float(v) for i, v in enumerate(fit2_full['params'])},
+            "GJR_SPY": {f"p{i}": float(v) for i, v in enumerate(fit1g_full['params'])},
+            "GJR_QQQ": {f"p{i}": float(v) for i, v in enumerate(fit2g_full['params'])}
+        },
+        "correlation_stats_oos": {
+            "DCC_A4f": {
+                "mean": float(np.mean(rho_dcc_a4f_oos[mask_a])),
+                "std": float(np.std(rho_dcc_a4f_oos[mask_a])),
+                "min": float(np.min(rho_dcc_a4f_oos[mask_a])),
+                "max": float(np.max(rho_dcc_a4f_oos[mask_a]))
+            },
+            "DCC_GJR": {
+                "mean": float(np.mean(rho_dcc_gjr_oos[mask_g])),
+                "std": float(np.std(rho_dcc_gjr_oos[mask_g])),
+                "min": float(np.min(rho_dcc_gjr_oos[mask_g])),
+                "max": float(np.max(rho_dcc_gjr_oos[mask_g]))
+            }
+        },
+        "var_backtest_5pct": {},
+        "references": [
+            "Engle, R. (2002). Dynamic Conditional Correlation. JBES 20(3), 339-350.",
+            "Patton, A. (2011). Volatility forecast comparison using imperfect proxies. JoE 160(1), 246-256.",
+            "A4f multiplicative framework from Paper 9 (Lai, 2026)"
+        ],
+        "elapsed_seconds": round(elapsed, 1),
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+    }
+
+    # VaR results
+    for name, pv in [("DCC_GJR", pvar_dcc_gjr), ("DCC_A4f", pvar_dcc_a4f),
+                      ("CCC_GJR", pvar_ccc_gjr), ("CCC_A4f", pvar_ccc_a4f)]:
+        sigma_oos = np.sqrt(pv[oos_idx:])
+        var5 = z_05 * sigma_oos
+        violations = int(np.sum(port_ret_oos < var5))
+        vrate = violations / n_oos
+        if 0 < violations < n_oos:
+            lr = 2.0 * (violations * np.log(vrate/0.05) + (n_oos-violations)*np.log((1-vrate)/(1-0.05)))
+            pval = float(1.0 - stats.chi2.cdf(lr, 1))
+        else:
+            lr = float('nan')
+            pval = float('nan')
+        results["var_backtest_5pct"][name] = {
+            "violations": violations,
+            "total": n_oos,
+            "violation_rate": round(vrate, 4),
+            "kupiec_lr": round(lr, 4) if np.isfinite(lr) else None,
+            "kupiec_p": round(pval, 4) if np.isfinite(pval) else None,
+            "pass": pval > 0.05 if np.isfinite(pval) else False
         }
-    except Exception as e:
-        print(f"    ERROR: {e}")
-        granger_results[label] = {'error': str(e)}
 
-# ============================================================
-# STEP 2b: PARTIAL GRANGER (controlling for VIX)
-# ============================================================
-print("\n" + "-" * 50)
-print("[Step 2b] Partial Granger Causality (controlling for VIX)")
-print("-" * 50)
-
-# Manual partial Granger: regress out VIX effect first, then test residuals
-from statsmodels.regression.linear_model import OLS
-from statsmodels.tools import add_constant
-
-partial_granger_results = {}
-for cause, effect, label in [('2881.TW', '0050.TW', 'Fubon -> 0050'),
-                               ('0055.TW', '0050.TW', 'FinETF -> 0050'),
-                               ('2881.TW', '2330.TW', 'Fubon -> TSMC')]:
-    if cause not in sq_returns.columns or effect not in sq_returns.columns or '^VIX' not in returns.columns:
-        continue
-
-    # Build dataset with lagged values
-    df_test = pd.DataFrame()
-    df_test['y'] = sq_returns[effect]
-    for lag in range(1, 4):  # Use 3 lags for VIX control
-        df_test[f'y_lag{lag}'] = sq_returns[effect].shift(lag)
-        df_test[f'vix_lag{lag}'] = (returns['^VIX'].shift(lag)) ** 2  # VIX squared change
-        df_test[f'cause_lag{lag}'] = sq_returns[cause].shift(lag)
-
-    df_test = df_test.dropna()
-
-    # Restricted model: y ~ y_lags + vix_lags
-    y = df_test['y']
-    X_restricted = df_test[[f'y_lag{i}' for i in range(1, 4)] + [f'vix_lag{i}' for i in range(1, 4)]]
-    X_restricted = add_constant(X_restricted)
-
-    # Unrestricted model: y ~ y_lags + vix_lags + cause_lags
-    X_unrestricted = df_test[[f'y_lag{i}' for i in range(1, 4)] +
-                              [f'vix_lag{i}' for i in range(1, 4)] +
-                              [f'cause_lag{i}' for i in range(1, 4)]]
-    X_unrestricted = add_constant(X_unrestricted)
-
-    model_r = OLS(y, X_restricted).fit()
-    model_u = OLS(y, X_unrestricted).fit()
-
-    # F-test for restriction
-    n = len(y)
-    k_r = X_restricted.shape[1]
-    k_u = X_unrestricted.shape[1]
-    q = k_u - k_r  # number of restrictions
-
-    ssr_r = model_r.ssr
-    ssr_u = model_u.ssr
-
-    F_stat = ((ssr_r - ssr_u) / q) / (ssr_u / (n - k_u))
-    p_val = 1 - stats.f.cdf(F_stat, q, n - k_u)
-
-    sig = '***' if p_val < 0.01 else ('**' if p_val < 0.05 else ('*' if p_val < 0.10 else 'ns'))
-    print(f"  {label} | VIX-controlled: F={F_stat:.3f}, p={p_val:.4f} {sig}")
-
-    partial_granger_results[label] = {
-        'F_stat': float(F_stat),
-        'p_value': float(p_val),
-        'significant_at_5pct': p_val < 0.05,
-        'n_obs': int(n),
-        'vix_controlled': True
+    # Summary
+    best_model = results["portfolio_qlike"]["best"]
+    a4f_improves = ql_dcc_a4f < ql_dcc_gjr
+    dcc_needed = dm3['t_stat'] < 0  # negative means DCC better than CCC
+    results["summary"] = {
+        "a4f_improves_over_gjr_in_dcc": a4f_improves,
+        "qlike_improvement_pct": round((ql_dcc_gjr - ql_dcc_a4f) / abs(ql_dcc_gjr) * 100, 2) if ql_dcc_gjr != 0 else 0,
+        "dm_t_a4f_vs_gjr": dm1['t_stat'],
+        "dm_p_a4f_vs_gjr": dm1['p_value'],
+        "dcc_adds_value_over_ccc": dcc_needed,
+        "dm_t_dcc_vs_ccc_a4f": dm3['t_stat'],
+        "best_model": best_model,
+        "conclusion": (
+            f"DCC-A4f {'improves' if a4f_improves else 'does not improve'} over DCC-GJR "
+            f"(QLIKE: {ql_dcc_a4f:.6f} vs {ql_dcc_gjr:.6f}, "
+            f"DM t={dm1['t_stat']:.3f}, p={dm1['p_value']:.3f}). "
+            f"DCC {'adds value' if dcc_needed else 'does NOT add value'} over CCC "
+            f"for A4f marginals (DM t={dm3['t_stat']:.3f}, p={dm3['p_value']:.3f})."
+        )
     }
 
-# ============================================================
-# STEP 3: FINANCIAL STRESS INDICATOR CONSTRUCTION
-# ============================================================
-print("\n" + "=" * 70)
-print("[Step 3] Financial Stress Indicator Construction")
-print("=" * 70)
-
-# Method 1: 22-day rolling vol of 0055.TW (financial ETF)
-if '0055.TW' in returns.columns:
-    fin_stress_vol = returns['0055.TW'].rolling(FINSTRESS_WINDOW).std() * np.sqrt(252)
-    fin_stress_vol.name = 'FinStress_Vol'
-
-    # Method 2: 2881 5-day return momentum (negative = stress)
-    fin_stress_momentum = returns['2881.TW'].rolling(5).mean()
-    fin_stress_momentum.name = 'FinStress_Mom'
-
-    # Method 3: Combined indicator (z-score)
-    fin_stress_z = (fin_stress_vol - fin_stress_vol.expanding().mean()) / fin_stress_vol.expanding().std()
-    fin_stress_z.name = 'FinStress_Z'
-
-    # High stress indicator
-    threshold_vol = fin_stress_vol.expanding().quantile(FINSTRESS_PERCENTILE / 100)
-    high_stress = (fin_stress_vol > threshold_vol).astype(int)
-    high_stress.name = 'HighStress'
-
-    # Statistics
-    stress_pct = high_stress.dropna().mean() * 100
-    print(f"  FinStress (22-day rolling vol of 0055.TW):")
-    print(f"    Mean: {fin_stress_vol.dropna().mean():.4f}")
-    print(f"    Median: {fin_stress_vol.dropna().median():.4f}")
-    print(f"    Std: {fin_stress_vol.dropna().std():.4f}")
-    print(f"    High stress days (>P{FINSTRESS_PERCENTILE}): {stress_pct:.1f}%")
-
-    # Conditional analysis: 0050 vol during high vs low stress
-    combined = pd.DataFrame({
-        'r2_0050': sq_returns['0050.TW'],
-        'high_stress': high_stress,
-        'fin_stress_vol': fin_stress_vol
-    }).dropna()
-
-    avg_r2_high = combined.loc[combined['high_stress'] == 1, 'r2_0050'].mean()
-    avg_r2_low = combined.loc[combined['high_stress'] == 0, 'r2_0050'].mean()
-    vol_ratio = avg_r2_high / avg_r2_low if avg_r2_low > 0 else np.nan
-
-    print(f"\n  0050.TW avg r^2 during high stress: {avg_r2_high:.6f}")
-    print(f"  0050.TW avg r^2 during low stress:  {avg_r2_low:.6f}")
-    print(f"  Volatility ratio (high/low): {vol_ratio:.2f}x")
-
-    # T-test for difference
-    high_group = combined.loc[combined['high_stress'] == 1, 'r2_0050']
-    low_group = combined.loc[combined['high_stress'] == 0, 'r2_0050']
-    t_stat_cond, p_val_cond = stats.ttest_ind(high_group, low_group)
-    print(f"  T-test (high vs low stress): t={t_stat_cond:.3f}, p={p_val_cond:.4f}")
-
-# ============================================================
-# STEP 4: GARCH-X WITH FINANCIAL STRESS REGRESSOR
-# ============================================================
-print("\n" + "=" * 70)
-print("[Step 4] GJR-GARCH vs GJR-GARCH-X (FinStress)")
-print("=" * 70)
-
-# Prepare data for GARCH
-garch_returns = returns['0050.TW'] * 100  # Scale to percentage
-garch_returns = garch_returns.dropna()
-
-# Align financial stress indicator
-fin_stress_aligned = fin_stress_vol.reindex(garch_returns.index).dropna()
-common_idx = garch_returns.index.intersection(fin_stress_aligned.index)
-garch_returns_aligned = garch_returns.loc[common_idx]
-fin_stress_aligned = fin_stress_aligned.loc[common_idx]
-
-print(f"  GARCH sample: {len(garch_returns_aligned)} days")
-
-# Split into in-sample (80%) and out-of-sample (20%)
-n_total = len(garch_returns_aligned)
-n_is = int(n_total * 0.8)
-n_oos = n_total - n_is
-
-is_returns = garch_returns_aligned.iloc[:n_is]
-oos_returns = garch_returns_aligned.iloc[n_is:]
-is_stress = fin_stress_aligned.iloc[:n_is]
-oos_stress = fin_stress_aligned.iloc[n_is:]
-
-print(f"  In-sample: {n_is} days ({is_returns.index[0].date()} to {is_returns.index[-1].date()})")
-print(f"  Out-of-sample: {n_oos} days ({oos_returns.index[0].date()} to {oos_returns.index[-1].date()})")
-
-# Model H0: GJR-GARCH(1,1)
-print("\n  Fitting GJR-GARCH(1,1)...")
-try:
-    gjr_base = arch_model(is_returns, vol='GARCH', p=1, o=1, q=1, dist='t')
-    gjr_base_fit = gjr_base.fit(disp='off')
-    print(f"    Convergence: {gjr_base_fit.convergence_flag == 0}")
-    print(f"    omega={gjr_base_fit.params.get('omega', 'N/A'):.6f}")
-    print(f"    alpha={gjr_base_fit.params.get('alpha[1]', 'N/A'):.6f}")
-    print(f"    gamma={gjr_base_fit.params.get('gamma[1]', 'N/A'):.6f}")
-    print(f"    beta={gjr_base_fit.params.get('beta[1]', 'N/A'):.6f}")
-    persistence = (gjr_base_fit.params.get('alpha[1]', 0) +
-                   gjr_base_fit.params.get('gamma[1]', 0) / 2 +
-                   gjr_base_fit.params.get('beta[1]', 0))
-    print(f"    Persistence: {persistence:.4f} {'< 1 OK' if persistence < 1 else 'WARNING >= 1'}")
-    print(f"    AIC: {gjr_base_fit.aic:.2f}")
-    print(f"    BIC: {gjr_base_fit.bic:.2f}")
-except Exception as e:
-    print(f"    ERROR: {e}")
-    gjr_base_fit = None
-
-# Model H1: GJR-GARCH(1,1) with X = FinStress (lagged by 1 day for no lookahead)
-print("\n  Fitting GJR-GARCH-X (FinStress as external regressor)...")
-# arch library supports exogenous variables in the mean equation
-# For variance equation X, we use a manual approach
-try:
-    # Use lagged financial stress as exogenous in mean equation
-    exog_is = pd.DataFrame({'fin_stress': is_stress.shift(1)}).dropna()  # shift(1) for no lookahead!
-    common_is = is_returns.index.intersection(exog_is.index)
-    is_ret_x = is_returns.loc[common_is]
-    exog_is_x = exog_is.loc[common_is]
-
-    gjr_x = arch_model(is_ret_x, vol='GARCH', p=1, o=1, q=1, dist='t', x=exog_is_x)
-    gjr_x_fit = gjr_x.fit(disp='off')
-    print(f"    Convergence: {gjr_x_fit.convergence_flag == 0}")
-    print(f"    AIC: {gjr_x_fit.aic:.2f}")
-    print(f"    BIC: {gjr_x_fit.bic:.2f}")
-    print(f"    FinStress coeff: {gjr_x_fit.params.get('fin_stress', 'N/A')}")
-
-    # AIC/BIC comparison
-    aic_diff = gjr_x_fit.aic - gjr_base_fit.aic
-    bic_diff = gjr_x_fit.bic - gjr_base_fit.bic
-    print(f"\n    AIC diff (X - base): {aic_diff:.2f} ({'X better' if aic_diff < 0 else 'base better'})")
-    print(f"    BIC diff (X - base): {bic_diff:.2f} ({'X better' if bic_diff < 0 else 'base better'})")
-except Exception as e:
-    print(f"    ERROR fitting GARCH-X: {e}")
-    gjr_x_fit = None
-
-# Out-of-sample evaluation with QLIKE on r^2
-print("\n  Out-of-sample forecast evaluation (QLIKE on r^2)...")
-
-# Recursive OOS forecasting for base model
-oos_forecasts_base = []
-oos_forecasts_x = []
-oos_r2 = []
-
-# Use expanding window for OOS
-for t in range(n_oos):
-    idx = n_is + t
-    # All data up to idx (exclusive of current)
-    r_train = garch_returns_aligned.iloc[:idx]
-    s_train = fin_stress_aligned.iloc[:idx]
-
-    # Actual r^2 (scaled to match GARCH output)
-    actual_r2 = (garch_returns_aligned.iloc[idx]) ** 2
-    oos_r2.append(float(actual_r2))
-
-    try:
-        # Base model
-        mod_b = arch_model(r_train, vol='GARCH', p=1, o=1, q=1, dist='t')
-        fit_b = mod_b.fit(disp='off', show_warning=False)
-        fcast_b = fit_b.forecast(horizon=1)
-        var_b = fcast_b.variance.values[-1, 0]
-        oos_forecasts_base.append(float(var_b))
-    except:
-        oos_forecasts_base.append(np.nan)
-
-    try:
-        # X model (with lagged stress)
-        exog_t = pd.DataFrame({'fin_stress': s_train.shift(1)}).dropna()
-        common_t = r_train.index.intersection(exog_t.index)
-        r_t = r_train.loc[common_t]
-        exog_t = exog_t.loc[common_t]
-
-        # For forecast, use current stress as exog (it's already lagged by construction)
-        mod_x = arch_model(r_t, vol='GARCH', p=1, o=1, q=1, dist='t', x=exog_t)
-        fit_x = mod_x.fit(disp='off', show_warning=False)
-
-        # Last available stress for forecast
-        last_stress = fin_stress_aligned.iloc[idx - 1]  # t-1 stress
-        fcast_x = fit_x.forecast(horizon=1, x={'fin_stress': last_stress})
-        var_x = fcast_x.variance.values[-1, 0]
-        oos_forecasts_x.append(float(var_x))
-    except:
-        oos_forecasts_x.append(np.nan)
-
-    if (t + 1) % 100 == 0:
-        print(f"    OOS progress: {t+1}/{n_oos}")
-
-print(f"    OOS complete: {len(oos_r2)} observations")
-
-# Compute QLIKE
-oos_r2 = np.array(oos_r2)
-oos_base = np.array(oos_forecasts_base)
-oos_x = np.array(oos_forecasts_x)
-
-# Remove NaN
-valid = ~(np.isnan(oos_base) | np.isnan(oos_x) | np.isnan(oos_r2) | (oos_base <= 0) | (oos_x <= 0))
-oos_r2_v = oos_r2[valid]
-oos_base_v = oos_base[valid]
-oos_x_v = oos_x[valid]
-
-print(f"    Valid OOS observations: {valid.sum()}")
-
-if valid.sum() > 50:
-    # QLIKE = mean(r2/sigma2 - log(r2/sigma2) - 1) = mean(r2/sigma2 + log(sigma2)) up to constant
-    qlike_base = np.mean(oos_r2_v / oos_base_v + np.log(oos_base_v))
-    qlike_x = np.mean(oos_r2_v / oos_x_v + np.log(oos_x_v))
-
-    print(f"\n    QLIKE (base GJR): {qlike_base:.6f}")
-    print(f"    QLIKE (GJR-X):    {qlike_x:.6f}")
-    print(f"    QLIKE diff:       {qlike_x - qlike_base:.6f} ({'X better' if qlike_x < qlike_base else 'base better'})")
-
-    # DM test
-    loss_base = oos_r2_v / oos_base_v + np.log(oos_base_v)
-    loss_x = oos_r2_v / oos_x_v + np.log(oos_x_v)
-    d = loss_base - loss_x  # positive = base worse = X better
-
-    dm_mean = np.mean(d)
-    dm_se = np.std(d, ddof=1) / np.sqrt(len(d))
-    dm_t = dm_mean / dm_se if dm_se > 0 else 0
-    dm_p = 2 * (1 - stats.t.cdf(abs(dm_t), len(d) - 1))
-
-    print(f"\n    DM test (QLIKE): t={dm_t:.4f}, p={dm_p:.4f}")
-    print(f"    Harvey (2016) threshold: |t| > 3.0 -> {'PASS' if abs(dm_t) > 3.0 else 'FAIL (not significant at Harvey threshold)'}")
-
-    garchx_results = {
-        'qlike_base': float(qlike_base),
-        'qlike_x': float(qlike_x),
-        'qlike_diff': float(qlike_x - qlike_base),
-        'dm_t': float(dm_t),
-        'dm_p': float(dm_p),
-        'harvey_pass': abs(dm_t) > 3.0,
-        'n_oos': int(valid.sum()),
-        'x_better': qlike_x < qlike_base
-    }
-else:
-    print("    ERROR: Not enough valid OOS observations")
-    garchx_results = {'error': 'insufficient_data'}
-
-# ============================================================
-# STEP 5: VT OVERLAY TEST
-# ============================================================
-print("\n" + "=" * 70)
-print("[Step 5] VT Strategy Overlay Test")
-print("=" * 70)
-
-# Get VIX data aligned with 0050 returns
-vix_close = data['^VIX']['Close'].reindex(returns.index)
-
-# For Taiwan, we use previous day VIX (cross-market lag)
-vix_signal = vix_close.shift(1)  # signal.shift(1) - MANDATORY LAG
-
-# Build high stress signal (also lagged)
-high_stress_signal = high_stress.shift(1)  # signal.shift(1) - MANDATORY LAG
-
-# 0050 returns (unscaled)
-r_0050 = returns['0050.TW']
-
-# Baseline: 8.63/VIX
-w_baseline = VT_SIGMA / vix_signal
-w_baseline = w_baseline.clip(0, 1.5)  # Cap leverage at 1.5x
-
-# Test: 8.63/VIX * (1 - 0.3 * I(FinStress > P80))
-# When financial stress is high, reduce exposure by 30%
-w_overlay = w_baseline * (1 - 0.3 * high_stress_signal)
-w_overlay = w_overlay.clip(0, 1.5)
-
-# Compute strategy returns
-strat_baseline = w_baseline * r_0050
-strat_overlay = w_overlay * r_0050
-bh_0050 = r_0050.copy()  # Buy & hold baseline
-
-# Drop NaN and align
-strat_df = pd.DataFrame({
-    'BH_0050': bh_0050,
-    'VT_baseline': strat_baseline,
-    'VT_overlay': strat_overlay,
-    'high_stress': high_stress_signal,
-    'vix': vix_signal
-}).dropna()
-
-print(f"  Strategy evaluation period: {len(strat_df)} days")
-print(f"  From {strat_df.index[0].date()} to {strat_df.index[-1].date()}")
-
-# Performance metrics
-def compute_metrics(r, name):
-    n_years = len(r) / 252
-    ann_ret = (1 + r).prod() ** (1 / n_years) - 1
-    ann_vol = r.std() * np.sqrt(252)
-    sharpe = ann_ret / ann_vol if ann_vol > 0 else 0
-
-    # Max drawdown
-    cum = (1 + r).cumprod()
-    peak = cum.expanding().max()
-    dd = (cum - peak) / peak
-    mdd = dd.min()
-
-    return {
-        'ann_return': float(ann_ret),
-        'ann_vol': float(ann_vol),
-        'sharpe': float(sharpe),
-        'max_drawdown': float(mdd),
-        'n_days': len(r),
-        'n_years': float(n_years)
-    }
-
-metrics = {}
-for name, col in [('BH_0050', 'BH_0050'), ('VT_baseline', 'VT_baseline'), ('VT_overlay', 'VT_overlay')]:
-    m = compute_metrics(strat_df[col], name)
-    metrics[name] = m
-    print(f"\n  {name}:")
-    print(f"    Ann Return: {m['ann_return']:.4f}")
-    print(f"    Ann Vol:    {m['ann_vol']:.4f}")
-    print(f"    Sharpe:     {m['sharpe']:.4f}")
-    print(f"    Max DD:     {m['max_drawdown']:.4f}")
-
-# DM test between strategies (using squared return loss)
-loss_bl = (strat_df['VT_baseline'] ** 2)
-loss_ov = (strat_df['VT_overlay'] ** 2)
-d_strat = loss_bl - loss_ov
-dm_strat_t = d_strat.mean() / (d_strat.std() / np.sqrt(len(d_strat))) if d_strat.std() > 0 else 0
-dm_strat_p = 2 * (1 - stats.t.cdf(abs(dm_strat_t), len(d_strat) - 1))
-
-print(f"\n  DM test (VT_baseline vs VT_overlay, squared return loss):")
-print(f"    t={dm_strat_t:.4f}, p={dm_strat_p:.4f}")
-
-# Sanity check: Sharpe > 2x baseline?
-if metrics['VT_overlay']['sharpe'] > 2 * metrics['VT_baseline']['sharpe']:
-    print("\n  WARNING: Overlay Sharpe > 2x baseline! Possible bug.")
-
-# Check overlap with VIX information
-print("\n  VIX vs FinStress overlap analysis:")
-if '0055.TW' in returns.columns:
-    overlap_df = pd.DataFrame({
-        'fin_stress': fin_stress_vol,
-        'vix': vix_close
-    }).dropna()
-    vix_finstress_corr = overlap_df.corr().iloc[0, 1]
-    print(f"    Correlation(FinStress, VIX): {vix_finstress_corr:.4f}")
-
-    # Regime overlap
-    vix_high = vix_close > vix_close.expanding().quantile(0.80)
-    stress_high = high_stress == 1
-    both_high = (vix_high & stress_high).dropna()
-    either_high = (vix_high | stress_high).dropna()
-
-    overlap_common = both_high.sum()
-    overlap_union = either_high.sum()
-    jaccard = overlap_common / overlap_union if overlap_union > 0 else 0
-
-    print(f"    Jaccard similarity (high VIX & high stress): {jaccard:.4f}")
-    print(f"    Unique FinStress signals (stress high, VIX not): "
-          f"{(stress_high & ~vix_high).dropna().sum()}")
-
-# ============================================================
-# STEP 6: CONDITIONAL ANALYSIS - DRAWDOWN OVERLAP
-# ============================================================
-print("\n" + "=" * 70)
-print("[Step 6] Financial Stress & Drawdown Timing Analysis")
-print("=" * 70)
-
-# 0050 drawdown
-cum_0050 = (1 + r_0050).cumprod()
-peak_0050 = cum_0050.expanding().max()
-dd_0050 = (cum_0050 - peak_0050) / peak_0050
-
-# Combine with stress signal
-timing_df = pd.DataFrame({
-    'drawdown': dd_0050,
-    'high_stress': high_stress,
-    'fin_stress': fin_stress_vol
-}).dropna()
-
-# When high stress = 1, what's the avg drawdown?
-avg_dd_stress = timing_df.loc[timing_df['high_stress'] == 1, 'drawdown'].mean()
-avg_dd_no_stress = timing_df.loc[timing_df['high_stress'] == 0, 'drawdown'].mean()
-print(f"  Avg 0050 drawdown during high stress: {avg_dd_stress:.4f}")
-print(f"  Avg 0050 drawdown during low stress:  {avg_dd_no_stress:.4f}")
-
-# Can stress predict future drawdowns? (Lead analysis)
-leads = [1, 5, 10, 20]
-lead_results = {}
-for lead in leads:
-    future_dd = dd_0050.shift(-lead)
-    lead_df = pd.DataFrame({
-        'high_stress': high_stress,
-        'future_dd': future_dd
-    }).dropna()
-
-    avg_fdd_high = lead_df.loc[lead_df['high_stress'] == 1, 'future_dd'].mean()
-    avg_fdd_low = lead_df.loc[lead_df['high_stress'] == 0, 'future_dd'].mean()
-    t_lead, p_lead = stats.ttest_ind(
-        lead_df.loc[lead_df['high_stress'] == 1, 'future_dd'],
-        lead_df.loc[lead_df['high_stress'] == 0, 'future_dd']
-    )
-
-    lead_results[lead] = {
-        'avg_dd_high': float(avg_fdd_high),
-        'avg_dd_low': float(avg_fdd_low),
-        't_stat': float(t_lead),
-        'p_value': float(p_lead)
-    }
-    sig = '***' if p_lead < 0.01 else ('**' if p_lead < 0.05 else ('*' if p_lead < 0.10 else 'ns'))
-    print(f"  Lead {lead:2d}d: DD(high)={avg_fdd_high:.4f}, DD(low)={avg_fdd_low:.4f}, "
-          f"t={t_lead:.3f}, p={p_lead:.4f} {sig}")
-
-# ============================================================
-# STEP 7: ROBUSTNESS - DIFFERENT STRESS THRESHOLDS
-# ============================================================
-print("\n" + "=" * 70)
-print("[Step 7] Robustness: Different Stress Thresholds")
-print("=" * 70)
-
-thresholds = [70, 75, 80, 85, 90]
-reduction_levels = [0.2, 0.3, 0.4, 0.5]
-
-robustness_results = {}
-for pctl in thresholds:
-    threshold = fin_stress_vol.expanding().quantile(pctl / 100)
-    hs = (fin_stress_vol > threshold).astype(int).shift(1)  # signal.shift(1)!
-
-    for red in reduction_levels:
-        w = w_baseline * (1 - red * hs)
-        w = w.clip(0, 1.5)
-        r_strat = (w * r_0050).dropna()
-        m = compute_metrics(r_strat, f'P{pctl}_R{int(red*100)}')
-        key = f'P{pctl}_R{int(red*100)}'
-        robustness_results[key] = m
-
-print("  Sharpe ratios (Percentile x Reduction):")
-print(f"  {'':8s}", end='')
-for red in reduction_levels:
-    print(f"  R{int(red*100):2d}%  ", end='')
-print()
-for pctl in thresholds:
-    print(f"  P{pctl:2d}    ", end='')
-    for red in reduction_levels:
-        key = f'P{pctl}_R{int(red*100)}'
-        print(f"  {robustness_results[key]['sharpe']:.4f}", end='')
-    print()
-
-print(f"\n  Baseline Sharpe: {metrics['VT_baseline']['sharpe']:.4f}")
-
-# ============================================================
-# CHARTS
-# ============================================================
-print("\n" + "=" * 70)
-print("[Charts] Generating visualizations...")
-print("=" * 70)
-
-# Chart 1: Granger Causality Network
-fig, axes = plt.subplots(1, 2, figsize=(16, 7))
-
-# Panel A: Granger F-statistics heatmap
-pairs_for_heatmap = [
-    ('2881.TW', '0050.TW'), ('0055.TW', '0050.TW'),
-    ('2881.TW', '2330.TW'), ('0055.TW', '2330.TW'),
-    ('^VIX', '0050.TW'), ('0050.TW', '2881.TW')
-]
-labels_map = {
-    ('2881.TW', '0050.TW'): 'Fubon->0050',
-    ('0055.TW', '0050.TW'): 'FinETF->0050',
-    ('2881.TW', '2330.TW'): 'Fubon->TSMC',
-    ('0055.TW', '2330.TW'): 'FinETF->TSMC',
-    ('^VIX', '0050.TW'): 'VIX->0050',
-    ('0050.TW', '2881.TW'): '0050->Fubon'
-}
-
-ax = axes[0]
-pair_labels = []
-f_values_by_lag = {lag: [] for lag in range(1, GRANGER_MAX_LAG + 1)}
-
-for pair in pairs_for_heatmap:
-    cause, effect = pair
-    label = labels_map.get(pair, f'{cause}->{effect}')
-    pair_labels.append(label)
-
-    for granger_label, gr in granger_results.items():
-        if 'error' not in gr and gr.get('cause') == cause and gr.get('effect') == effect:
-            for lag in range(1, GRANGER_MAX_LAG + 1):
-                f_values_by_lag[lag].append(gr['all_lags'][lag]['F'])
-            break
-    else:
-        for lag in range(1, GRANGER_MAX_LAG + 1):
-            f_values_by_lag[lag].append(0)
-
-heatmap_data = np.array([f_values_by_lag[lag] for lag in range(1, GRANGER_MAX_LAG + 1)])
-im = ax.imshow(heatmap_data, aspect='auto', cmap='YlOrRd', interpolation='nearest')
-ax.set_xticks(range(len(pair_labels)))
-ax.set_xticklabels(pair_labels, rotation=45, ha='right', fontsize=9)
-ax.set_yticks(range(GRANGER_MAX_LAG))
-ax.set_yticklabels([f'Lag {i}' for i in range(1, GRANGER_MAX_LAG + 1)])
-ax.set_title('(A) Granger Causality F-statistics\n(on squared returns)', fontsize=12)
-plt.colorbar(im, ax=ax, label='F-statistic')
-
-# Add significance markers
-for i in range(heatmap_data.shape[0]):
-    for j in range(heatmap_data.shape[1]):
-        val = heatmap_data[i, j]
-        # Check p-value
-        for granger_label, gr in granger_results.items():
-            if 'error' not in gr:
-                cause_t = pairs_for_heatmap[j][0]
-                effect_t = pairs_for_heatmap[j][1]
-                if gr.get('cause') == cause_t and gr.get('effect') == effect_t:
-                    p = gr['all_lags'][i + 1]['p']
-                    if p < 0.01:
-                        ax.text(j, i, '***', ha='center', va='center', fontsize=8, fontweight='bold', color='white' if val > 5 else 'black')
-                    elif p < 0.05:
-                        ax.text(j, i, '**', ha='center', va='center', fontsize=8, fontweight='bold', color='white' if val > 5 else 'black')
-                    elif p < 0.10:
-                        ax.text(j, i, '*', ha='center', va='center', fontsize=8, color='white' if val > 5 else 'black')
-                    break
-
-# Panel B: Partial Granger (VIX-controlled) bar chart
-ax2 = axes[1]
-partial_labels = list(partial_granger_results.keys())
-partial_f = [partial_granger_results[k]['F_stat'] for k in partial_labels]
-partial_p = [partial_granger_results[k]['p_value'] for k in partial_labels]
-colors = ['#2ecc71' if p < 0.05 else '#e74c3c' for p in partial_p]
-bars = ax2.bar(partial_labels, partial_f, color=colors, edgecolor='black', linewidth=0.5)
-ax2.axhline(y=stats.f.ppf(0.95, 3, 2000), color='red', linestyle='--', alpha=0.7, label='5% critical value')
-ax2.set_ylabel('F-statistic')
-ax2.set_title('(B) Partial Granger (VIX-controlled)\nGreen=sig, Red=not sig', fontsize=12)
-ax2.legend()
-
-for i, (f, p) in enumerate(zip(partial_f, partial_p)):
-    ax2.text(i, f + 0.1, f'p={p:.3f}', ha='center', fontsize=9)
-
-plt.tight_layout()
-plt.savefig(os.path.join(SCRIPT_DIR, 'k1028_granger_causality.png'), dpi=150, bbox_inches='tight')
-plt.close()
-print("  Saved k1028_granger_causality.png")
-
-# Chart 2: Financial Stress Timeline vs 0050 Drawdown
-fig, axes = plt.subplots(3, 1, figsize=(16, 12), sharex=True)
-
-# Panel A: 0050 cumulative return
-ax1 = axes[0]
-cum_0050_plot = cum_0050.reindex(timing_df.index)
-ax1.plot(cum_0050_plot.index, cum_0050_plot.values, color='#2c3e50', linewidth=1)
-ax1.fill_between(cum_0050_plot.index, cum_0050_plot.values,
-                  where=timing_df['high_stress'] == 1, alpha=0.3, color='red', label='High FinStress')
-ax1.set_ylabel('0050.TW Cumulative Return')
-ax1.set_title('K1028: Financial Stress Early Warning System for Taiwan 50 ETF', fontsize=14)
-ax1.legend(loc='upper left')
-ax1.grid(True, alpha=0.3)
-
-# Panel B: Financial stress indicator
-ax2 = axes[1]
-ax2.plot(timing_df.index, timing_df['fin_stress'], color='#e67e22', linewidth=0.8, label='FinStress (22d vol of 0055.TW)')
-threshold_plot = fin_stress_vol.expanding().quantile(FINSTRESS_PERCENTILE / 100).reindex(timing_df.index)
-ax2.plot(timing_df.index, threshold_plot, color='red', linestyle='--', linewidth=0.8, label=f'P{FINSTRESS_PERCENTILE} threshold')
-ax2.fill_between(timing_df.index, timing_df['fin_stress'], threshold_plot,
-                  where=timing_df['fin_stress'] > threshold_plot, alpha=0.3, color='red')
-ax2.set_ylabel('Annualized Volatility')
-ax2.legend(loc='upper right')
-ax2.grid(True, alpha=0.3)
-
-# Panel C: 0050 drawdown
-ax3 = axes[2]
-dd_plot = dd_0050.reindex(timing_df.index)
-ax3.fill_between(dd_plot.index, dd_plot.values, 0, color='#e74c3c', alpha=0.4)
-ax3.plot(dd_plot.index, dd_plot.values, color='#c0392b', linewidth=0.8)
-# Mark high stress periods
-stress_periods = timing_df.index[timing_df['high_stress'] == 1]
-for idx in stress_periods:
-    ax3.axvline(idx, color='orange', alpha=0.05, linewidth=0.5)
-ax3.set_ylabel('Drawdown')
-ax3.set_xlabel('Date')
-ax3.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.savefig(os.path.join(SCRIPT_DIR, 'k1028_finstress_timeline.png'), dpi=150, bbox_inches='tight')
-plt.close()
-print("  Saved k1028_finstress_timeline.png")
-
-# Chart 3: Strategy comparison
-fig, axes = plt.subplots(2, 2, figsize=(16, 10))
-
-# Panel A: Cumulative returns
-ax1 = axes[0, 0]
-for name, col, color in [('BH 0050', 'BH_0050', '#95a5a6'),
-                           ('VT 8.63/VIX', 'VT_baseline', '#3498db'),
-                           ('VT + FinStress', 'VT_overlay', '#e74c3c')]:
-    cum = (1 + strat_df[col]).cumprod()
-    ax1.plot(cum.index, cum.values, label=name, color=color, linewidth=1.2)
-ax1.set_title('(A) Cumulative Returns', fontsize=11)
-ax1.legend()
-ax1.grid(True, alpha=0.3)
-ax1.set_ylabel('Growth of $1')
-
-# Panel B: Rolling Sharpe (252-day)
-ax2 = axes[0, 1]
-for name, col, color in [('VT baseline', 'VT_baseline', '#3498db'),
-                           ('VT overlay', 'VT_overlay', '#e74c3c')]:
-    rolling_ret = strat_df[col].rolling(252).mean() * 252
-    rolling_vol = strat_df[col].rolling(252).std() * np.sqrt(252)
-    rolling_sharpe = rolling_ret / rolling_vol
-    ax2.plot(rolling_sharpe.index, rolling_sharpe.values, label=name, color=color, linewidth=1)
-ax2.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
-ax2.set_title('(B) Rolling 252-day Sharpe Ratio', fontsize=11)
-ax2.legend()
-ax2.grid(True, alpha=0.3)
-
-# Panel C: Robustness heatmap
-ax3 = axes[1, 0]
-rob_matrix = np.zeros((len(thresholds), len(reduction_levels)))
-for i, pctl in enumerate(thresholds):
-    for j, red in enumerate(reduction_levels):
-        key = f'P{pctl}_R{int(red*100)}'
-        rob_matrix[i, j] = robustness_results[key]['sharpe']
-
-im = ax3.imshow(rob_matrix, cmap='RdYlGn', aspect='auto')
-ax3.set_xticks(range(len(reduction_levels)))
-ax3.set_xticklabels([f'{int(r*100)}%' for r in reduction_levels])
-ax3.set_yticks(range(len(thresholds)))
-ax3.set_yticklabels([f'P{p}' for p in thresholds])
-ax3.set_xlabel('Reduction Level')
-ax3.set_ylabel('Stress Percentile')
-ax3.set_title('(C) Sharpe Robustness\n(Percentile x Reduction)', fontsize=11)
-plt.colorbar(im, ax=ax3, label='Sharpe')
-
-# Add values to heatmap
-for i in range(len(thresholds)):
-    for j in range(len(reduction_levels)):
-        ax3.text(j, i, f'{rob_matrix[i,j]:.3f}', ha='center', va='center', fontsize=9)
-
-# Panel D: VIX vs FinStress scatter
-ax4 = axes[1, 1]
-scatter_df = pd.DataFrame({
-    'vix': vix_close,
-    'fin_stress': fin_stress_vol
-}).dropna()
-ax4.scatter(scatter_df['vix'], scatter_df['fin_stress'], alpha=0.15, s=5, color='#2c3e50')
-ax4.set_xlabel('VIX Level')
-ax4.set_ylabel('FinStress (22d vol of 0055.TW)')
-ax4.set_title(f'(D) VIX vs FinStress\n(corr={vix_finstress_corr:.3f})', fontsize=11)
-ax4.grid(True, alpha=0.3)
-
-plt.tight_layout()
-plt.savefig(os.path.join(SCRIPT_DIR, 'k1028_strategy_comparison.png'), dpi=150, bbox_inches='tight')
-plt.close()
-print("  Saved k1028_strategy_comparison.png")
-
-# ============================================================
-# RESULTS SUMMARY & SAVE
-# ============================================================
-print("\n" + "=" * 70)
-print("[Summary] K1028 Results")
-print("=" * 70)
-
-results = {
-    'experiment_id': 'K1028',
-    'title': 'Financial Stock Early Warning System - Fubon/Financial ETF -> TSMC/0050.TW Vol Transmission',
-    'date': datetime.now(timezone.utc).isoformat(),
-    'data_source': 'yfinance',
-    'sample_period': f'{START_DATE} to {END_DATE}',
-    'n_observations': len(returns),
-    'seed': 42,
-    'descriptive_stats': desc_stats,
-    'adf_tests': adf_results,
-    'return_correlations': corr_matrix.to_dict(),
-    'granger_causality': granger_results,
-    'partial_granger_vix_controlled': partial_granger_results,
-    'financial_stress_indicator': {
-        'method': '22-day rolling vol of 0055.TW',
-        'threshold': f'P{FINSTRESS_PERCENTILE}',
-        'stress_pct': float(stress_pct),
-        'vol_ratio_high_low': float(vol_ratio),
-        'conditional_ttest': {
-            't_stat': float(t_stat_cond),
-            'p_value': float(p_val_cond)
-        }
-    },
-    'garchx_evaluation': garchx_results,
-    'vt_strategy_metrics': metrics,
-    'vt_dm_test': {
-        't_stat': float(dm_strat_t),
-        'p_value': float(dm_strat_p)
-    },
-    'vix_finstress_overlap': {
-        'correlation': float(vix_finstress_corr),
-        'jaccard_similarity': float(jaccard)
-    },
-    'lead_analysis': lead_results,
-    'robustness': robustness_results,
-    'conclusions': {
-        'Q1_financial_vol_leads_0050': None,  # Will be filled below
-        'Q2_finstress_as_regime_overlay': None,
-        'Q3_vix_overlap': None,
-        'overall': None
-    },
-    'charts': [
-        'k1028_granger_causality.png',
-        'k1028_finstress_timeline.png',
-        'k1028_strategy_comparison.png'
-    ]
-}
-
-# Fill conclusions based on results
-# Q1: Does financial vol lead 0050?
-granger_sig_count = sum(1 for k, v in granger_results.items() if 'error' not in v and v.get('significant_at_5pct', False))
-partial_sig_count = sum(1 for k, v in partial_granger_results.items() if v.get('significant_at_5pct', False))
-
-q1_conclusion = (f"Granger causality: {granger_sig_count}/{len(granger_results)} pairs significant at 5%. "
-                 f"After controlling for VIX: {partial_sig_count}/{len(partial_granger_results)} pairs remain significant. "
-                 f"Volatility ratio (high/low stress): {vol_ratio:.2f}x.")
-
-q2_conclusion = (f"GARCH-X vs base: QLIKE diff = {garchx_results.get('qlike_diff', 'N/A')}, "
-                 f"DM t = {garchx_results.get('dm_t', 'N/A')}, Harvey pass = {garchx_results.get('harvey_pass', 'N/A')}. "
-                 f"VT overlay Sharpe = {metrics['VT_overlay']['sharpe']:.4f} vs baseline {metrics['VT_baseline']['sharpe']:.4f}.")
-
-q3_conclusion = (f"VIX-FinStress correlation = {vix_finstress_corr:.4f}, "
-                 f"Jaccard overlap of high regimes = {jaccard:.4f}. "
-                 f"Partial Granger significance indicates {'some' if partial_sig_count > 0 else 'no'} incremental info beyond VIX.")
-
-results['conclusions']['Q1_financial_vol_leads_0050'] = q1_conclusion
-results['conclusions']['Q2_finstress_as_regime_overlay'] = q2_conclusion
-results['conclusions']['Q3_vix_overlap'] = q3_conclusion
-
-# Overall assessment
-if partial_sig_count > 0 and garchx_results.get('harvey_pass', False):
-    overall = "POSITIVE: Financial stress provides statistically significant incremental information beyond VIX for Taiwan VT."
-elif partial_sig_count > 0 and not garchx_results.get('harvey_pass', False):
-    overall = "MIXED: Granger causality exists but does not survive Harvey (2016) threshold in GARCH-X framework. Marginal practical value."
-elif partial_sig_count == 0:
-    overall = "NULL: Financial stress does not provide incremental information beyond VIX. VIX sufficiency confirmed again."
-else:
-    overall = "INCONCLUSIVE: Results require further investigation."
-
-results['conclusions']['overall'] = overall
-
-print(f"\n  {overall}")
-print(f"\n  Q1: {q1_conclusion}")
-print(f"\n  Q2: {q2_conclusion}")
-print(f"\n  Q3: {q3_conclusion}")
-
-# Save results
-results_path = os.path.join(SCRIPT_DIR, 'k1028_results.json')
-with open(results_path, 'w', encoding='utf-8') as f:
-    json.dump(results, f, indent=2, ensure_ascii=False, default=str)
-print(f"\n  Results saved to {results_path}")
-
-print("\n" + "=" * 70)
-print("K1028 COMPLETE")
-print("=" * 70)
+    with open('experiments/k1028/k1028_results.json', 'w') as f:
+        json.dump(results, f, indent=2, default=str)
+    print(f"\nResults saved to experiments/k1028/k1028_results.json")
+    print(f"Elapsed: {elapsed:.1f}s")
+    print(f"\n{'='*60}")
+    print(f"CONCLUSION: {results['summary']['conclusion']}")
+
+if __name__ == "__main__":
+    main()
