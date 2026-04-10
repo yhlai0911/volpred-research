@@ -1,109 +1,82 @@
-# K1019: VIX Regime Transition Prediction
+# K1019: Markov-Switching GJR-GARCH (MS-GJR) Volatility Forecasting
 
-## Problem
-K752 found VIX-return R² varies 0.24-0.64 across eras (CV=0.33), suggesting distinct volatility regimes. Can we predict when VIX transitions from low to high volatility regime, and use such predictions to improve VT strategy performance?
+## Research Questions
+1. Do two regimes (calm/crisis) in GJR parameters show economically meaningful differences?
+2. Can MS-GJR improve OOS QLIKE over the GJR-t baseline?
+3. How does MS-GJR compare to A4f-VIX9D-t (K1004 best model)?
+4. Is the MS-GJR regime probability highly correlated with VIX level?
 
 ## Motivation
-If regime transitions are predictable, VT strategies could reduce equity weight *before* entering high-vol periods, reducing drawdowns. This connects to the broader question of whether VIX regime information adds value beyond the smooth 12/VIX weight function.
-
-## Related Work
-- **K752**: 5 eras VIX R² from 0.24 (pre-GFC) to 0.64 (COVID recovery)
-- **K162**: VIX Regime -> Return Prediction (initial results)
-- **K278**: VIX Regime Transition (initial results)
-- **K133**: VIX info decay router - no true decay regime
+- K813 (Smooth Transition GARCH) showed IS significance (LR=252) but OOS DM=-0.11 NS with 11 parameters
+- MS-GJR is a cleaner approach: discrete regime switching via Hamilton (1989) filter, 10 parameters
+- If regime probability aligns with VIX, it would confirm that VIX-augmented models (like A4f-VIX9D) capture the same information more efficiently
 
 ## Method
+- **Models**: M1 (GJR-t baseline), M2 (MS(2)-GJR-Normal), M3 (MS(2)-GJR + VIX-driven transitions), M4 (A4f-VIX9D-t)
+- **MS-GJR structure**: Gray (1996) / Klaassen (2002) variance collapse to avoid path dependence
+- **Data**: SPY 2003-2026 (yfinance), OOS: 2013-2026, window=2000, refit every 63 days
+- **Evaluation**: QLIKE on r^2 (Patton 2011), DM test (Harvey t>3.0), VaR 2.5% backtest
 
-### Data
-- SPY, VIX, VIX3M from yfinance (2007-07-17 to 2026-04-08)
-- Total: 4,712 observations; IS: 2,886; OOS: 1,826 (from 2019-01-01)
-- seed=42
+## Key Results
 
-### Regime Definition
-Three thresholds tested: VIX > 20, VIX > 25, VIX > 30
+### QLIKE (OOS, lower = better)
+| Model | QLIKE | DM vs M1 | DM vs M4 |
+|-------|-------|----------|----------|
+| M1: GJR-t (baseline) | 1.6474 | -- | t=+3.53*** |
+| M2: MS(2)-GJR | 1.6149 | t=-3.20*** | t=+2.75 NS |
+| M3: MS(2)-GJR+VIX | 1.6247 | t=-2.37 NS | t=+2.49 NS |
+| M4: A4f-VIX9D-t | 1.5808 | t=-3.53*** | -- |
 
-### Features (14 total)
-VIX change rates (daily, 5d, 20d), VIX above MA20, term structure (VIX/VIX3M), realized vol (5d, 20d, ratio), return momentum (5d, 20d), VIX percentile rank, VIX acceleration, VIX level.
+### VaR 2.5% Backtest
+| Model | Violation Rate | Kupiec p | Status |
+|-------|---------------|----------|--------|
+| M1: GJR-t | 2.97% | 0.093 | PASS |
+| M2: MS-GJR | 3.30% | 0.005 | FAIL |
+| M3: MS-GJR-VIX | 3.69% | 0.000 | FAIL |
+| M4: A4f-VIX9D-t | 2.82% | 0.250 | PASS |
 
-### Models
-1. **Logistic Regression**: Full IS fit, OOS predict
-2. **Rolling Logistic**: 756-day window, refit every 63 days (adaptive)
-3. **Threshold Model**: ΔlogVIX speed threshold (optimized on IS)
-4. **Naive Persistence** (baseline): Tomorrow's regime = today's regime
+### Regime Parameters (last estimation window)
+- **Regime 0 (Calm, 73% of time)**: alpha=0.00, gamma=0.60, beta=0.65, persistence=0.95
+  - High leverage effect, moderate GARCH persistence
+- **Regime 1 (Crisis, 27%)**: alpha=0.00, gamma=0.00, beta=0.83, persistence=0.83
+  - Pure GARCH persistence, no leverage effect
+- Transition: P(stay calm)=0.96, P(stay crisis)=0.90
 
-### Lag Convention
-- Target: `regime.shift(-1)` (predict tomorrow's regime from today's features)
-- Economic strategies: `prediction.shift(1)` (use yesterday's prediction for today's weight)
-- Both baseline and strategy use same lag convention
+### Regime-VIX Correlation
+- M2 P(calm) vs VIX: r = 0.225 (weak)
+- M3 P(calm) vs VIX: r = -0.294 (weak-moderate)
 
-## Results
+## Conclusions
 
-### Classification Performance (OOS, VIX > 20)
+1. **MS-GJR significantly beats GJR-t** (DM t=-3.20, passes Harvey threshold). The regime structure captures meaningful volatility dynamics.
 
-| Model | Accuracy | F1 | Precision | Recall |
-|-------|----------|-----|-----------|--------|
-| Logistic Regression | 0.9102 | 0.8896 | 0.8573 | 0.9245 |
-| Rolling Logistic | 0.8812 | 0.8527 | 0.8285 | 0.8783 |
-| Threshold Model | 0.9200 | 0.8990 | 0.8892 | 0.9091 |
-| **Naive Persistence** | **0.9272** | **0.9071** | **0.9064** | **0.9077** |
+2. **A4f-VIX9D-t remains the best model** (QLIKE 1.581 vs MS-GJR 1.615). MS-GJR does not significantly beat A4f-VIX9D-t (DM t=+2.75, NS at Harvey threshold).
 
-**Key finding: No model beats naive persistence.** VIX regimes are so persistent that "tomorrow = today" is extremely accurate.
+3. **Regime probability is only weakly correlated with VIX** (r=0.225). This means MS-GJR and VIX-augmented models capture partially different information -- the regime variable is NOT simply a discretized VIX.
 
-### Regime Persistence
+4. **MS-GJR fails VaR backtest** (VR=3.30%, Kupiec p=0.005). Normal distribution in each regime is insufficient for tail risk. This is consistent with K799-K804 findings that Student-t is essential for VaR/ES.
 
-| Threshold | Mean High-Vol Episode | Median | Max | Episodes |
-|-----------|----------------------|--------|-----|----------|
-| VIX > 20 | 12.1 days | 2.0 days | 331 days | 143 |
-| VIX > 25 | 8.6 days | 2.0 days | 212 days | 102 |
-| VIX > 30 | 8.5 days | 2.0 days | 170 days | 53 |
+5. **VIX-driven transitions (M3) do not help** over constant transitions (M2). QLIKE is worse (1.625 vs 1.615) and VaR violation rate is higher (3.69% vs 3.30%).
 
-Daily transition probability: 6.1% for VIX > 20 (~15 transitions/year).
-
-### Transition Detection (VIX > 20)
-
-| Lead Time | Rolling Logistic | Logistic Regression |
-|-----------|-----------------|---------------------|
-| 1 day | 33.3% | 21.2% |
-| 2 days | 39.4% | 40.9% |
-| 3 days | 37.9% | 31.8% |
-| 5 days | 43.9% | 39.4% |
-
-Models detect only ~33-44% of transitions with 1-5 day lead -- insufficient for reliable early warning.
-
-### Economic Value (OOS 2019-2026)
-
-| Strategy | Sharpe | Ann. Return | MDD |
-|----------|--------|-------------|-----|
-| **12/VIX baseline** | **0.9177** | **0.0870** | **-0.1483** |
-| Buy & Hold | 0.7752 | 0.1523 | -0.3372 |
-| LR Binary (VIX>20) | 0.8580 | 0.0723 | -0.1341 |
-| LR Prob-wt (VIX>20) | 0.8824 | 0.0587 | -0.0919 |
-| Rolling Log Binary (VIX>20) | 0.8549 | 0.0710 | -0.1312 |
-| Rolling Log Prob-wt (VIX>20) | 0.9083 | 0.0596 | -0.1006 |
-| LR Binary (VIX>30) | 0.9549 | 0.0904 | -0.1396 |
-
-- Best Sharpe improvement: +0.0372 (LR Binary VIX>30) -- marginal
-- Prob-weighted strategies improve MDD (-0.09 to -0.10 vs -0.15) but at cost of lower returns
-- No strategy achieves Sharpe > 2x baseline (no bug suspicion)
-
-## Conclusion
-
-**Null result (important).** VIX regime prediction does not meaningfully improve upon the 12/VIX baseline:
-
-1. **Regime persistence dominates**: VIX regimes are so sticky (mean 12 days for VIX>20) that naive persistence achieves F1=0.91. Sophisticated models cannot beat this.
-2. **Transition detection is poor**: Only 33-44% of regime transitions are detected even with 5-day lead -- too unreliable for strategy use.
-3. **12/VIX already adapts smoothly**: The continuous weight function `min(12/VIX, 1)` naturally reduces exposure as VIX rises toward/past 20, effectively capturing regime information without discrete switching.
-4. **Binary switching hurts**: Abrupt weight changes (1.0 -> 0.3) add unnecessary whipsaw cost vs smooth adjustment.
-
-**Implication for VT design**: Smooth-weight strategies (12/VIX, Risk Parity) are more robust than regime-switching approaches. This reinforces K133's finding that there is no true VIX decay regime worth trading, and supports the existing system's reliance on smooth weight functions.
+6. **Interesting regime characterization**: Calm regime has high leverage (gamma=0.60) but moderate persistence; crisis regime has high persistence (beta=0.83) but no leverage effect. This aligns with the stylized fact that leverage effects matter more in normal markets, while crisis periods are dominated by volatility persistence.
 
 ## Limitations
-- OOS period (2019-2026) includes unusual events (COVID, 2022 rate hikes, 2025 tariff shock)
-- VIX>20 threshold is arbitrary; results may differ with data-driven threshold selection
-- Only tested logistic-family models; deep learning or ensemble methods might perform differently
-- Single asset (SPY); cross-market applicability untested
+- Normal innovations in MS-GJR (not Student-t) -- explains poor VaR performance
+- Gray (1996) collapse approximation may lose information vs full path-dependent model
+- VIX9D availability limits M4 comparison to post-2011 data
+- 10 parameters (MS-GJR) vs 5 (GJR-t) -- risk of overfitting despite QLIKE improvement
+
+## References
+- Hamilton (1989), Econometrica 57(2): Markov-Switching time series
+- Gray (1996), JFE 42(1): Regime-Switching GARCH
+- Klaassen (2002), Empirical Economics 27(2): Improving GARCH with RS
+- Haas, Mittnik & Paolella (2004), JFEC 2(4): MS-GARCH models
+- Patton (2011), JoE 160(1): QLIKE loss
+- Harvey (2016): t>3.0 threshold
 
 ## Files
-- `k1019.py` -- Experiment script
-- `k1019_results.json` -- Full results
-- `k1019_regime_prediction.png` -- 4-panel visualization
+- `k1019.py` -- experiment script
+- `k1019_results.json` -- complete results
+- `k1019_qlike_comparison.png` -- QLIKE bar chart
+- `k1019_regime_timeline.png` -- regime probability vs VIX timeline
+- `k1019_regime_params.png` -- regime parameter evolution
