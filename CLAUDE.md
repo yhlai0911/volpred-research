@@ -573,11 +573,13 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 #### 標準啟動集（台灣時間）
 ```
+CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點草稿池數量、今日已發佈文章（一般4/研究2/每日1）、草稿 buffer ≥4 (2) 讀 research_program.md 事件日曆，WebSearch 確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (3) 有事件→立即寫事件文章（--status published）(4) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h)、next_tasks 是否為空 (5) 根據缺口用 TaskCreate 列出今日必做清單 (6) 文章撰寫前必做 LanceDB 語義查重 + grep (7) 輸出今日計劃告訴用戶")
 CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 分配編號前先 ls experiments/ 確認該編號目錄不存在，已存在則跳到下一個可用編號 (3) 啟動 agent 執行 (4) 完成後從 research_program.md 補充 next_tasks (5) next_tasks 空了才讀 research_program.md 全文。絕對不可只 check status。")
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
 CronCreate(cron="47 */4 * * *", prompt="每4小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --no-rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉。用 merge 不用 rebase，避免多 session 並行時 rebase 衝突")
 CronCreate(cron="7 */3 * * *", prompt="知識索引更新")
 CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：(1) python scripts/token_usage_report.py --detailed (2) 將結果存檔到 storage/token_reports/ (3) 週五額外 --weekly (4) >40% 標記高消耗警告 (5) 摘要告訴用戶")
+CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit")
 ```
 
 #### 反空轉規則（2026-03-31 教訓）

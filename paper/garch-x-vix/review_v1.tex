@@ -1,0 +1,374 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[top=2cm, bottom=2cm, left=2cm, right=2cm]{geometry}
+\usepackage{fontspec}
+\setmainfont{Times New Roman}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang TC}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{longtable}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{enumitem}
+\usepackage{hyperref}
+
+\definecolor{errorred}{RGB}{200,0,0}
+\definecolor{warncolor}{RGB}{180,100,0}
+\definecolor{okgreen}{RGB}{0,128,0}
+
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+\begin{document}
+
+\begin{center}
+{\Large\bfseries Academic Review Report}\\[0.5em]
+{\large Multiplicative GARCH-X with VIX: Daily Source Decomposition\\Beats GARCH-MIDAS for Volatility Forecasting and Risk Management}\\[0.5em]
+{\normalsize Document type: Journal paper (target: J.\ Empirical Finance / J.\ Forecasting)}\\
+{\normalsize Review date: 2026-04-10}\\
+{\normalsize Review standard: Strict (referee perspective)}
+\end{center}
+
+\section*{Review Summary}
+
+\begin{tabular}{ll}
+\textcolor{errorred}{HIGH --- must fix before submission} & 7 items \\
+\textcolor{warncolor}{MEDIUM --- recommended fix} & 12 items \\
+LOW --- optional improvement & 8 items \\
+Overall assessment & \textbf{Good --- publishable after revisions} \\
+\end{tabular}
+
+\bigskip
+
+\noindent\textbf{General impression.}
+The paper makes a clear and well-motivated argument that a parsimonious daily multiplicative GARCH-X model with VIX dominates the more complex GARCH-MIDAS framework when the external variable is daily. The 17-specification horse race is systematic, the DM test statistics are strong (especially A4f vs.\ GJR at $t = 4.48$), the VRP interpretation adds intellectual value, and the honest null result on VRP predictability is commendable. However, several issues---ranging from numerical inconsistencies between the paper and experiment data to selective reporting in the VRP section, incomplete citations, and methodological omissions---need to be addressed before submission.
+
+%=================================================================
+\section*{I. Logic Structure}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Strengths:}}
+\begin{itemize}
+\item The Introduction clearly states the gap (VIX is daily, so MIDAS mixed-frequency aggregation is conceptually redundant) and previews three contributions with key numbers.
+\item The progression from specification horse race $\to$ economic interpretation (VRP) $\to$ risk management application $\to$ cross-asset validation is logical and natural.
+\item The ``source decomposition'' label is well motivated and clearly distinguished from the long-run/short-run narrative of GARCH-MIDAS.
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{Issue M1 (MEDIUM):}} \textbf{Missing Discussion section.} The paper jumps from Robustness (Section 6) directly to Conclusion (Section 7), but the JBF-standard structure calls for a Discussion section that provides economic interpretation, connects findings to theory, and discusses caveats. Currently, economic interpretation is scattered across Sections 5.1--5.3 and the Conclusion. A dedicated Discussion section would strengthen the narrative.
+
+\textcolor{warncolor}{\textbf{Issue M2 (MEDIUM):}} \textbf{Robustness section is thin.} Section 6 contains only four short subsections (refit frequency, estimation consistency, multiple testing, Student-$t$ degrees of freedom). Missing robustness analyses include:
+\begin{itemize}
+\item Sub-period analysis (e.g., pre-COVID 2019--2020 vs.\ post-COVID 2021--2026).
+\item Alternative OOS start dates.
+\item Sensitivity to estimation window size ($W = 1500, 2000, 2500$).
+\item Alternative volatility proxies (5-minute RV instead of $r_t^2$).
+\end{itemize}
+At least the sub-period analysis should be included, as a referee will want to know whether the A4f dominance holds in both calm and turbulent sub-periods.
+
+
+%=================================================================
+\section*{II. Claim-Evidence Matching}
+%=================================================================
+
+\textcolor{errorred}{\textbf{Issue H1 (HIGH):}} \textbf{MIDAS-FS DM test statistics in Table 3 do not match experiment data.} Cross-checking against the K988b experiment results JSON reveals the following discrepancies:
+
+\begin{center}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Model & Paper DM $t$ & Data DM $t$ & Difference & Paper Harvey sig. \\
+\midrule
+C1 (MIDAS-FS, $K_m=6$)  & 3.55 & 2.85 & +0.70 & Yes $\to$ should be No \\
+C2 (MIDAS-FS, $K_m=12$) & 2.33 & 1.71 & +0.62 & No (correct) \\
+C3 (MIDAS-FS, $K_m=24$) & 2.85 & 2.19 & +0.66 & No (correct) \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+The most critical error is C1: the paper claims $t = 3.55$ (Harvey-significant), but the experiment data shows $t = 2.85$ (not significant at $|t| > 3.0$). This changes the finding count from ``14 of 16 models achieve $|t| > 3.0$'' (stated in Section 6.3) to 13 of 16. Additionally, the K988b GJR baseline QLIKE ($-8.273$) differs slightly from the K988 baseline ($-8.277$), which may account for some discrepancy---but not the $\sim$0.7-unit gap in DM $t$.
+
+\textbf{Fix:} Re-verify all MIDAS-FS DM statistics using a single consistent GJR baseline. Update Table 3, the abstract (``14 of 16'' claim in Section 6.3), and any downstream text.
+
+\bigskip
+
+\textcolor{errorred}{\textbf{Issue H2 (HIGH):}} \textbf{Selective reporting of VRP predictive regression results.} The paper states ``the Newey-West $t$-statistic on $g_t$ ranges from $-1.28$ to $-1.95$ across horizons---none surpassing the Harvey threshold.'' However, this range refers only to models 1--2 (g-only and VRP+g). The experiment data (K998) shows that models 3--4 (with additional controls: log-VIX, full controls) produce $t$-statistics as large as $-2.34$ ($h=5$, model3) and $-2.27$ ($h=1$, model3). While none exceed the Harvey $|t|>3.0$ threshold, the selective reporting of only the weakest specifications is misleading.
+
+\textbf{Fix:} Either report the full range (``from $-1.28$ to $-2.34$'') or present a table with all model specifications and horizons. The conclusion that $g_t$ has no exploitable predictive power remains valid, but transparency requires reporting the strongest evidence too.
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M3 (MEDIUM):}} \textbf{Cross-asset table mixes experiment sources without disclosure.} Table 5 (cross-asset validation) reports GLD with GVZ ($t = -3.39$), but this value comes from the dual-factor VIX+GVZ model in K997 (Table 6 experiment), not from the standard A4f specification in K994. Table 5 presents it as ``A4f'' which is misleading---it is actually a dual-factor $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}^2 + \theta_2 \mathrm{GVZ}^2$ model with 3 $\tau$-parameters vs.\ 2 for the standard A4f.
+
+\textbf{Fix:} Either (a) report the single-factor GVZ result from K997 ($t = -3.17$) in Table 5, which is still Harvey-significant, or (b) clearly label the GLD entry as ``A4f-GVZ'' or ``A4f-dual'' and note the model differs from the other rows. Option (a) is cleaner.
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M4 (MEDIUM):}} \textbf{Abstract claims ``scorecard 3/4'' but the 2.5\% VaR fails.} The abstract and conclusion state A4f-$t$ achieves ``VaR backtesting at two of three confidence levels (scorecard 3/4).'' The VaR 2.5\% test has DQ $p = 0.006$ (clear failure), and the scorecard counts 2 VaR passes + 1 ES pass = 3/4. This is technically correct but the scorecard construction is unusual: treating VaR at 3 levels + ES at 1 level as a ``4-test scorecard'' is not standard. A referee might argue this cherry-picks the denominator.
+
+\textbf{Fix:} Explicitly acknowledge in the text that the 2.5\% level fails (DQ $p = 0.006$), and discuss why---is it the DQ test's sensitivity to violation clustering? Consider presenting it as ``passes 2 of 3 VaR levels and 1 of 1 ES level'' rather than conflating them into a single scorecard.
+
+
+%=================================================================
+\section*{III. Mechanical vs.\ Empirical Distinction}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Strengths:}}
+\begin{itemize}
+\item The paper correctly notes that VIX-squared dominance follows from dimensional consistency---this is acknowledged as a dimensional argument, not an empirical discovery.
+\item The null result on VRP predictability is an honest empirical finding.
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{Issue M5 (MEDIUM):}} \textbf{``Source decomposition'' risks being perceived as tautological.} If $\tau_t \approx \theta_0 + \theta_1 \mathrm{VIX}^2$ and $g_t = \sigma_t^2 / \tau_t$, then $g_t \approx \sigma_t^2 / (\theta_0 + \theta_1 \mathrm{VIX}^2)$. The correlation between $g_t$ and VRP ($\rho \approx 0.80$) follows mechanically from the model specification, not from an independent empirical test. The paper should more explicitly address the anti-tautology test: what \emph{independent} evidence shows that the GARCH dynamics in $g_t$ add information beyond the mechanical ratio?
+
+The comparison with the raw ratio ($\rho = 0.15$) partially addresses this, but the argument could be strengthened by decomposing the $\rho = 0.80$ into what comes from the ratio structure and what comes from the GARCH smoothing.
+
+\textbf{Fix:} Add a brief discussion (2--3 sentences) acknowledging that the high $\rho$ is partly mechanical, then arguing that the GARCH autoregressive structure is the empirical contribution (e.g., show that an AR(1) filter on the raw ratio achieves an intermediate $\rho$, demonstrating that the GARCH dynamics specifically add value).
+
+
+%=================================================================
+\section*{IV. Statistical Rigor}
+%=================================================================
+
+\textcolor{errorred}{\textbf{Issue H3 (HIGH):}} \textbf{No Model Confidence Set (MCS) test.} The paper cites Hansen et al.\ (2011) in the bibliography but never uses the MCS. For a 17-model horse race, the MCS is a standard tool that identifies the set of models that are statistically indistinguishable from the best. A referee at J.\ Empirical Finance will almost certainly request this. Given that the top 10 QLIKE values span only $-8.361$ to $-8.348$ (a range of 0.013), it is likely that many models fall within the MCS, which would \emph{qualify} the ``A4f dominates'' claim.
+
+\textbf{Fix:} Run the MCS at $\alpha = 0.10$ and $\alpha = 0.25$. Report which models survive. If A4f is the sole survivor, this strengthens the paper enormously. If 5--10 models survive, the message shifts to ``A4f is among the best, and daily GARCH-X models dominate MIDAS-FS'' (still a strong finding).
+
+\bigskip
+
+\textcolor{errorred}{\textbf{Issue H4 (HIGH):}} \textbf{Pairwise DM tests insufficient for a 17-model comparison.} The paper conducts 16 pairwise DM tests (each model vs.\ GJR), but does not test any GARCH-X model against another (e.g., A4f vs.\ B1, A4f vs.\ A2). This means the claim ``uniformly dominating all GARCH-MIDAS specifications'' (abstract, introduction, conclusion) is based on QLIKE rank ordering, not statistical tests. The DM test between A4f (QLIKE $= -8.361$) and B1 (QLIKE $= -8.354$) may not be significant.
+
+\textbf{Fix:} Add pairwise DM tests between A4f and each GARCH-MIDAS specification (B1--B3, C1--C3). If A4f vs.\ B1 is not significant, soften ``uniformly dominating'' to ``outperforming in point estimates.''
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M6 (MEDIUM):}} \textbf{Harvey (2016) threshold applied inconsistently.} The paper uses $|t| > 3.0$ as the significance threshold (following Harvey 2016 for multiple testing). However, Harvey (2016) is about controlling false discovery rates in factor zoo studies. For a pre-specified model comparison (A4f vs.\ GJR), the standard 5\% DM critical value ($|t| > 1.96$) is appropriate, and the Bonferroni correction computed in Section 6.3 ($z \approx 2.95$) is the correct multiple-testing adjustment. Using $|t| > 3.0$ as a blanket threshold conflates these two justifications.
+
+\textbf{Fix:} Clarify that $|t| > 3.0$ is adopted as a conservative threshold for the full 16-comparison horse race (close to the Bonferroni value of 2.95), and that for the primary A4f vs.\ GJR comparison, the standard $|t| > 1.96$ applies and is comfortably exceeded.
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M7 (MEDIUM):}} \textbf{No Giacomini-White (2006) conditional test.} The DM test assumes constant loss differential. In a rolling-window scheme with regime changes (COVID, 2022 drawdown, 2025 trade war), the loss differential may be time-varying. The Giacomini-White conditional predictive ability test would address this.
+
+\textbf{Fix:} Add GW tests for at least A4f vs.\ GJR and A4f vs.\ B1. This is standard for J.\ Empirical Finance.
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M8 (MEDIUM):}} \textbf{OOS $R^2$ interpretation for VRP.} The paper reports OOS $R^2 = 1.3\%$ for $g_t$-based VRP forecasts. This is actually \emph{positive}, which typically indicates some predictive content in the Campbell-Thompson framework. The paper dismisses it as evidence of overfitting (``negative at longer horizons''), but the $h=1$ result deserves more nuanced discussion. Is $1.3\%$ economically meaningful? Is it statistically significant (Clark-West test)?
+
+\textbf{Fix:} Report the Clark-West p-value for $R^2_{\mathrm{OOS}} = 1.3\%$. The current K998 data shows CW $t = 0.24$, $p = 0.40$---not significant. Stating this directly would be cleaner than calling it ``overfitting.''
+
+
+%=================================================================
+\section*{V. Equations and Symbols}
+%=================================================================
+
+\textcolor{errorred}{\textbf{Issue H5 (HIGH):}} \textbf{Ambiguous subscript $t^*$ in Equation (6).} The standardized return is defined as $u_{t-1} = r_{t-1}/\sqrt{\tau_{t^*}}$ with ``$t^* \in \{t, t-1\}$ depending on whether the current or lagged $\tau$ is used for normalization.'' This notation is nonstandard and confusing. The paper should define two variants explicitly:
+\begin{align*}
+u_{t-1}^{(a)} &= r_{t-1}/\sqrt{\tau_t} \qquad (\text{contemporaneous}), \\
+u_{t-1}^{(b)} &= r_{t-1}/\sqrt{\tau_{t-1}} \qquad (\text{lagged}).
+\end{align*}
+
+\textbf{Fix:} Replace the $t^*$ notation with explicit variant definitions.
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M9 (MEDIUM):}} \textbf{VIX units not converted in $\tau_t$.} Equation (4) writes $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$. However, VIX is quoted as annualized percentage volatility (e.g., VIX $= 20$ means 20\%). $\mathrm{VIX}^2 = 400$ in percentage-squared units. For $\tau_t$ to match $\sigma_t^2$ (which is in decimal daily variance units), the VIX must be converted: $\mathrm{VIX}^2/(100^2 \times 252)$. The paper should clarify whether $\theta_1$ absorbs this scaling or whether VIX is pre-converted.
+
+\textbf{Fix:} Add a sentence clarifying the scaling convention. E.g., ``We use $\mathrm{VIX}_{t-1}$ in its raw form (annualized percentage); the coefficients $\theta_0, \theta_1$ absorb the necessary unit conversions.''
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M10 (MEDIUM):}} \textbf{ES formula sign convention.} Equation (10) writes $\mathrm{ES}_{\alpha,t}^{\text{Normal}} = \hat{\sigma}_t \left(-\frac{\phi(z_\alpha)}{\alpha}\right)$. This gives a positive number when $z_\alpha < 0$ (left tail). For VaR and ES to represent losses (negative returns), both should be negative or both should be positive. The paper should clarify the sign convention. If $\mathrm{VaR}_\alpha < 0$ (a negative return threshold), then ES should also be negative.
+
+\textbf{Fix:} Define the sign convention explicitly. Common practice: $\mathrm{VaR}_\alpha = -\hat{\sigma}_t z_\alpha > 0$ (positive loss), or $\mathrm{VaR}_\alpha = \hat{\sigma}_t z_\alpha < 0$ (threshold return). Be consistent.
+
+
+%=================================================================
+\section*{VI. Citations}
+%=================================================================
+
+\textcolor{errorred}{\textbf{Issue H6 (HIGH):}} \textbf{Three uncited references in bibliography.} The following entries appear in the bibliography but are never cited in the text:
+\begin{itemize}
+\item \textbf{Bollerslev (1986)} --- foundational GARCH paper. Must be cited (e.g., when first mentioning GARCH).
+\item \textbf{Glosten, Jagannathan, and Runkle (1993)} --- the GJR-GARCH paper. The model is called ``GJR'' throughout but never cited. Must be cited at first mention of the GJR process.
+\item \textbf{Diebold and Yilmaz (2012)} --- a spillover paper with no obvious connection to this manuscript. Should be removed unless cited.
+\end{itemize}
+
+\textbf{Fix:} Add \verb|\citet{bollerslev1986}| where GARCH is first introduced (Section 1 or 3). Add \verb|\citet{glosten1993}| where GJR is first mentioned (Equation 5 or earlier). Remove \verb|\bibitem{diebold2012}| if not cited.
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M11 (MEDIUM):}} \textbf{Missing key citations.}
+\begin{itemize}
+\item \textbf{Engle (1982)} --- ARCH original paper. Not cited anywhere. Should appear alongside Bollerslev (1986).
+\item \textbf{Nelson (1991)} --- EGARCH, relevant when discussing asymmetric volatility models.
+\item \textbf{Diebold and Mariano (1995/2002)} --- the DM test paper itself is never cited, only used implicitly. Should be cited at first mention of the DM test.
+\item \textbf{Giacomini and White (2006)} --- conditional predictive ability, relevant for rolling-window evaluation (even if not used).
+\item \textbf{Wang and Ghysels (2015)} --- the bibliography labels this as \texttt{wang2017} but the publication year is 2015. Fix the citation key to avoid confusion.
+\end{itemize}
+
+\bigskip
+
+\textcolor{warncolor}{\textbf{Issue M12 (MEDIUM):}} \textbf{Self-citation to unpublished work.} The paper cites ``Lai (2026). Volatility targeting as drawdown insurance. Working paper.'' This citation is used only for the 0050.TW split-adjustment procedure, which is a minor data-cleaning step. A referee may question citing an unpublished working paper for a data procedure. Consider either describing the procedure directly or citing a published source.
+
+
+%=================================================================
+\section*{VII. Tables}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Strengths:}}
+\begin{itemize}
+\item Tables use booktabs style (no vertical lines, proper \verb|\toprule/\midrule/\bottomrule|).
+\item Captions are mostly self-contained with table notes explaining acronyms and test details.
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{Issue M13 (MEDIUM):}} \textbf{Table 1 has 10 GARCH-X specs but the abstract says ``seven daily GARCH-X variants.''} Table 1 lists A1--A5 + A2f + A4f + A3f + A2n + A4n = 10 models. The abstract counts only 7. The discrepancy arises because A2n, A4n, A3f were added in K988b. Either update the abstract to ``ten'' or justify the count of seven (perhaps by excluding the normalized variants as sub-variants).
+
+\bigskip
+
+LOW \textbf{Issue L1:} \textbf{Table 3 ranking inconsistency.} A2n (rank 9, QLIKE $= -8.350$) is listed \emph{after} A4n (rank 8, QLIKE $= -8.348$), but A2n has the higher (better) QLIKE. This appears to be a ranking error. Verify and re-sort.
+
+\bigskip
+
+LOW \textbf{Issue L2:} \textbf{Table 2 caption should clarify annualization.} The table reports ``Mean (ann.)'' for both SPY returns and VIX, but VIX is natively annualized while SPY mean is computed from daily and annualized. Add a note clarifying the annualization method (e.g., $\times 252$ for mean, $\times \sqrt{252}$ for std).
+
+\bigskip
+
+LOW \textbf{Issue L3:} \textbf{Table 2 missing daily statistics.} Including daily mean, daily std, and autocorrelation coefficients ($\rho_1, \rho_5$ of $r_t^2$) would strengthen the data description and provide evidence of volatility clustering.
+
+
+%=================================================================
+\section*{VIII. Academic Tone}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Strengths:}}
+\begin{itemize}
+\item The paper generally maintains an academic tone and avoids practitioner language.
+\item Claims are hedged appropriately (``preliminary evidence,'' ``consistent with the interpretation'').
+\end{itemize}
+
+LOW \textbf{Issue L4:} \textbf{Minor practitioner language.} Section 5.4 mentions ``a practically relevant finding for risk officers and regulators.'' While acceptable in J.\ Empirical Finance, consider softening to ``These results have implications for risk management practice.''
+
+LOW \textbf{Issue L5:} \textbf{``Beats'' in the title.} The word ``beats'' is informal. Consider ``Outperforms'' or ``Dominates'' for a journal title.
+
+
+%=================================================================
+\section*{IX. Contribution Count and Depth}
+%=================================================================
+
+\textcolor{okgreen}{The paper has exactly 3 contributions---ideal for JBF/JEF.}
+
+However, the depth of Contribution 2 (source decomposition / VRP) is mixed:
+\begin{itemize}
+\item The VRP tracking result ($\rho \approx 0.80$) is striking but partly mechanical (see Issue M5).
+\item The null result on VRP predictability is honest and valuable, but the analysis is somewhat thin (4 bullet points without a formal table).
+\end{itemize}
+
+\textcolor{warncolor}{\textbf{Issue M14 (MEDIUM):}} \textbf{VRP analysis deserves a formal table.} The four VRP predictability approaches (Granger, predictive regressions, OOS $R^2$, variance swap) are listed as bullet points. A formal table with rows = horizon $\times$ model and columns = test statistic / $p$-value / significance would be much stronger, especially given that the full data (K998) contains 16 regression results (4 models $\times$ 4 horizons).
+
+
+%=================================================================
+\section*{X. Limitations}
+%=================================================================
+
+\textcolor{okgreen}{\textbf{Strengths:}}
+\begin{itemize}
+\item The Conclusion section explicitly discusses limitations: 5-asset sample, DQ failure at 2.5\%, and cross-asset evidence for free omega.
+\item The null result on VRP predictability is reported honestly.
+\end{itemize}
+
+\textcolor{errorred}{\textbf{Issue H7 (HIGH):}} \textbf{Missing limitation: $r_t^2$ as volatility proxy.} The paper uses $r_t^2$ as the volatility proxy for QLIKE evaluation, citing Patton (2011) for robustness. However, Patton (2011) shows robustness of \emph{rankings}, not absolute QLIKE values. The paper should acknowledge that:
+\begin{enumerate}
+\item Using 5-minute realized variance as the proxy might change the \emph{magnitude} of QLIKE differences and DM statistics.
+\item The VIX-based model might look relatively better or worse with RV as the target, because VIX and RV have a known non-trivial relationship.
+\end{enumerate}
+Ideally, a robustness table using 5-min RV (which is available for SPY in the research system's data) should be included.
+
+\bigskip
+
+LOW \textbf{Issue L6:} \textbf{Missing limitation: single-asset primary analysis.} The main 17-model horse race is conducted only on SPY. While cross-asset validation covers 4 additional assets, only the A4f and A4 specifications are tested cross-asset (not the full 17). This limits the generalizability of the functional form ranking.
+
+LOW \textbf{Issue L7:} \textbf{No out-of-sample start date sensitivity.} The OOS period begins January 2, 2019, which is fixed. Rolling the start date by $\pm$1 year would test whether the results are sensitive to the specific OOS window.
+
+LOW \textbf{Issue L8:} \textbf{Forecasting horizon limited to 1 day.} All evaluations are one-step-ahead. Multi-step forecasts ($h = 5, 10, 22$) would be relevant for portfolio construction and risk management applications.
+
+
+%=================================================================
+\section*{Detailed Issue List}
+%=================================================================
+
+\subsection*{\textcolor{errorred}{HIGH --- Must Fix}}
+
+\begin{enumerate}[label=H\arabic*.]
+\item \textbf{Table 3: MIDAS-FS DM statistics do not match experiment data} (Section 5.1, Table 3). C1 paper $t=3.55$, data $t=2.85$; C2 paper $t=2.33$, data $t=1.71$; C3 paper $t=2.85$, data $t=2.19$. Re-verify against consistent GJR baseline.
+
+\item \textbf{Selective reporting of VRP predictive regression $t$-statistics} (Section 5.2.2). Paper reports range $-1.28$ to $-1.95$ (models 1--2 only); data shows $-1.28$ to $-2.34$ (all 4 models). Report the full range.
+
+\item \textbf{No Model Confidence Set (MCS)} (Section 5.1). For a 17-model comparison, MCS is expected by referees at J.\ Empirical Finance.
+
+\item \textbf{No pairwise DM tests among top models} (Section 5.1). ``Uniformly dominates'' claim requires A4f vs.\ B1 (and other MIDAS) DM tests, not just QLIKE ordering.
+
+\item \textbf{Ambiguous $t^*$ subscript in Equation (6)} (Section 3.1.2). Replace with explicit variant definitions.
+
+\item \textbf{Three uncited bibliography entries} (Bibliography). Bollerslev (1986), Glosten et al.\ (1993) must be cited; Diebold \& Yilmaz (2012) should be removed.
+
+\item \textbf{Missing limitation on $r_t^2$ as volatility proxy} (Section 7). Acknowledge and ideally provide 5-min RV robustness check.
+\end{enumerate}
+
+\subsection*{\textcolor{warncolor}{MEDIUM --- Recommended Fix}}
+
+\begin{enumerate}[label=M\arabic*.]
+\item \textbf{Missing Discussion section} --- add between Robustness and Conclusion.
+\item \textbf{Thin Robustness section} --- add sub-period analysis and window-size sensitivity.
+\item \textbf{Cross-asset table mixes experiment sources} (Table 5) --- GLD uses dual-factor VIX+GVZ from K997, not standard A4f.
+\item \textbf{Scorecard 3/4 conflates VaR and ES tests} --- present VaR and ES results separately.
+\item \textbf{Source decomposition partly tautological} --- add anti-tautology discussion.
+\item \textbf{Harvey (2016) threshold conflated with Bonferroni} --- clarify the justification for $|t| > 3.0$.
+\item \textbf{No Giacomini-White conditional test} --- add for A4f vs.\ GJR.
+\item \textbf{OOS $R^2$ interpretation} --- report Clark-West $p$-value instead of calling it ``overfitting.''
+\item \textbf{VIX units scaling not clarified} in Equation (4).
+\item \textbf{ES sign convention ambiguous} in Equation (10).
+\item \textbf{Missing citations}: Engle (1982), Nelson (1991), Diebold-Mariano (1995). Wang-Ghysels key/year mismatch.
+\item \textbf{Self-citation to unpublished working paper} for 0050.TW split adjustment.
+\item \textbf{Abstract says ``seven'' GARCH-X variants but Table 1 has ten.}
+\item \textbf{VRP predictability analysis lacks formal table.}
+\end{enumerate}
+
+\subsection*{LOW --- Optional Improvement}
+
+\begin{enumerate}[label=L\arabic*.]
+\item Table 3: A2n/A4n ranking swap (A2n QLIKE $> $ A4n but ranked lower).
+\item Table 2: clarify annualization method for mean and std.
+\item Table 2: add daily statistics ($\rho_1, \rho_5$ of $r_t^2$).
+\item Minor practitioner language in Section 5.4.
+\item Title: ``Beats'' is informal --- consider ``Outperforms.''
+\item Missing limitation: single-asset primary analysis.
+\item Missing limitation: no OOS start date sensitivity.
+\item Missing limitation: 1-day horizon only.
+\end{enumerate}
+
+
+%=================================================================
+\section*{Summary and Recommendations}
+%=================================================================
+
+\textbf{Overall assessment:} The paper presents a solid empirical contribution with a clear message (daily GARCH-X with VIX beats GARCH-MIDAS). The main DM result ($t = 4.48$) is strong and survives Harvey thresholds. The source decomposition interpretation and the honest VRP null result add intellectual depth. However, the HIGH-priority issues---particularly the numerical discrepancies in Table 3, the missing MCS test, and the selective VRP reporting---must be addressed before submission.
+
+\textbf{Revision priority:}
+\begin{enumerate}
+\item Fix the MIDAS-FS DM statistics (H1) --- credibility issue.
+\item Add MCS test (H3) and pairwise DM among top models (H4) --- referees will request these.
+\item Fix citation issues (H6) --- easy but important.
+\item Address VRP selective reporting (H2) and proxy limitation (H7).
+\item Clarify equation notation (H5).
+\item Add sub-period robustness, formal VRP table, GW test (M2, M7, M14).
+\item Polish: Discussion section, cross-asset table clarity, scorecard presentation.
+\end{enumerate}
+
+\textbf{Target journal fit:}
+\begin{itemize}
+\item \textbf{J.\ Empirical Finance}: Good fit. The paper is empirical, uses proper evaluation tools, and the 17-model comparison is the kind of systematic study JEF publishes. Adding the MCS and GW tests would seal the fit.
+\item \textbf{J.\ Forecasting}: Also a good fit, especially for the forecasting evaluation component. The VRP interpretation might be seen as tangential at this journal.
+\item \textbf{J.\ Banking and Finance}: Possible but would require deeper economic interpretation (the Discussion section suggested in M1 would help).
+\end{itemize}
+
+\end{document}

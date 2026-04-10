@@ -23,37 +23,91 @@ class Publisher:
         POST is no longer used to avoid duplicate/ordering conflicts."""
         pass
 
+    # Domain-specific compound terms for topic extraction (longest match first)
+    _DOMAIN_TERMS = [
+        # 4+ char compounds
+        '波動率預測', '隔夜跳空', '開盤跳空', '跳空風險', '資產配置', '風險預測',
+        '期貨避險', '機器學習', '人工智慧', '深度學習', '計量經濟',
+        '恐慌指數', '定期定額', '槓桿策略', '動量策略', '條件槓桿',
+        '台指期貨', '波動率', '隔夜風險', '跳空', '隔夜',
+        # 3-char terms
+        '避險', '預測', '台股', '美股', '期貨', '選擇權',
+        '波動', '風險', '策略', '配置', '槓桿', '恐慌',
+        '加密', '比特幣', '黃金', '股市', '債券',
+        '模型', '回測', '績效', '報酬', '夏普',
+    ]
+
     @staticmethod
     def _tokenize_title(title: str) -> set:
-        """Extract meaningful Chinese/English keywords from title."""
+        """Extract meaningful domain keywords from title using dictionary matching + English words.
+
+        Strategy: longest-match dictionary extraction for Chinese domain terms,
+        plus lowercase English words (>=2 chars). This avoids the bigram noise problem
+        that made Jaccard similarity useless for Chinese titles.
+        """
         import re
-        # Remove punctuation and split
-        clean = re.sub(r'[^\w\u4e00-\u9fff]', ' ', title.lower())
-        # Split Chinese into 2-char ngrams + keep English words
         tokens = set()
-        for word in clean.split():
-            if len(word) >= 2:
-                tokens.add(word)
-        # Chinese 2-gram
-        chinese = re.findall(r'[\u4e00-\u9fff]+', title)
-        for phrase in chinese:
+
+        # 1. Extract English words and well-known acronyms (case-insensitive)
+        for word in re.findall(r'[A-Za-z][A-Za-z0-9]+', title):
+            w = word.lower()
+            if len(w) >= 2:
+                tokens.add(w)
+
+        # 2. Extract Chinese domain terms via longest-match
+        chinese_text = ''.join(re.findall(r'[\u4e00-\u9fff]+', title))
+        remaining = chinese_text
+        while remaining:
+            matched = False
+            for term in Publisher._DOMAIN_TERMS:
+                if remaining.startswith(term):
+                    tokens.add(term)
+                    remaining = remaining[len(term):]
+                    matched = True
+                    break
+            if not matched:
+                remaining = remaining[1:]  # skip one char
+
+        # 3. Also extract any Chinese 2-char segments that weren't matched but appear meaningful
+        #    (fallback: all unique 2-char substrings from title's Chinese text)
+        for phrase in re.findall(r'[\u4e00-\u9fff]{2,}', title):
             for i in range(len(phrase) - 1):
-                tokens.add(phrase[i:i+2])
-        # Remove very common words
-        stopwords = {'的', '了', '是', '在', '和', '你', '我', '這', '那', '都', '也', '就', '但'}
+                pair = phrase[i:i+2]
+                tokens.add(pair)
+
+        # Remove very common stopwords
+        stopwords = {'的了', '了是', '是在', '在和', '和你', '你我', '我這', '這那',
+                     '的', '了', '是', '在', '和', '你', '我', '這', '那',
+                     '都', '也', '就', '但', '不', '有', '到', '能', '會',
+                     '什麼', '為什', '什麼', '怎麼', '可以', '一個', '告訴',
+                     '其實', '到底', '真的', '如何', '為何', '為什麼'}
         tokens -= stopwords
+
         return tokens
 
     def _find_similar_articles(self, title: str, feed: list, audience: str | None = None) -> list:
-        """Find articles with similar topics (>50% keyword overlap).
-        Only checks same audience type to avoid false positives across general/research.
+        """Find articles with similar topics using domain-keyword overlap.
+
+        Uses two-tier matching:
+        1. Domain term overlap: shared domain-specific keywords (weighted 2x)
+        2. General token Jaccard similarity
+
+        Threshold: 0.20 (lowered from broken 0.35) for extended reading,
+        0.40 for duplicate warning.
         """
         new_tokens = self._tokenize_title(title)
         if not new_tokens:
             return []
 
+        # Only check the most recent 200 articles — duplicates happen within days, not months.
+        # feed is already sorted newest-first from _load_feed, but sort defensively.
+        recent = sorted(feed, key=lambda x: x.get('published_at') or x.get('created_at', ''), reverse=True)[:200]
+
+        domain_set = set(Publisher._DOMAIN_TERMS)
+        new_domain = new_tokens & domain_set
+
         similar = []
-        for existing in feed:
+        for existing in recent:
             if existing.get('status') == 'unpublished':
                 continue
             # Only compare within same audience
@@ -62,14 +116,28 @@ class Publisher:
             ex_tokens = self._tokenize_title(existing.get('title', ''))
             if not ex_tokens:
                 continue
-            overlap = len(new_tokens & ex_tokens)
-            union = len(new_tokens | ex_tokens)
-            jaccard = overlap / union if union > 0 else 0
-            if jaccard > 0.35:  # 35% Jaccard similarity threshold
+
+            # Also include tags in similarity for better matching
+            ex_tags = set(existing.get('tags', []))
+            ex_combined = ex_tokens | ex_tags
+
+            ex_domain = ex_tokens & domain_set
+
+            # Weighted Jaccard: domain terms count double
+            all_new = new_tokens | new_domain  # domain counted twice
+            all_ex = ex_combined | ex_domain
+            overlap = len((new_tokens & ex_combined) | (new_domain & ex_domain))
+            union = len(all_new | all_ex)
+            if union == 0:
+                continue
+
+            similarity = overlap / union
+
+            if similarity > 0.15:  # Extended reading threshold
                 similar.append({
                     'id': existing.get('id', '?'),
                     'title': existing.get('title', '?'),
-                    'similarity': jaccard,
+                    'similarity': round(similarity, 3),
                     'status': existing.get('status', '?'),
                 })
 
@@ -178,13 +246,19 @@ class Publisher:
                 except Exception:
                     pass
 
-        # --- Similar topic check: warn if >60% keyword overlap with existing ---
+        # --- Similar topic check: warn if keyword overlap with existing ---
         similar = self._find_similar_articles(title, feed, audience)
-        if similar:
-            print(f"  ⚠️ Similar articles found ({len(similar)}):")
+        high_overlap = [s for s in similar if s['similarity'] > 0.30]
+        if high_overlap:
+            print(f"  🚫 HIGH similarity articles found ({len(high_overlap)}) — likely duplicate topic:")
+            for s in high_overlap[:3]:
+                print(f"    [{s['similarity']:.0%}] {s['id']}: {s['title'][:60]}")
+            print(f"  → Consider skipping or differentiating this article significantly.")
+        elif similar:
+            print(f"  ⚠️ Related articles found ({len(similar)}):")
             for s in similar[:3]:
                 print(f"    [{s['similarity']:.0%}] {s['id']}: {s['title'][:60]}")
-            print(f"  → Proceeding with publish, but consider if this adds new value.")
+            print(f"  → Proceeding with publish. 延伸閱讀 will link to these.")
         # Sanitize description
         if isinstance(description, str):
             # Fix double-escaped newlines from various input sources
@@ -201,7 +275,7 @@ class Publisher:
         if similar and isinstance(description, str):
             related_published = [
                 s for s in similar
-                if s.get('status') in ('published', 'draft') and s['similarity'] > 0.2
+                if s.get('status') in ('published', 'draft') and s['similarity'] > 0.15
             ][:3]
             if related_published:
                 related_section = "\n\n---\n\n### 延伸閱讀\n"

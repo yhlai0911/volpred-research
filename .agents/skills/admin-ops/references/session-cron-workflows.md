@@ -132,12 +132,9 @@ uv run python -m volpred.cli ops send-daily-digest --target-date YYYY-MM-DD
 5. 釋出後再次讀 `/admin/content` 或 content snapshot，確認文章池狀態已更新
 6. 若這次是正式發布且需要管理提醒，再執行單篇通知或每日摘要
 
-## 3. 平台巡檢（已遷移至雲端 trigger）
+## 3. 綜合平台巡檢
 
-平台巡檢已由 RemoteTrigger `platform-ops-patrol`（每 6 小時）自動執行，不再需要 session cron。
-報告寫入 `storage/ops_patrol_report.json`，異常寫入 `storage/ops_alerts/`。
-
-若需手動巡檢，順序：
+若 session cron 當前要做的是「平台層巡檢」，建議順序：
 
 1. `uv run python -m volpred.cli ops health`
 2. `uv run python -m volpred.cli ops platform-cycle-summary --storage-dir storage --limit 20`
@@ -196,9 +193,9 @@ uv run python -m volpred.cli ops paper-upload-pdf --paper-id <id> --file paper/<
 
 ```
 CronCreate(cron="13 */6 * * *", prompt="會員問題研究")     # 6 小時重排
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢")         # 6 小時巡檢（health + cycle summary）
 CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit") # 自動存檔
 CronCreate(cron="7 * * * *", prompt="知識索引更新")         # 每小時
-# 平台巡檢已遷移至雲端 trigger platform-ops-patrol（0 */6 * * *）
 ```
 
 先讓 Claude 養成：

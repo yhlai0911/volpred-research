@@ -46,7 +46,7 @@ HEADERS = {
 }
 
 _ARTICLE_ID_CACHE: dict[str, str] = {}
-_TAG_ID_CACHE: dict[str, str] = {}
+_TAG_ID_CACHE: dict[str, int] = {}
 _STRATEGY_SIGNAL_CACHE_BY_KEY: dict[str, dict] = {}
 _STRATEGY_SIGNAL_CACHE_BY_NAME: dict[str, dict] = {}
 _STRATEGY_SIGNAL_CACHE_LOADED = False
@@ -232,7 +232,7 @@ def _get_article_id(slug: str) -> str | None:
     return None
 
 
-def _get_tag_ids(tag_names: list[str]) -> dict[str, str]:
+def _get_tag_ids(tag_names: list[str]) -> dict[str, int]:
     normalized = [name.strip() for name in tag_names if isinstance(name, str) and name.strip()]
     missing = [name for name in normalized if name not in _TAG_ID_CACHE]
     if missing:
@@ -241,10 +241,12 @@ def _get_tag_ids(tag_names: list[str]) -> dict[str, str]:
             for row in rows:
                 name = row.get("name")
                 tag_id = row.get("id")
-                if isinstance(name, str) and name and isinstance(tag_id, str) and tag_id:
+                if isinstance(name, str) and name and isinstance(tag_id, int):
                     _TAG_ID_CACHE[name] = tag_id
-        except Exception:
-            pass
+                elif isinstance(name, str) and name and isinstance(tag_id, str) and tag_id.isdigit():
+                    _TAG_ID_CACHE[name] = int(tag_id)
+        except Exception as e:
+            print(f"  Supabase tags lookup error: {e}")
     return {name: _TAG_ID_CACHE[name] for name in normalized if name in _TAG_ID_CACHE}
 
 
@@ -339,25 +341,34 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         # Sync tags
         tags = item.get("tags") or []
         if tags:
-            _sync_article_tags(row["slug"], tags)
+            tag_ok = _sync_article_tags(row["slug"], tags)
+            if not tag_ok:
+                print(f"  Warning: article synced but tags missing for {row['slug']}")
     return ok
 
 
-def _sync_article_tags(slug: str, tags: list[str]) -> None:
+def _sync_article_tags(slug: str, tags: list[str]) -> bool:
     """Sync tags for an article."""
     tag_names = list(dict.fromkeys(tag.strip() for tag in tags if isinstance(tag, str) and tag.strip()))
     if not tag_names:
-        return
+        return True
 
     # Upsert tags
     tag_rows = [{"name": tag_name} for tag_name in tag_names]
-    _post("tags", tag_rows)
+    if not _post("tags", tag_rows):
+        print(f"  Supabase tag upsert failed for {slug}: {tag_names}")
+        return False
 
     try:
         article_id = _get_article_id(slug)
         if not article_id:
-            return
+            print(f"  Supabase article tag sync skipped for {slug}: article_id not found")
+            return False
         tag_map = _get_tag_ids(tag_names)
+        if len(tag_map) != len(tag_names):
+            missing = [name for name in tag_names if name not in tag_map]
+            print(f"  Supabase article tag sync incomplete for {slug}: missing tag ids for {missing}")
+            return False
 
         # Upsert article_tags
         at_rows = []
@@ -366,9 +377,12 @@ def _sync_article_tags(slug: str, tags: list[str]) -> None:
             if tag_id:
                 at_rows.append({"article_id": article_id, "tag_id": tag_id})
         if at_rows:
-            _post("article_tags", at_rows)
-    except Exception:
-        pass  # Non-critical
+            return _post("article_tags", at_rows)
+        print(f"  Supabase article tag sync skipped for {slug}: no article_tags rows built")
+        return False
+    except Exception as e:
+        print(f"  Supabase article tag sync error for {slug}: {e}")
+        return False
 
 
 def sync_risk_forecast(data: dict) -> bool:

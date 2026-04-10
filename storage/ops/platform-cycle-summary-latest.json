@@ -1,38 +1,38 @@
 {
   "workflow_name": "platform_cycle_summary",
-  "generated_at": "2026-03-21T10:57:08.301060+00:00",
+  "generated_at": "2026-04-09T06:23:53.776684+00:00",
   "release_preview": {
-    "mode": "scheduled",
+    "mode": "auto",
     "settings": {
-      "mode": "scheduled",
-      "interval_minutes": 15,
+      "mode": "auto",
+      "interval_minutes": 60,
       "max_articles_per_run": 1,
       "due_only": true,
       "include_drafts": true,
       "preferred_audiences": [],
-      "last_released_at": "2026-03-21T10:33:01.410158+00:00",
-      "updated_at": "2026-03-21T10:33:05.977099+00:00"
+      "last_released_at": "2026-04-09T06:03:01.195669+00:00",
+      "updated_at": "2026-04-09T06:03:21.294457+00:00"
     },
-    "due_now": true,
-    "next_release_at": "2026-03-21T10:48:01.410158+00:00",
+    "due_now": false,
+    "next_release_at": "2026-04-09T07:03:00+00:00",
     "pool_counts": {
-      "draft": 10,
+      "draft": 4,
       "scheduled": 0,
-      "eligible": 10
+      "eligible": 4
     },
     "next_candidates": [
       {
-        "id": "mile_7b2c3f53",
-        "title": "宏觀經濟數據能預測波動率嗎？答案讓人意外",
+        "id": "mile_1badc085",
+        "title": "金融股跌了台股就會大跌？數據告訴你：相關性不等於預測力",
         "status": "draft",
-        "audience": "uncategorized",
-        "published_at": "2026-03-21T08:35:31.484208+00:00",
-        "created_at": "2026-03-21T08:35:31.484208+00:00"
+        "audience": "general",
+        "published_at": "2026-04-09T03:59:18.709355+00:00",
+        "created_at": "2026-04-09T03:59:18.709355+00:00"
       }
     ]
   },
   "question_ranking": {
-    "generated_at": "2026-03-21T10:57:08.301060+00:00",
+    "generated_at": "2026-04-09T06:23:53.776684+00:00",
     "cadence_hint": "每 6 小時檢查 pending_questions，評分後呼叫 question-rerank；既有榜單相對順序不應變動。",
     "table_columns": [
       "排名",
@@ -45,18 +45,18 @@
       "active_ranked": 1,
       "pending_evaluation": 0,
       "researching": 0,
-      "answered": 8,
-      "scored_questions": 9,
+      "answered": 11,
+      "scored_questions": 12,
       "candidate_pool": 0,
-      "latest_member_question_at": "2026-03-20T14:51:48.640783+00:00",
-      "latest_answered_at": null
+      "latest_member_question_at": "2026-04-05T08:11:23.674499+00:00",
+      "latest_answered_at": "2026-04-05T16:03:03.793975+00:00"
     },
     "ranked_table": [
       {
-        "rank": 1,
-        "prev_rank": null,
-        "rank_delta": null,
-        "rank_direction": "new",
+        "rank": 2,
+        "prev_rank": 1,
+        "rank_delta": 1,
+        "rank_direction": "down",
         "question_id": "54ba8732-2c80-46fb-a8bb-439658d589c4",
         "question": "testtewtrwqetwqtewqtqwet",
         "proposer": "yhlai",
@@ -80,12 +80,10 @@
     ],
     "evaluation_template": [],
     "next_commands": {
-      "read_summary": "uv run python -m volpred.cli ops question-ranking-summary --source user --limit 5",
+      "read_summary": "uv run python -m volpred.cli ops question-ranking-summary --source user --limit 20",
       "apply_rerank": "uv run python -m volpred.cli ops question-rerank --evaluations-json /path/to/evaluations.json"
     },
     "snapshot_path": "storage/ops/question-ranking-workflow-latest.json"
   },
-  "suggestions": [
-    "內容池已到節奏釋出時間，可評估執行 release-pool-by-settings。"
-  ]
+  "suggestions": []
 }
