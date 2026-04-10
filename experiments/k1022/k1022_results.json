@@ -1,559 +1,654 @@
 {
   "experiment_id": "K1022",
-  "title": "Crypto Fear Channel: BTC Vol Spillover to Equity via VIX",
-  "timestamp": "2026-04-10T08:49:26.670485+00:00",
-  "data_source": "yfinance",
-  "data_period": "2015-02-03 to 2026-04-08",
-  "sample_size": 2811,
-  "seed": 42,
-  "methodology": {
-    "granger_test": "statsmodels grangercausalitytests, max_lag=10",
-    "asymmetric_test": "Split BTC returns into positive/negative, rolling 21-day vol",
-    "tail_dependence": "Quantile regression (VIX change ~ BTC r²) at τ = 0.05-0.95",
-    "spillover": "Diebold-Yilmaz style VAR FEVD, 252-day rolling, 10-day forecast horizon",
-    "dcc": "EWMA dynamic correlation (λ=0.94) on GARCH standardized residuals",
-    "forecasting": "Expanding window OOS linear regression, AR vs AR+BTC_vol"
-  },
-  "descriptive_statistics": {
-    "spy_ret": {
-      "mean": 0.0004969434575017107,
-      "std": 0.011192336713490845,
-      "skew": -0.5765068193943568,
-      "kurtosis": 14.561913748636705,
-      "min": -0.11588643606135948,
-      "max": 0.09986278391659298,
-      "adf_stat": -17.171876975569077,
-      "adf_pval": 6.734944885696093e-30,
-      "stationary": "True"
+  "assets": {
+    "SPY": {
+      "status": "completed",
+      "label": "US Large Cap (baseline)",
+      "n_total": 5349,
+      "n_oos": 1827,
+      "n_valid": 1825,
+      "has_local_fear": false,
+      "local_fear_proxy": "VIX (same as M2)",
+      "vix_r2_corr_oos": 0.5262,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.1531,
+        "oos_vol_ann": 0.1965,
+        "oos_skewness": -0.574,
+        "oos_kurtosis": 14.134
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.513268,
+          "spearman_rho": 0.3707,
+          "params": [
+            3e-06,
+            0.08081909,
+            0.24298897,
+            0.77802078
+          ],
+          "persistence": 0.9803,
+          "var_025": {
+            "violation_rate": 0.0361,
+            "kupiec_stat": 8.1725,
+            "kupiec_p": 0.0043,
+            "pass": "FAIL"
+          },
+          "elapsed_s": 1.2
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.410636,
+          "spearman_rho": 0.4206,
+          "params": [
+            -5.33e-06,
+            0.001,
+            0.31853152,
+            0.0001,
+            0.17502261,
+            0.83655458
+          ],
+          "persistence": 0.9242,
+          "var_025": {
+            "violation_rate": 0.0263,
+            "kupiec_stat": 0.1194,
+            "kupiec_p": 0.7297,
+            "pass": "PASS"
+          },
+          "elapsed_s": 1.8
+        },
+        "A4f-LocalFear-t": {
+          "qlike": 1.410636,
+          "spearman_rho": 0.4206,
+          "var_025": {
+            "violation_rate": 0.0263,
+            "kupiec_stat": 0.1194,
+            "kupiec_p": 0.7297,
+            "pass": "PASS"
+          },
+          "elapsed_s": 0.0
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -2.7525,
+          "dm_p": 0.005973537099303261,
+          "significant_harvey": false,
+          "direction": "A4f better"
+        },
+        "A4f_Local_vs_GJR": {
+          "dm_t": -2.7525,
+          "dm_p": 0.005973537099303261,
+          "significant_harvey": false,
+          "direction": "A4f-Local better"
+        },
+        "A4f_Local_vs_A4f_VIX": {
+          "dm_t": 0.0,
+          "dm_p": 1.0,
+          "significant_harvey": false
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 6.78,
+        "A4f_Local_vs_GJR": 6.78
+      },
+      "elapsed_seconds": 3.0
     },
-    "btc_ret": {
-      "mean": 0.0020273705770328873,
-      "std": 0.04153166793666661,
-      "skew": -0.5861649798522877,
-      "kurtosis": 9.777391122194711,
-      "min": -0.46473017533977296,
-      "max": 0.22511895434132784,
-      "adf_stat": -29.11282583135382,
-      "adf_pval": 0.0,
-      "stationary": true
+    "QQQ": {
+      "status": "completed",
+      "label": "US Tech (high-beta)",
+      "n_total": 5349,
+      "n_oos": 1827,
+      "n_valid": 1826,
+      "has_local_fear": false,
+      "local_fear_proxy": "VIX (same as M2)",
+      "vix_r2_corr_oos": 0.4936,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.1959,
+        "oos_vol_ann": 0.2406,
+        "oos_skewness": -0.372,
+        "oos_kurtosis": 7.503
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.50793,
+          "spearman_rho": 0.34,
+          "params": [
+            4.77e-06,
+            0.0001,
+            0.25590937,
+            0.83590718
+          ],
+          "persistence": 0.964,
+          "var_025": {
+            "violation_rate": 0.0367,
+            "kupiec_stat": 8.9473,
+            "kupiec_p": 0.0028,
+            "pass": "FAIL"
+          },
+          "elapsed_s": 1.1
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.420229,
+          "spearman_rho": 0.3778,
+          "params": [
+            -2.4e-06,
+            0.00097903,
+            0.29967744,
+            0.0001,
+            0.13339998,
+            0.8762964
+          ],
+          "persistence": 0.9431,
+          "var_025": {
+            "violation_rate": 0.0301,
+            "kupiec_stat": 1.8349,
+            "kupiec_p": 0.1755,
+            "pass": "PASS"
+          },
+          "elapsed_s": 2.0
+        },
+        "A4f-LocalFear-t": {
+          "qlike": 1.420229,
+          "spearman_rho": 0.3778,
+          "var_025": {
+            "violation_rate": 0.0301,
+            "kupiec_stat": 1.8349,
+            "kupiec_p": 0.1755,
+            "pass": "PASS"
+          },
+          "elapsed_s": 0.0
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -2.1226,
+          "dm_p": 0.033924784417661114,
+          "significant_harvey": false,
+          "direction": "A4f better"
+        },
+        "A4f_Local_vs_GJR": {
+          "dm_t": -2.1226,
+          "dm_p": 0.033924784417661114,
+          "significant_harvey": false,
+          "direction": "A4f-Local better"
+        },
+        "A4f_Local_vs_A4f_VIX": {
+          "dm_t": 0.0,
+          "dm_p": 1.0,
+          "significant_harvey": false
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 5.82,
+        "A4f_Local_vs_GJR": 5.82
+      },
+      "elapsed_seconds": 3.1
     },
-    "vix": {
-      "mean": 18.38192815349773,
-      "std": 7.111624926947328,
-      "skew": 2.5915799122840384,
-      "kurtosis": 13.011697609802955,
-      "min": 9.140000343322754,
-      "max": 82.69000244140625,
-      "adf_stat": -5.7078272355776365,
-      "adf_pval": 7.417570588764385e-07,
-      "stationary": "True"
+    "GLD": {
+      "status": "completed",
+      "label": "Gold (GVZ available)",
+      "n_total": 4491,
+      "n_oos": 1827,
+      "n_valid": 1823,
+      "has_local_fear": true,
+      "local_fear_proxy": "GVZ",
+      "vix_r2_corr_oos": 0.1263,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.1771,
+        "oos_vol_ann": 0.1732,
+        "oos_skewness": -0.825,
+        "oos_kurtosis": 8.36
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.534674,
+          "spearman_rho": 0.1932,
+          "params": [
+            1.68e-06,
+            0.03987281,
+            0.03596635,
+            0.91996135
+          ],
+          "persistence": 0.9778,
+          "var_025": {
+            "violation_rate": 0.0323,
+            "kupiec_stat": 3.6563,
+            "kupiec_p": 0.0559,
+            "pass": "PASS"
+          },
+          "elapsed_s": 1.0
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.504886,
+          "spearman_rho": 0.2093,
+          "params": [
+            5.1e-05,
+            0.001,
+            0.00584954,
+            0.02109608,
+            0.00323834,
+            0.96999683
+          ],
+          "persistence": 0.9927,
+          "var_025": {
+            "violation_rate": 0.0285,
+            "kupiec_stat": 0.8605,
+            "kupiec_p": 0.3536,
+            "pass": "PASS"
+          },
+          "elapsed_s": 4.0
+        },
+        "A4f-LocalFear-t": {
+          "qlike": 1.440858,
+          "spearman_rho": 0.2358,
+          "var_025": {
+            "violation_rate": 0.0323,
+            "kupiec_stat": 3.6563,
+            "kupiec_p": 0.0559,
+            "pass": "PASS"
+          },
+          "elapsed_s": 3.0
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -2.3865,
+          "dm_p": 0.017110084378429757,
+          "significant_harvey": false,
+          "direction": "A4f better"
+        },
+        "A4f_Local_vs_GJR": {
+          "dm_t": -2.9589,
+          "dm_p": 0.003126933303208679,
+          "significant_harvey": false,
+          "direction": "A4f-Local better"
+        },
+        "A4f_Local_vs_A4f_VIX": {
+          "dm_t": -2.5879,
+          "dm_p": 0.009733773839207815,
+          "significant_harvey": false
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 1.94,
+        "A4f_Local_vs_GJR": 6.11
+      },
+      "elapsed_seconds": 8.0
     },
-    "spy_rv21": {
-      "mean": 14.87101178873188,
-      "std": 9.854548607510988,
-      "skew": 3.7071243428371274,
-      "kurtosis": 21.55737562639015,
-      "min": 3.4158105514502943,
-      "max": 93.66831081667675,
-      "adf_stat": -7.602950720683387,
-      "adf_pval": 2.3627308391585667e-11,
-      "stationary": "True"
+    "EEM": {
+      "status": "completed",
+      "label": "Emerging Markets",
+      "n_total": 5349,
+      "n_oos": 1827,
+      "n_valid": 1815,
+      "has_local_fear": false,
+      "local_fear_proxy": "VIX (same as M2)",
+      "vix_r2_corr_oos": 0.4969,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.0821,
+        "oos_vol_ann": 0.2124,
+        "oos_skewness": -0.822,
+        "oos_kurtosis": 11.528
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.33647,
+          "spearman_rho": 0.2221,
+          "params": [
+            3.76e-06,
+            0.00726232,
+            0.12189485,
+            0.91104922
+          ],
+          "persistence": 0.9793,
+          "var_025": {
+            "violation_rate": 0.0301,
+            "kupiec_stat": 1.8349,
+            "kupiec_p": 0.1755,
+            "pass": "PASS"
+          },
+          "elapsed_s": 0.9
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.317856,
+          "spearman_rho": 0.2665,
+          "params": [
+            2.86e-06,
+            0.001,
+            0.18004248,
+            0.0001,
+            0.06421577,
+            0.93965137
+          ],
+          "persistence": 0.9719,
+          "var_025": {
+            "violation_rate": 0.023,
+            "kupiec_stat": 0.3115,
+            "kupiec_p": 0.5767,
+            "pass": "PASS"
+          },
+          "elapsed_s": 2.5
+        },
+        "A4f-LocalFear-t": {
+          "qlike": 1.317856,
+          "spearman_rho": 0.2665,
+          "var_025": {
+            "violation_rate": 0.023,
+            "kupiec_stat": 0.3115,
+            "kupiec_p": 0.5767,
+            "pass": "PASS"
+          },
+          "elapsed_s": 0.0
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -1.6094,
+          "dm_p": 0.10770483418101295,
+          "significant_harvey": false,
+          "direction": "A4f better"
+        },
+        "A4f_Local_vs_GJR": {
+          "dm_t": -1.6094,
+          "dm_p": 0.10770483418101295,
+          "significant_harvey": false,
+          "direction": "A4f-Local better"
+        },
+        "A4f_Local_vs_A4f_VIX": {
+          "dm_t": 0.0,
+          "dm_p": 1.0,
+          "significant_harvey": false
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 1.39,
+        "A4f_Local_vs_GJR": 1.39
+      },
+      "elapsed_seconds": 3.3
     },
-    "btc_rv21": {
-      "mean": 59.90061918380772,
-      "std": 28.07811098802652,
-      "skew": 1.309225568934398,
-      "kurtosis": 2.745914033552331,
-      "min": 12.15490149060425,
-      "max": 194.10495559330298,
-      "adf_stat": -7.873829040904406,
-      "adf_pval": 4.904004879752855e-12,
-      "stationary": "True"
+    "TLT": {
+      "status": "completed",
+      "label": "US Bonds (new asset)",
+      "n_total": 5349,
+      "n_oos": 1827,
+      "n_valid": 1822,
+      "has_local_fear": false,
+      "local_fear_proxy": "VIX (same as M2)",
+      "vix_r2_corr_oos": 0.422,
+      "diagnostics": {
+        "oos_mean_return_ann": -0.0182,
+        "oos_vol_ann": 0.1627,
+        "oos_skewness": 0.062,
+        "oos_kurtosis": 4.456
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.209717,
+          "spearman_rho": 0.2782,
+          "params": [
+            5.1e-07,
+            0.03872475,
+            0.0001,
+            0.95574863
+          ],
+          "persistence": 0.9945,
+          "var_025": {
+            "violation_rate": 0.0285,
+            "kupiec_stat": 0.8605,
+            "kupiec_p": 0.3536,
+            "pass": "PASS"
+          },
+          "elapsed_s": 1.1
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.169378,
+          "spearman_rho": 0.2898,
+          "params": [
+            5.859e-05,
+            0.00089188,
+            0.00413701,
+            0.02923022,
+            0.0001,
+            0.96751454
+          ],
+          "persistence": 0.9968,
+          "var_025": {
+            "violation_rate": 0.029,
+            "kupiec_stat": 1.1467,
+            "kupiec_p": 0.2842,
+            "pass": "PASS"
+          },
+          "elapsed_s": 3.5
+        },
+        "A4f-LocalFear-t": {
+          "qlike": 1.169378,
+          "spearman_rho": 0.2898,
+          "var_025": {
+            "violation_rate": 0.029,
+            "kupiec_stat": 1.1467,
+            "kupiec_p": 0.2842,
+            "pass": "PASS"
+          },
+          "elapsed_s": 0.0
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -2.7485,
+          "dm_p": 0.006045866110672815,
+          "significant_harvey": false,
+          "direction": "A4f better"
+        },
+        "A4f_Local_vs_GJR": {
+          "dm_t": -2.7485,
+          "dm_p": 0.006045866110672815,
+          "significant_harvey": false,
+          "direction": "A4f-Local better"
+        },
+        "A4f_Local_vs_A4f_VIX": {
+          "dm_t": 0.0,
+          "dm_p": 1.0,
+          "significant_harvey": false
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 3.33,
+        "A4f_Local_vs_GJR": 3.33
+      },
+      "elapsed_seconds": 4.6
+    },
+    "0050.TW": {
+      "status": "completed",
+      "label": "Taiwan ETF (VIX lag+1)",
+      "n_total": 4084,
+      "n_oos": 1700,
+      "n_valid": 1641,
+      "has_local_fear": false,
+      "local_fear_proxy": "VIX (same as M2)",
+      "vix_r2_corr_oos": 0.2754,
+      "diagnostics": {
+        "oos_mean_return_ann": 0.2218,
+        "oos_vol_ann": 0.212,
+        "oos_skewness": -0.323,
+        "oos_kurtosis": 7.451
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.502474,
+          "spearman_rho": 0.2097,
+          "params": [
+            4.4e-06,
+            0.02704296,
+            0.07759056,
+            0.87869672
+          ],
+          "persistence": 0.9445,
+          "var_025": {
+            "violation_rate": 0.0371,
+            "kupiec_stat": 8.8521,
+            "kupiec_p": 0.0029,
+            "pass": "FAIL"
+          },
+          "elapsed_s": 0.9
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.48489,
+          "spearman_rho": 0.2584,
+          "params": [
+            1.001e-05,
+            0.00088128,
+            0.12378172,
+            0.0001,
+            0.04169606,
+            0.92833863
+          ],
+          "persistence": 0.9493,
+          "var_025": {
+            "violation_rate": 0.0294,
+            "kupiec_stat": 1.2859,
+            "kupiec_p": 0.2568,
+            "pass": "PASS"
+          },
+          "elapsed_s": 2.9
+        },
+        "A4f-LocalFear-t": {
+          "qlike": 1.48489,
+          "spearman_rho": 0.2584,
+          "var_025": {
+            "violation_rate": 0.0294,
+            "kupiec_stat": 1.2859,
+            "kupiec_p": 0.2568,
+            "pass": "PASS"
+          },
+          "elapsed_s": 0.0
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -0.5166,
+          "dm_p": 0.6054987284900579,
+          "significant_harvey": false,
+          "direction": "A4f better"
+        },
+        "A4f_Local_vs_GJR": {
+          "dm_t": -0.5166,
+          "dm_p": 0.6054987284900579,
+          "significant_harvey": false,
+          "direction": "A4f-Local better"
+        },
+        "A4f_Local_vs_A4f_VIX": {
+          "dm_t": 0.0,
+          "dm_p": 1.0,
+          "significant_harvey": false
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 1.17,
+        "A4f_Local_vs_GJR": 1.17
+      },
+      "elapsed_seconds": 3.7
     }
   },
-  "unconditional_correlations": {
-    "BTC RV21 vs VIX": {
-      "pearson_r": 0.22555378681219918,
-      "pearson_p": 9.388304802214626e-34,
-      "spearman_rho": 0.0704720285703905,
-      "spearman_p": 0.00018450795390693073
-    },
-    "BTC RV21 vs SPY RV21": {
-      "pearson_r": 0.3068553551654383,
-      "pearson_p": 2.3329264621002625e-62,
-      "spearman_rho": 0.10175792751627166,
-      "spearman_p": 6.418602338957472e-08
-    },
-    "BTC ret vs SPY ret": {
-      "pearson_r": 0.24221073792241143,
-      "pearson_p": 8.204474393246356e-39,
-      "spearman_rho": 0.19840770694884602,
-      "spearman_p": 2.3947691617382817e-26
-    },
-    "BTC r² vs VIX change": {
-      "pearson_r": 0.24086798998530193,
-      "pearson_p": 2.1707336524016995e-38,
-      "spearman_rho": 0.061271818908569135,
-      "spearman_p": 0.001153355077977716
-    }
-  },
-  "granger_causality": {
-    "btc_rv_to_vix_lag1": {
-      "F_stat": 0.5191888262482319,
-      "p_value": 0.4712479095347966,
-      "significant_5pct": "False"
-    },
-    "btc_rv_to_vix_lag2": {
-      "F_stat": 4.5233098300965215,
-      "p_value": 0.010932353780072708,
-      "significant_5pct": "True"
-    },
-    "btc_rv_to_vix_lag3": {
-      "F_stat": 8.983456266608643,
-      "p_value": 6.4021576170655715e-06,
-      "significant_5pct": "True"
-    },
-    "btc_rv_to_vix_lag4": {
-      "F_stat": 6.749111369008598,
-      "p_value": 2.105377208762692e-05,
-      "significant_5pct": "True"
-    },
-    "btc_rv_to_vix_lag5": {
-      "F_stat": 5.722820253508259,
-      "p_value": 2.9269395387705426e-05,
-      "significant_5pct": "True"
-    },
-    "btc_rv_to_vix_lag6": {
-      "F_stat": 5.198973246870591,
-      "p_value": 2.4873851701984537e-05,
-      "significant_5pct": "True"
-    },
-    "btc_rv_to_vix_lag7": {
-      "F_stat": 5.632618357496788,
-      "p_value": 1.8000909860424665e-06,
-      "significant_5pct": "True"
-    },
-    "btc_rv_to_vix_lag8": {
-      "F_stat": 5.018338498977509,
-      "p_value": 3.339714293414583e-06,
-      "significant_5pct": "True"
-    },
-    "btc_rv_to_vix_lag9": {
-      "F_stat": 4.508617997881824,
-      "p_value": 6.6062912663516915e-06,
-      "significant_5pct": "True"
-    },
-    "btc_rv_to_vix_lag10": {
-      "F_stat": 4.465834339339068,
-      "p_value": 2.827674210929238e-06,
-      "significant_5pct": "True"
-    },
-    "vix_to_btc_rv_lag1": {
-      "F_stat": 5.596579758767819,
-      "p_value": 0.018063169334040483,
-      "significant_5pct": "True"
-    },
-    "vix_to_btc_rv_lag2": {
-      "F_stat": 2.583364630941752,
-      "p_value": 0.07569921711820274,
-      "significant_5pct": "False"
-    },
-    "vix_to_btc_rv_lag3": {
-      "F_stat": 2.2240750668852893,
-      "p_value": 0.08335991859801947,
-      "significant_5pct": "False"
-    },
-    "vix_to_btc_rv_lag4": {
-      "F_stat": 1.9848361554688831,
-      "p_value": 0.09414117719421788,
-      "significant_5pct": "False"
-    },
-    "vix_to_btc_rv_lag5": {
-      "F_stat": 1.7702989962558116,
-      "p_value": 0.11552416967035845,
-      "significant_5pct": "False"
-    },
-    "vix_to_btc_rv_lag6": {
-      "F_stat": 1.8402936371194998,
-      "p_value": 0.08751873868999585,
-      "significant_5pct": "False"
-    },
-    "vix_to_btc_rv_lag7": {
-      "F_stat": 1.6147749710544046,
-      "p_value": 0.1264324335370902,
-      "significant_5pct": "False"
-    },
-    "vix_to_btc_rv_lag8": {
-      "F_stat": 1.4353443624876514,
-      "p_value": 0.1763877855115278,
-      "significant_5pct": "False"
-    },
-    "vix_to_btc_rv_lag9": {
-      "F_stat": 1.3427377789569583,
-      "p_value": 0.20919000558252915,
-      "significant_5pct": "False"
-    },
-    "vix_to_btc_rv_lag10": {
-      "F_stat": 1.6403167070981517,
-      "p_value": 0.08929858357393453,
-      "significant_5pct": "False"
-    }
-  },
-  "asymmetric_granger": {
-    "btc_upvol_to_vix_lag1": {
-      "F_stat": 1.5121729624835762,
-      "p_value": 0.21891160837477647
-    },
-    "btc_upvol_to_vix_lag2": {
-      "F_stat": 1.1721179892187004,
-      "p_value": 0.30986307220031095
-    },
-    "btc_upvol_to_vix_lag3": {
-      "F_stat": 0.7711550816990752,
-      "p_value": 0.51005045225258
-    },
-    "btc_upvol_to_vix_lag5": {
-      "F_stat": 0.5485154080934924,
-      "p_value": 0.7395797057685294
-    },
-    "btc_downvol_to_vix_lag1": {
-      "F_stat": 0.13605660728135627,
-      "p_value": 0.7122612012379548
-    },
-    "btc_downvol_to_vix_lag2": {
-      "F_stat": 3.129735026915053,
-      "p_value": 0.04388328047726816
-    },
-    "btc_downvol_to_vix_lag3": {
-      "F_stat": 8.4607811491332,
-      "p_value": 1.3546644913362953e-05
-    },
-    "btc_downvol_to_vix_lag5": {
-      "F_stat": 5.43298860246127,
-      "p_value": 5.5841743029164756e-05
-    },
-    "ratio_down_over_up_lag1": 0.08997423618651294,
-    "ratio_down_over_up_lag2": 2.670153564489905,
-    "ratio_down_over_up_lag3": 10.971568948870415,
-    "ratio_down_over_up_lag5": 9.90489696788105
-  },
-  "quantile_regression_tail": {
-    "coefficients": {
-      "q05": {
-        "beta": -47.857275942157685,
-        "p_value": 7.304263590332278e-05,
-        "ci_low": -71.4820122315267,
-        "ci_high": -24.23253965278867,
-        "significant": true
-      },
-      "q10": {
-        "beta": -8.547437079105407,
-        "p_value": 0.16034833857576625,
-        "ci_low": -20.48236635350172,
-        "ci_high": 3.387492195290907,
-        "significant": false
-      },
-      "q25": {
-        "beta": 17.449700194564386,
-        "p_value": 3.992208213441438e-05,
-        "ci_low": 9.13380799077743,
-        "ci_high": 25.76559239835134,
-        "significant": true
-      },
-      "q50": {
-        "beta": 22.835641252398638,
-        "p_value": 2.5468343178295004e-10,
-        "ci_low": 15.781211051089334,
-        "ci_high": 29.89007145370794,
-        "significant": true
-      },
-      "q75": {
-        "beta": 93.86687540529252,
-        "p_value": 1.0834669244797817e-33,
-        "ci_low": 78.85218191040649,
-        "ci_high": 108.88156890017855,
-        "significant": true
-      },
-      "q90": {
-        "beta": 142.51423742593693,
-        "p_value": 6.745426205774501e-60,
-        "ci_low": 125.80076518511288,
-        "ci_high": 159.22770966676097,
-        "significant": true
-      },
-      "q95": {
-        "beta": 311.58212236106044,
-        "p_value": 1.2133955994259893e-77,
-        "ci_low": 279.8387743279099,
-        "ci_high": 343.325470394211,
-        "significant": true
-      }
-    },
-    "asymmetry": {
-      "upper_tail_avg_beta": 227.04817989349868,
-      "lower_tail_avg_beta": -28.202356510631546,
-      "asymmetry_ratio": -8.050681148148294,
-      "interpretation": "BTC vol has stronger effect on VIX in upper tail (VIX spikes)"
-    }
-  },
-  "spillover_analysis": {
-    "mean_total_spillover": 2.7852266891968362,
-    "mean_btc_to_vix": 3.463009224933213,
-    "mean_vix_to_btc": 2.10744415346046,
-    "by_year": {
-      "2016": {
-        "mean_total": 7.3438886438632744,
-        "mean_btc_to_vix": 13.629059081411944,
-        "mean_vix_to_btc": 1.0587182063146054
-      },
-      "2017": {
-        "mean_total": 1.8834917153838984,
-        "mean_btc_to_vix": 2.344783884475275,
-        "mean_vix_to_btc": 1.4221995462925228
-      },
-      "2018": {
-        "mean_total": 1.6611950645765439,
-        "mean_btc_to_vix": 2.6110369356822245,
-        "mean_vix_to_btc": 0.7113531934708629
-      },
-      "2019": {
-        "mean_total": 1.375180604310934,
-        "mean_btc_to_vix": 1.811152474333912,
-        "mean_vix_to_btc": 0.9392087342879556
-      },
-      "2020": {
-        "mean_total": 6.018208817611375,
-        "mean_btc_to_vix": 5.3088409706138355,
-        "mean_vix_to_btc": 6.727576664608911
-      },
-      "2021": {
-        "mean_total": 3.2648807472188457,
-        "mean_btc_to_vix": 3.235547356595652,
-        "mean_vix_to_btc": 3.294214137842041
-      },
-      "2022": {
-        "mean_total": 2.4465880395023225,
-        "mean_btc_to_vix": 2.2584471491922877,
-        "mean_vix_to_btc": 2.6347289298123564
-      },
-      "2023": {
-        "mean_total": 1.6168949772077545,
-        "mean_btc_to_vix": 2.1680638387962534,
-        "mean_vix_to_btc": 1.0657261156192555
-      },
-      "2024": {
-        "mean_total": 1.4478133234946957,
-        "mean_btc_to_vix": 1.2574032508835205,
-        "mean_vix_to_btc": 1.6382233961058716
-      },
-      "2025": {
-        "mean_total": 1.1259136799097285,
-        "mean_btc_to_vix": 0.761774334099419,
-        "mean_vix_to_btc": 1.490053025720038
-      },
-      "2026": {
-        "mean_total": 2.338473329945211,
-        "mean_btc_to_vix": 2.85193449892451,
-        "mean_vix_to_btc": 1.8250121609659122
-      }
-    },
-    "high_spillover_episodes": [
+  "summary": {
+    "n_assets_tested": 6,
+    "a4f_vix_significant_wins": 0,
+    "a4f_vix_qlike_better": 6,
+    "a4f_vix_var_pass": 6,
+    "a4f_local_significant_wins": 0,
+    "conclusion": "LIMITED robustness: A4f significant in only 0/6 — may be SPY/QQQ specific",
+    "summary_table": [
       {
-        "start": "2016-02-03",
-        "end": "2016-06-27",
-        "mean_spillover": 11.212874883490715,
-        "max_spillover": 12.801252583674453,
-        "mean_btc_to_vix": 21.99234930556424
+        "asset": "SPY",
+        "qlike_gjr": 1.513268,
+        "qlike_a4f": 1.410636,
+        "dm_t": -2.7525,
+        "harvey_sig": false,
+        "qlike_improve_pct": 6.78,
+        "var_gjr": "FAIL",
+        "var_a4f": "PASS"
       },
       {
-        "start": "2020-03-16",
-        "end": "2020-04-06",
-        "mean_spillover": 7.597708642102565,
-        "max_spillover": 8.299545623471316,
-        "mean_btc_to_vix": 7.9210677030140815
+        "asset": "QQQ",
+        "qlike_gjr": 1.50793,
+        "qlike_a4f": 1.420229,
+        "dm_t": -2.1226,
+        "harvey_sig": false,
+        "qlike_improve_pct": 5.82,
+        "var_gjr": "FAIL",
+        "var_a4f": "PASS"
       },
       {
-        "start": "2020-07-23",
-        "end": "2020-07-23",
-        "mean_spillover": 7.458294218858286,
-        "max_spillover": 7.458294218858286,
-        "mean_btc_to_vix": 6.658862804901585
+        "asset": "GLD",
+        "qlike_gjr": 1.534674,
+        "qlike_a4f": 1.504886,
+        "dm_t": -2.3865,
+        "harvey_sig": false,
+        "qlike_improve_pct": 1.94,
+        "var_gjr": "PASS",
+        "var_a4f": "PASS"
       },
       {
-        "start": "2020-08-27",
-        "end": "2021-03-05",
-        "mean_spillover": 8.733196560973468,
-        "max_spillover": 10.611945360661709,
-        "mean_btc_to_vix": 7.716770964843639
+        "asset": "EEM",
+        "qlike_gjr": 1.33647,
+        "qlike_a4f": 1.317856,
+        "dm_t": -1.6094,
+        "harvey_sig": false,
+        "qlike_improve_pct": 1.39,
+        "var_gjr": "PASS",
+        "var_a4f": "PASS"
       },
       {
-        "start": "2021-04-12",
-        "end": "2021-04-12",
-        "mean_spillover": 8.327904962871083,
-        "max_spillover": 8.327904962871083,
-        "mean_btc_to_vix": 0.09378401784805984
+        "asset": "TLT",
+        "qlike_gjr": 1.209717,
+        "qlike_a4f": 1.169378,
+        "dm_t": -2.7485,
+        "harvey_sig": false,
+        "qlike_improve_pct": 3.33,
+        "var_gjr": "PASS",
+        "var_a4f": "PASS"
       },
       {
-        "start": "2024-08-06",
-        "end": "2024-08-06",
-        "mean_spillover": 12.88750222863525,
-        "max_spillover": 12.88750222863525,
-        "mean_btc_to_vix": 7.176864858043866
+        "asset": "0050.TW",
+        "qlike_gjr": 1.502474,
+        "qlike_a4f": 1.48489,
+        "dm_t": -0.5166,
+        "harvey_sig": false,
+        "qlike_improve_pct": 1.17,
+        "var_gjr": "FAIL",
+        "var_a4f": "PASS"
       }
     ]
   },
-  "dcc_analysis": {
-    "btc_spy": {
-      "mean": 0.18069377421395533,
-      "std": 0.2629727714650009,
-      "min": -0.5406636255545099,
-      "max": 0.7742704528586474
-    },
-    "btc_vix": {
-      "mean": -0.17813895097245092,
-      "std": 0.24985262719956985
-    },
-    "regime_conditional": {
-      "vix_median": 16.56999969482422,
-      "dcc_high_vix_mean": 0.2952156240484818,
-      "dcc_low_vix_mean": 0.06641610742811654,
-      "dcc_diff_tstat": 25.61184505667105,
-      "dcc_diff_pval": 3.326381748486713e-130,
-      "contagion_during_stress": true
-    }
-  },
-  "vix_forecasting": {
+  "metadata": {
+    "experiment_id": "K1022",
+    "base_experiments": [
+      "K988",
+      "K994",
+      "K1004",
+      "K1021"
+    ],
+    "model_spec": "A4f: τ=θ₀+θ₁×X², free ω, GJR g_t, Student-t(df=8)",
+    "data_source": "yfinance",
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-10",
     "oos_start": "2019-01-01",
-    "oos_n": 1826,
-    "ar_mse": 4.429187215219687,
-    "arx_mse": 4.393482854456783,
-    "mse_improvement_pct": 0.8061154118799929,
-    "ar_mae": 1.203876449547183,
-    "arx_mae": 1.21075130855917,
-    "mae_improvement_pct": -0.571060179354177,
-    "dm_tstat": 0.41747261690513965,
-    "dm_pval": 0.6763327494178837,
-    "harvey_pass": "False",
-    "standard_pass": "False",
-    "ar_qlike": 6.923010030826394,
-    "arx_qlike": 6.922909212269077,
-    "qlike_improvement_pct": 0.0014562821210484245
-  },
-  "time_varying_coupling": {
-    "rolling_63d_corr_mean": 0.11262739154436739,
-    "rolling_63d_corr_std": 0.4231878374796414,
-    "by_year": {
-      "2015": {
-        "mean": 0.3736678724738832,
-        "std": 0.31961635918816766
-      },
-      "2016": {
-        "mean": 0.31805477734638354,
-        "std": 0.42733631327894445
-      },
-      "2017": {
-        "mean": -0.016730704172003497,
-        "std": 0.32802357049794917
-      },
-      "2018": {
-        "mean": 0.01369523617979875,
-        "std": 0.34824014966111067
-      },
-      "2019": {
-        "mean": 0.04876835839691158,
-        "std": 0.4754578092919935
-      },
-      "2020": {
-        "mean": 0.09094767532269998,
-        "std": 0.4861442320468313
-      },
-      "2021": {
-        "mean": 0.044210445025828014,
-        "std": 0.36588448247537786
-      },
-      "2022": {
-        "mean": 0.21086882157386452,
-        "std": 0.3798664437048735
-      },
-      "2023": {
-        "mean": -0.044021299266928875,
-        "std": 0.4192969502464797
-      },
-      "2024": {
-        "mean": 0.0263799815124804,
-        "std": 0.43996696443156874
-      },
-      "2025": {
-        "mean": 0.21381964723099567,
-        "std": 0.41102746585565714
-      },
-      "2026": {
-        "mean": 0.28195591842059453,
-        "std": 0.2907736322282238
-      }
-    },
-    "breakpoints": {
-      "pre_covid_mean": 0.1183047473322381,
-      "post_covid_mean": 0.10813065928735116,
-      "covid_break_tstat": 0.6259327813354809,
-      "covid_break_pval": 0.5314110336472924,
-      "pre_crypto_winter_mean": 0.1331134951939077,
-      "post_crypto_winter_mean": 0.09344095867148769,
-      "crypto_winter_break_tstat": 1.7599737507396427,
-      "crypto_winter_break_pval": 0.07861180284692243
-    }
-  },
-  "vix_regime_analysis": {
-    "low_vix": {
-      "n_obs": 705,
-      "vix_range": "<= 13.6",
-      "return_corr": 0.05671099403367593,
-      "vol_corr": -0.28205946350469885,
-      "btc_ann_ret": 1.2084597457811568,
-      "spy_ann_ret": 0.4808099390620205
-    },
-    "mid_vix": {
-      "n_obs": 1403,
-      "vix_range": "13.6 - 21.3",
-      "return_corr": 0.09028786763976829,
-      "vol_corr": 0.27280654678192134,
-      "btc_ann_ret": 0.416745989486298,
-      "spy_ann_ret": 0.22330522058616734
-    },
-    "high_vix": {
-      "n_obs": 703,
-      "vix_range": "> 21.3",
-      "return_corr": 0.42538355130850825,
-      "vol_corr": 0.5332222380609708,
-      "btc_ann_ret": -0.0007484973414668019,
-      "spy_ann_ret": -0.42709445326275314
-    }
-  },
-  "key_findings": [
-    "Granger: BTC_RV→VIX significant at 9/10 lags; VIX→BTC_RV significant at 1/10 lags",
-    "Asymmetry: BTC down-vol significant at 3/3 lags (2,3,5), up-vol at 0/3 — crypto crashes drive VIX (Down/Up ratio at lags 2-5 avg = 7.8x)",
-    "Tail dependence: BTC vol has stronger effect on VIX in upper tail (VIX spikes)",
-    "Mean spillover: BTC→VIX=3.5%, VIX→BTC=2.1%",
-    "Contagion: BTC-SPY DCC higher during high VIX (0.2952 vs 0.0664)",
-    "No economic value: BTC vol does not significantly improve VIX forecast (DM t=0.42)"
-  ],
-  "limitations": [
-    "BTC data starts 2015 — limited pre-maturity observations",
-    "VIX is implied vol, not realized — comparison is cross-concept",
-    "Granger causality ≠ true causation",
-    "EWMA DCC is simplified (not full DCC-GARCH estimation)",
-    "Linear AR model for VIX forecasting — nonlinear methods may differ",
-    "No intraday data — daily frequency may miss fast spillovers"
-  ],
-  "references": [
-    "K639: BTC→SPY Granger confirmed",
-    "K746b: BTC vol asymmetrically Granger-causes VIX",
-    "Diebold & Yilmaz (2012): Connectedness approach",
-    "Patton (2006): Copula-based models",
-    "Harvey (2016): |t| > 3.0 threshold"
-  ],
-  "plots": [
-    "k1022_spillover_dynamics.png",
-    "k1022_regime_analysis.png"
-  ]
+    "window": 2000,
+    "refit_every": 63,
+    "df_fixed": 8,
+    "evaluation": "QLIKE on r² (Patton 2011), DM test (Harvey t>3.0), VaR 2.5% Kupiec",
+    "charts": [
+      "k1022_dm_t_bar.png",
+      "k1022_qlike_var_comparison.png"
+    ],
+    "elapsed_seconds": 31.7,
+    "timestamp": "2026-04-10T08:48:21.005247+00:00",
+    "seed": 42,
+    "references": [
+      "Engle, Ghysels & Sohn (2013). Stock Market Volatility and Macroeconomic Fundamentals. RES 95(3):776-797.",
+      "Engle & Rangel (2008). Spline-GARCH. RFS 21(3):1187-1222.",
+      "Conrad & Loch (2015). Anticipating Long-Term Stock Market Volatility. JBES 33(3):338-358.",
+      "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256.",
+      "Harvey et al. (2016). t > 3.0 threshold.",
+      "Kupiec (1995). Techniques for Verifying the Accuracy of Risk Measurement Models. J Deriv 3:73-84."
+    ]
+  }
 }
