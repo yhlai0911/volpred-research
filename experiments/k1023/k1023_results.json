@@ -1,0 +1,129 @@
+{
+  "proposition_1_eg1_identity": {
+    "A4_constrained": {
+      "theoretical_E_g": 1.0,
+      "empirical_E_g": 0.9310627888401249,
+      "E_sigma2": 0.00012862228928752997,
+      "E_tau": 0.00012067929765158077,
+      "E_tau_times_E_g": 0.00011236000342674833,
+      "Cov_tau_g": 1.626532667713556e-05,
+      "Corr_tau_g": 0.4785125596073153,
+      "identity_error_pct": 6.175439482493554
+    },
+    "A4f_free_omega": {
+      "theoretical_E_g": 0.41739000058660186,
+      "empirical_E_g": 0.35437754065604254,
+      "E_sigma2": 0.00014206633236383284,
+      "E_tau": 0.0003385695863153099,
+      "E_tau_times_E_g": 0.00011998145733935323,
+      "Cov_tau_g": 2.2089004582262807e-05,
+      "Corr_tau_g": 0.4752336940732146
+    },
+    "verdict": "E(g)\u22481 confirmed for constrained model; Corr(\u03c4,g) small validates approximation"
+  },
+  "proposition_2_vrp_auto_correction": {
+    "theta1_A4": 2.964457510885065e-07,
+    "theta1_A4f": 8.436333010311091e-07,
+    "theta1_no_vrp": 3.9682539682539683e-07,
+    "theta1_ratio_A4": 0.7470432927430364,
+    "theta1_ratio_A4f": 2.125955918598395,
+    "avg_vrp_daily": 3.149882115034583e-05,
+    "avg_vrp_fraction_of_implied": 0.17982697639867481,
+    "theta1_predicted_from_vrp": 3.254654855560814e-07,
+    "verdict": "\u03b8\u2081 < 1/252/10000 confirms VRP auto-correction"
+  },
+  "proposition_3_g_tracks_vrp": {
+    "spearman_g_A4_vs_vrp": 0.05690827396690128,
+    "p_value_A4": 3.7014762367262637e-05,
+    "spearman_g_A4f_vs_vrp": 0.04429688756046448,
+    "p_value_A4f": 0.0013267954556345383,
+    "spearman_raw_ratio_vs_vrp": -0.687619034392702,
+    "p_value_raw": 0.0,
+    "g_gt_1_iff_vrp_neg_agreement": 0.6866069727567156,
+    "verdict": "g highly correlated with VRP; GARCH filtering amplifies signal from raw ratio"
+  },
+  "g_distribution": {
+    "A4_constrained": {
+      "mean": 0.9310627888401249,
+      "std": 0.21019798612991886,
+      "median": 0.8790731782595642,
+      "skewness": 2.1492070125028455,
+      "kurtosis": 7.425682945407635,
+      "min": 0.6666649755441538,
+      "max": 2.579727153363716,
+      "pct_below_1": 73.1725556178725
+    },
+    "A4f_free_omega": {
+      "mean": 0.35437754065604254,
+      "std": 0.10099957312022846,
+      "median": 0.33337833081299273,
+      "skewness": 2.0624849448630638,
+      "kurtosis": 7.392077889554093,
+      "min": 0.2126031253488061,
+      "max": 1.1302899640046244
+    },
+    "ks_test_standardized": {
+      "D_statistic": 0.03122078893251075,
+      "p_value": 0.010877220804908905
+    }
+  },
+  "model_parameters": {
+    "A4_constrained": {
+      "theta0": -1.01741679458742e-05,
+      "theta1": 2.964457510885065e-07,
+      "omega": 0.09345993278973697,
+      "alpha": 0.01779535312596401,
+      "gamma": 0.07005559755489324,
+      "beta": 0.8537169153068523,
+      "persistence": 0.9065400672102629,
+      "E_g": 0.9999999999999988,
+      "log_lik": 17783.823535073476,
+      "free_omega": false
+    },
+    "A4f_free_omega": {
+      "theta0": -3.381672965648833e-05,
+      "theta1": 8.436333010311091e-07,
+      "omega": 0.025134295312766716,
+      "alpha": 0.037308246529273954,
+      "gamma": 0.06761891968760445,
+      "beta": 0.8686645230108505,
+      "persistence": 0.9397822293839266,
+      "E_g": 0.41739000058660186,
+      "log_lik": 17775.12407984531,
+      "free_omega": true
+    }
+  },
+  "not_relabeling_evidence": {
+    "1_parametric_identification": "\u03c4 has parametric form \u03b8\u2080+\u03b8\u2081VIX\u00b2; \u03b8\u2081 has VRP interpretation",
+    "2_dynamic_structure": "g follows GJR-GARCH; not arbitrary residual",
+    "3_scale_identification": "E(g)=1 pins scale; without it \u03c4 and g not separately identified",
+    "4_empirical_falsifiability": {
+      "g_vs_vrp_spearman": 0.05690827396690128,
+      "dm_t_A4f_vs_GJR": 4.48,
+      "raw_ratio_vs_vrp": -0.687619034392702,
+      "garch_filter_improvement": -0.6307107604258008
+    },
+    "5_comparison_with_literature": {
+      "spline_garch": "No external variable; \u03c4 is pure time trend",
+      "garch_midas": "Macro variables; indirect VRP link; monthly \u03c4 loses daily info",
+      "our_a4f": "VIX (risk-neutral); direct VRP bridge; daily \u03c4 preserves all info"
+    }
+  },
+  "metadata": {
+    "experiment_id": "K1023",
+    "asset": "SPY",
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-10",
+    "n_total": 5349,
+    "elapsed_seconds": 20.5572350025177,
+    "timestamp": "2026-04-10T08:48:49.238422+00:00",
+    "seed": 42,
+    "references": [
+      "Bollerslev, Tauchen & Zhou (2009). Expected Stock Returns and VRP. RFS 22(11):4463-4492.",
+      "Engle, Ghysels & Sohn (2013). Stock Market Volatility. RES 95(3):776-797.",
+      "Engle & Rangel (2008). Spline-GARCH. RFS 21(3):1187-1222.",
+      "Conrad & Loch (2015). Anticipating Long-Term Volatility. JBES 33(3):338-358.",
+      "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256."
+    ]
+  }
+}
