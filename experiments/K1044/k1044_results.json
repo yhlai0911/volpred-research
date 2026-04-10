@@ -1,0 +1,420 @@
+{
+  "experiment_id": "K1044",
+  "title": "Gamma-VT Causal Panel Test (Cross-Asset Causal Verification)",
+  "date": "2026-04-11 06:47",
+  "config": {
+    "assets": [
+      "SPY",
+      "QQQ",
+      "IWM",
+      "EFA",
+      "EEM",
+      "GLD",
+      "SLV",
+      "USO",
+      "TLT",
+      "HYG",
+      "BTC-USD",
+      "0050.TW",
+      "XLF"
+    ],
+    "n_assets_processed": 13,
+    "start_date": "2007-01-01",
+    "end_date": "2026-04-10",
+    "oos_start": "2015-01-01",
+    "garch_window": 2000,
+    "garch_refit": 63,
+    "vt_formula": "12/VIX",
+    "vt_cap": 1.5,
+    "vt_lag": "signal.shift(1)",
+    "bootstrap_reps": 5000,
+    "seed": 42
+  },
+  "data_source": "yfinance (daily adjusted close) + ^VIX",
+  "asset_panel": [
+    {
+      "asset": "SPY",
+      "gamma": 0.2584,
+      "gamma_std": 0.0408,
+      "vt_alpha": -0.0565,
+      "sharpe_diff": 0.092,
+      "mdd_improvement": -0.194,
+      "autocorr_lag1": -0.1196,
+      "vix_return_corr": -0.7295,
+      "bh_sharpe": 0.785,
+      "vt_sharpe": 0.877,
+      "bh_mdd": -0.337,
+      "vt_mdd": -0.144,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "QQQ",
+      "gamma": 0.1981,
+      "gamma_std": 0.0311,
+      "vt_alpha": -0.0756,
+      "sharpe_diff": 0.046,
+      "mdd_improvement": -0.117,
+      "autocorr_lag1": -0.1067,
+      "vix_return_corr": -0.6974,
+      "bh_sharpe": 0.867,
+      "vt_sharpe": 0.913,
+      "bh_mdd": -0.351,
+      "vt_mdd": -0.234,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "IWM",
+      "gamma": 0.1543,
+      "gamma_std": 0.0213,
+      "vt_alpha": -0.0565,
+      "sharpe_diff": -0.089,
+      "mdd_improvement": -0.177,
+      "autocorr_lag1": -0.0597,
+      "vix_return_corr": -0.6583,
+      "bh_sharpe": 0.483,
+      "vt_sharpe": 0.394,
+      "bh_mdd": -0.411,
+      "vt_mdd": -0.234,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "EFA",
+      "gamma": 0.1455,
+      "gamma_std": 0.0153,
+      "vt_alpha": -0.0442,
+      "sharpe_diff": -0.06,
+      "mdd_improvement": -0.146,
+      "autocorr_lag1": -0.0791,
+      "vix_return_corr": -0.6613,
+      "bh_sharpe": 0.522,
+      "vt_sharpe": 0.462,
+      "bh_mdd": -0.342,
+      "vt_mdd": -0.196,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "EEM",
+      "gamma": 0.1128,
+      "gamma_std": 0.0146,
+      "vt_alpha": -0.0508,
+      "sharpe_diff": -0.152,
+      "mdd_improvement": -0.076,
+      "autocorr_lag1": -0.0928,
+      "vix_return_corr": -0.6134,
+      "bh_sharpe": 0.4,
+      "vt_sharpe": 0.248,
+      "bh_mdd": -0.398,
+      "vt_mdd": -0.323,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "GLD",
+      "gamma": -0.0124,
+      "gamma_std": 0.0278,
+      "vt_alpha": -0.0451,
+      "sharpe_diff": -0.022,
+      "mdd_improvement": -0.06,
+      "autocorr_lag1": 0.008,
+      "vix_return_corr": -0.0017,
+      "bh_sharpe": 0.836,
+      "vt_sharpe": 0.814,
+      "bh_mdd": -0.22,
+      "vt_mdd": -0.16,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "SLV",
+      "gamma": -0.0063,
+      "gamma_std": 0.0148,
+      "vt_alpha": -0.0668,
+      "sharpe_diff": -0.035,
+      "mdd_improvement": -0.115,
+      "autocorr_lag1": 0.0115,
+      "vix_return_corr": -0.1482,
+      "bh_sharpe": 0.596,
+      "vt_sharpe": 0.561,
+      "bh_mdd": -0.428,
+      "vt_mdd": -0.313,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "USO",
+      "gamma": 0.0959,
+      "gamma_std": 0.0229,
+      "vt_alpha": 0.0052,
+      "sharpe_diff": 0.116,
+      "mdd_improvement": -0.331,
+      "autocorr_lag1": 0.031,
+      "vix_return_corr": -0.217,
+      "bh_sharpe": 0.15,
+      "vt_sharpe": 0.266,
+      "bh_mdd": -0.898,
+      "vt_mdd": -0.567,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "TLT",
+      "gamma": -0.0256,
+      "gamma_std": 0.0142,
+      "vt_alpha": 0.0099,
+      "sharpe_diff": 0.114,
+      "mdd_improvement": -0.184,
+      "autocorr_lag1": -0.0242,
+      "vix_return_corr": 0.1462,
+      "bh_sharpe": 0.028,
+      "vt_sharpe": 0.143,
+      "bh_mdd": -0.484,
+      "vt_mdd": -0.299,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "HYG",
+      "gamma": 0.1996,
+      "gamma_std": 0.0354,
+      "vt_alpha": -0.0199,
+      "sharpe_diff": 0.056,
+      "mdd_improvement": -0.112,
+      "autocorr_lag1": 0.0169,
+      "vix_return_corr": -0.5114,
+      "bh_sharpe": 0.568,
+      "vt_sharpe": 0.624,
+      "bh_mdd": -0.22,
+      "vt_mdd": -0.108,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "BTC-USD",
+      "gamma": 0.0612,
+      "gamma_std": 0.0247,
+      "vt_alpha": -0.1457,
+      "sharpe_diff": -0.04,
+      "mdd_improvement": -0.029,
+      "autocorr_lag1": -0.0274,
+      "vix_return_corr": -0.2054,
+      "bh_sharpe": 0.931,
+      "vt_sharpe": 0.892,
+      "bh_mdd": -0.799,
+      "vt_mdd": -0.77,
+      "n_obs_oos": 2832
+    },
+    {
+      "asset": "0050.TW",
+      "gamma": 0.1087,
+      "gamma_std": 0.0161,
+      "vt_alpha": -0.0199,
+      "sharpe_diff": 0.385,
+      "mdd_improvement": -0.136,
+      "autocorr_lag1": -0.0116,
+      "vix_return_corr": -0.1994,
+      "bh_sharpe": 0.952,
+      "vt_sharpe": 1.336,
+      "bh_mdd": -0.33,
+      "vt_mdd": -0.194,
+      "n_obs_oos": 2648
+    },
+    {
+      "asset": "XLF",
+      "gamma": 0.1953,
+      "gamma_std": 0.0469,
+      "vt_alpha": -0.0444,
+      "sharpe_diff": 0.098,
+      "mdd_improvement": -0.251,
+      "autocorr_lag1": -0.0986,
+      "vix_return_corr": -0.6172,
+      "bh_sharpe": 0.577,
+      "vt_sharpe": 0.675,
+      "bh_mdd": -0.429,
+      "vt_mdd": -0.178,
+      "n_obs_oos": 2832
+    }
+  ],
+  "cross_sectional_results": {
+    "correlations": {
+      "gamma_vs_vt_alpha": {
+        "spearman_rho": -0.2087912087912088,
+        "spearman_p": 0.49362181935688504,
+        "pearson_r": -0.07567772308918533,
+        "pearson_p": 0.8059010674650927
+      },
+      "gamma_vs_sharpe_diff": {
+        "spearman_rho": -0.03296703296703297,
+        "spearman_p": 0.9148564744875124,
+        "pearson_r": 0.09284585511078775,
+        "pearson_p": 0.7628948387582398
+      },
+      "gamma_vs_mdd_improvement": {
+        "spearman_rho": -0.25274725274725274,
+        "spearman_p": 0.40477407127094645,
+        "pearson_r": -0.2693393136738734,
+        "pearson_p": 0.373532932023857
+      }
+    },
+    "bootstrap_ci": {
+      "gamma_vs_vt_alpha_95ci": [
+        -0.7815278625416647,
+        0.4270064205457458
+      ],
+      "gamma_vs_sharpe_diff_95ci": [
+        -0.5029247566819821,
+        0.553119049492485
+      ],
+      "gamma_vs_mdd_improvement_95ci": [
+        -0.7457984193486956,
+        0.37716806722689034
+      ],
+      "n_bootstrap": 5000
+    },
+    "leave_one_out": [
+      {
+        "removed_asset": "SPY",
+        "rho_alpha": -0.1398601398601399,
+        "rho_sharpe": -0.10489510489510491,
+        "rho_mdd": -0.1258741258741259,
+        "delta_rho_alpha": 0.0689310689310689
+      },
+      {
+        "removed_asset": "QQQ",
+        "rho_alpha": -0.1258741258741259,
+        "rho_sharpe": -0.10489510489510491,
+        "rho_mdd": -0.3076923076923077,
+        "delta_rho_alpha": 0.08291708291708291
+      },
+      {
+        "removed_asset": "IWM",
+        "rho_alpha": -0.18181818181818185,
+        "rho_sharpe": 0.006993006993006993,
+        "rho_mdd": -0.2447552447552448,
+        "delta_rho_alpha": 0.026973026973026948
+      },
+      {
+        "removed_asset": "EFA",
+        "rho_alpha": -0.22377622377622378,
+        "rho_sharpe": 0.006993006993006993,
+        "rho_mdd": -0.2447552447552448,
+        "delta_rho_alpha": -0.014985014985014977
+      },
+      {
+        "removed_asset": "EEM",
+        "rho_alpha": -0.2027972027972028,
+        "rho_sharpe": 0.0,
+        "rho_mdd": -0.23076923076923078,
+        "delta_rho_alpha": 0.005994005994005985
+      },
+      {
+        "removed_asset": "GLD",
+        "rho_alpha": -0.20979020979020982,
+        "rho_sharpe": -0.0979020979020979,
+        "rho_mdd": -0.1258741258741259,
+        "delta_rho_alpha": -0.0009990009990010207
+      },
+      {
+        "removed_asset": "SLV",
+        "rho_alpha": -0.34965034965034975,
+        "rho_sharpe": -0.0979020979020979,
+        "rho_mdd": -0.21678321678321683,
+        "delta_rho_alpha": -0.14085914085914095
+      },
+      {
+        "removed_asset": "USO",
+        "rho_alpha": -0.16783216783216784,
+        "rho_sharpe": 0.04195804195804196,
+        "rho_mdd": -0.35664335664335667,
+        "delta_rho_alpha": 0.04095904095904096
+      },
+      {
+        "removed_asset": "TLT",
+        "rho_alpha": 0.006993006993006993,
+        "rho_sharpe": 0.16783216783216784,
+        "rho_mdd": -0.41958041958041964,
+        "delta_rho_alpha": 0.2157842157842158
+      },
+      {
+        "removed_asset": "HYG",
+        "rho_alpha": -0.3076923076923077,
+        "rho_sharpe": -0.10489510489510491,
+        "rho_mdd": -0.3636363636363637,
+        "delta_rho_alpha": -0.09890109890109891
+      },
+      {
+        "removed_asset": "BTC-USD",
+        "rho_alpha": -0.39860139860139865,
+        "rho_sharpe": -0.0979020979020979,
+        "rho_mdd": -0.14685314685314685,
+        "delta_rho_alpha": -0.18981018981018985
+      },
+      {
+        "removed_asset": "0050.TW",
+        "rho_alpha": -0.16783216783216784,
+        "rho_sharpe": 0.04195804195804196,
+        "rho_mdd": -0.27272727272727276,
+        "delta_rho_alpha": 0.04095904095904096
+      },
+      {
+        "removed_asset": "XLF",
+        "rho_alpha": -0.2447552447552448,
+        "rho_sharpe": -0.08391608391608392,
+        "rho_mdd": -0.20979020979020982,
+        "delta_rho_alpha": -0.035964035964035995
+      }
+    ],
+    "mechanism_decomposition": {
+      "gamma_vs_autocorr": {
+        "rho": -0.5384615384615384,
+        "p": 0.05763443347046608
+      },
+      "gamma_vs_vix_return_corr": {
+        "rho": -0.8791208791208791,
+        "p": 7.54456235935913e-05
+      },
+      "autocorr_vs_vt_alpha": {
+        "rho": 0.45604395604395603,
+        "p": 0.11728306543614486
+      },
+      "vix_corr_vs_vt_alpha": {
+        "rho": 0.35714285714285715,
+        "p": 0.23092986230203388
+      },
+      "autocorr_vs_sharpe_diff": {
+        "rho": 0.2582417582417582,
+        "p": 0.3942840173973615
+      },
+      "vix_corr_vs_mdd_improvement": {
+        "rho": 0.30769230769230765,
+        "p": 0.30644705251252874
+      }
+    }
+  },
+  "conclusion": "NOT CONFIRMED: Gamma-VT alpha correlation is not significant (rho=-0.209, p=0.4936) at N=13",
+  "dominant_channel": "sizing",
+  "channel_strengths": {
+    "momentum_path": 0.24556213017751477,
+    "sizing_path": 0.3139717425431711
+  },
+  "comparison_with_prior": {
+    "K53_r": 0.564,
+    "K53_N": 22,
+    "K1044_rho": -0.2087912087912088,
+    "K1044_N": 13,
+    "N145_rho_sharpe": -0.264,
+    "K1044_rho_sharpe": -0.03296703296703297
+  },
+  "plots": [
+    "k1044_gamma_vt_scatter.png",
+    "k1044_mechanism_decomposition.png"
+  ],
+  "references": [
+    "Moreira & Muir (2017) Volatility-Managed Portfolios, JF",
+    "Engle & Ng (1993) Measuring and Testing the Impact of News on Volatility, JF",
+    "Glosten, Jagannathan & Runkle (1993) GJR-GARCH, JF",
+    "Hood & Raughtigan (2025) VT = trend following"
+  ],
+  "limitations": [
+    "Cross-sectional N=13 is small; Spearman test has low power",
+    "VIX is US-specific; non-US assets use US VIX as sizing proxy",
+    "0050.TW may have data quality issues despite cleaning",
+    "BTC has shorter history (from 2014)",
+    "USO has structural contango/roll issues",
+    "Causality cannot be established from cross-sectional correlation alone",
+    "VT alpha depends on the specific VT formula (12/VIX, cap=1.5)"
+  ]
+}
