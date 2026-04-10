@@ -35,7 +35,7 @@
 \newcommand{\bm}[1]{\boldsymbol{#1}}
 
 % ─── Title ───────────────────────────────────────────────────
-\title{Multiplicative GARCH-X with VIX: Daily Source Decomposition Outperforms GARCH-MIDAS for Volatility Forecasting and Risk Management\thanks{We thank the VolPred Research System for computational support. Data and replication code are available upon request.}}
+\title{Multiplicative GARCH-X with VIX: A Parsimonious Alternative to GARCH-MIDAS for Volatility Forecasting and Risk Management\thanks{We thank the VolPred Research System for computational support. Data and replication code are available upon request.}}
 
 \author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University, Taiwan. Corresponding author. Email: yhlai@mail.dyu.edu.tw}}
 
@@ -292,7 +292,7 @@ The primary loss function is the QLIKE of \citet{patton2011}:
 L_{\text{QLIKE}}(\hat{\sigma}_t^2, r_t^2) = \frac{r_t^2}{\hat{\sigma}_t^2} - \log\frac{r_t^2}{\hat{\sigma}_t^2} - 1,
 \label{eq:qlike}
 \end{equation}
-evaluated on the squared return $r_t^2$ as the volatility proxy. \citet{patton2011} shows that QLIKE is robust to noise in the volatility proxy in the sense that using $r_t^2$ instead of realized variance preserves the ranking of correctly specified models.
+evaluated on the squared return $r_t^2$ as the volatility proxy. In practice, we report the average of $\log(\hat{\sigma}_t^2) + r_t^2/\hat{\sigma}_t^2$ (the QLIKE kernel without the constant), which can take negative values; lower values indicate better forecasts. We denote this as ``QLIKE'' throughout for brevity.\footnote{Some tables report QLIKE values around $-8.3$ (SPY main sample) while others report values around $1.4$--$1.6$ (cross-asset and sensitivity samples). The difference arises from the variance scaling: the main sample uses decimal daily returns (magnitude $\sim 10^{-4}$), while the cross-asset computations use a different normalization. Rankings within each table are internally consistent.} \citet{patton2011} shows that QLIKE is robust to noise in the volatility proxy in the sense that using $r_t^2$ instead of realized variance preserves the ranking of correctly specified models.
 
 Pairwise model comparisons use the \citet{diebold2002} test (hereafter DM test). For the full 16-comparison horse race, we adopt the conservative threshold $|t| > 3.0$, which is close to the Bonferroni-adjusted critical value of $z_{0.05/(2 \times 16)} \approx 2.95$ and consistent with the multiple-testing concerns raised by \citet{harvey2016}. For the primary A4f vs.\ GJR comparison, the standard $|t| > 1.96$ threshold applies and is comfortably exceeded.
 
@@ -428,9 +428,9 @@ Several findings emerge from Table~\ref{tab:main_results}.
 
 \textbf{Finding 2: Contemporaneous normalization ($\tau_t$) dominates lagged ($\tau_{t-1}$).} Comparing A2 vs.\ A3 (both log-exp, constrained), A2 achieves a lower QLIKE ($-8.356$ vs.\ $-8.350$). This ordering is consistent with the logic of \citet[Eq.~4]{engle2013}, where $u_{t-1} = r_{t-1}/\sqrt{\tau_t}$ uses the \emph{current} environment to normalize past shocks.
 
-\textbf{Finding 3: Free omega improves the VIX-squared model.} Comparing A4f vs.\ A4, freeing $\omega_g$ reduces QLIKE from $-8.358$ to $-8.361$ and increases the DM $t$ from 4.17 to 4.48. This improvement is consistent with the presence of a positive variance risk premium: VIX$^2$ systematically exceeds realized variance, so constraining $\E[g_t] = 1$ forces an inappropriate normalization. However, free omega does \emph{not} improve the log-exp model (A2f vs.\ A2: $-8.353$ vs.\ $-8.356$), suggesting that the log-exp parameterization already absorbs some of this flexibility through its intercept $\theta_0$.
+\textbf{Finding 3: Free omega improves the VIX-squared model.} Comparing A4f vs.\ A4, freeing $\omega_g$ reduces QLIKE from $-8.358$ to $-8.360$ and increases the DM $t$ from 3.81 to 4.03. This improvement is consistent with the presence of a positive variance risk premium: VIX$^2$ systematically exceeds realized variance, so constraining $\E[g_t] = 1$ forces an inappropriate normalization. However, free omega does \emph{not} improve the log-exp model (A2f vs.\ A2: $-8.353$ vs.\ $-8.356$), suggesting that the log-exp parameterization already absorbs some of this flexibility through its intercept $\theta_0$.
 
-\textbf{Finding 4: Daily GARCH-X uniformly dominates GARCH-MIDAS.} All GARCH-X specifications in Table~\ref{tab:main_results} outperform all GARCH-MIDAS variants. The best MIDAS model (B1, rolling-window $K=22$) ranks 4th, and the fixed-span MIDAS models (C1--C3) cluster at the bottom. This result is intuitive: VIX information is concentrated in the most recent observation. The Beta-polynomial weighting scheme in MIDAS dilutes this signal by spreading it across 22--125 lags, and the monthly aggregation in fixed-span MIDAS further destroys daily information.
+\textbf{Finding 4: Daily GARCH-X outperforms GARCH-MIDAS in point estimates, but the difference is small.} All GARCH-X specifications in Table~\ref{tab:main_results} achieve lower QLIKE than all GARCH-MIDAS variants. However, the Model Confidence Set analysis (Section~\ref{sec:robustness}) shows that these differences are not statistically significant at conventional levels---A4f is indistinguishable from B1 (the best MIDAS, $K=22$) in pairwise DM tests ($t = -0.90$). The ranking advantage of daily GARCH-X is consistent with VIX information being concentrated in the most recent observation, which the MIDAS Beta-polynomial weighting dilutes across 22--125 lags, but parsimony rather than statistical dominance is the practical argument for preferring the daily specification.
 
 \textbf{Finding 5: The A1 specification reveals the cost of inconsistency.} The original K889 specification (A1), which uses $\tau_t$ in estimation but $\tau_{t-1}$ in OOS forecasting, ranks 10th. Adopting a consistent denominator (either $\tau_t$ everywhere as in A2, or $\tau_{t-1}$ everywhere as in A3) improves performance, confirming that estimation/forecasting consistency is important in multiplicative models.
 
@@ -528,7 +528,7 @@ EEM & 0.50 & 1.338 & 1.307 & $-2.47$ & No \\
 \end{tabular}
 \begin{tablenotes}
 \footnotesize
-\item DM $t$ uses the \citet{harvey2016} threshold $|t| > 3.0$. OOS: 2019--2026. For GLD, A4f uses a single-factor model with the CBOE Gold VIX (GVZ) replacing equity VIX: $\tau_t = \theta_0 + \theta_1 \mathrm{GVZ}_{t-1}^2$.
+\item DM $t$: negative values indicate A4f has lower (better) QLIKE than GJR. Harvey significance: $|t| > 3.0$. OOS: 2019--2026. For GLD, A4f uses a single-factor model with the CBOE Gold VIX (GVZ): $\tau_t = \theta_0 + \theta_1 \mathrm{GVZ}_{t-1}^2$.
 \item $^a$ GVZ-$r^2$ correlation for GLD.
 \end{tablenotes}
 \end{threeparttable}
