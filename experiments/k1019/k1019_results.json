@@ -1,0 +1,310 @@
+{
+  "experiment_id": "K1019",
+  "title": "VIX Regime Transition Prediction",
+  "date": "2026-04-10",
+  "data_source": "yfinance",
+  "data_period": "2007-07-17 to 2026-04-08",
+  "oos_period": "2019-01-01 to 2026-04-08",
+  "n_total": 4712,
+  "n_is": 2886,
+  "n_oos": 1826,
+  "seed": 42,
+  "classification_results": {
+    "threshold_20": {
+      "logistic_regression": {
+        "accuracy": 0.9102,
+        "precision": 0.8573,
+        "recall": 0.9245,
+        "f1": 0.8896,
+        "top_features": {
+          "VIX": 7.8865,
+          "rv20": 0.8105,
+          "rv5": 0.7549,
+          "ret_5d": 0.4681,
+          "vix_above_ma20": 0.3849
+        }
+      },
+      "rolling_logistic": {
+        "accuracy": 0.8812,
+        "precision": 0.8285,
+        "recall": 0.8783,
+        "f1": 0.8527
+      },
+      "threshold_model": {
+        "accuracy": 0.92,
+        "precision": 0.8892,
+        "recall": 0.9091,
+        "f1": 0.899,
+        "best_delta": 0.145
+      },
+      "naive_persistence": {
+        "accuracy": 0.9272,
+        "precision": 0.9064,
+        "recall": 0.9077,
+        "f1": 0.9071
+      }
+    },
+    "threshold_25": {
+      "logistic_regression": {
+        "accuracy": 0.9343,
+        "precision": 0.7683,
+        "recall": 0.9366,
+        "f1": 0.8442,
+        "top_features": {
+          "VIX": 7.0825,
+          "vix_log_chg": -0.7343,
+          "vix_chg": 0.6778,
+          "rv20": 0.255,
+          "vix_above_ma20": 0.1907
+        }
+      },
+      "rolling_logistic": {
+        "accuracy": 0.8959,
+        "precision": 0.6997,
+        "recall": 0.7925,
+        "f1": 0.7432
+      },
+      "threshold_model": {
+        "accuracy": 0.9409,
+        "precision": 0.8238,
+        "recall": 0.8761,
+        "f1": 0.8492,
+        "best_delta": 0.145
+      },
+      "naive_persistence": {
+        "accuracy": 0.9507,
+        "precision": 0.8703,
+        "recall": 0.8703,
+        "f1": 0.8703
+      }
+    },
+    "threshold_30": {
+      "logistic_regression": {
+        "accuracy": 0.9403,
+        "precision": 0.584,
+        "recall": 0.9329,
+        "f1": 0.7183,
+        "top_features": {
+          "VIX": 4.5863,
+          "rv20": 2.2806,
+          "rv5": -0.767,
+          "ret_20d": 0.7426,
+          "vix_log_chg": 0.5443
+        }
+      },
+      "rolling_logistic": {
+        "accuracy": 0.9441,
+        "precision": 0.6478,
+        "recall": 0.6913,
+        "f1": 0.6688
+      },
+      "threshold_model": {
+        "accuracy": 0.965,
+        "precision": 0.7576,
+        "recall": 0.8389,
+        "f1": 0.7962,
+        "best_delta": 0.145
+      },
+      "naive_persistence": {
+        "accuracy": 0.9726,
+        "precision": 0.8322,
+        "recall": 0.8322,
+        "f1": 0.8322
+      }
+    }
+  },
+  "economic_results": {
+    "logistic_regression_th20": {
+      "binary_switch": {
+        "annual_return": 0.0723,
+        "annual_vol": 0.0842,
+        "sharpe": 0.858,
+        "max_drawdown": -0.1341,
+        "total_return": 0.688
+      },
+      "prob_weighted": {
+        "annual_return": 0.0587,
+        "annual_vol": 0.0666,
+        "sharpe": 0.8824,
+        "max_drawdown": -0.0919,
+        "total_return": 0.5305
+      }
+    },
+    "rolling_logistic_th20": {
+      "binary_switch": {
+        "annual_return": 0.071,
+        "annual_vol": 0.0831,
+        "sharpe": 0.8549,
+        "max_drawdown": -0.1312,
+        "total_return": 0.6733
+      },
+      "prob_weighted": {
+        "annual_return": 0.0596,
+        "annual_vol": 0.0656,
+        "sharpe": 0.9083,
+        "max_drawdown": -0.1006,
+        "total_return": 0.5401
+      }
+    },
+    "threshold_model_th20": {
+      "binary_switch": {
+        "annual_return": 0.0752,
+        "annual_vol": 0.085,
+        "sharpe": 0.885,
+        "max_drawdown": -0.1341,
+        "total_return": 0.7246
+      },
+      "prob_weighted": {
+        "annual_return": 0.058,
+        "annual_vol": 0.07,
+        "sharpe": 0.8283,
+        "max_drawdown": -0.1016,
+        "total_return": 0.5221
+      }
+    },
+    "logistic_regression_th25": {
+      "binary_switch": {
+        "annual_return": 0.0851,
+        "annual_vol": 0.0913,
+        "sharpe": 0.9326,
+        "max_drawdown": -0.1341,
+        "total_return": 0.8532
+      },
+      "prob_weighted": {
+        "annual_return": 0.0715,
+        "annual_vol": 0.0773,
+        "sharpe": 0.924,
+        "max_drawdown": -0.1329,
+        "total_return": 0.6783
+      }
+    },
+    "rolling_logistic_th25": {
+      "binary_switch": {
+        "annual_return": 0.0849,
+        "annual_vol": 0.0914,
+        "sharpe": 0.9282,
+        "max_drawdown": -0.1341,
+        "total_return": 0.8494
+      },
+      "prob_weighted": {
+        "annual_return": 0.0734,
+        "annual_vol": 0.0774,
+        "sharpe": 0.9478,
+        "max_drawdown": -0.1278,
+        "total_return": 0.7021
+      }
+    },
+    "threshold_model_th25": {
+      "binary_switch": {
+        "annual_return": 0.0845,
+        "annual_vol": 0.0918,
+        "sharpe": 0.9204,
+        "max_drawdown": -0.1341,
+        "total_return": 0.8443
+      },
+      "prob_weighted": {
+        "annual_return": 0.0732,
+        "annual_vol": 0.0805,
+        "sharpe": 0.9099,
+        "max_drawdown": -0.1284,
+        "total_return": 0.6996
+      }
+    },
+    "logistic_regression_th30": {
+      "binary_switch": {
+        "annual_return": 0.0904,
+        "annual_vol": 0.0946,
+        "sharpe": 0.9549,
+        "max_drawdown": -0.1396,
+        "total_return": 0.9247
+      },
+      "prob_weighted": {
+        "annual_return": 0.0785,
+        "annual_vol": 0.0838,
+        "sharpe": 0.9369,
+        "max_drawdown": -0.152,
+        "total_return": 0.7666
+      }
+    },
+    "rolling_logistic_th30": {
+      "binary_switch": {
+        "annual_return": 0.088,
+        "annual_vol": 0.0938,
+        "sharpe": 0.9378,
+        "max_drawdown": -0.1512,
+        "total_return": 0.8921
+      },
+      "prob_weighted": {
+        "annual_return": 0.074,
+        "annual_vol": 0.087,
+        "sharpe": 0.8509,
+        "max_drawdown": -0.1458,
+        "total_return": 0.7097
+      }
+    },
+    "threshold_model_th30": {
+      "binary_switch": {
+        "annual_return": 0.0886,
+        "annual_vol": 0.0959,
+        "sharpe": 0.9239,
+        "max_drawdown": -0.1498,
+        "total_return": 0.9007
+      },
+      "prob_weighted": {
+        "annual_return": 0.0806,
+        "annual_vol": 0.0881,
+        "sharpe": 0.9153,
+        "max_drawdown": -0.1623,
+        "total_return": 0.7933
+      }
+    }
+  },
+  "baselines": {
+    "12_over_vix": {
+      "annual_return": 0.087,
+      "annual_vol": 0.0948,
+      "sharpe": 0.9177,
+      "max_drawdown": -0.1483,
+      "total_return": 0.8788
+    },
+    "buy_and_hold": {
+      "annual_return": 0.1523,
+      "annual_vol": 0.1965,
+      "sharpe": 0.7752,
+      "max_drawdown": -0.3372,
+      "total_return": 2.0159
+    }
+  },
+  "regime_persistence": {
+    "vix_gt_20": {
+      "high_vol_mean_days": 12.1,
+      "high_vol_median_days": 2.0,
+      "high_vol_max_days": 331,
+      "n_high_episodes": 143,
+      "low_vol_mean_days": 20.5,
+      "n_low_episodes": 144
+    },
+    "vix_gt_25": {
+      "high_vol_mean_days": 8.6,
+      "high_vol_median_days": 2.0,
+      "high_vol_max_days": 212,
+      "n_high_episodes": 102,
+      "low_vol_mean_days": 37.6,
+      "n_low_episodes": 102
+    },
+    "vix_gt_30": {
+      "high_vol_mean_days": 8.5,
+      "high_vol_median_days": 2.0,
+      "high_vol_max_days": 170,
+      "n_high_episodes": 53,
+      "low_vol_mean_days": 80.3,
+      "n_low_episodes": 53
+    }
+  },
+  "key_findings": [
+    "VIX>20: Best model F1=0.8990 vs Naive persistence F1=0.9071. Models did NOT beat naive persistence.",
+    "VIX>25: Best model F1=0.8492 vs Naive persistence F1=0.8703. Models did NOT beat naive persistence.",
+    "VIX>30: Best model F1=0.7962 vs Naive persistence F1=0.8322. Models did NOT beat naive persistence.",
+    "Best economic model: logistic_regression_th30_binary_switch with Sharpe improvement of +0.0372 vs 12/VIX baseline"
+  ]
+}
