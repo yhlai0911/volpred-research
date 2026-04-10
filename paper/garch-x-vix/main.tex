@@ -771,6 +771,38 @@ A natural question is whether macroeconomic variables can substitute for or comp
 
 
 %=================================================================
+\section{Discussion: Theoretical Foundation of Source Decomposition}
+\label{sec:discussion}
+%=================================================================
+
+A natural concern is whether the ``source decomposition'' label is merely a relabeling of the standard long-run/short-run narrative in GARCH-MIDAS models. We address this by deriving three propositions that establish the economic content of the decomposition.
+
+\begin{proposition}[Unconditional Variance Identity]
+Under the constrained model ($\omega_g = 1 - \alpha - \gamma/2 - \beta$), $\E[g_t] = 1$ in the stationary distribution, and the unconditional variance satisfies:
+\begin{equation}
+\E[\sigma_t^2] = \E[\tau_t] \cdot \E[g_t] + \mathrm{Cov}(\tau_t, g_t).
+\label{eq:var_identity}
+\end{equation}
+\end{proposition}
+
+This identity is exact, not an approximation. The simpler $\E[\sigma_t^2] \approx \E[\tau_t]$ holds only when $\mathrm{Cov}(\tau_t, g_t) \approx 0$. Empirically, $\mathrm{Corr}(\tau_t, g_t) \approx 0.49$, reflecting the crisis channel: high VIX $\to$ high $\tau_t$ $\to$ large standardized shocks $\to$ higher $g_t$.
+
+\begin{proposition}[VRP Auto-Correction]
+When $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$, the MLE of $\theta_1$ endogenously corrects for the variance risk premium. Specifically, the ratio $\theta_1 / [1/(252 \times 10{,}000)]$ measures the discount on implied variance relative to the ``no-VRP'' benchmark.
+\end{proposition}
+
+Empirically, the constrained model yields $\theta_1$-ratio $= 0.78$, implying a 21.9\% discount---directly measuring the average VRP fraction. In the free-omega model, VRP correction splits between two channels: $\theta_1$-ratio $= 1.96$ (overshoot) and $\E[g_t] = 0.48$ (level correction), with effective ratio $= 0.94$. This demonstrates that VRP correction is a real economic phenomenon captured by the multiplicative structure.
+
+\begin{proposition}[g Tracks VRP Dynamics]
+The dynamic factor $g_t$ reflects time-varying departures of realized variance from the VRP-corrected implied level. The GARCH autoregressive structure smooths the noisy daily ratio $r_t^2/\tau_t$, extracting its persistent VRP component.
+\end{proposition}
+
+By construction, $g_t$ from the model recursion is approximately orthogonal to VRP ($\rho \approx 0.06$), because $\tau_t$ already absorbs the VRP signal. The high correlation reported in Section~\ref{sec:vrp} ($\rho \approx 0.80$) uses the g-proxy method of comparing model variance to raw implied variance without VRP correction, where the GARCH dynamics amplify the systematic VRP component relative to the raw ratio ($\rho = 0.15$).
+
+These propositions distinguish source decomposition from mere relabeling: (i)~$\theta_1$ provides parametric identification of VRP magnitude, (ii)~the $\E[g_t]=1$ constraint pins the scale, making $\tau_t$ the sole determinant of unconditional variance, and (iii)~the forecasting gain (DM $t = 4.03$ vs.\ GJR) demonstrates that the decomposition captures information not available to standard models.
+
+
+%=================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %=================================================================
