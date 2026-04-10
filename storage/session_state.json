@@ -1,7 +1,9 @@
 {
-  "saved_at": "2026-04-10T12:54:36.115528+00:00",
+  "saved_at": "2026-04-10T13:03:41.065143+00:00",
   "reason": "pre-compact auto-save",
   "recent_commits": [
+    "81ed0a4 K1031: Bayesian SSVS ARX-GARCH — VIX9D² PIP=1.000, confirms K1004",
+    "a715a6b K1031: Bayesian SSVS ARX-GARCH joint variable selection (So, Chen, Liu 2006)",
     "c81cf70 K1031: Joint SSVS NULL confirms K1013 — additive ≠ multiplicative",
     "0e30e47 Copy experiment + storage files from worktree agent-af1861fc (merge conflict fallback)",
     "2cd7449 Merge agent worktree agent-a0abe78a (1 commits)",
@@ -29,15 +31,13 @@
     "bb197b6 K1024: A4f refit frequency sensitivity (Paper 9 robustness)",
     "8cf8d24 Session state sync: knowledge index, next_tasks, notifications",
     "cccb2c3 K1025: ★★★ Crypto Fear Channel — BTC down-vol→VIX asymmetric, forecast NULL",
-    "47fa52e Merge agent worktree agent-a43e693f (1 commits)",
-    "723a832 K1025: Crypto Fear Channel — BTC vol spillover analysis",
-    "730ccae Paper 9 v4: Add Discussion section with E(g)=1 theoretical framework"
+    "47fa52e Merge agent worktree agent-a43e693f (1 commits)"
   ],
-  "knowledge_count": 50303,
-  "last_experiment": "K1031",
-  "uncommitted_files": 23,
+  "knowledge_count": 50304,
+  "last_experiment": "know_20260410210323_k1031",
+  "uncommitted_files": 0,
   "draft_count": 9,
-  "metrics_age_hours": 12.8,
+  "metrics_age_hours": 13.0,
   "next_priorities": "## Next Session Priorities（2026-03-31 起）\n\n### P0: 時間敏感\n\n| 項目 | 說明 | 截止日 |\n|------|------|--------|\n| **HAR-RV 正式實驗** | 5-min 數據 ETA 04/11 達 60 天門檻 | 04/11 |\n| **TSMC 營收 04/10 解讀** | 營收公告後解讀文 | 04/11 |\n| **TSMC 法說 04/16** | 預告+解讀文 | 04/14, 04/17 |\n| **FOMC 04/28-29** | 預告文 04/26，事後解讀 04/30 | 04/26, 04/30 |\n\n### P1: 高價值\n\n**論文修正：**\n- [ ] **Leverage-Direction**（K628 已瘦身 64→52p）：加入「VT is insurance」框架\n- [ ] **Taiwan VT**：K636 修正 amplification（gamma vs vol level）、TX cost 已修正\n\n**平台經營方向（基於 analytics：192 views, 3 users, 10 reactions）：**\n- [x] **SEO 完成**：Google Search Console 驗證 + sitemap + 6 頁 metadata + FAQ/Article/Breadcrumb schema + admin noindex + /portfolio 公開路由 ✅ 2026-03-31\n- [x] **分享按鈕**：LINE/Facebook/X/Twitter + 複製連結 ✅ 2026-03-31\n- [x] **首頁預設「一般讀者」tab** ✅ 2026-03-31\n- [ ] **加強入門內容**：「從零開始」是最熱門文章之一，應建立 /guide 頁面\n- [ ] **減少學術文章比例，增加實務操作指南**：收藏(7)>按讚(3) = 讀者當工具書用\n- [x] K705 GAP-03：StrategySelector CAGR 降級，突出 Sharpe/MDD ✅ 2026-03-31\n- [x] **Umami Analytics** 上線（cloud.umami.is，免費方案） ✅ 2026-03-31\n- [ ] **Umami API 自動化**：寫 scripts/analytics.py 包裝 Umami REST API，方便終端查看訪客數據（**2026-04-04 週五檢視數據後決定**）\n\n### P2: 研究新方向\n\n**高優先（有明確下一步）：**\n- [x] **★ Paper: Multiplicative GARCH-X(VIX) — 規格比較與 VRP 解釋**（K988 發現，初稿 31p 完成 2026-04-10）：\n  - **核心發現**：K988/K988b 比較 17 個規格。A4f（VIX² + free ω）冠軍 DM t=+4.48 vs GJR。τ=VIX² 最佳（維度一致）。GARCH-MIDAS 不優於單 lag。\n  - **已完成**：跨資產（K994 QQQ/K997 GLD PASS）、VaR/ES（K995 scorecard 3/4）、Codex 審查（K999）、VRP 驗證（K998 NULL）。初稿 31 頁完成。\n  - **論文待做**：E(g)=1 理論推導、Conrad & Loch 比較、Stud",
   "pending_events": [
     "NFP 04/03 — post-event article template ready (mile_nfp_040326)",
