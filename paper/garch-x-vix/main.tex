@@ -48,7 +48,7 @@
 % ─── Abstract ────────────────────────────────────────────────
 \begin{abstract}
 \noindent
-We propose a daily multiplicative GARCH-X model, $\sigma_t^2 = \tau_t \times g_t$, where $\tau_t$ is a simple function of lagged VIX and $g_t$ follows a GJR-GARCH process on standardized returns. In a systematic horse race among 17 specifications---including ten daily GARCH-X variants, six GARCH-MIDAS alternatives with Beta-polynomial weighting, and a GJR-GARCH benchmark---the simplest daily model with $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ and freely estimated intercept (A4f) achieves the lowest QLIKE loss function, significantly outperforming GJR-GARCH (Diebold-Mariano $t = 4.03$, surpassing the \citet{harvey2016} threshold of $|t| > 3.0$) and outperforming all GARCH-MIDAS specifications in point estimates. The result extends to QQQ ($t = 3.71$) and, when asset-specific fear indices are used, to GLD with GVZ ($t = 3.17$). We show that the $g_t$ component captures the dynamics of the variance risk premium (Spearman $\rho \approx 0.80$), providing a structural interpretation: $\tau_t$ reflects the option-market fear level while $g_t$ tracks deviations of realized variance from implied variance. However, $g_t$ has no out-of-sample predictive power for future VRP---it is a contemporaneous decomposition, not a forecasting tool. For risk management, A4f with Student-$t$ innovations passes VaR backtesting at two of three confidence levels (scorecard 3/4), whereas GJR-GARCH passes none (scorecard 1/4). These findings demonstrate that GARCH-MIDAS complexity is unnecessary when the external variable updates daily, and that a parsimonious multiplicative structure with VIX delivers both superior point forecasts and improved tail risk measurement.
+We propose a daily multiplicative GARCH-X model, $\sigma_t^2 = \tau_t \times g_t$, where $\tau_t$ is a simple function of lagged VIX and $g_t$ follows a GJR-GARCH process on standardized returns. In a systematic horse race among 17 specifications---including ten daily GARCH-X variants, six GARCH-MIDAS alternatives with Beta-polynomial weighting, and a GJR-GARCH benchmark---the simplest daily model with $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ and freely estimated intercept (A4f) achieves the lowest QLIKE loss function, significantly outperforming GJR-GARCH (Diebold-Mariano $t = 4.03$, surpassing the \citet{harvey2016} threshold of $|t| > 3.0$) and outperforming all GARCH-MIDAS specifications in point estimates. The result extends to QQQ ($t = 3.71$), European equities (EURO STOXX 50: $t = 3.64$; FEZ: $t = 3.45$), and, when asset-specific fear indices are used, to GLD with GVZ ($t = 3.17$). We show that the $g_t$ component captures the dynamics of the variance risk premium (Spearman $\rho \approx 0.80$), providing a structural interpretation: $\tau_t$ reflects the option-market fear level while $g_t$ tracks deviations of realized variance from implied variance. However, $g_t$ has no out-of-sample predictive power for future VRP---it is a contemporaneous decomposition, not a forecasting tool. For risk management, A4f with Student-$t$ innovations passes VaR backtesting at two of three confidence levels (scorecard 3/4), whereas GJR-GARCH passes none (scorecard 1/4). These findings demonstrate that GARCH-MIDAS complexity is unnecessary when the external variable updates daily, and that a parsimonious multiplicative structure with VIX delivers both superior point forecasts and improved tail risk measurement.
 
 \medskip
 \noindent
@@ -522,19 +522,21 @@ Asset & VIX-$r^2$ corr. & GJR QLIKE & A4f QLIKE & DM $t$ & Harvey sig. \\
 SPY (primary) & 0.52 & $-8.277$ & $-8.361$ & 4.03 & \textbf{Yes} \\
 QQQ & 0.49 & 1.481 & 1.420 & $-3.71$ & \textbf{Yes} \\
 GLD (with GVZ) & 0.38$^a$ & 1.530 & 1.457 & $-3.17$ & \textbf{Yes} \\
+STOXX50E & 0.44 & 1.565 & 1.513 & $-3.64$ & \textbf{Yes} \\
+FEZ & 0.44 & 1.422 & 1.371 & $-3.45$ & \textbf{Yes} \\
 EEM & 0.50 & 1.338 & 1.307 & $-2.47$ & No \\
 0050.TW & 0.28 & 1.458 & 1.432 & $-1.44$ & No \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \footnotesize
-\item DM $t$: negative values indicate A4f has lower (better) QLIKE than GJR. Harvey significance: $|t| > 3.0$. OOS: 2019--2026. For GLD, A4f uses a single-factor model with the CBOE Gold VIX (GVZ): $\tau_t = \theta_0 + \theta_1 \mathrm{GVZ}_{t-1}^2$.
+\item DM $t$: negative values indicate A4f has lower (better) QLIKE than GJR. Harvey significance: $|t| > 3.0$. OOS: 2019--2026. For GLD, A4f uses GVZ: $\tau_t = \theta_0 + \theta_1 \mathrm{GVZ}_{t-1}^2$. STOXX50E and FEZ use US VIX (not VSTOXX), which suffices due to global fear synchronization.
 \item $^a$ GVZ-$r^2$ correlation for GLD.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-The A4f specification achieves Harvey-significant improvements for three of five assets: SPY ($t = 4.03$), QQQ ($t = 3.71$), and GLD with GVZ ($t = 3.17$). The model fails to reach significance for EEM ($t = -2.47$) and 0050.TW ($t = -1.44$), though the direction of improvement is correct in both cases.
+The A4f specification achieves Harvey-significant improvements for five of seven assets: SPY ($t = 4.03$), QQQ ($t = 3.71$), GLD with GVZ ($t = 3.17$), EURO STOXX 50 ($t = -3.64$), and FEZ ($t = -3.45$). Notably, the European results use US VIX rather than VSTOXX, suggesting that VIX captures a \emph{global} fear factor that extends beyond U.S.\ equities. The model fails to reach significance for EEM ($t = -2.47$) and 0050.TW ($t = -1.44$), likely because these markets have stronger idiosyncratic drivers.
 
 The pattern is informative: the model works when the fear index is \emph{relevant} to the asset. SPY and QQQ are both U.S.\ equity products for which VIX is the natural fear gauge. GLD benefits from its own implied volatility index (GVZ). EEM and 0050.TW are driven by idiosyncratic factors that U.S.\ VIX does not capture---consistent with our source decomposition interpretation, which requires $\tau_t$ to reflect the asset's \emph{own} fear environment.
 
@@ -815,7 +817,7 @@ Second, the VIX-squared functional form for $\tau_t$ dominates alternatives due 
 
 Third, the $g_t$ component provides a structured decomposition of volatility into exogenous (option-market fear) and endogenous (GARCH dynamics) sources, with the latter tracking VRP dynamics at $\rho \approx 0.80$. However, $g_t$ has no exploitable out-of-sample predictive power for future VRP, making it a contemporaneous decomposition tool rather than a forecasting signal.
 
-Fourth, the model generalizes to assets with relevant fear indices: QQQ (DM $t = 3.71$) and GLD with GVZ (DM $t = 3.17$). For assets without appropriate implied volatility indices (EEM, 0050.TW), the model improves directionally but not significantly, underscoring the requirement for a \emph{relevant} fear gauge.
+Fourth, the model generalizes broadly: A4f with US VIX achieves Harvey significance for five of seven tested markets---SPY, QQQ, EURO STOXX 50, FEZ, and GLD (with GVZ)---demonstrating that VIX functions as a \emph{global} fear factor. Only EEM and 0050.TW fail to reach significance, consistent with their weaker linkage to U.S.\ option markets.
 
 Fifth, A4f with Student-$t$ innovations achieves a VaR/ES scorecard of 3/4, substantially outperforming GJR-GARCH (1/4), demonstrating practical value for risk management.
 
