@@ -1,0 +1,469 @@
+{
+  "experiment_id": "K1040",
+  "title": "VRP Return Predictability via A4f g_t",
+  "timestamp": "2026-04-10T19:12:18.432848+00:00",
+  "runtime_seconds": 467.2,
+  "config": {
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-10",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "horizons": [
+      1,
+      5,
+      22
+    ],
+    "rv_window": 22,
+    "df_fixed": 8,
+    "seed": 42,
+    "asset": "SPY",
+    "data_source": "yfinance"
+  },
+  "n_total": 5349,
+  "results_by_horizon": {
+    "1": {
+      "n_valid": 1805,
+      "n_refits": 61,
+      "models": {
+        "hist_mean": {
+          "mse": 0.00015341396345440597,
+          "oos_r2": 0.0,
+          "direction_accuracy": 0.5562326869806095,
+          "dm_stat": null,
+          "dm_pval": null,
+          "cw_stat": null,
+          "cw_pval": null
+        },
+        "vrp_only": {
+          "mse": 0.0001574547659702765,
+          "oos_r2": -0.026339209449284917,
+          "direction_accuracy": 0.5479224376731302,
+          "dm_stat": -0.8231284177109426,
+          "dm_pval": 0.41043497004904994,
+          "cw_stat": -0.47584657527167296,
+          "cw_pval": 0.6829081571768669
+        },
+        "gt_only": {
+          "mse": 0.00015434618786995752,
+          "oos_r2": -0.006076529114825924,
+          "direction_accuracy": 0.5529085872576177,
+          "dm_stat": -2.0000753493770893,
+          "dm_pval": 0.0454921281380154,
+          "cw_stat": -1.7509342893694724,
+          "cw_pval": 0.960021385244893
+        },
+        "vix_only": {
+          "mse": 0.0001552335927448353,
+          "oos_r2": -0.011860910502909494,
+          "direction_accuracy": 0.554016620498615,
+          "dm_stat": -1.7687275588724711,
+          "dm_pval": 0.0769393509020535,
+          "cw_stat": -1.5882098456632763,
+          "cw_pval": 0.9438805522553599
+        },
+        "gt_vrp": {
+          "mse": 0.0001583912175189874,
+          "oos_r2": -0.03244329233473375,
+          "direction_accuracy": 0.5429362880886427,
+          "dm_stat": -0.9880514380774394,
+          "dm_pval": 0.3231274571180274,
+          "cw_stat": -0.6276232473349715,
+          "cw_pval": 0.7348746120445266
+        },
+        "kitchen_sink": {
+          "mse": 0.0001596740092221849,
+          "oos_r2": -0.04080492822701487,
+          "direction_accuracy": 0.5246537396121884,
+          "dm_stat": -1.0470525922813485,
+          "dm_pval": 0.2950753226283811,
+          "cw_stat": -0.5152073526446399,
+          "cw_pval": 0.6967959341904371
+        },
+        "in_sample": {
+          "r2": 0.01415744961392551,
+          "n": 3501,
+          "coefficients": {
+            "const": -0.0013235181053799215,
+            "g_t": 5.478008886970578e-05,
+            "VRP": 0.43486543837673186,
+            "VIX": 0.006528950474343624
+          },
+          "hac_t_stats": {
+            "const": -0.845210601768649,
+            "g_t": 0.07537120014881916,
+            "VRP": 2.675147316821276,
+            "VIX": 1.1267030192675722
+          }
+        },
+        "long_short": {
+          "ls_sharpe": -0.11825049327962531,
+          "bh_sharpe": 0.7108482701050945,
+          "ls_mean_ann": -0.023435855988277424,
+          "n_trades": 1755
+        },
+        "g_t_stats": {
+          "mean": 1.5873639934939916,
+          "std": 0.5031417648574589,
+          "median": 1.482289676076004,
+          "min": 0.9430759542693791,
+          "max": 5.136738524755274,
+          "pct_below_1": 0.019944598337950138
+        }
+      }
+    },
+    "5": {
+      "n_valid": 1805,
+      "n_refits": 61,
+      "models": {
+        "hist_mean": {
+          "mse": 0.0006344067135786573,
+          "oos_r2": 0.0,
+          "direction_accuracy": 0.6204986149584487,
+          "dm_stat": null,
+          "dm_pval": null,
+          "cw_stat": null,
+          "cw_pval": null
+        },
+        "vrp_only": {
+          "mse": 0.000637687038461369,
+          "oos_r2": -0.005170696987438106,
+          "direction_accuracy": 0.5817174515235457,
+          "dm_stat": -0.23370294779384213,
+          "dm_pval": 0.8152155991140888,
+          "cw_stat": 0.9547203373179998,
+          "cw_pval": 0.1698595711852039
+        },
+        "gt_only": {
+          "mse": 0.0006398078995585525,
+          "oos_r2": -0.008513759177338098,
+          "direction_accuracy": 0.6171745152354571,
+          "dm_stat": -1.3329862979049785,
+          "dm_pval": 0.18253630040298097,
+          "cw_stat": -1.0632282368960626,
+          "cw_pval": 0.8561607699497633
+        },
+        "vix_only": {
+          "mse": 0.0006395751394775956,
+          "oos_r2": -0.008146865076164467,
+          "direction_accuracy": 0.621606648199446,
+          "dm_stat": -0.5097246792187347,
+          "dm_pval": 0.6102443606024612,
+          "cw_stat": -0.028805040903023913,
+          "cw_pval": 0.5114899597548257
+        },
+        "gt_vrp": {
+          "mse": 0.0006443632325861616,
+          "oos_r2": -0.015694220748926346,
+          "direction_accuracy": 0.5916897506925207,
+          "dm_stat": -0.6494971090620649,
+          "dm_pval": 0.516017114441244,
+          "cw_stat": 0.7127077354209032,
+          "cw_pval": 0.23801331440657403
+        },
+        "kitchen_sink": {
+          "mse": 0.0006454247179334486,
+          "oos_r2": -0.017367414497616585,
+          "direction_accuracy": 0.585595567867036,
+          "dm_stat": -0.6483201853594802,
+          "dm_pval": 0.5167778810946093,
+          "cw_stat": 0.7840405381572314,
+          "cw_pval": 0.21650816201942757
+        },
+        "in_sample": {
+          "r2": 0.029959048706057367,
+          "n": 3501,
+          "coefficients": {
+            "const": -0.0019278934941810825,
+            "g_t": -8.444192080262107e-05,
+            "VRP": 1.2927991907859817,
+            "VIX": 0.013896984066585757
+          },
+          "hac_t_stats": {
+            "const": -0.44178324768157257,
+            "g_t": -0.034945318090297016,
+            "VRP": 3.4630741710711144,
+            "VIX": 0.8340703851071762
+          }
+        },
+        "long_short": {
+          "ls_sharpe": -0.0010902023108458041,
+          "bh_sharpe": 0.7694203128103747,
+          "ls_mean_ann": -0.00019762022314707585,
+          "n_trades": 1755
+        },
+        "g_t_stats": {
+          "mean": 1.5873639934939916,
+          "std": 0.5031417648574589,
+          "median": 1.482289676076004,
+          "min": 0.9430759542693791,
+          "max": 5.136738524755274,
+          "pct_below_1": 0.019944598337950138
+        }
+      }
+    },
+    "22": {
+      "n_valid": 1805,
+      "n_refits": 61,
+      "models": {
+        "hist_mean": {
+          "mse": 0.002732990200478212,
+          "oos_r2": 0.0,
+          "direction_accuracy": 0.696398891966759,
+          "dm_stat": null,
+          "dm_pval": null,
+          "cw_stat": null,
+          "cw_pval": null
+        },
+        "vrp_only": {
+          "mse": 0.00271187211124196,
+          "oos_r2": 0.007727100240812024,
+          "direction_accuracy": 0.6808864265927977,
+          "dm_stat": 0.29440605447325124,
+          "dm_pval": 0.7684476410149186,
+          "cw_stat": 0.9403789678308302,
+          "cw_pval": 0.17351160328053983
+        },
+        "gt_only": {
+          "mse": 0.0027092146134444547,
+          "oos_r2": 0.008699477601345595,
+          "direction_accuracy": 0.696398891966759,
+          "dm_stat": 0.5795770274575808,
+          "dm_pval": 0.5621998884952601,
+          "cw_stat": 0.9053373148403541,
+          "cw_pval": 0.18264335683539357
+        },
+        "vix_only": {
+          "mse": 0.002579133612691273,
+          "oos_r2": 0.05629606273744314,
+          "direction_accuracy": 0.6958448753462604,
+          "dm_stat": 1.2863029089162799,
+          "dm_pval": 0.19833736769019117,
+          "cw_stat": 2.0241651668620944,
+          "cw_pval": 0.02147658015290954
+        },
+        "gt_vrp": {
+          "mse": 0.0027090522640852836,
+          "oos_r2": 0.008758881165669696,
+          "direction_accuracy": 0.6858725761772854,
+          "dm_stat": 0.2743132760165598,
+          "dm_pval": 0.7838438828990004,
+          "cw_stat": 0.9191618580869261,
+          "cw_pval": 0.17900545904330079
+        },
+        "kitchen_sink": {
+          "mse": 0.0025888266326971093,
+          "oos_r2": 0.052749390669559415,
+          "direction_accuracy": 0.6736842105263158,
+          "dm_stat": 1.1273942082618433,
+          "dm_pval": 0.25957584672554335,
+          "cw_stat": 1.5905480169050712,
+          "cw_pval": 0.05585566561312061
+        },
+        "in_sample": {
+          "r2": 0.04447482997852259,
+          "n": 3501,
+          "coefficients": {
+            "const": 0.014933959774815935,
+            "g_t": -0.009633461144941803,
+            "VRP": 2.5032330586772593,
+            "VIX": 0.026477269788508947
+          },
+          "hac_t_stats": {
+            "const": 0.9497858377773841,
+            "g_t": -1.038753529731605,
+            "VRP": 2.7738819637284493,
+            "VIX": 0.5331840153313782
+          }
+        },
+        "long_short": {
+          "ls_sharpe": -0.074455063709158,
+          "bh_sharpe": 0.7594492335439909,
+          "ls_mean_ann": -0.013606685707081,
+          "n_trades": 1755
+        },
+        "g_t_stats": {
+          "mean": 1.5873639934939916,
+          "std": 0.5031417648574589,
+          "median": 1.482289676076004,
+          "min": 0.9430759542693791,
+          "max": 5.136738524755274,
+          "pct_below_1": 0.019944598337950138
+        }
+      }
+    }
+  },
+  "summary_table": [
+    {
+      "horizon": 1,
+      "model": "hist_mean",
+      "oos_r2": 0.0,
+      "direction_accuracy": 0.5562326869806095,
+      "dm_stat": null,
+      "cw_stat": null,
+      "cw_pval": null
+    },
+    {
+      "horizon": 1,
+      "model": "vrp_only",
+      "oos_r2": -0.026339209449284917,
+      "direction_accuracy": 0.5479224376731302,
+      "dm_stat": -0.8231284177109426,
+      "cw_stat": -0.47584657527167296,
+      "cw_pval": 0.6829081571768669
+    },
+    {
+      "horizon": 1,
+      "model": "gt_only",
+      "oos_r2": -0.006076529114825924,
+      "direction_accuracy": 0.5529085872576177,
+      "dm_stat": -2.0000753493770893,
+      "cw_stat": -1.7509342893694724,
+      "cw_pval": 0.960021385244893
+    },
+    {
+      "horizon": 1,
+      "model": "vix_only",
+      "oos_r2": -0.011860910502909494,
+      "direction_accuracy": 0.554016620498615,
+      "dm_stat": -1.7687275588724711,
+      "cw_stat": -1.5882098456632763,
+      "cw_pval": 0.9438805522553599
+    },
+    {
+      "horizon": 1,
+      "model": "gt_vrp",
+      "oos_r2": -0.03244329233473375,
+      "direction_accuracy": 0.5429362880886427,
+      "dm_stat": -0.9880514380774394,
+      "cw_stat": -0.6276232473349715,
+      "cw_pval": 0.7348746120445266
+    },
+    {
+      "horizon": 1,
+      "model": "kitchen_sink",
+      "oos_r2": -0.04080492822701487,
+      "direction_accuracy": 0.5246537396121884,
+      "dm_stat": -1.0470525922813485,
+      "cw_stat": -0.5152073526446399,
+      "cw_pval": 0.6967959341904371
+    },
+    {
+      "horizon": 5,
+      "model": "hist_mean",
+      "oos_r2": 0.0,
+      "direction_accuracy": 0.6204986149584487,
+      "dm_stat": null,
+      "cw_stat": null,
+      "cw_pval": null
+    },
+    {
+      "horizon": 5,
+      "model": "vrp_only",
+      "oos_r2": -0.005170696987438106,
+      "direction_accuracy": 0.5817174515235457,
+      "dm_stat": -0.23370294779384213,
+      "cw_stat": 0.9547203373179998,
+      "cw_pval": 0.1698595711852039
+    },
+    {
+      "horizon": 5,
+      "model": "gt_only",
+      "oos_r2": -0.008513759177338098,
+      "direction_accuracy": 0.6171745152354571,
+      "dm_stat": -1.3329862979049785,
+      "cw_stat": -1.0632282368960626,
+      "cw_pval": 0.8561607699497633
+    },
+    {
+      "horizon": 5,
+      "model": "vix_only",
+      "oos_r2": -0.008146865076164467,
+      "direction_accuracy": 0.621606648199446,
+      "dm_stat": -0.5097246792187347,
+      "cw_stat": -0.028805040903023913,
+      "cw_pval": 0.5114899597548257
+    },
+    {
+      "horizon": 5,
+      "model": "gt_vrp",
+      "oos_r2": -0.015694220748926346,
+      "direction_accuracy": 0.5916897506925207,
+      "dm_stat": -0.6494971090620649,
+      "cw_stat": 0.7127077354209032,
+      "cw_pval": 0.23801331440657403
+    },
+    {
+      "horizon": 5,
+      "model": "kitchen_sink",
+      "oos_r2": -0.017367414497616585,
+      "direction_accuracy": 0.585595567867036,
+      "dm_stat": -0.6483201853594802,
+      "cw_stat": 0.7840405381572314,
+      "cw_pval": 0.21650816201942757
+    },
+    {
+      "horizon": 22,
+      "model": "hist_mean",
+      "oos_r2": 0.0,
+      "direction_accuracy": 0.696398891966759,
+      "dm_stat": null,
+      "cw_stat": null,
+      "cw_pval": null
+    },
+    {
+      "horizon": 22,
+      "model": "vrp_only",
+      "oos_r2": 0.007727100240812024,
+      "direction_accuracy": 0.6808864265927977,
+      "dm_stat": 0.29440605447325124,
+      "cw_stat": 0.9403789678308302,
+      "cw_pval": 0.17351160328053983
+    },
+    {
+      "horizon": 22,
+      "model": "gt_only",
+      "oos_r2": 0.008699477601345595,
+      "direction_accuracy": 0.696398891966759,
+      "dm_stat": 0.5795770274575808,
+      "cw_stat": 0.9053373148403541,
+      "cw_pval": 0.18264335683539357
+    },
+    {
+      "horizon": 22,
+      "model": "vix_only",
+      "oos_r2": 0.05629606273744314,
+      "direction_accuracy": 0.6958448753462604,
+      "dm_stat": 1.2863029089162799,
+      "cw_stat": 2.0241651668620944,
+      "cw_pval": 0.02147658015290954
+    },
+    {
+      "horizon": 22,
+      "model": "gt_vrp",
+      "oos_r2": 0.008758881165669696,
+      "direction_accuracy": 0.6858725761772854,
+      "dm_stat": 0.2743132760165598,
+      "cw_stat": 0.9191618580869261,
+      "cw_pval": 0.17900545904330079
+    },
+    {
+      "horizon": 22,
+      "model": "kitchen_sink",
+      "oos_r2": 0.052749390669559415,
+      "direction_accuracy": 0.6736842105263158,
+      "dm_stat": 1.1273942082618433,
+      "cw_stat": 1.5905480169050712,
+      "cw_pval": 0.05585566561312061
+    }
+  ],
+  "references": [
+    "Bollerslev, Tauchen & Zhou (2009). Expected Stock Returns and VRP. RFS 22(11).",
+    "Campbell & Thompson (2008). Predicting Excess Stock Returns OOS. RFS 21(4).",
+    "Clark & West (2007). Approximately Normal Tests for Nested Models. JoE 138(1).",
+    "K1023: g_t vs VRP Spearman rho ~ 0.80",
+    "K998: g_t cannot predict future VRP",
+    "K818: SSVS return prediction NULL (OOS R2=-1.47%)"
+  ],
+  "conclusion": "NUANCED NULL for g_t: At h=22d (monthly), VIX-only achieves OOS R2=+5.63% with CW=+2.02 (p=0.021), but g_t-only achieves only R2=+0.87% (CW=0.91, p=0.183, not significant). g_t adds NO incremental value beyond VIX for return prediction. The monthly predictability comes from VIX level, not from A4f's GARCH dynamics (g_t). At h=1d and h=5d, all models fail (negative R2). This extends K818 (SSVS null) and K998 (g_t cannot predict VRP). In-sample, VRP shows significant t-stats (2.68-3.46), but this does not survive OOS. The long-short strategy based on g_t yields negative Sharpe (-0.12 to -0.07 vs BH 0.71-0.77), confirming no economic value from g_t signal."
+}
