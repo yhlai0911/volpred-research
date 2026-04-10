@@ -436,13 +436,23 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 以下文件會隨研究推展持續演化，應主動修改以反映最新狀態：
 - **`CLAUDE.md`**：架構變更、新模型/策略、新發現 → 立即更新
 - **`research_program.md`**：目標調整、新研究面向、約束修正 → 及時更新
-- **`.claude/skills/`**：發現反覆出錯的流程 → 建立或修正 skill
+- **`.claude/skills/`**：發現反覆出錯的流程 → 建立或修正 skill（不需要事先徵求同意，但必須遵守下方審查規則）
 - **`research_findings.md`**：新的具體發現和數據 → 實驗後立即記錄
 - **Memory files**：thinking/knowledge/questions → 每個發現後同步
 
 修改原則：
 - **新增補充內容**可以先做，但要記錄修改原因。
 - **刪除或改寫既有治理內容**（`CLAUDE.md`、`research_program.md`、`.claude/skills/`、`docs/` 的既有規範）前，必須先取得使用者同意。
+
+### Skill 自主管理與定期審查
+- **建立/修正 skill 不需要事先徵求同意**——Claude 依據任務執行中累積的經驗自行判斷。但每次建立或修正必須在下次與用戶互動時主動通知。
+- **每月第一個 session 產出 Skill 審查報告**，內容包含：
+  1. 目前所有 skill 清單（名稱、用途、上次觸發時間）
+  2. 本月新增/修改的 skill 及原因
+  3. 使用頻率低（上月 0 次觸發）的 skill → 建議合併或刪除
+  4. 覆蓋不足的流程（反覆出錯但尚無 skill）→ 建議新增
+  5. 與其他 skill 功能重疊的 → 建議合併
+- **報告給用戶審閱**，用戶可據此增刪調整 skill
 
 ## 署名與歸屬
 所有研究成果、發現、策略建議必須標注發起者：

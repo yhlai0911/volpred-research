@@ -178,34 +178,40 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
             fi
 
             # --- Merge storage/memory/ JSON arrays (knowledge, experiments, etc.) ---
-            # Strategy: use jq to union both sides by unique key, avoiding data loss
+            # Strategy: content-hash dedup to avoid data loss AND prevent bloat
+            # Previous bug: jq union by single key (item_id) failed for entries
+            # using a different key (id), causing 90x duplication (54MB bloat).
+            # Fix: use Python content-hash dedup which handles ALL formats safely.
             local memory_files
             memory_files=$(cd "$wt_path" && git diff --name-only "$main_branch" -- storage/memory/ 2>/dev/null || true)
-            if [[ -n "$memory_files" ]] && command -v jq &>/dev/null; then
+            if [[ -n "$memory_files" ]]; then
                 echo "  [ACTION] 合併 storage/memory/ JSON 檔案..."
                 echo "$memory_files" | while IFS= read -r f; do
                     local main_file="$MAIN_DIR/$f"
                     local wt_file="$wt_path/$f"
                     if [[ -f "$wt_file" ]] && [[ -f "$main_file" ]]; then
-                        # Detect unique key: item_id for knowledge, id for others, entry_id for log
-                        local key="id"
-                        if jq -e '.[0].item_id' "$main_file" &>/dev/null; then
-                            key="item_id"
-                        elif jq -e '.[0].entry_id' "$main_file" &>/dev/null; then
-                            key="entry_id"
-                        fi
-                        # Union: main entries + worktree entries not already in main
-                        local merged
-                        merged=$(jq -s --arg key "$key" '
-                            (.[0] | map(.[$key]) | map(select(. != null))) as $existing_ids |
-                            .[0] + [.[1][] | select(.[$key] as $id | ($existing_ids | index($id)) == null)]
-                        ' "$main_file" "$wt_file" 2>/dev/null) || true
-                        if [[ -n "$merged" ]]; then
-                            echo "$merged" > "$main_file"
-                            echo "      Merged: $f (union by .$key)"
-                        else
-                            echo "      [WARN] jq merge failed for $f, keeping main version"
-                        fi
+                        # Content-hash dedup: merge both arrays, remove exact duplicates
+                        python3 -c "
+import json, hashlib, sys
+main_path, wt_path = sys.argv[1], sys.argv[2]
+with open(main_path) as f: main_data = json.load(f)
+with open(wt_path) as f: wt_data = json.load(f)
+if not isinstance(main_data, list) or not isinstance(wt_data, list):
+    sys.exit(0)  # skip non-array files
+seen = set()
+merged = []
+for e in main_data + wt_data:
+    h = hashlib.md5(json.dumps(e, sort_keys=True, ensure_ascii=False, default=str).encode()).hexdigest()
+    if h not in seen:
+        seen.add(h)
+        merged.append(e)
+added = len(merged) - len(main_data)
+with open(main_path, 'w') as f:
+    json.dump(merged, f, indent=2, ensure_ascii=False, default=str)
+print(f'      Merged: {sys.argv[3]} (content-hash dedup, +{added} new, {len(merged)} total)')
+" "$main_file" "$wt_file" "$f" 2>/dev/null || {
+                            echo "      [WARN] Python merge failed for $f, keeping main version"
+                        }
                     elif [[ -f "$wt_file" ]] && [[ ! -f "$main_file" ]]; then
                         local dir=$(dirname "$f")
                         mkdir -p "$MAIN_DIR/$dir"
