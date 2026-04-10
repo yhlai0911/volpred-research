@@ -1,0 +1,755 @@
+{
+  "experiment_id": "K1038",
+  "title": "GAS-t Score-Driven Volatility Model vs GARCH (Multi-Asset)",
+  "description": "Compare GAS-t and GAS-t+leverage against GARCH(1,1) and GJR-GARCH for OOS volatility forecasting",
+  "methodology": {
+    "models": [
+      "GARCH(1,1)",
+      "GJR-GARCH(1,1)",
+      "GAS-t(1,1)",
+      "GAS-t(1,1)+Leverage"
+    ],
+    "assets": [
+      "SPY",
+      "QQQ",
+      "GLD",
+      "0050.TW"
+    ],
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "evaluation_target": "r\u00b2 (squared returns, GARCH-native proxy)",
+    "metrics": [
+      "QLIKE (Patton 2011)",
+      "MSE",
+      "Spearman rank correlation",
+      "VaR Kupiec/CC/Basel Trinity at 1% and 2.5%",
+      "ES Acerbi-Szekely backtest"
+    ],
+    "dm_threshold": "Harvey (2016) |t| > 3.0"
+  },
+  "data_source": "yfinance",
+  "seed": 42,
+  "references": [
+    "Creal, Koopman, Lucas (2013) JASA 108(501):1-18",
+    "Harvey (2013) Dynamic Models for Volatility & Heavy Tails, Cambridge UP",
+    "Blasques, Koopman, Lucas (2015) Biometrika 102(2):325-343",
+    "Patton (2011) \u2014 QLIKE proxy-robust loss",
+    "Harvey (2016) \u2014 DM |t|>3.0 threshold"
+  ],
+  "results": {
+    "SPY": {
+      "n_oos": 1828,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-04-10",
+      "model_metrics": {
+        "GARCH": {
+          "QLIKE": 1.5138881170349545,
+          "MSE": 26.73505893922781,
+          "Spearman_rho": 0.33149152504825896,
+          "Spearman_p": 3.9114235697965193e-48
+        },
+        "GJR": {
+          "QLIKE": 1.4959709735505369,
+          "MSE": 25.682034524715977,
+          "Spearman_rho": 0.38252736974362517,
+          "Spearman_p": 9.040370185150069e-65
+        },
+        "GAS-t": {
+          "QLIKE": 1.5308810915022242,
+          "MSE": 27.976767506716396,
+          "Spearman_rho": 0.3278085102710089,
+          "Spearman_p": 4.757079191121743e-47
+        },
+        "GAS-t-Lev": {
+          "QLIKE": 1.5301331721403901,
+          "MSE": 27.65362606649022,
+          "Spearman_rho": 0.34660342679824196,
+          "Spearman_p": 9.591814315631865e-53
+        }
+      },
+      "dm_tests": {
+        "GARCH_vs_GJR": {
+          "DM_t": -0.5761291268278668,
+          "DM_p": 0.5645279053287795,
+          "significant_Harvey": false,
+          "better_model": "GJR"
+        },
+        "GAS-t_vs_GJR": {
+          "DM_t": -0.9863350601228887,
+          "DM_p": 0.3239687205922417,
+          "significant_Harvey": false,
+          "better_model": "GJR"
+        },
+        "GAS-t-Lev_vs_GJR": {
+          "DM_t": -1.7271350788006348,
+          "DM_p": 0.08414340695022782,
+          "significant_Harvey": false,
+          "better_model": "GJR"
+        },
+        "GAS-t-Lev_vs_GAS-t": {
+          "DM_t": 0.04098142637011097,
+          "DM_p": 0.9673107030310297,
+          "significant_Harvey": false,
+          "better_model": "GAS-t-Lev"
+        }
+      },
+      "var_es_backtests": {
+        "alpha_0.01": {
+          "GARCH": {
+            "violation_rate": 0.022975929978118162,
+            "n_violations": 42,
+            "expected_violations": 18.28,
+            "Kupiec_p": 1.8463113696798317e-06,
+            "CC_p": 0.9713639410000479,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.1351047728099497,
+            "ES_p": 0.25633142203592785,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GJR": {
+            "violation_rate": 0.02024070021881838,
+            "n_violations": 37,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.0001114280334518769,
+            "CC_p": 0.21615309342866884,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.5985175360410746,
+            "ES_p": 0.10992784589945614,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GAS-t": {
+            "violation_rate": 0.016958424507658644,
+            "n_violations": 31,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.006534171542834644,
+            "CC_p": 0.1109526559693571,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.5278226910123502,
+            "ES_p": 0.5976224064444551,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 7.508151382848729
+          },
+          "GAS-t-Lev": {
+            "violation_rate": 0.018052516411378557,
+            "n_violations": 33,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.0018768340505420644,
+            "CC_p": 0.6262614078279913,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.6081861553749431,
+            "ES_p": 0.5430640158079205,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 7.001913184331252
+          }
+        },
+        "alpha_0.025": {
+          "GARCH": {
+            "violation_rate": 0.03555798687089715,
+            "n_violations": 65,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.006495906027515375,
+            "CC_p": 0.65302291950439,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.5041271938335776,
+            "ES_p": 0.13254861954742192,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GJR": {
+            "violation_rate": 0.03336980306345733,
+            "n_violations": 61,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.029089008271486638,
+            "CC_p": 0.40698206729636,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.7839173652037066,
+            "ES_p": 0.07443709373859919,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GAS-t": {
+            "violation_rate": 0.032275711159737416,
+            "n_violations": 59,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.056362394354375955,
+            "CC_p": 0.9438103805171856,
+            "Basel": "Green",
+            "Trinity_PASS": true,
+            "ES_z": 0.7877827125787658,
+            "ES_p": 0.4308238146633432,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 7.508151382848729
+          },
+          "GAS-t-Lev": {
+            "violation_rate": 0.0350109409190372,
+            "n_violations": 64,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.009657545599096151,
+            "CC_p": 0.8646710360068962,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.8099530589380599,
+            "ES_p": 0.41796715505848425,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 7.001913184331252
+          }
+        }
+      },
+      "kurtosis": 15.356011069550634,
+      "skewness": 0.0016443906084157075
+    },
+    "QQQ": {
+      "n_oos": 1828,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-04-10",
+      "model_metrics": {
+        "GARCH": {
+          "QLIKE": 1.5008379495131594,
+          "MSE": 40.026732140117424,
+          "Spearman_rho": 0.3028493451142014,
+          "Spearman_p": 4.397517165766191e-40
+        },
+        "GJR": {
+          "QLIKE": 1.4914681585256324,
+          "MSE": 37.92137290897486,
+          "Spearman_rho": 0.34463437336092273,
+          "Spearman_p": 3.9559450215972075e-52
+        },
+        "GAS-t": {
+          "QLIKE": 1.5015283094639824,
+          "MSE": 40.30355235128201,
+          "Spearman_rho": 0.302422419218571,
+          "Spearman_p": 5.709582026260342e-40
+        },
+        "GAS-t-Lev": {
+          "QLIKE": 1.4884182818399234,
+          "MSE": 39.47370396911929,
+          "Spearman_rho": 0.32011691616715393,
+          "Spearman_p": 7.858505204064537e-45
+        }
+      },
+      "dm_tests": {
+        "GARCH_vs_GJR": {
+          "DM_t": -0.31439230373689947,
+          "DM_p": 0.7532231007658488,
+          "significant_Harvey": false,
+          "better_model": "GJR"
+        },
+        "GAS-t_vs_GJR": {
+          "DM_t": -0.3032178040127564,
+          "DM_p": 0.7617238816844689,
+          "significant_Harvey": false,
+          "better_model": "GJR"
+        },
+        "GAS-t-Lev_vs_GJR": {
+          "DM_t": 0.11708410514723659,
+          "DM_p": 0.9067934053515012,
+          "significant_Harvey": false,
+          "better_model": "GAS-t-Lev"
+        },
+        "GAS-t-Lev_vs_GAS-t": {
+          "DM_t": 1.2882146234588558,
+          "DM_p": 0.19767126292284742,
+          "significant_Harvey": false,
+          "better_model": "GAS-t-Lev"
+        }
+      },
+      "var_es_backtests": {
+        "alpha_0.01": {
+          "GARCH": {
+            "violation_rate": 0.020787746170678335,
+            "n_violations": 38,
+            "expected_violations": 18.28,
+            "Kupiec_p": 5.15336415648493e-05,
+            "CC_p": 0.8168242415215214,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.8337430085371204,
+            "ES_p": 0.40442581674785316,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GJR": {
+            "violation_rate": 0.023522975929978117,
+            "n_violations": 43,
+            "expected_violations": 18.28,
+            "Kupiec_p": 7.575175989815719e-07,
+            "CC_p": 0.9897817855634815,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.0148291054950407,
+            "ES_p": 0.31018729705310366,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GAS-t": {
+            "violation_rate": 0.016411378555798686,
+            "n_violations": 30,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.011675748890198179,
+            "CC_p": 0.5174372659211268,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.11466177697901006,
+            "ES_p": 0.9087132115978633,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 8.834975348958947
+          },
+          "GAS-t-Lev": {
+            "violation_rate": 0.019693654266958426,
+            "n_violations": 36,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.0002348683189842271,
+            "CC_p": 0.7397300160726309,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.02677592584753219,
+            "ES_p": 0.9786384547229241,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 8.490527723171539
+          }
+        },
+        "alpha_0.025": {
+          "GARCH": {
+            "violation_rate": 0.038840262582056896,
+            "n_violations": 71,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.00044730732701803166,
+            "CC_p": 0.6182035260872561,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.9958974324486141,
+            "ES_p": 0.3192999829609824,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GJR": {
+            "violation_rate": 0.03774617067833698,
+            "n_violations": 69,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.0011536946421668581,
+            "CC_p": 0.6850054418403126,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.346271575626385,
+            "ES_p": 0.17821494920505154,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GAS-t": {
+            "violation_rate": 0.03391684901531729,
+            "n_violations": 62,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.02043902202442338,
+            "CC_p": 0.9402752889506238,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.30414522664786947,
+            "ES_p": 0.7610172519873928,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 8.834975348958947
+          },
+          "GAS-t-Lev": {
+            "violation_rate": 0.03336980306345733,
+            "n_violations": 61,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.029089008271486638,
+            "CC_p": 0.9784508538434226,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.5358531506004746,
+            "ES_p": 0.5920600452488847,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 8.490527723171539
+          }
+        }
+      },
+      "kurtosis": 7.781925878344897,
+      "skewness": -0.05140869149681917
+    },
+    "GLD": {
+      "n_oos": 1828,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-04-10",
+      "model_metrics": {
+        "GARCH": {
+          "QLIKE": 1.5014421983213033,
+          "MSE": 11.731787908593452,
+          "Spearman_rho": 0.2148400206241827,
+          "Spearman_p": 1.5738445887774228e-20
+        },
+        "GJR": {
+          "QLIKE": 1.5075512546825256,
+          "MSE": 11.734516444383857,
+          "Spearman_rho": 0.20881971128656826,
+          "Spearman_p": 1.8529732405762168e-19
+        },
+        "GAS-t": {
+          "QLIKE": 1.5101255829322313,
+          "MSE": 11.95968539081536,
+          "Spearman_rho": 0.2114112479428935,
+          "Spearman_p": 6.469561424005909e-20
+        },
+        "GAS-t-Lev": {
+          "QLIKE": 1.5110726921174973,
+          "MSE": 11.960696330342323,
+          "Spearman_rho": 0.21081750426709064,
+          "Spearman_p": 8.24343977955298e-20
+        }
+      },
+      "dm_tests": {
+        "GARCH_vs_GJR": {
+          "DM_t": 1.9428229922293248,
+          "DM_p": 0.0520375488771303,
+          "significant_Harvey": false,
+          "better_model": "GARCH"
+        },
+        "GAS-t_vs_GJR": {
+          "DM_t": -0.26376199116218674,
+          "DM_p": 0.7919633243086597,
+          "significant_Harvey": false,
+          "better_model": "GJR"
+        },
+        "GAS-t-Lev_vs_GJR": {
+          "DM_t": -0.3719798511891354,
+          "DM_p": 0.7099078510820533,
+          "significant_Harvey": false,
+          "better_model": "GJR"
+        },
+        "GAS-t-Lev_vs_GAS-t": {
+          "DM_t": -1.6044498807290608,
+          "DM_p": 0.1086149235722238,
+          "significant_Harvey": false,
+          "better_model": "GAS-t"
+        }
+      },
+      "var_es_backtests": {
+        "alpha_0.01": {
+          "GARCH": {
+            "violation_rate": 0.0175054704595186,
+            "n_violations": 32,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.0035520648274047772,
+            "CC_p": 0.5893589263128349,
+            "Basel": "Yellow",
+            "Trinity_PASS": false,
+            "ES_z": 1.1231480964807936,
+            "ES_p": 0.2613746020752039,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GJR": {
+            "violation_rate": 0.0175054704595186,
+            "n_violations": 32,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.0035520648274047772,
+            "CC_p": 0.5893589263128349,
+            "Basel": "Yellow",
+            "Trinity_PASS": false,
+            "ES_z": 1.1947771803020442,
+            "ES_p": 0.232174098357127,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GAS-t": {
+            "violation_rate": 0.010393873085339168,
+            "n_violations": 19,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.8664517830270861,
+            "CC_p": 0.19122731990787456,
+            "Basel": "Green",
+            "Trinity_PASS": true,
+            "ES_z": 0.4081160918147668,
+            "ES_p": 0.6831884465331519,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 5.809725799473611
+          },
+          "GAS-t-Lev": {
+            "violation_rate": 0.010393873085339168,
+            "n_violations": 19,
+            "expected_violations": 18.28,
+            "Kupiec_p": 0.8664517830270861,
+            "CC_p": 0.19122731990787456,
+            "Basel": "Green",
+            "Trinity_PASS": true,
+            "ES_z": 0.41454633144253106,
+            "ES_p": 0.6784740433115781,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 5.80973671336162
+          }
+        },
+        "alpha_0.025": {
+          "GARCH": {
+            "violation_rate": 0.03446389496717724,
+            "n_violations": 63,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.014152187130892724,
+            "CC_p": 0.006078387741650482,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.0820766627864102,
+            "ES_p": 0.279218464611493,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GJR": {
+            "violation_rate": 0.03446389496717724,
+            "n_violations": 63,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.014152187130892724,
+            "CC_p": 0.006078387741650482,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.1329223091987364,
+            "ES_p": 0.2572468804722554,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GAS-t": {
+            "violation_rate": 0.02954048140043764,
+            "n_violations": 54,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.22655288127670736,
+            "CC_p": 0.00506547576214611,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.19806752166682026,
+            "ES_p": 0.8429922353530119,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 5.809725799473611
+          },
+          "GAS-t-Lev": {
+            "violation_rate": 0.02954048140043764,
+            "n_violations": 54,
+            "expected_violations": 45.7,
+            "Kupiec_p": 0.22655288127670736,
+            "CC_p": 0.00506547576214611,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 0.20632532373969203,
+            "ES_p": 0.8365367985897603,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 5.80973671336162
+          }
+        }
+      },
+      "kurtosis": 6.752109858943562,
+      "skewness": -0.31023913533397496
+    },
+    "0050.TW": {
+      "n_oos": 1759,
+      "oos_start": "2019-01-02",
+      "oos_end": "2026-04-09",
+      "model_metrics": {
+        "GARCH": {
+          "QLIKE": 1.4719369712196364,
+          "MSE": 26.180831880792827,
+          "Spearman_rho": 0.18829771830960756,
+          "Spearman_p": 1.6790961705040377e-15
+        },
+        "GJR": {
+          "QLIKE": 1.4822146013966502,
+          "MSE": 24.75289860345492,
+          "Spearman_rho": 0.2132649099946637,
+          "Spearman_p": 1.534335398163221e-19
+        },
+        "GAS-t": {
+          "QLIKE": 1.4795666640732608,
+          "MSE": 26.763322647134704,
+          "Spearman_rho": 0.20243587873206959,
+          "Spearman_p": 1.0071568623524989e-17
+        },
+        "GAS-t-Lev": {
+          "QLIKE": 1.4695432201674024,
+          "MSE": 26.013311420505072,
+          "Spearman_rho": 0.21658870849020992,
+          "Spearman_p": 4.053705059535338e-20
+        }
+      },
+      "dm_tests": {
+        "GARCH_vs_GJR": {
+          "DM_t": 0.4437927573122643,
+          "DM_p": 0.6571924252755343,
+          "significant_Harvey": false,
+          "better_model": "GARCH"
+        },
+        "GAS-t_vs_GJR": {
+          "DM_t": 0.06568598823033682,
+          "DM_p": 0.9476278280920869,
+          "significant_Harvey": false,
+          "better_model": "GAS-t"
+        },
+        "GAS-t-Lev_vs_GJR": {
+          "DM_t": 0.5899408516733964,
+          "DM_p": 0.5552303047984484,
+          "significant_Harvey": false,
+          "better_model": "GAS-t-Lev"
+        },
+        "GAS-t-Lev_vs_GAS-t": {
+          "DM_t": 0.4329263085697627,
+          "DM_p": 0.6650683064834231,
+          "significant_Harvey": false,
+          "better_model": "GAS-t-Lev"
+        }
+      },
+      "var_es_backtests": {
+        "alpha_0.01": {
+          "GARCH": {
+            "violation_rate": 0.01762364980102331,
+            "n_violations": 31,
+            "expected_violations": 17.59,
+            "Kupiec_p": 0.003718832675760231,
+            "CC_p": 0.5746887248656521,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.1986259437451792,
+            "ES_p": 0.23067342559914672,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GJR": {
+            "violation_rate": 0.01762364980102331,
+            "n_violations": 31,
+            "expected_violations": 17.59,
+            "Kupiec_p": 0.003718832675760231,
+            "CC_p": 0.5746887248656521,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.0337362671066508,
+            "ES_p": 0.30125947351729687,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GAS-t": {
+            "violation_rate": 0.010801591813530414,
+            "n_violations": 19,
+            "expected_violations": 17.59,
+            "Kupiec_p": 0.738711977985516,
+            "CC_p": 0.19959434548983568,
+            "Basel": "Green",
+            "Trinity_PASS": true,
+            "ES_z": 0.2094724851219096,
+            "ES_p": 0.8340794126144124,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 4.7262187753435345
+          },
+          "GAS-t-Lev": {
+            "violation_rate": 0.012507106310403639,
+            "n_violations": 22,
+            "expected_violations": 17.59,
+            "Kupiec_p": 0.3091038934898537,
+            "CC_p": 0.2774520646330155,
+            "Basel": "Green",
+            "Trinity_PASS": true,
+            "ES_z": 0.05619273175244191,
+            "ES_p": 0.9551882712371342,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 4.780888850294824
+          }
+        },
+        "alpha_0.025": {
+          "GARCH": {
+            "violation_rate": 0.03297328027288232,
+            "n_violations": 58,
+            "expected_violations": 43.975,
+            "Kupiec_p": 0.040992473393848816,
+            "CC_p": 0.4510028977784447,
+            "Basel": "Green",
+            "Trinity_PASS": false,
+            "ES_z": 1.2249729427014138,
+            "ES_p": 0.2205854152212976,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GJR": {
+            "violation_rate": 0.03126776577600909,
+            "n_violations": 55,
+            "expected_violations": 43.975,
+            "Kupiec_p": 0.10490566048424177,
+            "CC_p": 0.5399211608979779,
+            "Basel": "Green",
+            "Trinity_PASS": true,
+            "ES_z": 1.252444007598522,
+            "ES_p": 0.21040811907094237,
+            "ES_PASS": true,
+            "distribution": "normal",
+            "nu": null
+          },
+          "GAS-t": {
+            "violation_rate": 0.027288231949971573,
+            "n_violations": 48,
+            "expected_violations": 43.975,
+            "Kupiec_p": 0.5445855289735024,
+            "CC_p": 0.19027224790238562,
+            "Basel": "Green",
+            "Trinity_PASS": true,
+            "ES_z": 0.1902360275941192,
+            "ES_p": 0.8491241806377394,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 4.7262187753435345
+          },
+          "GAS-t-Lev": {
+            "violation_rate": 0.03126776577600909,
+            "n_violations": 55,
+            "expected_violations": 43.975,
+            "Kupiec_p": 0.10490566048424177,
+            "CC_p": 0.8300646089161732,
+            "Basel": "Green",
+            "Trinity_PASS": true,
+            "ES_z": -0.00010616146249934671,
+            "ES_p": 0.9999152954082786,
+            "ES_PASS": true,
+            "distribution": "t",
+            "nu": 4.780888850294824
+          }
+        }
+      },
+      "kurtosis": 18.861629938626905,
+      "skewness": 0.4837359880384938
+    }
+  },
+  "charts": [
+    "k1038_qlike_comparison.png",
+    "k1038_spy_volatility_path.png"
+  ],
+  "created_at": "2026-04-10T18:25:22.995018+00:00"
+}
