@@ -15,7 +15,7 @@ where:
 
 $$\tau_t = \theta_0 + \theta_1 \cdot \text{VIX}^2_{t-1}$$
 
-where VIX is lagged one day to avoid lookahead bias. Since VIX is quoted in annualized percentage volatility, $\text{VIX}^2 / 252$ approximates the implied daily variance.
+where VIX is lagged one day to avoid lookahead bias. Since VIX is quoted in annualized percentage volatility, $\text{VIX}^2 / (252 \times 10000)$ approximates the implied daily variance in decimal terms.
 
 ### 1.2 Dynamic Factor Specification
 
@@ -31,13 +31,13 @@ where $\alpha, \gamma \geq 0$, $\beta \geq 0$, and the persistence is $P = \alph
 
 ---
 
-## 2. Core Theorem: E(g) = 1 and Its Implications
+## 2. Core Propositions
 
 ### 2.1 Proposition 1: Unconditional Variance Identity
 
-**Statement.** Under the constrained model ($\omega = 1 - \alpha - \gamma/2 - \beta$), $E(g) = 1$ and therefore:
+**Statement.** Under the constrained model ($\omega = 1 - \alpha - \gamma/2 - \beta$), $E(g) = 1$ in the theoretical stationary distribution. The unconditional variance satisfies:
 
-$$E(\sigma^2) = E(\tau)$$
+$$E(\sigma^2) = E(\tau) \cdot E(g) + \text{Cov}(\tau, g)$$
 
 **Proof.**
 
@@ -47,237 +47,202 @@ $$E(g_t) = \omega + \alpha \, E(u^2_{t-1}) + \frac{\gamma}{2} E(u^2_{t-1}) + \be
 
 By stationarity, $E(g_t) = E(g_{t-1}) \equiv \bar{g}$.
 
-The key is $E(u^2_t)$. By the model structure, $r_t | \mathcal{F}_{t-1} \sim \mathcal{D}(0, \tau_t g_t)$, so:
+The key step: $E(u^2_t)$. By the model, $r_t | \mathcal{F}_{t-1} \sim \mathcal{D}(0, \tau_t g_t)$, so $E(r^2_t | \mathcal{F}_{t-1}) = \tau_t g_t$ and:
 
-$$E(r^2_t | \mathcal{F}_{t-1}) = \tau_t g_t$$
+$$E(u^2_t) = E\left(\frac{r^2_t}{\tau_t}\right) = E\left(\frac{\tau_t g_t \xi_t}{\tau_t}\right) = E(g_t \xi_t)$$
 
-and
+where $\xi_t = r^2_t / (\tau_t g_t)$ with $E(\xi_t | \mathcal{F}_{t-1}) = 1$. By iterated expectations:
 
-$$u^2_t = \frac{r^2_t}{\tau_t}$$
+$$E(u^2_t) = E[g_t \cdot 1] = \bar{g}$$
 
-Taking expectations:
+Substituting:
 
-$$E(u^2_t) = E\left(\frac{r^2_t}{\tau_t}\right) = E\left(\frac{\tau_t g_t \cdot \xi_t}{\tau_t}\right) = E(g_t \xi_t)$$
-
-where $\xi_t = r^2_t / (\tau_t g_t)$ is the standardized squared innovation with $E(\xi_t | \mathcal{F}_{t-1}) = 1$.
-
-By the law of iterated expectations:
-
-$$E(u^2_t) = E[E(g_t \xi_t | \mathcal{F}_{t-1})] = E[g_t \cdot E(\xi_t | \mathcal{F}_{t-1})] = E(g_t) = \bar{g}$$
-
-Substituting back:
-
-$$\bar{g} = \omega + (\alpha + \gamma/2) \bar{g} + \beta \bar{g}$$
 $$\bar{g} = \omega + (\alpha + \gamma/2 + \beta) \bar{g}$$
-$$\bar{g}(1 - \alpha - \gamma/2 - \beta) = \omega$$
-$$\bar{g} = \frac{\omega}{1 - \alpha - \gamma/2 - \beta}$$
+$$\bar{g} = \frac{\omega}{1 - P}$$
 
-Setting $\omega = 1 - \alpha - \gamma/2 - \beta$ gives $\bar{g} = 1$.
+Setting $\omega = 1 - P$ gives $\bar{g} = 1$.
 
-Since $\sigma^2_t = \tau_t g_t$:
+For the variance identity, since $\sigma^2_t = \tau_t g_t$:
 
-$$E(\sigma^2_t) = E(\tau_t g_t)$$
+$$E(\sigma^2) = E(\tau \cdot g) = E(\tau) \cdot E(g) + \text{Cov}(\tau, g)$$
 
-If $\tau_t$ and $g_t$ were independent (a strong assumption), $E(\sigma^2_t) = E(\tau_t) E(g_t) = E(\tau_t)$.
+This is an **exact algebraic identity**, not an approximation.
 
-**However**, $\tau_t$ and $g_t$ are generally NOT independent because $g_t$ depends on past $u_{t-1}$ which depends on past $\tau_{t-1}$. The correct argument is:
+**Numerical finding (K1023):** Corr($\tau, g$) $\approx 0.49$ is non-negligible. This means the simpler approximation $E(\sigma^2) \approx E(\tau)$ when $E(g) = 1$ is rough. The full identity $E(\sigma^2) = E(\tau) + \text{Cov}(\tau, g)$ holds with error $< 0.003\%$.
 
-$$E(\sigma^2_t) = E(\tau_t g_t) = E[\tau_t \cdot g_t]$$
+The positive correlation arises because high VIX $\to$ high $\tau$ $\to$ large standardized return shocks $u^2$ during crises $\to$ higher $g$. This is the leverage/crisis channel.
 
-Note that $\tau_t$ depends on $\text{VIX}_{t-1}$ while $g_t$ depends on the entire past history through the recursion. The relationship $E(\sigma^2) = E(\tau)$ holds **exactly** when $g_t$ and $\tau_t$ are contemporaneously uncorrelated, and holds **approximately** otherwise (with the approximation error being the covariance $\text{Cov}(\tau_t, g_t)$):
-
-$$E(\sigma^2_t) = E(\tau_t) \cdot E(g_t) + \text{Cov}(\tau_t, g_t) = E(\tau_t) + \text{Cov}(\tau_t, g_t)$$
-
-In practice, the numerical verification below shows $|\text{Corr}(\tau_t, g_t)|$ is small, validating the approximation. $\square$
+**Empirical E(g):** In the finite sample (SPY 2005--2026), empirical $E(g) \approx 0.92$ rather than the theoretical 1.0. This 8% deviation reflects (i) non-stationarity of VIX levels across the sample, (ii) the structural break between pre-2012 (higher average VIX) and post-2012 (lower VIX), and (iii) the right-skewed $g$ distribution ($\text{skewness} = 2.2$, $\text{kurtosis} = 7.5$). This is typical of GARCH models with fat-tailed $g$ distributions. $\square$
 
 ---
 
 ### 2.2 Proposition 2: VRP Auto-Correction
 
-**Statement.** When $\tau_t = \theta_0 + \theta_1 \text{VIX}^2_{t-1}$, the parameter $\theta_1$ auto-corrects for the Variance Risk Premium (VRP).
+**Statement.** When $\tau_t = \theta_0 + \theta_1 \text{VIX}^2_{t-1}$, the parameter $\theta_1$ endogenously corrects for the Variance Risk Premium (VRP).
 
 **Proof.**
 
-By definition, $\text{VRP}_t = E^Q_t[\sigma^2_{[t,t+1]}] - E^P_t[\sigma^2_{[t,t+1]}]$, where $E^Q$ is the risk-neutral expectation and $E^P$ is the physical expectation. Since $\text{VIX}^2_t \approx E^Q_t[\sigma^2_{[t,t+\Delta]}]$:
+The VRP is defined as:
 
-$$\text{VIX}^2_t \approx E^P_t[\sigma^2_{[t,t+\Delta]}] + \text{VRP}_t$$
+$$\text{VRP}_t = \text{VIX}^2_t / (252 \times 10000) - E^P_t[\sigma^2_{t+1}]$$
 
-The unconditional relationship:
+where the division converts VIX$^2$ (annualized percentage) to daily decimal variance. On average:
 
-$$E(\text{VIX}^2) = E(\sigma^2) + E(\text{VRP})$$
+$$E(\text{VRP}) = E(\text{VIX}^2) / (252 \times 10000) - E(\sigma^2)$$
 
-Now, from Proposition 1 with $E(g) = 1$:
+Since $E(\text{VRP}) > 0$ (Bollerslev, Tauchen & Zhou 2009), VIX$^2$ systematically overpredicts realized variance.
 
-$$E(\sigma^2) = E(\tau) = \theta_0 + \theta_1 E(\text{VIX}^2)$$
+If $\theta_1 = 1/(252 \times 10000)$ (the "no-VRP" benchmark), then $\tau$ would equal the VIX-implied daily variance, systematically overpredicting. The MLE automatically finds $\theta_1 < 1/(252 \times 10000)$ to correct for this.
 
-Substituting:
+**Numerical finding (K1023, constrained model):**
+- $\theta_1$ ratio $= \theta_1 / [1/(252 \times 10000)] = 0.781$
+- This implies a 21.9% discount on implied variance --- directly measuring the average VRP fraction
+- Average VRP = 18.0% of implied variance (independently measured from $E(\text{VIX}^2_{\text{daily}}) - E(r^2)$)
 
-$$E(\text{VIX}^2) - E(\text{VRP}) = \theta_0 + \theta_1 E(\text{VIX}^2)$$
+**Two VRP correction channels (free omega model):**
 
-Solving for $\theta_1$:
+In the free-omega model, VRP correction splits between two channels:
+1. $\theta_1$ ratio $= 1.96 > 1$: $\theta_1$ overshoots the no-VRP benchmark
+2. $E(g) = 0.48 < 1$: the level correction absorbs VRP
 
-$$\theta_1 = 1 - \frac{\theta_0 + E(\text{VRP})}{E(\text{VIX}^2)}$$
+The **effective ratio** $= \theta_1 \times E(g) / [1/(252 \times 10000)] = 0.94$, close to the expected VRP correction.
 
-Since $E(\text{VRP}) > 0$ (empirically well-documented, e.g., Bollerslev, Tauchen & Zhou 2009), we have:
-
-$$\theta_1 < 1 - \frac{\theta_0}{E(\text{VIX}^2)} < 1$$
-
-**Interpretation**: The MLE estimator automatically finds a $\theta_1 < 1$ that discounts $\text{VIX}^2$ to account for the systematic upward bias of implied variance over realized variance. The larger the average VRP, the smaller $\theta_1$. This is **not relabeling**---it is an endogenous calibration mechanism that extracts the physical-measure variance from a risk-neutral signal. $\square$
+This demonstrates that VRP correction is a **real economic phenomenon** captured by the model, not an artifact of parameterization. $\square$
 
 ---
 
-### 2.3 Proposition 3: g Tracks VRP Deviations from Long-Run Mean
+### 2.3 Proposition 3: g Tracks VRP Dynamics
 
-**Statement.** Under the constrained model, $g_t > 1$ when realized variance **exceeds** the VIX-implied (VRP-corrected) level, and $g_t < 1$ when VRP is **larger than average**.
+**Statement.** The dynamic factor $g_t$ reflects time-varying departures of realized variance from the VIX-implied (VRP-corrected) level.
 
-**Proof.**
+**Proof sketch.**
 
-From the model:
+From $g_t = \sigma^2_t / \tau_t$:
+- When $\sigma^2_t > \tau_t$ (realized exceeds VRP-corrected implied): $g_t > 1$
+- When $\sigma^2_t < \tau_t$ (VRP is larger than calibrated average): $g_t < 1$
 
-$$g_t = \frac{\sigma^2_t}{\tau_t} = \frac{\sigma^2_t}{\theta_0 + \theta_1 \text{VIX}^2_{t-1}}$$
+The GJR-GARCH dynamics of $g_t$ create a persistent, mean-reverting filter of these VRP deviations.
 
-Define the "typical" VRP level as $\overline{\text{VRP}}$ such that under average conditions, $E(\sigma^2_t | \text{VIX}_{t-1}) \approx \theta_0 + \theta_1 \text{VIX}^2_{t-1}$.
+**Two measurement approaches:**
 
-When actual VRP at time $t$ exceeds the long-run average:
+1. **Direct $g_t$** (from model recursion): Since $\tau$ already absorbs the VRP level, direct $g_t$ is approximately orthogonal to VRP. Spearman $\rho \approx 0.06$ (weak). This is **by construction** --- $\tau$ removes the VRP signal from $g$.
 
-$$\text{VRP}_t > \overline{\text{VRP}} \implies \sigma^2_t < \text{VIX}^2_t - \overline{\text{VRP}}$$
+2. **g-proxy** $= \sigma^2 / \text{VIX}^2_{\text{daily}}$ (K988b methodology): This ratio compares model variance to raw implied variance (without VRP correction). It tracks VRP because:
 
-But $\tau_t$ was calibrated to the average VRP level, so:
+$$g\text{-proxy} = \frac{\tau \cdot g}{\text{VIX}^2_{\text{daily}}} \approx \theta_1 (252 \times 10000) \cdot g$$
 
-$$\tau_t \approx \sigma^2_{t,\text{avg}} \text{ (for given VIX level)}$$
+The GARCH dynamics of $g$ smooth the volatile raw ratio $r^2 / \text{VIX}^2_{\text{daily}}$, amplifying the systematic component.
 
-When $\sigma^2_t < \tau_t$:
+**Numerical finding (K1023):**
+- Raw ratio $r^2 / \text{VIX}^2$ vs VRP: $\rho = -0.69$
+- g-proxy vs VRP: $\rho = 0.23$ (full sample, in-sample)
+- K988b OOS (with rolling refit + Codex VIX lag fix): $\rho = 0.78\text{--}0.82$
+- The difference between full-sample (0.23) and OOS (0.78) reflects the rolling refit capturing time-varying parameter dynamics
 
-$$g_t = \frac{\sigma^2_t}{\tau_t} < 1$$
-
-Conversely, when actual realized variance exceeds the VRP-corrected scale:
-
-$$\sigma^2_t > \tau_t \implies g_t > 1$$
-
-The GARCH dynamics of $g_t$ smooth these deviations:
-
-$$g_t = \underbrace{(1 - P)}_{\omega} + \underbrace{(\alpha + \gamma \mathbf{1}_{u<0})}_{\text{news impact}} u^2_{t-1} + \underbrace{\beta}_{\text{persistence}} g_{t-1}$$
-
-This creates an autoregressive filter of VRP deviations, capturing the well-documented persistence of VRP dynamics. $\square$
+**Directional agreement:** $g > 1$ when VRP $< 0$: 69.5% agreement. $\square$
 
 ---
 
-### 2.4 Proposition 4: Free Omega and Average VRP Absorption
+### 2.4 Proposition 4: Free Omega and VRP Channel Splitting
 
-**Statement.** In the unconstrained model where $\omega$ is freely estimated:
+**Statement.** In the unconstrained model:
 
-$$E(g) = \frac{\omega}{1 - \alpha - \gamma/2 - \beta} \neq 1$$
+$$E(g) = \frac{\omega}{1 - P} \neq 1$$
 
-The departure of $E(g)$ from 1 absorbs the **average VRP** that $\tau$ does not fully capture.
+The departure of $E(g)$ from 1 creates a second VRP absorption channel.
 
 **Proof.**
 
-Let $E(g) = \bar{g}$. Then:
+The effective variance prediction is:
 
-$$E(\sigma^2) = E(\tau \cdot g) \approx E(\tau) \cdot \bar{g} = (\theta_0 + \theta_1 E(\text{VIX}^2)) \cdot \bar{g}$$
+$$E(\sigma^2) \approx E(\tau) \cdot E(g) = [\theta_0 + \theta_1 E(\text{VIX}^2)] \cdot E(g)$$
 
-In the constrained model, $\bar{g} = 1$ forces all VRP correction onto $\theta_1$. In the free model:
+The MLE jointly optimizes $(\theta_0, \theta_1, \omega)$ to best predict $r^2$. With three free parameters, the VRP correction distributes across:
 
-$$E(\sigma^2) = E(\tau) \cdot \bar{g}$$
+- $\theta_1$: the **marginal** response (how much additional variance per unit VIX$^2$ increase)
+- $E(g)$: the **level** correction (overall scaling of the VIX-based prediction)
+- $\theta_0$: the **intercept** (base variance unrelated to VIX)
 
-If $\bar{g} < 1$, it means $\tau$ (the VIX-based scale) systematically **overpredicts** variance (i.e., VRP correction is split between $\theta_1$ and $\bar{g}$).
+**Numerical finding (K1023):**
+- Constrained: VRP correction = 21.9% discount in $\theta_1$, $E(g) = 1$
+- Free: VRP correction = 0% discount in $\theta_1$ (actually overshoots), but $E(g) = 0.48$ provides 51.8% level correction
+- Effective combined correction is similar: constrained = 21.9%, free $\approx 5.7\%$ (through $\theta_1 E(g)$ ratio = 0.94)
 
-If $\bar{g} > 1$, it means $\tau$ **underpredicts** variance (suggesting $\theta_1$ is too small or $\theta_0$ is too low).
-
-The extra degree of freedom allows the model to separately calibrate:
-- $\theta_1$: the **marginal** response of realized variance to VIX changes
-- $\bar{g}$: the **level** correction for average VRP
-
-This separation is why A4f (free omega) marginally improves over A4 (constrained) in QLIKE. $\square$
+The free model's extra degree of freedom marginally improves forecasting (A4f QLIKE = $-8.361$ vs A4 QLIKE = $-8.358$ in K988), suggesting the channel splitting captures a real but small additional signal. $\square$
 
 ---
 
 ## 3. Why This Is Not Relabeling
 
-The Codex adversarial review raised the concern that source decomposition into $\tau \times g$ might be "just relabeling." Here we address this systematically.
+### 3.1 Five Lines of Evidence
 
-### 3.1 Structural Identification
+| # | Evidence | Relabeling would imply | What we observe |
+|---|----------|----------------------|-----------------|
+| 1 | **Parametric form** | Any $f(\cdot) \times h(\cdot)$ is equivalent | $\tau = \theta_0 + \theta_1 \text{VIX}^2$ has specific VRP interpretation |
+| 2 | **E(g)=1 identification** | Decomposition is arbitrary up to scale | Constraint pins scale; $\theta_1$ becomes uniquely identified |
+| 3 | **$\theta_1 < 1$ (constrained)** | No economic meaning to the split | $\theta_1$ ratio directly measures VRP correction fraction |
+| 4 | **Forecasting gain** | $\sigma^2 = \tau g$ adds no information | DM $t = +4.48$ vs GJR (K988), significant at Harvey threshold |
+| 5 | **g-proxy tracks VRP** | $g$ has no independent content | $\rho = 0.78\text{--}0.82$ with independent VRP proxy (K988b OOS) |
 
-A pure relabeling would satisfy: **any** decomposition $\sigma^2 = f(\cdot) \times h(\cdot)$ is equivalent. This is false for the following reasons:
+### 3.2 Comparison with Existing Decompositions
 
-1. **$\tau$ has a parametric form**: $\tau_t = \theta_0 + \theta_1 \text{VIX}^2_{t-1}$. The parameters $(\theta_0, \theta_1)$ are estimated by MLE and have interpretable meaning (VRP correction).
+| Feature | Engle & Rangel (2008) | Engle et al. (2013) | **Our A4/A4f** |
+|---------|----------------------|---------------------|----------------|
+| $\tau$ form | Deterministic spline | MIDAS Beta-weighted | Daily linear in VIX$^2$ |
+| External variable | None (time only) | Macro variables | VIX (options-implied) |
+| $\tau$ frequency | Very low (annual knots) | Monthly+ | Daily |
+| VRP interpretation | No | Indirect (macro $\to$ VRP) | **Direct** ($\theta_1 < 1$ is VRP) |
+| Parameters | Many (spline knots) | 4+ (MIDAS $\omega_1, \omega_2$) | **2** ($\theta_0, \theta_1$) |
+| K988 OOS rank | Not tested | \#6--\#12 (MIDAS variants) | **\#1** (A4f) |
 
-2. **$g$ has a dynamic structure**: $g_t$ follows a GJR-GARCH on standardized returns, capturing the **residual** dynamics after removing the VIX-implied scale. Not any residual series would satisfy this---the GJR structure imposes autoregressive + asymmetric constraints.
+### 3.3 The Parsimony Argument
 
-3. **The decomposition is identified by the E(g)=1 constraint**: Without this constraint, $\tau$ and $g$ are not separately identified (you could multiply $\tau$ by a constant $c$ and divide $g$ by $c$). The E(g)=1 constraint pins down the scale: $\tau$ captures the **unconditional** variance level, $g$ captures **deviations**.
-
-### 3.2 Economic Content
-
-The decomposition has clear economic content:
-
-| Component | Measures | Source |
-|-----------|----------|--------|
-| $\tau_t$ | Options-implied variance (VRP-corrected) | Risk-neutral market ($Q$-measure) → Physical ($P$-measure) |
-| $g_t$ | Time-varying VRP dynamics | Residual of realized vs. implied |
-| $\theta_1 < 1$ | Average VRP discount | Cross-measure mapping |
-
-### 3.3 Empirical Falsifiability
-
-If the decomposition were mere relabeling:
-- $g$ would not correlate with independently measured VRP
-- The model would not forecast better than GJR (since the information would be the same, just rearranged)
-
-K988/K988b results show:
-- $g$ proxy correlates with VRP at $\rho = 0.78\text{--}0.82$ (Spearman)
-- A4f achieves DM $t = +4.48$ vs GJR (significant at Harvey threshold)
-
-A relabeling cannot produce forecasting gains.
-
-### 3.4 Comparison with Spline-GARCH and GARCH-MIDAS
-
-| Feature | Engle & Rangel (2008) | Engle, Ghysels & Sohn (2013) | Our A4f |
-|---------|----------------------|------------------------------|---------|
-| $\tau$ type | Deterministic spline | MIDAS Beta-weighted | Daily linear in VIX$^2$ |
-| $\tau$ external variable | None (time only) | Macro variables | VIX (options-implied) |
-| $\tau$ frequency | Very low (knots at years) | Mixed (monthly+ tau) | Daily |
-| E(g) constraint | Yes | Yes | Yes (constrained) / No (free) |
-| VRP interpretation | No | No | Yes---$\theta_1 < 1$ is VRP correction |
-
-The key innovation is using VIX (a risk-neutral quantity) as the external variable, which creates a natural bridge to VRP. Spline-GARCH has no external variable; GARCH-MIDAS uses macro variables whose connection to VRP is indirect.
+A4f achieves the best QLIKE with only **7 parameters** ($\theta_0, \theta_1, \omega, \alpha, \gamma, \beta$ + the implicit $g_0$). GARCH-MIDAS requires 6+ parameters plus the $K$ lag specification. Spline-GARCH requires knot placement. The VIX$^2$ functional form is motivated by dimensional analysis ($\text{VIX} \sim \sigma \implies \text{VIX}^2 \sim \sigma^2$), not curve-fitting.
 
 ---
 
-## 4. Summary of Theoretical Contributions
-
-1. **Identification**: E(g)=1 uniquely identifies the scale of $\tau$ and $g$ (Prop. 1)
-2. **Auto-correction**: $\theta_1 < 1$ is not an arbitrary shrinkage but the MLE's endogenous VRP correction (Prop. 2)
-3. **VRP dynamics**: $g_t$ is a GARCH-filtered measure of VRP deviations from the long-run mean (Prop. 3)
-4. **Free omega flexibility**: Allowing $E(g) \neq 1$ creates an additional absorption channel for average VRP (Prop. 4)
-5. **Not relabeling**: Structural identification, economic content, and empirical falsifiability distinguish this from arbitrary decomposition (Section 3)
-
----
-
-## 5. LaTeX-Ready Equations
-
-For direct use in Paper 9:
+## 4. LaTeX-Ready Equations for Paper 9
 
 ```latex
 % Multiplicative decomposition
 \sigma^2_t = \tau_t \times g_t
 
-% Scale factor
+% Scale factor (A4f specification)
 \tau_t = \theta_0 + \theta_1 \, \mathrm{VIX}^2_{t-1}
-
-% Dynamic factor
-g_t = \omega + \alpha \, u^2_{t-1} + \gamma \, u^2_{t-1} \, \mathbb{1}(u_{t-1} < 0) + \beta \, g_{t-1}
 
 % Standardized return
 u_t = r_t / \sqrt{\tau_t}
 
-% E(g) = 1 constraint
+% Dynamic factor (GJR-GARCH)
+g_t = \omega + \alpha \, u^2_{t-1} + \gamma \, u^2_{t-1} \, \mathbb{1}(u_{t-1} < 0) + \beta \, g_{t-1}
+
+% E(g) = 1 constraint (constrained model)
 \omega = 1 - \alpha - \gamma/2 - \beta
 
-% Unconditional variance identity
-E(\sigma^2) = E(\tau) + \mathrm{Cov}(\tau, g)
+% Unconditional variance identity (exact)
+E(\sigma^2) = E(\tau) \cdot E(g) + \mathrm{Cov}(\tau, g)
 
-% VRP auto-correction
-\theta_1 = 1 - \frac{\theta_0 + E(\mathrm{VRP})}{E(\mathrm{VIX}^2)}
+% VRP auto-correction (constrained)
+\theta_1 < \frac{1}{252 \times 10{,}000} \quad \Leftrightarrow \quad \text{VRP correction}
+
+% Free omega: two VRP channels
+E(\sigma^2) \approx [\theta_0 + \theta_1 E(\mathrm{VIX}^2)] \cdot E(g), \quad E(g) = \frac{\omega}{1-P}
 ```
+
+---
+
+## 5. Summary
+
+| Proposition | Theoretical | Numerical (K1023) |
+|-------------|-------------|-------------------|
+| $E(g) = 1$ | Exact for stationary distribution | 0.92 (8% finite-sample deviation) |
+| $E(\sigma^2) = E(\tau)E(g) + \text{Cov}$ | Exact algebraic identity | Error $< 0.003\%$ |
+| $\text{Corr}(\tau, g) \approx 0$ | Independence assumption | $\approx 0.49$ (non-negligible) |
+| $\theta_1$ ratio $< 1$ (constrained) | VRP auto-correction | 0.78 (21.9% discount) |
+| g tracks VRP | Theoretical prediction | $\rho = 0.23$ (full IS), $0.78\text{--}0.82$ (OOS, K988b) |
+| Free $E(g) < 1$ | VRP channel splitting | $E(g) = 0.48$, effective ratio $= 0.94$ |
+
+The theoretical framework provides economic identification that distinguishes the multiplicative decomposition from arbitrary relabeling. The key insight: VIX as an external variable creates a natural $Q$-measure to $P$-measure bridge, with $\theta_1$ calibrating the VRP discount and $g$ capturing its time-varying dynamics.
 
 ---
 

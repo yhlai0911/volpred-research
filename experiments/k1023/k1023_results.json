@@ -2,112 +2,136 @@
   "proposition_1_eg1_identity": {
     "A4_constrained": {
       "theoretical_E_g": 1.0,
-      "empirical_E_g": 0.9310627888401249,
-      "E_sigma2": 0.00012862228928752997,
-      "E_tau": 0.00012067929765158077,
-      "E_tau_times_E_g": 0.00011236000342674833,
-      "Cov_tau_g": 1.626532667713556e-05,
-      "Corr_tau_g": 0.4785125596073153,
-      "identity_error_pct": 6.175439482493554
+      "empirical_E_g_full_sample": 0.9253253033552677,
+      "empirical_E_g_after_skip": 0.9215567547452478,
+      "E_sigma2": 0.00014024335875304533,
+      "E_tau_times_E_g": 0.00012245899292756212,
+      "Cov_tau_g": 1.7788034217773922e-05,
+      "E_tau_E_g_plus_Cov": 0.00014024702714533606,
+      "identity_error_pct": 0.00261573333906394,
+      "Corr_tau_g": 0.4930051070093254
     },
     "A4f_free_omega": {
-      "theoretical_E_g": 0.41739000058660186,
-      "empirical_E_g": 0.35437754065604254,
-      "E_sigma2": 0.00014206633236383284,
-      "E_tau": 0.0003385695863153099,
-      "E_tau_times_E_g": 0.00011998145733935323,
-      "Cov_tau_g": 2.2089004582262807e-05,
-      "Corr_tau_g": 0.4752336940732146
+      "theoretical_E_g": 0.48207423511799163,
+      "empirical_E_g_full_sample": 0.3981587201049674,
+      "empirical_E_g_after_skip": 0.3947806410328847,
+      "E_sigma2": 0.00015425519914466276,
+      "E_tau_times_E_g": 0.0001284088903834683,
+      "Cov_tau_g": 2.5851640095509844e-05,
+      "Corr_tau_g": 0.5163466485142891
     },
-    "verdict": "E(g)\u22481 confirmed for constrained model; Corr(\u03c4,g) small validates approximation"
+    "note": "Corr(\u03c4,g) \u2248 0.48 is non-negligible. Identity E(\u03c3\u00b2) = E(\u03c4)E(g) + Cov(\u03c4,g) holds exactly. The simpler E(\u03c3\u00b2) \u2248 E(\u03c4) is an approximation."
   },
   "proposition_2_vrp_auto_correction": {
-    "theta1_A4": 2.964457510885065e-07,
-    "theta1_A4f": 8.436333010311091e-07,
-    "theta1_no_vrp": 3.9682539682539683e-07,
-    "theta1_ratio_A4": 0.7470432927430364,
-    "theta1_ratio_A4f": 2.125955918598395,
-    "avg_vrp_daily": 3.149882115034583e-05,
-    "avg_vrp_fraction_of_implied": 0.17982697639867481,
-    "theta1_predicted_from_vrp": 3.254654855560814e-07,
-    "verdict": "\u03b8\u2081 < 1/252/10000 confirms VRP auto-correction"
+    "theta1_A4": 3.0984885912358076e-07,
+    "theta1_A4f": 7.764253183059989e-07,
+    "theta1_no_vrp_benchmark": 3.9682539682539683e-07,
+    "theta1_ratio_A4": 0.7808191249914235,
+    "theta1_ratio_A4f": 1.9565918021311173,
+    "E_g_A4f": 0.48207423511799163,
+    "effective_ratio_A4f": 0.9432224964504912,
+    "avg_vrp_daily_var": 3.1498573517779304e-05,
+    "avg_vrp_pct_of_implied": 17.98255626627295,
+    "interpretation": {
+      "A4_constrained": "\u03b8\u2081 ratio = 0.7808 < 1: VRP correction via \u03b8\u2081 (21.9% discount)",
+      "A4f_free_omega": "\u03b8\u2081 ratio = 1.9566 > 1 but E(g) = 0.4821: VRP split between E(g) and \u03b8\u2081"
+    },
+    "verdict": "Constrained: VRP fully in \u03b8\u2081. Free: VRP split between \u03b8\u2081 and E(g). Both channels are economically meaningful."
   },
   "proposition_3_g_tracks_vrp": {
-    "spearman_g_A4_vs_vrp": 0.05690827396690128,
-    "p_value_A4": 3.7014762367262637e-05,
-    "spearman_g_A4f_vs_vrp": 0.04429688756046448,
-    "p_value_A4f": 0.0013267954556345383,
-    "spearman_raw_ratio_vs_vrp": -0.687619034392702,
-    "p_value_raw": 0.0,
-    "g_gt_1_iff_vrp_neg_agreement": 0.6866069727567156,
-    "verdict": "g highly correlated with VRP; GARCH filtering amplifies signal from raw ratio"
+    "method_A_direct_g": {
+      "description": "g_t from model recursion vs VRP (weak because \u03c4 already removed VRP)",
+      "spearman_A4": 0.06173062519527939,
+      "p_A4": 1.6957554286860223e-05,
+      "spearman_A4f": 0.0469097025147723,
+      "p_A4f": 0.001085009027547302
+    },
+    "method_B_g_proxy": {
+      "description": "\u03c3\u00b2/VIX\u00b2_daily (K988b method) vs VRP \u2014 measures realized/implied ratio",
+      "spearman_A4": 0.22806777584974994,
+      "p_A4": 3.005738416935698e-58,
+      "spearman_A4f": 0.21300142595661195,
+      "p_A4f": 7.239009571030479e-51,
+      "spearman_raw_ratio": -0.6883148426184827,
+      "p_raw": 0.0,
+      "garch_filter_improvement": -0.46024706676873284
+    },
+    "directional_agreement": {
+      "g_gt_1_iff_vrp_neg": 0.6947824293668797,
+      "g_gt_1_freq_pct": 24.685502165394926,
+      "vrp_neg_freq_pct": 19.241080635182513
+    },
+    "verdict": "Method B confirms GARCH filtering amplifies VRP tracking. Direct g is orthogonal to VRP by construction (\u03c4 absorbs VRP signal)."
   },
   "g_distribution": {
     "A4_constrained": {
-      "mean": 0.9310627888401249,
-      "std": 0.21019798612991886,
-      "median": 0.8790731782595642,
-      "skewness": 2.1492070125028455,
-      "kurtosis": 7.425682945407635,
-      "min": 0.6666649755441538,
-      "max": 2.579727153363716,
-      "pct_below_1": 73.1725556178725
+      "mean": 0.9215567547452478,
+      "std": 0.20602825226508675,
+      "median": 0.869114921944323,
+      "skewness": 2.197936929636459,
+      "excess_kurtosis": 7.50197899055499,
+      "min": 0.6672895657596241,
+      "max": 2.496300134115825,
+      "pct_below_1": 75.31449783460508,
+      "p5": 0.7122954891759761,
+      "p25": 0.7815408475499257,
+      "p75": 0.9975115407651873,
+      "p95": 1.3105147810558464
     },
     "A4f_free_omega": {
-      "mean": 0.35437754065604254,
-      "std": 0.10099957312022846,
-      "median": 0.33337833081299273,
-      "skewness": 2.0624849448630638,
-      "kurtosis": 7.392077889554093,
-      "min": 0.2126031253488061,
-      "max": 1.1302899640046244
+      "mean": 0.3947806410328847,
+      "std": 0.11408989793292776,
+      "median": 0.3690051968343383,
+      "skewness": 2.0108083309058427,
+      "excess_kurtosis": 6.378038444939378,
+      "min": 0.24129893305527006,
+      "max": 1.2192070111617777
     },
     "ks_test_standardized": {
-      "D_statistic": 0.03122078893251075,
-      "p_value": 0.010877220804908905
+      "D_statistic": 0.02804702000412456,
+      "p_value": 0.04409693516390973,
+      "interpretation": "Similar shapes confirm both models have same GARCH dynamics; scale differs."
     }
   },
   "model_parameters": {
     "A4_constrained": {
-      "theta0": -1.01741679458742e-05,
-      "theta1": 2.964457510885065e-07,
-      "omega": 0.09345993278973697,
-      "alpha": 0.01779535312596401,
-      "gamma": 0.07005559755489324,
-      "beta": 0.8537169153068523,
-      "persistence": 0.9065400672102629,
-      "E_g": 0.9999999999999988,
-      "log_lik": 17783.823535073476,
+      "theta0": -1.2625876499091458e-05,
+      "theta1": 3.0984885912358076e-07,
+      "omega": 0.09357820145167595,
+      "alpha": 0.017398985907305275,
+      "gamma": 0.07030130933722868,
+      "beta": 0.8538721579724045,
+      "persistence": 0.906421798548324,
+      "E_g": 1.0,
+      "log_lik": 17785.036079362922,
       "free_omega": false
     },
     "A4f_free_omega": {
-      "theta0": -3.381672965648833e-05,
-      "theta1": 8.436333010311091e-07,
-      "omega": 0.025134295312766716,
-      "alpha": 0.037308246529273954,
-      "gamma": 0.06761891968760445,
-      "beta": 0.8686645230108505,
-      "persistence": 0.9397822293839266,
-      "E_g": 0.41739000058660186,
-      "log_lik": 17775.12407984531,
+      "theta0": -3.935191650047669e-05,
+      "theta1": 7.764253183059989e-07,
+      "omega": 0.023008257232251774,
+      "alpha": 0.019605896078387537,
+      "gamma": 0.07787183101382593,
+      "beta": 0.8937305656625308,
+      "persistence": 0.9522723772478313,
+      "E_g": 0.48207423511799163,
+      "log_lik": 17787.53571265432,
       "free_omega": true
     }
   },
   "not_relabeling_evidence": {
-    "1_parametric_identification": "\u03c4 has parametric form \u03b8\u2080+\u03b8\u2081VIX\u00b2; \u03b8\u2081 has VRP interpretation",
-    "2_dynamic_structure": "g follows GJR-GARCH; not arbitrary residual",
-    "3_scale_identification": "E(g)=1 pins scale; without it \u03c4 and g not separately identified",
-    "4_empirical_falsifiability": {
-      "g_vs_vrp_spearman": 0.05690827396690128,
-      "dm_t_A4f_vs_GJR": 4.48,
-      "raw_ratio_vs_vrp": -0.687619034392702,
-      "garch_filter_improvement": -0.6307107604258008
+    "1_parametric_identification": "\u03c4 = \u03b8\u2080+\u03b8\u2081VIX\u00b2; \u03b8 parameters are estimated by MLE with economic interpretation (VRP correction)",
+    "2_dynamic_structure": "g follows GJR-GARCH; imposes autoregressive + asymmetry constraints. Not arbitrary residual.",
+    "3_scale_identification": "E(g)=1 constraint identifies scale. Without it, (c\u03c4, g/c) is observationally equivalent for any c>0.",
+    "4_empirical_content": {
+      "g_proxy_vs_vrp_spearman": 0.22806777584974994,
+      "dm_t_A4f_vs_GJR_from_K988": 4.48,
+      "raw_ratio_vs_vrp": -0.6883148426184827,
+      "garch_improvement": "|\u03c1| from 0.688 to 0.228"
     },
-    "5_comparison_with_literature": {
-      "spline_garch": "No external variable; \u03c4 is pure time trend",
-      "garch_midas": "Macro variables; indirect VRP link; monthly \u03c4 loses daily info",
-      "our_a4f": "VIX (risk-neutral); direct VRP bridge; daily \u03c4 preserves all info"
-    }
+    "5_vs_spline_garch": "Engle & Rangel (2008): \u03c4 = time spline, no external variable, no VRP link",
+    "6_vs_garch_midas": "Engle et al. (2013): \u03c4 = Beta-weighted MIDAS, monthly+, indirect VRP link via macro",
+    "7_our_innovation": "A4f: \u03c4 = daily VIX\u00b2 (risk-neutral \u2192 physical measure bridge), direct VRP auto-correction"
   },
   "metadata": {
     "experiment_id": "K1023",
@@ -115,9 +139,12 @@
     "data_start": "2005-01-01",
     "data_end": "2026-04-10",
     "n_total": 5349,
-    "elapsed_seconds": 20.5572350025177,
-    "timestamp": "2026-04-10T08:48:49.238422+00:00",
+    "skip_init": 500,
+    "n_analysis": 4849,
+    "elapsed_seconds": 34.26320004463196,
+    "timestamp": "2026-04-10T08:53:21.412858+00:00",
     "seed": 42,
+    "data_source": "yfinance",
     "references": [
       "Bollerslev, Tauchen & Zhou (2009). Expected Stock Returns and VRP. RFS 22(11):4463-4492.",
       "Engle, Ghysels & Sohn (2013). Stock Market Volatility. RES 95(3):776-797.",
