@@ -1,0 +1,294 @@
+{
+  "experiment_id": "K1015",
+  "title": "VIX9D+VIX3M Dual-Factor A4f Model",
+  "date": "2026-04-10 14:34:30",
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance",
+    "period": "2011-01-03 to 2026-04-09",
+    "total_obs": 3839,
+    "oos_start": "2018-12-13",
+    "oos_obs": 1839,
+    "oos_period": "2018-12-13 to 2026-04-09"
+  },
+  "descriptive_stats": {
+    "mean_return": 0.000574,
+    "std_return": 0.012447,
+    "skewness": -0.536,
+    "kurtosis": 13.8342,
+    "vix9d_mean": 19.4,
+    "vix3m_mean": 22.24,
+    "slope_mean": -0.1501,
+    "slope_std": 0.1587
+  },
+  "models": {
+    "M1_A4f_VIX9D": {
+      "spec": "tau = theta0 + theta1 * VIX9D^2",
+      "distribution": "Student-t",
+      "QLIKE": -8.382674
+    },
+    "M2_A4f_VIX3M": {
+      "spec": "tau = theta0 + theta1 * VIX3M^2",
+      "distribution": "Student-t",
+      "QLIKE": -8.329025
+    },
+    "M3_A4f_Dual": {
+      "spec": "tau = theta0 + theta1 * VIX9D^2 + theta2 * VIX3M^2",
+      "distribution": "Student-t",
+      "QLIKE": -8.381938,
+      "theta2_degenerate": true,
+      "final_theta2": 0.0
+    },
+    "M4_A4f_Slope": {
+      "spec": "tau = theta0 + theta1 * VIX9D^2 + theta2 * (VIX9D/VIX3M - 1)^2",
+      "distribution": "Student-t",
+      "QLIKE": -8.37973,
+      "theta2_degenerate": true,
+      "final_theta2": 0.0
+    },
+    "M5_A4f_VIX": {
+      "spec": "tau = theta0 + theta1 * VIX^2",
+      "distribution": "Student-t",
+      "QLIKE": -8.350955
+    },
+    "M6_GJR_t": {
+      "spec": "GJR-GARCH(1,1)-t",
+      "QLIKE": -8.265577
+    }
+  },
+  "qlike_ranking": [
+    [
+      "M1: A4f-VIX9D",
+      -8.382674
+    ],
+    [
+      "M3: A4f-Dual",
+      -8.381938
+    ],
+    [
+      "M4: A4f-Slope",
+      -8.37973
+    ],
+    [
+      "M5: A4f-VIX",
+      -8.350955
+    ],
+    [
+      "M2: A4f-VIX3M",
+      -8.329025
+    ],
+    [
+      "M6: GJR-t",
+      -8.265577
+    ]
+  ],
+  "dm_tests": {
+    "M1 vs M3 (single vs dual)": {
+      "t_stat": -0.298,
+      "p_value": 0.766,
+      "harvey_significant": "False"
+    },
+    "M1 vs M4 (single vs slope)": {
+      "t_stat": -1.333,
+      "p_value": 0.1827,
+      "harvey_significant": "False"
+    },
+    "M3 vs M6 (dual vs GJR)": {
+      "t_stat": -6.298,
+      "p_value": 0.0,
+      "harvey_significant": "True"
+    },
+    "M1 vs M2 (VIX9D vs VIX3M)": {
+      "t_stat": -5.953,
+      "p_value": 0.0,
+      "harvey_significant": "True"
+    },
+    "M1 vs M5 (VIX9D vs VIX)": {
+      "t_stat": -4.808,
+      "p_value": 0.0,
+      "harvey_significant": "True"
+    },
+    "M1 vs M6 (VIX9D vs GJR)": {
+      "t_stat": -6.127,
+      "p_value": 0.0,
+      "harvey_significant": "True"
+    },
+    "M3 vs M1 (dual vs single)": {
+      "t_stat": 0.298,
+      "p_value": 0.766,
+      "harvey_significant": "False"
+    },
+    "M4 vs M1 (slope vs single)": {
+      "t_stat": 1.333,
+      "p_value": 0.1827,
+      "harvey_significant": "False"
+    }
+  },
+  "var_es_2_5pct": {
+    "M1: A4f-VIX9D": {
+      "alpha": 0.025,
+      "T": 1839,
+      "violations": 47,
+      "violation_rate": 2.56,
+      "expected_rate": 2.5,
+      "UC_stat": 0.023,
+      "UC_p": 0.8788,
+      "CC_stat": 0.038,
+      "CC_p": 0.8459,
+      "DQ_stat": 0.07,
+      "DQ_p": 0.9952,
+      "Basel": "GREEN",
+      "ES_Z1": 2.0921,
+      "ES_Z1_p": 0.523,
+      "ES_Z2": 0.4537,
+      "ES_Z2_p": 0.542,
+      "scorecard": "6/6"
+    },
+    "M2: A4f-VIX3M": {
+      "alpha": 0.025,
+      "T": 1839,
+      "violations": 50,
+      "violation_rate": 2.72,
+      "expected_rate": 2.5,
+      "UC_stat": 0.352,
+      "UC_p": 0.5532,
+      "CC_stat": 0.111,
+      "CC_p": 0.7395,
+      "DQ_stat": 1.857,
+      "DQ_p": 0.6027,
+      "Basel": "GREEN",
+      "ES_Z1": 2.1625,
+      "ES_Z1_p": 0.515,
+      "ES_Z2": 0.4287,
+      "ES_Z2_p": 0.533,
+      "scorecard": "6/6"
+    },
+    "M3: A4f-Dual": {
+      "alpha": 0.025,
+      "T": 1839,
+      "violations": 49,
+      "violation_rate": 2.66,
+      "expected_rate": 2.5,
+      "UC_stat": 0.2,
+      "UC_p": 0.6548,
+      "CC_stat": 0.082,
+      "CC_p": 0.7743,
+      "DQ_stat": 1.201,
+      "DQ_p": 0.7527,
+      "Basel": "GREEN",
+      "ES_Z1": 2.1365,
+      "ES_Z1_p": 0.513,
+      "ES_Z2": 0.4603,
+      "ES_Z2_p": 0.541,
+      "scorecard": "6/6"
+    },
+    "M4: A4f-Slope": {
+      "alpha": 0.025,
+      "T": 1839,
+      "violations": 49,
+      "violation_rate": 2.66,
+      "expected_rate": 2.5,
+      "UC_stat": 0.2,
+      "UC_p": 0.6548,
+      "CC_stat": 0.082,
+      "CC_p": 0.7743,
+      "DQ_stat": 1.013,
+      "DQ_p": 0.798,
+      "Basel": "GREEN",
+      "ES_Z1": 2.1384,
+      "ES_Z1_p": 0.513,
+      "ES_Z2": 0.454,
+      "ES_Z2_p": 0.54,
+      "scorecard": "6/6"
+    },
+    "M5: A4f-VIX": {
+      "alpha": 0.025,
+      "T": 1839,
+      "violations": 52,
+      "violation_rate": 2.83,
+      "expected_rate": 2.5,
+      "UC_stat": 0.777,
+      "UC_p": 0.3779,
+      "CC_stat": 0.179,
+      "CC_p": 0.6721,
+      "DQ_stat": 1.507,
+      "DQ_p": 0.6806,
+      "Basel": "GREEN",
+      "ES_Z1": 2.1853,
+      "ES_Z1_p": 0.516,
+      "ES_Z2": 0.4405,
+      "ES_Z2_p": 0.538,
+      "scorecard": "6/6"
+    },
+    "M6: GJR-t": {
+      "alpha": 0.025,
+      "T": 1839,
+      "violations": 62,
+      "violation_rate": 3.37,
+      "expected_rate": 2.5,
+      "UC_stat": 5.174,
+      "UC_p": 0.0229,
+      "CC_stat": 0.004,
+      "CC_p": 0.9474,
+      "DQ_stat": 9.441,
+      "DQ_p": 0.024,
+      "Basel": "GREEN",
+      "ES_Z1": 2.4416,
+      "ES_Z1_p": 0.503,
+      "ES_Z2": 0.4259,
+      "ES_Z2_p": 0.539,
+      "scorecard": "4/6"
+    }
+  },
+  "parameter_check": {
+    "M3_dual_final": {
+      "theta0": -9e-06,
+      "theta1_VIX9D": 0.0018,
+      "theta2_VIX3M": 0.0,
+      "omega": 0.147993,
+      "alpha": 0.0,
+      "gamma": 0.0633,
+      "beta": 0.9006,
+      "df": 8.0,
+      "persistence": 0.9322,
+      "converged": true
+    },
+    "M4_slope_final": {
+      "theta0": -8e-06,
+      "theta1_VIX9D": 0.0017,
+      "theta2_slope": 0.0,
+      "omega": 0.156618,
+      "alpha": 0.0,
+      "gamma": 0.0638,
+      "beta": 0.8995,
+      "df": 8.0,
+      "persistence": 0.9315,
+      "converged": true
+    }
+  },
+  "conclusions": {
+    "best_model": "M1: A4f-VIX9D",
+    "best_qlike": -8.382674057613311,
+    "dual_adds_value": false,
+    "slope_adds_value": false
+  },
+  "methodology": {
+    "window": 2000,
+    "refit_every": 63,
+    "evaluation_target": "r^2 (Patton 2011 proxy-robust)",
+    "dm_threshold": "Harvey (2016) |t| > 3.0",
+    "var_alpha": 0.025,
+    "es_method": "Acerbi-Szekely (2014)",
+    "seed": 42
+  },
+  "references": [
+    "Engle & Rangel (2008) - Spline-GARCH",
+    "Patton (2011) - QLIKE loss proxy-robust ranking",
+    "Kupiec (1995) - VaR unconditional coverage",
+    "Christoffersen (1998) - VaR conditional coverage",
+    "Engle & Manganelli (2004) - DQ test",
+    "Acerbi & Szekely (2014) - ES backtesting",
+    "Harvey (2016) - Multiple testing threshold t>3.0"
+  ],
+  "runtime_seconds": 1519.8
+}
