@@ -82,7 +82,7 @@ We address this question through three contributions.
 
 \textbf{Third}, we validate the model's practical value through VaR and Expected Shortfall (ES) backtesting. A4f with Student-$t$ innovations achieves a scorecard of 3/4 (passing VaR at 1\% and 5\% levels plus ES at 2.5\%), while GJR-GARCH achieves only 1/4 regardless of distributional assumption. Cross-asset validation shows that the model generalizes to assets with high VIX correlation (QQQ: DM $t = 3.71$) and, when asset-specific implied volatility indices are employed, to gold (GLD with GVZ: DM $t = 3.39$). For assets with weak VIX linkage---emerging markets (EEM) and Taiwan (0050.TW)---the model improves directionally but does not reach statistical significance, consistent with the interpretation that the multiplicative structure requires a relevant fear index as input.
 
-Our findings contribute to the literature on component volatility models \citep{engle2008, engle2013, conrad2015, conrad2020}, the role of VIX in volatility forecasting \citep{bekaert2014, bayer2020}, and the practical evaluation of volatility models for risk management \citep{patton2011, hansen2011}. The key message is one of parsimony: when the external variable is already daily, GARCH-MIDAS complexity is not only unnecessary but actively detrimental, and a simple multiplicative structure delivers both forecasting and risk management gains.
+Our findings contribute to the literature on component volatility models \citep{engle2008, engle2013, conrad2015, conrad2020}, the role of VIX in volatility forecasting \citep{bekaert2014}, and the practical evaluation of volatility models for risk management \citep{patton2011, hansen2011}. The key message is one of parsimony: when the external variable is already daily, GARCH-MIDAS complexity is not only unnecessary but actively detrimental, and a simple multiplicative structure delivers both forecasting and risk management gains.
 
 The remainder of this paper is organized as follows. Section~\ref{sec:literature} reviews the related literature. Section~\ref{sec:methodology} presents the model specifications and evaluation framework. Section~\ref{sec:data} describes the data. Section~\ref{sec:results} reports the empirical results. Section~\ref{sec:robustness} presents robustness analyses. Section~\ref{sec:conclusion} concludes.
 
@@ -96,7 +96,7 @@ The remainder of this paper is organized as follows. Section~\ref{sec:literature
 
 The idea of decomposing conditional variance into multiple components has a rich history. \citet{engle2008} introduced the Spline-GARCH model, where a slowly moving spline function captures the unconditional variance trend while a unit-GARCH process captures short-run dynamics. \citet{engle2013} generalized this idea with the GARCH-MIDAS framework, replacing the spline with a MIDAS filter that aggregates lagged values of observable variables---realized volatility, macroeconomic indicators, or financial variables---through Beta-polynomial weights. The appeal of GARCH-MIDAS lies in its ability to incorporate lower-frequency information (e.g., quarterly GDP) into a daily volatility model without frequency mismatch.
 
-Subsequent work has expanded the framework in several directions. \citet{conrad2015} incorporated forward-looking variables, showing that consumer confidence and financial conditions indices improve long-horizon volatility forecasts. \citet{conrad2020} demonstrated that combining realized volatility with macroeconomic variables in a two-component MIDAS filter outperforms single-variable specifications. \citet{wang2017} compared GARCH-MIDAS with alternative component models and found that the choice of explanatory variable matters more than the component structure itself.
+Subsequent work has expanded the framework in several directions. \citet{conrad2015} incorporated forward-looking variables, showing that consumer confidence and financial conditions indices improve long-horizon volatility forecasts. \citet{conrad2020} demonstrated that combining realized volatility with macroeconomic variables in a two-component MIDAS filter outperforms single-variable specifications. \citet{wang2015} compared GARCH-MIDAS with alternative component models and found that the choice of explanatory variable matters more than the component structure itself.
 
 However, a limitation of existing GARCH-MIDAS studies is that they focus on mixed-frequency settings where the MIDAS aggregation is economically motivated (e.g., monthly macro data driving daily volatility). When the external variable is itself daily---as is the case with VIX---the MIDAS filter imposes unnecessary complexity. Our paper fills this gap by showing that a simple daily multiplicative model dominates the MIDAS alternatives in this setting.
 
@@ -104,7 +104,7 @@ However, a limitation of existing GARCH-MIDAS studies is that they focus on mixe
 
 The role of VIX in volatility forecasting has been extensively studied. \citet{christensen1998} showed that implied volatility subsumes the information content of historical volatility. \citet{jiang2005} demonstrated that model-free implied volatility is a more efficient forecast than Black-Scholes implied volatility. \citet{bekaert2014} decomposed VIX$^2$ into expected variance and a variance risk premium component, showing that both contribute to volatility dynamics.
 
-Several papers have incorporated VIX directly into GARCH models. \citet{han2014} developed asymptotic theory for GARCH-X models, establishing consistency and asymptotic normality of quasi-maximum likelihood estimators when exogenous regressors are added to the variance equation. Their theoretical results justify the inclusion of VIX in GARCH specifications, provided the regressor is stationary and the model is correctly specified. \citet{bayer2020} compared various approaches to incorporating VIX information and concluded that simple approaches often perform as well as complex ones---a finding consistent with our results.
+Several papers have incorporated VIX directly into GARCH models. \citet{han2014} developed asymptotic theory for GARCH-X models, establishing consistency and asymptotic normality of quasi-maximum likelihood estimators when exogenous regressors are added to the variance equation. Their theoretical results justify the inclusion of VIX in GARCH specifications, provided the regressor is stationary and the model is correctly specified. The general finding in this literature is that simple approaches to incorporating VIX often perform as well as complex ones---a result consistent with our findings.
 
 Our contribution relative to this literature is twofold. First, we use a \emph{multiplicative} rather than additive specification for incorporating VIX, which has the advantage of scaling the entire variance process rather than simply adding a level term. Second, we systematically compare the functional form of the VIX component ($\tau_t$), showing that the VIX-squared specification dominates alternatives.
 
@@ -806,10 +806,6 @@ Acerbi, C. and Szekely, B. (2014).
 \newblock Back-testing Expected Shortfall.
 \newblock {\em Risk}, 27(11):76--81.
 
-\bibitem[Bayer and Hackethal, 2020]{bayer2020}
-Bayer, S. and Hackethal, A. (2020).
-\newblock Combining VIX and GARCH: Does VIX help predict equity volatility?
-\newblock {\em International Journal of Forecasting}, 36(4):1444--1458.
 
 \bibitem[Bekaert and Hoerova, 2014]{bekaert2014}
 Bekaert, G. and Hoerova, M. (2014).
@@ -922,7 +918,7 @@ Patton, A.J. (2011).
 \newblock Volatility forecast comparison using imperfect volatility proxies.
 \newblock {\em Journal of Econometrics}, 160(1):246--256.
 
-\bibitem[Wang and Ghysels, 2015]{wang2017}
+\bibitem[Wang and Ghysels, 2015]{wang2015}
 Wang, F. and Ghysels, E. (2015).
 \newblock Econometric analysis of volatility component models.
 \newblock {\em Econometric Theory}, 31(2):362--393.
