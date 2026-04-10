@@ -23107,5 +23107,25 @@
     "data_source": "yfinance",
     "confidence": 0.95,
     "created_at": "2026-04-10T20:50:53.319960+00:00"
+  },
+  {
+    "id": "know_20260410224942_k1044",
+    "title": "K1044: Gamma-VT Causal Panel — K53 r=0.564 不可重現（ρ=-0.209 NS），因果鏈斷裂",
+    "content": "[提出: Claude, 執行: Claude] K1044 用 13 資產 panel 驗證 K53 的 gamma-VT alpha 相關。結果：Spearman ρ=-0.209（p=0.494），**方向反轉且不顯著**。Bootstrap 95% CI [-0.782, +0.427] 包含零。因果鏈分解：gamma→VIX-return corr 很強（ρ=-0.879, p=0.0001）但這是 mechanical——高 gamma equity 與 VIX 共動。VIX-return corr→VT alpha 不顯著（ρ=0.357, p=0.23）。因果鏈在第二環斷裂。LOO 分析：TLT(+0.216) 和 BTC(-0.190) 影響大。結論：gamma 決定 VT 機制（trend-following vs contrarian），但不決定 VT 效果（Sharpe 改善）。推翻 K53 的暗示性結論。K53 N=22 可能有 small-sample inflation。",
+    "tags": [
+      "gamma",
+      "VT",
+      "causal",
+      "panel",
+      "Spearman",
+      "K53 overturned",
+      "mechanism",
+      "cross-asset"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1044",
+    "data_source": "yfinance",
+    "confidence": 0.9,
+    "created_at": "2026-04-10T22:49:42.369117+00:00"
   }
 ]

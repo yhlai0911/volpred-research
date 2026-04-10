@@ -182,7 +182,7 @@
 - DCA + VT：**K59 DCA 用 24/VIX**，**K70 DCA 50/50 幾乎不需 VT（防禦階層）**
 - Covered Call：**K72 XYLD + VT 不改善 50/50**
 - **VaR-targeting**（K44: rescaled σ-targeting，非新 alpha 但提供直觀風險選擇框架）
-- **VT alpha = trend following**（K46→K53→K79: r=0.564, N=22, threshold-robust）
+- **VT alpha = trend following**（K46→K53→K79: r=0.564, N=22, threshold-robust）⚠️ **K1044 修正**：13 資產 panel ρ=-0.209 (NS)，gamma-VT alpha 相關不可重現。Gamma 決定 VT 機制但不決定效果
 - **VT 雙重機制**（K49: Sharpe 來自 TSMOM, MDD 來自 VIX position sizing, 90-97% 跨 5 資產）
 - **VVIX/SKEW/VIX3M overlay**（K43: 全部 NULL，方向關閉）
 - **利率 regime**（K62: 高利率保險費僅 1.8%/yr vs 低利率 6.10%）
