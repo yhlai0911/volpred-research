@@ -1,0 +1,71 @@
+{
+  "report_type": "weekly",
+  "week_range": "2026-04-10 → 2026-04-17",
+  "total_commits": 64,
+  "total_estimated_tokens": 1112484,
+  "daily_breakdown": {
+    "2026-04-10": {
+      "commits": 64,
+      "estimated_tokens": 1665644,
+      "weekday": "Friday"
+    }
+  },
+  "categories": {
+    "experiment": {
+      "emoji": "🔬",
+      "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
+      "commits": 4,
+      "lines_changed": 196465,
+      "estimated_tokens": 540000,
+      "percentage": 48.5
+    },
+    "other": {
+      "emoji": "❔",
+      "description": "其他",
+      "commits": 49,
+      "lines_changed": 77402,
+      "estimated_tokens": 407608,
+      "percentage": 36.6
+    },
+    "latex_content_fix": {
+      "emoji": "🔧",
+      "description": "LaTeX/內容批量修復（讀寫大型 JSON）",
+      "commits": 2,
+      "lines_changed": 3208,
+      "estimated_tokens": 117824,
+      "percentage": 10.6
+    },
+    "paper_review": {
+      "emoji": "📝",
+      "description": "論文審查/修訂（讀寫完整 LaTeX，多輪 review）",
+      "commits": 1,
+      "lines_changed": 10,
+      "estimated_tokens": 16320,
+      "percentage": 1.5
+    },
+    "research_program": {
+      "emoji": "📋",
+      "description": "研究計畫/規範更新",
+      "commits": 6,
+      "lines_changed": 349,
+      "estimated_tokens": 13396,
+      "percentage": 1.2
+    },
+    "knowledge_index": {
+      "emoji": "📚",
+      "description": "知識索引建立/更新",
+      "commits": 1,
+      "lines_changed": 863,
+      "estimated_tokens": 10904,
+      "percentage": 1.0
+    },
+    "ops_patrol": {
+      "emoji": "🛡️",
+      "description": "平台巡檢",
+      "commits": 1,
+      "lines_changed": 36,
+      "estimated_tokens": 6432,
+      "percentage": 0.6
+    }
+  }
+}
