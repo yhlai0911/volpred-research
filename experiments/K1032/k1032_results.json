@@ -1,0 +1,361 @@
+{
+  "experiment_id": "K1032",
+  "title": "A4f Cross-Market Validation: Japanese Equity (N225 + EWJ)",
+  "status": "completed",
+  "timestamp": "2026-04-10T15:08:31.120652+00:00",
+  "elapsed_seconds": 1154.8,
+  "seed": 42,
+  "config": {
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-10",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "df_fixed": 8,
+    "rv_window": 20,
+    "n225_vix_lag": 1,
+    "ewj_vix_lag": 0,
+    "note": "Japanese VIX unavailable from yfinance; used own 20d RV as local fear proxy. N225 uses VIX lag=1 (previous US close), EWJ uses lag=0 (same-day US)."
+  },
+  "assets": {
+    "^N225": {
+      "status": "completed",
+      "label": "Nikkei 225 Index",
+      "vix_lag": 1,
+      "descriptive_stats": {
+        "n_total": 5183,
+        "n_oos": 1771,
+        "data_start": "2005-02-02",
+        "data_end": "2026-04-09",
+        "oos_mean_return_ann": 0.14613583642150088,
+        "oos_vol_ann": 0.2168721989408812,
+        "oos_skewness": -0.3207796490791884,
+        "oos_kurtosis": 9.730374566842379,
+        "corr_vix_r2_oos": 0.25967327785181643,
+        "corr_rv20_r2_oos": 0.30542924016898426,
+        "corr_vix_rv20_oos": 0.4598845128661447,
+        "vix_lag_used": 1
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.5222823119368627,
+          "spearman": 0.20775084990099185,
+          "n_valid": 1771,
+          "time_s": 58.7
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.5266882818191931,
+          "spearman": 0.2129621407867639,
+          "n_valid": 1771,
+          "time_s": 222.3,
+          "dm_vs_gjr_t": 0.3374,
+          "dm_vs_gjr_p": 0.7358,
+          "sig_harvey": false
+        },
+        "A4f-RV20-t": {
+          "qlike": 1.5191557948304375,
+          "spearman": 0.21161873736285156,
+          "n_valid": 1771,
+          "time_s": 310.2,
+          "dm_vs_gjr_t": -0.8756,
+          "dm_vs_gjr_p": 0.3814,
+          "sig_harvey": false,
+          "dm_vs_a4f_vix_t": -0.6054,
+          "dm_vs_a4f_vix_p": 0.545
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": 0.3374,
+          "dm_p": 0.7358,
+          "significant_harvey": false
+        },
+        "A4f_RV20_vs_GJR": {
+          "dm_t": -0.8756,
+          "dm_p": 0.3814,
+          "significant_harvey": false
+        },
+        "A4f_RV20_vs_A4f_VIX": {
+          "dm_t": -0.6054,
+          "dm_p": 0.545
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": -0.29,
+        "A4f_RV20_vs_GJR": 0.21
+      },
+      "var_es_backtesting": {
+        "VaR_2.5%": {
+          "GJR": {
+            "violation_rate": 0.03557312252964427,
+            "kupiec_p": 0.00730732430827552,
+            "pass": "FAIL"
+          },
+          "A4f_VIX": {
+            "violation_rate": 0.02766798418972332,
+            "kupiec_p": 0.47943312853749165,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "violation_rate": 0.03162055335968379,
+            "kupiec_p": 0.08629708030391436,
+            "pass": "PASS"
+          }
+        },
+        "ES_2.5%": {
+          "GJR": {
+            "z_stat": 2.465203372485675,
+            "p_value": 0.9931532248110215,
+            "pass": "PASS"
+          },
+          "A4f_VIX": {
+            "z_stat": 2.1797605690765547,
+            "p_value": 0.9853623929009306,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "z_stat": 2.324313623292667,
+            "p_value": 0.9899456544067832,
+            "pass": "PASS"
+          }
+        },
+        "VaR_1%": {
+          "GJR": {
+            "violation_rate": 0.015245623941276116,
+            "kupiec_p": 0.0394470300641403,
+            "pass": "FAIL"
+          },
+          "A4f_VIX": {
+            "violation_rate": 0.014116318464144552,
+            "kupiec_p": 0.10112747667122024,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "violation_rate": 0.014680971202710334,
+            "kupiec_p": 0.06419494897615752,
+            "pass": "PASS"
+          }
+        },
+        "ES_1%": {
+          "GJR": {
+            "z_stat": 2.5713485662781967,
+            "p_value": 0.9949348345741944,
+            "pass": "PASS"
+          },
+          "A4f_VIX": {
+            "z_stat": 2.4662997805040954,
+            "p_value": 0.9931741486887221,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "z_stat": 2.5174944993454798,
+            "p_value": 0.9940903592467033,
+            "pass": "PASS"
+          }
+        }
+      },
+      "regime_analysis": {
+        "Low (<20)": {
+          "n": 1077,
+          "qlike_gjr": 1.5612384334499991,
+          "qlike_a4f_vix": 1.5583033092360594,
+          "qlike_a4f_rv20": 1.5609234322145085,
+          "dm_t_vix_vs_gjr": -0.2152181390099962
+        },
+        "Med (20-30)": {
+          "n": 549,
+          "qlike_gjr": 1.4885965330253197,
+          "qlike_a4f_vix": 1.522948995054637,
+          "qlike_a4f_rv20": 1.4864483516481586,
+          "dm_t_vix_vs_gjr": 1.1194890200386272
+        },
+        "High (>30)": {
+          "n": 145,
+          "qlike_gjr": 1.3604736895423037,
+          "qlike_a4f_vix": 1.3060226535831692,
+          "qlike_a4f_rv20": 1.3327602144471735,
+          "dm_t_vix_vs_gjr": -1.0422161224866784
+        }
+      }
+    },
+    "EWJ": {
+      "status": "completed",
+      "label": "iShares MSCI Japan ETF (US-traded)",
+      "vix_lag": 0,
+      "descriptive_stats": {
+        "n_total": 5330,
+        "n_oos": 1827,
+        "data_start": "2005-02-01",
+        "data_end": "2026-04-09",
+        "oos_mean_return_ann": 0.09760387813962344,
+        "oos_vol_ann": 0.18614140152513792,
+        "oos_skewness": -0.42580426710951674,
+        "oos_kurtosis": 6.961611585112324,
+        "corr_vix_r2_oos": 0.4004828784441899,
+        "corr_rv20_r2_oos": 0.3579540051940421,
+        "corr_vix_rv20_oos": 0.6728681947023629,
+        "vix_lag_used": 0
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.4501199349022633,
+          "spearman": 0.2150260044570509,
+          "n_valid": 1827,
+          "time_s": 63.0
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.4184428327590028,
+          "spearman": 0.23014609263210525,
+          "n_valid": 1827,
+          "time_s": 158.9,
+          "dm_vs_gjr_t": -2.3366,
+          "dm_vs_gjr_p": 0.0196,
+          "sig_harvey": false
+        },
+        "A4f-RV20-t": {
+          "qlike": 1.45104188735014,
+          "spearman": 0.2149187493372991,
+          "n_valid": 1827,
+          "time_s": 337.7,
+          "dm_vs_gjr_t": 0.6911,
+          "dm_vs_gjr_p": 0.4896,
+          "sig_harvey": false,
+          "dm_vs_a4f_vix_t": 2.3969,
+          "dm_vs_a4f_vix_p": 0.0166
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -2.3366,
+          "dm_p": 0.0196,
+          "significant_harvey": false
+        },
+        "A4f_RV20_vs_GJR": {
+          "dm_t": 0.6911,
+          "dm_p": 0.4896,
+          "significant_harvey": false
+        },
+        "A4f_RV20_vs_A4f_VIX": {
+          "dm_t": 2.3969,
+          "dm_p": 0.0166
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 2.18,
+        "A4f_RV20_vs_GJR": -0.06
+      },
+      "var_es_backtesting": {
+        "VaR_2.5%": {
+          "GJR": {
+            "violation_rate": 0.037219485495347565,
+            "kupiec_p": 0.0017902357785445355,
+            "pass": "FAIL"
+          },
+          "A4f_VIX": {
+            "violation_rate": 0.029009304871373837,
+            "kupiec_p": 0.2842434250403383,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "violation_rate": 0.037219485495347565,
+            "kupiec_p": 0.0017902357785445355,
+            "pass": "FAIL"
+          }
+        },
+        "ES_2.5%": {
+          "GJR": {
+            "z_stat": 2.5216990662405365,
+            "p_value": 0.9941605213272512,
+            "pass": "PASS"
+          },
+          "A4f_VIX": {
+            "z_stat": 2.1650535155852264,
+            "p_value": 0.9848082063887545,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "z_stat": 2.5254932897343534,
+            "p_value": 0.9942232006058536,
+            "pass": "PASS"
+          }
+        },
+        "VaR_1%": {
+          "GJR": {
+            "violation_rate": 0.016420361247947456,
+            "kupiec_p": 0.011590499547319943,
+            "pass": "FAIL"
+          },
+          "A4f_VIX": {
+            "violation_rate": 0.013683634373289545,
+            "kupiec_p": 0.13397369550642213,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "violation_rate": 0.016420361247947456,
+            "kupiec_p": 0.011590499547319943,
+            "pass": "FAIL"
+          }
+        },
+        "ES_1%": {
+          "GJR": {
+            "z_stat": 2.672684960363301,
+            "p_value": 0.996237655998553,
+            "pass": "PASS"
+          },
+          "A4f_VIX": {
+            "z_stat": 2.303838184174471,
+            "p_value": 0.989384135610294,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "z_stat": 2.677908275727477,
+            "p_value": 0.9962958248536371,
+            "pass": "PASS"
+          }
+        }
+      },
+      "regime_analysis": {
+        "Low (<20)": {
+          "n": 1109,
+          "qlike_gjr": 1.3400475386832467,
+          "qlike_a4f_vix": 1.3239774329866822,
+          "qlike_a4f_rv20": 1.341556365557375,
+          "dm_t_vix_vs_gjr": -2.039750461690126
+        },
+        "Med (20-30)": {
+          "n": 569,
+          "qlike_gjr": 1.658178423038782,
+          "qlike_a4f_vix": 1.62593335776071,
+          "qlike_a4f_rv20": 1.6563818275446816,
+          "dm_t_vix_vs_gjr": -0.9935379415587307
+        },
+        "High (>30)": {
+          "n": 149,
+          "qlike_gjr": 1.4710767092097365,
+          "qlike_a4f_vix": 1.3261358015383837,
+          "qlike_a4f_rv20": 1.4780214778543521,
+          "dm_t_vix_vs_gjr": -1.517847657597995
+        }
+      }
+    }
+  },
+  "summary": {
+    "n_completed": 2,
+    "n_vix_sig_harvey": 0,
+    "n_rv20_sig_harvey": 0,
+    "conclusion": "A4f-VIX does NOT significantly improve for N225 (DM t=0.337); A4f-RV20 not significant for N225 (DM t=-0.876); A4f-VIX marginally improves for EWJ (DM t=-2.337, below Harvey threshold); A4f-RV20 not significant for EWJ (DM t=0.691)"
+  },
+  "data_source": "yfinance: ^N225, EWJ, ^VIX",
+  "references": [
+    "Engle, Ghysels & Sohn (2013). Stock Market Volatility and Macroeconomic Fundamentals. RES 95(3):776-797.",
+    "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256.",
+    "Harvey et al. (2016). t > 3.0 threshold for multiple testing.",
+    "Kupiec (1995). Techniques for Verifying the Accuracy of Risk Measurement Models.",
+    "Acerbi & Szekely (2014). Back-testing Expected Shortfall.",
+    "K988: A4f champion for SPY (DM t=+4.48)",
+    "K994: Cross-asset (QQQ pass, others not sig with US VIX)",
+    "K997: Local fear indices (GLD+GVZ pass)",
+    "K1022: Cross-asset robustness with Student-t df=8",
+    "K1030: European A4f-VIX DM t=-3.64/-3.45 (2/2 sig)"
+  ]
+}
