@@ -4,6 +4,7 @@
 
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
+| 2026-04-09 | 數據收集不完整 | FRED 停 23 天、VIXTWN DNS 失敗、QQQ/EEM/N225/VIX3M 不在收集器中 | `collect_us_data.py` 只收 4 個 ticker，FRED 完全沒自動化，`collect_5min_data.py` 不接受命令行參數 | (1) `collect_us_data.py` 擴充到 8 ticker + 週一 FRED 23 指標 (2) `collect_5min_data.py` 加 CLI 參數+ticker 格式修正 (3) 更新 CLAUDE.md 文檔。教訓：**新增研究用到的資產時，必須同步加入收集腳本+crontab** |
 | 2026-03-16 | Thinking page crash | experiment_ids undefined → 頁面閃退 | experiment_ids 欄位在部分 entry 不存在 | 加 optional chaining `?.` + `&&` guard |
 | 2026-03-16 | Feed 文章缺 content | 網頁顯示空白文章 | `record_and_publish.py` 只用 `--thinking` 當 content | 個別檔案 + feed.json 都要有完整 Markdown content |
 | 2026-03-16 | Citation errors | 論文引用 6 處錯誤 | Cederburg fabricated, Kim wrong, etc. | `/citation-verifier` + WebSearch 驗證每筆引用 |
@@ -272,3 +273,32 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **「沒事做」是不存在的** — research_program.md 是北極星，永遠有未完成項目
 - **Cron prompt 要具體到操作步驟**，不能只是「繼續研究」這種模糊指令
 - **流程完整性**：實驗 → 記錄 → 衍生方向 → archive → 下一個。少一步就會斷鏈
+
+---
+
+## 2026-04-09: 文章 tags 再次遺失（文章存在，但 article_tags 沒寫入）
+
+### 問題
+從 `mile_4cb24c36` 開始，多篇新文章在網站文章頁不再顯示既有 tags；前一篇 `mile_60c48d4c` 仍正常。
+
+### 現象
+- `storage/reports/<id>.json` 與通知內容都有 tags
+- Supabase `articles` 表已有文章列，`article_tags` 卻是空的
+- 前端單篇頁面完全依賴 `article_tags` join table，沒有關聯就不會顯示 tags
+
+### 根因
+1. `scripts/supabase_sync.py` 的 `_get_tag_ids()` 把 `tags.id` 當成 `str` 處理，但 DB schema 裡 `tags.id` 是 `INT`
+2. 因為型別不符，tag id 查詢結果全部被丟掉，`article_tags` rows 永遠組不出來
+3. `_sync_article_tags()` 外層又用 `except: pass` 靜默吞錯，所以發文看似成功，實際上 tags 已漏寫
+4. 另外，`frontend-v2-fix/src/app/api/sync/[...path]/route.ts` 的遠端 sync 只 upsert `articles`，原本完全沒同步 `article_tags`
+
+### 解決
+1. `scripts/supabase_sync.py`：改為接受 `INT` tag id，並保留數字字串 fallback
+2. `scripts/supabase_sync.py`：tag sync 失敗時改為明確 log warning，不再靜默吞掉
+3. `frontend-v2-fix/src/app/api/sync/[...path]/route.ts`：補上 `tags`/`article_tags` 同步
+4. 用正式 `sync_article()` 流程重跑受影響的最近 9 篇文章，補回缺失的 `article_tags`
+
+### 教訓
+- **Schema 型別要跟同步碼一致**。`UUID`/`INT`/`TEXT` 任何一個判斷寫錯，join table 會無聲失效
+- **禁止靜默吞錯**。文章主體寫進去但 tags 沒寫進去，比整體失敗更危險，因為它會假裝成功
+- **遠端 sync API 與本地 sync 腳本必須等價**。不能一條路同步 article，另一條路忘了同步 article_tags

@@ -105,9 +105,9 @@ def main():
     print(f"=== VIXTWN Daily Collector: {now.strftime('%Y-%m-%d')} ===")
     print(f"  Existing records: {len(existing)}")
 
-    # Fetch last 4 months (TAIFEX keeps ~3-4 months)
+    # Fetch last 6 months (TAIFEX keeps ~3-4 months, but try wider to be safe)
     months_to_fetch = []
-    for delta in range(4):
+    for delta in range(6):
         m = now.month - delta
         y = now.year
         if m <= 0:

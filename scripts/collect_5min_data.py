@@ -18,37 +18,19 @@ import pandas as pd
 import yfinance as yf
 
 
+def _safe_ticker(ticker):
+    """Convert ticker to filesystem-safe name (e.g., 0050.TW -> 0050_TW)."""
+    return ticker.replace('.', '_')
+
+
 def _detect_gap_days(ticker, output_dir):
-    """Detect how many days back we need to fetch based on existing files.
+    """Always fetch max window (59 days) — expanding window strategy.
 
-    Checks two conditions:
-    1. Gap since latest file (e.g. system was down for a few days)
-    2. Coverage start too recent (e.g. only 7 days of data when 59 are possible)
+    yfinance only keeps ~60 days of 5-min data. If we miss a day, it's gone forever.
+    So we always request the full 59-day window and skip files we already have.
+    The cost is one slightly larger API call; the benefit is zero data loss risk.
     """
-    pattern = f"{ticker}_5min_*.csv"
-    existing = sorted(output_dir.glob(pattern))
-    if not existing:
-        return 59  # No data at all — fetch max (yfinance 5-min limit ~60 days)
-    today = datetime.now().date()
-    try:
-        # Check gap since latest file
-        latest_str = existing[-1].stem.split("_5min_")[-1]
-        latest_date = datetime.strptime(latest_str, "%Y-%m-%d").date()
-        gap_latest = (today - latest_date).days
-
-        # Check if earliest file is much newer than 59 days ago (incomplete backfill)
-        earliest_str = existing[0].stem.split("_5min_")[-1]
-        earliest_date = datetime.strptime(earliest_str, "%Y-%m-%d").date()
-        gap_earliest = (today - earliest_date).days
-
-        # If we have less than ~40 trading days and could fetch more, do a full backfill
-        if gap_earliest < 55 and len(existing) < 40:
-            return 59
-
-        # Otherwise just fill the gap since latest file
-        return min(max(gap_latest + 2, 7), 59)
-    except ValueError:
-        return 59
+    return 59
 
 
 def collect_5min(ticker='SPY', days_back=None):
@@ -76,8 +58,9 @@ def collect_5min(ticker='SPY', days_back=None):
         return
 
     # Save each trading day as separate file
+    safe = _safe_ticker(ticker)
     for date, group in data.groupby(data.index.date):
-        filename = output_dir / f"{ticker}_5min_{date}.csv"
+        filename = output_dir / f"{safe}_5min_{date}.csv"
         if not filename.exists():
             group.to_csv(filename)
             print(f"  Saved {filename.name} ({len(group)} bars)")
@@ -91,7 +74,7 @@ def collect_5min(ticker='SPY', days_back=None):
     )
 
     # Save/append to cumulative RV file
-    rv_file = output_dir / f"{ticker}_daily_rv.csv"
+    rv_file = output_dir / f"{safe}_daily_rv.csv"
     if rv_file.exists():
         existing = pd.read_csv(rv_file, index_col=0, parse_dates=True)
         new_rv = pd.DataFrame({'rv_5min': daily_rv})
@@ -110,5 +93,7 @@ def collect_5min(ticker='SPY', days_back=None):
 
 
 if __name__ == '__main__':
-    collect_5min('SPY')  # Auto-detect gap and backfill (up to ~60 days)
+    ticker = sys.argv[1] if len(sys.argv) > 1 else 'SPY'
+    days = int(sys.argv[2]) if len(sys.argv) > 2 else None
+    collect_5min(ticker, days_back=days)
     print("\nDone.")

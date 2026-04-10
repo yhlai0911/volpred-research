@@ -20,33 +20,12 @@ VENV_PYTHON = PROJECT / ".venv" / "bin" / "python"
 
 
 def _detect_gap_days(ticker, output_dir):
-    """Detect how many days back we need to fetch based on existing files.
+    """Always fetch max window (59 days) — expanding window strategy.
 
-    Checks two conditions:
-    1. Gap since latest file (e.g. system was down for a few days)
-    2. Coverage start too recent (e.g. only 7 days of data when 59 are possible)
+    yfinance only keeps ~60 days of 5-min data. If we miss a day, it's gone forever.
+    Always request full window; skip files we already have on save.
     """
-    safe_ticker = ticker.replace('.', '_')
-    pattern = f"{safe_ticker}_5min_*.csv"
-    existing = sorted(output_dir.glob(pattern))
-    if not existing:
-        return 59
-    today = datetime.now().date()
-    try:
-        latest_str = existing[-1].stem.split("_5min_")[-1]
-        latest_date = datetime.strptime(latest_str, "%Y-%m-%d").date()
-        gap_latest = (today - latest_date).days
-
-        earliest_str = existing[0].stem.split("_5min_")[-1]
-        earliest_date = datetime.strptime(earliest_str, "%Y-%m-%d").date()
-        gap_earliest = (today - earliest_date).days
-
-        if gap_earliest < 55 and len(existing) < 40:
-            return 59
-
-        return min(max(gap_latest + 2, 7), 59)
-    except ValueError:
-        return 59
+    return 59
 
 
 def collect_5min(ticker, output_dir):
@@ -115,13 +94,13 @@ def main():
     except Exception as e:
         print(f"  VIXTWN error: {e}")
 
-    # 2. 0050.TW 日線快取更新
+    # 2. 0050.TW 日線快取更新（force_refresh 確保拿最新）
     print("\n--- 0050.TW 日線 ---")
     try:
         sys.path.insert(0, str(PROJECT / "src"))
         from volpred.data.manager import DataManager
         dm = DataManager()
-        tw50 = dm.get_model_data("0050.TW", "2020-01-01", "2026-12-31")
+        tw50 = dm.get_model_data("0050.TW", "2020-01-01", "2026-12-31", force_refresh=True)
         print(f"  0050.TW: {tw50.index[-1].date()} close={float(tw50.iloc[-1]['close']):.2f} ({len(tw50)} rows)")
     except Exception as e:
         print(f"  0050.TW 日線 error: {e}")

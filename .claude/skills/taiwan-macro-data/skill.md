@@ -87,9 +87,48 @@ gdp = pd.read_csv('data/dgbas/gdp_national_income_2006_2025.csv',
 gdp['year'] = gdp['統計期'].str.extract(r'(\d+)').astype(int) + 1911
 ```
 
+## NDC 景氣指標（國發會）
+
+### 資料來源
+- **國發會景氣指標查詢系統**: https://index.ndc.gov.tw/n/zh_tw
+- 發布時間：**每月 27 日 16:00 台灣時間**，資料落後 2 個月（例如 4/27 發布 2 月數據）
+- 下次發布日期可在首頁查看
+
+### 本地檔案
+- `storage/macro/tw_dgbas_bci_m.csv`：景氣對策信號 + 領先/同時/落後指標
+- 格式：`item, unit, freq, period, value`（period = `YYYYMmm`）
+- 策略 `vix_leading_guard` 使用此檔案的「領先指標不含趨勢指數」計算 MoM
+
+### 抓取方法（NDC 無 REST API，需 Chrome）
+1. 用 Chrome DevTools MCP 導航到 `https://index.ndc.gov.tw/n/zh_tw/data/eco/indicators_table1`
+2. 點擊「領先指標不含趨勢指數」加入表格欄位
+3. 從 table 或 Highcharts（`Highcharts.charts[0].series[0].data`）取得數據
+4. 或用 Angular scope：`angular.element(document.body).scope().lt_score`（最新值）
+
+### 抓取腳本
+```bash
+uv run python scripts/collect_ndc_bci.py          # 更新數據
+uv run python scripts/collect_ndc_bci.py --check   # 檢查是否過期
+```
+
+### 自動抓取設定
+**✅ Session cron 已設定（每月 28 日 10:00 自動執行）**
+- 用 Chrome DevTools MCP 導航 NDC 網站並自動提取數據
+- 無需手動，Claude session 活躍時自動觸發
+- 若 session 不活躍，可手動執行：`uv run python scripts/collect_ndc_bci.py`
+
+### 手動執行（備選）
+```bash
+# 每月 28 日 10:00 後手動執行（若 session 不活躍）
+uv run python scripts/collect_ndc_bci.py
+```
+
+⚠️ 舊 crontab 不可行，因為 NDC 需要 Chrome 互動（Angular SPA）。改用 session cron（Chrome DevTools MCP）。
+
 ## 注意事項
 - 統計期用民國年（非西元年）
 - 部分資料集只有近 5 年（視資料庫設定）
 - 大量 checkbox 的資料集（>50 項）可能下載失敗，需分批
 - CPI 類資料用月頻查詢更完整
 - 需要 Chrome 瀏覽器自動化或手動操作（無 REST API key）
+- **NDC 景氣指標也需 Chrome（Angular SPA），但可用 Highcharts API 取數據**

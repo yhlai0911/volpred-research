@@ -555,8 +555,8 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ### 永久任務（系統 crontab — 無人值守也會跑，台灣時間）
 ```
-0 15 * * 1-5   collect_tw_data.py      # 15:00 台股收盤後
-3 7 * * 2-6    collect_us_data.py      # 07:03 美股收盤後收集數據
+0 15 * * 1-5   collect_tw_data.py      # 15:00 台股收盤後（0050.TW 日頻+5min、VIXTWN）
+3 7 * * 2-6    collect_us_data.py      # 07:03 美股收盤後（SPY/GLD/TLT/QQQ/EEM/VIX/VIX3M/N225 日頻、SPY 5min、週一 FRED 23 指標）
 3 8 * * 2-6    daily_update.py         # 08:03 策略計算+Supabase sync
 3 */2 * * *    release-pool-by-settings # 每 2 小時 1 篇文章池釋出
 ```
