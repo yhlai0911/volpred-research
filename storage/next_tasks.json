@@ -1,23 +1,29 @@
 [
   {
     "id": "K1017",
-    "title": "K1017: HAR-RV 正式實驗（5-min 數據 60 天門檻）",
-    "description": "SPY 59 天 5-min。明天到 60 天。HAR-RV vs HAR-ABS vs GJR 完整比較",
+    "title": "K1017: HAR-RV 正式實驗",
+    "description": "5-min 數據明天到 60 天。HAR-RV vs HAR-ABS vs GJR",
     "priority": 1,
-    "status": "blocked_until_tomorrow"
+    "status": "blocked"
   },
   {
     "id": "Paper9_review",
     "title": "Paper 9 審查修訂",
-    "description": "K1021(df), K1022(cross-asset), K1024(refit), K1023(E(g)=1) 全完成。可啟動 /latex-academic-reviewer",
+    "description": "K1021(df)+K1022(cross)+K1023(E(g)=1)+K1024(refit)+K1026(conformal)+K1030(sub-period) 全完成",
     "priority": 1,
     "status": "pending"
   },
   {
     "id": "Paper5_update",
     "title": "Paper 5 整合 A4f 結果",
-    "description": "VIX Sufficiency 論文加入 K988 GARCH-X 比較",
     "priority": 3,
+    "status": "pending"
+  },
+  {
+    "id": "K1031",
+    "title": "K1031: Bayesian SSVS for ARX-GARCH (So, Chen, Liu 2006)",
+    "description": "用戶指定。MCMC 從 2^p 空間搜索最優外生變數子集。K433 延續",
+    "priority": 2,
     "status": "pending"
   }
 ]

@@ -583,6 +583,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **K1027: Drawdown Recovery K735 修正** — K735 rho=-0.49 確認為 artifact（IS=0.00, OOS=-0.14）。VIX reactive not predictive。Protection overlay 不如 12/VIX
 - [x] **K1028: DCC-A4f Multivariate** — DCC-A4f 勝 DCC-GJR（DM t=2.58）但 DCC≈CCC（SPY-QQQ 相關太穩定）。A4f 共用 VIX 因子=隱式 common factor
 
+- [x] **K1029: 金融股早期預警 MIXED**。Granger F=18.98 存活 VIX 控制，但 GARCH-X 反而惡化。VT overlay +1.5%。Regime indicator 非 predictor
+- [x] **K1030: ★★ Sub-Period 7/7 全勝**。QLIKE +4.8~8.1%，平均 6.52%。非 COVID 驅動。Paper 9 robustness 完備
+
 **中優先（新研究主題）：**
 - [ ] **K1016b: HAR+vix_gap 修正版**：修正 M4/M5 bug，重新評估 vix_gap 在正確 QLIKE 下的效果
 - [x] **K1018: Robust VT**：Sharpe 0.594 vs baseline 0.575（DM t=-1.47 ns）≈ BH 50/50。不上架。Sensitivity PASS 但 alpha 不顯著。VT=insurance confirmed
