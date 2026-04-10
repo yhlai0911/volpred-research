@@ -575,7 +575,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **K1016: HAR+vix_gap** ⚠️ MIXED：在 MSE(|r|) 改善（DM=-2.87）但在 QLIKE(r²) 惡化（1.616→1.831）。M4/M5 bug（A4f=GJR）。agent 回報不準確已修正。需重做
 - [ ] **K1016b: HAR+vix_gap 修正版**：修正 M4/M5 bug，重新評估 vix_gap 在正確 QLIKE 下的效果
 - [x] **K1018: Robust VT**：Sharpe 0.594 vs baseline 0.575（DM t=-1.47 ns）≈ BH 50/50。不上架。Sensitivity PASS 但 alpha 不顯著。VT=insurance confirmed
-- [ ] **VIX Regime 轉換預測**：K752 發現不同 era 的 VIX R² 差異大（0.24-0.64）。能否預測 VIX regime 何時轉換？
+- [x] **K1019: VIX Regime 轉換預測** — NULL。Naive persistence F1=0.91 unbeatable。12/VIX smooth weight 已內建 regime 資訊。Regime-switching 反而更差（Sharpe 0.882 vs 0.918）
 - [ ] **Drawdown Recovery 修正版**：K735 被 Codex 推翻（fake OOS + timing misalign）。修正方法論後重做
 - [ ] **跨國 VIX sufficiency**：K752 證明 US 33 年成立。在其他市場（VSTOXX、VNKY、VIXTWN proxy）驗證？
 - [ ] **Alternative data**：K750 Google Trends 是反應式。嘗試 Reddit/Twitter 情緒或 options flow
