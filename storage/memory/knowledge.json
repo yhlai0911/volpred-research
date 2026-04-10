@@ -23087,5 +23087,25 @@
     "data_source": "congressional_trades_house.csv + yfinance",
     "confidence": 0.9,
     "created_at": "2026-04-10T20:49:39.335302+00:00"
+  },
+  {
+    "id": "know_20260410205053_k1041",
+    "title": "K1041: ★★★ DCC-A4f Portfolio VaR — 推翻 K891 NULL，DM t=3.83 Harvey PASS",
+    "content": "[提出: Claude, 執行: Claude] K1041 50/50 SPY/GLD portfolio VaR。DCC-A4f 是最佳模型：QLIKE -8.836（rank 1/4），Trinity 2/2 PASS，DM t=+3.826 vs CCC-GJR（Harvey PASS）。推翻 K891 的 NULL——差異是 A4f marginals（K891 用 GJR marginals）。A4f marginal 改善 > DCC correlation 改善：A4f +0.53% vs DCC +0.23%。改善是 additive（0.53%+0.23%=0.71%）。DCC 捕捉 SPY/GLD 相關 [-0.39,+0.39] vs CCC [-0.08,+0.10]。COVID 時 DCC 追蹤相關從 +0.10 → -0.37。DCC 把 CCC-FAIL 的 alpha 修成 PASS。結論：(1) DCC 對變動大的相關性有效（SPY/GLD），對穩定的無效（SPY/QQQ K1028）(2) A4f marginals 比 DCC 更重要 (3) DCC-A4f 是 portfolio risk management 最佳工具。",
+    "tags": [
+      "DCC",
+      "A4f",
+      "portfolio VaR",
+      "SPY",
+      "GLD",
+      "multivariate",
+      "Harvey PASS",
+      "K891 overturned"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1041",
+    "data_source": "yfinance",
+    "confidence": 0.95,
+    "created_at": "2026-04-10T20:50:53.319960+00:00"
   }
 ]

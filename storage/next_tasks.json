@@ -3,15 +3,29 @@
     "id": "K1039",
     "title": "K1039: A4f Multi-Horizon VaR (h=1,5,10)",
     "priority": 1,
-    "status": "in_progress",
-    "description": "Basel III 10-day VaR。A4f h-step 預測 + CF-Rolling。支援 Paper 9"
+    "status": "completed",
+    "description": "★★ h=1,5 全 PASS，√h scaling = h-step。Paper 9 robustness"
   },
   {
     "id": "K1040",
     "title": "K1040: VRP Return Predictability via A4f g_t",
     "priority": 2,
+    "status": "completed",
+    "description": "Nuanced NULL — VIX 月頻 R²=5.63% 顯著，但 g_t 無增量"
+  },
+  {
+    "id": "K1041",
+    "title": "K1041: DCC-A4f Portfolio VaR (SPY/GLD)",
+    "priority": 1,
     "status": "in_progress",
-    "description": "Bollerslev et al. (2009) VRP→return。g_t 是否比 raw VRP 更好？面向 D/G"
+    "description": "多變量：DCC-A4f vs CCC-GJR portfolio VaR。SPY/GLD 相關性危機時劇變"
+  },
+  {
+    "id": "K1042",
+    "title": "K1042: Congressional Trades Signal",
+    "priority": 2,
+    "status": "in_progress",
+    "description": "面向 G 替代數據。國會交易聚合 flow → SPY vol/return 預測"
   },
   {
     "id": "Paper9_review",
@@ -25,12 +39,6 @@
     "title": "Paper 6 Crypto Fear Channel 論文",
     "priority": 2,
     "description": "K639/K746b/K1025 素材齊備。主線程撰寫",
-    "status": "pending"
-  },
-  {
-    "id": "Paper5_update",
-    "title": "Paper 5 整合 A4f 結果",
-    "priority": 3,
     "status": "pending"
   }
 ]
