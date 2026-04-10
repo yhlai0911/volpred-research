@@ -1,30 +1,24 @@
 [
   {
-    "id": "K1036",
-    "title": "K1036: A4f + CF-Rolling VaR",
+    "id": "K1039",
+    "title": "K1039: A4f Multi-Horizon VaR (h=1,5,10)",
     "priority": 1,
-    "status": "completed",
-    "description": "★★ CF-Rolling 使模型選擇對 VaR 無關。GJR+CF = A4f+CF = 6/6。A4f 真正價值在 QLIKE"
+    "status": "in_progress",
+    "description": "Basel III 10-day VaR。A4f h-step 預測 + CF-Rolling。支援 Paper 9"
   },
   {
-    "id": "K1038",
-    "title": "K1038: GAS-t Score-Driven Vol",
+    "id": "K1040",
+    "title": "K1040: VRP Return Predictability via A4f g_t",
     "priority": 2,
-    "status": "completed",
-    "description": "NULL — GAS-t 4 資產全 NS。Score-driven robustification 不改善 QLIKE"
+    "status": "in_progress",
+    "description": "Bollerslev et al. (2009) VRP→return。g_t 是否比 raw VRP 更好？面向 D/G"
   },
   {
     "id": "Paper9_review",
     "title": "Paper 9 論文審查與修正",
     "priority": 1,
-    "description": "2026-04-11 13:00 開始。latex-academic-reviewer + citation-verifier + 整合 K1033/K1030/K1036",
+    "description": "2026-04-11 13:00 開始。整合 K1033/K1030/K1036/K1039",
     "status": "pending"
-  },
-  {
-    "id": "K1037",
-    "title": "K1037: Probabilistic RV Quantile Forecasting",
-    "priority": 2,
-    "description": "arXiv:2508.15922。從 HAR/GARCH 點預測到條件分位數。新方向"
   },
   {
     "id": "Paper6_start",

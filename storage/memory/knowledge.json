@@ -23029,5 +23029,25 @@
     "data_source": "yfinance",
     "confidence": 0.9,
     "created_at": "2026-04-10T18:27:38.349121+00:00"
+  },
+  {
+    "id": "know_20260410190715_k1039",
+    "title": "K1039: ★★ A4f Multi-Horizon VaR — h=1,5 全 PASS，√h scaling 足夠",
+    "content": "[提出: Claude, 執行: Claude] K1039 multi-horizon VaR factorial（2 model × 3 method × 3 horizon）。SPY+QQQ OOS 2019-2026。核心發現：(1) A4f+CF-Rolling h=1 和 h=5 都 100% Trinity PASS (2) h=10 降為 75%（182 blocks 小樣本問題，非模型失敗）(3) √h scaling = proper h-step GARCH（pass rate 完全相同）→ 實務上不需要 h-step 公式 (4) A4f 在 h=5 優勢明顯：A4f+Normal 100% vs GJR+Normal 75% (5) Normal 方法在 h=1 失敗但隨 horizon 增加改善（CLT effect）(6) CF-Rolling 在 h=1,5 最穩健（100%），是 multi-horizon 最佳 VaR 方法。Paper 9 直接適用：A4f multi-horizon VaR 結果穩健。",
+    "tags": [
+      "VaR",
+      "multi-horizon",
+      "A4f",
+      "CF-Rolling",
+      "Basel",
+      "h-step",
+      "sqrt-h",
+      "Paper9"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1039",
+    "data_source": "yfinance",
+    "confidence": 0.9,
+    "created_at": "2026-04-10T19:07:15.404526+00:00"
   }
 ]
