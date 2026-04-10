@@ -1,36 +1,30 @@
 [
   {
-    "id": "K1034",
-    "title": "K1034: Cornish-Fisher Expansion VaR",
-    "priority": 1,
-    "status": "completed",
-    "description": "★★★ CF-Rolling 6/6 Trinity PASS (Normal 0/6, Student-t 1/6). 最佳 VaR 方法"
-  },
-  {
-    "id": "K1035",
-    "title": "K1035: EVT-VaR（Peaks-over-Threshold）",
-    "priority": 1,
-    "status": "completed",
-    "description": "★★ GJR-EVT rescues GJR (0/4→4/4), unnecessary for A4f (already 4/4)"
-  },
-  {
     "id": "K1036",
-    "title": "K1036: A4f + CF-Rolling VaR（最佳模型 + 最佳 VaR 方法結合）",
+    "title": "K1036: A4f + CF-Rolling VaR",
     "priority": 1,
-    "description": "K1034 + K1035 的自然延伸。A4f 是最佳 QLIKE 模型，CF-Rolling 是最佳 VaR 方法。結合後是否能進一步改善？"
+    "status": "completed",
+    "description": "★★ CF-Rolling 使模型選擇對 VaR 無關。GJR+CF = A4f+CF = 6/6。A4f 真正價值在 QLIKE"
+  },
+  {
+    "id": "K1038",
+    "title": "K1038: GAS-t Score-Driven Vol",
+    "priority": 2,
+    "status": "completed",
+    "description": "NULL — GAS-t 4 資產全 NS。Score-driven robustification 不改善 QLIKE"
+  },
+  {
+    "id": "Paper9_review",
+    "title": "Paper 9 論文審查與修正",
+    "priority": 1,
+    "description": "2026-04-11 13:00 開始。latex-academic-reviewer + citation-verifier + 整合 K1033/K1030/K1036",
+    "status": "pending"
   },
   {
     "id": "K1037",
     "title": "K1037: Probabilistic RV Quantile Forecasting",
     "priority": 2,
     "description": "arXiv:2508.15922。從 HAR/GARCH 點預測到條件分位數。新方向"
-  },
-  {
-    "id": "Paper9_review",
-    "title": "Paper 9 論文審查與修正",
-    "priority": 1,
-    "description": "2026-04-11 13:00 開始。latex-academic-reviewer + citation-verifier",
-    "status": "pending"
   },
   {
     "id": "Paper6_start",

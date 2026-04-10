@@ -172,7 +172,7 @@
 - **VaR 方法排名（K1034+K1035 綜合）**：CF-Rolling ≥ EVT > Student-t >> Normal
 - **Copula-based VaR**（多資產聯合尾部風險）
 - Monte Carlo VaR（GARCH 路徑模擬）
-- [ ] **A4f + CF-Rolling 結合**：最佳預測模型 + 最佳 VaR 方法，預期最強 risk management 組合
+- [x] **★★ A4f + CF-Rolling 結合 (K1036)**：2×3 factorial 完成。CF-Rolling 是 VaR 王者——GJR+CF = A4f+CF = 6/6 Trinity PASS。A4f 對 Student-t 有巨大改善（1/6→5/6），但 CF-Rolling 使模型選擇對 VaR 無關。A4f 的真正價值在 QLIKE 預測精度
 
 ### 面向 C: 投資策略
 - Volatility Targeting（12/VIX, EWMA VT, Hybrid VT）
@@ -440,6 +440,9 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 ### 新發現（2026-04-01 文獻搜尋）
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。
+
+### Score-Driven (GAS) Models
+- [x] ~~GAS-t vs GARCH~~ → **K1038 完成 NULL**。GAS-t (Creal et al. 2013) 4 資產全 NS。SPY DM t=-0.99, QQQ t=-0.30。Score-driven robustification 不改善 QLIKE。但 VaR violation rate 稍低（內建 Student-t）。結論：大 shock 資訊對波動率預測有價值，downweighting 反而失去資訊
 
 ### 其他
 - [ ] Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting）

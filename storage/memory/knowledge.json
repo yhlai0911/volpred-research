@@ -23010,5 +23010,24 @@
     "data_source": "yfinance",
     "confidence": 0.95,
     "created_at": "2026-04-10T18:24:51.776712+00:00"
+  },
+  {
+    "id": "know_20260410182738_k1038",
+    "title": "K1038: GAS-t Score-Driven Vol NULL — GJR-GARCH 仍是穩健基準",
+    "content": "[提出: Claude, 執行: Claude] K1038 比較 GAS-t (Creal, Koopman & Lucas 2013) 和 GJR-GARCH。4 資產（SPY/QQQ/GLD/0050.TW），OOS 2019-2026。結果：GAS-t 全部 NS。SPY: GJR QLIKE=1.496 vs GAS-t 1.531（DM t=-0.99）。QQQ: 1.492 vs 1.502（t=-0.30）。GLD: 1.508 vs 1.510（t=-0.26）。0050.TW: GAS-t-Lev 微勝（1.470 vs 1.482）但 t=+0.59 NS。Score-driven 的 Student-t robustification 不改善 QLIKE 預測。但 VaR violation rate 稍低（GAS-t SPY 1.70% vs GJR 2.02%）——因內建 Student-t 分配。結論：GAS-t 不提供超過 GJR 的統計顯著改善。大 shock 的資訊對後續波動率預測有價值，score-driven 的 downweighting 反而失去資訊。",
+    "tags": [
+      "GAS",
+      "score-driven",
+      "GJR",
+      "GARCH",
+      "null result",
+      "Student-t",
+      "robustification"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1038",
+    "data_source": "yfinance",
+    "confidence": 0.9,
+    "created_at": "2026-04-10T18:27:38.349121+00:00"
   }
 ]
