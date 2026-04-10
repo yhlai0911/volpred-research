@@ -1,0 +1,491 @@
+{
+  "qlike": {
+    "GJR": -8.536743451636335,
+    "A4f": -8.643869714726824
+  },
+  "var_eval": {
+    "M1_GJR_Normal": {
+      "0.01": {
+        "alpha": 0.01,
+        "T": 3337,
+        "violations": 71,
+        "violation_rate": 2.128,
+        "expected_rate": 1.0,
+        "UC_stat": 32.383,
+        "UC_p": 0.0,
+        "CC_stat": 1.202,
+        "CC_p": 0.273,
+        "DQ_stat": 48.276,
+        "DQ_p": 0.0,
+        "Basel": "RED",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "1/4",
+        "avg_var_level": 0.021077
+      },
+      "0.025": {
+        "alpha": 0.025,
+        "T": 3337,
+        "violations": 117,
+        "violation_rate": 3.506,
+        "expected_rate": 2.5,
+        "UC_stat": 12.343,
+        "UC_p": 0.0004,
+        "CC_stat": 0.198,
+        "CC_p": 0.6567,
+        "DQ_stat": 15.113,
+        "DQ_p": 0.0017,
+        "Basel": "GREEN",
+        "ES_Z1": -0.6776,
+        "ES_Z1_p": 0.515,
+        "ES_Z2": -2.5886,
+        "ES_Z2_p": 0.468,
+        "scorecard": "4/6",
+        "avg_var_level": 0.017757
+      },
+      "0.05": {
+        "alpha": 0.05,
+        "T": 3337,
+        "violations": 181,
+        "violation_rate": 5.424,
+        "expected_rate": 5.0,
+        "UC_stat": 1.231,
+        "UC_p": 0.2673,
+        "CC_stat": 0.004,
+        "CC_p": 0.9517,
+        "DQ_stat": 1.836,
+        "DQ_p": 0.6072,
+        "Basel": "GREEN",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "4/4",
+        "avg_var_level": 0.014903
+      }
+    },
+    "M2_GJR_t8": {
+      "0.01": {
+        "alpha": 0.01,
+        "T": 3337,
+        "violations": 58,
+        "violation_rate": 1.738,
+        "expected_rate": 1.0,
+        "UC_stat": 15.047,
+        "UC_p": 0.0001,
+        "CC_stat": 0.791,
+        "CC_p": 0.3738,
+        "DQ_stat": 22.322,
+        "DQ_p": 0.0001,
+        "Basel": "YELLOW",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "1/4",
+        "avg_var_level": 0.022726
+      },
+      "0.025": {
+        "alpha": 0.025,
+        "T": 3337,
+        "violations": 113,
+        "violation_rate": 3.386,
+        "expected_rate": 2.5,
+        "UC_stat": 9.697,
+        "UC_p": 0.0018,
+        "CC_stat": 0.353,
+        "CC_p": 0.5525,
+        "DQ_stat": 11.942,
+        "DQ_p": 0.0076,
+        "Basel": "GREEN",
+        "ES_Z1": 2.488,
+        "ES_Z1_p": 0.488,
+        "ES_Z2": 0.444,
+        "ES_Z2_p": 0.532,
+        "scorecard": "4/6",
+        "avg_var_level": 0.018094
+      },
+      "0.05": {
+        "alpha": 0.05,
+        "T": 3337,
+        "violations": 190,
+        "violation_rate": 5.694,
+        "expected_rate": 5.0,
+        "UC_stat": 3.242,
+        "UC_p": 0.0718,
+        "CC_stat": 0.14,
+        "CC_p": 0.7083,
+        "DQ_stat": 4.138,
+        "DQ_p": 0.247,
+        "Basel": "GREEN",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "4/4",
+        "avg_var_level": 0.014591
+      }
+    },
+    "M3_A4f_t8": {
+      "0.01": {
+        "alpha": 0.01,
+        "T": 3337,
+        "violations": 45,
+        "violation_rate": 1.349,
+        "expected_rate": 1.0,
+        "UC_stat": 3.691,
+        "UC_p": 0.0547,
+        "CC_stat": 2.072,
+        "CC_p": 0.15,
+        "DQ_stat": 11.92,
+        "DQ_p": 0.0077,
+        "Basel": "GREEN",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "3/4",
+        "avg_var_level": 0.022752
+      },
+      "0.025": {
+        "alpha": 0.025,
+        "T": 3337,
+        "violations": 102,
+        "violation_rate": 3.057,
+        "expected_rate": 2.5,
+        "UC_stat": 3.965,
+        "UC_p": 0.0464,
+        "CC_stat": 0.244,
+        "CC_p": 0.621,
+        "DQ_stat": 4.714,
+        "DQ_p": 0.194,
+        "Basel": "GREEN",
+        "ES_Z1": 2.3036,
+        "ES_Z1_p": 0.501,
+        "ES_Z2": 0.4424,
+        "ES_Z2_p": 0.532,
+        "scorecard": "5/6",
+        "avg_var_level": 0.018114
+      },
+      "0.05": {
+        "alpha": 0.05,
+        "T": 3337,
+        "violations": 191,
+        "violation_rate": 5.724,
+        "expected_rate": 5.0,
+        "UC_stat": 3.523,
+        "UC_p": 0.0605,
+        "CC_stat": 0.092,
+        "CC_p": 0.7611,
+        "DQ_stat": 3.803,
+        "DQ_p": 0.2835,
+        "Basel": "GREEN",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "4/4",
+        "avg_var_level": 0.014607
+      }
+    },
+    "M4_Conformal_GJR": {
+      "0.01": {
+        "alpha": 0.01,
+        "T": 3287,
+        "violations": 43,
+        "violation_rate": 1.308,
+        "expected_rate": 1.0,
+        "UC_stat": 2.875,
+        "UC_p": 0.09,
+        "CC_stat": 0.285,
+        "CC_p": 0.5937,
+        "DQ_stat": 10.313,
+        "DQ_p": 0.0161,
+        "Basel": "GREEN",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "3/4",
+        "avg_var_level": 0.026379
+      },
+      "0.025": {
+        "alpha": 0.025,
+        "T": 3287,
+        "violations": 84,
+        "violation_rate": 2.556,
+        "expected_rate": 2.5,
+        "UC_stat": 0.041,
+        "UC_p": 0.839,
+        "CC_stat": 0.319,
+        "CC_p": 0.5722,
+        "DQ_stat": 6.516,
+        "DQ_p": 0.089,
+        "Basel": "GREEN",
+        "ES_Z1": 2.0995,
+        "ES_Z1_p": 0.528,
+        "ES_Z2": 0.2379,
+        "ES_Z2_p": 0.524,
+        "scorecard": "6/6",
+        "avg_var_level": 0.02
+      },
+      "0.05": {
+        "alpha": 0.05,
+        "T": 3287,
+        "violations": 176,
+        "violation_rate": 5.354,
+        "expected_rate": 5.0,
+        "UC_stat": 0.85,
+        "UC_p": 0.3564,
+        "CC_stat": 0.28,
+        "CC_p": 0.5969,
+        "DQ_stat": 2.022,
+        "DQ_p": 0.5678,
+        "Basel": "GREEN",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "4/4",
+        "avg_var_level": 0.015719
+      }
+    },
+    "M5_Conformal_A4f": {
+      "0.01": {
+        "alpha": 0.01,
+        "T": 3287,
+        "violations": 40,
+        "violation_rate": 1.217,
+        "expected_rate": 1.0,
+        "UC_stat": 1.461,
+        "UC_p": 0.2267,
+        "CC_stat": 0.427,
+        "CC_p": 0.5136,
+        "DQ_stat": 9.797,
+        "DQ_p": 0.0204,
+        "Basel": "GREEN",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "3/4",
+        "avg_var_level": 0.02502
+      },
+      "0.025": {
+        "alpha": 0.025,
+        "T": 3287,
+        "violations": 89,
+        "violation_rate": 2.708,
+        "expected_rate": 2.5,
+        "UC_stat": 0.566,
+        "UC_p": 0.4517,
+        "CC_stat": 0.078,
+        "CC_p": 0.7797,
+        "DQ_stat": 7.48,
+        "DQ_p": 0.0581,
+        "Basel": "GREEN",
+        "ES_Z1": 2.1264,
+        "ES_Z1_p": 0.504,
+        "ES_Z2": 0.3244,
+        "ES_Z2_p": 0.525,
+        "scorecard": "6/6",
+        "avg_var_level": 0.019461
+      },
+      "0.05": {
+        "alpha": 0.05,
+        "T": 3287,
+        "violations": 166,
+        "violation_rate": 5.05,
+        "expected_rate": 5.0,
+        "UC_stat": 0.017,
+        "UC_p": 0.8951,
+        "CC_stat": 0.828,
+        "CC_p": 0.3628,
+        "DQ_stat": 1.536,
+        "DQ_p": 0.6739,
+        "Basel": "GREEN",
+        "ES_Z1": null,
+        "ES_Z1_p": null,
+        "ES_Z2": null,
+        "ES_Z2_p": null,
+        "scorecard": "4/4",
+        "avg_var_level": 0.015376
+      }
+    }
+  },
+  "conditional_cal": {
+    "M1_GJR_Normal": {
+      "0.01": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 3.83,
+        "viol_rate_low_vix": 0.42,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 1.0
+      },
+      "0.025": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 6.044,
+        "viol_rate_low_vix": 0.96,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 2.5
+      },
+      "0.05": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 9.156,
+        "viol_rate_low_vix": 1.681,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 5.0
+      }
+    },
+    "M2_GJR_t8": {
+      "0.01": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 3.232,
+        "viol_rate_low_vix": 0.24,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 1.0
+      },
+      "0.025": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 5.865,
+        "viol_rate_low_vix": 0.9,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 2.5
+      },
+      "0.05": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 9.635,
+        "viol_rate_low_vix": 1.741,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 5.0
+      }
+    },
+    "M3_A4f_t8": {
+      "0.01": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 2.214,
+        "viol_rate_low_vix": 0.48,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 1.0
+      },
+      "0.025": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 4.608,
+        "viol_rate_low_vix": 1.501,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 2.5
+      },
+      "0.05": {
+        "vix_median": 15.96,
+        "viol_rate_high_vix": 8.498,
+        "viol_rate_low_vix": 2.941,
+        "n_high": 1671,
+        "n_low": 1666,
+        "target_rate": 5.0
+      }
+    },
+    "M4_Conformal_GJR": {
+      "0.01": {
+        "vix_median": 16.04,
+        "viol_rate_high_vix": 2.19,
+        "viol_rate_low_vix": 0.426,
+        "n_high": 1644,
+        "n_low": 1643,
+        "target_rate": 1.0
+      },
+      "0.025": {
+        "vix_median": 16.04,
+        "viol_rate_high_vix": 4.015,
+        "viol_rate_low_vix": 1.096,
+        "n_high": 1644,
+        "n_low": 1643,
+        "target_rate": 2.5
+      },
+      "0.05": {
+        "vix_median": 16.04,
+        "viol_rate_high_vix": 8.333,
+        "viol_rate_low_vix": 2.374,
+        "n_high": 1644,
+        "n_low": 1643,
+        "target_rate": 5.0
+      }
+    },
+    "M5_Conformal_A4f": {
+      "0.01": {
+        "vix_median": 16.04,
+        "viol_rate_high_vix": 1.825,
+        "viol_rate_low_vix": 0.609,
+        "n_high": 1644,
+        "n_low": 1643,
+        "target_rate": 1.0
+      },
+      "0.025": {
+        "vix_median": 16.04,
+        "viol_rate_high_vix": 4.015,
+        "viol_rate_low_vix": 1.4,
+        "n_high": 1644,
+        "n_low": 1643,
+        "target_rate": 2.5
+      },
+      "0.05": {
+        "vix_median": 16.04,
+        "viol_rate_high_vix": 7.299,
+        "viol_rate_low_vix": 2.8,
+        "n_high": 1644,
+        "n_low": 1643,
+        "target_rate": 5.0
+      }
+    }
+  },
+  "sharpness": {
+    "M1_GJR_Normal": {
+      "0.01": 0.021077,
+      "0.025": 0.017757,
+      "0.05": 0.014903
+    },
+    "M2_GJR_t8": {
+      "0.01": 0.022726,
+      "0.025": 0.018094,
+      "0.05": 0.014591
+    },
+    "M3_A4f_t8": {
+      "0.01": 0.022752,
+      "0.025": 0.018114,
+      "0.05": 0.014607
+    },
+    "M4_Conformal_GJR": {
+      "0.01": 0.026379,
+      "0.025": 0.02,
+      "0.05": 0.015719
+    },
+    "M5_Conformal_A4f": {
+      "0.01": 0.02502,
+      "0.025": 0.019461,
+      "0.05": 0.015376
+    }
+  },
+  "metadata": {
+    "experiment": "K1026",
+    "title": "Proxy-Reliance Controlled Conformal VaR vs Parametric VaR",
+    "asset": "SPY",
+    "oos_start": "2013-01-02",
+    "window": 2000,
+    "refit_every": 63,
+    "cal_window": 252,
+    "df_fixed": 8,
+    "data_source": "yfinance",
+    "seed": 42,
+    "elapsed_seconds": 16.0,
+    "date": "2026-04-10 17:32"
+  }
+}
