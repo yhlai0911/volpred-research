@@ -23069,5 +23069,23 @@
     "data_source": "yfinance",
     "confidence": 0.9,
     "created_at": "2026-04-10T19:14:55.340379+00:00"
+  },
+  {
+    "id": "know_20260410204939_k1042",
+    "title": "K1042: Congressional Trades Signal NULL — 國會交易無法預測 SPY",
+    "content": "[提出: Claude, 執行: Claude] K1042 測試 15,674 筆美國眾議院國會交易（2019-2022）的聚合 flow 是否預測 SPY。用 disclosure_date（保守防 lookahead，中位延遲 28 天）。Return prediction NULL：OOS R²=-0.016，方向準確率 ~50%，零迴歸通過 Harvey t>3.0。Vol prediction 邊際：21d rolling net count ρ=0.14(p<0.001) 但 OOS R²=-0.050。策略 Sharpe 0.412 vs BH 0.635（顯著劣勢 t=-2.30）。反直覺：高 net-sell 報酬 22.7%/yr > 高 net-buy 9.6%/yr（但 NS）。COVID 期間無先見之明。Transaction-date 的 Granger F=5.37 但那是 lookahead。結論：國會聚合交易對 SPY 日頻無可操作預測力，主因 disclosure lag ~28 天。",
+    "tags": [
+      "congressional trades",
+      "alternative data",
+      "null result",
+      "SPY",
+      "disclosure lag",
+      "Granger"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1042",
+    "data_source": "congressional_trades_house.csv + yfinance",
+    "confidence": 0.9,
+    "created_at": "2026-04-10T20:49:39.335302+00:00"
   }
 ]
