@@ -572,8 +572,16 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **K1016: HAR+vix_gap — In-Sample Overfit**。vix_gap IS t=18.43 但 OOS QLIKE(r²) 惡化（1.831 vs HAR 1.616）。|r| MSE 改善（DM=-2.869 未達 Harvey）。86.5% 時間 VIX>realized 導致系統性高估。教科書級過擬合
 - [x] **K1019: MS(2)-GJR ★ — Regime Dynamics Real**。MS-GJR 顯著勝 GJR（DM t=-3.20 PASS）但輸 A4f-VIX9D（DM t=+2.75 NS）。Calm: γ=0.60; Crisis: pure β=0.83。Regime prob 與 VIX 弱相關 r=0.225。衍生：MS-A4f 結合兩者
 
+- [x] **K1016b: HAR+vix_gap corrected**。|vix_gap| DM t=-4.20***、vix_gap² DM t=-5.57*** 顯著勝 HAR，但 A4f 仍稱霸（DM t=+7.11***）。線性 vix_gap ≡ VIX level
+- [x] **K1020: MS(2)-A4f NULL**。結合 regime+VIX 反而惡化。VIX 已包含 regime info
+- [x] **K1021: A4f df joint ★**。df≈8.5，QLIKE 不變但 VaR 從失敗→通過。Paper 9 建議 df=8
+- [x] **K1022: A4f 跨資產 6/6 QLIKE 改善**。Student-t 下 DM 個別未達 Harvey 但 VaR 6/6 PASS
+- [x] **K1023: E(g)=1 理論框架 ★★**。VRP auto-correction 證明非 relabeling
+- [x] **K1024: Refit insensitive ★**。QLIKE spread 0.021%，63d 最佳
+- [x] **K1025: Crypto Fear Channel ★★★**。BTC down-vol→VIX asymmetric
+- [x] **K1026: Conformal VaR ★★**。92% pass rate vs parametric 58-83%。不是 K800 artifact
+
 **中優先（新研究主題）：**
-- [x] **K1016: HAR+vix_gap** ⚠️ MIXED：在 MSE(|r|) 改善（DM=-2.87）但在 QLIKE(r²) 惡化（1.616→1.831）。M4/M5 bug（A4f=GJR）。agent 回報不準確已修正。需重做
 - [ ] **K1016b: HAR+vix_gap 修正版**：修正 M4/M5 bug，重新評估 vix_gap 在正確 QLIKE 下的效果
 - [x] **K1018: Robust VT**：Sharpe 0.594 vs baseline 0.575（DM t=-1.47 ns）≈ BH 50/50。不上架。Sensitivity PASS 但 alpha 不顯著。VT=insurance confirmed
 - [x] **K1019: VIX Regime 轉換預測** — NULL。Naive persistence F1=0.91 unbeatable。12/VIX smooth weight 已內建 regime 資訊。Regime-switching 反而更差（Sharpe 0.882 vs 0.918）
