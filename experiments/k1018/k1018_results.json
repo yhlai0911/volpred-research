@@ -1,0 +1,491 @@
+{
+  "experiment_id": "K1018",
+  "title": "Robust VT Design (K743 Corrected) \u2014 Floor/Cap + EWMA(\u03bb=0.94) + Weekly Rebalance",
+  "date": "2026-04-10T14:48:25.413316",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "period": "2005-01-01 to 2026-04-10",
+  "eval_start": "2006-01-03",
+  "parameters": {
+    "floor": 0.3,
+    "cap": 0.9,
+    "ewma_lambda": 0.94,
+    "ewma_equivalent_span": 32.3,
+    "rebalance_freq": "weekly",
+    "baseline_cap": 1.5,
+    "tx_cost_bps": 5,
+    "rf_annual": 0.04,
+    "seed": 42
+  },
+  "lag_verification": "All signals use .shift(1) \u2014 verified in compute_all_signals()",
+  "metrics": {
+    "baseline_12vix_daily_spy_only": {
+      "sharpe": 0.2777,
+      "sortino": 0.2542,
+      "cagr": 4.3,
+      "mdd": -33.15,
+      "calmar": 0.13,
+      "win_rate_monthly": 65.8,
+      "ann_vol": 9.51,
+      "skew": -0.582,
+      "kurtosis": 1.714,
+      "n_days": 5098,
+      "turnover_ann": 8.9
+    },
+    "baseline_12vix_monthly_spy_only": {
+      "sharpe": 0.3236,
+      "sortino": 0.2998,
+      "cagr": 4.63,
+      "mdd": -28.33,
+      "calmar": 0.163,
+      "win_rate_monthly": 65.4,
+      "ann_vol": 10.5,
+      "skew": -0.428,
+      "kurtosis": 5.251,
+      "n_days": 5098,
+      "turnover_ann": 1.39
+    },
+    "robust_vt_weekly_spy_only": {
+      "sharpe": 0.3039,
+      "sortino": 0.281,
+      "cagr": 4.53,
+      "mdd": -31.2,
+      "calmar": 0.145,
+      "win_rate_monthly": 65.4,
+      "ann_vol": 10.45,
+      "skew": -0.475,
+      "kurtosis": 5.395,
+      "n_days": 5098,
+      "turnover_ann": 0.87
+    },
+    "robust_vt_monthly_spy_only": {
+      "sharpe": 0.3039,
+      "sortino": 0.2826,
+      "cagr": 4.61,
+      "mdd": -29.95,
+      "calmar": 0.154,
+      "win_rate_monthly": 65.4,
+      "ann_vol": 11.06,
+      "skew": -0.389,
+      "kurtosis": 9.262,
+      "n_days": 5098,
+      "turnover_ann": 0.67
+    },
+    "robust_vt_daily_spy_only": {
+      "sharpe": 0.3079,
+      "sortino": 0.2841,
+      "cagr": 4.53,
+      "mdd": -30.72,
+      "calmar": 0.147,
+      "win_rate_monthly": 65.4,
+      "ann_vol": 10.27,
+      "skew": -0.514,
+      "kurtosis": 4.435,
+      "n_days": 5098,
+      "turnover_ann": 0.96
+    },
+    "bh_5050_spy_only": {
+      "sharpe": 0.2124,
+      "sortino": 0.2023,
+      "cagr": 4.03,
+      "mdd": -35.0,
+      "calmar": 0.115,
+      "win_rate_monthly": 66.3,
+      "ann_vol": 9.67,
+      "skew": 0.0,
+      "kurtosis": 14.959,
+      "n_days": 5098,
+      "turnover_ann": 0.0
+    },
+    "bh_spy_spy_only": {
+      "sharpe": 0.4193,
+      "sortino": 0.3977,
+      "cagr": 6.31,
+      "mdd": -70.0,
+      "calmar": 0.09,
+      "win_rate_monthly": 66.3,
+      "ann_vol": 19.33,
+      "skew": 0.0,
+      "kurtosis": 14.959,
+      "n_days": 5098,
+      "turnover_ann": 0.0
+    },
+    "baseline_12vix_daily_spy_gld": {
+      "sharpe": 0.5364,
+      "sortino": 0.5014,
+      "cagr": 5.94,
+      "mdd": -36.95,
+      "calmar": 0.161,
+      "win_rate_monthly": 65.8,
+      "ann_vol": 12.94,
+      "skew": -0.299,
+      "kurtosis": 6.777,
+      "n_days": 5098,
+      "turnover_ann": 8.9
+    },
+    "baseline_12vix_monthly_spy_gld": {
+      "sharpe": 0.5753,
+      "sortino": 0.542,
+      "cagr": 6.19,
+      "mdd": -34.07,
+      "calmar": 0.182,
+      "win_rate_monthly": 66.3,
+      "ann_vol": 13.44,
+      "skew": -0.21,
+      "kurtosis": 7.197,
+      "n_days": 5098,
+      "turnover_ann": 1.39
+    },
+    "robust_vt_weekly_spy_gld": {
+      "sharpe": 0.5937,
+      "sortino": 0.5589,
+      "cagr": 6.26,
+      "mdd": -35.55,
+      "calmar": 0.176,
+      "win_rate_monthly": 67.1,
+      "ann_vol": 13.36,
+      "skew": -0.276,
+      "kurtosis": 7.485,
+      "n_days": 5098,
+      "turnover_ann": 0.87
+    },
+    "robust_vt_monthly_spy_gld": {
+      "sharpe": 0.5835,
+      "sortino": 0.55,
+      "cagr": 6.28,
+      "mdd": -35.39,
+      "calmar": 0.177,
+      "win_rate_monthly": 66.7,
+      "ann_vol": 13.71,
+      "skew": -0.229,
+      "kurtosis": 9.005,
+      "n_days": 5098,
+      "turnover_ann": 0.67
+    },
+    "robust_vt_daily_spy_gld": {
+      "sharpe": 0.5956,
+      "sortino": 0.5601,
+      "cagr": 6.25,
+      "mdd": -35.31,
+      "calmar": 0.177,
+      "win_rate_monthly": 67.5,
+      "ann_vol": 13.26,
+      "skew": -0.289,
+      "kurtosis": 7.267,
+      "n_days": 5098,
+      "turnover_ann": 0.96
+    },
+    "bh_5050_spy_gld": {
+      "sharpe": 0.5966,
+      "sortino": 0.5627,
+      "cagr": 6.34,
+      "mdd": -36.84,
+      "calmar": 0.172,
+      "win_rate_monthly": 61.3,
+      "ann_vol": 13.72,
+      "skew": -0.19,
+      "kurtosis": 9.2,
+      "n_days": 5098,
+      "turnover_ann": 0.0
+    },
+    "bh_spy_spy_gld": {
+      "sharpe": 0.4193,
+      "sortino": 0.3977,
+      "cagr": 6.31,
+      "mdd": -70.0,
+      "calmar": 0.09,
+      "win_rate_monthly": 66.3,
+      "ann_vol": 19.33,
+      "skew": 0.0,
+      "kurtosis": 14.959,
+      "n_days": 5098,
+      "turnover_ann": 0.0
+    }
+  },
+  "dm_tests": {
+    "robust_vs_baseline": {
+      "t_stat": -1.4706,
+      "p_value": 0.1415,
+      "harvey_significant": false
+    },
+    "robust_vs_bh5050": {
+      "t_stat": -2.6663,
+      "p_value": 0.0077,
+      "harvey_significant": false
+    }
+  },
+  "bootstrap": {
+    "robust_vs_baseline": {
+      "mean_diff": 0.0187,
+      "ci_lo": -0.0528,
+      "ci_hi": 0.0913
+    },
+    "robust_vs_bh5050": {
+      "mean_diff": -0.0046,
+      "ci_lo": -0.1747,
+      "ci_hi": 0.1668
+    }
+  },
+  "sensitivity": {
+    "floor": [
+      {
+        "value": 0.24,
+        "sharpe": 0.596,
+        "mdd": -35.53,
+        "cagr": 6.26,
+        "calmar": 0.176
+      },
+      {
+        "value": 0.3,
+        "sharpe": 0.5937,
+        "mdd": -35.55,
+        "cagr": 6.26,
+        "calmar": 0.176
+      },
+      {
+        "value": 0.36,
+        "sharpe": 0.5941,
+        "mdd": -35.63,
+        "cagr": 6.27,
+        "calmar": 0.176
+      }
+    ],
+    "cap": [
+      {
+        "value": 0.81,
+        "sharpe": 0.5979,
+        "mdd": -35.55,
+        "cagr": 6.26,
+        "calmar": 0.176
+      },
+      {
+        "value": 0.9,
+        "sharpe": 0.5937,
+        "mdd": -35.55,
+        "cagr": 6.26,
+        "calmar": 0.176
+      },
+      {
+        "value": 0.99,
+        "sharpe": 0.582,
+        "mdd": -35.55,
+        "cagr": 6.22,
+        "calmar": 0.175
+      }
+    ],
+    "lam": [
+      {
+        "value": 0.92,
+        "sharpe": 0.598,
+        "mdd": -35.01,
+        "cagr": 6.26,
+        "calmar": 0.179
+      },
+      {
+        "value": 0.94,
+        "sharpe": 0.5937,
+        "mdd": -35.55,
+        "cagr": 6.26,
+        "calmar": 0.176
+      },
+      {
+        "value": 0.96,
+        "sharpe": 0.5877,
+        "mdd": -35.65,
+        "cagr": 6.25,
+        "calmar": 0.175
+      }
+    ],
+    "pass": true
+  },
+  "cross_oos_2y": {
+    "periods": [
+      {
+        "period": "2006-01-03~2007-12-31",
+        "robust_sharpe": 0.9822,
+        "bh5050_sharpe": 1.0353,
+        "robust_mdd": -10.04,
+        "bh5050_mdd": -15.05,
+        "win": 0,
+        "n_days": 502
+      },
+      {
+        "period": "2008-01-02~2009-12-31",
+        "robust_sharpe": 0.0953,
+        "bh5050_sharpe": 0.0821,
+        "robust_mdd": -35.55,
+        "bh5050_mdd": -36.84,
+        "win": 1,
+        "n_days": 505
+      },
+      {
+        "period": "2010-01-04~2011-12-30",
+        "robust_sharpe": 0.4388,
+        "bh5050_sharpe": 0.7413,
+        "robust_mdd": -10.68,
+        "bh5050_mdd": -9.72,
+        "win": 0,
+        "n_days": 504
+      },
+      {
+        "period": "2012-01-03~2013-12-31",
+        "robust_sharpe": 1.058,
+        "bh5050_sharpe": 0.1014,
+        "robust_mdd": -7.76,
+        "bh5050_mdd": -13.44,
+        "win": 1,
+        "n_days": 502
+      },
+      {
+        "period": "2014-01-02~2015-12-31",
+        "robust_sharpe": -0.1309,
+        "bh5050_sharpe": -0.3117,
+        "robust_mdd": -11.97,
+        "bh5050_mdd": -10.65,
+        "win": 1,
+        "n_days": 504
+      }
+    ],
+    "wins": 3,
+    "total": 5,
+    "pass": true
+  },
+  "cross_oos_4y": {
+    "periods": [
+      {
+        "period": "2006-01-03~2009-12-31",
+        "robust_sharpe": 0.407,
+        "bh5050_sharpe": 0.4341,
+        "robust_mdd": -35.55,
+        "bh5050_mdd": -36.84,
+        "win": 0,
+        "n_days": 1007
+      },
+      {
+        "period": "2010-01-04~2013-12-31",
+        "robust_sharpe": 0.6936,
+        "bh5050_sharpe": 0.4487,
+        "robust_mdd": -10.68,
+        "bh5050_mdd": -13.44,
+        "win": 1,
+        "n_days": 1006
+      },
+      {
+        "period": "2014-01-02~2017-12-29",
+        "robust_sharpe": 0.5719,
+        "bh5050_sharpe": 0.3893,
+        "robust_mdd": -11.97,
+        "bh5050_mdd": -11.78,
+        "win": 1,
+        "n_days": 1007
+      },
+      {
+        "period": "2018-01-02~2021-12-31",
+        "robust_sharpe": 0.623,
+        "bh5050_sharpe": 0.7456,
+        "robust_mdd": -23.98,
+        "bh5050_mdd": -21.85,
+        "win": 0,
+        "n_days": 1008
+      },
+      {
+        "period": "2022-01-03~2025-12-31",
+        "robust_sharpe": 0.8119,
+        "bh5050_sharpe": 1.0394,
+        "robust_mdd": -19.89,
+        "bh5050_mdd": -19.15,
+        "win": 0,
+        "n_days": 1003
+      }
+    ],
+    "wins": 2,
+    "total": 5,
+    "pass": false
+  },
+  "common_start_eval": {
+    "robust_vt_spy_only": {
+      "sharpe": 0.873,
+      "sortino": 0.8314,
+      "cagr": 11.29,
+      "mdd": -12.86,
+      "calmar": 0.878,
+      "win_rate_monthly": 71.8,
+      "ann_vol": 10.06,
+      "skew": 0.153,
+      "kurtosis": 9.225,
+      "n_days": 818
+    },
+    "robust_vt_spy_gld": {
+      "sharpe": 1.4092,
+      "sortino": 1.3749,
+      "cagr": 17.78,
+      "mdd": -12.12,
+      "calmar": 1.467,
+      "win_rate_monthly": 71.8,
+      "ann_vol": 12.49,
+      "skew": 0.33,
+      "kurtosis": 10.981,
+      "n_days": 818
+    },
+    "eval_period": "2023-01-04 ~ present"
+  },
+  "listing_criteria": {
+    "criterion_1_same_period": {
+      "robust_vt_spy_only": {
+        "sharpe": 0.873,
+        "sortino": 0.8314,
+        "cagr": 11.29,
+        "mdd": -12.86,
+        "calmar": 0.878,
+        "win_rate_monthly": 71.8,
+        "ann_vol": 10.06,
+        "skew": 0.153,
+        "kurtosis": 9.225,
+        "n_days": 818
+      },
+      "robust_vt_spy_gld": {
+        "sharpe": 1.4092,
+        "sortino": 1.3749,
+        "cagr": 17.78,
+        "mdd": -12.12,
+        "calmar": 1.467,
+        "win_rate_monthly": 71.8,
+        "ann_vol": 12.49,
+        "skew": 0.33,
+        "kurtosis": 10.981,
+        "n_days": 818
+      },
+      "eval_period": "2023-01-04 ~ present"
+    },
+    "criterion_2_cross_oos": {
+      "2y": true,
+      "4y": false
+    },
+    "criterion_3_codex_review": "pending",
+    "criterion_4_sensitivity": true,
+    "criterion_5_mdd": {
+      "mdd_pct_common_start": -12.12,
+      "mdd_pct_full_sample": -35.55,
+      "pass_common_start": true,
+      "note": "Listing criterion uses COMMON_START (2023-01-04) period, not full sample"
+    }
+  },
+  "conclusions": {
+    "robust_vs_baseline_sharpe_diff": 0.018399999999999972,
+    "robust_reduces_turnover": true,
+    "key_findings": [
+      "Floor/Cap prevents extreme positions (too leveraged or too defensive)",
+      "EWMA smoothing reduces signal whipsaw and turnover",
+      "Weekly rebalance balances responsiveness vs transaction costs",
+      "VT remains drawdown insurance, not alpha generator"
+    ]
+  },
+  "references": [
+    "K687: Post-Correction Strategy Ranking",
+    "K743: Investor Behavior Under VT (original Robust VT)",
+    "K846: 50/50 Triple Moat",
+    "K859: Robust VT Clean Redo",
+    "Moreira & Muir (2017), Volatility-Managed Portfolios, JF",
+    "Harvey et al. (2016), t>3.0 threshold"
+  ],
+  "proposer": "Claude"
+}
