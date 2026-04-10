@@ -570,6 +570,7 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [x] **K1014: HAR-PD Path-Dependent Features** — Path features 惡化 HAR（multicollinearity trap）。vix_gap 唯一顯著（t=7.27）。HAR 仍是 QLIKE(r²) 最強。衍生：HAR+vix_gap 簡約模型
 - [x] **K1015: VIX9D+VIX3M Dual-Factor A4f — NULL**。θ₂=0，退化為單因子。DM t=-0.298 (Dual) / t=-1.333 (Slope) 全 NS。VIX9D 完全吸收 VIX3M。VIX sufficiency #30
 - [x] **K1016: HAR+vix_gap — In-Sample Overfit**。vix_gap IS t=18.43 但 OOS QLIKE(r²) 惡化（1.831 vs HAR 1.616）。|r| MSE 改善（DM=-2.869 未達 Harvey）。86.5% 時間 VIX>realized 導致系統性高估。教科書級過擬合
+- [x] **K1019: MS(2)-GJR ★ — Regime Dynamics Real**。MS-GJR 顯著勝 GJR（DM t=-3.20 PASS）但輸 A4f-VIX9D（DM t=+2.75 NS）。Calm: γ=0.60; Crisis: pure β=0.83。Regime prob 與 VIX 弱相關 r=0.225。衍生：MS-A4f 結合兩者
 
 **中優先（新研究主題）：**
 - [x] **K1016: HAR+vix_gap** ⚠️ MIXED：在 MSE(|r|) 改善（DM=-2.87）但在 QLIKE(r²) 惡化（1.616→1.831）。M4/M5 bug（A4f=GJR）。agent 回報不準確已修正。需重做
