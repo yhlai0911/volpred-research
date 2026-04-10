@@ -1,39 +1,47 @@
 {
-  "timestamp": "2026-04-08T18:17:02.907123+00:00",
+  "timestamp": "2026-04-10T06:14:12Z",
   "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
-      "status": "ok",
-      "detail": "4 draft articles in pool (threshold: 3)"
+      "status": "alert",
+      "detail": "2 draft articles in pool (threshold: 3). Pool is low — cron may release faster than articles are written."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
-      "status": "alert",
-      "detail": "storage/strategy_metrics.json is 144.1 hours old (threshold: 26h). Needs recalc_metrics.py run."
+      "status": "ok",
+      "detail": "strategy_metrics.json is 11.9h old (threshold: 26h)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "No entries for 2026-04-08 or 2026-04-07. Latest: 2026-03-31 session cron 空轉 issue."
+      "detail": "Recent entry (yesterday 2026-04-09): 2026-04-09: 文章 tags 再次遺失 — schema INT/str 型別不符導致 article_tags 無聲失效"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies last_date=2026-04-07. Each has 1 null (today not yet filled). No strategy exceeds >2 nulls threshold."
+      "detail": "All 14 strategies: last 3 entries have exactly 1 null (most recent day pending). No strategy exceeds threshold of >2 nulls."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50)"
+      "detail": "0 uncommitted files"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1776 entries in knowledge.json"
+      "detail": "6678 entries in knowledge.json"
     }
   ],
   "alerts": [
-    "metrics stale: storage/strategy_metrics.json is 144.1 hours old — run: uv run python scripts/recalc_metrics.py"
-  ]
+    "article pool low"
+  ],
+  "summary": {
+    "draft_articles": 2,
+    "metrics_age_hours": 11.9,
+    "uncommitted_files": 0,
+    "knowledge_entries": 6678,
+    "paper_trading_strategies_checked": 14,
+    "paper_trading_max_nulls": 1
+  }
 }
