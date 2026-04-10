@@ -22959,5 +22959,37 @@
       "K1005",
       "K1026"
     ]
+  },
+  {
+    "id": "know_20260410171852_k1035",
+    "type": "knowledge",
+    "title": "K1035: ★★ EVT-GPD Rescues GJR (0/4→4/4 Trinity), Unnecessary for A4f",
+    "content": "[提出: Claude, 執行: Claude] EVT-GPD 尾部建模大幅改善 GJR-GARCH 的 VaR 校準：GJR-t 0/4 Trinity → GJR-EVT 4/4 Trinity（SPY+QQQ × 2.5%+1%）。這是對 K159（Trinity 3/12）的重大改進。但 A4f-t 已經 4/4 Trinity PASS，加上 EVT 不提供額外改善。原因：A4f 的 VIX 乘法縮放已內化尾部風險——GPD shape ξ=0.055 (A4f) vs 0.103 (GJR)，A4f 殘差尾部更輕。A4f-EVT 的 violation rate 稍優（SPY 2.5%: 0.0224 vs A4f-t 0.0268），但都在可接受範圍。QLIKE：A4f 顯著勝 GJR (SPY DM t=-3.08)。**實務建議**：用 GJR 的機構應加 EVT-GPD；用 A4f 的機構 Student-t(df=8) 已足夠。**與 K1034 比較**：CF-Rolling 也達 6/6 Trinity（不同資產集），兩者都是有效的尾部校準方法，CF 更簡單。",
+    "confidence": 0.9,
+    "category": "var_methods",
+    "tags": [
+      "EVT",
+      "GPD",
+      "VaR",
+      "Trinity-test",
+      "A4f",
+      "GJR-GARCH",
+      "risk-management",
+      "tail-risk"
+    ],
+    "experiment_ids": [
+      "K1035"
+    ],
+    "timestamp": "2026-04-10T17:18:52.683161+00:00",
+    "source": "experiment",
+    "data_source": "yfinance (SPY, QQQ, ^VIX)",
+    "sample_period": "2005-2026, OOS 2019-01-01",
+    "references": [
+      "K159",
+      "K536",
+      "K995",
+      "K1000",
+      "K1034"
+    ]
   }
 ]

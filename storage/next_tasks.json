@@ -1,35 +1,36 @@
 [
   {
-    "id": "K1031",
-    "title": "K1031: Bayesian SSVS ARX-GARCH (joint estimation)",
-    "priority": 1,
-    "status": "completed"
-  },
-  {
-    "id": "K1032",
-    "title": "K1032: A4f 日本市場（N225/EWJ）",
-    "priority": 1,
-    "status": "completed",
-    "description": "K1030 歐洲成功（DM t=-3.64/-3.45）。日本是否也有效？US VIX + RV20 as fear proxy"
-  },
-  {
-    "id": "K1033",
-    "title": "K1033: A4f Refit Frequency Sensitivity（Paper 9 robustness）",
-    "priority": 2,
-    "description": "Paper 9 第 277 行需要 refit frequency sensitivity。測 refit=21/42/63/126/252 對 QLIKE 的影響。SPY + QQQ",
-    "status": "completed"
-  },
-  {
     "id": "K1034",
     "title": "K1034: Cornish-Fisher Expansion VaR",
-    "priority": 3,
-    "description": "面向 B 待做。用偏態/峰態修正 Normal VaR，比較 CF-VaR vs parametric t-VaR vs FHS。快速新方向"
+    "priority": 1,
+    "status": "completed",
+    "description": "★★★ CF-Rolling 6/6 Trinity PASS (Normal 0/6, Student-t 1/6). 最佳 VaR 方法"
   },
   {
     "id": "K1035",
     "title": "K1035: EVT-VaR（Peaks-over-Threshold）",
-    "priority": 3,
-    "description": "面向 B 待做。極值理論 VaR，GPD 擬合尾部。比較 EVT-VaR vs GARCH-t VaR vs conformal VaR"
+    "priority": 1,
+    "status": "completed",
+    "description": "★★ GJR-EVT rescues GJR (0/4→4/4), unnecessary for A4f (already 4/4)"
+  },
+  {
+    "id": "K1036",
+    "title": "K1036: A4f + CF-Rolling VaR（最佳模型 + 最佳 VaR 方法結合）",
+    "priority": 1,
+    "description": "K1034 + K1035 的自然延伸。A4f 是最佳 QLIKE 模型，CF-Rolling 是最佳 VaR 方法。結合後是否能進一步改善？"
+  },
+  {
+    "id": "K1037",
+    "title": "K1037: Probabilistic RV Quantile Forecasting",
+    "priority": 2,
+    "description": "arXiv:2508.15922。從 HAR/GARCH 點預測到條件分位數。新方向"
+  },
+  {
+    "id": "Paper9_review",
+    "title": "Paper 9 論文審查與修正",
+    "priority": 1,
+    "description": "2026-04-11 13:00 開始。latex-academic-reviewer + citation-verifier",
+    "status": "pending"
   },
   {
     "id": "Paper6_start",

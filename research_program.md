@@ -167,10 +167,12 @@
 - Adaptive sigma floor
 - Multi-step VaR（proper GARCH h-step formula）
 - VIX/GARCH ratio 作為 VaR reliability indicator
-- **Cornish-Fisher expansion**（CF-VaR: 用偏態/峰態修正 Normal VaR）
+- **★★★ Cornish-Fisher Rolling VaR (K1034)**：CF-Rolling 6/6 Trinity PASS（Normal 0/6, Student-t 1/6）。用 rolling 偏態/峰態修正 quantile，無需假設特定分配。**目前最佳 VaR 方法**
+- **★★ EVT-GPD VaR (K1035)**：GJR-EVT rescues GJR（0/4→4/4 Trinity PASS），但 A4f 本身已 4/4 不需 EVT。EVT 是 weak model 的補救工具，非 strong model 的加分項
+- **VaR 方法排名（K1034+K1035 綜合）**：CF-Rolling ≥ EVT > Student-t >> Normal
 - **Copula-based VaR**（多資產聯合尾部風險）
-- **EVT-VaR**（極值理論, Peaks-over-Threshold）
 - Monte Carlo VaR（GARCH 路徑模擬）
+- [ ] **A4f + CF-Rolling 結合**：最佳預測模型 + 最佳 VaR 方法，預期最強 risk management 組合
 
 ### 面向 C: 投資策略
 - Volatility Targeting（12/VIX, EWMA VT, Hybrid VT）
