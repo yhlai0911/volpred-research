@@ -1,178 +1,354 @@
 {
   "experiment_id": "K1030",
-  "title": "A4f Sub-Period Robustness Analysis",
-  "timestamp": "2026-04-10T10:58:29.214824+00:00",
-  "data_source": "yfinance (SPY, ^VIX)",
-  "data_period": "2005-01-04 to 2026-04-09",
-  "n_total": 5349,
-  "n_oos_total": 3337,
-  "window": 2000,
-  "refit_every": 63,
-  "student_t_df": 8,
-  "models": [
-    "A4f-VIX2-t(df=8)",
-    "GJR-t(df=8)"
-  ],
-  "evaluation": "QLIKE on r2 (Patton 2011)",
-  "sub_periods": {
-    "P1": {
-      "period": "P1",
-      "start": "2013-01-01",
-      "end": "2014-12-31",
-      "description": "Low vol, post-crisis recovery",
-      "n_obs": 501,
-      "avg_vix": 14.2,
-      "max_vix": 25.27,
-      "min_vix": 10.32,
-      "ann_vol": 0.1117,
-      "ann_ret": 0.2031,
-      "gjr_qlike": 1.464745,
-      "a4f_qlike": 1.37007,
-      "improvement_pct": 6.4635,
-      "dm_t_stat": -4.3127,
-      "dm_p_value": 0.0,
-      "winner": "A4f"
+  "title": "A4f Cross-Market Validation: European Equity (EURO STOXX 50 + FEZ)",
+  "status": "completed",
+  "timestamp": "2026-04-10T11:35:15.440491+00:00",
+  "elapsed_seconds": 1126.0,
+  "seed": 42,
+  "config": {
+    "data_start": "2005-01-01",
+    "data_end": "2026-04-10",
+    "oos_start": "2019-01-01",
+    "window": 2000,
+    "refit_every": 63,
+    "df_fixed": 8,
+    "rv_window": 20,
+    "note": "VSTOXX unavailable from yfinance; used own 20d RV as local fear proxy"
+  },
+  "assets": {
+    "^STOXX50E": {
+      "status": "completed",
+      "label": "EURO STOXX 50 Index",
+      "descriptive_stats": {
+        "n_total": 4638,
+        "n_oos": 1778,
+        "data_start": "2007-05-02",
+        "data_end": "2026-04-09",
+        "oos_mean_return_ann": 0.09235489816670221,
+        "oos_vol_ann": 0.19764321677176447,
+        "oos_skewness": -0.8960181624149713,
+        "oos_kurtosis": 12.559510580173155,
+        "corr_vix_r2_oos": 0.44438192678014427,
+        "corr_rv20_r2_oos": 0.3539910434094722,
+        "corr_vix_rv20_oos": 0.7823079192605928
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.564575385789251,
+          "spearman": 0.3179806262303932,
+          "n_valid": 1778,
+          "time_s": 74.9
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.5126242539151697,
+          "spearman": 0.351970790566808,
+          "n_valid": 1778,
+          "time_s": 204.0,
+          "dm_vs_gjr_t": -3.6424,
+          "dm_vs_gjr_p": 0.0003,
+          "sig_harvey": true
+        },
+        "A4f-RV20-t": {
+          "qlike": 1.5563650477204067,
+          "spearman": 0.321365231163974,
+          "n_valid": 1778,
+          "time_s": 304.8,
+          "dm_vs_gjr_t": -1.6532,
+          "dm_vs_gjr_p": 0.0985,
+          "sig_harvey": false,
+          "dm_vs_a4f_vix_t": 3.5631,
+          "dm_vs_a4f_vix_p": 0.0004
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -3.6424,
+          "dm_p": 0.0003,
+          "significant_harvey": true
+        },
+        "A4f_RV20_vs_GJR": {
+          "dm_t": -1.6532,
+          "dm_p": 0.0985,
+          "significant_harvey": false
+        },
+        "A4f_RV20_vs_A4f_VIX": {
+          "dm_t": 3.5631,
+          "dm_p": 0.0004
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 3.32,
+        "A4f_RV20_vs_GJR": 0.52
+      },
+      "var_es_backtesting": {
+        "VaR_2.5%": {
+          "GJR": {
+            "violation_rate": 0.03487064116985377,
+            "kupiec_p": 0.011793295635413092,
+            "pass": "FAIL"
+          },
+          "A4f_VIX": {
+            "violation_rate": 0.0281214848143982,
+            "kupiec_p": 0.40835264081813183,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "violation_rate": 0.0343082114735658,
+            "kupiec_p": 0.01723197409946875,
+            "pass": "FAIL"
+          }
+        },
+        "ES_2.5%": {
+          "GJR": {
+            "z_stat": 2.578244639968255,
+            "p_value": 0.9950348166918129,
+            "pass": "PASS"
+          },
+          "A4f_VIX": {
+            "z_stat": 2.1995294126636997,
+            "p_value": 0.9860798499484525,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "z_stat": 2.5493580002702467,
+            "p_value": 0.9946039274467324,
+            "pass": "PASS"
+          }
+        },
+        "VaR_1%": {
+          "GJR": {
+            "violation_rate": 0.021372328458942633,
+            "kupiec_p": 2.8488915769897538e-05,
+            "pass": "FAIL"
+          },
+          "A4f_VIX": {
+            "violation_rate": 0.015748031496062992,
+            "kupiec_p": 0.02461529376864191,
+            "pass": "FAIL"
+          },
+          "A4f_RV20": {
+            "violation_rate": 0.020247469066366704,
+            "kupiec_p": 0.00013712269264987142,
+            "pass": "FAIL"
+          }
+        },
+        "ES_1%": {
+          "GJR": {
+            "z_stat": 3.299113129817294,
+            "p_value": 0.9995150459250739,
+            "pass": "PASS"
+          },
+          "A4f_VIX": {
+            "z_stat": 2.603632408718272,
+            "p_value": 0.9953879185113939,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "z_stat": 3.1897664529235192,
+            "p_value": 0.9992880609434329,
+            "pass": "PASS"
+          }
+        }
+      },
+      "regime_analysis": {
+        "Low (<20)": {
+          "n": 1076,
+          "qlike_gjr": 1.4698564934701888,
+          "qlike_a4f_vix": 1.4626499874402552,
+          "qlike_a4f_rv20": 1.4692315356678494,
+          "dm_t_vix_vs_gjr": -0.8266251661657368
+        },
+        "Med (20-30)": {
+          "n": 556,
+          "qlike_gjr": 1.766154855421596,
+          "qlike_a4f_vix": 1.6360978347361776,
+          "qlike_a4f_rv20": 1.740874640261348,
+          "dm_t_vix_vs_gjr": -3.1534188597946065
+        },
+        "High (>30)": {
+          "n": 146,
+          "qlike_gjr": 1.4949818448284795,
+          "qlike_a4f_vix": 1.4107132935763191,
+          "qlike_a4f_rv20": 1.4958741265956699,
+          "dm_t_vix_vs_gjr": -1.4628487093571205
+        }
+      }
     },
-    "P2": {
-      "period": "P2",
-      "start": "2015-01-01",
-      "end": "2016-12-31",
-      "description": "Mid vol, oil crash + Brexit",
-      "n_obs": 503,
-      "avg_vix": 16.25,
-      "max_vix": 40.74,
-      "min_vix": 11.27,
-      "ann_vol": 0.143,
-      "ann_ret": 0.0628,
-      "gjr_qlike": 1.605305,
-      "a4f_qlike": 1.499099,
-      "improvement_pct": 6.616,
-      "dm_t_stat": -3.4825,
-      "dm_p_value": 0.0005,
-      "winner": "A4f"
-    },
-    "P3": {
-      "period": "P3",
-      "start": "2017-01-01",
-      "end": "2018-12-31",
-      "description": "Low vol then vol spike",
-      "n_obs": 499,
-      "avg_vix": 13.87,
-      "max_vix": 37.32,
-      "min_vix": 9.14,
-      "ann_vol": 0.13,
-      "ann_ret": 0.0751,
-      "gjr_qlike": 1.738264,
-      "a4f_qlike": 1.62782,
-      "improvement_pct": 6.3537,
-      "dm_t_stat": -2.1193,
-      "dm_p_value": 0.0346,
-      "winner": "A4f"
-    },
-    "P4": {
-      "period": "P4",
-      "start": "2019-01-01",
-      "end": "2020-12-31",
-      "description": "COVID crash + recovery",
-      "n_obs": 505,
-      "avg_vix": 22.33,
-      "max_vix": 82.69,
-      "min_vix": 11.54,
-      "ann_vol": 0.2538,
-      "ann_ret": 0.2196,
-      "gjr_qlike": 1.5165,
-      "a4f_qlike": 1.393765,
-      "improvement_pct": 8.0933,
-      "dm_t_stat": -1.7987,
-      "dm_p_value": 0.0727,
-      "winner": "A4f"
-    },
-    "P5": {
-      "period": "P5",
-      "start": "2021-01-01",
-      "end": "2022-12-31",
-      "description": "Inflation + rate hikes + bear",
-      "n_obs": 502,
-      "avg_vix": 22.63,
-      "max_vix": 37.21,
-      "min_vix": 15.01,
-      "ann_vol": 0.1948,
-      "ann_ret": 0.026,
-      "gjr_qlike": 1.389508,
-      "a4f_qlike": 1.299442,
-      "improvement_pct": 6.4819,
-      "dm_t_stat": -2.692,
-      "dm_p_value": 0.0073,
-      "winner": "A4f"
-    },
-    "P6": {
-      "period": "P6",
-      "start": "2023-01-01",
-      "end": "2024-12-31",
-      "description": "AI rally + normalization",
-      "n_obs": 501,
-      "avg_vix": 16.24,
-      "max_vix": 38.57,
-      "min_vix": 11.86,
-      "ann_vol": 0.1281,
-      "ann_ret": 0.2283,
-      "gjr_qlike": 1.507807,
-      "a4f_qlike": 1.435276,
-      "improvement_pct": 4.8104,
-      "dm_t_stat": -2.7027,
-      "dm_p_value": 0.0071,
-      "winner": "A4f"
-    },
-    "P7": {
-      "period": "P7",
-      "start": "2025-01-01",
-      "end": "2026-12-31",
-      "description": "Tariff war volatility",
-      "n_obs": 317,
-      "avg_vix": 19.33,
-      "max_vix": 52.33,
-      "min_vix": 13.47,
-      "ann_vol": 0.1843,
-      "ann_ret": 0.1295,
-      "gjr_qlike": 1.644717,
-      "a4f_qlike": 1.532191,
-      "improvement_pct": 6.8417,
-      "dm_t_stat": -3.2992,
-      "dm_p_value": 0.0011,
-      "winner": "A4f"
+    "FEZ": {
+      "status": "completed",
+      "label": "SPDR EURO STOXX 50 ETF (US-traded)",
+      "descriptive_stats": {
+        "n_total": 5330,
+        "n_oos": 1827,
+        "data_start": "2005-02-01",
+        "data_end": "2026-04-09",
+        "oos_mean_return_ann": 0.12165298587453242,
+        "oos_vol_ann": 0.2255191555592022,
+        "oos_skewness": -0.8414861997249418,
+        "oos_kurtosis": 11.926528081429064,
+        "corr_vix_r2_oos": 0.4948281581725546,
+        "corr_rv20_r2_oos": 0.3990157795872359,
+        "corr_vix_rv20_oos": 0.7930536422382134
+      },
+      "models": {
+        "GJR-t": {
+          "qlike": 1.4223067614733977,
+          "spearman": 0.29723729721868775,
+          "n_valid": 1827,
+          "time_s": 59.6
+        },
+        "A4f-VIX-t": {
+          "qlike": 1.3710633181019123,
+          "spearman": 0.3296343061199971,
+          "n_valid": 1827,
+          "time_s": 173.3,
+          "dm_vs_gjr_t": -3.4541,
+          "dm_vs_gjr_p": 0.0006,
+          "sig_harvey": true
+        },
+        "A4f-RV20-t": {
+          "qlike": 1.422895925896167,
+          "spearman": 0.30080629461055675,
+          "n_valid": 1827,
+          "time_s": 307.7,
+          "dm_vs_gjr_t": 0.2917,
+          "dm_vs_gjr_p": 0.7706,
+          "sig_harvey": false,
+          "dm_vs_a4f_vix_t": 3.265,
+          "dm_vs_a4f_vix_p": 0.0011
+        }
+      },
+      "dm_tests": {
+        "A4f_VIX_vs_GJR": {
+          "dm_t": -3.4541,
+          "dm_p": 0.0006,
+          "significant_harvey": true
+        },
+        "A4f_RV20_vs_GJR": {
+          "dm_t": 0.2917,
+          "dm_p": 0.7706,
+          "significant_harvey": false
+        },
+        "A4f_RV20_vs_A4f_VIX": {
+          "dm_t": 3.265,
+          "dm_p": 0.0011
+        }
+      },
+      "qlike_improvement_pct": {
+        "A4f_VIX_vs_GJR": 3.6,
+        "A4f_RV20_vs_GJR": -0.04
+      },
+      "var_es_backtesting": {
+        "VaR_2.5%": {
+          "GJR": {
+            "violation_rate": 0.03886152162014231,
+            "kupiec_p": 0.0004405028217822071,
+            "pass": "FAIL"
+          },
+          "A4f_VIX": {
+            "violation_rate": 0.03393541324575807,
+            "kupiec_p": 0.020224669192298483,
+            "pass": "FAIL"
+          },
+          "A4f_RV20": {
+            "violation_rate": 0.03886152162014231,
+            "kupiec_p": 0.0004405028217822071,
+            "pass": "FAIL"
+          }
+        },
+        "ES_2.5%": {
+          "GJR": {
+            "z_stat": 2.6094476069481933,
+            "p_value": 0.9954655733901943,
+            "pass": "PASS"
+          },
+          "A4f_VIX": {
+            "z_stat": 2.300550054717025,
+            "p_value": 0.9892914615461944,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "z_stat": 2.6117175854290546,
+            "p_value": 0.9954955679972346,
+            "pass": "PASS"
+          }
+        },
+        "VaR_1%": {
+          "GJR": {
+            "violation_rate": 0.01751505199781062,
+            "kupiec_p": 0.003522458858427613,
+            "pass": "FAIL"
+          },
+          "A4f_VIX": {
+            "violation_rate": 0.00875752599890531,
+            "kupiec_p": 0.5855453861991824,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "violation_rate": 0.016967706622879036,
+            "kupiec_p": 0.006483098302117463,
+            "pass": "FAIL"
+          }
+        },
+        "ES_1%": {
+          "GJR": {
+            "z_stat": 2.791373880844846,
+            "p_value": 0.997375759640774,
+            "pass": "PASS"
+          },
+          "A4f_VIX": {
+            "z_stat": 1.8627014883332729,
+            "p_value": 0.9687478618109225,
+            "pass": "PASS"
+          },
+          "A4f_RV20": {
+            "z_stat": 2.745506709606513,
+            "p_value": 0.996979123399293,
+            "pass": "PASS"
+          }
+        }
+      },
+      "regime_analysis": {
+        "Low (<20)": {
+          "n": 1109,
+          "qlike_gjr": 1.3512461613772095,
+          "qlike_a4f_vix": 1.3414166797988083,
+          "qlike_a4f_rv20": 1.3499165166856681,
+          "dm_t_vix_vs_gjr": -1.271377717702489
+        },
+        "Med (20-30)": {
+          "n": 569,
+          "qlike_gjr": 1.5033737181484925,
+          "qlike_a4f_vix": 1.4101822836139897,
+          "qlike_a4f_rv20": 1.5039849597868924,
+          "dm_t_vix_vs_gjr": -2.525992509675416
+        },
+        "High (>30)": {
+          "n": 149,
+          "qlike_gjr": 1.6395136714356686,
+          "qlike_a4f_vix": 1.4415941007803728,
+          "qlike_a4f_rv20": 1.6541848251128697,
+          "dm_t_vix_vs_gjr": -1.9172128022518446
+        }
+      }
     }
   },
   "summary": {
-    "n_periods": 7,
-    "a4f_wins": 7,
-    "a4f_win_rate": 1.0,
-    "mean_improvement_pct": 6.5229,
-    "median_improvement_pct": 6.4819,
-    "min_improvement_pct": 4.8104,
-    "max_improvement_pct": 8.0933,
-    "mean_dm_t_stat": -2.9153,
-    "n_periods_dm_significant_3": 3,
-    "n_periods_dm_significant_2": 6,
-    "n_periods_dm_significant_1_96": 6,
-    "conclusion": "A4f robustly outperforms GJR across ALL regimes -- advantage not driven by any single period",
-    "vix_improvement_spearman_rho": 0.6786,
-    "vix_improvement_spearman_p": 0.0938
+    "n_completed": 2,
+    "n_vix_sig_harvey": 2,
+    "n_rv20_sig_harvey": 0,
+    "conclusion": "A4f-VIX significantly improves vol forecasting for EURO STOXX 50 (DM t=-3.642, QLIKE improvement +3.3%); A4f-RV20 not significant (DM t=-1.653)"
   },
+  "data_source": "yfinance: ^STOXX50E, FEZ, ^VIX",
   "references": [
     "Engle, Ghysels & Sohn (2013). Stock Market Volatility and Macroeconomic Fundamentals. RES 95(3):776-797.",
-    "Conrad & Loch (2015). Anticipating Long-Term Stock Market Volatility. JBES 33(3):338-358.",
     "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256.",
-    "Harvey et al. (2016). Testing the accuracy of out-of-sample forecasts."
-  ],
-  "seed": 42,
-  "full_oos": {
-    "gjr_qlike": 1.5471309784721399,
-    "a4f_qlike": 1.4464190617399786,
-    "improvement_pct": 6.509592150473178,
-    "dm_t_stat": -6.53461642412665,
-    "dm_p_value": 7.351519393239414e-11,
-    "n_obs": 3328
-  },
-  "runtime_seconds": 253.3,
-  "refit_count": 53
+    "Harvey et al. (2016). t > 3.0 threshold for multiple testing.",
+    "Kupiec (1995). Techniques for Verifying the Accuracy of Risk Measurement Models.",
+    "Acerbi & Szekely (2014). Back-testing Expected Shortfall.",
+    "K988: A4f champion for SPY (DM t=+4.48)",
+    "K994: Cross-asset (QQQ pass, others not sig with US VIX)",
+    "K997: Local fear indices (GLD+GVZ pass)",
+    "K1022: Cross-asset robustness with Student-t df=8"
+  ]
 }

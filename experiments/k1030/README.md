@@ -1,106 +1,78 @@
-# K1030: A4f Sub-Period Robustness Analysis
+# K1030: A4f Cross-Market Validation — European Equity (EURO STOXX 50)
 
-**Paper 9 必備 robustness test**
+**[提出: 賴奕豪, 執行: Claude]**
 
-## 研究問題
+## 問題與動機
 
-K988 顯示 A4f(VIX²) 在 SPY 全期 OOS (2013-2026) 中以 DM t=-6.53 顯著優於 GJR。審稿人必問：「你的結果是否被 COVID 驅動？」本實驗在 7 個非重疊 2 年子期間測試 A4f 的穩健性。
+K994/K997 證明 A4f 需要 asset-specific fear index 才能跨市場泛化。K756 測試了 12 個國際市場但只用 US VIX。本實驗測試 A4f 在歐洲市場（EURO STOXX 50）的效果，使用 VIX 和 own-RV20 作為 τ 驅動。
 
-## 動機
-
-- 波動率預測文獻中，sub-period analysis 是標準 robustness check
-- COVID 期間 (2019-2020) VIX 曾達 82.7，可能主導整體結果
-- 需要證明 A4f 在低、中、高波動環境下均有效
+原計劃使用 VSTOXX（歐洲 VIX），但該指標在 yfinance 上不可用。改用 20 日實現波動率（RV20）作為本地 fear proxy，延續 K997 對 EEM/0050.TW 的做法。
 
 ## 方法
 
-### 模型
-- **A4f-VIX²-t(df=8)**: τ = θ₀ + θ₁ × VIX²_{t-1}, ω free, Student-t(8)
-- **GJR-t(df=8)**: baseline
+- **資產**: ^STOXX50E (EURO STOXX 50 Index) + FEZ (US-traded ETF)
+- **模型**:
+  - M1: GJR-t(df=8) — baseline
+  - M2: A4f-VIX-t(df=8) — US VIX as τ driver
+  - M3: A4f-RV20-t(df=8) — own 20d realized vol as τ driver
+- **配置**: OOS 2019-01-01, window=2000, refit/63d, seed=42
+- **評估**: QLIKE on r², DM test (Harvey |t|>3.0), VaR/ES backtesting, Spearman rank correlation
 
-### 子期間
-| Period | 期間 | 特徵 |
-|--------|------|------|
-| P1 | 2013-2014 | 低波動，危機後復甦 |
-| P2 | 2015-2016 | 中波動，油價崩盤 + Brexit |
-| P3 | 2017-2018 | 低波動 → 波動飆升 |
-| P4 | 2019-2020 | COVID 崩盤 + 復甦 |
-| P5 | 2021-2022 | 通膨 + 升息 + 熊市 |
-| P6 | 2023-2024 | AI 漲勢 + 正常化 |
-| P7 | 2025-2026 | 關稅戰波動（最新） |
+## 關鍵結果
 
-### 評估
-- QLIKE on r² (Patton 2011, proxy-robust)
-- DM test (Newey-West HAC)
-- 注意：子期間樣本 ~500 天，DM test power 有限，報告但不嚴格依賴 Harvey t>3.0
+### QLIKE 與 DM 檢定
 
-## 結果
+| Asset | QLIKE GJR | QLIKE A4f-VIX | Improvement | DM t-stat | Significant? |
+|-------|-----------|---------------|-------------|-----------|-------------|
+| ^STOXX50E | 1.5646 | 1.5126 | +3.3% | -3.642 | **YES** (|t|>3.0) |
+| FEZ | 1.4223 | 1.3711 | +3.6% | -3.454 | **YES** (|t|>3.0) |
 
-### 全期 OOS (2013-2026)
-- GJR QLIKE: 1.547131
-- A4f QLIKE: 1.446419
-- **改善: +6.51%**
-- **DM t-stat: -6.535** (遠超 Harvey t>3.0)
+A4f-RV20 is NOT significant for either asset (DM t=-1.65 / +0.29).
 
-### 子期間結果
+### VaR/ES Scorecard (^STOXX50E)
 
-| Period | N | Avg VIX | GJR QLIKE | A4f QLIKE | 改善% | DM t | Winner |
-|--------|---|---------|-----------|-----------|-------|------|--------|
-| P1 (2013-14) | 501 | 14.2 | 1.4647 | 1.3701 | +6.46% | -4.31 | A4f |
-| P2 (2015-16) | 503 | 16.3 | 1.6053 | 1.4991 | +6.62% | -3.48 | A4f |
-| P3 (2017-18) | 502 | 13.9 | 1.7383 | 1.6278 | +6.35% | -2.12 | A4f |
-| P4 (2019-20) | 505 | 22.3 | 1.5165 | 1.3938 | **+8.09%** | -1.80 | A4f |
-| P5 (2021-22) | 503 | 22.6 | 1.3895 | 1.2994 | +6.48% | -2.69 | A4f |
-| P6 (2023-24) | 502 | 16.2 | 1.5078 | 1.4353 | +4.81% | -2.70 | A4f |
-| P7 (2025-26) | 317 | 19.3 | 1.6447 | 1.5322 | +6.84% | -3.30 | A4f |
+| Model | VaR 2.5% | VaR 1% | ES 2.5% | ES 1% |
+|-------|----------|--------|---------|-------|
+| GJR-t | FAIL | FAIL | PASS | PASS |
+| A4f-VIX-t | **PASS** | FAIL | PASS | PASS |
+| A4f-RV20-t | FAIL | FAIL | PASS | PASS |
 
-### 關鍵統計
-- **A4f 勝率: 7/7 (100%)**
-- 平均 QLIKE 改善: +6.52%
-- 改善範圍: [+4.81%, +8.09%]
-- Spearman(avg_VIX, improvement): rho=0.679 (p=0.094) — 高 VIX 時改善略大但非顯著
+For FEZ: A4f-VIX passes VaR 1% (p=0.586), while GJR and RV20 fail.
 
-### DM 顯著性
-- |t| > 3.0 (Harvey threshold): 3/7 期間 (P1, P2, P7)
-- |t| > 2.0: 5/7 期間
-- |t| > 1.96: 5/7 期間
-- 注意: 子期間 N~500，DM power 有限。全期 DM=-6.53 為最可靠的統計推論
+### Regime Analysis
+
+VIX 效果在 Medium VIX (20-30) 最強：
+- ^STOXX50E Medium: DM t=-3.15, QLIKE 改善 7.4%
+- FEZ Medium: DM t=-2.53, QLIKE 改善 6.2%
 
 ## 結論
 
-**A4f 穩健地優於 GJR，在所有 7 個子期間中均勝出，改善幅度在 4.8%~8.1% 之間。**
+**A4f-VIX 在歐洲市場顯著有效**（2/2 資產通過 Harvey |t|>3.0 門檻）。
 
-- 優勢不被 COVID (P4) 驅動 — COVID 期間改善最大 (+8.09%) 但移除後其他期間仍有 +4.8%~+6.8%
-- 低 VIX 環境 (P1: 14.2, P3: 13.9) 仍有 +6.3%~+6.5% 改善
-- VIX level 與改善幅度有弱正相關 (rho=0.679) 但不顯著 (p=0.094) — A4f 在高波動時略有優勢但非必要條件
-- 這是 Paper 9 最強的 robustness 證據之一
+核心發現：
+1. **US VIX 對歐洲股票波動率預測同樣有效**——不需要 VSTOXX。VIX-r² 相關性（0.44-0.49）與 SPY（~0.63）相當。
+2. **Own 20d RV 作為 fear proxy 無效**——RV20 對兩個資產都不顯著（STOXX50E DM t=-1.65, FEZ DM t=+0.29）。
+3. **VIX 顯著優於 RV20**（head-to-head DM t=3.56 / 3.27）。
+4. **A4f-VIX 改善 VaR coverage**——STOXX50E VaR 2.5% 唯一 PASS 模型。
+
+**Paper 9 意義**: 這擴展了 A4f 的跨市場有效性——從 SPY/QQQ（美國）和 GLD+GVZ（商品）到歐洲股票。VIX 不僅是美國市場的 fear gauge，對歐洲市場也同樣有效。
+
+**令人意外的發現**: 原假設是「歐洲市場需要歐洲 fear index」，但實際上 US VIX 就夠了。這可能因為：(1) 全球化使恐慌高度同步，(2) VIX 是全球 fear 的 leading indicator，(3) STOXX50E/FEZ 與 SPY 高度相關（VIX-RV20 corr = 0.78-0.79）。
 
 ## 局限性
-- 僅測試 SPY（K1022 已測跨資產 6/6 贏）
-- 子期間 N~500 限制了 DM test 的 power
-- P7 (2025-2026) 只有 317 天（不完整的 2 年期間）
-- Student-t df=8 固定，未嘗試其他 df
+
+- VSTOXX 無法取得，無法直接比較 VSTOXX vs VIX 對歐洲市場的效果
+- VaR 1% 對所有模型都偏高，可能需要更高 df 或調整
+- OOS 期間包含 COVID-19，可能誇大 VIX 的效果
 
 ## 檔案
-- `k1030.py`: 實驗腳本
-- `k1030_results.json`: 完整結果
-- `k1030_dm_by_period.png`: DM t-stat 柱狀圖
-- `k1030_vix_vs_improvement.png`: VIX vs 改善散佈圖
-- `k1030_qlike_comparison.png`: QLIKE 比較柱狀圖
 
-## 參考文獻
-- Engle, Ghysels & Sohn (2013). RES 95(3):776-797.
-- Conrad & Loch (2015). JBES 33(3):338-358.
-- Patton (2011). J Econometrics 160:246-256.
-- Harvey et al. (2016). |t| > 3.0 threshold.
+- `k1030.py` — 實驗腳本
+- `k1030_results.json` — 完整結果
+- `k1030_qlike_comparison.png` — QLIKE 比較圖
+- `k1030_dm_summary.png` — DM 檢定摘要圖
+- `k1030_var_es_scorecard.png` — VaR/ES 評分卡
 
-## 相關實驗
-- K988: A4f 原始發現 (DM t=+4.48)
-- K1021: Student-t df=8 推薦
-- K1022: 跨資產 6/6 QLIKE 改善
-- K1024: Refit frequency 不敏感
+## 數據來源
 
----
-Data source: yfinance (SPY, ^VIX), 2005-01-04 to 2026-04-09
-Seed: 42
-Runtime: ~253s
+yfinance: ^STOXX50E, FEZ, ^VIX (2005-2026)
