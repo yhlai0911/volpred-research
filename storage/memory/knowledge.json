@@ -23127,5 +23127,24 @@
     "data_source": "yfinance",
     "confidence": 0.9,
     "created_at": "2026-04-10T22:49:42.369117+00:00"
+  },
+  {
+    "id": "know_20260410230535_k1043",
+    "title": "K1043: ★★ FHS = CF-Rolling（12/12 vs 12/12）— 非參數尾部建模是關鍵",
+    "content": "[提出: Claude, 執行: Claude] K1043 2×4 factorial（GJR/A4f × Normal/Student-t/CF-Rolling/FHS），3 資產，OOS 2019-2026。FHS 12/12 Trinity PASS = CF-Rolling 12/12。12 個 DM test 全 NS（max |t|=1.654）。方法效應 >> 模型效應：Normal 16.7%→Student-t 50%→CF/FHS 100%。A4f 改善參數方法（Normal 0→33%, t 17→83%）但非參數方法已 100%。ES 48/48 全 PASS。結論：FHS 和 CF-Rolling 可互換。非參數尾部建模（empirical quantile 或 moment-based expansion）是 VaR 的關鍵，具體方法不重要。FHS 實作更簡單，CF-Rolling 更透明。",
+    "tags": [
+      "FHS",
+      "CF-Rolling",
+      "VaR",
+      "non-parametric",
+      "Trinity",
+      "A4f",
+      "interchangeable"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1043",
+    "data_source": "yfinance",
+    "confidence": 0.95,
+    "created_at": "2026-04-10T23:05:35.415446+00:00"
   }
 ]
