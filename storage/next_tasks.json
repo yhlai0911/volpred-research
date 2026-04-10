@@ -1,11 +1,5 @@
 [
   {
-    "id": "K1016b",
-    "title": "K1016b: HAR+vix_gap 修正版（修 M4/M5 bug）",
-    "priority": 1,
-    "description": "K1016 代碼 bug（A4f=GJR 結果相同）。修正後重新評估 vix_gap"
-  },
-  {
     "id": "Paper5_update",
     "title": "Paper 5 整合 A4f 結果",
     "priority": 3,
@@ -19,9 +13,9 @@
     "status": "pending"
   },
   {
-    "id": "K1020",
-    "title": "K1020: MS-A4f 結合 regime switching + VIX 外生資訊",
-    "description": "K1019 發現 MS-GJR 顯著勝 GJR 但輸 A4f。結合兩者：MS(2)-A4f-VIX9D，regime-dependent tau",
+    "id": "K1021",
+    "title": "K1021: A4f Student-t df 聯合估計",
+    "description": "K995/K1004 顯示 Student-t 大幅改善 VaR。目前 A4f 用固定 df 或 Normal。測試 df 聯合 MLE",
     "priority": 2,
     "status": "pending"
   }
