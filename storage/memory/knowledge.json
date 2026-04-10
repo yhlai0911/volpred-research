@@ -23049,5 +23049,25 @@
     "data_source": "yfinance",
     "confidence": 0.9,
     "created_at": "2026-04-10T19:07:15.404526+00:00"
+  },
+  {
+    "id": "know_20260410191455_k1040",
+    "title": "K1040: VRP Return Predictability — VIX 月頻有效 (R²=5.63%), g_t 無增量",
+    "content": "[提出: Claude, 執行: Claude] K1040 測試 A4f g_t 是否預測 SPY 報酬（Bollerslev et al. 2009 框架）。SPY OOS 2019-2026。日/週頻：所有模型 OOS R² ≤ 0（EMH barrier）。月頻（h=22）：VIX-only R²=+5.63%（Clark-West t=+2.02, p=0.021 顯著），但 g_t-only R²=+0.87%（t=0.91 NS）。VRP IS 顯著（t=2.77）但 OOS 失敗（R²=0.77%）——經典的 IS/OOS gap。g_t long-short 策略 Sharpe -0.12（vs BH 0.77）。結論：g_t 的價值在波動率域（改善 QLIKE），不能跨域預測報酬。VIX level 月頻預測力存在但 g_t 無增量。",
+    "tags": [
+      "VRP",
+      "return prediction",
+      "g_t",
+      "A4f",
+      "VIX",
+      "EMH",
+      "null result",
+      "Clark-West"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1040",
+    "data_source": "yfinance",
+    "confidence": 0.9,
+    "created_at": "2026-04-10T19:14:55.340379+00:00"
   }
 ]
