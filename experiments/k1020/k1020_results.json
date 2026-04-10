@@ -1,0 +1,154 @@
+{
+  "experiment_id": "K1020",
+  "title": "MS(2)-A4f: Markov Regime Switching + VIX Multiplicative GARCH-X",
+  "timestamp": "2026-04-10T07:15:47.075516+00:00",
+  "data_source": "yfinance (SPY, ^VIX, ^VIX9D)",
+  "data_period": "2003-01-03 to 2026-04-09",
+  "oos_period": "2011-01-04 to 2026-04-09",
+  "oos_n": 3838,
+  "window": 2000,
+  "refit_every": 63,
+  "seed": 42,
+  "models": {
+    "M1_GJR_t": "GJR-GARCH(1,1) with Student-t (5 params)",
+    "M2_A4f_VIX9D_t": "Multiplicative A4f with VIX9D, Student-t (7 params)",
+    "M3_MS2_GJR_N": "MS(2)-GJR with Normal, Hamilton filter (10 params)",
+    "M4_MS2_A4f": "MS(2)-A4f: regime-specific tau, shared g, Normal (10 params)",
+    "M5_A4f_RegProb": "A4f + regime probability as extra regressor (7 params)"
+  },
+  "qlike_results": {
+    "M1: GJR-t": {
+      "qlike": -8.508334,
+      "n_valid": 3838
+    },
+    "M2: A4f-VIX9D-t": {
+      "qlike": -8.395977,
+      "n_valid": 1822
+    },
+    "M3: MS(2)-GJR-N": {
+      "qlike": -8.529795,
+      "n_valid": 3838
+    },
+    "M4: MS(2)-A4f": {
+      "qlike": -8.330093,
+      "n_valid": 1822
+    },
+    "M5: A4f+RegProb": {
+      "qlike": -8.39206,
+      "n_valid": 1822
+    }
+  },
+  "dm_tests": {
+    "M4: MS(2)-A4f vs M2: A4f-VIX9D-t": {
+      "t_stat": 1.892,
+      "p_val": 0.0586,
+      "significance": "NS"
+    },
+    "M5: A4f+RegProb vs M2: A4f-VIX9D-t": {
+      "t_stat": 1.471,
+      "p_val": 0.1412,
+      "significance": "NS"
+    },
+    "M4: MS(2)-A4f vs M3: MS(2)-GJR-N": {
+      "t_stat": -1.001,
+      "p_val": 0.3169,
+      "significance": "NS"
+    },
+    "M4: MS(2)-A4f vs M1: GJR-t": {
+      "t_stat": -2.115,
+      "p_val": 0.0344,
+      "significance": "NS"
+    },
+    "M2: A4f-VIX9D-t vs M1: GJR-t": {
+      "t_stat": -5.327,
+      "p_val": 0.0,
+      "significance": "***"
+    },
+    "M3: MS(2)-GJR-N vs M1: GJR-t": {
+      "t_stat": -2.03,
+      "p_val": 0.0424,
+      "significance": "NS"
+    },
+    "M5: A4f+RegProb vs M1: GJR-t": {
+      "t_stat": -5.168,
+      "p_val": 0.0,
+      "significance": "***"
+    },
+    "M5: A4f+RegProb vs M3: MS(2)-GJR-N": {
+      "t_stat": -2.831,
+      "p_val": 0.0046,
+      "significance": "**"
+    }
+  },
+  "var_2_5_pct": {
+    "M1: GJR-t": {
+      "alpha": 0.025,
+      "T": 3838,
+      "violations": 121,
+      "violation_rate": 3.153,
+      "expected_rate": 2.5,
+      "UC_p": 0.0128,
+      "CC_p": 0.9229,
+      "Basel": "GREEN",
+      "scorecard": "2/3"
+    },
+    "M2: A4f-VIX9D-t": {
+      "alpha": 0.025,
+      "T": 1822,
+      "violations": 48,
+      "violation_rate": 2.634,
+      "expected_rate": 2.5,
+      "UC_p": 0.7155,
+      "CC_p": 0.8018,
+      "Basel": "GREEN",
+      "scorecard": "3/3"
+    },
+    "M3: MS(2)-GJR-N": {
+      "alpha": 0.025,
+      "T": 3838,
+      "violations": 120,
+      "violation_rate": 3.127,
+      "expected_rate": 2.5,
+      "UC_p": 0.0166,
+      "CC_p": 0.526,
+      "Basel": "GREEN",
+      "scorecard": "2/3"
+    },
+    "M4: MS(2)-A4f": {
+      "alpha": 0.025,
+      "T": 1822,
+      "violations": 62,
+      "violation_rate": 3.403,
+      "expected_rate": 2.5,
+      "UC_p": 0.0192,
+      "CC_p": 0.3804,
+      "Basel": "GREEN",
+      "scorecard": "2/3"
+    },
+    "M5: A4f+RegProb": {
+      "alpha": 0.025,
+      "T": 1822,
+      "violations": 52,
+      "violation_rate": 2.854,
+      "expected_rate": 2.5,
+      "UC_p": 0.3437,
+      "CC_p": 0.6641,
+      "Basel": "GREEN",
+      "scorecard": "3/3"
+    }
+  },
+  "regime_analysis": {
+    "regime_corr_ms_gjr_vs_ms_a4f": 0.4546,
+    "vix_vs_ms_a4f_regime_corr": 0.1466
+  },
+  "runtime_seconds": 267.1,
+  "references": [
+    "Hamilton (1989) Econometrica 57(2)",
+    "Gray (1996) JFE 42(1)",
+    "Klaassen (2002) Empirical Economics 27(2)",
+    "Engle & Rangel (2008) RFS 21(3)",
+    "Patton (2011) J Econometrics 160(1)",
+    "Harvey et al. (2016) t>3.0",
+    "Kupiec (1995), Christoffersen (1998)"
+  ]
+}
