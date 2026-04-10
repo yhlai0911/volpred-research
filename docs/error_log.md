@@ -4,6 +4,7 @@
 
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
+| 2026-04-10 | K1016 agent 回報不準確 | Agent 聲稱 QLIKE 改善 +13.7%（DM=+5.46），但 JSON 顯示 QLIKE 惡化（1.616→1.831）。M4/M5 結果完全相同（代碼 bug） | 主線程未在 agent 完成後立即交叉驗證 JSON 數字，直接信任 agent 回報並記入 knowledge + research_program | (1) 修正 knowledge 記錄（降 confidence 到 0.5）(2) 修正 research_program 標注 ⚠️ (3) 需重做 K1016b。**教訓：agent 完成後必須用 python 讀取 results JSON 驗證核心數字，不可只看 agent summary** |
 | 2026-04-09 | 數據收集不完整 | FRED 停 23 天、VIXTWN DNS 失敗、QQQ/EEM/N225/VIX3M 不在收集器中 | `collect_us_data.py` 只收 4 個 ticker，FRED 完全沒自動化，`collect_5min_data.py` 不接受命令行參數 | (1) `collect_us_data.py` 擴充到 8 ticker + 週一 FRED 23 指標 (2) `collect_5min_data.py` 加 CLI 參數+ticker 格式修正 (3) 更新 CLAUDE.md 文檔。教訓：**新增研究用到的資產時，必須同步加入收集腳本+crontab** |
 | 2026-03-16 | Thinking page crash | experiment_ids undefined → 頁面閃退 | experiment_ids 欄位在部分 entry 不存在 | 加 optional chaining `?.` + `&&` guard |
 | 2026-03-16 | Feed 文章缺 content | 網頁顯示空白文章 | `record_and_publish.py` 只用 `--thinking` 當 content | 個別檔案 + feed.json 都要有完整 Markdown content |
