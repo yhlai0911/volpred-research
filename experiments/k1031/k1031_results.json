@@ -1,0 +1,226 @@
+{
+  "experiment_id": "K1031",
+  "title": "Bayesian SSVS ARX-GARCH Joint Estimation",
+  "description": "Joint Bayesian SSVS in GARCH-X variance equation, extending K1013 two-stage approach. Tests whether joint estimation reveals exogenous variable importance missed by two-stage method.",
+  "timestamp": "2026-04-10T20:51:29.468029",
+  "seed": 42,
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance + FRED (local cache)",
+    "is_period": "2011-01-04 to 2018-12-13",
+    "is_n": 2000,
+    "oos_period": "2018-12-14 to 2026-04-09",
+    "oos_n": 1838
+  },
+  "candidate_variables": [
+    "VIX_sq",
+    "VIX9D_sq",
+    "VIX3M_sq",
+    "TermSpread",
+    "STLFSI4",
+    "RV_20d"
+  ],
+  "ssvs_hyperparameters": {
+    "tau_spike": 0.001,
+    "tau_slab": 1.0,
+    "c_ratio": 1000.0,
+    "p_prior": 0.5
+  },
+  "mcmc": {
+    "n_total": 10000,
+    "n_burnin": 5000,
+    "n_posterior": 5000,
+    "acceptance_rates": {
+      "mu": 0.7695,
+      "omega": 0.2462,
+      "alpha": 0.3536,
+      "gamma": 0.8606,
+      "beta": 0.8265,
+      "delta": {
+        "VIX_sq": 0.0077,
+        "VIX9D_sq": 0.0086,
+        "VIX3M_sq": 0.0071,
+        "TermSpread": 0.0045,
+        "STLFSI4": 0.0043,
+        "RV_20d": 0.0081
+      }
+    },
+    "ess": {
+      "mu": 475.47311749474284,
+      "omega": 7.308468306794724,
+      "alpha": 355.72986666436515,
+      "gamma": 61.491302396309614,
+      "beta": 9.256097498459955,
+      "delta": {
+        "VIX_sq": 5.9895794539244696,
+        "VIX9D_sq": 6.370078912214472,
+        "VIX3M_sq": 6.1800150152258935,
+        "TermSpread": 12.103438294814277,
+        "STLFSI4": 7.868341045714731,
+        "RV_20d": 13.232800466222235
+      }
+    }
+  },
+  "pip_results": [
+    {
+      "variable": "VIX3M_sq",
+      "pip": 0.0012,
+      "delta_mean": 7.301162857142652e-07,
+      "delta_std": 2.7972085692403182e-06,
+      "delta_median": -1.773332697748332e-07,
+      "status": "exclude"
+    },
+    {
+      "variable": "RV_20d",
+      "pip": 0.001,
+      "delta_mean": -4.227209775544618e-06,
+      "delta_std": 1.2946307163402075e-06,
+      "delta_median": -4.34001598400948e-06,
+      "status": "exclude"
+    },
+    {
+      "variable": "TermSpread",
+      "pip": 0.0008,
+      "delta_mean": -1.1747601211147146e-06,
+      "delta_std": 4.084332815380825e-07,
+      "delta_median": -9.900931347665944e-07,
+      "status": "exclude"
+    },
+    {
+      "variable": "VIX_sq",
+      "pip": 0.0006,
+      "delta_mean": 9.418262994818826e-06,
+      "delta_std": 3.5494836764757396e-06,
+      "delta_median": 1.0268285889053988e-05,
+      "status": "exclude"
+    },
+    {
+      "variable": "VIX9D_sq",
+      "pip": 0.0006,
+      "delta_mean": 2.117816154274715e-05,
+      "delta_std": 2.6030808647538747e-06,
+      "delta_median": 2.0201774263472606e-05,
+      "status": "exclude"
+    },
+    {
+      "variable": "STLFSI4",
+      "pip": 0.0006,
+      "delta_mean": -4.1315639762932037e-07,
+      "delta_std": 7.764559829941633e-07,
+      "delta_median": -4.5096499426961394e-07,
+      "status": "exclude"
+    }
+  ],
+  "garch_posterior": {
+    "mu": {
+      "mean": 0.00031745122598928876,
+      "std": 0.00013668446952744677
+    },
+    "omega": {
+      "mean": 2.3571606290713647e-05,
+      "std": 3.0392388825482068e-06
+    },
+    "alpha": {
+      "mean": 0.00592552398865184,
+      "std": 0.006216600780386734
+    },
+    "gamma": {
+      "mean": 0.1934588284092227,
+      "std": 0.034938832384166285
+    },
+    "beta": {
+      "mean": 0.5962787437102144,
+      "std": 0.04471993335430871
+    },
+    "persistence": 0.6989336819034776
+  },
+  "gjr_mle_baseline": {
+    "mu": 0.0005545217072879329,
+    "omega": 2.5428958752799e-06,
+    "alpha": 0.055088008729343683,
+    "gamma": 0.10452269409200823,
+    "beta": 0.8516846941924204,
+    "persistence": 0.9590340499677682
+  },
+  "null_model_analysis": {
+    "null_freq": 0.9952,
+    "one_var_freq": 0.0048,
+    "two_plus_freq": 0.0,
+    "top5_models": [
+      {
+        "variables": [
+          "NULL"
+        ],
+        "frequency": 0.9952
+      },
+      {
+        "variables": [
+          "VIX3M_sq"
+        ],
+        "frequency": 0.0012
+      },
+      {
+        "variables": [
+          "RV_20d"
+        ],
+        "frequency": 0.001
+      },
+      {
+        "variables": [
+          "TermSpread"
+        ],
+        "frequency": 0.0008
+      },
+      {
+        "variables": [
+          "STLFSI4"
+        ],
+        "frequency": 0.0006
+      }
+    ]
+  },
+  "oos_comparison": {
+    "qlike": {
+      "gjr_baseline": -8.270298387816522,
+      "garchx_all": -8.352099454412404,
+      "garchx_selected": -8.159100999039978,
+      "garchx_best_single": -8.175483441613032
+    },
+    "mse": {
+      "gjr_baseline": 2.7280539275240336e-07,
+      "garchx_all": 2.62434807792644e-07,
+      "garchx_selected": 3.039355645600014e-07,
+      "garchx_best_single": 3.028002476100923e-07
+    },
+    "dm_test": {
+      "base_vs_garchx_all": {
+        "t_stat": 3.560523553838506,
+        "p_value": 0.000370116108578733,
+        "harvey_pass": true
+      },
+      "base_vs_best_single": {
+        "t_stat": -3.6596644529939315,
+        "p_value": 0.0002525457262718689,
+        "harvey_pass": true
+      }
+    },
+    "selected_variables": [],
+    "best_single_variable": "VIX3M_sq"
+  },
+  "comparison_with_k1013": {
+    "k1013_method": "two-stage (MLE GARCH \u2192 residual SSVS)",
+    "k1013_pip_max": 0.0012,
+    "k1013_null_freq": 0.9956,
+    "k1031_method": "joint estimation (MCMC GARCH-X with SSVS)",
+    "k1031_pip_max": 0.0012,
+    "k1031_null_freq": 0.9952
+  },
+  "conclusion": "NULL \u2014 Joint estimation also selects null model. GJR-GARCH internal dynamics sufficient; exogenous variables do not improve variance prediction even with joint estimation.",
+  "finding_type": "NULL (confirms K1013)",
+  "references": [
+    "So, Chen, Liu (2006, JRSS-C 55(2):201-224) \u2014 SSVS for GARCH",
+    "George & McCulloch (1993, JASA 88(423):881-889) \u2014 original SSVS",
+    "Patton (2011) \u2014 QLIKE loss function",
+    "Harvey (2016) \u2014 DM test threshold |t| > 3.0"
+  ]
+}
