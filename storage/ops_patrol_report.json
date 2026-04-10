@@ -1,47 +1,37 @@
 {
-  "timestamp": "2026-04-10T06:14:12Z",
-  "all_ok": false,
+  "timestamp": "2026-04-10T12:25:44.763184+00:00",
+  "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
-      "status": "alert",
-      "detail": "2 draft articles in pool (threshold: 3). Pool is low — cron may release faster than articles are written."
+      "status": "ok",
+      "detail": "8 drafts in pool (threshold: <3 = alert)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json is 11.9h old (threshold: 26h)"
+      "detail": "strategy_metrics.json is ~9 seconds old (threshold: >26 hours = alert)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Recent entry (yesterday 2026-04-09): 2026-04-09: 文章 tags 再次遺失 — schema INT/str 型別不符導致 article_tags 無聲失效"
+      "detail": "Recent entries found: (2026-04-10) K1016 agent 回報不準確 — Agent 聲稱 QLIKE 改善 +13.7% 但 JSON 顯示惡化; (2026-04-09) 數據收集不完整 — FRED 停 23天/VIXTWN DNS失敗/QQQ等不在收集器; (2026-04-09) 文章 tags 再次遺失 — article_tags join table 未寫入"
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies: last 3 entries have exactly 1 null (most recent day pending). No strategy exceeds threshold of >2 nulls."
+      "detail": "All 14 strategies: last_date=2026-04-09, last3_nulls=1 (1 null = today not yet settled, threshold: >2 = alert). No alerts."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files"
+      "detail": "0 uncommitted files (threshold: >50 = alert)"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "6678 entries in knowledge.json"
+      "detail": "17587 entries in storage/memory/knowledge.json"
     }
   ],
-  "alerts": [
-    "article pool low"
-  ],
-  "summary": {
-    "draft_articles": 2,
-    "metrics_age_hours": 11.9,
-    "uncommitted_files": 0,
-    "knowledge_entries": 6678,
-    "paper_trading_strategies_checked": 14,
-    "paper_trading_max_nulls": 1
-  }
+  "alerts": []
 }
