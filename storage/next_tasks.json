@@ -1,26 +1,28 @@
 [
   {
-    "id": "Paper_MF",
-    "title": "MF-GJR-X 論文撰寫（4/11 週五開始）",
+    "id": "Paper9_review",
+    "title": "Paper 9 審查修訂",
+    "description": "基於 reviewer feedback + K1003/K1004 robustness",
     "priority": 1,
-    "description": "K988-K1010 素材完整"
+    "status": "pending"
   },
   {
-    "id": "K1013",
-    "title": "K1013: Bayesian SSVS for GARCH-X variable selection",
+    "id": "K1017",
+    "title": "K1017: HAR-RV 正式實驗（5-min 數據）",
     "priority": 2,
-    "description": "So, Chen, Liu (2006) SSVS 方法選 VIX/VIX9D/macro 最優子集。K433 延伸"
+    "description": "BLOCKED：SPY 5-min 數據不可用。需先修正 collect_5min_data.py",
+    "status": "blocked"
   },
   {
-    "id": "K1012",
-    "title": "K1012: 跨資產 Return Prediction Pipeline",
+    "id": "Paper5_update",
+    "title": "Paper 5 (VIX Sufficiency) 更新",
     "priority": 3,
-    "description": "SPY/QQQ/0050.TW 日頻方向預測"
+    "description": "K1002 7-model 比較。Paper 5 需整合 A4f 結果"
   },
   {
-    "id": "K1014",
-    "title": "K1014: HAR-PD (Path-Dependent) vol forecasting",
-    "priority": 2,
-    "description": "arXiv:2503.00851，路徑依賴的 HAR 擴展"
+    "id": "K1018",
+    "title": "K1018: GARCH-X vs HAR+vix_gap 統一比較",
+    "priority": 3,
+    "description": "如果 K1016 成功，需要在公平框架下比較 A4f 和 HAR+vix_gap"
   }
 ]
