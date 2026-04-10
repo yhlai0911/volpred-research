@@ -1,0 +1,165 @@
+{
+  "experiment_id": "K1014",
+  "title": "HAR-PD (Path-Dependent) Volatility Forecasting",
+  "proposer": "Claude",
+  "executor": "Claude",
+  "timestamp": "2026-04-10T05:39:24.328104+00:00",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2005-01-04 to 2026-04-07",
+  "n_total": 5347,
+  "n_oos": 1824,
+  "oos_start": "2019-01-01",
+  "har_window": 1000,
+  "garch_window": 2000,
+  "refit_every": 63,
+  "references": [
+    "arXiv:2503.00851 - Path-dependent HAR",
+    "Corsi (2009, JFE) - HAR-RV model",
+    "Patton (2011, J Econometrics) - QLIKE loss",
+    "Harvey et al. (2016) - t > 3.0 threshold",
+    "K530 - HAR-ABS vs GJR baseline",
+    "K988 - MF-GJR-X A4f specification"
+  ],
+  "models": [
+    "HAR",
+    "HAR-PD",
+    "HAR-PD-LASSO",
+    "A4f-N",
+    "GJR-N"
+  ],
+  "qlike_results": {
+    "HAR": 1.2825749637929655,
+    "HAR-PD": 1.6270355908077092,
+    "HAR-PD-LASSO": 1.4834861631142926,
+    "A4f-N": 1.434385070851252,
+    "GJR-N": 1.5180261932752814
+  },
+  "spearman_results": {
+    "HAR": {
+      "rho": 0.5183112625416756,
+      "p_value": 5.975100746961587e-126
+    },
+    "HAR-PD": {
+      "rho": 0.371210221180064,
+      "p_value": 1.098443207314279e-60
+    },
+    "HAR-PD-LASSO": {
+      "rho": 0.4033770415768953,
+      "p_value": 2.530415683449991e-72
+    },
+    "A4f-N": {
+      "rho": 0.41780083754060265,
+      "p_value": 5.638940624434899e-78
+    },
+    "GJR-N": {
+      "rho": 0.36980225456199267,
+      "p_value": 3.3180130214845136e-60
+    }
+  },
+  "dm_tests": {
+    "HAR-PD vs HAR": {
+      "dm_stat": 5.529463467712314,
+      "p_value": 3.67635448750292e-08,
+      "winner": "HAR"
+    },
+    "HAR-PD-LASSO vs HAR": {
+      "dm_stat": 6.192622813066011,
+      "p_value": 7.293883275139024e-10,
+      "winner": "HAR"
+    },
+    "HAR-PD vs HAR-PD-LASSO": {
+      "dm_stat": 4.129785893889215,
+      "p_value": 3.7951272735758934e-05,
+      "winner": "HAR-PD-LASSO"
+    },
+    "HAR vs GJR-N": {
+      "dm_stat": -7.689925328066544,
+      "p_value": 2.398081733190338e-14,
+      "winner": "HAR"
+    },
+    "HAR-PD vs GJR-N": {
+      "dm_stat": 1.5370136200876328,
+      "p_value": 0.12446350968010478,
+      "winner": "GJR-N"
+    },
+    "HAR-PD vs A4f-N": {
+      "dm_stat": 2.988061930555569,
+      "p_value": 0.0028450317634522992,
+      "winner": "A4f-N"
+    },
+    "HAR vs A4f-N": {
+      "dm_stat": -8.78068766952697,
+      "p_value": 0.0,
+      "winner": "HAR"
+    },
+    "A4f-N vs GJR-N": {
+      "dm_stat": -3.47219526534314,
+      "p_value": 0.0005282633975236539,
+      "winner": "A4f-N"
+    }
+  },
+  "path_feature_significance": {
+    "intercept": {
+      "coef": -0.00454598581518951,
+      "se": 0.0010377319725364748,
+      "t_stat": -4.38069360441694
+    },
+    "rv1": {
+      "coef": 0.2759068279061012,
+      "se": 306853.9138206054,
+      "t_stat": 8.991471689926151e-07
+    },
+    "rv5": {
+      "coef": 0.393671361432479,
+      "se": null,
+      "t_stat": null
+    },
+    "rv22": {
+      "coef": 0.30349761077275506,
+      "se": 202750.16441051918,
+      "t_stat": 1.4969043879947101e-06
+    },
+    "trend": {
+      "coef": 0.0901737506597275,
+      "se": 669400.1364675907,
+      "t_stat": 1.3470829440754575e-07
+    },
+    "convex": {
+      "coef": -0.20793828418610502,
+      "se": 306853.9138206106,
+      "t_stat": -6.776458595462709e-07
+    },
+    "mom": {
+      "coef": -0.0011763826013677222,
+      "se": 0.0005823819560711649,
+      "t_stat": -2.019950290534023
+    },
+    "jump": {
+      "coef": -9.783175939949719e-05,
+      "se": 0.0004552641047541876,
+      "t_stat": -0.21489012284928513
+    },
+    "asym": {
+      "coef": 0.0015441237026081272,
+      "se": 0.0008405541115700297,
+      "t_stat": 1.8370306936265346
+    },
+    "vix_gap": {
+      "coef": 0.9788156645538149,
+      "se": 0.13455221602111428,
+      "t_stat": 7.27461571052993
+    }
+  },
+  "significant_path_features": [
+    "vix_gap"
+  ],
+  "conclusion": "HAR-PD does NOT significantly improve HAR (Harvey t>3.0) — path features redundant with |r| proxy at daily frequency",
+  "elapsed_seconds": 165.5,
+  "seed": 42,
+  "notes": {
+    "multicollinearity": "trend = rv5 - rv22 and convex = rv1 - 2*rv5 + rv22 are exact linear combinations of HAR features, causing perfect multicollinearity in HAR-PD OLS. This explains the NaN/extreme SEs and the forecast degradation.",
+    "har_dominance": "Standard HAR with |r| proxy dominates all models including HAR-PD, HAR-PD-LASSO, A4f-N, and GJR-N on QLIKE(r²).",
+    "vix_gap_significance": "vix_gap (implied-realized spread) is the only individually significant path feature (t=7.27), suggesting a HAR+VIX_GAP model could be tested separately.",
+    "mechanical_vs_empirical": "HAR beating GARCH on r² is partly mechanical (HAR uses r-based features). But HAR beating A4f (which uses VIX) is an empirical result since VIX contains forward info."
+  }
+}
