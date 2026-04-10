@@ -383,72 +383,56 @@ print(f"  OOS period: {df.index[oos_start].date()} to {df.index[oos_end-1].date(
 
 from arch import arch_model
 
-def compute_oos_forecast_base(returns_decimal, oos_start, oos_end, refit_every=250):
-    """GJR-GARCH baseline OOS forecasts using recursive conditional variance.
-
-    Uses h[t] = omega + alpha*eps[t-1]^2 + gamma*eps[t-1]^2*I(eps<0) + beta*h[t-1]
-    where eps = r - mu (in percentage scale for estimation, converted back).
-    """
+def compute_oos_forecast_base(returns_pct, oos_start, oos_end, refit_every=250):
+    """GJR-GARCH baseline OOS forecasts"""
     forecasts = np.zeros(oos_end - oos_start)
-    r_pct = returns_decimal * 100
-    params = None
+    last_fit = None
 
     for t in range(oos_start, oos_end):
-        if params is None or (t - oos_start) % refit_every == 0:
-            train = r_pct.iloc[:t]
+        if last_fit is None or (t - oos_start) % refit_every == 0:
+            train = returns_pct.iloc[:t]
             model = arch_model(train, vol='GARCH', p=1, o=1, q=1, dist='normal', mean='Constant')
-            fit_result = model.fit(disp='off')
-            params = {
-                'mu': fit_result.params['mu'],
-                'omega': fit_result.params['omega'],
-                'alpha': fit_result.params['alpha[1]'],
-                'gamma': fit_result.params['gamma[1]'],
-                'beta': fit_result.params['beta[1]']
-            }
-            # Get the last conditional variance from the fitted model
-            cond_vol = fit_result.conditional_volatility
-            h_prev = cond_vol.iloc[-1] ** 2  # in pct^2 scale
+            last_fit = model.fit(disp='off', last_obs=t)
 
-        # eps_{t-1} = r_{t-1} - mu (in percentage scale)
-        eps_prev = r_pct.iloc[t-1] - params['mu']
-        indicator = 1.0 if eps_prev < 0 else 0.0
-
-        # GJR-GARCH(1,1,1) recursion
-        h_t = (params['omega'] +
-               params['alpha'] * eps_prev**2 +
-               params['gamma'] * eps_prev**2 * indicator +
-               params['beta'] * h_prev)
-
-        forecasts[t - oos_start] = h_t / 10000  # convert pct^2 to decimal
-        h_prev = h_t  # update for next step
+        # 1-step forecast
+        fcast = last_fit.forecast(horizon=1, start=t-1, reindex=False)
+        forecasts[t - oos_start] = fcast.variance.values[-1, 0] / 10000  # to decimal
 
     return forecasts
 
-def compute_oos_forecast_ssvs(returns_decimal, X_data, selected_cols, theta_means,
-                               oos_start, oos_end, refit_every=250):
+# Simple approach: use GJR conditional variance + SSVS linear adjustment
+def compute_oos_forecast_ssvs(returns_pct, X_data, selected_cols, theta_means, oos_start, oos_end, refit_every=250):
     """GJR + SSVS selected variables OOS forecasts"""
-    # First get base GJR forecasts
-    h_base = compute_oos_forecast_base(returns_decimal, oos_start, oos_end, refit_every)
     forecasts = np.zeros(oos_end - oos_start)
+    last_fit = None
 
-    for i in range(oos_end - oos_start):
-        t = oos_start + i
-        h_gjr = h_base[i]
+    for t in range(oos_start, oos_end):
+        if last_fit is None or (t - oos_start) % refit_every == 0:
+            train = returns_pct.iloc[:t]
+            model = arch_model(train, vol='GARCH', p=1, o=1, q=1, dist='normal', mean='Constant')
+            last_fit = model.fit(disp='off', last_obs=t)
+
+        # GJR base forecast
+        fcast = last_fit.forecast(horizon=1, start=t-1, reindex=False)
+        h_gjr = fcast.variance.values[-1, 0] / 10000  # decimal
 
         # SSVS adjustment: Σ θ_j * X_{j,t-1} (X already lagged in df)
         adj = 0.0
         for col in selected_cols:
             j = X_names.index(col)
             x_val = (X_data[col].iloc[t] - X_mean[j]) / X_std[j]  # standardized
+            # Use posterior mean of theta (conditional on inclusion)
             adj += theta_means[col] * x_val
 
-        forecasts[i] = max(h_gjr + adj, 1e-10)  # ensure positive
+        forecasts[t - oos_start] = max(h_gjr + adj, 1e-10)  # ensure positive
 
     return forecasts
 
 # Compute OOS
+r_pct = df['r'] * 100  # percentage returns for arch
+
 print("  Computing baseline GJR forecasts...")
-h_base = compute_oos_forecast_base(df['r'], oos_start, oos_end)
+h_base = compute_oos_forecast_base(r_pct, oos_start, oos_end)
 
 # Get theta means for selected variables
 theta_means_sel = {}
@@ -456,16 +440,15 @@ for name in selected_vars:
     theta_means_sel[name] = pip_results[name]['theta_incl_mean']
 
 print("  Computing SSVS-augmented forecasts...")
-h_ssvs = compute_oos_forecast_ssvs(df['r'], df[X_names], selected_vars, theta_means_sel, oos_start, oos_end)
+h_ssvs = compute_oos_forecast_ssvs(r_pct, df[X_names], selected_vars, theta_means_sel, oos_start, oos_end)
 
 # Actual r² (target)
 r_sq_oos = df['r_sq'].iloc[oos_start:oos_end].values
 
 # QLIKE loss
 def qlike(actual, forecast):
-    """Patton (2011) QLIKE loss - handles zero actual values"""
+    """Patton (2011) QLIKE loss"""
     forecast = np.maximum(forecast, 1e-10)
-    actual = np.maximum(actual, 1e-10)  # avoid log(0) for days with near-zero r²
     return np.mean(actual / forecast - np.log(actual / forecast) - 1)
 
 def mse(actual, forecast):
@@ -499,11 +482,8 @@ def dm_test(loss1, loss2, h=1):
     p_value = 2 * (1 - stats.norm.cdf(abs(t_stat)))
     return t_stat, p_value
 
-r_sq_oos_safe = np.maximum(r_sq_oos, 1e-10)
-h_base_safe = np.maximum(h_base, 1e-10)
-h_ssvs_safe = np.maximum(h_ssvs, 1e-10)
-loss_base = r_sq_oos_safe / h_base_safe - np.log(r_sq_oos_safe / h_base_safe) - 1
-loss_ssvs = r_sq_oos_safe / h_ssvs_safe - np.log(r_sq_oos_safe / h_ssvs_safe) - 1
+loss_base = r_sq_oos / h_base - np.log(r_sq_oos / h_base) - 1
+loss_ssvs = r_sq_oos / h_ssvs - np.log(r_sq_oos / h_ssvs) - 1
 
 dm_t, dm_p = dm_test(loss_base, loss_ssvs)
 print(f"\n  DM test (base vs SSVS): t={dm_t:.4f}, p={dm_p:.4f}")
@@ -516,13 +496,12 @@ print("\n[9] Comparison with VIX-only model (K988)...")
 
 # VIX-only GARCH-X
 theta_vix_only = {'VIX_sq': pip_results['VIX_sq']['theta_incl_mean']}
-h_vix_only = compute_oos_forecast_ssvs(df['r'], df[X_names], ['VIX_sq'], theta_vix_only, oos_start, oos_end)
+h_vix_only = compute_oos_forecast_ssvs(r_pct, df[X_names], ['VIX_sq'], theta_vix_only, oos_start, oos_end)
 
 qlike_vix = qlike(r_sq_oos, h_vix_only)
 mse_vix = mse(r_sq_oos, h_vix_only)
 
-h_vix_safe = np.maximum(h_vix_only, 1e-10)
-loss_vix = r_sq_oos_safe / h_vix_safe - np.log(r_sq_oos_safe / h_vix_safe) - 1
+loss_vix = r_sq_oos / h_vix_only - np.log(r_sq_oos / h_vix_only) - 1
 dm_vix_t, dm_vix_p = dm_test(loss_base, loss_vix)
 
 print(f"    VIX-only        : QLIKE={qlike_vix:.6f}, MSE={mse_vix:.4e}")
