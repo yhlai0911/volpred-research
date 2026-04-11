@@ -24550,5 +24550,27 @@
     "confidence": 0.9,
     "data_source": "yfinance SPY+VIX 2005-2026",
     "timestamp": "2026-04-11T18:59:11.564557"
+  },
+  {
+    "id": "know_20260411190026_k1051",
+    "title": "K1051: TX Futures Overnight Gap NULL — Alpha Extinct Post-2017 Night Session",
+    "content": "[提出: Claude, 執行: Claude] K1051 測試 K515 發現的台股隔夜 gap alpha 能否用 TX 期貨（2bp cost）獲利。核心發現：STRUCTURAL BREAK。(1) Pre-night session（2012-2017）：SPY-conditioned Sharpe=5.155，spread 46.86bp，alpha 真實且巨大——SPY 漲隔日台股 gap +23bp，SPY 跌 gap -24bp (2) Post-night session（2017-2026）：Sharpe=-0.590，spread -2.01bp，alpha 完全消失 (3) 根因：2017-05-22 夜盤開始後，台指期 15:00-05:00 與美股交易時段重疊（US 09:30-16:00 ET），SPY 資訊即時定價在夜盤中。殘餘 gap（05:00-08:45，3.75 小時）不含 SPY alpha (4) Cross-period 單調衰減：Sharpe 4.962→2.338→0.059→-0.382 (5) Night session lookahead trap：用同日 SPY 條件化夜盤 return 得 Sharpe 6.947，但這是 lookahead（美股在台灣夜盤期間交易）(6) TX cost 優勢（2bp vs ETF 18.55bp）irrelevant——alpha 本身已消失。教訓：市場微結構變化可以完全消除 alpha。K515 的結果在當時是真的，但不具 forward validity。",
+    "tags": [
+      "overnight-gap",
+      "TAIFEX",
+      "TX-futures",
+      "structural-break",
+      "night-session",
+      "null-result",
+      "market-microstructure",
+      "K515"
+    ],
+    "experiment_ids": [
+      "K1051"
+    ],
+    "category": "strategy",
+    "confidence": 0.95,
+    "data_source": "TAIFEX TX tick data 2012-2026 (3484 files) + yfinance SPY",
+    "timestamp": "2026-04-11T19:00:26.782014"
   }
 ]
