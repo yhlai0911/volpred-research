@@ -1,0 +1,382 @@
+{
+  "experiment_id": "K1057",
+  "title": "HAR-RV-J \u2014 Jump Component & Bipower Variation (60-Day 5-min SPY)",
+  "status": "PRELIMINARY",
+  "note": "OOS only ~30 days, well below 252-day minimum. Results indicative only.",
+  "timestamp": "2026-04-11T22:20:19.198537+00:00",
+  "extends": [
+    "K156",
+    "K1054"
+  ],
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance (daily) + data/intraday/ (5-min)",
+    "rv_days": 60,
+    "rv_period": "2026-01-14 to 2026-04-10",
+    "oos_days": 30,
+    "oos_period": "2026-02-27 to 2026-04-10",
+    "common_oos_days": 30,
+    "garch_window": 2000,
+    "har_initial_window": 30
+  },
+  "descriptive_stats": {
+    "rv": {
+      "mean": 5.467345761258861e-05,
+      "std": 3.091222024495199e-05,
+      "min": 4.1065844260412436e-06,
+      "max": 0.00012455394089465867,
+      "skew": 0.3890033010739378,
+      "kurtosis": -0.4812661092469548
+    },
+    "bpv": {
+      "mean": 5.462060382693285e-05,
+      "std": 3.11707704083838e-05,
+      "min": 3.4189122945531446e-06,
+      "max": 0.00013533862217652635,
+      "skew": 0.34766368279810683,
+      "kurtosis": -0.32643861132197927
+    },
+    "jump": {
+      "mean": 2.1421098326864252e-06,
+      "std": 3.6683111650408683e-06,
+      "min": 0.0,
+      "max": 2.1080230553352893e-05,
+      "fraction_of_rv": 0.03918006883459302
+    },
+    "jump_significant": {
+      "count": 8,
+      "total_days": 60,
+      "rate": 0.13333333333333333,
+      "mean_z": 0.3685516075524324,
+      "max_z": 12.592114894120307
+    },
+    "overnight": {
+      "mean_share": 0.32670969812976636,
+      "median_share": 0.25033967228312204,
+      "min_share": 5.204178571645272e-05,
+      "max_share": 0.9451422358819541,
+      "corr_overnight_intraday": 0.18644200495960161
+    },
+    "rv_acf": {
+      "lag1": 0.28436769470875645,
+      "lag5": 0.0388510172373573
+    },
+    "bpv_acf": {
+      "lag1": 0.33114339684042104,
+      "lag5": 0.08307860732184848
+    },
+    "jump_acf": {
+      "lag1": -0.056142905129524086,
+      "lag5": -0.04862758918552187
+    },
+    "C_abd_acf": {
+      "lag1": 0.31582454226925427,
+      "lag5": 0.0505605947488423
+    }
+  },
+  "significant_jumps": [
+    {
+      "date": "2026-01-30",
+      "rv": 8.462410178280306e-06,
+      "bpv": 3.4189122945531446e-06,
+      "jump": 5.043497883727162e-06,
+      "z_stat": 12.592114894120307,
+      "p_value": 0.0,
+      "rel_jump": 0.5959883505377518
+    },
+    {
+      "date": "2026-02-09",
+      "rv": 1.9658257478706362e-05,
+      "bpv": 1.4653855685108577e-05,
+      "jump": 5.004401793597786e-06,
+      "z_stat": 3.539810869489721,
+      "p_value": 0.0002002069376477733,
+      "rel_jump": 0.25456995865572046
+    },
+    {
+      "date": "2026-03-12",
+      "rv": 7.401975233723916e-05,
+      "bpv": 6.263649359380007e-05,
+      "jump": 1.1383258743439092e-05,
+      "z_stat": 1.8062172617302577,
+      "p_value": 0.03544220482367344,
+      "rel_jump": 0.15378677155762654
+    },
+    {
+      "date": "2026-03-17",
+      "rv": 2.4486816101759605e-05,
+      "bpv": 2.1016653770609392e-05,
+      "jump": 3.470162331150213e-06,
+      "z_stat": 1.9769277514685157,
+      "p_value": 0.024024898703560726,
+      "rel_jump": 0.14171553854650992
+    },
+    {
+      "date": "2026-03-18",
+      "rv": 4.44399292564911e-05,
+      "bpv": 3.7769898101673844e-05,
+      "jump": 6.670031154817254e-06,
+      "z_stat": 2.0141273142060565,
+      "p_value": 0.021998084236936832,
+      "rel_jump": 0.1500909489823951
+    },
+    {
+      "date": "2026-04-02",
+      "rv": 0.00011353284984671558,
+      "bpv": 9.245261929336269e-05,
+      "jump": 2.1080230553352893e-05,
+      "z_stat": 1.8640959849854934,
+      "p_value": 0.031154113140123396,
+      "rel_jump": 0.18567516434066442
+    },
+    {
+      "date": "2026-04-09",
+      "rv": 3.2633731301296406e-05,
+      "bpv": 2.6500411716047672e-05,
+      "jump": 6.133319585248734e-06,
+      "z_stat": 3.2513717645671485,
+      "p_value": 0.000574247862293098,
+      "rel_jump": 0.18794417128160523
+    },
+    {
+      "date": "2026-04-10",
+      "rv": 1.2938965936204273e-05,
+      "bpv": 1.0949684659316374e-05,
+      "jump": 1.989281276887899e-06,
+      "z_stat": 1.8105421080818065,
+      "p_value": 0.03510588028362727,
+      "rel_jump": 0.15374345111472384
+    }
+  ],
+  "models": {
+    "HAR-RV": {
+      "specification": "RV_t = b0 + b_d*RV_{t-1} + b_w*RV_w_{t-1} + b_m*RV_m_{t-1}",
+      "estimation": "Expanding window OLS, initial=30 days"
+    },
+    "HAR-C": {
+      "specification": "RV_t = b0 + b_d*C_{t-1} + b_w*C_w_{t-1} + b_m*C_m_{t-1} (C=BPV)",
+      "estimation": "Expanding window OLS, initial=30 days"
+    },
+    "HAR-RV-J": {
+      "specification": "RV_t = b0 + b_d*RV_{t-1} + b_w*RV_w_{t-1} + b_m*RV_m_{t-1} + g*J_{t-1}",
+      "estimation": "Expanding window OLS, initial=30 days"
+    },
+    "HAR-CJ": {
+      "specification": "RV_t = b0 + b_d*C_{t-1} + b_w*C_w_{t-1} + b_m*C_m_{t-1} + g*J_{t-1}",
+      "estimation": "Expanding window OLS, initial=30 days"
+    },
+    "HAR-CJ-ABD": {
+      "specification": "RV_t = HAR-C(ABD) + g*J_ABD (Andersen-Bollerslev-Diebold truncated)",
+      "estimation": "Expanding window OLS, initial=30 days"
+    },
+    "GJR-GARCH": {
+      "specification": "GJR(1,1) normal innovations",
+      "estimation": "Rolling window=2000 daily"
+    },
+    "A4f-VIX\u00b2": {
+      "specification": "h_t = (VIX_{t-1}/100)\u00b2/252",
+      "estimation": "Analytic (no estimation)"
+    }
+  },
+  "evaluation": {
+    "qlike_rv_proxy": {
+      "HAR-RV": -8.597298,
+      "HAR-C": -8.58281,
+      "HAR-RV-J": -8.572012,
+      "HAR-CJ": -8.545774,
+      "HAR-CJ-ABD": -8.521487,
+      "GJR-GARCH": -8.504157,
+      "A4f-VIX\u00b2": -8.074224
+    },
+    "qlike_r2_proxy": {
+      "HAR-RV": -7.773837,
+      "HAR-C": -7.761652,
+      "HAR-RV-J": -7.773229,
+      "HAR-CJ": -7.743576,
+      "HAR-CJ-ABD": -7.779777,
+      "GJR-GARCH": -8.069672,
+      "A4f-VIX\u00b2": -7.894751
+    },
+    "spearman_rv": {
+      "HAR-RV": -0.119,
+      "HAR-C": -0.1301,
+      "HAR-RV-J": -0.1657,
+      "HAR-CJ": -0.1435,
+      "HAR-CJ-ABD": -0.1034,
+      "GJR-GARCH": 0.0723,
+      "A4f-VIX\u00b2": 0.313
+    },
+    "spearman_r2": {
+      "HAR-RV": 0.103,
+      "HAR-C": 0.1466,
+      "HAR-RV-J": 0.1453,
+      "HAR-CJ": 0.1471,
+      "HAR-CJ-ABD": 0.1155,
+      "GJR-GARCH": 0.0229,
+      "A4f-VIX\u00b2": 0.3032
+    },
+    "ranking_rv": [
+      {
+        "rank": 1,
+        "model": "HAR-RV",
+        "qlike": -8.597298
+      },
+      {
+        "rank": 2,
+        "model": "HAR-C",
+        "qlike": -8.58281
+      },
+      {
+        "rank": 3,
+        "model": "HAR-RV-J",
+        "qlike": -8.572012
+      },
+      {
+        "rank": 4,
+        "model": "HAR-CJ",
+        "qlike": -8.545774
+      },
+      {
+        "rank": 5,
+        "model": "HAR-CJ-ABD",
+        "qlike": -8.521487
+      },
+      {
+        "rank": 6,
+        "model": "GJR-GARCH",
+        "qlike": -8.504157
+      },
+      {
+        "rank": 7,
+        "model": "A4f-VIX\u00b2",
+        "qlike": -8.074224
+      }
+    ],
+    "ranking_r2": [
+      {
+        "rank": 1,
+        "model": "GJR-GARCH",
+        "qlike": -8.069672
+      },
+      {
+        "rank": 2,
+        "model": "A4f-VIX\u00b2",
+        "qlike": -7.894751
+      },
+      {
+        "rank": 3,
+        "model": "HAR-CJ-ABD",
+        "qlike": -7.779777
+      },
+      {
+        "rank": 4,
+        "model": "HAR-RV",
+        "qlike": -7.773837
+      },
+      {
+        "rank": 5,
+        "model": "HAR-RV-J",
+        "qlike": -7.773229
+      },
+      {
+        "rank": 6,
+        "model": "HAR-C",
+        "qlike": -7.761652
+      },
+      {
+        "rank": 7,
+        "model": "HAR-CJ",
+        "qlike": -7.743576
+      }
+    ],
+    "ranking_consistent_across_proxies": false
+  },
+  "dm_tests": {
+    "HAR-C_vs_HAR-RV_rv": {
+      "t_stat": 1.309585826442354,
+      "p_val": 0.20061666937806621
+    },
+    "HAR-RV-J_vs_HAR-RV_rv": {
+      "t_stat": 1.1639652932651745,
+      "p_val": 0.25392521081821884
+    },
+    "HAR-CJ_vs_HAR-RV_rv": {
+      "t_stat": 1.2421823868621242,
+      "p_val": 0.22412118006445958
+    },
+    "HAR-CJ-ABD_vs_HAR-RV_rv": {
+      "t_stat": 1.1728371199361216,
+      "p_val": 0.2504051787913646
+    },
+    "HAR-RV_vs_A4f-VIX\u00b2_rv": {
+      "t_stat": -5.969151795274238,
+      "p_val": 1.7335192847856007e-06
+    },
+    "HAR-C_vs_A4f-VIX\u00b2_rv": {
+      "t_stat": -5.257988717567511,
+      "p_val": 1.2383640130897433e-05
+    },
+    "HAR-CJ_vs_A4f-VIX\u00b2_rv": {
+      "t_stat": -3.949562700619802,
+      "p_val": 0.00045870845374484936
+    },
+    "HAR-RV_vs_GJR-GARCH_rv": {
+      "t_stat": -1.4450808337505348,
+      "p_val": 0.15915505205430813
+    },
+    "A4f-VIX\u00b2_vs_GJR-GARCH_rv": {
+      "t_stat": 12.414804789779684,
+      "p_val": 3.950173521616307e-13
+    },
+    "HAR-C_vs_HAR-RV_r2": {
+      "t_stat": 0.8169893618496386,
+      "p_val": 0.4205958472543472
+    },
+    "HAR-RV-J_vs_HAR-RV_r2": {
+      "t_stat": 0.017210108676272665,
+      "p_val": 0.9863868597253185
+    },
+    "HAR-CJ_vs_HAR-RV_r2": {
+      "t_stat": 0.8231519978987216,
+      "p_val": 0.41713949808744966
+    },
+    "HAR-CJ-ABD_vs_HAR-RV_r2": {
+      "t_stat": -0.30496690477739447,
+      "p_val": 0.7625694228739786
+    },
+    "HAR-RV_vs_A4f-VIX\u00b2_r2": {
+      "t_stat": 0.34270573347969696,
+      "p_val": 0.7342915446355611
+    },
+    "HAR-C_vs_A4f-VIX\u00b2_r2": {
+      "t_stat": 0.3788260989538474,
+      "p_val": 0.7075764399852236
+    },
+    "HAR-CJ_vs_A4f-VIX\u00b2_r2": {
+      "t_stat": 0.4357552205700867,
+      "p_val": 0.6662408200324874
+    },
+    "HAR-RV_vs_GJR-GARCH_r2": {
+      "t_stat": 1.1446164480910892,
+      "p_val": 0.26172756580906187
+    },
+    "A4f-VIX\u00b2_vs_GJR-GARCH_r2": {
+      "t_stat": 1.4605861545571017,
+      "p_val": 0.1548794181866222
+    }
+  },
+  "interpretation": {
+    "q1_jump_rate": "8/60 significant jumps (13.3%) by BN-S test at 5%",
+    "q2_har_rvj_vs_har_rv": "QLIKE(RV): HAR-RV-J=-8.572012 vs HAR-RV=-8.597298",
+    "q3_har_c_vs_har_rv": "QLIKE(RV): HAR-C=-8.582810 vs HAR-RV=-8.597298",
+    "q4_best_har_vs_a4f": "Best HAR variant on r\u00b2: GJR-GARCH (-8.069672); A4f: -7.894751",
+    "q5_overnight_share": "Mean overnight share: 32.7%"
+  },
+  "references": [
+    "Barndorff-Nielsen & Shephard (2006). Econometrics of testing for jumps in financial economics using bipower variation. JFE.",
+    "Corsi (2009). A simple approximate long-memory model of realized volatility. JFEC.",
+    "Andersen, Bollerslev & Diebold (2007). Roughing it up: Including jump components in the measurement, modeling, and forecasting of return volatility. REStat.",
+    "Patton (2011). Volatility forecast comparison using imperfect volatility proxies. JoE.",
+    "Hansen & Lunde (2005). A forecast comparison of volatility models: Does anything beat a GARCH(1,1)? JFEC."
+  ]
+}
