@@ -24530,5 +24530,25 @@
     "confidence": 0.9,
     "data_source": "yfinance SPY+VIX 2005-2026",
     "timestamp": "2026-04-11T16:59:12.255602"
+  },
+  {
+    "id": "know_20260411185911_k1052",
+    "title": "K1052: Asymmetric A4f NULL — VIX Direction/Regime Asymmetry Not Useful",
+    "content": "[提出: Claude, 執行: Claude] K1052 測試 A4f 的 VIX 不對稱延伸。4 個模型（SPY OOS 2019-2026, 1828 天）。核心結論：NULL。M2（+ΔVIX⁺ indicator）QLIKE=1.4165 顯著惡化（DM t=+4.28 Harvey PASS，M1 更好）——額外參數引入 noise/overfitting，θ₂ 平均 -7.3e-5 不顯著（p=0.094）。M3（+high-VIX regime indicator）QLIKE=1.3995 微幅改善 -0.41% 但 NS（DM t=-0.71, p=0.476）——θ₃ 在所有 30 次 refit 中一致為正但幅度微小。M1 A4f baseline QLIKE=1.4052 仍是最佳 risk/complexity tradeoff。M4 GJR QLIKE=1.4880 再次被 A4f 顯著打敗（DM t=-4.44 PASS）。Paper 9 意義：(1) 對稱 VIX² 是最佳 parsimony 選擇 (2) GJR γ 已捕捉 return-based 不對稱，τ_t 的 VIX 不對稱是 redundant (3) 6 參數 A4f 是最優，第 7 個不對稱參數不 justified。可用於回應審查委員「VIX 不對稱效應」的潛在質疑。",
+    "tags": [
+      "asymmetric",
+      "A4f",
+      "vix-direction",
+      "null-result",
+      "paper9",
+      "parsimony"
+    ],
+    "experiment_ids": [
+      "K1052"
+    ],
+    "category": "volatility_forecasting",
+    "confidence": 0.9,
+    "data_source": "yfinance SPY+VIX 2005-2026",
+    "timestamp": "2026-04-11T18:59:11.564557"
   }
 ]
