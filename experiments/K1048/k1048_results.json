@@ -1,0 +1,346 @@
+{
+  "experiment_id": "K1048",
+  "title": "Threshold GARCH-X with Variable Selection",
+  "timestamp": "2026-04-11T11:05:25.787164",
+  "data_source": "yfinance (SPY, ^VIX, ^VIX9D)",
+  "data_period": "2004-04-02 to 2026-04-10",
+  "n_total": 5540,
+  "n_is": 3712,
+  "n_oos": 1828,
+  "oos_start": "2019-01-01",
+  "window": 2000,
+  "refit_every": 63,
+  "seed": 42,
+  "threshold_candidates": [
+    15,
+    20,
+    25,
+    30,
+    35
+  ],
+  "optimal_threshold": 15,
+  "threshold_results": {
+    "15": {
+      "n_low": 1667,
+      "n_high": 2044,
+      "params_low": [
+        0.00028180029632216057,
+        7.160575773100899e-06,
+        0.03771450679996488,
+        0.03773405721551124,
+        0.7182533959690683
+      ],
+      "params_high": [
+        0.0005443965222816304,
+        5.162681013045029e-06,
+        1e-06,
+        0.16829080881894076,
+        0.8794418456526234
+      ],
+      "conv_low": "True",
+      "conv_high": "True",
+      "bic_low_base": -12505.390654623045,
+      "bic_high_base": -12333.179280364702,
+      "bic_combined": -24823.367535886453,
+      "bic_pooled_gjr": -24737.45374134451,
+      "best_low_exog": "VIX_change",
+      "best_high_exog": "VIX_percentile",
+      "best_low_bic": -12525.683216930454,
+      "best_high_bic": -12339.205430630846,
+      "loglik_low": 6271.242279518399,
+      "loglik_high": 6185.64630006066,
+      "loglik_combined": 12456.88857957906,
+      "lr_stat": 135.226787344076,
+      "lr_pvalue": 0.0
+    },
+    "20": {
+      "n_low": 2661,
+      "n_high": 1050,
+      "params_low": [
+        0.0003000502906730143,
+        5.643374264010146e-06,
+        1e-06,
+        0.24077320256896123,
+        0.7650414551187348
+      ],
+      "params_high": [
+        0.0003423405307477854,
+        7.876147049808005e-06,
+        1e-06,
+        0.15043756443578746,
+        0.8924140217556321
+      ],
+      "conv_low": "True",
+      "conv_high": "True",
+      "bic_low_base": -19054.742556070538,
+      "bic_high_base": -5746.972756861604,
+      "bic_combined": -24785.52070323112,
+      "bic_pooled_gjr": -24737.45374134451,
+      "best_low_exog": "VIX_change",
+      "best_high_exog": null,
+      "best_low_bic": -19096.1168933137,
+      "best_high_bic": -5746.972756861604,
+      "loglik_low": 9547.087421212713,
+      "loglik_high": 2890.8777420386805,
+      "loglik_combined": 12437.965163251392,
+      "lr_stat": 97.37995468874215,
+      "lr_pvalue": 0.0
+    },
+    "25": {
+      "n_low": 3179,
+      "n_high": 532,
+      "params_low": [
+        0.0004429133486993576,
+        4.141739798316452e-06,
+        0.09604879528706478,
+        0.14323570882819375,
+        0.7823311132030331
+      ],
+      "params_high": [
+        0.0006991487770523681,
+        2.1108886511160107e-05,
+        1e-06,
+        0.15219695133826194,
+        0.8751316627100999
+      ],
+      "conv_low": "True",
+      "conv_high": "True",
+      "bic_low_base": -22090.948480080915,
+      "bic_high_base": -2605.733684868745,
+      "bic_combined": -24677.977368929256,
+      "bic_pooled_gjr": -24737.45374134451,
+      "best_low_exog": "VIX_change",
+      "best_high_exog": null,
+      "best_low_bic": -22186.538417920026,
+      "best_high_bic": -2605.733684868745,
+      "loglik_low": 11065.635044942734,
+      "loglik_high": 1318.5584511577267,
+      "loglik_combined": 12384.19349610046,
+      "lr_stat": -10.163379613120924,
+      "lr_pvalue": 1.0
+    },
+    "30": {
+      "n_low": 3411,
+      "n_high": 300,
+      "params_low": [
+        0.0003484881584685182,
+        3.3675055991577887e-06,
+        1e-06,
+        0.21185862966718885,
+        0.8440556463635914
+      ],
+      "params_high": [
+        0.0009518892332356558,
+        3.314200897806236e-05,
+        0.00555955846363993,
+        0.1615668725669473,
+        0.8603768012812627
+      ],
+      "conv_low": "True",
+      "conv_high": "True",
+      "bic_low_base": -23452.75515409985,
+      "bic_high_base": -1329.6944605341143,
+      "bic_combined": -24761.232707647672,
+      "bic_pooled_gjr": -24737.45374134451,
+      "best_low_exog": "VIX_change",
+      "best_high_exog": null,
+      "best_low_bic": -23532.52771467738,
+      "best_high_bic": -1329.6944605341143,
+      "loglik_low": 11746.714479005972,
+      "loglik_high": 679.1066864536976,
+      "loglik_combined": 12425.821165459669,
+      "lr_stat": 73.09195910529525,
+      "lr_pvalue": 9.481304630298837e-14
+    },
+    "35": {
+      "n_low": 3517,
+      "n_high": 194,
+      "params_low": [
+        0.00034070433132490436,
+        3.0038251841612927e-06,
+        1e-06,
+        0.2082723331733345,
+        0.854674449537114
+      ],
+      "params_high": [
+        0.002074901212910123,
+        6.33331248808822e-05,
+        0.03992115055597683,
+        0.16995837492268615,
+        0.8019825557948059
+      ],
+      "conv_low": "True",
+      "conv_high": "True",
+      "bic_low_base": -23981.54348704841,
+      "bic_high_base": -795.9556371664216,
+      "bic_combined": -24754.255609900854,
+      "bic_pooled_gjr": -24737.45374134451,
+      "best_low_exog": "VIX_change",
+      "best_high_exog": null,
+      "best_low_bic": -24011.554188462436,
+      "best_high_bic": -795.9556371664216,
+      "loglik_low": 12011.18515260539,
+      "loglik_high": 411.14746398086913,
+      "loglik_combined": 12422.33261658626,
+      "lr_stat": 66.11486135847736,
+      "lr_pvalue": 2.553290912032935e-12
+    }
+  },
+  "pooled_results": {
+    "GJR": {
+      "bic": -24737.45374134451,
+      "qlike_is": -8.5131211015969,
+      "loglik": 12389.275185907021,
+      "params": [
+        0.000478974136826102,
+        1.8577196536937512e-06,
+        0.05318629075022643,
+        0.08528472696381081,
+        0.882108741159021
+      ]
+    }
+  },
+  "oos_qlike": {
+    "GJR": -8.258638000424975,
+    "GJR+VIX_sq": -8.2787993493452,
+    "Threshold_GJR": -8.281688279773817,
+    "Threshold_GJR-X": -8.283132917742863
+  },
+  "oos_dm_tests": {
+    "GJR+VIX_sq_vs_GJR": {
+      "t_stat": -0.9953140575882652,
+      "p_value": 0.3195835428110847
+    },
+    "Threshold_GJR_vs_GJR": {
+      "t_stat": -1.0159440074204866,
+      "p_value": 0.3096560509205952
+    },
+    "Threshold_GJR-X_vs_GJR": {
+      "t_stat": -0.9000428914653833,
+      "p_value": 0.36809742556151015
+    },
+    "Threshold_GJR_vs_A4f": {
+      "t_stat": -0.21089519915533397,
+      "p_value": 0.8329690503998057
+    },
+    "Threshold_GJR-X_vs_A4f": {
+      "t_stat": -0.24633330883393023,
+      "p_value": 0.8054242274611438
+    }
+  },
+  "oos_var_backtest": {
+    "GJR_VaR5%": {
+      "violations": 115,
+      "violation_rate": 0.06291028446389496,
+      "expected": 91.4,
+      "kupiec_lr": 5.950110907616377,
+      "kupiec_p": 0.014716360198482437,
+      "kupiec_pass": "False",
+      "n": 1828
+    },
+    "GJR_VaR1%": {
+      "violations": 39,
+      "violation_rate": 0.021334792122538294,
+      "expected": 18.28,
+      "kupiec_lr": 17.902958019676234,
+      "kupiec_p": 2.3245952446959706e-05,
+      "kupiec_pass": "False",
+      "n": 1828
+    },
+    "GJR+VIX_sq_VaR5%": {
+      "violations": 122,
+      "violation_rate": 0.06673960612691467,
+      "expected": 91.4,
+      "kupiec_lr": 9.803624861021191,
+      "kupiec_p": 0.0017416822356759454,
+      "kupiec_pass": "False",
+      "n": 1828
+    },
+    "GJR+VIX_sq_VaR1%": {
+      "violations": 48,
+      "violation_rate": 0.0262582056892779,
+      "expected": 18.28,
+      "kupiec_lr": 33.7285392755725,
+      "kupiec_p": 6.336422719854795e-09,
+      "kupiec_pass": "False",
+      "n": 1828
+    },
+    "Threshold_GJR_VaR5%": {
+      "violations": 93,
+      "violation_rate": 0.05087527352297593,
+      "expected": 91.4,
+      "kupiec_lr": 0.029321330745514906,
+      "kupiec_p": 0.8640392047949558,
+      "kupiec_pass": "True",
+      "n": 1828
+    },
+    "Threshold_GJR_VaR1%": {
+      "violations": 37,
+      "violation_rate": 0.02024070021881838,
+      "expected": 18.28,
+      "kupiec_lr": 14.932479143970738,
+      "kupiec_p": 0.0001114280334518769,
+      "kupiec_pass": "False",
+      "n": 1828
+    },
+    "Threshold_GJR-X_VaR5%": {
+      "violations": 105,
+      "violation_rate": 0.057439824945295405,
+      "expected": 91.4,
+      "kupiec_lr": 2.0369091506301906,
+      "kupiec_p": 0.1535213145806964,
+      "kupiec_pass": "True",
+      "n": 1828
+    },
+    "Threshold_GJR-X_VaR1%": {
+      "violations": 42,
+      "violation_rate": 0.022975929978118162,
+      "expected": 18.28,
+      "kupiec_lr": 22.748677714956628,
+      "kupiec_p": 1.8463113696798317e-06,
+      "kupiec_pass": "False",
+      "n": 1828
+    }
+  },
+  "parameter_comparison": {
+    "pooled": {
+      "omega": 1.8577196536937512e-06,
+      "alpha": 0.05318629075022643,
+      "gamma": 0.08528472696381081,
+      "beta": 0.882108741159021,
+      "persistence": 0.9779373953911529
+    },
+    "low_regime": {
+      "omega": 7.160575773100899e-06,
+      "alpha": 0.03771450679996488,
+      "gamma": 0.03773405721551124,
+      "beta": 0.7182533959690683,
+      "persistence": 0.7748349313767888,
+      "n_obs": 1667
+    },
+    "high_regime": {
+      "omega": 5.162681013045029e-06,
+      "alpha": 1e-06,
+      "gamma": 0.16829080881894076,
+      "beta": 0.8794418456526234,
+      "persistence": 0.9635882500620938,
+      "n_obs": 2044
+    }
+  },
+  "key_findings": [
+    "LR test for threshold at VIX=15: LR=135.23, p=0.0000. Threshold effect significant.",
+    "Gamma (leverage): Low VIX=0.0377, High VIX=0.1683. Higher leverage effect in high VIX regime.",
+    "Best exog variable differs by regime: Low=VIX_change, High=VIX_percentile. Different variables optimal in different regimes.",
+    "Best OOS model by QLIKE: Threshold_GJR-X (-8.283133)",
+    "Threshold GJR-X vs A4f (GJR+VIX^2): DM t=-0.246. No significant improvement over A4f."
+  ],
+  "references": [
+    "Gonzalez-Rivera (1998, JBES) - Threshold GARCH",
+    "Chen & So (2006) - Threshold heteroscedastic models",
+    "So, Chen, Liu (2006, JRSS-C) - SSVS for GARCH",
+    "Patton (2011) - QLIKE loss",
+    "K1031: SSVS VIX9D^2 PIP=1.000",
+    "K813: STGARCH 11-param OOS DM=-0.11 NS",
+    "K1019: MS(2)-GJR DM=-3.20 sig but lost to A4f"
+  ]
+}
