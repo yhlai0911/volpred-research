@@ -1,11 +1,11 @@
 {
-  "timestamp": "2026-04-11T00:31:50Z",
+  "timestamp": "2026-04-11T06:28:11Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "7 draft articles in feed.json (threshold: >=3)"
+      "detail": "6 draft articles in feed.json (threshold: >=3)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
@@ -15,7 +15,7 @@
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Last 30 lines reviewed. Most recent entry dated 2026-04-09 (article_tags sync fix). No entries dated today (2026-04-11) or yesterday (2026-04-10)."
+      "detail": "Last 30 lines reviewed. Most recent entry dated 2026-04-09 (article_tags sync fix — schema INT/TEXT mismatch caused silent tag-write failures). No entries dated today (2026-04-11) or yesterday (2026-04-10)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
@@ -30,7 +30,7 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1821 entries in storage/memory/knowledge.json"
+      "detail": "1825 entries in storage/memory/knowledge.json"
     }
   ],
   "alerts": []
