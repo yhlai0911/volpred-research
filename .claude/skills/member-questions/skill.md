@@ -36,8 +36,8 @@ user-invocable: true
 5. 若進研究候選池，遵循 lifecycle：
    - `queued` → `claimed` → `completed` / `cancelled`
 6. 做研究（LanceDB 搜尋 + Agent 實驗 if needed）
-7. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --audience member_qa --proposer 會員名稱 --status draft --tags "會員提問,..."`
-   - **必須傳 `--audience member_qa` 和 `--proposer 會員名稱`**（否則 badge 和署名不顯示）
+7. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --category member_qa --audience member_qa --proposer 會員名稱 --status draft --tags "會員提問,..."`
+   - **必須傳 `--category member_qa`、`--audience member_qa` 和 `--proposer 會員名稱`**（否則 badge 和署名不顯示）
 8. 連結文章到問題：`uv run volpred ops question-answer <question_id> --answer "摘要" --article-id <article_slug>`
    - **文章是 draft → 問題保持 `researching`**（不是 answered），文章發佈時 release-pool 自動改為 `answered`
    - **文章是 published → 問題直接標為 `answered`**

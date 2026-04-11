@@ -2,17 +2,21 @@
   "report_type": "daily",
   "date": "2026-04-11",
   "week_range": "2026-04-10 → 2026-04-17",
-  "total_commits": 37,
-  "total_estimated_tokens": 635260,
+  "total_commits": 45,
+  "total_estimated_tokens": 874548,
   "categories": {
     "other": {
       "emoji": "❔",
       "description": "其他",
-      "commits": 32,
-      "lines_changed": 882406,
-      "estimated_tokens": 564000,
-      "percentage": 88.8,
+      "commits": 36,
+      "lines_changed": 884610,
+      "estimated_tokens": 572000,
+      "percentage": 65.4,
       "commit_messages": [
+        "Merge branch 'main' of https://github.com/yhlai0911/volpred-research",
+        "K1050 knowledge: Earnings season vol — A4f uniform improvement (not earnings-spe",
+        "K1050: Earnings season vol — A4f seasonal decomposition",
+        "K1049: HAR-RV 60-day pilot — proxy comparison r² vs RV (PRELIMINARY)",
         "K1048 knowledge: Threshold GARCH-X (IS sig LR=135, OOS NS, VaR improved)",
         "K1048: Threshold GARCH + SSVS variable selection",
         "K1047 knowledge: ABM VT crowding (50-75% tipping point, <5% safe)",
@@ -47,14 +51,27 @@
         "K1033: A4f refit frequency sensitivity (Paper 9 robustness)"
       ]
     },
+    "paper_review": {
+      "emoji": "📝",
+      "description": "論文審查/修訂（讀寫完整 LaTeX，多輪 review）",
+      "commits": 2,
+      "lines_changed": 5401,
+      "estimated_tokens": 204832,
+      "percentage": 23.4,
+      "commit_messages": [
+        "Periodic sync: Paper 9 v5 complete, K1049+K1050 experiments, storage state",
+        "Paper 9 v5: Review + revision (3E + 10W fixes) + K1049 knowledge"
+      ]
+    },
     "experiment": {
       "emoji": "🔬",
       "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
-      "commits": 2,
-      "lines_changed": 2017,
-      "estimated_tokens": 60340,
-      "percentage": 9.5,
+      "commits": 3,
+      "lines_changed": 2535,
+      "estimated_tokens": 80700,
+      "percentage": 9.2,
       "commit_messages": [
+        "Session sync: 12 experiments complete (K1036-K1048), token reports, articles, Pa",
         "Session sync: 10 experiments (K1036-K1046), token reports, paper trading, articl",
         "Session sync: 6 experiments (K1036-K1042), knowledge index, articles, sync state"
       ]
@@ -62,11 +79,12 @@
     "ops_patrol": {
       "emoji": "🛡️",
       "description": "平台巡檢",
-      "commits": 1,
-      "lines_changed": 16,
-      "estimated_tokens": 6192,
-      "percentage": 1.0,
+      "commits": 2,
+      "lines_changed": 24,
+      "estimated_tokens": 12288,
+      "percentage": 1.4,
       "commit_messages": [
+        "Ops patrol report 2026-04-11T06:28Z",
         "Ops patrol report 2026-04-11T00:32Z"
       ]
     },
@@ -76,7 +94,7 @@
       "commits": 2,
       "lines_changed": 182,
       "estimated_tokens": 4728,
-      "percentage": 0.7,
+      "percentage": 0.5,
       "commit_messages": [
         "K1038 knowledge + research_program GAS-t results + K1036 factorial update",
         "Session state sync: K1034/K1035 results, research_program.md VaR ranking, CLAUDE"

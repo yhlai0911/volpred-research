@@ -146,6 +146,7 @@ a{color:#34d399;text-decoration:none}
 h1{font-size:1.5rem;margin:1rem 0 0.5rem}
 .badge{display:inline-block;font-size:0.7rem;padding:2px 10px;border-radius:99px;
   background:rgba(245,158,11,0.15);color:#fbbf24;border:1px solid rgba(245,158,11,0.3)}
+.badge.member_qa{background:rgba(234,179,8,0.2);color:#facc15;border-color:rgba(234,179,8,0.5)}
 .meta{color:#6b7280;font-size:0.8rem;margin:0.3rem 0 1rem}
 .tags span{background:#1f2937;color:#9ca3af;font-size:0.7rem;padding:2px 8px;border-radius:4px;margin-right:4px}
 .card{background:#111827;border:1px solid #1f2937;border-radius:12px;padding:1.5rem;margin:1.5rem 0}
@@ -167,7 +168,8 @@ fetch("/api/publications/feed/"+id)
 .then(function(r){if(!r.ok)throw new Error();return r.json()})
 .then(function(d){
   var h='';
-  if(d.category)h+='<span class="badge">'+esc(d.category)+'</span> ';
+  var catLabel={member_qa:'會員提問'};
+  if(d.category)h+='<span class="badge '+esc(d.category)+'">'+(catLabel[d.category]||esc(d.category))+'</span> ';
   if(d.published_at)h+='<span class="meta">'+esc(d.published_at.slice(0,19))+'</span>';
   h+='<h1>'+esc(d.title||'Report')+'</h1>';
   if(d.tags&&d.tags.length){h+='<div class="tags" style="margin:0.5rem 0">';d.tags.forEach(function(t){h+='<span>#'+esc(t)+'</span>'});h+='</div>'}

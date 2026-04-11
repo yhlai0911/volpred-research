@@ -306,3 +306,26 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **Schema 型別要跟同步碼一致**。`UUID`/`INT`/`TEXT` 任何一個判斷寫錯，join table 會無聲失效
 - **禁止靜默吞錯**。文章主體寫進去但 tags 沒寫進去，比整體失敗更危險，因為它會假裝成功
 - **遠端 sync API 與本地 sync 腳本必須等價**。不能一條路同步 article，另一條路忘了同步 article_tags
+
+## 2026-04-11: 會員提問文章 badge 不一致 + article_tags 更新後舊 tags 殘留
+
+### 問題
+會員提問文章的 badge（category）有三種值（milestone / qa / 會員提問），前端顯示不一致。
+
+### 根因（流程缺陷，共 3 處）
+1. `publisher.py`：`audience=member_qa` 沒有專屬 category 映射，fallback 到 `milestone`；也不自動在 tags 中加入「會員提問」，導致前端 v2 的 `resolveBadge()` 無法匹配
+2. `_sync_article_tags()`：只 upsert 不 delete，tags 變更後舊的 article_tags 關聯殘留
+3. `member-questions/skill.md`：發文指令沒有 `--category member_qa`
+
+### 解決
+1. `publisher.py`：加入 `_audience_tag_map`，發文時自動確保正確的 category tag 在 tags 首位（同時移除衝突的 category tags）；category 自動映射 member_qa
+2. `_sync_article_tags()`：改為先 `_delete_where` 再 `_post`，確保 tags 更新時舊關聯被清除
+3. `member-questions/skill.md`：加入 `--category member_qa`
+4. `frontend-v2-fix/`：會員提問 badge 改為金色（yellow-300）
+5. 既有 8 篇文章 category/tags 統一修正並重新同步 Supabase
+
+### 教訓
+- **修流程不修資料**（CLAUDE.md 明確規定）。手動改 JSON 只是治標，根因在 publisher 邏輯
+- **tag 同步必須 delete-then-insert**。只做 upsert 的 join table 永遠不會清除舊關聯
+- **前端改 `frontend-v2-fix/`**，不是 `frontend/`（舊版）。部署用 `frontend-v2-fix/scripts/deploy-zeabur-safe.sh`
+- **遇到 error 第一步查 error_log**——這次的 article_tags 殘留問題跟 2026-04-09 同根源

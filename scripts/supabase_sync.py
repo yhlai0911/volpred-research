@@ -330,7 +330,7 @@ def sync_article(item: dict, storage_dir: str | Path = "storage") -> bool:
         "audience": classify_audience(item),
         "phase": item.get("phase"),
         "status": item.get("status", "published"),
-        "category": item.get("category", "milestone"),
+        "category": item.get("category") or ("member_qa" if classify_audience(item) == "member_qa" else "milestone"),
         "proposer": extract_proposer(item),
         "author_id": "claude",
         "details": item.get("details"),
@@ -370,7 +370,9 @@ def _sync_article_tags(slug: str, tags: list[str]) -> bool:
             print(f"  Supabase article tag sync incomplete for {slug}: missing tag ids for {missing}")
             return False
 
-        # Upsert article_tags
+        # Delete existing article_tags then insert current set
+        # (prevents stale tags from persisting after tag changes)
+        _delete_where("article_tags", {"article_id": article_id})
         at_rows = []
         for tag_name in tag_names:
             tag_id = tag_map.get(tag_name)

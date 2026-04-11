@@ -1019,6 +1019,12 @@ def main():
                         sync_paper_trade(strat_id, enriched, trade_date)
                         pt_synced += 1
         print(f"  Supabase: {pt_synced} paper trades synced (last 30d × {len(strat_list)} strategies)")
+        # Sync today's market_daily row to Supabase
+        today_market = pt.get("_market_daily", {}).get(today)
+        if today_market:
+            from supabase_sync import _post
+            _post("market_daily", {"date": today, **today_market})
+            print(f"  Supabase: market_daily synced for {today}")
     except Exception as e:
         print(f"  Supabase sync skipped: {e}")
 
@@ -1038,6 +1044,14 @@ def main():
         recalc_all()
     except Exception as e:
         print(f"  Metrics recalc skipped: {e}")
+
+    # --- Update market status → Supabase ---
+    try:
+        from volpred.market_calendar import sync_market_status_to_supabase
+        print("\n--- Updating market status ---")
+        sync_market_status_to_supabase()
+    except Exception as e:
+        print(f"  Market status update failed: {e}")
 
     print(f"\n✓ Done!")
 

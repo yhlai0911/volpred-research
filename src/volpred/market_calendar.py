@@ -259,9 +259,78 @@ def save_market_status(storage_dir: str | Path = "storage") -> Path:
     return out_path
 
 
-# ── CLI test ────────────────────────────────────────────────────────
+def sync_market_status_to_supabase(days_ahead: int = 30) -> bool:
+    """
+    Pre-generate trading calendar for the next N days and push to Supabase.
+    Each day gets its own row (id = date string).
+    Frontend queries by today's date — no daily sync needed.
+    Run weekly via crontab to extend the horizon.
+    """
+    import os
+    from urllib.request import Request, urlopen
+
+    today = datetime.now(timezone.utc).date()
+
+    # Also save today's status locally
+    save_market_status()
+
+    # Find Supabase credentials
+    url = key = ""
+    for p in ["frontend-v2-fix/.env.production", "frontend-v2-fix/.env.local", ".env"]:
+        if os.path.exists(p):
+            for line in open(p):
+                if line.startswith("NEXT_PUBLIC_SUPABASE_URL="):
+                    url = line.split("=", 1)[1].strip()
+                if line.startswith("SUPABASE_SERVICE_ROLE_KEY="):
+                    key = line.split("=", 1)[1].strip()
+
+    if not url or not key:
+        print("  Supabase credentials not found, skipping sync")
+        return False
+
+    now = datetime.now(timezone.utc).isoformat()
+    rows = []
+    for i in range(days_ahead):
+        d = today + timedelta(days=i)
+        status = get_all_market_status(d)
+        status["upcoming_holidays"] = {
+            "us": get_upcoming_holidays("us", d, days_ahead=14),
+            "tw": get_upcoming_holidays("tw", d, days_ahead=14),
+        }
+        rows.append({"id": d.isoformat(), "data": status, "updated_at": now})
+
+    # Keep 'current' for backward compatibility
+    rows.append({"id": "current", "data": rows[0]["data"], "updated_at": now})
+
+    payload = json.dumps(rows).encode()
+    req = Request(
+        f"{url}/rest/v1/market_status",
+        data=payload,
+        headers={
+            "apikey": key,
+            "Authorization": f"Bearer {key}",
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates",
+        },
+        method="POST",
+    )
+    resp = urlopen(req)
+    ok = resp.status in (200, 201)
+    if ok:
+        today_status = rows[0]["data"]
+        print(f"  Trading calendar synced: {days_ahead} days ({today} ~ {(today + timedelta(days=days_ahead-1)).isoformat()})")
+        print(f"  Today: {today_status['summary']}")
+    return ok
+
+
+# ── CLI ────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import sys
+
+    if len(sys.argv) > 1 and sys.argv[1] == "sync":
+        # Standalone sync mode — called by crontab daily
+        ok = sync_market_status_to_supabase()
+        sys.exit(0 if ok else 1)
 
     d = date.fromisoformat(sys.argv[1]) if len(sys.argv) > 1 else None
     result = get_all_market_status(d)

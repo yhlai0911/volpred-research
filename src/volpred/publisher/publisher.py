@@ -300,8 +300,28 @@ class Publisher:
         if category is None:
             if audience == 'general':
                 category = 'general'
+            elif audience == 'member_qa':
+                category = 'member_qa'
             else:
                 category = 'milestone'
+
+        # Ensure audience-specific category tag is present and first
+        # (frontend-v2 badge uses tags to determine display)
+        _audience_tag_map = {
+            'general': '一般讀者',
+            'research': '研究',
+            'daily': '每日建議',
+            'member_qa': '會員提問',
+        }
+        required_tag = _audience_tag_map.get(audience)
+        if required_tag:
+            # Remove any mismatched category tags first
+            category_tags = set(_audience_tag_map.values())
+            tag_list = [t for t in tag_list if t not in category_tags or t == required_tag]
+            # Ensure required tag is first
+            if required_tag in tag_list:
+                tag_list.remove(required_tag)
+            tag_list.insert(0, required_tag)
 
         # Build related_articles list for metadata
         related_articles = []
@@ -423,7 +443,28 @@ class Publisher:
             else:
                 item['audience'] = 'research'
         if not item.get('category'):
-            item['category'] = 'general' if item.get('audience') == 'general' else 'milestone'
+            if item.get('audience') == 'general':
+                item['category'] = 'general'
+            elif item.get('audience') == 'member_qa':
+                item['category'] = 'member_qa'
+            else:
+                item['category'] = 'milestone'
+        # Ensure audience-specific category tag is present and first
+        _audience_tag_map = {
+            'general': '一般讀者',
+            'research': '研究',
+            'daily': '每日建議',
+            'member_qa': '會員提問',
+        }
+        required_tag = _audience_tag_map.get(item.get('audience', ''))
+        if required_tag:
+            tag_list = item.get('tags', [])
+            category_tags = set(_audience_tag_map.values())
+            tag_list = [t for t in tag_list if t not in category_tags or t == required_tag]
+            if required_tag in tag_list:
+                tag_list.remove(required_tag)
+            tag_list.insert(0, required_tag)
+            item['tags'] = tag_list
         # Ensure content is not empty (use description as fallback)
         if not item.get('content') and item.get('description'):
             item['content'] = item['description']
