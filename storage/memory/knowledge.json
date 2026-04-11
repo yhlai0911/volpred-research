@@ -23205,5 +23205,26 @@
     "data_source": "simulation (no external data)",
     "confidence": 0.85,
     "created_at": "2026-04-11T02:56:35.686771+00:00"
+  },
+  {
+    "id": "know_20260411030657_k1048",
+    "title": "K1048: Threshold GARCH-X — IS 顯著（LR=135）但 OOS NS，VaR 改善",
+    "content": "[提出: 賴奕豪(Bayesian方向), 執行: Claude] K1048 Threshold GARCH-X + BIC 變數選擇。SPY OOS 2019-2026。最佳 threshold VIX=15。IS: LR=135.23(p<0.001), BIC 改善 85.9。Regime 差異：leverage 低VIX 0.038 vs 高VIX 0.168(4.5x), persistence 0.775 vs 0.964。最佳外生變數不同：低VIX 用 VIX_change(momentum), 高VIX 用 VIX_percentile(relative level)。OOS QLIKE: Threshold GJR-X 數值最佳(-8.2831) 但 DM t=-0.246 vs A4f(NS)——再次確認 K813 教訓。VaR: Threshold models 唯一通過 Kupiec 5%（GJR/A4f 都 fail），但所有 Normal VaR 在 1% fail。結論：threshold 捕捉真實 regime 異質性，VaR 有實際改善，但 QLIKE 不顯著。複雜模型 IS 好但 OOS 不一定好。",
+    "tags": [
+      "threshold",
+      "GARCH-X",
+      "SSVS",
+      "BIC",
+      "regime",
+      "VIX",
+      "IS vs OOS",
+      "VaR",
+      "Bayesian"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1048",
+    "data_source": "yfinance",
+    "confidence": 0.9,
+    "created_at": "2026-04-11T03:06:57.883698+00:00"
   }
 ]
