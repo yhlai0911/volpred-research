@@ -24572,5 +24572,28 @@
     "confidence": 0.95,
     "data_source": "TAIFEX TX tick data 2012-2026 (3484 files) + yfinance SPY",
     "timestamp": "2026-04-11T19:00:26.782014"
+  },
+  {
+    "id": "know_20260411205613_k1053",
+    "title": "K1053: VIX Term Structure Slope NULL — No Incremental Info Beyond VIX Level in A4f",
+    "content": "[提出: Claude, 執行: Claude] K1053 測試 VIX term structure slope（VIX/VIX3M ratio 和 VIX-VIX3M spread²）是否對 A4f 有增量預測力。5 個模型（SPY OOS 2019-2026, n=1828）。核心結論：NULL。M2（+slope ratio）DM t=+0.58 NS——slope 完全無增量。M3（+spread²）DM t=-2.17——suggestive 但未達 Harvey 3.0。M4（VIX9D²）DM t=-4.73 vs GJR（最強單一 VIX 變數），但 vs M1 DM t=-2.66 也未達 Harvey。Regime 分析：backwardation（131天）和 contango（1697天）下 slope 都無優勢。θ₂ 經濟量級僅 VIX level 的 10%。結論：VIX² alone is sufficient for τ_t。Term structure information 已被 VIX level 吸收。Confirms K1015（dual factor NULL）and extends to slope/spread specifications。VIX sufficiency #32。",
+    "tags": [
+      "vix-term-structure",
+      "vix3m",
+      "slope",
+      "backwardation",
+      "contango",
+      "null-result",
+      "A4f",
+      "paper9",
+      "vix-sufficiency"
+    ],
+    "experiment_ids": [
+      "K1053"
+    ],
+    "category": "volatility_forecasting",
+    "confidence": 0.9,
+    "data_source": "yfinance SPY+VIX+VIX3M+VIX9D 2005-2026",
+    "timestamp": "2026-04-11T20:56:13.591132"
   }
 ]
