@@ -23185,5 +23185,25 @@
     "data_source": "yfinance",
     "confidence": 0.95,
     "created_at": "2026-04-11T00:59:27.654319+00:00"
+  },
+  {
+    "id": "know_20260411025635_k1047",
+    "title": "K1047: ★★★ ABM VT Crowding — 50-75% 臨界點，90% vol +50.6%，<5% 安全",
+    "content": "[提出: Claude, 執行: Claude] K1047 正式 ABM：1000 agents（F/C/V），5000 天，50 MC reps。VT 採用率影響：0%→25% 微降（穩定化），50% 開始惡化（vol 21.1%），75% 嚴重（24.7%, kurt=6.09），90% 病態（vol 30.5% +50.6%, kurt=14.57, AC|r|=0.449, skew=-0.750）。臨界點 50-75%。機制：VT feedback loop（高 vol→全體賣→更高 vol）。K742 的 \"always converge\" 技術上正確但誤導——價格不發散但市場性質病態。當前 VT 採用率 <5% 完全安全。Alpha 衰減：VT agents Sharpe 隨採用率下降（crowding cost）。Fundamentalist 是市場穩定器。模擬實驗，非實證。",
+    "tags": [
+      "ABM",
+      "VT",
+      "crowding",
+      "tipping point",
+      "simulation",
+      "feedback loop",
+      "kurtosis",
+      "safe zone"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1047",
+    "data_source": "simulation (no external data)",
+    "confidence": 0.85,
+    "created_at": "2026-04-11T02:56:35.686771+00:00"
   }
 ]
