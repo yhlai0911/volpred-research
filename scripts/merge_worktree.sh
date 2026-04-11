@@ -24,7 +24,7 @@ TARGET=""
 for arg in "$@"; do
     case "$arg" in
         --dry-run) DRY_RUN=true ;;
-        *) TARGET="$arg" ;;
+        *) TARGET="$(basename "$arg")" ;;  # 只取 basename，確保匹配一致
     esac
 done
 
@@ -44,8 +44,8 @@ merge_one_worktree() {
     local wt_path="$1"
     local wt_name=$(basename "$wt_path")
 
-    # 如果指定了 target，只處理匹配的
-    if [[ -n "$TARGET" ]] && [[ "$wt_name" != *"$TARGET"* ]]; then
+    # 如果指定了 target，只處理匹配的（雙向包含匹配）
+    if [[ -n "$TARGET" ]] && [[ "$wt_name" != *"$TARGET"* ]] && [[ "$TARGET" != *"$wt_name"* ]]; then
         return 0
     fi
 
@@ -221,11 +221,17 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
 
         # 清理 worktree
         if $merge_ok; then
+            # 最終驗證：至少一個 experiments/K* 檔案存在
+            local exp_dirs_on_main
+            exp_dirs_on_main=$(ls -d experiments/K*/ 2>/dev/null | wc -l | tr -d ' ')
+            echo "  [VERIFY] main 上 experiments/ 目錄數: $exp_dirs_on_main"
+
             git worktree remove "$wt_path" 2>/dev/null || git worktree remove --force "$wt_path" 2>/dev/null
             git branch -D "$branch" 2>/dev/null || true
-            echo "  [DONE] 已移除 worktree"
+            echo "  [DONE] 已移除 worktree 和 branch"
         else
             echo "  [SKIP] 合併失敗，保留 worktree 待手動處理: $wt_path"
+            echo "  [HINT] 手動修復: git cherry-pick <commit-hash>"
         fi
     else
         echo "  [DRY-RUN] 會合併 $commit_count 個 commits 到 $main_branch"
@@ -235,34 +241,61 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>" 2>/dev/nul
 }
 
 # 主流程
-worktrees=$(get_agent_worktrees)
+# 用 compatible 方式讀 array（macOS bash 3.x 無 mapfile）
+wt_array=()
+while IFS= read -r line; do
+    [[ -n "$line" ]] && wt_array+=("$line")
+done < <(get_agent_worktrees)
 
-if [[ -z "$worktrees" ]]; then
+if [[ ${#wt_array[@]} -eq 0 ]]; then
     echo "沒有找到 agent worktrees"
-    exit 0
+else
+    echo "找到以下 agent worktrees:"
+    for wt in "${wt_array[@]}"; do
+        [[ -n "$wt" ]] && echo "  $(basename "$wt")"
+    done
+    echo ""
+
+    # 用 for loop（非 pipe-while），避免子 shell 吞錯誤
+    for wt in "${wt_array[@]}"; do
+        if [[ -n "$wt" ]]; then
+            merge_one_worktree "$wt"
+        fi
+    done
 fi
-
-echo "找到以下 agent worktrees:"
-echo "$worktrees" | while IFS= read -r wt; do
-    echo "  $(basename "$wt")"
-done
-echo ""
-
-echo "$worktrees" | while IFS= read -r wt; do
-    if [[ -n "$wt" ]]; then
-        merge_one_worktree "$wt"
-    fi
-done
 
 echo ""
 echo "=== 完成 ==="
 echo ""
+
+# 清理 orphan worktree branches（worktree 已移除但 branch 殘留）
+echo "--- 清理 orphan worktree branches ---"
+orphan_count=0
+for branch in $(git branch --list 'worktree-agent-*' 2>/dev/null | tr -d ' '); do
+    # 檢查該 branch 是否還有 worktree 關聯
+    if ! git worktree list --porcelain | grep -q "branch refs/heads/$branch"; then
+        if ! $DRY_RUN; then
+            git branch -D "$branch" 2>/dev/null && echo "  [CLEAN] 刪除 orphan branch: $branch"
+        else
+            echo "  [DRY-RUN] 會刪除 orphan branch: $branch"
+        fi
+        orphan_count=$((orphan_count + 1))
+    fi
+done
+if [[ $orphan_count -eq 0 ]]; then
+    echo "  無 orphan branches"
+fi
+
 # 顯示剩餘的 worktrees
-remaining=$(get_agent_worktrees)
-if [[ -n "$remaining" ]]; then
+echo ""
+remaining=()
+while IFS= read -r line; do
+    [[ -n "$line" ]] && remaining+=("$line")
+done < <(get_agent_worktrees)
+if [[ ${#remaining[@]} -gt 0 ]] && [[ -n "${remaining[0]}" ]]; then
     echo "剩餘 worktrees："
-    echo "$remaining" | while IFS= read -r wt; do
-        echo "  $(basename "$wt")"
+    for wt in "${remaining[@]}"; do
+        [[ -n "$wt" ]] && echo "  $(basename "$wt")"
     done
 else
     echo "所有 agent worktrees 已清理完成"
