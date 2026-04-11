@@ -2,17 +2,36 @@
   "report_type": "daily",
   "date": "2026-04-11",
   "week_range": "2026-04-10 → 2026-04-17",
-  "total_commits": 45,
-  "total_estimated_tokens": 874548,
+  "total_commits": 28,
+  "total_estimated_tokens": 419868,
   "categories": {
+    "paper_review": {
+      "emoji": "📝",
+      "description": "論文審查/修訂（讀寫完整 LaTeX，多輪 review）",
+      "commits": 2,
+      "lines_changed": 5401,
+      "estimated_tokens": 204832,
+      "percentage": 48.8,
+      "commit_messages": [
+        "Periodic sync: Paper 9 v5 complete, K1049+K1050 experiments, storage state",
+        "Paper 9 v5: Review + revision (3E + 10W fixes) + K1049 knowledge"
+      ]
+    },
     "other": {
       "emoji": "❔",
       "description": "其他",
-      "commits": 36,
-      "lines_changed": 884610,
-      "estimated_tokens": 572000,
-      "percentage": 65.4,
+      "commits": 20,
+      "lines_changed": 21469,
+      "estimated_tokens": 125876,
+      "percentage": 30.0,
       "commit_messages": [
+        "Merge branch 'main' of https://github.com/yhlai0911/volpred-research",
+        "K1053 knowledge: VIX term structure slope NULL — VIX² sufficient (#32)",
+        "K1053: VIX term structure slope as vol predictor — NULL (slope adds no increment",
+        "K1052: Asymmetric A4f — VIX direction/regime effects",
+        "K1051 knowledge: TX overnight gap alpha extinct post-2017 (night session structu",
+        "K1051: TX futures overnight gap strategy — null result, alpha extinct post-2017",
+        "K1052 knowledge: Asymmetric A4f NULL — symmetric VIX² is optimal parsimony",
         "Merge branch 'main' of https://github.com/yhlai0911/volpred-research",
         "K1050 knowledge: Earnings season vol — A4f uniform improvement (not earnings-spe",
         "K1050: Earnings season vol — A4f seasonal decomposition",
@@ -25,65 +44,30 @@
         "K1046 knowledge: MC-VaR dominated by CF-Rolling/FHS (37.5% vs 100%)",
         "K1046: Monte Carlo VaR with A4f",
         "K1045 knowledge: A4f residual diagnostics (60% kurtosis reduction, df 5.3→8.0)",
-        "K1045: A4f Residual Diagnostic Suite (Paper 9)",
-        "K1043 knowledge: FHS = CF-Rolling (12/12 both, non-parametric tail modeling is k",
-        "K1043: FHS-A4f VaR vs CF-Rolling -- both achieve 12/12 Trinity PASS",
-        "K1044 knowledge: Gamma-VT causal panel — K53 r=0.564 overturned (ρ=-0.209 NS)",
-        "K1044: Gamma-VT Causal Panel Test (13 assets) — gamma does NOT predict VT alpha",
-        "K1041 knowledge: DCC-A4f Portfolio VaR ★★★ (DM t=3.83 PASS, overturns K891)",
-        "K1041: DCC-A4f Portfolio VaR (SPY/GLD)",
-        "K1042 knowledge: Congressional trades signal NULL (disclosure lag kills signal)",
-        "K1042: Congressional Trades as Vol/Return Signal",
-        "K1040 knowledge: VRP return predictability (VIX monthly R²=5.63%, g_t no increme",
-        "K1040: VRP Return Predictability via A4f g_t",
-        "K1039 knowledge: A4f Multi-Horizon VaR (h=1,5 100% PASS, sqrt-h sufficient)",
-        "K1039: A4f Multi-Horizon VaR (h=1,5,10)",
-        "K1038: GAS-t Score-Driven volatility model vs GARCH",
-        "K1036 knowledge + TSMC Q1 article + fat tail draft article",
-        "K1036: A4f + CF-Rolling VaR combination comparison",
-        "Merge agent worktree agent-a53d02b6 (1 commits)",
-        "Merge remote: resolve token report conflict (keep local detailed version)",
-        "Session maintenance: knowledge.json dedup (52MB→1.4MB), merge_worktree.sh fix, 3",
-        "K1035: EVT-VaR with A4f residuals (GPD tail modeling)",
-        "Merge agent worktree agent-a6e512e6 (1 commits)",
-        "K1034: Cornish-Fisher expansion VaR comparison",
-        "Merge agent worktree agent-a901687e (1 commits)",
-        "K1033: A4f refit frequency sensitivity (Paper 9 robustness)"
-      ]
-    },
-    "paper_review": {
-      "emoji": "📝",
-      "description": "論文審查/修訂（讀寫完整 LaTeX，多輪 review）",
-      "commits": 2,
-      "lines_changed": 5401,
-      "estimated_tokens": 204832,
-      "percentage": 23.4,
-      "commit_messages": [
-        "Periodic sync: Paper 9 v5 complete, K1049+K1050 experiments, storage state",
-        "Paper 9 v5: Review + revision (3E + 10W fixes) + K1049 knowledge"
+        "K1045: A4f Residual Diagnostic Suite (Paper 9)"
       ]
     },
     "experiment": {
       "emoji": "🔬",
       "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
-      "commits": 3,
-      "lines_changed": 2535,
-      "estimated_tokens": 80700,
-      "percentage": 9.2,
+      "commits": 2,
+      "lines_changed": 2287,
+      "estimated_tokens": 65740,
+      "percentage": 15.7,
       "commit_messages": [
         "Session sync: 12 experiments complete (K1036-K1048), token reports, articles, Pa",
-        "Session sync: 10 experiments (K1036-K1046), token reports, paper trading, articl",
-        "Session sync: 6 experiments (K1036-K1042), knowledge index, articles, sync state"
+        "Session sync: 10 experiments (K1036-K1046), token reports, paper trading, articl"
       ]
     },
     "ops_patrol": {
       "emoji": "🛡️",
       "description": "平台巡檢",
-      "commits": 2,
-      "lines_changed": 24,
-      "estimated_tokens": 12288,
-      "percentage": 1.4,
+      "commits": 3,
+      "lines_changed": 34,
+      "estimated_tokens": 18408,
+      "percentage": 4.4,
       "commit_messages": [
+        "Ops patrol report 2026-04-11T12:39Z",
         "Ops patrol report 2026-04-11T06:28Z",
         "Ops patrol report 2026-04-11T00:32Z"
       ]
@@ -91,13 +75,12 @@
     "research_program": {
       "emoji": "📋",
       "description": "研究計畫/規範更新",
-      "commits": 2,
-      "lines_changed": 182,
-      "estimated_tokens": 4728,
-      "percentage": 0.5,
+      "commits": 1,
+      "lines_changed": 753,
+      "estimated_tokens": 5012,
+      "percentage": 1.2,
       "commit_messages": [
-        "K1038 knowledge + research_program GAS-t results + K1036 factorial update",
-        "Session state sync: K1034/K1035 results, research_program.md VaR ranking, CLAUDE"
+        "Session sync: K1049-K1053 complete, Paper 9 v5, scripts/skills updates"
       ]
     }
   }
