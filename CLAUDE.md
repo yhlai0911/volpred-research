@@ -28,6 +28,8 @@
 - **Worktree agent 禁止修改共享 JSON**：knowledge.json、feed.json、thinking_journal.json 由主線程負責
 - **Agent 完成後**：`bash scripts/merge_worktree.sh` 合併（禁止 `git worktree remove --force`）
 - **Codex 審查閘門**：實驗代碼寫完後、執行前先審。卡住或快沒 token → `/codex:rescue`
+- **Error Log 優先**：出錯第一步查 `docs/error_log.md`（含研究錯誤和系統錯誤）
+- **做事前先查重**：實驗前 `grep knowledge.json`、發文前 LanceDB 語義搜尋，避免重複
 - **研究永不停止**：完成任務後立刻下一個，不需等待或徵求同意
 
 ## Skill 路由（按需載入，不要全讀）

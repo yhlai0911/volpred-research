@@ -154,4 +154,6 @@ Load these references only when relevant:
   - use when diagnosing errors or deciding whether to manually fix data vs fix the process
   - core principle: 永遠修流程，不修資料
 
+**⚠️ 系統出錯時第一步：查 `docs/error_log.md`。** 不只研究錯誤，所有平台/sync/deploy/merge 錯誤都記錄在此。先查再修，避免重蹈覆轍。
+
 Do not paste or re-explain all references by default. Load the minimal needed section and move.
