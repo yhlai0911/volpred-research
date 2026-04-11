@@ -1,10 +1,31 @@
 [
   {
-    "id": "K1054",
-    "title": "K1054: HAR-RV Formal 60-Day SPY",
+    "id": "K1055",
+    "title": "K1055: Conformal Prediction Intervals for A4f",
+    "priority": 1,
+    "status": "completed",
+    "description": "★ A4f intervals 5-11% narrower (bootstrap t=3.67). Both achieve nominal coverage. High-VIX advantage largest."
+  },
+  {
+    "id": "K1056",
+    "title": "K1056: A4f Sub-Period Stability (Paper 9 Robustness)",
     "priority": 1,
     "status": "in_progress",
-    "description": "HAR-RV 正式實驗：60 天 5-min 數據，proxy comparison r² vs RV。Agent running in worktree."
+    "description": "5 non-overlapping sub-periods (2015-2026). Tests if DM t=4.48 is regime-driven or stable. Agent in worktree."
+  },
+  {
+    "id": "TSMC_0416_post",
+    "title": "TSMC 法說 04/16 事後解讀文章",
+    "priority": 1,
+    "description": "法說會 04/16 14:00 結束後，04/17 前完成解讀文章（--status published）",
+    "status": "pending"
+  },
+  {
+    "id": "Paper9_citation_verify",
+    "title": "Paper 9 citation-verifier",
+    "priority": 2,
+    "description": "Paper 9 v5 完成，待 /citation-verifier 引用驗證",
+    "status": "pending"
   },
   {
     "id": "Paper6_start",
@@ -14,24 +35,10 @@
     "status": "pending"
   },
   {
-    "id": "K1055",
-    "title": "K1055: Probabilistic RV Quantile Forecasting",
+    "id": "FOMC_0428",
+    "title": "FOMC 04/28-29 預告文章",
     "priority": 2,
-    "description": "arXiv:2508.15922 方法。從 GARCH/HAR 點預測延伸到條件分位數。可用現有日頻數據。",
-    "status": "pending"
-  },
-  {
-    "id": "TSMC_0416",
-    "title": "TSMC 法說 04/16 預告文章",
-    "priority": 1,
-    "description": "04/14 前完成預告文章，04/17 完成解讀文章。WebSearch 查最新預測。",
-    "status": "pending"
-  },
-  {
-    "id": "Paper9_citation_verify",
-    "title": "Paper 9 citation-verifier",
-    "priority": 2,
-    "description": "Paper 9 v5 完成，待 /citation-verifier 引用驗證",
+    "description": "04/26 前完成預告文",
     "status": "pending"
   }
 ]
