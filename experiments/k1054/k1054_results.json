@@ -1,0 +1,336 @@
+{
+  "experiment_id": "K1054",
+  "title": "HAR-RV Formal 60-Day SPY — Proxy Comparison r² vs 5-min RV",
+  "status": "PRELIMINARY",
+  "timestamp": "2026-04-11T16:58:03.718251+00:00",
+  "extends": "K1049",
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance (daily) + data/intraday/ (5-min)",
+    "rv_days": 60,
+    "rv_period": "2026-01-14 to 2026-04-10",
+    "daily_returns_count": 2833,
+    "oos_days": 30,
+    "oos_period": "2026-02-27 to 2026-04-10",
+    "5min_rv_files": 60
+  },
+  "descriptive_stats": {
+    "daily_returns": {
+      "mean": -0.00030191409301412345,
+      "std": 0.009651739733516011,
+      "skew": 0.3599105028663253,
+      "kurtosis": 1.040933838503809
+    },
+    "rv_5min": {
+      "mean": 0.00010555156099236943,
+      "std": 0.00010749122416381149,
+      "min": 1.0144186829991309e-05,
+      "max": 0.0006855965619199
+    },
+    "r_squared": {
+      "mean": 9.169463067170005e-05,
+      "std": 0.00015505886493682192,
+      "min": 1.013544982707287e-08,
+      "max": 0.0008210211162467398
+    },
+    "vix": {
+      "mean": 21.45233348210653,
+      "std": 4.104262991531458,
+      "min": 15.640000343322754,
+      "max": 31.049999237060547
+    },
+    "correlation_rv_r2": 0.60564268005693
+  },
+  "models": {
+    "HAR-RV": {
+      "specification": "RV_t = beta0 + beta_d*RV_{t-1} + beta_w*mean(RV_{t-1:t-5}) + beta_m*mean(RV_{t-1:t-22})",
+      "estimation": "Expanding window OLS, initial window = 30 days",
+      "betas": [
+        {
+          "date": "2026-02-27",
+          "n_train_obs": 8,
+          "beta_0": 5.812115238276237e-05,
+          "beta_d": 2.0189134691527342e-08,
+          "beta_w": -4.215450289180161e-08,
+          "beta_m": 2.877389684092116e-08
+        },
+        {
+          "date": "2026-04-10",
+          "n_train_obs": 37,
+          "beta_0": 1.038908327527544e-05,
+          "beta_d": -0.3139050014036555,
+          "beta_w": 0.08993045398477273,
+          "beta_m": 1.5461962740616473
+        }
+      ]
+    },
+    "GJR-GARCH": {
+      "specification": "GJR(1,1) with normal innovations",
+      "estimation": "Rolling window = 2000 daily returns",
+      "params": [
+        {
+          "date": "2026-02-27",
+          "n_train": 2000,
+          "omega": 0.04366270138314378,
+          "alpha": 0.032328697336656026,
+          "gamma": 0.20429389298315964,
+          "beta": 0.8272795056696639,
+          "persistence": 0.9617551494978998,
+          "converged": true
+        },
+        {
+          "date": "2026-04-10",
+          "n_train": 2000,
+          "omega": 0.04158268467355617,
+          "alpha": 0.02859705767886555,
+          "gamma": 0.20076469604647598,
+          "beta": 0.8349367240906931,
+          "persistence": 0.9639161297927966,
+          "converged": true
+        }
+      ]
+    },
+    "A4f-VIX²": {
+      "specification": "tau_t = theta0 + theta1*VIX²_{t-1}, g_t = GJR(1,1) on r_t/sqrt(tau_t)",
+      "estimation": "Rolling window = 2000 daily returns",
+      "params": [
+        {
+          "date": "2026-02-27",
+          "theta_0": 1e-10,
+          "theta_1": 1.6289955153449547,
+          "gjr_omega": 264.97020604396397,
+          "gjr_alpha": 3.3806811234239156e-13,
+          "gjr_gamma": 0.09169458541339326,
+          "gjr_beta": 0.8787989505550193,
+          "tau_fcast": 0.0002243598867624632,
+          "g_fcast": 0.3355687935241976,
+          "converged": true
+        },
+        {
+          "date": "2026-04-10",
+          "theta_0": 1e-10,
+          "theta_1": 1.6246414067745465,
+          "gjr_omega": 257.4144057461548,
+          "gjr_alpha": 0.0,
+          "gjr_gamma": 0.08983655588178298,
+          "gjr_beta": 0.8818523228586344,
+          "tau_fcast": 0.0002448955098201474,
+          "g_fcast": 0.3010624093180099,
+          "converged": true
+        }
+      ]
+    }
+  },
+  "proxy_stats_oos": {
+    "rv_5min": {
+      "mean": 0.00014893945718694293,
+      "std": 0.00013042519074293285,
+      "min": 1.5556632602004514e-05,
+      "max": 0.0006855965619199
+    },
+    "r_squared": {
+      "mean": 0.0001191475660589877,
+      "std": 0.00018746116868035418,
+      "min": 1.9358002595763248e-07,
+      "max": 0.0008210211162467398
+    },
+    "correlation_rv_r2": 0.5785459151794008
+  },
+  "evaluation": {
+    "QLIKE": {
+      "RV (5-min)": {
+        "HAR-RV": -7.6572341456686335,
+        "GJR-GARCH": -7.668872634754377,
+        "A4f-VIX²": -7.811110045426432
+      },
+      "r² (daily)": {
+        "HAR-RV": -8.008862298974758,
+        "GJR-GARCH": -8.071118959377568,
+        "A4f-VIX²": -8.12298699217872
+      }
+    },
+    "MSE": {
+      "RV (5-min)": {
+        "HAR-RV": 2.508157942920121e-08,
+        "GJR-GARCH": 1.960935469430832e-08,
+        "A4f-VIX²": 1.7356281427912294e-08
+      },
+      "r² (daily)": {
+        "HAR-RV": 4.253363124990432e-08,
+        "GJR-GARCH": 3.3738866116429594e-08,
+        "A4f-VIX²": 3.188664936196602e-08
+      }
+    },
+    "MAE": {
+      "RV (5-min)": {
+        "HAR-RV": 0.00010669783374621863,
+        "GJR-GARCH": 8.277401872961017e-05,
+        "A4f-VIX²": 8.042109422041704e-05
+      },
+      "r² (daily)": {
+        "HAR-RV": 0.00014639293991513074,
+        "GJR-GARCH": 0.00012855199540611807,
+        "A4f-VIX²": 0.00013582317311342507
+      }
+    },
+    "rankings": {
+      "QLIKE_RV (5-min)": [
+        "A4f-VIX²",
+        "GJR-GARCH",
+        "HAR-RV"
+      ],
+      "QLIKE_r² (daily)": [
+        "A4f-VIX²",
+        "GJR-GARCH",
+        "HAR-RV"
+      ]
+    },
+    "rankings_consistent": true
+  },
+  "spearman": {
+    "RV (5-min)": {
+      "HAR-RV": {
+        "rho": -0.28231368186874306,
+        "p_value": 0.130653458010912
+      },
+      "GJR-GARCH": {
+        "rho": 0.0967741935483871,
+        "p_value": 0.6109428677788465
+      },
+      "A4f-VIX²": {
+        "rho": 0.3793103448275862,
+        "p_value": 0.038709471845164635
+      }
+    },
+    "r² (daily)": {
+      "HAR-RV": {
+        "rho": -0.2382647385984427,
+        "p_value": 0.20482230186655506
+      },
+      "GJR-GARCH": {
+        "rho": 0.012235817575083427,
+        "p_value": 0.9488325740980202
+      },
+      "A4f-VIX²": {
+        "rho": 0.2387096774193548,
+        "p_value": 0.20395266872419004
+      }
+    }
+  },
+  "dm_tests": {
+    "RV (5-min)": {
+      "HAR-RV_vs_GJR-GARCH": {
+        "t_stat": 0.13825832946409586,
+        "p_value": 0.8909918347477195,
+        "significant_harvey": "False",
+        "direction": "GJR-GARCH better"
+      },
+      "HAR-RV_vs_A4f-VIX²": {
+        "t_stat": 2.5588744613083834,
+        "p_value": 0.0159829637217217,
+        "significant_harvey": "False",
+        "direction": "A4f-VIX² better"
+      },
+      "GJR-GARCH_vs_A4f-VIX²": {
+        "t_stat": 1.8942960980261299,
+        "p_value": 0.06819804675239838,
+        "significant_harvey": "False",
+        "direction": "A4f-VIX² better"
+      }
+    },
+    "r² (daily)": {
+      "HAR-RV_vs_GJR-GARCH": {
+        "t_stat": 0.6881898552352149,
+        "p_value": 0.49680170655561606,
+        "significant_harvey": "False",
+        "direction": "GJR-GARCH better"
+      },
+      "HAR-RV_vs_A4f-VIX²": {
+        "t_stat": 1.4494258515806218,
+        "p_value": 0.15794752663542644,
+        "significant_harvey": "False",
+        "direction": "A4f-VIX² better"
+      },
+      "GJR-GARCH_vs_A4f-VIX²": {
+        "t_stat": 0.8680902935837504,
+        "p_value": 0.39247214911283557,
+        "significant_harvey": "False",
+        "direction": "A4f-VIX² better"
+      }
+    }
+  },
+  "bootstrap_ci": {
+    "RV (5-min)": {
+      "HAR-RV_vs_GJR-GARCH": {
+        "mean_diff": 0.011638489085746015,
+        "ci_95_lo": -0.15793158296550508,
+        "ci_95_hi": 0.1614413005559785,
+        "ci_excludes_zero": false
+      },
+      "HAR-RV_vs_A4f-VIX²": {
+        "mean_diff": 0.15387589975779767,
+        "ci_95_lo": 0.0418058570268267,
+        "ci_95_hi": 0.2874099283380014,
+        "ci_excludes_zero": true
+      },
+      "GJR-GARCH_vs_A4f-VIX²": {
+        "mean_diff": 0.14223741067205165,
+        "ci_95_lo": 0.003881283010680728,
+        "ci_95_hi": 0.31749959553295015,
+        "ci_excludes_zero": true
+      }
+    },
+    "r² (daily)": {
+      "HAR-RV_vs_GJR-GARCH": {
+        "mean_diff": 0.06225666040281105,
+        "ci_95_lo": -0.15448948951207359,
+        "ci_95_hi": 0.27754756597711816,
+        "ci_excludes_zero": false
+      },
+      "HAR-RV_vs_A4f-VIX²": {
+        "mean_diff": 0.11412469320396215,
+        "ci_95_lo": -0.06057030163781922,
+        "ci_95_hi": 0.34034674762725603,
+        "ci_excludes_zero": false
+      },
+      "GJR-GARCH_vs_A4f-VIX²": {
+        "mean_diff": 0.05186803280115111,
+        "ci_95_lo": -0.07166805529658653,
+        "ci_95_hi": 0.19017441905795288,
+        "ci_excludes_zero": false
+      }
+    }
+  },
+  "comparison_with_k1049": {
+    "k1049_oos": 28,
+    "k1054_oos": 30,
+    "har_spearman_RV_improved": true,
+    "ranking_RV_changed": true,
+    "ranking_r2_changed": false
+  },
+  "key_findings": [
+    "OOS period: 30 days (2026-02-27 to 2026-04-10) — PRELIMINARY, need >= 252",
+    "Best QLIKE (RV proxy): A4f-VIX²",
+    "Best QLIKE (r² proxy): A4f-VIX²",
+    "Rankings consistent: True",
+    "Spearman RV HAR-RV: K1049=-0.383 -> K1054=-0.282 (delta=+0.101)",
+    "No DM test reaches Harvey (2016) |t|>3.0 threshold — expected with small sample",
+    "GARCH winning on r² proxy is EXPECTED (native target) — mechanical, not empirical",
+    "HAR-RV winning on RV proxy would be EXPECTED (native target) — mechanical, not empirical",
+    "A4f winning on BOTH proxies (if confirmed) would be genuine empirical finding"
+  ],
+  "limitations": [
+    "Only 30 OOS days — still below 252-day minimum for definitive conclusions",
+    "HAR-RV trained on only 60 expanding-window observations (vs 2000 for GARCH)",
+    "r² is noisy proxy (single squared return vs sum of ~78 squared 5-min returns)",
+    "VIX regime during sample may not represent typical conditions (includes tariff crisis)",
+    "No multiple testing correction beyond Harvey (2016) threshold"
+  ],
+  "references": [
+    "Patton (2011). Volatility forecast comparison using imperfect volatility proxies. JoE.",
+    "Corsi (2009). A simple approximate long-memory model of realized volatility. JFEC.",
+    "Hansen & Lunde (2005). A forecast comparison of volatility models. JFEC.",
+    "Engle & Rangel (2008). The Spline-GARCH Model for Low-Frequency Volatility. RFS.",
+    "Harvey, Leybourne & Newbold (1997). Testing the equality of prediction MSEs."
+  ]
+}
