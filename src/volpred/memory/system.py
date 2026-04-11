@@ -11,7 +11,8 @@ from volpred.memory.schemas import ExperimentRecord, KnowledgeItem, ResearchLogE
 
 
 class MemorySystem:
-    REMOTE_URL = os.environ.get("VOLPRED_REMOTE_URL", "https://volpred.zeabur.app")
+    MIRROR_URL = os.environ.get("VOLPRED_MIRROR_URL", "https://mirror-api.zeabur.app")
+    MIRROR_TOKEN = os.environ.get("RESEARCH_MIRROR_TOKEN", "")
 
     def __init__(self, storage_dir: str = "storage"):
         self.storage_dir = Path(storage_dir)
@@ -21,33 +22,37 @@ class MemorySystem:
             d.mkdir(parents=True, exist_ok=True)
 
     def _sync_to_remote(self, filename: str, new_entries: list[dict] | None = None) -> None:
-        """Sync memory to remote. Append new entries if given, else full push."""
-        if not self.REMOTE_URL:
+        """Sync memory to Mirror API. Append new entries if given, else full push."""
+        if not self.MIRROR_URL or not self.MIRROR_TOKEN:
             return
         filepath = self.memory_dir / filename
         if not filepath.exists():
             return
         try:
             import urllib.request
+            auth_headers = {
+                "Content-Type": "application/json",
+                "x-research-mirror-token": self.MIRROR_TOKEN,
+            }
             if new_entries:
-                # Incremental: only send new entries
+                # Incremental: POST /api/mirror/memory/{filename}/append
                 data = json.dumps(new_entries, ensure_ascii=False, default=str).encode("utf-8")
                 req = urllib.request.Request(
-                    f"{self.REMOTE_URL}/api/sync/{filename}",
+                    f"{self.MIRROR_URL}/api/mirror/memory/{filename}/append",
                     data=data,
-                    headers={"Content-Type": "application/json", "X-Sync-Mode": "append"},
+                    headers=auth_headers,
                     method="POST",
                 )
             else:
-                # Full: send entire file (for reconciliation)
+                # Full: PUT /api/mirror/memory/{filename}
                 data = filepath.read_bytes()
                 req = urllib.request.Request(
-                    f"{self.REMOTE_URL}/api/sync/{filename}",
+                    f"{self.MIRROR_URL}/api/mirror/memory/{filename}",
                     data=data,
-                    headers={"Content-Type": "application/json"},
+                    headers=auth_headers,
                     method="PUT",
                 )
-            urllib.request.urlopen(req, timeout=10)
+            urllib.request.urlopen(req, timeout=30)
         except Exception:
             pass  # Don't fail research for sync issues
 

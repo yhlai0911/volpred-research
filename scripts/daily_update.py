@@ -909,36 +909,45 @@ def main():
 
     print(f"  Published + synced locally. Feed: {len(feed)} items")
 
-    # --- Sync to Zeabur via POST ---
-    remote = os.environ.get("VOLPRED_REMOTE_URL", "")
-    if remote:
+    # --- Sync to Mirror API ---
+    mirror_url = os.environ.get("VOLPRED_MIRROR_URL", "https://mirror-api.zeabur.app")
+    mirror_token = os.environ.get("RESEARCH_MIRROR_TOKEN", "")
+    if mirror_url and mirror_token:
         import urllib.request
-        sync_files = [
-            "paper_trading.json",
-            "reports/feed.json",
-            "memory/research_log.json",
+        # Memory files → PUT /api/mirror/memory/{filename}
+        # Mirror API only supports these 4 files (see /api/mirror/manifest)
+        memory_files = [
             "memory/knowledge.json",
             "memory/thinking_journal.json",
-            "memory/open_questions.json",
+            "memory/research_log.json",
+            "memory/experiments.json",
         ]
-        for sf in sync_files:
+        mirror_ok = 0
+        for sf in memory_files:
             local = storage / sf
             if not local.exists():
                 continue
             try:
                 payload = local.read_bytes()
+                filename = sf.split("/")[-1]  # e.g. "knowledge.json"
                 req = urllib.request.Request(
-                    f"{remote}/api/sync/{sf}",
+                    f"{mirror_url}/api/mirror/memory/{filename}",
                     data=payload,
-                    headers={"Content-Type": "application/json"},
-                    method="POST",
+                    headers={
+                        "Content-Type": "application/json",
+                        "x-research-mirror-token": mirror_token,
+                    },
+                    method="PUT",
                 )
-                urllib.request.urlopen(req, timeout=10)
+                urllib.request.urlopen(req, timeout=30)
+                mirror_ok += 1
             except Exception as e:
-                print(f"  Sync {sf}: {e}")
-        print(f"  Synced to {remote}")
+                print(f"  Mirror sync {sf}: {e}")
+        print(f"  Mirror API: {mirror_ok}/{len(memory_files)} synced")
+    elif mirror_url and not mirror_token:
+        print("  Mirror API: RESEARCH_MIRROR_TOKEN not set, skipping")
     else:
-        print("  Set VOLPRED_REMOTE_URL to sync to Zeabur")
+        print("  Mirror API URL not configured")
 
     # --- Sync to Supabase (v2 website) ---
     try:

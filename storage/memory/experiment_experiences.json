@@ -548,5 +548,38 @@
       "Cross-market experiments need open-to-close returns: K812 used close-to-close capturing untradable overnight gap."
     ],
     "meta_observation": "Codex審查品質下降可能因為session太長,agent prompts變得模板化。每5個實驗後應pause和反思,不是一直衝量。"
+  },
+  {
+    "id": "E42",
+    "title": "Session 2026-04-10~11 (Part 1): Paper 9 robustness + VaR method survey (K1032-K1035)",
+    "created_at": "2026-04-11T01:30:00Z",
+    "experiments": "K1032-K1035 (4 completed)",
+    "lessons": [
+      "Cross-market VIX lag matters: K1032 N225 vs EWJ 的差異完全來自 VIX lag（~16h vs 同步）。跨市場模型必須考慮 time zone alignment。",
+      "Model stability > point improvement: K1033 A4f QLIKE CV=0.1% 跨 5 種 refit 頻率——穩定性比單點改善更有說服力。這是論文 robustness 的關鍵武器。",
+      "VaR method hierarchy established: K1034+K1035 確立 CF-Rolling ≥ EVT-GPD >> Student-t >> Normal。CF-Rolling 是最佳的 distribution-free 方法。",
+      "A4f 已內化尾部風險: K1035 GPD shape ξ=0.055 (A4f) vs 0.103 (GJR)，EVT 對 A4f 無邊際改善——A4f 的 VIX component 已做了 EVT 該做的事。",
+      "Knowledge entries lost during merge: K1032-K1035 知識條目在 session sync 時因 merge -X ours 被靜默覆蓋。教訓：merge_worktree.sh 需加驗證步驟。"
+    ],
+    "meta_observation": "VaR 方法選擇不再是問題——CF-Rolling 或 A4f-t 都夠。真正的問題是模型比較公平性和跨市場 generalizability。"
+  },
+  {
+    "id": "E43",
+    "title": "Session 2026-04-11 (Part 2): 13 experiments — VaR synthesis, DCC portfolio, ABM crowding (K1036-K1048)",
+    "created_at": "2026-04-11T11:30:00Z",
+    "experiments": "K1036-K1048 (13 completed, K1037 skipped)",
+    "lessons": [
+      "CF-Rolling 使模型選擇對 VaR 無關: K1036 A4f+CF 和 GJR+CF 都 100% Trinity PASS——如果用 CF-Rolling，底層模型差異消失。這簡化了 practitioner guidance。",
+      "Score-driven (GAS) 模型 NULL: K1038 GAS-t 未優於 GJR-GARCH。理論上的 robustness 在實務上不成立。",
+      "推翻前次 NULL 要小心但值得: K1041 DCC-A4f 推翻 K891 的 NULL（DM t=3.83），因為用了更長樣本+正確的 DCC 估計。前次 NULL 可能是 power 不足。",
+      "國會交易 = noise: K1042 Congressional trades 對 SPY 完全無預測力。不要被 narrative 誘惑。",
+      "FHS ≈ CF-Rolling: K1043 兩者 12/12 Trinity PASS。非參數尾部建模是關鍵，具體方法不重要。",
+      "歷史結果不可重現要如實報告: K1044 推翻 K53 的 gamma-VT 因果鏈（r=0.564→ρ=-0.209 NS），不可因為與 narrative 矛盾就忽略。",
+      "ABM 是最有趣的新方向: K1047 VT crowding 50-75% 臨界、<5% 安全——這是可以寫成獨立論文的發現。",
+      "IS 顯著 ≠ OOS 有效: K1048 Threshold GARCH LR=135 但 OOS NS。非線性 IS 容易 overfit。",
+      "MC-VaR 完全被支配: K1046 MC simulation 37.5% Trinity vs CF/FHS 100%。蒙地卡羅不適合單資產 VaR。",
+      "Agent 報告品質問題持續: 需對照 results JSON 驗證每個數字，不能信 agent 的 summary。"
+    ],
+    "meta_observation": "13 個實驗中 5 個 ★★+ 是很高的命中率。Paper 9 VaR 部分已完整。下一步是 DCC portfolio 和 ABM crowding 的深化。"
   }
 ]
