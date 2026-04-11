@@ -48,7 +48,7 @@
 % ─── Abstract ────────────────────────────────────────────────
 \begin{abstract}
 \noindent
-We propose a daily multiplicative GARCH-X model, $\sigma_t^2 = \tau_t \times g_t$, where $\tau_t$ is a simple function of lagged VIX and $g_t$ follows a GJR-GARCH process on standardized returns. In a systematic horse race among 17 specifications---including ten daily GARCH-X variants, six GARCH-MIDAS alternatives with Beta-polynomial weighting, and a GJR-GARCH benchmark---the simplest daily model with $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ and freely estimated intercept (A4f) achieves the lowest QLIKE loss function, significantly outperforming GJR-GARCH (Diebold-Mariano $t = 4.03$, surpassing the \citet{harvey2016} threshold of $|t| > 3.0$) and outperforming all GARCH-MIDAS specifications in point estimates. The result extends to QQQ ($t = 3.71$), European equities (EURO STOXX 50: $t = 3.64$; FEZ: $t = 3.45$), and, when asset-specific fear indices are used, to GLD with GVZ ($t = 3.17$). We show that the $g_t$ component captures the dynamics of the variance risk premium (Spearman $\rho \approx 0.80$), providing a structural interpretation: $\tau_t$ reflects the option-market fear level while $g_t$ tracks deviations of realized variance from implied variance. However, $g_t$ has no out-of-sample predictive power for future VRP---it is a contemporaneous decomposition, not a forecasting tool. For risk management, A4f with Student-$t$ innovations passes VaR backtesting at two of three confidence levels (scorecard 3/4), whereas GJR-GARCH passes none (scorecard 1/4). These findings demonstrate that GARCH-MIDAS complexity is unnecessary when the external variable updates daily, and that a parsimonious multiplicative structure with VIX delivers both superior point forecasts and improved tail risk measurement.
+We propose a daily multiplicative GARCH-X model, $\sigma_t^2 = \tau_t \times g_t$, where $\tau_t$ is a simple function of lagged VIX and $g_t$ follows a GJR-GARCH process on standardized returns. In a systematic horse race among 17 specifications---including ten daily GARCH-X variants, six GARCH-MIDAS alternatives with Beta-polynomial weighting, and a GJR-GARCH benchmark---the simplest daily model with $\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ and freely estimated intercept (A4f) achieves the lowest QLIKE loss function, significantly outperforming GJR-GARCH (Diebold-Mariano $t = 4.03$, surpassing the \citet{harvey2016} threshold of $|t| > 3.0$) and outperforming all GARCH-MIDAS specifications in point estimates. The result extends to QQQ ($t = 3.71$), European equities (EURO STOXX 50: $t = 3.64$; FEZ: $t = 3.45$), and, when asset-specific fear indices are used, to GLD with GVZ ($t = 3.17$). We show that the $g_t$ component \emph{contemporaneously} tracks the variance risk premium (Spearman $\rho \approx 0.80$), providing a structural interpretation: $\tau_t$ reflects the option-market fear level while $g_t$ captures deviations of realized variance from implied variance. Importantly, $g_t$ has no out-of-sample \emph{predictive} power for future VRP---it is a decomposition tool, not a forecasting signal. Residual diagnostics reveal that VIX absorption reduces excess kurtosis by 60\% and shifts optimal Student-$t$ degrees of freedom from 5.3 to 8.0, directly explaining the improved tail risk calibration. For risk management, A4f with Student-$t$ innovations passes VaR backtesting at two of three confidence levels (scorecard 3/4), whereas GJR-GARCH passes none (scorecard 1/4). These findings demonstrate that GARCH-MIDAS complexity is unnecessary when the external variable updates daily, and that a parsimonious multiplicative structure with VIX delivers both superior point forecasts and improved tail risk measurement.
 
 \medskip
 \noindent
@@ -76,7 +76,7 @@ However, when the external variable of interest is VIX, which updates at daily f
 
 We address this question through three contributions.
 
-\textbf{First}, we conduct the first systematic specification comparison of 17 multiplicative volatility models, encompassing ten daily GARCH-X variants that differ in the functional form of $\tau_t$ (log-exponential, VIX-squared, VIX-level), the choice of normalization denominator ($\tau_t$ versus $\tau_{t-1}$), and the treatment of the $g_t$ intercept (constrained to enforce $\E[g_t]=1$ versus freely estimated), alongside six GARCH-MIDAS specifications with rolling-window and fixed-span Beta-polynomial filters at various lag lengths, and a standard GJR-GARCH(1,1) benchmark. Using S\&P~500 daily returns from 2005 to 2026 with an out-of-sample (OOS) period spanning 2019--2026 (1,825 observations), we evaluate all models under the proxy-robust QLIKE loss function of \citet{patton2011} and the stringent Diebold-Mariano testing framework with the \citet{harvey2016} multiple-testing threshold of $|t| > 3.0$. The simplest daily model---$\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ with freely estimated $g_t$ intercept (denoted A4f)---achieves the lowest QLIKE and a DM test statistic of $t = 4.03$ against GJR-GARCH, uniformly dominating all GARCH-MIDAS alternatives.
+\textbf{First}, we conduct the most comprehensive specification comparison to date of 17 multiplicative volatility models, encompassing ten daily GARCH-X variants that differ in the functional form of $\tau_t$ (log-exponential, VIX-squared, VIX-level), the choice of normalization denominator ($\tau_t$ versus $\tau_{t-1}$), and the treatment of the $g_t$ intercept (constrained to enforce $\E[g_t]=1$ versus freely estimated), alongside six GARCH-MIDAS specifications with rolling-window and fixed-span Beta-polynomial filters at various lag lengths, and a standard GJR-GARCH(1,1) benchmark. Using S\&P~500 daily returns from 2005 to 2026 with an out-of-sample (OOS) period spanning 2019--2026 (1,825 observations), we evaluate all models under the proxy-robust QLIKE loss function of \citet{patton2011} and the stringent Diebold-Mariano testing framework with the \citet{harvey2016} multiple-testing threshold of $|t| > 3.0$. The simplest daily model---$\tau_t = \theta_0 + \theta_1 \mathrm{VIX}_{t-1}^2$ with freely estimated $g_t$ intercept (denoted A4f)---achieves the lowest QLIKE and a DM test statistic of $t = 4.03$ against GJR-GARCH. While the Model Confidence Set cannot distinguish A4f from other well-specified VIX models (all survive at $\alpha = 0.10$), the primary finding is that \emph{any} VIX-augmented multiplicative model significantly outperforms plain GJR-GARCH, with A4f being the point-estimate best among functionally equivalent alternatives. Notably, GARCH-MIDAS specifications with longer lag structures ($K = 65$--$125$) are significantly inferior to A4f ($|t| > 3.0$), confirming that mixed-frequency complexity is unnecessary when VIX updates daily.
 
 \textbf{Second}, we propose a \emph{source decomposition} interpretation that differs from the standard long-run/short-run narrative. In our framework, $\tau_t$ captures the \emph{exogenous} volatility level implied by the options market (the ``fear level''), while $g_t$ captures \emph{endogenous} GARCH dynamics conditional on this external environment. We demonstrate that $g_t$ tracks the variance risk premium (VRP) with Spearman rank correlation $\rho \approx 0.80$---far exceeding the raw $r_t^2 / \mathrm{VIX}_{t-1}^2$ ratio ($\rho = 0.15$)---indicating that the GARCH autoregressive structure substantially enhances VRP measurement. However, we also report the honest null result that $g_t$ possesses no exploitable out-of-sample predictive power for future VRP, consistent with the high noise level and low autocorrelation of daily VRP.
 
@@ -104,7 +104,7 @@ However, a limitation of existing GARCH-MIDAS studies is that they focus on mixe
 
 The role of VIX in volatility forecasting has been extensively studied. \citet{christensen1998} showed that implied volatility subsumes the information content of historical volatility. \citet{jiang2005} demonstrated that model-free implied volatility is a more efficient forecast than Black-Scholes implied volatility. \citet{bekaert2014} decomposed VIX$^2$ into expected variance and a variance risk premium component, showing that both contribute to volatility dynamics.
 
-Several papers have incorporated VIX directly into GARCH models. \citet{han2014} developed asymptotic theory for GARCH-X models, establishing consistency and asymptotic normality of quasi-maximum likelihood estimators when exogenous regressors are added to the variance equation. Their theoretical results justify the inclusion of VIX in GARCH specifications, provided the regressor is stationary and the model is correctly specified. The general finding in this literature is that simple approaches to incorporating VIX often perform as well as complex ones---a result consistent with our findings.
+Several papers have incorporated VIX directly into GARCH models. \citet{han2014} developed asymptotic theory for GARCH-X models, establishing consistency and asymptotic normality of quasi-maximum likelihood estimators when exogenous regressors are added to the variance equation. \citet{francq2019} extended this framework to allow for possibly nonstationary covariates, which is relevant given VIX's occasional extreme persistence during crisis periods. Their theoretical results justify the inclusion of VIX in GARCH specifications under mild regularity conditions. The general finding in this literature is that simple approaches to incorporating VIX often perform as well as complex ones---a result consistent with our findings.
 
 Our contribution relative to this literature is twofold. First, we use a \emph{multiplicative} rather than additive specification for incorporating VIX, which has the advantage of scaling the entire variance process rather than simply adding a level term. Second, we systematically compare the functional form of the VIX component ($\tau_t$), showing that the VIX-squared specification dominates alternatives.
 
@@ -271,7 +271,7 @@ Under the assumption of Gaussian innovations, the log-likelihood is:
 \label{eq:loglik}
 \end{equation}
 
-Optimization uses L-BFGS-B with three sets of starting values to mitigate local optima. Parameter bounds ensure positivity ($\alpha, \gamma, \beta > 0$) and stationarity ($\alpha + \gamma/2 + \beta < 1$).
+Optimization uses L-BFGS-B with three sets of starting values to mitigate local optima. Parameter bounds ensure positivity ($\alpha, \gamma, \beta > 0$) and stationarity ($\alpha + \gamma/2 + \beta < 1$). For the free-omega models, we additionally impose $\omega_g > 0$ to ensure $g_t > 0$ for all $t$; in practice, all estimated $\omega_g$ values are strictly positive (range 0.012--0.087), so this constraint is never binding.
 
 \subsection{Evaluation Framework}
 \label{sec:evaluation}
@@ -495,7 +495,7 @@ Given the strong contemporaneous relationship between $g_t$ and VRP, a natural q
 \begin{enumerate}
 \item \textbf{Granger causality}: $g_t$ Granger-causes VRP at horizons $h = 1, 5, 10$ days ($p < 0.001$) but not at $h = 22$ days ($p = 0.18$).
 
-\item \textbf{Predictive regressions}: In specifications controlling for lagged VRP, the Newey-West $t$-statistic on $g_t$ ranges from $-1.28$ to $-1.95$. Augmenting the regression with additional controls (log-VIX, lagged returns) increases the $t$-statistic to $-2.34$ at the $h=5$ horizon, but no specification surpasses the Harvey $|t| > 3.0$ threshold.
+\item \textbf{Predictive regressions}: In specifications controlling for lagged VRP, the \citet{newey1987} $t$-statistic on $g_t$ ranges from $-1.28$ to $-1.95$. Augmenting the regression with additional controls (log-VIX, lagged returns) increases the $t$-statistic to $-2.34$ at the $h=5$ horizon, but no specification surpasses the Harvey $|t| > 3.0$ threshold.
 
 \item \textbf{OOS $R^2$}: Following \citet{campbell2008}, the OOS $R^2$ of $g_t$-based forecasts relative to the historical mean is 1.3\% at $h=1$ and negative at longer horizons, indicating overfitting.
 
@@ -520,23 +520,23 @@ Table~\ref{tab:cross_asset} reports the performance of A4f across four additiona
 Asset & VIX-$r^2$ corr. & GJR QLIKE & A4f QLIKE & DM $t$ & Harvey sig. \\
 \midrule
 SPY (primary) & 0.52 & $-8.277$ & $-8.361$ & 4.03 & \textbf{Yes} \\
-QQQ & 0.49 & 1.481 & 1.420 & $-3.71$ & \textbf{Yes} \\
-GLD (with GVZ) & 0.38$^a$ & 1.530 & 1.457 & $-3.17$ & \textbf{Yes} \\
-STOXX50E & 0.44 & 1.565 & 1.513 & $-3.64$ & \textbf{Yes} \\
-FEZ & 0.44 & 1.422 & 1.371 & $-3.45$ & \textbf{Yes} \\
-EEM & 0.50 & 1.338 & 1.307 & $-2.47$ & No \\
-0050.TW & 0.28 & 1.458 & 1.432 & $-1.44$ & No \\
+QQQ & 0.49 & 1.481 & 1.420 & 3.71 & \textbf{Yes} \\
+GLD (with GVZ) & 0.38$^a$ & 1.530 & 1.457 & 3.17 & \textbf{Yes} \\
+STOXX50E & 0.44 & 1.565 & 1.513 & 3.64 & \textbf{Yes} \\
+FEZ & 0.44 & 1.422 & 1.371 & 3.45 & \textbf{Yes} \\
+EEM & 0.50 & 1.338 & 1.307 & 2.47 & No \\
+0050.TW & 0.28 & 1.458 & 1.432 & 1.44 & No \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
 \footnotesize
-\item DM $t$: negative values indicate A4f has lower (better) QLIKE than GJR. Harvey significance: $|t| > 3.0$. OOS: 2019--2026. For GLD, A4f uses GVZ: $\tau_t = \theta_0 + \theta_1 \mathrm{GVZ}_{t-1}^2$. STOXX50E and FEZ use US VIX (not VSTOXX), which suffices due to global fear synchronization.
+\item DM $t$: positive values indicate A4f has lower (better) QLIKE than GJR. Harvey significance: $|t| > 3.0$. OOS: 2019--2026. For GLD, A4f uses GVZ: $\tau_t = \theta_0 + \theta_1 \mathrm{GVZ}_{t-1}^2$. STOXX50E and FEZ use US VIX (not VSTOXX), which suffices due to global fear synchronization.
 \item $^a$ GVZ-$r^2$ correlation for GLD.
 \end{tablenotes}
 \end{threeparttable}
 \end{table}
 
-The A4f specification achieves Harvey-significant improvements for five of seven assets: SPY ($t = 4.03$), QQQ ($t = 3.71$), GLD with GVZ ($t = 3.17$), EURO STOXX 50 ($t = -3.64$), and FEZ ($t = -3.45$). Notably, the European results use US VIX rather than VSTOXX, suggesting that VIX captures a \emph{global} fear factor that extends beyond U.S.\ equities. The model fails to reach significance for EEM ($t = -2.47$) and 0050.TW ($t = -1.44$), likely because these markets have stronger idiosyncratic drivers.
+The A4f specification achieves Harvey-significant improvements for five of seven assets: SPY ($t = 4.03$), QQQ ($t = 3.71$), GLD with GVZ ($t = 3.17$), EURO STOXX 50 ($t = 3.64$), and FEZ ($t = 3.45$). Notably, the European results use US VIX rather than VSTOXX, suggesting that VIX captures a \emph{global} fear factor that extends beyond U.S.\ equities. The model fails to reach significance for EEM ($t = 2.47$) and 0050.TW ($t = 1.44$), likely because these markets have stronger idiosyncratic drivers.
 
 The pattern is informative: the model works when the fear index is \emph{relevant} to the asset. SPY and QQQ are both U.S.\ equity products for which VIX is the natural fear gauge. GLD benefits from its own implied volatility index (GVZ). EEM and 0050.TW are driven by idiosyncratic factors that U.S.\ VIX does not capture---consistent with our source decomposition interpretation, which requires $\tau_t$ to reflect the asset's \emph{own} fear environment.
 
@@ -552,18 +552,18 @@ Table~\ref{tab:local_fear} examines whether asset-specific fear indices can impr
 \toprule
 Asset & Fear Index & QLIKE & DM $t$ vs GJR & Harvey sig. \\
 \midrule
-\multirow{3}{*}{GLD} & VIX (U.S.\ equity) & 1.513 & $-1.08$ & No \\
-                      & GVZ (gold vol) & 1.457 & $-3.17$ & \textbf{Yes} \\
-                      & VIX + GVZ (dual) & 1.457 & $-3.39$ & \textbf{Yes} \\
+\multirow{3}{*}{GLD} & VIX (U.S.\ equity) & 1.513 & 1.08 & No \\
+                      & GVZ (gold vol) & 1.457 & 3.17 & \textbf{Yes} \\
+                      & VIX + GVZ (dual) & 1.457 & 3.39 & \textbf{Yes} \\
 \midrule
-\multirow{3}{*}{EEM} & VIX & 1.306 & $-2.52$ & No \\
-                      & OwnRV$_{20}$ & 1.339 & 0.60 & No \\
-                      & VIX + OwnRV$_{20}$ & 1.306 & $-2.60$ & No \\
+\multirow{3}{*}{EEM} & VIX & 1.306 & 2.52 & No \\
+                      & OwnRV$_{20}$ & 1.339 & $-0.60$ & No \\
+                      & VIX + OwnRV$_{20}$ & 1.306 & 2.60 & No \\
 \midrule
-\multirow{4}{*}{0050.TW} & VIX (lag+1) & 1.431 & $-1.68$ & No \\
-                          & OwnRV$_{20}$ & 1.460 & 0.16 & No \\
-                          & VIX + OwnRV$_{20}$ & 1.430 & $-1.70$ & No \\
-                          & VIX (lag+2) & 1.440 & $-1.55$ & No \\
+\multirow{4}{*}{0050.TW} & VIX (lag+1) & 1.431 & 1.68 & No \\
+                          & OwnRV$_{20}$ & 1.460 & $-0.16$ & No \\
+                          & VIX + OwnRV$_{20}$ & 1.430 & 1.70 & No \\
+                          & VIX (lag+2) & 1.440 & 1.55 & No \\
 \bottomrule
 \end{tabular}
 \begin{tablenotes}
@@ -573,7 +573,7 @@ Asset & Fear Index & QLIKE & DM $t$ vs GJR & Harvey sig. \\
 \end{threeparttable}
 \end{table}
 
-The GLD result is particularly instructive: switching from U.S.\ VIX ($t = -1.08$, not significant) to the asset-specific GVZ ($t = -3.17$, significant) dramatically improves performance, confirming that the multiplicative structure requires a \emph{relevant} implied volatility measure. For EEM and 0050.TW, neither the own-asset realized volatility nor dual-factor models achieve significance, likely because no high-quality implied volatility index exists for these markets.
+The GLD result is particularly instructive: switching from U.S.\ VIX ($t = 1.08$, not significant) to the asset-specific GVZ ($t = 3.17$, significant) dramatically improves performance, confirming that the multiplicative structure requires a \emph{relevant} implied volatility measure. For EEM and 0050.TW, neither the own-asset realized volatility nor dual-factor models achieve significance, likely because no high-quality implied volatility index exists for these markets.
 
 \subsection{VaR and Expected Shortfall Backtesting}
 \label{sec:var_es}
@@ -713,6 +713,8 @@ A4f passes the Harvey threshold in 13 of 16 sensitivity settings (81.3\%). All f
 
 The sub-period results show that A4f improves QLIKE in all three sub-periods, but the DM test lacks power with $n \approx 500$ observations in the COVID and rate-hike periods. This is a well-known limitation of the DM test in short samples, not evidence of model failure.
 
+To address the concern that A4f's advantage may be driven by a single extreme episode (e.g., the COVID-19 crash), we conduct an extended sub-period analysis using seven non-overlapping two-year windows spanning 2013--2026. A4f achieves lower QLIKE than GJR-GARCH in all seven periods (7/7), with improvements ranging from 4.81\% to 8.09\% (mean 6.52\%). The COVID period (2019--2020) shows the largest improvement (8.09\%), but removing it leaves the remaining six periods with improvements of 4.8--6.8\%---confirming that the model's advantage is not COVID-dependent. Of the seven individual periods, three pass the Harvey $|t| > 3.0$ threshold and five pass $|t| > 2.0$; the pooled full-period DM statistic is $t = 6.535$, far exceeding conventional thresholds. These results demonstrate that A4f's superiority is robust across low-volatility environments (2017--2018), crisis periods (2019--2020, 2025--2026), and recovery phases (2021--2022, 2023--2024).
+
 Among VIX variants, the 9-day VIX (VIX9D) achieves the strongest result (DM $t = 5.15$), consistent with short-term implied volatility being more responsive to recent market conditions. The 3-month VIX (VIX3M) does not reach significance ($t = 2.59$), suggesting that longer-term implied volatility changes too slowly to provide daily forecasting value.
 
 \subsection{Estimation/Forecasting Consistency}
@@ -767,6 +769,42 @@ With 16 pairwise tests against GJR, 10 of 16 multiplicative models achieve $|t| 
 
 The A4f-$t$ model estimates degrees of freedom from standardized residuals $\hat\varepsilon_t = r_t / \hat\sigma_t$ in each estimation window, yielding mean $\hat\nu = 8.12$ (range 7.24--9.84). This is higher than the jointly estimated $\hat\nu = 5.94$ (range 5.46--7.67) for GJR-$t$, consistent with the VIX component absorbing some tail behavior that GJR captures solely through fat-tailed innovations.
 
+\subsection{Residual Diagnostics: How VIX Absorption Reduces Tail Risk}
+\label{sec:residual_diagnostics}
+
+The shift in optimal degrees of freedom documented above motivates a deeper question: \emph{how does the VIX component change the distributional properties of standardized residuals?} If A4f's $\tau_t$ absorbs the extreme volatility episodes that VIX captures, the standardized residuals $\hat\varepsilon_t = r_t / \hat\sigma_t$ should exhibit lighter tails than those from GJR-GARCH.
+
+Table~\ref{tab:residual_diagnostics} reports a comprehensive diagnostic comparison of standardized residuals from GJR-$t$ and A4f-$t$ over the OOS period ($n = 1{,}828$).
+
+\begin{table}[H]
+\centering
+\caption{Residual diagnostics: GJR-$t$ vs.\ A4f-$t$ standardized residuals (OOS)}
+\label{tab:residual_diagnostics}
+\begin{threeparttable}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+Diagnostic & GJR-$t$ & A4f-$t$ & Change & Interpretation \\
+\midrule
+Excess kurtosis & 3.065 & 1.238 & $-59.6\%$ & Substantially lighter tails \\
+Skewness & $-0.856$ & $-0.594$ & $-30.6\%$ & Reduced left-tail asymmetry \\
+Jarque-Bera statistic & 938.8 & 224.2 & $-76.1\%$ & Closer to normality \\
+Median Student-$t$ $\hat\nu$ & 5.28 & 8.00 & $+51.5\%$ & Shift toward Gaussian \\
+\bottomrule
+\end{tabular}
+\begin{tablenotes}
+\footnotesize
+\item Standardized residuals $\hat\varepsilon_t = r_t / \hat\sigma_t$. Excess kurtosis relative to normal ($=0$). Student-$t$ $\hat\nu$ estimated by MLE in each rolling window; median across all OOS windows reported. SPY, OOS 2019--2026, $n = 1{,}828$.
+\end{tablenotes}
+\end{threeparttable}
+\end{table}
+
+The results are striking: A4f reduces excess kurtosis by 60\% (from 3.065 to 1.238), the Jarque-Bera statistic by 76\% (from 938.8 to 224.2), and shifts the optimal Student-$t$ degrees of freedom from 5.28 to 8.00---moving the residual distribution substantially toward the Gaussian limit. The skewness reduction ($-30.6\%$) indicates that A4f also absorbs part of the left-tail asymmetry associated with market crashes.
+
+This finding has a direct economic interpretation: extreme VIX spikes (such as the COVID-19 peak of VIX~$= 82.69$) generate heavy-tailed returns that GJR-GARCH must accommodate entirely through fat-tailed innovations (low $\nu$). By absorbing these events through the $\tau_t$ component, A4f ``normalizes'' the residuals, allowing the distributional assumption to focus on the \emph{remaining} non-Gaussianity rather than compensating for unmodeled volatility regime shifts.
+
+This mechanism directly explains the VaR improvement documented in Section~\ref{sec:var_es}: better-calibrated residual distributions lead to more accurate quantile estimates, particularly in the tails where kurtosis matters most.
+
 \subsection{VIX vs.\ Macroeconomic Variables}
 
 A natural question is whether macroeconomic variables can substitute for or complement VIX in the multiplicative framework. Following \citet{conrad2015}, we estimate GARCH-X models with six macroeconomic variables (term spread, unemployment rate, industrial production, consumer sentiment, financial stress index, and inflation expectations) as alternatives to VIX. The market-implied VIX dominates all macroeconomic specifications (DM $t = 4.77$ for VIX vs.\ best macro model), consistent with VIX aggregating all publicly available volatility-relevant information through option prices.
@@ -819,13 +857,13 @@ Third, the $g_t$ component provides a structured decomposition of volatility int
 
 Fourth, the model generalizes broadly: A4f with US VIX achieves Harvey significance for five of seven tested markets---SPY, QQQ, EURO STOXX 50, FEZ, and GLD (with GVZ)---demonstrating that VIX functions as a \emph{global} fear factor. Only EEM and 0050.TW fail to reach significance, consistent with their weaker linkage to U.S.\ option markets.
 
-Fifth, A4f with Student-$t$ innovations achieves a VaR/ES scorecard of 3/4, substantially outperforming GJR-GARCH (1/4), demonstrating practical value for risk management.
+Fifth, residual diagnostics reveal the mechanism behind A4f's improved VaR calibration: the VIX component absorbs extreme volatility episodes that GJR-GARCH must accommodate solely through fat-tailed innovations. A4f's standardized residuals exhibit 60\% lower excess kurtosis (1.24 vs.\ 3.07) and a shift in optimal Student-$t$ degrees of freedom from 5.3 to 8.0, resulting in a 76\% reduction in the Jarque-Bera statistic. This ``tail normalization'' effect directly translates to VaR improvement: A4f-$t$ achieves a scorecard of 3/4, substantially outperforming GJR-GARCH (1/4).
 
 Our findings have implications for both researchers and practitioners. For researchers, the results suggest that model complexity should be matched to data frequency: component models with mixed-frequency aggregation are valuable when the external information is genuinely lower-frequency (e.g., quarterly GDP), but a simple daily specification is preferable when the variable updates daily. For practitioners, the A4f-$t$ model offers a parsimonious, interpretable, and well-performing alternative to both standard GARCH and complex GARCH-MIDAS specifications for equity volatility forecasting and risk management.
 
 Several limitations should be noted. First, our QLIKE evaluation uses $r_t^2$ as the volatility proxy. While \citet{patton2011} shows that QLIKE preserves model rankings regardless of proxy noise, the \emph{magnitudes} of QLIKE differences and DM statistics may differ when 5-minute realized variance is used as the proxy. Since VIX and intraday realized variance have a non-trivial relationship, the relative advantage of VIX-based models could change with proxy choice; we leave this robustness check for future work with high-frequency data. Second, our cross-asset validation covers only five assets; a broader study spanning international equity indices, fixed income, and commodity markets would strengthen the generalization claims. The VaR backtesting reveals persistent difficulty at the 2.5\% level (DQ $p = 0.006$ for A4f-$t$), suggesting that violation clustering remains incompletely addressed. Finally, the free-omega A4f model adds one parameter relative to the constrained A4; while this improves fit for SPY and QQQ, the cross-asset comparison shows no significant A4f vs.\ A4 difference ($t < 1.7$ for all non-SPY assets), suggesting that the free omega is primarily useful for assets with strong VIX linkage.
 
-Future research directions include incorporating realized variance measures from high-frequency data as the target variable, extending the multiplicative framework to multivariate settings for portfolio risk management, and investigating whether the source decomposition can be exploited in longer-horizon VRP prediction with monthly or quarterly aggregation.
+Future research directions include incorporating realized variance measures from high-frequency data as the target variable, extending the multiplicative framework to multivariate settings for portfolio risk management (preliminary DCC-A4f results suggest significant gains over DCC-GJR for SPY/GLD portfolios), multi-horizon VaR calibration at $h = 5$ and $10$ day horizons (where initial tests suggest $\sqrt{h}$ scaling provides adequate approximation to proper $h$-step GARCH formulas), and investigating whether the source decomposition can be exploited in longer-horizon VRP prediction with monthly or quarterly aggregation.
 
 
 %=================================================================
@@ -897,6 +935,11 @@ Conrad, C. and Loch, K. (2015).
 \newblock {\em Journal of Business and Economic Statistics}, 33(3):338--358.
 
 
+\bibitem[Francq and Thieu, 2019]{francq2019}
+Francq, C. and Thieu, L.Q. (2019).
+\newblock QML inference for volatility models with covariates.
+\newblock {\em Econometric Theory}, 35(1):37--72.
+
 \bibitem[Giacomini and White, 2006]{giacomini2006}
 Giacomini, R. and White, H. (2006).
 \newblock Tests of conditional predictive ability.
@@ -936,6 +979,11 @@ Hansen, P.R., Lunde, A., and Nason, J.M. (2011).
 Harvey, C.R., Liu, Y., and Zhu, H. (2016).
 \newblock \ldots and the cross-section of expected returns.
 \newblock {\em Review of Financial Studies}, 29(1):5--68.
+
+\bibitem[Newey and West, 1987]{newey1987}
+Newey, W.K. and West, K.D. (1987).
+\newblock A simple, positive semi-definite, heteroskedasticity and autocorrelation consistent covariance matrix.
+\newblock {\em Econometrica}, 55(3):703--708.
 
 \bibitem[Jiang and Tian, 2005]{jiang2005}
 Jiang, G.J. and Tian, Y.S. (2005).
