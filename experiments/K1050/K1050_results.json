@@ -1,0 +1,122 @@
+{
+  "experiment_id": "K1050",
+  "title": "Earnings Season Volatility Patterns — Does A4f Capture Earnings Vol?",
+  "date": "2026-04-11T08:49:51.261708+00:00",
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "data_period": "2005-01-04 to 2026-04-10",
+  "n_total": 5350,
+  "n_oos": 1828,
+  "oos_start": "2019-01-01",
+  "window": 2000,
+  "refit_every": 63,
+  "n_refits": 30,
+  "random_seed": 42,
+  "earnings_definition": {
+    "source": "K964",
+    "Q4_earnings": "Jan 10 - Feb 15",
+    "Q1_earnings": "Apr 10 - May 15",
+    "Q2_earnings": "Jul 10 - Aug 15",
+    "Q3_earnings": "Oct 10 - Nov 15"
+  },
+  "oos_sample_split": {
+    "earnings_days": 749,
+    "non_earnings_days": 1079,
+    "earnings_pct": 41.0
+  },
+  "vix_descriptives": {
+    "earnings_mean": 19.8,
+    "earnings_median": 18.04,
+    "non_earnings_mean": 20.51,
+    "non_earnings_median": 18.56,
+    "full_sample_welch_t": -1.962,
+    "full_sample_welch_p": 0.0498
+  },
+  "overall": {
+    "n": 1828,
+    "qlike_gjr": 1.492983,
+    "qlike_a4f": 1.408408,
+    "improvement_pct": 5.66,
+    "dm_t": -4.089,
+    "dm_p": 0.0,
+    "spearman_gjr": 0.3668,
+    "spearman_a4f": 0.4174
+  },
+  "earnings_season": {
+    "n": 749,
+    "qlike_gjr": 1.5379,
+    "qlike_a4f": 1.470495,
+    "improvement_pct": 4.38,
+    "dm_t": -2.682,
+    "dm_p": 0.0075,
+    "spearman_gjr": 0.3342,
+    "spearman_a4f": 0.3742
+  },
+  "non_earnings_season": {
+    "n": 1079,
+    "qlike_gjr": 1.461887,
+    "qlike_a4f": 1.365425,
+    "improvement_pct": 6.6,
+    "dm_t": -3.095,
+    "dm_p": 0.002,
+    "spearman_gjr": 0.3865,
+    "spearman_a4f": 0.4438
+  },
+  "per_quarter": {
+    "Q4_earnings": {
+      "n": 202,
+      "qlike_gjr": 1.514273481433928,
+      "qlike_a4f": 1.4303920041494642,
+      "improvement_pct": 5.539387588365676,
+      "dm_t": -1.9730078180590123,
+      "dm_p": 0.0498653578863848
+    },
+    "Q1_earnings": {
+      "n": 177,
+      "qlike_gjr": 1.7119779156287827,
+      "qlike_a4f": 1.6398617158996474,
+      "improvement_pct": 4.212449183530977,
+      "dm_t": -2.0563964962991816,
+      "dm_p": 0.041220367948992864
+    },
+    "Q2_earnings": {
+      "n": 185,
+      "qlike_gjr": 1.3350806509327497,
+      "qlike_a4f": 1.333313514813982,
+      "improvement_pct": 0.132361750395608,
+      "dm_t": -0.054282908371734315,
+      "dm_p": 0.9567686598796499
+    },
+    "Q3_earnings": {
+      "n": 185,
+      "qlike_gjr": 1.597775185102677,
+      "qlike_a4f": 1.4879390158786525,
+      "improvement_pct": 6.874319381607248,
+      "dm_t": -1.7643559443578671,
+      "dm_p": 0.07933135954211346
+    }
+  },
+  "concentration_test": {
+    "concentration_ratio": 0.664,
+    "bootstrap_n": 5000,
+    "bootstrap_contrast_mean": 0.029578,
+    "bootstrap_contrast_se": 0.041049,
+    "bootstrap_t": 0.721,
+    "bootstrap_p": 0.4712,
+    "bootstrap_ci_95": [
+      -0.048289,
+      0.112645
+    ],
+    "significant_at_harvey": false,
+    "significant_at_5pct": false
+  },
+  "conclusion": "A4f improvement is UNIFORM across seasons (earn: 4.38%, non-earn: 6.60%, bootstrap p=0.471). VIX captures GENERAL volatility information, not earnings-specific uncertainty. This supports VIX as a broad fear gauge rather than an earnings anticipation tool.",
+  "references": [
+    "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256.",
+    "Harvey et al. (2016). t > 3.0 threshold.",
+    "Engle, Ghysels & Sohn (2013). Stock Market Volatility. RES 95(3):776-797.",
+    "Patell & Wolfson (1984). Earnings announcements and intraday volatility.",
+    "Savor & Wilson (2016). Earnings announcements and systematic risk."
+  ],
+  "runtime_seconds": 98.1
+}
