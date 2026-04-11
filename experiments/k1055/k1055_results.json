@@ -1,0 +1,259 @@
+{
+  "experiment_id": "K1055",
+  "title": "Conformal Prediction Intervals for A4f vs GJR Volatility Forecasts",
+  "timestamp": "2026-04-12 02:21:15",
+  "data_source": "yfinance",
+  "asset": "SPY",
+  "data_period": "2004-01-05 to 2026-04-10",
+  "oos_period": "2019-01-02 to 2026-04-10",
+  "n_total": 5602,
+  "n_oos": 1828,
+  "n_refits": 30,
+  "config": {
+    "training_window": 2000,
+    "refit_every": 63,
+    "calibration_window": 252,
+    "alpha_levels": [
+      0.1,
+      0.05
+    ],
+    "aci_gamma": 0.01,
+    "rolling_coverage_window": 126,
+    "bootstrap_reps": 10000,
+    "random_seed": 42
+  },
+  "qlike": {
+    "GJR": -8.266322021183761,
+    "A4f": -8.349479881541335,
+    "improvement_pct": -1.0059837996205367
+  },
+  "conformal_results": {
+    "GJR_90": {
+      "model": "GJR",
+      "nominal_coverage": 0.9,
+      "split_conformal": {
+        "coverage": 0.8965736040609137,
+        "avg_width": 0.0004439650019164813,
+        "median_width": 0.0002214843501148844,
+        "winkler_score": 0.001212858739258684,
+        "n_valid": 1576
+      },
+      "adaptive_conformal": {
+        "coverage": 0.8984771573604061,
+        "avg_width": 0.0005461948686201776,
+        "median_width": 0.00022004266076555926,
+        "winkler_score": 0.001163007914078179,
+        "n_valid": 1576
+      }
+    },
+    "A4f_90": {
+      "model": "A4f",
+      "nominal_coverage": 0.9,
+      "split_conformal": {
+        "coverage": 0.9029187817258884,
+        "avg_width": 0.0004135393670485103,
+        "median_width": 0.00022542410224961186,
+        "winkler_score": 0.0012049932214183198,
+        "n_valid": 1576
+      },
+      "adaptive_conformal": {
+        "coverage": 0.899746192893401,
+        "avg_width": 0.0004851009113422992,
+        "median_width": 0.00021914082874084764,
+        "winkler_score": 0.0011481314818273113,
+        "n_valid": 1576
+      }
+    },
+    "GJR_95": {
+      "model": "GJR",
+      "nominal_coverage": 0.95,
+      "split_conformal": {
+        "coverage": 0.9524111675126904,
+        "avg_width": 0.0007004429981963504,
+        "median_width": 0.0003294165217529386,
+        "winkler_score": 0.001535932961718437,
+        "n_valid": 1576
+      },
+      "adaptive_conformal": {
+        "coverage": 0.949238578680203,
+        "avg_width": 0.0008234928558057121,
+        "median_width": 0.0003349724846570803,
+        "winkler_score": 0.0015563861417203831,
+        "n_valid": 1576
+      }
+    },
+    "A4f_95": {
+      "model": "A4f",
+      "nominal_coverage": 0.95,
+      "split_conformal": {
+        "coverage": 0.9479695431472082,
+        "avg_width": 0.0006624314737470475,
+        "median_width": 0.0003382654821974314,
+        "winkler_score": 0.0015089112117090792,
+        "n_valid": 1576
+      },
+      "adaptive_conformal": {
+        "coverage": 0.9498730964467005,
+        "avg_width": 0.0008025711970034559,
+        "median_width": 0.0003057816370143867,
+        "winkler_score": 0.0013845137084698069,
+        "n_valid": 1576
+      }
+    }
+  },
+  "width_ratios": {
+    "90%_split_conformal": {
+      "width_ratio": 0.9314683933719291,
+      "winkler_ratio": 0.9935148937087498,
+      "a4f_coverage": 0.9029187817258884,
+      "gjr_coverage": 0.8965736040609137
+    },
+    "90%_adaptive_conformal": {
+      "width_ratio": 0.8881462262137014,
+      "winkler_ratio": 0.9872086577651029,
+      "a4f_coverage": 0.899746192893401,
+      "gjr_coverage": 0.8984771573604061
+    },
+    "95%_split_conformal": {
+      "width_ratio": 0.9457321658619144,
+      "winkler_ratio": 0.9824069469938811,
+      "a4f_coverage": 0.9479695431472082,
+      "gjr_coverage": 0.9524111675126904
+    },
+    "95%_adaptive_conformal": {
+      "width_ratio": 0.9745940008407404,
+      "winkler_ratio": 0.8895695427738816,
+      "a4f_coverage": 0.9498730964467005,
+      "gjr_coverage": 0.949238578680203
+    },
+    "90%_bootstrap": {
+      "width_diff_mean": 3.042563486797099e-05,
+      "width_diff_se": 8.29321762228623e-06,
+      "width_diff_t": 3.668737063671002,
+      "width_diff_ci": [
+        1.4302143273667232e-05,
+        4.695806817422282e-05
+      ],
+      "width_diff_significant": true,
+      "winkler_diff_mean": 7.865517840363997e-06,
+      "winkler_diff_se": 8.448558143838737e-05,
+      "winkler_diff_t": 0.09309893719675785,
+      "winkler_diff_ci": [
+        -0.00015596785960891898,
+        0.00018147320936064853
+      ],
+      "winkler_diff_significant": false
+    },
+    "95%_bootstrap": {
+      "width_diff_mean": 3.8011524449303015e-05,
+      "width_diff_se": 1.3358624934421137e-05,
+      "width_diff_t": 2.84546685275659,
+      "width_diff_ci": [
+        1.2051561429845702e-05,
+        6.429141199693642e-05
+      ],
+      "width_diff_significant": true,
+      "winkler_diff_mean": 2.7021750009357525e-05,
+      "winkler_diff_se": 0.00016269641790264257,
+      "winkler_diff_t": 0.16608693883799777,
+      "winkler_diff_ci": [
+        -0.000265480380674922,
+        0.00037659586943421773
+      ],
+      "winkler_diff_significant": false
+    }
+  },
+  "regime_analysis": {
+    "Low (VIX<15)": {
+      "GJR": {
+        "split_coverage": 0.9363957597173145,
+        "split_avg_width": 0.0001393456567572557,
+        "aci_coverage": 0.9187279151943463,
+        "aci_avg_width": 0.0001247593792358394,
+        "n_days": 283
+      },
+      "A4f": {
+        "split_coverage": 0.9187279151943463,
+        "split_avg_width": 0.0001018664780369723,
+        "aci_coverage": 0.911660777385159,
+        "aci_avg_width": 9.54087144202006e-05,
+        "n_days": 283
+      }
+    },
+    "Medium (15-25)": {
+      "GJR": {
+        "split_coverage": 0.9111111111111111,
+        "split_avg_width": 0.0002521542456669381,
+        "aci_coverage": 0.9068783068783068,
+        "aci_avg_width": 0.0002610546336791428,
+        "n_days": 945
+      },
+      "A4f": {
+        "split_coverage": 0.9142857142857143,
+        "split_avg_width": 0.00024195278758292905,
+        "aci_coverage": 0.9026455026455027,
+        "aci_avg_width": 0.0002548529563894494,
+        "n_days": 945
+      }
+    },
+    "High (25-35)": {
+      "GJR": {
+        "split_coverage": 0.8339100346020761,
+        "split_avg_width": 0.000744941026977773,
+        "aci_coverage": 0.8685121107266436,
+        "aci_avg_width": 0.0009125154429098903,
+        "n_days": 289
+      },
+      "A4f": {
+        "split_coverage": 0.8719723183391004,
+        "split_avg_width": 0.0007408877895042776,
+        "aci_coverage": 0.8996539792387543,
+        "aci_avg_width": 0.0009323269619726577,
+        "n_days": 289
+      }
+    },
+    "Crisis (VIX>=35)": {
+      "GJR": {
+        "split_coverage": 0.7796610169491526,
+        "split_avg_width": 0.0035030559865464102,
+        "aci_coverage": 0.8135593220338984,
+        "aci_avg_width": 0.005340383335489986,
+        "n_days": 59
+      },
+      "A4f": {
+        "split_coverage": 0.7966101694915254,
+        "split_avg_width": 0.0030533537923963547,
+        "aci_coverage": 0.7966101694915254,
+        "aci_avg_width": 0.003851522615193543,
+        "n_days": 59
+      }
+    }
+  },
+  "failure_detection": {
+    "GJR": {
+      "median_width": 0.0002214843501148844,
+      "mad": 0.00011028877491229186,
+      "spike_threshold": 0.00055235067485176,
+      "n_spikes": 258,
+      "mean_vix_at_spikes": 32.152248175569284,
+      "mean_vix_overall": 20.21988514059221
+    },
+    "A4f": {
+      "median_width": 0.00022542410224961186,
+      "mad": 0.0001193963294059839,
+      "spike_threshold": 0.0005836130904675635,
+      "n_spikes": 235,
+      "mean_vix_at_spikes": 33.5351915724734,
+      "mean_vix_overall": 20.21988514059221
+    }
+  },
+  "runtime_seconds": 161.10457015037537,
+  "references": [
+    "Vovk, Gammerman, Shafer (2005). Algorithmic Learning in a Random World",
+    "Lei, GSell, Rinaldo, Tibshirani, Wasserman (2018). Distribution-Free Predictive Inference",
+    "Gibbs & Candes (2021). Adaptive Conformal Inference Under Distribution Shift",
+    "Barber, Candes, Ramdas, Tibshirani (2023). Conformal Prediction Beyond Exchangeability",
+    "Winkler (1972). A Decision-Theoretic Approach to Interval Estimation",
+    "Patton (2011). Volatility Forecast Comparison Using Imperfect Volatility Proxies"
+  ]
+}
