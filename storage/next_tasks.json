@@ -1,38 +1,24 @@
 [
   {
-    "id": "K1043",
-    "title": "K1043: FHS = CF-Rolling (12/12)",
-    "priority": 1,
+    "id": "K1047",
+    "title": "K1047: ABM VT Crowding",
+    "priority": 2,
     "status": "completed",
-    "description": "★★ FHS 和 CF-Rolling 統計不可區分。非參數尾部建模是關鍵"
+    "description": "★★★ 50-75% 臨界點，90% vol +50.6%，<5% 安全"
   },
   {
-    "id": "K1044",
-    "title": "K1044: Gamma-VT Causal Panel",
-    "priority": 1,
+    "id": "K1048",
+    "title": "K1048: Threshold GARCH + SSVS",
+    "priority": 2,
     "status": "completed",
-    "description": "K53 r=0.564 不可重現（ρ=-0.209 NS）。因果鏈第二環斷裂"
-  },
-  {
-    "id": "K1045",
-    "title": "K1045: A4f Residual Diagnostics (Paper 9)",
-    "priority": 1,
-    "status": "in_progress",
-    "description": "ARCH-LM、Ljung-Box、JB、QQ-plot、PIT。A4f vs GJR 殘差品質"
-  },
-  {
-    "id": "K1046",
-    "title": "K1046: Monte Carlo VaR with A4f",
-    "priority": 1,
-    "status": "in_progress",
-    "description": "10K 路徑模擬。MC-VaR vs CF-Rolling vs FHS。面向 B 最後方法"
+    "description": "IS 顯著 LR=135 但 OOS NS。VaR 改善。K813 再次確認"
   },
   {
     "id": "Paper9_review",
     "title": "Paper 9 論文審查與修正",
     "priority": 1,
-    "description": "2026-04-11 13:00。整合 K1033/K1030/K1036/K1039/K1041/K1043/K1045",
-    "status": "pending"
+    "description": "NOW。整合 K1033/K1030/K1036/K1039/K1041/K1043/K1045/K1046",
+    "status": "in_progress"
   },
   {
     "id": "Paper6_start",
