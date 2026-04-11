@@ -1,0 +1,202 @@
+{
+  "experiment_id": "K1049",
+  "title": "HAR-RV 60-Day SPY Pilot \u2014 Proxy Comparison r\u00b2 vs RV",
+  "status": "PRELIMINARY",
+  "timestamp": "2026-04-11T08:48:48.793185+00:00",
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance (daily) + data/intraday/ (5-min)",
+    "rv_days": 60,
+    "rv_period": "2026-01-14 to 2026-04-10",
+    "daily_returns_count": 2833,
+    "oos_days": 28,
+    "oos_period": "2026-03-03 to 2026-04-10"
+  },
+  "models": {
+    "HAR-RV": {
+      "specification": "RV_t = \u03b2\u2080 + \u03b2\u2081\u00d7RV_{t-1} + \u03b2\u2085\u00d7RV_{t-1:t-5} + \u03b2\u2082\u2082\u00d7RV_{t-1:t-22}",
+      "estimation": "Expanding window OLS, initial window = 30 days",
+      "initial_betas": null
+    },
+    "GJR-GARCH": {
+      "specification": "GJR(1,1) with normal innovations",
+      "estimation": "Rolling window = 2000 daily returns",
+      "initial_params": {
+        "date": "2026-03-03",
+        "omega": 0.04367431556393739,
+        "alpha": 0.03287814431438796,
+        "gamma": 0.20352109537455948,
+        "beta": 0.8268688562760763,
+        "persistence": 0.961507548277744
+      }
+    },
+    "A4f-VIX\u00b2": {
+      "specification": "\u03c4_t = \u03b8\u2080 + \u03b8\u2081\u00d7VIX\u00b2_{t-1}, g_t = GJR(1,1) on r_t/\u221a\u03c4_t",
+      "estimation": "Rolling window = 2000 daily returns",
+      "initial_params": {
+        "date": "2026-03-03",
+        "theta_0": 1e-10,
+        "theta_1": 1.6289836402732103,
+        "gjr_omega": 267.67607041299976,
+        "gjr_alpha": 0.0,
+        "gjr_gamma": 0.09201388200580768,
+        "gjr_beta": 0.87769248771329,
+        "tau_fcast": 0.0002971432791943864,
+        "g_fcast": 0.31862841140114256
+      }
+    }
+  },
+  "proxy_stats": {
+    "rv_5min": {
+      "mean": 0.0001516758347612781,
+      "std": 0.00013458627618280405,
+      "min": 1.5556632602004514e-05,
+      "max": 0.0006855965619199
+    },
+    "r_squared": {
+      "mean": 0.00012681907173901796,
+      "std": 0.00019172821775484362,
+      "min": 1.9358002595763248e-07,
+      "max": 0.0008210211162467398
+    },
+    "correlation_rv_r2": 0.5751314197036476
+  },
+  "evaluation": {
+    "QLIKE": {
+      "RV (5-min)": {
+        "HAR-RV": {
+          "QLIKE": -7.645738021769333,
+          "MSE": 3.00286440002908e-08,
+          "MAE": 0.00011949340571132856
+        },
+        "GJR-GARCH": {
+          "QLIKE": -7.645564509932814,
+          "MSE": 2.0898255721523564e-08,
+          "MAE": 8.586137277986664e-05
+        },
+        "A4f-VIX\u00b2": {
+          "QLIKE": -7.794198507079474,
+          "MSE": 1.8528010860755978e-08,
+          "MAE": 8.398292085417173e-05
+        }
+      },
+      "r\u00b2 (daily)": {
+        "HAR-RV": {
+          "QLIKE": -7.847834355816289,
+          "MSE": 5.02853862307709e-08,
+          "MAE": 0.00016814872607068626
+        },
+        "GJR-GARCH": {
+          "QLIKE": -7.977055176274924,
+          "MSE": 3.58890616390447e-08,
+          "MAE": 0.00013349626541379092
+        },
+        "A4f-VIX\u00b2": {
+          "QLIKE": -8.040434330984683,
+          "MSE": 3.381317382127465e-08,
+          "MAE": 0.00014064452206600752
+        }
+      }
+    },
+    "rankings": {
+      "QLIKE_RV_proxy": [
+        "A4f-VIX\u00b2",
+        "HAR-RV",
+        "GJR-GARCH"
+      ],
+      "QLIKE_r2_proxy": [
+        "A4f-VIX\u00b2",
+        "GJR-GARCH",
+        "HAR-RV"
+      ],
+      "rankings_consistent": false
+    }
+  },
+  "spearman": {
+    "RV (5-min)": {
+      "HAR-RV": {
+        "rho": -0.38314176245210724,
+        "p_value": 0.04416695030835388
+      },
+      "GJR-GARCH": {
+        "rho": 0.13738368910782706,
+        "p_value": 0.48571591740141484
+      },
+      "A4f-VIX\u00b2": {
+        "rho": 0.42419266557197594,
+        "p_value": 0.0244669522314179
+      }
+    },
+    "r\u00b2 (daily)": {
+      "HAR-RV": {
+        "rho": -0.43240284619594965,
+        "p_value": 0.0215588499153467
+      },
+      "GJR-GARCH": {
+        "rho": -0.07334428024083196,
+        "p_value": 0.7107066108811115
+      },
+      "A4f-VIX\u00b2": {
+        "rho": 0.14833059660645867,
+        "p_value": 0.4512764510079168
+      }
+    }
+  },
+  "dm_tests": {
+    "RV (5-min)": {
+      "HAR-RV_vs_GJR-GARCH": {
+        "t_stat": -0.0024682614108729514,
+        "p_value": 0.9980487611684685,
+        "significant_harvey": "False"
+      },
+      "HAR-RV_vs_A4f-VIX\u00b2": {
+        "t_stat": 2.460605770456418,
+        "p_value": 0.020553930893769667,
+        "significant_harvey": "False"
+      },
+      "GJR-GARCH_vs_A4f-VIX\u00b2": {
+        "t_stat": 1.7470028030653588,
+        "p_value": 0.09200454726939156,
+        "significant_harvey": "False"
+      }
+    },
+    "r\u00b2 (daily)": {
+      "HAR-RV_vs_GJR-GARCH": {
+        "t_stat": 1.389642507979808,
+        "p_value": 0.17599090883629076,
+        "significant_harvey": "False"
+      },
+      "HAR-RV_vs_A4f-VIX\u00b2": {
+        "t_stat": 2.2330181742279436,
+        "p_value": 0.034033328109771555,
+        "significant_harvey": "False"
+      },
+      "GJR-GARCH_vs_A4f-VIX\u00b2": {
+        "t_stat": 0.9633237311815646,
+        "p_value": 0.34393415452823684,
+        "significant_harvey": "False"
+      }
+    }
+  },
+  "key_findings": [
+    "OOS period: 28 days (PRELIMINARY, need \u2265252)",
+    "QLIKE rankings DIFFER: RV proxy \u2192 A4f-VIX\u00b2 > HAR-RV > GJR-GARCH, r\u00b2 proxy \u2192 A4f-VIX\u00b2 > GJR-GARCH > HAR-RV",
+    "Ranking discrepancy likely due to small sample (30 days) \u2014 not a refutation of Patton (2011)",
+    "Best model with RV proxy: A4f-VIX\u00b2",
+    "Best model with r\u00b2 proxy: A4f-VIX\u00b2",
+    "A4f-VIX\u00b2 winning on r\u00b2 proxy is EXPECTED (native target) \u2014 mechanical, not empirical"
+  ],
+  "limitations": [
+    "Only 28 OOS days \u2014 far below 252-day minimum for definitive conclusions",
+    "HAR-RV trained on only 30 expanding-window observations (vs 2000 for GARCH)",
+    "r\u00b2 is very noisy proxy (single squared return vs sum of 78 squared 5-min returns)",
+    "VIX regime during sample may not represent typical conditions",
+    "No bootstrap CI due to small sample"
+  ],
+  "references": [
+    "Patton (2011). Volatility forecast comparison using imperfect volatility proxies. JoE.",
+    "Corsi (2009). A simple approximate long-memory model of realized volatility. JFEC.",
+    "Hansen & Lunde (2005). A forecast comparison of volatility models. JFEC.",
+    "Engle & Rangel (2008). The Spline-GARCH Model for Low-Frequency Volatility. RFS."
+  ]
+}
