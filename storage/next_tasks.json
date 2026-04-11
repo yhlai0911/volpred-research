@@ -1,37 +1,37 @@
 [
   {
-    "id": "Paper9_review",
-    "title": "Paper 9 論文審查與修正",
+    "id": "K1054",
+    "title": "K1054: HAR-RV Formal 60-Day SPY",
     "priority": 1,
-    "description": "v5 完成（1015行/39頁）。待 citation-verifier。",
-    "status": "completed"
-  },
-  {
-    "id": "K1051",
-    "title": "K1051: TX Futures Overnight Gap Strategy",
-    "priority": 2,
-    "status": "completed",
-    "description": "NULL。Alpha extinct post-2017 night session structural break"
-  },
-  {
-    "id": "K1052",
-    "title": "K1052: Asymmetric A4f (VIX Direction)",
-    "priority": 2,
-    "status": "completed",
-    "description": "NULL。M2 ΔVIX+ 惡化 DM t=+4.28, M3 high-VIX NS. Symmetric VIX² optimal"
-  },
-  {
-    "id": "K1053",
-    "title": "K1053: VIX Term Structure Slope Predictor",
-    "priority": 2,
     "status": "in_progress",
-    "description": "VIX/VIX3M ratio + spread 是否對 A4f 有增量預測力"
+    "description": "HAR-RV 正式實驗：60 天 5-min 數據，proxy comparison r² vs RV。Agent running in worktree."
   },
   {
     "id": "Paper6_start",
     "title": "Paper 6 Crypto Fear Channel 論文",
     "priority": 2,
     "description": "K639/K746b/K1025 素材齊備。主線程撰寫",
+    "status": "pending"
+  },
+  {
+    "id": "K1055",
+    "title": "K1055: Probabilistic RV Quantile Forecasting",
+    "priority": 2,
+    "description": "arXiv:2508.15922 方法。從 GARCH/HAR 點預測延伸到條件分位數。可用現有日頻數據。",
+    "status": "pending"
+  },
+  {
+    "id": "TSMC_0416",
+    "title": "TSMC 法說 04/16 預告文章",
+    "priority": 1,
+    "description": "04/14 前完成預告文章，04/17 完成解讀文章。WebSearch 查最新預測。",
+    "status": "pending"
+  },
+  {
+    "id": "Paper9_citation_verify",
+    "title": "Paper 9 citation-verifier",
+    "priority": 2,
+    "description": "Paper 9 v5 完成，待 /citation-verifier 引用驗證",
     "status": "pending"
   }
 ]

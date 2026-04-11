@@ -1,14 +1,14 @@
 ---
 name: autonomous-research
 description: >
-  Experiment methodology for autonomous volatility prediction research. Handles the full
-  experiment loop: data analysis, model fitting (GARCH, GJR, EGARCH, HAR-RV), evaluation
-  (QLIKE, VaR, DM test), cross-asset comparison, knowledge recording, and strategy deployment.
-  Trigger phrases: '開始研究', 'start research', '研究波動率', 'run experiment', '跑實驗',
-  or any request about volatility forecasting or VT strategies.
-  This skill should NOT be used for: research scheduling/cron (use research-planning),
-  publishing feed articles (use feed-publisher), reviewing papers (use latex-academic-reviewer),
-  or verifying citations (use citation-verifier).
+  This skill should be used when the user wants autonomous volatility prediction research
+  on any asset. It handles the full loop: data analysis, model fitting (GARCH, GJR, EGARCH,
+  HAR-RV), evaluation (QLIKE, VaR, DM test), cross-asset comparison, and publishing.
+  Trigger phrases: '開始研究', 'start research', '研究波動率', '繼續研究', 'continue research',
+  'run experiment', '跑實驗', or any request about volatility forecasting or VT strategies.
+  Also triggers when resuming a previous session — it reads stored logs to pick up where it left off.
+  This skill should NOT be used for: publishing feed articles (use feed-publisher),
+  reviewing papers (use latex-academic-reviewer), or verifying citations (use citation-verifier).
 ---
 
 # Autonomous Volatility Prediction Research
@@ -30,7 +30,12 @@ You are an autonomous volatility researcher. This skill guides the full research
 ## Core Principle
 
 **research_program.md is your north star.** Every experiment must align with its goals and phases.
-research_program.md 維護規則（更新結論、衍生方向、archive、< 700 行）見 `research-planning` skill。
+
+**research_program.md 是隨研究推展逐步奠基衍生的活文件**——不只是打勾的 checklist，而是要反映研究的認知演進。每次重大發現都應該：
+1. 更新結論區塊（新數據、新發現）
+2. 衍生新的研究方向（從已知推向未知）
+3. 修正約束條件（如 OOS 期間隨時間推移應延伸、數據量增加應重新評估先前結論）
+4. 記錄失敗原因，作為後續嘗試的基礎（而不是簡單標記 ✗ 就結束）
 
 ## Researcher Capabilities
 
@@ -156,8 +161,11 @@ Report issues." 2>/dev/null
 ### 實驗完成後的必做流程（不可跳步）
 ```
 實驗完成 → Codex 審查 → 記錄 knowledge → 記錄 experience（如適用，每 5-10 個實驗彙整）
-         → 衍生新方向寫入 research_program.md（維護規則見 research-planning skill）
+         → 衍生新方向寫入 research_program.md
+         → 已完成項目從 research_program.md 移到 docs/research_archive/
+         → research_program.md 保持 < 700 行
 ```
+**研究多元化**：每個 session 至少 1 個完全不同方向。連續 3 個 null result → 必須換方向。
 
 ### Step 0: Resume or Start Fresh
 
@@ -182,6 +190,31 @@ uv run python scripts/build_knowledge_index.py build
 **⚠️ 知識索引每小時重建一次**（新知識需要被 embedding 才能被檢索到）：
 ```bash
 uv run python scripts/build_knowledge_index.py build
+```
+
+### Session Cron 啟動（每次新 session 必做）
+
+系統 crontab 已設定永久任務（5-min 數據收集 + daily update）。
+但以下 session-only cron 需要每次新 session 重新建立：
+
+#### 最小啟動集（保守模式）
+```
+CronCreate(cron="13 */6 * * *", prompt="會員問題研究")               # :13 每6小時
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢")                   # :37 每6小時
+CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit")        # :47
+CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07
+```
+
+#### 全速模式（確認穩定後加入）
+```
+CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究")         # 08-23時 每15分鐘
+CronCreate(cron="5 0-7 * * *", prompt="繼續研究")                   # 00-07時 每小時
+CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")   # :37 每2小時
+```
+
+也可以安排**單次性提醒**避免忘記（範例格式，日期需依實際事件更新）：
+```
+CronCreate(cron="0 14 <day> <month> *", prompt="<事件提醒>", recurring=false)
 ```
 
 ### Steps 1-7: Core Research Cycle
@@ -241,6 +274,31 @@ See `references/strategies.md` for detailed guidance on:
   - 低頻 Harvey threshold 更嚴（fewer obs → wider CI）
 - **跨資產假日處理**：多資產投組中某資產無當日價格 → forward-fill 前一日價格，return=0
 
+## Publishing
+
+All publications in **繁體中文**. Details in `references/publishing-guide.md`.
+- 每個推理鏈段的發現都要即時發佈，不是等到最後
+- Strategy reports must include operational manual with dollar amounts ($1M basis)
+- 若要決定是否先入文章池、是否排程、是否依節奏釋出，改查 `admin-ops` 的 platform manual
+- **每完成 2-3 篇研究文章 → 寫 1 篇一般讀者文章**
+  - 研究文章（audience=research）：完整數據、統計檢定、方法論
+  - 一般文章（audience=general）：白話解說、類比、操作建議、500-1000 字
+  - 一般文章要寫成**爆款但高品質的部落格文章**：
+    - **標題**：用好奇缺口、數字、反直覺（「我測了 11 種 AI 模型，結果最笨的贏了」而非「GINN null result」）
+    - **開頭 hook**：3 秒內抓住注意力（驚人數字、反常識、故事）
+    - **敘事結構**：問題→探索→轉折→結論（不是平鋪直敘的研究報告）
+    - **具體場景**：「假設你有 100 萬，今天 VIX 是 25...」
+    - **類比法**：「VIX 就像保險的價格」「分散投資就像不把雞蛋放同一個籃子，但我們發現有些籃子其實是黏在一起的」
+    - **一個核心 takeaway**：讀完能用一句話轉述給朋友
+    - **CTA**：文末有明確行動（「現在就查一下 VIX，算算你的配置」）
+  - 讀者能在網站篩選文章類型
+  - 一般文章必須**奠基於先前研究**：用 LanceDB 語意搜索找相關 knowledge → 基於 research facts 改寫白話版
+    ```python
+    # 寫一般文章前先查 LanceDB
+    results = index.search("VIX 投資策略").limit(10).to_list()
+    # 基於 results 中的 research facts 撰寫
+    ```
+
 ## Key Rules
 
 0. **數據誠實：不造假，不把模擬當實證** — 這是最高優先規則，違反即研究無效。
@@ -271,7 +329,10 @@ See `references/strategies.md` for detailed guidance on:
 8. **Never conclude from a single attempt** — systematic ablation before declaring failure
 9. **不懂的模型或理論必須先查文獻** — 用 WebSearch 搜尋論文、用 `/sci-hub` 讀全文。記錄：模型規格、估計方法、關鍵參數、原始論文引用。不要猜測或憑記憶實現——查到原始公式再寫程式碼
 10. **定期使用 Codex/Gemini 審查研究** — 每完成一個 Phase 或重大發現後，用 `/codex:rescue` 和 `/gemini` 取得第二意見。不要只在用戶要求時才用——主動每隔 5-10 個實驗就做一次 AI 協作審查
-11. **與使用者討論中產生的 insight 必須即時內化** — 方法論改進、新觀念立刻寫入對應檔案
+11. **定期搜索最新文獻（每 session 至少一次）** — WebSearch arXiv/SSRN/JFE 搜尋最新波動率文獻，用 `/sci-hub` 讀全文。發現新方向 → 寫入 research_program.md 待探索方向 + 提出新 open question。永遠有新議題可以研究：rough volatility、XAI、intraday commonality、panel data ML、non-Gaussian models 等
+11. **數據會增加** — 定期延伸 OOS、重新驗證結論
+12. **與使用者討論中產生的 insight 必須即時內化** — 方法論改進、新觀念立刻寫入對應檔案
+13. **Research never stops, never asks permission** — 只有使用者主動中斷才停止
 14. **Numbers: price round(2), vol round(1)%, weight round(2)**
 15. **Null results 跟 positive results 一樣重要** — 記錄每個失敗及其原因
 16. **一直質疑自己，直到被證據說服** — 一個 OOS 的發現不足以改變結論。必須跨期驗證 + 可操作性測試。宣布「重大發現」前先自問：「這在其他時期也成立嗎？」「能實際使用嗎？」「有前瞻偏誤嗎？」
@@ -302,11 +363,36 @@ See `references/strategies.md` for detailed guidance on:
 - `/deploy` — 部署到 Zeabur（**必須用 `bash scripts/deploy_zeabur.sh`**）
 - `/publish` — 發佈研究成果
 
+## Paper Review & Revision Workflow
+
+論文完成後的正式審查流程（每次大改版後執行）：
+
+1. **Codex 整體審查**: `/codex:rescue "Review paper/<name>/main.tex for top-tier journal submission bugs"` → 產出結構性問題清單
+2. **LaTeX 學術審查**: `/latex-academic-reviewer` → 版面、方程式、符號一致性、邏輯流暢
+3. **引用驗證**: `/citation-verifier` → DOI、作者名、期刊名、引用格式
+4. **根據報告修正** → 重新編譯 PDF → 重複審查直到問題清零
+5. **最終 PDF**: `tectonic main.tex`
+
+所有正式文件用 LaTeX 轉 PDF（`paper/leverage-direction/main.tex`）。
+
+**論文更新後必須同步網頁：**
+1. 編譯 PDF: `cd paper/leverage-direction && xelatex main.tex`
+2. 複製到前端: `cp paper/leverage-direction/main.pdf frontend/public/paper/leverage-direction-matters.pdf`
+3. 更新頁數: `frontend/src/app/paper/page.tsx` 中的 "Download PDF (XX pages)"
+4. Push 到 Zeabur
+
 ## Reference Files
 
-- `references/publishing-guide.md` — Publishing formats, Signal card, API endpoints
-- `references/strategies.md` — Trading strategies, Hybrid VT details, transaction costs, advanced techniques
+- `references/experiment-preamble.md` — **Agent 必讀 preamble**（方法論規則、防錯、統計門檻）
+- `references/agent-brief-template.md` — Agent prompt 模板（6 要素）
+- `references/agent-result-template.md` — Agent 結果回報模板
 - `references/models.md` — Model descriptions, parameters, sample size requirements, cross-asset rules
-- `references/paper-guide.md` — 論文列表、PDF slug 對照、Review 流程、更新後同步網頁步驟
+- `references/strategies.md` — Trading strategies, Hybrid VT details, transaction costs, advanced techniques
+- `references/transaction-costs.md` — 各市場交易成本明細
+- `references/publishing-guide.md` — Publishing formats, Signal card, API endpoints
 - `references/paper-writing-process.md` — 論文寫作全流程（Phase 1-4，含 Review 循環和可重現性）
+- `references/add-strategy-guide.md` — 新策略上線完整步驟
+- `references/data-timing.md` — 數據時間對齊規則
+- `references/ai-collaboration.md` — AI 協作模式（Codex/Gemini 使用指引）
+- `references/question-review-guide.md` — 會員問題審查標準
 - `research_program.md` — **Core research direction, progress, and findings** (highest priority)

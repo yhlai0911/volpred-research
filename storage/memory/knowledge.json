@@ -24595,5 +24595,23 @@
     "confidence": 0.9,
     "data_source": "yfinance SPY+VIX+VIX3M+VIX9D 2005-2026",
     "timestamp": "2026-04-11T20:56:13.591132"
+  },
+  {
+    "id": "know_20260411170402_k1054",
+    "experiment_id": "K1054",
+    "title": "K1054: HAR-RV Formal 60-Day — A4f Wins on Both RV and r² Proxy, Rankings Now Consistent",
+    "content": "[提出: Claude, 執行: Claude] K1054 extends K1049 (28→30 OOS days) with 60 SPY 5-min trading days. Three models compared: HAR-RV (expanding OLS), GJR-GARCH (w=2000), A4f-VIX² (w=2000). QLIKE on RV proxy: A4f -7.811 > GJR -7.669 > HAR -7.657. QLIKE on r² proxy: A4f -8.123 > GJR -8.071 > HAR -8.009. Rankings now CONSISTENT across proxies (K1049 had inconsistency). A4f Spearman rho=0.379 (p=0.039) significant on RV. HAR-RV still negative Spearman (-0.282) due to tiny training. No DM reaches Harvey |t|>3.0 (max A4f vs HAR t=2.56). A4f winning on RV (not its native target) is genuine empirical finding. Status PRELIMINARY (30 OOS << 252 minimum). Paper 9 implication: proxy choice does NOT change A4f superiority.",
+    "tags": [
+      "HAR-RV",
+      "A4f",
+      "proxy-robustness",
+      "5-min RV",
+      "Patton 2011",
+      "PRELIMINARY"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance SPY daily + data/intraday/ 5-min (60 days)",
+    "confidence": 0.6,
+    "timestamp": "2026-04-11T17:04:02.647297+00:00"
   }
 ]
