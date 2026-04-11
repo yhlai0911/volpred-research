@@ -23146,5 +23146,25 @@
     "data_source": "yfinance",
     "confidence": 0.95,
     "created_at": "2026-04-10T23:05:35.415446+00:00"
+  },
+  {
+    "id": "know_20260411005043_k1045",
+    "title": "K1045: ★★ A4f Residual Diagnostics — 峰態降 60%，df 5.3→8.0，VIX 吸收尾部",
+    "content": "[提出: Claude, 執行: Claude] K1045 SPY OOS 2019-2026 殘差完整診斷。A4f 分佈檢定明顯勝 GJR：excess kurtosis 降 60%（3.065→1.238），JB 4.2x 更小（938→224），skewness 減少（-0.856→-0.594），df 從 5.28→8.00（VIX 吸收尾部厚度入 τ 分量）。獨立性檢定兩者皆通過：ARCH-LM(10) GJR p=0.80 vs A4f p=0.48（皆 PASS）。A4f 特有：E[g]=0.306（非 1.0，已知 identification issue，不影響預測）、g_t ACF(1)=0.879（高持續性）、τ 範圍 13.8-130.9% annualized。Corr(z,VIX)=-0.183（A4f 未完全消除 VIX 影響）。Paper 9 headline：60% kurtosis reduction + df shift。",
+    "tags": [
+      "residual diagnostics",
+      "A4f",
+      "GJR",
+      "kurtosis",
+      "ARCH-LM",
+      "Ljung-Box",
+      "Paper9",
+      "df"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1045",
+    "data_source": "yfinance",
+    "confidence": 0.95,
+    "created_at": "2026-04-11T00:50:43.189661+00:00"
   }
 ]
