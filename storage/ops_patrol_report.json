@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-04-10T12:25:44.763184+00:00",
+  "timestamp": "2026-04-11T00:31:50Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "8 drafts in pool (threshold: <3 = alert)"
+      "detail": "7 draft articles in feed.json (threshold: >=3)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json is ~9 seconds old (threshold: >26 hours = alert)"
+      "detail": "storage/strategy_metrics.json is ~9 seconds old (threshold: <26 hours)"
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Recent entries found: (2026-04-10) K1016 agent 回報不準確 — Agent 聲稱 QLIKE 改善 +13.7% 但 JSON 顯示惡化; (2026-04-09) 數據收集不完整 — FRED 停 23天/VIXTWN DNS失敗/QQQ等不在收集器; (2026-04-09) 文章 tags 再次遺失 — article_tags join table 未寫入"
+      "detail": "Last 30 lines reviewed. Most recent entry dated 2026-04-09 (article_tags sync fix). No entries dated today (2026-04-11) or yesterday (2026-04-10)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies: last_date=2026-04-09, last3_nulls=1 (1 null = today not yet settled, threshold: >2 = alert). No alerts."
+      "detail": "All strategies: last 3 entries have <=2 null portfolio_return values. No gaps detected."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50 = alert)"
+      "detail": "0 uncommitted files (threshold: <=50)"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "17587 entries in storage/memory/knowledge.json"
+      "detail": "1821 entries in storage/memory/knowledge.json"
     }
   ],
   "alerts": []
