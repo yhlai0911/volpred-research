@@ -1,16 +1,16 @@
 {
-  "timestamp": "2026-04-11T06:28:11Z",
+  "timestamp": "2026-04-11T12:39:00Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "6 draft articles in feed.json (threshold: >=3)"
+      "detail": "5 draft articles in feed.json (threshold: >=3)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json is ~9 seconds old (threshold: <26 hours)"
+      "detail": "storage/strategy_metrics.json is ~7 seconds old (threshold: <26 hours)"
     },
     {
       "name": "ERROR_LOG",
@@ -20,7 +20,7 @@
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies: last 3 entries have <=2 null portfolio_return values. No gaps detected."
+      "detail": "15 strategies checked. All have fewer than 3 history records with 0 null portfolio_return values. No gaps detected."
     },
     {
       "name": "GIT_STATUS",
@@ -30,7 +30,7 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1825 entries in storage/memory/knowledge.json"
+      "detail": "1824 entries in storage/memory/knowledge.json (24533 lines)"
     }
   ],
   "alerts": []
