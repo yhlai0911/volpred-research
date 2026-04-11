@@ -1,37 +1,37 @@
 [
   {
-    "id": "K1039",
-    "title": "K1039: A4f Multi-Horizon VaR (h=1,5,10)",
+    "id": "K1043",
+    "title": "K1043: FHS = CF-Rolling (12/12)",
     "priority": 1,
     "status": "completed",
-    "description": "★★ h=1,5 全 PASS，√h scaling = h-step。Paper 9 robustness"
+    "description": "★★ FHS 和 CF-Rolling 統計不可區分。非參數尾部建模是關鍵"
   },
   {
-    "id": "K1040",
-    "title": "K1040: VRP Return Predictability via A4f g_t",
-    "priority": 2,
+    "id": "K1044",
+    "title": "K1044: Gamma-VT Causal Panel",
+    "priority": 1,
     "status": "completed",
-    "description": "Nuanced NULL — VIX 月頻 R²=5.63% 顯著，但 g_t 無增量"
+    "description": "K53 r=0.564 不可重現（ρ=-0.209 NS）。因果鏈第二環斷裂"
   },
   {
-    "id": "K1041",
-    "title": "K1041: DCC-A4f Portfolio VaR (SPY/GLD)",
+    "id": "K1045",
+    "title": "K1045: A4f Residual Diagnostics (Paper 9)",
     "priority": 1,
     "status": "in_progress",
-    "description": "多變量：DCC-A4f vs CCC-GJR portfolio VaR。SPY/GLD 相關性危機時劇變"
+    "description": "ARCH-LM、Ljung-Box、JB、QQ-plot、PIT。A4f vs GJR 殘差品質"
   },
   {
-    "id": "K1042",
-    "title": "K1042: Congressional Trades Signal",
-    "priority": 2,
+    "id": "K1046",
+    "title": "K1046: Monte Carlo VaR with A4f",
+    "priority": 1,
     "status": "in_progress",
-    "description": "面向 G 替代數據。國會交易聚合 flow → SPY vol/return 預測"
+    "description": "10K 路徑模擬。MC-VaR vs CF-Rolling vs FHS。面向 B 最後方法"
   },
   {
     "id": "Paper9_review",
     "title": "Paper 9 論文審查與修正",
     "priority": 1,
-    "description": "2026-04-11 13:00 開始。整合 K1033/K1030/K1036/K1039",
+    "description": "2026-04-11 13:00。整合 K1033/K1030/K1036/K1039/K1041/K1043/K1045",
     "status": "pending"
   },
   {

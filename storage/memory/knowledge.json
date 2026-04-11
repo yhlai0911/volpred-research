@@ -23166,5 +23166,24 @@
     "data_source": "yfinance",
     "confidence": 0.95,
     "created_at": "2026-04-11T00:50:43.189661+00:00"
+  },
+  {
+    "id": "know_20260411005927_k1046",
+    "title": "K1046: MC-VaR 被 CF-Rolling/FHS 完全支配（37.5% vs 100% Trinity）",
+    "content": "[提出: Claude, 執行: Claude] K1046 2×4 factorial（GJR/A4f × MC-Normal/MC-t/CF-Rolling/FHS），SPY+QQQ OOS 2019-2026，10K 模擬。MC 方法 6/16（37.5%）vs 非 MC 16/16（100%）。GJR+MC 0/8 完全失敗。A4f 救了 MC-t（4/4 PASS）但 MC-Normal 仍失敗。原因：1-day VaR 的條件方差已是確定性的（GARCH 已知），MC 只增加 innovation 採樣噪音。CF-Rolling 和 FHS 用經驗分佈/moment 展開直接取 quantile，無噪音。MC 的優勢（多步/路徑依賴）在 h=1 無用。結論：CF-Rolling/FHS 是 1-day VaR 的 definitive 方法。MC 只在多步 VaR 才有理論優勢。",
+    "tags": [
+      "Monte Carlo",
+      "VaR",
+      "CF-Rolling",
+      "FHS",
+      "simulation",
+      "dominated",
+      "A4f"
+    ],
+    "category": "experiment",
+    "experiment_id": "K1046",
+    "data_source": "yfinance",
+    "confidence": 0.95,
+    "created_at": "2026-04-11T00:59:27.654319+00:00"
   }
 ]
