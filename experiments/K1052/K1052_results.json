@@ -1,0 +1,145 @@
+{
+  "experiment_id": "K1052",
+  "title": "Asymmetric A4f — Does VIX Direction Matter?",
+  "date": "2026-04-11T10:56:08.467456+00:00",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2005-04-05 to 2026-04-10",
+  "oos_period": "2019-01-01 to 2026-04-10",
+  "n_total": 5288,
+  "n_oos": 1828,
+  "window": 2000,
+  "refit_every": 63,
+  "n_refits": 30,
+  "seed": 42,
+  "models": {
+    "M1_A4f": "τ_t = θ₀ + θ₁ × VIX²_{t-1} (baseline)",
+    "M2_A4f_DeltaVIX": "τ_t = θ₀ + θ₁ × VIX²_{t-1} + θ₂ × ΔVIX⁺_{t-1}",
+    "M3_A4f_HighVIX": "τ_t = θ₀ + θ₁ × VIX²_{t-1} + θ₃ × VIX²_{t-1} × 1_{VIX>median}",
+    "M4_GJR": "Standard GJR-GARCH(1,1)"
+  },
+  "evaluation": {
+    "M1_A4f": {
+      "qlike": 1.405213,
+      "spearman": 0.4191
+    },
+    "M2_A4f_DeltaVIX": {
+      "qlike": 1.416453,
+      "spearman": 0.4133
+    },
+    "M3_A4f_HighVIX": {
+      "qlike": 1.399517,
+      "spearman": 0.4246
+    },
+    "M4_GJR": {
+      "qlike": 1.488021,
+      "spearman": 0.3704
+    }
+  },
+  "dm_tests": {
+    "M2_A4f_DeltaVIX_vs_M1_A4f": {
+      "dm_t": 4.2771,
+      "p_value": 2e-05,
+      "significant_harvey": true,
+      "description": "M2 vs M1 (ΔVIX asymmetry)",
+      "interpretation": "M1_A4f better"
+    },
+    "M3_A4f_HighVIX_vs_M1_A4f": {
+      "dm_t": -0.7128,
+      "p_value": 0.476082,
+      "significant_harvey": false,
+      "description": "M3 vs M1 (VIX regime)",
+      "interpretation": "M3_A4f_HighVIX better"
+    },
+    "M1_A4f_vs_M4_GJR": {
+      "dm_t": -4.4396,
+      "p_value": 1e-05,
+      "significant_harvey": true,
+      "description": "M1(A4f) vs M4(GJR)",
+      "interpretation": "M1_A4f better"
+    },
+    "M2_A4f_DeltaVIX_vs_M4_GJR": {
+      "dm_t": -3.6101,
+      "p_value": 0.000314,
+      "significant_harvey": true,
+      "description": "M2 vs M4(GJR)",
+      "interpretation": "M2_A4f_DeltaVIX better"
+    },
+    "M3_A4f_HighVIX_vs_M4_GJR": {
+      "dm_t": -4.451,
+      "p_value": 9e-06,
+      "significant_harvey": true,
+      "description": "M3 vs M4(GJR)",
+      "interpretation": "M3_A4f_HighVIX better"
+    }
+  },
+  "parameter_estimates": {
+    "M1_A4f": {
+      "n_refits": 30,
+      "last_refit": {
+        "refit": 30,
+        "theta0": -1.2958260396593287e-05,
+        "theta1": 1.9145303434492402e-07,
+        "omega_g": 0.09979789850841635,
+        "alpha": 0.02993957285155787,
+        "gamma": 0.0798375169089276,
+        "beta": 0.8792253770013674,
+        "nll": -6556.386882325432
+      }
+    },
+    "M2_A4f_DeltaVIX": {
+      "n_refits": 30,
+      "last_refit": {
+        "refit": 30,
+        "theta0": -2.827430476890534e-05,
+        "theta1": 2.8460436818193363e-07,
+        "theta2": -5.362661192689591e-07,
+        "omega_g": 0.04986537975723164,
+        "alpha": 0.04986563583560863,
+        "gamma": 0.04986564580420387,
+        "beta": 0.8989230085251441,
+        "nll": -6553.457599942224
+      }
+    },
+    "M3_A4f_HighVIX": {
+      "n_refits": 30,
+      "last_refit": {
+        "refit": 30,
+        "theta0": 7.433306009000405e-06,
+        "theta1": 9.297764812482154e-08,
+        "theta3": 7.577332295966279e-08,
+        "omega_g": 0.10000023258242248,
+        "alpha": 0.030000017479302723,
+        "gamma": 0.0800000989290043,
+        "beta": 0.8800002221471436,
+        "nll": -6557.711085314201
+      }
+    },
+    "M4_GJR": {
+      "n_refits": 30,
+      "last_refit": {
+        "refit": 30,
+        "omega": 3.655809436954875e-06,
+        "alpha": 0.041164253333650265,
+        "gamma": 0.10007775353517838,
+        "beta": 0.8684366522393537
+      }
+    }
+  },
+  "best_model": "M3_A4f_HighVIX",
+  "conclusion": "NULL: Neither VIX direction nor VIX regime significantly improves over A4f. Symmetric VIX² in A4f is parsimonious and sufficient.",
+  "a4f_beats_gjr": true,
+  "m2_improves_over_m1": false,
+  "m3_improves_over_m1": false,
+  "implications": {
+    "for_paper9": "Symmetric A4f is sufficient; asymmetric extensions do not improve forecasts",
+    "for_gjr_gamma": "GJR γ already captures return-based asymmetry; VIX-based asymmetry is redundant",
+    "parsimony": "A4f with 6 params is optimal (vs 7 for asymmetric extensions)"
+  },
+  "references": [
+    "Patton (2011). J Econometrics 160:246-256.",
+    "Harvey et al. (2016). JBES 34(4):574-587.",
+    "Engle, Ghysels & Sohn (2013). RES 95(3):776-797.",
+    "Conrad & Loch (2015). JBES 33(3):338-358."
+  ],
+  "runtime_seconds": 409.0
+}
