@@ -87,3 +87,27 @@ Sources: [Hwang & Valls Pereira 2006](https://www.tandfonline.com/doi/abs/10.108
 - **Fixed df=5 >> jointly estimated df** (17 vs 24 violations for SPY). Joint estimation over-adapts in quiet markets.
 - **VIX/GARCH ratio > 1.5 → VaR unreliable** — 94% of VaR violations occur in this state
 - Multi-step VaR: use proper GARCH h-step formula σ²_h = h×σ²_∞ + (σ²_1-σ²_∞)×(1-ρ^h)/(1-ρ), not naive σ×√h
+
+## Claude Model / Agent 選擇原則
+
+| 任務類型 | 模型 | 原因 |
+|---------|------|------|
+| **研究實驗**（GARCH、統計檢定、策略回測） | `model: "opus"` | 精確性與專業性要求高 |
+| **程式開發**（前端、後端、bug 修復） | `model: "opus"` | 程式碼正確性關鍵 |
+| **統計分析**（DM test、bootstrap、cross-OOS） | `model: "opus"` | 數學嚴謹性不可妥協 |
+| **論文寫作/審查** | `model: "opus"` | 學術品質要求 |
+| 簡單搜尋（grep、檔案查找） | `subagent_type: "Explore"` | 快速唯讀 |
+| 簡單文章撰寫（feed 文章） | `model: "sonnet"` 可接受 | 創意寫作彈性較大 |
+| 規劃與架構 | `subagent_type: "Plan"` | 結構化思考 |
+
+**規則：研究、分析、程式等精確性工作，務必使用 opus。不確定時預設 opus。**
+
+## 硬體資源
+
+| 項目 | 規格 |
+|------|------|
+| CPU | Apple M1 Max · 10 核心 |
+| RAM | 64 GB |
+| 平行 agent 建議 | 3-4 個 worktree agent 同時跑（每個 ~1GB RAM） |
+| GARCH 估計速度 | ~6ms/model（單核） |
+| Bootstrap 10,000 reps | ~2-5 秒 |

@@ -150,4 +150,8 @@ Load these references only when relevant:
 - `references/session-cron-workflows.md`
   - use when the task is about packaging platform operations into Claude session cron routines
 
+- `references/governance.md`
+  - use when diagnosing errors or deciding whether to manually fix data vs fix the process
+  - core principle: 永遠修流程，不修資料
+
 Do not paste or re-explain all references by default. Load the minimal needed section and move.

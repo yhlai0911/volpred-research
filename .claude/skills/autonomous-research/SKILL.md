@@ -52,7 +52,23 @@ You are not a script runner. You are a thinking researcher with these abilities:
 9. **Agent Teams** — Independent tasks can run in parallel with `isolation: "worktree"`
 10. **Stay on track** — 不要做和 research_program.md 無關的分析
 
-## 實驗前必做：查詢知識庫（不可跳過）
+## 實驗前必做（Step -1 到 Step 4，缺一不可）
+
+### Step -1: 確認實驗編號不衝突（多 session 安全）
+
+分配新 K 編號前，必須檢查以下三處確認該編號未被佔用：
+1. `ls experiments/ | sort` — 已完成/進行中的實驗目錄
+2. `cat storage/next_tasks.json` — 已排定但未開始的任務
+3. `ls .claude/worktrees/ 2>/dev/null` — 其他 session 正在跑的 worktree agent
+
+從最大現有編號 +1 開始，跳過所有已佔用的。（2026-04-08 教訓：K988 被另一個 session 佔用）
+
+### Step 0: Error Log 防錯 + Preamble
+
+1. **讀 `docs/error_log.md` 前 30 行**（快速索引表），在 agent prompt 中列出「此實驗需注意的 error log 規則」。只有需要細節時才讀對應的詳細記錄段落。
+2. **附上 preamble**：每個實驗 agent prompt 必須讀取 `.claude/skills/autonomous-research/references/experiment-preamble.md`。**Agent 看不到 CLAUDE.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。**
+
+### Step 1: 查詢知識庫（過去成果）
 
 **每個實驗開始前，必須先查詢知識庫確認：**
 
@@ -79,6 +95,28 @@ grep -i 'BTC\|bitcoin\|加密' storage/memory/knowledge.json | grep 'title' | he
 發現 K202(VIX不充分)、K205(微結構VT)、K277(深層結構)、K334(DeFi pilot) → agent prompt 引用這些。
 
 **違反此規則 = 浪費計算資源和 context window。**
+
+### Step 2: 學術文獻搜尋（方法論與概念）
+
+每個特定主題的研究開始前，**必須先搜尋並分析相關學術文獻**：
+1. 用 WebSearch 搜尋 arXiv/SSRN/Google Scholar 該主題的關鍵論文（**至少 3 篇**）
+2. 分析方法論：前人用什麼方法？為什麼？有什麼已知結論？
+3. 用 sci-hub skill 取得全文（如果需要細節）
+4. 基於文獻分析決定實驗設計，**不自行猜測**
+5. 實驗腳本和結果 JSON 必須標注參考文獻（作者、年份、期刊）
+- **例外**：純探索性實驗可先做再查文獻，但事後仍須補充
+
+### Step 3: 概念驗證（先想清楚再動手）
+
+1. 問自己：「這個實驗跟過去哪個 K 最像？那個 K 的結論是什麼？」
+2. 如果知識庫已有非常相似的實驗 → 不重複，除非有明確的差異化理由
+3. 如果文獻說某方法在某條件下不 work → 不盲目嘗試
+
+### Step 4: 跨市場驗證
+
+在美股測完的方法，如果有潛力也要在**台股（0050.TW）**測試——特別是使用外生變數的方法。
+- 台股特性：高波動（amplification 4.6x）、US lead-lag、不同 gamma、外部驅動
+- K461 教訓：SSVS 在台股選出 SPY PIP=1.000，美股選空模型——跨市場結果可能完全不同
 
 ## Research Loop（強制流程，每個實驗必須完整走完）
 
@@ -119,6 +157,15 @@ Report issues." 2>/dev/null
 - **不直接 publish，不跳過 Codex**
 
 **每一步跳躍都必須有思維邏輯**：不是「做完 A 就做 B」，而是「A 的結果顯示 X，X 意味著 Y，所以下一步應該測試 Z」。
+
+### 實驗完成後的必做流程（不可跳步）
+```
+實驗完成 → Codex 審查 → 記錄 knowledge → 記錄 experience（如適用，每 5-10 個實驗彙整）
+         → 衍生新方向寫入 research_program.md
+         → 已完成項目從 research_program.md 移到 docs/research_archive/
+         → research_program.md 保持 < 700 行
+```
+**研究多元化**：每個 session 至少 1 個完全不同方向。連續 3 個 null result → 必須換方向。
 
 ### Step 0: Resume or Start Fresh
 
