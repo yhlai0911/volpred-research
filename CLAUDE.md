@@ -36,7 +36,8 @@
 
 | 觸發情境 | 載入 Skill |
 |---------|-----------|
-| 研究實驗、模型、agent team、排程 | `autonomous-research`（含 experiment-preamble、agent 規則、硬體規格） |
+| 研究調度、cron 觸發、研究計劃管理 | `research-planning`（含任務獲取、skill 路由、研究節奏） |
+| 研究實驗、模型、agent team | `autonomous-research`（含 experiment-preamble、agent 規則、硬體規格） |
 | 平台運維、前端、策略管理、發文排程 | `admin-ops`（含 architecture、scheduling、surfaces） |
 | 撰寫 feed 文章 | `feed-publisher` |
 | 論文寫作/審查 | `latex-academic-reviewer` + `citation-verifier` |
@@ -67,7 +68,7 @@
 - 網站架構/DB/策略 → `.claude/skills/admin-ops/references/architecture.md`
 - 自動化排程/cron → `.claude/skills/admin-ops/references/scheduling.md`
 - 快速指令 → `docs/quick-commands.md`
-- 論文更新程序 → `docs/paper-guide.md`
+- 論文更新程序 → `autonomous-research` skill 的 `references/paper-guide.md`
 - AI 協作模式 → `docs/ai-collaboration.md`
 - 研究結論/方法論 → `research_program.md`
 - 知識細節 → `storage/memory/knowledge.json`（用 grep 查詢）

@@ -30,3 +30,21 @@
 - vt-insurance-cost → `vt-insurance-cost.pdf`
 - prg-periodic-garch → `prg-periodic-garch.pdf`
 - garch-x-vix → `garch-x-vix.pdf`
+
+## Paper Review & Revision Workflow
+
+論文完成或大改版後的正式審查流程：
+
+1. **Codex 整體審查**: `/codex:rescue "Review paper/<name>/main.tex for top-tier journal submission bugs"` → 結構性問題清單
+2. **LaTeX 學術審查**: `/latex-academic-reviewer` → 版面、方程式、符號一致性、邏輯流暢
+3. **引用驗證**: `/citation-verifier` → DOI、作者名、期刊名、引用格式
+4. **根據報告修正** → 重新編譯 PDF → 重複審查直到問題清零
+5. **最終 PDF**: `xelatex -interaction=nonstopmode main.tex`（跑兩次解引用）
+
+## 論文更新後同步網頁
+
+每次論文 PDF 更新後必須同步前端：
+1. 編譯 PDF: `cd paper/<name> && /Library/TeX/texbin/xelatex -interaction=nonstopmode main.tex`
+2. 複製到前端: `cp paper/<name>/main.pdf frontend-v2-fix/public/paper/<slug>.pdf`（slug 見上方對照表）
+3. 更新頁數: Supabase `papers` table 中的 metadata
+4. Deploy: `bash scripts/deploy_zeabur.sh`
