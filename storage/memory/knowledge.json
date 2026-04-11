@@ -24510,5 +24510,25 @@
     "confidence": 0.5,
     "data_source": "yfinance SPY 5-min 60 days (2026-01-14 to 2026-04-10)",
     "timestamp": "2026-04-11T16:51:45.970888"
+  },
+  {
+    "id": "know_20260411165912_k1050",
+    "title": "K1050: Earnings Season Vol — A4f Improvement UNIFORM, Not Earnings-Specific",
+    "content": "[提出: Claude, 執行: Claude] K1050 測試 A4f 的 VIX 成分是否在財報季（Jan/Apr/Jul/Oct 各 36 天窗口）更有優勢。核心發現：A4f 改善 UNIFORM（bootstrap p=0.471，非季節性集中）。Overall: QLIKE 改善 5.66%（DM t=-4.09 Harvey PASS）。Earnings season: 改善 4.38%（DM t=-2.68 未達 Harvey）。Non-earnings: 改善 6.60%（DM t=-3.10 Harvey PASS）。改善在非財報季反而略大。Per-quarter: Q2（Jul-Aug）幾乎無改善（0.13%, DM t=-0.05）——夏季低波動 regime 兩模型收斂。Q3（Oct-Nov）最大改善（6.87%）但個別不顯著。Paper 9 意義：VIX 是廣泛 fear gauge，不是 earnings-specific indicator。支持 source decomposition 中 τ_t 捕捉市場整體恐慌、不限於特定事件的解釋。VIX sufficiency 再次確認（#31）。",
+    "tags": [
+      "earnings-season",
+      "seasonality",
+      "A4f",
+      "paper9",
+      "vix-sufficiency",
+      "uniform-improvement"
+    ],
+    "experiment_ids": [
+      "K1050"
+    ],
+    "category": "volatility_forecasting",
+    "confidence": 0.9,
+    "data_source": "yfinance SPY+VIX 2005-2026",
+    "timestamp": "2026-04-11T16:59:12.255602"
   }
 ]
