@@ -1,0 +1,264 @@
+{
+  "experiment_id": "K1062",
+  "title": "T+1 event-window re-run of K1059 — Does 0050.TW ETF show EAV too?",
+  "proposer": "Claude (K1060 follow-up)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-12T06:20:55.944236+00:00",
+  "runtime_seconds": 237.2,
+  "random_seed": 42,
+  "asset": "0050.TW",
+  "data_sources": {
+    "earnings": "財報公告日.txt (Big5, parsed 153,875 dated records, 2,409 companies)",
+    "prices": "yfinance 0050.TW daily (auto-adjust); clean_tw50_data applied",
+    "vix": "yfinance ^VIX daily"
+  },
+  "sample": {
+    "start": "2009-01-05",
+    "end": "2025-12-30",
+    "n_trading_days": 4161,
+    "n_tsmc_events_mapped": 64
+  },
+  "config": {
+    "OOS_START": "2010-01-01",
+    "WINDOW": 2000,
+    "REFIT_EVERY": 63,
+    "BOOTSTRAP_REPS": 5000,
+    "EVENT_HALF_NONEVENT_EXCLUSION": 5
+  },
+  "part_a_window_comparison": {
+    "windows_tested": [
+      "T+0 only",
+      "T+1 only",
+      "T+2 only",
+      "[-5, -1] pre-event",
+      "[+1, +5] post-event",
+      "[T+1, T+3] window"
+    ],
+    "non_event_mean_r2_bp": 1.848971656825054,
+    "results": {
+      "T+0 only": {
+        "offsets": [
+          0
+        ],
+        "n_event_days": 64,
+        "event_mean_r2_bp": 1.7994019250107995,
+        "nonevent_mean_r2_bp": 1.848971656825054,
+        "ratio": 0.9731906480928039,
+        "t_stat": -0.06606002682614447,
+        "p_value_two_sided": 0.947523339821277,
+        "bootstrap_ci_low": 0.4156334081034987,
+        "bootstrap_ci_high": 1.9035631012563652,
+        "bootstrap_p_le_1": 0.583
+      },
+      "T+1 only": {
+        "offsets": [
+          1
+        ],
+        "n_event_days": 64,
+        "event_mean_r2_bp": 2.0937524777739043,
+        "nonevent_mean_r2_bp": 1.848971656825054,
+        "ratio": 1.1323875463668132,
+        "t_stat": 0.3105567418076068,
+        "p_value_two_sided": 0.7570920738363005,
+        "bootstrap_ci_low": 0.49563479354652074,
+        "bootstrap_ci_high": 2.103712457078537,
+        "bootstrap_p_le_1": 0.4272
+      },
+      "T+2 only": {
+        "offsets": [
+          2
+        ],
+        "n_event_days": 64,
+        "event_mean_r2_bp": 1.323535560259707,
+        "nonevent_mean_r2_bp": 1.848971656825054,
+        "ratio": 0.7158225251177753,
+        "t_stat": -1.3113868684540615,
+        "p_value_two_sided": 0.19328444028446068,
+        "bootstrap_ci_low": 0.37851689460429794,
+        "bootstrap_ci_high": 1.187289580648761,
+        "bootstrap_p_le_1": 0.8964
+      },
+      "[-5, -1] pre-event": {
+        "offsets": [
+          -5,
+          -4,
+          -3,
+          -2,
+          -1
+        ],
+        "n_event_days": 320,
+        "event_mean_r2_bp": 1.5324805468296157,
+        "nonevent_mean_r2_bp": 1.848971656825054,
+        "ratio": 0.828828576778241,
+        "t_stat": -1.107653281099914,
+        "p_value_two_sided": 0.2684648466460246,
+        "bootstrap_ci_low": 0.5834958453122137,
+        "bootstrap_ci_high": 1.154240962663197,
+        "bootstrap_p_le_1": 0.8644
+      },
+      "[+1, +5] post-event": {
+        "offsets": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ],
+        "n_event_days": 320,
+        "event_mean_r2_bp": 1.3609270394338078,
+        "nonevent_mean_r2_bp": 1.848971656825054,
+        "ratio": 0.736045376580143,
+        "t_stat": -1.9746516146406683,
+        "p_value_two_sided": 0.048673259684999984,
+        "bootstrap_ci_low": 0.5279964013658558,
+        "bootstrap_ci_high": 1.001281014732945,
+        "bootstrap_p_le_1": 0.9744
+      },
+      "[T+1, T+3] window": {
+        "offsets": [
+          1,
+          2,
+          3
+        ],
+        "n_event_days": 192,
+        "event_mean_r2_bp": 1.3593360554275462,
+        "nonevent_mean_r2_bp": 1.848971656825054,
+        "ratio": 0.7351849069237322,
+        "t_stat": -1.4949110843788305,
+        "p_value_two_sided": 0.13598835398781614,
+        "bootstrap_ci_low": 0.45988375558415434,
+        "bootstrap_ci_high": 1.112886744978768,
+        "bootstrap_p_le_1": 0.9264
+      }
+    },
+    "best_window_label": "T+1 only",
+    "best_window_ratio": 1.1323875463668132
+  },
+  "part_b_clustering_t1": {
+    "threshold_90": 122,
+    "n_dense_days": 284,
+    "n_any_announce_days": 2825,
+    "n_none_days": 1336,
+    "T0": {
+      "dense_r2_bp": 1.7777608456748586,
+      "none_r2_bp": 1.996443373989867,
+      "ratio": 0.8904639464539512,
+      "t_stat": -0.41399534396418786,
+      "p_value": 0.679055226675699
+    },
+    "T1": {
+      "dense_r2_bp": 1.4482835985336682,
+      "any_r2_bp": 1.6120058606810175,
+      "none_r2_bp": 1.996443373989867,
+      "ratio_dense": 0.7254318441495746,
+      "ratio_any": 0.8074388092758394,
+      "t_dense_vs_none": -1.4549188599469172,
+      "p_dense_vs_none": 0.1460238875170274,
+      "t_any_vs_none": -1.2990093840779111,
+      "p_any_vs_none": 0.19409415705688074
+    }
+  },
+  "part_c_ols_t1": {
+    "t1_regression": {
+      "n_obs": 4160,
+      "alpha": {
+        "coef": -4.350635204140242,
+        "t": -13.822468179431473
+      },
+      "beta_n": {
+        "coef": -0.0002653384689149814,
+        "t": -1.0459529823846385
+      },
+      "gamma_vix": {
+        "coef": 0.3198432045621952,
+        "t": 20.92232107787329
+      },
+      "R2": 0.09528512991785132
+    },
+    "t0_regression_replicate": {
+      "n_obs": 4160,
+      "alpha": {
+        "coef": -4.86764726325387,
+        "t": -15.554503070482134
+      },
+      "beta_n": {
+        "coef": 0.003492880501786651,
+        "t": 13.848405895887604
+      },
+      "gamma_vix": {
+        "coef": 0.3411366271229009,
+        "t": 22.44425520604186
+      },
+      "R2": 0.14754268951503324
+    },
+    "comment": "K1059 Part B reported β_n(T+0) ≈ -0.46 NS. H1 predicts β_n(T+0) > 0 when the dependent is r²[T+1]."
+  },
+  "part_d_a4f_conditional": {
+    "n_oos": 3913,
+    "n_valid_forecasts": 3913,
+    "refits": 63,
+    "dm_blocks": {
+      "overall": {
+        "n": 3913,
+        "gjr_qlike": 2.108247700651112,
+        "a4f_qlike": 2.080282917825732,
+        "diff": 0.027964782825380716,
+        "dm_t": 2.3466432047946855,
+        "dm_p": 0.018943385086421127,
+        "label": "overall"
+      },
+      "t0": {
+        "n": 60,
+        "gjr_qlike": 1.6191665224149452,
+        "a4f_qlike": 1.5084875625318825,
+        "diff": 0.110678959883063,
+        "dm_t": 1.6841823622344232,
+        "dm_p": 0.09214643084108443,
+        "label": "t0"
+      },
+      "t1": {
+        "n": 60,
+        "gjr_qlike": 2.1477201448531775,
+        "a4f_qlike": 2.0174566211713936,
+        "diff": 0.13026352368178412,
+        "dm_t": 1.3143353937952642,
+        "dm_p": 0.18873336143686004,
+        "label": "t1"
+      },
+      "non_event": {
+        "n": 3793,
+        "gjr_qlike": 2.115359887321834,
+        "a4f_qlike": 2.0903217522883972,
+        "diff": 0.02503813503343631,
+        "dm_t": 2.060996841074397,
+        "dm_p": 0.03930334145441505,
+        "label": "non_event"
+      }
+    }
+  },
+  "hypothesis_verdict": {
+    "h1_pure_timing": "T+1 ratio > 1 and > T+0, with statistical evidence (t or bootstrap p < 0.10)",
+    "h2_diversification_washout": "Even under T+1, ratio ≈ 1 → index diversification dominates",
+    "h1_conditions": {
+      "T1_ratio_gt_1": true,
+      "T1_ratio_gt_T0": true,
+      "T1_has_stat_evidence": false
+    },
+    "verdict": "H1 PARTIAL: T+1 ratio > 1 and > T+0, but statistical evidence is weak — consistent with diversified ETF dilution on top of the timing shift."
+  },
+  "references": [
+    "Patell & Wolfson (1984) JAR — earnings day vol",
+    "Beaver (1968) JAR — vol/volume at earnings",
+    "Savor & Wilson (2016) JFQA — earnings as systematic risk",
+    "K1058 — A4f on 0050.TW (DM NS, VaR Trinity A4f PASS)",
+    "K1059 — TSMC → 0050.TW T+0 event study (ratio = 1.007, NULL)",
+    "K1060 — Individual-stock T+1 EAV (mean ratio 1.466, t=2.075)",
+    "Patton (2011) J Econometrics — QLIKE for vol model comparison"
+  ],
+  "error_log_checklist": {
+    "clean_tw50_data_applied": true,
+    "random_seed_fixed": 42,
+    "no_shared_state_writes": true,
+    "lag_respected": "OOS forecasts use only info up to t-1"
+  }
+}
