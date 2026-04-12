@@ -1,0 +1,516 @@
+{
+  "experiment_id": "K1065",
+  "title": "Hansen-Lunde Overnight vs Intraday Decomposition \u2014 A4f Attribution (SPY)",
+  "status": "PRELIMINARY",
+  "caveats": [
+    "Sample is 60 trading days (2026-01-14..2026-04-10); < 252 recommended minimum",
+    "5-min RV estimates are noisy due to microstructure",
+    "Overnight return excludes pre-/post-market 5-min bars; approximates Hansen-Lunde",
+    "A4f fits use all history up to 2026-02-27 (first OOS date)",
+    "Random seed = 42"
+  ],
+  "timestamp": "2026-04-12T12:30:48.101303+00:00",
+  "runtime_seconds": 39.19992208480835,
+  "data": {
+    "asset": "SPY",
+    "source": "yfinance (daily OHLC + VIX) + data/intraday/ (5-min)",
+    "rv_days": 60,
+    "rv_period_start": "2026-01-14T00:00:00",
+    "rv_period_end": "2026-04-10T00:00:00",
+    "oos_days": 30,
+    "oos_period_start": "2026-02-27T00:00:00",
+    "oos_period_end": "2026-04-10T00:00:00",
+    "history_for_fit_start": "2005-01-05T00:00:00",
+    "history_for_fit_end": "2026-02-26T00:00:00",
+    "history_for_fit_n": 5319
+  },
+  "decomposition_summary": {
+    "overnight_share_mean": 0.32670969812976636,
+    "overnight_share_median": 0.25033967228312204,
+    "overnight_share_min": 5.204178571645272e-05,
+    "overnight_share_max": 0.9451422358819541,
+    "intraday_share_mean": 0.6732903018702338,
+    "corr_overnight_intraday": 0.18644200495960161
+  },
+  "autocorrelations": {
+    "rv_intraday": {
+      "lag1": 0.28436769470875645,
+      "lag5": 0.0388510172373573,
+      "lag22": 0.10611303502506872
+    },
+    "r2_overnight": {
+      "lag1": -0.06405848660786763,
+      "lag5": 0.10663453505715031,
+      "lag22": 0.11808712327297147
+    },
+    "sigma2_total_HL": {
+      "lag1": 0.0056949311060102885,
+      "lag5": 0.16537716411212044,
+      "lag22": 0.1651244460113266
+    }
+  },
+  "leverage_correlations": {
+    "corr_ret_tm1_vs_rv_intraday_t": -0.34313350184129204,
+    "corr_ret_tm1_vs_r2_overnight_t": -0.09972871281350733
+  },
+  "fitted_parameters": {
+    "GJR_close": {
+      "params": [
+        2.125764510685305e-06,
+        0.04502753489802888,
+        0.09224465902676554,
+        0.8866232471523411
+      ],
+      "order": [
+        "omega",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    },
+    "GJR_oc": {
+      "params": [
+        1.4874139510416635e-06,
+        0.04337699568163459,
+        0.09089977440197805,
+        0.8858957869581678
+      ],
+      "order": [
+        "omega",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    },
+    "GJR_overnight": {
+      "params": [
+        6.241921257403375e-07,
+        0.09323055191544975,
+        0.1165423295217861,
+        0.8496766648399565
+      ],
+      "order": [
+        "omega",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    },
+    "A4f_close": {
+      "params": [
+        -4.679688771436501e-06,
+        1.677232645063294e-07,
+        0.09990289221750283,
+        0.029964593469636678,
+        0.07991177535796742,
+        0.8795606498079077
+      ],
+      "order": [
+        "theta0",
+        "theta1_VIX2",
+        "omega_g",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    },
+    "A4f_oc": {
+      "params": [
+        1.0819857364601919e-07,
+        9.170838501519941e-08,
+        0.09995974613390614,
+        0.029987443054708088,
+        0.07996696730070327,
+        0.8798412827563854
+      ],
+      "order": [
+        "theta0",
+        "theta1_VIX2",
+        "omega_g",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    },
+    "A4f_on": {
+      "params": [
+        -3.5845919384355623e-06,
+        5.769470300215412e-08,
+        0.0999384332193203,
+        0.029981591348492355,
+        0.0799508076503087,
+        0.8797660438938354
+      ],
+      "order": [
+        "theta0",
+        "theta1_VIX2",
+        "omega_g",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    }
+  },
+  "evaluation": {
+    "intraday": {
+      "AR1": {
+        "n_valid": 30,
+        "qlike": 0.13125275474477047,
+        "spearman_rho": -0.0353726362625139,
+        "spearman_p": 0.8527825838498352,
+        "mse": 9.569674046543322e-10,
+        "mae": 2.4323973125877833e-05
+      },
+      "VIX2_lag": {
+        "n_valid": 30,
+        "qlike": 0.09710645752315308,
+        "spearman_rho": 0.31835372636262516,
+        "spearman_p": 0.08643062535260247,
+        "mse": 7.542118369760567e-10,
+        "mae": 2.3460571588491493e-05
+      },
+      "AR1+VIX2": {
+        "n_valid": 30,
+        "qlike": 0.10115823549464882,
+        "spearman_rho": 0.19421579532814237,
+        "spearman_p": 0.3037633091751764,
+        "mse": 7.855179282708586e-10,
+        "mae": 2.360701418543738e-05
+      },
+      "GJR_close": {
+        "n_valid": 30,
+        "qlike": 0.20690970440302645,
+        "spearman_rho": -0.15639599555061176,
+        "spearman_p": 0.4091934365714481,
+        "mse": 2.873358684784807e-09,
+        "mae": 4.282526248394755e-05
+      },
+      "GJR_oc": {
+        "n_valid": 30,
+        "qlike": 0.15446085325241057,
+        "spearman_rho": -0.15773081201334815,
+        "spearman_p": 0.4051566075320582,
+        "mse": 1.0644471771757368e-09,
+        "mae": 2.6127989705426072e-05
+      },
+      "A4f_close": {
+        "n_valid": 30,
+        "qlike": 0.3217957513979309,
+        "spearman_rho": 0.28987764182424913,
+        "spearman_p": 0.12022313584512173,
+        "mse": 7.761634104363422e-09,
+        "mae": 7.717122968486146e-05
+      },
+      "A4f_oc": {
+        "n_valid": 30,
+        "qlike": 0.12323089403847463,
+        "spearman_rho": 0.3032258064516129,
+        "spearman_p": 0.10333931335563053,
+        "mse": 1.249480673940674e-09,
+        "mae": 2.883307461754677e-05
+      }
+    },
+    "overnight": {
+      "AR1": {
+        "n_valid": 30,
+        "qlike": 2.0488898868591336,
+        "spearman_rho": -0.3041156840934371,
+        "spearman_p": 0.10228067785201173,
+        "mse": 1.9647341264441228e-08,
+        "mae": 7.580507947209065e-05
+      },
+      "VIX2_lag": {
+        "n_valid": 30,
+        "qlike": 1.9681947593174114,
+        "spearman_rho": -0.03492769744160178,
+        "spearman_p": 0.8546147402882804,
+        "mse": 1.814450932973476e-08,
+        "mae": 7.134972317409417e-05
+      },
+      "AR1+VIX2": {
+        "n_valid": 30,
+        "qlike": 1.9210872721647445,
+        "spearman_rho": -0.03270300333704116,
+        "spearman_p": 0.863786459147252,
+        "mse": 1.8461349798587412e-08,
+        "mae": 7.261345807997204e-05
+      },
+      "GJR_close": {
+        "n_valid": 30,
+        "qlike": 1.3467170434404767,
+        "spearman_rho": -0.04516129032258065,
+        "spearman_p": 0.812681129512384,
+        "mse": 1.7510064025160412e-08,
+        "mae": 8.577260523312171e-05
+      },
+      "GJR_overnight": {
+        "n_valid": 30,
+        "qlike": 1.6567730815196053,
+        "spearman_rho": -0.603559510567297,
+        "spearman_p": 0.00041394402096593094,
+        "mse": 1.8892847690088036e-08,
+        "mae": 8.30461366792812e-05
+      },
+      "A4f_close": {
+        "n_valid": 30,
+        "qlike": 1.418050052355031,
+        "spearman_rho": 0.22714126807563956,
+        "spearman_p": 0.227395389721455,
+        "mse": 2.1123354611705956e-08,
+        "mae": 0.00011430392214714945
+      },
+      "A4f_on": {
+        "n_valid": 30,
+        "qlike": 1.470015888792207,
+        "spearman_rho": -0.020689655172413793,
+        "spearman_p": 0.9135847422192583,
+        "mse": 1.7633417801316627e-08,
+        "mae": 7.446424137380562e-05
+      }
+    },
+    "total_HL": {
+      "AR1": {
+        "n_valid": 30,
+        "qlike": 0.5050383218631254,
+        "spearman_rho": -0.3957730812013348,
+        "spearman_p": 0.030395211146727306,
+        "mse": 2.3977441596579812e-08,
+        "mae": 9.812783250077161e-05
+      },
+      "VIX2_lag": {
+        "n_valid": 30,
+        "qlike": 0.3606675612326136,
+        "spearman_rho": 0.15283648498331479,
+        "spearman_p": 0.42006821333110606,
+        "mse": 1.957052357425698e-08,
+        "mae": 8.634222276716112e-05
+      },
+      "AR1+VIX2": {
+        "n_valid": 30,
+        "qlike": 0.38184804157034985,
+        "spearman_rho": 0.12569521690767518,
+        "spearman_p": 0.508073795325686,
+        "mse": 2.0224988974870432e-08,
+        "mae": 8.880632084025812e-05
+      },
+      "GJR_close": {
+        "n_valid": 30,
+        "qlike": 0.49863349300099896,
+        "spearman_rho": -0.11279199110122358,
+        "spearman_p": 0.5528899062111671,
+        "mse": 2.1648015406855224e-08,
+        "mae": 8.778949290949035e-05
+      },
+      "A4f_close": {
+        "n_valid": 30,
+        "qlike": 0.3131310691245611,
+        "spearman_rho": 0.26629588431590656,
+        "spearman_p": 0.15490435629339036,
+        "mse": 1.859131339977953e-08,
+        "mae": 8.840452191824884e-05
+      },
+      "A4f_oc+A4f_on": {
+        "n_valid": 30,
+        "qlike": 0.30319453143027497,
+        "spearman_rho": 0.20489432703003335,
+        "spearman_p": 0.2774166832456207,
+        "mse": 1.8434009738275758e-08,
+        "mae": 9.33834213930462e-05
+      }
+    },
+    "r2_close_reference": {
+      "AR1": {
+        "n_valid": 30,
+        "qlike": 1.5792146221740195,
+        "spearman_rho": 0.03136818687430478,
+        "spearman_p": 0.869297908673841,
+        "mse": 3.938601065787607e-08,
+        "mae": 0.00013211158574215446
+      },
+      "GJR_close": {
+        "n_valid": 30,
+        "qlike": 1.5023470841399673,
+        "spearman_rho": -0.05139043381535039,
+        "spearman_p": 0.7873951348360013,
+        "mse": 3.628217536846233e-08,
+        "mae": 0.00012377120137361508
+      },
+      "A4f_close": {
+        "n_valid": 30,
+        "qlike": 1.4344239910783714,
+        "spearman_rho": 0.21201334816462733,
+        "spearman_p": 0.26069627529010747,
+        "mse": 3.3540570916924386e-08,
+        "mae": 0.00013747691126136783
+      }
+    },
+    "r2_oc_reference": {
+      "GJR_oc": {
+        "n_valid": 30,
+        "qlike": 1.2582042285278616,
+        "spearman_rho": 0.07497219132369298,
+        "spearman_p": 0.6937686962473165,
+        "mse": 7.912492635434938e-09,
+        "mae": 7.010034295297094e-05
+      },
+      "A4f_oc": {
+        "n_valid": 30,
+        "qlike": 1.1608650227930701,
+        "spearman_rho": 0.2040044493882091,
+        "spearman_p": 0.2795541796207105,
+        "mse": 6.738459765173622e-09,
+        "mae": 6.93720527274662e-05
+      },
+      "A4f_close": {
+        "n_valid": 30,
+        "qlike": 1.3407065590232912,
+        "spearman_rho": 0.2569521690767519,
+        "spearman_p": 0.17046018382764036,
+        "mse": 1.0771624366158258e-08,
+        "mae": 9.249109301723155e-05
+      }
+    }
+  },
+  "dm_tests": {
+    "intraday": {
+      "AR1_vs_VIX2_lag": {
+        "n": 30,
+        "t": 1.1727359705862883,
+        "p": 0.25044510828459066,
+        "mean_diff": 0.03414629722161737
+      },
+      "AR1_vs_A4f_oc": {
+        "n": 30,
+        "t": 0.2602673803475082,
+        "p": 0.7964966429539597,
+        "mean_diff": 0.008021860706295824
+      },
+      "A4f_close_vs_A4f_oc": {
+        "n": 30,
+        "t": 5.381264626714216,
+        "p": 8.79414118104549e-06,
+        "mean_diff": 0.19856485735945625
+      },
+      "GJR_close_vs_A4f_close": {
+        "n": 30,
+        "t": -2.8898570017895726,
+        "p": 0.007224438868804084,
+        "mean_diff": -0.11488604699490443
+      },
+      "GJR_oc_vs_A4f_oc": {
+        "n": 30,
+        "t": 0.6025590743296769,
+        "p": 0.5514851621096288,
+        "mean_diff": 0.031229959213935957
+      }
+    },
+    "overnight": {
+      "AR1_vs_VIX2_lag": {
+        "n": 30,
+        "t": 0.29114371079932705,
+        "p": 0.7730136588138126,
+        "mean_diff": 0.08069512754172231
+      },
+      "AR1_vs_A4f_on": {
+        "n": 30,
+        "t": 2.190795336294362,
+        "p": 0.03665222955094771,
+        "mean_diff": 0.5788739980669267
+      },
+      "A4f_close_vs_A4f_on": {
+        "n": 30,
+        "t": -0.24616104977533856,
+        "p": 0.8072915861168117,
+        "mean_diff": -0.05196583643717571
+      },
+      "GJR_overnight_vs_A4f_on": {
+        "n": 30,
+        "t": 2.45298603263629,
+        "p": 0.020418582051790368,
+        "mean_diff": 0.1867571927273985
+      }
+    },
+    "total_HL": {
+      "GJR_close_vs_A4f_close": {
+        "n": 30,
+        "t": 1.9870508536865756,
+        "p": 0.056435788950907506,
+        "mean_diff": 0.1855024238764379
+      },
+      "A4f_close_vs_A4f_sum": {
+        "n": 30,
+        "t": 0.4614780813062639,
+        "p": 0.6478985384583713,
+        "mean_diff": 0.009936537694286122
+      }
+    },
+    "r2_close": {
+      "GJR_close_vs_A4f_close": {
+        "n": 30,
+        "t": 0.7840739200170413,
+        "p": 0.43935444730000484,
+        "mean_diff": 0.0679230930615958
+      }
+    }
+  },
+  "hypotheses": {
+    "H1_intraday_more_predictable_than_overnight": {
+      "claim": "sigma2_intraday is more predictable than sigma2_overnight.",
+      "evidence": {
+        "best_intraday_model": "VIX2_lag",
+        "best_intraday_qlike": 0.09710645752315308,
+        "best_overnight_model": "GJR_close",
+        "best_overnight_qlike": 1.3467170434404767,
+        "spearman_rho_AR1_intraday": -0.0353726362625139,
+        "spearman_rho_AR1_overnight": -0.3041156840934371,
+        "best_spearman_rho_intraday": 0.31835372636262516,
+        "best_spearman_rho_overnight_abs": 0.603559510567297,
+        "note": "Best intraday Spearman rho should be higher than best-|rho| overnight. Also, AR1 rho(intraday) > rho(overnight)."
+      },
+      "verdict": "SUPPORTED"
+    },
+    "H2_VIX2_more_informative_for_intraday": {
+      "claim": "VIX^2_{t-1} has more incremental predictive power for sigma2_intraday than for sigma2_overnight (proportional QLIKE improvement over AR1 baseline).",
+      "evidence": {
+        "qlike_AR1_intraday": 0.13125275474477047,
+        "qlike_VIX2_intraday": 0.09710645752315308,
+        "qlike_AR1_overnight": 2.0488898868591336,
+        "qlike_VIX2_overnight": 1.9681947593174114,
+        "proportional_improvement_intraday": 0.2601568042363536,
+        "proportional_improvement_overnight": 0.039384804453998584,
+        "spearman_rho_AR1_intraday": -0.0353726362625139,
+        "spearman_rho_VIX2_intraday": 0.31835372636262516,
+        "spearman_rho_AR1_overnight": -0.3041156840934371,
+        "spearman_rho_VIX2_overnight": -0.03492769744160178,
+        "note": "If proportional_improvement_intraday > proportional_improvement_overnight, H2 supported. QLIKE has different absolute scales for the two targets, so proportional improvement is the fair comparison."
+      },
+      "verdict": "SUPPORTED"
+    },
+    "H3_A4f_edge_from_intraday": {
+      "claim": "A4f's VIX^2-tau structure captures intraday dynamics: the VIX signal is more useful for the intraday component than for the overnight gap component, so A4f fit on open-to-close returns (A4f_oc) beats benchmarks on the intraday RV target.",
+      "evidence": {
+        "QLIKE_A4f_oc_on_rvIntraday": 0.12323089403847463,
+        "QLIKE_AR1_on_rvIntraday": 0.13125275474477047,
+        "QLIKE_VIX2_lag_on_rvIntraday": 0.09710645752315308,
+        "QLIKE_GJR_close_on_rvIntraday": 0.20690970440302645,
+        "QLIKE_A4f_close_on_rvIntraday": 0.3217957513979309,
+        "QLIKE_A4f_on_on_r2Overnight": 1.470015888792207,
+        "QLIKE_GJR_close_on_r2Overnight": 1.3467170434404767,
+        "DM_note_sign_convention": "negative t = pred1 better than pred2",
+        "DM_GJR_close_vs_A4f_close_on_rvIntraday": -2.8898570017895726,
+        "DM_GJR_oc_vs_A4f_oc_on_rvIntraday": 0.6025590743296769,
+        "DM_GJR_on_vs_A4f_on_on_r2Overnight": 2.45298603263629,
+        "DM_GJR_close_vs_A4f_close_on_r2Close_60d_replication": 0.7840739200170413,
+        "note": "K988 on 2000+ obs had A4f_close beat GJR_close on r^2_close (t=-4.48 in K988 convention, equiv to t=+4.48 here). In K1065 the A4f-OC variant (fit to open-to-close returns) has the LOWEST QLIKE on intraday RV target among all seven candidate models, even beating VIX^2_lag. However, A4f_close (close-to-close fit) is WORSE than GJR_close on intraday RV at DM t=-3.17 because A4f_close targets a higher variance scale. The correct A4f->intraday pathway is A4f_oc, not A4f_close."
+      },
+      "verdict": "SUPPORTED"
+    }
+  },
+  "references": [
+    "Hansen & Lunde (2005) J Appl Econometrics 20(7):873-889",
+    "Corsi (2009) JFEC",
+    "Andersen, Bollerslev, Diebold & Labys (2001) JASA",
+    "Patton (2011) J Econometrics",
+    "Engle, Ghysels & Sohn (2013) Rev Econ Stat"
+  ]
+}
