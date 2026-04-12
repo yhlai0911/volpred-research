@@ -4,23 +4,23 @@
   "date": "2026-04-12",
   "week_range": "2026-04-10 → 2026-04-17",
   "totals": {
-    "input_tokens": 3990,
-    "output_tokens": 288569,
-    "cache_read_tokens": 85358508,
-    "cache_create_tokens": 3268543,
-    "billable_total": 3561102,
-    "assistant_messages": 610,
-    "unique_sessions": 7,
-    "estimated_cost_usd": 204.3104
+    "input_tokens": 4393,
+    "output_tokens": 457987,
+    "cache_read_tokens": 131881077,
+    "cache_create_tokens": 5398139,
+    "billable_total": 5860519,
+    "assistant_messages": 797,
+    "unique_sessions": 10,
+    "estimated_cost_usd": 326.7366
   },
   "by_model": {
     "claude-opus-4-6": {
-      "input_tokens": 3282,
-      "output_tokens": 282060,
-      "cache_read_tokens": 83049689,
-      "cache_create_tokens": 3101538,
-      "messages": 546,
-      "estimated_cost_usd": 203.9321
+      "input_tokens": 3685,
+      "output_tokens": 451478,
+      "cache_read_tokens": 129572258,
+      "cache_create_tokens": 5231134,
+      "messages": 733,
+      "estimated_cost_usd": 326.3583
     },
     "claude-haiku-4-5-20251001": {
       "input_tokens": 708,
@@ -33,48 +33,59 @@
   },
   "by_category": {
     "text_only": {
-      "input_tokens": 1898,
-      "output_tokens": 67009,
-      "cache_read_tokens": 33933653,
-      "cache_create_tokens": 788591,
-      "messages": 199,
-      "billable_total": 857498,
-      "estimated_cost_usd": 70.7407,
+      "input_tokens": 2051,
+      "output_tokens": 110293,
+      "cache_read_tokens": 54940295,
+      "cache_create_tokens": 1320274,
+      "messages": 248,
+      "billable_total": 1432618,
+      "estimated_cost_usd": 115.4683,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
     "investigation": {
-      "input_tokens": 660,
-      "output_tokens": 33958,
-      "cache_read_tokens": 11442465,
-      "cache_create_tokens": 1751155,
-      "messages": 141,
-      "billable_total": 1785773,
-      "estimated_cost_usd": 52.5546,
+      "input_tokens": 741,
+      "output_tokens": 45933,
+      "cache_read_tokens": 16438953,
+      "cache_create_tokens": 2563319,
+      "messages": 181,
+      "billable_total": 2609993,
+      "estimated_cost_usd": 76.1768,
       "emoji": "🔍",
       "description": "閱讀 / 搜尋檔案"
     },
     "bash_other": {
-      "input_tokens": 845,
-      "output_tokens": 42666,
-      "cache_read_tokens": 13022111,
-      "cache_create_tokens": 256317,
-      "messages": 91,
-      "billable_total": 299828,
-      "estimated_cost_usd": 27.5517,
+      "input_tokens": 895,
+      "output_tokens": 55964,
+      "cache_read_tokens": 20391523,
+      "cache_create_tokens": 431749,
+      "messages": 122,
+      "billable_total": 488608,
+      "estimated_cost_usd": 42.8933,
       "emoji": "💭",
       "description": "其他 Bash 操作"
     },
     "agent_delegation": {
-      "input_tokens": 229,
-      "output_tokens": 5048,
-      "cache_read_tokens": 3641702,
-      "cache_create_tokens": 353755,
-      "messages": 63,
-      "billable_total": 359032,
-      "estimated_cost_usd": 12.4775,
+      "input_tokens": 277,
+      "output_tokens": 7915,
+      "cache_read_tokens": 6645829,
+      "cache_create_tokens": 792900,
+      "messages": 99,
+      "billable_total": 801092,
+      "estimated_cost_usd": 25.4334,
       "emoji": "🤖",
       "description": "Agent 派送（非實驗）"
+    },
+    "experiment": {
+      "input_tokens": 31,
+      "output_tokens": 160074,
+      "cache_read_tokens": 4120907,
+      "cache_create_tokens": 167681,
+      "messages": 31,
+      "billable_total": 327786,
+      "estimated_cost_usd": 21.3314,
+      "emoji": "🔬",
+      "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
     },
     "script_dev": {
       "input_tokens": 22,
@@ -87,71 +98,82 @@
       "emoji": "💻",
       "description": "腳本開發（scripts/ *.py）"
     },
-    "experiment": {
-      "input_tokens": 22,
-      "output_tokens": 79919,
-      "cache_read_tokens": 2298632,
-      "cache_create_tokens": 28867,
-      "messages": 22,
-      "billable_total": 108808,
-      "estimated_cost_usd": 9.9835,
-      "emoji": "🔬",
-      "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
-    },
     "git_sync": {
-      "input_tokens": 142,
-      "output_tokens": 4597,
-      "cache_read_tokens": 3198148,
-      "cache_create_tokens": 11564,
-      "messages": 17,
-      "billable_total": 16303,
-      "estimated_cost_usd": 5.361,
+      "input_tokens": 149,
+      "output_tokens": 7061,
+      "cache_read_tokens": 4665334,
+      "cache_create_tokens": 17618,
+      "messages": 24,
+      "billable_total": 24828,
+      "estimated_cost_usd": 7.8601,
       "emoji": "🔄",
       "description": "Git commit / pull / push"
     },
     "token_report": {
-      "input_tokens": 12,
-      "output_tokens": 1879,
-      "cache_read_tokens": 2820134,
-      "cache_create_tokens": 9915,
-      "messages": 7,
-      "billable_total": 11806,
-      "estimated_cost_usd": 4.5572,
+      "input_tokens": 19,
+      "output_tokens": 2949,
+      "cache_read_tokens": 3727392,
+      "cache_create_tokens": 17278,
+      "messages": 9,
+      "billable_total": 20246,
+      "estimated_cost_usd": 6.1365,
       "emoji": "📈",
       "description": "Token 用量報告"
     },
-    "article_writing": {
-      "input_tokens": 4,
-      "output_tokens": 12214,
-      "cache_read_tokens": 1235576,
-      "cache_create_tokens": 1002,
-      "messages": 4,
-      "billable_total": 13220,
-      "estimated_cost_usd": 2.7883,
-      "emoji": "✍️",
-      "description": "文章撰寫/發佈（publish-milestone / mile_*）"
-    },
     "worktree_merge": {
-      "input_tokens": 14,
-      "output_tokens": 1677,
-      "cache_read_tokens": 1637595,
-      "cache_create_tokens": 5286,
-      "messages": 5,
-      "billable_total": 6977,
-      "estimated_cost_usd": 2.6815,
+      "input_tokens": 32,
+      "output_tokens": 3131,
+      "cache_read_tokens": 3013777,
+      "cache_create_tokens": 10815,
+      "messages": 8,
+      "billable_total": 13978,
+      "estimated_cost_usd": 4.9588,
       "emoji": "🔀",
       "description": "Worktree 合併與分支管理"
     },
+    "article_writing": {
+      "input_tokens": 6,
+      "output_tokens": 19602,
+      "cache_read_tokens": 2145410,
+      "cache_create_tokens": 1880,
+      "messages": 6,
+      "billable_total": 21488,
+      "estimated_cost_usd": 4.7236,
+      "emoji": "✍️",
+      "description": "文章撰寫/發佈（publish-milestone / mile_*）"
+    },
     "chart_generation": {
-      "input_tokens": 4,
-      "output_tokens": 3577,
-      "cache_read_tokens": 1227750,
-      "cache_create_tokens": 4472,
-      "messages": 4,
-      "billable_total": 8053,
-      "estimated_cost_usd": 2.1938,
+      "input_tokens": 6,
+      "output_tokens": 5576,
+      "cache_read_tokens": 2133392,
+      "cache_create_tokens": 6794,
+      "messages": 6,
+      "billable_total": 12376,
+      "estimated_cost_usd": 3.7458,
       "emoji": "📊",
       "description": "圖表生成（matplotlib / upload_chart）"
+    },
+    "task_management": {
+      "input_tokens": 10,
+      "output_tokens": 4322,
+      "cache_read_tokens": 1961258,
+      "cache_create_tokens": 13518,
+      "messages": 5,
+      "billable_total": 17850,
+      "estimated_cost_usd": 3.5196,
+      "emoji": "📌",
+      "description": "任務管理（TaskCreate/Update）"
+    },
+    "knowledge_index": {
+      "input_tokens": 21,
+      "output_tokens": 621,
+      "cache_read_tokens": 1565727,
+      "cache_create_tokens": 1425,
+      "messages": 4,
+      "billable_total": 2067,
+      "estimated_cost_usd": 2.4222,
+      "emoji": "📇",
+      "description": "知識索引更新"
     },
     "platform_ops": {
       "input_tokens": 31,
@@ -164,6 +186,17 @@
       "emoji": "🛡️",
       "description": "平台運維（Supabase sync / daily_update）"
     },
+    "member_qa": {
+      "input_tokens": 12,
+      "output_tokens": 439,
+      "cache_read_tokens": 852682,
+      "cache_create_tokens": 715,
+      "messages": 2,
+      "billable_total": 1166,
+      "estimated_cost_usd": 1.3255,
+      "emoji": "❓",
+      "description": "會員問答研究"
+    },
     "research_planning": {
       "input_tokens": 2,
       "output_tokens": 2884,
@@ -174,28 +207,6 @@
       "estimated_cost_usd": 1.221,
       "emoji": "📋",
       "description": "研究計劃（research_program.md / CLAUDE.md）"
-    },
-    "task_management": {
-      "input_tokens": 2,
-      "output_tokens": 1407,
-      "cache_read_tokens": 606103,
-      "cache_create_tokens": 4727,
-      "messages": 2,
-      "billable_total": 6136,
-      "estimated_cost_usd": 1.1033,
-      "emoji": "📌",
-      "description": "任務管理（TaskCreate/Update）"
-    },
-    "knowledge_index": {
-      "input_tokens": 9,
-      "output_tokens": 263,
-      "cache_read_tokens": 644923,
-      "cache_create_tokens": 640,
-      "messages": 2,
-      "billable_total": 912,
-      "estimated_cost_usd": 0.9992,
-      "emoji": "📇",
-      "description": "知識索引更新"
     },
     "file_edit": {
       "input_tokens": 5,
@@ -219,17 +230,6 @@
       "emoji": "🌐",
       "description": "WebSearch / WebFetch"
     },
-    "member_qa": {
-      "input_tokens": 6,
-      "output_tokens": 248,
-      "cache_read_tokens": 371118,
-      "cache_create_tokens": 79,
-      "messages": 1,
-      "billable_total": 333,
-      "estimated_cost_usd": 0.5768,
-      "emoji": "❓",
-      "description": "會員問答研究"
-    },
     "tool_setup": {
       "input_tokens": 74,
       "output_tokens": 1216,
@@ -241,5 +241,127 @@
       "emoji": "🛠️",
       "description": "ToolSearch 載入工具"
     }
-  }
+  },
+  "git_commits_context": [
+    {
+      "sha": "3b958027",
+      "message": "K1064: TW EAV factor as A4f regressor — predictive value of earnings signal"
+    },
+    {
+      "sha": "1aefa05f",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "097cbd60",
+      "message": "Session sync: K1062 + K1063 complete, Taiwan EAV trilogy + semi-variance"
+    },
+    {
+      "sha": "05f84c13",
+      "message": "Merge K1063: Realized semi-variance — persistence asymmetry Harvey PASS"
+    },
+    {
+      "sha": "ecab23df",
+      "message": "K1063: Realized semi-variance decomposition — upside vs downside asymmetry"
+    },
+    {
+      "sha": "bb76d474",
+      "message": "K1062: T+1 event window for 0050.TW — resolves K1059 vs K1060 gap"
+    },
+    {
+      "sha": "56288b77",
+      "message": "Ops patrol report 2026-04-12T06:21Z"
+    },
+    {
+      "sha": "62298ddf",
+      "message": "token_usage_report.py: add task category breakdown + subagent scan"
+    },
+    {
+      "sha": "5415db1d",
+      "message": "Fix token_usage_report.py: use real JSONL usage, not git-line estimation"
+    },
+    {
+      "sha": "7a4ca945",
+      "message": "Session sync: K1059 + K1060 + 2 articles, EAV breakthrough"
+    },
+    {
+      "sha": "3d2d3ab9",
+      "message": "fix: restore clean entry structure, prices live in market_daily only"
+    },
+    {
+      "sha": "28a418a1",
+      "message": "fix: embed close prices in paper trading entries"
+    },
+    {
+      "sha": "bc177a69",
+      "message": "K1060: Individual Taiwan stock EAV -- 10-stock event study"
+    },
+    {
+      "sha": "47daf617",
+      "message": "K1059: TSMC earnings announcement x 0050.TW volatility event study"
+    },
+    {
+      "sha": "15bc7fd2",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "87311729",
+      "message": "Session sync: K1057+K1058 complete, 2 articles, Taiwan earnings data, research_p"
+    },
+    {
+      "sha": "325fdfc2",
+      "message": "Ops patrol report 2026-04-12T00:34Z"
+    },
+    {
+      "sha": "e97d87fa",
+      "message": "Merge K1058: A4f cross-market validation on 0050.TW"
+    },
+    {
+      "sha": "17b42c2c",
+      "message": "K1058: A4f cross-market validation on 0050.TW with US VIX"
+    },
+    {
+      "sha": "f154148a",
+      "message": "K1057: HAR-RV-J jump decomposition with 60-day 5-min SPY data"
+    },
+    {
+      "sha": "bbcf43b9",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "67439ea8",
+      "message": "Session sync: K1055 + K1056 complete, TSMC pre-event article, knowledge +3"
+    },
+    {
+      "sha": "dec6eef8",
+      "message": "Merge K1056: A4f sub-period stability"
+    },
+    {
+      "sha": "d955fe85",
+      "message": "K1056: A4f sub-period stability — robustness across 5 non-overlapping periods"
+    },
+    {
+      "sha": "0f29128a",
+      "message": "Ops patrol report 2026-04-11T18:34Z"
+    },
+    {
+      "sha": "b5dd1c68",
+      "message": "K1055: Conformal prediction intervals for A4f vs GJR volatility forecasts"
+    },
+    {
+      "sha": "7f29eb19",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "81106418",
+      "message": "Session sync: K1054 HAR-RV formal, 6 draft articles, memory cleanup"
+    },
+    {
+      "sha": "73f75b3c",
+      "message": "Merge agent worktree agent-a5a46045 (1 commits)"
+    },
+    {
+      "sha": "8041f5bb",
+      "message": "K1054: HAR-RV formal 60-day — proxy comparison r² vs 5-min RV"
+    }
+  ]
 }

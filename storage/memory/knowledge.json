@@ -24764,5 +24764,44 @@
     "data_source": "yfinance SPY + data/intraday/ 5-min 60 days (2026-01-14 to 2026-04-10)",
     "confidence": 0.75,
     "timestamp": "2026-04-12T08:21:28.770329+00:00"
+  },
+  {
+    "id": "know_20260412102738_k1064",
+    "experiment_id": "K1064",
+    "title": "K1064: TW EAV Factor as A4f Regressor NULL — Descriptive ≠ Predictive",
+    "content": "[提出: Claude, 執行: Claude] K1064 extends Taiwan EAV trilogy (K1059/K1060/K1062) from description to prediction. Tests 3 EAV signal variants (equal-weighted, sector-weighted from K1060 ratios, top-50 proxy) as exogenous regressor in A4f for 0050.TW. OOS 2019-2025 (1,698 days), w=2000, refit 63d, 27 refits. ALL NULL: DM t=+1.08 (equal), +0.96 (sector), +2.36 (top50) — all POSITIVE meaning A4f baseline wins. θ₂ all NS (p>0.80, mean slightly negative). H3 event-window: sector variant +0.55% in event days (NS) vs -0.62% non-event. KEY INSIGHTS: (1) Descriptive ≠ Predictive — K1060 T+1 ratio=1.466 is individual-stock conditional mean, not ETF daily linear signal. (2) VIX already absorbs systemic component — in-sample corr(r², EAV) ≈ -0.01. (3) Diversification dilution for 50-stock ETF (consistent with K1062). Paper 2 implication: EAV story belongs in descriptive/mechanism section NOT prediction model. A4f with US VIX² remains correct for 0050.TW.",
+    "tags": [
+      "A4f",
+      "EAV",
+      "Taiwan",
+      "0050.TW",
+      "NULL",
+      "prediction",
+      "descriptive-vs-predictive"
+    ],
+    "category": "experiment",
+    "data_source": "財報公告日.txt + yfinance 0050.TW/VIX 2010-2025",
+    "confidence": 0.85,
+    "timestamp": "2026-04-12T10:27:38.813519+00:00"
+  },
+  {
+    "id": "know_20260412123443_k1065",
+    "experiment_id": "K1065",
+    "title": "K1065: Hansen-Lunde Decomposition ★ — VIX is Intraday Signal, Not Gap Risk Signal (3/3 hypotheses supported)",
+    "content": "[提出: Claude, 執行: Claude] K1065 applies Hansen-Lunde (2005) decomposition to 60-day SPY 5-min data: σ²_total = σ²_overnight + σ²_intraday. Overnight share 32.7% (matches K1057), corr(overnight, intraday)=0.186 near-orthogonal (HL assumption holds). ALL 3 HYPOTHESES SUPPORTED: (H1) Intraday vastly more predictable — best QLIKE 0.097 vs overnight 1.35; Spearman rho VIX2-lag on intraday 0.318 vs overnight -0.03. (H2) VIX² cuts intraday QLIKE by 26% vs only 3.9% overnight — VIX is forward-looking FEAR signal for trading session, NOT gap-risk signal. Overnight gaps are driven by idiosyncratic news (earnings, geopolitics) that VIX can't anticipate. (H3) A4f attribution: correct pathway is A4f_oc (fit to open-to-close returns) on intraday target — QLIKE 0.123 vs A4f_close 0.322 (DM t=+5.38 A4f_oc dominance, p<0.001). K988's A4f_close beats GJR_close because σ²_close = σ²_overnight + σ²_intraday with 67% intraday weight, and A4f captures that 67%. Leverage effect: intraday r² shows strong negative autocorr with lagged return (-0.34) vs weak for overnight (-0.10). PRELIMINARY (60 OOS). Paper 9 implication: A4f's DM t=4.48 edge is primarily INTRADAY. Open-to-close returns may be a cleaner target than close-to-close for VIX-informed models.",
+    "tags": [
+      "Hansen-Lunde",
+      "overnight",
+      "intraday",
+      "A4f",
+      "VIX",
+      "decomposition",
+      "Paper9",
+      "mechanism"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance SPY + data/intraday/ 5-min (60 days)",
+    "confidence": 0.8,
+    "timestamp": "2026-04-12T12:34:43.486158+00:00"
   }
 ]

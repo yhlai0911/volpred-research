@@ -1,17 +1,17 @@
 [
   {
-    "id": "K1062",
-    "title": "K1062: 0050.TW ETF EAV with T+1 Window",
+    "id": "K1064",
+    "title": "K1064: TW_EAV_factor as A4f Regressor",
     "priority": 1,
     "status": "completed",
-    "description": "H1 partial (T+1 ratio 1.132 direction correct, CI straddles 1). Diversification dominates. Need 4x more events (K1061 extension)."
+    "description": "NULL. Descriptive ≠ Predictive. VIX absorbs systematic component, diversification dilutes. EAV story belongs in Paper 2 mechanism section."
   },
   {
-    "id": "K1063",
-    "title": "K1063: Realized Semi-Variance Decomposition",
+    "id": "K1065",
+    "title": "K1065: Hansen-Lunde Overnight/Intraday Decomposition",
     "priority": 1,
     "status": "in_progress",
-    "description": "Upside vs downside semi-variance (BN-Kinnebrock-Shephard 2010). HAR-SV, signed jump, leverage asymmetry. Agent in worktree."
+    "description": "Test which component A4f's VIX² improves: overnight (gap) or intraday (trading). H1/H2/H3 validation. Agent in worktree."
   },
   {
     "id": "TSMC_0416_post",
@@ -24,21 +24,28 @@
     "id": "K1061",
     "title": "K1061: Full TWSE 50 Constituents EAV",
     "priority": 2,
-    "description": "Extend K1060 to all 50 constituents (N=50 for binomial power, address K1062 underpowered)",
+    "description": "Extend K1060 to all 50 constituents (N=50 for binomial power)",
     "status": "pending"
   },
   {
-    "id": "K1064",
-    "title": "K1064: TW_EAV_factor as A4f Regressor",
+    "id": "K1066",
+    "title": "K1066: Nonlinear EAV × VIX Interaction",
     "priority": 2,
-    "description": "Sector-conditional T+1 EAV as exogenous variable in A4f",
+    "description": "K1064 NULL suggests maybe nonlinear. Test threshold EAV or EAV×VIX interaction in A4f.",
+    "status": "pending"
+  },
+  {
+    "id": "K1067",
+    "title": "K1067: TSMC Single-Stock A4f-EAV",
+    "priority": 2,
+    "description": "K1064 ETF NULL, but K1060 TSMC T+1=1.466 is strong. Test A4f+EAV on TSMC single-stock where diversification doesn't dilute.",
     "status": "pending"
   },
   {
     "id": "Paper9_citation_verify",
     "title": "Paper 9 citation-verifier",
     "priority": 2,
-    "description": "Paper 9 v5。K1054-K1062 可加入 robustness section。",
+    "description": "Paper 9 v5。K1054-K1064 可加入 robustness section。",
     "status": "pending"
   },
   {
