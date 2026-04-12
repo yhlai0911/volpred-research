@@ -1,257 +1,176 @@
 #!/usr/bin/env python3
 """
-Token Usage Report — 基於 git 活動的 Claude token 用量分析
+Token Usage Report — 從 Claude Code 實際 JSONL session 記錄讀取真實 token 用量
 
-分析 git commits 按類別估算 token 消耗，產出每日/每週報告。
-週期：週五到週五（對齊帳單週期）。
+主要數據源：~/.claude/projects/<project>/*.jsonl 中的 message.usage 欄位
+（每個 assistant message 有真實的 input/output/cache tokens）
+
+次要：git commits 分類（僅供參考，不作為 token 估算依據）
 
 用法：
     python scripts/token_usage_report.py                  # 今日報告
-    python scripts/token_usage_report.py --weekly          # 本週摘要
-    python scripts/token_usage_report.py --date 2026-04-05 # 指定日期
-    python scripts/token_usage_report.py --week-start 2026-03-28  # 指定週起點
+    python scripts/token_usage_report.py --weekly         # 本週摘要
+    python scripts/token_usage_report.py --date 2026-04-05
+    python scripts/token_usage_report.py --week-start 2026-03-28
 """
 
+import json
 import subprocess
 import re
-import json
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from collections import defaultdict, Counter
+from collections import defaultdict
 
+PROJECT_DIR_SLUG = "-Users-yhlai0911-Desktop-volpred-research"
+CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects" / PROJECT_DIR_SLUG
 STORAGE_DIR = Path(__file__).parent.parent / "storage" / "reports" / "token_usage"
 
-# ── 分類規則 ────────────────────────────────────────────────
-# 每個 category: (patterns, estimated_token_weight, description)
-# weight 是相對值，1.0 = 普通 commit，越高表示越吃 token
-CATEGORIES = {
-    "paper_review": {
-        "patterns": [
-            r"Paper \d.*R\d",
-            r"Paper \d.*SEVERE",
-            r"Paper \d.*HIGH",
-            r"Paper \d.*CRITICAL",
-            r"Paper \d.*complete",
-            r"Paper \d.*fix",
-            r"Paper \d.*audit",
-            r"Paper \d.*citation",
-            r"AUDIT_PLAN",
-            r"paper.*review",
-            r"paper.*R\d",
-            r"reproduce\.py",
-            r"Recompile.*paper",
-        ],
-        "weight": 8.0,
-        "emoji": "📝",
-        "description": "論文審查/修訂（讀寫完整 LaTeX，多輪 review）",
+# Anthropic pricing (Opus 4.x as of 2026-04，USD per million tokens)
+PRICING = {
+    "claude-opus-4-6": {
+        "input": 15.00,
+        "output": 75.00,
+        "cache_write": 18.75,  # 1.25x input
+        "cache_read": 1.50,    # 0.1x input
     },
-    "experiment": {
-        "patterns": [
-            r"^[a-f0-9]+ K\d{3,4}[a-z]?:",
-            r"^[a-f0-9]+ K\d{3,4}[a-z]? ",
-            r"experiment",
-            r"E\d{1,3}.*experience",
-        ],
-        "weight": 5.0,
-        "emoji": "🔬",
-        "description": "研究實驗（agent + Codex 審查 + 知識記錄）",
+    "claude-sonnet-4-6": {
+        "input": 3.00,
+        "output": 15.00,
+        "cache_write": 3.75,
+        "cache_read": 0.30,
     },
-    "article_writing": {
-        "patterns": [
-            r"article.*mile_",
-            r"mile_[a-f0-9]+",
-            r"general article",
-            r"research article",
-            r"publish.*article",
-            r"write.*article",
-            r"\d+ articles:",
-            r"Article[s]?:",
-        ],
-        "weight": 4.0,
-        "emoji": "✍️",
-        "description": "文章撰寫與發佈",
-    },
-    "latex_content_fix": {
-        "patterns": [
-            r"LaTeX",
-            r"KaTeX",
-            r"Unicode.*minus",
-            r"bare inline",
-            r"math block",
-            r"equation fix",
-            r"JSON escaping",
-            r"Restore.*article",
-            r"Fix.*rendering",
-            r"artifact",
-            r"80789---",
-        ],
-        "weight": 7.0,
-        "emoji": "🔧",
-        "description": "LaTeX/內容批量修復（讀寫大型 JSON）",
-    },
-    "feed_ops": {
-        "patterns": [
-            r"release.*pool",
-            r"feed.*sync",
-            r"supabase.*sync",
-            r"Supabase",
-            r"content sync",
-        ],
-        "weight": 2.0,
-        "emoji": "📡",
-        "description": "Feed 發佈/同步操作",
-    },
-    "frontend_deploy": {
-        "patterns": [
-            r"frontend",
-            r"deploy",
-            r"Zeabur",
-            r"Next\.js",
-            r"component",
-            r"admin",
-        ],
-        "weight": 4.0,
-        "emoji": "🌐",
-        "description": "前端開發/部署",
-    },
-    "ops_patrol": {
-        "patterns": [
-            r"Ops patrol",
-            r"platform.*patrol",
-            r"health check",
-            r"ops.*report",
-        ],
-        "weight": 3.0,
-        "emoji": "🛡️",
-        "description": "平台巡檢",
-    },
-    "knowledge_index": {
-        "patterns": [
-            r"knowledge index",
-            r"知識索引",
-            r"build_knowledge_index",
-        ],
-        "weight": 2.0,
-        "emoji": "📚",
-        "description": "知識索引建立/更新",
-    },
-    "daily_update": {
-        "patterns": [
-            r"daily.update",
-            r"daily.*策略",
-            r"recalc.*metric",
-            r"strategy.*weight",
-        ],
-        "weight": 1.5,
-        "emoji": "📊",
-        "description": "每日策略更新/績效重算",
-    },
-    "periodic_sync": {
-        "patterns": [
-            r"Periodic commit",
-            r"storage state sync",
-            r"session.*state",
-        ],
-        "weight": 0.5,
-        "emoji": "🔄",
-        "description": "定期狀態同步（低 token）",
-    },
-    "research_program": {
-        "patterns": [
-            r"research_program",
-            r"CLAUDE\.md",
-            r"skill.*update",
-            r"error.log",
-        ],
-        "weight": 1.0,
-        "emoji": "📋",
-        "description": "研究計畫/規範更新",
-    },
-    "member_qa": {
-        "patterns": [
-            r"member.*Q&A",
-            r"會員.*問",
-            r"question.*rank",
-            r"question.*answer",
-        ],
-        "weight": 3.0,
-        "emoji": "❓",
-        "description": "會員問答研究",
-    },
-    "codex_review": {
-        "patterns": [
-            r"[Cc]odex.*review",
-            r"[Cc]odex.*flag",
-            r"[Cc]odex.*audit",
-            r"[Cc]odex.*FATAL",
-            r"[Cc]odex.*bug",
-            r"CODEX CRITICAL",
-            r"REVERT.*Codex",
-        ],
-        "weight": 2.0,
-        "emoji": "🤖",
-        "description": "Codex 審查",
-    },
-    "paper_writing": {
-        "patterns": [
-            r"Paper.*writing",
-            r"Paper.*audit.*plan",
-            r"paper.*dirs",
-            r"paper.*README",
-            r"paper.*upload",
-            r"PRG.*paper",
-            r"FRL.*paper",
-            r"citation.*verif",
-            r"Add README.*paper",
-            r"Organize paper",
-            r"papers.*uploaded",
-        ],
-        "weight": 6.0,
-        "emoji": "📄",
-        "description": "論文撰寫/組織",
-    },
-    "skill_process": {
-        "patterns": [
-            r"[Ss]kill:",
-            r"[Pp]reamble",
-            r"process.*fix",
-            r"PROCESS FIX",
-            r"Ban agents",
-            r"standard.*protocol",
-            r"dispatch protocol",
-            r"Academic prose",
-        ],
-        "weight": 1.5,
-        "emoji": "⚙️",
-        "description": "流程/技能規範更新",
-    },
-    "bugfix": {
-        "patterns": [
-            r"^[a-f0-9]+ Fix:",
-            r"^[a-f0-9]+ Fix ",
-            r"^[a-f0-9]+ REVERT",
-            r"except:pass",
-            r"silent.*error",
-            r"Eliminate.*except",
-            r"install.*pymupdf",
-            r"broken images",
-        ],
-        "weight": 3.0,
-        "emoji": "🐛",
-        "description": "Bug 修復/程式碼改善",
-    },
-    "experience_log": {
-        "patterns": [
-            r"^[a-f0-9]+ E\d{1,3}:",
-            r"experience.*lesson",
-            r"session final",
-        ],
-        "weight": 1.0,
-        "emoji": "📝",
-        "description": "經驗記錄/Session 總結",
+    "claude-haiku-4-5-20251001": {
+        "input": 0.80,
+        "output": 4.00,
+        "cache_write": 1.00,
+        "cache_read": 0.08,
     },
 }
+
+
+def iter_session_usage(target_date_start=None, target_date_end=None):
+    """
+    遍歷所有 JSONL session files，yield (timestamp_date, session_id, model, usage_dict).
+
+    target_date_start/end: datetime.date objects (inclusive start, exclusive end)
+    """
+    if not CLAUDE_PROJECTS_DIR.exists():
+        return
+
+    for jsonl_path in sorted(CLAUDE_PROJECTS_DIR.glob("*.jsonl")):
+        session_id = jsonl_path.stem
+        try:
+            with open(jsonl_path, "r") as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        obj = json.loads(line)
+                    except json.JSONDecodeError:
+                        continue
+
+                    if obj.get("type") != "assistant":
+                        continue
+
+                    msg = obj.get("message", {})
+                    usage = msg.get("usage")
+                    if not usage:
+                        continue
+
+                    ts_str = obj.get("timestamp")
+                    if not ts_str:
+                        continue
+
+                    try:
+                        ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                    except ValueError:
+                        continue
+
+                    ts_date = ts.date()
+
+                    if target_date_start and ts_date < target_date_start:
+                        continue
+                    if target_date_end and ts_date >= target_date_end:
+                        continue
+
+                    model = msg.get("model", "unknown")
+                    yield (ts_date, session_id, model, usage)
+        except IOError:
+            continue
+
+
+def aggregate_usage(date_start, date_end):
+    """聚合指定日期區間的 token 用量"""
+    totals = {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 0,
+        "assistant_messages": 0,
+        "unique_sessions": set(),
+    }
+    by_model = defaultdict(lambda: {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 0,
+        "messages": 0,
+    })
+    by_date = defaultdict(lambda: {
+        "input_tokens": 0,
+        "output_tokens": 0,
+        "cache_read_tokens": 0,
+        "cache_create_tokens": 0,
+        "messages": 0,
+    })
+
+    for ts_date, session_id, model, usage in iter_session_usage(date_start, date_end):
+        inp = usage.get("input_tokens", 0) or 0
+        out = usage.get("output_tokens", 0) or 0
+        cr = usage.get("cache_read_input_tokens", 0) or 0
+        cc = usage.get("cache_creation_input_tokens", 0) or 0
+
+        totals["input_tokens"] += inp
+        totals["output_tokens"] += out
+        totals["cache_read_tokens"] += cr
+        totals["cache_create_tokens"] += cc
+        totals["assistant_messages"] += 1
+        totals["unique_sessions"].add(session_id)
+
+        by_model[model]["input_tokens"] += inp
+        by_model[model]["output_tokens"] += out
+        by_model[model]["cache_read_tokens"] += cr
+        by_model[model]["cache_create_tokens"] += cc
+        by_model[model]["messages"] += 1
+
+        date_key = ts_date.isoformat()
+        by_date[date_key]["input_tokens"] += inp
+        by_date[date_key]["output_tokens"] += out
+        by_date[date_key]["cache_read_tokens"] += cr
+        by_date[date_key]["cache_create_tokens"] += cc
+        by_date[date_key]["messages"] += 1
+
+    totals["unique_sessions"] = len(totals["unique_sessions"])
+
+    return totals, dict(by_model), dict(by_date)
+
+
+def compute_cost_usd(usage, model):
+    """估算 USD 成本（基於 Anthropic pricing）"""
+    if model not in PRICING:
+        # Fallback: assume Opus pricing
+        pricing = PRICING["claude-opus-4-6"]
+    else:
+        pricing = PRICING[model]
+
+    return (
+        usage["input_tokens"] / 1_000_000 * pricing["input"]
+        + usage["output_tokens"] / 1_000_000 * pricing["output"]
+        + usage["cache_create_tokens"] / 1_000_000 * pricing["cache_write"]
+        + usage["cache_read_tokens"] / 1_000_000 * pricing["cache_read"]
+    )
 
 
 def get_friday_week_range(target_date=None):
@@ -259,15 +178,14 @@ def get_friday_week_range(target_date=None):
     if target_date is None:
         target_date = datetime.now(timezone.utc).date()
     weekday = target_date.weekday()  # Monday=0, Friday=4
-    # 找到本週或上一個週五
     days_since_friday = (weekday - 4) % 7
     week_start = target_date - timedelta(days=days_since_friday)
     week_end = week_start + timedelta(days=7)
     return week_start, week_end
 
 
-def get_git_log(since, until, repo_dir=None):
-    """取得 git log（one-line + date）"""
+def get_git_commits(since, until):
+    """補充：取得該時段的 git commits（僅供 context，不用於估算）"""
     cmd = [
         "git", "log", "--oneline", "--format=%h %ai %s",
         f"--since={since.isoformat()}T00:00:00",
@@ -275,7 +193,7 @@ def get_git_log(since, until, repo_dir=None):
     ]
     result = subprocess.run(
         cmd, capture_output=True, text=True,
-        cwd=repo_dir or Path(__file__).parent.parent,
+        cwd=Path(__file__).parent.parent,
     )
     lines = result.stdout.strip().split("\n") if result.stdout.strip() else []
     commits = []
@@ -283,301 +201,200 @@ def get_git_log(since, until, repo_dir=None):
         parts = line.split(" ", 3)
         if len(parts) >= 4:
             sha = parts[0]
-            date_str = parts[1]
-            # parts[2] is time, parts[3] is tz + message
             rest = " ".join(parts[1:])
-            # parse: 2026-04-06 12:34:56 +0800 commit message
             m = re.match(r"(\d{4}-\d{2}-\d{2}) \d{2}:\d{2}:\d{2} [+-]\d{4} (.+)", rest)
             if m:
-                commits.append({
-                    "sha": sha,
-                    "date": m.group(1),
-                    "message": m.group(2),
-                })
+                commits.append({"sha": sha, "date": m.group(1), "message": m.group(2)})
     return commits
 
 
-def classify_commit(message):
-    """將 commit message 分類到最佳匹配的 category"""
-    best_cat = None
-    best_priority = -1
-
-    # priority 越高越優先匹配
-    priority_order = [
-        "paper_review", "paper_writing", "latex_content_fix", "experiment",
-        "article_writing", "codex_review", "member_qa", "bugfix",
-        "frontend_deploy", "ops_patrol", "feed_ops", "skill_process",
-        "daily_update", "knowledge_index", "research_program",
-        "experience_log", "periodic_sync",
-    ]
-
-    for cat in priority_order:
-        info = CATEGORIES[cat]
-        for pattern in info["patterns"]:
-            if re.search(pattern, message, re.IGNORECASE):
-                return cat
-
-    return "other"
-
-
-def get_commit_file_stats(sha, repo_dir=None):
-    """取得單一 commit 的檔案變更統計（用於更精確估算）"""
-    cmd = ["git", "diff", "--shortstat", f"{sha}~1", sha]
-    result = subprocess.run(
-        cmd, capture_output=True, text=True,
-        cwd=repo_dir or Path(__file__).parent.parent,
-    )
-    text = result.stdout.strip()
-    insertions = 0
-    deletions = 0
-    m_ins = re.search(r"(\d+) insertion", text)
-    m_del = re.search(r"(\d+) deletion", text)
-    if m_ins:
-        insertions = int(m_ins.group(1))
-    if m_del:
-        deletions = int(m_del.group(1))
-    return insertions + deletions
-
-
-def estimate_tokens(category, lines_changed, num_commits=1):
-    """估算 token 消耗（相對單位，不是絕對值）
-
-    邏輯：每個 commit = 一次 Claude 互動（prompt + response）
-    - 基礎開銷：每個 commit 的 prompt/context 讀取（weight × 2000 per commit）
-    - 變更行數：讀+寫+surrounding context（weight × lines × 4）
-    - Weight 反映該類型工作的 context 密度（論文讀整篇 vs 改一行 status）
-    """
-    info = CATEGORIES.get(category, {"weight": 1.0})
-    weight = info["weight"]
-    base = weight * 2000 * num_commits  # per-commit overhead
-    line_factor = int(weight * lines_changed * 4)  # context multiplier
-    line_factor = min(line_factor, 500000)  # cap
-    return int(base + line_factor)
-
-
-def generate_daily_report(target_date=None, detailed=False):
-    """產出單日報告"""
+def generate_daily_report(target_date=None, include_commits=False):
+    """產出單日報告（基於真實 JSONL usage）"""
     if target_date is None:
         target_date = datetime.now(timezone.utc).date()
 
-    since = target_date
-    until = target_date + timedelta(days=1)
-    commits = get_git_log(since, until)
+    date_start = target_date
+    date_end = target_date + timedelta(days=1)
 
-    # 分類
-    categorized = defaultdict(list)
-    for c in commits:
-        cat = classify_commit(c["message"])
-        categorized[cat].append(c)
+    totals, by_model, by_date = aggregate_usage(date_start, date_end)
 
-    # 計算 token 估算
-    category_stats = {}
-    total_estimated = 0
+    # 計算各模型成本
+    cost_by_model = {}
+    total_cost_usd = 0.0
+    for model, usage in by_model.items():
+        cost = compute_cost_usd(usage, model)
+        cost_by_model[model] = cost
+        total_cost_usd += cost
 
-    for cat, cat_commits in categorized.items():
-        total_lines = 0
-        for c in cat_commits:
-            lines = get_commit_file_stats(c["sha"])
-            total_lines += lines
-
-        tokens = estimate_tokens(cat, total_lines, num_commits=len(cat_commits))
-        category_stats[cat] = {
-            "commits": len(cat_commits),
-            "lines_changed": total_lines,
-            "estimated_tokens": tokens,
-        }
-        total_estimated += tokens
-
-    # 排序
-    sorted_cats = sorted(
-        category_stats.items(),
-        key=lambda x: x[1]["estimated_tokens"],
-        reverse=True,
-    )
-
-    # 週區間
     week_start, week_end = get_friday_week_range(target_date)
 
     report = {
         "report_type": "daily",
+        "source": "claude_code_jsonl",
         "date": target_date.isoformat(),
         "week_range": f"{week_start.isoformat()} → {week_end.isoformat()}",
-        "total_commits": len(commits),
-        "total_estimated_tokens": total_estimated,
-        "categories": {},
+        "totals": {
+            "input_tokens": totals["input_tokens"],
+            "output_tokens": totals["output_tokens"],
+            "cache_read_tokens": totals["cache_read_tokens"],
+            "cache_create_tokens": totals["cache_create_tokens"],
+            "billable_total": (
+                totals["input_tokens"]
+                + totals["output_tokens"]
+                + totals["cache_create_tokens"]
+            ),
+            "assistant_messages": totals["assistant_messages"],
+            "unique_sessions": totals["unique_sessions"],
+            "estimated_cost_usd": round(total_cost_usd, 4),
+        },
+        "by_model": {
+            model: {
+                **usage,
+                "estimated_cost_usd": round(cost_by_model[model], 4),
+            }
+            for model, usage in by_model.items()
+        },
     }
 
-    for cat, stats in sorted_cats:
-        info = CATEGORIES.get(cat, {"emoji": "❔", "description": "其他"})
-        pct = stats["estimated_tokens"] / total_estimated * 100 if total_estimated > 0 else 0
-        report["categories"][cat] = {
-            "emoji": info.get("emoji", "❔"),
-            "description": info.get("description", "其他"),
-            "commits": stats["commits"],
-            "lines_changed": stats["lines_changed"],
-            "estimated_tokens": stats["estimated_tokens"],
-            "percentage": round(pct, 1),
-        }
-        if detailed:
-            report["categories"][cat]["commit_messages"] = [
-                c["message"][:80] for c in categorized[cat]
-            ]
+    if include_commits:
+        commits = get_git_commits(date_start, date_end)
+        report["git_commits_context"] = [
+            {"sha": c["sha"], "message": c["message"][:80]} for c in commits
+        ]
 
     return report
 
 
 def generate_weekly_report(week_start=None):
-    """產出週報（週五到週五）"""
+    """產出週報（週五到週五，基於真實 JSONL usage）"""
     if week_start is None:
         today = datetime.now(timezone.utc).date()
         week_start, _ = get_friday_week_range(today)
 
     week_end = week_start + timedelta(days=7)
-    commits = get_git_log(week_start, week_end)
+    totals, by_model, by_date = aggregate_usage(week_start, week_end)
 
-    # 按日分組
-    daily_counts = Counter()
-    for c in commits:
-        daily_counts[c["date"]] += 1
+    cost_by_model = {}
+    total_cost_usd = 0.0
+    for model, usage in by_model.items():
+        cost = compute_cost_usd(usage, model)
+        cost_by_model[model] = cost
+        total_cost_usd += cost
 
-    # 按類別分組 + 估算
-    categorized = defaultdict(list)
-    for c in commits:
-        cat = classify_commit(c["message"])
-        categorized[cat].append(c)
-
-    category_stats = {}
-    total_estimated = 0
-    for cat, cat_commits in categorized.items():
-        total_lines = 0
-        for c in cat_commits:
-            lines = get_commit_file_stats(c["sha"])
-            total_lines += lines
-        tokens = estimate_tokens(cat, total_lines, num_commits=len(cat_commits))
-        category_stats[cat] = {
-            "commits": len(cat_commits),
-            "lines_changed": total_lines,
-            "estimated_tokens": tokens,
-        }
-        total_estimated += tokens
-
-    sorted_cats = sorted(
-        category_stats.items(),
-        key=lambda x: x[1]["estimated_tokens"],
-        reverse=True,
-    )
-
-    # 每日 token 分布
-    daily_data = {}
-    for date_str in sorted(daily_counts.keys()):
-        d = datetime.strptime(date_str, "%Y-%m-%d").date()
-        day_commits = [c for c in commits if c["date"] == date_str]
-        day_tokens = 0
-        for c in day_commits:
-            cat = classify_commit(c["message"])
-            lines = get_commit_file_stats(c["sha"])
-            day_tokens += estimate_tokens(cat, lines)
-        daily_data[date_str] = {
-            "commits": daily_counts[date_str],
-            "estimated_tokens": day_tokens,
-            "weekday": d.strftime("%A"),
+    # Per-day breakdown with cost
+    daily_breakdown = {}
+    for date_key, usage in sorted(by_date.items()):
+        # Approximate per-day cost (can't split by model here, use aggregate)
+        # More accurate: re-aggregate by date and model. For simplicity, we estimate proportionally.
+        day_total = usage["input_tokens"] + usage["output_tokens"] + usage["cache_create_tokens"]
+        total_billable = totals["input_tokens"] + totals["output_tokens"] + totals["cache_create_tokens"]
+        day_cost = total_cost_usd * (day_total / total_billable) if total_billable else 0
+        daily_breakdown[date_key] = {
+            **usage,
+            "billable_total": day_total,
+            "estimated_cost_usd": round(day_cost, 4),
         }
 
     report = {
         "report_type": "weekly",
+        "source": "claude_code_jsonl",
         "week_range": f"{week_start.isoformat()} → {week_end.isoformat()}",
-        "total_commits": len(commits),
-        "total_estimated_tokens": total_estimated,
-        "daily_breakdown": daily_data,
-        "categories": {},
+        "totals": {
+            "input_tokens": totals["input_tokens"],
+            "output_tokens": totals["output_tokens"],
+            "cache_read_tokens": totals["cache_read_tokens"],
+            "cache_create_tokens": totals["cache_create_tokens"],
+            "billable_total": (
+                totals["input_tokens"]
+                + totals["output_tokens"]
+                + totals["cache_create_tokens"]
+            ),
+            "assistant_messages": totals["assistant_messages"],
+            "unique_sessions": totals["unique_sessions"],
+            "estimated_cost_usd": round(total_cost_usd, 4),
+        },
+        "by_model": {
+            model: {
+                **usage,
+                "estimated_cost_usd": round(cost_by_model[model], 4),
+            }
+            for model, usage in by_model.items()
+        },
+        "daily_breakdown": daily_breakdown,
     }
-
-    for cat, stats in sorted_cats:
-        info = CATEGORIES.get(cat, {"emoji": "❔", "description": "其他"})
-        pct = stats["estimated_tokens"] / total_estimated * 100 if total_estimated > 0 else 0
-        report["categories"][cat] = {
-            "emoji": info.get("emoji", "❔"),
-            "description": info.get("description", "其他"),
-            "commits": stats["commits"],
-            "lines_changed": stats["lines_changed"],
-            "estimated_tokens": stats["estimated_tokens"],
-            "percentage": round(pct, 1),
-        }
 
     return report
 
 
+def format_number(n):
+    """Format with thousands separator"""
+    return f"{n:,}"
+
+
 def format_report_text(report):
-    """格式化報告為 Markdown 文字"""
+    """格式化為 Markdown 文字"""
     lines = []
+    t = report["totals"]
 
     if report["report_type"] == "daily":
-        lines.append(f"# Token 用量日報 — {report['date']}")
+        lines.append(f"# Token 用量日報 — {report['date']}（Claude Code 真實記錄）")
         lines.append(f"**週期**: {report['week_range']}")
     else:
-        lines.append(f"# Token 用量週報")
+        lines.append(f"# Token 用量週報（Claude Code 真實記錄）")
         lines.append(f"**週期**: {report['week_range']}")
 
-    lines.append(f"**總 commits**: {report['total_commits']}")
-    lines.append(f"**估算總 token**: {report['total_estimated_tokens']:,}")
+    lines.append(f"**數據源**: {report['source']}")
+    lines.append(f"**Assistant messages**: {t['assistant_messages']:,}")
+    lines.append(f"**Sessions**: {t['unique_sessions']}")
     lines.append("")
 
-    # 週報的每日分布
-    if report["report_type"] == "weekly" and "daily_breakdown" in report:
-        lines.append("## 每日分布")
-        lines.append("| 日期 | 星期 | Commits | 估算 Token | 佔比 |")
-        lines.append("|------|------|---------|-----------|------|")
-        total = report["total_estimated_tokens"] or 1
-        for date_str, data in report["daily_breakdown"].items():
-            pct = data["estimated_tokens"] / total * 100
-            bar = "█" * max(1, int(pct / 5))
+    # Totals table
+    lines.append("## Token 分布")
+    lines.append("| 類型 | Tokens | 說明 |")
+    lines.append("|------|--------|------|")
+    lines.append(f"| Input | {t['input_tokens']:,} | 非快取輸入 |")
+    lines.append(f"| Output | {t['output_tokens']:,} | Claude 產生的內容 |")
+    lines.append(f"| Cache Read | {t['cache_read_tokens']:,} | 重複讀取（便宜）|")
+    lines.append(f"| Cache Create | {t['cache_create_tokens']:,} | 首次寫入快取 |")
+    lines.append(f"| **Billable** | **{t['billable_total']:,}** | input + output + cache_create |")
+    lines.append(f"| **成本估算** | **${t['estimated_cost_usd']}** | 基於 Anthropic pricing |")
+    lines.append("")
+
+    # By model
+    if report["by_model"]:
+        lines.append("## 按模型分布")
+        lines.append("| 模型 | Messages | Input | Output | Cache Read | Cost USD |")
+        lines.append("|------|----------|-------|--------|-----------|----------|")
+        for model, u in sorted(report["by_model"].items(), key=lambda x: -x[1]["messages"]):
             lines.append(
-                f"| {date_str} | {data['weekday'][:3]} | {data['commits']} | "
-                f"{data['estimated_tokens']:,} | {pct:.1f}% {bar} |"
+                f"| {model} | {u['messages']:,} | "
+                f"{u['input_tokens']:,} | {u['output_tokens']:,} | "
+                f"{u['cache_read_tokens']:,} | ${u['estimated_cost_usd']} |"
             )
         lines.append("")
 
-    # 類別分布
-    lines.append("## 類別分布")
-    lines.append("| 類別 | Commits | 行數變更 | 估算 Token | 佔比 |")
-    lines.append("|------|---------|---------|-----------|------|")
-
-    for cat, data in report["categories"].items():
-        emoji = data["emoji"]
-        desc = data["description"]
-        bar = "█" * max(1, int(data["percentage"] / 5))
-        lines.append(
-            f"| {emoji} {desc} | {data['commits']} | "
-            f"{data['lines_changed']:,} | {data['estimated_tokens']:,} | "
-            f"{data['percentage']:.1f}% {bar} |"
-        )
-
-    lines.append("")
-
-    # Top 3 token 消耗者
-    cats = list(report["categories"].items())
-    if cats:
-        lines.append("## Top 3 Token 消耗")
-        for i, (cat, data) in enumerate(cats[:3], 1):
-            lines.append(f"{i}. **{data['emoji']} {data['description']}** — "
-                         f"{data['percentage']:.1f}%（{data['commits']} commits, "
-                         f"{data['lines_changed']:,} 行變更）")
-
-    # 詳細 commit 列表（daily only）
-    if report["report_type"] == "daily":
+    # Weekly: daily breakdown
+    if report["report_type"] == "weekly" and "daily_breakdown" in report:
+        lines.append("## 每日分布")
+        lines.append("| 日期 | Messages | Billable Tokens | 成本 USD |")
+        lines.append("|------|----------|-----------------|----------|")
+        for date_key, d in report["daily_breakdown"].items():
+            lines.append(
+                f"| {date_key} | {d['messages']:,} | "
+                f"{d['billable_total']:,} | ${d['estimated_cost_usd']} |"
+            )
         lines.append("")
-        lines.append("## 詳細 Commits")
-        for cat, data in report["categories"].items():
-            if "commit_messages" in data:
-                lines.append(f"\n### {data['emoji']} {data['description']}")
-                for msg in data["commit_messages"]:
-                    lines.append(f"- {msg}")
+
+    # Git commits context (optional)
+    if "git_commits_context" in report and report["git_commits_context"]:
+        lines.append("## Git Commits（僅供參考）")
+        for c in report["git_commits_context"][:20]:
+            lines.append(f"- `{c['sha']}` {c['message']}")
 
     return "\n".join(lines)
 
 
 def save_report(report, text):
-    """儲存報告到 storage"""
     STORAGE_DIR.mkdir(parents=True, exist_ok=True)
 
     if report["report_type"] == "daily":
@@ -593,7 +410,6 @@ def save_report(report, text):
 
     with open(json_path, "w") as f:
         json.dump(report, f, ensure_ascii=False, indent=2)
-
     with open(text_path, "w") as f:
         f.write(text)
 
@@ -602,11 +418,11 @@ def save_report(report, text):
 
 def main():
     import argparse
-    parser = argparse.ArgumentParser(description="Token Usage Report")
+    parser = argparse.ArgumentParser(description="Token Usage Report (Real from JSONL)")
     parser.add_argument("--date", help="指定日期 (YYYY-MM-DD)")
     parser.add_argument("--weekly", action="store_true", help="產出週報")
     parser.add_argument("--week-start", help="週報起始日 (YYYY-MM-DD)")
-    parser.add_argument("--detailed", action="store_true", help="包含 commit 列表")
+    parser.add_argument("--detailed", action="store_true", help="包含 git commits context")
     parser.add_argument("--no-save", action="store_true", help="不儲存檔案")
     parser.add_argument("--json", action="store_true", help="JSON 輸出")
     args = parser.parse_args()
@@ -620,7 +436,7 @@ def main():
         target_date = None
         if args.date:
             target_date = datetime.strptime(args.date, "%Y-%m-%d").date()
-        report = generate_daily_report(target_date, detailed=args.detailed)
+        report = generate_daily_report(target_date, include_commits=args.detailed)
 
     text = format_report_text(report)
 
