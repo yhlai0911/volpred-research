@@ -24725,5 +24725,44 @@
     "data_source": "財報公告日.txt + yfinance 10 Taiwan stocks 2010-2025",
     "confidence": 0.9,
     "timestamp": "2026-04-12T04:21:26.284473+00:00"
+  },
+  {
+    "id": "know_20260412062359_k1062",
+    "experiment_id": "K1062",
+    "title": "K1062: 0050.TW ETF EAV with T+1 — H1 Partial Support (ratio 1.13), H2 Diversification Dominant",
+    "content": "[提出: Claude, 執行: Claude] K1062 replicates K1059 on 0050.TW with 6 event windows to test K1060's T+1 finding at ETF level. CORE RESULT: T+1 best window ratio=1.132 (direction correct), T+0 replicated NULL 0.973, but CI straddles 1 (n=64 TSMC events underpowered). Individual stock K1060 T+1 ratio was 1.466 → ETF 1.132 = diversification wash-out effect (TSMC 35% weight insufficient to force signal through). Part B clustering T+1: dense days STILL show LOWER vol (ratio 0.725) — dense days cluster in calendar low-vol months (confounding). Part C OLS: β_n(T+0)=-0.0003 NS for T+1 regressand (H1 prediction unfulfilled). Part D A4f: overall DM t=2.35 (p=0.019), advantage 4-5x larger on TSMC T+0/T+1 (+0.11/+0.13 vs +0.03 non-event) but 60-obs subsample too thin for Harvey. CONCLUSION: H1 (timing) directionally correct but power-limited; H2 (diversification) also active. Need 4x more events (K1061 full TWSE50 extension).",
+    "tags": [
+      "Taiwan",
+      "earnings-announcement",
+      "EAV",
+      "0050.TW",
+      "T+1",
+      "diversification",
+      "mixed-result"
+    ],
+    "category": "experiment",
+    "data_source": "財報公告日.txt + yfinance 0050.TW/VIX 2003-2025, n=4160 days",
+    "confidence": 0.75,
+    "timestamp": "2026-04-12T06:23:59.232016+00:00"
+  },
+  {
+    "id": "know_20260412082128_k1063",
+    "experiment_id": "K1063",
+    "title": "K1063: Semi-Variance Persistence Asymmetry ★ — β⁻>β⁺ Harvey PASS (t=3.10, p=0.003)",
+    "content": "[提出: Claude, 執行: Claude] K1063 decomposes SPY 5-min RV into RV+ (upside) and RV- (downside) using BN-Kinnebrock-Shephard (2010). n=60 days, 30 common OOS. LEVEL SYMMETRY: RV+ share 51.1% vs RV- 48.9%, paired t=+0.585 p=0.561 (cannot reject symmetry). PERSISTENCE ASYMMETRY (★ key finding): RV- AR(1)=0.390 vs RV+ AR(1)=0.059 — 6.6x difference. RV+ near white noise, RV- predictable core. H1 TEST (β⁻>β⁺) SUPPORTED: HAR-SV β⁻=+1.181 (t=+3.63), β⁺=-0.381 (t=-1.51), asymmetry test t=+3.10, p=0.003 — passes Harvey |t|>3.0. HAR-RV-down borderline beats baseline (DM RV t=-2.99, p=0.006, just below Harvey). MECHANICAL CAVEAT: HAR-SV/HAR-RV-SJ/HAR-LL produce identical QLIKE (linear reparameterization of same parameters). Leverage corr(r_t, RV-_{t+1} - RV+_{t+1}) = +0.14 positive (leverage effect at intraday scale). Status PRELIMINARY (30 OOS << 252). Implies: downside 5-min returns carry volatility signal, upside are noise. Connects to Paper 9 robustness: A4f's GJR γ captures this asymmetry at daily level.",
+    "tags": [
+      "semi-variance",
+      "RV+",
+      "RV-",
+      "persistence",
+      "leverage-asymmetry",
+      "HAR-SV",
+      "5-min",
+      "Harvey-PASS"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance SPY + data/intraday/ 5-min 60 days (2026-01-14 to 2026-04-10)",
+    "confidence": 0.75,
+    "timestamp": "2026-04-12T08:21:28.770329+00:00"
   }
 ]

@@ -1,17 +1,17 @@
 [
   {
-    "id": "K1059",
-    "title": "K1059: TSMC Earnings × 0050.TW Vol Event Study",
+    "id": "K1062",
+    "title": "K1062: 0050.TW ETF EAV with T+1 Window",
     "priority": 1,
     "status": "completed",
-    "description": "Event NULL (ratio 1.007). Clustering counterintuitive. A4f advantage concentrated in event window (DM t=2.50 vs non-event 1.22)."
+    "description": "H1 partial (T+1 ratio 1.132 direction correct, CI straddles 1). Diversification dominates. Need 4x more events (K1061 extension)."
   },
   {
-    "id": "K1060",
-    "title": "K1060: Individual Taiwan Stock EAV (10 stocks)",
+    "id": "K1063",
+    "title": "K1063: Realized Semi-Variance Decomposition",
     "priority": 1,
     "status": "in_progress",
-    "description": "Resolve K1059 puzzle: does individual stock EAV exist in Taiwan? 10 stocks event study 2010-2025. Agent in worktree."
+    "description": "Upside vs downside semi-variance (BN-Kinnebrock-Shephard 2010). HAR-SV, signed jump, leverage asymmetry. Agent in worktree."
   },
   {
     "id": "TSMC_0416_post",
@@ -21,10 +21,24 @@
     "status": "pending"
   },
   {
+    "id": "K1061",
+    "title": "K1061: Full TWSE 50 Constituents EAV",
+    "priority": 2,
+    "description": "Extend K1060 to all 50 constituents (N=50 for binomial power, address K1062 underpowered)",
+    "status": "pending"
+  },
+  {
+    "id": "K1064",
+    "title": "K1064: TW_EAV_factor as A4f Regressor",
+    "priority": 2,
+    "description": "Sector-conditional T+1 EAV as exogenous variable in A4f",
+    "status": "pending"
+  },
+  {
     "id": "Paper9_citation_verify",
     "title": "Paper 9 citation-verifier",
     "priority": 2,
-    "description": "Paper 9 v5。K1054-K1059 可加入 robustness section。",
+    "description": "Paper 9 v5。K1054-K1062 可加入 robustness section。",
     "status": "pending"
   },
   {

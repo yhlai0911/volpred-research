@@ -1023,7 +1023,7 @@ def main():
         today_market = pt.get("_market_daily", {}).get(today)
         if today_market:
             from supabase_sync import _post
-            _post("market_daily", {"date": today, **today_market})
+            _post("market_daily", {"trade_date": today, **today_market})
             print(f"  Supabase: market_daily synced for {today}")
     except Exception as e:
         print(f"  Supabase sync skipped: {e}")
