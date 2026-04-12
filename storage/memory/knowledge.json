@@ -24687,5 +24687,43 @@
     "data_source": "yfinance 0050.TW/VIX 2005-2026, n_oos=1760",
     "confidence": 0.8,
     "timestamp": "2026-04-12T00:22:48.760547+00:00"
+  },
+  {
+    "id": "know_20260412023419_k1059",
+    "experiment_id": "K1059",
+    "title": "K1059: TSMC Earnings × 0050.TW Vol — Event NULL, But A4f Advantage Concentrated in Event Window",
+    "content": "[提出: 用戶, 執行: Claude] K1059 uses 財報公告日.txt (2411 companies, 1986-2025) + 0050.TW daily data. THREE PARTS: (A) Event study: TSMC earnings day vol=1.80bp vs non-event 1.79bp, ratio 1.007, t=0.018 — NULL. Even TSMC at 50% weight doesn't move ETF-level vol. (B) Clustering: dense announcement days (>=106 firms) have LOWER vol (1.54bp) than non-announcement (2.06bp) — counterintuitive but consistent with VIX dominance (t=22.5, R²=10.8%). Announcement timing orthogonal to VIX regime. (C) A4f conditional: most interesting — A4f advantage CONCENTRATED in event window (DM t=2.50, 660 days) vs non-event (DM t=1.22, 3253 days). VIX² captures global uncertainty particularly informative around Taiwan earnings. Overall DM t=2.24 (below Harvey 3.0). Consistent with K1050 (SPY earnings = uniform, but here conditional effect emerges). Paper 2 (Taiwan VT) implication: VIX captures Taiwan earnings uncertainty via global channel.",
+    "tags": [
+      "Taiwan",
+      "earnings-announcement",
+      "0050.TW",
+      "TSMC",
+      "event-study",
+      "A4f",
+      "mixed-result"
+    ],
+    "category": "experiment",
+    "data_source": "財報公告日.txt (Big5) + yfinance 0050.TW/VIX 2003-2025",
+    "confidence": 0.8,
+    "timestamp": "2026-04-12T02:34:19.237094+00:00"
+  },
+  {
+    "id": "know_20260412042126_k1060",
+    "experiment_id": "K1060",
+    "title": "K1060: ★★ Taiwan Stock EAV Occurs on T+1 Not T+0 — K1059 Puzzle Resolved by Announcement Timing",
+    "content": "[提出: 用戶, 執行: Claude] K1060 tests Earnings Announcement Volatility (EAV) at individual stock level for 10 major Taiwan stocks (2010-2025). METHODOLOGICAL BREAKTHROUGH: T+0 ratio=0.936 (NULL matches K1059 ETF finding 1.007), but T+1 ratio=1.466 with one-sample t=2.075 (p=0.034). 9/10 stocks T+1 > T+0. The K1059 '0050.TW earnings NULL' puzzle is resolved: Taiwan companies announce AFTER market close, so vol shock appears on T+1 next trading day, NOT T+0. K1059 (and by extension K1050's calendar-based SPY analysis) implicitly assumed US pre-market/intraday announcement convention. SECTOR HETEROGENEITY: Tech T+1 ratio=1.636 (UMC 2.58, Hon Hai 2.06 strongest), Financial T+0 collapse (0.69)→T+1 recovery (1.29) with CTBC t=-3.65 at T+0, Telecom (2412) unique pattern with both T+0 and T+1 <1, Traditional (China Steel T+1=2.15). Cross-market event studies MUST account for announcement timing conventions. Opens K1061-K1064 research directions: full TWSE50 (N=50), re-run K1059 with T+1 window, scrape actual timestamps, TW_EAV_factor as A4f regressor.",
+    "tags": [
+      "Taiwan",
+      "earnings-announcement",
+      "EAV",
+      "event-study",
+      "methodology",
+      "T+1",
+      "sector-heterogeneity"
+    ],
+    "category": "experiment",
+    "data_source": "財報公告日.txt + yfinance 10 Taiwan stocks 2010-2025",
+    "confidence": 0.9,
+    "timestamp": "2026-04-12T04:21:26.284473+00:00"
   }
 ]
