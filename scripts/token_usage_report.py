@@ -26,6 +26,146 @@ PROJECT_DIR_SLUG = "-Users-yhlai0911-Desktop-volpred-research"
 CLAUDE_PROJECTS_DIR = Path.home() / ".claude" / "projects" / PROJECT_DIR_SLUG
 STORAGE_DIR = Path(__file__).parent.parent / "storage" / "reports" / "token_usage"
 
+# Task categories with emoji + description
+CATEGORY_META = {
+    "experiment": ("🔬", "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"),
+    "paper_work": ("📝", "論文撰寫/審查（paper/ *.tex 編輯）"),
+    "article_writing": ("✍️", "文章撰寫/發佈（publish-milestone / mile_*）"),
+    "knowledge_recording": ("📚", "知識記錄（knowledge.json / thinking_journal）"),
+    "research_planning": ("📋", "研究計劃（research_program.md / CLAUDE.md）"),
+    "chart_generation": ("📊", "圖表生成（matplotlib / upload_chart）"),
+    "script_dev": ("💻", "腳本開發（scripts/ *.py）"),
+    "worktree_merge": ("🔀", "Worktree 合併與分支管理"),
+    "member_qa": ("❓", "會員問答研究"),
+    "platform_ops": ("🛡️", "平台運維（Supabase sync / daily_update）"),
+    "skill_invoke": ("⚡", "Skill 呼叫"),
+    "skill_edit": ("🔧", "Skill 編輯"),
+    "git_sync": ("🔄", "Git commit / pull / push"),
+    "knowledge_index": ("📇", "知識索引更新"),
+    "token_report": ("📈", "Token 用量報告"),
+    "web_research": ("🌐", "WebSearch / WebFetch"),
+    "investigation": ("🔍", "閱讀 / 搜尋檔案"),
+    "task_management": ("📌", "任務管理（TaskCreate/Update）"),
+    "scheduling": ("⏰", "Cron / Monitor 排程"),
+    "tool_setup": ("🛠️", "ToolSearch 載入工具"),
+    "bash_other": ("💭", "其他 Bash 操作"),
+    "file_edit": ("📄", "其他檔案編輯"),
+    "agent_delegation": ("🤖", "Agent 派送（非實驗）"),
+    "text_only": ("💬", "純文字回覆（無工具）"),
+    "other": ("❔", "其他"),
+}
+
+
+def classify_message(content):
+    """從 assistant message 的 content 分類此 message 在做的任務"""
+    if not isinstance(content, list):
+        return "text_only"
+
+    categories = []
+    for item in content:
+        if not isinstance(item, dict) or item.get("type") != "tool_use":
+            continue
+        name = item.get("name", "")
+        inp = item.get("input", {}) if isinstance(item.get("input"), dict) else {}
+
+        if name == "Agent":
+            prompt = str(inp.get("prompt", ""))
+            if re.search(r"\bK\d{3,4}\b", prompt):
+                categories.append("experiment")
+            else:
+                categories.append("agent_delegation")
+
+        elif name in ("Edit", "Write"):
+            path = str(inp.get("file_path", ""))
+            if "paper/" in path and path.endswith((".tex", ".bib")):
+                categories.append("paper_work")
+            elif "experiments/" in path:
+                categories.append("experiment")
+            elif "knowledge.json" in path or "thinking_journal" in path or "experiment_experiences" in path:
+                categories.append("knowledge_recording")
+            elif "research_program.md" in path or "CLAUDE.md" in path:
+                categories.append("research_planning")
+            elif ".claude/skills" in path:
+                categories.append("skill_edit")
+            elif "scripts/" in path:
+                categories.append("script_dev")
+            elif "next_tasks.json" in path:
+                categories.append("task_management")
+            elif "/memory/" in path and path.endswith(".md"):
+                categories.append("knowledge_recording")
+            elif "storage/reports/mile_" in path or "feed.json" in path:
+                categories.append("article_writing")
+            else:
+                categories.append("file_edit")
+
+        elif name == "Bash":
+            cmd = str(inp.get("command", ""))
+            if "publish-milestone" in cmd or "release-pool" in cmd and "release-pool" not in cmd:
+                categories.append("article_writing")
+            elif "publish-milestone" in cmd:
+                categories.append("article_writing")
+            elif "git commit" in cmd or "git push" in cmd or "git pull" in cmd:
+                categories.append("git_sync")
+            elif "git add" in cmd:
+                categories.append("git_sync")
+            elif "merge_worktree" in cmd or "git worktree" in cmd or "git branch" in cmd or "git merge" in cmd:
+                categories.append("worktree_merge")
+            elif "supabase_sync" in cmd or "daily_update" in cmd:
+                categories.append("platform_ops")
+            elif "release-pool" in cmd:
+                categories.append("platform_ops")
+            elif "build_knowledge_index" in cmd:
+                categories.append("knowledge_index")
+            elif "question-" in cmd:
+                categories.append("member_qa")
+            elif "token_usage_report" in cmd:
+                categories.append("token_report")
+            elif "matplotlib" in cmd or "upload_chart" in cmd or "generate_bar_chart" in cmd or "savefig" in cmd:
+                categories.append("chart_generation")
+            elif cmd.startswith("grep") or cmd.startswith("rg ") or cmd.startswith("ls ") or cmd.startswith("wc ") or "find " in cmd[:20]:
+                categories.append("investigation")
+            else:
+                categories.append("bash_other")
+
+        elif name in ("Read", "Grep", "Glob"):
+            categories.append("investigation")
+
+        elif name in ("CronCreate", "CronDelete", "CronList", "Monitor", "ScheduleWakeup"):
+            categories.append("scheduling")
+
+        elif name in ("TaskCreate", "TaskUpdate", "TaskList", "TaskGet", "TaskStop"):
+            categories.append("task_management")
+
+        elif name == "Skill":
+            categories.append("skill_invoke")
+
+        elif name in ("WebSearch", "WebFetch"):
+            categories.append("web_research")
+
+        elif name == "RemoteTrigger":
+            categories.append("scheduling")
+
+        elif name == "ToolSearch":
+            categories.append("tool_setup")
+
+    if not categories:
+        return "text_only"
+
+    # Priority: heaviest work first
+    priority = [
+        "experiment", "paper_work", "article_writing", "knowledge_recording",
+        "research_planning", "script_dev", "chart_generation", "worktree_merge",
+        "skill_edit", "member_qa", "platform_ops", "skill_invoke", "git_sync",
+        "knowledge_index", "token_report", "web_research",
+        "investigation", "task_management", "scheduling", "tool_setup",
+        "bash_other", "file_edit", "agent_delegation",
+    ]
+    for p in priority:
+        if p in categories:
+            return p
+    return categories[0]
+
+
 # Anthropic pricing (Opus 4.x as of 2026-04，USD per million tokens)
 PRICING = {
     "claude-opus-4-6": {
@@ -49,112 +189,116 @@ PRICING = {
 }
 
 
+def _scan_jsonl(jsonl_path, session_id, is_subagent, target_date_start, target_date_end):
+    """Scan a single JSONL file and yield usage entries"""
+    try:
+        with open(jsonl_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    obj = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+
+                if obj.get("type") != "assistant":
+                    continue
+
+                msg = obj.get("message", {})
+                usage = msg.get("usage")
+                if not usage:
+                    continue
+
+                ts_str = obj.get("timestamp")
+                if not ts_str:
+                    continue
+
+                try:
+                    ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
+                except ValueError:
+                    continue
+
+                ts_date = ts.date()
+
+                if target_date_start and ts_date < target_date_start:
+                    continue
+                if target_date_end and ts_date >= target_date_end:
+                    continue
+
+                model = msg.get("model", "unknown")
+                category = classify_message(msg.get("content", []))
+                # Subagents: mark as delegated work but keep category for what they do
+                if is_subagent and category == "text_only":
+                    category = "agent_delegation"
+                yield (ts_date, session_id, model, usage, category, is_subagent)
+    except IOError:
+        return
+
+
 def iter_session_usage(target_date_start=None, target_date_end=None):
     """
-    遍歷所有 JSONL session files，yield (timestamp_date, session_id, model, usage_dict).
-
-    target_date_start/end: datetime.date objects (inclusive start, exclusive end)
+    遍歷所有 JSONL session files（主 session + subagents），
+    yield (timestamp_date, session_id, model, usage_dict, category, is_subagent).
     """
     if not CLAUDE_PROJECTS_DIR.exists():
         return
 
+    # Main session files
     for jsonl_path in sorted(CLAUDE_PROJECTS_DIR.glob("*.jsonl")):
-        session_id = jsonl_path.stem
-        try:
-            with open(jsonl_path, "r") as f:
-                for line in f:
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        obj = json.loads(line)
-                    except json.JSONDecodeError:
-                        continue
+        yield from _scan_jsonl(
+            jsonl_path, jsonl_path.stem, False,
+            target_date_start, target_date_end,
+        )
 
-                    if obj.get("type") != "assistant":
-                        continue
-
-                    msg = obj.get("message", {})
-                    usage = msg.get("usage")
-                    if not usage:
-                        continue
-
-                    ts_str = obj.get("timestamp")
-                    if not ts_str:
-                        continue
-
-                    try:
-                        ts = datetime.fromisoformat(ts_str.replace("Z", "+00:00"))
-                    except ValueError:
-                        continue
-
-                    ts_date = ts.date()
-
-                    if target_date_start and ts_date < target_date_start:
-                        continue
-                    if target_date_end and ts_date >= target_date_end:
-                        continue
-
-                    model = msg.get("model", "unknown")
-                    yield (ts_date, session_id, model, usage)
-        except IOError:
-            continue
+    # Subagent JSONL files (in <session>/subagents/*.jsonl)
+    for sub_path in sorted(CLAUDE_PROJECTS_DIR.glob("*/subagents/*.jsonl")):
+        # session_id is the parent dir of subagents/
+        session_id = sub_path.parent.parent.name + "/" + sub_path.stem
+        yield from _scan_jsonl(
+            sub_path, session_id, True,
+            target_date_start, target_date_end,
+        )
 
 
 def aggregate_usage(date_start, date_end):
     """聚合指定日期區間的 token 用量"""
-    totals = {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "cache_read_tokens": 0,
-        "cache_create_tokens": 0,
-        "assistant_messages": 0,
-        "unique_sessions": set(),
-    }
-    by_model = defaultdict(lambda: {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "cache_read_tokens": 0,
-        "cache_create_tokens": 0,
-        "messages": 0,
-    })
-    by_date = defaultdict(lambda: {
-        "input_tokens": 0,
-        "output_tokens": 0,
-        "cache_read_tokens": 0,
-        "cache_create_tokens": 0,
-        "messages": 0,
-    })
+    def empty_bucket():
+        return {
+            "input_tokens": 0,
+            "output_tokens": 0,
+            "cache_read_tokens": 0,
+            "cache_create_tokens": 0,
+            "messages": 0,
+        }
 
-    for ts_date, session_id, model, usage in iter_session_usage(date_start, date_end):
+    totals = {**empty_bucket(), "unique_sessions": set(), "subagent_messages": 0, "main_messages": 0}
+    by_model = defaultdict(empty_bucket)
+    by_date = defaultdict(empty_bucket)
+    by_category = defaultdict(empty_bucket)
+
+    for ts_date, session_id, model, usage, category, is_subagent in iter_session_usage(date_start, date_end):
         inp = usage.get("input_tokens", 0) or 0
         out = usage.get("output_tokens", 0) or 0
         cr = usage.get("cache_read_input_tokens", 0) or 0
         cc = usage.get("cache_creation_input_tokens", 0) or 0
 
-        totals["input_tokens"] += inp
-        totals["output_tokens"] += out
-        totals["cache_read_tokens"] += cr
-        totals["cache_create_tokens"] += cc
-        totals["assistant_messages"] += 1
+        for bucket in (totals, by_model[model], by_date[ts_date.isoformat()], by_category[category]):
+            bucket["input_tokens"] += inp
+            bucket["output_tokens"] += out
+            bucket["cache_read_tokens"] += cr
+            bucket["cache_create_tokens"] += cc
+            bucket["messages"] += 1
+
         totals["unique_sessions"].add(session_id)
-
-        by_model[model]["input_tokens"] += inp
-        by_model[model]["output_tokens"] += out
-        by_model[model]["cache_read_tokens"] += cr
-        by_model[model]["cache_create_tokens"] += cc
-        by_model[model]["messages"] += 1
-
-        date_key = ts_date.isoformat()
-        by_date[date_key]["input_tokens"] += inp
-        by_date[date_key]["output_tokens"] += out
-        by_date[date_key]["cache_read_tokens"] += cr
-        by_date[date_key]["cache_create_tokens"] += cc
-        by_date[date_key]["messages"] += 1
+        if is_subagent:
+            totals["subagent_messages"] += 1
+        else:
+            totals["main_messages"] += 1
 
     totals["unique_sessions"] = len(totals["unique_sessions"])
 
-    return totals, dict(by_model), dict(by_date)
+    return totals, dict(by_model), dict(by_date), dict(by_category)
 
 
 def compute_cost_usd(usage, model):
@@ -216,7 +360,7 @@ def generate_daily_report(target_date=None, include_commits=False):
     date_start = target_date
     date_end = target_date + timedelta(days=1)
 
-    totals, by_model, by_date = aggregate_usage(date_start, date_end)
+    totals, by_model, by_date, by_category = aggregate_usage(date_start, date_end)
 
     # 計算各模型成本
     cost_by_model = {}
@@ -225,6 +369,13 @@ def generate_daily_report(target_date=None, include_commits=False):
         cost = compute_cost_usd(usage, model)
         cost_by_model[model] = cost
         total_cost_usd += cost
+
+    # 各類別成本（按消息比例分配到 Opus，因為幾乎全是 Opus）
+    cost_by_category = {}
+    for cat, usage in by_category.items():
+        # Use the dominant model's pricing
+        dominant_model = max(by_model.keys(), key=lambda m: by_model[m]["messages"]) if by_model else "claude-opus-4-6"
+        cost_by_category[cat] = compute_cost_usd(usage, dominant_model)
 
     week_start, week_end = get_friday_week_range(target_date)
 
@@ -243,7 +394,7 @@ def generate_daily_report(target_date=None, include_commits=False):
                 + totals["output_tokens"]
                 + totals["cache_create_tokens"]
             ),
-            "assistant_messages": totals["assistant_messages"],
+            "assistant_messages": totals["messages"],
             "unique_sessions": totals["unique_sessions"],
             "estimated_cost_usd": round(total_cost_usd, 4),
         },
@@ -253,6 +404,16 @@ def generate_daily_report(target_date=None, include_commits=False):
                 "estimated_cost_usd": round(cost_by_model[model], 4),
             }
             for model, usage in by_model.items()
+        },
+        "by_category": {
+            cat: {
+                **usage,
+                "billable_total": usage["input_tokens"] + usage["output_tokens"] + usage["cache_create_tokens"],
+                "estimated_cost_usd": round(cost_by_category[cat], 4),
+                "emoji": CATEGORY_META.get(cat, ("❔", cat))[0],
+                "description": CATEGORY_META.get(cat, ("❔", cat))[1],
+            }
+            for cat, usage in sorted(by_category.items(), key=lambda x: -cost_by_category.get(x[0], 0))
         },
     }
 
@@ -272,7 +433,7 @@ def generate_weekly_report(week_start=None):
         week_start, _ = get_friday_week_range(today)
 
     week_end = week_start + timedelta(days=7)
-    totals, by_model, by_date = aggregate_usage(week_start, week_end)
+    totals, by_model, by_date, by_category = aggregate_usage(week_start, week_end)
 
     cost_by_model = {}
     total_cost_usd = 0.0
@@ -280,6 +441,12 @@ def generate_weekly_report(week_start=None):
         cost = compute_cost_usd(usage, model)
         cost_by_model[model] = cost
         total_cost_usd += cost
+
+    # 各類別成本
+    cost_by_category = {}
+    for cat, usage in by_category.items():
+        dominant_model = max(by_model.keys(), key=lambda m: by_model[m]["messages"]) if by_model else "claude-opus-4-6"
+        cost_by_category[cat] = compute_cost_usd(usage, dominant_model)
 
     # Per-day breakdown with cost
     daily_breakdown = {}
@@ -309,7 +476,7 @@ def generate_weekly_report(week_start=None):
                 + totals["output_tokens"]
                 + totals["cache_create_tokens"]
             ),
-            "assistant_messages": totals["assistant_messages"],
+            "assistant_messages": totals["messages"],
             "unique_sessions": totals["unique_sessions"],
             "estimated_cost_usd": round(total_cost_usd, 4),
         },
@@ -319,6 +486,16 @@ def generate_weekly_report(week_start=None):
                 "estimated_cost_usd": round(cost_by_model[model], 4),
             }
             for model, usage in by_model.items()
+        },
+        "by_category": {
+            cat: {
+                **usage,
+                "billable_total": usage["input_tokens"] + usage["output_tokens"] + usage["cache_create_tokens"],
+                "estimated_cost_usd": round(cost_by_category[cat], 4),
+                "emoji": CATEGORY_META.get(cat, ("❔", cat))[0],
+                "description": CATEGORY_META.get(cat, ("❔", cat))[1],
+            }
+            for cat, usage in sorted(by_category.items(), key=lambda x: -cost_by_category.get(x[0], 0))
         },
         "daily_breakdown": daily_breakdown,
     }
@@ -344,7 +521,7 @@ def format_report_text(report):
         lines.append(f"**週期**: {report['week_range']}")
 
     lines.append(f"**數據源**: {report['source']}")
-    lines.append(f"**Assistant messages**: {t['assistant_messages']:,}")
+    lines.append(f"**Assistant messages**: {t.get('assistant_messages', t.get('messages', 0)):,}")
     lines.append(f"**Sessions**: {t['unique_sessions']}")
     lines.append("")
 
@@ -370,6 +547,21 @@ def format_report_text(report):
                 f"| {model} | {u['messages']:,} | "
                 f"{u['input_tokens']:,} | {u['output_tokens']:,} | "
                 f"{u['cache_read_tokens']:,} | ${u['estimated_cost_usd']} |"
+            )
+        lines.append("")
+
+    # By task category
+    if report.get("by_category"):
+        lines.append("## 按任務類別分布（依成本排序）")
+        lines.append("| 類別 | Messages | Billable | Cost USD | 佔比 |")
+        lines.append("|------|----------|----------|----------|------|")
+        total_cost = t.get("estimated_cost_usd", 0) or 0.0001
+        for cat, u in report["by_category"].items():
+            pct = u["estimated_cost_usd"] / total_cost * 100 if total_cost else 0
+            bar = "█" * max(1, int(pct / 5))
+            lines.append(
+                f"| {u['emoji']} {u['description']} | {u['messages']:,} | "
+                f"{u['billable_total']:,} | ${u['estimated_cost_usd']} | {pct:.1f}% {bar} |"
             )
         lines.append("")
 
