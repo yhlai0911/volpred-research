@@ -1,0 +1,407 @@
+{
+  "experiment_id": "K1084",
+  "title": "Realized Skewness and Kurtosis \u2014 Higher-Order Moments for Volatility Prediction",
+  "timestamp": "2026-04-12T22:31:11.087348+00:00",
+  "status": "PRELIMINARY",
+  "random_seed": 42,
+  "data": {
+    "source": "SPY 5-min CSV (data/intraday/) + yfinance daily",
+    "n_5min_files": 60,
+    "n_5min_days_processed": 60,
+    "n_daily_spy": 2581,
+    "n_vix": 2582
+  },
+  "design": {
+    "target": "RV_{t+1}",
+    "init_window": 30,
+    "n_oos": 30,
+    "oos_start": "2026-02-27",
+    "oos_end": "2026-04-10",
+    "models": [
+      "HAR-RV",
+      "HAR-RSk",
+      "HAR-RKt",
+      "HAR-SJ",
+      "HAR-Full",
+      "GJR-GARCH",
+      "A4f-VIX2"
+    ],
+    "var_methods": [
+      "Normal",
+      "Student-t_df5",
+      "Cornish-Fisher"
+    ]
+  },
+  "descriptive": {
+    "n_days": 60,
+    "date_start": "2026-01-14",
+    "date_end": "2026-04-10",
+    "n_bars": {
+      "mean": 74.96666666666667,
+      "min": 9,
+      "max": 77
+    },
+    "rv": {
+      "mean": 5.467345761258861e-05,
+      "std": 3.091222024495199e-05,
+      "skew": 0.3890033010739378,
+      "kurtosis": -0.4812661092469548
+    },
+    "rsk": {
+      "mean": 0.058954761865840796,
+      "std": 0.7385201735265927,
+      "min": -1.3328840916347287,
+      "max": 2.022943812931206,
+      "pct_negative": 0.4666666666666667,
+      "p01": -1.2508452354961583,
+      "p99": 1.8285046940347676,
+      "t_null_zero": 0.6131723068037538,
+      "p_null_zero": 0.5421190428329721
+    },
+    "rkt": {
+      "mean": 4.491000709829267,
+      "std": 1.7121060980811034,
+      "min": 2.1427738453397516,
+      "max": 12.662960226923097,
+      "pct_above_bm_null_3": 0.85,
+      "p01": 2.381094504277169,
+      "p99": 10.418763264675269,
+      "t_null_bm3": 6.689184610235316,
+      "p_null_bm3": 9.066118728191744e-09
+    },
+    "acf": {
+      "rv": {
+        "lag1": 0.28436769470875645,
+        "lag5": 0.0388510172373573,
+        "lag22": 0.10611303502506872
+      },
+      "rsk": {
+        "lag1": -0.46177457073073863,
+        "lag5": 0.03778826434838155,
+        "lag22": -0.1070482120007532
+      },
+      "rkt": {
+        "lag1": 0.36131328520700146,
+        "lag5": -0.0780414802914464,
+        "lag22": -0.00977269043015949
+      },
+      "sj": {
+        "lag1": -0.23709867957738012,
+        "lag5": 0.007868645951119038,
+        "lag22": -0.10445471197858895
+      },
+      "abs_rsk": {
+        "lag1": 0.3369581678067729,
+        "lag5": -0.1983540093389663,
+        "lag22": -0.14387503922083697
+      }
+    },
+    "correlations": {
+      "rv_rsk": 0.17448502017387574,
+      "rv_abs_rsk": 0.0634586007392771,
+      "rv_rkt": 0.06769661748085735,
+      "rsk_rkt": 0.3152195065641334
+    },
+    "leverage": {
+      "r_t_vs_rsk_tp1": -0.13620785745803854,
+      "r_t_vs_rkt_tp1": 0.2339808822257768
+    }
+  },
+  "full_sample_coefs": {
+    "HAR-RV": {
+      "intercept": 2.4929164071451258e-05,
+      "intercept_t": 1.5627811449635616,
+      "RV_d": 0.26869054750000276,
+      "RV_d_t": 1.7877397014014913,
+      "RV_w": -0.28483020625770716,
+      "RV_w_t": -0.7697304699515405,
+      "RV_m": 0.6046363831946672,
+      "RV_m_t": 1.2680777550347524
+    },
+    "HAR-RSk": {
+      "intercept": 2.8430306543398416e-05,
+      "intercept_t": 1.8971844457640432,
+      "RV_d": 0.3491315488991407,
+      "RV_d_t": 2.4353008190712564,
+      "RV_w": -0.21057922143526492,
+      "RV_w_t": -0.6060788854862051,
+      "RV_m": 0.38531975244185707,
+      "RV_m_t": 0.8512267615685641,
+      "RSk_d": -1.5056665788193006e-05,
+      "RSk_d_t": -2.9520031761769787
+    },
+    "HAR-RKt": {
+      "intercept": 4.2497236451223445e-05,
+      "intercept_t": 2.572977265858304,
+      "RV_d": 0.23680698412828202,
+      "RV_d_t": 1.6544624665087395,
+      "RV_w": -0.1902805958816122,
+      "RV_w_t": -0.5391033058816485,
+      "RV_m": 0.7226295626018409,
+      "RV_m_t": 1.5893842063253165,
+      "RKt_d": -5.981375773976442e-06,
+      "RKt_d_t": -2.6593111634326188
+    },
+    "HAR-SJ": {
+      "intercept": 1.8591588713080088e-05,
+      "intercept_t": 1.2418308985603932,
+      "RV_d": 0.39984447837221304,
+      "RV_d_t": 2.7388248114981337,
+      "RV_w": -0.29223786862446777,
+      "RV_w_t": -0.8494048505698828,
+      "RV_m": 0.612968583525449,
+      "RV_m_t": 1.3826680363778154,
+      "SJ_d": -0.7809949759943311,
+      "SJ_d_t": -3.1025844186825946
+    },
+    "HAR-Full": {
+      "intercept": 3.519699999424891e-05,
+      "intercept_t": 1.958400892323684,
+      "RV_d": 0.33537842560562003,
+      "RV_d_t": 2.232569894787062,
+      "RV_w": -0.19292946637224556,
+      "RV_w_t": -0.5546261357416659,
+      "RV_m": 0.5732728016064131,
+      "RV_m_t": 1.2400846778791053,
+      "RSk_d": -7.353098525662581e-06,
+      "RSk_d_t": -0.8147496716887482,
+      "RKt_d": -3.6880043265954636e-06,
+      "RKt_d_t": -1.485009051038266,
+      "SJ_d": -0.2802469234496368,
+      "SJ_d_t": -0.5907024795074997
+    }
+  },
+  "evaluation_rv_target": {
+    "HAR-RV": {
+      "QLIKE": -8.597298302064429,
+      "MSE": 1.064748461125233e-09,
+      "n": 30
+    },
+    "HAR-RSk": {
+      "QLIKE": -8.621414292810114,
+      "MSE": 8.872234894411047e-10,
+      "n": 30
+    },
+    "HAR-RKt": {
+      "QLIKE": -8.580538958235225,
+      "MSE": 9.99902380901398e-10,
+      "n": 30
+    },
+    "HAR-SJ": {
+      "QLIKE": -8.611592352133274,
+      "MSE": 8.869426949058021e-10,
+      "n": 30
+    },
+    "HAR-Full": {
+      "QLIKE": -8.575798197456184,
+      "MSE": 9.14617901306463e-10,
+      "n": 30
+    },
+    "GJR-GARCH": {
+      "QLIKE_RV": -8.504157721030316,
+      "QLIKE_r2": -8.069672361796608,
+      "n_rv": 30,
+      "n_r2": 30
+    },
+    "A4f-VIX2": {
+      "QLIKE_RV": -8.074223666149068,
+      "QLIKE_r2": -7.894750966650074,
+      "n_rv": 30,
+      "n_r2": 30
+    }
+  },
+  "dm_tests_vs_har_rv": {
+    "HAR-RSk_vs_HAR-RV": {
+      "t_stat": -1.7782584084643716,
+      "p_value": 0.08584893443303399,
+      "harvey_significant": false,
+      "direction": "alt_better"
+    },
+    "HAR-RKt_vs_HAR-RV": {
+      "t_stat": 0.6713483975274386,
+      "p_value": 0.5073114356371495,
+      "harvey_significant": false,
+      "direction": "base_better"
+    },
+    "HAR-SJ_vs_HAR-RV": {
+      "t_stat": -0.8299256695070055,
+      "p_value": 0.41336084205823176,
+      "harvey_significant": false,
+      "direction": "alt_better"
+    },
+    "HAR-Full_vs_HAR-RV": {
+      "t_stat": 0.5297090764433915,
+      "p_value": 0.6003459197899395,
+      "harvey_significant": false,
+      "direction": "base_better"
+    }
+  },
+  "var_tests": {
+    "5%": {
+      "Normal": {
+        "n": 30,
+        "violations": 6,
+        "viol_rate": 0.2,
+        "target_rate": 0.05,
+        "kupiec_LR": 8.386720000959052,
+        "kupiec_p": 0.003779723626145981,
+        "pass_kupiec": false
+      },
+      "Student-t_df5": {
+        "n": 30,
+        "violations": 6,
+        "viol_rate": 0.2,
+        "target_rate": 0.05,
+        "kupiec_LR": 8.386720000959052,
+        "kupiec_p": 0.003779723626145981,
+        "pass_kupiec": false
+      },
+      "Cornish-Fisher": {
+        "n": 30,
+        "violations": 5,
+        "viol_rate": 0.16666666666666666,
+        "target_rate": 0.05,
+        "kupiec_LR": 5.488314922939161,
+        "kupiec_p": 0.019143985615877934,
+        "pass_kupiec": false
+      }
+    },
+    "1%": {
+      "Normal": {
+        "n": 30,
+        "violations": 1,
+        "viol_rate": 0.03333333333333333,
+        "target_rate": 0.01,
+        "kupiec_LR": 1.0245750909654383,
+        "kupiec_p": 0.3114362374474279,
+        "pass_kupiec": true
+      },
+      "Student-t_df5": {
+        "n": 30,
+        "violations": 0,
+        "viol_rate": 0.0,
+        "target_rate": 0.01,
+        "kupiec_LR": 0.0,
+        "kupiec_p": 1.0,
+        "pass_kupiec": true
+      },
+      "Cornish-Fisher": {
+        "n": 30,
+        "violations": 1,
+        "viol_rate": 0.03333333333333333,
+        "target_rate": 0.01,
+        "kupiec_LR": 1.0245750909654383,
+        "kupiec_p": 0.3114362374474279,
+        "pass_kupiec": true
+      }
+    }
+  },
+  "regime_analysis": {
+    "vix_median_oos": 24.735000610351562,
+    "low_n": 15,
+    "high_n": 15,
+    "by_regime": {
+      "Low": {
+        "HAR-RV": {
+          "QLIKE": -8.718807479954,
+          "n": 15
+        },
+        "HAR-RSk": {
+          "QLIKE": -8.764432608341929,
+          "n": 15
+        },
+        "HAR-RKt": {
+          "QLIKE": -8.679392453415943,
+          "n": 15
+        },
+        "HAR-Full": {
+          "QLIKE": -8.665200247027549,
+          "n": 15
+        },
+        "DM_Full_vs_RV": {
+          "t_stat": 0.6610103279825327,
+          "p_value": 0.5193360384662404,
+          "harvey_significant": false
+        }
+      },
+      "High": {
+        "HAR-RV": {
+          "QLIKE": -8.475789124174856,
+          "n": 15
+        },
+        "HAR-RSk": {
+          "QLIKE": -8.478395977278296,
+          "n": 15
+        },
+        "HAR-RKt": {
+          "QLIKE": -8.481685463054507,
+          "n": 15
+        },
+        "HAR-Full": {
+          "QLIKE": -8.48639614788482,
+          "n": 15
+        },
+        "DM_Full_vs_RV": {
+          "t_stat": -0.8015436845932826,
+          "p_value": 0.4362108826937443,
+          "harvey_significant": false
+        }
+      }
+    }
+  },
+  "references": [
+    "Amaya, Christoffersen, Jacobs & Vasquez (2015). JFE 118(1), 135-167.",
+    "Barndorff-Nielsen, Kinnebrock & Shephard (2010). Festschrift for R. Engle.",
+    "Neuberger (2012). RFS 25(11).",
+    "Corsi (2009). JoFE 7(2).",
+    "Patton (2011). JoE.",
+    "Harvey (2016). RFS 29(1)."
+  ],
+  "conclusions": {
+    "H1_rsk_beats_har": {
+      "question": "Does RSk have incremental predictive power for RV?",
+      "dm_t_stat": -1.7782584084643716,
+      "dm_p_value": 0.08584893443303399,
+      "harvey_significant": false,
+      "qlike_improvement_pct": 0.28050661845586833,
+      "verdict": "NULL"
+    },
+    "H2_rkt_predicts_tail": {
+      "question": "Does RKt predict tail risk (VaR violations)?",
+      "kupiec_5pct_normal": false,
+      "kupiec_5pct_cf": false,
+      "kupiec_1pct_normal": true,
+      "kupiec_1pct_cf": true,
+      "verdict": "see var_tests section"
+    },
+    "H3_har_full_improvement": {
+      "question": "Does HAR-Full (RV+RSk+RKt+SJ) beat HAR-RV?",
+      "dm_t_stat": 0.5297090764433915,
+      "dm_p_value": 0.6003459197899395,
+      "harvey_significant": false,
+      "qlike_improvement_pct": -0.25007977916832935,
+      "verdict": "NULL"
+    },
+    "H4_regime_dependent": {
+      "question": "Are higher-moment effects regime-dependent?",
+      "low_vix_dm": {
+        "t_stat": 0.6610103279825327,
+        "p_value": 0.5193360384662404,
+        "harvey_significant": false
+      },
+      "high_vix_dm": {
+        "t_stat": -0.8015436845932826,
+        "p_value": 0.4362108826937443,
+        "harvey_significant": false
+      },
+      "verdict": "see regime_analysis section"
+    },
+    "best_model_by_qlike": {
+      "name": "HAR-RSk",
+      "qlike": -8.621414292810114,
+      "improvement_vs_har_rv_pct": 0.28050661845586833
+    },
+    "paper9_implication": "NULL \u2014 semi-variance (K1063) already captures the asymmetry signal; higher moments do not add Harvey-significant incremental predictive power. Paper 9 should stick with HAR-semi-variance specification.",
+    "caveats": "PRELIMINARY: 60-day 5-min sample. OOS n=30 days. Harvey |t|>3.0 is strict. Results may differ with longer sample. Replicate in K1085+ when 5-min backfill extends beyond 2026-04-10."
+  }
+}
