@@ -24649,5 +24649,43 @@
     "data_source": "yfinance SPY/VIX 2005-2026",
     "confidence": 0.95,
     "timestamp": "2026-04-11T20:23:37.006104+00:00"
+  },
+  {
+    "id": "know_20260411222319_k1057",
+    "experiment_id": "K1057",
+    "title": "K1057: HAR-RV-J Jump Decomposition NULL — Jump Component Adds Noise, Not Signal",
+    "content": "[提出: Claude, 執行: Claude] K1057 decomposes 60-day SPY 5-min RV into continuous (BPV) and jump components (BN-S 2006). 8/60 significant jumps (13.3%), jump fraction 3.9% of total RV. KEY NULL: Adding jump to HAR does NOT improve forecasting — HAR-RV (-8.597) > HAR-RV-J (-8.572) > HAR-CJ (-8.546) on RV proxy. Jump ACF(1)=-0.056 confirms jumps unpredictable. HAR-C (denoised BPV only) also doesn't beat standard HAR-RV. PROXY SENSITIVITY (mechanical): rankings completely flip — RV proxy: HAR-RV wins; r² proxy: GJR-GARCH wins. This is NOT empirical — each model wins on its native target. A4f has best Spearman rho=0.313 on both proxies despite not winning QLIKE. Overnight return² = 32.7% of total variance, low correlation with intraday RV (0.186). Status: PRELIMINARY (30 OOS days).",
+    "tags": [
+      "HAR-RV-J",
+      "jump",
+      "bipower-variation",
+      "5-min",
+      "microstructure",
+      "NULL",
+      "PRELIMINARY"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance SPY daily + data/intraday/ 5-min (60 days)",
+    "confidence": 0.6,
+    "timestamp": "2026-04-11T22:23:19.478490+00:00"
+  },
+  {
+    "id": "know_20260412002248_k1058",
+    "experiment_id": "K1058",
+    "title": "K1058: A4f on 0050.TW — Direction Correct but DM NS (t=-1.26), VaR Trinity A4f PASS / GJR FAIL",
+    "content": "[提出: Claude, 執行: Claude] K1058 tests A4f (VIX²) on 0050.TW (Taiwan ETF). OOS 2019-2026 (1,760 days), w=2000, refit 63d. QLIKE: A4f 1.4363 vs GJR 1.4614, improvement 0.98% but DM t=-1.26 (NS, well below Harvey 3.0). For comparison SPY DM t=-4.48 (K988). VaR 1%: A4f Trinity PASS (Kupiec p=0.070, CC p=0.367, Basel Green) vs GJR FAIL (Kupiec p=7.6e-5, Basel Yellow) — economic significance even without statistical significance. Spearman: A4f 0.263 vs GJR 0.220. theta1 highly unstable (mean=1.3e-5, std=5.0e-5) — VIX-to-Taiwan transmission erratic. Regime: improvement concentrated in normal VIX (15-25: +3.1%) and crisis (>35: +7.0%). Paper 9 implication: cross-market effect is directionally consistent but diminished; VaR Trinity PASS is the stronger argument for 0050.TW.",
+    "tags": [
+      "A4f",
+      "0050.TW",
+      "Taiwan",
+      "cross-market",
+      "VaR",
+      "Paper9",
+      "mixed-result"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance 0050.TW/VIX 2005-2026, n_oos=1760",
+    "confidence": 0.8,
+    "timestamp": "2026-04-12T00:22:48.760547+00:00"
   }
 ]
