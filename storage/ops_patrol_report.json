@@ -1,37 +1,39 @@
 {
-  "timestamp": "2026-04-12T06:20:37Z",
-  "all_ok": true,
+  "timestamp": "2026-04-12T12:16:28.010880+00:00",
+  "all_ok": false,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "4 draft articles in storage/reports/feed.json (threshold: >=3)"
+      "detail": "4 draft articles in pool (threshold: <3)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json age: ~0.02 hours (last modified ~2026-04-12T06:20Z UTC, threshold: 26h)"
+      "detail": "strategy_metrics.json is 0.0h old (threshold: >26h)"
     },
     {
       "name": "ERROR_LOG",
-      "status": "ok",
-      "detail": "Last entry dated 2026-04-11: article_tags badge inconsistency + old tags residual after update. Root cause fixed in publisher.py and _sync_article_tags(). Informational only — all resolved."
+      "status": "alert",
+      "detail": "2026-04-11 (yesterday): article_tags sync bug — badge inconsistency + stale tags residue in Supabase. Root causes: publisher.py missing audience tag map, _sync_article_tags() not deleting old tags, member-questions skill missing --category flag. Fixed in publisher.py + _sync_article_tags() + frontend-v2-fix badge color."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All 14 strategies show exactly 1 null in last 3 entries (today entry pending daily_update.py at 08:03 TWN). No strategy exceeds threshold of >2 nulls."
+      "detail": "All strategies: <2 null portfolio_returns in last 3 entries"
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: 50)"
+      "detail": "0 uncommitted files (threshold: >50)"
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1834 entries in storage/memory/knowledge.json"
+      "detail": "1836 entries in knowledge.json"
     }
   ],
-  "alerts": []
+  "alerts": [
+    "error_log: yesterday entry (2026-04-11) — article_tags sync + badge inconsistency fix applied"
+  ]
 }
