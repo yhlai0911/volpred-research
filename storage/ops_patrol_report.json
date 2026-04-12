@@ -1,26 +1,26 @@
 {
-  "timestamp": "2026-04-12T00:34:08Z",
-  "all_ok": false,
+  "timestamp": "2026-04-12T06:20:37Z",
+  "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "4 draft articles in pool (threshold: >=3)"
+      "detail": "4 draft articles in storage/reports/feed.json (threshold: >=3)"
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json age: ~0.0 hours (threshold: 26h)"
+      "detail": "storage/strategy_metrics.json age: ~0.02 hours (last modified ~2026-04-12T06:20Z UTC, threshold: 26h)"
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "Recent entries found: 2026-04-11 (article_tags badge inconsistency + old tags residual), 2026-04-09 (article_tags sync issue). Both resolved."
+      "status": "ok",
+      "detail": "Last entry dated 2026-04-11: article_tags badge inconsistency + old tags residual after update. Root cause fixed in publisher.py and _sync_article_tags(). Informational only — all resolved."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "No strategy has >2 null portfolio_return in last 3 entries"
+      "detail": "All 14 strategies show exactly 1 null in last 3 entries (today entry pending daily_update.py at 08:03 TWN). No strategy exceeds threshold of >2 nulls."
     },
     {
       "name": "GIT_STATUS",
@@ -30,10 +30,8 @@
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1830 entries in knowledge.json"
+      "detail": "1834 entries in storage/memory/knowledge.json"
     }
   ],
-  "alerts": [
-    "error_log_recent_entries: 2026-04-11 article_tags badge inconsistency (resolved), 2026-04-09 article_tags sync (resolved)"
-  ]
+  "alerts": []
 }
