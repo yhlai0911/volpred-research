@@ -1,0 +1,2490 @@
+{
+  "experiment_id": "K1071",
+  "title": "Right-Tail CASV Decomposition — Which Events Drive 0050.TW's Vol Spike?",
+  "proposer": "Claude (Paper 2 Taiwan VT track)",
+  "executor": "Claude (worktree)",
+  "timestamp_utc": "2026-04-12T18:43:22.719338+00:00",
+  "runtime_seconds": 4.2,
+  "random_seed": 42,
+  "config": {
+    "start_date": "2010-01-01",
+    "end_date": "2025-12-31",
+    "event_window": "[-5,+5]",
+    "estimation_window": "[-250,-11]",
+    "min_estimation": 100,
+    "market_index": "^TWII",
+    "etf_ticker": "0050.TW",
+    "crisis_vix_threshold": 25.0,
+    "twse50_codes": [
+      "1101",
+      "1102",
+      "1216",
+      "1301",
+      "1303",
+      "1326",
+      "2002",
+      "2105",
+      "2207",
+      "2301",
+      "2303",
+      "2313",
+      "2317",
+      "2324",
+      "2327",
+      "2330",
+      "2347",
+      "2352",
+      "2353",
+      "2354",
+      "2356",
+      "2357",
+      "2376",
+      "2379",
+      "2382",
+      "2385",
+      "2404",
+      "2408",
+      "2409",
+      "2412",
+      "2439",
+      "2449",
+      "2454",
+      "2458",
+      "2474",
+      "2492",
+      "2603",
+      "2610",
+      "2615",
+      "2618",
+      "2801",
+      "2809",
+      "2812",
+      "2823",
+      "2834",
+      "2836",
+      "2838",
+      "2881",
+      "2882",
+      "2883",
+      "2884",
+      "2885",
+      "2886",
+      "2887",
+      "2888",
+      "2889",
+      "2890",
+      "2891",
+      "2892",
+      "2912",
+      "3008",
+      "3034",
+      "3037",
+      "3044",
+      "3045",
+      "3231",
+      "3481",
+      "3702",
+      "3711",
+      "4904",
+      "5880",
+      "6669",
+      "9910",
+      "9914",
+      "9921",
+      "9933",
+      "9945"
+    ]
+  },
+  "data_summary": {
+    "n_announcement_records": 116856,
+    "n_twse50_records": 4862,
+    "n_unique_companies_twse50": 77,
+    "n_trading_days": 3906,
+    "trading_day_start": "2010-01-05",
+    "trading_day_end": "2025-12-30"
+  },
+  "setC_reproduction": {
+    "n_events_attempted": 1062,
+    "n_events_used": 999,
+    "mean_CAR": -0.0007589748454644766,
+    "std_CAR": 0.010873741767965897,
+    "mean_CASV": 2.781347716193266,
+    "median_CASV": -2.3635315591003865,
+    "std_CASV": 41.3637845099764,
+    "note": "Reproduces K1070 Set C (TWSE-50 union) per-event CAR/CASV."
+  },
+  "tail_split": {
+    "n_total": 999,
+    "n_top10": 100,
+    "n_middle80": 799,
+    "n_bottom10": 100,
+    "top10": {
+      "mean_CASV": 48.250481882719114,
+      "min_CASV": 9.957461681898325,
+      "max_CASV": 882.4377670999738,
+      "share_of_total_mean": 1.7365243612721448
+    },
+    "middle80": {
+      "mean_CASV": -1.526571940829851,
+      "median_CASV": -2.3635315591003865
+    },
+    "bottom10": {
+      "mean_CASV": -8.267508390717879,
+      "min_CASV": -10.190679965544392,
+      "max_CASV": -7.276406747024223
+    }
+  },
+  "stripped_tests": {
+    "full_N999": {
+      "n": 999,
+      "mean_CASV": 2.781347716193266,
+      "median_CASV": -2.3635315591003865,
+      "std_CASV": 41.3637845099764,
+      "t_stat": 2.125287870869195,
+      "p_value": 0.033807726692611784
+    },
+    "excl_top10pct": {
+      "n": 899,
+      "mean_CASV": -2.2763980197940366,
+      "median_CASV": -2.897576310031153,
+      "std_CASV": 4.441992780339286,
+      "t_stat": -15.365623821854223,
+      "p_value": 0.0
+    },
+    "excl_top5pct": {
+      "n": 949,
+      "mean_CASV": -1.3238530903349737,
+      "median_CASV": -2.655795371472149,
+      "std_CASV": 6.026677287803463,
+      "t_stat": -6.7669810916794395,
+      "p_value": 2.3001600624183993e-11
+    },
+    "excl_both_tails_10": {
+      "n": 799,
+      "mean_CASV": -1.526571940829851,
+      "median_CASV": -2.3635315591003865,
+      "std_CASV": 4.131033180229987,
+      "t_stat": -10.445566108485528,
+      "p_value": 0.0
+    },
+    "excl_both_tails_5": {
+      "n": 899,
+      "mean_CASV": -0.9031169357626653,
+      "median_CASV": -2.3635315591003865,
+      "std_CASV": 5.9123625127128205,
+      "t_stat": -4.579971522771964,
+      "p_value": 5.3064100369315526e-06
+    }
+  },
+  "winsor_trim": {
+    "raw_mean": 2.781347716193266,
+    "raw_median": -2.3635315591003865,
+    "winsor_95_mean": 0.615744690143044,
+    "winsor_90_mean": 0.13655062747429347,
+    "trimmed_95_mean": -0.148809971996462,
+    "trimmed_90_mean": -0.8800619325290642
+  },
+  "bootstrap_CI": {
+    "raw_mean": {
+      "mean": 2.7637038719081004,
+      "ci2.5": 0.6407000623510256,
+      "ci97.5": 5.792891164446198
+    },
+    "trimmed_95_mean": {
+      "mean": -0.13966575767659328,
+      "ci2.5": -0.7828313189137219,
+      "ci97.5": 0.5663051213817559
+    },
+    "trimmed_90_mean": {
+      "mean": -0.869071663524074,
+      "ci2.5": -1.4060918231230048,
+      "ci97.5": -0.24787761845891118
+    }
+  },
+  "year_distribution": [
+    {
+      "year": 2011,
+      "n_events": 60,
+      "n_top10": 17,
+      "expected_top10": 6.01,
+      "top10_share": 0.2833333333333333
+    },
+    {
+      "year": 2012,
+      "n_events": 17,
+      "n_top10": 0,
+      "expected_top10": 1.7,
+      "top10_share": 0.0
+    },
+    {
+      "year": 2013,
+      "n_events": 43,
+      "n_top10": 0,
+      "expected_top10": 4.3,
+      "top10_share": 0.0
+    },
+    {
+      "year": 2014,
+      "n_events": 59,
+      "n_top10": 6,
+      "expected_top10": 5.91,
+      "top10_share": 0.1016949152542373
+    },
+    {
+      "year": 2015,
+      "n_events": 62,
+      "n_top10": 0,
+      "expected_top10": 6.21,
+      "top10_share": 0.0
+    },
+    {
+      "year": 2016,
+      "n_events": 68,
+      "n_top10": 0,
+      "expected_top10": 6.81,
+      "top10_share": 0.0
+    },
+    {
+      "year": 2017,
+      "n_events": 71,
+      "n_top10": 5,
+      "expected_top10": 7.11,
+      "top10_share": 0.07042253521126761
+    },
+    {
+      "year": 2018,
+      "n_events": 69,
+      "n_top10": 10,
+      "expected_top10": 6.91,
+      "top10_share": 0.14492753623188406
+    },
+    {
+      "year": 2019,
+      "n_events": 71,
+      "n_top10": 0,
+      "expected_top10": 7.11,
+      "top10_share": 0.0
+    },
+    {
+      "year": 2020,
+      "n_events": 76,
+      "n_top10": 18,
+      "expected_top10": 7.61,
+      "top10_share": 0.23684210526315788
+    },
+    {
+      "year": 2021,
+      "n_events": 85,
+      "n_top10": 11,
+      "expected_top10": 8.51,
+      "top10_share": 0.12941176470588237
+    },
+    {
+      "year": 2022,
+      "n_events": 87,
+      "n_top10": 10,
+      "expected_top10": 8.71,
+      "top10_share": 0.11494252873563218
+    },
+    {
+      "year": 2023,
+      "n_events": 80,
+      "n_top10": 0,
+      "expected_top10": 8.01,
+      "top10_share": 0.0
+    },
+    {
+      "year": 2024,
+      "n_events": 75,
+      "n_top10": 22,
+      "expected_top10": 7.51,
+      "top10_share": 0.29333333333333333
+    },
+    {
+      "year": 2025,
+      "n_events": 76,
+      "n_top10": 1,
+      "expected_top10": 7.61,
+      "top10_share": 0.013157894736842105
+    }
+  ],
+  "announcement_count": {
+    "top10": {
+      "count": 100.0,
+      "mean": 4.15,
+      "std": 4.257791432044068,
+      "min": 1.0,
+      "25%": 1.0,
+      "50%": 3.0,
+      "75%": 6.0,
+      "max": 19.0
+    },
+    "middle80": {
+      "count": 799.0,
+      "mean": 4.620775969962453,
+      "std": 6.094298160888405,
+      "min": 1.0,
+      "25%": 1.0,
+      "50%": 2.0,
+      "75%": 6.0,
+      "max": 78.0
+    },
+    "ks_p_value": 0.8639815833437349,
+    "mannwhitney_p_value": 0.5748567524231153
+  },
+  "sector": {
+    "top10_share": {
+      "tech": 0.43614457831325304,
+      "financial": 0.17349397590361446,
+      "traditional": 0.2674698795180723,
+      "other": 0.12289156626506025
+    },
+    "middle80_share": {
+      "tech": 0.4005958829902492,
+      "financial": 0.2586673889490791,
+      "traditional": 0.23672806067172264,
+      "other": 0.10400866738894908
+    },
+    "all_share": {
+      "tech": 0.39640823477879983,
+      "financial": 0.2619360490582567,
+      "traditional": 0.23653088042049936,
+      "other": 0.10512483574244415
+    },
+    "fisher_tech": {
+      "table": [
+        [
+          181,
+          234
+        ],
+        [
+          1479,
+          2213
+        ]
+      ],
+      "odds_ratio": 1.1573799575827974,
+      "p_value": 0.17024053980023504
+    },
+    "fisher_financial": {
+      "table": [
+        [
+          72,
+          343
+        ],
+        [
+          955,
+          2737
+        ]
+      ],
+      "odds_ratio": 0.6016027353349717,
+      "p_value": 9.858606710320134e-05
+    },
+    "fisher_traditional": {
+      "table": [
+        [
+          111,
+          304
+        ],
+        [
+          874,
+          2818
+        ]
+      ],
+      "odds_ratio": 1.1772777911598218,
+      "p_value": 0.163643887832929
+    }
+  },
+  "market_comovement": {
+    "vix_level": {
+      "top10_mean": 26.803300075531006,
+      "middle80_mean": 18.09727162801578,
+      "top10_median": 22.440000534057617,
+      "middle80_median": 16.479999542236328,
+      "ks_p_value": 8.919246192482865e-09,
+      "mannwhitney_p_value": 1.8576919613836583e-10
+    },
+    "high_vix_regime_share": {
+      "top10": 0.33,
+      "middle80": 0.13642052565707133,
+      "all": 0.14614614614614616,
+      "fisher_p": 6.75613187312064e-06,
+      "table": [
+        [
+          33,
+          67
+        ],
+        [
+          109,
+          690
+        ]
+      ]
+    },
+    "spy_abs_return": {
+      "top10_mean": 0.014684407214404926,
+      "middle80_mean": 0.007089293972350122,
+      "ks_p_value": 4.746829159166867e-06,
+      "mannwhitney_p_value": 1.4144153027834606e-07
+    }
+  },
+  "regime_stats": {
+    "high": {
+      "n": 146,
+      "mean_CASV": 8.398167086746572,
+      "median_CASV": -1.2587289990124813,
+      "std_CASV": 22.110222278328283,
+      "t_stat": 4.589525954361414,
+      "p_value": 9.544049016207978e-06,
+      "mean_CAR": -0.0025419421398169906,
+      "share_of_sample": 0.14614614614614616
+    },
+    "low": {
+      "n": 853,
+      "mean_CASV": 1.8199694886425246,
+      "median_CASV": -2.5800688532403377,
+      "std_CASV": 43.75643850615708,
+      "t_stat": 1.2147772691078509,
+      "p_value": 0.22478760647062979,
+      "mean_CAR": -0.00045380107644282645,
+      "share_of_sample": 0.8538538538538538
+    }
+  },
+  "top10_events": [
+    {
+      "event_date": "2014-10-30",
+      "CASV": 882.4377670999738,
+      "CAR": 0.07958505548839542,
+      "n_firms": 2,
+      "firms": [
+        "2823",
+        "3481"
+      ],
+      "vix_level": 14.520000457763672,
+      "vix_change": -0.6299991607666016,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.006390357425483582,
+      "firms_tech": 1,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2014-10-31",
+      "CASV": 882.1010462526465,
+      "CAR": 0.08035979187755554,
+      "n_firms": 3,
+      "firms": [
+        "2303",
+        "2809",
+        "3045"
+      ],
+      "vix_level": 14.029999732971191,
+      "vix_change": -0.49000072479248047,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.011370157735136688,
+      "firms_tech": 1,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2020-03-19",
+      "CASV": 89.95170205800487,
+      "CAR": 0.024817249778638976,
+      "n_firms": 3,
+      "firms": [
+        "2376",
+        "2618",
+        "3034"
+      ],
+      "vix_level": 72.0,
+      "vix_change": -4.4499969482421875,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.002122569810104048,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2020-03-18",
+      "CASV": 84.9457605828824,
+      "CAR": 0.02923529902480866,
+      "n_firms": 4,
+      "firms": [
+        "1303",
+        "2353",
+        "2357",
+        "2610"
+      ],
+      "vix_level": 76.44999694824219,
+      "vix_change": 0.5399932861328125,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.05195968697294937,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 2,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2020-03-13",
+      "CASV": 81.82798960682534,
+      "CAR": 0.03976015948338595,
+      "n_firms": 4,
+      "firms": [
+        "1326",
+        "2313",
+        "2347",
+        "2449"
+      ],
+      "vix_level": 57.83000183105469,
+      "vix_change": -17.639999389648438,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.0820282598777311,
+      "firms_tech": 3,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2020-03-17",
+      "CASV": 80.71369219825341,
+      "CAR": 0.0371414254383065,
+      "n_firms": 2,
+      "firms": [
+        "1301",
+        "2882"
+      ],
+      "vix_level": 75.91000366210938,
+      "vix_change": -6.779998779296875,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.05258497390937293,
+      "firms_tech": 0,
+      "firms_financial": 1,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2020-03-20",
+      "CASV": 78.97648633729567,
+      "CAR": 0.011140537267110428,
+      "n_firms": 3,
+      "firms": [
+        "1101",
+        "2890",
+        "6669"
+      ],
+      "vix_level": 66.04000091552734,
+      "vix_change": -5.959999084472656,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.044050199315799614,
+      "firms_tech": 1,
+      "firms_financial": 1,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2020-07-28",
+      "CASV": 72.38390277655219,
+      "CAR": 0.022648802032756016,
+      "n_firms": 1,
+      "firms": [
+        "3037"
+      ],
+      "vix_level": 25.440000534057617,
+      "vix_change": 0.7000007629394531,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.006362501012675197,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2020-07-27",
+      "CASV": 71.33581428347853,
+      "CAR": 0.0253907616628727,
+      "n_firms": 1,
+      "firms": [
+        "3008"
+      ],
+      "vix_level": 24.739999771118164,
+      "vix_change": -1.1000003814697266,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.007266193667958552,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2011-11-02",
+      "CASV": 68.85681999833383,
+      "CAR": -0.03734515022081007,
+      "n_firms": 1,
+      "firms": [
+        "2352"
+      ],
+      "vix_level": 32.7400016784668,
+      "vix_change": -2.029998779296875,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.016179738445590595,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-10-28",
+      "CASV": 68.68790942299854,
+      "CAR": -0.03605475659934866,
+      "n_firms": 18,
+      "firms": [
+        "1301",
+        "1303",
+        "1326",
+        "2002",
+        "2327",
+        "2330",
+        "2347",
+        "2353",
+        "2356",
+        "2408",
+        "2409",
+        "2412",
+        "2458",
+        "2474",
+        "2809",
+        "2836",
+        "3231",
+        "9914"
+      ],
+      "vix_level": 24.530000686645508,
+      "vix_change": -0.9299983978271484,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.00023336674786117453,
+      "firms_tech": 10,
+      "firms_financial": 2,
+      "firms_traditional": 5,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2020-07-29",
+      "CASV": 68.57394213067039,
+      "CAR": 0.019075241393656107,
+      "n_firms": 1,
+      "firms": [
+        "2303"
+      ],
+      "vix_level": 24.100000381469727,
+      "vix_change": -1.3400001525878906,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.012223630436284369,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-10-31",
+      "CASV": 68.2845524187466,
+      "CAR": -0.039016271621900786,
+      "n_firms": 8,
+      "firms": [
+        "2454",
+        "2603",
+        "2801",
+        "2812",
+        "2823",
+        "2834",
+        "3037",
+        "4904"
+      ],
+      "vix_level": 29.959999084472656,
+      "vix_change": 5.429998397827148,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.02440133985349661,
+      "firms_tech": 1,
+      "firms_financial": 4,
+      "firms_traditional": 1,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2020-07-30",
+      "CASV": 66.22941924800443,
+      "CAR": 0.02416440215978853,
+      "n_firms": 3,
+      "firms": [
+        "2301",
+        "2439",
+        "2912"
+      ],
+      "vix_level": 24.760000228881836,
+      "vix_change": 0.6599998474121094,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.003574299531822676,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2020-08-03",
+      "CASV": 60.19762423350892,
+      "CAR": 0.01813270250017102,
+      "n_firms": 1,
+      "firms": [
+        "2002"
+      ],
+      "vix_level": 24.280000686645508,
+      "vix_change": -0.17999839782714844,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.0069281306122643055,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-10-26",
+      "CASV": 49.74243264148852,
+      "CAR": -0.03281152358832816,
+      "n_firms": 3,
+      "firms": [
+        "2303",
+        "2449",
+        "3044"
+      ],
+      "vix_level": 29.860000610351562,
+      "vix_change": -2.3600006103515625,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.010107391686016525,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2011-10-27",
+      "CASV": 49.30531120698121,
+      "CAR": -0.0309371027362049,
+      "n_firms": 3,
+      "firms": [
+        "3034",
+        "3045",
+        "9910"
+      ],
+      "vix_level": 25.459999084472656,
+      "vix_change": -4.400001525878906,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.0342419700690433,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2020-03-11",
+      "CASV": 48.779613656825596,
+      "CAR": 0.020974156323135523,
+      "n_firms": 1,
+      "firms": [
+        "9933"
+      ],
+      "vix_level": 53.900001525878906,
+      "vix_change": 6.600002288818359,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.04997671964649148,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2020-03-10",
+      "CASV": 47.99868035978072,
+      "CAR": 0.02299674522517277,
+      "n_firms": 3,
+      "firms": [
+        "2385",
+        "2474",
+        "3711"
+      ],
+      "vix_level": 47.29999923706055,
+      "vix_change": -7.159999847412109,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.05045067052773202,
+      "firms_tech": 3,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2020-03-25",
+      "CASV": 46.27812695461743,
+      "CAR": -0.007362726032382919,
+      "n_firms": 3,
+      "firms": [
+        "2105",
+        "2458",
+        "3044"
+      ],
+      "vix_level": 63.95000076293945,
+      "vix_change": 2.2800025939941406,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.01485923603731247,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2020-03-27",
+      "CASV": 45.991189142870304,
+      "CAR": -0.008714937852360348,
+      "n_firms": 6,
+      "firms": [
+        "1216",
+        "2207",
+        "2352",
+        "2884",
+        "3037",
+        "5880"
+      ],
+      "vix_level": 65.54000091552734,
+      "vix_change": 4.540000915527344,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.030237968928006665,
+      "firms_tech": 1,
+      "firms_financial": 2,
+      "firms_traditional": 1,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2020-03-24",
+      "CASV": 45.789608649094134,
+      "CAR": -0.009739769884943298,
+      "n_firms": 6,
+      "firms": [
+        "2356",
+        "2603",
+        "2834",
+        "2836",
+        "3231",
+        "9910"
+      ],
+      "vix_level": 61.66999816894531,
+      "vix_change": 0.07999801635742188,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.08673094716915171,
+      "firms_tech": 1,
+      "firms_financial": 2,
+      "firms_traditional": 2,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2020-03-26",
+      "CASV": 45.312944493473864,
+      "CAR": -0.006363676644670248,
+      "n_firms": 1,
+      "firms": [
+        "2404"
+      ],
+      "vix_level": 61.0,
+      "vix_change": -2.950000762939453,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.05674846781535423,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2021-05-11",
+      "CASV": 43.046638320939586,
+      "CAR": 0.029414332301514377,
+      "n_firms": 6,
+      "firms": [
+        "1303",
+        "2347",
+        "2352",
+        "2356",
+        "2458",
+        "9910"
+      ],
+      "vix_level": 21.84000015258789,
+      "vix_change": 2.1800003051757812,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.00896488916418343,
+      "firms_tech": 4,
+      "firms_financial": 0,
+      "firms_traditional": 2,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2020-03-23",
+      "CASV": 40.22550386689039,
+      "CAR": -0.006852390578770759,
+      "n_firms": 2,
+      "firms": [
+        "2002",
+        "2885"
+      ],
+      "vix_level": 61.59000015258789,
+      "vix_change": -4.450000762939453,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.02590073266244886,
+      "firms_tech": 0,
+      "firms_financial": 1,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2021-05-17",
+      "CASV": 39.28626433984261,
+      "CAR": 0.010743665292136115,
+      "n_firms": 3,
+      "firms": [
+        "2324",
+        "2882",
+        "3481"
+      ],
+      "vix_level": 19.719999313354492,
+      "vix_change": 0.9099998474121094,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.002547690641930362,
+      "firms_tech": 2,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2021-05-12",
+      "CASV": 38.54755344455939,
+      "CAR": 0.013425278853197145,
+      "n_firms": 9,
+      "firms": [
+        "1101",
+        "1216",
+        "1301",
+        "2105",
+        "2207",
+        "2357",
+        "2404",
+        "2615",
+        "3045"
+      ],
+      "vix_level": 27.59000015258789,
+      "vix_change": 5.75,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.021474043240365132,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 5,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2021-05-14",
+      "CASV": 38.26155737944626,
+      "CAR": 0.013880245206294752,
+      "n_firms": 11,
+      "firms": [
+        "1102",
+        "2317",
+        "2330",
+        "2354",
+        "2376",
+        "2382",
+        "2454",
+        "2801",
+        "2838",
+        "3702",
+        "9914"
+      ],
+      "vix_level": 18.809999465942383,
+      "vix_change": -4.319999694824219,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.015238672231941197,
+      "firms_tech": 7,
+      "firms_financial": 2,
+      "firms_traditional": 2,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-03-01",
+      "CASV": 38.147815027673545,
+      "CAR": 0.029808728793245563,
+      "n_firms": 1,
+      "firms": [
+        "2324"
+      ],
+      "vix_level": 13.109999656677246,
+      "vix_change": -0.28999996185302734,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.009344357372133698,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2021-05-13",
+      "CASV": 37.89975306596303,
+      "CAR": 0.016424972070826802,
+      "n_firms": 11,
+      "firms": [
+        "2327",
+        "2379",
+        "2409",
+        "2449",
+        "2812",
+        "2834",
+        "2836",
+        "2884",
+        "4904",
+        "9921",
+        "9945"
+      ],
+      "vix_level": 23.1299991607666,
+      "vix_change": -4.460000991821289,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.011940700098535043,
+      "firms_tech": 4,
+      "firms_financial": 4,
+      "firms_traditional": 2,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2022-11-08",
+      "CASV": 37.041125825558765,
+      "CAR": 0.02896573014621198,
+      "n_firms": 2,
+      "firms": [
+        "2354",
+        "2449"
+      ],
+      "vix_level": 25.540000915527344,
+      "vix_change": 1.1900005340576172,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.005381011167871166,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2022-11-09",
+      "CASV": 36.48542451274593,
+      "CAR": 0.02912417565656142,
+      "n_firms": 6,
+      "firms": [
+        "1216",
+        "1303",
+        "2458",
+        "2474",
+        "2610",
+        "2812"
+      ],
+      "vix_level": 26.09000015258789,
+      "vix_change": 0.5499992370605469,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.020817287092967023,
+      "firms_tech": 2,
+      "firms_financial": 1,
+      "firms_traditional": 2,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2024-03-07",
+      "CASV": 36.03938744119259,
+      "CAR": 0.018869263318911613,
+      "n_firms": 1,
+      "firms": [
+        "1216"
+      ],
+      "vix_level": 14.4399995803833,
+      "vix_change": -0.06000041961669922,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.009877469141656981,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2024-03-06",
+      "CASV": 35.93500915272358,
+      "CAR": 0.021359175180814167,
+      "n_firms": 2,
+      "firms": [
+        "1301",
+        "9933"
+      ],
+      "vix_level": 14.5,
+      "vix_change": 0.039999961853027344,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.005054421001380554,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 2,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2022-11-10",
+      "CASV": 35.871859946219615,
+      "CAR": 0.030327636360732716,
+      "n_firms": 11,
+      "firms": [
+        "1101",
+        "1301",
+        "2105",
+        "2207",
+        "2357",
+        "2404",
+        "2492",
+        "2834",
+        "3044",
+        "3045",
+        "9910"
+      ],
+      "vix_level": 23.530000686645508,
+      "vix_change": -2.559999465942383,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.05349730669750436,
+      "firms_tech": 3,
+      "firms_financial": 1,
+      "firms_traditional": 5,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2024-03-05",
+      "CASV": 34.71639808982476,
+      "CAR": 0.015328638124654594,
+      "n_firms": 1,
+      "firms": [
+        "2352"
+      ],
+      "vix_level": 14.460000038146973,
+      "vix_change": 0.9700002670288086,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.010044372622901828,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2022-11-11",
+      "CASV": 34.6109385710236,
+      "CAR": 0.0340163079567642,
+      "n_firms": 15,
+      "firms": [
+        "1102",
+        "2313",
+        "2317",
+        "2327",
+        "2356",
+        "2376",
+        "2379",
+        "2382",
+        "2409",
+        "2454",
+        "2615",
+        "2884",
+        "3702",
+        "4904",
+        "9945"
+      ],
+      "vix_level": 22.520000457763672,
+      "vix_change": -1.010000228881836,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.009632028202071397,
+      "firms_tech": 10,
+      "firms_financial": 1,
+      "firms_traditional": 3,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2022-11-14",
+      "CASV": 34.4034507401699,
+      "CAR": 0.036260835470330016,
+      "n_firms": 7,
+      "firms": [
+        "2324",
+        "2330",
+        "2801",
+        "2823",
+        "2838",
+        "3481",
+        "9914"
+      ],
+      "vix_level": 23.729999542236328,
+      "vix_change": 1.2099990844726562,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.008543144554003701,
+      "firms_tech": 3,
+      "firms_financial": 3,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-08-05",
+      "CASV": 33.967732442028925,
+      "CAR": 0.019270587813143836,
+      "n_firms": 1,
+      "firms": [
+        "3008"
+      ],
+      "vix_level": 38.56999969482422,
+      "vix_change": 15.180000305175781,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.029556156969170244,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2022-11-18",
+      "CASV": 32.510276754433264,
+      "CAR": 0.028644945314706755,
+      "n_firms": 2,
+      "firms": [
+        "2887",
+        "2890"
+      ],
+      "vix_level": 23.1200008392334,
+      "vix_change": -0.8099994659423828,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.004530253903117497,
+      "firms_tech": 0,
+      "firms_financial": 2,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2021-05-19",
+      "CASV": 32.49299158929113,
+      "CAR": 0.005289926359423797,
+      "n_firms": 1,
+      "firms": [
+        "5880"
+      ],
+      "vix_level": 22.18000030517578,
+      "vix_change": 0.8400001525878906,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.0026251729969705884,
+      "firms_tech": 0,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-02-22",
+      "CASV": 32.14525260354153,
+      "CAR": 0.00220061689752336,
+      "n_firms": 2,
+      "firms": [
+        "2439",
+        "2474"
+      ],
+      "vix_level": 14.539999961853027,
+      "vix_change": -0.8000001907348633,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.020484297246361787,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-08-02",
+      "CASV": 32.08744040292372,
+      "CAR": 0.023981593783165906,
+      "n_firms": 2,
+      "firms": [
+        "2408",
+        "9933"
+      ],
+      "vix_level": 23.389999389648438,
+      "vix_change": 4.799999237060547,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.018794007802899755,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-07-31",
+      "CASV": 31.648069994135504,
+      "CAR": 0.025118231554957855,
+      "n_firms": 3,
+      "firms": [
+        "2301",
+        "2303",
+        "2912"
+      ],
+      "vix_level": 16.360000610351562,
+      "vix_change": -1.3299999237060547,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.016124124079351494,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-03-08",
+      "CASV": 31.090130876377646,
+      "CAR": 0.02579232862177365,
+      "n_firms": 4,
+      "firms": [
+        "1326",
+        "2313",
+        "2610",
+        "2890"
+      ],
+      "vix_level": 14.739999771118164,
+      "vix_change": 0.3000001907348633,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.006020220745794653,
+      "firms_tech": 1,
+      "firms_financial": 1,
+      "firms_traditional": 2,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-08-06",
+      "CASV": 30.834664488716506,
+      "CAR": 0.014014109289666146,
+      "n_firms": 1,
+      "firms": [
+        "2352"
+      ],
+      "vix_level": 27.709999084472656,
+      "vix_change": -10.860000610351562,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.00917722559711791,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-07-30",
+      "CASV": 29.5400296698421,
+      "CAR": 0.03367605088781714,
+      "n_firms": 1,
+      "firms": [
+        "3037"
+      ],
+      "vix_level": 17.690000534057617,
+      "vix_change": 1.0900001525878906,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.005079571590955998,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2024-08-07",
+      "CASV": 28.616510339709585,
+      "CAR": 0.016925336391944344,
+      "n_firms": 3,
+      "firms": [
+        "1326",
+        "2357",
+        "2385"
+      ],
+      "vix_level": 27.850000381469727,
+      "vix_change": 0.1400012969970703,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.006706254654646626,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-08-08",
+      "CASV": 27.65010452867197,
+      "CAR": 0.013553363216903973,
+      "n_firms": 7,
+      "firms": [
+        "1216",
+        "1301",
+        "2347",
+        "2353",
+        "2474",
+        "3044",
+        "6669"
+      ],
+      "vix_level": 23.790000915527344,
+      "vix_change": -4.059999465942383,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.02285409726696231,
+      "firms_tech": 4,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2024-02-29",
+      "CASV": 27.09873203721002,
+      "CAR": 0.021845719632176033,
+      "n_firms": 14,
+      "firms": [
+        "1101",
+        "2002",
+        "2330",
+        "2409",
+        "2458",
+        "2492",
+        "2801",
+        "2812",
+        "2823",
+        "2888",
+        "3034",
+        "3044",
+        "3481",
+        "3702"
+      ],
+      "vix_level": 13.399999618530273,
+      "vix_change": -0.030000686645507812,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.0035885126838880936,
+      "firms_tech": 6,
+      "firms_financial": 4,
+      "firms_traditional": 2,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2024-08-12",
+      "CASV": 25.047104456602536,
+      "CAR": 0.012932778471110812,
+      "n_firms": 7,
+      "firms": [
+        "2105",
+        "2207",
+        "2379",
+        "2449",
+        "2458",
+        "2809",
+        "3231"
+      ],
+      "vix_level": 20.709999084472656,
+      "vix_change": 0.3399982452392578,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.0005252032507052198,
+      "firms_tech": 3,
+      "firms_financial": 1,
+      "firms_traditional": 2,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2021-05-05",
+      "CASV": 24.89577694161646,
+      "CAR": 0.02433369449678996,
+      "n_firms": 4,
+      "firms": [
+        "2353",
+        "2408",
+        "2474",
+        "9933"
+      ],
+      "vix_level": 19.149999618530273,
+      "vix_change": -0.3299999237060547,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.00031284541965714613,
+      "firms_tech": 3,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-03-14",
+      "CASV": 24.892779074387906,
+      "CAR": 0.017811196608983594,
+      "n_firms": 10,
+      "firms": [
+        "2327",
+        "2353",
+        "2376",
+        "2404",
+        "2603",
+        "2885",
+        "2889",
+        "2891",
+        "5880",
+        "9910"
+      ],
+      "vix_level": 14.399999618530273,
+      "vix_change": 0.6499996185302734,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.0019788037034459585,
+      "firms_tech": 4,
+      "firms_financial": 4,
+      "firms_traditional": 2,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2025-03-27",
+      "CASV": 24.787004478097423,
+      "CAR": 0.021407615835106114,
+      "n_firms": 1,
+      "firms": [
+        "9921"
+      ],
+      "vix_level": 18.690000534057617,
+      "vix_change": 0.3600006103515625,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.002659393438435454,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2021-05-06",
+      "CASV": 24.753212796668418,
+      "CAR": 0.02728935955967687,
+      "n_firms": 3,
+      "firms": [
+        "2385",
+        "2610",
+        "3044"
+      ],
+      "vix_level": 18.389999389648438,
+      "vix_change": -0.7600002288818359,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.00795363437449154,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2024-08-09",
+      "CASV": 24.72595942285918,
+      "CAR": 0.017647848361569466,
+      "n_firms": 10,
+      "firms": [
+        "1303",
+        "2313",
+        "2354",
+        "2382",
+        "2412",
+        "2492",
+        "2610",
+        "2618",
+        "3045",
+        "3711"
+      ],
+      "vix_level": 20.3700008392334,
+      "vix_change": -3.4200000762939453,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.004399941804783993,
+      "firms_tech": 6,
+      "firms_financial": 0,
+      "firms_traditional": 3,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2018-09-07",
+      "CASV": 23.905726809024372,
+      "CAR": 0.007033361452950583,
+      "n_firms": 2,
+      "firms": [
+        "6669"
+      ],
+      "vix_level": 14.880000114440918,
+      "vix_change": 0.23000049591064453,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.001945301926758892,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2021-05-07",
+      "CASV": 23.710150295188985,
+      "CAR": 0.032059238630009305,
+      "n_firms": 9,
+      "firms": [
+        "1326",
+        "2002",
+        "2313",
+        "2412",
+        "2603",
+        "2823",
+        "3231",
+        "3711",
+        "6669"
+      ],
+      "vix_level": 16.690000534057617,
+      "vix_change": -1.6999988555908203,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.007251702830744717,
+      "firms_tech": 4,
+      "firms_financial": 1,
+      "firms_traditional": 3,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2024-03-12",
+      "CASV": 23.469569720990258,
+      "CAR": 0.01646484115784525,
+      "n_firms": 4,
+      "firms": [
+        "1303",
+        "2356",
+        "2883",
+        "3231"
+      ],
+      "vix_level": 13.84000015258789,
+      "vix_change": -1.380000114440918,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.010700040315194647,
+      "firms_tech": 1,
+      "firms_financial": 1,
+      "firms_traditional": 1,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2024-03-13",
+      "CASV": 22.41898144111482,
+      "CAR": 0.0112336483677615,
+      "n_firms": 9,
+      "firms": [
+        "2105",
+        "2207",
+        "2347",
+        "2354",
+        "2385",
+        "2618",
+        "2886",
+        "2892",
+        "9945"
+      ],
+      "vix_level": 13.75,
+      "vix_change": -0.09000015258789062,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.0015687967578118655,
+      "firms_tech": 3,
+      "firms_financial": 2,
+      "firms_traditional": 4,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-08-09",
+      "CASV": 21.387856282354463,
+      "CAR": -0.0010851950264949314,
+      "n_firms": 1,
+      "firms": [
+        "4904"
+      ],
+      "vix_level": 35.060001373291016,
+      "vix_change": -12.939998626708984,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.045450413921357784,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2011-03-21",
+      "CASV": 18.95749896705414,
+      "CAR": 0.005990061509684738,
+      "n_firms": 1,
+      "firms": [
+        "2303"
+      ],
+      "vix_level": 20.610000610351562,
+      "vix_change": -3.8299999237060547,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.015378523322603723,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-03-18",
+      "CASV": 18.841398139512044,
+      "CAR": 0.0006437115069798261,
+      "n_firms": 2,
+      "firms": [
+        "2439",
+        "9910"
+      ],
+      "vix_level": 24.440000534057617,
+      "vix_change": -1.9300003051757812,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.0036308327961058593,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-03-22",
+      "CASV": 18.319294650696875,
+      "CAR": -0.0015529509377026698,
+      "n_firms": 3,
+      "firms": [
+        "1301",
+        "2603",
+        "2618"
+      ],
+      "vix_level": 20.209999084472656,
+      "vix_change": -0.40000152587890625,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.003474585099549821,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 3,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-08-25",
+      "CASV": 17.402864005831887,
+      "CAR": 0.021142481274978024,
+      "n_firms": 3,
+      "firms": [
+        "2357",
+        "2458",
+        "2892"
+      ],
+      "vix_level": 39.7599983215332,
+      "vix_change": 3.859996795654297,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.015361112407856597,
+      "firms_tech": 2,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2018-10-26",
+      "CASV": 17.391912551443713,
+      "CAR": -0.0028679906927244134,
+      "n_firms": 1,
+      "firms": [
+        "2439"
+      ],
+      "vix_level": 24.15999984741211,
+      "vix_change": -0.05999946594238281,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.017743904545659668,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-08-29",
+      "CASV": 17.35286914699826,
+      "CAR": 0.022963863669255933,
+      "n_firms": 11,
+      "firms": [
+        "1301",
+        "2207",
+        "2303",
+        "2317",
+        "2330",
+        "2354",
+        "2385",
+        "2454",
+        "2492",
+        "9914",
+        "9921"
+      ],
+      "vix_level": 32.279998779296875,
+      "vix_change": -3.3100013732910156,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.028331228258653304,
+      "firms_tech": 7,
+      "firms_financial": 0,
+      "firms_traditional": 4,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-08-26",
+      "CASV": 16.56455641836369,
+      "CAR": 0.024641842088871976,
+      "n_firms": 13,
+      "firms": [
+        "1303",
+        "2105",
+        "2313",
+        "2412",
+        "2603",
+        "2618",
+        "2884",
+        "2887",
+        "2888",
+        "2889",
+        "3008",
+        "3034",
+        "9910"
+      ],
+      "vix_level": 35.59000015258789,
+      "vix_change": -4.1699981689453125,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.014429037494170995,
+      "firms_tech": 2,
+      "firms_financial": 4,
+      "firms_traditional": 5,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2011-03-16",
+      "CASV": 16.13241417047595,
+      "CAR": -0.007797307828669624,
+      "n_firms": 2,
+      "firms": [
+        "2330",
+        "3231"
+      ],
+      "vix_level": 29.399999618530273,
+      "vix_change": 5.079999923706055,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.01868642520008219,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2022-11-07",
+      "CASV": 15.570664229828546,
+      "CAR": 0.012870829228570864,
+      "n_firms": 1,
+      "firms": [
+        "9921"
+      ],
+      "vix_level": 24.350000381469727,
+      "vix_change": -0.1999988555908203,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.009520128929702084,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2014-03-13",
+      "CASV": 15.143901165052517,
+      "CAR": 0.007887705296351485,
+      "n_firms": 1,
+      "firms": [
+        "2884"
+      ],
+      "vix_level": 16.219999313354492,
+      "vix_change": 1.7499990463256836,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.0112765933341164,
+      "firms_tech": 0,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2021-05-21",
+      "CASV": 14.935054061153576,
+      "CAR": -0.01846255294773918,
+      "n_firms": 6,
+      "firms": [
+        "2883",
+        "2885",
+        "2887",
+        "2888",
+        "2890",
+        "2891"
+      ],
+      "vix_level": 20.149999618530273,
+      "vix_change": -0.5200004577636719,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.0008191690249718343,
+      "firms_tech": 0,
+      "firms_financial": 6,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2022-11-04",
+      "CASV": 14.844801996717752,
+      "CAR": 0.01476886785344403,
+      "n_firms": 7,
+      "firms": [
+        "1326",
+        "2002",
+        "2352",
+        "2412",
+        "2603",
+        "2836",
+        "3231"
+      ],
+      "vix_level": 24.549999237060547,
+      "vix_change": -0.75,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.014290166860806086,
+      "firms_tech": 2,
+      "firms_financial": 1,
+      "firms_traditional": 3,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2021-05-20",
+      "CASV": 14.802799306786987,
+      "CAR": -0.015996143510211495,
+      "n_firms": 1,
+      "firms": [
+        "2889"
+      ],
+      "vix_level": 20.670000076293945,
+      "vix_change": -1.510000228881836,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.010700387322812099,
+      "firms_tech": 0,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2022-11-21",
+      "CASV": 14.616155533087175,
+      "CAR": 0.008711724480040475,
+      "n_firms": 3,
+      "firms": [
+        "2882",
+        "2885",
+        "2889"
+      ],
+      "vix_level": 22.360000610351562,
+      "vix_change": -0.7600002288818359,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.0036427239720098546,
+      "firms_tech": 0,
+      "firms_financial": 3,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2022-11-22",
+      "CASV": 14.012297727305167,
+      "CAR": 0.01020038253966848,
+      "n_firms": 1,
+      "firms": [
+        "2888"
+      ],
+      "vix_level": 21.290000915527344,
+      "vix_change": -1.0699996948242188,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.013367238176866683,
+      "firms_tech": 0,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-08-13",
+      "CASV": 14.01053251593039,
+      "CAR": 0.0002226992646159685,
+      "n_firms": 16,
+      "firms": [
+        "1101",
+        "1102",
+        "2002",
+        "2356",
+        "2404",
+        "2409",
+        "2454",
+        "2603",
+        "2812",
+        "3481",
+        "3702",
+        "4904",
+        "9910",
+        "9914",
+        "9921",
+        "9945"
+      ],
+      "vix_level": 18.1200008392334,
+      "vix_change": -2.589998245239258,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.016311894024751885,
+      "firms_tech": 6,
+      "firms_financial": 1,
+      "firms_traditional": 8,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2011-08-22",
+      "CASV": 13.395662921993832,
+      "CAR": 0.013188561172727233,
+      "n_firms": 1,
+      "firms": [
+        "1326"
+      ],
+      "vix_level": 42.439998626708984,
+      "vix_change": -0.6100006103515625,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.0007986337044923299,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-08-19",
+      "CASV": 13.164448694270277,
+      "CAR": 0.015266396615202509,
+      "n_firms": 1,
+      "firms": [
+        "3231"
+      ],
+      "vix_level": 43.04999923706055,
+      "vix_change": 0.3800010681152344,
+      "vix_regime": "high",
+      "spy_return_aligned": -0.016465256847238506,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2018-11-06",
+      "CASV": 13.102761156601613,
+      "CAR": -0.011760675972997068,
+      "n_firms": 1,
+      "firms": [
+        "3034"
+      ],
+      "vix_level": 19.90999984741211,
+      "vix_change": -0.049999237060546875,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.006308022037501659,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2018-11-07",
+      "CASV": 12.989860988393168,
+      "CAR": -0.011855420341865163,
+      "n_firms": 5,
+      "firms": [
+        "1216",
+        "2313",
+        "2353",
+        "2412",
+        "2492"
+      ],
+      "vix_level": 16.360000610351562,
+      "vix_change": -3.549999237060547,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.021183028127470336,
+      "firms_tech": 4,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2011-08-24",
+      "CASV": 12.701705193300642,
+      "CAR": 0.010954020152814513,
+      "n_firms": 1,
+      "firms": [
+        "2002"
+      ],
+      "vix_level": 35.900001525878906,
+      "vix_change": -0.3699989318847656,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.013986292792815557,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2014-03-14",
+      "CASV": 12.58849856548694,
+      "CAR": 0.005159004805189788,
+      "n_firms": 1,
+      "firms": [
+        "2303"
+      ],
+      "vix_level": 17.81999969482422,
+      "vix_change": 1.6000003814697266,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.0028124255845147134,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2018-04-26",
+      "CASV": 12.505693061656597,
+      "CAR": -0.0039012917995032404,
+      "n_firms": 2,
+      "firms": [
+        "2303",
+        "2439"
+      ],
+      "vix_level": 16.239999771118164,
+      "vix_change": -1.6000003814697266,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.010114284267489566,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2017-08-16",
+      "CASV": 12.46599786205277,
+      "CAR": 0.0011290680972786873,
+      "n_firms": 1,
+      "firms": [
+        "2823"
+      ],
+      "vix_level": 11.739999771118164,
+      "vix_change": -0.3000001907348633,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.0017425834796341657,
+      "firms_tech": 0,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2018-04-27",
+      "CASV": 12.318821310470875,
+      "CAR": -0.005573954047873149,
+      "n_firms": 1,
+      "firms": [
+        "2301"
+      ],
+      "vix_level": 15.40999984741211,
+      "vix_change": -0.8299999237060547,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.000938095522454357,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2017-08-08",
+      "CASV": 12.264915114063893,
+      "CAR": 0.009579984318293046,
+      "n_firms": 3,
+      "firms": [
+        "2313",
+        "2330",
+        "3044"
+      ],
+      "vix_level": 10.960000038146973,
+      "vix_change": 1.0299997329711914,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.002463750146030532,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2024-02-23",
+      "CASV": 12.222248564348263,
+      "CAR": -0.004755175063699586,
+      "n_firms": 6,
+      "firms": [
+        "2408",
+        "2412",
+        "2836",
+        "2887",
+        "3037",
+        "4904"
+      ],
+      "vix_level": 13.75,
+      "vix_change": -0.7899999618530273,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.0006894399960007954,
+      "firms_tech": 2,
+      "firms_financial": 2,
+      "firms_traditional": 0,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2020-04-22",
+      "CASV": 11.812793509690527,
+      "CAR": -0.01427452114165848,
+      "n_firms": 1,
+      "firms": [
+        "3008"
+      ],
+      "vix_level": 41.97999954223633,
+      "vix_change": -3.4300003051757812,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.021951776146959912,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2018-02-21",
+      "CASV": 11.805607950070137,
+      "CAR": -0.007307808998431043,
+      "n_firms": 1,
+      "firms": [
+        "2330"
+      ],
+      "vix_level": 20.020000457763672,
+      "vix_change": -5.590000152587891,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.004986527780770721,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2017-08-07",
+      "CASV": 11.382386222935121,
+      "CAR": 0.010826668848038302,
+      "n_firms": 1,
+      "firms": [
+        "2474"
+      ],
+      "vix_level": 9.930000305175781,
+      "vix_change": -0.09999942779541016,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.0018575592491323614,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2018-05-02",
+      "CASV": 10.620846220840365,
+      "CAR": 0.004365891469716491,
+      "n_firms": 2,
+      "firms": [
+        "2330",
+        "2884"
+      ],
+      "vix_level": 15.970000267028809,
+      "vix_change": 0.039999961853027344,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.006740338121657266,
+      "firms_tech": 1,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2011-08-17",
+      "CASV": 10.601097043623277,
+      "CAR": -0.007401425857805742,
+      "n_firms": 1,
+      "firms": [
+        "3044"
+      ],
+      "vix_level": 31.579999923706055,
+      "vix_change": -1.269998550415039,
+      "vix_regime": "high",
+      "spy_return_aligned": 0.0006690338466939116,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2018-07-26",
+      "CASV": 10.439792132595612,
+      "CAR": 0.021341696902775785,
+      "n_firms": 1,
+      "firms": [
+        "2439"
+      ],
+      "vix_level": 12.140000343322754,
+      "vix_change": -0.14999961853027344,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.0023614755058020587,
+      "firms_tech": 1,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2014-03-18",
+      "CASV": 10.275830289372951,
+      "CAR": -0.0006074746645534142,
+      "n_firms": 3,
+      "firms": [
+        "2408",
+        "2492",
+        "9910"
+      ],
+      "vix_level": 14.520000457763672,
+      "vix_change": -1.119999885559082,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.007112548418467537,
+      "firms_tech": 2,
+      "firms_financial": 0,
+      "firms_traditional": 1,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2024-02-26",
+      "CASV": 10.205725597135045,
+      "CAR": 0.004437006761379675,
+      "n_firms": 3,
+      "firms": [
+        "2809",
+        "3711",
+        "6669"
+      ],
+      "vix_level": 13.739999771118164,
+      "vix_change": -0.010000228881835938,
+      "vix_regime": "low",
+      "spy_return_aligned": -0.003669214722263372,
+      "firms_tech": 2,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    },
+    {
+      "event_date": "2017-08-11",
+      "CASV": 10.179779612903866,
+      "CAR": 0.0008856478910637586,
+      "n_firms": 19,
+      "firms": [
+        "1101",
+        "1303",
+        "2357",
+        "2379",
+        "2385",
+        "2408",
+        "2409",
+        "2449",
+        "2454",
+        "2603",
+        "2615",
+        "2618",
+        "3008",
+        "3702",
+        "9910",
+        "9914",
+        "9921",
+        "9933",
+        "9945"
+      ],
+      "vix_level": 15.510000228881836,
+      "vix_change": -0.5300006866455078,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.0014758386104930285,
+      "firms_tech": 8,
+      "firms_financial": 0,
+      "firms_traditional": 10,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2017-08-14",
+      "CASV": 10.130258045724743,
+      "CAR": 0.0012604007663696423,
+      "n_firms": 15,
+      "firms": [
+        "1102",
+        "2317",
+        "2324",
+        "2327",
+        "2347",
+        "2352",
+        "2354",
+        "2356",
+        "2376",
+        "2404",
+        "2610",
+        "2809",
+        "2812",
+        "3037",
+        "3231"
+      ],
+      "vix_level": 12.329999923706055,
+      "vix_change": -3.1800003051757812,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.009864626634754499,
+      "firms_tech": 9,
+      "firms_financial": 2,
+      "firms_traditional": 2,
+      "firms_other": 2
+    },
+    {
+      "event_date": "2014-03-17",
+      "CASV": 10.119909022376406,
+      "CAR": 0.0003505717331780292,
+      "n_firms": 1,
+      "firms": [
+        "3034"
+      ],
+      "vix_level": 15.640000343322754,
+      "vix_change": -2.179999351501465,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.009003112127916435,
+      "firms_tech": 0,
+      "firms_financial": 0,
+      "firms_traditional": 0,
+      "firms_other": 1
+    },
+    {
+      "event_date": "2018-10-30",
+      "CASV": 9.957461681898325,
+      "CAR": -0.0018822184157445895,
+      "n_firms": 2,
+      "firms": [
+        "2301",
+        "2809"
+      ],
+      "vix_level": 23.350000381469727,
+      "vix_change": -1.3500003814697266,
+      "vix_regime": "low",
+      "spy_return_aligned": 0.014710030593062178,
+      "firms_tech": 1,
+      "firms_financial": 1,
+      "firms_traditional": 0,
+      "firms_other": 0
+    }
+  ],
+  "K1070_reference": {
+    "set_C_mean_CASV": 2.78,
+    "set_C_median_CASV": -2.8,
+    "set_C_t_stat": 2.13,
+    "set_C_p": 0.034,
+    "note": "K1071 must reproduce these numbers in setC_reproduction."
+  },
+  "hypotheses_answered": {
+    "Q1_top_characteristics": "See sector / announcement-count / VIX blocks; details in top10_events list.",
+    "Q2_crisis_clustering": "High-VIX regime share: top10=0.330, mid80=0.136, Fisher p=6.76e-06.",
+    "Q3_sector_clustering": "Tech share top=0.436 vs mid=0.401 (Fisher odds=1.16, p=0.17); Financial top=0.173 vs mid=0.259 (odds=0.60, p=9.86e-05).",
+    "Q4_systematic_shocks": "VIX level MW p=1.86e-10; SPY |return| MW p=1.41e-07.",
+    "Q5_residual_after_stripping": "Excluding top 10% (N=899): mean=-2.276, median=-2.898, t=-15.37, p=0.000."
+  },
+  "references": [
+    "MacKinlay (1997) JEL 35",
+    "Brown & Warner (1985) JFE 14",
+    "Patell (1976) J Accounting Research 14",
+    "Patell & Wolfson (1984) J Accounting Research 22",
+    "Beaver (1968) J Accounting Research 6",
+    "Wilcox (2017) Introduction to Robust Estimation and Hypothesis Testing",
+    "K1068, K1070 (predecessor event studies)"
+  ]
+}
