@@ -1,17 +1,24 @@
 [
   {
-    "id": "K1064",
-    "title": "K1064: TW_EAV_factor as A4f Regressor",
+    "id": "K1066",
+    "title": "K1066: A4f_oc Full Rolling OOS (Paper 9 Target Switch?)",
     "priority": 1,
     "status": "completed",
-    "description": "NULL. Descriptive ≠ Predictive. VIX absorbs systematic component, diversification dilutes. EAV story belongs in Paper 2 mechanism section."
+    "description": "2/3 PASS (H1/H3), H2 FAIL. Best finding: A4f_oc vs GJR_close on r²_oc DM t=+7.05 (largest). Paper 9 should add dual-target robustness section, not switch main target."
   },
   {
-    "id": "K1065",
-    "title": "K1065: Hansen-Lunde Overnight/Intraday Decomposition",
+    "id": "K1067",
+    "title": "K1067: TSMC Single-Stock A4f-EAV",
     "priority": 1,
-    "status": "in_progress",
-    "description": "Test which component A4f's VIX² improves: overnight (gap) or intraday (trading). H1/H2/H3 validation. Agent in worktree."
+    "status": "completed",
+    "description": "NULL on TSMC (all H fail). BUT K1060 correction: TSMC T+1=0.983 weakest. H_vix diagnosis incomplete. Need K1067b on strong-EAV stocks (UMC/Hon Hai/中鋼)."
+  },
+  {
+    "id": "K1067b",
+    "title": "K1067b: UMC (2303.TW) A4f-EAV — Testing Strongest T+1 Stock",
+    "priority": 2,
+    "description": "UMC T+1=2.579 strongest of 10 stocks. If A4f+EAV NULL here too → H_vix confirmed. Resolves K1067 ambiguity.",
+    "status": "pending"
   },
   {
     "id": "TSMC_0416_post",
@@ -24,28 +31,28 @@
     "id": "K1061",
     "title": "K1061: Full TWSE 50 Constituents EAV",
     "priority": 2,
-    "description": "Extend K1060 to all 50 constituents (N=50 for binomial power)",
+    "description": "Extend K1060 to all 50 constituents",
     "status": "pending"
   },
   {
-    "id": "K1066",
-    "title": "K1066: Nonlinear EAV × VIX Interaction",
+    "id": "K1068",
+    "title": "K1068: Nonlinear EAV × VIX Interaction",
     "priority": 2,
-    "description": "K1064 NULL suggests maybe nonlinear. Test threshold EAV or EAV×VIX interaction in A4f.",
+    "description": "K1064 linear NULL. Test threshold EAV or EAV×VIX interaction in A4f.",
     "status": "pending"
   },
   {
-    "id": "K1067",
-    "title": "K1067: TSMC Single-Stock A4f-EAV",
+    "id": "K1069",
+    "title": "K1069: Paper 9 Dual-Target Integration",
     "priority": 2,
-    "description": "K1064 ETF NULL, but K1060 TSMC T+1=1.466 is strong. Test A4f+EAV on TSMC single-stock where diversification doesn't dilute.",
+    "description": "Build K1066 dual-target finding into Paper 9 v6 robustness section.",
     "status": "pending"
   },
   {
     "id": "Paper9_citation_verify",
     "title": "Paper 9 citation-verifier",
     "priority": 2,
-    "description": "Paper 9 v5。K1054-K1064 可加入 robustness section。",
+    "description": "Paper 9 v5。K1054-K1066 可加入 robustness section。",
     "status": "pending"
   },
   {

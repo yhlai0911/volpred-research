@@ -24803,5 +24803,44 @@
     "data_source": "yfinance SPY + data/intraday/ 5-min (60 days)",
     "confidence": 0.8,
     "timestamp": "2026-04-12T12:34:43.486158+00:00"
+  },
+  {
+    "id": "know_20260412142534_k1066",
+    "experiment_id": "K1066",
+    "title": "K1066: A4f_oc Dual-Target — H1/H3 PASS, H2 FAIL; Best DM t=+7.05 (A4f_oc vs GJR_close on r²_oc)",
+    "content": "[提出: Claude, 執行: Claude] K1066 tests whether Paper 9 should switch main target from r²_close to r²_oc, based on K1065 intraday insight. Full rolling OOS 2019-2026, w=2000, refit 63d. HYPOTHESES: H1 PASS (A4f_oc vs GJR_oc on r²_oc, DM t=+4.04 Harvey PASS). H2 FAIL (4.04 < K988's 4.48 — close-to-close has better signal). H3 PASS weak (5/5 sub-periods wins, binomial p=0.031, but only P3 Post-COVID Harvey sig). KEY FINDING: A4f_oc vs GJR_close on r²_oc gives DM t=+7.05 (largest in experiment), confirming K1065's insight that VIX² × multiplicative GJR dominates trading-session variance. But close-to-close target still gives strongest same-model comparison (A4f_close vs GJR_close DM=4.71). PAPER 9 RECOMMENDATION: DUAL-TARGET framework — keep r²_close as main result (Paper 9 current), ADD robustness section showing A4f_oc vs GJR_close DM t=+7.05 on r²_oc. Core message: 'VIX² captures trading-session variance dynamics, visible in both close-to-close and open-to-close targets'. θ₁ A4f_oc is 2 orders of magnitude smaller than A4f_close (1.07e-7 vs 4.75e-6) but more stable (CV 0.19 vs 3.6).",
+    "tags": [
+      "A4f",
+      "A4f_oc",
+      "A4f_close",
+      "Paper9",
+      "target-switch",
+      "rolling-OOS",
+      "Hansen-Lunde"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance SPY OHLC + VIX 2005-2026, n_oos=1820",
+    "confidence": 0.9,
+    "timestamp": "2026-04-12T14:25:34.028232+00:00"
+  },
+  {
+    "id": "know_20260412162544_k1067",
+    "experiment_id": "K1067",
+    "title": "K1067: TSMC Single-Stock A4f-EAV NULL — But Testing Wrong Stock (TSMC T+1=0.983 Weakest)",
+    "content": "[提出: Claude, 執行: Claude] K1067 tests A4f+EAV on TSMC (2330.TW) single-stock to discriminate H_div (diversification dilution) vs H_vix (VIX absorption) for K1064's ETF-level NULL. 28 OOS event days, 1,697 non-event days. ALL HYPOTHESES FAIL: H1 (DM Harvey) t=+0.348 p=0.73 (A4f baseline wins), H2 (θ₂>0) mean=-4.48e-4, p=0.95, H3 (event |t| > non-event |t|) 0.083 < 0.323 opposite of predicted. H4 PASS marginal (TSMC -0.07% > K1064 ETF -0.205%, marginal diversification evidence). IMPORTANT CAVEAT: Agent discovered K1067 prompt incorrectly claimed TSMC T+1=2.58 (actually UMC 2303.TW). K1060 actual per-stock T+1 ratios: TSMC=0.983 WEAKEST, UMC=2.579 STRONGEST, Hon Hai=2.063, Delta=1.681, Cathay=1.960, 中鋼=2.146, CTBC=0.791, Fubon=1.128, MediaTek=0.872, 中華電=0.452. TSMC's T+1 signal is near-zero (p=0.97), so NULL test on TSMC may simply reflect TSMC-specific absence of EAV rather than structural H_vix. Preliminary diagnosis: H_vix favored but incomplete — needs K1067b on UMC/Hon Hai/中鋼 (strong T+1 stocks) to resolve. Paper 2 implication: A4f with US VIX² remains correct spec for 0050.TW (K1058+K1064 consistent); EAV integration not recommended for A4f family. K1059 A4f event-window amplification (DM t=2.50) remains valid architectural finding.",
+    "tags": [
+      "A4f",
+      "EAV",
+      "TSMC",
+      "2330.TW",
+      "NULL",
+      "H_vix",
+      "methodology-error",
+      "Taiwan"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance 2330.TW + VIX 2010-2025 + 財報公告日.txt",
+    "confidence": 0.65,
+    "timestamp": "2026-04-12T16:25:44.345307+00:00"
   }
 ]
