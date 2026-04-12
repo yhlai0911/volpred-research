@@ -763,7 +763,7 @@ def main():
                 ent["actual_returns"] = prev_actual
                 ent["portfolio_return"] = round(port_ret, 6)
 
-        # Today's entry — strategy-specific only (market data in _market_daily)
+        # Today's entry — includes close prices for trade log display
         total_w = sum(w_info.values())
         entry = {
             "trade_date": today,
@@ -771,6 +771,9 @@ def main():
             "weights": w_info,
             "cash_weight": round(max(0, 1 - total_w), 2),
             "portfolio_return": None,
+            "spy_close": spy_close,
+            "gld_close": gld_close,
+            "tw50_close": tw50_close if locals().get('tw50_close') is not None else None,
         }
         entries.append(entry)
 

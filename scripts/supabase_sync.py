@@ -493,10 +493,10 @@ def sync_paper_trade(strategy: str, entry: dict, trade_date: str) -> bool:
     """
     if not SUPABASE_KEY or not trade_date:
         return False
-    # Strip market data from entry — market data lives in _market_daily, not per-entry
-    _MARKET_KEYS = {"spy_close", "spy_open", "gld_close", "gld_open", "tw50_close",
-                    "tw50_open", "nk225_close", "nk225_open", "vix_close", "sigma_spy_ann"}
-    clean_entry = {k: v for k, v in entry.items() if k not in _MARKET_KEYS}
+    # Strip bulky market data but keep close prices for trade log display
+    _STRIP_KEYS = {"spy_open", "gld_open", "tw50_open",
+                   "nk225_open", "vix_close", "sigma_spy_ann"}
+    clean_entry = {k: v for k, v in entry.items() if k not in _STRIP_KEYS}
     row = {
         "strategy": strategy,
         "entry": clean_entry,
