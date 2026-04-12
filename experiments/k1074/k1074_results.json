@@ -1,0 +1,306 @@
+{
+  "experiment_id": "K1074",
+  "description": "A4f forecast -> VT strategy economic value vs 12/VIX baseline",
+  "date": "2026-04-12T19:23:13.653515+00:00",
+  "data_source": "yfinance (SPY, GLD, ^VIX)",
+  "data_period": "2005-01-01 to 2026-04-10",
+  "oos_start": "2013-01-02",
+  "oos_end": "2026-04-10",
+  "n_oos": 3338,
+  "window": 2000,
+  "refit_every": 63,
+  "random_seed": 42,
+  "target_sigma": 0.12,
+  "weight_cap": 1.5,
+  "tx_bps": 5.0,
+  "n_bootstrap": 1000,
+  "boot_block_size": 22,
+  "references": [
+    "Moreira & Muir (2017). Volatility-Managed Portfolios. JF 72(4):1611-1644.",
+    "Harvey et al. (2018). The Impact of Volatility Targeting. JPM 45(1):14-33.",
+    "Engle, Ghysels & Sohn (2013). GARCH-MIDAS. RES 95(3):776-797.",
+    "Patton (2011). Volatility forecast comparison. J Econometrics 160:246-256."
+  ],
+  "strategies": {
+    "A_12VIX": "w_t = min(12 / VIX_{t-1}, 1.5)",
+    "B_A4f": "w_t = min(0.12 / sigma_hat_{A4f,t-1}, 1.5)",
+    "C_GJR": "w_t = min(0.12 / sigma_hat_{GJR,t-1}, 1.5)",
+    "D_5050_12VIX": "50% SPY*w_12VIX + 50% GLD; monthly rebalance",
+    "E_5050_A4f": "50% SPY*w_A4f   + 50% GLD; monthly rebalance"
+  },
+  "metrics": {
+    "A_12VIX_gross": {
+      "name": "A_12VIX_gross",
+      "n": 3338,
+      "mean_daily": 0.00033922888900910457,
+      "std_daily": 0.005897703508989208,
+      "sharpe": 0.9130828056841186,
+      "cagr": 0.0892459632631879,
+      "mdd": -0.1604787772773394,
+      "calmar": 0.5561231508447565,
+      "sortino": 1.1987068286979088,
+      "mean_return_annual": 0.08548568003029436,
+      "vol_annual": 0.09362314074707061,
+      "mean_abs_dw": 0.03850061651280019,
+      "annual_notional": 9.702155361225648,
+      "mean_w": 0.7461356996626853,
+      "std_w": 0.2094290938034101
+    },
+    "A_12VIX_net": {
+      "name": "A_12VIX_net",
+      "n": 3338,
+      "mean_daily": 0.00031998434777135527,
+      "std_daily": 0.005897948295570762,
+      "sharpe": 0.8612476392225984,
+      "cagr": 0.08397631769978386,
+      "mdd": -0.16304894429410777,
+      "calmar": 0.5150374819251042,
+      "sortino": 1.1301850903325676,
+      "mean_return_annual": 0.08063605563838153,
+      "vol_annual": 0.09362702661358507,
+      "mean_abs_dw": 0.03850061651280019,
+      "annual_notional": 9.702155361225648,
+      "mean_w": 0.7461356996626853,
+      "std_w": 0.2094290938034101
+    },
+    "B_A4f_gross": {
+      "name": "B_A4f_gross",
+      "n": 3338,
+      "mean_daily": 0.0004268858625992537,
+      "std_daily": 0.00742684320449974,
+      "sharpe": 0.9124472938617728,
+      "cagr": 0.11357464002762563,
+      "mdd": -0.1800409833478156,
+      "calmar": 0.6308265924554206,
+      "sortino": 1.2098048228583207,
+      "mean_return_annual": 0.10757523737501193,
+      "vol_annual": 0.117897480872258,
+      "mean_abs_dw": 0.06456421509681007,
+      "annual_notional": 16.270182204396136,
+      "mean_w": 0.9923002286448359,
+      "std_w": 0.34555604459869516
+    },
+    "B_A4f_net": {
+      "name": "B_A4f_net",
+      "n": 3338,
+      "mean_daily": 0.00039461342614358335,
+      "std_daily": 0.007427321683248144,
+      "sharpe": 0.8434122291521552,
+      "cagr": 0.10455504911075764,
+      "mdd": -0.18579478642910674,
+      "calmar": 0.5627447955901198,
+      "sortino": 1.1175501586336558,
+      "mean_return_annual": 0.099442583388183,
+      "vol_annual": 0.11790507648691344,
+      "mean_abs_dw": 0.06456421509681007,
+      "annual_notional": 16.270182204396136,
+      "mean_w": 0.9923002286448359,
+      "std_w": 0.34555604459869516
+    },
+    "C_GJR_gross": {
+      "name": "C_GJR_gross",
+      "n": 3338,
+      "mean_daily": 0.00041865302726254954,
+      "std_daily": 0.007584269317733608,
+      "sharpe": 0.8762756827512405,
+      "cagr": 0.11126673002156084,
+      "mdd": -0.17531646616039132,
+      "calmar": 0.634662176682061,
+      "sortino": 1.123742532887372,
+      "mean_return_annual": 0.10550056287016249,
+      "vol_annual": 0.12039654294516386,
+      "mean_abs_dw": 0.05322731986278075,
+      "annual_notional": 13.413284605420749,
+      "mean_w": 0.9572965660098971,
+      "std_w": 0.3036701444186411
+    },
+    "C_GJR_net": {
+      "name": "C_GJR_net",
+      "n": 3338,
+      "mean_daily": 0.00039204734026702844,
+      "std_daily": 0.007584441037726113,
+      "sharpe": 0.8205691831617349,
+      "cagr": 0.10384101545779711,
+      "mdd": -0.18152332406183302,
+      "calmar": 0.5720532939470926,
+      "sortino": 1.05210739786565,
+      "mean_return_annual": 0.09879592974729116,
+      "vol_annual": 0.12039926891553569,
+      "mean_abs_dw": 0.05322731986278075,
+      "annual_notional": 13.413284605420749,
+      "mean_w": 0.9572965660098971,
+      "std_w": 0.3036701444186411
+    },
+    "D_5050_12VIX_gross": {
+      "name": "D_5050_12VIX_gross",
+      "n": 3338,
+      "mean_daily": 0.00031782753985075125,
+      "std_daily": 0.006007977207721811,
+      "sharpe": 0.8397761188292724,
+      "cagr": 0.0833873197447148,
+      "mdd": -0.15563548142842787,
+      "calmar": 0.5357860494238401,
+      "sortino": 1.073741700553315,
+      "mean_return_annual": 0.08009254004238932,
+      "vol_annual": 0.09537368144505697,
+      "mean_abs_dw": 0.03850061651280019,
+      "annual_notional": 9.702155361225648,
+      "mean_w": 0.7461356996626853,
+      "std_w": 0.2094290938034101
+    },
+    "D_5050_12VIX_net": {
+      "name": "D_5050_12VIX_net",
+      "n": 3338,
+      "mean_daily": 0.0003082081391662063,
+      "std_daily": 0.006007948653858394,
+      "sharpe": 0.814363239695212,
+      "cagr": 0.08076427302374856,
+      "mdd": -0.15648534038981027,
+      "calmar": 0.5161139875630651,
+      "sortino": 1.0413134617142328,
+      "mean_return_annual": 0.07766845106988399,
+      "vol_annual": 0.09537322816652753,
+      "mean_abs_dw": 0.03850061651280019,
+      "annual_notional": 9.702155361225648,
+      "mean_w": 0.7461356996626853,
+      "std_w": 0.2094290938034101
+    },
+    "E_5050_A4f_gross": {
+      "name": "E_5050_A4f_gross",
+      "n": 3338,
+      "mean_daily": 0.0003616690959362383,
+      "std_daily": 0.006435928394163664,
+      "sharpe": 0.8920731488677726,
+      "cagr": 0.09542302424474447,
+      "mdd": -0.1571919113568483,
+      "calmar": 0.6070479290001154,
+      "sortino": 1.1471602235581355,
+      "mean_return_annual": 0.09114061217593206,
+      "vol_annual": 0.10216719592065804,
+      "mean_abs_dw": 0.06456421509681007,
+      "annual_notional": 16.270182204396136,
+      "mean_w": 0.9923002286448359,
+      "std_w": 0.34555604459869516
+    },
+    "E_5050_A4f_net": {
+      "name": "E_5050_A4f_net",
+      "n": 3338,
+      "mean_daily": 0.0003455474705377298,
+      "std_daily": 0.006435795690653862,
+      "sharpe": 0.8523260064373185,
+      "cagr": 0.09098173214845184,
+      "mdd": -0.16390950788416792,
+      "calmar": 0.5550729382504589,
+      "sortino": 1.0961205880196931,
+      "mean_return_annual": 0.08707796257550791,
+      "vol_annual": 0.10216508931774779,
+      "mean_abs_dw": 0.06456421509681007,
+      "annual_notional": 16.270182204396136,
+      "mean_w": 0.9923002286448359,
+      "std_w": 0.34555604459869516
+    },
+    "BH_SPY": {
+      "name": "BH_SPY",
+      "n": 3338,
+      "mean_daily": 0.0005364001859966444,
+      "std_daily": 0.010661653978071504,
+      "sharpe": 0.7986649153732615,
+      "cagr": 0.14473463105150963,
+      "mdd": -0.41124060259289263,
+      "calmar": 0.35194635485637976,
+      "sortino": 0.9530573784429659,
+      "mean_return_annual": 0.1351728468711544,
+      "vol_annual": 0.16924850994359814
+    },
+    "BH_5050_SPY_GLD": {
+      "name": "BH_5050_SPY_GLD",
+      "n": 3338,
+      "mean_daily": 0.00041686858222716175,
+      "std_daily": 0.00758274614165442,
+      "sharpe": 0.8727159612349971,
+      "cagr": 0.11076712777194331,
+      "mdd": -0.2349657625732245,
+      "calmar": 0.4714181613477579,
+      "sortino": 1.0767449787539976,
+      "mean_return_annual": 0.10505088272124476,
+      "vol_annual": 0.1203723632745129
+    }
+  },
+  "hit_rate_A4f_vs_12VIX_monthly": 0.5625,
+  "bootstrap_sharpe_diff": {
+    "B_A4f_net__minus__A_12VIX_net": {
+      "mean": -0.02165302393715367,
+      "ci95_lo": -0.10775785258022397,
+      "ci95_hi": 0.07362492544705829,
+      "p_two_sided": 0.636
+    },
+    "B_A4f_net__minus__C_GJR_net": {
+      "mean": 0.020956211908669156,
+      "ci95_lo": -0.06373376687188058,
+      "ci95_hi": 0.10345905542068011,
+      "p_two_sided": 0.582
+    },
+    "B_A4f_net__minus__BH_SPY": {
+      "mean": 0.016209931836217734,
+      "ci95_lo": -0.2597228801513031,
+      "ci95_hi": 0.3179763898116665,
+      "p_two_sided": 0.962
+    },
+    "A_12VIX_net__minus__BH_SPY": {
+      "mean": 0.046601917608334584,
+      "ci95_lo": -0.16038656743523658,
+      "ci95_hi": 0.28504721984789083,
+      "p_two_sided": 0.712
+    },
+    "E_5050_A4f_net__minus__D_5050_12VIX_net": {
+      "mean": 0.03326175200642326,
+      "ci95_lo": -0.03633084179968127,
+      "ci95_hi": 0.10287325861541277,
+      "p_two_sided": 0.368
+    },
+    "E_5050_A4f_net__minus__BH_5050_SPY_GLD": {
+      "mean": -0.025097681322179675,
+      "ci95_lo": -0.2067698334930715,
+      "ci95_hi": 0.1854784153549026,
+      "p_two_sided": 0.76
+    },
+    "D_5050_12VIX_net__minus__BH_5050_SPY_GLD": {
+      "mean": -0.05617724863007635,
+      "ci95_lo": -0.23949215365070153,
+      "ci95_hi": 0.14241622429282944,
+      "p_two_sided": 0.536
+    }
+  },
+  "lookahead_guard": {
+    "weight_uses_t_minus_1_vix": true,
+    "sigma_hat_a4f_step0_uses_t_minus_1_info": true,
+    "sigma_hat_gjr_step0_uses_t_minus_1_info": true
+  },
+  "sharpe_sanity_check": {
+    "A_12VIX_net": {
+      "sharpe": 0.8612476392225984,
+      "sharpe_over_bh_spy": 1.078359174974011,
+      "exceeds_2x": false
+    },
+    "B_A4f_net": {
+      "sharpe": 0.8434122291521552,
+      "sharpe_over_bh_spy": 1.0560276442818084,
+      "exceeds_2x": false
+    },
+    "C_GJR_net": {
+      "sharpe": 0.8205691831617349,
+      "sharpe_over_bh_spy": 1.0274261049494535,
+      "exceeds_2x": false
+    },
+    "D_5050_12VIX_net": {
+      "sharpe": 0.814363239695212,
+      "sharpe_over_bh_spy": 1.0196557079443183,
+      "exceeds_2x": false
+    },
+    "E_5050_A4f_net": {
+      "sharpe": 0.8523260064373185,
+      "sharpe_over_bh_spy": 1.0671884917330796,
+      "exceeds_2x": false
+    }
+  }
+}
