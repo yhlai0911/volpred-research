@@ -1,24 +1,17 @@
 [
   {
-    "id": "K1066",
-    "title": "K1066: A4f_oc Full Rolling OOS (Paper 9 Target Switch?)",
+    "id": "K1068",
+    "title": "K1068: Traditional CAR/CASV Event Study",
     "priority": 1,
     "status": "completed",
-    "description": "2/3 PASS (H1/H3), H2 FAIL. Best finding: A4f_oc vs GJR_close on r²_oc DM t=+7.05 (largest). Paper 9 should add dual-target robustness section, not switch main target."
+    "description": "★ 用戶 methodology correction. CAR NULL, CASV t=4.35 (p<0.0001, 2x K1060's t=2.07). Taiwan earnings = pure vol event. Paper 2 应用 CASV."
   },
   {
-    "id": "K1067",
-    "title": "K1067: TSMC Single-Stock A4f-EAV",
+    "id": "K1070",
+    "title": "K1070: 0050.TW ETF-Level CAR/CASV Event Study",
     "priority": 1,
-    "status": "completed",
-    "description": "NULL on TSMC (all H fail). BUT K1060 correction: TSMC T+1=0.983 weakest. H_vix diagnosis incomplete. Need K1067b on strong-EAV stocks (UMC/Hon Hai/中鋼)."
-  },
-  {
-    "id": "K1067b",
-    "title": "K1067b: UMC (2303.TW) A4f-EAV — Testing Strongest T+1 Stock",
-    "priority": 2,
-    "description": "UMC T+1=2.579 strongest of 10 stocks. If A4f+EAV NULL here too → H_vix confirmed. Resolves K1067 ambiguity.",
-    "status": "pending"
+    "status": "in_progress",
+    "description": "K1068 的 ETF 鏡像版。4 event sets (TSMC, Top4, All TWSE50, Dense days) × 4 windows × 3 tests. Quantify diversification dilution. Agent in worktree."
   },
   {
     "id": "TSMC_0416_post",
@@ -28,31 +21,38 @@
     "status": "pending"
   },
   {
+    "id": "K1067b",
+    "title": "K1067b: UMC (2303.TW) A4f-EAV — Testing Strongest T+1 Stock",
+    "priority": 2,
+    "description": "K1067 used TSMC (weakest T+1=0.983). UMC T+1=2.579 strongest. Resolves H_vix vs H_div ambiguity.",
+    "status": "pending"
+  },
+  {
+    "id": "K1071",
+    "title": "K1071: EPS Surprise Direction × CAR",
+    "priority": 2,
+    "description": "K1068 CAR NULL on pooled events. Maybe beat/miss direction matters. Collect EPS consensus vs actual.",
+    "status": "pending"
+  },
+  {
     "id": "K1061",
     "title": "K1061: Full TWSE 50 Constituents EAV",
     "priority": 2,
-    "description": "Extend K1060 to all 50 constituents",
+    "description": "Extend K1068 CAR to all 50 constituents for larger N",
     "status": "pending"
   },
   {
-    "id": "K1068",
-    "title": "K1068: Nonlinear EAV × VIX Interaction",
+    "id": "Paper9_dual_target_integration",
+    "title": "Paper 9 Dual-Target Integration",
     "priority": 2,
-    "description": "K1064 linear NULL. Test threshold EAV or EAV×VIX interaction in A4f.",
-    "status": "pending"
-  },
-  {
-    "id": "K1069",
-    "title": "K1069: Paper 9 Dual-Target Integration",
-    "priority": 2,
-    "description": "Build K1066 dual-target finding into Paper 9 v6 robustness section.",
+    "description": "Build K1066 finding (DM 7.05 on r²_oc) into Paper 9 v6 robustness. Main thread.",
     "status": "pending"
   },
   {
     "id": "Paper9_citation_verify",
     "title": "Paper 9 citation-verifier",
     "priority": 2,
-    "description": "Paper 9 v5。K1054-K1066 可加入 robustness section。",
+    "description": "Paper 9 v5 + K1054-K1068 additions. Main thread skill invocation.",
     "status": "pending"
   },
   {
