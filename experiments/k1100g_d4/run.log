@@ -1,0 +1,95 @@
+[05:54:55] Loading session cache...
+  Aligned rows: 1077
+  Per-year counts: {2017: 151, 2018: 232, 2019: 230, 2020: 233, 2021: 231}
+
+[05:54:55] === Annual IS fits (Student-t) ===
+
+  --- Year 2017  (n=151) ---
+    [05:54:55] fitting M2 (day-only, t) ...
+      ll=591.847  df=7.49  success=True
+    [05:54:56] fitting M4 (day + night exog, t) ...
+      ll=591.986  df=6.35  xn=-0.06558  success=True
+    LRT M4 vs M2: chi2=0.278  p=0.5978
+
+  --- Year 2018  (n=232) ---
+    [05:54:57] fitting M2 (day-only, t) ...
+      ll=840.196  df=8.00  success=True
+    [05:54:57] fitting M4 (day + night exog, t) ...
+      ll=842.379  df=6.84  xn=+0.07743  success=True
+    LRT M4 vs M2: chi2=4.366  p=0.03667
+
+  --- Year 2019  (n=230) ---
+    [05:54:58] fitting M2 (day-only, t) ...
+      ll=902.628  df=9.46  success=True
+    [05:54:59] fitting M4 (day + night exog, t) ...
+      ll=904.048  df=9.64  xn=+0.04946  success=True
+    LRT M4 vs M2: chi2=2.840  p=0.09196
+
+  --- Year 2020  (n=233) ---
+    [05:55:00] fitting M2 (day-only, t) ...
+      ll=774.901  df=4.92  success=True
+    [05:55:00] fitting M4 (day + night exog, t) ...
+      ll=776.040  df=6.61  xn=+0.1403  success=True
+    LRT M4 vs M2: chi2=2.279  p=0.1312
+
+  --- Year 2021  (n=231) ---
+    [05:55:01] fitting M2 (day-only, t) ...
+      ll=790.544  df=7.60  success=True
+    [05:55:02] fitting M4 (day + night exog, t) ...
+      ll=790.640  df=6.84  xn=+0.07743  success=True
+    LRT M4 vs M2: chi2=0.191  p=0.6619
+
+[05:55:03] === Pseudo-OOS per year (Student-t, frozen params) ===
+
+  --- Test year 2018  (train n=151,  test n=232) ---
+    [05:55:03] train M_null (day-only, t)...
+      success=True  df=9.464391625883408
+    [05:55:03] train M_full (day + night exog, t)...
+      success=True  df=6.966384193790639  xn=-0.014884223040606956
+    n_valid=232
+    QLIKE null=1.8441  full=1.8751  improv=-1.682%
+    DM-HLN t=-0.362  p=0.7175
+    OOS LRT chi2=0.041  p=0.8387  (threshold 1% = 7.88)
+
+  --- Test year 2019  (train n=383,  test n=230) ---
+    [05:55:04] train M_null (day-only, t)...
+      success=True  df=5.118019869222655
+    [05:55:04] train M_full (day + night exog, t)...
+      success=True  df=6.83620774502519  xn=0.07742632658341214
+    n_valid=230
+    QLIKE null=1.6917  full=1.6423  improv=+2.921%
+    DM-HLN t=1.056  p=0.2909
+    OOS LRT chi2=1.796  p=0.1802  (threshold 1% = 7.88)
+
+  --- Test year 2020  (train n=613,  test n=233) ---
+    [05:55:06] train M_null (day-only, t)...
+      success=True  df=5.118019868915871
+    [05:55:07] train M_full (day + night exog, t)...
+      success=True  df=6.836207744943082  xn=0.07742632566422504
+    n_valid=233
+    QLIKE null=1.7181  full=1.7185  improv=-0.026%
+    DM-HLN t=-0.009  p=0.9932
+    OOS LRT chi2=0.000  p=1  (threshold 1% = 7.88)
+
+  --- Test year 2021  (train n=846,  test n=231) ---
+    [05:55:09] train M_null (day-only, t)...
+      success=True  df=5.118019868708786
+    [05:55:10] train M_full (day + night exog, t)...
+      success=True  df=6.498933130262903  xn=0.06007955737619026
+    n_valid=231
+    QLIKE null=1.5055  full=1.4914  improv=+0.939%
+    DM-HLN t=0.526  p=0.5987
+    OOS LRT chi2=3.525  p=0.06045  (threshold 1% = 7.88)
+
+[05:55:12] === Summary ===
+  IS LRT pass @ 1% (threshold 7.88): 0/5 years
+  xn coef positive: 4/5 years
+  OOS LRT pass @ 1% (threshold 7.88): 0/4 years
+  2020-only dominance: False
+  VERDICT: H3_MIXED_MINORITY_PASS
+  Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a14899fe/experiments/k1100g_d4/k1100g_d4_annual_lrt.png
+  Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a14899fe/experiments/k1100g_d4/k1100g_d4_xn_and_oos.png
+
+  Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a14899fe/experiments/k1100g_d4/k1100g_d4_results.json
+
+Total elapsed: 17.7s
