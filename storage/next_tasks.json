@@ -608,8 +608,8 @@
   {
     "id": "K1146",
     "title": "K1146: Paper 2 manuscript pivot to universal-magnitude (main thread, NOT agent)",
-    "priority": 2,
-    "description": "K1145 universal-magnitude PASS。Paper 2 contribution 從 dual-NULL 改寫為 'pooled θ_EAV=+6.4e-5 t=5.24 robust across 5 layers, invisible at firm level due to idiosyncratic noise'。需主線程改 paper/2/body.tex，不可派 agent (per CLAUDE.md 禁用 agent 寫論文)。",
+    "priority": 1,
+    "description": "[3-market 全 PASS 後] Paper 2 從 dual-NULL 改寫為 three-market universal regularity (TW K1145 + US K1147 + JP K1150)。需主線程改 paper/2/body.tex (5-stage classifier 判 stage)。重點：5-layer robustness 表 + magnitude comparison + self-challenge §4.7 防審稿人質疑高 t-stat。",
     "status": "pending"
   },
   {
@@ -639,7 +639,8 @@
     "title": "K1150: TOPIX N=30 Japan pooled θ_EAV — third market validation",
     "priority": 2,
     "description": "K1145 TW + K1147 US 都 PASS。第三市場 (Japan TOPIX top-30) 若也 PASS → 三大區域 universal，extreme-strong contribution。EAV 用 Japan earnings (yfinance 或 EDINET API)。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-13T23:30:00+08:00"
   },
   {
     "id": "K1151",
@@ -660,6 +661,13 @@
     "title": "K1153: EU index pooled (DAX+CAC+FTSE composite) — fourth market",
     "priority": 4,
     "description": "歐洲市場 large-cap pooled，第四市場驗證。Top 10 from each + composite N=30。EU earnings 通常季報但時點分散。",
+    "status": "pending"
+  },
+  {
+    "id": "K1156",
+    "title": "K1156: 5-market validation visualization for Paper 2 cover figure",
+    "priority": 3,
+    "description": "Three-market table 已成核心 finding；若 K1153 EU 也 PASS → 4-market。視覺化 fig 為 Paper 2 cover：x=market, y=θ_EAV with 95% CI bars + placebo z annotation。",
     "status": "pending"
   }
 ]

@@ -611,6 +611,18 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 16. Paper 2 三市場全 PASS：true global volatility regularity（2026-04-13 K1150）
+**TW + US + JP 三市場全 universal-magnitude PASS — 真 cross-market regularity 確認**
+- JP TOPIX top-30 pooled θ_EAV = +1.413e-4，bootstrap (n=150) t=+11.99，95% CI [+1.29e-4, +1.76e-4]
+- Placebo 60 reps: 觀測值 = +38.6σ from null mean，p=0/60 decisive
+- 3 EAV-def monotonic shrinkage 同 K1145 TW pattern
+- Drop-5 × 5 seeds θ ∈ [+1.34e-4, +1.47e-4]，全部 t > 18
+- **Three-market table**: TW (+6.36e-5, t=+5.24, +13.6σ) / US (+1.91e-4, t=+4.50, +70.7σ) / JP (+1.41e-4, t=+11.99, +38.6σ)
+- Magnitude ratio US/TW=3.0, JP/TW=2.2, JP/US=0.74 — 同 1e-4 量級
+- JP 高 t (+11.99) 觸發 Rule #5 self-challenge: TOPIX top-30 同質性 > S&P 500 (NVDA/TSLA outlier 不存在)，所有 150 bootstrap draws 嚴格 >0，三層一致可接受
+- **Paper 2 final narrative**: "Three independent equity markets, 5 robustness layers each, magnitudes differ ~3× but direction uniformly positive — global volatility regularity where GARCH-MIDAS τ component absorbs market-wide announcement-day variance premium invisible at firm level but robust at panel level"
+- K1146 主線程改稿升 P1; 衍生 K1153 EU + K1156 cover-fig
+
 ### 15. Paper 2 cross-market 升級：global volatility regularity（2026-04-13 K1147）
 **TW K1145 + US K1147 雙市場全 PASS — universal regularity 確認**
 - US S&P 500 top-30 pooled θ_EAV = +1.91e-4，bootstrap t=+4.50，95% CI [+1.29e-4, +2.80e-4]
