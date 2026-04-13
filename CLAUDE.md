@@ -136,6 +136,15 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **research_program.md**：研究策略文件（北極星）
 - **paper/**：學術論文（按子目錄組織）
 
+### Skill 導覽
+- **完整技能地圖**：見 `docs/skill-registry.md`
+- **研究主流程**：`.claude/skills/autonomous-research/SKILL.md`
+- **文章內容與圖表規格**：`.claude/skills/feed-publisher/SKILL.md`
+- **平台 ops / 文章池 / cron / monitor**：`.claude/skills/admin-ops/SKILL.md`
+- **會員問題審查與流轉**：`.claude/skills/member-questions/SKILL.md`
+- **論文系列 workflow**：`.claude/skills/paper-*/SKILL.md`
+- **support gates**：`agent-result-verification` / `worktree-merge-verification` / `memory-health`
+
 ### 研究結論（非此處）
 → 所有研究結論、設計原則、K 編號詳情見 `research_program.md`「重大研究結論」段（5 條核心結論：VT 本質、50/50 SPY/GLD、Smooth-weight、Proxy-robust、VaR+ES）。CLAUDE.md 只放跨研究通用的操作規則（如 Token 節約、部署、排程），不放會隨實驗更新的研究結論。
 
@@ -169,57 +178,41 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **Paper trading 多日回補**：daily_update.py 自動回填所有 `portfolio_return=None` 的歷史條目（利用相鄰條目價差）
 - **frontend-v2-fix 已部署**：`volpred.zeabur.app` 綁定到 volpred-v3 服務（frontend-v2-fix），前端修改只需改 `frontend-v2-fix/`
 
-### 每日文章產出要求（不可缺少任何一種）
+### 每日文章產出要求（摘要）
 
-每天必須產出以下三種類型的文章，面向不同讀者群：
+文章內容規格與圖表要求由 `feed-publisher` 負責；文章池、排程釋出、通知與節奏由 `admin-ops` 負責。完整細節請直接讀對應 skill。
 
-| 類型 | 目標讀者 | 每日數量 | 內容要求 | tags 必含 |
-|------|---------|---------|---------|----------|
-| **一般讀者** (general) | 非專業投資人 | 4 篇 | 800-1200 字、爆款標題、具體場景、一個核心 takeaway、CTA。基於研究數據但用類比解釋 | `一般讀者` |
-| **研究發現** (research) | 有金融背景的讀者 | 2-4 篇 | 實驗結果報告，含統計數據、表格、方法論。每個重要實驗（★+）都應有對應文章 | `研究` |
-| **每日建議** (daily) | 所有讀者 | 1 篇 | 當日策略權重、VIX regime、持倉建議。由 `daily_update.py` 自動產生 | `每日建議` |
+每日最低產出要求仍維持：
 
-**執行規則**：
-- **非時效性文章**一律 `status=draft` 進文章池，由每 2 小時 cron 按節奏釋出
-- **⚠️ 事件驅動文章（NFP/FOMC/CPI/TSMC 營收等）必須立即 `status=published`** + Supabase sync。延遲 = 過期（2026-04-03 教訓：NFP 文章延遲 10 小時釋出）
-- **每篇文章必須附真正的圖表（不可用 ASCII/文字表格替代）**：
-  - 使用共用模組 `from volpred.charts import generate_bar_chart, upload_chart, embed_chart`
-  - 可用函式：`generate_bar_chart`、`generate_grouped_bar_chart`、`generate_line_chart`、`generate_heatmap`
-  - 流程：`path = generate_bar_chart(...) → url = upload_chart(path) → content = embed_chart(content, url, '描述')`
-  - 一般讀者至少 1 張真實圖表，研究文章 2-3 張
-  - **禁止用 ASCII art、文字方框、或純 Markdown 表格冒充圖表**——這些不是圖表
-- **每篇文章必須標注數據來源和實驗檔案**：
-  - 研究文章：文末必須列出 `實驗腳本: experiments/kXXX.py` 和 `結果數據: experiments/kXXX_results.json`
-  - 一般讀者文章：文末用 `*本文基於實驗 KXXX 的實證結果（數據來源：yfinance，期間：YYYY-YYYY）*` 格式標注
-  - 不標注來源的文章等同「無法追溯」，違反研究誠實原則第 9 條
-- 一般讀者文章的主題**不可重疊**——每篇必須有獨立的核心 insight
-- **⚠️ 主題重複檢查必須在「決定主題後、啟動寫作 agent 前」完成（不是發佈時才檢查）：**
-  1. **LanceDB 語義搜尋**（主要）：`uv run python scripts/build_knowledge_index.py search --query "主題描述"` — 看前 5 筆是否有高度相似的已發佈文章
-  2. **grep 輔助**：`grep -i '關鍵詞' storage/reports/feed.json | grep title | head -10`
-  3. 若找到同 audience 相似文章 → **不啟動 agent**，除非有明確的新觀點
-  4. 若有部分重疊 → 在 agent prompt 中明確指出「已有 XXX 文章講過 Y，這次要從 Z 角度切入」
-  5. 高頻重複主題（50/50 配置 10+篇、VT 保險 5+篇、隔夜波動 3+篇）→ **原則上不再寫，除非有新實驗數據**
-  6. 浪費資源寫完才發現重複 = 流程失敗（2026-04-01 教訓：K791 隔夜波動文章與 K772 重複）
-- **research_program.md 每月初存檔瘦身**：將已完成 Phase/Session 記錄移至 `docs/research_archive/completed_phases_YYYY-MM.md`，只保留活躍內容（目標 < 500 行）。查詢追蹤表指向存檔位置。**存檔前必須先確認所有實驗都已進入 knowledge.json + experiment_experiences.json**——不可以存檔未記錄的內容（2026-03 教訓：先存檔才發現 85 個實驗不在知識庫）
-- **重要事件前後必須安排研究與文章**：每月初用 WebSearch 查詢未來一個月的重要政治/經濟/金融事件（FOMC、CPI、NFP、GDP、央行決議、大型法說會）。**每事件文章節奏（hard）**：
-  - **T-7 天 heads-up**（事件前 1 週）：喚起讀者注意，包含「下週/月哪天有 X 事件」+「為什麼這次特別」
-  - **T-2 天 深度預告**（事件前 2 天，hard deadline 不可延）：歷史波動率、期權市場 IV、分析師預期等時效性分析
-  - **T+0 即時解讀**（事件公布後立即發 `--status published`，不等次日）：hot-take 3 重點 + 對市場影響。CLAUDE.md 行 184 規則：事件驅動文章延遲 = 過期
-  - **T+1 ~ T+3 深度追蹤**（optional，只有真新發現才寫，避免重複）
-  - **每事件 total**：2 預告（T-7 + T-2）+ 1 解讀（T+0 必）+ 0-1 追蹤 = 3-4 篇
-  - **常態 research 文章 vs 事件文章區分**：方法論研究（如 K1067 series 跨公司對照）不綁特定日期；事件預告/解讀必須綁日期且當期才發，不可早早發完
-  - 例：TSMC 法說 04/16 14:00 → 04/09 heads-up，04/14 深度預告，04/16 14:00+ 立即解讀
-  - 具體事件日曆記在 `research_program.md`，**每次查詢新月份時覆蓋更新（不累積），只保留當月和下月**
-- 研究文章在實驗完成後**立刻撰寫**，不要累積
-- **每 5 個實驗後必須補充文章池**——檢查池中草稿數量，若 <3 篇則立刻寫 2 篇（1 general + 1 research）
-- 每個 session 開始時檢查今日各類型文章產出是否達標
-- **池子不可空超過 3 小時**——若空池超過 3 小時等於網站停止更新
+| 類型 | 每日數量 | 核心要求 |
+|------|---------|---------|
+| `general` | 4 篇 | reader-facing、具場景、具單一 takeaway |
+| `research` | 2-4 篇 | 實驗結果、統計數據、方法論清楚 |
+| `daily` | 1 篇 | 由 `daily_update.py` 自動產出 |
+
+不可違反的高層規則：
+
+- 非時效性文章預設進文章池，不直接 `published`
+- 事件驅動文章必須即時發佈，延遲等於過期
+- 每篇文章都必須有真實圖表、資料來源與實驗/腳本追溯資訊
+- 主題重複檢查必須在啟動寫作前完成
+- 每 5 個實驗後要檢查文章池是否偏空；池子不可空超過 3 小時
+- 事件行事曆與研究排程仍記在 `research_program.md`
+
+對應 skill：
+
+- 文章內容、圖表、標註、主題查重、事件文章內容規格 → `.claude/skills/feed-publisher/SKILL.md`
+- 文章池、釋出節奏、通知與平台 surfaces → `.claude/skills/admin-ops/SKILL.md`
 
 ## 論文
 - 論文列表、版本命名、PDF slug → `docs/paper-guide.md`
-- **完整 stage 分類 + 更新 SOP + 持續審查迴圈 + review 歸檔規則** → `.claude/skills/paper-stage-classifier/SKILL.md`
-- 5 stages: early / draft / review / ready_for_submission / submitted。Ready 論文進入 continuous review loop。
-- ⚠️ 修正完必跑 `uv run volpred ops paper-update --paper-id <id>` 同步平台，否則 = 沒修。
+- paper workflow 現在拆成 4 個 skill：
+  - stage 判定 → `.claude/skills/paper-stage-classifier/SKILL.md`
+  - review orchestration → `.claude/skills/paper-review-cycle/SKILL.md`
+  - 修稿與同步 → `.claude/skills/paper-update/SKILL.md`
+  - 內容品質 / citation / LaTeX review → `finance-paper-quality` / `citation-verifier` / `latex-academic-reviewer`
+- 5 stages 仍維持：`early` / `draft` / `review` / `ready_for_submission` / `submitted`
+- ⚠️ 修正完必跑 `uv run volpred ops paper-update --paper-id <id>`；不同步平台等於沒修
 
 ### 目前 STRATEGY_REGISTRY（14 筆，10 個 active）
 → 完整上架流程見 `docs/strategy-registry.md`
@@ -340,86 +333,32 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 **記錄要求**：每次根本修正後更新 Error Log + 寫入對應 skill/memory。
 
 ## 自主研究模式
-**研究永不停止。** 完成任何任務後**立刻執行下一個任務**，不需要回報等待、不需要徵求同意。在同一個 turn 中連續做多個實驗（用 agent team 並行 + 主線串行）。不要做完一個實驗就停下來——連續鏈式執行直到使用者主動中斷。
-**透過 session cron 每 4 分鐘 heartbeat 觸發 autonomous-research 繼續研究**（在 5 分鐘 cache TTL 內維持 warm）。**前一個任務進行中時直接跳過不重複啟動**（避免編號衝突）。
 
-**⚠️ 反空轉原則（2026-03-31 教訓）：**
-- **「方向窮盡」是假象** — research_program.md 永遠有 100+ 未完成項目。不要靠腦中判斷「沒事做」，要讀文件。
-- **每次 cron 觸發必須做事** — 讀 research_program.md 選一個待辦，啟動 agent 或自己做。禁止只回「系統穩定」。
-- **實驗衍生方向必須寫回** — 每個實驗完成後，提取 2-3 個新方向寫入 research_program.md。不寫 = 知識流失。
-- **完成項目必須 archive** — 移到 `docs/research_archive/`，保持 research_program.md < 700 行。
+研究主流程的唯一母本是 `.claude/skills/autonomous-research/SKILL.md`。本段只保留高層規則：
 
-### 實驗前必做：防錯 + 查詢知識庫 + 搜尋文獻（不可跳過，違反即無效）
-**每個實驗/新主題路線開始前，必須完成以下步驟，缺一不可：**
+- 研究永不停止；完成一個任務後要接續下一個有價值的研究動作
+- 反空轉：不能靠主觀感覺判斷「沒方向了」，要回到 `research_program.md`
+- 每個實驗前都必須做：
+  - error log 防錯
+  - 知識庫搜尋
+  - 文獻搜尋
+  - K 編號衝突檢查
+- 每個實驗都必須遵守：
+  - `寫代碼 → Codex 審代碼 → 修正 → 跑實驗 → 驗證結果 → 記錄 knowledge → 才寫文章`
+  - 回測代碼必須顯式 lag，避免 lookahead
+  - Sharpe 異常過高時先懷疑 bug
+- 每個實驗完成後都要：
+  - 記 knowledge
+  - 視情況記 experience
+  - 寫回新的研究方向到 `research_program.md`
+  - 將完成項目 archive，維持 `research_program.md` 可讀
+- 不要連續停留在同一舒適區；連續 3 個 null result 必須換方向
 
-**Step -1: 確認實驗編號不衝突（多 session 安全）**
-- **分配新 K 編號前，必須檢查以下三處確認該編號未被佔用：**
-  1. `ls experiments/ | sort` — 已完成/進行中的實驗目錄
-  2. `cat storage/next_tasks.json` — 已排定但未開始的任務
-  3. `ls .claude/worktrees/ 2>/dev/null` — 其他 session 正在跑的 worktree agent
-- 另一個 session 可能已經用了該編號（2026-04-08 教訓：K988 被另一個 session 佔用）
-- 從最大現有編號 +1 開始，跳過所有已佔用的
+詳細操作與模板：
 
-**Step 0: Error Log 防錯 + Preamble（最重要）**
-0. **讀 `docs/error_log.md` 前 30 行（快速索引表）**，在 agent prompt 中列出「此實驗需注意的 error log 規則：XXX」。只有需要細節時才讀對應的詳細記錄段落
-1. **附上 preamble**：每個實驗 agent prompt 必須讀取 `.claude/skills/autonomous-research/references/experiment-preamble.md` 附加在開頭。**Agent 看不到 CLAUDE.md 和 research_program.md，preamble 是唯一能把方法論規則傳遞給 agent 的機制。** Preamble 包含：模型-target 匹配、mechanical vs empirical 區分、統計門檻、防錯規則、VaR+ES 標準、worktree 禁令。
-
-**Step 1: 知識庫搜尋（過去成果）**
-1. `grep -i '關鍵詞' storage/memory/knowledge.json | grep title | head -10`
-2. 確認：是否已有相關成果？過去結論是什麼？有無自我修正？
-3. 在 agent prompt 中**引用相關 K 編號**，讓 agent 建立在已有基礎上
-4. 避免重複實驗、避免被已推翻的結論誤導
-
-**Step 2: 學術文獻搜尋（方法論與概念）**
-5. 用 WebSearch 搜尋該主題的學術文獻（至少 3 篇）
-6. 分析方法論：前人用什麼方法？為什麼？有什麼已知結論？
-7. 用 sci-hub skill 取得全文（如果需要細節）
-8. 基於文獻分析決定實驗設計，不自行猜測
-
-**Step 3: 概念驗證（先想清楚再動手）**
-9. 問自己：「這個實驗跟過去哪個 K 最像？那個 K 的結論是什麼？」
-10. 如果知識庫已有非常相似的實驗 → 不重複，除非有明確的差異化理由
-11. 如果文獻說某方法在某條件下不 work → 不盲目嘗試
-
-**反面教材**：K503（VIX mean-reversion）如果先查知識庫就會發現 12/VIX 本身就是 MR trade；K504（STLFSI4）如果先查會發現 VIX 已被確認 31 次 sufficient。這些 null results 本可避免。
-
-**Step 4: 跨市場驗證（美股無效 ≠ 其他市場無效）**
-12. 在美股測完的方法，如果有潛力也要在**台股（0050.TW）**測試——特別是使用外生變數的方法（K461 SSVS 在台股選出 SPY PIP=1.000，美股選空模型）
-13. 台股特性：高波動（amplification 4.6x）、US lead-lag、不同 gamma、外部驅動
-
-**Step 5: 效率檢查（超時 ≠ 方法無效）**
-14. Agent 超時（exit 144）時，先檢查**代碼效率**（向量化、refit 頻率、numba），不要直接下「方法無效」結論（K419→K426 教訓：1.5s vs timeout）
-15. 設計實驗時預估運行時間，控制在合理範圍（< 3-5 分鐘）
-
-**Step 6: 錯誤處理與 AI 協作規則**
-16. 程式跑不出結果或產生錯誤時，**必須用 `/codex:review` 或 `/codex:rescue` 檢查並修正**——不要自己猜、不要反覆重試同一個錯
-17. Gemini API 額度用完時，**轉由 Codex 協助**（`/codex:rescue` 委派任務）
-18. 為避免 Gemini API 額度快速用完：知識索引用 `auto`（增量）不用 `build`（全量），每 session 論文修訂任務**不可過於集中**（分散在不同時段執行）
-
-### 實驗完整流程（強制，不可跳步）
-
-```
-寫代碼 → Codex 審代碼 → 修正 → 跑實驗 → 驗證結果 → 記錄 knowledge → 才寫文章
-```
-
-**實驗中必做（寫代碼時）：**
-1. 策略回測代碼必須有 `signal = signal.shift(1)` 或等效 lag——**在代碼裡強制，不靠記憶**
-2. TX cost 必須在每次 weight 變化時扣除
-3. Baseline 用相同的 lag convention（如果新策略 lag=1，baseline 也要 lag=1）
-4. `evaluate_new_strategy.py` 已內建正確 lag——優先使用
-
-**實驗後必做（跑完後、記錄前）：**
-1. **Codex 審查代碼**（不是審結果——審代碼本身有沒有 bug）
-   - `codex exec -s read-only "Review experiments/kXXX.py for lag, TX, baseline bugs"` 或 `/codex:rescue`
-2. **結果合理性檢查**：Sharpe > 2x baseline → 90% 有 bug，先停下來
-3. **Codex 通過後才記錄** knowledge
-4. **Knowledge 記錄後才寫文章**
-5. **文章存 draft**，由 cron 釋出——不直接 publish
-
-**2026-03-29 教訓**：93 個實驗中 8 個被推翻（10%），全部因為跳過「Codex 先審代碼」這一步。如果每個實驗都先審再跑，推翻率應該趨近 0%。
-
-### 研究多元化（必須遵守）
-**不要停留在模型舒適區。** 每個 session 至少 1 個完全不同方向。連續 3 個 null result → 必須換方向。**具體跳躍方向和判斷清單見 `research_program.md`「研究多元化原則」。**
+- 研究主流程 → `.claude/skills/autonomous-research/SKILL.md`
+- agent 回傳數字驗證 → `.claude/skills/agent-result-verification/SKILL.md`
+- worktree merge 與檔案落地驗證 → `.claude/skills/worktree-merge-verification/SKILL.md`
 
 ## 活文件原則
 以下文件會隨研究推展持續演化，應主動修改以反映最新狀態：
@@ -435,6 +374,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ### Skill 自主管理與定期審查
 - **建立/修正 skill 不需要事先徵求同意**——Claude 依據任務執行中累積的經驗自行判斷。但每次建立或修正必須在下次與用戶互動時主動通知。
+- **完整 skill 註冊表 + scope boundaries**: `docs/skill-registry.md`（14 top-level skills，每個有 trigger phrases / 使用範圍 / handoff / 對應 CLAUDE.md 段落）
 - **每月第一個 session 產出 Skill 審查報告**，內容包含：
   1. 目前所有 skill 清單（名稱、用途、上次觸發時間）
   2. 本月新增/修改的 skill 及原因
@@ -489,18 +429,12 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ## 自動化：cron + Monitor（session 啟動必建）
 
-**操作細節（所有啟動指令、Monitor command、RemoteTrigger 表）→ `scripts/session_startup.md`**。SessionStart hook 會提醒讀取。
+session 自動化與平台 cycle 的唯一母本是 `.claude/skills/admin-ops/SKILL.md` 與其 references。高層規則如下：
 
-### 工具區分
-- **Monitor**：持續串流，每次事件都通知（「X 發生就告訴我」）
-- **Bash(run_in_background)**：一次性任務完成通知（「等 X 做完」）
-- **CronCreate**：定時觸發 prompt（「每 N 小時做一件事」）
-
-### Session-only 警告
-- Session cron 與 Monitor 都在關 session 時消失——每次新 session 都要重建
-- 跨 session 持久監控用系統 crontab 或 RemoteTrigger（不會消失）
-- Monitor 場景門檻：knowledge.json >5MB · feed.json >7MB · draft <3 · 最新發文 >3h · worktree >3
-- 2026-04-13 教訓：Monitor 未列入啟動清單 → 用戶問「有在 monitor 嗎」才發現
+- Session cron / Monitor 都是 session-only；每次新 session 都要重建
+- 跨 session 的長期任務仍應靠系統 crontab 或 RemoteTrigger
+- 啟動清單、cron cadence、platform cycle 細節 → `scripts/session_startup.md`
+- 若任務屬於平台巡檢、文章池、question ranking 或 monitor 門檻處理，優先走 `admin-ops`
 
 ## 硬體資源與 Agent Team
 → 完整 Agent 設定對照表見 `docs/hardware.md`
@@ -531,58 +465,30 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ### Agent Prompt 必備內容（不可省略）
 
-**Agent 是空白的 Claude，只知道 prompt 裡寫的東西。** 不要假設 agent 知道任何事。
+**Agent 是空白的 Claude，只知道 prompt 裡寫的東西。** 高層規則如下：
 
-| 任務類型 | Agent prompt 必須包含 |
-|---------|---------------------|
-| **實驗** | 讀取 `experiment-preamble.md`（模型-target 匹配、統計門檻、防錯規則、VaR+ES 標準、periodic model 注意事項） |
-| **論文寫作** | **⚠️ 禁止用 agent 寫論文。** 必須在主對話串中直接進行（保留完整 context）。可用 `run_in_background` 做長時間編譯或數據提取，但寫作本身不可委派。原因：對話中的方法論決策、用戶糾正、模型理解無法傳遞給 agent。 |
-| **論文審查** | 指示 agent 讀取：(1) `latex-academic-reviewer` skill 完整內容 (2) `citation-verifier` skill (3) 論文本身 + 實驗結果 JSON |
-| **Feed 文章** | 指示 agent 讀取：(1) `feed-publisher` skill (2) 實驗結果 JSON (3) 已有文章（避免重複） |
+- 所有 agent prompt 都必須是完整 brief，不可假設 agent 知道專案背景
+- 實驗 agent 必須讀 `experiment-preamble.md`
+- paper review agent 必須明確指定對應的 paper skills
+- feed 文章 agent 必須讀 `feed-publisher` 並自己讀實驗 JSON
+- worktree agent 必須 commit，且不得改共享狀態 JSON / Supabase / Mirror
+- agent 返回後，主線程必須做 synthesis，再合併、驗證、記錄
 
-**通用原則（適用所有 agent 任務）：**
-- **使用標準化模板**：agent brief 必須按照 `.claude/skills/autonomous-research/references/agent-brief-template.md` 格式填寫（WHAT + WHY + 約束 + 成功標準 + 相關知識）。agent 回報必須按照 `agent-result-template.md` 格式（結果 + 數字 + 異常 + 與動機關聯 + 後續）
-- **主 agent 判斷需要哪些 skill**，在 prompt 中指示 subagent 讀取對應的 skill 文件路徑（`.claude/skills/<name>/SKILL.md`）
-- **完整傳遞必要資訊**：相關 K 編號+結論、error log 防錯規則、檔案路徑、統計門檻、研究背景
-- **Agent prompt = 完整 brief**：像寫給剛加入團隊的聰明同事，不是一行指令
-- **主線程做 synthesis**：agent 回報後，主線程必須先「解讀」（連回動機）再「行動」（記 knowledge/寫文章）。不是照搬 agent 的結論
-- **⚠️ Worktree agent 必須 commit**：每個 worktree agent 的 prompt 結尾必須包含：
-  > 在完成所有工作後，必須執行 `git add -A && git commit -m "K9XX: description"` 保存所有新檔案。不 commit = 檔案在 worktree 清理時永久遺失。
-- **Agent 返回後**：主對話必須執行 `bash scripts/merge_worktree.sh` 合併變更到 main
-- **⚠️ Worktree agent 禁止修改共享狀態**：Worktree 是隔離的 git 分支，與 main 同時修改 JSON 陣列會導致 merge 衝突和資料遺失。規則：
-  - **禁止寫入**：`storage/reports/feed.json`、`storage/memory/knowledge.json`、`storage/memory/thinking_journal.json`、`storage/memory/experiment_experiences.json`
-  - **禁止呼叫**：`supabase_sync.py`、`_sync_to_remote()`、任何寫入 Supabase/Mirror 的操作
-  - **Worktree agent 只應產出**：`experiments/kXXX/` 下的檔案（腳本、結果 JSON、圖表、README）
-  - **主線程負責**：agent 完成後，由主線程記錄 knowledge、發佈文章、sync 到 Supabase
-  - 詳見 `experiment-preamble.md` 第 8 節
+詳細模板與規範：
 
-**絕對禁止**：
-- 在 prompt 中給 agent 「摘要數字」然後讓它寫論文 → 必須讓 agent 自己讀 JSON
-- 不告訴 agent 讀 skill 就讓它寫學術文件 → agent 不知道學術規範
-- 假設 agent「應該知道」某件事 → 它什麼都不知道，必須明確指示
-- 只說「參考 XXX skill」但不給路徑 → agent 找不到，必須給完整路徑
-- **`git worktree remove --force`** → 用 `bash scripts/merge_worktree.sh` 替代（K923/K924/K932 教訓）
+- `.claude/skills/autonomous-research/references/agent-brief-template.md`
+- `.claude/skills/autonomous-research/references/agent-result-template.md`
+- `.claude/skills/autonomous-research/references/experiment-preamble.md`
+- `.claude/skills/worktree-merge-verification/SKILL.md`
+- `.claude/skills/agent-result-verification/SKILL.md`
 
 ## 排程核心原則（操作細節見 `scripts/session_startup.md`）
 
-**⚠️ 時區規則**：系統 crontab + session cron 用台灣時間；RemoteTrigger cron 表達式**固定 UTC**，設定時必須「台灣時間 - 8 小時」換算。
+排程與 cron 細節以 `scripts/session_startup.md` 與 `admin-ops` references 為準。高層規則：
 
-### 反空轉規則（2026-03-31 教訓）
-每次「繼續研究」cron 觸發後必須滿足至少一項才算完成：
-1. 有新 agent 在背景跑
-2. 有實際的 git diff（不是只改 session_state.json）
-3. 有新的 knowledge/experience 記錄
-4. 有 research_program.md 內容更新
-
-**禁止連續兩次 cron 觸發都只回覆 status check。** 上次沒做，這次必須補上。
-
-### 實驗完成後必做流程（不可跳步）
-```
-實驗完成 → Codex 審代碼 → 合併 worktree → 記 knowledge → 記 experience（如適用）
-         → 衍生新方向寫入 research_program.md
-         → 已完成項目移到 docs/research_archive/
-         → research_program.md 保持 < 700 行
-```
+- 系統 crontab / session cron 使用台灣時間；RemoteTrigger 固定 UTC
+- 任何「繼續研究」型 cron 都必須落成真工作，不能只回 status check
+- 實驗完成後仍必須走：Codex 審代碼 → 合併 / 驗證 → 記 knowledge / experience → 回寫 `research_program.md`
 
 ## 研究方法論與模型
 

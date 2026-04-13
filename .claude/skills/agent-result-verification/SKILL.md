@@ -4,10 +4,24 @@ description: >
   Agent（worktree 或 background）返回實驗結果後的驗證 checklist。
   防止 agent 回報不準確的數字（K1016 教訓：agent 聲稱 QLIKE 改善 +13.7%
   但 JSON 顯示惡化）。Trigger: 每次 agent 返回實驗結果後自動執行。
+  Do not use for research design, article writing, or generic platform ops.
 user-invocable: false
 ---
 
 # Agent Result Verification Checklist
+
+## Scope Boundary
+
+Use this skill only after agent 回報統計或比較結果時，用來：
+
+- 以 results JSON 為準驗證數字
+- 檢查號誌方向與合理性
+- 阻止錯誤數字流入 knowledge / 文章
+
+Do **not** use this skill for：
+
+- 研究設計與模型選擇 → `autonomous-research`
+- worktree merge / reflog 恢復 → `worktree-merge-verification`
 
 ## 觸發時機
 每次 agent 返回包含統計數字的實驗結果後，**在記錄 knowledge 之前**必須執行。

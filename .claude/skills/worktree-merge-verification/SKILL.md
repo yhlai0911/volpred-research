@@ -4,10 +4,24 @@ description: >
   Worktree agent 完成後的合併與驗證流程。防止 agent 工作成果遺失（K1032 教訓：
   merge_worktree.sh 判斷「no commits」但 reflog 有 commit，導致實驗檔案遺失）。
   Trigger: 每次 worktree agent 完成返回後自動執行。
+  Do not use for general research design or article writing.
 user-invocable: false
 ---
 
 # Worktree Merge Verification
+
+## Scope Boundary
+
+Use this skill only for：
+
+- merge_worktree 後驗證檔案有無到位
+- reflog / cherry-pick 恢復遺失 commit
+- 主線程記錄前的 merge safety gate
+
+Do **not** use this skill for：
+
+- 研究設計與下一步判斷 → `autonomous-research`
+- 純數字驗證 → `agent-result-verification`
 
 ## 觸發時機
 每次 worktree agent（`isolation: "worktree"`）完成返回後，**必須執行此流程**。

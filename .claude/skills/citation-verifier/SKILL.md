@@ -15,6 +15,20 @@ description: >
 
 # Citation Verifier
 
+## Scope Boundary
+
+Use this skill for：
+
+- citation bibliographic accuracy
+- DOI correctness
+- 內文對原文的忠實度
+
+Do **not** use this skill for：
+
+- 一般 paper quality / contribution framing → `finance-paper-quality`
+- LaTeX 結構審查 → `latex-academic-reviewer`
+- 論文修稿同步 → `paper-update`
+
 ## Overview
 
 This skill provides systematic verification of academic citations in financial econometrics manuscripts. It ensures all references are accurate, properly formatted (APA 7th edition with DOI), and that cited claims faithfully represent the original source material.
@@ -29,6 +43,12 @@ This skill should be triggered:
 1. **Automatically**: After saving a new draft version of a manuscript section
 2. **Manually**: When explicitly requested to verify citations
 3. **Proactively**: When reviewing literature review sections, methodology citations, or any text with academic references
+
+## Related Skills
+
+- 內容品質與 claim framing → `finance-paper-quality`
+- 結構與 review report → `latex-academic-reviewer`
+- review orchestration → `paper-review-cycle`
 
 ## Verification Workflow
 

@@ -17,12 +17,33 @@ description: >
 
 Enforce academic quality standards when writing or revising finance papers targeting top-tier journals (JBF, JFE, RFS, JoE, FRL).
 
+## Scope Boundary
+
+Use this skill for：
+
+- claim-evidence matching
+- contribution count and framing
+- mechanical vs empirical distinction
+- threshold justification
+- submission-quality writing standards
+
+Do **not** use this skill for：
+
+- citation-only verification → `citation-verifier`
+- LaTeX 結構與符號審查 → `latex-academic-reviewer`
+- paper 平台同步 → `paper-update`
+
 ## When to Use
 
 - Writing new paper sections
 - Revising paper after peer review
 - Checking if a claim is appropriately stated
 - Adding new empirical results to the paper
+
+## Related Bundle
+
+Read `academic-finance-reviewer/` as a reference bundle when you need journal standards,
+rejection patterns, writing style guidance, or reviewer response templates.
 
 ## Core Principles (from Codex Review Lessons)
 

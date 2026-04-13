@@ -16,7 +16,20 @@ user-invocable: true
 | **ready_for_submission** | latex-reviewer ≥ 4★ + citation-verifier 0 MAJOR + ≤3 MED | **進入 continuous review loop**（見下段）|
 | **submitted** | 已投稿 journal | 監控 reviewer 回應，準備 R&R |
 
-## Stage 判定 SOP（**只負責分類**，修訂操作 SOP 在 paper-update-sop skill）
+## Scope Boundary
+
+Use this skill only for：
+
+- paper stage 判定
+- ready / submitted 的條件界定
+- continuous review loop 何時啟動
+
+Do **not** use this skill for：
+
+- 實際跑 review → `paper-review-cycle`
+- 實際修稿與平台同步 → `paper-update`
+
+## Stage 判定 SOP（**只負責分類**，修訂操作 SOP 在 `paper-update` skill）
 
 每次 `paper-update` 後立即：
 1. 跑 `paper-list` 看 pages, citations
@@ -24,7 +37,7 @@ user-invocable: true
 3. 用 `volpred ops paper-upsert --paper-id <id> --stage <stage>` 寫入 DB（若有 --stage 欄位；無則寫 details JSON）
 4. 同步更新 `next_tasks.json` 的對應任務 description
 
-修訂操作步驟（從 review report 到平台同步）→ 見 `paper-update-sop` skill。本 skill 只負責 stage 判定 + continuous review loop 觸發頻率。
+修訂操作步驟（從 review report 到平台同步）→ 見 `paper-update` skill。本 skill 只負責 stage 判定 + continuous review loop 觸發頻率。
 
 ## Ready-for-Submission 持續審查迴圈
 

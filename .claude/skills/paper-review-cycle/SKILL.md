@@ -8,6 +8,20 @@ user-invocable: true
 
 **只負責「跑審查 + 歸檔」**。不分類（→ paper-stage-classifier）、不修訂（→ paper-update）。
 
+## Scope Boundary
+
+Use this skill for：
+
+- 併行啟動 review agents
+- 收集 review 結果
+- 寫 round README
+- 維護 `review_history/`
+
+Do **not** use this skill for：
+
+- stage 判定 → `paper-stage-classifier`
+- 主線程修稿與同步 → `paper-update`
+
 ## 當下啟動條件
 
 任一以下情況啟動一輪 review cycle：

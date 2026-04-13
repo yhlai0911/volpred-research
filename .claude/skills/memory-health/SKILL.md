@@ -5,10 +5,24 @@ description: >
   防止檔案膨脹、重複累積、格式不一致。2026-04-10 教訓：knowledge.json
   膨脹到 54.5MB（50,304 筆中 96.4% 是重複），根因是 merge_worktree.sh
   的 jq 去重 bug。Trigger: 每週一次自動檢查，或手動觸發。
+  Do not use for normal experiment execution or publishing.
 user-invocable: true
 ---
 
 # Memory Health Check
+
+## Scope Boundary
+
+Use this skill for：
+
+- 記憶檔案大小、重複與格式健康檢查
+- knowledge / thinking / experience 類檔案維護
+- 孤兒 worktree 檢查
+
+Do **not** use this skill for：
+
+- 一般研究與實驗執行 → `autonomous-research`
+- 發文與排程 → `feed-publisher` / `admin-ops`
 
 ## 定期檢查（建議每週一次）
 

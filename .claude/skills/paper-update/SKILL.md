@@ -8,6 +8,19 @@ user-invocable: true
 
 **只負責「修訂 + 同步」**。不審查（→ paper-review-cycle）、不分類（→ paper-stage-classifier）。
 
+## Scope Boundary
+
+Use this skill for：
+
+- review 後的 tex 修訂
+- compile 驗證
+- `volpred ops paper-update` 平台同步
+
+Do **not** use this skill for：
+
+- review orchestration → `paper-review-cycle`
+- stage 判定 → `paper-stage-classifier`
+
 ## 啟動條件
 
 review_history/v(n)/README.md action plan 已就緒，主線程要把 v(n+1) 修出來。
