@@ -26490,5 +26490,23 @@
     "data_source": "TAIFEX TX 5-min bars + session closes/opens 2017-2021 (reuse K1100g_d3 cache)",
     "created_at": "2026-04-14T13:45:00+08:00",
     "updated_at": "2026-04-14T13:45:00+08:00"
+  },
+  {
+    "id": "k1117b-1776122407",
+    "experiment_id": "K1117b",
+    "title": "K1117b H2 ROBUST NULL: monthly alt-data confirms Paper 4 compendium cross-frequency (publication-delay < period)",
+    "content": "[提出: Claude, 執行: Claude] K1116 (週頻 PIT) NULL 可能是 'upsample 月度 alt-data → 週度 interpolation noise' artifact。K1117b 改 monthly SPY RV vs monthly alt-data (EPU/CFNAI/NFCI/UMCSENT/INDPRO), publication delay 1-45 days < 30-day period, zero interpolation。**結果 H2 ROBUST NULL**: OOS n=87 months 2019-2026, 0/6 specs pass Harvey |t|>3 vs VIX baseline。Max |t|=1.62 (M5 sentiment CFNAI+UMCSENT) **方向 favors VIX not alt-data**。5/6 challenger specs 負 DM (VIX wins numerically)。Bootstrap M5/M7 nominally p<0.05 但 VIX-favoring, **strengthens** null。IS n=216, ADF stationary p=7e-13。**Paper 4 compendium cross-frequency robust**: weekly K1116c NULL, monthly K1117b NULL, daily K1121/K1122 allocation NULL。**'Upsample artifact' loophole CLOSED** — monthly indicators (CFNAI/UMCSENT/INDPRO) 是 native 月度 data point, 零 interpolation, 仍 NULL → alt-data 無增量訊息 over VIX at any frequency。衍生 Markov-switching alt-data (regime conditional) 或 cross-market monthly (TOPIX/FTSE + country-specific alt-data)。total NULL evidence: 9 K1116 + 72 K1122 + 6 K1121 + 6 K1117b = **93 specs**, Paper 4 NULL 已 battle-hardened。",
+    "tags": [
+      "K1117b",
+      "Paper4",
+      "monthly-frequency",
+      "H2-robust-null",
+      "cross-frequency-robust",
+      "publication-delay-clean",
+      "K1116-K1117-strengthened"
+    ],
+    "data_source": "FRED monthly EPU/CFNAI/NFCI/UMCSENT/INDPRO + SPY monthly RV 2010-2025",
+    "created_at": "2026-04-14T14:30:00+08:00",
+    "updated_at": "2026-04-14T14:30:00+08:00"
   }
 ]

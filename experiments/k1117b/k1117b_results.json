@@ -1,0 +1,275 @@
+{
+  "experiment_id": "K1117b",
+  "title": "Monthly-frequency alt-data re-test for Paper 4 null compendium",
+  "started_utc": "2026-04-13T23:16:10.841641Z",
+  "data_source": "yfinance SPY/VIX 2000-2026; FRED fredgraph (revision-corrected) for USEPU/NFCI/CFNAI/UMCSENT/INDPRO with explicit publication-delay release-date rules (PIT-aligned).",
+  "hypotheses": {
+    "H1": "Monthly alt-data DM |t| > 3 vs VIX baseline (weekly null was upsampling artifact).",
+    "H2": "All alt-data NULL at monthly frequency (null robust across frequencies).",
+    "H3": "Selective rescue \u2014 1-2 indicators PASS, rest NULL."
+  },
+  "baseline_experiments": [
+    "K1116",
+    "K1116b",
+    "K1116c"
+  ],
+  "diagnostics": {
+    "rv_full": {
+      "n": 303,
+      "mean": 0.046148142186425184,
+      "std": 0.0304397553981026,
+      "skew": 3.4189288753557747,
+      "kurt": 18.157820443018565,
+      "min": 0.013010527332222141,
+      "max": 0.26264777030925024
+    },
+    "adf_rv": {
+      "stat": -8.205081645515492,
+      "pvalue": 7.06016928645538e-13
+    },
+    "ljungbox_rv": {
+      "lb_stat": {
+        "6": 258.10663801079494,
+        "12": 283.06555542881114
+      },
+      "lb_pvalue": {
+        "6": 7.58742209810432e-53,
+        "12": 1.673805134051376e-53
+      }
+    }
+  },
+  "data_coverage": {
+    "market_n": 315,
+    "alt_n_per_indicator": {
+      "USEPU": 303,
+      "NFCI": 303,
+      "CFNAI": 303,
+      "UMCSENT": 303,
+      "INDPRO": 303
+    }
+  },
+  "fit_summary": {
+    "M1_base": {
+      "regressors": [
+        "rv_lag1"
+      ],
+      "n_is": 216,
+      "n_oos": 87,
+      "oos_qlike": -2.0913974534515574,
+      "oos_rmse": 0.030217615067237316,
+      "coef_is_static": {
+        "const": 0.012285151154097566,
+        "rv_lag1": 0.731698734078578
+      },
+      "r2_is_static": 0.5350988727928623
+    },
+    "M2_vix": {
+      "regressors": [
+        "rv_lag1",
+        "log_vix_sig"
+      ],
+      "n_is": 216,
+      "n_oos": 87,
+      "oos_qlike": -2.0916989282535043,
+      "oos_rmse": 0.029980003568630065,
+      "coef_is_static": {
+        "const": -0.010950441940434923,
+        "rv_lag1": 0.6319352021895241,
+        "log_vix_sig": 0.009590583975189415
+      },
+      "r2_is_static": 0.5388293248624948
+    },
+    "M3_epu": {
+      "regressors": [
+        "rv_lag1",
+        "log_USEPU_sig",
+        "INDPRO_sig"
+      ],
+      "n_is": 216,
+      "n_oos": 87,
+      "oos_qlike": -2.09197492896655,
+      "oos_rmse": 0.03022850492997801,
+      "coef_is_static": {
+        "const": 0.012854776369990727,
+        "rv_lag1": 0.7070658322913121,
+        "log_USEPU_sig": 0.00018813992433505157,
+        "INDPRO_sig": -0.0004383647868755837
+      },
+      "r2_is_static": 0.538279791505221
+    },
+    "M4_finstress": {
+      "regressors": [
+        "rv_lag1",
+        "NFCI_sig"
+      ],
+      "n_is": 216,
+      "n_oos": 87,
+      "oos_qlike": -2.0904366177282263,
+      "oos_rmse": 0.029868931516039737,
+      "coef_is_static": {
+        "const": 0.018203162449205626,
+        "rv_lag1": 0.6492817341408859,
+        "NFCI_sig": 0.006396183253951538
+      },
+      "r2_is_static": 0.5449097742813498
+    },
+    "M5_sentiment": {
+      "regressors": [
+        "rv_lag1",
+        "CFNAI_sig",
+        "log_UMCSENT_sig"
+      ],
+      "n_is": 216,
+      "n_oos": 87,
+      "oos_qlike": -2.0839226486372544,
+      "oos_rmse": 0.031127474526672475,
+      "coef_is_static": {
+        "const": 0.06270143771108844,
+        "rv_lag1": 0.6450857778762054,
+        "CFNAI_sig": -0.00565523003995754,
+        "log_UMCSENT_sig": -0.010693347421559522
+      },
+      "r2_is_static": 0.5462828533528288
+    },
+    "M6_all": {
+      "regressors": [
+        "rv_lag1",
+        "log_vix_sig",
+        "log_USEPU_sig",
+        "NFCI_sig",
+        "CFNAI_sig",
+        "log_UMCSENT_sig",
+        "INDPRO_sig"
+      ],
+      "n_is": 216,
+      "n_oos": 87,
+      "oos_qlike": -2.081745463884563,
+      "oos_rmse": 0.030320576985578305,
+      "coef_is_static": {
+        "const": 0.055488740996757706,
+        "rv_lag1": 0.5712911985063283,
+        "log_vix_sig": 0.008193259467807166,
+        "log_USEPU_sig": -0.0046808208005899386,
+        "NFCI_sig": 0.0030319260693471945,
+        "CFNAI_sig": -0.004653347394791908,
+        "log_UMCSENT_sig": -0.008602236844639684,
+        "INDPRO_sig": 0.00015828637616305274
+      },
+      "r2_is_static": 0.5506542296276867
+    },
+    "M7_altonly": {
+      "regressors": [
+        "rv_lag1",
+        "log_USEPU_sig",
+        "NFCI_sig",
+        "CFNAI_sig",
+        "log_UMCSENT_sig",
+        "INDPRO_sig"
+      ],
+      "n_is": 216,
+      "n_oos": 87,
+      "oos_qlike": -2.0821245071915735,
+      "oos_rmse": 0.030450414933067264,
+      "coef_is_static": {
+        "const": 0.07751156416055574,
+        "rv_lag1": 0.6388776607706712,
+        "log_USEPU_sig": -0.00314700109552971,
+        "NFCI_sig": 0.0032006183139583087,
+        "CFNAI_sig": -0.004488197979591234,
+        "log_UMCSENT_sig": -0.010463253841506249,
+        "INDPRO_sig": 8.009579234095153e-05
+      },
+      "r2_is_static": 0.5486842770821296
+    }
+  },
+  "dm_table_vs_vix": {
+    "M1_base": {
+      "t_hln": -0.1227763489118335,
+      "p_hln": 0.9025706696045654,
+      "n": 87,
+      "harvey_pass": false,
+      "sign": "vix_wins"
+    },
+    "M3_epu": {
+      "t_hln": 0.08923460424126015,
+      "p_hln": 0.9291029495687175,
+      "n": 87,
+      "harvey_pass": false,
+      "sign": "challenger_beats_vix"
+    },
+    "M4_finstress": {
+      "t_hln": -0.4216557662759111,
+      "p_hln": 0.6743284066959414,
+      "n": 87,
+      "harvey_pass": false,
+      "sign": "vix_wins"
+    },
+    "M5_sentiment": {
+      "t_hln": -1.6175145224575582,
+      "p_hln": 0.10942951560489322,
+      "n": 87,
+      "harvey_pass": false,
+      "sign": "vix_wins"
+    },
+    "M6_all": {
+      "t_hln": -1.5648956145529567,
+      "p_hln": 0.12127984250471524,
+      "n": 87,
+      "harvey_pass": false,
+      "sign": "vix_wins"
+    },
+    "M7_altonly": {
+      "t_hln": -1.5895322646519148,
+      "p_hln": 0.11560998435031267,
+      "n": 87,
+      "harvey_pass": false,
+      "sign": "vix_wins"
+    }
+  },
+  "bootstrap_table_vs_vix": {
+    "M1_base": {
+      "mean_diff": -0.0003014748019470026,
+      "se": 0.0020571487940593412,
+      "p_two_sided": 0.8705,
+      "bootstrap_sig_95": false
+    },
+    "M3_epu": {
+      "mean_diff": 0.00027600071304585135,
+      "se": 0.003062127439664324,
+      "p_two_sided": 0.9365,
+      "bootstrap_sig_95": false
+    },
+    "M4_finstress": {
+      "mean_diff": -0.001262310525278254,
+      "se": 0.0024642719438184787,
+      "p_two_sided": 0.612,
+      "bootstrap_sig_95": false
+    },
+    "M5_sentiment": {
+      "mean_diff": -0.0077762796162497505,
+      "se": 0.0036423167022812735,
+      "p_two_sided": 0.032,
+      "bootstrap_sig_95": true
+    },
+    "M6_all": {
+      "mean_diff": -0.009953464368941201,
+      "se": 0.0055436367978206,
+      "p_two_sided": 0.069,
+      "bootstrap_sig_95": false
+    },
+    "M7_altonly": {
+      "mean_diff": -0.009574421061931347,
+      "se": 0.004877282230546103,
+      "p_two_sided": 0.049,
+      "bootstrap_sig_95": true
+    }
+  },
+  "verdict": "H2_ROBUST_NULL",
+  "verdict_note": "No alt-data spec achieves Harvey |t| > 3 against VIX baseline at monthly frequency. Null is robust across frequencies (weekly + monthly). Paper 4 null compendium narrative strongly confirmed \u2014 publication-delay << period length at monthly frequency provides the cleanest null test; alt-data still offers no incremental vol signal over VIX.",
+  "harvey_passes": [],
+  "bootstrap_passes": [
+    "M5_sentiment",
+    "M7_altonly"
+  ],
+  "completed_utc": "2026-04-13T23:16:15.276979Z"
+}

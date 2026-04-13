@@ -1,0 +1,89 @@
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53] ======================================================================
+[23:13:53] K1117b monthly alt-data fetch + PIT alignment
+[23:13:53] ======================================================================
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:198: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  fetch_log = {"started_utc": datetime.utcnow().isoformat() + "Z", "indicators": {}}
+[23:13:53] Month-end calendar: 316 months, 2000-01-31 .. 2026-04-30
+[23:13:53] 
+[USEPU] daily -> monthly mean, release T+1 BDay
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53]   Loaded 15074 daily obs from K1116c
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53] 
+[NFCI] weekly -> monthly mean, release +3 BDay from weekly Fri
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53]   Loaded 2883 weekly obs from K1116c
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53] 
+[CFNAI] native monthly, release ~4th week of M+1 -> end of M+1
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53]   Fetched 708 monthly obs
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53] 
+[UMCSENT] monthly, release end-of-M (final)
+[23:13:53]   Using cache: fred_UMCSENT.csv
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53] 
+[INDPRO] monthly, release ~mid-M+1 -> end-of-M+1
+[23:13:53]   Using cache: fred_INDPRO.csv
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:285: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  fetch_log["completed_utc"] = datetime.utcnow().isoformat() + "Z"
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_fetch_monthly.py:58: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+  ts = datetime.utcnow().strftime("%H:%M:%S")
+[23:13:53] 
+Done. Files in experiments/k1117b/data/
+[23:13:53]   CFNAI_monthly_pit.csv
+[23:13:53]   CFNAI_monthly_with_release.csv
+[23:13:53]   INDPRO_monthly_pit.csv
+[23:13:53]   INDPRO_monthly_with_release.csv
+[23:13:53]   NFCI_monthly_pit.csv
+[23:13:53]   NFCI_monthly_with_release.csv
+[23:13:53]   UMCSENT_monthly_pit.csv
+[23:13:53]   UMCSENT_monthly_with_release.csv
+[23:13:53]   USEPU_monthly_pit.csv
+[23:13:53]   USEPU_monthly_with_release.csv
+[23:13:53]   _raw_CFNAI.csv
+[23:16:10] ======================================================================
+[23:16:10] K1117b: Monthly alt-data re-test
+[23:16:10] ======================================================================
+[23:16:11] Fetching SPY + VIX daily...
+[23:16:12] SPY+VIX monthly: 315 months, 2000-01-31 to 2026-03-31
+[23:16:12] Alt-data monthly panel: (316, 5) (2000-01-31..2026-04-30)
+[23:16:12] Merged panel: (303, 19), 2001-01-31..2026-03-31
+[23:16:13] 
+Fit models — IS <= 2018-12-31, OOS from 2019-01-01, expanding refit
+[23:16:14] 
+Spec             n_IS  n_OOS  OOS_QLIKE   OOS_RMSE
+[23:16:14] M1_base           216     87    -2.0914    0.03022
+[23:16:14] M2_vix            216     87    -2.0917    0.02998
+[23:16:14] M3_epu            216     87    -2.0920    0.03023
+[23:16:14] M4_finstress      216     87    -2.0904    0.02987
+[23:16:14] M5_sentiment      216     87    -2.0839    0.03113
+[23:16:14] M6_all            216     87    -2.0817    0.03032
+[23:16:14] M7_altonly        216     87    -2.0821    0.03045
+[23:16:14] 
+======================================================================
+[23:16:14] DM-HLN tests (each spec vs M2_vix; positive t => challenger beats VIX)
+[23:16:14] ======================================================================
+[23:16:15]   M1_base        DM t= -0.123  p= 0.903  n=87    bootSE=0.00206  bootP=0.871
+[23:16:15]   M3_epu         DM t= +0.089  p= 0.929  n=87    bootSE=0.00306  bootP=0.936
+[23:16:15]   M4_finstress   DM t= -0.422  p= 0.674  n=87    bootSE=0.00246  bootP=0.612
+[23:16:15]   M5_sentiment   DM t= -1.618  p= 0.109  n=87    bootSE=0.00364  bootP=0.032
+[23:16:15]   M6_all         DM t= -1.565  p= 0.121  n=87    bootSE=0.00554  bootP=0.069
+[23:16:15]   M7_altonly     DM t= -1.590  p= 0.116  n=87    bootSE=0.00488  bootP=0.049
+[23:16:15] 
+======================================================================
+[23:16:15] VERDICT: H2_ROBUST_NULL
+[23:16:15] No alt-data spec achieves Harvey |t| > 3 against VIX baseline at monthly frequency. Null is robust across frequencies (weekly + monthly). Paper 4 null compendium narrative strongly confirmed — publication-delay << period length at monthly frequency provides the cleanest null test; alt-data still offers no incremental vol signal over VIX.
+[23:16:15] ======================================================================
+[23:16:15] 
+Results written to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a6ef86dc/experiments/k1117b/k1117b_results.json
