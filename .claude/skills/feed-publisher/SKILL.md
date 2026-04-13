@@ -253,9 +253,28 @@ Working directory: /Users/yhlai0911/Desktop/volpred-research
 **受眾**：有金融/統計背景的讀者、學術研究者
 **目的**：完整記錄實驗結果，可追溯、可驗證
 
+**觸發時機**：**跟著實驗走**——當實驗（或一組系列實驗）產生顯著發現時寫。不是從候選清單挑。
+
 **兩種合法形式**：
 1. **單一 K 深度報告**：重大發現可獨立成篇（例：K1145 pooled panel PASS、K1140 block-bootstrap 方法論警示）
-2. **同主題多 K 聚合**：同類型 / 同研究目的 / 同標的的多實驗可共圖寫成研究發現文（例：K1145+K1147+K1150 三市場 universality 聚合；K1136+K1129+K1134 alt-model NULL 跨資產聚合）
+2. **系列實驗聚合**：同主題 / 同研究目的 / 同標的的多實驗共圖寫成研究文（例：K1145+K1147+K1150 三市場 universality；K1136+K1129+K1134 alt-model NULL 跨資產）
+
+**寫作來源（必讀，不可從 knowledge 摘要寫）**：
+- `experiments/k<id>/README.md` —— 計劃、問題描述、動機、方法、預期、結論
+- `experiments/k<id>*.py` 腳本**內部註解** —— 實作細節、設計意圖、樣本處理邏輯
+- `experiments/k<id>_results.json` —— 真實統計量（byte-for-byte 對應，不可引自記憶）
+- `experiments/k<id>*.png` —— **直接 embed 既有圖表**，不要重畫
+- 系列實驗相關 K 的對應檔案（如寫 K1145 要一併讀 K1109/K1113/K1140 等背景 K）
+
+### general vs research 二分總結
+
+| 維度 | General（一般讀者） | Research（研究發現） |
+|------|----------|----------|
+| 觸發 | **主動挑讀者感興趣主題**（`publication-candidates` 軌道 A+B） | **跟著實驗進行**，有顯著發現就寫 |
+| 素材 | 融貫 3-5 個相關 K 實驗 | 單 K 深度 或 系列實驗聚合 |
+| 文風 | 生活類比、禁 K 編號、800-1200 字 | K 編號 + t-stat + 完整方法、3000-8000 字 |
+| 主要來源 | knowledge.json 摘要 + 概念層 | README.md + 腳本註解 + results JSON + 既有 PNG |
+| 寫作節奏 | 寫手動籌劃，每天 4 篇配額 | 實驗完成即寫，無固定配額 |
 
 | 元素 | 規範 |
 |------|------|
