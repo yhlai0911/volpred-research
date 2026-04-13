@@ -1,39 +1,37 @@
 {
-  "timestamp": "2026-04-12T12:16:28.010880+00:00",
-  "all_ok": false,
+  "timestamp": "2026-04-13T00:43:54Z",
+  "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "4 draft articles in pool (threshold: <3)"
+      "detail": "4 drafts in pool (threshold: <3). Total articles: 878."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "strategy_metrics.json is 0.0h old (threshold: >26h)"
+      "detail": "storage/strategy_metrics.json mtime is ~11 seconds old (well within 26-hour threshold)."
     },
     {
       "name": "ERROR_LOG",
-      "status": "alert",
-      "detail": "2026-04-11 (yesterday): article_tags sync bug — badge inconsistency + stale tags residue in Supabase. Root causes: publisher.py missing audience tag map, _sync_article_tags() not deleting old tags, member-questions skill missing --category flag. Fixed in publisher.py + _sync_article_tags() + frontend-v2-fix badge color."
+      "status": "ok",
+      "detail": "Most recent error_log entry is 2026-04-11 (2 days ago). No entries dated today (2026-04-13) or yesterday (2026-04-12)."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies: <2 null portfolio_returns in last 3 entries"
+      "detail": "All strategies have <=2 null portfolio_return in last 3 entries. No gaps detected."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50)"
+      "detail": "0 uncommitted files (threshold: >50)."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "1836 entries in knowledge.json"
+      "detail": "storage/memory/knowledge.json contains 1850 entries."
     }
   ],
-  "alerts": [
-    "error_log: yesterday entry (2026-04-11) — article_tags sync + badge inconsistency fix applied"
-  ]
+  "alerts": []
 }
