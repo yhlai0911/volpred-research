@@ -1,0 +1,425 @@
+{
+  "experiment_id": "K1100g_d3",
+  "title": "Student-t PRG innovation \u2014 re-estimating K1100g_d1/d2 under fat-tail likelihood",
+  "run_at": "2026-04-14T05:43:00",
+  "seed": 42,
+  "references": [
+    "Bollerslev (1987) A Conditionally Heteroskedastic Time Series Model, RESTAT 69(3), 542-547 \u2014 Student-t GARCH",
+    "Engle & Rangel (2008) The Spline-GARCH Model..., RFS 21(3) \u2014 tau*g multiplicative PRG",
+    "Kupiec (1995) Techniques for Verifying the Accuracy of Risk Measurement Models",
+    "Christoffersen (1998) Evaluating Interval Forecasts, IER 39(4), 841-862 \u2014 CC test",
+    "Harvey, Leybourne & Newbold (1997) Testing the equality of prediction mean squared errors, IJF"
+  ],
+  "data": {
+    "source": "TAIFEX TX 2017-2021 (K1100g_d1 raw-tick session cache)",
+    "cache_file": "_cache_taifex_sessions_2017-2021.parquet",
+    "n_aligned": 1077,
+    "descriptive": {
+      "excess_kurtosis_day": 6.773402508378753,
+      "excess_kurtosis_night": 11.99297228426382,
+      "excess_kurtosis_combined": 9.666545429358042,
+      "skew_day": -0.4662235920664028,
+      "skew_night": -1.6122898126936571,
+      "skew_combined": -0.48954045078471087
+    }
+  },
+  "design": {
+    "innovation_compared": [
+      "normal",
+      "student"
+    ],
+    "prg_kernel": "tau*g multiplicative, omega=1-alpha-gamma/2-beta",
+    "models": {
+      "M1": "combined PRG",
+      "M2": "day-only PRG",
+      "M3": "night-only PRG",
+      "M4": "day PRG + r_night[t]^2 contemp exog",
+      "M5": "night PRG + r_day[t-1]^2 lagged exog"
+    },
+    "train_start": "2017-01-01",
+    "train_end": "2019-12-31",
+    "test_start": "2020-01-01",
+    "test_end": "2021-12-31",
+    "refit_every": 5,
+    "n_train": 613,
+    "n_test": 464,
+    "n_test_valid": 464
+  },
+  "is_fits": {
+    "M1_combined__normal": {
+      "innovation": "normal",
+      "success": true,
+      "nll": -3513.525143120858,
+      "log_lik": 3513.525143120858,
+      "aic": -7009.050286241716,
+      "bic": -6964.2212345752205,
+      "k_params": 9,
+      "df_est": null,
+      "xn_coef": null,
+      "params": [
+        0.00013010580607262124,
+        0.03473906080542389,
+        -3.097176472403933e-05,
+        -4.556949415702074e-05,
+        6.341188335739985e-05,
+        -3.069511663402464e-05,
+        0.05919704236523433,
+        0.1117854568557416,
+        0.8452489642816216
+      ]
+    },
+    "M1_combined__student": {
+      "innovation": "student",
+      "success": true,
+      "nll": -3543.1187013909184,
+      "log_lik": 3543.1187013909184,
+      "aic": -7066.237402781837,
+      "bic": -7016.427345374619,
+      "k_params": 10,
+      "df_est": 5.118019871458941,
+      "xn_coef": null,
+      "params": [
+        0.0001083052661876492,
+        0.06996056068771832,
+        -3.166212888635232e-05,
+        -3.880883857028066e-05,
+        -2.1532547225157093e-06,
+        -2.7538362391773375e-05,
+        0.050998511504965593,
+        0.043066514171507045,
+        0.8364992597263752,
+        5.118019871458941
+      ]
+    },
+    "M2_day_only__normal": {
+      "innovation": "normal",
+      "success": true,
+      "nll": -3847.917906010698,
+      "log_lik": 3847.917906010698,
+      "aic": -7677.835812021396,
+      "bic": -7633.0067603549005,
+      "k_params": 9,
+      "df_est": null,
+      "xn_coef": null,
+      "params": [
+        5.362160042496677e-05,
+        0.04854226982052994,
+        8.44467590017821e-06,
+        -6.302687295391979e-06,
+        2.3205167588859845e-05,
+        -2.1945029489357537e-06,
+        0.07602126145674282,
+        0.04498939009769271,
+        0.8664519831082134
+      ]
+    },
+    "M2_day_only__student": {
+      "innovation": "student",
+      "success": true,
+      "nll": -3884.209682537481,
+      "log_lik": 3884.209682537481,
+      "aic": -7748.419365074962,
+      "bic": -7698.609307667744,
+      "k_params": 10,
+      "df_est": 5.118019869043528,
+      "xn_coef": null,
+      "params": [
+        4.6271084016330634e-05,
+        0.06996066579154549,
+        3.855603134122692e-06,
+        -6.617154947612647e-06,
+        3.4582332446567306e-06,
+        -5.443645080592506e-06,
+        0.05099832197737487,
+        0.04306627894427781,
+        0.8364991311090026,
+        5.118019869043528
+      ]
+    },
+    "M3_night_only__normal": {
+      "innovation": "normal",
+      "success": true,
+      "nll": -4194.877075944592,
+      "log_lik": 4194.877075944592,
+      "aic": -8371.754151889185,
+      "bic": -8326.92510022269,
+      "k_params": 9,
+      "df_est": null,
+      "xn_coef": null,
+      "params": [
+        2.241844519062179e-05,
+        0.048542293973381244,
+        -4.88713850554521e-07,
+        -2.5172233780518754e-06,
+        4.894231729721508e-06,
+        8.368278291014689e-06,
+        0.07602122632700235,
+        0.044989349986026814,
+        0.8664519623809036
+      ]
+    },
+    "M3_night_only__student": {
+      "innovation": "student",
+      "success": true,
+      "nll": -4225.565584683855,
+      "log_lik": 4225.565584683855,
+      "aic": -8431.13116936771,
+      "bic": -8381.321111960493,
+      "k_params": 10,
+      "df_est": 9.053315192882692,
+      "xn_coef": null,
+      "params": [
+        1.6441318452816506e-05,
+        0.07560589628041817,
+        -3.1815722398928967e-07,
+        -1.9489717438750502e-06,
+        4.188953941422591e-06,
+        6.859647915967685e-06,
+        0.0643667968353713,
+        0.025105392786995796,
+        0.865526242008731,
+        9.053315192882692
+      ]
+    },
+    "M4_cross_night_to_day__normal": {
+      "innovation": "normal",
+      "success": true,
+      "nll": -3854.159598832017,
+      "log_lik": 3854.159598832017,
+      "aic": -7688.319197664034,
+      "bic": -7638.509140256816,
+      "k_params": 10,
+      "df_est": null,
+      "xn_coef": 0.03949937406207369,
+      "params": [
+        4.084868790464901e-05,
+        0.07560587345510206,
+        1.6168631068446076e-06,
+        -5.631671969703319e-06,
+        1.949619467330814e-05,
+        -2.17826052868508e-06,
+        0.06436681322761172,
+        0.025105428438241907,
+        0.865526251501336,
+        0.03949937406207369
+      ]
+    },
+    "M4_cross_night_to_day__student": {
+      "innovation": "student",
+      "success": true,
+      "nll": -3892.2534951589923,
+      "log_lik": 3892.2534951589923,
+      "aic": -7762.506990317985,
+      "bic": -7707.715927170046,
+      "k_params": 11,
+      "df_est": 6.606602864899871,
+      "xn_coef": 0.14025292343096316,
+      "params": [
+        4.082555367270987e-05,
+        0.07358724487747512,
+        -1.3363610334949872e-06,
+        -6.2710975048047705e-06,
+        6.129020857751247e-06,
+        -7.453048952550418e-06,
+        0.03234317778621384,
+        0.07464391920184248,
+        0.8489524436568516,
+        0.14025292343096316,
+        6.606602864899871
+      ]
+    },
+    "M5_reverse_day_to_night__normal": {
+      "innovation": "normal",
+      "success": true,
+      "nll": -4196.467314947885,
+      "log_lik": 4196.467314947885,
+      "aic": -8372.93462989577,
+      "bic": -8323.124572488552,
+      "k_params": 10,
+      "df_est": null,
+      "xn_coef": 0.039499320016930996,
+      "params": [
+        1.779823078864949e-05,
+        0.07560589798759071,
+        -1.9262073657476756e-07,
+        -2.3358463735834783e-06,
+        4.206204218359107e-06,
+        5.3791554448875455e-06,
+        0.06436679983813545,
+        0.025105395739136373,
+        0.8655262417734442,
+        0.039499320016930996
+      ]
+    },
+    "M5_reverse_day_to_night__student": {
+      "innovation": "student",
+      "success": true,
+      "nll": -4241.061621134749,
+      "log_lik": 4241.061621134749,
+      "aic": -8460.123242269497,
+      "bic": -8405.332179121559,
+      "k_params": 11,
+      "df_est": 6.498933130944641,
+      "xn_coef": 0.06007953030058073,
+      "params": [
+        2.1048882017160157e-05,
+        0.048173344574725246,
+        -9.77144823016111e-07,
+        -3.3122994554164262e-06,
+        4.8587745329530056e-06,
+        7.802187728486647e-06,
+        0.07358512030218409,
+        0.05497215823553066,
+        0.8665356404709147,
+        0.06007953030058073,
+        6.498933130944641
+      ]
+    }
+  },
+  "is_lrt_tests": {
+    "normal": {
+      "M4_vs_M2": {
+        "chi2": 12.483385642637586,
+        "p_value": 0.00041058738064869704
+      },
+      "M5_vs_M3": {
+        "chi2": 3.1804780065849627,
+        "p_value": 0.07452292592850218
+      }
+    },
+    "student": {
+      "M4_vs_M2": {
+        "chi2": 16.087625243022558,
+        "p_value": 6.047794073693602e-05
+      },
+      "M5_vs_M3": {
+        "chi2": 30.99207290178674,
+        "p_value": 2.590844394578795e-08
+      }
+    }
+  },
+  "oos_student_t": {
+    "lrt_chi2": 14.608064559224658,
+    "lrt_p": 0.00013234696101216414,
+    "dm_qlike_t_hln": 1.923066979903009,
+    "dm_qlike_p": 0.05447163858894033,
+    "dm_loglik_t_hln": 1.695282865639555,
+    "dm_loglik_p": 0.09002177362764208,
+    "qlike_null_mean": 1.643085684868009,
+    "qlike_full_mean": 1.5810437460711666,
+    "qlike_improv_pct": 3.7759405591697064,
+    "ll_null_sum": 1550.4879082485822,
+    "ll_full_sum": 1557.7919405281946,
+    "df_null_mean": 8.667566099230822,
+    "df_full_mean": 6.633818959204055,
+    "df_null_min": 7.603087501821494,
+    "df_full_min": 6.6066028583407315,
+    "df_flag_below_3": false,
+    "sub_period": {
+      "y2020": {
+        "n": 233,
+        "qlike_null_mean": 1.7703021088798303,
+        "qlike_full_mean": 1.686371669037188,
+        "qlike_improv_pct": 4.741023547429985,
+        "lrt_chi2": 9.649145530665919,
+        "lrt_p": 0.0018943968412983292,
+        "dm_t_hln": 1.3766527440127811,
+        "dm_p": 0.16861963551786285,
+        "pass_h3": true
+      },
+      "y2021": {
+        "n": 231,
+        "qlike_null_mean": 1.5147678199556527,
+        "qlike_full_mean": 1.4748038930361749,
+        "qlike_improv_pct": 2.6382872934710098,
+        "lrt_chi2": 4.9589190285582845,
+        "lrt_p": 0.02595642821217814,
+        "dm_t_hln": 1.7879002005230138,
+        "dm_p": 0.07379211055753943,
+        "pass_h3": true
+      }
+    }
+  },
+  "var_trinity_oos": {
+    "level_1pct": {
+      "M_null_student_t": {
+        "N": 464,
+        "n_breaches": 17,
+        "breach_rate": 0.036637931034482756,
+        "target_rate": 0.01,
+        "kupiec_LR": 19.764559393102388,
+        "kupiec_p": 8.75918835574474e-06,
+        "kupiec_pass": false,
+        "cc_LR": 19.9733334562805,
+        "cc_p": 4.6009312876016395e-05,
+        "cc_pass": false,
+        "trinity_pass": false
+      },
+      "M_full_student_t": {
+        "N": 464,
+        "n_breaches": 15,
+        "breach_rate": 0.032327586206896554,
+        "target_rate": 0.01,
+        "kupiec_LR": 14.715501935732789,
+        "kupiec_p": 0.00012501421989774553,
+        "kupiec_pass": false,
+        "cc_LR": 15.168207627831919,
+        "cc_p": 0.0005084702681418252,
+        "cc_pass": false,
+        "trinity_pass": false
+      }
+    },
+    "level_5pct": {
+      "M_null_student_t": {
+        "N": 464,
+        "n_breaches": 39,
+        "breach_rate": 0.08405172413793104,
+        "target_rate": 0.05,
+        "kupiec_LR": 9.487155084531139,
+        "kupiec_p": 0.0020691541867147167,
+        "kupiec_pass": false,
+        "cc_LR": 9.517592782561735,
+        "cc_p": 0.008575925246531169,
+        "cc_pass": false,
+        "trinity_pass": false
+      },
+      "M_full_student_t": {
+        "N": 464,
+        "n_breaches": 39,
+        "breach_rate": 0.08405172413793104,
+        "target_rate": 0.05,
+        "kupiec_LR": 9.487155084531139,
+        "kupiec_p": 0.0020691541867147167,
+        "kupiec_pass": false,
+        "cc_LR": 9.517592782561735,
+        "cc_p": 0.008575925246531169,
+        "cc_pass": false,
+        "trinity_pass": false
+      }
+    }
+  },
+  "verdict": {
+    "primary": "H1_STUDENT_T_SAVES_PARTIAL",
+    "paper3_salvage": true,
+    "explanation": "Student-t OOS shows LRT>7.88 and QLIKE>1% and both sub-periods positive, BUT DM |t| below Harvey (2016) threshold of 3. Evidence is directionally consistent but not Harvey-robust.",
+    "criteria_detail": {
+      "lrt_strong_oos_chi2_gt_7_88": true,
+      "qlike_meaningful_gt_1pct": true,
+      "harvey_dm_t_gt_3_0": false,
+      "both_subperiods_positive_gt_1pct": true,
+      "df_flag_below_3": false
+    },
+    "normal_is_lrt_M4_vs_M2": 12.483385642637586,
+    "student_is_lrt_M4_vs_M2": 16.087625243022558,
+    "oos_lrt_student": 14.608064559224658,
+    "oos_qlike_improv_student_pct": 3.7759405591697064,
+    "oos_dm_qlike_t_hln": 1.923066979903009
+  },
+  "limitations": [
+    "N test = ~464 may be small for asymptotic chi-square; OOS LRT is approximate",
+    "df estimated jointly with PRG params; may be biased toward interior via optimizer bounds [2.05, 200]",
+    "Student-t assumes symmetric innovations; TAIFEX skew is non-zero (asymmetric-t would be further refinement)",
+    "Cross-market replication (SPY, N225) remains open (K1100g_d4 candidate)",
+    "Only one pair of session-level exogenous variables tested (r_night^2, r_day^2 lag)"
+  ]
+}

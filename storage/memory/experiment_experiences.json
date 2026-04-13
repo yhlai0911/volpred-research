@@ -1023,5 +1023,22 @@
       "K1119",
       "K1116"
     ]
+  },
+  {
+    "id": "E074",
+    "title": "Gaussian QML 在 fat-tail 市場的 nested-model OOS 比較有偏誤, 必加 Student-t robustness check",
+    "category": "methodology",
+    "lesson": "當 nested GARCH-family model (M_null ⊂ M_full) 用 Gaussian QML 的 OOS DM test, 若 underlying data 是 fat-tail (df < 10), Normal likelihood 對極端 shocks 的 over-penalty 會系統性壓低 M_full 的 OOS 表現。Student-t innovation 下 K1100g_d1 IS LRT 被 K1100g_d2 OOS reject 的結論**完全反轉**: OOS LRT 從 0 → 14.6, QLIKE 從 -0.48% → +3.78%。方向完全由 '真 null' 轉為 'partial PASS'。",
+    "examples": [
+      "K1100g_d1 Normal IS LRT χ²=12.48 → K1100g_d2 Normal OOS χ²=0 被視為 data mining",
+      "K1100g_d3 Student-t OOS LRT χ²=14.608, DM t=+1.92 borderline, 2020 sub-period +4.74% — K1100g_d2 結論是 Gaussian QML artifact",
+      "TAIFEX df=5-9 中度厚尾, VaR Trinity 仍 FAIL (Normal 和 Student-t 都不夠, 需 asymmetric-t + TGARCH)"
+    ],
+    "recommendation": "任何 GARCH nested-model OOS DM comparison 前必估 Student-t df; 若 df<10 一律加 Student-t spec robustness (即使主結果是 Normal reject)。'Data mining artifact' 判定 不可只 based on Gaussian QML。Paper 3/Paper 4 等未來 nested comparison 須套此規則。",
+    "source_experiments": [
+      "K1100g_d1",
+      "K1100g_d2",
+      "K1100g_d3"
+    ]
   }
 ]

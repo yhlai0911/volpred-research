@@ -1,0 +1,56 @@
+[05:39:17] Loading session cache...
+  Aligned rows: 1077
+  Excess kurtosis: day=6.77  night=11.99  combined=9.67
+  Skew: day=-0.466  night=-1.612  combined=-0.490
+
+[05:39:17] === IS fits (full sample) ===
+  [05:39:17] fitting M1_combined__normal ...
+    ll=3513.525  success=True
+  [05:39:21] fitting M1_combined__student ...
+    ll=3543.119 df=5.12  success=True
+  [05:39:24] fitting M2_day_only__normal ...
+    ll=3847.918  success=True
+  [05:39:27] fitting M2_day_only__student ...
+    ll=3884.210 df=5.12  success=True
+  [05:39:30] fitting M3_night_only__normal ...
+    ll=4194.877  success=True
+  [05:39:33] fitting M3_night_only__student ...
+    ll=4225.566 df=9.05  success=True
+  [05:39:35] fitting M4_cross_night_to_day__normal ...
+    ll=3854.160  success=True
+  [05:39:38] fitting M4_cross_night_to_day__student ...
+    ll=3892.253 df=6.61  success=True
+  [05:39:40] fitting M5_reverse_day_to_night__normal ...
+    ll=4196.467  success=True
+  [05:39:42] fitting M5_reverse_day_to_night__student ...
+    ll=4241.062 df=6.50  success=True
+
+[05:39:44] === IS LRT (M4 vs M2, M5 vs M3) ===
+  [normal] M4 vs M2: chi2=12.483 p=0.0004106   M5 vs M3: chi2=3.180 p=0.07452
+  [student] M4 vs M2: chi2=16.088 p=6.048e-05   M5 vs M3: chi2=30.992 p=2.591e-08
+
+[05:39:44] === OOS (Student-t expanding window) ===
+  Train: n=613  Test: n=464
+[05:39:44] M_null (day-only, Student-t) OOS...
+  refits=93  elapsed=103.3s
+[05:41:27] M_full (day + night exog, Student-t) OOS...
+  refits=93  elapsed=93.2s
+
+  OOS valid obs: 464 / 464
+
+[05:43:00] Student-t OOS results:
+  chi2_lrt=14.608  p=0.0001323
+  DM-QLIKE t=1.923  p=0.05447
+  DM-LL    t=1.695  p=0.09002
+  QLIKE improv: +3.78%
+  df_null mean=8.67  df_full mean=6.63
+
+[05:43:00] === VaR Trinity backtests ===
+  [1% VaR] null: breach=3.664%  Kupiec p=8.75918835574474e-06  CC p=4.6009312876016395e-05
+  [1% VaR] full: breach=3.233%  Kupiec p=0.00012501421989774553  CC p=0.0005084702681418252
+  [5% VaR] null: breach=8.405%  Kupiec p=0.0020691541867147167  CC p=0.008575925246531169
+  [5% VaR] full: breach=8.405%  Kupiec p=0.0020691541867147167  CC p=0.008575925246531169
+[OK] results -> k1100g_d3_results.json
+[OK] 2 charts saved
+
+[DONE] Total: 223.8s

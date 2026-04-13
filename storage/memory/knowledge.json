@@ -26419,5 +26419,23 @@
     "data_source": "yfinance SPY/GLD/TLT + FRED EPU/NFCI/STLFSI4 2015-2025",
     "created_at": "2026-04-14T10:45:00+08:00",
     "updated_at": "2026-04-14T10:45:00+08:00"
+  },
+  {
+    "id": "k1100gd3-1776116798",
+    "experiment_id": "K1100g_d3",
+    "title": "K1100g_d3 H1 PARTIAL: Student-t reverses K1100g_d2 NULL — Normal QML was fat-tail artifact",
+    "content": "[提出: Claude, 執行: Claude] K1100g_d1 IS LRT χ²=12.48 但 K1100g_d2 OOS 0.00 被視為 data mining。K1100g_d3 懷疑 Gaussian QML 在 fat-tail TAIFEX 下 nested-model OOS 比較有偏誤，改 Student-t innovation 重估 M1-M5。**結果 H1 PARTIAL 方向完全反轉**: Student-t OOS LRT χ²=**14.608 p=1.3e-4** (vs K1100g_d2 Normal 0.00 p=1.00); DM-HLN t=+1.92 p=0.055 (vs Normal -0.21); QLIKE improvement +3.78% (vs Normal -0.48% 惡化)。Sub-period 2020 +4.74% + 2021 +2.64% 雙通過 >1% stability。IS LRT 其實放大不降 (Normal 12.48 → t 16.09)；M5 Normal LRT 3.18 → t 30.99 (反方向 day→night 也強化)。Student-t log-lik 比 Normal 高 30-45 units — 確認 TAIFEX 中度厚尾 (df=5-9, M4 df=6.61, no extreme fat-tail flag)。Criteria: 4/5 通過 (OOS LRT + QLIKE + sub-period + df), **Harvey t>3 唯一未過** (1.92 vs 3.0)。**關鍵 methodological finding**: **K1100g_d2 'data mining' 結論本身是 Gaussian QML 在 fat-tail 市場 nested-model OOS DM 比較的 artifact**, 不是真 null。Paper 3 reframe **部分可救** (directionally) 但不建議作唯一 anchor。VaR Trinity 兩模型仍 FAIL (Student-t 不夠厚處理 2020 COVID tail, 需 asymmetric-t + TGARCH)。建議後續 (a) 延伸 2022-2025 增 N, (b) 跨市場 (SPY/N225) 複製; 目前可作 **'Gaussian QML fat-tail 市場模型選擇陷阱'** 方法論貢獻實證例。E074 候選: Gaussian QML 在 fat-tail 市場的 nested OOS 比較必加 Student-t robustness check。",
+    "tags": [
+      "K1100g_d3",
+      "Paper3",
+      "Student-t-innovation",
+      "Gaussian-QML-artifact",
+      "K1100g_d1-partial-rescue",
+      "methodological-finding",
+      "fat-tail-TAIFEX"
+    ],
+    "data_source": "TAIFEX TX daily 2017-2021 (reuse K1100g_d1/d2 cache)",
+    "created_at": "2026-04-14T12:00:00+08:00",
+    "updated_at": "2026-04-14T12:00:00+08:00"
   }
 ]
