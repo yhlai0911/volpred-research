@@ -1,0 +1,196 @@
+{
+  "experiment_id": "K1100g",
+  "title": "TAIFEX vs SPY-ES microstructural quantification",
+  "run_at": "2026-04-13T07:18:35.040680",
+  "seed": 42,
+  "period": {
+    "start": "2017-01-01",
+    "end": "2021-12-31"
+  },
+  "data": {
+    "taifex_n_days": 1223,
+    "taifex_settlement_days": 60,
+    "taifex_roll_days": 61,
+    "spy_n_days": 1259,
+    "spy_settlement_days": 20,
+    "es_available": true,
+    "es_n_days": 1259
+  },
+  "dim1_settlement_multiplier": {
+    "taifex": {
+      "multiplier": 0.6677760103119081,
+      "n_settlement": 58,
+      "n_nonsettlement": 1104,
+      "var_settlement": 7.173794421977091e-05,
+      "var_nonsettlement": 0.00010742815421935148,
+      "levene_pvalue": 0.36455209799644506
+    },
+    "spy": {
+      "multiplier": 0.913698535161955,
+      "n_settlement": 20,
+      "n_nonsettlement": 1239,
+      "var_settlement": 0.00012998126122439697,
+      "var_nonsettlement": 0.00014225836665192587,
+      "levene_pvalue": 0.9965201524111029
+    },
+    "es": {
+      "multiplier": 0.26371723908093436,
+      "n_settlement": 20,
+      "n_nonsettlement": 1239,
+      "var_settlement": 3.950568307652327e-05,
+      "var_nonsettlement": 0.0001498031877407872,
+      "levene_pvalue": 0.18699411350499234
+    },
+    "taifex_window1": {
+      "multiplier": 0.9815528391302207,
+      "n_settlement": 120,
+      "n_nonsettlement": 1042,
+      "var_settlement": 0.00010388653448046184,
+      "var_nonsettlement": 0.00010583896285452995,
+      "levene_pvalue": 0.8171932062070881
+    },
+    "spy_window1": {
+      "multiplier": 0.6863221763471892,
+      "n_settlement": 60,
+      "n_nonsettlement": 1199,
+      "var_settlement": 9.881671257802905e-05,
+      "var_nonsettlement": 0.00014398006648125666,
+      "levene_pvalue": 0.7520359370795662
+    },
+    "taifex_intraday": {
+      "multiplier": 0.6645251376543757,
+      "n_settlement": 60,
+      "n_nonsettlement": 1163,
+      "var_settlement": 3.704590028430051e-05,
+      "var_nonsettlement": 5.574792913788665e-05,
+      "levene_pvalue": 0.3804776392110995
+    },
+    "spy_intraday": {
+      "multiplier": 3.1201604036185913,
+      "n_settlement": 20,
+      "n_nonsettlement": 1239,
+      "var_settlement": 0.00019746864744216793,
+      "var_nonsettlement": 6.328797942988911e-05,
+      "levene_pvalue": 0.08009030457242997
+    }
+  },
+  "dim2_overnight_intraday_ratio": {
+    "taifex": {
+      "sigma_overnight": 0.011766513002296022,
+      "sigma_intraday": 0.007417906375366132,
+      "ratio": 1.5862309938786807,
+      "n": 1076
+    },
+    "spy": {
+      "sigma_overnight": 0.008136962000781253,
+      "sigma_intraday": 0.008130308110626264,
+      "ratio": 1.0008184056575042,
+      "n": 1259
+    }
+  },
+  "dim3_dow_anova": {
+    "taifex": {
+      "F": 0.6528353705607326,
+      "p_value": 0.6249378490730887,
+      "n_groups": 5,
+      "by_dow": {
+        "dow_0": {
+          "n": 239,
+          "mean_r2": 0.00010748245727805742
+        },
+        "dow_1": {
+          "n": 244,
+          "mean_r2": 0.00010907840981285557
+        },
+        "dow_2": {
+          "n": 246,
+          "mean_r2": 8.222646106861404e-05
+        },
+        "dow_3": {
+          "n": 190,
+          "mean_r2": 0.00013920527551562864
+        },
+        "dow_4": {
+          "n": 238,
+          "mean_r2": 0.00010314206936459375
+        }
+      }
+    },
+    "spy": {
+      "F": 0.7320691721868818,
+      "p_value": 0.5700823002237998,
+      "n_groups": 5,
+      "by_dow": {
+        "dow_0": {
+          "n": 237,
+          "mean_r2": 0.0002053431087916257
+        },
+        "dow_1": {
+          "n": 258,
+          "mean_r2": 0.00012724310253642556
+        },
+        "dow_2": {
+          "n": 257,
+          "mean_r2": 0.0001247735272741731
+        },
+        "dow_3": {
+          "n": 255,
+          "mean_r2": 0.00014607644175919186
+        },
+        "dow_4": {
+          "n": 252,
+          "mean_r2": 0.00011561446441501104
+        }
+      }
+    }
+  },
+  "dim4_intraday_fft": {
+    "taifex": {
+      "total_power": 3.230279237154792,
+      "peak_freq_cycles_per_day": 23.183742591024554,
+      "peak_power_ratio": 0.004254643975453507,
+      "periodic_band_ratio": 0.014549756053788825,
+      "n_samples": 3543
+    },
+    "spy": {
+      "total_power": 3.6567062422708605,
+      "peak_freq_cycles_per_day": 18.28571428571429,
+      "peak_power_ratio": 0.005678008967001601,
+      "periodic_band_ratio": 0.010432962074128789,
+      "n_samples": 3003
+    },
+    "taifex_bars_per_day": 60,
+    "spy_bars_per_day": 78,
+    "spy_note": "SPY 5-min data restricted to last ~60 days by yfinance"
+  },
+  "hypotheses": {
+    "H1_settlement": {
+      "pass": false,
+      "description": "TAIFEX settle multiplier >=1.3 & SPY <1.1"
+    },
+    "H2_overnight": {
+      "pass": false,
+      "description": "TAIFEX on/id >0.8 & SPY <0.3"
+    },
+    "H3_dow": {
+      "pass": false,
+      "description": "TAIFEX DOW F>5 & SPY F<2"
+    },
+    "H4_fft": {
+      "pass": false,
+      "description": "TAIFEX periodic band >0.10 & SPY <0.10"
+    },
+    "all_pass": false
+  },
+  "paper3_reframe_evidence": {
+    "sufficient": false,
+    "partial": false,
+    "notes": "If >=2/4 pass with clear direction, Taiwan-specific microstructure is empirically defensible as a Paper 3 reframe anchor."
+  },
+  "limitations": [
+    "TAIFEX vs SPY sessions are not time-aligned (TW 08:45-13:45 vs US 09:30-16:00).",
+    "Roll days dropped (log_ret=NaN) to avoid roll-gap contamination; ~60 days/year.",
+    "SPY 5-min FFT uses the most recent 60 days only (yfinance history limit); TAIFEX FFT uses last 60 days of the study window.",
+    "ES=F daily loaded for reference only; microstructure metrics are reported on SPY (same underlying, better yfinance coverage)."
+  ]
+}
