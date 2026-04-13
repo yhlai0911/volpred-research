@@ -162,12 +162,18 @@ Load these references only when relevant:
 - `references/platform-api-manual.md`
   - use when you need exact CLI/API workflows and payload shapes
 
+- `references/deploy-and-runtime.md`
+  - use when the task is about Zeabur redeploy, runtime verification, worker/jobs, or session startup operations
+
 - `references/session-cron-workflows.md`
   - use when the task is about packaging platform operations into Claude session cron routines
 
 - `references/governance.md`
   - use when diagnosing errors or deciding whether to manually fix data vs fix the process
   - core principle: 永遠修流程，不修資料
+
+- `references/architecture.md`
+  - use when you need current platform topology, source-of-truth ownership, or deploy surface boundaries
 
 **⚠️ 系統出錯時第一步：查 `docs/error_log.md`。** 不只研究錯誤，所有平台/sync/deploy/merge 錯誤都記錄在此。先查再修，避免重蹈覆轍。
 

@@ -61,86 +61,26 @@
 Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波動率預測模型，並建立一般投資人可用的交易策略。
 
 ## 網站架構（v4 Supabase + Admin CMS + Mirror API）
-→ 完整細節見 `docs/architecture.md`
+完整細節與最新頁面 / schema / 資料流以 `docs/architecture.md` 與 `.claude/skills/admin-ops/references/architecture.md` 為準。
 
-- **前端（線上版）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，部署於 volpred-v3 服務）
-- **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
-- **資料庫**：Supabase（PostgreSQL + Auth + REST API + RPC）
-- **線上網址**：https://volpred.zeabur.app
-- **Zeabur Dashboard**：https://zeabur.com/projects/69b5b264800a475a1f82b073
+CLAUDE.md 只保留高層 source-of-truth：
 
-### 前端頁面列表
-| 路徑 | 說明 |
-|------|------|
-| `/` | 首頁 Feed（SSR + `FeedBrowser` 無限滾動） |
-| `/about` | 關於頁面（研究背景、團隊） |
-| `/admin/*` | Admin CMS（12 面板：analytics/content/health/ops/paper-trading/papers/program/questions/schedules/strategies/thinking/users） |
-| `/disclaimer` | 免責聲明 |
-| `/me` | 用戶專區（書籤、提問、活動摘要） |
-| `/paper` | 論文頁（讀 Supabase `papers` table） |
-| `/portfolio` | 投資組合總覽（`PaperTradingStrategyChart` + `PaperTradingTradeLog`） |
-| `/questions` | 會員問答 |
-| `/reports` | 研究報告列表 |
-| `/risk-forecast` | 風險預測儀表板 |
-| `/strategy-selector` | 策略選擇器 |
-| `/vix-calculator` | VIX 計算器 |
-| `/vt-calculator` | VT 計算器 |
+- **前端（線上版）**：`frontend-v2-fix/`，部署於 `volpred-v3`
+- **平台資料唯一源頭**：`storage/`
+- **平台同步入口**：`scripts/supabase_sync.py` / `uv run volpred ops ...`
+- **策略 metadata 唯一來源**：`daily_update.py` 的 `STRATEGY_REGISTRY`
+- **每日策略更新**：`scripts/daily_update.py` 於台灣時間 08:03 執行
+- **Mirror 記憶同步**：`MemorySystem._sync_to_remote()`
 
-### 資料流核心規則
-- `storage/` → 本地唯一源頭（JSON）
-- `scripts/supabase_sync.py` → Supabase 同步（由 daily_update.py 呼叫）
-  - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
-  - **Paper trades 同步**：自動剝離市場數據，只存策略 weights + returns
-  - **Draft 同步**：用 `published_at OR created_at` 過濾
-- `scripts/daily_update.py` → 每日 08:03 台灣時間（crontab `3 8 * * 2-6`，美股收盤後）計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇
-- **Paper Trading 資料結構**：
-  - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
-  - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
-  - `recalc_metrics.py` 每次執行自動 sync 到 Supabase `strategy_metrics_cache`
-  - 市場數據統一存在 `_market_daily`（key=日期），不在每個 entry 重複
-- **新策略評估**：必須用 `scripts/evaluate_new_strategy.py` 在 COMMON_START（2023-01-04）~ 今天同期間比較
-- **Mirror 資料流**：`MemorySystem._sync_to_remote()` → 雙寫 Supabase + Mirror API
-
-### Supabase 資料庫表
-| 表名 | 用途 |
-|------|------|
-| `articles` + `article_tags` | 文章（feed）+ 標籤 |
-| `strategy_signals` | 策略即時信號（權重、VIX、sigma） |
-| `paper_trades` | Paper trading 每日記錄 |
-| `strategy_metrics_cache` | 預計算的績效指標 + sparkline |
-| `questions` + `question_articles` | 會員問答系統 |
-| `memory_entries` | 研究記憶（thinking/knowledge/experiments） |
-| `profiles` + `quota_usage` | 用戶角色（admin/premium/free）+ 配額 |
-| `article_impressions` + `article_reactions` | 互動追蹤（瀏覽/按讚/收藏） |
-| `ops_jobs` + `ops_job_logs` + `ops_audit_logs` | Job queue + 審計紀錄 |
-| `papers` | 論文 metadata（論文頁 DB 驅動） |
-| RPC: `feed_page()`, `feed_tag_counts()` | 伺服器端分頁查詢 |
-
-### 策略管理（DB 驅動，無需重新部署）
-- 策略 metadata 唯一來源：`daily_update.py` 頂部的 `STRATEGY_REGISTRY`
-- Registry 驅動：Feed 文章（只列 active）、Supabase 同步、Paper trading
-- **新增策略**：(1) 加入 STRATEGY_REGISTRY (2) 加計算邏輯到 strat_list (3) `add_strategy.py` 寫 DB
-- **下架策略**：改 `is_active=False`（面板隱藏、文章不列、paper trading 繼續記錄）
-
-### Agent-first Ops Layer
-- **CLI 首選入口**：`uv run volpred ops ...`
-- 已統一操作：publish-milestone / release-pool-by-settings / sync-all / daily-update / recalc-metrics / strategy-upsert / strategy-set-active / question-ranking-summary / question-rerank / question-answer / health / cleanup-post / unpublish / send-article-notification / send-daily-digest
-- **Job Queue**（`src/volpred/ops/jobs.py`）：Supabase-backed，lifecycle: `queued` → `running` → `succeeded|failed`
-
-### 程式碼架構
-- **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）
-- **storage/**：唯一資料源頭（JSON），跨 session 保存
-- **frontend-v2-fix/**：Next.js 15 前端（線上版，volpred-v3 服務）
-- **scripts/supabase_sync.py**：資料同步到 Supabase
-- **src/volpred/ops/jobs.py**：Supabase-backed job queue（agent + human 共用）
-- **research_program.md**：研究策略文件（北極星）
-- **paper/**：學術論文（按子目錄組織）
+頁面、資料表、ops surfaces、job queue、deploy 拓樸等操作細節不再放在 `CLAUDE.md`。
 
 ### Skill 導覽
 - **完整技能地圖**：見 `docs/skill-registry.md`
 - **研究主流程**：`.claude/skills/autonomous-research/SKILL.md`
+- **研究派工 / 策略上架 gate**：`autonomous-research/references/agent-orchestration.md`、`autonomous-research/references/strategy-launch-gate.md`
 - **文章內容與圖表規格**：`.claude/skills/feed-publisher/SKILL.md`
 - **平台 ops / 文章池 / cron / monitor**：`.claude/skills/admin-ops/SKILL.md`
+- **deploy / runtime / session automation**：`.claude/skills/admin-ops/references/deploy-and-runtime.md`
 - **會員問題審查與流轉**：`.claude/skills/member-questions/SKILL.md`
 - **論文系列 workflow**：`.claude/skills/paper-stage-classifier/SKILL.md`、`.claude/skills/paper-review-cycle/SKILL.md`、`.claude/skills/paper-update/SKILL.md`
 - **support gates**：`agent-result-verification` / `worktree-merge-verification` / `memory-health`
@@ -157,51 +97,28 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - 同理，`knowledge.json`（1.3MB）也禁止整檔讀取，用 `grep` 或 `jq` 查詢
 
 ### 注意事項
-- Feed 發文要用 `feed-publisher` skill（thinking ≠ content）
-- **Zeabur reverse proxy 陷阱**：詳見 `docs/zeabur-oauth-gotcha.md`
-- Paper trading 用 `portfolio_return`（加權後組合報酬），不是單一資產 return
-- 時間處理：`published_at` 存 UTC，前端用 `timeZone: 'Asia/Taipei'` 顯示。詳見 `.claude/skills/autonomous-research/references/data-timing.md`
-  - **⚠️ 比較時間必須用 UTC**：`datetime.now(timezone.utc)` 不是 `datetime.now()`。後者是本地台灣時間（UTC+8），會差 8 小時
-  - 檢查「多久沒發文」的正確寫法：`(datetime.now(timezone.utc) - datetime.fromisoformat(pub_at).replace(tzinfo=timezone.utc))`
-- 跨市場策略注意 VIX lag（台股用前一天 VIX）
-- **外部數據來源**：→ 完整操作手冊見 `.claude/skills/external-data-sources/SKILL.md`
-  - **yfinance**：股價/ETF/VIX（免費，無需 key）
-  - **FRED**：`pandas_datareader` 讀取數千個總經指標（免費，無需 key）
-  - **TAIFEX tick**：台指期日內 tick（`~/Dropbox/TAIFEXDATA/TAIFEXDATA/python/`，✅ 本地 33G；選擇權 41G ❌ 僅雲端）
-  - **CBOE**：VIX/VVIX/VIX3M/SKEW（透過 yfinance）
-  - **DGBAS 主計總處**：台灣 GDP/CPI/就業（需 Chrome 自動化，見 `taiwan-macro-data` skill）
-  - **Congressional trades**：`data/congressional_trades_house.csv`
-- **⚠️ 0050.TW 數據品質**：Yahoo Finance 1:4 分割只回溯到 2014，2013 前未調整。**所有 0050.TW 實驗必須 `from volpred.utils import clean_tw50_data`**
-- **5-min 數據回補**：`collect_5min_data.py` 自動偵測 gap 回補（上限 59 天）
-- **TAIFEX 格式陷阱**：2012 是 9 欄/2014 起 10 欄、時間格式 2017 夜盤前後不同、2011 特殊編碼。**必須用 header 判斷，不可硬編碼 index**。詳見 skill
-- **⚠️ TAIFEX 期貨轉倉（必須處理）**：不要直接用 TX1，要用 **TX（全合約），每日按成交量選最活躍的合約月份**。TX1 在結算日（每月第三個週三）自動切換合約有 roll gap ~0.5-1.0%。正確做法：讀 TX → 按「到期月份」分群 → 選當日成交量最大的合約 → 只用該合約 tick 算 return/RV。K849/K851/K852b/K868 未處理
-- **Paper trading 多日回補**：daily_update.py 自動回填所有 `portfolio_return=None` 的歷史條目（利用相鄰條目價差）
-- **frontend-v2-fix 已部署**：`volpred.zeabur.app` 綁定到 volpred-v3 服務（frontend-v2-fix），前端修改只需改 `frontend-v2-fix/`
+- Feed 發文一律走 `feed-publisher`（thinking ≠ content）
+- 時間對齊與跨市場規則以 `.claude/skills/autonomous-research/references/data-timing.md` 為準；涉及 `published_at` 比較一律用 UTC
+- 外部數據來源與高風險資料陷阱以 `.claude/skills/external-data-sources/SKILL.md` 與 `taiwan-macro-data` 為準
+- **不可遺漏的高風險規則仍保留**：
+  - `paper_trading` 一律看 `portfolio_return`
+  - `0050.TW` 實驗必須用 `clean_tw50_data`
+  - TAIFEX 不可直接把 `TX1` 當永久連續合約；轉倉處理以 `external-data-sources` 規範為準
+- deploy / runtime / reverse proxy 類問題優先看 `admin-ops` 與 `docs/zeabur-oauth-gotcha.md`
 
 ### 每日文章產出要求（摘要）
 
-文章內容規格與圖表要求由 `feed-publisher` 負責；文章池、排程釋出、通知與節奏由 `admin-ops` 負責。完整細節請直接讀對應 skill。
+文章內容規格與圖表要求由 `feed-publisher` 負責；文章池、排程釋出、通知與節奏由 `admin-ops` 負責。
 
-每日最低產出要求仍維持：
+`CLAUDE.md` 只保留全域要求：
 
-| 類型 | 每日數量 | 核心要求 |
-|------|---------|---------|
-| `general` | 4 篇 | reader-facing、具場景、具單一 takeaway |
-| `research` | 2-4 篇 | 實驗結果、統計數據、方法論清楚 |
-| `daily` | 1 篇 | 由 `daily_update.py` 自動產出 |
+- 網站每日仍有 `general` / `research` / `daily` 三類產出目標
+- 非時效性文章預設進文章池；事件驅動文章不可延遲
+- 每篇文章都必須可追溯到真實圖表、資料來源與實驗腳本/結果
 
-不可違反的高層規則：
+每日數量、audience 寫法、主題查重、圖表與來源模板、文章池節奏等細節，全部以下列 owner 為準：
 
-- 非時效性文章預設進文章池，不直接 `published`
-- 事件驅動文章必須即時發佈，延遲等於過期
-- 每篇文章都必須有真實圖表、資料來源與實驗/腳本追溯資訊
-- 主題重複檢查必須在啟動寫作前完成
-- 每 5 個實驗後要檢查文章池是否偏空；池子不可空超過 3 小時
-- 事件行事曆與研究排程仍記在 `research_program.md`
-
-對應 skill：
-
-- 文章內容、圖表、標註、主題查重、事件文章內容規格 → `.claude/skills/feed-publisher/SKILL.md`
+- 文章內容、圖表、標註、主題查重、audience 寫法 → `.claude/skills/feed-publisher/SKILL.md`
 - 文章池、釋出節奏、通知與平台 surfaces → `.claude/skills/admin-ops/SKILL.md`
 
 ## 論文
@@ -214,95 +131,24 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - 5 stages 仍維持：`early` / `draft` / `review` / `ready_for_submission` / `submitted`
 - ⚠️ 修正完必跑 `uv run volpred ops paper-update --paper-id <id>`；不同步平台等於沒修
 
-### 目前 STRATEGY_REGISTRY（14 筆，10 個 active）
-→ 完整上架流程見 `docs/strategy-registry.md`
+### 目前 STRATEGY_REGISTRY（摘要）
+策略 metadata 唯一來源仍是 `daily_update.py` 的 `STRATEGY_REGISTRY`。完整清單、active/inactive 狀態、display order 與上下架流程見 `docs/strategy-registry.md`。
+是否值得上架先看 `.claude/skills/autonomous-research/references/strategy-launch-gate.md`；真正 `upsert` / activation / 平台同步走 `admin-ops`。
 
-| key | display_name | is_active | order |
-|-----|-------------|-----------|-------|
-| `slow_vt` | GARCH VT (SPY) | True | 0 |
-| `risk_parity` | Risk Parity (SPY+GLD) | True | 1 |
-| `simple_12vix` | 12/VIX (SPY) | True | 2 |
-| `recommended_5050` | 50/50 SPY/GLD | True | 3 |
-| `taiwan_8.63vix` | 台灣 VT (0050.TW) | True | 4 |
-| `taiwan_spy_momentum` | 台股動量 (0050.TW) | False | 5 |
-| `tz_tw_jp_5050` | TW+JP 50/50 TZ | False | 6 |
-| `global_vt_tz` | Global US VT + TW TZ | False | 7 |
-| `vix_leading_guard` | VIX+景氣領先 (0050.TW) | True | 8 |
-| `vix_cond_leverage` | VIX 條件槓桿（月頻） | True | 9 |
-| `taiwan_hybrid_leverage` | 台股混合槓桿 | True | 10 |
-| `piecewise_conservative` | 保守型 VT（Piecewise） | True | 11 |
-| `fear_dca` | 恐慌加碼定期定額 | True | 12 |
-| `adaptive_tier` | 自適應三階 VT | True | 13 |
+### 上架必須通過的 5 項檢驗（摘要）
 
-### 上架必須通過的 5 項檢驗（ALL PASS 才可上架）
-
-| # | 檢驗 | 通過標準 | 工具 |
-|---|------|---------|------|
-| 1 | **同期間比較** | `evaluate_new_strategy.py` Sharpe **>= 已上架策略中位數** | `uv run python scripts/evaluate_new_strategy.py` |
-| 2 | **Cross-OOS** | 5 個非重疊 2 年期間，勝 BH 50/50 **>= 3/5** | 回測腳本（可用 2006-2026） |
-| 3 | **Codex 審查** | 無 HIGH severity bug（lag/lookahead/TX） | `/codex:rescue` 或 `codex exec -s read-only` |
-| 4 | **Sensitivity** | 參數 +-20% 變動後 Sharpe 不降 > 30% | 回測腳本 |
-| 5 | **MDD 可接受** | 同期間 MDD **< -20%** | `evaluate_new_strategy.py` 輸出 |
+策略是否值得上架，現在以 `.claude/skills/autonomous-research/references/strategy-launch-gate.md` 為 runtime 母本。
+高層原則只有一條：**同期間比較、Cross-OOS、Codex 審查、Sensitivity、MDD 五項都過，才 handoff 給 `admin-ops` 做平台上架。**
 
 ## 快速指令
-→ 完整指令見 `docs/quick-commands.md`
+完整命令表改以 `docs/quick-commands.md` 為準，`CLAUDE.md` 不再維護命令清單。
 
-```bash
-# 研究
-uv run volpred summary                              # 研究摘要
-uv run volpred analyze-data --asset SPY              # 資料特性
-uv run volpred run-experiment --asset SPY --model gjr_arch --window 2000
-uv run python scripts/build_knowledge_index.py auto  # 知識索引（增量，偵測變化才重建，省 API）
+runtime routing：
 
-# 每日運營
-uv run python scripts/daily_update.py                # 每日更新（策略計算 + 績效重算 + Supabase 同步）
-uv run python scripts/recalc_metrics.py              # 手動重算績效指標
-uv run python scripts/supabase_sync.py full          # 手動 incremental sync
-uv run python scripts/supabase_sync.py force-full    # 強制全量同步（慎用，IO 大）
-uv run volpred ops health                            # 本地營運健康檢查
-uv run volpred ops article-backups --repair          # 確保每篇已發布文章都有本地單篇 JSON
-uv run volpred ops sync-all                          # 統一入口：手動 Supabase sync
-uv run volpred ops daily-update                      # 統一入口：每日更新
-uv run volpred ops recalc-metrics                    # 統一入口：重算績效指標
-uv run volpred ops paper-list                        # 查看論文與 Storage 狀態
-uv run volpred ops paper-upsert --paper-id xxx --title "..." --authors "..."
-uv run volpred ops paper-upload-pdf --paper-id xxx --file paper/<name>/main.pdf
-
-# 策略管理（只寫 DB，不需部署）
-uv run python scripts/list_new_strategy.py --list-all                          # 查看所有策略上線狀態
-uv run python scripts/list_new_strategy.py --key xxx --verify-only             # 驗證單一策略
-uv run python scripts/list_new_strategy.py --key xxx --name "名稱" --howto "說明" --description "完整說明" --assets '{"SPY":50}' --order N  # 一鍵上架
-uv run volpred ops strategy-upsert --strategy-key xxx --strategy-name "名稱" --weights-json '{"SPY":0.5}'
-uv run volpred ops strategy-set-active xxx --inactive
-
-# Jobs 與 Worker（agent-first ops）
-uv run volpred ops jobs --status queued              # 查看待處理任務
-uv run volpred ops job-show <job_id>                 # 查看任務詳情及日誌
-uv run volpred ops enqueue --action daily_update     # 手動入隊任務
-uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
-
-# Zeabur CLI（部署 + 域名管理）
-# Project ID: 69b5b264800a475a1f82b073
-# Environment ID: 69b5b2646853f6f4f5f6a16d
-# Services: volpred-web (69b5b279e0a0c18cef9d780d), volpred-v2 (69b8ed895a53b5901a3c8d25), volpred-v3 (69be521a1066986b9a1692be)
-npx zeabur@latest auth status                    # 確認登入狀態
-npx zeabur@latest service list --project-id 69b5b264800a475a1f82b073 --json  # 列出服務
-npx zeabur@latest service redeploy --id <service_id> -i=false -y             # 重新部署
-cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh  # 安全部署前端
-
-# 發佈
-uv run volpred ops publish-milestone --title "標題" --description "Markdown 內容" --phase "Phase_X"
-uv run volpred ops release-pool-by-settings --storage-dir storage
-uv run volpred ops send-article-notification mile_xxxxxxxx
-uv run volpred ops send-daily-digest --target-date 2026-03-21
-uv run volpred ops edit-article mile_xxxxxxxx --title "新標題" --content "新內容" --audience research
-uv run volpred ops unpublish mile_xxxxxxxx
-uv run volpred ops cleanup-post mile_xxxxxxxx --hard-delete
-
-# 會員問題排行
-uv run volpred ops question-ranking-summary --limit 20
-uv run volpred ops question-rerank --evaluations-json '[...]'
-```
+- 研究與實驗 → `autonomous-research`
+- 發文內容與圖表 → `feed-publisher`
+- 平台 ops / strategy / question / paper metadata / deploy → `admin-ops`
+- 論文 stage / review / update → `paper-*`
 
 ## 思維模式：永遠修流程，不修資料
 
@@ -334,31 +180,13 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ## 自主研究模式
 
-研究主流程的唯一母本是 `.claude/skills/autonomous-research/SKILL.md`。本段只保留高層規則：
+研究主流程的 runtime 母本是 `.claude/skills/autonomous-research/SKILL.md`、`.claude/skills/autonomous-research/references/agent-orchestration.md`、`.claude/skills/agent-result-verification/SKILL.md`、`.claude/skills/worktree-merge-verification/SKILL.md`。
+
+本段只保留全域原則：
 
 - 研究永不停止；完成一個任務後要接續下一個有價值的研究動作
-- 反空轉：不能靠主觀感覺判斷「沒方向了」，要回到 `research_program.md`
-- 每個實驗前都必須做：
-  - error log 防錯
-  - 知識庫搜尋
-  - 文獻搜尋
-  - K 編號衝突檢查
-- 每個實驗都必須遵守：
-  - `寫代碼 → Codex 審代碼 → 修正 → 跑實驗 → 驗證結果 → 記錄 knowledge → 才寫文章`
-  - 回測代碼必須顯式 lag，避免 lookahead
-  - Sharpe 異常過高時先懷疑 bug
-- 每個實驗完成後都要：
-  - 記 knowledge
-  - 視情況記 experience
-  - 寫回新的研究方向到 `research_program.md`
-  - 將完成項目 archive，維持 `research_program.md` 可讀
-- 不要連續停留在同一舒適區；連續 3 個 null result 必須換方向
-
-詳細操作與模板：
-
-- 研究主流程 → `.claude/skills/autonomous-research/SKILL.md`
-- agent 回傳數字驗證 → `.claude/skills/agent-result-verification/SKILL.md`
-- worktree merge 與檔案落地驗證 → `.claude/skills/worktree-merge-verification/SKILL.md`
+- 每個實驗前都必須做 error log 防錯、知識庫搜尋、文獻搜尋、K 編號衝突檢查
+- 每個實驗完成後都必須經過驗證、記錄、回寫 `research_program.md`，再決定是否 handoff 發文或平台操作
 
 ## 活文件原則
 以下文件會隨研究推展持續演化，應主動修改以反映最新狀態：
@@ -395,103 +223,56 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 - **研究方向**：記錄建議來源（例：N182 Excess Fear Signal 由 Gemini 提出）
 
 ## AI 協作模式（Claude + Codex + Gemini）
-→ 完整協作場景見 `docs/ai-collaboration.md`
+完整協作場景與命令表見 `docs/ai-collaboration.md` 與 `.claude/skills/autonomous-research/references/ai-collaboration.md`。
 
-| AI | 角色 | 使用方式 | 擅長 |
-|---|---|---|---|
-| **Claude**（主研究員）| 實驗執行、分析、記憶管理、論文寫作 | 直接執行 | 深度分析、code、持續研究 |
-| **Codex (GPT)**| 針對性審查、第二意見、新方向 | `/codex:rescue`、`/codex:review`、`codex exec` | 找漏洞、結構性問題、editorial advice |
-| **Gemini** | 方法論建議、文獻連結、robustness 建議 | `/gemini-cli` | 學術框架、cross-reference、新測試建議 |
+本段只保留高層分工：
 
-### Codex Plugin 可用命令（openai/codex-plugin-cc v1.0.1）
-| 命令 | 用途 |
-|------|------|
-| `/codex:rescue` | 委派特定任務（審查、診斷、修正建議） |
-| `/codex:review` | Git diff 代碼審查（需指定 scope） |
-| `/codex:adversarial-review` | 對抗性審查（挑戰設計決策） |
-| `/codex:status` | 查看背景任務進度 |
-| `/codex:result` | 取得背景任務結果 |
-| `/codex:cancel` | 取消背景任務 |
-| `/codex:setup` | 檢查 Codex 就緒狀態 |
+- Claude：主線研究、整合、記錄、最終判斷
+- Codex：針對性審查、第二意見、卡住時接手
+- Gemini：方法論、文獻連結、robustness 建議
 
-**使用原則**：針對特定目標，不掃全專案。不要用 `--scope working-tree`。不要無目標地「讓 Codex 看看」。
+原則：
 
-**`/codex:rescue` 使用時機（必須遵守）**：
-- **Bug 改很多次還是錯** → 停下來，用 `/codex:rescue` 換 Codex 接手重新分析
-- **程式越修越壞** → 不要再修，直接 `/codex:rescue`
-- **多檔案/邏輯複雜** → 用 Codex 的全局視角
-- **Token 快用完**（避免思路斷掉）→ 趁還有 context 讓 Codex 接手
-- **ML/非標準模型代碼審查** → 實驗完成後必須 `/codex:rescue` 審查再記錄 knowledge
-
-**一句話：卡住 or 快沒 token → 直接 `/codex:rescue`，不要繼續自己掙扎**
-
-記得開啟 `--full-auto` 模式讓 Codex 自主修復。
+- 針對特定目標請第二意見，不做無目標全專案掃描
+- 卡住、多次修錯、或需要結構性 challenge 時，立即請 Codex / Gemini 協助
 
 ### 研究主題來源（必須多元）
-研究主題不可只靠 Claude 自選。必須來自：用戶指定（最高優先）、Codex/Gemini 建議、會員問題、文獻搜索、跨 AI 交叉驗證。**完整流程和頻率表見 `research_program.md`「研究主題來源」段。**
+研究主題不可只靠 Claude 自選。runtime 規則與派工順序以 `.claude/skills/autonomous-research/references/agent-orchestration.md` 為準；`research_program.md` 仍是北極星。
 
 ## 自動化：cron + Monitor（session 啟動必建）
 
-session 自動化與平台 cycle 的唯一母本是 `.claude/skills/admin-ops/SKILL.md` 與其 references。高層規則如下：
+session 自動化與平台 cycle 的 runtime 母本是 `.claude/skills/admin-ops/SKILL.md`、`.claude/skills/admin-ops/references/deploy-and-runtime.md`、`.claude/skills/admin-ops/references/session-cron-workflows.md`。高層規則如下：
 
 - Session cron / Monitor 都是 session-only；每次新 session 都要重建
-- 跨 session 的長期任務仍應靠系統 crontab 或 RemoteTrigger
 - 啟動清單、cron cadence、platform cycle 細節 → `scripts/session_startup.md`
-- 若任務屬於平台巡檢、文章池、question ranking 或 monitor 門檻處理，優先走 `admin-ops`
+- 平台巡檢、文章池、question ranking、deploy/runtime 類工作一律優先走 `admin-ops`
 
 ## 硬體資源與 Agent Team
-→ 完整 Agent 設定對照表見 `docs/hardware.md`
-
-| 項目 | 規格 |
-|------|------|
-| CPU | Apple M1 Max · 10 核心 |
-| RAM | 64 GB |
-| 平行 agent 建議 | 3-4 個 worktree agent 同時跑（每個 ~1GB RAM） |
-| GARCH 估計速度 | ~6ms/model（單核） |
-| Bootstrap 10,000 reps | ~2-5 秒 |
+完整硬體資訊與 agent 容量見 `docs/hardware.md`。
+實務上預設同時跑 `3-4` 個獨立 worktree agent；具體派工與模型選擇仍以 `.claude/skills/autonomous-research/references/agent-orchestration.md` 為準。
 
 ### 模型選擇原則（必須遵守）
+模型選擇與 agent 派工的 runtime 規則改由 `.claude/skills/autonomous-research/references/agent-orchestration.md` 承接。
+高層原則只保留兩條：
 
-| 任務類型 | 模型 | 原因 |
-|---------|------|------|
-| **研究實驗**（GARCH、統計檢定、策略回測） | `model: "opus"` | 精確性與專業性要求高 |
-| **程式開發**（前端、後端、bug 修復） | `model: "opus"` | 程式碼正確性關鍵 |
-| **統計分析**（DM test、bootstrap、cross-OOS） | `model: "opus"` | 數學嚴謹性不可妥協 |
-| **論文寫作/審查** | `model: "opus"` | 學術品質要求 |
-| **知識合成**（meta-analysis、投資指南） | `model: "opus"` | 需要深度推理 |
-| 簡單搜尋（grep、檔案查找） | `subagent_type: "Explore"` | 快速唯讀 |
-| 簡單文章撰寫（feed 文章） | `model: "sonnet"` 可接受 | 創意寫作彈性較大 |
-| 規劃與架構 | `subagent_type: "Plan"` | 結構化思考 |
-
-**規則：研究、分析、程式等精確性與專業性工作，務必使用 opus 模型。不確定時預設 opus。**
-**優先使用 agent team 並行分派任務**，同時推進 3-4 個方向以最大化效率。
+- 研究、統計、程式、論文相關工作預設用最強模型
+- 簡單唯讀探索才降級；agent team 必須有明確邊界
 
 ### Agent Prompt 必備內容（不可省略）
 
-**Agent 是空白的 Claude，只知道 prompt 裡寫的東西。** 高層規則如下：
+**Agent 是空白的 Claude，只知道 prompt 裡寫的東西。** 詳細規範改由 `.claude/skills/autonomous-research/references/agent-orchestration.md` 承接。
+高層規則只保留：
 
-- 所有 agent prompt 都必須是完整 brief，不可假設 agent 知道專案背景
-- 實驗 agent 必須讀 `experiment-preamble.md`
-- paper review agent 必須明確指定對應的 paper skills
-- feed 文章 agent 必須讀 `feed-publisher` 並自己讀實驗 JSON
-- worktree agent 必須 commit，且不得改共享狀態 JSON / Supabase / Mirror
-- agent 返回後，主線程必須做 synthesis，再合併、驗證、記錄
-
-詳細模板與規範：
-
-- `.claude/skills/autonomous-research/references/agent-brief-template.md`
-- `.claude/skills/autonomous-research/references/agent-result-template.md`
-- `.claude/skills/autonomous-research/references/experiment-preamble.md`
-- `.claude/skills/worktree-merge-verification/SKILL.md`
-- `.claude/skills/agent-result-verification/SKILL.md`
+- 所有 agent prompt 都必須是完整 brief；experiment agent 必須讀 `experiment-preamble.md`
+- feed / paper / worktree agent 都要明確指定 skill 與邊界；返回後主線程必須做 synthesis、驗證、合併、記錄
 
 ## 排程核心原則（操作細節見 `scripts/session_startup.md`）
 
-排程與 cron 細節以 `scripts/session_startup.md` 與 `admin-ops` references 為準。高層規則：
+排程與 cron 細節以 `scripts/session_startup.md`、`.claude/skills/admin-ops/references/deploy-and-runtime.md`、`.claude/skills/admin-ops/references/session-cron-workflows.md` 為準。高層規則：
 
 - 系統 crontab / session cron 使用台灣時間；RemoteTrigger 固定 UTC
 - 任何「繼續研究」型 cron 都必須落成真工作，不能只回 status check
-- 實驗完成後仍必須走：Codex 審代碼 → 合併 / 驗證 → 記 knowledge / experience → 回寫 `research_program.md`
+- 實驗完成後仍必須走：審代碼 → 合併 / 驗證 → 記 knowledge / experience → 回寫 `research_program.md`
 
 ## 研究方法論與模型
 

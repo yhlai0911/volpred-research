@@ -250,7 +250,10 @@ CronCreate(cron="0 14 <day> <month> *", prompt="<事件提醒>", recurring=false
 
 當研究發現統計顯著（Harvey t>3）的新交易策略時，**必須完成完整上線流程**才算完成。
 
-**完整步驟和細節參考 `references/add-strategy-guide.md`。**
+先讀：
+
+- `references/strategy-launch-gate.md` — 先判斷是否值得上架
+- `references/add-strategy-guide.md` — 通過 gate 後的實作步驟
 
 簡要流程：Feed 文章 → 3 年回測 → `add_strategy.py` → `daily_update.py` → 更新數據 → Deploy → 驗證
 
@@ -405,11 +408,13 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 - `references/experiment-preamble.md` — **Agent 必讀 preamble**（方法論規則、防錯、統計門檻）
 - `references/agent-brief-template.md` — Agent prompt 模板（6 要素）
 - `references/agent-result-template.md` — Agent 結果回報模板
+- `references/agent-orchestration.md` — agent 派工、模型選擇、topic sourcing、返回後 synthesis
 - `references/models.md` — Model descriptions, parameters, sample size requirements, cross-asset rules
 - `references/strategies.md` — Trading strategies, Hybrid VT details, transaction costs, advanced techniques
 - `references/transaction-costs.md` — 各市場交易成本明細
 - `references/publishing-guide.md` — Publishing formats, Signal card, API endpoints
 - `references/paper-writing-process.md` — 論文寫作全流程（Phase 1-4，含 Review 循環和可重現性）
+- `references/strategy-launch-gate.md` — 新策略是否可上架的 5 項 gate
 - `references/add-strategy-guide.md` — 新策略上線完整步驟
 - `references/data-timing.md` — 數據時間對齊規則
 - `references/ai-collaboration.md` — AI 協作模式（Codex/Gemini 使用指引）
