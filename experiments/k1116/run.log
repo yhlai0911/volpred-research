@@ -1,0 +1,76 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+[08:36:42] Fetching SPY + VIX daily 2018-2026...
+[08:36:43] Weekly SPY+VIX: 431 weeks, 2018-01-12 to 2026-04-10
+[08:36:43] Fetching FRED alt-data: ['USEPUINDXD', 'WLEMUINDXD', 'NFCI', 'ANFCI', 'STLFSI4']
+[08:36:44]   USEPUINDXD: (3021, 1), last=2026-04-09
+[08:36:45]   WLEMUINDXD: (3021, 1), last=2026-04-09
+[08:36:45]   NFCI: (431, 1), last=2026-04-03
+[08:36:45]   ANFCI: (431, 1), last=2026-04-03
+[08:36:45]   STLFSI4: (431, 1), last=2026-04-03
+[08:36:45] FRED weekly merged: (432, 5), nan_pct_per_col:
+[08:36:45]   USEPU: 0.00% missing
+[08:36:45]   WLEMU: 0.00% missing
+[08:36:45]   NFCI: 0.00% missing
+[08:36:45]   ANFCI: 0.00% missing
+[08:36:45]   STLFSI: 0.00% missing
+[08:36:45] Merged panel: 431 weeks, 2018-01-12 to 2026-04-10
+[08:36:45] IS: 260, OOS: 171
+[08:36:45] IS lag-1 correlations with RV: {'USEPU': 0.2691430523993845, 'WLEMU': 0.5726165911307632, 'NFCI': 0.5816731982327793, 'ANFCI': 0.5529798910667217, 'STLFSI': 0.6205967054541811, 'vix_mean': 0.6774209354542942}
+[08:36:46] In-sample fits complete
+[08:36:46] Common OOS n: 170
+[08:36:46] Regime counts OOS: {'calm': 111, 'normal': 50, 'stress': 9, 'transition': 0}
+[08:36:46] Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-k1116/experiments/k1116/k1116_results.json
+
+================================================================================
+K1116 SUMMARY — Alternative Data (EPU + NFCI + STLFSI) for SPY Vol Prediction
+================================================================================
+Panel: 431 weeks (2018-01-12 to 2026-04-10)
+IS n=260, OOS n=171, Common OOS DM n=170
+Regime OOS: {'calm': 111, 'normal': 50, 'stress': 9, 'transition': 0}
+
+IS vs OOS QLIKE:
+  Model                     IS R²     IS QLIKE    OOS QLIKE     OOS RMSE
+  M1_AR1                   0.5315      -2.8526      -3.0492     0.010475
+  M2_AR1_VIX               0.5453      -2.8605      -3.0586     0.010125
+  M3_AR1_EPU               0.5448      -2.8531      -3.0397     0.012240
+  M4_AR1_FinStress         0.5551      -2.8577      -3.0382     0.010983
+  M5_AR1_All               0.5945      -2.8395      59.9074     0.012074
+
+Full OOS DM tests (vs M2_AR1_VIX):
+  (positive t = challenger beats baseline; negative t = baseline beats challenger)
+  M2_AR1_VIX_vs_M1_AR1: t=-3.021 p=0.0029 [baseline wins]
+  M2_AR1_VIX_vs_M3_AR1_EPU: t=-2.554 p=0.0115 [baseline wins]
+  M2_AR1_VIX_vs_M4_AR1_FinStress: t=-3.001 p=0.0031 [baseline wins]
+  M2_AR1_VIX_vs_M5_AR1_All: t=-1.008 p=0.3149 ns
+
+Regime-conditional DM (main new analysis):
+  [calm] n=111
+    M2_AR1_VIX_vs_M3_AR1_EPU: t=-2.572 [baseline wins]
+    M2_AR1_VIX_vs_M4_AR1_FinStress: t=-3.920 [baseline wins]
+    M2_AR1_VIX_vs_M5_AR1_All: t=-1.003 ns
+  stress: n=9 (skip)
+  transition: n=0 (skip)
+  [normal] n=50
+    M2_AR1_VIX_vs_M3_AR1_EPU: t=-1.559 ns
+    M2_AR1_VIX_vs_M4_AR1_FinStress: t=+0.338 ns
+    M2_AR1_VIX_vs_M5_AR1_All: t=-1.487 ns
+
+BH-adj IS p-values (M5 alt-data regressors):
+  * USEPU_lag1           coef=-0.000063  raw p=0.0000  BH p=0.0000  (negative)
+    WLEMU_lag1           coef=+0.000034  raw p=0.1053  BH p=0.1316  (positive)
+  * NFCI_lag1            coef=+0.045392  raw p=0.0012  BH p=0.0031  (positive)
+  * ANFCI_lag1           coef=-0.030508  raw p=0.0169  BH p=0.0281  (negative)
+    STLFSI_lag1          coef=+0.000406  raw p=0.8501  BH p=0.8501  (positive)
+
+Hypothesis tests:
+  H1_base_full_OOS_challenger_beats_baseline: fail
+  H1_base_full_OOS_baseline_beats_challenger_count: PASS
+  H1_regime_transition_or_stress_challenger_wins: fail
+  H2_BH_sig_at_10_ge_2: PASS
+  H3_sub_period_stability_ge_2of3: fail
+
+Best alt-data model (OOS QLIKE): M3_AR1_EPU
+QLIKE improvement vs M2_AR1_VIX: -0.62% (threshold 5%)
+
+OVERALL VERDICT: NULL (alt-data actively worsens OOS vs VIX baseline)

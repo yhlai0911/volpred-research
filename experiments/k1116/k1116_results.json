@@ -1,0 +1,459 @@
+{
+  "experiment_id": "K1116",
+  "title": "Alternative Data (EPU + NFCI + STLFSI) for SPY Vol Prediction \u2014 Regime-Conditional",
+  "started_utc": "2026-04-13T08:36:42.407238Z",
+  "data_source": "FRED (USEPUINDXD, WLEMUINDXD, NFCI, ANFCI, STLFSI4) + yfinance (SPY, VIX)",
+  "pivot_from": "Google Trends (pytrends 429 rate-limited; K750 already NULL for GT-vol)",
+  "prior_related": {
+    "K473": "Google Trends attention -> vol: NULL",
+    "K750": "Real Google Trends fear -> vol: NULL (Fear LAGS VIX, reactive)",
+    "K789": "Google Trends -> return + tail: NULL",
+    "K192": "Google Trends general overfitting warning",
+    "K504": "STLFSI4 narrow: NULL (but not in regime-conditional framework)"
+  },
+  "new_angle": "Regime-conditional DM stratification (calm/stress/transition) on EPU+NFCI+STLFSI",
+  "references": [
+    "Baker, Bloom, Davis (2016) QJE - EPU index",
+    "Brave, Butters (2011) - NFCI",
+    "Kliesen, Smith (2010) - STLFSI",
+    "Patton (2011) - QLIKE proxy-robust loss",
+    "Harvey, Leybourne, Newbold (1997) - HLN DM correction"
+  ],
+  "alt_data_columns": [
+    "USEPU",
+    "WLEMU",
+    "NFCI",
+    "ANFCI",
+    "STLFSI"
+  ],
+  "n_full": 431,
+  "n_is": 260,
+  "n_oos": 171,
+  "is_period": [
+    "2018-01-12",
+    "2022-12-30"
+  ],
+  "oos_period": [
+    "2023-01-06",
+    "2026-04-10"
+  ],
+  "descriptive_stats": {
+    "rv": {
+      "mean": 0.021171597465888536,
+      "std": 0.016438103775448104,
+      "min": 0.0032754306485692376,
+      "max": 0.16881174669222265
+    },
+    "vix_mean": {
+      "mean": 19.78123435443073,
+      "std": 7.1521030971281485,
+      "min": 9.892000007629395,
+      "max": 74.61800079345703
+    },
+    "USEPU": {
+      "mean": 184.98863606231356,
+      "std": 124.07109921144662,
+      "min": 36.88857142857143,
+      "max": 705.3785714285714
+    },
+    "WLEMU": {
+      "mean": 121.86420726991491,
+      "std": 114.32377567061701,
+      "min": 9.045714285714286,
+      "max": 949.6871428571428
+    },
+    "NFCI": {
+      "mean": -0.44534802784222743,
+      "std": 0.16901122706497496,
+      "min": -0.693,
+      "max": 0.31
+    },
+    "ANFCI": {
+      "mean": -0.4394037122969838,
+      "std": 0.18223152762517633,
+      "min": -0.683,
+      "max": 0.483
+    },
+    "STLFSI": {
+      "mean": -0.3186445475638051,
+      "std": 0.6419684662339782,
+      "min": -0.9754,
+      "max": 5.657
+    }
+  },
+  "lag1_corr_with_rv_IS": {
+    "USEPU": 0.2691430523993845,
+    "WLEMU": 0.5726165911307632,
+    "NFCI": 0.5816731982327793,
+    "ANFCI": 0.5529798910667217,
+    "STLFSI": 0.6205967054541811,
+    "vix_mean": 0.6774209354542942
+  },
+  "is_results": {
+    "M1_AR1": {
+      "r2": 0.5315356610526045,
+      "adj_r2": 0.5297128426131206,
+      "aic": -1516.492050236704,
+      "bic": -1509.378394113305,
+      "n_is": 259,
+      "params": {
+        "const": 0.00639916505964979,
+        "y_lag1": 0.7283833761304435
+      },
+      "pvalues": {
+        "const": 1.062577671867327e-06,
+        "y_lag1": 3.2677903833911145e-44
+      }
+    },
+    "M2_AR1_VIX": {
+      "r2": 0.5453118610256245,
+      "adj_r2": 0.5417596099398871,
+      "aic": -1522.2227356346752,
+      "bic": -1511.5522514495767,
+      "n_is": 259,
+      "params": {
+        "const": 6.792632249274762e-05,
+        "y_lag1": 0.5450503709568795,
+        "vix_lag1": 0.0004976945532189305
+      },
+      "pvalues": {
+        "const": 0.9791837759203418,
+        "y_lag1": 2.600321998378474e-11,
+        "vix_lag1": 0.005752419877188108
+      }
+    },
+    "M3_AR1_EPU": {
+      "r2": 0.5447909062661742,
+      "adj_r2": 0.5394355051634234,
+      "aic": -1519.9261586310522,
+      "bic": -1505.698846384254,
+      "n_is": 259,
+      "params": {
+        "const": 0.008074187384167148,
+        "y_lag1": 0.6122729550446729,
+        "USEPU_lag1": -2.757853320939131e-05,
+        "WLEMU_lag1": 5.565370958119903e-05
+      },
+      "pvalues": {
+        "const": 1.394867458231567e-06,
+        "y_lag1": 1.8869124654312608e-18,
+        "USEPU_lag1": 0.026638182967327978,
+        "WLEMU_lag1": 0.007430578448335755
+      }
+    },
+    "M4_AR1_FinStress": {
+      "r2": 0.5550731813393166,
+      "adj_r2": 0.5480664597856051,
+      "aic": -1523.843542992065,
+      "bic": -1506.0594026835674,
+      "n_is": 259,
+      "params": {
+        "const": 0.017858887489758994,
+        "y_lag1": 0.6113482897415047,
+        "NFCI_lag1": 0.03675438509608357,
+        "ANFCI_lag1": -0.019227488755214957,
+        "STLFSI_lag1": 0.0002967753629106338
+      },
+      "pvalues": {
+        "const": 1.3765726580941227e-06,
+        "y_lag1": 1.6818512637450211e-16,
+        "NFCI_lag1": 0.009976936994961013,
+        "ANFCI_lag1": 0.1319842493688017,
+        "STLFSI_lag1": 0.8788207890455189
+      }
+    },
+    "M5_AR1_All": {
+      "r2": 0.5945185470895495,
+      "adj_r2": 0.5832102993988199,
+      "aic": -1541.8877257596428,
+      "bic": -1513.4331012660464,
+      "n_is": 259,
+      "params": {
+        "const": 0.009427148475826357,
+        "y_lag1": 0.2850783700667282,
+        "vix_lag1": 0.0010145455230516096,
+        "USEPU_lag1": -6.329617080673029e-05,
+        "WLEMU_lag1": 3.4136024178879046e-05,
+        "NFCI_lag1": 0.045391560867265215,
+        "ANFCI_lag1": -0.030507842926993912,
+        "STLFSI_lag1": 0.00040610210163767265
+      },
+      "pvalues": {
+        "const": 0.09382276337187542,
+        "y_lag1": 0.0031923944424828814,
+        "vix_lag1": 0.0001385732596294265,
+        "USEPU_lag1": 7.936079261051659e-06,
+        "WLEMU_lag1": 0.10525227171588056,
+        "NFCI_lag1": 0.0012250356408999568,
+        "ANFCI_lag1": 0.016873241861644437,
+        "STLFSI_lag1": 0.8500915779944695
+      }
+    }
+  },
+  "dm_tests_full_oos": {
+    "M2_AR1_VIX_vs_M1_AR1": {
+      "t_stat": -3.021071123808624,
+      "p_value": 0.0029103987362664174,
+      "interpretation": "baseline beats M1_AR1",
+      "challenger_wins_harvey": false,
+      "baseline_wins_harvey": true,
+      "abs_t_gt_2": true
+    },
+    "M2_AR1_VIX_vs_M3_AR1_EPU": {
+      "t_stat": -2.554339252920554,
+      "p_value": 0.011521868821647185,
+      "interpretation": "baseline beats M3_AR1_EPU",
+      "challenger_wins_harvey": false,
+      "baseline_wins_harvey": true,
+      "abs_t_gt_2": true
+    },
+    "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+      "t_stat": -3.0010052156613773,
+      "p_value": 0.0030986432363262484,
+      "interpretation": "baseline beats M4_AR1_FinStress",
+      "challenger_wins_harvey": false,
+      "baseline_wins_harvey": true,
+      "abs_t_gt_2": true
+    },
+    "M2_AR1_VIX_vs_M5_AR1_All": {
+      "t_stat": -1.0080273290071626,
+      "p_value": 0.3148824204808436,
+      "interpretation": "indistinguishable",
+      "challenger_wins_harvey": false,
+      "baseline_wins_harvey": false,
+      "abs_t_gt_2": false
+    }
+  },
+  "is_oos_comparison": {
+    "M1_AR1": {
+      "IS_R2": 0.5315356610526045,
+      "IS_QLIKE": -2.8526302436292212,
+      "OOS_QLIKE": -3.0492458679941845,
+      "OOS_RMSE": 0.010475246320017468,
+      "OOS_n": 170,
+      "divergence_IS_OOS": -0.19661562436496327
+    },
+    "M2_AR1_VIX": {
+      "IS_R2": 0.5453118610256245,
+      "IS_QLIKE": -2.860548048045537,
+      "OOS_QLIKE": -3.058643045510296,
+      "OOS_RMSE": 0.010125227621359194,
+      "OOS_n": 170,
+      "divergence_IS_OOS": -0.198094997464759
+    },
+    "M3_AR1_EPU": {
+      "IS_R2": 0.5447909062661742,
+      "IS_QLIKE": -2.853115622034469,
+      "OOS_QLIKE": -3.039680576412327,
+      "OOS_RMSE": 0.012240213592455335,
+      "OOS_n": 170,
+      "divergence_IS_OOS": -0.1865649543778578
+    },
+    "M4_AR1_FinStress": {
+      "IS_R2": 0.5550731813393166,
+      "IS_QLIKE": -2.8576922061489025,
+      "OOS_QLIKE": -3.038194908301758,
+      "OOS_RMSE": 0.010982796018370792,
+      "OOS_n": 170,
+      "divergence_IS_OOS": -0.18050270215285558
+    },
+    "M5_AR1_All": {
+      "IS_R2": 0.5945185470895495,
+      "IS_QLIKE": -2.8394728868339745,
+      "OOS_QLIKE": 59.90739361892298,
+      "OOS_RMSE": 0.012074327383666938,
+      "OOS_n": 170,
+      "divergence_IS_OOS": 62.746866505756955
+    }
+  },
+  "regime_counts_oos": {
+    "calm": 111,
+    "normal": 50,
+    "stress": 9,
+    "transition": 0
+  },
+  "dm_tests_by_regime": {
+    "calm": {
+      "n": 111,
+      "M2_AR1_VIX_vs_M3_AR1_EPU": {
+        "t_stat": -2.5724746553376185,
+        "p_value": 0.01143001308928282,
+        "interpretation": "baseline beats M3_AR1_EPU",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": true
+      },
+      "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+        "t_stat": -3.919506184100728,
+        "p_value": 0.0001545678106698034,
+        "interpretation": "baseline beats M4_AR1_FinStress",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": true
+      },
+      "M2_AR1_VIX_vs_M5_AR1_All": {
+        "t_stat": -1.00291315166335,
+        "p_value": 0.3181038680192352,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      }
+    },
+    "stress": {
+      "n": 9,
+      "note": "insufficient n for DM"
+    },
+    "transition": {
+      "n": 0,
+      "note": "insufficient n for DM"
+    },
+    "normal": {
+      "n": 50,
+      "M2_AR1_VIX_vs_M3_AR1_EPU": {
+        "t_stat": -1.559110504104367,
+        "p_value": 0.12540628004386756,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      },
+      "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+        "t_stat": 0.3383935817035126,
+        "p_value": 0.7365123312528339,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      },
+      "M2_AR1_VIX_vs_M5_AR1_All": {
+        "t_stat": -1.4868302954034953,
+        "p_value": 0.14346648471687407,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      }
+    }
+  },
+  "subperiod_dm": {
+    "2023": {
+      "n": 51,
+      "M2_AR1_VIX_vs_M3_AR1_EPU": {
+        "t_stat": -2.0167087803370727,
+        "p_value": 0.04911240600542843,
+        "interpretation": "baseline beats M3_AR1_EPU",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": true
+      },
+      "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+        "t_stat": -2.8776354417632546,
+        "p_value": 0.005878375394058555,
+        "interpretation": "baseline beats M4_AR1_FinStress",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": true
+      },
+      "M2_AR1_VIX_vs_M5_AR1_All": {
+        "t_stat": -1.5296037528289026,
+        "p_value": 0.13241740234348987,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      }
+    },
+    "2024": {
+      "n": 52,
+      "M2_AR1_VIX_vs_M3_AR1_EPU": {
+        "t_stat": -1.136754751213116,
+        "p_value": 0.26095393750426643,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      },
+      "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+        "t_stat": -1.3455249041464392,
+        "p_value": 0.18440771603970973,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      },
+      "M2_AR1_VIX_vs_M5_AR1_All": {
+        "t_stat": -1.158815321245066,
+        "p_value": 0.2519288063353664,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      }
+    },
+    "2025": {
+      "n": 52,
+      "M2_AR1_VIX_vs_M3_AR1_EPU": {
+        "t_stat": -1.4544469484494091,
+        "p_value": 0.1519496276256258,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      },
+      "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+        "t_stat": -0.36677003716747686,
+        "p_value": 0.7153079395699482,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      },
+      "M2_AR1_VIX_vs_M5_AR1_All": {
+        "t_stat": -1.000043121607208,
+        "p_value": 0.3220110338778477,
+        "interpretation": "indistinguishable",
+        "challenger_wins_harvey": false,
+        "baseline_wins_harvey": false
+      }
+    }
+  },
+  "keyword_analysis_IS_M5": {
+    "USEPU_lag1": {
+      "coef": -6.329617080673029e-05,
+      "p_value_raw": 7.936079261051659e-06,
+      "p_value_bh_adj": 3.96803963052583e-05,
+      "sign": "negative",
+      "bh_sig_at_10": true
+    },
+    "WLEMU_lag1": {
+      "coef": 3.4136024178879046e-05,
+      "p_value_raw": 0.10525227171588056,
+      "p_value_bh_adj": 0.1315653396448507,
+      "sign": "positive",
+      "bh_sig_at_10": false
+    },
+    "NFCI_lag1": {
+      "coef": 0.045391560867265215,
+      "p_value_raw": 0.0012250356408999568,
+      "p_value_bh_adj": 0.003062589102249892,
+      "sign": "positive",
+      "bh_sig_at_10": true
+    },
+    "ANFCI_lag1": {
+      "coef": -0.030507842926993912,
+      "p_value_raw": 0.016873241861644437,
+      "p_value_bh_adj": 0.028122069769407395,
+      "sign": "negative",
+      "bh_sig_at_10": true
+    },
+    "STLFSI_lag1": {
+      "coef": 0.00040610210163767265,
+      "p_value_raw": 0.8500915779944695,
+      "p_value_bh_adj": 0.8500915779944694,
+      "sign": "positive",
+      "bh_sig_at_10": false
+    }
+  },
+  "n_bh_sig_at_10": 3,
+  "hypothesis_tests": {
+    "H1_base_full_OOS_challenger_beats_baseline": false,
+    "H1_base_full_OOS_baseline_beats_challenger_count": 2,
+    "H1_regime_transition_or_stress_challenger_wins": false,
+    "H2_BH_sig_at_10_ge_2": true,
+    "H3_sub_period_stability_ge_2of3": false
+  },
+  "best_alt_model": "M3_AR1_EPU",
+  "qlike_improvement_pct": -0.6199634548988507,
+  "qlike_improvement_5pct_pass": false,
+  "triple_gate_pass": false,
+  "active_harm_alt_data_worse_than_VIX": true,
+  "overall_verdict": "NULL (alt-data actively worsens OOS vs VIX baseline)",
+  "finished_utc": "2026-04-13T08:36:46.296624Z"
+}
