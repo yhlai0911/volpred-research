@@ -766,5 +766,20 @@
       "copula-applicable-domain"
     ],
     "created_at": "2026-04-13T06:53:36.409771+00:00"
+  },
+  {
+    "id": "E057",
+    "title": "4 假設全 FAIL 但實驗仍有 contribution — 意外發現的價值",
+    "lesson": "K1100g 的 4 個 pre-registered hypotheses 嚴格門檻全 FAIL：\n- H1 settlement multiplier 反方向 (SPY 強 not TAIFEX)\n- H2 overnight ratio 數值對但未達 0.8 threshold\n- H3 DOW ANOVA 兩市都 < 1 (都無 pattern)\n- H4 FFT 兩市都平坦\n\n但實驗成功**提供 Paper 3 reframe 的 anchor**——因為：\n\n1. **Dim2 數值差異實質顯著**：TAIFEX 1.586 vs SPY 1.001 ≈ 60% 差距，雖未過 H2 的 0.8 強門檻，但**作為機制 narrative 已足夠**。Reviewer 不會問 \"are 1.586 and 1.001 significantly different\"，會問 \"does this support the mechanism?\" — 答案是 yes。\n\n2. **反方向發現比預期支持更有價值**：SPY OPEX 3.12× pinning 是完全意外，原本假設 TAIFEX > SPY，結果是 SPY > TAIFEX 在 settlement 維度。這個反向是新 finding，值得獨立 follow-up (D2 候選)。\n\n**通則**：\n1. **Strict pre-reg threshold FAIL ≠ 實驗失敗**——只表示原本假設過強。實驗仍可貢獻：\n   - 機制 anchor (numerical magnitude support)\n   - 反向發現 (unexpected direction)\n   - 推翻其他假設 (e.g., DOW pattern 不存在)\n2. **Pre-reg 是為了防 cherry-pick (E053 教訓)，不是為了 thresholds 一定要過**\n3. **Reframe 用 single mechanism 比 4-dimension 全方位更可信**——少假設更不易遭 reviewer 攻擊「為什麼挑這 4 個維度」\n4. **反向發現 (反 hypothesis sign) 應該 tag 為 priority-2 follow-up**，不要當失敗忽略\n\n**對 Paper 3 的 implication**：\n- 不要寫「TAIFEX 在 4 個 microstructural dimension 上和 SPY 有差異」（這是 cherry-pick 嫌疑）\n- 應寫「Lai 2024 PRS edge 來自 TAIFEX day/night session asymmetry (1.6× overnight vol multiplier vs SPY 1.0×)；SPY-ES Globex continuous structure 沒有對應 anchor 點，所以方法不能直接遷移」（single mechanism, falsifiable）\n\n**下次該怎麼做**：\n- 設 strict thresholds 保護自己 (E053 教訓)，但**結果 below threshold 時不要否認 mechanism**\n- 看數值差異的「實質 magnitude」（1.586 vs 1.001 = 58% 差距）而非只看 binary PASS/FAIL\n- 反向發現必須立刻寫成獨立 follow-up，不要混入主線敘事 (D2 vs main narrative)",
+    "context": "K1100g 4 hypotheses FAIL 但 Dim2 mechanism 仍 valid",
+    "applies_to": [
+      "hypothesis-testing",
+      "pre-registration",
+      "unexpected-findings",
+      "mechanism-narrative",
+      "binary-vs-magnitude",
+      "reframe-strategy"
+    ],
+    "created_at": "2026-04-13T07:22:08.354783+00:00"
   }
 ]

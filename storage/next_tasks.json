@@ -64,9 +64,30 @@
   },
   {
     "id": "K1100g",
-    "title": "K1100g: TAIFEX vs SPY-ES microstructural difference quantification",
+    "title": "K1100g: TAIFEX vs SPY microstructure",
     "priority": 2,
-    "description": "K1100f agent 衍生：拿 TAIFEX TX (Dropbox 2017-2021) tick-level vs SPY-ES daily-level，量化 microstructural 差異（settlement effect, intraday session, overnight gap）解釋為何 Lai 2024 在 Taiwan work 但 US 不 work。",
+    "description": "4 H 嚴格 FAIL 但 Dim2 overnight ratio TAIFEX 1.586 vs SPY 1.001 提供 single-mechanism reframe anchor。意外發現 SPY OPEX 3.12× pinning。Worktree-only 規則本次正確遵守。",
+    "status": "completed"
+  },
+  {
+    "id": "K1100g_d1",
+    "title": "K1100g D1: TAIFEX day-only vs night-only PRG decomposition",
+    "priority": 2,
+    "description": "K1100g 衍生：確認 Dim2 overnight asymmetry 是 PRG 增益的真正機制。拆 day/night session 跑 PRG。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100g_d2",
+    "title": "K1100g D2: SPY OPEX 3.12× pinning study (反向發現)",
+    "priority": 3,
+    "description": "K1100g 意外發現：SPY OPEX intraday vol 3.12x 平日。獨立研究 monthly/quarterly Friday + 0DTE 因素。可能 Paper 8 candidate。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100g_d3",
+    "title": "K1100g D3: Cross-Asia overnight asymmetry replication",
+    "priority": 3,
+    "description": "K1100g 衍生：NK225/K200 是否有 TAIFEX 類似的 overnight asymmetry。分辨亞洲共通 vs 台灣 only。",
     "status": "pending"
   },
   {

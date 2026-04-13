@@ -25657,5 +25657,25 @@
     ],
     "data_source": "yfinance SPY+ES=F + GLD+GC=F (2013-2026)",
     "created_at": "2026-04-13T06:53:36.409771+00:00"
+  },
+  {
+    "id": "k1100g-1776064928",
+    "experiment_id": "K1100g",
+    "title": "K1100g: TAIFEX vs SPY microstructure — Dim2 overnight asymmetry IS the Paper 3 reframe anchor",
+    "content": "[提出: Claude pivot K1100f, 執行: Claude] 4-dimension 對照（TAIFEX TX 2017-2021 daily vs SPY daily）：(1) Settlement multiplier TAIFEX 0.668 vs SPY 0.914（**反向發現**：SPY OPEX intraday=3.12x，US 才有強 settlement，TAIFEX 反而結算日波動較低——可能因主力已轉次月）(2) **Overnight/intraday ratio TAIFEX 1.586 vs SPY 1.001** ← Paper 3 reframe 核心 anchor，Taiwan 隔夜風險 1.6× 日盤 (3) DOW ANOVA F TAIFEX 0.653 vs SPY 0.732，**兩市都無 DOW pattern**（推翻原假設 H3）(4) FFT periodic band TAIFEX 0.015 vs SPY 0.010，無 spike（SPY 5-min 受 yfinance 60 天限制不可靠）。**4 hypothesis strict threshold 全 FAIL，但 Dim2 提供 clean single-mechanism**：Lai 2024 PRS 成功源自 TAIFEX day/night session asymmetry，SPY-ES (24h Globex continuous) 沒有對應結構，所以同方法 fails。**Paper 3 reframe 改為 single-mechanism narrative**（比 4-dimension 全方位更可信）。**反向發現** D2: SPY OPEX intraday 3.12× pinning effect 是獨立 US-specific finding，可能涉及 monthly/quarterly Friday + 0DTE。Codex 審查抓到 1 個 label-drift bug (drop-then-enumerate dow_idx 不對齊) 修正。Commit 5861e07c。Worktree-only 規則本次正確遵守（與 K1100f 違反對比）。",
+    "tags": [
+      "Paper_3",
+      "TAIFEX",
+      "SPY",
+      "microstructure",
+      "overnight-asymmetry",
+      "Lai2024-mechanism",
+      "reframe-anchor",
+      "session-boundaries",
+      "unexpected-finding",
+      "SPY-OPEX-pinning"
+    ],
+    "data_source": "TAIFEX TX 2017-2021 (Dropbox) + yfinance SPY daily",
+    "created_at": "2026-04-13T07:22:08.354783+00:00"
   }
 ]
