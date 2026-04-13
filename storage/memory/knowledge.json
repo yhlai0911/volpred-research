@@ -26053,5 +26053,23 @@
     "data_source": "yfinance K1147 cache + earnings_dates Surprise(%) 2014-2025",
     "created_at": "2026-04-13T23:50:00+08:00",
     "updated_at": "2026-04-13T23:50:00+08:00"
+  },
+  {
+    "id": "k1152-1776096419",
+    "experiment_id": "K1152",
+    "title": "K1152 relative-magnitude cross-market: direction universal, magnitude market-specific (Wald p~0)",
+    "content": "[提出: Claude, 執行: Claude] K1145+K1147+K1150 三市場 absolute θ_EAV 差距 3× (TW +6.36e-5, US +1.91e-4, JP +1.41e-4) — 真 universal 還是 scale artifact？K1152 post-processing 定義 θ_rel = θ_EAV / avg_σ²，檢驗 scale-adjusted 後三市場是否一致。**結果**: TW θ_rel=0.1673 [0.109, 0.247], US=0.5862 [0.395, 0.859], JP=0.3875 [0.354, 0.482]。三市場 avg_σ² 幾乎相同 (TW=3.80e-4, US=3.26e-4, JP=3.65e-4, 差 ±15%)，但 θ_rel 差距 3.5× — **scale 幾乎沒校正任何差異**。Wald H0 (equal θ_rel): χ²(2)=29.19, p≈4.6e-7 bootstrap p=0.000 決定性 reject。CI overlap: TW∩US=False, TW∩JP=False, US∩JP=True → 結構 pattern: TW = 低 cluster (quarterly 混合), US+JP = 高 cluster (純 quarterly)。**Paper 2 narrative 升級**: 從 'three-market universal regularity' 修正為雙層 '方向 universal + 量級 market-specific'；與制度性差異 (quarterly reporting density, analyst coverage) 一致。衍生 K1153 EU 4th market + K1156 TW sub-sample 季報公告是否 converge to US/JP level (mechanism test)。",
+    "tags": [
+      "K1152",
+      "Paper2",
+      "relative-magnitude",
+      "cross-market",
+      "Wald-test",
+      "quarterly-vs-mixed",
+      "K1145-K1147-K1150-post-processing"
+    ],
+    "data_source": "Reuse K1145/K1147/K1150 results JSON",
+    "created_at": "2026-04-14T00:10:00+08:00",
+    "updated_at": "2026-04-14T00:10:00+08:00"
   }
 ]

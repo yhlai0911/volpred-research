@@ -1,0 +1,76 @@
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152.py:299: UserWarning: Glyph 8315 (\N{SUPERSCRIPT MINUS}) missing from font(s) PingFang HK.
+  plt.tight_layout()
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152.py:299: UserWarning: Glyph 10007 (\N{BALLOT X}) missing from font(s) PingFang HK.
+  plt.tight_layout()
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152.py:299: UserWarning: Glyph 10003 (\N{CHECK MARK}) missing from font(s) PingFang HK.
+  plt.tight_layout()
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152.py:301: UserWarning: Glyph 8315 (\N{SUPERSCRIPT MINUS}) missing from font(s) PingFang HK.
+  plt.savefig(out1, dpi=150, bbox_inches="tight")
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152.py:301: UserWarning: Glyph 10007 (\N{BALLOT X}) missing from font(s) PingFang HK.
+  plt.savefig(out1, dpi=150, bbox_inches="tight")
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152.py:301: UserWarning: Glyph 10003 (\N{CHECK MARK}) missing from font(s) PingFang HK.
+  plt.savefig(out1, dpi=150, bbox_inches="tight")
+[K1152] Repo root: /Users/yhlai0911/Desktop/volpred-research
+[K1152] Loaded results from K1145 / K1147 / K1150
+[K1152] θ_EAV absolute:
+  TW: 6.3622e-05  (bootstrap SE=1.2137e-05)
+  US: 1.9090e-04  (bootstrap SE=4.2463e-05)
+  JP: 1.4128e-04  (bootstrap SE=1.1784e-05)
+
+[K1152] avg_σ² (empirical std_r^2):
+  TW: 3.8028e-04
+  US: 3.2565e-04
+  JP: 3.6459e-04
+
+[K1152] θ_rel = θ_EAV / avg_σ²:
+Market        θ_rel      boot_SE        t        CI_lo        CI_hi
+TW           0.1673       0.0318    5.260       0.1086       0.2467
+US           0.5862       0.1300    4.511       0.3947       0.8590
+JP           0.3875       0.0322   12.029       0.3540       0.4821
+
+[K1152] Wald test H0: θ_rel_TW = θ_rel_US = θ_rel_JP
+  δ1 (US-TW) = 0.4189,  δ2 (JP-TW) = 0.2202
+  Wald χ²(2) = 29.188,  p = 0.0000
+
+[K1152] 95% CI overlap:
+  TW ∩ US: False
+  TW ∩ JP: False
+  US ∩ JP: True
+
+[K1152] Magnitude ratios (vs TW):
+  Absolute θ_EAV: US/TW=3.001, JP/TW=2.221
+  Relative θ_rel: US/TW=3.504, JP/TW=2.316
+
+[K1152] Bootstrap Wald p-value (H0: θ_rel equal): 0.0000
+
+[K1152] Verdict: MARKET_SPECIFIC_AFTER_SCALING
+  θ_rel 三市場 Wald p < 0.05，部分 CI 不重疊 → 市場特性在 scaling 後仍有差異
+[K1152] Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152_abs_vs_rel_theta.png
+[K1152] Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152_bootstrap_rel_distributions.png
+
+[K1152] Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5072d7f/experiments/k1152/k1152_results.json
+
+============================================================
+K1152 FINAL SUMMARY
+============================================================
+
+Absolute θ_EAV × 1e5:
+  TW = 6.362,  US = 19.090,  JP = 14.128
+  Ratio US/TW = 3.001,  JP/TW = 2.221
+
+Avg σ² (empirical):
+  TW = 3.8028e-04,  US = 3.2565e-04,  JP = 3.6459e-04
+
+Relative θ_rel = θ_EAV / avg_σ²:
+  TW = 0.1673 [0.1086, 0.2467]
+  US = 0.5862 [0.3947, 0.8590]
+  JP = 0.3875 [0.3540, 0.4821]
+  Ratio US/TW = 3.504,  JP/TW = 2.316
+
+Wald test H0 (θ_rel equal): χ²(2) = 29.188,  p = 0.0000
+Bootstrap Wald p = 0.0000
+CI overlap: TW∩US=False, TW∩JP=False, US∩JP=True
+
+>>> VERDICT: MARKET_SPECIFIC_AFTER_SCALING
+    θ_rel 三市場 Wald p < 0.05，部分 CI 不重疊 → 市場特性在 scaling 後仍有差異
+============================================================

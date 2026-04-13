@@ -1,0 +1,77 @@
+{
+  "experiment_id": "K1152",
+  "title": "Relative-magnitude \u03b8_EAV cross-market analysis: absolute universality vs scale artifact",
+  "proposer": "Claude (\u627f\u63a5 K1150 next_tasks K1152)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-13",
+  "random_seed": 42,
+  "data_source": "Post-processing of K1145 / K1147 / K1150 results JSONs (no new MLE)",
+  "input_experiments": {
+    "TW": "K1145",
+    "US": "K1147",
+    "JP": "K1150"
+  },
+  "markets": {
+    "TW": {
+      "theta_eav_abs": 6.362165248598386e-05,
+      "avg_sigma2": 0.0003802814068793024,
+      "theta_rel": 0.16730150708150912,
+      "theta_rel_boot_mean": 0.17808349896847947,
+      "theta_rel_boot_se": 0.03180869330058489,
+      "theta_rel_t": 5.2596158383668286,
+      "theta_rel_ci95_lo": 0.10862037423011593,
+      "theta_rel_ci95_hi": 0.2466615227371774
+    },
+    "US": {
+      "theta_eav_abs": 0.00019089860360002893,
+      "avg_sigma2": 0.00032565334354163554,
+      "theta_rel": 0.5862018842610842,
+      "theta_rel_boot_mean": 0.5974276777497994,
+      "theta_rel_boot_se": 0.1299568351066464,
+      "theta_rel_t": 4.510743000012502,
+      "theta_rel_ci95_lo": 0.39473595679813095,
+      "theta_rel_ci95_hi": 0.8589537440108828
+    },
+    "JP": {
+      "theta_eav_abs": 0.00014127865441754286,
+      "avg_sigma2": 0.00036458784071539084,
+      "theta_rel": 0.3875023756698172,
+      "theta_rel_boot_mean": 0.407987811035814,
+      "theta_rel_boot_se": 0.03221434873681987,
+      "theta_rel_t": 12.028875046817742,
+      "theta_rel_ci95_lo": 0.35396491585754486,
+      "theta_rel_ci95_hi": 0.48207193597539566
+    }
+  },
+  "wald_test": {
+    "H0": "theta_rel_TW = theta_rel_US = theta_rel_JP",
+    "delta1_US_minus_TW": 0.41890037717957507,
+    "delta2_JP_minus_TW": 0.2202008685883081,
+    "chi2_stat": 29.187596113311226,
+    "df": 2,
+    "chi2_p_asymptotic": 4.5919170477137783e-07,
+    "bootstrap_p": 0.0
+  },
+  "ci_overlap": {
+    "TW_US": false,
+    "TW_JP": false,
+    "US_JP": true,
+    "all_overlap": false
+  },
+  "magnitude_ratios": {
+    "absolute": {
+      "US_vs_TW": 3.000528847346189,
+      "JP_vs_TW": 2.220606490041534
+    },
+    "relative": {
+      "US_vs_TW": 3.5038649351526,
+      "JP_vs_TW": 2.316191781111849
+    }
+  },
+  "verdict": "MARKET_SPECIFIC_AFTER_SCALING",
+  "verdict_description": "\u03b8_rel \u4e09\u5e02\u5834 Wald p < 0.05\uff0c\u90e8\u5206 CI \u4e0d\u91cd\u758a \u2192 \u5e02\u5834\u7279\u6027\u5728 scaling \u5f8c\u4ecd\u6709\u5dee\u7570",
+  "figures": [
+    "k1152_abs_vs_rel_theta.png",
+    "k1152_bootstrap_rel_distributions.png"
+  ]
+}
