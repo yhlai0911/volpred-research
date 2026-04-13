@@ -26401,5 +26401,23 @@
     "data_source": "K1120 cache + rolling 252-day trailing OLS residualization",
     "created_at": "2026-04-14T10:00:00+08:00",
     "updated_at": "2026-04-14T10:00:00+08:00"
+  },
+  {
+    "id": "k1122-1776115344",
+    "experiment_id": "K1122",
+    "title": "K1122 H2 confirmed: sigmoid continuous loading does NOT rescue alt-data allocation null",
+    "content": "[提出: Claude, 執行: Claude] K1121 step-based alt-data allocation NULL (6 strategies)。K1122 改 sigmoid continuous weight: w_def=1/(1+exp(-α(z-z0))) 測是否 binarize 丟失訊息。擴 72 specs: 12 sigmoid combos (α∈{0.5,1,2,4} × z0∈{-0.5,0,0.5}) × 3 drivers (EPU/NFCI/STLFSI4) × 2 universes (pair + 3-asset)。**結果 H2 NULL**: 0/72 過 Harvey, 0/72 bootstrap p<0.05, 0/72 Harvey+stable simultaneously, 24/72 名義 beat baseline。**反證 'step 拋資訊' 假說**: α 越高 (越接近 step function) 表現越差 — α=0.5 (12/18 beat) vs α=4 (2/18 beat)。最強 combo NFCI α=0.5 z0=0: Sharpe 1.428 vs baseline 1.309 (1.09x, well below 2x bug threshold), p=0.306 NS。Continuous vs step 兩種 loading 都 NULL → K1121 結論不是二元化 bug, alt-data 真的無法改進 SPY/GLD 或 SPY/GLD/TLT allocation。NFCI 18/24 名義 beat (K1121 paper 4 已知 NFCI 'least-bad' alt-data 但從未 statistically significant)。STLFSI 0/24 beat 甚至 1 spec 反向顯著 (p=0.036)。EPU 6/24 beat median -0.118。**Paper 4 allocation compendium 更 robust**: alt-data 無效 across 9 forecasting exps + 6 step allocation + 72 sigmoid allocation = **87 specs total NULL**。衍生研究方向: (1) cross-asset (TLT-dominant/EFA/EEM) (2) event-driven absolute-threshold crisis flag (3) alt-data for risk targeting (scale leverage) 而非 allocation (4) multi-driver fusion HMM/RF。",
+    "tags": [
+      "K1122",
+      "Paper4",
+      "alt-data-allocation-NULL",
+      "sigmoid-continuous",
+      "K1121-followup",
+      "binarization-not-the-issue",
+      "87-specs-null"
+    ],
+    "data_source": "yfinance SPY/GLD/TLT + FRED EPU/NFCI/STLFSI4 2015-2025",
+    "created_at": "2026-04-14T10:45:00+08:00",
+    "updated_at": "2026-04-14T10:45:00+08:00"
   }
 ]

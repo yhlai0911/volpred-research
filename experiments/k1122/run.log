@@ -1,0 +1,16 @@
+[2026-04-13T21:16:49Z] === K1122: Sigmoid alt-data allocation ===
+[2026-04-13T21:16:49Z] seed=42
+[2026-04-13T21:16:49Z] Fetching SPY + GLD + TLT + VIX 2018-2026 ...
+[2026-04-13T21:16:50Z]   market panel: 2079 rows 2018-01-02 -> 2026-04-10
+[2026-04-13T21:16:52Z]   USEPUINDXD: 15077 rows fetched -> fred_USEPUINDXD.csv
+[2026-04-13T21:16:52Z]   NFCI: 2883 rows fetched -> fred_NFCI.csv
+[2026-04-13T21:16:52Z]   FRED cache hit: fred_STLFSI4.csv
+[2026-04-13T21:16:52Z]   merged panel rows: 2074 2018-01-05 -> 2026-04-10
+[2026-04-13T21:16:52Z] signals: 37 columns (1 baseline + 36 sigmoid specs)
+[2026-04-13T21:16:52Z] backtests stored
+[2026-04-13T21:16:52Z] pair backtest active period: 2019-01-15 -> 2026-04-10, n=1817
+[2026-04-13T21:16:52Z] evaluating 36 pair specs ...
+[2026-04-13T21:17:23Z] evaluating 36 3-asset specs ...
+[2026-04-13T21:17:53Z] results -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-abdf1829/experiments/k1122/k1122_results.json
+[2026-04-13T21:17:53Z] VERDICT: H2_K1121_robust - Only 24/72 specs nominally beat 50/50; 0 pass Harvey or 3/3 stability. Sigmoid does NOT rescue alt-data; K1121 step-regime null is robust.
+[2026-04-13T21:17:53Z] top spec: wDef_NFCI_a0.5_z0.5_3a diff=+0.1347 p=0.376 harvey=False stable=False
