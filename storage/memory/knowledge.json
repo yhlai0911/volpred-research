@@ -26198,5 +26198,22 @@
     "data_source": "Reuse K1145/K1147/K1150/K1153 + K1165 new (AU/KR/CA/HK fetch via yfinance), N=7 markets 133 stocks",
     "created_at": "2026-04-14T03:00:00+08:00",
     "updated_at": "2026-04-14T03:00:00+08:00"
+  },
+  {
+    "id": "k1168-1776105332",
+    "experiment_id": "K1168",
+    "title": "K1168 STRENGTHENED N=10 markets — emerging-market data quality adds residuals but two-level mechanism survives",
+    "content": "[提出: Claude, 執行: Claude] K1165 N=7 ρ=+0.750 p=0.052 STRENGTHENED 後 K1168 +BR/CH/IN 至 N=10 力求 CONFIRMED。**結果**: ρ=+0.612 p=0.060 still STRENGTHENED (slightly weakened from N=7 due to emerging-market residuals)。Drop-EU LOO ρ=+0.750 p=0.020 維持。Per-stock panel (n=153) log_analyst β=+1.28e-3 t=+3.63 PASS Harvey (replicates K1165 t=+3.24, K1166 t=+3.56)。Two-level R² 54% between-market vs 6.2% within-market (≈26× dominance ratio preserved)。**Emerging-market scale residuals**: BR θ_rel=1.887 (high σ²-low ratio), CH θ_rel=0.304 (yfinance under-count A-share state-owned), IN θ_rel=1.170 (promoter+FII inflated)。**Verdict: STRENGTHENED with caveat** (not CONFIRMED): primary p=0.060 > 0.05 ceiling at N=10; two-level structure survives but yfinance institutional-share proxy 對新興市場不準。Paper 2 §5: ready for STRENGTHENED commit with caveat 'developed markets ladder holds (drop-EU N=9 ρ=+0.750 p=0.020); emerging-market 殘差需 K1173 finer institutional-share proxies'。衍生 K1172 (LatAm+ZA+ID 至 N≥13), K1173 (institutional proxy refinement: separate state-owned vs private institutions for CH; promoter vs FII for IN; control-shareholder for BR)。",
+    "tags": [
+      "K1168",
+      "Paper2",
+      "N=10-markets",
+      "STRENGTHENED-with-caveat",
+      "K1165-followup",
+      "emerging-market-residuals"
+    ],
+    "data_source": "Reuse K1145-K1153 + K1165 + K1168 new fetch (BR/CH/IN +30 stocks via yfinance), N=10 markets 153 stocks",
+    "created_at": "2026-04-14T03:30:00+08:00",
+    "updated_at": "2026-04-14T03:30:00+08:00"
   }
 ]

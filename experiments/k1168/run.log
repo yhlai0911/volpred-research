@@ -1,0 +1,68 @@
+
+========================================================================
+K1168: N=10 markets cross-market test (TW/EU/JP/US + KR/CA/HK + BR/CH/IN)
+========================================================================
+
+[panel] rows: 165 - {'TW': 31, 'US': 30, 'JP': 30, 'EU': 19, 'KR': 10, 'CA': 10, 'BR': 10, 'CH': 10, 'IN': 10, 'HK': 5}
+[K1168 new markets converged]: ['BR', 'CH', 'IN']
+
+Per-market summary:
+         n  theta_eav_mean  theta_eav_median  sigma2_sample_mean  analyst_median  market_cap_median  log_mcap_median  institutions_pct_mean  institutions_pct_median  pooled_theta_eav  pooled_theta_eav_t  theta_rel
+market                                                                                                                                                                                                               
+BR      10        0.001680          0.000791            0.000647            13.0       1.911760e+11        25.966856               0.485622                 0.484825          0.001220           10.522055   1.886705
+CA      10        0.000360          0.000105            0.000216            14.5       1.301472e+11        25.591141               0.551501                 0.530065          0.000313           10.272994   1.448405
+CH      10        0.000351          0.000349            0.000352             NaN       5.474078e+11        26.985204               0.156900                 0.164630          0.000107            5.275428   0.303738
+EU      19        0.000661          0.000242            0.000291            21.0       1.167161e+11        25.471210               0.415821                 0.407700          0.000041           10.030000   0.140000
+HK       5        0.000247          0.000125            0.000290            17.0       2.388137e+12        28.501535               0.260677                 0.210880          0.000052            2.411236   0.179562
+IN      10        0.000698          0.000609            0.000278            37.0       9.310789e+12        29.861427               0.382843                 0.394680          0.000325           13.276211   1.169647
+JP      30        0.001019          0.000762            0.000364            14.5       9.899296e+12        29.923456               0.425083                 0.433995          0.000141           20.160000   0.390000
+KR      10        0.000077          0.000081            0.000459            25.5       5.176361e+13        31.574097               0.365205                 0.348070          0.000127            2.686601   0.275709
+TW      31        0.000379          0.000085            0.000380             7.5       3.271991e+11        26.513835               0.246967                 0.249310          0.000064           14.140000   0.170000
+US      30        0.002019          0.000232            0.000326            32.5       4.430608e+11        26.816881               0.749664                 0.758265          0.000191           22.390000   0.590000
+
+Cross-market Spearman (N=10):
+  institutions_pct_vs_theta_rel: rho=+0.612, p=0.0600, n=10
+  analyst_median_vs_theta_rel: rho=+0.008, p=0.9830, n=9
+  log_mcap_median_vs_theta_rel: rho=-0.018, p=0.9602, n=10
+
+[panel_valid] n=153  - markets: {'TW': 30, 'US': 30, 'JP': 30, 'EU': 18, 'KR': 10, 'CA': 10, 'BR': 10, 'IN': 10, 'HK': 5}
+
+Panel OLS (market FE + log_mcap):
+  analyst_only: R2=0.210, n=153
+    log_analyst: beta=+1.130e-03, t=+3.90, p=0.000
+    log_mcap: beta=-1.977e-04, t=-1.02, p=0.308
+  inst_only: R2=0.155, n=153
+    institutions_pct: beta=-1.284e-03, t=-0.80, p=0.427
+    log_mcap: beta=+3.694e-05, t=+0.20, p=0.839
+  joint: R2=0.233, n=153
+    log_analyst: beta=+1.281e-03, t=+3.63, p=0.000
+    institutions_pct: beta=-2.124e-03, t=-1.22, p=0.223
+    log_mcap: beta=-2.094e-04, t=-1.14, p=0.257
+
+Within-market (demeaned) Pearson:
+  log_analyst_x_theta_eav: r=+0.250, p=0.002, n=153
+  institutions_pct_x_theta_eav: r=-0.101, p=0.215, n=153
+  log_analyst_x_institutions_pct: r=+0.223, p=0.006, n=153
+
+Two-level R2 decomposition:
+  between-market (N=9): {'institutions_pct': 0.5381816403890951, 'log_analyst': 0.02281177004087509, 'log_mcap': 0.0960202091653729}
+  within-market  (N=153): {'log_analyst': 0.06234129913683506, 'institutions_pct': 0.010148567112967855, 'log_mcap': 0.0002786470629804194}
+
+Leave-one-out (drop each market, N=9 each):
+  drop BR: rho=+0.533, p=0.1392
+  drop CA: rho=+0.533, p=0.1392
+  drop CH: rho=+0.650, p=0.0581
+  drop EU: rho=+0.750, p=0.0199
+  drop HK: rho=+0.600, p=0.0876
+  drop IN: rho=+0.667, p=0.0499
+  drop JP: rho=+0.517, p=0.1544
+  drop KR: rho=+0.600, p=0.0876
+  drop TW: rho=+0.600, p=0.0876
+  drop US: rho=+0.600, p=0.0876
+
+===== VERDICT: STRENGTHENED =====
+rho=+0.612, p=0.0600. Direction consistent, borderline significance at N=10. Paper 2 Section 5 needs STRENGTHENED qualifier like K1165.
+
+[figures] wrote cross_market_scatter.png + panel_forest.png
+[csv] wrote k1168_per_stock_table.csv (n=153)
+[json] wrote k1168_results.json

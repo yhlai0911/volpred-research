@@ -755,13 +755,28 @@
     "title": "K1168: N≥10 markets +BR/CH/IN for CONFIRMED-level mechanism evidence",
     "priority": 2,
     "description": "K1165 N=7 ρ=+0.750 p=0.052 緊貼門檻 (STRENGTHENED but not CONFIRMED)。+BR (Bovespa), CH (SSE), IN (Nifty) 至 N≥10 跨美洲+新興+亞洲, 預期 ρ p < 0.01 確定。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T03:30:00+08:00"
   },
   {
     "id": "K1171",
     "title": "K1171: ASX earnings via Alpha Vantage (yfinance failed K1165)",
     "priority": 3,
     "description": "K1165 AU 0/10 stocks earnings via yfinance 不足。改 Alpha Vantage EARNINGS endpoint 或 ASX official disclosures 取得 ASX top-10 earnings dates, 加入 K1168 N≥10 panel。",
+    "status": "pending"
+  },
+  {
+    "id": "K1172",
+    "title": "K1172: Extend to N≥13 markets +LatAm/ZA/ID for true CONFIRMED",
+    "priority": 3,
+    "description": "K1168 N=10 ρ=+0.612 p=0.060 卡在門檻外。+MX (Bovespa-like Bolsa Mexicana), ZA (JSE Top 40), ID (IDX Composite) 至 N≥13 增 power。yfinance earnings 可能稀疏，預期 N=11-13 final。",
+    "status": "pending"
+  },
+  {
+    "id": "K1173",
+    "title": "K1173: Refine institutional-share proxy for emerging markets",
+    "priority": 3,
+    "description": "K1168 BR/CH/IN θ_rel residuals 主因 yfinance institutional% 對新興市場不準: CH state-owned undercounted, IN promoter+FII inflated, BR control-shareholder ambiguous. 用 BCBS/CSRC/SEBI/CVM 官方數據 separate state-owned vs private institutions, 重做 N=10 cross-market regression。",
     "status": "pending"
   }
 ]

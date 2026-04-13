@@ -1,0 +1,20 @@
+
+========================================================================
+K1168: per-stock refit + pooled MLE for new markets (BR, CH, IN)
+========================================================================
+
+[BR] loaded 10/10 (skipped: [])
+[CH] loaded 10/10 (skipped: [])
+[IN] loaded 10/10 (skipped: [])
+
+[per-stock] MP n_workers=8
+  fits done in 1.8s (30 stocks)
+  wrote /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a7d7228d/experiments/k1168/k1168_per_stock_table_newmkts.csv
+
+[pooled] per-market pooled MLE (shared MIDAS + stock-FE GJR)
+  BR: pooled fit (0.7s) theta_EAV=1.220e-03 t=10.52
+  CH: pooled fit (0.3s) theta_EAV=1.070e-04 t=5.28
+  IN: pooled fit (0.3s) theta_EAV=3.248e-04 t=13.28
+  wrote k1168_pooled_by_market.json
+
+[done] total 3.3s
