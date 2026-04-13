@@ -1,0 +1,2719 @@
+{
+  "experiment_id": "K1118b",
+  "title": "Currency cross-asset extension of Paper 4 Universal IV Sufficiency",
+  "started_utc": "2026-04-13T20:08:17.460266Z",
+  "data_source": "yfinance (FXE, FXY, UUP, ^EVZ, ^VIX) + FRED (USEPUINDXD, WLEMUINDXD, NFCI, ANFCI, STLFSI4)",
+  "period": "2010-01 to 2025-03 weekly (W-FRI); constrained by ^EVZ discontinuation 2025-03-05",
+  "is_period": "2010-01 to 2018-12 (9 years)",
+  "oos_period": "2019-01 to 2025-03 (6.2 years: COVID / Fed hike / BOJ YCC end / ECB pivot)",
+  "predecessors": {
+    "K1116": "SPY EPU+NFCI+STLFSI vs VIX NULL",
+    "K1118": "GLD/TLT/BTC: 3/3 NULL (GVZ/MOVE sufficient; BTC-RV30 proxy failed)",
+    "K1119": "BTC DVOL sufficient vs alt-data (still failed vs GJR baseline)",
+    "K1098": "0050.TW VIXTWN sufficient"
+  },
+  "hypotheses": {
+    "H1_currency_IV_universal": "EVZ/VIX suffices for all 3 FX \u2014 Paper 4 boundary extends to FX",
+    "H2_currency_IV_fails": "All 3 M2 DM t<-2 vs M1 OR all 3 triple-gate NULL -> FX joins crypto in IV-insufficient class",
+    "H3_reserve_currency_specific": "DXY/EUR work, JPY fails (safe-haven channel distinct)"
+  },
+  "references": [
+    "Baker, Bloom, Davis (2016) QJE - EPU",
+    "Brave, Butters (2011) - NFCI",
+    "Patton (2011) - QLIKE proxy-robust",
+    "Harvey, Leybourne, Newbold (1997) - HLN DM",
+    "Menkhoff, Sarno, Schmeling, Schrimpf (2012) JF - FX carry vol",
+    "Lustig, Roussanov, Verdelhan (2011) RFS - currency risk factors"
+  ],
+  "alt_data_columns": [
+    "USEPU",
+    "WLEMU",
+    "NFCI",
+    "ANFCI",
+    "STLFSI"
+  ],
+  "asset_results": {
+    "EUR_USD": {
+      "asset": "EUR_USD",
+      "price_ticker": "FXE",
+      "iv_candidates": {
+        "Native_EVZ": "^EVZ",
+        "Cross_VIX": "^VIX",
+        "Realized30": null
+      },
+      "by_iv": {
+        "Native_EVZ": {
+          "iv_source": "^EVZ",
+          "n_is": 468,
+          "n_oos": 323,
+          "n_common_oos": 322,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.11853889239950732,
+              "adj_r2": 0.11664327711434497,
+              "aic": -3646.706134862501,
+              "bic": -3638.4134763471634,
+              "n_is": 467,
+              "params": {
+                "const": 0.007581782107569189,
+                "y_lag1": 0.34428613348364845
+              },
+              "pvalues": {
+                "const": 2.461421329298203e-36,
+                "y_lag1": 1.9236344237974682e-14
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.31001183571108915,
+              "adj_r2": 0.3070377487960507,
+              "aic": -3759.077440438112,
+              "bic": -3746.638452665105,
+              "n_is": 467,
+              "params": {
+                "const": 0.0013591198234789437,
+                "y_lag1": 0.019234134556131544,
+                "iv_lag1": 0.00098177651251958
+              },
+              "pvalues": {
+                "const": 0.0648377208011728,
+                "y_lag1": 0.6890442030611341,
+                "iv_lag1": 1.6627526300719316e-26
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.12565191638559015,
+              "adj_r2": 0.11998659402955736,
+              "aic": -3646.4899177363413,
+              "bic": -3629.904600705666,
+              "n_is": 467,
+              "params": {
+                "const": 0.006824644378799141,
+                "y_lag1": 0.3278620837321321,
+                "USEPU_lag1": 8.68649798035158e-06,
+                "WLEMU_lag1": -1.0046973606408444e-07
+              },
+              "pvalues": {
+                "const": 1.092948562851116e-21,
+                "y_lag1": 6.496713280125647e-13,
+                "USEPU_lag1": 0.10879120950572416,
+                "WLEMU_lag1": 0.9880117478926126
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.2069937734286068,
+              "adj_r2": 0.20012791865309698,
+              "aic": -3690.0912945630253,
+              "bic": -3669.3596482746807,
+              "n_is": 467,
+              "params": {
+                "const": 0.016599447386288387,
+                "y_lag1": 0.21521182830070176,
+                "NFCI_lag1": 0.03107951538064941,
+                "ANFCI_lag1": -0.015870352532044652,
+                "STLFSI_lag1": -0.0012329102240703233
+              },
+              "pvalues": {
+                "const": 2.1511577142983845e-23,
+                "y_lag1": 2.9027234677653056e-06,
+                "NFCI_lag1": 2.9737432290194026e-06,
+                "ANFCI_lag1": 0.00033433926074543405,
+                "STLFSI_lag1": 0.18448739090878796
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.3250458985058532,
+              "adj_r2": 0.3147524808360077,
+              "aic": -3759.3653353065392,
+              "bic": -3726.194701245188,
+              "n_is": 467,
+              "params": {
+                "const": 0.0032776704091601163,
+                "y_lag1": 0.009819191410942674,
+                "iv_lag1": 0.0011084817128246794,
+                "USEPU_lag1": -1.0736554821955577e-05,
+                "WLEMU_lag1": 2.944692061451936e-06,
+                "NFCI_lag1": 0.010091273132123955,
+                "ANFCI_lag1": -0.005407935741671397,
+                "STLFSI_lag1": -0.0021653375399152534
+              },
+              "pvalues": {
+                "const": 0.15231290117690097,
+                "y_lag1": 0.838129914161396,
+                "iv_lag1": 9.568859351677806e-18,
+                "USEPU_lag1": 0.04468523337534536,
+                "WLEMU_lag1": 0.6446313882342298,
+                "NFCI_lag1": 0.13267881029575576,
+                "ANFCI_lag1": 0.20499967535104502,
+                "STLFSI_lag1": 0.021626028940142063
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.11853889239950732,
+              "IS_QLIKE": -3.4721559360009584,
+              "OOS_QLIKE": -3.700768417767606,
+              "OOS_RMSE": 0.004169913589821239,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.2286124817666475
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.31001183571108915,
+              "IS_QLIKE": -3.49265007607761,
+              "OOS_QLIKE": -3.7253229466577906,
+              "OOS_RMSE": 0.003591612547594561,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.23267287058018082
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.12565191638559015,
+              "IS_QLIKE": -3.473043398647603,
+              "OOS_QLIKE": -3.694116179373151,
+              "OOS_RMSE": 0.00439742004905302,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.22107278072554815
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.2069937734286068,
+              "IS_QLIKE": -3.4827227784540904,
+              "OOS_QLIKE": -3.6730000045386064,
+              "OOS_RMSE": 0.005219579289930606,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.19027722608451603
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.3250458985058532,
+              "IS_QLIKE": -3.4934198180977103,
+              "OOS_QLIKE": -3.6891104119968654,
+              "OOS_RMSE": 0.004104292649257467,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.1956905938991551
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": -5.066490799037714,
+              "p_value": 6.851594784862414e-07,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": -5.8354880627252985,
+              "p_value": 1.3109006102851595e-08,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -7.537531748328579,
+              "p_value": 4.936051567483446e-13,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -2.8567529352949834,
+              "p_value": 0.004559156101737072,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": 5.066490799037714,
+            "p_value": 6.851594784862414e-07,
+            "iv_beats_ar1_harvey": true,
+            "ar1_beats_iv_harvey": false
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -6.3824347057904705,
+                "p_value": 5.205162523225226e-09,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -6.24875375490334,
+                "p_value": 9.687702196004011e-09,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -2.133279215579463,
+                "p_value": 0.03530033514138431,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -2.2328804488731744,
+                "p_value": 0.027699580295306392,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -0.8495827140174987,
+                "p_value": 0.39750863995380215,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -2.0011585024279457,
+                "p_value": 0.04798043193350354,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            },
+            "2023-2025": {
+              "n": 114,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -1.7296255840470411,
+                "p_value": 0.0864277440402319,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -5.6482586915201765,
+                "p_value": 1.2264873205936055e-07,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -3.119298039289658,
+                "p_value": 0.002300584791274929,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 322,
+              "k_violations": 22,
+              "target_k": 16.1,
+              "violation_rate": 0.06832298136645963,
+              "Kupiec_LR": 2.052354079793531,
+              "Kupiec_p": 0.15197105206615724,
+              "Christoffersen_LR": 2.2226503213520346,
+              "Christoffersen_p": 0.3291225317329102,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 322,
+              "k_violations": 6,
+              "target_k": 3.22,
+              "violation_rate": 0.018633540372670808,
+              "Kupiec_LR": 1.9328517783361647,
+              "Kupiec_p": 0.1644467834284794,
+              "Christoffersen_LR": 2.161437030315355,
+              "Christoffersen_p": 0.3393516087517702,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            }
+          },
+          "best_alt_model": "M3_AR1_EPU",
+          "qlike_improvement_pct": -0.8376929391487227,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 3,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": false,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": true
+          },
+          "verdict": "NULL (IV baseline actively beats alt-data)"
+        },
+        "Cross_VIX": {
+          "iv_source": "^VIX",
+          "n_is": 468,
+          "n_oos": 324,
+          "n_common_oos": 323,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.11853889239950732,
+              "adj_r2": 0.11664327711434497,
+              "aic": -3646.706134862501,
+              "bic": -3638.4134763471634,
+              "n_is": 467,
+              "params": {
+                "const": 0.007581782107569189,
+                "y_lag1": 0.34428613348364845
+              },
+              "pvalues": {
+                "const": 2.461421329298203e-36,
+                "y_lag1": 1.9236344237974682e-14
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.16746235328298054,
+              "adj_r2": 0.16387382894368296,
+              "aic": -3671.372973430888,
+              "bic": -3658.9339856578813,
+              "n_is": 467,
+              "params": {
+                "const": 0.004922577962737805,
+                "y_lag1": 0.25209766831479985,
+                "iv_lag1": 0.00021930049859073257
+              },
+              "pvalues": {
+                "const": 8.022943301489394e-11,
+                "y_lag1": 6.504311944091772e-08,
+                "iv_lag1": 2.6806059093385954e-07
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.12565191638559015,
+              "adj_r2": 0.11998659402955736,
+              "aic": -3646.4899177363413,
+              "bic": -3629.904600705666,
+              "n_is": 467,
+              "params": {
+                "const": 0.006824644378799141,
+                "y_lag1": 0.3278620837321321,
+                "USEPU_lag1": 8.68649798035158e-06,
+                "WLEMU_lag1": -1.0046973606408444e-07
+              },
+              "pvalues": {
+                "const": 1.092948562851116e-21,
+                "y_lag1": 6.496713280125647e-13,
+                "USEPU_lag1": 0.10879120950572416,
+                "WLEMU_lag1": 0.9880117478926126
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.2069937734286068,
+              "adj_r2": 0.20012791865309698,
+              "aic": -3690.0912945630253,
+              "bic": -3669.3596482746807,
+              "n_is": 467,
+              "params": {
+                "const": 0.016599447386288387,
+                "y_lag1": 0.21521182830070176,
+                "NFCI_lag1": 0.03107951538064941,
+                "ANFCI_lag1": -0.015870352532044652,
+                "STLFSI_lag1": -0.0012329102240703233
+              },
+              "pvalues": {
+                "const": 2.1511577142983845e-23,
+                "y_lag1": 2.9027234677653056e-06,
+                "NFCI_lag1": 2.9737432290194026e-06,
+                "ANFCI_lag1": 0.00033433926074543405,
+                "STLFSI_lag1": 0.18448739090878796
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.2100912868348318,
+              "adj_r2": 0.198044748725559,
+              "aic": -3685.918986715995,
+              "bic": -3652.7483526546434,
+              "n_is": 467,
+              "params": {
+                "const": 0.015028819167595187,
+                "y_lag1": 0.2101728929145238,
+                "iv_lag1": 9.099379894390305e-05,
+                "USEPU_lag1": -2.193045767597385e-06,
+                "WLEMU_lag1": -3.974345143426717e-06,
+                "NFCI_lag1": 0.028577431212490755,
+                "ANFCI_lag1": -0.014145550358275513,
+                "STLFSI_lag1": -0.0018057554153496054
+              },
+              "pvalues": {
+                "const": 4.6438607363408387e-10,
+                "y_lag1": 5.8448697975382794e-06,
+                "iv_lag1": 0.22239338159621624,
+                "USEPU_lag1": 0.7067212078089788,
+                "WLEMU_lag1": 0.5668563416365765,
+                "NFCI_lag1": 7.335977965326977e-05,
+                "ANFCI_lag1": 0.0026857036999244272,
+                "STLFSI_lag1": 0.11419685493410786
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.11853889239950732,
+              "IS_QLIKE": -3.4721559360009584,
+              "OOS_QLIKE": -3.700167618702225,
+              "OOS_RMSE": 0.004175385186021772,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.2280116827012666
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.16746235328298054,
+              "IS_QLIKE": -3.4768779064953583,
+              "OOS_QLIKE": -3.6914936671974017,
+              "OOS_RMSE": 0.004477167768185386,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.21461576070204336
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.12565191638559015,
+              "IS_QLIKE": -3.473043398647603,
+              "OOS_QLIKE": -3.693297153286423,
+              "OOS_RMSE": 0.004418426639891964,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.2202537546388199
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.2069937734286068,
+              "IS_QLIKE": -3.4827227784540904,
+              "OOS_QLIKE": -3.672540895073876,
+              "OOS_RMSE": 0.005218499360271724,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.18981811661978565
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.2100912868348318,
+              "IS_QLIKE": -3.48257437086631,
+              "OOS_QLIKE": -3.675912066922585,
+              "OOS_RMSE": 0.005083446318543338,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.19333769605627493
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": 3.546489468851499,
+              "p_value": 0.0004483529467240732,
+              "challenger_wins_harvey": true,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": 1.0131610643300004,
+              "p_value": 0.311743923999652,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -4.12896513021262,
+              "p_value": 4.64758730727155e-05,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -3.7236880673959747,
+              "p_value": 0.00023171999905469143,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": -3.546489468851499,
+            "p_value": 0.0004483529467240732,
+            "iv_beats_ar1_harvey": false,
+            "ar1_beats_iv_harvey": true
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": 2.0060734532929163,
+                "p_value": 0.047495939962170164,
+                "challenger_wins_harvey": true,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": 0.49622118364745676,
+                "p_value": 0.6208060041936587,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": 2.104097212182091,
+                "p_value": 0.037828408901788624,
+                "challenger_wins_harvey": true,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": 1.9693363022266757,
+                "p_value": 0.05157458607443899,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": 2.535019019561015,
+                "p_value": 0.01273297715367594,
+                "challenger_wins_harvey": true,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": 2.743377113728823,
+                "p_value": 0.007163069773895803,
+                "challenger_wins_harvey": true,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2023-2025": {
+              "n": 115,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -2.5161553482663,
+                "p_value": 0.013255811563817499,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -8.956694748415352,
+                "p_value": 7.327471962526033e-15,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -8.729282627236955,
+                "p_value": 2.4868995751603507e-14,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 323,
+              "k_violations": 8,
+              "target_k": 16.150000000000002,
+              "violation_rate": 0.02476780185758514,
+              "Kupiec_LR": 5.274918166210824,
+              "Kupiec_p": 0.021634804842395217,
+              "Christoffersen_LR": 5.682605590900593,
+              "Christoffersen_p": 0.05834959883341673,
+              "Basel_light": "Green",
+              "trinity_PASS": false
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 323,
+              "k_violations": 0,
+              "target_k": 3.23,
+              "violation_rate": 0.0,
+              "Kupiec_LR": 6.492516961361937,
+              "Kupiec_p": 0.010832949333473563,
+              "Christoffersen_LR": 6.492516961361937,
+              "Christoffersen_p": 0.03891955401762781,
+              "Basel_light": "Green",
+              "trinity_PASS": false
+            }
+          },
+          "best_alt_model": "M3_AR1_EPU",
+          "qlike_improvement_pct": 0.04885518577607287,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 2,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": true,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": true
+          },
+          "verdict": "NULL (IV baseline actively beats alt-data)"
+        },
+        "Realized30": {
+          "iv_source": null,
+          "n_is": 462,
+          "n_oos": 324,
+          "n_common_oos": 323,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.11979545138762848,
+              "adj_r2": 0.11787779441897417,
+              "aic": -3596.224853845982,
+              "bic": -3587.9580577599886,
+              "n_is": 461,
+              "params": {
+                "const": 0.007545326216559055,
+                "y_lag1": 0.345826964131559
+              },
+              "pvalues": {
+                "const": 1.1189022669015231e-35,
+                "y_lag1": 2.0269748646320012e-14
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.2362515266298859,
+              "adj_r2": 0.23291638045796415,
+              "aic": -3659.648042460565,
+              "bic": -3647.2478483315754,
+              "n_is": 461,
+              "params": {
+                "const": 0.0029997086716909396,
+                "y_lag1": 0.10600156661714191,
+                "iv_lag1": 0.08330763983381953
+              },
+              "pvalues": {
+                "const": 7.464519782450821e-05,
+                "y_lag1": 0.03412397280278587,
+                "iv_lag1": 7.771052054212555e-16
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.1261322389045818,
+              "adj_r2": 0.12039568905056386,
+              "aic": -3595.555699145442,
+              "bic": -3579.0221069734553,
+              "n_is": 461,
+              "params": {
+                "const": 0.006833429965376347,
+                "y_lag1": 0.33003726196189204,
+                "USEPU_lag1": 8.117366954660116e-06,
+                "WLEMU_lag1": 2.388388261119881e-07
+              },
+              "pvalues": {
+                "const": 1.8107947466833682e-21,
+                "y_lag1": 6.388147387386508e-13,
+                "USEPU_lag1": 0.14019416227403755,
+                "WLEMU_lag1": 0.9716974034060244
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.20790113870579896,
+              "adj_r2": 0.20095290308041125,
+              "aic": -3638.845654020113,
+              "bic": -3618.17866380513,
+              "n_is": 461,
+              "params": {
+                "const": 0.01681848393441834,
+                "y_lag1": 0.21616770874124597,
+                "NFCI_lag1": 0.031667696787607086,
+                "ANFCI_lag1": -0.015963781155995588,
+                "STLFSI_lag1": -0.001408145804464966
+              },
+              "pvalues": {
+                "const": 1.8114508977974232e-22,
+                "y_lag1": 3.0174615970637844e-06,
+                "NFCI_lag1": 2.6822304068794204e-06,
+                "ANFCI_lag1": 0.00035491686650584005,
+                "STLFSI_lag1": 0.14765748289558353
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.2548135619506907,
+              "adj_r2": 0.24329853972917814,
+              "aic": -3660.990519715375,
+              "bic": -3627.9233353714017,
+              "n_is": 461,
+              "params": {
+                "const": 0.009826092978522648,
+                "y_lag1": 0.099837110098978,
+                "iv_lag1": 0.06292817714554111,
+                "USEPU_lag1": -1.6643979376664779e-06,
+                "WLEMU_lag1": -1.4316514454693868e-06,
+                "NFCI_lag1": 0.019401493273279516,
+                "ANFCI_lag1": -0.00975867848654828,
+                "STLFSI_lag1": -0.0011939882533871368
+              },
+              "pvalues": {
+                "const": 2.7848861658415956e-05,
+                "y_lag1": 0.04543524517737665,
+                "iv_lag1": 1.7235285541537854e-07,
+                "USEPU_lag1": 0.7647307243884794,
+                "WLEMU_lag1": 0.8318594980791856,
+                "NFCI_lag1": 0.006654103568943404,
+                "ANFCI_lag1": 0.03121574619123863,
+                "STLFSI_lag1": 0.2472336789352113
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.11979545138762848,
+              "IS_QLIKE": -3.4742543103225128,
+              "OOS_QLIKE": -3.700538761576704,
+              "OOS_RMSE": 0.004166300866476859,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.22628445125419105
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.2362515266298859,
+              "IS_QLIKE": -3.488330855691632,
+              "OOS_QLIKE": -3.720743610678983,
+              "OOS_RMSE": 0.003756919589525102,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.23241275498735092
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.1261322389045818,
+              "IS_QLIKE": -3.4750636676467614,
+              "OOS_QLIKE": -3.693912086844321,
+              "OOS_RMSE": 0.004397035384540677,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.2188484191975597
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.20790113870579896,
+              "IS_QLIKE": -3.4849034744188017,
+              "OOS_QLIKE": -3.6707856535597374,
+              "OOS_RMSE": 0.005289515500245479,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.18588217914093574
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.2548135619506907,
+              "IS_QLIKE": -3.4905955578031063,
+              "OOS_QLIKE": -3.7043374790162455,
+              "OOS_RMSE": 0.004279422757488284,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.21374192121313929
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": -5.556125909142706,
+              "p_value": 5.786535983709484e-08,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": -6.766604765164062,
+              "p_value": 6.236300365003444e-11,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -8.331243558021635,
+              "p_value": 2.4424906541753444e-15,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -4.825385084796,
+              "p_value": 2.1610110914060954e-06,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": 5.556125909142706,
+            "p_value": 5.786535983709484e-08,
+            "iv_beats_ar1_harvey": true,
+            "ar1_beats_iv_harvey": false
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -5.302843659479739,
+                "p_value": 6.641173664334588e-07,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -5.464722223377942,
+                "p_value": 3.296934254493067e-07,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -2.2250852218921566,
+                "p_value": 0.02827780715036221,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -3.045949872729983,
+                "p_value": 0.002939361895636372,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -0.9778993523384849,
+                "p_value": 0.3303933809994597,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -0.20072977843559853,
+                "p_value": 0.8413019051713133,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2023-2025": {
+              "n": 115,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -3.188659197286116,
+                "p_value": 0.0018456020532602313,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -7.106851915065368,
+                "p_value": 1.1012479816940868e-10,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -4.81494822637971,
+                "p_value": 4.561652504397884e-06,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 323,
+              "k_violations": 19,
+              "target_k": 16.150000000000002,
+              "violation_rate": 0.058823529411764705,
+              "Kupiec_LR": 0.5022722441537724,
+              "Kupiec_p": 0.4785034157205307,
+              "Christoffersen_LR": 0.5175442024024619,
+              "Christoffersen_p": 0.7719989406284592,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 323,
+              "k_violations": 3,
+              "target_k": 3.23,
+              "violation_rate": 0.009287925696594427,
+              "Kupiec_LR": 0.016946300356231347,
+              "Kupiec_p": 0.8964256343332522,
+              "Christoffersen_LR": 0.07337346442191262,
+              "Christoffersen_p": 0.9639780713322681,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            }
+          },
+          "best_alt_model": "M5_AR1_All",
+          "qlike_improvement_pct": -0.4409369034633277,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 3,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": false,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": true
+          },
+          "verdict": "NULL (IV baseline actively beats alt-data)"
+        }
+      }
+    },
+    "JPY_USD": {
+      "asset": "JPY_USD",
+      "price_ticker": "FXY",
+      "iv_candidates": {
+        "Cross_VIX": "^VIX",
+        "Cross_EVZ": "^EVZ",
+        "Realized30": null
+      },
+      "by_iv": {
+        "Cross_VIX": {
+          "iv_source": "^VIX",
+          "n_is": 468,
+          "n_oos": 324,
+          "n_common_oos": 323,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.08672838391130855,
+              "adj_r2": 0.08476435893047263,
+              "aic": -3485.5067450094766,
+              "bic": -3477.214086494139,
+              "n_is": 467,
+              "params": {
+                "const": 0.008209091082540573,
+                "y_lag1": 0.29435480719072904
+              },
+              "pvalues": {
+                "const": 5.628402821775093e-38,
+                "y_lag1": 8.493646377368338e-11
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.08745441008057286,
+              "adj_r2": 0.08352102391712701,
+              "aic": -3483.8781449916887,
+              "bic": -3471.439157218682,
+              "n_is": 467,
+              "params": {
+                "const": 0.008672860632396655,
+                "y_lag1": 0.29668040931402057,
+                "iv_lag1": -2.8896425517611912e-05
+              },
+              "pvalues": {
+                "const": 4.290742022099737e-18,
+                "y_lag1": 7.372529973347543e-11,
+                "iv_lag1": 0.5437592460616298
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.08862838032693976,
+              "adj_r2": 0.08272316464871265,
+              "aic": -3482.4793172136306,
+              "bic": -3465.894000182955,
+              "n_is": 467,
+              "params": {
+                "const": 0.007904623042592233,
+                "y_lag1": 0.29764742537346267,
+                "USEPU_lag1": 5.2823342448348885e-06,
+                "WLEMU_lag1": -7.283414017779395e-06
+              },
+              "pvalues": {
+                "const": 8.653094552102438e-21,
+                "y_lag1": 7.347172272635257e-11,
+                "USEPU_lag1": 0.40859363004832683,
+                "WLEMU_lag1": 0.3630957267724813
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.09006376311683384,
+              "adj_r2": 0.08218552729966366,
+              "aic": -3481.215407929155,
+              "bic": -3460.4837616408104,
+              "n_is": 467,
+              "params": {
+                "const": 0.007811289718708109,
+                "y_lag1": 0.2853420520678032,
+                "NFCI_lag1": -0.006555642231496253,
+                "ANFCI_lag1": 0.005558491455866996,
+                "STLFSI_lag1": 0.00038004059936029653
+              },
+              "pvalues": {
+                "const": 4.7570067515692315e-06,
+                "y_lag1": 7.313814170299977e-10,
+                "NFCI_lag1": 0.42100537690125733,
+                "ANFCI_lag1": 0.30978631404908885,
+                "STLFSI_lag1": 0.7470726405871511
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.09910428178471586,
+              "adj_r2": 0.08536513139799029,
+              "aic": -3479.878410791778,
+              "bic": -3446.7077767304268,
+              "n_is": 467,
+              "params": {
+                "const": 0.01059151910823668,
+                "y_lag1": 0.2862526174924044,
+                "iv_lag1": -0.00017000224713247197,
+                "USEPU_lag1": 9.204061681945239e-06,
+                "WLEMU_lag1": -7.088903459667881e-06,
+                "NFCI_lag1": -0.0025542882121284034,
+                "ANFCI_lag1": 0.0021554505331820156,
+                "STLFSI_lag1": 0.0021271996558051625
+              },
+              "pvalues": {
+                "const": 0.00022184782019937392,
+                "y_lag1": 6.917332667378394e-10,
+                "iv_lag1": 0.06640143908747519,
+                "USEPU_lag1": 0.20557102827175086,
+                "WLEMU_lag1": 0.4128185861824091,
+                "NFCI_lag1": 0.7746559598602359,
+                "ANFCI_lag1": 0.7130500818565625,
+                "STLFSI_lag1": 0.1396184152921438
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.08672838391130855,
+              "IS_QLIKE": -3.466087623719891,
+              "OOS_QLIKE": -3.549942906512854,
+              "OOS_RMSE": 0.006057506060355761,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.08385528279296262
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.08745441008057286,
+              "IS_QLIKE": -3.466039486770224,
+              "OOS_QLIKE": -3.550025541417151,
+              "OOS_RMSE": 0.006072558339479625,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.08398605464692688
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.08862838032693976,
+              "IS_QLIKE": -3.4663333747958056,
+              "OOS_QLIKE": -3.545554474134942,
+              "OOS_RMSE": 0.00616662079482306,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.07922109933913646
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.09006376311683384,
+              "IS_QLIKE": -3.466577212075213,
+              "OOS_QLIKE": -3.5465529301869374,
+              "OOS_RMSE": 0.006131415317090294,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.07997571811172444
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.09910428178471586,
+              "IS_QLIKE": -3.467241181653506,
+              "OOS_QLIKE": -3.5407028294293683,
+              "OOS_RMSE": 0.006292116997785718,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.07346164777586228
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": -0.142515810851891,
+              "p_value": 0.8867617244013211,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": -2.4085515532465522,
+              "p_value": 0.01657735436015595,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -2.9774739945617803,
+              "p_value": 0.0031267909927750193,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -2.383334052531666,
+              "p_value": 0.017736023299709025,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": 0.142515810851891,
+            "p_value": 0.8867617244013211,
+            "iv_beats_ar1_harvey": false,
+            "ar1_beats_iv_harvey": false
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -1.1634850928369997,
+                "p_value": 0.24734727450094085,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": 0.24203861959505918,
+                "p_value": 0.8092362046532602,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -1.1423532960472398,
+                "p_value": 0.25598164879049956,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -2.0819445089558517,
+                "p_value": 0.03980204584862301,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -3.5996997830261526,
+                "p_value": 0.0004898382930000889,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -0.5205167070552486,
+                "p_value": 0.6038098769513378,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2023-2025": {
+              "n": 115,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -1.7201464683655578,
+                "p_value": 0.08811928205599884,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -1.916994054868204,
+                "p_value": 0.05774164489732403,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -2.4692704208832184,
+                "p_value": 0.015021467549980683,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 323,
+              "k_violations": 20,
+              "target_k": 16.150000000000002,
+              "violation_rate": 0.06191950464396285,
+              "Kupiec_LR": 0.9009976200164544,
+              "Kupiec_p": 0.34251435335485536,
+              "Christoffersen_LR": 0.9580805601755742,
+              "Christoffersen_p": 0.6193775356088193,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 323,
+              "k_violations": 4,
+              "target_k": 3.23,
+              "violation_rate": 0.01238390092879257,
+              "Kupiec_LR": 0.1723534262924744,
+              "Kupiec_p": 0.6780286571295869,
+              "Christoffersen_LR": 0.2729850108896201,
+              "Christoffersen_p": 0.8724128585814382,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            }
+          },
+          "best_alt_model": "M4_AR1_FinStress",
+          "qlike_improvement_pct": -0.09781933086676403,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 3,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": false,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": true
+          },
+          "verdict": "NULL (IV baseline actively beats alt-data)"
+        },
+        "Cross_EVZ": {
+          "iv_source": "^EVZ",
+          "n_is": 468,
+          "n_oos": 323,
+          "n_common_oos": 322,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.08672838391130855,
+              "adj_r2": 0.08476435893047263,
+              "aic": -3485.5067450094766,
+              "bic": -3477.214086494139,
+              "n_is": 467,
+              "params": {
+                "const": 0.008209091082540573,
+                "y_lag1": 0.29435480719072904
+              },
+              "pvalues": {
+                "const": 5.628402821775093e-38,
+                "y_lag1": 8.493646377368338e-11
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.08766709176078158,
+              "adj_r2": 0.08373462232871587,
+              "aic": -3483.9869986443646,
+              "bic": -3471.5480108713577,
+              "n_is": 467,
+              "params": {
+                "const": 0.007584566741718242,
+                "y_lag1": 0.2914957073437811,
+                "iv_lag1": 6.470542273206905e-05
+              },
+              "pvalues": {
+                "const": 6.195607244437893e-12,
+                "y_lag1": 1.544922142255425e-10,
+                "iv_lag1": 0.4899415544153661
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.08862838032693976,
+              "adj_r2": 0.08272316464871265,
+              "aic": -3482.4793172136306,
+              "bic": -3465.894000182955,
+              "n_is": 467,
+              "params": {
+                "const": 0.007904623042592233,
+                "y_lag1": 0.29764742537346267,
+                "USEPU_lag1": 5.2823342448348885e-06,
+                "WLEMU_lag1": -7.283414017779395e-06
+              },
+              "pvalues": {
+                "const": 8.653094552102438e-21,
+                "y_lag1": 7.347172272635257e-11,
+                "USEPU_lag1": 0.40859363004832683,
+                "WLEMU_lag1": 0.3630957267724813
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.09006376311683384,
+              "adj_r2": 0.08218552729966366,
+              "aic": -3481.215407929155,
+              "bic": -3460.4837616408104,
+              "n_is": 467,
+              "params": {
+                "const": 0.007811289718708109,
+                "y_lag1": 0.2853420520678032,
+                "NFCI_lag1": -0.006555642231496253,
+                "ANFCI_lag1": 0.005558491455866996,
+                "STLFSI_lag1": 0.00038004059936029653
+              },
+              "pvalues": {
+                "const": 4.7570067515692315e-06,
+                "y_lag1": 7.313814170299977e-10,
+                "NFCI_lag1": 0.42100537690125733,
+                "ANFCI_lag1": 0.30978631404908885,
+                "STLFSI_lag1": 0.7470726405871511
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.09277034850054433,
+              "adj_r2": 0.07893460218138049,
+              "aic": -3476.60655919055,
+              "bic": -3443.4359251291985,
+              "n_is": 467,
+              "params": {
+                "const": 0.006176001561120791,
+                "y_lag1": 0.2852707103693975,
+                "iv_lag1": 5.869335666189182e-05,
+                "USEPU_lag1": 5.0918875262990045e-06,
+                "WLEMU_lag1": -8.899133771115974e-06,
+                "NFCI_lag1": -0.009440215749671466,
+                "ANFCI_lag1": 0.006579492108938517,
+                "STLFSI_lag1": 0.0008376830754349392
+              },
+              "pvalues": {
+                "const": 0.046369747410561636,
+                "y_lag1": 1.0205201239979858e-09,
+                "iv_lag1": 0.6914636090755446,
+                "USEPU_lag1": 0.4804579088342116,
+                "WLEMU_lag1": 0.30384007252539597,
+                "NFCI_lag1": 0.30646636631421104,
+                "ANFCI_lag1": 0.26097653182834996,
+                "STLFSI_lag1": 0.514997408299842
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.08672838391130855,
+              "IS_QLIKE": -3.466087623719891,
+              "OOS_QLIKE": -3.5499727784686286,
+              "OOS_RMSE": 0.006066816257322546,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.08388515474873737
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.08766709176078158,
+              "IS_QLIKE": -3.4664975861370553,
+              "OOS_QLIKE": -3.5529048162727843,
+              "OOS_RMSE": 0.006018239193234251,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.08640723013572904
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.08862838032693976,
+              "IS_QLIKE": -3.4663333747958056,
+              "OOS_QLIKE": -3.545576287334577,
+              "OOS_RMSE": 0.006175984454900485,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.07924291253877147
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.09006376311683384,
+              "IS_QLIKE": -3.466577212075213,
+              "OOS_QLIKE": -3.546570828556836,
+              "OOS_RMSE": 0.00614087073886474,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.07999361648162306
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.09277034850054433,
+              "IS_QLIKE": -3.4668823796264903,
+              "OOS_QLIKE": -3.535722960070413,
+              "OOS_RMSE": 0.006350570532048834,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.06884058044392294
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": -6.324590368864266,
+              "p_value": 8.510268045824887e-10,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": -3.8480497360222294,
+              "p_value": 0.00014365012610118022,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -6.453088245857894,
+              "p_value": 4.0389114275285465e-10,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -3.780136344269465,
+              "p_value": 0.00018685740855772792,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": 6.324590368864266,
+            "p_value": 8.510268045824887e-10,
+            "iv_beats_ar1_harvey": true,
+            "ar1_beats_iv_harvey": false
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -2.308781432371239,
+                "p_value": 0.022972826065753127,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -2.61489650119854,
+                "p_value": 0.01027801417586982,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -0.20210873872760693,
+                "p_value": 0.8402342734394015,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -4.565533317736989,
+                "p_value": 1.3714357397498489e-05,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -5.471558634576916,
+                "p_value": 3.099023122565825e-07,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -3.6812689601802417,
+                "p_value": 0.0003699339194300766,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            },
+            "2023-2025": {
+              "n": 114,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -1.694431309969275,
+                "p_value": 0.09293773094573798,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -2.7438673815088057,
+                "p_value": 0.007064070796823696,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -2.834551867345957,
+                "p_value": 0.005437627797042044,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 322,
+              "k_violations": 20,
+              "target_k": 16.1,
+              "violation_rate": 0.062111801242236024,
+              "Kupiec_LR": 0.9264548582221153,
+              "Kupiec_p": 0.3357858254644588,
+              "Christoffersen_LR": 0.9852656914721649,
+              "Christoffersen_p": 0.6110155648577439,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 322,
+              "k_violations": 5,
+              "target_k": 3.22,
+              "violation_rate": 0.015527950310559006,
+              "Kupiec_LR": 0.8505232229388042,
+              "Kupiec_p": 0.3564043626808926,
+              "Christoffersen_LR": 1.0087576740357207,
+              "Christoffersen_p": 0.6038805672034584,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            }
+          },
+          "best_alt_model": "M4_AR1_FinStress",
+          "qlike_improvement_pct": -0.17827631314348097,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 3,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": false,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": true
+          },
+          "verdict": "NULL (IV baseline actively beats alt-data)"
+        },
+        "Realized30": {
+          "iv_source": null,
+          "n_is": 462,
+          "n_oos": 324,
+          "n_common_oos": 323,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.09183575359884333,
+              "adj_r2": 0.08985718225592154,
+              "aic": -3443.554312763847,
+              "bic": -3435.2875166778535,
+              "n_is": 461,
+              "params": {
+                "const": 0.008092430667777182,
+                "y_lag1": 0.3031010036060581
+              },
+              "pvalues": {
+                "const": 6.251077048547869e-37,
+                "y_lag1": 3.01409212479986e-11
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.1372033501970913,
+              "adj_r2": 0.1334356792372533,
+              "aic": -3465.1788196207103,
+              "bic": -3452.7786254917205,
+              "n_is": 461,
+              "params": {
+                "const": 0.004956691530797388,
+                "y_lag1": 0.1869241022445649,
+                "iv_lag1": 0.04983359333291544
+              },
+              "pvalues": {
+                "const": 1.2498377234470902e-08,
+                "y_lag1": 0.00017735699005593924,
+                "iv_lag1": 1.285184196275783e-06
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.09344242073569908,
+              "adj_r2": 0.08749127688932523,
+              "aic": -3440.3706072869413,
+              "bic": -3423.8370151149547,
+              "n_is": 461,
+              "params": {
+                "const": 0.007939382959986047,
+                "y_lag1": 0.307076724563723,
+                "USEPU_lag1": 3.7942320527966674e-06,
+                "WLEMU_lag1": -7.1644027448816454e-06
+              },
+              "pvalues": {
+                "const": 8.465943488767573e-21,
+                "y_lag1": 2.4224542336256018e-11,
+                "USEPU_lag1": 0.5560505620277985,
+                "WLEMU_lag1": 0.3708707159836249
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.09467636988321759,
+              "adj_r2": 0.08673493453131598,
+              "aic": -3438.9985189204485,
+              "bic": -3418.331528705465,
+              "n_is": 461,
+              "params": {
+                "const": 0.007700916134920565,
+                "y_lag1": 0.29491768299074644,
+                "NFCI_lag1": -0.006215231167120722,
+                "ANFCI_lag1": 0.005238499298894847,
+                "STLFSI_lag1": 0.00035683064138653485
+              },
+              "pvalues": {
+                "const": 1.1895571257520063e-05,
+                "y_lag1": 2.830490887806684e-10,
+                "NFCI_lag1": 0.44924780055772795,
+                "ANFCI_lag1": 0.3400822117026242,
+                "STLFSI_lag1": 0.7717746635372272
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.14002018261615135,
+              "adj_r2": 0.12673131126584902,
+              "aic": -3456.6863406800153,
+              "bic": -3423.619156336042,
+              "n_is": 461,
+              "params": {
+                "const": 0.004275091137603986,
+                "y_lag1": 0.18913896528648286,
+                "iv_lag1": 0.05016645596098906,
+                "USEPU_lag1": 5.349054150086459e-06,
+                "WLEMU_lag1": -9.534224163541256e-06,
+                "NFCI_lag1": -0.0023183703955347718,
+                "ANFCI_lag1": 0.0013748443986102699,
+                "STLFSI_lag1": 0.00021705257456979248
+              },
+              "pvalues": {
+                "const": 0.054273621660672615,
+                "y_lag1": 0.0001879263777991492,
+                "iv_lag1": 2.5492854931149276e-06,
+                "USEPU_lag1": 0.44060828882832664,
+                "WLEMU_lag1": 0.25768267160549435,
+                "NFCI_lag1": 0.7829306163257963,
+                "ANFCI_lag1": 0.802175734650016,
+                "STLFSI_lag1": 0.8687209680552389
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.09183575359884333,
+              "IS_QLIKE": -3.4689437822734415,
+              "OOS_QLIKE": -3.550707250072591,
+              "OOS_RMSE": 0.006042560061176058,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.08176346779914967
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.1372033501970913,
+              "IS_QLIKE": -3.475582734401652,
+              "OOS_QLIKE": -3.5627975560469456,
+              "OOS_RMSE": 0.005844690590960202,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.08721482164529348
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.09344242073569908,
+              "IS_QLIKE": -3.46906261516391,
+              "OOS_QLIKE": -3.5471951599575435,
+              "OOS_RMSE": 0.006135396009241605,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.07813254479363341
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.09467636988321759,
+              "IS_QLIKE": -3.469320113041172,
+              "OOS_QLIKE": -3.547432407837963,
+              "OOS_RMSE": 0.006113257904947859,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.07811229479679094
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.14002018261615135,
+              "IS_QLIKE": -3.475718824196922,
+              "OOS_QLIKE": -3.554594881817428,
+              "OOS_RMSE": 0.00600304745593528,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.07887605762050631
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": -3.6697447280471867,
+              "p_value": 0.0002840687206100423,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": -4.235089144710605,
+              "p_value": 2.985084581830222e-05,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -4.498700247919952,
+              "p_value": 9.559669387426695e-06,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -1.9585190320206125,
+              "p_value": 0.051032106137953726,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": 3.6697447280471867,
+            "p_value": 0.0002840687206100423,
+            "iv_beats_ar1_harvey": true,
+            "ar1_beats_iv_harvey": false
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -1.5208255837413218,
+                "p_value": 0.13139761173016784,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -1.516353444859325,
+                "p_value": 0.13252311632182456,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -0.5569505017394055,
+                "p_value": 0.5787812869459847,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -4.866427903882994,
+                "p_value": 4.0620961279103085e-06,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -5.695666855410304,
+                "p_value": 1.149975359382438e-07,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -2.0930048818978926,
+                "p_value": 0.03878153798915207,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            },
+            "2023-2025": {
+              "n": 115,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -1.5628880678016062,
+                "p_value": 0.12085073615510988,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -1.051544670773371,
+                "p_value": 0.2952324011435219,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -1.5386484784848913,
+                "p_value": 0.12666122950863024,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 323,
+              "k_violations": 19,
+              "target_k": 16.150000000000002,
+              "violation_rate": 0.058823529411764705,
+              "Kupiec_LR": 0.5022722441537724,
+              "Kupiec_p": 0.4785034157205307,
+              "Christoffersen_LR": 0.5175442024024619,
+              "Christoffersen_p": 0.7719989406284592,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 323,
+              "k_violations": 3,
+              "target_k": 3.23,
+              "violation_rate": 0.009287925696594427,
+              "Kupiec_LR": 0.016946300356231347,
+              "Kupiec_p": 0.8964256343332522,
+              "Christoffersen_LR": 0.07337346442191262,
+              "Christoffersen_p": 0.9639780713322681,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            }
+          },
+          "best_alt_model": "M5_AR1_All",
+          "qlike_improvement_pct": -0.23023127473508595,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 2,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": false,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": true
+          },
+          "verdict": "NULL (IV baseline actively beats alt-data)"
+        }
+      }
+    },
+    "DXY": {
+      "asset": "DXY",
+      "price_ticker": "UUP",
+      "iv_candidates": {
+        "Native_EVZ": "^EVZ",
+        "Cross_VIX": "^VIX",
+        "Realized30": null
+      },
+      "by_iv": {
+        "Native_EVZ": {
+          "iv_source": "^EVZ",
+          "n_is": 468,
+          "n_oos": 323,
+          "n_common_oos": 322,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.07873163820186801,
+              "adj_r2": 0.07675041591843113,
+              "aic": -3825.5671397629176,
+              "bic": -3817.27448124758,
+              "n_is": 467,
+              "params": {
+                "const": 0.006884897212871435,
+                "y_lag1": 0.28061084834817795
+              },
+              "pvalues": {
+                "const": 6.501711582202614e-41,
+                "y_lag1": 6.751685511442495e-10
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.2581246941018436,
+              "adj_r2": 0.2549269557143514,
+              "aic": -3924.7054217644736,
+              "bic": -3912.266433991467,
+              "n_is": 467,
+              "params": {
+                "const": 0.0020472293308383144,
+                "y_lag1": 0.007354082164881759,
+                "iv_lag1": 0.000733224052460272
+              },
+              "pvalues": {
+                "const": 0.0010139284274997627,
+                "y_lag1": 0.8772532072222334,
+                "iv_lag1": 1.2564603821899262e-23
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.0823554453948464,
+              "adj_r2": 0.07640958434988865,
+              "aic": -3823.4077056044625,
+              "bic": -3806.822388573787,
+              "n_is": 467,
+              "params": {
+                "const": 0.006436839401250331,
+                "y_lag1": 0.2708415223344194,
+                "USEPU_lag1": 4.905067512153719e-06,
+                "WLEMU_lag1": 1.0253595375862447e-07
+              },
+              "pvalues": {
+                "const": 7.489663177462369e-26,
+                "y_lag1": 4.170516143025559e-09,
+                "USEPU_lag1": 0.27110187044148515,
+                "WLEMU_lag1": 0.9852355183805337
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.17567782701003098,
+              "adj_r2": 0.16854083849929535,
+              "aic": -3871.4928392061847,
+              "bic": -3850.76119291784,
+              "n_is": 467,
+              "params": {
+                "const": 0.013887377272226682,
+                "y_lag1": 0.14864906151344837,
+                "NFCI_lag1": 0.023509248299338814,
+                "ANFCI_lag1": -0.012054453547312514,
+                "STLFSI_lag1": -0.0004746415749866252
+              },
+              "pvalues": {
+                "const": 1.282032631147369e-24,
+                "y_lag1": 0.001363553519997211,
+                "NFCI_lag1": 1.4848616370372492e-05,
+                "ANFCI_lag1": 0.0008755811619658077,
+                "STLFSI_lag1": 0.5354741827506966
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.2729823192187726,
+              "adj_r2": 0.2618949036077298,
+              "aic": -3924.153009347261,
+              "bic": -3890.9823752859097,
+              "n_is": 467,
+              "params": {
+                "const": 0.004785310428316694,
+                "y_lag1": 0.0018499836748720327,
+                "iv_lag1": 0.0007701603993909934,
+                "USEPU_lag1": -1.0621169300899314e-05,
+                "WLEMU_lag1": 1.3333928701181573e-06,
+                "NFCI_lag1": 0.008656635348741767,
+                "ANFCI_lag1": -0.004456576932075601,
+                "STLFSI_lag1": -0.0011457348964861126
+              },
+              "pvalues": {
+                "const": 0.012807710364497044,
+                "y_lag1": 0.9689834589762518,
+                "iv_lag1": 7.138148193564049e-14,
+                "USEPU_lag1": 0.01803378090792257,
+                "WLEMU_lag1": 0.8033133587446423,
+                "NFCI_lag1": 0.12386805268320533,
+                "ANFCI_lag1": 0.2127521423428179,
+                "STLFSI_lag1": 0.14646660248178384
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.07873163820186801,
+              "IS_QLIKE": -3.6567276362329215,
+              "OOS_QLIKE": -3.76881165893147,
+              "OOS_RMSE": 0.004310205959469075,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.11208402269854867
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.2581246941018436,
+              "IS_QLIKE": -3.6749618291992348,
+              "OOS_QLIKE": -3.7762821168450715,
+              "OOS_RMSE": 0.004318318533928253,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.10132028764583678
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.0823554453948464,
+              "IS_QLIKE": -3.657121574250518,
+              "OOS_QLIKE": -3.76657095083756,
+              "OOS_RMSE": 0.004362443882146509,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.10944937658704212
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.17567782701003098,
+              "IS_QLIKE": -3.6673784585493845,
+              "OOS_QLIKE": -3.7605417357386126,
+              "OOS_RMSE": 0.004555375676356365,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.09316327718922812
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.2729823192187726,
+              "IS_QLIKE": -3.6759830257643817,
+              "OOS_QLIKE": -3.7502518401422273,
+              "OOS_RMSE": 0.004567530556197415,
+              "OOS_n": 322,
+              "divergence_IS_OOS": -0.0742688143778456
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": -1.131379126723142,
+              "p_value": 0.2587400700941296,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": -1.3866871923358028,
+              "p_value": 0.1664994076979709,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -1.702362743687491,
+              "p_value": 0.08965549509082837,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -3.7619026833049634,
+              "p_value": 0.00020039743402411325,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": 1.131379126723142,
+            "p_value": 0.2587400700941296,
+            "iv_beats_ar1_harvey": false,
+            "ar1_beats_iv_harvey": false
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -1.4400800011910508,
+                "p_value": 0.1529070750714614,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -1.2310145056043194,
+                "p_value": 0.22114843475603352,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -3.278725314980859,
+                "p_value": 0.0014267506631835403,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -0.6264417836592072,
+                "p_value": 0.5323978247533212,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": 1.4984403037094483,
+                "p_value": 0.1370481504873391,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -1.6608756155464877,
+                "p_value": 0.09975040379948452,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2023-2025": {
+              "n": 114,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": 0.03868028152797674,
+                "p_value": 0.9692135488743552,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -2.1582520641442424,
+                "p_value": 0.0330242711957589,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -1.1771988122310593,
+                "p_value": 0.2415897540864096,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 322,
+              "k_violations": 20,
+              "target_k": 16.1,
+              "violation_rate": 0.062111801242236024,
+              "Kupiec_LR": 0.9264548582221153,
+              "Kupiec_p": 0.3357858254644588,
+              "Christoffersen_LR": 1.4679788639415676,
+              "Christoffersen_p": 0.47999027679100126,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 322,
+              "k_violations": 10,
+              "target_k": 3.22,
+              "violation_rate": 0.031055900621118012,
+              "Kupiec_LR": 9.249309014745705,
+              "Kupiec_p": 0.0023558430007176723,
+              "Christoffersen_LR": 9.82724799003654,
+              "Christoffersen_p": 0.007345818824650907,
+              "Basel_light": "Red",
+              "trinity_PASS": false
+            }
+          },
+          "best_alt_model": "M3_AR1_EPU",
+          "qlike_improvement_pct": -0.2571620897758778,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 1,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": false,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": false
+          },
+          "verdict": "NULL (no significant improvement)"
+        },
+        "Cross_VIX": {
+          "iv_source": "^VIX",
+          "n_is": 468,
+          "n_oos": 324,
+          "n_common_oos": 323,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.07873163820186801,
+              "adj_r2": 0.07675041591843113,
+              "aic": -3825.5671397629176,
+              "bic": -3817.27448124758,
+              "n_is": 467,
+              "params": {
+                "const": 0.006884897212871435,
+                "y_lag1": 0.28061084834817795
+              },
+              "pvalues": {
+                "const": 6.501711582202614e-41,
+                "y_lag1": 6.751685511442495e-10
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.1255235331432888,
+              "adj_r2": 0.12175423802752705,
+              "aic": -3847.909977560924,
+              "bic": -3835.470989787917,
+              "n_is": 467,
+              "params": {
+                "const": 0.004756205156100006,
+                "y_lag1": 0.2004145303492439,
+                "iv_lag1": 0.00017052449482293753
+              },
+              "pvalues": {
+                "const": 1.3106378119136624e-13,
+                "y_lag1": 1.8415259216419135e-05,
+                "iv_lag1": 8.86304979328829e-07
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.0823554453948464,
+              "adj_r2": 0.07640958434988865,
+              "aic": -3823.4077056044625,
+              "bic": -3806.822388573787,
+              "n_is": 467,
+              "params": {
+                "const": 0.006436839401250331,
+                "y_lag1": 0.2708415223344194,
+                "USEPU_lag1": 4.905067512153719e-06,
+                "WLEMU_lag1": 1.0253595375862447e-07
+              },
+              "pvalues": {
+                "const": 7.489663177462369e-26,
+                "y_lag1": 4.170516143025559e-09,
+                "USEPU_lag1": 0.27110187044148515,
+                "WLEMU_lag1": 0.9852355183805337
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.17567782701003098,
+              "adj_r2": 0.16854083849929535,
+              "aic": -3871.4928392061847,
+              "bic": -3850.76119291784,
+              "n_is": 467,
+              "params": {
+                "const": 0.013887377272226682,
+                "y_lag1": 0.14864906151344837,
+                "NFCI_lag1": 0.023509248299338814,
+                "ANFCI_lag1": -0.012054453547312514,
+                "STLFSI_lag1": -0.0004746415749866252
+              },
+              "pvalues": {
+                "const": 1.282032631147369e-24,
+                "y_lag1": 0.001363553519997211,
+                "NFCI_lag1": 1.4848616370372492e-05,
+                "ANFCI_lag1": 0.0008755811619658077,
+                "STLFSI_lag1": 0.5354741827506966
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.17862812716736476,
+              "adj_r2": 0.1661017587363659,
+              "aic": -3867.1672593731755,
+              "bic": -3833.996625311824,
+              "n_is": 467,
+              "params": {
+                "const": 0.014252136623068352,
+                "y_lag1": 0.14988371134545864,
+                "iv_lag1": 1.734304379007244e-05,
+                "USEPU_lag1": -3.0741811682519275e-06,
+                "WLEMU_lag1": -3.3468291522711087e-06,
+                "NFCI_lag1": 0.024008947486449852,
+                "ANFCI_lag1": -0.01213063722241671,
+                "STLFSI_lag1": -0.0006004533218627092
+              },
+              "pvalues": {
+                "const": 1.772762139286235e-12,
+                "y_lag1": 0.0012800976305090649,
+                "iv_lag1": 0.7764983079524151,
+                "USEPU_lag1": 0.5217811510438001,
+                "WLEMU_lag1": 0.5578886617645146,
+                "NFCI_lag1": 5.204404185227581e-05,
+                "ANFCI_lag1": 0.0017783587912707272,
+                "STLFSI_lag1": 0.5236887723178137
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.07873163820186801,
+              "IS_QLIKE": -3.6567276362329215,
+              "OOS_QLIKE": -3.7689755662074176,
+              "OOS_RMSE": 0.004311738891079962,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.11224792997449606
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.1255235331432888,
+              "IS_QLIKE": -3.661232461348886,
+              "OOS_QLIKE": -3.768438098118502,
+              "OOS_RMSE": 0.004275648153800466,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.10720563676961614
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.0823554453948464,
+              "IS_QLIKE": -3.657121574250518,
+              "OOS_QLIKE": -3.7665421285369027,
+              "OOS_RMSE": 0.004371474241554552,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.10942055428638486
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.17567782701003098,
+              "IS_QLIKE": -3.6673784585493845,
+              "OOS_QLIKE": -3.760796530950472,
+              "OOS_RMSE": 0.004554133859968758,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.09341807240108757
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.17862812716736476,
+              "IS_QLIKE": -3.6675441539545828,
+              "OOS_QLIKE": -3.763557210757802,
+              "OOS_RMSE": 0.004480138037318315,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.09601305680321914
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": 0.17192058298384646,
+              "p_value": 0.8636079615480374,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": -0.7258180009189432,
+              "p_value": 0.46847755393274637,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -1.9755764665892548,
+              "p_value": 0.04905630619681811,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -1.21902121098126,
+              "p_value": 0.22372840380575298,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": -0.17192058298384646,
+            "p_value": 0.8636079615480374,
+            "iv_beats_ar1_harvey": false,
+            "ar1_beats_iv_harvey": false
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -0.016938165232299046,
+                "p_value": 0.9865190335897212,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -0.529838636939281,
+                "p_value": 0.5973752464776381,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": 0.9109639672261152,
+                "p_value": 0.36446218611882575,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": 0.24083711290753726,
+                "p_value": 0.8101555084850132,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": 2.800459390942406,
+                "p_value": 0.006085189268246527,
+                "challenger_wins_harvey": true,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": 2.4653333295511928,
+                "p_value": 0.015325098159924888,
+                "challenger_wins_harvey": true,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2023-2025": {
+              "n": 115,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -2.6026506066287896,
+                "p_value": 0.010479469815904974,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -4.990857494525574,
+                "p_value": 2.1777266576705756e-06,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -4.97078041920469,
+                "p_value": 2.3713258452406905e-06,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 323,
+              "k_violations": 9,
+              "target_k": 16.150000000000002,
+              "violation_rate": 0.02786377708978328,
+              "Kupiec_LR": 3.9408065399525327,
+              "Kupiec_p": 0.047128177001143134,
+              "Christoffersen_LR": 4.458449769262415,
+              "Christoffersen_p": 0.10761180938466941,
+              "Basel_light": "Green",
+              "trinity_PASS": false
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 323,
+              "k_violations": 3,
+              "target_k": 3.23,
+              "violation_rate": 0.009287925696594427,
+              "Kupiec_LR": 0.016946300356231347,
+              "Kupiec_p": 0.8964256343332522,
+              "Christoffersen_LR": 0.07337346442191262,
+              "Christoffersen_p": 0.9639780713322681,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            }
+          },
+          "best_alt_model": "M3_AR1_EPU",
+          "qlike_improvement_pct": -0.050311814397212114,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 0,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": false,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": false
+          },
+          "verdict": "NULL (no significant improvement)"
+        },
+        "Realized30": {
+          "iv_source": null,
+          "n_is": 462,
+          "n_oos": 324,
+          "n_common_oos": 323,
+          "is_results": {
+            "M1_AR1": {
+              "r2": 0.08000810404922631,
+              "adj_r2": 0.07800376440663215,
+              "aic": -3772.6294152736873,
+              "bic": -3764.362619187694,
+              "n_is": 461,
+              "params": {
+                "const": 0.0068554683991446826,
+                "y_lag1": 0.28267631453693587
+              },
+              "pvalues": {
+                "const": 3.4363683988878485e-40,
+                "y_lag1": 6.272315461622254e-10
+              }
+            },
+            "M2_AR1_IV": {
+              "r2": 0.20170737254515458,
+              "adj_r2": 0.19822137853880162,
+              "aic": -3836.040534681785,
+              "bic": -3823.6403405527954,
+              "n_is": 461,
+              "params": {
+                "const": 0.0026773659253198677,
+                "y_lag1": 0.05258969603538762,
+                "iv_lag1": 0.08761167698363635
+              },
+              "pvalues": {
+                "const": 6.384511250151652e-05,
+                "y_lag1": 0.29335070694783694,
+                "iv_lag1": 7.818432640088459e-16
+              }
+            },
+            "M3_AR1_EPU": {
+              "r2": 0.08334765938520561,
+              "adj_r2": 0.07733024795885035,
+              "aic": -3770.3058822517787,
+              "bic": -3753.772290079792,
+              "n_is": 461,
+              "params": {
+                "const": 0.006426819672985994,
+                "y_lag1": 0.2731155761291889,
+                "USEPU_lag1": 4.672406317970913e-06,
+                "WLEMU_lag1": 2.6302411137486096e-07
+              },
+              "pvalues": {
+                "const": 1.8478303012694687e-25,
+                "y_lag1": 3.806027146842002e-09,
+                "USEPU_lag1": 0.3020575026343949,
+                "WLEMU_lag1": 0.9623852738953483
+              }
+            },
+            "M4_AR1_FinStress": {
+              "r2": 0.17740266125930315,
+              "adj_r2": 0.17018689512999874,
+              "aic": -3818.2144120107214,
+              "bic": -3797.547421795738,
+              "n_is": 461,
+              "params": {
+                "const": 0.014113026366346036,
+                "y_lag1": 0.1501164521882426,
+                "NFCI_lag1": 0.024030196966900452,
+                "ANFCI_lag1": -0.012060944624643188,
+                "STLFSI_lag1": -0.0006595303559096353
+              },
+              "pvalues": {
+                "const": 8.328472824299375e-24,
+                "y_lag1": 0.0012994074367452466,
+                "NFCI_lag1": 1.2555042993813792e-05,
+                "ANFCI_lag1": 0.0009752315635461798,
+                "STLFSI_lag1": 0.4104443365790539
+              }
+            },
+            "M5_AR1_All": {
+              "r2": 0.22557872637754794,
+              "adj_r2": 0.21361195172996028,
+              "aic": -3840.0361372289417,
+              "bic": -3806.9689528849685,
+              "n_is": 461,
+              "params": {
+                "const": 0.009035289130266844,
+                "y_lag1": 0.04555149302627243,
+                "iv_lag1": 0.06489113481350499,
+                "USEPU_lag1": -3.0099918327759686e-06,
+                "WLEMU_lag1": -1.6437096495697506e-06,
+                "NFCI_lag1": 0.017153808702141435,
+                "ANFCI_lag1": -0.008511766410843773,
+                "STLFSI_lag1": -0.001020613301691603
+              },
+              "pvalues": {
+                "const": 3.0135954971847048e-06,
+                "y_lag1": 0.35973346201819006,
+                "iv_lag1": 3.934804909832641e-07,
+                "USEPU_lag1": 0.5103539147855622,
+                "WLEMU_lag1": 0.7672452669474904,
+                "NFCI_lag1": 0.002806444480449153,
+                "ANFCI_lag1": 0.020272442279945596,
+                "STLFSI_lag1": 0.23129975501114713
+              }
+            }
+          },
+          "is_oos_comparison": {
+            "M1_AR1": {
+              "IS_R2": 0.08000810404922631,
+              "IS_QLIKE": -3.658072481918488,
+              "OOS_QLIKE": -3.769146983638806,
+              "OOS_RMSE": 0.004307740791741748,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.11107450172031808
+            },
+            "M2_AR1_IV": {
+              "IS_R2": 0.20170737254515458,
+              "IS_QLIKE": -3.6724949721132836,
+              "OOS_QLIKE": -3.775876913188647,
+              "OOS_RMSE": 0.004455644928887254,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.10338194107536358
+            },
+            "M3_AR1_EPU": {
+              "IS_R2": 0.08334765938520561,
+              "IS_QLIKE": -3.658440569450746,
+              "OOS_QLIKE": -3.7668268882372713,
+              "OOS_RMSE": 0.004363489405859564,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.10838631878652549
+            },
+            "M4_AR1_FinStress": {
+              "IS_R2": 0.17740266125930315,
+              "IS_QLIKE": -3.6688569991620743,
+              "OOS_QLIKE": -3.7592800859494067,
+              "OOS_RMSE": 0.004604617885834647,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.09042308678733235
+            },
+            "M5_AR1_All": {
+              "IS_R2": 0.22557872637754794,
+              "IS_QLIKE": -3.67486801687062,
+              "OOS_QLIKE": -3.768910760850975,
+              "OOS_RMSE": 0.004565357721892539,
+              "OOS_n": 323,
+              "divergence_IS_OOS": -0.09404274398035506
+            }
+          },
+          "dm_tests_full_oos": {
+            "M2_AR1_IV_vs_M1_AR1": {
+              "t_stat": -1.1831304961370583,
+              "p_value": 0.2376302164559505,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M3_AR1_EPU": {
+              "t_stat": -1.542452379083402,
+              "p_value": 0.1239458585806541,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            },
+            "M2_AR1_IV_vs_M4_AR1_FinStress": {
+              "t_stat": -2.090914604551352,
+              "p_value": 0.0373193143952415,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": true
+            },
+            "M2_AR1_IV_vs_M5_AR1_All": {
+              "t_stat": -1.6492550342315855,
+              "p_value": 0.10007058322771956,
+              "challenger_wins_harvey": false,
+              "baseline_wins_harvey": false
+            }
+          },
+          "iv_vs_ar1_DM": {
+            "t_stat": 1.1831304961370583,
+            "p_value": 0.2376302164559505,
+            "iv_beats_ar1_harvey": false,
+            "ar1_beats_iv_harvey": false
+          },
+          "subperiod_dm": {
+            "2019-2020": {
+              "n": 103,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -0.20105879005414332,
+                "p_value": 0.8410529925870838,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -0.30736909272060037,
+                "p_value": 0.7591891397464066,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": 0.37969345596971166,
+                "p_value": 0.7049623703386168,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2021-2022": {
+              "n": 105,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -3.0414907704571705,
+                "p_value": 0.0029795895733848443,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": 0.6091293688641921,
+                "p_value": 0.5437670401855836,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": 0.06652502182265525,
+                "p_value": 0.9470875571513315,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              }
+            },
+            "2023-2025": {
+              "n": 115,
+              "M2_AR1_IV_vs_M3_AR1_EPU": {
+                "t_stat": -1.8094058603092242,
+                "p_value": 0.07302301023944358,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": false
+              },
+              "M2_AR1_IV_vs_M4_AR1_FinStress": {
+                "t_stat": -4.381902247471915,
+                "p_value": 2.6291194567651388e-05,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              },
+              "M2_AR1_IV_vs_M5_AR1_All": {
+                "t_stat": -3.3640184907548565,
+                "p_value": 0.0010469201111209525,
+                "challenger_wins_harvey": false,
+                "baseline_wins_harvey": true
+              }
+            }
+          },
+          "var_trinity_M2": {
+            "alpha_0.05": {
+              "alpha": 0.05,
+              "n": 323,
+              "k_violations": 17,
+              "target_k": 16.150000000000002,
+              "violation_rate": 0.05263157894736842,
+              "Kupiec_LR": 0.04632875694892391,
+              "Kupiec_p": 0.8295793018691602,
+              "Christoffersen_LR": 1.2051853477568102,
+              "Christoffersen_p": 0.5473905894522326,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            },
+            "alpha_0.01": {
+              "alpha": 0.01,
+              "n": 323,
+              "k_violations": 5,
+              "target_k": 3.23,
+              "violation_rate": 0.015479876160990712,
+              "Kupiec_LR": 0.8393732334051975,
+              "Kupiec_p": 0.3595760879067178,
+              "Christoffersen_LR": 0.9971084807292883,
+              "Christoffersen_p": 0.6074081914551849,
+              "Basel_light": "Green",
+              "trinity_PASS": true
+            }
+          },
+          "best_alt_model": "M5_AR1_All",
+          "qlike_improvement_pct": -0.18449098044854684,
+          "gates": {
+            "H1_any_challenger_beats_IV": false,
+            "baseline_beats_challengers_count": 1,
+            "QLIKE_improvement_gt_5pct": false,
+            "subperiod_stability_ge_2of3": false,
+            "triple_gate_PASS": false,
+            "active_harm_alt_data_worse_than_IV": false
+          },
+          "verdict": "NULL (no significant improvement)"
+        }
+      }
+    }
+  },
+  "cross_asset_synthesis": {
+    "EUR_USD": {
+      "primary_iv_source": "Native_EVZ",
+      "iv_vs_ar1_t": 5.066490799037714,
+      "iv_vs_ar1_p": 6.851594784862414e-07,
+      "iv_beats_ar1": true,
+      "ar1_beats_iv": false,
+      "verdict_vs_altdata": "NULL (IV baseline actively beats alt-data)",
+      "triple_gate": false,
+      "active_harm": true,
+      "qlike_improvement_pct": -0.8376929391487227,
+      "best_alt_model": "M3_AR1_EPU"
+    },
+    "JPY_USD": {
+      "primary_iv_source": "Cross_VIX",
+      "iv_vs_ar1_t": 0.142515810851891,
+      "iv_vs_ar1_p": 0.8867617244013211,
+      "iv_beats_ar1": false,
+      "ar1_beats_iv": false,
+      "verdict_vs_altdata": "NULL (IV baseline actively beats alt-data)",
+      "triple_gate": false,
+      "active_harm": true,
+      "qlike_improvement_pct": -0.09781933086676403,
+      "best_alt_model": "M4_AR1_FinStress"
+    },
+    "DXY": {
+      "primary_iv_source": "Native_EVZ",
+      "iv_vs_ar1_t": 1.131379126723142,
+      "iv_vs_ar1_p": 0.2587400700941296,
+      "iv_beats_ar1": false,
+      "ar1_beats_iv": false,
+      "verdict_vs_altdata": "NULL (no significant improvement)",
+      "triple_gate": false,
+      "active_harm": false,
+      "qlike_improvement_pct": -0.2571620897758778,
+      "best_alt_model": "M3_AR1_EPU"
+    }
+  },
+  "hypothesis_tests": {
+    "H1_currency_IV_universal": false,
+    "H2_currency_IV_fails_all": false,
+    "H3_reserve_currency_specific": true,
+    "iv_success_per_asset_any": {
+      "EUR_USD": true,
+      "JPY_USD": true,
+      "DXY": false
+    },
+    "iv_success_per_asset_primary": {
+      "EUR_USD": true,
+      "JPY_USD": false,
+      "DXY": false
+    },
+    "iv_any_detail": {
+      "EUR_USD": {
+        "any_iv_wins": true,
+        "ar1_wins_all": false,
+        "sources_win": [
+          "Native_EVZ",
+          "Realized30"
+        ],
+        "best_t": 5.556125909142706
+      },
+      "JPY_USD": {
+        "any_iv_wins": true,
+        "ar1_wins_all": false,
+        "sources_win": [
+          "Cross_EVZ",
+          "Realized30"
+        ],
+        "best_t": 6.324590368864266
+      },
+      "DXY": {
+        "any_iv_wins": false,
+        "ar1_wins_all": false,
+        "sources_win": [],
+        "best_t": 1.1831304961370583
+      }
+    },
+    "n_iv_success_any": 2,
+    "n_iv_fail_any": 1,
+    "n_valid": 3
+  },
+  "paper4_boundary_implication": "MIXED (asset-specific): EUR_USD=True, JPY_USD=True, DXY=False. Some FX admit IV signal, others do not. Paper 4 needs FX sub-class nuance rather than universal claim.",
+  "finished_utc": "2026-04-13T20:08:22.873352Z"
+}

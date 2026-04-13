@@ -1,0 +1,97 @@
+[20:08:17] FRED fetch: ['USEPUINDXD', 'WLEMUINDXD', 'NFCI', 'ANFCI', 'STLFSI4']
+[20:08:17]   USEPUINDXD: n=5553 first=2010-01-01 last=2025-03-15
+[20:08:17]   WLEMUINDXD: n=5553 first=2010-01-01 last=2025-03-15
+[20:08:17]   NFCI: n=794 first=2010-01-01 last=2025-03-14
+[20:08:17]   ANFCI: n=794 first=2010-01-01 last=2025-03-14
+[20:08:17]   STLFSI4: n=794 first=2010-01-01 last=2025-03-14
+[20:08:17] Altdata panel: n=795, 2010-01-01 to 2025-03-21
+[20:08:19] 
+===== Asset: EUR_USD (price=FXE) IVs=['Native_EVZ', 'Cross_VIX', 'Realized30'] =====
+[20:08:20]   Weekly panel: n=792, 2010-01-08 to 2025-03-14, RV mean=0.0106 std=0.0050
+[20:08:21]   IV Native_EVZ (^EVZ): n=792, 2010-01-08 to 2025-03-07, mean=9.075
+[20:08:21]   IV Cross_VIX (^VIX): n=793, 2010-01-08 to 2025-03-14, mean=18.359
+[20:08:21]   Panel+altdata: n=792
+[20:08:21]   IV Native_EVZ: IS n=468, OOS n=323
+[20:08:21]   IV Cross_VIX: IS n=468, OOS n=324
+[20:08:21]   IV Realized30: IS n=462, OOS n=324
+[20:08:21] 
+===== Asset: JPY_USD (price=FXY) IVs=['Cross_VIX', 'Cross_EVZ', 'Realized30'] =====
+[20:08:21]   Weekly panel: n=792, 2010-01-08 to 2025-03-14, RV mean=0.0114 std=0.0064
+[20:08:22]   IV Cross_VIX (^VIX): n=793, 2010-01-08 to 2025-03-14, mean=18.359
+[20:08:22]   IV Cross_EVZ (^EVZ): n=792, 2010-01-08 to 2025-03-07, mean=9.075
+[20:08:22]   Panel+altdata: n=792
+[20:08:22]   IV Cross_VIX: IS n=468, OOS n=324
+[20:08:22]   IV Cross_EVZ: IS n=468, OOS n=323
+[20:08:22]   IV Realized30: IS n=462, OOS n=324
+[20:08:22] 
+===== Asset: DXY (price=UUP) IVs=['Native_EVZ', 'Cross_VIX', 'Realized30'] =====
+[20:08:22]   Weekly panel: n=792, 2010-01-08 to 2025-03-14, RV mean=0.0092 std=0.0044
+[20:08:22]   IV Native_EVZ (^EVZ): n=792, 2010-01-08 to 2025-03-07, mean=9.075
+[20:08:22]   IV Cross_VIX (^VIX): n=793, 2010-01-08 to 2025-03-14, mean=18.359
+[20:08:22]   Panel+altdata: n=792
+[20:08:22]   IV Native_EVZ: IS n=468, OOS n=323
+[20:08:22]   IV Cross_VIX: IS n=468, OOS n=324
+[20:08:22]   IV Realized30: IS n=462, OOS n=324
+[20:08:22] 
+===== Cross-asset synthesis =====
+[20:08:22] Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-afce4f2d/experiments/k1118b/k1118b_results.json
+
+==========================================================================================
+K1118b SUMMARY — Currency cross-asset extension
+==========================================================================================
+
+[EUR_USD] price=FXE
+  [Native_EVZ <- ^EVZ]
+    IV vs AR1 DM: t=+5.066 p=0.0000 iv_beats_ar1=True ar1_beats_iv=False
+    Best alt: M3_AR1_EPU  QLIKE imp: -0.84%
+    Verdict vs alt-data: NULL (IV baseline actively beats alt-data)
+  [Cross_VIX <- ^VIX]
+    IV vs AR1 DM: t=-3.546 p=0.0004 iv_beats_ar1=False ar1_beats_iv=True
+    Best alt: M3_AR1_EPU  QLIKE imp: +0.05%
+    Verdict vs alt-data: NULL (IV baseline actively beats alt-data)
+  [Realized30 <- realized30]
+    IV vs AR1 DM: t=+5.556 p=0.0000 iv_beats_ar1=True ar1_beats_iv=False
+    Best alt: M5_AR1_All  QLIKE imp: -0.44%
+    Verdict vs alt-data: NULL (IV baseline actively beats alt-data)
+
+[JPY_USD] price=FXY
+  [Cross_VIX <- ^VIX]
+    IV vs AR1 DM: t=+0.143 p=0.8868 iv_beats_ar1=False ar1_beats_iv=False
+    Best alt: M4_AR1_FinStress  QLIKE imp: -0.10%
+    Verdict vs alt-data: NULL (IV baseline actively beats alt-data)
+  [Cross_EVZ <- ^EVZ]
+    IV vs AR1 DM: t=+6.325 p=0.0000 iv_beats_ar1=True ar1_beats_iv=False
+    Best alt: M4_AR1_FinStress  QLIKE imp: -0.18%
+    Verdict vs alt-data: NULL (IV baseline actively beats alt-data)
+  [Realized30 <- realized30]
+    IV vs AR1 DM: t=+3.670 p=0.0003 iv_beats_ar1=True ar1_beats_iv=False
+    Best alt: M5_AR1_All  QLIKE imp: -0.23%
+    Verdict vs alt-data: NULL (IV baseline actively beats alt-data)
+
+[DXY] price=UUP
+  [Native_EVZ <- ^EVZ]
+    IV vs AR1 DM: t=+1.131 p=0.2587 iv_beats_ar1=False ar1_beats_iv=False
+    Best alt: M3_AR1_EPU  QLIKE imp: -0.26%
+    Verdict vs alt-data: NULL (no significant improvement)
+  [Cross_VIX <- ^VIX]
+    IV vs AR1 DM: t=-0.172 p=0.8636 iv_beats_ar1=False ar1_beats_iv=False
+    Best alt: M3_AR1_EPU  QLIKE imp: -0.05%
+    Verdict vs alt-data: NULL (no significant improvement)
+  [Realized30 <- realized30]
+    IV vs AR1 DM: t=+1.183 p=0.2376 iv_beats_ar1=False ar1_beats_iv=False
+    Best alt: M5_AR1_All  QLIKE imp: -0.18%
+    Verdict vs alt-data: NULL (no significant improvement)
+
+Hypothesis tests:
+  H1_currency_IV_universal: False
+  H2_currency_IV_fails_all: False
+  H3_reserve_currency_specific: True
+  iv_success_per_asset_any: {'EUR_USD': True, 'JPY_USD': True, 'DXY': False}
+  iv_success_per_asset_primary: {'EUR_USD': True, 'JPY_USD': False, 'DXY': False}
+  iv_any_detail: {'EUR_USD': {'any_iv_wins': True, 'ar1_wins_all': False, 'sources_win': ['Native_EVZ', 'Realized30'], 'best_t': 5.556125909142706}, 'JPY_USD': {'any_iv_wins': True, 'ar1_wins_all': False, 'sources_win': ['Cross_EVZ', 'Realized30'], 'best_t': 6.324590368864266}, 'DXY': {'any_iv_wins': False, 'ar1_wins_all': False, 'sources_win': [], 'best_t': 1.1831304961370583}}
+  n_iv_success_any: 2
+  n_iv_fail_any: 1
+  n_valid: 3
+
+Paper 4 boundary implication:
+  MIXED (asset-specific): EUR_USD=True, JPY_USD=True, DXY=False. Some FX admit IV signal, others do not. Paper 4 needs FX sub-class nuance rather than universal claim.

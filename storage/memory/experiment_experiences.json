@@ -1005,5 +1005,23 @@
     "source_experiments": [
       "K1170"
     ]
+  },
+  {
+    "id": "E073",
+    "title": "US VIX 跨資產類別不是中性——對非 equity asset 有時 actively 有害",
+    "category": "methodology",
+    "lesson": "標準 practice 把 US VIX 當 'universal risk barometer' 丟進任何模型。但 K1118b 顯示 US VIX 預測 EUR/USD 波動的 A4f spec 比純 AR1 baseline **更差** (DM t=-3.55, Harvey 嚴格反向)。VIX 不只是 'no signal'，是**引入錯誤的 time-varying long-run 結構**讓 model over-fit 到 US equity 的風險週期而非 FX 的風險週期。'cross-asset universal' 是一個 lazy framing，應換成 'asset-class specific'。",
+    "examples": [
+      "K1118b EUR/USD: A4f-VIX DM t=-3.55, AR1 WINS; native ^EVZ DM t=+5.07 PASS",
+      "K1118b JPY/USD: A4f-VIX DM t=+0.14 NS; FX-family ^EVZ cross DM t=+6.32 PASS",
+      "K1119 BTC: A4f-DVOL DM t=-0.177 NS (crypto IV-insufficient)",
+      "K1116 BTC-alt-data: 甚至 actively 變差 (negative DM)"
+    ],
+    "recommendation": "新實驗選 IV regressor 時必須 match asset class: equity → VIX, FX → FX-family VIX, commodity → commodity VIX (OVX/GVZ), crypto → 避免 IV (用 realized + jump). 禁止 'universal VIX' 作為跨資產類別 default. Paper 寫作時 'US VIX 對所有資產都有預測力' 是 overreach。",
+    "source_experiments": [
+      "K1118b",
+      "K1119",
+      "K1116"
+    ]
   }
 ]

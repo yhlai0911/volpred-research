@@ -26307,5 +26307,26 @@
     "data_source": "Reuse K1166/K1067e data + yfinance 110 stocks 4 markets + VIX",
     "created_at": "2026-04-14T06:30:00+08:00",
     "updated_at": "2026-04-14T06:30:00+08:00"
+  },
+  {
+    "id": "k1118b-1776111152",
+    "experiment_id": "K1118b",
+    "title": "K1118b FX IV-sufficiency H3 mixed: native IV works single-pair, basket-FX fails, VIX actively harms EUR",
+    "content": "[提出: Claude, 執行: Claude] Paper 4 boundary 最後 major asset class: currency。EUR/USD + JPY/USD + DXY 分別測 native IV vs US VIX vs realized-30 proxy。**結果 H3 mixed**: **EUR/USD**: native ^EVZ DM t=+5.07 PASS Harvey ✓, 但 cross ^VIX t=**-3.55** — AR1 baseline actually beats A4f-VIX (Paper 4 首個明確 'VIX 跨資產反而有害' 證據); VaR Trinity: native PASS 5%+1%, cross VIX FAIL (over-conservative k=8 vs 16.2)。**JPY/USD**: native ^JYVIX yfinance 無數據 (delisted/從未 mirror), US VIX t=+0.14 NS, 但 FX-family cross ^EVZ t=+6.32 PASS + VaR 3 sources 全 PASS — 'currency-family IV transfers within FX but not from equity'。**DXY**: ALL 3 IV 全 NS (|t|<1.2, realized-30=+1.18), native EVZ VaR 1% Basel RED (basket 結構平均掉 idiosyncratic vol → IV 無著力點)。**^EVZ 2025-03-05 CBOE deprecated** (live signal 到此為止, future work 需替代)。**Paper 4 boundary revised**: 從 'universal with crypto exception' → '**native-asset-class IV sufficient for equity/commodity/single-pair FX; NOT cross-class substitutable (equity VIX 對 EUR/USD 反向、對 JPY/DXY 無效); basket-FX + crypto 是 IV-insufficient 類別**'。符合 Menkhoff et al. (2012) FX carry-vol + Lustig-Roussanov-Verdelhan (2011) dollar-factor 文獻。衍生 K1118c (^JPYVIX via OTC option 或 1M variance swap proxy), K1118d (GBPUSD/AUDUSD/CAD 補完 G10), K1118e (DXY 用 spot DX-Y.NYB 而非 UUP ETF 避 tracking error)。",
+    "tags": [
+      "K1118b",
+      "Paper4",
+      "currency",
+      "EUR",
+      "JPY",
+      "DXY",
+      "H3-mixed",
+      "EVZ-deprecated",
+      "VIX-actively-harms",
+      "basket-FX-fails"
+    ],
+    "data_source": "yfinance EURUSD=X/JPY=X/UUP + ^EVZ (CBOE EuroCurrency VIX, now deprecated) + ^VIX",
+    "created_at": "2026-04-14T07:00:00+08:00",
+    "updated_at": "2026-04-14T07:00:00+08:00"
   }
 ]
