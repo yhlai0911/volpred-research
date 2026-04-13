@@ -442,10 +442,10 @@
   },
   {
     "id": "leverage_direction_review_v2",
-    "title": "Paper 1 (leverage-direction) v2 SOP: 雙審查 → v2 修正 → 同步",
+    "title": "leverage-direction v3 修正 (7 HIGH + 3 MED issues, 修完進 ready)",
     "priority": 1,
-    "description": "Citation-verifier (a990382e8119702c9) + latex-academic-reviewer (acfb6a6c76db4abd2) 並行跑。完成後主線程做 step 2 修正 → body_v2.tex + diff_v1_v2.tex → xelatex 編譯 → uv run volpred ops paper-update --paper-id leverage-direction → git commit。",
-    "status": "in_progress"
+    "description": "v2 review 完成 (citation 0 MAJOR + academic 3★, 7 HIGH)。v3 修正待主線程：7 HIGH (gamma 矛盾/H-M 衝突/Proposition fragile/abstract qualifier/ES backtest/BTC rule/citation 缺失) + 3 MED citation issues。詳 paper/leverage-direction/review_history/v2/README.md。",
+    "status": "pending_main_thread"
   },
   {
     "id": "vix_sufficiency_expansion",

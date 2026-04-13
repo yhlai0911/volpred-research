@@ -73,6 +73,14 @@ paper/<paper-id>/
 4. **agent prompt 寫死**：寫 review 時必須指明輸出到 `paper/<id>/review_history/v<n>/`
 5. Git track：`review_history/` 不放 `.gitignore`，全部 commit 進 repo
 
+**Format：Markdown 為主**（不是 LaTeX）：
+- Review 是頻繁迭代的 working document，MD 寫快讀快
+- 主要產出是 action items（HIGH/MED/MINOR list），表格 + 清單 MD 更適合
+- Git diff 比較 v(n) → v(n+1) review 演進，MD 一目了然
+- 引用論文 sec/eq 用文字 "§4.3, eq.(7)" 即可，不需 `\ref{}`
+- 公式用 inline `$...$` 即可（KaTeX/GitHub 原生支援）
+- **罕見場景才用 .tex 補充**：reviewer 提出新數學推導且要嵌入論文 → `appendix_v<n>.tex`
+
 **為什麼**：
 - 6 個月後 reviewer 詢問「為何這篇 paper 改了 5 次？」→ 翻 review_history 即知
 - 提交 journal 時可附 prior review log 證明 rigor
@@ -114,7 +122,7 @@ paper/<paper-id>/
 
 | Paper ID | Stage | 證據 / 待辦 |
 |----------|-------|------------|
-| leverage-direction | **review→ready** | citation 0 MAJOR ✅，latex-reviewer running，3 MED content fixes 後 ready |
+| leverage-direction | **review** | citation 0 MAJOR ✅，**latex-reviewer 3★/5★ + 7 HIGH issues**（內部矛盾、缺 ES backtest、Proposition 1 N=6 脆弱）。需 v3 修正 7 HIGH 後再 review，預計修完可達 ★★★★ ready。詳 `paper/leverage-direction/review_history/v2/README.md` |
 | vix-sufficiency | **review→expansion** | integration_plan_v2 ready，整合今日 6 實驗 +9.2p → 48p，主線程執行中 |
 | volatility-absorption | **review** | 39p, 36 cites, JFE target，需 SOP step 1 雙審查 |
 | taiwan-vt | **review** | Gemini 找到 3 weaknesses (TX tax/linear scaling/TSMC endogeneity)，待修 |
