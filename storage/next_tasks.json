@@ -58,8 +58,8 @@
   {
     "id": "Paper3_reframe",
     "title": "Paper 3 完整重構為 Taiwan microstructural study (PRIORITY 1)",
-    "priority": 1,
-    "description": "K1100/K1100b/K1100f 連 5 null 證明 Lai 2024 不可推廣為通用方法。改寫 Paper 3 outline 為 TAIFEX 微結構 empirical study，或完全 pivot 到不同 paper。Main thread 主導。",
+    "priority": 4,
+    "description": "[priority 4 — wait for new evidence per user 2026-04-13] K1100/K1100b/K1100f 連 5 null 證明 Lai 2024 不可推廣為通用方法。改寫 Paper 3 outline 為 TAIFEX 微結構 empirical study，或完全 pivot 到不同 paper。Main thread 主導。",
     "status": "pending"
   },
   {
@@ -112,39 +112,11 @@
     "status": "pending"
   },
   {
-    "id": "K1100g_d2",
-    "title": "K1100g D2: SPY OPEX 3.12× pinning study (反向發現)",
-    "priority": 3,
-    "description": "K1100g 意外發現：SPY OPEX intraday vol 3.12x 平日。獨立研究 monthly/quarterly Friday + 0DTE 因素。可能 Paper 8 candidate。",
-    "status": "pending"
-  },
-  {
-    "id": "K1100g_d3",
-    "title": "K1100g D3: Cross-Asia overnight asymmetry replication",
-    "priority": 3,
-    "description": "K1100g 衍生：NK225/K200 是否有 TAIFEX 類似的 overnight asymmetry。分辨亞洲共通 vs 台灣 only。",
-    "status": "pending"
-  },
-  {
     "id": "K1100h",
     "title": "K1100h: Tick-level PRG on TAIFEX TX (Dropbox 2017-2021)",
     "priority": 3,
     "description": "K1100f agent 衍生：only tick-level reveals true periodic structure。Daily DOW dummies 太粗。",
     "status": "pending"
-  },
-  {
-    "id": "K1100c",
-    "title": "K1100c: Patton (2006) Asymmetric Copula",
-    "priority": 3,
-    "status": "pending",
-    "description": "K1100 衍生：時變 ρ_L, ρ_U 分別建模。測試不對稱尾部相依（上漲 vs 下跌）。"
-  },
-  {
-    "id": "K1100d",
-    "title": "K1100d: VIX-regime-conditional Copula",
-    "priority": 3,
-    "status": "pending",
-    "description": "K1100 衍生：低 VIX → Gaussian copula；高 VIX → Student-t copula。Regime-switching copula。"
   },
   {
     "id": "TSMC_0416_post",
@@ -224,24 +196,10 @@
     "status": "completed"
   },
   {
-    "id": "K1112",
-    "title": "K1112: N≥50 真 confirmatory [deferred — K1113 已確認 null]",
-    "priority": 4,
-    "description": "降優先級。K1113 的 strong null（CV R²<0）告訴我們不需要更大 N——observable covariates 本身不夠。",
-    "status": "deferred"
-  },
-  {
     "id": "K1114",
     "title": "K1114: Rolling θ₂ heterogeneity (time-varying)",
     "priority": 2,
     "description": "K1109/K1113 後：jump 到不同 dimension (時間) 而非繼續 cross-sectional。可能找到結構 vs 循環 heterogeneity。",
-    "status": "pending"
-  },
-  {
-    "id": "K1114",
-    "title": "K1114: Rolling θ₂ heterogeneity (time-varying)",
-    "priority": 2,
-    "description": "K1109 D3：2010-2015 vs 2016-2025 哪些 firms 穩定、哪些反轉。time-varying heterogeneity 可能是 Paper 2 真正 contribution。",
     "status": "pending"
   },
   {
@@ -291,13 +249,6 @@
     "title": "K1067e: GARCH-X + EAV only (exclude VIX)",
     "priority": 3,
     "description": "K1067b 衍生：確認是 EAV 本身無力還是 VIX 占位效應。",
-    "status": "pending"
-  },
-  {
-    "id": "K1071",
-    "title": "K1071: EPS Surprise Direction × CAR",
-    "priority": 2,
-    "description": "K1068 CAR NULL on pooled events. Maybe beat/miss direction matters. Collect EPS consensus vs actual.",
     "status": "pending"
   },
   {
@@ -449,10 +400,10 @@
   },
   {
     "id": "TSMC_0414_pre2",
-    "title": "TSMC 法說 04/14 深度預告（T-2 hard deadline）",
+    "title": "TSMC_0414_pre2 [SKIPPED — quota exhausted]",
     "priority": 1,
-    "description": "04/14 截止發 draft，cron 04/14 釋出。內容：歷史波動率 + IV 期權市場 + 分析師預期。**hard deadline 不可延**。",
-    "status": "pending"
+    "description": "查 feed 已有 5+ 篇 TSMC 04/16 預告文章 (含 法說會前瞻/三件反直覺/三個關鍵數字 等)。CLAUDE.md 新規則 quota 為 2 預告/事件，已嚴重 over。不再寫額外預告，避免重複污染 feed。教訓：今後事件預告必須在 T-7 + T-2 兩個時點寫，不可隨便看到實驗就發 TSMC 文。",
+    "status": "cancelled"
   },
   {
     "id": "TSMC_0416_immediate",
