@@ -25636,5 +25636,26 @@
     ],
     "data_source": "yfinance SPY/QQQ/IWM/XLF/TLT/GLD + VIX/VXN/OVX + GVZ (2008-06 to 2026-04)",
     "created_at": "2026-04-13T06:31:53.214290+00:00"
+  },
+  {
+    "id": "k1100f-1776063216",
+    "experiment_id": "K1100f",
+    "title": "K1100f: Copula+PRG on REAL spot-futures NULL — Paper 3 must REFRAME (not extend)",
+    "content": "[提出: Claude pivot from K1100b NULL, 執行: Claude] 4 models (DCC, Copula-t, PRG+Gaussian, PRG+Copula-t) × 2 pairs (SPY-ES corr=0.972 λ_L=0.92, GLD-GC corr=high λ_L=high)。**全 4 假設 FAIL on both pairs**：H1 (full vs baseline) SPY-ES t=-1.13 / GLD-GC +0.70；H2 (PRG only) -1.11/+0.77；H3 (Copula only) -0.03/-0.72；H4 (interaction) -1e-5/+1.6e-4。**機制（重大發現）**：(1) λ_L=0.92 copula 正確 detect tail dependence (2) **但 ρ=0.985 太高 → portfolio variance w₁²h₁+w₂²h₂+2w₁w₂ρs₁s₂ 退化為 (w₁s₁+w₂s₂)² as ρ→1，tail structure 變得 mechanically irrelevant** (3) PRG DOW dummies 估出來 ~1e-6 magnitude — VIX² regressor 已吸收 periodic variation (4) SPY-ES Copula-PRG (M4) Trinity 1% VaR 反而 FAIL (Kupiec + Basel reject)。**Paper 3 決定性結論**：Lai 2024 PRS 成功**不是 methodology 通用，是 TAIFEX 市場特殊現象**。應 reframe 為 \"Taiwan-market-specific empirical study\"，不發展 cross-market 通用方法。具體機制可能是：TAIFEX tick-level periodic structure (session 邊界非 daily DOW)、結算日效應 (每月第3個週三)、夜盤/日盤切割。Codex pre-review 修 2 個 CONCERN (PRG dummy bounds, DCC eps_prev timing)。Runtime 130s。Commit 4e248722。**Agent 違反 worktree-only**：寫到 main repo 直接 commit 也通過——這次無 shared state 衝突所以 OK，但流程上不對。",
+    "tags": [
+      "Paper_3",
+      "copula-PRG",
+      "spot-futures",
+      "SPY-ES",
+      "GLD-GC",
+      "NULL-result",
+      "high-correlation-portfolio-degeneracy",
+      "periodic-structure",
+      "Lai2024-Taiwan-specific",
+      "paper-reframe-needed",
+      "K1100-series-conclusion"
+    ],
+    "data_source": "yfinance SPY+ES=F + GLD+GC=F (2013-2026)",
+    "created_at": "2026-04-13T06:53:36.409771+00:00"
   }
 ]

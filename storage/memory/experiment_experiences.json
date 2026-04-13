@@ -750,5 +750,21 @@
       "pivot-depth"
     ],
     "created_at": "2026-04-13T06:31:53.214290+00:00"
+  },
+  {
+    "id": "E056",
+    "title": "Paper 3 完整方向重構 — 4 連 null 揭露 Lai 2024 是 Taiwan-specific 不是通用方法",
+    "lesson": "K1100 series 4 個實驗全 null：\n- K1100 (SPY-GLD tail-indep) NULL\n- K1100b (5 equity pairs incl SPY-QQQ λ_L=0.589) NULL\n- K1100f (SPY-ES corr=0.97 λ_L=0.92 + PRG) NULL  ← 真 spot-futures + 真 periodic 都失敗\n\n**揭露的根本問題**：\n高 ρ portfolio variance formula 退化：\nw₁²h₁+w₂²h₂+2w₁w₂ρs₁s₂ → (w₁s₁+w₂s₂)² as ρ→1\n\n意思：當 spot-futures 接近 perfectly correlated（ρ=0.99+），tail dependence 結構**對 portfolio risk 數學上不重要**——因為 portfolio 退化為 single-asset，而 single-asset 的 risk 只看 marginal volatility 不看 dependence。\n\n**這推翻了我原本以為的「Lai 2024 在 spot-futures 上有效，所以加 copula 是改進」假設**。Lai 2024 真正的 contribution 不是 copula 本身，而是 **TAIFEX 市場的 microstructural 特殊性**：\n- Tick-level session boundaries (而非 daily DOW)\n- Settlement day effects (每月第3個週三)\n- Overnight gap (台灣特有的夜盤切割 2017 起)\n- Possibly: 散戶比例高 → 結算日 noise trading → 可預測\n\n**Paper 3 完整 reframe 方案**：\n- ❌ 廢棄：「Generalized copula+periodic GARCH」\n- ✅ 改為：「TAIFEX-specific microstructural study with copula as one descriptor」\n- 或：完全 pivot 到不同 paper（例如 Paper 7-9 已存在的方向）\n\n**通則 — Pivot Depth 的 4 階段**：\n1. **第1級**：換 dataset (Paper 2 Taiwan → Paper 3 US copula)\n2. **第2級**：換 specification (general equity → tail-dependent → spot-futures)\n3. **第3級**：換 methodology (copula → +PRG periodic)\n4. **第4級**：換 framing (developing method → empirical case study) ← K1100f 後唯一還沒試的\n\n當前 4 個連續 null（K1106b/K1109/K1113/K1100b/K1100f 共 5 個）告訴我們：**第1-3級 pivot 不夠，必須做第 4 級 framing 改變**。\n\n**Implementation**：\n- K1100f agent 提的 K1100g (Reframe Paper 3 as Taiwan study) 應該優先\n- 或者 main thread 直接改 Paper 3 outline 寫成 empirical study\n\n**E055 通則延伸**：copula edge 出現的 3 個必要條件之一不滿足就必 null：\n1. 高正相關（near-collinear，ρ>0.95）pairs\n2. **單一資產**或 path-dependent 應用（不是 portfolio aggregate）  ← K1100f 確認 portfolio 級不行\n3. 非對稱 dependence（contagion 期 downside > upside）\n\nK1100f 證明條件 1+3 都滿足但條件 2 不滿足（50/50 portfolio）→ null。\n\n**Paper 3 唯一可救的方向**：single-asset path-dependent 應用，例如：\n- TAIFEX VIX prediction（用 copula-implied tail risk 預測 VIXTWN）\n- VaR breach clustering analysis（path-dependent）\n- 不再試圖在 portfolio QLIKE 比賽中贏",
+    "context": "K1100 series 5 experiments synthesis, Paper 3 fundamental rethinking",
+    "applies_to": [
+      "Paper-3-reframe",
+      "pivot-depth",
+      "high-correlation-degeneracy",
+      "spot-futures-microstructure",
+      "TAIFEX-specificity",
+      "methodology-vs-empirical",
+      "copula-applicable-domain"
+    ],
+    "created_at": "2026-04-13T06:53:36.409771+00:00"
   }
 ]

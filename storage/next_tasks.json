@@ -50,9 +50,30 @@
   },
   {
     "id": "K1100f",
-    "title": "K1100f: Copula + PRG/PRS periodic structure (Paper 3 正路)",
+    "title": "K1100f: Copula + PRG on SPY-ES spot-futures",
     "priority": 2,
-    "description": "K1100b 啟示：Lai 2024 PRS 成功於 spot-futures 特殊結構。結合 K868/K868e periodic 模型，回到 copula 真正 effective 的 domain。",
+    "description": "全 4 假設 NULL on both pairs。機制：高 ρ portfolio 退化為 single-asset，tail dependence 對 portfolio risk 數學上不重要。Paper 3 須 reframe 為 Taiwan-specific study。",
+    "status": "completed"
+  },
+  {
+    "id": "Paper3_reframe",
+    "title": "Paper 3 完整重構為 Taiwan microstructural study (PRIORITY 1)",
+    "priority": 1,
+    "description": "K1100/K1100b/K1100f 連 5 null 證明 Lai 2024 不可推廣為通用方法。改寫 Paper 3 outline 為 TAIFEX 微結構 empirical study，或完全 pivot 到不同 paper。Main thread 主導。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100g",
+    "title": "K1100g: TAIFEX vs SPY-ES microstructural difference quantification",
+    "priority": 2,
+    "description": "K1100f agent 衍生：拿 TAIFEX TX (Dropbox 2017-2021) tick-level vs SPY-ES daily-level，量化 microstructural 差異（settlement effect, intraday session, overnight gap）解釋為何 Lai 2024 在 Taiwan work 但 US 不 work。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100h",
+    "title": "K1100h: Tick-level PRG on TAIFEX TX (Dropbox 2017-2021)",
+    "priority": 3,
+    "description": "K1100f agent 衍生：only tick-level reveals true periodic structure。Daily DOW dummies 太粗。",
     "status": "pending"
   },
   {
