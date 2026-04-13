@@ -611,6 +611,15 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 15. Paper 2 cross-market 升級：global volatility regularity（2026-04-13 K1147）
+**TW K1145 + US K1147 雙市場全 PASS — universal regularity 確認**
+- US S&P 500 top-30 pooled θ_EAV = +1.91e-4，bootstrap t=+4.50，95% CI [+1.29e-4, +2.80e-4]
+- Placebo 60 reps: 觀測值 = +70.7σ from null mean，p=0/60 (比 K1145 +13.6σ 強 5×)
+- 3 EAV-def: 1d 峰 +1.91e-4 / 3d +7.7e-5 / 5d +8.3e-5 — US conference call 同日集中釋出
+- TW (+6.36e-5) vs US (+1.91e-4) 方向 match，量級比 3.0 (US 大型股 σ² 規模較大 + 季報密度)
+- **Paper 2 升級 narrative**: "Two independent equity markets (TW N=31 + US N=30), 5 robustness layers each, consistent with global volatility regularity where GARCH-MIDAS τ component absorbs market-wide announcement-day variance premium invisible at firm level but robust at panel level"
+- 衍生 K1150 (TOPIX 第三市場), K1151 (continuous surprise), K1152 (relative-magnitude), K1153 (EU)
+
 ### 14. Paper 2 SAVED：universal-magnitude pooled effect（2026-04-13 K1145）
 **Pooled MLE 揭露 firm-level idiosyncratic SE 掩蓋的 universal signal**
 - N=31 K1109 pre-reg stocks pooled A4f-EAV，shared θ_EAV，stock-FE on (m_i, GJR_i)

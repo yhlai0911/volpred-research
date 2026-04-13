@@ -617,7 +617,8 @@
     "title": "K1147: Cross-market validation of universal-magnitude (US S&P 500 pooled)",
     "priority": 2,
     "description": "K1145 在 TW 找到 universal-magnitude，跨市場驗證 (US large-caps N=30 from S&P 500) 是否同 pattern 存在。若 PASS → 'EAV universal effect is global volatility regularity'，contribution 加大；若 NS → TW 特殊性 caveat。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-13T22:30:00+08:00"
   },
   {
     "id": "K1148",
@@ -631,6 +632,34 @@
     "title": "K1149: Pooled spec + PCA factor — θ_EAV vs systematic factor competition",
     "priority": 3,
     "description": "K1145 pooled θ_EAV 是否被市場 factor (TWII / VIX) 主導？加 factor PC1/PC2 為 covariate，看 θ_EAV 是否 absorb。若 absorb → 解釋為 factor effect 不純為 EAV; 若 incremental → 真 firm-event effect。",
+    "status": "pending"
+  },
+  {
+    "id": "K1150",
+    "title": "K1150: TOPIX N=30 Japan pooled θ_EAV — third market validation",
+    "priority": 2,
+    "description": "K1145 TW + K1147 US 都 PASS。第三市場 (Japan TOPIX top-30) 若也 PASS → 三大區域 universal，extreme-strong contribution。EAV 用 Japan earnings (yfinance 或 EDINET API)。",
+    "status": "pending"
+  },
+  {
+    "id": "K1151",
+    "title": "K1151: Continuous earnings surprise vs binary EAV indicator",
+    "priority": 3,
+    "description": "K1145+K1147 binary EAV 已 PASS。改用 actual surprise (consensus EPS deviation) 作 continuous covariate，看 θ_continuous 是否更強且更精確 (smaller SE)。",
+    "status": "pending"
+  },
+  {
+    "id": "K1152",
+    "title": "K1152: Relative-magnitude analysis (θ_EAV / avg_σ²) cross-market",
+    "priority": 3,
+    "description": "K1147 absolute US/TW=3.0 但相對 σ² baseline 後是否一致？θ_relative_TW vs θ_relative_US 比較 — 真 universal vs scale artifact 區辨。",
+    "status": "pending"
+  },
+  {
+    "id": "K1153",
+    "title": "K1153: EU index pooled (DAX+CAC+FTSE composite) — fourth market",
+    "priority": 4,
+    "description": "歐洲市場 large-cap pooled，第四市場驗證。Top 10 from each + composite N=30。EU earnings 通常季報但時點分散。",
     "status": "pending"
   }
 ]
