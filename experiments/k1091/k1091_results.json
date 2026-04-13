@@ -1,0 +1,1702 @@
+{
+  "metadata": {
+    "experiment_id": "K1091",
+    "title": "Out-of-sample validation of K1090 meta-regression (VGK/EWJ/CPER/SLV)",
+    "generated_at": "2026-04-13T00:43:38.286468+00:00",
+    "random_seed": 42,
+    "data_end": "2026-04-13",
+    "upstream_K": [
+      "K1090",
+      "K1075",
+      "K1085",
+      "K1088",
+      "K1089"
+    ],
+    "caveat": "Validation sample of only N=4 assets. MAE is a point estimate; with n=4 the confidence interval on MAE itself is very wide."
+  },
+  "asset_results": {
+    "VGK": {
+      "ticker": "VGK",
+      "class_label": "equity_europe",
+      "currency": "USD",
+      "data_start": "2005-03-11",
+      "data_end": "2026-04-10",
+      "n_total": 5304,
+      "window": 2000,
+      "refit_every": 63,
+      "oos_start": "2013-03-01",
+      "oos_end": "2026-04-10",
+      "n_oos": 3298,
+      "n_refits": 53,
+      "diagnostics": {
+        "n": 5304,
+        "mean_ret_ann": 0.06153318975882763,
+        "std_ret_ann": 0.22948372738717285,
+        "skew": -0.6147675526498729,
+        "kurt": 11.026594311829815,
+        "vix_mean": 19.222814859667874,
+        "vix_max": 82.69000244140625,
+        "corr_ret_vix_level": -0.1330794345800656
+      },
+      "full_oos": {
+        "n": 3298,
+        "qlike_base": -8.240735072406977,
+        "qlike_a4f_vix": -8.297622093651892,
+        "qlike_diff_pct": -0.6903148899349234,
+        "dm_t": 4.456740849955657,
+        "dm_p": 8.321509830766516e-06,
+        "harvey_pass": true,
+        "spearman_base": 0.2735250782040064,
+        "spearman_a4f_vix": 0.3284699606018417,
+        "bootstrap_ci_95_qlike_diff": [
+          0.033179452132974414,
+          0.0833446530283123
+        ]
+      },
+      "meta_validation": {
+        "k1090_ridge_pred": 4.708657433115338,
+        "k1090_ridge_pi95": [
+          3.2610300990945134,
+          5.839911828209797
+        ],
+        "k1090_recommendation": "strong_run",
+        "realized_dm_t": 4.456740849955657,
+        "abs_error": 0.251916583159681,
+        "within_pi95": true,
+        "harvey_pass": true,
+        "meta_prediction_correct_direction": true
+      },
+      "forecasts": {
+        "first_date": "2013-03-01",
+        "last_date": "2026-04-10",
+        "gjr_qlike_full": -8.240735072406977,
+        "a4f_qlike_full": -8.297622093651892
+      },
+      "refit_log": [
+        {
+          "date": "2013-03-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.613540053275644e-06,
+          "a4f_theta1": 2.852341208572988e-07
+        },
+        {
+          "date": "2013-05-31",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 7.848181533074778e-06,
+          "a4f_theta1": 2.8816144737122973e-07
+        },
+        {
+          "date": "2013-08-29",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.42068104499448e-06,
+          "a4f_theta1": 2.9251566402811485e-07
+        },
+        {
+          "date": "2013-11-27",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.782261147542356e-06,
+          "a4f_theta1": 2.905613078629765e-07
+        },
+        {
+          "date": "2014-03-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.356048548171777e-06,
+          "a4f_theta1": 2.9136979830586556e-07
+        },
+        {
+          "date": "2014-06-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.5021097454407403e-06,
+          "a4f_theta1": 2.9719189952713966e-07
+        },
+        {
+          "date": "2014-08-29",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.805123999155273e-07,
+          "a4f_theta1": 2.9741873832199947e-07
+        },
+        {
+          "date": "2014-11-28",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.203848222985443e-06,
+          "a4f_theta1": 2.8710372209488624e-07
+        },
+        {
+          "date": "2015-03-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.1167272895142163e-05,
+          "a4f_theta1": 3.245191592067172e-07
+        },
+        {
+          "date": "2015-06-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.0920318686082832e-05,
+          "a4f_theta1": 3.2432536036138893e-07
+        },
+        {
+          "date": "2015-08-31",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.1296016149477238e-05,
+          "a4f_theta1": 3.26360658374053e-07
+        },
+        {
+          "date": "2015-11-30",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.200587633288958e-05,
+          "a4f_theta1": 3.2681785858518973e-07
+        },
+        {
+          "date": "2016-03-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.2183727438293728e-05,
+          "a4f_theta1": 3.2934496861908725e-07
+        },
+        {
+          "date": "2016-06-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.5208512804502486e-05,
+          "a4f_theta1": 3.4589552408967443e-07
+        },
+        {
+          "date": "2016-08-30",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.366698132056802e-05,
+          "a4f_theta1": 3.976953463062838e-07
+        },
+        {
+          "date": "2016-11-29",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.7701103692459792e-05,
+          "a4f_theta1": 3.6432229334442136e-07
+        },
+        {
+          "date": "2017-03-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.2572135152306088e-05,
+          "a4f_theta1": 3.830062309277783e-07
+        },
+        {
+          "date": "2017-06-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.4015384192380396e-05,
+          "a4f_theta1": 3.9379028683260005e-07
+        },
+        {
+          "date": "2017-08-30",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.2872502850179407e-05,
+          "a4f_theta1": 3.9184576189598736e-07
+        },
+        {
+          "date": "2017-11-29",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.255319860576409e-05,
+          "a4f_theta1": 3.9178085622200915e-07
+        },
+        {
+          "date": "2018-03-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.7305643954684377e-05,
+          "a4f_theta1": 3.663992124341004e-07
+        },
+        {
+          "date": "2018-06-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.4566833511411845e-05,
+          "a4f_theta1": 3.4487615965223643e-07
+        },
+        {
+          "date": "2018-08-30",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.3129496656724574e-05,
+          "a4f_theta1": 3.303085054573762e-07
+        },
+        {
+          "date": "2018-11-29",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.1768259044139046e-05,
+          "a4f_theta1": 3.203142744655865e-07
+        },
+        {
+          "date": "2019-03-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.246979177154709e-05,
+          "a4f_theta1": 3.6466231915698483e-07
+        },
+        {
+          "date": "2019-06-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.4198674470310493e-05,
+          "a4f_theta1": 3.785696536451412e-07
+        },
+        {
+          "date": "2019-09-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.1746037452719893e-05,
+          "a4f_theta1": 3.5032614245132713e-07
+        },
+        {
+          "date": "2019-12-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.4358265053630952e-05,
+          "a4f_theta1": 3.5653980717352823e-07
+        },
+        {
+          "date": "2020-03-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.5725436078728936e-05,
+          "a4f_theta1": 3.659059858544305e-07
+        },
+        {
+          "date": "2020-06-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.4264107301005057e-05,
+          "a4f_theta1": 3.5661240314276253e-07
+        },
+        {
+          "date": "2020-09-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.0776815517605933e-05,
+          "a4f_theta1": 3.2498430677749053e-07
+        },
+        {
+          "date": "2020-12-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -1.1847593373982974e-05,
+          "a4f_theta1": 3.315732246508143e-07
+        },
+        {
+          "date": "2021-03-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -9.461818262818656e-06,
+          "a4f_theta1": 3.0717773195022554e-07
+        },
+        {
+          "date": "2021-06-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -8.664594092627405e-06,
+          "a4f_theta1": 2.953406959468011e-07
+        },
+        {
+          "date": "2021-09-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -6.522392423362025e-06,
+          "a4f_theta1": 2.6593155015602237e-07
+        },
+        {
+          "date": "2021-12-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -6.100373076599473e-06,
+          "a4f_theta1": 2.6553104823558163e-07
+        },
+        {
+          "date": "2022-03-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -5.986495068417399e-06,
+          "a4f_theta1": 2.5427140623682494e-07
+        },
+        {
+          "date": "2022-06-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -4.5910048796818964e-06,
+          "a4f_theta1": 2.55680153712662e-07
+        },
+        {
+          "date": "2022-09-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -5.7579856435655456e-06,
+          "a4f_theta1": 2.599945071356379e-07
+        },
+        {
+          "date": "2022-12-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -7.137114527756596e-06,
+          "a4f_theta1": 2.656851398576253e-07
+        },
+        {
+          "date": "2023-03-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -5.293380918161534e-06,
+          "a4f_theta1": 2.5140635285563346e-07
+        },
+        {
+          "date": "2023-06-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -6.346969185209684e-06,
+          "a4f_theta1": 2.624260235310354e-07
+        },
+        {
+          "date": "2023-09-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -5.124734993534007e-06,
+          "a4f_theta1": 2.494533275270109e-07
+        },
+        {
+          "date": "2023-12-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -4.759281393286816e-06,
+          "a4f_theta1": 2.483801384235661e-07
+        },
+        {
+          "date": "2024-03-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -3.0691279423242996e-06,
+          "a4f_theta1": 2.418705180156133e-07
+        },
+        {
+          "date": "2024-06-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -6.31824075621015e-06,
+          "a4f_theta1": 2.828034598519989e-07
+        },
+        {
+          "date": "2024-09-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.0634407876602365e-06,
+          "a4f_theta1": 1.646517563525835e-07
+        },
+        {
+          "date": "2024-12-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.481442191129693e-06,
+          "a4f_theta1": 1.635625462014771e-07
+        },
+        {
+          "date": "2025-03-10",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.336998891354009e-06,
+          "a4f_theta1": 1.6412328009435577e-07
+        },
+        {
+          "date": "2025-06-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.099457987999028e-06,
+          "a4f_theta1": 1.6229492075917076e-07
+        },
+        {
+          "date": "2025-09-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.155070927232459e-06,
+          "a4f_theta1": 1.622376572563453e-07
+        },
+        {
+          "date": "2025-12-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.616675594227896e-06,
+          "a4f_theta1": 1.592491061809432e-07
+        },
+        {
+          "date": "2026-03-11",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.9650652505676444e-06,
+          "a4f_theta1": 1.617377338575603e-07
+        }
+      ]
+    },
+    "EWJ": {
+      "ticker": "EWJ",
+      "class_label": "equity_japan",
+      "currency": "USD",
+      "data_start": "1996-03-19",
+      "data_end": "2026-04-10",
+      "n_total": 7564,
+      "window": 2000,
+      "refit_every": 63,
+      "oos_start": "2007-01-03",
+      "oos_end": "2026-04-10",
+      "n_oos": 4848,
+      "n_refits": 77,
+      "diagnostics": {
+        "n": 7564,
+        "mean_ret_ann": 0.027449804410480266,
+        "std_ret_ann": 0.22585318737649776,
+        "skew": 0.15584006252136598,
+        "kurt": 7.019896319690872,
+        "vix_mean": 20.194650982877427,
+        "vix_max": 82.69000244140625,
+        "corr_ret_vix_level": -0.09697770803986491
+      },
+      "full_oos": {
+        "n": 4848,
+        "qlike_base": -8.03097612231888,
+        "qlike_a4f_vix": -8.062194551037413,
+        "qlike_diff_pct": -0.3887252090287558,
+        "dm_t": 4.806422432147647,
+        "dm_p": 1.5365505912079414e-06,
+        "harvey_pass": true,
+        "spearman_base": 0.2893126103968031,
+        "spearman_a4f_vix": 0.3136476249814934,
+        "bootstrap_ci_95_qlike_diff": [
+          0.017437657413483448,
+          0.043577783409189365
+        ]
+      },
+      "meta_validation": {
+        "k1090_ridge_pred": 4.339689983398169,
+        "k1090_ridge_pi95": [
+          3.1595157584597446,
+          5.401306137507816
+        ],
+        "k1090_recommendation": "strong_run",
+        "realized_dm_t": 4.806422432147647,
+        "abs_error": 0.46673244874947795,
+        "within_pi95": true,
+        "harvey_pass": true,
+        "meta_prediction_correct_direction": true
+      },
+      "forecasts": {
+        "first_date": "2007-01-03",
+        "last_date": "2026-04-10",
+        "gjr_qlike_full": -8.03097612231888,
+        "a4f_qlike_full": -8.062194551037413
+      },
+      "refit_log": [
+        {
+          "date": "2007-01-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.984278800338702e-05,
+          "a4f_theta1": 1.439224474714545e-07
+        },
+        {
+          "date": "2007-04-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.745527907117982e-05,
+          "a4f_theta1": 1.5250805024121722e-07
+        },
+        {
+          "date": "2007-07-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.898176445262044e-05,
+          "a4f_theta1": 1.6005151522313958e-07
+        },
+        {
+          "date": "2007-10-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.233060134149223e-05,
+          "a4f_theta1": 1.2569968744420207e-07
+        },
+        {
+          "date": "2008-01-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.265817808063818e-05,
+          "a4f_theta1": 1.251328275889773e-07
+        },
+        {
+          "date": "2008-04-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.512649303023473e-05,
+          "a4f_theta1": 1.5478610547179937e-07
+        },
+        {
+          "date": "2008-07-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.159533463610969e-05,
+          "a4f_theta1": 1.653561711777445e-07
+        },
+        {
+          "date": "2008-10-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.9331401298895636e-05,
+          "a4f_theta1": 1.710730035946118e-07
+        },
+        {
+          "date": "2009-01-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.0491762368633705e-05,
+          "a4f_theta1": 1.6677239670822152e-07
+        },
+        {
+          "date": "2009-04-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.7737609673024516e-05,
+          "a4f_theta1": 1.702357989665686e-07
+        },
+        {
+          "date": "2009-07-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.7301924583026575e-05,
+          "a4f_theta1": 1.7510661129716166e-07
+        },
+        {
+          "date": "2009-10-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.890655007894083e-05,
+          "a4f_theta1": 1.4779644533190627e-07
+        },
+        {
+          "date": "2010-01-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.787873488180237e-05,
+          "a4f_theta1": 1.479479317084003e-07
+        },
+        {
+          "date": "2010-04-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.674549715325285e-05,
+          "a4f_theta1": 1.407328288922047e-07
+        },
+        {
+          "date": "2010-07-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.094390907798545e-05,
+          "a4f_theta1": 1.2487369344286367e-07
+        },
+        {
+          "date": "2010-10-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.3031620714835184e-05,
+          "a4f_theta1": 1.1507534822960512e-07
+        },
+        {
+          "date": "2011-01-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.9072978374705816e-05,
+          "a4f_theta1": 1.1552059243703984e-07
+        },
+        {
+          "date": "2011-04-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.3564706912253545e-05,
+          "a4f_theta1": 1.48652055478007e-07
+        },
+        {
+          "date": "2011-07-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.156838754524953e-05,
+          "a4f_theta1": 1.5243572714271416e-07
+        },
+        {
+          "date": "2011-10-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.970995016008129e-05,
+          "a4f_theta1": 1.6025132655850021e-07
+        },
+        {
+          "date": "2012-01-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.744353967876002e-05,
+          "a4f_theta1": 1.6326663172321043e-07
+        },
+        {
+          "date": "2012-04-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.732267327279278e-05,
+          "a4f_theta1": 1.5711892480437352e-07
+        },
+        {
+          "date": "2012-07-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.549950398029615e-05,
+          "a4f_theta1": 1.5192286107570315e-07
+        },
+        {
+          "date": "2012-10-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.9586055800199887e-05,
+          "a4f_theta1": 1.617509454279173e-07
+        },
+        {
+          "date": "2013-01-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.7778739562764782e-05,
+          "a4f_theta1": 1.6619146832735254e-07
+        },
+        {
+          "date": "2013-04-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.830199650467627e-05,
+          "a4f_theta1": 1.0644182583541427e-07
+        },
+        {
+          "date": "2013-07-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.256023213330678e-05,
+          "a4f_theta1": 1.0258030979799185e-07
+        },
+        {
+          "date": "2013-10-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.604756080973322e-05,
+          "a4f_theta1": 1.0979196169432521e-07
+        },
+        {
+          "date": "2014-01-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.5288263619240205e-05,
+          "a4f_theta1": 1.1585691373853258e-07
+        },
+        {
+          "date": "2014-04-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.0259619510678986e-05,
+          "a4f_theta1": 1.2110855664545865e-07
+        },
+        {
+          "date": "2014-07-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.769892282293475e-05,
+          "a4f_theta1": 1.2732140499316883e-07
+        },
+        {
+          "date": "2014-10-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.2602750895543113e-05,
+          "a4f_theta1": 1.3551521857127094e-07
+        },
+        {
+          "date": "2015-01-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.6503980807686496e-05,
+          "a4f_theta1": 1.2970812450428955e-07
+        },
+        {
+          "date": "2015-04-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.485296771460713e-05,
+          "a4f_theta1": 1.3138048649026248e-07
+        },
+        {
+          "date": "2015-07-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.994159639322132e-05,
+          "a4f_theta1": 1.2434440645774424e-07
+        },
+        {
+          "date": "2015-10-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.6985473762057735e-05,
+          "a4f_theta1": 1.4051627968367324e-07
+        },
+        {
+          "date": "2016-01-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.5356137598481528e-05,
+          "a4f_theta1": 1.4284666280070607e-07
+        },
+        {
+          "date": "2016-04-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.717471264411571e-05,
+          "a4f_theta1": 1.3327024215262026e-07
+        },
+        {
+          "date": "2016-07-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.7987553717094384e-05,
+          "a4f_theta1": 1.3524010224474327e-07
+        },
+        {
+          "date": "2016-10-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.538434024857394e-06,
+          "a4f_theta1": 1.8789883683343023e-07
+        },
+        {
+          "date": "2017-01-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0002692146658206989,
+          "a4f_theta1": 8.847393581081998e-07
+        },
+        {
+          "date": "2017-04-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.666192390156376e-06,
+          "a4f_theta1": 1.9415144291574105e-07
+        },
+        {
+          "date": "2017-07-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 1.8845993669369304e-05,
+          "a4f_theta1": 1.4660503000427493e-07
+        },
+        {
+          "date": "2017-10-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.281118037092984e-06,
+          "a4f_theta1": 1.88435626055813e-07
+        },
+        {
+          "date": "2018-01-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.618253199720924e-06,
+          "a4f_theta1": 1.9218062086306259e-07
+        },
+        {
+          "date": "2018-04-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.628859465281167e-06,
+          "a4f_theta1": 2.0536798422102206e-07
+        },
+        {
+          "date": "2018-07-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.8863621943182844e-06,
+          "a4f_theta1": 2.7826828770519124e-07
+        },
+        {
+          "date": "2018-10-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -6.1767812607472526e-06,
+          "a4f_theta1": 3.0332245702441335e-07
+        },
+        {
+          "date": "2019-01-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -4.859881732884828e-06,
+          "a4f_theta1": 3.0629860065531714e-07
+        },
+        {
+          "date": "2019-04-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.76862451409862e-06,
+          "a4f_theta1": 2.841906633632246e-07
+        },
+        {
+          "date": "2019-07-10",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.53345723910225e-06,
+          "a4f_theta1": 2.825471267489294e-07
+        },
+        {
+          "date": "2019-10-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.6994568510555374e-06,
+          "a4f_theta1": 2.7315505054823523e-07
+        },
+        {
+          "date": "2020-01-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -2.170423925238966e-06,
+          "a4f_theta1": 2.5626324278746694e-07
+        },
+        {
+          "date": "2020-04-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -7.202600605873306e-06,
+          "a4f_theta1": 2.9226788302844374e-07
+        },
+        {
+          "date": "2020-07-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": -6.59896238098122e-06,
+          "a4f_theta1": 2.916991666770585e-07
+        },
+        {
+          "date": "2020-10-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.04558095912055e-07,
+          "a4f_theta1": 2.3449052663568452e-07
+        },
+        {
+          "date": "2021-01-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.4684657102744703e-06,
+          "a4f_theta1": 2.141668337288078e-07
+        },
+        {
+          "date": "2021-04-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.0712657998955487e-06,
+          "a4f_theta1": 2.0731594781455018e-07
+        },
+        {
+          "date": "2021-07-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.7396364471881385e-06,
+          "a4f_theta1": 2.1419945691679666e-07
+        },
+        {
+          "date": "2021-10-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.855423893480548e-07,
+          "a4f_theta1": 2.1806592050307117e-07
+        },
+        {
+          "date": "2022-01-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 1.7517659480981455e-06,
+          "a4f_theta1": 2.0769313624018855e-07
+        },
+        {
+          "date": "2022-04-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.4670849017947414e-06,
+          "a4f_theta1": 1.9798254797989997e-07
+        },
+        {
+          "date": "2022-07-11",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.655741735029457e-06,
+          "a4f_theta1": 1.8977997720918354e-07
+        },
+        {
+          "date": "2022-10-07",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.225268079556981e-06,
+          "a4f_theta1": 2.0291138940855111e-07
+        },
+        {
+          "date": "2023-01-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 1.413672974980695e-06,
+          "a4f_theta1": 1.921123101376989e-07
+        },
+        {
+          "date": "2023-04-11",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 2.0220168727983845e-06,
+          "a4f_theta1": 1.878828742190941e-07
+        },
+        {
+          "date": "2023-07-12",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.6138424728606883e-06,
+          "a4f_theta1": 1.794573294118266e-07
+        },
+        {
+          "date": "2023-10-10",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.190588449164141e-06,
+          "a4f_theta1": 1.6884831836924789e-07
+        },
+        {
+          "date": "2024-01-10",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.616324705202701e-06,
+          "a4f_theta1": 1.6995186883619165e-07
+        },
+        {
+          "date": "2024-04-11",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.280346985656874e-06,
+          "a4f_theta1": 1.6683309473365792e-07
+        },
+        {
+          "date": "2024-07-12",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.8220003166978035e-06,
+          "a4f_theta1": 1.622114522484323e-07
+        },
+        {
+          "date": "2024-10-10",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 5.562150645744441e-06,
+          "a4f_theta1": 1.6831028719133663e-07
+        },
+        {
+          "date": "2025-01-13",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.925875389878778e-06,
+          "a4f_theta1": 1.7074800252540233e-07
+        },
+        {
+          "date": "2025-04-14",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 4.846655824997256e-06,
+          "a4f_theta1": 1.7872153449354999e-07
+        },
+        {
+          "date": "2025-07-16",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.347761158909412e-06,
+          "a4f_theta1": 1.8290873487350236e-07
+        },
+        {
+          "date": "2025-10-14",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.468278803991573e-06,
+          "a4f_theta1": 1.861111811462355e-07
+        },
+        {
+          "date": "2026-01-14",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 1.6191824319610764e-05,
+          "a4f_theta1": 1.642851411414047e-07
+        }
+      ]
+    },
+    "CPER": {
+      "ticker": "CPER",
+      "class_label": "commodity_copper",
+      "currency": "USD",
+      "data_start": "2011-11-16",
+      "data_end": "2026-04-10",
+      "n_total": 3619,
+      "window": 1500,
+      "refit_every": 63,
+      "oos_start": "2020-01-02",
+      "oos_end": "2026-04-10",
+      "n_oos": 1576,
+      "n_refits": 26,
+      "diagnostics": {
+        "n": 3619,
+        "mean_ret_ann": 0.02463954343734957,
+        "std_ret_ann": 0.3111264140465643,
+        "skew": 0.2004194665980076,
+        "kurt": 164.616604792037,
+        "vix_mean": 17.84185687795335,
+        "vix_max": 82.69000244140625,
+        "corr_ret_vix_level": -0.054454487366331475
+      },
+      "full_oos": {
+        "n": 1576,
+        "qlike_base": -7.182499695009701,
+        "qlike_a4f_vix": -7.1881676603581175,
+        "qlike_diff_pct": -0.07891354805561918,
+        "dm_t": 0.4357413050350582,
+        "dm_p": 0.6630244336465547,
+        "harvey_pass": false,
+        "spearman_base": 0.09939545677164675,
+        "spearman_a4f_vix": 0.10944441749339567,
+        "bootstrap_ci_95_qlike_diff": [
+          -0.019270309685460958,
+          0.031404922249020174
+        ]
+      },
+      "meta_validation": {
+        "k1090_ridge_pred": 3.579902046160302,
+        "k1090_ridge_pi95": [
+          0.35350537938578613,
+          4.471380070584446
+        ],
+        "k1090_recommendation": "run",
+        "realized_dm_t": 0.4357413050350582,
+        "abs_error": 3.1441607411252437,
+        "within_pi95": true,
+        "harvey_pass": false,
+        "meta_prediction_correct_direction": false
+      },
+      "forecasts": {
+        "first_date": "2020-01-02",
+        "last_date": "2026-04-10",
+        "gjr_qlike_full": -7.182499695009701,
+        "a4f_qlike_full": -7.1881676603581175
+      },
+      "refit_log": [
+        {
+          "date": "2020-01-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00017706379857488448,
+          "a4f_theta1": 1.4824088389510374e-07
+        },
+        {
+          "date": "2020-04-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.000182488514375949,
+          "a4f_theta1": 1.1713628071776311e-07
+        },
+        {
+          "date": "2020-07-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00020188238680772362,
+          "a4f_theta1": 5.675628001696226e-08
+        },
+        {
+          "date": "2020-10-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0003166644780259279,
+          "a4f_theta1": 6.4184045997069e-08
+        },
+        {
+          "date": "2020-12-31",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 3.866117488134993e-05,
+          "a4f_theta1": 6.485549702757622e-07
+        },
+        {
+          "date": "2021-04-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.856966230595494e-05,
+          "a4f_theta1": 1.3779843900221788e-07
+        },
+        {
+          "date": "2021-07-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.552204827454723e-05,
+          "a4f_theta1": 1.4058243148373298e-07
+        },
+        {
+          "date": "2021-10-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.995051641050243e-05,
+          "a4f_theta1": 1.2774884964883179e-07
+        },
+        {
+          "date": "2021-12-31",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.510011073178136e-05,
+          "a4f_theta1": 1.3982396110533473e-07
+        },
+        {
+          "date": "2022-04-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.890822996281483e-05,
+          "a4f_theta1": 8.667093370470585e-08
+        },
+        {
+          "date": "2022-07-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.827376184696899e-05,
+          "a4f_theta1": 9.060539888888892e-08
+        },
+        {
+          "date": "2022-10-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00010089556996495708,
+          "a4f_theta1": 8.828931259687259e-08
+        },
+        {
+          "date": "2023-01-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00010119364924681835,
+          "a4f_theta1": 8.444469577106828e-08
+        },
+        {
+          "date": "2023-04-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.769216275498868e-05,
+          "a4f_theta1": 9.185998291680055e-08
+        },
+        {
+          "date": "2023-07-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.249833420901622e-05,
+          "a4f_theta1": 1.0051451368879592e-07
+        },
+        {
+          "date": "2023-10-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.10505522503225e-05,
+          "a4f_theta1": 1.0435235178284675e-07
+        },
+        {
+          "date": "2024-01-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.431293226876258e-05,
+          "a4f_theta1": 9.003656689284622e-08
+        },
+        {
+          "date": "2024-04-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.077553909437278e-05,
+          "a4f_theta1": 9.911456690866378e-08
+        },
+        {
+          "date": "2024-07-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.451217065699179e-05,
+          "a4f_theta1": 8.505568500295846e-08
+        },
+        {
+          "date": "2024-10-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.369466306707256e-05,
+          "a4f_theta1": 8.214495158519989e-08
+        },
+        {
+          "date": "2025-01-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.179421028096614e-05,
+          "a4f_theta1": 9.071445059761333e-08
+        },
+        {
+          "date": "2025-04-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.219388132913626e-05,
+          "a4f_theta1": 1.1854014223746282e-07
+        },
+        {
+          "date": "2025-07-10",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.663107689047802e-05,
+          "a4f_theta1": 1.2363835120755083e-07
+        },
+        {
+          "date": "2025-10-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0009077089551912286,
+          "a4f_theta1": 6.767581470267282e-07
+        },
+        {
+          "date": "2026-01-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0011125898918976202,
+          "a4f_theta1": 4.032044941139772e-07
+        },
+        {
+          "date": "2026-04-10",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0012585037752999957,
+          "a4f_theta1": 1.1158759705246762e-07
+        }
+      ]
+    },
+    "SLV": {
+      "ticker": "SLV",
+      "class_label": "commodity_silver",
+      "currency": "USD",
+      "data_start": "2006-05-01",
+      "data_end": "2026-04-10",
+      "n_total": 5018,
+      "window": 2000,
+      "refit_every": 63,
+      "oos_start": "2014-05-01",
+      "oos_end": "2026-04-10",
+      "n_oos": 3004,
+      "n_refits": 48,
+      "diagnostics": {
+        "n": 5018,
+        "mean_ret_ann": 0.08083924373328619,
+        "std_ret_ann": 0.3346335403124601,
+        "skew": -1.5906997411724786,
+        "kurt": 19.677745928358185,
+        "vix_mean": 19.599280592833633,
+        "vix_max": 82.69000244140625,
+        "corr_ret_vix_level": -0.0414942031178017
+      },
+      "full_oos": {
+        "n": 3004,
+        "qlike_base": -7.20468094226262,
+        "qlike_a4f_vix": -7.204082148503557,
+        "qlike_diff_pct": 0.00831117663449189,
+        "dm_t": -0.08214643581495609,
+        "dm_p": 0.9345302674335421,
+        "harvey_pass": false,
+        "spearman_base": 0.206030727295034,
+        "spearman_a4f_vix": 0.20616758055109796,
+        "bootstrap_ci_95_qlike_diff": [
+          -0.015776759985792192,
+          0.011953957980586833
+        ]
+      },
+      "meta_validation": {
+        "k1090_ridge_pred": 3.583805960400902,
+        "k1090_ridge_pi95": [
+          0.7023882806676324,
+          4.28821391919544
+        ],
+        "k1090_recommendation": "run",
+        "realized_dm_t": -0.08214643581495609,
+        "abs_error": 3.665952396215858,
+        "within_pi95": false,
+        "harvey_pass": false,
+        "meta_prediction_correct_direction": false
+      },
+      "forecasts": {
+        "first_date": "2014-05-01",
+        "last_date": "2026-04-10",
+        "gjr_qlike_full": -7.20468094226262,
+        "a4f_qlike_full": -7.204082148503557
+      },
+      "refit_log": [
+        {
+          "date": "2014-05-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0011695152335001765,
+          "a4f_theta1": 1.5813468355517447e-06
+        },
+        {
+          "date": "2014-07-31",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0010969466845981764,
+          "a4f_theta1": 1.5601688760035229e-06
+        },
+        {
+          "date": "2014-10-29",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0001385856239946862,
+          "a4f_theta1": 2.2864872405567455e-07
+        },
+        {
+          "date": "2015-01-30",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0001422114922082808,
+          "a4f_theta1": 2.3575526270816426e-07
+        },
+        {
+          "date": "2015-05-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0001340539056367605,
+          "a4f_theta1": 2.417315521692078e-07
+        },
+        {
+          "date": "2015-07-31",
+          "gjr_conv": true,
+          "a4f_conv": false,
+          "a4f_theta0": 0.0001374715012578217,
+          "a4f_theta1": 2.1747419661001915e-07
+        },
+        {
+          "date": "2015-10-29",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0001372812212733942,
+          "a4f_theta1": 2.1624968050737848e-07
+        },
+        {
+          "date": "2016-02-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00013612799420823174,
+          "a4f_theta1": 2.1507239422237117e-07
+        },
+        {
+          "date": "2016-05-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00014353562605091348,
+          "a4f_theta1": 1.9008704951653993e-07
+        },
+        {
+          "date": "2016-08-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00014312054586463347,
+          "a4f_theta1": 2.025623033431052e-07
+        },
+        {
+          "date": "2016-10-28",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00014836747646785117,
+          "a4f_theta1": 1.7545729853900966e-07
+        },
+        {
+          "date": "2017-01-31",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00016152804022653443,
+          "a4f_theta1": 1.3591947402791989e-07
+        },
+        {
+          "date": "2017-05-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0001460395824812566,
+          "a4f_theta1": 1.7926215830942656e-07
+        },
+        {
+          "date": "2017-08-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00012925050734541963,
+          "a4f_theta1": 2.0462211716872774e-07
+        },
+        {
+          "date": "2017-10-30",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00012648524949488406,
+          "a4f_theta1": 1.9308636437168032e-07
+        },
+        {
+          "date": "2018-01-31",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00012094397648969464,
+          "a4f_theta1": 1.9510370862085935e-07
+        },
+        {
+          "date": "2018-05-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00013332311151766183,
+          "a4f_theta1": 1.1625759773081076e-07
+        },
+        {
+          "date": "2018-08-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00012543230647237957,
+          "a4f_theta1": 1.333127383736001e-07
+        },
+        {
+          "date": "2018-10-30",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00012448691878166865,
+          "a4f_theta1": 1.331134071951513e-07
+        },
+        {
+          "date": "2019-02-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00012566808675670675,
+          "a4f_theta1": 8.391688729693603e-08
+        },
+        {
+          "date": "2019-05-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 6.442700593951775e-06,
+          "a4f_theta1": 4.967916634809182e-09
+        },
+        {
+          "date": "2019-08-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00011168486903585318,
+          "a4f_theta1": 8.853944609802088e-08
+        },
+        {
+          "date": "2019-10-31",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.0001199292282435347,
+          "a4f_theta1": 5.945230786979755e-08
+        },
+        {
+          "date": "2020-02-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00012883397747268926,
+          "a4f_theta1": 7.147513590383553e-10
+        },
+        {
+          "date": "2020-05-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00010587720179285013,
+          "a4f_theta1": 8.934935994965689e-08
+        },
+        {
+          "date": "2020-08-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00010527546640729897,
+          "a4f_theta1": 1.1229946743466232e-07
+        },
+        {
+          "date": "2020-10-30",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00010737851152617714,
+          "a4f_theta1": 9.620567898989794e-08
+        },
+        {
+          "date": "2021-02-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 0.00010227662086292514,
+          "a4f_theta1": 1.3237472101631381e-07
+        },
+        {
+          "date": "2021-05-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.898435331518188e-05,
+          "a4f_theta1": 1.5992501725999754e-07
+        },
+        {
+          "date": "2021-08-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.908233494551644e-05,
+          "a4f_theta1": 1.4895976640880844e-07
+        },
+        {
+          "date": "2021-11-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.550531725249675e-05,
+          "a4f_theta1": 1.5295876328601722e-07
+        },
+        {
+          "date": "2022-02-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.219344301043774e-05,
+          "a4f_theta1": 1.4912949740606202e-07
+        },
+        {
+          "date": "2022-05-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.195282238365669e-05,
+          "a4f_theta1": 1.5533351361832356e-07
+        },
+        {
+          "date": "2022-08-03",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.686346668909015e-05,
+          "a4f_theta1": 1.7476156573648517e-07
+        },
+        {
+          "date": "2022-11-01",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.068390431227392e-05,
+          "a4f_theta1": 1.9162812639885223e-07
+        },
+        {
+          "date": "2023-02-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.333595113875428e-05,
+          "a4f_theta1": 1.9460529276391407e-07
+        },
+        {
+          "date": "2023-05-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.040658466731406e-05,
+          "a4f_theta1": 1.9814807038057463e-07
+        },
+        {
+          "date": "2023-08-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.001478977290336e-05,
+          "a4f_theta1": 1.84404769663349e-07
+        },
+        {
+          "date": "2023-11-02",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.87275773182455e-05,
+          "a4f_theta1": 1.91969429627526e-07
+        },
+        {
+          "date": "2024-02-05",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.998614263968246e-05,
+          "a4f_theta1": 1.9413025548148813e-07
+        },
+        {
+          "date": "2024-05-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.96075991162078e-05,
+          "a4f_theta1": 2.0340018975069362e-07
+        },
+        {
+          "date": "2024-08-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.982825224383195e-05,
+          "a4f_theta1": 2.0515010402453512e-07
+        },
+        {
+          "date": "2024-11-04",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.40518570636672e-05,
+          "a4f_theta1": 2.1032038940913648e-07
+        },
+        {
+          "date": "2025-02-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.209664871734302e-05,
+          "a4f_theta1": 2.1610219224461898e-07
+        },
+        {
+          "date": "2025-05-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 7.98773090352749e-05,
+          "a4f_theta1": 2.262089092416127e-07
+        },
+        {
+          "date": "2025-08-08",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 8.888546133224145e-05,
+          "a4f_theta1": 2.1028267851196098e-07
+        },
+        {
+          "date": "2025-11-06",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.065017271175525e-05,
+          "a4f_theta1": 2.2600916295655476e-07
+        },
+        {
+          "date": "2026-02-09",
+          "gjr_conv": true,
+          "a4f_conv": true,
+          "a4f_theta0": 9.681521296337331e-05,
+          "a4f_theta1": 2.320468941772732e-07
+        }
+      ]
+    }
+  },
+  "meta_summary": {
+    "k1090_formula_compact": "DM_t ~ -1.22 + 3.38*USD_dummy - 4.11*corr(ret, dVIX)",
+    "k1090_loocv_rmse": 1.942752,
+    "n_assets": 4,
+    "harvey_pass_count": 2,
+    "direction_correct_count": 2,
+    "mae_realized_vs_pred": 1.882190542312565,
+    "rmse_realized_vs_pred": 2.4293134256894766,
+    "mean_bias_realized_minus_pred": -1.6488243179378261,
+    "h1_vgk_harvey_pass": true,
+    "h2_ewj_harvey_pass": true,
+    "h3_cper_harvey_pass": false,
+    "h4_slv_harvey_pass": false,
+    "h5_mae_below_loocv_rmse": true
+  }
+}
