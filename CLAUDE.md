@@ -18,7 +18,7 @@
      - **Agent worktree 完成後必須用 `bash scripts/merge_worktree.sh` 合併到主分支**（⚠️ 絕對禁止 `git worktree remove --force`）
      - **README.md 是必備的**——打開資料夾就能知道在做什麼、為什麼、怎麼做、結論是什麼
    - **知識庫**（`storage/memory/knowledge.json`）：含 experiment_id、title、content 摘要（200-300字）、tags、data_source。記錄**發現了什麼**（結論、數據、統計量）
-   - **經驗庫**（`storage/memory/experiment_experiences.json`，Exxx 編號）：記錄**學到了什麼**（為什麼成功/失敗、踩了什麼坑、下次該怎麼做）。每 5-10 個實驗彙整一條經驗記錄
+   - **經驗庫**（`storage/memory/experiment_experiences.json`，Exxx 編號）：記錄**學到了什麼**（為什麼成功/失敗、踩了什麼坑、下次該怎麼做）。**觸發條件 = per-incident**（遇到棘手狀況/重要狀況/非預期方式解決後立刻寫），不是「每 N 實驗批次彙整」。判斷要不要寫：問「這件事下次我該怎麼做才不重犯？」——有答案就寫。每 5-10 實驗再補一條 session-arc summary 是輔助，不是主觸發
    - 不可只存 results JSON 而不進知識庫——2026-03 曾發現 85/124 實驗只有 results 但不在知識庫中
    - **Knowledge = 發現（what），Experience = 教訓（why + how to avoid）**
 4. **文獻先於實驗，理解先於動手**：每個特定主題的研究開始前，**必須先搜尋並分析相關學術文獻**，不可直接憑直覺設計實驗。具體要求：
@@ -74,12 +74,13 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 |------|------|
 | `/` | 首頁 Feed（SSR + `FeedBrowser` 無限滾動） |
 | `/about` | 關於頁面（研究背景、團隊） |
-| `/admin/*` | Admin CMS（10 面板：analytics/content/ops/strategies/questions/users/papers/paper-trading/health/schedules） |
+| `/admin/*` | Admin CMS（12 面板：analytics/content/health/ops/paper-trading/papers/program/questions/schedules/strategies/thinking/users） |
 | `/disclaimer` | 免責聲明 |
 | `/me` | 用戶專區（書籤、提問、活動摘要） |
 | `/paper` | 論文頁（讀 Supabase `papers` table） |
 | `/portfolio` | 投資組合總覽（`PaperTradingStrategyChart` + `PaperTradingTradeLog`） |
 | `/questions` | 會員問答 |
+| `/reports` | 研究報告列表 |
 | `/risk-forecast` | 風險預測儀表板 |
 | `/strategy-selector` | 策略選擇器 |
 | `/vix-calculator` | VIX 計算器 |
@@ -91,7 +92,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
   - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
   - **Paper trades 同步**：自動剝離市場數據，只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾
-- `scripts/daily_update.py` → 每日 00:03 UTC（台灣 08:03）美股收盤後計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇
+- `scripts/daily_update.py` → 每日 08:03 台灣時間（crontab `3 8 * * 2-6`，美股收盤後）計算策略權重 + 同步 Supabase + 重算績效指標。每日只產出一篇「每日策略建議」（含市場快照+持倉表+VIX分析），不再分兩篇
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正

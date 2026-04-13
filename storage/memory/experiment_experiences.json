@@ -611,5 +611,84 @@
       "sector-diversification"
     ],
     "created_at": "2026-04-13T05:08:48.054956+00:00"
+  },
+  {
+    "id": "E046",
+    "title": "K1100 matplotlib + pandas DatetimeIndex multi-dim indexing",
+    "lesson": "Agent 在 K1100 繪圖時遇到 matplotlib 對 pandas DatetimeIndex 的 multi-dim indexing 錯誤，結果差點沒存檔。解法：**將 plotting code 放在 save_results() 之後**，且用 numpy datetime64 array 代替 pandas DatetimeIndex 傳入 matplotlib。下次設計長時實驗時，務必 **save results 在最前面，plotting 放最後**——避免 plotting bug 導致幾百秒計算遺失。",
+    "context": "K1100 Student-t Copula-GARCH portfolio VaR",
+    "applies_to": [
+      "matplotlib",
+      "pandas-DatetimeIndex",
+      "plotting-bug",
+      "save-before-plot"
+    ],
+    "created_at": "2026-04-13T05:13:23.894607+00:00"
+  },
+  {
+    "id": "E047",
+    "title": "K1104 small-sample CV negative R² — artefact vs bug",
+    "lesson": "K1104 cross-sectional regression N=23，5-fold CV R² 跑出 -9.13 極負。Agent 第一反應是「有 bug」，Codex 審了代碼才確認：**小樣本 kfold CV 本質就會給極負 R²**（每 fold validation set 只有 4-5 筆，train set 18-19 筆，variance 吞 inference），**不代表 main spec 不成立**（Main R²=0.232 仍合理）。教訓：N<30 的 CV R² 永遠有 small-sample artefact，只能當 diagnostic 不能當 model rejection。Agent 最後用 boundary MLE filter（persist≥0.998 標為不穩定）而非重寫 CV 邏輯——正確判斷。",
+    "context": "K1104 24-firm regression + 5-fold CV",
+    "applies_to": [
+      "small-sample-CV",
+      "kfold-artefact",
+      "R²-interpretation",
+      "boundary-MLE-filter"
+    ],
+    "created_at": "2026-04-13T05:13:23.894607+00:00"
+  },
+  {
+    "id": "E048",
+    "title": "Monitor session-only 被忘記設起來",
+    "lesson": "Session 開始時自動設了 7 個 cron，但 **Monitor 沒設**——直到用戶問「有在 monitor 嗎」才發現。Monitor 跟 cron 都是 session-only，關 session 就消失，但 Claude Code 的 SessionStart hook 原本只提醒設 cron 沒提醒設 Monitor。已修正：(1) hook echo 更新 (2) scripts/session_startup.md 新增 Monitor 標準啟動集 (3) CLAUDE.md 加「session 啟動必建 Monitor」提示。**通則**：任何 session-only 的基礎設施必須在 SessionStart hook 和 scripts/session_startup.md 同時記載，缺一個就會漏。",
+    "context": "Session start infrastructure",
+    "applies_to": [
+      "session-only",
+      "Monitor",
+      "SessionStart-hook",
+      "startup-checklist"
+    ],
+    "created_at": "2026-04-13T05:13:23.894607+00:00"
+  },
+  {
+    "id": "E049",
+    "title": "跨 session race 防撞：Option A（file lock）vs Option B（task idempotent）決策",
+    "lesson": "用戶問兩 session 並行的 cron 衝突。Option A = 全域檔案鎖 (30 行) vs Option B = 每個 task 自己冪等。分析後選 B：(1) 多數 cron 本來就冪等（worktree check、git、增量索引、Monitor 只讀）(2) 真正會撞的只有 member_qa 挑題（兩 session 可能挑同題） (3) Option B 只要在 Supabase 加 status=ranked→researching atomic transition 5 行。**通則**：跨 process 協調優先考慮「任務層冪等」而非「全域互斥鎖」，鎖是 last resort（複雜、易生 zombie、違背 Claude Code per-session 設計）。已實作 （commit 873f1310）。",
+    "context": "兩 session 並行時 cron 重複問題",
+    "applies_to": [
+      "concurrency",
+      "cross-session",
+      "task-idempotency",
+      "atomic-transition",
+      "Supabase-conditional-patch"
+    ],
+    "created_at": "2026-04-13T05:13:23.894607+00:00"
+  },
+  {
+    "id": "E050",
+    "title": "用戶指研究盲區 → 立刻 pivot，不為 momentum 繼續",
+    "lesson": "連續做 K1067/K1067b/K1067c/K1103/K1104 共 5 個實驗全聚焦半導體，正要啟動 K1106（N=50 全 0050.TW）時用戶指出「研究的台股公司怎麼都很特定幾間？」。我的第一反應是解釋「K1104 已經 N=24 算跨 sector」—但用戶邏輯是：0050.TW 半導體權重 >50%，擴大 N 沒解決問題，只是更多半導體。**立刻 pivot**：刪 K1106，改 K1106b（7 sectors × 2-3 檔，N=15-18 but diverse）。教訓：用戶指出盲區時不要用「momentum」或「現有框架擴充」回應，應該**立刻重新設計**。繼續做同路線實驗只是 pattern-matching，不是回應挑戰。",
+    "context": "K1106 → K1106b pivot",
+    "applies_to": [
+      "research-direction",
+      "sector-overconcentration",
+      "user-feedback-response",
+      "momentum-bias"
+    ],
+    "created_at": "2026-04-13T05:13:23.894607+00:00"
+  },
+  {
+    "id": "E051",
+    "title": "Experience base 真正的觸發條件 — per-incident 不是 periodic",
+    "lesson": "今天 session 原本只寫了 E044（K1067c parity）+ E045（batch summary）。用戶指正：經驗庫「不就是遇到棘手狀況或重要狀況而你經歷且解決後的總結嗎」。重讀 CLAUDE.md 規則「每 5-10 實驗彙整一條」是補充頻率參考，**主觸發應該是 per-incident**。每次（1）遇到障礙、（2）Codex/用戶指出盲區、（3）用非預期方式解決某個問題，都該當場寫 experience。本次漏掉 E046-E050 共 5 條。**通則**：判斷是否要寫 experience 不要用「實驗數」量化，用「這件事下次我該怎麼做才不重犯/更好」這個問題來觸發。CLAUDE.md 規則段也該更新。",
+    "context": "Experience base 頻率 vs 觸發條件",
+    "applies_to": [
+      "memory-hygiene",
+      "experience-recording",
+      "CLAUDE-md-rule",
+      "meta-workflow"
+    ],
+    "created_at": "2026-04-13T05:13:23.894607+00:00"
   }
 ]

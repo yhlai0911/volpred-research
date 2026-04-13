@@ -11,8 +11,8 @@
 
 ### 前端 v4 架構（frontend-v2-fix/）
 - **SSR + CSR 混合**：首頁用 Server Component 初始載入 → `FeedBrowser` 用 `useSWRInfinite` 無限滾動
-- **Admin CMS**（10 個核心面板）：analytics / content / ops / strategies / questions / users / papers / paper-trading / health / schedules
-- **Legacy 面板**：`program` 已降級為隱藏/過渡功能，不列入主要平台操作入口
+- **Admin CMS**（12 個面板）：analytics / content / health / ops / paper-trading / papers / program / questions / schedules / strategies / thinking / users
+- （原 legacy `program` 已重新啟用為主面板之一；`thinking` 為 Claude 思考日誌檢視器）
 - **用戶專區** `/me`：書籤、提問歷史、活動摘要
 - **API 路由 45+**：含 `/api/admin/*`（12 端點）、`/api/me/*`（3 端點）、`/api/strategy-overview`、`/api/portfolio-overview`
 - **認證**：`admin-auth.ts` 支持 secret-based + session-based 雙模式，角色：admin/user/guest
@@ -27,7 +27,7 @@
   - **文章同步**：只讀取 `storage/reports/feed.json`（唯一源頭，`storage/feed.json` 已廢除）
   - **Paper trades 同步**：自動剝離市場數據（spy_close/gld_close 等），只存策略 weights + returns
   - **Draft 同步**：用 `published_at OR created_at` 過濾（支持 draft sync）
-- `scripts/daily_update.py` → 每日 06:03 計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
+- `scripts/daily_update.py` → 每日 08:03 台灣時間（crontab `3 8 * * 2-6`，美股收盤後）計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
 - `scripts/recalc_metrics.py` → 從 paper_trading.json 重算 Sharpe/MDD 等（daily_update 自動呼叫）
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
