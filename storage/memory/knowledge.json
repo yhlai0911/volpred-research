@@ -25557,5 +25557,24 @@
     ],
     "data_source": "yfinance (0050.TW 25 constituents), 財報公告日.txt (Big5)",
     "created_at": "2026-04-13T05:04:23.046613+00:00"
+  },
+  {
+    "id": "k1106b-1776057664",
+    "experiment_id": "K1106b",
+    "title": "K1106b: Sector-diversified firm θ₂ — fabless SIG, ANOVA underpowered, cherry-pick warning",
+    "content": "[提出: 用戶指 sector overconcentration, 執行: Claude] N=14 跨 7 sectors (foundry/fabless/financials/shipping/trad_mfg/consumer/electronics)。**ANOVA F(6,5)=6.87, p=0.026 nominally sig** 但 dof=5 underpowered 屬探索性。**Sector ranking (mean θ₂)**: fabless -1.997e-3 (only SIG, β=-2.29e-3 t=-5.16 **p=0.004 *** 重現 K1104) → shipping/financials/trad_mfg ≈ 0 → consumer +2.44e-4 (split firm-specific) → foundry +2.46e-4 → electronics n=1 Hon Hai +7.25e-4 t=3.59 最高。**Major caveats**: (1) **cherry-pick bias**: K1104 4 fabless 是 mixed signs (Novatek/Phison +, MediaTek/Realtek -)，K1106b 只挑到負的兩家 → 結論不該擴大到全體 fabless (2) shipping H3 反直覺 FAIL：可能運價 Baltic Dry/SCFI 即時公開 → 公告無 news shock (3) consumer 分裂 2912 +5.22e-4 (t=2.92) 是 firm-specific 非 sector (4) electronics n=1 不能推論 sector 結論。**K1104 replicability**: 10 個重疊 firm θ₂ 精確為 0.0% 差，deterministic MLE + shared parquet cache 確認方法論可重現。**Paper 2 tentative rules**: (1) foundry → 用 A4f-EAV (2) 避免 MediaTek/Realtek style 大型 fabless (3) Hon Hai 單點正面需 Quanta/Asus 補驗 (4) Financials/shipping → 用 plain A4f 不 EAV (5) Consumer firm-specific pooling 不可靠。Runtime 100s, Codex 審代碼 2 bugs 修正。",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "sector-heterogeneity",
+      "ANOVA-underpowered",
+      "cherry-pick-bias",
+      "K1104-replicability",
+      "cross-sectional",
+      "Taiwan",
+      "K1067-series"
+    ],
+    "data_source": "yfinance (14 tickers across 7 Taiwan sectors), 財報公告日.txt",
+    "created_at": "2026-04-13T05:21:04.753733+00:00"
   }
 ]

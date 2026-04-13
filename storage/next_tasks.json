@@ -99,16 +99,30 @@
   },
   {
     "id": "K1106b",
-    "title": "K1106b: Sector-diversified firm θ₂ heterogeneity (N=15-18 × 7 sectors)",
+    "title": "K1106b: Sector-diversified firm θ₂ heterogeneity",
     "priority": 2,
-    "description": "取代 K1106。用戶指出 0050.TW 半導體權重過高。改做跨 sector（foundry/fabless/financials/shipping/mfg/electronics/consumer）diversified sample。Agent a2b57efb99b820726 in worktree agent-k1106b.",
-    "status": "in_progress"
+    "description": "完成 N=14 / 7 sectors：ANOVA F=6.87 p=0.026 nominally sig 但 underpowered (dof=5)。fabless β=-2.29e-3 p=0.004 重現 K1104 但 cherry-pick bias warning。E052 記錄教訓。",
+    "status": "completed"
   },
   {
-    "id": "K1106",
-    "title": "K1106: Extend N to 50 (full 0050.TW) [deferred]",
-    "priority": 3,
-    "description": "延後。K1106b sector-diversified 版優先，若結果支持 sector heterogeneity 再回頭做全 50 檔確認。",
+    "id": "K1109",
+    "title": "K1109: Pre-registered random sample N=50+ across sectors",
+    "priority": 1,
+    "description": "K1106b D1 衍生：解決 cherry-pick bias。每 sector random sample ≥5 firms（不人為挑），ANOVA dof>20 才能 confirmatory。Pre-register 樣本清單在實驗前。",
+    "status": "pending"
+  },
+  {
+    "id": "K1110",
+    "title": "K1110: Panel regression with time-varying θ₂",
+    "priority": 2,
+    "description": "K1106b D2 衍生：rolling 63-day refits，測 sector heterogeneity 是結構性還是循環性。",
+    "status": "pending"
+  },
+  {
+    "id": "K1111",
+    "title": "K1111: Fundamental covariates replace sector dummies",
+    "priority": 2,
+    "description": "K1106b D3 衍生：EPS-guidance-spread、earnings-day volume spike、analyst coverage 替代 sector dummies。測 sector effect 是否可 decompose 為 firm characteristics。",
     "status": "pending"
   },
   {

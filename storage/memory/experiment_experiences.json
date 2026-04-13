@@ -690,5 +690,20 @@
       "meta-workflow"
     ],
     "created_at": "2026-04-13T05:13:23.894607+00:00"
+  },
+  {
+    "id": "E052",
+    "title": "K1106b Cherry-pick bias：先驗選樣 → 「驗證」只是重複 K1104 結果",
+    "lesson": "K1106b 挑 7 sectors × 2-3 檔 total N=14 來檢驗 sector heterogeneity，在 fabless 類別只挑了 MediaTek (K1067c 已確定 θ₂<0) + Realtek（也負），漏了 K1104 中 Novatek/Phison（正）。結果：fabless β=-2.29e-3 p=0.004 極度顯著，但這不是**新證據**，只是**對已知負樣本的重複估計**。\n\n**本質問題**：hypothesis-driven 抽樣 → 挑能支持假設的樣本 → regression 必然顯著 → 無助於 generalizable claim。\n\n**下次該怎麼做**：\n1. 小樣本分類實驗（N<30 per category）絕對要 **random sample within each category**，不是按「代表性」挑\n2. Category 內 sample 必須覆蓋 K1104 所有已知 signs（mixed signs → 代表這個 category 本身異質）\n3. ANOVA dof < 10 時明確標記 exploratory，不宣稱 confirmatory\n4. 若要真正 confirm sector effect，需 D1：N=50+ 全擴充，每 sector ≥5 firms\n\n**通則**：研究流程中「選樣」是重大決策節點，比「估計」「檢定」更前置也更容易 bias。**Sample design 必須在看結果前決定**（pre-registration 精神）。本次 K1106b design 在 agent prompt 裡指定了具體 tickers，等於是看過 K1104 結果後挑 — 就是 bias source。",
+    "context": "K1106b sector-diversified sample design",
+    "applies_to": [
+      "sampling-bias",
+      "cherry-pick",
+      "hypothesis-driven-selection",
+      "pre-registration",
+      "small-sample-ANOVA",
+      "confirmatory-vs-exploratory"
+    ],
+    "created_at": "2026-04-13T05:21:04.753733+00:00"
   }
 ]
