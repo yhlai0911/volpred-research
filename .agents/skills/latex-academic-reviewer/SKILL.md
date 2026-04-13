@@ -17,6 +17,20 @@ description: >
 
 # LaTeX 學術文件全面審查與修訂
 
+## Scope Boundary
+
+Use this skill for：
+
+- LaTeX 結構審查
+- 論述邏輯與段落編排
+- 符號、方程式、版本差異與 review report
+
+Do **not** use this skill for：
+
+- claim-evidence 強度與 contribution framing → `finance-paper-quality`
+- citation-only 驗證 → `citation-verifier`
+- stage 判定或平台同步 → `paper-stage-classifier` / `paper-update`
+
 ## 核心理念
 
 **審查目的**：讓研究計畫書更容易通過審查委員評審

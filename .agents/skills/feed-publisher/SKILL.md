@@ -13,6 +13,20 @@ description: >
 
 # Feed 研究文章發佈規範
 
+## Scope Boundary
+
+Use this skill for **文章內容本身**：
+
+- audience / article type 選擇
+- 標題、結構、圖表與資料來源標注
+- 主題查重與事件文章內容時效
+
+Do **not** use this skill for：
+
+- 文章池釋出節奏、排程發布、補寄通知 → `admin-ops`
+- 實驗設計與研究判斷 → `autonomous-research`
+- 論文寫作或 paper metadata 更新 → `finance-paper-quality` / `admin-ops`
+
 ## 核心原則
 
 **Feed = 給讀者看的完整文章，不是內部研究筆記。**
@@ -77,6 +91,11 @@ Publisher 會自動在文章末尾附加「延伸閱讀」區塊，列出同 aud
 - 「Phase O+P 完整報告：從 Skewed-t 到 QLIKE 天花板」
 - 「2026 Q1 Hormuz 危機即時追蹤報告」
 適合每個月或每個重大 Phase 結束後撰寫一次。
+
+## Related Skills
+
+- 研究產出來源 → `autonomous-research`
+- 文章池、節奏與通知 → `admin-ops`
 
 ## 文章結構模板（milestone 用）
 

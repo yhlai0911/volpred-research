@@ -25891,5 +25891,25 @@
     ],
     "data_source": "yfinance USO/GLD/UNG/BTC-USD 2015-2026",
     "created_at": "2026-04-13T11:11:38.667147+00:00"
+  },
+  {
+    "id": "k1134-1776080582",
+    "experiment_id": "K1134",
+    "title": "K1134: Range-proxy reveals hidden damage — GAS compendium 32 DM / 0 triple-gate",
+    "content": "[提出: Claude K1129 衍生, 執行: Claude] 4 commodity × 3 models × 4 vol proxies (r²/Parkinson/GK/RS)。**H1 FAIL 0/4 triple gate under any proxy**。**核心發現**: range proxies 揭露 close² 隱藏的 damage: (1) GLD r² DM t=-0.76 NS → range t=-4.0 to -4.1 Harvey 3 proxies 顯著 (GAS-t actively hurts) (2) USO r² +2.65% → range all negative (noise reversal) (3) UNG range DM t=2.4-2.5 邊界 near-pass but QLIKE <5% gate (4) BTC consistent loss across 4 proxies。**H2 range 比 close² 效率**: QLIKE magnitude 降 50-70%, Spearman 0.18→0.36-0.52。**H4 Patton 2011 proxy-robustness confirmed**: model ranking 跨 3 range estimators identical。**GAS compendium 最終**: K437+K1038+K1129+K1134 = 8 assets × 4 proxies = **32 DM comparisons, 0 triple-gate PASS**。Paper 4 升級為 3-NULL narrative (alt-data forecasting + alt-data allocation + alt-method GAS)。Codex PASS。Commit 08fbbbff。",
+    "tags": [
+      "Paper_4",
+      "GAS-t",
+      "range-proxy",
+      "Parkinson",
+      "Garman-Klass",
+      "Rogers-Satchell",
+      "proxy-robustness",
+      "GLD-hidden-damage",
+      "Patton-2011",
+      "compendium-final"
+    ],
+    "data_source": "yfinance USO/GLD/UNG/BTC-USD OHLC 2015-2026",
+    "created_at": "2026-04-13T11:43:02.017330+00:00"
   }
 ]

@@ -498,16 +498,30 @@
   },
   {
     "id": "K1134",
-    "title": "K1134: Range-based GAS (Parkinson/RS range + GAS-t)",
+    "title": "K1134: Range-proxy + GAS commodity (hidden damage revealed)",
     "priority": 3,
-    "description": "K1129 衍生: commodity intraday range 比 close² 資訊豐富，可能補純 close-to-close 看不到的 gain。",
-    "status": "pending"
+    "description": "0/4 triple-gate under Parkinson/GK/RS. GLD r² NS → range t=-4.0 Harvey sig (proxy-robustness Patton 2011). GAS compendium final: 8 assets × 4 proxies = 32 DM 0 PASS.",
+    "status": "completed"
   },
   {
     "id": "K1135",
     "title": "K1135: Skew-t GAS (Gonzalez-Rivera 2014) on negatively skewed commodities",
     "priority": 3,
     "description": "K1129 衍生: USO skew=-0.58 明顯，對稱 t 不捕捉，skew-t 可能改善 VaR/ES。",
+    "status": "pending"
+  },
+  {
+    "id": "K1135",
+    "title": "K1135: Hansen-Lunde 5-min RV as 5th proxy (where intraday exists)",
+    "priority": 3,
+    "description": "K1134 衍生: SPY/GLD/BTC close proxy-robustness audit。",
+    "status": "pending"
+  },
+  {
+    "id": "K1136",
+    "title": "K1136: Non-score-driven robust vol models (GARCH-MIDAS, HAR-RV-X)",
+    "priority": 3,
+    "description": "K1134 衍生: 區分「score-driven downweight fails」vs「all robust extensions fail」。",
     "status": "pending"
   }
 ]

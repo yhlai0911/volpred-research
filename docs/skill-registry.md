@@ -38,6 +38,8 @@
 ## Maintenance Rules
 
 - 新增 skill 前，先確認不能用現有 skill + reference bundle 解決。
+- 新增/刪除/改名/合併 top-level skill 時，必須同步更新本表；若影響 CLAUDE 導覽或流程入口，也要同步更新 `CLAUDE.md`。
+- 若 skill 變更會影響固定路徑、hooks、session 啟動 prompt 或 cron 工作流，必須連帶檢查 `.claude/settings.json`、`scripts/session_startup.md`、`.claude/commands/` 與相關 references。
 - 若內容是高頻重複流程但不值得獨立觸發，優先放到現有 skill 的 `references/`。
 - 若內容是全域治理原則，優先留在 `CLAUDE.md`，不要硬拆成 skill。
 - 若 skill 名稱改動會影響既有觸發，優先保留舊名並在內文修邊界。

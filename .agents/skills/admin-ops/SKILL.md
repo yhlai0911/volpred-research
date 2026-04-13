@@ -21,6 +21,21 @@ Use this skill for **platform-layer work**. Treat it as the operating manual for
 - `/api/admin/*`
 - `uv run python -m volpred.cli ops ...`
 
+## Scope Boundary
+
+Use this skill when the job is about：
+
+- 平台 surfaces 與 ops CLI
+- 文章池、排程、節奏釋出、通知
+- 策略 metadata / 問答營運 / paper metadata
+- session cron、monitor、platform-cycle 類型工作流
+
+Do **not** use this skill for：
+
+- 核心研究設計與實驗判斷 → `autonomous-research`
+- 文章內容撰寫 → `feed-publisher`
+- 論文內容品質或 citation 驗證 → `finance-paper-quality` / `citation-verifier`
+
 Do **not** use this skill as the main research workflow. When the task is primarily about:
 
 - model experiments
@@ -149,5 +164,11 @@ Load these references only when relevant:
 
 - `references/session-cron-workflows.md`
   - use when the task is about packaging platform operations into Claude session cron routines
+
+- `references/governance.md`
+  - use when diagnosing errors or deciding whether to manually fix data vs fix the process
+  - core principle: 永遠修流程，不修資料
+
+**⚠️ 系統出錯時第一步：查 `docs/error_log.md`。** 不只研究錯誤，所有平台/sync/deploy/merge 錯誤都記錄在此。先查再修，避免重蹈覆轍。
 
 Do not paste or re-explain all references by default. Load the minimal needed section and move.

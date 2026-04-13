@@ -4,11 +4,28 @@ description: >
   會員問題研究。每 6 小時由 cron 自動觸發。評估排名會員提問，
   選最高分做研究，回答發佈為 feed 文章（proposer=會員名稱），
   問答頁自動連結文章。每次只處理一個問題。
-  Trigger phrases: '會員問題研究', 'member questions', '提問排名', '評估會員問題'
+  Trigger phrases: '會員問題研究', 'member questions', '提問排名', '評估會員問題',
+  'question ranking', 'question rerank'. Do not use for the core experiment itself
+  (use autonomous-research), article writing (use feed-publisher), or general
+  platform surfaces unrelated to member questions (use admin-ops).
 user-invocable: true
 ---
 
 # 會員問題研究
+
+這個 skill 是會員問題審查與流轉的唯一母本。它負責：
+
+- 評分 `pending_questions`
+- stable insertion rerank
+- atomic claim 防撞
+- candidate lifecycle
+- `question-answer` 綁定
+
+它不負責：
+
+- 真正的研究與新實驗：交給 `autonomous-research`
+- 文章內容寫作與圖表：交給 `feed-publisher`
+- 一般平台後台操作：交給 `admin-ops`
 
 ## 核心原則
 - **每個回答 = 一篇完整資訊性文章**（1000-2000 字，委託研究報告等級）
@@ -30,19 +47,28 @@ user-invocable: true
    - 只插入新題目
    - 舊榜相對順序不可變
    - 更新 `current_rank` / `prev_rank` / `status`
-4. 從 ranked 榜單挑最高分且未承接題目：
-   - 直接進研究
-   - 或先加入研究候選池
-5. 若進研究候選池，遵循 lifecycle：
+4. 從 ranked 榜單挑最高分且未承接題目
+5. **Atomic claim（跨 session 防撞必做）**：
+   - `uv run volpred ops question-claim <question_id>`
+   - 成功（exit 0）→ 繼續做研究
+   - 失敗（exit 2，claimed=False）→ 代表另一個 session 已經接走，挑下一題重試
+   - 機制：Supabase 條件式 PATCH `status=ranked → researching`，原子操作
+6. 若進研究候選池，遵循 lifecycle：
    - `queued` → `claimed` → `completed` / `cancelled`
-6. 做研究（LanceDB 搜尋 + Agent 實驗 if needed）
-7. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --audience member_qa --proposer 會員名稱 --status draft --tags "會員提問,..."`
-   - **必須傳 `--audience member_qa` 和 `--proposer 會員名稱`**（否則 badge 和署名不顯示）
-8. 連結文章到問題：`uv run volpred ops question-answer <question_id> --answer "摘要" --article-id <article_slug>`
+7. 做研究（LanceDB 搜尋 + Agent 實驗 if needed）
+8. 發 feed 文章：`uv run volpred ops publish-milestone --title "..." --description "..." --phase member_qa --category member_qa --audience member_qa --proposer 會員名稱 --status draft --tags "會員提問,..."`
+   - **必須傳 `--category member_qa`、`--audience member_qa` 和 `--proposer 會員名稱`**（否則 badge 和署名不顯示）
+9. 連結文章到問題：`uv run volpred ops question-answer <question_id> --answer "摘要" --article-id <article_slug>`
    - **文章是 draft → 問題保持 `researching`**（不是 answered），文章發佈時 release-pool 自動改為 `answered`
    - **文章是 published → 問題直接標為 `answered`**
    - ⚠️ **不要在文章發佈前手動改問題狀態為 answered**——這是之前的 bug
-9. 回報：處理了哪個問題、發了什麼文章、問題狀態（researching=等待發佈 / answered=已完成）
+10. 回報：處理了哪個問題、發了什麼文章、問題狀態（researching=等待發佈 / answered=已完成）
 
 ## 詳細實作
-見 `references/evaluation-guide.md`（評分標準、Supabase 程式碼、文章格式模板、DB 欄位）
+見 [references/evaluation-guide.md](references/evaluation-guide.md)：
+
+- 評分標準與 `score_breakdown`
+- stable insertion 規則
+- candidate / question status lifecycle
+- `question-answer` 綁定規範
+- 常見錯誤與邊界案例

@@ -9,6 +9,18 @@ user-invocable: true
 
 # 台灣主計總處數據下載
 
+## Scope Boundary
+
+Use this skill for：
+
+- DGBAS / NDC 的台灣總體資料抓取
+- 欄位、民國年、下載方式與更新節奏
+
+Do **not** use this skill for：
+
+- 一般外部資料來源總覽 → `external-data-sources`
+- 研究判斷與模型選擇 → `autonomous-research`
+
 ## 資料來源
 - **主計總處總體統計資料庫**: https://nstatdb.dgbas.gov.tw/dgbasall/webMain.aspx?k=dgmain
 - 資料格式：CSV(UTF8)、JSON、Excel、XML

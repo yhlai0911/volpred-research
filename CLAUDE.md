@@ -142,7 +142,7 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **文章內容與圖表規格**：`.claude/skills/feed-publisher/SKILL.md`
 - **平台 ops / 文章池 / cron / monitor**：`.claude/skills/admin-ops/SKILL.md`
 - **會員問題審查與流轉**：`.claude/skills/member-questions/SKILL.md`
-- **論文系列 workflow**：`.claude/skills/paper-*/SKILL.md`
+- **論文系列 workflow**：`.claude/skills/paper-stage-classifier/SKILL.md`、`.claude/skills/paper-review-cycle/SKILL.md`、`.claude/skills/paper-update/SKILL.md`
 - **support gates**：`agent-result-verification` / `worktree-merge-verification` / `memory-health`
 
 ### 研究結論（非此處）
@@ -375,6 +375,9 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 ### Skill 自主管理與定期審查
 - **建立/修正 skill 不需要事先徵求同意**——Claude 依據任務執行中累積的經驗自行判斷。但每次建立或修正必須在下次與用戶互動時主動通知。
 - **完整 skill 註冊表 + scope boundaries**: `docs/skill-registry.md`（14 top-level skills，每個有 trigger phrases / 使用範圍 / handoff / 對應 CLAUDE.md 段落）
+- **新增/刪除/改名/合併 top-level skill 時，必須同步更新 `docs/skill-registry.md`**。若該變更影響 `CLAUDE.md` 的導覽、職責邊界或流程入口，也必須同步更新 `CLAUDE.md`。
+- **若 skill 變更會影響固定路徑、hooks、session 啟動 prompt 或 cron 工作流，必須一併檢查**：`.claude/settings.json`、`scripts/session_startup.md`、`.claude/commands/`、以及相關 skill references 是否仍指向正確路徑。
+- **若只是 skill 內部 reference 細節或案例補充，通常更新 skill/reference 本身即可；不要為了小改動過度擴散到 `CLAUDE.md`。**
 - **每月第一個 session 產出 Skill 審查報告**，內容包含：
   1. 目前所有 skill 清單（名稱、用途、上次觸發時間）
   2. 本月新增/修改的 skill 及原因

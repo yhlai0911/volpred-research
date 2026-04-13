@@ -10,6 +10,15 @@ description: >
 
 # 外部數據來源操作手冊
 
+## Scope Boundary
+
+Use this skill to decide **去哪裡拿資料、怎麼拿、有哪些陷阱**。
+
+Do **not** use this skill for：
+
+- 研究結論判斷與模型設計 → `autonomous-research`
+- 純 DGBAS / NDC 專屬流程細節 → `taiwan-macro-data`
+
 ## 總覽
 
 | 來源 | 類型 | 費用 | API Key | 頻率 | 主要用途 |
