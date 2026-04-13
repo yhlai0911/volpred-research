@@ -611,6 +611,17 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 20. Paper 2 四市場 + 雙 cluster taxonomy（2026-04-14 K1153 EU）
+**EU 加入四市場全 PASS，但 K1152 quarterly hypothesis 被推翻**
+- EU (DAX+CAC+FTSE, N=18 due yfinance earnings 稀疏) pooled θ_EAV = +4.07e-5, bootstrap t=+4.19 PASS
+- Placebo +14.77σ p=0/60；3 EAV-def monotonic, drop-5×5 stable
+- **Four-market direction universal confirmed** (TW+US+JP+EU all PASS + placebo p=0)
+- **θ_rel cluster**: TW 0.167 / EU 0.137 / JP 0.388 / US 0.586
+- EU 是純季報但 θ_rel 落 TW cluster → **K1152 quarterly-cadence hypothesis REJECTED**
+- 新假說：media concentration × analyst coverage 密度（US 季報媒體報導 + I/B/E/S coverage 最密）
+- Paper 2 narrative: "four independent markets + refined two-cluster θ_rel taxonomy; quarterly cadence 不是 cluster 主因"
+- 衍生 K1163 (EU local filings 改 N=30), K1164 (analyst coverage + media mechanism test)
+
 ### 18. Paper 2 relative-magnitude verdict: 方向 universal + 量級 market-specific（2026-04-13 K1152）
 **Scale-adjusted θ_rel 仍顯著差異：quarterly vs mixed reporting cluster**
 - K1145/K1147/K1150 三市場 absolute θ_EAV 差 3× — 只是 scale artifact 還是真 magnitude 差異？

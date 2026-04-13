@@ -664,7 +664,8 @@
     "title": "K1153: EU index pooled (DAX+CAC+FTSE composite) — fourth market",
     "priority": 4,
     "description": "歐洲市場 large-cap pooled，第四市場驗證。Top 10 from each + composite N=30。EU earnings 通常季報但時點分散。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T00:30:00+08:00"
   },
   {
     "id": "K1156",
@@ -693,6 +694,20 @@
     "title": "K1162: Analyst-coverage-high sub-sample — continuous EAV mechanism test",
     "priority": 3,
     "description": "K1151+K1157 兩市場 continuous NS 是 surprise noise 太大？在高 analyst coverage 子集（I/B/E/S covered, ≥5 analysts）檢驗 continuous θ_SURP 是否 PASS — 若 PASS → 'noise masks true effect in low coverage'; 若 NS → 機制確為非 shock-scale。",
+    "status": "pending"
+  },
+  {
+    "id": "K1163",
+    "title": "K1163: EU earnings via BaFin/AMF/FCA local filings (K1153 follow-up)",
+    "priority": 3,
+    "description": "K1153 EU yfinance earnings 資料稀疏 (12/30 skip)，N=18 DAX-biased。改用 BaFin (DE)/AMF (FR)/FCA (UK) 本地 filing API 取完整 CAC+FTSE earnings，N=30 重測是否改變 θ_rel=0.137 cluster 歸屬。",
+    "status": "pending"
+  },
+  {
+    "id": "K1164",
+    "title": "K1164: Analyst-coverage density + media-concentration mechanism test",
+    "priority": 2,
+    "description": "K1153 推翻 quarterly-density hypothesis。新假說測試: 用 I/B/E/S analyst coverage count per stock × earnings-season media article volume 作為 cross-market predictor of θ_rel。若 correlation 顯著 → mechanism 確認。",
     "status": "pending"
   }
 ]

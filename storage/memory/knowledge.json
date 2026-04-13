@@ -26089,5 +26089,26 @@
     "data_source": "yfinance TOPIX top-30 reuse K1150 data cache + earnings_dates Surprise(%) 2014-2025",
     "created_at": "2026-04-14T00:20:00+08:00",
     "updated_at": "2026-04-14T00:20:00+08:00"
+  },
+  {
+    "id": "k1153-1776098326",
+    "experiment_id": "K1153",
+    "title": "K1153 EU 4th market PASS — direction universal but refutes K1152 quarterly-cluster hypothesis",
+    "content": "[提出: Claude, 執行: Claude] K1145 TW + K1147 US + K1150 JP 三市場 binary EAV pooled 全 PASS 後驗證第四市場 (EU DAX+CAC+FTSE)。資料限制: 12 支 CAC/FTSE yfinance earnings 過稀疏 skip，loaded N=18 (100% quarterly, DAX-biased 56%)。**結果**: pooled θ_EAV = +4.07e-5，bootstrap t=+4.19 PASS，95% CI [1.94e-5, 6.22e-5] 不含 0，BH-FDR p=0。Placebo 60 reps z=+14.77σ p=0/60 decisive。3 EAV-def monotonic decay (1d/3d/5d: 4.07e-5 / 1.36e-5 / 0.74e-5)，drop-5×5 seeds t=8.1-8.7 穩定。**四市場 verdict**: direction universal (4/4 PASS + placebo p=0)。但 **relative-magnitude cluster 打破 quarterly hypothesis**: TW 0.167 / EU **0.137** / JP 0.388 / US 0.586 — EU 是純季報但 θ_rel 落 TW cluster 而非 US+JP cluster。**K1152 的 quarterly-reporting-density 解釋 REJECTED**。新假說: media concentration × analyst coverage 密度（US 媒體報導季報密度 + sell-side analyst coverage 最高，DAX/EU 儘管季報但 coverage 密度較低）。**Paper 2 narrative 升級**: 'four independent equity markets, direction universal + refined two-cluster θ_rel taxonomy' — Contribution 1 四區域 (America + Asia dev + Europe) direction universal 打破單一制度解釋; Contribution 2 否定 quarterly cadence 簡單說法，開 media-concentration + analyst-coverage 機制研究 (衍生 K1162)。Caveats: BCD converged=False (practical converged; bootstrap mean 貼近 point)，N=18 due yfinance EU earnings 稀疏，未來 K1163 用 BaFin/AMF/FCA 本地 filings 改善。",
+    "tags": [
+      "K1153",
+      "Paper2",
+      "EU",
+      "DAX",
+      "CAC",
+      "FTSE",
+      "four-market",
+      "cluster-taxonomy",
+      "refutation",
+      "K1152-followup"
+    ],
+    "data_source": "yfinance DAX+CAC+FTSE top + ^VIX 2014-2025; earnings from yfinance API",
+    "created_at": "2026-04-14T00:30:00+08:00",
+    "updated_at": "2026-04-14T00:30:00+08:00"
   }
 ]
