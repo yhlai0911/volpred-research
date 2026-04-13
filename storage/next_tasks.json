@@ -456,16 +456,37 @@
   },
   {
     "id": "K1128",
-    "title": "K1128: VIX tertile regime split for OFI-jump",
+    "title": "K1128: VIX tertile for OFI-jump (COVID out-of-range + high-VIX DM+3.59)",
     "priority": 3,
-    "status": "in_progress",
-    "description": "Agent a4620fec80f468013 in worktree agent-k1128。"
+    "status": "completed",
+    "description": "IS-based tertile degenerate (COVID); OOS-internal high-VIX DM+3.59 強 signal 但 N=6 jumps。U-shape not monotonic。E064 教訓: IS cutoff 遇 unprecedented 會 degenerate。"
   },
   {
     "id": "K1129",
     "title": "K1129: GAS-t on commodities (USO/GLD/UNG/BTC) — claim from Creal-Koopman-Lucas",
     "priority": 2,
     "description": "已知 GAS-t 在 equity NULL (K437/K1038)。文獻 (Creal-Koopman-Lucas 2008+) 主張 commodity/electricity 有優勢。測 USO (oil)、GLD (gold)、UNG (natural gas)、BTC vs GJR-GARCH baseline + A4f-X if applicable。三重 OOS 門檻 (DM-HLN |t|>2 + QLIKE >5% + sub-period stable)。若 PASS 是新 commodity vol paper candidate；若 NULL 加深 GAS NULL 普遍性。",
+    "status": "pending"
+  },
+  {
+    "id": "K1130",
+    "title": "K1130: Expanding-window IS with prior crises (OFI regime test v2)",
+    "priority": 3,
+    "description": "K1128 衍生 (was agent K1129，avoid conflict with GAS K1129): IS 擴含 2008 GFC / 2011 debt / 2015 China deval → 修正 VIX tertile degeneracy 問題。",
+    "status": "pending"
+  },
+  {
+    "id": "K1131",
+    "title": "K1131: Continuous VIX-dependent β via spline (OFI-jump)",
+    "priority": 3,
+    "description": "K1128 衍生: β_2(VIX)·|OFI|_t spline basis 取代 tertile dummy。繞過離散 cutoff 問題。",
+    "status": "pending"
+  },
+  {
+    "id": "K1132",
+    "title": "K1132: Block-bootstrap CI on high-tertile DM (robustness)",
+    "priority": 3,
+    "description": "K1128 衍生: High-VIX DM +3.59 只 N=6 jumps，block-bootstrap 驗 CI 是否不跨越 0。",
     "status": "pending"
   }
 ]

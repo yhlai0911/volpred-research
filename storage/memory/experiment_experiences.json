@@ -870,5 +870,19 @@
       "tick-data-timing-edge-cases"
     ],
     "created_at": "2026-04-13T10:30:58.813239+00:00"
+  },
+  {
+    "id": "E064",
+    "title": "IS-based regime cutoffs 在 OOS 含 unprecedented volatility 時 degenerate",
+    "lesson": "K1128 設計 VIX tertile split，用 IS (2017-2019) 33%/67% 分位點當 cutoff，套到 OOS (2020-2021) test。結果 OOS 幾乎全部落在 IS high-tertile 之上，low tertile **0 bars**，mid 854 bars，high 20,060 bars。\n\n**原因**：IS 2017-2019 是 low-vol regime（VIX 平均 15），OOS 2020 COVID VIX 衝到 82（3σ+ event）。IS 訓練時「high VIX」定義為 VIX>15，在 COVID 期間 **低 VIX 也有 15+**。等於整個 OOS 只覆蓋到 IS 的 high tail。\n\n**一般化的 bug**: 任何 \"IS quantile cutoff applied to OOS\" 都有這個風險，如果 OOS 包含 unprecedented event。\n\n**正確做法**：\n1. **擴大 IS 覆蓋**: 2017-2019 太平靜，加 2008 GFC / 2011 debt ceiling / 2015 China deval 等 prior crises\n2. **Expanding-window adaptive**: 每次 refit 時用到當下所有歷史的 quantile\n3. **連續建模取代離散 cutoff**: β(VIX) 用 spline basis，非 tertile dummies\n4. **Rolling quantile**: e.g. past-1-year rolling median/75th percentile\n\n**K1128 教訓套用範圍**：\n- 任何 regime-switching 模型（Markov-switching GARCH、bull-bear HMM）\n- Volatility forecasting 分 calm/stress regime\n- Portfolio allocation triggered by \"threshold\" rules\n\n**對 Paper 4 compendium 的啟示**：\n- K1121 用 NFCI percentile threshold rebalance — 也有同問題？\n- 應回查 K1121 NFCI cutoff 是 IS-based 還是 expanding-window\n\n**Next time 的 diagnostic check**：\n```python\n# 在 OOS 用 IS cutoff 前先跑\nassert OOS_low_count > 0 and OOS_mid_count > 0, \"IS cutoff degenerate, need expanding window\"\n```",
+    "context": "K1128 VIX tertile regime split + COVID out-of-range",
+    "applies_to": [
+      "IS-OOS-regime-cutoff",
+      "regime-switching",
+      "unprecedented-volatility",
+      "quantile-threshold",
+      "Paper-4-review"
+    ],
+    "created_at": "2026-04-13T10:52:20.728030+00:00"
   }
 ]

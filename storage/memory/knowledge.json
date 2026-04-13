@@ -25854,5 +25854,24 @@
     ],
     "data_source": "K1124 cached TAIFEX 5-min bars 2017-2021",
     "created_at": "2026-04-13T10:30:58.813239+00:00"
+  },
+  {
+    "id": "k1128-1776077540",
+    "experiment_id": "K1128",
+    "title": "K1128: VIX tertile split — COVID OOS 打破 IS-based cutoffs，但 high-VIX signal 最強 (DM +3.59)",
+    "content": "[提出: K1125 D3 衍生, 執行: Claude] VIX tertile split for OFI→jump prediction。**主實驗 methodologically null**: IS 2017-2019 VIX range 9-37 vs OOS 2020-2021 VIX range 15-82 (COVID 超出 IS)，IS-based cutoffs (12.07/14.99) 產生 degenerate coverage: low=0 bars, mid=854, high=20,060。H1 monotonicity **untestable** due to coverage degeneracy。**Secondary (OOS-internal cutoffs, descriptive)**: Low-VIX (12-19) AUC 0.562 DM +0.53; Mid-VIX (19-25) AUC 0.496 DM +1.85（small-N N=11 jumps）; **High-VIX (25-82) AUC 0.626 DM +3.59 超 Harvey 3.0！TAIFEX 至今最強 OFI→jump signal**, but N=6 jumps limits confidence。**U-shape NOT monotonic** (H1 rejected)。**強化 K1125 regime-dependent caveat**: OFI→jump predictability 集中在 crisis-like conditions (VIX>25)。**方法論教訓**: IS-based regime thresholds 在 OOS 包含 unprecedented volatility 時會 degenerate。未來 Taiwan microstructure regime studies 需 (a) IS 擴含 prior crises (2008 GFC, 2011 debt, 2015 China deval) (b) 用 adaptive/expanding-window thresholds (c) 改連續 VIX-dependent coefficients via spline。Codex PASS all 7 checks (IS-only cutoffs, OOS assignment, T-1 lag, scaler discipline, DM-HLN HAC+small-sample, N guard)。Runtime 1.5s。Commit ddd01c47。",
+    "tags": [
+      "Paper_taiwan_microstructure",
+      "OFI",
+      "jump",
+      "VIX-regime",
+      "IS-OOS-coverage-degeneracy",
+      "COVID-out-of-range",
+      "methodological-finding",
+      "partial-signal",
+      "K1125-companion"
+    ],
+    "data_source": "K1125 cached TAIFEX 5-min bars + yfinance VIX daily",
+    "created_at": "2026-04-13T10:52:20.728030+00:00"
   }
 ]
