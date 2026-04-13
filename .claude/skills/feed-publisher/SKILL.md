@@ -251,7 +251,30 @@ Working directory: /Users/yhlai0911/Desktop/volpred-research
 
 #### 研究發現 (audience=research)
 **受眾**：有金融/統計背景的讀者、學術研究者
-**目的**：完整記錄實驗結果，可追溯、可驗證
+**目的**：**揭露**有趣、顯著、特別的發現；**不是流水帳倒出所有數據**
+
+**核心寫作原則**（2026-04-14 強化）：
+
+1. **從「反常識」或「推翻前說」開頭**，不要從 method table 開頭
+   - ❌「我們測試了 4 個市場 × 5 層 robustness × 3 EAV-def...」
+   - ✓「三市場（TW/US/JP）pooled panel 告訴我們：**個股看不到的訊號，集合起來卻強到 +70σ**」
+2. **一篇一個「aha」**：找出最意外 / 最推翻直覺 / 最有啟發的那個點，反覆強化
+   - 不是把所有 t-stat / p-value 都列出來
+   - 次要數據進附錄或條列，不占主敘述
+3. **curate 數字**：全文最多 3-5 個關鍵數字，每個都要有解讀（不是單純「t=+5.24」）
+   - ❌「bootstrap t=+5.24, p=0.000, 95% CI [+4.13e-5, +9.38e-5]」（純數字堆砌）
+   - ✓「bootstrap t=+5.24——遠超 Harvey 嚴格門檻 3.0，代表這不是巧合。更關鍵的是，placebo 測試 60 次隨機打亂下，觀測值離 null 13.6 個標準差，這在任何正常分佈下都是宇宙級罕見」
+4. **結構 = 敘事不是 template**：
+   - 核心發現（1 段）→ 為什麼 surprising（1 段）→ 方法關鍵抉擇（1 段，不是完整 method）→ 數據支持（1-2 段）→ paradigm shift（1 段）→ 實務 / 下一步
+5. **避免流水帳陷阱**：
+   - ❌ 「Layer 1 QLIKE、Layer 2 MCS、Layer 3 Spearman、Layer 4 VaR、Layer 5 DM、Layer 6 VT Sharpe...」逐層列
+   - ✓ 「6 層公平比較中，最關鍵的是 MCS 直接淘汰 GJR+HAR——這意味著舊論文的 HAR 勝出全是 target-mismatch artifact」
+6. **讓讀者帶走一個 paradigm / framework / rule**，不是帶走一堆數字
+
+**反例**（本 session mile_302a3775 / mile_15b190b5 / mile_7674c21f 這類）：
+- 從方法表開頭、把所有 6 層逐層敘述、數字堆疊沒 curation、無敘事主線
+- 看起來像實驗 report 不是 article
+- 讀完只記得「很多 t-stat 都 pass」，抓不到 single takeaway
 
 **觸發時機**：**跟著實驗走**——當實驗（或一組系列實驗）產生顯著發現時寫。不是從候選清單挑。
 
