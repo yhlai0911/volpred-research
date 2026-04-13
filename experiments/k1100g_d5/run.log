@@ -1,0 +1,62 @@
+[06:53:48] Loading session cache...
+  Aligned rows: 1071
+  --- Gap series descriptives ---
+    gap_night_t: mean=+9.14e-04  sd=1.1835e-02  kurt=11.10  skew=-1.431
+    gap_day_lag: mean=-5.97e-04  sd=1.0493e-02  kurt=9.12  skew=0.944
+    gap_total sd=7.696e-04  ratio gap_total/r_night2 var = 36.705
+
+[06:53:48] === IS fits (Student-t) ===
+  [06:53:48] fitting M1_baseline ...
+    ll=3859.634 df=5.12  success=True
+  [06:53:51] fitting M2_gap_night ...
+    ll=3868.899 df=6.50 xn=+0.0601  success=True
+  [06:53:53] fitting M2_gap_day_lag ...
+    ll=3863.433 df=6.50 xn=+0.0601  success=True
+  [06:53:56] fitting M2_gap_total ...
+    ll=3869.071 df=6.50 xn=+0.0601  success=True
+  [06:53:58] fitting M2_signed_gn ...
+    ll=3861.403 df=8.00 xn=-0.0005  success=True
+  [06:53:58] fitting REF_night_r2 ...
+    ll=3867.785 df=6.61 xn=+0.1403  success=True
+
+[06:54:01] === IS LRT (vs M1_baseline) ===
+  M2_gap_night vs M1: chi2=18.529  p=1.673e-05
+  M2_gap_day_lag vs M1: chi2=7.598  p=0.005845
+  M2_gap_total vs M1: chi2=18.873  p=1.397e-05
+  M2_signed_gn vs M1: chi2=3.538  p=0.05997
+  REF_night_r2 vs M1: chi2=16.302  p=5.4e-05
+
+[06:54:01] === OOS expanding-window ===
+  Train: n=607  Test: n=464
+[06:54:01] OOS M1_baseline ...
+  refits=93  elapsed=102.7s
+[06:55:44] OOS M2_gap_night ...
+  refits=93  elapsed=61.6s
+[06:56:45] OOS M2_gap_day_lag ...
+  refits=93  elapsed=68.4s
+[06:57:54] OOS M2_gap_total ...
+  refits=93  elapsed=58.9s
+[06:58:53] OOS M2_signed_gn ...
+  refits=93  elapsed=21.4s
+[06:59:14] OOS REF_night_r2 ...
+  refits=93  elapsed=95.1s
+
+[07:00:49] === OOS summary ===
+  model                 n    LRT_chi2   DM_QLIKE t   QLIKE %      LL Δ
+  M2_gap_night        464       7.301        1.292     +4.75%     +3.65
+  M2_gap_day_lag      464       1.157        0.139     +0.42%     +0.58
+  M2_gap_total        464      14.368        1.490     +6.62%     +7.18
+  M2_signed_gn        464       0.000       -0.267     -1.02%     -0.10
+  REF_night_r2        464      14.938        2.010     +3.80%     +7.47
+
+[07:00:49] === Cross-model DM (gap vs night_r2) ===
+  M2_gap_night vs REF_night_r2: DM_qlike t=-0.307 p=0.759  DM_ll t=+0.821  (qlike_a=1.56534 qlike_b=1.58101)
+  M2_gap_total vs REF_night_r2: DM_qlike t=-0.722 p=0.47  DM_ll t=+0.043  (qlike_a=1.53471 qlike_b=1.58101)
+  M2_gap_night vs M2_gap_total: DM_qlike t=+0.957 p=0.339  DM_ll t=+0.818  (qlike_a=1.56534 qlike_b=1.53471)
+[OK] results -> k1100g_d5_results.json
+[OK] 2 charts saved
+
+[07:00:50] === Verdict: H3_NIGHT_R2_BETTER ===
+  REF_night_r2 DM t = +2.01 dominates M2_gap_total DM t = +1.49. Pure gap^2 UNDERPERFORMS 5-min night RV; true info carrier is intra-session night movement, not just gaps.
+
+[DONE] Total: 422.7s
