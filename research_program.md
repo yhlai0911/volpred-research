@@ -563,6 +563,58 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 ### 5. 風險管理必做 VaR + ES 雙指標
 不能只做 VaR——VaR 無法反映尾部形狀。必須用 Fissler-Ziegel (2016) joint score 同時評估兩者。詳見「經濟顯著性評估」段和 K1041/K1092 DCC-A4f 實驗。
 
+### 6. Paper 2 firm-selection 路線完整 dead-end（2026-04-13 K1067 系列 7 實驗）
+**A4f-EAV 在 Taiwan equity 有 pooled-level signal，但 cross-sectional heterogeneity 不可用 observable firm characteristics 預測。**
+- K1067 (TSMC null) → K1067b (UMC +39%) → K1067c (MediaTek 反方向 monotonicity FAIL)
+- K1103 (τ-lag bug-fix STABLE) → K1104 (N=24 fabless p=0.039)
+- K1106b (cherry-pick p=0.004) → **K1109 (pre-reg N=31 BH-adj p=0.278 REJECTED)**
+- **K1113 (firm-level 6 covariates 全 5/5 FAIL, CV R²=-0.66)**
+- → 任何 observable firm characteristic（market cap, beta, sector dummy, earnings CV, momentum）都不能預測 EAV 增益
+- → 需要 **private data**（retail flow, governance opacity, analyst dispersion 細節）才能 firm-select
+- **Paper 2 final**: pooled A4f-EAV + cluster SE by firm 當 default，不寫 Tier 規則
+- **教訓 E052/E053**: pre-registration 2-commit audit trail 救一個 cherry-pick artefact
+
+### 7. Paper 3 copula-GARCH 不可推廣（2026-04-13 K1100 系列 6 實驗 + K1115）
+**Lai 2024 PRS copula edge 是 TAIFEX 市場 microstructure 特有現象，不是通用 methodology。** E055 三條件全 REJECTED：
+- (a) Near-collinear ρ>0.95: K1100f SPY-ES (corr=0.97) 也 NULL（portfolio variance degenerates as ρ→1）
+- (b) Tail-dependent: K1100b 5 pairs 含 SPY-QQQ λ_L=0.589 全 NULL（aggregation 把 tail dep 平均化）
+- (c) Single-asset path-dependent: K1115 SPY VaR breach clustering NULL（GARCH-t 已 absorb clustering）
+- **K1100g_d1/d2 chain**: 「找到 anchor → OOS 推翻」3 級 correction（E059 LRT-vs-DM divergence trap）
+- **Paper 3 status**: 待用戶決策（A reframe negative paper / B TAIFEX microstructure / C abandon）
+- **教訓 E055/E056/E060**: pivot depth L1-L4，當前需 L4 framing change
+
+### 8. Paper 4 Universal IV Sufficiency Compendium（2026-04-13 NEW，10 實驗 × 5 asset class × 2 application）
+**no public alt-data source improves over native implied volatility for vol prediction or portfolio allocation.**
+- **Forecasting NULL**: K473 (Trends VAR) + K750 (Trends weekly) + K789 (Trends overlay) + K504 (STLFSI4) + K1116 (EPU+NFCI+STLFSI on SPY) + K1098 (VIXTWN on 0050.TW) + K1118 (GLD/TLT/BTC native IV sufficient) = 7 evidence
+- **Allocation NULL**: K1121 (4 alt-data strategies vs 50/50 baseline, bootstrap p>0.16) = 1 evidence
+- **K1116b verified**: TLT M4 NFCI 唯一 positive (+3.74) 是 publication-delay artifact，corrected → +1.96 NS。Universal NULL 統一無例外
+- **Active harm pattern**: SPY M4 NFCI 修正後從 -3.00 → -3.61，alt-data 不只 silent 是 actively harmful
+- **Paper 4 status**: 主線程寫作 priority 1，建議標題 "Universal Sufficiency of Native Implied Volatility for Weekly Realized Volatility Prediction: A 10-Experiment Compendium"
+- **教訓 E061/E062**: knowledge-base precheck 救重複實驗 + FRED publication delay (NFCI shift(5), EPU shift(2)) 必查
+
+### 9. 防 in-sample data mining 的雙重門檻（2026-04-13 K1100g_d1/K1115/K1116 教訓）
+**LRT 顯著 + DM-HLN<2 = overfit 警訊**（E059）：
+- LRT 用全樣本 likelihood 易 overfit residual variance → χ² 易顯著
+- DM-HLN test forecast accuracy improvement，prospective fit assessment
+- 兩者 divergence > 1.5 → 必做 OOS 才能 publish
+- K1100g_d1 in-sample LRT χ²=12.48 p=0.0004 → K1100g_d2 OOS LRT 0.00 p=1.00（推翻）
+- K1115 IS Kupiec p~0.92 grid fit → OOS p<0.01 同 pattern
+- K1116 M5 IS QLIKE -2.84 → OOS +59.9（24× degradation）
+- **規則**：Paper-publishable finding 在啟動文章 agent 前必做 OOS PASS
+
+## Next Session Priorities（2026-04-13 update）
+
+### P0: 用戶決策待回（不可繼續挖同 direction）
+- **Paper 3 strategic decision** (A negative paper / B TAIFEX microstructure / C abandon)
+- **Paper 4 main thread 啟動寫作** (compendium 10 實驗 ready)
+- **TSMC 法說 04/16** 事件文章準備（04/17 截止）
+
+### P1: 高價值新方向（避免 Paper 2/3/alt-data 死局重蹈）
+- 面向 G NLP sentiment（用真新聞 headlines + FinBERT，非 Google Trends）
+- 面向 G market microstructure（OFI from existing TAIFEX tick）
+- 面向 I7 Taiwan cross-border hedging
+- Paper 6 crypto fear 完稿 (K639/K746b/K1025 素材齊備)
+
 ## Next Session Priorities（2026-03-31 起）
 
 ### P0: 時間敏感
