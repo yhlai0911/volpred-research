@@ -25835,5 +25835,24 @@
     ],
     "data_source": "TAIFEX TX tick 2017-2021 (Dropbox 33G, processed to 5-min bars)",
     "created_at": "2026-04-13T10:03:32.131461+00:00"
+  },
+  {
+    "id": "k1125-1776076258",
+    "experiment_id": "K1125",
+    "title": "K1125: TAIFEX |OFI| → jump prediction PASS, K1124+K1125 = Cont-Tankov decomposition empirical",
+    "content": "[提出: K1124 衍生, 執行: Claude] Lee-Mykland jump test (Gumbel multi-test α=0.01) + logistic regression on TAIFEX 5-min bars 2017-2021 (n=53,635)。**Triple threshold FAIL but partial PASS**: M3 (signed OFI) DM vs M1 t=+2.82 ✓ Harvey-equiv，OOS AUC 0.554 vs 0.514 baseline (+0.040 improvement, but threshold needs >0.02 + Brier >5%)。Jump bars |OFI|=0.1728 vs no-jump 0.1410 Welch t=+2.15 p=0.034 顯著正向。**Sell-side asymmetry**: signed OFI coef=-0.187 (大 sell pressure 預測 jump，反 US Cont 2014)。Regime-dependent：2020 COVID AUC 0.580 強，2021 calm 0.547 弱（M4 VIX interaction FAIL，可能因日頻 VIX 變化太慢無法 explain 5-min regime shift）。**KEY**: K1124 (|OFI|→diffusive RV ↓) + K1125 (|OFI|→jump ↑) = **Cont-Tankov (2004) jump-diffusion decomposition empirically confirmed in TAIFEX**。OFI 對兩 component sign 相反，diffusive 主導所以 K1124 total RV 被拉低。Codex 修 2 HIGH bugs: (1) BV window off-by-one (pairs[t-K+1:t-1] 少 r_{t-K} 改為 pairs[t-K:t-1] + divisor (K-1)μ₁²) (2) VIX z-score OOS leakage (改只用 IS stats)。修正後 DM 從 +2.43 → +2.82。Commit 3cd9933e merged 22bac986。",
+    "tags": [
+      "Paper_taiwan_microstructure",
+      "OFI",
+      "jump-detection",
+      "Lee-Mykland",
+      "Cont-Tankov-decomposition",
+      "sell-side-asymmetry",
+      "K1124-companion",
+      "partial-PASS",
+      "Codex-saves-2-HIGH"
+    ],
+    "data_source": "K1124 cached TAIFEX 5-min bars 2017-2021",
+    "created_at": "2026-04-13T10:30:58.813239+00:00"
   }
 ]

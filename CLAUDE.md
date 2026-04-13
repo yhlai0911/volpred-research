@@ -216,27 +216,10 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **池子不可空超過 3 小時**——若空池超過 3 小時等於網站停止更新
 
 ## 論文
-→ 論文列表、版本命名、PDF slug 詳見 `docs/paper-guide.md`
-
-### 論文更新標準程序（每次修訂都要完整執行，不可跳步）
-
-**審查 → 修正 → 版本化 → 平台同步，一氣呵成。**
-
-```
-1. 審查：/latex-academic-reviewer + /citation-verifier → review_v1.tex + citation_check.md
-2. 修正：body_v2.tex（保留原版）+ v1_to_v2_diff.tex（差異報告）
-3. 編譯：cd paper/<name> && xelatex main_v2.tex && xelatex main_v2.tex
-4. **一鍵同步**：uv run volpred ops paper-update --paper-id <id>
-   （自動：計算 pages + citations → 上傳 PDF → 更新 metadata → 複製到前端）
-5. Git commit：含 review + diff + v2 所有檔案
-6. 驗證：curl API 確認 pages/citations/pdf_url 正確
-```
-
-**⚠️ 步驟 4 的 `paper-update` 自動完成原本的步驟 4-6，不需要手動跑 3 個命令。**
-**⚠️ 修正完不更新平台 = 沒修。步驟 4-6 不可省略。**
-
-### 論文 stage 分類 + 持續審查迴圈
-→ 完整 SOP 見 `.claude/skills/paper-stage-classifier/SKILL.md`。5 stages: early / draft / review / ready_for_submission / submitted。Ready 論文進入 continuous review loop（每月最低 1 輪 latex-reviewer + citation-verifier）。
+- 論文列表、版本命名、PDF slug → `docs/paper-guide.md`
+- **完整 stage 分類 + 更新 SOP + 持續審查迴圈 + review 歸檔規則** → `.claude/skills/paper-stage-classifier/SKILL.md`
+- 5 stages: early / draft / review / ready_for_submission / submitted。Ready 論文進入 continuous review loop。
+- ⚠️ 修正完必跑 `uv run volpred ops paper-update --paper-id <id>` 同步平台，否則 = 沒修。
 
 ### 目前 STRATEGY_REGISTRY（14 筆，10 個 active）
 → 完整上架流程見 `docs/strategy-registry.md`

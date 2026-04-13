@@ -856,5 +856,19 @@
       "paper-publication-risk"
     ],
     "created_at": "2026-04-13T09:19:23.657538+00:00"
+  },
+  {
+    "id": "E063",
+    "title": "Lee-Mykland BV window off-by-one + VIX OOS leakage 雙救援（K1125 教訓）",
+    "lesson": "K1125 Codex 抓到 2 HIGH bugs：\n\n**Bug 1：BV window off-by-one**\n原 code：`pairs[t-K+1:t-1]` 計算 bipower variation\n- 試圖用 K returns，但 slice 實際只取 K-1 個\n- 缺 r_{t-K}，導致 BV 估計值偏小\n- σ_t 偏小 → L_t = |r_t|/σ_t 偏大 → 誤判 jump 率上升\n\n正確：`pairs[t-K:t-1]` + divisor `(K-1)·μ₁²`\n\n**Bug 2：VIX z-score OOS leakage**\n原 code：用全樣本 mean/std 標準化 VIX\n- IS train + OOS test 共用統計量 = data leakage\n- M4 (VIX regime) 看似 OOS 但偷用 OOS 期 VIX 分佈\n\n正確：只用 IS (2017-2019) mean/std 標準化全部 VIX\n\n**修正後 DM M3 vs M1 從 +2.43 → +2.82**（更強，方向正確 → 證明原本兩個 bug 不是「使結果好看」的方向，是 noise；但仍須修，誠實）。\n\n**通則**：\n1. **Sliding window slice 永遠 explicit 標**：不用 K-1, K+1 模糊表示，用 `pairs[t-K:t-1]` 確保覆蓋 r_{t-K},...,r_{t-1}\n2. **OOS test 任何標準化都只能用 IS stats**——這是 SOP，不只 ML model parameter\n3. Lee-Mykland BV 公式必引 Barndorff-Nielsen-Shephard (2004)，divisor 公式 `(n-1)·μ₁²` 不可省\n\n**整 K1124 + K1125 系列 Codex 已抓 5 個 HIGH**：\n- K1124 (a) DAY_END=13:45 spurious bar=60 (b) active contract selection lookahead (c) current-bar OFI asymmetry\n- K1125 (d) BV window off-by-one (e) VIX z-score leakage\n\n**5 個 high-frequency tick-data bug** 都是 timing edge case。tick-data 實驗的 Codex 審查必看 timing！",
+    "context": "K1125 Codex audit + Cont-Tankov decomposition discovery",
+    "applies_to": [
+      "Lee-Mykland-jump-test",
+      "BV-window-slicing",
+      "OOS-standardization-leakage",
+      "Cont-Tankov-decomposition",
+      "tick-data-timing-edge-cases"
+    ],
+    "created_at": "2026-04-13T10:30:58.813239+00:00"
   }
 ]
