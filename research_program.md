@@ -537,15 +537,31 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 
 **K801**：Event-Surprise VIX Shock Guard — NULL（12/VIX 本身即 shock-guard）
 
-## 重大研究結論更新（2026-03-29 K687/K697/K700/K701）
+## 重大研究結論（持續更新）
 
-**VT 策略是 drawdown insurance，不是 alpha generator。**
+### 1. VT 策略本質 — drawdown insurance 不是 alpha generator（2026-03-29 K687/K697/K700/K701）
 - K687：正確 lag 後，沒有 VT 策略在 Sharpe 上打敗 BH 50/50（0.545）
 - K697：VIX 預測 vol（corr 0.57）但不預測 direction（corr 0.04）——daily alpha 理論不可能
 - K701：weekly/monthly 也一樣（direction corr 全部<0.04）
 - K688：VT 在 CRRA utility γ≥5 時勝出——drawdown protection 對風險厭惡投資人有價值
 - K693：歷史 paper_trading 9935 筆修正 same-day→next-day return
 - K700：Codex 審查防止 3 個 false breakthrough（37.5% false positive rate without review）
+
+### 2. 50/50 SPY/GLD 不可動搖
+K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534 理論解釋（correlation dynamics 不可預測）。任何新策略的 Sharpe 門檻 = 50/50 Sharpe 0.545，打不過就不上架。
+
+### 3. Smooth-weight 設計原則（最可靠）
+**連續權重策略（12/VIX、Risk Parity、Piecewise VT）幾乎不受 signal lag 的影響。** 機制：每天權重變化 <5%，即使 lag 方向錯也無害；反觀 binary regime-switch 策略 lag 錯一天 Sharpe 可差 0.5+。教訓來自 K679（VIX Percentile Sharpe 1.68→lag 修正後 0.355，100% artifact）和 K618/K621/K698 共 4 次 lag bug。**設計新策略優先 smooth-weight，避免 binary switch**。
+
+### 4. Proxy-robust 模型比較（Patton 2011 標準）
+- GARCH/GJR：原生 target σ²（r² 是無偏估計）
+- MEM：原生 target |r| 或 r²（r² 直接可比 GARCH）
+- HAR-RV：原生 target 5-min RV
+- **跨模型必做 QLIKE on r²**（詳見行為準則「模型比較公平性標準」段）
+- K782 教訓：Proxy 比模型更重要——HAR 在 |r| target DM=-15.45（K530）但在 r² target 全輸 GJR
+
+### 5. 風險管理必做 VaR + ES 雙指標
+不能只做 VaR——VaR 無法反映尾部形狀。必須用 Fissler-Ziegel (2016) joint score 同時評估兩者。詳見「經濟顯著性評估」段和 K1041/K1092 DCC-A4f 實驗。
 
 ## Next Session Priorities（2026-03-31 起）
 

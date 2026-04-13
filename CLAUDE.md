@@ -136,14 +136,8 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 - **research_program.md**：研究策略文件（北極星）
 - **paper/**：學術論文（按子目錄組織）
 
-### 重要研究結論
-
-→ **所有研究結論、K 編號詳情見 `research_program.md`「重大研究結論」和「最終工具指南」。** 以下僅列影響日常操作的核心結論：
-
-- **VT = drawdown insurance，不是 alpha generator**（K687/K697）。50/50 SPY/GLD 不可動搖（K846 三重護城河）
-- **Smooth-weight 策略（12/VIX, Risk Parity）幾乎不受 lag 影響——最可靠的設計原則**
-- **模型評估 target 必須匹配**：GARCH 用 r²、HAR-RV 用 5-min RV。跨模型用 Patton (2011) QLIKE
-- **⚠️ 風險管理評估必須同時做 VaR + ES（不可只做 VaR）**。詳見 `research_program.md` 評估指標段
+### 研究結論（非此處）
+→ 所有研究結論、設計原則、K 編號詳情見 `research_program.md`「重大研究結論」段（5 條核心結論：VT 本質、50/50 SPY/GLD、Smooth-weight、Proxy-robust、VaR+ES）。CLAUDE.md 只放跨研究通用的操作規則（如 Token 節約、部署、排程），不放會隨實驗更新的研究結論。
 
 ### Token 節約規則（必須遵守）
 - **⚠️ 禁止整檔讀取 `feed.json`（5.4MB = 135 萬 tokens）**。任何情況都不可 `Read("storage/reports/feed.json")`：
