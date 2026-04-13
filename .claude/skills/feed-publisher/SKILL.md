@@ -80,6 +80,23 @@ Do **not** use this skill for：
   - 在文章中主動引用/連結舊文章：「我們在 [之前的分析] 中發現 X，但這次新數據顯示 Y」
 - **無重疊**（<30%）→ 正常發佈
 
+## 寫作前必讀實驗檔案（⚠️ 不可跳過）
+
+**寫每篇文章前，每個引用的 K 實驗都必須**：
+
+1. `cat experiments/k<id>/README.md` —— 計劃、問題、方法、預期、結論（若有獨立資料夾）
+2. `cat experiments/k<id>*.py` 或 `experiments/k<id>/k<id>.py` —— 實作細節、真實樣本、參數設定
+3. `python3 -c "import json; print(json.dumps(json.load(open('experiments/k<id>*_results.json')), ensure_ascii=False, indent=2)[:3000])"` —— 真實統計量、DM t / p / bootstrap CI / VaR 等
+4. `ls experiments/k<id>*.png` 或 `experiments/k<id>/*.png` —— **優先直接 embed 既有圖表**，不要重畫
+
+**為什麼**：
+- knowledge.json 摘要只有 200-300 字，可能漏關鍵細節（樣本數、OOS 期間、模型版本）
+- 文章數字必須 byte-for-byte 對應 results JSON，不可從記憶引用
+- 既有 PNG 是原始實驗設計的視覺化，重畫簡化反而丟失資訊
+- 若沒有既有 PNG 才用 `volpred.charts` 生成新圖
+
+**2026-04-14 教訓**：agent 只讀 knowledge.json 摘要就寫文章，漏掉實驗真實方法細節；重畫新 chart 失去原始 bootstrap/placebo 分布資訊。
+
 ### 高頻重複主題警告
 以下主題已有多篇文章，新文章必須有**顯著不同的切入角度**：
 - 50/50 SPY/GLD 配置（10+ 篇）
