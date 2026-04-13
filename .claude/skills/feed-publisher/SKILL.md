@@ -43,6 +43,15 @@ Do **not** use this skill for：
 | 語氣 | 「我發現...」「可能是...」 | 「研究結果顯示...」 |
 | 長度 | 不限 | 500-3000 字 |
 
+## 選題來源（寫之前先查）
+
+**主題不是憑記憶挑——用 `publication-candidates` skill 系統化選。**
+
+1. **研究驅動**：`cat storage/publication_candidates.json | jq '.top_10_uncovered, .missing_general_top5, .missing_research_top5'`
+2. **事件驅動**：WebSearch 近期 CPI/NFP/FOMC/TSMC/earnings season；`grep '財報公告日.txt'`；讀 `next_tasks.json` 事件任務
+
+詳見 `publication-candidates` skill。
+
 ## 發文前必做：主題重複檢查（不可跳過）
 
 **在決定主題之後、撰寫內容之前，必須先確認主題是否已有類似文章。**
