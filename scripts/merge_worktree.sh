@@ -102,16 +102,34 @@ Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>") || {
     local new_commits
     new_commits=$(git log --oneline "$main_branch..$branch" 2>/dev/null || true)
 
-    if [[ -z "$new_commits" ]]; then
-        echo "  [OK] 沒有新的 commits，可安全移除"
+    # 雙重驗證：rev-list --count 防止 git log 靜默失敗（K1032/K1114/E067 教訓）
+    local commit_count_verify
+    commit_count_verify=$(git rev-list --count "$main_branch..$branch" 2>/dev/null || echo "ERROR")
+
+    if [[ "$commit_count_verify" == "ERROR" ]]; then
+        echo "  [ABORT] git rev-list 失敗，無法確認 commit 狀態。手動處理。"
+        return 1
+    fi
+
+    if [[ -z "$new_commits" ]] && [[ "$commit_count_verify" -eq 0 ]]; then
+        echo "  [OK] 沒有新的 commits（雙重確認 rev-list=0），可安全移除"
         if ! $DRY_RUN; then
             git worktree remove "$wt_path" 2>/dev/null || git worktree remove --force "$wt_path" 2>/dev/null
-            git branch -D "$branch" 2>/dev/null || true
+            # 用 -d (lowercase) 不 -D：refuse 未合併 commit, 防止 silent data loss
+            git branch -d "$branch" 2>/dev/null || {
+                echo "  [WARN] branch -d 拒絕（branch 有未合併 commits），保留 branch 等待人工檢查"
+            }
             echo "  [DONE] 已移除 worktree"
         else
             echo "  [DRY-RUN] 會移除 worktree"
         fi
         return 0
+    fi
+
+    if [[ -z "$new_commits" ]] && [[ "$commit_count_verify" -gt 0 ]]; then
+        echo "  [ABORT] git log 報 0 commits 但 rev-list 報 $commit_count_verify commits。可能 K1032/K1114-style detection bug。"
+        echo "         請手動執行：git log --oneline $main_branch..$branch"
+        return 1
     fi
 
     echo "  [INFO] 發現新 commits："
@@ -274,8 +292,16 @@ orphan_count=0
 for branch in $(git branch --list 'worktree-agent-*' 2>/dev/null | tr -d ' '); do
     # 檢查該 branch 是否還有 worktree 關聯
     if ! git worktree list --porcelain | grep -q "branch refs/heads/$branch"; then
+        # 額外保護：檢查 branch 是否有未合併到 main 的 commits（防止 silent data loss）
+        unmerged=$(git rev-list --count "main..$branch" 2>/dev/null || echo 0)
+        if [[ "$unmerged" -gt 0 ]]; then
+            echo "  [SKIP] $branch 有 $unmerged 個未合併 commits，不刪除（請手動 cherry-pick 或 git checkout）"
+            continue
+        fi
         if ! $DRY_RUN; then
-            git branch -D "$branch" 2>/dev/null && echo "  [CLEAN] 刪除 orphan branch: $branch"
+            # -d (lowercase) 而不是 -D，refuse 未合併 commit 是最後一道防線
+            git branch -d "$branch" 2>/dev/null && echo "  [CLEAN] 刪除 orphan branch: $branch" || \
+                echo "  [SKIP] $branch branch -d 拒絕，保留供人工檢查"
         else
             echo "  [DRY-RUN] 會刪除 orphan branch: $branch"
         fi
