@@ -522,6 +522,28 @@
     "title": "K1136: Non-score-driven robust vol models (GARCH-MIDAS, HAR-RV-X)",
     "priority": 3,
     "description": "K1134 衍生: 區分「score-driven downweight fails」vs「all robust extensions fail」。",
+    "status": "completed",
+    "completed_at": "2026-04-13T12:00:00+08:00"
+  },
+  {
+    "id": "K1137",
+    "title": "K1137: Regime-conditional robust models",
+    "priority": 3,
+    "description": "K1136 延伸：VIX tertile regime 切分，檢驗 GARCH-MIDAS/HAR-RV-X 在高 VIX regime 是否有條件優勢。控 K1128 IS-regime degeneracy 教訓：regime cutoff 用 rolling ex-ante percentile。",
+    "status": "pending"
+  },
+  {
+    "id": "K1138",
+    "title": "K1138: Equity compendium (SPY/QQQ/IWM) robust models",
+    "priority": 3,
+    "description": "K1136 擴充：將 MIDAS-X + HAR-RV-X + GAS-t 3 家族套用到 equity，與 commodity 對稱。若 equity 也 NULL → Paper 4 'universal-null' 可含 5 asset classes 全包。",
+    "status": "pending"
+  },
+  {
+    "id": "K1139",
+    "title": "K1139: Intraday 5-min RV as target",
+    "priority": 4,
+    "description": "Hansen-Lunde 高頻標準。K1136 改用 5-min 彙總 RV 當 target，檢驗 daily proxy 是否仍為 NULL。資料需 yfinance/polygon 5-min 回抓。",
     "status": "pending"
   }
 ]

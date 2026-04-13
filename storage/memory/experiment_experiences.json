@@ -898,5 +898,20 @@
       "Paper-4-expansion"
     ],
     "created_at": "2026-04-13T11:11:38.667147+00:00"
+  },
+  {
+    "id": "E066",
+    "title": "Model-target mismatch → mechanical win/loss（K1136 trap）",
+    "category": "methodology",
+    "lesson": "跨模型實驗中若 model A 以 target X fit（原生），model B 以 target Y fit（原生），用 X 評估兩者 → A 天然勝（mechanical），非 empirical truth。必須加入 within-family control（同 fit 規格但不含新 regressor）才能孤立該 regressor 的 marginal contribution。",
+    "examples": [
+      "K1136 M4 HAR-RV-X (Parkinson-fit) vs M1 GJR-GARCH (close²-fit) on Parkinson target → 4/4 t=2.5~13 看似 breakthrough，實為 HAR 對 Parkinson 的 mechanical advantage",
+      "加入 M5 HAR-RV（無 VIX，同 Parkinson-fit）後，M4 vs M5 fair test 0/4 PASS → 真正答案：VIX 在 HAR 內無 marginal value",
+      "對稱反向：M3 GARCH-MIDAS (close²-fit) vs M1 on Parkinson → GARCH 家族 mechanical loss，也非 empirical"
+    ],
+    "recommendation": "設計跨模型實驗前先問：(1) 每個模型的 native fit target 是什麼？(2) 評估 target 是否對所有模型都是 'fair'？(3) 若模型家族不同，必須加入 within-family control 孤立新變數的貢獻。Preamble Rule #5（效應>2x baseline = 90% bug）觸發時，優先檢查 target 匹配，不是程式碼。",
+    "source_experiments": [
+      "K1136"
+    ]
   }
 ]

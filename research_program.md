@@ -611,6 +611,16 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 12. Universal robust-method NULL：非 score-driven 也失敗（2026-04-13 K1136）
+**「alt-model NULL」擴張到 score-driven + non-score-driven 兩家族**
+- K1136 fair-test 設計：M3 GARCH-MIDAS-X vs M1 GJR-N on r²（close²-native 公平）；M4 HAR-RV-X vs M5 HAR-RV on Parkinson（within HAR-family control, 孤立 VIX marginal）
+- **Fair Test #1 (MIDAS)**: 0/4 PASS, DM t=1.23/0.94/0.62/-0.32
+- **Fair Test #2 (HAR-within)**: 0/4 PASS, DM t=1.65/-0.88/0.74/0.52, GLD 反向
+- **命名升級**：Paper 4 從 "GAS-specific fail" 升為 "Universal robust-method NULL across score-driven AND non-score-driven"
+- 證據合計：8 unique assets × 4 proxies × {GAS/MIDAS/HAR-X} = 一致 NULL
+- **Meta-lesson (E066)**：首次跑 M4 看到 Parkinson t=2.5~13 誤判為 breakthrough，實為 model-target mismatch 造成的 mechanical win；加入 M5 within-family control 才揭穿
+- 亦修 VIX monthly-lag double-shift bug（`monthly.shift(1)` + "latest ≤ d" 重複 shift）
+
 ### 9. 防 in-sample data mining 的雙重門檻（2026-04-13 K1100g_d1/K1115/K1116 教訓）
 **LRT 顯著 + DM-HLN<2 = overfit 警訊**（E059）：
 - LRT 用全樣本 likelihood 易 overfit residual variance → χ² 易顯著

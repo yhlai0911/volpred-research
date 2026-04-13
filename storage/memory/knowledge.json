@@ -25911,5 +25911,29 @@
     ],
     "data_source": "yfinance USO/GLD/UNG/BTC-USD OHLC 2015-2026",
     "created_at": "2026-04-13T11:43:02.017330+00:00"
+  },
+  {
+    "id": "k1136-1776083379",
+    "experiment_id": "K1136",
+    "title": "Non-score-driven robust vol models on commodity compendium — H3 CONFIRMED universal robust-method NULL",
+    "content": "[提出: Claude, 執行: Claude] Paper 4 compendium 擴充實驗：檢驗 non-score-driven robust 模型（M3 GARCH-MIDAS-X 以 VIX 月均為 long-run driver；M4 HAR-RV-X 加 VIX 為 daily regressor；M5 HAR-RV 控制組）能否在 K1129/K1134 GAS-t 失敗的 4 commodity（USO/GLD/UNG/BTC-USD）上擊敗 M1 GJR-Normal baseline。OOS 2021-2026（n=1323），refit_every=63，VIX 無 leakage（daily shift(1); MIDAS 取前一完整月 mean）。Fair Test #1（M3 vs M1, r² target, 同 close²-native）: 0/4 PASS, DM t=1.23/0.94/0.62/-0.32。Fair Test #2（M4 vs M5, Parkinson target, within HAR-family 控制）: 0/4 PASS, DM t=1.65/-0.88/0.74/0.52，GLD 反向。H3 CONFIRMED: 普遍 robust-method NULL，橫跨 score-driven 與 non-score-driven。Paper 4 命名從 'score-driven specific failure' 升級為 'Universal robust-method NULL: K1129/K1134 GAS + K1136 GARCH-MIDAS-X + HAR-RV-X'。過程中抓到 mechanical trap：首次跑 M4 在 Parkinson 上 4/4 t=2.5~13 看似突破，觸發 preamble Rule #5（效應>2x baseline = 90% bug），自我質疑後發現是 model-target mismatch（M4 以 Parkinson fit，天然勝 M1 close²-fit），加入 M5 within-family control 才孤立 VIX marginal value，答案 NULL。亦修一 VIX monthly-lag double-shift bug。Codex rescue 審過代碼無 HIGH，但仍需結果層自我質疑。",
+    "tags": [
+      "K1136",
+      "Paper4",
+      "GARCH-MIDAS",
+      "HAR-RV-X",
+      "VIX",
+      "commodity",
+      "universal-null",
+      "mechanical-trap",
+      "USO",
+      "GLD",
+      "UNG",
+      "BTC",
+      "fair-test"
+    ],
+    "data_source": "yfinance USO/GLD/UNG/BTC-USD + VIX 2021-2026",
+    "created_at": "2026-04-13T12:00:00+08:00",
+    "updated_at": "2026-04-13T12:00:00+08:00"
   }
 ]
