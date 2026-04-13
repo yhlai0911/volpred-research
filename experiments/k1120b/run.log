@@ -1,0 +1,68 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+[21:05:53] Fetching ^MOVE daily...
+[21:05:54]   MOVE daily: 2789 rows
+[21:05:54] Fetching ^VIX daily...
+[21:05:54]   VIX daily: 2833 rows
+[21:05:54] Loading FRED NFCI (daily-frequency cache)...
+[21:05:54]   NFCI from fred_NFCI.csv: 588 rows, last=2026-04-03
+[21:05:54]   Daily panel: (2789, 3), range 2015-01-02..2026-04-09
+[21:05:54] 
+========== Rolling residualization (252-day trailing) ==========
+[21:05:55]   NFCI_resid valid: 2537/2789 business days
+[21:05:55]   NFCI variance:          0.023610
+[21:05:55]   NFCI predicted variance: 0.020593
+[21:05:55]   NFCI residual variance: 0.006774  (share of original = 0.287)
+[21:05:55]   corr(NFCI_raw, VIX) = +0.498,  corr(NFCI_raw, MOVE) = +0.640
+[21:05:55]   corr(NFCI_resid, VIX) = +0.178,  corr(NFCI_resid, MOVE) = +0.161
+[21:05:55] Fetching TLT daily for weekly RV...
+[21:05:56]   TLT weekly RV: 588 weeks, range 2015-01-09..2026-04-10
+[21:05:56] Loading FRED STLFSI4 (weekly)...
+[21:05:56]   STLFSI4 from fred_STLFSI4.csv: 588 rows, last=2026-04-03
+[21:05:56] 
+Merged weekly panel: (534, 10), range 2016-01-15..2026-04-03
+[21:05:56] 
+========== Pre-2022 regime DM ==========
+[21:05:57] 
+========== Post-2022 regime DM ==========
+[21:05:57] 
+Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a867c040/experiments/k1120b/k1120b_results.json
+[21:05:57] Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a867c040/experiments/k1120b/k1120b_nfci_vs_residual.png
+[21:05:57] Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a867c040/experiments/k1120b/k1120b_dm_comparison.png
+
+================================================================================
+K1120b SUMMARY — Residualized NFCI common-shock confound check
+================================================================================
+Panel: 2016-01-15 .. 2026-04-03  n_weeks=534
+
+Residualization (rolling 252-day OLS NFCI ~ VIX + MOVE):
+  resid_share_of_original_variance = 0.287
+  corr(NFCI_raw,    VIX) = +0.498, (NFCI_raw,    MOVE) = +0.640
+  corr(NFCI_resid,  VIX) = +0.178, (NFCI_resid,  MOVE) = +0.161
+
+Pre-2022 regime DM:
+  M4_raw_vs_M3_MOVE: t=-3.417  n=158
+  M4_resid_vs_M3_MOVE: t=-2.767  n=158
+  M4_resid_vs_M3_VIX_MOVE: t=-2.475  n=158
+  M4_resid_full_vs_M3_VIX_MOVE: t=-1.816  n=158
+  M4_resid_only_vs_M3_VIX_MOVE: t=-2.364  n=158
+  M3_VIX_MOVE_STLFSI_vs_M3_VIX_MOVE: t=-2.411  n=158
+  M4_resid_full_vs_M3_VIX_MOVE_STLFSI: t=+1.534  n=158
+  M4_raw_vs_M1: t=-4.980  n=158
+  M4_resid_vs_M1: t=-3.804  n=158
+
+Post-2022 regime DM:
+  M4_raw_vs_M3_MOVE: t=+4.932  n=103
+  M4_resid_vs_M3_MOVE: t=-6.191  n=103
+  M4_resid_vs_M3_VIX_MOVE: t=+4.036  n=103
+  M4_resid_full_vs_M3_VIX_MOVE: t=+6.325  n=103
+  M4_resid_only_vs_M3_VIX_MOVE: t=+9.729  n=103
+  M3_VIX_MOVE_STLFSI_vs_M3_VIX_MOVE: t=+5.157  n=103
+  M4_resid_full_vs_M3_VIX_MOVE_STLFSI: t=+8.431  n=103
+  M4_raw_vs_M1: t=+8.090  n=103
+  M4_resid_vs_M1: t=+1.546  n=103
+
+Verdict: GENUINE
+  K1120 confirmed: residualized NFCI (orthogonal to VIX+MOVE) still carries TLT-specific independent information in post-2022 regime even after controlling for cross-asset IV (VIX+MOVE) in baseline. Common-shock confound rejected.
+
+Paper 4 impact: Paper 4 TLT regime caveat survives: residualized NFCI is genuinely independent of VIX+MOVE during rate-hike regime. K1120 conclusion intact. Caveat: a substantial fraction of K1120's raw NFCI signal comes from the VIX-correlated component of NFCI; the truly orthogonal TLT-specific component is the smaller residual portion. Paper 4 should explicitly note that ~71% of NFCI variance overlaps with VIX+MOVE.

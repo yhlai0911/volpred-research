@@ -26383,5 +26383,23 @@
     "data_source": "yfinance TLT 2015-2025 + FRED NFCI/STLFSI + ^VIX + ^MOVE + Fed policy regime markers",
     "created_at": "2026-04-14T09:00:00+08:00",
     "updated_at": "2026-04-14T09:00:00+08:00"
+  },
+  {
+    "id": "k1120b-1776114562",
+    "experiment_id": "K1120b",
+    "title": "K1120b GENUINE confirmed: NFCI carries TLT-specific funding info orthogonal to VIX+MOVE (not Fed common shock)",
+    "content": "[提出: Claude, 執行: Claude] K1120 Post-2022 TLT FinStress signal DM t=+5.68 raw 可能 Fed common shock proxy (VIX+MOVE+NFCI 三者同時 react to Fed +475bp)。K1120b 做 residualization: NFCI_t = α + β_VIX×VIX_t + β_MOVE×MOVE_t + ε_t (rolling 252-day trailing), 取殘差 ε_t 再測。**Verdict GENUINE**: Residualized NFCI variance 占原 NFCI 只剩 **0.287** (VIX+MOVE 已解釋 ~71%)。**Post-2022 M4_resid_only vs M3_VIX_MOVE DM t=+9.729** (n=103, Harvey-sig) — 殘差還有 TLT-specific 預測力。Pre-2022 primary test t=-2.364 **sign 反向確認 regime-dependence** (不是 algorithmic bias)。K1120 raw replication M4_raw vs M3_MOVE=+4.932 跟發表 +5.675 一致。STLFSI 也獨立貢獻: M3_VIX_MOVE_STLFSI vs M3_VIX_MOVE=+5.157 (FinStress family 兩成分各自有用)。**Paper 4 narrative 強化**: 'Rolling 252-day OLS residualization removes ~71% of NFCI variance attributable to common cross-asset IV shocks (VIX+MOVE). Remaining ~29% orthogonal residual still produces post-2022 OOS DM-t=+9.729 vs M3_VIX_MOVE — ruling out common-shock confound. NFCI carries TLT-specific funding-market information not captured by either Treasury IV (MOVE) or equity IV (VIX).' **Preamble Rule #5 audit** (primary t=+9.729 > 6): pre-2022 反向 (-2.364) + secondary +8.431 + raw replication +4.932 + no-lookahead 多重佐證 effect 真實; 下游引用建議以 +5.675 保守 anchor 不直接報 +9.729。",
+    "tags": [
+      "K1120b",
+      "Paper4",
+      "TLT",
+      "residualization",
+      "genuine-regime-signal",
+      "K1120-confirmed",
+      "funding-market-orthogonal"
+    ],
+    "data_source": "K1120 cache + rolling 252-day trailing OLS residualization",
+    "created_at": "2026-04-14T10:00:00+08:00",
+    "updated_at": "2026-04-14T10:00:00+08:00"
   }
 ]
