@@ -1,0 +1,4 @@
+# K1162 data cache: parquet files are duplicates of experiments/k1151/data/
+# To reproduce: symlink or copy k1151's data folder before running k1162.py
+data/*.parquet
+__pycache__/

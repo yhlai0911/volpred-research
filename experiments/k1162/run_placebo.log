@@ -1,0 +1,36 @@
+
+=== Placebo for subset LOW (15 tickers) ===
+  Loaded 15 stocks for subset LOW
+  [LOW] placebo 1/60: θ=-9.237e-07, t=-0.60, elapsed=2s
+  [LOW] placebo 10/60: θ=+4.788e-06, t=+2.76, elapsed=15s
+  [LOW] placebo 20/60: θ=-6.065e-07, t=-0.42, elapsed=30s
+  [LOW] placebo 30/60: θ=-3.062e-07, t=-0.30, elapsed=45s
+  [LOW] placebo 40/60: θ=-1.471e-06, t=-2.87, elapsed=60s
+  [LOW] placebo 50/60: θ=-6.222e-07, t=-0.49, elapsed=75s
+  [LOW] placebo 60/60: θ=+3.109e-07, t=+0.33, elapsed=89s
+
+  [LOW] Placebo summary:
+    N = 60
+    mean = +9.931e-07, SE = 2.820e-06
+    95% CI = [-2.273e-06, +7.324e-06]
+    observed = -6.961e-07, z = -0.60
+    P(placebo >= observed) = 0.7000
+
+=== Placebo for subset HIGH (15 tickers) ===
+  Loaded 15 stocks for subset HIGH
+  [HIGH] placebo 1/60: θ=-8.640e-07, t=-0.22, elapsed=2s
+  [HIGH] placebo 10/60: θ=+8.186e-06, t=+1.58, elapsed=15s
+  [HIGH] placebo 20/60: θ=-4.815e-06, t=-12.91, elapsed=29s
+  [HIGH] placebo 30/60: θ=-3.609e-06, t=-2.09, elapsed=43s
+  [HIGH] placebo 40/60: θ=+2.194e-07, t=+0.04, elapsed=57s
+  [HIGH] placebo 50/60: θ=-1.313e-07, t=-0.02, elapsed=71s
+  [HIGH] placebo 60/60: θ=-3.230e-06, t=-2.45, elapsed=85s
+
+  [HIGH] Placebo summary:
+    N = 60
+    mean = -1.136e-07, SE = 4.168e-06
+    95% CI = [-4.448e-06, +1.348e-05]
+    observed = +4.075e-06, z = +1.01
+    P(placebo >= observed) = 0.1000
+
+Results -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a916e45e/experiments/k1162/k1162_placebo_results.json
