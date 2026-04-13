@@ -1,0 +1,29 @@
+{
+  "attempt_timestamp": "2026-04-14T04:35:30.649769",
+  "alfred_accessible": false,
+  "fredapi_keyless": false,
+  "fallback_used": "fredgraph_revision_corrected_plus_release_calendar",
+  "indicators": {
+    "USEPU": {
+      "source": "local_cache:fred_USEPUINDXD.csv",
+      "rows": 15074
+    },
+    "WLEMU": {
+      "source": "fredgraph_api",
+      "rows": 15077
+    },
+    "NFCI": {
+      "source": "local_cache:fred_NFCI.csv",
+      "rows": 2883
+    },
+    "ANFCI": {
+      "source": "fredgraph_api",
+      "rows": 2883
+    },
+    "STLFSI": {
+      "source": "local_cache:fred_STLFSI4.csv",
+      "rows": 1684
+    }
+  },
+  "fallback_note": "ALFRED blocked in this environment (Akamai bot protection). No FRED API key available. Using fredgraph revision-corrected values with explicit release-calendar lag. Scientifically valid upper bound on vintage signal quality: if revision-corrected data with proper release-lag still yields NULL, then vintage data (which is NOISIER than revision-corrected) would also yield NULL (H2 robust). If revision-corrected PASSES, a true vintage test remains necessary to rule out revision-bias lookahead."
+}

@@ -1,0 +1,82 @@
+[20:39:09] ======================================================================
+[20:39:09] K1116c: Vintage-approximation via PIT release-calendar alignment
+[20:39:09] ======================================================================
+[20:39:09] Fetching SPY + VIX daily 2018-2026...
+[20:39:10] SPY+VIX weekly: 431 weeks, 2018-01-12 to 2026-04-10
+[20:39:10] Weekly-mean altdata shape: (2885, 5)
+[20:39:10] PIT altdata shape: (2885, 5)
+[20:39:10] 
+--- Variant: orig_shift1 ---
+[20:39:10]   merged panel: (431, 8), period 2018-01-12 to 2026-04-10
+[20:39:11] 
+--- Variant: corrected_shift2 ---
+[20:39:11]   merged panel: (431, 8), period 2018-01-12 to 2026-04-10
+[20:39:11] 
+--- Variant: conservative_shift2 ---
+[20:39:11]   merged panel: (431, 8), period 2018-01-12 to 2026-04-10
+[20:39:11] 
+--- Variant: pit_shift0 ---
+[20:39:11]   merged panel: (431, 8), period 2018-01-12 to 2026-04-10
+[20:39:11] 
+--- Variant: pit_shift1 ---
+[20:39:11]   merged panel: (431, 8), period 2018-01-12 to 2026-04-10
+[20:39:11] 
+--- Variant: multi_lag_3 ---
+[20:39:11]   merged panel: (431, 8), period 2018-01-12 to 2026-04-10
+[20:39:11] 
+======================================================================
+[20:39:11] DM-HLN tests (each spec vs M2_vix baseline, within same variant)
+[20:39:11] ======================================================================
+[20:39:11]   orig_shift1            base       t=-3.021 p=0.0029 n=170 -> BASELINE_WINS
+[20:39:11]   orig_shift1            epu        t=-2.555 p=0.0115 n=170 -> NS
+[20:39:11]   orig_shift1            finstress  t=-3.001 p=0.0031 n=170 -> BASELINE_WINS
+[20:39:11]   orig_shift1            all        t=-1.008 p=0.3149 n=170 -> NS
+[20:39:11]   corrected_shift2       base       t=-3.021 p=0.0029 n=170 -> BASELINE_WINS
+[20:39:11]   corrected_shift2       epu        t=-2.555 p=0.0115 n=170 -> NS
+[20:39:11]   corrected_shift2       finstress  t=-3.664 p=0.0003 n=170 -> BASELINE_WINS
+[20:39:11]   corrected_shift2       all        t=-0.999 p=0.3191 n=170 -> NS
+[20:39:11]   conservative_shift2    base       t=-3.021 p=0.0029 n=170 -> BASELINE_WINS
+[20:39:11]   conservative_shift2    epu        t=-2.469 p=0.0146 n=170 -> NS
+[20:39:11]   conservative_shift2    finstress  t=-3.664 p=0.0003 n=170 -> BASELINE_WINS
+[20:39:11]   conservative_shift2    all        t=-3.346 p=0.0010 n=170 -> BASELINE_WINS
+[20:39:11]   pit_shift0             base       t=-3.021 p=0.0029 n=170 -> BASELINE_WINS
+[20:39:11]   pit_shift0             epu        t=-2.603 p=0.0101 n=170 -> NS
+[20:39:11]   pit_shift0             finstress  t=-3.001 p=0.0031 n=170 -> BASELINE_WINS
+[20:39:11]   pit_shift0             all        t=-2.537 p=0.0121 n=170 -> NS
+[20:39:11]   pit_shift1             base       t=-3.021 p=0.0029 n=170 -> BASELINE_WINS
+[20:39:11]   pit_shift1             epu        t=-2.711 p=0.0074 n=170 -> NS
+[20:39:11]   pit_shift1             finstress  t=-3.664 p=0.0003 n=170 -> BASELINE_WINS
+[20:39:11]   pit_shift1             all        t=-1.984 p=0.0488 n=170 -> NS
+[20:39:11]   multi_lag_3            base       t=-3.021 p=0.0029 n=170 -> BASELINE_WINS
+[20:39:11]   multi_lag_3            epu        t=-2.272 p=0.0244 n=170 -> NS
+[20:39:11]   multi_lag_3            finstress  t=-3.989 p=0.0001 n=170 -> BASELINE_WINS
+[20:39:11]   multi_lag_3            all        t=-2.828 p=0.0052 n=170 -> NS
+[20:39:11] 
+======================================================================
+[20:39:11] Cross-variant DM (does PIT vs corrected change OOS loss for same spec?)
+[20:39:11] ======================================================================
+[20:39:11]   base       corrected_shift2 vs pit_shift0: t=+nan p=nan n=170
+[20:39:11]   vix        corrected_shift2 vs pit_shift0: t=+nan p=nan n=170
+[20:39:11]   epu        corrected_shift2 vs pit_shift0: t=-1.638 p=0.1033 n=170
+[20:39:11]   finstress  corrected_shift2 vs pit_shift0: t=+5.157 p=0.0000 n=170
+[20:39:11]   all        corrected_shift2 vs pit_shift0: t=-2.181 p=0.0306 n=170
+[20:39:11] 
+======================================================================
+[20:39:11] VERDICT
+[20:39:11] ======================================================================
+[20:39:11] VERDICT: H2_ROBUST_NULL - all alt-data specs FAIL across all 6 variants.
+[20:39:11]   Revision-corrected + PIT alignment still NULL. Vintage would likewise be NULL.
+[20:39:11]   K1116 / K1116b NULL conclusion is robust to publication-delay/vintage concerns.
+[20:39:11] 
+Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8e19af5/experiments/k1116c/k1116c_results.json
+
+======================================================================
+DM-HLN t-stats (vs M2_vix baseline) — Harvey threshold |t|>3
+======================================================================
+Variant                       base      epu  finstress      all
+orig_shift1                 -3.021   -2.555     -3.001   -1.008
+corrected_shift2            -3.021   -2.555     -3.664   -0.999
+conservative_shift2         -3.021   -2.469     -3.664   -3.346
+pit_shift0                  -3.021   -2.603     -3.001   -2.537
+pit_shift1                  -3.021   -2.711     -3.664   -1.984
+multi_lag_3                 -3.021   -2.272     -3.989   -2.828

@@ -391,7 +391,8 @@
     "title": "K1116c: ALFRED vintage-based intraday release-time alignment",
     "priority": 3,
     "description": "K1116b 衍生：ultimate publication-delay fix using vintage data。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T08:30:00+08:00"
   },
   {
     "id": "K1117b",
@@ -806,5 +807,19 @@
     "description": "K1067e 確認移除 VIX 後 θ_EAV 仍穩定 (H3 borderline H1)。反向: 保留 VIX 但移除 EAV: τ=exp(m+θ_VIX×VIX²)。看 loglik 變化 + 每檔 stock θ_VIX 穩定性, 完整的 robustness sanity check 雙邊。",
     "status": "completed",
     "completed_at": "2026-04-14T06:30:00+08:00"
+  },
+  {
+    "id": "K1116d",
+    "title": "K1116d: True ALFRED vintage when FRED_API_KEY obtained",
+    "priority": 4,
+    "description": "K1116c ALFRED Akamai-blocked + fredapi 需 FRED_API_KEY。用戶取得 FRED_API_KEY 後補 true first-release vintage 替代 PIT-revised (K1116c upper bound 下限驗證)。",
+    "status": "pending"
+  },
+  {
+    "id": "K1116f",
+    "title": "K1116f: PIT alignment 套用 GLD/TLT/BTC cross-asset Paper 4 cells",
+    "priority": 3,
+    "description": "K1116c SPY 已 ROBUST NULL。擴展 PIT 套用到 K1118 cross-asset (GLD/TLT/BTC), 確認 alt-data NULL universality 跨資產 (K1118 原用 shift(1))。",
+    "status": "pending"
   }
 ]

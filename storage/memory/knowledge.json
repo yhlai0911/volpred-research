@@ -26346,5 +26346,23 @@
     "data_source": "Reuse K1124/K1125 TAIFEX TX 5-min bars 2017-2021 + Lee-Mykland jump flags + rolling VIX percentile",
     "created_at": "2026-04-14T07:30:00+08:00",
     "updated_at": "2026-04-14T07:30:00+08:00"
+  },
+  {
+    "id": "k1116c-1776113051",
+    "experiment_id": "K1116c",
+    "title": "K1116c H2 ROBUST NULL: Paper 4 alt-data NULL 不受 publication-delay / PIT alignment 影響",
+    "content": "[提出: Claude, 執行: Claude] K1116/K1116b 以 calendar shift(1)/shift(2) 修正 publication delay 仍 NULL。K1116c 本欲用 ALFRED vintage 做 ultimate fix。**ALFRED endpoint blocked** (Akamai 60s timeout + FRED_API_KEY unavailable + fredgraph.csv 忽略 vintage_date param)。**Fallback**: fredgraph revision-corrected values + explicit release-calendar PIT alignment。這是 upper bound (revision-corrected 比 vintage 更 smooth, 若 revised+PIT 都 NULL, vintage+PIT 必 NULL)。**結果 H2 ROBUST NULL**: SPY weekly RV OOS n=170, 6 lag variants × 5 alt-data specs = 30 cells, **沒有一個 cell** 達 positive DM |t|>3。全部 consistent 於 'VIX sufficient, alt-data redundant or harmful'。orig_shift1 精確複製 K1116 (M1=-3.021, M3=-2.555, M4=-3.001, M5=-1.008, QLIKE overfit +59.91 到 4 decimals)。PIT vs weekly-mean correlation: NFCI 0.991, ANFCI 0.985, STLFSI 0.895, USEPU 0.900, WLEMU 0.764 (EPU 最大 divergence 但 DM 仍 negative)。finstress PIT vs K1116b shift(2) cross-variant DM t=+5.16 (PIT 略優), 但兩者仍都 lose to VIX。**Paper 4 narrative 強化**: old 'NULL under calendar shift' → new '**NULL robust to ANY plausible publication-delay or PIT alignment**; revision-corrected PIT is upper bound on vintage signal quality'。K1116 article 不需加 caveat — 反而更 robust。衍生 K1116d (true ALFRED vintage once FRED_API_KEY 可得), K1116f (PIT alignment 套用 GLD/TLT/BTC cross-asset), K1116e (intraday release-time alignment)。",
+    "tags": [
+      "K1116c",
+      "Paper4",
+      "alt-data-NULL",
+      "PIT-alignment",
+      "ALFRED-blocked",
+      "K1116-strengthened",
+      "publication-delay-robust"
+    ],
+    "data_source": "fredgraph.csv revision-corrected + FRED release-calendar PIT alignment (ALFRED blocked) + SPY weekly RV",
+    "created_at": "2026-04-14T08:30:00+08:00",
+    "updated_at": "2026-04-14T08:30:00+08:00"
   }
 ]
