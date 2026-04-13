@@ -611,6 +611,19 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 23. Paper 2 two-level mechanism 浮現：between-market 用 institutional + within-market 用 analyst（2026-04-14 K1167）
+**K1166 within-market analyst 確認後，K1167 用 institutional ownership 解 cross-market puzzle**
+- 4-market institutions_pct ranking: TW 0.247 < EU 0.416 < JP 0.425 < US 0.750 **完全匹配** 2-cluster split
+- Spearman ρ(institutions_pct, θ_rel)=+0.80 p=0.20 (N=4 限制 power) — 優於 analyst ρ=+0.40
+- Per-stock joint panel: log_analyst β=+1.14e-3 t=+2.71 (PASS); institutions_pct β=-2.73e-3 t=-0.93 (NS)
+- **Two-level mechanism**:
+  - **Between-market** retail-vs-institutional → cluster split
+  - **Within-market** analyst coverage → per-stock θ_EAV_i
+  - Institutions_pct **不 subsume** analyst — 兩通道互補
+- EU-vs-JP gap (0.14 vs 0.39) institutions_pct 也未完全解釋 (EU 0.416 ≈ JP 0.425) — 殘差留 K1170 press-concentration
+- N=4 preliminary, K1165 升 P1 補 N≥8 markets
+- **E071**: yfinance major_holders 0.2+ 結構踩坑教訓
+
 ### 22. Paper 2 mechanism 翻轉再翻轉：per-stock refit CONFIRMED within-market（2026-04-14 K1166）
 **K1164 REJECTED 純粹是 σ² tautology artifact，移除後 analyst hypothesis 在 within-market 層級成立**
 - K1166: 110 stocks per-stock θ_EAV_i refit (no shared pooling) + Engle-Ghysels-Sohn (2013) E[g]=1 normalization

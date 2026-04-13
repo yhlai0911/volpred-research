@@ -26163,5 +26163,23 @@
     "data_source": "Reuse K1145/K1147/K1150/K1153 panel data + K1164 analyst proxies (110 stocks 4 markets)",
     "created_at": "2026-04-14T02:00:00+08:00",
     "updated_at": "2026-04-14T02:00:00+08:00"
+  },
+  {
+    "id": "k1167-1776103090",
+    "experiment_id": "K1167",
+    "title": "K1167 PARTIAL: two-level mechanism — institutional% explains between-market cluster + analyst explains within-market (preliminary N=4)",
+    "content": "[提出: Claude, 執行: Claude] K1166 內部 mechanism 確認後 K1167 檢驗 cross-market puzzle (EU 21 analyst > JP 14.5 但 EU LOW JP HIGH cluster)。**Two-level mechanism revealed**: (1) Between-market: institutions_pct ranking TW(0.247)<EU(0.416)<JP(0.425)<US(0.750) **完全匹配** K1166 預期 2-cluster split; Spearman ρ(institutions_pct, θ_rel_market)=+0.80 p=0.20 (N=4 限制 power) — 優於 analyst ρ=+0.40 p=0.60。 (2) Within-market: per-stock panel (109 stocks, market FE) joint spec log_analyst β=+1.14e-3 t=+2.71 (Harvey marginal); institutions_pct β=-2.73e-3 t=-0.93 (NS, 變號是 collinearity). 關鍵: institutions_pct **未 subsume** analyst, 兩個通道互補非競爭。within-market demeaned: analyst r=+0.265 p=0.005 PASS; institutions_pct r=-0.057 p=0.56 NS。EU-vs-JP gap (0.14 vs 0.39) institutions_pct 也未完全解釋 (EU 0.416 vs JP 0.425 幾乎相等), 殘差需 K1170 press-concentration 或其他 covariate。**Paper 2 §5 兩層敘事**: between-market retail-vs-institutional 解 cluster; within-market analyst 解 firm-level θ_EAV_i; **不可宣稱 institutions_pct subsumes analyst**。N=4 markets 必須標 preliminary, 待 K1168 N≥8 markets 才能 causal claim。yfinance debug note: major_holders DataFrame 把 'Breakdown' 當 row index name 而非 column name (yfinance 0.2+) — 用 df.index.name=='Breakdown' 抽。",
+    "tags": [
+      "K1167",
+      "Paper2",
+      "two-level-mechanism",
+      "institutional-ownership",
+      "cross-market",
+      "K1166-followup",
+      "preliminary"
+    ],
+    "data_source": "yfinance major_holders (institutions_pct) + K1166 per-stock θ_EAV_i (109 stocks 4 markets)",
+    "created_at": "2026-04-14T02:30:00+08:00",
+    "updated_at": "2026-04-14T02:30:00+08:00"
   }
 ]

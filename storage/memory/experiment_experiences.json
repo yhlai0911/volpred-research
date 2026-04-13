@@ -977,5 +977,19 @@
       "K1164",
       "K1166"
     ]
+  },
+  {
+    "id": "E071",
+    "title": "yfinance 0.2+ major_holders DataFrame: 'Breakdown' 是 row index name 不是 column",
+    "category": "data-source",
+    "lesson": "yfinance.Ticker.major_holders() 返回的 DataFrame 結構在 0.2+ 改變: 'Breakdown' 字段是 DataFrame.index.name，不是 column。用 df['Breakdown'] 會回傳 None 並失去訊號。正確抽取: 檢查 df.index.name=='Breakdown' 後用 df.index.tolist() + df['Value'].values。",
+    "examples": [
+      "K1167 第一次實作用 df['Breakdown'] 全部回傳 None, 109 stocks institutions_pct 全 NaN",
+      "重構用 df.index.name + df['Value'] 才正確抽 institutions_pct, insider_pct"
+    ],
+    "recommendation": "對 yfinance 任何 holders/info 類 DataFrame API, 使用前先 print(df.index.name, list(df.columns)) 確認結構; 不要假設 column 結構像 pre-0.2 版本。",
+    "source_experiments": [
+      "K1167"
+    ]
   }
 ]
