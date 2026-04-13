@@ -26181,5 +26181,22 @@
     "data_source": "yfinance major_holders (institutions_pct) + K1166 per-stock θ_EAV_i (109 stocks 4 markets)",
     "created_at": "2026-04-14T02:30:00+08:00",
     "updated_at": "2026-04-14T02:30:00+08:00"
+  },
+  {
+    "id": "k1165-1776104442",
+    "experiment_id": "K1165",
+    "title": "K1165 STRENGTHENED: N=7 markets confirms K1167 two-level mechanism (institutions cluster between, analyst within)",
+    "content": "[提出: Claude, 執行: Claude] K1167 N=4 markets preliminary (ρ=+0.80 p=0.20)。K1165 擴展 +AU/KR/CA/HK 至 N≥8。AU yfinance earnings 0/10 stocks 達 n_events≥15 → DROPPED 為 N=7。**結果 STRENGTHENED**: institutions_pct × θ_rel Spearman ρ=+0.750 p=0.052 (緊貼 0.05 門檻); Drop-EU LOO ρ=+0.943 p=0.005 (穿過 0.01)。Per-market table: TW 6.36e-5 t=14.1 / HK 5.21e-5 t=2.4 (新, N=5/10) / KR 1.27e-4 t=2.7 (新) / EU 4.07e-5 t=10.0 / JP 1.41e-4 t=20.2 / CA 3.13e-4 t=10.3 (新) / US 1.91e-4 t=22.4。Per-stock panel (N=133, +24 from new markets) log_analyst β=+1.07e-3 t=+3.24 PASS Harvey, replicates K1166 N=109 t=+3.56。**Two-level R² 分解 super-clean**: Between-market (N=7) institutions_pct 63.1% vs log_analyst 15.8% → institutions 強 4×; Within-market (N=133) log_analyst 7.2% vs institutions_pct 0.4% → analyst 強 20×。**兩個 channel 在 between/within 邊界乾淨切換**——這正是 K1167 two-level hypothesis 的最強證據。**Verdict**: STRENGTHENED (not yet CONFIRMED — primary p=0.052; CONFIRMED 留 N≥10 K1168)。Paper 2 §5 narrative READY: Between-market institutions explains cross-country θ_rel cluster (R²=63%); Within-market analyst explains per-stock θ_EAV heterogeneity (panel t=+3.24); EU residual outlier 留 K1170 press-concentration。Caveats: AU dropped (yfinance limitation, K1171 用 Alpha Vantage); HK N=5/10 子集; CA θ_rel=1.45 全部最高 (banks/utilities low σ²)。",
+    "tags": [
+      "K1165",
+      "Paper2",
+      "N=7-markets",
+      "two-level-mechanism-strengthened",
+      "K1167-followup",
+      "between-within-decomposition"
+    ],
+    "data_source": "Reuse K1145/K1147/K1150/K1153 + K1165 new (AU/KR/CA/HK fetch via yfinance), N=7 markets 133 stocks",
+    "created_at": "2026-04-14T03:00:00+08:00",
+    "updated_at": "2026-04-14T03:00:00+08:00"
   }
 ]

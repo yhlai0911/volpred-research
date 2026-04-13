@@ -1,0 +1,20 @@
+
+========================================================================
+K1165: per-stock refit + pooled MLE for new markets (KR, CA, HK)
+========================================================================
+
+[KR] loaded 10/10 (skipped: [])
+[CA] loaded 10/10 (skipped: [])
+[HK] loaded 5/10 (skipped: ['1299.HK', '0941.HK', '0883.HK', '0016.HK', '1109.HK'])
+
+[per-stock] MP n_workers=8
+  fits done in 2.6s (25 stocks)
+  wrote /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a4b24b42/experiments/k1165/k1165_per_stock_table_newmkts.csv
+
+[pooled] per-market pooled MLE (shared MIDAS + stock-FE GJR)
+  KR: pooled fit (0.5s) θ_EAV=1.267e-04 t=2.69
+  CA: pooled fit (0.4s) θ_EAV=3.128e-04 t=10.27
+  HK: pooled fit (0.1s) θ_EAV=5.212e-05 t=2.41
+  wrote k1165_pooled_by_market.json
+
+[done] total 7.3s

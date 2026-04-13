@@ -1,0 +1,61 @@
+
+========================================================================
+K1165: N=7 markets (TW, EU, JP, US + KR, CA, HK) cross-market test
+========================================================================
+
+[panel] rows: 135 — {'TW': 31, 'US': 30, 'JP': 30, 'EU': 19, 'KR': 10, 'CA': 10, 'HK': 5}
+
+Per-market summary:
+         n  theta_eav_mean  theta_eav_median  sigma2_sample_mean  analyst_median  market_cap_median  log_mcap_median  institutions_pct_mean  institutions_pct_median  pooled_theta_eav  pooled_theta_eav_t  theta_rel
+market                                                                                                                                                                                                               
+CA      10        0.000360          0.000105            0.000216            14.5       1.301472e+11        25.591141               0.551501                 0.530065          0.000313           10.272994   1.448405
+EU      19        0.000661          0.000242            0.000291            21.0       1.167161e+11        25.471210               0.415821                 0.407700          0.000041           10.030000   0.140000
+HK       5        0.000247          0.000125            0.000290            17.0       2.388137e+12        28.501535               0.260677                 0.210880          0.000052            2.411236   0.179562
+JP      30        0.001019          0.000762            0.000364            14.5       9.899296e+12        29.923456               0.425083                 0.433995          0.000141           20.160000   0.390000
+KR      10        0.000077          0.000081            0.000459            25.5       5.176361e+13        31.574097               0.365205                 0.348070          0.000127            2.686601   0.275709
+TW      31        0.000379          0.000085            0.000380             7.5       3.271991e+11        26.513835               0.246967                 0.249310          0.000064           14.140000   0.170000
+US      30        0.002019          0.000232            0.000326            32.5       4.430608e+11        26.816881               0.749664                 0.758265          0.000191           22.390000   0.590000
+
+Cross-market Spearman (N=7):
+  institutions_pct_vs_theta_rel: ρ=+0.750, p=0.052, n=7
+  analyst_median_vs_theta_rel: ρ=+0.108, p=0.818, n=7
+  log_mcap_median_vs_theta_rel: ρ=+0.214, p=0.645, n=7
+
+[panel_valid] n=133  — markets: {'TW': 30, 'US': 30, 'JP': 30, 'EU': 18, 'KR': 10, 'CA': 10, 'HK': 5}
+
+Panel OLS (market FE + log_mcap):
+  analyst_only: R²=0.215, n=133
+    log_analyst: β=+9.222e-04, t=+3.74, p=0.000
+    log_mcap: β=-1.088e-05, t=-0.07, p=0.945
+  inst_only: R²=0.173, n=133
+    institutions_pct: β=-9.768e-04, t=-0.47, p=0.640
+    log_mcap: β=+2.047e-04, t=+1.27, p=0.205
+  joint: R²=0.232, n=133
+    log_analyst: β=+1.071e-03, t=+3.24, p=0.002
+    institutions_pct: β=-1.965e-03, t=-0.88, p=0.382
+    log_mcap: β=-2.717e-05, t=-0.18, p=0.855
+
+Within-market (demeaned) Pearson:
+  log_analyst_x_theta_eav: r=+0.268, p=0.002, n=133
+  institutions_pct_x_theta_eav: r=-0.061, p=0.485, n=133
+  log_analyst_x_institutions_pct: r=+0.267, p=0.002, n=133
+
+Two-level R² decomposition:
+  between-market (N=7): {'institutions_pct': 0.6314447874403539, 'log_analyst': 0.15782390228982923, 'log_mcap': 0.03457704227910885}
+  within-market  (N=133): {'log_analyst': 0.07184879196446492, 'institutions_pct': 0.0037248535217391243, 'log_mcap': 0.016623167710928533}
+
+===== VERDICT: STRENGTHENED =====
+Direction and magnitude consistent with K1167, but p does not reach 0.05 at N=7. Supportive; not yet fully confirmed.
+
+Leave-one-out (drop each market):
+  drop CA: ρ=+0.657, p=0.156
+  drop EU: ρ=+0.943, p=0.005
+  drop HK: ρ=+0.771, p=0.072
+  drop JP: ρ=+0.600, p=0.208
+  drop KR: ρ=+0.771, p=0.072
+  drop TW: ρ=+0.771, p=0.072
+  drop US: ρ=+0.657, p=0.156
+
+[figures] wrote cross_market_scatter.png + panel_forest.png
+[csv] wrote k1165_per_stock_table.csv  (n=133)
+[json] wrote k1165_results.json

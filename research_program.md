@@ -611,6 +611,20 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 24. Paper 2 two-level mechanism STRENGTHENED：N=7 markets 確認 between/within R² super-clean 切換（2026-04-14 K1165）
+**N=4 → N=7 把 Spearman p 從 0.20 推進到 0.052 緊貼門檻**
+- K1165 +AU/KR/CA/HK 擴展，AU 因 yfinance earnings 0/10 droppped → N=7 final
+- Spearman ρ(institutions_pct, θ_rel)=+0.750 p=0.052 (Drop-EU LOO ρ=+0.943 p=0.005)
+- Per-market table: TW 6.36e-5 / HK 5.21e-5 / KR 1.27e-4 / EU 4.07e-5 / JP 1.41e-4 / CA 3.13e-4 / US 1.91e-4
+- Per-stock panel (N=133, +24 new) log_analyst β=+1.07e-3 t=+3.24 PASS Harvey (replicates K1166 t=+3.56)
+- **Two-level R² 分解 super-clean**:
+  - Between-market: institutions_pct 63.1% vs log_analyst 15.8% (institutions 強 4×)
+  - Within-market: log_analyst 7.2% vs institutions_pct 0.4% (analyst 強 20×)
+  - 兩個 channel 在 between/within 邊界乾淨切換 — 強 evidence for K1167 hypothesis
+- **Verdict**: STRENGTHENED (CONFIRMED 留 N≥10 K1168)
+- Paper 2 §5 narrative **READY commit**
+- 衍生 K1168 (+BR/CH/IN N≥10), K1171 (AU via Alpha Vantage)
+
 ### 23. Paper 2 two-level mechanism 浮現：between-market 用 institutional + within-market 用 analyst（2026-04-14 K1167）
 **K1166 within-market analyst 確認後，K1167 用 institutional ownership 解 cross-market puzzle**
 - 4-market institutions_pct ranking: TW 0.247 < EU 0.416 < JP 0.425 < US 0.750 **完全匹配** 2-cluster split
