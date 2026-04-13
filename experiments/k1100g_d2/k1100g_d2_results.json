@@ -1,0 +1,103 @@
+{
+  "experiment_id": "K1100g_d2",
+  "title": "OOS validation of night->day predictive power in TAIFEX PRG",
+  "run_at": "2026-04-13T16:02:22",
+  "seed": 42,
+  "design": {
+    "train_start": "2017-01-01",
+    "train_end": "2019-12-31",
+    "test_start": "2020-01-01",
+    "test_end": "2021-12-31",
+    "refit_every": 5,
+    "refit_policy": "expanding_window_weekly",
+    "n_train": 613,
+    "n_test": 464,
+    "n_test_valid": 464
+  },
+  "data": {
+    "source": "TAIFEX TX 2017-2021 via K1100g_d1 session cache (raw-tick rebuild)",
+    "cache_file": "_cache_taifex_sessions_2017-2021.parquet"
+  },
+  "models": {
+    "M_null": "Day-only PRG (K1100g_d1 M2 spec)",
+    "M_full": "Day + contemporaneous night_t^2 exog PRG (K1100g_d1 M4 spec)",
+    "info_set": "night_t ends 05:00 < day_t opens 08:45 => legal contemporaneous info"
+  },
+  "oos_stats": {
+    "n_obs": 464,
+    "ll_null_sum": 1533.0765070354119,
+    "ll_full_sum": 1531.188665642296,
+    "ll_diff_sum": -1.8878413931158775,
+    "qlike_null_mean": 1.6166532270828982,
+    "qlike_full_mean": 1.6244677039900122,
+    "qlike_improv_pct": -0.48337372395034367,
+    "n_refits_null": 93,
+    "n_refits_full": 93
+  },
+  "tests": {
+    "H1_oos_lrt_primary": {
+      "chi2": 0.0,
+      "p_value": 1.0,
+      "dof": 1,
+      "threshold_chi2": 7.88,
+      "threshold_p": 0.005,
+      "pass": false,
+      "interpretation": "2*(LL_full - LL_null) on OOS loglik sums; chi2>7.88 (p<0.005) required, stricter than in-sample 0.05 threshold"
+    },
+    "H2_dm_hln_robustness": {
+      "t_stat": -0.21214830379565824,
+      "p_value": 0.8319913362739826,
+      "threshold_abs_t": 2.0,
+      "pass": false,
+      "interpretation": "DM HLN on QLIKE differential; t>0 means full>null"
+    },
+    "H3_qlike_magnitude": {
+      "qlike_improv_pct": -0.48337372395034367,
+      "threshold_pct": 1.0,
+      "pass": false,
+      "interpretation": "Meaningful effect size > 1%"
+    },
+    "H4_subperiod_stability": {
+      "sub_2020": {
+        "n": 233,
+        "qlike_null_mean": 1.7393460228795714,
+        "qlike_full_mean": 1.7564019733923188,
+        "qlike_improv_pct": -0.9805955967582858,
+        "lrt_chi2": 0.0,
+        "lrt_p": 1.0,
+        "dm_t_hln": -0.2462290680381915,
+        "dm_p": 0.8055049150686955,
+        "pass_h3": false
+      },
+      "sub_2021": {
+        "n": 231,
+        "qlike_null_mean": 1.4928981559979424,
+        "qlike_full_mean": 1.4913911465409322,
+        "qlike_improv_pct": 0.10094522864507363,
+        "lrt_chi2": 0.19771169006799028,
+        "lrt_p": 0.6565742785948636,
+        "dm_t_hln": 0.05101346382318399,
+        "dm_p": 0.9593147919384151,
+        "pass_h3": false
+      },
+      "pass": false,
+      "interpretation": "Both 2020 (COVID) and 2021 (recovery) separately pass H3"
+    }
+  },
+  "paper3_reframe_verdict": {
+    "verdict": "FAIL \u2014 OOS worse than baseline; in-sample was data mining",
+    "all_four_pass": false,
+    "h1_pass": false,
+    "h2_pass": false,
+    "h3_pass": false,
+    "h4_pass": false
+  },
+  "limitations": [
+    "N=2 years OOS is modest for asymptotic chi-square to be precise; 2*(LL_diff) on OOS is an approximate rather than exact chi2.",
+    "Single market (TAIFEX). Cross-market replication needed (SPY / N225 etc.) to establish 'Taiwan microstructure' claim.",
+    "COVID 2020 is an atypical volatility regime; H4 sub-period stability check tests this explicitly.",
+    "Active-contract selection at each file uses volume argmax; may cause contract-month-edge effects at rollover (Codex MED, unchanged from K1100g_d1).",
+    "2020 early sample contains ~90 days with missing night session data (pre-dawn); aligned OOS excludes these.",
+    "Refit frequency = 5 days (weekly). Daily refit would be more OOS-rigorous but >5x compute; robustness to this choice not tested here (candidate for d3)."
+  ]
+}
