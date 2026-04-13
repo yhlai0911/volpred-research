@@ -611,6 +611,25 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 18. Paper 2 relative-magnitude verdict: 方向 universal + 量級 market-specific（2026-04-13 K1152）
+**Scale-adjusted θ_rel 仍顯著差異：quarterly vs mixed reporting cluster**
+- K1145/K1147/K1150 三市場 absolute θ_EAV 差 3× — 只是 scale artifact 還是真 magnitude 差異？
+- θ_rel = θ_EAV / avg_σ²: TW 0.1673 [0.109, 0.247] / US 0.5862 [0.395, 0.859] / JP 0.3875 [0.354, 0.482]
+- avg_σ² 三市場近乎相同 (3.26e-4 ~ 3.80e-4) — scaling 沒校正差異
+- Wald H0 (equal θ_rel): χ²(2)=29.19, p≈4.6e-7 bootstrap p=0.000 — 決定性 reject
+- CI overlap: TW∩US=F, TW∩JP=F, US∩JP=T → quarterly cluster (US+JP) vs mixed (TW)
+- **Paper 2 narrative 雙層修正**: "方向 universal（三市場均顯著正向）+ 量級 market-specific（quarterly reporting institutional density 主導）"
+- 衍生 K1153 EU 4th market, K1156 TW 季報 sub-sample converge test
+
+### 19. Paper 2 binary-sufficient universality 跨市場確認（2026-04-13 K1157）
+**JP 完美複製 US K1151 — 三市場 binary EAV 全 PASS，US+JP continuous 全 NS**
+- JP TOPIX N=30 同 panel 同 design：binary θ=+1.25e-4 boot t=+13.03 PASS vs continuous θ=+4.76e-6 boot t=+1.32 NS, ΔAIC=-2551 strongly favors binary
+- Placebo z=+1.53 p=0.067 跟 US K1151 (+1.60) 量級一致
+- Drop-5 sign-flip when removing SoftBank (outlier-driven main-spec signal)
+- **Universality verdict**: 三市場 binary PASS + 兩市場 continuous NS replication
+- Paper 2 narrative 升級：「Announcement-day long-run variance channel reflects information-processing friction (attention/IV crush/scheduled hedging), not scaling with market-aggregated EPS surprise magnitude — universal across US and JP」
+- 衍生 K1162 (analyst-coverage-high sub-sample mechanism test)
+
 ### 17. Paper 2 mechanism narrowing: binary sufficient, surprise size 無關（2026-04-13 K1151）
 **Continuous EAV surprise spec 全面失效 — 機制非 surprise-size driven**
 - US S&P 500 N=30 (K1147 cache) 同 panel: continuous |Surprise%| z-score winsor p99 取代 binary EAV

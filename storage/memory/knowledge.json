@@ -26071,5 +26071,23 @@
     "data_source": "Reuse K1145/K1147/K1150 results JSON",
     "created_at": "2026-04-14T00:10:00+08:00",
     "updated_at": "2026-04-14T00:10:00+08:00"
+  },
+  {
+    "id": "k1157-1776096502",
+    "experiment_id": "K1157",
+    "title": "K1157 JP TOPIX continuous EAV — binary-sufficient universality confirmed cross-market",
+    "content": "[提出: Claude, 執行: Claude] K1151 US 發現 continuous surprise 無效後，K1157 在 JP TOPIX N=30 (K1150 同 panel) 同樣設計複製。2014-2025, 87,917 obs, 1411 earnings events。**結果全面複製 US**: binary θ_EAV=+1.2518e-4 boot t=+13.03 PASS (K1150 confirmed); continuous θ_SURP=+4.76e-6 boot t=+1.32 p=0.31 NS; placebo z=+1.53 p=0.067 NS; ΔAIC(bin-cont)=-2551 strongly favors binary (logℓ 差 1276)。Drop-5 robustness 顯示 9984.T (SoftBank) 移除時 continuous sign-flip (−1.50e-6) — 一個 outlier 主導 main spec 的 NS signal。**跨市場對比**: US K1151 (θ=+5.26e-6 t=+1.11 placebo z=+1.60 ΔAIC=-5479) vs JP K1157 (θ=+4.76e-6 t=+1.32 z=+1.53 ΔAIC=-2551) — within 10% 量級一致。**Universality verdict**: 三市場 (TW K1145 + US K1147 + JP K1150) binary EAV 全 PASS；US + JP continuous 兩次 replication 都 NS。'Announcement-day clustering NOT surprise-size' 從 mechanism control 升級為 **universal cross-market finding**。Paper 2 narrative: 'earnings-day long-run variance channel reflects information-processing friction (attention shocks, options-IV crush unwind, scheduled hedging) rather than scaling with market-aggregated EPS surprise magnitude. Universal across US and JP.'",
+    "tags": [
+      "K1157",
+      "Paper2",
+      "continuous-EAV",
+      "JP-TOPIX",
+      "K1151-replication",
+      "universality-confirmed",
+      "binary-sufficient"
+    ],
+    "data_source": "yfinance TOPIX top-30 reuse K1150 data cache + earnings_dates Surprise(%) 2014-2025",
+    "created_at": "2026-04-14T00:20:00+08:00",
+    "updated_at": "2026-04-14T00:20:00+08:00"
   }
 ]

@@ -678,13 +678,21 @@
     "title": "K1157: JP TOPIX continuous EAV — verify binary-sufficient universality",
     "priority": 3,
     "description": "K1151 (US) 顯示 binary > continuous。檢驗 K1150 JP TOPIX 是否同 pattern。若 universal binary-sufficient → mechanism 進一步穩固。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T00:20:00+08:00"
   },
   {
     "id": "K1161",
     "title": "K1161: Options-implied IV crush as continuous EAV regressor",
     "priority": 3,
     "description": "K1151 yfinance Surprise(%) noisy。改用 30-day IV at T-1 minus T+1 (IV crush) 作為市場彙總 continuous expected impact。OptionMetrics 或 polygon API 需要付費；先試 yfinance options chain 拼湊。",
+    "status": "pending"
+  },
+  {
+    "id": "K1162",
+    "title": "K1162: Analyst-coverage-high sub-sample — continuous EAV mechanism test",
+    "priority": 3,
+    "description": "K1151+K1157 兩市場 continuous NS 是 surprise noise 太大？在高 analyst coverage 子集（I/B/E/S covered, ≥5 analysts）檢驗 continuous θ_SURP 是否 PASS — 若 PASS → 'noise masks true effect in low coverage'; 若 NS → 機制確為非 shock-scale。",
     "status": "pending"
   }
 ]
