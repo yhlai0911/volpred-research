@@ -1,0 +1,638 @@
+{
+  "experiment_id": "K1100",
+  "models": {
+    "DCC-GJR": {
+      "var_tests": {
+        "alpha_0.025": {
+          "kupiec": {
+            "stat": 0.1761294791859882,
+            "p_value": 0.67472082453999,
+            "violations": 71,
+            "rate": 0.023809523809523808,
+            "expected_rate": 0.025,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.8720450486221125,
+            "p_value": 0.3503897742618737,
+            "clusters": 3,
+            "pass": true
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 6.454545454545454,
+            "n_blocks": 11,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": -0.01829400085775379,
+            "p_value": 0.9854043132890401,
+            "pass": true,
+            "n_violations": 71
+          },
+          "trinity_pass": true,
+          "n_oos": 2982,
+          "violation_rate": 0.023809523809523808
+        },
+        "alpha_0.010": {
+          "kupiec": {
+            "stat": 0.8609069835220993,
+            "p_value": 0.353485003133427,
+            "violations": 35,
+            "rate": 0.011737089201877934,
+            "expected_rate": 0.01,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 7.149398685502419,
+            "p_value": 0.0074989124795276085,
+            "clusters": 3,
+            "pass": false
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 3.1818181818181817,
+            "n_blocks": 11,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.15199031833906496,
+            "p_value": 0.879194571780939,
+            "pass": true,
+            "n_violations": 35
+          },
+          "trinity_pass": false,
+          "n_oos": 2982,
+          "violation_rate": 0.011737089201877934
+        }
+      },
+      "fz_score": {
+        "alpha_0.025": {
+          "mean": -5.536038610555308,
+          "n": 2982
+        },
+        "alpha_0.010": {
+          "mean": -5.371398625552407,
+          "n": 2982
+        }
+      }
+    },
+    "DCC-A4f-SYMM": {
+      "var_tests": {
+        "alpha_0.025": {
+          "kupiec": {
+            "stat": 0.09047104630408853,
+            "p_value": 0.7635791697902232,
+            "violations": 72,
+            "rate": 0.02414486921529175,
+            "expected_rate": 0.025,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 2.290740374228399,
+            "p_value": 0.1301478274350858,
+            "clusters": 4,
+            "pass": true
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 6.545454545454546,
+            "n_blocks": 11,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.008781471317489853,
+            "p_value": 0.9929934896650422,
+            "pass": true,
+            "n_violations": 72
+          },
+          "trinity_pass": true,
+          "n_oos": 2982,
+          "violation_rate": 0.02414486921529175
+        },
+        "alpha_0.010": {
+          "kupiec": {
+            "stat": 0.8609069835220993,
+            "p_value": 0.353485003133427,
+            "violations": 35,
+            "rate": 0.011737089201877934,
+            "expected_rate": 0.01,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 3.3008954675947653,
+            "p_value": 0.06924212683691366,
+            "clusters": 2,
+            "pass": true
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 3.1818181818181817,
+            "n_blocks": 11,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.17862525086323777,
+            "p_value": 0.858231966038969,
+            "pass": true,
+            "n_violations": 35
+          },
+          "trinity_pass": true,
+          "n_oos": 2982,
+          "violation_rate": 0.011737089201877934
+        }
+      },
+      "fz_score": {
+        "alpha_0.025": {
+          "mean": -5.564890286459327,
+          "n": 2982
+        },
+        "alpha_0.010": {
+          "mean": -5.4601825342056065,
+          "n": 2982
+        }
+      }
+    },
+    "DCC-A4f-ASYM": {
+      "var_tests": {
+        "alpha_0.025": {
+          "kupiec": {
+            "stat": 0.00278050108929051,
+            "p_value": 0.9579466716454038,
+            "violations": 75,
+            "rate": 0.025150905432595575,
+            "expected_rate": 0.025,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 0.5903022671752467,
+            "p_value": 0.44230225767811016,
+            "clusters": 3,
+            "pass": true
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 6.818181818181818,
+            "n_blocks": 11,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.02656622316737467,
+            "p_value": 0.9788057137533546,
+            "pass": true,
+            "n_violations": 75
+          },
+          "trinity_pass": true,
+          "n_oos": 2982,
+          "violation_rate": 0.025150905432595575
+        },
+        "alpha_0.010": {
+          "kupiec": {
+            "stat": 0.15723217147165514,
+            "p_value": 0.6917176796189533,
+            "violations": 32,
+            "rate": 0.010731052984574111,
+            "expected_rate": 0.01,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 3.9111801333189042,
+            "p_value": 0.047965903805271215,
+            "clusters": 2,
+            "pass": false
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 2.909090909090909,
+            "n_blocks": 11,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.07916345349868226,
+            "p_value": 0.9369026132137308,
+            "pass": true,
+            "n_violations": 32
+          },
+          "trinity_pass": false,
+          "n_oos": 2982,
+          "violation_rate": 0.010731052984574111
+        }
+      },
+      "fz_score": {
+        "alpha_0.025": {
+          "mean": -5.607749464296392,
+          "n": 2982
+        },
+        "alpha_0.010": {
+          "mean": -5.534433725417761,
+          "n": 2982
+        }
+      }
+    },
+    "Copula-t-A4f-ASYM": {
+      "var_tests": {
+        "alpha_0.025": {
+          "kupiec": {
+            "stat": 7.319959384678725,
+            "p_value": 0.006819295334490771,
+            "violations": 106,
+            "rate": 0.03277674706246135,
+            "expected_rate": 0.025,
+            "pass": false
+          },
+          "christoffersen": {
+            "stat": 1.630856629913275,
+            "p_value": 0.20158460553889523,
+            "clusters": 6,
+            "pass": true
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 8.833333333333334,
+            "n_blocks": 12,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.3345721760135709,
+            "p_value": 0.737947836738112,
+            "pass": true,
+            "n_violations": 106
+          },
+          "trinity_pass": false,
+          "n_oos": 3234,
+          "violation_rate": 0.03277674706246135
+        },
+        "alpha_0.010": {
+          "kupiec": {
+            "stat": 5.888447263493362,
+            "p_value": 0.015240532669574702,
+            "violations": 47,
+            "rate": 0.01453308596165739,
+            "expected_rate": 0.01,
+            "pass": false
+          },
+          "christoffersen": {
+            "stat": 1.7387420842328272,
+            "p_value": 0.18729829193644543,
+            "clusters": 2,
+            "pass": true
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 3.9166666666666665,
+            "n_blocks": 12,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.4301079208887648,
+            "p_value": 0.6671171384225645,
+            "pass": true,
+            "n_violations": 47
+          },
+          "trinity_pass": false,
+          "n_oos": 3234,
+          "violation_rate": 0.01453308596165739
+        }
+      },
+      "fz_score": {
+        "alpha_0.025": {
+          "mean": -5.562266194660091,
+          "n": 3234
+        },
+        "alpha_0.010": {
+          "mean": -5.4341603126610645,
+          "n": 3234
+        }
+      }
+    },
+    "Copula-Clayton-A4f-ASYM": {
+      "var_tests": {
+        "alpha_0.025": {
+          "kupiec": {
+            "stat": 3.1132458030560315,
+            "p_value": 0.07765805791303604,
+            "violations": 97,
+            "rate": 0.02999381570810142,
+            "expected_rate": 0.025,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 1.3273705881392246,
+            "p_value": 0.24927353206884229,
+            "clusters": 5,
+            "pass": true
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 8.083333333333334,
+            "n_blocks": 12,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.22530278285726957,
+            "p_value": 0.8217437349162321,
+            "pass": true,
+            "n_violations": 97
+          },
+          "trinity_pass": true,
+          "n_oos": 3234,
+          "violation_rate": 0.02999381570810142
+        },
+        "alpha_0.010": {
+          "kupiec": {
+            "stat": 3.216524662965469,
+            "p_value": 0.07289824784583698,
+            "violations": 43,
+            "rate": 0.013296227581941867,
+            "expected_rate": 0.01,
+            "pass": true
+          },
+          "christoffersen": {
+            "stat": 2.2493608907173677,
+            "p_value": 0.13366959920768684,
+            "clusters": 2,
+            "pass": true
+          },
+          "basel": {
+            "color": "Green",
+            "violations_per_block": 3.5833333333333335,
+            "n_blocks": 12,
+            "pass": true
+          },
+          "es_test": {
+            "z_stat": 0.33318556214372896,
+            "p_value": 0.7389942158470398,
+            "pass": true,
+            "n_violations": 43
+          },
+          "trinity_pass": true,
+          "n_oos": 3234,
+          "violation_rate": 0.013296227581941867
+        }
+      },
+      "fz_score": {
+        "alpha_0.025": {
+          "mean": -5.5952123764135955,
+          "n": 3234
+        },
+        "alpha_0.010": {
+          "mean": -5.468875435981746,
+          "n": 3234
+        }
+      }
+    }
+  },
+  "dm_qlike": {
+    "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+      "t_stat": -1.6806583780754738,
+      "p_value": 0.09282928952652438,
+      "mean_loss_diff": -0.006781768299087454,
+      "n": 3234,
+      "significant_harvey": false
+    },
+    "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+      "t_stat": -1.4134042830917788,
+      "p_value": 0.15753688697515156,
+      "mean_loss_diff": -0.006041179246044176,
+      "n": 3234,
+      "significant_harvey": false
+    },
+    "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+      "t_stat": 0.28998975699901325,
+      "p_value": 0.7718240738081333,
+      "mean_loss_diff": 0.000740589053043279,
+      "n": 3234,
+      "significant_harvey": false
+    },
+    "DCC-GJR_vs_Copula-t-A4f-ASYM": {
+      "t_stat": 4.075381112968959,
+      "p_value": 4.593904775824048e-05,
+      "mean_loss_diff": 0.05777830452994247,
+      "n": 3234,
+      "significant_harvey": true
+    },
+    "DCC-GJR_vs_Copula-Clayton-A4f-ASYM": {
+      "t_stat": 4.097112689061137,
+      "p_value": 4.183352845144947e-05,
+      "mean_loss_diff": 0.058518893582985745,
+      "n": 3234,
+      "significant_harvey": true
+    }
+  },
+  "dm_fz": {
+    "alpha_0.025": {
+      "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+        "t_stat": -0.33424582390580204,
+        "p_value": 0.7381940679148437,
+        "mean_loss_diff": -0.024547557423489064,
+        "n": 2982,
+        "significant_harvey": false
+      },
+      "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+        "t_stat": 0.14316509134933822,
+        "p_value": 0.886159798842475,
+        "mean_loss_diff": 0.010176628902797679,
+        "n": 2982,
+        "significant_harvey": false
+      },
+      "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+        "t_stat": 4.947895043426818,
+        "p_value": 7.502033966221881e-07,
+        "mean_loss_diff": 0.032946181753504646,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "DCC-GJR_vs_Copula-t-A4f-ASYM": {
+        "t_stat": 0.6212943913122788,
+        "p_value": 0.5344059433155612,
+        "mean_loss_diff": 0.04716329631759408,
+        "n": 2982,
+        "significant_harvey": false
+      },
+      "DCC-GJR_vs_Copula-Clayton-A4f-ASYM": {
+        "t_stat": 1.1107421181669028,
+        "p_value": 0.26667936736059183,
+        "mean_loss_diff": 0.08188748264388077,
+        "n": 2982,
+        "significant_harvey": false
+      }
+    },
+    "alpha_0.010": {
+      "DCC-A4f-ASYM_vs_Copula-t-A4f-ASYM": {
+        "t_stat": -0.9246061312494749,
+        "p_value": 0.35517082260335253,
+        "mean_loss_diff": -0.07823765447032822,
+        "n": 2982,
+        "significant_harvey": false
+      },
+      "DCC-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+        "t_stat": -0.5308437126983524,
+        "p_value": 0.5955270857136159,
+        "mean_loss_diff": -0.04369193764643536,
+        "n": 2982,
+        "significant_harvey": false
+      },
+      "Copula-t-A4f-ASYM_vs_Copula-Clayton-A4f-ASYM": {
+        "t_stat": 3.0231319078231906,
+        "p_value": 0.002501731702001239,
+        "mean_loss_diff": 0.03471512332068086,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "DCC-GJR_vs_Copula-t-A4f-ASYM": {
+        "t_stat": 0.9158236204490156,
+        "p_value": 0.3597594125744289,
+        "mean_loss_diff": 0.08479744539502511,
+        "n": 2982,
+        "significant_harvey": false
+      },
+      "DCC-GJR_vs_Copula-Clayton-A4f-ASYM": {
+        "t_stat": 1.3175780106673791,
+        "p_value": 0.1876449506623833,
+        "mean_loss_diff": 0.1193431622189179,
+        "n": 2982,
+        "significant_harvey": false
+      }
+    }
+  },
+  "copula_stats": {
+    "student_t": {
+      "rho_mean": 0.022583453203720398,
+      "rho_std": 0.1133059401987503,
+      "rho_min": -0.1359264822180843,
+      "rho_max": 0.2058790381830293,
+      "nu_mean": 7.948489207031219,
+      "nu_std": 3.3617056390519506,
+      "nu_min": 3.7613933250937253,
+      "nu_max": 18.27547813023789,
+      "lambda_L_mean": 0.0378411008290604,
+      "lambda_L_std": 0.040373663786702395,
+      "lambda_L_min": 0.00027218340157507046,
+      "lambda_L_max": 0.13745554953784586
+    },
+    "clayton": {
+      "theta_mean": 0.0766095915285159,
+      "theta_std": 0.07497039644041802,
+      "theta_min": 0.01004030997094148,
+      "theta_max": 0.22727519328475473,
+      "lambda_L_mean": 0.007445554295575158,
+      "lambda_L_std": 0.013858699502768364,
+      "lambda_L_min": 1.0419775439757449e-30,
+      "lambda_L_max": 0.04736771016355901
+    }
+  },
+  "covid_copula_stats": {
+    "student_t_rho": {
+      "mean": -0.12747941743455293,
+      "min": -0.1322658224540072,
+      "max": -0.11835280140711242,
+      "range": 0.013913021046894777
+    },
+    "student_t_lambda_L": {
+      "mean": 0.0021967795306912564,
+      "min": 0.0019656956658960435,
+      "max": 0.0027602071029530235,
+      "range": 0.0007945114370569799
+    },
+    "clayton_theta": {
+      "mean": 0.010040309970941479,
+      "min": 0.01004030997094148,
+      "max": 0.01004030997094148,
+      "range": 0.0
+    },
+    "clayton_lambda_L": {
+      "mean": 1.0419775439757447e-30,
+      "min": 1.0419775439757449e-30,
+      "max": 1.0419775439757449e-30,
+      "range": 0.0
+    }
+  },
+  "mean_qlike": {
+    "DCC-GJR": -9.050208137963947,
+    "DCC-A4f-SYMM": -9.090294952403267,
+    "DCC-A4f-ASYM": -9.11476821079298,
+    "Copula-t-A4f-ASYM": -9.10798644249389,
+    "Copula-Clayton-A4f-ASYM": -9.108727031546934
+  },
+  "trinity_scores": {
+    "DCC-GJR": "1/2",
+    "DCC-A4f-SYMM": "2/2",
+    "DCC-A4f-ASYM": "1/2",
+    "Copula-t-A4f-ASYM": "0/2",
+    "Copula-Clayton-A4f-ASYM": "2/2"
+  },
+  "core_answers": {
+    "h1_copula_t_beats_dcc_asym_qlike": {
+      "t_stat": -1.6806583780754738,
+      "harvey_sig": false,
+      "copula_better": false
+    },
+    "h2_clayton_beats_dcc_asym_qlike": {
+      "t_stat": -1.4134042830917788,
+      "harvey_sig": false,
+      "copula_better": false
+    },
+    "h1_copula_t_beats_dcc_asym_fz_1pct": {
+      "t_stat": -0.9246061312494749,
+      "p_value": 0.35517082260335253,
+      "mean_loss_diff": -0.07823765447032822,
+      "n": 2982,
+      "significant_harvey": false
+    },
+    "h2_clayton_beats_dcc_asym_fz_1pct": {
+      "t_stat": -0.5308437126983524,
+      "p_value": 0.5955270857136159,
+      "mean_loss_diff": -0.04369193764643536,
+      "n": 2982,
+      "significant_harvey": false
+    },
+    "h3_t_vs_clayton_fz_1pct": {
+      "t_stat": 3.0231319078231906,
+      "p_value": 0.002501731702001239,
+      "mean_loss_diff": 0.03471512332068086,
+      "n": 3234,
+      "significant_harvey": true
+    },
+    "best_model_by_qlike": "DCC-A4f-ASYM",
+    "best_model_by_trinity": "DCC-A4f-SYMM"
+  },
+  "metadata": {
+    "experiment_id": "K1100",
+    "data_source": "yfinance (SPY, GLD, ^VIX, ^GVZ)",
+    "data_period": "2005-01-01 to 2026-04-12",
+    "oos_start": "2013-06-01",
+    "n_oos": 3234,
+    "window": 1250,
+    "refit_every": 63,
+    "alpha_levels": [
+      0.025,
+      0.01
+    ],
+    "portfolio_weights": [
+      0.5,
+      0.5
+    ],
+    "mc_paths": 5000,
+    "seed": 42,
+    "runtime_seconds": 339.9670157432556,
+    "timestamp": "2026-04-13T03:04:59.396298+00:00",
+    "parent_experiments": [
+      "K1041",
+      "K1092",
+      "K193"
+    ],
+    "proposer": "User (Lai Yi-Hao)",
+    "references": [
+      "Patton (2006) IER 47(2)",
+      "Jondeau & Rockinger (2006) JIMF 25(5)",
+      "Demarta & McNeil (2005) Int Stat Rev 73(1)",
+      "Nelsen (2006) Intro to Copulas, Springer",
+      "Lai, Chen, Gerlach (2009) JEDC",
+      "Lai (2024) APFM 31(2) [PRS copula]",
+      "Fissler & Ziegel (2016) Ann Stat 44(4)",
+      "Kupiec (1995) J Derivatives 3",
+      "Christoffersen (1998) Int Econ Rev",
+      "Acerbi & Szekely (2014) Risk"
+    ]
+  }
+}
