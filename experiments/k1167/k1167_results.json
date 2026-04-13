@@ -1,0 +1,402 @@
+{
+  "experiment_id": "k1167",
+  "title": "Retail-vs-institutional ownership mechanism for cross-market θ_rel cluster",
+  "proposer": "Claude (from K1166 next_tasks)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-13T17:55:49.401845+00:00",
+  "random_seed": 42,
+  "data_sources": [
+    "experiments/k1166/k1166_per_stock_table.csv (θ_EAV_i per stock)",
+    "experiments/k1164/data/analyst_media_proxies.json (analyst_count per stock, via K1166 merge)",
+    "yfinance Ticker.major_holders snapshot, fetched via k1167_fetch.py",
+    "K1152/K1153 documented market-level θ_rel (TW 0.17, EU 0.14, JP 0.39, US 0.59)"
+  ],
+  "hypothesis": "High institutional ownership -> algorithmic / IV-arb / scheduled hedging -> concentrated vol response to earnings -> HIGH θ_rel. High retail (low institutional) -> noise-driven dispersed reaction -> LOW θ_rel. This should explain the EU-vs-JP inversion that K1164 analyst coverage could not.",
+  "market_summary": {
+    "EU": {
+      "n": 19,
+      "n_with_inst_pct": 19,
+      "institutions_pct_mean": 0.41582052947368425,
+      "institutions_pct_median": 0.4077,
+      "institutions_pct_std": 0.09659921880609972,
+      "theta_eav_mean": 0.000661152603013499,
+      "theta_eav_median": 0.0002418924740081,
+      "analyst_median": 21.0,
+      "theta_rel_market_documented": 0.14
+    },
+    "JP": {
+      "n": 30,
+      "n_with_inst_pct": 30,
+      "institutions_pct_mean": 0.42508333099999995,
+      "institutions_pct_median": 0.433995,
+      "institutions_pct_std": 0.11374842394929945,
+      "theta_eav_mean": 0.00101882726602056,
+      "theta_eav_median": 0.0007619218243662,
+      "analyst_median": 14.5,
+      "theta_rel_market_documented": 0.39
+    },
+    "TW": {
+      "n": 31,
+      "n_with_inst_pct": 31,
+      "institutions_pct_mean": 0.24696709580645163,
+      "institutions_pct_median": 0.24931,
+      "institutions_pct_std": 0.12153417666526829,
+      "theta_eav_mean": 0.00037893524176670274,
+      "theta_eav_median": 8.501739932063492e-05,
+      "analyst_median": 7.5,
+      "theta_rel_market_documented": 0.17
+    },
+    "US": {
+      "n": 30,
+      "n_with_inst_pct": 30,
+      "institutions_pct_mean": 0.7496643360000002,
+      "institutions_pct_median": 0.75826498,
+      "institutions_pct_std": 0.12056741748930827,
+      "theta_eav_mean": 0.0020190013893990957,
+      "theta_eav_median": 0.00023194728782460002,
+      "analyst_median": 32.5,
+      "theta_rel_market_documented": 0.59
+    }
+  },
+  "cross_market_rank_check": {
+    "ranking_by_institutions_pct_ascending": [
+      "TW",
+      "EU",
+      "JP",
+      "US"
+    ],
+    "ranking_by_theta_rel_ascending": [
+      "EU",
+      "TW",
+      "JP",
+      "US"
+    ],
+    "ranking_by_analyst_median_ascending": [
+      "TW",
+      "JP",
+      "EU",
+      "US"
+    ],
+    "expected_cluster_split_low_to_high": [
+      "TW",
+      "EU",
+      "JP",
+      "US"
+    ],
+    "institutions_ranking_matches_expected_cluster": true,
+    "analyst_ranking_matches_expected_cluster": false,
+    "theta_rel_ranking_matches_expected_cluster": false
+  },
+  "spearman_cross_market": {
+    "institutions_pct_vs_theta_rel": {
+      "rho": 0.7999999999999999,
+      "p": 0.2000000000000001,
+      "n": 4,
+      "markets": [
+        "EU",
+        "JP",
+        "TW",
+        "US"
+      ],
+      "xs": [
+        0.41582052947368425,
+        0.42508333099999995,
+        0.24696709580645163,
+        0.7496643360000002
+      ],
+      "ys": [
+        0.14,
+        0.39,
+        0.17,
+        0.59
+      ]
+    },
+    "analyst_median_vs_theta_rel": {
+      "rho": 0.39999999999999997,
+      "p": 0.6,
+      "n": 4,
+      "markets": [
+        "EU",
+        "JP",
+        "TW",
+        "US"
+      ],
+      "xs": [
+        21.0,
+        14.5,
+        7.5,
+        32.5
+      ],
+      "ys": [
+        0.14,
+        0.39,
+        0.17,
+        0.59
+      ]
+    }
+  },
+  "per_stock_panel": {
+    "inputs_n": 109,
+    "pooled_spearman": {
+      "institutions_pct": {
+        "rho": 0.2853952367713836,
+        "p": 0.0026289912982268215,
+        "n": 109
+      },
+      "log_analyst": {
+        "rho": 0.2610595234711878,
+        "p": 0.006109693024187117,
+        "n": 109
+      },
+      "log_mcap": {
+        "rho": 0.31545732554906863,
+        "p": 0.0008340435002716232,
+        "n": 109
+      },
+      "insiders_pct": {
+        "rho": -0.08067101113788983,
+        "p": 0.4021508680158876,
+        "n": 110
+      }
+    },
+    "within_market_spearman": {
+      "EU": {
+        "institutions_pct": {
+          "rho": 0.2425180598555212,
+          "p": 0.33223109090531006,
+          "n": 18
+        },
+        "log_analyst": {
+          "rho": 0.2542854092359137,
+          "p": 0.3085571646275566,
+          "n": 18
+        },
+        "log_mcap": {
+          "rho": 0.10629514963880288,
+          "p": 0.6746395315456968,
+          "n": 18
+        }
+      },
+      "JP": {
+        "institutions_pct": {
+          "rho": 0.3228031145717464,
+          "p": 0.08188381695492772,
+          "n": 30
+        },
+        "log_analyst": {
+          "rho": 0.19315482491913288,
+          "p": 0.3064639882852714,
+          "n": 30
+        },
+        "log_mcap": {
+          "rho": -0.1243604004449388,
+          "p": 0.5126248379279994,
+          "n": 30
+        }
+      },
+      "TW": {
+        "institutions_pct": {
+          "rho": -0.09072580645161292,
+          "p": 0.6274035095319994,
+          "n": 31
+        },
+        "log_analyst": {
+          "rho": 0.1226761893906255,
+          "p": 0.5108891853296229,
+          "n": 31
+        },
+        "log_mcap": {
+          "rho": -0.11491935483870967,
+          "p": 0.5381618885371389,
+          "n": 31
+        }
+      },
+      "US": {
+        "institutions_pct": {
+          "rho": -0.012235817575083427,
+          "p": 0.9488325740980202,
+          "n": 30
+        },
+        "log_analyst": {
+          "rho": 0.5753428974974641,
+          "p": 0.0008804146757381893,
+          "n": 30
+        },
+        "log_mcap": {
+          "rho": 0.3041156840934371,
+          "p": 0.10228067785201173,
+          "n": 30
+        }
+      }
+    },
+    "analyst_only": {
+      "n": 109,
+      "k": 6,
+      "r2": 0.1856224512531709,
+      "X_cols": [
+        "D_EU",
+        "D_JP",
+        "D_TW",
+        "D_US",
+        "log_analyst",
+        "log_mcap"
+      ],
+      "coefs": {
+        "D_EU": {
+          "beta": -0.0018588254533057306,
+          "se": 0.004684414833616196,
+          "t": -0.39681059840526245,
+          "p": 0.6923281181336309
+        },
+        "D_JP": {
+          "beta": -0.0011708827837089118,
+          "se": 0.005570648731699802,
+          "t": -0.21018786861321875,
+          "p": 0.8339362705276843
+        },
+        "D_TW": {
+          "beta": -0.0011976161761894115,
+          "se": 0.004970712634967769,
+          "t": -0.24093450258308424,
+          "p": 0.8100848258016158
+        },
+        "D_US": {
+          "beta": -0.0008132740774678899,
+          "se": 0.004796684931996789,
+          "t": -0.16954919678856956,
+          "p": 0.8656972316462936
+        },
+        "log_analyst": {
+          "beta": 0.0008704844249513288,
+          "se": 0.00025885594284798523,
+          "t": 3.3628141404600713,
+          "p": 0.0010840429281691044
+        },
+        "log_mcap": {
+          "beta": -6.729845524537534e-06,
+          "se": 0.00019426142108572325,
+          "t": -0.034643242528159014,
+          "p": 0.9724312678853626
+        }
+      }
+    },
+    "institutional_only": {
+      "n": 109,
+      "k": 6,
+      "r2": 0.14594483942889758,
+      "X_cols": [
+        "D_EU",
+        "D_JP",
+        "D_TW",
+        "D_US",
+        "institutions_pct",
+        "log_mcap"
+      ],
+      "coefs": {
+        "D_EU": {
+          "beta": -0.005030170665258131,
+          "se": 0.004274176285659735,
+          "t": -1.1768748711031944,
+          "p": 0.24195799074391644
+        },
+        "D_JP": {
+          "beta": -0.0057758102616823175,
+          "se": 0.005060338105182093,
+          "t": -1.141388211939344,
+          "p": 0.2563551113839506
+        },
+        "D_TW": {
+          "beta": -0.0057682817668450945,
+          "se": 0.0046342890717801484,
+          "t": -1.2446961502618028,
+          "p": 0.21606814622652548
+        },
+        "D_US": {
+          "beta": -0.003754884004134053,
+          "se": 0.004175437347784905,
+          "t": -0.8992792111049258,
+          "p": 0.3706015387793842
+        },
+        "institutions_pct": {
+          "beta": -0.001011921537290191,
+          "se": 0.0025336079016831225,
+          "t": -0.39939942428264164,
+          "p": 0.690425874503666
+        },
+        "log_mcap": {
+          "beta": 0.0002408806050637321,
+          "se": 0.00018656780875578546,
+          "t": 1.2911155824263407,
+          "p": 0.1995538283808287
+        }
+      }
+    },
+    "joint": {
+      "n": 109,
+      "k": 7,
+      "r2": 0.20997937250927645,
+      "X_cols": [
+        "D_EU",
+        "D_JP",
+        "D_TW",
+        "D_US",
+        "log_analyst",
+        "institutions_pct",
+        "log_mcap"
+      ],
+      "coefs": {
+        "D_EU": {
+          "beta": -0.00019592451184438967,
+          "se": 0.004166776218112699,
+          "t": -0.04702064655949576,
+          "p": 0.9625887128283566
+        },
+        "D_JP": {
+          "beta": 0.0008700697780951391,
+          "se": 0.005000125391061444,
+          "t": 0.17400959176954514,
+          "p": 0.8622028156489967
+        },
+        "D_TW": {
+          "beta": 0.0003703336467095978,
+          "se": 0.004474053531358679,
+          "t": 0.08277362890585152,
+          "p": 0.9341937595915835
+        },
+        "D_US": {
+          "beta": 0.0017608683689718345,
+          "se": 0.004572452070475065,
+          "t": 0.3851037346770668,
+          "p": 0.7009624318150025
+        },
+        "log_analyst": {
+          "beta": 0.0011443647424427897,
+          "se": 0.00042227335316393774,
+          "t": 2.710009366843749,
+          "p": 0.007894190414980962
+        },
+        "institutions_pct": {
+          "beta": -0.00272901709870709,
+          "se": 0.002947708818524218,
+          "t": -0.9258095920320187,
+          "p": 0.3567302365864973
+        },
+        "log_mcap": {
+          "beta": -6.118708724861307e-05,
+          "se": 0.00017836154495942764,
+          "t": -0.3430508928509868,
+          "p": 0.7322661858325499
+        }
+      }
+    }
+  },
+  "preliminary_warning": "N_markets=4; Spearman on 4 points can be noisy and easily hit ±1. Cross-market conclusions are PRELIMINARY pending K1168/K1165 extension to N>=8 markets.",
+  "mechanism_verdict": "PARTIAL / two-level (preliminary, N=4 markets): institutions_pct wins between-market ranking; log_analyst wins within-market per-stock panel.",
+  "verdict_notes": [
+    "Institutions_pct ranking ['TW', 'EU', 'JP', 'US'] matches cluster: True; analyst ranking ['TW', 'JP', 'EU', 'US'] matches: False.",
+    "Cross-market Spearman: institutions_pct rho=+0.800 (p=0.200), analyst rho=+0.400 (p=0.600); N=4 markets each.",
+    "Panel (analyst-only, FE+logmcap): β(log_analyst)=+8.705e-04, t=+3.36",
+    "Panel (institutional-only, FE+logmcap): β(institutions_pct)=-1.012e-03, t=-0.40",
+    "Panel (both, FE+logmcap): β(log_analyst)=+1.144e-03 t=+2.71; β(institutions_pct)=-2.729e-03 t=-0.93"
+  ]
+}
