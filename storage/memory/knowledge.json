@@ -25718,5 +25718,23 @@
     ],
     "data_source": "K1100g_d1 raw-tick reconstructed sessions (2017-2021)",
     "created_at": "2026-04-13T08:06:04.948154+00:00"
+  },
+  {
+    "id": "k1115-1776068705",
+    "experiment_id": "K1115",
+    "title": "K1115: SPY VaR breach clustering REJECTED — E055 condition (c) FAIL, Paper 3 完整死局",
+    "content": "[提出: Claude E055 條件 c 唯一未測, 執行: Claude] SPY 5 VaR models × 1%/5% × IS(2010-17)/OOS(2018-26)。**H1 部分**: M1 empirical OOS Ljung-Box p<0.001 (強 clustering)，但 **M3 GJR-t 已吸收 clustering** (Christoffersen indep p=0.620, LB p=0.878) → GARCH baseline 已捕捉 SPY breach clustering。**H2 REJECTED**: M4 (breach-history) 和 M5 (hawkes-decay) OOS Trinity 全 FAIL（Kupiec p<0.01）。DM-HLN 正 t-stat 表示 conditional models forecast loss **比 M3 更高**——條件式調整惡化結果。IS Kupiec p~0.92 by-construction grid fit，OOS p<0.01 = 典型 overfitting (E059 模式重現)。**E055 三條件全 REJECTED**：(1) near-collinear → K1100f FAIL (2) tail-dependent → K1100b FAIL (3) **single-asset path-dependent → K1115 FAIL**。**結論**：Lai 2024 PRS copula edge **是 TAIFEX 市場 microstructure 特有**，非通用方法論。Codex 修 2 MED bugs (Koenker-Bassett check function direction, Acerbi-Szekely Z2 one-sided bootstrap)。Commit 22324efc。**Paper 3 三個方向**：A reframe negative result paper, B pivot TAIFEX settlement microstructure, C abandon。",
+    "tags": [
+      "Paper_3",
+      "SPY",
+      "VaR-breach-clustering",
+      "E055-condition-c-FAIL",
+      "GARCH-absorbs-clustering",
+      "IS-OOS-divergence",
+      "Paper_3-completely-rejected",
+      "methodology-vs-empirical"
+    ],
+    "data_source": "yfinance SPY 2010-2026",
+    "created_at": "2026-04-13T08:25:05.706844+00:00"
   }
 ]

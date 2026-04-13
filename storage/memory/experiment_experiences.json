@@ -811,5 +811,21 @@
       "pre-publication-gate"
     ],
     "created_at": "2026-04-13T08:06:04.948154+00:00"
+  },
+  {
+    "id": "E060",
+    "title": "Paper 3 完整死局 — 三條件 + 5 實驗全 REJECTED，方法論不是通用而是市場特定",
+    "lesson": "K1100 系列從 2026-04-13 早上開始，連跑 6 個實驗測 copula-GARCH 在不同 setting 的 edge：\n\n| Experiment | Setting | E055 condition | Result |\n|-----------|---------|----------------|--------|\n| K1100 | SPY-GLD tail-indep | (none) | NULL |\n| K1100b | 5 equity pairs | (1) tail-dependent | NULL |\n| K1100f | SPY-ES spot-futures | (2) near-collinear | NULL |\n| K1100g | TAIFEX vs SPY structure | — | Microstructural diff (mech) |\n| K1100g_d1 | TAIFEX day vs night | (3) asymmetric-prediction | NULL (OOS rejected) |\n| **K1115** | **SPY VaR breach clustering** | **(b) single-asset path-dependent** | **NULL** |\n\n**E055 全部 3 條件全部被否定**：\n- (a) Near-collinear: K1100f FAIL（portfolio variance degenerates as ρ→1）\n- (b) Asymmetric dependence: K1100 series FAIL\n- (c) Single-asset path-dependent: K1115 FAIL（GARCH already absorbs breach clustering）\n\n**Paper 3 完整死局 — 我們證明了**：\n**Lai 2024 PRS copula edge 不是 generic methodology contribution，而是 TAIFEX 市場 microstructure 特有現象。**\n\nK1115 的 H1 finding 特別重要：\n- 直覺：「VaR breach 在時間上 cluster，所以加 conditional model 應該有用」\n- 實證：是的 breach 確實 cluster (M1 empirical LB p<0.001)\n- 但是！M3 GJR-t 已經 absorb 這個 clustering（Christoffersen p=0.620）\n- → 加 conditional layer 在 GARCH 之上是 redundant，且容易 overfit\n\n**通則 — 何時該停止挖一個方向**：\n1. 預先列出 hypothesis 條件清單（E055 3 條件）\n2. 系統性逐一測試\n3. 全部 REJECTED 後：**接受方向已死，不要繼續加 variant**\n4. 把 negative result 寫成 contribution 而非「找不到正面結果」\n\n**Paper 3 三個 strategic options**：\n- **A**: 寫 negative result paper — \"Why Copula-GARCH Doesn't Generalize Beyond Spot-Futures\"\n  - 優點：6 實驗已有完整資料、誠實研究\n  - 缺點：JBF 收 negative result 較難\n- **B**: Pivot to TAIFEX settlement-day microstructure\n  - 優點：K1100g 找到 anchor (SPY OPEX 3.12x intraday)\n  - 缺點：跟 Lai 2024 太接近，不是新 contribution\n- **C**: Abandon Paper 3, 資源轉 Papers 4-9\n  - 優點：避免 sunk cost fallacy，加快其他 papers 進度\n  - 缺點：6 實驗變成「練習」而非 publication\n\n**我建議 A 或 C，視 user 偏好**。\n\n**廣義教訓 — 1 整天 6 連 Paper 3 null 的反思**：\n- E055 條件清單在 K1100b 後就建立，但我繼續在剩下 5 個方向上挖\n- 每次「找到 anchor」都被下個實驗推翻 (K1100g→K1100g_d1→K1100g_d2)\n- 我應該在 K1100g_d2 OOS REJECTED 後就停下來討論 Paper 3 strategic decision\n- 而不是繼續 K1115 嘗試最後條件 (c)\n- 雖然 K1115 確認了 (c) FAIL 是有貢獻的（讓 Paper 3 死局完整），但這時間應該用在其他 paper\n\n**反空轉 vs 反過度挖掘的張力**：\n- CLAUDE.md 反空轉規則 → 持續做事\n- 但「持續做事」≠ 「持續挖同一坑」\n- 連 3 null 後**真正的 pivot 是換 paper，不是換 condition variant**",
+    "context": "Paper 3 完整 6 實驗 null arc 結束",
+    "applies_to": [
+      "research-line-termination",
+      "when-to-stop",
+      "Paper-strategic-decision",
+      "methodology-vs-empirical",
+      "sunk-cost",
+      "pivot-depth",
+      "paper-3-conclusion"
+    ],
+    "created_at": "2026-04-13T08:25:05.706844+00:00"
   }
 ]

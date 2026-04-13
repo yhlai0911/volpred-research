@@ -334,5 +334,19 @@
     "priority": 2,
     "description": "04/26 前完成預告文",
     "status": "pending"
+  },
+  {
+    "id": "K1115",
+    "title": "K1115: SPY VaR breach clustering",
+    "priority": 1,
+    "description": "REJECTED: GARCH-t 已吸收 SPY breach clustering (Christoffersen p=0.620)，conditional models 加東西反而 overfit。E055 條件 (c) FAIL → 三條件全 REJECTED。Paper 3 完整死局，需 strategic decision (A reframe / B microstructure / C abandon)。",
+    "status": "completed"
+  },
+  {
+    "id": "Paper3_strategic_decision",
+    "title": "Paper 3 Strategic Decision (PRIORITY 1) — A/B/C 三選一",
+    "priority": 1,
+    "description": "K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。",
+    "status": "blocked_user_decision"
   }
 ]
