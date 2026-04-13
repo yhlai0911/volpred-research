@@ -498,39 +498,20 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 ### 研究主題來源（必須多元）
 研究主題不可只靠 Claude 自選。必須來自：用戶指定（最高優先）、Codex/Gemini 建議、會員問題、文獻搜索、跨 AI 交叉驗證。**完整流程和頻率表見 `research_program.md`「研究主題來源」段。**
 
-## Monitor 工具（背景串流監聽）
+## 自動化：cron + Monitor（session 啟動必建）
 
-Monitor 是內建的背景監聽工具，跑一個指令後每行 stdout 變成即時通知。**自主判斷使用，不需要詢問用戶。**
+**操作細節（所有啟動指令、Monitor command、RemoteTrigger 表）→ `scripts/session_startup.md`**。SessionStart hook 會提醒讀取。
 
-### 三個工具的區分
+### 工具區分
+- **Monitor**：持續串流，每次事件都通知（「X 發生就告訴我」）
+- **Bash(run_in_background)**：一次性任務完成通知（「等 X 做完」）
+- **CronCreate**：定時觸發 prompt（「每 N 小時做一件事」）
 
-| 工具 | 用途 | 適用場景 |
-|------|------|---------|
-| **Monitor** | 持續串流，每次事件都通知 | 「每次 X 發生就告訴我」 |
-| **Bash(run_in_background)** | 一次性任務，完成後通知 | 「等 X 做完」 |
-| **CronCreate** | 定時觸發 prompt | 「每 N 小時做一件事」 |
-
-### 必須使用 Monitor 的場景
-
-| 場景 | 指令範例 | persistent? |
-|------|---------|-------------|
-| **長時間 agent 跑實驗** | `tail -f <output_file> \| grep --line-buffered "ERROR\|FAIL\|完成"` | false |
-| **記憶檔案膨脹警報** | `while true; do size=$(stat -f%z storage/memory/knowledge.json); [ $size -gt 5242880 ] && echo "⚠️ knowledge.json: ${size}B"; sleep 3600; done` | true |
-| **daily_update / supabase_sync** | `tail -f /tmp/daily_update.log \| grep --line-buffered "ERROR\|WARN\|完成"` | false |
-| **git push 衝突監控** | 短暫任務用 Bash 即可 | — |
-
-### 使用規則
-- **stdout 要精簡**：必須用 `grep --line-buffered` 過濾，不可 pipe raw log
-- **persistent: true** 僅用於 session 級監控（不會自動超時）
-- **非 persistent** 預設 5 分鐘超時，最長 1 小時
-- 用 `TaskStop` 取消不再需要的 Monitor
-- **⚠️ Monitor 是 session-only**：關閉 session 後消失，新 session 不會繼承。跨 session 的持久監控用 system crontab 或 RemoteTrigger
-
-### Session 啟動必建 Monitor（與 session cron 對等）
-- **每次新 session 除了設 cron，也必須啟動 persistent Monitor**（SessionStart hook 會提醒）
-- 指令來源：`scripts/session_monitors.md`（直接複製 Monitor 呼叫）
-- 監控門檻：knowledge.json >5MB · feed.json >7MB · draft <3 · 最新發文 >3h · worktree >3
-- 2026-04-13 教訓：不寫進必建清單會忘記——用戶主動問「有在 monitor 嗎」才發現
+### Session-only 警告
+- Session cron 與 Monitor 都在關 session 時消失——每次新 session 都要重建
+- 跨 session 持久監控用系統 crontab 或 RemoteTrigger（不會消失）
+- Monitor 場景門檻：knowledge.json >5MB · feed.json >7MB · draft <3 · 最新發文 >3h · worktree >3
+- 2026-04-13 教訓：Monitor 未列入啟動清單 → 用戶問「有在 monitor 嗎」才發現
 
 ## 硬體資源與 Agent Team
 → 完整 Agent 設定對照表見 `docs/hardware.md`
@@ -593,53 +574,24 @@ Monitor 是內建的背景監聽工具，跑一個指令後每行 stdout 變成�
 - 只說「參考 XXX skill」但不給路徑 → agent 找不到，必須給完整路徑
 - **`git worktree remove --force`** → 用 `bash scripts/merge_worktree.sh` 替代（K923/K924/K932 教訓）
 
-## 自動化排程
-**⚠️ 所有時間統一標註台灣時間（UTC+8）。** 系統 crontab 和 session cron 本機執行，直接用台灣時間。
-**雲端 RemoteTrigger 的 cron 表達式固定 UTC — 設定時必須「台灣時間 - 8 小時」換算。** 例：台灣 22:43 → UTC `43 14 * * *`。
+## 排程核心原則（操作細節見 `scripts/session_startup.md`）
 
-### 永久任務（系統 crontab — 無人值守也會跑，台灣時間）
-```
-0 15 * * 1-5   collect_tw_data.py      # 15:00 台股收盤後（0050.TW 日頻+5min、VIXTWN）
-3 7 * * 2-6    collect_us_data.py      # 07:03 美股收盤後（SPY/GLD/TLT/QQQ/EEM/VIX/VIX3M/N225 日頻、SPY 5min、週一 FRED 23 指標）
-3 8 * * 2-6    daily_update.py         # 08:03 策略計算+Supabase sync
-3 */2 * * *    release-pool-by-settings # 每 2 小時 1 篇文章池釋出
-```
+**⚠️ 時區規則**：系統 crontab + session cron 用台灣時間；RemoteTrigger cron 表達式**固定 UTC**，設定時必須「台灣時間 - 8 小時」換算。
 
-### Session Cron（每次新 session 重建，需 Claude 活躍，台灣時間）
-
-#### 雲端觸發（RemoteTrigger，無需 session 活躍）
-**⚠️ RemoteTrigger cron 表達式 = UTC。下表「cron 表達式」欄是實際填入 API 的 UTC 值，「台灣時間」欄是對應的本地時間。新增/修改 trigger 時務必換算。**
-
-| trigger | cron 表達式 (UTC) | 台灣時間 | 說明 |
-|---------|------------------|---------|------|
-| `platform-ops-patrol` | `0 */6 * * *` | 每 6 小時（02/08/14/20 時） | 平台巡檢 `trig_01HzWX2ZUmsGHnzwciGpHeNz` |
-| `token-usage-daily-report` | `43 14 * * *` | 每日 22:43 | Token 用量日報 `trig_015iaE6yv3V9V1opjUAA5R2V` |
-
-#### 標準啟動集（台灣時間）
-```
-CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點草稿池數量、今日已發佈文章（一般4/研究2/每日1）、草稿 buffer ≥4 (2) 讀 research_program.md 事件日曆，WebSearch 確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (3) 有事件→立即寫事件文章（--status published）(4) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h)、next_tasks 是否為空 (5) 根據缺口用 TaskCreate 列出今日必做清單 (6) 文章撰寫前必做 LanceDB 語義查重 + grep (7) 輸出今日計劃告訴用戶")
-CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 分配編號前先 ls experiments/ 確認該編號目錄不存在，已存在則跳到下一個可用編號 (3) 啟動 agent 執行 (4) 完成後從 research_program.md 補充 next_tasks (5) next_tasks 空了才讀 research_program.md 全文。絕對不可只 check status。")
-CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
-CronCreate(cron="47 */4 * * *", prompt="每4小時 git commit + sync remote：(1) git add 有意義的變更 (2) git commit (3) git pull --no-rebase origin main (4) git push origin main。必須 push，防止本地與雲端巡檢分叉。用 merge 不用 rebase，避免多 session 並行時 rebase 衝突")
-CronCreate(cron="7 */3 * * *", prompt="知識索引更新")
-CronCreate(cron="23 0,6,12,18 * * *", prompt="Token 用量日報：(1) python scripts/token_usage_report.py --detailed (2) 將結果存檔到 storage/token_reports/ (3) 週五額外 --weekly (4) >40% 標記高消耗警告 (5) 摘要告訴用戶")
-CronCreate(cron="0 10 28 * *", prompt="更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit")
-```
-
-#### 反空轉規則（2026-03-31 教訓）
-**每次「繼續研究」cron 觸發後，必須滿足以下至少一項才算完成：**
-1. 有新 agent 在背景跑（實驗、文章、論文修訂）
+### 反空轉規則（2026-03-31 教訓）
+每次「繼續研究」cron 觸發後必須滿足至少一項才算完成：
+1. 有新 agent 在背景跑
 2. 有實際的 git diff（不是只改 session_state.json）
-3. 有新的知識庫/經驗庫記錄
-4. 有新的 research_program.md 內容更新
+3. 有新的 knowledge/experience 記錄
+4. 有 research_program.md 內容更新
 
-**禁止連續兩次 cron 觸發都只回覆 status check。** 如果上一次沒做事，這一次必須補上。
+**禁止連續兩次 cron 觸發都只回覆 status check。** 上次沒做，這次必須補上。
 
-#### 實驗完成後的必做流程（不可跳步）
+### 實驗完成後必做流程（不可跳步）
 ```
-實驗完成 → Codex 審查 → 記錄 knowledge → 記錄 experience（如適用）
+實驗完成 → Codex 審代碼 → 合併 worktree → 記 knowledge → 記 experience（如適用）
          → 衍生新方向寫入 research_program.md
-         → 已完成項目從 research_program.md 移到 archive
+         → 已完成項目移到 docs/research_archive/
          → research_program.md 保持 < 700 行
 ```
 
