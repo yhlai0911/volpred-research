@@ -1,0 +1,207 @@
+{
+  "experiment_id": "K1108",
+  "timestamp": "2026-04-13T22:41:19.741622+00:00",
+  "data_source": [
+    "TSMC 2330.TW yfinance cache (experiments/k1104/data/2330.TW.parquet)",
+    "^VIX yfinance cache (experiments/k1104/data/IDX_VIX.parquet)",
+    "\u8ca1\u5831\u516c\u544a\u65e5.txt (TWSE earnings announcement dates)",
+    "TSMC IR public capex guidance press releases (hand-coded in k1108_fetch_capex.py \u2014 48 announcements 2014-2025)"
+  ],
+  "sample": {
+    "start": "2014-01-03",
+    "end": "2025-12-30",
+    "n_obs": 2922,
+    "n_earnings_events": 48,
+    "n_capex_change_events": 25,
+    "n_capex_stable_events": 23,
+    "n_unmatched_events": 0
+  },
+  "pre_estimation_diagnostics": {
+    "tag": "TSMC log_ret 2014-2025",
+    "n": 2922,
+    "mean": 0.0010288963479183207,
+    "std": 0.016587586416833788,
+    "skew": 0.08414216074105235,
+    "kurt": 3.5632815680186978,
+    "min": -0.10512470625048068,
+    "max": 0.09507479159165122,
+    "adf_stat": -40.39798468980512,
+    "adf_pvalue": 0.0,
+    "ljungbox_Q10": 13.985271126491545,
+    "ljungbox_p10": 0.1736644982296857,
+    "arch_lm_stat": 193.4716208377635,
+    "arch_lm_p": 3.7021280046567406e-36
+  },
+  "models": {
+    "M1_GJR_baseline": {
+      "label": "M1_GJR",
+      "params": {
+        "theta0": 0.00016527378360409257,
+        "omega_g": 0.07575095448546532,
+        "alpha": 0.054851308012398244,
+        "gamma": 0.058091057330249954,
+        "beta": 0.8743560847475528
+      },
+      "se": {
+        "theta0": 0.00017418823226516896,
+        "omega_g": 0.08018695095508166,
+        "alpha": 0.012098376931818446,
+        "gamma": 0.016580688806697663,
+        "beta": 0.020806616732884586
+      },
+      "loglik": 7973.955786687091,
+      "converged": true
+    },
+    "M2_A4fEAV_standard": {
+      "label": "M2_A4fEAV",
+      "params": {
+        "theta0": 0.00011406655415523834,
+        "theta1": 4.347074141098723e-07,
+        "theta2": -8.679951335365542e-05,
+        "omega_g": 0.04956600964682343,
+        "alpha": 0.03234359474737355,
+        "gamma": 0.05948006916124474,
+        "beta": 0.8965280077714796
+      },
+      "se": {
+        "theta0": 1.7641117729475677e-05,
+        "theta1": 0.0,
+        "theta2": 2.2487748019989337e-05,
+        "omega_g": 0.018664765807479732,
+        "alpha": 0.009655778558192647,
+        "gamma": 0.027592404631398167,
+        "beta": 0.02797002810646354
+      },
+      "loglik": 7999.3846166473195,
+      "converged": true
+    },
+    "M3_A4fEAV_capex_split": {
+      "label": "M3_A4fEAV_capex_split",
+      "params": {
+        "theta0": 0.0001276622455706024,
+        "theta1": 3.7660331887460693e-07,
+        "theta_capex_change": 6.79059528809679e-06,
+        "theta_capex_stable": -7.359207783707538e-05,
+        "omega_g": 0.053066327436658546,
+        "alpha": 0.03209159642749957,
+        "gamma": 0.059014620296990755,
+        "beta": 0.893429529472231
+      },
+      "se": {
+        "theta0": 2.3620096325885708e-05,
+        "theta1": 0.0,
+        "theta_capex_change": 7.46027008275975e-05,
+        "theta_capex_stable": 4.255383801539057e-05,
+        "omega_g": 0.02054882057891104,
+        "alpha": 0.00937422765346374,
+        "gamma": 0.024658035723475774,
+        "beta": 0.026968749512547317
+      },
+      "loglik": 8001.8900952688,
+      "converged": true
+    }
+  },
+  "tests": {
+    "LR_M3_vs_M2": {
+      "stat": 5.0109572429610125,
+      "df": 1,
+      "p_value": 0.025187376315614185,
+      "description": "Does adding capex split improve fit?"
+    },
+    "Wald_change_eq_stable": {
+      "theta_change_minus_stable": 8.038267312517217e-05,
+      "se_diff": 8.564308460249182e-05,
+      "t_stat": 0.9385775103531641,
+      "p_value_two_sided": 0.3479477039963843,
+      "description": "H0: \u03b8_change = \u03b8_stable"
+    },
+    "t_test_change_positive": {
+      "t_stat": 0.0910234510649884,
+      "p_value_one_sided": 0.4637369785742359,
+      "description": "H0: \u03b8_change <= 0 vs H1: > 0"
+    },
+    "Bootstrap_diff": {
+      "n_reps": 500,
+      "mean": 4.7759247742144515e-05,
+      "se": 6.538566973205477e-05,
+      "ci_2.5": -8.037455396610488e-05,
+      "ci_97.5": 9.866844504600634e-05,
+      "p_one_sided_leq_0": 0.226
+    }
+  },
+  "tau_diagnostics_M3": {
+    "tau_on_capex_change": 0.000285035155816087,
+    "tau_on_capex_stable": 0.0001640714894519187,
+    "tau_non_event": 0.0002669115345062871,
+    "tau_jump_change_pct": 6.790122930926774,
+    "tau_jump_stable_pct": -38.529636886841246
+  },
+  "matched_events_sample": [
+    {
+      "date": "2014-02-25",
+      "pos": 31,
+      "flag": "change"
+    },
+    {
+      "date": "2014-05-14",
+      "pos": 84,
+      "flag": "stable"
+    },
+    {
+      "date": "2014-08-13",
+      "pos": 148,
+      "flag": "stable"
+    },
+    {
+      "date": "2014-11-12",
+      "pos": 211,
+      "flag": "stable"
+    },
+    {
+      "date": "2015-02-24",
+      "pos": 277,
+      "flag": "change"
+    },
+    {
+      "date": "2015-05-11",
+      "pos": 327,
+      "flag": "stable"
+    },
+    {
+      "date": "2015-08-11",
+      "pos": 392,
+      "flag": "stable"
+    },
+    {
+      "date": "2015-11-11",
+      "pos": 456,
+      "flag": "change"
+    },
+    {
+      "date": "2016-02-04",
+      "pos": 516,
+      "flag": "change"
+    },
+    {
+      "date": "2016-05-11",
+      "pos": 574,
+      "flag": "stable"
+    }
+  ],
+  "verdict": {
+    "label": "INCONCLUSIVE",
+    "bullets": [
+      "Wald p=0.348, \u03b8_change=+6.791e-06, \u03b8_stable=-7.359e-05",
+      "Evidence is mixed or low-powered; N=25 / N=23 event days is the main limitation"
+    ]
+  },
+  "references": [
+    "K1067/K1067b/K1067c single-firm A4f-EAV series",
+    "K1103 \u03c4-lag fixed rolling estimates",
+    "K1104 firm-level covariate regression",
+    "Engle, Ghysels & Sohn (2013) GARCH-MIDAS. RES 95(3).",
+    "Patton (2011) Volatility forecast comparison. JoE 160:246-256.",
+    "Harvey et al. (2016) t>3.0 threshold for multiple testing."
+  ],
+  "runtime_seconds": 553.2802550792694
+}

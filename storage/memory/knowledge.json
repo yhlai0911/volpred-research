@@ -26454,5 +26454,24 @@
     "data_source": "TAIFEX TX daily 2017-2021 per-year fit (reuse K1100g cache)",
     "created_at": "2026-04-14T12:45:00+08:00",
     "updated_at": "2026-04-14T12:45:00+08:00"
+  },
+  {
+    "id": "k1108-1776120248",
+    "experiment_id": "K1108",
+    "title": "K1108 INCONCLUSIVE: capex guidance direction supports foundry θ₂>0 but power too low to confirm",
+    "content": "[提出: Claude, 執行: Claude] K1104 fabless effect 顯著 θ₂<0, foundry 方向性支持 θ₂>0 但 N=2 NS。K1108 測 capex guidance 是否是 foundry mechanism: TSMC 2330.TW 2014-2025, 48 earnings events 手動編碼 IR press release capex guidance (25 days capex 調整 vs 23 days 穩定)。**結果 INCONCLUSIVE**: θ_change=+6.79e-6 t=+0.09, θ_stable=-7.36e-5 t=-1.73 marginal negative。Wald t=+0.94 p=0.348 NS。Direction +8.0e-5 diff 支持 H1 (capex change → θ_change > θ_stable)。Bootstrap 500 reps: 95% CI [-8.0e-5, +9.9e-5] 跨 0。LR χ²=5.01 p=0.025 — split 有 information 但非 directional 顯著。τ jump: capex_change +6.8% vs capex_stable -38.5% (direction consistent)。**Power 限制**: N=25/23 是主導 constraint, 單一 TSMC 樣本不足 Harvey threshold。**Paper 2 firm-selection**: capex guidance 不是 clean mechanism for foundry θ₂>0。Derivatives: D1 replace binary flag with continuous guide_delta_pct (-32.5% to +60.6%); D2 multi-foundry pool (TSMC+UMC+TSM ADR+GFS+SMIC) 250+ events 獲 power; D3 non-capex foundry signals (utilisation, wafer pricing, R&D guidance)。Methodological notes: nested MLE 必 seed M3 with M2 optimum (避免 local optima → loglik(M3)<loglik(M2)); L-BFGS-B maxiter 1500 → 80 with ftol=1e-6 + 900s budget。Foundry θ₂>0 仍是 direction-only finding, 未建機制。",
+    "tags": [
+      "K1108",
+      "Paper2",
+      "capex-guidance",
+      "TSMC",
+      "foundry",
+      "INCONCLUSIVE",
+      "K1104-followup",
+      "power-constraint"
+    ],
+    "data_source": "TSMC 2330.TW yfinance + hand-coded TSMC IR capex guidance 48 events 2014-2025",
+    "created_at": "2026-04-14T13:30:00+08:00",
+    "updated_at": "2026-04-14T13:30:00+08:00"
   }
 ]

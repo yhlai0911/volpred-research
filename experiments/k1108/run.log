@@ -1,0 +1,59 @@
+=== K1108 ===
+Sample: 2014-01-03 → 2025-12-30
+Obs: 2922
+Earnings events matched: 48  (unmatched: 0)
+  capex_change days: 25
+  capex_stable days: 23
+  total EAV days:    48
+
+--- Pre-estimation diagnostics ---
+  tag: TSMC log_ret 2014-2025
+  n: 2922
+  mean: 0.0010288963479183207
+  std: 0.016587586416833788
+  skew: 0.08414216074105235
+  kurt: 3.5632815680186978
+  min: -0.10512470625048068
+  max: 0.09507479159165122
+  adf_stat: -40.39798468980512
+  adf_pvalue: 0.0
+  ljungbox_Q10: 13.985271126491545
+  ljungbox_p10: 0.1736644982296857
+  arch_lm_stat: 193.4716208377635
+  arch_lm_p: 3.7021280046567406e-36
+
+--- Bootstrap (500 reps, seed 42, time budget 900s) ---
+  boot 50/500  elapsed 79s  mean=+4.441e-05  n_good=50
+  boot 100/500  elapsed 134s  mean=+4.579e-05  n_good=100
+  boot 150/500  elapsed 187s  mean=+4.882e-05  n_good=150
+  boot 200/500  elapsed 242s  mean=+4.786e-05  n_good=200
+  boot 250/500  elapsed 296s  mean=+4.716e-05  n_good=250
+  boot 300/500  elapsed 348s  mean=+4.807e-05  n_good=300
+  boot 350/500  elapsed 397s  mean=+4.627e-05  n_good=350
+  boot 400/500  elapsed 449s  mean=+4.461e-05  n_good=400
+  boot 450/500  elapsed 499s  mean=+4.730e-05  n_good=450
+  boot 500/500  elapsed 553s  mean=+4.776e-05  n_good=500
+
+--- M3 coefficients ---
+  theta0                 = +1.2766e-04  SE=2.3620e-05  t=+5.405
+  theta1                 = +3.7660e-07  SE=0.0000e+00  t=+nan
+  theta_capex_change     = +6.7906e-06  SE=7.4603e-05  t=+0.091
+  theta_capex_stable     = -7.3592e-05  SE=4.2554e-05  t=-1.729
+  omega_g                = +5.3066e-02  SE=2.0549e-02  t=+2.582
+  alpha                  = +3.2092e-02  SE=9.3742e-03  t=+3.423
+  gamma                  = +5.9015e-02  SE=2.4658e-02  t=+2.393
+  beta                   = +8.9343e-01  SE=2.6969e-02  t=+33.128
+
+LR(M3 vs M2): stat=5.011, p=0.0252
+Wald (θ_change = θ_stable): diff=+8.0383e-05  SE_diff=8.5643e-05  t=+0.939  p=0.3479
+One-sided θ_change > 0: t=+0.091  p=0.4637
+Bootstrap diff: mean=+4.7759e-05  SE=6.5386e-05  95% CI=[-8.0375e-05, +9.8668e-05]
+Bootstrap one-sided p (diff<=0): 0.2260
+
+>>> VERDICT: INCONCLUSIVE
+    - Wald p=0.348, θ_change=+6.791e-06, θ_stable=-7.359e-05
+    - Evidence is mixed or low-powered; N=25 / N=23 event days is the main limitation
+Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a780cab8/experiments/k1108/k1108_theta_split.png
+Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a780cab8/experiments/k1108/k1108_tau_jump_timeseries.png
+
+Results written: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a780cab8/experiments/k1108/k1108_results.json

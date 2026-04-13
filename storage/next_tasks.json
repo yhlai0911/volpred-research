@@ -241,7 +241,8 @@
     "title": "K1108: Foundry economic rationale — capex guidance",
     "priority": 3,
     "description": "K1104 衍生：foundry θ₂>0 是否因 capex guidance 才 reveal capacity info？比對 capex 公告日 τ-jumps。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T13:30:00+08:00"
   },
   {
     "id": "K1105",
@@ -833,5 +834,19 @@
     "description": "K1120 post-2022 M4 t=+5.68 但 NFCI 可能共享 Fed shock with VIX/MOVE。residualize NFCI on VIX+MOVE 取殘差再測 DM，排除 common shock confound。",
     "status": "completed",
     "completed_at": "2026-04-14T10:00:00+08:00"
+  },
+  {
+    "id": "K1108b",
+    "title": "K1108b: Multi-foundry pool for capex guidance mechanism power",
+    "priority": 3,
+    "description": "K1108 N=25/23 TSMC power constraint. +UMC 2303.TW + TSM ADR + GFS + SMIC 600029.SS/0981.HK pool 250+ capex events 測 Harvey threshold 是否 pass。",
+    "status": "pending"
+  },
+  {
+    "id": "K1108c",
+    "title": "K1108c: Continuous guide_delta_pct as capex covariate (replace binary)",
+    "priority": 3,
+    "description": "K1108 binary flag direction-only. 改用 continuous guide_delta_pct (-32.5% to +60.6% range) 作 θ_EAV covariate, 看 signed magnitude 是否 PASS。",
+    "status": "pending"
   }
 ]
