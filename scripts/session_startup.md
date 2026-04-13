@@ -2,6 +2,28 @@
 
 SessionStart hook 會提醒讀這份。這裡只放**每次新 session 要執行的具體指令**——不是原則、不是教訓（那些留在 CLAUDE.md）。
 
+## 0. 去重檢查（每次啟動必做，放在 cron/Monitor 之前）
+
+Session cron 和 Monitor **不會自動去重**。在新增前必須先檢查：
+
+```python
+# 檢查是否已經有 cron 和 Monitor（避免重複）
+CronList()  # 看現有 cron 列表
+TaskList()  # 看現有 Monitor（description 含 "Article pool + file bloat"）
+```
+
+**決策規則**：
+- **沒有任何 cron** → 全量執行第 1 段
+- **已有部分 cron（例如 session 續跑）** → 跳過已有，只補缺的
+- **有重複（例如兩個相同 prompt 的 cron）** → 用 `CronDelete(cronId)` 刪多的再重建
+- **Monitor 已存在** → 不要重複啟動；若要重啟，先 `TaskStop(taskId)` 再 `Monitor(...)`
+
+### 跨 session 並行的限制
+- 同一台機器開**兩個 session 並行**時，各 session 的 CronList 彼此**看不見對方的 cron**（各自獨立）
+- 因此並行 session 會導致雙份 cron 跑同樣任務 → 撞 git、撞 `next_tasks.json`
+- **建議實務**：盡量只保留一個 active session；若需多 session，至少讓其中一個**關閉 session cron**（只做手動操作），讓主 session 獨佔 cron
+- 偵測方法：開新 session 時檢查 `ps aux | grep claude` 是否已有其他 session 在跑
+
 ## 1. Session Cron 標準啟動集（台灣時間，直接複製執行）
 
 ```python
