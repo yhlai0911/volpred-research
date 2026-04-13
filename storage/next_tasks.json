@@ -10,8 +10,43 @@
     "id": "K1070",
     "title": "K1070: 0050.TW ETF-Level CAR/CASV Event Study",
     "priority": 1,
-    "status": "in_progress",
-    "description": "K1068 的 ETF 鏡像版。4 event sets (TSMC, Top4, All TWSE50, Dense days) × 4 windows × 3 tests. Quantify diversification dilution. Agent in worktree."
+    "status": "completed",
+    "description": "Pre-event window is the real signal. Aggregation effect quantified. Committed + in knowledge.json."
+  },
+  {
+    "id": "K1071",
+    "title": "K1071: Right-tail CASV decomposition",
+    "priority": 1,
+    "status": "completed",
+    "description": "VIX regime captures all earnings vol. K1071 is right-tail decomposition (NOT EPS surprise — that was placeholder)."
+  },
+  {
+    "id": "K1100",
+    "title": "K1100: Student-t/Clayton Copula-GARCH vs DCC-A4f-ASYM",
+    "priority": 1,
+    "status": "completed",
+    "description": "NULL: Copula 無法打敗 DCC-A4f-ASYM（SPY-GLD tail-independent λ<0.04）。用戶 PRS copula 適用 tail-dependent pair，非 SPY-GLD。"
+  },
+  {
+    "id": "K1100b",
+    "title": "K1100b: Copula-GARCH on tail-dependent pairs (SPY-TLT, SPY-QQQ)",
+    "priority": 2,
+    "status": "pending",
+    "description": "K1100 衍生：在 tail-dependent pairs 上 copula 可能有 edge。SPY-TLT (flight-to-quality) / SPY-QQQ (co-crash)。"
+  },
+  {
+    "id": "K1100c",
+    "title": "K1100c: Patton (2006) Asymmetric Copula",
+    "priority": 3,
+    "status": "pending",
+    "description": "K1100 衍生：時變 ρ_L, ρ_U 分別建模。測試不對稱尾部相依（上漲 vs 下跌）。"
+  },
+  {
+    "id": "K1100d",
+    "title": "K1100d: VIX-regime-conditional Copula",
+    "priority": 3,
+    "status": "pending",
+    "description": "K1100 衍生：低 VIX → Gaussian copula；高 VIX → Student-t copula。Regime-switching copula。"
   },
   {
     "id": "TSMC_0416_post",

@@ -25337,5 +25337,144 @@
     "data_source": "yfinance SPY/GLD + VIX/GVZ 2005-2026, n_oos=3234 × 5 weights",
     "confidence": 0.9,
     "timestamp": "2026-04-13T01:07:58.897673+00:00"
+  },
+  {
+    "id": "know_20260413011923_k1094",
+    "experiment_id": "K1094",
+    "title": "K1094: ★★ A4f-VT on 0050.TW — Paper 3 Statistical≠Strategy Confirmed Cross-Market",
+    "content": "[提出: Claude, 執行: Claude] K1094 replicates K1074 on Taiwan 0050.TW. 5 strategies, OOS 2013-2026, net 2bp TX, 52 refits 0 failures, all lookahead guards PASS. RESULTS (Sharpe/CAGR/MDD): 8.63/VIX 1.096/9.9%/-16.3% ★, A4f-VT 1.028/17.0%/-28.8%, GJR-VT 0.745/12.3%/-39.8%, 50/50+8.63 0.909/9.0%/-21%, 50/50+A4f 1.031/12.5%/-22%, BH 0050 0.764/15.0%/-45.2%. H1 (A4f-VT LOSES) REJECTED: diff -0.065, CI [-0.18, +0.05], p=0.284 NS. H2 (mirrors K1074 pattern) CONFIRMED: Both SPY and 0050.TW show A4f statistical edge does NOT translate to strategy edge. CRITICAL INSIGHT: A4f is STATISTICALLY NULL on 0050.TW (K1077 DM t=-0.49) but STRATEGY-LEVEL matches 8.63/VIX (Sharpe diff -0.065 NS). DECOUPLING CONFIRMED CROSS-MARKET. BONUS: A4f-VT significantly beats GJR-VT on 0050.TW (+0.286, p=0.000) even though their statistical ranking is NS — external VIX² driver helps at strategy margin. PAPER 3 FINAL CLAIM STRENGTHENED: 'Statistical and strategy layers are decoupled cross-market. VT α comes from return-side (TSMOM/drawdown persistence), not vol-forecast accuracy. Investors on both SPY and 0050.TW can retain simple VT rules (12/VIX or 8.63/VIX) without statistical performance cost.' Note: A4f-VT 17% CAGR significantly higher than 8.63/VIX 9.9% but equal Sharpe reflects higher risk - investors pay for CAGR with MDD jumping -16.3% to -28.8%.",
+    "tags": [
+      "A4f-VT",
+      "0050.TW",
+      "Taiwan",
+      "Paper3",
+      "cross-market",
+      "statistical-vs-strategy",
+      "K1074-replication"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance 0050.TW + VIX 2005-2026, OOS 2013-2026 N=3230",
+    "confidence": 0.95,
+    "timestamp": "2026-04-13T01:19:23.601904+00:00"
+  },
+  {
+    "id": "know_20260413013008_k1095",
+    "experiment_id": "K1095",
+    "title": "K1095: Event-Switched VT on 0050.TW NULL — Event Windows Cover 49-71%, Not Sparse Enough",
+    "content": "[提出: Claude, 執行: Claude] K1095 tests synthesis strategy: 8.63/VIX normally + A4f-VT only in [-5,+5] window around top-10 stock earnings. OOS 2017-2026 (N=2,160), net 20bp TX. ALL 3 HYPOTHESES REJECTED. SHARPE: Pure 8.63/VIX 0.929, Pure A4f-VT 0.966, Event-Switched 0.777 (WORST), BH 1.020. H1 (Switched > 8.63/VIX) FAIL. H2 (Switched > A4f-VT) DM t=-2.89 p=0.004 switched STATISTICALLY WORSE. H3 (Events concentrate A4f alpha) REJECTED — every strategy has LOWER Sharpe on event days (0.46-0.65) vs non-event (1.32-1.49). WHY FAIL: (1) Event coverage 49-71% too high — top-10 stocks announce too frequently so [-5,+5] windows not sparse. (2) Event days are VOLATILITY regimes not RETURN regimes — low Sharpe everywhere. (3) Turnover doubles 13.4x vs 6.5x → 20bp TX removes ~130bp/yr. CRITICAL INSIGHT: K1062 Part D's A4f QLIKE advantage is GLOBAL not event-specific. DM t=+2.71 on A4f-VT vs 8.63/VIX spread holds regardless of event timing. K1068's CAR≈0 CASV>>0 pattern means event days show 'vol spike but no return drift' — which doesn't help VT strategy. IMPLICATION: Do NOT add event-overlay to Taiwan VT. Keep 8.63/VIX or A4f-VT pure. A4f-VT wins overall Sharpe (0.966>0.929) but 2x higher MDD (-27.9% vs -16.5%). Simple rule still best for risk-conscious investors.",
+    "tags": [
+      "Taiwan",
+      "event-switching",
+      "VT",
+      "NULL",
+      "turnover-cost",
+      "synthesis-fail",
+      "Paper2",
+      "Paper3"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance 0050.TW + VIX + 財報公告日 2017-2026",
+    "confidence": 0.9,
+    "timestamp": "2026-04-13T01:30:08.610257+00:00"
+  },
+  {
+    "id": "know_20260413014356_k1096",
+    "experiment_id": "K1096",
+    "title": "K1096: BTC Regime-Switching A4f FAIL — Crypto Boundary Structural, Rescue Attempts Unsuccessful",
+    "content": "[提出: Claude, 執行: Claude] K1096 tests 5 regime-switching variants to rescue K1089 BTC A4f NULL. OOS 2018-2026 n=3023. ALL FAIL: A4f-VIX full t=+1.13, Reg-VIX-OFF-HighVIX t=+0.82, Reg-VIX-ON-HighCorr t=+1.19, Adaptive |corr| t=-0.92 (WORSE than GJR). H1-H4 FAIL, no regime variant Harvey-passes. H5 PARTIAL: Two hard-switching variants DO eliminate K1089's High-VIX bucket damage (t=-0.54/-0.10 vs K1089 -2.91), but adaptive smooth weighting makes it worse (t=-3.50). CONCLUSION: BTC crypto boundary is STRUCTURAL. Regime switching can eliminate localized harm but cannot make A4f prevail overall. Indirectly confirms K1025/Paper 6 asymmetric crypto fear channel: high-VIX + high-correlation regimes are where BTC decouples most strongly, so VIX loading is most useless there. PAPER 9 FINAL: Crypto joins Bonds as structural boundary — asset-matched IV theory needs crypto-native IV (Deribit DVOL/BVIV) or HAR-RV approach instead. FOLLOW-UPS: K1097 Markov-switching HMM state-dependent GJR; K1098 Deribit DVOL if data acquirable; K1099 HAR-RV + crypto-native factors.",
+    "tags": [
+      "BTC",
+      "regime-switching",
+      "NULL",
+      "crypto-boundary",
+      "Paper6",
+      "Paper9",
+      "structural-limit"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance BTC-USD + ^VIX + BTC-SPY rolling corr 2014-2026, n_oos=3023",
+    "confidence": 0.9,
+    "timestamp": "2026-04-13T01:43:56.795592+00:00"
+  },
+  {
+    "id": "know_20260413020055_k1097",
+    "experiment_id": "K1097",
+    "title": "K1097: MS-GJR Student-t NULL — Regime-Label Instability Explains Failure (A4f-VIX9D-t Best Overall)",
+    "content": "[提出: Claude, 執行: Claude] K1097 pivoted from duplicating K1019 to extending with Student-t innovations + full Trinity. Agent detected K1019 already did MS-GJR vs GJR + A4f-VIX (per CLAUDE.md 不重複原則). RESULTS: M3 MS-GJR-t QLIKE=1.630 vs M2 MS-GJR-N=1.614 → Student-t does NOT improve MS-GJR (DM t=+0.62 NS). M4 A4f-VIX9D-t remains best: QLIKE=1.568, full Trinity PASS at 1% and 5%, lowest FZ0 (-5.07). NEITHER MS variant fixes VaR: M3 Kupiec 1% p=0.04, 5% p=0.02. NOVEL EMPIRICAL FINDING: MS-GJR-t has regime-label instability across refits — mean P(calm) jumps 0.835→0.149 within 6 months. Student-t absorbing fat tails causes the 2 regimes to differentiate by persistence (one near-unit-root, one mean-reverting) rather than volatility level, breaking unconditional-variance-based ordering. PAPER 9 IMPLICATION: Strengthens case for A4f-VIX9D-t as single recommended equity model. Beats MS-GJR family even with matching Student-t. Only model passing full VaR-ES Trinity.",
+    "tags": [
+      "MS-GJR",
+      "Markov-switching",
+      "Student-t",
+      "NULL",
+      "regime-instability",
+      "Paper9",
+      "A4f-VIX9D"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance SPY + VIX + VIX9D",
+    "confidence": 0.85,
+    "timestamp": "2026-04-13T02:00:55.050129+00:00"
+  },
+  {
+    "id": "know_20260413021947_k1098",
+    "experiment_id": "K1098",
+    "title": "K1098: VIXTWN A4f NULL on 0050.TW — Taiwan Gap is Structural (Currency + TSMC), Paper 10 Not Supported",
+    "content": "[提出: Claude, 執行: Claude] K1098 tests Paper 10 hypothesis: can TAIFEX VIXTWN rescue K1077 NULL on 0050.TW? Used 15 years of official Dropbox data (2007-2021), OOS 2013-2021 (~8 yrs). ALL 4 HYPOTHESES FAIL. A4f-VIXTWN DM t=+1.86 below Harvey. Head-to-head vs A4f-VIX: t=-0.99 (VIX slightly BETTER). COMBO +0.14/+1.51 no improvement. Spearman ranks with r²: VIX 0.211 > VIXTWN 0.201. REGIME TEST: even when VIXTWN-VIX spread top 20% (n=441), VIXTWN still loses DM t=-1.30. COMPLETE CROSS-ASSET MATRIX: GLD+GVZ +4.46 PASS, USO+OVX +4.48 PASS, **0050.TW+VIXTWN +1.86 FAIL**. PAPER 9 CONFIRMATION: Taiwan gap is STRUCTURAL — K1083 showed currency (USD/TWD) explains 83%, TSMC concentration is residual 17%. A domestic equity IV can't fix a currency-denomination problem. VIXTWN level-correlation with VIX=0.87 so VIXTWN adds marginal info even locally. PAPER 10 SIDE PAPER: NOT SUPPORTED by evidence. Taiwan is boundary case in Paper 9 matrix, not independent paper material. METHODOLOGY NOTE: Codex pre-review caught 2 bugs (Harvey sign for wrong-direction + VIXTWN Oct/Nov 2007 format). Fixed before run. DOWNSTREAM: K1099 USD/TWD realized vol directly; K1100 TWSE-50 ex-TSMC; K1101 single-stock TSMC with VIXTWN (isolate concentration).",
+    "tags": [
+      "VIXTWN",
+      "0050.TW",
+      "Taiwan",
+      "NULL",
+      "Paper10-not-supported",
+      "structural-gap",
+      "Paper9",
+      "K1083-confirmation"
+    ],
+    "category": "experiment",
+    "data_source": "Dropbox TAIFEXDATA VIXTWN 2007-2021 + yfinance 0050.TW/VIX",
+    "confidence": 0.95,
+    "timestamp": "2026-04-13T02:19:47.458932+00:00"
+  },
+  {
+    "id": "know_20260413023517_k1099",
+    "experiment_id": "K1099",
+    "title": "K1099: FXVol A4f on 0050.TW NULL — Paper 10 Revival DENIED, K1083/K1099 Measure Different Decompositions",
+    "content": "[提出: Claude, 執行: Claude] K1099 tests if USD/TWD realized vol (directly attacking K1083 currency channel) can be the matched τ regressor for 0050.TW. OOS 2010-2025 n=3913. ALL 4 HYPOTHESES FAIL. A4f-FX vs GJR DM t=-1.45 FAIL. H2 FX vs VIX t=+0.12 INDIFFERENT. H3 COMBO dominates t=-0.97 FAIL. H4 High-FX regime reversed: DM t=-3.50 (VIX strictly BETTER Harvey PASS wrong direction). SMOKING GUN DIAGNOSTIC: Corr(FXVol_RV21, 0050.TW realized vol)=+0.014 (essentially zero) vs Corr(VIX, 0050.TW realized vol)=+0.601 — VIX carries 42x more linear information. K1077 replication: A4f-VIX vs GJR DM t=-0.27 matches K1077's -0.49 (internal consistency check PASS). CRITICAL RESOLUTION OF APPARENT K1083/K1099 CONTRADICTION: K1083 measures FX dominates Taiwan→EWT RETURN-LEVEL gap (wrapper mechanics on return process); K1099 shows FX is IRRELEVANT to variance-level forecasting problem (variance proxy doesn't depend on FX). TWO DIFFERENT DECOMPOSITIONS — both correct. PAPER 10 IMPLICATION: Revival DENIED. Must be re-scoped away from 'FX vol is right τ regressor' toward 'EWT forecastability is superposition of equity + FX vol, not reducible to single shared τ'. K1077 + K1098 + K1099 = THREE INDEPENDENT NULL for 0050.TW from different angles → Taiwan boundary case structurally unrescuable via A4f framework.",
+    "tags": [
+      "FXVol",
+      "0050.TW",
+      "Taiwan",
+      "NULL",
+      "Paper10-denied",
+      "K1083-refinement",
+      "variance-vs-return"
+    ],
+    "category": "experiment",
+    "data_source": "yfinance 0050.TW + TWDUSD=X + VIX 2005-2026",
+    "confidence": 0.95,
+    "timestamp": "2026-04-13T02:35:17.571735+00:00"
+  },
+  {
+    "id": "k1100-1776049816",
+    "experiment_id": "K1100",
+    "title": "K1100: Student-t/Clayton Copula-GARCH vs DCC-A4f-ASYM — Null Result on SPY/GLD",
+    "content": "[提出: 用戶(copula-GARCH 專長), 執行: Claude] 測試 Student-t copula 與 Clayton copula 能否打敗 K1092 DCC-A4f-ASYM 用於 50/50 SPY+GLD portfolio VaR/ES 預測。DM 檢定：H1 (Copula-t vs DCC-A4f QLIKE) t=-1.68 NS；H2 (Clayton vs DCC-A4f QLIKE) t=-1.41 NS；FZ 1% joint: t=-0.92/-0.53 均 NS。**NULL 結果**：copula 無法顯著改善。機制：SPY-GLD 本質 tail-independent（Student-t λ=0.038，Clayton λ_L=0.007 近零；COVID 時 ρ 轉為 -0.128 反向移動，不是 crash co-movement），Clayton θ 塌至下限 0.010 無法建模負相依。Trinity: DCC-A4f-SYMM 2/2、Clayton-A4f-ASYM 2/2、Copula-t-A4f-ASYM 0/2（MC sampling noise）、DCC-A4f-ASYM 1/2（與 K1092 一致）。Mean QLIKE 最佳 DCC-A4f-ASYM (-9.11477)。含副產品：H3 Clayton vs Copula-t FZ t=+3.02 Harvey SIG、DCC-GJR vs Copula-t QLIKE t=+4.08 Harvey SIG（copula 反不如 DCC-GARCH 基準）。OOS 3234 天 (2013-06~2026-04)，MC=5000/day，seed=42。對用戶 PRS 論文 (Lai 2024 APFM) 的啟示：copula 方法對 tail-dependent pair（spot-futures）有效，對 tail-independent pair（SPY-GLD）DCC+A4f-ASYM 已足夠。",
+    "tags": [
+      "copula-GARCH",
+      "DCC-A4f",
+      "Paper_3",
+      "Paper_9",
+      "Student-t",
+      "Clayton",
+      "VaR",
+      "ES",
+      "Fissler-Ziegel",
+      "null-result",
+      "tail-dependence",
+      "SPY-GLD",
+      "K1092-followup"
+    ],
+    "data_source": "yfinance (SPY, GLD), VIX, GVZ (2007-06 ~ 2026-04)",
+    "created_at": "2026-04-13T03:10:16.637939+00:00"
   }
 ]

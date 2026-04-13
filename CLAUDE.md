@@ -523,9 +523,14 @@ Monitor 是內建的背景監聽工具，跑一個指令後每行 stdout 變成�
 - **stdout 要精簡**：必須用 `grep --line-buffered` 過濾，不可 pipe raw log
 - **persistent: true** 僅用於 session 級監控（不會自動超時）
 - **非 persistent** 預設 5 分鐘超時，最長 1 小時
-- **每個 session 啟動時**，視情況設一個 persistent Monitor 監控關鍵檔案異常
 - 用 `TaskStop` 取消不再需要的 Monitor
 - **⚠️ Monitor 是 session-only**：關閉 session 後消失，新 session 不會繼承。跨 session 的持久監控用 system crontab 或 RemoteTrigger
+
+### Session 啟動必建 Monitor（與 session cron 對等）
+- **每次新 session 除了設 cron，也必須啟動 persistent Monitor**（SessionStart hook 會提醒）
+- 指令來源：`scripts/session_monitors.md`（直接複製 Monitor 呼叫）
+- 監控門檻：knowledge.json >5MB · feed.json >7MB · draft <3 · 最新發文 >3h · worktree >3
+- 2026-04-13 教訓：不寫進必建清單會忘記——用戶主動問「有在 monitor 嗎」才發現
 
 ## 硬體資源與 Agent Team
 → 完整 Agent 設定對照表見 `docs/hardware.md`
