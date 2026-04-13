@@ -1,0 +1,43 @@
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa820ce8/experiments/k1164/k1164.py:435: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  "timestamp_utc": pd.Timestamp.utcnow().isoformat(),
+K1164 — Analyst × Media-density mechanism test
+============================================================
+[panel] built: n_obs=109
+         n  theta_rel_mean  sigma2_mean  analyst_mean
+market                                               
+EU      18          0.1469       0.0003       20.9444
+JP      30          0.4238       0.0004       15.0333
+TW      31          0.2374       0.0004        9.3667
+US      30          0.7994       0.0003       34.2333
+
+[market summary]
+market cluster  n_stocks  analyst_mean  analyst_median  log_marketcap_mean  log_turnover_mean  theta_rel_market_docd  theta_rel_stock_mean  theta_rel_stock_median
+    TW     LOW        31      9.366667             7.5           26.557258          19.242311               0.167302              0.237365                0.239431
+    US    HIGH        30     34.233333            32.5           27.119190          20.810024               0.586202              0.799436                0.699426
+    JP    HIGH        30     15.033333            14.5           29.993235          23.367490               0.387502              0.423830                0.403223
+    EU     LOW        18     20.944444            21.0           25.310458          19.666361               0.137000              0.146914                0.144169
+
+[cross-market Spearman (N=4)]
+  analyst_mean          ρ=+0.4000  p=0.6000  pearson=+0.7302
+  analyst_median        ρ=+0.4000  p=0.6000  pearson=+0.6993
+  log_marketcap_mean    ρ=+0.8000  p=0.2000  pearson=+0.4895
+  log_turnover_mean     ρ=+0.6000  p=0.4000  pearson=+0.5323
+
+[panel regression] n_obs=108  r2=0.6137
+  D_TW             β=+0.271124  se=0.542644  t=+0.500
+  D_US             β=+1.077342  se=0.544821  t=+1.977
+  D_JP             β=+0.574322  se=0.603044  t=+0.952
+  D_EU             β=+0.387028  se=0.504725  t=+0.767
+  log_analyst      β=-0.148931  se=0.032701  t=-4.554
+  log_mcap         β=+0.026092  se=0.024995  t=+1.044
+  log_turnover     β=-0.022856  se=0.015411  t=-1.483
+
+[VERDICT] REJECTED
+  - Rank-ordering check FAILS: analyst_median rank = ['TW', 'JP', 'EU', 'US'] but θ_rel LOW cluster = ['EU', 'TW'], HIGH = ['JP', 'US']. EU has MORE analysts than JP yet sits in LOW θ_rel cluster (0.14 vs JP 0.39). Direct contradiction of K1153 hypothesis.
+  - Cross-market Spearman ρ(analyst_median, θ_rel) = +0.400 (p=0.600, N_markets=4).
+  - Panel log_analyst coef = -0.1489, t_HC0 = -4.554.
+  - ⚠️ TAUTOLOGY WARNING: within-market log(analyst) correlates POSITIVELY with σ²_i (TW: ρ=+0.250 (n=30); US: ρ=+0.645 (n=30); JP: ρ=+0.461 (n=30); EU: ρ=+0.311 (n=18)). Since θ_rel_i = θ_EAV/σ²_i by construction, the negative panel coef on log(analyst) is likely a SIZE/VOL confound, NOT evidence of a coverage mechanism.
+  - N_markets=4 → any finding must be treated as preliminary; recommend K1165 N≥8 extension (add AU ASX, KR KOSPI, CA TSX, HK HSI) to gain df.
+
+[saved] /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa820ce8/experiments/k1164/k1164_results.json
+[saved] /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa820ce8/experiments/k1164/k1164_per_stock_panel.csv

@@ -1,0 +1,250 @@
+{
+  "experiment_id": "K1164",
+  "title": "Analyst coverage × media density mechanism test for cross-market θ_rel cluster",
+  "proposer": "Claude (K1153 next_task K1164)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-13T17:20:59.288871+00:00",
+  "random_seed": 42,
+  "data_sources": [
+    "K1145 (TW) / K1147 (US) / K1150 (JP) / K1153 (EU) per-stock GJR-τ fits",
+    "yfinance Ticker.info (analyst count, market cap) — current snapshot",
+    "Cached parquet turnover medians"
+  ],
+  "markets": [
+    "TW",
+    "US",
+    "JP",
+    "EU"
+  ],
+  "n_stocks_loaded": 109,
+  "per_stock_panel_head": [
+    {
+      "market": "TW",
+      "ticker": "2330.TW",
+      "analyst_count": 33.0,
+      "market_cap": 51605722365952.0,
+      "median_daily_turnover": 5083485395.53833,
+      "sigma2_i": 0.00025985349967299064,
+      "theta_eav_shared": 6.362165248598386e-05,
+      "theta_rel_i": 0.2448366197339952
+    },
+    {
+      "market": "TW",
+      "ticker": "2303.TW",
+      "analyst_count": 20.0,
+      "market_cap": 756548173824.0,
+      "median_daily_turnover": 489784974.01189804,
+      "sigma2_i": 0.00036545948205307264,
+      "theta_eav_shared": 6.362165248598386e-05,
+      "theta_rel_i": 0.1740867472601097
+    },
+    {
+      "market": "TW",
+      "ticker": "6239.TW",
+      "analyst_count": 8.0,
+      "market_cap": 161427144704.0,
+      "median_daily_turnover": 184921716.66378403,
+      "sigma2_i": 0.0003762484492164116,
+      "theta_eav_shared": 6.362165248598386e-05,
+      "theta_rel_i": 0.16909478994128632
+    },
+    {
+      "market": "TW",
+      "ticker": "2454.TW",
+      "analyst_count": 24.0,
+      "market_cap": 2585698500608.0,
+      "median_daily_turnover": 1908644049.6425018,
+      "sigma2_i": 0.0005094605269575156,
+      "theta_eav_shared": 6.362165248598386e-05,
+      "theta_rel_i": 0.12488043551858793
+    },
+    {
+      "market": "TW",
+      "ticker": "2379.TW",
+      "analyst_count": 16.0,
+      "market_cap": 270643806208.0,
+      "median_daily_turnover": 306153705.9650421,
+      "sigma2_i": 0.00048803182415695654,
+      "theta_eav_shared": 6.362165248598386e-05,
+      "theta_rel_i": 0.13036373723350142
+    }
+  ],
+  "per_market_summary": [
+    {
+      "market": "TW",
+      "cluster": "LOW",
+      "n_stocks": 31,
+      "analyst_mean": 9.366666666666667,
+      "analyst_median": 7.5,
+      "log_marketcap_mean": 26.557257817281883,
+      "log_turnover_mean": 19.242310855030563,
+      "theta_rel_market_docd": 0.16730150708150912,
+      "theta_rel_stock_mean": 0.23736548470758004,
+      "theta_rel_stock_median": 0.23943114451176117
+    },
+    {
+      "market": "US",
+      "cluster": "HIGH",
+      "n_stocks": 30,
+      "analyst_mean": 34.233333333333334,
+      "analyst_median": 32.5,
+      "log_marketcap_mean": 27.119189937029336,
+      "log_turnover_mean": 20.810024470440972,
+      "theta_rel_market_docd": 0.5862018842610842,
+      "theta_rel_stock_mean": 0.7994359206371068,
+      "theta_rel_stock_median": 0.6994259130402578
+    },
+    {
+      "market": "JP",
+      "cluster": "HIGH",
+      "n_stocks": 30,
+      "analyst_mean": 15.033333333333333,
+      "analyst_median": 14.5,
+      "log_marketcap_mean": 29.99323462996715,
+      "log_turnover_mean": 23.367489660613746,
+      "theta_rel_market_docd": 0.3875023756698172,
+      "theta_rel_stock_mean": 0.4238296721222182,
+      "theta_rel_stock_median": 0.40322266486788816
+    },
+    {
+      "market": "EU",
+      "cluster": "LOW",
+      "n_stocks": 18,
+      "analyst_mean": 20.944444444444443,
+      "analyst_median": 21.0,
+      "log_marketcap_mean": 25.310458253322178,
+      "log_turnover_mean": 19.666360521826977,
+      "theta_rel_market_docd": 0.137,
+      "theta_rel_stock_mean": 0.14691407997293277,
+      "theta_rel_stock_median": 0.14416911407305955
+    }
+  ],
+  "cross_market_spearman_N4": {
+    "analyst_mean": {
+      "spearman_rho": 0.39999999999999997,
+      "spearman_p_two_sided": 0.6,
+      "pearson_r": 0.7301920863252374,
+      "n_markets": 4
+    },
+    "analyst_median": {
+      "spearman_rho": 0.39999999999999997,
+      "spearman_p_two_sided": 0.6,
+      "pearson_r": 0.6993045521631054,
+      "n_markets": 4
+    },
+    "log_marketcap_mean": {
+      "spearman_rho": 0.7999999999999999,
+      "spearman_p_two_sided": 0.2000000000000001,
+      "pearson_r": 0.4895304554863568,
+      "n_markets": 4
+    },
+    "log_turnover_mean": {
+      "spearman_rho": 0.6000000000000001,
+      "spearman_p_two_sided": 0.4,
+      "pearson_r": 0.5323205377771129,
+      "n_markets": 4
+    }
+  },
+  "panel_regression_with_market_FE": {
+    "n_obs": 108,
+    "n_params": 7,
+    "r2": 0.6136750706913909,
+    "rss": 4.640657730252334,
+    "tss": 12.012317554959608,
+    "coefs": {
+      "D_TW": {
+        "beta": 0.27112427796529476,
+        "se_hc0": 0.542643901079377,
+        "t_hc0": 0.4996357232173797
+      },
+      "D_US": {
+        "beta": 1.0773417566475736,
+        "se_hc0": 0.5448207691742365,
+        "t_hc0": 1.9774241688334648
+      },
+      "D_JP": {
+        "beta": 0.5743217326505173,
+        "se_hc0": 0.6030438260584239,
+        "t_hc0": 0.952371465941973
+      },
+      "D_EU": {
+        "beta": 0.38702814706143734,
+        "se_hc0": 0.5047250777557785,
+        "t_hc0": 0.76680982205665
+      },
+      "log_analyst": {
+        "beta": -0.14893105970551565,
+        "se_hc0": 0.03270060073629801,
+        "t_hc0": -4.554382988450747
+      },
+      "log_mcap": {
+        "beta": 0.026092398086214316,
+        "se_hc0": 0.024994865005764824,
+        "t_hc0": 1.0439103423921816
+      },
+      "log_turnover": {
+        "beta": -0.02285616748064017,
+        "se_hc0": 0.015411385246014455,
+        "t_hc0": -1.4830702831564744
+      }
+    }
+  },
+  "rank_ordering_check": {
+    "rank_by_analyst_median_low_to_high": [
+      "TW",
+      "JP",
+      "EU",
+      "US"
+    ],
+    "rank_by_theta_rel_low_to_high": [
+      "EU",
+      "TW",
+      "JP",
+      "US"
+    ],
+    "expected_low_cluster": [
+      "EU",
+      "TW"
+    ],
+    "expected_high_cluster": [
+      "JP",
+      "US"
+    ],
+    "rank_matches_cluster": false
+  },
+  "within_market_analyst_vs_sigma2": {
+    "TW": {
+      "rho": 0.25027972778680146,
+      "p": 0.18222515188609023,
+      "n": 30
+    },
+    "US": {
+      "rho": 0.6452839233643646,
+      "p": 0.00011802971552298444,
+      "n": 30
+    },
+    "JP": {
+      "rho": 0.46084100174796594,
+      "p": 0.010379367292191528,
+      "n": 30
+    },
+    "EU": {
+      "rho": 0.3113698888603025,
+      "p": 0.2084839779141269,
+      "n": 18
+    }
+  },
+  "verdict": "REJECTED",
+  "verdict_notes": [
+    "Rank-ordering check FAILS: analyst_median rank = ['TW', 'JP', 'EU', 'US'] but θ_rel LOW cluster = ['EU', 'TW'], HIGH = ['JP', 'US']. EU has MORE analysts than JP yet sits in LOW θ_rel cluster (0.14 vs JP 0.39). Direct contradiction of K1153 hypothesis.",
+    "Cross-market Spearman ρ(analyst_median, θ_rel) = +0.400 (p=0.600, N_markets=4).",
+    "Panel log_analyst coef = -0.1489, t_HC0 = -4.554.",
+    "⚠️ TAUTOLOGY WARNING: within-market log(analyst) correlates POSITIVELY with σ²_i (TW: ρ=+0.250 (n=30); US: ρ=+0.645 (n=30); JP: ρ=+0.461 (n=30); EU: ρ=+0.311 (n=18)). Since θ_rel_i = θ_EAV/σ²_i by construction, the negative panel coef on log(analyst) is likely a SIZE/VOL confound, NOT evidence of a coverage mechanism.",
+    "N_markets=4 → any finding must be treated as preliminary; recommend K1165 N≥8 extension (add AU ASX, KR KOSPI, CA TSX, HK HSI) to gain df."
+  ],
+  "hypothesis_tested": "K1153 new hypothesis: High analyst coverage + concentrated earnings-season media -> high θ_rel cluster (US/JP). Low analyst + diffuse media -> low θ_rel cluster (TW/EU).",
+  "figures": [
+    "k1164_scatter.png",
+    "k1164_bar_cluster.png"
+  ]
+}

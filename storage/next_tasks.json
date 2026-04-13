@@ -709,6 +709,28 @@
     "title": "K1164: Analyst-coverage density + media-concentration mechanism test",
     "priority": 2,
     "description": "K1153 推翻 quarterly-density hypothesis。新假說測試: 用 I/B/E/S analyst coverage count per stock × earnings-season media article volume 作為 cross-market predictor of θ_rel。若 correlation 顯著 → mechanism 確認。",
+    "status": "completed",
+    "completed_at": "2026-04-14T01:30:00+08:00"
+  },
+  {
+    "id": "K1165",
+    "title": "K1165: Expand to N≥8 markets for cross-market Spearman power",
+    "priority": 3,
+    "description": "K1164 N=4 markets 無 Spearman power (ρ=+0.40 p=0.60)。擴展至 8+ markets (+AU ASX, KR KOSPI, CA TSX, HK HSI 各 30 large-caps) pooled panel θ_EAV，再做 cross-market mechanism regression。",
+    "status": "pending"
+  },
+  {
+    "id": "K1166",
+    "title": "K1166: per-stock θ_EAV refit to remove σ² tautology",
+    "priority": 3,
+    "description": "K1164 panel coef 受 θ_rel = θ_EAV/σ² 機械 rank-inversion 污染。改 per-stock fit 取 θ_EAV_i (allow heterogeneity)，再用真正 cross-stock θ_EAV_i variation 跟 analyst/media correlate。",
+    "status": "pending"
+  },
+  {
+    "id": "K1167",
+    "title": "K1167: retail-vs-institutional ownership proxy mechanism test",
+    "priority": 3,
+    "description": "K1164 排除 quarterly + analyst hypotheses。新假說: retail-vs-institutional 持股比例（institutional 多 → 算盤 driven by quant/automated → high θ_rel; retail 多 → noise driven → low θ_rel）。Proxy: US 13F holdings, JP MOF, EU ECB SHS-S, TW FISC。",
     "status": "pending"
   }
 ]

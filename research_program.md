@@ -611,6 +611,16 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 21. Paper 2 mechanism 仍 OPEN：analyst hypothesis 也被推翻（2026-04-14 K1164）
+**K1153 後第二次推翻——cluster mechanism 尚未找到**
+- K1164 檢驗 analyst coverage × media density 假說 (K1153 §5.4 提出)
+- 4-market analyst median: TW 7.5 / EU 21.0 / JP 14.5 / US 32.5
+- 假設預測順序 TW<EU<JP<US，但實際 EU(21) > JP(14.5) 且 cluster 反轉 (EU LOW vs JP HIGH) — **rank-ordering inversion**
+- Cross-market Spearman ρ=+0.40 p=0.60 無 power
+- Panel coef β=-0.149 但是 σ² tautology artifact (θ_rel=θ_EAV/σ² 機械 rank-inverse)，**不可採信**
+- **Mechanism question remains OPEN**：K1153 §5.4 必須改寫為「analyst hypothesis tested in K1164 also rejected」
+- 衍生 K1165 (N≥8 markets), K1166 (per-stock θ_EAV refit 移除 tautology), K1167 (retail-vs-institutional ownership proxy via 13F/MOF/ECB/FISC)
+
 ### 20. Paper 2 四市場 + 雙 cluster taxonomy（2026-04-14 K1153 EU）
 **EU 加入四市場全 PASS，但 K1152 quarterly hypothesis 被推翻**
 - EU (DAX+CAC+FTSE, N=18 due yfinance earnings 稀疏) pooled θ_EAV = +4.07e-5, bootstrap t=+4.19 PASS

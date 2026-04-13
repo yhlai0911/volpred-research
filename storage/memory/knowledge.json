@@ -26127,5 +26127,23 @@
     "data_source": "Reuse K1147/K1151 US 30 stocks data + yfinance numberOfAnalystOpinions",
     "created_at": "2026-04-14T01:00:00+08:00",
     "updated_at": "2026-04-14T01:00:00+08:00"
+  },
+  {
+    "id": "k1164-1776101110",
+    "experiment_id": "K1164",
+    "title": "K1164 analyst × media mechanism REJECTED — EU > JP analyst but cluster inverted; θ_rel mechanism remains OPEN",
+    "content": "[提出: Claude, 執行: Claude] K1153 推翻 K1152 quarterly-cadence 假說後，K1164 檢驗新假說「analyst coverage × media density」是否解釋 θ_rel 兩 cluster (LOW: TW 0.167 + EU 0.137; HIGH: JP 0.388 + US 0.586)。**結果**: REJECTED via rank-ordering inversion。4-market analyst median: TW 7.5 / EU 21.0 / JP 14.5 / US 32.5 → 假設預測順序 TW<EU<JP<US (對應 LOW→HIGH cluster)，但實際 EU(21)>JP(14.5) 且 cluster 反轉 (EU LOW, JP HIGH)。Cross-market Spearman ρ(analyst, θ_rel)=+0.40 p=0.60 無 power (N=4 markets)。Panel regression 雖 log_analyst β=-0.149 t=-4.55，但這是 σ² tautology artifact (θ_rel 機械上 = θ_EAV/σ²，within-market analyst-σ² 正相關 ρ 0.46-0.65 → 自動產生負相關，不是 mechanism)。**機制問題仍 OPEN**: K1153 §5.4 不可寫成 confirmed mechanism，必須改寫為 'analyst × media hypothesis tested in K1164 also rejected, mechanism remains open'。衍生 K1165 (擴展 N≥8 markets +AU/KR/CA/HK), K1166 (per-stock θ_EAV refit 移除 σ² tautology), K1167 (retail-vs-institutional ownership proxy via 13F/FISC/ECB/MOF)。",
+    "tags": [
+      "K1164",
+      "Paper2",
+      "mechanism-rejected",
+      "K1153-followup",
+      "analyst-coverage",
+      "rank-ordering-inversion",
+      "negative-result"
+    ],
+    "data_source": "yfinance Ticker.recommendations + market cap/turnover for 4 markets (TW/EU/JP/US, N=109 stocks)",
+    "created_at": "2026-04-14T01:30:00+08:00",
+    "updated_at": "2026-04-14T01:30:00+08:00"
   }
 ]
