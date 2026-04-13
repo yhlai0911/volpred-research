@@ -263,7 +263,8 @@
     "title": "K1067e: GARCH-X + EAV only (exclude VIX)",
     "priority": 3,
     "description": "K1067b 衍生：確認是 EAV 本身無力還是 VIX 占位效應。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T05:00:00+08:00"
   },
   {
     "id": "K1061",
@@ -793,6 +794,13 @@
     "title": "K1175: Full 96-files-per-day GDELT scan OR GCP-authed BigQuery rerun",
     "priority": 2,
     "description": "K1174 only 1/96 slice coverage (1.04%) + 131/413 events. Need full-day (96 files) scan or GCP BigQuery (if user can provide auth) for N≥10 per market decisive PCR test. Current K1170 press concentration claim hangs on this.",
+    "status": "pending"
+  },
+  {
+    "id": "K1067f",
+    "title": "K1067f: VIX-only ablation (reverse sanity check of K1067e)",
+    "priority": 3,
+    "description": "K1067e 確認移除 VIX 後 θ_EAV 仍穩定 (H3 borderline H1)。反向: 保留 VIX 但移除 EAV: τ=exp(m+θ_VIX×VIX²)。看 loglik 變化 + 每檔 stock θ_VIX 穩定性, 完整的 robustness sanity check 雙邊。",
     "status": "pending"
   }
 ]

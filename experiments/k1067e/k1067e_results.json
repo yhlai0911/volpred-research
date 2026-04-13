@@ -1,0 +1,238 @@
+{
+  "experiment_id": "K1067e",
+  "title": "EAV-only ablation vs A4f-EAV (full) per-stock spec",
+  "proposer": "Claude (follow-up to K1166 / K1145-K1170 chain)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-13T19:27:41.447031+00:00",
+  "random_seed": 42,
+  "data_sources": [
+    "experiments/k1145/data/ (TW parquet + VIX, VIX used only for alignment not likelihood)",
+    "experiments/k1147/data/ (US parquet + earnings_dates.json)",
+    "experiments/k1150/data/ (JP parquet + earnings_dates.json)",
+    "experiments/k1153/data/ (EU parquet + earnings_dates.json)",
+    "experiments/k1166/k1166_per_stock_table.csv (full-spec theta_EAV baselines)",
+    "experiments/k1164/data/analyst_media_proxies.json (analyst/mcap proxies)",
+    "\u8ca1\u5831\u516c\u544a\u65e5.txt (TW earnings, big5)"
+  ],
+  "specification": {
+    "full_reference": "K1166 A4f-EAV: tau = theta0 + theta_VIX*VIX^2 + theta_EAV*EAV",
+    "noVIX_tested_here": "tau = theta0 + theta_EAV*EAV  (no VIX term)",
+    "g_process": "GJR(1,1) with Engle-Ghysels-Sohn E[g]=1 (omega_g = 1 - alpha - gamma/2 - beta)",
+    "estimation": "L-BFGS-B multi-start, Hessian SE from 2nd-order finite-diff",
+    "lookahead": "EAV at lag t-1 (verified in numba likelihood)",
+    "n_free_params_per_stock": 5
+  },
+  "n_stocks_total": 110,
+  "n_converged_noVIX": 110,
+  "pooled_cross_stock": {
+    "spearman_noVIX_vs_full": {
+      "rho": 0.8979509951987017,
+      "p": 2.710755788351328e-40,
+      "n": 110
+    },
+    "pearson_noVIX_vs_full": {
+      "r": 0.8489357612642108,
+      "p": 1.1024002771573027e-31,
+      "n": 110
+    },
+    "sign_agreement": 0.9636363636363636,
+    "ratio_noVIX_over_full": {
+      "median": 1.1152313788240062,
+      "mean": 1.384520239383507,
+      "q25": 0.8223934746138947,
+      "q75": 1.587904970721586,
+      "n": 110
+    },
+    "loglik_diff_full_minus_noVIX": {
+      "mean": 31.840097430539565,
+      "median": 28.101871655786454,
+      "n_full_better": 103,
+      "n_total": 110,
+      "LR_reject_0.05": 0.8818181818181818,
+      "LR_reject_0.01": 0.8818181818181818
+    }
+  },
+  "per_market": {
+    "TW": {
+      "n": 31,
+      "spearman_noVIX_vs_full": {
+        "rho": 0.9580645161290324,
+        "p": 2.775132078033764e-17
+      },
+      "pearson_noVIX_vs_full": 0.9740775210525553,
+      "sign_agreement": 1.0,
+      "noVIX_mean": 0.000356095437609666,
+      "noVIX_median": 8.948739493390319e-05,
+      "noVIX_std": 0.000571659144906316,
+      "full_mean": 0.00037893524176670274,
+      "full_median": 8.501739932063492e-05,
+      "pct_sig_t2_noVIX": 0.41935483870967744,
+      "pct_sig_t3_noVIX": 0.2903225806451613,
+      "frac_pos_noVIX": 0.7096774193548387,
+      "frac_pos_full": 0.7096774193548387,
+      "LR_reject_0.05": 0.6774193548387096
+    },
+    "EU": {
+      "n": 19,
+      "spearman_noVIX_vs_full": {
+        "rho": 0.6263157894736843,
+        "p": 0.00411697230662223
+      },
+      "pearson_noVIX_vs_full": 0.4162419143914791,
+      "sign_agreement": 0.8421052631578947,
+      "noVIX_mean": 0.00026459149327225307,
+      "noVIX_median": 0.00023896215535186704,
+      "noVIX_std": 0.00023952547282072404,
+      "full_mean": 0.000661152603013499,
+      "full_median": 0.0002418924740081,
+      "pct_sig_t2_noVIX": 0.5263157894736842,
+      "pct_sig_t3_noVIX": 0.2631578947368421,
+      "frac_pos_noVIX": 0.9473684210526315,
+      "frac_pos_full": 0.8947368421052632,
+      "LR_reject_0.05": 0.9473684210526315
+    },
+    "JP": {
+      "n": 30,
+      "spearman_noVIX_vs_full": {
+        "rho": 0.9092324805339266,
+        "p": 3.596435270992925e-12
+      },
+      "pearson_noVIX_vs_full": 0.9470531447403651,
+      "sign_agreement": 1.0,
+      "noVIX_mean": 0.0011920044135002134,
+      "noVIX_median": 0.000983287530089515,
+      "noVIX_std": 0.0008222859922061471,
+      "full_mean": 0.00101882726602056,
+      "full_median": 0.0007619218243662,
+      "pct_sig_t2_noVIX": 1.0,
+      "pct_sig_t3_noVIX": 0.8333333333333334,
+      "frac_pos_noVIX": 1.0,
+      "frac_pos_full": 1.0,
+      "LR_reject_0.05": 0.9666666666666667
+    },
+    "US": {
+      "n": 30,
+      "spearman_noVIX_vs_full": {
+        "rho": 0.8638487208008899,
+        "p": 7.857786277701833e-10
+      },
+      "pearson_noVIX_vs_full": 0.8616630492631797,
+      "sign_agreement": 0.9666666666666667,
+      "noVIX_mean": 0.002359506259104298,
+      "noVIX_median": 0.00022074542336592438,
+      "noVIX_std": 0.003369437895418146,
+      "full_mean": 0.0020190013893990957,
+      "full_median": 0.00023194728782460002,
+      "pct_sig_t2_noVIX": 0.6333333333333333,
+      "pct_sig_t3_noVIX": 0.4666666666666667,
+      "frac_pos_noVIX": 0.9333333333333333,
+      "frac_pos_full": 0.9666666666666667,
+      "LR_reject_0.05": 0.9666666666666667
+    }
+  },
+  "mechanism_spearman_log_analyst_vs_theta_eav_noVIX": {
+    "pooled": {
+      "rho": 0.23195692635616424,
+      "p": 0.01571103909557793,
+      "n": 108
+    },
+    "TW": {
+      "rho": 0.16016118052666975,
+      "p": 0.39786462885327045,
+      "n": 30
+    },
+    "US": {
+      "rho": 0.6341468173346034,
+      "p": 0.00016795732596522477,
+      "n": 30
+    },
+    "JP": {
+      "rho": 0.31356884091738724,
+      "p": 0.09153265575170108,
+      "n": 30
+    },
+    "EU": {
+      "rho": 0.3124077884898368,
+      "p": 0.20689080277589747,
+      "n": 18
+    }
+  },
+  "panel_regression_noVIX": {
+    "n": 108,
+    "k": 6,
+    "r2": 0.2736602913146171,
+    "coefs": {
+      "D_EU": {
+        "beta": -0.005953835741086412,
+        "se": 0.005671114813583613,
+        "t": -1.0498527955783257,
+        "p": 0.2962668902072312
+      },
+      "D_JP": {
+        "beta": -0.005141891578429969,
+        "se": 0.006712440669368029,
+        "t": -0.7660241381193577,
+        "p": 0.4454310405028252
+      },
+      "D_TW": {
+        "beta": -0.004839208313645801,
+        "se": 0.0059472576464477496,
+        "t": -0.8136873499227367,
+        "p": 0.41771951633417137
+      },
+      "D_US": {
+        "beta": -0.004511259678001315,
+        "se": 0.00594637723923822,
+        "t": -0.758656825240244,
+        "p": 0.4498073782942207
+      },
+      "log_analyst": {
+        "beta": 0.0011680836994348862,
+        "se": 0.0003172513383410161,
+        "t": 3.681887381604371,
+        "p": 0.0003722698113148848
+      },
+      "log_mcap": {
+        "beta": 0.00010418065884330008,
+        "se": 0.00022544845216402841,
+        "t": 0.4621041211119155,
+        "p": 0.644990804944851
+      }
+    },
+    "X_cols": [
+      "D_EU",
+      "D_JP",
+      "D_TW",
+      "D_US",
+      "log_analyst",
+      "log_mcap"
+    ]
+  },
+  "panel_regression_full_reference_K1166": {
+    "log_analyst_beta": 0.0009682056030173924,
+    "log_analyst_se": 0.0002722633422411649,
+    "log_analyst_t": 3.5561364781887423,
+    "log_analyst_p": 0.0005723709709193336,
+    "source": "K1166 per-stock refit with VIX in tau"
+  },
+  "ablation_verdict": "H3: Partial collinearity (sign mostly preserved, magnitudes shift)",
+  "ablation_verdict_code": "H3",
+  "paper2_narrative_impact": "Paper 2 mechanism story MOSTLY INTACT. Need to clarify that EAV and VIX jointly identify the long-run term; report joint loadings.",
+  "hypotheses": {
+    "H1": "EAV truly independent (rho>0.9 + sign agree >85% + panel t>3 same sign)",
+    "H2": "VIX was carrying the weight (rho<0.5 or sign_agree<70% or panel sign flip)",
+    "H3": "Partial collinearity (neither H1 nor H2)"
+  },
+  "figures": {
+    "scatter_noVIX_vs_full": "k1067e_scatter_noVIX_vs_full.png",
+    "sign_consistency_hist": "k1067e_sign_consistency_hist.png"
+  },
+  "limitations": [
+    "Per-stock N_obs still 500-3000 daily observations each.",
+    "Analyst count is yfinance snapshot (current, not historical average).",
+    "SE from profile Hessian only (no block bootstrap).",
+    "Compare within-stock: LR test assumes nesting holds; E[g]=1 normalization preserved.",
+    "VIX column still needed for data-window alignment; K1166 dropped rows where VIX NaN \u2014 we replicate."
+  ],
+  "execution_time_sec": 12.3
+}

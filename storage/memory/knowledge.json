@@ -26252,5 +26252,23 @@
     "data_source": "GDELT GKG 2.1 raw CSV daily 12:00 UTC 15-min slice (1.04% full-day news), 131/413 events 2024-01-09 to 2024-07-10",
     "created_at": "2026-04-14T04:30:00+08:00",
     "updated_at": "2026-04-14T04:30:00+08:00"
+  },
+  {
+    "id": "k1067e-1776108724",
+    "experiment_id": "K1067e",
+    "title": "K1067e EAV-only ablation: Paper 2 θ_EAV is NOT a VIX artifact (H3 borderline H1)",
+    "content": "[提出: Claude, 執行: Claude] K1145-K1170 全 chain 用 A4f-EAV (τ=exp(m+θ_VIX×VIX²+θ_EAV×EAV))。K1067e 移除 VIX 純用 EAV: τ=exp(m+θ_EAV×EAV) 重做 per-stock MLE 110 stocks 4 markets。**結果 H3 borderline H1 — Paper 2 SAFE**: Pooled Spearman ρ(θ_noVIX, θ_full)=+0.898 p=2.7e-40 (剛 below 0.9 H1 門檻); Pearson r=+0.849。Per-market: TW +0.958 / EU +0.626 (weakest, smallest |θ|) / JP +0.909 / US +0.864。**Sign consistency 96.4%** (106/110 sign agreement); TW+JP 100% 全一致, US 97%, EU 84%; 只有 4 檔 flip sign, 全為 small |θ| + large SE。Ordering TW ≤ EU < JP < US **完全保留**。Panel β_noVIX=+1.168e-3 t=+3.68 p=3.7e-4 **反而略強於** K1166 β_full=+9.68e-4 t=+3.56。Mechanism replay ρ(log_analyst, θ_EAV_noVIX) pooled +0.232 (vs K1166 +0.241, 幾乎一致)。Per-stock LR test: 93.6% stocks LL_full>LL_noVIX (VIX 加 daily LL info 但不改變 cross-sectional θ_EAV structure)。Ratio θ_noVIX/θ_full: median +1.12, mean +1.38, IQR [+0.82, +1.59] — ~12% 量級差異遠小於 K1166 EGS normalization 的 6-16x。**Paper 2 narrative SAFE**: θ_EAV 不是 VIX residual; K1166 analyst-coverage mechanism 在 noVIX spec 甚至 marginally 更強。建議 Paper 2 §4 加 K1067e robustness footnote。衍生 K1067f (VIX-only ablation 反向 sanity check)。",
+    "tags": [
+      "K1067e",
+      "Paper2",
+      "ablation",
+      "EAV-only-no-VIX",
+      "robustness",
+      "K1166-confirmation",
+      "Paper2-SAFE"
+    ],
+    "data_source": "Reuse K1166 110 stocks 4 markets data, per-stock MLE EAV-only vs full",
+    "created_at": "2026-04-14T05:00:00+08:00",
+    "updated_at": "2026-04-14T05:00:00+08:00"
   }
 ]

@@ -1,0 +1,57 @@
+
+========================================================================
+K1067e: EAV-only ablation (no VIX in tau)
+========================================================================
+
+[1/5] Loading cached stocks ...
+  TW: loaded 31/31 (skipped: [])
+  US: loaded 30/30 (skipped: [])
+  JP: loaded 30/30 (skipped: [])
+  EU: loaded 19/30 (skipped: ['MC.PA', 'OR.PA', 'SU.PA', 'DG.PA', 'RMS.PA', 'AI.PA', 'ULVR.L', 'RIO.L', 'DGE.L', 'REL.L', 'LSEG.L'])
+  Total loaded: 110 stocks
+
+[2/5] Per-stock EAV-only MLE fits (n_workers=8) ...
+  All 110 fits done in 3.3s
+
+  Converged: 110/110
+  Stocks with any param at bound: 9/110
+
+[3/5] Merge with K1166 full-spec per-stock table ...
+  Saved: k1067e_per_stock_comparison.csv
+
+[4/5] Cross-stock comparison noVIX vs full ...
+  Pooled (N=110): rho_Spearman(noVIX, full) = +0.898 (p=2.71e-40)
+  Pooled Pearson r = +0.849
+  Sign agreement = 0.964 (106/110)
+  Ratio noVIX/full: median=+1.12, mean=+1.38, IQR=[+0.82, +1.59]
+  LR (full vs noVIX): mean diff LL = +31.84, median = +28.10, full wins in 103/110
+  LR reject @0.05: 88.18%, @0.01: 88.18%
+    TW: rho=+0.958, sign_agree=1.00, mean_noVIX=+3.561e-04 vs full=+3.789e-04, %|t|>2_noVIX=42%
+    EU: rho=+0.626, sign_agree=0.84, mean_noVIX=+2.646e-04 vs full=+6.612e-04, %|t|>2_noVIX=53%
+    JP: rho=+0.909, sign_agree=1.00, mean_noVIX=+1.192e-03 vs full=+1.019e-03, %|t|>2_noVIX=100%
+    US: rho=+0.864, sign_agree=0.97, mean_noVIX=+2.360e-03 vs full=+2.019e-03, %|t|>2_noVIX=63%
+
+  Mechanism replay: Spearman(log_analyst, theta_eav_noVIX):
+    pooled: rho=+0.232 (p=0.016, N=108)
+    TW: rho=+0.160 (p=0.398, N=30)
+    US: rho=+0.634 (p=0.000, N=30)
+    JP: rho=+0.314 (p=0.092, N=30)
+    EU: rho=+0.312 (p=0.207, N=18)
+
+  Panel: theta_eav_noVIX ~ log_analyst + log_mcap + market_FE (HC0):
+    D_EU: beta=-5.9538e-03, SE=5.6711e-03, t=-1.050, p=0.2963
+    D_JP: beta=-5.1419e-03, SE=6.7124e-03, t=-0.766, p=0.4454
+    D_TW: beta=-4.8392e-03, SE=5.9473e-03, t=-0.814, p=0.4177
+    D_US: beta=-4.5113e-03, SE=5.9464e-03, t=-0.759, p=0.4498
+    log_analyst: beta=+1.1681e-03, SE=3.1725e-04, t=+3.682, p=0.0004
+    log_mcap: beta=+1.0418e-04, SE=2.2545e-04, t=+0.462, p=0.6450
+    R^2 = 0.274, n = 108
+
+[5/5] Plots ...
+  k1067e_scatter_noVIX_vs_full.png
+  k1067e_sign_consistency_hist.png
+
+  Ablation verdict: H3: Partial collinearity (sign mostly preserved, magnitudes shift)
+
+[DONE] Results: k1067e_results.json
+[DONE] Total time: 12.3s
