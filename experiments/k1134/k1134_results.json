@@ -1,0 +1,1386 @@
+{
+  "experiment_id": "K1134",
+  "title": "Range-based volatility proxy + GAS-t on commodities",
+  "description": "Re-evaluate K1129 NULL using Parkinson/Garman-Klass/Rogers-Satchell daily variance proxies. Test whether a lower-variance proxy reveals GAS-t advantage hidden under r\u00b2.",
+  "methodology": {
+    "models": [
+      "M1 GJR-GARCH Normal",
+      "M2 GJR-GARCH Student-t",
+      "M3 GAS-t"
+    ],
+    "assets": [
+      "USO",
+      "GLD",
+      "UNG",
+      "BTC-USD"
+    ],
+    "targets": [
+      "parkinson",
+      "garman_klass",
+      "rogers_satchell",
+      "r2_close"
+    ],
+    "target_details": {
+      "parkinson": "(log H/L)\u00b2 / (4 log 2) [Parkinson 1980, primary target]",
+      "garman_klass": "0.5 [log H/L]\u00b2 - (2 log 2 - 1) [log C/O]\u00b2 [GK 1980]",
+      "rogers_satchell": "log(H/C) log(H/O) + log(L/C) log(L/O) [RS 1991]",
+      "r2_close": "Close-to-close squared return [K1129 baseline for comparison]"
+    },
+    "oos_start": "2021-01-01",
+    "sub_period_split": "2024-01-01",
+    "window": 1500,
+    "refit_every": 63,
+    "evaluation_target": "Parkinson primary; GK+RS robustness; r\u00b2_close for direct K1129 comparison",
+    "metrics": [
+      "QLIKE (Patton 2011, proxy-robust for ranking)",
+      "DM-HLN test (Harvey-Leybourne-Newbold 1997)",
+      "Spearman rank correlation",
+      "Triple gate: DM |t|>2 + QLIKE>5% + sub-period stable"
+    ],
+    "dm_threshold_harvey": "Harvey (2016) |t| > 3.0 (reported separately)"
+  },
+  "data_source": "yfinance (Open/High/Low/Close)",
+  "seed": 42,
+  "references": [
+    "Parkinson (1980) J Business 53(1):61-65",
+    "Garman & Klass (1980) J Business 53(1):67-78",
+    "Rogers & Satchell (1991) Ann Appl Prob 1(4):504-512",
+    "Patton (2011) J Econometrics 160:246-256 \u2014 QLIKE proxy-robust",
+    "Creal, Koopman, Lucas (2013) JASA 108(501):1-18",
+    "Harvey-Leybourne-Newbold (1997) IJF 13:281-291",
+    "Harvey (2016) \u2014 multiple-testing |t|>3.0"
+  ],
+  "prior_experiments": {
+    "K437": "SPY r\u00b2: GAS-t underperforms",
+    "K1038": "SPY/QQQ/GLD/0050.TW r\u00b2: 4/4 NULL",
+    "K1129": "USO/GLD/UNG/BTC r\u00b2: 4/4 NULL (triple gate)"
+  },
+  "results": {
+    "USO": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "kurtosis_excess": 9.62451542005395,
+      "skewness": -0.5778391002248731,
+      "std_pct": 2.3411586699122857,
+      "per_target": {
+        "parkinson": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.5747771169891792,
+              "Spearman_rho": 0.41051677825933564,
+              "Spearman_p": 6.126336497697528e-55,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.5721617114019529,
+              "Spearman_rho": 0.4090454971586064,
+              "Spearman_p": 1.6011686520505452e-54,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.5890319165905354,
+              "Spearman_rho": 0.43277891488100406,
+              "Spearman_p": 1.6349894911873024e-61,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": 0.6568201437744629,
+              "DM_HLN_p": 0.5114108897488747,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 0.4550295253447817,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M2_GJR_t",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -0.8986096269037173,
+              "DM_HLN_p": 0.3690242639290553,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -2.480056909020021,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": -1.158747662136851,
+              "DM_HLN_p": 0.24676832471536203,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -2.9485029935410894,
+              "gate_DM": false,
+              "better": "M2_GJR_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.5457063202566687,
+              "late": 0.613181169514759,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.5367891713839235,
+              "late": 0.6188906984784025,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.5666526947917634,
+              "late": 0.618596046440492,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "garman_klass": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.5430154802832247,
+              "Spearman_rho": 0.4335178186129877,
+              "Spearman_p": 9.699687046020166e-62,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.5406026008472481,
+              "Spearman_rho": 0.4308249433541868,
+              "Spearman_p": 6.46326746921608e-61,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.5539174221514488,
+              "Spearman_rho": 0.4572271059456808,
+              "Spearman_p": 2.541397851839391e-69,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": 0.5477720626645947,
+              "DM_HLN_p": 0.5839408937718225,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 0.44434818593349557,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M2_GJR_t",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -0.6024844062351988,
+              "DM_HLN_p": 0.5469550657775364,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -2.0076668647711333,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": -0.8060727862272263,
+              "DM_HLN_p": 0.420345852594592,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -2.4629591650749223,
+              "gate_DM": false,
+              "better": "M2_GJR_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.5189121908215203,
+              "late": 0.5748571942563183,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.5094530942603094,
+              "late": 0.5817527384963094,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.5343827209407945,
+              "late": 0.5797237905928921,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "rogers_satchell": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.5862959555811841,
+              "Spearman_rho": 0.41139895557353306,
+              "Spearman_p": 3.435764118003577e-55,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.5843853503561048,
+              "Spearman_rho": 0.408618912978912,
+              "Spearman_p": 2.1135887652241028e-54,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.5962508216779937,
+              "Spearman_rho": 0.4365092631138439,
+              "Spearman_p": 1.1560243080006825e-62,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": 0.3926830950792317,
+              "DM_HLN_p": 0.694616863398442,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 0.32587726503848996,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M2_GJR_t",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -0.5356470052960198,
+              "DM_HLN_p": 0.592292635266986,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -1.697925084088556,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": -0.6947226602867591,
+              "DM_HLN_p": 0.48735120011636823,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -2.0304190231083727,
+              "gate_DM": false,
+              "better": "M2_GJR_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.5620528613279799,
+              "late": 0.6183223590419961,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.5521394551810993,
+              "late": 0.6269838750346648,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.5763998546941563,
+              "late": 0.6224749938513787,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "r2_close": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 1.4395699897640357,
+              "Spearman_rho": 0.2148812955270014,
+              "Spearman_p": 3.0462117706984207e-15,
+              "n_finite": 1319
+            },
+            "M2_GJR_t": {
+              "QLIKE": 1.4418069863801504,
+              "Spearman_rho": 0.21570651457848336,
+              "Spearman_p": 2.3745913751665474e-15,
+              "n_finite": 1319
+            },
+            "M3_GAS_t": {
+              "QLIKE": 1.4014872607179256,
+              "Spearman_rho": 0.21336662946520932,
+              "Spearman_p": 4.799050716833621e-15,
+              "n_finite": 1319
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -0.3248541974466056,
+              "DM_HLN_p": 0.7453429775854188,
+              "n_used": 1319,
+              "QLIKE_rel_improvement_pct": -0.15539339052777304,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": 1.0334250119931523,
+              "DM_HLN_p": 0.3015946283874045,
+              "n_used": 1319,
+              "QLIKE_rel_improvement_pct": 2.645423933320002,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M3_GAS_t",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 1.1749397784751825,
+              "DM_HLN_p": 0.2402310309363327,
+              "n_used": 1319,
+              "QLIKE_rel_improvement_pct": 2.7964717915157857,
+              "gate_DM": false,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 1.4637153774001124,
+              "late": 1.4077439076426697,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 1.4533398025464843,
+              "late": 1.426605559095879,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 1.4093260321528198,
+              "late": 1.391154960935552,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        }
+      }
+    },
+    "GLD": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "kurtosis_excess": 6.751938840070315,
+      "skewness": -0.31015318365273203,
+      "std_pct": 1.1415193236775711,
+      "per_target": {
+        "parkinson": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.6878434632085211,
+              "Spearman_rho": 0.36015555843055924,
+              "Spearman_p": 8.514140426804184e-42,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.7034176854865686,
+              "Spearman_rho": 0.360224288017087,
+              "Spearman_p": 8.198590507538619e-42,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.7128952844591854,
+              "Spearman_rho": 0.35961200757023515,
+              "Spearman_p": 1.1473921243676905e-41,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -4.962064388307405,
+              "DM_HLN_p": 7.882366601652535e-07,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -2.264210261648753,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -4.026786359520941,
+              "DM_HLN_p": 5.975866839835753e-05,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -3.6420817512472006,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": -1.8444625693818708,
+              "DM_HLN_p": 0.0653393609649009,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -1.3473643282171595,
+              "gate_DM": false,
+              "better": "M2_GJR_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.6536488279928243,
+              "late": 0.7330163760460996,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.6629086579726352,
+              "late": 0.7569322428865544,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.6762205451904557,
+              "late": 0.7613445452826123,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "garman_klass": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.6406378288143396,
+              "Spearman_rho": 0.40576680873683163,
+              "Spearman_p": 1.3388787702353392e-53,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.6560921551329149,
+              "Spearman_rho": 0.40244744902027096,
+              "Spearman_p": 1.1220945030420867e-52,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.666372822244611,
+              "Spearman_rho": 0.3997313737042519,
+              "Spearman_p": 6.2769667119768134e-52,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -4.807749013535912,
+              "DM_HLN_p": 1.701154682010042e-06,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -2.412334336730838,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -4.138440188234119,
+              "DM_HLN_p": 3.717819931647881e-05,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -4.017089262103121,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": -2.0281589579588424,
+              "DM_HLN_p": 0.04274420752045516,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -1.5669547381820863,
+              "gate_DM": true,
+              "better": "M2_GJR_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.5954991458595595,
+              "late": 0.7002684047177598,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.6054734478967819,
+              "late": 0.7229621315343324,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.6193145815549049,
+              "late": 0.7285392349452229,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "rogers_satchell": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.6878204023629594,
+              "Spearman_rho": 0.390763776872307,
+              "Spearman_p": 1.6500870411698337e-49,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.7025282715496541,
+              "Spearman_rho": 0.3851768434596012,
+              "Spearman_p": 4.870789531301657e-48,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.7140318398894473,
+              "Spearman_rho": 0.38214765805708756,
+              "Spearman_p": 2.9704893595930937e-47,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -3.950337217616147,
+              "DM_HLN_p": 8.216035298569402e-05,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -2.1383298803244117,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -4.103289707883698,
+              "DM_HLN_p": 4.322265783263113e-05,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -3.8107967481686114,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": -2.216460714413639,
+              "DM_HLN_p": 0.026829666051848555,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": -1.6374527269085275,
+              "gate_DM": true,
+              "better": "M2_GJR_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.6282812098130532,
+              "late": 0.7664748093630986,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.6384740370079368,
+              "late": 0.7871472866547647,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.652654042879323,
+              "late": 0.7951151401501902,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "r2_close": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 1.5011602547720995,
+              "Spearman_rho": 0.17452171468627226,
+              "Spearman_p": 1.674376311863359e-10,
+              "n_finite": 1322
+            },
+            "M2_GJR_t": {
+              "QLIKE": 1.5020688565917912,
+              "Spearman_rho": 0.18035240404567532,
+              "Spearman_p": 3.961140332024407e-11,
+              "n_finite": 1322
+            },
+            "M3_GAS_t": {
+              "QLIKE": 1.5082258105416233,
+              "Spearman_rho": 0.17912445448857062,
+              "Spearman_p": 5.387805440515717e-11,
+              "n_finite": 1322
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -0.2267313221389804,
+              "DM_HLN_p": 0.8206677493155983,
+              "n_used": 1322,
+              "QLIKE_rel_improvement_pct": -0.06052663709976176,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -0.7613789894929877,
+              "DM_HLN_p": 0.44656662886010423,
+              "n_used": 1322,
+              "QLIKE_rel_improvement_pct": -0.47067298425087206,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": -0.8046291594698242,
+              "DM_HLN_p": 0.42117849479787717,
+              "n_used": 1322,
+              "QLIKE_rel_improvement_pct": -0.4098982495251419,
+              "gate_DM": false,
+              "better": "M2_GJR_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 1.4977575306121615,
+              "late": 1.5056494627866142,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 1.4959571138719525,
+              "late": 1.510132068039719,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 1.4954500666068382,
+              "late": 1.5250808271011995,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        }
+      }
+    },
+    "UNG": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "kurtosis_excess": 3.2348743741290273,
+      "skewness": 0.10265881524236616,
+      "std_pct": 3.1238475301436055,
+      "per_target": {
+        "parkinson": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.5766751878804949,
+              "Spearman_rho": 0.4970856877112508,
+              "Spearman_p": 1.7028737269789978e-83,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.5687430390861952,
+              "Spearman_rho": 0.4922673357431374,
+              "Spearman_p": 1.1114047139789295e-81,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.5609044087252291,
+              "Spearman_rho": 0.4989444206884674,
+              "Spearman_p": 3.3369568310686704e-84,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": 6.578346466459225,
+              "DM_HLN_p": 6.835820798301029e-11,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 1.3754968066951927,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M2_GJR_t",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": 2.4254054313847333,
+              "DM_HLN_p": 0.015424486488006428,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 2.73477678365694,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M3_GAS_t",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 1.2731519157848112,
+              "DM_HLN_p": 0.2031879689486098,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 1.378237591014829,
+              "gate_DM": false,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.520777856834597,
+              "late": 0.6505185041569183,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.5079501511100976,
+              "late": 0.6490536437283029,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.512383141442004,
+              "late": 0.6250035565572791,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "garman_klass": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.526652734302737,
+              "Spearman_rho": 0.5288310121823774,
+              "Spearman_p": 3.310517430526184e-96,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.5188714896124023,
+              "Spearman_rho": 0.5239567252447124,
+              "Spearman_p": 3.6319751854583467e-94,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.5109863931793207,
+              "Spearman_rho": 0.5305068626411826,
+              "Spearman_p": 6.467005849065742e-97,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": 6.5160528711007855,
+              "DM_HLN_p": 1.0237255487766106e-10,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 1.4774906088044326,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M2_GJR_t",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": 2.436943771706001,
+              "DM_HLN_p": 0.014943168211691393,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 2.9747004245895994,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M3_GAS_t",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 1.2968495512190805,
+              "DM_HLN_p": 0.1949092545360922,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 1.5196626893051552,
+              "gate_DM": false,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.4621317097895175,
+              "late": 0.6118884035280953,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.44946505525794594,
+              "late": 0.6105610423648681,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.4530234196821425,
+              "late": 0.5875585318519089,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "rogers_satchell": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.5507915629269722,
+              "Spearman_rho": 0.5119142269269886,
+              "Spearman_p": 2.8885578852492345e-89,
+              "n_finite": 1323
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.54294278347001,
+              "Spearman_rho": 0.5072558036443335,
+              "Spearman_p": 2.014836296826305e-87,
+              "n_finite": 1323
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.5348675140362339,
+              "Spearman_rho": 0.5134512138760159,
+              "Spearman_p": 7.01654611810757e-90,
+              "n_finite": 1323
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": 6.532960404063407,
+              "DM_HLN_p": 9.177547610761394e-11,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 1.4249999428554807,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M2_GJR_t",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": 2.481868655720154,
+              "DM_HLN_p": 0.01319300526118461,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 2.8911207002002692,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M3_GAS_t",
+              "gate_subperiod_stable": true,
+              "sub_early_beats": true,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 1.3322342548727932,
+              "DM_HLN_p": 0.183012828064415,
+              "n_used": 1323,
+              "QLIKE_rel_improvement_pct": 1.4873149951761293,
+              "gate_DM": false,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.47814770320533545,
+              "late": 0.6467579249802924,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 0.4653657575470956,
+              "late": 0.6454261177155445,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 0.46814036448555457,
+              "late": 0.6230175905479208,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        },
+        "r2_close": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 1.2058433820340728,
+              "Spearman_rho": 0.23946580778633753,
+              "Spearman_p": 1.534883930343889e-18,
+              "n_finite": 1310
+            },
+            "M2_GJR_t": {
+              "QLIKE": 1.2061929401265026,
+              "Spearman_rho": 0.23773755911227162,
+              "Spearman_p": 2.7386000481950273e-18,
+              "n_finite": 1310
+            },
+            "M3_GAS_t": {
+              "QLIKE": 1.204585042587641,
+              "Spearman_rho": 0.23898784998423162,
+              "Spearman_p": 1.8022542878075086e-18,
+              "n_finite": 1310
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -0.2096509199817052,
+              "DM_HLN_p": 0.8339727578421883,
+              "n_used": 1310,
+              "QLIKE_rel_improvement_pct": -0.028988681087265846,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": true,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": 0.18516694506252332,
+              "DM_HLN_p": 0.853126779894521,
+              "n_used": 1310,
+              "QLIKE_rel_improvement_pct": 0.10435347286222257,
+              "gate_DM": false,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": false,
+              "better": "M3_GAS_t",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": true,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 0.26505944358256833,
+              "DM_HLN_p": 0.79100540176709,
+              "n_used": 1310,
+              "QLIKE_rel_improvement_pct": 0.13330351101980076,
+              "gate_DM": false,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 1.1825802189448527,
+              "late": 1.2363275622374075,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M2_GJR_t": {
+              "early": 1.1823823289622986,
+              "late": 1.23739449937695,
+              "n_early": 753,
+              "n_late": 570
+            },
+            "M3_GAS_t": {
+              "early": 1.184054490765438,
+              "late": 1.231488393564532,
+              "n_early": 753,
+              "n_late": 570
+            }
+          }
+        }
+      }
+    },
+    "BTC-USD": {
+      "n_oos": 1926,
+      "oos_start": "2021-01-01",
+      "oos_end": "2026-04-10",
+      "kurtosis_excess": 7.97354793132837,
+      "skewness": -0.1189765740422792,
+      "std_pct": 3.510477292638615,
+      "per_target": {
+        "parkinson": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.6784124416770304,
+              "Spearman_rho": 0.43829917572997956,
+              "Spearman_p": 3.103822607567419e-91,
+              "n_finite": 1926
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.7922843132474207,
+              "Spearman_rho": 0.3999727976217508,
+              "Spearman_p": 6.669157775129181e-75,
+              "n_finite": 1926
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.7410120764089065,
+              "Spearman_rho": 0.4638611441664951,
+              "Spearman_p": 2.3345792414539163e-103,
+              "n_finite": 1926
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -5.244488820260175,
+              "DM_HLN_p": 1.739471366946077e-07,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": -16.785050593839323,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -4.437565271205613,
+              "DM_HLN_p": 9.612791751267835e-06,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": -9.22737126947883,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 2.661703156957301,
+              "DM_HLN_p": 0.007839301705684809,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": 6.471444149683982,
+              "gate_DM": true,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.7435859909526985,
+              "late": 0.5925339381188396,
+              "n_early": 1095,
+              "n_late": 831
+            },
+            "M2_GJR_t": {
+              "early": 0.9031206297724502,
+              "late": 0.6462364593425981,
+              "n_early": 1095,
+              "n_late": 831
+            },
+            "M3_GAS_t": {
+              "early": 0.7987502839648508,
+              "late": 0.6649310447918679,
+              "n_early": 1095,
+              "n_late": 831
+            }
+          }
+        },
+        "garman_klass": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.6172719179960291,
+              "Spearman_rho": 0.45344554324858816,
+              "Spearman_p": 2.7125008148946126e-98,
+              "n_finite": 1926
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.7308852258122459,
+              "Spearman_rho": 0.41418770182671266,
+              "Spearman_p": 1.0302724135181604e-80,
+              "n_finite": 1926
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.6759789634501435,
+              "Spearman_rho": 0.48555031729284487,
+              "Spearman_p": 1.739157144321046e-114,
+              "n_finite": 1926
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -4.978461434383843,
+              "DM_HLN_p": 6.980564073444384e-07,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": -18.405714645996206,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -3.897471374090743,
+              "DM_HLN_p": 0.00010052944477645376,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": -9.510726754702631,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 2.7976834148093213,
+              "DM_HLN_p": 0.005198277357352676,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": 7.51229610655819,
+              "gate_DM": true,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.6788908045164871,
+              "late": 0.5360773563354979,
+              "n_early": 1095,
+              "n_late": 831
+            },
+            "M2_GJR_t": {
+              "early": 0.8400166280703473,
+              "late": 0.5870839195876717,
+              "n_early": 1095,
+              "n_late": 831
+            },
+            "M3_GAS_t": {
+              "early": 0.7314286292553042,
+              "late": 0.6029135193386504,
+              "n_early": 1095,
+              "n_late": 831
+            }
+          }
+        },
+        "rogers_satchell": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 0.6682671103732805,
+              "Spearman_rho": 0.43946870919231235,
+              "Spearman_p": 9.110178367595384e-92,
+              "n_finite": 1926
+            },
+            "M2_GJR_t": {
+              "QLIKE": 0.779253732444586,
+              "Spearman_rho": 0.4030606719229294,
+              "Spearman_p": 3.8516535007204853e-76,
+              "n_finite": 1926
+            },
+            "M3_GAS_t": {
+              "QLIKE": 0.7207755136812422,
+              "Spearman_rho": 0.47587539436299564,
+              "Spearman_p": 2.0107624489646387e-109,
+              "n_finite": 1926
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -4.587673803101268,
+              "DM_HLN_p": 4.77098257012365e-06,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": -16.60812276236528,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -3.072564342258224,
+              "DM_HLN_p": 0.0021520199362483616,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": -7.85739751259516,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 2.916217361391447,
+              "DM_HLN_p": 0.003584035072251357,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": 7.504387380974436,
+              "gate_DM": true,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 0.7384216471426069,
+              "late": 0.5758252117422186,
+              "n_early": 1095,
+              "n_late": 831
+            },
+            "M2_GJR_t": {
+              "early": 0.893574465144471,
+              "late": 0.628614499825604,
+              "n_early": 1095,
+              "n_late": 831
+            },
+            "M3_GAS_t": {
+              "early": 0.7816458208483776,
+              "late": 0.6405673471974718,
+              "n_early": 1095,
+              "n_late": 831
+            }
+          }
+        },
+        "r2_close": {
+          "model_metrics": {
+            "M1_GJR_N": {
+              "QLIKE": 1.8614472150745525,
+              "Spearman_rho": 0.2413891688789962,
+              "Spearman_p": 6.183831178915507e-27,
+              "n_finite": 1926
+            },
+            "M2_GJR_t": {
+              "QLIKE": 1.9729770030154523,
+              "Spearman_rho": 0.22215947672436626,
+              "Spearman_p": 5.789221061556718e-23,
+              "n_finite": 1926
+            },
+            "M3_GAS_t": {
+              "QLIKE": 1.9325834138978129,
+              "Spearman_rho": 0.2477503162472778,
+              "Spearman_p": 2.497343517374835e-28,
+              "n_finite": 1926
+            }
+          },
+          "dm_tests": {
+            "M2_GJR_t_vs_M1": {
+              "DM_HLN_t": -5.274062275564875,
+              "DM_HLN_p": 1.4844638984712333e-07,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": -5.99156328676411,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M1": {
+              "DM_HLN_t": -4.425658447406141,
+              "DM_HLN_p": 1.0152967459431395e-05,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": -3.821553372407142,
+              "gate_DM": true,
+              "gate_QLIKE_5pct": false,
+              "significant_Harvey": true,
+              "better": "M1_GJR_N",
+              "gate_subperiod_stable": false,
+              "sub_early_beats": false,
+              "sub_late_beats": false,
+              "triple_gate_PASS": false
+            },
+            "M3_GAS_t_vs_M2_GJR_t": {
+              "DM_HLN_t": 2.1210281625890803,
+              "DM_HLN_p": 0.034046943616938385,
+              "n_used": 1926,
+              "QLIKE_rel_improvement_pct": 2.0473421157926746,
+              "gate_DM": true,
+              "better": "M3_GAS_t"
+            }
+          },
+          "sub_period_qlike": {
+            "M1_GJR_N": {
+              "early": 1.9432073933146186,
+              "late": 1.7537126841806032,
+              "n_early": 1095,
+              "n_late": 831
+            },
+            "M2_GJR_t": {
+              "early": 2.094026510317943,
+              "late": 1.8134713345482727,
+              "n_early": 1095,
+              "n_late": 831
+            },
+            "M3_GAS_t": {
+              "early": 2.0040866912128115,
+              "late": 1.8383642939701073,
+              "n_early": 1095,
+              "n_late": 831
+            }
+          }
+        }
+      }
+    }
+  },
+  "charts": [
+    "k1134_qlike_by_proxy.png",
+    "k1134_dm_heatmap.png",
+    "k1134_proxy_magnitude.png"
+  ],
+  "created_at": "2026-04-13T11:40:23.747675+00:00"
+}
