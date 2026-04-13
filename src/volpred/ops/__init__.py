@@ -28,6 +28,7 @@ from .jobs import SUPPORTED_ACTIONS, enqueue_job, get_job, list_jobs, work_loop,
 from .questions import (
     answer_internal_question,
     build_question_rerank_workflow,
+    claim_question_for_research,
     get_member_question_ranking_summary,
     rerank_member_questions,
 )
@@ -38,6 +39,7 @@ __all__ = [
     "activate_strategy",
     "answer_internal_question",
     "build_question_rerank_workflow",
+    "claim_question_for_research",
     "build_platform_cycle_summary",
     "cleanup_test_post",
     "deactivate_strategy",

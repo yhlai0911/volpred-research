@@ -3,7 +3,12 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from scripts.supabase_sync import _patch_where, _post, _select_rows
+from scripts.supabase_sync import (
+    _patch_where,
+    _patch_where_returning,
+    _post,
+    _select_rows,
+)
 from volpred.memory.system import MemorySystem
 
 from .common import dump_json, load_json, project_path, write_ops_snapshot
@@ -38,6 +43,43 @@ def _link_question_article(question_id: str, article_slug: str) -> bool:
         return _post("question_articles", {"question_id": question_id, "article_id": article_id})
     except Exception:
         return False
+
+
+def claim_question_for_research(question_id: str) -> dict:
+    """Atomically claim a question for research using status transition as lock.
+
+    Transition: status='ranked' → status='researching' (conditional).
+    If another session already changed status to 'researching' (or beyond),
+    this call returns claimed=False. Protects against cross-session races
+    where two concurrent sessions pick the same top-ranked question.
+
+    Uses Supabase conditional PATCH with return=representation, so we know
+    whether any row was actually updated (not just HTTP success).
+    """
+    now = _utc_now()
+    affected = _patch_where_returning(
+        "questions",
+        {"id": question_id, "status": "ranked"},
+        {"status": "researching", "updated_at": now},
+    )
+    if affected:
+        return {
+            "claimed": True,
+            "question_id": question_id,
+            "question": affected[0],
+        }
+    # Check current status to explain why claim failed
+    current = _select_rows(
+        "questions", select="id,status,updated_at", id=question_id
+    )
+    if not current:
+        return {"claimed": False, "question_id": question_id, "reason": "not_found"}
+    return {
+        "claimed": False,
+        "question_id": question_id,
+        "reason": f"current_status={current[0].get('status')}",
+        "current_status": current[0].get("status"),
+    }
 
 
 def answer_internal_question(

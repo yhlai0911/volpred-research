@@ -174,6 +174,34 @@ def _patch_where(table: str, filters: dict[str, object], row: dict) -> bool:
         return False
 
 
+def _patch_where_returning(
+    table: str, filters: dict[str, object], row: dict
+) -> list[dict]:
+    """PATCH rows matching filters, returning the affected rows.
+
+    Empty list means no rows matched (useful for atomic conditional updates
+    and cross-session race protection). Differs from _patch_where which
+    returns True on any HTTP success regardless of rows affected.
+    """
+    query = _build_filter_query(filters)
+    if not query:
+        return []
+    url = f"{SUPABASE_URL}/rest/v1/{table}?{query}"
+    payload = json.dumps(row, ensure_ascii=False).encode("utf-8")
+    headers = {**HEADERS, "Prefer": "return=representation"}
+    req = Request(url, data=payload, headers=headers, method="PATCH")
+    try:
+        resp = urlopen(req, timeout=15)
+        body = resp.read().decode("utf-8")
+        if not body:
+            return []
+        data = json.loads(body)
+        return data if isinstance(data, list) else []
+    except Exception as e:
+        print(f"  Supabase {table} patch-returning error: {e}")
+        return []
+
+
 def _delete_where(table: str, filters: dict[str, object]) -> bool:
     query = _build_filter_query(filters)
     if not query:

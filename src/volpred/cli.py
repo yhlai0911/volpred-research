@@ -20,6 +20,7 @@ OPS_ACTION_CHOICES = (
     "paper_upsert",
     "platform_cycle_summary",
     "publish_milestone",
+    "question_claim",
     "question_rerank",
     "question_ranking_summary",
     "question_ranking_workflow",
@@ -851,6 +852,26 @@ def ops_strategy_set_active(identifier: str, active: bool) -> None:
         raise click.ClickException(f"Failed to update strategy active state: {identifier}")
     console.print(f"[green]Updated strategy state[/green] {identifier} -> {'active' if active else 'inactive'}")
     _print_json({"action": "strategy_set_active", "identifier": identifier, "active": active})
+
+
+@ops.command("question-claim")
+@click.argument("question_id")
+def ops_question_claim(question_id: str) -> None:
+    """Atomically claim a ranked question for research (cross-session race protection).
+
+    Uses status='ranked' → 'researching' transition as the lock. If another
+    session already claimed this question, the command reports claimed=False
+    with the current status. Exit code 0 on success, 2 on claim lost.
+    """
+    from volpred.ops import claim_question_for_research
+
+    result = claim_question_for_research(question_id)
+    _print_json({"action": "question_claim", **result})
+    if not result.get("claimed"):
+        reason = result.get("reason", "unknown")
+        console.print(f"[yellow]Claim lost:[/yellow] {question_id} — {reason}")
+        raise SystemExit(2)
+    console.print(f"[green]Claimed[/green] {question_id}")
 
 
 @ops.command("question-answer")
