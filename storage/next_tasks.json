@@ -57,9 +57,30 @@
   },
   {
     "id": "K1067b",
-    "title": "K1067b: UMC (2303.TW) A4f-EAV — Testing Strongest T+1 Stock",
+    "title": "K1067b: UMC (2303.TW) A4f-EAV — MIXED result",
     "priority": 2,
-    "description": "K1067 used TSMC (weakest T+1=0.983). UMC T+1=2.579 strongest. Resolves H_vix vs H_div ambiguity.",
+    "description": "MIXED: H2/H3/H4 PASS, H1 marginal. EAV 在 event window 有真預測價值但 event days 只 1.6%。Paper 2 建議移除主 regressor，保留為 descriptive analysis。",
+    "status": "completed"
+  },
+  {
+    "id": "K1067c",
+    "title": "K1067c: MediaTek (2454.TW) 第三重驗證",
+    "priority": 2,
+    "description": "K1067b 衍生：2454.TW T+1=1.67 中間值，應給介於 TSMC 和 UMC 之間的 event DM。驗證 T+1 amplification 與 EAV edge 單調關係。",
+    "status": "pending"
+  },
+  {
+    "id": "K1067d",
+    "title": "K1067d: Earnings surprise magnitude as continuous EAV",
+    "priority": 2,
+    "description": "K1067b 衍生：取代 binary indicator，用 EPS surprise magnitude 作連續 EAV，提升 non-event days 的 signal density。",
+    "status": "pending"
+  },
+  {
+    "id": "K1067e",
+    "title": "K1067e: GARCH-X + EAV only (exclude VIX)",
+    "priority": 3,
+    "description": "K1067b 衍生：確認是 EAV 本身無力還是 VIX 占位效應。",
     "status": "pending"
   },
   {
