@@ -66,7 +66,28 @@
     "id": "K1067c",
     "title": "K1067c: MediaTek (2454.TW) 第三重驗證",
     "priority": 2,
-    "description": "K1067b 衍生：2454.TW T+1=1.67 中間值，應給介於 TSMC 和 UMC 之間的 event DM。驗證 T+1 amplification 與 EAV edge 單調關係。",
+    "description": "MONOTONICITY FAIL: MediaTek event DM +1.59 (預期 -0.90)，方向翻轉非單調。T+1 作為 firm-selection criterion 不可行。UMC +39% 可能是 firm-specific artefact。",
+    "status": "completed"
+  },
+  {
+    "id": "K1101",
+    "title": "K1101: Panel GARCH-MIDAS across N≥15 Taiwan stocks",
+    "priority": 2,
+    "description": "K1067c 衍生：foundry/fabless 分組、analyst dispersion、float size 為 covariates。橫截面統計檢驗取代 N=3 類比。",
+    "status": "pending"
+  },
+  {
+    "id": "K1102",
+    "title": "K1102: Options-implied pre-event signal",
+    "priority": 2,
+    "description": "K1067c 衍生：改用 options-implied 30-day IV 於公告前 T-1 的 upward shift 作為 ex-ante EAV（forward-looking），取代 backward-looking announcement flag。",
+    "status": "pending"
+  },
+  {
+    "id": "K1103",
+    "title": "K1103: u_prev τ-lag bug-fix replication (CRITICAL)",
+    "priority": 1,
+    "description": "K1067c Codex 發現：u_prev=r_{t-1}/√τ[t] 應為 τ[t-1] (timing mismatch, leaks forecast-day exogenous state)。三公司同步修正重跑——若 UMC +39% 消失 → 推翻 K1067b，monotonicity 故事失錨。",
     "status": "pending"
   },
   {

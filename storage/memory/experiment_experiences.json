@@ -581,5 +581,19 @@
       "Agent 報告品質問題持續: 需對照 results JSON 驗證每個數字，不能信 agent 的 summary。"
     ],
     "meta_observation": "13 個實驗中 5 個 ★★+ 是很高的命中率。Paper 9 VaR 部分已完整。下一步是 DCC portfolio 和 ABM crowding 的深化。"
+  },
+  {
+    "id": "E044",
+    "title": "N=3 對照 + inherited bug 的 parity vs correction tradeoff",
+    "lesson": "K1067/K1067b/K1067c 三公司對照推翻 monotonicity hypothesis，但 Codex 發現 u_prev τ-lag timing bug（K1067 系列共用）——這類 inherited bug 是否要當場修正？本次選擇保留 parity（三公司用相同 buggy code），待統一修正實驗（K1103）再判斷是否 artefact。若當場修正會破壞 N=3 對照的方法論一致性（無法分離「bug 影響」和「公司差異」兩個變因），所以 parity > correction 在這個情境下正確。但風險：若 UMC +39% 是 bug artefact，整個 monotonicity 故事失錨——K1103 必做且優先。N=3 對照給出決定性反例（非單調）足夠駁斥假設，但 N=3 不足以建立新的正向機制（需要 panel GARCH-MIDAS，K1101 提出）。",
+    "context": "Paper 2 EAV regressor 去留決策；Taiwan earnings event study",
+    "applies_to": [
+      "event-study",
+      "inherited-bug",
+      "methodological-parity",
+      "panel-validation",
+      "N=3-limitation"
+    ],
+    "created_at": "2026-04-13T03:55:30.844040+00:00"
   }
 ]

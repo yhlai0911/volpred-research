@@ -25496,5 +25496,25 @@
     ],
     "data_source": "yfinance (2303.TW UMC, VIX, 0050.TW), 財報公告日.txt",
     "created_at": "2026-04-13T03:33:22.518061+00:00"
+  },
+  {
+    "id": "k1067c-1776052515",
+    "experiment_id": "K1067c",
+    "title": "K1067c: MediaTek (2454.TW) A4f-EAV — MONOTONICITY FAIL, decisive counterexample",
+    "content": "[提出: 賴奕豪+Claude, 執行: Claude] 第三重驗證：MediaTek T+1=1.67 中間值應給介於 TSMC 和 UMC 之間的 event DM（預期 -0.90），實測 +1.59（A4f 優），residual +2.49 超閾值 5 倍。**Monotonicity FAIL**：T+1 amplification 不是 EAV event-window edge 的單調預測子。三公司對照：in-sample corr -0.0011→-0.0168→+0.0319（MediaTek 最負）；θ₂ positive fraction 0.593→0.185→1.000（MediaTek 最低，非中間）；event improvement -0.25%→-23.46%→+39.27%（MediaTek 大幅惡化）；event DM t +0.08→+1.59→-2.20（方向翻轉）。**結論**：UMC +39% 可能是 firm-specific artefact（foundry 商品化、分析師覆蓋不足、EPS 變異大），非可一般化規律。**Paper 2 影響**：T+1 作為 firm-selection criterion 不可行。若保留 EAV，必須走 panel GARCH-MIDAS（N≥15）+ 多 firm-covariates（analyst dispersion, float, foundry/fabless dummy）。**Codex 發現 inherited bug**：K1067 系列 u_prev=r_{t-1}/√τ[t] 應為 τ[t-1]（timing mismatch，leaks forecast-day exogenous state），保留 parity 留作 K1103 統一修正——若修正後 UMC +39% 消失 → 推翻 K1067b 整個 monotonicity 討論失錨。",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "MediaTek",
+      "2454.TW",
+      "Taiwan",
+      "monotonicity-fail",
+      "K1067-followup",
+      "firm-specific",
+      "decisive-counterexample",
+      "inherited-bug"
+    ],
+    "data_source": "yfinance (2454.TW MediaTek, VIX, 0050.TW), 財報公告日.txt",
+    "created_at": "2026-04-13T03:55:15.215015+00:00"
   }
 ]
