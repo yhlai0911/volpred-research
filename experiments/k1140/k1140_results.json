@@ -1,0 +1,542 @@
+{
+  "experiment_id": "K1140",
+  "title": "HAC Newey-West rolling θ_EAV trend re-test (K1114 follow-up)",
+  "author": "VolPred Research System (Claude)",
+  "timestamp_utc": "2026-04-13T12:56:26.012773+00:00",
+  "source": "/Users/yhlai0911/Desktop/volpred-research/experiments/k1114/k1114_results.json",
+  "config": {
+    "k1114_window_obs": 500,
+    "k1114_step_obs": 21,
+    "L_settings": [
+      5,
+      24,
+      48
+    ],
+    "block_size": 24,
+    "n_perm": 5000,
+    "vix_low_quantile": 0.33,
+    "vix_high_quantile": 0.67,
+    "random_seed": 42
+  },
+  "per_stock": {
+    "TSMC": {
+      "n_obs": 128,
+      "theta2_mean": -0.00026238179042449203,
+      "theta2_std": 0.0019568295079785444,
+      "k1114_test1_trend": {
+        "slope_per_day": 2.6365623478686197e-07,
+        "t_stat": 1.8142273462823235,
+        "p_value": 0.07202201542097983
+      },
+      "k1114_test2_spearman_vix": {
+        "rho": 0.05072642526351151,
+        "t_stat": 0.5587099688378965,
+        "p_value": 0.5773921788765853
+      },
+      "k1114_test3_regime_ks": {
+        "ks_stat": 0.40711462450592883,
+        "p_value": 0.009300141617083188,
+        "mean_theta2_low_vix": 0.00013613503732909057,
+        "mean_theta2_high_vix": 6.229169667482466e-05,
+        "n_low_vix_windows": 22,
+        "n_high_vix_windows": 46
+      },
+      "hac_trend": {
+        "L5": {
+          "n": 128,
+          "slope_per_window_step": 8.137708303581362e-06,
+          "slope_per_day": 3.875099192181601e-07,
+          "hac_se": 9.668699138191741e-06,
+          "hac_t": 0.841654930748346,
+          "hac_p": 0.39998113241565725,
+          "ols_se": 4.6620090271038134e-06,
+          "ols_t": 1.7455367967480668,
+          "ols_p": 0.08332914623950369,
+          "lag": 5
+        },
+        "L24": {
+          "n": 128,
+          "slope_per_window_step": 8.137708303581362e-06,
+          "slope_per_day": 3.875099192181601e-07,
+          "hac_se": 1.0759459758600609e-05,
+          "hac_t": 0.7563305673480919,
+          "hac_p": 0.44945102553766403,
+          "ols_se": 4.6620090271038134e-06,
+          "ols_t": 1.7455367967480668,
+          "ols_p": 0.08332914623950369,
+          "lag": 24
+        },
+        "L48": {
+          "n": 128,
+          "slope_per_window_step": 8.137708303581362e-06,
+          "slope_per_day": 3.875099192181601e-07,
+          "hac_se": 9.297502600727688e-06,
+          "hac_t": 0.8752574377278957,
+          "hac_p": 0.3814338470405384,
+          "ols_se": 4.6620090271038134e-06,
+          "ols_t": 1.7455367967480668,
+          "ols_p": 0.08332914623950369,
+          "lag": 48
+        }
+      },
+      "block_bootstrap_trend": {
+        "slope_obs": 8.137708303581365e-06,
+        "slope_per_day": 3.8750991921816025e-07,
+        "block_perm_p": 0.4877024595080984,
+        "block_bootstrap_se": 1.0179748566785037e-05,
+        "block_t_stat": 0.7994016993831717,
+        "lag1_acf": 0.3082415120953627,
+        "block_size": 24,
+        "n_boot": 5000
+      },
+      "block_spearman": {
+        "rho": 0.15745086904147604,
+        "asymptotic_p": 0.0759033206024029,
+        "block_perm_p": 0.4871025794841032,
+        "block_bootstrap_se": 0.21100781716606026,
+        "block_t_stat": 0.7461850046890176,
+        "n_perm": 5000,
+        "block_size": 24
+      },
+      "ks_regime": {
+        "ks_stat": 0.40476190476190477,
+        "raw_p": 0.0018353426137594632,
+        "effective_n_divisor": 24.0,
+        "effective_n": 0.875,
+        "effective_n_p": 0.9987884579714348,
+        "n_low": 42,
+        "n_high": 42,
+        "mean_theta_low": -0.0008360409003847096,
+        "mean_theta_high": 2.1607154062274018e-05
+      }
+    },
+    "UMC": {
+      "n_obs": 132,
+      "theta2_mean": 0.0008074950216102303,
+      "theta2_std": 0.00203553279441639,
+      "k1114_test1_trend": {
+        "slope_per_day": 4.204249851104263e-07,
+        "t_stat": 3.0639530301945292,
+        "p_value": 0.002656232656317815
+      },
+      "k1114_test2_spearman_vix": {
+        "rho": 0.11557823539269178,
+        "t_stat": 1.3009222419383009,
+        "p_value": 0.19567809283870446
+      },
+      "k1114_test3_regime_ks": {
+        "ks_stat": 0.21428571428571427,
+        "p_value": 0.374541628601595,
+        "mean_theta2_low_vix": 0.0007001077578655011,
+        "mean_theta2_high_vix": 0.000812879732877726,
+        "n_low_vix_windows": 24,
+        "n_high_vix_windows": 56
+      },
+      "hac_trend": {
+        "L5": {
+          "n": 132,
+          "slope_per_window_step": 1.3834871979815995e-05,
+          "slope_per_day": 6.588034276102854e-07,
+          "hac_se": 6.39037949893593e-06,
+          "hac_t": 2.164953111488865,
+          "hac_p": 0.030391276232070344,
+          "ols_se": 4.5254299134618205e-06,
+          "ols_t": 3.057139817514647,
+          "ols_p": 0.0027131555798440865,
+          "lag": 5
+        },
+        "L24": {
+          "n": 132,
+          "slope_per_window_step": 1.3834871979815995e-05,
+          "slope_per_day": 6.588034276102854e-07,
+          "hac_se": 5.649814375672581e-06,
+          "hac_t": 2.448730358184383,
+          "hac_p": 0.014336072552747164,
+          "ols_se": 4.5254299134618205e-06,
+          "ols_t": 3.057139817514647,
+          "ols_p": 0.0027131555798440865,
+          "lag": 24
+        },
+        "L48": {
+          "n": 132,
+          "slope_per_window_step": 1.3834871979815995e-05,
+          "slope_per_day": 6.588034276102854e-07,
+          "hac_se": 4.167090356679046e-06,
+          "hac_t": 3.3200316757330093,
+          "hac_p": 0.0009000723495806947,
+          "ols_se": 4.5254299134618205e-06,
+          "ols_t": 3.057139817514647,
+          "ols_p": 0.0027131555798440865,
+          "lag": 48
+        }
+      },
+      "block_bootstrap_trend": {
+        "slope_obs": 1.3834871979815993e-05,
+        "slope_per_day": 6.588034276102854e-07,
+        "block_perm_p": 0.021195760847830435,
+        "block_bootstrap_se": 7.249712645855261e-06,
+        "block_t_stat": 1.9083338410282424,
+        "lag1_acf": 0.3657296401799337,
+        "block_size": 24,
+        "n_boot": 5000
+      },
+      "block_spearman": {
+        "rho": 0.18853541073079444,
+        "asymptotic_p": 0.030390821324831133,
+        "block_perm_p": 0.2429514097180564,
+        "block_bootstrap_se": 0.1531442320361545,
+        "block_t_stat": 1.2310970398564196,
+        "n_perm": 5000,
+        "block_size": 24
+      },
+      "ks_regime": {
+        "ks_stat": 0.3181818181818182,
+        "raw_p": 0.022667144682794037,
+        "effective_n_divisor": 24.0,
+        "effective_n": 0.9166666666666666,
+        "effective_n_p": 0.9999861354639411,
+        "n_low": 44,
+        "n_high": 44,
+        "mean_theta_low": 0.0007273965962026255,
+        "mean_theta_high": 0.000966507681638774
+      }
+    },
+    "MediaTek": {
+      "n_obs": 124,
+      "theta2_mean": -0.001092670385449475,
+      "theta2_std": 0.0031375106467341654,
+      "k1114_test1_trend": {
+        "slope_per_day": 9.454891783491433e-07,
+        "t_stat": 4.666129975874329,
+        "p_value": 7.936212180865675e-06
+      },
+      "k1114_test2_spearman_vix": {
+        "rho": -0.19553083569224514,
+        "t_stat": -2.156617352192338,
+        "p_value": 0.03308166376039926
+      },
+      "k1114_test3_regime_ks": {
+        "ks_stat": 0.24338624338624337,
+        "p_value": 0.2794614006926979,
+        "mean_theta2_low_vix": -0.0011072231814197096,
+        "mean_theta2_high_vix": -0.0011855376527410712,
+        "n_low_vix_windows": 21,
+        "n_high_vix_windows": 54
+      },
+      "hac_trend": {
+        "L5": {
+          "n": 124,
+          "slope_per_window_step": 3.310373236133421e-05,
+          "slope_per_day": 1.5763682076825815e-06,
+          "hac_se": 8.60968933124512e-06,
+          "hac_t": 3.8449392408618768,
+          "hac_p": 0.00012058231243675447,
+          "ols_se": 7.348047486480148e-06,
+          "ols_t": 4.505105937630722,
+          "ols_p": 1.5309791577049397e-05,
+          "lag": 5
+        },
+        "L24": {
+          "n": 124,
+          "slope_per_window_step": 3.310373236133421e-05,
+          "slope_per_day": 1.5763682076825815e-06,
+          "hac_se": 7.649311608807058e-06,
+          "hac_t": 4.327674705161721,
+          "hac_p": 1.5069180633410166e-05,
+          "ols_se": 7.348047486480148e-06,
+          "ols_t": 4.505105937630722,
+          "ols_p": 1.5309791577049397e-05,
+          "lag": 24
+        },
+        "L48": {
+          "n": 124,
+          "slope_per_window_step": 3.310373236133421e-05,
+          "slope_per_day": 1.5763682076825815e-06,
+          "hac_se": 6.143272153359173e-06,
+          "hac_t": 5.38861563266946,
+          "hac_p": 7.100247382268366e-08,
+          "ols_se": 7.348047486480148e-06,
+          "ols_t": 4.505105937630722,
+          "ols_p": 1.5309791577049397e-05,
+          "lag": 48
+        }
+      },
+      "block_bootstrap_trend": {
+        "slope_obs": 3.310373236133419e-05,
+        "slope_per_day": 1.5763682076825807e-06,
+        "block_perm_p": 0.060587882423515295,
+        "block_bootstrap_se": 1.8870064402337552e-05,
+        "block_t_stat": 1.7542988542865507,
+        "lag1_acf": 0.4691153686150268,
+        "block_size": 24,
+        "n_boot": 5000
+      },
+      "block_spearman": {
+        "rho": -0.054685274855954064,
+        "asymptotic_p": 0.5463531424403633,
+        "block_perm_p": 0.8550289942011597,
+        "block_bootstrap_se": 0.18988753286701993,
+        "block_t_stat": -0.28798770530264717,
+        "n_perm": 5000,
+        "block_size": 24
+      },
+      "ks_regime": {
+        "ks_stat": 0.14634146341463414,
+        "raw_p": 0.778914912323089,
+        "effective_n_divisor": 24.0,
+        "effective_n": 0.8541666666666666,
+        "effective_n_p": 1.0,
+        "n_low": 41,
+        "n_high": 41,
+        "mean_theta_low": -0.0011681977322484528,
+        "mean_theta_high": -0.0008890885397392652
+      }
+    }
+  },
+  "bh_fdr_table_by_L": {
+    "L5": [
+      {
+        "label": "TSMC:trend",
+        "raw_p": 0.39998113241565725,
+        "bh_adj_p": 0.8767846430713858,
+        "bh_pass": false
+      },
+      {
+        "label": "TSMC:spearman_block",
+        "raw_p": 0.4871025794841032,
+        "bh_adj_p": 0.8767846430713858,
+        "bh_pass": false
+      },
+      {
+        "label": "TSMC:regime_effn",
+        "raw_p": 0.9987884579714348,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:trend",
+        "raw_p": 0.030391276232070344,
+        "bh_adj_p": 0.13676074304431654,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:spearman_block",
+        "raw_p": 0.2429514097180564,
+        "bh_adj_p": 0.7288542291541692,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:regime_effn",
+        "raw_p": 0.9999861354639411,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:trend",
+        "raw_p": 0.00012058231243675447,
+        "bh_adj_p": 0.0010852408119307903,
+        "bh_pass": true
+      },
+      {
+        "label": "MediaTek:spearman_block",
+        "raw_p": 0.8550289942011597,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:regime_effn",
+        "raw_p": 1.0,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      }
+    ],
+    "L24": [
+      {
+        "label": "TSMC:trend",
+        "raw_p": 0.44945102553766403,
+        "bh_adj_p": 0.8767846430713858,
+        "bh_pass": false
+      },
+      {
+        "label": "TSMC:spearman_block",
+        "raw_p": 0.4871025794841032,
+        "bh_adj_p": 0.8767846430713858,
+        "bh_pass": false
+      },
+      {
+        "label": "TSMC:regime_effn",
+        "raw_p": 0.9987884579714348,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:trend",
+        "raw_p": 0.014336072552747164,
+        "bh_adj_p": 0.06451232648736224,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:spearman_block",
+        "raw_p": 0.2429514097180564,
+        "bh_adj_p": 0.7288542291541692,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:regime_effn",
+        "raw_p": 0.9999861354639411,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:trend",
+        "raw_p": 1.5069180633410166e-05,
+        "bh_adj_p": 0.0001356226257006915,
+        "bh_pass": true
+      },
+      {
+        "label": "MediaTek:spearman_block",
+        "raw_p": 0.8550289942011597,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:regime_effn",
+        "raw_p": 1.0,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      }
+    ],
+    "L48": [
+      {
+        "label": "TSMC:trend",
+        "raw_p": 0.3814338470405384,
+        "bh_adj_p": 0.8582261558412114,
+        "bh_pass": false
+      },
+      {
+        "label": "TSMC:spearman_block",
+        "raw_p": 0.4871025794841032,
+        "bh_adj_p": 0.8767846430713858,
+        "bh_pass": false
+      },
+      {
+        "label": "TSMC:regime_effn",
+        "raw_p": 0.9987884579714348,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:trend",
+        "raw_p": 0.0009000723495806947,
+        "bh_adj_p": 0.004050325573113126,
+        "bh_pass": true
+      },
+      {
+        "label": "UMC:spearman_block",
+        "raw_p": 0.2429514097180564,
+        "bh_adj_p": 0.7288542291541692,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:regime_effn",
+        "raw_p": 0.9999861354639411,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:trend",
+        "raw_p": 7.100247382268366e-08,
+        "bh_adj_p": 6.390222644041529e-07,
+        "bh_pass": true
+      },
+      {
+        "label": "MediaTek:spearman_block",
+        "raw_p": 0.8550289942011597,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:regime_effn",
+        "raw_p": 1.0,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      }
+    ],
+    "block_bootstrap_strictest": [
+      {
+        "label": "TSMC:trend_blockboot",
+        "raw_p": 0.4877024595080984,
+        "bh_adj_p": 0.877864427114577,
+        "bh_pass": false
+      },
+      {
+        "label": "TSMC:spearman_block",
+        "raw_p": 0.4871025794841032,
+        "bh_adj_p": 0.877864427114577,
+        "bh_pass": false
+      },
+      {
+        "label": "TSMC:regime_effn",
+        "raw_p": 0.9987884579714348,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:trend_blockboot",
+        "raw_p": 0.021195760847830435,
+        "bh_adj_p": 0.1907618476304739,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:spearman_block",
+        "raw_p": 0.2429514097180564,
+        "bh_adj_p": 0.7288542291541692,
+        "bh_pass": false
+      },
+      {
+        "label": "UMC:regime_effn",
+        "raw_p": 0.9999861354639411,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:trend_blockboot",
+        "raw_p": 0.060587882423515295,
+        "bh_adj_p": 0.2726454709058188,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:spearman_block",
+        "raw_p": 0.8550289942011597,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      },
+      {
+        "label": "MediaTek:regime_effn",
+        "raw_p": 1.0,
+        "bh_adj_p": 1.0,
+        "bh_pass": false
+      }
+    ]
+  },
+  "label_order": [
+    "TSMC:trend",
+    "TSMC:spearman_block",
+    "TSMC:regime_effn",
+    "UMC:trend",
+    "UMC:spearman_block",
+    "UMC:regime_effn",
+    "MediaTek:trend",
+    "MediaTek:spearman_block",
+    "MediaTek:regime_effn"
+  ],
+  "core_verdict": {
+    "conservative_L": 24,
+    "survivors_hac_L24_bh_fdr": [
+      "MediaTek:trend"
+    ],
+    "survivors_strictest_bh_fdr": [],
+    "k1114_3_of_9_pass_fully_collapses": true
+  },
+  "elapsed_seconds": 2.53495192527771
+}

@@ -1,0 +1,69 @@
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac3ec8f9/experiments/k1140/k1140.py:479: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  "timestamp_utc": pd.Timestamp.utcnow().isoformat(),
+K1140: HAC Newey-West rolling θ_EAV trend re-test
+Reading K1114 series from: /Users/yhlai0911/Desktop/volpred-research/experiments/k1114/k1114_results.json
+K1114 config: window=500 step=21
+  Implied L_conservative = window/step = 23.81
+  L settings to test: [5, 24, 48]
+
+=== TSMC: n_obs=128 ===
+  θ mean=-2.624e-04, std=1.957e-03
+  Trend (L=5): slope/day=3.875e-07, HAC t=0.842, HAC p=0.4 (OLS t=1.746, OLS p=0.08333)
+  Trend (L=24): slope/day=3.875e-07, HAC t=0.756, HAC p=0.4495 (OLS t=1.746, OLS p=0.08333)
+  Trend (L=48): slope/day=3.875e-07, HAC t=0.875, HAC p=0.3814 (OLS t=1.746, OLS p=0.08333)
+  Trend (block-boot, blk=24): slope/day=3.875e-07, block t=0.799, block-perm p=0.4877, lag1 ACF=0.308
+  Spearman: ρ=0.157, asym p=0.0759, block-perm p=0.4871, block t=0.746
+  KS regime: D=0.405, raw p=0.001835, effective-n p=0.9988 (n_low=42, n_high=42, n_eff=0.88)
+
+=== UMC: n_obs=132 ===
+  θ mean=8.075e-04, std=2.036e-03
+  Trend (L=5): slope/day=6.588e-07, HAC t=2.165, HAC p=0.03039 (OLS t=3.057, OLS p=0.002713)
+  Trend (L=24): slope/day=6.588e-07, HAC t=2.449, HAC p=0.01434 (OLS t=3.057, OLS p=0.002713)
+  Trend (L=48): slope/day=6.588e-07, HAC t=3.320, HAC p=0.0009001 (OLS t=3.057, OLS p=0.002713)
+  Trend (block-boot, blk=24): slope/day=6.588e-07, block t=1.908, block-perm p=0.0212, lag1 ACF=0.366
+  Spearman: ρ=0.189, asym p=0.03039, block-perm p=0.243, block t=1.231
+  KS regime: D=0.318, raw p=0.02267, effective-n p=1 (n_low=44, n_high=44, n_eff=0.92)
+
+=== MediaTek: n_obs=124 ===
+  θ mean=-1.093e-03, std=3.138e-03
+  Trend (L=5): slope/day=1.576e-06, HAC t=3.845, HAC p=0.0001206 (OLS t=4.505, OLS p=1.531e-05)
+  Trend (L=24): slope/day=1.576e-06, HAC t=4.328, HAC p=1.507e-05 (OLS t=4.505, OLS p=1.531e-05)
+  Trend (L=48): slope/day=1.576e-06, HAC t=5.389, HAC p=7.1e-08 (OLS t=4.505, OLS p=1.531e-05)
+  Trend (block-boot, blk=24): slope/day=1.576e-06, block t=1.754, block-perm p=0.06059, lag1 ACF=0.469
+  Spearman: ρ=-0.055, asym p=0.5464, block-perm p=0.855, block t=-0.288
+  KS regime: D=0.146, raw p=0.7789, effective-n p=1 (n_low=41, n_high=41, n_eff=0.85)
+
+======================================================================
+CORE VERDICT (conservative L=24, Newey-West HAC)
+======================================================================
+  TSMC:trend                     raw p=0.4495  BH-adj p=0.8768  [NS]
+  TSMC:spearman_block            raw p=0.4871  BH-adj p=0.8768  [NS]
+  TSMC:regime_effn               raw p=0.9988  BH-adj p=1  [NS]
+  UMC:trend                      raw p=0.01434  BH-adj p=0.06451  [NS]
+  UMC:spearman_block             raw p=0.243  BH-adj p=0.7289  [NS]
+  UMC:regime_effn                raw p=1  BH-adj p=1  [NS]
+  MediaTek:trend                 raw p=1.507e-05  BH-adj p=0.0001356  [PASS]
+  MediaTek:spearman_block        raw p=0.855  BH-adj p=1  [NS]
+  MediaTek:regime_effn           raw p=1  BH-adj p=1  [NS]
+
+  SURVIVED BH-FDR @ L=24: ['MediaTek:trend']
+
+======================================================================
+STRICTEST VERDICT (block-bootstrap trend + block-perm Spearman + effective-n KS)
+======================================================================
+  TSMC:trend_blockboot           raw p=0.4877  BH-adj p=0.8779  [NS]
+  TSMC:spearman_block            raw p=0.4871  BH-adj p=0.8779  [NS]
+  TSMC:regime_effn               raw p=0.9988  BH-adj p=1  [NS]
+  UMC:trend_blockboot            raw p=0.0212  BH-adj p=0.1908  [NS]
+  UMC:spearman_block             raw p=0.243  BH-adj p=0.7289  [NS]
+  UMC:regime_effn                raw p=1  BH-adj p=1  [NS]
+  MediaTek:trend_blockboot       raw p=0.06059  BH-adj p=0.2726  [NS]
+  MediaTek:spearman_block        raw p=0.855  BH-adj p=1  [NS]
+  MediaTek:regime_effn           raw p=1  BH-adj p=1  [NS]
+
+  NO STRICTEST SURVIVORS → all K1114 PASS are overlap artifacts.
+saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac3ec8f9/experiments/k1140/k1140_hac_vs_ols_tstat.png
+saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac3ec8f9/experiments/k1140/k1140_L_sensitivity.png
+
+saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac3ec8f9/experiments/k1140/k1140_results.json
+elapsed: 2.5s

@@ -929,5 +929,21 @@
       "K1032",
       "K1114"
     ]
+  },
+  {
+    "id": "E068",
+    "title": "HAC SE alone 對 high-overlap rolling 不夠—block-bootstrap 是 gold standard",
+    "category": "methodology",
+    "lesson": "Newey-West HAC 校正自相關，但對 96%+ overlap 的 rolling-window 估計序列仍可能低估 SE。Bartlett kernel 對結構性曲度 (lag-1 ACF=0.47) 的序列不夠 robust。Block-bootstrap 用實際 block 重抽，不依賴 kernel 假設，是 high-overlap rolling 的真正 gold standard。",
+    "examples": [
+      "K1140 MediaTek trend：OLS t=4.51 → HAC L=24 t=4.33 (HAC 仍顯著) → block-boot (block=24) t=1.75 (NS)",
+      "K1140 UMC trend：OLS t=3.06 → HAC L=24 t=2.45 → block-boot t=1.91 (兩者皆 NS)",
+      "教訓：HAC 過 ≠ 真信號；rolling 高 overlap 必加 block-bootstrap 第二門"
+    ],
+    "recommendation": "對 rolling/sliding-window 估計的 trend/correlation tests，HAC 是必要不充分。Workflow：(1) HAC L = window/step 起跳 sensitivity；(2) 若 HAC 顯著，必須再做 block-bootstrap (block ≥ window/step)；(3) 兩者皆 PASS 才聲稱 robust。Paper 寫作時報告 strictest layer 結果。",
+    "source_experiments": [
+      "K1114",
+      "K1140"
+    ]
   }
 ]

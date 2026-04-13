@@ -25957,5 +25957,24 @@
     "data_source": "yfinance 2330.TW/2303.TW/2454.TW + TWII (2014-2025)",
     "created_at": "2026-04-13T20:50:00+08:00",
     "updated_at": "2026-04-13T20:50:00+08:00"
+  },
+  {
+    "id": "k1140-1776085256",
+    "experiment_id": "K1140",
+    "title": "HAC + block-bootstrap re-test of K1114 — Paper 2 dual NULL confirmed",
+    "content": "[提出: Claude, 執行: Claude] K1140 reuse K1114 rolling θ_EAV time-series（不重跑 GARCH），三層 robustness 重檢：(1) Newey-West HAC SE 用 3 個 lag (L=5/24/48); (2) 非 OLS 的 Spearman block-permutation; (3) Block-bootstrap (block=24) 為 strictest gold standard。Conservative L=24 結果：TSMC trend t=0.76 (↓ 1.75)，UMC t=2.45 (↓ 3.06, BH p=0.065 不達)，MediaTek t=4.33 (↓ 4.51) HAC 倖存但 block-boot 崩潰 t=1.75。TSMC regime KS effective-n 校正後 p≈1.0（24× overlap 膨脹）。Strictest 層 0/9 BH-PASS。**K1114 的 3 個 PASS 全是 96% window-overlap + Newey-West 未校正 artifact**。Paper 2 narrative pivot 路徑（時間/regime θ_EAV heterogeneity）破滅，dual-NULL（cross-sectional + temporal）成立。K1067 三檔 mean pattern 真實但是 within-sample window artifact，無 systematic 來源可解釋。Paper 2 contribution 定位轉為「after rigorous controls, no systematic source of θ_EAV heterogeneity survives MTCorrection」。",
+    "tags": [
+      "K1140",
+      "Paper2",
+      "HAC",
+      "Newey-West",
+      "block-bootstrap",
+      "K1114-followup",
+      "dual-null",
+      "negative-result"
+    ],
+    "data_source": "Reuse experiments/k1114/k1114_results.json θ time-series",
+    "created_at": "2026-04-13T21:05:00+08:00",
+    "updated_at": "2026-04-13T21:05:00+08:00"
   }
 ]

@@ -611,6 +611,15 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 13. Paper 2 dual-NULL 確認（2026-04-13 K1114→K1140）
+**Cross-sectional + temporal θ_EAV heterogeneity 雙 NULL**
+- K1114 rolling 2-yr A4f-EAV on TSMC/UMC/MediaTek 報 3/9 BH-PASS (UMC trend t=3.06, MediaTek t=4.51, TSMC regime KS p=0.009)
+- K1140 三層 robustness 重檢：(1) Newey-West HAC L=5/24/48; (2) Spearman block-permutation; (3) Block-bootstrap block=24 gold standard
+- 結果：HAC L=24 後 1/9 倖存 (MediaTek t=4.33)，block-boot 後 0/9 PASS — K1114 全為 96% overlap artifact
+- K1067 三檔 mean pattern 真實但 within-sample artifact，無 systematic 來源
+- Paper 2 contribution 定位轉為 rigorous null：「after N=31 sector ANOVA + 5 covariates + rolling HAC + block-boot, no systematic θ_EAV heterogeneity survives MTCorrection」
+- **E068**：HAC alone 對 high-overlap rolling 不夠，必加 block-bootstrap 第二門
+
 ### 12. Universal robust-method NULL：非 score-driven 也失敗（2026-04-13 K1136）
 **「alt-model NULL」擴張到 score-driven + non-score-driven 兩家族**
 - K1136 fair-test 設計：M3 GARCH-MIDAS-X vs M1 GJR-N on r²（close²-native 公平）；M4 HAR-RV-X vs M5 HAR-RV on Parkinson（within HAR-family control, 孤立 VIX marginal）

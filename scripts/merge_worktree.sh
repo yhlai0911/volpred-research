@@ -15,8 +15,17 @@
 
 set -euo pipefail
 
-MAIN_DIR="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$MAIN_DIR"
+# 防護：若 cwd 已失效（前次 worktree 被 force-rm 後 cwd 殘留），切回 HOME
+pwd >/dev/null 2>&1 || cd "$HOME"
+
+# 用 BASH_SOURCE 而非 $0，並 fallback 到絕對路徑 git rev-parse --show-toplevel
+SCRIPT_PATH="${BASH_SOURCE[0]:-$0}"
+if [[ -f "$SCRIPT_PATH" ]]; then
+    MAIN_DIR="$(cd "$(dirname "$SCRIPT_PATH")/.." && pwd)"
+else
+    MAIN_DIR="$(git rev-parse --show-toplevel 2>/dev/null || echo "$PWD")"
+fi
+cd "$MAIN_DIR" || { echo "[FATAL] 無法 cd 至 MAIN_DIR=$MAIN_DIR"; exit 1; }
 
 DRY_RUN=false
 TARGET=""

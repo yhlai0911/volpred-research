@@ -556,27 +556,44 @@
     "title": "K1140: HAC Newey-West rolling θ_EAV trend re-test (K1114 follow-up)",
     "priority": 2,
     "description": "K1114 3/9 BH-PASS 用 OLS SE 評估 overlapping rolling t-stat, 偏高估。改用 Newey-West HAC SE (lag=63 ≈ 3 month overlap) 重檢 UMC trend t=3.06 / MediaTek t=4.67 / TSMC regime。HAC 過才能 Paper 2 narrative pivot。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-13T21:05:00+08:00"
   },
   {
     "id": "K1141",
     "title": "K1141: Block bootstrap θ_EAV temporal heterogeneity (independence-free)",
     "priority": 3,
     "description": "K1114 caveat 替代方案：moving block bootstrap (block=63) 重抽 θ_EAV 序列，建構非 overlap-dependent 的 trend slope CI。與 K1140 HAC 互補。",
-    "status": "pending"
+    "status": "superseded",
+    "superseded_by": "K1140 included block-bootstrap"
   },
   {
     "id": "K1142",
     "title": "K1142: Extend rolling θ_EAV to N=10 Taiwan large caps",
     "priority": 3,
-    "description": "K1114 3-stock 樣本太小。擴展到 N=10 (foundry/fabless/IC design/PC) 檢驗 trend signal cross-sectional 重現性。前提：K1140 HAC 過。",
-    "status": "pending"
+    "description": "[K1140 後] N=10 擴展已無必要——dual NULL 已確認。除非 reviewer 要求，否則不做。",
+    "status": "deprioritized"
   },
   {
     "id": "K1143",
     "title": "K1143: Fix merge_worktree.sh K1032/K1114 detection bug",
     "priority": 2,
     "description": "Recurrent bug：script 用 rev-parse 比較 detect 新 commit 偶爾失敗。改用 git rev-list --count main..<branch> 確切數，並加 ls experiments/ 驗證。E067 教訓。",
+    "status": "completed",
+    "completed_at": "2026-04-13T20:55:00+08:00"
+  },
+  {
+    "id": "K1144",
+    "title": "K1144: Paper 2 narrative pivot to dual-NULL (after K1140 confirmation)",
+    "priority": 2,
+    "description": "K1140 確認 cross + temporal θ_EAV heterogeneity dual NULL。Paper 2 contribution 從「找 firm-attribute predictor」改為「rigorous null verification: after N=31 sector ANOVA + 5 covariates + rolling HAC + block-boot, no systematic source of θ heterogeneity survives MTCorrection」。需主線程更新 paper/2/body.tex (5-stage classifier 判 stage)。",
+    "status": "pending"
+  },
+  {
+    "id": "K1145",
+    "title": "K1145: A4f-EAV pooled panel estimation (Paper 2 side-finding candidate)",
+    "priority": 3,
+    "description": "K1140 derivative：在 N=31 stocks pooled panel 上估 single θ_EAV，若顯著 → 'EAV effect 是 universal magnitude not stock-specific'，當 Paper 2 small contribution。若 NS → 純 NULL paper。",
     "status": "pending"
   }
 ]
