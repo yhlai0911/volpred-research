@@ -1,0 +1,10 @@
+[K1167] loading inputs ...
+  K1166 per-stock rows=110
+  institutional_ownership rows=110
+  merged panel rows=110
+  missing institutions_pct: 0/110
+  Spearman ρ(institutions_pct, θ_rel) cross-market = +0.8000
+  Spearman ρ(analyst_median,    θ_rel) cross-market = +0.4000
+  panel OLS input rows=109
+[K1167] wrote /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a58989aa/experiments/k1167/k1167_results.json
+[K1167] verdict: PARTIAL / two-level (preliminary, N=4 markets): institutions_pct wins between-market ranking; log_analyst wins within-market per-stock panel.
