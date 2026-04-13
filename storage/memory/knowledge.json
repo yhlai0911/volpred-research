@@ -25562,7 +25562,7 @@
     "id": "k1106b-1776057664",
     "experiment_id": "K1106b",
     "title": "K1106b: Sector-diversified firm θ₂ — fabless SIG, ANOVA underpowered, cherry-pick warning",
-    "content": "[提出: 用戶指 sector overconcentration, 執行: Claude] N=14 跨 7 sectors (foundry/fabless/financials/shipping/trad_mfg/consumer/electronics)。**ANOVA F(6,5)=6.87, p=0.026 nominally sig** 但 dof=5 underpowered 屬探索性。**Sector ranking (mean θ₂)**: fabless -1.997e-3 (only SIG, β=-2.29e-3 t=-5.16 **p=0.004 *** 重現 K1104) → shipping/financials/trad_mfg ≈ 0 → consumer +2.44e-4 (split firm-specific) → foundry +2.46e-4 → electronics n=1 Hon Hai +7.25e-4 t=3.59 最高。**Major caveats**: (1) **cherry-pick bias**: K1104 4 fabless 是 mixed signs (Novatek/Phison +, MediaTek/Realtek -)，K1106b 只挑到負的兩家 → 結論不該擴大到全體 fabless (2) shipping H3 反直覺 FAIL：可能運價 Baltic Dry/SCFI 即時公開 → 公告無 news shock (3) consumer 分裂 2912 +5.22e-4 (t=2.92) 是 firm-specific 非 sector (4) electronics n=1 不能推論 sector 結論。**K1104 replicability**: 10 個重疊 firm θ₂ 精確為 0.0% 差，deterministic MLE + shared parquet cache 確認方法論可重現。**Paper 2 tentative rules**: (1) foundry → 用 A4f-EAV (2) 避免 MediaTek/Realtek style 大型 fabless (3) Hon Hai 單點正面需 Quanta/Asus 補驗 (4) Financials/shipping → 用 plain A4f 不 EAV (5) Consumer firm-specific pooling 不可靠。Runtime 100s, Codex 審代碼 2 bugs 修正。",
+    "content": "[提出: 用戶指 sector overconcentration, 執行: Claude] N=14 跨 7 sectors (foundry/fabless/financials/shipping/trad_mfg/consumer/electronics)。**ANOVA F(6,5)=6.87, p=0.026 nominally sig** 但 dof=5 underpowered 屬探索性。**Sector ranking (mean θ₂)**: fabless -1.997e-3 (only SIG, β=-2.29e-3 t=-5.16 **p=0.004 *** 重現 K1104) → shipping/financials/trad_mfg ≈ 0 → consumer +2.44e-4 (split firm-specific) → foundry +2.46e-4 → electronics n=1 Hon Hai +7.25e-4 t=3.59 最高。**Major caveats**: (1) **cherry-pick bias**: K1104 4 fabless 是 mixed signs (Novatek/Phison +, MediaTek/Realtek -)，K1106b 只挑到負的兩家 → 結論不該擴大到全體 fabless (2) shipping H3 反直覺 FAIL：可能運價 Baltic Dry/SCFI 即時公開 → 公告無 news shock (3) consumer 分裂 2912 +5.22e-4 (t=2.92) 是 firm-specific 非 sector (4) electronics n=1 不能推論 sector 結論。**K1104 replicability**: 10 個重疊 firm θ₂ 精確為 0.0% 差，deterministic MLE + shared parquet cache 確認方法論可重現。**Paper 2 tentative rules**: (1) foundry → 用 A4f-EAV (2) 避免 MediaTek/Realtek style 大型 fabless (3) Hon Hai 單點正面需 Quanta/Asus 補驗 (4) Financials/shipping → 用 plain A4f 不 EAV (5) Consumer firm-specific pooling 不可靠。Runtime 100s, Codex 審代碼 2 bugs 修正。 ⚠️ **[K1109 2026-04-13 推翻]: Pre-registered random sample N=31 得 ANOVA p=0.297, fabless BH-adj p=0.278——本文的 p=0.004 是 cherry-pick artifact，不是 genuine sector effect。Paper 2 改用 firm-level θ₂ tiering + log_mktcap + beta。**",
     "tags": [
       "Paper_2",
       "A4f-EAV",
@@ -25572,9 +25572,31 @@
       "K1104-replicability",
       "cross-sectional",
       "Taiwan",
-      "K1067-series"
+      "K1067-series",
+      "K1109-invalidated"
     ],
     "data_source": "yfinance (14 tickers across 7 Taiwan sectors), 財報公告日.txt",
-    "created_at": "2026-04-13T05:21:04.753733+00:00"
+    "created_at": "2026-04-13T05:21:04.753733+00:00",
+    "updated_at": "2026-04-13T05:41:47.102518+00:00"
+  },
+  {
+    "id": "k1109-1776058907",
+    "experiment_id": "K1109",
+    "title": "K1109: Pre-registered random N=31 — K1106b cherry-pick bias CONFIRMED, sector effect FAIL",
+    "content": "[提出: Claude 承接 K1106b E052, 執行: Claude] Pre-registered random sample N=31 across 8 sectors（pre-reg commit 4c59a41a 先於結果 commit 19a19b19，audit trail 完整）。**ANOVA H1 FAIL**: F(7,20)=1.31, p=0.297; BH-FDR 無任何 dummy <0.05。**H2 fabless<foundry FAIL**: β=-1.24e-3, raw p=0.040 但 BH-adj p=0.278。**H3 shipping=0 PASS**: CI=[-3.6e-5, +2.5e-4] crosses 0。**Cherry-pick bias 量化**：K1106b→K1109 |β| 衰減 46% (-2.29e-3→-1.24e-3)，|t| 衰減 57% (5.16→2.20)，p 放大 11x (0.004→0.040)，BH-FDR 後完全失去顯著性。**K1106b fabless 是 post-hoc sampling artifact，不是 genuine sector effect**。Paper 2 影響重大：(1) sector dummies 不可作 selection primary key (2) 改用 firm-level θ₂ Tier A (t>1.96)/B/C (t<-1.96) (3) log_mktcap (t=-2.19) + beta (t=1.97) 作連續 covariate (4) N<30 禁做 sector ANOVA。Runtime 221s，含 15 筆新 yfinance 下載 + 31 firm MLE + 5000-rep bootstrap + BH-FDR correction。Codex 審代碼 HIGH=0 MEDIUM=0。這是 E052 cherry-pick 教訓的直接實證。",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "pre-registration",
+      "cherry-pick-bias-confirmed",
+      "sector-effect-FAIL",
+      "BH-FDR-correction",
+      "bootstrap-CI",
+      "K1106b-invalidated",
+      "Taiwan",
+      "confirmatory-test"
+    ],
+    "data_source": "yfinance (31 TWSE tickers across 8 sectors pre-registered with seed=42)",
+    "created_at": "2026-04-13T05:41:47.102518+00:00"
   }
 ]

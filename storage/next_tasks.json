@@ -106,9 +106,30 @@
   },
   {
     "id": "K1109",
-    "title": "K1109: Pre-registered random sample N=50+ across sectors",
+    "title": "K1109: Pre-registered random N=31 sector confirmatory",
     "priority": 1,
-    "description": "K1106b D1 衍生：解決 cherry-pick bias。每 sector random sample ≥5 firms（不人為挑），ANOVA dof>20 才能 confirmatory。Pre-register 樣本清單在實驗前。",
+    "description": "完成：ANOVA FAIL (p=0.297), fabless BH-adj p=0.278 FAIL。K1106b cherry-pick 量化確認——|β| 衰減 46%, p 放大 11x。Paper 2 sector-based rules 廢止，改 firm-level θ₂ tiering + log_mktcap + beta。",
+    "status": "completed"
+  },
+  {
+    "id": "K1112",
+    "title": "K1112: N≥50 真 confirmatory sector test",
+    "priority": 2,
+    "description": "K1109 D1：納入中型股、退市股、跨市場擴大樣本，power > 0.8。檢驗 sector effect 是否在更大樣本下浮現。",
+    "status": "pending"
+  },
+  {
+    "id": "K1113",
+    "title": "K1113: Firm-level covariate rule (skip sector)",
+    "priority": 1,
+    "description": "K1109 D2：θ₂ ~ log_mktcap + beta + earnings_freq + ind_momentum + float_ratio 非 sector predictors。Paper 2 真正可操作的 selection rule。",
+    "status": "pending"
+  },
+  {
+    "id": "K1114",
+    "title": "K1114: Rolling θ₂ heterogeneity (time-varying)",
+    "priority": 2,
+    "description": "K1109 D3：2010-2015 vs 2016-2025 哪些 firms 穩定、哪些反轉。time-varying heterogeneity 可能是 Paper 2 真正 contribution。",
     "status": "pending"
   },
   {

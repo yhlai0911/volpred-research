@@ -705,5 +705,20 @@
       "confirmatory-vs-exploratory"
     ],
     "created_at": "2026-04-13T05:21:04.753733+00:00"
+  },
+  {
+    "id": "E053",
+    "title": "Pre-registration 工作流的價值 — K1106b p=0.004 → K1109 BH-adj p=0.278",
+    "lesson": "K1106b fabless p=0.004 *** 看起來是漂亮的 finding，E052 已經警告可能是 cherry-pick，K1109 用**真正 pre-registered random sample** 量化確認：\n\n- |β| 衰減 46%\n- |t| 衰減 57%\n- p 放大 11x\n- ANOVA joint F 收縮 5x\n\n**整個「sector heterogeneity」結論消失**。\n\n**關鍵方法論優勢**：K1109 的 **2-commit audit trail**：\n1. `4c59a41a`: Pre-reg（樣本 + seed + 時間戳記）**在 Stage 1 MLE 前**單獨 commit\n2. `19a19b19`: 完整結果\n\n用戶/reviewer 可以 `git show 4c59a41a` 驗證樣本清單沒看過結果就先寫死。這是真正的 pre-registration（不只是「我記得我有先想好」）。\n\n**通則**：\n1. 任何小樣本（N<50）分類實驗如果用 hypothesis-driven sampling，結果必須標為 **exploratory only**，並且**必做 pre-registered random replication** 才能宣稱 confirmatory\n2. BH-FDR correction（Benjamini-Hochberg）對多重檢定必做——K1106b 單 fabless p=0.004 看起來 extreme，但 7 個 sector dummies 做 7 次檢定已是 multiple testing\n3. Pre-reg audit trail 用 **分離 commit** 是低成本又高可信的做法——比「pre-registration 平台」簡單，但效果等同\n4. K1104 N=24 的「fabless SIG」也要重新審視——可能同樣是 artifact（下次擴樣 N=50 時順便檢查）\n\n**應避免**：把 K1106b 這類 p=0.004 當作「已驗證」去寫 Paper 2。必要先 pre-reg confirmatory 再用。",
+    "context": "K1106b → K1109 cherry-pick confirmation",
+    "applies_to": [
+      "pre-registration",
+      "small-sample-bias",
+      "BH-FDR-correction",
+      "multiple-testing",
+      "audit-trail",
+      "git-workflow-for-research"
+    ],
+    "created_at": "2026-04-13T05:41:47.102518+00:00"
   }
 ]
