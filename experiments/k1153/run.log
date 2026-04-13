@@ -1,0 +1,143 @@
+
+========================================================================
+K1153: A4f-EAV pooled panel estimation (N=30 EU large-caps)
+========================================================================
+
+Tickers (30): ['SAP.DE', 'SIE.DE', 'ALV.DE', 'MRK.DE', 'BMW.DE', 'BAS.DE', 'MBG.DE', 'DTE.DE', 'ADS.DE', 'VOW3.DE', 'MC.PA', 'TTE.PA', 'AIR.PA', 'OR.PA', 'SU.PA', 'SAN.PA', 'BNP.PA', 'DG.PA', 'RMS.PA', 'AI.PA', 'SHEL.L', 'AZN.L', 'ULVR.L', 'HSBA.L', 'RIO.L', 'BP.L', 'DGE.L', 'GSK.L', 'REL.L', 'LSEG.L']
+
+[1/6] Loading stocks (EAV window=1) ...
+    [download] SAP.DE ...
+    [download] ^VIX ...
+    SAP.DE: n_obs=3046, n_events=48
+    [download] SIE.DE ...
+    SIE.DE: n_obs=3046, n_events=48
+    [download] ALV.DE ...
+    ALV.DE: n_obs=3046, n_events=48
+    [download] MRK.DE ...
+    MRK.DE: n_obs=3046, n_events=48
+    [download] BMW.DE ...
+    BMW.DE: n_obs=3046, n_events=48
+    [download] BAS.DE ...
+    BAS.DE: n_obs=3046, n_events=48
+    [download] MBG.DE ...
+    MBG.DE: n_obs=3046, n_events=48
+    [download] DTE.DE ...
+    DTE.DE: n_obs=3046, n_events=48
+    [download] ADS.DE ...
+    ADS.DE: n_obs=3046, n_events=48
+    [download] VOW3.DE ...
+    VOW3.DE: n_obs=3046, n_events=48
+    [download] MC.PA ...
+    SKIP MC.PA: insufficient data
+    [download] TTE.PA ...
+    TTE.PA: n_obs=3070, n_events=48
+    [download] AIR.PA ...
+    AIR.PA: n_obs=3070, n_events=48
+    [download] OR.PA ...
+    SKIP OR.PA: insufficient data
+    [download] SU.PA ...
+    SKIP SU.PA: insufficient data
+    [download] SAN.PA ...
+    SAN.PA: n_obs=3070, n_events=48
+    [download] BNP.PA ...
+    BNP.PA: n_obs=3070, n_events=48
+    [download] DG.PA ...
+    SKIP DG.PA: insufficient data
+    [download] RMS.PA ...
+    SKIP RMS.PA: insufficient data
+    [download] AI.PA ...
+    SKIP AI.PA: insufficient data
+    [download] SHEL.L ...
+    SHEL.L: n_obs=3030, n_events=48
+    [download] AZN.L ...
+    AZN.L: n_obs=3030, n_events=48
+    [download] ULVR.L ...
+    SKIP ULVR.L: insufficient data
+    [download] HSBA.L ...
+    HSBA.L: n_obs=3030, n_events=48
+    [download] RIO.L ...
+    SKIP RIO.L: insufficient data
+    [download] BP.L ...
+    BP.L: n_obs=3029, n_events=47
+    [download] DGE.L ...
+    SKIP DGE.L: insufficient data
+    [download] GSK.L ...
+    [earnings API fail] GSK.L: ['Earnings Date']
+    SKIP GSK.L: insufficient data
+    [download] REL.L ...
+    SKIP REL.L: insufficient data
+    [download] LSEG.L ...
+    SKIP LSEG.L: insufficient data
+  Loaded 18/30 stocks
+
+[2/6] Pre-fit panel diagnostic ...
+  Pooled obs: 54,859
+  Mean r=+2.7020e-04, std=1.7262e-02
+  Skew=-0.465, kurt=+13.287
+  Mean events per stock: 47.9
+
+[3/6] Pooled BCD fit (EAV window=1, primary) ...
+    [BCD outer 0] θ_VIX=9.993e-08, θ_EAV=+4.2914e-05, pooled_negll=-152103.56, Δll=+inf, Δθ_eav=7.09e-06
+    [BCD outer 1] θ_VIX=9.992e-08, θ_EAV=+4.1742e-05, pooled_negll=-152107.81, Δll=+4.2469, Δθ_eav=1.17e-06
+    [BCD outer 2] θ_VIX=9.992e-08, θ_EAV=+4.1420e-05, pooled_negll=-152131.50, Δll=+23.6935, Δθ_eav=3.22e-07
+    [BCD outer 3] θ_VIX=9.991e-08, θ_EAV=+4.1170e-05, pooled_negll=-152136.43, Δll=+4.9217, Δθ_eav=2.50e-07
+    [BCD outer 4] θ_VIX=9.987e-08, θ_EAV=+4.1114e-05, pooled_negll=-152137.87, Δll=+1.4415, Δθ_eav=5.61e-08
+    [BCD outer 5] θ_VIX=9.986e-08, θ_EAV=+4.0764e-05, pooled_negll=-152138.66, Δll=+0.7892, Δθ_eav=3.49e-07
+    [BCD outer 6] θ_VIX=9.986e-08, θ_EAV=+4.0764e-05, pooled_negll=-152139.33, Δll=+0.6768, Δθ_eav=0.00e+00
+    [BCD outer 7] θ_VIX=9.979e-08, θ_EAV=+4.0719e-05, pooled_negll=-152139.40, Δll=+0.0695, Δθ_eav=4.55e-08
+
+  → θ_VIX = 9.9794e-08
+  → θ_EAV = +4.0719e-05
+  → pooled loglik = 152139.43
+  → converged = False
+
+  Hessian SE for θ_EAV ...
+  Hessian SE=4.05840257258563e-06, t=10.033220965909743
+
+[4/6] Stock-clustered block bootstrap (gold-standard) ...
+  bootstrap draws: 150/150 (elapsed=228.3s)
+  bootstrap mean=3.917234465826135e-05, SE=9.729172227781932e-06
+  bootstrap 95% CI = [1.9445834176531962e-05, 6.217391944527891e-05]
+  bootstrap t=4.185232702849511, p=0.0
+
+[5/6] Robustness — alternate EAV definitions ...
+
+  R1 EAV window=3:
+    [earnings API fail] GSK.L: ['Earnings Date']
+    θ_EAV=+1.3632e-05, SE=1.4901396688213073e-06, t=9.147902674404218
+
+  R1 EAV window=5:
+    [earnings API fail] GSK.L: ['Earnings Date']
+    θ_EAV=+7.4348e-06, SE=1.0320308156484487e-06, t=7.204004861975737
+
+  R2 Drop-out 5 random stocks x 5 seeds:
+    seed=42, dropped=['SIE.DE', 'DTE.DE', 'TTE.PA', 'AIR.PA', 'BP.L'], θ_EAV=+4.264e-05, t=8.662704017236875
+    seed=43, dropped=['SAP.DE', 'MBG.DE', 'DTE.DE', 'VOW3.DE', 'TTE.PA'], θ_EAV=+4.248e-05, t=8.702672256448448
+    seed=44, dropped=['SIE.DE', 'BMW.DE', 'VOW3.DE', 'AIR.PA', 'BNP.PA'], θ_EAV=+4.155e-05, t=8.674573956495149
+    seed=45, dropped=['ADS.DE', 'VOW3.DE', 'AIR.PA', 'SAN.PA', 'HSBA.L'], θ_EAV=+3.751e-05, t=8.10841531993409
+    seed=46, dropped=['SIE.DE', 'MRK.DE', 'DTE.DE', 'VOW3.DE', 'BNP.PA'], θ_EAV=+3.784e-05, t=8.544328040515378
+
+  BH-FDR multi-test correction:
+    pooled_hessian: raw_p=0.0000, BH_adj_p=0.0000
+    pooled_bootstrap: raw_p=0.0000, BH_adj_p=0.0000
+
+  Four-market comparison (K1145 TW vs K1147 US vs K1150 JP vs K1153 EU):
+    K1145 TW pooled θ_EAV = +6.362e-05 (boot t=5.24, θ_rel=0.167)
+    K1147 US pooled θ_EAV = +1.909e-04 (boot t=4.50, θ_rel=0.586)
+    K1150 JP pooled θ_EAV = +1.413e-04 (boot t=11.99, θ_rel=0.388)
+    K1153 EU pooled θ_EAV = +4.072e-05 (boot t=4.185232702849511, θ_rel=0.137)
+    EU θ_rel = 0.137; US+JP cluster range = [0.388, 0.586]
+    EU in quarterly-cluster (0.30-0.70): False
+
+  FOUR-MARKET VERDICT: UNIVERSAL-FOUR-MARKET — EU pooled θ_EAV PASS (bootstrap t>3, BH PASS), same direction as TW+US+JP, but θ_rel falls outside quarterly-reporting cluster (EU=0.137). Universal direction confirmed; relative magnitude needs additional mechanism analysis (IFRS vs GAAP, analyst coverage differences).
+
+[6/6] Plots ...
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa064375/experiments/k1153/k1153_four_market_abs_comparison.png
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa064375/experiments/k1153/k1153_four_market_rel_comparison.png
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa064375/experiments/k1153/k1153_robustness_barplot.png
+
+  Results -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa064375/experiments/k1153/k1153_results.json
+  Elapsed: 333.2s
+
+  CORE FOUR-MARKET VERDICT: UNIVERSAL-FOUR-MARKET — EU pooled θ_EAV PASS (bootstrap t>3, BH PASS), same direction as TW+US+JP, but θ_rel falls outside quarterly-reporting cluster (EU=0.137). Universal direction confirmed; relative magnitude needs additional mechanism analysis (IFRS vs GAAP, analyst coverage differences).
+
