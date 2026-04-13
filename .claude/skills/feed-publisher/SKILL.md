@@ -179,33 +179,70 @@ Publisher 會自動在文章末尾附加「延伸閱讀」區塊，列出同 aud
 
 ### 方法 A：Agent 寫完整文章（推薦）
 
+**⚠️ Agent prompt 必須是 articulated brief，不是 topic list**。每個 prompt 必含下列 7 段（缺一不可）。
+
+**為什麼**：vague prompt → agent 自由發揮 → **過度推論造幻覺**（編造數字、誤解 K 之間關係、把 NULL 寫成 PASS 等）。詳細 prompt + 必讀檔案 + curation list = 把 agent 鎖在 ground-truth 內。
+
+**更新（2026-04-14）**：每個引用的 K 在 prompt 內**必須單獨指定** README + .py + results.json 路徑，不可只給 K 編號讓 agent 自己找。原因：agent 若只知道「K1145」可能讀不到實驗檔（路徑可能是 `experiments/k1145/` 也可能是 `experiments/k1145_xxx.py`），漏讀就會回去抓 knowledge.json 摘要寫文 → 深度不夠 + 幻覺。
+
 ```
-Agent(description="Publish article", prompt="
-Write a complete research article in 繁體中文 Markdown about [topic].
-Include: summary, method table, key findings with interpretation, practical implications.
+為 volpred-research 平台寫一篇 [audience] 文章，主題：「<具體 angle 標題，不要泛泛>」
 
-MANDATORY — 每篇文章必須包含：
-1. 真正的圖表（使用 volpred.charts 模組）：
-   from volpred.charts import generate_bar_chart, upload_chart, embed_chart
-   path = generate_bar_chart(labels=[...], values=[...], title='...', ylabel='...')
-   url = upload_chart(path)
-   content = embed_chart(content, url, '圖表描述')
-   可用函式：generate_bar_chart, generate_grouped_bar_chart, generate_line_chart, generate_heatmap
-   禁止用 ASCII art 或純文字表格替代真正的圖表。
-2. 數據來源標注（文末）：
-   *本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
-   數據來源：yfinance，期間：YYYY-YYYY。*
+## 1. 必讀先（按順序逐項執行 cat）
+- cat .claude/skills/feed-publisher/SKILL.md
+- python3 -c "import json; e=[k for k in json.load(open('storage/memory/knowledge.json')) if k.get('experiment_id') in ('K<a>','K<b>','K<c>')]; [print('---',k['experiment_id'],'---'); print(k['content']) for k in e]"
+- cat experiments/k<a>/README.md           # ⚠️ 用到的每個實驗都要讀 README + .py
+- cat experiments/k<a>/k<a>.py
+- python3 -c "import json; print(json.dumps(json.load(open('experiments/k<a>/k<a>_results.json')), ensure_ascii=False, indent=2)[:3000])"
+- cat experiments/k<b>/README.md
+- ... (對每個引用的 K 重複)
 
-Then save as DRAFT (not published) via Publisher:
+## 2. 主題查重（必跑兩種）
+- grep -iE "concept_kw1|concept_kw2|concept_kw3" storage/reports/feed.json | grep title | head -10
+- uv run python scripts/build_knowledge_index.py search --query "<主題一句話>"
+若 top-3 dist < 0.5 或標題重疊 > 30% → 回報已存在，停止
 
+## 3. 文章核心（list 5-7 個 numbered points 明確 curation）
+1. <最反常識 / aha 點，這是文章主幹>
+2. <對比點：之前以為什麼，這次發現什麼>
+3. <關鍵抉擇 / 機制 / 為什麼會這樣>
+4. <主要支持數據：3-5 個 curated 數字，不全列>
+5. <實務 / 投資意涵>
+6. <局限 / 下一步>
+
+## 4. 結構建議（articulated 不是 template）
+- 標題：<具體建議>
+- 摘要：3-4 句含核心數字 + 1 個反直覺發現
+- 開頭：用「反常識」或「推翻前說」hook，不從 method table 開頭
+- 主敘事：核心發現 → 為什麼 surprising → 機制 → 數據 → paradigm shift → 實務
+- ⚠️ 禁止 Layer-1 / Layer-2 逐層 walkthrough；次要層級進附錄條列
+
+## 5. 圖表（必含真實圖表，禁 ASCII）
+- 優先 embed 既有 PNG：upload_chart('experiments/k<a>/k<a>_xxx.png')
+- 沒有再用 volpred.charts.generate_bar_chart / grouped_bar / line / heatmap
+
+## 6. 發佈
 from src.volpred.publisher.publisher import Publisher
 pub = Publisher()
-pub.publish_milestone(title='...', description='[content]', phase='research',
-                      tags=[...], status='draft')  # ← 永遠 draft！
+pub.publish_milestone(
+    title='<具體 hook 標題>',
+    description=content,
+    phase='research',
+    category='milestone',
+    tags=['K<a>','K<b>','<asset>','<method>','<theme>'],  # 3-8 個
+    proposer='Claude',
+    status='draft',  # ⚠️ 永遠 draft
+)
 
-Working directory: /Users/yhlai0911/Desktop/volpred-research
-")
+## 7. 紀律
+- 繁中、status=draft、不派 sub-agent、不修改 storage/memory/* 或 storage/reports/* 以外共享檔
+- 完成回報：title + id + draft 確認
 ```
+
+**反模式（禁止給 agent 的 prompt 樣態）**：
+- ❌「寫一篇關於 K1150 的研究文章」← 太 vague
+- ❌「主題：A B C 三個，自由發揮」← 沒 curation
+- ❌「3000-6000 字，1 圖」← 沒結構引導
 
 ## 平台層發佈決策
 
