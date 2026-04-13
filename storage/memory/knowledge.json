@@ -25976,5 +25976,26 @@
     "data_source": "Reuse experiments/k1114/k1114_results.json θ time-series",
     "created_at": "2026-04-13T21:05:00+08:00",
     "updated_at": "2026-04-13T21:05:00+08:00"
+  },
+  {
+    "id": "k1145-1776087267",
+    "experiment_id": "K1145",
+    "title": "A4f-EAV pooled panel N=31 TW stocks → universal-magnitude PASS (Paper 2 saved)",
+    "content": "[提出: Claude, 執行: Claude] Paper 2 last-pass：N=31 K1109 pre-reg 股票 pooled MLE A4f-EAV 估 single shared θ_EAV across stocks (stock-FE on m_i, GJR_i)。**核心 PASS**: pooled θ_EAV = +6.36e-5，cluster bootstrap (n=150) t=+5.24，Hessian Wald t=+14.14（後者可能膨脹故以 bootstrap 為 primary）。**5 層 robustness 全過**: (1) bootstrap 95% CI [+4.13e-5, +9.38e-5] 排除 0; (2) within-stock EAV permutation placebo 60 reps mean=+1.36e-6 ≈0, 觀測值 = placebo +13.6σ, p=0/60; (3) 三 EAV-def (1d/3d/5d) θ 線性遞減 +6.4e-5/+3.8e-5/+1.7e-5 符合 'smear over more days' 物理直覺; (4) Drop-5 stocks × 5 seeds θ ∈ [+6.21e-5,+7.96e-5] t∈[12.17,14.12] 不被 1-2 檔股票驅動; (5) Codex 審查通過。**對比 single-stock**: K1109 mean θ₂=+4.64e-5 SE=1.15e-4 t=0.40 p=0.69 NS — direction MATCH 但 firm-level SE 過大；pooled SE=1.21e-5 (9.5x reduction) 揭露 panel signal。**Paper 2 narrative pivot**: 從 'cross+temporal dual NULL' 改寫為 'universal-magnitude pooled effect (θ=+6.4e-5, t=+5.24) invisible at firm level due to large idiosyncratic SE; EAV effect is population-level constant, not firm-level predictor'。Limits: (a) TW 藍籌 N=31; (b) EAV 是 binary 粗指標; (c) cross-stock copula 結構未模型化 (bootstrap 部分校正)。",
+    "tags": [
+      "K1145",
+      "Paper2",
+      "A4f-EAV",
+      "pooled-panel",
+      "MLE",
+      "bootstrap",
+      "placebo",
+      "universal-magnitude",
+      "PASS",
+      "K1140-pivot"
+    ],
+    "data_source": "yfinance N=31 K1109 pre-reg TW stocks 2014-2025",
+    "created_at": "2026-04-13T22:00:00+08:00",
+    "updated_at": "2026-04-13T22:00:00+08:00"
   }
 ]

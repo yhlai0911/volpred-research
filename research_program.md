@@ -611,8 +611,23 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
-### 13. Paper 2 dual-NULL 確認（2026-04-13 K1114→K1140）
-**Cross-sectional + temporal θ_EAV heterogeneity 雙 NULL**
+### 14. Paper 2 SAVED：universal-magnitude pooled effect（2026-04-13 K1145）
+**Pooled MLE 揭露 firm-level idiosyncratic SE 掩蓋的 universal signal**
+- N=31 K1109 pre-reg stocks pooled A4f-EAV，shared θ_EAV，stock-FE on (m_i, GJR_i)
+- **Pooled θ_EAV = +6.36e-5**
+- Cluster bootstrap (n=150) **t=+5.24** primary inference (Hessian Wald t=14.14 may inflate)
+- Bootstrap 95% CI [+4.13e-5, +9.38e-5] excludes 0
+- Placebo permutation 60 reps mean=+1.36e-6 ≈0; observed = +13.6σ from null mean; one-sided p=0/60
+- 三 EAV-def (1d/3d/5d) θ 線性遞減 +6.4e-5 / +3.8e-5 / +1.7e-5 符合 smear-over-days 物理直覺
+- Drop-5 stocks × 5 seeds θ ∈ [+6.21e-5, +7.96e-5], t ∈ [+12.17, +14.12]
+- vs single-stock K1109: mean θ=+4.64e-5 SE=1.15e-4 (t=0.40 NS); pooled SE=1.21e-5 (9.5x reduction)
+- Codex review passed
+- **Paper 2 narrative pivot**: 從 dual-NULL 改為 "EAV is universal-magnitude population-level constant, invisible at firm level due to large idiosyncratic SE"
+- **E069**: pooled panel reveals signal hidden by firm-level noise floor — 對 dual-NULL 假設前必跑 pooled spec
+- 衍生 K1146 (paper rewrite, main thread), K1147 (US S&P validation), K1148 (continuous surprise EAV), K1149 (PCA factor competition)
+
+### 13. Paper 2 dual-NULL 確認（2026-04-13 K1114→K1140）→ 被 K1145 推翻
+**Cross-sectional + temporal θ_EAV heterogeneity 雙 NULL**（已過時 — 見 §14 K1145）
 - K1114 rolling 2-yr A4f-EAV on TSMC/UMC/MediaTek 報 3/9 BH-PASS (UMC trend t=3.06, MediaTek t=4.51, TSMC regime KS p=0.009)
 - K1140 三層 robustness 重檢：(1) Newey-West HAC L=5/24/48; (2) Spearman block-permutation; (3) Block-bootstrap block=24 gold standard
 - 結果：HAC L=24 後 1/9 倖存 (MediaTek t=4.33)，block-boot 後 0/9 PASS — K1114 全為 96% overlap artifact

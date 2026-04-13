@@ -602,6 +602,35 @@
     "title": "K1145: A4f-EAV pooled panel estimation (Paper 2 side-finding candidate)",
     "priority": 3,
     "description": "K1140 derivative：在 N=31 stocks pooled panel 上估 single θ_EAV，若顯著 → 'EAV effect 是 universal magnitude not stock-specific'，當 Paper 2 small contribution。若 NS → 純 NULL paper。",
+    "status": "completed",
+    "completed_at": "2026-04-13T22:00:00+08:00"
+  },
+  {
+    "id": "K1146",
+    "title": "K1146: Paper 2 manuscript pivot to universal-magnitude (main thread, NOT agent)",
+    "priority": 2,
+    "description": "K1145 universal-magnitude PASS。Paper 2 contribution 從 dual-NULL 改寫為 'pooled θ_EAV=+6.4e-5 t=5.24 robust across 5 layers, invisible at firm level due to idiosyncratic noise'。需主線程改 paper/2/body.tex，不可派 agent (per CLAUDE.md 禁用 agent 寫論文)。",
+    "status": "pending"
+  },
+  {
+    "id": "K1147",
+    "title": "K1147: Cross-market validation of universal-magnitude (US S&P 500 pooled)",
+    "priority": 2,
+    "description": "K1145 在 TW 找到 universal-magnitude，跨市場驗證 (US large-caps N=30 from S&P 500) 是否同 pattern 存在。若 PASS → 'EAV universal effect is global volatility regularity'，contribution 加大；若 NS → TW 特殊性 caveat。",
+    "status": "pending"
+  },
+  {
+    "id": "K1148",
+    "title": "K1148: EAV refinement — earnings surprise (continuous) vs binary indicator",
+    "priority": 3,
+    "description": "K1145 用 binary EAV 已 PASS。改用 actual surprise magnitude (consensus vs actual EPS deviation) 作 continuous covariate，是否 θ_continuous 訊號更強？",
+    "status": "pending"
+  },
+  {
+    "id": "K1149",
+    "title": "K1149: Pooled spec + PCA factor — θ_EAV vs systematic factor competition",
+    "priority": 3,
+    "description": "K1145 pooled θ_EAV 是否被市場 factor (TWII / VIX) 主導？加 factor PC1/PC2 為 covariate，看 θ_EAV 是否 absorb。若 absorb → 解釋為 factor effect 不純為 EAV; 若 incremental → 真 firm-event effect。",
     "status": "pending"
   }
 ]

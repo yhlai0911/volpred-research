@@ -945,5 +945,21 @@
       "K1114",
       "K1140"
     ]
+  },
+  {
+    "id": "E069",
+    "title": "Pooled panel 揭露 firm-level idiosyncratic SE 掩蓋的 signal",
+    "category": "methodology",
+    "lesson": "當 single-stock estimate mean(θ)=X, SE(θ)≫X 但同方向，t-stat 低 → 不代表 signal 不存在，可能是 firm-level idiosyncratic noise 過大。Pooled MLE (shared parameter across stocks, individual fixed effects on nuisance) 透過 31x effective N 把 SE 降 9.5x，揭露同 mean 但 t=+5.24 BH-PASS 的 signal。",
+    "examples": [
+      "K1109 single-stock mean θ_EAV=+4.64e-5 SE=1.15e-4 t=0.40 NS",
+      "K1145 pooled θ_EAV=+6.36e-5 SE=1.21e-5 t=+5.24 BH-PASS",
+      "Same direction, magnitude consistent. Pooled exposes universal-magnitude signal."
+    ],
+    "recommendation": "對 cross-sectional 假設 dual-NULL 之前，必跑 pooled panel 估 single shared parameter（stock-FE 處理 nuisance），檢查是否 universal-magnitude exists below firm-level noise floor。Bootstrap (n≥150 cluster) 為 primary inference，Hessian Wald 可能膨脹。Placebo permutation 證明 null distribution 居中。",
+    "source_experiments": [
+      "K1109",
+      "K1145"
+    ]
   }
 ]

@@ -1,0 +1,108 @@
+
+========================================================================
+K1145: A4f-EAV pooled panel estimation (N=31 TW stocks)
+========================================================================
+
+Tickers (31): ['2330.TW', '2303.TW', '6239.TW', '2454.TW', '2379.TW', '3034.TW', '3035.TW', '3443.TW', '2388.TW', '2881.TW', '2882.TW', '2883.TW', '2886.TW', '2887.TW', '2603.TW', '2615.TW', '2609.TW', '1301.TW', '1303.TW', '1326.TW', '2002.TW', '2027.TW', '2317.TW', '3045.TW', '2382.TW', '2912.TW', '2637.TW', '1215.TW', '2347.TW', '1210.TW', '2892.TW']
+
+[1/6] Loading stocks (EAV window=1) ...
+    2330.TW: n_obs=3911, n_events=60
+    2303.TW: n_obs=3911, n_events=60
+    6239.TW: n_obs=3911, n_events=60
+    2454.TW: n_obs=3911, n_events=59
+    2379.TW: n_obs=3911, n_events=60
+    3034.TW: n_obs=3911, n_events=60
+    3035.TW: n_obs=3911, n_events=60
+    3443.TW: n_obs=3911, n_events=60
+    2388.TW: n_obs=3911, n_events=60
+    2881.TW: n_obs=3911, n_events=60
+    2882.TW: n_obs=3911, n_events=60
+    2883.TW: n_obs=3911, n_events=59
+    2886.TW: n_obs=3911, n_events=59
+    2887.TW: n_obs=3911, n_events=60
+    2603.TW: n_obs=3911, n_events=60
+    2615.TW: n_obs=3911, n_events=60
+    2609.TW: n_obs=3911, n_events=60
+    1301.TW: n_obs=3911, n_events=60
+    1303.TW: n_obs=3911, n_events=60
+    1326.TW: n_obs=3911, n_events=60
+    2002.TW: n_obs=3911, n_events=60
+    2027.TW: n_obs=3911, n_events=58
+    2317.TW: n_obs=3911, n_events=60
+    3045.TW: n_obs=3911, n_events=61
+    2382.TW: n_obs=3911, n_events=59
+    2912.TW: n_obs=3911, n_events=60
+    2637.TW: n_obs=3684, n_events=57
+    1215.TW: n_obs=3911, n_events=59
+    2347.TW: n_obs=3911, n_events=60
+    1210.TW: n_obs=3911, n_events=60
+    2892.TW: n_obs=3911, n_events=60
+  Loaded 31/31 stocks for default fit
+
+[2/6] Pre-fit panel diagnostic ...
+  Pooled obs: 121,014
+  Mean r=+4.1282e-04, std=1.9501e-02
+  Skew=+0.156, kurt=+5.743
+  Cross-stock variance dispersion: 2.4868e-04
+  Mean events per stock: 59.7
+
+[3/6] Pooled BCD fit (EAV window=1, primary) ...
+    [BCD outer 0] θ_VIX=9.323e-08, θ_EAV=+6.3703e-05, pooled_negll=-329336.69, Δll=+inf, Δθ_eav=1.37e-05
+    [BCD outer 1] θ_VIX=9.323e-08, θ_EAV=+6.3703e-05, pooled_negll=-329341.26, Δll=+4.5650, Δθ_eav=1.53e-14
+    [BCD outer 2] θ_VIX=9.323e-08, θ_EAV=+6.3703e-05, pooled_negll=-329343.81, Δll=+2.5503, Δθ_eav=1.71e-14
+    [BCD outer 3] θ_VIX=9.323e-08, θ_EAV=+6.3661e-05, pooled_negll=-329344.70, Δll=+0.8861, Δθ_eav=4.20e-08
+    [BCD outer 4] θ_VIX=9.323e-08, θ_EAV=+6.3622e-05, pooled_negll=-329345.38, Δll=+0.6864, Δθ_eav=3.93e-08
+    [BCD outer 5] θ_VIX=9.323e-08, θ_EAV=+6.3622e-05, pooled_negll=-329345.87, Δll=+0.4903, Δθ_eav=3.09e-14
+    [BCD outer 6] θ_VIX=9.323e-08, θ_EAV=+6.3622e-05, pooled_negll=-329346.32, Δll=+0.4444, Δθ_eav=2.15e-14
+    [BCD outer 7] θ_VIX=9.323e-08, θ_EAV=+6.3622e-05, pooled_negll=-329346.51, Δll=+0.1955, Δθ_eav=2.16e-14
+
+  → θ_VIX = 9.3234e-08
+  → θ_EAV = +6.3622e-05
+  → pooled loglik = 329349.98
+  → converged = False
+
+  Hessian SE for θ_EAV ...
+  Hessian SE=4.500531046168826e-06, t=14.136476747592521
+
+[4/6] Stock-clustered block bootstrap (gold-standard) ...
+  bootstrap draws: 150/150 (elapsed=426.4s)
+  bootstrap mean=6.772184352972217e-05, SE=1.2136778218976938e-05
+  bootstrap 95% CI = [4.1306308727984814e-05, 9.380079088948486e-05]
+  bootstrap t=5.24205446767625, p=0.0
+
+[5/6] Robustness — alternate EAV definitions ...
+
+  R1 EAV window=3:
+    θ_EAV=+3.7987e-05, SE=2.666260346385522e-06, t=14.247372701672376
+
+  R1 EAV window=5:
+    θ_EAV=+1.7254e-05, SE=1.705344016004977e-06, t=10.11748298334479
+
+  R2 Drop-out 5 random stocks x 5 seeds:
+    seed=42, dropped=['6239.TW', '2887.TW', '1303.TW', '2027.TW', '2892.TW'], θ_EAV=+7.963e-05, t=14.12290244594243
+    seed=43, dropped=['2303.TW', '2883.TW', '2887.TW', '1301.TW', '1303.TW'], θ_EAV=+7.028e-05, t=13.519498691515409
+    seed=44, dropped=['2454.TW', '3443.TW', '1303.TW', '2002.TW', '3045.TW'], θ_EAV=+7.252e-05, t=13.686503189897937
+    seed=45, dropped=['2615.TW', '2609.TW', '2027.TW', '2382.TW', '2892.TW'], θ_EAV=+6.211e-05, t=12.169007398719339
+    seed=46, dropped=['6239.TW', '3035.TW', '2887.TW', '1301.TW', '2912.TW'], θ_EAV=+6.293e-05, t=12.870432962371524
+
+  R3 Compare to K1109 single-stock θ_EAV:
+    K1109 N=31, mean θ₂=+4.639e-05, median=+2.780e-05, SE_mean=1.150e-04, t_mean=0: +0.40, p=0.6894
+    Pooled θ_EAV = +6.362e-05
+    Direction match: YES
+
+  BH-FDR multi-test correction:
+    pooled_hessian: raw_p=0.0000, BH_adj_p=0.0000
+    pooled_bootstrap: raw_p=0.0000, BH_adj_p=0.0000
+    k1109_mean_test: raw_p=0.6894, BH_adj_p=0.6894
+
+  CORE VERDICT: PASS — Paper 2 universal-magnitude side-finding
+
+[6/6] Plots ...
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aefc1925/experiments/k1145/k1145_theta_eav_pool_vs_single.png
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aefc1925/experiments/k1145/k1145_robustness_barplot.png
+
+  Results -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aefc1925/experiments/k1145/k1145_results.json
+  Elapsed: 468.5s
+
+  CORE VERDICT: PASS — Paper 2 universal-magnitude side-finding
+
