@@ -1,0 +1,450 @@
+{
+  "experiment_id": "K1100g_d5",
+  "title": "Overnight gap^2 as info carrier (Student-t PRG) \u2014 night+day-lag gap vs 5-min night RV",
+  "run_at": "2026-04-14T07:00:49",
+  "seed": 42,
+  "references": [
+    "Bollerslev (1987) RESTAT 69(3) \u2014 Student-t GARCH",
+    "Engle & Rangel (2008) RFS 21(3) \u2014 tau*g multiplicative PRG",
+    "French & Roll (1986) JFE 17(1), 5-26 \u2014 Non-trading hour information",
+    "Andersen, Bollerslev, Huang (2011) JoE 160(1) \u2014 Overnight jumps",
+    "Harvey, Leybourne & Newbold (1997) IJF \u2014 HLN DM correction",
+    "Harvey (2016) JF \u2014 t>3 threshold"
+  ],
+  "data": {
+    "source": "TAIFEX TX 2017-2021 (K1100g_d1 tick-derived session cache)",
+    "cache_file": "_cache_taifex_sessions_2017-2021.parquet",
+    "n_aligned": 1071,
+    "gap_descriptives": {
+      "gap_night_t": {
+        "mean": 0.0009137114005713745,
+        "sd": 0.01183520220860192,
+        "skew": -1.4305491847513445,
+        "excess_kurt": 11.096267590995895
+      },
+      "gap_day_lag": {
+        "mean": -0.0005971885337703979,
+        "sd": 0.010493017560260982,
+        "skew": 0.9444624704185915,
+        "excess_kurt": 9.124663122178069
+      },
+      "gap_total": {
+        "mean": 0.00025136693150684203,
+        "sd": 0.0007696384262822292
+      },
+      "var_ratio_gap_total_to_night_r2": 36.70473601517137
+    }
+  },
+  "design": {
+    "innovation": "student",
+    "prg_kernel": "tau*g multiplicative, Student-t innovation (Var(r)=h)",
+    "models": {
+      "M1_baseline": "day-only PRG (no exog)",
+      "M2_gap_night": "M1 + gap_night[t]^2 contemp (overnight gap only)",
+      "M2_gap_day_lag": "M1 + gap_day[t-1]^2 lagged (prev day close-to-night-open)",
+      "M2_gap_total": "M1 + gap_night[t]^2 + gap_day[t-1]^2 (all legal gap info)",
+      "M2_signed_gn": "M1 + gap_night[t] signed (asymmetry test, NOT ^2)",
+      "REF_night_r2": "M1 + r_night[t]^2 (K1100g_d3 M4 spec, benchmark)"
+    },
+    "train_start": "2017-01-01",
+    "train_end": "2019-12-31",
+    "test_start": "2020-01-01",
+    "test_end": "2021-12-31",
+    "refit_every": 5,
+    "n_train": 607,
+    "n_test": 464
+  },
+  "is_fits": {
+    "M1_baseline": {
+      "success": true,
+      "nll": -3859.63407377179,
+      "log_lik": 3859.63407377179,
+      "aic": -7699.26814754358,
+      "bic": -7649.51400826902,
+      "k_params": 10,
+      "df_est": 5.11801986902782,
+      "xn_coef": null,
+      "params": [
+        4.649045580764234e-05,
+        0.06996066836470968,
+        5.276352696701441e-06,
+        -6.4288291691496136e-06,
+        2.824695545395833e-06,
+        -5.439667754869708e-06,
+        0.05099831626952427,
+        0.04306627484646484,
+        0.8364991280073607,
+        5.11801986902782
+      ]
+    },
+    "M2_gap_night": {
+      "success": true,
+      "nll": -3868.8987071927763,
+      "log_lik": 3868.8987071927763,
+      "aic": -7715.797414385553,
+      "bic": -7661.067861183537,
+      "k_params": 11,
+      "df_est": 6.498933130846754,
+      "xn_coef": 0.060079536580721155,
+      "params": [
+        5.601752220712201e-05,
+        0.04817330760973562,
+        1.4345116077773406e-06,
+        -8.510855575765794e-06,
+        1.2746733675108188e-06,
+        -6.830628479888356e-06,
+        0.07358507565310116,
+        0.054972128499413166,
+        0.8665356322497831,
+        0.060079536580721155,
+        6.498933130846754
+      ]
+    },
+    "M2_gap_day_lag": {
+      "success": true,
+      "nll": -3863.432854329008,
+      "log_lik": 3863.432854329008,
+      "aic": -7704.865708658016,
+      "bic": -7650.136155456001,
+      "k_params": 11,
+      "df_est": 6.498933130177144,
+      "xn_coef": 0.06007950141641179,
+      "params": [
+        5.829040164260914e-05,
+        0.048173305146960735,
+        2.728643682094017e-06,
+        -8.77011182502606e-06,
+        8.433186881122602e-06,
+        -7.588282173879652e-06,
+        0.07358510493298492,
+        0.0549721409235655,
+        0.8665356498348624,
+        0.06007950141641179,
+        6.498933130177144
+      ]
+    },
+    "M2_gap_total": {
+      "success": true,
+      "nll": -3869.0706994599477,
+      "log_lik": 3869.0706994599477,
+      "aic": -7716.141398919895,
+      "bic": -7661.41184571788,
+      "k_params": 11,
+      "df_est": 6.498933130801595,
+      "xn_coef": 0.06007950264233906,
+      "params": [
+        5.731303361965443e-05,
+        0.04817330435318667,
+        4.620991043081743e-08,
+        -9.270798883164824e-06,
+        2.4999349435877488e-06,
+        -8.540575052093774e-06,
+        0.07358509930519497,
+        0.054972135607598185,
+        0.866535659867908,
+        0.06007950264233906,
+        6.498933130801595
+      ]
+    },
+    "M2_signed_gn": {
+      "success": true,
+      "nll": -3861.403213761768,
+      "log_lik": 3861.403213761768,
+      "aic": -7700.806427523536,
+      "bic": -7646.07687432152,
+      "k_params": 11,
+      "df_est": 7.999999961417967,
+      "xn_coef": -0.0005140127505935384,
+      "params": [
+        4.19588996833813e-05,
+        0.04999778218549649,
+        3.28605426383617e-06,
+        -6.022797612427338e-06,
+        1.7373855333256183e-06,
+        -4.083345942134997e-06,
+        0.050003687527891,
+        0.05000220213114901,
+        0.8000020230593793,
+        -0.0005140127505935384,
+        7.999999961417967
+      ]
+    },
+    "REF_night_r2": {
+      "success": true,
+      "nll": -3867.785166900791,
+      "log_lik": 3867.785166900791,
+      "aic": -7713.570333801582,
+      "bic": -7658.840780599567,
+      "k_params": 11,
+      "df_est": 6.606602864904392,
+      "xn_coef": 0.1402529240933859,
+      "params": [
+        4.0962056698399236e-05,
+        0.0735872447269949,
+        -3.860605744611057e-07,
+        -6.09766298362717e-06,
+        5.599046952971054e-06,
+        -7.501979833106636e-06,
+        0.03234317665561721,
+        0.07464391805796611,
+        0.8489524432375921,
+        0.1402529240933859,
+        6.606602864904392
+      ]
+    }
+  },
+  "is_lrt_vs_M1": {
+    "M2_gap_night": {
+      "chi2": 18.529266841972458,
+      "p_value": 1.6731530494862312e-05
+    },
+    "M2_gap_day_lag": {
+      "chi2": 7.597561114435848,
+      "p_value": 0.005844730960363975
+    },
+    "M2_gap_total": {
+      "chi2": 18.87325137631524,
+      "p_value": 1.3969784621759018e-05
+    },
+    "M2_signed_gn": {
+      "chi2": 3.538279979955405,
+      "p_value": 0.05996761678114537
+    },
+    "REF_night_r2": {
+      "chi2": 16.30218625800171,
+      "p_value": 5.4001611649145964e-05
+    }
+  },
+  "oos_metrics": {
+    "M2_gap_night": {
+      "n_valid": 464,
+      "lrt_chi2": 7.301221942112079,
+      "lrt_p": 0.0068907732150521595,
+      "dm_qlike_t_hln": 1.2917172542797097,
+      "dm_qlike_p": 0.19645507991231126,
+      "dm_loglik_t_hln": 0.6121006650121605,
+      "dm_loglik_p": 0.5404711575923904,
+      "qlike_base_mean": 1.6434481711632036,
+      "qlike_test_mean": 1.5653431167185488,
+      "qlike_improv_pct": 4.752510959282245,
+      "ll_base_sum": 1550.700542351051,
+      "ll_test_sum": 1554.351153322107,
+      "df_test_mean": 6.836207740800946,
+      "df_base_mean": 8.683193553527538,
+      "sub_2020": {
+        "n": 233,
+        "qlike_base_mean": 1.7690128202769757,
+        "qlike_test_mean": 1.6308082029569253,
+        "qlike_improv_pct": 7.812527740664514,
+        "lrt_chi2": 5.709519438643838,
+        "lrt_p": 0.016873157796198912,
+        "dm_t_hln": 1.2076263981797977,
+        "dm_p": 0.22719100044302376
+      },
+      "sub_2021": {
+        "n": 231,
+        "qlike_base_mean": 1.516796382230265,
+        "qlike_test_mean": 1.4993112331967224,
+        "qlike_improv_pct": 1.1527683767173023,
+        "lrt_chi2": 1.5917025034689232,
+        "lrt_p": 0.207083062135489,
+        "dm_t_hln": 0.4831985518851409,
+        "dm_p": 0.6289547634665533
+      }
+    },
+    "M2_gap_day_lag": {
+      "n_valid": 464,
+      "lrt_chi2": 1.1566816667336752,
+      "lrt_p": 0.2821547981137822,
+      "dm_qlike_t_hln": 0.13873022341812796,
+      "dm_qlike_p": 0.8896633341957882,
+      "dm_loglik_t_hln": 0.10265888202393805,
+      "dm_loglik_p": 0.9182337085538101,
+      "qlike_base_mean": 1.6434481711632036,
+      "qlike_test_mean": 1.6365541322499269,
+      "qlike_improv_pct": 0.4194862384006488,
+      "ll_base_sum": 1550.700542351051,
+      "ll_test_sum": 1551.2788831844177,
+      "df_test_mean": 6.961616377192081,
+      "df_base_mean": 8.683193553527538,
+      "sub_2020": {
+        "n": 233,
+        "qlike_base_mean": 1.7690128202769757,
+        "qlike_test_mean": 1.8211022301330717,
+        "qlike_improv_pct": -2.944546769759437,
+        "lrt_chi2": 0.0,
+        "lrt_p": 1.0,
+        "dm_t_hln": -0.6149670010880746,
+        "dm_p": 0.5385765132528033
+      },
+      "sub_2021": {
+        "n": 231,
+        "qlike_base_mean": 1.516796382230265,
+        "qlike_test_mean": 1.4504082153374902,
+        "qlike_improv_pct": 4.376867433924063,
+        "lrt_chi2": 8.740078528132926,
+        "lrt_p": 0.0031129111355089334,
+        "dm_t_hln": 1.32339601841811,
+        "dm_p": 0.1857037151921257
+      }
+    },
+    "M2_gap_total": {
+      "n_valid": 464,
+      "lrt_chi2": 14.368375607699818,
+      "lrt_p": 0.00015030558270734407,
+      "dm_qlike_t_hln": 1.48987928699781,
+      "dm_qlike_p": 0.13625597868567785,
+      "dm_loglik_t_hln": 0.8892116315973462,
+      "dm_loglik_p": 0.3738893527761773,
+      "qlike_base_mean": 1.6434481711632036,
+      "qlike_test_mean": 1.5347136814648783,
+      "qlike_improv_pct": 6.616240877335668,
+      "ll_base_sum": 1550.700542351051,
+      "ll_test_sum": 1557.8847301549008,
+      "df_test_mean": 6.8362077392579295,
+      "df_base_mean": 8.683193553527538,
+      "sub_2020": {
+        "n": 233,
+        "qlike_base_mean": 1.7690128202769757,
+        "qlike_test_mean": 1.6129100786074326,
+        "qlike_improv_pct": 8.82428549303006,
+        "lrt_chi2": 7.536566359345898,
+        "lrt_p": 0.006045915224846543,
+        "dm_t_hln": 1.1468494746108617,
+        "dm_p": 0.25144383754659283
+      },
+      "sub_2021": {
+        "n": 231,
+        "qlike_base_mean": 1.516796382230265,
+        "qlike_test_mean": 1.4558402592388384,
+        "qlike_improv_pct": 4.018741322536518,
+        "lrt_chi2": 6.831809248354148,
+        "lrt_p": 0.00895485130811613,
+        "dm_t_hln": 1.2126483581660656,
+        "dm_p": 0.22526429177963347
+      }
+    },
+    "M2_signed_gn": {
+      "n_valid": 464,
+      "lrt_chi2": 0.0,
+      "lrt_p": 1.0,
+      "dm_qlike_t_hln": -0.2671860088720813,
+      "dm_qlike_p": 0.7893259479974124,
+      "dm_loglik_t_hln": -0.020427684746970227,
+      "dm_loglik_p": 0.983702199221034,
+      "qlike_base_mean": 1.6434481711632036,
+      "qlike_test_mean": 1.6601585810961592,
+      "qlike_improv_pct": -1.0167895907011324,
+      "ll_base_sum": 1550.700542351051,
+      "ll_test_sum": 1550.5959540853687,
+      "df_test_mean": 7.999999656192438,
+      "df_base_mean": 8.683193553527538,
+      "sub_2020": {
+        "n": 233,
+        "qlike_base_mean": 1.7690128202769757,
+        "qlike_test_mean": 1.8175747746399826,
+        "qlike_improv_pct": -2.745144286484229,
+        "lrt_chi2": 0.0,
+        "lrt_p": 1.0,
+        "dm_t_hln": -0.395154962416572,
+        "dm_p": 0.6927285283402769
+      },
+      "sub_2021": {
+        "n": 231,
+        "qlike_base_mean": 1.516796382230265,
+        "qlike_test_mean": 1.5013794767857225,
+        "qlike_improv_pct": 1.016412329641363,
+        "lrt_chi2": 4.590945941253267,
+        "lrt_p": 0.032141270842137026,
+        "dm_t_hln": 0.5680858500339176,
+        "dm_p": 0.5699766753906479
+      }
+    },
+    "REF_night_r2": {
+      "n_valid": 464,
+      "lrt_chi2": 14.937939215292317,
+      "lrt_p": 0.00011110602785890933,
+      "dm_qlike_t_hln": 2.0095845427719303,
+      "dm_qlike_p": 0.044475178573585294,
+      "dm_loglik_t_hln": 1.774890076699909,
+      "dm_loglik_p": 0.07591603911126832,
+      "qlike_base_mean": 1.6434481711632036,
+      "qlike_test_mean": 1.5810069575196635,
+      "qlike_improv_pct": 3.7994026668541285,
+      "ll_base_sum": 1550.700542351051,
+      "ll_test_sum": 1558.169511958697,
+      "df_test_mean": 6.633818956361308,
+      "df_base_mean": 8.683193553527538,
+      "sub_2020": {
+        "n": 233,
+        "qlike_base_mean": 1.7690128202769757,
+        "qlike_test_mean": 1.6876689734474117,
+        "qlike_improv_pct": 4.598262143562526,
+        "lrt_chi2": 9.474760584813794,
+        "lrt_p": 0.00208318070846758,
+        "dm_t_hln": 1.3844652228014003,
+        "dm_p": 0.16621604973642579
+      },
+      "sub_2021": {
+        "n": 231,
+        "qlike_base_mean": 1.516796382230265,
+        "qlike_test_mean": 1.4734214609345322,
+        "qlike_improv_pct": 2.8596403448665453,
+        "lrt_chi2": 5.4631786304789784,
+        "lrt_p": 0.0194212860133548,
+        "dm_t_hln": 1.994339384461805,
+        "dm_p": 0.04611497792488284
+      }
+    }
+  },
+  "cross_model_dm": {
+    "M2_gap_night_vs_REF_night_r2": {
+      "n_valid": 464,
+      "qlike_a": 1.5653431167185488,
+      "qlike_b": 1.5810069575196635,
+      "dm_qlike_t_hln": -0.3073473012302581,
+      "dm_qlike_p": 0.7585790356130966,
+      "dm_loglik_t_hln": 0.8214973281214717,
+      "dm_loglik_p": 0.41136304538573
+    },
+    "M2_gap_total_vs_REF_night_r2": {
+      "n_valid": 464,
+      "qlike_a": 1.5347136814648783,
+      "qlike_b": 1.5810069575196635,
+      "dm_qlike_t_hln": -0.7222459273863379,
+      "dm_qlike_p": 0.47014329102293884,
+      "dm_loglik_t_hln": 0.043475720367983126,
+      "dm_loglik_p": 0.9653223185613242
+    },
+    "M2_gap_night_vs_M2_gap_total": {
+      "n_valid": 464,
+      "qlike_a": 1.5653431167185488,
+      "qlike_b": 1.5347136814648783,
+      "dm_qlike_t_hln": 0.9566482028000513,
+      "dm_qlike_p": 0.33874485030166523,
+      "dm_loglik_t_hln": 0.8179680714891354,
+      "dm_loglik_p": 0.41337541892472873
+    }
+  },
+  "verdict": {
+    "primary": "H3_NIGHT_R2_BETTER",
+    "explanation": "REF_night_r2 DM t = +2.01 dominates M2_gap_total DM t = +1.49. Pure gap^2 UNDERPERFORMS 5-min night RV; true info carrier is intra-session night movement, not just gaps.",
+    "criteria_detail": {
+      "gap_total_harvey_dm_gt_3": false,
+      "gap_total_lrt_gt_7_88": true,
+      "gap_total_qlike_improv_gt_1pct": true,
+      "gap_total_dm_t_hln": 1.48987928699781,
+      "ref_night_r2_dm_t_hln": 2.0095845427719303,
+      "gap_minus_ref_dm_diff": -0.5197052557741204
+    },
+    "sanity_flags": [],
+    "paper3_reframe_anchor_strengthened": false
+  },
+  "limitations": [
+    "OOS N \u2248 464 test obs still below Harvey asymptotic comfort zone",
+    "Gaussian gap^2 assumption ignores occasional extreme gaps (e.g. flash-crash) \u2014 robustness could use winsorized gap",
+    "gap_day_lag adds 1-day lag information, but gap_night and r_night share overlap (r_night includes 15:00 open -> 05:00 close, while gap_night includes 05:00 -> 08:45 morning gap \u2014 small overlap at the join)",
+    "Single market (TAIFEX). Cross-market replication (SPY overnight gap, N225 Tokyo overnight) still open.",
+    "Symmetric Student-t; TAIFEX night skew \u2248 \u22121.6 suggests asymmetric-t (Hansen 1994) may further refine."
+  ]
+}
