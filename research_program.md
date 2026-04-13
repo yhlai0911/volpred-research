@@ -611,6 +611,16 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 17. Paper 2 mechanism narrowing: binary sufficient, surprise size 無關（2026-04-13 K1151）
+**Continuous EAV surprise spec 全面失效 — 機制非 surprise-size driven**
+- US S&P 500 N=30 (K1147 cache) 同 panel: continuous |Surprise%| z-score winsor p99 取代 binary EAV
+- Binary θ=+1.72e-4 boot t=+4.49 p=0.000 (K1147 confirmed) vs Continuous θ=+5.26e-6 boot t=+1.11 p=0.413
+- Placebo continuous z=+1.60 p=0.10 (跟 null 無法區別)
+- **ΔAIC binary - continuous = -5479** (binary 嚴格更佳)
+- **Mechanism evidence**: announcement-day vol clustering 跟 surprise size 無關 → 解釋為 attention-based vol spike 或 IV crush 一致性 resolve，非 information-shock-magnitude 驅動
+- Paper 2 narrative 微調：「effect characterised by announcement-day information-processing friction rather than surprise-magnitude-scaled information shock」
+- 衍生 K1157 (JP universality verification), K1161 (options IV crush as alt continuous regressor)
+
 ### 16. Paper 2 三市場全 PASS：true global volatility regularity（2026-04-13 K1150）
 **TW + US + JP 三市場全 universal-magnitude PASS — 真 cross-market regularity 確認**
 - JP TOPIX top-30 pooled θ_EAV = +1.413e-4，bootstrap (n=150) t=+11.99，95% CI [+1.29e-4, +1.76e-4]

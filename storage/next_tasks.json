@@ -255,7 +255,8 @@
     "title": "K1067d: Earnings surprise magnitude as continuous EAV",
     "priority": 2,
     "description": "K1067b 衍生：取代 binary indicator，用 EPS surprise magnitude 作連續 EAV，提升 non-event days 的 signal density。",
-    "status": "pending"
+    "status": "superseded",
+    "superseded_by": "K1151 (same continuous-surprise EAV concept, post K1147 derivative)"
   },
   {
     "id": "K1067e",
@@ -268,8 +269,8 @@
     "id": "K1061",
     "title": "K1061: Full TWSE 50 Constituents EAV",
     "priority": 2,
-    "description": "Extend K1068 CAR to all 50 constituents for larger N",
-    "status": "pending"
+    "description": "[K1145+K1147+K1150 3-market complete] N=50 sample expansion 邊際價值低，3 markets × N=30 已達 universality 證據。除非 reviewer 要求 N≥50，否則不做。",
+    "status": "deprioritized"
   },
   {
     "id": "Paper9_dual_target_integration",
@@ -647,7 +648,8 @@
     "title": "K1151: Continuous earnings surprise vs binary EAV indicator",
     "priority": 3,
     "description": "K1145+K1147 binary EAV 已 PASS。改用 actual surprise (consensus EPS deviation) 作 continuous covariate，看 θ_continuous 是否更強且更精確 (smaller SE)。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-13T23:50:00+08:00"
   },
   {
     "id": "K1152",
@@ -668,6 +670,20 @@
     "title": "K1156: 5-market validation visualization for Paper 2 cover figure",
     "priority": 3,
     "description": "Three-market table 已成核心 finding；若 K1153 EU 也 PASS → 4-market。視覺化 fig 為 Paper 2 cover：x=market, y=θ_EAV with 95% CI bars + placebo z annotation。",
+    "status": "pending"
+  },
+  {
+    "id": "K1157",
+    "title": "K1157: JP TOPIX continuous EAV — verify binary-sufficient universality",
+    "priority": 3,
+    "description": "K1151 (US) 顯示 binary > continuous。檢驗 K1150 JP TOPIX 是否同 pattern。若 universal binary-sufficient → mechanism 進一步穩固。",
+    "status": "pending"
+  },
+  {
+    "id": "K1161",
+    "title": "K1161: Options-implied IV crush as continuous EAV regressor",
+    "priority": 3,
+    "description": "K1151 yfinance Surprise(%) noisy。改用 30-day IV at T-1 minus T+1 (IV crush) 作為市場彙總 continuous expected impact。OptionMetrics 或 polygon API 需要付費；先試 yfinance options chain 拼湊。",
     "status": "pending"
   }
 ]

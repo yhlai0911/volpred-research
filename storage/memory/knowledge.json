@@ -26034,5 +26034,24 @@
     "data_source": "yfinance TOPIX top-30 + ^VIX 2014-2025; earnings_dates from yfinance API",
     "created_at": "2026-04-13T23:30:00+08:00",
     "updated_at": "2026-04-13T23:30:00+08:00"
+  },
+  {
+    "id": "k1151-1776092219",
+    "experiment_id": "K1151",
+    "title": "K1151 binary sufficient: continuous EAV surprise fails — mechanism is attention/IV-crush not surprise-size",
+    "content": "[提出: Claude, 執行: Claude] K1145+K1147+K1150 三市場 binary EAV 全 PASS 後檢驗：continuous surprise (|actual-estimate|/|estimate| z-score winsor p99) 是否提供更強信號？US S&P 500 N=30 同 K1147 panel 並對比。**結果**: continuous spec 全面失效。Binary θ=+1.72e-4 bootstrap t=+4.49 p=0.000；continuous θ=+5.26e-6 bootstrap t=+1.11 p=0.413, placebo z=+1.60 p=0.10。**ΔAIC = AIC_binary - AIC_continuous = -5479** (binary 嚴格更佳, 2740 loglik units)。**Mechanism evidence**: announcement-day vol clustering 跟 surprise size 無關 — 拒絕 'surprise size drives vol' 假設。合理機制：(1) attention-based vol spike (trading volume / hedging 集中); (2) earnings IV crush 一致性 resolve; (3) yfinance Surprise(%) 是 noisy proxy 未含 guidance/revenue/conference call tone。**Paper 2 narrative**: 保留 binary EAV 為 main spec，K1151 當 mechanism control。'effect characterised by announcement-day information-processing friction rather than surprise-magnitude-scaled information shock'。Self-challenge: continuous Hessian t=10.55 > 8 觸發 Rule #5 但 bootstrap t=1.11 才是誠實數字 (pooled panel Hessian inflation 同 K1145/K1147 pattern, winsor p99 切 1.04% 沒過度清洗)。衍生 K1157 (JP TOPIX 同測 universal binary-sufficient), K1161 (options-implied IV crush 取代 surprise 為 continuous regressor)。",
+    "tags": [
+      "K1151",
+      "Paper2",
+      "continuous-EAV",
+      "binary-vs-continuous",
+      "mechanism",
+      "AIC",
+      "negative-result",
+      "K1147-extension"
+    ],
+    "data_source": "yfinance K1147 cache + earnings_dates Surprise(%) 2014-2025",
+    "created_at": "2026-04-13T23:50:00+08:00",
+    "updated_at": "2026-04-13T23:50:00+08:00"
   }
 ]
