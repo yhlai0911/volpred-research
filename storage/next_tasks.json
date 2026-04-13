@@ -400,10 +400,10 @@
   },
   {
     "id": "K1116b_recheck",
-    "title": "K1116/K1118 重檢 FRED publication delay bug",
+    "title": "K1116b: FRED publication delay recheck (verified)",
     "priority": 2,
-    "description": "Agent aa1bf9a068283eb52 in worktree agent-k1116b。Critical: K1116/K1118 用 FRED EPU/NFCI/STLFSI，K1121 揭露 publication delay bug。重跑加正確 shift，確認 Paper 4 compendium 結論不變。",
-    "status": "in_progress"
+    "description": "H2 concerning verdict: 3 cells flip threshold, 最重要 TLT M4 NFCI t=+3.74 → +1.96 (47% bug artifact)。Paper 4 narrative 反而 STRENGTHENED (universal null across 4 classes)。SPY M4 從 -3.00→-3.61 active harm pattern 確認。",
+    "status": "completed"
   },
   {
     "id": "K1122",
@@ -417,6 +417,27 @@
     "title": "K1123: Cross-asset alt-data allocation (SPY+GLD+TLT)",
     "priority": 3,
     "description": "K1121 衍生：3-asset allocation 用 alt-data signal。",
+    "status": "pending"
+  },
+  {
+    "id": "K1116c",
+    "title": "K1116c: ALFRED vintage-based intraday release-time alignment",
+    "priority": 3,
+    "description": "K1116b 衍生：ultimate publication-delay fix using vintage data。",
+    "status": "pending"
+  },
+  {
+    "id": "K1117b",
+    "title": "K1117b: Monthly-frequency alt-data re-test",
+    "priority": 3,
+    "description": "K1116b 衍生：publication delay <<25% of period，monthly 是 cleanest null test。",
+    "status": "pending"
+  },
+  {
+    "id": "K1118b",
+    "title": "K1118b: Currency cross-asset extension (DXY/EUR/JPY)",
+    "priority": 3,
+    "description": "K1116b 衍生：擴大 universal-sufficiency 到 currency markets。",
     "status": "pending"
   }
 ]
