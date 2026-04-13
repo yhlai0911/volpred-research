@@ -7,7 +7,7 @@ SessionStart hook 會提醒讀這份。這裡只放**每次新 session 要執行
 ```python
 CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點草稿池數量、今日已發佈文章（一般4/研究2/每日1）、草稿 buffer ≥4 (2) 讀 research_program.md 事件日曆，WebSearch 確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (3) 有事件→立即寫事件文章（--status published）(4) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h)、next_tasks 是否為空 (5) 根據缺口用 TaskCreate 列出今日必做清單 (6) 文章撰寫前必做 LanceDB 語義查重 + grep (7) 輸出今日計劃告訴用戶")
 
-CronCreate(cron="11 */2 * * *", prompt="繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 分配編號前先 ls experiments/ 確認該編號目錄不存在，已存在則跳到下一個可用編號。同時檢查 .claude/worktrees/ 確認沒有 agent 在用該編號 (3) 啟動 agent 執行 (4) 完成後從 research_program.md 補充 next_tasks (5) next_tasks 空了才讀 research_program.md 全文。絕對不可只 check status。注意：若前一個任務還在進行中，直接跳過不重複啟動")
+CronCreate(cron="*/4 * * * *", prompt="繼續研究：(1) 讀 storage/next_tasks.json 取最高優先任務 (2) 分配編號前先 ls experiments/ 確認該編號目錄不存在，已存在則跳到下一個可用編號。**同時檢查 .claude/worktrees/ 確認沒有 agent 在用該編號** (3) 啟動 agent 執行 (4) 完成後從 research_program.md 補充 next_tasks (5) next_tasks 空了才讀 research_program.md 全文。絕對不可只 check status。**注意：cron 每 4 分鐘觸發以維持 cache warm（在 5 分鐘 cache TTL 內），但若前一個任務還在進行中，直接跳過不重複啟動（避免編號衝突）**")
 
 CronCreate(cron="17 */6 * * *", prompt="會員問題研究")
 

@@ -207,10 +207,11 @@ CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07
 
 #### 全速模式（確認穩定後加入）
 ```
-CronCreate(cron="5,20,35,50 8-23 * * *", prompt="繼續研究")         # 08-23時 每15分鐘
-CronCreate(cron="5 0-7 * * *", prompt="繼續研究")                   # 00-07時 每小時
+CronCreate(cron="*/4 * * * *", prompt="繼續研究")                   # 每 4 分鐘 heartbeat（在 5 分鐘 cache TTL 內維持 warm）
 CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")   # :37 每2小時
 ```
+
+**為什麼 4 分鐘**：5 分鐘 cache TTL 內維持 warm 又不過度 heartbeat。原 15 分鐘是早期保守設定；3 分鐘曾測過但比 4 分鐘額外消耗 25% heartbeat 成本而效益相同。
 
 也可以安排**單次性提醒**避免忘記（範例格式，日期需依實際事件更新）：
 ```

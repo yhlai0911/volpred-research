@@ -347,7 +347,7 @@ uv run volpred ops question-rerank --evaluations-json '[...]'
 
 ## 自主研究模式
 **研究永不停止。** 完成任何任務後**立刻執行下一個任務**，不需要回報等待、不需要徵求同意。在同一個 turn 中連續做多個實驗（用 agent team 並行 + 主線串行）。不要做完一個實驗就停下來——連續鏈式執行直到使用者主動中斷。
-**透過 session cron 每 2 小時自動觸發 autonomous-research 繼續研究。**
+**透過 session cron 每 4 分鐘 heartbeat 觸發 autonomous-research 繼續研究**（在 5 分鐘 cache TTL 內維持 warm）。**前一個任務進行中時直接跳過不重複啟動**（避免編號衝突）。
 
 **⚠️ 反空轉原則（2026-03-31 教訓）：**
 - **「方向窮盡」是假象** — research_program.md 永遠有 100+ 未完成項目。不要靠腦中判斷「沒事做」，要讀文件。
