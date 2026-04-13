@@ -29,10 +29,31 @@
   },
   {
     "id": "K1100b",
-    "title": "K1100b: Copula-GARCH on tail-dependent pairs (SPY-TLT, SPY-QQQ)",
+    "title": "K1100b: Copula-GARCH on 5 pairs",
     "priority": 2,
-    "status": "pending",
-    "description": "K1100 衍生：在 tail-dependent pairs 上 copula 可能有 edge。SPY-TLT (flight-to-quality) / SPY-QQQ (co-crash)。"
+    "status": "completed",
+    "description": "NULL 全部 5 pairs (含 SPY-QQQ λ_L=0.589 high tail-dep)。SPY-TLT 負相關 copula 結構性 FAIL (DCC Harvey -4.29***)。Paper 3 不擴充，深挖 spot-futures periodic 結構。"
+  },
+  {
+    "id": "K1100c",
+    "title": "K1100c: Vine / skew-t copula for asymmetric tail",
+    "priority": 3,
+    "description": "K1100b 衍生：單 Student-t 抓非對稱尾部不夠，用 pair-copula construction (PCC) 或 skew-t。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100d",
+    "title": "K1100d: VIX regime-switching copula",
+    "priority": 3,
+    "description": "K1100b 衍生：低 VIX → Gaussian copula；高 VIX → Student-t。Regime-switching 可能超越 uniform DCC。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100f",
+    "title": "K1100f: Copula + PRG/PRS periodic structure (Paper 3 正路)",
+    "priority": 2,
+    "description": "K1100b 啟示：Lai 2024 PRS 成功於 spot-futures 特殊結構。結合 K868/K868e periodic 模型，回到 copula 真正 effective 的 domain。",
+    "status": "pending"
   },
   {
     "id": "K1100c",

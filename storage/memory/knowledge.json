@@ -25616,5 +25616,25 @@
     ],
     "data_source": "K1109 firm_level_results.csv + yfinance covariates (31 TWSE firms)",
     "created_at": "2026-04-13T05:55:03.953093+00:00"
+  },
+  {
+    "id": "k1100b-1776061913",
+    "experiment_id": "K1100b",
+    "title": "K1100b: Copula-GARCH on tail-dependent pairs — NULL across all 5 pairs, Paper 3 generalization FAILS",
+    "content": "[提出: Claude pivot from Paper 2 3 連 null, 執行: Claude] K1100 測 SPY-GLD (tail-independent) NULL；K1100b 測 5 pairs 包含 tail-dependent。**結果全 NULL**：SPY-QQQ λ_L=0.589 (strongest) DM=+0.624 NS、SPY-XLF λ_L=0.467 DM=+1.81 NS、SPY-IWM λ_L=0.400 DM=+2.20*（但無 Harvey）、**SPY-TLT 負相關 DCC 顯著勝 Harvey=-4.29 *** (copula 集體失敗)**、SPY-GLD 重現 K1100 NULL (sanity check)。Spearman(λ_L, DM)=+0.600, p=0.285（方向對 N=5 underpowered）。**機制**：portfolio variance 由 ρ 主導，copula 額外尾部資訊在 50/50 mixing 下被平均化。**Paper 3 重大啟示**：Lai 2024 APFM PRS copula 成功來自 **spot-futures ~0.99 near-perfect correlation + 特殊時間結構**，不可推廣到 general equity portfolios。Paper 3 應 **聚焦 periodic return 結構 + spot-futures hedging**，不是擴充 asset universe。**SPY-TLT 反例**：負相關下 Clayton θ→0 退化為獨立，Student-t MC VaR 噪音大，Gaussian DCC 閉式解最有效率——copula family 對負相關有 structural limitation。Runtime 1170s（5 pairs × MLE + 5000 MC paths）。Commit 49657d35。**Paper 3 方向修正**：不擴充，改深挖 periodic 結構。",
+    "tags": [
+      "Paper_3",
+      "copula-GARCH",
+      "tail-dependent-FAIL",
+      "DCC-A4f",
+      "SPY-QQQ",
+      "SPY-TLT-DCC-wins",
+      "negative-correlation-copula-limitation",
+      "Lai2024-spot-futures-specific",
+      "K1100-continuation",
+      "null-result"
+    ],
+    "data_source": "yfinance SPY/QQQ/IWM/XLF/TLT/GLD + VIX/VXN/OVX + GVZ (2008-06 to 2026-04)",
+    "created_at": "2026-04-13T06:31:53.214290+00:00"
   }
 ]

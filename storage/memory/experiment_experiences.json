@@ -735,5 +735,20 @@
       "observable-vs-private-data"
     ],
     "created_at": "2026-04-13T05:55:03.953093+00:00"
+  },
+  {
+    "id": "E055",
+    "title": "Copula family 的 structural limitation — 負相關 + 50/50 portfolio 天生不利",
+    "lesson": "K1100b 5 pair 測試揭露 copula-GARCH 在兩種情境下 structurally 不利：\n\n1. **負相關 pair (SPY-TLT)**: Clayton copula 數學上只支持 positive dependence (θ≥0)，負相關時強制退化為獨立 copula → Trinity FAIL。Student-t copula 可處理 ρ<0 但 MC VaR 在低 λ_L 下 sampling noise 放大。此時 Gaussian DCC 閉式解反而最精確。\n\n2. **50/50 portfolio variance**: Var(w1·X1 + w2·X2) = w1²σ1² + w2²σ2² + 2·w1·w2·σ1·σ2·ρ，tail dependence 是**條件分配**資訊，在 portfolio 一次 aggregate 後被「平均化」。只有在 single-asset 或 path-dependent 策略（如 VaR breach persistence、drawdown analytics）才會顯出 copula 優勢。\n\n**通則**：\n- 檢討 user 原本的「copula 方法可擴充」直覺時，要問「原方法在什麼結構上成功」——Lai 2024 是 spot-futures（corr ~0.99、近乎 collinear、結構性 Granger 關係），general equity 不具備這個結構\n- tail dependence 高 ≠ copula 必贏：還要看 portfolio weighting、評估 metric（point forecast vs distributional）、correlation sign\n- copula 真正適合的場景：**(a) 高正相關（near-collinear）pairs (b) 單一資產的 path-dependent 應用 (c) 非對稱 dependence（如 contagion 期 downside > upside correlation）**\n\n**Paper 3 重新定位**：\n- ❌ 不擴充到 general equity universe（此路已證 null）\n- ✅ 深挖 spot-futures periodic structure（回到 Lai 2024 根源）\n- ✅ 或 pivot 到 asymmetric contagion copula（K1100c Vine / skew-t）\n\n**避免的陷阱**：我原本以為 Paper 2 (Taiwan firm) 失敗後，pivot 到 Paper 3 (US copula) 是「完全不同方向」就 OK。但 K1100b 發現 Paper 3 的 default 擴充方向也是 null——這暗示我們可能需要**更深的 pivot**：不只是換 dataset，要換 methodological paradigm（例如 tail risk forecasting vs portfolio VaR）。",
+    "context": "K1100 → K1100b 從 tail-independent 到 tail-dependent 測試全 null",
+    "applies_to": [
+      "copula-GARCH",
+      "negative-correlation",
+      "portfolio-aggregation",
+      "Paper-3-scope",
+      "spot-futures-specificity",
+      "pivot-depth"
+    ],
+    "created_at": "2026-04-13T06:31:53.214290+00:00"
   }
 ]
