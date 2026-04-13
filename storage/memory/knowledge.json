@@ -26110,5 +26110,22 @@
     "data_source": "yfinance DAX+CAC+FTSE top + ^VIX 2014-2025; earnings from yfinance API",
     "created_at": "2026-04-14T00:30:00+08:00",
     "updated_at": "2026-04-14T00:30:00+08:00"
+  },
+  {
+    "id": "k1162-1776100098",
+    "experiment_id": "K1162",
+    "title": "K1162 BINARY-FUNDAMENTAL: continuous EAV NS even in HIGH analyst-coverage sub-sample (US N=15)",
+    "content": "[提出: Claude, 執行: Claude] K1151 (US) + K1157 (JP) continuous EAV 全 NS 後做 mechanism control: 分高低 analyst coverage sub-sample, 檢驗 'noise-masks-true-effect' 假說。Pool 分: yfinance numberOfAnalystOpinions median=32.5 → HIGH n=15 (MSFT/NVDA/GOOGL/META/AMZN 等 33-64 analysts), LOW n=15 (BRK-B/PEP/PG/CSCO 等 3-32 analysts)。**結果**: HIGH continuous θ=+4.08e-6 boot t=+0.34 p=0.71 NS; LOW θ=-6.96e-7 boot t=-0.31 p=0.73 NS。Wald θ_HIGH = θ_LOW: t=+0.39 p=0.70 不能拒絕相等。HIGH 內部 ΔAIC(bin-cont)=-5003 強烈偏 binary; LOW ΔAIC=-772 同方向。**Verdict**: BINARY-FUNDAMENTAL—K1151/K1157 null 不是 noise artefact，即使高 coverage 子集 continuous 仍失敗。Side-finding: HIGH binary boot t=+6.07 vs LOW binary t=+2.25 — binary EAV 在更受關注股票更強, consistent with 'attention drives announcement-day vol'。**Paper 2 mechanism 確認**: information-processing friction (attention/IV crush/hedging flow) 不是 surprise-magnitude scale。Triple-confirm 跨 K1151/K1157/K1162 三個獨立 test。",
+    "tags": [
+      "K1162",
+      "Paper2",
+      "analyst-coverage",
+      "binary-fundamental",
+      "K1151-K1157-followup",
+      "mechanism-confirmed"
+    ],
+    "data_source": "Reuse K1147/K1151 US 30 stocks data + yfinance numberOfAnalystOpinions",
+    "created_at": "2026-04-14T01:00:00+08:00",
+    "updated_at": "2026-04-14T01:00:00+08:00"
   }
 ]
