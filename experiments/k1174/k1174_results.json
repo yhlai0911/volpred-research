@@ -1,0 +1,318 @@
+{
+  "experiment_id": "k1174",
+  "title": "True per-stock PCR from GDELT raw files \u2014 supersedes K1170 hardcoded",
+  "proposer": "Claude (K1170 \u00a77 limitation; rerun request)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-13T19:15:40.042826+00:00",
+  "random_seed": 42,
+  "data_sources": [
+    "GDELT GKG 2.1 raw CSV.zip files (one per unique earnings-window day at 12:00 UTC; fetched by k1174_fetch_gdelt_files.py)",
+    "yfinance earnings_dates (2024-01 to 2025-12)",
+    "experiments/k1168/k1168_per_stock_table.csv (panel N=153)",
+    "K1170 hardcoded PCR (for comparison only; see k1170_results.json)"
+  ],
+  "sampling_disclosure": "One 15-min GKG slice (12:00 UTC) per calendar day; ~1/96 \u2248 1.04% of full-day GDELT news volume. Relative PCR estimable if sampling rate is uncorrelated with T0 vs T\u00b12 positioning.",
+  "n_events_all": 46,
+  "n_events_reliable": 25,
+  "min_mentions_filter": 5,
+  "median_event_mentions": 5.5,
+  "n_stocks_with_pcr": 13,
+  "n_markets_observed": 6,
+  "per_market_summary": [
+    {
+      "market": "EU",
+      "n_stocks": 3,
+      "true_pcr_mean": 0.310847,
+      "true_pcr_sd": 0.308921,
+      "k1170_pcr": 0.317,
+      "theta_rel": 0.14,
+      "institutions_pct": 0.416
+    },
+    {
+      "market": "HK",
+      "n_stocks": 1,
+      "true_pcr_mean": 0.666667,
+      "true_pcr_sd": NaN,
+      "k1170_pcr": 0.667,
+      "theta_rel": 0.18,
+      "institutions_pct": 0.261
+    },
+    {
+      "market": "IN",
+      "n_stocks": 2,
+      "true_pcr_mean": 0.609375,
+      "true_pcr_sd": 0.066291,
+      "k1170_pcr": 0.517,
+      "theta_rel": 1.17,
+      "institutions_pct": 0.383
+    },
+    {
+      "market": "JP",
+      "n_stocks": 2,
+      "true_pcr_mean": 0.315476,
+      "true_pcr_sd": 0.069027,
+      "k1170_pcr": 0.767,
+      "theta_rel": 0.39,
+      "institutions_pct": 0.425
+    },
+    {
+      "market": "TW",
+      "n_stocks": 1,
+      "true_pcr_mean": 0.466667,
+      "true_pcr_sd": NaN,
+      "k1170_pcr": 0.65,
+      "theta_rel": 0.17,
+      "institutions_pct": 0.247
+    },
+    {
+      "market": "US",
+      "n_stocks": 4,
+      "true_pcr_mean": 0.241555,
+      "true_pcr_sd": 0.07857,
+      "k1170_pcr": 0.85,
+      "theta_rel": 0.59,
+      "institutions_pct": 0.75
+    }
+  ],
+  "cross_market_spearman_true_vs_k1170": {
+    "n": 6,
+    "rho": -0.2571428571428572,
+    "p": 0.6227871720116619
+  },
+  "cross_market_spearman_true_vs_theta_rel": {
+    "n": 6,
+    "rho": 0.08571428571428573,
+    "p": 0.8717434402332361
+  },
+  "eu_jp_pair_test": {
+    "eu_true_pcr_mean": 0.3108465608465608,
+    "jp_true_pcr_mean": 0.31547619047619047,
+    "eu_n": 3,
+    "jp_n": 2,
+    "delta_true_pcr_jp_minus_eu": 0.00462962962962965,
+    "delta_k1170_pcr_jp_minus_eu": 0.45,
+    "cross_market_sd_observed": 0.15926906983718891,
+    "ratio_vs_sd": 0.029067976816605,
+    "welch_t_jp_vs_eu": 0.025036681338895188,
+    "welch_p_jp_vs_eu": 0.9820437141261587
+  },
+  "panel_rerun": {
+    "pcr_only_filled": {
+      "n": 153,
+      "regressors": [
+        "pcr_stock_filled"
+      ],
+      "params": {
+        "const": -0.003445426268181832,
+        "pcr_stock_filled": 0.009040344225303188,
+        "fe_CA": -0.002071050433122651,
+        "fe_EU": 0.0012839655322386466,
+        "fe_HK": -0.0023346585663005133,
+        "fe_IN": -0.0013658186160998222,
+        "fe_JP": 0.001612240177410316,
+        "fe_KR": -0.0023540322909188496,
+        "fe_TW": -0.00037834155089102423,
+        "fe_US": 0.0032806879743452625
+      },
+      "tvalues": {
+        "const": -1.7482629186863412,
+        "pcr_stock_filled": 2.8104937374997014,
+        "fe_CA": -2.568494037821007,
+        "fe_EU": 1.138766625930873,
+        "fe_HK": -2.850404618490229,
+        "fe_IN": -1.7469591756571101,
+        "fe_JP": 1.450614796409136,
+        "fe_KR": -2.9594260606613547,
+        "fe_TW": -0.4600822533558851,
+        "fe_US": 2.343896030331841
+      },
+      "pvalues": {
+        "const": 0.08041851106604242,
+        "pcr_stock_filled": 0.004946555158215338,
+        "fe_CA": 0.010214146920787578,
+        "fe_EU": 0.25480050526128917,
+        "fe_HK": 0.00436636441855245,
+        "fe_IN": 0.08064441984081425,
+        "fe_JP": 0.14688715280100176,
+        "fe_KR": 0.003082126536754875,
+        "fe_TW": 0.6454571817560159,
+        "fe_US": 0.019083490272181754
+      },
+      "r2": 0.18618191218724622,
+      "r2_adj": 0.13496259197525473
+    },
+    "pcr_analyst": {
+      "n": 153,
+      "regressors": [
+        "log_analyst",
+        "pcr_stock_filled"
+      ],
+      "params": {
+        "const": -0.005590315754167412,
+        "log_analyst": 0.0008885989600351024,
+        "pcr_stock_filled": 0.008707021558928047,
+        "fe_CA": -0.002214586779883983,
+        "fe_EU": 0.0007988816072603655,
+        "fe_HK": -0.002601097305947148,
+        "fe_IN": -0.0022444676486384416,
+        "fe_JP": 0.001420957456901054,
+        "fe_KR": -0.0029003578858950033,
+        "fe_TW": 7.056720319965806e-05,
+        "fe_US": 0.0024285729747479433
+      },
+      "tvalues": {
+        "const": -3.031465165668746,
+        "log_analyst": 3.548152757647896,
+        "pcr_stock_filled": 3.158785087536881,
+        "fe_CA": -2.7682633022666754,
+        "fe_EU": 0.7543489240063521,
+        "fe_HK": -3.2232384651128627,
+        "fe_IN": -2.7430840683565947,
+        "fe_JP": 1.3771443288992287,
+        "fe_KR": -3.6112119611062106,
+        "fe_TW": 0.08592801062480569,
+        "fe_US": 1.9571342090001034
+      },
+      "pvalues": {
+        "const": 0.0024336999993302124,
+        "log_analyst": 0.0003879431554480885,
+        "pcr_stock_filled": 0.0015842827235905011,
+        "fe_CA": 0.005635590524195009,
+        "fe_EU": 0.4506397323244814,
+        "fe_HK": 0.0012674998594843013,
+        "fe_IN": 0.006086510087106996,
+        "fe_JP": 0.16846762974489926,
+        "fe_KR": 0.00030476944515757436,
+        "fe_TW": 0.9315236445974392,
+        "fe_US": 0.050331691388637544
+      },
+      "r2": 0.2364721681107157,
+      "r2_adj": 0.18270260248470982
+    },
+    "pcr_analyst_inst": {
+      "n": 153,
+      "regressors": [
+        "log_analyst",
+        "institutions_pct",
+        "pcr_stock_filled"
+      ],
+      "params": {
+        "const": -0.005271051421645265,
+        "log_analyst": 0.0010392313920031438,
+        "institutions_pct": -0.002350687657027651,
+        "pcr_stock_filled": 0.009459488774016938,
+        "fe_CA": -0.002151202226423104,
+        "fe_EU": 0.0007531725685496484,
+        "fe_HK": -0.003062879074487483,
+        "fe_IN": -0.0026692948770503664,
+        "fe_JP": 0.0014496997911783156,
+        "fe_KR": -0.003343176598960773,
+        "fe_TW": -0.0003163738266844929,
+        "fe_US": 0.0031680818718675973
+      },
+      "tvalues": {
+        "const": -3.0599492041644125,
+        "log_analyst": 3.3511601304164853,
+        "institutions_pct": -1.3480731378702746,
+        "pcr_stock_filled": 3.5591809658928213,
+        "fe_CA": -2.8948854752728144,
+        "fe_EU": 0.7379433131473598,
+        "fe_HK": -3.1136499316876174,
+        "fe_IN": -2.722500103696169,
+        "fe_JP": 1.4885852209370132,
+        "fe_KR": -3.457297469978477,
+        "fe_TW": -0.3550044495772842,
+        "fe_US": 2.4774349152939616
+      },
+      "pvalues": {
+        "const": 0.002213745338805437,
+        "log_analyst": 0.000804737537107962,
+        "institutions_pct": 0.1776348601941149,
+        "pcr_stock_filled": 0.0003720131391400067,
+        "fe_CA": 0.00379296887631248,
+        "fe_EU": 0.4605488970933437,
+        "fe_HK": 0.0018478859551398093,
+        "fe_IN": 0.006479001310530108,
+        "fe_JP": 0.13659662573816816,
+        "fe_KR": 0.0005456221978692058,
+        "fe_TW": 0.722586257793782,
+        "fe_US": 0.013233054133577114
+      },
+      "r2": 0.26472595489528805,
+      "r2_adj": 0.20736414995804098
+    },
+    "full_panel": {
+      "n": 153,
+      "regressors": [
+        "log_analyst",
+        "institutions_pct",
+        "pcr_stock_filled",
+        "log_mcap"
+      ],
+      "params": {
+        "const": -0.0012632054653616996,
+        "log_analyst": 0.0012214053583755628,
+        "institutions_pct": -0.002384434072001133,
+        "pcr_stock_filled": 0.00898364541486923,
+        "log_mcap": -0.00016320569621175527,
+        "fe_CA": -0.002187903078316818,
+        "fe_EU": 0.0004775698401368938,
+        "fe_HK": -0.0026518023927450196,
+        "fe_IN": -0.0021926199881553915,
+        "fe_JP": 0.0020008799962391573,
+        "fe_KR": -0.002392277665430678,
+        "fe_TW": -0.0001257822823371675,
+        "fe_US": 0.0030955526180247326
+      },
+      "tvalues": {
+        "const": -0.24177185531810838,
+        "log_analyst": 3.654502840167657,
+        "institutions_pct": -1.3682648769779504,
+        "pcr_stock_filled": 3.434318257269152,
+        "log_mcap": -0.9001384992921854,
+        "fe_CA": -3.037936821754116,
+        "fe_EU": 0.41993382229147586,
+        "fe_HK": -3.1080829408519937,
+        "fe_IN": -2.4916091766668322,
+        "fe_JP": 2.2834520587853318,
+        "fe_KR": -2.232036464887462,
+        "fe_TW": -0.16845737896116486,
+        "fe_US": 2.4195409719465495
+      },
+      "pvalues": {
+        "const": 0.808956948218416,
+        "log_analyst": 0.00025768081107356425,
+        "institutions_pct": 0.17122918059339431,
+        "pcr_stock_filled": 0.0005940462794277332,
+        "log_mcap": 0.36804655004967535,
+        "fe_CA": 0.002382038891537097,
+        "fe_EU": 0.674533798861696,
+        "fe_HK": 0.0018830521343367263,
+        "fe_IN": 0.01271658781751498,
+        "fe_JP": 0.022403753749342236,
+        "fe_KR": 0.02561255298353024,
+        "fe_TW": 0.8662234711072516,
+        "fe_US": 0.015540109959939943
+      },
+      "r2": 0.2719602646898439,
+      "r2_adj": 0.2095568588061163
+    },
+    "n_fallback_used": 140,
+    "n_total_panel": 153
+  },
+  "verdict_vs_k1170": {
+    "label": "INSUFFICIENT_COVERAGE",
+    "notes": [
+      "INSUFFICIENT_COVERAGE: this partial GDELT sample (1/96 rate, Jan-May 2024 only) gives EU n=3, JP n=2, markets=6, reliable events=25. Per-stock and pair tests are under-powered; direction is reported for transparency but K1170's PARTIAL_CONFIRMED label is preserved pending a full 96-files-per-day or BigQuery scan.",
+      "EU-JP gap NEAR-ZERO (true \u0394PCR=+0.005); K1170 claim fails",
+      "True-vs-K1170 cross-market \u03c1=-0.257 LOW \u2192 hardcoded calibration poorly aligned with GDELT.",
+      "Filled full panel (N=153, 140/153 used per-market-mean fallback): pcr_stock_filled t=3.434318257269152",
+      "  -> Harvey |t|>3 PASS, BUT driven by between-market variation with large imputation share. Treated as suggestive, not confirmatory."
+    ],
+    "method": "true per-stock PCR from GDELT GKG raw files (12:00 UTC slice)"
+  },
+  "preamble_rule5_self_check": {
+    "rule5_triggered": false,
+    "note": "Per-preamble: if observed-only panel |t(pcr_stock)| > 6.0 we must self-challenge (possible circularity / mechanical correlation with \u03b8_EAV_i)."
+  }
+}

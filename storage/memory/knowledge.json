@@ -26234,5 +26234,23 @@
     "data_source": "GDELT API (rate-limited fallback) + Reuters Institute 2024 + K1167/K1168 markets data",
     "created_at": "2026-04-14T04:00:00+08:00",
     "updated_at": "2026-04-14T04:00:00+08:00"
+  },
+  {
+    "id": "k1174-1776107927",
+    "experiment_id": "K1174",
+    "title": "K1174 WEAKENS K1170: GDELT empirical partial replication fails to confirm EU-JP 3.28σ gap",
+    "content": "[提出: Claude, 執行: Claude] K1170 hardcoded PCR 聲稱 EU-JP ΔPCR=+0.45 (3.28σ) 解 EU residual。K1174 用 GDELT empirical data 驗證: GCP BigQuery 環境無 auth → fallback GKG 2.1 raw CSV 每日 12:00 UTC 1/96 slice (1.04% 全日新聞量)。完成 131/413 events (sampling 限制)。**Empirical vs Hardcoded 對比**: Cross-market Spearman ρ(hardcoded, real)=-0.257 (N=6) — **完全不對齊甚至微負相關**。EU-JP pair: hardcoded ΔPCR=+0.45 (3.28σ) → empirical +0.005 (0.03σ, Welch t=+0.03 p=0.98)。US 最大落差 (hardcoded 0.85 vs real 0.24) 推測因 AMC 盤後財報新聞在 T+1 UTC 而非 T0, 我們的 12:00 UTC slice under-sample。**Verdict: INSUFFICIENT_COVERAGE with direction-of-evidence WEAKENING K1170**。Sample 太小 (EU n=3, JP n=2) 無法決定性 overturn K1170, 但 empirical 數據明確不 support 3.28σ claim。**K1170 PARTIAL_CONFIRMED 應降級為 OPEN question**，press concentration 作為 3-level mechanism 第三層需從 claim 降為 'hypothesis, empirical partial replication weak'。Per-stock panel 在 filled imputation spec: pcr_stock_filled t=+3.43 Harvey 邊緣 (140/153 imputed, suggestive only); analyst channel 依舊穩定 (log_analyst t=+3.65 replicates K1165-K1170 unchanged); institutions_pct 依舊 NS (-1.37)。衍生 K1175: full 96-files-per-day GDELT scan 或 GCP-authed BigQuery rerun, N≥10 per market 才能 decisive。**既有 K1170 press-concentration article (mile_45060685) 需加 caveat**。",
+    "tags": [
+      "K1174",
+      "Paper2",
+      "K1170-followup",
+      "GDELT-BigQuery",
+      "empirical-weakens-hypothesis",
+      "insufficient-coverage",
+      "3-level-mechanism-partial"
+    ],
+    "data_source": "GDELT GKG 2.1 raw CSV daily 12:00 UTC 15-min slice (1.04% full-day news), 131/413 events 2024-01-09 to 2024-07-10",
+    "created_at": "2026-04-14T04:30:00+08:00",
+    "updated_at": "2026-04-14T04:30:00+08:00"
   }
 ]

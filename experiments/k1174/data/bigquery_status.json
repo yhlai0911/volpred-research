@@ -1,0 +1,11 @@
+{
+  "attempted": false,
+  "reason": "GCP tooling (gcloud/bq CLI and google-cloud-bigquery Python library) not available on execution host; no authentication flow feasible inside an autonomous worktree agent.",
+  "recipe_for_future_rerun": {
+    "dataset": "gdelt-bq.gdeltv2.gkg",
+    "example_sql": "SELECT DATE(PARSE_TIMESTAMP('%Y%m%d%H%M%S', CAST(DATE AS STRING))) d, COUNT(*) n FROM `gdelt-bq.gdeltv2.gkg` WHERE CAST(DATE AS STRING) BETWEEN '20240401000000' AND '20240421000000' AND (LOWER(V2Persons) LIKE '%tsmc%' OR LOWER(V2Organizations) LIKE '%tsmc%') GROUP BY d ORDER BY d",
+    "max_bytes_billed": 1000000000000,
+    "notes": "The gkg table is partitioned by DATE; restrict to a specific earnings window to avoid scanning multi-TB years. One query per stock \u00d7 (list of events) is feasible in BigQuery; for K1174's ~250 events across 35 stocks this fits in one interactive session."
+  },
+  "fallback_script": "k1174_fetch_gdelt_files.py"
+}

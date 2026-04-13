@@ -785,6 +785,14 @@
     "title": "K1174: GDELT BigQuery export for true per-stock PCR (replaces K1170 hardcoded)",
     "priority": 3,
     "description": "K1170 GDELT DOC API 429 → hardcoded PCR (circularity risk)。改用 GDELT BigQuery export (公開 GCP, 不限速) 取每檔股票 ±2 天 article volume 算 true per-stock PCR variance, rerun within-market panel 看 PCR 是否真有 per-stock signal。",
+    "status": "completed",
+    "completed_at": "2026-04-14T04:30:00+08:00"
+  },
+  {
+    "id": "K1175",
+    "title": "K1175: Full 96-files-per-day GDELT scan OR GCP-authed BigQuery rerun",
+    "priority": 2,
+    "description": "K1174 only 1/96 slice coverage (1.04%) + 131/413 events. Need full-day (96 files) scan or GCP BigQuery (if user can provide auth) for N≥10 per market decisive PCR test. Current K1170 press concentration claim hangs on this.",
     "status": "pending"
   }
 ]

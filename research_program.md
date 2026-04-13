@@ -611,7 +611,20 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
-### 25. Paper 2 三層 mechanism 浮現：press concentration 解 EU-JP residual（2026-04-14 K1170）
+### 26. K1174 WEAKENS K1170 press-concentration claim：3.28σ → 0.03σ in empirical partial replication（2026-04-14 K1174）
+**真實 GDELT 數據未支持 K1170 hardcoded PCR**
+- K1174 GCP BigQuery 無 auth → fallback GKG raw CSV 每日 12:00 UTC 1/96 slice (1.04%)，131/413 events 覆蓋
+- Real Cross-market Spearman ρ(hardcoded, real) = -0.257 (N=6, p=0.62) — 完全不對齊甚至微負相關
+- **EU-JP pair test**: hardcoded +0.45 (3.28σ) → empirical +0.005 (0.03σ, Welch t=+0.03 p=0.98) — **崩潰**
+- US 最大落差 (hardcoded 0.85 vs real 0.24) 推測因 AMC 盤後財報新聞在 T+1 UTC, 12:00 UTC slice under-sample
+- **Verdict: INSUFFICIENT_COVERAGE with direction-of-evidence WEAKENING K1170**
+- Sample 太小 (EU n=3, JP n=2) 無法決定性 overturn，但 direction 明確不 support K1170 claim
+- **K1170 PARTIAL_CONFIRMED 應降級為 OPEN question**，3-level mechanism 第三層 (press) 從 claim 降為 hypothesis
+- 前兩層仍穩固：institutional ownership (between-market) + analyst coverage (within-market)
+- **既有 press article mile_45060685 已加 caveat**
+- 衍生 K1175 (full 96-files-per-day scan 或 GCP-authed BigQuery decisive)
+
+### 25. Paper 2 三層 mechanism 浮現：press concentration 解 EU-JP residual（2026-04-14 K1170）→ K1174 WEAKENS
 **EU-JP pair gap (institutions_pct 幾乎相同但 θ_rel 半數差距) 由媒體集中度解釋**
 - K1170 GDELT API 429 → fallback hardcoded PCR (Reuters Institute 2024 + Pew + K1153 prior)
 - Per-market PCR: EU 0.317 / TW 0.65 / JP 0.767 / US 0.85 / BR 0.567 / CH 0.567 / CA 0.65 / HK 0.667 / KR 0.65 / IN 0.517

@@ -1,0 +1,26 @@
+
+=== K1174 RESULTS ===
+Events with signal: 25
+Stocks with PCR:    13
+Markets observed:   6
+
+Per-market summary:
+market  n_stocks  true_pcr_mean  true_pcr_sd  k1170_pcr  theta_rel  institutions_pct
+    EU         3          0.311        0.309      0.317       0.14             0.416
+    HK         1          0.667          NaN      0.667       0.18             0.261
+    IN         2          0.609        0.066      0.517       1.17             0.383
+    JP         2          0.315        0.069      0.767       0.39             0.425
+    TW         1          0.467          NaN      0.650       0.17             0.247
+    US         4          0.242        0.079      0.850       0.59             0.750
+
+Cross-market ρ(true PCR, K1170 hardcoded) = {'n': 6, 'rho': -0.2571428571428572, 'p': 0.6227871720116619}
+Cross-market ρ(true PCR, θ_rel)          = {'n': 6, 'rho': 0.08571428571428573, 'p': 0.8717434402332361}
+
+EU-JP pair test: {'eu_true_pcr_mean': 0.3108465608465608, 'jp_true_pcr_mean': 0.31547619047619047, 'eu_n': 3, 'jp_n': 2, 'delta_true_pcr_jp_minus_eu': 0.00462962962962965, 'delta_k1170_pcr_jp_minus_eu': 0.45, 'cross_market_sd_observed': 0.15926906983718891, 'ratio_vs_sd': 0.029067976816605, 'welch_t_jp_vs_eu': 0.025036681338895188, 'welch_p_jp_vs_eu': 0.9820437141261587}
+
+Verdict: INSUFFICIENT_COVERAGE
+  - INSUFFICIENT_COVERAGE: this partial GDELT sample (1/96 rate, Jan-May 2024 only) gives EU n=3, JP n=2, markets=6, reliable events=25. Per-stock and pair tests are under-powered; direction is reported for transparency but K1170's PARTIAL_CONFIRMED label is preserved pending a full 96-files-per-day or BigQuery scan.
+  - EU-JP gap NEAR-ZERO (true ΔPCR=+0.005); K1170 claim fails
+  - True-vs-K1170 cross-market ρ=-0.257 LOW → hardcoded calibration poorly aligned with GDELT.
+  - Filled full panel (N=153, 140/153 used per-market-mean fallback): pcr_stock_filled t=3.434318257269152
+  -   -> Harvey |t|>3 PASS, BUT driven by between-market variation with large imputation share. Treated as suggestive, not confirmatory.
