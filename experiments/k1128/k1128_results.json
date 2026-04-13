@@ -1,0 +1,230 @@
+{
+  "experiment_id": "K1128",
+  "title": "VIX Tertile Regime Split for OFI -> Jump Prediction on TAIFEX TX",
+  "timestamp": "2026-04-13T18:49:34.599806",
+  "data_source": "TAIFEX TX futures 5-min bars (reused K1124 cache)",
+  "period_IS": "2017-2019",
+  "period_OOS": "2020-2021",
+  "vix_source": "yfinance ^VIX daily close, T-1 lag applied",
+  "n_bars_total": 73203,
+  "n_valid_prediction": 52412,
+  "jump_detection": {
+    "method": "Lee-Mykland (2008) L_t=|r|/sigma with rolling BV K=16 strictly past (same as K1125)",
+    "K_window": 16,
+    "alpha": 0.01,
+    "threshold_multi_Gumbel": 5.125598054567598,
+    "n_jumps": 115,
+    "jump_rate_pct": 0.21441223081942762
+  },
+  "vix_tertile_cutoffs": {
+    "computed_from": "IS 2017-2019 only",
+    "cutoff_33": 12.069999694824219,
+    "cutoff_67": 14.989999771118164,
+    "vix_is_mean": 14.344739332586041,
+    "vix_is_std": 4.187115253483659
+  },
+  "features_M1": [
+    "jump_curr"
+  ],
+  "features_M3": [
+    "jump_curr",
+    "ofi_abs_t",
+    "ofi_t"
+  ],
+  "tertile_results": {
+    "low": {
+      "tertile_idx": 0,
+      "status": "skipped_insufficient_jumps",
+      "n_is": 10585,
+      "n_oos": 0,
+      "n_is_jumps": 36,
+      "n_oos_jumps": 0
+    },
+    "mid": {
+      "tertile_idx": 1,
+      "status": "skipped_insufficient_jumps",
+      "n_is": 10451,
+      "n_oos": 854,
+      "n_is_jumps": 18,
+      "n_oos_jumps": 1
+    },
+    "high": {
+      "tertile_idx": 2,
+      "status": "ok",
+      "n_is": 10462,
+      "n_oos": 20060,
+      "n_is_jumps": 27,
+      "n_oos_jumps": 32,
+      "vix_range": {
+        "is_min": 15.0,
+        "is_max": 37.31999969482422,
+        "oos_min": 15.010000228881836,
+        "oos_max": 82.69000244140625
+      },
+      "M1": {
+        "name": "M1_tertile_high",
+        "n_features": 1,
+        "coefs": [
+          0.13825990946960162
+        ],
+        "intercept": -5.981133061601875,
+        "scaler_mean": [
+          0.002580768495507551
+        ],
+        "scaler_scale": [
+          0.050735669203038465
+        ],
+        "auc_is": 0.5172727111395056,
+        "auc_oos": 0.5148261184341921,
+        "brier_is": 0.00257103641222268,
+        "brier_oos": 0.0015922911470075607,
+        "ll_is": -0.017789173748748745,
+        "ll_oos": -0.011979342715824792,
+        "n_is": 10462,
+        "n_oos": 20060,
+        "n_is_positive": 27,
+        "n_oos_positive": 32
+      },
+      "M3": {
+        "name": "M3_tertile_high",
+        "n_features": 3,
+        "coefs": [
+          0.13758139106172956,
+          -0.030771287548245443,
+          -0.06480051063885907
+        ],
+        "intercept": -5.983786723586148,
+        "scaler_mean": [
+          0.002580768495507551,
+          0.14605792466317888,
+          0.01881625363715872
+        ],
+        "scaler_scale": [
+          0.050735669203038465,
+          0.12054271145664455,
+          0.18843941000039457
+        ],
+        "auc_is": 0.5220767005625655,
+        "auc_oos": 0.5926468569003396,
+        "brier_is": 0.0025707930095605546,
+        "brier_oos": 0.0015920904956065853,
+        "ll_is": -0.017781512022740326,
+        "ll_oos": -0.011963303138594384,
+        "n_is": 10462,
+        "n_oos": 20060,
+        "n_is_positive": 27,
+        "n_oos_positive": 32
+      },
+      "dm_M3_vs_M1": {
+        "t": 1.3061066504589265,
+        "t_plain": 1.3061392066773958,
+        "mean_d": 1.6039577230406496e-05,
+        "se": 1.2280143761405457e-05,
+        "n": 20060
+      }
+    }
+  },
+  "monotonicity": {
+    "auc_low": null,
+    "auc_mid": null,
+    "auc_high": 0.5926468569003396,
+    "strict_monotonic_L_lt_M_lt_H": false,
+    "high_minus_low": NaN,
+    "partial_high_gt_low": false
+  },
+  "coef_drift_M3": {
+    "high": {
+      "jump_curr": 0.13758139106172956,
+      "ofi_abs_t": -0.030771287548245443,
+      "ofi_t": -0.06480051063885907
+    }
+  },
+  "verdict": {
+    "high_tertile_auc_gt_0.55": true,
+    "high_minus_low_gt_0.02": false,
+    "high_dm_abs_ge_2.0": false,
+    "overall_pass": false
+  },
+  "secondary_oos_internal_analysis": {
+    "note": "OOS-internal tertile cutoffs (DESCRIPTIVE ONLY - uses OOS VIX info). Motivation: 2020-2021 OOS VIX range (15-83) disjoint from IS (9-37), making IS-based cutoffs degenerate. This split isolates regime effect on same full-IS-trained models.",
+    "oos_cutoff_33": 18.84000015258789,
+    "oos_cutoff_67": 25.34000015258789,
+    "M1_full_auc_oos": 0.514361323110904,
+    "M3_full_auc_oos": 0.5544956775261838,
+    "per_oos_tertile": {
+      "low": {
+        "status": "ok",
+        "n": 7074,
+        "jumps": 16,
+        "base_rate": 0.0022618037885213456,
+        "auc_M1": 0.5301873760272031,
+        "auc_M3": 0.5621457920090678,
+        "brier_M1": 0.0022516618718675346,
+        "brier_M3": 0.0022499941051202896,
+        "dm_M3_vs_M1": {
+          "t": 0.5285818937546207,
+          "t_plain": 0.5286192586077233,
+          "mean_d": 5.715274439073751e-05,
+          "se": 0.00010811703028237438,
+          "n": 7074
+        },
+        "vix_min": 12.319999694824219,
+        "vix_max": 18.84000015258789,
+        "vix_mean": 16.592281588127562
+      },
+      "mid": {
+        "status": "ok",
+        "n": 6894,
+        "jumps": 11,
+        "base_rate": 0.0015955903684363214,
+        "auc_M1": 0.4992009298271103,
+        "auc_M3": 0.4957008703921387,
+        "brier_M1": 0.0015948743842604477,
+        "brier_M3": 0.00159326958615915,
+        "dm_M3_vs_M1": {
+          "t": 1.8463859694267521,
+          "t_plain": 1.846519896527311,
+          "mean_d": 0.0002511545447116768,
+          "se": 0.00013601507635201487,
+          "n": 6894
+        },
+        "vix_min": 18.860000610351562,
+        "vix_max": 25.34000015258789,
+        "vix_mean": 22.08591092742973
+      },
+      "high": {
+        "status": "ok",
+        "n": 6946,
+        "jumps": 6,
+        "base_rate": 0.0008638065073423554,
+        "auc_M1": 0.4994956772334294,
+        "auc_M3": 0.6260566762728146,
+        "brier_M1": 0.0008663433468307319,
+        "brier_M3": 0.0008653853911187705,
+        "dm_M3_vs_M1": {
+          "t": 3.592277436840362,
+          "t_plain": 3.592536050816928,
+          "mean_d": 0.00020651510381348206,
+          "se": 5.7484490313332105e-05,
+          "n": 6946
+        },
+        "vix_min": 25.350000381469727,
+        "vix_max": 82.69000244140625,
+        "vix_mean": 34.73965446550154
+      }
+    },
+    "monotonicity_oos_internal": {
+      "strict_increasing": false,
+      "high_minus_low": 0.0639108842637468,
+      "auc_low": 0.5621457920090678,
+      "auc_mid": 0.4957008703921387,
+      "auc_high": 0.6260566762728146
+    }
+  },
+  "references": [
+    "Lee & Mykland (2008) RFS 21(6), 2535-2563",
+    "Cont, Kukanov, Stoikov (2014) JFE 12(1), 47-88",
+    "Harvey, Leybourne, Newbold (1997) IJF 13(2), 281-291"
+  ],
+  "runtime_sec": 1.525561
+}
