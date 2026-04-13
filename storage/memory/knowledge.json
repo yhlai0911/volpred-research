@@ -26289,5 +26289,23 @@
     "data_source": "Deribit public API get_volatility_index_data (2021-03 to 2026-04, n=1,847); BTC-USD yfinance; ^VIX",
     "created_at": "2026-04-14T05:30:00+08:00",
     "updated_at": "2026-04-14T05:30:00+08:00"
+  },
+  {
+    "id": "k1067f-1776110438",
+    "experiment_id": "K1067f",
+    "title": "K1067f VIX-only ablation H1 CLEAN: Paper 2 VIX channel independent of EAV, robustness chain complete",
+    "content": "[提出: Claude, 執行: Claude] K1067e EAV-only ablation 後 K1067f 反向: 移除 EAV 保留 VIX (τ=exp(m+θ_VIX×VIX²))，per-stock 110 stocks 4 markets 重做。**結果 H1 (clean)** — ρ(θ_VIX_noEAV, θ_VIX_full)=+0.949 p=8.3e-56 (cleaner than K1067e +0.898 because 0/1 sparse EAV perturbs dense VIX less); **100% sign consistency** (110/110 positive, 全部通過); median ratio θ_noEAV/θ_full = **1.00** (IQR [0.91, 1.07]) 量級完全保留。Per-market ρ: TW +0.904 / EU +0.930 / JP +0.910 / US +0.965 — 全部 H1。|t| median=11.8, max=736 (universally strongly significant 100% |t|>2 98.2% |t|>3)。**Key dissociation**: Panel θ_VIX_noEAV ~ log_analyst β=+2.28e-8 t=+0.31 NS; K1166 panel θ_EAV ~ log_analyst β=+9.68e-4 t=+3.56 PASS Harvey。**Analyst coverage 只 predict θ_EAV 不 predict θ_VIX** — 乾淨的 theory-consistent mechanism separation (firm-level attention 影響 firm-specific announcement channel, 不影響 global VIX channel)。LR reject rate 60-62% (EAV 加 daily-variance LL 但不 shift θ_VIX estimates)。**Paper 2 robustness chain COMPLETE**: 兩個 long-run regressors (VIX + EAV) non-redundant, neither is residual artifact of the other。",
+    "tags": [
+      "K1067f",
+      "Paper2",
+      "VIX-only-ablation",
+      "H1-clean",
+      "K1067e-complement",
+      "theory-consistent-dissociation",
+      "robustness-chain-complete"
+    ],
+    "data_source": "Reuse K1166/K1067e data + yfinance 110 stocks 4 markets + VIX",
+    "created_at": "2026-04-14T06:30:00+08:00",
+    "updated_at": "2026-04-14T06:30:00+08:00"
   }
 ]
