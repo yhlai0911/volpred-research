@@ -1,0 +1,1115 @@
+{
+  "meta": {
+    "experiment_id": "K1090",
+    "title": "Cross-asset A4f meta-regression \u2014 scope prediction",
+    "generated_at": "2026-04-13T00:28:31.081091Z",
+    "random_seed": 42,
+    "n_train": 12,
+    "n_new": 6,
+    "feature_cols": [
+      "class_equity",
+      "class_commodity",
+      "class_bond",
+      "class_crypto",
+      "currency_usd",
+      "log_n_constituents",
+      "hhi",
+      "log_avg_dollar_volume",
+      "corr_ret_vix",
+      "corr_r2_vix2",
+      "annualized_vol",
+      "r2_acf1"
+    ],
+    "window_for_features": "2018-01-01 .. 2024-12-31",
+    "training_source_Ks": [
+      "K1085",
+      "K1086",
+      "K1087",
+      "K1088",
+      "K1089"
+    ],
+    "pass_threshold_dm_t": 3.0,
+    "caveat": "N=12 sample. Bootstrap CIs are wide. Predictions are directional hypotheses, not guarantees."
+  },
+  "training": [
+    {
+      "ticker": "SPY",
+      "class_label": "equity_us_large",
+      "currency": "USD",
+      "n_constituents": 500,
+      "hhi": 0.07,
+      "log_n_constituents": 6.214608098422191,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 24.07345769424246,
+      "corr_ret_vix": -0.7711828129698296,
+      "corr_r2_vix2": 0.6662962955277439,
+      "annualized_vol": 0.1953990784236725,
+      "r2_acf1": 0.4596997315278014,
+      "dm_t": 7.92,
+      "source_K": "K1085",
+      "pass": 1
+    },
+    {
+      "ticker": "QQQ",
+      "class_label": "equity_us_tech",
+      "currency": "USD",
+      "n_constituents": 100,
+      "hhi": 0.12,
+      "log_n_constituents": 4.605170185988092,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 23.319907481731047,
+      "corr_ret_vix": -0.7172030151030222,
+      "corr_r2_vix2": 0.6115733401924468,
+      "annualized_vol": 0.2419489213429247,
+      "r2_acf1": 0.41509875461997714,
+      "dm_t": 5.99,
+      "source_K": "K1085",
+      "pass": 1
+    },
+    {
+      "ticker": "EEM",
+      "class_label": "equity_em_basket",
+      "currency": "USD",
+      "n_constituents": 1100,
+      "hhi": 0.05,
+      "log_n_constituents": 7.003065458786462,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 21.35022298124691,
+      "corr_ret_vix": -0.6438418275389277,
+      "corr_r2_vix2": 0.6380939085961008,
+      "annualized_vol": 0.21459427178999874,
+      "r2_acf1": 0.4098550681759692,
+      "dm_t": 5.25,
+      "source_K": "K1086",
+      "pass": 1
+    },
+    {
+      "ticker": "IWM",
+      "class_label": "equity_us_small",
+      "currency": "USD",
+      "n_constituents": 2000,
+      "hhi": 0.004,
+      "log_n_constituents": 7.600902459542082,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 22.292778438422484,
+      "corr_ret_vix": -0.6856640244711347,
+      "corr_r2_vix2": 0.6331505160015182,
+      "annualized_vol": 0.24985847134043437,
+      "r2_acf1": 0.25757486208209346,
+      "dm_t": 4.8,
+      "source_K": "K1085",
+      "pass": 1
+    },
+    {
+      "ticker": "GLD",
+      "class_label": "commodity_gold",
+      "currency": "USD",
+      "n_constituents": 1,
+      "hhi": 1.0,
+      "log_n_constituents": 0.0,
+      "class_equity": 0,
+      "class_commodity": 1,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 21.057206839312993,
+      "corr_ret_vix": -0.06922475984057108,
+      "corr_r2_vix2": 0.28633130154234976,
+      "annualized_vol": 0.14332797511886097,
+      "r2_acf1": 0.10384029960219307,
+      "dm_t": 4.46,
+      "source_K": "K1088",
+      "pass": 1
+    },
+    {
+      "ticker": "USO",
+      "class_label": "commodity_oil",
+      "currency": "USD",
+      "n_constituents": 1,
+      "hhi": 1.0,
+      "log_n_constituents": 0.0,
+      "class_equity": 0,
+      "class_commodity": 1,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 19.517042935863724,
+      "corr_ret_vix": -0.2811941838926132,
+      "corr_r2_vix2": 0.39961794898227776,
+      "annualized_vol": 0.41316601412928033,
+      "r2_acf1": 0.2740829890502401,
+      "dm_t": 4.48,
+      "source_K": "K1088",
+      "pass": 1
+    },
+    {
+      "ticker": "FXI",
+      "class_label": "equity_china",
+      "currency": "USD",
+      "n_constituents": 50,
+      "hhi": 0.09,
+      "log_n_constituents": 3.912023005428146,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 20.711229383565467,
+      "corr_ret_vix": -0.4190059236974842,
+      "corr_r2_vix2": 0.2326610428394701,
+      "annualized_vol": 0.2991411315814226,
+      "r2_acf1": 0.09613274749918951,
+      "dm_t": 3.61,
+      "source_K": "K1086",
+      "pass": 1
+    },
+    {
+      "ticker": "EWZ",
+      "class_label": "equity_brazil",
+      "currency": "USD",
+      "n_constituents": 80,
+      "hhi": 0.16,
+      "log_n_constituents": 4.382026634673881,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 20.279311778911506,
+      "corr_ret_vix": -0.5267102457736317,
+      "corr_r2_vix2": 0.6252735889715241,
+      "annualized_vol": 0.36599672119717774,
+      "r2_acf1": 0.5283715294577798,
+      "dm_t": 2.33,
+      "source_K": "K1086",
+      "pass": 0
+    },
+    {
+      "ticker": "EWT",
+      "class_label": "equity_taiwan_usd",
+      "currency": "USD",
+      "n_constituents": 90,
+      "hhi": 0.25,
+      "log_n_constituents": 4.499809670330265,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 18.7050474285302,
+      "corr_ret_vix": -0.6002320987067613,
+      "corr_r2_vix2": 0.5761509600812559,
+      "annualized_vol": 0.21353023606254484,
+      "r2_acf1": 0.23911029738612666,
+      "dm_t": 2.26,
+      "source_K": "K1086",
+      "pass": 0
+    },
+    {
+      "ticker": "TLT",
+      "class_label": "bonds_long_dur",
+      "currency": "USD",
+      "n_constituents": 30,
+      "hhi": 0.2,
+      "log_n_constituents": 3.4011973816621555,
+      "class_equity": 0,
+      "class_commodity": 0,
+      "class_bond": 1,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 21.384210294583838,
+      "corr_ret_vix": 0.17278125708321826,
+      "corr_r2_vix2": 0.5319324988029517,
+      "annualized_vol": 0.16215573649420567,
+      "r2_acf1": 0.4699719724840508,
+      "dm_t": 1.43,
+      "source_K": "K1087",
+      "pass": 0
+    },
+    {
+      "ticker": "BTC-USD",
+      "class_label": "crypto",
+      "currency": "USD",
+      "n_constituents": 1,
+      "hhi": 1.0,
+      "log_n_constituents": 0.0,
+      "class_equity": 0,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 1,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 34.51217175613422,
+      "corr_ret_vix": -0.2984188366245692,
+      "corr_r2_vix2": 0.24127008475183756,
+      "annualized_vol": 0.5662975283330277,
+      "r2_acf1": 0.0686012271314744,
+      "dm_t": 1.13,
+      "source_K": "K1089",
+      "pass": 0
+    },
+    {
+      "ticker": "0050.TW",
+      "class_label": "equity_taiwan_twd",
+      "currency": "TWD",
+      "n_constituents": 50,
+      "hhi": 0.5,
+      "log_n_constituents": 3.912023005428146,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 0,
+      "log_avg_dollar_volume": 20.76004184967218,
+      "corr_ret_vix": -0.1779982904100496,
+      "corr_r2_vix2": 0.32411127889273406,
+      "annualized_vol": 0.19414617671132986,
+      "r2_acf1": 0.32754087514210206,
+      "dm_t": -0.49,
+      "source_K": "K1088",
+      "pass": 0
+    }
+  ],
+  "new_assets_raw": [
+    {
+      "ticker": "EWJ",
+      "class_label": "equity_japan",
+      "currency": "USD",
+      "n_constituents": 220,
+      "hhi": 0.05,
+      "log_n_constituents": 5.393627546352362,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 19.763281193902486,
+      "corr_ret_vix": -0.6182368441389605,
+      "corr_r2_vix2": 0.5141750537642122,
+      "annualized_vol": 0.17739056865292382,
+      "r2_acf1": 0.21473246548341512
+    },
+    {
+      "ticker": "VGK",
+      "class_label": "equity_europe",
+      "currency": "USD",
+      "n_constituents": 1200,
+      "hhi": 0.04,
+      "log_n_constituents": 7.090076835776092,
+      "class_equity": 1,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 19.153088017256046,
+      "corr_ret_vix": -0.6849279647192839,
+      "corr_r2_vix2": 0.6345835518092294,
+      "annualized_vol": 0.20090179266374347,
+      "r2_acf1": 0.30737270420520607
+    },
+    {
+      "ticker": "IEF",
+      "class_label": "bonds_medium_dur",
+      "currency": "USD",
+      "n_constituents": 10,
+      "hhi": 0.18,
+      "log_n_constituents": 2.302585092994046,
+      "class_equity": 0,
+      "class_commodity": 0,
+      "class_bond": 1,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 20.223356772444642,
+      "corr_ret_vix": 0.1490778675750198,
+      "corr_r2_vix2": 0.3737283735157831,
+      "annualized_vol": 0.07188827346780154,
+      "r2_acf1": 0.26813431285544215
+    },
+    {
+      "ticker": "ETH-USD",
+      "class_label": "crypto",
+      "currency": "USD",
+      "n_constituents": 1,
+      "hhi": 1.0,
+      "log_n_constituents": 0.0,
+      "class_equity": 0,
+      "class_commodity": 0,
+      "class_bond": 0,
+      "class_crypto": 1,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 30.902298572547362,
+      "corr_ret_vix": -0.3001119260655869,
+      "corr_r2_vix2": 0.23041287439334152,
+      "annualized_vol": 0.7265455649891879,
+      "r2_acf1": 0.09557479002091651
+    },
+    {
+      "ticker": "CPER",
+      "class_label": "commodity_copper",
+      "currency": "USD",
+      "n_constituents": 1,
+      "hhi": 1.0,
+      "log_n_constituents": 0.0,
+      "class_equity": 0,
+      "class_commodity": 1,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 14.799471207865377,
+      "corr_ret_vix": -0.3012150507859483,
+      "corr_r2_vix2": 0.23046482058463147,
+      "annualized_vol": 0.22405891424133784,
+      "r2_acf1": 0.09159952530385368
+    },
+    {
+      "ticker": "SLV",
+      "class_label": "commodity_silver",
+      "currency": "USD",
+      "n_constituents": 1,
+      "hhi": 1.0,
+      "log_n_constituents": 0.0,
+      "class_equity": 0,
+      "class_commodity": 1,
+      "class_bond": 0,
+      "class_crypto": 0,
+      "currency_usd": 1,
+      "log_avg_dollar_volume": 19.916836936126423,
+      "corr_ret_vix": -0.1982779664523319,
+      "corr_r2_vix2": 0.28690240222748675,
+      "annualized_vol": 0.28627748702830974,
+      "r2_acf1": 0.10524443358919558
+    }
+  ],
+  "ols_full": {
+    "r2": 1.0,
+    "adj_r2": NaN,
+    "loocv_rmse": 8.145663215840901,
+    "loocv_r2": -12.053369887513158,
+    "saturated_warning": "N=p+1=12; full model is saturated, t and p are undefined; LOOCV exposes overfit.",
+    "coefficients": [
+      {
+        "feature": "const",
+        "coef_ols": -20.85296329744395,
+        "se_ols": Infinity,
+        "t_ols": -0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -11.95079648258926,
+        "boot_ci95_hi": 1.1803499724007613
+      },
+      {
+        "feature": "class_equity",
+        "coef_ols": -2.184633094195636,
+        "se_ols": Infinity,
+        "t_ols": -0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -7.568953757989588,
+        "boot_ci95_hi": 1.4270761821294373
+      },
+      {
+        "feature": "class_commodity",
+        "coef_ols": -4.412073621350913,
+        "se_ols": Infinity,
+        "t_ols": -0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -3.1084717443716285,
+        "boot_ci95_hi": 6.412471944771206
+      },
+      {
+        "feature": "class_bond",
+        "coef_ols": 3.54673363623923,
+        "se_ols": Infinity,
+        "t_ols": 0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -4.838061362080254,
+        "boot_ci95_hi": 2.1891541768212974
+      },
+      {
+        "feature": "class_crypto",
+        "coef_ols": -17.802990218142327,
+        "se_ols": Infinity,
+        "t_ols": -0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -10.031880052847043,
+        "boot_ci95_hi": 1.6557875090368248
+      },
+      {
+        "feature": "currency_usd",
+        "coef_ols": 7.622019938132752,
+        "se_ols": Infinity,
+        "t_ols": 0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -7.212193069455418,
+        "boot_ci95_hi": 6.567377620317112
+      },
+      {
+        "feature": "log_n_constituents",
+        "coef_ols": 1.1933272253652394,
+        "se_ols": Infinity,
+        "t_ols": 0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -0.7893102475161424,
+        "boot_ci95_hi": 1.4499025957627367
+      },
+      {
+        "feature": "hhi",
+        "coef_ols": 13.566208609619082,
+        "se_ols": Infinity,
+        "t_ols": 0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -8.260620631543313,
+        "boot_ci95_hi": 14.089106940884678
+      },
+      {
+        "feature": "log_avg_dollar_volume",
+        "coef_ols": 0.6237808745906115,
+        "se_ols": Infinity,
+        "t_ols": 0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -0.1523470472119586,
+        "boot_ci95_hi": 0.9733639013240039
+      },
+      {
+        "feature": "corr_ret_vix",
+        "coef_ols": -12.711667705356202,
+        "se_ols": Infinity,
+        "t_ols": -0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -14.480894161466106,
+        "boot_ci95_hi": 1.2628650955485066
+      },
+      {
+        "feature": "corr_r2_vix2",
+        "coef_ols": -20.825508427638937,
+        "se_ols": Infinity,
+        "t_ols": -0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -20.197370279049153,
+        "boot_ci95_hi": 3.5182235909370716
+      },
+      {
+        "feature": "annualized_vol",
+        "coef_ols": -4.2819108595672635,
+        "se_ols": Infinity,
+        "t_ols": -0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -16.711269324186347,
+        "boot_ci95_hi": 1.406705929063882
+      },
+      {
+        "feature": "r2_acf1",
+        "coef_ols": 10.578512186704117,
+        "se_ols": Infinity,
+        "t_ols": 0.0,
+        "p_ols": NaN,
+        "boot_ci95_low": -3.9693887287574747,
+        "boot_ci95_hi": 12.464600657961242
+      }
+    ],
+    "loocv_predictions": [
+      {
+        "ticker": "SPY",
+        "actual": 7.92,
+        "pred": 7.446192935983949
+      },
+      {
+        "ticker": "QQQ",
+        "actual": 5.99,
+        "pred": 6.497236181539705
+      },
+      {
+        "ticker": "EEM",
+        "actual": 5.25,
+        "pred": 5.758998773880555
+      },
+      {
+        "ticker": "IWM",
+        "actual": 4.8,
+        "pred": 4.441911709557157
+      },
+      {
+        "ticker": "GLD",
+        "actual": 4.46,
+        "pred": 4.60465154574101
+      },
+      {
+        "ticker": "USO",
+        "actual": 4.48,
+        "pred": 4.526224317627424
+      },
+      {
+        "ticker": "FXI",
+        "actual": 3.61,
+        "pred": -1.1949602618718078
+      },
+      {
+        "ticker": "EWZ",
+        "actual": 2.33,
+        "pred": 1.2328723331398281
+      },
+      {
+        "ticker": "EWT",
+        "actual": 2.26,
+        "pred": -0.1689729624033527
+      },
+      {
+        "ticker": "TLT",
+        "actual": 1.43,
+        "pred": -3.0034170452998765
+      },
+      {
+        "ticker": "BTC-USD",
+        "actual": 1.13,
+        "pred": 23.38373777267664
+      },
+      {
+        "ticker": "0050.TW",
+        "actual": -0.49,
+        "pred": 15.329435130876957
+      }
+    ]
+  },
+  "ols_compact": {
+    "features": [
+      "currency_usd",
+      "corr_ret_vix"
+    ],
+    "r2": 0.5428806873927274,
+    "adj_r2": 0.4412986179244446,
+    "loocv_rmse": 1.942752136650331,
+    "loocv_r2": 0.2574861910398165,
+    "coefficients": [
+      {
+        "feature": "const",
+        "coef": -1.2220079120920926,
+        "se": 1.7915436790534562,
+        "t": -0.6820977497672442,
+        "p": 0.5123475256451584
+      },
+      {
+        "feature": "currency_usd",
+        "coef": 3.381662386960209,
+        "se": 1.902982153821685,
+        "t": 1.7770331582820933,
+        "p": 0.10928692649395545
+      },
+      {
+        "feature": "corr_ret_vix",
+        "coef": -4.112443498225649,
+        "se": 1.876005508547388,
+        "t": -2.1921276240867544,
+        "p": 0.05605549358498264
+      }
+    ],
+    "loocv_predictions": [
+      {
+        "ticker": "SPY",
+        "actual": 7.92,
+        "pred": 4.61988396674278
+      },
+      {
+        "ticker": "QQQ",
+        "actual": 5.99,
+        "pred": 4.918091680566584
+      },
+      {
+        "ticker": "EEM",
+        "actual": 5.25,
+        "pred": 4.73649484824857
+      },
+      {
+        "ticker": "IWM",
+        "actual": 4.8,
+        "pred": 5.013447888864317
+      },
+      {
+        "ticker": "GLD",
+        "actual": 4.46,
+        "pred": 1.7829125376186585
+      },
+      {
+        "ticker": "USO",
+        "actual": 4.48,
+        "pred": 3.157998832091682
+      },
+      {
+        "ticker": "FXI",
+        "actual": 3.61,
+        "pred": 3.910237135547015
+      },
+      {
+        "ticker": "EWZ",
+        "actual": 2.33,
+        "pred": 4.5461179149084945
+      },
+      {
+        "ticker": "EWT",
+        "actual": 2.26,
+        "pred": 4.951232838242241
+      },
+      {
+        "ticker": "TLT",
+        "actual": 1.43,
+        "pred": 1.4695846504219432
+      },
+      {
+        "ticker": "BTC-USD",
+        "actual": 1.13,
+        "pred": 3.6763460180891823
+      },
+      {
+        "ticker": "0050.TW",
+        "actual": -0.49,
+        "pred": 1.8118351495261469
+      }
+    ]
+  },
+  "ols_stepwise": {
+    "selected_features": [
+      "class_equity",
+      "class_commodity",
+      "class_bond",
+      "class_crypto",
+      "currency_usd",
+      "log_n_constituents",
+      "hhi",
+      "log_avg_dollar_volume",
+      "corr_ret_vix",
+      "corr_r2_vix2",
+      "annualized_vol",
+      "r2_acf1"
+    ],
+    "r2": 1.0,
+    "adj_r2": NaN,
+    "coefficients": [
+      {
+        "feature": "const",
+        "coef": -20.85296329744395,
+        "p": NaN
+      },
+      {
+        "feature": "class_equity",
+        "coef": -2.184633094195636,
+        "p": NaN
+      },
+      {
+        "feature": "class_commodity",
+        "coef": -4.412073621350913,
+        "p": NaN
+      },
+      {
+        "feature": "class_bond",
+        "coef": 3.54673363623923,
+        "p": NaN
+      },
+      {
+        "feature": "class_crypto",
+        "coef": -17.802990218142327,
+        "p": NaN
+      },
+      {
+        "feature": "currency_usd",
+        "coef": 7.622019938132752,
+        "p": NaN
+      },
+      {
+        "feature": "log_n_constituents",
+        "coef": 1.1933272253652394,
+        "p": NaN
+      },
+      {
+        "feature": "hhi",
+        "coef": 13.566208609619082,
+        "p": NaN
+      },
+      {
+        "feature": "log_avg_dollar_volume",
+        "coef": 0.6237808745906115,
+        "p": NaN
+      },
+      {
+        "feature": "corr_ret_vix",
+        "coef": -12.711667705356202,
+        "p": NaN
+      },
+      {
+        "feature": "corr_r2_vix2",
+        "coef": -20.825508427638937,
+        "p": NaN
+      },
+      {
+        "feature": "annualized_vol",
+        "coef": -4.2819108595672635,
+        "p": NaN
+      },
+      {
+        "feature": "r2_acf1",
+        "coef": 10.578512186704117,
+        "p": NaN
+      }
+    ]
+  },
+  "ridge": {
+    "alpha_grid_loocv_rmse": {
+      "0.01": 3.086575446335467,
+      "0.03": 3.0430828542952524,
+      "0.1": 3.1521120618529324,
+      "0.3": 3.116493470260302,
+      "1.0": 2.7410787892232102,
+      "3.0": 2.4213784584645373,
+      "10.0": 2.3550479862180804,
+      "30.0": 2.381084277118784
+    },
+    "best_alpha": 10.0,
+    "loocv_rmse": 2.3550479862180804,
+    "coefficients_standardized": [
+      {
+        "feature": "class_equity",
+        "coef": -0.03841999963125953
+      },
+      {
+        "feature": "class_commodity",
+        "coef": 0.41495501092922665
+      },
+      {
+        "feature": "class_bond",
+        "coef": -0.255863312020305
+      },
+      {
+        "feature": "class_crypto",
+        "coef": -0.23813253902339543
+      },
+      {
+        "feature": "currency_usd",
+        "coef": 0.5647657512345801
+      },
+      {
+        "feature": "log_n_constituents",
+        "coef": 0.1539662745682087
+      },
+      {
+        "feature": "hhi",
+        "coef": -0.09747473474237821
+      },
+      {
+        "feature": "log_avg_dollar_volume",
+        "coef": 0.18295338111480366
+      },
+      {
+        "feature": "corr_ret_vix",
+        "coef": -0.51475571206871
+      },
+      {
+        "feature": "corr_r2_vix2",
+        "coef": 0.2367438847541114
+      },
+      {
+        "feature": "annualized_vol",
+        "coef": -0.2505551892732497
+      },
+      {
+        "feature": "r2_acf1",
+        "coef": 0.07134924304723239
+      }
+    ],
+    "loocv_predictions": [
+      {
+        "ticker": "SPY",
+        "actual": 7.92,
+        "pred": 4.256260340702452
+      },
+      {
+        "ticker": "QQQ",
+        "actual": 5.99,
+        "pred": 4.439023610244341
+      },
+      {
+        "ticker": "EEM",
+        "actual": 5.25,
+        "pred": 4.639655057916545
+      },
+      {
+        "ticker": "IWM",
+        "actual": 4.8,
+        "pred": 4.754786007861311
+      },
+      {
+        "ticker": "GLD",
+        "actual": 4.46,
+        "pred": 2.90367693071019
+      },
+      {
+        "ticker": "USO",
+        "actual": 4.48,
+        "pred": 2.9716373256860766
+      },
+      {
+        "ticker": "FXI",
+        "actual": 3.61,
+        "pred": 2.908740834331738
+      },
+      {
+        "ticker": "EWZ",
+        "actual": 2.33,
+        "pred": 4.693263187875431
+      },
+      {
+        "ticker": "EWT",
+        "actual": 2.26,
+        "pred": 4.675916949977591
+      },
+      {
+        "ticker": "TLT",
+        "actual": 1.43,
+        "pred": 3.813581219464289
+      },
+      {
+        "ticker": "BTC-USD",
+        "actual": 1.13,
+        "pred": 4.329989162386192
+      },
+      {
+        "ticker": "0050.TW",
+        "actual": -0.49,
+        "pred": 3.731351603260247
+      }
+    ]
+  },
+  "lasso": {
+    "alpha_grid_loocv_rmse": {
+      "0.01": 3.949824770159426,
+      "0.03": 4.375815048484532,
+      "0.1": 3.6473163863753757,
+      "0.3": 2.6011566013400604,
+      "1.0": 2.456885199634426
+    },
+    "best_alpha": 1.0,
+    "loocv_rmse": 2.456885199634426,
+    "coefficients_standardized": [
+      {
+        "feature": "class_equity",
+        "coef": 0.0
+      },
+      {
+        "feature": "class_commodity",
+        "coef": 0.0
+      },
+      {
+        "feature": "class_bond",
+        "coef": -0.0
+      },
+      {
+        "feature": "class_crypto",
+        "coef": -0.0
+      },
+      {
+        "feature": "currency_usd",
+        "coef": 0.13990719571187338
+      },
+      {
+        "feature": "log_n_constituents",
+        "coef": 0.0
+      },
+      {
+        "feature": "hhi",
+        "coef": -0.0
+      },
+      {
+        "feature": "log_avg_dollar_volume",
+        "coef": 0.0
+      },
+      {
+        "feature": "corr_ret_vix",
+        "coef": -0.35822651545312983
+      },
+      {
+        "feature": "corr_r2_vix2",
+        "coef": 0.0
+      },
+      {
+        "feature": "annualized_vol",
+        "coef": -0.0
+      },
+      {
+        "feature": "r2_acf1",
+        "coef": 0.0
+      }
+    ],
+    "nonzero_features": [
+      "currency_usd",
+      "corr_ret_vix"
+    ]
+  },
+  "decision_tree": {
+    "max_depth": 3,
+    "train_accuracy": 1.0,
+    "feature_importances": [
+      {
+        "feature": "class_equity",
+        "importance": 0.0
+      },
+      {
+        "feature": "class_commodity",
+        "importance": 0.4897959183673469
+      },
+      {
+        "feature": "class_bond",
+        "importance": 0.0
+      },
+      {
+        "feature": "class_crypto",
+        "importance": 0.0
+      },
+      {
+        "feature": "currency_usd",
+        "importance": 0.0
+      },
+      {
+        "feature": "log_n_constituents",
+        "importance": 0.0
+      },
+      {
+        "feature": "hhi",
+        "importance": 0.5102040816326531
+      },
+      {
+        "feature": "log_avg_dollar_volume",
+        "importance": 0.0
+      },
+      {
+        "feature": "corr_ret_vix",
+        "importance": 0.0
+      },
+      {
+        "feature": "corr_r2_vix2",
+        "importance": 0.0
+      },
+      {
+        "feature": "annualized_vol",
+        "importance": 0.0
+      },
+      {
+        "feature": "r2_acf1",
+        "importance": 0.0
+      }
+    ]
+  },
+  "new_asset_predictions": [
+    {
+      "ticker": "EWJ",
+      "class_label": "equity_japan",
+      "currency": "USD",
+      "ols_full_pred": 2.6898972105808028,
+      "ridge_pred": 4.339689983398169,
+      "lasso_pred": 3.895332207191572,
+      "recommended_pred": 4.339689983398169,
+      "pi95_low_ridge": 3.1595157584597446,
+      "pi95_hi_ridge": 5.401306137507816,
+      "pi95_low_ols": 2.424044191405922,
+      "pi95_hi_ols": 5.856173034059545,
+      "pass_prob_ridge": 0.9867,
+      "pass_prob_ols": 0.8245,
+      "tree_pass": 1,
+      "recommendation": "strong_run"
+    },
+    {
+      "ticker": "VGK",
+      "class_label": "equity_europe",
+      "currency": "USD",
+      "ols_full_pred": 3.41753751641078,
+      "ridge_pred": 4.708657433115338,
+      "lasso_pred": 3.980546028391178,
+      "recommended_pred": 4.708657433115338,
+      "pi95_low_ridge": 3.2610300990945134,
+      "pi95_hi_ridge": 5.839911828209797,
+      "pi95_low_ols": 2.3447562782605664,
+      "pi95_hi_ols": 7.214744655041251,
+      "pass_prob_ridge": 0.9876,
+      "pass_prob_ols": 0.8827,
+      "tree_pass": 1,
+      "recommendation": "strong_run"
+    },
+    {
+      "ticker": "IEF",
+      "class_label": "bonds_medium_dur",
+      "currency": "USD",
+      "ols_full_pred": 0.9709196917629246,
+      "ridge_pred": 1.932456721560757,
+      "lasso_pred": 2.9149045568708485,
+      "recommended_pred": 1.932456721560757,
+      "pi95_low_ridge": 0.9693560574510176,
+      "pi95_hi_ridge": 4.458691172817974,
+      "pi95_low_ols": -1.2285530654537462,
+      "pi95_hi_ols": 8.180973879654502,
+      "pass_prob_ridge": 0.2883,
+      "pass_prob_ols": 0.2245,
+      "tree_pass": 0,
+      "recommendation": "likely_fail"
+    },
+    {
+      "ticker": "ETH-USD",
+      "class_label": "crypto",
+      "currency": "USD",
+      "ols_full_pred": -1.2749685800652024,
+      "ridge_pred": 1.2780181159951898,
+      "lasso_pred": 3.488851709458835,
+      "recommended_pred": 1.2780181159951898,
+      "pi95_low_ridge": 0.46782218085232735,
+      "pi95_hi_ridge": 4.510275016297351,
+      "pi95_low_ols": -3.5968061010911647,
+      "pi95_hi_ols": 16.337161253340216,
+      "pass_prob_ridge": 0.2955,
+      "pass_prob_ols": 0.27,
+      "tree_pass": 0,
+      "recommendation": "likely_fail"
+    },
+    {
+      "ticker": "CPER",
+      "class_label": "commodity_copper",
+      "currency": "USD",
+      "ols_full_pred": 4.193803689211531,
+      "ridge_pred": 3.579902046160302,
+      "lasso_pred": 3.4902612145303316,
+      "recommended_pred": 3.579902046160302,
+      "pi95_low_ridge": 0.35350537938578613,
+      "pi95_hi_ridge": 4.471380070584446,
+      "pi95_low_ols": -4.39441797824696,
+      "pi95_hi_ols": 7.229450347665647,
+      "pass_prob_ridge": 0.7503,
+      "pass_prob_ols": 0.4657,
+      "tree_pass": 1,
+      "recommendation": "run"
+    },
+    {
+      "ticker": "SLV",
+      "class_label": "commodity_silver",
+      "currency": "USD",
+      "ols_full_pred": 4.780003662139865,
+      "ridge_pred": 3.583805960400902,
+      "lasso_pred": 3.3587345251767027,
+      "recommended_pred": 3.583805960400902,
+      "pi95_low_ridge": 0.7023882806676324,
+      "pi95_hi_ridge": 4.28821391919544,
+      "pi95_low_ols": -2.7610500553813355,
+      "pi95_hi_ols": 6.206966445465147,
+      "pass_prob_ridge": 0.8042,
+      "pass_prob_ols": 0.835,
+      "tree_pass": 1,
+      "recommendation": "run"
+    }
+  ]
+}
