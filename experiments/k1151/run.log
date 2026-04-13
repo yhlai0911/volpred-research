@@ -1,0 +1,120 @@
+
+========================================================================
+K1151: Continuous surprise vs Binary EAV (US N=30)
+========================================================================
+
+[1/5] Loading stocks (EAV window=1) ...
+    AAPL: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    MSFT: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    NVDA: n_obs=3016, n_events_binary=48, n_events_surp_matched=47
+    GOOGL: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    AMZN: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    META: n_obs=3015, n_events_binary=48, n_events_surp_matched=48
+    TSLA: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    BRK-B: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    UNH: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    V: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    JPM: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    WMT: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    MA: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    JNJ: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    XOM: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    PG: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    HD: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    CVX: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    ABBV: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    AVGO: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    COST: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    PEP: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    KO: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    MRK: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    ADBE: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    CSCO: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    TMO: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    CRM: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    MCD: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+    ABT: n_obs=3016, n_events_binary=48, n_events_surp_matched=48
+  Loaded 30/30 stocks
+
+[2/5] Standardizing continuous surprise (winsor p99 + z-score) ...
+  p99 threshold = 202.94%
+  n_nonzero events total = 1439
+  n_clipped at p99 = 15
+  mean_clipped = 12.75, std_clipped = 27.00
+
+[3/5] Binary EAV baseline (same as K1147, re-fit on local cache) ...
+    [BCD outer 0] θ_VIX=8.544e-08, θ_x=+2.0652e-04, negll=-256637.47, Δll=+inf
+    [BCD outer 1] θ_VIX=8.500e-08, θ_x=+1.7482e-04, negll=-256690.83, Δll=+53.3578
+    [BCD outer 2] θ_VIX=8.499e-08, θ_x=+1.7396e-04, negll=-256697.29, Δll=+6.4574
+    [BCD outer 3] θ_VIX=8.499e-08, θ_x=+1.7396e-04, negll=-256700.71, Δll=+3.4259
+    [BCD outer 4] θ_VIX=8.498e-08, θ_x=+1.7289e-04, negll=-256711.98, Δll=+11.2637
+    [BCD outer 5] θ_VIX=8.498e-08, θ_x=+1.7279e-04, negll=-256713.17, Δll=+1.1957
+    [BCD outer 6] θ_VIX=8.498e-08, θ_x=+1.7220e-04, negll=-256713.58, Δll=+0.4087
+    [BCD outer 7] θ_VIX=8.498e-08, θ_x=+1.7215e-04, negll=-256713.73, Δll=+0.1490
+
+  Binary:  θ_EAV=+1.7215e-04, SE=7.6470e-06, t_hess=+22.51
+           pooled_loglik=256714.06
+
+[4/5] Continuous surprise (z-scored |surprise|) ...
+    [BCD outer 0] θ_VIX=8.494e-08, θ_x=+6.0665e-06, negll=-253943.55, Δll=+inf
+    [BCD outer 1] θ_VIX=8.494e-08, θ_x=+5.6578e-06, negll=-253963.14, Δll=+19.5938
+    [BCD outer 2] θ_VIX=8.494e-08, θ_x=+5.5297e-06, negll=-253965.32, Δll=+2.1832
+    [BCD outer 3] θ_VIX=8.493e-08, θ_x=+5.4735e-06, negll=-253966.19, Δll=+0.8619
+    [BCD outer 4] θ_VIX=8.493e-08, θ_x=+5.2784e-06, negll=-253967.55, Δll=+1.3618
+    [BCD outer 5] θ_VIX=8.493e-08, θ_x=+5.3002e-06, negll=-253973.87, Δll=+6.3233
+    [BCD outer 6] θ_VIX=8.493e-08, θ_x=+5.2844e-06, negll=-253973.88, Δll=+0.0128
+    [BCD outer 7] θ_VIX=8.493e-08, θ_x=+5.2582e-06, negll=-253974.02, Δll=+0.1388
+
+  Continuous:  θ_SURP=+5.2582e-06, SE=4.9831e-07, t_hess=+10.55
+               pooled_loglik=253974.34
+
+  Information criteria (lower is better):
+    Binary      : AIC=-513124.12, BIC=-511693.36
+    Continuous  : AIC=-507644.67, BIC=-506213.92
+    ΔAIC (bin-cont) = -5479.45 (>0 favours continuous)
+    ΔBIC (bin-cont) = -5479.45
+
+[5/5a] Cluster bootstrap for BINARY (n=150) ...
+    [boot 25/150] elapsed=58s
+    [boot 50/150] elapsed=118s
+    [boot 75/150] elapsed=178s
+    [boot 100/150] elapsed=237s
+    [boot 125/150] elapsed=297s
+    [boot 150/150] elapsed=357s
+  Binary boot draws: 150/150
+
+[5/5b] Cluster bootstrap for CONTINUOUS (n=150) ...
+    [boot 25/150] elapsed=61s
+    [boot 50/150] elapsed=130s
+    [boot 75/150] elapsed=203s
+    [boot 100/150] elapsed=277s
+    [boot 125/150] elapsed=353s
+    [boot 150/150] elapsed=426s
+  Continuous boot draws: 150/150
+
+  Bootstrap results:
+    Binary      : mean=0.0001754431828945589, SE=3.833365611708852e-05, t=4.490885777684848, p=0.0
+    Continuous  : mean=4.683360955172633e-06, SE=4.72788144352617e-06, t=1.112177758500708, p=0.41333333333333333
+
+[6] Drop-5 robustness (continuous, 3 seeds) ...
+    seed=42, dropped=['NVDA', 'MA', 'ABBV', 'COST', 'ABT'], θ_SURP=+5.436e-06, t=10.487307390128969
+    seed=43, dropped=['MSFT', 'WMT', 'JNJ', 'CVX', 'ABT'], θ_SURP=+5.732e-06, t=10.628113500082828
+    seed=44, dropped=['GOOGL', 'BRK-B', 'CVX', 'AVGO', 'KO'], θ_SURP=+5.886e-06, t=10.5348555334214
+
+[7] Verdict
+
+  BINARY SUFFICIENT (continuous NS, binary captures announcement-day clustering regardless of surprise size)
+  Paper 2 narrative: Keep binary as main spec; cite K1151 to argue mechanism = announcement-day clustering, not surprise magnitude.
+
+  ⚠️  continuous Hessian t=+10.55 > 8 — Hessian inflation expected for pooled panels;
+      trust bootstrap t (4.50 in K1147 was accepted).  Also verified winsorization at p99 blocks
+      AMZN/TSLA near-zero-EPS outliers from dominating the standardization.
+
+[8] Plots ...
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5fe6ca3/experiments/k1151/k1151_tstat_barplot.png
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5fe6ca3/experiments/k1151/k1151_effect_barplot.png
+
+  Results -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a5fe6ca3/experiments/k1151/k1151_results.json
+  Elapsed: 808.6s
+
+  FINAL MECHANISM VERDICT: BINARY SUFFICIENT (continuous NS, binary captures announcement-day clustering regardless of surprise size)
