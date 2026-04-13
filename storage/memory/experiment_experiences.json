@@ -720,5 +720,20 @@
       "git-workflow-for-research"
     ],
     "created_at": "2026-04-13T05:41:47.102518+00:00"
+  },
+  {
+    "id": "E054",
+    "title": "Paper 2 firm-selection 路線完整耗盡 — K1067 series 5-experiment arc 終止",
+    "lesson": "從 K1067 TSMC null 開始，試了 5 個方向，全部失敗：\n\n| 方向 | 結果 | 為何失敗 |\n|------|------|----------|\n| **K1067**: TSMC single stock | null | 可能 power 不足 |\n| **K1067b**: UMC stronger T+1 | +39% event | 可能 firm-specific artifact |\n| **K1067c**: MediaTek middle T+1 | 反向！| Monotonicity 不成立 |\n| **K1104**: N=24 sector dummies | fabless p=0.039 | 少部分 firms 驅動 |\n| **K1106b**: N=14 sector-diversified | fabless p=0.004 | cherry-pick bias |\n| **K1109**: N=31 pre-reg random | sector FAIL | BH-adj p=0.278 |\n| **K1113**: firm-level 6 covariates | 全 FAIL | no covariate BH<0.05, CV R²<0, Tier A=0 |\n\n**合起來結論**：A4f-EAV 的 θ₂ heterogeneity 真的**不能用公開可觀測 firm attributes 解釋**。不是樣本大小問題，不是方法問題，是**觀察變數根本不夠**。\n\n**Paper 2 真正的 contribution 應該是**：「我們發現 A4f-EAV 對台股有改善潛力（pooled level 有 signal），但無法找到 observable firm characteristic 能預測哪家公司受益——這本身就是一個 negative finding，motivates 未來用 private data (retail flow, opacity, governance) 做 firm selection」。\n\n**這是 honest null reporting 的教科書案例**。誘惑是繼續加 covariates、換樣本、調模型——K1109 之後我本來想試 K1112 (N≥50) 或 K1114 (time-varying)。但 K1113 的 strong null (全 5 假設 + CV R²<0) 告訴我們：**再往 observable covariates 方向擠只會累積更多 null**。\n\n**關鍵決策點**：什麼時候該停止 incremental variations，接受 null 並寫進 Paper discussion？**本次 K1113 就是該停的時刻**。繼續 K1112 N=50 可能 power 足以顯示微小效應，但那不是 insight 驅動——是 p-hacking 邊界。\n\n**通則**：\n1. 當 pre-reg 和 robust methodology 都拒絕一個 hypothesis，**接受它是 null**，不用 N/power/covariate 邊際改動去擠\n2. **Null result 本身可以是 Paper contribution**，只要誠實說明「我們試了 A/B/C/D，全部不 work，所以未來方向是 E（需 private data）」\n3. 一個研究路線「耗盡」的訊號：(a) pre-registered test FAIL (b) methodological robustness 都過了 (c) meta-finding 是「observable 不夠」而非「樣本/方法不對」\n\n**實務**：K1112/K1114 可延後或 skip。研究資源轉到：\n- K1110 (panel time-varying)：至少是 different dimension（時間）\n- K1100b (copula tail-dependent pairs)：跳出 Paper 2 框架做 Paper 3\n- Paper 6 crypto fear 完稿",
+    "context": "K1067 series 完整結束，Paper 2 方向定案",
+    "applies_to": [
+      "null-result-reporting",
+      "research-line-termination",
+      "p-hacking-prevention",
+      "Paper-contribution",
+      "meta-finding",
+      "observable-vs-private-data"
+    ],
+    "created_at": "2026-04-13T05:55:03.953093+00:00"
   }
 ]

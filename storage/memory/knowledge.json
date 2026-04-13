@@ -25598,5 +25598,23 @@
     ],
     "data_source": "yfinance (31 TWSE tickers across 8 sectors pre-registered with seed=42)",
     "created_at": "2026-04-13T05:41:47.102518+00:00"
+  },
+  {
+    "id": "k1113-1776059703",
+    "experiment_id": "K1113",
+    "title": "K1113: Firm-level covariate rule STRONG NULL — Paper 2 firm-selection 路線耗盡",
+    "content": "[提出: Claude 承接 K1109 sector FAIL, 執行: Claude] Pre-registered 5 hypotheses **全 FAIL**：H1 min BH-adj p=0.854; H2 log_mktcap β=-1.10e-4 p=0.682; H3 price_volatility β=+3.28e-5 p=0.854; H4 CV R²=-0.661 (zero out-of-sample predictive power); H5 Tier A=0 (全 31 家都是 Tier B, 沒有 firm classifies as \"use EAV\")。In-sample R²=0.116, adj R²=-0.105 6 個 covariates bootstrap 95% CI 全跨零。**Codex 審代碼抓到 2 個 HIGH bugs**：(1) CV z-score leakage 修正為 `_kfold_cv_leakage_free` (2) Tier 分類用 coefficient-only SE 改為 prediction SE `σ̂²+x'Cov_HC1·x`。修正後結果**朝 stronger null 移動**（Tier A 從 1→0）。**Meta-finding**：K1109 拒絕 sector dummies + K1113 拒絕 continuous firm covariates → **A4f-EAV θ₂ cross-sectional heterogeneity 不能用公開可觀測 firm attributes 解釋**。可能需要 private data（retail flow、公司治理 opacity、analyst dispersion 細節）。**Paper 2 最終決策**：(1) 不寫 Tier A/B/C 規則 (2) Pooled A4f-EAV 當 default，cluster SE by firm (3) 明確 motivate 未來研究需 private data。Runtime 593s。Commit 671521aa。",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "strong-null",
+      "firm-level-covariates-FAIL",
+      "Paper_2-selection-exhausted",
+      "K1109-continuation",
+      "Codex-saves-from-bugs",
+      "K1067-series-closure"
+    ],
+    "data_source": "K1109 firm_level_results.csv + yfinance covariates (31 TWSE firms)",
+    "created_at": "2026-04-13T05:55:03.953093+00:00"
   }
 ]

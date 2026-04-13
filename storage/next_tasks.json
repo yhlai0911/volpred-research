@@ -120,9 +120,23 @@
   },
   {
     "id": "K1113",
-    "title": "K1113: Firm-level covariate rule (skip sector)",
+    "title": "K1113: Firm-level covariate rule",
     "priority": 1,
-    "description": "K1109 D2：θ₂ ~ log_mktcap + beta + earnings_freq + ind_momentum + float_ratio 非 sector predictors。Paper 2 真正可操作的 selection rule。",
+    "description": "STRONG NULL: 全 5 假設 FAIL, CV R²=-0.661, Tier A=0。Codex 抓 2 HIGH bugs 修正後更 null。Paper 2 firm-selection 路線耗盡 — 不用 Tier 規則，pooled A4f-EAV + cluster SE 當 default。",
+    "status": "completed"
+  },
+  {
+    "id": "K1112",
+    "title": "K1112: N≥50 真 confirmatory [deferred — K1113 已確認 null]",
+    "priority": 4,
+    "description": "降優先級。K1113 的 strong null（CV R²<0）告訴我們不需要更大 N——observable covariates 本身不夠。",
+    "status": "deferred"
+  },
+  {
+    "id": "K1114",
+    "title": "K1114: Rolling θ₂ heterogeneity (time-varying)",
+    "priority": 2,
+    "description": "K1109/K1113 後：jump 到不同 dimension (時間) 而非繼續 cross-sectional。可能找到結構 vs 循環 heterogeneity。",
     "status": "pending"
   },
   {
