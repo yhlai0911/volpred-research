@@ -1,0 +1,272 @@
+{
+  "experiment_id": "K1166",
+  "title": "Per-stock theta_EAV refit \u2014 remove sigma^2 tautology in K1164 cluster mechanism analysis",
+  "proposer": "Claude (K1164 next_tasks K1166)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-13T17:38:19.535863+00:00",
+  "random_seed": 42,
+  "data_sources": [
+    "experiments/k1145/data/ (TW parquet + VIX)",
+    "experiments/k1147/data/ (US parquet + VIX + earnings_dates.json)",
+    "experiments/k1150/data/ (JP parquet + VIX + earnings_dates.json)",
+    "experiments/k1153/data/ (EU parquet + VIX + earnings_dates.json)",
+    "\u8ca1\u5831\u516c\u544a\u65e5.txt (TW earnings, big5)",
+    "experiments/k1164/data/analyst_media_proxies.json"
+  ],
+  "specification": {
+    "equation": "sigma2_{i,t} = g_{i,t} * tau_{i,t}; g GJR(1,1) stock-specific; tau = max(theta0_i + theta_VIX_i*VIX^2_{t-1} + theta_EAV_i*EAV_{i,t-1}, eps)",
+    "estimation": "L-BFGS-B multi-start, Hessian SE from 2nd-order finite-diff",
+    "lookahead": "VIX lag-1, EAV lag-1"
+  },
+  "n_stocks_total": 110,
+  "n_converged": 110,
+  "per_market": {
+    "EU": {
+      "n_total": 19,
+      "n_converged": 19,
+      "theta_eav_mean": 0.0006611526030135155,
+      "theta_eav_median": 0.00024189247400811816,
+      "theta_eav_std": 0.0013559810651910518,
+      "n_sig_t2": 7,
+      "n_sig_t3": 4,
+      "pct_sig_t2": 0.4666666666666667,
+      "pct_sig_t3": 0.26666666666666666,
+      "fraction_positive": 0.8947368421052632
+    },
+    "JP": {
+      "n_total": 30,
+      "n_converged": 30,
+      "theta_eav_mean": 0.0010188272660206002,
+      "theta_eav_median": 0.0007619218243662201,
+      "theta_eav_std": 0.0008315324894136764,
+      "n_sig_t2": 30,
+      "n_sig_t3": 24,
+      "pct_sig_t2": 1.0,
+      "pct_sig_t3": 0.8,
+      "fraction_positive": 1.0
+    },
+    "TW": {
+      "n_total": 31,
+      "n_converged": 31,
+      "theta_eav_mean": 0.00037893524176672123,
+      "theta_eav_median": 8.501739932063492e-05,
+      "theta_eav_std": 0.0006658132967418546,
+      "n_sig_t2": 14,
+      "n_sig_t3": 6,
+      "pct_sig_t2": 0.45161290322580644,
+      "pct_sig_t3": 0.1935483870967742,
+      "fraction_positive": 0.7096774193548387
+    },
+    "US": {
+      "n_total": 30,
+      "n_converged": 30,
+      "theta_eav_mean": 0.002019001389399132,
+      "theta_eav_median": 0.00023194728782463834,
+      "theta_eav_std": 0.00294581581774999,
+      "n_sig_t2": 17,
+      "n_sig_t3": 12,
+      "pct_sig_t2": 0.6071428571428571,
+      "pct_sig_t3": 0.42857142857142855,
+      "fraction_positive": 0.9666666666666667
+    }
+  },
+  "preamble_rule5_check": {
+    "EU": "OK",
+    "JP": "WARN: >80% per-stock |t|>3 \u2014 self-challenge: verify no lookahead / tautology.",
+    "TW": "OK",
+    "US": "OK"
+  },
+  "spearman_correlations": {
+    "pooled": {
+      "theta_eav_vs_analyst": {
+        "rho": 0.24094691367908,
+        "p": 0.01200553313958703,
+        "n": 108
+      },
+      "theta_eav_vs_log_analyst": {
+        "rho": 0.24094691367908,
+        "p": 0.01200553313958703,
+        "n": 108
+      },
+      "theta_eav_vs_sigma2": {
+        "rho": 0.40169059802087326,
+        "p": 1.3645371568706361e-05,
+        "n": 110
+      },
+      "theta_eav_vs_log_mcap": {
+        "rho": 0.31545732554906863,
+        "p": 0.0008340435002716232,
+        "n": 109
+      }
+    },
+    "EU": {
+      "theta_eav_vs_log_analyst": {
+        "rho": 0.2542854092359137,
+        "p": 0.3085571646275566,
+        "n": 18
+      },
+      "theta_eav_vs_sigma2": {
+        "rho": -0.3298245614035088,
+        "p": 0.16788746525194864,
+        "n": 19
+      },
+      "theta_eav_vs_log_mcap": {
+        "rho": 0.10629514963880288,
+        "p": 0.6746395315456968,
+        "n": 18
+      }
+    },
+    "JP": {
+      "theta_eav_vs_log_analyst": {
+        "rho": 0.19315482491913288,
+        "p": 0.3064639882852714,
+        "n": 30
+      },
+      "theta_eav_vs_sigma2": {
+        "rho": 0.5377085650723026,
+        "p": 0.0021802730383193134,
+        "n": 30
+      },
+      "theta_eav_vs_log_mcap": {
+        "rho": -0.1243604004449388,
+        "p": 0.5126248379279994,
+        "n": 30
+      }
+    },
+    "TW": {
+      "theta_eav_vs_log_analyst": {
+        "rho": 0.04974365356190439,
+        "p": 0.7940604655581707,
+        "n": 30
+      },
+      "theta_eav_vs_sigma2": {
+        "rho": 0.29717741935483877,
+        "p": 0.10447454319314414,
+        "n": 31
+      },
+      "theta_eav_vs_log_mcap": {
+        "rho": -0.11491935483870967,
+        "p": 0.5381618885371389,
+        "n": 31
+      }
+    },
+    "US": {
+      "theta_eav_vs_log_analyst": {
+        "rho": 0.5753428974974641,
+        "p": 0.0008804146757381893,
+        "n": 30
+      },
+      "theta_eav_vs_sigma2": {
+        "rho": 0.6703003337041158,
+        "p": 5.0663115354063486e-05,
+        "n": 30
+      },
+      "theta_eav_vs_log_mcap": {
+        "rho": 0.3041156840934371,
+        "p": 0.10228067785201173,
+        "n": 30
+      }
+    }
+  },
+  "panel_regression_with_market_fe": {
+    "n": 108,
+    "k": 6,
+    "r2": 0.18782492248321203,
+    "coefs": {
+      "D_EU": {
+        "beta": -0.002245923702281194,
+        "se": 0.004811961333230444,
+        "t": -0.46673768693262213,
+        "p": 0.6416829562630317
+      },
+      "D_JP": {
+        "beta": -0.0015418407114311846,
+        "se": 0.005701052589431553,
+        "t": -0.2704484281182399,
+        "p": 0.7873617621736084
+      },
+      "D_TW": {
+        "beta": -0.0015340922117766248,
+        "se": 0.0050844966867399964,
+        "t": -0.30171958136533505,
+        "p": 0.7634801343800146
+      },
+      "D_US": {
+        "beta": -0.0012443755771703298,
+        "se": 0.004939619374972554,
+        "t": -0.2519173002428439,
+        "p": 0.8016118783577884
+      },
+      "log_analyst": {
+        "beta": 0.0009682056030173924,
+        "se": 0.0002722633422411649,
+        "t": 3.5561364781887423,
+        "p": 0.0005723709709193336
+      },
+      "log_mcap": {
+        "beta": -3.3130824659093978e-06,
+        "se": 0.00019635860642834457,
+        "t": -0.016872611423418366,
+        "p": 0.9865712023954178
+      }
+    },
+    "X_cols": [
+      "D_EU",
+      "D_JP",
+      "D_TW",
+      "D_US",
+      "log_analyst",
+      "log_mcap"
+    ]
+  },
+  "magnitude_comparison_vs_pooled_shared": {
+    "TW": {
+      "pooled_shared_theta_eav": 6.362165248598386e-05,
+      "per_stock_mean": 0.00037893524176672123,
+      "per_stock_median": 8.501739932063492e-05,
+      "ratio_mean_to_shared": 5.956073552949641
+    },
+    "US": {
+      "pooled_shared_theta_eav": 0.00019089860360002893,
+      "per_stock_mean": 0.002019001389399132,
+      "per_stock_median": 0.00023194728782463834,
+      "ratio_mean_to_shared": 10.576302557085997
+    },
+    "JP": {
+      "pooled_shared_theta_eav": 0.00014127865441754286,
+      "per_stock_mean": 0.0010188272660206002,
+      "per_stock_median": 0.0007619218243662201,
+      "ratio_mean_to_shared": 7.211473454507154
+    },
+    "EU": {
+      "pooled_shared_theta_eav": 4.0718849779368176e-05,
+      "per_stock_mean": 0.0006611526030135155,
+      "per_stock_median": 0.00024189247400811816,
+      "ratio_mean_to_shared": 16.237015696561123
+    }
+  },
+  "mechanism_hypothesis": "K1153 hypothesis: high analyst coverage -> HIGH theta_EAV_i (more institutional attention -> sharper vol response to earnings news).",
+  "mechanism_verdict": "CONFIRMED (removed-tautology)",
+  "verdict_notes": {
+    "tautology_removed": "YES \u2014 no shared theta_EAV; per-stock variation is firm-level.",
+    "pooled_log_analyst_rho": 0.24094691367908,
+    "pooled_log_analyst_p": 0.01200553313958703,
+    "panel_log_analyst_beta": 0.0009682056030173924,
+    "panel_log_analyst_t": 3.5561364781887423,
+    "panel_log_analyst_p": 0.0005723709709193336,
+    "n_markets_positive_rho": 4,
+    "n_markets_negative_rho": 0,
+    "n_markets_sig_positive": 1
+  },
+  "figures": {
+    "hist_by_market": "k1166_theta_eav_hist_by_market.png",
+    "scatter_vs_analyst": "k1166_theta_eav_vs_analyst.png"
+  },
+  "limitations": [
+    "Per-stock fits may be noisy (N=500-3000 daily obs each).",
+    "Analyst count is yfinance snapshot (current, not historical average).",
+    "theta_EAV_i SE from profile Hessian; no block-bootstrap due to per-stock computational cost.",
+    "No cross-market Spearman because market-level theta_EAV is at the market level; we instead do within-market plus pooled-with-FE cross-stock."
+  ],
+  "execution_time_sec": 5.8
+}

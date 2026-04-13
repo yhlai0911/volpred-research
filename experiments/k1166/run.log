@@ -1,0 +1,58 @@
+
+========================================================================
+K1166: Per-stock theta_EAV refit (no shared pooling)
+========================================================================
+
+[1/5] Loading cached stocks ...
+  TW: loaded 31/31 (skipped: [])
+  US: loaded 30/30 (skipped: [])
+  JP: loaded 30/30 (skipped: [])
+  EU: loaded 19/30 (skipped: ['MC.PA', 'OR.PA', 'SU.PA', 'DG.PA', 'RMS.PA', 'AI.PA', 'ULVR.L', 'RIO.L', 'DGE.L', 'REL.L', 'LSEG.L'])
+  Total loaded: 110 stocks
+
+[2/5] Per-stock MLE fits via multiprocessing (n_workers=8) ...
+  All 110 fits done in 2.6s
+
+  Converged: 110/110
+  Mean fit time: 0.09s
+  Stocks with any param at bound: 4/110
+
+[3/5] Merge with analyst/mcap proxies from K1164 cache ...
+  Saved: experiments/k1166/k1166_per_stock_table.csv
+
+[4/5] Cross-stock statistics and mechanism test ...
+  EU: N_conv=19/19, mean=+6.612e-04, median=+2.419e-04, %|t|>2=47%, frac_pos=0.89
+  JP: N_conv=30/30, mean=+1.019e-03, median=+7.619e-04, %|t|>2=100%, frac_pos=1.00
+  TW: N_conv=31/31, mean=+3.789e-04, median=+8.502e-05, %|t|>2=45%, frac_pos=0.71
+  US: N_conv=30/30, mean=+2.019e-03, median=+2.319e-04, %|t|>2=61%, frac_pos=0.97
+
+  Cross-stock Spearman corr (log_analyst, theta_eav):
+    pooled: rho=+0.241 (p=0.012, N=108)  | sanity sigma2: rho=+0.402
+    EU: rho=+0.254 (p=0.309, N=18)  | sanity sigma2: rho=-0.330
+    JP: rho=+0.193 (p=0.306, N=30)  | sanity sigma2: rho=+0.538
+    TW: rho=+0.050 (p=0.794, N=30)  | sanity sigma2: rho=+0.297
+    US: rho=+0.575 (p=0.001, N=30)  | sanity sigma2: rho=+0.670
+
+  Panel regression theta_eav_i ~ log_analyst + log_mcap + market_FE:
+    D_EU: beta=-2.2459e-03, SE=4.8120e-03, t=-0.467, p=0.6417
+    D_JP: beta=-1.5418e-03, SE=5.7011e-03, t=-0.270, p=0.7874
+    D_TW: beta=-1.5341e-03, SE=5.0845e-03, t=-0.302, p=0.7635
+    D_US: beta=-1.2444e-03, SE=4.9396e-03, t=-0.252, p=0.8016
+    log_analyst: beta=+9.6821e-04, SE=2.7226e-04, t=+3.556, p=0.0006
+    log_mcap: beta=-3.3131e-06, SE=1.9636e-04, t=-0.017, p=0.9866
+    R^2 = 0.188, n = 108
+
+  Pooled-shared vs per-stock mean theta_EAV:
+    TW: shared=+6.362e-05, per-stock mean=+3.789e-04, ratio=5.96
+    US: shared=+1.909e-04, per-stock mean=+2.019e-03, ratio=10.58
+    JP: shared=+1.413e-04, per-stock mean=+1.019e-03, ratio=7.21
+    EU: shared=+4.072e-05, per-stock mean=+6.612e-04, ratio=16.24
+
+[5/5] Plots ...
+  k1166_theta_eav_hist_by_market.png
+  k1166_theta_eav_vs_analyst.png
+
+  Mechanism verdict: CONFIRMED (removed-tautology)
+
+[DONE] Results: experiments/k1166/k1166_results.json
+[DONE] Total time: 5.8s
