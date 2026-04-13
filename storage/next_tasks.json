@@ -98,10 +98,17 @@
     "status": "completed"
   },
   {
-    "id": "K1106",
-    "title": "K1106: Extend N to 50 (full 0050.TW)",
+    "id": "K1106b",
+    "title": "K1106b: Sector-diversified firm θ₂ heterogeneity (N=15-18 × 7 sectors)",
     "priority": 2,
-    "description": "K1104 衍生：N=23→50 後 foundry/size 可能達 Harvey |t|>3。支持 5-6 covariates + interactions。",
+    "description": "取代 K1106。用戶指出 0050.TW 半導體權重過高。改做跨 sector（foundry/fabless/financials/shipping/mfg/electronics/consumer）diversified sample。Agent a2b57efb99b820726 in worktree agent-k1106b.",
+    "status": "in_progress"
+  },
+  {
+    "id": "K1106",
+    "title": "K1106: Extend N to 50 (full 0050.TW) [deferred]",
+    "priority": 3,
+    "description": "延後。K1106b sector-diversified 版優先，若結果支持 sector heterogeneity 再回頭做全 50 檔確認。",
     "status": "pending"
   },
   {

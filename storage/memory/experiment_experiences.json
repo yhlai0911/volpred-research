@@ -595,5 +595,21 @@
       "N=3-limitation"
     ],
     "created_at": "2026-04-13T03:55:30.844040+00:00"
+  },
+  {
+    "id": "E045",
+    "title": "Session 2026-04-13: 5-experiment arc — K1100 copula + K1067 series synthesis + Monitor/Option B infra",
+    "lesson": "今天 session 完成 5 個連貫實驗 + 1 個 infra 改進：\n\n1. **K1100 (Copula-GARCH null)**: Student-t/Clayton copula 打不過 DCC-A4f-ASYM 在 SPY+GLD 50/50。教訓：copula 方法適用 tail-dependent pairs（PRS spot-futures），對 tail-independent pairs（λ<0.05）DCC 已足夠。\n\n2. **K1067 series story arc**:\n   - K1067b (UMC MIXED): event-window PASS (DM-2.20, +39%)，全 OOS 不足\n   - K1067c (MediaTek counterexample): DM +1.59（反方向！），T+1 amplification 非單調\n   - K1103 (τ-lag bug-fix): SCENARIO STABLE，所有結論穩固\n   - K1104 (multi-covariate): **fabless p=0.039 SIG**，Paper 2 有 3 條 firm-selection rules\n\n**教訓**：\n- Chain of 5 experiments + Codex 審代碼每次都抓到 bug（K1067c τ-lag, K1104 kfold, K1104 boundary filter），**agent 主動 rerun 4 次才通過**——這是正確的 rigor，不是 inefficiency\n- K1067c monotonicity FAIL 一開始以為會推翻 K1067b，但 K1103 驗證 bug-fix 後 UMC 反而更強（-2.40 vs -2.20），最終 K1104 用 multi-covariate 解釋為何 UMC 有效、MediaTek 反向 → story 從「單一指標不行」變成「sector effect 才是 driver」\n- Back-annotation of older knowledge entries (K1067/b/c → K1103-verified tag) 是重要的累積——未來 researcher 讀 knowledge 會看到 robustness 已驗證\n\n3. **Infra: Option B 跨 session race 防撞**: 用 status=ranked→researching atomic transition 作為 lock，比 global file lock 更簡單，只保護真正有 race 的 task（member_qa）。其他 cron task 天然冪等（worktree check、git、增量索引）。\n\n4. **Infra: CLAUDE.md 瘦身 + scripts/session_startup.md**: 移出 cron/Monitor 操作細節（~107 行→4 行指針），每次 session load 省 context。Monitor 加入必建清單。\n\n5. **User 提醒 sector 過度集中** → 立刻 pivot K1106→K1106b (sector-diversified)，避免 0050.TW 半導體權重主宰 regression。\n\n**下次應重複的實踐**：\n- Codex 審代碼**之後**就讓 agent rerun 不要跳過（哪怕 4 次）\n- Knowledge 新增時**主動 back-annotate** 相關舊 entry\n- 用戶指出盲區時立刻改方向，不為了 momentum 繼續\n\n**應避免的**：\n- 連續 5 個實驗都在同一小樣本空間（TSMC/UMC/MediaTek）— K1104 只擴到 24 但仍 0050.TW 半導體偏\n- Infra 改動後未立刻寫 experience（Monitor/Option B 修了就忘）",
+    "context": "Paper 2 EAV 完整驗證鏈 + infra maturity",
+    "applies_to": [
+      "Paper_2",
+      "A4f-EAV",
+      "multi-experiment-chain",
+      "Codex-review-rerun",
+      "back-annotation",
+      "infrastructure",
+      "sector-diversification"
+    ],
+    "created_at": "2026-04-13T05:08:48.054956+00:00"
   }
 ]
