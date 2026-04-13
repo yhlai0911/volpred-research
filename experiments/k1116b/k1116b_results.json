@@ -1,0 +1,1190 @@
+{
+  "experiment_id": "K1116b",
+  "title": "K1116 & K1118 FRED Publication-Delay Re-verification",
+  "started_utc": "2026-04-13T09:30:13.162252Z",
+  "data_source": "yfinance (SPY, GLD, TLT, BTC-USD, ^VIX, ^GVZ, ^MOVE) + FRED (USEPUINDXD, WLEMUINDXD, NFCI, ANFCI, STLFSI4)",
+  "period": "2018-01 to 2026-04 weekly (W-FRI)",
+  "precedessor": "K1116 (SPY), K1118 (GLD/TLT/BTC)",
+  "delay_corrections": {
+    "USEPU": "1 week (daily series, 1-day release lag \u2192 weekly aggregation safe with shift(1))",
+    "WLEMU": "1 week (same as USEPU)",
+    "NFCI": "2 weeks (weekly Fri obs, 5-cal-day release; needs extra week lag)",
+    "ANFCI": "2 weeks (same as NFCI)",
+    "STLFSI": "2 weeks (weekly Fri obs, 6-cal-day release; needs extra week lag)"
+  },
+  "references": [
+    "K1121 publication-delay discovery (E062)",
+    "Baker, Bloom, Davis (2016) QJE \u2014 EPU",
+    "Brave, Butters (2011) \u2014 NFCI",
+    "Kliesen, Smith (2010) \u2014 STLFSI",
+    "Patton (2011) \u2014 QLIKE",
+    "Harvey, Leybourne, Newbold (1997) \u2014 HLN DM"
+  ],
+  "full_results": {
+    "SPY": {
+      "original_k1116": {
+        "asset": "SPY",
+        "variant": "original_k1116",
+        "delay_spec_weeks": {
+          "USEPU": 1,
+          "WLEMU": 1,
+          "NFCI": 1,
+          "ANFCI": 1,
+          "STLFSI": 1
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 170,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.5315370546866731,
+            "IS_QLIKE": -2.8526301278071755,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.0492457243643845,
+            "OOS_n_common": 170
+          },
+          "M2_AR1_VIX": {
+            "IS_R2": 0.5453132793784676,
+            "IS_QLIKE": -2.860547998694541,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.058643013089726,
+            "OOS_n_common": 170
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.5447925989348601,
+            "IS_QLIKE": -2.8531154040295696,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.0396802722601426,
+            "OOS_n_common": 170
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.5550744649174619,
+            "IS_QLIKE": -2.8576919423521256,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.0381951213008973,
+            "OOS_n_common": 170
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.59452007791267,
+            "IS_QLIKE": -2.839472591506511,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": 59.90740264163497,
+            "OOS_n_common": 170
+          }
+        },
+        "dm_results": {
+          "M2_AR1_VIX_vs_M1_AR1": {
+            "t_stat": -3.0210734176656016,
+            "p_value": 0.0029103778322305818,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M3_AR1_EPU": {
+            "t_stat": -2.5543453538857093,
+            "p_value": 0.011521674588589104,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+            "t_stat": -3.0009519451593367,
+            "p_value": 0.003099157559687926,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M5_AR1_All": {
+            "t_stat": -1.008028487535291,
+            "p_value": 0.31488186596307033,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          }
+        }
+      },
+      "corrected": {
+        "asset": "SPY",
+        "variant": "corrected",
+        "delay_spec_weeks": {
+          "USEPU": 1,
+          "WLEMU": 1,
+          "NFCI": 2,
+          "ANFCI": 2,
+          "STLFSI": 2
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 169,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.5315370546866731,
+            "IS_QLIKE": -2.8526301278071755,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.049182468334152,
+            "OOS_n_common": 169
+          },
+          "M2_AR1_VIX": {
+            "IS_R2": 0.5453132793784676,
+            "IS_QLIKE": -2.860547998694541,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.0586122278379957,
+            "OOS_n_common": 169
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.5447925989348601,
+            "IS_QLIKE": -2.8531154040295696,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.039665988359833,
+            "OOS_n_common": 169
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.550314751679934,
+            "IS_QLIKE": -2.853100280607125,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -3.031435752898928,
+            "OOS_n_common": 169
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.592554151078642,
+            "IS_QLIKE": -2.847948605950892,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": 59.7437620573248,
+            "OOS_n_common": 169
+          }
+        },
+        "dm_results": {
+          "M2_AR1_VIX_vs_M1_AR1": {
+            "t_stat": -3.0137394736317806,
+            "p_value": 0.0029803793535023715,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M3_AR1_EPU": {
+            "t_stat": -2.53702755360349,
+            "p_value": 0.012090432872486678,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+            "t_stat": -3.6077187400142714,
+            "p_value": 0.00040716083243763634,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M5_AR1_All": {
+            "t_stat": -0.9994439058967638,
+            "p_value": 0.319017056995788,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          }
+        }
+      },
+      "conservative": {
+        "asset": "SPY",
+        "variant": "conservative",
+        "delay_spec_weeks": {
+          "USEPU": 2,
+          "WLEMU": 2,
+          "NFCI": 2,
+          "ANFCI": 2,
+          "STLFSI": 2
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 169,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.5315370546866731,
+            "IS_QLIKE": -2.8526301278071755,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.049182468334152,
+            "OOS_n_common": 169
+          },
+          "M2_AR1_VIX": {
+            "IS_R2": 0.5453132793784676,
+            "IS_QLIKE": -2.860547998694541,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -3.0586122278379957,
+            "OOS_n_common": 169
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.5312712256334611,
+            "IS_QLIKE": -2.850262255785301,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -3.050183561131842,
+            "OOS_n_common": 169
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.550314751679934,
+            "IS_QLIKE": -2.853100280607125,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -3.031435752898928,
+            "OOS_n_common": 169
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.5797265754076781,
+            "IS_QLIKE": -2.866534348214337,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.8790965456879225,
+            "OOS_n_common": 169
+          }
+        },
+        "dm_results": {
+          "M2_AR1_VIX_vs_M1_AR1": {
+            "t_stat": -3.0137394736317806,
+            "p_value": 0.0029803793535023715,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M3_AR1_EPU": {
+            "t_stat": -2.4622017895146935,
+            "p_value": 0.014818081974839359,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M4_AR1_FinStress": {
+            "t_stat": -3.6077187400142714,
+            "p_value": 0.00040716083243763634,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_VIX_vs_M5_AR1_All": {
+            "t_stat": -3.3441797573840844,
+            "p_value": 0.0010177264685091725,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          }
+        }
+      }
+    },
+    "GLD": {
+      "original_k1116": {
+        "asset": "GLD",
+        "variant": "original_k1116",
+        "delay_spec_weeks": {
+          "USEPU": 1,
+          "WLEMU": 1,
+          "NFCI": 1,
+          "ANFCI": 1,
+          "STLFSI": 1
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 170,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.13877059290730576,
+            "IS_QLIKE": -3.059769510001059,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.826211471519026,
+            "OOS_n_common": 170
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.29261735770354425,
+            "IS_QLIKE": -3.0785411449071454,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.840472570955206,
+            "OOS_n_common": 170
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.261790409251231,
+            "IS_QLIKE": -3.071190589251259,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.8250793372048846,
+            "OOS_n_common": 170
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.21208649193218754,
+            "IS_QLIKE": -3.0634184516654375,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.8046814094533,
+            "OOS_n_common": 170
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.3236411844308287,
+            "IS_QLIKE": -3.0793495815024765,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.839891531050988,
+            "OOS_n_common": 170
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": -2.1031419074968296,
+            "p_value": 0.0369342395047092,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": -1.7727445417632175,
+            "p_value": 0.07807252001710019,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": -3.341162681457274,
+            "p_value": 0.0010269278968630946,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": -0.1281172867646949,
+            "p_value": 0.8982084840685367,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          }
+        }
+      },
+      "corrected": {
+        "asset": "GLD",
+        "variant": "corrected",
+        "delay_spec_weeks": {
+          "USEPU": 1,
+          "WLEMU": 1,
+          "NFCI": 2,
+          "ANFCI": 2,
+          "STLFSI": 2
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 169,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.13877059290730576,
+            "IS_QLIKE": -3.059769510001059,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.8248804178984654,
+            "OOS_n_common": 169
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.29261735770354425,
+            "IS_QLIKE": -3.0785411449071454,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.839157042004085,
+            "OOS_n_common": 169
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.261790409251231,
+            "IS_QLIKE": -3.071190589251259,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.82377287188226,
+            "OOS_n_common": 169
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.1853895150692405,
+            "IS_QLIKE": -3.059878063715136,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.8128578543560048,
+            "OOS_n_common": 169
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.3259182253099169,
+            "IS_QLIKE": -3.077365406909957,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.8410277749783255,
+            "OOS_n_common": 169
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": -2.0929787371452355,
+            "p_value": 0.037853360556090454,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": -1.7612182679243948,
+            "p_value": 0.08002069397487155,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": -3.002578657711756,
+            "p_value": 0.00308599723433578,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": 0.4143874589805076,
+            "p_value": 0.6791189847639219,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          }
+        }
+      },
+      "conservative": {
+        "asset": "GLD",
+        "variant": "conservative",
+        "delay_spec_weeks": {
+          "USEPU": 2,
+          "WLEMU": 2,
+          "NFCI": 2,
+          "ANFCI": 2,
+          "STLFSI": 2
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 169,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.13877059290730576,
+            "IS_QLIKE": -3.059769510001059,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.8248804178984654,
+            "OOS_n_common": 169
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.29261735770354425,
+            "IS_QLIKE": -3.0785411449071454,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.839157042004085,
+            "OOS_n_common": 169
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.18113931461090305,
+            "IS_QLIKE": -3.0628765644563867,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.8305711408924905,
+            "OOS_n_common": 169
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.1853895150692405,
+            "IS_QLIKE": -3.059878063715136,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.8128578543560048,
+            "OOS_n_common": 169
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.32009076631366173,
+            "IS_QLIKE": -3.0773089793444663,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.7973600552362687,
+            "OOS_n_common": 169
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": -2.0929787371452355,
+            "p_value": 0.037853360556090454,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": -1.4043079254072137,
+            "p_value": 0.16207321542190578,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": -3.002578657711756,
+            "p_value": 0.00308599723433578,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": -3.2201600538582995,
+            "p_value": 0.0015382298066473066,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          }
+        }
+      }
+    },
+    "TLT": {
+      "original_k1116": {
+        "asset": "TLT",
+        "variant": "original_k1116",
+        "delay_spec_weeks": {
+          "USEPU": 1,
+          "WLEMU": 1,
+          "NFCI": 1,
+          "ANFCI": 1,
+          "STLFSI": 1
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 170,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.3064461731446312,
+            "IS_QLIKE": -3.0092072871343136,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.993353356528763,
+            "OOS_n_common": 170
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.3840828254269524,
+            "IS_QLIKE": -3.023133883992611,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.983505330776839,
+            "OOS_n_common": 170
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.3554965341870804,
+            "IS_QLIKE": -3.0109860371456567,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.9770622791378685,
+            "OOS_n_common": 170
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.3502184951402486,
+            "IS_QLIKE": -3.0167838961966065,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.9983701268333984,
+            "OOS_n_common": 170
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.4282817017915359,
+            "IS_QLIKE": -3.024563282921079,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.944934020509467,
+            "OOS_n_common": 170
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": 1.4330567124064026,
+            "p_value": 0.1536889416505447,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": -0.8299927405328723,
+            "p_value": 0.4077137883325457,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": 3.743406956139768,
+            "p_value": 0.00024857585408044613,
+            "challenger_wins_harvey": true,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": -5.178825301752452,
+            "p_value": 6.291545493475326e-07,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          }
+        }
+      },
+      "corrected": {
+        "asset": "TLT",
+        "variant": "corrected",
+        "delay_spec_weeks": {
+          "USEPU": 1,
+          "WLEMU": 1,
+          "NFCI": 2,
+          "ANFCI": 2,
+          "STLFSI": 2
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 169,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.3064461731446312,
+            "IS_QLIKE": -3.0092072871343136,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.9968525919151827,
+            "OOS_n_common": 169
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.3840828254269524,
+            "IS_QLIKE": -3.023133883992611,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.9867549314560895,
+            "OOS_n_common": 169
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.3554965341870804,
+            "IS_QLIKE": -3.0109860371456567,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.980492406151233,
+            "OOS_n_common": 169
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.3609879934328839,
+            "IS_QLIKE": -3.0154973588713005,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.9919356748399144,
+            "OOS_n_common": 169
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.4546719918849458,
+            "IS_QLIKE": -3.0238372829372984,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.9046638218662886,
+            "OOS_n_common": 169
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": 1.461658694507579,
+            "p_value": 0.14570271585631778,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": -0.8021820052042196,
+            "p_value": 0.42358095127004214,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": 1.963062358632768,
+            "p_value": 0.05128995124076541,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": -7.434136881873357,
+            "p_value": 5.119016321941672e-12,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          }
+        }
+      },
+      "conservative": {
+        "asset": "TLT",
+        "variant": "conservative",
+        "delay_spec_weeks": {
+          "USEPU": 2,
+          "WLEMU": 2,
+          "NFCI": 2,
+          "ANFCI": 2,
+          "STLFSI": 2
+        },
+        "n_is": 260,
+        "n_oos": 171,
+        "n_common_oos": 169,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.3064461731446312,
+            "IS_QLIKE": -3.0092072871343136,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.9968525919151827,
+            "OOS_n_common": 169
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.3840828254269524,
+            "IS_QLIKE": -3.023133883992611,
+            "n_is": 259,
+            "n_oos": 170,
+            "OOS_QLIKE": -2.9867549314560895,
+            "OOS_n_common": 169
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.310170296797299,
+            "IS_QLIKE": -3.0082594798332325,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.997985615298765,
+            "OOS_n_common": 169
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.3609879934328839,
+            "IS_QLIKE": -3.0154973588713005,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.9919356748399144,
+            "OOS_n_common": 169
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.4002384685304773,
+            "IS_QLIKE": -3.020514727270666,
+            "n_is": 258,
+            "n_oos": 169,
+            "OOS_QLIKE": -2.9488797555784214,
+            "OOS_n_common": 169
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": 1.461658694507579,
+            "p_value": 0.14570271585631778,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": 1.7556305949909496,
+            "p_value": 0.08097401291023942,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": 1.963062358632768,
+            "p_value": 0.05128995124076541,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": -8.565094382874799,
+            "p_value": 6.661338147750939e-15,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          }
+        }
+      }
+    },
+    "BTC-USD": {
+      "original_k1116": {
+        "asset": "BTC-USD",
+        "variant": "original_k1116",
+        "delay_spec_weeks": {
+          "USEPU": 1,
+          "WLEMU": 1,
+          "NFCI": 1,
+          "ANFCI": 1,
+          "STLFSI": 1
+        },
+        "n_is": 257,
+        "n_oos": 171,
+        "n_common_oos": 170,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.11362051155343034,
+            "IS_QLIKE": -1.4488189591251224,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.796108276297509,
+            "OOS_n_common": 170
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.12801371912343706,
+            "IS_QLIKE": -1.4501859316512569,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.808875108808395,
+            "OOS_n_common": 170
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.12368450785659568,
+            "IS_QLIKE": -1.4513433400359932,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.7895468475052108,
+            "OOS_n_common": 170
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.14754533047457696,
+            "IS_QLIKE": -1.4542644069905364,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.8129821903101153,
+            "OOS_n_common": 170
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.15964158163029718,
+            "IS_QLIKE": -1.4574055632892393,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.8034202692366748,
+            "OOS_n_common": 170
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": -5.493557896139048,
+            "p_value": 1.4263089620492053e-07,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": -5.039092345010354,
+            "p_value": 1.193536443011567e-06,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": 1.3698992231021057,
+            "p_value": 0.1725356314456543,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": -1.2819063234037262,
+            "p_value": 0.20163131729836303,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          }
+        }
+      },
+      "corrected": {
+        "asset": "BTC-USD",
+        "variant": "corrected",
+        "delay_spec_weeks": {
+          "USEPU": 1,
+          "WLEMU": 1,
+          "NFCI": 2,
+          "ANFCI": 2,
+          "STLFSI": 2
+        },
+        "n_is": 257,
+        "n_oos": 171,
+        "n_common_oos": 169,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.11362051155343034,
+            "IS_QLIKE": -1.4488189591251224,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.7979675327590874,
+            "OOS_n_common": 169
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.12801371912343706,
+            "IS_QLIKE": -1.4501859316512569,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.8110092115422753,
+            "OOS_n_common": 169
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.12368450785659568,
+            "IS_QLIKE": -1.4513433400359932,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.7912980394517661,
+            "OOS_n_common": 169
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.13082139554601802,
+            "IS_QLIKE": -1.4577895205815887,
+            "n_is": 255,
+            "n_oos": 169,
+            "OOS_QLIKE": -1.8141509066178014,
+            "OOS_n_common": 169
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.1530831002816454,
+            "IS_QLIKE": -1.464095401611898,
+            "n_is": 255,
+            "n_oos": 169,
+            "OOS_QLIKE": -1.7880719874211517,
+            "OOS_n_common": 169
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": -5.61828157877239,
+            "p_value": 7.857338490957488e-08,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": -5.134313722345742,
+            "p_value": 7.766889851268388e-07,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": 1.2725174084593995,
+            "p_value": 0.20494769071162233,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": -3.6381511594732077,
+            "p_value": 0.0003650751110793049,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          }
+        }
+      },
+      "conservative": {
+        "asset": "BTC-USD",
+        "variant": "conservative",
+        "delay_spec_weeks": {
+          "USEPU": 2,
+          "WLEMU": 2,
+          "NFCI": 2,
+          "ANFCI": 2,
+          "STLFSI": 2
+        },
+        "n_is": 257,
+        "n_oos": 171,
+        "n_common_oos": 169,
+        "is_oos_table": {
+          "M1_AR1": {
+            "IS_R2": 0.11362051155343034,
+            "IS_QLIKE": -1.4488189591251224,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.7979675327590874,
+            "OOS_n_common": 169
+          },
+          "M2_AR1_IV": {
+            "IS_R2": 0.12801371912343706,
+            "IS_QLIKE": -1.4501859316512569,
+            "n_is": 256,
+            "n_oos": 170,
+            "OOS_QLIKE": -1.8110092115422753,
+            "OOS_n_common": 169
+          },
+          "M3_AR1_EPU": {
+            "IS_R2": 0.10716506307784257,
+            "IS_QLIKE": -1.4551679146031111,
+            "n_is": 255,
+            "n_oos": 169,
+            "OOS_QLIKE": -1.7991717667755822,
+            "OOS_n_common": 169
+          },
+          "M4_AR1_FinStress": {
+            "IS_R2": 0.13082139554601802,
+            "IS_QLIKE": -1.4577895205815887,
+            "n_is": 255,
+            "n_oos": 169,
+            "OOS_QLIKE": -1.8141509066178014,
+            "OOS_n_common": 169
+          },
+          "M5_AR1_All": {
+            "IS_R2": 0.13389653385147748,
+            "IS_QLIKE": -1.458383100850713,
+            "n_is": 255,
+            "n_oos": 169,
+            "OOS_QLIKE": -1.814333690423868,
+            "OOS_n_common": 169
+          }
+        },
+        "dm_results": {
+          "M2_AR1_IV_vs_M1_AR1": {
+            "t_stat": -5.61828157877239,
+            "p_value": 7.857338490957488e-08,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M3_AR1_EPU": {
+            "t_stat": -5.422925857556711,
+            "p_value": 2.0130775468807371e-07,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": true
+          },
+          "M2_AR1_IV_vs_M4_AR1_FinStress": {
+            "t_stat": 1.2725174084593995,
+            "p_value": 0.20494769071162233,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          },
+          "M2_AR1_IV_vs_M5_AR1_All": {
+            "t_stat": 1.7059637449737848,
+            "p_value": 0.08986281167548404,
+            "challenger_wins_harvey": false,
+            "baseline_wins_harvey": false
+          }
+        }
+      }
+    }
+  },
+  "comparison": [
+    {
+      "asset": "SPY",
+      "model": "M1_AR1",
+      "original_literature_t": -3.021,
+      "original_repro_t": -3.0210734176656016,
+      "corrected_t": -3.0137394736317806,
+      "conservative_t": -3.0137394736317806,
+      "delta_corrected_minus_repro": 0.007333944033820927,
+      "flag": ""
+    },
+    {
+      "asset": "SPY",
+      "model": "M3_AR1_EPU",
+      "original_literature_t": -2.554,
+      "original_repro_t": -2.5543453538857093,
+      "corrected_t": -2.53702755360349,
+      "conservative_t": -2.4622017895146935,
+      "delta_corrected_minus_repro": 0.01731780028221941,
+      "flag": ""
+    },
+    {
+      "asset": "SPY",
+      "model": "M4_AR1_FinStress",
+      "original_literature_t": -3.001,
+      "original_repro_t": -3.0009519451593367,
+      "corrected_t": -3.6077187400142714,
+      "conservative_t": -3.6077187400142714,
+      "delta_corrected_minus_repro": -0.6067667948549347,
+      "flag": ""
+    },
+    {
+      "asset": "SPY",
+      "model": "M5_AR1_All",
+      "original_literature_t": -1.008,
+      "original_repro_t": -1.008028487535291,
+      "corrected_t": -0.9994439058967638,
+      "conservative_t": -3.3441797573840844,
+      "delta_corrected_minus_repro": 0.008584581638527156,
+      "flag": ""
+    },
+    {
+      "asset": "GLD",
+      "model": "M1_AR1",
+      "original_literature_t": -2.103,
+      "original_repro_t": -2.1031419074968296,
+      "corrected_t": -2.0929787371452355,
+      "conservative_t": -2.0929787371452355,
+      "delta_corrected_minus_repro": 0.010163170351594086,
+      "flag": ""
+    },
+    {
+      "asset": "GLD",
+      "model": "M3_AR1_EPU",
+      "original_literature_t": -1.773,
+      "original_repro_t": -1.7727445417632175,
+      "corrected_t": -1.7612182679243948,
+      "conservative_t": -1.4043079254072137,
+      "delta_corrected_minus_repro": 0.011526273838822654,
+      "flag": ""
+    },
+    {
+      "asset": "GLD",
+      "model": "M4_AR1_FinStress",
+      "original_literature_t": -3.341,
+      "original_repro_t": -3.341162681457274,
+      "corrected_t": -3.002578657711756,
+      "conservative_t": -3.002578657711756,
+      "delta_corrected_minus_repro": 0.338584023745518,
+      "flag": ""
+    },
+    {
+      "asset": "GLD",
+      "model": "M5_AR1_All",
+      "original_literature_t": -0.128,
+      "original_repro_t": -0.1281172867646949,
+      "corrected_t": 0.4143874589805076,
+      "conservative_t": -3.2201600538582995,
+      "delta_corrected_minus_repro": 0.5425047457452025,
+      "flag": "SIGN_FLIP"
+    },
+    {
+      "asset": "TLT",
+      "model": "M1_AR1",
+      "original_literature_t": 1.433,
+      "original_repro_t": 1.4330567124064026,
+      "corrected_t": 1.461658694507579,
+      "conservative_t": 1.461658694507579,
+      "delta_corrected_minus_repro": 0.02860198210117626,
+      "flag": ""
+    },
+    {
+      "asset": "TLT",
+      "model": "M3_AR1_EPU",
+      "original_literature_t": -0.83,
+      "original_repro_t": -0.8299927405328723,
+      "corrected_t": -0.8021820052042196,
+      "conservative_t": 1.7556305949909496,
+      "delta_corrected_minus_repro": 0.027810735328652747,
+      "flag": ""
+    },
+    {
+      "asset": "TLT",
+      "model": "M4_AR1_FinStress",
+      "original_literature_t": 3.743,
+      "original_repro_t": 3.743406956139768,
+      "corrected_t": 1.963062358632768,
+      "conservative_t": 1.963062358632768,
+      "delta_corrected_minus_repro": -1.780344597507,
+      "flag": "THRESHOLD_FLIP"
+    },
+    {
+      "asset": "TLT",
+      "model": "M5_AR1_All",
+      "original_literature_t": -5.179,
+      "original_repro_t": -5.178825301752452,
+      "corrected_t": -7.434136881873357,
+      "conservative_t": -8.565094382874799,
+      "delta_corrected_minus_repro": -2.255311580120905,
+      "flag": ""
+    },
+    {
+      "asset": "BTC-USD",
+      "model": "M1_AR1",
+      "original_literature_t": -5.494,
+      "original_repro_t": -5.493557896139048,
+      "corrected_t": -5.61828157877239,
+      "conservative_t": -5.61828157877239,
+      "delta_corrected_minus_repro": -0.12472368263334133,
+      "flag": ""
+    },
+    {
+      "asset": "BTC-USD",
+      "model": "M3_AR1_EPU",
+      "original_literature_t": -5.039,
+      "original_repro_t": -5.039092345010354,
+      "corrected_t": -5.134313722345742,
+      "conservative_t": -5.422925857556711,
+      "delta_corrected_minus_repro": -0.09522137733538827,
+      "flag": ""
+    },
+    {
+      "asset": "BTC-USD",
+      "model": "M4_AR1_FinStress",
+      "original_literature_t": 1.37,
+      "original_repro_t": 1.3698992231021057,
+      "corrected_t": 1.2725174084593995,
+      "conservative_t": 1.2725174084593995,
+      "delta_corrected_minus_repro": -0.09738181464270612,
+      "flag": ""
+    },
+    {
+      "asset": "BTC-USD",
+      "model": "M5_AR1_All",
+      "original_literature_t": -1.282,
+      "original_repro_t": -1.2819063234037262,
+      "corrected_t": -3.6381511594732077,
+      "conservative_t": 1.7059637449737848,
+      "delta_corrected_minus_repro": -2.3562448360694814,
+      "flag": "THRESHOLD_FLIP"
+    }
+  ],
+  "verdict": {
+    "n_threshold_flips": 3,
+    "cells_affected": [
+      "GLD M5_AR1_All",
+      "TLT M4_AR1_FinStress",
+      "BTC-USD M5_AR1_All"
+    ],
+    "tlt_m4_nfci_verdict": "WEAKENS: TLT M4 NFCI loses significance (orig_repro=3.743, corrected=1.963) \u2192 borderline",
+    "h_verdict": "H3 (disastrous): 3 cells flip \u2014 broader recheck of Paper 4 needed"
+  },
+  "finished_utc": "2026-04-13T09:30:19.098294Z"
+}
