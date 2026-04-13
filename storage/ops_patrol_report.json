@@ -1,36 +1,36 @@
 {
-  "timestamp": "2026-04-13T00:43:54Z",
+  "timestamp": "2026-04-13T06:38:00Z",
   "all_ok": true,
   "checks": [
     {
       "name": "ARTICLE_POOL",
       "status": "ok",
-      "detail": "4 drafts in pool (threshold: <3). Total articles: 878."
+      "detail": "3 draft articles in pool (threshold: <3). Exactly at minimum — monitor closely."
     },
     {
       "name": "STRATEGY_METRICS_FRESHNESS",
       "status": "ok",
-      "detail": "storage/strategy_metrics.json mtime is ~11 seconds old (well within 26-hour threshold)."
+      "detail": "storage/strategy_metrics.json last modified ~13 seconds ago (threshold: >26 hours). Freshness nominal."
     },
     {
       "name": "ERROR_LOG",
       "status": "ok",
-      "detail": "Most recent error_log entry is 2026-04-11 (2 days ago). No entries dated today (2026-04-13) or yesterday (2026-04-12)."
+      "detail": "No error_log entries from today (2026-04-13) or yesterday (2026-04-12). Most recent entry: 2026-04-11 — '會員提問文章 badge 不一致 + article_tags 更新後舊 tags 殘留'. Root causes fixed; lessons recorded."
     },
     {
       "name": "PAPER_TRADING_GAPS",
       "status": "ok",
-      "detail": "All strategies have <=2 null portfolio_return in last 3 entries. No gaps detected."
+      "detail": "All 14 strategies have exactly 1 null in last 3 entries (today's return not yet computed — expected). No strategy exceeds threshold of >2 nulls. All clear: slow_vt, risk_parity, simple_12vix, recommended_5050, taiwan_8.63vix, taiwan_spy_momentum, tz_tw_jp_5050, global_vt_tz, vix_leading_guard, vix_cond_leverage, taiwan_hybrid_leverage, piecewise_conservative, fear_dca, adaptive_tier."
     },
     {
       "name": "GIT_STATUS",
       "status": "ok",
-      "detail": "0 uncommitted files (threshold: >50)."
+      "detail": "0 uncommitted files (threshold: >50). Working tree clean."
     },
     {
       "name": "KNOWLEDGE_SIZE",
       "status": "ok",
-      "detail": "storage/memory/knowledge.json contains 1850 entries."
+      "detail": "1876 entries in storage/memory/knowledge.json."
     }
   ],
   "alerts": []
