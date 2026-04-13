@@ -335,3 +335,9 @@ K693 修改了 paper_trading.json 中 9,935 筆歷史 portfolio_return（same-da
 - **tag 同步必須 delete-then-insert**。只做 upsert 的 join table 永遠不會清除舊關聯
 - **前端改 `frontend-v2-fix/`**，不是 `frontend/`（舊版）。部署用 `frontend-v2-fix/scripts/deploy-zeabur-safe.sh`
 - **遇到 error 第一步查 error_log**——這次的 article_tags 殘留問題跟 2026-04-09 同根源
+
+## 2026-04-13: merge_worktree.sh K1032 bug 再現 (K1114)
+- 現象：agent commit 5c6a5c8c (K1114 完整實驗檔) 真實存在於 worktree branch，但 merge_worktree.sh 在 detect-new-commits 階段判「沒有新的 commits 可安全移除」，執行 worktree force-delete + branch delete，主分支 experiments/k1114/ 不存在
+- 過程：通知收到 → bash scripts/merge_worktree.sh agent-a96a6532 → ls experiments/k1114/ 報 No such file → git reflog --all 找回 commit 5c6a5c8c → git checkout worktree-agent-a96a6532 -- experiments/k1114/ → git add + commit recover
+- 解決：當下用 reflog 救回；長期需修 merge_worktree.sh 改用 git rev-list --count main..<branch> 確切數新 commits（K1143 任務）
+- 經驗：E067（infrastructure 類）；worktree-merge-verification skill 必加「merge 後立即 ls experiments/<latest> 驗證」

@@ -913,5 +913,21 @@
     "source_experiments": [
       "K1136"
     ]
+  },
+  {
+    "id": "E067",
+    "title": "merge_worktree.sh K1032 bug 再現—agent commit 未被偵測",
+    "category": "infrastructure",
+    "lesson": "merge_worktree.sh 在 detect-new-commits 階段偶爾誤判「沒有新的 commits」並執行 worktree force-delete，導致 agent 工作遺失。K1114 重現該 bug：agent 真實 commit 5c6a5c8c (含 7 個 experiments/k1114/* 檔案) 被誤判，僅 auto-commit 7506b476 (.claude/settings.local.json) 被保留。",
+    "examples": [
+      "K1032 (前一次)：agent commit 被誤判為 no-new-commits, 全實驗目錄遺失",
+      "K1114：commit 5c6a5c8c 含 README.md/k1114.py/k1114_results.json/3 PNG/run.log 全部被踢出 main",
+      "Recovery 程序：git reflog --all | grep <branch> 找回 commit SHA → git checkout <branch> -- experiments/<id>/ → git add + commit"
+    ],
+    "recommendation": "(1) merge_worktree.sh 必須修：用 git rev-list --count main..<branch> 確切數新 commits，不靠 rev-parse 比較；(2) 主線程 merge 後永遠 ls experiments/<latest_k_id>/ 驗證；(3) 缺檔立即 git reflog 救回；(4) worktree-merge-verification skill 必加此 checklist；(5) 不要靠 merge script 自我清理 worktree branch — 保留至 main 確認檔案完整為止。",
+    "source_experiments": [
+      "K1032",
+      "K1114"
+    ]
   }
 ]

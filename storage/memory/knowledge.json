@@ -25935,5 +25935,27 @@
     "data_source": "yfinance USO/GLD/UNG/BTC-USD + VIX 2021-2026",
     "created_at": "2026-04-13T12:00:00+08:00",
     "updated_at": "2026-04-13T12:00:00+08:00"
+  },
+  {
+    "id": "k1114-1776084491",
+    "experiment_id": "K1114",
+    "title": "Rolling θ_EAV time-varying heterogeneity — Paper 2 temporal angle (3/9 BH-PASS, HAC required)",
+    "content": "[提出: Claude, 執行: Claude] Paper 2 cross-sectional exhaustion (K1109/K1113) 後改 dimension：θ_EAV 是否 time-varying？對 TSMC 2330/UMC 2303/MediaTek 2454 跑 rolling 2-yr A4f-EAV step=21（128/132/124 成功 fits）。3 tests × 3 stocks = 9 p-values，BH-FDR 後 3 PASS：(1) UMC structural trend t=3.06 BH-p=0.012 (Harvey PASS)；(2) MediaTek trend t=4.67 BH-p=7e-5 (Harvey PASS，REVERSE pattern 隨時間削弱)；(3) TSMC regime KS BH-p=0.028（low-VIX θ_EAV 較高）。pos fraction 52%/86%/40% 重現 K1067/K1067b/K1067c 三檔對比，方法論驗證。但 agent 自警 overlapping rolling windows share 96% obs → OLS t-stat 嚴重高估 → K1119 必做 Newey-West HAC SE 重檢，HAC 過才能 Paper 2 narrative pivot。Cross-sectional exhaustion 結論仍成立，但 temporal heterogeneity 開新窗。merge_worktree.sh K1032 bug 重現（commit 5c6a5c8c 未被檢測），用 git checkout worktree-agent-a96a6532 -- experiments/k1114/ 救回。",
+    "tags": [
+      "K1114",
+      "Paper2",
+      "A4f-EAV",
+      "rolling-theta",
+      "time-varying",
+      "TSMC",
+      "UMC",
+      "MediaTek",
+      "BH-FDR",
+      "HAC-needed",
+      "preliminary"
+    ],
+    "data_source": "yfinance 2330.TW/2303.TW/2454.TW + TWII (2014-2025)",
+    "created_at": "2026-04-13T20:50:00+08:00",
+    "updated_at": "2026-04-13T20:50:00+08:00"
   }
 ]

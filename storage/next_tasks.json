@@ -144,7 +144,9 @@
     "title": "K1101: Panel GARCH-MIDAS across N≥15 Taiwan stocks",
     "priority": 2,
     "description": "K1067c 衍生：foundry/fabless 分組、analyst dispersion、float size 為 covariates。橫截面統計檢驗取代 N=3 類比。",
-    "status": "pending"
+    "status": "superseded",
+    "superseded_by": "K1109+K1113 Paper 2 firm-selection exhaustion (E054)",
+    "completed_at": "2026-04-13T12:10:00+08:00"
   },
   {
     "id": "K1102",
@@ -186,7 +188,9 @@
     "title": "K1112: N≥50 真 confirmatory sector test",
     "priority": 2,
     "description": "K1109 D1：納入中型股、退市股、跨市場擴大樣本，power > 0.8。檢驗 sector effect 是否在更大樣本下浮現。",
-    "status": "pending"
+    "status": "superseded",
+    "superseded_by": "K1109+K1113 Paper 2 firm-selection exhaustion (E054)",
+    "completed_at": "2026-04-13T12:10:00+08:00"
   },
   {
     "id": "K1113",
@@ -200,7 +204,8 @@
     "title": "K1114: Rolling θ₂ heterogeneity (time-varying)",
     "priority": 2,
     "description": "K1109/K1113 後：jump 到不同 dimension (時間) 而非繼續 cross-sectional。可能找到結構 vs 循環 heterogeneity。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-13T20:50:00+08:00"
   },
   {
     "id": "K1110",
@@ -544,6 +549,34 @@
     "title": "K1139: Intraday 5-min RV as target",
     "priority": 4,
     "description": "Hansen-Lunde 高頻標準。K1136 改用 5-min 彙總 RV 當 target，檢驗 daily proxy 是否仍為 NULL。資料需 yfinance/polygon 5-min 回抓。",
+    "status": "pending"
+  },
+  {
+    "id": "K1140",
+    "title": "K1140: HAC Newey-West rolling θ_EAV trend re-test (K1114 follow-up)",
+    "priority": 2,
+    "description": "K1114 3/9 BH-PASS 用 OLS SE 評估 overlapping rolling t-stat, 偏高估。改用 Newey-West HAC SE (lag=63 ≈ 3 month overlap) 重檢 UMC trend t=3.06 / MediaTek t=4.67 / TSMC regime。HAC 過才能 Paper 2 narrative pivot。",
+    "status": "pending"
+  },
+  {
+    "id": "K1141",
+    "title": "K1141: Block bootstrap θ_EAV temporal heterogeneity (independence-free)",
+    "priority": 3,
+    "description": "K1114 caveat 替代方案：moving block bootstrap (block=63) 重抽 θ_EAV 序列，建構非 overlap-dependent 的 trend slope CI。與 K1140 HAC 互補。",
+    "status": "pending"
+  },
+  {
+    "id": "K1142",
+    "title": "K1142: Extend rolling θ_EAV to N=10 Taiwan large caps",
+    "priority": 3,
+    "description": "K1114 3-stock 樣本太小。擴展到 N=10 (foundry/fabless/IC design/PC) 檢驗 trend signal cross-sectional 重現性。前提：K1140 HAC 過。",
+    "status": "pending"
+  },
+  {
+    "id": "K1143",
+    "title": "K1143: Fix merge_worktree.sh K1032/K1114 detection bug",
+    "priority": 2,
+    "description": "Recurrent bug：script 用 rev-parse 比較 detect 新 commit 偶爾失敗。改用 git rev-list --count main..<branch> 確切數，並加 ls experiments/ 驗證。E067 教訓。",
     "status": "pending"
   }
 ]
