@@ -86,8 +86,8 @@
   {
     "id": "Paper3_decision",
     "title": "Paper 3 方向重大決策：reframe / abandon / negative-result paper",
-    "priority": 1,
-    "description": "K1100g_d2 推翻 Paper 3 reframe anchor。3 連 Paper 3 找 anchor 都失敗。需用戶決策：(a) 繼續挖 K1100g_d3/4/5 (b) reframe 為 negative-result paper (c) abandon Paper 3 資源轉其他 paper。",
+    "priority": 4,
+    "description": "[priority 4 — wait for new evidence] K1100g_d2 推翻 Paper 3 reframe anchor。3 連 Paper 3 找 anchor 都失敗。需用戶決策：(a) 繼續挖 K1100g_d3/4/5 (b) reframe 為 negative-result paper (c) abandon Paper 3 資源轉其他 paper。",
     "status": "pending"
   },
   {
@@ -345,8 +345,8 @@
   {
     "id": "Paper3_strategic_decision",
     "title": "Paper 3 Strategic Decision (PRIORITY 1) — A/B/C 三選一",
-    "priority": 1,
-    "description": "K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。",
+    "priority": 4,
+    "description": "[priority 4 — wait for new evidence] K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。",
     "status": "blocked_user_decision"
   },
   {
@@ -359,8 +359,8 @@
   {
     "id": "Paper4_VIX_sufficiency_compendium",
     "title": "Paper 4: Universal IV Sufficiency Compendium (9 experiments × 5 asset classes)",
-    "priority": 1,
-    "description": "K473+K750+K789+K504+K1116 (SPY) + K1098 (0050.TW) + K1118 (GLD/TLT/BTC) = 9 個 alt-data null 實驗跨 5 個 asset class。STRENGTHENED：universal claim。Main thread 寫作 priority 1。",
+    "priority": 3,
+    "description": "[priority 3 — solid evidence ready 但 publishability mid] 10 實驗 × 5 asset class universal compendium。需 main thread 寫作。等其他高完成度 paper 處理後。",
     "status": "pending"
   },
   {
@@ -438,6 +438,55 @@
     "title": "K1118b: Currency cross-asset extension (DXY/EUR/JPY)",
     "priority": 3,
     "description": "K1116b 衍生：擴大 universal-sufficiency 到 currency markets。",
+    "status": "pending"
+  },
+  {
+    "id": "K1124",
+    "title": "K1124: TAIFEX OFI vol prediction (NULL but stylized fact)",
+    "priority": 1,
+    "description": "Triple-threshold FAIL but Taiwan stylized fact: |OFI| 高 → 下一 5-min RV 低 (反 US 直覺)。Codex 攔 2 HIGH bugs (bar overflow, contract selection lookahead)。",
+    "status": "completed"
+  },
+  {
+    "id": "TSMC_0414_pre2",
+    "title": "TSMC 法說 04/14 深度預告（T-2 hard deadline）",
+    "priority": 1,
+    "description": "04/14 截止發 draft，cron 04/14 釋出。內容：歷史波動率 + IV 期權市場 + 分析師預期。**hard deadline 不可延**。",
+    "status": "pending"
+  },
+  {
+    "id": "TSMC_0416_immediate",
+    "title": "TSMC 法說 04/16 14:00 後立即解讀（T+0 published）",
+    "priority": 1,
+    "description": "04/16 14:00 結束後立即發 --status published（不等次日）。Hot-take 3 重點 + 對台股影響。",
+    "status": "pending"
+  },
+  {
+    "id": "TSMC_0417_optional",
+    "title": "TSMC 法說 04/17 深度追蹤（optional）",
+    "priority": 3,
+    "description": "只有真新發現才寫。否則跳過避免重複。",
+    "status": "pending"
+  },
+  {
+    "id": "K1125",
+    "title": "K1125: OFI × Lee-Mykland jump detection",
+    "priority": 3,
+    "description": "K1124 衍生：|OFI| 是否 predicts JUMP 而非 diffusive vol。jump-vs-RV 切分檢驗。",
+    "status": "pending"
+  },
+  {
+    "id": "K1126",
+    "title": "K1126: OFI 不對稱 regime — VIX 高/低時 buy vs sell asymmetry",
+    "priority": 3,
+    "description": "K1124 衍生：條件式 regime 拆 buy/sell side。",
+    "status": "pending"
+  },
+  {
+    "id": "K1127",
+    "title": "K1127: Cross-asset OFI lead-lag (TX vs ES via overnight)",
+    "priority": 3,
+    "description": "K1124 衍生：延伸 K1100g night→day channel，跨市場 OFI lead-lag。",
     "status": "pending"
   }
 ]

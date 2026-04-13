@@ -25816,5 +25816,24 @@
     ],
     "data_source": "cached FRED USEPU/NFCI/STLFSI4/WLEMU/ANFCI + yfinance SPY/GLD/TLT/BTC 2018-2026",
     "created_at": "2026-04-13T09:33:17.311063+00:00"
+  },
+  {
+    "id": "k1124-1776074612",
+    "experiment_id": "K1124",
+    "title": "K1124: TAIFEX OFI vol prediction NULL but discovers Taiwan stylized fact (flow→vol mean-revert)",
+    "content": "[提出: Claude 真 fresh direction 面向 G, 執行: Claude] 73,203 個 5-min bars (1223 trading days, 2017-2021) × HAR-RV + OFI 變體。**Triple-threshold FAIL**: M3 |OFI| DM=-5.24 反向, M4 signed +2.63, M5 persistence +5.85 best 但 QLIKE only +1.12% < 5%, M6/M7 strict lag-1 t=3.50/+1.24 仍 FAIL。但**stylized fact 浮現**：(1) **beta(|OFI|) 負且穩健** (M6 lag-1 t=3.50)：TAIFEX 上 |OFI| 高 → 下一 5-min RV **低**，**反 US 市場 \"flow→vol up\" 直覺**。解讀：directional pressure 完成後 vol mean-reversion (2) **結算日 |OFI| 顯著高** (0.1194 vs 0.0991, Welch t=6.77 p<0.0001) **但 RV 反而較低** (ratio 0.84x) — directional unwind 在 expiry close 前完成 (3) |OFI| ACF(1)=0.133 ACF(5)=0.120 (與 Cont et al. 2014 一致). **Codex 攔下 2 HIGH + 1 MED bugs**: (a) DAY_END=13:45 創造虛假 bar=60，會讓 bar 59 預測 bar 60，改成 13:44:59 (b) Active contract 用整天成交量選 = selection lookahead，改用 T-1 rolling (c) Current-bar OFI asymmetry，新增 M6/M7 strict lag-1 spec 驗證 beta 仍負穩健排除 current-bar leak。**Paper implications**: 不是獨立 paper 但可作 Taiwan microstructure 系列一節，US \"flow→vol up\" vs Taiwan \"flow→vol mean-revert\" 對比。Commit ba90cc47 merged df4fce66。",
+    "tags": [
+      "Paper_taiwan_microstructure",
+      "OFI",
+      "TAIFEX",
+      "NULL",
+      "stylized-fact",
+      "flow-mean-reversion",
+      "Codex-saves-2-HIGH",
+      "face-G",
+      "fresh-direction"
+    ],
+    "data_source": "TAIFEX TX tick 2017-2021 (Dropbox 33G, processed to 5-min bars)",
+    "created_at": "2026-04-13T10:03:32.131461+00:00"
   }
 ]
