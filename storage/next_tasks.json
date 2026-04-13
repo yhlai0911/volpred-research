@@ -71,9 +71,30 @@
   },
   {
     "id": "K1100g_d1",
-    "title": "K1100g D1: TAIFEX day-only vs night-only PRG decomposition",
+    "title": "K1100g_d1: TAIFEX day vs night PRG decomposition",
     "priority": 2,
-    "description": "K1100g 衍生：確認 Dim2 overnight asymmetry 是 PRG 增益的真正機制。拆 day/night session 跑 PRG。",
+    "description": "H1/H2/H3 PASS (night→day LRT χ²=12.5 p=0.0004, asymmetric)。H4 FAIL 推翻 K1100g 1.586 narrative (gap effect ≠ session asymmetry)。Codex 抓 4 bugs。Paper 3 anchor 改 asymmetric cross-prediction。",
+    "status": "completed"
+  },
+  {
+    "id": "K1100g_d2",
+    "title": "K1100g_d2: OOS 驗證 night→day 預測力",
+    "priority": 2,
+    "description": "K1100g_d1 衍生：expanding-window (2017-19 train, 2020-21 test) 重測 H2 LRT，確認顯著性在 OOS 維持。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100g_d3",
+    "title": "K1100g_d3: Student-t PRG innovation 厚尾檢驗",
+    "priority": 3,
+    "description": "K1100g_d1 衍生：Student-t innovation 重估 M1-M5，檢查厚尾是否改變 H1/H3。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100g_d4",
+    "title": "K1100g_d4: Night→day 效應年度穩定性",
+    "priority": 3,
+    "description": "K1100g_d1 衍生：逐年 (2017-2021) 擬合 M4，判斷是結構性或 COVID 驅動。",
     "status": "pending"
   },
   {

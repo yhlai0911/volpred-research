@@ -781,5 +781,20 @@
       "reframe-strategy"
     ],
     "created_at": "2026-04-13T07:22:08.354783+00:00"
+  },
+  {
+    "id": "E058",
+    "title": "實驗 cache reuse 的 mask-bug 陷阱 + 為什麼 gap effect 不是 session asymmetry",
+    "lesson": "K1100g_d1 發現 K1100g 報告的 overnight/intraday ratio 1.586 **不是 pure session asymmetry，是 gap effect 誤算**。\n\n**技術 bug**：K1100g 的 parquet cache 中 night_open/night_close 的 mask 邏輯錯位，只抓到夜盤末尾幾 ticks，因此：\n- `sigma(r_night) = 0.000083`（虛假低值）\n- 再除 day vol 得 ratio 1.586（看似 night 強）\n- 實際 raw tick 重建：`sigma(r_night) = 0.00581`，ratio = 0.765\n\nK1100g_d1 從 raw tick 重建才得到正確結果。\n\n**Paper 3 reframe narrative 修正**：\n- ❌ 錯誤原說法：「TAIFEX overnight vol 是 day vol 的 1.6 倍」\n- ✅ 正確說法：「TAIFEX 夜盤對日盤有 asymmetric 前瞻預測力 (LRT χ²=12.5 p=0.0004 vs day→night p=0.075)」\n\n**通則 1（cache 陷阱）**：\n1. 實驗 cache parquet 的中間欄位（非 raw return）**不可直接 reuse** — 產生 cache 的實驗邏輯可能有 bug，子實驗應從 raw data 重建\n2. Reuse cache 前必須驗證：(a) 資料 coverage 完整 (b) 關鍵統計量（mean, std）合理範圍 (c) 和 raw 計算一次對比\n3. K1100g_d1 如果直接用 K1100g cache 會得到錯誤結論 — 幸好 Codex 審代碼時要求驗證才發現\n4. Best practice：**agent prompt 應該明確列出「可 reuse cache 欄位」和「必須 raw 重建欄位」**\n\n**通則 2（gap effect vs session asymmetry）**：\n1. 日頻 vol 包含 close-to-close，天然含 gap\n2. Session-level 分析必須用 open-to-close 不含 gap\n3. 看到「overnight ratio > 1」時要問：(a) 這是交易時段內波動大，還是 (b) 是隔夜無交易期間的累積價格變動\n4. 兩者對 methodology implications 完全不同：(a) → intraday structure；(b) → information arrival patterns\n\n**通則 3（Codex 價值）**：Codex 審代碼這次又抓 4 bugs（3 HIGH）：\n- HIGH double-lag\n- HIGH in-sample DM 應改 LRT primary\n- HIGH identification (E[g]=1)\n- MED JSON NaN\n- 若無 Codex 審查，K1100g_d1 可能發表後才發現 bug\n\n**後續 action**：\n1. K1100g knowledge entry 已加 warning tag\n2. 未來實驗**絕對不能直接讀 K1100g cache 的 night_open/night_close**\n3. Paper 3 reframe 敘事改為 asymmetric cross-prediction 為主，vol ratio 為輔（且要說明是 gap effect）\n4. 考慮在 error_log.md 加一條「parquet cache mask-bug」",
+    "context": "K1100g → K1100g_d1 cache bug + narrative correction",
+    "applies_to": [
+      "cache-reuse",
+      "mask-bug",
+      "gap-vs-session",
+      "Paper-3-narrative",
+      "Codex-audit-value",
+      "narrative-correction"
+    ],
+    "created_at": "2026-04-13T07:51:18.021708+00:00"
   }
 ]

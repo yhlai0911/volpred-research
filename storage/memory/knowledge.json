@@ -25662,7 +25662,7 @@
     "id": "k1100g-1776064928",
     "experiment_id": "K1100g",
     "title": "K1100g: TAIFEX vs SPY microstructure — Dim2 overnight asymmetry IS the Paper 3 reframe anchor",
-    "content": "[提出: Claude pivot K1100f, 執行: Claude] 4-dimension 對照（TAIFEX TX 2017-2021 daily vs SPY daily）：(1) Settlement multiplier TAIFEX 0.668 vs SPY 0.914（**反向發現**：SPY OPEX intraday=3.12x，US 才有強 settlement，TAIFEX 反而結算日波動較低——可能因主力已轉次月）(2) **Overnight/intraday ratio TAIFEX 1.586 vs SPY 1.001** ← Paper 3 reframe 核心 anchor，Taiwan 隔夜風險 1.6× 日盤 (3) DOW ANOVA F TAIFEX 0.653 vs SPY 0.732，**兩市都無 DOW pattern**（推翻原假設 H3）(4) FFT periodic band TAIFEX 0.015 vs SPY 0.010，無 spike（SPY 5-min 受 yfinance 60 天限制不可靠）。**4 hypothesis strict threshold 全 FAIL，但 Dim2 提供 clean single-mechanism**：Lai 2024 PRS 成功源自 TAIFEX day/night session asymmetry，SPY-ES (24h Globex continuous) 沒有對應結構，所以同方法 fails。**Paper 3 reframe 改為 single-mechanism narrative**（比 4-dimension 全方位更可信）。**反向發現** D2: SPY OPEX intraday 3.12× pinning effect 是獨立 US-specific finding，可能涉及 monthly/quarterly Friday + 0DTE。Codex 審查抓到 1 個 label-drift bug (drop-then-enumerate dow_idx 不對齊) 修正。Commit 5861e07c。Worktree-only 規則本次正確遵守（與 K1100f 違反對比）。",
+    "content": "[提出: Claude pivot K1100f, 執行: Claude] 4-dimension 對照（TAIFEX TX 2017-2021 daily vs SPY daily）：(1) Settlement multiplier TAIFEX 0.668 vs SPY 0.914（**反向發現**：SPY OPEX intraday=3.12x，US 才有強 settlement，TAIFEX 反而結算日波動較低——可能因主力已轉次月）(2) **Overnight/intraday ratio TAIFEX 1.586 vs SPY 1.001** ← Paper 3 reframe 核心 anchor，Taiwan 隔夜風險 1.6× 日盤 (3) DOW ANOVA F TAIFEX 0.653 vs SPY 0.732，**兩市都無 DOW pattern**（推翻原假設 H3）(4) FFT periodic band TAIFEX 0.015 vs SPY 0.010，無 spike（SPY 5-min 受 yfinance 60 天限制不可靠）。**4 hypothesis strict threshold 全 FAIL，但 Dim2 提供 clean single-mechanism**：Lai 2024 PRS 成功源自 TAIFEX day/night session asymmetry，SPY-ES (24h Globex continuous) 沒有對應結構，所以同方法 fails。**Paper 3 reframe 改為 single-mechanism narrative**（比 4-dimension 全方位更可信）。**反向發現** D2: SPY OPEX intraday 3.12× pinning effect 是獨立 US-specific finding，可能涉及 monthly/quarterly Friday + 0DTE。Codex 審查抓到 1 個 label-drift bug (drop-then-enumerate dow_idx 不對齊) 修正。Commit 5861e07c。Worktree-only 規則本次正確遵守（與 K1100f 違反對比）。 ⚠️ **[K1100g_d1 2026-04-13 修正]**: 本 entry 的 overnight/intraday ratio 1.586 經 raw tick 重建發現是 **GAP effect** (13:45→15:00 + 05:00→08:45 的無交易時間累積) 而非 pure session asymmetry。Pure session ratio = 0.765；per-hour normalized 日盤波動實為夜盤 2.19× (reverse direction)。**Paper 3 reframe 正確 anchor 改為 asymmetric cross-prediction** (night→day LRT χ²=12.5 p=0.0004 vs day→night p=0.075)，不是 vol ratio。cache 內的 night_open/close 有 mask 邏輯 bug 不可 reuse。",
     "tags": [
       "Paper_3",
       "TAIFEX",
@@ -25673,9 +25673,30 @@
       "reframe-anchor",
       "session-boundaries",
       "unexpected-finding",
-      "SPY-OPEX-pinning"
+      "SPY-OPEX-pinning",
+      "K1100g_d1-corrected"
     ],
     "data_source": "TAIFEX TX 2017-2021 (Dropbox) + yfinance SPY daily",
-    "created_at": "2026-04-13T07:22:08.354783+00:00"
+    "created_at": "2026-04-13T07:22:08.354783+00:00",
+    "updated_at": "2026-04-13T07:51:18.021708+00:00"
+  },
+  {
+    "id": "k1100g_d1-1776066678",
+    "experiment_id": "K1100g_d1",
+    "title": "K1100g_d1: TAIFEX day vs night PRG — asymmetric night→day predictive power, K1100g ratio 推翻",
+    "content": "[提出: Claude K1100g 衍生, 執行: Claude] 4 PRG models on TAIFEX TX 2017-2021 (1077 days)。**H1 PASS** 夜盤 info density > 日盤（per-obs LL 3.90 > 3.58）。**H2 PASS** night→day LRT χ²=12.48 p=0.0004。**H3 PASS** asymmetric (forward p=0.0004 vs reverse p=0.075)。**H4 FAIL 但是重大 meta-finding**：從 raw tick 重建得 session ratio = 0.765 vs K1100g 報的 1.586——**K1100g 的 1.586 是 GAP effect (13:45→15:00 + 05:00→08:45)，不是 pure session asymmetry**。Per-hour normalized: 日盤波動是夜盤 2.19×（反方向）。**Paper 3 reframe 正確 anchor 不是 1.586 vol ratio，而是 asymmetric cross-prediction**（night→day LRT χ²=12.5 p=0.0004 vs day→night χ²=3.2 p=0.075）。Model LL: M1 Combined 3513 / M2 Day 3847 / M3 Night 4194 / M4 Night→Day 3854 / M5 Day→Night 4196。AIC 最佳 M5=-8372.93 但差異微小，主要貢獻是 M4 vs M2 的 LRT。Codex 審代碼修 4 bugs: HIGH double-lag、HIGH 用 LRT 取代 DM、HIGH E[g]=1 constraint、MED JSON NaN。**非預期發現（寫 error_log）**: K1100g cache 的 night_open/night_close mask 邏輯錯位，只抓末尾 ticks 得虛假 σ=0.000083，正確應為 0.00581 —— 後續實驗不可直接 reuse。Commit 7c191a7e。",
+    "tags": [
+      "Paper_3",
+      "TAIFEX",
+      "PRG",
+      "asymmetric-prediction",
+      "night-to-day",
+      "LRT",
+      "K1100g-correction",
+      "cache-bug",
+      "reframe-anchor-correction"
+    ],
+    "data_source": "TAIFEX TX 2017-2021 raw tick + session reconstruction",
+    "created_at": "2026-04-13T07:51:18.021708+00:00"
   }
 ]
