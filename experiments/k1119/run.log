@@ -1,0 +1,54 @@
+[19:41:46] K1119 start: BTC DVOL vs VIX
+[19:41:46] Daily panel: n=1847 range=2021-03-24..2026-04-13
+[19:41:46]   DVOL mean=61.71%  VIX mean=19.15%  corr(DVOL,VIX)=0.300
+[19:41:46] Weekly panel: n=263
+[19:41:46] Weekly OOS QLIKE: M1=-4.3909  M2(VIX)=-4.3836  M3(DVOL)=-4.3728  M4=-4.3563  M5=-4.3735
+[19:41:46] Rolling OOS: T=1847, window=504, OOS length=1343
+[19:42:10]   progress t=554/1847 date=2022-09-29
+[19:42:40]   progress t=654/1847 date=2023-01-07
+[19:43:06]   progress t=754/1847 date=2023-04-17
+[19:43:30]   progress t=854/1847 date=2023-07-26
+[19:43:52]   progress t=954/1847 date=2023-11-03
+[19:44:16]   progress t=1054/1847 date=2024-02-11
+[19:44:38]   progress t=1154/1847 date=2024-05-21
+[19:44:59]   progress t=1254/1847 date=2024-08-29
+[19:45:18]   progress t=1354/1847 date=2024-12-07
+[19:45:35]   progress t=1454/1847 date=2025-03-17
+[19:45:53]   progress t=1554/1847 date=2025-06-25
+[19:46:10]   progress t=1654/1847 date=2025-10-03
+[19:46:27]   progress t=1754/1847 date=2026-01-11
+[19:46:42] Daily OOS QLIKE  GJR=-6.4018  A4f-DVOL=-6.3956  improvement=-0.10%  DM t=-0.177 p=0.8598
+[19:46:43] Saved plot -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8641d1a/experiments/k1119/k1119_dvol_vs_vix.png
+[19:46:43] Saved plot -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8641d1a/experiments/k1119/k1119_qlike_timeseries.png
+[19:46:43] Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8641d1a/experiments/k1119/k1119_results.json
+
+==========================================================================================
+K1119 SUMMARY — BTC native IV (DVOL) vs US VIX
+==========================================================================================
+Panel: 2021-03-24..2026-04-13, daily n=1847 weekly n=263
+DVOL mean=61.71  VIX mean=19.15  corr(DVOL,VIX) daily=0.300
+
+-- Weekly battery (OOS 2024+) --
+  M1_AR1               OOS QLIKE = -4.3909
+  M2_AR1_VIX           OOS QLIKE = -4.3836
+  M3_AR1_DVOL          OOS QLIKE = -4.3728
+  M4_AR1_DVOL_VIX      OOS QLIKE = -4.3563
+  M5_AR1_DVOL_absr     OOS QLIKE = -4.3735
+  DM M1_AR1_vs_M2_AR1_VIX: t=-0.4896448741485888 p=0.6253020184129108
+  DM M1_AR1_vs_M3_AR1_DVOL: t=-0.27317550851069644 p=0.7851999121928146
+  DM M1_AR1_vs_M4_AR1_DVOL_VIX: t=-0.47057887690690114 p=0.6388175882878997
+  DM M1_AR1_vs_M5_AR1_DVOL_absr: t=-0.2619392126999528 p=0.793828905824548
+  DM M2_AR1_VIX_vs_M3_AR1_DVOL: t=-0.1807660156395686 p=0.8568639909063069
+
+-- Daily rolling GJR vs A4f-DVOL --
+  OOS window=504  n_oos=1343
+  QLIKE: GJR=-6.4018  A4f-DVOL=-6.3956  improvement -0.10%
+  DM t=-0.177 p=0.8598  (Harvey t>3 for A4f wins)
+  Sub-period wins (A4f beats GJR, Harvey): 0
+
+-- VaR Trinity --
+  alpha=0.01  GJR trinity=True  A4f trinity=False
+  alpha=0.05  GJR trinity=False  A4f trinity=False
+
+VERDICT: H2_NULL
+Paper 4 narrative: Paper 4 extension: even native DVOL fails to beat pure GJR for BTC. Crypto is an IV-insufficient asset class — consistent with K1118's BTC EPU/NFCI/FinStress null. Native IV helps SPY/GLD/TLT but NOT BTC.

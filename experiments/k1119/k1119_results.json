@@ -1,0 +1,392 @@
+{
+  "experiment_id": "K1119",
+  "title": "BTC native IV (Deribit DVOL) vs US VIX \u2014 Paper 4 crypto case",
+  "started_utc": "2026-04-13T19:41:46.931809+00:00",
+  "data_source": "Deribit DVOL via public API get_volatility_index_data | yfinance BTC-USD, ^VIX",
+  "period": "2021-03-24 to 2026-04-13 (DVOL-constrained)",
+  "predecessors": {
+    "K916": "MF-GJR BTC with VIX: QLIKE -2.93%, DM t=-2.81 Harvey FAIL; BTC-VIX lag1 corr only 0.055 (SPY 0.547)",
+    "K1118": "Cross-asset alt-data sufficiency; BTC used 30-day rolling RV as IV PROXY because DVOL not on yfinance",
+    "K1116": "SPY native VIX sufficient vs EPU/NFCI/STLFSI"
+  },
+  "hypotheses": {
+    "H1_SUFFICIENT": "DVOL beats GJR (|t|>3) AND VaR Trinity PASS",
+    "H2_NULL": "DVOL adds no value",
+    "H3_PARTIAL": "marginal 2<|t|<3 or unstable across sub-periods"
+  },
+  "references": [
+    "Deribit API docs (public get_volatility_index_data)",
+    "Conrad, Custovic, Ghysels (2018) JFQA \u2014 GARCH-MIDAS on crypto",
+    "Engle, Ghysels, Sohn (2013) REStud \u2014 GARCH-MIDAS",
+    "Patton (2011) JoE \u2014 QLIKE proxy-robust",
+    "Harvey, Leybourne, Newbold (1997) IJF \u2014 HLN DM correction",
+    "Kupiec (1995); Christoffersen (1998)",
+    "K916, K1116, K1118 \u2014 VolPred internal predecessors"
+  ],
+  "daily_n": 1847,
+  "daily_start": "2021-03-24",
+  "daily_end": "2026-04-13",
+  "descriptive_daily": {
+    "log_r": {
+      "n": 1847,
+      "mean": 0.00015645966743555993,
+      "std": 0.029430173426913328,
+      "skew": -0.25399388259877576,
+      "kurt": 3.957950345068069,
+      "min": -0.17405255177667023,
+      "max": 0.13576425730332176
+    },
+    "dvol": {
+      "n": 1847,
+      "mean": 61.709355711965344,
+      "std": 18.561277849108844,
+      "skew": 0.8511515275936444,
+      "kurt": 0.4816171300211116,
+      "min": 32.38,
+      "max": 156.2
+    },
+    "vix": {
+      "n": 1847,
+      "mean": 19.1464699950164,
+      "std": 5.252356055325248,
+      "skew": 1.2780117679382408,
+      "kurt": 2.3427609018866993,
+      "min": 11.859999656677246,
+      "max": 52.33000183105469
+    },
+    "corr": {
+      "dvol": {
+        "dvol": 1.0,
+        "vix": 0.3000047471342751,
+        "log_r": -0.05976406664124416
+      },
+      "vix": {
+        "dvol": 0.3000047471342751,
+        "vix": 1.0,
+        "log_r": -0.09022965050513052
+      },
+      "log_r": {
+        "dvol": -0.05976406664124416,
+        "vix": -0.09022965050513052,
+        "log_r": 1.0
+      }
+    }
+  },
+  "weekly_n": 263,
+  "weekly": {
+    "is_end": "2023-12-31",
+    "oos_start": "2024-01-01",
+    "is_records": {
+      "M1_AR1": {
+        "r2": 0.13681723626940345,
+        "adj_r2": 0.13069537269684617,
+        "aic": -533.688217551543,
+        "bic": -527.7625282910232,
+        "n": 143,
+        "params": {
+          "const": 0.04753157292208566,
+          "y_lag1": 0.3696115379981407
+        },
+        "pvalues": {
+          "const": 4.6357125772226096e-11,
+          "y_lag1": 5.448923816452867e-06
+        }
+      },
+      "M2_AR1_VIX": {
+        "r2": 0.15368572598722519,
+        "adj_r2": 0.14159552207275705,
+        "aic": -534.5104187850432,
+        "bic": -525.6218848942634,
+        "n": 143,
+        "params": {
+          "const": 0.028294024128988064,
+          "y_lag1": 0.3372517571983247,
+          "vix_lag1": 0.0010594756411005804
+        },
+        "pvalues": {
+          "const": 0.03491110710332371,
+          "y_lag1": 4.509068616790731e-05,
+          "vix_lag1": 0.09706240774582614
+        }
+      },
+      "M3_AR1_DVOL": {
+        "r2": 0.21121108565190083,
+        "adj_r2": 0.19994267258978515,
+        "aic": -544.5764781508385,
+        "bic": -535.6879442600588,
+        "n": 143,
+        "params": {
+          "const": 0.014327572537902915,
+          "y_lag1": 0.1604214196552365,
+          "dvol_lag1": 0.0006988348638393488
+        },
+        "pvalues": {
+          "const": 0.20093317667289343,
+          "y_lag1": 0.09198374315355388,
+          "dvol_lag1": 0.0003913110840403182
+        }
+      },
+      "M4_AR1_DVOL_VIX": {
+        "r2": 0.21777303486664012,
+        "adj_r2": 0.20089043849685528,
+        "aic": -543.7710735804567,
+        "bic": -531.9196950594171,
+        "n": 143,
+        "params": {
+          "const": 0.003968813659526845,
+          "y_lag1": 0.15153469298396754,
+          "dvol_lag1": 0.0006599233258634856,
+          "vix_lag1": 0.0006723117821545222
+        },
+        "pvalues": {
+          "const": 0.78762632260032,
+          "y_lag1": 0.11240912899985456,
+          "dvol_lag1": 0.0009582079318018297,
+          "vix_lag1": 0.2820857321670031
+        }
+      },
+      "M5_AR1_DVOL_absr": {
+        "r2": 0.211272832381462,
+        "adj_r2": 0.19424994387170935,
+        "aic": -542.5876726894332,
+        "bic": -530.7362941683937,
+        "n": 143,
+        "params": {
+          "const": 0.014223248965292395,
+          "y_lag1": 0.1522324465763508,
+          "dvol_lag1": 0.0007033665909205143,
+          "absr_lag1": 0.00669562840593436
+        },
+        "pvalues": {
+          "const": 0.20762037992858798,
+          "y_lag1": 0.21848843406884239,
+          "dvol_lag1": 0.000516385489252025,
+          "absr_lag1": 0.9170689390691198
+        }
+      }
+    },
+    "oos_qlike": {
+      "M1_AR1": -4.390915106055175,
+      "M2_AR1_VIX": -4.383645478426613,
+      "M3_AR1_DVOL": -4.372814405537561,
+      "M4_AR1_DVOL_VIX": -4.3562932285659715,
+      "M5_AR1_DVOL_absr": -4.3735370029600436
+    },
+    "dm_tests": {
+      "M1_AR1_vs_M2_AR1_VIX": {
+        "t_stat": -0.4896448741485888,
+        "p_value": 0.6253020184129108,
+        "harvey_pass_challenger_beats": false,
+        "harvey_pass_baseline_beats": false,
+        "standard_pass_challenger_beats": false
+      },
+      "M1_AR1_vs_M3_AR1_DVOL": {
+        "t_stat": -0.27317550851069644,
+        "p_value": 0.7851999121928146,
+        "harvey_pass_challenger_beats": false,
+        "harvey_pass_baseline_beats": false,
+        "standard_pass_challenger_beats": false
+      },
+      "M1_AR1_vs_M4_AR1_DVOL_VIX": {
+        "t_stat": -0.47057887690690114,
+        "p_value": 0.6388175882878997,
+        "harvey_pass_challenger_beats": false,
+        "harvey_pass_baseline_beats": false,
+        "standard_pass_challenger_beats": false
+      },
+      "M1_AR1_vs_M5_AR1_DVOL_absr": {
+        "t_stat": -0.2619392126999528,
+        "p_value": 0.793828905824548,
+        "harvey_pass_challenger_beats": false,
+        "harvey_pass_baseline_beats": false,
+        "standard_pass_challenger_beats": false
+      },
+      "M2_AR1_VIX_vs_M3_AR1_DVOL": {
+        "t_stat": -0.1807660156395686,
+        "p_value": 0.8568639909063069,
+        "interpretation": "VIX beats DVOL or tie"
+      }
+    },
+    "oos_n": 118
+  },
+  "daily": {
+    "training_window": 504,
+    "oos_n": 1343,
+    "oos_start": "2022-08-10",
+    "oos_end": "2026-04-13",
+    "oos_qlike_GJR": -6.401754827575234,
+    "oos_qlike_A4f_DVOL": -6.3955850501803075,
+    "qlike_improvement_pct_A4f_over_GJR": -0.09637634619104869,
+    "dm_A4f_minus_GJR": {
+      "t_stat": -0.17665064059956692,
+      "p_value": 0.8598094685861808,
+      "sign_convention": "positive t => A4f-DVOL beats GJR",
+      "harvey_pass_A4f_beats_GJR": false,
+      "harvey_pass_GJR_beats_A4f": false,
+      "standard_pass_A4f_beats_GJR": false
+    },
+    "subperiod_dm": {
+      "2023": {
+        "n": 365,
+        "qlike_gjr": -6.529034260474353,
+        "qlike_a4f": -6.500452866579418,
+        "dm_t": -0.3183610121866223,
+        "dm_p": 0.7503936893753222,
+        "harvey_pass_a4f_beats": false,
+        "harvey_pass_gjr_beats": false
+      },
+      "2024": {
+        "n": 366,
+        "qlike_gjr": -6.16891220884629,
+        "qlike_a4f": -6.124444867006164,
+        "dm_t": -0.9265590993741682,
+        "dm_p": 0.35476773717076693,
+        "harvey_pass_a4f_beats": false,
+        "harvey_pass_gjr_beats": false
+      },
+      "2025": {
+        "n": 365,
+        "qlike_gjr": -6.697768673480557,
+        "qlike_a4f": -6.733854295753581,
+        "dm_t": 0.9867302387214725,
+        "dm_p": 0.3244303313958823,
+        "harvey_pass_a4f_beats": false,
+        "harvey_pass_gjr_beats": false
+      },
+      "2026": {
+        "n": 103,
+        "qlike_gjr": -6.109042024262449,
+        "qlike_a4f": -6.18109722036739,
+        "dm_t": 1.0552705767675472,
+        "dm_p": 0.2937947447251936,
+        "harvey_pass_a4f_beats": false,
+        "harvey_pass_gjr_beats": false
+      }
+    },
+    "avg_params": {
+      "gjr_alpha": 0.07562021877715423,
+      "gjr_beta": 0.6991511922366003,
+      "gjr_gamma": 0.08288687820030569,
+      "gjr_persist": 0.8162148501139074,
+      "a4f_theta": 0.559284271990802,
+      "a4f_theta_median": 0.5649780027260576,
+      "a4f_theta_share_positive": 1.0,
+      "a4f_persist_g": 0.679652702439091
+    },
+    "var_es_trinity": {
+      "df_gjr": 12.398339843750023,
+      "df_a4f": 6.472656250000012,
+      "alpha_0.01": {
+        "GJR": {
+          "kupiec": {
+            "n": 1343,
+            "violations": 19,
+            "rate": 0.014147431124348473,
+            "LR": 2.067389998460847,
+            "p_value": 0.15047885177175702,
+            "pass": true
+          },
+          "cc": {
+            "LR_uc": 2.067389998460847,
+            "LR_ind": 1.2223024756478083,
+            "LR_cc": 3.289692474108655,
+            "p_value": 0.1930422432557879,
+            "pass": true,
+            "violations": 19,
+            "rate": 0.014147431124348473,
+            "n": 1343
+          },
+          "basel": "green",
+          "mean_VaR": -0.06445191773164465,
+          "mean_ES": -0.07738972820165974,
+          "trinity_PASS": true
+        },
+        "A4f_DVOL": {
+          "kupiec": {
+            "n": 1343,
+            "violations": 25,
+            "rate": 0.018615040953090096,
+            "LR": 8.030216895853222,
+            "p_value": 0.0046003330348263205,
+            "pass": false
+          },
+          "cc": {
+            "LR_uc": 8.030216895853222,
+            "LR_ind": 0.4834362018889067,
+            "LR_cc": 8.513653097742129,
+            "p_value": 0.014167190033358756,
+            "pass": false,
+            "violations": 25,
+            "rate": 0.018615040953090096,
+            "n": 1343
+          },
+          "basel": "yellow",
+          "mean_VaR": -0.05908671774135462,
+          "mean_ES": -0.0750252858536894,
+          "trinity_PASS": false
+        }
+      },
+      "alpha_0.05": {
+        "GJR": {
+          "kupiec": {
+            "n": 1343,
+            "violations": 55,
+            "rate": 0.04095309009679821,
+            "LR": 2.4598085146588886,
+            "p_value": 0.11679301931872543,
+            "pass": true
+          },
+          "cc": {
+            "LR_uc": 2.4598085146588886,
+            "LR_ind": 2.7721723078690843,
+            "LR_cc": 5.231980822527973,
+            "p_value": 0.07309535836772385,
+            "pass": true,
+            "violations": 55,
+            "rate": 0.04095309009679821,
+            "n": 1343
+          },
+          "basel": "red",
+          "mean_VaR": -0.04293877126059869,
+          "mean_ES": -0.05634731421410156,
+          "trinity_PASS": false
+        },
+        "A4f_DVOL": {
+          "kupiec": {
+            "n": 1343,
+            "violations": 76,
+            "rate": 0.05658972449739389,
+            "LR": 1.1798023541324767,
+            "p_value": 0.2773962359935157,
+            "pass": true
+          },
+          "cc": {
+            "LR_uc": 1.1798023541324767,
+            "LR_ind": 0.12088475205621307,
+            "LR_cc": 1.3006871061886898,
+            "p_value": 0.5218664571236921,
+            "pass": true,
+            "violations": 76,
+            "rate": 0.05658972449739389,
+            "n": 1343
+          },
+          "basel": "red",
+          "mean_VaR": -0.036948344482295864,
+          "mean_ES": -0.05105349022849049,
+          "trinity_PASS": false
+        }
+      }
+    }
+  },
+  "verdict": "H2_NULL",
+  "decision_trace": {
+    "A4f_beats_GJR_Harvey": false,
+    "GJR_beats_A4f_Harvey": false,
+    "QLIKE_improvement_gt_5pct": false,
+    "VaR_trinity_PASS_1pct": false,
+    "VaR_trinity_PASS_5pct": false,
+    "subperiod_a4f_wins_count": 0
+  },
+  "paper4_narrative": "Paper 4 extension: even native DVOL fails to beat pure GJR for BTC. Crypto is an IV-insufficient asset class \u2014 consistent with K1118's BTC EPU/NFCI/FinStress null. Native IV helps SPY/GLD/TLT but NOT BTC.",
+  "finished_utc": "2026-04-13T19:46:43.345745+00:00"
+}

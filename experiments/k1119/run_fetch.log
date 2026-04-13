@@ -1,0 +1,20 @@
+[19:36:47] K1119 fetch: BTC DVOL + BTC-USD + ^VIX
+[19:36:48]   DVOL page 0: 1000 rows, first=2023-07-19 last=2026-04-13, cont=1689638400000
+[19:36:48]   DVOL page 1: 847 rows, first=2021-03-24 last=2023-07-18, cont=None
+[19:36:49] DVOL saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8641d1a/experiments/k1119/data/dvol_daily.csv  n=1847 range=[2021-03-24..2026-04-13]
+[19:36:49] Fetching BTC-USD via yfinance...
+[19:36:49] BTC saved  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8641d1a/experiments/k1119/data/btc_ohlcv.csv   n=2295  range=[2020-01-01..2026-04-13]
+[19:36:49] Fetching ^VIX via yfinance...
+[19:36:50] VIX saved  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8641d1a/experiments/k1119/data/vix_daily.csv   n=1577  range=[2020-01-02..2026-04-13]
+[19:36:50] {
+  "dvol_n": 1847,
+  "dvol_start": "2021-03-24",
+  "dvol_end": "2026-04-13",
+  "btc_n": 2295,
+  "btc_start": "2020-01-01",
+  "btc_end": "2026-04-13",
+  "vix_n": 1577,
+  "vix_start": "2020-01-02",
+  "vix_end": "2026-04-13",
+  "fetched_at_utc": "2026-04-13T19:36:50.036851+00:00"
+}

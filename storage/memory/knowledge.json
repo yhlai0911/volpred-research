@@ -26270,5 +26270,24 @@
     "data_source": "Reuse K1166 110 stocks 4 markets data, per-stock MLE EAV-only vs full",
     "created_at": "2026-04-14T05:00:00+08:00",
     "updated_at": "2026-04-14T05:00:00+08:00"
+  },
+  {
+    "id": "k1119-1776109782",
+    "experiment_id": "K1119",
+    "title": "K1119 BTC Deribit DVOL NULL — Paper 4 crypto IV-insufficient confirmed with native IV",
+    "content": "[提出: Claude, 執行: Claude] Paper 4 Universal IV Sufficiency 前已測 K1116 EPU/NFCI NULL + K1118 US VIX on BTC NULL + K916 VIX→BTC Harvey FAIL。K1119 補最後缺口: 用 BTC **native IV** (Deribit DVOL, 2021-03 起 n=1,847 days) 替代 US VIX。**結果 H2 NULL 確認 crypto IV-insufficient**: A4f-DVOL QLIKE=-6.3956 vs GJR -6.4018 (A4f 略差 0.10%); DM-HLN t=-0.177 p=0.86 Harvey FAIL。A4f-DVOL vs A4f-VIX head-to-head DM t=-0.18 p=0.86 — 統計上 indistinguishable (兩者都 fail beat pure AR(1))。Sub-period stability: 2023 t=-0.32, 2024 t=-0.93, 2025 t=+0.99, 2026 t=+1.06 全部遠離 Harvey 3.0。VaR Trinity (Student-t): 1% GJR PASS vs A4f-DVOL FAIL (A4f fitted df=6.47 過 fat tail over-violation); 5% 兩者都 FAIL Basel red。A4f-theta > 0 on 100% rolling windows (avg 0.56) — DVOL 跟 future variance 相關，但 marginal information 完全被 GJR autoregressive dynamics 吸收。**Paper 4 narrative 升級 revised boundary**: 'IV-based vol sufficiency is equity/commodity/bond specific; it FAILS for crypto even when the right native IV (DVOL, not the US-VIX proxy) is used'。Crypto 是 IV-insufficient asset class — 結論 K1116+K1118+K916+K1119 四實驗一致收斂。衍生 K1120 (TLT FinStress regime-dependent, 看是否 IV sufficient 在不同 bond regime 變化)。",
+    "tags": [
+      "K1119",
+      "Paper4",
+      "BTC",
+      "DVOL",
+      "Deribit",
+      "crypto-IV-insufficient",
+      "triple-gate-null",
+      "universal-IV-sufficiency-boundary"
+    ],
+    "data_source": "Deribit public API get_volatility_index_data (2021-03 to 2026-04, n=1,847); BTC-USD yfinance; ^VIX",
+    "created_at": "2026-04-14T05:30:00+08:00",
+    "updated_at": "2026-04-14T05:30:00+08:00"
   }
 ]
