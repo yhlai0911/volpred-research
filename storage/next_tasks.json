@@ -348,5 +348,33 @@
     "priority": 1,
     "description": "K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。",
     "status": "blocked_user_decision"
+  },
+  {
+    "id": "K1116",
+    "title": "K1116: FRED Alt-Data (EPU+NFCI+STLFSI) for SPY vol",
+    "priority": 1,
+    "description": "Agent pivot 自 Google Trends（與 K473/750/789 80% overlap）。NULL with strong negative evidence: M3 EPU OOS DM t=-2.55, M4 NFCI t=-3.00 VIX wins。VIX sufficiency #37+ (5 alt-data sources)。",
+    "status": "completed"
+  },
+  {
+    "id": "Paper4_VIX_sufficiency_compendium",
+    "title": "Paper 4: VIX Sufficiency Compendium (NEW)",
+    "priority": 2,
+    "description": "K473+K750+K789+K504+K1116 共 5 個獨立 alt-data null 實驗的 compendium paper。Cross-class evidence (survey/search/news/fin-conditions)。論文核心：no public alt-data improves SPY weekly vol vs VIX。Main thread.",
+    "status": "pending"
+  },
+  {
+    "id": "K1117",
+    "title": "K1117: Daily-freq alt-data conditional on VIX jumps",
+    "priority": 3,
+    "description": "K1116 衍生：唯一還沒測的 angle。matched-pair design around |ΔVIX|>2σ days。",
+    "status": "pending"
+  },
+  {
+    "id": "K1118",
+    "title": "K1118: Cross-asset alt-data sufficiency (GLD/TLT/Bitcoin/TAIFEX)",
+    "priority": 3,
+    "description": "K1116 衍生：VIX 對 SPY sufficient 不代表對其他資產 sufficient。",
+    "status": "pending"
   }
 ]

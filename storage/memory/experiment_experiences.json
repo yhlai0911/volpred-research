@@ -827,5 +827,19 @@
       "paper-3-conclusion"
     ],
     "created_at": "2026-04-13T08:25:05.706844+00:00"
+  },
+  {
+    "id": "E061",
+    "title": "Knowledge-base precheck 救了一次重複實驗 + DM sign convention 陷阱",
+    "lesson": "K1116 兩個關鍵實踐展現出 E060 / K1100g_d1 教訓的回饋價值：\n\n**1. Knowledge-base precheck 救了一次重複實驗**\n- 我原 prompt 指定 Google Trends 為 alt-data\n- Agent 第 3 步 knowledge-base grep 發現與 K473/K750/K789 共 3 個 Google Trends 實驗 80% overlap\n- Agent 主動 pivot 到 FRED EPU/NFCI/STLFSI（仍是 alt-data 但測沒測過的數據源）\n- **沒做 knowledge precheck 就會浪費資源重複實驗**——E060「研究路線耗盡」教訓的具體應用\n\n**2. DM sign convention bug 半路被 catch**\n- Agent 寫 DM logic 第一版用 `abs(t) > 2` 當作 H1 PASS\n- 中途自審發現：significant-NEGATIVE t（baseline 勝）會被誤判為「H1 PASS」\n- 修正為 challenger-wins (negative t) vs baseline-wins (positive t) 區分\n- **這個 bug 與 K1100g_d1 LRT-only PASS 同源**——「顯著」不等於「方向對」\n\n**3. Catastrophic IS-OOS divergence 被 design 抓到（不再悄悄發生）**\n- M5 全 7 regressors IS QLIKE -2.84 → OOS +59.9（24× 惡化）\n- E059 教訓告訴我：IS 漂亮 + OOS 爛 = overfit 警訊\n- K1116 的 design 顯示這個 divergence，未來實驗 should adopt as default\n\n**Cross-experiment compendium emerge**:\n今天測完 K1115 + K1116 後，VIX sufficiency 共 37+ 次獨立確認：\n- K473 (Google Trends VAR), K750 (Trends weekly), K789 (Trends overlay), K504 (STLFSI4), K1116 (EPU+NFCI+STLFSI)\n- 5 個 alt-data 來源全部 null/worse vs VIX\n- 這是論文級 negative result：「VIX is sufficient for SPY weekly vol prediction; no public alt-data source improves it」\n\n**通則 — 如何把 7+ null 變 contribution**：\n1. **Compendium 比單一實驗更有 publication value**：5 個獨立 null 一起講，reviewer 接受度比 1 個 null 高\n2. **Cross-class evidence**: survey + search + news + fin-conditions = breadth makes case strong\n3. **Mechanism explanation**: 不只是「null」，要解釋 WHY（e.g., VIX 是 implied vol 直接 forward-looking，alt-data 都是 lagged behavioral indicator）\n\n**下一步建議**：\n- Paper 4「VIX Sufficiency Compendium」初稿（main thread, 不用 agent）\n- 或：K1117 daily-frequency conditional design（rare-event approach）—— 唯一還沒測的 angle\n- 不繼續 alt-data unconditional regression variants\n\n**今日 session 整體反思**：\n- 完成 16+ 實驗\n- 主要結論：Paper 2 firm-selection 不可行（K1109/K1113）、Paper 3 generalization 不可行（K1100b/f/g_d2/K1115）、alt-data sufficiency #37（K1116）\n- 都是 null，但 each 都 *delimits* 一個方向\n- **論文價值在於告訴後續研究者 \"don't waste time on these\"**",
+    "context": "K1116 alt-data NULL + 今日 16+ 實驗 cross-synthesis",
+    "applies_to": [
+      "knowledge-base-precheck",
+      "DM-sign-convention",
+      "compendium-papers",
+      "null-result-publication",
+      "session-arc-meta"
+    ],
+    "created_at": "2026-04-13T08:41:22.110993+00:00"
   }
 ]

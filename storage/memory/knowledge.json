@@ -25736,5 +25736,25 @@
     ],
     "data_source": "yfinance SPY 2010-2026",
     "created_at": "2026-04-13T08:25:05.706844+00:00"
+  },
+  {
+    "id": "k1116-1776069682",
+    "experiment_id": "K1116",
+    "title": "K1116: FRED Alt-Data (EPU+NFCI+STLFSI) for SPY vol — NULL, VIX sufficiency #37",
+    "content": "[提出: Claude pivot from Paper 3, 執行: Claude] 原計畫 Google Trends，agent knowledge-base precheck 發現與 K473/K750/K789 80% 重疊（E060 教訓正確應用），pivot 到 FRED 替代數據：US/World EPU (Baker-Bloom-Davis), NFCI/ANFCI (Chicago Fed), STLFSI4 (St. Louis Fed)。5 OLS models on SPY weekly RV 2018-2026 (IS 260 / OOS 170)。**結果 NULL with strong negative evidence**：M3 EPU OOS DM-HLN t=**-2.55**（VIX 勝），M4 NFCI+STLFSI t=**-3.00**（VIX 勝），M5 全 7 regressors OOS QLIKE 從 IS -2.84 暴增到 +59.9（catastrophic overfit, K1100g_d1 divergence trap caught live）。OOS QLIKE improvement -0.62%（更差，門檻 >5%）。**VIX sufficiency confirmation #37+**（cross K473/K750/K789/K504/K1116 共 5 個獨立實驗：survey UMich + search Google Trends + news-text EPU + fin-conditions NFCI/STLFSI 全 null/worse than VIX for SPY weekly vol）。Calm regime (n=111) alt-data t=-2.6 to -3.9 連 steady markets 也輸。Bug 修正 mid-run：原 DM logic 用 abs(t)>2 會 mis-flag significant-negative 為 PASS，改為 challenger-wins/baseline-wins distinction。Da-Engelberg-Gao 2015 FEARS effect 是 intraday return 不是 weekly vol。Baker-Bloom-Davis EPU 設計給 macro outcomes 不是 weekly equity RV。Commit ef507957。",
+    "tags": [
+      "Paper_4",
+      "alt-data",
+      "VIX-sufficiency",
+      "EPU",
+      "NFCI",
+      "STLFSI",
+      "NULL-result",
+      "pivot-from-Paper-3",
+      "compendium-evidence",
+      "IS-OOS-divergence-caught"
+    ],
+    "data_source": "FRED (USEPU, WLEMUINDXD, NFCI, ANFCI, STLFSI4) + yfinance SPY 2018-2026",
+    "created_at": "2026-04-13T08:41:22.110993+00:00"
   }
 ]
