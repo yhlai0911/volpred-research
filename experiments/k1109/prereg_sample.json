@@ -1,0 +1,365 @@
+{
+  "experiment_id": "K1109",
+  "title": "Pre-registered random sector sample (confirmatory)",
+  "pre_registration_timestamp_utc": "2026-04-13T05:27:36.196511+00:00",
+  "random_seed": 42,
+  "sector_pools": {
+    "foundry": [
+      "2330",
+      "2303",
+      "6239"
+    ],
+    "fabless": [
+      "2454",
+      "2379",
+      "3034",
+      "3035",
+      "3443",
+      "2388"
+    ],
+    "financials": [
+      "2881",
+      "2882",
+      "2883",
+      "2886",
+      "2887"
+    ],
+    "shipping": [
+      "2603",
+      "2615",
+      "2609"
+    ],
+    "trad_mfg": [
+      "1301",
+      "1303",
+      "1326",
+      "2002",
+      "2027"
+    ],
+    "ems": [
+      "2317",
+      "3045",
+      "2382"
+    ],
+    "consumer": [
+      "2912",
+      "1216",
+      "2637",
+      "1215",
+      "2347",
+      "1210"
+    ],
+    "tech_other": [
+      "2888",
+      "2892"
+    ]
+  },
+  "target_n_per_sector": {
+    "foundry": 3,
+    "fabless": 6,
+    "financials": 5,
+    "shipping": 3,
+    "trad_mfg": 5,
+    "ems": 3,
+    "consumer": 5,
+    "tech_other": 3
+  },
+  "selection_rule": "For each sector, draw `target` firms at random from the pool using numpy.random.default_rng(seed=42). If pool <= target, take all pool members and flag exhausted=True. Sample is locked BEFORE any Stage 1 estimation. Modifying the sample after looking at results would re-introduce the cherry-pick bias identified in E052 (K1106b).",
+  "n_total_firms": 32,
+  "sample_breakdown": {
+    "foundry": {
+      "n_pool": 3,
+      "n_drawn": 3,
+      "target": 3,
+      "exhausted": true,
+      "drawn": [
+        "2330",
+        "2303",
+        "6239"
+      ]
+    },
+    "fabless": {
+      "n_pool": 6,
+      "n_drawn": 6,
+      "target": 6,
+      "exhausted": true,
+      "drawn": [
+        "2454",
+        "2379",
+        "3034",
+        "3035",
+        "3443",
+        "2388"
+      ]
+    },
+    "financials": {
+      "n_pool": 5,
+      "n_drawn": 5,
+      "target": 5,
+      "exhausted": true,
+      "drawn": [
+        "2881",
+        "2882",
+        "2883",
+        "2886",
+        "2887"
+      ]
+    },
+    "shipping": {
+      "n_pool": 3,
+      "n_drawn": 3,
+      "target": 3,
+      "exhausted": true,
+      "drawn": [
+        "2603",
+        "2615",
+        "2609"
+      ]
+    },
+    "trad_mfg": {
+      "n_pool": 5,
+      "n_drawn": 5,
+      "target": 5,
+      "exhausted": true,
+      "drawn": [
+        "1301",
+        "1303",
+        "1326",
+        "2002",
+        "2027"
+      ]
+    },
+    "ems": {
+      "n_pool": 3,
+      "n_drawn": 3,
+      "target": 3,
+      "exhausted": true,
+      "drawn": [
+        "2317",
+        "3045",
+        "2382"
+      ]
+    },
+    "consumer": {
+      "n_pool": 6,
+      "n_drawn": 5,
+      "target": 5,
+      "exhausted": false,
+      "drawn": [
+        "2912",
+        "2637",
+        "1215",
+        "2347",
+        "1210"
+      ]
+    },
+    "tech_other": {
+      "n_pool": 2,
+      "n_drawn": 2,
+      "target": 3,
+      "exhausted": true,
+      "drawn": [
+        "2888",
+        "2892"
+      ]
+    }
+  },
+  "sample": [
+    {
+      "code": "2330",
+      "ticker": "2330.TW",
+      "name": "TSMC",
+      "sector": "foundry"
+    },
+    {
+      "code": "2303",
+      "ticker": "2303.TW",
+      "name": "UMC",
+      "sector": "foundry"
+    },
+    {
+      "code": "6239",
+      "ticker": "6239.TW",
+      "name": "Powertech",
+      "sector": "foundry"
+    },
+    {
+      "code": "2454",
+      "ticker": "2454.TW",
+      "name": "MediaTek",
+      "sector": "fabless"
+    },
+    {
+      "code": "2379",
+      "ticker": "2379.TW",
+      "name": "Realtek",
+      "sector": "fabless"
+    },
+    {
+      "code": "3034",
+      "ticker": "3034.TW",
+      "name": "Novatek",
+      "sector": "fabless"
+    },
+    {
+      "code": "3035",
+      "ticker": "3035.TW",
+      "name": "FarEastone Info",
+      "sector": "fabless"
+    },
+    {
+      "code": "3443",
+      "ticker": "3443.TW",
+      "name": "GlobalWafer",
+      "sector": "fabless"
+    },
+    {
+      "code": "2388",
+      "ticker": "2388.TW",
+      "name": "VIA Tech",
+      "sector": "fabless"
+    },
+    {
+      "code": "2881",
+      "ticker": "2881.TW",
+      "name": "Fubon FH",
+      "sector": "financials"
+    },
+    {
+      "code": "2882",
+      "ticker": "2882.TW",
+      "name": "Cathay FH",
+      "sector": "financials"
+    },
+    {
+      "code": "2883",
+      "ticker": "2883.TW",
+      "name": "China Dev FH",
+      "sector": "financials"
+    },
+    {
+      "code": "2886",
+      "ticker": "2886.TW",
+      "name": "Mega FH",
+      "sector": "financials"
+    },
+    {
+      "code": "2887",
+      "ticker": "2887.TW",
+      "name": "Taishin FH",
+      "sector": "financials"
+    },
+    {
+      "code": "2603",
+      "ticker": "2603.TW",
+      "name": "Evergreen",
+      "sector": "shipping"
+    },
+    {
+      "code": "2615",
+      "ticker": "2615.TW",
+      "name": "Wan Hai",
+      "sector": "shipping"
+    },
+    {
+      "code": "2609",
+      "ticker": "2609.TW",
+      "name": "Yang Ming",
+      "sector": "shipping"
+    },
+    {
+      "code": "1301",
+      "ticker": "1301.TW",
+      "name": "Formosa",
+      "sector": "trad_mfg"
+    },
+    {
+      "code": "1303",
+      "ticker": "1303.TW",
+      "name": "Nan Ya",
+      "sector": "trad_mfg"
+    },
+    {
+      "code": "1326",
+      "ticker": "1326.TW",
+      "name": "FCFC",
+      "sector": "trad_mfg"
+    },
+    {
+      "code": "2002",
+      "ticker": "2002.TW",
+      "name": "China Steel",
+      "sector": "trad_mfg"
+    },
+    {
+      "code": "2027",
+      "ticker": "2027.TW",
+      "name": "ChiaTai Steel",
+      "sector": "trad_mfg"
+    },
+    {
+      "code": "2317",
+      "ticker": "2317.TW",
+      "name": "Hon Hai",
+      "sector": "ems"
+    },
+    {
+      "code": "3045",
+      "ticker": "3045.TW",
+      "name": "TWM",
+      "sector": "ems"
+    },
+    {
+      "code": "2382",
+      "ticker": "2382.TW",
+      "name": "Quanta",
+      "sector": "ems"
+    },
+    {
+      "code": "2912",
+      "ticker": "2912.TW",
+      "name": "Pres. Chain",
+      "sector": "consumer"
+    },
+    {
+      "code": "2637",
+      "ticker": "2637.TW",
+      "name": "Yungshin",
+      "sector": "consumer"
+    },
+    {
+      "code": "1215",
+      "ticker": "1215.TW",
+      "name": "Charoen Pokphand",
+      "sector": "consumer"
+    },
+    {
+      "code": "2347",
+      "ticker": "2347.TW",
+      "name": "Synnex",
+      "sector": "consumer"
+    },
+    {
+      "code": "1210",
+      "ticker": "1210.TW",
+      "name": "Dachan Food",
+      "sector": "consumer"
+    },
+    {
+      "code": "2888",
+      "ticker": "2888.TW",
+      "name": "Shin Kong FH",
+      "sector": "tech_other"
+    },
+    {
+      "code": "2892",
+      "ticker": "2892.TW",
+      "name": "First FH",
+      "sector": "tech_other"
+    }
+  ],
+  "notes": [
+    "tech_other pool contains 2888 and 2892 which industry classification typically lists as financials. We preserve the task-supplied labels to respect pre-registration; robustness analysis in Stage 3 will drop tech_other.",
+    "Consumer-pool typos removed: task listed 2330 (actually foundry) and 2881 (actually financials) — we drop the duplicates before sampling."
+  ]
+}
