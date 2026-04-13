@@ -78,9 +78,23 @@
   },
   {
     "id": "K1100g_d2",
-    "title": "K1100g_d2: OOS 驗證 night→day 預測力",
+    "title": "K1100g_d2: OOS 驗證",
     "priority": 2,
-    "description": "K1100g_d1 衍生：expanding-window (2017-19 train, 2020-21 test) 重測 H2 LRT，確認顯著性在 OOS 維持。",
+    "description": "全 4 假設 FAIL: LRT 12.48→0.00, DM 反向, QLIKE 惡化。**K1100g_d1 是 in-sample data mining**。Paper 3 reframe anchor REJECTED。E059 教訓：LRT+DM divergence。",
+    "status": "completed"
+  },
+  {
+    "id": "Paper3_decision",
+    "title": "Paper 3 方向重大決策：reframe / abandon / negative-result paper",
+    "priority": 1,
+    "description": "K1100g_d2 推翻 Paper 3 reframe anchor。3 連 Paper 3 找 anchor 都失敗。需用戶決策：(a) 繼續挖 K1100g_d3/4/5 (b) reframe 為 negative-result paper (c) abandon Paper 3 資源轉其他 paper。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100g_d5",
+    "title": "K1100g_d5: Overnight gap² 替代 night session r² 再 OOS",
+    "priority": 3,
+    "description": "K1100g_d2 衍生：K1100g_d2 用 night session r² FAIL，改用 overnight gap²（13:45→15:00 + 05:00→08:45 純 gap）作 exog 重做 OOS。也許 gap 才是真正載 info 的對象。",
     "status": "pending"
   },
   {

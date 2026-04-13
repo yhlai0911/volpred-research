@@ -25684,7 +25684,7 @@
     "id": "k1100g_d1-1776066678",
     "experiment_id": "K1100g_d1",
     "title": "K1100g_d1: TAIFEX day vs night PRG — asymmetric night→day predictive power, K1100g ratio 推翻",
-    "content": "[提出: Claude K1100g 衍生, 執行: Claude] 4 PRG models on TAIFEX TX 2017-2021 (1077 days)。**H1 PASS** 夜盤 info density > 日盤（per-obs LL 3.90 > 3.58）。**H2 PASS** night→day LRT χ²=12.48 p=0.0004。**H3 PASS** asymmetric (forward p=0.0004 vs reverse p=0.075)。**H4 FAIL 但是重大 meta-finding**：從 raw tick 重建得 session ratio = 0.765 vs K1100g 報的 1.586——**K1100g 的 1.586 是 GAP effect (13:45→15:00 + 05:00→08:45)，不是 pure session asymmetry**。Per-hour normalized: 日盤波動是夜盤 2.19×（反方向）。**Paper 3 reframe 正確 anchor 不是 1.586 vol ratio，而是 asymmetric cross-prediction**（night→day LRT χ²=12.5 p=0.0004 vs day→night χ²=3.2 p=0.075）。Model LL: M1 Combined 3513 / M2 Day 3847 / M3 Night 4194 / M4 Night→Day 3854 / M5 Day→Night 4196。AIC 最佳 M5=-8372.93 但差異微小，主要貢獻是 M4 vs M2 的 LRT。Codex 審代碼修 4 bugs: HIGH double-lag、HIGH 用 LRT 取代 DM、HIGH E[g]=1 constraint、MED JSON NaN。**非預期發現（寫 error_log）**: K1100g cache 的 night_open/night_close mask 邏輯錯位，只抓末尾 ticks 得虛假 σ=0.000083，正確應為 0.00581 —— 後續實驗不可直接 reuse。Commit 7c191a7e。",
+    "content": "[提出: Claude K1100g 衍生, 執行: Claude] 4 PRG models on TAIFEX TX 2017-2021 (1077 days)。**H1 PASS** 夜盤 info density > 日盤（per-obs LL 3.90 > 3.58）。**H2 PASS** night→day LRT χ²=12.48 p=0.0004。**H3 PASS** asymmetric (forward p=0.0004 vs reverse p=0.075)。**H4 FAIL 但是重大 meta-finding**：從 raw tick 重建得 session ratio = 0.765 vs K1100g 報的 1.586——**K1100g 的 1.586 是 GAP effect (13:45→15:00 + 05:00→08:45)，不是 pure session asymmetry**。Per-hour normalized: 日盤波動是夜盤 2.19×（反方向）。**Paper 3 reframe 正確 anchor 不是 1.586 vol ratio，而是 asymmetric cross-prediction**（night→day LRT χ²=12.5 p=0.0004 vs day→night χ²=3.2 p=0.075）。Model LL: M1 Combined 3513 / M2 Day 3847 / M3 Night 4194 / M4 Night→Day 3854 / M5 Day→Night 4196。AIC 最佳 M5=-8372.93 但差異微小，主要貢獻是 M4 vs M2 的 LRT。Codex 審代碼修 4 bugs: HIGH double-lag、HIGH 用 LRT 取代 DM、HIGH E[g]=1 constraint、MED JSON NaN。**非預期發現（寫 error_log）**: K1100g cache 的 night_open/night_close mask 邏輯錯位，只抓末尾 ticks 得虛假 σ=0.000083，正確應為 0.00581 —— 後續實驗不可直接 reuse。Commit 7c191a7e。 ⚠️ **[K1100g_d2 2026-04-13 OOS REJECTED]**: 本 entry 的 night→day LRT χ²=12.48 p=0.0004 是 **in-sample data mining artifact**。OOS expanding-window (2017-19 train, 2020-21 test) 結果：LRT χ²=0.00 (p=1.00)，DM-HLN t=-0.21（反向），QLIKE 惡化 0.48%。**Paper 3 anchor 從 K1100g_d1 asymmetric prediction 撤回**。教訓：in-sample LRT p<0.001 + DM-HLN t<2 的組合是 overfit 警訊。",
     "tags": [
       "Paper_3",
       "TAIFEX",
@@ -25694,9 +25694,29 @@
       "LRT",
       "K1100g-correction",
       "cache-bug",
-      "reframe-anchor-correction"
+      "reframe-anchor-correction",
+      "K1100g_d2-rejected"
     ],
     "data_source": "TAIFEX TX 2017-2021 raw tick + session reconstruction",
-    "created_at": "2026-04-13T07:51:18.021708+00:00"
+    "created_at": "2026-04-13T07:51:18.021708+00:00",
+    "updated_at": "2026-04-13T08:06:04.948154+00:00"
+  },
+  {
+    "id": "k1100g_d2-1776067564",
+    "experiment_id": "K1100g_d2",
+    "title": "K1100g_d2: OOS REJECTS K1100g_d1 — night→day prediction is data mining",
+    "content": "[提出: Claude OOS validation, 執行: Claude] Expanding-window OOS（train 2017-2019, test 2020-2021, 93 次週頻 refit）驗證 K1100g_d1 in-sample LRT χ²=12.48 是否 robust。**全 4 假設 FAIL**：H1 OOS LRT χ²=**0.00 (p=1.00)** vs in-sample 12.48；H2 OOS DM-HLN t=**-0.21（反向）** vs in-sample +1.07；H3 QLIKE improvement = **-0.48% (惡化)**；H4 sub-period 2020 -0.98% / 2021 +0.10% 都 FAIL。**結論**：K1100g_d1 in-sample 顯著是 data mining artifact——night_t² 加入 exog 增加 free param 但無 OOS predictive power。**Paper 3 reframe anchor REJECTED**。**3 級遞進 correction chain 完整**：(1) K1100g 1.586 ratio = gap effect (K1100g_d1 corrected) (2) K1100g_d1 LRT χ²=12.5 = in-sample only (K1100g_d2 corrected) (3) Paper 3 「TAIFEX 夜盤 asymmetric prediction」整個 narrative REJECTED。**新教訓**：(a) in-sample LRT p<0.001 仍可能是 data mining——不只 Sharpe 2x 才警惕 (b) LRT 大 + DM-HLN 小（t=1.07）的組合是典型 overfit 警訊 (c) exog 資訊集合法 ≠ predictive power。Codex 審代碼 OK。Runtime 232s。Commit 286db00e。",
+    "tags": [
+      "Paper_3",
+      "OOS-validation",
+      "data-mining-detected",
+      "K1100g_d1-REJECTED",
+      "in-sample-trap",
+      "LRT-vs-DM-divergence",
+      "narrative-correction-cascade",
+      "NULL-OOS"
+    ],
+    "data_source": "K1100g_d1 raw-tick reconstructed sessions (2017-2021)",
+    "created_at": "2026-04-13T08:06:04.948154+00:00"
   }
 ]

@@ -796,5 +796,20 @@
       "narrative-correction"
     ],
     "created_at": "2026-04-13T07:51:18.021708+00:00"
+  },
+  {
+    "id": "E059",
+    "title": "In-sample LRT p<0.001 + DM-HLN t<2 = overfit 警訊（K1100g_d2 教訓）",
+    "lesson": "K1100g_d1 報告 night→day LRT χ²=12.48 p=0.0004（極度顯著），但同一實驗 DM-HLN t=+1.07（不顯著）。我當時看到 LRT 顯著就接受 finding 並寫進 knowledge + 啟動文章 agent。\n\nK1100g_d2 OOS 驗證：LRT 從 12.48 → **0.00**，DM 從 +1.07 → **-0.21**（反向）。整個 finding 是 in-sample artifact。\n\n**核心教訓 — 兩種統計 divergence 是 overfit 警訊**：\n\n| In-sample 訊號 | 解讀 |\n|---------------|------|\n| LRT 顯著 + DM 顯著 | ✅ 真正 finding |\n| LRT 顯著 + DM **不**顯著 | ⚠️ **疑似 overfit** ← K1100g_d1 |\n| LRT 不顯著 + DM 顯著 | ⚠️ DM 結構性差異但 LRT power 不足 |\n| LRT 不顯著 + DM 不顯著 | ❌ Null result |\n\n**機制**：\n- LRT 用全樣本 likelihood，free params 多會自動 overfit residual variance → χ² 易顯著\n- DM-HLN test forecast accuracy improvement，是 prospective fit assessment\n- 兩者 divergence = in-sample fit improvement 沒轉成 predictive gain = overfit\n\n**通則 — 防 in-sample data mining 的 4 道關卡**：\n1. **LRT alone 不夠**：必須配 DM-HLN test 雙重門檻\n2. **DM divergence > 1.5 → 需要 OOS 確認**（即使 LRT 顯著）\n3. **Pre-registered OOS 是 gold standard**：K1100g_d2 用 expanding-window 直接揭示 in-sample 假象\n4. **Paper-publishable finding 必須 OOS PASS**，不是 in-sample 顯著就寫\n\n**對之前 session 的 implication**：\n- K1106b cherry-pick → K1109 invalidated（已記 E053）\n- K1100g_d1 LRT-only 顯著 → K1100g_d2 invalidated（本次教訓 E059）\n- 兩者都是「先 in-sample 顯著，再 OOS 推翻」模式\n- 我可能還有其他類似 in-sample-only finding 沒被檢驗——需要回顧 knowledge.json 找出所有「LRT 顯著但 DM<2」的 entry，主動安排 OOS 驗證\n\n**3 級遞進 correction chain**（K1100g 系列）：\n1. K1100g: ratio=1.586（誤算 gap effect）\n2. K1100g_d1: 修正 ratio + 找到 LRT χ²=12.48（in-sample data mining）\n3. K1100g_d2: 推翻 LRT 結果（Paper 3 anchor REJECTED）\n\n**Paper 3 完整 reframe 失敗**：每次「找到 anchor」都被下一個實驗推翻。要不要繼續挖 Paper 3，還是接受 Paper 3 整個方向需 abandon？\n\n**下一步應做**：\n1. K1100g_d3/d4/d5（agent 提的）想保 Paper 3 → 但要嚴守「先做 OOS 才寫 narrative」\n2. 或：Paper 3 改為「TAIFEX 不可推廣的 negative result paper」\n3. 或：完全 abandon Paper 3，資源轉到其他 paper\n4. **任何選擇都需在文章 agent 啟動前確認 finding OOS-robust**——避免再次寫了又撤",
+    "context": "K1100g_d1 → K1100g_d2 OOS rejection",
+    "applies_to": [
+      "data-mining-detection",
+      "LRT-vs-DM-divergence",
+      "OOS-validation-mandatory",
+      "in-sample-trap",
+      "Paper-3-direction",
+      "pre-publication-gate"
+    ],
+    "created_at": "2026-04-13T08:06:04.948154+00:00"
   }
 ]
