@@ -15,7 +15,7 @@ description: >
 
 ## Scope Boundary
 
-Use this skill for文章內容本身：
+Use this skill for **文章內容本身**：
 
 - audience / article type 選擇
 - 標題、結構、圖表與資料來源標注
