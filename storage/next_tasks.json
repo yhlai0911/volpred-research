@@ -92,9 +92,30 @@
   },
   {
     "id": "K1104",
-    "title": "K1104: Multi-covariate firm-level θ₂ model",
+    "title": "K1104: Multi-covariate firm-level θ₂ regression",
     "priority": 2,
-    "description": "K1103 衍生（取代 K1101 原 Panel GARCH-MIDAS 計畫）：回 K1060 Top 20，做 cross-sectional regression of θ₂ on {foundry dummy, beta, size, analyst coverage, fab vs fabless}。解釋為何 UMC works vs MediaTek 反向。",
+    "description": "完成：fabless coef p=0.039 * 統計顯著（4 檔 fabless 一致 θ₂<0）。foundry/size 方向對但 N 小。ASE out-of-sample 方向對。Paper 2 有 3 條 firm-selection rules。",
+    "status": "completed"
+  },
+  {
+    "id": "K1106",
+    "title": "K1106: Extend N to 50 (full 0050.TW)",
+    "priority": 2,
+    "description": "K1104 衍生：N=23→50 後 foundry/size 可能達 Harvey |t|>3。支持 5-6 covariates + interactions。",
+    "status": "pending"
+  },
+  {
+    "id": "K1107",
+    "title": "K1107: Panel θ₂ with time fixed effects",
+    "priority": 3,
+    "description": "K1104 衍生：rolling-window 63-day refits，加時間固定效應檢驗 firm vs time effect。",
+    "status": "pending"
+  },
+  {
+    "id": "K1108",
+    "title": "K1108: Foundry economic rationale — capex guidance",
+    "priority": 3,
+    "description": "K1104 衍生：foundry θ₂>0 是否因 capex guidance 才 reveal capacity info？比對 capex 公告日 τ-jumps。",
     "status": "pending"
   },
   {

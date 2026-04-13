@@ -1,0 +1,593 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-04-13",
+  "week_range": "2026-04-10 → 2026-04-17",
+  "totals": {
+    "input_tokens": 3637,
+    "output_tokens": 1011046,
+    "cache_read_tokens": 484423590,
+    "cache_create_tokens": 8001513,
+    "billable_total": 9016196,
+    "assistant_messages": 1992,
+    "unique_sessions": 20,
+    "estimated_cost_usd": 950.7713
+  },
+  "by_model": {
+    "claude-opus-4-6": {
+      "input_tokens": 3623,
+      "output_tokens": 1006729,
+      "cache_read_tokens": 484134204,
+      "cache_create_tokens": 7923577,
+      "messages": 1982,
+      "estimated_cost_usd": 950.3274
+    },
+    "claude-sonnet-4-6": {
+      "input_tokens": 14,
+      "output_tokens": 4317,
+      "cache_read_tokens": 289386,
+      "cache_create_tokens": 77936,
+      "messages": 10,
+      "estimated_cost_usd": 0.4439
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 1151,
+      "output_tokens": 203596,
+      "cache_read_tokens": 201721573,
+      "cache_create_tokens": 582135,
+      "messages": 395,
+      "billable_total": 786882,
+      "estimated_cost_usd": 328.7844,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "investigation": {
+      "input_tokens": 999,
+      "output_tokens": 93045,
+      "cache_read_tokens": 91680346,
+      "cache_create_tokens": 2290216,
+      "messages": 395,
+      "billable_total": 2384260,
+      "estimated_cost_usd": 187.4554,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "bash_other": {
+      "input_tokens": 653,
+      "output_tokens": 143843,
+      "cache_read_tokens": 91015441,
+      "cache_create_tokens": 2049337,
+      "messages": 566,
+      "billable_total": 2193833,
+      "estimated_cost_usd": 185.7463,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "agent_delegation": {
+      "input_tokens": 459,
+      "output_tokens": 21917,
+      "cache_read_tokens": 42163927,
+      "cache_create_tokens": 2582090,
+      "messages": 379,
+      "billable_total": 2604466,
+      "estimated_cost_usd": 113.3107,
+      "emoji": "🤖",
+      "description": "Agent 派送（非實驗）"
+    },
+    "experiment": {
+      "input_tokens": 115,
+      "output_tokens": 469808,
+      "cache_read_tokens": 23530566,
+      "cache_create_tokens": 160576,
+      "messages": 115,
+      "billable_total": 630499,
+      "estimated_cost_usd": 73.544,
+      "emoji": "🔬",
+      "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
+    },
+    "worktree_merge": {
+      "input_tokens": 103,
+      "output_tokens": 13774,
+      "cache_read_tokens": 13542386,
+      "cache_create_tokens": 127417,
+      "messages": 33,
+      "billable_total": 141294,
+      "estimated_cost_usd": 23.7372,
+      "emoji": "🔀",
+      "description": "Worktree 合併與分支管理"
+    },
+    "git_sync": {
+      "input_tokens": 42,
+      "output_tokens": 16426,
+      "cache_read_tokens": 6723026,
+      "cache_create_tokens": 53055,
+      "messages": 42,
+      "billable_total": 69523,
+      "estimated_cost_usd": 12.3119,
+      "emoji": "🔄",
+      "description": "Git commit / pull / push"
+    },
+    "article_writing": {
+      "input_tokens": 9,
+      "output_tokens": 11952,
+      "cache_read_tokens": 1935498,
+      "cache_create_tokens": 1736,
+      "messages": 4,
+      "billable_total": 13697,
+      "estimated_cost_usd": 3.8323,
+      "emoji": "✍️",
+      "description": "文章撰寫/發佈（publish-milestone / mile_*）"
+    },
+    "chart_generation": {
+      "input_tokens": 9,
+      "output_tokens": 3658,
+      "cache_read_tokens": 1961238,
+      "cache_create_tokens": 9499,
+      "messages": 9,
+      "billable_total": 13166,
+      "estimated_cost_usd": 3.3944,
+      "emoji": "📊",
+      "description": "圖表生成（matplotlib / upload_chart）"
+    },
+    "task_management": {
+      "input_tokens": 15,
+      "output_tokens": 6142,
+      "cache_read_tokens": 1647602,
+      "cache_create_tokens": 18288,
+      "messages": 10,
+      "billable_total": 24445,
+      "estimated_cost_usd": 3.2752,
+      "emoji": "📌",
+      "description": "任務管理（TaskCreate/Update）"
+    },
+    "web_research": {
+      "input_tokens": 12,
+      "output_tokens": 1795,
+      "cache_read_tokens": 1841540,
+      "cache_create_tokens": 753,
+      "messages": 2,
+      "billable_total": 2560,
+      "estimated_cost_usd": 2.9112,
+      "emoji": "🌐",
+      "description": "WebSearch / WebFetch"
+    },
+    "member_qa": {
+      "input_tokens": 12,
+      "output_tokens": 1715,
+      "cache_read_tokens": 1553200,
+      "cache_create_tokens": 8878,
+      "messages": 8,
+      "billable_total": 10605,
+      "estimated_cost_usd": 2.6251,
+      "emoji": "❓",
+      "description": "會員問答研究"
+    },
+    "file_edit": {
+      "input_tokens": 9,
+      "output_tokens": 3322,
+      "cache_read_tokens": 1369073,
+      "cache_create_tokens": 7740,
+      "messages": 9,
+      "billable_total": 11071,
+      "estimated_cost_usd": 2.448,
+      "emoji": "📄",
+      "description": "其他檔案編輯"
+    },
+    "knowledge_index": {
+      "input_tokens": 15,
+      "output_tokens": 592,
+      "cache_read_tokens": 1140648,
+      "cache_create_tokens": 33103,
+      "messages": 3,
+      "billable_total": 33710,
+      "estimated_cost_usd": 2.3763,
+      "emoji": "📇",
+      "description": "知識索引更新"
+    },
+    "script_dev": {
+      "input_tokens": 4,
+      "output_tokens": 6761,
+      "cache_read_tokens": 502451,
+      "cache_create_tokens": 10874,
+      "messages": 4,
+      "billable_total": 17639,
+      "estimated_cost_usd": 1.4647,
+      "emoji": "💻",
+      "description": "腳本開發（scripts/ *.py）"
+    },
+    "tool_setup": {
+      "input_tokens": 12,
+      "output_tokens": 967,
+      "cache_read_tokens": 774557,
+      "cache_create_tokens": 9837,
+      "messages": 7,
+      "billable_total": 10816,
+      "estimated_cost_usd": 1.419,
+      "emoji": "🛠️",
+      "description": "ToolSearch 載入工具"
+    },
+    "research_planning": {
+      "input_tokens": 4,
+      "output_tokens": 8372,
+      "cache_read_tokens": 400811,
+      "cache_create_tokens": 4471,
+      "messages": 4,
+      "billable_total": 12847,
+      "estimated_cost_usd": 1.313,
+      "emoji": "📋",
+      "description": "研究計劃（research_program.md / CLAUDE.md）"
+    },
+    "platform_ops": {
+      "input_tokens": 5,
+      "output_tokens": 310,
+      "cache_read_tokens": 224875,
+      "cache_create_tokens": 48934,
+      "messages": 3,
+      "billable_total": 49249,
+      "estimated_cost_usd": 1.2782,
+      "emoji": "🛡️",
+      "description": "平台運維（Supabase sync / daily_update）"
+    },
+    "skill_edit": {
+      "input_tokens": 2,
+      "output_tokens": 1417,
+      "cache_read_tokens": 359675,
+      "cache_create_tokens": 2042,
+      "messages": 2,
+      "billable_total": 3461,
+      "estimated_cost_usd": 0.6841,
+      "emoji": "🔧",
+      "description": "Skill 編輯"
+    },
+    "skill_invoke": {
+      "input_tokens": 6,
+      "output_tokens": 272,
+      "cache_read_tokens": 257116,
+      "cache_create_tokens": 382,
+      "messages": 1,
+      "billable_total": 660,
+      "estimated_cost_usd": 0.4133,
+      "emoji": "⚡",
+      "description": "Skill 呼叫"
+    },
+    "scheduling": {
+      "input_tokens": 1,
+      "output_tokens": 1362,
+      "cache_read_tokens": 78041,
+      "cache_create_tokens": 150,
+      "messages": 1,
+      "billable_total": 1513,
+      "estimated_cost_usd": 0.222,
+      "emoji": "⏰",
+      "description": "Cron / Monitor 排程"
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "a2f0ca77",
+      "message": "K1103: τ-lag bug-fix SCENARIO STABLE — K1067 series verified"
+    },
+    {
+      "sha": "0280ac1a",
+      "message": "K1103: τ-lag bug-fix replication across TSMC/MediaTek/UMC"
+    },
+    {
+      "sha": "b741d8e1",
+      "message": "K1067c: MediaTek EAV MONOTONICITY FAIL + inherited τ-lag bug found"
+    },
+    {
+      "sha": "38e0f4b9",
+      "message": "K1067c: MediaTek (2454.TW) — test monotonic T+1 amplification hypothesis"
+    },
+    {
+      "sha": "873f1310",
+      "message": "Option B: atomic question-claim for cross-session race protection"
+    },
+    {
+      "sha": "b3ab85c5",
+      "message": "K1067b: UMC EAV MIXED result — H2/H3 PASS, H1 marginal"
+    },
+    {
+      "sha": "2d0be648",
+      "message": "Merge agent worktree agent-k1067b (1 commits)"
+    },
+    {
+      "sha": "ce1a91c2",
+      "message": "K1067b: UMC (2303.TW) A4f-EAV max-power test vs K1067 TSMC"
+    },
+    {
+      "sha": "73a6944d",
+      "message": "Revert \"session_startup: add dedup check (CronList/TaskList) + concurrent sessio"
+    },
+    {
+      "sha": "986a0c5f",
+      "message": "session_startup: add dedup check (CronList/TaskList) + concurrent session warnin"
+    },
+    {
+      "sha": "85904395",
+      "message": "Fix SessionStart hook: point at renamed session_startup.md"
+    },
+    {
+      "sha": "dd4cd5b0",
+      "message": "CLAUDE.md slim: move cron/Monitor operational details to scripts/session_startup"
+    },
+    {
+      "sha": "fc4324d4",
+      "message": "Ignore CLAUDE.md backups (local only, should not be tracked)"
+    },
+    {
+      "sha": "f96423da",
+      "message": "K1100 + Monitor session-start integration"
+    },
+    {
+      "sha": "ab4e3895",
+      "message": "Merge agent worktree agent-ada8a3b1 (1 commits)"
+    },
+    {
+      "sha": "f11c294f",
+      "message": "K1100: Student-t Copula-GARCH vs DCC-A4f for 50/50 SPY/GLD portfolio tail risk"
+    },
+    {
+      "sha": "0986c4ad",
+      "message": "Merge K1099: FXVol NULL — K1083 return-level ≠ K1099 variance-level (different d"
+    },
+    {
+      "sha": "21ec3bd6",
+      "message": "K1099: 0050.TW A4f with USD/TWD FX vol — all 4 hypotheses FAIL, Paper 10 revival"
+    },
+    {
+      "sha": "ad2f9db0",
+      "message": "Merge K1098: VIXTWN NULL — Taiwan gap structural not IV choice, Paper 10 not sup"
+    },
+    {
+      "sha": "b0bb755e",
+      "message": "K1098: 0050.TW A4f with TAIFEX VIXTWN (2007-2021) — Paper 10 pilot"
+    },
+    {
+      "sha": "bac4f193",
+      "message": "Merge K1097: MS-GJR Student-t NULL + regime instability finding"
+    },
+    {
+      "sha": "384fda8b",
+      "message": "K1097: MS-GJR-t (Student-t) + Full VaR-ES Trinity — Null result, regime instabil"
+    },
+    {
+      "sha": "70c54f8b",
+      "message": "Merge K1096: BTC regime-switching NULL — crypto boundary structural"
+    },
+    {
+      "sha": "7a5321e5",
+      "message": "K1096: BTC regime-switching A4f — rescue attempt via correlation/VIX switching"
+    },
+    {
+      "sha": "862ab7f0",
+      "message": "Merge K1095: Event-switched VT FAIL — event coverage 49-71% too high"
+    },
+    {
+      "sha": "dffd6ca8",
+      "message": "K1095: Taiwan event-switched VT (8.63/VIX + A4f at earnings events)"
+    },
+    {
+      "sha": "041faddf",
+      "message": "K1094: A4f-VT vs 8.63/VIX on 0050.TW — Paper 3 cross-market replication"
+    },
+    {
+      "sha": "6af9b2b1",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "d9511504",
+      "message": "Session sync: K1075-K1093 complete — Paper 9 maximal robustness + Paper 3×9 join"
+    },
+    {
+      "sha": "582eb4ee",
+      "message": "Merge K1093: Weight sensitivity — QLIKE monotonic, commodity-heavy PASS Harvey"
+    },
+    {
+      "sha": "0df9a06c",
+      "message": "K1093: DCC-A4f weight sensitivity — test commodity-heavy ASYM benefit"
+    },
+    {
+      "sha": "4e4d8570",
+      "message": "Merge K1092: Asymmetric DCC-A4f — strictly better but Harvey marginal over SYMM"
+    },
+    {
+      "sha": "0f6e111b",
+      "message": "K1092: Asymmetric DCC-A4f (SPY-VIX, GLD-GVZ) -- K1041 refinement"
+    },
+    {
+      "sha": "98ba7e1b",
+      "message": "Merge K1091: Meta validation — equities PASS <0.5 err, commodities need matched "
+    },
+    {
+      "sha": "84da0278",
+      "message": "K1091: Meta-regression out-of-sample validation (VGK/EWJ/CPER/SLV)"
+    },
+    {
+      "sha": "7efcadfb",
+      "message": "Ops patrol report 2026-04-13T00:44Z"
+    },
+    {
+      "sha": "c4b7f3ae",
+      "message": "Merge K1090: Cross-asset meta-regression — currency + corr(ret,VIX) predicts PAS"
+    },
+    {
+      "sha": "21b52891",
+      "message": "K1090: Cross-asset A4f meta-regression — scope prediction formula"
+    },
+    {
+      "sha": "0d604555",
+      "message": "Merge K1089: BTC A4f NULL — Paper 9 scope: liquid USD equity+commodity only"
+    },
+    {
+      "sha": "e7d56f34",
+      "message": "K1089: BTC A4f — asset-matched theory on crypto (5th class) FAILS"
+    },
+    {
+      "sha": "e7a7238a",
+      "message": "K1088: USO A4f with OVX — asset-matched theory on oil"
+    },
+    {
+      "sha": "79ad2f71",
+      "message": "Merge K1087: TLT yield-curve NULL — A4f limited to equity+commodity"
+    },
+    {
+      "sha": "50995055",
+      "message": "K1087: TLT A4f with yield-curve factors — all 4 hypotheses FAIL"
+    },
+    {
+      "sha": "03e8cb18",
+      "message": "Merge K1086: TLT A4f-MOVE FAIL — asset-matched theory not universal"
+    },
+    {
+      "sha": "ba3406f7",
+      "message": "K1086: TLT A4f with MOVE — asset-matched regressor theory bond test (FAIL)"
+    },
+    {
+      "sha": "bd37ff96",
+      "message": "Merge K1085: GLD A4f — GVZ beats VIX, structure general but regressor asset-matc"
+    },
+    {
+      "sha": "80cf6a19",
+      "message": "K1085: A4f on GLD — non-equity asset class extension"
+    },
+    {
+      "sha": "5333004f",
+      "message": "Merge K1084: Higher moments NULL — K1063 semi-variance spec sufficient"
+    },
+    {
+      "sha": "8a23880c",
+      "message": "K1084: Realized skewness and kurtosis — higher-moment predictability"
+    },
+    {
+      "sha": "f6b9488b",
+      "message": "K1083: 0050.TW synthetic USD — isolating pure currency effect"
+    },
+    {
+      "sha": "393a478f",
+      "message": "Merge K1082: Single-country EM ETFs — USD wrapper helps but TSMC concentration d"
+    },
+    {
+      "sha": "e664e079",
+      "message": "K1082: Single-country EM ETFs (EWT/EWZ/FXI) — USD wrapper diagnostic"
+    },
+    {
+      "sha": "09d74c2b",
+      "message": "Merge K1081: EEM PASS (t=+5.25) — Taiwan-specific failure confirmed"
+    },
+    {
+      "sha": "c9af324d",
+      "message": "K1081: A4f on EEM emerging markets — distinguishing non-US vs Taiwan-specific fa"
+    },
+    {
+      "sha": "49f04318",
+      "message": "Merge K1080: IWM small-cap Harvey PASS — US equity size axis complete"
+    },
+    {
+      "sha": "1da95d24",
+      "message": "K1080: A4f on IWM small-cap — completing US equity size axis"
+    },
+    {
+      "sha": "8d21c834",
+      "message": "K1079: VXN vs VIX matched-IV hypothesis for QQQ A4f"
+    },
+    {
+      "sha": "168d6052",
+      "message": "Session sync: K1075-K1078 complete — Paper 9 reviewer-proof achieved"
+    },
+    {
+      "sha": "c6d8a10e",
+      "message": "Merge K1078: QQQ A4f extended PASS (t=+5.99) — A4f is US liquid equity phenomeno"
+    },
+    {
+      "sha": "af5e21b7",
+      "message": "K1078: A4f on QQQ extended — US tech ETF Paper 9 cross-asset validation"
+    },
+    {
+      "sha": "de50f4c0",
+      "message": "Merge K1077: A4f 0050.TW extended history NULL — confirms K1058 not short-OOS ar"
+    },
+    {
+      "sha": "c3274bba",
+      "message": "K1077: A4f on 0050.TW extended history — Taiwan cross-market mirror of K1075"
+    },
+    {
+      "sha": "6e7ff426",
+      "message": "Merge K1076: Fissler-Ziegel joint VaR/ES — A4f 4/4 PASS"
+    },
+    {
+      "sha": "2e59fc13",
+      "message": "K1076: Fissler-Ziegel joint VaR/ES backtest — A4f vs GJR risk management"
+    },
+    {
+      "sha": "0a76fe41",
+      "message": "Merge K1075: A4f 2007-2026 extended history — GFC PASS Harvey (t=3.14), full DM "
+    },
+    {
+      "sha": "0e61e566",
+      "message": "K1075: A4f extended history — 2007-2026 stress test including GFC"
+    },
+    {
+      "sha": "e8c03529",
+      "message": "Merge K1074: A4f-VT vs 12/VIX — statistical edge does not translate to Sharpe"
+    },
+    {
+      "sha": "33e49e42",
+      "message": "K1074: A4f-VT strategy economic value vs 12/VIX baseline"
+    },
+    {
+      "sha": "11e372b4",
+      "message": "Merge K1073: A4f exog sensitivity — VIX baseline stable, VIX9D marginal"
+    },
+    {
+      "sha": "eb09b088",
+      "message": "K1073: A4f exogenous variable sensitivity — VIX9D/VIX/VIX3M/VVIX comparison"
+    },
+    {
+      "sha": "928c9056",
+      "message": "Merge K1072: Realized Kernel vs RV — K1054 proxy-robust confirmed"
+    },
+    {
+      "sha": "fb3b228d",
+      "message": "K1072: Realized Kernel vs RV — microstructure noise robustness for 5-min data"
+    },
+    {
+      "sha": "e09d61e5",
+      "message": "Merge K1071: Right-tail CASV decomposition — VIX regime captures all earnings vo"
+    },
+    {
+      "sha": "c96512d6",
+      "message": "K1071: Right-tail CASV decomposition — which events drive 0050.TW's vol spike"
+    },
+    {
+      "sha": "7b787d03",
+      "message": "Merge K1070: 0050.TW ETF CAR/CASV — pre-event window is the real signal"
+    },
+    {
+      "sha": "403f44ac",
+      "message": "K1070: 0050.TW ETF CAR/CASV event study -- aggregation effect"
+    },
+    {
+      "sha": "2b84a454",
+      "message": "K1068: Traditional CAR/CASV event study -- Taiwan earnings"
+    },
+    {
+      "sha": "bd8315bd",
+      "message": "Resolve merge conflict: keep local token report (richer categorization data)"
+    },
+    {
+      "sha": "02ab3a69",
+      "message": "Session sync: K1066 + K1067 complete, 2 articles, K1060 correction"
+    },
+    {
+      "sha": "5d13c142",
+      "message": "Merge K1067: TSMC single-stock A4f-EAV NULL — H_vix dominates H_div"
+    },
+    {
+      "sha": "dd51f4cd",
+      "message": "K1067: TSMC single-stock A4f-EAV — diversification vs VIX absorption test"
+    }
+  ]
+}

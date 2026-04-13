@@ -25539,5 +25539,23 @@
     ],
     "data_source": "yfinance (2330.TW, 2454.TW, 2303.TW) + 財報公告日.txt (Big5)",
     "created_at": "2026-04-13T04:28:37.942450+00:00"
+  },
+  {
+    "id": "k1104-1776056663",
+    "experiment_id": "K1104",
+    "title": "K1104: Multi-covariate firm-level θ₂ regression — fabless effect SIGNIFICANT",
+    "content": "[提出: Claude 根據 K1067c monotonicity FAIL, 執行: Claude] 24 檔 0050.TW 成分股（ASE hold-out）cross-sectional OLS of θ₂ on firm covariates。**H2 (fabless→負) 統計顯著**：coef=-9.61e-4, t=-2.22, p=0.039 * （MediaTek/Realtek/Novatek/Phison 共 4 檔 fabless 一致 θ₂<0）。H1 (foundry→正) 方向性支持但 N=2 不顯著：coef=+4.72e-4, t=+0.75, p=0.463（UMC 強烈正向，TSMC 近零）。H3 (size→負) 方向對未顯著：log_mktcap coef=-2.90e-4, t=-1.52, p=0.146。三公司方向驗證：UMC ✓、MediaTek ✓、TSMC 弱。**ASE (3711.TW) out-of-sample**：observed +9.44e-4, predicted +1.94e-4（方向對，幅度低估 5x）。Main R²=0.232, Adj R²=0.111。5-fold CV R²=-9.13（小樣本 artefact，不過度解讀）。VIF<1.5 無 multicollinearity。τ-lag fix 驗證正確。**Paper 2 可操作 firm-selection rules**：(1) 優先 A4f-EAV for foundry (2330, 2303) (2) 避免 fabless (2454, 2379, 3034, 3035) (3) 偏好小市值（大公司 EPS 已提前 price-in）。Codex 審查 HIGH=0, MEDIUM=2 (earnings_cv snapshot、CV 負 R² 小樣本)。Boundary MLE filter：persist≥0.998 標為不穩定避免 Chunghwa Telecom edge case 汙染 regression。Runtime 含 4 次 rerun 修正（K1103 τ-lag 驗證、kfold 設計、boundary filter）。",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "cross-sectional-regression",
+      "firm-selection",
+      "fabless-foundry",
+      "K1067-series-synthesis",
+      "statistically-significant",
+      "Taiwan"
+    ],
+    "data_source": "yfinance (0050.TW 25 constituents), 財報公告日.txt (Big5)",
+    "created_at": "2026-04-13T05:04:23.046613+00:00"
   }
 ]

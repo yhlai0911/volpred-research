@@ -1,0 +1,32 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:findresearcher.sdu.dk)",
+      "WebFetch(domain:sci-hub.se)",
+      "WebFetch(domain:www.econstor.eu)",
+      "WebFetch(domain:economics.ucr.edu)",
+      "WebFetch(domain:www.oru.se)",
+      "Bash(curl -s -L \"https://sci-hub.mk/10.1162/REST_a_00300\" -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\)\" --connect-timeout 15)",
+      "Bash(curl -s -L -o /tmp/garch_midas_engle2013.pdf \"https://sci.bban.top/pdf/10.1162/REST_a_00300.pdf\" -A \"Mozilla/5.0 \\(Macintosh; Intel Mac OS X 10_15_7\\)\" --connect-timeout 15 -w \"%{http_code}\")",
+      "Read(//tmp/**)",
+      "Bash(ls -d /Users/yhlai0911/Desktop/volpred-research/experiments/k9[5-9]*)",
+      "Bash(uv run:*)",
+      "Bash(python3 -c \":*)",
+      "Bash(crontab -l)",
+      "Bash(python3 -c ':*)",
+      "Skill(codex:rescue)",
+      "Skill(codex:rescue:*)",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__evaluate_script",
+      "Bash(git status:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(cp /Users/yhlai0911/Desktop/volpred-research/.claude/backups/skill-restructure-20260411-223411/autonomous-research-SKILL.md /Users/yhlai0911/Desktop/volpred-research/.claude/skills/autonomous-research/SKILL.md)",
+      "Bash(cp /Users/yhlai0911/Desktop/volpred-research/.claude/backups/skill-restructure-20260411-223411/CLAUDE.md /Users/yhlai0911/Desktop/volpred-research/CLAUDE.md)",
+      "Bash(mv /Users/yhlai0911/Desktop/volpred-research/.claude/skills/autonomous-research/references/paper-guide.md /Users/yhlai0911/Desktop/volpred-research/docs/paper-guide.md)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}
