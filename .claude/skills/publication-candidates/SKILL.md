@@ -53,22 +53,52 @@ Do **not** use for：
 
 ### 軌道 B — 事件驅動（時事 / 公佈 / 財報）
 
-**發文頻率、時效性分級、配額規則已在 `CLAUDE.md` 事件文章段 + `feed-publisher` skill 定義。不在此重寫。**
+**沒有獨立腳本，因為需要 WebSearch 或即時資料。主線程執行。**
 
-本 skill 只負責「**哪些事件正在發生**」的候選擷取：
-
-1. **macro 數據公佈**（CPI / NFP / FOMC / PPI / TW DGBAS 等）
-2. **企業財報**（`財報公告日.txt`、US/JP earnings season）
-3. **地緣政治 / 市場事件**（戰爭、能源、股災、加密）
-4. **央行決議**（ECB / BOJ / PBoC）
-5. **會員提問**（高排名無文章覆蓋）
+**來源清單**（主線程檢查）：
+1. **macroeconomic 數據公佈**：
+   - CPI: 每月 10-15 日美國公佈
+   - NFP 非農: 每月第一週五
+   - FOMC: 3/6/9/12 月固定 + 中間會議
+   - PPI / Retail Sales / PMI / Housing / GDP
+   - TW: DGBAS 月景氣對策信號（每月底）、失業率、CPI
+2. **企業事件**：
+   - `財報公告日.txt` 台股財報日（TSMC/Hon Hai/MediaTek 等大型股）
+   - US earnings season（1/4/7/10 月中）: 主要 mega-caps 如 NVDA/AAPL/MSFT/GOOGL/AMZN/META/TSLA
+   - JP earnings season
+3. **地緣政治 / 市場事件**：
+   - 戰爭 / 制裁（Hormuz / Israel-Iran / Russia-Ukraine）
+   - 能源危機（OPEC+ 決議）
+   - 股災 / 閃崩（>3% daily drop）
+   - 加密貨幣重大事件（halving / regulation）
+4. **其他**：
+   - 央行決議（ECB / BOJ / PBoC）
+   - 選舉事件
+   - 會員提問（高排名且無文章）
 
 **候選擷取 SOP**：
 - WebSearch 當日 + 未來 7 天重要事件
 - `cat 財報公告日.txt` 過濾近期財報
 - 讀 `storage/next_tasks.json` 找 `*_post` / `*_immediate` 事件任務
 
-**發文規則（頻率 / 時效 / 配額 / 查重）** → 見 `feed-publisher` skill「事件文章段」與 `CLAUDE.md`。
+**時效性分級**（與 `feed-publisher` skill 同步）：
+
+| 分級 | 寫作時點 | 策略 |
+|------|---------|------|
+| **T-7** heads-up | 事件前 7 天 | 背景 + 歷史反應 |
+| **T-2** preview | 事件前 2 天 | 具體數字預期 + 情境分析 |
+| **T+0** immediate | 事件當天/次日 | **status=published**，不等節奏釋出 |
+| **T+1** followup（可選） | 事件後 1-2 天 | 市場反應解讀 |
+
+**配額**：一個事件最多 3-4 篇（T-7 + T-2 + T+0 + 可選 T+1），避免過度集中。
+
+**查重必做**：
+```bash
+grep -i "事件關鍵詞" storage/reports/feed.json | grep title | head -10
+```
+一個事件不可發 5 篇以上（2026-04-13 TSMC 04/16 踩過坑）。
+
+> 以上頻率/配額規則以 `feed-publisher` skill + `CLAUDE.md` 為母本；本段為主線程操作時的自我檢查 reference，若不一致以 母本為準。
 
 ## 雙軌整合決策
 
