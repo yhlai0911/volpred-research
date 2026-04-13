@@ -235,6 +235,9 @@ Claude Code 驅動的自主研究系統，用於尋找給定資產的最佳波�
 **⚠️ 步驟 4 的 `paper-update` 自動完成原本的步驟 4-6，不需要手動跑 3 個命令。**
 **⚠️ 修正完不更新平台 = 沒修。步驟 4-6 不可省略。**
 
+### 論文 stage 分類 + 持續審查迴圈
+→ 完整 SOP 見 `.claude/skills/paper-stage-classifier/SKILL.md`。5 stages: early / draft / review / ready_for_submission / submitted。Ready 論文進入 continuous review loop（每月最低 1 輪 latex-reviewer + citation-verifier）。
+
 ### 目前 STRATEGY_REGISTRY（14 筆，10 個 active）
 → 完整上架流程見 `docs/strategy-registry.md`
 

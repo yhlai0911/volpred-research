@@ -309,10 +309,10 @@
   },
   {
     "id": "Paper4_VIX_sufficiency_compendium",
-    "title": "Paper 4: Universal IV Sufficiency Compendium (9 experiments × 5 asset classes)",
+    "title": "Paper4 = vix-sufficiency expansion (subsumed)",
     "priority": 3,
-    "description": "[priority 3 — solid evidence ready 但 publishability mid] 10 實驗 × 5 asset class universal compendium。需 main thread 寫作。等其他高完成度 paper 處理後。",
-    "status": "pending"
+    "description": "原 Paper 4 與 vix-sufficiency 是同 paper。改由 vix_sufficiency_expansion 統一。",
+    "status": "cancelled"
   },
   {
     "id": "K1117",
@@ -422,9 +422,9 @@
   {
     "id": "K1125",
     "title": "K1125: OFI × Lee-Mykland jump detection",
-    "priority": 3,
-    "description": "K1124 衍生：|OFI| 是否 predicts JUMP 而非 diffusive vol。jump-vs-RV 切分檢驗。",
-    "status": "pending"
+    "priority": 2,
+    "description": "Agent a9109d114c8b9e792 in worktree agent-k1125。K1124 衍生：直接續測 |OFI| → JUMP 預測（不是 diffusive vol）。reuse K1124 cache。Lee-Mykland test + logistic regression 4 spec。",
+    "status": "in_progress"
   },
   {
     "id": "K1126",
@@ -439,5 +439,19 @@
     "priority": 3,
     "description": "K1124 衍生：延伸 K1100g night→day channel，跨市場 OFI lead-lag。",
     "status": "pending"
+  },
+  {
+    "id": "leverage_direction_review_v2",
+    "title": "Paper 1 (leverage-direction) v2 SOP: 雙審查 → v2 修正 → 同步",
+    "priority": 1,
+    "description": "Citation-verifier (a990382e8119702c9) + latex-academic-reviewer (acfb6a6c76db4abd2) 並行跑。完成後主線程做 step 2 修正 → body_v2.tex + diff_v1_v2.tex → xelatex 編譯 → uv run volpred ops paper-update --paper-id leverage-direction → git commit。",
+    "status": "in_progress"
+  },
+  {
+    "id": "vix_sufficiency_expansion",
+    "title": "Paper vix-sufficiency 擴充：integrate K1116/K1118/K1116b/K1121 + K504/K1098",
+    "priority": 1,
+    "description": "Agent a90f872c29a03c25d 產出 integration_plan_v2.md。今日 6+ 實驗直接擴大 paper evidence base，從 SPY-only 升級為 cross-asset universal compendium。最佳 paper 排名第 1 (貢獻度 × 完成度)。",
+    "status": "in_progress"
   }
 ]
