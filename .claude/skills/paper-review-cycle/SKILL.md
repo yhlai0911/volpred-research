@@ -1,9 +1,6 @@
 ---
 name: paper-review-cycle
-description: >
-  論文審查迴圈標準作業：跑 latex-academic-reviewer + citation-verifier 雙審查 → 歸檔 review_history/v(n)/ → 寫 README 摘要。
-  每篇論文每輪 review 的 SOP。Stage 由 paper-stage-classifier 決定，修訂操作由 paper-update。
-  Trigger phrases: '論文審查', 'paper review', 'review cycle', '審查迴圈', '雙審查'
+description: 跑論文審查迴圈：並行 latex-academic-reviewer + citation-verifier → 歸檔到 review_history/v(n)/ Markdown reports → 寫 round README。Stage 由 paper-stage-classifier 決定，修訂由 paper-update。
 user-invocable: true
 ---
 

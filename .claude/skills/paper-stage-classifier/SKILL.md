@@ -1,9 +1,6 @@
 ---
 name: paper-stage-classifier
-description: >
-  論文 stage 分類 + 持續審查迴圈標準作業。每篇論文必須有明確 stage（early/draft/review/ready_for_submission/submitted），
-  決定資源分配與審查節奏。Ready 論文進入 continuous review loop，不視為「完成」。
-  Trigger phrases: '論文 stage', 'paper stage', 'paper-stage', '論文分類', '審查迴圈', '持續審查'
+description: 論文 stage 分類（5 階段 early/draft/review/ready/submitted）+ continuous review loop 觸發頻率。決定資源分配。不負責跑審查（→ paper-review-cycle）或修訂操作（→ paper-update）。
 user-invocable: true
 ---
 
