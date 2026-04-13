@@ -457,7 +457,8 @@ Codex 優先排序：(1) Decision-focused policy (2) Overnight/intraday decompos
 - [ ] **Transfer Learning for New Issues Vol** — arXiv:2503.12648 (March 2025)。多源遷移學習預測數據稀少資產（新 IPO/分割股）的波動率。實務導向工具。
 
 ### Score-Driven (GAS) Models
-- [x] ~~GAS-t vs GARCH~~ → **K1038 完成 NULL**。GAS-t (Creal et al. 2013) 4 資產全 NS。SPY DM t=-0.99, QQQ t=-0.30。Score-driven robustification 不改善 QLIKE。但 VaR violation rate 稍低（內建 Student-t）。結論：大 shock 資訊對波動率預測有價值，downweighting 反而失去資訊
+- [x] ~~GAS-t vs GARCH on equity~~ → **K1038/K437 完成 NULL**。4 資產全 NS（SPY DM t=-0.99, QQQ t=-0.30）。Score-driven robustification 不改善 QLIKE。但 VaR violation rate 稍低（內建 Student-t）。結論：US equity 上 downweighting 大 shock 反而失資訊
+- [ ] **K1129 (NEW 2026-04-13, user 提)**: 測 commodity/electricity markets 上 GAS-t 是否真有優勢（Creal-Koopman-Lucas 文獻主張）。USO/GLD/UNG/BTC × GJR baseline。equity null ≠ commodity null，需獨立驗證
 
 ### 其他
 - [ ] Regime-aware In-Context Learning — arXiv:2603.10299（LLM vol forecasting）
