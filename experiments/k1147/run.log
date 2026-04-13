@@ -1,0 +1,106 @@
+
+========================================================================
+K1147: A4f-EAV pooled panel estimation (N=30 US large-caps)
+========================================================================
+
+Tickers (30): ['AAPL', 'MSFT', 'NVDA', 'GOOGL', 'AMZN', 'META', 'TSLA', 'BRK-B', 'UNH', 'V', 'JPM', 'WMT', 'MA', 'JNJ', 'XOM', 'PG', 'HD', 'CVX', 'ABBV', 'AVGO', 'COST', 'PEP', 'KO', 'MRK', 'ADBE', 'CSCO', 'TMO', 'CRM', 'MCD', 'ABT']
+
+[1/6] Loading stocks (EAV window=1) ...
+    AAPL: n_obs=3016, n_events=48
+    MSFT: n_obs=3016, n_events=48
+    NVDA: n_obs=3016, n_events=48
+    GOOGL: n_obs=3016, n_events=48
+    AMZN: n_obs=3016, n_events=48
+    META: n_obs=3015, n_events=48
+    TSLA: n_obs=3016, n_events=48
+    BRK-B: n_obs=3016, n_events=48
+    UNH: n_obs=3016, n_events=48
+    V: n_obs=3016, n_events=48
+    JPM: n_obs=3016, n_events=48
+    WMT: n_obs=3016, n_events=48
+    MA: n_obs=3016, n_events=48
+    JNJ: n_obs=3016, n_events=48
+    XOM: n_obs=3016, n_events=48
+    PG: n_obs=3016, n_events=48
+    HD: n_obs=3016, n_events=48
+    CVX: n_obs=3016, n_events=48
+    ABBV: n_obs=3016, n_events=48
+    AVGO: n_obs=3016, n_events=48
+    COST: n_obs=3016, n_events=48
+    PEP: n_obs=3016, n_events=48
+    KO: n_obs=3016, n_events=48
+    MRK: n_obs=3016, n_events=48
+    ADBE: n_obs=3016, n_events=48
+    CSCO: n_obs=3016, n_events=48
+    TMO: n_obs=3016, n_events=48
+    CRM: n_obs=3016, n_events=48
+    MCD: n_obs=3016, n_events=48
+    ABT: n_obs=3016, n_events=48
+  Loaded 30/30 stocks
+
+[2/6] Pre-fit panel diagnostic ...
+  Pooled obs: 90,479
+  Mean r=+6.6942e-04, std=1.8046e-02
+  Skew=-0.225, kurt=+15.206
+  Mean events per stock: 48.0
+
+[3/6] Pooled BCD fit (EAV window=1, primary) ...
+    [BCD outer 0] θ_VIX=9.482e-08, θ_EAV=+2.2254e-04, pooled_negll=-256630.52, Δll=+inf, Δθ_eav=1.73e-04
+    [BCD outer 1] θ_VIX=9.436e-08, θ_EAV=+1.9144e-04, pooled_negll=-256683.50, Δll=+52.9791, Δθ_eav=3.11e-05
+    [BCD outer 2] θ_VIX=9.436e-08, θ_EAV=+1.9133e-04, pooled_negll=-256700.27, Δll=+16.7722, Δθ_eav=1.12e-07
+    [BCD outer 3] θ_VIX=9.436e-08, θ_EAV=+1.9110e-04, pooled_negll=-256709.05, Δll=+8.7819, Δθ_eav=2.33e-07
+    [BCD outer 4] θ_VIX=9.436e-08, θ_EAV=+1.9110e-04, pooled_negll=-256709.90, Δll=+0.8516, Δθ_eav=5.97e-14
+    [BCD outer 5] θ_VIX=9.436e-08, θ_EAV=+1.9110e-04, pooled_negll=-256712.16, Δll=+2.2602, Δθ_eav=5.25e-14
+    [BCD outer 6] θ_VIX=9.435e-08, θ_EAV=+1.9102e-04, pooled_negll=-256713.51, Δll=+1.3445, Δθ_eav=7.60e-08
+    [BCD outer 7] θ_VIX=9.435e-08, θ_EAV=+1.9090e-04, pooled_negll=-256713.56, Δll=+0.0543, Δθ_eav=1.23e-07
+
+  → θ_VIX = 9.4354e-08
+  → θ_EAV = +1.9090e-04
+  → pooled loglik = 256713.70
+  → converged = False
+
+  Hessian SE for θ_EAV ...
+  Hessian SE=8.525809373778077e-06, t=22.390672278828493
+
+[4/6] Stock-clustered block bootstrap (gold-standard) ...
+  bootstrap draws: 150/150 (elapsed=363.2s)
+  bootstrap mean=0.00019455432078353702, SE=4.24626567510244e-05
+  bootstrap 95% CI = [0.00012854708414741794, 0.00027972115868475005]
+  bootstrap t=4.495682046447166, p=0.0
+
+[5/6] Robustness — alternate EAV definitions ...
+
+  R1 EAV window=3:
+    θ_EAV=+7.7328e-05, SE=2.5077710037296887e-06, t=30.83526181294896
+
+  R1 EAV window=5:
+    θ_EAV=+8.2902e-05, SE=2.581963587547071e-06, t=32.107940632325956
+
+  R2 Drop-out 5 random stocks x 5 seeds:
+    seed=42, dropped=['NVDA', 'MA', 'ABBV', 'COST', 'ABT'], θ_EAV=+1.942e-04, t=20.66678916161969
+    seed=43, dropped=['MSFT', 'WMT', 'JNJ', 'CVX', 'ABT'], θ_EAV=+2.146e-04, t=20.893632172558753
+    seed=44, dropped=['GOOGL', 'BRK-B', 'CVX', 'AVGO', 'KO'], θ_EAV=+2.030e-04, t=20.749746934639475
+    seed=45, dropped=['PG', 'COST', 'ADBE', 'MCD', 'ABT'], θ_EAV=+1.969e-04, t=20.709191470418006
+    seed=46, dropped=['NVDA', 'TSLA', 'JNJ', 'HD', 'ADBE'], θ_EAV=+1.822e-04, t=20.26616362682762
+
+  BH-FDR multi-test correction:
+    pooled_hessian: raw_p=0.0000, BH_adj_p=0.0000
+    pooled_bootstrap: raw_p=0.0000, BH_adj_p=0.0000
+
+  Cross-market comparison (K1147 US vs K1145 TW):
+    K1145 TW pooled θ_EAV = +6.362e-05 (boot t=5.24)
+    K1147 US pooled θ_EAV = +1.909e-04 (boot t=4.495682046447166)
+    Direction match: True
+    Magnitude ratio US/TW: 3.0005124579552502
+
+  CROSS-MARKET VERDICT: UNIVERSAL — US pooled θ_EAV PASS and direction matches K1145 TW → global regularity
+
+[6/6] Plots ...
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac2f1611/experiments/k1147/k1147_tw_vs_us_comparison.png
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac2f1611/experiments/k1147/k1147_robustness_barplot.png
+
+  Results -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac2f1611/experiments/k1147/k1147_results.json
+  Elapsed: 396.2s
+
+  CORE CROSS-MARKET VERDICT: UNIVERSAL — US pooled θ_EAV PASS and direction matches K1145 TW → global regularity
+
