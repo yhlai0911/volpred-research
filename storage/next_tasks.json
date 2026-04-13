@@ -724,13 +724,21 @@
     "title": "K1166: per-stock θ_EAV refit to remove σ² tautology",
     "priority": 3,
     "description": "K1164 panel coef 受 θ_rel = θ_EAV/σ² 機械 rank-inversion 污染。改 per-stock fit 取 θ_EAV_i (allow heterogeneity)，再用真正 cross-stock θ_EAV_i variation 跟 analyst/media correlate。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T02:00:00+08:00"
   },
   {
     "id": "K1167",
     "title": "K1167: retail-vs-institutional ownership proxy mechanism test",
-    "priority": 3,
-    "description": "K1164 排除 quarterly + analyst hypotheses。新假說: retail-vs-institutional 持股比例（institutional 多 → 算盤 driven by quant/automated → high θ_rel; retail 多 → noise driven → low θ_rel）。Proxy: US 13F holdings, JP MOF, EU ECB SHS-S, TW FISC。",
+    "priority": 2,
+    "description": "[K1166 within-market analyst CONFIRMED 後] retail-vs-institutional ownership 解 cross-market 4-market EU>JP rank inversion (EU LOW vs JP HIGH cluster). Proxy: US 13F, JP MOF, EU ECB SHS-S, TW FISC.",
+    "status": "pending"
+  },
+  {
+    "id": "K1169",
+    "title": "K1169: Paper 2 §5 narrative rewrite (main thread, K1166 correction)",
+    "priority": 1,
+    "description": "K1164 REJECTED 已被 K1166 翻轉為 within-market CONFIRMED + cross-market open。Paper 2 §5 必須改寫: K1164 從 main result 降為 'shared-pooled-coef σ² tautology demonstration', K1166 升為 main mechanism test。主線程改 paper/2/body.tex。",
     "status": "pending"
   }
 ]

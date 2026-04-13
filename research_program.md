@@ -611,7 +611,22 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
-### 21. Paper 2 mechanism 仍 OPEN：analyst hypothesis 也被推翻（2026-04-14 K1164）
+### 22. Paper 2 mechanism 翻轉再翻轉：per-stock refit CONFIRMED within-market（2026-04-14 K1166）
+**K1164 REJECTED 純粹是 σ² tautology artifact，移除後 analyst hypothesis 在 within-market 層級成立**
+- K1166: 110 stocks per-stock θ_EAV_i refit (no shared pooling) + Engle-Ghysels-Sohn (2013) E[g]=1 normalization
+- Pooled Spearman ρ(log_analyst, θ_EAV_i) = +0.241, p=0.012 (vs K1164 ρ=+0.40 p=0.60)
+- US 獨市場 ρ=+0.575 p=0.001 PASS Harvey
+- Panel OLS coef log_analyst β=+9.68e-4 t=+3.56 p=0.0006 **PASS Harvey 3.0**
+- 全 4 markets ρ>0 無反向；JP 100% |t|>2 80% Harvey
+- Per-stock vs pooled-shared θ_EAV ratio 6-16x（EGS normalization 差異），ordering 保留
+- **Mechanism verdict**:
+  - K1153 within-market analyst hypothesis **CONFIRMED**
+  - cross-market 4-market rank inversion (EU 21 analysts > JP 14.5 但 EU LOW JP HIGH cluster) **仍 open puzzle**
+- **E070 教訓**: shared-coef pooled spec 評估個股 mechanism 必踩 σ² tautology；per-stock refit + EGS E[g]=1 才是 ground truth
+- K1167 升級 P2 (retail-vs-institutional 解 cross-market puzzle)
+- K1169 NEW P1：Paper 2 §5 主線程改寫（K1164 降為 tautology demonstration, K1166 升為 main mechanism test）
+
+### 21. Paper 2 mechanism 仍 OPEN：analyst hypothesis 也被推翻（2026-04-14 K1164）→ 已被 K1166 翻轉
 **K1153 後第二次推翻——cluster mechanism 尚未找到**
 - K1164 檢驗 analyst coverage × media density 假說 (K1153 §5.4 提出)
 - 4-market analyst median: TW 7.5 / EU 21.0 / JP 14.5 / US 32.5

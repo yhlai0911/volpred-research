@@ -961,5 +961,21 @@
       "K1109",
       "K1145"
     ]
+  },
+  {
+    "id": "E070",
+    "title": "Shared-coef pooled spec 評估個股 mechanism 必踩 σ² tautology — per-stock refit + EGS E[g]=1 才是 ground truth",
+    "category": "methodology",
+    "lesson": "若 θ_rel_i = θ_EAV / σ²_i 且 θ_EAV 是 shared across stocks 的 pooled coef，則 θ_rel_i 機械上 rank-inverse to σ²_i (within-market ρ=-1.0)。任何與 σ²_i 相關的 firm-level covariate (如 analyst count 與 σ² 正相關) 都會自動產生與 θ_rel_i 的負相關——這不是 mechanism 證據而是 artifact。",
+    "examples": [
+      "K1164 panel β=-0.149 t=-4.55 看似強 reject; K1166 per-stock refit 後同檢驗 β=+9.68e-4 t=+3.56 PASS — 完全翻轉",
+      "K1166 per-stock fit 須採 Engle-Ghysels-Sohn (2013) E[g]=1 identification 解決 τ·g multiplicative degeneracy (ω_g = 1-persistence)，否則 wide-bound 下 落 degenerate mode",
+      "Per-stock vs pooled-shared θ_EAV ratio 6-16x 是 normalization 差異, ordering 保留 sign consistency"
+    ],
+    "recommendation": "對任何 cross-firm mechanism test (e.g. 'analyst count predicts θ'), 必須先 per-stock refit θ_i (allow heterogeneity)，再用真正 cross-stock variation 跟 covariate correlate。若用 shared-coef pooled spec 的 θ_rel_i = θ_EAV/σ²_i，與任何跟 σ² 相關的 covariate 結論都不可信。",
+    "source_experiments": [
+      "K1164",
+      "K1166"
+    ]
   }
 ]

@@ -26145,5 +26145,23 @@
     "data_source": "yfinance Ticker.recommendations + market cap/turnover for 4 markets (TW/EU/JP/US, N=109 stocks)",
     "created_at": "2026-04-14T01:30:00+08:00",
     "updated_at": "2026-04-14T01:30:00+08:00"
+  },
+  {
+    "id": "k1166-1776102181",
+    "experiment_id": "K1166",
+    "title": "K1166 per-stock θ_EAV refit OVERTURNS K1164 — within-market analyst hypothesis CONFIRMED, cross-market still open",
+    "content": "[提出: Claude, 執行: Claude] K1164 panel coef β=-0.149 t=-4.55 (analyst NEGATIVELY 預測 θ_rel) 被診斷為 σ² tautology artifact。K1166 改用 per-stock θ_EAV_i refit (110 stocks, no shared pooling) 並採 Engle-Ghysels-Sohn (2013) E[g]=1 identification 修正 τ·g multiplicative degeneracy。**結果完全翻轉**: pooled Spearman ρ(log_analyst, θ_EAV_i)=+0.241 p=0.012 PASS; US 獨市場 ρ=+0.575 p=0.001 Harvey-OK; Panel OLS with market FE coef log_analyst β=+9.68e-4 t=+3.56 p=0.0006 PASS Harvey 3.0; **全 4 markets ρ>0 無反向**。Per-market signal: TW 19% 30% PASS Harvey, EU 27% PASS, **JP 100% |t|>2 80% Harvey**, US 43% Harvey。Per-stock vs pooled-shared θ_EAV ratio 6-16x (EGS normalization 取 ω_g=1-persistence), 但 ordering 保留 (TW≈EU LOW < JP < US HIGH)。**Mechanism verdict 修正**: K1153 hypothesis (analyst coverage → sharper earnings vol response) **within-market CONFIRMED**, cross-market 4-market rank inversion (EU 21 analysts > JP 14.5 但 EU LOW JP HIGH) **仍 open puzzle**, 應由 K1167 retail-vs-institutional 解答。**K1164 前驗證教訓**: shared-coef pooled spec 評估個股 mechanism 必踩 σ² tautology; per-stock fit + EGS normalization 才是 ground truth。Paper 2 §5 改寫: 'within-market analyst hypothesis CONFIRMED in K1166, cross-market mechanism remains open'。",
+    "tags": [
+      "K1166",
+      "Paper2",
+      "per-stock-refit",
+      "EGS-normalization",
+      "K1164-correction",
+      "within-market-confirmed",
+      "tautology-diagnosis"
+    ],
+    "data_source": "Reuse K1145/K1147/K1150/K1153 panel data + K1164 analyst proxies (110 stocks 4 markets)",
+    "created_at": "2026-04-14T02:00:00+08:00",
+    "updated_at": "2026-04-14T02:00:00+08:00"
   }
 ]
