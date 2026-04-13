@@ -1,0 +1,49 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a96a6532
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a96a6532
+Installed 109 packages in 1.16s
+========================================================================
+K1114: Rolling θ_EAV time-varying heterogeneity for A4f-EAV
+========================================================================
+
+[1] Loading earnings announcements (Big5)...
+  TSMC (2330): 86 announcements
+  UMC (2303): 81 announcements
+  MediaTek (2454): 76 announcements
+
+[2] Loading ^VIX...
+  VIX: 2012-01-03 to 2025-12-30, n=3519
+
+[3.TSMC] Rolling A4f-EAV for TSMC (2330.TW)...
+  TSMC: n=3414, events=53, event%=1.55
+  TSMC: 128 valid rolling-window fits (out of ~138)
+
+[3.UMC] Rolling A4f-EAV for UMC (2303.TW)...
+  UMC: n=3414, events=53, event%=1.55
+  UMC: 132 valid rolling-window fits (out of ~138)
+
+[3.MediaTek] Rolling A4f-EAV for MediaTek (2454.TW)...
+  MediaTek: n=3414, events=53, event%=1.55
+  MediaTek: 124 valid rolling-window fits (out of ~138)
+
+[4] Benjamini-Hochberg FDR across 9 tests...
+  TSMC_test1_trend                         raw_p=0.07202201542097983, bh_p=0.1296396277577637, t=1.8142273462823235, verdict=NS
+  TSMC_test2_spearman_vix                  raw_p=0.5773921788765853, bh_p=0.5773921788765853, t=0.5587099688378965, verdict=NS
+  TSMC_test3_regime_ks                     raw_p=0.009300141617083188, bh_p=0.027900424851249564, t=None, verdict=PASS
+  UMC_test1_trend                          raw_p=0.002656232656317815, bh_p=0.011953046953430167, t=3.0639530301945292, verdict=PASS
+  UMC_test2_spearman_vix                   raw_p=0.19567809283870446, bh_p=0.2935171392580567, t=1.3009222419383009, verdict=NS
+  UMC_test3_regime_ks                      raw_p=0.374541628601595, bh_p=0.4213593321767944, t=None, verdict=NS
+  MediaTek_test1_trend                     raw_p=7.936212180865675e-06, bh_p=7.142590962779107e-05, t=4.666129975874329, verdict=PASS
+  MediaTek_test2_spearman_vix              raw_p=0.03308166376039926, bh_p=0.07443374346089834, t=-2.156617352192338, verdict=NS
+  MediaTek_test3_regime_ks                 raw_p=0.2794614006926979, bh_p=0.3593075151763259, t=None, verdict=NS
+
+[5] Writing results JSON...
+  Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a96a6532/experiments/k1114/k1114_results.json
+
+[6] Plots...
+  Saved k1114_rolling_theta.png
+  Saved k1114_vix_scatter.png
+  Saved k1114_regime_boxplot.png
+
+K1114 done in 481s
