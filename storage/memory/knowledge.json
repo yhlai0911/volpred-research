@@ -25775,5 +25775,24 @@
     ],
     "data_source": "yfinance GLD/TLT/BTC-USD + FRED EPU/NFCI/STLFSI4 + ^GVZ + ^MOVE",
     "created_at": "2026-04-13T09:02:02.526603+00:00"
+  },
+  {
+    "id": "k1121-1776071963",
+    "experiment_id": "K1121",
+    "title": "K1121: Alt-data for portfolio ALLOCATION also NULL — Paper 4 compendium territory expands",
+    "content": "[提出: Claude K1118 衍生 application pivot, 執行: Claude] 6 strategies on SPY+GLD 2019-2026: S1 50/50, S2 vol-target, S3 VIX-regime, **S4 EPU-regime**, **S5 NFCI-regime**, **S6 Hybrid**。**全 4 alt-data 策略 NULL vs 50/50**: bootstrap p>0.16 全部，最佳 S5 NFCI Sharpe 1.312 vs S1 1.309 (+0.003 trivial, p=0.966)。**H1 FAIL** (alt vs vol-target NS), **H4 FAIL** (hybrid<single), **H2 PASS trivially** (50/50 護城河 hold), **H3 PARTIAL** (NFCI 在 3 stress episodes 都減 wSPY，EPU 2022 rate-shock fail)。S5 NFCI 唯一 silver lining：lowest MDD -17.9%、highest Calmar 0.950，但 Sharpe 持平 baseline → drawdown insurance at zero alpha (CLAUDE.md \"VT = insurance not alpha\" 再次驗證)。**Paper 4 compendium 領土擴張**：9 forecasting null + 4 allocation null = 跨 application 兩支 dead-end 連線。**Codex 救援**：HIGH lookahead bug (NFCI 需 shift(5) 因 FRED 週三才公佈週五觀測值，EPU 需 shift(2) 因 +1 day delay)，修正前 S4 Sharpe 假 1.250，修正後 1.283 tied baseline。MED log vs simple returns convention 修正。Internal NaN warm-up bug 修正。Commit 5d77f6ac merged 502dcaf7。",
+    "tags": [
+      "Paper_4",
+      "alt-data",
+      "allocation-application",
+      "NULL",
+      "50-50-fortress",
+      "NFCI-drawdown-insurance",
+      "FRED-publication-delay-bug",
+      "compendium-expanded",
+      "Codex-saves-lookahead"
+    ],
+    "data_source": "yfinance SPY/GLD + FRED USEPU/NFCI 2019-2026 (with corrected publication lag)",
+    "created_at": "2026-04-13T09:19:23.657538+00:00"
   }
 ]

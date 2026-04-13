@@ -841,5 +841,20 @@
       "session-arc-meta"
     ],
     "created_at": "2026-04-13T08:41:22.110993+00:00"
+  },
+  {
+    "id": "E062",
+    "title": "FRED publication delay = 隱性 lookahead bug，K1121 修正前 S4 看似有 edge",
+    "lesson": "K1121 第一版 alt-data allocation 結果 S4 EPU-regime Sharpe 1.250 看起來像有 edge（雖然 vs S2 vol-target 仍 NS），但 Codex 審代碼揭露：\n\n**FRED 數據 publication delay 沒處理**：\n- USEPU (Daily Economic Policy Uncertainty)：observation day X 但 publish on day X+1 → 需 `shift(2)` (一天 delay + 一天 trading lag)\n- NFCI (Chicago Fed)：**observation 週五，但 publish 下週三** → 需 `shift(5)`（週末 + 公布 delay + trading lag）\n\n修正後 S4 Sharpe 從 1.250 跌到 1.283（tied with baseline 1.309）。\n\n**這是一個典型 information lookahead bug**：\n- 用某天的 NFCI 值決定那天的 weight\n- 但實際投資人那天根本不知道那個 NFCI 值（要等到下週三才公佈）\n- → backtest 用了 future information\n\n**通則 — 任何 macro/economic 數據都要查 publication delay**：\n| 數據 | Source | Publication delay |\n|------|--------|-------------------|\n| FRED daily series | publish day | +1 trading day |\n| FRED weekly NFCI | observed Fri | published next Wed (5 calendar days) |\n| BLS NFP | observed monthly | first Friday after month end |\n| FOMC rate decisions | meeting day | same day announcement |\n| EPU (Baker-Bloom-Davis) | daily | +1 day |\n| ANFCI | weekly | same as NFCI |\n| USEPUINDXD | daily | +1 day |\n| 主計總處 GDP/CPI | quarterly | ~7 weeks delay |\n\n**好的 backtest 必做**：每個 exogenous 變數查 publication schedule，給予 conservative shift。\n\n**這次 Codex 救援的價值**：\n- 沒 Codex 審 → 我會接受 S4 Sharpe 1.250 為 edge\n- 寫進 knowledge → 下個實驗 reuse 假信號\n- 寫文章 → publishable false positive\n- **若論文發出去 reviewer 抓到這個 lookahead → desk reject + 信譽損失**\n\n**對 K1115 K1116 K1118 reuse 同樣 FRED 數據的舊實驗有沒有同樣 bug？**\n- K1116 (用 FRED EPU/NFCI/STLFSI for SPY weekly RV)：weekly aggregation 已經 dilute 了 daily delay 影響，但仍應檢查\n- K1118 (cross-asset 用同 FRED data)：同 K1116 weekly aggregation\n- **建議行動**：K1116/K1118 重檢一次 publication delay handling，若有 bug 需 OOS 重跑\n\n**再次驗證 E059 LRT-vs-DM divergence trap 的 cousin**：\n- E059 警告 in-sample 顯著但 OOS fail = overfit\n- E062 警告 backtest 看似 edge 但 publication delay = 假 edge\n- 共同點：**「結果太好」第一反應應該是「找 bug」不是「歡呼」**\n\n**CLAUDE.md 50/50 護城河又一次 hold**：K2-K89 + K1121 共 9 次 alt-data attempts 全敗給 50/50 baseline。\n",
+    "context": "K1121 alt-data allocation NULL + FRED publication delay bug",
+    "applies_to": [
+      "lookahead-bias",
+      "FRED-publication-delay",
+      "macro-data-timing",
+      "Codex-audit-value",
+      "50-50-baseline-fortress",
+      "paper-publication-risk"
+    ],
+    "created_at": "2026-04-13T09:19:23.657538+00:00"
   }
 ]

@@ -393,9 +393,30 @@
   },
   {
     "id": "K1121",
-    "title": "K1121: Alt-data for portfolio construction (vs vol forecasting)",
+    "title": "K1121: Alt-data for portfolio allocation",
     "priority": 2,
-    "description": "Agent aca7d489303b8ee41 in worktree agent-k1121。6 strategies × Sharpe/MDD/Calmar。測 alt-data 對 ALLOCATION 是否有用 (forecast NULL 但 regime signal 可能有效)。",
-    "status": "in_progress"
+    "description": "全 4 alt-data 策略 NULL vs 50/50 (bootstrap p>0.16)。S5 NFCI lowest MDD/highest Calmar but Sharpe tied → drawdown insurance at zero alpha。Codex 抓 HIGH FRED publication delay bug (E062)。Paper 4 compendium 領土擴張到 allocation。",
+    "status": "completed"
+  },
+  {
+    "id": "K1116b_recheck",
+    "title": "K1116/K1118 重檢 FRED publication delay bug",
+    "priority": 2,
+    "description": "K1121 揭露 FRED EPU/NFCI publication delay 沒處理。K1116 weekly aggregation 可能 dilute 但仍應檢查。若有 bug 需 OOS 重跑。",
+    "status": "pending"
+  },
+  {
+    "id": "K1122",
+    "title": "K1122: Continuous-weight alt-data (sigmoid loading)",
+    "priority": 3,
+    "description": "K1121 衍生：替代 70-th percentile step 為 sigmoid on EPU/NFCI z-score。測 soft loading 是否避免 null。",
+    "status": "pending"
+  },
+  {
+    "id": "K1123",
+    "title": "K1123: Cross-asset alt-data allocation (SPY+GLD+TLT)",
+    "priority": 3,
+    "description": "K1121 衍生：3-asset allocation 用 alt-data signal。",
+    "status": "pending"
   }
 ]
