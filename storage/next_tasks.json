@@ -95,7 +95,8 @@
     "title": "K1100g_d5: Overnight gap² 替代 night session r² 再 OOS",
     "priority": 3,
     "description": "K1100g_d2 衍生：K1100g_d2 用 night session r² FAIL，改用 overnight gap²（13:45→15:00 + 05:00→08:45 純 gap）作 exog 重做 OOS。也許 gap 才是真正載 info 的對象。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T13:45:00+08:00"
   },
   {
     "id": "K1100g_d3",
@@ -847,6 +848,20 @@
     "title": "K1108c: Continuous guide_delta_pct as capex covariate (replace binary)",
     "priority": 3,
     "description": "K1108 binary flag direction-only. 改用 continuous guide_delta_pct (-32.5% to +60.6% range) 作 θ_EAV covariate, 看 signed magnitude 是否 PASS。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100g_d6",
+    "title": "K1100g_d6: Extend 2022-2025 N double for Harvey threshold",
+    "priority": 3,
+    "description": "K1100g_d3/d4/d5 在 2017-2021 n=1071 下 DM t=1.5-2.0 borderline。擴 2022-2025 至 n~1800+ 測是否跨 Harvey 3.0。",
+    "status": "pending"
+  },
+  {
+    "id": "K1100g_d7",
+    "title": "K1100g_d7: Cross-market replicate (SPY overnight, N225 morning→afternoon)",
+    "priority": 3,
+    "description": "K1100g_d5 確認信號方向穩但 borderline。跨市場複製: SPY overnight gap→intraday, N225 morning session→afternoon session asymmetry。若 universal 則 Paper 3 reframe 真 anchor。",
     "status": "pending"
   }
 ]
