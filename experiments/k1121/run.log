@@ -1,0 +1,49 @@
+[09:15:15] === K1121: Alt-data for portfolio construction ===
+[09:15:15] Fetching SPY + GLD + VIX daily 2018-2026...
+[09:15:16]   daily panel: 2079 rows 2018-01-02 -> 2026-04-10
+[09:15:16] Fetching FRED: USEPUINDXD (daily), NFCI (weekly) via fredgraph CSV...
+[09:15:16]   cache hit: fred_USEPUINDXD.csv
+[09:15:16]   cache hit: fred_NFCI.csv
+[09:15:16]   EPU: 3021 rows, last=2026-04-09
+[09:15:16]   NFCI: 431 rows, last=2026-04-03
+[09:15:16]   merged panel: 2074 days
+[09:15:16] Saved panel: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-k1121/experiments/k1121/data/panel.parquet
+[09:15:16] Backtest window: 2019-01-15 -> 2026-04-10 (1817 days)
+[09:15:16] --- Full-sample metrics ---
+[09:15:16]   S1: Sharpe=1.309 MDD=-0.203 avg_wSPY=0.500
+[09:15:16]   S2: Sharpe=1.072 MDD=-0.220 avg_wSPY=0.880
+[09:15:16]   S3: Sharpe=1.210 MDD=-0.179 avg_wSPY=0.543
+[09:15:16]   S4: Sharpe=1.283 MDD=-0.232 avg_wSPY=0.566
+[09:15:16]   S5: Sharpe=1.312 MDD=-0.179 avg_wSPY=0.594
+[09:15:16]   S6: Sharpe=1.305 MDD=-0.184 avg_wSPY=0.568
+[09:15:16] --- IS/OOS split metrics ---
+[09:15:16] --- Stationary bootstrap test vs S1 (50/50 baseline) ---
+[09:15:17]   S2 vs S1: diff=-0.238 p=0.264 CI=[-0.670,0.174]
+[09:15:18]   S3 vs S1: diff=-0.099 p=0.388 CI=[-0.344,0.132]
+[09:15:18]   S4 vs S1: diff=-0.026 p=0.860 CI=[-0.310,0.257]
+[09:15:19]   S5 vs S1: diff=0.003 p=0.966 CI=[-0.231,0.254]
+[09:15:20]   S6 vs S1: diff=-0.005 p=0.948 CI=[-0.191,0.172]
+[09:15:20] --- Stationary bootstrap test vs S2 (vol-targeted) ---
+[09:15:21]   S3 vs S2: diff=0.138 p=0.512
+[09:15:22]   S4 vs S2: diff=0.212 p=0.280
+[09:15:23]   S5 vs S2: diff=0.241 p=0.166
+[09:15:23]   S6 vs S2: diff=0.233 p=0.194
+[09:15:23] --- OOS rolling Sharpe (252d window) ---
+[09:15:23] --- Stress episode analysis ---
+[09:15:23] --- Hypothesis tests ---
+[09:15:23] Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-k1121/experiments/k1121/k1121_results.json
+[09:15:23] 
+=== HEADLINE TABLE ===
+[09:15:23] strat  full_SR   OOS_SR     MDD  Calmar  avg_wSPY
+[09:15:23] S1       1.309    1.975  -0.203   0.888     0.500
+[09:15:23] S2       1.072    1.474  -0.220   0.720     0.880
+[09:15:23] S3       1.210    1.748  -0.179   0.883     0.543
+[09:15:23] S4       1.283    1.856  -0.232   0.752     0.566
+[09:15:23] S5       1.312    1.656  -0.179   0.950     0.594
+[09:15:23] S6       1.305    1.806  -0.184   0.911     0.568
+[09:15:23] 
+=== HYPOTHESIS TESTS ===
+[09:15:23] H1 (S4 or S5 > S2): FAIL
+[09:15:23] H2 (alt >= 50/50):  PASS
+[09:15:23] H4 (hybrid>single): FAIL
+[09:15:23] H3 stress episodes: ['COVID_2020', 'Rate_Shock_2022', 'SVB_2023']
