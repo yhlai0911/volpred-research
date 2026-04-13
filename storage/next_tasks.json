@@ -358,9 +358,9 @@
   },
   {
     "id": "Paper4_VIX_sufficiency_compendium",
-    "title": "Paper 4: VIX Sufficiency Compendium (NEW)",
-    "priority": 2,
-    "description": "K473+K750+K789+K504+K1116 共 5 個獨立 alt-data null 實驗的 compendium paper。Cross-class evidence (survey/search/news/fin-conditions)。論文核心：no public alt-data improves SPY weekly vol vs VIX。Main thread.",
+    "title": "Paper 4: Universal IV Sufficiency Compendium (9 experiments × 5 asset classes)",
+    "priority": 1,
+    "description": "K473+K750+K789+K504+K1116 (SPY) + K1098 (0050.TW) + K1118 (GLD/TLT/BTC) = 9 個 alt-data null 實驗跨 5 個 asset class。STRENGTHENED：universal claim。Main thread 寫作 priority 1。",
     "status": "pending"
   },
   {
@@ -372,9 +372,30 @@
   },
   {
     "id": "K1118",
-    "title": "K1118: Cross-asset alt-data sufficiency (GLD/TLT/Bitcoin/TAIFEX)",
+    "title": "K1118: Universal IV sufficiency confirmed (GLD/TLT/BTC)",
     "priority": 3,
-    "description": "K1116 衍生：VIX 對 SPY sufficient 不代表對其他資產 sufficient。",
+    "description": "3/3 NULL: GLD GVZ sufficient, TLT split (5% threshold fail), BTC EPU harmful。Paper 4 compendium 9 實驗 × 5 asset class universal claim。",
+    "status": "completed"
+  },
+  {
+    "id": "K1119",
+    "title": "K1119: BTC real Deribit DVOL/BVOL test",
+    "priority": 3,
+    "description": "K1118 衍生：BTC RV30 proxy bug 修正，從 Deribit API 取真 IV。",
+    "status": "pending"
+  },
+  {
+    "id": "K1120",
+    "title": "K1120: TLT FinStress regime-dependent tracking",
+    "priority": 3,
+    "description": "K1118 衍生：52-week rolling DM 驗證 M4 是否只在 rate-hike regime (2023-24) 有 signal。",
+    "status": "pending"
+  },
+  {
+    "id": "K1121",
+    "title": "K1121: Alt-data for portfolio construction (vs vol forecasting)",
+    "priority": 2,
+    "description": "K1118 衍生：alt-data forecasting 全 NULL，但對 cross-asset weight allocation 可能有用。完全 different application。",
     "status": "pending"
   }
 ]

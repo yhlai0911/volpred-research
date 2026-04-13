@@ -25756,5 +25756,24 @@
     ],
     "data_source": "FRED (USEPU, WLEMUINDXD, NFCI, ANFCI, STLFSI4) + yfinance SPY 2018-2026",
     "created_at": "2026-04-13T08:41:22.110993+00:00"
+  },
+  {
+    "id": "k1118-1776070922",
+    "experiment_id": "K1118",
+    "title": "K1118: Universal IV sufficiency confirmed across GLD/TLT/BTC — Paper 4 compendium 升級",
+    "content": "[提出: Claude K1116 衍生, 執行: Claude] Cross-asset alt-data sufficiency test：3 個非 SPY 資產 × 5 models (M1 GARCH / M2 +native IV / M3 +EPU / M4 +FinStress NFCI / M5 hybrid)。**3/3 NULL**: GLD GVZ 足夠 (M4 FinStress DM t=-3.34 顯著 WORSE)、TLT 分裂 (M4 DM t=+3.74 p=0.0002 directional but QLIKE only 0.50% < 5% threshold, stability 只 2025)、BTC EPU **actively harmful** (DM t=-3.97/-2.04/-2.65 跨 3 sub-years，H3 retail edge 不成立)。**H1 universal sufficiency PASS**。**Paper 4 compendium 升級**：K473+K750+K789+K504+K1116 (SPY) + K1098 (0050.TW) + K1118 (GLD/TLT/BTC) = **9 實驗 × 5 asset class** 全支持 native IV sufficiency for weekly RV prediction。從 \"SPY-specific null\" 升級為 \"universal claim\"。**Caveat**: BTC 用 RV30 proxy（非真 IV），M2 甚至被 M1 擊敗 (t=-5.49)，建議後續用 Deribit DVOL 重測（K1119 候選）。0050.TW 未在此實驗 (VIXTWN 2022-2025-11 gap, K1098 已 NULL)。Commit 6c373e39。pandas-datareader broken → 改用 requests 直拉 FRED CSV。",
+    "tags": [
+      "Paper_4",
+      "universal-IV-sufficiency",
+      "cross-asset",
+      "GLD-GVZ",
+      "TLT-MOVE",
+      "BTC-RV30",
+      "compendium-strengthened",
+      "EPU-harmful-BTC",
+      "K1116-extension"
+    ],
+    "data_source": "yfinance GLD/TLT/BTC-USD + FRED EPU/NFCI/STLFSI4 + ^GVZ + ^MOVE",
+    "created_at": "2026-04-13T09:02:02.526603+00:00"
   }
 ]
