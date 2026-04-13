@@ -56,10 +56,20 @@ Do **not** use this skill for：
 
 **在決定主題之後、撰寫內容之前，必須先確認主題是否已有類似文章。**
 
-### 檢查步驟
-1. **grep 搜尋**：`grep -i '關鍵詞' storage/reports/feed.json | grep title | head -10`
-2. **LanceDB 搜尋**（更精確）：`uv run python scripts/build_knowledge_index.py search --query "主題關鍵詞"`
+### 檢查步驟（⚠️ 2026-04-14 強化：用**概念關鍵字**不是字面字串）
+1. **grep 概念關鍵字**（多組查，涵蓋同義詞）：
+   ```bash
+   # 例：寫「0050 夜盤」主題必須至少查：夜盤 | overnight | 跳空 | 隔夜 | gap | pre.*market
+   grep -iE "夜盤|overnight|跳空|隔夜|gap" storage/reports/feed.json | grep title | head -20
+   ```
+   **禁止**只用狹義字串（例「0050.*夜盤」）——會漏掉同主題不同代號的文章（如 TX 期貨夜盤、K847 台股隔夜）
+2. **LanceDB 語義搜尋**（必跑，比 grep 更精確）：
+   ```bash
+   uv run python scripts/build_knowledge_index.py search --query "主題一句話描述"
+   ```
+   若 top-3 結果 dist < 0.5（高相似）→ 有重複，不可寫
 3. **同 audience 檢查**：只比較相同受眾類型（general vs general，research vs research）
+4. **主題家族檢查**：若主題屬已知高頻家族（overnight/gap/50-50 SPY-GLD/VT 保險/VIX 充分性），**先列已有同家族文章 title 清單，逐一確認差異化角度**，再決定是否寫
 
 ### 判斷標準
 - **完全重複**（>70% 標題相似）→ **禁止發佈**，除非要更正或更新
@@ -75,7 +85,9 @@ Do **not** use this skill for：
 - 50/50 SPY/GLD 配置（10+ 篇）
 - VT 保險/保費（5+ 篇）
 - VIX 充分性（多篇）
-- 隔夜波動（3 篇）
+- **隔夜波動 / overnight gap / 跳空 / 夜盤（20+ 篇，含 K847 / K906 / K812v2 / K847 / K886 / I4 / I5 / N68 等）**
+- 美股對台股的 spillover / lead-lag（10+ 篇）
+- PRG / Periodic GARCH 勝出 GJR（多篇，含 K874 系列）
 
 ## 延伸閱讀（自動附加）
 
