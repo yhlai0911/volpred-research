@@ -1,0 +1,365 @@
+{
+  "experiment_id": "K1126",
+  "title": "Regime-Conditional OFI Buy/Sell Asymmetry for Jump Prediction (TAIFEX TX)",
+  "timestamp": "2026-04-14T04:20:45.640007",
+  "data_source": "TAIFEX TX futures 5-min bars (via K1124 cache) + yfinance ^VIX",
+  "period": "2017-01-03 00:00:00 to 2021-12-30 00:00:00",
+  "n_bars_total": 73203,
+  "n_valid_prediction": 52412,
+  "jump_detection": {
+    "method": "Lee-Mykland (2008) L_t with bipower variation K=16",
+    "threshold_multi_Gumbel": 5.125598054567598,
+    "n_jumps": 115,
+    "jump_rate_pct": 0.21441223081942762
+  },
+  "regime_classification": {
+    "method": "Ex-ante rolling 252-day VIX percentile of yesterday's VIX close",
+    "cutoffs": "low=<33%, mid=33-67%, high=>67%",
+    "min_periods": 100
+  },
+  "IS_period": "2017-2019",
+  "OOS_period": "2020-2021",
+  "regime_counts_bar_level": {
+    "low": 21762,
+    "high": 15728,
+    "mid": 14922
+  },
+  "regime_results": {
+    "low": {
+      "skipped": false,
+      "n_is": 12555,
+      "n_oos": 9207,
+      "jumps_is": 37,
+      "jumps_oos": 17,
+      "baseline_signed": {
+        "name": "low_M3_signed",
+        "n_features": 3,
+        "coefs_std": [
+          0.11757300104657771,
+          0.36084925093321846,
+          -0.11239034297083333
+        ],
+        "intercept": -5.9256572428700425,
+        "n_is": 12555,
+        "n_oos": 9207,
+        "jumps_is": 37,
+        "jumps_oos": 17,
+        "scaler_mean": [
+          0.002867383512544803,
+          0.188859014403134,
+          0.019424551990311966
+        ],
+        "scaler_scale": [
+          0.05347112888593984,
+          0.14329033618567083,
+          0.2362679295746704
+        ],
+        "auc_is": 0.6014949283842079,
+        "brier_is": 0.002931774627656201,
+        "ll_is": -0.019714474703229255,
+        "auc_oos": 0.48988030467899896,
+        "brier_oos": 0.0018385399667156506,
+        "ll_oos": -0.013286845001937579
+      },
+      "asymmetric_buysell": {
+        "name": "low_M5_buysell",
+        "n_features": 3,
+        "coefs_std": [
+          0.12073210003735402,
+          0.2649977895770852,
+          0.3747331853765285
+        ],
+        "intercept": -5.9121572985273545,
+        "n_is": 12555,
+        "n_oos": 9207,
+        "jumps_is": 37,
+        "jumps_oos": 17,
+        "scaler_mean": [
+          0.002867383512544803,
+          0.10414178319672299,
+          0.08471723120641103
+        ],
+        "scaler_scale": [
+          0.05347112888593984,
+          0.14372249507278154,
+          0.1323675636434632
+        ],
+        "auc_is": 0.6011926609466154,
+        "brier_is": 0.002932058646876379,
+        "ll_is": -0.019716625308155836,
+        "auc_oos": 0.49269026435383734,
+        "brier_oos": 0.0018382468172249127,
+        "ll_oos": -0.013282568319950111
+      },
+      "unreg_coefs": {
+        "intercept": -5.915983552555023,
+        "jump_curr": 0.12070575755808725,
+        "buy": 0.27374527490576855,
+        "sell": 0.3833887658167909
+      },
+      "wald_buy_vs_sell": {
+        "z": -0.7182698719519406,
+        "p": 0.47259090298608175,
+        "abs_sell_over_buy_ratio": 1.4005310811255645
+      }
+    },
+    "mid": {
+      "skipped": false,
+      "n_is": 9387,
+      "n_oos": 5535,
+      "jumps_is": 16,
+      "jumps_oos": 10,
+      "baseline_signed": {
+        "name": "mid_M3_signed",
+        "n_features": 3,
+        "coefs_std": [
+          -0.060236437570705986,
+          -0.02516213259652823,
+          -0.49631803565380905
+        ],
+        "intercept": -6.444606670907151,
+        "n_is": 9387,
+        "n_oos": 5535,
+        "jumps_is": 16,
+        "jumps_oos": 10,
+        "scaler_mean": [
+          0.001704484925961436,
+          0.16569303302798533,
+          0.017629234873020313
+        ],
+        "scaler_scale": [
+          0.04125020796430736,
+          0.12807944924817258,
+          0.2086809444858829
+        ],
+        "auc_is": 0.6774990662682745,
+        "brier_is": 0.0017007810268698943,
+        "ll_is": -0.0122840206475997,
+        "auc_oos": 0.627764705882353,
+        "brier_oos": 0.0018024134510796722,
+        "ll_oos": -0.012974839629704077
+      },
+      "asymmetric_buysell": {
+        "name": "mid_M5_buysell",
+        "n_features": 3,
+        "coefs_std": [
+          -0.06064304041940612,
+          -0.31674729591671136,
+          0.2699818871715417
+        ],
+        "intercept": -6.451822417940651,
+        "n_is": 9387,
+        "n_oos": 5535,
+        "jumps_is": 16,
+        "jumps_oos": 10,
+        "scaler_mean": [
+          0.001704484925961436,
+          0.09166113395050282,
+          0.0740318990774825
+        ],
+        "scaler_scale": [
+          0.04125020796430736,
+          0.12793481303684398,
+          0.11665643818000554
+        ],
+        "auc_is": 0.6774923967559492,
+        "brier_is": 0.0017008140186165028,
+        "ll_is": -0.01228382015324104,
+        "auc_oos": 0.627764705882353,
+        "brier_oos": 0.0018023881473619445,
+        "ll_oos": -0.01297096568332568
+      },
+      "unreg_coefs": {
+        "intercept": -6.459700896152641,
+        "jump_curr": -0.06510934494626036,
+        "buy": -0.33264904785820104,
+        "sell": 0.27557665909015955
+      },
+      "wald_buy_vs_sell": {
+        "z": -1.7382250235546008,
+        "p": 0.08217117149707986,
+        "abs_sell_over_buy_ratio": 0.8284306264048895
+      }
+    },
+    "high": {
+      "skipped": false,
+      "n_is": 9556,
+      "n_oos": 6172,
+      "jumps_is": 28,
+      "jumps_oos": 6,
+      "baseline_signed": {
+        "name": "high_M3_signed",
+        "n_features": 3,
+        "coefs_std": [
+          0.13495770869195256,
+          0.008660475531683786,
+          -0.13524567587353814
+        ],
+        "intercept": -5.830401357246407,
+        "n_is": 9556,
+        "n_oos": 6172,
+        "jumps_is": 28,
+        "jumps_oos": 6,
+        "scaler_mean": [
+          0.0029300962745918793,
+          0.13854199406154163,
+          0.021998670085944406
+        ],
+        "scaler_scale": [
+          0.05405100193718431,
+          0.11321554712985488,
+          0.17756041998404487
+        ],
+        "auc_is": 0.5541974031426173,
+        "brier_is": 0.0029180259493243174,
+        "ll_is": -0.019809712504369897,
+        "auc_oos": 0.39977294842685696,
+        "brier_oos": 0.0009765404218240877,
+        "ll_oos": -0.008655606364440757
+      },
+      "asymmetric_buysell": {
+        "name": "high_M5_buysell",
+        "n_features": 3,
+        "coefs_std": [
+          0.13474784907019668,
+          -0.07865267841353035,
+          0.08975114478495827
+        ],
+        "intercept": -5.83306614851424,
+        "n_is": 9556,
+        "n_oos": 6172,
+        "jumps_is": 28,
+        "jumps_oos": 6,
+        "scaler_mean": [
+          0.0029300962745918793,
+          0.08027033207374303,
+          0.05827166198779861
+        ],
+        "scaler_scale": [
+          0.05405100193718431,
+          0.11224449904426233,
+          0.0978463277937092
+        ],
+        "auc_is": 0.5541974031426173,
+        "brier_is": 0.00291803760115949,
+        "ll_is": -0.01980896471688117,
+        "auc_oos": 0.39977294842685696,
+        "brier_oos": 0.0009765102672601614,
+        "ll_oos": -0.008650966728651488
+      },
+      "unreg_coefs": {
+        "intercept": -5.833476149588438,
+        "jump_curr": 0.13515755471844412,
+        "buy": -0.08000943547157889,
+        "sell": 0.09122925408086632
+      },
+      "wald_buy_vs_sell": {
+        "z": -0.7761578207119588,
+        "p": 0.4376558071746577,
+        "abs_sell_over_buy_ratio": 1.1402311932731104
+      }
+    }
+  },
+  "stability_table": [
+    {
+      "regime": "low",
+      "n_is": 12555,
+      "n_oos": 9207,
+      "jumps_is": 37,
+      "jumps_oos": 17,
+      "buy_coef": 0.27374527490576855,
+      "sell_coef": 0.3833887658167909,
+      "sell_over_buy_abs": 1.4005310811255645,
+      "wald_z": -0.7182698719519406,
+      "wald_p": 0.47259090298608175,
+      "auc_is_signed": 0.6014949283842079,
+      "auc_oos_signed": 0.48988030467899896,
+      "auc_is_asym": 0.6011926609466154,
+      "auc_oos_asym": 0.49269026435383734
+    },
+    {
+      "regime": "mid",
+      "n_is": 9387,
+      "n_oos": 5535,
+      "jumps_is": 16,
+      "jumps_oos": 10,
+      "buy_coef": -0.33264904785820104,
+      "sell_coef": 0.27557665909015955,
+      "sell_over_buy_abs": 0.8284306264048895,
+      "wald_z": -1.7382250235546008,
+      "wald_p": 0.08217117149707986,
+      "auc_is_signed": 0.6774990662682745,
+      "auc_oos_signed": 0.627764705882353,
+      "auc_is_asym": 0.6774923967559492,
+      "auc_oos_asym": 0.627764705882353
+    },
+    {
+      "regime": "high",
+      "n_is": 9556,
+      "n_oos": 6172,
+      "jumps_is": 28,
+      "jumps_oos": 6,
+      "buy_coef": -0.08000943547157889,
+      "sell_coef": 0.09122925408086632,
+      "sell_over_buy_abs": 1.1402311932731104,
+      "wald_z": -0.7761578207119588,
+      "wald_p": 0.4376558071746577,
+      "auc_is_signed": 0.5541974031426173,
+      "auc_oos_signed": 0.39977294842685696,
+      "auc_is_asym": 0.5541974031426173,
+      "auc_oos_asym": 0.39977294842685696
+    }
+  ],
+  "verdict": {
+    "regime_metrics": {
+      "low": [
+        1.4005310811255645,
+        0.47259090298608175
+      ],
+      "mid": [
+        0.8284306264048895,
+        0.08217117149707986
+      ],
+      "high": [
+        1.1402311932731104,
+        0.4376558071746577
+      ]
+    },
+    "H2_high_fear_asymmetry": {
+      "criterion": "|Wald z|>3 AND |sell|/|buy|>1.5 in high regime",
+      "pass": false
+    },
+    "H3_low_thin_market_asymmetry": {
+      "criterion": "|sell|/|buy| low > high",
+      "pass": true
+    },
+    "H1_both_symmetric": {
+      "criterion": "|sell|/|buy| in (0.7, 1.5) for both low and high",
+      "pass": true
+    },
+    "overall_label": "H3: Low-VIX thin-market asymmetry (unexpected)",
+    "triple_gate_per_regime": {
+      "low": {
+        "wald_pass": false,
+        "auc_oos": 0.49269026435383734,
+        "auc_oos_pass": false
+      },
+      "mid": {
+        "wald_pass": false,
+        "auc_oos": 0.627764705882353,
+        "auc_oos_pass": true
+      },
+      "high": {
+        "wald_pass": false,
+        "auc_oos": 0.39977294842685696,
+        "auc_oos_pass": false
+      }
+    },
+    "triple_gate_overall_pass": false
+  },
+  "references": [
+    "Lee & Mykland (2008) RFS 21(6), 2535-2563",
+    "Cont, Kukanov, Stoikov (2014) JFE 12(1), 47-88"
+  ],
+  "runtime_sec": 3.931625
+}

@@ -1,0 +1,84 @@
+========================================================================
+K1126 - Regime-Conditional OFI Buy/Sell Asymmetry for Jump Prediction
+========================================================================
+[Step 1] Loaded 73,203 bars across 1223 days
+  Period: 2017-01-03 00:00:00 to 2021-12-30 00:00:00
+
+[Step 2] Computing Lee-Mykland jump stat (K=16 per day)...
+  Multi-test threshold (alpha=0.01): 5.126
+  Jumps detected: 115 (0.21%)
+
+[Step 3] Loading VIX and computing ex-ante rolling percentile (252-day)...
+  VIX rows: 1782, pct non-null: 1681
+  After merge: vix_pct_roll non-null: 73203
+  Regime counts (bar-level, full sample):
+    {'low': 30398, 'high': 21967, 'mid': 20838}
+
+[Step 4] Building features and lagged target...
+  Valid bars: 52,412
+  Jump rate (target): 0.218%
+  IS: 31,498  OOS: 20,914
+  IS jump rate: 0.257%
+  OOS jump rate: 0.158%
+
+  Regime x Sample bar counts:
+year       IS   OOS
+regime             
+high     9556  6172
+low     12555  9207
+mid      9387  5535
+
+[Step 5] Fitting regime-conditional logistic regressions...
+
+  --- Regime: LOW ---
+    IS N=12,555  OOS N=9,207
+    IS jumps=37 (0.295%)  OOS jumps=17
+    Baseline M3 AUC: IS=0.6015 OOS=0.4899
+    Asymmetric    AUC: IS=0.6012 OOS=0.4927
+    Std coefs (unreg): buy=+0.2737  sell=+0.3834
+    Wald buy vs sell: z=-0.718, p=0.4726, |sell|/|buy|=1.40
+
+  --- Regime: MID ---
+    IS N=9,387  OOS N=5,535
+    IS jumps=16 (0.170%)  OOS jumps=10
+    Baseline M3 AUC: IS=0.6775 OOS=0.6278
+    Asymmetric    AUC: IS=0.6775 OOS=0.6278
+    Std coefs (unreg): buy=-0.3326  sell=+0.2756
+    Wald buy vs sell: z=-1.738, p=0.0822, |sell|/|buy|=0.83
+
+  --- Regime: HIGH ---
+    IS N=9,556  OOS N=6,172
+    IS jumps=28 (0.293%)  OOS jumps=6
+    Baseline M3 AUC: IS=0.5542 OOS=0.3998
+    Asymmetric    AUC: IS=0.5542 OOS=0.3998
+    Std coefs (unreg): buy=-0.0800  sell=+0.0912
+    Wald buy vs sell: z=-0.776, p=0.4377, |sell|/|buy|=1.14
+
+[Step 6] Cross-regime stability summary...
+regime  n_is  n_oos  jumps_is  jumps_oos  buy_coef  sell_coef  sell_over_buy_abs    wald_z   wald_p  auc_is_signed  auc_oos_signed  auc_is_asym  auc_oos_asym
+   low 12555   9207        37         17  0.273745   0.383389           1.400531 -0.718270 0.472591       0.601495        0.489880     0.601193      0.492690
+   mid  9387   5535        16         10 -0.332649   0.275577           0.828431 -1.738225 0.082171       0.677499        0.627765     0.677492      0.627765
+  high  9556   6172        28          6 -0.080009   0.091229           1.140231 -0.776158 0.437656       0.554197        0.399773     0.554197      0.399773
+
+  Sell/Buy asymmetry by regime:
+    low  : sell=+0.3834  buy=+0.2737  |sell|/|buy|=1.40  Wald z=-0.72 (p=0.473)
+    mid  : sell=+0.2756  buy=-0.3326  |sell|/|buy|=0.83  Wald z=-1.74 (p=0.082)
+    high : sell=+0.0912  buy=-0.0800  |sell|/|buy|=1.14  Wald z=-0.78 (p=0.438)
+  Per-regime table saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a1f8a651/experiments/k1126/k1126_per_regime_table.csv
+
+[Step 7] Verdict...
+  Verdict: H3: Low-VIX thin-market asymmetry (unexpected)
+
+[Step 8] Saving results...
+  Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a1f8a651/experiments/k1126/k1126_results.json
+
+[Step 9] Plots...
+  Plot saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a1f8a651/experiments/k1126/k1126_regime_coefs_auc.png
+  Plot saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a1f8a651/experiments/k1126/k1126_vix_percentile_timeline.png
+
+========================================================================
+K1126 COMPLETE
+========================================================================
+Verdict: H3: Low-VIX thin-market asymmetry (unexpected)
+Triple-gate overall pass: False
+Runtime: 3.9s

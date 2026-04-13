@@ -26328,5 +26328,23 @@
     "data_source": "yfinance EURUSD=X/JPY=X/UUP + ^EVZ (CBOE EuroCurrency VIX, now deprecated) + ^VIX",
     "created_at": "2026-04-14T07:00:00+08:00",
     "updated_at": "2026-04-14T07:00:00+08:00"
+  },
+  {
+    "id": "k1126-1776111817",
+    "experiment_id": "K1126",
+    "title": "K1126 OFI regime asymmetry FAIL: K1125 sell-side is pooled stylized fact, not high-VIX fear mechanism",
+    "content": "[提出: Claude, 執行: Claude] K1125 TAIFEX sell-side asymmetry (signed OFI coef=-0.187, 反 US Cont 2014) 後提出假說: 是不是 high-VIX regime 放大? K1128 IS-based cutoffs degenerate 不 testable。K1126 改用 **ex-ante rolling 252-day VIX percentile** (避免 E064) 分 low/mid/high regime, 每 regime 內 signed OFI 分 buy side (max(0, OFI)) + sell side (min(0, OFI))。**結果 triple-gate FAIL**: Low regime Wald z=-0.72 p=0.47 AUC OOS 0.493; Mid regime z=-1.74 p=0.08 AUC 0.628 (唯一 > 0.55 但 Wald fail); High regime z=-0.78 p=0.44 AUC 0.400 (COVID small-N 6 jumps fragile)。**β magnitudes small**: 全部 |β|<0.4, Sell/Buy ratio 最高 1.40 (Low regime, asymptotically symmetric)。**Verdict**: H2 high-VIX fear asymmetry **REJECTED**。H1 symmetry cannot be rejected at data power。**K1125 sell-side signal 確實存在但 carried by Mid-VIX bars 不是 stress regimes**。**Taiwan microstructure paper narrative guidance**: keep K1125 as pooled stylized fact; **DO NOT** pitch as 'high-VIX fear mechanism'。Next moves: (a) 擴大 TAIFEX 2012-2016 pre-2017 增加 jumps per regime, (b) continuous RV top-decile 代替 binary jumps power, (c) volume tertile regime 替代 VIX, (d) contemporaneous OFI 不是 lagged。",
+    "tags": [
+      "K1126",
+      "Taiwan-microstructure",
+      "OFI",
+      "TAIFEX",
+      "K1125-followup",
+      "regime-asymmetry-rejected",
+      "triple-gate-FAIL"
+    ],
+    "data_source": "Reuse K1124/K1125 TAIFEX TX 5-min bars 2017-2021 + Lee-Mykland jump flags + rolling VIX percentile",
+    "created_at": "2026-04-14T07:30:00+08:00",
+    "updated_at": "2026-04-14T07:30:00+08:00"
   }
 ]
