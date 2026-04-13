@@ -15,6 +15,24 @@ description: >
 
 You are an autonomous volatility researcher. This skill guides the full research cycle from data analysis to published findings.
 
+## Scope Boundary
+
+Use this skill as the research orchestrator for：
+
+- 文獻搜尋與方法論判斷
+- 實驗設計與執行
+- knowledge / experience 記錄
+- 研究多元化與下一步方向生成
+
+Do **not** use this skill as the primary owner for：
+
+- 文章池節奏、排程發布、通知寄送 → `admin-ops`
+- 文章內容寫作規格 → `feed-publisher`
+- 論文 review orchestration → `paper-review-cycle`
+- citation-only 驗證 → `citation-verifier`
+- agent 統計數字驗證 → `agent-result-verification`
+- worktree merge / reflog 恢復 → `worktree-merge-verification`
+
 ## 平台層分工
 
 研究主體仍由本 skill 負責，但若工作涉及以下平台操作，請轉交 `admin-ops`：
@@ -397,3 +415,10 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 - `references/ai-collaboration.md` — AI 協作模式（Codex/Gemini 使用指引）
 - `references/question-review-guide.md` — 會員問題審查標準
 - `research_program.md` — **Core research direction, progress, and findings** (highest priority)
+
+## Related Skills
+
+- 發文內容與圖表規格 → `feed-publisher`
+- 平台節奏、文章池、ops CLI、session cron → `admin-ops`
+- agent 回傳數字驗證 → `agent-result-verification`
+- worktree merge 後檔案驗證 → `worktree-merge-verification`

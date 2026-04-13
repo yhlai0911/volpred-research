@@ -593,6 +593,24 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - **Paper 4 status**: 主線程寫作 priority 1，建議標題 "Universal Sufficiency of Native Implied Volatility for Weekly Realized Volatility Prediction: A 10-Experiment Compendium"
 - **教訓 E061/E062**: knowledge-base precheck 救重複實驗 + FRED publication delay (NFCI shift(5), EPU shift(2)) 必查
 
+### 10. Taiwan microstructure findings（2026-04-13 K1124+K1125+K1128）
+**TAIFEX OFI 對 diffusive vol 和 jump 方向相反（Cont-Tankov decomposition 實證）**
+- K1124：|OFI| ↑ → 下一 5-min RV ↓ (反 US 市場直覺，Taiwan mean-revert after unwind)
+- K1125：|OFI| ↑ → jump 機率 ↑ (DM t=+2.82, sell-side asymmetric)
+- K1128：High-VIX tertile DM t=+3.59 超 Harvey，但 COVID OOS 超出 IS 範圍 (E064 教訓)
+- 合：Cont-Tankov (2004) decomposition 在 TAIFEX 實證成立，diffusive 主導解釋 K1124 total RV 降
+- **Paper Taiwan microstructure** candidate（US vs Taiwan 對比、sell-side asymmetry）
+- Triple-gate 擋住 K1124/K1125/K1128 各自 null，但 meta-finding (decomposition + regime) 可寫
+
+### 11. GAS compendium: 8+ assets 全 null（2026-04-13 K437/K1038/K1129）
+**Generalized Autoregressive Score (Creal-Koopman-Lucas 2008) 不是通用替代品**
+- K437/K1038：equity 4 assets NS
+- K1129：USO/GLD/UNG/BTC 4 assets triple-gate FAIL；**BTC DM t=-4.58 Harvey 反向**（score-driven 在 crypto extreme regime 反 hurt）
+- Hafner-Wang (2023) commodity GAS claim 在 2021-2026 OOS 未重現
+- **不單獨 paper**，併入 Paper 4 vix-sufficiency 作「alt-model NULL」第三類（alt-data forecasting + alt-data allocation + alt-model）
+- 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
+- H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
+
 ### 9. 防 in-sample data mining 的雙重門檻（2026-04-13 K1100g_d1/K1115/K1116 教訓）
 **LRT 顯著 + DM-HLN<2 = overfit 警訊**（E059）：
 - LRT 用全樣本 likelihood 易 overfit residual variance → χ² 易顯著

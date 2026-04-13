@@ -4,11 +4,28 @@ description: >
   會員問題研究。每 6 小時由 cron 自動觸發。評估排名會員提問，
   選最高分做研究，回答發佈為 feed 文章（proposer=會員名稱），
   問答頁自動連結文章。每次只處理一個問題。
-  Trigger phrases: '會員問題研究', 'member questions', '提問排名', '評估會員問題'
+  Trigger phrases: '會員問題研究', 'member questions', '提問排名', '評估會員問題',
+  'question ranking', 'question rerank'. Do not use for the core experiment itself
+  (use autonomous-research), article writing (use feed-publisher), or general
+  platform surfaces unrelated to member questions (use admin-ops).
 user-invocable: true
 ---
 
 # 會員問題研究
+
+這個 skill 是會員問題審查與流轉的唯一母本。它負責：
+
+- 評分 `pending_questions`
+- stable insertion rerank
+- atomic claim 防撞
+- candidate lifecycle
+- `question-answer` 綁定
+
+它不負責：
+
+- 真正的研究與新實驗：交給 `autonomous-research`
+- 文章內容寫作與圖表：交給 `feed-publisher`
+- 一般平台後台操作：交給 `admin-ops`
 
 ## 核心原則
 - **每個回答 = 一篇完整資訊性文章**（1000-2000 字，委託研究報告等級）
@@ -48,4 +65,10 @@ user-invocable: true
 10. 回報：處理了哪個問題、發了什麼文章、問題狀態（researching=等待發佈 / answered=已完成）
 
 ## 詳細實作
-見 `references/evaluation-guide.md`（評分標準、Supabase 程式碼、文章格式模板、DB 欄位）
+見 [references/evaluation-guide.md](references/evaluation-guide.md)：
+
+- 評分標準與 `score_breakdown`
+- stable insertion 規則
+- candidate / question status lifecycle
+- `question-answer` 綁定規範
+- 常見錯誤與邊界案例

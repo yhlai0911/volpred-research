@@ -21,6 +21,21 @@ Use this skill for **platform-layer work**. Treat it as the operating manual for
 - `/api/admin/*`
 - `uv run python -m volpred.cli ops ...`
 
+## Scope Boundary
+
+Use this skill when the job is about：
+
+- 平台 surfaces 與 ops CLI
+- 文章池、排程、節奏釋出、通知
+- 策略 metadata / 問答營運 / paper metadata
+- session cron、monitor、platform-cycle 類型工作流
+
+Do **not** use this skill for：
+
+- 核心研究設計與實驗判斷 → `autonomous-research`
+- 文章內容撰寫 → `feed-publisher`
+- 論文內容品質或 citation 驗證 → `finance-paper-quality` / `citation-verifier`
+
 Do **not** use this skill as the main research workflow. When the task is primarily about:
 
 - model experiments
