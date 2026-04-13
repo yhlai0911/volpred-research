@@ -25873,5 +25873,23 @@
     ],
     "data_source": "K1125 cached TAIFEX 5-min bars + yfinance VIX daily",
     "created_at": "2026-04-13T10:52:20.728030+00:00"
+  },
+  {
+    "id": "k1129-1776078698",
+    "experiment_id": "K1129",
+    "title": "K1129: GAS-t commodity NULL (4/4 FAIL, BTC DM -4.58 反向顯著), GAS compendium 8+ assets 全 null",
+    "content": "[提出: 用戶+文獻, 執行: Claude] 4 commodity × 3 models OOS (2015-2020 IS, 2021-2026 test)。**4/4 triple gate FAIL**: USO QLIKE +2.65% 但 DM t=1.03 NS; GLD +-0.47% NS; UNG +0.10% NS; **BTC DM t=-4.58 Harvey 反向顯著 M1 GJR-Normal 勝** (score-driven 在 crypto bubble+FTX+tail events 期間 hurt)。H2 kurt→gain Spearman 0.20 p=0.80 FAIL（重尾不保證 GAS 優勢）。H4 VaR violation 4/4 M3<M1 confirmed（分配假設準 ≠ vol predict 好）。**GAS compendium K437+K1038+K1129 = 8+ assets 全 NULL**，Hafner-Wang (2023) commodity claim 在 2021-2026 OOS 未重現。**不建議單獨 paper**——可加進 Paper 4 vix-sufficiency 作 alt-method null。Codex PASS all checks。Commit ab6ad13e。",
+    "tags": [
+      "Paper_4",
+      "GAS-t",
+      "commodity-NULL",
+      "BTC-reverse-DM",
+      "compendium-8-assets-null",
+      "K1038-K437-companion",
+      "triple-gate-save",
+      "crypto-extreme-regime"
+    ],
+    "data_source": "yfinance USO/GLD/UNG/BTC-USD 2015-2026",
+    "created_at": "2026-04-13T11:11:38.667147+00:00"
   }
 ]
