@@ -748,7 +748,8 @@
     "title": "K1170: press-release concentration mechanism — solve EU-JP residual gap",
     "priority": 3,
     "description": "K1167 institutions_pct EU(0.416)≈JP(0.425) 但 θ_rel EU 0.14 << JP 0.39。新假說: 財報日 media coverage 集中度 (US Bloomberg/CNBC + JP 日經 single-source vs EU 多語言分散)。Proxy: GDELT or Bloomberg news count per earnings event per stock per market。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T04:00:00+08:00"
   },
   {
     "id": "K1168",
@@ -777,6 +778,13 @@
     "title": "K1173: Refine institutional-share proxy for emerging markets",
     "priority": 3,
     "description": "K1168 BR/CH/IN θ_rel residuals 主因 yfinance institutional% 對新興市場不準: CH state-owned undercounted, IN promoter+FII inflated, BR control-shareholder ambiguous. 用 BCBS/CSRC/SEBI/CVM 官方數據 separate state-owned vs private institutions, 重做 N=10 cross-market regression。",
+    "status": "pending"
+  },
+  {
+    "id": "K1174",
+    "title": "K1174: GDELT BigQuery export for true per-stock PCR (replaces K1170 hardcoded)",
+    "priority": 3,
+    "description": "K1170 GDELT DOC API 429 → hardcoded PCR (circularity risk)。改用 GDELT BigQuery export (公開 GCP, 不限速) 取每檔股票 ±2 天 article volume 算 true per-stock PCR variance, rerun within-market panel 看 PCR 是否真有 per-stock signal。",
     "status": "pending"
   }
 ]

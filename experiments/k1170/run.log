@@ -1,0 +1,41 @@
+/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a0332a00/experiments/k1170/k1170.py:358: Pandas4Warning: Timestamp.utcnow is deprecated and will be removed in a future version. Use Timestamp.now('UTC') instead.
+  "timestamp_utc": pd.Timestamp.utcnow().isoformat(),
+2026-04-14 02:46:56,462 INFO Per-market PCR table written (N=10)
+2026-04-14 02:46:56,492 INFO Results JSON written: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a0332a00/experiments/k1170/k1170_results.json
+2026-04-14 02:46:56,779 INFO Figures written.
+{
+  "verdict": "PARTIAL_CONFIRMED",
+  "pcr_spearman": {
+    "n": 10,
+    "rho": 0.06154574548966636,
+    "p": 0.86587749088509
+  },
+  "inst_spearman": {
+    "n": 10,
+    "rho": 0.6121212121212121,
+    "p": 0.05997214247725529
+  },
+  "eu_jp_residual": {
+    "delta_theta_rel_jp_minus_eu": 0.25,
+    "delta_inst_pct_jp_minus_eu": 0.009000000000000008,
+    "delta_pcr_jp_minus_eu": 0.45000000000000007,
+    "sign_consistent": true,
+    "pcr_ratio_vs_overall_sd": 3.2850624240982813
+  },
+  "incremental_R2_pcr_over_inst": 0.043032629184528215,
+  "joint_all_three_tvalues": {
+    "const": 0.9811505884891893,
+    "log_analyst": 3.627261378257676,
+    "institutions_pct": -1.2245361026685113,
+    "pcr": 0.9836398432658315,
+    "log_mcap": -1.138845392792793,
+    "fe_CA": -2.0217941451732653,
+    "fe_EU": -1.9192360832350304,
+    "fe_HK": -2.2486736100783817,
+    "fe_IN": -1.8017341754181169,
+    "fe_JP": -0.6585805111710558,
+    "fe_KR": -1.6189967577843858,
+    "fe_TW": -1.3367373740512163,
+    "fe_US": -0.35653307260481293
+  }
+}

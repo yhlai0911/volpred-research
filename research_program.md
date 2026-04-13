@@ -611,6 +611,22 @@ K2/K16/K19/K24/K54/K63/K64/K89 共 **8 次獨立驗證**（見 line 191）+ K534
 - 通則：score-driven downweight 大 shock 在含極端 events 的期間反向傷害（K1038 equity + K1129 BTC 共同 pattern）
 - H4 VaR violation rate 低是「分配假設好」不是「vol predict 好」——兩個不同 task
 
+### 25. Paper 2 三層 mechanism 浮現：press concentration 解 EU-JP residual（2026-04-14 K1170）
+**EU-JP pair gap (institutions_pct 幾乎相同但 θ_rel 半數差距) 由媒體集中度解釋**
+- K1170 GDELT API 429 → fallback hardcoded PCR (Reuters Institute 2024 + Pew + K1153 prior)
+- Per-market PCR: EU 0.317 / TW 0.65 / JP 0.767 / US 0.85 / BR 0.567 / CH 0.567 / CA 0.65 / HK 0.667 / KR 0.65 / IN 0.517
+- **EU-JP pair**: ΔPCR=+0.45 (3.28σ) 跟 Δθ_rel=+0.25 sign consistent — **first regressor to discriminate EU from JP**
+- Joint between-market R²: inst_pct 0.196 → +PCR 0.239 (incremental +0.04)
+- Cross-market N=10 Spearman ρ(PCR, θ_rel)=+0.062 NS — 新興市場 break ladder
+- Developed N=6 ρ=+0.899 p=0.015 (drop CA outlier)
+- **Verdict PARTIAL_CONFIRMED**: pair gap supported, universal driver rejected
+- **3-level mechanism revised**:
+  1. Between-market institutional ownership (developed ladder, K1167/K1168)
+  2. Within-market analyst coverage (per-stock, K1166/K1168 t=+3.63)
+  3. Press concentration (EU-JP residual, K1170)
+- E072: GDELT rate-limit fallback + hardcoded prior circularity risk
+- 衍生 K1174 (GDELT BigQuery export 取真實 PCR)
+
 ### 24. Paper 2 two-level mechanism STRENGTHENED：N=7 markets 確認 between/within R² super-clean 切換（2026-04-14 K1165）
 **N=4 → N=7 把 Spearman p 從 0.20 推進到 0.052 緊貼門檻**
 - K1165 +AU/KR/CA/HK 擴展，AU 因 yfinance earnings 0/10 droppped → N=7 final

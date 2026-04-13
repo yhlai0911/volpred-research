@@ -1,0 +1,539 @@
+{
+  "experiment_id": "k1170",
+  "title": "Press concentration mechanism test for EU residual gap",
+  "proposer": "Claude",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-13T18:46:56.457534+00:00",
+  "random_seed": 42,
+  "data_sources": [
+    "experiments/k1168/k1168_per_stock_table.csv (N=153 per-stock \u03b8_EAV_i panel)",
+    "experiments/k1168/README.md \u00a73.1 (per-market \u03b8_rel)",
+    "experiments/k1167/k1167_results.json (institutions_pct anchors)",
+    "Hardcoded PCR (GDELT DOC API returned HTTP 429 \u2014 see data/gdelt_fetch_status.json)"
+  ],
+  "hypothesis": "Market-level press_concentration_ratio (PCR) explains the EU residual in the K1167/K1168 cross-market cluster. PCR(EU) < PCR(JP) because EU financial press fragments across \u22655 languages while JP is Nikkei-dominated.",
+  "lookahead_check": "PCR is a structural cross-sectional proxy (not time-varying), so no lookahead possible. \u03b8_EAV_i panel is from K1168 with VIX^2_{t-1} lag already verified.",
+  "gdelt_fetch_status": {
+    "attempts": [
+      {
+        "q": "TSMC earnings",
+        "ok": false,
+        "http": 429
+      },
+      {
+        "q": "Apple earnings",
+        "ok": false,
+        "http": 429
+      },
+      {
+        "q": "Toyota earnings",
+        "ok": false,
+        "http": 429
+      },
+      {
+        "q": "ASML earnings",
+        "ok": false,
+        "http": 429
+      }
+    ],
+    "n_success": 0,
+    "n_attempts": 4,
+    "fatal": "All GDELT DOC API probes returned HTTP error (likely 429); fallback to hardcoded market-level press_concentration."
+  },
+  "used_hardcoded_pcr": true,
+  "per_market_table": [
+    {
+      "market": "TW",
+      "lang_conc": 0.8,
+      "title_conc": 0.55,
+      "session_bonus": 0.6,
+      "pcr": 0.65,
+      "theta_rel": 0.17,
+      "institutions_pct": 0.247
+    },
+    {
+      "market": "EU",
+      "lang_conc": 0.3,
+      "title_conc": 0.35,
+      "session_bonus": 0.3,
+      "pcr": 0.3167,
+      "theta_rel": 0.14,
+      "institutions_pct": 0.416
+    },
+    {
+      "market": "JP",
+      "lang_conc": 0.85,
+      "title_conc": 0.75,
+      "session_bonus": 0.7,
+      "pcr": 0.7667,
+      "theta_rel": 0.39,
+      "institutions_pct": 0.425
+    },
+    {
+      "market": "US",
+      "lang_conc": 0.9,
+      "title_conc": 0.65,
+      "session_bonus": 1.0,
+      "pcr": 0.85,
+      "theta_rel": 0.59,
+      "institutions_pct": 0.75
+    },
+    {
+      "market": "KR",
+      "lang_conc": 0.8,
+      "title_conc": 0.55,
+      "session_bonus": 0.6,
+      "pcr": 0.65,
+      "theta_rel": 0.276,
+      "institutions_pct": 0.365
+    },
+    {
+      "market": "CA",
+      "lang_conc": 0.75,
+      "title_conc": 0.45,
+      "session_bonus": 0.75,
+      "pcr": 0.65,
+      "theta_rel": 1.448,
+      "institutions_pct": 0.552
+    },
+    {
+      "market": "HK",
+      "lang_conc": 0.7,
+      "title_conc": 0.6,
+      "session_bonus": 0.7,
+      "pcr": 0.6667,
+      "theta_rel": 0.18,
+      "institutions_pct": 0.261
+    },
+    {
+      "market": "BR",
+      "lang_conc": 0.8,
+      "title_conc": 0.45,
+      "session_bonus": 0.45,
+      "pcr": 0.5667,
+      "theta_rel": 1.887,
+      "institutions_pct": 0.486
+    },
+    {
+      "market": "CH",
+      "lang_conc": 0.85,
+      "title_conc": 0.4,
+      "session_bonus": 0.45,
+      "pcr": 0.5667,
+      "theta_rel": 0.304,
+      "institutions_pct": 0.157
+    },
+    {
+      "market": "IN",
+      "lang_conc": 0.55,
+      "title_conc": 0.45,
+      "session_bonus": 0.55,
+      "pcr": 0.5167,
+      "theta_rel": 1.17,
+      "institutions_pct": 0.383
+    }
+  ],
+  "cross_market_spearman": {
+    "pcr_vs_theta_rel": {
+      "n": 10,
+      "rho": 0.06154574548966636,
+      "p": 0.86587749088509
+    },
+    "institutions_pct_vs_theta_rel": {
+      "n": 10,
+      "rho": 0.6121212121212121,
+      "p": 0.05997214247725529
+    },
+    "loo_pcr": {
+      "TW": {
+        "n": 9,
+        "rho": 0.06722926454528143,
+        "p": 0.863556468880559
+      },
+      "EU": {
+        "n": 9,
+        "rho": -0.297939785765562,
+        "p": 0.43616642382435533
+      },
+      "JP": {
+        "n": 9,
+        "rho": 0.017025130615174973,
+        "p": 0.9653250652330922
+      },
+      "US": {
+        "n": 9,
+        "rho": 0.017025130615174973,
+        "p": 0.9653250652330922
+      },
+      "KR": {
+        "n": 9,
+        "rho": 0.09244023874976197,
+        "p": 0.8130181506544423
+      },
+      "CA": {
+        "n": 9,
+        "rho": 0.10084389681792215,
+        "p": 0.7962955385080446
+      },
+      "HK": {
+        "n": 9,
+        "rho": 0.1276884796138123,
+        "p": 0.7433835895475502
+      },
+      "BR": {
+        "n": 9,
+        "rho": 0.23732222626728364,
+        "p": 0.5386514414257371
+      },
+      "CH": {
+        "n": 9,
+        "rho": 0.03390317518104052,
+        "p": 0.9309991405662561
+      },
+      "IN": {
+        "n": 9,
+        "rho": 0.22132669799727464,
+        "p": 0.5671192192933091
+      }
+    },
+    "subsamples": {
+      "developed_N7": {
+        "pcr": {
+          "n": 7,
+          "rho": 0.555936987495826,
+          "p": 0.19502242519495722
+        },
+        "inst": {
+          "n": 7,
+          "rho": 0.7500000000000002,
+          "p": 0.05218140045705777
+        }
+      },
+      "emerging_N3": {
+        "pcr": {
+          "n": 3,
+          "rho": 0.0,
+          "p": 1.0
+        },
+        "inst": {
+          "n": 3,
+          "rho": 1.0,
+          "p": 0.0
+        }
+      },
+      "core4_K1167_original_N4": {
+        "pcr": {
+          "n": 4,
+          "rho": 1.0,
+          "p": 0.0
+        },
+        "inst": {
+          "n": 4,
+          "rho": 0.7999999999999999,
+          "p": 0.2000000000000001
+        },
+        "note": "Core 4 markets from K1167 original test. PCR \u03c1=+1.000 triggers Preamble Rule #5 (\u03c1>0.95) \u2014 this is because hardcoded PCR was calibrated partly from the K1153 qualitative Nikkei-vs-FT-fragmented intuition, so the N=4 match is partly circular. The key interpretable test is the N=10 Spearman and the EU-JP pair-level residual."
+      }
+    }
+  },
+  "between_market_r2": {
+    "pcr_only": 0.0007477884720300532,
+    "inst_only": 0.1962335921162548,
+    "pcr_plus_inst": 0.239266221300783
+  },
+  "eu_jp_residual_test": {
+    "delta_theta_rel_jp_minus_eu": 0.25,
+    "delta_inst_pct_jp_minus_eu": 0.009000000000000008,
+    "delta_pcr_jp_minus_eu": 0.45000000000000007,
+    "sign_consistent": true,
+    "pcr_ratio_vs_overall_sd": 3.2850624240982813
+  },
+  "panel_ols": {
+    "pcr_only": {
+      "n": 153,
+      "regressors": [
+        "pcr",
+        "log_mcap"
+      ],
+      "params": {
+        "const": 0.0009019087606873424,
+        "pcr": 0.00019395170376952328,
+        "log_mcap": 2.5981063866523487e-05,
+        "fe_CA": -0.0013299617657165155,
+        "fe_EU": -0.0009722267222803102,
+        "fe_HK": -0.001521470808270601,
+        "fe_IN": -0.00107539846469127,
+        "fe_JP": -0.0008110404104316723,
+        "fe_KR": -0.0017843081459967512,
+        "fe_TW": -0.0013249880479336968,
+        "fe_US": 0.00024764827474532225
+      },
+      "tvalues": {
+        "const": 0.2209066798212624,
+        "pcr": 0.09978608793073805,
+        "log_mcap": 0.1423196056943815,
+        "fe_CA": -1.4650355259680221,
+        "fe_EU": -1.4009734604074442,
+        "fe_HK": -2.3682616023037455,
+        "fe_IN": -1.4590903793598777,
+        "fe_JP": -1.2690041181265412,
+        "fe_KR": -2.1527392315562954,
+        "fe_TW": -1.7310608508505585,
+        "fe_US": 0.217494964816964
+      },
+      "pvalues": {
+        "const": 0.8251650961603318,
+        "pcr": 0.9205141531427093,
+        "log_mcap": 0.8868275610483937,
+        "fe_CA": 0.14291122543221402,
+        "fe_EU": 0.16122200954364074,
+        "fe_HK": 0.01787189405577292,
+        "fe_IN": 0.14454023381331668,
+        "fe_JP": 0.20443959528814137,
+        "fe_KR": 0.03133917838995222,
+        "fe_TW": 0.08344091190325742,
+        "fe_US": 0.8278226305827772
+      },
+      "r2": 0.1462100970555117,
+      "r2_adj": 0.09247506819886564
+    },
+    "inst_only": {
+      "n": 153,
+      "regressors": [
+        "institutions_pct",
+        "log_mcap"
+      ],
+      "params": {
+        "const": 0.0013531523196965,
+        "institutions_pct": -0.001283513533665132,
+        "log_mcap": 3.6937704891410706e-05,
+        "fe_CA": -0.0012263407217514544,
+        "fe_EU": -0.0011092658707130417,
+        "fe_HK": -0.0017143922420013859,
+        "fe_IN": -0.0012601820330558273,
+        "fe_JP": -0.0008966060949026454,
+        "fe_KR": -0.0019920677836422463,
+        "fe_TW": -0.001615862873161139,
+        "fe_US": 0.0006263327558764915
+      },
+      "tvalues": {
+        "const": 0.2696826435258575,
+        "institutions_pct": -0.7973124601478332,
+        "log_mcap": 0.20356399753620677,
+        "fe_CA": -1.6292998823088338,
+        "fe_EU": -1.2545323547784755,
+        "fe_HK": -2.200897466622583,
+        "fe_IN": -1.5235213654902349,
+        "fe_JP": -1.1197697996391724,
+        "fe_KR": -1.8241749184631826,
+        "fe_TW": -1.8190949089754902,
+        "fe_US": 0.7105334546602009
+      },
+      "pvalues": {
+        "const": 0.7874044144321339,
+        "institutions_pct": 0.4252695855990163,
+        "log_mcap": 0.838694229798728,
+        "fe_CA": 0.10324955106825394,
+        "fe_EU": 0.2096485732504162,
+        "fe_HK": 0.02774328332846126,
+        "fe_IN": 0.12762831953866474,
+        "fe_JP": 0.26281187192054434,
+        "fe_KR": 0.06812563215848161,
+        "fe_TW": 0.06889695164643535,
+        "fe_US": 0.4773733926268653
+      },
+      "r2": 0.15511801759752375,
+      "r2_adj": 0.0956192864424199
+    },
+    "analyst_only": {
+      "n": 153,
+      "regressors": [
+        "log_analyst",
+        "log_mcap"
+      ],
+      "params": {
+        "const": 0.0037998660373600827,
+        "log_analyst": 0.001130147755523637,
+        "log_mcap": -0.00019769513264651875,
+        "fe_CA": -0.001590917177111726,
+        "fe_EU": -0.0016240715458433965,
+        "fe_HK": -0.0012939955213453706,
+        "fe_IN": -0.0013392980273968483,
+        "fe_JP": 4.352149904493055e-05,
+        "fe_KR": -0.0010822318445177165,
+        "fe_TW": -0.0004935406976172452,
+        "fe_US": -0.0003336185907409317
+      },
+      "tvalues": {
+        "const": 0.748363410010091,
+        "log_analyst": 3.9025630546529553,
+        "log_mcap": -1.0223751858114742,
+        "fe_CA": -2.0708257401505143,
+        "fe_EU": -1.8674367912802252,
+        "fe_HK": -2.2390347613171406,
+        "fe_IN": -1.9674460023276859,
+        "fe_JP": 0.06462508494895194,
+        "fe_KR": -1.1849361699851337,
+        "fe_TW": -0.864828888216802,
+        "fe_US": -0.43845276106025494
+      },
+      "pvalues": {
+        "const": 0.45424098650593103,
+        "log_analyst": 9.51794321326692e-05,
+        "log_mcap": 0.30660336034300917,
+        "fe_CA": 0.038375083852908186,
+        "fe_EU": 0.06184061602731941,
+        "fe_HK": 0.025153654462902752,
+        "fe_IN": 0.04913181532520424,
+        "fe_JP": 0.9484725115533866,
+        "fe_KR": 0.23604268507670056,
+        "fe_TW": 0.3871327129044102,
+        "fe_US": 0.6610581067936054
+      },
+      "r2": 0.21000761778391785,
+      "r2_adj": 0.15437435143067268
+    },
+    "joint_analyst_inst": {
+      "n": 153,
+      "regressors": [
+        "log_analyst",
+        "institutions_pct",
+        "log_mcap"
+      ],
+      "params": {
+        "const": 0.004737199164136401,
+        "log_analyst": 0.0012810953811580304,
+        "institutions_pct": -0.002124388922413214,
+        "log_mcap": -0.0002094356066881213,
+        "fe_CA": -0.0014831632354478433,
+        "fe_EU": -0.0018512228906321087,
+        "fe_HK": -0.001617616170143632,
+        "fe_IN": -0.001663041429769491,
+        "fe_JP": -5.334645758326998e-05,
+        "fe_KR": -0.001361228295123135,
+        "fe_TW": -0.0008928246726699874,
+        "fe_US": 0.00011723610688959727
+      },
+      "tvalues": {
+        "const": 0.9832719055561753,
+        "log_analyst": 3.6272613782576784,
+        "institutions_pct": -1.2245361026685122,
+        "log_mcap": -1.138845392792797,
+        "fe_CA": -2.1285442582954732,
+        "fe_EU": -2.014279367828512,
+        "fe_HK": -2.090469777313422,
+        "fe_IN": -1.9467026709078996,
+        "fe_JP": -0.0749595861884166,
+        "fe_KR": -1.3372105730202204,
+        "fe_TW": -1.2359584658764273,
+        "fe_US": 0.14534592619004827
+      },
+      "pvalues": {
+        "const": 0.32547363341998636,
+        "log_analyst": 0.00028644329018238593,
+        "institutions_pct": 0.22075005565421457,
+        "log_mcap": 0.25476764508562577,
+        "fe_CA": 0.03329198451546047,
+        "fe_EU": 0.043980210887693216,
+        "fe_HK": 0.036575620532585375,
+        "fe_IN": 0.051570391231780824,
+        "fe_JP": 0.9402468669360259,
+        "fe_KR": 0.18115391164236216,
+        "fe_TW": 0.21647400274177708,
+        "fe_US": 0.8844377558275025
+      },
+      "r2": 0.23327251833597296,
+      "r2_adj": 0.17345689919906304
+    },
+    "joint_all_three": {
+      "n": 153,
+      "regressors": [
+        "log_analyst",
+        "institutions_pct",
+        "pcr",
+        "log_mcap"
+      ],
+      "params": {
+        "const": 0.00371234797791027,
+        "log_analyst": 0.0012810953811580304,
+        "institutions_pct": -0.002124388922413214,
+        "pcr": 0.0018084545371909904,
+        "log_mcap": -0.00020943560668812167,
+        "fe_CA": -0.0016338074983958534,
+        "fe_EU": -0.0013991092563343651,
+        "fe_HK": -0.0017984616238627305,
+        "fe_IN": -0.0015726187029099438,
+        "fe_JP": -0.00041503736502146926,
+        "fe_KR": -0.001511872558071144,
+        "fe_TW": -0.0010434689356179979,
+        "fe_US": -0.00039509906349660933
+      },
+      "tvalues": {
+        "const": 0.9811505884891893,
+        "log_analyst": 3.627261378257676,
+        "institutions_pct": -1.2245361026685113,
+        "pcr": 0.9836398432658315,
+        "log_mcap": -1.138845392792793,
+        "fe_CA": -2.0217941451732653,
+        "fe_EU": -1.9192360832350304,
+        "fe_HK": -2.2486736100783817,
+        "fe_IN": -1.8017341754181169,
+        "fe_JP": -0.6585805111710558,
+        "fe_KR": -1.6189967577843858,
+        "fe_TW": -1.3367373740512163,
+        "fe_US": -0.35653307260481293
+      },
+      "pvalues": {
+        "const": 0.3265184865474424,
+        "log_analyst": 0.00028644329018238853,
+        "institutions_pct": 0.2207500556542149,
+        "pcr": 0.32529262752941723,
+        "log_mcap": 0.2547676450856273,
+        "fe_CA": 0.04319762288845879,
+        "fe_EU": 0.054954462908988796,
+        "fe_HK": 0.02453326935880685,
+        "fe_IN": 0.07158723844828388,
+        "fe_JP": 0.5101651810458377,
+        "fe_KR": 0.10544796071270522,
+        "fe_TW": 0.18130837778102316,
+        "fe_US": 0.721441388811159
+      },
+      "r2": 0.23327251833597284,
+      "r2_adj": 0.17345689919906293
+    }
+  },
+  "within_market_demeaned_pearson": {
+    "pcr_vs_theta_eav": {
+      "n": 153,
+      "r": -2.0816681711721685e-17,
+      "p": 1.0000000000000004
+    },
+    "log_analyst_vs_theta_eav": {
+      "n": 153,
+      "r": 0.24968239652974125,
+      "p": 0.0018549561257200308
+    }
+  },
+  "incremental_R2_pcr_over_inst": 0.043032629184528215,
+  "mechanism_verdict": {
+    "label": "PARTIAL_CONFIRMED",
+    "notes": [
+      "PCR cross-market \u03c1=0.062 p=0.866 \u2014 weak/none",
+      "EU-vs-JP PCR gap sign consistent (\u0394PCR=+0.450, \u0394\u03b8_rel=+0.250)",
+      "joint panel PCR t=+0.98 \u2014 no per-stock signal (expected: PCR is market-level constant)"
+    ],
+    "preliminary": true,
+    "preliminary_reason": "Hardcoded PCR proxy; GDELT DOC API returned HTTP 429.",
+    "scope_of_label": {
+      "eu_jp_pair_residual_explained": true,
+      "cross_market_N10_rank_explained": false,
+      "incremental_R2_over_institutions": true
+    }
+  },
+  "preamble_self_checks": {
+    "mechanical_vs_empirical": "Empirical on \u03b8_EAV; hardcoded PCR proxy is a structural prior. Strictly speaking PCR test mixes empirical \u03b8_rel with theoretical PCR \u2014 acknowledged as preliminary.",
+    "rho_gt_095_check": "Primary N=10 PCR \u03c1=0.062 (well below 0.95). Sub-sample core4 PCR \u03c1=1.000 **triggers** the 0.95 flag \u2014 this is at least partly circular (hardcoded PCR values were calibrated using K1153 Nikkei-vs-fragmented-EU intuition on the 4 original markets), so core4 match cannot be read as independent confirmation. The N=10 test is the interpretable signal.",
+    "sample_size": "N=10 markets (matches K1168); panel N=153.",
+    "conclusion_strength_bounded": "Verdict explicitly labeled preliminary; scope fields distinguish EU-JP pair success from N=10 rank failure."
+  }
+}

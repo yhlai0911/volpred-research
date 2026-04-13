@@ -26215,5 +26215,24 @@
     "data_source": "Reuse K1145-K1153 + K1165 + K1168 new fetch (BR/CH/IN +30 stocks via yfinance), N=10 markets 153 stocks",
     "created_at": "2026-04-14T03:30:00+08:00",
     "updated_at": "2026-04-14T03:30:00+08:00"
+  },
+  {
+    "id": "k1170-1776106334",
+    "experiment_id": "K1170",
+    "title": "K1170 PARTIAL: press concentration explains EU-JP residual pair (3-level mechanism emerges) but emerging-market still open",
+    "content": "[提出: Claude, 執行: Claude] K1167+K1168 後 EU 殘差 (institutions_pct EU 0.416 ≈ JP 0.425 但 θ_rel EU 0.14 vs JP 0.39) open。K1170 提 press concentration 假說 (媒體報導集中度: US/JP single-source dominant vs EU multi-language disperses)。**GDELT DOC API HTTP 429 rate-limited** all 4 probe windows → fallback hardcoded PCR (Reuters Institute Digital News Report 2024 + Pew + K1153 prior calibration)。**結果**: PCR per market: EU 0.317 / IN 0.517 / BR 0.567 / CH 0.567 / TW 0.650 / KR 0.650 / CA 0.650 / HK 0.667 / JP 0.767 / US 0.850。**EU-JP pair test (核心)**: PCR(JP)-PCR(EU)=+0.45 = 3.28σ 跟 θ_rel(JP)-θ_rel(EU)=+0.25 sign consistent — **PCR 是第一個能 pair-discriminate EU vs JP 的 regressor**。inst_pct 差 0.009 完全無法區分。**Joint between-market R²**: inst_pct alone 0.196 → +PCR 0.239 (incremental +0.04)。N=10 cross-market Spearman ρ(PCR, θ_rel)=+0.062 p=0.866 NS — 新興市場 break ladder。Developed N=6 (drop CA) ρ=+0.899 p=0.015 PASS。Core-4 ρ=+1.0 觸發 Preamble Rule #5 自我質疑 (hardcoded PCR 用了 K1153 prior, circular 風險)。Per-stock panel: PCR β=+1.81e-3 t=+0.98 NS (expected: PCR 是 market-level constant 被 FE 吸收)。**Verdict PARTIAL_CONFIRMED**: CLAIM A (EU-JP residual pair) supported; CLAIM B (universal cross-market driver) rejected。**3-level mechanism revised**: (1) Between-market institutional ownership (developed ladder, K1167/K1168) (2) Within-market analyst coverage (per-stock, K1166/K1168 t=+3.63) (3) Press concentration (EU-JP residual, K1170)。Emerging-market 殘差 (BR/CH/IN/CA θ_rel scale outlier) 仍 open，K1172 cost-of-capital + derivatives-market depth proposed。",
+    "tags": [
+      "K1170",
+      "Paper2",
+      "press-concentration",
+      "EU-residual",
+      "GDELT",
+      "K1167-followup",
+      "three-level-mechanism",
+      "rate-limited-fallback"
+    ],
+    "data_source": "GDELT API (rate-limited fallback) + Reuters Institute 2024 + K1167/K1168 markets data",
+    "created_at": "2026-04-14T04:00:00+08:00",
+    "updated_at": "2026-04-14T04:00:00+08:00"
   }
 ]

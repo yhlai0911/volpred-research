@@ -991,5 +991,19 @@
     "source_experiments": [
       "K1167"
     ]
+  },
+  {
+    "id": "E072",
+    "title": "GDELT DOC API rate limit + hardcoded prior calibration risk",
+    "category": "data-source",
+    "lesson": "GDELT 2.0 DOC API 對 large queries 嚴格 rate-limit (HTTP 429 even with backoff)。fallback 用 hardcoded prior 估算雖能完成實驗，但若 prior 來自同一組 markets 的先驗知識 → circularity risk (Preamble Rule #5 觸發)。記錄 hardcoded source 與 prior 來源是必要 transparency。",
+    "examples": [
+      "K1170 GDELT 429 → 改用 Reuters Institute 2024 + Pew + K1153 prior 估算 PCR per market",
+      "Core-4 markets (TW/EU/JP/US) PCR Spearman ρ=+1.0 完美擬合 — 觸發 Rule #5，因為 PCR 校準時用了 K1153 cluster 的 prior 資訊"
+    ],
+    "recommendation": "GDELT 大量查詢用 BigQuery export (公開 GCP) 而非 DOC API。Hardcoded fallback 必須在 README + results 標明 prior 來源 + 避免 circularity (從不在當前 markets 之外的 prior 來源校準)。Rule #5 自證 ρ>0.95 時必檢視是否 circular。",
+    "source_experiments": [
+      "K1170"
+    ]
   }
 ]

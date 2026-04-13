@@ -1,0 +1,27 @@
+{
+  "attempts": [
+    {
+      "q": "TSMC earnings",
+      "ok": false,
+      "http": 429
+    },
+    {
+      "q": "Apple earnings",
+      "ok": false,
+      "http": 429
+    },
+    {
+      "q": "Toyota earnings",
+      "ok": false,
+      "http": 429
+    },
+    {
+      "q": "ASML earnings",
+      "ok": false,
+      "http": 429
+    }
+  ],
+  "n_success": 0,
+  "n_attempts": 4,
+  "fatal": "All GDELT DOC API probes returned HTTP error (likely 429); fallback to hardcoded market-level press_concentration."
+}
