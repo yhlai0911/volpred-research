@@ -1,0 +1,71 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a226f844
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a226f844
+Installed 109 packages in 1.03s
+
+========================================================================
+K1067f: VIX-only ablation (no EAV in tau)
+========================================================================
+
+[1/5] Loading cached stocks ...
+  TW: loaded 31/31 (skipped: [])
+  US: loaded 30/30 (skipped: [])
+  JP: loaded 30/30 (skipped: [])
+  EU: loaded 19/30 (skipped: ['MC.PA', 'OR.PA', 'SU.PA', 'DG.PA', 'RMS.PA', 'AI.PA', 'ULVR.L', 'RIO.L', 'DGE.L', 'REL.L', 'LSEG.L'])
+  Total loaded: 110 stocks
+
+[2/5] Per-stock VIX-only MLE fits (n_workers=8) ...
+  All 110 fits done in 3.3s
+
+  Converged: 110/110
+  Stocks with any param at bound: 4/110
+
+[3/5] Merge with K1166 full-spec per-stock table ...
+  Saved: k1067f_per_stock_comparison.csv
+
+[4/5] Cross-stock comparison noEAV vs full ...
+  Pooled (N=110): rho_Spearman(noEAV, full) = +0.949 (p=8.26e-56)
+  Pooled Pearson r = +0.784
+  Sign agreement = 1.000 (110/110)
+  Ratio noEAV/full: median=+1.00, mean=+1.03, IQR=[+0.91, +1.07]
+  LR (full vs noEAV): mean diff LL = +41.60, median = +10.38, full wins in 77/110
+  LR reject @0.05: 61.82%, @0.01: 60.00%
+    TW: rho=+0.904, sign_agree=1.00, mean_noEAV=+5.028e-07 vs full=+4.346e-07, %|t|>2_noEAV=100%
+    EU: rho=+0.930, sign_agree=1.00, mean_noEAV=+5.508e-07 vs full=+5.467e-07, %|t|>2_noEAV=100%
+    JP: rho=+0.910, sign_agree=1.00, mean_noEAV=+5.746e-07 vs full=+6.015e-07, %|t|>2_noEAV=100%
+    US: rho=+0.965, sign_agree=1.00, mean_noEAV=+5.608e-07 vs full=+5.360e-07, %|t|>2_noEAV=100%
+
+  Mechanism replay (symmetry check): Spearman(log_analyst, theta_vix_noEAV):
+    pooled: rho=+0.172 (p=0.075, N=108)
+    TW: rho=-0.066 (p=0.731, N=30)
+    US: rho=+0.607 (p=0.000, N=30)
+    JP: rho=-0.211 (p=0.262, N=30)
+    EU: rho=+0.174 (p=0.489, N=18)
+
+  Panel: theta_vix_noEAV ~ log_analyst + log_mcap + market_FE (HC0):
+    D_EU: beta=+6.1249e-07, SE=6.5863e-07, t=+0.930, p=0.3546
+    D_JP: beta=+6.4709e-07, SE=7.8050e-07, t=+0.829, p=0.4090
+    D_TW: beta=+5.6752e-07, SE=7.2622e-07, t=+0.781, p=0.4363
+    D_US: beta=+6.0413e-07, SE=7.0191e-07, t=+0.861, p=0.3914
+    log_analyst: beta=+2.2772e-08, SE=7.4124e-08, t=+0.307, p=0.7593
+    log_mcap: beta=-4.5042e-09, SE=2.7214e-08, t=-0.166, p=0.8689
+    R^2 = 0.008, n = 108
+
+  Panel reference: theta_vix (K1166 full) ~ log_analyst + log_mcap + market_FE (HC0):
+    D_EU: beta=+2.8390e-07, SE=6.5101e-07, t=+0.436, p=0.6637
+    D_JP: beta=+3.4978e-07, SE=7.8163e-07, t=+0.448, p=0.6555
+    D_TW: beta=+2.3478e-07, SE=7.0811e-07, t=+0.332, p=0.7409
+    D_US: beta=+2.2047e-07, SE=6.8677e-07, t=+0.321, p=0.7488
+    log_analyst: beta=+8.9819e-08, SE=3.9180e-08, t=+2.292, p=0.0239
+    log_mcap: beta=+1.6596e-10, SE=2.6755e-08, t=+0.006, p=0.9951
+    R^2 = 0.088, n = 108
+
+[5/5] Plots ...
+  k1067f_scatter_noEAV_vs_full.png
+  k1067f_sign_consistency_hist.png
+
+  Ablation verdict: H1: VIX channel truly independent (rho>0.9, sign_agree>90%)
+
+[DONE] Results: k1067f_results.json
+[DONE] Total time: 8.6s
