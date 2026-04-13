@@ -1,0 +1,94 @@
+==============================================================================
+K1107: Panel θ_EAV with Time Fixed Effects
+==============================================================================
+
+[Stage 0] Loading K1104 firm-level params ...
+  K1104 firms: 24
+  After persistence < 0.998 filter: 24
+  Train firms (non-holdout): 23
+
+[Stage 1] Building event-level panel ...
+  Panel shape: (1377, 16)
+  Unique firms: 23
+  Unique years: [np.int64(2010), np.int64(2011), np.int64(2012), np.int64(2013), np.int64(2014), np.int64(2015), np.int64(2016), np.int64(2017), np.int64(2018), np.int64(2019), np.int64(2020), np.int64(2021), np.int64(2022), np.int64(2023), np.int64(2024), np.int64(2025)]
+  Events per firm (summary):
+count    23.000000
+mean     59.869565
+std       0.457697
+min      59.000000
+25%      60.000000
+50%      60.000000
+75%      60.000000
+max      61.000000
+  rel_lift stats: mean=0.8101, std=1.2806, median=0.4526
+  Saved panel → /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ae36d2a7/experiments/k1107/k1107_panel.csv
+
+[Stage 2a] Baseline spec (no time FE) — event-level panel
+  Usable rows: 1377
+  Winsorizing y at 1/99 pct: [-0.5372, 5.0466]
+
+  Baseline (no time FE): R²=0.0726, n=1377, G=23
+    const                     β=+7.067e-01  SE_clust=3.069e-01 t_clust=+2.30  p=0.031 **
+    foundry                   β=+9.149e-01  SE_clust=4.183e-01 t_clust=+2.19  p=0.040 **
+    fabless                   β=+1.129e-01  SE_clust=5.836e-01 t_clust=+0.19  p=0.848 
+    log_mktcap_z              β=-3.614e-01  SE_clust=2.022e-01 t_clust=-1.79  p=0.088 *
+
+[Stage 2b] With time FE (year + quarter dummies)
+  Time FE: R²=0.0804, n=1377, G=23, k=22
+  (showing only firm covariates; year/quarter suppressed)
+    const                     β=+8.459e-01  SE_clust=2.915e-01 t_clust=+2.90  p=0.008 ***
+    foundry                   β=+9.091e-01  SE_clust=4.219e-01 t_clust=+2.15  p=0.042 **
+    fabless                   β=+1.128e-01  SE_clust=5.875e-01 t_clust=+0.19  p=0.850 
+    log_mktcap_z              β=-3.602e-01  SE_clust=2.039e-01 t_clust=-1.77  p=0.091 *
+
+[Stage 2c] With year FE only
+  Year FE: R²=0.0762, n=1377
+    const                     β=+7.056e-01  SE_clust=2.919e-01 t_clust=+2.42  p=0.024 **
+    foundry                   β=+9.155e-01  SE_clust=4.207e-01 t_clust=+2.18  p=0.041 **
+    fabless                   β=+1.120e-01  SE_clust=5.870e-01 t_clust=+0.19  p=0.850 
+    log_mktcap_z              β=-3.617e-01  SE_clust=2.034e-01 t_clust=-1.78  p=0.089 *
+
+[Stage 2d] With quarter FE only
+  Quarter FE: R²=0.0765, n=1377
+    const                     β=+8.141e-01  SE_clust=3.065e-01 t_clust=+2.66  p=0.014 ***
+    foundry                   β=+9.088e-01  SE_clust=4.196e-01 t_clust=+2.17  p=0.041 **
+    fabless                   β=+1.134e-01  SE_clust=5.842e-01 t_clust=+0.19  p=0.848 
+    log_mktcap_z              β=-3.600e-01  SE_clust=2.027e-01 t_clust=-1.78  p=0.090 *
+
+[Stage 3] Model-free outcome: log(r²_event / r²_baseline)
+  Usable rows: 1377
+
+  [Model-free log r² surprise] Baseline (no time FE): R²=0.0021, n=1377
+    const                     β=-2.527  SE_clust=0.214  t=-11.80  p=0.000 ***
+    foundry                   β=+0.792  SE_clust=0.369  t=+2.15  p=0.043 **
+    fabless                   β=+0.255  SE_clust=0.265  t=+0.96  p=0.347 
+    log_mktcap_z              β=-0.177  SE_clust=0.112  t=-1.58  p=0.128 
+
+  [Model-free log r² surprise] With Year+Quarter FE: R²=0.0177, n=1377
+    const                     β=-2.371  SE_clust=0.770  t=-3.08  p=0.005 ***
+    foundry                   β=+0.801  SE_clust=0.371  t=+2.16  p=0.042 **
+    fabless                   β=+0.257  SE_clust=0.266  t=+0.97  p=0.344 
+    log_mktcap_z              β=-0.178  SE_clust=0.113  t=-1.57  p=0.130 
+
+==============================================================================
+K1104 vs K1107 comparison
+==============================================================================
+Outcome #1: relative τ lift reconstructed from K1104 fitted params
+K1104 fabless (firm-level OLS on θ₂): coef=-9.61e-4, t=-2.22, p=0.039
+K1107 Baseline panel (no time FE):     coef=+1.129e-01, t=+0.19, p=0.848
+K1107 + Year FE:                       coef=+1.120e-01, t=+0.19, p=0.850
+K1107 + Quarter FE:                    coef=+1.134e-01, t=+0.19, p=0.848
+K1107 + Year+Quarter FE:               coef=+1.128e-01, t=+0.19, p=0.850
+
+Outcome #2: log(r²_event / r²_baseline) — model-free event vol surprise
+K1107 Baseline (no time FE):   coef=+0.255, t=+0.96, p=0.347
+K1107 + Year+Quarter FE:       coef=+0.257, t=+0.97, p=0.344
+
+Verdict: NOT SUPPORTED (model-free): fabless event-vol surprise indistinguishable from non-fabless firms when controlling for own-firm baseline and time.
+t-stat attenuation (baseline → time-FE): +0.7%
+
+  Results saved → /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ae36d2a7/experiments/k1107/k1107_results.json
+  Plot saved → /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ae36d2a7/experiments/k1107/k1107_fabless_forest.png
+  Plot saved → /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ae36d2a7/experiments/k1107/k1107_lift_by_year.png
+
+K1107 complete in 2.4s

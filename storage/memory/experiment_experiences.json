@@ -1040,5 +1040,22 @@
       "K1100g_d2",
       "K1100g_d3"
     ]
+  },
+  {
+    "id": "E075",
+    "title": "Cross-sectional type dummy significant 不等於真 type effect — within-type bimodal 可偽造顯著",
+    "category": "methodology",
+    "lesson": "K1104 cross-sectional OLS 4 家 fabless 給 t=-2.22 顯著, K1107 event-panel 平衡 firm weight 後 t=+0.96 NS — 因 4 家 fabless 內部 bimodal (2 家強負 + 2 家強正)。Cross-sectional equal-firm weight 被 extreme firms 主導; event panel equal-event weight (每 firm ~60 events, 24 stocks × ~60=1377) 讓 bimodal firms 彼此抵銷, 真 type effect 浮現。",
+    "examples": [
+      "K1104 firm-OLS fabless t=-2.22 p=0.039* vs K1107 event-panel t=+0.96 p=0.35 — 相反結論",
+      "Fabless 內部 MediaTek/Realtek 強負 (-1.6/-2.4e-3) 抵銷 Novatek/Phison 強正 (+0.7/+1.2e-3)",
+      "Foundry 只 2 家 (TSMC/UMC) 但 internally consistent，event panel t=+2.16 與 firm-OLS 方向一致"
+    ],
+    "recommendation": "任何 firm-characteristic dummy regression (fabless/foundry/sector/country), 必做 event-level panel check with time FE。cross-sectional equal-firm weight 在 N_type<8 時嚴重受 extreme firms 主導, event-panel 才是 honest test。Paper 2 firm-selection rule pre-commit 前須有此 panel evidence。",
+    "source_experiments": [
+      "K1104",
+      "K1107",
+      "K1108"
+    ]
   }
 ]

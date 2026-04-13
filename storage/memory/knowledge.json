@@ -26508,5 +26508,23 @@
     "data_source": "FRED monthly EPU/CFNAI/NFCI/UMCSENT/INDPRO + SPY monthly RV 2010-2025",
     "created_at": "2026-04-14T14:30:00+08:00",
     "updated_at": "2026-04-14T14:30:00+08:00"
+  },
+  {
+    "id": "k1107-1776123175",
+    "experiment_id": "K1107",
+    "title": "K1107 Paper 2 Rule 修正: Fabless effect driven by within-type bimodal, Foundry effect robust with time FE",
+    "content": "[提出: Claude, 執行: Claude] K1104 firm-level OLS: fabless β=-9.61e-4 t=-2.22 p=0.039 *, K1107 加 Year+Quarter FE 重估 panel (23 firms × ~60 events = 1377 events)。**結果 NOT SUPPORTED for Fabless but SUPPORTED for Foundry**。Outcome #2 model-free log(r²_event/r²_baseline) panel: Fabless β=+0.255 t=+0.96 p=0.35 → +Year+Quarter FE β=+0.257 t=+0.97 (attenuation 0.7%)。**Time FE 幾乎無影響** (by-year rel_lift 0.66-0.95 stable, no regime shift)。**真正原因**: K1104 cross-sectional (equal-firm weight) 被 4 家 fabless 中 MediaTek θ₂=-1.6e-3 + Realtek -2.4e-3 主導, 但 Novatek +7e-4 + Phison +1.2e-3 **符號相反** (bimodal)。Event panel (equal-event weight) Novatek/Phison rel_lift +1.89/+2.73 抵銷 MediaTek/Realtek -0.12/-0.16。**Foundry ROBUST**: β=+0.79→+0.80 with time FE, **t=+2.15→+2.16 * 仍顯著**。log_mktcap_z β=-0.177 t=-1.58 p=0.13 (方向一致未顯著)。**Paper 2 firm-selection rule 修正**: Rule 1 (prefer Foundry) **保留** — time FE 下 t=+2.16 穩健; Rule 2 (avoid Fabless) **撤回** — panel 層級不成立, fabless 內部 bimodal 不可視為單一類別; Rule 3 (prefer 小市值) 保留方向僅未顯著。衍生 D1: 擴 50 檔 0050.TW 讓 fabless 達 8-10 家, 細分 fabless 子類 (通訊 MediaTek/Realtek vs memory/storage controller Novatek/Phison)——商業模式差異可能是真正分化維度。",
+    "tags": [
+      "K1107",
+      "Paper2",
+      "time-FE",
+      "fabless-rule-withdrawn",
+      "foundry-rule-robust",
+      "within-type-bimodal",
+      "K1104-followup"
+    ],
+    "data_source": "Reuse K1104 per-firm A4f-EAV fitted params, 23 firms × 60 events panel 2014-2025",
+    "created_at": "2026-04-14T14:45:00+08:00",
+    "updated_at": "2026-04-14T14:45:00+08:00"
   }
 ]
