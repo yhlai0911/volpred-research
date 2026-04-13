@@ -1,0 +1,56 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+[20:53:10] Fetching TLT daily...
+[20:53:11]   TLT weekly RV: 588 weeks, range 2015-01-09..2026-04-10
+[20:53:11] Fetching ^MOVE daily...
+[20:53:11]   ^MOVE weekly: 589 weeks
+[20:53:11] Loading FRED stress indicators (local cache)...
+[20:53:11]   NFCI from fred_NFCI.csv: 588 rows, last=2026-04-03
+[20:53:11]   ANFCI cache missing -> skipping (M4 uses NFCI + STLFSI only)
+[20:53:11]   STLFSI4 from fred_STLFSI4.csv: 588 rows, last=2026-04-03
+[20:53:11]   Merged weekly panel: (588, 4), range 2015-01-09..2026-04-10
+[20:53:11]   Columns: ['rv', 'MOVE', 'NFCI', 'STLFSI']
+[20:53:11] 
+========== Full-sample DM (reproducibility vs K1116b) ==========
+[20:53:13] 
+========== Rolling 52-week DM: M4 vs M1 ==========
+[20:53:16]   432 rolling windows computed
+[20:53:16] 
+========== Rolling 52-week DM: M4 vs M3 ==========
+[20:53:20]   432 rolling windows computed
+[20:53:20] 
+========== Block bootstrap for post-2022 M4 vs M3 ==========
+[20:53:20] 
+========== Formal regime split (Pre-2022 vs Post-2022) ==========
+[20:53:20] Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a535460b/experiments/k1120/k1120_results.json
+[20:53:21] Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a535460b/experiments/k1120/k1120_rolling_dm.png
+[20:53:21] Saved -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a535460b/experiments/k1120/k1120_regime_compare.png
+
+================================================================================
+K1120 SUMMARY
+================================================================================
+Panel: 2015-01-09 .. 2026-04-10  n_weeks=588
+
+Full-sample (reprod vs K1116b):
+  M4_vs_M1: t=+0.583  p=0.5600  n=291
+  M4_vs_M3: t=+5.388  p=0.0000  n=291
+
+Pre-2022 (ZIRP+COVID):
+  M4_vs_M1: t=-0.936  n=185
+  M4_vs_M3: t=+0.722  n=185
+
+Post-2022 (rate hike):
+  M4_vs_M1: t=+8.054  n=104
+  M4_vs_M3: t=+5.675  n=104
+
+Rolling M4 vs M3 summary:
+  n_windows=432  mean_t=-0.008  median_t=+0.225
+  max_t=+2.981 at 2023-11-03
+  min_t=-4.420 at 2017-01-27
+  pct(t>3)=0.0%  pct(t>2)=9.5%
+
+Verdict: H1 — TLT FinStress is regime-dependent — significant ONLY in rate-hike era
+  - Post-2022 M4 vs M3 t=+5.675 Harvey-sig, Pre-2022 t=+0.722 NS
+  - Block bootstrap (8wk, 1000 reps) Post-2022: 99.8% > Harvey +3; Pre-2022 only 2.6% — robust
+
+Paper 4 impact: Paper 4 must add regime caveat: TLT M4 IV-sufficiency is regime-contingent, holding during ZIRP but breaking during rapid tightening. Universal claim becomes 'IV sufficient except during rate-cycle inflection.'

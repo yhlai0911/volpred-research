@@ -356,7 +356,8 @@
     "title": "K1120: TLT FinStress regime-dependent tracking",
     "priority": 3,
     "description": "K1118 衍生：52-week rolling DM 驗證 M4 是否只在 rate-hike regime (2023-24) 有 signal。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T09:00:00+08:00"
   },
   {
     "id": "K1121",
@@ -820,6 +821,13 @@
     "title": "K1116f: PIT alignment 套用 GLD/TLT/BTC cross-asset Paper 4 cells",
     "priority": 3,
     "description": "K1116c SPY 已 ROBUST NULL。擴展 PIT 套用到 K1118 cross-asset (GLD/TLT/BTC), 確認 alt-data NULL universality 跨資產 (K1118 原用 shift(1))。",
+    "status": "pending"
+  },
+  {
+    "id": "K1120b",
+    "title": "K1120b: Residualized NFCI (control VIX+MOVE) TLT regime retest",
+    "priority": 3,
+    "description": "K1120 post-2022 M4 t=+5.68 但 NFCI 可能共享 Fed shock with VIX/MOVE。residualize NFCI on VIX+MOVE 取殘差再測 DM，排除 common shock confound。",
     "status": "pending"
   }
 ]

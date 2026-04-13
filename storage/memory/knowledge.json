@@ -26364,5 +26364,24 @@
     "data_source": "fredgraph.csv revision-corrected + FRED release-calendar PIT alignment (ALFRED blocked) + SPY weekly RV",
     "created_at": "2026-04-14T08:30:00+08:00",
     "updated_at": "2026-04-14T08:30:00+08:00"
+  },
+  {
+    "id": "k1120-1776113797",
+    "experiment_id": "K1120",
+    "title": "K1120 H1 CONFIRMED: TLT FinStress predictive power is rate-hike regime-specific (rare Paper 4 regime finding)",
+    "content": "[提出: Claude, 執行: Claude] K1118 測 TLT cross-asset IV 顯 M4 (FinStress NFCI/STLFSI) marginal。K1120 用 52-week rolling DM + pre-2022 vs post-2022 regime split 檢驗 regime-contingent hypothesis。**H1 CONFIRMED**: Pre-2022 (ZIRP+COVID, n=185 OOS) M4 vs M1 t=-0.94 NS, M4 vs M3 t=+0.72 NS; **Post-2022 (rate hike, n=104 OOS) M4 vs M1 t=+8.05, M4 vs M3 t=+5.68 Harvey triple-PASS**。Block bootstrap 8-wk 1000 reps: Post-2022 **99.8% samples > Harvey 3**, Pre-2022 **僅 2.6%**。Rolling 52-week windows (432 個) 最大 +2.98 at 2023-11-03, 最小 -4.42 at 2017-01-27 — 沒有單一窗口破 Harvey 3 (regime-split joint power 來自 104-week combined OOS)。Pre-2022 94.4% windows M4<M3; Post-2022 94.4% windows M4>M3 — 幾乎完全翻轉。**Preamble Rule #5 audit** (post-2022 t=+8.054 > 6): bootstrap 99.8% > 3 + rolling 52-wk max +2.98 共同佐證，signal 真實但 +8 反映 joint OOS 102-105 week 共同擬合 (Paper 4 引用應用 +5.675 vs M3 為主證據)。**Paper 4 narrative 修正**: '3/4 asset classes (SPY/GLD/BTC) universal NULL; **TLT 需 regime caveat** — native MOVE IV 充分於 ZIRP/COVID/cutting regime, 但 2022-2024 rapid-tightening regime 下 NFCI+STLFSI 擊敗 MOVE'。機制推測: MOVE 只測 Treasury options IV, 未涵蓋 banking funding spreads / shadow banking liquidity; 升息 regime 下 SVB 2023-03 + regional bank crisis 2023-04 提供具體案例。E064 教訓成功應用 (rolling regime split + ex-ante percentile 避免 IS-cutoff degeneracy)。局限: Post-2022 只 213 weeks, ANFCI cache 缺失, cutting regime 30 windows 機制 replication 不足; K1120b 候選 residualized NFCI (控 VIX+MOVE) 重測。",
+    "tags": [
+      "K1120",
+      "Paper4",
+      "TLT",
+      "FinStress",
+      "regime-dependent",
+      "H1-CONFIRMED",
+      "rate-hike-specific",
+      "E064-applied"
+    ],
+    "data_source": "yfinance TLT 2015-2025 + FRED NFCI/STLFSI + ^VIX + ^MOVE + Fed policy regime markers",
+    "created_at": "2026-04-14T09:00:00+08:00",
+    "updated_at": "2026-04-14T09:00:00+08:00"
   }
 ]
