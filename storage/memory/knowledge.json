@@ -24827,7 +24827,7 @@
     "id": "know_20260412162544_k1067",
     "experiment_id": "K1067",
     "title": "K1067: TSMC Single-Stock A4f-EAV NULL — But Testing Wrong Stock (TSMC T+1=0.983 Weakest)",
-    "content": "[提出: Claude, 執行: Claude] K1067 tests A4f+EAV on TSMC (2330.TW) single-stock to discriminate H_div (diversification dilution) vs H_vix (VIX absorption) for K1064's ETF-level NULL. 28 OOS event days, 1,697 non-event days. ALL HYPOTHESES FAIL: H1 (DM Harvey) t=+0.348 p=0.73 (A4f baseline wins), H2 (θ₂>0) mean=-4.48e-4, p=0.95, H3 (event |t| > non-event |t|) 0.083 < 0.323 opposite of predicted. H4 PASS marginal (TSMC -0.07% > K1064 ETF -0.205%, marginal diversification evidence). IMPORTANT CAVEAT: Agent discovered K1067 prompt incorrectly claimed TSMC T+1=2.58 (actually UMC 2303.TW). K1060 actual per-stock T+1 ratios: TSMC=0.983 WEAKEST, UMC=2.579 STRONGEST, Hon Hai=2.063, Delta=1.681, Cathay=1.960, 中鋼=2.146, CTBC=0.791, Fubon=1.128, MediaTek=0.872, 中華電=0.452. TSMC's T+1 signal is near-zero (p=0.97), so NULL test on TSMC may simply reflect TSMC-specific absence of EAV rather than structural H_vix. Preliminary diagnosis: H_vix favored but incomplete — needs K1067b on UMC/Hon Hai/中鋼 (strong T+1 stocks) to resolve. Paper 2 implication: A4f with US VIX² remains correct spec for 0050.TW (K1058+K1064 consistent); EAV integration not recommended for A4f family. K1059 A4f event-window amplification (DM t=2.50) remains valid architectural finding.",
+    "content": "[提出: Claude, 執行: Claude] K1067 tests A4f+EAV on TSMC (2330.TW) single-stock to discriminate H_div (diversification dilution) vs H_vix (VIX absorption) for K1064's ETF-level NULL. 28 OOS event days, 1,697 non-event days. ALL HYPOTHESES FAIL: H1 (DM Harvey) t=+0.348 p=0.73 (A4f baseline wins), H2 (θ₂>0) mean=-4.48e-4, p=0.95, H3 (event |t| > non-event |t|) 0.083 < 0.323 opposite of predicted. H4 PASS marginal (TSMC -0.07% > K1064 ETF -0.205%, marginal diversification evidence). IMPORTANT CAVEAT: Agent discovered K1067 prompt incorrectly claimed TSMC T+1=2.58 (actually UMC 2303.TW). K1060 actual per-stock T+1 ratios: TSMC=0.983 WEAKEST, UMC=2.579 STRONGEST, Hon Hai=2.063, Delta=1.681, Cathay=1.960, 中鋼=2.146, CTBC=0.791, Fubon=1.128, MediaTek=0.872, 中華電=0.452. TSMC's T+1 signal is near-zero (p=0.97), so NULL test on TSMC may simply reflect TSMC-specific absence of EAV rather than structural H_vix. Preliminary diagnosis: H_vix favored but incomplete — needs K1067b on UMC/Hon Hai/中鋼 (strong T+1 stocks) to resolve. Paper 2 implication: A4f with US VIX² remains correct spec for 0050.TW (K1058+K1064 consistent); EAV integration not recommended for A4f family. K1059 A4f event-window amplification (DM t=2.50) remains valid architectural finding. **[K1103 τ-lag robustness verified 2026-04-13: bug effect negligible, conclusion HOLDS.]**",
     "tags": [
       "A4f",
       "EAV",
@@ -24836,12 +24836,14 @@
       "NULL",
       "H_vix",
       "methodology-error",
-      "Taiwan"
+      "Taiwan",
+      "K1103-verified"
     ],
     "category": "experiment",
     "data_source": "yfinance 2330.TW + VIX 2010-2025 + 財報公告日.txt",
     "confidence": 0.65,
-    "timestamp": "2026-04-12T16:25:44.345307+00:00"
+    "timestamp": "2026-04-12T16:25:44.345307+00:00",
+    "updated_at": "2026-04-13T04:28:37.942702+00:00"
   },
   {
     "id": "know_20260412174034_k1068",
@@ -25481,7 +25483,7 @@
     "id": "k1067b-1776051202",
     "experiment_id": "K1067b",
     "title": "K1067b: UMC (2303.TW) A4f-EAV — MIXED, resolves K1067 TSMC NULL",
-    "content": "[提出: 賴奕豪, 執行: Claude] 承接 K1067 TSMC NULL 的 power 驗證。UMC T+1=2.579（Top 4 最強）vs TSMC 0.983（最弱）。結果 MIXED：H1 FAIL (DM t=-1.37, Harvey NS, 方向 EAV_better)；**H2 PASS 極顯著** (θ₂ 100% 27/27 refits 為正, t=+15.43, p<1e-14)；**H3 PASS** (event T+1 DM t=-2.204, p=0.036, QLIKE 改善 +39.3%; non-event |t|=0.160)；H4 PASS (UMC +0.517% >> TSMC -0.070%)。K1067 vs K1067b 核心對比：in-sample corr 從 -0.0011 翻至 +0.0319 (29x)；θ₂ positive fraction 0.59→1.00；θ₂ one-sided p 從 0.948 翻至 6.7e-15。**結論**：既非純 H_vix 主導，也非 signal-absent。EAV 在 event window 有真預測價值但 event days 只占 1.6%，稀釋到全 OOS 未達 Harvey。**Paper 2 建議**：從 A4f 主模型 regressor list 移除 EAV，但保留為 descriptive event-window 分析（honest MIXED reporting）。**K1067 需回溯修正**：「H_vix DOMINATES」應軟化為「H_vix + power insufficient」。Codex 審查通過，方法論 100% 匹配 K1067（只改 TICKER + H4）。",
+    "content": "[提出: 賴奕豪, 執行: Claude] 承接 K1067 TSMC NULL 的 power 驗證。UMC T+1=2.579（Top 4 最強）vs TSMC 0.983（最弱）。結果 MIXED：H1 FAIL (DM t=-1.37, Harvey NS, 方向 EAV_better)；**H2 PASS 極顯著** (θ₂ 100% 27/27 refits 為正, t=+15.43, p<1e-14)；**H3 PASS** (event T+1 DM t=-2.204, p=0.036, QLIKE 改善 +39.3%; non-event |t|=0.160)；H4 PASS (UMC +0.517% >> TSMC -0.070%)。K1067 vs K1067b 核心對比：in-sample corr 從 -0.0011 翻至 +0.0319 (29x)；θ₂ positive fraction 0.59→1.00；θ₂ one-sided p 從 0.948 翻至 6.7e-15。**結論**：既非純 H_vix 主導，也非 signal-absent。EAV 在 event window 有真預測價值但 event days 只占 1.6%，稀釋到全 OOS 未達 Harvey。**Paper 2 建議**：從 A4f 主模型 regressor list 移除 EAV，但保留為 descriptive event-window 分析（honest MIXED reporting）。**K1067 需回溯修正**：「H_vix DOMINATES」應軟化為「H_vix + power insufficient」。Codex 審查通過，方法論 100% 匹配 K1067（只改 TICKER + H4）。 **[K1103 τ-lag robustness verified 2026-04-13: bug effect negligible, conclusion HOLDS.]**",
     "tags": [
       "Paper_2",
       "A4f-EAV",
@@ -25492,16 +25494,18 @@
       "power-analysis",
       "K1067-followup",
       "MIXED-result",
-      "methodology-correction"
+      "methodology-correction",
+      "K1103-verified"
     ],
     "data_source": "yfinance (2303.TW UMC, VIX, 0050.TW), 財報公告日.txt",
-    "created_at": "2026-04-13T03:33:22.518061+00:00"
+    "created_at": "2026-04-13T03:33:22.518061+00:00",
+    "updated_at": "2026-04-13T04:28:37.942720+00:00"
   },
   {
     "id": "k1067c-1776052515",
     "experiment_id": "K1067c",
     "title": "K1067c: MediaTek (2454.TW) A4f-EAV — MONOTONICITY FAIL, decisive counterexample",
-    "content": "[提出: 賴奕豪+Claude, 執行: Claude] 第三重驗證：MediaTek T+1=1.67 中間值應給介於 TSMC 和 UMC 之間的 event DM（預期 -0.90），實測 +1.59（A4f 優），residual +2.49 超閾值 5 倍。**Monotonicity FAIL**：T+1 amplification 不是 EAV event-window edge 的單調預測子。三公司對照：in-sample corr -0.0011→-0.0168→+0.0319（MediaTek 最負）；θ₂ positive fraction 0.593→0.185→1.000（MediaTek 最低，非中間）；event improvement -0.25%→-23.46%→+39.27%（MediaTek 大幅惡化）；event DM t +0.08→+1.59→-2.20（方向翻轉）。**結論**：UMC +39% 可能是 firm-specific artefact（foundry 商品化、分析師覆蓋不足、EPS 變異大），非可一般化規律。**Paper 2 影響**：T+1 作為 firm-selection criterion 不可行。若保留 EAV，必須走 panel GARCH-MIDAS（N≥15）+ 多 firm-covariates（analyst dispersion, float, foundry/fabless dummy）。**Codex 發現 inherited bug**：K1067 系列 u_prev=r_{t-1}/√τ[t] 應為 τ[t-1]（timing mismatch，leaks forecast-day exogenous state），保留 parity 留作 K1103 統一修正——若修正後 UMC +39% 消失 → 推翻 K1067b 整個 monotonicity 討論失錨。",
+    "content": "[提出: 賴奕豪+Claude, 執行: Claude] 第三重驗證：MediaTek T+1=1.67 中間值應給介於 TSMC 和 UMC 之間的 event DM（預期 -0.90），實測 +1.59（A4f 優），residual +2.49 超閾值 5 倍。**Monotonicity FAIL**：T+1 amplification 不是 EAV event-window edge 的單調預測子。三公司對照：in-sample corr -0.0011→-0.0168→+0.0319（MediaTek 最負）；θ₂ positive fraction 0.593→0.185→1.000（MediaTek 最低，非中間）；event improvement -0.25%→-23.46%→+39.27%（MediaTek 大幅惡化）；event DM t +0.08→+1.59→-2.20（方向翻轉）。**結論**：UMC +39% 可能是 firm-specific artefact（foundry 商品化、分析師覆蓋不足、EPS 變異大），非可一般化規律。**Paper 2 影響**：T+1 作為 firm-selection criterion 不可行。若保留 EAV，必須走 panel GARCH-MIDAS（N≥15）+ 多 firm-covariates（analyst dispersion, float, foundry/fabless dummy）。**Codex 發現 inherited bug**：K1067 系列 u_prev=r_{t-1}/√τ[t] 應為 τ[t-1]（timing mismatch，leaks forecast-day exogenous state），保留 parity 留作 K1103 統一修正——若修正後 UMC +39% 消失 → 推翻 K1067b 整個 monotonicity 討論失錨。 **[K1103 τ-lag robustness verified 2026-04-13: bug effect negligible, conclusion HOLDS.]**",
     "tags": [
       "Paper_2",
       "A4f-EAV",
@@ -25512,9 +25516,28 @@
       "K1067-followup",
       "firm-specific",
       "decisive-counterexample",
-      "inherited-bug"
+      "inherited-bug",
+      "K1103-verified"
     ],
     "data_source": "yfinance (2454.TW MediaTek, VIX, 0050.TW), 財報公告日.txt",
-    "created_at": "2026-04-13T03:55:15.215015+00:00"
+    "created_at": "2026-04-13T03:55:15.215015+00:00",
+    "updated_at": "2026-04-13T04:28:37.942724+00:00"
+  },
+  {
+    "id": "k1103-1776054517",
+    "experiment_id": "K1103",
+    "title": "K1103: τ-lag bug-fix replication across 3 firms — SCENARIO STABLE",
+    "content": "[提出: Codex, 執行: Claude] K1067c Codex 發現 u_prev=r_{t-1}/√τ[t] 應為 τ[t-1] (timing mismatch)。三公司同步修正重跑對照：**UMC 穩固且更強**（event DM t=-2.20→-2.40，improvement +39.27%→+39.43%，θ₂ pos_frac 1.00 unchanged，p=6.7e-15→8.3e-13 仍極度顯著）；**MediaTek 幾乎不變**（DM t=+1.59→+1.41，improvement -23.46%→-22.56%，pos_frac 0.185→0.111 傾向更負，強化 K1067c）；**TSMC 仍 null**（DM t=+0.08→+0.68，improvement -0.25%→-7.18%，仍近噪音）。**SCENARIO 3 STABLE**：bug 效應 negligible，K1067b/K1067c findings 穩固。**Paper 2 最終決策**：KEEP EAV 含 monotonicity nuance——UMC-like foundry firms 保留 event-window analysis，MediaTek-like fabless 拒絕 EAV（非單調反例強化），需 firm-selection criterion。論文 methodology 段必須明確定義 u_t=r_t/√τ_t，引 Engle-Ghysels-Sohn (2013)。Runtime 595s (3 firms)。Codex 代碼審查 PASS，τ/g state transition 三處 verified correct。",
+    "tags": [
+      "Paper_2",
+      "A4f-EAV",
+      "tau-lag-bug",
+      "robustness-check",
+      "K1067-verified",
+      "SCENARIO-STABLE",
+      "Codex-audit-followup"
+    ],
+    "data_source": "yfinance (2330.TW, 2454.TW, 2303.TW) + 財報公告日.txt (Big5)",
+    "created_at": "2026-04-13T04:28:37.942450+00:00"
   }
 ]

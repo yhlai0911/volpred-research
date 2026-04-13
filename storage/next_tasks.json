@@ -85,9 +85,23 @@
   },
   {
     "id": "K1103",
-    "title": "K1103: u_prev τ-lag bug-fix replication (CRITICAL)",
+    "title": "K1103: u_prev τ-lag bug-fix replication",
     "priority": 1,
-    "description": "K1067c Codex 發現：u_prev=r_{t-1}/√τ[t] 應為 τ[t-1] (timing mismatch, leaks forecast-day exogenous state)。三公司同步修正重跑——若 UMC +39% 消失 → 推翻 K1067b，monotonicity 故事失錨。",
+    "description": "SCENARIO STABLE: UMC event DM -2.20→-2.40 (更強), K1067b/c findings HOLD. Paper 2 KEEP EAV 含 monotonicity nuance。Back-annotated K1067/b/c in knowledge.",
+    "status": "completed"
+  },
+  {
+    "id": "K1104",
+    "title": "K1104: Multi-covariate firm-level θ₂ model",
+    "priority": 2,
+    "description": "K1103 衍生（取代 K1101 原 Panel GARCH-MIDAS 計畫）：回 K1060 Top 20，做 cross-sectional regression of θ₂ on {foundry dummy, beta, size, analyst coverage, fab vs fabless}。解釋為何 UMC works vs MediaTek 反向。",
+    "status": "pending"
+  },
+  {
+    "id": "K1105",
+    "title": "K1105: ASE + mid-cap chip validation",
+    "priority": 2,
+    "description": "K1103 衍生：UMC signal 穩固後延伸測試 ASE (T+1=1.85)、Nanya (2408)、WPG (3702)、Realtek (2379)。建立 firm-list selection criterion。",
     "status": "pending"
   },
   {
