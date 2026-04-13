@@ -1,0 +1,138 @@
+
+========================================================================
+K1150: A4f-EAV pooled panel estimation (N=30 TOPIX JP large-caps)
+========================================================================
+
+Tickers (30): ['7203.T', '6758.T', '9984.T', '8306.T', '6861.T', '9432.T', '6098.T', '7974.T', '6594.T', '8035.T', '4063.T', '6501.T', '9433.T', '8316.T', '8411.T', '6902.T', '6367.T', '8001.T', '8058.T', '4502.T', '6273.T', '7741.T', '6981.T', '8801.T', '6178.T', '7267.T', '8031.T', '4503.T', '8002.T', '6701.T']
+
+[1/6] Loading stocks (EAV window=1) ...
+    7203.T: n_obs=2952, n_events=48
+    6758.T: n_obs=2952, n_events=48
+    [download] 9984.T ...
+    9984.T: n_obs=2952, n_events=47
+    [download] 8306.T ...
+    8306.T: n_obs=2952, n_events=48
+    [download] 6861.T ...
+    6861.T: n_obs=2952, n_events=47
+    [download] 9432.T ...
+    9432.T: n_obs=2952, n_events=48
+    [download] 6098.T ...
+    6098.T: n_obs=2759, n_events=40
+    [download] 7974.T ...
+    7974.T: n_obs=2951, n_events=48
+    [download] 6594.T ...
+    6594.T: n_obs=2952, n_events=48
+    [download] 8035.T ...
+    8035.T: n_obs=2952, n_events=48
+    [download] 4063.T ...
+    4063.T: n_obs=2952, n_events=48
+    [download] 6501.T ...
+    6501.T: n_obs=2952, n_events=48
+    [download] 9433.T ...
+    9433.T: n_obs=2952, n_events=48
+    [download] 8316.T ...
+    8316.T: n_obs=2952, n_events=48
+    [download] 8411.T ...
+    8411.T: n_obs=2952, n_events=48
+    [download] 6902.T ...
+    6902.T: n_obs=2952, n_events=48
+    [download] 6367.T ...
+    6367.T: n_obs=2952, n_events=46
+    [download] 8001.T ...
+    8001.T: n_obs=2952, n_events=46
+    [download] 8058.T ...
+    8058.T: n_obs=2952, n_events=46
+    [download] 4502.T ...
+    4502.T: n_obs=2952, n_events=48
+    [download] 6273.T ...
+    6273.T: n_obs=2952, n_events=47
+    [download] 7741.T ...
+    7741.T: n_obs=2952, n_events=48
+    [download] 6981.T ...
+    6981.T: n_obs=2952, n_events=48
+    [download] 8801.T ...
+    8801.T: n_obs=2952, n_events=48
+    [download] 6178.T ...
+    6178.T: n_obs=2503, n_events=40
+    [download] 7267.T ...
+    7267.T: n_obs=2952, n_events=48
+    [download] 8031.T ...
+    8031.T: n_obs=2952, n_events=46
+    [download] 4503.T ...
+    4503.T: n_obs=2952, n_events=48
+    [download] 8002.T ...
+    8002.T: n_obs=2952, n_events=46
+    [download] 6701.T ...
+    6701.T: n_obs=2952, n_events=48
+  Loaded 30/30 stocks
+
+[2/6] Pre-fit panel diagnostic ...
+  Pooled obs: 87,917
+  Mean r=+5.3187e-04, std=1.9094e-02
+  Skew=-0.168, kurt=+8.017
+  Mean events per stock: 47.0
+
+[3/6] Pooled BCD fit (EAV window=1, primary) ...
+    [BCD outer 0] θ_VIX=9.275e-08, θ_EAV=+1.3420e-04, pooled_negll=-234361.59, Δll=+inf, Δθ_eav=8.42e-05
+    [BCD outer 1] θ_VIX=9.132e-08, θ_EAV=+1.3474e-04, pooled_negll=-234401.97, Δll=+40.3812, Δθ_eav=5.38e-07
+    [BCD outer 2] θ_VIX=9.100e-08, θ_EAV=+1.3567e-04, pooled_negll=-234410.26, Δll=+8.2860, Δθ_eav=9.31e-07
+    [BCD outer 3] θ_VIX=9.086e-08, θ_EAV=+1.3718e-04, pooled_negll=-234416.09, Δll=+5.8339, Δθ_eav=1.51e-06
+    [BCD outer 4] θ_VIX=9.052e-08, θ_EAV=+1.4104e-04, pooled_negll=-234421.26, Δll=+5.1721, Δθ_eav=3.86e-06
+    [BCD outer 5] θ_VIX=9.052e-08, θ_EAV=+1.4128e-04, pooled_negll=-234422.14, Δll=+0.8743, Δθ_eav=2.38e-07
+    [BCD outer 6] θ_VIX=9.052e-08, θ_EAV=+1.4128e-04, pooled_negll=-234429.12, Δll=+6.9835, Δθ_eav=8.18e-14
+    [BCD outer 7] θ_VIX=9.052e-08, θ_EAV=+1.4128e-04, pooled_negll=-234422.71, Δll=-6.4137, Δθ_eav=2.13e-14
+    [BCD] converged
+
+  → θ_VIX = 9.0522e-08
+  → θ_EAV = +1.4128e-04
+  → pooled loglik = 234432.52
+  → converged = True
+
+  Hessian SE for θ_EAV ...
+  Hessian SE=7.009334878670197e-06, t=20.15578608570434
+
+[4/6] Stock-clustered block bootstrap (gold-standard) ...
+  bootstrap draws: 150/150 (elapsed=294.4s)
+  bootstrap mean=0.0001487473950637463, SE=1.1784306555372175e-05
+  bootstrap 95% CI = [0.00012905130436150728, 0.00017575756620675766]
+  bootstrap t=11.988711745888638, p=0.0
+
+[5/6] Robustness — alternate EAV definitions ...
+
+  R1 EAV window=3:
+    θ_EAV=+1.1021e-04, SE=3.6019672731358575e-06, t=30.59722187605525
+
+  R1 EAV window=5:
+    θ_EAV=+8.1232e-05, SE=2.4504198438825257e-06, t=33.1502058180405
+
+  R2 Drop-out 5 random stocks x 5 seeds:
+    seed=42, dropped=['9984.T', '9433.T', '8058.T', '6273.T', '6701.T'], θ_EAV=+1.341e-04, t=18.24163104067316
+    seed=43, dropped=['6758.T', '6501.T', '8316.T', '8001.T', '6701.T'], θ_EAV=+1.416e-04, t=18.233074964197975
+    seed=44, dropped=['8306.T', '7974.T', '8001.T', '4502.T', '6981.T'], θ_EAV=+1.471e-04, t=18.510060538055466
+    seed=45, dropped=['6902.T', '6273.T', '6178.T', '8002.T', '6701.T'], θ_EAV=+1.411e-04, t=18.22272618726003
+    seed=46, dropped=['9984.T', '6098.T', '8316.T', '6367.T', '6178.T'], θ_EAV=+1.398e-04, t=18.28828014070632
+
+  BH-FDR multi-test correction:
+    pooled_hessian: raw_p=0.0000, BH_adj_p=0.0000
+    pooled_bootstrap: raw_p=0.0000, BH_adj_p=0.0000
+
+  Three-market comparison (K1145 TW vs K1147 US vs K1150 JP):
+    K1145 TW pooled θ_EAV = +6.362e-05 (boot t=5.24)
+    K1147 US pooled θ_EAV = +1.909e-04 (boot t=4.50)
+    K1150 JP pooled θ_EAV = +1.413e-04 (boot t=11.988711745888638)
+    Direction match (TW): True
+    Direction match (US): True
+    Magnitude ratio JP/TW: 2.220594360717093
+    Magnitude ratio JP/US: 0.7400662882008531
+
+  THREE-MARKET VERDICT: UNIVERSAL-THREE-MARKET — JP pooled θ_EAV PASS (bootstrap t>3, BH PASS) and direction matches both TW and US → true global volatility regularity. Paper 2 contribution upgrade to top-tier cross-market universal.
+
+[6/6] Plots ...
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a28bbe07/experiments/k1150/k1150_three_market_comparison.png
+  -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a28bbe07/experiments/k1150/k1150_robustness_barplot.png
+
+  Results -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a28bbe07/experiments/k1150/k1150_results.json
+  Elapsed: 404.9s
+
+  CORE THREE-MARKET VERDICT: UNIVERSAL-THREE-MARKET — JP pooled θ_EAV PASS (bootstrap t>3, BH PASS) and direction matches both TW and US → true global volatility regularity. Paper 2 contribution upgrade to top-tier cross-market universal.
+
