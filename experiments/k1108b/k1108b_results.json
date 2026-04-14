@@ -1,0 +1,511 @@
+{
+  "experiment_id": "K1108b",
+  "timestamp": "2026-04-14T10:44:48.565511+00:00",
+  "data_source": [
+    "TSMC 2330.TW yfinance cache (experiments/k1104/data/2330.TW.parquet)",
+    "UMC 2303.TW yfinance cache (experiments/k1104/data/2303.TW.parquet)",
+    "TSM ADR yfinance 2014-2025",
+    "GFS yfinance 2021-10-28 onwards",
+    "SMIC 0981.HK yfinance 2014-2025 (capex from 2020+)",
+    "^VIX yfinance cache (experiments/k1104/data/IDX_VIX.parquet)",
+    "\u8ca1\u5831\u516c\u544a\u65e5.txt (2330, 2303 TWSE earnings dates)",
+    "yfinance earnings_dates (TSM, GFS, 0981.HK)",
+    "k1108b_fetch_capex_pool.py (hand-coded capex guidance per foundry)"
+  ],
+  "primary_pool": {
+    "stocks": [
+      "2330.TW",
+      "2303.TW",
+      "GFS",
+      "0981.HK"
+    ],
+    "M": 4,
+    "n_obs_total": 9844,
+    "n_change_total": 63,
+    "n_stable_total": 73,
+    "n_all_total": 136,
+    "n_unmatched_total": 0,
+    "per_stock_counts": {
+      "2330.TW": {
+        "n_obs": 2922,
+        "n_change": 25,
+        "n_stable": 23,
+        "n_all": 48,
+        "n_unmatched": 0
+      },
+      "2303.TW": {
+        "n_obs": 2922,
+        "n_change": 21,
+        "n_stable": 27,
+        "n_all": 48,
+        "n_unmatched": 0
+      },
+      "GFS": {
+        "n_obs": 1046,
+        "n_change": 8,
+        "n_stable": 9,
+        "n_all": 17,
+        "n_unmatched": 0
+      },
+      "0981.HK": {
+        "n_obs": 2954,
+        "n_change": 9,
+        "n_stable": 14,
+        "n_all": 23,
+        "n_unmatched": 0
+      }
+    }
+  },
+  "pre_estimation_diagnostics": {
+    "2330.TW": {
+      "tag": "2330.TW",
+      "n": 2922,
+      "mean": 0.0010288963479183207,
+      "std": 0.016587586416833788,
+      "skew": 0.08414216074105235,
+      "kurt": 3.5632815680186978,
+      "adf_stat": -40.39798468980512,
+      "adf_pvalue": 0.0,
+      "ljungbox_Q10": 13.985271126491545,
+      "ljungbox_p10": 0.1736644982296857,
+      "arch_lm_stat": 193.4716208377635,
+      "arch_lm_p": 3.7021280046567406e-36
+    },
+    "2303.TW": {
+      "tag": "2303.TW",
+      "n": 2922,
+      "mean": 0.0006708324322441582,
+      "std": 0.019244924995168746,
+      "skew": 0.48302542606688553,
+      "kurt": 4.25605824131199,
+      "adf_stat": -54.06551834528863,
+      "adf_pvalue": 0.0,
+      "ljungbox_Q10": 7.54238267785422,
+      "ljungbox_p10": 0.6734383582400865,
+      "arch_lm_stat": 138.4383461114902,
+      "arch_lm_p": 8.80329057734371e-25
+    },
+    "GFS": {
+      "tag": "GFS",
+      "n": 1046,
+      "mean": -0.0002395708930584198,
+      "std": 0.030612228053525228,
+      "skew": 0.4105086664631102,
+      "kurt": 2.5245122254541528,
+      "adf_stat": -31.980666044312144,
+      "adf_pvalue": 0.0,
+      "ljungbox_Q10": 9.264044092901766,
+      "ljungbox_p10": 0.5072416956361266,
+      "arch_lm_stat": 61.57242856370893,
+      "arch_lm_p": 1.8244995134874153e-09
+    },
+    "0981.HK": {
+      "tag": "0981.HK",
+      "n": 2954,
+      "mean": 0.0008270267089328928,
+      "std": 0.03245265031368058,
+      "skew": -0.049246822034779154,
+      "kurt": 7.929239675848157,
+      "adf_stat": -55.46518609358603,
+      "adf_pvalue": 0.0,
+      "ljungbox_Q10": 7.943314904772755,
+      "ljungbox_p10": 0.6343739424425796,
+      "arch_lm_stat": 207.0132231629761,
+      "arch_lm_p": 5.549516826162001e-39
+    }
+  },
+  "pooled_models": {
+    "P1_pool_GJR": {
+      "label": "P1_pool_GJR",
+      "params": {
+        "theta0_0": 9.553512604790088e-05,
+        "theta1_0": 1.920370486887031e-07,
+        "omega_0": 0.10040242608620938,
+        "theta0_1": 0.00011489937676808171,
+        "theta1_1": 2.7149768636581493e-07,
+        "omega_1": 0.10041821221433334,
+        "theta0_2": 0.00022854489666276762,
+        "theta1_2": 8.399430179195207e-07,
+        "omega_2": 0.10041821211568615,
+        "theta0_3": 0.00025195525200971057,
+        "theta1_3": 7.838354481072353e-07,
+        "omega_3": 0.1004182119238943,
+        "alpha": 0.08032154125281256,
+        "gamma": 0.040160569322057915,
+        "beta": 0.8514085046362491
+      },
+      "se": {
+        "theta0_0": NaN,
+        "theta1_0": NaN,
+        "omega_0": NaN,
+        "theta0_1": NaN,
+        "theta1_1": NaN,
+        "omega_1": NaN,
+        "theta0_2": NaN,
+        "theta1_2": NaN,
+        "omega_2": NaN,
+        "theta0_3": NaN,
+        "theta1_3": NaN,
+        "omega_3": NaN,
+        "alpha": NaN,
+        "gamma": NaN,
+        "beta": NaN
+      },
+      "loglik": 23965.54278412326,
+      "converged": true,
+      "names": [
+        "theta0_0",
+        "theta1_0",
+        "omega_0",
+        "theta0_1",
+        "theta1_1",
+        "omega_1",
+        "theta0_2",
+        "theta1_2",
+        "omega_2",
+        "theta0_3",
+        "theta1_3",
+        "omega_3",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    },
+    "P2_pool_A4fEAV": {
+      "label": "P2_pool_A4fEAV",
+      "params": {
+        "theta0_0": 0.00010039510609882259,
+        "theta1_0": 2.0369445805035496e-07,
+        "omega_0": 0.09957504421929039,
+        "theta0_1": 0.00013841473582468667,
+        "theta1_1": 1.5193500086101901e-07,
+        "omega_1": 0.10783191065896706,
+        "theta0_2": 0.0003150572837166198,
+        "theta1_2": 5.620609581495692e-07,
+        "omega_2": 0.10783197224992477,
+        "theta0_3": 0.00035755437901350407,
+        "theta1_3": 4.891164764047611e-07,
+        "omega_3": 0.1078320326531859,
+        "theta_EAV_all_lag": 0.0001920701129278155,
+        "alpha": 0.07966038232973059,
+        "gamma": 0.0398299823007671,
+        "beta": 0.8485125078750357
+      },
+      "se": {
+        "theta0_0": 8.33486853819142e-06,
+        "theta1_0": 2.0458090218999027e-07,
+        "omega_0": 3.791066280202174e-08,
+        "theta0_1": 9.923667347739786e-06,
+        "theta1_1": 2.0414565503336227e-07,
+        "omega_1": 4.18605061103841e-08,
+        "theta0_2": 4.287693972210694e-05,
+        "theta1_2": 4.3042719045172087e-07,
+        "omega_2": 1.7752189497538674e-07,
+        "theta0_3": 2.731937637182276e-05,
+        "theta1_3": 7.234503013751933e-17,
+        "omega_3": 1.0066615299691791e-07,
+        "theta_EAV_all_lag": 4.8857241518239805e-05,
+        "alpha": 1.2860253614588427e-08,
+        "gamma": 3.2023927730434285e-08,
+        "beta": 6.4763102612002e-08
+      },
+      "loglik": 23989.715843821454,
+      "converged": true,
+      "names": [
+        "theta0_0",
+        "theta1_0",
+        "omega_0",
+        "theta0_1",
+        "theta1_1",
+        "omega_1",
+        "theta0_2",
+        "theta1_2",
+        "omega_2",
+        "theta0_3",
+        "theta1_3",
+        "omega_3",
+        "theta_EAV_all_lag",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    },
+    "P3_pool_capex_split": {
+      "label": "P3_pool_capex_split",
+      "params": {
+        "theta0_0": 9.305315365944997e-05,
+        "theta1_0": 2.3066150264118133e-07,
+        "omega_0": 0.09933561826958753,
+        "theta0_1": 0.00011383527209485874,
+        "theta1_1": 2.2220269352088473e-07,
+        "omega_1": 0.10841742317174659,
+        "theta0_2": 0.00030715344384432496,
+        "theta1_2": 5.88107466325175e-07,
+        "omega_2": 0.10841748448756137,
+        "theta0_3": 0.0003326069583807787,
+        "theta1_3": 5.398960726627565e-07,
+        "omega_3": 0.10841754474540265,
+        "theta_EAV_change_lag": 0.00021567027257443722,
+        "theta_EAV_stable_lag": 0.00021570771003611558,
+        "alpha": 0.07946907855461267,
+        "gamma": 0.03973444727336156,
+        "beta": 0.8480960610965934
+      },
+      "se": {
+        "theta0_0": 8.134020308922718e-06,
+        "theta1_0": 2.0452954777029151e-07,
+        "omega_0": 9.044812631523662e-08,
+        "theta0_1": 9.246327257068222e-06,
+        "theta1_1": 2.0355827200402696e-07,
+        "omega_1": 1.1771456774135939e-07,
+        "theta0_2": 4.245553355779834e-05,
+        "theta1_2": 4.2886516437733474e-07,
+        "omega_2": 1.7343418059793759e-07,
+        "theta0_3": 2.6200489679489245e-05,
+        "theta1_3": 7.057067660555833e-17,
+        "omega_3": 1.2628659627203836e-07,
+        "theta_EAV_change_lag": 7.841006409217006e-05,
+        "theta_EAV_stable_lag": 7.681821778605107e-05,
+        "alpha": 1.100373003506743e-08,
+        "gamma": 3.3861274359990573e-08,
+        "beta": 8.431539345751376e-08
+      },
+      "loglik": 23992.200991129703,
+      "converged": true,
+      "names": [
+        "theta0_0",
+        "theta1_0",
+        "omega_0",
+        "theta0_1",
+        "theta1_1",
+        "omega_1",
+        "theta0_2",
+        "theta1_2",
+        "omega_2",
+        "theta0_3",
+        "theta1_3",
+        "omega_3",
+        "theta_EAV_change_lag",
+        "theta_EAV_stable_lag",
+        "alpha",
+        "gamma",
+        "beta"
+      ]
+    }
+  },
+  "tests": {
+    "pool_Wald_change_eq_stable": {
+      "theta_change": 0.00021567027257443722,
+      "theta_stable": 0.00021570771003611558,
+      "diff": -3.7437461678359145e-08,
+      "se_diff": 0.00010962782380725169,
+      "t_stat": -0.00034149598503553186,
+      "p_value_two_sided": 0.9997275256312599,
+      "p_value_one_sided_change_gt_stable": 0.5001362371843701,
+      "LR_stat": 4.970294616497995,
+      "LR_p": 0.025786254800163166
+    },
+    "LR_P3_vs_P2": {
+      "stat": 4.970294616497995,
+      "df": 1,
+      "p_value": 0.025786254800163166,
+      "description": "Does capex split help the pooled fit?"
+    },
+    "k1108_tsmc_only_reference": {
+      "diff": 8.04e-05,
+      "t_stat": 0.94,
+      "p_value": 0.348
+    }
+  },
+  "per_stock_fits": [
+    {
+      "stock": "2330.TW",
+      "status": "OK",
+      "n_obs": 2922,
+      "n_change": 25,
+      "n_stable": 23,
+      "theta0": 0.00016762037404855485,
+      "theta1": 4.818042362739971e-07,
+      "theta_change": -3.395420727417256e-05,
+      "theta_stable": -5.712908055993329e-05,
+      "se_change": 7.237619770763241e-05,
+      "se_stable": 8.569292043148744e-05,
+      "alpha": 0.028956309766292015,
+      "gamma": 0.0579067964907959,
+      "beta": 0.886033057449791,
+      "diff": 2.3174873285760734e-05,
+      "loglik": 8002.038466821248
+    },
+    {
+      "stock": "2303.TW",
+      "status": "OK",
+      "n_obs": 2922,
+      "n_change": 21,
+      "n_stable": 27,
+      "theta0": 0.0002060298049348093,
+      "theta1": 3.5488718848908486e-07,
+      "theta_change": 0.0007235338801488167,
+      "theta_stable": 0.0003842648235393011,
+      "se_change": 0.0,
+      "se_stable": 0.00012815881604289161,
+      "alpha": 0.034581125264302924,
+      "gamma": 0.058983668868484294,
+      "beta": 0.89321406360065,
+      "diff": 0.00033926905660951564,
+      "loglik": 7598.198258728804
+    },
+    {
+      "stock": "GFS",
+      "status": "OK",
+      "n_obs": 1046,
+      "n_change": 8,
+      "n_stable": 9,
+      "theta0": 0.0007319444006964925,
+      "theta1": 1.6307141754842237e-06,
+      "theta_change": 0.0007029416032416556,
+      "theta_stable": 0.0007029442221314269,
+      "se_change": 0.0008221472487844591,
+      "se_stable": 0.0009024520400876486,
+      "alpha": 0.028073250218948246,
+      "gamma": 0.056140041260460065,
+      "beta": 0.8742240261884338,
+      "diff": -2.618889771276861e-09,
+      "loglik": 2215.5320699675326
+    },
+    {
+      "stock": "0981.HK",
+      "status": "OK",
+      "n_obs": 2954,
+      "n_change": 9,
+      "n_stable": 14,
+      "theta0": 0.0018966456756047039,
+      "theta1": 2.974161040170382e-06,
+      "theta_change": 0.005680386621019778,
+      "theta_stable": 0.005460262035420908,
+      "se_change": 0.0,
+      "se_stable": 0.0,
+      "alpha": 0.12114357948584101,
+      "gamma": 0.03940565232170739,
+      "beta": 0.7674616069187891,
+      "diff": 0.0002201245855988701,
+      "loglik": 6179.164522964239
+    }
+  ],
+  "loo_sensitivity": [
+    {
+      "excluded": "2330.TW",
+      "M_pool": 3,
+      "theta_change": 0.0005086352551165383,
+      "theta_stable": 0.0005149108433053661,
+      "diff": -6.275588188827861e-06,
+      "t_stat": -0.03581603614075729,
+      "p_value": 0.9714290462795669,
+      "loglik_P3": 16005.072282289788
+    },
+    {
+      "excluded": "2303.TW",
+      "M_pool": 3,
+      "theta_change": 6.190353001012866e-05,
+      "theta_stable": 5.950987361123512e-05,
+      "diff": 2.393656398893541e-06,
+      "t_stat": 0.020777132252641092,
+      "p_value": 0.983423439620188,
+      "loglik_P3": 16382.481669853087
+    },
+    {
+      "excluded": "GFS",
+      "M_pool": 3,
+      "theta_change": 0.00018949123788637072,
+      "theta_stable": 0.0001229114755765321,
+      "diff": 6.657976230983861e-05,
+      "t_stat": 0.7715481365351078,
+      "p_value": 0.44038210184128457,
+      "loglik_P3": 21774.348536712787
+    },
+    {
+      "excluded": "0981.HK",
+      "M_pool": 3,
+      "theta_change": 0.00018272987718149448,
+      "theta_stable": 0.0001890705966926545,
+      "diff": -6.340719511160013e-06,
+      "t_stat": -0.05996496380101512,
+      "p_value": 0.9521835392898936,
+      "loglik_P3": 17816.65589541901
+    }
+  ],
+  "regional_subpools": [
+    {
+      "group": "Taiwan",
+      "stocks": [
+        "2330.TW",
+        "2303.TW"
+      ],
+      "M": 2,
+      "theta_change": 0.00018112650456981986,
+      "theta_stable": 0.00019445457966948062,
+      "diff": -1.3328075099660762e-05,
+      "t_stat": -0.121771309202379,
+      "p_value_two_sided": 0.9030801367597583
+    },
+    {
+      "group": "US_listed",
+      "stocks": [
+        "GFS"
+      ],
+      "M": 1,
+      "theta_change": 0.0007029416032416556,
+      "theta_stable": 0.0007029442221314269,
+      "diff": -2.618889771276861e-09,
+      "t_stat": -2.1791153356651617e-06,
+      "p_value_two_sided": 0.9999982613175176
+    },
+    {
+      "group": "China",
+      "stocks": [
+        "0981.HK"
+      ],
+      "M": 1,
+      "theta_change": 0.005680386621019778,
+      "theta_stable": 0.005460262035420908,
+      "diff": 0.0002201245855988701,
+      "t_stat": 220124585598.8701,
+      "p_value_two_sided": 0.0
+    }
+  ],
+  "extended_pool_with_TSM_ADR": {
+    "stocks": [
+      "2330.TW",
+      "2303.TW",
+      "GFS",
+      "0981.HK",
+      "TSM"
+    ],
+    "wald": {
+      "theta_change": 6.467971706219567e-05,
+      "theta_stable": 0.00021788509152352776,
+      "diff": -0.0001532053744613321,
+      "se_diff": 6.731103076452701e-05,
+      "t_stat": -2.2760812413835665,
+      "p_value_two_sided": 0.02284114759934308,
+      "p_value_one_sided_change_gt_stable": 0.9885794262003285
+    }
+  },
+  "verdict": {
+    "label": "H2_MECHANISM_NULL",
+    "bullets": [
+      "Pool Wald t=-0.000, p=0.9997, diff=-3.744e-08",
+      "Per-stock direction consistency (diff>0): 3/4",
+      "H2: pool t < 2.0 \u2192 capex guidance NOT the mechanism",
+      "LOO t-range: min|t|=+0.021  max|t|=+0.772"
+    ]
+  },
+  "references": [
+    "K1108 (TSMC single-firm capex-guidance test \u2014 inconclusive)",
+    "K1166 (pooled stock-FE framework)",
+    "Engle, Ghysels & Sohn (2013) GARCH-MIDAS. RES 95(3).",
+    "Patton (2011) Volatility forecast comparison. JoE 160:246-256.",
+    "Harvey et al. (2016) t>3.0 threshold for multiple testing."
+  ],
+  "random_seed": 42,
+  "runtime_seconds": 13.614566802978516
+}

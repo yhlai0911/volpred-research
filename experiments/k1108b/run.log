@@ -1,0 +1,102 @@
+=== K1108b ===
+
+>>> Building primary pool (4 firms)
+  2330.TW: n_obs=2922 | change=25 stable=23 all=48 unmatched=0
+  2303.TW: n_obs=2922 | change=21 stable=27 all=48 unmatched=0
+  GFS: n_obs=1046 | change=8 stable=9 all=17 unmatched=0
+  0981.HK: n_obs=2954 | change=9 stable=14 all=23 unmatched=0
+
+Primary pool: ['2330.TW', '2303.TW', 'GFS', '0981.HK']  total events=136  n_change=63  n_stable=73
+
+--- Fitting P1 (pooled GJR + per-stock θ₀,θ₁; no EAV) ---
+
+--- Fitting P2 (pooled A4f-EAV; single θ₂) ---
+
+--- Fitting P3 (pooled A4f-EAV + capex split) ---
+
+--- Per-stock (independent) fits ---
+  2330.TW: diff=+2.317e-05, θ_change=-3.395e-05 (SE=7.24e-05), θ_stable=-5.713e-05 (SE=8.57e-05)
+  2303.TW: diff=+3.393e-04, θ_change=+7.235e-04 (SE=0.00e+00), θ_stable=+3.843e-04 (SE=1.28e-04)
+  GFS: diff=-2.619e-09, θ_change=+7.029e-04 (SE=8.22e-04), θ_stable=+7.029e-04 (SE=9.02e-04)
+  0981.HK: diff=+2.201e-04, θ_change=+5.680e-03 (SE=0.00e+00), θ_stable=+5.460e-03 (SE=0.00e+00)
+
+>>> POOL Wald: diff=-3.744e-08 SE=1.096e-04 t=-0.000 p=0.9997
+>>> LR(P3 vs P2): 4.970, p=0.0258
+
+--- LOO sensitivity ---
+
+--- LOO excluding 2330.TW (M=3) ---
+
+--- Fitting P1 (pooled GJR + per-stock θ₀,θ₁; no EAV) ---
+
+--- Fitting P2 (pooled A4f-EAV; single θ₂) ---
+
+--- Fitting P3 (pooled A4f-EAV + capex split) ---
+  LOO excl 2330.TW: diff=-6.276e-06, t=-0.036, p=0.9714
+
+--- LOO excluding 2303.TW (M=3) ---
+
+--- Fitting P1 (pooled GJR + per-stock θ₀,θ₁; no EAV) ---
+
+--- Fitting P2 (pooled A4f-EAV; single θ₂) ---
+
+--- Fitting P3 (pooled A4f-EAV + capex split) ---
+  LOO excl 2303.TW: diff=+2.394e-06, t=+0.021, p=0.9834
+
+--- LOO excluding GFS (M=3) ---
+
+--- Fitting P1 (pooled GJR + per-stock θ₀,θ₁; no EAV) ---
+
+--- Fitting P2 (pooled A4f-EAV; single θ₂) ---
+
+--- Fitting P3 (pooled A4f-EAV + capex split) ---
+  LOO excl GFS: diff=+6.658e-05, t=+0.772, p=0.4404
+
+--- LOO excluding 0981.HK (M=3) ---
+
+--- Fitting P1 (pooled GJR + per-stock θ₀,θ₁; no EAV) ---
+
+--- Fitting P2 (pooled A4f-EAV; single θ₂) ---
+
+--- Fitting P3 (pooled A4f-EAV + capex split) ---
+  LOO excl 0981.HK: diff=-6.341e-06, t=-0.060, p=0.9522
+
+--- Regional sub-pools ---
+
+--- Regional pool: Taiwan (['2330.TW', '2303.TW']) ---
+
+--- Fitting P1 (pooled GJR + per-stock θ₀,θ₁; no EAV) ---
+
+--- Fitting P2 (pooled A4f-EAV; single θ₂) ---
+
+--- Fitting P3 (pooled A4f-EAV + capex split) ---
+  Taiwan: diff=-1.333e-05, t=-0.122, p=0.9031
+
+--- Regional pool: US_listed (['GFS']) ---
+  US_listed: diff=-2.619e-09, t=-0.000, p=1.0000
+
+--- Regional pool: China (['0981.HK']) ---
+  China: diff=+2.201e-04, t=+220124585598.870, p=0.0000
+
+--- Extended pool (primary + TSM ADR) for validation ---
+  2330.TW: n_obs=2922 | change=25 stable=23 all=48 unmatched=0
+  2303.TW: n_obs=2922 | change=21 stable=27 all=48 unmatched=0
+  GFS: n_obs=1046 | change=8 stable=9 all=17 unmatched=0
+  0981.HK: n_obs=2954 | change=9 stable=14 all=23 unmatched=0
+  TSM: n_obs=3016 | change=25 stable=45 all=70 unmatched=22
+
+--- Fitting P1 (pooled GJR + per-stock θ₀,θ₁; no EAV) ---
+
+--- Fitting P2 (pooled A4f-EAV; single θ₂) ---
+
+--- Fitting P3 (pooled A4f-EAV + capex split) ---
+
+>>> VERDICT: H2_MECHANISM_NULL
+    - Pool Wald t=-0.000, p=0.9997, diff=-3.744e-08
+    - Per-stock direction consistency (diff>0): 3/4
+    - H2: pool t < 2.0 → capex guidance NOT the mechanism
+    - LOO t-range: min|t|=+0.021  max|t|=+0.772
+Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8f77619/experiments/k1108b/k1108b_per_stock_theta.png
+Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8f77619/experiments/k1108b/k1108b_pool_vs_tsmc.png
+
+Results written: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a8f77619/experiments/k1108b/k1108b_results.json

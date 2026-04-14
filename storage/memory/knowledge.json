@@ -26526,5 +26526,23 @@
     "data_source": "Reuse K1104 per-firm A4f-EAV fitted params, 23 firms × 60 events panel 2014-2025",
     "created_at": "2026-04-14T14:45:00+08:00",
     "updated_at": "2026-04-14T14:45:00+08:00"
+  },
+  {
+    "id": "k1108b-1776163737",
+    "experiment_id": "K1108b",
+    "title": "K1108b H2 DECISIVE NULL: 4-stock foundry pool collapses K1108 capex direction (not a mechanism)",
+    "content": "[提出: Claude, 執行: Claude] K1108 TSMC-only 48 events diff=+8.0e-5 Wald t=+0.94 INCONCLUSIVE (可能 direction-only)。K1108b 擴 5-stock foundry pool: TSMC+UMC+TSM ADR+GFS+SMIC, primary pool 4 firms (exclude TSM ADR due local-listing trading-day mismatch) = 9844 obs, 63 change + 73 stable = **136 events**。**結果 H2 DECISIVE NULL**: diff=**-3.74e-8**, SE=1.10e-4, Wald t=**-0.0003 p=0.9997** — 完全塌到 0。Per-stock drop-1-LOO: 排除 TSMC t=-0.036, UMC +0.021, GFS +0.772, SMIC -0.060 — all |t|<0.8, **robust NULL 不論排除哪支**。3/4 per-stock diff > 0 方向還在但 magnitude 極小。Extended pool +TSM ADR t=-2.28 p=0.023 反向是 ADR listing mismatch 造成 (confounded, 不救 H1)。LR χ²=4.97 p=0.026 為 stock-heterogeneous splits (個股方向不同, pool-level 不是 shared contrast)。**Paper 2 foundry rule 不可 codify via capex-guidance binary flag**, K1108 direction support 是 within-stock noise。需改找其他 signal: D1 continuous guide_delta_pct magnitude, D2 non-capex (utilisation/wafer price/R&D guidance), D3 operating leverage ratio, D4 regional regime (TW/US-export-control/China)。SMIC Hessian singular (N=9/14, collinear with stock-FE), pooled 結果不受影響。",
+    "tags": [
+      "K1108b",
+      "Paper2",
+      "foundry-capex",
+      "DECISIVE-NULL",
+      "K1108-overturn",
+      "multi-stock-pool",
+      "within-stock-noise-artifact"
+    ],
+    "data_source": "TSMC 2330.TW + UMC 2303.TW + GFS + SMIC 0981.HK + TSM ADR (validation) 2014-2025 yfinance + hand-coded capex guidance",
+    "created_at": "2026-04-14T16:00:00+08:00",
+    "updated_at": "2026-04-14T16:00:00+08:00"
   }
 ]

@@ -845,7 +845,8 @@
     "title": "K1108b: Multi-foundry pool for capex guidance mechanism power",
     "priority": 3,
     "description": "K1108 N=25/23 TSMC power constraint. +UMC 2303.TW + TSM ADR + GFS + SMIC 600029.SS/0981.HK pool 250+ capex events 測 Harvey threshold 是否 pass。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T16:00:00+08:00"
   },
   {
     "id": "K1108c",
@@ -873,6 +874,13 @@
     "title": "Paper 9 bib fix: conrad2015 MAJOR + 5 MED + 4 MINOR fixes (main thread)",
     "priority": 1,
     "description": "修 paper/garch-x-vix/main.tex 的 bibentry conrad2015 (JApplEconometrics 30(7):1090-1114), 補 5 MED DOI (bollerslev1986 engle1982 glosten1993 han2014 francq2019), 4 MINOR 格式統一。詳見 review_history/v1/citation_check_report.md。主線程修完 commit v2 (禁 agent 寫論文)。",
+    "status": "pending"
+  },
+  {
+    "id": "K1108d",
+    "title": "K1108d: Non-capex foundry signal — utilisation rate + wafer ASP",
+    "priority": 3,
+    "description": "K1108b 否證 capex 為 foundry mechanism。嘗試 utilisation rate (TSMC 75-80%/UMC 60-70% quarterly disclosures) + wafer ASP (industry report) 作為 alternative foundry-specific signals 預測 θ_EAV。",
     "status": "pending"
   }
 ]
