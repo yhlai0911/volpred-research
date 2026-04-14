@@ -290,7 +290,9 @@
     "title": "Paper 9 citation-verifier",
     "priority": 2,
     "description": "Paper 9 v5 + K1054-K1068 additions. Main thread skill invocation.",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-14T04:10:00+08:00",
+    "result": "needs revision: 1 MAJOR (conrad2015 wrong journal metadata) + 5 MED + 4 MINOR"
   },
   {
     "id": "Paper6_start",
@@ -864,6 +866,13 @@
     "title": "K1100g_d7: Cross-market replicate (SPY overnight, N225 morning→afternoon)",
     "priority": 3,
     "description": "K1100g_d5 確認信號方向穩但 borderline。跨市場複製: SPY overnight gap→intraday, N225 morning session→afternoon session asymmetry。若 universal 則 Paper 3 reframe 真 anchor。",
+    "status": "pending"
+  },
+  {
+    "id": "Paper9_bib_fix",
+    "title": "Paper 9 bib fix: conrad2015 MAJOR + 5 MED + 4 MINOR fixes (main thread)",
+    "priority": 1,
+    "description": "修 paper/garch-x-vix/main.tex 的 bibentry conrad2015 (JApplEconometrics 30(7):1090-1114), 補 5 MED DOI (bollerslev1986 engle1982 glosten1993 han2014 francq2019), 4 MINOR 格式統一。詳見 review_history/v1/citation_check_report.md。主線程修完 commit v2 (禁 agent 寫論文)。",
     "status": "pending"
   }
 ]

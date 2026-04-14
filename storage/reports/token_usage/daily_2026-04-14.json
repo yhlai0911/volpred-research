@@ -1,0 +1,390 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-04-14",
+  "week_range": "2026-04-10 → 2026-04-17",
+  "totals": {
+    "input_tokens": 11055,
+    "output_tokens": 42599,
+    "cache_read_tokens": 65308837,
+    "cache_create_tokens": 617451,
+    "billable_total": 671105,
+    "assistant_messages": 120,
+    "unique_sessions": 2,
+    "estimated_cost_usd": 112.9012
+  },
+  "by_model": {
+    "claude-opus-4-6": {
+      "input_tokens": 11055,
+      "output_tokens": 42599,
+      "cache_read_tokens": 65308837,
+      "cache_create_tokens": 617451,
+      "messages": 120,
+      "estimated_cost_usd": 112.9012
+    }
+  },
+  "by_category": {
+    "text_only": {
+      "input_tokens": 124,
+      "output_tokens": 20364,
+      "cache_read_tokens": 34982425,
+      "cache_create_tokens": 35418,
+      "messages": 39,
+      "billable_total": 55906,
+      "estimated_cost_usd": 54.6669,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "investigation": {
+      "input_tokens": 399,
+      "output_tokens": 6277,
+      "cache_read_tokens": 11139778,
+      "cache_create_tokens": 51586,
+      "messages": 22,
+      "billable_total": 58262,
+      "estimated_cost_usd": 18.1537,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "web_research": {
+      "input_tokens": 9282,
+      "output_tokens": 3465,
+      "cache_read_tokens": 3212526,
+      "cache_create_tokens": 336330,
+      "messages": 29,
+      "billable_total": 349077,
+      "estimated_cost_usd": 11.5241,
+      "emoji": "🌐",
+      "description": "WebSearch / WebFetch"
+    },
+    "bash_other": {
+      "input_tokens": 29,
+      "output_tokens": 2333,
+      "cache_read_tokens": 5454988,
+      "cache_create_tokens": 55794,
+      "messages": 9,
+      "billable_total": 58156,
+      "estimated_cost_usd": 9.404,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "agent_delegation": {
+      "input_tokens": 1195,
+      "output_tokens": 953,
+      "cache_read_tokens": 1521059,
+      "cache_create_tokens": 129684,
+      "messages": 10,
+      "billable_total": 131832,
+      "estimated_cost_usd": 4.8026,
+      "emoji": "🤖",
+      "description": "Agent 派送（非實驗）"
+    },
+    "git_sync": {
+      "input_tokens": 3,
+      "output_tokens": 1420,
+      "cache_read_tokens": 2675348,
+      "cache_create_tokens": 1648,
+      "messages": 3,
+      "billable_total": 3071,
+      "estimated_cost_usd": 4.1505,
+      "emoji": "🔄",
+      "description": "Git commit / pull / push"
+    },
+    "knowledge_index": {
+      "input_tokens": 12,
+      "output_tokens": 265,
+      "cache_read_tokens": 1813422,
+      "cache_create_tokens": 917,
+      "messages": 2,
+      "billable_total": 1194,
+      "estimated_cost_usd": 2.7574,
+      "emoji": "📇",
+      "description": "知識索引更新"
+    },
+    "chart_generation": {
+      "input_tokens": 1,
+      "output_tokens": 3561,
+      "cache_read_tokens": 876261,
+      "cache_create_tokens": 490,
+      "messages": 1,
+      "billable_total": 4052,
+      "estimated_cost_usd": 1.5907,
+      "emoji": "📊",
+      "description": "圖表生成（matplotlib / upload_chart）"
+    },
+    "tool_setup": {
+      "input_tokens": 7,
+      "output_tokens": 1054,
+      "cache_read_tokens": 970788,
+      "cache_create_tokens": 2885,
+      "messages": 2,
+      "billable_total": 3946,
+      "estimated_cost_usd": 1.5894,
+      "emoji": "🛠️",
+      "description": "ToolSearch 載入工具"
+    },
+    "platform_ops": {
+      "input_tokens": 1,
+      "output_tokens": 1537,
+      "cache_read_tokens": 882118,
+      "cache_create_tokens": 1178,
+      "messages": 1,
+      "billable_total": 2716,
+      "estimated_cost_usd": 1.4606,
+      "emoji": "🛡️",
+      "description": "平台運維（Supabase sync / daily_update）"
+    },
+    "file_edit": {
+      "input_tokens": 1,
+      "output_tokens": 678,
+      "cache_read_tokens": 893407,
+      "cache_create_tokens": 980,
+      "messages": 1,
+      "billable_total": 1659,
+      "estimated_cost_usd": 1.4094,
+      "emoji": "📄",
+      "description": "其他檔案編輯"
+    },
+    "skill_edit": {
+      "input_tokens": 1,
+      "output_tokens": 692,
+      "cache_read_tokens": 886717,
+      "cache_create_tokens": 541,
+      "messages": 1,
+      "billable_total": 1234,
+      "estimated_cost_usd": 1.3921,
+      "emoji": "🔧",
+      "description": "Skill 編輯"
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "968e4884",
+      "message": "4-hour sync: K1107/K1108/K1117b/K1120b/K1100g_d3-5 + audience root fix"
+    },
+    {
+      "sha": "84fb5530",
+      "message": "Root-cause fix: audience must be explicit (not phase-derived)"
+    },
+    {
+      "sha": "11a249dc",
+      "message": "Re-audience 4 articles from research to general (balance draft pool)"
+    },
+    {
+      "sha": "14a4d523",
+      "message": "K1107: Fabless rule withdrawn, Foundry rule robust with time FE"
+    },
+    {
+      "sha": "f4441b44",
+      "message": "K1117b H2 ROBUST NULL: monthly alt-data confirms Paper 4 cross-frequency"
+    },
+    {
+      "sha": "ef4051e3",
+      "message": "K1100g_d5 H2 indistinguishable: gap² and night r² statistically equivalent"
+    },
+    {
+      "sha": "64cfe244",
+      "message": "Merge agent worktree agent-af9d1ed4 (1 commits)"
+    },
+    {
+      "sha": "b1d1c094",
+      "message": "K1100g_d5: gap^2 vs night_r^2 info carrier - STATISTICALLY INDISTINGUISHABLE"
+    },
+    {
+      "sha": "9b1060f3",
+      "message": "K1108 INCONCLUSIVE: capex guidance direction-only, power constraint"
+    },
+    {
+      "sha": "3cec648c",
+      "message": "K1100g_d4 H3 mixed: K1100g_d3 effect is cumulative not year-stable"
+    },
+    {
+      "sha": "55728460",
+      "message": "K1100g_d3 H1 PARTIAL: Student-t reverses K1100g_d2 null — Normal QML fat-tail ar"
+    },
+    {
+      "sha": "3502f29a",
+      "message": "K1122 H2 confirmed: sigmoid loading doesn't rescue alt-data allocation"
+    },
+    {
+      "sha": "2e9aa58b",
+      "message": "4-hour sync: Paper 2 mechanism + Paper 4 boundary + TLT regime"
+    },
+    {
+      "sha": "40987173",
+      "message": "K1120b GENUINE confirmed + TLT regime general article"
+    },
+    {
+      "sha": "9961a809",
+      "message": "K1120 H1 CONFIRMED: TLT FinStress signal is rate-hike regime-specific"
+    },
+    {
+      "sha": "64a9d569",
+      "message": "K1116c H2 ROBUST NULL: Paper 4 alt-data NOT publication-delay artifact"
+    },
+    {
+      "sha": "434023a9",
+      "message": "K1126 OFI regime asymmetry FAIL: K1125 is pooled not regime-driven"
+    },
+    {
+      "sha": "c7f30fb9",
+      "message": "K1118b FX IV-sufficiency H3 mixed + E073 VIX-cross-class-harms"
+    },
+    {
+      "sha": "39a655f6",
+      "message": "K1067f VIX-only ablation H1 CLEAN: Paper 2 robustness chain COMPLETE"
+    },
+    {
+      "sha": "fd86d680",
+      "message": "Merge agent worktree agent-a226f844 (1 commits)"
+    },
+    {
+      "sha": "6d4d27dd",
+      "message": "K1067f VIX-only ablation PASS H1: reverse sanity of K1067e"
+    },
+    {
+      "sha": "0b5befac",
+      "message": "K1119 BTC Deribit DVOL NULL: crypto IV-insufficient confirmed"
+    },
+    {
+      "sha": "cee02bc9",
+      "message": "K1067e EAV-only ablation: Paper 2 SAFE (NOT a VIX artifact)"
+    },
+    {
+      "sha": "31eeee8c",
+      "message": "K1174 WEAKENS K1170 press-concentration + caveat added to article"
+    },
+    {
+      "sha": "4fa755f9",
+      "message": "K1170 PARTIAL: press concentration solves EU-JP residual, 3-level mechanism"
+    },
+    {
+      "sha": "528447c1",
+      "message": "K1168 STRENGTHENED at N=10 (emerging market residuals)"
+    },
+    {
+      "sha": "dd73784c",
+      "message": "K1165 STRENGTHENED: N=7 markets confirms two-level mechanism"
+    },
+    {
+      "sha": "8a98378a",
+      "message": "K1167 PARTIAL: two-level mechanism (institutional+analyst) for Paper 2"
+    },
+    {
+      "sha": "ed131469",
+      "message": "Merge agent worktree agent-a58989aa (1 commits)"
+    },
+    {
+      "sha": "96b3d4b1",
+      "message": "K1167 PARTIAL: two-level mechanism for cross-market theta_rel cluster"
+    },
+    {
+      "sha": "9fbbc5c6",
+      "message": "K1166 OVERTURNS K1164: per-stock refit confirms within-market analyst hypothesis"
+    },
+    {
+      "sha": "48cb3936",
+      "message": "Merge agent worktree agent-ab92400a (1 commits)"
+    },
+    {
+      "sha": "54c37b3a",
+      "message": "K1166 done: per-stock theta_EAV refit removes sigma^2 tautology, analyst mechani"
+    },
+    {
+      "sha": "234612d0",
+      "message": "K1164 mechanism REJECTED: analyst hypothesis fails rank-ordering test"
+    },
+    {
+      "sha": "4af3e30c",
+      "message": "Merge branch 'main' of https://github.com/yhlai0911/volpred-research"
+    },
+    {
+      "sha": "23982787",
+      "message": "4-hour sync: K1162 + K1164 progress + token report"
+    },
+    {
+      "sha": "033d09b9",
+      "message": "Rewrite K1140 + K1150 research articles + delete flow-chart drafts"
+    },
+    {
+      "sha": "c43e2c27",
+      "message": "Merge agent worktree agent-a916e45e (1 commits)"
+    },
+    {
+      "sha": "23ef012f",
+      "message": "K1162 done: analyst-coverage split - BINARY-FUNDAMENTAL"
+    },
+    {
+      "sha": "416e4616",
+      "message": "feed-publisher: codify articulated agent prompt template (anti-hallucination)"
+    },
+    {
+      "sha": "cad64e05",
+      "message": "feed-publisher: research articles must curate findings, not dump data"
+    },
+    {
+      "sha": "c60f7e70",
+      "message": "Fix broken tables in 6 drafts: image mid-table-header"
+    },
+    {
+      "sha": "9982d68e",
+      "message": "Fix broken table in mile_ac025889 (image was inserted mid-table-header)"
+    },
+    {
+      "sha": "490e3602",
+      "message": "K1153 EU 4th market + size-axis general article"
+    },
+    {
+      "sha": "3346e6d5",
+      "message": "Merge agent worktree agent-aa064375 (1 commits)"
+    },
+    {
+      "sha": "e3fbe31e",
+      "message": "K1153: EU 4th market pooled θ_EAV — universal direction, TW-cluster θ_rel"
+    },
+    {
+      "sha": "13b010a3",
+      "message": "feed-publisher: clarify research article trigger = experiment-driven"
+    },
+    {
+      "sha": "6c63f491",
+      "message": "feed-publisher: mandatory read experiment README + code + results before writing"
+    },
+    {
+      "sha": "a4157a23",
+      "message": "Unpublish mile_05e8a054 (topic duplicated) + strengthen dedup rule"
+    },
+    {
+      "sha": "3879adb3",
+      "message": "feed-publisher: clarify general=synthesis / research=single-K or topic-aggregate"
+    },
+    {
+      "sha": "376f711c",
+      "message": "Restore event-driven rule details in publication-candidates skill"
+    },
+    {
+      "sha": "686bb953",
+      "message": "Add publication-candidates skill + scanner"
+    },
+    {
+      "sha": "753437ca",
+      "message": "K1152+K1157+research drafts complete"
+    },
+    {
+      "sha": "b5c15e89",
+      "message": "Merge agent worktree agent-ae59b860 (2 commits)"
+    },
+    {
+      "sha": "db5e3d4d",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "83c423fd",
+      "message": "K1157: JP TOPIX continuous EAV — universality of binary-sufficient confirmed"
+    },
+    {
+      "sha": "93b1ede5",
+      "message": "K1152 complete: relative-magnitude still market-specific (Wald p~0)"
+    }
+  ]
+}
