@@ -297,6 +297,9 @@ class Publisher:
                 audience = 'daily'
             else:
                 audience = 'research'
+                # 2026-04-14: warn when auto-classify falls through to research default
+                # Common bug: general-intent article missed explicit audience='general'
+                print(f"  ⚠️ audience auto-defaulted to 'research' for title='{title[:50]}...'. If this is a general-reader article, explicitly pass audience='general'.")
         if category is None:
             if audience == 'general':
                 category = 'general'

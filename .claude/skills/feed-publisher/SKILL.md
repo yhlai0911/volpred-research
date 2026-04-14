@@ -222,6 +222,10 @@ Publisher 會自動在文章末尾附加「延伸閱讀」區塊，列出同 aud
 - 沒有再用 volpred.charts.generate_bar_chart / grouped_bar / line / heatmap
 
 ## 6. 發佈
+
+**⚠️ CRITICAL: `audience` 必須顯式傳**，不可依賴 Publisher 從 `phase` auto-derive (會自動變 research)。
+
+```python
 from src.volpred.publisher.publisher import Publisher
 pub = Publisher()
 pub.publish_milestone(
@@ -229,10 +233,14 @@ pub.publish_milestone(
     description=content,
     phase='research',
     category='milestone',
+    audience='general',  # ⚠️ 必填 — 'general' 或 'research' 或 'member_qa'
     tags=['K<a>','K<b>','<asset>','<method>','<theme>'],  # 3-8 個
     proposer='Claude',
     status='draft',  # ⚠️ 永遠 draft
 )
+```
+
+**2026-04-14 教訓**：7 篇本該 general 的文章因為沒傳 audience，被 Publisher auto-classify 成 research，draft pool 變 R=13/G=4 不符 R≥4/G≥8 目標。修正: 此 skill 強制 audience 必填。
 
 ## 7. 紀律
 - 繁中、status=draft、不派 sub-agent、不修改 storage/memory/* 或 storage/reports/* 以外共享檔
