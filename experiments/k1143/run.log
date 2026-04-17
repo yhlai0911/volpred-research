@@ -1,0 +1,100 @@
+========================================================================
+K1143: GAS-t equity HARM mechanism diagnostic
+Paper 4 channel-specific narrative rationale
+========================================================================
+
+[0] Downloading VIX...
+  VIX: 2000-01-03 ~ 2026-04-10, n=6607
+
+[0] Downloading SPY...
+  Observations: 6606
+  Date range: 2000-01-04 ~ 2026-04-10
+  Mean r: 0.0308%, Std r: 1.2212%
+  Mean Park: 1.0012 (pct²)
+  Pre-2020: skew=0.008, kurt=12.15
+  Post-2020: skew=0.299, kurt=8.85
+
+[0] Downloading QQQ...
+  Observations: 6606
+  Date range: 2000-01-04 ~ 2026-04-10
+  Mean r: 0.0425%, Std r: 1.6893%
+  Mean Park: 2.0762 (pct²)
+  Pre-2020: skew=0.249, kurt=7.59
+  Post-2020: skew=0.180, kurt=5.11
+
+============================================================
+  Processing: SPY
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  IS (2010-2019): ν̂_M1=6.27, ν̂_M2=6.21, λ̂_M2=-0.076
+  IS VIX tertiles: T1=13.97, T2=18.37
+  [SPY] 0% (0/1323) 8.3s
+  [SPY] 19% (252/1323) 43.6s
+  [SPY] 38% (504/1323) 80.6s
+  [SPY] 57% (756/1323) 120.1s
+  [SPY] 76% (1008/1323) 155.9s
+  [SPY] 95% (1260/1323) 192.6s
+  [SPY] OOS done in 192.6s
+    BASE_GJR_N: QLIKE=1.473663, n_valid=1321
+    M1_GAS_t_sym: QLIKE=1.527236, n_valid=1321
+    M2_GAS_skewt: QLIKE=1.535326, n_valid=1321
+    M3_GAS_t_clip: QLIKE=1.539445, n_valid=1321
+    M4_GAS_t_betacap: QLIKE=1.538335, n_valid=1321
+    M5_regime_HAR_GAS: QLIKE=1.520576, n_valid=1321
+    DM vs BASE M1_GAS_t_sym: t=-3.267, p=1.113e-03, rel=-3.64%
+    DM vs BASE M2_GAS_skewt: t=-3.183, p=1.490e-03, rel=-4.18%
+    DM vs M1 sym M2_GAS_skewt: t=-2.031, p=4.242e-02, rel=-0.53%
+    DM vs BASE M3_GAS_t_clip: t=-2.585, p=9.849e-03, rel=-4.46%
+    DM vs M1 sym M3_GAS_t_clip: t=-1.073, p=2.834e-01, rel=-0.80%
+    DM vs BASE M4_GAS_t_betacap: t=-3.798, p=1.525e-04, rel=-4.39%
+    DM vs M1 sym M4_GAS_t_betacap: t=-1.137, p=2.558e-01, rel=-0.73%
+    DM vs BASE M5_regime_HAR_GAS: t=-2.478, p=1.335e-02, rel=-3.18%
+    DM vs M1 sym M5_regime_HAR_GAS: t=+0.567, p=5.707e-01, rel=+0.44%
+
+============================================================
+  Processing: QQQ
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  IS (2010-2019): ν̂_M1=6.04, ν̂_M2=5.72, λ̂_M2=-0.103
+  IS VIX tertiles: T1=13.97, T2=18.37
+  [QQQ] 0% (0/1323) 8.7s
+  [QQQ] 19% (252/1323) 45.4s
+  [QQQ] 38% (504/1323) 84.0s
+  [QQQ] 57% (756/1323) 119.8s
+  [QQQ] 76% (1008/1323) 156.6s
+  [QQQ] 95% (1260/1323) 196.6s
+  [QQQ] OOS done in 196.6s
+    BASE_GJR_N: QLIKE=1.455917, n_valid=1322
+    M1_GAS_t_sym: QLIKE=1.494267, n_valid=1322
+    M2_GAS_skewt: QLIKE=1.506327, n_valid=1322
+    M3_GAS_t_clip: QLIKE=1.500851, n_valid=1322
+    M4_GAS_t_betacap: QLIKE=1.516205, n_valid=1322
+    M5_regime_HAR_GAS: QLIKE=1.493234, n_valid=1322
+    DM vs BASE M1_GAS_t_sym: t=-2.806, p=5.096e-03, rel=-2.63%
+    DM vs BASE M2_GAS_skewt: t=-2.888, p=3.936e-03, rel=-3.46%
+    DM vs M1 sym M2_GAS_skewt: t=-2.744, p=6.160e-03, rel=-0.81%
+    DM vs BASE M3_GAS_t_clip: t=-2.702, p=6.970e-03, rel=-3.09%
+    DM vs M1 sym M3_GAS_t_clip: t=-1.478, p=1.396e-01, rel=-0.44%
+    DM vs BASE M4_GAS_t_betacap: t=-3.851, p=1.233e-04, rel=-4.14%
+    DM vs M1 sym M4_GAS_t_betacap: t=-2.691, p=7.216e-03, rel=-1.47%
+    DM vs BASE M5_regime_HAR_GAS: t=-2.373, p=1.779e-02, rel=-2.56%
+    DM vs M1 sym M5_regime_HAR_GAS: t=+0.104, p=9.172e-01, rel=+0.07%
+
+========================================================================
+SCENARIO CLASSIFICATION
+========================================================================
+
+Skew-t        PASS_BH (both assets): False, no-harm: False
+Score-clip    PASS_BH (both assets): False, no-harm: False
+Persist-cap   PASS_BH (both assets): False, no-harm: False
+Regime-switch PASS_BH (both assets): False, no-harm: False
+
+*** SCENARIO: D: All variants still HARM — architectural incompatibility ***
+
+Charts saved: gas_forecast_error_by_regime.png, score_update_magnitude_distribution.png
+
+Results saved: k1143_results.json
+
+FINAL SCENARIO: D: All variants still HARM — architectural incompatibility
+
+K1143 complete.

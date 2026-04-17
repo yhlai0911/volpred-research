@@ -1,0 +1,390 @@
+{
+  "experiment_id": "K1143",
+  "title": "GAS-t equity HARM mechanism diagnostic: which variant repairs K1138 SPY/QQQ negative t?",
+  "description": "K1138 found GAS-t actively harmful on SPY (t=-3.27) and QQQ (t=-2.81). K1143 decomposes four candidate mechanisms: asymmetry (Hansen skew-t), score overshoot (winsorize at \u00b13), persistence near unity (\u03b2\u22640.97), and GAS-t low-vol ceiling (regime switch HAR vs GAS). OOS 2020-2026 vs K1138 baseline GJR-N and vs M1 symmetric GAS-t reference.",
+  "methodology": {
+    "assets": [
+      "SPY",
+      "QQQ"
+    ],
+    "IS_period": "2010-01-01 ~ 2019-12-31",
+    "OOS_period": "2021-01-04 ~ 2026-04-10",
+    "window": 1500,
+    "refit_every": 63,
+    "score_clip_threshold": 0.3,
+    "beta_cap": 0.9,
+    "models": {
+      "BASE_GJR_N": "GJR-GARCH(1,1) Normal, K1138 baseline",
+      "M1_GAS_t_sym": "K1138 symmetric Student-t GAS (reference)",
+      "M2_GAS_skewt": "Hansen (1994) skew-t GAS, static \u03bb",
+      "M3_GAS_t_clip": "Symmetric GAS-t with scaled score winsorized at \u00b10.3",
+      "M4_GAS_t_betacap": "Symmetric GAS-t with \u03b2 \u2264 0.9",
+      "M5_regime_HAR_GAS": "Regime switch on VIX IS tertile 1: HAR-RV in low-VIX, GAS-t otherwise"
+    },
+    "evaluation": "QLIKE on r\u00b2 (GARCH/GAS native, Patton 2011)",
+    "statistical_test": "DM-HLN (Harvey-Leybourne-Newbold 1997) + BH FDR",
+    "pass_threshold": "DM t>+2 AND BH p<0.05",
+    "seed": 42
+  },
+  "per_asset_results": {
+    "SPY": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "descriptive": {
+        "pre2020": {
+          "n": 5283,
+          "mean": 0.025761208427259822,
+          "std": 1.2555905732255632,
+          "skewness": 0.008463369038091285,
+          "excess_kurtosis": 12.149168604657984
+        },
+        "post2020": {
+          "n": 1323,
+          "mean": 0.050906552895090905,
+          "std": 1.0733251238978256,
+          "skewness": 0.2987878316272221,
+          "excess_kurtosis": 8.845058310500944
+        }
+      },
+      "IS_summary": {
+        "nu_hat_M1_symmetric": 6.26660130808386,
+        "nu_hat_M2_skewt": 6.210396461455478,
+        "lam_hat_M2_skewt": -0.07621756786664731,
+        "vix_tertile_T1": 13.96666685740153,
+        "vix_tertile_T2": 18.3700008392334,
+        "score_m1_mean": -0.0011771211488107044,
+        "score_m1_std": 0.18873745624884788,
+        "score_m1_skew": 1.5815675274464154,
+        "score_m1_kurt_excess": 2.2053431592709583,
+        "score_m1_q01": -0.1584828829994469,
+        "score_m1_q99": 0.6332841217660506
+      },
+      "model_metrics": {
+        "BASE_GJR_N": {
+          "QLIKE": 1.4736631792154722,
+          "n_valid": 1321
+        },
+        "M1_GAS_t_sym": {
+          "QLIKE": 1.527235532522082,
+          "n_valid": 1321
+        },
+        "M2_GAS_skewt": {
+          "QLIKE": 1.535326349007576,
+          "n_valid": 1321
+        },
+        "M3_GAS_t_clip": {
+          "QLIKE": 1.5394446299607727,
+          "n_valid": 1321
+        },
+        "M4_GAS_t_betacap": {
+          "QLIKE": 1.538335222629666,
+          "n_valid": 1321
+        },
+        "M5_regime_HAR_GAS": {
+          "QLIKE": 1.5205758633108437,
+          "n_valid": 1321
+        }
+      },
+      "dm_vs_BASE_GJR_N": {
+        "M1_GAS_t_sym": {
+          "DM_HLN_t": -3.267421583757149,
+          "DM_HLN_p": 0.0011132323317111226,
+          "n_used": 1321,
+          "rel_improvement_pct": -3.6353187120499277,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.004470635554944646,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        },
+        "M2_GAS_skewt": {
+          "DM_HLN_t": -3.1832681583964995,
+          "DM_HLN_p": 0.0014902118516482155,
+          "n_used": 1321,
+          "rel_improvement_pct": -4.184346237444237,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.004470635554944646,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        },
+        "M3_GAS_t_clip": {
+          "DM_HLN_t": -2.5848246880893235,
+          "DM_HLN_p": 0.009849343693816737,
+          "n_used": 1321,
+          "rel_improvement_pct": -4.463805004636154,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.022161023311087658,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        },
+        "M4_GAS_t_betacap": {
+          "DM_HLN_t": -3.798003723700126,
+          "DM_HLN_p": 0.00015249428109420649,
+          "n_used": 1321,
+          "rel_improvement_pct": -4.388522718510416,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.0013724485298478584,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        },
+        "M5_regime_HAR_GAS": {
+          "DM_HLN_t": -2.4775178592422726,
+          "DM_HLN_p": 0.013354371248215369,
+          "n_used": 1321,
+          "rel_improvement_pct": -3.183406137645797,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.024037868246787664,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        }
+      },
+      "dm_vs_M1_GAS_t_sym": {
+        "M2_GAS_skewt": {
+          "DM_HLN_t": -2.0312992007853325,
+          "DM_HLN_p": 0.0424246694242969,
+          "n_used": 1321,
+          "rel_improvement_pct": -0.5297687431441966,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.06363700413644535,
+          "PASS_BH": false
+        },
+        "M3_GAS_t_clip": {
+          "DM_HLN_t": -1.0731643462160363,
+          "DM_HLN_p": 0.2833935308482909,
+          "n_used": 1321,
+          "rel_improvement_pct": -0.7994246583909974,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.31881772220432725,
+          "PASS_BH": false
+        },
+        "M4_GAS_t_betacap": {
+          "DM_HLN_t": -1.136819990551561,
+          "DM_HLN_p": 0.2558198737813282,
+          "n_used": 1321,
+          "rel_improvement_pct": -0.7267831235732101,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.31881772220432725,
+          "PASS_BH": false
+        },
+        "M5_regime_HAR_GAS": {
+          "DM_HLN_t": 0.5672169689450003,
+          "DM_HLN_p": 0.5706632260135307,
+          "n_used": 1321,
+          "rel_improvement_pct": 0.43606038946989356,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.5706632260135307,
+          "PASS_BH": false
+        }
+      },
+      "forecasts_valid_mask_count": {
+        "BASE_GJR_N": 1323,
+        "M1_GAS_t_sym": 1323,
+        "M2_GAS_skewt": 1323,
+        "M3_GAS_t_clip": 1323,
+        "M4_GAS_t_betacap": 1323,
+        "M5_regime_HAR_GAS": 1323
+      },
+      "r2_oos_mean": 1.1537475301453133
+    },
+    "QQQ": {
+      "n_oos": 1323,
+      "oos_start": "2021-01-04",
+      "oos_end": "2026-04-10",
+      "descriptive": {
+        "pre2020": {
+          "n": 5283,
+          "mean": 0.03796942908616852,
+          "std": 1.7511991577444581,
+          "skewness": 0.24941281463885312,
+          "excess_kurtosis": 7.58775160936583
+        },
+        "post2020": {
+          "n": 1323,
+          "mean": 0.06039931839030902,
+          "std": 1.4156902224326013,
+          "skewness": 0.18013917459378662,
+          "excess_kurtosis": 5.109208800415335
+        }
+      },
+      "IS_summary": {
+        "nu_hat_M1_symmetric": 6.042321198569622,
+        "nu_hat_M2_skewt": 5.719496545450294,
+        "lam_hat_M2_skewt": -0.10292934715636008,
+        "vix_tertile_T1": 13.96666685740153,
+        "vix_tertile_T2": 18.3700008392334,
+        "score_m1_mean": -0.0008177832443704633,
+        "score_m1_std": 0.19578551210577516,
+        "score_m1_skew": 1.5318143339714294,
+        "score_m1_kurt_excess": 1.88401818305793,
+        "score_m1_q01": -0.16528785459939646,
+        "score_m1_q99": 0.6303306359732816
+      },
+      "model_metrics": {
+        "BASE_GJR_N": {
+          "QLIKE": 1.4559174892878877,
+          "n_valid": 1322
+        },
+        "M1_GAS_t_sym": {
+          "QLIKE": 1.494267261148022,
+          "n_valid": 1322
+        },
+        "M2_GAS_skewt": {
+          "QLIKE": 1.5063265293331762,
+          "n_valid": 1322
+        },
+        "M3_GAS_t_clip": {
+          "QLIKE": 1.5008507868033034,
+          "n_valid": 1322
+        },
+        "M4_GAS_t_betacap": {
+          "QLIKE": 1.5162053317303725,
+          "n_valid": 1322
+        },
+        "M5_regime_HAR_GAS": {
+          "QLIKE": 1.49323419266708,
+          "n_valid": 1322
+        }
+      },
+      "dm_vs_BASE_GJR_N": {
+        "M1_GAS_t_sym": {
+          "DM_HLN_t": -2.805612620879869,
+          "DM_HLN_p": 0.005095766563713466,
+          "n_used": 1322,
+          "rel_improvement_pct": -2.6340621733235667,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.010824263144405766,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        },
+        "M2_GAS_skewt": {
+          "DM_HLN_t": -2.8883236052938885,
+          "DM_HLN_p": 0.003936154055824037,
+          "n_used": 1322,
+          "rel_improvement_pct": -3.462355553537888,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.010824263144405766,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        },
+        "M3_GAS_t_clip": {
+          "DM_HLN_t": -2.70249794570346,
+          "DM_HLN_p": 0.006970229452851084,
+          "n_used": 1322,
+          "rel_improvement_pct": -3.086253022305085,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.010824263144405766,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        },
+        "M4_GAS_t_betacap": {
+          "DM_HLN_t": -3.850999654849188,
+          "DM_HLN_p": 0.0001232697875166444,
+          "n_used": 1322,
+          "rel_improvement_pct": -4.140883180953654,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.0011094280876497997,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        },
+        "M5_regime_HAR_GAS": {
+          "DM_HLN_t": -2.3729338420825017,
+          "DM_HLN_p": 0.01778988553987615,
+          "n_used": 1322,
+          "rel_improvement_pct": -2.563105646697365,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.022872709979840762,
+          "PASS_BH": false,
+          "Harvey_BH": false
+        }
+      },
+      "dm_vs_M1_GAS_t_sym": {
+        "M2_GAS_skewt": {
+          "DM_HLN_t": -2.743575595597208,
+          "DM_HLN_p": 0.006159617880315604,
+          "n_used": 1322,
+          "rel_improvement_pct": -0.8070355617568158,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.010824263144405766,
+          "PASS_BH": false
+        },
+        "M3_GAS_t_clip": {
+          "DM_HLN_t": -1.4782253460128336,
+          "DM_HLN_p": 0.13958585717630623,
+          "n_used": 1322,
+          "rel_improvement_pct": -0.4405855516250345,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.1570340893233445,
+          "PASS_BH": false
+        },
+        "M4_GAS_t_betacap": {
+          "DM_HLN_t": -2.6908846861361795,
+          "DM_HLN_p": 0.007216175429603844,
+          "n_used": 1322,
+          "rel_improvement_pct": -1.4681490488853879,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.010824263144405766,
+          "PASS_BH": false
+        },
+        "M5_regime_HAR_GAS": {
+          "DM_HLN_t": 0.10398685982099617,
+          "DM_HLN_p": 0.9171955611073725,
+          "n_used": 1322,
+          "rel_improvement_pct": 0.06913545573824588,
+          "PASS_gate": false,
+          "Harvey": false,
+          "DM_HLN_p_BH": 0.9171955611073727,
+          "PASS_BH": false
+        }
+      },
+      "forecasts_valid_mask_count": {
+        "BASE_GJR_N": 1323,
+        "M1_GAS_t_sym": 1323,
+        "M2_GAS_skewt": 1323,
+        "M3_GAS_t_clip": 1323,
+        "M4_GAS_t_betacap": 1323,
+        "M5_regime_HAR_GAS": 1323
+      },
+      "r2_oos_mean": 2.0063120091724125
+    }
+  },
+  "scenario_analysis": {
+    "skewt_PASS_both": false,
+    "skewt_no_harm_both": false,
+    "clip_PASS_both": false,
+    "clip_no_harm_both": false,
+    "betacap_PASS_both": false,
+    "betacap_no_harm_both": false,
+    "regime_PASS_both": false,
+    "regime_no_harm_both": false,
+    "scenario": "D: All variants still HARM \u2014 architectural incompatibility"
+  },
+  "paper4_implication": "Paper 4 channel-specific narrative: whichever variant repairs (or fails to repair) the equity-harm signature tells a mechanism story. Current scenario: D: All variants still HARM \u2014 architectural incompatibility.",
+  "data_source": "yfinance",
+  "timestamp": "2026-04-17T06:24:23.674390+00:00",
+  "references": [
+    "Creal, Koopman, Lucas (2013) JASA 108(501):1-18",
+    "Hansen (1994) International Economic Review 35:705-730 (skew-t)",
+    "Gonzalez-Rivera, Maldonado, Perez (2014) International Journal of Forecasting 30(3):529-550",
+    "Harvey (2013) Cambridge UP \u2014 Dynamic Models for Volatility and Heavy Tails",
+    "Patton (2011) J Econometrics 160:246-256",
+    "Harvey-Leybourne-Newbold (1997) IJF 13:281-291",
+    "Benjamini-Hochberg (1995) JRSS B 57:289-300"
+  ]
+}
