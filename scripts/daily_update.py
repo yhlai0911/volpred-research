@@ -1088,17 +1088,20 @@ def _run_sync_health_check() -> None:
     print("\n--- Sync health check ---")
     try:
         pt = json.loads(Path("storage/paper_trading.json").read_text())
-        local_dates = set()
-        if isinstance(pt, dict):
-            for v in pt.values():
-                if isinstance(v, list):
-                    for e in v:
-                        if isinstance(e, dict) and e.get("trade_date"):
-                            local_dates.add(e["trade_date"])
-        elif isinstance(pt, list):
-            for e in pt:
-                if isinstance(e, dict) and e.get("trade_date"):
-                    local_dates.add(e["trade_date"])
+        local_dates: set[str] = set()
+
+        def collect(obj):
+            if isinstance(obj, dict):
+                if "trade_date" in obj and isinstance(obj.get("trade_date"), str):
+                    local_dates.add(obj["trade_date"])
+                else:
+                    for v in obj.values():
+                        collect(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    collect(item)
+
+        collect(pt)
         local_max = max(local_dates) if local_dates else None
     except Exception as e:
         print(f"  [health] cannot read local paper_trading: {e}")
@@ -1109,18 +1112,27 @@ def _run_sync_health_check() -> None:
         return
 
     alerts = []
-    for table in ("paper_trades", "market_daily", "strategy_signals"):
+    # Each table's freshness column differs:
+    # paper_trades + market_daily have trade_date (date-indexed rows)
+    # strategy_signals is upsert-keyed by strategy, so compare updated_at date
+    table_specs = [
+        ("paper_trades", "trade_date", "date"),
+        ("market_daily", "trade_date", "date"),
+        ("strategy_signals", "updated_at", "timestamp"),
+    ]
+    for table, col, kind in table_specs:
         try:
-            url = f"{SUPABASE_URL}/rest/v1/{table}?select=trade_date&order=trade_date.desc&limit=1"
+            url = f"{SUPABASE_URL}/rest/v1/{table}?select={col}&order={col}.desc&limit=1"
             req = Request(url, headers=HEADERS, method="GET")
             with urlopen(req, timeout=15) as resp:
                 rows = json.loads(resp.read().decode())
-            remote_max = rows[0]["trade_date"] if rows else None
-            if remote_max == local_max:
-                print(f"  {table}: OK ({remote_max})")
+            raw = rows[0].get(col) if rows else None
+            remote_date = raw[:10] if isinstance(raw, str) else None
+            if remote_date == local_max:
+                print(f"  {table}: OK ({col}={raw})")
             else:
-                alerts.append(f"{table}: remote={remote_max} local={local_max}")
-                print(f"  ⚠️  {table}: remote={remote_max} local={local_max}")
+                alerts.append(f"{table}: remote {col}={raw} local trade_date={local_max}")
+                print(f"  ⚠️  {table}: remote {col}={raw} local trade_date={local_max}")
         except Exception as e:
             alerts.append(f"{table}: query failed {e}")
             print(f"  ⚠️  {table}: query failed — {e}")
