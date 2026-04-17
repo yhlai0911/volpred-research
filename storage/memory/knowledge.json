@@ -27709,5 +27709,16 @@
     ],
     "confidence": 0.92,
     "created_at": "2026-04-18T02:17:29.725447"
+  },
+  {
+    "item_id": "5d2d2435",
+    "category": "K1207",
+    "content": "K1207 GICS sector-FE decomposition of K1171 N=182 pool SECTOR_ORTHOGONAL_CONFIRMED. Coverage 182/182 stocks 10 GICS sectors (Utilities absent). 4-model R\u00b2 progression (cluster-robust SE by market): M1 mkt_FE+log_mcap R\u00b2=0.1547 adj=0.0947; M2 +inst_pct R\u00b2=0.1640 adj=0.0993 inst t=-0.87 NS; M3 +sector_FE R\u00b2=0.3305 adj=0.2427 sector F=689.5 p=7.9e-14; M4 +inst+sector R\u00b2=0.3376 adj=0.2460 inst t=-0.80 NS. Sector-FE incremental adj-R\u00b2=0.148 = 32\u00d7 inst-FE incremental 0.0046. Spearman(sector \u03b8_EAV median, sector inst_pct median)=-0.006 p=0.987 n=10 empirically ORTHOGONAL. inst_pct Harvey t M2 -0.87 -> M4 -0.80 (4.4% beta change) \u2014 sector does NOT kill inst_pct independent within-market channels. Sector-adjusted residuals absorb 95% IN / 78% MX / 39% BR above-ladder. AU below-ladder residual NOT sector-explained (31% amplification) \u2014 K1171 semi-annual + HAND_CODED \u00b11-day hypotheses remain leading for AU. Paper 2 \u00a75 narrative: K1171 sector-as-independent-structural-driver-orthogonal-to-inst-ownership claim empirically VERIFIED for EM above-ladder residuals (IN/MX/BR); AU below-ladder caveat preserved. 5 supporting experiments (K1168/K1171/K1172/K1204/K1207) satisfy narrative state machine.",
+    "evidence": [
+      "experiments/k1207/k1207_results.json",
+      "commit bd365d27"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-04-18T02:24:18.373982"
   }
 ]
