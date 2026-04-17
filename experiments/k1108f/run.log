@@ -1,0 +1,42 @@
+=== K1108f: Regime-split K1108c pooled capex regression ===
+Seed=42, starting at 00:37:01
+Loaded K1108c pool: N=135, firms=4, date range [2014-02-26 .. 2025-11-17]
+
+>>> Regime classification (fixed a priori):
+    UP: 54
+    NEUTRAL: 47
+    DOWN: 32
+    TRANSITION: 2
+
+>>> TSMC rev YoY PIT merge: 133/135 events have valid t-1 YoY (missing: 2 pre-2014Q1 events)
+
+>>> SPEC 1: θ_EAV = β₀ + β_up·Δpct·1[UP] + β_down·Δpct·1[DOWN]
+    Primary analysis pool (UP ∪ DOWN): N=86
+    β_up   = -1.7624e-05  SE=2.9436e-05  t=-0.599  p=0.5494
+    β_down = -1.1725e-05  SE=1.3589e-05  t=-0.863  p=0.3882
+    Wald χ² (β_up = β_down) = 0.036 (df=1, p=0.8491)
+
+>>> SPEC 2: θ_EAV = β₀ + β₁·Δpct + β₂·Δpct·TSMC_YoY_lag
+    Spec 2 pool: N=133 (after dropping pre-data events)
+    β₁ (Δpct main)         = -5.8997e-06  t=-0.555  p=0.5790
+    β₂ (Δpct × YoY interact)= -5.4231e-05  t=-0.877  p=0.3807
+
+>>> Block bootstrap Spec 1 (N=1000, block=10)
+    β_up   bootstrap mean=+6.706e-06  95% CI=[-2.448e-05, +3.756e-05]
+    β_down bootstrap mean=+1.518e-05  95% CI=[-1.173e-05, +6.846e-05]
+    Bootstrap (β_up − β_down) 95% CI = [-6.214e-05, +3.632e-05]  p=0.7940
+
+>>> Block bootstrap Spec 2 β₂ (N=1000, block=10)
+    β₁ bootstrap mean=+1.893e-06  95% CI=[-1.119e-05, +2.273e-05]
+    β₂ bootstrap mean=-4.651e-05  95% CI=[-2.024e-04, +6.099e-05]
+
+>>> VERDICT: H2_REGIME_NULL_CONFIRMED
+    - β_up   = -1.762e-05  t_HAC = -0.599  (n_up=54)
+    - β_down = -1.172e-05  t_HAC = -0.863  (n_dn=32)
+    - Wald χ² (β_up = β_down) = 0.036  p = 0.8491
+    - Spec 2 |t_b2| (interaction) = 0.877
+Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a4a76806/experiments/k1108f/k1108f_scatter_by_regime.png
+Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a4a76806/experiments/k1108f/k1108f_coef_forest.png
+
+Results written: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a4a76806/experiments/k1108f/k1108f_results.json
+Total runtime: 2.2s
