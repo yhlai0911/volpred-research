@@ -124,21 +124,23 @@
     ]
   },
   "idle_policy": {
-    "source_label": "Slot-aware idle continuation policy (updated 2026-04-17 for M1 Max 10-core parallel agents)",
+    "source_label": "Slot-aware idle continuation policy (updated 2026-04-17 for M1 Max 10-core, cap raised 3->4)",
     "note": "Use after a top-level agent completes its main task instead of a high-frequency heartbeat cron. Priority ordering decides WHICH task to pick; it does NOT mandate sequential execution.",
-    "max_concurrent_agents": 3,
+    "max_concurrent_agents": 4,
     "rules": [
-      "硬體容量：M1 Max 10 核，建議同時跑 3 個 agent（每個約 1GB RAM + 1 個 worktree）。",
+      "硬體容量：M1 Max 10 核，同時最多 4 個 agent（每個約 1-2 核 + 1-2GB RAM + 1 個 worktree），保留 ≥1 核給主線程 buffer。",
       "每次觸發先 count 當前 running agents（.claude/worktrees/ + background task ids）。若 >= max_concurrent_agents 則跳過。",
       "slot 有空就挑新任務：(1) user-assigned pending 最高優先 (2) scheduled queue (3) discovery / research continuation。不必等 user queue 清空才 discovery。",
       "同一個 K 編號 / 任務 id 不得同時被兩個 agent 執行（啟動前 ls experiments/ + ls .claude/worktrees/ 檢查）。",
       "discovery pass 最多每 30 分鐘一次（整體節奏限制，不是 slot 限制）。",
       "user queue 仍優先於 discovery — 若有 user pending，下次 slot 空出時必須優先挑 user。",
-      "每次 idle-driven continuation 或 discovery pass 之後，必須產生實際工作成果（新 agent running / git diff / knowledge 新增 / research_program 更新），不能只回報狀態。"
+      "每次 idle-driven continuation 或 discovery pass 之後，必須產生實際工作成果（新 agent running / git diff / knowledge 新增 / research_program 更新），不能只回報狀態。",
+      "next_tasks 主動補滿：每次 cron tick check；若 P4 pending < 2 或 P3 pending < 5，從 research_program.md / knowledge.json / 最近 NULL 實驗衍生新任務補齊；不等 queue 清空才 refill。"
     ],
     "history": [
       {"date": "2026-03-31", "change": "Deprecated */4 heartbeat; introduced queue-first sequential idle continuation."},
-      {"date": "2026-04-17", "change": "Relaxed to slot-aware concurrent execution (up to 3 parallel agents on M1 Max 10-core); priority ordering still enforced but no longer sequential."}
+      {"date": "2026-04-17", "change": "Relaxed to slot-aware concurrent execution (up to 3 parallel agents on M1 Max 10-core); priority ordering still enforced but no longer sequential."},
+      {"date": "2026-04-17", "change": "Raised max_concurrent_agents 3->4 (context still manageable, keeps ≥1 core headroom). Added proactive next_tasks refill: trigger when P4<2 or P3<5."}
     ]
   },
   "deprecated_patterns": [

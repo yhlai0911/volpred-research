@@ -193,11 +193,12 @@
 ## 自動化與控制面
 
 - 任務優先順序：`user-assigned > scheduled > agent-discovered`（只決定「誰先被挑」，不要求序貫執行）
-- 研究續跑採 `slot-aware idle-driven continuation`（2026-04-17 放寬；M1 Max 10 核建議 3 並行 agent）
-- **不必等 queue 清空才 discovery**；slot 有空（running < 3）就允許挑新任務；優先序仍為 user > scheduled > discovery
+- 研究續跑採 `slot-aware idle-driven continuation`（2026-04-17 放寬；M1 Max 10 核建議 4 並行 agent，保留 1 核給主線程）
+- **不必等 queue 清空才 discovery**；slot 有空（running < 4）就允許挑新任務；優先序仍為 user > scheduled > discovery
 - 同一 K 編號 / task id 不得同時被兩個 agent 執行（啟動前 `ls experiments/` + `ls .claude/worktrees/` 檢查）
 - 每次 idle / discovery pass 必須真的產生可驗證輸出，不可空轉
-- **Cron skip 用 stub** — slot 滿或 agent 仍在跑時，回覆 ≤15 字省 token（例：`跳過：slot 3/3`）
+- **Cron skip 用 stub** — slot 滿或 agent 仍在跑時，回覆 ≤15 字省 token（例：`跳過：slot 4/4`）
+- **next_tasks 主動補滿**（2026-04-17）：每次 cron tick check，若 P4 pending < 2 **或** P3 pending < 5，主動從 `research_program.md` / knowledge.json / 最近實驗 NULL 衍生新任務補齊；不等 queue 清空才 refill。
 - **論文 narrative state machine**（防 Paper 2/4 單一實驗觸發反覆 pivot）：
   - 單一實驗不可直接改 paper body.tex — 只能更新 `research_program.md` + knowledge.json
   - 必須 ≥ 3 個互補實驗（OOS-verified + Codex/Gemini reviewed）都完成才進 narrative decision
