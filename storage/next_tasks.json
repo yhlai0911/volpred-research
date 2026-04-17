@@ -1683,5 +1683,33 @@
       "paper-2",
       "new-experiments-batch"
     ]
+  },
+  {
+    "id": "Paper1_new_experiments_Tables_4_6_7_8",
+    "title": "Paper 1 BLOCKER: 4 new K experiments 補 Tables 4/6/7/8 的 15 no-source",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T17:36:43+08:00",
+    "description": "Paper 1 rescan (dcb84f0c): 0 UNDOCUMENTED_K, 15 STILL_NO_SOURCE — 需建 4 new K experiments. Table 4 (VaR config): K1185 VaR backtest with specific config matching paper 2020-2025 n=1508. Table 6 (pass-rate rows): K1186 Kupiec/Christoffersen pass rate aggregation. Table 7 (5 asset rows): K1187 cross-asset GARCH comparison (SPY/GLD/TLT/BTC/EEM). Table 8 (window robustness): K1188 rolling window sensitivity (w=250/500/1000). Agent-launchable, ~2-3h each = 8-12h total.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "new-experiments-batch",
+      "blocker"
+    ]
+  },
+  {
+    "id": "Paper1_KB_only_tables_10_11_12_C3_footnote",
+    "title": "Paper 1: Tables 10/11/12/C3 6 KB-only 數字加 'pre-K era, KB source' footnote",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:36:43+08:00",
+    "description": "Paper 1 rescan 發現 Tables 10/11/12/C3 共 6 數字只在 knowledge.json, experiments/ 無 (pre-K numbering era). avg stock γ, t-stat, ES/kurtosis block, β_trend/Spearman, gold regime t-test. 建議 main-thread footnote: 'Source: internal research memo <knowledge_id>; experiment pre-dates current K numbering system'. 或選 build 補遺 experiments (K1189+) 但 KB footnote 較經濟.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "kb-footnote",
+      "main-thread"
+    ]
   }
 ]

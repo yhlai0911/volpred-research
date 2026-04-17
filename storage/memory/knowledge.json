@@ -27130,5 +27130,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:30:01.665076"
+  },
+  {
+    "item_id": "101dcc8c",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] Paper 1 (leverage-direction) no-source systematic rescan. **Result: 0 UNDOCUMENTED_K, 15 STILL_NO_SOURCE, 6 KB_ONLY_PRE_K (out of 21 no-source)**. **Paper 1 \u8207 Paper 9 pattern \u6839\u672c\u4e0d\u540c** \u2014 K1045 rescue pattern \u4e0d\u9069\u7528. experiments/ \u4e2d\u7121\u672a\u767b\u9304 K \u80fd match Paper 1 \u7684 no-source \u6578\u5b57. **STILL_NO_SOURCE (15)** across: Table 4 (4 VaR config rows, \u8fd1 K899 \u4f46 period \u5dee), Table 6 (5 pass-rate rows), Table 7 (5 asset rows), Table 8 (window robustness block \u2014 K783b Patton scale \u4e0d\u517c\u5bb9 Table 8 quasi-LL scale). **KB_ONLY_PRE_K (6)**: Table 10 (avg stock \u03b3), Table 11 (ES/kurtosis), Table 12 (\u03b2_trend/Spearman), C3 gold regime \u2014 \u9019\u4e9b\u662f pre-K numbering era, knowledge \u6709\u4f46\u7121 experiment. **\u8fd1 K \u6aa2\u67e5 ruled out**: K899 (Normal=32 vs paper 33 + \u7121 Adaptive/Jump), K885 (n=1510 vs 1508), K783b (Patton ~1.5 vs quasi-LL -8~-9), K228 (code \u6709\u4f46\u7121 results JSON). **\u6295\u7a3f JBF \u524d\u5fc5\u505a**: 4 new K experiments (Tables 4/6/7/8) + 6 KB footnote annotation (Tables 10/11/12/C3). **Paper 1 \u7e3d\u6210\u672c\u4f30**: K903 (done, DIVERGENT Table 3 vs 8) + 4 new K Tables 4-8 (~10h) + D4 \u03b3_HM clarification + GLD \u03b3 forensic + 3 errata tasks = **~20-25 hours**. commit dcb84f0c.",
+    "evidence": [
+      "paper/leverage-direction/reproducibility_audit/nosource_rescan_report.md",
+      "paper/leverage-direction/reproducibility_audit/undocumented_k_additions_for_experiments_md.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:36:30.197347"
   }
 ]
