@@ -1,0 +1,111 @@
+2026-04-17 21:00:37,210 INFO K1198: Paper 1 Tables 10/11/12/C3 KB-only 6 values Formal Rebuild
+2026-04-17 21:00:37,210 INFO Start time: 2026-04-17T13:00:37.210921+00:00
+2026-04-17 21:00:37,210 INFO ======================================================================
+2026-04-17 21:00:37,210 INFO ======================================================================
+2026-04-17 21:00:37,211 INFO TABLE 10: Diversification Amplification (SPY vs 20 constituents)
+2026-04-17 21:00:37,211 INFO ======================================================================
+2026-04-17 21:00:37,211 INFO Downloading SPY...
+2026-04-17 21:00:41,113 INFO   SPY: γ=0.2453, t=7.13
+2026-04-17 21:00:42,059 INFO   AAPL: γ=0.1830, t=6.29
+2026-04-17 21:00:42,906 INFO   MSFT: γ=0.1352, t=5.54
+2026-04-17 21:00:43,832 INFO   AMZN: γ=0.1828, t=5.55
+2026-04-17 21:00:44,788 INFO   NVDA: γ=0.1987, t=4.41
+2026-04-17 21:00:45,882 INFO   GOOGL: γ=0.0576, t=4.23
+2026-04-17 21:00:46,812 INFO   META: γ=0.1335, t=2.54
+2026-04-17 21:00:47,852 INFO   TSLA: γ=0.0181, t=1.60
+2026-04-17 21:00:48,779 INFO   BRK-B: γ=0.0960, t=4.46
+2026-04-17 21:00:49,636 INFO   UNH: γ=0.0506, t=3.41
+2026-04-17 21:00:50,737 INFO   JNJ: γ=0.0364, t=1.60
+2026-04-17 21:00:51,861 INFO   JPM: γ=0.1282, t=5.33
+2026-04-17 21:00:52,873 INFO   V: γ=0.1499, t=6.41
+2026-04-17 21:00:53,956 INFO   PG: γ=0.0977, t=5.95
+2026-04-17 21:00:54,809 INFO   MA: γ=0.1544, t=5.19
+2026-04-17 21:00:55,892 INFO   HD: γ=0.0948, t=4.60
+2026-04-17 21:00:58,408 INFO   XOM: γ=0.0330, t=2.42
+2026-04-17 21:00:59,325 INFO   CVX: γ=0.0580, t=3.60
+2026-04-17 21:01:00,322 INFO   MRK: γ=0.0222, t=1.31
+2026-04-17 21:01:01,245 INFO   ABBV: γ=-0.0399, t=-1.51
+2026-04-17 21:01:02,248 INFO   PEP: γ=0.0886, t=4.41
+2026-04-17 21:01:02,250 INFO 
+  N constituents used: 20
+2026-04-17 21:01:02,250 INFO   Avg constituent γ: 0.0939 (paper: 0.076)
+2026-04-17 21:01:02,250 INFO   SPY ETF γ: 0.2453 (paper: 0.211)
+2026-04-17 21:01:02,250 INFO   Ratio: 2.61x (paper: 2.8x)
+2026-04-17 21:01:02,250 INFO   t-stat (stocks vs SPY): -10.53 (paper: -16.92)
+2026-04-17 21:01:02,250 INFO   p-value: 0.000000
+2026-04-17 21:01:02,250 INFO   MATCH avg_gamma: False | MATCH t_stat: False
+2026-04-17 21:01:02,250 INFO ======================================================================
+2026-04-17 21:01:02,250 INFO TABLE 11: Tail Risk Metrics (SPY 2014-2026)
+2026-04-17 21:01:02,250 INFO ======================================================================
+2026-04-17 21:01:02,250 INFO Downloading SPY (2014-2026)...
+2026-04-17 21:01:02,536 INFO   SPY observations: 3017
+2026-04-17 21:01:02,537 INFO   BH ES(1%): -4.5319% (paper: -4.68%)
+2026-04-17 21:01:02,537 INFO   BH Excess Kurtosis: 14.5125 (paper: 14.71)
+2026-04-17 21:01:02,537 INFO   BH skewness: -0.3186 (paper: -0.583)
+2026-04-17 21:01:02,537 INFO   BH worst day: -10.9424%
+2026-04-17 21:01:13,707 INFO   VT ES(1%): -2.7364% (paper: -1.35%)
+2026-04-17 21:01:13,707 INFO   VT Excess Kurtosis: 3.7563 (paper: 0.46)
+2026-04-17 21:01:13,707 INFO   VT skewness: -0.9055 (paper: -0.143)
+2026-04-17 21:01:13,707 INFO   VT worst day: -4.1126%
+2026-04-17 21:01:13,707 INFO   ES improvement: 39.6% (paper: -71%)
+2026-04-17 21:01:13,707 INFO   MATCH ES_bh: True | ES_vt: False
+2026-04-17 21:01:13,707 INFO   MATCH kurtosis_bh: True | kurtosis_vt: False
+2026-04-17 21:01:13,707 INFO ======================================================================
+2026-04-17 21:01:13,707 INFO TABLE 12: Gamma-Mechanism Mapping (7 primary assets)
+2026-04-17 21:01:13,707 INFO ======================================================================
+2026-04-17 21:01:13,707 INFO 
+  Processing SPY...
+2026-04-17 21:01:15,378 INFO   SPY: γ=0.2453 (paper:0.211), β_trend=0.0054 (paper:0.109), t_trend=8.30 (paper:18.0)
+2026-04-17 21:01:15,378 INFO 
+  Processing QQQ...
+2026-04-17 21:01:17,112 INFO   QQQ: γ=0.1817 (paper:0.15), β_trend=0.0028 (paper:0.074), t_trend=8.14 (paper:17.5)
+2026-04-17 21:01:17,112 INFO 
+  Processing EEM...
+2026-04-17 21:01:19,024 INFO   EEM: γ=0.1539 (paper:0.1), β_trend=0.0021 (paper:0.053), t_trend=5.55 (paper:14.5)
+2026-04-17 21:01:19,024 INFO 
+  Processing USO...
+2026-04-17 21:01:20,875 INFO   USO: γ=0.0794 (paper:0.05), β_trend=0.0004 (paper:0.032), t_trend=4.22 (paper:12.9)
+2026-04-17 21:01:20,875 INFO 
+  Processing BTC-USD...
+2026-04-17 21:01:23,047 INFO   BTC-USD: γ=0.0676 (paper:0.03), β_trend=0.0000 (paper:0.007), t_trend=0.91 (paper:5.3)
+2026-04-17 21:01:23,047 INFO 
+  Processing TLT...
+2026-04-17 21:01:25,078 INFO   TLT: γ=-0.0054 (paper:0.006), β_trend=-0.0002 (paper:-0.006), t_trend=-0.49 (paper:-1.3)
+2026-04-17 21:01:25,078 INFO 
+  Processing GLD...
+2026-04-17 21:01:27,044 INFO   GLD: γ=-0.0633 (paper:-0.088), β_trend=-0.0005 (paper:-0.055), t_trend=-1.13 (paper:-11.8)
+2026-04-17 21:01:27,046 INFO 
+  N assets used: 7
+2026-04-17 21:01:27,046 INFO   Spearman ρ: 1.0000 (paper: 1.000)
+2026-04-17 21:01:27,046 INFO   Spearman p: 0.000000
+2026-04-17 21:01:27,046 INFO   Pearson r: 0.9222 (paper: 0.993)
+2026-04-17 21:01:27,046 INFO   MATCH Spearman: True | Pearson: False
+2026-04-17 21:01:27,046 INFO ======================================================================
+2026-04-17 21:01:27,046 INFO C3: Gold Regime t-test (2005-2026 extended)
+2026-04-17 21:01:27,046 INFO ======================================================================
+2026-04-17 21:01:27,046 INFO Downloading GLD (2005-2026 extended)...
+2026-04-17 21:01:27,509 INFO   GLD obs: 5282
+2026-04-17 21:01:55,060 INFO   Total rolling windows: 76
+2026-04-17 21:01:55,060 INFO   N bull windows: 56, mean γ = -0.0444 (paper: -0.043)
+2026-04-17 21:01:55,060 INFO   N bear windows: 20, mean γ = 0.0659 (paper: +0.048)
+2026-04-17 21:01:55,061 INFO   t-stat (bull vs bear): -3.7942 (paper: -4.71)
+2026-04-17 21:01:55,061 INFO   p-value: 0.000991 (paper: <0.0001)
+2026-04-17 21:01:55,061 INFO   MATCH bull_gamma: True | bear_gamma: False | t_stat: False
+2026-04-17 21:01:55,061 INFO 
+======================================================================
+2026-04-17 21:01:55,061 INFO SUMMARY: Match Status for 6 KB-only Values
+2026-04-17 21:01:55,061 INFO ======================================================================
+2026-04-17 21:01:55,061 INFO   DIVERGED: T10_avg_stock_gamma paper=0.076 computed=0.0939
+2026-04-17 21:01:55,061 INFO   DIVERGED: T10_t_stat paper=-16.92 computed=-10.5344
+2026-04-17 21:01:55,061 INFO   MATCHED: T11_ES_bh paper=-4.68 computed=-4.5319
+2026-04-17 21:01:55,061 INFO   MATCHED: T11_kurtosis_bh paper=14.71 computed=14.5125
+2026-04-17 21:01:55,061 INFO   MATCHED: T12_spearman_rho paper=1.0 computed=1.0000
+2026-04-17 21:01:55,061 INFO   DIVERGED: C3_t_stat paper=-4.71 computed=-3.7942
+2026-04-17 21:01:55,061 INFO 
+  OVERALL: 3/6 values matched
+2026-04-17 21:01:55,061 INFO 
+  Verdict: (b) MODIFY_PAPER
+2026-04-17 21:01:55,061 INFO   Recommendation: Partial match — update divergent paper values to match formal experiment
+2026-04-17 21:01:55,061 INFO   Elapsed: 77.9s
+2026-04-17 21:01:55,062 INFO 
+Results saved to: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ac1c126f/experiments/k1198/k1198_results.json
