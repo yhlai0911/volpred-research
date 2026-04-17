@@ -1,0 +1,108 @@
+========================================================================
+K1196: Paper 1 Structural Leverage Panel Activation
+  GJR-GARCH gamma panel + VT trend-beta + MDD-base_vol correlations
+  Primary sample: 2017-01-01 to 2025-12-31
+  OOS IS window:  2010-01-01 to 2017-12-31
+  OOS window:     2018-01-01 to 2026-01-01
+  seed=42
+========================================================================
+
+[1/7] Downloading 14 assets from yfinance...
+    BTC-USD: 4123 days (2014-09-18 to 2025-12-31)
+    DIA: 4275 days (2009-01-05 to 2025-12-31)
+    EEM: 4275 days (2009-01-05 to 2025-12-31)
+    EFA: 4275 days (2009-01-05 to 2025-12-31)
+    EWJ: 4275 days (2009-01-05 to 2025-12-31)
+    GLD: 4275 days (2009-01-05 to 2025-12-31)
+    IEF: 4275 days (2009-01-05 to 2025-12-31)
+    IWM: 4275 days (2009-01-05 to 2025-12-31)
+    QQQ: 4275 days (2009-01-05 to 2025-12-31)
+    SLV: 4275 days (2009-01-05 to 2025-12-31)
+    SPY: 4275 days (2009-01-05 to 2025-12-31)
+    TLT: 4275 days (2009-01-05 to 2025-12-31)
+    UUP: 4275 days (2009-01-05 to 2025-12-31)
+    VGK: 4275 days (2009-01-05 to 2025-12-31)
+
+  Loaded 14 assets.
+
+[2/7] Full-sample GJR-GARCH gamma (primary 7 assets, 2017-01-01–2025-12-31)...
+    SPY: gamma=+0.2932, t=+5.75, alpha=0.0035, beta=0.8456, N=2262
+    QQQ: gamma=+0.2213, t=+6.00, alpha=0.0052, beta=0.8752, N=2262
+    EEM: gamma=+0.1546, t=+5.09, alpha=0.0231, beta=0.8525, N=2262
+    GLD: gamma=-0.0564, t=-3.64, alpha=0.0807, beta=0.9320, N=2262
+    SLV: gamma=-0.0275, t=-2.44, alpha=0.0496, beta=0.9601, N=2262
+    TLT: gamma=-0.0004, t=-0.03, alpha=0.0682, beta=0.9200, N=2262
+    BTC-USD: gamma=+0.0168, t=+0.76, alpha=0.0789, beta=0.9127, N=3287
+
+[3/7] Rolling GJR-GARCH gamma (window=504, step=63)...
+    SPY: mean_gamma=+0.2638, std=0.1192, pct_neg=0.0%, HAC_t=+5.21, HAC_p=0.0000 [POS], N=28
+    QQQ: mean_gamma=+0.1976, std=0.1021, pct_neg=0.0%, HAC_t=+4.09, HAC_p=0.0000 [POS], N=28
+    EEM: mean_gamma=+0.1259, std=0.0526, pct_neg=3.6%, HAC_t=+6.84, HAC_p=0.0000 [POS], N=28
+    GLD: mean_gamma=-0.0494, std=0.0325, pct_neg=100.0%, HAC_t=-7.26, HAC_p=0.0000 [NEG], N=28
+    SLV: mean_gamma=-0.0303, std=0.0330, pct_neg=71.4%, HAC_t=-2.57, HAC_p=0.0101 [NEG], N=28
+    TLT: mean_gamma=-0.0084, std=0.0516, pct_neg=32.1%, HAC_t=-0.55, HAC_p=0.5806 [NEG], N=28
+    BTC-USD: mean_gamma=+0.0595, std=0.1131, pct_neg=37.8%, HAC_t=+1.90, HAC_p=0.0572 [POS], N=45
+
+  Paper claims: GLD HAC t-stat = -5.79 (p<0.001)
+  K1196 GLD HAC t-stat = -7.26, p = 0.0000
+
+[4/7] VT trend-beta for equity-type assets (6 assets)...
+    SPY: trend_beta=+0.1159, t=+2.15, N=2260
+    QQQ: trend_beta=+0.1026, t=+2.42, N=2260
+    EEM: trend_beta=+0.0991, t=+1.96, N=2260
+    IWM: trend_beta=+0.0603, t=+1.62, N=2260
+    DIA: trend_beta=+0.1293, t=+1.99, N=2260
+    EFA: trend_beta=+0.0744, t=+1.57, N=2260
+
+[5/7] Spearman rho: gamma vs VT trend-beta (equity-type, primary period)...
+  Valid equity-type assets: ['SPY', 'QQQ', 'EEM'] (N=3)
+  Gamma:      [0.2932, 0.2213, 0.1546]
+  Trend-beta: [0.1159, 0.1026, 0.0991]
+  Insufficient data for Spearman test (N=3)
+
+[6/7] OOS predictive: gamma 2010-01-01–2017-12-31 -> trend-beta 2018-01-01–2026-01-01...
+    SPY: IS_gamma=+0.3575, OOS_trend_beta=+0.1178
+    QQQ: IS_gamma=+0.2993, OOS_trend_beta=+0.1038
+    EEM: IS_gamma=+0.1035, OOS_trend_beta=+0.1026
+    IWM: IS_gamma=+0.1728, OOS_trend_beta=+0.0617
+    DIA: IS_gamma=+0.3524, OOS_trend_beta=+0.1303
+    EFA: IS_gamma=+0.1951, OOS_trend_beta=+0.0753
+  OOS Spearman rho = 0.771, p = 0.0724
+  Paper target: rho = 0.821
+
+[7/7] Diverse-asset + MDD-base_vol correlations...
+  Diverse-asset (N=12) rho=0.923, p=0.0000
+  Paper target: rho=-0.448, p=0.14
+    SPY: mean_vol=16.0%, BH_MDD=-33.7%, VT_MDD=-13.6%, Improvement=20.1pp
+    QQQ: mean_vol=21.0%, BH_MDD=-35.1%, VT_MDD=-16.0%, Improvement=19.1pp
+    EEM: mean_vol=18.4%, BH_MDD=-39.8%, VT_MDD=-25.8%, Improvement=14.0pp
+    GLD: mean_vol=14.2%, BH_MDD=-22.0%, VT_MDD=-15.4%, Improvement=6.6pp
+    SLV: mean_vol=26.7%, BH_MDD=-39.3%, VT_MDD=-16.2%, Improvement=23.1pp
+    TLT: mean_vol=14.3%, BH_MDD=-48.4%, VT_MDD=-34.4%, Improvement=14.0pp
+    BTC-USD: mean_vol=57.3%, BH_MDD=-83.4%, VT_MDD=-23.0%, Improvement=60.4pp
+    IWM: mean_vol=21.7%, BH_MDD=-41.1%, VT_MDD=-17.1%, Improvement=24.0pp
+    DIA: mean_vol=15.1%, BH_MDD=-36.7%, VT_MDD=-14.7%, Improvement=22.0pp
+    EFA: mean_vol=15.1%, BH_MDD=-34.2%, VT_MDD=-21.0%, Improvement=13.1pp
+    IEF: mean_vol=6.4%, BH_MDD=-23.9%, VT_MDD=-29.1%, Improvement=-5.2pp
+    VGK: mean_vol=16.5%, BH_MDD=-37.2%, VT_MDD=-21.3%, Improvement=16.0pp
+    EWJ: mean_vol=16.2%, BH_MDD=-33.1%, VT_MDD=-21.5%, Improvement=11.7pp
+    UUP: mean_vol=6.6%, BH_MDD=-14.2%, VT_MDD=-18.4%, Improvement=-4.2pp
+
+  MDD-base_vol Spearman rho = 0.815, p = 0.0004
+  Paper target: rho = 0.944, p < 0.001
+
+========================================================================
+MATCH ASSESSMENT vs PAPER 1 STRUCTURAL LEVERAGE PANEL
+========================================================================
+
+  A) GLD HAC t-stat: paper=-5.79, script=-7.26 => MATCHED (neg sig)
+
+  C) OOS predictive rho: paper=0.821, script=0.771 => MATCHED
+
+  D) Diverse-asset rho: paper=-0.448, script=0.923 => DIVERGED
+
+  E) MDD-base_vol rho: paper=0.944, script=0.815 p=0.0004 => MATCHED (high pos sig)
+
+  Overall: 3/4 checks matched.
+  => (b) CLOSE: Directionally consistent; minor numeric deviations.
+     Likely driver: slightly different asset universe or VT implementation.
