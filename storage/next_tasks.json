@@ -925,21 +925,23 @@
     "title": "K1108e: Operating leverage (fixed-cost:sales ratio) as foundry mechanism",
     "priority": 3,
     "description": "K1108c capex NULL. D3 candidate: Foundry high fixed-cost structure (fab depreciation) → operating leverage amplifies vol on earnings surprise. Test θ_EAV ~ β * op_leverage (debt/equity + PP&E/sales) on same 5-foundry pool. Firm-FE + year-FE. Agent-launchable 3-4h.",
-    "status": "pending",
+    "status": "completed",
     "created_at": "2026-04-17T23:51:54.221355",
     "tags": [
       "K1108-followup",
       "foundry",
       "Paper2",
       "D3"
-    ]
+    ],
+    "completed_at": "2026-04-18T00:40:22.229686",
+    "outcome": "D3 NULL: max HAC |t|=1.58, partial-F p=0.102. Firm-FE absorbs SMIC level confound. Balance-sheet is NOT foundry mechanism."
   },
   {
     "id": "K1108f_D4_regime",
     "title": "K1108f: Regime-aware spec (up-cycle vs down-cycle) for foundry θ₂",
     "priority": 3,
     "description": "K1108c pooled NULL 可能 regime-contaminated. D4: split 5-foundry pool by semi cycle (up 2020-2021 2024-26 vs down 2022-2023) and re-estimate. Cross-reference TSMC revenue YoY as regime indicator. Agent-launchable 2-3h.",
-    "status": "pending",
+    "status": "completed",
     "created_at": "2026-04-17T23:51:54.221356",
     "tags": [
       "K1108-followup",
@@ -947,6 +949,8 @@
       "Paper2",
       "D4",
       "regime"
-    ]
+    ],
+    "completed_at": "2026-04-18T00:40:22.229696",
+    "outcome": "D4 NULL: Wald(β_up=β_down) p=0.849. Same-sign same-magnitude across regimes confirms K1108c pooled NULL is genuine not masking."
   }
 ]
