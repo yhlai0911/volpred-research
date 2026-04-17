@@ -885,8 +885,9 @@
     "id": "Paper9_bib_fix",
     "title": "Paper 9 bib fix: conrad2015 MAJOR + 5 MED + 4 MINOR fixes (main thread)",
     "priority": 1,
-    "description": "修 paper/garch-x-vix/main.tex 的 bibentry conrad2015 (JApplEconometrics 30(7):1090-1114), 補 5 MED DOI (bollerslev1986 engle1982 glosten1993 han2014 francq2019), 4 MINOR 格式統一。詳見 review_history/v1/citation_check_report.md。主線程修完 commit v2 (禁 agent 寫論文)。",
-    "status": "pending"
+    "description": "修 paper/garch-x-vix/main.tex 的 bibentry conrad2015 (JApplEconometrics 30(7):1090-1114), 補 5 MED DOI (bollerslev1986 engle1982 glosten1993 han2014 francq2019), 4 MINOR 格式統一。詳見 review_history/v1/citation_check_report.md。主線程修完 commit v2 (禁 agent 寫論文)。 [DONE commit 2bf5f2f6: 1 MAJOR (conrad2015 journal) + 5 MED DOIs + 2 MINOR DOIs. xelatex clean compile 36 pages 27 citations. paper-update synced.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T17:20:00+08:00"
   },
   {
     "id": "K1108d",
@@ -916,7 +917,7 @@
     "title": "Paper 2 section 5 narrative decision (main thread + 用戶決策)",
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
-    "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。 | K1149 (2026-04-17) MAJOR UPGRADE: PCA factor absorption test both markets PASS Harvey joint (US OOS DM t=-3.31, TW t=-2.48). TW OOS heterogeneity reframe: K1148_d1 FAIL was baseline choice artifact. New Opt 4+: claim universal-magnitude is TRUE firm-event effect orthogonal to market factor, surviving both IS and OOS in US+TW. Optional interaction subsection with US-vs-TW sign opposition caveat."
+    "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。 | K1149 (2026-04-17) MAJOR UPGRADE: PCA factor absorption test both markets PASS Harvey joint (US OOS DM t=-3.31, TW t=-2.48). TW OOS heterogeneity reframe: K1148_d1 FAIL was baseline choice artifact. New Opt 4+: claim universal-magnitude is TRUE firm-event effect orthogonal to market factor, surviving both IS and OOS in US+TW. Optional interaction subsection with US-vs-TW sign opposition caveat. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 2 目錄 (EAV universal-magnitude) - 這其實是「start a new paper」不是「rewrite section 5」. 主線程需要先建立 paper/eav-universal-magnitude/ + outline + literature review 才有 body 可寫. Decision 已 confirmed Opt4, 但 paper kick-off is separate P1."
   },
   {
     "id": "K1148_d3",
@@ -952,7 +953,7 @@
     "title": "Paper 4 narrative pivot: universal null -> channel-specific claims (主線程 + 用戶決策)",
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
-    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\". | K1143 (2026-04-17) mechanism diagnostic: GAS-t architectural incompatibility on equity with 3 evidence-backed rationale (score skew / near-Gaussian innovations / long-memory). Paper 4 Channel 3 narrative upgraded from \"unhelpful\" to \"mechanistically incompatible\" with concrete diagnostic numbers."
+    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\". | K1143 (2026-04-17) mechanism diagnostic: GAS-t architectural incompatibility on equity with 3 evidence-backed rationale (score skew / near-Gaussian innovations / long-memory). Paper 4 Channel 3 narrative upgraded from \"unhelpful\" to \"mechanistically incompatible\" with concrete diagnostic numbers. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 4 目錄 (robust null compendium) - 這也是 start-from-scratch. 素材 K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143/K1137 (running) 齊全. 主線程需建立 paper/robust-null-compendium/ + outline."
   },
   {
     "id": "K1139_equity_har_deep_dive",
@@ -983,5 +984,19 @@
     "priority": 4,
     "status": "blocked_on_user",
     "description": "K1161 DATA_INFEASIBLE due to yfinance free options chain history limit (~90d per contract). Requires paid data source: ThetaData Standard (~$50/mo), OptionMetrics IvyDB (academic), HistoricalOptionData.com, or Bloomberg OVDV. 需用戶決定是否訂閱，否則此路線 blocked."
+  },
+  {
+    "id": "Paper2_kickoff",
+    "title": "Paper 2 kick-off: EAV Universal-Magnitude paper (main thread, new paper/)",
+    "priority": 2,
+    "status": "pending",
+    "description": "素材齊 (K1145/K1148/d1/d2/d3/K1149). 建立 paper/eav-universal-magnitude/ + outline.md + literature_review.md + body_v1.tex section skeleton. Abstract 強調 Option 4+: universal-magnitude 真實 firm-event effect, orthogonal to market factor, US+TW IS+OOS robust under PCA absorption test."
+  },
+  {
+    "id": "Paper4_kickoff",
+    "title": "Paper 4 kick-off: Channel-specific robust vol compendium (main thread, new paper/)",
+    "priority": 2,
+    "status": "pending",
+    "description": "素材齊 (K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143 + K1137 K1135 running). 建立 paper/robust-null-compendium/ + outline. Channel-specific narrative: HAR+VIX asset-heterogeneous, MIDAS universal null, GAS-t architectural incompatible."
   }
 ]
