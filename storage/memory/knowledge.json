@@ -26852,5 +26852,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T15:19:38.165866"
+  },
+  {
+    "item_id": "9da1430c",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1128 \u884d\u751f robustness, \u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1132 Block-bootstrap CI on K1128 high-VIX tertile DM (OFI-jump signal). **VERDICT: Scenario A \u2014 ROBUST, K1128 \u7d50\u8ad6\u6709\u6548\u4e0d\u9700\u66f4\u6b63**. \u91cd\u8dd1 DM-HLN t=3.5923\uff08K1128 exact match\uff0creproduction clean\uff09\u3002Block-bootstrap circular Politis-Romano b=1 / b=2 \u5404 B=10000: b=1 95% CI [1.042, 10.588] **\u5b8c\u5168 > 0**; b=2 95% CI [1.025, 10.581] \u540c\u6a23\u5b8c\u5168 > 0. Empirical p-value 0.0016 (2 block sizes \u4e00\u81f4). Permutation test (right-tail, 10000 shuffles): 0/10000 \u2265 3.59 \u2192 p=0.0000. **Signal structure**: 6048/6946 bars \u6709 d_i>0 (M3 vs M1)\uff0c\u7d50\u69cb\u6027\u512a\u52e2\u4e3b\u5c0e CI \u4e0d\u8de8 0. **\u9650\u5236**: CI \u5bec [1.0, 10.6]\uff0csignal \u5b58\u5728\u78ba\u8a8d\u4f46 magnitude estimate \u56e0 N_jumps=6 \u4e0d\u7cbe\u78ba. **\u7814\u7a76\u542b\u7fa9**: K1128 'OFI\u2192jump \u9ad8 VIX \u9ad4\u5236 Harvey-significant' \u7d50\u8ad6\u7ad9\u5f97\u4f4f\uff1bK1130/K1131 fix \u7684 invalidation \u662f\u53e6\u4e00\u5c64\u554f\u984c\uff08fix \u672c\u8eab\u932f\uff0c\u4e0d\u662f\u539f signal \u932f\uff09. **recommended next**: research_program.md \u53ef\u52a0 K1128 OOS-peeked cutoff caveat + CI \u5bec\u5ea6\u8a3b\u8a18. Script: experiments/k1132/k1132.py, commit 551d882d.",
+    "evidence": [
+      "experiments/k1132/k1132.py",
+      "experiments/k1132/k1132_results.json",
+      "experiments/k1132/README.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T15:54:06.478916"
   }
 ]
