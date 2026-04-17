@@ -1,0 +1,126 @@
+
+========================================================================
+K1163: EU panel re-estimation with K1163 earnings (target N>=25)
+========================================================================
+
+K1163 earnings table: 30 tickers loaded
+  SAP.DE: 48 events (prov=['YFINANCE'])
+  SIE.DE: 48 events (prov=['YFINANCE'])
+  ALV.DE: 48 events (prov=['YFINANCE'])
+  MRK.DE: 48 events (prov=['YFINANCE'])
+  BMW.DE: 48 events (prov=['YFINANCE'])
+  BAS.DE: 48 events (prov=['YFINANCE'])
+  MBG.DE: 48 events (prov=['YFINANCE'])
+  DTE.DE: 48 events (prov=['YFINANCE'])
+  ADS.DE: 48 events (prov=['YFINANCE'])
+  VOW3.DE: 48 events (prov=['YFINANCE'])
+  MC.PA: 47 events (prov=['HAND_IRCALENDAR'])
+  TTE.PA: 48 events (prov=['YFINANCE'])
+  AIR.PA: 48 events (prov=['YFINANCE'])
+  OR.PA: 47 events (prov=['HAND_IRCALENDAR'])
+  SU.PA: 47 events (prov=['HAND_IRCALENDAR'])
+  SAN.PA: 48 events (prov=['YFINANCE'])
+  BNP.PA: 48 events (prov=['YFINANCE'])
+  DG.PA: 47 events (prov=['HAND_IRCALENDAR'])
+  RMS.PA: 47 events (prov=['HAND_IRCALENDAR'])
+  AI.PA: 47 events (prov=['HAND_IRCALENDAR'])
+  SHEL.L: 48 events (prov=['YFINANCE'])
+  AZN.L: 48 events (prov=['YFINANCE'])
+  ULVR.L: 47 events (prov=['HAND_IRCALENDAR'])
+  HSBA.L: 48 events (prov=['YFINANCE'])
+  RIO.L: 47 events (prov=['HAND_IRCALENDAR'])
+  BP.L: 47 events (prov=['YFINANCE'])
+  DGE.L: 47 events (prov=['HAND_IRCALENDAR'])
+  GSK.L: 48 events (prov=['YFINANCE'])
+  REL.L: 47 events (prov=['HAND_IRCALENDAR'])
+  LSEG.L: 47 events (prov=['HAND_IRCALENDAR'])
+
+[1/6] Loading stocks with K1163 earnings (window=1) ...
+    SAP.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    SIE.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    ALV.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    MRK.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    BMW.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    BAS.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    MBG.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    DTE.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    ADS.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    VOW3.DE: n_obs=3046, n_events=48 (prov=['YFINANCE'])
+    MC.PA: n_obs=3070, n_events=47 (prov=['HAND_IRCALENDAR'])
+    TTE.PA: n_obs=3070, n_events=48 (prov=['YFINANCE'])
+    AIR.PA: n_obs=3070, n_events=48 (prov=['YFINANCE'])
+    OR.PA: n_obs=3070, n_events=47 (prov=['HAND_IRCALENDAR'])
+    SU.PA: n_obs=3070, n_events=47 (prov=['HAND_IRCALENDAR'])
+    SAN.PA: n_obs=3070, n_events=48 (prov=['YFINANCE'])
+    BNP.PA: n_obs=3070, n_events=48 (prov=['YFINANCE'])
+    DG.PA: n_obs=3070, n_events=47 (prov=['HAND_IRCALENDAR'])
+    RMS.PA: n_obs=3070, n_events=47 (prov=['HAND_IRCALENDAR'])
+    AI.PA: n_obs=3070, n_events=47 (prov=['HAND_IRCALENDAR'])
+    SHEL.L: n_obs=3030, n_events=48 (prov=['YFINANCE'])
+    AZN.L: n_obs=3030, n_events=48 (prov=['YFINANCE'])
+    ULVR.L: n_obs=3030, n_events=47 (prov=['HAND_IRCALENDAR'])
+    HSBA.L: n_obs=3030, n_events=48 (prov=['YFINANCE'])
+    RIO.L: n_obs=3029, n_events=47 (prov=['HAND_IRCALENDAR'])
+    BP.L: n_obs=3029, n_events=47 (prov=['YFINANCE'])
+    DGE.L: n_obs=3029, n_events=47 (prov=['HAND_IRCALENDAR'])
+    GSK.L: n_obs=3030, n_events=48 (prov=['YFINANCE'])
+    REL.L: n_obs=3030, n_events=47 (prov=['HAND_IRCALENDAR'])
+    LSEG.L: n_obs=3030, n_events=47 (prov=['HAND_IRCALENDAR'])
+
+  Loaded 30/30 stocks  (skipped: [])
+
+[2/6] Pre-fit panel diagnostic ...
+  Pooled obs: 91,457
+  Mean r=+3.1007e-04, std=1.6398e-02
+  Skew=-0.370, kurt=+11.966
+  Mean events per stock: 47.6
+
+[3/6] Pooled BCD fit (EAV window=1, primary) ...
+    [BCD outer 0] θ_VIX=9.962e-08, θ_EAV=+5.2475e-05, pooled_negll=-257826.60, Δll=+inf, Δθ_eav=2.48e-06
+    [BCD outer 1] θ_VIX=9.928e-08, θ_EAV=+5.2447e-05, pooled_negll=-257859.26, Δll=+32.6626, Δθ_eav=2.83e-08
+    [BCD outer 2] θ_VIX=9.918e-08, θ_EAV=+5.2270e-05, pooled_negll=-257867.83, Δll=+8.5673, Δθ_eav=1.77e-07
+    [BCD outer 3] θ_VIX=9.918e-08, θ_EAV=+5.2270e-05, pooled_negll=-257893.56, Δll=+25.7367, Δθ_eav=7.62e-14
+    [BCD outer 4] θ_VIX=9.918e-08, θ_EAV=+5.2270e-05, pooled_negll=-257895.87, Δll=+2.3024, Δθ_eav=9.73e-14
+    [BCD outer 5] θ_VIX=9.918e-08, θ_EAV=+5.2174e-05, pooled_negll=-257896.17, Δll=+0.2999, Δθ_eav=9.57e-08
+    [BCD outer 6] θ_VIX=9.918e-08, θ_EAV=+5.2174e-05, pooled_negll=-257898.60, Δll=+2.4314, Δθ_eav=8.73e-14
+    [BCD outer 7] θ_VIX=9.918e-08, θ_EAV=+5.2174e-05, pooled_negll=-257904.47, Δll=+5.8735, Δθ_eav=8.52e-14
+
+  → θ_VIX = 9.9177e-08
+  → θ_EAV = +5.2174e-05
+  → pooled loglik = 257907.61
+  → converged = False
+  Hessian SE=3.698277132523129e-06, t=14.107757064526739
+
+[4/6] Stock-clustered block bootstrap (n_boot=150) ...
+  bootstrap draws: 150/150 (elapsed=353.2s)
+  bootstrap mean=5.176843123600117e-05, SE=1.0853817682680736e-05
+  bootstrap 95% CI = [3.412906424278707e-05, 7.43729043103621e-05]
+  bootstrap t=4.807008636802949, p=0.0
+
+[5/6] Within-stock EAV permutation placebo (n_placebo=60) ...
+  placebo draws completed: 60/60 (elapsed=175.0s)
+  placebo mean=2.8291824603767205e-08, SE=2.3412030911262846e-06
+  placebo 95% CI = [-3.7643003408664754e-06, 4.486940867526941e-06]
+  observed θ_EAV = +5.2174e-05
+  z_observed = 22.273208042468937
+  P(placebo >= observed) = 0.0
+
+[6/6] K1163 vs K1153 comparison + four-market update ...
+
+  Delta table:
+    θ_EAV  K1153=+4.072e-05  K1163=+5.217e-05  Δ=+1.146e-05
+    θ_rel  K1153=0.137      K1163=0.194      Δ=+0.057
+    boot t K1153=4.19       K1163=4.807008636802949
+    placebo z K1153=14.77  K1163=22.273208042468937
+    N     K1153=18          K1163=30
+
+  FOUR-MARKET VERDICT: ROBUST
+  ROBUST — K1163 EU θ_rel=0.194 stays in low cluster [<=0.25]; K1153 conclusion confirmed. Quarterly-density hypothesis remains REJECTED. TW+EU low cluster vs US+JP high cluster — refined media×analyst mechanism narrative holds for Paper 2.
+
+  Generating figures ...
+
+  Results -> /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ab0c5632/experiments/k1163/k1163_results.json
+  Elapsed: 534.3s
+
+  FINAL VERDICT: ROBUST
+  ROBUST — K1163 EU θ_rel=0.194 stays in low cluster [<=0.25]; K1153 conclusion confirmed. Quarterly-density hypothesis remains REJECTED. TW+EU low cluster vs US+JP high cluster — refined media×analyst mechanism narrative holds for Paper 2.
