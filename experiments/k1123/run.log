@@ -1,0 +1,100 @@
+[05:42:33] === K1123: Cross-asset alt-data allocation (SPY+GLD+TLT) ===
+[05:42:33] Fetching SPY + GLD + TLT daily 2018-2026...
+[05:42:34]   daily panel: 2080 rows 2018-01-02 -> 2026-04-13
+[05:42:34] Loading cached FRED data...
+[05:42:34]   EPU: 3021 rows, last=2026-04-09
+[05:42:34]   NFCI: 431 rows, last=2026-04-03
+[05:42:34]   merged panel: 2075 days
+[05:42:34] Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1123/data/panel.parquet
+[05:42:34] Desc: SPY 14.43%/19.33%, TLT -0.14%/15.59%, SPY-TLT corr=-0.144
+[05:42:34] --- Computing strategies ---
+[05:42:34]   B0: weight sum [1.0000, 1.0000] avg_wSPY=0.500 avg_wGLD=0.500 avg_wTLT=0.000
+[05:42:34]   B1: weight sum [1.0000, 1.0000] avg_wSPY=0.400 avg_wGLD=0.300 avg_wTLT=0.300
+[05:42:34]   B2: weight sum [1.0000, 1.0000] avg_wSPY=0.316 avg_wGLD=0.338 avg_wTLT=0.346
+[05:42:34]   S1: weight sum [1.0000, 1.0000] avg_wSPY=0.364 avg_wGLD=0.318 avg_wTLT=0.318
+[05:42:34]   S2: weight sum [1.0000, 1.0000] avg_wSPY=0.359 avg_wGLD=0.341 avg_wTLT=0.300
+[05:42:34]   S3: weight sum [1.0000, 1.0000] avg_wSPY=0.335 avg_wGLD=0.348 avg_wTLT=0.316
+[05:42:34]   S4: weight sum [1.0000, 1.0000] avg_wSPY=0.405 avg_wGLD=0.306 avg_wTLT=0.289
+[05:42:34] --- Running backtest (net of TX cost) ---
+[05:42:34] Backtest window: 2019-01-14 -> 2026-04-13 (1819 days)
+[05:42:34] --- Full-sample metrics (net of TX) ---
+[05:42:34]   B0: Sharpe=1.310 MDD=-0.203 CAGR=0.186 wSPY=0.50 wGLD=0.50 wTLT=0.00 TO_ann=0.00 TX_drag=0.00%
+[05:42:34]   B1: Sharpe=1.128 MDD=-0.226 CAGR=0.126 wSPY=0.40 wGLD=0.30 wTLT=0.30 TO_ann=0.00 TX_drag=0.00%
+[05:42:34]   B2: Sharpe=1.094 MDD=-0.219 CAGR=0.113 wSPY=0.32 wGLD=0.34 wTLT=0.34 TO_ann=2.76 TX_drag=0.14%
+[05:42:34]   S1: Sharpe=1.161 MDD=-0.230 CAGR=0.125 wSPY=0.36 wGLD=0.32 wTLT=0.32 TO_ann=1.16 TX_drag=0.06%
+[05:42:34]   S2: Sharpe=1.014 MDD=-0.246 CAGR=0.110 wSPY=0.35 wGLD=0.35 wTLT=0.30 TO_ann=21.78 TX_drag=1.09%
+[05:42:34]   S3: Sharpe=1.074 MDD=-0.218 CAGR=0.115 wSPY=0.33 wGLD=0.35 wTLT=0.32 TO_ann=17.29 TX_drag=0.86%
+[05:42:34]   S4: Sharpe=1.082 MDD=-0.231 CAGR=0.117 wSPY=0.40 wGLD=0.31 wTLT=0.29 TO_ann=23.81 TX_drag=1.19%
+[05:42:34] --- IS/OOS split (IS=<2023, OOS>=2023) ---
+[05:42:34] --- Stationary bootstrap: alt-data strategies vs baselines ---
+[05:42:34]   bootstrapping S1 vs B0...
+[05:42:35]     S1 vs B0: diff=-0.149 p=0.492 t=-0.70 CI=[-0.558,0.271]
+[05:42:35]   bootstrapping S1 vs B1...
+[05:42:36]     S1 vs B1: diff=0.033 p=0.682 t=0.38 CI=[-0.120,0.207]
+[05:42:36]   bootstrapping S1 vs B2...
+[05:42:37]     S1 vs B2: diff=0.067 p=0.392 t=0.86 CI=[-0.085,0.221]
+[05:42:37]   bootstrapping S2 vs B0...
+[05:42:38]     S2 vs B0: diff=-0.295 p=0.134 t=-1.42 CI=[-0.713,0.085]
+[05:42:38]   bootstrapping S2 vs B1...
+[05:42:39]     S2 vs B1: diff=-0.113 p=0.274 t=-1.10 CI=[-0.324,0.081]
+[05:42:39]   bootstrapping S2 vs B2...
+[05:42:39]     S2 vs B2: diff=-0.079 p=0.334 t=-0.91 CI=[-0.251,0.093]
+[05:42:39]   bootstrapping S3 vs B0...
+[05:42:40]     S3 vs B0: diff=-0.236 p=0.296 t=-1.06 CI=[-0.669,0.173]
+[05:42:40]   bootstrapping S3 vs B1...
+[05:42:41]     S3 vs B1: diff=-0.054 p=0.664 t=-0.46 CI=[-0.292,0.167]
+[05:42:41]   bootstrapping S3 vs B2...
+[05:42:42]     S3 vs B2: diff=-0.020 p=0.804 t=-0.24 CI=[-0.196,0.140]
+[05:42:42]   bootstrapping S4 vs B0...
+[05:42:43]     S4 vs B0: diff=-0.228 p=0.232 t=-1.19 CI=[-0.623,0.131]
+[05:42:43]   bootstrapping S4 vs B1...
+[05:42:44]     S4 vs B1: diff=-0.046 p=0.600 t=-0.54 CI=[-0.205,0.121]
+[05:42:44]   bootstrapping S4 vs B2...
+[05:42:45]     S4 vs B2: diff=-0.012 p=0.896 t=-0.14 CI=[-0.197,0.161]
+[05:42:45] --- OOS bootstrap (2023+) ---
+[05:42:45]     OOS S1 vs B0: diff=-0.350 p=0.102 t=-1.55
+[05:42:46]     OOS S1 vs B1: diff=-0.039 p=0.186 t=-1.34
+[05:42:46]     OOS S1 vs B2: diff=-0.041 p=0.720 t=-0.35
+[05:42:47]     OOS S2 vs B0: diff=-0.484 p=0.076 t=-1.69
+[05:42:47]     OOS S2 vs B1: diff=-0.173 p=0.328 t=-0.94
+[05:42:48]     OOS S2 vs B2: diff=-0.175 p=0.300 t=-1.02
+[05:42:48]     OOS S3 vs B0: diff=-0.495 p=0.066 t=-1.74
+[05:42:49]     OOS S3 vs B1: diff=-0.183 p=0.266 t=-1.07
+[05:42:49]     OOS S3 vs B2: diff=-0.186 p=0.234 t=-1.19
+[05:42:50]     OOS S4 vs B0: diff=-0.456 p=0.082 t=-1.65
+[05:42:50]     OOS S4 vs B1: diff=-0.144 p=0.260 t=-1.10
+[05:42:50]     OOS S4 vs B2: diff=-0.147 p=0.326 t=-0.99
+[05:42:50] --- Regime-conditional analysis ---
+[05:42:50]   stress days: 666, calm days: 1153
+[05:42:50]   B0: stress_SR=0.8272325461984947 calm_SR=1.7942415573479131
+[05:42:50]   B1: stress_SR=0.5753047952276509 calm_SR=1.6506867133016176
+[05:42:50]   B2: stress_SR=0.5402737719565193 calm_SR=1.5875223006966084
+[05:42:50]   S1: stress_SR=0.5963315993077055 calm_SR=1.648670094738747
+[05:42:50]   S2: stress_SR=0.39123804625665926 calm_SR=1.5775101061334995
+[05:42:50]   S3: stress_SR=0.4922132695715807 calm_SR=1.5765177787056914
+[05:42:50]   S4: stress_SR=0.5898862578347343 calm_SR=1.5432310754400995
+[05:42:50] --- Hypothesis tests ---
+[05:42:50] Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1123/k1123_results.json
+[05:42:50] 
+=== HEADLINE TABLE ===
+[05:42:50] strat SR_full   SR_IS  SR_OOS     MDD    CAGR  Calmar  avg_wSPY  avg_wTLT     TO TX_drag
+[05:42:50] B0     1.310   0.818   1.980  -0.203   0.186   0.887     0.500     0.000   0.00   0.000
+[05:42:50] B1     1.128   0.718   1.669  -0.226   0.126   0.551     0.400     0.300   0.00   0.000
+[05:42:50] B2     1.094   0.665   1.671  -0.219   0.113   0.514     0.321     0.342   2.76   0.138
+[05:42:50] S1     1.161   0.781   1.630  -0.230   0.125   0.538     0.359     0.320   1.16   0.058
+[05:42:50] S2     1.014   0.631   1.496  -0.246   0.110   0.451     0.353     0.300  21.78   1.089
+[05:42:50] S3     1.074   0.738   1.486  -0.218   0.115   0.526     0.327     0.318  17.29   0.864
+[05:42:50] S4     1.082   0.745   1.524  -0.231   0.117   0.504     0.405     0.289  23.81   1.191
+[05:42:50] 
+=== HYPOTHESIS TESTS ===
+[05:42:50] H1_beat_baselines: FAIL
+[05:42:50] H2_cross_asset_edge: FAIL
+[05:42:50] H3_smooth_vs_step: FAIL
+[05:42:50] H4_regime_conditional: FAIL
+[05:42:50] 
+=== VERDICT: FAIL (H pass: 0/4) ===
+Saved /Users/yhlai0911/Desktop/volpred-research/experiments/k1123/weight_trajectory.png
+Saved /Users/yhlai0911/Desktop/volpred-research/experiments/k1123/cumulative_returns_vs_baselines.png
+Saved /Users/yhlai0911/Desktop/volpred-research/experiments/k1123/risk_metrics_comparison.png
+Saved /Users/yhlai0911/Desktop/volpred-research/experiments/k1123/regime_conditional_sharpe.png
+All plots saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1123
