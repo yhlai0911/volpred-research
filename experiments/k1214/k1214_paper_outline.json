@@ -1,0 +1,278 @@
+{
+  "experiment_id": "K1214",
+  "title": "BTC GAS-t negative-result methodology paper — markdown draft for new paper repo",
+  "paper_title": "Why GAS-t Fails on Bitcoin: Student-t Innovation Is the Culprit, Regime-Switching Cannot Rescue",
+  "target_paper_repo": "paper/btc-gas-negative/",
+  "target_journals_ranked": [
+    {
+      "rank": 1,
+      "name": "Journal of Empirical Finance",
+      "publisher": "Elsevier",
+      "rationale": "Strong track record on GARCH extensions and cryptocurrency volatility; negative-result methodology papers accepted; scope exactly matches."
+    },
+    {
+      "rank": 2,
+      "name": "Journal of Financial Econometrics",
+      "publisher": "Oxford University Press",
+      "rationale": "Home of Catania (2018); paper tests and falsifies a JFEC claim for BTC."
+    },
+    {
+      "rank": 3,
+      "name": "Journal of Risk",
+      "publisher": "Incisive Media",
+      "rationale": "Fallback if revision emphasises VaR/ES angle."
+    }
+  ],
+  "source_experiments": [
+    {
+      "id": "K1129",
+      "role": "Full-sample reversal motivator",
+      "key_numbers": {
+        "btc_n_oos": 1926,
+        "oos_start": "2021-01-01",
+        "oos_end": "2026-04-10",
+        "M3_vs_M1_DM_HLN_t": -4.578252983820725,
+        "M3_vs_M1_DM_HLN_p": 4.988495868385456e-06,
+        "M3_vs_M1_QLIKE_rel_pct": -3.95463174081084,
+        "M2_vs_M1_DM_HLN_t": -5.174898932831996,
+        "M2_vs_M1_DM_HLN_p": 2.517875083984933e-07,
+        "M2_vs_M1_QLIKE_rel_pct": -5.835782255132056,
+        "M1_QLIKE": 1.861447166004963,
+        "M2_QLIKE": 1.9700771694073391,
+        "M3_QLIKE": 1.935060546470219
+      }
+    },
+    {
+      "id": "K1133",
+      "role": "Sub-period decomposition (P1/P2/P3)",
+      "key_numbers": {
+        "P1_n_oos": 1441,
+        "P1_oos_start": "2017-01-21",
+        "P1_oos_end": "2020-12-31",
+        "P1_preliminary_flag": false,
+        "P1_M3_vs_M1_DM_HLN_t": -4.669249494856592,
+        "P1_M3_vs_M1_DM_HLN_p": 3.3048879699570932e-06,
+        "P1_M3_vs_M1_QLIKE_rel_pct": -9.924859169439532,
+        "P1_M2_vs_M1_DM_HLN_t": -3.3550132344851713,
+        "P1_M2_vs_M1_QLIKE_rel_pct": -12.11045817982542,
+        "P2_n_oos": 345,
+        "P2_preliminary_flag": true,
+        "P2_M3_vs_M1_DM_HLN_t": -0.8151935984054965,
+        "P3_n_oos": 100,
+        "P3_preliminary_flag": true,
+        "P3_M3_vs_M1_DM_HLN_t": -0.8031173886140709,
+        "LRT_P1_chi2": 48.52677119350483,
+        "LRT_P1_p": 9.272109524616212e-09,
+        "LRT_P2_chi2": 36.634150594186394,
+        "LRT_P2_p": 2.07496286663833e-06,
+        "LRT_P3_chi2": 15.912523507006426,
+        "LRT_P3_p": 0.014231270363755266
+      }
+    },
+    {
+      "id": "K1133b",
+      "role": "5-model decomposition + MS-GAS-t OOS",
+      "key_numbers": {
+        "P1_M1_QLIKE": 1.9926090749966137,
+        "P1_M2_QLIKE": 2.2339231637114847,
+        "P1_M3_QLIKE": 2.1903727194874993,
+        "P1_M4_QLIKE": 2.0401526923538533,
+        "P1_M5_QLIKE": 1.9929794095325601,
+        "P1_M4_vs_M1_DM_HLN_t": -1.8975765387157064,
+        "P1_M4_vs_M1_QLIKE_rel_pct": -2.385998234868044,
+        "P1_M5_vs_M1_DM_HLN_t": -0.05905064224471394,
+        "P1_M4_vs_M3_DM_HLN_t": 2.665422847474968,
+        "P1_M4_vs_M3_QLIKE_rel_pct": 6.858194762797918,
+        "P1_M4_vs_M3_p": 0.007775187529620142,
+        "P1_MS_QLIKE": 1.9869886714881102,
+        "P1_MS_vs_M1_DM_HLN_t": 0.2753833815410044,
+        "P1_MS_vs_M2_DM_HLN_t": 3.0646805264330736,
+        "P1_MS_vs_M3_DM_HLN_t": 5.9708709100311745,
+        "P1_MS_vs_M3_p": 2.9681856972274545e-09,
+        "P1_MS_vs_M3_QLIKE_rel_pct": 9.285362540808885,
+        "P1_MS_vs_M4_DM_HLN_t": 1.5391093445024215,
+        "student_t_attribution_p1_pct": 75,
+        "gas_dynamics_attribution_p1_pct": 25
+      }
+    }
+  ],
+  "sections": [
+    {
+      "section": "Abstract",
+      "target_words": 200,
+      "actual_words": 280,
+      "key_numbers_cited": ["-4.58", "-4.67", "+5.97", "+0.28", "~75%", "n=1926", "n=1441"],
+      "structure": ["background", "problem", "method", "result", "contribution"]
+    },
+    {
+      "section": "1. Introduction",
+      "target_words": 800,
+      "actual_words": 820,
+      "subsections": [
+        "GAS family motivation (Creal-Koopman-Lucas 2013)",
+        "K1129 BTC full-sample reversal context",
+        "Two diagnoses: Catania (2018) regime-switching vs Student-t innovation",
+        "Three main findings preview",
+        "Contribution and paper structure"
+      ],
+      "key_citations": ["Creal-Koopman-Lucas 2013", "Glosten-Jagannathan-Runkle 1993", "Catania 2018", "Harvey 2016"]
+    },
+    {
+      "section": "2. Methodology",
+      "target_words": 500,
+      "actual_words": 650,
+      "subsections": [
+        "2.1 Five-model decomposition (M1-M5)",
+        "2.2 Markov-switching GAS-t with OOS state-prob recursion (Klaassen 2002)",
+        "2.3 DM-HLN inference with Harvey (2016) threshold",
+        "2.4 Lookahead and reproducibility safeguards"
+      ],
+      "key_citations": ["Creal-Koopman-Lucas 2013", "Harvey 2013", "Nelson 1991", "Glosten-Jagannathan-Runkle 1993", "Hamilton 1989", "Gray 1996", "Klaassen 2002", "Harvey-Leybourne-Newbold 1997", "Patton 2011", "Harvey 2016"]
+    },
+    {
+      "section": "3. Data",
+      "target_words": 300,
+      "actual_words": 320,
+      "subsections": [
+        "3.1 Bitcoin return series (yfinance BTC-USD, n=4121)",
+        "3.2 Sub-period definitions (P1/P2/P3 with PRELIMINARY flag)",
+        "3.3 Full-sample pooled window for K1129 replication"
+      ],
+      "key_citations": ["Chu et al 2017"]
+    },
+    {
+      "section": "4. Results",
+      "target_words": 1200,
+      "actual_words": 1200,
+      "subsections": [
+        "4.1 Full-sample K1129 replication (Table 1)",
+        "4.2 Sub-period decomposition (Table 2) — P1 concentration of reversal",
+        "4.3 Innovation-distribution decomposition (Table 3) — 75% Student-t attribution",
+        "4.4 Regime-switching rescue (Table 4) — MS rescues self, no edge vs GJR-N"
+      ],
+      "key_tables": ["Table 1", "Table 2", "Table 3", "Table 4"]
+    },
+    {
+      "section": "5. Discussion",
+      "target_words": 600,
+      "actual_words": 700,
+      "subsections": [
+        "5.1 Why Student-t is culprit (BTC extremes are signals, not noise)",
+        "5.2 Why GAS dynamics add little (Blasques-Koopman-Lucas 2015 robustness bound)",
+        "5.3 Why regime-switching cannot help beyond GJR-N (three mutually-reinforcing reasons)",
+        "5.4 Locating finding in cryptocurrency volatility literature",
+        "5.5 Methodological implication (decomposition strategy for composite models)",
+        "5.6 Limitations (single-coin, daily frequency, 2015+, sample-starved sub-periods, 2-state MS)"
+      ],
+      "key_citations": ["Blasques-Koopman-Lucas 2015", "Hwang-Valls-Pereira 2006"]
+    },
+    {
+      "section": "6. Conclusion",
+      "target_words": 300,
+      "actual_words": 230,
+      "key_takeaways": [
+        "75% Student-t attribution",
+        "Catania (2018) regime-switching remedy falsified for BTC",
+        "GJR-Normal is the applied default for BTC",
+        "Composite-model decomposition is the methodological template"
+      ]
+    },
+    {
+      "section": "References",
+      "target_entries": 20,
+      "actual_entries": 16,
+      "core_references": [
+        "Bollerslev 1986 JoE",
+        "Glosten-Jagannathan-Runkle 1993 JoF",
+        "Creal-Koopman-Lucas 2013 (JAE and JASA versions)",
+        "Catania 2018 JFEC",
+        "Klaassen 2002 Emp Econ",
+        "Patton 2011 JoE",
+        "Harvey-Leybourne-Newbold 1997 IJF",
+        "Harvey 2016 JoF editorial (multiple-testing threshold)",
+        "Hansen-Lunde 2005 JAE",
+        "Hwang-Valls-Pereira 2006 EJF",
+        "Chu et al 2017 JRFM",
+        "Hamilton 1989 Econometrica",
+        "Gray 1996 JFE",
+        "Nelson 1991 Econometrica",
+        "Harvey 2013 Cambridge monograph",
+        "Blasques-Koopman-Lucas 2015 Biometrika",
+        "Diebold-Mariano 1995 JBES"
+      ]
+    },
+    {
+      "section": "Appendix A",
+      "target_words": 200,
+      "actual_words": 250,
+      "subsections": [
+        "A.1 Five-model QLIKE + DM across all three sub-periods",
+        "A.2 MS-GAS-t OOS across all three sub-periods",
+        "A.3 In-sample MS-GAS-t LRT (K1133 Approach B)"
+      ]
+    }
+  ],
+  "cross_experiment_consistency_check": {
+    "status": "PASS",
+    "checks": [
+      {
+        "metric": "BTC full-sample DM M3 vs M1",
+        "k1129_value": -4.578252983820725,
+        "draft_value": -4.58,
+        "consistent": true
+      },
+      {
+        "metric": "P1 DM M3 vs M1",
+        "k1133_value": -4.669249494856592,
+        "k1133b_value": -4.669249494856592,
+        "draft_value": -4.67,
+        "consistent": true
+      },
+      {
+        "metric": "P1 M4 vs M3 DM",
+        "k1133b_value": 2.665422847474968,
+        "draft_value": 2.67,
+        "consistent": true
+      },
+      {
+        "metric": "P1 MS vs M3 DM",
+        "k1133b_value": 5.9708709100311745,
+        "draft_value": 5.97,
+        "consistent": true
+      },
+      {
+        "metric": "P1 MS vs M1 DM",
+        "k1133b_value": 0.2753833815410044,
+        "draft_value": 0.28,
+        "consistent": true
+      },
+      {
+        "metric": "P1 M1 QLIKE",
+        "k1133_value": 1.9926090749966137,
+        "k1133b_value": 1.9926090749966137,
+        "consistent": true
+      }
+    ]
+  },
+  "adoption_workflow_for_main_thread": [
+    "Step 1: mkdir -p paper/btc-gas-negative/{figures,tables,scripts,data_docs,review_history}",
+    "Step 2: Seed main.tex from k1214_paper_draft.md (convert math to amsmath, tables to booktabs)",
+    "Step 3: Write paper/btc-gas-negative/README.md (title, target journal, status=draft, K list)",
+    "Step 4: Write paper/btc-gas-negative/experiments.md (K1129+K1133+K1133b index)",
+    "Step 5: Write paper/btc-gas-negative/data_docs/data_sources.md (yfinance BTC-USD)",
+    "Step 6: Write paper/btc-gas-negative/scripts/README.md (entry points per table/figure)",
+    "Step 7: Soft-link PNG figures into paper/btc-gas-negative/figures/",
+    "Step 8: Write reproduce.py for self-contained folder validation",
+    "Step 9: Run paper-workflow self-contained folder checklist from CLAUDE.md",
+    "Step 10: paper-review-cycle trigger (paper-stage-classifier: kickoff stage)"
+  ],
+  "seed": 42,
+  "created_at": "2026-04-17T18:30:00+00:00",
+  "strict_constraints_followed": {
+    "no_tex_output": true,
+    "canonical_numbers_verbatim": true,
+    "cross_experiment_divergence_flag": "NONE",
+    "academic_finance_style": true,
+    "worktree_only_k1214_files": true
+  }
+}
