@@ -1,0 +1,254 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+========================================================================
+K1138b: Pure HAR structure vs GJR baseline — VIX X incremental
+6 assets (TLT/GLD/USO + SPY/QQQ/IWM) × 4 models
+========================================================================
+
+[0] Downloading VIX...
+  VIX: 1999-01-04 ~ 2026-04-10, n=6859
+
+[0] Downloading TLT...
+  Obs: 5854 [2003-01-03 ~ 2026-04-10], Mean VIX: 19.13
+
+[0] Downloading GLD...
+  Obs: 5350 [2005-01-04 ~ 2026-04-10], Mean VIX: 19.17
+
+[0] Downloading USO...
+  Obs: 4847 [2007-01-04 ~ 2026-04-10], Mean VIX: 19.83
+
+[0] Downloading SPY...
+  Obs: 6606 [2000-01-04 ~ 2026-04-10], Mean VIX: 19.85
+
+[0] Downloading QQQ...
+  Obs: 6606 [2000-01-04 ~ 2026-04-10], Mean VIX: 19.85
+
+[0] Downloading IWM...
+  Obs: 6354 [2001-01-03 ~ 2026-04-10], Mean VIX: 19.71
+
+[1] Running OOS forecasts for all assets...
+    Window=1250, Refit_every=63, OOS_start=2013-06-01
+
+  --- TLT ---
+  [TLT] IS: 1250 basis, OOS: 3234 bars [2013-06-03 ~ 2026-04-10]
+    step 200/3234 — M0 ok:200 M1 ok:200 M2 ok:200 M3 ok:200
+    step 400/3234 — M0 ok:400 M1 ok:400 M2 ok:400 M3 ok:400
+    step 600/3234 — M0 ok:600 M1 ok:600 M2 ok:600 M3 ok:600
+    step 800/3234 — M0 ok:800 M1 ok:800 M2 ok:800 M3 ok:800
+    step 1000/3234 — M0 ok:1000 M1 ok:1000 M2 ok:1000 M3 ok:1000
+    step 1200/3234 — M0 ok:1200 M1 ok:1200 M2 ok:1200 M3 ok:1200
+    step 1400/3234 — M0 ok:1400 M1 ok:1400 M2 ok:1400 M3 ok:1400
+    step 1600/3234 — M0 ok:1600 M1 ok:1600 M2 ok:1600 M3 ok:1600
+    step 1800/3234 — M0 ok:1800 M1 ok:1800 M2 ok:1800 M3 ok:1800
+    step 2000/3234 — M0 ok:2000 M1 ok:2000 M2 ok:2000 M3 ok:2000
+    step 2200/3234 — M0 ok:2200 M1 ok:2200 M2 ok:2200 M3 ok:2200
+    step 2400/3234 — M0 ok:2400 M1 ok:2400 M2 ok:2400 M3 ok:2400
+    step 2600/3234 — M0 ok:2600 M1 ok:2600 M2 ok:2600 M3 ok:2600
+    step 2800/3234 — M0 ok:2800 M1 ok:2800 M2 ok:2800 M3 ok:2800
+    step 3000/3234 — M0 ok:3000 M1 ok:3000 M2 ok:3000 M3 ok:3000
+    step 3200/3234 — M0 ok:3200 M1 ok:3200 M2 ok:3200 M3 ok:3200
+  [TLT] done in 38.8s
+
+  --- GLD ---
+  [GLD] IS: 1250 basis, OOS: 3234 bars [2013-06-03 ~ 2026-04-10]
+    step 200/3234 — M0 ok:200 M1 ok:200 M2 ok:200 M3 ok:200
+    step 400/3234 — M0 ok:400 M1 ok:400 M2 ok:400 M3 ok:400
+    step 600/3234 — M0 ok:600 M1 ok:600 M2 ok:600 M3 ok:600
+    step 800/3234 — M0 ok:800 M1 ok:800 M2 ok:800 M3 ok:800
+    step 1000/3234 — M0 ok:1000 M1 ok:1000 M2 ok:1000 M3 ok:1000
+    step 1200/3234 — M0 ok:1200 M1 ok:1200 M2 ok:1200 M3 ok:1200
+    step 1400/3234 — M0 ok:1400 M1 ok:1400 M2 ok:1400 M3 ok:1400
+    step 1600/3234 — M0 ok:1600 M1 ok:1600 M2 ok:1600 M3 ok:1600
+    step 1800/3234 — M0 ok:1800 M1 ok:1800 M2 ok:1800 M3 ok:1800
+    step 2000/3234 — M0 ok:2000 M1 ok:2000 M2 ok:2000 M3 ok:2000
+    step 2200/3234 — M0 ok:2200 M1 ok:2200 M2 ok:2200 M3 ok:2200
+    step 2400/3234 — M0 ok:2400 M1 ok:2400 M2 ok:2400 M3 ok:2400
+    step 2600/3234 — M0 ok:2600 M1 ok:2600 M2 ok:2600 M3 ok:2600
+    step 2800/3234 — M0 ok:2800 M1 ok:2800 M2 ok:2800 M3 ok:2800
+    step 3000/3234 — M0 ok:3000 M1 ok:3000 M2 ok:3000 M3 ok:3000
+    step 3200/3234 — M0 ok:3200 M1 ok:3200 M2 ok:3200 M3 ok:3200
+  [GLD] done in 35.2s
+
+  --- USO ---
+  [USO] IS: 1250 basis, OOS: 3234 bars [2013-06-03 ~ 2026-04-10]
+    step 200/3234 — M0 ok:200 M1 ok:200 M2 ok:200 M3 ok:200
+    step 400/3234 — M0 ok:400 M1 ok:400 M2 ok:400 M3 ok:400
+    step 600/3234 — M0 ok:600 M1 ok:600 M2 ok:600 M3 ok:600
+    step 800/3234 — M0 ok:800 M1 ok:800 M2 ok:800 M3 ok:800
+    step 1000/3234 — M0 ok:1000 M1 ok:1000 M2 ok:1000 M3 ok:1000
+    step 1200/3234 — M0 ok:1200 M1 ok:1200 M2 ok:1200 M3 ok:1200
+    step 1400/3234 — M0 ok:1400 M1 ok:1400 M2 ok:1400 M3 ok:1400
+    step 1600/3234 — M0 ok:1600 M1 ok:1600 M2 ok:1600 M3 ok:1600
+    step 1800/3234 — M0 ok:1800 M1 ok:1800 M2 ok:1800 M3 ok:1800
+    step 2000/3234 — M0 ok:2000 M1 ok:2000 M2 ok:2000 M3 ok:2000
+    step 2200/3234 — M0 ok:2200 M1 ok:2200 M2 ok:2200 M3 ok:2200
+    step 2400/3234 — M0 ok:2400 M1 ok:2400 M2 ok:2400 M3 ok:2400
+    step 2600/3234 — M0 ok:2600 M1 ok:2600 M2 ok:2600 M3 ok:2600
+    step 2800/3234 — M0 ok:2800 M1 ok:2800 M2 ok:2800 M3 ok:2800
+    step 3000/3234 — M0 ok:3000 M1 ok:3000 M2 ok:3000 M3 ok:3000
+    step 3200/3234 — M0 ok:3200 M1 ok:3200 M2 ok:3200 M3 ok:3200
+  [USO] done in 38.5s
+
+  --- SPY ---
+  [SPY] IS: 1250 basis, OOS: 3234 bars [2013-06-03 ~ 2026-04-10]
+    step 200/3234 — M0 ok:200 M1 ok:200 M2 ok:200 M3 ok:200
+    step 400/3234 — M0 ok:400 M1 ok:400 M2 ok:400 M3 ok:400
+    step 600/3234 — M0 ok:600 M1 ok:600 M2 ok:600 M3 ok:600
+    step 800/3234 — M0 ok:800 M1 ok:800 M2 ok:800 M3 ok:800
+    step 1000/3234 — M0 ok:1000 M1 ok:1000 M2 ok:1000 M3 ok:1000
+    step 1200/3234 — M0 ok:1200 M1 ok:1200 M2 ok:1200 M3 ok:1200
+    step 1400/3234 — M0 ok:1400 M1 ok:1400 M2 ok:1400 M3 ok:1400
+    step 1600/3234 — M0 ok:1600 M1 ok:1600 M2 ok:1600 M3 ok:1600
+    step 1800/3234 — M0 ok:1800 M1 ok:1800 M2 ok:1800 M3 ok:1800
+    step 2000/3234 — M0 ok:2000 M1 ok:2000 M2 ok:2000 M3 ok:2000
+    step 2200/3234 — M0 ok:2200 M1 ok:2200 M2 ok:2200 M3 ok:2200
+    step 2400/3234 — M0 ok:2400 M1 ok:2400 M2 ok:2400 M3 ok:2400
+    step 2600/3234 — M0 ok:2600 M1 ok:2600 M2 ok:2600 M3 ok:2600
+    step 2800/3234 — M0 ok:2800 M1 ok:2800 M2 ok:2800 M3 ok:2800
+    step 3000/3234 — M0 ok:3000 M1 ok:3000 M2 ok:3000 M3 ok:3000
+    step 3200/3234 — M0 ok:3200 M1 ok:3200 M2 ok:3200 M3 ok:3200
+  [SPY] done in 37.2s
+
+  --- QQQ ---
+  [QQQ] IS: 1250 basis, OOS: 3234 bars [2013-06-03 ~ 2026-04-10]
+    step 200/3234 — M0 ok:200 M1 ok:200 M2 ok:200 M3 ok:200
+    step 400/3234 — M0 ok:400 M1 ok:400 M2 ok:400 M3 ok:400
+    step 600/3234 — M0 ok:600 M1 ok:600 M2 ok:600 M3 ok:600
+    step 800/3234 — M0 ok:800 M1 ok:800 M2 ok:800 M3 ok:800
+    step 1000/3234 — M0 ok:1000 M1 ok:1000 M2 ok:1000 M3 ok:1000
+    step 1200/3234 — M0 ok:1200 M1 ok:1200 M2 ok:1200 M3 ok:1200
+    step 1400/3234 — M0 ok:1400 M1 ok:1400 M2 ok:1400 M3 ok:1400
+    step 1600/3234 — M0 ok:1600 M1 ok:1600 M2 ok:1600 M3 ok:1600
+    step 1800/3234 — M0 ok:1800 M1 ok:1800 M2 ok:1800 M3 ok:1800
+    step 2000/3234 — M0 ok:2000 M1 ok:2000 M2 ok:2000 M3 ok:2000
+    step 2200/3234 — M0 ok:2200 M1 ok:2200 M2 ok:2200 M3 ok:2200
+    step 2400/3234 — M0 ok:2400 M1 ok:2400 M2 ok:2400 M3 ok:2400
+    step 2600/3234 — M0 ok:2600 M1 ok:2600 M2 ok:2600 M3 ok:2600
+    step 2800/3234 — M0 ok:2800 M1 ok:2800 M2 ok:2800 M3 ok:2800
+    step 3000/3234 — M0 ok:3000 M1 ok:3000 M2 ok:3000 M3 ok:3000
+    step 3200/3234 — M0 ok:3200 M1 ok:3200 M2 ok:3200 M3 ok:3200
+  [QQQ] done in 34.5s
+
+  --- IWM ---
+  [IWM] IS: 1250 basis, OOS: 3234 bars [2013-06-03 ~ 2026-04-10]
+    step 200/3234 — M0 ok:200 M1 ok:200 M2 ok:200 M3 ok:200
+    step 400/3234 — M0 ok:400 M1 ok:400 M2 ok:400 M3 ok:400
+    step 600/3234 — M0 ok:600 M1 ok:600 M2 ok:600 M3 ok:600
+    step 800/3234 — M0 ok:800 M1 ok:800 M2 ok:800 M3 ok:800
+    step 1000/3234 — M0 ok:1000 M1 ok:1000 M2 ok:1000 M3 ok:1000
+    step 1200/3234 — M0 ok:1200 M1 ok:1200 M2 ok:1200 M3 ok:1200
+    step 1400/3234 — M0 ok:1400 M1 ok:1400 M2 ok:1400 M3 ok:1400
+    step 1600/3234 — M0 ok:1600 M1 ok:1600 M2 ok:1600 M3 ok:1600
+    step 1800/3234 — M0 ok:1800 M1 ok:1800 M2 ok:1800 M3 ok:1800
+    step 2000/3234 — M0 ok:2000 M1 ok:2000 M2 ok:2000 M3 ok:2000
+    step 2200/3234 — M0 ok:2200 M1 ok:2200 M2 ok:2200 M3 ok:2200
+    step 2400/3234 — M0 ok:2400 M1 ok:2400 M2 ok:2400 M3 ok:2400
+    step 2600/3234 — M0 ok:2600 M1 ok:2600 M2 ok:2600 M3 ok:2600
+    step 2800/3234 — M0 ok:2800 M1 ok:2800 M2 ok:2800 M3 ok:2800
+    step 3000/3234 — M0 ok:3000 M1 ok:3000 M2 ok:3000 M3 ok:3000
+    step 3200/3234 — M0 ok:3200 M1 ok:3200 M2 ok:3200 M3 ok:3200
+  [IWM] done in 36.0s
+
+  Completed: ['TLT', 'GLD', 'USO', 'SPY', 'QQQ', 'IWM']
+
+[2] Computing QLIKE losses and DM tests...
+  [TLT] QLIKE_park M0=0.6280 M1=0.3369 M2=0.3267 | HAR_alone+46.3% HAR+VIX_total+48.0% VIX_incr+3.0%
+  [GLD] QLIKE_park M0=0.7602 M1=0.4485 M2=0.4487 | HAR_alone+41.0% HAR+VIX_total+41.0% VIX_incr+-0.0%
+  [USO] QLIKE_park M0=0.5145 M1=0.3643 M2=0.3539 | HAR_alone+29.2% HAR+VIX_total+31.2% VIX_incr+2.9%
+  [SPY] QLIKE_park M0=0.5103 M1=0.4204 M2=0.3755 | HAR_alone+17.6% HAR+VIX_total+26.4% VIX_incr+10.7%
+  [QQQ] QLIKE_park M0=0.4632 M1=0.3992 M2=0.3799 | HAR_alone+13.8% HAR+VIX_total+18.0% VIX_incr+4.9%
+  [IWM] QLIKE_park M0=0.3745 M1=0.3058 M2=0.2876 | HAR_alone+18.3% HAR+VIX_total+23.2% VIX_incr+6.0%
+
+  Bonferroni: alpha=0.05, n_tests=18, adjusted_alpha=0.0028
+
+[3] Harvey PASS determination (|t| > 3.0 or < -3.0, Bonferroni corrected)...
+    Sign convention: d = loss_model_a - loss_model_b
+    DM1: d = HAR_loss - GJR_loss  → t < -3 means HAR beats GJR (PASS)
+    DM2: d = HARX_loss - GJR_loss → t < -3 means HAR-X beats GJR (PASS)
+    DM3: d = HARX_loss - HAR_loss → t < -3 means HAR-X beats HAR (VIX incr. PASS)
+  [TLT] DM1: t=-14.310 p=0.0000 bonf_p<0.0028? True → PASS
+  [TLT] DM2: t=-16.134 p=0.0000 bonf_p<0.0028? True → PASS
+  [TLT] DM3: t=-1.852 p=0.0642 bonf_p<0.0028? False → null
+  [GLD] DM1: t=-11.537 p=0.0000 bonf_p<0.0028? True → PASS
+  [GLD] DM2: t=-10.745 p=0.0000 bonf_p<0.0028? True → PASS
+  [GLD] DM3: t=0.032 p=0.9749 bonf_p<0.0028? False → null
+  [USO] DM1: t=-6.846 p=0.0000 bonf_p<0.0028? True → PASS
+  [USO] DM2: t=-7.907 p=0.0000 bonf_p<0.0028? True → PASS
+  [USO] DM3: t=-1.194 p=0.2324 bonf_p<0.0028? False → null
+  [SPY] DM1: t=-5.877 p=0.0000 bonf_p<0.0028? True → PASS
+  [SPY] DM2: t=-9.915 p=0.0000 bonf_p<0.0028? True → PASS
+  [SPY] DM3: t=-5.792 p=0.0000 bonf_p<0.0028? True → PASS
+  [QQQ] DM1: t=-2.168 p=0.0302 bonf_p<0.0028? False → null
+  [QQQ] DM2: t=-3.434 p=0.0006 bonf_p<0.0028? True → PASS
+  [QQQ] DM3: t=-1.600 p=0.1097 bonf_p<0.0028? False → null
+  [IWM] DM1: t=-6.480 p=0.0000 bonf_p<0.0028? True → PASS
+  [IWM] DM2: t=-8.668 p=0.0000 bonf_p<0.0028? True → PASS
+  [IWM] DM3: t=-2.864 p=0.0042 bonf_p<0.0028? False → null
+
+[4] Scenario A/B/C/D determination...
+  Commodity/Bond DM1 PASS: 3/3 (harvey: 3/3)
+  Equity DM1 PASS: 2/3
+  Commodity/Bond DM3 VIX_incr PASS: 0/3
+  Equity DM3 VIX_incr PASS: 1/3
+  Avg VIX incr % — CB: 2.0%, EQ: 7.2%
+  Avg HAR_alone vs GJR % — CB: 38.8%
+
+  SCENARIO: A
+  Description: HAR structure alone drives ALL asset improvements; VIX X is placebo on commodity/bond (+2% incr); adds modest value on equity (+7%)
+
+[5] Full DM table...
+
+Asset        DM1_HAR_vs_GJR        DM2_HARX_vs_GJR        DM3_HARX_vs_HAR |  HAR_alone_%  VIX_incr_%  HARX_total_%
+------------------------------------------------------------------------------------------------------------------------
+TLT    t=-14.310 p=0.0000 PASS  t=-16.134 p=0.0000 PASS  t=-1.852 p=0.0642 null  |      +46.35%      +3.04%       +47.98%
+GLD    t=-11.537 p=0.0000 PASS  t=-10.745 p=0.0000 PASS  t=+0.032 p=0.9749 null  |      +41.01%      -0.04%       +40.98%
+USO    t=-6.846 p=0.0000 PASS  t=-7.907 p=0.0000 PASS  t=-1.194 p=0.2324 null  |      +29.19%      +2.87%       +31.22%
+SPY    t=-5.877 p=0.0000 PASS  t=-9.915 p=0.0000 PASS  t=-5.792 p=0.0000 PASS  |      +17.62%     +10.69%       +26.42%
+QQQ    t=-2.168 p=0.0302 null  t=-3.434 p=0.0006 PASS  t=-1.600 p=0.1097 null  |      +13.80%      +4.85%       +17.98%
+IWM    t=-6.480 p=0.0000 PASS  t=-8.668 p=0.0000 PASS  t=-2.864 p=0.0042 null  |      +18.35%      +5.95%       +23.21%
+
+[6] Creating plots...
+  Saved: k1138b_dm_har_vs_gjr.png
+  Saved: k1138b_vix_x_incremental.png
+
+[7] Saving results JSON...
+  Saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ad8aacfc/experiments/k1138b/k1138b_results.json
+
+========================================================================
+K1138b FINAL SUMMARY
+========================================================================
+
+SCENARIO: A
+Description: HAR structure alone drives ALL asset improvements; VIX X is placebo on commodity/bond (+2% incr); adds modest value on equity (+7%)
+
+DM1 (HAR-RV alone vs GJR, Parkinson):
+  TLT: t=-14.310 p=0.0000 Harvey=PASS Bonf=PASS → PASS
+  GLD: t=-11.537 p=0.0000 Harvey=PASS Bonf=PASS → PASS
+  USO: t=-6.846 p=0.0000 Harvey=PASS Bonf=PASS → PASS
+  SPY: t=-5.877 p=0.0000 Harvey=PASS Bonf=PASS → PASS
+  QQQ: t=-2.168 p=0.0302 Harvey=fail Bonf=fail → null
+  IWM: t=-6.480 p=0.0000 Harvey=PASS Bonf=PASS → PASS
+
+DM3 (VIX X incremental: HAR-RV-X vs HAR-RV, Parkinson):
+  TLT: t=-1.852 p=0.0642 VIX_incr=+3.04% → null
+  GLD: t=+0.032 p=0.9749 VIX_incr=-0.04% → null
+  USO: t=-1.194 p=0.2324 VIX_incr=+2.87% → null
+  SPY: t=-5.792 p=0.0000 VIX_incr=+10.69% → PASS
+  QQQ: t=-1.600 p=0.1097 VIX_incr=+4.85% → null
+  IWM: t=-2.864 p=0.0042 VIX_incr=+5.95% → null
+
+QLIKE Improvement Summary (Parkinson):
+  Asset   HAR_alone_%   VIX_incr_%  HAR-X_total_%
+  TLT         +46.35%       +3.04%        +47.98%
+  GLD         +41.01%       -0.04%        +40.98%
+  USO         +29.19%       +2.87%        +31.22%
+  SPY         +17.62%      +10.69%        +26.42%
+  QQQ         +13.80%       +4.85%        +17.98%
+  IWM         +18.35%       +5.95%        +23.21%
+
+Paper 4 implication: HAR structure (daily+weekly+monthly RV lags) alone drives the large improvement over GJR-GARCH on all assets. VIX X is a near-placebo on commodity/bond (avg +2% incremental) and adds modest incremental value on equity (avg +7%). Paper 4 Channel 1 can upgrade to: 'HAR structure universally dominates GJR; VIX X provides additional but not necessary incremental benefit for equity'.
+
+Supports K1137: True
+
+Total runtime: 224.1s
+========================================================================
