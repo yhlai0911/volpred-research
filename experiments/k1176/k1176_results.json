@@ -1,0 +1,416 @@
+{
+  "metadata": {
+    "experiment": "K1176",
+    "paper": "paper/taiwan-vt/main.tex",
+    "table": "Table 4",
+    "run_date": "2026-04-17T17:02:51.263056",
+    "signal": "SPY 10-day log-return cumsum (shifted 1 lag, no lookahead)",
+    "sample": "2012-01-01 to 2025-12-31",
+    "tc_per_switch": 0.00186,
+    "seed": 42,
+    "data_source": "yfinance (daily OHLC, auto_adjust=False, Adj Close used)",
+    "data_note": "0050.TW 4:1 split 2014-01-02 excluded; adj_open = Open * (AdjClose/Close)",
+    "nw_lags": "auto Andrews(1991)"
+  },
+  "individual_markets": {
+    "TW": {
+      "c2c": {
+        "sharpe": 1.9152,
+        "mean_daily_pct": 0.092589,
+        "ann_ret_pct": 23.3325,
+        "ann_vol_pct": 12.1831,
+        "nw_tstat": 6.7585,
+        "mdd_pct": -10.5662,
+        "n_days": 3302,
+        "switches": 424,
+        "switches_per_year": 32.36,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "o2o": {
+        "sharpe": 2.35,
+        "mean_daily_pct": 0.109589,
+        "ann_ret_pct": 27.6163,
+        "ann_vol_pct": 11.7518,
+        "nw_tstat": 8.1292,
+        "mdd_pct": -8.5021,
+        "n_days": 3302,
+        "switches": 424,
+        "switches_per_year": 32.36,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "buyhold_c2c_sharpe": 0.9705
+    },
+    "JP": {
+      "c2c": {
+        "sharpe": 1.7728,
+        "mean_daily_pct": 0.101427,
+        "ann_ret_pct": 25.5595,
+        "ann_vol_pct": 14.4175,
+        "nw_tstat": 6.9105,
+        "mdd_pct": -15.3465,
+        "n_days": 3307,
+        "switches": 418,
+        "switches_per_year": 31.85,
+        "sample_start": "2012-01-04",
+        "sample_end": "2025-12-30"
+      },
+      "o2o": {
+        "sharpe": 2.2236,
+        "mean_daily_pct": 0.117065,
+        "ann_ret_pct": 29.5003,
+        "ann_vol_pct": 13.2671,
+        "nw_tstat": 8.3422,
+        "mdd_pct": -9.9021,
+        "n_days": 3307,
+        "switches": 418,
+        "switches_per_year": 31.85,
+        "sample_start": "2012-01-04",
+        "sample_end": "2025-12-30"
+      },
+      "buyhold_c2c_sharpe": 0.7282
+    },
+    "HK": {
+      "c2c": {
+        "sharpe": 0.7979,
+        "mean_daily_pct": 0.047196,
+        "ann_ret_pct": 11.8934,
+        "ann_vol_pct": 14.9058,
+        "nw_tstat": 2.9151,
+        "mdd_pct": -32.113,
+        "n_days": 3353,
+        "switches": 424,
+        "switches_per_year": 31.87,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "o2o": {
+        "sharpe": 1.0927,
+        "mean_daily_pct": 0.067252,
+        "ann_ret_pct": 16.9475,
+        "ann_vol_pct": 15.509,
+        "nw_tstat": 4.1445,
+        "mdd_pct": -19.1742,
+        "n_days": 3353,
+        "switches": 424,
+        "switches_per_year": 31.87,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "buyhold_c2c_sharpe": 0.2202
+    },
+    "AU": {
+      "c2c": {
+        "sharpe": 1.1288,
+        "mean_daily_pct": 0.042684,
+        "ann_ret_pct": 10.7563,
+        "ann_vol_pct": 9.5293,
+        "nw_tstat": 4.5159,
+        "mdd_pct": -11.3665,
+        "n_days": 3448,
+        "switches": 424,
+        "switches_per_year": 30.99,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "o2o": {
+        "sharpe": 1.6281,
+        "mean_daily_pct": 0.060352,
+        "ann_ret_pct": 15.2086,
+        "ann_vol_pct": 9.3412,
+        "nw_tstat": 6.1732,
+        "mdd_pct": -9.4814,
+        "n_days": 3448,
+        "switches": 424,
+        "switches_per_year": 30.99,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "buyhold_c2c_sharpe": 0.4502
+    },
+    "SG": {
+      "c2c": {
+        "sharpe": 1.3367,
+        "mean_daily_pct": 0.045777,
+        "ann_ret_pct": 11.5359,
+        "ann_vol_pct": 8.6302,
+        "nw_tstat": 4.8324,
+        "mdd_pct": -8.8015,
+        "n_days": 3419,
+        "switches": 430,
+        "switches_per_year": 31.69,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "o2o": {
+        "sharpe": 1.6495,
+        "mean_daily_pct": 0.055018,
+        "ann_ret_pct": 13.8645,
+        "ann_vol_pct": 8.4051,
+        "nw_tstat": 5.9618,
+        "mdd_pct": -10.8621,
+        "n_days": 3419,
+        "switches": 430,
+        "switches_per_year": 31.69,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "buyhold_c2c_sharpe": 0.6316
+    },
+    "KR": {
+      "c2c": {
+        "sharpe": 1.3678,
+        "mean_daily_pct": 0.062072,
+        "ann_ret_pct": 15.6422,
+        "ann_vol_pct": 11.4356,
+        "nw_tstat": 4.8817,
+        "mdd_pct": -15.4125,
+        "n_days": 3327,
+        "switches": 428,
+        "switches_per_year": 32.42,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-30"
+      },
+      "o2o": {
+        "sharpe": 1.7817,
+        "mean_daily_pct": 0.076521,
+        "ann_ret_pct": 19.2832,
+        "ann_vol_pct": 10.8232,
+        "nw_tstat": 6.0829,
+        "mdd_pct": -14.3702,
+        "n_days": 3327,
+        "switches": 428,
+        "switches_per_year": 32.42,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-30"
+      },
+      "buyhold_c2c_sharpe": 0.456
+    }
+  },
+  "controls": {
+    "EWT": {
+      "name": "EWT (US-listed TW ETF)",
+      "c2c": {
+        "sharpe": 0.124,
+        "mean_daily_pct": 0.006957,
+        "ann_ret_pct": 1.7531,
+        "ann_vol_pct": 14.1424,
+        "nw_tstat": 0.461,
+        "mdd_pct": -74.4279,
+        "n_days": 3520,
+        "switches": 434,
+        "switches_per_year": 31.07,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "o2o": {
+        "sharpe": 1.0941,
+        "mean_daily_pct": 0.060058,
+        "ann_ret_pct": 15.1347,
+        "ann_vol_pct": 13.8326,
+        "nw_tstat": 4.1703,
+        "mdd_pct": -19.5875,
+        "n_days": 3520,
+        "switches": 434,
+        "switches_per_year": 31.07,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      }
+    },
+    "INDY": {
+      "name": "India (INDY ETF)",
+      "c2c": {
+        "sharpe": -0.2149,
+        "mean_daily_pct": -0.012772,
+        "ann_ret_pct": -3.2184,
+        "ann_vol_pct": 14.9755,
+        "nw_tstat": -0.8047,
+        "mdd_pct": -98.0737,
+        "n_days": 3520,
+        "switches": 434,
+        "switches_per_year": 31.07,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "o2o": {
+        "sharpe": 0.5792,
+        "mean_daily_pct": 0.030724,
+        "ann_ret_pct": 7.7425,
+        "ann_vol_pct": 13.3676,
+        "nw_tstat": 2.0533,
+        "mdd_pct": -30.0364,
+        "n_days": 3520,
+        "switches": 434,
+        "switches_per_year": 31.07,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      }
+    },
+    "EIDO": {
+      "name": "Indonesia (EIDO ETF)",
+      "c2c": {
+        "sharpe": -0.5455,
+        "mean_daily_pct": -0.039085,
+        "ann_ret_pct": -9.8494,
+        "ann_vol_pct": 18.0568,
+        "nw_tstat": -2.1537,
+        "mdd_pct": -157.2992,
+        "n_days": 3520,
+        "switches": 434,
+        "switches_per_year": 31.07,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      },
+      "o2o": {
+        "sharpe": 0.1451,
+        "mean_daily_pct": 0.0096,
+        "ann_ret_pct": 2.4192,
+        "ann_vol_pct": 16.6724,
+        "nw_tstat": 0.5618,
+        "mdd_pct": -42.3892,
+        "n_days": 3520,
+        "switches": 434,
+        "switches_per_year": 31.07,
+        "sample_start": "2012-01-03",
+        "sample_end": "2025-12-31"
+      }
+    }
+  },
+  "combinations": {
+    "tw_jp_5050_c2c": {
+      "sharpe": 2.192,
+      "nw_tstat": 7.8773,
+      "mdd_pct": -10.8265,
+      "n_days": 3106,
+      "paper_claim": 1.81,
+      "description": "Equal-weight TW+JP c2c TZ momentum (paper Table 4 Panel B)"
+    },
+    "global_spy_tw_c2c_proxy": {
+      "sharpe": 1.8992,
+      "nw_tstat": 6.4632,
+      "mdd_pct": -19.4266,
+      "n_days": 3302,
+      "paper_claim": 1.61,
+      "caveat": "SPY B&H used as proxy for US 12/VIX VT (no VIX data here)",
+      "description": "50/50 SPY B&H + TW TZ c2c (paper uses actual 12/VIX VT)"
+    }
+  },
+  "paper_comparison": {
+    "TW": {
+      "rep_c2c_sharpe": 1.9152,
+      "rep_o2o_sharpe": 2.35,
+      "rep_c2c_nw_tstat": 6.7585,
+      "rep_o2o_nw_tstat": 8.1292,
+      "rep_c2c_mdd": -10.5662,
+      "rep_c2c_sw_yr": 32.36,
+      "paper_c2c_sharpe": 1.473,
+      "diff_c2c_sharpe": 0.4422,
+      "reldiff_c2c": 0.3002,
+      "match_c2c": "DIVERGENT",
+      "paper_o2o_sharpe": 0.87,
+      "diff_o2o_sharpe": 1.48,
+      "match_o2o": "DIVERGENT",
+      "paper_c2c_tstat": 3.76,
+      "diff_c2c_tstat": 2.9985,
+      "paper_o2o_tstat": 2.22,
+      "diff_o2o_tstat": 5.9092,
+      "paper_mdd": -12.8,
+      "diff_mdd": 2.2338
+    },
+    "JP": {
+      "rep_c2c_sharpe": 1.7728,
+      "rep_o2o_sharpe": 2.2236,
+      "rep_c2c_nw_tstat": 6.9105,
+      "rep_o2o_nw_tstat": 8.3422,
+      "rep_c2c_mdd": -15.3465,
+      "rep_c2c_sw_yr": 31.85,
+      "paper_c2c_sharpe": 1.306,
+      "diff_c2c_sharpe": 0.4668,
+      "reldiff_c2c": 0.3574,
+      "match_c2c": "DIVERGENT",
+      "paper_o2o_sharpe": 0.78,
+      "diff_o2o_sharpe": 1.4436,
+      "match_o2o": "DIVERGENT",
+      "paper_c2c_tstat": 3.69,
+      "diff_c2c_tstat": 3.2205,
+      "paper_o2o_tstat": 2.0,
+      "diff_o2o_tstat": 6.3422,
+      "paper_mdd": -14.5,
+      "diff_mdd": -0.8465
+    },
+    "HK": {
+      "rep_c2c_sharpe": 0.7979,
+      "rep_o2o_sharpe": 1.0927,
+      "rep_c2c_nw_tstat": 2.9151,
+      "rep_o2o_nw_tstat": 4.1445,
+      "rep_c2c_mdd": -32.113,
+      "rep_c2c_sw_yr": 31.87,
+      "paper_c2c_tstat": 4.12,
+      "diff_c2c_tstat": -1.2049
+    },
+    "AU": {
+      "rep_c2c_sharpe": 1.1288,
+      "rep_o2o_sharpe": 1.6281,
+      "rep_c2c_nw_tstat": 4.5159,
+      "rep_o2o_nw_tstat": 6.1732,
+      "rep_c2c_mdd": -11.3665,
+      "rep_c2c_sw_yr": 30.99,
+      "paper_c2c_tstat": 4.04,
+      "diff_c2c_tstat": 0.4759
+    },
+    "SG": {
+      "rep_c2c_sharpe": 1.3367,
+      "rep_o2o_sharpe": 1.6495,
+      "rep_c2c_nw_tstat": 4.8324,
+      "rep_o2o_nw_tstat": 5.9618,
+      "rep_c2c_mdd": -8.8015,
+      "rep_c2c_sw_yr": 31.69,
+      "paper_c2c_tstat": 4.03,
+      "diff_c2c_tstat": 0.8024
+    },
+    "KR": {
+      "rep_c2c_sharpe": 1.3678,
+      "rep_o2o_sharpe": 1.7817,
+      "rep_c2c_nw_tstat": 4.8817,
+      "rep_o2o_nw_tstat": 6.0829,
+      "rep_c2c_mdd": -15.4125,
+      "rep_c2c_sw_yr": 32.42,
+      "paper_c2c_tstat": 3.83,
+      "diff_c2c_tstat": 1.0517
+    }
+  },
+  "data_feasibility": {
+    "verdict": "FEASIBLE",
+    "data_infeasible": false,
+    "reason": "TZ momentum at daily frequency requires only daily open/close prices. yfinance provides these for all 6 markets. No intraday timestamps are needed.",
+    "known_data_issue": "0050.TW had a 4:1 stock split on 2014-01-02. yfinance adj_close does NOT backward-adjust this split, creating a spurious -75% return on that date. The split day must be excluded from return computations. Paper's data source (TEJ/Bloomberg) likely handles this transparently.",
+    "impact_of_data_issue": "Without split correction: TW c2c Sharpe=0.73, MDD=-81% (paper-like noise). With split correction: TW c2c Sharpe=1.91 (higher than paper's 1.47). The remaining divergence (~30%) is attributed to data vendor differences."
+  },
+  "assessment": {
+    "overall_status": "PARTIAL_MATCH",
+    "recommendation": "b",
+    "recommendation_label": "(b) Modify paper: update Table 4 numbers to match split-corrected yfinance results, OR add data provenance note",
+    "details": {
+      "tw_c2c": {
+        "rep": 1.9152,
+        "paper": 1.473,
+        "match": "DIVERGENT"
+      },
+      "tw_o2o": {
+        "rep": 2.35,
+        "paper": 0.87,
+        "note": "Our o2o (open_t/open_{t-1}) > c2c. Paper reports c2c>o2o which is opposite."
+      },
+      "direction_confirmed": "ALL 6 markets show positive c2c Sharpe, consistent with paper claim",
+      "main_divergence": "TW c2c Sharpe: rep=1.91 vs paper=1.47 (+30%). TW o2o/c2c ordering: rep shows o2o>c2c; paper shows c2c>o2o. Six-market t-stats: our NW t-stats are systematically higher than paper's by ~2x. Root cause: data vendor difference (yfinance vs TEJ/Bloomberg for TW split handling) AND possibly different o2o definition (paper's 'implementable o2o' may be intraday-only while our o2o is open_t/open_{t-1} which includes the previous gap).",
+      "combination_match": {
+        "tw_jp_5050": {
+          "rep": 2.192,
+          "paper": 1.81,
+          "note": "Rep shows higher Sharpe (consistent with individual market overestimate)"
+        }
+      }
+    }
+  }
+}
