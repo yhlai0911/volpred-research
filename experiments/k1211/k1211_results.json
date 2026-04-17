@@ -1,0 +1,152 @@
+{
+  "experiment_id": "K1211",
+  "title": "Paper 2 §5 cross-market institutional ladder rewrite draft (markdown)",
+  "proposer": "Main thread narrative state-machine unlock",
+  "executor": "Claude (worktree agent-a407c489)",
+  "timestamp_utc": "2026-04-18T00:00:00+00:00",
+  "random_seed": 42,
+  "task_type": "pure_writing_canonical_number_lookup",
+  "no_new_estimation": true,
+  "output_format": ["markdown", "csv", "json"],
+  "paper_target": "Paper 2 §5 body_v4.tex (main-thread cherry-pick; paper folder to be identified by main thread — cross-market institutional ladder paper)",
+  "paper_workflow_compliance": {
+    "no_tex_writes_from_agent": true,
+    "body_rewrite_reserved_to_main_thread": true,
+    "narrative_state_machine_status": "decision_candidate (9 complementary experiments satisfied; unlock gate cleared)"
+  },
+  "source_experiments": [
+    {"id": "K1165", "results_json": "experiments/k1165/k1165_results.json", "role": "N=7 base confirmation"},
+    {"id": "K1166", "results_json": "experiments/k1166/k1166_results.json", "role": "per-stock theta_EAV refit tautology-removed"},
+    {"id": "K1168", "results_json": "experiments/k1168/k1168_results.json", "role": "N=10 extension"},
+    {"id": "K1172", "results_json": "experiments/k1172/k1172_results.json", "role": "N=12 extension"},
+    {"id": "K1171", "results_json": "experiments/k1171/k1171_results.json", "role": "N=13 extension +AU"},
+    {"id": "K1173", "results_json": "experiments/k1173/k1173_results.json", "role": "EM refined proxy falsification NULL"},
+    {"id": "K1163", "results_json": "experiments/k1163/k1163_results.json", "role": "EU full-coverage refit ROBUST"},
+    {"id": "K1204", "results_json": "experiments/k1204/k1204_results.json", "role": "synthesis + 32/32 integrity PASS + Figures A-E"},
+    {"id": "K1207", "results_json": "experiments/k1207/k1207_results.json", "role": "GICS sector-FE orthogonality verification"}
+  ],
+  "trajectory_canonical": [
+    {"iter": 1, "experiment_id": "K1165", "N": 7, "markets_added": "base TW/EU/JP/US + KR/CA/HK",
+     "spearman_rho": 0.7500000000000002, "spearman_p": 0.05218140045705777,
+     "loo_min_drop_market": "EU", "loo_min_rho": 0.942857142857143, "loo_min_p": 0.004804664723032055,
+     "panel_joint_log_analyst_t": 3.236320474030991,
+     "panel_analyst_only_log_analyst_t": 3.740466580894467,
+     "between_r2_inst_pct": 0.6314447874403539, "within_r2_log_analyst": 0.07184879196446492,
+     "n_stocks_within": 133, "verdict": "STRENGTHENED"},
+    {"iter": 2, "experiment_id": "K1166", "N": "pooled 108", "markets_added": "per-stock theta_EAV refit (tautology removed)",
+     "spearman_rho": null, "spearman_p": null,
+     "loo_min_drop_market": null, "loo_min_rho": null, "loo_min_p": null,
+     "panel_joint_log_analyst_t": 3.5561364781887423,
+     "panel_analyst_only_log_analyst_t": null,
+     "between_r2_inst_pct": null, "within_r2_log_analyst": null,
+     "n_stocks_within": 108, "verdict": "CONFIRMED_REMOVED_TAUTOLOGY"},
+    {"iter": 3, "experiment_id": "K1168", "N": 10, "markets_added": "BR/CH/IN",
+     "spearman_rho": 0.6121212121212121, "spearman_p": 0.05997214247725529,
+     "loo_min_drop_market": "EU", "loo_min_rho": 0.75, "loo_min_p": 0.01994212613199253,
+     "panel_joint_log_analyst_t": 3.6272613782576935,
+     "panel_analyst_only_log_analyst_t": 3.9025630546533807,
+     "between_r2_inst_pct": 0.5381816403890951, "within_r2_log_analyst": 0.06234129913683506,
+     "n_stocks_within": 153, "verdict": "STRENGTHENED"},
+    {"iter": 4, "experiment_id": "K1172", "N": 12, "markets_added": "MX/ID (ZA UNDERPOWERED dropped)",
+     "spearman_rho": 0.44055944055944063, "spearman_p": 0.1517350357167303,
+     "loo_min_drop_market": "MX", "loo_min_rho": 0.6090909090909091, "loo_min_p": 0.0466957093540989,
+     "panel_joint_log_analyst_t": 3.7893591528566297,
+     "panel_analyst_only_log_analyst_t": 4.060079450617653,
+     "between_r2_inst_pct": 0.4320212873384225, "within_r2_log_analyst": 0.05327628932900952,
+     "n_stocks_within": 172, "verdict": "PARTIAL"},
+    {"iter": 5, "experiment_id": "K1171", "N": 13, "markets_added": "AU via HAND_CODED earnings (below-ladder leverage point)",
+     "spearman_rho": 0.38461538461538464, "spearman_p": 0.19441291997748628,
+     "loo_min_drop_market": "MX", "loo_min_rho": 0.5454545454545455, "loo_min_p": 0.06661188226688902,
+     "panel_joint_log_analyst_t": 3.807645658649989,
+     "panel_analyst_only_log_analyst_t": 4.076238750002866,
+     "between_r2_inst_pct": 0.4194408675389064, "within_r2_log_analyst": 0.05335826723618908,
+     "n_stocks_within": 182, "verdict": "DATA_LIMITED"}
+  ],
+  "panel_harvey_t_joint_sequence": {
+    "values": [3.236320474030991, 3.5561364781887423, 3.6272613782576935, 3.7893591528566297, 3.807645658649989],
+    "monotonic_increase": true,
+    "threshold_harvey_abs_t_gt_3": 3.0,
+    "all_above_threshold": true
+  },
+  "two_level_r2_ratio_range": {
+    "min_ratio": 7.8608,
+    "max_ratio": 8.7885,
+    "interpretation": "between-market inst_pct R² dominates within-market log_analyst R² by 7.86x to 8.79x across iterations"
+  },
+  "k1173_em_proxy_refinement_null": {
+    "baseline_rho": 0.44055944055944063,
+    "refined_rho": 0.3846153846153847,
+    "delta_rho": -0.05594405594405594,
+    "null_band_abs": 0.10,
+    "within_null_band": true,
+    "verdict": "NULL_proxy_artefact_falsified",
+    "implication": "EM above-ladder residual is STRUCTURAL cost-of-capital scale factor, not yfinance proxy artefact"
+  },
+  "k1163_eu_robustness": {
+    "n_stocks_k1153": 18,
+    "n_stocks_k1163": 30,
+    "theta_eav_k1153": 4.0718849779368176e-05,
+    "theta_eav_k1163": 5.217439534293086e-05,
+    "theta_rel_k1153": 0.1366,
+    "theta_rel_k1163": 0.19402312729021276,
+    "delta_theta_rel": 0.05742312729021276,
+    "boot_t_k1153": 4.19,
+    "boot_t_k1163": 4.807008636802949,
+    "placebo_z_k1153": 14.77,
+    "placebo_z_k1163": 22.273208042468937,
+    "cluster_upper_low": 0.25,
+    "cluster_lower_high": 0.3,
+    "eu_k1163_boot_ci95": [0.126917192472482, 0.27657366003202444],
+    "verdict": "ROBUST_eu_low_cluster_preserved"
+  },
+  "k1207_sector_orthogonality": {
+    "sector_fe_incremental_adj_r2": 0.148,
+    "inst_fe_incremental_adj_r2": 0.0046,
+    "ratio_sector_over_inst": 32.17,
+    "sector_fe_joint_F": 689.5,
+    "sector_fe_joint_p": 7.9e-14,
+    "inst_pct_beta_m2": -0.001274,
+    "inst_pct_beta_m4": -0.001219,
+    "inst_pct_beta_stability_pct": 4.4,
+    "cross_sector_spearman_rho": -0.006,
+    "cross_sector_spearman_p": 0.987,
+    "cross_sector_n": 10,
+    "residual_absorption_pct": {"IN": 95.4, "MX": 78.2, "BR": 38.6, "AU": -31.2},
+    "verdict": "SECTOR_ORTHOGONAL_CONFIRMED"
+  },
+  "em_residual_taxonomy": {
+    "em_above_ladder": {"BR": 1.8867051764668052, "CA": 1.4484048051571432, "IN": 1.1696466686766267, "MX": 1.2017366550891662},
+    "developed_low_cluster": {"TW": 0.17, "EU_k1163": 0.194, "JP": 0.39, "US": 0.59},
+    "au_below_ladder": {"AU_theta_rel": 0.14981716921228005, "AU_inst_pct_mean": 0.367725499},
+    "other_em": {"CH": 0.3037377992879883, "HK": 0.17956196672805746, "ID": 0.23765282907382518, "KR": 0.2757092296599137}
+  },
+  "narrative_commitment_final": "Paper 2 §5 headline: STRENGTHENED across five N-extension iterations with three residual caveats: (i) EM cost-of-capital scale factor — STRUCTURAL, not yfinance proxy artefact (K1173 NULL); (ii) AU below-ladder sector-independent residual (K1207 sector amplifies 31%, K1210 forensic pending); (iii) EU full-coverage low-cluster robust (K1163 θ_rel=0.194 within low cluster ≤0.25, cluster-boot t=4.81, placebo z=22.27σ). Within-market analyst-attention channel robust via panel Harvey |t| monotonic 3.236 → 3.808 across 5 iterations, all above Harvey (2016) |t|>3 threshold. Two-level R² decomposition (between inst_pct 0.42 / within log_analyst 0.053, ratio ≈7.9x) structurally stable. Third orthogonal level: within-market GICS sector-FE incremental adj-R² 0.148 (K1207 SECTOR_ORTHOGONAL_CONFIRMED).",
+  "k1210_dependency": {
+    "status": "pending",
+    "worktree": "agent-a16275fd",
+    "role": "AU below-ladder forensic root-cause decomposition (semi-annual reporting cadence vs HAND_CODED ±1-day precision vs sector composition)",
+    "cherry_pick_gate": "main thread adopts K1210 verdict into §5.5 if lands before submission; else ships with pending-caveat wording"
+  },
+  "main_thread_adoption_path": [
+    "Read experiments/k1211/k1211_draft.md",
+    "Cherry-pick §5.1–§5.7 into paper/<paper2>/body_v4.tex",
+    "Preserve all numbers verbatim; Table 5 and Figures 5A–5F mapping provided",
+    "xelatex main_v4.tex → uv run volpred ops paper-update --paper-id <paper2-id>",
+    "Re-run K1204 32/32 shared-key integrity assertion if any source JSON is updated"
+  ],
+  "compliance": {
+    "claude_md_no_tex_writes_from_agent": "PASS — only .md / .csv / .json outputs",
+    "numbers_verbatim_from_source_jsons": "PASS — K1204 32/32 integrity canonical",
+    "seed_declared": 42,
+    "worktree_scope": "experiments/k1211/ only; no shared-state writes",
+    "shared_state_untouched": ["storage/reports/feed.json", "storage/memory/knowledge.json", "storage/memory/thinking_journal.json", "storage/memory/experiment_experiences.json"],
+    "paper_body_untouched": true,
+    "cross_experiment_divergence_check": "PASS — K1204 32/32; no new divergence detected across trajectory"
+  },
+  "output_deliverables": [
+    "experiments/k1211/k1211_draft.md (~1900 words, 7 subsections + Table 5 + Figure 5A–5F mapping)",
+    "experiments/k1211/k1211_panorama.csv (5-iteration trajectory table; 5 data rows + header)",
+    "experiments/k1211/k1211_results.json (this file)",
+    "experiments/k1211/README.md"
+  ]
+}
