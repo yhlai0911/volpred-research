@@ -1,0 +1,235 @@
+{
+  "experiment_id": "K1220",
+  "title": "Session-end executive briefing + decision gate machine-readable matrix",
+  "date": "2026-04-17",
+  "worktree": "agent-a6d91ff5",
+  "task_type": "pure_consolidation_session_end_briefing",
+  "seed": 42,
+  "rng_used": false,
+  "session_window_start": "2026-04-17T00:00",
+  "session_duration_hours_estimated": 8,
+  "k_experiments_this_session_estimated": 35,
+  "k_range": "K1133-K1217",
+  "markdown_drafts_produced": 7,
+  "session_spend_usd_daily_report_snapshot": 291.45,
+  "session_spend_usd_estimated_trajectory_low": 3000,
+  "session_spend_usd_estimated_trajectory_high": 3500,
+  "decision_gates": [
+    {
+      "priority": "P1",
+      "severity": "HIGH",
+      "gate_id": "Paper2_section5_K1216_fragility_decision",
+      "blocker_k": ["K1213", "K1216"],
+      "pending_investigations": ["K1216b", "K1216c"],
+      "options": {
+        "a": "Accept K1216 methodology fix and reissue Paper 2 §5 with attenuated Spearman (~+0.341) + WIDESPREAD_FRAGILITY disclosure",
+        "b": "Wait K1216b + K1216c results (~1-2 hr agent turnaround) before committing — diagnose EM-specific vs MLE design flaw",
+        "c": "Continue with K1172 original ρ = +0.441 and add robustness footnote acknowledging fragility"
+      },
+      "impact": "Paper 2 submission credibility — institutional-ownership proxy LESS predictive than originally claimed",
+      "time_min": 15,
+      "recommendation": "b (wait) if turnaround acceptable; a (re-issue) if submission timeline tight"
+    },
+    {
+      "priority": "P2",
+      "severity": "MEDIUM",
+      "gate_id": "Paper4_CONFLICT_A4_framing",
+      "blocker_k": ["K1203", "K1208"],
+      "conflict_detail": {
+        "user_decision_7ecab636": "channel-specific pivot",
+        "session_gate_K1203": "UNIVERSAL_NULL_7_OF_7 final",
+        "k1208_draft_framing": "UNIVERSAL_NULL"
+      },
+      "options": {
+        "channel_specific": "Adopt user 7ecab636 pivot; reframe K1208 draft §5.1-§5.6",
+        "universal_null": "Keep K1208 UNIVERSAL_NULL framing; document as baseline-to-beat if channel-specific added separately"
+      },
+      "impact": "Paper 4 body_v4 rewrite blocker",
+      "time_min": 5,
+      "recommendation": "channel_specific with UNIVERSAL_NULL as setup (per K1212 delta §5 Paper 4 recommendation)"
+    },
+    {
+      "priority": "P3",
+      "severity": "MEDIUM",
+      "gate_id": "Paper3_K1128_pivot_abc",
+      "blocker_k": ["K1128", "K1131", "K1142", "K1199", "K1205", "K1217"],
+      "options": {
+        "a": "Full K1142 vol-norm anchor — high reviewer risk, single positive cell",
+        "b": "Hybrid null+positive — 4-branch honest null + K1142 partial (K1205 RECOMMENDED)",
+        "c": "Abandon leverage-direction — K1142 kept for separate submission"
+      },
+      "impact": "Paper 3 narrative commitment",
+      "time_min": 30,
+      "recommendation": "b (K1205 recommendation)"
+    },
+    {
+      "priority": "P4",
+      "severity": "LOW",
+      "gate_id": "BTC_GAS_negative_paper_go_nogo",
+      "blocker_k": ["K1214"],
+      "options": {
+        "go_standalone": "Create paper/btc-gas-negative/ as new paper folder",
+        "go_paper10_slot": "Merge into Paper 10 slot (currently Paper10_start = Crypto Fear Channel — potentially conflicting scope)",
+        "go_appendix": "Fold into Paper 6 or Paper 9 appendix",
+        "nogo": "Archive K1214 draft; keep findings in knowledge.json only"
+      },
+      "impact": "New paper pipeline slot",
+      "time_min": 5,
+      "recommendation": "go_standalone (per K1212 delta — Paper 10 scope conflict)"
+    },
+    {
+      "priority": "P5",
+      "severity": "LOW",
+      "gate_id": "Paper1_Batch2_K1209_cherry_pick",
+      "blocker_k": [],
+      "options": {
+        "approve": "Cherry-pick 8 items into body_v4.tex + create experiments.md + update tables.tex",
+        "defer": "Park for next session"
+      },
+      "impact": "Paper 1 errata complete → JBF submission-ready within 2 iterations",
+      "time_min": 2,
+      "recommendation": "approve (zero blocker)"
+    },
+    {
+      "priority": "P6",
+      "severity": "LOW",
+      "gate_id": "Paper6_Appendix_A_K1218",
+      "blocker_k": [],
+      "options": {
+        "approve": "Cherry-pick into \\appendix \\section + add Section 4 cross-reference + xelatex ×2 + paper-update CLI",
+        "defer": "Park for next session"
+      },
+      "impact": "Paper 6 reviewer defence → FRL submission path clear",
+      "time_min": 2,
+      "recommendation": "approve (zero blocker)"
+    }
+  ],
+  "immediate_ready_actions": [
+    {
+      "id": "K1209_paper1_batch2",
+      "status": "ready_no_gate",
+      "source_draft": "experiments/k1209/k1209_batch2_draft.md",
+      "target": "paper/leverage-direction/body_v4.tex",
+      "post_adoption_commit_template": "Paper 1 errata batch 2 (v4): Table 6 errata + Table 3/4/7 footnotes + experiments.md"
+    },
+    {
+      "id": "K1218_paper6_appendix_a",
+      "status": "ready_no_gate",
+      "source_draft": "experiments/k1218/k1218_appendix_draft.md",
+      "target": "paper/prg-periodic-garch/main.tex \\appendix"
+    },
+    {
+      "id": "K1215_paper2_section5",
+      "status": "ready_pre_K1216_fragility",
+      "source_draft": "experiments/k1215/k1215_revised_draft.md",
+      "target": "paper/taiwan-vt/body_v4.tex",
+      "note": "K1216 WIDESPREAD_FRAGILITY discovered AFTER K1215 draft; P1 decision must resolve before adoption is canonical"
+    },
+    {
+      "id": "K1216b_K1216c_pending",
+      "status": "informs_P1",
+      "target": "scope EM-specific vs MLE design root cause for Paper 2 §5 decision"
+    }
+  ],
+  "major_findings": {
+    "Paper2_K1216_fragility": {
+      "K1213_AU_overturn": {
+        "theta_rel_before": 0.150,
+        "theta_rel_after": 1.476,
+        "mechanism": "basin bimodality in LL surface, multi-start resolution"
+      },
+      "K1216_fragile_markets": ["BR", "IN", "MX"],
+      "likelihood_ratio_diagnostics": {"BR": 146, "IN": 411, "MX": 347, "chi2_1df_5pct_critical": 3.84},
+      "primary_spearman_decay": {
+        "K1172_original": 0.441,
+        "K1216_corrected": 0.364,
+        "K1216_plus_AU": 0.341
+      },
+      "implication": "institutional_ownership_proxy_less_predictive_than_originally_claimed"
+    },
+    "Paper4_UNIVERSAL_NULL_7_of_7": {
+      "assets": ["SPY", "GLD", "TLT", "BTC", "QQQ", "USO", "EEM"],
+      "PIT_chain": ["K1116", "K1116b", "K1116c", "K1116f", "K1201", "K1203"],
+      "TLT_finstress_regime_artefact": {
+        "DM_t": 3.74,
+        "QLIKE_improvement_pct": 0.50,
+        "QLIKE_gate_pct": 5.0,
+        "subperiod_significant": "2/3 NS",
+        "all_alt_aug_DM": -5.67
+      }
+    },
+    "BTC_GAS_negative": {
+      "K1133_full_sample_DM_t": -4.58,
+      "K1133_subperiod": {"P1_2017_2020_n1441": -4.67, "P2_FTX_Luna_n345": -0.82, "P3_spot_ETF_n100": -0.80},
+      "K1133b_decomposition": {"student_t_attribution_pct": 75, "GAS_dynamics_attribution_pct": 25},
+      "GAS_Normal_beats_GAS_t_DM": 2.67,
+      "MS_GAS_t_rescue": "fails",
+      "falsifies_reference": "Catania (2018)"
+    },
+    "Paper3_4branch_NULL": {
+      "branches": {
+        "K1128": {"verdict": "NULL", "coverage": "0/854/20060"},
+        "K1131": {"verdict": "NULL", "issue": "IS-extrapolation explosion"},
+        "K1142": {"verdict": "PARTIAL", "OOS_t": 2.255, "AUC": 0.671, "harvey": "fail"},
+        "K1199": {"verdict": "NULL", "coverage": "0/6816/14098", "DM_t": 1.14, "AUC": 0.548}
+      },
+      "structural_root_cause": "IS_2017_2019_VIX_range_9_37_does_not_intersect_OOS_COVID_12_83",
+      "K1205_recommendation": "path_b_hybrid"
+    },
+    "Paper6_defensibility": {
+      "K1200_clean_slate": {"K880_DM": 6.00, "K1200_DM": 6.13, "verdict": "MINOR_DIVERGENT_K1200_better"},
+      "K880v2_two_phase_timing_defensible": true
+    }
+  },
+  "cost_benefit_summary": {
+    "session_spend_usd_snapshot": 291.45,
+    "session_spend_usd_estimated_trajectory": [3000, 3500],
+    "token_allocation_top5_pct": {
+      "other_bash_ops": 22.1,
+      "file_read_search": 20.8,
+      "text_replies_no_tool": 20.4,
+      "agent_dispatch_non_experiment": 17.9,
+      "worktree_merges": 7.4
+    },
+    "high_value_outputs": [
+      "Paper 2 fragility discovery prevents submission of flawed ρ = +0.441 claim",
+      "Paper 4 7/7 UNIVERSAL_NULL strong submission-ready claim",
+      "Paper 6 defensibility confirmation via K1200",
+      "BTC GAS negative paper new submission stream",
+      "Paper 1 Batch 2 clears JBF reproducibility audit"
+    ],
+    "deferred_decisions_count": 6,
+    "blocked_persistent_count": 5
+  },
+  "recommended_next_30min_action_sequence": [
+    {"step": 1, "min": 5, "action": "Review K1216 fragility findings"},
+    {"step": 2, "min": 10, "action": "Decide Paper 2 §5 path a/b/c (P1 HIGH)"},
+    {"step": 3, "min": 5, "action": "Approve K1218 Paper 6 Appendix A (P6 LOW)"},
+    {"step": 4, "min": 5, "action": "Approve K1209 Paper 1 Batch 2 (P5 LOW)"},
+    {"step": 5, "min": 5, "action": "Park P2 + P3 into storage/next_tasks.json for next session"}
+  ],
+  "alternative_close_patterns": {
+    "minimal_10min": ["Approve P5 + P6 only; park P1-P4"],
+    "standard_30min": ["P1 decision + P5 + P6 approve + park P2 + P3"],
+    "deep_60min": ["Standard 30min + Paper 3 a/b/c decision (P3) thinking"]
+  },
+  "source_files_traceability": {
+    "K1212_session_delta": "experiments/k1212/k1212_research_program_delta.md",
+    "K1212_stats": "experiments/k1212/k1212_session_stats.json",
+    "K1219_dashboard": "experiments/k1219/k1219_dashboard.md",
+    "K1219_actions": "experiments/k1219/k1219_session_actions.json",
+    "token_report": "storage/token_reports/daily_2026-04-17.md",
+    "knowledge_base": "storage/memory/knowledge.json",
+    "pending_queue": "storage/next_tasks.json"
+  },
+  "compliance": {
+    "no_new_numerical_claims": true,
+    "no_tex_output": true,
+    "no_shared_state_mutation": true,
+    "worktree_scope_only": "experiments/k1220/",
+    "seed_declared": 42,
+    "output_formats": [".md", ".json"],
+    "all_figures_verbatim_from_source": true
+  },
+  "decision": "executive_briefing_ready_for_user"
+}
