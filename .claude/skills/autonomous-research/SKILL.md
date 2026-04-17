@@ -1,5 +1,3 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 ---
 name: autonomous-research
 description: >
@@ -76,10 +74,13 @@ You are not a script runner. You are a thinking researcher with these abilities:
 
 ### Step -1: 確認實驗編號不衝突（多 session 安全）
 
-分配新 K 編號前，必須檢查以下三處確認該編號未被佔用：
-1. `ls experiments/ | sort` — 已完成/進行中的實驗目錄
-2. `cat storage/next_tasks.json` — 已排定但未開始的任務
-3. `ls .claude/worktrees/ 2>/dev/null` — 其他 session 正在跑的 worktree agent
+分配新 K 編號前，**用一條 bash 同時檢查三個來源**（避免 312 次/天的重複 `ls` 浪費 context；2026-04-17 教訓：a10f7b0f session 312 次重複 `ls .claude/worktrees/`）：
+
+```bash
+{ ls experiments/ 2>/dev/null | grep -oE 'k[0-9]+$' | sort -u;
+  jq -r '.[].id // empty' storage/next_tasks.json 2>/dev/null;
+  ls .claude/worktrees/ 2>/dev/null; } | sort -u | tail -20
+```
 
 從最大現有編號 +1 開始，跳過所有已佔用的。（2026-04-08 教訓：K988 被另一個 session 佔用）
 
@@ -426,6 +427,39 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 - `references/ai-collaboration.md` — AI 協作模式（Codex/Gemini 使用指引）
 - `references/question-review-guide.md` — 會員問題審查標準
 - `research_program.md` — **Core research direction, progress, and findings** (highest priority)
+
+## Token Thrift（2026-04-17 加入；防止單日 $1000+ 浪費）
+
+主 session 是 token 大戶，每條訊息都帶完整 cache。下列規則保持 cache 命中率與訊息精簡：
+
+### Agent prompt 精簡（最高 ROI）
+
+派 Agent 時 prompt 不要超過 **800 字**。違反此上限的常見浪費（13f14b3a session 統計）：
+
+- ❌ 重複「專案路徑 / Python CLI / 部署目標」boilerplate — agent 已從 system prompt + CLAUDE.md 知道
+- ❌ 整段抄 `CLAUDE.md` / `error_log.md` / `research_program.md` — 引用路徑與行號即可
+- ❌ 把 `references/experiment-preamble.md` 內容複製進 prompt — 寫「**讀** `.claude/skills/autonomous-research/references/experiment-preamble.md`」就好
+- ❌ 重述「研究誠實 13 條」 — 寫「遵守 CLAUDE.md §研究誠實原則」即可
+
+✅ Prompt 必備（≤ 800 字）：任務 ID + 一句話目標 + 必讀檔路徑 + 成功標準 + 輸出位置。背景由 agent 自己讀。
+
+### Tool call 合併
+
+- ❌ 不要分次 `ls experiments/` → `ls .claude/worktrees/` → `git worktree list` → `cat storage/next_tasks.json`。**一條 bash 用 `{ ... ; ... ; }` 包起來**（見 Step -1）
+- ❌ 不要每完成 1 個 K 實驗就 `git add storage/memory/knowledge.json && git commit && git push`。**批次每 5-10 個實驗 commit 一次**，或交給每 4h cron 處理（13f14b3a 教訓：1 天 46 次 add knowledge.json）
+- ❌ 不要 `git status` + `git status --short` + `git diff --stat` 連續呼叫。挑一個
+
+### Subagent_type 選擇
+
+- 純探索 / 找檔 / 列實驗結果 → `Explore`（輕量，無 write 權限）
+- 寫實驗 / 寫文章 / 修論文 / 修 bug → `general-purpose`（必要，無法替代）
+- **不要為了「保險」一律選 general-purpose** — Explore 載入的 context 約小 60%
+
+### Session 衛生
+
+- 單一 session 累積成本超過 **$200** 或跨日超過 **24h**，主動建議使用者 `/clear`
+- 排程 cron tick 用 stub 回覆（≤15 字）省 token — 已在 CLAUDE.md「Cron skip 用 stub」段
+- `next_tasks.json` 只放 next-action 任務；completed/cancelled/superseded/resolved_* 一律移到 `storage/next_tasks_archive.jsonl`（2026-04-17 教訓：曾累積到 128KB / 205 條，每次 Edit 都重寫整檔）
 
 ## Related Skills
 
