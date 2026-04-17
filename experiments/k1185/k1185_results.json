@@ -1,0 +1,197 @@
+{
+  "experiment_id": "K1185",
+  "title": "K1185: Paper 1 Table 4 VaR Configuration Canonical Replication",
+  "asset": "SPY",
+  "data_source": "yfinance (SPY, 2000-01-01 to 2026-01-01)",
+  "oos_start": "2020-01-01",
+  "oos_end": "2025-12-31",
+  "n_oos": 1508,
+  "n_valid_forecasts": 1508,
+  "alpha_var": 0.01,
+  "base_model": "GARCH(1,1)",
+  "fixed_student_t_df": 5.0,
+  "scale_correction": 0.7745966692414834,
+  "rollmax_window": 20,
+  "jump_threshold": 3.0,
+  "jump_scale": 1.5,
+  "refit_every": 63,
+  "seed": 42,
+  "paper_target": {
+    "Normal": {
+      "violations": 33,
+      "rate_pct": 2.2,
+      "improvement": null
+    },
+    "StudentT5": {
+      "violations": 18,
+      "rate_pct": 1.2,
+      "improvement": -45.5
+    },
+    "Adaptive": {
+      "violations": 14,
+      "rate_pct": 0.9,
+      "improvement": -22.2
+    },
+    "JumpAugment": {
+      "violations": 14,
+      "rate_pct": 0.9,
+      "improvement": 0.0
+    }
+  },
+  "rtol": 0.05,
+  "configurations": {
+    "Normal": {
+      "description": "GARCH(1,1) + Normal",
+      "paper": {
+        "violations": 33,
+        "rate_pct": 2.2
+      },
+      "config": "GARCH(1,1) + Normal",
+      "n_total": 1508,
+      "n_violations": 30,
+      "violation_rate": 0.019894,
+      "violation_rate_pct": 1.99,
+      "kupiec": {
+        "stat": 11.5793,
+        "p_value": 0.0007,
+        "pass": false
+      },
+      "christoffersen": {
+        "stat": 0.2366,
+        "p_value": 0.6267,
+        "pass": true
+      },
+      "basel_zone": "yellow",
+      "basel_violations_250d": 5,
+      "trinity_pass": false
+    },
+    "StudentT5": {
+      "description": "GARCH(1,1) + Student-t(df=5)",
+      "paper": {
+        "violations": 18,
+        "rate_pct": 1.2
+      },
+      "config": "GARCH(1,1) + Student-t(df=5)",
+      "n_total": 1508,
+      "n_violations": 19,
+      "violation_rate": 0.012599,
+      "violation_rate_pct": 1.26,
+      "kupiec": {
+        "stat": 0.9509,
+        "p_value": 0.3295,
+        "pass": true
+      },
+      "christoffersen": {
+        "stat": 1.4,
+        "p_value": 0.2367,
+        "pass": true
+      },
+      "basel_zone": "green",
+      "basel_violations_250d": 4,
+      "trinity_pass": true
+    },
+    "Adaptive": {
+      "description": "GARCH(1,1) + Student-t(df=5) + RollingMaxSigma(20)",
+      "paper": {
+        "violations": 14,
+        "rate_pct": 0.9
+      },
+      "config": "GARCH(1,1) + Student-t(df=5) + RollingMaxSigma(20)",
+      "n_total": 1508,
+      "n_violations": 14,
+      "violation_rate": 0.009284,
+      "violation_rate_pct": 0.93,
+      "kupiec": {
+        "stat": 0.08,
+        "p_value": 0.7772,
+        "pass": true
+      },
+      "christoffersen": {
+        "stat": 2.4516,
+        "p_value": 0.1174,
+        "pass": true
+      },
+      "basel_zone": "green",
+      "basel_violations_250d": 3,
+      "trinity_pass": true
+    },
+    "JumpAugment": {
+      "description": "GARCH(1,1) + Student-t(df=5) + RollingMaxSigma + Jump",
+      "paper": {
+        "violations": 14,
+        "rate_pct": 0.9
+      },
+      "config": "GARCH(1,1) + Student-t(df=5) + RollingMaxSigma + Jump",
+      "n_total": 1508,
+      "n_violations": 14,
+      "violation_rate": 0.009284,
+      "violation_rate_pct": 0.93,
+      "kupiec": {
+        "stat": 0.08,
+        "p_value": 0.7772,
+        "pass": true
+      },
+      "christoffersen": {
+        "stat": 2.4516,
+        "p_value": 0.1174,
+        "pass": true
+      },
+      "basel_zone": "green",
+      "basel_violations_250d": 3,
+      "trinity_pass": true
+    }
+  },
+  "match_summary": {
+    "Normal": {
+      "paper_violations": 33,
+      "script_violations": 30,
+      "paper_rate_pct": 2.2,
+      "script_rate_pct": 1.99,
+      "count_match": false,
+      "rate_match": false,
+      "matched": false,
+      "delta_violations": -3
+    },
+    "StudentT5": {
+      "paper_violations": 18,
+      "script_violations": 19,
+      "paper_rate_pct": 1.2,
+      "script_rate_pct": 1.26,
+      "count_match": true,
+      "rate_match": true,
+      "matched": true,
+      "delta_violations": 1
+    },
+    "Adaptive": {
+      "paper_violations": 14,
+      "script_violations": 14,
+      "paper_rate_pct": 0.9,
+      "script_rate_pct": 0.93,
+      "count_match": true,
+      "rate_match": true,
+      "matched": true,
+      "delta_violations": 0
+    },
+    "JumpAugment": {
+      "paper_violations": 14,
+      "script_violations": 14,
+      "paper_rate_pct": 0.9,
+      "script_rate_pct": 0.93,
+      "count_match": true,
+      "rate_match": true,
+      "matched": true,
+      "delta_violations": 0
+    }
+  },
+  "n_configs_matched": 3,
+  "overall_status": "PARTIAL (3/4)",
+  "recommendation": "b_or_c_partial",
+  "final_garch_params": {
+    "omega": 1.4880915650125714e-06,
+    "alpha": 0.0716149580550265,
+    "beta": 0.9120889591092016,
+    "persistence": 0.9837039171642281
+  },
+  "elapsed_seconds": 2.0,
+  "timestamp": "2026-04-17T09:57:06.028000+00:00"
+}
