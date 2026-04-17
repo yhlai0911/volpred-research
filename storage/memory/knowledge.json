@@ -26686,5 +26686,51 @@
     ],
     "confidence": 0.97,
     "created_at": "2026-04-17T13:35:29.698263"
+  },
+  {
+    "item_id": "d257aa5a",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1138 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1139 Equity HAR-RV-X VIX component decomposition (SPY/QQQ/IWM OOS 2021-2026). **VERDICT: Scenario B_AGGREGATOR** - VIX is efficient aggregator of forward-looking IV components, NOT realized-vol proxy. 7-spec DM-HLN BH: M1 VIX SPY t=+4.19 QQQ t=+4.22 PASS; M2 \u03c3_21d alone OOS FAIL (SPY t=-0.96, QQQ t=-1.10) - \u6c7a\u5b9a\u6027\u63a8\u7ffb Scenario A RV-proxy; M4 TermPrem SPY t=+3.00 PASS; M3 VRP SPY t=+2.11 near miss; M5 SKEW t\u22480; M6 VVIX NS; M7 encompass PASS (SPY t=+3.38, QQQ t=+2.96) but M7 vs M1 t\u22480 (SPY -0.24, QQQ +0.09) - **decomposition \u6c92\u5728 composite VIX \u4e4b\u5916\u52a0 incremental info**. **Paper 4 mechanism claim**: VIX \u5c0d equity \u662f forward-looking IV channels (VRP + TermPrem + SKEW + VVIX) \u7684 efficient composite, \u4e0d\u662f backward-looking RV proxy. \u53ef\u5ba3\u7a31 'VIX \u662f forward-looking IV aggregator' \u4f46\u4e0d\u53ef\u5ba3\u7a31\u300cdecomposition \u52dd\u904e VIX\u300d(encompass \u2248 0). M7 IS joint: VRP t=+5.62, TermPrem t=-16.22, SKEW t=-5.54, VVIX t=+10.85 \u5168\u986f\u8457\uff1blog_\u03c3_21d NS. Gemini pre-run \u6293\u5230 1 HIGH bug (VIX\u00b2 annualized vs \u03c3\u00b2_21d daily \u55ae\u4f4d\u4e0d\u5c0d\u9f4a, VRP \u2248 VIX\u00b2) \u5df2\u4fee\u70ba VRP = VIX\u00b2/252 - \u03c3\u00b2_21d (85.36% positive). Script: experiments/k1139/k1139.py, commit 8206ff0c.",
+    "evidence": [
+      "experiments/k1139/k1139.py",
+      "experiments/k1139/k1139_results.json",
+      "experiments/k1139/README.md"
+    ],
+    "confidence": 0.94,
+    "created_at": "2026-04-17T13:38:46.060717"
+  },
+  {
+    "item_id": "903802f8",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1148 trilogy \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1149 Pooled EAV vs PCA factor absorption test (US N=30 + TW N=29). **VERDICT: Scenario A+D - Paper 2 Section 5 STRENGTHENED**. US panel M3 (EAV + gamma*|PC1|) theta_EAV=+5.57e-5 Hessian t=**23.81** (M1 t=16.30 SHARPENS after factor control); gamma_PC1 t=1.05 NS. TW panel M3 theta_EAV=+4.92e-5 t=10.62 (M1 10.59, essentially unchanged); gamma_PC1 t=-0.24 NS. H1 absorption LRT df=1: US LR=2915.6 p~=0, TW LR=226.0 p~=0 BOTH pass IS. **OOS panel DM M3 vs M2 (factor-only baseline): US t=-3.31 p=0.0000 JOINT PASS; TW t=-2.48 p=0.0061 JOINT PASS**. **KEY RECONCILIATION**: K1148_d1 TW OOS FAIL (t=-1.46 vs pure GARCH) \u5176\u5be6\u662f baseline \u9078\u64c7\u554f\u984c - vs factor-controlled M2, TW OOS DM t=-2.48 PASS Harvey. H3 interaction EAV*|PC1|: US IS t_stress=+5.04 PASS but US OOS M4 vs M3 t=+0.04 FAIL (IS-only artifact); TW IS LRT p=0.010 with ambiguous t_stress=-0.39 but TW OOS M4 vs M3 t=-2.78 PASS with OPPOSITE sign (US: EAV amplified under stress; TW: muted under stress). **Paper 2 Section 5 new claim strengthened**: 'universal-magnitude is TRUE firm-specific event effect, orthogonal to systematic market factor risk, surviving PCA-based |PC1_{t-1}| absorption in both US and TW at IS and OOS levels'. Optional conditional-on-stress subsection OK but must caveat US OOS FAILs interaction. Gemini 4/5 LOW (no issue), 1 MED (M4 interaction small-sample, report n_events). 0 HIGH. Script: experiments/k1149/k1149.py, commit 8b36a0d2.",
+    "evidence": [
+      "experiments/k1149/k1149.py",
+      "experiments/k1149/k1149_results.json",
+      "experiments/k1149/README.md"
+    ],
+    "confidence": 0.96,
+    "created_at": "2026-04-17T13:41:19.055170"
+  },
+  {
+    "item_id": "58b79984",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1121 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review (Codex quota\u6eff), \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1123 Cross-asset alt-data allocation (SPY+GLD+TLT, 2019-04 to 2026-04, net 5bps TX). **VERDICT: FAIL** (0/4 hypotheses passed). Best alt strategy S1 NFCI-regime Sharpe=1.161 MDD=-0.230 CAGR=12.5% < **B0 50/50 SPY/GLD Sharpe=1.310 MDD=-0.203 CAGR=18.6%** (K846 baseline). DM t full-sample bootstrap: S1 vs B0 t=-0.70 p=0.49 (loses); S1 vs B1 t=+0.38; S1 vs B2 t=+0.86 all ties no Harvey PASS. Regime split: B0 dominates BOTH stress (0.827 vs alt max 0.596) AND calm (1.794 vs alt max 1.649) - alt-data offers NO stress-period alpha (\u5176\u8a2d\u8a08\u672c\u610f). vs K1121 comparison: K1121 2-asset best edge vs 50/50 = +0.003 tied; K1123 3-asset best edge vs B0 = -0.149 WORSE. Cross-asset extension makes things actively worse because (a) TLT 2022-2024 drawdown dragged returns, (b) percentile-threshold S2/S3/S4 turnover 17-24x/yr -> TX drag 0.86-1.19%/yr. **Investor implication**: DO NOT upgrade 50/50 to 3-asset alt-data. K846 moat holds. **Paper 4 compendium gains 10th null**: alt-data now null across forecasting (K1116/K1117/K1117b) + 2-asset allocation (K1121) + 3-asset allocation (K1123). Gemini 5/5 PASS no issues. Script: experiments/k1123/k1123.py, commit 4e186ef8.",
+    "evidence": [
+      "experiments/k1123/k1123.py",
+      "experiments/k1123/k1123_results.json",
+      "experiments/k1123/README.md"
+    ],
+    "confidence": 0.94,
+    "created_at": "2026-04-17T13:47:57.609403"
+  },
+  {
+    "item_id": "5f9f95e2",
+    "category": "research_article",
+    "content": "[\u63d0\u51fa: Claude K1148 trilogy synthesis, \u57f7\u884c: Claude article agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Research article mile_03173c26 '5 \u500b\u5be6\u9a57\u9a57\u8b49 earnings-day \u6ce2\u52d5\u653e\u5927\uff1aUS decisive PASS\uff0cTW \u770b\u4f3c FAIL \u537b\u662f baseline \u5047\u8b66\u5831' published draft pool 2026-04-17T05:45Z. ~2300 \u5b57\u4e2d\u6587 + 3 \u5f35\u5716. Tags \u624b\u4fee\u5f8c\u70ba ['\u7814\u7a76','Paper 2','EAV','\u4e8b\u4ef6\u7814\u7a76','\u8de8\u5e02\u5834','GARCH','panel DM']. \u5f15\u7528 K1148/d1/d2/d3 + K1149 \u5b8c\u6574 trilogy \u6545\u4e8b. \u6558\u4e8b\u4e3b\u7dda: K1148 TW continuous FAIL -> K1148_d1 TW binary Marginal FAIL (\u5e7e\u8981\u64a4\u56de \u00a75) -> K1148_d2 US decisive PASS (t=-5.58/-5.25) -> K1148_d3 firm-char \u5426\u6c7a heterogeneity \u6558\u4e8b -> K1149 factor-absorption \u96d9\u5e02\u5834 cross Harvey joint (US t=-3.31, TW t=-2.48). Method lesson: TW OOS FAIL \u662f baseline \u9078\u64c7 artifact, \u975e\u771f negative result.",
+    "evidence": [
+      "storage/reports/mile_03173c26.json"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T13:47:57.637524"
   }
 ]

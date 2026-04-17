@@ -395,8 +395,9 @@
     "id": "K1123",
     "title": "K1123: Cross-asset alt-data allocation (SPY+GLD+TLT)",
     "priority": 3,
-    "description": "K1121 衍生：3-asset allocation 用 alt-data signal。",
-    "status": "pending"
+    "description": "K1121 衍生：3-asset allocation 用 alt-data signal。 [DONE commit 4e186ef8: FAIL, 50/50 SPY/GLD moat holds. Paper 4 10th null.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T15:55:00+08:00"
   },
   {
     "id": "K1116c",
@@ -655,8 +656,9 @@
     "id": "K1149",
     "title": "K1149: Pooled spec + PCA factor — θ_EAV vs systematic factor competition",
     "priority": 3,
-    "description": "K1145 pooled θ_EAV 是否被市場 factor (TWII / VIX) 主導？加 factor PC1/PC2 為 covariate，看 θ_EAV 是否 absorb。若 absorb → 解釋為 factor effect 不純為 EAV; 若 incremental → 真 firm-event effect。",
-    "status": "pending"
+    "description": "K1145 pooled θ_EAV 是否被市場 factor (TWII / VIX) 主導？加 factor PC1/PC2 為 covariate，看 θ_EAV 是否 absorb。若 absorb → 解釋為 factor effect 不純為 EAV; 若 incremental → 真 firm-event effect。 [DONE commit 8b36a0d2: Scenario A+D. Paper 2 narrative STRENGTHENED. TW OOS FAIL reconciled: vs factor baseline M2, TW OOS DM t=-2.48 PASS.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T15:50:00+08:00"
   },
   {
     "id": "K1150",
@@ -912,7 +914,7 @@
     "title": "Paper 2 section 5 narrative decision (main thread + 用戶決策)",
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
-    "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。"
+    "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。 | K1149 (2026-04-17) MAJOR UPGRADE: PCA factor absorption test both markets PASS Harvey joint (US OOS DM t=-3.31, TW t=-2.48). TW OOS heterogeneity reframe: K1148_d1 FAIL was baseline choice artifact. New Opt 4+: claim universal-magnitude is TRUE firm-event effect orthogonal to market factor, surviving both IS and OOS in US+TW. Optional interaction subsection with US-vs-TW sign opposition caveat."
   },
   {
     "id": "K1148_d3",
@@ -948,14 +950,15 @@
     "title": "Paper 4 narrative pivot: universal null -> channel-specific claims (主線程 + 用戶決策)",
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
-    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。"
+    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\"."
   },
   {
     "id": "K1139_equity_har_deep_dive",
     "title": "K1139: SPY-HARRVX/QQQ-HARRVX deep dive on which VIX component drives the +4.19 t-stat",
     "priority": 3,
-    "status": "pending",
-    "description": "K1138 equity HAR-VIX channel is endogenous - what is the mechanism? Decompose VIX into realized-vol, skew, term premium components and test which drives the predictive power. If realized-vol component = the driver -> equity VIX channel is essentially realized-vol proxy; if skew/term drives it -> true IV signal."
+    "status": "completed",
+    "description": "K1138 equity HAR-VIX channel is endogenous - what is the mechanism? Decompose VIX into realized-vol, skew, term premium components and test which drives the predictive power. If realized-vol component = the driver -> equity VIX channel is essentially realized-vol proxy; if skew/term drives it -> true IV signal. [DONE commit 8206ff0c: Scenario B_AGGREGATOR - VIX is forward-looking IV aggregator (not RV proxy). Paper 4 mechanism claim upgraded.]",
+    "completed_at": "2026-04-17T15:25:00+08:00"
   },
   {
     "id": "K1143_gas_t_harm_diagnostic",
