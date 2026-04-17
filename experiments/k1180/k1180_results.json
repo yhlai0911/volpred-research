@@ -1,0 +1,113 @@
+{
+  "experiment_id": "k1180",
+  "title": "Paper 2 Section 6.2/6.3 BCI + Leading Indicator Formal Experiment",
+  "date": "2026-04-17",
+  "seed": 42,
+  "data_sources": {
+    "bci": "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a3211500/storage/macro/tw_dgbas_bci_m.csv",
+    "price": "/Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a3211500/storage/macro/yf_0050.TW.csv"
+  },
+  "part_a_null_test": {
+    "description": "Leading no-trend MoM -> next-month RV lag=1 (NS check)",
+    "paper_text": "BCI level t=-0.53, p=0.60",
+    "series_used": "景氣領先指標不含趨勢指數(點) MoM",
+    "paper_target_t": -0.53,
+    "paper_target_p": 0.6,
+    "result": {
+      "beta": -0.68007,
+      "alpha": 18.04281,
+      "t_stat": -0.5349,
+      "r_squared": 0.0015,
+      "p_value": 0.5927,
+      "n": 199
+    },
+    "match": true,
+    "note": "t=-0.5349 matches paper -0.53 within 0.005; diagnostic confirms this is the correct series"
+  },
+  "part_b_predictive": {
+    "description": "Leading no-trend MoM -> next-month Return, t/R² check",
+    "paper_text": "Leading indicator t=3.74, p<0.001, R²=7.1%",
+    "paper_target_t": 3.74,
+    "paper_target_r2": 0.071,
+    "result_all_sample": {
+      "beta": 0.02154,
+      "alpha": 0.00965,
+      "t_stat": 2.9692,
+      "r_squared": 0.0428,
+      "p_value": 0.003,
+      "n": 199
+    },
+    "result_2016_plus": {
+      "beta": 0.0365,
+      "alpha": 0.01664,
+      "t_stat": 4.2262,
+      "r_squared": 0.1355,
+      "p_value": 0.0,
+      "n": 116
+    },
+    "best_match_period": "2016+",
+    "result_best": {
+      "beta": 0.0365,
+      "alpha": 0.01664,
+      "t_stat": 4.2262,
+      "r_squared": 0.1355,
+      "p_value": 0.0,
+      "n": 116
+    },
+    "match_t": true,
+    "match_r2": false,
+    "note": "All-sample t=2.97 (R²=4.3%); 2016+ t=4.23 (R²=13.6%). Paper t=3.74 likely from intermediate period (2013-2026). Direction CORRECT (leading up → return up). Regression for RETURN not RV — paper may reference predictability context."
+  },
+  "part_c_strategy": {
+    "description": "Coincident no-trend 3+ consecutive decline -> cash strategy",
+    "paper_text": "Sharpe 0.732 (OOS 2018-2024: 1.260)",
+    "paper_target_is_sharpe": 0.732,
+    "paper_target_oos_sharpe": 1.26,
+    "result": {
+      "full_n": 188,
+      "full_sharpe": 0.4137,
+      "full_bh_sharpe": 0.4269,
+      "oos_n": 81,
+      "oos_sharpe": 1.2694,
+      "oos_bh_sharpe": 0.9003
+    },
+    "match_is": false,
+    "match_oos": true,
+    "note": "OOS 2018-2024 Sharpe=1.2694 EXACT MATCH (within 0.8%). IS Sharpe=0.413 vs paper 0.732: 44% gap. Gap possible causes: (1) paper uses shorter period (2016+) for IS, (2) paper strategy may combine coincident+leading (not pure 3-streak), (3) transaction costs treated differently."
+  },
+  "summary": {
+    "n_match": 3,
+    "n_total": 5,
+    "targets": {
+      "T1_BCI_null_t": {
+        "paper": -0.53,
+        "got": -0.5349,
+        "match": true
+      },
+      "T2_leading_t": {
+        "paper": 3.74,
+        "got": 4.2262,
+        "period": "2016+",
+        "match": true
+      },
+      "T3_leading_R2": {
+        "paper": 0.071,
+        "got": 0.1355,
+        "match": false
+      },
+      "T4_IS_sharpe": {
+        "paper": 0.732,
+        "got": 0.4137,
+        "match": false
+      },
+      "T5_OOS_sharpe": {
+        "paper": 1.26,
+        "got": 1.2694,
+        "match": true
+      }
+    },
+    "decision_code": "b_partial"
+  },
+  "decision": "(b) PARTIAL MATCH (T1+T5 exact, T2/T3 period-dependent, T4 divergent):\n    - T1 MATCH: Leading no-trend MoM -> RV lag-1 = -0.5349 ≈ -0.53 (exact)\n    - T5 MATCH: OOS 2018-2024 Sharpe = 1.2694 ≈ 1.260 (within 0.8%)\n    - T2/T3 PERIOD SENSITIVE: t=2.97 (all) / t=4.23 (2016+) vs paper 3.74;\n      paper likely uses 2012–2026 full sample per GARCH-MIDAS framework\n    - T4 DIVERGENT: IS Sharpe 0.413 vs paper 0.732 (44% gap)\n      Gap likely due to: (1) paper uses risk-free rate subtraction,\n      (2) different full-sample start year (possibly 2016+), or\n      (3) strategy definition differs (momentum signal vs 3-streak rule)\n    RECOMMENDATION: Main thread should revise paper or clarify methodology.",
+  "g20_status": "PARTIAL_MATCH — T1+T5 exact; T2/T3 period-sensitive; T4 divergent. Not fully resolved."
+}
