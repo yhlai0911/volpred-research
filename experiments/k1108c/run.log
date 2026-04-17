@@ -1,0 +1,69 @@
+=== K1108c — Continuous capex magnitude test ===
+Seed=42, starting at 23:48:06
+Loaded magnitude table: 184 events across 5 firms
+guide_delta_pct range: [-69.57, +136.84]%  n_nonzero=77
+
+>>> STAGE 1: Building per-firm frames + A4f-EAV refit
+  2330.TW: n_obs=2922 | change=25 stable=23 all=48 unmatched=0
+  2303.TW: n_obs=2922 | change=21 stable=27 all=48 unmatched=0
+  GFS: n_obs=1046 | change=8 stable=9 all=17 unmatched=0
+  0981.HK: n_obs=2954 | change=9 stable=14 all=23 unmatched=0
+
+>>> 4 firms built: ['2330.TW', '2303.TW', 'GFS', '0981.HK']
+
+  Fitting A4f-EAV for 2330.TW (n=2922) ...
+    2330.TW: θ_change=-3.395e-05  θ_stable=-5.713e-05  n_events=48
+
+  Fitting A4f-EAV for 2303.TW (n=2922) ...
+    2303.TW: θ_change=+7.235e-04  θ_stable=+3.843e-04  n_events=48
+
+  Fitting A4f-EAV for GFS (n=1046) ...
+    GFS: θ_change=+7.029e-04  θ_stable=+7.029e-04  n_events=17
+
+  Fitting A4f-EAV for 0981.HK (n=2954) ...
+    0981.HK: θ_change=+5.680e-03  θ_stable=+5.460e-03  n_events=23
+
+>>> Merged: 135/136 events matched to guidance magnitudes (7-day tolerance)
+
+>>> STAGE 2: θ_EAV = β₀ + β₁ · guide_delta_pct
+
+  β₀ = +1.2524e-03  (t=+2.85)
+  β₁ = -1.2857e-05  SE_HAC=9.5987e-06
+     t_HAC = -1.339   p_HAC = 0.1804
+     95% CI = [-3.1671e-05, +5.9561e-06]
+     R² = 0.0030
+     n = 135  NW bw = 4
+
+>>> Winsorised [1%, 99%]
+  β₁_wins = -1.5937e-05   t_HAC = -1.351  p=0.1768
+
+>>> Sign asymmetry: β_pos and β_neg separately
+  β_pos = -2.3194e-05   t=-2.329  p=0.0198
+  β_neg = +1.7281e-05   t=+0.646  p=0.5180
+
+>>> Block bootstrap β₁ (N=1000, block=10)
+  Mean=-2.3268e-06  SD=8.6960e-06
+  95% bootstrap CI = [-1.7904e-05, +1.6316e-05]
+  Bootstrap two-sided p = 0.7280
+  N successful reps: 1000
+
+>>> LOO by firm (drop one firm, refit Stage 2)
+  drop 2330.TW: n=88  β₁=-1.185e-05  t=-1.011
+  drop 2303.TW: n=87  β₁=-1.583e-05  t=-1.009
+  drop 0981.HK: n=112  β₁=-6.614e-06  t=-1.064
+  drop GFS: n=118  β₁=-2.071e-05  t=-1.502
+
+>>> Magnitude interpretation:
+  θ_EAV(+10% guide) − baseline = -1.2857e-04
+  θ_EAV(−10% guide) − baseline = +1.2857e-04
+
+>>> VERDICT: H2_MAGNITUDE_NULL
+    - β₁ = -1.2857e-05  t_HAC = -1.339
+    - bootstrap 95% CI = [-1.7904e-05, +1.6316e-05]
+    - HAC SE = 9.5987e-06
+    - H2 NULL: |t_HAC| < 2.0 — magnitude AND direction both null
+Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a75819bf/experiments/k1108c/k1108c_scatter_theta_vs_deltapct.png
+Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a75819bf/experiments/k1108c/k1108c_bootstrap_beta1.png
+
+Results written: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a75819bf/experiments/k1108c/k1108c_results.json
+Total runtime: 19.3s
