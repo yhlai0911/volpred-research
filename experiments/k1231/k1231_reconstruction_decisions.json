@@ -1,0 +1,198 @@
+{
+  "experiment_id": "K1231",
+  "paper": "volatility-absorption",
+  "paper_status": "DRAFT (R1 revision in flight)",
+  "audit_source": "K1229",
+  "reproduce_report_traceability_before": "50.7%",
+  "reproduce_report_traceability_target": ">=85%",
+  "generated_at": "2026-04-17",
+  "seed": 42,
+  "rule_reference": "docs/paper-guide.md 三方一致 rule (a)/(b)/(c)",
+  "scope_note": "K716-K722 scripts already exist as 'RECONSTRUCTED' versions dated 2026-04-17; K1229 'scripts missing' claim is obsolete. Remaining issue is reconstructed-vs-original allclose gap.",
+  "decisions": [
+    {
+      "k": "K716",
+      "title": "SAR by VIX Regime (Table 3, SPY pilot)",
+      "current_state": {
+        "script_exists": true,
+        "script_label": "RECONSTRUCTED",
+        "diff_status": "APPROXIMATE",
+        "sar_ratios_match": "20/20 cells YES (rtol=0.01)",
+        "scalar_drift": {
+          "regression_raw_slope": {"original": 0.0669, "reconstructed": 0.0677, "diff_pct": 1.2},
+          "regression_normalized_slope": {"original": -0.00028, "reconstructed": -0.00027, "diff_pct": 3.6}
+        },
+        "reproduce_report_table": "T3: 21/21 match"
+      },
+      "paper_body_numbers": {"slope": -0.00028, "ratios": [3.16, 2.77, 2.37, 2.32, 2.43]},
+      "recommendation": "a",
+      "recommendation_detail": "Rebuild with end-date + trading-calendar alignment; close slope drift from -0.00027 back to -0.00028.",
+      "effort_hours": 1,
+      "priority": "LOW",
+      "rationale": "Drift is within 2-decimal rounding; one pipeline alignment pass likely fixes it."
+    },
+    {
+      "k": "K717",
+      "title": "Multi-Strategy VT Scorecard (Section 6 support)",
+      "current_state": {
+        "script_exists": true,
+        "script_label": "RECONSTRUCTED",
+        "diff_status": "APPROXIMATE",
+        "strategies_reconstructed": 4,
+        "strategies_missing": 10,
+        "reproduce_report_table": "not in any Table"
+      },
+      "paper_body_numbers": {"tables_citing_k717": [], "section_6_qualitative_only": true},
+      "recommendation": "c",
+      "recommendation_detail": "Disclose pending errata: 4/14 strategies verified, 10/14 require upstream K specs; Section 6 relies on verified subset.",
+      "effort_hours": 0.25,
+      "priority": "LOW",
+      "rationale": "K717 supports no reproduce_report Table; full 10-strategy rebuild ~10 h for zero Table impact."
+    },
+    {
+      "k": "K718",
+      "title": "Cross-Asset Absorption (Table 4)",
+      "current_state": {
+        "script_exists": true,
+        "script_label": "RECONSTRUCTED",
+        "diff_status": "APPROXIMATE",
+        "per_asset_drift": {
+          "SPY": {"slope_original": -0.00028, "slope_reconstructed": -0.00027, "pct": 3.6},
+          "GLD": {"slope_original": -0.00043, "slope_reconstructed": -0.00043, "pct": 0.0},
+          "TLT": {"slope_original": -0.00044, "slope_reconstructed": -0.00041, "pct": 6.8},
+          "0050.TW": {"slope_original": 0.00019, "slope_reconstructed": 0.00008, "pct": 57.9}
+        },
+        "t_stats_in_json": false,
+        "reproduce_report_table": "T4: 5/9 match, 4 untraceable (all t-stats)"
+      },
+      "paper_body_numbers": {
+        "slopes": {"SPY": -0.00028, "GLD": -0.00043, "TLT": -0.00044, "0050.TW": 0.00019},
+        "t_stats": {"SPY": -3.42, "GLD": -4.17, "TLT": -3.89, "0050.TW": 1.62}
+      },
+      "recommendation": "a",
+      "recommendation_detail": "Fix end-date alignment + 0050.TW trading calendar; emit t-stats (Newey-West) so T4 reaches 9/9 reproduce.",
+      "effort_hours": 3.5,
+      "priority": "HIGH",
+      "rationale": "Table 4 is central evidence; 0050.TW 57.9% drift too large for errata; rebuilding SPY/GLD/TLT pipeline likely fixes K716 too."
+    },
+    {
+      "k": "K719",
+      "title": "Synthesis / Implications (Table 8 CB ratios)",
+      "current_state": {
+        "script_exists": true,
+        "script_label": "RECONSTRUCTED (synthesis doc, qualitative)",
+        "diff_status": "MATCHED (implications text)",
+        "structured_numerics_in_json": false,
+        "table_8_cb_ratios": {"calm": 13.7, "elevated": 8.0, "high": 3.6},
+        "reproduce_report_table": "T8: 0/3 match, 3 untraceable (K719 not in JSON)"
+      },
+      "paper_body_numbers": {"cb_ratios": {"calm": 13.7, "elevated": 8.0, "high": 3.6}},
+      "recommendation": "a",
+      "recommendation_detail": "Build structured CB-ratio script (option cost vs realized drawdown-avoidance value by VIX regime); either add to K719 or spawn K1232. Tag ownership explicitly.",
+      "effort_hours": 3,
+      "priority": "MEDIUM",
+      "rationale": "Table 8 has zero JSON provenance; a small structured script reaches T8: 3/3. Ownership confusion (K719 vs K722) must be resolved."
+    },
+    {
+      "k": "K720",
+      "title": "VRP by VIX Regime (Table 7)",
+      "current_state": {
+        "script_exists": true,
+        "script_label": "RECONSTRUCTED",
+        "diff_status": "APPROXIMATE",
+        "vrp_flip_confirmed_match": true,
+        "direction_corr_divergence": {"original": 0.0277, "reconstructed": 0.8432, "formula_ambiguous": true},
+        "vrp_quintile_block_in_json": false,
+        "reproduce_report_table": "T7: 1/4 match, 3 untraceable"
+      },
+      "paper_body_numbers": {"vrp_by_regime": {"calm": 3.5, "elevated": 3.1, "high": 2.8}},
+      "recommendation": "a",
+      "recommendation_detail": "Extend k720.py (~40 lines) to emit structured VRP quintile summary; clarify direction_corr definition in K720 README.",
+      "effort_hours": 2,
+      "priority": "MEDIUM",
+      "rationale": "Cheap extension reaches T7: 4/4; also resolves 0.0277 vs 0.8432 ambiguity that blocks honest reproduce."
+    },
+    {
+      "k": "K721",
+      "title": "Shock Type Decomposition (Table 5)",
+      "current_state": {
+        "script_exists": true,
+        "script_label": "RECONSTRUCTED",
+        "diff_status": "APPROXIMATE",
+        "paralysis_direction_match": "YES all three",
+        "n_discrepancy_paper_vs_json": {
+          "rate_shock": {"paper_N": 127, "json_N_low_plus_high": 79, "diff_pct": 60.8},
+          "risk_off": {"paper_N": 203, "json_N_low_plus_high": 182, "diff_pct": 11.5},
+          "geopolitical": {"paper_N": 89, "json_N_low_plus_high": 146, "diff_pct": 64.0}
+        },
+        "t_stats_in_json": false,
+        "reproduce_report_table": "T5: 3/9 match, 3 mismatch (N), 3 untraceable (t)"
+      },
+      "paper_body_numbers": {
+        "rate_shock": {"N": 127, "t": 2.87},
+        "risk_off": {"N": 203, "t": 1.94},
+        "geopolitical": {"N": 89, "t": -0.68}
+      },
+      "recommendation": "b",
+      "recommendation_detail": "Accept K721 JSON N=79/182/146 (re-evaluate with paper definition or keep JSON), recompute Newey-West t-stats, revise Table 5 body text. Main-thread writes revised numbers + docs/error_log.md note.",
+      "effort_hours": 2,
+      "priority": "HIGH",
+      "rationale": "N discrepancy 11-64% is not a rounding or vintage effect. Reviewer S2 already flagged Table 5 sample-size inconsistency. Honest path: paper revision (b), not silent errata."
+    },
+    {
+      "k": "K722",
+      "title": "Absorption-adjusted VIX (Section 7.3 robustness)",
+      "current_state": {
+        "script_exists": true,
+        "script_label": "RECONSTRUCTED",
+        "diff_status": "APPROXIMATE",
+        "corr_drift": {
+          "corr_raw": {"original": 0.6803, "reconstructed": 0.5671, "pct": 16.6},
+          "corr_adjusted": {"original": 0.6686, "reconstructed": 0.5092, "pct": 23.8}
+        },
+        "conclusion_match": "not improved (both)",
+        "reproduce_report_table": "T8 in report maps to K719; K722 is Section 7.3 robustness text"
+      },
+      "paper_body_numbers": {"corr_raw": 0.680, "corr_adjusted": 0.669, "r2_raw": 0.463, "r2_adjusted": 0.447},
+      "recommendation": "c",
+      "recommendation_detail": "Disclose pending errata: Section 7.3 correlations drift 16-24% vs reconstruction (likely shock-filter and RV-window differences); qualitative conclusion 'adjusted does not improve over raw' holds in both datasets.",
+      "effort_hours": 0.5,
+      "priority": "LOW",
+      "rationale": "Section 7.3 is supporting robustness; qualitative claim intact. Rebuild disproportionate; errata note with magnitude disclosure preserves honesty per 三方一致 rule."
+    }
+  ],
+  "verdict_counts": {"a": 4, "b": 1, "c": 2, "total": 7},
+  "aggregate": {
+    "total_effort_hours": 12.25,
+    "best_sequence": [
+      {"step": 1, "k_list": ["K716", "K718"], "action": "parallel SPY/VIX pipeline alignment", "hours_block": 4.5},
+      {"step": 2, "k_list": ["K721"], "action": "paper body Table 5 revision (b)", "hours_block": 2},
+      {"step": 3, "k_list": ["K720"], "action": "VRP quintile dump (a)", "hours_block": 2},
+      {"step": 4, "k_list": ["K719"], "action": "Table 8 CB structured script (a, possibly K1232)", "hours_block": 3},
+      {"step": 5, "k_list": ["K717", "K722"], "action": "errata disclosure notes (c+c)", "hours_block": 0.75}
+    ],
+    "pending_errata_count": 2,
+    "expected_post_traceability": ">=85%",
+    "submission_timeline_estimate": "R2 ready in ~1 week of focused main-thread work"
+  },
+  "main_thread_decision_points": [
+    "Accept (a)x4 + (b)x1 + (c)x2 mix, or override any K?",
+    "K721 Table 5 (b) willingness to publish revised N=79/182/146 with new t-stats?",
+    "Sequencing: K716+K718 first (pipeline) or K721 first (reviewer pressure)?",
+    "K719 rebuild: extend K719 JSON or spawn K1232?",
+    "Disclose K717+K722 errata in paper body methodology or only in docs/error_log.md + commit messages?"
+  ],
+  "worktree_constraints": {
+    "scope": "experiments/k1231/ only",
+    "forbidden": [
+      "paper/volatility-absorption/main_v2.tex modification",
+      "storage/reports/feed.json modification",
+      "storage/memory/knowledge.json modification"
+    ],
+    "outputs": [
+      "experiments/k1231/README.md",
+      "experiments/k1231/k1231_reconstruction_plan.md",
+      "experiments/k1231/k1231_reconstruction_decisions.json"
+    ]
+  }
+}
