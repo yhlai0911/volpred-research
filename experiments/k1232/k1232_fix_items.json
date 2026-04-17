@@ -1,0 +1,199 @@
+{
+  "experiment_id": "k1232",
+  "type": "planning_only",
+  "date": "2026-04-17",
+  "seed": 42,
+  "target_paper": "garch-x-vix",
+  "source_audit": "experiments/k1229/k1229_papers_audit.md",
+  "authoritative_citation_check": "paper/garch-x-vix/review_history/v1/citation_check_report.md",
+  "authoritative_repro_audit": "paper/garch-x-vix/reproducibility_audit/",
+  "scope_correction": {
+    "k1229_phrasing": "1 MAJOR fabricated citation + 5 MED",
+    "actual_v1_finding": "1 MAJOR wrong-metadata (conrad2015 wrong journal/vol/pages, not fabricated) + 5 MED missing DOIs + 4 MINOR optional",
+    "note": "The v0 citation_check.md (58-line top-level) references Bayer & Hackethal as fabricated, but that citation no longer exists in main.tex (already removed before v1 check). v1 citation_check_report.md (165 lines in review_history/v1/) is authoritative."
+  },
+  "items": [
+    {
+      "id": 1,
+      "severity": "MAJOR",
+      "category": "citation_metadata",
+      "key": "conrad2015",
+      "current_main_tex_line": "935-939",
+      "issue": "Pre-fix: wrong journal (JBES 33(3):338-358). Actual: Journal of Applied Econometrics 30(7):1090-1114.",
+      "content_claim_status": "faithful_to_real_source",
+      "fabricated": false,
+      "fix_status": "APPLIED",
+      "fix_commit": "2bf5f2f6",
+      "fix_date": "2026-04-17",
+      "replacement_doi": "10.1002/jae.2404",
+      "remaining_action": null,
+      "priority": null,
+      "effort_hours": 0
+    },
+    {
+      "id": 2,
+      "severity": "MEDIUM",
+      "category": "citation_doi",
+      "key": "bollerslev1986",
+      "current_main_tex_line": 891,
+      "issue": "Missing DOI for APA 7 compliance",
+      "fix_status": "APPLIED",
+      "fix_commit": "2bf5f2f6",
+      "added_doi": "10.1016/0304-4076(86)90063-1",
+      "remaining_action": null,
+      "priority": null,
+      "effort_hours": 0
+    },
+    {
+      "id": 3,
+      "severity": "MEDIUM",
+      "category": "citation_doi",
+      "key": "engle1982",
+      "current_main_tex_line": 902,
+      "issue": "Missing DOI",
+      "fix_status": "APPLIED",
+      "fix_commit": "2bf5f2f6",
+      "added_doi": "10.2307/1912773",
+      "remaining_action": null,
+      "priority": null,
+      "effort_hours": 0
+    },
+    {
+      "id": 4,
+      "severity": "MEDIUM",
+      "category": "citation_doi",
+      "key": "glosten1993",
+      "current_main_tex_line": 972,
+      "issue": "Missing DOI",
+      "fix_status": "APPLIED",
+      "fix_commit": "2bf5f2f6",
+      "added_doi": "10.1111/j.1540-6261.1993.tb05128.x",
+      "remaining_action": null,
+      "priority": null,
+      "effort_hours": 0
+    },
+    {
+      "id": 5,
+      "severity": "MEDIUM",
+      "category": "citation_doi_and_narrative",
+      "key": "han2014",
+      "current_main_tex_line": 978,
+      "issue": "Missing DOI; v1 also flagged narrative ambiguity (Han alone vs Han and Kristensen)",
+      "fix_status": "APPLIED",
+      "fix_commit": "2bf5f2f6",
+      "added_doi": "10.1080/07350015.2014.897954",
+      "narrative_fix": "natbib renders correctly via \\bibitem[Han and Kristensen, 2014]{han2014} label; verified no raw 'Han (2014)' string in main.tex",
+      "remaining_action": null,
+      "priority": null,
+      "effort_hours": 0
+    },
+    {
+      "id": 6,
+      "severity": "MEDIUM",
+      "category": "citation_doi",
+      "key": "francq2019",
+      "current_main_tex_line": 946,
+      "issue": "Missing DOI",
+      "fix_status": "APPLIED",
+      "fix_commit": "2bf5f2f6",
+      "added_doi": "10.1017/S0266466617000512",
+      "remaining_action": null,
+      "priority": null,
+      "effort_hours": 0
+    },
+    {
+      "id": 7,
+      "severity": "HIGH_RISK",
+      "category": "reproducibility_no_source",
+      "label": "FEZ DM t=3.45",
+      "locations_in_paper": [
+        {"location": "Table 6", "line": 526, "context": "FEZ row cross-asset DM stat"},
+        {"location": "Conclusion §6", "line": 858, "context": "five-of-seven global-factor narrative"},
+        {"location": "Abstract", "line": null, "context": "five-of-seven language"}
+      ],
+      "issue": "No existing experiment produces t=3.45 for FEZ under A4f + OOS 2019-2026. K949 FEZ uses MF-GJR log-exp + OOS 2016-2025 → t=3.84 (wrong spec, wrong period).",
+      "false_positive_warning": "Main-spec Table 3 row 8 A4n also shows t=3.45 at line 406; this is a DIFFERENT t-stat (sourced from compute_mcs_dm.py → mcs_dm_results.json, fully reproducible). Do not conflate.",
+      "claim_supported": "US VIX as global fear factor; Harvey significance on Eurozone equity via FEZ ETF",
+      "fix_options": {
+        "a": "Run dedicated A4f experiment on FEZ OOS 2019-2026 (bundle with Item #8 in single K1232b).",
+        "b": "Rewrite claim to drop FEZ (weakens global-factor contribution).",
+        "c": "Errata footnote disclosing pending source."
+      },
+      "recommendation": "a",
+      "fallback": "c",
+      "fix_status": "OPEN",
+      "priority": "P1",
+      "effort_hours": 2,
+      "remaining_action": "Main thread creates experiments/k1232b_fez_stoxx50e/ bundling FEZ + STOXX50E; compare new t-stats to paper claims; tex edit only if materially different."
+    },
+    {
+      "id": 8,
+      "severity": "HIGH_RISK",
+      "category": "reproducibility_oos_mismatch",
+      "label": "STOXX50E DM t=3.64",
+      "locations_in_paper": [
+        {"location": "Table 6", "line": 525, "context": "STOXX50E row"},
+        {"location": "Conclusion §6", "line": 858, "context": "five-of-seven"},
+        {"location": "Abstract", "line": null, "context": "five-of-seven"}
+      ],
+      "issue": "Same root cause as FEZ: K949 spec+period mismatch. No A4f OOS 2019-2026 run exists.",
+      "fix_options": {
+        "a": "Bundle with Item #7 K1232b — same script handles both tickers.",
+        "b": "Same as #7",
+        "c": "Same as #7"
+      },
+      "recommendation": "a",
+      "fix_status": "OPEN",
+      "priority": "P1",
+      "effort_hours": 0,
+      "note": "Effort bundled into Item #7 K1232b (no separate cost)"
+    }
+  ],
+  "minor_optional_items_not_in_k1229_scope": [
+    {
+      "key": "MINOR-2",
+      "issue": "JBES journal name 'and' vs '\\&' inconsistency",
+      "status": "SKIPPED_intentionally (commit 2bf5f2f6 note)"
+    },
+    {
+      "key": "MINOR-3",
+      "issue": "acerbi2014 URL (Risk magazine, no DOI)",
+      "status": "SKIPPED_optional"
+    }
+  ],
+  "summary": {
+    "total_items": 8,
+    "resolved": 6,
+    "open": 2,
+    "open_bundled_as": "single K1232b experiment",
+    "total_remaining_hours": 3,
+    "p1_items": 2,
+    "p2_items": 0,
+    "p3_items": 0
+  },
+  "execution_sequence": [
+    {"step": 1, "action": "Confirm citation state clean", "status": "already_done_commit_2bf5f2f6"},
+    {"step": 2, "action": "Create experiments/k1232b_fez_stoxx50e/ — A4f on FEZ + STOXX50E OOS 2019-2026 + US VIX", "owner": "main_thread", "effort_h": 2},
+    {"step": 3, "action": "Codex review of k1232b code before trusting t-stats", "owner": "main_thread_via_codex_skill", "effort_h": 0.3},
+    {"step": 4, "action": "Compare new t-stats to paper claims (3.45 for FEZ, 3.64 for STOXX50E). If within ±0.05 → no tex change. If different → update Table 6 + Abstract + Conclusion.", "owner": "main_thread"},
+    {"step": 5, "action": "If tex edits: xelatex compile + uv run volpred ops paper-update --paper-id garch-x-vix", "owner": "main_thread", "effort_h": 0.3},
+    {"step": 6, "action": "Update reproducibility_audit/diff_report.md: mark D1, D2 RESOLVED with K1232b source", "owner": "main_thread", "effort_h": 0.2},
+    {"step": 7, "action": "Update experiments/k1229/k1229_papers_audit.md Paper 9 status: NEEDS-FIX → audit-clean", "owner": "main_thread", "effort_h": 0.1}
+  ],
+  "pre_submission_gate": [
+    "xelatex compile clean (27 cites, 0 undefined)",
+    "citation_check v2 re-run: 0 MAJOR, ≤3 MED (expected: 0 MED after 2bf5f2f6)",
+    "experiments/k1232b/ exists with results JSON + Codex review passed",
+    "reproducibility_audit/diff_report.md D1 + D2 marked RESOLVED",
+    "paper/garch-x-vix/experiments.md registers K1232b",
+    "paper-update CLI sync succeeded (Supabase + Mirror)"
+  ],
+  "do_not_rules": [
+    "Do NOT edit main.tex from K1232 worktree (CLAUDE.md rule: agent 不寫 body.tex)",
+    "Do NOT fabricate replacement citations (none needed — all 6 citation items already resolved with real DOIs)",
+    "Do NOT hardcode paper's 3.45/3.64 into k1232b expected output (research-honesty rule)",
+    "Do NOT adjust seed until numbers match (forbidden)",
+    "Do NOT skip Codex review of k1232b (standard post-experiment rule)"
+  ],
+  "commit_hash_pending": "TBD_at_commit_time"
+}
