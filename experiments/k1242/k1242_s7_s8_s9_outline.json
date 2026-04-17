@@ -1,0 +1,173 @@
+{
+  "experiment_id": "K1242",
+  "paper": "Paper 10 — The Crypto Fear Channel: Asymmetric BTC-Equity Volatility Spillover",
+  "target_sections": ["\u00a77 Robustness", "\u00a78 Discussion", "\u00a79 Conclusion"],
+  "draft_version": "v0",
+  "date": "2026-04-17",
+  "worktree_agent": "agent-a35b4552",
+  "seed": 42,
+  "source_k": ["K1234", "K1237", "K1238", "K1239", "K1240"],
+  "supporting_experiments": ["K639", "K746b", "K949", "K1025", "K1133b", "K1214"],
+  "files_produced": [
+    "experiments/k1242/README.md",
+    "experiments/k1242/k1242_s7_s8_s9_draft.md",
+    "experiments/k1242/k1242_s7_s8_s9_outline.json"
+  ],
+  "forbidden_outputs": [".tex files", "body.tex modifications", "fabricated \u03d5 values"],
+  "word_count_targets": {
+    "s7_robustness": 800,
+    "s8_discussion": 600,
+    "s9_conclusion": 300,
+    "total": 1700
+  },
+  "word_count_actual": {
+    "s7_robustness": 848,
+    "s8_discussion": 614,
+    "s9_conclusion": 296,
+    "total": 1758
+  },
+  "variance_pct_vs_target": {
+    "s7": 6.0,
+    "s8": 2.3,
+    "s9": -1.3,
+    "total": 3.4
+  },
+  "sections": [
+    {
+      "section": "\u00a77 Robustness",
+      "target_words": 800,
+      "actual_words": 820,
+      "status": "drafted_with_pending_k1241_cells",
+      "subsections": [
+        {
+          "id": "7.1",
+          "title": "Alternative fear proxies",
+          "words": 165,
+          "content": "VIX level vs VIX^2 vs log(VIX) vs CFIX (falsification device)",
+          "pending": "K1241 Table 4 cells"
+        },
+        {
+          "id": "7.2",
+          "title": "Sub-sample regime splits",
+          "words": 165,
+          "content": "Pre-2020 / 2020-2023 / 2024-2026 three-way split + crisis vs calm (VIX>25); K1025 five-regime cross-reference",
+          "pending": "K1241 sub-sample re-estimations"
+        },
+        {
+          "id": "7.3",
+          "title": "Extended sample (ETH/SOL)",
+          "words": 195,
+          "content": "Cross-crypto fear-channel spillover; ETH full sample, SOL post-2020-04; pairwise DM on fitted variance series",
+          "pending": "Main-thread scope decision + K1241 ETH/SOL runs"
+        },
+        {
+          "id": "7.4",
+          "title": "Alternative GARCH bases",
+          "words": 147,
+          "content": "E-GARCH (Nelson 1991) and APARCH (Ding-Granger-Engle 1993) re-estimation; news-impact-curve comparison",
+          "pending": "K1241 alternative-base re-estimations"
+        },
+        {
+          "id": "7.5",
+          "title": "Endogeneity / IV diagnostics",
+          "words": 143,
+          "content": "Granger VIX->BTC-RV (expected sig) vs BTC-RV->VIX (expected NS); AR(p) residual IV approach",
+          "pending": "K1241 IV orthogonalised-shock re-estimation"
+        }
+      ]
+    },
+    {
+      "section": "\u00a78 Discussion",
+      "target_words": 600,
+      "actual_words": 610,
+      "status": "complete_draft_no_pending_numbers",
+      "subsections": [
+        {
+          "id": "8.1",
+          "title": "Mechanism interpretation",
+          "words": 225,
+          "content": "Three non-mutually-exclusive channels: flight-to-quality, leverage-cycle (Geanakoplos 2010), sentiment-correlation"
+        },
+        {
+          "id": "8.2",
+          "title": "Relation to K1214 companion",
+          "words": 170,
+          "content": "K1214 BTC GAS-t negative result (within-BTC model family) vs Paper 10 positive cross-market transmission — complementary not conflicting; orthogonal research questions"
+        },
+        {
+          "id": "8.3",
+          "title": "Contribution vs existing literature",
+          "words": 165,
+          "content": "Bouri 2020 (correlation->GARCH-X variance-domain); Corbet 2018 (symmetric->asymmetric Granger+QR); Matkovskyy 2019 (receiver->bidirectional with honest OOS null)"
+        },
+        {
+          "id": "8.4",
+          "title": "Limitations",
+          "words": 150,
+          "content": "Single-crypto BTC, US-centric VIX proxy, daily frequency, 2015-02 start (pre-2015 microstructure noise)"
+        }
+      ]
+    },
+    {
+      "section": "\u00a79 Conclusion",
+      "target_words": 300,
+      "actual_words": 320,
+      "status": "drafted_with_placeholders_for_k1241_headline",
+      "paragraphs": [
+        {
+          "id": "9.p1",
+          "content": "Summary: fear-channel transmission VIX to BTC conditional variance; \u03d5 placeholder pending K1241; Harvey-significant, sign-stable robustness claim",
+          "pending": "[placeholder for K1241 verdict] + [X%] annualised volatility response"
+        },
+        {
+          "id": "9.p2",
+          "content": "Broader implication: crypto volatility is informational not purely speculative; traditional fear propagates to decentralized market with quantifiable \u03d5; complementary to K1214 negative within-BTC result"
+        },
+        {
+          "id": "9.p3",
+          "content": "Future research directions: multi-crypto extension, intraday transmission, VIX-CFIX bidirectional, regime-switching fear channel"
+        }
+      ]
+    }
+  ],
+  "citations": {
+    "new_in_k1242": ["nelson1991", "ding1993", "geanakoplos2010"],
+    "reused_from_k1237": ["engle2002", "bekaert2014", "bouri2020", "corbet2018", "matkovskyy2019", "hatemi2012", "harvey2016", "lai2026btc"]
+  },
+  "pending_experiments": [
+    {
+      "k": "K1241",
+      "criticality": "high",
+      "purpose": "MF-GJR(1,1,1)-X fear-channel regression on BTC returns with VIX^2 regressor",
+      "outputs_needed": [
+        "\u00a77.1 Table 4 alternative-proxy cells",
+        "\u00a77.2 three-way chronological + crisis/calm sub-sample \u03d5",
+        "\u00a77.4 E-GARCH / APARCH alternative-base cells",
+        "\u00a77.5 IV-orthogonalised fear shock \u03d5",
+        "\u00a79 headline \u03d5 magnitude and annualised response X%"
+      ]
+    }
+  ],
+  "pending_scope_decisions": [
+    {
+      "decision": "ETH/SOL in scope for Paper 10 v1?",
+      "effect_if_no": "Delete \u00a77.3; move to \u00a78.4 limitations; acknowledge in \u00a79 future-research direction"
+    }
+  ],
+  "research_honesty_checks": [
+    "\u00a79 contains [placeholder] markers, NOT fabricated \u03d5 values",
+    "Per principle 1 (\u4e0d\u53ef\u9020\u5047): no number is interpolated before K1241 runs",
+    "Per principle 9 (Null result \u5982\u5be6\u5831\u544a): if K1241 returns insig \u03d5, \u00a79 rewrite to honest NULL",
+    "Per principle 11 (Lookahead bias): K1241 script must use Fear_{t-1} not Fear_t; Codex-review before \u00a77 numbers transcribed to .tex"
+  ],
+  "main_thread_next_steps": [
+    "Commission K1241 MF-GJR(1,1,1)-X on BTC + alternative fear proxies + sub-samples + E-GARCH/APARCH + IV",
+    "Resolve main-thread scope decision on ETH/SOL inclusion (affects \u00a77.3)",
+    "Populate [pending K1241] cells in K1240 Tables 3-5 and K1242 \u00a77 tables",
+    "Populate [X%] placeholder and \u03d5 estimate in K1242 \u00a79",
+    "Transcribe K1237 (\u00a72) + K1238 (\u00a73) + K1239 (\u00a74) + K1240 (\u00a75/\u00a76) + K1242 (\u00a77/\u00a78/\u00a79) into body_v1.tex; harmonise BibTeX keys with body_v0_intro.tex",
+    "Run paper-review-cycle after first complete draft",
+    "Run citation-verifier on full reference list before submission",
+    "Build reproduce.py and run reproduce_report.json"
+  ]
+}
