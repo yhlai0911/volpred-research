@@ -1,0 +1,79 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+========================================================================
+K1193: Paper 3 Split-Sample Robustness Check
+  gamma: 2007-01-01–2016-12-31
+  TSMOM: 2017-01-01–2026-03-20
+========================================================================
+[Step 1] Downloading price data...
+  Downloaded: (4833, 24), 2007-01-03 to 2026-03-19
+
+[Step 2] First half (2007-01-01–2016-12-31): GJR-GARCH gamma_i
+  SPY   : n=2518, gamma=0.2199
+  QQQ   : n=2518, gamma=0.2088
+  IWM   : n=2518, gamma=0.1613
+  XLF   : n=2518, gamma=0.1500
+  XLE   : n=2518, gamma=0.1178
+  DIA   : n=2518, gamma=0.2358
+  EEM   : n=2518, gamma=0.1025
+  EFA   : n=2518, gamma=0.1319
+  FXI   : n=2518, gamma=0.0715
+  EWZ   : n=2518, gamma=0.0861
+  GLD   : n=2518, gamma=-0.0033
+  TLT   : n=2518, gamma=-0.0264
+  USO   : n=2518, gamma=0.0780
+  HYG   : n=2451, gamma=0.1438
+  LQD   : n=2518, gamma=0.1112
+  EWJ   : n=2518, gamma=0.1269
+  EWG   : n=2518, gamma=0.1242
+  EWU   : n=2518, gamma=0.1191
+  EWA   : n=2518, gamma=0.1042
+  INDA  : n=1236, gamma=0.0849
+  VNQ   : n=2518, gamma=0.0922
+  SLV   : n=2518, gamma=-0.0006
+
+[Step 3] Second half (2017-01-01–2026-03-20): TSMOM_orth loading
+  SPY   : beta_TSMOM_orth=0.0900
+  QQQ   : beta_TSMOM_orth=0.0857
+  IWM   : beta_TSMOM_orth=0.0674
+  XLF   : beta_TSMOM_orth=0.0782
+  XLE   : beta_TSMOM_orth=0.0503
+  DIA   : beta_TSMOM_orth=0.0832
+  EEM   : beta_TSMOM_orth=0.0507
+  EFA   : beta_TSMOM_orth=0.0557
+  FXI   : beta_TSMOM_orth=0.0305
+  EWZ   : beta_TSMOM_orth=0.0383
+  GLD   : beta_TSMOM_orth=0.0126
+  TLT   : beta_TSMOM_orth=0.0050
+  USO   : beta_TSMOM_orth=-0.0059
+  HYG   : beta_TSMOM_orth=0.0249
+  LQD   : beta_TSMOM_orth=0.0062
+  EWJ   : beta_TSMOM_orth=0.0352
+  EWG   : beta_TSMOM_orth=0.0511
+  EWU   : beta_TSMOM_orth=0.0509
+  EWA   : beta_TSMOM_orth=0.0816
+  INDA  : beta_TSMOM_orth=0.0520
+  VNQ   : beta_TSMOM_orth=0.0390
+  SLV   : beta_TSMOM_orth=-0.0143
+
+[Step 4] Cross-sectional correlation (gamma_H1 vs beta_TSMOM_H2)
+  Valid: 22 assets
+  Bootstrap CI (5000 reps, seed=42)...
+
+  ════════════════════════════════════════════════════
+  RESULTS (N=22)
+  ════════════════════════════════════════════════════
+  Pearson r   : 0.793   (paper: 0.487)
+  p-value     : 0.000   (paper: 0.021)
+  Spearman ρ  : 0.749   (paper: 0.461)
+  Spearman p  : 0.000   (paper: 0.031)
+  95% CI      : [0.589, 0.919]  (paper: [0.114, 0.737])
+
+  r match(±0.05) : NO (0.306)
+  p match(±0.015): NO (0.021)
+  CI match(±0.05): NO
+  ρ match(±0.05) : NO (0.288)
+
+  Status: DIVERGED (0/4)
+
+  Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-af7c5b3e/experiments/k1193/k1193_results.json
