@@ -1173,15 +1173,16 @@
   {
     "id": "Paper9_D4_sensitivity_table_source",
     "title": "Paper 9: Sensitivity Table 12 (16 DM t) 全無 JSON source",
-    "status": "pending",
+    "status": "resolved_via_K988_sens_and_K1003",
     "priority": 3,
     "created_at": "2026-04-17T16:24:26+08:00",
-    "description": "Paper 9 audit 發現 Sensitivity Table 12 的 refit freq / window size / VIX variants 共 16 個 DM t 無任何 JSON source. **動作**: 建 k988_sensitivity.py 專用實驗 reproduce Table 12. 約 3 小時.",
+    "description": "Paper 9 audit 發現 Sensitivity Table 12 的 refit freq / window size / VIX variants 共 16 個 DM t 無任何 JSON source. **動作**: 建 k988_sensitivity.py 專用實驗 reproduce Table 12. 約 3 小時. [K988_sens DONE commit 7f85d06b: Harvey pass count 13/16 完全一致, 8 MATCHED / 5 APPROX / 3 DIVERGENT. 核心結論 robust. 3 divergent 屬 data vintage + spec ambiguity, 建議 (b) footnote errata. 併同 Paper 9 rescan K1003 已登錄 experiments.md — Table 12 雙 source 可追溯.]",
     "tags": [
       "paper-9",
       "sensitivity",
       "replication"
-    ]
+    ],
+    "completed_at": "2026-04-17T17:19:17+08:00"
   },
   {
     "id": "Paper9_D5_0050TW_t144_source",
@@ -1571,6 +1572,19 @@
     "tags": [
       "paper-7",
       "minor-errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper9_Table12_footnote_errata",
+    "title": "Paper 9 Table 12 加 footnote (K988_sens 驗證 + 5-day vintage 差異)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T17:19:17+08:00",
+    "description": "K988_sens (7f85d06b) + K1003 (experiments.md 已登錄) 都能 replicate Table 12. 主線程 edit paper/garch-x-vix/main.tex Table 12 加 footnote: 'Results replicated in K988_sens (2026-04-17); DM t values differ ≤ 0.82 due to 5-day data vintage; Harvey significance count unchanged at 13/16.' 5 min body edit.",
+    "tags": [
+      "paper-9",
+      "footnote-errata",
       "main-thread"
     ]
   }
