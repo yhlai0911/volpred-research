@@ -26992,5 +26992,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T16:47:56.477559"
+  },
+  {
+    "item_id": "f69d9c5b",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K995b Paper 9 Table 11 \u6b98\u5dee\u8a3a\u65b7 source recovery. **MAJOR FINDING: Paper 9 D3 \u662f documentation gap \u975e missing-script**. Paper 9 Table 11 \u6240\u6709 8 cells \u5be6\u969b\u4f86\u81ea **K1045** (experiments/k1045/k1045.py, 2026-04-11), JSON \u8207 paper \u9010\u5b57\u7cbe\u78ba\u543b\u5408. Paper 9 audit (4e84d37f) \u8aa4\u8a8d no-source \u56e0 K1045 **\u672a\u88ab paper/garch-x-vix/experiments.md \u767b\u9304**. Kurtosis convention: Fisher excess (scipy fisher=True, normal=0), K1045 line 433. K995b \u81ea\u5df1\u91cd\u5efa (joint MLE A4f-t + GJR-t): A4f-t \u5168 MATCHED (kurt 1.227 vs 1.238, skew -0.593 vs -0.594, JB 221.8 vs 224.2), GJR-t DIVERGENT (L-BFGS-B \u591a local optima, df 7.13 vs K1045 5.28 \u2192 kurt 2.686 vs 3.065 12.4%). **(a) FIX**: paper/garch-x-vix/experiments.md \u52a0\u5165 K1045 \u70ba Table 11 source \u2192 D3 resolved. **(b)**: K1045.py \u5305\u5165 replication package. **(c) pending**: GJR-t cells \u6a19 'optimization-sensitive, canonical K1045'. K995b knowledge \u50f9\u503c: \u63ed\u793a Paper 9 audit \u7684 no-source \u6bd4\u4f8b (34.8%) \u4e2d\u90e8\u5206\u53ef\u80fd\u662f **\u672a\u767b\u9304\u65e2\u6709 K**\uff0c\u975e\u771f\u7f3a script. \u4e0b\u4e00\u6b65: \u7cfb\u7d71\u6027\u6aa2\u67e5 Paper 9 \u6240\u6709 no-source \u6578\u5b57\u662f\u5426\u6709\u672a\u767b\u9304\u7684 K. commit 2b9beac0.",
+    "evidence": [
+      "experiments/k995b/k995b.py",
+      "experiments/k1045/k1045.py",
+      "paper/garch-x-vix/experiments.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T16:52:04.524845"
   }
 ]

@@ -1143,16 +1143,17 @@
   {
     "id": "Paper9_D3_residual_diagnostics_source",
     "title": "Paper 9 BLOCKER: Table 11 殘差診斷全表無 script source — 擴 K995.py",
-    "status": "pending",
+    "status": "resolved_documentation_fix_pending",
     "priority": 4,
     "created_at": "2026-04-17T16:24:26+08:00",
-    "description": "Paper 9 audit (commit 4e84d37f) 發現 Table 11 整張殘差診斷表（kurtosis 3.065→1.238 -59.6%, JB 938.8→224.2 -76.1%, skewness -0.856→-0.594）完全無對應 script JSON. Paper 已 submitted → reviewer 若要 replication 會暴露. **動作**: 擴 K995.py 計算並儲存殘差統計量 (A4f vs GJR kurtosis/skewness/JB) 到 k995_results.json. 約 1 小時. 完成後重跑 Paper 9 audit 驗證 D3 resolved. 優先於 Paper 10 kickoff.",
+    "description": "Paper 9 audit (commit 4e84d37f) 發現 Table 11 整張殘差診斷表（kurtosis 3.065→1.238 -59.6%, JB 938.8→224.2 -76.1%, skewness -0.856→-0.594）完全無對應 script JSON. Paper 已 submitted → reviewer 若要 replication 會暴露. **動作**: 擴 K995.py 計算並儲存殘差統計量 (A4f vs GJR kurtosis/skewness/JB) 到 k995_results.json. 約 1 小時. 完成後重跑 Paper 9 audit 驗證 D3 resolved. 優先於 Paper 10 kickoff. [K995b DONE commit 2b9beac0: Paper 9 Table 11 **實際 source 是 K1045**（2026-04-11 existing experiment）, JSON 與 paper 逐字吻合. K995b 發現 audit 的 no-source 是 documentation gap 非 missing script. **Fix trivial (main-thread)**: paper/garch-x-vix/experiments.md 加 K1045 為 Table 11 source.]",
     "tags": [
       "paper-9",
       "submitted-paper",
       "replication-blocker",
       "main-thread"
-    ]
+    ],
+    "completed_at": "2026-04-17T16:52:19+08:00"
   },
   {
     "id": "Paper9_D1D2_FEZ_STOXX_A4f_2019_2026",
@@ -1321,6 +1322,33 @@
       "forensic",
       "main-thread",
       "possible-major-errata"
+    ]
+  },
+  {
+    "id": "Paper9_audit_nosource_systematic_rescan",
+    "title": "Paper 9: 系統性 rescan 所有 no-source 數字找未登錄 K（K1045 case 可能是 pattern）",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T16:52:19+08:00",
+    "description": "K995b (2b9beac0) 發現 Paper 9 audit 的 D3 Table 11 'no-source' 實際是 K1045 existing experiment 未被 paper/garch-x-vix/experiments.md 登錄. Audit 的 34.8% no-source 比例部分可能同性質. **動作**: 用 grep/find 掃 experiments/*/k*_results.json 內含 paper Table 12 / cross-asset / sensitivity 的 特徵數字, 比對 main.tex 所有 no-source 數字是否有未登錄的 K. 可由 agent 執行.",
+    "tags": [
+      "paper-9",
+      "audit-followup",
+      "documentation-gap"
+    ]
+  },
+  {
+    "id": "Paper9_experiments_md_add_K1045",
+    "title": "Paper 9: paper/garch-x-vix/experiments.md 加 K1045 為 Table 11 source (main-thread quick)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:52:19+08:00",
+    "description": "K995b 確認 Paper 9 Table 11 (GJR-t / A4f-t kurtosis/skewness/JB) source 是 K1045. 主線程 edit paper/garch-x-vix/experiments.md 加一行: 'K1045: Table 11 residual diagnostics - joint MLE Student-t, Fisher excess kurt'. 5 min main-thread edit.",
+    "tags": [
+      "paper-9",
+      "experiments-md",
+      "quick-fix",
+      "main-thread"
     ]
   }
 ]
