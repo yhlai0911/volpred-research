@@ -1,0 +1,158 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+======================================================================
+K1177: Paper 3 Table 3 TSMOM Hedge — Canonical Replication
+======================================================================
+OBJECTIVE: Determine canonical paper numbers vs K898 divergence
+
+KEY DIFFERENCES vs K898:
+  1. VT rebalancing: MONTHLY (not daily)
+  2. Tx costs: 10 bps per round trip (not 0)
+  3. TSMOM hedge: orthogonalized TSMOM^perp (not raw TSMOM)
+  4. Beta constraint: NONE (K898 constrains [0, 0.5])
+
+Analysis period: 2005-01-03 to 2026-03-31
+TSMOM lookback: 252 days
+Bootstrap: 10000 reps, block=252
+Seed: 42
+Downloading ['SPY', 'GLD', 'DIA', 'QQQ', 'IWM', '^VIX', 'SHY'] from 2003-12-01 to 2026-04-01...
+Data range: 2003-12-01 to 2026-03-31
+Shape: (5618, 7)
+  DIA: starts 2003-12-01
+  GLD: starts 2004-11-18
+  IWM: starts 2003-12-01
+  QQQ: starts 2003-12-01
+  SHY: starts 2003-12-01
+  SPY: starts 2003-12-01
+  VIX: starts 2003-12-01
+
+============================================================
+Analyzing: SPY [canonical: monthly VT, 10bps, orth-TSMOM]
+============================================================
+  B&H:                Sharpe=0.616, MDD=-55.2%
+  12/VIX VT monthly:  Sharpe=0.683, MDD=-26.4%
+  Hedged VT (orth):   Sharpe=0.692, MDD=-17.2%
+  Hedged VT (raw):    Sharpe=0.689, MDD=-17.1%
+  Pure TSMOM:         Sharpe=0.266, MDD=-46.4%
+  Avg TSMOM beta:     0.4042
+  ΔSharpe (VT-BH):    +0.067
+  ΔSharpe lost:       -0.009 (-13.4%)
+  MDD protection:     28.8 pp
+  MDD retained:       38.0 pp (132%)
+  Bootstrap 90% CI:   [105.9%, 193.8%]
+
+============================================================
+Analyzing: 50/50 SPY/GLD [canonical: monthly VT, 10bps, orth-TSMOM]
+============================================================
+  B&H:                Sharpe=0.878, MDD=-32.5%
+  12/VIX VT monthly:  Sharpe=0.940, MDD=-16.9%
+  Hedged VT (orth):   Sharpe=0.704, MDD=-14.6%
+  Hedged VT (raw):    Sharpe=0.622, MDD=-17.5%
+  Pure TSMOM:         Sharpe=0.471, MDD=-31.2%
+  ΔSharpe (VT-BH):    +0.062
+  ΔSharpe lost:       +0.236 (380.6%)
+  MDD protection:     15.6 pp
+  MDD retained:       17.9 pp (115%)
+  Bootstrap 90% CI:   [41.6%, 182.4%]
+
+============================================================
+Analyzing: DIA [canonical: monthly VT, 10bps, orth-TSMOM]
+============================================================
+  B&H:                Sharpe=0.607, MDD=-51.9%
+  12/VIX VT monthly:  Sharpe=0.676, MDD=-26.8%
+  Hedged VT (orth):   Sharpe=0.453, MDD=-22.9%
+  Hedged VT (raw):    Sharpe=0.456, MDD=-22.9%
+  Pure TSMOM:         Sharpe=0.254, MDD=-48.2%
+  Avg TSMOM beta:     0.3781
+  ΔSharpe (VT-BH):    +0.069
+  ΔSharpe lost:       +0.223 (323.2%)
+  MDD protection:     25.1 pp
+  MDD retained:       29.0 pp (116%)
+  Bootstrap 90% CI:   [87.5%, 163.3%]
+
+============================================================
+Analyzing: QQQ [canonical: monthly VT, 10bps, orth-TSMOM]
+============================================================
+  B&H:                Sharpe=0.745, MDD=-53.4%
+  12/VIX VT monthly:  Sharpe=0.775, MDD=-28.5%
+  Hedged VT (orth):   Sharpe=0.752, MDD=-18.2%
+  Hedged VT (raw):    Sharpe=0.646, MDD=-24.2%
+  Pure TSMOM:         Sharpe=0.335, MDD=-48.4%
+  Avg TSMOM beta:     0.5499
+  ΔSharpe (VT-BH):    +0.030
+  ΔSharpe lost:       +0.023 (76.7%)
+  MDD protection:     24.9 pp
+  MDD retained:       35.2 pp (141%)
+  Bootstrap 90% CI:   [94.9%, 196.1%]
+
+============================================================
+Analyzing: IWM [canonical: monthly VT, 10bps, orth-TSMOM]
+============================================================
+  B&H:                Sharpe=0.443, MDD=-58.6%
+  12/VIX VT monthly:  Sharpe=0.441, MDD=-31.1%
+  Hedged VT (orth):   Sharpe=0.553, MDD=-27.6%
+  Hedged VT (raw):    Sharpe=0.565, MDD=-26.2%
+  Pure TSMOM:         Sharpe=0.060, MDD=-66.3%
+  Avg TSMOM beta:     0.2304
+  ΔSharpe (VT-BH):    -0.002
+  ΔSharpe lost:       -0.112 (5600.0%)
+  MDD protection:     27.5 pp
+  MDD retained:       31.1 pp (113%)
+  Bootstrap 90% CI:   [67.5%, 206.1%]
+
+================================================================================
+PAPER vs K1177 vs K898 COMPARISON
+================================================================================
+
+--- SPY ---
+Metric                    Paper    K1177     K898  K1177-Paper   K1177-K898
+---------------------------------------------------------------------------
+  B&H Sharpe              0.611    0.616    0.616    +0.005(~)  +0.000
+  VT Sharpe               0.797    0.683    0.805    -0.114(DIFF)  -0.122
+  Hedged Sharpe           0.737    0.692    0.848    -0.045(*)  -0.156
+  B&H MDD(%)            -55.200  -55.190  -55.200    +0.010(~)  +0.010
+  VT MDD(%)             -24.700  -26.410  -24.700    -1.710(*)  -1.710
+  Hedged MDD(%)         -26.900  -17.160  -22.500    +9.740(DIFF)  +5.340
+  TSMOM Sharpe            0.172    0.266    0.242    +0.094(DIFF)  +0.024
+  MDD retention(%)       93.000  132.000  107.000   +39.000(DIFF) +25.000
+
+--- 50/50 ---
+Metric                    Paper    K1177     K898  K1177-Paper   K1177-K898
+---------------------------------------------------------------------------
+  B&H Sharpe              0.865    0.878    0.878    +0.013(~)  +0.000
+  VT Sharpe               0.982    0.940    0.998    -0.042(*)  -0.058
+  Hedged Sharpe           0.937    0.704    0.830    -0.233(DIFF)  -0.126
+  B&H MDD(%)            -32.500  -32.490  -32.500    +0.010(~)  +0.010
+  VT MDD(%)             -12.400  -16.880  -12.300    -4.480(DIFF)  -4.580
+  Hedged MDD(%)         -13.100  -14.560  -13.300    -1.460(DIFF)  -1.260
+  TSMOM Sharpe            0.232    0.471    0.232    +0.239(DIFF)  +0.239
+  MDD retention(%)       96.000  115.000  110.000   +19.000(DIFF)  +5.000
+
+--- MDD Retention all assets ---
+Asset         Paper  K1177   K898  Direction                
+------------------------------------------------------------
+  SPY           93%   132%   107%  IMPROVES MDD
+  50/50         96%   115%   110%  IMPROVES MDD
+  DIA           91%   116%   104%  IMPROVES MDD
+  QQQ           90%   141%   120%  IMPROVES MDD
+  IWM           97%   113%   115%  IMPROVES MDD
+
+================================================================================
+VERDICT
+================================================================================
+K1177 SPY Hedged Sharpe:    0.692
+  vs Paper  0.737:  diff = -0.045  (6.1% rel)
+  vs K898   0.848:  diff = -0.156  (18.4% rel)
+
+K1177 SPY MDD Retention:    132%
+  vs Paper  93%:    diff = +39pp
+  vs K898   107%:   diff = +25pp
+
+Verdict: (c) K1177 INTERMEDIATE — errata pending further analysis
+
+MDD direction: IMPROVES (retention>100%)
+  Paper claims: DEGRADES (93% retention)
+  K898 shows:   IMPROVES (107% retention)
+  K1177 shows:  IMPROVES (132% retention)
+
+✓ Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a9d575bd/experiments/k1177/k1177_results.json
