@@ -27687,5 +27687,16 @@
     ],
     "confidence": 0.88,
     "created_at": "2026-04-18T02:07:02.257782"
+  },
+  {
+    "item_id": "78e05702",
+    "category": "K1206",
+    "content": "K1206 Paper 1 Table 6 forensic sensitivity \u2014 errata_recommended. 3 experiments (A) data vintage proxy OOS truncation 2025-12 vs 2025-03, (B) skewed-t Hansen closed-form vs brentq bisection, (C) CF-VaR 4th-order full vs 3rd-only vs Maillard 2012 monotonicity fix. Per-method pass rate reconstruction (Paper 1 / K1186 / best K1206 variant): StudentT5 57.1 / 76.2 / A-vintage 71.4 (neither reconstructs, +14.3pp residual); Skewed-t 76.2 / 90.5 / all variants 90.5 (bisection IDENTICAL to closed-form on all 63 cells - hypothesis (b) FALSIFIED); CF-VaR 66.7 / 76.2 / 76.2 (3rd-only and Maillard go WRONG direction to 81.0). Normal and FHS retain exact match 57.1% and 76.2%. Key findings: (1) bisection != divergence source; (2) data vintage partial for StudentT5 not sufficient; (3) CF-VaR spec variance cannot explain. Action: errata_recommended. Paper 1 Table 6 should update StudentT5 57.1\u219276.2, Skewed-t 76.2\u219290.5, CF-VaR 66.7\u219276.2 with K1186/K1206 replication footnote. Untested: mixed GJR/GARCH base, different in-sample window for skewed-t, CF-VaR rolling moments length, true price-vintage (not recoverable from yfinance).",
+    "evidence": [
+      "experiments/k1206/k1206_results.json",
+      "commit d8bdb205"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-04-18T02:10:32.157597"
   }
 ]
