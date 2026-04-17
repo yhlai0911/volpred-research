@@ -27084,5 +27084,16 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T17:19:08.177574"
+  },
+  {
+    "item_id": "0394f1da",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Paper 8 (vt-crowding-abm) reproducibility audit. **Score: 97.5% matched (158/162) \u2014 NEW BEST. Readiness: SUBMISSION-READY. Seed deterministic CONFIRMED**. ABM simulation \u4f7f\u7528 numpy.random.RandomState + \u78ba\u5b9a seed \u516c\u5f0f (vt_frac*100000 + sim_idx + 42), bootstrap fixed seed 12345. **DIV-1 TRIVIAL**: \u0394Vol 100% paper +119.1% vs +119.0% (rounding). **DIV-2 AMBIGUITY**: Table 3 threshold column \u2014 paper footnote [c] '50% degradation' (8/9 >50%, 1/9 30-50%) \u6587\u5b57\u6b63\u78ba; K827v3 code analyze_results \u7528 30% cutoff internal \u4f7f threshold_region JSON \u986f\u793a 5/9 30-50%. **Paper table \u6b63\u78ba, code metadata mislabeled**. Fix: code 30\u219250% cutoff. **DIV-3 MEDIUM**: Section 4.6 K827v2 design-validation (Sharpe 0.43 at 30%, 0.18 at 50%) \u672a\u6b63\u5f0f audit, \u5efa\u8b70\u55ae\u7368\u9a57. **DIV-4/5 LOW**: Abstract 'VT adoption <5%' \u7121 citation; intro qualitative claims. Paper 8 \u662f project \u7b2c\u4e8c clean paper (after Paper 7 96%). Submission-ready. **\u7e3d audit \u6392\u540d\u66f4\u65b0**: Paper 8 (97.5%) > Paper 7 (96%) > Paper 6 (90%) > Paper 3/4 (77%) > Paper 9 (55.5%) > Paper 1 (48%) > Paper 2 (17%). Paper 7/8 ready; Paper 1/2/4 critical research-integrity issues; Paper 6 \u5b58\u4ea1; Paper 3 3 BLOCKERS; Paper 9 almost resolved. commit 1bd06dfe. Output paper/vt-crowding-abm/reproducibility_audit/.",
+    "evidence": [
+      "paper/vt-crowding-abm/reproducibility_audit/diff_report.md",
+      "paper/vt-crowding-abm/reproducibility_audit/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:20:04.769117"
   }
 ]
