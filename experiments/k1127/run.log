@@ -1,0 +1,94 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-k1127
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-k1127
+Installed 109 packages in 939ms
+============================================================
+K1127 - Cross-asset OFI lead-lag (TX vs ES)
+============================================================
+
+[Step 1] Load TAIFEX TX sessions
+[TAIFEX] Scanning /Users/yhlai0911/Dropbox/TAIFEXDATA/TAIFEXDATA/python for 2023-11-23..2026-04-16
+  processed 50 days, elapsed 8.6s
+  processed 100 days, elapsed 19.4s
+  processed 150 days, elapsed 30.4s
+  processed 200 days, elapsed 44.6s
+  processed 250 days, elapsed 54.7s
+  processed 300 days, elapsed 62.8s
+  processed 350 days, elapsed 73.6s
+  processed 400 days, elapsed 81.0s
+  processed 450 days, elapsed 88.6s
+  processed 500 days, elapsed 98.3s
+  processed 550 days, elapsed 108.6s
+[TAIFEX] Loaded 575 days, 1725 session rows, 114.5s
+[CACHE] Saved to _cache_tx_sessions_2023-11-23_2026-04-16.parquet
+TX session rows: 1725, days: 575
+session
+day            575
+night_early    575
+night_late     575
+Name: count, dtype: int64
+
+[Step 2] Load ES=F 1h bars
+[YF] Fetching ES=F 1h from 2023-11-23 to 2026-04-16
+[YF] ES=F 1h loaded 13158 bars, from 2023-11-23 06:00:00+00:00 to 2026-04-17 00:00:00+00:00
+[CACHE] Saved to _cache_es_1h_2023-11-23_2026-04-16.parquet
+ES 1h bars: 13158
+
+[Coverage] TX days=575, ES dates=735, ratio=78.2%
+
+[Step 3] Aggregate ES into TW-date overnight windows
+ES window rows: 1967
+window
+es_eve_after_tw         597
+es_night_for_tw_full    713
+es_night_pre_tw_open    657
+dtype: int64
+
+[Step 4] Build cross-market panel
+Panel rows: 570
+Period: 2023-11-23..2026-04-16
+Complete-case panel: 487 rows
+
+[Step 5] Cross-correlation analysis
+Channel A (ES overnight -> TX day):
+  lag -4: OFI=-0.0304, RV=+0.0070, |OFI|=-0.0271
+  lag -3: OFI=-0.1026, RV=+0.0374, |OFI|=+0.0667
+  lag -2: OFI=+0.0096, RV=+0.1082, |OFI|=-0.0060
+  lag -1: OFI=-0.0244, RV=+0.1447, |OFI|=-0.0413
+  lag +0: OFI=+0.0687, RV=+0.0418, |OFI|=+0.0364
+  lag +1: OFI=-0.0628, RV=+0.3042, |OFI|=+0.0583
+  lag +2: OFI=-0.0014, RV=+0.3489, |OFI|=-0.0048
+  lag +3: OFI=-0.0288, RV=+0.0026, |OFI|=-0.0219
+  lag +4: OFI=+0.0615, RV=+0.1606, |OFI|=+0.0517
+Channel B (TX day -> ES evening):
+  lag -4: OFI=+0.1043, RV=+0.0828, |OFI|=+0.0468
+  lag -3: OFI=-0.0266, RV=+0.1403, |OFI|=+0.0264
+  lag -2: OFI=-0.0880, RV=+0.3182, |OFI|=+0.0805
+  lag -1: OFI=+0.0424, RV=+0.1258, |OFI|=+0.0146
+  lag +0: OFI=-0.0260, RV=+0.3695, |OFI|=-0.0472
+  lag +1: OFI=+0.0925, RV=+0.2869, |OFI|=+0.0645
+  lag +2: OFI=-0.0618, RV=+0.0223, |OFI|=-0.0028
+  lag +3: OFI=-0.0085, RV=+0.0348, |OFI|=-0.0209
+  lag +4: OFI=-0.0271, RV=+0.0184, |OFI|=-0.0389
+
+[Step 6] Granger causality (L=2)
+Channel A (ES -> TX):
+  OFI F=1.018, p=0.3621
+  RV F=44.662, p=0.0000
+  |OFI| F=0.837, p=0.4337
+Channel B (TX -> ES):
+  OFI F=3.021, p=0.0497
+  RV F=36.579, p=0.0000
+  |OFI| F=0.988, p=0.3729
+
+[Step 7] Forecasting models (target: tx_day_rv)
+IS rows=322 (2023-11-29..2025-06-30)
+OOS rows=164 (2025-07-01..2026-04-16)
+M1: IS QLIKE=0.3035, OOS QLIKE=0.1585
+M2: IS QLIKE=763140.9844, OOS QLIKE=0.1736
+M3: IS QLIKE=0.2491, OOS QLIKE=0.1528
+DM M2 vs M1: t=-1.346, p=0.1802, QLIKE impr=-9.54%
+DM M3 vs M1: t=+0.514, p=0.6079, QLIKE impr=+3.59%
+
+[DONE] Wrote /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-k1127/experiments/k1127/k1127_results.json
