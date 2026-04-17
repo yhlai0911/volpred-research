@@ -1,0 +1,359 @@
+========================================================================
+K1100e: N=13 Cross-Asset λ_L Threshold Test
+  13 pairs × 3 models
+  H1: Spearman(λ_L, DM_Joe-vs-DCC) < 0, p < 0.05
+  OOS from 2013-06-01, window=1250, refit=63d, MC=5000
+========================================================================
+Downloading prices: ['SPY', 'QQQ', 'IWM', 'XLF', 'TLT', 'IEF', 'TIP', 'GLD', 'SLV', 'USO', 'UUP', 'FXE', 'LQD', 'HYG'] + ^VIX + ^GVZ ...
+  SPY: 5351 rows
+  QQQ: 5351 rows
+  IWM: 5351 rows
+  XLF: 5351 rows
+  TLT: 5351 rows
+  IEF: 5351 rows
+  TIP: 5351 rows
+  GLD: 5351 rows
+  SLV: 5019 rows
+  USO: 5032 rows
+  UUP: 4809 rows
+  FXE: 5113 rows
+  LQD: 5351 rows
+  HYG: 4781 rows
+Data: 2005-01-04 to 2026-04-10 (5350 days)
+
+>>> [6s elapsed] Starting pair SPY-QQQ [equity-equity]
+
+========================================================================
+PAIR: SPY-QQQ  (SPY vs QQQ) [equity-equity]
+========================================================================
+  Sample: 5350 days, 2005-01-04 to 2026-04-10
+  Full-sample corr: +0.9204
+    [SPY-QQQ] OOS day 0/3234 (6s)
+    [SPY-QQQ] OOS day 500/3234 (16s)
+    [SPY-QQQ] OOS day 1000/3234 (24s)
+    [SPY-QQQ] OOS day 1500/3234 (32s)
+    [SPY-QQQ] OOS day 2000/3234 (42s)
+    [SPY-QQQ] OOS day 2500/3234 (50s)
+    [SPY-QQQ] OOS day 3000/3234 (58s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.5886
+  DM Joe vs DCC: t=+1.654 
+  DM SkewT vs DCC: t=-0.680
+  Checkpoint saved (1/13 pairs done)
+
+>>> [92s elapsed] Starting pair SPY-IWM [equity-equity]
+
+========================================================================
+PAIR: SPY-IWM  (SPY vs IWM) [equity-equity]
+========================================================================
+  Sample: 5350 days, 2005-01-04 to 2026-04-10
+  Full-sample corr: +0.8951
+    [SPY-IWM] OOS day 0/3234 (92s)
+    [SPY-IWM] OOS day 500/3234 (100s)
+    [SPY-IWM] OOS day 1000/3234 (110s)
+    [SPY-IWM] OOS day 1500/3234 (118s)
+    [SPY-IWM] OOS day 2000/3234 (127s)
+    [SPY-IWM] OOS day 2500/3234 (135s)
+    [SPY-IWM] OOS day 3000/3234 (143s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.4012
+  DM Joe vs DCC: t=-2.125 *
+  DM SkewT vs DCC: t=-2.165
+  Checkpoint saved (2/13 pairs done)
+
+>>> [176s elapsed] Starting pair SPY-XLF [equity-equity]
+
+========================================================================
+PAIR: SPY-XLF  (SPY vs XLF) [equity-equity]
+========================================================================
+  Sample: 5350 days, 2005-01-04 to 2026-04-10
+  Full-sample corr: +0.8422
+    [SPY-XLF] OOS day 0/3234 (176s)
+    [SPY-XLF] OOS day 500/3234 (183s)
+    [SPY-XLF] OOS day 1000/3234 (191s)
+    [SPY-XLF] OOS day 1500/3234 (199s)
+    [SPY-XLF] OOS day 2000/3234 (207s)
+    [SPY-XLF] OOS day 2500/3234 (216s)
+    [SPY-XLF] OOS day 3000/3234 (224s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.4650
+  DM Joe vs DCC: t=-1.023 
+  DM SkewT vs DCC: t=-1.878
+  Checkpoint saved (3/13 pairs done)
+
+>>> [256s elapsed] Starting pair SPY-TLT [equity-bond]
+
+========================================================================
+PAIR: SPY-TLT  (SPY vs TLT) [equity-bond]
+========================================================================
+  Sample: 5350 days, 2005-01-04 to 2026-04-10
+  Full-sample corr: -0.3031
+    [SPY-TLT] OOS day 0/3234 (256s)
+    [SPY-TLT] OOS day 500/3234 (265s)
+    [SPY-TLT] OOS day 1000/3234 (272s)
+    [SPY-TLT] OOS day 1500/3234 (280s)
+    [SPY-TLT] OOS day 2000/3234 (288s)
+    [SPY-TLT] OOS day 2500/3234 (296s)
+    [SPY-TLT] OOS day 3000/3234 (304s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0093
+  DM Joe vs DCC: t=+10.292 ***Harvey
+  DM SkewT vs DCC: t=+3.958
+  Checkpoint saved (4/13 pairs done)
+
+>>> [337s elapsed] Starting pair SPY-IEF [equity-bond]
+
+========================================================================
+PAIR: SPY-IEF  (SPY vs IEF) [equity-bond]
+========================================================================
+  Sample: 5350 days, 2005-01-04 to 2026-04-10
+  Full-sample corr: -0.2916
+    [SPY-IEF] OOS day 0/3234 (337s)
+    [SPY-IEF] OOS day 500/3234 (344s)
+    [SPY-IEF] OOS day 1000/3234 (352s)
+    [SPY-IEF] OOS day 1500/3234 (361s)
+    [SPY-IEF] OOS day 2000/3234 (369s)
+    [SPY-IEF] OOS day 2500/3234 (376s)
+    [SPY-IEF] OOS day 3000/3234 (383s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0192
+  DM Joe vs DCC: t=+7.613 ***Harvey
+  DM SkewT vs DCC: t=+4.125
+  Checkpoint saved (5/13 pairs done)
+
+>>> [416s elapsed] Starting pair SPY-TIP [equity-bond]
+
+========================================================================
+PAIR: SPY-TIP  (SPY vs TIP) [equity-bond]
+========================================================================
+  Sample: 5350 days, 2005-01-04 to 2026-04-10
+  Full-sample corr: -0.1001
+    [SPY-TIP] OOS day 0/3234 (416s)
+    [SPY-TIP] OOS day 500/3234 (424s)
+    [SPY-TIP] OOS day 1000/3234 (432s)
+    [SPY-TIP] OOS day 1500/3234 (440s)
+    [SPY-TIP] OOS day 2000/3234 (449s)
+    [SPY-TIP] OOS day 2500/3234 (459s)
+    [SPY-TIP] OOS day 3000/3234 (467s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0140
+  DM Joe vs DCC: t=+5.592 ***Harvey
+  DM SkewT vs DCC: t=+1.816
+  Checkpoint saved (6/13 pairs done)
+
+>>> [499s elapsed] Starting pair SPY-GLD [equity-commodity]
+
+========================================================================
+PAIR: SPY-GLD  (SPY vs GLD) [equity-commodity]
+========================================================================
+  Sample: 5350 days, 2005-01-04 to 2026-04-10
+  Full-sample corr: +0.0590
+    [SPY-GLD] OOS day 0/3234 (499s)
+    [SPY-GLD] OOS day 500/3234 (506s)
+    [SPY-GLD] OOS day 1000/3234 (514s)
+    [SPY-GLD] OOS day 1500/3234 (522s)
+    [SPY-GLD] OOS day 2000/3234 (532s)
+    [SPY-GLD] OOS day 2500/3234 (542s)
+    [SPY-GLD] OOS day 3000/3234 (551s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0377
+  DM Joe vs DCC: t=+7.692 ***Harvey
+  DM SkewT vs DCC: t=+1.737
+  Checkpoint saved (7/13 pairs done)
+
+>>> [582s elapsed] Starting pair SPY-SLV [equity-commodity]
+
+========================================================================
+PAIR: SPY-SLV  (SPY vs SLV) [equity-commodity]
+========================================================================
+  Sample: 5018 days, 2006-05-01 to 2026-04-10
+  Full-sample corr: +0.2241
+    [SPY-SLV] OOS day 0/3234 (582s)
+    [SPY-SLV] OOS day 500/3234 (590s)
+    [SPY-SLV] OOS day 1000/3234 (598s)
+    [SPY-SLV] OOS day 1500/3234 (612s)
+    [SPY-SLV] OOS day 2000/3234 (628s)
+    [SPY-SLV] OOS day 2500/3234 (642s)
+    [SPY-SLV] OOS day 3000/3234 (653s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0229
+  DM Joe vs DCC: t=+3.516 ***Harvey
+  DM SkewT vs DCC: t=+2.361
+  Checkpoint saved (8/13 pairs done)
+
+>>> [686s elapsed] Starting pair SPY-USO [equity-commodity]
+
+========================================================================
+PAIR: SPY-USO  (SPY vs USO) [equity-commodity]
+========================================================================
+  Sample: 5031 days, 2006-04-11 to 2026-04-10
+  Full-sample corr: +0.3518
+    [SPY-USO] OOS day 0/3234 (686s)
+    [SPY-USO] OOS day 500/3234 (693s)
+    [SPY-USO] OOS day 1000/3234 (702s)
+    [SPY-USO] OOS day 1500/3234 (715s)
+    [SPY-USO] OOS day 2000/3234 (729s)
+    [SPY-USO] OOS day 2500/3234 (738s)
+    [SPY-USO] OOS day 3000/3234 (748s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0465
+  DM Joe vs DCC: t=+3.518 ***Harvey
+  DM SkewT vs DCC: t=+0.657
+  Checkpoint saved (9/13 pairs done)
+
+>>> [781s elapsed] Starting pair SPY-UUP [equity-fx]
+
+========================================================================
+PAIR: SPY-UUP  (SPY vs UUP) [equity-fx]
+========================================================================
+  Sample: 4808 days, 2007-03-02 to 2026-04-10
+  Full-sample corr: -0.1851
+    [SPY-UUP] OOS day 0/3234 (781s)
+    [SPY-UUP] OOS day 500/3234 (788s)
+    [SPY-UUP] OOS day 1000/3234 (796s)
+    [SPY-UUP] OOS day 1500/3234 (804s)
+    [SPY-UUP] OOS day 2000/3234 (812s)
+    [SPY-UUP] OOS day 2500/3234 (821s)
+    [SPY-UUP] OOS day 3000/3234 (829s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0122
+  DM Joe vs DCC: t=+7.092 ***Harvey
+  DM SkewT vs DCC: t=+3.492
+  Checkpoint saved (10/13 pairs done)
+
+>>> [860s elapsed] Starting pair SPY-FXE [equity-fx]
+
+========================================================================
+PAIR: SPY-FXE  (SPY vs FXE) [equity-fx]
+========================================================================
+  Sample: 5112 days, 2005-12-13 to 2026-04-10
+  Full-sample corr: +0.2294
+    [SPY-FXE] OOS day 0/3234 (860s)
+    [SPY-FXE] OOS day 500/3234 (868s)
+    [SPY-FXE] OOS day 1000/3234 (876s)
+    [SPY-FXE] OOS day 1500/3234 (885s)
+    [SPY-FXE] OOS day 2000/3234 (893s)
+    [SPY-FXE] OOS day 2500/3234 (902s)
+    [SPY-FXE] OOS day 3000/3234 (910s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0386
+  DM Joe vs DCC: t=+6.984 ***Harvey
+  DM SkewT vs DCC: t=+3.387
+  Checkpoint saved (11/13 pairs done)
+
+>>> [941s elapsed] Starting pair SPY-LQD [equity-credit]
+
+========================================================================
+PAIR: SPY-LQD  (SPY vs LQD) [equity-credit]
+========================================================================
+  Sample: 5350 days, 2005-01-04 to 2026-04-10
+  Full-sample corr: +0.1968
+    [SPY-LQD] OOS day 0/3234 (941s)
+    [SPY-LQD] OOS day 500/3234 (950s)
+    [SPY-LQD] OOS day 1000/3234 (959s)
+    [SPY-LQD] OOS day 1500/3234 (967s)
+    [SPY-LQD] OOS day 2000/3234 (977s)
+    [SPY-LQD] OOS day 2500/3234 (986s)
+    [SPY-LQD] OOS day 3000/3234 (994s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.0201
+  DM Joe vs DCC: t=+4.584 ***Harvey
+  DM SkewT vs DCC: t=+2.846
+  Checkpoint saved (12/13 pairs done)
+
+>>> [1025s elapsed] Starting pair SPY-HYG [equity-credit]
+
+========================================================================
+PAIR: SPY-HYG  (SPY vs HYG) [equity-credit]
+========================================================================
+  Sample: 4780 days, 2007-04-12 to 2026-04-10
+  Full-sample corr: +0.6831
+    [SPY-HYG] OOS day 0/3234 (1025s)
+    [SPY-HYG] OOS day 500/3234 (1033s)
+    [SPY-HYG] OOS day 1000/3234 (1041s)
+    [SPY-HYG] OOS day 1500/3234 (1049s)
+    [SPY-HYG] OOS day 2000/3234 (1057s)
+    [SPY-HYG] OOS day 2500/3234 (1067s)
+    [SPY-HYG] OOS day 3000/3234 (1077s)
+  OOS: 2013-06-03 to 2026-04-10 (3234 days)
+  Computing MC VaR for Copula-Joe-A4f-ASYM ...
+  Computing MC VaR for Copula-SkewT-A4f-ASYM ...
+  λ_L(t-copula mean): 0.1739
+  DM Joe vs DCC: t=-0.020 
+  DM SkewT vs DCC: t=-1.538
+  Checkpoint saved (13/13 pairs done)
+
+========================================================================
+CROSS-PAIR ANALYSIS — λ_L Threshold Hypothesis
+========================================================================
+
+Pair         Asset Class             λ_L  λ_U_Joe   DM_Joe   DM_SKT  Harvey_Joe
+-------------------------------------------------------------------------------------
+SPY-QQQ      equity-equity        0.5886   0.3898   +1.654   -0.680          no
+SPY-IWM      equity-equity        0.4012   0.3873   -2.125   -2.165          no
+SPY-XLF      equity-equity        0.4650   0.3829   -1.023   -1.878          no
+SPY-TLT      equity-bond          0.0093   0.3496  +10.292   +3.958      YES***
+SPY-IEF      equity-bond          0.0192   0.3495   +7.613   +4.125      YES***
+SPY-TIP      equity-bond          0.0140   0.3513   +5.592   +1.816      YES***
+SPY-GLD      equity-commodity     0.0377   0.3542   +7.692   +1.737      YES***
+SPY-SLV      equity-commodity     0.0229   0.3573   +3.516   +2.361      YES***
+SPY-USO      equity-commodity     0.0465   0.3667   +3.518   +0.657      YES***
+SPY-UUP      equity-fx            0.0122   0.3497   +7.092   +3.492      YES***
+SPY-FXE      equity-fx            0.0386   0.3604   +6.984   +3.387      YES***
+SPY-LQD      equity-credit        0.0201   0.3549   +4.584   +2.846      YES***
+SPY-HYG      equity-credit        0.1739   0.3781   -0.020   -1.538          no
+
+Harvey |t|>3.0 pass count (Joe copula beats DCC):
+  equity-equity         : 0/3 PASS
+  equity-bond           : 3/3 PASS
+  equity-commodity      : 3/3 PASS
+  equity-fx             : 2/2 PASS
+  equity-credit         : 1/2 PASS
+
+  Total Harvey |t|>3.0 PASS (Joe): 9/13
+  Total Harvey |t|>3.0 PASS (SkewT): 4/13
+
+========================================================================
+FORMAL H1 TEST: Spearman(λ_L, DM_Joe) < 0
+========================================================================
+
+  Spearman(λ_L, DM_Joe): rho=-0.791 p2=0.001 p1(neg)=0.001
+  Spearman(λ_L, DM_SkewT): rho=-0.841 p2=0.000 p1(neg)=0.000
+  H1 (Joe, p<0.05 one-sided): CONFIRMED
+
+========================================================================
+SCENARIO: CONFIRMED
+  λ_L threshold confirmed: Spearman ρ<0, p<0.05 (one-sided). N=13, 9 pairs Harvey sig. Paper 3 'asset-class-specific copula' claim supported.
+========================================================================
+  Paper 3 pivot decision: SUPPORT: Publish asset-class-specific copula claim
+
+Generating plots ...
+  Plot saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a519ddcc/experiments/k1100e/dm_vs_lambdaL_N13.png
+  Plot saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a519ddcc/experiments/k1100e/k1100e_dm_heatmap.png
+
+Final results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a519ddcc/experiments/k1100e/k1100e_results.json
+Total runtime: 1111s
