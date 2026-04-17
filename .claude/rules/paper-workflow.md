@@ -30,6 +30,20 @@ paths:
 - `data_sources.md` 列全 API endpoint、期間、授權條件（含付費資料的取得管道）
 - 孤兒 K ref（experiments.md 標 TODO 的）必須在投稿前補齊或明註「unused in final draft」
 
+### 腳本 / 資料 / 論文數字必須三方一致（用戶 2026-04-17 強調）
+
+**「所有論文中的腳本和資料都要能直接跑出最新的論文內結果。」**
+
+每次論文數字更新（新實驗、revision、OOS 延長）後，對應腳本必須能產出**與論文 body 內寫的數字一致**的結果。具體操作：
+
+1. **reproduce 檢查常駐**：`paper/<name>/reproduce.py` 或 `scripts/reproduce_all.sh`，一鍵重跑產出 `reproduce_report.json`；若該 paper 有 `reproduce_report.json`，則 CI / 投稿前必須重跑對齊。
+2. **數字不符處理三選一**：
+   - (a) **修腳本到符合論文**（合理路徑：腳本有 bug、資料切片錯誤、參數 drift）
+   - (b) **修論文到符合腳本**（合理路徑：研究誠實原則 — 發現舊數字有錯 → 主線程改論文 + 記 error_log + paper-update workflow）
+   - (c) **明記 errata**（暫時接受 divergence，但 commit message / README 必須明標 "pending errata, magnitude <X>%"；**不得靜默保留不一致**）
+3. **絕對禁止**：為了 match 論文數字而偽造腳本輸出、硬 coded 結果、調整隨機 seed 直到湊到。研究誠實原則優先於任何「看起來齊全」的表象。
+4. **重建的腳本**（如 K716-K722 case）：若 reconstruction 未能 allclose 還原舊 JSON → 必須走 (a)(b)(c) 其一決策，不可靜默 commit divergent 狀態。
+
 參考範例：`paper/leverage-direction/`、`paper/taiwan-vt/`、`paper/vt-trend-following/`（均為齊全樣板）。
 
 Kickoff 階段（僅 outline/abstract）可暫缺，但 body drafting 開始時必須補齊；第一次投稿前跑投稿前檢查清單。

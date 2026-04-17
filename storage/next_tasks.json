@@ -1051,5 +1051,19 @@
       "submission-critical",
       "volatility-absorption"
     ]
+  },
+  {
+    "id": "All_papers_reproducibility_audit",
+    "title": "所有論文 reproducibility audit：腳本 output 必須與論文 body 數字一致",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T16:04:03+08:00",
+    "description": "用戶 2026-04-17 強化規則：『所有論文中的腳本和資料 都要能直接跑出最新的論文內結果』。需對所有 10 個 paper/ 做 reproducibility audit：(1) 對每個 paper 跑其 scripts/ 或 experiments/kXXX 取得最新 output; (2) 對比 main.tex / main_v2.tex body 內寫的數字（Table, Figure, inline 結果）; (3) 列 diff report：per-paper (matched / approx / divergent) 數字清單; (4) divergent cases 走三選一：修腳本 / 修論文 / 明記 errata. 特別注意：- Paper 4 (vix-sufficiency v2): 剛整合 9 個新實驗，需確認 main_v2.tex 的數字對得上 K1135/K1137/K1138/K1139/K1143 JSON; - Paper 5 (volatility-absorption): 承 VolAbsorption_missing_scripts_recovery 結果; - Paper 9 (garch-x-vix, submitted): 確認投稿版的數字當前腳本能重現; - Paper 2/3/6 等其他 paper 依序. **Blocker if any paper's script cannot reproduce its own paper numbers**.",
+    "tags": [
+      "paper",
+      "reproducibility",
+      "submission-critical",
+      "multi-paper"
+    ]
   }
 ]
