@@ -1,0 +1,97 @@
+[2026-04-17T12:08:08Z] ======================================================================
+[2026-04-17T12:08:08Z] K1187: Paper 1 Table 7 VT Cross-Asset Performance
+[2026-04-17T12:08:08Z] SEED=42, SIGMA_TARGET=0.006299/day (10.00%/yr)
+[2026-04-17T12:08:08Z] WINDOW=504, SMOOTH=5, WEIGHT_CLIP=[0.0,1.5]
+[2026-04-17T12:08:08Z] ======================================================================
+[2026-04-17T12:08:08Z] 
+[SPY] use_gjr=True
+[2026-04-17T12:08:08Z]   [SPY] Downloading 2013-01-01 to 2026-04-17 ...
+[2026-04-17T12:08:09Z]   [SPY] 3341 daily returns (2013-01-03 to 2026-04-16)
+[2026-04-17T12:08:09Z]   [SPY] Running rolling GARCH (w=504, n_steps=2837) ...
+[2026-04-17T12:08:23Z]   [SPY] 18% done (13.9s)
+[2026-04-17T12:08:35Z]   [SPY] 35% done (26.2s)
+[2026-04-17T12:08:48Z]   [SPY] 53% done (38.3s)
+[2026-04-17T12:09:00Z]   [SPY] 70% done (51.3s)
+[2026-04-17T12:09:13Z]   [SPY] 88% done (64.1s)
+[2026-04-17T12:09:23Z]   [SPY] Rolling done in 73.7s
+[2026-04-17T12:09:23Z]   [SPY] VT active period: 2836 days (2015-01-06 to 2026-04-16)
+[2026-04-17T12:09:23Z]   [SPY] BH Sharpe=0.81, VT Sharpe=0.78, Δ=-0.03, BH MDD=-33.7%, VT MDD=-15.2%
+[2026-04-17T12:09:23Z]   [SPY] bh_sharpe: paper=0.82, computed=0.81, status=MATCHED, rdelta=0.012
+[2026-04-17T12:09:23Z]   [SPY] vt_sharpe: paper=0.85, computed=0.78, status=DIVERGED, rdelta=0.082
+[2026-04-17T12:09:23Z]   [SPY] bh_maxdd: paper=-0.337, computed=-0.337, status=MATCHED, rdelta=0.000
+[2026-04-17T12:09:23Z]   [SPY] vt_maxdd: paper=-0.148, computed=-0.152, status=MATCHED, rdelta=0.027
+[2026-04-17T12:09:23Z] 
+[GLD] use_gjr=False
+[2026-04-17T12:09:23Z]   [GLD] Downloading 2013-01-01 to 2026-04-17 ...
+[2026-04-17T12:09:23Z]   [GLD] 3341 daily returns (2013-01-03 to 2026-04-16)
+[2026-04-17T12:09:23Z]   [GLD] Running rolling GARCH (w=504, n_steps=2837) ...
+[2026-04-17T12:09:33Z]   [GLD] 18% done (9.8s)
+[2026-04-17T12:09:43Z]   [GLD] 35% done (19.6s)
+[2026-04-17T12:09:52Z]   [GLD] 53% done (28.8s)
+[2026-04-17T12:10:02Z]   [GLD] 70% done (38.4s)
+[2026-04-17T12:10:10Z]   [GLD] 88% done (47.0s)
+[2026-04-17T12:10:16Z]   [GLD] Rolling done in 53.0s
+[2026-04-17T12:10:16Z]   [GLD] VT active period: 2836 days (2015-01-06 to 2026-04-16)
+[2026-04-17T12:10:16Z]   [GLD] BH Sharpe=0.83, VT Sharpe=0.89, Δ=+0.06, BH MDD=-22.0%, VT MDD=-15.3%
+[2026-04-17T12:10:16Z]   [GLD] bh_sharpe: paper=1.56, computed=0.83, status=DIVERGED, rdelta=0.468
+[2026-04-17T12:10:16Z]   [GLD] vt_sharpe: paper=1.71, computed=0.89, status=DIVERGED, rdelta=0.480
+[2026-04-17T12:10:16Z]   [GLD] bh_maxdd: paper=-0.251, computed=-0.22, status=DIVERGED, rdelta=0.124
+[2026-04-17T12:10:16Z]   [GLD] vt_maxdd: paper=-0.134, computed=-0.153, status=DIVERGED, rdelta=0.142
+[2026-04-17T12:10:16Z] 
+[TLT] use_gjr=False
+[2026-04-17T12:10:16Z]   [TLT] Downloading 2013-01-01 to 2026-04-17 ...
+[2026-04-17T12:10:16Z]   [TLT] 3341 daily returns (2013-01-03 to 2026-04-16)
+[2026-04-17T12:10:16Z]   [TLT] Running rolling GARCH (w=504, n_steps=2837) ...
+[2026-04-17T12:10:25Z]   [TLT] 18% done (8.7s)
+[2026-04-17T12:10:34Z]   [TLT] 35% done (17.0s)
+[2026-04-17T12:10:42Z]   [TLT] 53% done (25.9s)
+[2026-04-17T12:10:52Z]   [TLT] 70% done (35.4s)
+[2026-04-17T12:11:01Z]   [TLT] 88% done (44.6s)
+[2026-04-17T12:11:06Z]   [TLT] Rolling done in 49.9s
+[2026-04-17T12:11:06Z]   [TLT] VT active period: 2836 days (2015-01-06 to 2026-04-16)
+[2026-04-17T12:11:06Z]   [TLT] BH Sharpe=0.02, VT Sharpe=0.07, Δ=+0.05, BH MDD=-48.4%, VT MDD=-35.2%
+[2026-04-17T12:11:06Z]   [TLT] bh_sharpe: paper=0.02, computed=0.02, status=MATCHED, rdelta=0.000
+[2026-04-17T12:11:06Z]   [TLT] vt_sharpe: paper=0.33, computed=0.07, status=DIVERGED, rdelta=0.788
+[2026-04-17T12:11:06Z]   [TLT] bh_maxdd: paper=-0.438, computed=-0.484, status=DIVERGED, rdelta=0.105
+[2026-04-17T12:11:06Z]   [TLT] vt_maxdd: paper=-0.307, computed=-0.35200000000000004, status=DIVERGED, rdelta=0.147
+[2026-04-17T12:11:06Z] 
+[EEM] use_gjr=True
+[2026-04-17T12:11:06Z]   [EEM] Downloading 2013-01-01 to 2026-04-17 ...
+[2026-04-17T12:11:07Z]   [EEM] 3341 daily returns (2013-01-03 to 2026-04-16)
+[2026-04-17T12:11:07Z]   [EEM] Running rolling GARCH (w=504, n_steps=2837) ...
+[2026-04-17T12:11:17Z]   [EEM] 18% done (10.7s)
+[2026-04-17T12:11:30Z]   [EEM] 35% done (23.3s)
+[2026-04-17T12:11:42Z]   [EEM] 53% done (35.2s)
+[2026-04-17T12:11:54Z]   [EEM] 70% done (47.2s)
+[2026-04-17T12:12:04Z]   [EEM] 88% done (57.2s)
+[2026-04-17T12:12:11Z]   [EEM] Rolling done in 64.2s
+[2026-04-17T12:12:11Z]   [EEM] VT active period: 2836 days (2015-01-06 to 2026-04-16)
+[2026-04-17T12:12:11Z]   [EEM] BH Sharpe=0.42, VT Sharpe=0.32, Δ=-0.10, BH MDD=-39.8%, VT MDD=-24.8%
+[2026-04-17T12:12:11Z]   [EEM] bh_sharpe: paper=0.42, computed=0.42, status=MATCHED, rdelta=0.000
+[2026-04-17T12:12:11Z]   [EEM] vt_sharpe: paper=0.45, computed=0.32, status=DIVERGED, rdelta=0.289
+[2026-04-17T12:12:11Z]   [EEM] bh_maxdd: paper=-0.382, computed=-0.39799999999999996, status=MATCHED, rdelta=0.042
+[2026-04-17T12:12:11Z]   [EEM] vt_maxdd: paper=-0.215, computed=-0.248, status=DIVERGED, rdelta=0.153
+[2026-04-17T12:12:11Z] 
+[BTC-USD] use_gjr=True
+[2026-04-17T12:12:11Z]   [BTC-USD] Downloading 2013-01-01 to 2026-04-17 ...
+[2026-04-17T12:12:11Z]   [BTC-USD] 4229 daily returns (2014-09-18 to 2026-04-16)
+[2026-04-17T12:12:11Z]   [BTC-USD] Running rolling GARCH (w=504, n_steps=3725) ...
+[2026-04-17T12:12:37Z]   [BTC-USD] 13% done (25.4s)
+[2026-04-17T12:13:02Z]   [BTC-USD] 27% done (50.4s)
+[2026-04-17T12:13:21Z]   [BTC-USD] 40% done (69.8s)
+[2026-04-17T12:13:46Z]   [BTC-USD] 54% done (94.9s)
+[2026-04-17T12:14:11Z]   [BTC-USD] 67% done (119.7s)
+[2026-04-17T12:14:32Z]   [BTC-USD] 81% done (140.4s)
+[2026-04-17T12:14:49Z]   [BTC-USD] 94% done (158.4s)
+[2026-04-17T12:14:56Z]   [BTC-USD] Rolling done in 165.2s
+[2026-04-17T12:14:56Z]   [BTC-USD] VT active period: 3724 days (2016-02-05 to 2026-04-16)
+[2026-04-17T12:14:56Z]   [BTC-USD] BH Sharpe=0.92, VT Sharpe=1.02, Δ=+0.10, BH MDD=-83.4%, VT MDD=-25.0%
+[2026-04-17T12:14:56Z]   [BTC-USD] bh_sharpe: paper=0.43, computed=0.92, status=DIVERGED, rdelta=1.140
+[2026-04-17T12:14:56Z]   [BTC-USD] vt_sharpe: paper=0.6, computed=1.02, status=DIVERGED, rdelta=0.700
+[2026-04-17T12:14:56Z]   [BTC-USD] bh_maxdd: paper=-0.766, computed=-0.8340000000000001, status=DIVERGED, rdelta=0.089
+[2026-04-17T12:14:56Z]   [BTC-USD] vt_maxdd: paper=-0.213, computed=-0.25, status=DIVERGED, rdelta=0.174
+[2026-04-17T12:14:56Z] 
+======================================================================
+[2026-04-17T12:14:56Z] SUMMARY: 6/20 metrics matched (rtol=0.05)
+[2026-04-17T12:14:56Z] Elapsed: 408.1s
+[2026-04-17T12:14:56Z] Results saved to /Users/yhlai0911/Desktop/volpred-research/experiments/k1187/k1187_results.json

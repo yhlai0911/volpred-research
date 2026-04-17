@@ -1,0 +1,270 @@
+{
+  "experiment": "K1187",
+  "purpose": "Paper 1 Table 7 (Tab:vt) VT Cross-Asset Performance Reproduction",
+  "run_date": "2026-04-17T12:14:56.844692+00:00",
+  "parameters": {
+    "seed": 42,
+    "sigma_target_annual": 0.1,
+    "sigma_target_daily": 0.00629940788348712,
+    "smooth_window": 5,
+    "weight_min": 0.0,
+    "weight_max": 1.5,
+    "garch_window": 504,
+    "rtol": 0.05
+  },
+  "paper_table7": {
+    "SPY": {
+      "bh_sharpe": 0.82,
+      "vt_sharpe": 0.85,
+      "delta": 0.03,
+      "bh_maxdd": -0.337,
+      "vt_maxdd": -0.148
+    },
+    "GLD": {
+      "bh_sharpe": 1.56,
+      "vt_sharpe": 1.71,
+      "delta": 0.15,
+      "bh_maxdd": -0.251,
+      "vt_maxdd": -0.134
+    },
+    "TLT": {
+      "bh_sharpe": 0.02,
+      "vt_sharpe": 0.33,
+      "delta": 0.31,
+      "bh_maxdd": -0.438,
+      "vt_maxdd": -0.307
+    },
+    "EEM": {
+      "bh_sharpe": 0.42,
+      "vt_sharpe": 0.45,
+      "delta": 0.03,
+      "bh_maxdd": -0.382,
+      "vt_maxdd": -0.215
+    },
+    "BTC": {
+      "bh_sharpe": 0.43,
+      "vt_sharpe": 0.6,
+      "delta": 0.17,
+      "bh_maxdd": -0.766,
+      "vt_maxdd": -0.213
+    }
+  },
+  "results": {
+    "SPY": {
+      "ticker": "SPY",
+      "use_gjr": true,
+      "n_obs": 2836,
+      "data_start": "2015-01-06",
+      "data_end": "2026-04-16",
+      "bh_sharpe": 0.81,
+      "vt_sharpe": 0.78,
+      "delta_sharpe": -0.03,
+      "bh_maxdd": -0.337,
+      "vt_maxdd": -0.152,
+      "bh_sharpe_raw": 0.8090187562855783,
+      "vt_sharpe_raw": 0.7812513061297441,
+      "bh_maxdd_raw": -0.3371726975633844,
+      "vt_maxdd_raw": -0.1522571090691931,
+      "match": {
+        "bh_sharpe": {
+          "paper": 0.82,
+          "computed": 0.81,
+          "status": "MATCHED",
+          "rel_delta": 0.012195121951219388
+        },
+        "vt_sharpe": {
+          "paper": 0.85,
+          "computed": 0.78,
+          "status": "DIVERGED",
+          "rel_delta": 0.08235294117647053
+        },
+        "bh_maxdd": {
+          "paper": -0.337,
+          "computed": -0.337,
+          "status": "MATCHED",
+          "rel_delta": 0.0
+        },
+        "vt_maxdd": {
+          "paper": -0.148,
+          "computed": -0.152,
+          "status": "MATCHED",
+          "rel_delta": 0.027027027027027053
+        }
+      }
+    },
+    "GLD": {
+      "ticker": "GLD",
+      "use_gjr": false,
+      "n_obs": 2836,
+      "data_start": "2015-01-06",
+      "data_end": "2026-04-16",
+      "bh_sharpe": 0.83,
+      "vt_sharpe": 0.89,
+      "delta_sharpe": 0.06,
+      "bh_maxdd": -0.22,
+      "vt_maxdd": -0.153,
+      "bh_sharpe_raw": 0.8290960498027347,
+      "vt_sharpe_raw": 0.8934528462153709,
+      "bh_maxdd_raw": -0.2200216813471545,
+      "vt_maxdd_raw": -0.15306316333701453,
+      "match": {
+        "bh_sharpe": {
+          "paper": 1.56,
+          "computed": 0.83,
+          "status": "DIVERGED",
+          "rel_delta": 0.467948717948718
+        },
+        "vt_sharpe": {
+          "paper": 1.71,
+          "computed": 0.89,
+          "status": "DIVERGED",
+          "rel_delta": 0.47953216374269003
+        },
+        "bh_maxdd": {
+          "paper": -0.251,
+          "computed": -0.22,
+          "status": "DIVERGED",
+          "rel_delta": 0.12350597609561753
+        },
+        "vt_maxdd": {
+          "paper": -0.134,
+          "computed": -0.153,
+          "status": "DIVERGED",
+          "rel_delta": 0.1417910447761193
+        }
+      }
+    },
+    "TLT": {
+      "ticker": "TLT",
+      "use_gjr": false,
+      "n_obs": 2836,
+      "data_start": "2015-01-06",
+      "data_end": "2026-04-16",
+      "bh_sharpe": 0.02,
+      "vt_sharpe": 0.07,
+      "delta_sharpe": 0.05,
+      "bh_maxdd": -0.484,
+      "vt_maxdd": -0.35200000000000004,
+      "bh_sharpe_raw": 0.016115677551737796,
+      "vt_sharpe_raw": 0.0693309652532742,
+      "bh_maxdd_raw": -0.4835115276520495,
+      "vt_maxdd_raw": -0.35165848388345866,
+      "match": {
+        "bh_sharpe": {
+          "paper": 0.02,
+          "computed": 0.02,
+          "status": "MATCHED",
+          "rel_delta": 0.0
+        },
+        "vt_sharpe": {
+          "paper": 0.33,
+          "computed": 0.07,
+          "status": "DIVERGED",
+          "rel_delta": 0.7878787878787878
+        },
+        "bh_maxdd": {
+          "paper": -0.438,
+          "computed": -0.484,
+          "status": "DIVERGED",
+          "rel_delta": 0.10502283105022828
+        },
+        "vt_maxdd": {
+          "paper": -0.307,
+          "computed": -0.35200000000000004,
+          "status": "DIVERGED",
+          "rel_delta": 0.1465798045602607
+        }
+      }
+    },
+    "EEM": {
+      "ticker": "EEM",
+      "use_gjr": true,
+      "n_obs": 2836,
+      "data_start": "2015-01-06",
+      "data_end": "2026-04-16",
+      "bh_sharpe": 0.42,
+      "vt_sharpe": 0.32,
+      "delta_sharpe": -0.1,
+      "bh_maxdd": -0.39799999999999996,
+      "vt_maxdd": -0.248,
+      "bh_sharpe_raw": 0.4224054602313453,
+      "vt_sharpe_raw": 0.319541036622452,
+      "bh_maxdd_raw": -0.3982232598630854,
+      "vt_maxdd_raw": -0.24805443842097963,
+      "match": {
+        "bh_sharpe": {
+          "paper": 0.42,
+          "computed": 0.42,
+          "status": "MATCHED",
+          "rel_delta": 0.0
+        },
+        "vt_sharpe": {
+          "paper": 0.45,
+          "computed": 0.32,
+          "status": "DIVERGED",
+          "rel_delta": 0.2888888888888889
+        },
+        "bh_maxdd": {
+          "paper": -0.382,
+          "computed": -0.39799999999999996,
+          "status": "MATCHED",
+          "rel_delta": 0.04188481675392659
+        },
+        "vt_maxdd": {
+          "paper": -0.215,
+          "computed": -0.248,
+          "status": "DIVERGED",
+          "rel_delta": 0.15348837209302327
+        }
+      }
+    },
+    "BTC-USD": {
+      "ticker": "BTC-USD",
+      "use_gjr": true,
+      "n_obs": 3724,
+      "data_start": "2016-02-05",
+      "data_end": "2026-04-16",
+      "bh_sharpe": 0.92,
+      "vt_sharpe": 1.02,
+      "delta_sharpe": 0.1,
+      "bh_maxdd": -0.8340000000000001,
+      "vt_maxdd": -0.25,
+      "bh_sharpe_raw": 0.9212775188699408,
+      "vt_sharpe_raw": 1.0171536167307706,
+      "bh_maxdd_raw": -0.8339900882218971,
+      "vt_maxdd_raw": -0.2501980835863433,
+      "match": {
+        "bh_sharpe": {
+          "paper": 0.43,
+          "computed": 0.92,
+          "status": "DIVERGED",
+          "rel_delta": 1.1395348837209303
+        },
+        "vt_sharpe": {
+          "paper": 0.6,
+          "computed": 1.02,
+          "status": "DIVERGED",
+          "rel_delta": 0.7000000000000001
+        },
+        "bh_maxdd": {
+          "paper": -0.766,
+          "computed": -0.8340000000000001,
+          "status": "DIVERGED",
+          "rel_delta": 0.0887728459530027
+        },
+        "vt_maxdd": {
+          "paper": -0.213,
+          "computed": -0.25,
+          "status": "DIVERGED",
+          "rel_delta": 0.17370892018779346
+        }
+      }
+    }
+  },
+  "summary": {
+    "total_metrics": 20,
+    "matched": 6,
+    "match_rate": 0.3,
+    "elapsed_seconds": 408.0709319114685
+  }
+}
