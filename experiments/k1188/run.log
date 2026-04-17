@@ -1,0 +1,118 @@
+========================================================================
+K1188: Paper 1 Table 8 Window Robustness — GJR-GARCH QLIKE for SPY
+  MODEL: GJR-GARCH(1,1) (Table 8 explicit)
+  QLIKE: quasi-LL scale [log(h) + r²/h], NOT Patton-centered
+  WINDOW SIZES: [504, 1000, 2000, 3000, 5000]
+  OOS PERIODS: ['2020-2021', '2023-2024', '2025-2026']
+  seed=42
+========================================================================
+
+[1/4] Downloading SPY data (yfinance, 2000-2026)...
+  Total data: 6610 days (2000-01-04 to 2026-04-16)
+  Scale check: mean daily return = 0.000383, std = 0.012187 (19.3% ann. vol)
+  Quasi-LL sanity check (constant h=var): -7.069 [expect ~-8 to -9]
+
+[2/4] Running rolling window OOS (GJR-GARCH, 5 windows × 3 periods)...
+  Note: This takes several minutes for large windows (w=3000, 5000)
+
+  Period: 2020-2021 (2020-01-01 to 2021-12-31)
+    Window w=504...
+    Initial GJR fit (w=504): omega=4.02e-06, alpha=0.0000, gamma=0.3670, beta=0.7881, persistence=0.9715
+    w=  504: QLIKE=-8.0889, n=505
+    Window w=1000...
+    Initial GJR fit (w=1000): omega=3.80e-06, alpha=0.0368, gamma=0.2994, beta=0.7705, persistence=0.9571
+    w= 1000: QLIKE=-7.9904, n=505
+    Window w=2000...
+    Initial GJR fit (w=2000): omega=3.66e-06, alpha=0.0806, gamma=0.2296, beta=0.7720, persistence=0.9674
+    w= 2000: QLIKE=-8.0318, n=505
+    Window w=3000...
+    Initial GJR fit (w=3000): omega=2.86e-06, alpha=0.0000, gamma=0.2708, beta=0.8483, persistence=0.9837
+    w= 3000: QLIKE=-7.9892, n=505
+    Window w=5000...
+    Initial GJR fit (w=5000): omega=1.91e-06, alpha=0.0646, gamma=0.0688, beta=0.8824, persistence=0.9814
+    w= 5000: QLIKE=-7.9822, n=505
+
+  Period: 2023-2024 (2023-01-01 to 2024-12-31)
+    Window w=504...
+    Initial GJR fit (w=504): omega=2.20e-06, alpha=0.0654, gamma=0.0579, beta=0.8926, persistence=0.9869
+    w=  504: QLIKE=-8.6591, n=502
+    Window w=1000...
+    Initial GJR fit (w=1000): omega=4.51e-06, alpha=0.1408, gamma=0.1419, beta=0.7787, persistence=0.9904
+    w= 1000: QLIKE=-8.6522, n=502
+    Window w=2000...
+    Initial GJR fit (w=2000): omega=3.94e-06, alpha=0.0774, gamma=0.2744, beta=0.7739, persistence=0.9884
+    w= 2000: QLIKE=-8.6517, n=502
+    Window w=3000...
+    Initial GJR fit (w=3000): omega=4.68e-06, alpha=0.1491, gamma=0.2144, beta=0.7292, persistence=0.9855
+    w= 3000: QLIKE=-8.6585, n=502
+    Window w=5000...
+    Initial GJR fit (w=5000): omega=2.65e-06, alpha=0.0121, gamma=0.2010, beta=0.8676, persistence=0.9802
+    w= 5000: QLIKE=-8.6827, n=502
+
+  Period: 2025-2026 (2025-01-01 to 2026-04-17)
+    Window w=504...
+    Initial GJR fit (w=504): omega=5.78e-06, alpha=0.0000, gamma=0.1886, beta=0.8326, persistence=0.9269
+    w=  504: QLIKE=-8.3913, n=322
+    Window w=1000...
+    Initial GJR fit (w=1000): omega=2.27e-06, alpha=0.0596, gamma=0.0967, beta=0.8805, persistence=0.9885
+    w= 1000: QLIKE=-8.3920, n=322
+    Window w=2000...
+    Initial GJR fit (w=2000): omega=3.56e-06, alpha=0.0559, gamma=0.2421, beta=0.8088, persistence=0.9856
+    w= 2000: QLIKE=-8.3967, n=322
+    Window w=3000...
+    Initial GJR fit (w=3000): omega=4.19e-06, alpha=0.0710, gamma=0.2395, beta=0.7808, persistence=0.9714
+    w= 3000: QLIKE=-8.3914, n=322
+    Window w=5000...
+    Initial GJR fit (w=5000): omega=2.92e-06, alpha=0.0076, gamma=0.2178, beta=0.8624, persistence=0.9788
+    w= 5000: QLIKE=-8.4193, n=322
+
+[3/4] Results table vs Paper Table 8...
+
+  === K1188 QLIKE vs Paper Table 8 (quasi-LL scale) ===
+
+  Period       |     w |    K1188 |    Paper |    Delta | Status
+  --------------------------------------------------------------------
+  2020-2021    |   504 |  -8.0889 |  -8.0510 |  -0.0379 | MATCH
+  2020-2021    |  1000 |  -7.9904 |  -8.0270 |  +0.0366 | MATCH
+  2020-2021    |  2000 |  -8.0318 |  -8.0060 |  -0.0258 | MATCH
+  2020-2021    |  3000 |  -7.9892 |  -8.0150 |  +0.0258 | MATCH
+  2020-2021    |  5000 |  -7.9822 |  -8.0030 |  +0.0208 | MATCH
+  2023-2024    |   504 |  -8.6591 |  -8.6710 |  +0.0119 | MATCH
+  2023-2024    |  1000 |  -8.6522 |  -8.6600 |  +0.0078 | MATCH
+  2023-2024    |  2000 |  -8.6517 |  -8.6520 |  +0.0003 | MATCH
+  2023-2024    |  3000 |  -8.6585 |  -8.6630 |  +0.0045 | MATCH
+  2023-2024    |  5000 |  -8.6827 |  -8.6820 |  -0.0007 | MATCH
+  2025-2026    |   504 |  -8.3913 |  -8.4290 |  +0.0377 | MATCH
+  2025-2026    |  1000 |  -8.3920 |  -8.4440 |  +0.0520 | MATCH
+  2025-2026    |  2000 |  -8.3967 |  -8.4380 |  +0.0413 | MATCH
+  2025-2026    |  3000 |  -8.3914 |  -8.4330 |  +0.0416 | MATCH
+  2025-2026    |  5000 |  -8.4193 |  -8.4570 |  +0.0377 | MATCH
+
+  Match: 15/15 cells within ±0.1
+
+[4/4] Pattern analysis...
+
+  Paper claims: 'U-shaped QLIKE–window relationship'
+  w=504 best in high-vol periods (2020-2021), w=5000 best in calm (2023-2024, 2025-2026)
+  2020-2021: best_w=504 (paper expects 504), worst_w=5000, rank_match=True
+    QLIKE by window: {504: -8.088949153462965, 1000: -7.990421426766207, 2000: -8.031785659709952, 3000: -7.989209140103791, 5000: -7.982154024646756}
+  2023-2024: best_w=5000 (paper expects 5000), worst_w=2000, rank_match=True
+    QLIKE by window: {504: -8.65906401884535, 1000: -8.652225440084232, 2000: -8.651731966784567, 3000: -8.658511916143707, 5000: -8.682741613195159}
+  2025-2026: best_w=5000 (paper expects 5000), worst_w=504, rank_match=True
+    QLIKE by window: {504: -8.391251766843213, 1000: -8.391976283786287, 2000: -8.396661715515027, 3000: -8.391352451786435, 5000: -8.419262229371236}
+
+  DM tests (w=504 vs w=5000, Harvey 1997 HAC):
+  2020-2021: w=504 vs w=5000, n=505, DM_stat=-1.6231, p=0.1052
+  2023-2024: w=504 vs w=5000, n=502, DM_stat=1.2814, p=0.2007
+  2025-2026: w=504 vs w=5000, n=322, DM_stat=0.8775, p=0.3809
+
+  KB Cross-check:
+  KB entry: 'expanding window QLIKE=0.529 > w=2000=0.560' (Patton scale)
+  body.tex: 'expanding windows (worst QLIKE, distant regime contamination)'
+  K1188 (quasi-LL): rolling w=504 vs w=2000 comparison...
+  2020-2021: w=504=-8.0889, w=2000=-8.0318 → w=504 BETTER
+  2023-2024: w=504=-8.6591, w=2000=-8.6517 → w=504 BETTER
+  2025-2026: w=504=-8.3913, w=2000=-8.3967 → w=2000 BETTER
+
+  === RECOMMENDATION ===
+  (a) PAPER REPRODUCED: All 15 cells match within ±0.1.
