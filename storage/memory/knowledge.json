@@ -26968,5 +26968,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T16:30:19.721525"
+  },
+  {
+    "item_id": "22985f00",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49\u5f8c\u624b\u52d5 recovered (worktree race \u5c0e\u81f4 auto-commit \u5728\u5b64\u7acb branch)] K1175 Paper 2 Table 3 VT Performance 2010-2026 canonical replication. **VERDICT: DIVERGENT \u2014 \u5efa\u8b70 (b) \u4fee\u8ad6\u6587**. Matches: GJR VT Sharpe matched 3.1%, GARCH VT Sharpe matched 4.5%, EWMA Return/Vol matched. **Divergences**: (1) **\u7d19\u9762\u7b97\u8853\u932f\u8aa4 (research integrity!)**: paper Buy&Hold Return=10.2%, Vol=20.8%, Sharpe=0.729 \u2014 \u4f46 10.2/20.8=0.490 \u4e0d\u7b49\u65bc 0.729\uff0c\u5167\u90e8\u77db\u76fe; (2) **\u8cc7\u6599\u65b7\u5c64**: yfinance 0050.TW \u5f9e 2009 \u8d77\uff0c\u7f3a 2008 \u5371\u6a5f\uff0cpaper MDD=-41.3% \u7121\u53ef\u7528\u8cc7\u6599\u91cd\u73fe (K1175 max MDD=-33.83%); (3) **\u518d\u5e73\u8861\u983b\u7387\u672a\u8a18\u9304**: Turnover 98-116%/yr \u96b1\u542b monthly rebalancing\uff0cK900/K1175 \u7528 daily \u5c0e\u81f4 TO 580-592% (5-6x). **K1175 canonical \u6578\u5b57**: B&H Sharpe=0.799, MDD=-33.83%, Return=14.48%, Vol=18.13%. **\u4e09\u9078\u4e00\u5efa\u8b70 (b)**: Paper 2 Table 3 + abstract + Sec 4 'Sharpe \u5f9e 0.729 \u5230 0.796' \u6558\u8ff0\u5168\u90e8 errata \u6539\u70ba K1175 canonical. Paper 2 \u76ee\u6a19\u671f\u520a Pacific-Basin Finance Journal \u2014 Table 3 arithmetic inconsistency \u88ab\u5be9\u7a3f\u4eba\u6293\u5230\u5373 desk-reject. \u4e3b\u7dda\u7a0b: (1) \u66f4\u65b0 main.tex Table 3 cells \u5230 K1175 canonical (2) \u5728 Data section \u660e\u8f09 0050.TW \u5f9e 2009 (3) \u660e\u8f09 daily rebalancing. commit 4549bc00 (recovered via merge to main).",
+    "evidence": [
+      "experiments/k1175/k1175.py",
+      "experiments/k1175/k1175_results.json",
+      "experiments/k1175/k1175_vs_paper2_table3_diff.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T16:41:57.677259"
   }
 ]

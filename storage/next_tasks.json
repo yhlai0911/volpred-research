@@ -1195,16 +1195,17 @@
   {
     "id": "Paper2_D1_VT_2010_2026_full_period",
     "title": "Paper 2 BLOCKER: Table 3 VT Performance 需 2010-2026 full-period 實驗 (K900 只有 2019-2026)",
-    "status": "pending",
+    "status": "resolved_awaiting_paper_fix",
     "priority": 4,
     "created_at": "2026-04-17T16:29:10+08:00",
-    "description": "Paper 2 audit (commit 8b43604a) 發現 Table 3 聲稱 2010-2026 (B&H Sharpe=0.729, MDD=-41.3%) 但 K900 僅 2019-2026 (Sharpe=1.247, MDD=-33.83%). 沒有 JSON 覆蓋 paper 寫的期間. **動作**: 建立新 K 編號 (下一可用: K1175) 跑 VT Performance on 2010-01-01 ~ 2026-03-31 full period. 完成後 allclose 比對 paper Table 3 數字. 若不符走 (a)/(b)/(c) 決策. 投稿 PBFJ 前必做. Agent-launchable.",
+    "description": "Paper 2 audit (commit 8b43604a) 發現 Table 3 聲稱 2010-2026 (B&H Sharpe=0.729, MDD=-41.3%) 但 K900 僅 2019-2026 (Sharpe=1.247, MDD=-33.83%). 沒有 JSON 覆蓋 paper 寫的期間. **動作**: 建立新 K 編號 (下一可用: K1175) 跑 VT Performance on 2010-01-01 ~ 2026-03-31 full period. 完成後 allclose 比對 paper Table 3 數字. 若不符走 (a)/(b)/(c) 決策. 投稿 PBFJ 前必做. Agent-launchable. [K1175 DONE commit 4549bc00: DIVERGENT 建議 (b) 修論文. paper Sharpe=0.729 vs Return/Vol 10.2/20.8=0.490 **紙面算術錯誤 research integrity**; 資料斷層 0050.TW from 2009 無 2008 危機; rebalancing frequency 未記錄. K1175 canonical: B&H Sharpe=0.799, MDD=-33.83%, Return=14.48%, Vol=18.13%. Paper 2 投稿前必 errata Table 3 + abstract + Sec 4.]",
     "tags": [
       "paper-2",
       "taiwan-vt",
       "blocker",
       "vt-performance"
-    ]
+    ],
+    "completed_at": "2026-04-17T16:42:10+08:00"
   },
   {
     "id": "Paper2_D2_TZ_momentum_cross_market",
@@ -1274,6 +1275,21 @@
       "vt-trend-following",
       "blocker",
       "main-thread"
+    ]
+  },
+  {
+    "id": "Paper2_errata_Table3_full_rewrite",
+    "title": "Paper 2 ERRATA: Table 3 全面重寫 (K1175 canonical) + Data section + abstract",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:42:10+08:00",
+    "description": "K1175 audit 發現 Paper 2 Table 3 紙面 Sharpe 0.729 與 Return/Vol (10.2/20.8=0.490) 算術矛盾 — **research integrity 問題**。Paper 2 投稿 PBFJ 前必做 errata： (1) main.tex Table 3 全 cells 改為 K1175 canonical (B&H Sharpe=0.799, MDD=-33.83%, Return=14.48%, Vol=18.13%; EWMA/GARCH/GJR VT 也改 K1175); (2) Data section 明載 '0050.TW data from 2009-01 (yfinance earliest)，缺 2008 crisis'; (3) Methodology section 明載 daily rebalancing (不 monthly); (4) Abstract 更新敘述; (5) Section 4 'Sharpe 從 0.729 到 0.796' 改為 K1175 數字. 主線程 body edit only (禁用 agent 改 .tex).",
+    "tags": [
+      "paper-2",
+      "taiwan-vt",
+      "errata",
+      "research-integrity",
+      "main-thread-only"
     ]
   }
 ]
