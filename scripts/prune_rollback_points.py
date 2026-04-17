@@ -54,7 +54,9 @@ def main() -> None:
     parser.add_argument("--keep-days", type=int, default=14, help="Retain snapshots newer than this many days (default 14)")
     parser.add_argument("--apply", action="store_true", help="Actually delete. Default is dry-run")
     parser.add_argument("--root", default=str(ROLLBACK_ROOT))
+    parser.add_argument("--preserve", action="append", default=[], help="Snapshot IDs to always keep regardless of age (repeatable)")
     args = parser.parse_args()
+    preserve_ids = set(args.preserve)
 
     root = Path(args.root)
     if not root.exists():
@@ -75,7 +77,11 @@ def main() -> None:
     to_delete: list[tuple[Path, datetime | None, int]] = []
     to_keep: list[tuple[Path, datetime | None, int]] = []
     undated: list[tuple[Path, datetime | None, int]] = []
+    preserved: list[tuple[Path, datetime | None, int]] = []
     for p, ts, sz in snapshots:
+        if p.name in preserve_ids:
+            preserved.append((p, ts, sz))
+            continue
         if ts is None:
             undated.append((p, ts, sz))
             continue
@@ -90,8 +96,11 @@ def main() -> None:
     total_keep = sum(s for _, _, s in to_keep)
     total_undated = sum(s for _, _, s in undated)
 
+    total_preserved = sum(s for _, _, s in preserved)
+
     print(f"Rollback snapshots: total={len(snapshots)}  size={human(total_before)}")
     print(f"  keep ({args.keep_days}d): {len(to_keep)}  size={human(total_keep)}")
+    print(f"  preserved (explicit): {len(preserved)}  size={human(total_preserved)}")
     print(f"  undated (preserve): {len(undated)}  size={human(total_undated)}")
     print(f"  delete (> {args.keep_days}d): {len(to_delete)}  size={human(total_delete)}")
 
