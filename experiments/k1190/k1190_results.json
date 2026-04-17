@@ -1,0 +1,130 @@
+{
+  "experiment_id": "k1190",
+  "timestamp": "2026-04-17T20:12:25.116839",
+  "paper_claims": {
+    "pearson_r": 0.163,
+    "p_value": 0.632,
+    "gamma_min": 0.077,
+    "gamma_max": 0.16,
+    "n_sectors": 11
+  },
+  "computed": {
+    "pearson_r": 0.0885,
+    "p_value": 0.7958,
+    "gamma_min": 0.0724,
+    "gamma_max": 0.1653,
+    "n_valid_sectors": 11
+  },
+  "diffs": {
+    "r_diff": 0.0745,
+    "p_diff": 0.1638,
+    "gamma_min_diff": 0.0046,
+    "gamma_max_diff": 0.0053
+  },
+  "match_status": "(c) gamma_range_matched_r_diverges",
+  "kb_verification": {
+    "xlf_gamma_kb": 0.251,
+    "xlf_gamma_computed": 0.1519,
+    "xlf_gamma_diff": 0.0991
+  },
+  "sector_results": {
+    "XLB": {
+      "gamma": 0.0972,
+      "sharpe_bh": 0.5007,
+      "sharpe_vt": 0.4347,
+      "delta_sharpe": -0.066,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLE": {
+      "gamma": 0.0771,
+      "sharpe_bh": 0.49,
+      "sharpe_vt": 0.4051,
+      "delta_sharpe": -0.0849,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLF": {
+      "gamma": 0.1519,
+      "sharpe_bh": 0.36,
+      "sharpe_vt": 0.3874,
+      "delta_sharpe": 0.0274,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLI": {
+      "gamma": 0.1366,
+      "sharpe_bh": 0.5982,
+      "sharpe_vt": 0.5801,
+      "delta_sharpe": -0.0182,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLK": {
+      "gamma": 0.1293,
+      "sharpe_bh": 0.7073,
+      "sharpe_vt": 0.6554,
+      "delta_sharpe": -0.052,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLP": {
+      "gamma": 0.1152,
+      "sharpe_bh": 0.6628,
+      "sharpe_vt": 0.6028,
+      "delta_sharpe": -0.0599,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLU": {
+      "gamma": 0.0724,
+      "sharpe_bh": 0.6177,
+      "sharpe_vt": 0.6556,
+      "delta_sharpe": 0.0378,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLV": {
+      "gamma": 0.1417,
+      "sharpe_bh": 0.6194,
+      "sharpe_vt": 0.5765,
+      "delta_sharpe": -0.0429,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLY": {
+      "gamma": 0.1167,
+      "sharpe_bh": 0.5886,
+      "sharpe_vt": 0.5325,
+      "delta_sharpe": -0.0561,
+      "n_days": 5955,
+      "garch_converged": true
+    },
+    "XLRE": {
+      "gamma": 0.0827,
+      "sharpe_bh": 0.4136,
+      "sharpe_vt": 0.3448,
+      "delta_sharpe": -0.0688,
+      "n_days": 2633,
+      "garch_converged": true
+    },
+    "XLC": {
+      "gamma": 0.1653,
+      "sharpe_bh": 0.6151,
+      "sharpe_vt": 0.548,
+      "delta_sharpe": -0.0671,
+      "n_days": 1955,
+      "garch_converged": true
+    }
+  },
+  "methodology": {
+    "vt_rule": "w_t = min(12/VIX_end_of_month_t, 1), lag 1 month",
+    "rebalancing": "monthly",
+    "tx_cost_bps": 10,
+    "garch_model": "GJR-GARCH(1,1)",
+    "correlation": "Pearson r(gamma, delta_sharpe)",
+    "data_source": "yfinance",
+    "period": "1998-12-01 to 2026-03-31",
+    "seed": 42
+  }
+}
