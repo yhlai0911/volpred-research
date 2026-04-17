@@ -972,14 +972,16 @@
     "title": "K1108d_transcript_scrape: 補 MOPS/10-Q transcript coverage to >=60% before Paper 2 final submission",
     "priority": 3,
     "description": "K1108d coverage 8.9% below 60% gate. Scrape TSMC/UMC MOPS 重大訊息 + TSM/GFS/SMIC 10-Q earnings calls for utilisation/ASP/R&D tokens pre-2024. Rerun K1108d spec with ≥60% coverage; finalize industry-FE commitment only after this.",
-    "status": "pending",
+    "status": "completed",
     "created_at": "2026-04-18T00:53:30.983850",
     "tags": [
       "K1108d-followup",
       "Paper2",
       "coverage",
       "submission-gate"
-    ]
+    ],
+    "completed_at": "2026-04-18T01:41:26.568249",
+    "outcome": "FINAL_NULL with UNCERTAIN_SCRAPE: coverage 8.9%→96.3% via LLM extraction (79.3% LLM share). Partial-F p=0.320. Paper 2 narrative upgraded to INDUSTRY_FIXED_EFFECT_NO_ATTRIBUTABLE_CHANNEL_FINAL. Submission caveat: reviewer may challenge LLM provenance."
   },
   {
     "id": "Paper3_K1128_pivot_decision",
@@ -1022,6 +1024,20 @@
       "Paper4",
       "EEM",
       "PIT"
+    ]
+  },
+  {
+    "id": "K1202b_primary_source_verify",
+    "title": "K1202b: Primary-source hand-verify K1202 LLM-extracted D2 data (reviewer credibility)",
+    "priority": 3,
+    "description": "K1202 80%+ LLM_EXTRACTED_FROM_PUBLIC triggers UNCERTAIN_SCRAPE. For Paper 2 submission credibility, hand-verify >=1 firm × >=5 quarters via primary sources (TSMC/UMC MOPS 法說會 raw PDF + TSM 10-Q MD&A direct). Cross-check LLM values against primary. If >10% divergence → rerun D2 with hand-verified subset; if <5% → LLM provenance defensible as appendix note.",
+    "status": "pending",
+    "created_at": "2026-04-18T01:41:26.568266",
+    "tags": [
+      "K1202-followup",
+      "Paper2",
+      "submission-gate",
+      "reviewer-defense"
     ]
   }
 ]
