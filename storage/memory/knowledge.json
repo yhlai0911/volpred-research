@@ -26935,5 +26935,16 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T16:19:00.887788"
+  },
+  {
+    "item_id": "b279e027",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Paper 9 (garch-x-vix) reproducibility audit. **Status: SUBMITTED to J. Empirical Finance / J. Forecasting. Audit NEEDS-FIX.** Score: 155 numbers extracted, 86 matched (55.5%), 8 approx, 7 divergent, 54 no-source (34.8%). When source exists 85.1% match rate. **5 critical issues**: D1 FEZ DM t=3.45 (Abstract+Table 6+Conclusion \u5f15\u7528) **NO SCRIPT source** \u2014 K949 \u6700\u8fd1 t=3.84 \u4f46 OOS 2016-2025 log-exp \u975e A4f 2019-2026. D2 STOXX50E t=3.64 OOS period mismatch. D3 **Table 11 \u6b98\u5dee\u8a3a\u65b7\u5168\u8868\u7121 source** \u2014 kurtosis 3.065\u21921.238 (-59.6%), JB 938.8\u2192224.2 (-76.1%), skewness -0.856\u2192-0.594. D4 Sensitivity Table 12 16 \u500b DM t \u5168\u7121 JSON source. D5 0050.TW t=1.44 paper \u8207 K997 (1.677) + K1098 (2.68) \u90fd\u4e0d\u7b26. **\u6838\u5fc3 solid**: Table 3 (17 model horse race), Table 4-5 (DM/MCS), Tables 8-9 (VaR/ES), Table 10 (VRP) \u53ef\u4e00\u9375\u91cd\u73fe. **\u6295\u7a3f submitted \u4f46 reproducible \u4e0d\u5b8c\u6574** \u2014 reviewer \u8981 replication \u6642 D3 \u6574\u5f35\u6b98\u5dee\u8868\u6703\u88ab\u6293. Blocker \u6e05\u55ae: \u64f4 K995.py \u5132\u5b58\u6b98\u5dee\u8a3a\u65b7 (1h), \u5efa FEZ/STOXX50E A4f-spec OOS 2019-2026 \u5be6\u9a57 (2h), \u5efa sensitivity JSON (3h), \u627e 0050.TW t=1.44 \u4f86\u6e90 (1h). commit 4e84d37f. Output: paper/garch-x-vix/reproducibility_audit/.",
+    "evidence": [
+      "paper/garch-x-vix/reproducibility_audit/diff_report.md",
+      "paper/garch-x-vix/reproducibility_audit/README.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T16:24:05.006066"
   }
 ]

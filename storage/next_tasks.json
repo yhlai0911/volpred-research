@@ -1063,7 +1063,7 @@
     "status": "pending",
     "priority": 4,
     "created_at": "2026-04-17T16:04:03+08:00",
-    "description": "用戶 2026-04-17 強化規則：『所有論文中的腳本和資料 都要能直接跑出最新的論文內結果』。需對所有 10 個 paper/ 做 reproducibility audit：(1) 對每個 paper 跑其 scripts/ 或 experiments/kXXX 取得最新 output; (2) 對比 main.tex / main_v2.tex body 內寫的數字（Table, Figure, inline 結果）; (3) 列 diff report：per-paper (matched / approx / divergent) 數字清單; (4) divergent cases 走三選一：修腳本 / 修論文 / 明記 errata. 特別注意：- Paper 4 (vix-sufficiency v2): 剛整合 9 個新實驗，需確認 main_v2.tex 的數字對得上 K1135/K1137/K1138/K1139/K1143 JSON; - Paper 5 (volatility-absorption): 承 VolAbsorption_missing_scripts_recovery 結果; - Paper 9 (garch-x-vix, submitted): 確認投稿版的數字當前腳本能重現; - Paper 2/3/6 等其他 paper 依序. **Blocker if any paper's script cannot reproduce its own paper numbers**.",
+    "description": "用戶 2026-04-17 強化規則：『所有論文中的腳本和資料 都要能直接跑出最新的論文內結果』。需對所有 10 個 paper/ 做 reproducibility audit：(1) 對每個 paper 跑其 scripts/ 或 experiments/kXXX 取得最新 output; (2) 對比 main.tex / main_v2.tex body 內寫的數字（Table, Figure, inline 結果）; (3) 列 diff report：per-paper (matched / approx / divergent) 數字清單; (4) divergent cases 走三選一：修腳本 / 修論文 / 明記 errata. 特別注意：- Paper 4 (vix-sufficiency v2): 剛整合 9 個新實驗，需確認 main_v2.tex 的數字對得上 K1135/K1137/K1138/K1139/K1143 JSON; - Paper 5 (volatility-absorption): 承 VolAbsorption_missing_scripts_recovery 結果; - Paper 9 (garch-x-vix, submitted): 確認投稿版的數字當前腳本能重現; - Paper 2/3/6 等其他 paper 依序. **Blocker if any paper's script cannot reproduce its own paper numbers**. | 2026-04-17 progress: Paper 1 (commit a9f25e9f, 48% match, 3 follow-ups), Paper 9 (commit 4e84d37f, 55.5% match NEEDS-FIX submitted-paper 4 blockers). Paper 2/3 audit 跑中.",
     "tags": [
       "paper",
       "reproducibility",
@@ -1137,6 +1137,59 @@
       "paper-1",
       "precision-fix",
       "main-thread-only"
+    ]
+  },
+  {
+    "id": "Paper9_D3_residual_diagnostics_source",
+    "title": "Paper 9 BLOCKER: Table 11 殘差診斷全表無 script source — 擴 K995.py",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T16:24:26+08:00",
+    "description": "Paper 9 audit (commit 4e84d37f) 發現 Table 11 整張殘差診斷表（kurtosis 3.065→1.238 -59.6%, JB 938.8→224.2 -76.1%, skewness -0.856→-0.594）完全無對應 script JSON. Paper 已 submitted → reviewer 若要 replication 會暴露. **動作**: 擴 K995.py 計算並儲存殘差統計量 (A4f vs GJR kurtosis/skewness/JB) 到 k995_results.json. 約 1 小時. 完成後重跑 Paper 9 audit 驗證 D3 resolved. 優先於 Paper 10 kickoff.",
+    "tags": [
+      "paper-9",
+      "submitted-paper",
+      "replication-blocker",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper9_D1D2_FEZ_STOXX_A4f_2019_2026",
+    "title": "Paper 9 BLOCKER: FEZ t=3.45 + STOXX50E t=3.64 無 A4f 2019-2026 source",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T16:24:26+08:00",
+    "description": "Paper 9 audit 發現 FEZ DM t=3.45 (Abstract+Table 6+Conclusion 引用) 與 STOXX50E t=3.64 無 script 能 reproduce with A4f spec + OOS 2019-2026. K949 最近但用 log-exp + OOS 2016-2025. **動作**: 建立 k1144 或 re-run K949 with exact A4f spec + OOS 2019-2026 + FEZ + STOXX50E assets. 約 2 小時. 若 reproduced ≠ 3.45/3.64 → 主線程決 (a) errata (b) paper re-submit. 若 ≠ 則為 submitted paper 重大 errata.",
+    "tags": [
+      "paper-9",
+      "submitted-paper",
+      "cross-asset",
+      "main-thread-decision"
+    ]
+  },
+  {
+    "id": "Paper9_D4_sensitivity_table_source",
+    "title": "Paper 9: Sensitivity Table 12 (16 DM t) 全無 JSON source",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T16:24:26+08:00",
+    "description": "Paper 9 audit 發現 Sensitivity Table 12 的 refit freq / window size / VIX variants 共 16 個 DM t 無任何 JSON source. **動作**: 建 k988_sensitivity.py 專用實驗 reproduce Table 12. 約 3 小時.",
+    "tags": [
+      "paper-9",
+      "sensitivity",
+      "replication"
+    ]
+  },
+  {
+    "id": "Paper9_D5_0050TW_t144_source",
+    "title": "Paper 9: 0050.TW DM t=1.44 setting 不明",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:24:26+08:00",
+    "description": "Paper 9 audit: tex t=1.44 但 K997 t=1.677, K1098 t=2.68. 找不到生成 1.44 的設定. **動作**: 主線程檢查 paper 草稿期 notebook 或 deprecated 腳本找出 1.44 來源; 若找不到 → 更新 tex 用 K997 (1.677) 或 K1098 (2.68) 的 canonical 結果. 影響：t=1.44 NS 與 t=1.677 NS 結論相同, t=2.68 Harvey 不顯著但超過 2.0.",
+    "tags": [
+      "paper-9",
+      "data-forensics"
     ]
   }
 ]
