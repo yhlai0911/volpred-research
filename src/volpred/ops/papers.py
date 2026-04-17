@@ -232,8 +232,8 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
 
     metrics: dict[str, int | None] = {}
 
-    # Find the best tex file (v2 preferred over v1)
-    for name in ["main_v2.tex", "main.tex"]:
+    # Find the best tex file (v3 > v2 > v1)
+    for name in ["main_v3.tex", "main_v2.tex", "main.tex"]:
         tex = paper_dir / name
         if tex.exists():
             break
@@ -245,7 +245,7 @@ def _count_tex_metrics(paper_dir: Path) -> dict[str, int | None]:
     # Count \bibitem entries (citations)
     citations = len(re.findall(r"\\bibitem", content))
     # Also check body files
-    for body_name in ["body_v2.tex", "body.tex"]:
+    for body_name in ["body_v3.tex", "body_v2.tex", "body.tex"]:
         body = paper_dir / body_name
         if body.exists():
             body_content = body.read_text(errors="ignore")
@@ -296,9 +296,9 @@ def update_paper_full(
     # 1. Auto-detect metrics
     metrics = _count_tex_metrics(paper_dir)
 
-    # 2. Find best PDF (v2 preferred)
+    # 2. Find best PDF (v3 > v2 > v1)
     pdf_path = None
-    for name in ["main_v2.pdf", "main.pdf"]:
+    for name in ["main_v3.pdf", "main_v2.pdf", "main.pdf"]:
         candidate = paper_dir / name
         if candidate.exists():
             pdf_path = candidate
