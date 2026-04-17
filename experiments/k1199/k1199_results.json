@@ -1,0 +1,733 @@
+{
+  "experiment_id": "K1199",
+  "task_id_mapping": "next_tasks.json -> K1133_expanding_window (K1133 reused by BTC GAS-t, so we use K1199 dir)",
+  "title": "Expanding-window adaptive VIX quantile for K1128 OFI->jump logit (error_log 2026-04-13 fix #2)",
+  "timestamp": "2026-04-18T00:51:32.565064",
+  "seed": 42,
+  "runtime_sec": 2.893041,
+  "data_source": "TAIFEX TX 5-min bars 2017-2021 (K1124 parquet cache)",
+  "is_period": "2017-2019",
+  "oos_period": "2020-2021",
+  "refit_cadence_bars": 252,
+  "n_bars_valid": 52412,
+  "n_is": 31498,
+  "n_oos": 20914,
+  "n_is_jumps": 81,
+  "n_oos_jumps": 33,
+  "jump_detection": {
+    "method": "Lee-Mykland K=16 strictly-past BV",
+    "gumbel_thresh_alpha_0.01": 5.125598054567598,
+    "n_jumps_total": 115
+  },
+  "tertile_cutoffs_IS_fixed_K1128": {
+    "cutoff_33": 12.069999694824219,
+    "cutoff_67": 14.989999771118164
+  },
+  "oos_tertile_coverage": {
+    "K1128_IS_fixed": {
+      "low": 0,
+      "mid": 854,
+      "high": 20060
+    },
+    "K1199_expanding": {
+      "low": 0,
+      "mid": 6816,
+      "high": 14098
+    }
+  },
+  "is_tertile_coverage_expanding": {
+    "low": 6601,
+    "mid": 9947,
+    "high": 14950
+  },
+  "models": {
+    "M_base": {
+      "n_params": 4,
+      "nll_is": 557.0556458071347,
+      "beta": [
+        -6.261803083749046,
+        2.276980104523164,
+        1.529129428130548,
+        -0.8859756470268693
+      ],
+      "features": [
+        "intercept",
+        "jump_curr",
+        "|OFI|",
+        "OFI"
+      ]
+    },
+    "M_tertile": {
+      "n_params": 8,
+      "nll_is": 554.8611340504539,
+      "beta": [
+        -6.227184229298453,
+        2.2308253169006798,
+        2.0836428657467643,
+        -0.4170860584742328,
+        -1.632016648548323,
+        -1.1935605671028855,
+        -1.8147529953845836,
+        0.04722706433117147
+      ],
+      "features": [
+        "intercept",
+        "jump_curr",
+        "|OFI|",
+        "OFI",
+        "mid*|OFI|",
+        "high*|OFI|",
+        "mid*OFI",
+        "high*OFI"
+      ]
+    },
+    "M_volnorm": {
+      "n_params": 4,
+      "nll_is": 550.1169787794558,
+      "beta": [
+        -6.250463035499583,
+        0.002978118069406507,
+        0.0004514632847007385,
+        -3.453517228255692e-05
+      ],
+      "features": [
+        "intercept",
+        "jump_curr",
+        "|OFI|/\u03c3",
+        "OFI/\u03c3"
+      ]
+    },
+    "M_expanding_IS": {
+      "n_params": 8,
+      "nll_is": 554.6596395833584,
+      "beta": [
+        -6.209459423795235,
+        2.223265519946187,
+        1.8531771452681984,
+        0.1281801608452777,
+        -0.29301298638001133,
+        -1.5509152406463664,
+        -1.7205812806044296,
+        -1.1683880271313158
+      ],
+      "features": [
+        "intercept",
+        "jump_curr",
+        "|OFI|",
+        "OFI",
+        "mid_exp*|OFI|",
+        "high_exp*|OFI|",
+        "mid_exp*OFI",
+        "high_exp*OFI"
+      ]
+    },
+    "M_expanding_final_refit": {
+      "beta": [
+        -6.346084445945277,
+        2.3986136961096,
+        2.222912140263101,
+        0.10365683913623577,
+        -0.5694793067536406,
+        -1.806067600489278,
+        -2.021822679649845,
+        -1.4792802520770443
+      ],
+      "effective_beta_absofi_by_regime": {
+        "low": 2.222912140263101,
+        "mid": 1.6534328335094606,
+        "high": 0.4168445397738232
+      },
+      "effective_beta_sgnofi_by_regime": {
+        "low": 0.10365683913623577,
+        "mid": -1.9181658405136093,
+        "high": -1.3756234129408085
+      },
+      "n_refits": 82,
+      "refit_log": [
+        {
+          "refit_at_oos_bar": 252,
+          "n_train": 31750,
+          "nll": 555.3119410487484,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 504,
+          "n_train": 32002,
+          "nll": 556.0074352663489,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 756,
+          "n_train": 32254,
+          "nll": 562.432031462072,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 1008,
+          "n_train": 32506,
+          "nll": 569.0985676358714,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 1260,
+          "n_train": 32758,
+          "nll": 569.7735911499456,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 1512,
+          "n_train": 33010,
+          "nll": 570.2879273592725,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 1764,
+          "n_train": 33262,
+          "nll": 570.7883029564881,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 2016,
+          "n_train": 33514,
+          "nll": 571.2844309300294,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 2268,
+          "n_train": 33766,
+          "nll": 571.7669447490426,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 2520,
+          "n_train": 34018,
+          "nll": 572.2455186975618,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 2772,
+          "n_train": 34270,
+          "nll": 579.1612329551438,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 3024,
+          "n_train": 34522,
+          "nll": 579.6462808661307,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 3276,
+          "n_train": 34774,
+          "nll": 586.4436236700775,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 3528,
+          "n_train": 35026,
+          "nll": 586.9391231631466,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 3780,
+          "n_train": 35278,
+          "nll": 587.429418579204,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 4032,
+          "n_train": 35530,
+          "nll": 587.9142876565538,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 4284,
+          "n_train": 35782,
+          "nll": 588.3911065046408,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 4536,
+          "n_train": 36034,
+          "nll": 588.8715181984444,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 4788,
+          "n_train": 36286,
+          "nll": 595.7284178775742,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 5040,
+          "n_train": 36538,
+          "nll": 602.385815188093,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 5292,
+          "n_train": 36790,
+          "nll": 602.8635532445256,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 5544,
+          "n_train": 37042,
+          "nll": 603.3367897738743,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 5796,
+          "n_train": 37294,
+          "nll": 603.8121790482805,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 6048,
+          "n_train": 37546,
+          "nll": 604.270638459236,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 6300,
+          "n_train": 37798,
+          "nll": 604.7235308484552,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 6552,
+          "n_train": 38050,
+          "nll": 623.7468577009106,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 6804,
+          "n_train": 38302,
+          "nll": 624.2207424693493,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 7056,
+          "n_train": 38554,
+          "nll": 624.6895142426135,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 7308,
+          "n_train": 38806,
+          "nll": 625.1583263903177,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 7560,
+          "n_train": 39058,
+          "nll": 631.681567768164,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 7812,
+          "n_train": 39310,
+          "nll": 632.145100237347,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 8064,
+          "n_train": 39562,
+          "nll": 632.6123241048821,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 8316,
+          "n_train": 39814,
+          "nll": 639.557747324067,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 8568,
+          "n_train": 40066,
+          "nll": 640.0484737370913,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 8820,
+          "n_train": 40318,
+          "nll": 640.5111632051768,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 9072,
+          "n_train": 40570,
+          "nll": 640.9755041200959,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 9324,
+          "n_train": 40822,
+          "nll": 641.4397578996814,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 9576,
+          "n_train": 41074,
+          "nll": 641.89336793343,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 9828,
+          "n_train": 41326,
+          "nll": 648.7143309801861,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 10080,
+          "n_train": 41578,
+          "nll": 649.1639090400307,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 10332,
+          "n_train": 41830,
+          "nll": 655.6669366049998,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 10584,
+          "n_train": 42082,
+          "nll": 656.1082488802915,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 10836,
+          "n_train": 42334,
+          "nll": 656.5396285344971,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 11088,
+          "n_train": 42586,
+          "nll": 663.4135144964333,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 11340,
+          "n_train": 42838,
+          "nll": 663.8522993919719,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 11592,
+          "n_train": 43090,
+          "nll": 664.2872637642138,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 11844,
+          "n_train": 43342,
+          "nll": 664.7146198804523,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 12096,
+          "n_train": 43594,
+          "nll": 665.1383670302571,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 12348,
+          "n_train": 43846,
+          "nll": 665.5637902434954,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 12600,
+          "n_train": 44098,
+          "nll": 671.8490365900261,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 12852,
+          "n_train": 44350,
+          "nll": 672.2865220244504,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 13104,
+          "n_train": 44602,
+          "nll": 678.8798084758305,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 13356,
+          "n_train": 44854,
+          "nll": 679.3658240201928,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 13608,
+          "n_train": 45106,
+          "nll": 679.862358029696,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 13860,
+          "n_train": 45358,
+          "nll": 680.3053930105565,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 14112,
+          "n_train": 45610,
+          "nll": 687.1735490509509,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 14364,
+          "n_train": 45862,
+          "nll": 687.5944593619895,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 14616,
+          "n_train": 46114,
+          "nll": 694.4556552096332,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 14868,
+          "n_train": 46366,
+          "nll": 694.9281343164571,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 15120,
+          "n_train": 46618,
+          "nll": 705.1161051582814,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 15372,
+          "n_train": 46870,
+          "nll": 711.8890910247085,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 15624,
+          "n_train": 47122,
+          "nll": 712.38047350516,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 15876,
+          "n_train": 47374,
+          "nll": 719.283296735077,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 16128,
+          "n_train": 47626,
+          "nll": 719.7554494158252,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 16380,
+          "n_train": 47878,
+          "nll": 720.2259926100473,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 16632,
+          "n_train": 48130,
+          "nll": 720.6946181049065,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 16884,
+          "n_train": 48382,
+          "nll": 721.1728694468183,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 17136,
+          "n_train": 48634,
+          "nll": 721.6203255881004,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 17388,
+          "n_train": 48886,
+          "nll": 722.0809363854762,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 17640,
+          "n_train": 49138,
+          "nll": 722.5447976336856,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 17892,
+          "n_train": 49390,
+          "nll": 729.1665745480561,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 18144,
+          "n_train": 49642,
+          "nll": 729.6108964288452,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 18396,
+          "n_train": 49894,
+          "nll": 730.0174728537993,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 18648,
+          "n_train": 50146,
+          "nll": 730.4621951174554,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 18900,
+          "n_train": 50398,
+          "nll": 743.6429665253727,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 19152,
+          "n_train": 50650,
+          "nll": 744.1251316520825,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 19404,
+          "n_train": 50902,
+          "nll": 762.5875486205472,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 19656,
+          "n_train": 51154,
+          "nll": 769.4187602691807,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 19908,
+          "n_train": 51406,
+          "nll": 776.3369031624469,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 20160,
+          "n_train": 51658,
+          "nll": 783.0658141272339,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 20412,
+          "n_train": 51910,
+          "nll": 789.9066137564877,
+          "success": true
+        },
+        {
+          "refit_at_oos_bar": 20664,
+          "n_train": 52162,
+          "nll": 796.9099072482513,
+          "success": true
+        }
+      ]
+    }
+  },
+  "OOS_log_loss": {
+    "base": 0.011707634471523584,
+    "tertile": 0.011720834011924587,
+    "volnorm": 0.01173846173676338,
+    "expanding": 0.011645884931261515
+  },
+  "OOS_AUC": {
+    "base": 0.5542707376431815,
+    "tertile": 0.5558859511256427,
+    "volnorm": 0.6712162572035184,
+    "expanding": 0.5483526418826452
+  },
+  "OOS_Brier": {
+    "base": 0.0015736858605999988,
+    "tertile": 0.0015742582183395559,
+    "volnorm": 0.0015752936651962832,
+    "expanding": 0.0015735522017606871
+  },
+  "spearman_fitted_vs_realized": {
+    "base": {
+      "rho": 0.007461941944932225,
+      "p": 0.2805555423222559
+    },
+    "expanding": {
+      "rho": 0.006648234725535577,
+      "p": 0.3363515084344882
+    }
+  },
+  "LRT": {
+    "expanding_vs_base": {
+      "chi2": 4.792012447552679,
+      "df": 4,
+      "p": 0.30931159174218936
+    },
+    "tertile_vs_base": {
+      "chi2": 4.389023513361735,
+      "df": 4,
+      "p": 0.3559099621814814
+    }
+  },
+  "DM_HLN": {
+    "exp_vs_base": {
+      "t": 1.1433015421188153,
+      "t_plain": 1.1433288765011396,
+      "mean_d": 6.174954026207085e-05,
+      "se": 5.4008554783501354e-05,
+      "n": 20914
+    },
+    "exp_vs_tertile": {
+      "t": 1.4352378999075084,
+      "t_plain": 1.4352722139882972,
+      "mean_d": 7.494908066307422e-05,
+      "se": 5.221941868073071e-05,
+      "n": 20914
+    },
+    "exp_vs_volnorm": {
+      "t": 0.812005501737963,
+      "t_plain": 0.8120249153992031,
+      "mean_d": 9.25768055018658e-05,
+      "se": 0.00011400734601395046,
+      "n": 20914
+    },
+    "tertile_vs_base": {
+      "t": -0.41572542480188585,
+      "t_plain": -0.4157353640849925,
+      "mean_d": -1.3199540401003372e-05,
+      "se": 3.174986191048417e-05,
+      "n": 20914
+    },
+    "volnorm_vs_base": {
+      "t": -0.26703089646993844,
+      "t_plain": -0.26703728072146576,
+      "mean_d": -3.082726523979501e-05,
+      "se": 0.00011544180331865161,
+      "n": 20914
+    }
+  },
+  "hypotheses": {
+    "H1_coverage_balanced": false,
+    "H2_DM_gt3_positive": false,
+    "H2_DM_gt2_positive": false,
+    "H3_regime_spread_gt_0.05": true,
+    "H4_beats_K1128_tertile": false
+  },
+  "verdict": "NULL",
+  "references": [
+    "Lee & Mykland (2008) RFS 21(6), 2535-2563",
+    "Cont, Kukanov, Stoikov (2014) JFE 12(1), 47-88",
+    "Harvey, Leybourne, Newbold (1997) IJF 13(2), 281-291",
+    "Harvey, Liu, Zhu (2016) RFS 29(1), 5-68 \u2014 multiple testing t-thresholds"
+  ]
+}
