@@ -1823,5 +1823,32 @@
       "split-sample",
       "new-experiment"
     ]
+  },
+  {
+    "id": "Non_K_experiments_forensic_sweep",
+    "title": "CRITICAL 未掃到: 非 K 編號 experiments 目錄 ~50 個可能含 paper no-source 數字",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T17:52:41+08:00",
+    "description": "用戶 2026-04-17 發現: rescan 只掃 experiments/k*/ 漏了 ~50 個 non-K 編號目錄. Relevant non-K folders per paper: **Paper 1 JBF**: jbf_robustness_suite, structural_leverage_panel, structural_leverage_index, gjr_vs_ewma_crisis, qlike_error_decomposition, caviar_test. **Paper 2 taiwan**: taiwan_paper_fixes. **Paper 3 VT**: vt_tsmom_cross_asset, rebalance_freq_hybrid_vt, multi_asset_hybrid_vt, multi_asset_hybrid_vt_v2, momentum_overlay_cross_asset_validation. **Paper 4 vix-suff**: vix_sufficiency_boundary, vix_term_structure_vol_pred(_v2), vix_term_structure_trading, vix_zone_cross_period_validation, vix_death_zone_enhanced. **Paper 5 vol-absorption**: vrp_regime_decomposition, rate_hike_vt_experiment. **Paper 6 PRG**: realized_garch_pilot, pairs_trading_garch. **Paper 7 insurance**: vt_insurance_pricing. **Paper 8 ABM**: vt_crowding_simulation, btc_liquidation_abm. **Paper 9 GARCH-X**: garch_midas_test, gld_inventory_vol. **動作**: 啟 agent forensic — 對每個 paper rescan STILL_NO_SOURCE + already-rescanned no-source 重掃, 包含 non-K 目錄 + experiments/ root level 檔. 可能大量降低 STILL_NO_SOURCE count (K1045 pattern 延伸). Agent-launchable.",
+    "tags": [
+      "forensic",
+      "non-K-dirs",
+      "all-papers",
+      "critical-discovery"
+    ]
+  },
+  {
+    "id": "K716_722_file_placement_fixed",
+    "title": "DONE: K716-K722 .py + diff.md + results_reconstructed 搬回各自目錄",
+    "status": "completed",
+    "priority": 2,
+    "created_at": "2026-04-17T17:52:41+08:00",
+    "completed_at": "2026-04-17T17:52:41+08:00",
+    "description": "K716-K722 reconstruction agent (2026-04-17 earlier) 把 .py/.md/.json 寫到 experiments/ root 而非 experiments/k71X/. 主線程 2026-04-17 修正 — 全部 21 個檔案 (7 .py + 7 diff.md + 7 reconstructed.json) 搬回正確位置.",
+    "tags": [
+      "cleanup",
+      "file-placement"
+    ]
   }
 ]
