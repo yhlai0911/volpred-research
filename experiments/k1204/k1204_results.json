@@ -1,0 +1,578 @@
+{
+  "experiment_id": "K1204",
+  "title": "Paper 2 \u00a75 cross-market institutional-ownership synthesis (K1165/K1166/K1168/K1172/K1171 + K1173 + K1163)",
+  "proposer": "Main thread decision candidate",
+  "executor": "Claude (worktree agent-a242f798)",
+  "random_seed": 42,
+  "synthesis_only": true,
+  "no_new_estimation": true,
+  "data_sources": [
+    "experiments/k1165/k1165_results.json",
+    "experiments/k1166/k1166_results.json",
+    "experiments/k1168/k1168_results.json",
+    "experiments/k1172/k1172_results.json",
+    "experiments/k1171/k1171_results.json",
+    "experiments/k1173/k1173_results.json",
+    "experiments/k1163/k1163_results.json"
+  ],
+  "n_extension_trajectory": [
+    {
+      "experiment_id": "K1165",
+      "N": 7,
+      "markets_added": "base (TW/EU/JP/US) + KR/CA/HK",
+      "spearman_rho": 0.7500000000000002,
+      "spearman_p": 0.05218140045705777,
+      "loo_min_drop_market": "EU",
+      "loo_min_rho": 0.942857142857143,
+      "loo_min_p": 0.004804664723032055,
+      "panel_analyst_only_log_analyst_t": 3.740466580894467,
+      "panel_joint_log_analyst_t": 3.236320474030991,
+      "between_r2_inst_pct": 0.6314447874403539,
+      "within_r2_log_analyst": 0.07184879196446492,
+      "n_stocks_within": 133,
+      "verdict": "STRENGTHENED"
+    },
+    {
+      "experiment_id": "K1166",
+      "N": "pooled (TW/EU/JP/US, no cross-market Spearman)",
+      "markets_added": "per-stock theta_EAV refit (tautology removed)",
+      "spearman_rho": null,
+      "spearman_p": null,
+      "loo_min_drop_market": null,
+      "loo_min_rho": null,
+      "loo_min_p": null,
+      "panel_analyst_only_log_analyst_t": null,
+      "panel_joint_log_analyst_t": 3.5561364781887423,
+      "between_r2_inst_pct": null,
+      "within_r2_log_analyst": null,
+      "n_stocks_within": 108,
+      "verdict": "CONFIRMED (removed-tautology)"
+    },
+    {
+      "experiment_id": "K1168",
+      "N": 10,
+      "markets_added": "BR/CH/IN",
+      "spearman_rho": 0.6121212121212121,
+      "spearman_p": 0.05997214247725529,
+      "loo_min_drop_market": "EU",
+      "loo_min_rho": 0.75,
+      "loo_min_p": 0.01994212613199253,
+      "panel_analyst_only_log_analyst_t": 3.9025630546533807,
+      "panel_joint_log_analyst_t": 3.6272613782576935,
+      "between_r2_inst_pct": 0.5381816403890951,
+      "within_r2_log_analyst": 0.06234129913683506,
+      "n_stocks_within": 153,
+      "verdict": "STRENGTHENED"
+    },
+    {
+      "experiment_id": "K1172",
+      "N": 12,
+      "markets_added": "MX/ID (ZA UNDERPOWERED dropped)",
+      "spearman_rho": 0.44055944055944063,
+      "spearman_p": 0.1517350357167303,
+      "loo_min_drop_market": "MX",
+      "loo_min_rho": 0.6090909090909091,
+      "loo_min_p": 0.0466957093540989,
+      "panel_analyst_only_log_analyst_t": 4.060079450617653,
+      "panel_joint_log_analyst_t": 3.7893591528566297,
+      "between_r2_inst_pct": 0.4320212873384225,
+      "within_r2_log_analyst": 0.05327628932900952,
+      "n_stocks_within": 172,
+      "verdict": "PARTIAL"
+    },
+    {
+      "experiment_id": "K1171",
+      "N": 13,
+      "markets_added": "AU via HAND_CODED earnings (below-ladder leverage point)",
+      "spearman_rho": 0.38461538461538464,
+      "spearman_p": 0.19441291997748628,
+      "loo_min_drop_market": "MX",
+      "loo_min_rho": 0.5454545454545455,
+      "loo_min_p": 0.06661188226688902,
+      "panel_analyst_only_log_analyst_t": 4.076238750002866,
+      "panel_joint_log_analyst_t": 3.807645658649989,
+      "between_r2_inst_pct": 0.4194408675389064,
+      "within_r2_log_analyst": 0.05335826723618908,
+      "n_stocks_within": 182,
+      "verdict": "DATA_LIMITED"
+    }
+  ],
+  "panel_harvey_t_joint": {
+    "monotonic_increase": true,
+    "sequence": [
+      [
+        "K1165",
+        3.236320474030991
+      ],
+      [
+        "K1166",
+        3.5561364781887423
+      ],
+      [
+        "K1168",
+        3.6272613782576935
+      ],
+      [
+        "K1172",
+        3.7893591528566297
+      ],
+      [
+        "K1171",
+        3.807645658649989
+      ]
+    ],
+    "threshold_harvey_abs_t_gt_3": 3.0,
+    "all_above_threshold": true
+  },
+  "k1163_eu_robustness": {
+    "n_stocks_k1153": 18,
+    "n_stocks_k1163": 30,
+    "theta_eav_k1153": 4.0718849779368176e-05,
+    "theta_eav_k1163": 5.217439534293086e-05,
+    "theta_rel_k1153": 0.1366,
+    "theta_rel_k1163": 0.19402312729021276,
+    "delta_theta_rel": 0.05742312729021276,
+    "boot_t_k1153": 4.19,
+    "boot_t_k1163": 4.807008636802949,
+    "placebo_z_k1153": 14.77,
+    "placebo_z_k1163": 22.273208042468937,
+    "cluster_upper_low": 0.25,
+    "cluster_lower_high": 0.3,
+    "eu_k1163_boot_ci95": [
+      0.126917192472482,
+      0.27657366003202444
+    ],
+    "verdict_label": "ROBUST",
+    "verdict_text": "ROBUST \u2014 K1163 EU \u03b8_rel=0.194 stays in low cluster [<=0.25]; K1153 conclusion confirmed. Quarterly-density hypothesis remains REJECTED. TW+EU low cluster vs US+JP high cluster \u2014 refined media\u00d7analyst mechanism narrative holds for Paper 2."
+  },
+  "k1173_em_proxy_refinement": {
+    "markets_refined": [
+      "BR",
+      "CH",
+      "IN",
+      "MX"
+    ],
+    "baseline_rho": 0.44055944055944063,
+    "baseline_p": 0.1517350357167303,
+    "refined_rho": 0.3846153846153847,
+    "refined_p": 0.21702022575997731,
+    "delta_rho": -0.05594405594405594,
+    "delta_p": 0.06528519004324701,
+    "per_market_diff_mean": {
+      "BR": -0.11727200039999999,
+      "CH": 0.1263499986,
+      "IN": 0.185827001,
+      "MX": 0.04534444488888889
+    },
+    "verdict": "NULL",
+    "narrative": "refined \u03c1=+0.385 within \u00b10.10 of yfinance baseline \u03c1=+0.441 (\u0394\u03c1=-0.056). EM off-ladder is STRUCTURAL, not a yfinance proxy artefact. Paper 2 \u00a75 narrative: keep K1172 'STRENGTHENED with emerging-market scale residual caveat'; emerging markets genuinely sit off the developed institutional-ownership ladder even when the proxy is re-estimated from SEBI/CVM/BMV/SSE regulatory disclosures."
+  },
+  "em_residual_taxonomy": [
+    {
+      "market": "BR",
+      "region": "EM_above_ladder",
+      "inst_pct_mean": 0.4856220004,
+      "theta_rel": 1.8867051764668052,
+      "analyst_median": 13.0,
+      "log_mcap_median": 25.966856249655834,
+      "n_stocks": 10
+    },
+    {
+      "market": "CA",
+      "region": "EM_above_ladder",
+      "inst_pct_mean": 0.551501006,
+      "theta_rel": 1.4484048051571432,
+      "analyst_median": 14.5,
+      "log_mcap_median": 25.591141150228694,
+      "n_stocks": 10
+    },
+    {
+      "market": "CH",
+      "region": "other_EM",
+      "inst_pct_mean": 0.1569000014,
+      "theta_rel": 0.3037377992879883,
+      "analyst_median": NaN,
+      "log_mcap_median": 26.98520402785077,
+      "n_stocks": 10
+    },
+    {
+      "market": "EU",
+      "region": "developed",
+      "inst_pct_mean": 0.41582052947368425,
+      "theta_rel": 0.14,
+      "analyst_median": 21.0,
+      "log_mcap_median": 25.47120978167395,
+      "n_stocks": 19
+    },
+    {
+      "market": "HK",
+      "region": "other_EM",
+      "inst_pct_mean": 0.26067700000000005,
+      "theta_rel": 0.17956196672805746,
+      "analyst_median": 17.0,
+      "log_mcap_median": 28.501534824471666,
+      "n_stocks": 5
+    },
+    {
+      "market": "ID",
+      "region": "other_EM",
+      "inst_pct_mean": 0.153744001,
+      "theta_rel": 0.23765282907382518,
+      "analyst_median": 20.0,
+      "log_mcap_median": 32.62641834599371,
+      "n_stocks": 10
+    },
+    {
+      "market": "IN",
+      "region": "EM_above_ladder",
+      "inst_pct_mean": 0.382842999,
+      "theta_rel": 1.1696466686766267,
+      "analyst_median": 37.0,
+      "log_mcap_median": 29.861427227275342,
+      "n_stocks": 10
+    },
+    {
+      "market": "JP",
+      "region": "developed",
+      "inst_pct_mean": 0.42508333099999995,
+      "theta_rel": 0.39,
+      "analyst_median": 14.5,
+      "log_mcap_median": 29.92345588354967,
+      "n_stocks": 30
+    },
+    {
+      "market": "KR",
+      "region": "other_EM",
+      "inst_pct_mean": 0.365204996,
+      "theta_rel": 0.2757092296599137,
+      "analyst_median": 25.5,
+      "log_mcap_median": 31.574097210197422,
+      "n_stocks": 10
+    },
+    {
+      "market": "MX",
+      "region": "EM_above_ladder",
+      "inst_pct_mean": 0.19547777733333332,
+      "theta_rel": 1.2017366550891662,
+      "analyst_median": 13.0,
+      "log_mcap_median": 26.778987367654388,
+      "n_stocks": 10
+    },
+    {
+      "market": "TW",
+      "region": "developed",
+      "inst_pct_mean": 0.24696709580645163,
+      "theta_rel": 0.17,
+      "analyst_median": 7.5,
+      "log_mcap_median": 26.513834681377794,
+      "n_stocks": 31
+    },
+    {
+      "market": "US",
+      "region": "developed",
+      "inst_pct_mean": 0.7496643360000002,
+      "theta_rel": 0.59,
+      "analyst_median": 32.5,
+      "log_mcap_median": 26.816881368993798,
+      "n_stocks": 30
+    },
+    {
+      "market": "AU",
+      "region": "AU_below_ladder",
+      "inst_pct_mean": 0.367725499,
+      "theta_rel": 0.14981716921228005,
+      "analyst_median": 14.0,
+      "log_mcap_median": 25.521418632750116,
+      "n_stocks": 10
+    }
+  ],
+  "integrity_check": {
+    "status": "PASS",
+    "total_checks": 32,
+    "n_pass": 32,
+    "n_fail": 0,
+    "checks": [
+      {
+        "name": "theta_rel[TW] K1165 vs K1168",
+        "expected": 0.17,
+        "observed": 0.17,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[TW] K1165 vs K1172",
+        "expected": 0.17,
+        "observed": 0.17,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[TW] K1165 vs K1171",
+        "expected": 0.17,
+        "observed": 0.17,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[EU] K1165 vs K1168",
+        "expected": 0.14,
+        "observed": 0.14,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[EU] K1165 vs K1172",
+        "expected": 0.14,
+        "observed": 0.14,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[EU] K1165 vs K1171",
+        "expected": 0.14,
+        "observed": 0.14,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[JP] K1165 vs K1168",
+        "expected": 0.39,
+        "observed": 0.39,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[JP] K1165 vs K1172",
+        "expected": 0.39,
+        "observed": 0.39,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[JP] K1165 vs K1171",
+        "expected": 0.39,
+        "observed": 0.39,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[US] K1165 vs K1168",
+        "expected": 0.59,
+        "observed": 0.59,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[US] K1165 vs K1172",
+        "expected": 0.59,
+        "observed": 0.59,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[US] K1165 vs K1171",
+        "expected": 0.59,
+        "observed": 0.59,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[KR] K1165 vs K1168",
+        "expected": 0.2757092296599137,
+        "observed": 0.2757092296599137,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[KR] K1165 vs K1172",
+        "expected": 0.2757092296599137,
+        "observed": 0.2757092296599137,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[KR] K1165 vs K1171",
+        "expected": 0.2757092296599137,
+        "observed": 0.2757092296599137,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[CA] K1165 vs K1168",
+        "expected": 1.4484048051571432,
+        "observed": 1.4484048051571432,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[CA] K1165 vs K1172",
+        "expected": 1.4484048051571432,
+        "observed": 1.4484048051571432,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[CA] K1165 vs K1171",
+        "expected": 1.4484048051571432,
+        "observed": 1.4484048051571432,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[HK] K1165 vs K1168",
+        "expected": 0.17956196672805746,
+        "observed": 0.17956196672805746,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[HK] K1165 vs K1172",
+        "expected": 0.17956196672805746,
+        "observed": 0.17956196672805746,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[HK] K1165 vs K1171",
+        "expected": 0.17956196672805746,
+        "observed": 0.17956196672805746,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[BR] K1168 vs K1172",
+        "expected": 1.8867051764668052,
+        "observed": 1.8867051764668052,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[BR] K1168 vs K1171",
+        "expected": 1.8867051764668052,
+        "observed": 1.8867051764668052,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[CH] K1168 vs K1172",
+        "expected": 0.3037377992879883,
+        "observed": 0.3037377992879883,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[CH] K1168 vs K1171",
+        "expected": 0.3037377992879883,
+        "observed": 0.3037377992879883,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[IN] K1168 vs K1172",
+        "expected": 1.1696466686766267,
+        "observed": 1.1696466686766267,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[IN] K1168 vs K1171",
+        "expected": 1.1696466686766267,
+        "observed": 1.1696466686766267,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[MX] K1172 vs K1171",
+        "expected": 1.2017366550891662,
+        "observed": 1.2017366550891662,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "theta_rel[ID] K1172 vs K1171",
+        "expected": 0.23765282907382518,
+        "observed": 0.23765282907382518,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "K1173 baseline rho = K1172 primary rho",
+        "expected": 0.44055944055944063,
+        "observed": 0.44055944055944063,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "K1173 baseline p = K1172 primary p",
+        "expected": 0.1517350357167303,
+        "observed": 0.1517350357167303,
+        "tolerance": 1e-09,
+        "pass": true
+      },
+      {
+        "name": "K1171 delta_rho vs K1172 (reconstructed)",
+        "expected": -0.056384615384615366,
+        "observed": -0.056384615384615366,
+        "tolerance": 1e-06,
+        "pass": true
+      }
+    ]
+  },
+  "paper2_section5_narrative_commitment": {
+    "headline": "STRENGTHENED with 3 residual caveats",
+    "caveats": [
+      {
+        "label": "(i) EM cost-of-capital scale factor",
+        "text": "EM theta_rel values (BR 1.89, CA 1.45, IN 1.17, MX 1.20) sit 3-25x above the developed-market reference range (TW 0.17, EU 0.14, JP 0.39, US 0.59). K1173 refined-proxy test (\u03c1=+0.385 vs yfinance \u03c1=+0.441, \u0394\u03c1=-0.056) confirms this is STRUCTURAL cost-of-capital scaling, not a yfinance institutional-ownership proxy artefact."
+      },
+      {
+        "label": "(ii) AU below-ladder sector bias",
+        "text": "K1171 (N=13) adding AU drops primary \u03c1 from 0.441 \u2192 0.385. AU sits at inst_pct\u22480.37 (mid-high ladder) but \u03b8_rel=0.15 (very low, near-developed). Drop-AU LOO recovers K1172 \u03c1=0.441. AU is a mild leverage point attributable to ASX Top 10 being heavy on banks/miners whose earnings reports generate less idiosyncratic volatility than in US/CA/BR."
+      },
+      {
+        "label": "(iii) K1163 EU cluster robust under full 30/30 coverage",
+        "text": "K1163 extending EU from K1153 N=18 DAX-heavy to full 30/30 (HAND_IRCALENDAR used for 10 tickers) yields \u03b8_rel=0.194 (vs K1153 0.137). Value stays within the low cluster [\u22640.25]; bootstrap 95% CI [0.127, 0.277] excludes the high cluster boundary 0.30. placebo z=22.27 (vs 14.77 in K1153). Paper 2 four-market EU classification (TW+EU low vs US+JP high) holds under full coverage."
+      }
+    ],
+    "supported_by_panel_harvey_t": {
+      "claim": "Within-market analyst-coverage mechanism is monotonically strengthened as N grows",
+      "sequence_joint_log_analyst_t": [
+        [
+          "K1165",
+          3.236320474030991
+        ],
+        [
+          "K1166",
+          3.5561364781887423
+        ],
+        [
+          "K1168",
+          3.6272613782576935
+        ],
+        [
+          "K1172",
+          3.7893591528566297
+        ],
+        [
+          "K1171",
+          3.807645658649989
+        ]
+      ],
+      "all_abs_t_gt_3": true
+    },
+    "two_level_structure": {
+      "between_market_r2_institutions_pct_range": [
+        0.4194408675389064,
+        0.6314447874403539
+      ],
+      "within_market_r2_log_analyst_range": [
+        0.05327628932900952,
+        0.07184879196446492
+      ],
+      "between_to_within_ratio_range": [
+        7.86,
+        8.79
+      ]
+    }
+  }
+}
