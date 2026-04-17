@@ -994,14 +994,14 @@
     "title": "Paper 2 kick-off: EAV Universal-Magnitude paper (main thread, new paper/)",
     "priority": 2,
     "status": "pending",
-    "description": "素材齊 (K1145/K1148/d1/d2/d3/K1149). 建立 paper/eav-universal-magnitude/ + outline.md + literature_review.md + body_v1.tex section skeleton. Abstract 強調 Option 4+: universal-magnitude 真實 firm-event effect, orthogonal to market factor, US+TW IS+OOS robust under PCA absorption test."
+    "description": "Paper 2 K1145 universal-magnitude EAV line is a NEW paper (NOT taiwan-vt — that is different, about VT strategies in Taiwan). Verified 2026-04-17: paper/taiwan-vt/main_v2.tex is VT/GJR focused, has no EAV content. So K1145/K1148 line needs a fresh paper dir, tentative name: paper/eav-universal-magnitude/. Decision already confirmed Option 4+ (K1149 strengthened): universal-magnitude is true firm-event effect orthogonal to factor, US+TW IS+OOS both PASS under PCA absorption test. Scaffolding: outline, abstract (150 words), lit review collection, methodology reuse K1148/K1149 panel DM + stock-bootstrap spec. N=29 TW + N=30 US panel. Execution needs main thread (禁止 agent 寫論文 per CLAUDE.md)."
   },
   {
-    "id": "Paper4_kickoff",
-    "title": "Paper 4 kick-off: Channel-specific robust vol compendium (main thread, new paper/)",
+    "id": "Paper4_v3_integrate_today",
+    "title": "Paper 4 v3: integrate K1117/K1123/K1130/K1131/K1135/K1137/K1138/K1139/K1143 into existing main_v2.tex",
     "priority": 2,
     "status": "pending",
-    "description": "素材齊 (K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143 + K1137 K1135 running). 建立 paper/robust-null-compendium/ + outline. Channel-specific narrative: HAR+VIX asset-heterogeneous, MIDAS universal null, GAS-t architectural incompatible. | K1137 (2026-04-17) regime-conditional PASS 17/54: HAR-RV-X 15/18 cells PASS regime-invariantly (QQQ 3/3, IWM 3/3). Rolling ex-ante 252d quantile fixes K1128 degeneracy. NEW direction: TLT/GLD/USO HAR-structure effect 30-52% might warrant independent subsection. | K1135 (2026-04-17) commodity skew-t diagnostic: QLIKE 0/4 but ES 4/4 PASS. Channel 3 narrative complete: \"asset-class-specific usage pattern — equity harmful, commodity skew-t is concrete tail-risk tool not vol forecasting tool\"."
+    "description": "Paper 4 = paper/vix-sufficiency/main_v2.tex (953 LoC, 39 pages, 40 citations). Already wrote \"universal null across 11 signal families\". Integration plan v2 (2026-04-13) planned 6 integrations (K1116/K1116b/K1118/K1121/K504/K1098). Today added 9 more experiments forming complete channel-specific narrative: Channel 1 HAR+VIX regime-invariant (K1137 17/54 PASS) + mechanism (K1139 VIX is IV aggregator); Channel 2 MIDAS universal null (K1136+K1137+K1138 confirmed); Channel 3 GAS-t asset-class-specific (K1143 equity architectural, K1135 commodity ES-only). Supporting nulls: K1117 matched-pair alt-data, K1123 portfolio allocation, K1130/K1131 regime-fix invalidated. Main thread executes v3 rewrite — likely +10-15 pages, new §11 \"channel-specific universal claims\" section."
   },
   {
     "id": "K1138b_har_structure_vs_gjr",
