@@ -262,6 +262,14 @@
 - [ ] Gemini 審查
 - [ ] `/citation-verifier` 引用驗證
 
+**第三篇相關方向探索：Copula-GARCH for VT / Portfolio Risk Management**（2026-04-17 更新）
+- 動機：用戶 Lai 2024 APFM PRS paper 用 copula-GARCH 成功 → 測試能否推廣 equity-equity portfolios
+- K1100b (5 pairs Student-t/Clayton, 2026-04-13): 5/5 NULL vs DCC-A4f-ASYM, 最強 tail-dep SPY-QQQ λ_L=0.589 DM=+0.624 NS
+- K1100d (VIX regime-switching, 2026-04-17, Scenario B): 5/5 × 4 RS models 全 NULL 全 OOS；**反直覺**：高 VIX 子期 RS 反而略輸 DCC，「regime-switching 捕獲 crisis 尾部」假設不成立；RS 優勢反在 low-VIX
+- K1100c (skew-t/vine asymmetric, 進行中)：若亦 NULL → 三路線（uniform / regime / asymmetric）均 NULL
+- **結構性機制**：50/50 portfolio variance = w₁²h₁+w₂²h₂+2w₁w₂ρs₁s₂ 由 ρ_t 主導，copula 額外尾部資訊在 mixing 下平均化
+- **Paper 3 narrative state machine 預計走向**（待 K1100c 完成觸發）：copula 擴展 general equity FAILS → Paper 3 聚焦 **periodic return + spot-futures (ρ≈0.99 不被 averaging 稀釋)**，不擴 asset universe
+
 **未來可能的第四篇：VIX Sufficient Statistic**
 - 23+ 個指標全被 VIX 吸收的 comprehensive study
 - 適合 Journal of Financial Economics 或 Review of Financial Studies

@@ -26864,5 +26864,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T15:54:06.478916"
+  },
+  {
+    "item_id": "15caeaed",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1100b \u884d\u751f regime extension, \u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1100d VIX Regime-Switching Copula (Gaussian-t, Gaussian-Clayton) \u00d7 3 regime schemes (VIX\u226525 fixed, 75th rolling pctile, 2-state HMM) on 5 equity pairs (SPY-QQQ/XLF/IWM/TLT/GLD). **VERDICT: Scenario B \u2014 DECISIVE NULL**. 5/5 pairs \u00d7 4 RS models \u5168\u90e8\u672a\u9054 Harvey |t|>3.0 \u5168 OOS \u9580\u6abb. **\u53cd\u76f4\u89ba\u767c\u73fe**: \u9ad8 VIX \u5b50\u671f\uff08RS \u7406\u8ad6\u6700\u8a72\u6709\u512a\u52e2\u8655\uff09\u53cd\u800c DCC \u7565\u52dd\u6216\u6253\u5e73\u2014SPY-XLF/IWM/QQQ high-VIX R1 DM = -0.79/-0.54/-0.39, 'regime-switching \u6355\u7372 crisis \u5c3e\u90e8' \u5047\u8a2d\u4e0d\u6210\u7acb. RS \u4e9b\u5fae\u512a\u52e2\u4f86\u81ea low-VIX \u5b50\u671f\uff08Gaussian \u6bd4 uniform Student-t \u7cbe\u7c21\uff09\uff0c\u975e crisis \u5c3e\u90e8\u806f\u52d5. \u6700\u4f73\u8fd1\u9580\u6abb: SPY-IWM RS-Gaussian-t-R2 \u5168 OOS t=+2.59, SPY-XLF RS-Gaussian-t-R2 t=+2.37, \u4ecd\u96e2 3.0 \u6709\u8ddd. SPY-TLT 5/5 copula/RS \u5168 DCC \u986f\u8457\u52dd (t=-3.6 to -4.6)\u2014\u8ca0\u76f8\u95dc\u4e0b copula family structural limitation \u518d\u9a57\u8b49. **\u7d50\u5408 K1100b + K1100d**: Mixing-averaging \u662f 50/50 portfolio \u7d50\u69cb\u6027\u554f\u984c\uff08variance = w1\u00b2h1+w2\u00b2h2+2w1w2\u03c1s1s2 \u7531 \u03c1 \u4e3b\u5c0e\uff09\uff0c\u975e regime-specific. **Paper 3 narrative \u5df2 2/3 \u4e92\u88dc\u5be6\u9a57 null\uff08K1100b uniform + K1100d regime\uff09\uff0c\u5f85 K1100c asymmetric \u5b8c\u6210\u5373\u9032 narrative state machine decision**: \u805a\u7126 periodic return + spot-futures pair (\u03c1\u22480.99 \u4e0d\u88ab averaging \u7a00\u91cb)\uff0c\u4e0d\u64f4 general equity. Script: experiments/k1100d/k1100d.py, commit 4392012f.",
+    "evidence": [
+      "experiments/k1100d/k1100d.py",
+      "experiments/k1100d/k1100d_results.json",
+      "experiments/k1100d/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T16:06:16.628843"
   }
 ]

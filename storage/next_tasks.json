@@ -45,8 +45,9 @@
     "id": "K1100d",
     "title": "K1100d: VIX regime-switching copula",
     "priority": 3,
-    "description": "K1100b 衍生：低 VIX → Gaussian copula；高 VIX → Student-t。Regime-switching 可能超越 uniform DCC。",
-    "status": "pending"
+    "description": "K1100b 衍生：低 VIX → Gaussian copula；高 VIX → Student-t。Regime-switching 可能超越 uniform DCC。 [DONE commit 4392012f: Scenario B DECISIVE NULL. 5/5 × 4 RS models 全無 Harvey t>3. 反直覺：高 VIX 子期反而 DCC 略勝 (RS 優勢在 low-VIX). 結合 K1100b: mixing-averaging 是 50/50 portfolio 結構性問題非 regime-specific. Paper 3 方向進一步收斂：periodic/spot-futures only, 不擴 general equity.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T16:06:21+08:00"
   },
   {
     "id": "K1100f",
