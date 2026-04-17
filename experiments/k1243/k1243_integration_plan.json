@@ -1,0 +1,321 @@
+{
+  "k_id": "K1243",
+  "paper_id": "crypto-fear-channel",
+  "paper_number": 10,
+  "paper_full_title": "The Crypto Fear Channel: Asymmetric, Tail-Concentrated, and Regime-Dependent Volatility Spillover from Bitcoin to Equity Markets",
+  "created_date": "2026-04-17",
+  "worktree": "agent-a82bfd46",
+  "seed": 42,
+  "purpose": "Paper 10 final integration package: v1 abstract + §1 intro gap analysis + main-thread body_v1.tex integration guide.",
+  "deliverables": [
+    {
+      "file": "k1243_abstract_draft.md",
+      "target_words": 250,
+      "actual_words": 250,
+      "status": "ready",
+      "supersedes": "body_v0_intro.tex lines 23-28 (292-word v0 abstract)"
+    },
+    {
+      "file": "k1243_intro_gap_analysis.md",
+      "verdict": "extension_recommended",
+      "recommended_extension_words": 220,
+      "short_fallback_words": 90,
+      "status": "ready",
+      "gaps_identified": 4,
+      "gaps_mandatory": 1,
+      "gaps_optional": 3
+    },
+    {
+      "file": "k1243_body_v1_integration.md",
+      "steps": 11,
+      "estimated_main_thread_minutes_min": 228,
+      "estimated_main_thread_minutes_max": 362,
+      "main_thread_decisions_required": 4,
+      "status": "ready"
+    },
+    {
+      "file": "README.md",
+      "purpose": "K1243 deliverables overview + main-thread adoption path (4-phase)",
+      "status": "ready"
+    },
+    {
+      "file": "k1243_integration_plan.json",
+      "purpose": "Structured per-section source map + dependencies + K1241-pending flags",
+      "status": "ready"
+    }
+  ],
+  "source_map": {
+    "preamble": {
+      "source_file": "paper/crypto-fear-channel/body_v0_intro.tex",
+      "source_lines": "1-22",
+      "format": "latex",
+      "status": "ready",
+      "action": "verbatim_copy"
+    },
+    "abstract": {
+      "source_file": "experiments/k1243/k1243_abstract_draft.md",
+      "source_anchor": "Abstract (v1 draft, 250 words)",
+      "format": "markdown",
+      "status": "ready",
+      "action": "md_to_latex_transcribe",
+      "word_count": 250,
+      "supersedes_v0": true,
+      "k1241_dependency": "hedged placeholder; actual value replaces hedge sentence after K1241 completion"
+    },
+    "section_1_intro": {
+      "source_file_primary": "paper/crypto-fear-channel/body_v0_intro.tex",
+      "source_lines_primary": "30-46",
+      "format_primary": "latex",
+      "source_file_extension": "experiments/k1243/k1243_intro_gap_analysis.md",
+      "source_anchor_extension": "§3 Recommended §1 Extension — Draft paragraph",
+      "format_extension": "markdown",
+      "extension_required": true,
+      "extension_placement": "new paragraph 6, between current paragraph 5 and current contributions paragraph",
+      "extension_words": 220,
+      "extension_short_fallback_words": 90,
+      "status": "ready",
+      "action": "preserve_v0_paragraphs_1_to_5_and_7_insert_extension_paragraph_6"
+    },
+    "section_2_litrev": {
+      "source_file": "experiments/k1237/k1237_litrev_draft.md",
+      "source_anchor": "§2 Literature Review (§2.1-§2.4)",
+      "format": "markdown",
+      "status": "ready",
+      "action": "md_to_latex_transcribe",
+      "word_count": 1006,
+      "subsections": 4,
+      "citations": 22,
+      "k_dependency": [],
+      "main_thread_decisions": []
+    },
+    "section_3_data": {
+      "source_file": "experiments/k1238/k1238_data_draft.md",
+      "source_anchor": "§3.1-§3.3 + Table 1",
+      "format": "markdown",
+      "status": "ready",
+      "action": "md_to_latex_transcribe",
+      "word_count": 600,
+      "subsections": 3,
+      "tables": ["Table 1 (descriptive statistics + ADF)"],
+      "k_dependency": ["K1025 (descriptive JSON source)"],
+      "main_thread_decisions": ["Option A vs B for §3 / §5 descriptive-stats division"]
+    },
+    "section_4_methodology": {
+      "source_file": "experiments/k1239/k1239_methodology_draft.md",
+      "source_anchor": "§4.1-§4.4",
+      "format": "markdown",
+      "status": "ready",
+      "action": "md_to_latex_transcribe_plus_add_4_2_to_4_5_K1025_method_blocks",
+      "word_count": 870,
+      "subsections": 4,
+      "equations_to_number": [
+        "eq:garch-x-baseline (GARCH-X specification)",
+        "eq:qlike (Patton QLIKE loss)",
+        "eq:rv20 (20-day realised volatility)"
+      ],
+      "k_dependency": [],
+      "main_thread_decisions": ["§4.1 primary vs §4.6 supplementary placement for GARCH-X"],
+      "missing_blocks": [
+        "§4.2 Granger (K1025 method summary, ~100 words, main-thread to write)",
+        "§4.3 Quantile regression (K1025 method summary, ~100 words, main-thread to write)",
+        "§4.4 Diebold-Yilmaz (K1025 method summary, ~100 words, main-thread to write)",
+        "§4.5 DCC / EWMA + Forecasting (K1025 method summary, ~100 words, main-thread to write)"
+      ]
+    },
+    "section_5_data_descriptive": {
+      "source_file": "experiments/k1240/k1240_s5_s6_draft.md",
+      "source_anchor": "§5.1-§5.3 + Table 2",
+      "format": "markdown",
+      "status": "ready",
+      "action": "md_to_latex_transcribe",
+      "word_count": 400,
+      "subsections": 3,
+      "tables": ["Table 2 (extended descriptive + ADF + stationarity)"],
+      "k_dependency": ["K1025 (descriptive JSON source)"]
+    },
+    "section_6_main_results": {
+      "source_file": "experiments/k1240/k1240_s5_s6_draft.md",
+      "source_anchor": "§6.1-§6.4",
+      "format": "markdown",
+      "status": "partial_K1241_pending",
+      "action": "md_to_latex_transcribe_with_TBD_placeholders",
+      "word_count": 600,
+      "subsections": 4,
+      "tables": [
+        "Table 3 (fear-channel coefficient phi across specifications) — K1241-pending",
+        "Table 4 (phi across alternative fear proxies) — K1241-pending",
+        "Table 5 (phi across ETF regimes and K1025 5-regime split) — K1241-pending"
+      ],
+      "figures": [
+        "Figure 1 (Granger-causality flow diagram) — can be generated from K1025 JSON immediately, does not require K1241"
+      ],
+      "k_dependency": ["K1241 (critical, not yet complete)"],
+      "k1241_pending_cells": 18
+    },
+    "section_7_robustness": {
+      "source_file": "experiments/k1242/k1242_s7_s8_s9_draft.md",
+      "source_anchor": "§7.1-§7.5",
+      "format": "markdown",
+      "status": "partial_K1241_pending",
+      "action": "md_to_latex_transcribe_with_TBD_placeholders",
+      "word_count": 820,
+      "subsections": 5,
+      "k_dependency": ["K1241 (critical)", "K1025 (5-regime breakdown, already complete)"],
+      "k1241_pending_cells": "all §7.1, §7.2, §7.4, §7.5 robustness tables",
+      "main_thread_decisions": [
+        "§7.3 ETH/SOL inclusion — keep with K1241 ETH/SOL estimates OR cut to §8.4 limitations"
+      ]
+    },
+    "section_8_discussion": {
+      "source_file": "experiments/k1242/k1242_s7_s8_s9_draft.md",
+      "source_anchor": "§8.1-§8.4",
+      "format": "markdown",
+      "status": "ready",
+      "action": "md_to_latex_transcribe",
+      "word_count": 610,
+      "subsections": 4,
+      "k_dependency": [],
+      "cross_reference": "K1214 companion paper (Lai 2026a)"
+    },
+    "section_9_conclusion": {
+      "source_file": "experiments/k1242/k1242_s7_s8_s9_draft.md",
+      "source_anchor": "§9",
+      "format": "markdown",
+      "status": "partial_K1241_pending",
+      "action": "md_to_latex_transcribe_with_2_placeholders",
+      "word_count": 320,
+      "placeholders": [
+        "[placeholder for K1241 verdict] — headline phi coefficient statement",
+        "[X%] — annualised conditional-volatility response magnitude"
+      ],
+      "k_dependency": ["K1241 (critical)"]
+    },
+    "references": {
+      "sources": [
+        "body_v0_intro.tex lines 49-86 (8 bibitem entries)",
+        "K1237 §2 References (22 entries)",
+        "K1239 §4 Citations introduced (7 entries)",
+        "K1242 §7-§9 Citations introduced (3 new entries)"
+      ],
+      "expected_unique_entries_after_dedup": 35,
+      "format": "bibtex",
+      "output_file": "paper/crypto-fear-channel/references.bib",
+      "status": "ready_for_assembly",
+      "action": "collate_dedup_verify_via_citation_verifier",
+      "new_keys_added_by_k1243": []
+    },
+    "replication_package": {
+      "experiments_md": {
+        "file": "paper/crypto-fear-channel/experiments.md",
+        "status": "missing_to_be_created",
+        "template": "k1243_body_v1_integration.md Step 8"
+      },
+      "data_sources_md": {
+        "file": "paper/crypto-fear-channel/data_sources.md",
+        "status": "missing_to_be_created",
+        "template": "k1243_body_v1_integration.md Step 9"
+      },
+      "scripts_readme": {
+        "file": "paper/crypto-fear-channel/scripts/README.md",
+        "status": "missing_to_be_created_by_main_thread",
+        "content": "Entry points to experiments/k639/, experiments/k746b/, experiments/k1025/, experiments/k1241/"
+      },
+      "reproduce_py": {
+        "file": "paper/crypto-fear-channel/reproduce.py",
+        "status": "missing_to_be_created_pre_submission",
+        "purpose": "One-shot script reproducing main tables/figures from K1025 + K1241 outputs"
+      },
+      "figures_dir": {
+        "file": "paper/crypto-fear-channel/figures/",
+        "status": "missing_to_be_created",
+        "expected_contents": [
+          "fig1_granger_flow.pdf (from K1025)",
+          "fig2_qr_coefficient_path.pdf (from K1025)",
+          "fig3_dcc_regime_bars.pdf (from K1025)",
+          "fig4_rolling_dy_spillover.pdf (from K1025)",
+          "fig5_sigma_timeseries.pdf (from K1241, pending)"
+        ]
+      },
+      "readme_md": {
+        "file": "paper/crypto-fear-channel/README.md",
+        "status": "missing_to_be_created",
+        "content": "Title, target journal, status=draft, K list, data summary"
+      }
+    }
+  },
+  "main_thread_decisions": {
+    "decision_1_k1241_wait_strategy": {
+      "options": {
+        "strategy_A": "Wait for K1241, then populate body_v1 with actual phi values (single commit)",
+        "strategy_B": "Commit body_v1 with TBD placeholders, revise to body_v2 after K1241 completes"
+      },
+      "recommendation": "strategy_A",
+      "rationale": "Avoids v2 revision overhead; produces fully populated body_v1 from day 1"
+    },
+    "decision_2_intro_extension_form": {
+      "options": {
+        "full_paragraph_6_220w": "Insert 220-word ¶6 introducing GARCH-X variance-domain complement",
+        "short_hedge_90w": "Append 90-word hedge sentence to current ¶5 forecastability gap paragraph"
+      },
+      "recommendation": "full_paragraph_6_220w",
+      "rationale": "Pre-figures §4.1 specification, §6 Table 3 headline, and §9 conclusion headline; better scope calibration for JIFMIM reviewer"
+    },
+    "decision_3_section_3_5_split": {
+      "options": {
+        "option_A": "§3 keeps sample construction + RV definitions (§3.1-§3.2); §5 absorbs descriptive stats (originally §3.3)",
+        "option_B": "§3 keeps all three subsections per K1238; §5 focuses on correlation only"
+      },
+      "recommendation": "option_A",
+      "rationale": "Reduces §3 / §5 redundancy; concentrates descriptive-stat discussion in §5"
+    },
+    "decision_4_section_7_3_eth_sol": {
+      "options": {
+        "include": "Keep §7.3 ETH and SOL extension; K1241 must also produce ETH and SOL fear-channel estimates",
+        "cut": "Delete §7.3 ETH and SOL; move point to §8.4 limitations"
+      },
+      "recommendation": "cut",
+      "rationale": "Paper 10 v1 scope is BTC-only (body_v0_intro.tex abstract locks); extend in R&R round or v2"
+    }
+  },
+  "k1241_status": {
+    "worktree": "agent-afd040e6",
+    "expected_output_file": "experiments/k1241/k1241_results.json",
+    "expected_contents": [
+      "phi_hat (VIX^2 coefficient)",
+      "SE_phi (Bollerslev-Wooldridge robust SE)",
+      "t_hln (Harvey-adjusted t-statistic)",
+      "lrt_pvalue (LR test against GJR baseline)",
+      "qlike_gjr, qlike_gjr_x (in-sample QLIKE comparison)",
+      "alt_proxy_results (VIX level, log VIX, CFIX)",
+      "subsample_results (pre-ETF, post-ETF, 2015-2019, 2020-2023, 2024-2026, crisis vs calm)",
+      "alt_garch_results (E-GARCH, APARCH)",
+      "iv_results (orthogonalised VIX shock)",
+      "eth_sol_results (optional, per main-thread scope decision)"
+    ],
+    "current_state_as_of_20260417": "script k1241.py and sigma timeseries png exist; results json NOT yet produced",
+    "integration_guide_dependency": "Tables 3, 4, 5 in §6, all §7 tables, §9 headline phi placeholder"
+  },
+  "research_honesty_compliance": {
+    "principle_1_no_fabrication": "All K1241-pending cells marked TBD; no representative phi values inserted",
+    "principle_2_data_transparency": "All numerical claims chain-of-custody traced to K1025 JSON or body_v0_intro.tex",
+    "principle_9_null_reporting": "Abstract v1 provides both positive-K1241 and honest-NULL templates",
+    "principle_11_lookahead_bias": "K1241 script must use signal.shift(1); flagged in integration guide Step 6 and quality gate 5",
+    "principle_12_seed_fixed": "Seed 42 cited in abstract, data_sources.md template, integration guide"
+  },
+  "worktree_compliance": {
+    "output_restricted_to": "experiments/k1243/",
+    "shared_state_modifications": "NONE (no storage/*, no paper/*, no agent-specs/*)",
+    "commit_required_on_completion": true,
+    "merge_path": "scripts/merge_worktree.sh by main thread"
+  },
+  "summary_stats": {
+    "total_source_files_examined": 8,
+    "total_output_files_created": 5,
+    "total_output_words": 7900,
+    "sections_mapped": 9,
+    "k1241_pending_cells": "approximately 25+ across Tables 3, 4, 5 and §7 tables and §9 placeholders",
+    "main_thread_estimated_effort_hours_min": 3.8,
+    "main_thread_estimated_effort_hours_max": 6.0,
+    "recommended_strategy": "A (wait for K1241 + full 220w intro extension + option A §3/§5 split + cut §7.3 ETH/SOL)"
+  }
+}
