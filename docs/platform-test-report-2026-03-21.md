@@ -1,5 +1,9 @@
 # 平台整合測試報告 v2
 
+> **⚠️ Historical snapshot (2026-04-17 note)**: 本檔為 2026-03-21 當下的測試報告，cron 範例與建議**已過時**。
+> Canonical schedule 看 `config/runtime_schedules.json`；session cron 啟動集看 `scripts/session_startup.md`。
+> 本檔 `13 */6 * * *` 會員問題已改為 `17 */6 * * *`；`47 */2 * * *` 每 2 小時 git commit 已改為 `47 */4 * * *` 每 4 小時；`7 * * * *` 每小時知識索引改為 `7 */6 * * *` 每 6 小時。
+
 **測試日期**: 2026-03-21 12:57~13:10 (UTC+8)
 **報告版本**: v3（補充 /admin/schedules、/admin/health、/admin/papers 與 Storage 驅動論文交付）
 **測試環境**: 本地 CLI + 本地前端 (127.0.0.1:3003, frontend-v2-fix) + 線上 (volpred.zeabur.app, frontend-v2)
