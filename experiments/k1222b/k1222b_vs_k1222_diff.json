@@ -1,0 +1,303 @@
+{
+  "experiment_id": "K1222b",
+  "title": "Paper 2 §5 post-K1216c FINAL revision guide — supersedes K1222 which was based on K1216b asymmetric-refinement artefact ρ=-0.071 'COLLAPSE' headline",
+  "proposer": "Main thread (post-K1216c reframe)",
+  "executor": "Claude (worktree agent agent-a12f00e5)",
+  "date": "2026-04-17",
+  "global_seed": 42,
+  "kind": "revision_guide (Markdown + JSON only; no estimation; post-K1216c reframe)",
+  "supersedes": {
+    "k1222": {
+      "commit": "75df1c8f",
+      "draft_file": "experiments/k1222/k1222_revision_guide.md",
+      "scope": "entire K1222 revision guide superseded; K1222 headline ρ=-0.071 revealed as asymmetric-refinement artefact by K1216c"
+    }
+  },
+  "supersedes_chain_full": {
+    "k1211": {
+      "commit": "9efffe4b",
+      "draft_file": "experiments/k1211/k1211_draft.md",
+      "scope": "entire §5 superseded except §5.6 sector discussion (promoted in K1222 and K1222b alike to §5.2 primary)",
+      "status": "SUPERSEDED"
+    },
+    "k1215": {
+      "commit": "45f621ee",
+      "draft_file": "experiments/k1215/k1215_revised_draft.md",
+      "scope": "entire §5 superseded; K1215 AU reclassification quote subsumed into K1222b §5.4 multistart methodology (AU is 1 of 10 audited markets)",
+      "status": "SUPERSEDED"
+    },
+    "k1222": {
+      "commit": "75df1c8f",
+      "draft_file": "experiments/k1222/k1222_revision_guide.md",
+      "scope": "entire K1222 revision guide SUPERSEDED by K1222b; K1222 'ladder WITHDRAWN' framing reversed on K1216c evidence",
+      "status": "SUPERSEDED"
+    }
+  },
+  "source_experiments": {
+    "K1165": "N=7 pre-EM baseline",
+    "K1166": "N=108 pooled TW/EU/JP/US tautology-removed refit",
+    "K1168": "N=10 +BR/CH/IN pool canonical",
+    "K1171": "N=13 +AU canonical (pre-multistart)",
+    "K1172": "N=12 +MX/ID pool canonical (Spearman baseline +0.441)",
+    "K1173": "EM yfinance proxy falsification (NULL, Δρ=-0.056 at canonical); K1222b defers K1173 aggregate ρ rebuild to §6 pending panel-wide refined inputs",
+    "K1204": "32/32 PASS shared-key cross-verification",
+    "K1163": "EU N=30 full coverage bootstrap t=4.81, 95% CI [0.127, 0.277]",
+    "K1207": "sector-FE orthogonality: F=689.5, p=7.9e-14, adj-R² 0.148 vs inst-FE 0.0046, 32× ratio; cross-sector Spearman -0.006 p=0.987",
+    "K1213": "AU 100-multistart: basin-B θ_rel ∈ [1.07, 1.48]; LR=198.9 (511.9 NM-polished); ABOVE_LADDER_OVERTURNED",
+    "K1216": "BR/IN/MX 100-multistart: ALL FRAGILE; LR 145.66/410.76/347.27",
+    "K1216b": "CH/ID 100-multistart: ALL_5_EM_FRAGILE; LR 597.94/365.36; headline ρ=-0.071 now known to be asymmetric-refinement artefact",
+    "K1216c": "US/EU/JP/TW 100-multistart: 4/4 DEV FRAGILE; LR 2836.68/837.97/235.57/587.78; ROOT_CAUSE_METHODOLOGY; 9-market consistent refined Spearman ρ=+0.379 p=0.201 N=13 (FINAL)"
+  },
+  "knowledge_entries_referenced": [
+    "f63b6e01 (K1216c ROOT_CAUSE_METHODOLOGY; DEV/EM unified fragility; ρ rebounds to +0.379)",
+    "b40d669f (K1216b ALL_5_EM_FRAGILE; -0.071 disclosed as asymmetric-refinement artefact)",
+    "5cf52ce6 (K1216 WIDESPREAD_FRAGILITY)",
+    "e4d376ad (K1213 ABOVE_LADDER_OVERTURNED)",
+    "5d2d2435 (K1207 SECTOR_ORTHOGONAL_CONFIRMED)"
+  ],
+  "k1222_vs_k1222b_headline_diff": {
+    "k1222_headline": "COLLAPSE to ρ=-0.071; cross-market institutional-ownership ladder WITHDRAWN as local-min artefact",
+    "k1222b_headline_FINAL": "MODESTLY WEAKER ladder ρ=+0.379 p=0.201 N=13 at 9-market consistent refined optimum; statistically indistinguishable from canonical +0.441 under Fisher z (p≈0.87); NEW additional methodological contribution via multistart protocol",
+    "reason_for_supersession": "K1222 accepted K1216b ρ=-0.071 as global truth; K1216c revealed -0.071 was asymmetric-refinement artefact (EM refined but DEV still canonical). Symmetric 9-market refinement produces +0.379, indistinguishable from canonical +0.441."
+  },
+  "core_claim_changes_k1222_to_k1222b": {
+    "primary_rho_n13": {
+      "k1222_supserseded": {
+        "rho": -0.07142857142857142,
+        "p": 0.8166280406760862,
+        "harvey_t": -0.23750843439814173,
+        "source": "K1216b 5-EM refined + K1213 AU, DEV still canonical",
+        "interpretation": "COLLAPSE; ladder WITHDRAWN",
+        "status": "ARTEFACT of asymmetric refinement"
+      },
+      "k1222b_FINAL": {
+        "rho": 0.37912087912087916,
+        "p": 0.20140608996104342,
+        "harvey_t": 1.3588432170088491,
+        "source": "K1216c full 9-market refined + K1213 AU + K1172 canonical CA/HK/KR",
+        "interpretation": "MODESTLY WEAKER ladder; statistically indistinguishable from canonical +0.441 under Fisher z (two-sample z≈0.16, p≈0.87)",
+        "status": "FINAL Paper 2 headline"
+      },
+      "delta_rho_k1222_to_k1222b": 0.4505,
+      "delta_rho_k1172_canonical_to_k1222b_FINAL": -0.0615
+    },
+    "institutional_ladder_status": {
+      "k1211": "cross-market anchor, STRENGTHENED",
+      "k1215": "cross-market anchor with AU reclassification",
+      "k1222": "NUMERICAL ARTEFACT — WITHDRAWN from §5 as finding",
+      "k1222b_FINAL": "MODESTLY WEAKER BUT SURVIVING — restored to §5.3 primary finding at weakened magnitude"
+    },
+    "sector_fe_role": {
+      "k1211_k1215": "secondary channel",
+      "k1222": "PRIMARY cross-market driver (promoted to §5.2)",
+      "k1222b_FINAL": "PRIMARY cross-market driver (UNCHANGED from K1222); coexists with K1222b modestly-weaker ladder as orthogonal channel (cross-sector Spearman -0.006 p=0.987)",
+      "k1207_pool_stats": {
+        "sector_fe_joint_F": 689.5,
+        "sector_fe_joint_p": 7.9e-14,
+        "sector_fe_incremental_adj_r2": 0.148,
+        "inst_fe_incremental_adj_r2": 0.0046,
+        "ratio": 32.17,
+        "cross_sector_spearman_rho": -0.006,
+        "cross_sector_spearman_p": 0.987,
+        "cross_sector_spearman_n": 10
+      }
+    },
+    "panel_harvey_t_within_market": {
+      "all_versions_identical": [3.236, 3.556, 3.627, 3.789, 3.808],
+      "iterations": ["K1165 N=7", "K1166 N=108", "K1168 N=10", "K1172 N=12", "K1171 N=13"],
+      "interpretation": "monotonically increasing, all above |t|>3; invariant across K1211 → K1215 → K1222 → K1222b; within-market panel does not consume pooled-MLE θ_EAV"
+    },
+    "within_market_analyst_channel": {
+      "all_versions": "ROBUST UNCHANGED"
+    },
+    "k1213_au_status_in_k1222b": {
+      "k1215_framing": "AU-specific above-ladder reclassification",
+      "k1222_framing": "AU is one of 5 EM markets all showing pathology (ALL_5_EM_FRAGILE)",
+      "k1222b_framing_FINAL": "AU is one of 10 markets (9 audited + K1172 canonical) all showing pathology (ROOT_CAUSE_METHODOLOGY) — panel-wide, not EM-specific",
+      "au_theta_rel_basin_b": 1.476,
+      "au_theta_rel_nm_refined": 1.070,
+      "au_theta_rel_range": [1.07, 1.48]
+    },
+    "k1173_em_scale_factor_status": {
+      "k1211_k1215": "EM cost-of-capital residual verified by NULL yfinance proxy swap (Δρ=-0.056)",
+      "k1222_qualification": "K1173 aggregate ρ rebuild needs refit under K1216/K1216b refined EM inputs",
+      "k1222b_qualification": "K1173 aggregate ρ rebuild needs refit under FULL PANEL K1216/K1216b/K1216c refined inputs (EM + DEV + AU); per-stock yfinance proxy comparison remains basin-invariant; K1222b defers K1173 to §6 robustness section pending this rebuild"
+    },
+    "residual_caveat_count": {
+      "k1211": 3,
+      "k1215": 3,
+      "k1222": 1,
+      "k1222b_FINAL": 2,
+      "k1222b_surviving_caveats": [
+        "EU low-cluster robust (K1163 bootstrap t=4.81 95% CI [0.127, 0.277])",
+        "CA/HK/KR still unaudited; K1216c Spearman rebuild uses K1172 canonical for these 3 markets — future K1216d extension recommended"
+      ],
+      "k1222b_new_methodology_contribution": "Multistart pooled-MLE diagnostic protocol promoted from K1222 appendix to §5.4 ADDITIONAL Paper 2 contribution"
+    },
+    "ladder_strength_verdict": {
+      "k1211": "STRENGTHENED",
+      "k1215": "STRENGTHENED (+ AU reclass)",
+      "k1222": "WITHDRAWN (artefact)",
+      "k1222b_FINAL": "MODESTLY WEAKER BUT SURVIVING"
+    },
+    "methodology_appendix_role": {
+      "k1211_k1215": "n/a",
+      "k1222": "appendix only (§5.5)",
+      "k1222b_FINAL": "ADDITIONAL Paper 2 contribution (§5.4); panel-wide 10-market basin-bimodality record"
+    }
+  },
+  "trajectory_evolution_FINAL": {
+    "k1211_canonical": [
+      {"iter": 1, "exp": "K1165", "n": 7, "rho": 0.7500, "p": 0.0522, "harvey_t": 3.236},
+      {"iter": 2, "exp": "K1166", "n": 108, "rho": null, "p": null, "harvey_t": 3.556},
+      {"iter": 3, "exp": "K1168", "n": 10, "rho": 0.6121, "p": 0.0600, "harvey_t": 3.627},
+      {"iter": 4, "exp": "K1172", "n": 12, "rho": 0.4406, "p": 0.1517, "harvey_t": 3.789},
+      {"iter": 5, "exp": "K1171", "n": 13, "rho": 0.3846, "p": 0.1944, "harvey_t": 3.808}
+    ],
+    "k1215_k1213_au_integration": [
+      {"iter": "5-prime", "exp": "K1213", "n": 13, "rho": 0.4176, "p": 0.1557, "au_theta_rel": 1.476, "harvey_t": 3.808}
+    ],
+    "k1216_em_refined_partial": [
+      {"exp": "K1216 EM refined (BR/IN/MX)", "n": 12, "rho": 0.3636, "p": 0.2453, "harvey_t": 1.234},
+      {"exp": "K1216 EM + K1213 AU", "n": 13, "rho": 0.3407, "p": 0.2547, "harvey_t": 1.202}
+    ],
+    "k1216b_5em_refined_asymmetric": [
+      {"exp": "K1216b 5-EM refined N=12", "n": 12, "rho": -0.0769, "p": 0.8122, "harvey_t": -0.244, "note": "DEV still canonical — asymmetric refinement"},
+      {"exp": "K1216b 5-EM + K1213 AU N=13", "n": 13, "rho": -0.0714, "p": 0.8166, "harvey_t": -0.238, "note": "K1222 headline (SUPERSEDED); disclosed in K1222b §5.3 / Table 5 as asymmetric-refinement artefact intermediate step"}
+    ],
+    "k1216c_9market_refined_FINAL": [
+      {"exp": "K1216c full 9-market refined + AU N=13", "n": 13, "rho": 0.3791, "p": 0.2014, "harvey_t": 1.3588, "status": "PRIMARY K1222b canonical FINAL"}
+    ]
+  },
+  "per_market_lr_audit_summary_10_markets_FINAL": [
+    {"market": "AU", "experiment": "K1213", "canon_theta_rel": 0.150, "refined_theta_rel_best": 1.476, "refined_theta_rel_nm": 1.070, "canon_ll": 89047.22, "refined_ll_lbfgs_best": 89146.69, "refined_ll_nm": 89303.19, "lr_stat_best": 198.9, "lr_stat_nm": 511.9, "hac_t": null, "verdict": "ABOVE_LADDER_OVERTURNED", "commit": "e4d376ad"},
+    {"market": "BR", "experiment": "K1216", "canon_theta_rel": 1.887, "refined_theta_rel_best": 1.529, "refined_theta_rel_nm": 2.691, "canon_ll": 72213.52, "refined_ll_nm": 72286.35, "lr_stat_nm": 145.66, "hac_t": 3.24, "verdict": "FRAGILE", "commit": "cbc852ae"},
+    {"market": "IN", "experiment": "K1216", "canon_theta_rel": 1.170, "refined_theta_rel_best": 2.783, "refined_theta_rel_nm": 3.077, "canon_ll": 81844.51, "refined_ll_nm": 82049.89, "lr_stat_nm": 410.76, "hac_t": 6.58, "verdict": "FRAGILE", "commit": "cbc852ae"},
+    {"market": "MX", "experiment": "K1216", "canon_theta_rel": 1.202, "refined_theta_rel_best": 1.558, "refined_theta_rel_nm": 1.845, "canon_ll": 75932.06, "refined_ll_nm": 76105.69, "lr_stat_nm": 347.27, "hac_t": 3.74, "verdict": "FRAGILE", "commit": "cbc852ae"},
+    {"market": "CH", "experiment": "K1216b", "canon_theta_rel": 0.304, "refined_theta_rel_best": 1.001, "refined_theta_rel_nm": 1.469, "canon_ll": 77922.50, "refined_ll_nm": 78221.47, "lr_stat_nm": 597.94, "hac_t": 3.00, "verdict": "FRAGILE", "commit": "ee923da1"},
+    {"market": "ID", "experiment": "K1216b", "canon_theta_rel": 0.238, "refined_theta_rel_best": 0.709, "refined_theta_rel_nm": 1.917, "canon_ll": 76494.23, "refined_ll_nm": 76676.91, "lr_stat_nm": 365.36, "hac_t": 2.54, "verdict": "FRAGILE", "commit": "ee923da1"},
+    {"market": "US", "experiment": "K1216c", "canon_theta_rel": 0.415, "refined_theta_rel_nm": 8.614, "canon_ll": 79291.63, "refined_ll_nm": 80709.97, "lr_stat_nm": 2836.68, "hac_t": 5.21, "verdict": "FRAGILE", "commit": "3cf6bc84"},
+    {"market": "EU", "experiment": "K1216c", "canon_theta_rel": 0.196, "refined_theta_rel_nm": 1.434, "canon_ll": 83936.06, "refined_ll_nm": 84355.05, "lr_stat_nm": 837.97, "hac_t": 2.96, "verdict": "FRAGILE", "commit": "3cf6bc84"},
+    {"market": "JP", "experiment": "K1216c", "canon_theta_rel": 1.668, "refined_theta_rel_nm": 4.706, "canon_ll": 75325.33, "refined_ll_nm": 75443.12, "lr_stat_nm": 235.57, "hac_t": 3.41, "verdict": "FRAGILE", "commit": "3cf6bc84"},
+    {"market": "TW", "experiment": "K1216c", "canon_theta_rel": 0.314, "refined_theta_rel_nm": 1.364, "canon_ll": 95629.74, "refined_ll_nm": 95923.63, "lr_stat_nm": 587.78, "hac_t": 1.94, "verdict": "FRAGILE", "commit": "3cf6bc84"}
+  ],
+  "section_mapping_k1222_to_k1222b": {
+    "§5.1 (within-market analyst)": {
+      "k1222": "Within-market analyst-attention mechanism (PRIMARY); Harvey t monotonic 3.236→3.808",
+      "k1222b": "UNCHANGED"
+    },
+    "§5.2 (sector-FE dominant)": {
+      "k1222": "K1207 PROMOTED to §5.2 PRIMARY cross-market driver; adj-R² 32× inst-FE; cross-sector ρ=-0.006 p=0.987",
+      "k1222b": "UNCHANGED from K1222 (K1207 verdict SECTOR_ORTHOGONAL_CONFIRMED invariant); coexists with K1222b §5.3 modestly-weaker ladder as orthogonal channel"
+    },
+    "§5.3 (institutional ladder)": {
+      "k1222": "K1222 §5.4 RETRACTED; cross-market ladder WITHDRAWN as local-min artefact; headline ρ=-0.071",
+      "k1222b": "§5.3 MODESTLY WEAKER BUT SURVIVING; K1216c 9-market consistent refined ρ=+0.379 p=0.201 N=13; statistically indistinguishable from canonical +0.441 under Fisher z (p≈0.87); K1216b -0.071 disclosed only as asymmetric-refinement artefact intermediate step"
+    },
+    "§5.4 (methodology)": {
+      "k1222": "§5.5 appendix: 10-step protocol + 6-market LR record (AU + 5 EM)",
+      "k1222b": "§5.4 NEW ADDITIONAL Paper 2 contribution (not appendix): 10-step protocol + 10-market LR record (AU + 5 EM + 4 DEV); promoted because K1216c established panel-wide (not EM-specific) two-basin pathology"
+    },
+    "§5.5 (narrative commitment)": {
+      "k1222": "FINAL §5.6: two cross-market drivers (analyst + sector); ladder WITHDRAWN; multistart mandatory for future extensions",
+      "k1222b": "FINAL §5.5: THREE cross-market drivers (analyst + sector + modestly-weaker ladder) + ONE additional methodological contribution (multistart); 2 surviving caveats (EU + CA/HK/KR unaudited disclosure)"
+    },
+    "EU K1163 caveat": {
+      "k1222": "§5.3 retained (renumbered from K1215 §5.4)",
+      "k1222b": "Kept as footnote to §5.3 and narrative commitment §5.5 EU-specific robustness paragraph; unchanged from K1222"
+    },
+    "K1173 EM scale-factor": {
+      "k1222": "REMOVED from §5; defer to §6 robustness pending K1216/K1216b refined-input recomputation",
+      "k1222b": "REMOVED from §5; defer to §6 robustness pending PANEL-WIDE K1216/K1216b/K1216c refined-input recomputation (same plan as K1222 but with expanded refined-input scope)"
+    }
+  },
+  "cherry_pick_action_list_FINAL": [
+    {"id": 1, "target": "K1222 language (if any partially merged)", "action": "REVERT any 'WITHDRAWN' / 'COLLAPSED' / 'numerical artefact' framing of institutional ladder; K1222 is SUPERSEDED"},
+    {"id": 2, "target": "§5.1 Within-market analyst", "action": "retain K1215 Panel Harvey t 3.236→3.808 verbatim; unchanged across K1211/K1215/K1222/K1222b"},
+    {"id": 3, "target": "§5.2 Sector-FE dominant", "action": "retain K1222 promotion of K1207 to §5.2 headline; SECTOR_ORTHOGONAL_CONFIRMED unchanged; figure F promoted to §5.2 headline"},
+    {"id": 4, "target": "§5.3 Institutional ladder MODESTLY WEAKER", "action": "use K1222b §3 §5.3 verbatim; include 3-column Spearman Table 5 (canonical +0.441 / asymmetric -0.071 artefact footnote / 9-market refined +0.379 FINAL); add Fisher-z indistinguishability note"},
+    {"id": 5, "target": "§5.4 NEW methodology contribution", "action": "promote K1222 appendix to §5.4 additional Paper 2 contribution; use K1222b §3 §5.4 verbatim; include 10-market LR record + 10-step protocol; insert 10-market basin-bimodality panel figure"},
+    {"id": 6, "target": "§5.5 FINAL narrative commitment", "action": "use K1222b §3 §5.5 verbatim; THREE cross-market drivers + ONE methodological contribution; 2 surviving caveats (EU K1163 + CA/HK/KR unaudited disclosure)"},
+    {"id": 7, "target": "K1211/K1215 §5.3 EM K1173", "action": "REMOVE from §5; defer to §6 robustness pending panel-wide K1216/K1216b/K1216c refined-input recomputation (same as K1222 plan)"},
+    {"id": 8, "target": "K1211/K1215 §5.4 EU K1163", "action": "RETAIN unchanged as EU robustness footnote in §5.3 and narrative commitment; same as K1222 plan"},
+    {"id": 9, "target": "K1211 §5.5 AU trajectory / K1215 §5.5 AU reclassification", "action": "ABSORB into §5.4 methodology contribution; AU is one of 10 multistart-audited markets; no AU-specific subsection"},
+    {"id": 10, "target": "Table 5 (Primary Spearman)", "action": "3-column format: canonical +0.441 N=12 / asymmetric -0.071 N=13 footnote only / 9-market refined +0.379 N=13 FINAL headline"},
+    {"id": 11, "target": "Figure 5A (ρ trajectory)", "action": "annotate K1216c N=13 ρ=+0.379 as FINAL; do not headline K1216b -0.071 (relegate to methodology footnote)"},
+    {"id": 12, "target": "Figure 5G (basin-bimodality panel)", "action": "EXPAND from 6 markets (K1222 plan) to 10 markets (AU + 5 EM + 4 DEV) per K1222b §5.4"},
+    {"id": 13, "target": "Reference citations", "action": "cite K1216c commit 3cf6bc84 in §5.3 and §5.4; retain K1213/K1216/K1216b citations from K1222 plan"}
+  ],
+  "figure_mapping_updates_FINAL": {
+    "5A_rho_trajectory": "annotate K1216c N=13 ρ=+0.379 as FINAL; K1215 +0.418 baseline; K1216b -0.071 disclosed only in methodology footnote as asymmetric-refinement artefact",
+    "5B_panel_harvey_t": "UNCHANGED (invariant to pooled-MLE basin)",
+    "5C_two_level_r2": "UNCHANGED; add between-R² interpretation footnote (same as K1222 plan)",
+    "5D_em_residual_taxonomy": "REPLACE with 9-market panel-wide basin-structure visual (K1216/K1216b/K1216c basin histograms); retired above-ladder color-coding; expanded from K1222's 6-market plan",
+    "5E_k1163_eu_robustness": "UNCHANGED",
+    "5F_k1207_sector": "PROMOTED to §5.2 headline figure (unchanged from K1222 plan)",
+    "5G_basin_bimodality_panel": "EXPAND to 10-market basin-bimodality panel (AU + BR + IN + MX + CH + ID + US + EU + JP + TW histograms); key §5.4 additional-contribution visual; expanded from K1222's 6-market plan",
+    "NEW_5H_spearman_3scenario": "K1216c_9market_trajectory.png — 3 bars: canonical +0.441 / asymmetric -0.071 / 9-market refined +0.379; key §5.3 visual showing rebound from artefact"
+  },
+  "canonical_inputs_for_main_thread_rewrite_FINAL": {
+    "primary_spearman_FINAL": {
+      "source": "experiments/k1216c/k1216c_results.json field spearman_variants.K1216c_FULL_9market_refined_plus_AU_N13",
+      "rho": 0.37912087912087916,
+      "p": 0.20140608996104342,
+      "n": 13,
+      "harvey_t": 1.3588432170088491
+    },
+    "primary_spearman_BASELINE_canonical": {
+      "source": "experiments/k1216c/k1216c_results.json field spearman_variants.K1172_baseline_N12 / experiments/k1172/k1172_results.json",
+      "rho": 0.44055944055944063,
+      "p": 0.1517350357167303,
+      "n": 12
+    },
+    "primary_spearman_INTERMEDIATE_artefact": {
+      "source": "experiments/k1216c/k1216c_results.json field spearman_variants.K1216b_5EM_refined_plus_K1213_AU_N13",
+      "rho": -0.07142857142857142,
+      "p": 0.8166280406760862,
+      "n": 13,
+      "harvey_t": -0.23750843439814173,
+      "note": "ASYMMETRIC-REFINEMENT ARTEFACT; refined EM + canonical DEV; do not headline; disclose only in methodology footnote"
+    },
+    "ten_market_lr_record": [
+      "experiments/k1213/k1213_results.json",
+      "experiments/k1216/k1216_per_market_summary.csv",
+      "experiments/k1216b/k1216b_per_market_summary.csv",
+      "experiments/k1216c/k1216c_per_market_summary.csv"
+    ],
+    "sector_fe_k1207": "experiments/k1207/k1207_results.json",
+    "eu_full_coverage_k1163": "experiments/k1163/",
+    "fisher_z_indistinguishability": {
+      "z_canonical": 0.4735,
+      "z_refined": 0.3989,
+      "delta_z": 0.0746,
+      "se_independent_samples": 0.4595,
+      "z_stat_two_sample": 0.16,
+      "p_two_sided": 0.87,
+      "interpretation": "canonical +0.441 and refined +0.379 are statistically indistinguishable at conventional 5%"
+    }
+  },
+  "rigor_notes": {
+    "kind": "No new estimation in K1222b — pure consolidation guide over K1213/K1216/K1216b/K1216c",
+    "numbers": "verbatim from upstream experiment JSONs",
+    "seed_discipline_upstream": "base 42; 100 starts 43..142; DE seed 49; K-means seed 42 (K1213/K1216/K1216b/K1216c)",
+    "spec_invariance": "shared-MIDAS + stock-FE-GJR identical across K1168/K1172/K1213/K1216/K1216b/K1216c; bounds identical",
+    "lookahead_guard": "inherited from _pooled_negll (VIX²_{t-1}, EAV_{i,t-1})",
+    "worktree_contract": "only experiments/k1222b/ outputs; no shared-state writes; no paper/*.tex edits",
+    "paper_workflow_rule": "body rewrite stays in main thread (CLAUDE.md)",
+    "k1222_supersession_discipline": "K1222 commit 75df1c8f explicitly marked SUPERSEDED in K1222b §0 header, section mapping, supersession summary, and title"
+  },
+  "unresolved_audit_gap": {
+    "unaudited_markets": ["CA", "HK", "KR"],
+    "current_theta_rel_source": "K1172 canonical (single-init)",
+    "expected_direction_if_audited": "probably FRAGILE (given 9/9 audited markets FRAGILE); refined θ_rel likely to shift upward for these 3 pools; final Spearman ρ likely to move slightly further from -0.071 toward a value between +0.30 and +0.50",
+    "recommendation": "commission K1216d: 100-multistart on CA/HK/KR; not a prerequisite for K1222b §5.5 commitment because within-market Panel Harvey t is basin-invariant; K1222b §5.3 discloses this gap"
+  },
+  "next_steps_main_thread": [
+    "cherry-pick K1222b §3 block into paper/<paper2>/body_v(n+1).tex per §4 instructions",
+    "revert any K1222 'WITHDRAWN' / 'COLLAPSED' language if partially merged into body_v(n).tex",
+    "re-run K1173 aggregate ρ rebuild against PANEL-WIDE K1216/K1216b/K1216c refined inputs (if K1173 retained in §6)",
+    "consider commissioning K1216d (100-multistart on CA/HK/KR) for complete 12-market audit",
+    "update Figure 5A/5D/5G per K1222b §4 Figure mapping updates; add NEW Figure 5H Spearman 3-scenario visual",
+    "write K1222b knowledge.json entry from main thread (worktree cannot); log K1222 SUPERSEDED and K1216c f63b6e01 ROOT_CAUSE_METHODOLOGY references"
+  ]
+}
