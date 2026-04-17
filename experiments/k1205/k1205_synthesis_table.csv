@@ -1,0 +1,5 @@
+experiment,branch,focal_model,n_oos,n_oos_jumps,auc_oos,ll_oos,brier_oos,dm_t_vs_baseline,verdict
+K1128,"VIX tertile (IS-fixed)",M3_tertile_high,20060,32,0.5926,0.011963,0.001592,1.306,"NULL (partial only; OOS coverage 0/854/20060 degenerate)"
+K1131,"Natural cubic spline (continuous beta)",M_spline,20914,33,0.4965,0.012479,NA,-3.934,"NULL"
+K1142,"Vol-normalized OFI (sigma_60, strictly past)",M_volnorm,20914,33,0.594,0.01165,0.001574,2.255,"PARTIAL_OOS_ONLY"
+K1199,"Expanding-window adaptive VIX quantile",M_expanding,20914,33,0.5484,0.011646,0.001574,1.143,"NULL"
