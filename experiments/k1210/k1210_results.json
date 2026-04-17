@@ -1,0 +1,87 @@
+{
+  "k_id": "K1210",
+  "global_seed": 42,
+  "jitter_seeds": [
+    43,
+    44,
+    45,
+    46,
+    47,
+    48,
+    49,
+    50,
+    51,
+    52
+  ],
+  "runtime_sec": 30.4,
+  "experiment_A_cadence": {
+    "semi_annual": {
+      "converged": true,
+      "S": 10,
+      "theta_eav": 3.163797681847504e-05,
+      "theta_eav_se": 1.3161777374986199e-05,
+      "theta_eav_t": 2.4037769305080814,
+      "theta_eav_p": 0.01622667147799217,
+      "mean_sigma2": 0.00021117724346831251,
+      "theta_rel": 0.14981716921228005,
+      "loglik": 89047.22333560206,
+      "total_events": 216
+    },
+    "synthetic_quarterly": {
+      "converged": true,
+      "S": 10,
+      "theta_eav": 3.165432529777036e-05,
+      "theta_eav_se": 1.1639647915389758e-05,
+      "theta_eav_t": 2.7195260138339337,
+      "theta_eav_p": 0.006537555246803439,
+      "mean_sigma2": 0.00021117724346831251,
+      "theta_rel": 0.14989458512616746,
+      "loglik": 89048.10159180163,
+      "total_events": 422
+    },
+    "delta_theta_rel": 7.741591388740754e-05,
+    "pct_change_theta_rel": 0.0005167359274938295,
+    "h1_verdict": "H1_REJECTED_FLAT",
+    "synth_events_added": 206
+  },
+  "experiment_B_precision": {
+    "yfinance_coverage": {
+      "BHP.AX": 1,
+      "CBA.AX": 0,
+      "CSL.AX": 0,
+      "NAB.AX": 1,
+      "ANZ.AX": 0,
+      "WBC.AX": 1,
+      "WES.AX": 0,
+      "MQG.AX": 0,
+      "TLS.AX": 0,
+      "RIO.AX": 0
+    },
+    "yfinance_total_events": 3,
+    "yfinance_handcoded_diff_pct_ge_1d": 1.0,
+    "yfinance_handcoded_diff_median_days": 2.0,
+    "jitter_theta_rel_mean": 0.2208524634668073,
+    "jitter_theta_rel_sd": 0.15966399880495752,
+    "jitter_n_converged": 10
+  },
+  "experiment_C_loo": {
+    "loo_table_path": "k1210_expC_loo.csv",
+    "max_abs_delta_theta_rel": 1.2188121391244984,
+    "max_delta_stock": "BHP.AX",
+    "max_delta_value": 1.2188121391244984,
+    "c_verdict": "C_STOCK_DRIVEN"
+  },
+  "verdict": {
+    "h1_verdict": "H1_REJECTED_FLAT",
+    "h2_verdict": "H2_SUPPORTED",
+    "h2_jitter_frac": 1.0657256417568886,
+    "h2_yfinance_pct": 1.0,
+    "c_verdict": "C_STOCK_DRIVEN",
+    "root_cause": "H2_ONLY+STOCK_DRIVEN",
+    "paper2_s5_au_footnote": "AU \u03b8_rel below ladder is partly contaminated by HAND_CODED date imprecision; \u00b13-day jitter yields \u03b8_rel SD/mean \u2265 20% indicating event-window sensitivity."
+  },
+  "notes": {
+    "synth_quarterly_caveat": "Synthetic quarterly events are zero-info midpoint injections. They test whether cadence alone drives \u03b8_rel estimation, NOT a simulation of real quarterly earnings. If \u03b8_rel drops or stays flat, H1 (sparsity \u2192 low \u03b8_rel) is rejected.",
+    "yfinance_au_caveat": "yfinance ASX coverage is historically weak (K1165 failure root cause); zero-coverage tickers default H2 to jitter-only evidence, which is the pre-planned fallback."
+  }
+}

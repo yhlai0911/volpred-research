@@ -1,0 +1,55 @@
+Using CPython 3.12.10
+Creating virtual environment at: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a16275fd/.venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a16275fd
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a16275fd
+Installed 109 packages in 973ms
+
+========================================================================
+K1210: AU residual forensic — H1 cadence vs H2 precision
+========================================================================
+  GLOBAL_SEED = 42
+  K1171 source: /Users/yhlai0911/Desktop/volpred-research/experiments/k1171
+  Events CSV:   /Users/yhlai0911/Desktop/volpred-research/experiments/k1171/k1171_asx_earnings_dates.csv
+  HAND_CODED events loaded: 216 rows across 10 tickers
+
+[Exp A] Semi-annual vs synthetic-quarterly injection
+  [A1] semi-annual baseline ...
+    done 6.1s | θ_rel=0.1498 θ_EAV_t=2.40 events=216
+  [A2] synthetic quarterly (midpoints injected) ...
+    done 0.3s | θ_rel=0.1499 θ_EAV_t=2.72 events=422
+
+[Exp B] HAND_CODED precision test
+  [B1] yfinance AU earnings_dates ...
+    yfinance coverage: {'BHP.AX': 1, 'CBA.AX': 0, 'CSL.AX': 0, 'NAB.AX': 1, 'ANZ.AX': 0, 'WBC.AX': 1, 'WES.AX': 0, 'MQG.AX': 0, 'TLS.AX': 0, 'RIO.AX': 0} (total 3 events, 12.7s)
+  [B2] jitter sensitivity (10 replicates ±3 tdays) ...
+    rep1 seed=43 θ_rel=0.1468 θ_EAV=3.100e-05 [0.2s]
+    rep2 seed=44 θ_rel=0.1501 θ_EAV=3.169e-05 [0.3s]
+    rep3 seed=45 θ_rel=0.1504 θ_EAV=3.176e-05 [0.3s]
+    rep4 seed=46 θ_rel=0.1467 θ_EAV=3.099e-05 [0.2s]
+    rep5 seed=47 θ_rel=0.1537 θ_EAV=3.246e-05 [0.2s]
+    rep6 seed=48 θ_rel=0.1459 θ_EAV=3.082e-05 [0.3s]
+    rep7 seed=49 θ_rel=0.4189 θ_EAV=8.846e-05 [0.5s]
+    rep8 seed=50 θ_rel=0.1451 θ_EAV=3.065e-05 [0.2s]
+    rep9 seed=51 θ_rel=0.1456 θ_EAV=3.074e-05 [0.3s]
+    rep10 seed=52 θ_rel=0.6052 θ_EAV=1.278e-04 [0.6s]
+
+[Exp C] Drop-1 LOO for 10 AU stocks
+    drop BHP.AX: θ_rel=1.3686 (Δ=1.2188) [0.4s]
+    drop CBA.AX: θ_rel=0.1616 (Δ=0.0118) [0.2s]
+    drop CSL.AX: θ_rel=0.1225 (Δ=-0.0273) [0.2s]
+    drop NAB.AX: θ_rel=0.4859 (Δ=0.3361) [0.5s]
+    drop ANZ.AX: θ_rel=0.4657 (Δ=0.3159) [0.5s]
+    drop WBC.AX: θ_rel=0.1615 (Δ=0.0117) [0.2s]
+    drop WES.AX: θ_rel=0.1472 (Δ=-0.0026) [0.2s]
+    drop MQG.AX: θ_rel=0.8166 (Δ=0.6668) [0.6s]
+    drop TLS.AX: θ_rel=1.0039 (Δ=0.8541) [0.3s]
+    drop RIO.AX: θ_rel=1.1024 (Δ=0.9526) [0.9s]
+
+========================================================================
+Results written: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a16275fd/experiments/k1210/k1210_results.json
+  H1 verdict: H1_REJECTED_FLAT
+  H2 verdict: H2_SUPPORTED (jitter_frac=1.0657256417568886, yf_pct=1.0)
+  C verdict:  C_STOCK_DRIVEN
+  ROOT CAUSE: H2_ONLY+STOCK_DRIVEN
+  Runtime:    30.4s
+========================================================================
