@@ -26876,5 +26876,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T16:06:16.628843"
+  },
+  {
+    "item_id": "2804169e",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1100b \u5ef6\u4f38 asymmetric family, \u57f7\u884c: Claude worktree agent 7.1 min OOS 3234 days 5 pairs x 5 models, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1100c Asymmetric Copula (Hansen SkewT + Joe upper-tail) on same 5 pairs as K1100b. **VERDICT: Scenario C MIXED \u2014 2/5 PASS**. 3 equity-equity pairs NULL (SPY-QQQ/XLF/IWM, \u03bb_L=0.40-0.59), 2 flight-to-safety pairs PASS (SPY-TLT \u03bb_L=0.009 SkewT DM=+3.98 & Joe DM=+10.36; SPY-GLD \u03bb_L=0.038 Joe DM=+7.66). **\u95dc\u9375**: Joe upper-tail dominates SkewT \u2014 TLT Joe +10.36 vs SkewT +3.98; GLD Joe +7.66 vs SkewT +1.46. \u4e0a\u5c3e\u7d50\u69cb\u662f K1100b \u907a\u6f0f\u7684\u95dc\u9375\uff0c\u975e Hansen skew-t marginal asymmetry. **\u6a5f\u5236\u89e3\u91cb**: \u9ad8 tail-dep equity-equity (\u03bb_L 0.4-0.6) mixing-averaging \u4e3b\u5c0e \u2192 DCC \u03c1 \u5df2\u6355\u7372\u4e3b info \u2192 copula \u908a\u969b\u8ca2\u737b\u5c0f. \u4f4e tail-dep flight-to-safety (\u03bb_L ~0.01-0.04) DCC under-specifies regime \u2192 Joe \u6b63\u78ba capture upper-tail \u7d50\u69cb. **K1100a-c \u4e09\u8def\u7dda\u7d71\u6574**: K1100b uniform NULL, K1100d regime-switching NULL, K1100c \u63ed\u793a copula \u975e general NULL \u2014 **asset-class-specific**. **Paper 3 \u53ef\u767c\u8868\u4e3b\u5f35** (major pivot): 'Joe copula with upper-tail structure significantly beats DCC for flight-to-safety pairs (equity-bond, equity-gold), but not equity-equity pairs, due to portfolio-mixing mechanism'. **\u5f8c\u7e8c\u8def\u5f91**: \u9700 N=10-15 pairs cross asset-class formally test \u03bb_L threshold (Spearman \u03c1=-0.600 @ p=0.285 \u65bc N=5 underpowered). FZ scores (\u03b1=1%): SPY-TLT DCC=-5.595 vs SkewT=-5.610 (SkewT better, \u4e00\u81f4 DM PASS). Script: experiments/k1100c/k1100c.py, commit 445ed344.",
+    "evidence": [
+      "experiments/k1100c/k1100c.py",
+      "experiments/k1100c/k1100c_results.json",
+      "experiments/k1100c/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T16:09:22.838186"
   }
 ]

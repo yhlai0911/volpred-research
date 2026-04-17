@@ -38,8 +38,9 @@
     "id": "K1100c",
     "title": "K1100c: Vine / skew-t copula for asymmetric tail",
     "priority": 3,
-    "description": "K1100b 衍生：單 Student-t 抓非對稱尾部不夠，用 pair-copula construction (PCC) 或 skew-t。",
-    "status": "pending"
+    "description": "K1100b 衍生：單 Student-t 抓非對稱尾部不夠，用 pair-copula construction (PCC) 或 skew-t。 [DONE commit 445ed344: Scenario C MIXED! 2/5 PASS. SPY-TLT Joe DM=+10.36, GLD Joe=+7.66 (λ_L<0.05 flight-to-safety); equity-equity NULL (λ_L≈0.4-0.6). Joe upper-tail dominates SkewT. Paper 3 可發表主張: asset-class-specific copula advantage.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T16:09:43+08:00"
   },
   {
     "id": "K1100d",
@@ -323,8 +324,8 @@
     "id": "Paper3_strategic_decision",
     "title": "Paper 3 Strategic Decision (PRIORITY 1) — A/B/C 三選一",
     "priority": 4,
-    "description": "[priority 4 — wait for new evidence] K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。",
-    "status": "blocked_user_decision"
+    "description": "[priority 4 — wait for new evidence] K1100/K1100b/K1100f/K1100g/K1100g_d1/K1100g_d2/K1115 共 7 實驗證明 E055 三條件全 REJECTED。Lai 2024 PRS edge = TAIFEX market microstructure 特有，非通用方法論。需 user 決策：(A) 寫 negative result paper (B) Pivot to TAIFEX microstructure (C) Abandon Paper 3 資源轉其他 papers。 | 2026-04-17 narrative state machine 觸發: K1100b NULL + K1100d NULL + K1100c MIXED (2/5 PASS flight-to-safety). 3/3 互補實驗完成. **新 Paper 3 可發表主張浮現**: asset-class-specific copula advantage — Joe upper-tail significantly beats DCC on equity-bond & equity-gold (λ_L<0.05), NULL on equity-equity (λ_L>0.4, mixing-averaging 主導). 用戶選項: (A) Paper 3 reframe 為 asset-class-specific copula (需 K1172 衍生 N=10-15 pairs 擴驗 λ_L threshold) (B) 保留原 periodic/spot-futures 方向（PRS 延伸） (C) 結合 A+B 雙 subsection. 等用戶 confirm 再進 body rewrite.",
+    "status": "decision_ready_user_input_needed"
   },
   {
     "id": "K1116",
@@ -1065,6 +1066,20 @@
       "reproducibility",
       "submission-critical",
       "multi-paper"
+    ]
+  },
+  {
+    "id": "K1100e_cross_asset_threshold_test",
+    "title": "K1100e: 10-15 pairs cross-asset λ_L threshold test (K1100c follow-up)",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T16:09:43+08:00",
+    "description": "K1100c (2026-04-17, Scenario C MIXED) 發現 copula advantage 在 λ_L<0.05 的 flight-to-safety pairs (TLT/GLD) 顯著. N=5 下 Spearman(λ_L, DM)=-0.600 p=0.285 underpowered. K1100e 擴展到 N=10-15 pairs 跨 asset-class: equity-equity x 3 (K1100b baseline), equity-bond x 3 (SPY-TLT/IEF/TIP), equity-commodity x 3 (SPY-GLD/SLV/USO), equity-FX x 2 (SPY-UUP/FXE), equity-credit x 2 (SPY-LQD/HYG). 檢驗 H1: Spearman(λ_L, DM_copula-vs-DCC) < 0, Harvey significant. 若 confirm → Paper 3 最有力主張 + 可發表到 J. Financial Econometrics. Joe copula 主力（K1100c 證實上尾為 driver）. 重用 k1100c 腳本延伸.",
+    "tags": [
+      "paper-3",
+      "copula",
+      "threshold-test",
+      "follow-up-K1100c"
     ]
   }
 ]

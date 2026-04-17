@@ -262,13 +262,31 @@
 - [ ] Gemini 審查
 - [ ] `/citation-verifier` 引用驗證
 
-**第三篇相關方向探索：Copula-GARCH for VT / Portfolio Risk Management**（2026-04-17 更新）
-- 動機：用戶 Lai 2024 APFM PRS paper 用 copula-GARCH 成功 → 測試能否推廣 equity-equity portfolios
-- K1100b (5 pairs Student-t/Clayton, 2026-04-13): 5/5 NULL vs DCC-A4f-ASYM, 最強 tail-dep SPY-QQQ λ_L=0.589 DM=+0.624 NS
-- K1100d (VIX regime-switching, 2026-04-17, Scenario B): 5/5 × 4 RS models 全 NULL 全 OOS；**反直覺**：高 VIX 子期 RS 反而略輸 DCC，「regime-switching 捕獲 crisis 尾部」假設不成立；RS 優勢反在 low-VIX
-- K1100c (skew-t/vine asymmetric, 進行中)：若亦 NULL → 三路線（uniform / regime / asymmetric）均 NULL
-- **結構性機制**：50/50 portfolio variance = w₁²h₁+w₂²h₂+2w₁w₂ρs₁s₂ 由 ρ_t 主導，copula 額外尾部資訊在 mixing 下平均化
-- **Paper 3 narrative state machine 預計走向**（待 K1100c 完成觸發）：copula 擴展 general equity FAILS → Paper 3 聚焦 **periodic return + spot-futures (ρ≈0.99 不被 averaging 稀釋)**，不擴 asset universe
+**第三篇相關方向探索：Copula-GARCH for Portfolio Risk Management**（2026-04-17 narrative state machine triggered, user decision pending）
+
+三個互補實驗（K1100b uniform / K1100d regime / K1100c asymmetric）完成：
+
+| 實驗 | 方向 | 結果 | Mechanism implication |
+|------|------|------|----------------------|
+| K1100b (2026-04-13) | Student-t / Clayton uniform | 5/5 NULL | 對稱或單下尾 copula 不足 |
+| K1100d (2026-04-17) | VIX regime-switching (Gaussian↔Student-t/Clayton) | 5/5 NULL | 反直覺：crisis 子期 RS 反略輸 DCC，regime conditioning 無用 |
+| K1100c (2026-04-17) | Hansen SkewT + Joe upper-tail | **2/5 PASS** | SPY-TLT Joe DM=+10.36, SPY-GLD Joe DM=+7.66 (λ_L<0.05); equity-equity (λ_L>0.4) 仍 NULL |
+
+**重大發現**：copula 非 general NULL — **asset-class-specific**。
+- **Mixing-averaging mechanism**: 50/50 portfolio variance = w₁²h₁+w₂²h₂+2w₁w₂ρs₁s₂ 由 ρ_t 主導
+- 高 tail-dep (equity-equity, λ_L 0.4-0.6): DCC ρ 已捕獲主 info → copula 邊際貢獻小
+- 低 tail-dep (flight-to-safety, λ_L <0.05): DCC under-specifies regime → Joe upper-tail 正確 capture 殘餘結構
+- **Joe copula is the star** (不是 SkewT)：上尾結構是 K1100b 遺漏的關鍵
+
+**新 Paper 3 可發表主張**（narrative state machine: decision_ready_user_input_needed）：
+> 「Joe copula with upper-tail structure significantly beats DCC for flight-to-safety pairs (equity-bond, equity-gold), but not equity-equity pairs, due to portfolio-mixing mechanism.」
+
+**用戶決策選項**：
+- (A) **Reframe Paper 3 為 asset-class-specific copula study** — 需 K1100e 擴驗 N=10-15 pairs 的 λ_L threshold (已加 task)，最有力實證+可發表 J. Financial Econometrics 等
+- (B) 保留原 **periodic return / spot-futures** 方向（PRS 延伸），K1100 系列當 appendix null
+- (C) 結合 A+B 雙 subsection，copula + periodic 都寫
+
+等用戶 confirm 後才進 body rewrite（state machine 規則：decision_made_awaiting_body_rewrite）。
 
 **未來可能的第四篇：VIX Sufficient Statistic**
 - 23+ 個指標全被 VIX 吸收的 comprehensive study
