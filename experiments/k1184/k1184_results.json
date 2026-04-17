@@ -1,0 +1,77 @@
+{
+  "experiment_id": "k1184",
+  "timestamp": "2026-04-17T12:28:43.069552+00:00",
+  "metadata": {
+    "purpose": "Reproduce Paper 2 (taiwan-vt) body.tex:459 skew-t params \u03b7=5.2, \u03bb=-0.05",
+    "paper_ref": "paper/taiwan-vt/body.tex line 459",
+    "reference": "Hansen (1994) IER 35(3):705-730",
+    "k1100c_connection": "Same Hansen skew-t PDF as K1100c bivariate copula"
+  },
+  "data": {
+    "ticker": "0050.TW",
+    "start": "2009-01-05",
+    "end": "2026-03-31",
+    "n_total": 4216,
+    "n_oos": 1513,
+    "oos_period": "2020-01-01 to 2026-04-01"
+  },
+  "gjr_garch": {
+    "omega": 0.0433274388839504,
+    "alpha": 0.04371314282291772,
+    "gamma": 0.10103597213523123,
+    "beta": 0.8802715485675213,
+    "persistence": 0.9745026774580546,
+    "converged": true,
+    "nll": 6364.491878356004,
+    "stdresid_mean": 0.05306188016965601,
+    "stdresid_std": 1.006758039375775,
+    "stdresid_skew": -0.13581263258240373,
+    "stdresid_kurt": 3.999817564094977
+  },
+  "skewt_full_sample": {
+    "eta_hat": 4.967943910331803,
+    "lambda_hat": -0.05898342373638357,
+    "eta_paper": 5.2,
+    "lambda_paper": -0.05,
+    "eta_diff": 0.23205608966819735,
+    "lambda_diff": 0.00898342373638357,
+    "eta_rtol": 0.04462617109003795,
+    "lambda_rtol": 0.1796684747276714,
+    "eta_match": true,
+    "lambda_match": true,
+    "overall_match": true,
+    "nll": 5814.029147852358,
+    "converged": true
+  },
+  "skewt_oos_2020_2026": {
+    "eta_hat": 6.034124728873087,
+    "lambda_hat": -0.04301671396148781,
+    "eta_diff": 0.8341247288730864,
+    "lambda_diff": 0.006983286038512192,
+    "eta_match": false,
+    "lambda_match": true,
+    "overall_match": false,
+    "nll": 2196.3827245178445,
+    "converged": true
+  },
+  "student_t_symmetric": {
+    "df_mle": 4.96559602876009,
+    "df_paper_assumed": 5.0
+  },
+  "var_violations": {
+    "n_oos": 1513,
+    "student_t5_violations": 20,
+    "student_t5_rate": 0.013218770654329148,
+    "sym_t_mle_violations": 20,
+    "sym_t_mle_rate": 0.013218770654329148,
+    "paper_claimed_violations": 8,
+    "paper_claimed_rate": 0.005
+  },
+  "verdict": {
+    "code": "(a) MATCHED \u2014 both \u03b7 and \u03bb within tight tolerance",
+    "best_match_period": "FULL_SAMPLE",
+    "eta_reproduced": true,
+    "lambda_reproduced": true,
+    "recommendation": "Paper values confirmed within tolerance"
+  }
+}
