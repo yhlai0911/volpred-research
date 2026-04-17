@@ -1,0 +1,224 @@
+{
+  "experiment_id": "K1225",
+  "title": "Paper 4 body_v4 Dual-Framing Edit Guide (CONFLICT-A4 resolver)",
+  "type": "paper_edit_guide_markdown",
+  "date": "2026-04-17",
+  "worktree": "agent-a05ba53d",
+  "status": "COMPLETED_AWAITING_USER_PICK",
+  "conflict_context": {
+    "conflict_id": "CONFLICT-A4",
+    "user_commit": "7ecab636",
+    "user_signal": "channel-specific pivot",
+    "k1203_gate_language": "UNIVERSAL_NULL_7_OF_7 with TLT caveat",
+    "k1208_draft_framing": "UNIVERSAL_NULL",
+    "resolution_approach": "produce both framings in parallel; user picks A or B"
+  },
+  "paper_reference": {
+    "paper_id": "vix-sufficiency",
+    "current_body": "paper/vix-sufficiency/body_v3.tex",
+    "target_body": "paper/vix-sufficiency/body_v4.tex",
+    "target_main": "paper/vix-sufficiency/main_v4.tex",
+    "section_to_rewrite": "Section 5 (cross-asset universality / alt-data channels)",
+    "narrative_state": "gate_unlocked_awaiting_framing_decision"
+  },
+  "source_experiments": {
+    "K1116c": {
+      "commit": "64a9d569",
+      "assets": ["SPY"],
+      "role": "6 PIT variants; alt-data NULL baseline under publication-delay correction",
+      "path": "experiments/k1116c/"
+    },
+    "K1116f": {
+      "commit": "885d7b0b",
+      "assets": ["GLD", "TLT", "BTC-USD"],
+      "role": "PIT (3 variants); TLT finstress +3.74 outlier identified",
+      "path": "experiments/k1116f/"
+    },
+    "K1201": {
+      "commit": "87059567",
+      "assets": ["QQQ", "USO"],
+      "role": "Closed equity-tech + energy-commodity cells; USO EPU t=-5.60 strongest baseline win",
+      "path": "experiments/k1201/"
+    },
+    "K1203": {
+      "commit": "477c504a",
+      "assets": ["EEM"],
+      "role": "EEM PIT closure; ^VIX primary + rv30 robustness; 7/7 panorama gate UNLOCKED",
+      "path": "experiments/k1203/"
+    },
+    "K1208": {
+      "commit": "pending",
+      "assets": ["7-asset synthesis"],
+      "role": "Section 5 Markdown draft in UNIVERSAL_NULL framing",
+      "path": "experiments/k1208/"
+    },
+    "K1218": {
+      "commit": "pending",
+      "assets": ["Paper 6 template"],
+      "role": "Appendix A structural template reused for Paper 4",
+      "path": "experiments/k1218/"
+    }
+  },
+  "versions": {
+    "A_channel_specific": {
+      "section_title": "Alt-Data Channels and Native IV Dominance Across Asset Classes",
+      "core_claim": "No alt-data channel delivers Harvey |t|>3 improvement over asset-class native IV under PIT alignment for any of SPY/QQQ/GLD/USO/TLT/BTC/EEM.",
+      "matches_user_commit_7ecab636": true,
+      "matches_k1203_gate_language": "partial",
+      "reviewer_attack_surface": "smaller",
+      "alignment_with_main_v3_vocabulary": "strong (channels already used lines 210, 226, 806)",
+      "k1208_draft_reuse": "heavy_rewrite",
+      "word_target_section_5": 1800,
+      "subsection_structure": {
+        "5.1": {"title": "Alt-data channels per asset class: panorama construction", "words": 300},
+        "5.2": {"title": "Channel-by-channel results (Table 5.1 + Table 5.2)", "words": 450},
+        "5.3": {"title": "The TLT / financial-stress channel outlier", "words": 400},
+        "5.4": {"title": "^VXEEM channel availability and the EEM dual-baseline", "words": 200},
+        "5.5": {"title": "Channel-specific summary commitment", "words": 250},
+        "5.6": {"title": "Limitations: unexamined channels", "words": 200}
+      },
+      "channel_mapping": {
+        "base": "AR(1)-only (no channel)",
+        "epu": "Economic-uncertainty channel",
+        "finstress": "Financial-stress channel",
+        "all": "Kitchen-sink (all channels + native IV)"
+      },
+      "additional_citations": [
+        "Baker, Bloom, Davis (2016) QJE — EPU channel exemplar",
+        "Brave & Butters (2011) Chicago Fed Letter — NFCI channel"
+      ]
+    },
+    "B_universal_null": {
+      "section_title": "Cross-Asset Universality of Native IV Sufficiency",
+      "core_claim": "Native IV proxies (^VIX/^VXN/^OVX/^GVZ/^MOVE/^VXEEM-or-proxy + rv30 robust) are sufficient for 1-step-ahead volatility forecasting across SPY/QQQ/GLD/USO/TLT/BTC/EEM. Alt-data cannot deliver Harvey |t|>3 improvement under PIT alignment.",
+      "matches_user_commit_7ecab636": "partial",
+      "matches_k1203_gate_language": true,
+      "reviewer_attack_surface": "larger but data-backed",
+      "alignment_with_main_v3_vocabulary": "partial (abstract + §1 need update to universalise claim)",
+      "k1208_draft_reuse": "verbatim_copy_paste",
+      "word_target_section_5": 1800,
+      "subsection_structure": {
+        "5.1": {"title": "Panorama overview", "words": 350},
+        "5.2": {"title": "Results by asset class (Table 5.1 + Table 5.2)", "words": 400},
+        "5.3": {"title": "The TLT finstress outlier: lag-sensitive regime artefact", "words": 400},
+        "5.4": {"title": "Data-availability caveat: ^VXEEM and the EEM cell", "words": 250},
+        "5.5": {"title": "Final narrative commitment", "words": 250},
+        "5.6": {"title": "Limitations and future work", "words": 350}
+      },
+      "additional_citations": [
+        "Harvey (2017) — pre-registration",
+        "Ioannidis (2005) — negative-result bias"
+      ]
+    }
+  },
+  "canonical_panorama": {
+    "description": "28-cell panorama (7 assets × 4 specs) at pit_shift0; DM t vs native IV baseline; sign convention: positive t = alt-data beats native IV",
+    "sign_convention": "positive t = alt-data wins; negative t = native IV wins",
+    "cells": {
+      "SPY": {"native_iv": "^VIX", "base": -3.021, "epu": -2.603, "finstress": -3.001, "all": -2.537, "source": "K1116c"},
+      "QQQ": {"native_iv": "^VXN", "base": -2.186, "epu": -1.967, "finstress": -2.439, "all": -1.967, "source": "K1201"},
+      "GLD": {"native_iv": "^GVZ", "base": -2.103, "epu": -2.069, "finstress": -3.341, "all": -2.246, "source": "K1116f"},
+      "USO": {"native_iv": "^OVX", "base": -3.049, "epu": -5.596, "finstress": -2.584, "all": -3.735, "source": "K1201"},
+      "TLT": {"native_iv": "^MOVE", "base": 1.433, "epu": -2.477, "finstress": 3.743, "all": -5.666, "source": "K1116f"},
+      "BTC-USD": {"native_iv": "rv30", "base": -5.494, "epu": -3.550, "finstress": 1.370, "all": 0.203, "source": "K1116f"},
+      "EEM": {"native_iv": "^VIX (spillover)", "base": -2.596, "epu": -3.539, "finstress": -1.434, "all": -0.999, "source": "K1203"}
+    },
+    "qlike_improvement_best_alt": {
+      "SPY": {"improvement_pct": -0.67, "gate_pass": false, "comment": "alt-data degrades"},
+      "QQQ": {"improvement_pct": -0.56, "gate_pass": false, "comment": "alt-data degrades"},
+      "GLD": {"improvement_pct": -0.63, "gate_pass": false, "comment": "alt-data degrades"},
+      "USO": {"improvement_pct": -0.84, "gate_pass": false, "comment": "strongest baseline win"},
+      "TLT": {"improvement_pct": 0.50, "gate_pass": false, "comment": "only positive, below 5% gate"},
+      "BTC-USD": {"improvement_pct": 0.23, "gate_pass": false, "comment": "positive but tiny"},
+      "EEM": {"improvement_pct": -0.13, "gate_pass": false, "comment": "rv30 robust +0.09%"}
+    },
+    "cells_exceeding_harvey_threshold": 1,
+    "cells_passing_qlike_gate": 0,
+    "sole_harvey_exceeding_cell": {
+      "asset": "TLT",
+      "spec": "finstress",
+      "variant": "pit_shift0",
+      "dm_t": 3.743,
+      "disposal": "non-structural regime artefact",
+      "robustness_fails": [
+        "pit_shift1 collapses to +2.00 (Harvey-insignificant)",
+        "QLIKE improvement +0.50% fails 5% economic gate",
+        "kitchen-sink 'all' spec DM t = -5.67 (overfitting signature)"
+      ]
+    }
+  },
+  "shared_methodology": {
+    "window": "2018-01-12 to 2026-04-10",
+    "split": "260-week IS / 170-week OOS (OOS start 2023-01-01)",
+    "target": "weekly realised volatility sqrt(sum(daily_log_return^2)); min 4 trading days",
+    "baseline": "AR(1) + asset-class native IV (or rv30 for BTC-USD and EEM robust)",
+    "alt_data_specs": {
+      "epu": ["USEPU", "WLEMU"],
+      "finstress": ["NFCI", "ANFCI", "STLFSI"],
+      "all": ["native_IV", "USEPU", "WLEMU", "NFCI", "ANFCI", "STLFSI"]
+    },
+    "tests": [
+      "DM-HLN with Harvey (1997) finite-sample correction",
+      "QLIKE (Patton 2011) on r^2 proxy",
+      "Harvey (2016) |t|>3 multiple-testing threshold",
+      "5% QLIKE Patton economic gate"
+    ],
+    "seed": 42
+  },
+  "data_availability_caveat": {
+    "issue": "^VXEEM delisted from yfinance 2026-04-17",
+    "probed_alternatives": ["^VXEEM", "VXEEM", "^VXFXI", "^CIV"],
+    "all_returned": "HTTP 404 or delisted",
+    "fallback_used": "^VIX primary (spillover proxy; weekly correlation ~0.75) + rv30 robustness",
+    "verdict_invariance": "EEM NULL under both ^VIX and rv30 baselines"
+  },
+  "decision_matrix": {
+    "matches_user_7ecab636": {"A": "yes", "B": "partial"},
+    "matches_k1203_gate": {"A": "partial", "B": "yes"},
+    "reviewer_attack_surface": {"A": "smaller", "B": "larger but data-backed"},
+    "main_v3_vocabulary_alignment": {"A": "strong", "B": "partial"},
+    "k1208_draft_reuse": {"A": "heavy_rewrite", "B": "verbatim_copy_paste"},
+    "future_work_hook": {"A": "rich (untested channels)", "B": "narrower (more assets, HAR-RV daily)"},
+    "positioning": {"A": "asset-class taxonomy", "B": "universal negative-result methodology"},
+    "word_count_section_5": {"A": 1800, "B": 1800}
+  },
+  "recommendation_if_no_user_pick": {
+    "default": "B",
+    "rationale": "K1208 draft already written in this framing; K1203 gate explicitly unlocks under UNIVERSAL_NULL_7_OF_7 language; zero rewrite cost"
+  },
+  "main_thread_integration_steps": [
+    "1. User picks A or B (CONFLICT-A4 resolved)",
+    "2. Copy paper/vix-sufficiency/body_v3.tex to body_v4.tex",
+    "3. Apply chosen version's Section 5 rewrite from k1225_dual_framing_guide.md (A.1-A.5 or B.1-B.5)",
+    "4. Integrate shared Appendix A (K1218 template adapted for Paper 4)",
+    "5. Update main_v4.tex include list; xelatex main_v4.tex twice",
+    "6. Run `uv run volpred ops paper-update --paper-id vix-sufficiency`",
+    "7. Commit with message marking CONFLICT-A4 resolution (A or B)",
+    "8. Update research_program.md + knowledge.json with body_v4 commit hash"
+  ],
+  "strict_rules_observed": {
+    "no_tex_output": true,
+    "verbatim_panorama_numbers": true,
+    "seed_fixed": 42,
+    "worktree_scope_respected": true,
+    "both_versions_cite_same_source_commits": true,
+    "no_shared_state_modification": true
+  },
+  "files": {
+    "k1225_dual_framing_guide.md": "main deliverable (~2000 words; both framings fully specified)",
+    "k1225_dual_framing.json": "this file (structured metadata)",
+    "README.md": "experiment documentation"
+  },
+  "references": [
+    "experiments/k1116c/ (SPY baseline)",
+    "experiments/k1116f/ (GLD/TLT/BTC PIT)",
+    "experiments/k1201/ (QQQ/USO PIT)",
+    "experiments/k1203/ (EEM PIT + gate unlock)",
+    "experiments/k1208/k1208_draft.md (UNIVERSAL_NULL draft source)",
+    "experiments/k1218/ (Appendix A template)",
+    "paper/vix-sufficiency/main_v3.tex (pre-rewrite state; channel vocabulary lines 210, 226, 806)",
+    "paper/vix-sufficiency/body_v3.tex (pre-rewrite body)",
+    "User commit 7ecab636 2026-04-17 (channel-specific pivot indication)",
+    "CLAUDE.md paper-workflow rule (no .tex from background agent)"
+  ]
+}
