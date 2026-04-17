@@ -50,6 +50,11 @@ Do **not** use this skill for：
 1. **研究驅動**：`cat storage/publication_candidates.json | jq '.top_10_uncovered, .missing_general_top5, .missing_research_top5'`
 2. **事件驅動**：WebSearch 近期 CPI/NFP/FOMC/TSMC/earnings season；`grep '財報公告日.txt'`；讀 `next_tasks.json` 事件任務
 
+補充：
+- `storage/next_tasks.json` 在 v11 之後只算 **legacy planning / working list**，可當事件線索，但不是正式 scheduler queue。
+- 正式事件來源仍是 `config/runtime_schedules.json` 的 `event_jobs`、`storage/ops/` control plane 與 `storage/ops/event_ledger/`。
+- 若 `next_tasks.json` 與 control plane / `event_jobs` 不一致，以後者為準。
+
 詳見 `publication-candidates` skill。
 
 ## 發文前必做：主題重複檢查（不可跳過）
@@ -135,45 +140,18 @@ Publisher 會自動在文章末尾附加「延伸閱讀」區塊，列出同 aud
 - 研究產出來源 → `autonomous-research`
 - 文章池、節奏與通知 → `admin-ops`
 
-## 文章結構模板（milestone 用）
+## 文章結構模板
 
-```markdown
-## 摘要
-一句話說明發現了什麼、為什麼重要。
+**骨架依 `audience` 分流**（見下方「文章類型寫作模板」）：
 
-## 研究背景
-為什麼要做這個分析？之前的結論是什麼？
+- `audience=general` → **敘事式**（爆款標題、場景 hook、類比解釋、2-3 張表、800-1500 字）
+- `audience=research` → **學術報告式**（摘要/背景/方法/發現/實務/限制/結論、數字完整列、3000-8000 字）
+- `audience=daily` → 維持現狀（本節規則不適用）
 
-## 方法與數據
-| 項目 | 設定 |
-|------|------|
-| 資產 | SPY, QQQ... |
-| 期間 | 2014-2026 |
-| 方法 | GJR-GARCH... |
+**所有文章通用（不論 audience）**：
 
-## 核心發現
-
-### 發現一：[標題]
-數據 + 解讀。不只報數字，要解釋為什麼重要。
-
-### 發現二：[標題]
-...
-
-## 實務意義
-投資人可以怎麼用這個結果？
-
-## 結論
-重申核心發現，指出限制和未來方向。
-
-## 圖表（必須，不可省略）
-![核心發現的視覺化圖表](supabase_storage_url)
-用 matplotlib 生成 PNG，上傳 Supabase Storage article-images bucket。
-禁止用 ASCII art 或純文字表格替代真正的圖表。
-
-## 數據來源
-*本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。
-數據來源：yfinance 實證數據，期間：YYYY-YYYY，樣本：N 個觀測值。*
-```
+- 必含**真實圖表**（禁 ASCII、純文字表格替代）；優先 `upload_chart('experiments/k<id>/*.png')`，沒有再用 `volpred.charts` 生成新圖
+- 必含**數據來源標注**：`*本文基於實驗 KXXX（腳本：experiments/kXXX.py，結果：experiments/kXXX_results.json）。數據來源：yfinance / FRED / TAIFEX，期間：YYYY-YYYY，樣本：N 個觀測值。*`
 
 ## 發佈流程
 
@@ -202,20 +180,39 @@ Publisher 會自動在文章末尾附加「延伸閱讀」區塊，列出同 aud
 - uv run python scripts/build_knowledge_index.py search --query "<主題一句話>"
 若 top-3 dist < 0.5 或標題重疊 > 30% → 回報已存在，停止
 
-## 3. 文章核心（list 5-7 個 numbered points 明確 curation）
-1. <最反常識 / aha 點，這是文章主幹>
+## 3. 文章核心（依 audience 不同）
+
+**若 audience=general**（敘事式，5-6 個 numbered points 明確 curation）：
+1. <最反常識 / aha 點，文章主幹>
 2. <對比點：之前以為什麼，這次發現什麼>
-3. <關鍵抉擇 / 機制 / 為什麼會這樣>
-4. <主要支持數據：3-5 個 curated 數字，不全列>
+3. <關鍵機制 / 為什麼會這樣（白話）>
+4. <主要支持數據：3-5 個 curated 數字，不全列；用白話解釋>
 5. <實務 / 投資意涵>
 6. <局限 / 下一步>
 
-## 4. 結構建議（articulated 不是 template）
-- 標題：<具體建議>
+**若 audience=research**（學術式，列完整研究要素）：
+1. <研究問題 / 假設>
+2. <方法、數據、期間、樣本、OOS 設定、統計門檻>
+3. <核心發現（可多個）：完整列統計量、p-value、CI；允許 Layer-1/2/3 逐層 walkthrough>
+4. <穩健性 / placebo / subperiod / 交替 spec>
+5. <實務意義 / 後續研究方向 / open questions>
+6. <限制（樣本、proxy、look-ahead 檢查）>
+
+## 4. 結構建議（依 audience）
+
+**若 audience=general**（敘事式）：
+- 標題：爆款型（「你以為...其實...」「為什麼...」）
 - 摘要：3-4 句含核心數字 + 1 個反直覺發現
-- 開頭：用「反常識」或「推翻前說」hook，不從 method table 開頭
-- 主敘事：核心發現 → 為什麼 surprising → 機制 → 數據 → paradigm shift → 實務
-- ⚠️ 禁止 Layer-1 / Layer-2 逐層 walkthrough；次要層級進附錄條列
+- 開頭：用場景 / 類比 / 反常識 hook，不從 method table 開頭
+- 主敘事：核心發現 → 為什麼 surprising → 機制（白話）→ 數據 → 實務
+- 表格 2-3 張上限；避免 Layer 逐層列
+
+**若 audience=research**（學術報告式，回歸 3/25 模板）：
+- 標題：具體描述發現（「K1145: 三市場 pooled panel — OFI 預測 RV 的 universality 檢定」）
+- 摘要：3-5 句，含數據期間、方法、主要統計量、實務意涵（不需要 hook）
+- 結構：摘要 → 研究背景 → 方法與數據 → 核心發現（可多節，每節對應 K）→ 實務意義 → 限制與穩健性 → 結論
+- 表格不限；統計量完整列（t-stat、p-value、CI、bootstrap 分布）
+- Layer-1/2/3 逐層 walkthrough **允許且鼓勵**（robustness 驗證所需）
 
 ## 5. 圖表（必含真實圖表，禁 ASCII）
 - 優先 embed 既有 PNG：upload_chart('experiments/k<a>/k<a>_xxx.png')
@@ -259,12 +256,26 @@ pub.publish_milestone(
 - **永遠用 `status=draft`**：不論 research 或 general，所有文章先進文章池
 - **禁止直接 `status=published`**：除非用戶明確說「立即發布這篇」
 - **Agent prompt 必須指定 `status="draft"`**：不可省略
-- 文章池每 **15 分鐘**自動釋出 1 篇（session cron 驅動）
+- 文章池每 **15 分鐘**自動釋出 1 篇（正式時鐘以 shared scheduler / canonical runtime schedule 為準；若本機仍留 session cron，只視為過渡期便利）
 - CLI 指令：`uv run python -m volpred.cli ops release-pool --include-drafts --limit 1 --storage-dir storage`
 
 ### 文章類型寫作模板（寫作前必須選定類型）
 
 **一般讀者和研究文章的受眾完全不同，寫作方式必須有本質差異。**
+
+#### Audience 分流決策表（寫第一個字之前必看）
+
+| 情境 | audience | 骨架風格 | 表格上限 | 字數 |
+|------|----------|---------|---------|-----|
+| 散戶 / 業餘投資人可讀；從主題切入；融貫 3-5 K | `general` | 敘事式（場景 hook → 白話解釋 → 實務建議） | 2-3 張 | 800-1500 |
+| 同行學者 / 有統計背景讀者；單一 K 深度或系列 K 聚合 | `research` | **學術報告式**（摘要/背景/方法/發現/實務/限制/結論） | 不限（但避免為表格而表格） | 3000-8000 |
+| 每日市場建議、配置、短版評論 | `daily` | 維持現狀，**本節規則不適用** | — | — |
+
+**分流原則**：
+- 同一素材兩種寫法都可行時，以「主要讀者」判斷 — 想用生活比喻教散戶 → `general`；想讓同行驗證或復現 → `research`
+- **不要為了「好讀」把 research 素材硬寫成 general**（t-stat、Harvey 門檻、DM test 這些在 research 必須保留）
+- **不要為了「學術感」把 general 強加 research 模板**（爆款標題、生活場景開頭是 general 的本分）
+- 若 audience 判錯，產出的文章會「結構與讀者錯位」——這是最近「文章架構統一化、為故事而故事」的主因
 
 #### 一般讀者 (audience=general) — **融會貫通型**
 **受眾**：非專業投資人、對金融有興趣但無統計背景的人
@@ -284,44 +295,69 @@ pub.publish_milestone(
 | 核心概念 | 用類比解釋（VIX = 恐懼溫度計、VT = 自動煞車、MDD = 最深的坑） |
 | 數據 | 只引用 1-2 個關鍵數字，用白話解釋（「20 年來最差的一個月也只虧了 4.7%」） |
 | 結構 | 問題 → 一句話答案 → 為什麼 → 具體例子 → 行動建議 → CTA |
-| 長度 | 800-1200 字 |
+| 長度 | 800-1500 字 |
 | 語氣 | 像朋友聊天，不是教授講課 |
 
 **禁止**：
 - ❌ t-stat、p-value、DM test、Harvey threshold（改用「經過嚴格統計檢驗」）
 - ❌ K 編號（改用「我們的研究發現」）
-- ❌ 多個表格堆砌統計結果（最多 1 個簡單對比表）
+- ❌ 多個表格堆砌統計結果（**最多 2-3 張**對比表；超過就視為 research 素材寫錯 audience）
 - ❌ 論文引用格式（改用「學術研究顯示」）
 - ❌ 超過 2 個 takeaway（一篇一個核心重點）
 
-#### 研究發現 (audience=research)
+#### 研究發現 (audience=research) — **學術報告式**（2026-04-18 回歸 3/25 模板）
 **受眾**：有金融/統計背景的讀者、學術研究者
-**目的**：**揭露**有趣、顯著、特別的發現；**不是流水帳倒出所有數據**
+**目的**：完整記錄有統計顯著性或方法論價值的發現，讓同行能復現、檢驗、延伸。
 
-**核心寫作原則**（2026-04-14 強化）：
+**2026-04-18 變更原因**：4/14 曾把 research 改為敘事式（「一篇一個 aha / curate 3-5 數字 / 反常識開頭 / 禁止 Layer 逐層列」），但此風格副作用是**最近 research 文章過度統一化、結構同構、統計量缺失**。研究文章的讀者要的是**可驗證、可復現、可延伸**，不是「爆款敘事」；敘事式保留給 `general`。
 
-1. **從「反常識」或「推翻前說」開頭**，不要從 method table 開頭
-   - ❌「我們測試了 4 個市場 × 5 層 robustness × 3 EAV-def...」
-   - ✓「三市場（TW/US/JP）pooled panel 告訴我們：**個股看不到的訊號，集合起來卻強到 +70σ**」
-2. **一篇一個「aha」**：找出最意外 / 最推翻直覺 / 最有啟發的那個點，反覆強化
-   - 不是把所有 t-stat / p-value 都列出來
-   - 次要數據進附錄或條列，不占主敘述
-3. **curate 數字**：全文最多 3-5 個關鍵數字，每個都要有解讀（不是單純「t=+5.24」）
-   - ❌「bootstrap t=+5.24, p=0.000, 95% CI [+4.13e-5, +9.38e-5]」（純數字堆砌）
-   - ✓「bootstrap t=+5.24——遠超 Harvey 嚴格門檻 3.0，代表這不是巧合。更關鍵的是，placebo 測試 60 次隨機打亂下，觀測值離 null 13.6 個標準差，這在任何正常分佈下都是宇宙級罕見」
-4. **結構 = 敘事不是 template**：
-   - 核心發現（1 段）→ 為什麼 surprising（1 段）→ 方法關鍵抉擇（1 段，不是完整 method）→ 數據支持（1-2 段）→ paradigm shift（1 段）→ 實務 / 下一步
-5. **避免流水帳陷阱**：
-   - ❌ 「Layer 1 QLIKE、Layer 2 MCS、Layer 3 Spearman、Layer 4 VaR、Layer 5 DM、Layer 6 VT Sharpe...」逐層列
-   - ✓ 「6 層公平比較中，最關鍵的是 MCS 直接淘汰 GJR+HAR——這意味著舊論文的 HAR 勝出全是 target-mismatch artifact」
-6. **讓讀者帶走一個 paradigm / framework / rule**，不是帶走一堆數字
+**骨架（按此順序，不相關章節可省略，但不可倒置）**：
 
-**反例**（本 session mile_302a3775 / mile_15b190b5 / mile_7674c21f 這類）：
-- 從方法表開頭、把所有 6 層逐層敘述、數字堆疊沒 curation、無敘事主線
-- 看起來像實驗 report 不是 article
-- 讀完只記得「很多 t-stat 都 pass」，抓不到 single takeaway
+```markdown
+## 摘要
+3-5 句：發現什麼、數據期間、方法、主要統計量、實務意涵。不需要「反常識 hook」。
 
-**觸發時機**：**跟著實驗走**——當實驗（或一組系列實驗）產生顯著發現時寫。不是從候選清單挑。
+## 研究背景
+為什麼要做這個分析？既有文獻或自己的舊結論是什麼？本研究的差異化在哪？
+
+## 方法與數據
+| 項目 | 設定 |
+|------|------|
+| 資產 | SPY / 0050.TW / ... |
+| 期間 | YYYY-YYYY |
+| 樣本 | N 個觀測值 |
+| 方法 | GJR-GARCH / HAR-RV / OFI / ... |
+| OOS 設定 | rolling / expanding / block-bootstrap |
+| 統計門檻 | Harvey 3.0 / DM-HLN / MCS / placebo z-score |
+
+## 核心發現
+
+### 發現一：[具體標題]
+統計量 + 解讀。可含表格、圖、p-value、CI。**完整列數據，不 curate**。
+
+### 發現二：...
+（多實驗聚合時可多節；每節對應一個 K 或一個面向）
+
+## 實務意義
+投資人、其他研究者、後續實驗可以怎麼用？
+
+## 限制與穩健性
+樣本限制、proxy 假設、look-ahead 檢查、OOS / placebo / subperiod；Harvey / DM / bootstrap 細節。
+
+## 結論
+重申核心發現 + 下一步研究方向 / open questions。
+```
+
+**核心寫作原則**：
+
+1. **不強制故事 hook**（可有可無，但**不是必要**；摘要是合法的開頭）
+2. **不強制「三個 Takeaway」結論模板**（research 用「結論 + 下一步」即可）
+3. **數字可完整列**：research 讀者要看所有統計量，**不需要 curate 3-5**；p-value、CI、bootstrap 細節都列出來
+4. **允許 Layer-1/2/3 逐層 walkthrough**（對 robustness 驗證非常重要，不是流水帳）
+5. **K 編號明確標記**：每個引用的 K 都要標（含實驗路徑、results JSON 路徑）
+6. **不要強行找「paradigm / framework / rule」**：如果結果只是 `H0 無法拒絕` 或 `PASS under X condition only`，就照實寫 — null result 也是結果
+
+**觸發時機**：跟著實驗走——當實驗（或一組系列實驗）產生顯著發現、methodology 教訓、或值得記錄的 null result 時寫。不是從候選清單挑。
 
 **兩種合法形式**：
 1. **單一 K 深度報告**：重大發現可獨立成篇（例：K1145 pooled panel PASS、K1140 block-bootstrap 方法論警示）
@@ -340,7 +376,7 @@ pub.publish_milestone(
 |------|----------|----------|
 | 觸發 | **主動挑讀者感興趣主題**（`publication-candidates` 軌道 A+B） | **跟著實驗進行**，有顯著發現就寫 |
 | 素材 | 融貫 3-5 個相關 K 實驗 | 單 K 深度 或 系列實驗聚合 |
-| 文風 | 生活類比、禁 K 編號、800-1200 字 | K 編號 + t-stat + 完整方法、3000-8000 字 |
+| 文風 | 生活類比、禁 K 編號、800-1500 字 | K 編號 + t-stat + 完整方法、3000-8000 字 |
 | 主要來源 | knowledge.json 摘要 + 概念層 | README.md + 腳本註解 + results JSON + 既有 PNG |
 | 寫作節奏 | 寫手動籌劃，每天 4 篇配額 | 實驗完成即寫，無固定配額 |
 

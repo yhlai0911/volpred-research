@@ -41,6 +41,10 @@ Do **not** use this skill for：
 3. 用 `volpred ops paper-upsert --paper-id <id> --stage <stage>` 寫入 DB（若有 --stage 欄位；無則寫 details JSON）
 4. 同步更新 `next_tasks.json` 的對應任務 description
 
+補充：
+- 這裡同步 `next_tasks.json` 的目的，只是維持 paper working list / human-readable plan。
+- v11 之後，正式 orchestration 狀態仍以 `storage/ops/` control plane 與 `config/runtime_schedules.json` / `event_jobs` 為準；`next_tasks.json` 不是 canonical scheduler queue。
+
 修訂操作步驟（從 review report 到平台同步）→ 見 `paper-update` skill。本 skill 只負責 stage 判定 + continuous review loop 觸發頻率。
 
 ## Ready-for-Submission 持續審查迴圈
@@ -120,6 +124,8 @@ paper/<paper-id>/
 3. 用戶確認 final（避免 agent 自行判定提交）
 
 ### Continuous review 在 next_tasks 的維持
+
+這一段是 **legacy paper working list** 規範，用於人類與主線程快速追蹤；不是 shared scheduler 的 canonical task schema。
 
 每篇 ready 論文在 `next_tasks.json` 必須有：
 ```json

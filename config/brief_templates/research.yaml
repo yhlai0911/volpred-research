@@ -1,0 +1,19 @@
+task_summary: "{{title}}"
+goal: "完成研究任務：{{description}}"
+success_criteria:
+  - "遵守 research honesty 與 lookahead 防錯"
+  - "先讀 error log、再看必要研究背景"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "research_program.md"
+  - "docs/error_log.md"
+  - "docs/project_improvement_status.md"
+recommended_files:
+  - "docs/architecture.md"
+  - "AGENTS.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+  - "storage/memory/knowledge.json"
+relevant_commands:
+  - "uv run volpred ops health"
+why_this_agent: "研究與高判斷任務預設由 {{preferred_agent}} 處理。"

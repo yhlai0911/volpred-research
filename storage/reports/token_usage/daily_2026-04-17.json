@@ -4,23 +4,23 @@
   "date": "2026-04-17",
   "week_range": "2026-04-17 → 2026-04-24",
   "totals": {
-    "input_tokens": 101661,
-    "output_tokens": 4154895,
-    "cache_read_tokens": 1000535670,
-    "cache_create_tokens": 36793957,
-    "billable_total": 41050513,
-    "assistant_messages": 7090,
-    "unique_sessions": 83,
-    "estimated_cost_usd": 1935.6916
+    "input_tokens": 143984,
+    "output_tokens": 5658948,
+    "cache_read_tokens": 1517488240,
+    "cache_create_tokens": 46819762,
+    "billable_total": 52622694,
+    "assistant_messages": 10065,
+    "unique_sessions": 117,
+    "estimated_cost_usd": 2836.1686
   },
   "by_model": {
     "claude-opus-4-7": {
-      "input_tokens": 29897,
-      "output_tokens": 2687540,
-      "cache_read_tokens": 750136091,
-      "cache_create_tokens": 25160648,
-      "messages": 3640,
-      "estimated_cost_usd": 1798.9802
+      "input_tokens": 35381,
+      "output_tokens": 3788915,
+      "cache_read_tokens": 1202859593,
+      "cache_create_tokens": 30497261,
+      "messages": 5596,
+      "estimated_cost_usd": 2660.8124
     },
     "<synthetic>": {
       "input_tokens": 0,
@@ -31,119 +31,130 @@
       "estimated_cost_usd": 0.0
     },
     "claude-sonnet-4-6": {
-      "input_tokens": 70973,
-      "output_tokens": 1433488,
-      "cache_read_tokens": 240143849,
-      "cache_create_tokens": 11041134,
-      "messages": 3212,
-      "estimated_cost_usd": 135.1626
+      "input_tokens": 94675,
+      "output_tokens": 1807542,
+      "cache_read_tokens": 295008423,
+      "cache_create_tokens": 15019395,
+      "messages": 4042,
+      "estimated_cost_usd": 172.2224
     },
     "claude-haiku-4-5-20251001": {
-      "input_tokens": 791,
-      "output_tokens": 33867,
-      "cache_read_tokens": 10255730,
-      "cache_create_tokens": 592175,
-      "messages": 232,
-      "estimated_cost_usd": 1.5487
+      "input_tokens": 13928,
+      "output_tokens": 62491,
+      "cache_read_tokens": 19620224,
+      "cache_create_tokens": 1303106,
+      "messages": 421,
+      "estimated_cost_usd": 3.1338
     }
   },
   "by_category": {
     "bash_other": {
-      "input_tokens": 25093,
-      "output_tokens": 951169,
-      "cache_read_tokens": 267212542,
-      "cache_create_tokens": 6923621,
-      "messages": 2174,
-      "billable_total": 7899883,
-      "estimated_cost_usd": 602.3508,
+      "input_tokens": 32720,
+      "output_tokens": 1315754,
+      "cache_read_tokens": 461860736,
+      "cache_create_tokens": 9204688,
+      "messages": 3317,
+      "billable_total": 10553162,
+      "estimated_cost_usd": 964.5514,
       "emoji": "💭",
       "description": "其他 Bash 操作"
     },
     "text_only": {
-      "input_tokens": 2290,
-      "output_tokens": 831321,
-      "cache_read_tokens": 263321896,
-      "cache_create_tokens": 5812060,
-      "messages": 844,
-      "billable_total": 6645671,
-      "estimated_cost_usd": 566.3424,
+      "input_tokens": 3314,
+      "output_tokens": 1102764,
+      "cache_read_tokens": 381979383,
+      "cache_create_tokens": 7014242,
+      "messages": 1200,
+      "billable_total": 8120320,
+      "estimated_cost_usd": 787.2431,
       "emoji": "💬",
       "description": "純文字回覆（無工具）"
     },
     "investigation": {
-      "input_tokens": 32603,
-      "output_tokens": 313794,
-      "cache_read_tokens": 137181679,
-      "cache_create_tokens": 9825724,
-      "messages": 1673,
-      "billable_total": 10172121,
-      "estimated_cost_usd": 414.0284,
+      "input_tokens": 47441,
+      "output_tokens": 443810,
+      "cache_read_tokens": 193760405,
+      "cache_create_tokens": 12976699,
+      "messages": 2283,
+      "billable_total": 13467950,
+      "estimated_cost_usd": 567.9511,
       "emoji": "🔍",
       "description": "閱讀 / 搜尋檔案"
     },
     "agent_delegation": {
-      "input_tokens": 36680,
-      "output_tokens": 109348,
-      "cache_read_tokens": 110122846,
-      "cache_create_tokens": 8050209,
-      "messages": 1349,
-      "billable_total": 8196237,
-      "estimated_cost_usd": 324.877,
+      "input_tokens": 54946,
+      "output_tokens": 146550,
+      "cache_read_tokens": 146109862,
+      "cache_create_tokens": 10881495,
+      "messages": 1819,
+      "billable_total": 11082991,
+      "estimated_cost_usd": 435.0083,
       "emoji": "🤖",
       "description": "Agent 派送（非實驗）"
     },
     "experiment": {
-      "input_tokens": 320,
-      "output_tokens": 1230713,
-      "cache_read_tokens": 47376487,
-      "cache_create_tokens": 843445,
-      "messages": 306,
-      "billable_total": 2074478,
-      "estimated_cost_usd": 179.1876,
+      "input_tokens": 458,
+      "output_tokens": 1743008,
+      "cache_read_tokens": 67628708,
+      "cache_create_tokens": 1070828,
+      "messages": 444,
+      "billable_total": 2814294,
+      "estimated_cost_usd": 252.2536,
       "emoji": "🔬",
       "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
     },
     "worktree_merge": {
-      "input_tokens": 545,
-      "output_tokens": 63921,
-      "cache_read_tokens": 39062461,
-      "cache_create_tokens": 3459620,
-      "messages": 131,
-      "billable_total": 3524086,
-      "estimated_cost_usd": 128.2638,
+      "input_tokens": 736,
+      "output_tokens": 89083,
+      "cache_read_tokens": 66674691,
+      "cache_create_tokens": 3522808,
+      "messages": 197,
+      "billable_total": 3612627,
+      "estimated_cost_usd": 172.757,
       "emoji": "🔀",
       "description": "Worktree 合併與分支管理"
     },
-    "file_edit": {
-      "input_tokens": 237,
-      "output_tokens": 386455,
-      "cache_read_tokens": 38658912,
-      "cache_create_tokens": 308213,
-      "messages": 182,
-      "billable_total": 694905,
-      "estimated_cost_usd": 92.755,
-      "emoji": "📄",
-      "description": "其他檔案編輯"
-    },
     "git_sync": {
-      "input_tokens": 195,
-      "output_tokens": 100175,
-      "cache_read_tokens": 45476510,
-      "cache_create_tokens": 258516,
-      "messages": 188,
-      "billable_total": 358886,
-      "estimated_cost_usd": 80.578,
+      "input_tokens": 260,
+      "output_tokens": 144163,
+      "cache_read_tokens": 64326483,
+      "cache_create_tokens": 328779,
+      "messages": 249,
+      "billable_total": 473202,
+      "estimated_cost_usd": 113.4705,
       "emoji": "🔄",
       "description": "Git commit / pull / push"
     },
+    "file_edit": {
+      "input_tokens": 244,
+      "output_tokens": 399313,
+      "cache_read_tokens": 39426944,
+      "cache_create_tokens": 329116,
+      "messages": 189,
+      "billable_total": 728673,
+      "estimated_cost_usd": 95.2635,
+      "emoji": "📄",
+      "description": "其他檔案編輯"
+    },
+    "paper_work": {
+      "input_tokens": 55,
+      "output_tokens": 40986,
+      "cache_read_tokens": 31420300,
+      "cache_create_tokens": 62435,
+      "messages": 55,
+      "billable_total": 103476,
+      "estimated_cost_usd": 51.3759,
+      "emoji": "📝",
+      "description": "論文撰寫/審查（paper/ *.tex 編輯）"
+    },
     "task_management": {
-      "input_tokens": 96,
-      "output_tokens": 42388,
-      "cache_read_tokens": 10576564,
-      "cache_create_tokens": 307674,
-      "messages": 36,
-      "billable_total": 350158,
-      "estimated_cost_usd": 24.8143,
+      "input_tokens": 161,
+      "output_tokens": 82168,
+      "cache_read_tokens": 18524643,
+      "cache_create_tokens": 368580,
+      "messages": 81,
+      "billable_total": 450909,
+      "estimated_cost_usd": 40.8629,
       "emoji": "📌",
       "description": "任務管理（TaskCreate/Update）"
     },
@@ -158,6 +169,28 @@
       "emoji": "🛡️",
       "description": "平台運維（Supabase sync / daily_update）"
     },
+    "knowledge_index": {
+      "input_tokens": 1703,
+      "output_tokens": 11337,
+      "cache_read_tokens": 9197172,
+      "cache_create_tokens": 18417,
+      "messages": 21,
+      "billable_total": 31457,
+      "estimated_cost_usd": 15.0169,
+      "emoji": "📇",
+      "description": "知識索引更新"
+    },
+    "script_dev": {
+      "input_tokens": 35,
+      "output_tokens": 40132,
+      "cache_read_tokens": 6022529,
+      "cache_create_tokens": 41182,
+      "messages": 35,
+      "billable_total": 81349,
+      "estimated_cost_usd": 12.8164,
+      "emoji": "💻",
+      "description": "腳本開發（scripts/ *.py）"
+    },
     "scheduling": {
       "input_tokens": 23,
       "output_tokens": 10299,
@@ -169,60 +202,49 @@
       "emoji": "⏰",
       "description": "Cron / Monitor 排程"
     },
-    "script_dev": {
-      "input_tokens": 28,
-      "output_tokens": 26361,
-      "cache_read_tokens": 5355710,
-      "cache_create_tokens": 30859,
-      "messages": 28,
-      "billable_total": 57248,
-      "estimated_cost_usd": 10.5897,
-      "emoji": "💻",
-      "description": "腳本開發（scripts/ *.py）"
-    },
-    "knowledge_index": {
-      "input_tokens": 1693,
-      "output_tokens": 9687,
-      "cache_read_tokens": 5798678,
-      "cache_create_tokens": 16433,
-      "messages": 16,
-      "billable_total": 27813,
-      "estimated_cost_usd": 9.7581,
-      "emoji": "📇",
-      "description": "知識索引更新"
-    },
     "tool_setup": {
-      "input_tokens": 32,
-      "output_tokens": 5349,
-      "cache_read_tokens": 3137510,
-      "cache_create_tokens": 161573,
-      "messages": 22,
-      "billable_total": 166954,
-      "estimated_cost_usd": 8.1374,
+      "input_tokens": 42,
+      "output_tokens": 6145,
+      "cache_read_tokens": 3548173,
+      "cache_create_tokens": 170048,
+      "messages": 27,
+      "billable_total": 176235,
+      "estimated_cost_usd": 8.9722,
       "emoji": "🛠️",
       "description": "ToolSearch 載入工具"
     },
-    "paper_work": {
-      "input_tokens": 10,
-      "output_tokens": 7410,
-      "cache_read_tokens": 4718230,
-      "cache_create_tokens": 7987,
-      "messages": 10,
-      "billable_total": 15407,
-      "estimated_cost_usd": 7.783,
-      "emoji": "📝",
-      "description": "論文撰寫/審查（paper/ *.tex 編輯）"
+    "knowledge_recording": {
+      "input_tokens": 13,
+      "output_tokens": 19627,
+      "cache_read_tokens": 3326125,
+      "cache_create_tokens": 21006,
+      "messages": 13,
+      "billable_total": 40646,
+      "estimated_cost_usd": 6.8553,
+      "emoji": "📚",
+      "description": "知識記錄（knowledge.json / thinking_journal）"
     },
     "chart_generation": {
-      "input_tokens": 1576,
-      "output_tokens": 15665,
-      "cache_read_tokens": 1171652,
-      "cache_create_tokens": 140475,
-      "messages": 18,
-      "billable_total": 157716,
-      "estimated_cost_usd": 5.5899,
+      "input_tokens": 1579,
+      "output_tokens": 16029,
+      "cache_read_tokens": 1380970,
+      "cache_create_tokens": 140902,
+      "messages": 21,
+      "billable_total": 158510,
+      "estimated_cost_usd": 5.9392,
       "emoji": "📊",
       "description": "圖表生成（matplotlib / upload_chart）"
+    },
+    "token_report": {
+      "input_tokens": 15,
+      "output_tokens": 2477,
+      "cache_read_tokens": 2743861,
+      "cache_create_tokens": 20472,
+      "messages": 10,
+      "billable_total": 22964,
+      "estimated_cost_usd": 4.6856,
+      "emoji": "📈",
+      "description": "Token 用量報告"
     },
     "article_writing": {
       "input_tokens": 23,
@@ -235,17 +257,6 @@
       "emoji": "✍️",
       "description": "文章撰寫/發佈（publish-milestone / mile_*）"
     },
-    "token_report": {
-      "input_tokens": 13,
-      "output_tokens": 1701,
-      "cache_read_tokens": 2101185,
-      "cache_create_tokens": 6096,
-      "messages": 8,
-      "billable_total": 7810,
-      "estimated_cost_usd": 3.3938,
-      "emoji": "📈",
-      "description": "Token 用量報告"
-    },
     "web_research": {
       "input_tokens": 18,
       "output_tokens": 412,
@@ -257,16 +268,16 @@
       "emoji": "🌐",
       "description": "WebSearch / WebFetch"
     },
-    "knowledge_recording": {
-      "input_tokens": 5,
-      "output_tokens": 5889,
-      "cache_read_tokens": 1429365,
-      "cache_create_tokens": 5113,
+    "skill_invoke": {
+      "input_tokens": 10,
+      "output_tokens": 2977,
+      "cache_read_tokens": 1159276,
+      "cache_create_tokens": 12443,
       "messages": 5,
-      "billable_total": 11007,
-      "estimated_cost_usd": 2.6817,
-      "emoji": "📚",
-      "description": "知識記錄（knowledge.json / thinking_journal）"
+      "billable_total": 15430,
+      "estimated_cost_usd": 2.1956,
+      "emoji": "⚡",
+      "description": "Skill 呼叫"
     },
     "research_planning": {
       "input_tokens": 5,
@@ -279,30 +290,219 @@
       "emoji": "📋",
       "description": "研究計劃（research_program.md / CLAUDE.md）"
     },
-    "skill_invoke": {
-      "input_tokens": 3,
-      "output_tokens": 1962,
-      "cache_read_tokens": 301174,
-      "cache_create_tokens": 4835,
-      "messages": 3,
-      "billable_total": 6800,
-      "estimated_cost_usd": 0.6896,
-      "emoji": "⚡",
-      "description": "Skill 呼叫"
-    },
     "member_qa": {
-      "input_tokens": 6,
-      "output_tokens": 188,
-      "cache_read_tokens": 223504,
-      "cache_create_tokens": 235,
-      "messages": 1,
-      "billable_total": 429,
-      "estimated_cost_usd": 0.3539,
+      "input_tokens": 16,
+      "output_tokens": 1226,
+      "cache_read_tokens": 1089214,
+      "cache_create_tokens": 4353,
+      "messages": 3,
+      "billable_total": 5595,
+      "estimated_cost_usd": 1.8076,
       "emoji": "❓",
       "description": "會員問答研究"
     }
   },
   "git_commits_context": [
+    {
+      "sha": "d1240e89",
+      "message": "K1108c complete: capex-guidance magnitude is also NULL for foundry θ_EAV"
+    },
+    {
+      "sha": "ff43a492",
+      "message": "Merge commit '9e8a1061'"
+    },
+    {
+      "sha": "9e8a1061",
+      "message": "K1108c: continuous guide_delta_pct is also NULL for foundry theta_EAV"
+    },
+    {
+      "sha": "124d2bd5",
+      "message": "K1133 complete: BTC GAS-t reversal is regime-concentrated, not universal"
+    },
+    {
+      "sha": "a5d0e94f",
+      "message": "Merge commit 'b05e4745'"
+    },
+    {
+      "sha": "b05e4745",
+      "message": "K1133: Regime-switching GAS-t on BTC — K1129 reversal is regime-concentrated"
+    },
+    {
+      "sha": "0a442356",
+      "message": "Paper 1 errata batch (v3): Kupiec p 2-decimal + GLD γ forensic + γ_HM disambigua"
+    },
+    {
+      "sha": "2997023f",
+      "message": "Papers 2/3/4 compile + paper-update to v3"
+    },
+    {
+      "sha": "db6bfc7d",
+      "message": "Merge agent worktree agent-ae4e1d3e (2 commits)"
+    },
+    {
+      "sha": "e4967de3",
+      "message": "Auto-commit: save agent work before worktree merge"
+    },
+    {
+      "sha": "7d35418b",
+      "message": "Paper 6 K880 lookahead errata: option (b) defensible two-phase forecast timing"
+    },
+    {
+      "sha": "95f614e9",
+      "message": "K1156: Paper 2 cover figure — six-market overnight-channel validation"
+    },
+    {
+      "sha": "6e04cd43",
+      "message": "Paper 4 main_v3: Abstract/intro/conclusion 41.8% direction errata + CV 0.33->0.3"
+    },
+    {
+      "sha": "a29e8ae2",
+      "message": "Paper 3 body_v3: TSMOM direction reversal + 1.4% + rho=0.830 errata"
+    },
+    {
+      "sha": "5c0ef08e",
+      "message": "Paper 2 body_v3: Table 3 errata to K1175 canonical (2010-2026)"
+    },
+    {
+      "sha": "6013753b",
+      "message": "K1100e 善後: Paper 3 pivot CONFIRMED — Spearman p=0.001 asset-class threshold"
+    },
+    {
+      "sha": "5d3338bf",
+      "message": "Merge K1100e Paper 3 pivot confirmed (orphan)"
+    },
+    {
+      "sha": "348b827f",
+      "message": "K1100e: N=13 pairs cross-asset λ_L threshold (Spearman ρ=-0.791, p=0.001)"
+    },
+    {
+      "sha": "02058297",
+      "message": "4-hour sync: auto-gen headers + storage state"
+    },
+    {
+      "sha": "26924986",
+      "message": "K1198 善後: Paper 1 pre-K era Tables 10/11/12/C3 — 3/6 MATCHED (Spearman ρ=1.000 E"
+    },
+    {
+      "sha": "c49e8633",
+      "message": "Merge K1198 (orphan)"
+    },
+    {
+      "sha": "9080fbb3",
+      "message": "K1198: Paper 1 Tables 10/11/12/C3 KB-only rebuild (match: 3/6)"
+    },
+    {
+      "sha": "8dcd35a9",
+      "message": "K1195 善後: Paper 1 JBF robustness suite 5/6 MATCHED (R11 confirmed)"
+    },
+    {
+      "sha": "9f9cafc5",
+      "message": "Merge K1195 Paper 1 JBF robustness (orphan)"
+    },
+    {
+      "sha": "f4e394a0",
+      "message": "K1195: Paper 1 JBF robustness suite activation (match: 5/6)"
+    },
+    {
+      "sha": "9ee9585a",
+      "message": "K1197 善後: Paper 1 GJR vs EWMA crisis partial match (MDD dir confirmed, Sharpe di"
+    },
+    {
+      "sha": "86b38b35",
+      "message": "Merge K1197 (orphan)"
+    },
+    {
+      "sha": "9c1d5aca",
+      "message": "K1197: Paper 1 GJR vs EWMA crisis (match: b)"
+    },
+    {
+      "sha": "bb8e90e3",
+      "message": "K1196 善後: Paper 1 structural leverage panel 3/4 MATCHED"
+    },
+    {
+      "sha": "9210a235",
+      "message": "Merge K1196 Paper 1 structural panel (orphan)"
+    },
+    {
+      "sha": "0956dbcf",
+      "message": "K1196: Paper 1 structural leverage panel (match: PARTIAL-b)"
+    },
+    {
+      "sha": "98725bac",
+      "message": "K1183 + K1184 善後: Paper 2 TSMC + skew-t 全 MATCHED"
+    },
+    {
+      "sha": "7f971756",
+      "message": "Merge K1184 (orphan)"
+    },
+    {
+      "sha": "eede50fa",
+      "message": "Merge K1183 (orphan)"
+    },
+    {
+      "sha": "a2df89da",
+      "message": "K1184: Paper 2 skew-t params (match: η=4.97 vs 5.2, λ=-0.059 vs -0.05)"
+    },
+    {
+      "sha": "c0e45ba4",
+      "message": "K1183: Paper 2 TSMC decomposition (match: PARTIAL_b)"
+    },
+    {
+      "sha": "16022f46",
+      "message": "K1193 善後: Paper 3 split-sample STRENGTHENING (not attenuation) — good-news errat"
+    },
+    {
+      "sha": "81aad672",
+      "message": "Merge K1193 Paper 3 split-sample (orphan)"
+    },
+    {
+      "sha": "fc0b3a02",
+      "message": "K1193: Paper 3 split-sample (match: DIVERGED)"
+    },
+    {
+      "sha": "642dcf93",
+      "message": "K1181 善後: Paper 2 VIXTWN 2/4 MATCHED (VXEEM delisted blocks 2/4)"
+    },
+    {
+      "sha": "de3c1041",
+      "message": "Merge K1181 Paper 2 VIXTWN (orphan)"
+    },
+    {
+      "sha": "bd5f87d4",
+      "message": "K1181: Paper 2 VIXTWN stats + Steiger Z (match: 2/4)"
+    },
+    {
+      "sha": "31505d80",
+      "message": "K1182 + K1187 + K1190 善後: Granger MATCHED, Table 7 6/20, sector γ range MATCHED"
+    },
+    {
+      "sha": "31baa2ac",
+      "message": "Merge K1182 Paper 2 Granger (orphan)"
+    },
+    {
+      "sha": "5efb638e",
+      "message": "K1187: Paper 1 Table 7 5-asset canonical (match: 6/20)"
+    },
+    {
+      "sha": "2ad0ef7a",
+      "message": "K1182: Paper 2 Granger F=58.8 (match: STRONG_MATCH F=58.90)"
+    },
+    {
+      "sha": "a73d97d5",
+      "message": "K1190 善後: Paper 3 sector γ range MATCHED (r magnitude diverges)"
+    },
+    {
+      "sha": "ef689b37",
+      "message": "Merge K1190 Paper 3 sector (orphan)"
+    },
+    {
+      "sha": "72187f6d",
+      "message": "K1190: Paper 3 sector 11 SPDR (match: (c) gamma_range_match_r_diverges)"
+    },
+    {
+      "sha": "4f810afc",
+      "message": "Token reports + skill compliance audit (daily/weekly/audit)"
+    },
     {
       "sha": "a22a8ca3",
       "message": "Rate limit hit 8pm Asia/Taipei: 4 agents rate-limited, worktrees cleaned"

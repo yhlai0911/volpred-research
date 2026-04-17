@@ -39,7 +39,7 @@ def _lock_dir(storage_dir: str = "storage") -> Path:
 
 
 @contextmanager
-def shared_state_lock(name: str, storage_dir: str = "storage") -> Iterable[None]:
+def shared_state_lock(name: str, storage_dir: str = "storage", *, blocking: bool = True) -> Iterable[bool]:
     """Acquire an exclusive advisory lock keyed on `name`.
 
     Blocks until the lock is acquired. Cooperative across processes on the same
@@ -49,8 +49,15 @@ def shared_state_lock(name: str, storage_dir: str = "storage") -> Iterable[None]
     if not lock_file.exists():
         lock_file.touch()
     with lock_file.open("a+", encoding="utf-8") as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX)
+        acquired = False
+        flags = fcntl.LOCK_EX | (0 if blocking else fcntl.LOCK_NB)
         try:
-            yield
+            fcntl.flock(handle.fileno(), flags)
+            acquired = True
+        except BlockingIOError:
+            acquired = False
+        try:
+            yield acquired
         finally:
-            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            if acquired:
+                fcntl.flock(handle.fileno(), fcntl.LOCK_UN)

@@ -460,6 +460,10 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 - 單一 session 累積成本超過 **$200** 或跨日超過 **24h**，主動建議使用者 `/clear`
 - 排程 cron tick 用 stub 回覆（≤15 字）省 token — 已在 CLAUDE.md「Cron skip 用 stub」段
 - `next_tasks.json` 只放 next-action 任務；completed/cancelled/superseded/resolved_* 一律移到 `storage/next_tasks_archive.jsonl`（2026-04-17 教訓：曾累積到 128KB / 205 條，每次 Edit 都重寫整檔）
+- 但在 v11 之後，`next_tasks.json` 只算 **legacy planning / working list**：
+  - scheduler / control plane 的正式 task source of truth 是 `storage/ops/`
+  - `next_tasks.json` 只能當補充線索，不可當成 canonical queue
+  - 若是正式排程、approval、rollback、event 任務，一律以 control plane / `event_jobs` 為準
 
 ## Related Skills
 

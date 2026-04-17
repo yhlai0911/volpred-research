@@ -48,6 +48,28 @@
         "matchers": [
           "release-pool-by-settings"
         ]
+      },
+      {
+        "id": "market_calendar_sync",
+        "label": "市場交易日曆同步",
+        "cron": "0 8 * * 1",
+        "command": "volpred.market_calendar sync",
+        "description": "每週一同步市場交易日曆與 market status，作為 daily_update 之外的保守補強。",
+        "matchers": [
+          "volpred.market_calendar sync",
+          "market_status.log"
+        ]
+      },
+      {
+        "id": "shared_scheduler_tick",
+        "label": "shared scheduler tick",
+        "cron": "*/10 * * * *",
+        "command": "run_scheduler_tick.sh",
+        "description": "每 10 分鐘觸發一次 shared scheduler，由 Claude coordinator 調控 Claude/Codex 任務派工。",
+        "matchers": [
+          "run_scheduler_tick.sh",
+          "volpred-scheduler-tick"
+        ]
       }
     ]
   },
@@ -122,6 +144,11 @@
         "description": "每月 28 日更新 NDC 景氣指標。"
       }
     ]
+  },
+  "event_jobs": {
+    "source_label": "Canonical one-shot and event-relative task spec",
+    "note": "Materialize due event windows into control-plane tasks with dedupe ledger protection.",
+    "items": []
   },
   "idle_policy": {
     "source_label": "Slot-aware idle continuation policy (updated 2026-04-17 for M1 Max 10-core, cap raised 3->4)",

@@ -37,7 +37,9 @@ def test_stale_agent_claim_is_reclaimed(tmp_path: Path):
     task = create_task(
         title="stuck-task",
         description="claude claimed then died",
+        task_family="research",
         preferred_agent="auto",
+        fallback_allowed=True,
         storage_dir=storage_dir,
     )
 

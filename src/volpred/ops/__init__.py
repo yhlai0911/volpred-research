@@ -43,16 +43,34 @@ from .local_control_plane import (
     get_agent_session,
     get_task as get_local_task,
     heartbeat_agent,
+    is_schedule_governance_task,
     list_agent_sessions,
     list_tasks as list_local_tasks,
+    requeue_task,
     reject_task,
+    task_governance_area,
 )
 from .papers import get_paper, list_papers, migrate_paper_pdf_to_storage, upload_paper_pdf, upsert_paper_metadata
 from .rollback import create_rollback_point, list_rollback_points, restore_rollback_point
 from .schedules import build_schedule_report
 from .shared_lock import shared_state_lock
-from .agent_spec import check_agent_specs, import_agent_specs, render_agent_specs
+from .agent_spec import check_agent_specs, import_agent_specs, render_agent_specs, sync_agent_specs
+from .session import session_bootstrap, session_finish_task, session_next_task, session_shutdown
 from .jobs import SUPPORTED_ACTIONS, enqueue_job, get_job, list_jobs, work_loop, work_once
+from .event_jobs import expand_due_event_jobs, gc_event_ledger, preview_event_jobs
+from .execution_brief import (
+    build_execution_brief,
+    ensure_execution_brief,
+    preflight_executor_task,
+    run_executor_task,
+    task_brief_is_ready,
+    task_brief_is_stale,
+    task_preconditions_met,
+    task_requires_coordinator,
+    task_unmet_preconditions,
+)
+from .smoke import run_scheduler_smoke
+from .scheduler import get_scheduler_state, scheduler_preview, scheduler_tick
 from .questions import (
     answer_internal_question,
     build_question_rerank_workflow,
@@ -73,6 +91,7 @@ __all__ = [
     "build_platform_cycle_summary",
     "build_schedule_report",
     "build_control_plane_snapshot",
+    "build_execution_brief",
     "build_experiment_migration_plan",
     "build_experiments_report",
     "build_hygiene_report",
@@ -83,8 +102,10 @@ __all__ = [
     "create_rollback_point",
     "create_task",
     "deactivate_strategy",
+    "ensure_execution_brief",
     "ensure_article_local_backups",
     "enqueue_job",
+    "expand_due_event_jobs",
     "fail_task",
     "get_agent_session",
     "get_local_task",
@@ -95,8 +116,10 @@ __all__ = [
     "heartbeat_agent",
     "infer_experiment_id",
     "import_agent_specs",
+    "is_schedule_governance_task",
     "list_agent_sessions",
     "get_paper",
+    "gc_event_ledger",
     "list_jobs",
     "list_local_tasks",
     "list_papers",
@@ -104,10 +127,22 @@ __all__ = [
     "migrate_paper_pdf_to_storage",
     "preview_release_pool_by_settings",
     "publish_milestone_article",
+    "preflight_executor_task",
+    "preview_event_jobs",
     "reject_task",
+    "requeue_task",
     "release_pool_articles",
     "release_pool_by_settings",
     "render_agent_specs",
+    "run_executor_task",
+    "run_scheduler_smoke",
+    "session_bootstrap",
+    "session_finish_task",
+    "session_next_task",
+    "session_shutdown",
+    "scheduler_preview",
+    "get_scheduler_state",
+    "scheduler_tick",
     "restore_rollback_point",
     "migrate_experiment_files",
     "scaffold_experiment",
@@ -119,6 +154,13 @@ __all__ = [
     "run_recalc_metrics",
     "SUPPORTED_ACTIONS",
     "sync_all",
+    "sync_agent_specs",
+    "task_brief_is_ready",
+    "task_brief_is_stale",
+    "task_governance_area",
+    "task_preconditions_met",
+    "task_requires_coordinator",
+    "task_unmet_preconditions",
     "unpublish_article",
     "upload_paper_pdf",
     "upsert_paper_metadata",

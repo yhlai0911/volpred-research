@@ -1,0 +1,18 @@
+task_summary: "{{title}}"
+goal: "完成策略任務：{{description}}"
+success_criteria:
+  - "遵守 registry、lag、launch gate 與 rollback 規範"
+  - "任何高風險變更都要保留可回滾路徑"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "docs/strategy-registry.md"
+  - "research_program.md"
+  - "docs/error_log.md"
+recommended_files:
+  - "docs/architecture.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+  - "storage/memory/knowledge.json"
+relevant_commands:
+  - "uv run volpred ops health"
+why_this_agent: "策略與 code-heavy 風險任務優先交給 {{preferred_agent}}。"

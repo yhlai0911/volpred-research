@@ -26,6 +26,12 @@ PLACEHOLDERS = {
 }
 
 
+def _normalize_skill_relative_path(relative: Path) -> Path:
+    if relative.name.lower() == "skill.md":
+        return relative.with_name("SKILL.md")
+    return relative
+
+
 @dataclass(frozen=True)
 class AgentSpecTarget:
     key: str
@@ -108,6 +114,8 @@ def _normalize_text(text: str) -> str:
 
 
 def _generated_header_for(destination: Path) -> str:
+    if destination.name == "SKILL.md":
+        return ""
     if destination.suffix.lower() in {".toml"}:
         return COMMENT_GENERATED_HEADER
     return GENERATED_HEADER
@@ -179,7 +187,7 @@ def import_agent_specs(
             shutil.rmtree(CANONICAL_SKILLS)
         CANONICAL_SKILLS.mkdir(parents=True, exist_ok=True)
         for path in _iter_files(target.skills_path):
-            relative = path.relative_to(target.skills_path)
+            relative = _normalize_skill_relative_path(path.relative_to(target.skills_path))
             destination = CANONICAL_SKILLS / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
             try:
@@ -202,11 +210,18 @@ def _render_skills(target: AgentSpecTarget) -> list[str]:
     target.skills_path.mkdir(parents=True, exist_ok=True)
     rendered_files: list[str] = []
     for path in _iter_files(CANONICAL_SKILLS):
-        relative = path.relative_to(CANONICAL_SKILLS)
+        relative = _normalize_skill_relative_path(path.relative_to(CANONICAL_SKILLS))
         destination = target.skills_path / relative
         _render_file(path, destination, target)
         rendered_files.append(_display_path(destination))
     return rendered_files
+
+
+def _skill_file_map(root: Path) -> dict[Path, Path]:
+    return {
+        _normalize_skill_relative_path(path.relative_to(root)): path
+        for path in _iter_files(root)
+    }
 
 
 def _render_optional_tree(
@@ -274,6 +289,18 @@ def render_agent_specs(*, target_key: str | None = None) -> dict[str, object]:
     return {"targets": rendered}
 
 
+def sync_agent_specs(*, source: str) -> dict[str, object]:
+    imported = import_agent_specs(source=source)
+    rendered = render_agent_specs()
+    checked = check_agent_specs()
+    return {
+        "source": source,
+        "import": imported,
+        "render": rendered,
+        "check": checked,
+    }
+
+
 def _check_optional_tree(
     *,
     source_root: Path | None,
@@ -330,14 +357,10 @@ def check_agent_specs(*, target_key: str | None = None) -> dict[str, object]:
         if actual_guide != expected_guide:
             issues.append(f"{_display_path(target.guide_path)}: drift")
 
-        expected_rel_paths = {
-            path.relative_to(CANONICAL_SKILLS)
-            for path in _iter_files(CANONICAL_SKILLS)
-        }
-        actual_rel_paths = {
-            path.relative_to(target.skills_path)
-            for path in _iter_files(target.skills_path)
-        } if target.skills_path.exists() else set()
+        expected_skill_map = _skill_file_map(CANONICAL_SKILLS)
+        actual_skill_map = _skill_file_map(target.skills_path) if target.skills_path.exists() else {}
+        expected_rel_paths = set(expected_skill_map)
+        actual_rel_paths = set(actual_skill_map)
 
         for missing in sorted(expected_rel_paths - actual_rel_paths):
             issues.append(f"{_display_path(target.skills_path)}/{missing}: missing")
@@ -345,8 +368,8 @@ def check_agent_specs(*, target_key: str | None = None) -> dict[str, object]:
             issues.append(f"{_display_path(target.skills_path)}/{extra}: unexpected")
 
         for relative in sorted(expected_rel_paths & actual_rel_paths):
-            expected_text = _render_text(_load_text(CANONICAL_SKILLS / relative), target, target.skills_path / relative)
-            actual_text = _load_text(target.skills_path / relative)
+            expected_text = _render_text(_load_text(expected_skill_map[relative]), target, target.skills_path / relative)
+            actual_text = _load_text(actual_skill_map[relative])
             if actual_text != expected_text:
                 issues.append(f"{_display_path(target.skills_path)}/{relative}: drift")
 

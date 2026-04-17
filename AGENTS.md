@@ -83,6 +83,15 @@
 - Paper trading 歷史資料不可手補；讓 forward tracking / recalc 流程自然修正。
 - 前端 target、Zeabur service、paper public dir、Mirror 預設 URL 全看 `config/project_targets.json`。
 - 排程唯一來源是 `config/runtime_schedules.json`；不要從舊文件反推 cron。
+- v11 orchestration 的正式 task / schedule source of truth 是：
+  - `storage/ops/` 下的 control-plane `TaskRecord` / `AgentSession` / `ExecutionReceipt`
+  - `config/runtime_schedules.json`
+  - `event_jobs` + `storage/ops/event_ledger/`
+- `storage/next_tasks.json` 現在只視為 **legacy planning / working list**：
+  - 可以當補充線索或人工待辦
+  - 不是 shared scheduler 的正式 queue
+  - 不是 canonical control-plane schema
+  - 不可拿它覆蓋 `storage/ops/` 或 `event_jobs` 的狀態
 
 ### 永遠修流程，不修資料
 
@@ -193,11 +202,13 @@
 ## 自動化與控制面
 
 - 任務優先順序：`user-assigned > scheduled > agent-discovered`（只決定「誰先被挑」，不要求序貫執行）
-- 研究續跑採 `slot-aware idle-driven continuation`（2026-04-17 放寬；M1 Max 10 核建議 3 並行 agent）
-- **不必等 queue 清空才 discovery**；slot 有空（running < 3）就允許挑新任務；優先序仍為 user > scheduled > discovery
+- 研究續跑採 `slot-aware idle-driven continuation`（2026-04-17 放寬；M1 Max 10 核建議 4 並行 agent，保留 1 核給主線程）
+- **不必等 queue 清空才 discovery**；slot 有空（running < 4）就允許挑新任務；優先序仍為 user > scheduled > discovery
 - 同一 K 編號 / task id 不得同時被兩個 agent 執行（啟動前 `ls experiments/` + `ls .claude/worktrees/` 檢查）
 - 每次 idle / discovery pass 必須真的產生可驗證輸出，不可空轉
-- **Cron skip 用 stub** — slot 滿或 agent 仍在跑時，回覆 ≤15 字省 token（例：`跳過：slot 3/3`）
+- **Cron skip 用 stub** — slot 滿或 agent 仍在跑時，回覆 ≤15 字省 token（例：`跳過：slot 4/4`）
+- **next_tasks 主動補滿**（2026-04-17）：每次 cron tick check，若 P4 pending < 2 **或** P3 pending < 5，主動從 `research_program.md` / knowledge.json / 最近實驗 NULL 衍生新任務補齊；不必等 queue 清空才 refill。
+  - 這裡的「補滿」指的是 discovery / planning view 的補充；正式可執行任務仍要 materialize 進 `storage/ops/` control plane。若同步 `storage/next_tasks.json`，也只屬 legacy working list，不是 canonical queue。
 - **論文 narrative state machine**（防 Paper 2/4 單一實驗觸發反覆 pivot）：
   - 單一實驗不可直接改 paper body.tex — 只能更新 `research_program.md` + knowledge.json
   - 必須 ≥ 3 個互補實驗（OOS-verified + Codex/Gemini reviewed）都完成才進 narrative decision

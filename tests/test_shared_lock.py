@@ -82,3 +82,12 @@ def test_different_names_do_not_block(tmp_path: Path):
         elapsed = time.time() - t0
     child.join(timeout=3)
     assert elapsed < 0.3, f"different-name locks should not block, elapsed={elapsed:.3f}s"
+
+
+def test_nonblocking_shared_state_lock_reports_busy(tmp_path: Path):
+    storage_dir = str(tmp_path / "storage")
+    from volpred.ops.shared_lock import shared_state_lock
+
+    with shared_state_lock("scheduler_tick", storage_dir=storage_dir):
+        with shared_state_lock("scheduler_tick", storage_dir=storage_dir, blocking=False) as acquired:
+            assert acquired is False

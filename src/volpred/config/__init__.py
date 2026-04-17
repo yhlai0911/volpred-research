@@ -1,5 +1,6 @@
 from .schedules import (
     get_runtime_schedules_path,
+    get_optional_schedule_items,
     get_schedule_items,
     get_schedule_section,
     load_runtime_schedules,
@@ -30,6 +31,7 @@ __all__ = [
     "get_active_service_name",
     "get_default_mirror_url",
     "get_default_remote_url",
+    "get_optional_schedule_items",
     "get_deploy_project_id",
     "get_frontend_config",
     "get_frontend_names",

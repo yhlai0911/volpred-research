@@ -47,7 +47,7 @@ Do **not** use for：
 **執行**：`uv run python scripts/build_publication_candidates.py`
 
 **使用時機**：
-- 每週一次自動（session cron 已整合）
+- 每週一次自動（正式時鐘以 shared scheduler / canonical runtime schedule 為準；若本機仍保留 session cron，只視為過渡期便利）
 - 補草稿池前必跑
 - 用戶說「寫什麼文章」時查
 
@@ -80,6 +80,11 @@ Do **not** use for：
 - WebSearch 當日 + 未來 7 天重要事件
 - `cat 財報公告日.txt` 過濾近期財報
 - 讀 `storage/next_tasks.json` 找 `*_post` / `*_immediate` 事件任務
+
+補充：
+- `storage/next_tasks.json` 在 v11 orchestration 下只屬 **legacy planning / working list**，這裡只能把它當事件靈感或人工待辦線索。
+- 正式事件 queue 與去重狀態仍以 `config/runtime_schedules.json` 的 `event_jobs`、`storage/ops/` task records、`storage/ops/event_ledger/` 為準。
+- 若兩者不一致，永遠以 control plane / `event_jobs` 為準。
 
 **時效性分級**（與 `feed-publisher` skill 同步）：
 
@@ -142,7 +147,7 @@ grep -i "事件關鍵詞" storage/reports/feed.json | grep title | head -10
 
 ## 自動化
 
-session cron 已在：
+正式時鐘應由 shared scheduler / canonical runtime schedule 觸發；以下若仍存在，只視為 legacy session convenience：
 ```
 7 */3 * * *  知識索引更新
 ```
@@ -152,7 +157,7 @@ session cron 已在：
 CronCreate(cron="0 9 * * 1", prompt="執行 uv run python scripts/build_publication_candidates.py 並回報 summary；告訴用戶 uncovered high-priority / missing audience 的 K 清單")
 ```
 
-（目前 session 已建，每週自動重建候選清單）
+（若本機尚有 session 版 convenience，可保留作提醒；但 v11 canonical orchestration 以 shared scheduler 為準）
 
 ## 規則
 
@@ -160,3 +165,4 @@ CronCreate(cron="0 9 * * 1", prompt="執行 uv run python scripts/build_publicat
 - ⚠️ 軌道 B（事件）**必須 WebSearch 確認**事件是否發生、數字是否已公佈，禁止憑記憶寫
 - ⚠️ 主線程 MUST cross-reference 兩軌，不只看一邊
 - ⚠️ 1900+ 舊實驗也會被候選清單涵蓋（不止本 session）
+- ⚠️ `next_tasks.json` 只屬 legacy planning view；不要把它當成 scheduler 的正式事件來源

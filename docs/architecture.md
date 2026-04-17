@@ -2,7 +2,7 @@
 
 ## 網站架構（v4 Supabase + Admin CMS + Mirror API）
 - **前端 target 設定**：`config/project_targets.json`（唯一來源；目前 `active_frontend=frontend-v2-fix`、`active_service=volpred-v3`）
-- **排程 target 設定**：`config/runtime_schedules.json`（唯一來源；session cron / RemoteTrigger / system crontab spec）
+- **排程 target 設定**：`config/runtime_schedules.json`（唯一來源；shared scheduler / `event_jobs` / system crontab spec。若本機仍保留 session cron，只視為過渡期 monitor / reminder）
 - **前端（目前線上版）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，部署於 volpred-v3 服務）
 - **Legacy 前端快照**：舊版已自 root retire；如需參考請看 `archive/root-clutter/local/舊前端/`
 - **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
@@ -33,7 +33,7 @@
 - `scripts/daily_update.py` → 每日 08:03 台灣時間（crontab `3 8 * * 2-6`，美股收盤後）計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
 - `scripts/recalc_metrics.py` → 從 paper_trading.json 重算 Sharpe/MDD 等（daily_update 自動呼叫）
 - `config/project_targets.json` + `src/volpred/config/runtime.py` → 控制 active frontend、Zeabur deploy service、paper public dir、strategy metrics local sync target、預設 remote/mirror URL
-- `config/runtime_schedules.json` + `src/volpred/config/schedules.py` → 控制 canonical session cron / RemoteTrigger / system crontab spec
+- `config/runtime_schedules.json` + `src/volpred/config/schedules.py` → 控制 canonical shared scheduler / `event_jobs` / system crontab spec
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
@@ -83,7 +83,8 @@
 7. 測試貼文清理優先走 `uv run volpred ops cleanup-post <pub_id>`，不要手改 feed/DB
 
 ### Agent-first Ops Layer
-- **本地唯一核心 agent**：`Claude Code + session cron`
+- **本地唯一核心 orchestrator**：`Claude Code + shared scheduler`
+- 若本機仍保留 session cron，僅視為過渡期 monitor / reminder，不再作為正式執行時鐘
 - 後台最終形態是 **agent-first control plane**，不是只有真人點擊的 CMS
 - **核心原則**：同一套操作能力，同時暴露給本機 agent（CLI / job）與真人 UI
 - **CLI 首選入口**：`uv run volpred ops ...`

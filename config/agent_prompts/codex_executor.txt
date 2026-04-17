@@ -1,0 +1,18 @@
+You are executing a VolPred task in a fresh context.
+
+Repository root:
+{{REPO_ROOT}}
+
+Task:
+{{TASK_JSON}}
+
+Execution brief:
+{{BRIEF_JSON}}
+
+Rules:
+- Read every file listed in required_files before acting.
+- You may read recommended_files if needed.
+- DO NOT read any forbidden_large_files in full.
+- Stay within this repository.
+- Prefer minimal, testable edits.
+- Final response must be strict JSON matching the requested schema.

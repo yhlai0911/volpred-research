@@ -1,6 +1,7 @@
 #!/bin/bash
 # Session Cron Setup Script
-# Run this at the start of each local agent session to restore recurring tasks
+# Shared scheduler (system crontab -> run_scheduler_tick.sh) is now the formal clock.
+# This helper is retained only for session-local reminders / monitor workflows.
 #
 # Usage (in Claude Code / Codex):
 #   CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃")
@@ -21,10 +22,13 @@
 #   - 5-min data collection: weekdays 10pm
 #   - Daily update: every day 8am
 
-echo "=== VolPred Session Cron Setup ==="
+echo "=== VolPred Session Cron Setup (Auxiliary Only) ==="
 echo "System crontab (permanent):"
 crontab -l 2>/dev/null
 echo ""
-echo "Session crons need to be created via CronCreate in your local agent session."
-echo "High-frequency 'continue research' heartbeat is deprecated; use queue-first idle continuation instead."
-echo "See this script for the commands to run."
+echo "Shared scheduler is the formal execution clock:"
+echo "  scripts/install_scheduler_cron.sh"
+echo ""
+echo "Session crons are now auxiliary only (reminders / monitors)."
+echo "High-frequency 'continue research' heartbeat is deprecated."
+echo "See this script for any session-only helper prompts you still want."

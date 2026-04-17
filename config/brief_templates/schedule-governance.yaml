@@ -1,0 +1,25 @@
+task_summary: "{{title}}"
+goal: "評估並整理 schedule / cron 治理需求：{{description}}\n\nSchedule proposal:\n{{schedule_proposal_json}}"
+success_criteria:
+  - "確認需求是否應納入 canonical schedule，而不是臨時 workaround"
+  - "明確指出要改動 runtime_schedules、cron wrapper、或 install/uninstall script 哪一層"
+  - "不要直接安裝或移除 cron，除非任務明確要求執行"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "docs/project_improvement_status.md"
+  - "docs/architecture.md"
+  - "config/runtime_schedules.json"
+  - "scripts/run_scheduler_tick.sh"
+  - "scripts/install_scheduler_cron.sh"
+  - "scripts/uninstall_scheduler_cron.sh"
+recommended_files:
+  - "AGENTS.md"
+  - "docs/error_log.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+  - "storage/memory/knowledge.json"
+relevant_commands:
+  - "uv run volpred ops scheduler-preview"
+  - "uv run volpred ops event-preview"
+  - "uv run volpred ops health"
+why_this_agent: "這是 schedule governance 任務，正式治理與最終收斂由 Claude 負責。"

@@ -44,3 +44,15 @@ def get_schedule_items(name: str) -> list[dict[str, Any]]:
     if not isinstance(items, list):
         raise RuntimeError(f"runtime_schedules.json section '{name}.items' must be a list")
     return [item for item in items if isinstance(item, dict)]
+
+
+def get_optional_schedule_items(name: str) -> list[dict[str, Any]]:
+    section = load_runtime_schedules().get(name)
+    if section is None:
+        return []
+    if not isinstance(section, dict):
+        raise RuntimeError(f"runtime_schedules.json section '{name}' must be an object")
+    items = section.get("items", [])
+    if not isinstance(items, list):
+        raise RuntimeError(f"runtime_schedules.json section '{name}.items' must be a list")
+    return [item for item in items if isinstance(item, dict)]

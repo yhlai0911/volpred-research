@@ -1,6 +1,14 @@
-# Session 啟動必建集（queue-first cron + Monitor 操作細節）
+# Session 啟動必建集（shared scheduler + session-only monitor 操作細節）
 
 SessionStart hook 會提醒讀這份。這裡只放**每次新 session 要執行的具體指令**——不是原則、不是教訓（那些留在 CLAUDE.md）。
+
+正式時鐘現在是：
+
+```bash
+scripts/install_scheduler_cron.sh
+```
+
+下面的 session cron 僅保留為 session-local 提醒 / monitor，**不是正式派工來源**。
 
 **Canonical source**：`config/runtime_schedules.json`
 若本檔和其他文件不一致，以該檔為準；本檔只是方便複製執行的操作手冊。

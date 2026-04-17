@@ -1,0 +1,17 @@
+task_summary: "{{title}}"
+goal: "完成 review 任務：{{description}}"
+success_criteria:
+  - "優先找出 bug、風險、回歸、缺測"
+  - "不要只做風格層評論"
+repo_root: "/Users/yhlai0911/Desktop/volpred-research"
+required_files:
+  - "AGENTS.md"
+  - "docs/error_log.md"
+recommended_files:
+  - "docs/project_improvement_status.md"
+forbidden_large_files:
+  - "storage/reports/feed.json"
+  - "storage/memory/knowledge.json"
+relevant_commands:
+  - "uv run pytest"
+why_this_agent: "review 類任務預設由 {{preferred_agent}} 執行。"

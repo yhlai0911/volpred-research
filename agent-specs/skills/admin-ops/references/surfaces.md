@@ -9,7 +9,8 @@
 
 ## 原則
 
-- 本地研究與決策主體仍是 `Claude Code + session cron + 活文件`
+- 本地研究與決策主體仍是 `Claude Code + shared scheduler + 活文件`
+- 若本機仍保留 session cron，只視為過渡期 monitor / reminder，不是正式執行時鐘
 - 平台層負責：發文、同步、策略管理、問答管理、會員摘要、讀者分析、站務觀測
 - 能用既有 CLI / API / UI 就不要直接手改 DB
 - 舊治理文件不得直接覆寫；若要改 `{{GUIDE_FILE}}`、`research_program.md`、`{{SKILL_ROOT}}/`、`docs/` 既有內容，先取得使用者同意
@@ -35,7 +36,7 @@
 - `/admin/health`
   - 站務健康監看台：概覽指標、Session Cron 工作包、內容釋出節奏、Analytics/問答摘要、最近平台工作、failed sync 樣本、workflow 快照狀態、下一步建議
 - `/admin/schedules`
-  - 排程管理：canonical schedule spec（`config/runtime_schedules.json`）中的 session cron / RemoteTrigger + system crontab 即時讀取（`crontab -l`）+ 核心永久任務覆蓋檢查 + 判讀建議
+  - 排程管理：canonical schedule spec（`config/runtime_schedules.json`）中的 shared scheduler / `event_jobs` / system crontab 即時讀取（`crontab -l`）+ 核心永久任務覆蓋檢查 + 判讀建議
 - `/admin/paper-trading`
   - Portfolio / 策略績效面板
 
@@ -72,7 +73,7 @@
 - `GET /api/admin/health`
   - 站務健康監看台：local + jobs + workflows + content_release + analytics + questions + suggestions
 - `GET /api/admin/schedules`
-  - 排程管理：canonical schedule spec + RemoteTrigger + system crontab 即時讀取 + 覆蓋檢查
+  - 排程管理：canonical schedule spec（含 shared scheduler / `event_jobs`）+ system crontab 即時讀取 + 覆蓋檢查
 - `GET /api/admin/questions/candidates`
   - 研究候選池
 - `POST /api/admin/questions/candidates`
@@ -124,14 +125,14 @@
 - 研究候選池 lifecycle
 - 讀者/文章 analytics summary
 - 站務健康面板（`/admin/health`）：local + jobs + workflows + content_release + analytics + questions
-- 排程管理面板（`/admin/schedules`）：session cron 定義 + system crontab 即時讀取 + 核心任務覆蓋檢查
-- Session cron 驅動的 6 小時會員問題重排（CLI + API + workflow snapshot 全通過 2026-03-21 測試）
-- Session cron 驅動的平台巡檢（`platform-cycle-summary` → `storage/ops/` snapshot）
+- 排程管理面板（`/admin/schedules`）：shared scheduler / `event_jobs` / system crontab 即時讀取 + 核心任務覆蓋檢查
+- 6 小時會員問題重排 workflow 已可由 canonical schedule / shared scheduler 驅動；若本機尚有 session cron，只算過渡期便利
+- 平台巡檢 workflow（`platform-cycle-summary` → `storage/ops/` snapshot）已可由 canonical schedule / shared scheduler 驅動；若本機尚有 session cron，只算過渡期便利
 - 論文頁 DB 驅動 + PDF Storage 交付（metadata / PDF 更新不必 redeploy）
 
 ### 尚未完全產品化
 
-- 文章池自動釋出（CLI 已可用，但尚未正式接入 session cron 自動執行）
+- 文章池自動釋出（CLI 已可用；正式自動化應接 shared scheduler / canonical runtime schedule，不再以 session cron 當正式時鐘）
 - 完整會員中心（`/me` 基本功能已有，但缺完整 BI）
 - 完整 BI / cohort / funnel analytics
 - 完整 editorial workflow（review / approve / reject）
@@ -139,6 +140,7 @@
 ## 下一步讀什麼
 
 - 若要實際操作平台 API / CLI：讀 [platform-api-manual.md](./platform-api-manual.md)
-- 若要把平台工作包裝成 session cron：讀 [session-cron-workflows.md](./session-cron-workflows.md)
+- 若要理解舊的 session-only 包裝方式：讀 [session-cron-workflows.md](./session-cron-workflows.md)
+- 若要做正式排程治理，仍以 `config/runtime_schedules.json` + shared scheduler 為準
 - 若要做會員問題 6 小時重排：先讀 `question-ranking-summary` 與 `question-rerank` 小節
 - 若要做內容釋出：先讀 `publish-milestone`、`release-pool-by-settings` 小節

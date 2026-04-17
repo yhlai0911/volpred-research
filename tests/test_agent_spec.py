@@ -57,9 +57,9 @@ def test_render_and_check_detect_drift(tmp_path: Path, monkeypatch):
         "Shared guide -> {{GUIDE_FILE}} and {{SKILL_ROOT}} and {{PROVIDER_DIR}}\n",
         encoding="utf-8",
     )
-    (canonical_root / "skills" / "demo" / "SKILL.md").parent.mkdir(parents=True, exist_ok=True)
-    (canonical_root / "skills" / "demo" / "SKILL.md").write_text(
-        "Use {{GUIDE_FILE}} with {{SKILL_ROOT}} from {{PROVIDER_DIR}}\n",
+    (canonical_root / "skills" / "demo" / "skill.md").parent.mkdir(parents=True, exist_ok=True)
+    (canonical_root / "skills" / "demo" / "skill.md").write_text(
+        "---\nname: demo\n---\n\nUse {{GUIDE_FILE}} with {{SKILL_ROOT}} from {{PROVIDER_DIR}}\n",
         encoding="utf-8",
     )
     (canonical_root / "claude_rules" / "frontend.md").write_text(
@@ -95,9 +95,15 @@ def test_render_and_check_detect_drift(tmp_path: Path, monkeypatch):
     claude_rule = (tmp_path / ".claude" / "rules" / "frontend.md").read_text(encoding="utf-8")
     codex_config = (tmp_path / ".codex" / "config.toml").read_text(encoding="utf-8")
     codex_agent = (tmp_path / ".codex" / "agents" / "fresh_context_worker.toml").read_text(encoding="utf-8")
+    claude_skill = (tmp_path / ".claude" / "skills" / "demo" / "SKILL.md").read_text(encoding="utf-8")
+    codex_skill = (tmp_path / ".agents" / "skills" / "demo" / "SKILL.md").read_text(encoding="utf-8")
     assert agent_spec.GENERATED_HEADER in claude_rule
     assert agent_spec.COMMENT_GENERATED_HEADER in codex_config
     assert agent_spec.COMMENT_GENERATED_HEADER in codex_agent
+    assert claude_skill.startswith("---\n")
+    assert codex_skill.startswith("---\n")
+    assert agent_spec.GENERATED_HEADER not in claude_skill
+    assert agent_spec.GENERATED_HEADER not in codex_skill
 
     clean = agent_spec.check_agent_specs()
     assert clean["clean"] is True
@@ -117,7 +123,7 @@ def test_import_normalizes_provider_specific_paths(tmp_path: Path, monkeypatch):
         encoding="utf-8",
     )
     (tmp_path / ".claude" / "skills" / "demo" / "SKILL.md").write_text(
-        agent_spec.GENERATED_HEADER + "Use .claude/skills/demo/SKILL.md from .claude/ and watch .claude/worktrees/\n",
+        "---\nname: demo\n---\n\nUse .claude/skills/demo/SKILL.md from .claude/ and watch .claude/worktrees/\n",
         encoding="utf-8",
     )
 
@@ -131,3 +137,4 @@ def test_import_normalizes_provider_specific_paths(tmp_path: Path, monkeypatch):
     assert "{{SKILL_ROOT}}" in imported_guide
     assert "{{SKILL_ROOT}}" in imported_skill
     assert "{{PROVIDER_DIR}}" in imported_skill
+    assert imported_skill.startswith("---\n")

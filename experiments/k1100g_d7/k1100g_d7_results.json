@@ -1,0 +1,96 @@
+{
+  "experiment_id": "K1100g_d7",
+  "title": "Cross-market replication of overnight gap\u00b2 session asymmetry \u2014 SPY + N225 vs TAIFEX (K1100g_d5 anchor)",
+  "run_at": "2026-04-18T01:03:09",
+  "seed": 42,
+  "parent_chain": [
+    "K1100g",
+    "K1100g_d1",
+    "K1100g_d3",
+    "K1100g_d5",
+    "K1100g_d6"
+  ],
+  "references": [
+    "Bollerslev (1987) REStat \u2014 Student-t GARCH",
+    "Engle & Rangel (2008) RFS \u2014 tau*g PRG",
+    "French & Roll (1986) JFE \u2014 non-trading-hour information",
+    "Harvey et al. (1997) IJF \u2014 HLN DM correction",
+    "Harvey (2016) JF \u2014 t>3 threshold",
+    "Ito & Lin (1994) JFQA \u2014 Japan intraday vol structure"
+  ],
+  "design": {
+    "markets": [
+      {
+        "label": "SPY",
+        "ticker": "SPY",
+        "cache": "spy_daily_2010-2026.parquet"
+      },
+      {
+        "label": "N225",
+        "ticker": "^N225",
+        "cache": "n225_daily_2010-2026.parquet"
+      }
+    ],
+    "target_return": "r_intraday[t] = log(Close_t / Open_t)",
+    "exog": "gap\u00b2[t] = (log Open_t - log Close_{t-1})\u00b2",
+    "innovation": "student",
+    "prg_kernel": "tau*g multiplicative, Student-t (Var(r)=h)",
+    "train_start": "2010-01-01",
+    "train_end": "2019-12-31",
+    "test_start": "2020-01-01",
+    "test_end": "2025-12-31",
+    "refit_every": 5,
+    "note_data_granularity": "Daily OHLC only. 5-min intraday not sufficient on yfinance for SPY/N225 at 2010-2025 span (only last ~60 days available); using daily close-to-open gap\u00b2 as second-best consistent with K1100g_d5 TAIFEX gap\u00b2 definition."
+  },
+  "markets": {
+    "SPY": {
+      "error": "'numpy.ndarray' object has no attribute 'values'"
+    },
+    "N225": {
+      "error": "'numpy.ndarray' object has no attribute 'values'"
+    }
+  },
+  "taifex_d5_anchor": {
+    "label": "TAIFEX",
+    "ticker": "TX (TAIFEX)",
+    "source": "K1100g_d5",
+    "oos": {
+      "n_valid": 464,
+      "test_start": "2020-01-01",
+      "test_end": "2021-12-31",
+      "dm_qlike_t_hln": 1.48987928699781,
+      "dm_qlike_p": 0.13625597868567785,
+      "qlike_improv_pct": 6.616240877335668,
+      "lrt_chi2": 14.368375607699818,
+      "lrt_p": 0.00015030558270734407,
+      "harvey_pass": false
+    },
+    "is": {
+      "lrt_chi2": 18.87325137631524,
+      "lrt_p": 1.3969784621759018e-05
+    }
+  },
+  "cross_market_verdict": {
+    "verdict": "DIRECTION_CONSISTENT_ALL_BORDERLINE",
+    "explanation": "All 1 markets positive direction but none past Harvey t>3. Consistent direction suggests real but weak structural effect; Paper 3 should frame as direction-consistent borderline signal.",
+    "n_markets_evaluated": 1,
+    "directions_consistent": true,
+    "positive_count": 1,
+    "harvey_count": 0,
+    "spearman_t_vs_qlike_imp": null,
+    "entries": [
+      {
+        "market": "TAIFEX",
+        "dm_qlike_t_hln": 1.48987928699781,
+        "qlike_improv_pct": 6.616240877335668
+      }
+    ]
+  },
+  "limitations": [
+    "Daily OHLC only \u2014 5-min intraday RV not used (yfinance 5-min limited to ~60 days). K1100g_d5 TAIFEX result also based on daily close-to-open gap\u00b2, so comparison is apples-to-apples.",
+    "SPY/N225 DOW structure differs from TAIFEX (no Saturday half-day, no lunch break on daily OHLC)",
+    "TAIFEX anchor is d5 Student-t gap_total DM t=+1.49 (BORDERLINE not Harvey-passing); d7 tests whether other markets behave similarly or whether TAIFEX is idiosyncratic.",
+    "N225 trading hours partially overlap US close \u2192 overnight gap may be dampened by Asia daylight trading in other venues (unlike TAIFEX night session which is structurally separated).",
+    "No winsorization \u2014 COVID Mar 2020 extreme gaps may dominate gap\u00b2 mass in SPY/N225 (similar issue to TAIFEX_d5 limitation)."
+  ]
+}
