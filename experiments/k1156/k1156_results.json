@@ -1,0 +1,156 @@
+{
+  "experiment_id": "K1156",
+  "title": "Paper 2 cover figure: 6-market validation visualization",
+  "purpose": "Publication-quality cover figure showing direction-universal cross-market validation of the overnight U.S.->Asia information transmission channel that motivates Paper 2's VIX-proxy VT design.",
+  "type": "visualization_only_no_new_estimation",
+  "timestamp_utc": "2026-04-17T15:26:40.542155+00:00",
+  "random_seed": 42,
+  "deterministic": true,
+  "paper_target": "paper/taiwan-vt (body_v3.tex Appendix tz_results)",
+  "x_axis": "Six Asia-Pacific markets (TW, JP, KR, AU, SG, HK)",
+  "y_axis_panel_a": "Newey-West HAC c2c t-statistic (Harvey 2016 threshold = 3.0)",
+  "y_axis_panel_b": "Annualised c2c Sharpe ratio with 95% asymptotic CI",
+  "n_markets": 6,
+  "sample_period": "2012-2025",
+  "lookback_days": 10,
+  "transaction_cost_per_switch": 0.00186,
+  "data_sources": {
+    "K1176": {
+      "path": "experiments/k1176/k1176_results.json",
+      "role": "6-market replicated NW c2c & o2o t-stats and Sharpe ratios",
+      "data_provider": "yfinance daily OHLC (Adj Close, split-corrected)"
+    },
+    "Paper2_body_v3": {
+      "path": "paper/taiwan-vt/body_v3.tex",
+      "role": "Canonical 6-market c2c NW t-stats (Appendix tz_results post-table prose) + TW/JP Sharpe + TW block bootstrap CI"
+    },
+    "K1153_K1175_K1178": {
+      "note": "Considered but not used for this cover. K1153 is 4-market earnings-announcement panel (paper-1 lineage); K1175 is single-market TW VT replication; K1178 is 13-market international VT for Paper 3. None of these correspond to Paper 2's 6-market overnight-channel cross-validation."
+    }
+  },
+  "paper_canonical_inputs": {
+    "c2c_t": {
+      "HK": 4.12,
+      "AU": 4.04,
+      "SG": 4.03,
+      "KR": 3.83,
+      "TW": 3.76,
+      "JP": 3.69
+    },
+    "tw_c2c_sharpe": 1.473,
+    "tw_o2o_sharpe": 0.87,
+    "tw_o2o_t": 2.22,
+    "jp_c2c_sharpe": 1.306,
+    "jp_o2o_sharpe": 0.78,
+    "jp_o2o_t": 2.0,
+    "tw_c2c_sharpe_ci95": [
+      0.65,
+      2.24
+    ],
+    "harvey_threshold": 3.0,
+    "sample_period": "2012-2025",
+    "lookback_days": 10,
+    "tx_cost_per_switch": 0.00186
+  },
+  "paper_text_verification": {
+    "all_six_t_stats_found_verbatim": true,
+    "missing_markets": [],
+    "paper_body_path": "paper/taiwan-vt/body_v2.tex"
+  },
+  "per_market": [
+    {
+      "market": "TW",
+      "label": "Taiwan\n(0050.TW)",
+      "paper_c2c_t": 3.76,
+      "k1176_c2c_t": 6.7585,
+      "k1176_o2o_t": 8.1292,
+      "k1176_c2c_sharpe": 1.9152,
+      "k1176_o2o_sharpe": 2.35,
+      "k1176_c2c_mdd_pct": -10.5662,
+      "k1176_n_days": 3302
+    },
+    {
+      "market": "JP",
+      "label": "Japan\n(Nikkei 225)",
+      "paper_c2c_t": 3.69,
+      "k1176_c2c_t": 6.9105,
+      "k1176_o2o_t": 8.3422,
+      "k1176_c2c_sharpe": 1.7728,
+      "k1176_o2o_sharpe": 2.2236,
+      "k1176_c2c_mdd_pct": -15.3465,
+      "k1176_n_days": 3307
+    },
+    {
+      "market": "KR",
+      "label": "Korea\n(KOSPI)",
+      "paper_c2c_t": 3.83,
+      "k1176_c2c_t": 4.8817,
+      "k1176_o2o_t": 6.0829,
+      "k1176_c2c_sharpe": 1.3678,
+      "k1176_o2o_sharpe": 1.7817,
+      "k1176_c2c_mdd_pct": -15.4125,
+      "k1176_n_days": 3327
+    },
+    {
+      "market": "AU",
+      "label": "Australia\n(ASX)",
+      "paper_c2c_t": 4.04,
+      "k1176_c2c_t": 4.5159,
+      "k1176_o2o_t": 6.1732,
+      "k1176_c2c_sharpe": 1.1288,
+      "k1176_o2o_sharpe": 1.6281,
+      "k1176_c2c_mdd_pct": -11.3665,
+      "k1176_n_days": 3448
+    },
+    {
+      "market": "SG",
+      "label": "Singapore\n(STI)",
+      "paper_c2c_t": 4.03,
+      "k1176_c2c_t": 4.8324,
+      "k1176_o2o_t": 5.9618,
+      "k1176_c2c_sharpe": 1.3367,
+      "k1176_o2o_sharpe": 1.6495,
+      "k1176_c2c_mdd_pct": -8.8015,
+      "k1176_n_days": 3419
+    },
+    {
+      "market": "HK",
+      "label": "Hong Kong\n(HSI)",
+      "paper_c2c_t": 4.12,
+      "k1176_c2c_t": 2.9151,
+      "k1176_o2o_t": 4.1445,
+      "k1176_c2c_sharpe": 0.7979,
+      "k1176_o2o_sharpe": 1.0927,
+      "k1176_c2c_mdd_pct": -32.113,
+      "k1176_n_days": 3353
+    }
+  ],
+  "harvey_pass_paper_canonical": [
+    "TW",
+    "JP",
+    "KR",
+    "AU",
+    "SG",
+    "HK"
+  ],
+  "harvey_pass_k1176_c2c": [
+    "TW",
+    "JP",
+    "KR",
+    "AU",
+    "SG"
+  ],
+  "harvey_pass_k1176_o2o": [
+    "TW",
+    "JP",
+    "KR",
+    "AU",
+    "SG",
+    "HK"
+  ],
+  "tw_block_bootstrap_ci_width": 1.5900000000000003,
+  "outputs": {
+    "png": "experiments/k1156/k1156_cover.png",
+    "pdf": "experiments/k1156/k1156_cover.pdf"
+  }
+}
