@@ -1013,14 +1013,15 @@
   {
     "id": "Paper_folders_backfill_selfcontained",
     "title": "論文資料夾 self-contained 補齊：data/scripts/results/experiments.md",
-    "status": "pending",
+    "status": "partially_completed",
     "priority": 3,
     "created_at": "2026-04-17T15:33:04+08:00",
-    "description": "Audit 2026-04-17: 10 個 paper/ 有 6 個缺項（參考 agent-specs/claude_rules/paper-workflow.md 新增規範）。缺口清單：(1) crypto-fear-channel (Paper 10, kick-off) — 缺 data/script/results（kickoff 階段，可暫緩）;(2) garch-x-vix (Paper 9, submitted) — 缺 results/figures 與 expref;(3) vix-sufficiency (Paper 4, 39 pages) — 缺 results/figures 與 experiments 索引;(4) volatility-absorption — 缺 results;(5) vt-crowding-abm — 缺 results + expref;(6) vt-insurance-cost — 缺 results。處理策略：主線程分批補 experiments.md + figures soft-link（從對應 experiments/kXXX/）+ scripts/README.md 指向實驗入口檔。不需搬移原始資料（仍在 experiments/kXXX/），只需建立引用。參考樣板：paper/leverage-direction/、paper/taiwan-vt/、paper/vt-trend-following/。注意：Kickoff 階段（outline-only）可暫緩，body drafting 開始時必須補齊；第一次投稿前再做完整性檢查。",
+    "description": "Audit 2026-04-17: 10 個 paper/ 有 6 個缺項（參考 agent-specs/claude_rules/paper-workflow.md 新增規範）。缺口清單：(1) crypto-fear-channel (Paper 10, kick-off) — 缺 data/script/results（kickoff 階段，可暫緩）;(2) garch-x-vix (Paper 9, submitted) — 缺 results/figures 與 expref;(3) vix-sufficiency (Paper 4, 39 pages) — 缺 results/figures 與 experiments 索引;(4) volatility-absorption — 缺 results;(5) vt-crowding-abm — 缺 results + expref;(6) vt-insurance-cost — 缺 results。處理策略：主線程分批補 experiments.md + figures soft-link（從對應 experiments/kXXX/）+ scripts/README.md 指向實驗入口檔。不需搬移原始資料（仍在 experiments/kXXX/），只需建立引用。參考樣板：paper/leverage-direction/、paper/taiwan-vt/、paper/vt-trend-following/。注意：Kickoff 階段（outline-only）可暫緩，body drafting 開始時必須補齊；第一次投稿前再做完整性檢查。 | 2026-04-17 done (commit 5b785551 + merge 3ba96c4b): Paper 9 (garch-x-vix) + Paper 4 (vix-sufficiency) 完成 self-contained 索引 — experiments.md, data_sources.md, scripts/README.md, results/README.md, figures/ soft-links. .tex 未動。剩 Paper 6 (prg-periodic-garch 缺 expref) / volatility-absorption / vt-crowding-abm / vt-insurance-cost 缺 results. 孤兒 figure: K1118/K1116b/K504/K1134/K889 (在 experiments.md 標 TODO).",
     "tags": [
       "paper",
       "infrastructure",
       "compliance"
-    ]
+    ],
+    "completed_at": "2026-04-17T15:47:34+08:00"
   }
 ]
