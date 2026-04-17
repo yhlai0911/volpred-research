@@ -27543,5 +27543,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-18T00:54:17.473794"
+  },
+  {
+    "item_id": "61578f1b",
+    "category": "K1172",
+    "content": "K1172 N>=13 cross-market ladder extension PARTIAL verdict. Actually N=12 (ZA dropped UNDERPOWERED yfinance JSE 0-4 events/ticker < 15 filter). MX 10/10 converged after ALFAA.MX->GRUMAB.MX substitution. ID 10/10. Primary cross-market Spearman rho(inst_pct, theta_rel)=+0.441 p=0.152 N=12 \u2014 fails both 5% and 1% thresholds. Rho decay trajectory: K1165 (N=7, +0.750) -> K1168 (N=10, +0.612 p=0.060) -> K1172 (N=12, +0.441 p=0.152). Emerging markets off-ladder residuals pattern: MX (inst=0.20, theta_rel=1.20), BR, IN \u2014 do not sit on developed-market institutional ownership ladder. Drop-MX LOO rho=+0.609 p=0.047 CONFIRMED without MX. Between-market inst_pct R^2=43% (decayed but still 16x larger than log_analyst 2.7%). Panel Harvey t=+3.79 N=172 log_analyst STRENGTHENED vs K1168 +3.63 (within-market mechanism is robust). Paper 2 \u00a75 narrative: maintain STRENGTHENED language with emerging-market scale residual caveat; within-market analyst channel is the clean panel result.",
+    "evidence": [
+      "experiments/k1172/k1172_results.json",
+      "experiments/k1172/README.md",
+      "commit 8c226669"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-18T01:06:17.008128"
   }
 ]
