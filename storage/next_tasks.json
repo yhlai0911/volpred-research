@@ -1869,10 +1869,10 @@
   {
     "id": "Paper3_TSMOM_systematic_direction_reversal_ERRATA",
     "title": "Paper 3 SYSTEMATIC ERRATA: TSMOM hedge direction 橫跨 Table 3 + 6 方向全反 (research integrity)",
-    "status": "pending_forensic_first",
-    "priority": 3,
+    "status": "triple_confirmed_errata_required",
+    "priority": 4,
     "created_at": "2026-04-17T17:55:56+08:00",
-    "description": "**WALKBACK 2026-04-17**: earlier conclusion \"systematic direction reversal\" premature. Knowledge.json Paper 3 R1 A.1 entry: \"50/50 MDD retention 96% confirmed. TSMOM hedge implementation-sensitive (different regression normalization). MDD protection 96%+ from VIX channel not TSMOM.\" Plus paper3_fixes.json uses Model 2 raw TSMOM + Model 3 orthogonalized TSMOM. K1177/K1192 likely used one implementation, paper used another. **需先跑 K1194 測 raw vs orthogonalized TSMOM 兩種 hedge implementation**, 再決定是否真的 direction reversal. 原始 task 改為 \"待 K1194 forensic 確認\"; 若 K1194 還是得 inverted direction, 才走 errata.",
+    "description": "**WALKBACK 2026-04-17**: earlier conclusion \"systematic direction reversal\" premature. Knowledge.json Paper 3 R1 A.1 entry: \"50/50 MDD retention 96% confirmed. TSMOM hedge implementation-sensitive (different regression normalization). MDD protection 96%+ from VIX channel not TSMOM.\" Plus paper3_fixes.json uses Model 2 raw TSMOM + Model 3 orthogonalized TSMOM. K1177/K1192 likely used one implementation, paper used another. **需先跑 K1194 測 raw vs orthogonalized TSMOM 兩種 hedge implementation**, 再決定是否真的 direction reversal. 原始 task 改為 \"待 K1194 forensic 確認\"; 若 K1194 還是得 inverted direction, 才走 errata. | K1194 (163542b0) TRIPLE CONFIRMATION: 5 implementations tested, all give retention 107-132%. Mechanism: long-short TSMOM 崩盤時為正, VT-β×TSMOM 減 exposure → MDD 改善. Fundamental direction. K898/K1177/K1192/K1194 四方 converge — walkback was process-correct但 conclusion 回到 original: Paper 3 TSMOM 93% retention 方向反了, 實際 retention 100%+, hedging enhances protection not degrades. **errata 不可避免**. 主線程 body edit 必做.",
     "tags": [
       "paper-3",
       "vt-trend-following",
@@ -1885,16 +1885,17 @@
   {
     "id": "K1194_paper3_TSMOM_raw_vs_orthogonal_forensic",
     "title": "K1194 FORENSIC: Paper 3 raw vs orthogonalized TSMOM hedge (paper3_fixes dual model replication)",
-    "status": "pending",
+    "status": "completed",
     "priority": 4,
     "created_at": "2026-04-17T17:59:29+08:00",
-    "description": "K1177/K1192 可能用錯 TSMOM implementation, 知識庫明文 Paper 3 TSMOM hedge implementation-sensitive. paper3_fixes.json 同時跑 Model 2 raw TSMOM + Model 3 orth TSMOM. K1194: 對 SPY replicate paper Table 3 + Table 6 metrics 同時用: (A) Raw TSMOM (K1177 用), (B) Orthogonalized TSMOM (perpendicular to 12/VIX), (C) paper3_fixes Model 3 spec, (D) 回歸 normalization 的多種 variants. **找 retention 93% / CI [86,97] 的 canonical implementation**. 若都找不到 → 真的是 direction reversal, 走 errata; 若找到 → K1177/K1192 用錯方法, paper 數字 valid, 只需補 experiments.md + methodology clarification.",
+    "description": "K1177/K1192 可能用錯 TSMOM implementation, 知識庫明文 Paper 3 TSMOM hedge implementation-sensitive. paper3_fixes.json 同時跑 Model 2 raw TSMOM + Model 3 orth TSMOM. K1194: 對 SPY replicate paper Table 3 + Table 6 metrics 同時用: (A) Raw TSMOM (K1177 用), (B) Orthogonalized TSMOM (perpendicular to 12/VIX), (C) paper3_fixes Model 3 spec, (D) 回歸 normalization 的多種 variants. **找 retention 93% / CI [86,97] 的 canonical implementation**. 若都找不到 → 真的是 direction reversal, 走 errata; 若找到 → K1177/K1192 用錯方法, paper 數字 valid, 只需補 experiments.md + methodology clarification. [DONE commit 163542b0: 5 implementations 全 diverge paper 93%. Mechanism: long-short TSMOM 崩盤為正 → subtract 減 exposure → MDD 改善. Paper 3 direction reversal re-confirmed triple (K898 + K1177 + K1192 + K1194).]",
     "tags": [
       "paper-3",
       "tsmom-hedge",
       "forensic",
       "implementation-sensitive"
-    ]
+    ],
+    "completed_at": "2026-04-17T18:12:41+08:00"
   },
   {
     "id": "Lesson_search_knowledge_before_launching_agent",

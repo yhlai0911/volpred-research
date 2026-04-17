@@ -27211,5 +27211,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T18:00:54.846970"
+  },
+  {
+    "item_id": "f11f4dcd",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered + KB lesson applied] K1194 Paper 3 TSMOM hedge 5-implementation forensic. **VERDICT: direction reversal CONFIRMED across 5 subtract implementations \u2014 original K1177/K1192 \u7d50\u8ad6 \u6b63\u78ba**. (Walkback earlier \u2014 the 'implementation-sensitive' KB note was real but all standard subtract implementations give same direction) **5 implementations SPY retention %**: Raw Monthly 132.4% [105.5, 195.1]; Orth VT Monthly 132.0% [104.3, 194.7]; Orth \u0394VIX 125.3%; Normalized 122.0%; K898 Daily+clip 107.2% [95.7, 175.5]. **Paper target**: Sharpe 0.737, retention 93%, CI [86, 97]. **\u7121\u4efb\u4f55 subtract implementation match**. ADD variant \u9ede\u4f30 86-87% \u4f46 CI [-70, 88] \u8207 paper [86, 97] \u6839\u672c\u4e0d\u76f8\u5bb9. **Mechanism \u89e3\u91cb**: long-short TSMOM factor \u5d29\u76e4\u6642\u70ba\u6b63 (sign(-1) \u00d7 r_t<0 = \u6b63), \u56e0\u6b64 VT - \u03b2\u00d7TSMOM \u5728\u5d29\u76e4\u81ea\u52d5\u6e1b exposure \u2192 MDD \u6539\u5584. Fundamental direction property, \u975e implementation detail. **Systematic direction reversal RE-CONFIRMED** (Walkback was process-correct but conclusion same). K1177/K1192/K1194 \u4e09\u65b9 triple-confirmation. Paper Table 3 retention 93% + Table 6 CI [86, 97] \u7121\u6cd5 reproduce. **\u5be6\u8b49\u6b63\u78ba\u7d50\u8ad6**: TSMOM hedge \u8b93 MDD \u5f9e -24.7% \u6539\u5584\u81f3 ~-17% (retention 132%), \u6bd4 paper \u8072\u7a31\u7684 93% \u65b9\u5411\u76f8\u53cd\u4e14\u5e45\u5ea6\u66f4\u5927 (enhances protection). **Paper 3 errata \u4e0d\u53ef\u907f\u514d**. commit 163542b0.",
+    "evidence": [
+      "experiments/k1194/k1194.py",
+      "experiments/k1194/k1194_results.json",
+      "experiments/k1194/k1194_vs_paper3_Table3_Table6_diff.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T18:12:32.379419"
   }
 ]
