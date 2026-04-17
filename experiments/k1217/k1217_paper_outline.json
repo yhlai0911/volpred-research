@@ -1,0 +1,212 @@
+{
+  "experiment_id": "K1217",
+  "title": "Paper 3 Path (b) Hybrid Null + Positive Conditional Draft",
+  "status": "CONDITIONAL",
+  "date": "2026-04-17",
+  "seed": 42,
+  "paper_working_title": "Regime-Dependent Volatility Jump Prediction on TAIFEX: A Four-Branch Null with Vol-Normalized Partial Positive Signal",
+  "target_journals_ordered": [
+    {"name": "Journal of Empirical Finance", "abbrev": "JoE", "fit": "primary", "rationale": "methodology-paper tradition, receptive to honest-null framings, emerging-market microstructure underrepresented"},
+    {"name": "International Review of Financial Analysis", "abbrev": "IRFA", "fit": "secondary", "rationale": "broader scope, null-result-friendly"},
+    {"name": "Pacific-Basin Finance Journal", "abbrev": "PBFJ", "fit": "tertiary", "rationale": "Taiwan-specific audience, faster cycle but lower impact"}
+  ],
+  "narrative_pivot_option": "path_b_hybrid_null_positive",
+  "k1205_reference": {
+    "commit": "e7088770",
+    "date": "2026-04-17",
+    "recommendation": "Path (b) Hybrid null+positive",
+    "files": [
+      "experiments/k1205/k1205_synthesis_table.csv",
+      "experiments/k1205/k1205_results.json",
+      "experiments/k1205/k1205_integrity_report.txt",
+      "experiments/k1205/README.md"
+    ]
+  },
+  "conditional_on": "User selects Path (b) in Paper 3 K1128 narrative-pivot decision",
+  "adoption_workflow": [
+    "User decision on Paper 3 K1128 pivot (a/b/c)",
+    "If Path (b): create paper/prg-hybrid-null/ folder",
+    "Copy k1217_paper_draft.md content into main.tex body",
+    "Add LaTeX preamble + bibliography + figure references",
+    "Link K1205 figures to paper/prg-hybrid-null/figures/",
+    "Run paper-review-cycle round 1",
+    "Iterate via paper-update CLI"
+  ],
+  "structure": {
+    "abstract": {
+      "word_target": 250,
+      "word_actual_approx": 290,
+      "key_claims": [
+        "Four complementary regime-switching specifications all fail OOS on TAIFEX 2020-2021",
+        "Vol-normalized OFI crosses methodological |t|>2 (DM +2.25, AUC 0.594) but not Harvey |t|>3",
+        "Cross-market SPY/N225/TAIFEX gap² direction-consistent weak-universal signal",
+        "Methodological contribution: 4-branch honest-null protocol + regime-free alternative identification"
+      ]
+    },
+    "section_1_introduction": {
+      "word_target": 1000,
+      "subsections": [
+        "microstructure OFI predictor motivation (Cont-Kukanov-Stoikov, Chordia-Huh-Subrahmanyam)",
+        "VIX regime-switching hypothesis",
+        "TAIFEX data environment + IS/OOS disjunction",
+        "Four specifications: tertile / spline / volnorm / expanding",
+        "Contribution: honest-null protocol + vol-normalization identification"
+      ]
+    },
+    "section_2_methodology": {
+      "word_target": 800,
+      "subsections": [
+        "2.1 Data environment (K1124 cache, 73,203 bars, 115 jumps)",
+        "2.2 Lee-Mykland jump detection (K=16 BV, Gumbel alpha=0.01, threshold 5.1256)",
+        "2.3 Four regression specifications (baseline + 4 variants)",
+        "2.4 Estimation (L-BFGS-B, L2 1e-4, seed 42) + DM-HLN inference"
+      ]
+    },
+    "section_3_data": {
+      "word_target": 400,
+      "subsections": [
+        "3.1 TAIFEX TX 5-min bars",
+        "3.2 IS 2017-2019 / OOS 2020-2021 split",
+        "3.3 Descriptive stats (jump rates, VIX ranges, |OFI| tails)"
+      ]
+    },
+    "section_4_results": {
+      "word_target": 1500,
+      "subsections": [
+        "4.1 Four-branch null evidence (Table 1 + Figure C AUC ranking)",
+        "4.2 Partial-positive vol-normalized signal characteristics",
+        "4.3 Cross-market weak-universal evidence (TAIFEX/SPY/N225)",
+        "4.4 Regime-switching rescue exhausted (MS-GAS parallel via K1133b)"
+      ]
+    },
+    "section_5_discussion": {
+      "word_target": 700,
+      "subsections": [
+        "5.1 Methodological contribution",
+        "5.2 Why all four VIX-conditional branches fail (structural IS/OOS disjunction)",
+        "5.3 Why vol-normalization partially succeeds (regime-free endogenous standardization)",
+        "5.4 Why partial positive is not fully positive (33 OOS jumps power ceiling)",
+        "5.5 Limitations (single market, Asia-Pacific, 33 jumps hard-bounded, binary target, VIX-only)"
+      ]
+    },
+    "section_6_conclusion": {
+      "word_target": 300,
+      "key_takeaways": [
+        "For crisis-era OOS data, regime-conditional specifications structurally susceptible to support disjunction",
+        "Regime-free adaptive standardization is cleaner better-identified alternative",
+        "Cross-market weak-universal corroboration supports the methodological claim",
+        "Honest-null + partial-positive framing is appropriate at 33-OOS-jump power ceiling"
+      ]
+    },
+    "references": {
+      "count_approx": 24,
+      "core_list": [
+        "Ang-Timmermann (2012) regime changes ARFE 4, 313-337",
+        "Catania (2018) dynamic adaptive mixture models",
+        "Chordia-Huh-Subrahmanyam (2007) cross-section of trading activity RFS 20(3), 709-740",
+        "Cont-Kukanov-Stoikov (2014) price impact of order book events JFE 12(1), 47-88",
+        "Creal-Koopman-Lucas (2013) GAS models JAE 28(5), 777-795",
+        "Diebold-Mariano (1995) comparing predictive accuracy JBES 13(3), 253-263",
+        "Ederington (1979) hedging performance JoF 34(1), 157-170",
+        "Hansen (1994) ACD IER 35(3), 705-730",
+        "Hansen-Lunde (2005) GARCH(1,1) comparison JAE 20(7), 873-889",
+        "Hansen-Lunde-Nason (2011) MCS Econometrica 79(2), 453-497",
+        "Harvey (2016) presidential address JoF 72(4), 1399-1440",
+        "Harvey-Leybourne-Newbold (1997) MSPE equality IJF 13(2), 281-291",
+        "Hastie-Tibshirani (1990) GAM Chapman and Hall",
+        "Hastie-Tibshirani-Friedman (2009) ESL 2nd ed, §5.2",
+        "Kao-Lin-Fung (2020) TAIFEX microstructure PBFJ 62, 101365",
+        "Klaassen (2002) regime-switching GARCH EmpEcon 27(2), 363-394",
+        "Lee-Mykland (2008) jumps in financial markets RFS 21(6), 2535-2563",
+        "Lin-Chiang (2019) order flow Taiwan futures JFM 39(11), 1425-1444",
+        "Patton (2011) volatility forecast comparison JoE 160(1), 246-256",
+        "Ruppert-Wand-Carroll (2003) semiparametric regression Cambridge",
+        "Schwert (1989) stock market volatility JoF 44(5), 1115-1153",
+        "Tsay (2010) analysis of financial time series 3rd ed Wiley"
+      ]
+    }
+  },
+  "canonical_numbers": {
+    "source": "experiments/k1205/k1205_synthesis_table.csv + integrity_report.txt (7/7 PASS)",
+    "lee_mykland_jumps_total": 115,
+    "gumbel_threshold_alpha_0.01": 5.125598,
+    "n_bars_total": 73203,
+    "n_valid_regression": 52369,
+    "n_is_bars": 31455,
+    "n_is_jumps": 81,
+    "n_oos_bars": 20914,
+    "n_oos_jumps": 33,
+    "vix_is_range": [9.14, 37.32],
+    "vix_oos_range": [12.32, 82.69],
+    "is_vix_tertile_cutoffs": {"q33": 12.07, "q67": 14.99},
+    "baseline_oos_auc": 0.5542,
+    "baseline_oos_ll": 0.011708,
+    "baseline_oos_brier": 0.001574,
+    "four_branch_table": [
+      {"model": "M_tertile_high", "branch": "VIX tertile IS-fixed", "n_oos": 20060, "n_oos_jumps": 32, "auc": 0.5926, "ll": 0.011963, "brier": 0.001592, "dm_t_vs_base": 1.306, "verdict": "NULL (degenerate coverage 0/854/20060)"},
+      {"model": "M_spline", "branch": "Natural cubic spline", "n_oos": 20914, "n_oos_jumps": 33, "auc": 0.4965, "ll": 0.012479, "brier": null, "dm_t_vs_base": -3.934, "verdict": "NULL (reverse, extrapolation explosion)"},
+      {"model": "M_volnorm", "branch": "Vol-normalized sigma_60 strictly-past", "n_oos": 20914, "n_oos_jumps": 33, "auc": 0.5940, "ll": 0.011650, "brier": 0.001574, "dm_t_vs_base": 2.255, "verdict": "PARTIAL_OOS_ONLY (methodological |t|>2, not Harvey |t|>3)"},
+      {"model": "M_expanding", "branch": "Expanding-window adaptive VIX quantile", "n_oos": 20914, "n_oos_jumps": 33, "auc": 0.5484, "ll": 0.011646, "brier": 0.001574, "dm_t_vs_base": 1.143, "verdict": "NULL"}
+    ],
+    "k1142_volnorm_detail": {
+      "is_nll_base": 556.9451,
+      "is_nll_volnorm": 553.9152,
+      "is_nll_improvement": 3.03,
+      "is_dm_t_vs_base": 1.454,
+      "oos_dm_t_vs_base": 2.255,
+      "oos_dm_mean_d": 5.86e-5,
+      "oos_dm_se": 2.60e-5,
+      "realvol_tertile_oos_auc": 0.6663,
+      "realvol_tertile_oos_dm_t": 1.982,
+      "volnorm_vs_realvol_tertile_oos_dm_t": -1.573,
+      "lag12_robustness_oos_auc": 0.5920,
+      "lag12_robustness_oos_dm_t": -0.278
+    },
+    "k1100g_d7_cross_market": {
+      "markets": ["TAIFEX", "SPY", "N225"],
+      "period": "2010-2025 daily OHLC (TAIFEX anchor from K1100g_d5 daily)",
+      "directions": [1, 1, 1],
+      "dm_t_range": [0.66, 2.32],
+      "max_dm_market": "N225",
+      "max_dm_t": 2.32,
+      "verdict": "DIRECTION_CONSISTENT_ALL_BORDERLINE"
+    },
+    "k1142_vs_k1199_volnorm_auc_diff": {
+      "k1142_auc": 0.594028,
+      "k1199_auc": 0.671216,
+      "reason": "K1199 uses sigma fallback (rolling-60 -> LM BV sigma) for 43 bars; K1142 strictly drops those rows. Both valid operationalizations, not a bug.",
+      "canonical_for_paper": 0.5940,
+      "source_note": "K1205 integrity check #7"
+    }
+  },
+  "files": {
+    "README.md": "purpose + conditional status + adoption workflow + target journals + derived directions",
+    "k1217_paper_draft.md": "~5000-word CONDITIONAL paper draft, 6 sections + abstract + references, prominent DRAFT STATUS banner",
+    "k1217_paper_outline.json": "this file — structured outline + canonical numbers"
+  },
+  "derived_directions": [
+    {
+      "id": "K1218",
+      "description": "Codex adversarial review of K1217 draft — methodological rigor + vol-norm partial-positive calibration + target journal fit"
+    },
+    {
+      "id": "K1219",
+      "description": "BibTeX construction + citation-verifier for all 24 references listed"
+    },
+    {
+      "id": "K1220",
+      "description": "Cross-market K1142 replication on US ES/NQ (deferred K1145) as robustness addendum if Path (b) adopted"
+    }
+  ],
+  "worktree": {
+    "branch": "worktree-agent-adecfdf2",
+    "constraint_compliance": {
+      "no_shared_state_modification": true,
+      "only_experiments_k1217_files": true,
+      "no_latex_body": true,
+      "markdown_and_json_only": true,
+      "canonical_numbers_verbatim_from_k1205": true,
+      "seed_42_fixed": true
+    }
+  }
+}
