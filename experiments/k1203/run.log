@@ -1,0 +1,69 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a16dfea0
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a16dfea0
+Installed 109 packages in 699ms
+[17:42:59] Loading alt-data PIT + weekly-mean views from K1116c cache...
+[17:42:59]   weekly_mean panel: (2885, 5), PIT panel: (2885, 5)
+[17:43:02] Fetching EEM + IV=^VIX (iv_type=close)...
+[17:43:03]   EEM: 431 weeks, 2018-01-12 to 2026-04-10
+[17:43:33]   [EEM/k1118_shift1] best_alt=finstress qlike_imp%=-0.13 DM finstress t=-1.43 n_oos=170
+[17:43:33]   [EEM/pit_shift0] best_alt=finstress qlike_imp%=-0.13 DM finstress t=-1.43 n_oos=170
+[17:43:33]   [EEM/pit_shift1] best_alt=epu qlike_imp%=-0.43 DM finstress t=-3.62 n_oos=170
+[17:43:33] Fetching EEM + IV=None (iv_type=rv30)...
+[17:43:33]   EEM: 426 weeks, 2018-02-16 to 2026-04-10
+[17:43:33]   [EEM_rv30/k1118_shift1] best_alt=finstress qlike_imp%=+0.09 DM finstress t=+1.18 n_oos=170
+[17:43:33]   [EEM_rv30/pit_shift0] best_alt=finstress qlike_imp%=+0.09 DM finstress t=+1.18 n_oos=170
+[17:43:33]   [EEM_rv30/pit_shift1] best_alt=epu qlike_imp%=-0.23 DM finstress t=-3.35 n_oos=170
+[17:43:33] Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a16dfea0/experiments/k1203/k1203_results.json
+[17:43:36]   saved k1203_dm_bar.png
+[17:43:36]   saved k1203_dm_heatmap_7asset.png
+[17:43:36]   saved k1203_qlike_improvement_7asset.png
+
+==========================================================================================
+K1203 SUMMARY — EEM PIT + 7-asset panorama complete
+==========================================================================================
+Verdict: UNIVERSAL_NULL_7_OF_7 with TLT caveat — SPY/GLD/BTC/QQQ/USO/EEM all confirm NULL under PIT; only TLT finstress pit_shift0 gives a marginal +3.74 (K1116f) which was already shown lag-sensitive (collapses to +2.00 at pit_shift1) and fails QLIKE 5% gate. Paper 4 'native IV sufficient' claim is 6/7 robust + 1 non-structural outlier.
+Paper 4 body.tex rewrite gate: UNLOCKED
+
+[EEM]  ticker=EEM  IV=^VIX
+  k1118_shift1    n_oos=170  best_alt=finstress   qlike_imp%=-0.13
+    iv_vs_base            t=-2.596  p=0.0102  [B<-2]
+    iv_vs_epu             t=-3.940  p=0.0001  [B<-3]
+    iv_vs_finstress       t=-1.434  p=0.1536  [ns]
+    iv_vs_all             t=-2.657  p=0.0086  [B<-2]
+  pit_shift0      n_oos=170  best_alt=finstress   qlike_imp%=-0.13
+    iv_vs_base            t=-2.596  p=0.0102  [B<-2]
+    iv_vs_epu             t=-3.539  p=0.0005  [B<-3]
+    iv_vs_finstress       t=-1.434  p=0.1536  [ns]
+    iv_vs_all             t=-0.999  p=0.3192  [ns]
+  pit_shift1      n_oos=170  best_alt=epu         qlike_imp%=-0.43
+    iv_vs_base            t=-2.596  p=0.0102  [B<-2]
+    iv_vs_epu             t=-3.297  p=0.0012  [B<-3]
+    iv_vs_finstress       t=-3.616  p=0.0004  [B<-3]
+    iv_vs_all             t=-1.711  p=0.0890  [ns]
+[EEM_rv30]  ticker=EEM  IV=rv30(internal)
+  k1118_shift1    n_oos=170  best_alt=finstress   qlike_imp%=+0.09
+    iv_vs_base            t=-2.150  p=0.0330  [B<-2]
+    iv_vs_epu             t=-3.487  p=0.0006  [B<-3]
+    iv_vs_finstress       t=+1.184  p=0.2382  [ns]
+    iv_vs_all             t=-2.879  p=0.0045  [B<-2]
+  pit_shift0      n_oos=170  best_alt=finstress   qlike_imp%=+0.09
+    iv_vs_base            t=-2.150  p=0.0330  [B<-2]
+    iv_vs_epu             t=-3.054  p=0.0026  [B<-3]
+    iv_vs_finstress       t=+1.184  p=0.2382  [ns]
+    iv_vs_all             t=-2.233  p=0.0268  [B<-2]
+  pit_shift1      n_oos=170  best_alt=epu         qlike_imp%=-0.23
+    iv_vs_base            t=-2.150  p=0.0330  [B<-2]
+    iv_vs_epu             t=-2.595  p=0.0103  [B<-2]
+    iv_vs_finstress       t=-3.352  p=0.0010  [B<-3]
+    iv_vs_all             t=-3.620  p=0.0004  [B<-3]
+
+Panorama (7-asset, pit_shift0 DM t vs IV baseline):
+  SPY       src=K1116c                          base=-3.021  epu=-2.603  finstress=-3.001  all=-2.537
+  GLD       src=K1116f                          base=-2.103  epu=-2.069  finstress=-3.341  all=-2.246
+  TLT       src=K1116f                          base=+1.433  epu=-2.477  finstress=+3.743  all=-5.666
+  BTC-USD   src=K1116f                          base=-5.494  epu=-3.550  finstress=+1.370  all=+0.203
+  QQQ       src=K1201                           base=-2.186  epu=-1.967  finstress=-2.439  all=-1.967
+  USO       src=K1201                           base=-3.049  epu=-5.596  finstress=-2.584  all=-3.735
+  EEM       src=K1203 (^VIX primary)            base=-2.596  epu=-3.539  finstress=-1.434  all=-0.999
