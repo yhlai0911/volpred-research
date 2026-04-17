@@ -1,0 +1,45 @@
+[01:03:28] K1100g_d7 cross-market gap² start
+
+=== [SPY] (SPY) ===
+  [cache] SPY -> spy_daily_2010-2026.parquet n=4085
+  Aligned rows (finite overnight): 4084
+  Date range: 2010-01-05 .. 2026-03-31
+  r_intraday sd=8.1658e-03  r_overnight sd=6.9405e-03  ratio(ovn/day var)=0.722
+  Train n=2515  Test n=1508
+  [01:03:28] IS fits ...
+    M_base  ll=14612.380 df=9.05 success=True
+    M_gap   ll=14669.223 df=6.50 xn=+0.0601 LRT=113.686 (p=0)
+  [01:03:47] OOS M_base ...
+    refits=314 elapsed=967.6s
+  [01:19:55] OOS M_gap ...
+    refits=314 elapsed=685.1s
+  [OOS] n_valid=1508
+  [OOS] LRT=22.295  DM-QLIKE t=+0.660  QLIKE improv=+1.38%  Harvey_pass=False
+
+=== [N225] (^N225) ===
+  [cache] ^N225 -> n225_daily_2010-2026.parquet n=3971
+  Aligned rows (finite overnight): 3970
+  Date range: 2010-01-05 .. 2026-03-31
+  r_intraday sd=9.4666e-03  r_overnight sd=7.9008e-03  ratio(ovn/day var)=0.697
+  Train n=2447  Test n=1465
+  [01:31:20] IS fits ...
+    M_base  ll=13582.961 df=5.12 success=True
+    M_gap   ll=13614.148 df=6.61 xn=+0.1403 LRT=62.372 (p=2.887e-15)
+  [01:31:37] OOS M_base ...
+    refits=305 elapsed=959.3s
+  [01:47:36] OOS M_gap ...
+    refits=305 elapsed=929.0s
+  [OOS] n_valid=1465
+  [OOS] LRT=36.726  DM-QLIKE t=+2.315  QLIKE improv=+2.33%  Harvey_pass=False
+
+[02:03:05] Loading TAIFEX d5 anchor ...
+  TAIFEX d5: DM t=+1.490  LRT=14.368  QLIKE improv=+6.62%
+
+[02:03:05] === Verdict: DIRECTION_CONSISTENT_ALL_BORDERLINE ===
+  All 3 markets positive direction but none past Harvey t>3. Consistent direction suggests real but weak structural effect; Paper 3 should frame as direction-consistent borderline signal.
+
+[OK] results -> k1100g_d7_results.json
+  [plot] k1100g_d7_cross_market_bars.png
+  [plot] k1100g_d7_gap2_contribution_ranking.png
+
+[DONE] total elapsed: 3577.1s

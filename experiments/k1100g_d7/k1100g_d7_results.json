@@ -1,0 +1,330 @@
+{
+  "experiment_id": "K1100g_d7",
+  "title": "Cross-market replication of overnight gap\u00b2 session asymmetry \u2014 SPY + N225 vs TAIFEX (K1100g_d5 anchor)",
+  "run_at": "2026-04-18T02:03:05",
+  "seed": 42,
+  "parent_chain": [
+    "K1100g",
+    "K1100g_d1",
+    "K1100g_d3",
+    "K1100g_d5",
+    "K1100g_d6"
+  ],
+  "references": [
+    "Bollerslev (1987) REStat \u2014 Student-t GARCH",
+    "Engle & Rangel (2008) RFS \u2014 tau*g PRG",
+    "French & Roll (1986) JFE \u2014 non-trading-hour information",
+    "Harvey et al. (1997) IJF \u2014 HLN DM correction",
+    "Harvey (2016) JF \u2014 t>3 threshold",
+    "Ito & Lin (1994) JFQA \u2014 Japan intraday vol structure"
+  ],
+  "design": {
+    "markets": [
+      {
+        "label": "SPY",
+        "ticker": "SPY",
+        "cache": "spy_daily_2010-2026.parquet"
+      },
+      {
+        "label": "N225",
+        "ticker": "^N225",
+        "cache": "n225_daily_2010-2026.parquet"
+      }
+    ],
+    "target_return": "r_intraday[t] = log(Close_t / Open_t)",
+    "exog": "gap\u00b2[t] = (log Open_t - log Close_{t-1})\u00b2",
+    "innovation": "student",
+    "prg_kernel": "tau*g multiplicative, Student-t (Var(r)=h)",
+    "train_start": "2010-01-01",
+    "train_end": "2019-12-31",
+    "test_start": "2020-01-01",
+    "test_end": "2025-12-31",
+    "refit_every": 5,
+    "note_data_granularity": "Daily OHLC only. 5-min intraday not sufficient on yfinance for SPY/N225 at 2010-2025 span (only last ~60 days available); using daily close-to-open gap\u00b2 as second-best consistent with K1100g_d5 TAIFEX gap\u00b2 definition."
+  },
+  "markets": {
+    "SPY": {
+      "label": "SPY",
+      "ticker": "SPY",
+      "descriptives": {
+        "n": 4084,
+        "date_min": "2010-01-05",
+        "date_max": "2026-03-31",
+        "r_intraday": {
+          "mean": 0.00018175947973584754,
+          "sd": 0.008165758962943368,
+          "skew": 0.11535775503910824,
+          "excess_kurt": 10.826198100586682
+        },
+        "r_overnight": {
+          "mean": 0.00024605428408602353,
+          "sd": 0.006940451734198825,
+          "skew": -1.8478191324064916,
+          "excess_kurt": 30.290913486407305
+        },
+        "gap2": {
+          "mean": 4.823041298546056e-05,
+          "sd": 0.00027263424828709336
+        },
+        "overnight_over_intraday_var_ratio": 0.7224076963643296
+      },
+      "is": {
+        "M_base": {
+          "success": true,
+          "log_lik": 14612.379808911828,
+          "df": 9.05331519266517,
+          "params": [
+            3.042910811642106e-05,
+            0.07560588732773946,
+            3.877346433696573e-06,
+            1.0812737750814843e-05,
+            1.0672161626260334e-05,
+            5.0733699283894824e-06,
+            0.0643668475506429,
+            0.025105438388397294,
+            0.8655262755672528,
+            9.05331519266517
+          ]
+        },
+        "M_gap": {
+          "success": true,
+          "log_lik": 14669.22264773364,
+          "df": 6.498933130812091,
+          "xn_coef": 0.06007954729673714,
+          "params": [
+            3.676371237161112e-05,
+            0.0481733321138002,
+            5.257404535158628e-06,
+            1.444043949776093e-05,
+            1.3917240619680785e-05,
+            8.221207330547068e-06,
+            0.07358514361559636,
+            0.054972196340798744,
+            0.8665356717062873,
+            0.06007954729673714,
+            6.498933130812091
+          ]
+        },
+        "lrt_chi2": 113.68567764362524,
+        "lrt_p": 0.0
+      },
+      "oos": {
+        "n_valid": 1508,
+        "test_start": "2020-01-01",
+        "test_end": "2025-12-31",
+        "lrt_chi2": 22.294914328169398,
+        "lrt_p": 2.3382505079938554e-06,
+        "dm_qlike_t_hln": 0.6603955857641025,
+        "dm_qlike_p": 0.5090000041799343,
+        "dm_loglik_t_hln": 1.0531244288051849,
+        "dm_loglik_p": 0.29228396807258417,
+        "qlike_base_mean": 1.6070214953171817,
+        "qlike_gap_mean": 1.584915503136043,
+        "qlike_improv_pct": 1.375587834111437,
+        "ll_base_sum": 5140.74633267858,
+        "ll_gap_sum": 5151.893789842665,
+        "harvey_pass": false,
+        "annual": {
+          "2020": {
+            "n": 253,
+            "dm_qlike_t_hln": -0.220966008605178,
+            "qlike_improv_pct": -1.8342652441022695
+          },
+          "2021": {
+            "n": 252,
+            "dm_qlike_t_hln": 1.4096864441086758,
+            "qlike_improv_pct": 1.6551763016240326
+          },
+          "2022": {
+            "n": 251,
+            "dm_qlike_t_hln": -0.6381889761510465,
+            "qlike_improv_pct": -3.728552713425267
+          },
+          "2023": {
+            "n": 250,
+            "dm_qlike_t_hln": -0.6545394839785271,
+            "qlike_improv_pct": -1.506956999030671
+          },
+          "2024": {
+            "n": 252,
+            "dm_qlike_t_hln": 1.6281608870296984,
+            "qlike_improv_pct": 5.709281722758719
+          },
+          "2025": {
+            "n": 250,
+            "dm_qlike_t_hln": 2.295817845411616,
+            "qlike_improv_pct": 7.256311617199364
+          }
+        }
+      }
+    },
+    "N225": {
+      "label": "N225",
+      "ticker": "^N225",
+      "descriptives": {
+        "n": 3970,
+        "date_min": "2010-01-05",
+        "date_max": "2026-03-31",
+        "r_intraday": {
+          "mean": -8.465698733033783e-05,
+          "sd": 0.00946663023566593,
+          "skew": -0.9771160869478072,
+          "excess_kurt": 15.67572875940759
+        },
+        "r_overnight": {
+          "mean": 0.00047938360702270093,
+          "sd": 0.007900847537974584,
+          "skew": -0.18123572400599772,
+          "excess_kurt": -0.05173898002741417
+        },
+        "gap2": {
+          "mean": 6.265320046100115e-05,
+          "sd": 8.647388215448935e-05
+        },
+        "overnight_over_intraday_var_ratio": 0.6965567973510456
+      },
+      "is": {
+        "M_base": {
+          "success": true,
+          "log_lik": 13582.961412234405,
+          "df": 5.11801986927514,
+          "params": [
+            5.6356916514725266e-05,
+            0.06996068756294374,
+            9.07237664468511e-06,
+            2.7681683250670255e-06,
+            8.24225176115891e-06,
+            6.994330670428857e-06,
+            0.05099836858067414,
+            0.0430663198134033,
+            0.8364991509318571,
+            5.11801986927514
+          ]
+        },
+        "M_gap": {
+          "success": true,
+          "log_lik": 13614.147655741888,
+          "df": 6.606602864838559,
+          "xn_coef": 0.14025292574983816,
+          "params": [
+            4.221418207230679e-05,
+            0.07358725510061388,
+            1.0740145470325768e-05,
+            5.403137554037042e-06,
+            1.0034315041057878e-05,
+            9.634662386821602e-06,
+            0.032343190815068076,
+            0.07464392885523596,
+            0.8489524475745205,
+            0.14025292574983816,
+            6.606602864838559
+          ]
+        },
+        "lrt_chi2": 62.37248701496719,
+        "lrt_p": 2.886579864025407e-15
+      },
+      "oos": {
+        "n_valid": 1465,
+        "test_start": "2020-01-01",
+        "test_end": "2025-12-31",
+        "lrt_chi2": 36.725695854984224,
+        "lrt_p": 1.3597528658593205e-09,
+        "dm_qlike_t_hln": 2.3146126850632074,
+        "dm_qlike_p": 0.020634138036891736,
+        "dm_loglik_t_hln": 2.7809411506597774,
+        "dm_loglik_p": 0.005420156162556866,
+        "qlike_base_mean": 1.5255760680453876,
+        "qlike_gap_mean": 1.4899804541226807,
+        "qlike_improv_pct": 2.3332572310414563,
+        "ll_base_sum": 4956.432021339597,
+        "ll_gap_sum": 4974.794869267089,
+        "harvey_pass": false,
+        "annual": {
+          "2020": {
+            "n": 242,
+            "dm_qlike_t_hln": 0.09424697993925846,
+            "qlike_improv_pct": 0.20013194760091654
+          },
+          "2021": {
+            "n": 245,
+            "dm_qlike_t_hln": 1.486767366363832,
+            "qlike_improv_pct": 2.3932636465182067
+          },
+          "2022": {
+            "n": 244,
+            "dm_qlike_t_hln": 1.6154711003898086,
+            "qlike_improv_pct": 2.2561800936238905
+          },
+          "2023": {
+            "n": 246,
+            "dm_qlike_t_hln": -0.46636996445716716,
+            "qlike_improv_pct": -0.3936326265586273
+          },
+          "2024": {
+            "n": 245,
+            "dm_qlike_t_hln": 1.072849694528394,
+            "qlike_improv_pct": 1.383325388649966
+          },
+          "2025": {
+            "n": 243,
+            "dm_qlike_t_hln": 1.840788832970271,
+            "qlike_improv_pct": 7.17271060357463
+          }
+        }
+      }
+    }
+  },
+  "taifex_d5_anchor": {
+    "label": "TAIFEX",
+    "ticker": "TX (TAIFEX)",
+    "source": "K1100g_d5",
+    "oos": {
+      "n_valid": 464,
+      "test_start": "2020-01-01",
+      "test_end": "2021-12-31",
+      "dm_qlike_t_hln": 1.48987928699781,
+      "dm_qlike_p": 0.13625597868567785,
+      "qlike_improv_pct": 6.616240877335668,
+      "lrt_chi2": 14.368375607699818,
+      "lrt_p": 0.00015030558270734407,
+      "harvey_pass": false
+    },
+    "is": {
+      "lrt_chi2": 18.87325137631524,
+      "lrt_p": 1.3969784621759018e-05
+    }
+  },
+  "cross_market_verdict": {
+    "verdict": "DIRECTION_CONSISTENT_ALL_BORDERLINE",
+    "explanation": "All 3 markets positive direction but none past Harvey t>3. Consistent direction suggests real but weak structural effect; Paper 3 should frame as direction-consistent borderline signal.",
+    "n_markets_evaluated": 3,
+    "directions_consistent": true,
+    "positive_count": 3,
+    "harvey_count": 0,
+    "spearman_t_vs_qlike_imp": 0.5,
+    "entries": [
+      {
+        "market": "TAIFEX",
+        "dm_qlike_t_hln": 1.48987928699781,
+        "qlike_improv_pct": 6.616240877335668
+      },
+      {
+        "market": "SPY",
+        "dm_qlike_t_hln": 0.6603955857641025,
+        "qlike_improv_pct": 1.375587834111437
+      },
+      {
+        "market": "N225",
+        "dm_qlike_t_hln": 2.3146126850632074,
+        "qlike_improv_pct": 2.3332572310414563
+      }
+    ]
+  },
+  "limitations": [
+    "Daily OHLC only \u2014 5-min intraday RV not used (yfinance 5-min limited to ~60 days). K1100g_d5 TAIFEX result also based on daily close-to-open gap\u00b2, so comparison is apples-to-apples.",
+    "SPY/N225 DOW structure differs from TAIFEX (no Saturday half-day, no lunch break on daily OHLC)",
+    "TAIFEX anchor is d5 Student-t gap_total DM t=+1.49 (BORDERLINE not Harvey-passing); d7 tests whether other markets behave similarly or whether TAIFEX is idiosyncratic.",
+    "N225 trading hours partially overlap US close \u2192 overnight gap may be dampened by Asia daylight trading in other venues (unlike TAIFEX night session which is structurally separated).",
+    "No winsorization \u2014 COVID Mar 2020 extreme gaps may dominate gap\u00b2 mass in SPY/N225 (similar issue to TAIFEX_d5 limitation)."
+  ]
+}
