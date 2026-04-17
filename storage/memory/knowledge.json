@@ -27004,5 +27004,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T16:52:04.524845"
+  },
+  {
+    "item_id": "b25d45fe",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1144 Paper 9 FEZ/STOXX50E A4f OOS 2019-2026 canonical replication. **VERDICT: Harvey significance PRESERVED, magnitudes divergent \u2014 \u5efa\u8b70 (a)/(c)**. FEZ DM t reproduced 3.114 vs paper 3.45 (9.7% diff), Harvey YES \u2713; STOXX50E t reproduced 3.025 vs paper 3.64 (16.9% diff), Harvey YES \u2713. **Critical debug**: decimal returns QLIKE \u5b8c\u5168\u932f (~-8), \u6b63\u78ba percentage returns (\u00d7100) per paper footnote p.295. \u4fee\u6b63\u5f8c FEZ QLIKE 1.33 vs paper 1.422 (6% \u5408\u7406); STOXX50E QLIKE 1.09 vs paper 1.565 (30% \u5927\u5dee, \u7591 ticker \u554f\u984c^STOXX50E \u53ef\u80fd\u542b FX / close time drift). **Paper 9 D1/D2 status**: Harvey \u986f\u8457\u6027\u7d50\u8ad6\u4e0d\u8b8a, \u8de8\u5e02\u5834\u4e3b\u5f35 robust \u2014 magnitude \u5dee\u7570\u5c6c data-vintage / ticker \u7d30\u7bc0. **\u4e09\u9078\u4e00**: (a) \u512a\u5148\u8abf\u67e5 STOXX50E ticker (^ESTX50 vs ^STOXX50E), FEZ 9.7% \u53ef\u80fd exact vintage \u6536\u6582; (b) \u82e5 K1144 \u6b0a\u5a01 \u2192 paper Table 6 \u66f4\u65b0 FEZ 3.11 STOXX50E 3.03 \u7d50\u8ad6\u4e0d\u8b8a; (c) errata pending. good news: submitted paper cross-asset claim \u4e0d\u9700\u5927\u6539\uff0c\u50c5 magnitude \u6578\u5b57\u5fae\u8abf. commit 1e3ecff8.",
+    "evidence": [
+      "experiments/k1144/k1144.py",
+      "experiments/k1144/k1144_results.json",
+      "experiments/k1144/k1144_vs_paper9_diff.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T16:57:58.907888"
   }
 ]

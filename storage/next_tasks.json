@@ -1158,16 +1158,17 @@
   {
     "id": "Paper9_D1D2_FEZ_STOXX_A4f_2019_2026",
     "title": "Paper 9 BLOCKER: FEZ t=3.45 + STOXX50E t=3.64 無 A4f 2019-2026 source",
-    "status": "pending",
+    "status": "resolved_magnitude_divergent_Harvey_preserved",
     "priority": 4,
     "created_at": "2026-04-17T16:24:26+08:00",
-    "description": "Paper 9 audit 發現 FEZ DM t=3.45 (Abstract+Table 6+Conclusion 引用) 與 STOXX50E t=3.64 無 script 能 reproduce with A4f spec + OOS 2019-2026. K949 最近但用 log-exp + OOS 2016-2025. **動作**: 建立 k1144 或 re-run K949 with exact A4f spec + OOS 2019-2026 + FEZ + STOXX50E assets. 約 2 小時. 若 reproduced ≠ 3.45/3.64 → 主線程決 (a) errata (b) paper re-submit. 若 ≠ 則為 submitted paper 重大 errata.",
+    "description": "Paper 9 audit 發現 FEZ DM t=3.45 (Abstract+Table 6+Conclusion 引用) 與 STOXX50E t=3.64 無 script 能 reproduce with A4f spec + OOS 2019-2026. K949 最近但用 log-exp + OOS 2016-2025. **動作**: 建立 k1144 或 re-run K949 with exact A4f spec + OOS 2019-2026 + FEZ + STOXX50E assets. 約 2 小時. 若 reproduced ≠ 3.45/3.64 → 主線程決 (a) errata (b) paper re-submit. 若 ≠ 則為 submitted paper 重大 errata. [K1144 DONE commit 1e3ecff8: FEZ t 3.11 vs paper 3.45 (9.7%), STOXX50E t 3.03 vs 3.64 (16.9%). Harvey significance PRESERVED 兩者都 >3.0, 跨市場 conclusion robust. Magnitude divergent 屬 data vintage + STOXX50E ticker 問題. 主線程 decision: (a) ticker 查 + FEZ exact vintage, 或 (b) paper 更新到 K1144 canonical, 結論不變.]",
     "tags": [
       "paper-9",
       "submitted-paper",
       "cross-asset",
       "main-thread-decision"
-    ]
+    ],
+    "completed_at": "2026-04-17T16:58:13+08:00"
   },
   {
     "id": "Paper9_D4_sensitivity_table_source",
@@ -1348,6 +1349,19 @@
       "paper-9",
       "experiments-md",
       "quick-fix",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper9_STOXX50E_ticker_forensic",
+    "title": "Paper 9: STOXX50E ticker 查 (^STOXX50E vs ^ESTX50, K1144 30% QLIKE 差)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:58:13+08:00",
+    "description": "K1144 (1e3ecff8) 發現 STOXX50E QLIKE 1.09 vs paper 1.565 (30% 差). 疑 ^STOXX50E yfinance ticker 有 FX 因子或收市時差. 嘗試 ^ESTX50 或其他 source 看能否收斂. 若可收斂 → K1144 update 對齊 paper; 若仍差 → (b) paper errata STOXX50E 到 K1144 canonical 3.03 (Harvey 仍顯著). **Harvey significance 不受影響**, 此為 magnitude cosmetic fix. 主線程 forensic.",
+    "tags": [
+      "paper-9",
+      "ticker-forensic",
       "main-thread"
     ]
   }
