@@ -26554,5 +26554,41 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T11:32:11.732899"
+  },
+  {
+    "item_id": "ba90e426",
+    "category": "event_preview_article",
+    "content": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude] FOMC 04/28-29 2026 \u6703\u8b70\u9810\u544a\u6587\u7ae0\uff08draft mile_78d649c4\uff09\u3002CME FedWatch \u7dad\u6301\u4e0d\u52d5\u6a5f\u7387 94.8% (Polymarket 98.7%)\uff0c\u7576\u524d Fed funds 3.50-3.75%\u30023 \u6708 CPI YoY 3.3% (\u4e0a\u6708 2.4%)\uff0c\u6c7d\u6cb9 +21.2% \u53d7 Iran \u6230\u722d\u885d\u64ca\uff1b\u6838\u5fc3 CPI YoY 2.6% \u76f8\u5c0d\u6eab\u548c\u3002VIX 2026-04-16 \u6536 17.94\u3002\u4e09\u60c5\u5883\u9810\u671f\uff1a\u57fa\u6e96 ~70% (\u53cd\u61c9\u5e73\u6de1)\u3001\u9d3f\u6d3e\u610f\u5916 ~20% (\u98a8\u96aa+\u907f\u96aa\u540c\u6f32)\u3001\u9df9\u6d3e\u610f\u5916 ~10% (VIX \u8df3\u81f3 21-23)\u3002Takeaway\uff1a\u89c0\u5bdf\u6703\u8b70\u7576\u665a VIX regime \u6c7a\u5b9a\u662f\u5426\u8abf\u6574\u90e8\u4f4d\uff0c\u4e0d\u9810\u6e2c\u5229\u7387\u3002\u53c3\u8003 K687/K697 VT \u7814\u7a76\u3002",
+    "evidence": [
+      "storage/reports/mile_78d649c4.json"
+    ],
+    "confidence": 0.8,
+    "created_at": "2026-04-17T11:42:17.737634"
+  },
+  {
+    "item_id": "70996bfa",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude, \u57f7\u884c: Claude agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1148 EAV continuous surprise refinement (N=29 TW stocks, 1711 earnings events, 2010-2025). H1 PASS (pooled \u03b8=+2.695e-4, Hessian t=10.43; bootstrap t=2.90, 95% CI [+1.27e-4, +5.01e-4]). H2 FAIL (bootstrap t=2.90 < K1145 binary 5.24). H3 FAIL (OOS panel DM t=-1.16, p=0.12). Placebo within-stock permutation \u03b8\u22480 (\u89c0\u6e2c\u503c 26.9\u03c3 above). **VERDICT: H1_PASS_but_binary_stronger | OVERFIT_RISK flag**. **Key insight**: Taiwan earnings \u7684 vol \u653e\u5927\u6548\u61c9\u662f\u95dc\u65bc EVENT \u672c\u8eab\uff08\u6bcf\u6b21 announcement \u7684 uniform variance uplift\uff09\uff0c\u4e0d\u662f surprise magnitude\u3002Binary EAV \u662f\u6b63\u78ba\u7684 reduced form\uff1bcontinuous \u52a0\u96dc\u8a0a\u4f46\u4e0d\u6539\u5584 fit \u6216 OOS\u3002\u5f37\u5316 K1145 universal-magnitude claim \u70ba uniform per-announcement variance across firms \u800c\u975e within-announcement surprise-size mapping\u3002Codex \u5be9\u67e5 pre-execution \u6293 3 HIGH bugs \u5168\u4fee\uff08mask.values AttributeError / pooled DM \u5ffd\u7565 cross-stock corr / \u03c4[0] lag violation\uff09\u3002Script: experiments/k1148/k1148.py, commit a5d152ff.",
+    "evidence": [
+      "experiments/k1148/k1148.py",
+      "experiments/k1148/k1148_results.json",
+      "experiments/k1148/k1148_placebo_results.json",
+      "experiments/k1148/README.md"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-17T12:19:42.933183"
+  },
+  {
+    "item_id": "2dd79017",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1148 \u884d\u751f, \u57f7\u884c: Claude agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1148_d1 K1145 binary EAV OOS panel DM retest (N=29 TW stocks, IS 2010-2019 / OOS 2020-2025, K1148 panel DM infrastructure). **Scenario B: Marginal FAIL**. Binary EAV IS pooled theta=+4.90e-5 Hessian t=+10.62 (IS \u4ecd\u9ad8\u5ea6\u986f\u8457). OOS panel DM: per-stock mean t=-0.54, median=-0.86, bootstrap panel t=**-1.46**, 95% CI [-1.23, +0.22] (\u8de8 0), one-sided p=**0.076**. \u500b\u80a1 DM<=-2 \u901a\u904e\u7387 **9/29 (31%)**. vs K1148 continuous (DM t=-1.16 p=0.12): binary \u7565\u5f37\u4f46\u5169\u8005\u7686\u672a\u904e Harvey \u806f\u5408\u9580\u6abb (t<=-2 AND p<0.05). **Paper 2 section 5 universal-magnitude three-market claim \u5fc5\u9808\u964d\u7d1a**. 3 Option: Opt1 \u522a section 5 OOS \u6539 IS-only paper; Opt2 \u6539\u5beb IS-identified panel effect with OOS heterogeneity + \u5831 9/29 stock-level PASS; Opt3 \u65b0\u589e subsection \u63a2 OOS PASS \u80a1\u7968\u7279\u5fb5\uff08\u771f empirical contribution\uff09. Codex \u6293 1 HIGH bug (Scenario A \u53ea\u6aa2\u67e5 t \u672a\u6aa2\u67e5\u806f\u5408 joint threshold) \u5df2\u4fee. Script: experiments/k1148_d1/k1148_d1.py, commit 8dd6fa37.",
+    "evidence": [
+      "experiments/k1148_d1/k1148_d1.py",
+      "experiments/k1148_d1/k1148_d1_results.json",
+      "experiments/k1148_d1/README.md",
+      "experiments/k1148_d1/binary_vs_continuous_oos.png"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T12:39:09.590129"
   }
 ]

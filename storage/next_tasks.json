@@ -125,8 +125,9 @@
     "id": "TSMC_0416_post",
     "title": "TSMC 法說 04/16 事後解讀文章",
     "priority": 1,
-    "description": "法說會 04/16 14:00 結束後，04/17 前完成解讀文章",
-    "status": "pending"
+    "description": "法說會 04/16 14:00 結束後，04/17 前完成解讀文章 [DONE mile_f52fb13b]",
+    "status": "completed",
+    "completed_at": "2026-04-17T11:24:01+08:00"
   },
   {
     "id": "K1067b",
@@ -305,8 +306,9 @@
     "id": "FOMC_0428",
     "title": "FOMC 04/28-29 預告文章",
     "priority": 2,
-    "description": "04/26 前完成預告文",
-    "status": "pending"
+    "description": "04/26 前完成預告文 [DONE mile_78d649c4, draft in pool]",
+    "status": "completed",
+    "completed_at": "2026-04-17T11:45:00+08:00"
   },
   {
     "id": "K1115",
@@ -437,8 +439,9 @@
     "id": "TSMC_0416_immediate",
     "title": "TSMC 法說 04/16 14:00 後立即解讀（T+0 published）",
     "priority": 1,
-    "description": "04/16 14:00 結束後立即發 --status published（不等次日）。Hot-take 3 重點 + 對台股影響。",
-    "status": "pending"
+    "description": "04/16 14:00 結束後立即發 --status published（不等次日）。Hot-take 3 重點 + 對台股影響。 [OBSOLETE - covered by TSMC_0416_post mile_f52fb13b]",
+    "status": "completed",
+    "completed_at": "2026-04-17T11:24:01+08:00"
   },
   {
     "id": "TSMC_0417_optional",
@@ -640,8 +643,9 @@
     "id": "K1148",
     "title": "K1148: EAV refinement — earnings surprise (continuous) vs binary indicator",
     "priority": 3,
-    "description": "K1145 用 binary EAV 已 PASS。改用 actual surprise magnitude (consensus vs actual EPS deviation) 作 continuous covariate，是否 θ_continuous 訊號更強？",
-    "status": "pending"
+    "description": "K1145 用 binary EAV 已 PASS。改用 actual surprise magnitude (consensus vs actual EPS deviation) 作 continuous covariate，是否 θ_continuous 訊號更強？ [DONE commit a5d152ff: H1 PASS but binary stronger — continuous loses information. Strengthens K1145 universal-magnitude = per-event uniform uplift, NOT surprise-size mapping]",
+    "status": "completed",
+    "completed_at": "2026-04-17T12:17:00+08:00"
   },
   {
     "id": "K1149",
@@ -882,5 +886,34 @@
     "priority": 3,
     "description": "K1108b 否證 capex 為 foundry mechanism。嘗試 utilisation rate (TSMC 75-80%/UMC 60-70% quarterly disclosures) + wafer ASP (industry report) 作為 alternative foundry-specific signals 預測 θ_EAV。",
     "status": "pending"
+  },
+  {
+    "id": "K1148_d1",
+    "title": "K1148_d1: binary EAV OOS DM panel test (missing from K1145)",
+    "priority": 3,
+    "status": "completed",
+    "description": "K1148 continuous OOS DM t=-1.16 FAIL。回查 K1145 是否做過 binary EAV 的 OOS panel DM（per-stock + stock-bootstrap spec）。若沒做，補上 — 因為 H3 FAIL 可能 continuous 和 binary 都 OOS FAIL，那 K1145 H3 宣稱需要降級。 [DONE commit 8dd6fa37: Scenario B Marginal FAIL, Paper 2 section 5 must downgrade]",
+    "completed_at": "2026-04-17T13:25:00+08:00"
+  },
+  {
+    "id": "K1148_d2_us_replication",
+    "title": "K1148_d2: US equities replication of binary-vs-continuous EAV (magnitude-is-noise test)",
+    "priority": 2,
+    "status": "pending",
+    "description": "K1148 TW 結論「magnitude is noise, event is the signal」需跨市場驗證。用 K1147 US stocks (30 ticker panel) 重做 binary vs continuous θ 比較。若 US 也 binary > continuous → three-market universal claim 升級（Paper 2 §5 narrative 可強化）。 [UPGRADED P3->P2 after K1148_d1 Scenario B FAIL: US validation now critical]"
+  },
+  {
+    "id": "Paper2_section5_decision",
+    "title": "Paper 2 section 5 narrative decision (main thread + 用戶決策)",
+    "priority": 1,
+    "status": "pending",
+    "description": "K1148_d1 Scenario B: binary EAV OOS panel DM t=-1.46 p=0.076 (marginal FAIL). K1148 continuous 也 FAIL (t=-1.16). universal-magnitude claim 需降級. 3 Options: Opt1 刪 section 5 改 IS-only paper; Opt2 改寫 IS-identified + OOS heterogeneity + 9/29 stock PASS; Opt3 新增 subsection 探 OOS PASS 股票特徵. 用戶決策後主線程執行 narrative pivot."
+  },
+  {
+    "id": "K1148_d3_oos_stock_characteristics",
+    "title": "K1148_d3: OOS PASS 股票特徵分析 (9/29 stocks DM<=-2 的什麼屬性)",
+    "priority": 2,
+    "status": "pending",
+    "description": "K1148_d1 發現 9/29 stocks OOS PASS, 20 FAIL. 分析 PASS vs FAIL stocks 的 market cap / sector / earnings announcement frequency / avg surprise magnitude / pre-2020 vol / beta_EAV 個股值. 若找到明顯區分特徵 -> Paper 2 Option 3 (subsection) 有 real empirical contribution."
   }
 ]

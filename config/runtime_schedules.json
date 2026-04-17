@@ -1,0 +1,150 @@
+{
+  "metadata": {
+    "canonical_path": "config/runtime_schedules.json",
+    "timezone": "Asia/Taipei",
+    "updated_at": "2026-04-17",
+    "policy_summary": "Queue-first local control plane. Session-only work should be recreated from this spec; high-frequency continue-research heartbeat cron is deprecated in favor of idle-driven continuation."
+  },
+  "system_crontab": {
+    "source_label": "Canonical system crontab spec",
+    "note": "Persistent local tasks that should exist in the host crontab.",
+    "items": [
+      {
+        "id": "collect_tw_data",
+        "label": "台股/0050/VIXTWN 收集",
+        "cron": "0 15 * * 1-5",
+        "command": "collect_tw_data.py",
+        "description": "15:00 台股收盤後收集台股日頻與 5min 資料。",
+        "matchers": [
+          "collect_tw_data.py"
+        ]
+      },
+      {
+        "id": "collect_us_data",
+        "label": "美股/SPY/GLD/VIX 收集",
+        "cron": "3 7 * * 2-6",
+        "command": "collect_us_data.py",
+        "description": "07:03 美股收盤後收集 SPY/GLD/TLT/QQQ/EEM/VIX/VIX3M/N225。",
+        "matchers": [
+          "collect_us_data.py"
+        ]
+      },
+      {
+        "id": "daily_update",
+        "label": "daily_update 每日更新與同步",
+        "cron": "3 8 * * 2-6",
+        "command": "daily_update.py",
+        "description": "08:03 策略計算、Supabase 同步、績效重算與 heartbeat。",
+        "matchers": [
+          "daily_update.py"
+        ]
+      },
+      {
+        "id": "release_pool",
+        "label": "文章池定時釋出",
+        "cron": "3 */2 * * *",
+        "command": "release-pool-by-settings",
+        "description": "每 2 小時依節奏設定釋出文章池內容。",
+        "matchers": [
+          "release-pool-by-settings"
+        ]
+      }
+    ]
+  },
+  "remote_triggers": {
+    "source_label": "Canonical remote trigger spec",
+    "note": "Cloud triggers survive across local sessions. Cron expressions here are UTC, not Asia/Taipei.",
+    "items": [
+      {
+        "id": "platform_ops_patrol",
+        "name": "platform-ops-patrol",
+        "cron": "0 */6 * * *",
+        "timezone": "UTC",
+        "local_time": "每 6 小時（台灣時間）",
+        "description": "平台巡檢雲端 trigger。",
+        "trigger_id": "trig_01HzWX2ZUmsGHnzwciGpHeNz"
+      },
+      {
+        "id": "token_usage_daily_report",
+        "name": "token-usage-daily-report",
+        "cron": "43 14 * * *",
+        "timezone": "UTC",
+        "local_time": "每日 22:43（台灣時間）",
+        "description": "Token 日報雲端 trigger。",
+        "trigger_id": "trig_015iaE6yv3V9V1opjUAA5R2V"
+      }
+    ]
+  },
+  "session_crons": {
+    "source_label": "Canonical session cron spec",
+    "note": "Recreate these in each new local agent session. Do not add the deprecated high-frequency continue-research heartbeat cron.",
+    "items": [
+      {
+        "id": "daily_planning",
+        "cron": "3 9 * * *",
+        "prompt": "每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務",
+        "recurring": true,
+        "description": "每日一次的 queue-first 任務審視。"
+      },
+      {
+        "id": "question_research",
+        "cron": "17 */6 * * *",
+        "prompt": "會員問題研究摘要：先跑 question-ranking-workflow；只有 pending_questions > 0 才建立/執行後續任務",
+        "recurring": true,
+        "description": "每 6 小時檢查會員問題研究 backlog。"
+      },
+      {
+        "id": "platform_patrol",
+        "cron": "37 */6 * * *",
+        "prompt": "平台巡檢摘要：先跑 ops health + platform-cycle-summary；只有異常或 release_due 才建立/執行後續任務",
+        "recurring": true,
+        "description": "每 6 小時的本地平台巡檢摘要。"
+      },
+      {
+        "id": "knowledge_index_check",
+        "cron": "7 */6 * * *",
+        "prompt": "知識索引檢查：先判斷是否真的需要更新",
+        "recurring": true,
+        "description": "每 6 小時檢查知識索引是否過期。"
+      },
+      {
+        "id": "token_usage_daily",
+        "cron": "23 22 * * *",
+        "prompt": "Token 用量日報：每日一次 detailed；週五再補 weekly",
+        "recurring": true,
+        "description": "每日 token 使用量摘要。"
+      },
+      {
+        "id": "ndc_indicator_refresh",
+        "cron": "0 10 28 * *",
+        "prompt": "更新 NDC 景氣指標：用 Chrome DevTools MCP 導航 NDC 網站提取最新領先指標和景氣對策信號，更新 storage/macro/tw_dgbas_bci_m.csv，git commit",
+        "recurring": true,
+        "description": "每月 28 日更新 NDC 景氣指標。"
+      }
+    ]
+  },
+  "idle_policy": {
+    "source_label": "Slot-aware idle continuation policy (updated 2026-04-17 for M1 Max 10-core parallel agents)",
+    "note": "Use after a top-level agent completes its main task instead of a high-frequency heartbeat cron. Priority ordering decides WHICH task to pick; it does NOT mandate sequential execution.",
+    "max_concurrent_agents": 3,
+    "rules": [
+      "硬體容量：M1 Max 10 核，建議同時跑 3 個 agent（每個約 1GB RAM + 1 個 worktree）。",
+      "每次觸發先 count 當前 running agents（.claude/worktrees/ + background task ids）。若 >= max_concurrent_agents 則跳過。",
+      "slot 有空就挑新任務：(1) user-assigned pending 最高優先 (2) scheduled queue (3) discovery / research continuation。不必等 user queue 清空才 discovery。",
+      "同一個 K 編號 / 任務 id 不得同時被兩個 agent 執行（啟動前 ls experiments/ + ls .claude/worktrees/ 檢查）。",
+      "discovery pass 最多每 30 分鐘一次（整體節奏限制，不是 slot 限制）。",
+      "user queue 仍優先於 discovery — 若有 user pending，下次 slot 空出時必須優先挑 user。",
+      "每次 idle-driven continuation 或 discovery pass 之後，必須產生實際工作成果（新 agent running / git diff / knowledge 新增 / research_program 更新），不能只回報狀態。"
+    ],
+    "history": [
+      {"date": "2026-03-31", "change": "Deprecated */4 heartbeat; introduced queue-first sequential idle continuation."},
+      {"date": "2026-04-17", "change": "Relaxed to slot-aware concurrent execution (up to 3 parallel agents on M1 Max 10-core); priority ordering still enforced but no longer sequential."}
+    ]
+  },
+  "deprecated_patterns": [
+    {
+      "pattern": "*/4 * * * * continue research heartbeat",
+      "reason": "2026-03-31 後改為 queue-first idle-driven continuation，避免空轉。"
+    }
+  ]
+}
