@@ -511,8 +511,9 @@
     "id": "K1131",
     "title": "K1131: Continuous VIX-dependent β via spline (OFI-jump)",
     "priority": 3,
-    "description": "K1128 衍生: β_2(VIX)·|OFI|_t spline basis 取代 tertile dummy。繞過離散 cutoff 問題。",
-    "status": "pending"
+    "description": "K1128 衍生: β_2(VIX)·|OFI|_t spline basis 取代 tertile dummy。繞過離散 cutoff 問題。 [DONE commit 8135a777: NULL. Spline NOT a fix. Structural OOS-VIX-disjoint problem. Error_log fix #3 empirically invalidated. K1128 narrative preserved.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T14:20:00+08:00"
   },
   {
     "id": "K1132",
@@ -896,24 +897,47 @@
     "completed_at": "2026-04-17T13:25:00+08:00"
   },
   {
-    "id": "K1148_d2_us_replication",
+    "id": "K1148_d2",
     "title": "K1148_d2: US equities replication of binary-vs-continuous EAV (magnitude-is-noise test)",
     "priority": 2,
-    "status": "pending",
-    "description": "K1148 TW 結論「magnitude is noise, event is the signal」需跨市場驗證。用 K1147 US stocks (30 ticker panel) 重做 binary vs continuous θ 比較。若 US 也 binary > continuous → three-market universal claim 升級（Paper 2 §5 narrative 可強化）。 [UPGRADED P3->P2 after K1148_d1 Scenario B FAIL: US validation now critical]"
+    "status": "completed",
+    "description": "K1148 TW 結論「magnitude is noise, event is the signal」需跨市場驗證。用 K1147 US stocks (30 ticker panel) 重做 binary vs continuous θ 比較。若 US 也 binary > continuous → three-market universal claim 升級（Paper 2 §5 narrative 可強化）。 [UPGRADED P3->P2 after K1148_d1 Scenario B FAIL: US validation now critical] [DONE commit 30142d85: Scenario A_BOTH US OOS DM t=-5.58 binary / -5.25 continuous BOTH DECISIVE PASS. Paper 2 §5 narrative saved + strengthened with cross-market heterogeneity story.]",
+    "completed_at": "2026-04-17T14:05:00+08:00"
   },
   {
     "id": "Paper2_section5_decision",
     "title": "Paper 2 section 5 narrative decision (main thread + 用戶決策)",
     "priority": 1,
     "status": "pending",
-    "description": "K1148_d1 Scenario B: binary EAV OOS panel DM t=-1.46 p=0.076 (marginal FAIL). K1148 continuous 也 FAIL (t=-1.16). universal-magnitude claim 需降級. 3 Options: Opt1 刪 section 5 改 IS-only paper; Opt2 改寫 IS-identified + OOS heterogeneity + 9/29 stock PASS; Opt3 新增 subsection 探 OOS PASS 股票特徵. 用戶決策後主線程執行 narrative pivot."
+    "description": "K1148 trilogy verdict: K1148 TW continuous FAIL | K1148_d1 TW binary Marginal FAIL | K1148_d3 firm-char REJECTED | K1148_d2 **US BOTH PASS (t=-5.58, -5.25 p<0.0001)**. **NEW OPTION 4 (recommended)**: keep universal-magnitude claim as panel regularity with IS identification across both markets; US cross-market OOS validates; TW OOS heterogeneity reframes as market-microstructure subsection. Old options superseded: Opt1 (IS-only) too conservative, Opt2 (OOS heterogeneity no attribution) OK but misses US story, Opt3 REJECTED already. Awaiting user final decision between Opt4 (recommended) or Opt1/2."
   },
   {
-    "id": "K1148_d3_oos_stock_characteristics",
+    "id": "K1148_d3",
     "title": "K1148_d3: OOS PASS 股票特徵分析 (9/29 stocks DM<=-2 的什麼屬性)",
     "priority": 2,
+    "status": "completed",
+    "description": "K1148_d1 發現 9/29 stocks OOS PASS, 20 FAIL. 分析 PASS vs FAIL stocks 的 market cap / sector / earnings announcement frequency / avg surprise magnitude / pre-2020 vol / beta_EAV 個股值. 若找到明顯區分特徵 -> Paper 2 Option 3 (subsection) 有 real empirical contribution. [DONE commit cef890f3: Option 3 REJECTED, no feature survives BH correction at N=29. Paper 2 §5 must choose Option 1 or 2.]",
+    "completed_at": "2026-04-17T13:55:00+08:00"
+  },
+  {
+    "id": "K1132_extended_is",
+    "title": "K1132: Extended IS with prior crises (2008 GFC / 2011 EU debt / 2015 China deval) for OFI-jump regime test",
+    "priority": 3,
     "status": "pending",
-    "description": "K1148_d1 發現 9/29 stocks OOS PASS, 20 FAIL. 分析 PASS vs FAIL stocks 的 market cap / sector / earnings announcement frequency / avg surprise magnitude / pre-2020 vol / beta_EAV 個股值. 若找到明顯區分特徵 -> Paper 2 Option 3 (subsection) 有 real empirical contribution."
+    "description": "K1131 NULL confirms K1128 degeneracy is structural not functional-form. Best remaining fix from error_log 2026-04-13: extend IS training period to include prior VIX spikes so OOS regime is not disjoint from IS training range. Target IS 2008-2019, OOS 2020-2025. Re-test K1128 OFI-jump regime test with this expanded IS. If PASS → error_log fix #1 validated; if FAIL → regime instability may be irreducible."
+  },
+  {
+    "id": "K1133_expanding_window",
+    "title": "K1133: Expanding-window adaptive VIX quantile for K1128 OFI-jump",
+    "priority": 3,
+    "status": "pending",
+    "description": "K1131 NULL. Try error_log fix #2: expanding-window rolling quantile so VIX tertile cutoffs update each OOS period with latest info. Bypasses both discrete-cutoff degeneracy and IS-extrapolation explosion. Test if regime-switching beta can be identified under adaptive quantile."
+  },
+  {
+    "id": "K1134_vol_normalized_ofi",
+    "title": "K1134: Volatility-normalized OFI (alternative specification, no VIX-regime)",
+    "priority": 3,
+    "status": "pending",
+    "description": "K1131 agent suggested alt-direction: instead of VIX-conditional beta, normalize OFI by rolling realized vol. |OFI|/sigma_t_hat provides regime-free standardization. Test if this 繞過 regime-switching 本身. If PASS → K1128 story changes from \"regime-dependent\" to \"vol-normalized signal\"."
   }
 ]

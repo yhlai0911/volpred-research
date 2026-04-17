@@ -26590,5 +26590,47 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T12:39:09.590129"
+  },
+  {
+    "item_id": "b577ec90",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1148_d1 \u884d\u751f, \u57f7\u884c: Claude agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1148_d3 TW OOS PASS vs FAIL \u80a1\u7968\u7279\u5fb5\u5206\u6790 (N=9 PASS + N=20 FAIL from K1148_d1 per-stock DM). **VERDICT: Option 3 REJECTED**. 16 \u500b\u7279\u5fb5\u4e2d 0 \u500b\u901a\u904e BH adj p<0.1 AND |Cohen d|>0.5. \u6700\u5f37\u8a0a\u865f surprise_symmetry_ratio Cohen d=+1.03\uff08large\uff09raw p=0.037 \u4f46 BH adj p=0.60 NS. Market cap d=+0.58 BH adj 0.89 NS. Industrials sector Fisher raw p=0.076 BH adj 0.46 NS. PASS 9 \u6a94\uff1a2330, 2303, 3035, 3443, 2886, 2603, 2615, 2002, 2637. FAIL 20 \u6a94\uff1a6239, 2454, 2379, 3034, 2881, 2882, 2887, 2609, 1301, 1303, 1326, 2027, 2317, 3045, 2382, 2912, 1215, 2347, 1210, 2892. **Paper 2 \u00a75 implication**: Option 3 (new subsection on OOS PASS stock characteristics) REJECTED - N=29 \u6a23\u672c\u592a\u5c0f\u300116 \u500b\u7279\u5fb5\u90fd\u7121\u6cd5\u901a\u904e\u591a\u91cd\u6821\u6b63. \u4e3b\u7dda\u7a0b\u61c9\u9078 Option 1 (IS-only paper) \u6216 Option 2 (OOS heterogeneity reported but no firm-level attribution). Exploratory pattern\uff08symmetry ratio + industrial sector \u50be\u5411\uff09\u53ef\u5217\u9644\u9304 footnote with 'not surviving multiple-comparison correction' caveat. Codex quota exceeded, self-review covered key checks, no HIGH issues. Script: experiments/k1148_d3/k1148_d3.py, commit cef890f3.",
+    "evidence": [
+      "experiments/k1148_d3/k1148_d3.py",
+      "experiments/k1148_d3/k1148_d3_results.json",
+      "experiments/k1148_d3/README.md",
+      "experiments/k1148_d3/pass_vs_fail_features.png",
+      "experiments/k1148_d3/feature_importance.png"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-17T12:52:21.793658"
+  },
+  {
+    "item_id": "20009d04",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1148 \u884d\u751f, \u57f7\u884c: Claude agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1148_d2 US EAV binary-vs-continuous OOS panel DM cross-market validation (N=30 US stocks, IS 2010-2019 / OOS 2020-2025). **VERDICT: Scenario A_BOTH - Decisive Cross-Market OOS PASS in US**. US binary OOS DM t=-5.58 p<0.0001 95% CI [-2.55, -1.19] 19/30 individual PASS (63.3%). US continuous OOS DM t=-5.25 p<0.0001 95% CI [-2.49, -1.10] 18/30 individual PASS (60%). US binary IS pooled theta=+1.77e-4 Hessian t=+16.30. US continuous IS pooled theta=+2.25e-3 Hessian t=+15.50. vs TW (K1148_d1 + K1148): TW binary t=-1.46 p=0.076 Marginal FAIL; TW continuous t=-1.16 p=0.12 FAIL. **Paper 2 \u00a75 narrative transformation**: universal-magnitude claim \u4e0d\u518d\u88ab\u5168\u9762\u62d2\u7d55 - \u5347\u7d1a\u70ba 'identified as panel regularity with strong IS identification across TW+US; cross-market OOS validation decisive in US; TW OOS heterogeneity consistent with market-microstructure differences'. New section 5 structure should include: (a) IS pooled identification across both markets; (b) US cross-market OOS validation as main confirmatory evidence; (c) TW OOS heterogeneity subsection discussing possible mechanisms (trading rules, retail flow, market maker structure, announcement timing); (d) 31% TW individual-stock PASS rate reported as partial signal within heterogeneous market. Codex quota exceeded, self-review 6/6 checks passed. Script: experiments/k1148_d2/k1148_d2.py, commit 30142d85.",
+    "evidence": [
+      "experiments/k1148_d2/k1148_d2.py",
+      "experiments/k1148_d2/k1148_d2_results.json",
+      "experiments/k1148_d2/README.md",
+      "experiments/k1148_d2/binary_vs_continuous_us_oos.png",
+      "experiments/k1148_d2/tw_vs_us_comparison.png"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T12:54:40.626860"
+  },
+  {
+    "item_id": "c3791cd2",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1128 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1131 Continuous VIX-dependent beta via natural cubic spline (attempt to fix K1128 regime degeneracy). **VERDICT: NULL - spline is NOT a robust fix for K1128's degeneracy**. H1 global LRT(df=6) chi2=8.05 p=0.235 FAIL (tertile LRT chi2=4.39 p=0.356 similar). H2 OOS DM-HLN t=**-3.94 (spline significantly WORSE than tertile)**, mean_d=-7.58e-4 n=20914. H3 OOS AUC=0.4965 (below chance) vs tertile 0.5559 vs base 0.5543. Knots at IS 20/40/60/80%: VIX=11.05/12.50/14.25/17.30. f_abs range [-0.58, +20.43] inflated at OOS-high VIX (OOS max 82 vs IS max 37 = extrapolation explosion). Gemini review caught 1 MED (basis violated natural-boundary linearity, fixed), 3 LOW accepted. Codex quota exceeded. **Key structural insight**: K1128 narrative STAYS VALID - the IS-tertile FAIL is not a cutoffs technicality but structural (OOS regime shift breaks OFI-jump signal regardless of functional form discrete or smooth). **Error_log 2026-04-13 fix #3 (continuous spline) empirically INVALIDATED here - should be downgraded**. Remaining promising fixes from that error_log entry: #1 extend IS with prior crises (K1132 candidate), #2 expanding-window adaptive quantile (K1133 candidate), #4 rolling quantile (K1134 candidate). Script: experiments/k1131/k1131.py, commit 8135a777.",
+    "evidence": [
+      "experiments/k1131/k1131.py",
+      "experiments/k1131/k1131_results.json",
+      "experiments/k1131/README.md",
+      "experiments/k1131/spline_beta_vs_vix.png",
+      "experiments/k1131/tertile_vs_spline_comparison.png"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T13:01:31.396604"
   }
 ]
