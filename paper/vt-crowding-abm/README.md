@@ -17,3 +17,22 @@ uv run python paper/vt-crowding-abm/reproduce.py
 - Tipping point: 50-70% VT adoption
 - 10-20% adoption: safe (Sharpe ~0.50)
 - 50%+: collapse (Sharpe negative, flash crashes)
+
+## Self-Contained Index (2026-04-17)
+
+| File | Status |
+|------|--------|
+| `data_sources.md` | ✅ Pure simulation — no external data |
+| `scripts/README.md` | ✅ Reproduction guide for all ABM experiments |
+| `results/README.md` | ✅ Table → JSON source mapping |
+| `figures/` | ✅ Directory created (no figures in current draft) |
+| `experiments.md` | ✅ Full K-number index (K827–K864) |
+
+## Supporting Experiments (K Index)
+
+| K | Title | Key Result |
+|---|-------|-----------|
+| K827 | ABM VT Crowding (base) | Original simulation baseline |
+| K827v2 | ABM Sensitivity | OAT 9-parameter sweep (Table 3) |
+| K827v3 | ABM Fixed Liquidity | Main results: tipping point 50–70% |
+| K864 | Heterogeneous ABM | Microstructure effects (Table 2) |
