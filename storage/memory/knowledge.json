@@ -27326,5 +27326,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T20:24:19.223672"
+  },
+  {
+    "item_id": "e6cfb357",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered via stash-pop] K1193 Paper 3 split-sample r=0.487, CI [0.114, 0.737]. **VERDICT: DIVERGED with opposite direction \u2014 paper claims attenuation, K1193 finds STRENGTHENING**. K1193 Pearson r=0.793 vs paper 0.487 (+0.306 diff); CI [0.589, 0.919] vs [0.114, 0.737]; Spearman 0.749 vs 0.461. **Root cause**: Regime shift 2017-2026 \u2014 international ETFs (EWJ, EWU, EWA, VNQ) + safe havens (GLD, TLT) \u5728 K55 full-sample \u6709 near-zero \u6216\u8ca0 TSMOM loadings (EWA=-0.011, VNQ=-0.094, EWJ=-0.006), \u4f46 K1193 H2 (2017-2026) \u5168\u7ffb\u6b63 (EWA=+0.082, VNQ=+0.039, EWJ=+0.035). \u6d88\u9664 suppressive cross-sectional variance \u2192 \u66f4 tight \u6b63\u76f8\u95dc. **Methodology validated**: GJR-GARCH \u03b3 from 2007-2016 training, TSMOM_orth loading 2017-2026 eval, N=22, 5000 bootstrap. 6 test assets match K55 R\u00b2 benchmarks. **Paper 3 implication**: Paper Panel B r=0.487 \u7121\u6cd5\u4ee5\u7576\u524d\u8cc7\u6599 (through 2026-03-20) \u91cd\u73fe. \u5169\u9078\u4e00: (a) Update Panel B with r=0.793, narrative \u6539 'correlation STRENGTHENS in second half' (\u5be6\u969b\u66f4 robust); (b) document \u539f\u59cb data vintage \u7522\u751f 0.487. **\u5be6\u969b\u4e0a\u9019\u5c0d Paper 3 \u662f\u597d\u6d88\u606f** \u2014 \u7d50\u679c\u6bd4 paper \u539f\u672c narrative \u66f4\u5f37, \u4e0d\u662f attenuation \u800c\u662f strengthening, TSMOM \u2192 VT alpha \u95dc\u4fc2 second-half \u66f4 tight. commit fc0b3a02.",
+    "evidence": [
+      "experiments/k1193/k1193.py",
+      "experiments/k1193/k1193_results.json",
+      "experiments/k1193/k1193_vs_paper3_split_diff.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T20:28:48.031168"
   }
 ]

@@ -1817,15 +1817,16 @@
   {
     "id": "K1193_paper3_split_sample",
     "title": "K1193: Paper 3 split-sample r=0.487, p=0.021 + bootstrap CI [0.114, 0.737]",
-    "status": "pending",
+    "status": "completed",
     "priority": 3,
     "created_at": "2026-04-17T17:48:11+08:00",
-    "description": "Paper 3 STILL_NO_SOURCE: split-sample r=0.487, p=0.021 + bootstrap CI [0.114, 0.737]. K901b 只是 stub. 需 K1193 正式 split-sample cross-validation experiment.",
+    "description": "Paper 3 STILL_NO_SOURCE: split-sample r=0.487, p=0.021 + bootstrap CI [0.114, 0.737]. K901b 只是 stub. 需 K1193 正式 split-sample cross-validation experiment. [DONE commit fc0b3a02: DIVERGED opposite direction. K1193 r=0.793 vs paper 0.487 — paper claims attenuation but K1193 finds STRENGTHENING. Regime shift 2017-2026: EWA/VNQ/EWJ TSMOM loadings 翻正 消除 suppressive variance. 實際對 paper 是好消息 (更 robust), 需 update narrative.]",
     "tags": [
       "paper-3",
       "split-sample",
       "new-experiment"
-    ]
+    ],
+    "completed_at": "2026-04-17T20:28:48+08:00"
   },
   {
     "id": "Non_K_experiments_forensic_sweep",
@@ -1993,5 +1994,18 @@
       "4-agents"
     ],
     "completed_at": "2026-04-17T20:24:19+08:00"
+  },
+  {
+    "id": "Paper3_split_sample_K1193_STRENGTHENING_update",
+    "title": "Paper 3 GOOD NEWS: K1193 finds r=0.793 (STRENGTHENING) vs paper 0.487 — update Panel B narrative",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T20:28:48+08:00",
+    "description": "K1193 (fc0b3a02) 發現 Paper 3 Panel B split-sample 結果 **比原 paper narrative 更強**: r=0.793 vs paper 0.487, CI [0.589, 0.919] vs [0.114, 0.737]. 方向反轉: paper 'attenuation' → K1193 'STRENGTHENING'. Regime shift 2017-2026 消除 suppressive variance. 主線程 body edit: (1) Panel B 數字更新 r=0.793 (Pearson) / 0.749 (Spearman), CI [0.589, 0.919]; (2) Section 4 narrative 'attenuation' → 'strengthening' (實際對 paper 更有利); (3) 機制討論: second half 國際 ETFs + safe havens TSMOM loadings 翻正; (4) experiments.md 加 K1193 為 Panel B source. 此為 paper-friendly errata (結果變強).",
+    "tags": [
+      "paper-3",
+      "good-news-errata",
+      "main-thread"
+    ]
   }
 ]
