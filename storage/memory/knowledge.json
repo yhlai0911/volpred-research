@@ -27338,5 +27338,27 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T20:28:48.031168"
+  },
+  {
+    "item_id": "29e24191",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1183 Paper 2 TSMC decomposition. **VERDICT: (b) 3/3 core MATCHED**. TSMC VT Sharpe 1.1244 vs paper 1.121 MATCHED (diff 0.003). ex-TSMC weight range 0.192-0.628 (w=0.32-0.52) vs paper 0.193-0.637 MATCHED. TSMC variance R\u00b2=52.56% vs paper 52.5% MATCHED. Key: paper uses full sample 2012-2026 NOT 2019 OOS. Weight range maps TSMC historical allocation (~32% low \u2192 ~52% current). Core claim VT benefits persist across plausible TSMC weights \u5b8c\u5168 confirmed. commit c0e45ba4.",
+    "evidence": [
+      "experiments/k1183/k1183.py",
+      "experiments/k1183/k1183_results.json"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T20:30:28.888462"
+  },
+  {
+    "item_id": "da5f5313",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1184 Paper 2 Hansen skew-t params. **VERDICT: (a) MATCHED \u2014 \u03b7=4.97 vs 5.2, \u03bb=-0.059 vs -0.05**. GJR-GARCH(1,1) full sample 0050.TW 2009-2026 n=4216 + Hansen (1994) skew-t MLE on standardized residuals. \u03b7 \u8aa4\u5dee 4.5% (paper round \u5230 5.2), \u03bb \u7d55\u5c0d\u5dee 0.009 \u53ef\u5ffd\u7565. \u5c0d\u7a31 Student-t MLE df=4.97 \u8207 paper \u56fa\u5b9a df=5 \u4e00\u81f4. **K1100c methodology \u4e00\u81f4**: K1100c \u7528\u540c Hansen (1994) PDF \u96d9\u8b8a\u91cf copula \u908a\u969b, \u03bd\u22485-8 \u8207 K1184 \u03b7\u22485 \u543b\u5408. VaR violation 20 vs paper 8 \u662f independent DIV-2 (CF vs Student-t label \u932f\u8aa4, \u5df2 audit \u8a18\u9304), \u4e0d\u5f71\u97ff skew-t \u53c3\u6578\u9a57\u8b49. Paper 2 skew-t SOURCED. commit a2df89da.",
+    "evidence": [
+      "experiments/k1184/k1184.py",
+      "experiments/k1184/k1184_results.json"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T20:30:29.020137"
   }
 ]
