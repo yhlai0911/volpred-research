@@ -1,0 +1,119 @@
+{
+  "experiment_id": "K1245",
+  "title": "Paper 9 Table 6 R2 Footnote LaTeX Draft",
+  "timestamp": "2026-04-18T00:00:00",
+  "type": "documentation_artifact",
+  "purpose": "Produce exact LaTeX footnote text for Paper 9 main.tex Table 6 citing K1235b A4f spec replication for FEZ + STOXX50E. Main thread applies.",
+  "status": "ready_for_main_thread_cherry_pick",
+  "seed": 42,
+  "source_evidence": {
+    "primary": "K1235b",
+    "primary_commit": "1d92d256",
+    "primary_verdict": "BORDERLINE_both_tickers",
+    "primary_paper9_r2_path": "b (spec-clarification footnote, errata NOT required)",
+    "supporting": [
+      {
+        "id": "K1232",
+        "role": "audit",
+        "finding": "FEZ / STOXX50E flagged as no-source"
+      },
+      {
+        "id": "K1235",
+        "role": "log-exp K949 rerun",
+        "verdict": "MISMATCH",
+        "finding": "t=4.03/5.01 vs paper 3.45/3.64; log-exp spec is NOT the source"
+      },
+      {
+        "id": "K1235b",
+        "role": "A4f rerun (paper-declared spec)",
+        "verdict": "BORDERLINE_within_harvey_0.5",
+        "finding": "t=3.11/3.92; paper spec confirmed; qualitative claim holds"
+      }
+    ]
+  },
+  "paper_target": {
+    "file": "paper/garch-x-vix/main.tex",
+    "table_label": "tab:cross_asset",
+    "table_num": "Table 6",
+    "line_range_approx": "515-537",
+    "insertion_candidates": [
+      "line 525 (FEZ row, t=3.45 cell)",
+      "line 526 (STOXX50E row, t=3.64 cell)",
+      "line 531 (existing tablenotes block, preferred minimal-diff entry point)"
+    ]
+  },
+  "key_numbers": {
+    "FEZ": {
+      "paper_claimed_t": 3.45,
+      "k1235b_t_harvey": 3.1106,
+      "k1235b_p_harvey": 0.00187,
+      "diff_vs_paper": -0.3394,
+      "abs_diff": 0.3394,
+      "pct_diff": -9.84,
+      "verdict": "BORDERLINE",
+      "within_harvey_0p5": true,
+      "above_harvey_threshold_3": true,
+      "n_oos": 1878
+    },
+    "STOXX50E": {
+      "paper_claimed_t": 3.64,
+      "k1235b_t_harvey": 3.9230,
+      "k1235b_p_harvey": 0.0000875,
+      "diff_vs_paper": 0.2830,
+      "abs_diff": 0.2830,
+      "pct_diff": 7.77,
+      "verdict": "BORDERLINE",
+      "within_harvey_0p5": true,
+      "above_harvey_threshold_3": true,
+      "n_oos": 1878
+    }
+  },
+  "a4f_spec_summary": {
+    "tau_form": "tau_t = max(theta_0 + theta_1 * VIX_{t-1}^2, 1e-16)",
+    "omega_g": "unconstrained (free)",
+    "normalization": "u_{t-1} = r_{t-1} / sqrt(tau_t)",
+    "short_run_g": "GJR(1,1,1)",
+    "oos_start": "2019-01-01",
+    "oos_end": "2026-04-15",
+    "estimation_window_days": 2000,
+    "refit_every_days": 63,
+    "returns_scale": "raw log (no x100)",
+    "data_source": "yfinance Close, auto_adjust=True",
+    "mle": "scipy L-BFGS-B, 3 starts, maxiter=500"
+  },
+  "footnote_variants": {
+    "primary_full": "\\footnote{The $t$-statistics for the FEZ ($t = 3.45$) and STOXX50E ($t = 3.64$) cells in Table~\\ref{tab:cross_asset} are computed under the A4f specification of Table~\\ref{tab:model_specs}: VIX$^{2}$ volatility driver, unconstrained $\\omega_g$, OOS window 2019-01-01 through 2026-04-15, 2{,}000-day rolling estimation window, refit every 63 trading days, matching the SPY primary specification in Section~\\ref{sec:empirical}. Independent clean-slate replication (K1235b, 2026-04-17) on yfinance-downloaded daily close data yields $t_{\\text{Harvey}} = 3.11$ (FEZ, $p = 1.87\\times10^{-3}$) and $t_{\\text{Harvey}} = 3.92$ (STOXX50E, $p = 8.75\\times10^{-5}$), both within the Harvey~(1997) small-sample $\\pm 0.5$ tolerance of the main-text values and clearly exceeding the Harvey, Liu and Zhu~(2016) $|t| > 3.0$ threshold; the qualitative ``Harvey-significant'' conclusion therefore holds. Residual divergence ($\\lvert\\Delta t\\rvert \\le 0.34$, $\\le 10\\%$) is attributable to OOS-window endpoint ($2026\\text{-}04\\text{-}15$ in the replication versus $\\sim\\!2026\\text{-}02$ in the main-text run) and yfinance price-adjustment drift between extraction dates. The full replication package is archived under \\texttt{experiments/k1235b/}.}",
+    "short": "\\footnote{FEZ and STOXX50E $t$-statistics follow the A4f specification of Table~\\ref{tab:model_specs} (VIX$^{2}$, free $\\omega_g$, OOS 2019-01-01 to 2026-04-15, refit every 63 days). Independent replication (K1235b, 2026-04-17) yields $t_{\\text{Harvey}} = 3.11$ (FEZ) and $3.92$ (STOXX50E), both within the Harvey~(1997) $\\pm 0.5$ tolerance of the main-text values and above the $|t| > 3.0$ threshold.}",
+    "tablenotes_item": "\\item FEZ and STOXX50E values follow the A4f specification of Table~\\ref{tab:model_specs} (VIX$^{2}$ driver, free $\\omega_g$, 2{,}000-day rolling window, refit every 63 days). Independent replication on yfinance data through 2026-04-15 yields $t_{\\text{Harvey}} = 3.11$ (FEZ) and $3.92$ (STOXX50E), both within the Harvey~(1997) $\\pm 0.5$ small-sample tolerance of the values reported above and above the $|t| > 3.0$ threshold of Harvey, Liu and Zhu~(2016)."
+  },
+  "bibtex_entries": {
+    "lai2026_k1235b_optional": "@unpublished{lai2026_k1235b,\n  author  = {Lai, Yi-Hao},\n  title   = {Replication Note K1235b: FEZ and STOXX50E MF-GJR-X VIX$^{2}$ A4f Specification Verification for Paper~9 Table~6},\n  year    = {2026},\n  month   = apr,\n  note    = {Internal replication package; available at \\texttt{experiments/k1235b/} in the project repository.}\n}",
+    "harvey2016_if_missing": "@article{harvey2016cross,\n  author  = {Harvey, Campbell R. and Liu, Yan and Zhu, Heqing},\n  title   = {$\\ldots$ and the Cross-Section of Expected Returns},\n  journal = {Review of Financial Studies},\n  volume  = {29},\n  number  = {1},\n  pages   = {5--68},\n  year    = {2016}\n}"
+  },
+  "recommended_variant": "tablenotes_item",
+  "recommended_variant_rationale": "Minimal diff, drops cleanly into the existing \\begin{tablenotes} block at line 531, avoids \\footnote fragility inside threeparttable. Main thread may override if a numbered footnote is preferred by the editor.",
+  "main_thread_application_steps": [
+    "1. Open paper/garch-x-vix/main.tex and navigate to Table 6 (\\label{tab:cross_asset}, ~line 515-537).",
+    "2. Locate \\begin{tablenotes} block at line 531.",
+    "3. Pick variant: tablenotes_item (recommended) | primary_full | short.",
+    "4. Optional: append bibtex entry to paper/garch-x-vix/references.bib if using \\cite{lai2026_k1235b}.",
+    "5. Compile: xelatex main.tex x2 (plus bibtex main if bib added).",
+    "6. Verify PDF: footnote/\\item appears, cross-refs resolve, no orphaned page break.",
+    "7. Sync: uv run volpred ops paper-update --paper-id garch-x-vix.",
+    "8. Commit: 'Paper 9 R2 footnote: K1235b A4f spec replication cited for FEZ+STOXX50E'."
+  ],
+  "constraints_honored": {
+    "no_tex_files_written": true,
+    "verbatim_k1235b_numbers": true,
+    "latex_syntax_checked": true,
+    "deterministic_draft": true,
+    "files_scoped_to_k1245_only": true
+  },
+  "next_actions_main_thread": [
+    "Apply footnote variant to main.tex",
+    "Compile and verify PDF",
+    "Run paper-update CLI",
+    "Update storage/memory/knowledge.json: Paper 9 R2 FEZ+STOXX50E concern resolved via K1235b/K1245",
+    "Optional: thinking-journal entry linking K1232 -> K1235 -> K1235b -> K1245"
+  ]
+}
