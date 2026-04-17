@@ -1983,14 +1983,15 @@
   {
     "id": "Rate_limit_retry_2026-04-17",
     "title": "Rate limit 撞上 8pm reset: retry K1187 Table 7, K1181 VIXTWN, K1193 split, K1190 sector",
-    "status": "partially_completed",
+    "status": "completed",
     "priority": 4,
     "created_at": "2026-04-17T20:01:59+08:00",
-    "description": "2026-04-17 晚間 4 agents 全撞 rate limit reset 8pm Asia/Taipei, 無產出: K1187 Paper 1 Table 7 5-asset, K1181 Paper 2 VIXTWN stats, K1193 Paper 3 split-sample, K1190 Paper 3 sector 11 SPDR. Worktrees 清理完畢. 8pm reset 後重啟. | 2/4 complete: K1187 (commit 5efb638e) + K1190 (72187f6d). Still running: K1193 split-sample, K1181 VIXTWN.",
+    "description": "2026-04-17 晚間 4 agents 全撞 rate limit reset 8pm Asia/Taipei, 無產出: K1187 Paper 1 Table 7 5-asset, K1181 Paper 2 VIXTWN stats, K1193 Paper 3 split-sample, K1190 Paper 3 sector 11 SPDR. Worktrees 清理完畢. 8pm reset 後重啟. | 2/4 complete: K1187 (commit 5efb638e) + K1190 (72187f6d). Still running: K1193 split-sample, K1181 VIXTWN. | 4/4 complete: K1187 (5efb638e), K1190 (72187f6d), K1182 (2ad0ef7a), K1181 (bd5f87d4). All rate-limit retries done.",
     "tags": [
       "rate-limit",
       "retry",
       "4-agents"
-    ]
+    ],
+    "completed_at": "2026-04-17T20:24:19+08:00"
   }
 ]
