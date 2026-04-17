@@ -27742,5 +27742,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-18T02:50:33.602910"
+  },
+  {
+    "item_id": "5cf52ce6",
+    "category": "K1216",
+    "content": "K1216 WIDESPREAD_FRAGILITY \u2014 3/3 EM markets (BR/IN/MX) all stuck in secondary local minima, mirroring K1213 AU pathology. Per-market refined best-LL vs K1168/K1172 canonical: BR \u03b8_rel 1.887->2.691 LR=+145.66; IN 1.170->3.077 LR=+410.76; MX 1.202->1.845 LR=+347.27. All >> \u03c7\u00b2(1)=3.84 decisive rejection. NM polish from L-BFGS-B 100-start best refines +73 to +154 LL units; HAC t-stats remain significant (BR 3.24 / IN 6.58 / MX 3.74) effect sign robust only magnitude shifts. DE hit penalty wall in all markets (conservative exclusion). Revised Spearman trajectory: K1172 baseline N=12 +0.441 p=0.152 -> K1216-corrected EM N=12 +0.364 p=0.245 -> K1216+K1213 AU N=13 +0.341 p=0.255. Correcting EM pools pushes theta_rel UP (4-10x developed-market ladder) widening off-ladder residual so rho DECAYS further (not restores). Cross-market verdict WIDESPREAD_FRAGILITY. Paper 2 \u00a75 implication: MAJOR trajectory revision required. K1168/K1172 pooled numbers rejected at LR p<<1e-30. Institutional-ownership proxy is LESS predictive than originally claimed. K1213 AU fragility NOT isolated \u2014 same pathology affects ALL EM pools under shared-MIDAS + stock-FE-GJR spec. Recommended follow-ups: K1216b (CH/ID multistart), K1216c (developed-market US/EU/JP/TW pools).",
+    "evidence": [
+      "experiments/k1216/k1216_results.json",
+      "commit cbc852ae"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-18T03:13:18.714787"
   }
 ]

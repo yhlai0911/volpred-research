@@ -1117,5 +1117,44 @@
       "Paper2",
       "AU-overturned"
     ]
+  },
+  {
+    "id": "K1216b_CH_ID_multistart",
+    "title": "K1216b: CH/ID multistart completion (EM widespread fragility verification)",
+    "priority": 4,
+    "description": "Complete EM fragility audit: K1216 covered BR/IN/MX. CH (K1168) + ID (K1172) remaining. Same 100-start L-BFGS-B+NM+DE pattern. If also fragile → Paper 2 §5 certain 6-market-EM revision.",
+    "status": "pending",
+    "created_at": "2026-04-18T03:13:18.883452",
+    "tags": [
+      "K1216-followup",
+      "Paper2",
+      "numerical-fragility"
+    ]
+  },
+  {
+    "id": "K1216c_developed_multistart",
+    "title": "K1216c: Developed markets (US/EU/JP/TW) multistart sanity check",
+    "priority": 4,
+    "description": "If K1216 WIDESPREAD_FRAGILITY extends to DEV markets → Paper 2 §5 methodology root-cause (MLE design) not EM-specific. Apply 100-start to US/EU/JP/TW pools for full paper revision scope.",
+    "status": "pending",
+    "created_at": "2026-04-18T03:13:18.883460",
+    "tags": [
+      "K1216-followup",
+      "Paper2",
+      "numerical-fragility"
+    ]
+  },
+  {
+    "id": "Paper2_section5_major_revision",
+    "title": "Paper 2 §5 MAJOR trajectory revision (K1215 supersede): integrate K1216 WIDESPREAD_FRAGILITY",
+    "priority": 4,
+    "description": "K1215 K1213 AU-only revision SUPERSEDED by K1216 EM widespread fragility. Whole trajectory K1165-K1172 needs rebuild. Main-thread task, blocked until K1216b+c complete for scope.",
+    "status": "pending",
+    "created_at": "2026-04-18T03:13:18.883461",
+    "tags": [
+      "K1216-followup",
+      "Paper2",
+      "numerical-fragility"
+    ]
   }
 ]
