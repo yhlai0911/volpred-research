@@ -1,0 +1,275 @@
+{
+  "report_type": "daily",
+  "source": "claude_code_jsonl",
+  "date": "2026-04-17",
+  "week_range": "2026-04-17 → 2026-04-24",
+  "totals": {
+    "input_tokens": 9637,
+    "output_tokens": 433138,
+    "cache_read_tokens": 74818150,
+    "cache_create_tokens": 8161414,
+    "billable_total": 8604189,
+    "assistant_messages": 773,
+    "unique_sessions": 13,
+    "estimated_cost_usd": 291.4507
+  },
+  "by_model": {
+    "claude-opus-4-7": {
+      "input_tokens": 9517,
+      "output_tokens": 426635,
+      "cache_read_tokens": 72439144,
+      "cache_create_tokens": 8015422,
+      "messages": 718,
+      "estimated_cost_usd": 291.0883
+    },
+    "<synthetic>": {
+      "input_tokens": 0,
+      "output_tokens": 0,
+      "cache_read_tokens": 0,
+      "cache_create_tokens": 0,
+      "messages": 1,
+      "estimated_cost_usd": 0.0
+    },
+    "claude-haiku-4-5-20251001": {
+      "input_tokens": 120,
+      "output_tokens": 6503,
+      "cache_read_tokens": 2379006,
+      "cache_create_tokens": 145992,
+      "messages": 54,
+      "estimated_cost_usd": 0.3624
+    }
+  },
+  "by_category": {
+    "bash_other": {
+      "input_tokens": 1836,
+      "output_tokens": 69379,
+      "cache_read_tokens": 17015167,
+      "cache_create_tokens": 1787938,
+      "messages": 188,
+      "billable_total": 1859153,
+      "estimated_cost_usd": 64.2776,
+      "emoji": "💭",
+      "description": "其他 Bash 操作"
+    },
+    "investigation": {
+      "input_tokens": 530,
+      "output_tokens": 47063,
+      "cache_read_tokens": 13244359,
+      "cache_create_tokens": 1985061,
+      "messages": 216,
+      "billable_total": 2032654,
+      "estimated_cost_usd": 60.6241,
+      "emoji": "🔍",
+      "description": "閱讀 / 搜尋檔案"
+    },
+    "text_only": {
+      "input_tokens": 403,
+      "output_tokens": 111684,
+      "cache_read_tokens": 18440032,
+      "cache_create_tokens": 1252571,
+      "messages": 119,
+      "billable_total": 1364658,
+      "estimated_cost_usd": 59.5281,
+      "emoji": "💬",
+      "description": "純文字回覆（無工具）"
+    },
+    "agent_delegation": {
+      "input_tokens": 3464,
+      "output_tokens": 20564,
+      "cache_read_tokens": 12397935,
+      "cache_create_tokens": 1705131,
+      "messages": 145,
+      "billable_total": 1729159,
+      "estimated_cost_usd": 52.1624,
+      "emoji": "🤖",
+      "description": "Agent 派送（非實驗）"
+    },
+    "worktree_merge": {
+      "input_tokens": 39,
+      "output_tokens": 3510,
+      "cache_read_tokens": 1373121,
+      "cache_create_tokens": 1033442,
+      "messages": 10,
+      "billable_total": 1036991,
+      "estimated_cost_usd": 21.7006,
+      "emoji": "🔀",
+      "description": "Worktree 合併與分支管理"
+    },
+    "experiment": {
+      "input_tokens": 34,
+      "output_tokens": 133513,
+      "cache_read_tokens": 5053640,
+      "cache_create_tokens": 51924,
+      "messages": 34,
+      "billable_total": 185471,
+      "estimated_cost_usd": 18.568,
+      "emoji": "🔬",
+      "description": "研究實驗（Agent 派送 K\\d+ / experiments/ 編輯）"
+    },
+    "tool_setup": {
+      "input_tokens": 14,
+      "output_tokens": 1637,
+      "cache_read_tokens": 1463614,
+      "cache_create_tokens": 118997,
+      "messages": 9,
+      "billable_total": 120648,
+      "estimated_cost_usd": 4.5496,
+      "emoji": "🛠️",
+      "description": "ToolSearch 載入工具"
+    },
+    "file_edit": {
+      "input_tokens": 14,
+      "output_tokens": 30639,
+      "cache_read_tokens": 1247133,
+      "cache_create_tokens": 16864,
+      "messages": 9,
+      "billable_total": 47517,
+      "estimated_cost_usd": 4.485,
+      "emoji": "📄",
+      "description": "其他檔案編輯"
+    },
+    "web_research": {
+      "input_tokens": 18,
+      "output_tokens": 412,
+      "cache_read_tokens": 295358,
+      "cache_create_tokens": 128906,
+      "messages": 8,
+      "billable_total": 129336,
+      "estimated_cost_usd": 2.8912,
+      "emoji": "🌐",
+      "description": "WebSearch / WebFetch"
+    },
+    "token_report": {
+      "input_tokens": 11,
+      "output_tokens": 1057,
+      "cache_read_tokens": 1284566,
+      "cache_create_tokens": 3789,
+      "messages": 6,
+      "billable_total": 4857,
+      "estimated_cost_usd": 2.0773,
+      "emoji": "📈",
+      "description": "Token 用量報告"
+    },
+    "git_sync": {
+      "input_tokens": 7,
+      "output_tokens": 3039,
+      "cache_read_tokens": 956902,
+      "cache_create_tokens": 6701,
+      "messages": 7,
+      "billable_total": 9747,
+      "estimated_cost_usd": 1.789,
+      "emoji": "🔄",
+      "description": "Git commit / pull / push"
+    },
+    "platform_ops": {
+      "input_tokens": 11,
+      "output_tokens": 2691,
+      "cache_read_tokens": 446314,
+      "cache_create_tokens": 6749,
+      "messages": 6,
+      "billable_total": 9451,
+      "estimated_cost_usd": 0.998,
+      "emoji": "🛡️",
+      "description": "平台運維（Supabase sync / daily_update）"
+    },
+    "scheduling": {
+      "input_tokens": 12,
+      "output_tokens": 110,
+      "cache_read_tokens": 71393,
+      "cache_create_tokens": 38652,
+      "messages": 2,
+      "billable_total": 38774,
+      "estimated_cost_usd": 0.8402,
+      "emoji": "⏰",
+      "description": "Cron / Monitor 排程"
+    },
+    "chart_generation": {
+      "input_tokens": 1563,
+      "output_tokens": 3391,
+      "cache_read_tokens": 270101,
+      "cache_create_tokens": 7257,
+      "messages": 5,
+      "billable_total": 12211,
+      "estimated_cost_usd": 0.819,
+      "emoji": "📊",
+      "description": "圖表生成（matplotlib / upload_chart）"
+    },
+    "script_dev": {
+      "input_tokens": 2,
+      "output_tokens": 1417,
+      "cache_read_tokens": 404250,
+      "cache_create_tokens": 1621,
+      "messages": 2,
+      "billable_total": 3040,
+      "estimated_cost_usd": 0.7431,
+      "emoji": "💻",
+      "description": "腳本開發（scripts/ *.py）"
+    },
+    "knowledge_index": {
+      "input_tokens": 1669,
+      "output_tokens": 790,
+      "cache_read_tokens": 240477,
+      "cache_create_tokens": 5585,
+      "messages": 2,
+      "billable_total": 8044,
+      "estimated_cost_usd": 0.5497,
+      "emoji": "📇",
+      "description": "知識索引更新"
+    },
+    "article_writing": {
+      "input_tokens": 3,
+      "output_tokens": 744,
+      "cache_read_tokens": 195212,
+      "cache_create_tokens": 6906,
+      "messages": 3,
+      "billable_total": 7653,
+      "estimated_cost_usd": 0.4782,
+      "emoji": "✍️",
+      "description": "文章撰寫/發佈（publish-milestone / mile_*）"
+    },
+    "research_planning": {
+      "input_tokens": 1,
+      "output_tokens": 1310,
+      "cache_read_tokens": 195072,
+      "cache_create_tokens": 3085,
+      "messages": 1,
+      "billable_total": 4396,
+      "estimated_cost_usd": 0.4487,
+      "emoji": "📋",
+      "description": "研究計劃（research_program.md / CLAUDE.md）"
+    },
+    "member_qa": {
+      "input_tokens": 6,
+      "output_tokens": 188,
+      "cache_read_tokens": 223504,
+      "cache_create_tokens": 235,
+      "messages": 1,
+      "billable_total": 429,
+      "estimated_cost_usd": 0.3539,
+      "emoji": "❓",
+      "description": "會員問答研究"
+    }
+  },
+  "git_commits_context": [
+    {
+      "sha": "cef890f3",
+      "message": "K1148_d3: TW OOS PASS stock characteristics (9 vs 20 feature comparison)"
+    },
+    {
+      "sha": "aa9d8c98",
+      "message": "Relax idle-driven policy to slot-aware concurrent execution (M1 Max 10-core) + K"
+    },
+    {
+      "sha": "8dd6fa37",
+      "message": "K1148_d1: K1145 binary EAV OOS panel DM retest (Scenario B: Marginal FAIL)"
+    },
+    {
+      "sha": "a5d152ff",
+      "message": "K1148: EAV continuous surprise refinement (experiments-only)"
+    },
+    {
+      "sha": "f5edd6d2",
+      "message": "Fix knowledge.json stray `]}` corruption + post-write sanity guard + TSMC mile_f"
+    }
+  ]
+}
