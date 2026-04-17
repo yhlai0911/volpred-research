@@ -1063,7 +1063,7 @@
     "status": "pending",
     "priority": 4,
     "created_at": "2026-04-17T16:04:03+08:00",
-    "description": "用戶 2026-04-17 強化規則：『所有論文中的腳本和資料 都要能直接跑出最新的論文內結果』。需對所有 10 個 paper/ 做 reproducibility audit：(1) 對每個 paper 跑其 scripts/ 或 experiments/kXXX 取得最新 output; (2) 對比 main.tex / main_v2.tex body 內寫的數字（Table, Figure, inline 結果）; (3) 列 diff report：per-paper (matched / approx / divergent) 數字清單; (4) divergent cases 走三選一：修腳本 / 修論文 / 明記 errata. 特別注意：- Paper 4 (vix-sufficiency v2): 剛整合 9 個新實驗，需確認 main_v2.tex 的數字對得上 K1135/K1137/K1138/K1139/K1143 JSON; - Paper 5 (volatility-absorption): 承 VolAbsorption_missing_scripts_recovery 結果; - Paper 9 (garch-x-vix, submitted): 確認投稿版的數字當前腳本能重現; - Paper 2/3/6 等其他 paper 依序. **Blocker if any paper's script cannot reproduce its own paper numbers**. | 2026-04-17 progress: Paper 1 (commit a9f25e9f, 48% match, 3 follow-ups), Paper 9 (commit 4e84d37f, 55.5% match NEEDS-FIX submitted-paper 4 blockers). Paper 2/3 audit 跑中. | Paper 2 done commit 8b43604a: 17% matched NEEDS-FIX 2 BLOCKERS (Table 3 VT 2010-2026 無實驗, Table 4 TZ momentum 全無 JSON 這是第三貢獻核心). | Paper 3 done commit 0fa27397: 77% matched (best), 3 BLOCKERS (TSMOM hedge Table 3, Table 5 13-market 缺, 1.4% 數字不明). 覆蓋率 4/10 papers.",
+    "description": "用戶 2026-04-17 強化規則：『所有論文中的腳本和資料 都要能直接跑出最新的論文內結果』。需對所有 10 個 paper/ 做 reproducibility audit：(1) 對每個 paper 跑其 scripts/ 或 experiments/kXXX 取得最新 output; (2) 對比 main.tex / main_v2.tex body 內寫的數字（Table, Figure, inline 結果）; (3) 列 diff report：per-paper (matched / approx / divergent) 數字清單; (4) divergent cases 走三選一：修腳本 / 修論文 / 明記 errata. 特別注意：- Paper 4 (vix-sufficiency v2): 剛整合 9 個新實驗，需確認 main_v2.tex 的數字對得上 K1135/K1137/K1138/K1139/K1143 JSON; - Paper 5 (volatility-absorption): 承 VolAbsorption_missing_scripts_recovery 結果; - Paper 9 (garch-x-vix, submitted): 確認投稿版的數字當前腳本能重現; - Paper 2/3/6 等其他 paper 依序. **Blocker if any paper's script cannot reproduce its own paper numbers**. | 2026-04-17 progress: Paper 1 (commit a9f25e9f, 48% match, 3 follow-ups), Paper 9 (commit 4e84d37f, 55.5% match NEEDS-FIX submitted-paper 4 blockers). Paper 2/3 audit 跑中. | Paper 2 done commit 8b43604a: 17% matched NEEDS-FIX 2 BLOCKERS (Table 3 VT 2010-2026 無實驗, Table 4 TZ momentum 全無 JSON 這是第三貢獻核心). | Paper 3 done commit 0fa27397: 77% matched (best), 3 BLOCKERS (TSMOM hedge Table 3, Table 5 13-market 缺, 1.4% 數字不明). 覆蓋率 4/10 papers. | Paper 4 done commit a772592a: 77% matched 5 MAJOR/MEDIUM divergent + body stale YES. DIV-1 CRITICAL: 41.8% QLIKE 方向反了 (research integrity). 覆蓋率 5/10 papers.",
     "tags": [
       "paper",
       "reproducibility",
@@ -1377,6 +1377,77 @@
       "paper-2",
       "taiwan-vt",
       "documentation-errata",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_DIV1_41pct_direction_CRITICAL",
+    "title": "Paper 4 CRITICAL: '41.8% QLIKE improvement' Abstract 方向錯 (research integrity)",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "Paper 4 audit (a772592a) 發現 Abstract L98 + §8.2 L703 '5-min HAR-RV 比 daily 改善 41.8% QLIKE' **方向完全反了**. K745 improvement_pct=-41.8 實際 daily HAR-ABS (QLIKE=0.077) 比 5-min HAR-RV (QLIKE=0.109) 好 41.8%. K745 N=37 PRELIMINARY; K1139 未執行. **主線程決策**: (a) 跑 K1139 完整 5-min RV target 實驗對比, 看是否能改變方向; (b) **立即 errata** — 修 abstract + §8.2 將 direction 反轉，承認 5-min 不優於 daily 或至少 preliminary N=37; (c) 保留 pending 待 K1139. **research integrity — 必須在下次 submission commit 前解**.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "research-integrity",
+      "critical",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_DIV3_Table3_Sharpe_ranking",
+    "title": "Paper 4: Table 3 BH 50/50 Sharpe 0.947 vs K731 0.827 — 可能 ranking 翻轉",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "Paper 4 audit: Table 3 BH 50/50 Sharpe paper 0.947 vs K731 (2008-2026 canonical) 0.827. 12/VIX Sharpe 0.870 一致. 若 K731 canonical → 12/VIX (0.870) > BH (0.827) 為 ranking 翻轉, **影響 Paper 4 核心敘事 'BH 打不贏' 可能變成 'BH 打 平但 12/VIX 更好'**. 主線程 forensic: (a) K731 的 2008-2026 是否為 paper 設定 (可能 paper 用不同 window); (b) 確認 Table 3 來源 K, 若非 K731 → 找正確 K; (c) 若 K731 canonical → errata Table 3 + 重寫相關 narrative.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "ranking-flip-risk",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_DIV4_Table6_era_Harvey_passes",
+    "title": "Paper 4 MAJOR: Table 6 era-specific Harvey pass 隱藏 + incr R² 低估 10-186×",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "Paper 4 audit: Table 6 era 數字與 K752 不符. K752 Era3 GFC 3 訊號過 Harvey (t=-3.15, -6.51, +7.6), Era5 COVID 1 過 (t=+9.3). Paper Table 6 顯示 0/5 Harvey pass, 數字小 10-186×. **Paper '全 null' universal claim 實際 era-specific 有顯著**. 影響核心 contribution. 主線程 decision: (a) 修腳本重建 Table 6 (K752 是 canonical?); (b) paper errata 承認 era-specific Harvey passes, 弱化 universal claim; (c) errata pending.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "era-specific",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_DIV2_CV_0.33_to_0.37",
+    "title": "Paper 4 MEDIUM: CV=0.33 應為 0.37 (全 paper 6 處 rounding/typo)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "K752 mean=0.446 std=0.165 CV=0.370, paper abstract+Table 5+§8+conclusion 共 6 處寫 0.33. 可能 typo 或 rounding 錯誤. 主線程 body edit 全改 0.33 → 0.37.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "typo-fix",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_body_integration_9_new_experiments",
+    "title": "Paper 4 body stale: 9 新實驗未整合 main_v2.tex (integration_plan_v2 未套用)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:09:27+08:00",
+    "description": "Paper 4 audit 確認 K1116/K1117/K1118/K1116b/K1121/K1098/K1129/K1136/K1138 皆未整合到 main_v2.tex. K1135/K1137/K1139/K1141/K1143/K1123 agent 找不到 (但實驗 dir 存在, 可能 path issue). integration_plan_v2.md 存在但完全未套用. 主線程 body rewrite 任務: 先完成 critical errata (DIV-1/3/4), 再整合 9 個新實驗 + K1141 table/heatmap 到 §4. narrative state 已設 decision_made_awaiting_body_rewrite.",
+    "tags": [
+      "paper-4",
+      "vix-sufficiency",
+      "body-rewrite",
       "main-thread"
     ]
   }

@@ -27028,5 +27028,16 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T17:05:32.404954"
+  },
+  {
+    "item_id": "447a263d",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Paper 4 (vix-sufficiency) reproducibility audit. **Score: 77% matched (63/82), \u53ef\u8ffd\u6eaf\u7387 96%. Body stale YES \u2014 9 \u65b0\u5be6\u9a57\u672a\u6574\u5408\u5230 main_v2.tex**. **5 MAJOR/MEDIUM Divergent**: **DIV-1 MAJOR CRITICAL**: '41.8% QLIKE improvement' **\u65b9\u5411\u5b8c\u5168\u53cd\u4e86**. Abstract L98 + \u00a78.2 L703 \u8072\u7a31 5-min HAR-RV \u6bd4 daily \u6539\u5584 41.8% QLIKE; \u4f46 K745 improvement_pct=-41.8 \u5be6\u969b daily HAR-ABS (QLIKE=0.077) \u6bd4 5-min HAR-RV (QLIKE=0.109) \u597d 41.8%, \u65b9\u5411\u5b8c\u5168\u76f8\u53cd. \u4e14 K745 N=37 PRELIMINARY. K1139 \u5c1a\u672a\u57f7\u884c \u2014 \u8ad6\u6587\u6838\u5fc3\u6578\u5b57 sign-flip error, research integrity issue. **DIV-4 MAJOR**: Table 6 era-specific incr R\u00b2 \u4f4e\u4f30 10-186\u00d7, Harvey pass \u96b1\u85cf. K752 Era3 GFC \u6709 3 \u8a0a\u865f\u904e Harvey (t=-3.15, -6.51, +7.6), Era5 COVID 1 \u500b (t=+9.3); paper Table 6 \u5168\u986f\u793a 0/5 pass, \u6578\u5b57\u5c0f 10-186\u00d7. **DIV-2 MEDIUM**: CV=0.33 \u61c9\u70ba 0.37 (K752 mean=0.446 std=0.165 CV=0.370). Paper abstract+Table 5+\u00a78+conclusion 6 \u8655\u932f\u8aa4. **DIV-3 MEDIUM**: Table 3 BH 50/50 Sharpe paper 0.947 vs K731 0.827. \u82e5 K731 canonical \u2192 12/VIX (0.870) \u53cd\u800c > BH, **ranking \u7ffb\u8f49\u5f71\u97ff\u6838\u5fc3\u6558\u4e8b**. **DIV-8 MEDIUM**: K1138 MIXED result (SPY t=4.18, QQQ t=4.22 Harvey pass with Parkinson) \u672a\u7d0d\u5165 \u00a78.2. **Body integration**: K1116/K1117/K1118/K1116b/K1121/K1098/K1129/K1136/K1138 \u7686\u672a\u6574\u5408; K1135/K1137/K1139/K1141/K1143/K1123 \u627e\u4e0d\u5230\uff08\u4f46\u4ed6\u5011\u6709\u5be6\u9a57 dir, agent \u53ef\u80fd didn't find\uff09; integration_plan_v2.md \u5b8c\u5168\u672a\u5957\u7528. **\u52a0\u5165 Paper 1/2/3/4/9 research-integrity pattern**: Paper 1 Table 3 vs 8, Paper 2 Sharpe \u7b97\u8853\u932f, Paper 4 41.8% \u65b9\u5411\u932f, Paper 3 1.4% \u6578\u5b57\u4f86\u6e90\u4e0d\u660e \u2014 **\u591a\u500b submitted/active paper \u6709\u6578\u5b57\u932f\u8aa4**. commit a772592a. Output: paper/vix-sufficiency/reproducibility_audit/.",
+    "evidence": [
+      "paper/vix-sufficiency/reproducibility_audit/diff_report.md",
+      "paper/vix-sufficiency/reproducibility_audit/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:08:59.141127"
   }
 ]
