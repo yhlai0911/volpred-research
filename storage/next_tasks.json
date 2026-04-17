@@ -1116,15 +1116,16 @@
   {
     "id": "K903_paper1_2010_start_canonical_table",
     "title": "K903: Paper 1 Tables 2/3 用 2010-2025 sample canonical replication",
-    "status": "pending",
+    "status": "resolved_divergent_awaiting_decision",
     "priority": 3,
     "created_at": "2026-04-17T16:19:18+08:00",
-    "description": "Paper 1 audit 發現 K902 用 2017-2025 sample, paper 用 2010-2025 extended window. K903 建立 canonical replication: 重跑 K902 setup 但 data_start=2010-01-01, 產出 canonical Tables 2 & 3 of Paper 1 with absolute QLIKE numbers 對齊 main.tex. 目標: paper scripts/K903 能直接 reproduce Tables 2 & 3 (rtol 0.01). 若 reproduced 數字 ≠ paper 現寫數字 → 主線程走三選一決策.",
+    "description": "Paper 1 audit 發現 K902 用 2017-2025 sample, paper 用 2010-2025 extended window. K903 建立 canonical replication: 重跑 K902 setup 但 data_start=2010-01-01, 產出 canonical Tables 2 & 3 of Paper 1 with absolute QLIKE numbers 對齊 main.tex. 目標: paper scripts/K903 能直接 reproduce Tables 2 & 3 (rtol 0.01). 若 reproduced 數字 ≠ paper 現寫數字 → 主線程走三選一決策. [DONE commit efaa93c0: Scenario DIVERGENT 建議 (c) errata pending. Table 3 GJR QLIKE -9.034 vs Table 8 -8.671 (同 SPY 2023-24 w=504) **Paper 1 內部不一致**; GLD mean γ paper -0.067 vs K903 +0.002 **符號翻轉** 即使 2010-start+step=63+HAC lags=8. date_start 假說 insufficient for GLD.]",
     "tags": [
       "paper-1",
       "canonical-replication",
       "data-window-alignment"
-    ]
+    ],
+    "completed_at": "2026-04-17T16:48:14+08:00"
   },
   {
     "id": "Paper1_D3_kupiec_rounding_precision",
@@ -1290,6 +1291,36 @@
       "errata",
       "research-integrity",
       "main-thread-only"
+    ]
+  },
+  {
+    "id": "Paper1_Table3_vs_Table8_inconsistency",
+    "title": "Paper 1 CRITICAL: Table 3 vs Table 8 同設定 GJR QLIKE 值不同 (-9.034 vs -8.671)",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:48:14+08:00",
+    "description": "K903 (efaa93c0) 發現 Paper 1 Table 3 GJR QLIKE=-9.034 vs Table 8 (同 SPY 2023-24 w=504)=-8.671，差 0.363 (4.1%). K903 重現 -8.674 (match Table 8 0.003 內). Paper 1 內部不一致類似 Paper 2 算術錯誤. **主線程 decision**: (a) Table 3 用了 daily refit 而非 63d - 需確認 paper 是否有未明說; (b) errata 修 Table 3 到 K903 canonical (= Table 8); (c) errata pending. **research integrity**: 同 paper 兩 table 同設定不同值必須解釋.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "research-integrity",
+      "internal-inconsistency",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper1_GLD_gamma_negative_0.067_forensic",
+    "title": "Paper 1: GLD mean γ=-0.067 反推不出，需查原始 K799 spec",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:48:14+08:00",
+    "description": "K903 試 data_start=2010 + step=63 + HAC lags=8，GLD mean γ=+0.002 (67% negative) 無法重現 paper -0.067 (93% negative) **符號翻轉**. date_start alone insufficient. **主線程 forensic**: 查 K799 (paper GLD 段原始實驗) 腳本實際 settings — sample filter, weighting, 是否 truncated early data, HAC lags. 若找到 → K903 update 試 match; 若找不到 → paper errata -0.067 → K903 +0.002 (GLD 反而 positive gamma, 結論可能要重寫). 影響: 若 +0.002 canonical，則 'GLD leverage negative' claim 可能錯誤.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "forensic",
+      "main-thread",
+      "possible-major-errata"
     ]
   }
 ]

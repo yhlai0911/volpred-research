@@ -26980,5 +26980,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T16:41:57.677259"
+  },
+  {
+    "item_id": "d538b63a",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K903 Paper 1 Tables 2/3 canonical replication (2010-start). **VERDICT: (c) ERRATA PENDING \u2014 \u5169\u9805\u91cd\u5927\u767c\u73fe**. **\u767c\u73fe 1: Paper 1 \u5167\u90e8\u4e0d\u4e00\u81f4 (Table 3 vs Table 8)**: Paper Table 3 GJR QLIKE=-9.034, Paper Table 8 (w=504, same SPY 2023-24)=-8.671, K903 reproduced -8.674 (match Table 8 0.003 \u5167). Table 3 vs Table 8 \u5dee 0.363 (4.1%). **Paper 1 has internal inconsistency like Paper 2** \u2014 \u53ef\u80fd Table 3 refit=daily \u800c\u975e 63d, \u4f46\u672a\u8aaa. **\u767c\u73fe 2: GLD mean \u03b3 \u7b26\u865f\u7ffb\u8f49**: Paper Table 2 GLD mean \u03b3=-0.067 (93% negative), K903 2010-start=+0.002 (67% negative). \u5373\u4f7f step=63 + HAC lags=8 + 2010-start\uff0cGLD \u4ecd\u7121\u6cd5\u91cd\u73fe -0.067. Paper 1 D1/D2 date_start-only \u5047\u8aaa insufficient, GLD \u53e6\u6709\u65b9\u6cd5\u8ad6 gap. **Diff stats**: Table 2 (rolling gamma) 8 matched / 20 divergent; Table 3 (OOS QLIKE) 8 matched / 25 divergent. Max divergence 7.76 (EEM HAC t-stat). **\u5b9a\u6027 OK**: SPY GJR>GARCH \u2713; GLD/TLT/BTC/EEM GJR \u4e0d\u986f\u8457\u512a \u2713 (GLD K903 rolling p=0.001 \u4f8b\u5916 vs paper 0.871 \u2014 \u9700\u4e3b\u7dda\u7a0b\u67e5). **(c) ERRATA PENDING** \u2014 \u4e3b\u7dda\u7a0b decisions: (1) Table 3 vs Table 8 config \u70ba\u4f55\u4e0d\u540c (refit?), (2) GLD -0.067 \u4f86\u6e90 (K799 \u5982\u4f55\u7b97\u51fa), (3) \u6c7a\u5b9a\u4fee\u54ea\u500b table. commit efaa93c0. Output experiments/k903/.",
+    "evidence": [
+      "experiments/k903/k903.py",
+      "experiments/k903/k903_results.json",
+      "experiments/k903/k903_vs_paper_diff.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T16:47:56.477559"
   }
 ]
