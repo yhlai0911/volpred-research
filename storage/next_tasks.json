@@ -142,7 +142,9 @@
     "title": "K1173: Refine institutional-share proxy for emerging markets",
     "priority": 3,
     "description": "K1168 BR/CH/IN θ_rel residuals 主因 yfinance institutional% 對新興市場不準: CH state-owned undercounted, IN promoter+FII inflated, BR control-shareholder ambiguous. 用 BCBS/CSRC/SEBI/CVM 官方數據 separate state-owned vs private institutions, 重做 N=10 cross-market regression。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-18T01:24:11.388618",
+    "outcome": "NULL: refined rho=+0.385 p=0.217 (vs yfinance +0.441). EM off-ladder is STRUCTURAL cost-of-capital scale factor, not proxy artefact. Paper 2 §5 sharpens EM caveat."
   },
   {
     "id": "K1175",
@@ -181,7 +183,9 @@
     "title": "K1100g_d6: Extend 2022-2025 N double for Harvey threshold",
     "priority": 3,
     "description": "K1100g_d3/d4/d5 在 2017-2021 n=1071 下 DM t=1.5-2.0 borderline。擴 2022-2025 至 n~1800+ 測是否跨 Harvey 3.0。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-18T01:24:11.388624",
+    "outcome": "FAIL: max |DM_t|=1.99 < Harvey and weak |t|>2. sqrt(N) scaling only 54-57% (not i.i.d.). COVID 2020-21 drives all; 2022-25 near-zero. Paper 3 TAIFEX anchor NOT established."
   },
   {
     "id": "K1100g_d7",

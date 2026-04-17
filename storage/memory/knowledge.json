@@ -27566,5 +27566,27 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-18T01:08:25.015321"
+  },
+  {
+    "item_id": "a19fdf35",
+    "category": "K1100g_d6",
+    "content": "K1100g_d6 N-extension 2017-2021->2017-2025 FAILS Harvey |t|>3 test. 3 periods x 2 models: Period A 2020-2021 n=464 (COVID): M2_gap +1.49, REF_night_r2 +2.01; Period B 2022-2025 n=921: M2_gap +0.48, REF_night_r2 +0.92 near-zero; Period C 2020-2025 n=1385: M2_gap +1.40, REF_night_r2 +1.99. Max |DM_t|=1.99 < Harvey |t|>3 AND < weak |t|>2. sqrt(N) scaling only 54-57% of expected (i.i.d. predicts Period C +2.57/+3.47, actual +1.40/+1.99), signal-to-noise regime-dependent. Replicate check: Period A byte-identical to K1100g_d5. IS LRT chi^2=31.85 very strong (classic IS-good / OOS-weak pattern). Paper 3 TAIFEX overnight anchor NOT established. COVID period drives entire signal; 2022-2025 contributes near-zero. Next: K1100g_d7 cross-market replication as alternative anchor path.",
+    "evidence": [
+      "experiments/k1100g_d6/k1100g_d6_results.json",
+      "commit ab89d028"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-18T01:24:11.193113"
+  },
+  {
+    "item_id": "bb659e28",
+    "category": "K1173",
+    "content": "K1173 EM institutional proxy refinement NULL \u2014 EM off-ladder is STRUCTURAL not yfinance artefact. Data 40/40 EM tickers refined (IN screener.in/SEBI; BR/MX/CH simplywall.st aggregating CVM/BMV/SSE). Primary Spearman N=12: yfinance baseline rho=+0.441 p=0.152; refined rho=+0.385 p=0.217; delta rho=-0.056 within NULL band and slightly regressed. Per-market diff: IN +0.186 (DII undercounted), CH +0.126 (SOE+SWF missing), MX +0.045 (small), BR -0.117 (yfinance over-counts controlling private). Panel OLS N=172 refined: log_analyst t=+3.86 Harvey PASS (vs K1172 +3.79); inst_pct beta t=-1.20 NS. Drop-MX LOO rho=+0.609 p=0.047. Paper 2 \u00a75 narrative: pooled theta_EAV cost-of-capital scale factor 3-25x developed-market range mechanically inflates theta_rel in EM, independent of institutional ownership. Sharpens K1172 caveat (Explanation 1 survives; Explanation 2 falsified).",
+    "evidence": [
+      "experiments/k1173/k1173_results.json",
+      "commit ea5c6340"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-18T01:24:11.317237"
   }
 ]
