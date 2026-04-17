@@ -1757,5 +1757,71 @@
       "main-thread",
       "critical"
     ]
+  },
+  {
+    "id": "Paper3_experiments_md_add_K697_paper3_fixes",
+    "title": "Paper 3 QUICK WIN: experiments.md 加 K697 (VIX predictive) + paper3_fixes.json (VIX threshold)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:48:11+08:00",
+    "description": "Paper 3 rescan (f0cd9229) 發現 2 UNDOCUMENTED: K697 (VIX predictive r=0.570 magnitude, r=0.042 direction) + paper3_fixes.json (VIX threshold t-stats 7.98-10.91). 建議主線程: (1) experiments.md 加 K697; (2) body main.tex §methodology cite K697 核心發現; (3) paper3_fixes.json 正式化成 K 編號 + experiments.md 登錄. 5-10 min.",
+    "tags": [
+      "paper-3",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "K1190_paper3_sector_analysis",
+    "title": "K1190: Paper 3 Sector Analysis (11 SPDR ETFs, Dec 1998) r=0.163, gamma range",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T17:48:11+08:00",
+    "description": "Paper 3 rescan STILL_NO_SOURCE: Sector analysis r=0.163, gamma range [0.077, 0.160] across 11 SPDR ETFs (XLY/XLK/XLV/XLF/XLI/XLP/XLE/XLU/XLRE/XLB/XLC) from Dec 1998. Agent-launchable. 新實驗算 sector-level VT 與 cross-sector gamma correlation.",
+    "tags": [
+      "paper-3",
+      "sector-analysis",
+      "new-experiment"
+    ]
+  },
+  {
+    "id": "K1191_paper3_COVID_subperiod",
+    "title": "K1191: Paper 3 COVID sub-period Sharpe 1.295 vs 1.254",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T17:48:11+08:00",
+    "description": "Paper 3 STILL_NO_SOURCE: COVID sub-period (likely 2020-01 ~ 2020-12 or similar) Sharpe 1.295 vs 1.254. K898 無子期間分析. 建 K1191 sub-period VT Sharpe comparison.",
+    "tags": [
+      "paper-3",
+      "covid-subperiod",
+      "new-experiment"
+    ]
+  },
+  {
+    "id": "K1192_paper3_bootstrap_MDD_CI_Table6_BLOCKER",
+    "title": "K1192 BLOCKER: Paper 3 Table 6 Bootstrap MDD CI [86, 97] 需正確公式",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T17:48:11+08:00",
+    "description": "Paper 3 Table 6 Bootstrap MDD CI [86, 97] 無法從 K898 重現 (K898 定義給 [95, 172] 不同). **BLOCKER**: body_v2.tex Table 6 數字目前無法從任何 K 重現. 需 K1192 驗證正確 bootstrap MDD CI 計算公式 — 可能是 percentile bootstrap over MDD distribution vs block-bootstrap. 若公式不同 → paper errata.",
+    "tags": [
+      "paper-3",
+      "bootstrap-mdd",
+      "table6-blocker",
+      "new-experiment"
+    ]
+  },
+  {
+    "id": "K1193_paper3_split_sample",
+    "title": "K1193: Paper 3 split-sample r=0.487, p=0.021 + bootstrap CI [0.114, 0.737]",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T17:48:11+08:00",
+    "description": "Paper 3 STILL_NO_SOURCE: split-sample r=0.487, p=0.021 + bootstrap CI [0.114, 0.737]. K901b 只是 stub. 需 K1193 正式 split-sample cross-validation experiment.",
+    "tags": [
+      "paper-3",
+      "split-sample",
+      "new-experiment"
+    ]
   }
 ]

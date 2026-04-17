@@ -27164,5 +27164,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:43:40.422376"
+  },
+  {
+    "item_id": "7133608c",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] Paper 3 (vt-trend-following) no-source rescan. **Stats**: 13 no-source \u2192 2 UNDOCUMENTED_K (\u6db5\u84cb 8 \u6578\u503c) + 5 COVERED_BY_K1178 (parallel) + 5 STILL_NO_SOURCE. **UNDOCUMENTED_K**: (1) paper3_fixes.json (paper dir \u5167 but \u7121\u6b63\u5f0f K \u7de8\u865f) \u2192 VIX threshold t-stats 7.98-10.91 \u5168\u78ba\u8a8d (6 threshold \u00d7 TSMOM_t); (2) K697 \u2192 VIX predictive power r=0.570 (vol magnitude), r=0.042 (direction) \u5b8c\u5168\u78ba\u8a8d **\u4f46\u672a cite \u5728 main.tex**. **5 STILL_NO_SOURCE (\u9700 new experiments)**: (a) Sector analysis r=0.163, gamma range [0.077, 0.160] \u2014 11 SPDR ETFs + Dec 1998 \u8d77\u59cb; (b) COVID sub-period Sharpe 1.295 vs 1.254 \u2014 K898 \u7121\u5b50\u671f\u9593; (c) **Bootstrap MDD CI [86, 97] for SPY (Table 6) \u2014 K898 \u4e0d\u540c\u5b9a\u7fa9 ([95, 172]), \u9700 new K (BLOCKER-level)**; (d) Split-sample r=0.487, p=0.021 \u2014 K901b \u53ea\u662f stub; (e) Split-sample bootstrap CI [0.114, 0.737] \u2014 \u7121 source. **K687/K697/K688 \u6574\u5408**: K697 UNDOCUMENTED_K \u8981\u52a0 experiments.md + body cite; K687/K688 \u65b9\u6cd5\u8ad6\u5dee\u7570 (VT on blend vs per-asset) \u9700 paper \u8aaa\u660e\u975e no-source. **Paper 3 \u7d71\u5408 blockers**: D1 TSMOM 93%\u2192132% direction (K1177 \u78ba\u8a8d), D2 Table 5 \u03c1=0.830 unreproducible (K1178 \u78ba\u8a8d), H4 1.4% forensic, Table 6 Bootstrap MDD CI \u65b0 K \u5fc5\u505a. commit f0cd9229.",
+    "evidence": [
+      "paper/vt-trend-following/reproducibility_audit/nosource_rescan_report.md",
+      "paper/vt-trend-following/reproducibility_audit/undocumented_k_additions_for_experiments_md.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:47:52.367266"
   }
 ]
