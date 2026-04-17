@@ -35,6 +35,12 @@ OPS_ACTION_CHOICES = (
     "sync_all",
     "unpublish_article",
 )
+LOCAL_TASK_SOURCE_CHOICES = ("user", "schedule", "agent")
+LOCAL_TASK_FAMILY_CHOICES = ("research", "ops", "content", "code", "review")
+LOCAL_TASK_AGENT_CHOICES = ("claude", "codex", "auto")
+LOCAL_APPROVAL_MODE_CHOICES = ("auto", "needs_approval")
+LOCAL_RISK_LEVEL_CHOICES = ("safe", "elevated", "destructive")
+LOCAL_AGENT_CHOICES = ("claude", "codex")
 
 
 def _print_json(payload: object) -> None:
@@ -53,7 +59,16 @@ def _parse_json_input(raw: str | None, *, default: object) -> object:
 def _parse_tags(raw: str | None) -> list[str]:
     if not raw:
         return []
-    return [tag.strip() for tag in raw.split(",") if tag.strip()]
+    trimmed = raw.strip()
+    # Accept JSON array form: '["a", "b"]' — prevents split-by-comma mangling JSON strings.
+    if trimmed.startswith("[") and trimmed.endswith("]"):
+        try:
+            decoded = json.loads(trimmed)
+            if isinstance(decoded, list):
+                return [str(t).strip() for t in decoded if str(t).strip()]
+        except json.JSONDecodeError:
+            pass
+    return [tag.strip() for tag in trimmed.split(",") if tag.strip()]
 
 
 def _parse_optional_number(raw: str | None) -> int | None:
@@ -72,6 +87,15 @@ def _parse_optional_float(raw: str | None) -> float | None:
     if not trimmed:
         return None
     return float(trimmed)
+
+
+def _parse_string_list_input(raw: str | None) -> list[str]:
+    payload = _parse_json_input(raw, default=[])
+    if isinstance(payload, list):
+        return [str(item) for item in payload if str(item).strip()]
+    if isinstance(payload, str):
+        return [item.strip() for item in payload.split(",") if item.strip()]
+    raise click.ClickException("Input must decode to a JSON array or a comma-separated string")
 
 
 def _print_completed_process(result, *, action: str) -> None:
@@ -450,6 +474,552 @@ def ops() -> None:
     pass
 
 
+@ops.group("agent-spec")
+def ops_agent_spec() -> None:
+    """Provider-neutral canonical specs for CLAUDE/AGENTS and shared skills."""
+    pass
+
+
+@ops_agent_spec.command("import")
+@click.option("--from", "source_name", required=True, type=click.Choice(["claude", "codex"]), help="Source provider tree to import into agent-specs/")
+@click.option("--skip-guide", is_flag=True, help="Import only skills")
+@click.option("--skip-skills", is_flag=True, help="Import only the top-level guide")
+def ops_agent_spec_import(source_name: str, skip_guide: bool, skip_skills: bool) -> None:
+    """Import provider-native guide/skills into the canonical agent-specs tree."""
+    from volpred.ops import import_agent_specs
+
+    result = import_agent_specs(
+        source=source_name,
+        include_guide=not skip_guide,
+        include_skills=not skip_skills,
+    )
+    console.print(f"[green]Imported agent specs[/green] from {source_name}")
+    _print_json(result)
+
+
+@ops_agent_spec.command("render")
+@click.option("--target", "target_name", default="all", show_default=True, type=click.Choice(["all", "claude", "codex"]), help="Render one provider or both")
+def ops_agent_spec_render(target_name: str) -> None:
+    """Render canonical agent-specs back into CLAUDE/AGENTS outputs."""
+    from volpred.ops import render_agent_specs
+
+    result = render_agent_specs(target_key=None if target_name == "all" else target_name)
+    console.print(f"[green]Rendered agent specs[/green] target={target_name}")
+    _print_json(result)
+
+
+@ops_agent_spec.command("check")
+@click.option("--target", "target_name", default="all", show_default=True, type=click.Choice(["all", "claude", "codex"]), help="Check one provider or both")
+def ops_agent_spec_check(target_name: str) -> None:
+    """Fail when rendered CLAUDE/AGENTS outputs drift away from canonical agent-specs."""
+    from volpred.ops import check_agent_specs
+
+    result = check_agent_specs(target_key=None if target_name == "all" else target_name)
+    if result["clean"]:
+        console.print(f"[green]Agent spec outputs are clean[/green] target={target_name}")
+    else:
+        console.print(f"[red]Agent spec drift detected[/red] target={target_name}")
+        for issue in result["issues"]:
+            console.print(f"  - {issue}")
+    _print_json(result)
+    if not result["clean"]:
+        raise SystemExit(1)
+
+
+@ops.group("rollback")
+def ops_rollback() -> None:
+    """Rollback points for local repo + storage + config recovery."""
+    pass
+
+
+@ops_rollback.command("create")
+@click.option("--point-id", default=None, help="Optional stable rollback point id")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_rollback_create(point_id: str | None, storage_dir: str) -> None:
+    """Create a rollback point covering tracked diff, untracked files, storage, and config."""
+    from volpred.ops import create_rollback_point
+
+    result = create_rollback_point(point_id=point_id, storage_dir=storage_dir)
+    console.print(f"[green]Created rollback point[/green] {result['point_id']}")
+    _print_json(result)
+
+
+@ops_rollback.command("list")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_rollback_list(storage_dir: str) -> None:
+    """List local rollback points."""
+    from volpred.ops import list_rollback_points
+
+    points = list_rollback_points(storage_dir=storage_dir)
+    table = Table(title="Rollback Points")
+    table.add_column("ID", style="cyan")
+    table.add_column("Created", style="green")
+    table.add_column("Branch", style="white")
+    table.add_column("Head", style="magenta")
+    for point in points:
+        table.add_row(
+            str(point.get("point_id", "")),
+            str(point.get("created_at", "")),
+            str(point.get("branch", "")),
+            str(point.get("head_sha", ""))[:12],
+        )
+    console.print(table)
+    _print_json({"points": points})
+
+
+@ops_rollback.command("restore")
+@click.argument("point_id")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+@click.option("--force", is_flag=True, help="Allow restore even when current HEAD differs from the rollback baseline")
+@click.option("--dry-run", is_flag=True, help="Only show what would be removed/restored")
+def ops_rollback_restore(point_id: str, storage_dir: str, force: bool, dry_run: bool) -> None:
+    """Restore the repo working tree + local state to a named rollback point."""
+    from volpred.ops import restore_rollback_point
+
+    result = restore_rollback_point(point_id, storage_dir=storage_dir, force=force, dry_run=dry_run)
+    if dry_run:
+        console.print(f"[yellow]Dry run[/yellow] rollback restore {point_id}")
+    else:
+        console.print(f"[green]Restored rollback point[/green] {point_id}")
+    _print_json(result)
+
+
+@ops.command("hygiene-report")
+def ops_hygiene_report() -> None:
+    """Report repo clutter hotspots and worktree hygiene candidates."""
+    from volpred.ops import build_hygiene_report
+
+    report = build_hygiene_report()
+    console.print("[green]Repo hygiene snapshot[/green]")
+    console.print(f"  root_clutter={len(report['root_clutter'])}")
+    console.print(f"  experiments_loose_files={report['experiments_loose_files']}")
+    console.print(f"  orphan_worktree_dirs={len(report['orphan_worktree_dirs'])}")
+    _print_json(report)
+
+
+@ops.group("experiments")
+def ops_experiments() -> None:
+    """Inspect and gradually normalize experiments/ structure."""
+
+
+@ops_experiments.command("report")
+@click.option("--limit", default=20, show_default=True, type=int, help="Max candidate groups to include")
+def ops_experiments_report(limit: int) -> None:
+    """Report loose top-level experiment files and migration candidates."""
+    from volpred.ops import build_experiments_report
+
+    report = build_experiments_report(limit=limit)
+    console.print("[green]Experiments hygiene snapshot[/green]")
+    console.print(f"  loose_files={report['loose_file_count']}")
+    console.print(f"  top_level_dirs={report['top_level_dir_count']}")
+    console.print(f"  candidate_groups={report['candidate_count']}")
+    if report["grouped_candidates"]:
+        table = Table(title="Top migration candidates")
+        table.add_column("Experiment", style="cyan")
+        table.add_column("Loose", style="yellow")
+        table.add_column("Dir", style="magenta")
+        table.add_column("Script", style="green")
+        table.add_column("Results", style="green")
+        table.add_column("Action", style="white")
+        for item in report["grouped_candidates"]:
+            table.add_row(
+                str(item["experiment_id"]),
+                str(item["loose_count"]),
+                "yes" if item["has_experiment_dir"] else "no",
+                "yes" if item["has_canonical_script"] else "no",
+                "yes" if item["has_canonical_results"] else "no",
+                str(item["recommended_action"]),
+            )
+        console.print(table)
+    _print_json(report)
+
+
+@ops_experiments.command("scaffold")
+@click.option("--experiment-id", required=True, help="Canonical experiment id, e.g. k1121")
+@click.option("--title", default=None, help="Optional README/results title")
+@click.option("--no-script", is_flag=True, help="Skip creating the canonical script file")
+@click.option("--no-results", is_flag=True, help="Skip creating the canonical results JSON")
+@click.option("--overwrite", is_flag=True, help="Overwrite existing scaffold files")
+def ops_experiments_scaffold(
+    experiment_id: str,
+    title: str | None,
+    no_script: bool,
+    no_results: bool,
+    overwrite: bool,
+) -> None:
+    """Create the canonical experiments/<id>/ scaffold for a touched experiment."""
+    from volpred.ops import scaffold_experiment
+
+    result = scaffold_experiment(
+        experiment_id,
+        title=title,
+        create_script=not no_script,
+        create_results=not no_results,
+        overwrite=overwrite,
+    )
+    console.print(f"[green]Prepared experiment scaffold[/green] {result['target_dir']}")
+    _print_json(result)
+
+
+@ops_experiments.command("migrate")
+@click.option("--experiment-id", required=True, help="Experiment id to migrate from loose top-level files")
+@click.option("--title", default=None, help="Optional title for scaffolded README")
+@click.option("--apply", "apply_changes", is_flag=True, help="Actually move files into experiments/<id>/")
+@click.option("--rewrite-references", is_flag=True, help="Rewrite repo text references from old loose paths to new canonical paths")
+@click.option("--overwrite", is_flag=True, help="Allow overwriting canonical targets during apply")
+@click.option("--no-scaffold", is_flag=True, help="Do not ensure README/references/data exist first")
+def ops_experiments_migrate(
+    experiment_id: str,
+    title: str | None,
+    apply_changes: bool,
+    rewrite_references: bool,
+    overwrite: bool,
+    no_scaffold: bool,
+) -> None:
+    """Plan or apply a touched-file migration into experiments/<id>/."""
+    from volpred.ops import migrate_experiment_files
+
+    result = migrate_experiment_files(
+        experiment_id,
+        apply_changes=apply_changes,
+        ensure_scaffold=not no_scaffold,
+        rewrite_references=rewrite_references,
+        overwrite=overwrite,
+        title=title,
+    )
+    mode = "Applied migration" if apply_changes else "Dry-run migration plan"
+    console.print(f"[green]{mode}[/green] for {experiment_id}")
+    _print_json(result)
+
+
+@ops_experiments.command("adopt")
+@click.option("--experiment-id", required=True, help="Canonical experiment id for the target directory")
+@click.option("--source", "source_files", multiple=True, required=True, help="Repo-relative source file to move into experiments/<id>/")
+@click.option("--title", default=None, help="Optional title for scaffolded README")
+@click.option("--apply", "apply_changes", is_flag=True, help="Actually move files into experiments/<id>/")
+@click.option("--rewrite-references", is_flag=True, help="Rewrite repo text references from old paths to new canonical paths")
+@click.option("--overwrite", is_flag=True, help="Allow overwriting canonical targets during apply")
+@click.option("--no-scaffold", is_flag=True, help="Do not ensure README/references/data exist first")
+@click.option("--no-placeholder-script", is_flag=True, help="Skip creating a placeholder canonical script when no .py source is provided")
+@click.option("--no-placeholder-results", is_flag=True, help="Skip creating a placeholder canonical results JSON when no .json source is provided")
+def ops_experiments_adopt(
+    experiment_id: str,
+    source_files: tuple[str, ...],
+    title: str | None,
+    apply_changes: bool,
+    rewrite_references: bool,
+    overwrite: bool,
+    no_scaffold: bool,
+    no_placeholder_script: bool,
+    no_placeholder_results: bool,
+) -> None:
+    """Adopt arbitrary loose files into experiments/<id>/."""
+    from volpred.ops import adopt_experiment_files
+
+    result = adopt_experiment_files(
+        experiment_id,
+        source_files=list(source_files),
+        apply_changes=apply_changes,
+        ensure_scaffold=not no_scaffold,
+        rewrite_references=rewrite_references,
+        overwrite=overwrite,
+        title=title,
+        create_placeholder_script=False if no_placeholder_script else None,
+        create_placeholder_results=False if no_placeholder_results else None,
+    )
+    mode = "Applied arbitrary adoption" if apply_changes else "Dry-run arbitrary adoption"
+    console.print(f"[green]{mode}[/green] for {experiment_id}")
+    _print_json(result)
+
+
+@ops.command("assign")
+@click.option("--title", required=True, help="Task title")
+@click.option("--description", required=True, help="Task description")
+@click.option("--source", default="user", show_default=True, type=click.Choice(LOCAL_TASK_SOURCE_CHOICES), help="Task source")
+@click.option("--task-family", default="ops", show_default=True, type=click.Choice(LOCAL_TASK_FAMILY_CHOICES), help="Task family")
+@click.option("--priority", default=100, show_default=True, type=int, help="Lower runs earlier within the same source")
+@click.option("--preferred-agent", default="auto", show_default=True, type=click.Choice(LOCAL_TASK_AGENT_CHOICES), help="Preferred agent")
+@click.option("--fallback-allowed/--no-fallback", default=False, show_default=True, help="Allow the other agent to take over")
+@click.option("--approval-mode", default="auto", show_default=True, type=click.Choice(LOCAL_APPROVAL_MODE_CHOICES), help="Approval policy")
+@click.option("--risk-level", default="safe", show_default=True, type=click.Choice(LOCAL_RISK_LEVEL_CHOICES), help="Risk level")
+@click.option("--payload-json", default=None, help="JSON object or file path for structured payload")
+@click.option("--parent-task-id", default=None, help="Optional parent task id")
+@click.option("--created-by", default=None, help="Actor label")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_assign(
+    title: str,
+    description: str,
+    source: str,
+    task_family: str,
+    priority: int,
+    preferred_agent: str,
+    fallback_allowed: bool,
+    approval_mode: str,
+    risk_level: str,
+    payload_json: str | None,
+    parent_task_id: str | None,
+    created_by: str | None,
+    storage_dir: str,
+) -> None:
+    """Create a task in the local file-backed control plane."""
+    from volpred.ops import create_task
+
+    payload = _parse_json_input(payload_json, default={})
+    if not isinstance(payload, dict):
+        raise click.ClickException("--payload-json must decode to an object")
+    task = create_task(
+        title=title,
+        description=description,
+        source=source,
+        task_family=task_family,
+        priority=priority,
+        preferred_agent=preferred_agent,
+        fallback_allowed=fallback_allowed,
+        approval_mode=approval_mode,
+        risk_level=risk_level,
+        payload=payload,
+        parent_task_id=parent_task_id,
+        created_by=created_by,
+        storage_dir=storage_dir,
+    )
+    console.print(f"[green]Queued local task[/green] {task['id']} ({task['status']})")
+    _print_json(task)
+
+
+@ops.command("tasks")
+@click.option("--status", default=None, help="Filter by task status")
+@click.option("--source", default=None, type=click.Choice(LOCAL_TASK_SOURCE_CHOICES), help="Filter by task source")
+@click.option("--limit", default=20, show_default=True, type=int, help="Max tasks to show")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_tasks(status: str | None, source: str | None, limit: int, storage_dir: str) -> None:
+    """List local control-plane tasks."""
+    from volpred.ops import list_local_tasks
+
+    tasks = list_local_tasks(status=status, source=source, limit=limit, storage_dir=storage_dir)
+    table = Table(title="Local Tasks")
+    table.add_column("ID", style="cyan")
+    table.add_column("Source", style="yellow")
+    table.add_column("Family", style="magenta")
+    table.add_column("Status", style="green")
+    table.add_column("Preferred", style="white")
+    table.add_column("Priority", style="white")
+    table.add_column("Title", style="white")
+    for task in tasks:
+        table.add_row(
+            str(task.get("id", ""))[:16],
+            str(task.get("source", "")),
+            str(task.get("task_family", "")),
+            str(task.get("status", "")),
+            str(task.get("preferred_agent", "")),
+            str(task.get("priority", "")),
+            str(task.get("title", "")),
+        )
+    console.print(table)
+    _print_json({"tasks": tasks})
+
+
+@ops.command("task-show")
+@click.argument("task_id")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_task_show(task_id: str, storage_dir: str) -> None:
+    """Show one local control-plane task with approvals and execution receipts."""
+    from volpred.ops import get_local_task
+
+    task = get_local_task(task_id, storage_dir=storage_dir)
+    if task is None:
+        raise click.ClickException(f"Task not found: {task_id}")
+    _print_json(task)
+
+
+@ops.command("agents")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_agents(storage_dir: str) -> None:
+    """List agent sessions in the local control plane."""
+    from volpred.ops import list_agent_sessions
+
+    agents = list_agent_sessions(storage_dir=storage_dir)
+    table = Table(title="Agent Sessions")
+    table.add_column("Agent", style="cyan")
+    table.add_column("Status", style="green")
+    table.add_column("Role", style="white")
+    table.add_column("Claimed Task", style="magenta")
+    table.add_column("Heartbeat", style="dim")
+    for agent in agents:
+        table.add_row(
+            str(agent.get("agent_name", "")),
+            str(agent.get("status", "")),
+            str(agent.get("role_profile", "")),
+            str(agent.get("claimed_task_id", "")),
+            str(agent.get("heartbeat_at", "")),
+        )
+    console.print(table)
+    _print_json({"agents": agents})
+
+
+@ops.command("heartbeat")
+@click.option("--agent", "agent_name", required=True, type=click.Choice(LOCAL_AGENT_CHOICES), help="Agent name")
+@click.option("--status", default="idle", show_default=True, type=click.Choice(["online", "idle", "busy", "offline"]), help="Agent status")
+@click.option("--provider", default=None, help="Provider/runtime label")
+@click.option("--claimed-task-id", default=None, help="Currently claimed task id")
+@click.option("--capabilities-json", default=None, help="JSON array or comma-separated capability list")
+@click.option("--role-profile", default=None, help="Role profile label")
+@click.option("--session-id", default=None, help="Stable session id")
+@click.option("--subagent-budget", default=None, type=int, help="Max concurrent subagents inside one top-level task")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_heartbeat(
+    agent_name: str,
+    status: str,
+    provider: str | None,
+    claimed_task_id: str | None,
+    capabilities_json: str | None,
+    role_profile: str | None,
+    session_id: str | None,
+    subagent_budget: int | None,
+    storage_dir: str,
+) -> None:
+    """Create/update an agent heartbeat in the local control plane."""
+    from volpred.ops import heartbeat_agent
+
+    capabilities = _parse_string_list_input(capabilities_json) if capabilities_json else None
+    session = heartbeat_agent(
+        agent_name=agent_name,
+        status=status,
+        provider=provider,
+        claimed_task_id=claimed_task_id,
+        capabilities=capabilities,
+        role_profile=role_profile,
+        session_id=session_id,
+        subagent_budget=subagent_budget,
+        storage_dir=storage_dir,
+    )
+    console.print(f"[green]Heartbeat updated[/green] {agent_name}")
+    _print_json(session)
+
+
+@ops.command("claim-next")
+@click.option("--agent", "agent_name", required=True, type=click.Choice(LOCAL_AGENT_CHOICES), help="Agent name")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_claim_next(agent_name: str, storage_dir: str) -> None:
+    """Claim the next eligible task for Claude or Codex."""
+    from volpred.ops import claim_next_task
+
+    task = claim_next_task(agent_name, storage_dir=storage_dir)
+    if task is None:
+        console.print(f"[yellow]No claimable task[/yellow] for {agent_name}")
+        _print_json({"agent": agent_name, "task": None})
+        return
+    console.print(f"[green]Claimed task[/green] {task['id']} for {agent_name}")
+    _print_json(task)
+
+
+@ops.command("approve")
+@click.argument("task_id")
+@click.option("--actor", required=True, help="Approver label")
+@click.option("--reason", default=None, help="Approval note")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_approve(task_id: str, actor: str, reason: str | None, storage_dir: str) -> None:
+    """Approve a queued local task that was waiting for approval."""
+    from volpred.ops import approve_task
+
+    task = approve_task(task_id, actor=actor, reason=reason, storage_dir=storage_dir)
+    console.print(f"[green]Approved task[/green] {task_id}")
+    _print_json(task)
+
+
+@ops.command("reject")
+@click.argument("task_id")
+@click.option("--actor", required=True, help="Rejector label")
+@click.option("--reason", default=None, help="Rejection note")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_reject(task_id: str, actor: str, reason: str | None, storage_dir: str) -> None:
+    """Reject a queued local task that was waiting for approval."""
+    from volpred.ops import reject_task
+
+    task = reject_task(task_id, actor=actor, reason=reason, storage_dir=storage_dir)
+    console.print(f"[green]Rejected task[/green] {task_id}")
+    _print_json(task)
+
+
+@ops.command("complete")
+@click.argument("task_id")
+@click.option("--agent", "agent_name", required=True, type=click.Choice(LOCAL_AGENT_CHOICES), help="Agent name")
+@click.option("--summary", default=None, help="Short result summary")
+@click.option("--commands-json", default=None, help="JSON array or comma-separated command list")
+@click.option("--files-json", default=None, help="JSON array or comma-separated touched-file list")
+@click.option("--subagent-count", default=0, show_default=True, type=int, help="Number of internal subagents used")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_complete(
+    task_id: str,
+    agent_name: str,
+    summary: str | None,
+    commands_json: str | None,
+    files_json: str | None,
+    subagent_count: int,
+    storage_dir: str,
+) -> None:
+    """Mark a local control-plane task as succeeded and store an execution receipt."""
+    from volpred.ops import complete_task
+
+    result = complete_task(
+        task_id,
+        agent_name=agent_name,
+        summary=summary,
+        commands_run=_parse_string_list_input(commands_json) if commands_json else None,
+        files_touched=_parse_string_list_input(files_json) if files_json else None,
+        subagent_count=subagent_count,
+        storage_dir=storage_dir,
+    )
+    console.print(f"[green]Completed task[/green] {task_id}")
+    _print_json(result)
+
+
+@ops.command("fail")
+@click.argument("task_id")
+@click.option("--agent", "agent_name", required=True, type=click.Choice(LOCAL_AGENT_CHOICES), help="Agent name")
+@click.option("--error", required=True, help="Error message")
+@click.option("--summary", default=None, help="Short summary")
+@click.option("--commands-json", default=None, help="JSON array or comma-separated command list")
+@click.option("--files-json", default=None, help="JSON array or comma-separated touched-file list")
+@click.option("--subagent-count", default=0, show_default=True, type=int, help="Number of internal subagents used")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_fail(
+    task_id: str,
+    agent_name: str,
+    error: str,
+    summary: str | None,
+    commands_json: str | None,
+    files_json: str | None,
+    subagent_count: int,
+    storage_dir: str,
+) -> None:
+    """Mark a local control-plane task as failed and store an execution receipt."""
+    from volpred.ops import fail_task
+
+    result = fail_task(
+        task_id,
+        agent_name=agent_name,
+        error=error,
+        summary=summary,
+        commands_run=_parse_string_list_input(commands_json) if commands_json else None,
+        files_touched=_parse_string_list_input(files_json) if files_json else None,
+        subagent_count=subagent_count,
+        storage_dir=storage_dir,
+    )
+    console.print(f"[green]Marked task failed[/green] {task_id}")
+    _print_json(result)
+
+
+@ops.command("control-plane-summary")
+@click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
+def ops_control_plane_summary(storage_dir: str) -> None:
+    """Summarize local queue/agent state and whether discovery is currently allowed."""
+    from volpred.ops import build_control_plane_snapshot
+
+    summary = build_control_plane_snapshot(storage_dir=storage_dir)
+    console.print("[green]Local control plane summary[/green]")
+    _print_json(summary)
+
+
 @ops.command("health")
 @click.option("--storage-dir", default="storage", show_default=True, help="Storage directory")
 def ops_health(storage_dir: str) -> None:
@@ -464,6 +1034,24 @@ def ops_health(storage_dir: str) -> None:
         table.add_row(key, str(value))
     console.print(table)
     _print_json(snapshot)
+
+
+@ops.command("schedule-report")
+def ops_schedule_report() -> None:
+    """Show canonical schedule spec coverage vs live system crontab."""
+    from volpred.ops import build_schedule_report
+
+    report = build_schedule_report()
+    console.print("[green]Schedule report[/green]")
+    console.print(f"  canonical_path={report['canonical_path']}")
+    console.print(f"  session_crons={report['session_cron_count']}")
+    console.print(f"  remote_triggers={report['remote_trigger_count']}")
+    console.print(
+        "  system_tasks="
+        f"{len(report['matched_system_tasks'])}/{report['expected_system_task_count']}"
+    )
+    console.print(f"  live_system_crontab={report['live_system_crontab_count']}")
+    _print_json(report)
 
 
 @ops.command("sync-all")
