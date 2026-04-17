@@ -27360,5 +27360,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T20:30:29.020137"
+  },
+  {
+    "item_id": "f38c6304",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1196 Paper 1 structural leverage panel activation (stub \u2192 formal). **VERDICT: (b) CLOSE \u2014 3/4 checks MATCHED**. GJR-GARCH(1,1) Student-t rolling w=504 step=63q, 7 primary + 7 extended assets 2009-2026, seed=42, shift(1) lookahead \u9632\u8b77. **MATCHED 3/4**: GLD HAC t -7.26 vs paper -5.79; OOS IS\u2192OOS \u03c1=0.771 vs 0.821 (\u03b4=0.05); MDD-base_vol \u03c1=0.815 (p=0.0004) vs 0.944. **DIVERGED**: diverse-asset \u03c1=+0.923 vs paper -0.448 (sign opposite). **\u6839\u56e0**: K1196 12-asset \u591a equity (\u5168 \u03b3 \u6b63\u503c), paper \u03c1=-0.448 \u9700\u542b GLD(\u03b3<0)/TLT(\u03b3\u22480) \u8b93\u8ca0\u76f8\u95dc\u6d6e\u73fe. \u6b64\u5206\u6b67\u53cd\u800c**\u4f50\u8b49** paper '\u03b3-trend_beta \u547d\u984c\u57df\u6709\u9650' \u4e3b\u5f35 \u2014 need mixed asset universe. Equity-type \u03c1 SKIPPED (N=3 universe gap). Paper 1 structural_leverage_panel stub \u2192 K1196 SOURCED. \u5efa\u8b70 (b) paper \u65b9\u6cd5 section \u660e\u8f09 exact 12-asset list. commit 0956dbcf.",
+    "evidence": [
+      "experiments/k1196/k1196.py",
+      "experiments/k1196/k1196_results.json"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T20:40:02.706550"
   }
 ]
