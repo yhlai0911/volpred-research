@@ -1,0 +1,102 @@
+======================================================================
+K995b: Paper 9 Table 11 Residual Diagnostics Source Recovery
+======================================================================
+NOTE: Replicating K1045 methodology which produced Table 11 values.
+      K1045 source: experiments/K1045/k1045.py
+
+[1] Loading data (K1045 setup: vix2=(vix/100)^2, ret.clip(-0.20,0.20))...
+  Data: 2004-01-05 to 2026-04-10, n_total=5602
+  OOS: 2019-01-01 onwards, n_oos=1828
+
+[2] Model implementations (K1045 parameterizations)...
+
+[3] Out-of-sample rolling forecasts...
+  Running GJR-t rolling OOS...
+  GJR-t step 226/1828 (2s)
+  GJR-t step 726/1828 (2s)
+  GJR-t step 1226/1828 (2s)
+  GJR-t step 1726/1828 (3s)
+  GJR-t: 30 refits
+  Running A4f-t rolling OOS...
+  A4f-t step 226/1828 (36s)
+  A4f-t step 726/1828 (99s)
+  A4f-t step 1226/1828 (171s)
+  A4f-t step 1726/1828 (243s)
+  A4f-t: 30 refits
+  Rolling complete in 263s
+
+[4] Computing standardized residuals and diagnostics...
+  GJR-t OOS residuals: n=1828
+  A4f-t OOS residuals: n=1828
+
+  GJR-t: mean=0.0607, std=1.0522
+  A4f-t: mean=0.0603, std=0.9764
+
+  --- Kurtosis (Fisher excess, normal=0) ---
+  GJR-t: 2.686  (paper: 3.065, K1045: 3.065)
+  A4f-t: 1.227  (paper: 1.238, K1045: 1.238)
+
+  --- Skewness ---
+  GJR-t: -0.811  (paper: -0.856, K1045: -0.856)
+  A4f-t: -0.593  (paper: -0.594, K1045: -0.594)
+
+  --- Jarque-Bera ---
+  GJR-t JB: 750.0  (paper: 938.8, K1045: 938.78)
+  A4f-t JB: 221.8  (paper: 224.2, K1045: 224.19)
+
+  --- Median degrees of freedom ---
+  GJR-t median ν: 7.13  (paper Table 11: 5.28, K1045: 5.28)
+  A4f-t median ν: 8.00  (paper Table 11: 8.00, K1045: 8.00)
+
+[5] Verification against Paper 9 Table 11 and K1045...
+
+  [GJR-t]
+  GJR-t excess kurtosis: computed=2.686, paper=3.065, rel_diff=12.4% => DIVERGENT
+  GJR-t skewness: computed=-0.811, paper=-0.856, rel_diff=5.3% => APPROX
+  GJR-t JB stat: computed=750.022, paper=938.800, rel_diff=20.1% => DIVERGENT
+  GJR-t median nu: computed=7.126, paper=5.280, rel_diff=35.0% => DIVERGENT
+
+  [A4f-t]
+  A4f-t excess kurtosis: computed=1.227, paper=1.238, rel_diff=0.9% => MATCHED
+  A4f-t skewness: computed=-0.593, paper=-0.594, rel_diff=0.2% => MATCHED
+  A4f-t JB stat: computed=221.767, paper=224.200, rel_diff=1.1% => APPROX
+  A4f-t median nu: computed=8.001, paper=8.000, rel_diff=0.0% => MATCHED
+
+  Table 11 cells (6): 2 MATCHED, 2 APPROX, 2 DIVERGENT
+  Overall: PARTIAL_OR_FAILED
+
+[6] Saving results...
+  Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aa539c1b/experiments/k995b/k995b_results.json
+  Total elapsed: 263s
+
+======================================================================
+FINAL SUMMARY: Paper 9 Table 11 Reproduction
+======================================================================
+
+Kurtosis convention: Fisher excess kurtosis (scipy.stats.kurtosis, fisher=True)
+Source identified: K1045 (experiments/K1045/k1045.py)
+
+Stat                                     GJR-t      A4f-t
+-------------------------------------------------------
+            Excess kurtosis (paper)      3.065      1.238
+         Excess kurtosis (computed)      2.686      1.227
+                       Match status  DIVERGENT    MATCHED
+-------------------------------------------------------
+                   Skewness (paper)     -0.856     -0.594
+                Skewness (computed)     -0.811     -0.593
+                       Match status     APPROX    MATCHED
+-------------------------------------------------------
+                    JB stat (paper)      938.8      224.2
+                 JB stat (computed)      750.0      221.8
+                       Match status  DIVERGENT     APPROX
+-------------------------------------------------------
+                  Median nu (paper)       5.28       8.00
+               Median nu (computed)       7.13       8.00
+                       Match status  DIVERGENT    MATCHED
+
+  Table 11 cells (kurtosis/skew/JB, 6 cells): 2 MATCHED / 2 APPROX / 2 DIVERGENT
+  => PARTIAL_OR_FAILED
+
+======================================================================
+K995b COMPLETE
+======================================================================
