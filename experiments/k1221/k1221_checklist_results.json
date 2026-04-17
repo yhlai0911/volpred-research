@@ -1,0 +1,306 @@
+{
+  "experiment_id": "K1221",
+  "task": "Paper 6 (prg-periodic-garch) pre-submission checklist audit",
+  "audit_date": "2026-04-17",
+  "auditor": "K1221 worktree agent-aab1a22a",
+  "paper_id": "paper-6",
+  "paper_path": "paper/prg-periodic-garch/",
+  "target_journal": "Finance Research Letters (FRL)",
+  "main_tex_commit": "7d35418b",
+  "reference_spec": "docs/paper-guide.md (2026-04-17 replication-package hard requirement)",
+
+  "summary": {
+    "total_items": 24,
+    "pass": 17,
+    "fail_blocker": 3,
+    "warn": 3,
+    "na": 1,
+    "readiness": "NEEDS-MINOR-FIX",
+    "estimated_remediation_minutes_blockers": 80,
+    "estimated_remediation_minutes_with_polish": 165,
+    "body_numbers_spot_checked": 10,
+    "body_numbers_match": 10
+  },
+
+  "checklist_items": [
+    {
+      "id": "1.1",
+      "category": "Data Sources",
+      "item": "data_sources.md exists",
+      "status": "PASS",
+      "evidence": "paper/prg-periodic-garch/data_sources.md (1975 bytes, 2026-04-17 15:53)"
+    },
+    {
+      "id": "1.2",
+      "category": "Data Sources",
+      "item": "data/ subfolder exists",
+      "status": "WARN",
+      "evidence": "Missing; data_sources.md covers but reviewers expect data/ stub",
+      "remediation": "Create data/README.md pointing at 4 data locations",
+      "remediation_minutes": 10
+    },
+    {
+      "id": "1.3",
+      "category": "Data Sources",
+      "item": "TAIFEX tick data documented",
+      "status": "PASS",
+      "evidence": "data_sources.md line 11, 32: ~/Dropbox/TAIFEXDATA/"
+    },
+    {
+      "id": "1.4",
+      "category": "Data Sources",
+      "item": "yfinance sources documented",
+      "status": "PASS",
+      "evidence": "data_sources.md lines 12-16: SPY/QQQ/GLD/EEM/0050.TW tickers + periods"
+    },
+    {
+      "id": "1.5",
+      "category": "Data Sources",
+      "item": "Sample periods explicit per market",
+      "status": "PASS",
+      "evidence": "main.tex Table 1 lines 154-161 + data_sources.md lines 12-16"
+    },
+    {
+      "id": "1.6",
+      "category": "Data Sources",
+      "item": "Zenodo/LFS/data-on-request plan for TAIFEX tick",
+      "status": "WARN",
+      "evidence": "data_sources.md mentions ~/Dropbox/ but no explicit data-availability clause",
+      "remediation": "Add 2-line 'TAIFEX tick data available upon written request; processed daily session RV in experiments/k874/data/' clause",
+      "remediation_minutes": 5
+    },
+    {
+      "id": "2.1",
+      "category": "Reproduce Scripts",
+      "item": "scripts/ folder exists",
+      "status": "PASS",
+      "evidence": "paper/prg-periodic-garch/scripts/README.md (2757 bytes)"
+    },
+    {
+      "id": "2.2",
+      "category": "Reproduce Scripts",
+      "item": "scripts/README.md maps K → purpose",
+      "status": "PASS",
+      "evidence": "scripts/README.md lines 16-27 map 11 K scripts; lines 31-46 give full sequence"
+    },
+    {
+      "id": "2.3",
+      "category": "Reproduce Scripts",
+      "item": "reproduce.py exists (one-shot pipeline)",
+      "status": "PASS",
+      "evidence": "paper/prg-periodic-garch/reproduce.py (5672 bytes)"
+    },
+    {
+      "id": "2.4",
+      "category": "Reproduce Scripts",
+      "item": "reproduce.py pins canonical K880 numbers (main.tex Table 2 SPY)",
+      "status": "WARN",
+      "evidence": "reproduce.py line 76 runs k880v2_prg_fixed.py which gives QLIKE=0.864, DM=-0.57. Paper Table 2 SPY uses K880 canonical QLIKE=0.748, DM=6.00. Reviewer running reproduce.py will see confusing divergence.",
+      "remediation": "Change reproduce.py to run K880 canonical OR run K1200 + verify MINOR_DIVERGENT band (|ΔQLIKE|<0.05, |ΔDM_t|<0.3) against K880",
+      "remediation_minutes": 30
+    },
+    {
+      "id": "3.1",
+      "category": "Results",
+      "item": "results/ directory with README",
+      "status": "PASS",
+      "evidence": "paper/prg-periodic-garch/results/README.md (2901 bytes)"
+    },
+    {
+      "id": "3.2",
+      "category": "Results",
+      "item": "Table → JSON mapping complete",
+      "status": "PASS",
+      "evidence": "results/README.md lines 10-16 maps Tables 1-5 to K874d/K880/K880v2/K880b/K881/K881b/K883/K886 JSON"
+    },
+    {
+      "id": "3.3",
+      "category": "Results",
+      "item": "figures/ directory with soft-links",
+      "status": "PASS",
+      "evidence": "4 soft-links: k880_qlike_comparison.png, k880_rolling_qlike_ratio.png, k881_dm_heatmap.png, k881_qlike_all_assets.png"
+    },
+    {
+      "id": "3.4",
+      "category": "Results",
+      "item": "Table 1 0050.TW OOS period matches K886 actual",
+      "status": "FAIL",
+      "severity": "BLOCKER",
+      "blocker_id": "B1",
+      "evidence": "main.tex line 160: '2019/12--2026/04'; K886 JSON actual: 2021-01-08 to 2026-04-02. Flagged in reproducibility_audit/diff_report.md DIV-2.",
+      "remediation": "Edit main.tex line 160 OOS period string to '2021/01--2026/04'. Re-run xelatex × 2.",
+      "remediation_minutes": 15
+    },
+    {
+      "id": "4.1",
+      "category": "Experiment Index",
+      "item": "experiments.md lists all supporting K",
+      "status": "PASS",
+      "evidence": "experiments.md (3819 bytes): K874c/K874d/K874e/K880/K880b/K880v2/K881/K881b/K883/K884/K886"
+    },
+    {
+      "id": "4.2",
+      "category": "Experiment Index",
+      "item": "Table/Figure → K mapping present",
+      "status": "PASS",
+      "evidence": "experiments.md lines 49-67"
+    },
+    {
+      "id": "5.1",
+      "category": "README",
+      "item": "Paper title + target journal + status",
+      "status": "PASS",
+      "evidence": "README.md lines 1-4: title, FRL, Near submission-ready, 14 pages, 19 citations"
+    },
+    {
+      "id": "5.2",
+      "category": "README",
+      "item": "Supporting K list with key results",
+      "status": "PASS",
+      "evidence": "README.md lines 39-54 list 11 K experiments"
+    },
+    {
+      "id": "5.3",
+      "category": "README",
+      "item": "Data sources summary in README",
+      "status": "PASS",
+      "evidence": "README.md lines 7-10 summarise + delegate to data_sources.md"
+    },
+    {
+      "id": "6.1",
+      "category": "Three-Way Consistency",
+      "item": "Scripts produce numbers matching main.tex body",
+      "status": "PASS",
+      "evidence": "reproducibility_audit/diff_report.md: 56/85 matched at rtol<0.01; after nosource_rescan_report.md all no-source items resolved except DIV-2 (Table 1 date). Spot-check 10/10 body numbers match JSON at 3-dp."
+    },
+    {
+      "id": "6.2",
+      "category": "Three-Way Consistency",
+      "item": "reproduce_report.json exists",
+      "status": "N/A",
+      "evidence": "reproduce.py prints traceability table to stdout instead. docs/paper-guide.md allows either approach.",
+      "note": "Not required for FRL"
+    },
+    {
+      "id": "7.1",
+      "category": "Post-7d35418b Extras",
+      "item": "K1218 Appendix A cherry-picked into main.tex",
+      "status": "FAIL",
+      "severity": "BLOCKER",
+      "blocker_id": "B2",
+      "evidence": "experiments/k1218/k1218_appendix_draft.md (7712 bytes) exists but main.tex has no \\appendix section, no Appendix A, no K1200/K1218 reference. grep 'Appendix|errata|K1200|Eq.(5)' main.tex returns no matches for appendix content.",
+      "remediation": "1) Convert k1218_appendix_draft.md to LaTeX (math and tables already LaTeX-compatible). 2) Append \\appendix \\section{Independent Replication of the Two-Phase Forecast Timing} + contents before \\end{document}. 3) Add cross-reference sentence in Section 4.1 near line 203: 'Appendix A.3 documents an independent clean-slate replication of the SPY results, yielding DM t=6.13 against the main-text 6.00, which confirms the transcription of Eqs.(5)-(6).'. 4) Re-run xelatex × 2.",
+      "remediation_minutes": 55
+    },
+    {
+      "id": "7.2",
+      "category": "Post-7d35418b Extras",
+      "item": "Section 4 two-phase timing cross-reference sentence",
+      "status": "PASS",
+      "evidence": "main.tex line 202: Table 2 caption already references Eqs.(eq:prg_ov_forecast)-(eq:prg_fullday) for two-phase timing convention. Appendix-specific cross-reference still pending (part of B2)."
+    },
+    {
+      "id": "7.3",
+      "category": "Post-7d35418b Extras",
+      "item": "paper-update CLI re-run since 7d35418b",
+      "status": "FAIL",
+      "severity": "BLOCKER",
+      "blocker_id": "B3",
+      "evidence": "main.pdf timestamp 2026-04-17 23:29 confirms xelatex ran after commit 7d35418b, but no paper-6-specific paper-update commit in git log after 7d35418b. Supabase paper metadata may point at pre-errata version.",
+      "remediation": "Run 'uv run volpred ops paper-update --paper-id paper-6' after B1+B2 remediation. Single call covers all three.",
+      "remediation_minutes": 5
+    }
+  ],
+
+  "blockers": [
+    {
+      "id": "B1",
+      "item": "3.4",
+      "title": "Table 1 0050.TW OOS date mismatch",
+      "file": "paper/prg-periodic-garch/main.tex",
+      "line": 160,
+      "fix": "change '2019/12--2026/04' to '2021/01--2026/04'",
+      "minutes": 15
+    },
+    {
+      "id": "B2",
+      "item": "7.1",
+      "title": "K1218 Appendix A not in main.tex",
+      "file": "paper/prg-periodic-garch/main.tex",
+      "fix": "append \\appendix section from experiments/k1218/k1218_appendix_draft.md + add Sec 4.1 cross-reference sentence",
+      "minutes": 55
+    },
+    {
+      "id": "B3",
+      "item": "7.3",
+      "title": "paper-update CLI not run since errata commit",
+      "cli": "uv run volpred ops paper-update --paper-id paper-6",
+      "note": "Covers B1+B2+B3 in single execution after main.tex edits",
+      "minutes": 5
+    }
+  ],
+
+  "warn_items": [
+    {"id": "W1", "item": "1.2", "title": "Create data/README.md stub", "minutes": 10},
+    {"id": "W2", "item": "1.6", "title": "Add 'data on request' clause to data_sources.md", "minutes": 5},
+    {"id": "W3", "item": "2.4", "title": "Update reproduce.py to pin K880 canonical or K1200 band check", "minutes": 30}
+  ],
+
+  "body_numbers_verification": {
+    "total_checked": 10,
+    "matched": 10,
+    "rtol_threshold": 0.01,
+    "checks": [
+      {"location": "Abstract line 40", "paper_value": "4.26-6.63", "json_source": "K881 QQQ=4.257, EEM=6.629", "match": true},
+      {"location": "Abstract line 40", "paper_value": "6.00/-0.57", "json_source": "K880=6.004, K880v2=-0.569", "match": true},
+      {"location": "Table 2 SPY QLIKE", "paper_value": 0.748, "json_value": 0.7478, "source": "K880", "match": true},
+      {"location": "Table 2 TAIFEX QLIKE", "paper_value": 0.198, "json_value": 0.1979, "source": "K874d", "match": true},
+      {"location": "Table 2 GLD QLIKE (Basic)", "paper_value": 0.811, "json_value": 0.8115, "source": "K881 PRG_Basic", "match": true},
+      {"location": "Table 2 TAIFEX DM vs Sep", "paper_value": -4.07, "json_value": -4.0657, "source": "K874c", "match": true},
+      {"location": "Table 2 TAIFEX Spearman", "paper_value": 0.726, "json_value": 0.72650, "source": "K874d PRG_Ext", "match": true},
+      {"location": "Table 3 PRG-Ablated QLIKE", "paper_value": 0.864, "json_value": 0.8636, "source": "K880v2", "match": true},
+      {"location": "Table 4 SPY VaR VR%", "paper_value": 0.93, "json_value": 0.9325, "source": "K880", "match": true},
+      {"location": "Table 5 PRG Ext Sharpe", "paper_value": 1.66, "json_value": 1.6622, "source": "K874e", "match": true}
+    ]
+  },
+
+  "sources_audited": [
+    "docs/paper-guide.md",
+    "paper/prg-periodic-garch/main.tex (commit 7d35418b)",
+    "paper/prg-periodic-garch/README.md",
+    "paper/prg-periodic-garch/data_sources.md",
+    "paper/prg-periodic-garch/experiments.md",
+    "paper/prg-periodic-garch/reproduce.py",
+    "paper/prg-periodic-garch/scripts/README.md",
+    "paper/prg-periodic-garch/results/README.md",
+    "paper/prg-periodic-garch/figures/",
+    "paper/prg-periodic-garch/reproducibility_audit/README.md",
+    "paper/prg-periodic-garch/reproducibility_audit/diff_report.md",
+    "paper/prg-periodic-garch/reproducibility_audit/script_output.json",
+    "paper/prg-periodic-garch/reproducibility_audit/nosource_rescan_report.md",
+    "experiments/k1200/README.md",
+    "experiments/k1218/k1218_appendix_draft.md",
+    "experiments/k880/ (canonical K)"
+  ],
+
+  "rules_observed": {
+    "filesystem_only": true,
+    "no_modification_to_paper_folder": true,
+    "no_modification_to_shared_json": true,
+    "worktree_output_only": "experiments/k1221/",
+    "seed": 42,
+    "seed_used": false,
+    "seed_required": false,
+    "notes": "Audit is deterministic filesystem check + verbatim number comparison; no random computation."
+  },
+
+  "next_steps_for_main_thread": [
+    "1. Read experiments/k1221/k1221_submission_checklist.md for line-by-line fix list",
+    "2. Address B1: edit main.tex line 160 Table 1 0050.TW OOS date",
+    "3. Address B2: convert experiments/k1218/k1218_appendix_draft.md to \\appendix in main.tex + Sec 4.1 cross-reference sentence",
+    "4. Re-run: cd paper/prg-periodic-garch && /Library/TeX/texbin/xelatex -interaction=nonstopmode main.tex (twice)",
+    "5. Address B3: uv run volpred ops paper-update --paper-id paper-6",
+    "6. Optional polish: W1 (data/README.md), W2 (data-on-request clause), W3 (reproduce.py canonical pin)",
+    "7. Re-audit: rerun K1221 checklist to confirm readiness=READY"
+  ]
+}
