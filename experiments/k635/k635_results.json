@@ -1,0 +1,266 @@
+{
+  "experiment_id": "K635",
+  "title": "Fixed vs Rolling GARCH Parameters \u2014 Impact on VT Strategy Performance",
+  "description": "Tests whether the QLIKE improvement from fixed (pre-OOS) GARCH parameters (found in K634) translates to better VT strategy economic outcomes. Compares Rolling VT, Fixed VT, EWMA VT, 12/VIX, and Buy&Hold.",
+  "attribution": "[\u63d0\u51fa: \u7528\u6236, \u57f7\u884c: Claude]",
+  "timestamp": "2026-03-28T19:01:35.048188+00:00",
+  "config": {
+    "data_source": "yfinance",
+    "analysis_start": "2006-01-01",
+    "oos_start": "2023-01-01",
+    "oos_end": "2024-12-31",
+    "rolling_window": 2000,
+    "refit_step": 21,
+    "target_vol": 0.1,
+    "max_weight": 1.5,
+    "min_weight": 0.0,
+    "ewma_lambda": 0.94,
+    "tx_cost_bp": 2
+  },
+  "references": [
+    "K634: Fixed params QLIKE < rolling QLIKE for SPY",
+    "Hillebrand (2005) 'Neglecting parameter changes in GARCH models' JoE",
+    "Fleming, Kirby & Ostdiek (2001) 'Economic value of volatility timing' JoFE",
+    "Hansen & Lunde (2005) 'A forecast comparison of volatility models' JoAE"
+  ],
+  "prior_knowledge": [
+    "K634 (fixed params better QLIKE)",
+    "K35/K36 (GJR baseline)",
+    "K459/K474/K476 (prediction \u2260 application)"
+  ],
+  "descriptive_stats": {
+    "SPY": {
+      "n_obs": 4781,
+      "mean_return": 0.00039907941054871,
+      "std_return": 0.012224262811378972,
+      "skewness": -0.37637774693287734,
+      "kurtosis": 14.00172828468591
+    },
+    "GLD": {
+      "n_obs": 4781,
+      "mean_return": 0.00032343458611544784,
+      "std_return": 0.011205474279135924,
+      "skewness": -0.3138244648170639,
+      "kurtosis": 6.00147760553287
+    }
+  },
+  "fixed_params": {
+    "SPY": {
+      "omega": 3.0025432224878198e-06,
+      "alpha": 0.014817351753402697,
+      "gamma": 0.21885279406135769,
+      "beta": 0.8554998181308953,
+      "persistence": 0.9797435669149768,
+      "converged": true,
+      "loglik": -5739.922798376526
+    },
+    "GLD": {
+      "omega": 1.1679433837924046e-06,
+      "alpha": 0.06194882069463055,
+      "gamma": -0.01735363339246995,
+      "beta": 0.9382668062821323,
+      "persistence": 0.9915388102805278,
+      "converged": true,
+      "loglik": -6200.899672509404
+    }
+  },
+  "spy_strategies": {
+    "rolling_vt": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.15690633194438788,
+      "annualized_vol": 0.10014856983797239,
+      "sharpe_ratio": 1.5667356228675289,
+      "net_sharpe_ratio": 1.534463707136836,
+      "total_return": 0.35319418394912283,
+      "total_return_net": 0.34451723568550574,
+      "max_drawdown": -0.0812290700058836,
+      "max_drawdown_net": -0.08204805670414096,
+      "calmar_ratio": 1.9316524482309452,
+      "calmar_ratio_net": 1.8729910088956885,
+      "sortino_ratio": 2.143521572616937,
+      "avg_weight": 0.8196784807771601,
+      "weight_std": 0.21138956290171856,
+      "n_significant_weight_changes": 247,
+      "weight_change_std": 0.076185162711092,
+      "qlike_oos": 1.4923959431645344
+    },
+    "fixed_vt": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.16078557388499293,
+      "annualized_vol": 0.0995990144134897,
+      "sharpe_ratio": 1.6143289653197221,
+      "net_sharpe_ratio": 1.5901101386716672,
+      "total_return": 0.3638371007527539,
+      "total_return_net": 0.3573021952678206,
+      "max_drawdown": -0.0815625232475629,
+      "max_drawdown_net": -0.08218498850994947,
+      "calmar_ratio": 1.9713168190857464,
+      "calmar_ratio_net": 1.9270307114883811,
+      "sortino_ratio": 2.242448391861701,
+      "avg_weight": 0.8238884054075131,
+      "weight_std": 0.20144011371821183,
+      "n_significant_weight_changes": 65,
+      "weight_change_std": 0.06504234062014402,
+      "qlike_oos": 1.4643736613264666
+    },
+    "ewma_vt": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.16497956588166443,
+      "annualized_vol": 0.10223373965018981,
+      "sharpe_ratio": 1.6137487139389617,
+      "net_sharpe_ratio": 1.6013243346172574,
+      "total_return": 0.37454227224813197,
+      "total_return_net": 0.37108220522113444,
+      "max_drawdown": -0.09222474991081414,
+      "max_drawdown_net": -0.09255006616808176,
+      "calmar_ratio": 1.7888860207396362,
+      "calmar_ratio_net": 1.7689219679221388,
+      "sortino_ratio": 2.2183244064847893,
+      "avg_weight": 0.8139292259732235,
+      "weight_std": 0.168505011812839,
+      "n_significant_weight_changes": 40,
+      "weight_change_std": 0.030169458546483133,
+      "qlike_oos": 1.522651117539915
+    },
+    "12vix": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.23769960842561225,
+      "annualized_vol": 0.08976390708360601,
+      "sharpe_ratio": 2.6480532782983595,
+      "net_sharpe_ratio": 2.6284788928320437,
+      "total_return": 0.5924597475882984,
+      "total_return_net": 0.587023870546435,
+      "max_drawdown": -0.0605174738403092,
+      "max_drawdown_net": -0.0609334855696245,
+      "calmar_ratio": 3.927784709798749,
+      "calmar_ratio_net": 3.8727963960846647,
+      "sortino_ratio": 4.557662610350069,
+      "avg_weight": 0.7661450935909283,
+      "weight_std": 0.13712551449404622,
+      "n_significant_weight_changes": 117,
+      "weight_change_std": 0.0324183823298701,
+      "qlike_oos": null
+    },
+    "buy_hold": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.23657396203214284,
+      "annualized_vol": 0.12798241325551163,
+      "sharpe_ratio": 1.8484880540565574,
+      "total_return": 0.5757651027968689,
+      "max_drawdown": -0.09974317142568878,
+      "calmar_ratio": 2.371831160475948
+    }
+  },
+  "portfolio_5050_strategies": {
+    "rolling_vt_5050": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.19479025910202766,
+      "annualized_vol": 0.1005690160728321,
+      "sharpe_ratio": 1.93688142440372,
+      "net_sharpe_ratio": 1.913787829477162,
+      "total_return": 0.4590879542374424,
+      "total_return_net": 0.45232772656704423,
+      "max_drawdown": -0.07926651346154141,
+      "max_drawdown_net": -0.07989303999966531,
+      "calmar_ratio": 2.4574091958331956,
+      "calmar_ratio_net": 2.4089300473737962,
+      "sortino_ratio": 2.757158380508197,
+      "avg_weight": 0.9937220969636789,
+      "weight_std": 0.21358877818895397,
+      "n_significant_weight_changes": 128,
+      "weight_change_std": 0.050461734124019005
+    },
+    "fixed_vt_5050": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.1921621728438386,
+      "annualized_vol": 0.09800424986156837,
+      "sharpe_ratio": 1.9607534685002834,
+      "net_sharpe_ratio": 1.9424008383999376,
+      "total_return": 0.45221299875060605,
+      "total_return_net": 0.446986375323033,
+      "max_drawdown": -0.07785285600317143,
+      "max_drawdown_net": -0.0783258835662404,
+      "calmar_ratio": 2.4682739042484276,
+      "calmar_ratio_net": 2.4302340268774345,
+      "sortino_ratio": 2.816479345170245,
+      "avg_weight": 0.9751966949215576,
+      "weight_std": 0.20875330596376593,
+      "n_significant_weight_changes": 76,
+      "weight_change_std": 0.0402294551867725
+    },
+    "ewma_vt_5050": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.19981572932524153,
+      "annualized_vol": 0.10235131399060145,
+      "sharpe_ratio": 1.9522536793576473,
+      "net_sharpe_ratio": 1.9391363435667215,
+      "total_return": 0.4732284603804573,
+      "total_return_net": 0.4692762051602306,
+      "max_drawdown": -0.09018568305311206,
+      "max_drawdown_net": -0.09049453158444486,
+      "calmar_ratio": 2.2156036585936403,
+      "calmar_ratio_net": 2.1931249959267687,
+      "sortino_ratio": 2.8096254524474014,
+      "avg_weight": 1.01687515765814,
+      "weight_std": 0.2107180964785104,
+      "n_significant_weight_changes": 49,
+      "weight_change_std": 0.027861074905888357
+    },
+    "buy_hold_5050": {
+      "n_obs_oos": 502,
+      "annualized_return": 0.21266954279483347,
+      "annualized_vol": 0.10198527763932563,
+      "sharpe_ratio": 2.0852965027652957,
+      "total_return": 0.5115194966192851,
+      "max_drawdown": -0.07450458072649797,
+      "calmar_ratio": 2.854449226088945
+    }
+  },
+  "qlike_comparison": {
+    "rolling": 1.4923959431645344,
+    "fixed": 1.4643736613264666,
+    "ewma": 1.522651117539915
+  },
+  "weight_analysis": {
+    "rolling": {
+      "mean_weight": 0.8196784807771601,
+      "std_weight": 0.21138956290171856,
+      "min_weight": 0.3034193461775289,
+      "max_weight": 1.3031262868444606,
+      "pct_at_cap": 0.0,
+      "avg_daily_change": 0.06423628294856605
+    },
+    "fixed": {
+      "mean_weight": 0.8238884054075131,
+      "std_weight": 0.20144011371821183,
+      "min_weight": 0.32051385578036073,
+      "max_weight": 1.2603972312219376,
+      "pct_at_cap": 0.0,
+      "avg_daily_change": 0.04796413741985478
+    },
+    "ewma": {
+      "mean_weight": 0.8139292259732235,
+      "std_weight": 0.168505011812839,
+      "min_weight": 0.4749709033901942,
+      "max_weight": 1.331284730187893,
+      "pct_at_cap": 0.0,
+      "avg_daily_change": 0.02516363279619801
+    }
+  },
+  "dm_tests": {
+    "qlike_rolling_vs_fixed": {
+      "dm_statistic": 4.078382097841695,
+      "p_value": 4.535019051643552e-05,
+      "interpretation": "positive = rolling worse (higher QLIKE)"
+    },
+    "econ_rolling_vs_fixed": {
+      "dm_statistic": -1.3325842459537356,
+      "p_value": 0.1826682779321156,
+      "interpretation": "Tests if strategy return variance differs significantly"
+    }
+  },
+  "conclusion": "prediction_application_aligned",
+  "key_finding": "QLIKE winner: fixed, Sharpe winner: fixed. Conclusion: prediction_application_aligned",
+  "runtime_seconds": 4.9,
+  "plot_file": "experiments/k635/k635_fixed_vs_rolling_vt.png"
+}
