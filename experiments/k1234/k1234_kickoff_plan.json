@@ -1,0 +1,320 @@
+{
+  "experiment_id": "K1234",
+  "task_type": "planning_documentation",
+  "date": "2026-04-17",
+  "seed": 42,
+  "paper": {
+    "slug": "crypto-fear-channel",
+    "paper_number": 10,
+    "title": "The Crypto Fear Channel: Asymmetric, Tail-Concentrated, and Regime-Dependent Volatility Spillover from Bitcoin to Equity Markets",
+    "status": "kickoff",
+    "target_journals": [
+      "Journal of International Financial Markets, Institutions & Money (JIFMIM)",
+      "Journal of Empirical Finance (JEF)",
+      "Finance Research Letters (FRL) backup"
+    ],
+    "sample": {
+      "assets": ["SPY", "BTC-USD", "VIX"],
+      "period_start": "2015-02",
+      "period_end": "2026-04",
+      "n_obs": 2812,
+      "data_source": "yfinance"
+    },
+    "page_target": 30
+  },
+  "current_state": {
+    "outline_md": "paper/crypto-fear-channel/outline.md",
+    "body_v0_intro_tex": "paper/crypto-fear-channel/body_v0_intro.tex",
+    "sections_drafted": ["abstract", "section_1_introduction"],
+    "sections_pending": [
+      "section_2_literature_review",
+      "section_3_data",
+      "section_4_methodology",
+      "section_5_main_results",
+      "section_6_robustness",
+      "section_7_forecasting",
+      "section_8_discussion",
+      "section_9_conclusion"
+    ],
+    "repro_package_status": {
+      "readme_md": false,
+      "data_sources_md": false,
+      "experiments_md": false,
+      "scripts_readme": false,
+      "figures_dir": false,
+      "results_dir": false,
+      "reproduce_py": false
+    }
+  },
+  "sections": [
+    {
+      "id": "section_2",
+      "title": "Literature Review",
+      "target_words": 1000,
+      "target_pages": 3,
+      "subsections": [
+        "2.1 Volatility spillover literature",
+        "2.2 Cryptocurrency-equity linkage",
+        "2.3 Asymmetric and tail causality",
+        "2.4 Positioning of the present paper"
+      ],
+      "primary_k_source": null,
+      "secondary_k_source": null,
+      "key_claims": [
+        "Prior literature focuses on level/return spillover not asymmetric volatility",
+        "Most studies stop at 2020 or exclude COVID",
+        "No prior paper combines asymm Granger + QR + DY + honest OOS null"
+      ]
+    },
+    {
+      "id": "section_3",
+      "title": "Data and Preliminaries",
+      "target_words": 600,
+      "target_pages": 2,
+      "subsections": [
+        "3.1 Sample construction",
+        "3.2 Return and RV definitions",
+        "3.3 Descriptive statistics",
+        "3.4 Correlation matrix",
+        "3.5 Diagnostics (ADF, Ljung-Box)"
+      ],
+      "primary_k_source": "K1025",
+      "secondary_k_source": "K639",
+      "key_claims": [
+        "All series stationary in returns",
+        "BTC RV ~3-4x SPY",
+        "Unconditional corr(BTC_rv, VIX) non-trivial"
+      ]
+    },
+    {
+      "id": "section_4",
+      "title": "Methodology",
+      "target_words": 800,
+      "target_pages": 3,
+      "subsections": [
+        "4.1 Symmetric and asymmetric Granger (Hatemi-J 2012)",
+        "4.2 Quantile regression (Koenker & Bassett 1978)",
+        "4.3 Diebold-Yilmaz spillover index",
+        "4.4 EWMA/DCC correlation by VIX regime",
+        "4.5 DM forecasting evaluation (Diebold-Mariano; Harvey 2016 threshold)"
+      ],
+      "primary_k_source": "K1025",
+      "secondary_k_source": "K746b",
+      "key_claims": [
+        "Framework combines 5 complementary methods",
+        "Harvey 2016 |t|>3 threshold applied to DM"
+      ]
+    },
+    {
+      "id": "section_5",
+      "title": "Main Results",
+      "target_words": 1500,
+      "target_pages": 4,
+      "subsections": [
+        "5.1 Asymmetric Granger causality",
+        "5.2 Tail dependence (QR)",
+        "5.3 Regime-conditional correlation (EWMA)"
+      ],
+      "primary_k_source": "K1025",
+      "secondary_k_source": "K746b",
+      "key_claims": [
+        "BTC_neg Granger-causes VIX; BTC_pos does not",
+        "QR coef: 2.61 at tau=0.5, 22.31 at tau=0.95 (8.5x amplification)",
+        "EWMA corr(BTC, SPY) rises in high-VIX regime (not safe-haven)"
+      ],
+      "tables_required": 3,
+      "figures_required": 3
+    },
+    {
+      "id": "section_6",
+      "title": "Robustness",
+      "target_words": 800,
+      "target_pages": 3,
+      "subsections": [
+        "6.1 Rolling Diebold-Yilmaz spillover",
+        "6.2 Sub-period Granger (5 regimes)",
+        "6.3 Pre-ETF vs post-ETF microstructure"
+      ],
+      "primary_k_source": "K1025",
+      "secondary_k_source": null,
+      "key_claims": [
+        "BTC is net receiver in DY framework",
+        "Granger significance concentrated only in 2020 (F=11.05, p<1e-6)",
+        "ETF-era robustness: sign and magnitude preserved post-2019"
+      ],
+      "tables_required": 2,
+      "figures_required": 1,
+      "verify_before_draft": [
+        "K1025 has pre-ETF vs post-ETF 2-split, or need new K12xx-B"
+      ]
+    },
+    {
+      "id": "section_7",
+      "title": "Forecasting and Economic Significance",
+      "target_words": 700,
+      "target_pages": 2,
+      "subsections": [
+        "7.1 Out-of-sample DM test (honest NULL)",
+        "7.2 Crisis-period sub-forecast"
+      ],
+      "primary_k_source": "K1025",
+      "secondary_k_source": null,
+      "key_claims": [
+        "DM t=-0.98, p=0.33 over 1,826 OOS days -- does not beat Harvey 2016 |t|>3",
+        "Granger != forecastability",
+        "Possibly crisis-conditional improvement (hypothesis, verify)"
+      ],
+      "tables_required": 1,
+      "figures_required": 0,
+      "verify_before_draft": [
+        "K1025 has crisis-conditional (VIX>25) sub-forecast, or need new K12xx-A"
+      ]
+    },
+    {
+      "id": "section_8",
+      "title": "Discussion",
+      "target_words": 600,
+      "target_pages": 2,
+      "subsections": [
+        "8.1 Asymmetry mechanism",
+        "8.2 Why Granger != forecastability",
+        "8.3 Policy implications"
+      ],
+      "primary_k_source": null,
+      "secondary_k_source": null,
+      "key_claims": [
+        "Retail-heavy BTC transmits fear not euphoria",
+        "Spillover is crisis-time amplifier not steady-state channel",
+        "Regime-dependent margin/capital requirements implied"
+      ]
+    },
+    {
+      "id": "section_9",
+      "title": "Conclusion",
+      "target_words": 300,
+      "target_pages": 1,
+      "subsections": [],
+      "primary_k_source": null,
+      "secondary_k_source": null,
+      "key_claims": [
+        "Restate 3 stylized facts",
+        "Forecastability gap headline",
+        "3 contributions",
+        "Limitations",
+        "Future research"
+      ]
+    }
+  ],
+  "supporting_experiments": {
+    "confirmed_exist": [
+      {
+        "k": "K639",
+        "path": "experiments/k639/",
+        "contribution": "BTC -> SPY RV Granger causality at lag 1-10",
+        "artifacts": ["k639_crypto_equity_vol.py", "k639_results.json", "README.md"]
+      },
+      {
+        "k": "K746b",
+        "path": "experiments/k746b/",
+        "contribution": "BTC volatility asymmetrically Granger-causes VIX; negative branch dominates",
+        "artifacts": ["k746b_bitcoin_vix_fixed.py", "k746b_bitcoin_vix_fixed_results.json", "README.md"]
+      },
+      {
+        "k": "K1025",
+        "path": "experiments/k1025/",
+        "contribution": "Full framework: asymm Granger + QR + rolling DY + EWMA + 5-subperiod + OOS null",
+        "artifacts": ["k1025.py", "k1025_results.json", "k1025_results.png", "README.md"]
+      }
+    ],
+    "verify_needed": [
+      {
+        "proposed_k": "K12xx-A",
+        "for_section": "7.2",
+        "contribution": "Crisis-conditional (VIX>25) sub-forecast",
+        "action": "Check K1025 JSON first; run new experiment only if missing"
+      },
+      {
+        "proposed_k": "K12xx-B",
+        "for_section": "6.3",
+        "contribution": "Pre-ETF (2015-2018) vs post-ETF (2019-2026) 2-split Granger",
+        "action": "Check K1025 sub-period breakdown first"
+      }
+    ],
+    "open_decisions": [
+      {
+        "proposed_k": "K12xx-C",
+        "question": "Multi-asset receiver (SPY + GLD + TLT)?",
+        "recommendation": "v1 = SPY only; multi-asset = v2 or R&R"
+      },
+      {
+        "proposed_k": "K12xx-D",
+        "question": "Memecoin (DOGE/PEPE/SHIB) alternative fear channel?",
+        "recommendation": "Defer to R&R; keep out of v1"
+      },
+      {
+        "question": "Deribit BTC options IV?",
+        "recommendation": "Cut; data not free historically; acknowledge in section 9 limitations"
+      },
+      {
+        "question": "Forecasting section length -- body or appendix?",
+        "recommendation": "Keep in body section 7 as headline honest-NULL"
+      }
+    ]
+  },
+  "writing_sequence_recommended": [
+    {"order": 1, "section_id": "section_3", "rationale": "Establishes fact base and notation"},
+    {"order": 2, "section_id": "section_4", "rationale": "Specifies machinery before applying"},
+    {"order": 3, "section_id": "section_5", "rationale": "Primary contribution; applies section_4 to section_3"},
+    {"order": 4, "section_id": "section_6", "rationale": "Extends section_5 to sub-samples"},
+    {"order": 5, "section_id": "section_7", "rationale": "Separate OOS analysis; honest-NULL highlight"},
+    {"order": 6, "section_id": "section_2", "rationale": "Written last; contribution framing depends on knowing results"},
+    {"order": 7, "section_id": "section_8", "rationale": "Interprets results through mechanism/policy lens"},
+    {"order": 8, "section_id": "section_9", "rationale": "Summary + limitations + future research"}
+  ],
+  "reproduction_package_tasks": [
+    {"file": "paper/crypto-fear-channel/README.md", "priority": "before_section_2_draft"},
+    {"file": "paper/crypto-fear-channel/data_sources.md", "priority": "before_section_2_draft"},
+    {"file": "paper/crypto-fear-channel/experiments.md", "priority": "before_section_2_draft"},
+    {"file": "paper/crypto-fear-channel/scripts/README.md", "priority": "before_section_5_draft"},
+    {"file": "paper/crypto-fear-channel/figures/", "priority": "before_section_5_draft"},
+    {"file": "paper/crypto-fear-channel/results/", "priority": "before_section_5_draft"},
+    {"file": "paper/crypto-fear-channel/reproduce.py", "priority": "before_first_submission"}
+  ],
+  "estimated_effort_days": {
+    "pre_flight_repro_package": 1,
+    "section_3_data": 0.5,
+    "section_4_methodology": 1,
+    "section_5_main_results": 2,
+    "section_6_robustness": 1.5,
+    "section_7_forecasting": 1,
+    "section_2_literature": 1.5,
+    "section_8_discussion": 1,
+    "section_9_conclusion": 0.5,
+    "internal_review": 1,
+    "reproduce_py_report": 0.5,
+    "citation_verifier": 0.5,
+    "subtotal_drafting_no_new_experiments": 11,
+    "optional_new_experiments": "1-4",
+    "total_ready_for_first_submission": "2-3 weeks"
+  },
+  "risk_notes": [
+    "Paper narrative state machine: K1234 is planning only; satisfies 3-experiment minimum via K639+K746b+K1025",
+    "Lookahead bias: verify K1025 DM test uses signal.shift(1); Codex-review before section 7 finalized",
+    "Three-way consistency: section 5 numbers must match reproduce.py bit-for-bit per paper-guide",
+    "Honest NULL: section 7 must state Granger != forecastability; not spin as weak predictability"
+  ],
+  "sources_verified_by_filesystem_read": [
+    "paper/crypto-fear-channel/outline.md",
+    "paper/crypto-fear-channel/body_v0_intro.tex",
+    "paper/crypto-fear-channel/reproducibility_audit/nonK_sweep_report.md",
+    "experiments/k1229/k1229_papers_audit.md",
+    "experiments/k639/ (README + py + results.json + data/ + references/)",
+    "experiments/k746b/ (README + py + results.json + data/ + references/)",
+    "experiments/k1025/ (README + py + results.json + results.png)"
+  ],
+  "output_deliverables": [
+    "experiments/k1234/README.md",
+    "experiments/k1234/k1234_kickoff_guide.md",
+    "experiments/k1234/k1234_kickoff_plan.json"
+  ]
+}
