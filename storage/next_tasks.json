@@ -524,8 +524,9 @@
     "id": "K1132",
     "title": "K1132: Block-bootstrap CI on high-tertile DM (robustness)",
     "priority": 3,
-    "description": "K1128 衍生: High-VIX DM +3.59 只 N=6 jumps，block-bootstrap 驗 CI 是否不跨越 0。",
-    "status": "pending"
+    "description": "K1128 衍生: High-VIX DM +3.59 只 N=6 jumps，block-bootstrap 驗 CI 是否不跨越 0。 [DONE commit 551d882d: Scenario A ROBUST. DM=3.59 b=1/b=2 CI [1.04, 10.59] 完全>0, permutation p=0.0000. K1128 結論有效不需更正; CI 寬因 N_jumps=6 限制, magnitude 估計不精確.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T15:54:08+08:00"
   },
   {
     "id": "K1133",
@@ -1027,14 +1028,28 @@
   {
     "id": "Paper_folders_backfill_remaining_4",
     "title": "論文資料夾補齊剩 4 個：prg-periodic-garch / volatility-absorption / vt-crowding-abm / vt-insurance-cost",
-    "status": "pending",
+    "status": "completed",
     "priority": 3,
     "created_at": "2026-04-17T15:50:02+08:00",
-    "description": "承 Paper_folders_backfill_selfcontained (commit 5b785551) Paper 9 + Paper 4 已完成，剩 4 個資料夾。**投稿 hard requirement**: 期刊要求附原始資料+腳本供審稿人復現，非 nice-to-have。目標：(A) prg-periodic-garch (Paper 6) — 只缺 experiments.md 與 K 編號索引(B) volatility-absorption — 缺 results/README.md 與 figures/ soft-link(C) vt-crowding-abm — 缺 results/README.md、figures/、experiments 索引(D) vt-insurance-cost — 缺 results/README.md、figures/方法：照 Paper 9/4 的 agent 模式（worktree isolation，禁碰 .tex），commit 格式：'paper-folder backfill: <4 folder names> self-contained indexes'.樣板：paper/leverage-direction/, paper/taiwan-vt/, paper/vt-trend-following/.規範參考：agent-specs/claude_rules/paper-workflow.md 投稿前檢查清單段。",
+    "description": "承 Paper_folders_backfill_selfcontained (commit 5b785551) Paper 9 + Paper 4 已完成，剩 4 個資料夾。**投稿 hard requirement**: 期刊要求附原始資料+腳本供審稿人復現，非 nice-to-have。目標：(A) prg-periodic-garch (Paper 6) — 只缺 experiments.md 與 K 編號索引(B) volatility-absorption — 缺 results/README.md 與 figures/ soft-link(C) vt-crowding-abm — 缺 results/README.md、figures/、experiments 索引(D) vt-insurance-cost — 缺 results/README.md、figures/方法：照 Paper 9/4 的 agent 模式（worktree isolation，禁碰 .tex），commit 格式：'paper-folder backfill: <4 folder names> self-contained indexes'.樣板：paper/leverage-direction/, paper/taiwan-vt/, paper/vt-trend-following/.規範參考：agent-specs/claude_rules/paper-workflow.md 投稿前檢查清單段。 | 2026-04-17 DONE commit 65bdf9ef + merge ffdfc230 (27 files, 1029 insertions). prg-periodic-garch: 4 figures soft-linked (K880/K881 charts), K 索引 K874c/d/e K880/b/v2 K881/b K883/K884/K886. volatility-absorption: **缺漏警告 K716-K722 原始 .py 不在 repo，投稿前必須重建**. vt-crowding-abm: 純 ABM simulation 無外部資料，figures stub. vt-insurance-cost: 4 CSV data/ 齊全，figures stub. .tex 全未動.",
     "tags": [
       "paper",
       "infrastructure",
       "submission-readiness"
+    ],
+    "completed_at": "2026-04-17T15:59:00+08:00"
+  },
+  {
+    "id": "VolAbsorption_missing_scripts_recovery",
+    "title": "volatility-absorption 缺 K716-K722 原始 .py 腳本 — 投稿前必須重建",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T15:59:00+08:00",
+    "description": "Paper folder audit (commit 65bdf9ef, 2026-04-17) 發現 paper/volatility-absorption/ 對應 K716/K717/K718/K719/K720/K721/K722 的 .py 原始腳本不在 repo（只有 results JSON）。**投稿 hard requirement**: 審稿人需要完整 replication package，缺腳本會 desk-reject。處理方案：(1) 從 git log 查這些 K 編號是否曾存在於 experiments/ 然後被刪（git log -- experiments/k71X/）; (2) 若曾存在，從 git blob 恢復到 paper/volatility-absorption/scripts/legacy_k71X/; (3) 若 never existed 於 tracked experiments，從 results JSON + main_v2.tex method 描述重建; (4) 更新 paper/volatility-absorption/scripts/README.md 標明恢復狀態. **必做 before Paper 5 投稿**. | 2026-04-17 深查: `git log --all -- experiments/k71[6-9]*.py k72[0-2]*.py` 空 → 腳本 **從未被 commit**. 所有 K716-K722 README 是 2026-04-16 migration 的 stub（\"待補充\"），僅 results JSON 有效. K716 JSON 結構示例: VIX tertile buckets (calm/normal/elevated/high/crisis) × (shock_days, shock_abs_r, normal_abs_r, ratio) + regression_raw_slope/normalized_slope/conclusion. **重建路徑必走**: (a) 從 main_v2.tex methodology 段 + results JSON 結構反推 → 寫 reconstruct_k71X.py 能重產相同 JSON; (b) validate 重建腳本 output 與舊 JSON 一致 (allclose); (c) 若輸出不同，論文需更正或明註 \"original script lost, reconstruction approximate\"；不可偽造一致性.",
+    "tags": [
+      "paper",
+      "submission-critical",
+      "volatility-absorption"
     ]
   }
 ]
