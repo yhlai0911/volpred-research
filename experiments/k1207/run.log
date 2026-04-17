@@ -1,0 +1,122 @@
+/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/base/model.py:1894: ValueWarning: covariance of constraints does not have full rank. The number of constraints is 12, but rank is 1
+  warnings.warn('covariance of constraints does not have full '
+/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/base/model.py:1894: ValueWarning: covariance of constraints does not have full rank. The number of constraints is 13, but rank is 2
+  warnings.warn('covariance of constraints does not have full '
+/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/base/model.py:1894: ValueWarning: covariance of constraints does not have full rank. The number of constraints is 21, but rank is 9
+  warnings.warn('covariance of constraints does not have full '
+/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/base/model.py:1894: ValueWarning: covariance of constraints does not have full rank. The number of constraints is 22, but rank is 10
+  warnings.warn('covariance of constraints does not have full '
+/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/base/model.py:1894: ValueWarning: covariance of constraints does not have full rank. The number of constraints is 12, but rank is 1
+  warnings.warn('covariance of constraints does not have full '
+/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/base/model.py:1894: ValueWarning: covariance of constraints does not have full rank. The number of constraints is 13, but rank is 2
+  warnings.warn('covariance of constraints does not have full '
+/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/base/model.py:1894: ValueWarning: covariance of constraints does not have full rank. The number of constraints is 21, but rank is 9
+  warnings.warn('covariance of constraints does not have full '
+/Users/yhlai0911/Desktop/volpred-research/.venv/lib/python3.12/site-packages/statsmodels/base/model.py:1894: ValueWarning: covariance of constraints does not have full rank. The number of constraints is 22, but rank is 10
+  warnings.warn('covariance of constraints does not have full '
+============================================================================
+K1207 — GICS sector-FE vs inst-FE decomposition (K1171 N=182 pool)
+============================================================================
+
+Panel N = 182 stocks across 12 markets
+GICS sectors present: 10
+gics_sector
+Financials                45
+Information Technology    29
+Industrials               19
+Consumer Staples          19
+Communication Services    17
+Consumer Discretionary    15
+Health Care               14
+Materials                 13
+Energy                    10
+Real Estate                1
+
+--- Analysis 1: Sector-FE only (no market FE) ---
+{
+  "S1_sector_only": {
+    "n": 182,
+    "r2": 0.1791975913761762,
+    "adj_r2": 0.13624862813423189,
+    "sector_fe_f": 380.38950956518624,
+    "sector_fe_p": 2.047298781845301e-12,
+    "sector_fe_df": 9
+  },
+  "S2_sector_plus_mcap": {
+    "n": 182,
+    "r2": 0.1836930346304535,
+    "adj_r2": 0.13595578519363782
+  }
+}
+
+--- Analysis 2: 4-model panel OLS (y = θ_EAV) ---
+
+--- Analysis 2b (robustness): y = θ_rel_stock ---
+M1: R²=0.1547 adj=0.0947 inst_β=None inst_t=None sec_F=None sec_p=None
+M2: R²=0.1640 adj=0.0993 inst_β=-0.001274309446296991 inst_t=-0.8745611980735556 sec_F=None sec_p=None
+M3: R²=0.3305 adj=0.2427 inst_β=None inst_t=None sec_F=689.5201482099515 sec_p=7.865192356265678e-14
+M4: R²=0.3376 adj=0.2460 inst_β=-0.0012187311451080714 inst_t=-0.800193781110197 sec_F=154.39359918089633 sec_p=2.8041176441698043e-10
+Robustness (y=θ_rel_stock):
+M1_rel: R²=0.1726 adj=0.1138 inst_β=None inst_t=None sec_F=None sec_p=None
+M2_rel: R²=0.1731 adj=0.1091 inst_β=0.5765658574791432 inst_t=0.4225224940329933 sec_F=None sec_p=None
+M3_rel: R²=0.3031 adj=0.2116 inst_β=None inst_t=None sec_F=688.2830938539212 sec_p=7.943042513358365e-14
+M4_rel: R²=0.3034 adj=0.2070 inst_β=0.5011944296988882 inst_t=0.23181490753425943 sec_F=372.8727033218954 sec_p=2.283587701650545e-12
+
+--- Analysis 3a: sector-adjusted θ_EAV residual by market ---
+        theta_raw_mean  theta_sec_adj_mean  theta_raw_median  theta_sec_adj_median   n  abs_reduction_pct
+market                                                                                                   
+AU            0.000295           -0.000387          0.000116             -0.000345  10         -31.150392
+BR            0.001680            0.001032          0.000791              0.000401  10          38.604969
+CA            0.000360           -0.000265          0.000105             -0.000338  10          26.345482
+EU            0.000649           -0.000337          0.000227             -0.000251  18          48.067702
+HK            0.000247           -0.000344          0.000125             -0.000328   5         -39.235043
+ID            0.000428           -0.000071          0.000364             -0.000111  10          83.541212
+IN            0.000698           -0.000032          0.000609             -0.000102  10          95.373353
+JP            0.001019           -0.000004          0.000762              0.000029  30          99.633314
+KR            0.000077           -0.000959          0.000081             -0.000814  10       -1149.883166
+MX            0.000689            0.000150          0.000208             -0.000048   9          78.222853
+TW            0.000395           -0.000551          0.000092             -0.000377  30         -39.570887
+US            0.002019            0.000997          0.000232             -0.000114  30          50.623408
+
+--- Analysis 3b: per-market sector mix (AU/BR/IN/MX focus) ---
+  AU: n=10 top=Financials(50.0%) inst_pct_mean=0.375 theta_med=1.163e-04
+  BR: n=10 top=Financials(40.0%) inst_pct_mean=0.486 theta_med=7.912e-04
+  IN: n=10 top=Financials(40.0%) inst_pct_mean=0.383 theta_med=6.093e-04
+  MX: n=9 top=Consumer Staples(44.4%) inst_pct_mean=0.195 theta_med=2.076e-04
+  EU: n=18 top=Consumer Discretionary(22.2%) inst_pct_mean=0.413 theta_med=2.270e-04
+  US: n=30 top=Information Technology(23.3%) inst_pct_mean=0.750 theta_med=2.319e-04
+  CA: n=10 top=Financials(50.0%) inst_pct_mean=0.552 theta_med=1.053e-04
+  JP: n=30 top=Industrials(26.7%) inst_pct_mean=0.425 theta_med=7.619e-04
+
+--- Analysis 4: Orthogonality (sector-θ vs sector-inst) ---
+                        theta_eav_median  theta_eav_mean  inst_pct_median  log_analyst_median   n
+gics_sector                                                                                      
+Communication Services          0.000335        0.001173         0.318270            2.944439  17
+Consumer Discretionary          0.000352        0.002474         0.341500            3.178054  15
+Consumer Staples                0.000184        0.000388         0.194520            2.944439  19
+Energy                          0.000172        0.000269         0.552075            3.043387  10
+Financials                      0.000122        0.000445         0.406550            2.708050  45
+Health Care                     0.000195        0.000434         0.575085            3.198465  14
+Industrials                     0.000566        0.000661         0.377980            2.708050  19
+Information Technology          0.001368        0.001651         0.464220            3.135494  29
+Materials                       0.000208        0.000256         0.243550            2.564949  13
+Real Estate                     0.000512        0.000512         0.474300            2.484907   1
+  Spearman rho(sector_θ_median, sector_inst_pct_median) = -0.006, p=0.987, n=10
+
+--- Verdict ---
+{
+  "verdict": "SECTOR_ORTHOGONAL_CONFIRMED",
+  "inc_R2_inst_M2_minus_M1": 0.004634010827904711,
+  "inc_R2_sector_M3_minus_M1": 0.14798849501269962,
+  "inc_R2_joint_M4_minus_M1": 0.151299450071384,
+  "inst_beta_M2": -0.001274309446296991,
+  "inst_beta_M4": -0.0012187311451080714,
+  "inst_t_M2": -0.8745611980735556,
+  "inst_t_M4": -0.800193781110197,
+  "inst_beta_relative_change_M2_to_M4": 0.04361444651487465,
+  "sector_fe_joint_F_M3": 689.5201482099515,
+  "sector_fe_joint_p_M3": 7.865192356265678e-14
+}
+
+Wrote /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ab2963a2/experiments/k1207/k1207_results.json
+Wrote k1207_sector_median.csv and k1207_per_market_sector_mix_pct.csv
