@@ -27175,5 +27175,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:47:52.367266"
+  },
+  {
+    "item_id": "4ebbc2cb",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1180 Paper 2 Section 6.2/6.3 BCI Leading formal experiment. **VERDICT: (b) PARTIAL \u2014 3/5 MATCH, G20 partial resolved**. T1 BCI null t=-0.5349 vs paper -0.53 **MATCH** (diff 0.005). T2 Leading MoM t 3.74 vs 2.97 (\u5168\u6a23) / 4.23 (2016+): PARTIAL, \u671f\u9593\u654f\u611f. T3 Leading MoM R\u00b2 7.1% vs 4.28% / 13.55%: DIVERGENT, \u671f\u9593\u7a97\u53e3\u4e0d\u78ba\u5b9a. T4 IS Sharpe 0.732 vs K1180 0.413: DIVERGENT (44% gap), \u6700\u5927\u554f\u984c. T5 OOS Sharpe 1.260 vs K1180 1.2694 **MATCH** (diff 0.7%). **\u65b9\u5411\u78ba\u8a8d**: BCI \u9818\u5148\u6307\u6a19 MoM \u2192 RV \u5b8c\u5168 NS (direction \u6b63\u78ba); coincident 3+ \u9023\u8dcc\u7b56\u7565 OOS \u7cbe\u78ba\u5c0d\u9f4a. **T4 IS Sharpe 0.732 \u7121\u6cd5\u4efb\u4f55\u6a19\u6e96\u671f\u9593\u91cd\u73fe** \u2014 \u4e3b\u7dda\u7a0b\u6c7a: (b) body.tex \u88dc\u8173\u6ce8\u8aaa\u660e IS \u671f\u9593\u8207\u7b56\u7565\u898f\u5247, \u6216 (c) errata pending. Paper 2 G20 partial resolved: 2/5 formal source; 3/5 \u4ecd\u9700 clarification. commit 18084478.",
+    "evidence": [
+      "experiments/k1180/k1180.py",
+      "experiments/k1180/k1180_results.json",
+      "experiments/k1180/k1180_vs_paper2_section6_2_3_diff.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T17:54:26.322103"
   }
 ]

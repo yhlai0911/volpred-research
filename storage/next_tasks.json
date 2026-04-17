@@ -1663,10 +1663,10 @@
   {
     "id": "Paper2_G12_G20_Section6_formal_experiments",
     "title": "Paper 2 CRITICAL: G12/G20 Section 6 數字 8 個 knowledge 有但無 formal experiment",
-    "status": "pending",
+    "status": "partially_resolved_K1180_done_awaiting_K1179",
     "priority": 4,
     "created_at": "2026-04-17T17:30:16+08:00",
-    "description": "Paper 2 rescan G12/G20: Section 6 共 8 數字在 knowledge.json 有 match 但 experiments/ 無 formal .py + results.json. **不符 research 誠實原則 reproducibility standard**. G12 (Section 6.1 import growth): r=0.214, OOS +5.6%, DM p=0.043 (3 數字). G20 (Section 6.2/6.3 BCI leading): BCI t=-0.53, Leading t=3.74, R²=7.1%, Sharpe 0.732 (5 數字). **動作**: 建 K1179 (Section 6.1 import growth) + K1180 (Section 6.2/6.3 BCI leading) formal experiments, 產生 _results.json 可 replicate knowledge 數字. Agent-launchable.",
+    "description": "Paper 2 rescan G12/G20: Section 6 共 8 數字在 knowledge.json 有 match 但 experiments/ 無 formal .py + results.json. **不符 research 誠實原則 reproducibility standard**. G12 (Section 6.1 import growth): r=0.214, OOS +5.6%, DM p=0.043 (3 數字). G20 (Section 6.2/6.3 BCI leading): BCI t=-0.53, Leading t=3.74, R²=7.1%, Sharpe 0.732 (5 數字). **動作**: 建 K1179 (Section 6.1 import growth) + K1180 (Section 6.2/6.3 BCI leading) formal experiments, 產生 _results.json 可 replicate knowledge 數字. Agent-launchable. | K1180 (18084478) PARTIAL: 3/5 MATCH (T1 BCI null, T5 OOS Sharpe exact). 2/5 DIVERGENT (T4 IS Sharpe 44% gap — 主要問題, T3 R² 期間敏感). 方向確認 valid. K1179 Section 6.1 仍在跑.]",
     "tags": [
       "paper-2",
       "section-6",
@@ -1849,6 +1849,20 @@
     "tags": [
       "cleanup",
       "file-placement"
+    ]
+  },
+  {
+    "id": "Paper2_G20_T4_IS_Sharpe_errata",
+    "title": "Paper 2 G20 T4: IS Sharpe 0.732 vs K1180 0.413 (44% gap) — main-thread errata",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:54:37+08:00",
+    "description": "K1180 (18084478) 確認 Paper 2 Section 6.2/6.3 T4 IS Sharpe=0.732 無法 reproduce (K1180 全期 0.413). 主線程 decision: (a) body.tex 補腳注說明 IS 計算精確期間 + 策略規則 (可能 paper 用 sub-period), (b) errata 改為 K1180 canonical 0.413, (c) pending. Paper 2 G20 partial resolve — T1 BCI null + T5 OOS Sharpe 已 formal verify.",
+    "tags": [
+      "paper-2",
+      "g20-section6",
+      "main-thread",
+      "errata"
     ]
   }
 ]
