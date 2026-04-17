@@ -1098,5 +1098,45 @@
       "reproducibility",
       "main-thread-decision"
     ]
+  },
+  {
+    "id": "Paper1_D4_gamma_HM_clarification",
+    "title": "Paper 1 CRITICAL: Sec 4.7 vs 5.4 γ_HM 值衝突 — 需主線程 clarification",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:19:18+08:00",
+    "description": "Paper 1 audit (a9f25e9f) 發現: body.tex Sec 4.7 report γ_HM=-0.035 t=-0.39 p=0.70 (不顯著), Sec 5.4 report γ_HM=-0.043 t=-4.06 p<0.001 (高度顯著). 同標記但不同值 — 兩節 likely 不同 setup (SPY-only short-window vs Hybrid VT full-period) 但 paper 未明說. **投稿 JBF 前必做**: 主線程 body rewrite 在兩節加入 explicit clarification 說明 γ_HM_section_4 vs γ_HM_section_5 是哪種 strategy × period. 主線程 .tex 修改 + commit (禁用 agent). 可能需升級為 γ_HM_A vs γ_HM_B 避免混淆.",
+    "tags": [
+      "paper-1",
+      "leverage-direction",
+      "submission-blocker",
+      "main-thread-only"
+    ]
+  },
+  {
+    "id": "K903_paper1_2010_start_canonical_table",
+    "title": "K903: Paper 1 Tables 2/3 用 2010-2025 sample canonical replication",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T16:19:18+08:00",
+    "description": "Paper 1 audit 發現 K902 用 2017-2025 sample, paper 用 2010-2025 extended window. K903 建立 canonical replication: 重跑 K902 setup 但 data_start=2010-01-01, 產出 canonical Tables 2 & 3 of Paper 1 with absolute QLIKE numbers 對齊 main.tex. 目標: paper scripts/K903 能直接 reproduce Tables 2 & 3 (rtol 0.01). 若 reproduced 數字 ≠ paper 現寫數字 → 主線程走三選一決策.",
+    "tags": [
+      "paper-1",
+      "canonical-replication",
+      "data-window-alignment"
+    ]
+  },
+  {
+    "id": "Paper1_D3_kupiec_rounding_precision",
+    "title": "Paper 1 MEDIUM: Kupiec p 1-decimal rounding — 建議 paper 改 2-decimal",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T16:19:18+08:00",
+    "description": "Paper 1 audit 發現: GJR+Student-t Kupiec p paper 0.60 actual 0.6698; GJR+HistSim paper 0.60 vs 0.6353. 1-decimal rounding 讓 Student-t 與 HistSim 看起來一樣 (都 0.60) 但實際 0.67 vs 0.64 明顯差. Basel zone 結論不變 (都 Yellow). **建議 (b) 修 paper 到 0.67 與 0.64** — 主線程 body rewrite 順便修, 誠實 research.",
+    "tags": [
+      "paper-1",
+      "precision-fix",
+      "main-thread-only"
+    ]
   }
 ]

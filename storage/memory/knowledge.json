@@ -26924,5 +26924,16 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-04-17T16:18:17.125085"
+  },
+  {
+    "item_id": "7917f8bb",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: \u7528\u6236 2026-04-17 '\u8173\u672c+\u8ad6\u6587\u4e09\u65b9\u4e00\u81f4' \u898f\u5247\u5ef6\u4f38, \u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Paper 1 (leverage-direction) reproducibility audit PILOT. **Score**: 42/87 matched (48%), 14 approx (16%), 24 divergent (28%), 21 no-source (24%). **D4 CRITICAL** (\u9700\u4e3b\u7dda\u7a0b\u6c7a\u7b56): body.tex Sec 4.7 \u03b3_HM=-0.035 t=-0.39 p=0.70 \u4e0d\u986f\u8457, vs Sec 5.4 \u03b3_HM=-0.043 t=-4.06 p<0.001 \u9ad8\u5ea6\u986f\u8457. \u540c\u6a19\u8a18\u4e0d\u540c\u503c, \u5169\u7bc0\u5c0d\u6bd4\u8a2d\u5b9a\u4e0d\u540c\u4f46 paper \u672a\u660e\u8aaa. \u5efa\u8b70 (a) \u4e3b\u7dda\u7a0b\u52a0 explicit clarification \u54ea\u7bc0\u662f SPY-only short-window \u54ea\u7bc0\u662f Hybrid VT full-period. **D1+D2 HIGH**: Tables 2/3 \u7d55\u5c0d\u503c paper \u7528 2010-2025 sample K902 \u7528 2017-2025. GLD rolling mean \u03b3 paper -0.067 vs K902 -0.006; HAC t -5.79 vs -0.46. Qualitative conclusions \u4e00\u81f4 (GJR>GARCH for SPY, not GLD) \u4f46\u7d55\u5c0d QLIKE \u4e0d\u53ef\u5f9e K902 \u91cd\u73fe. \u5efa\u8b70 (a) \u5efa K903 explicit 2010-start replication \u7522\u51fa canonical table numbers. **D3 MEDIUM**: Kupiec p GJR+Student-t paper 0.60 actual 0.6698; GJR+HistSim 0.60 vs 0.6353. 1-decimal rounding systematic aggressive. \u5efa\u8b70 (b) \u4fee paper \u5230 0.67, 0.64. Basel zone \u7d50\u8ad6\u4e0d\u8b8a. **Pilot pattern for 9 remaining papers**: (1) \u5148\u9a57 data_start in JSON vs paper stated sample (#1 divergence cause); (2) Kupiec/DM p-values \u6aa2\u5230 2 decimal; (3) \u8de8 tex \u641c\u540c statistic \u540d\u6349 cross-section conflicts; (4) Tables with no JSON flag as '?' early; (5) Figure generation scripts universally missing; (6) reproduce.py + experiments/ architecture \u6b63\u78ba, \u7f3a completeness coverage. commit a9f25e9f. Output: paper/leverage-direction/reproducibility_audit/.",
+    "evidence": [
+      "paper/leverage-direction/reproducibility_audit/diff_report.md",
+      "paper/leverage-direction/reproducibility_audit/README.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T16:19:00.887788"
   }
 ]
