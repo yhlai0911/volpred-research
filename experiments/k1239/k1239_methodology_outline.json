@@ -1,0 +1,90 @@
+{
+  "experiment_id": "k1239",
+  "paper_id": "crypto-fear-channel",
+  "paper_number": 10,
+  "section": "4_Methodology",
+  "version": "v0",
+  "draft_format": "markdown",
+  "target_total_words": 800,
+  "actual_total_words_estimate": 870,
+  "seed": 42,
+  "created": "2026-04-17",
+  "source_kickoff": "experiments/k1234/k1234_kickoff_guide.md",
+  "sister_tasks": ["k1237", "k1238"],
+  "supporting_experiments": ["k639", "k746b", "k1025", "k949", "k1129", "k1133b"],
+  "subsections": [
+    {
+      "id": "4.1",
+      "title": "Fear-Channel Regression Specification",
+      "word_target": 250,
+      "anchor_equation": "sigma_t^2 = omega + alpha*eps_{t-1}^2 + gamma*eps_{t-1}^2*I(eps_{t-1}<0) + beta*sigma_{t-1}^2 + phi*Fear_{t-1}^2",
+      "key_parameter": "phi",
+      "hypothesis": {
+        "H0": "phi = 0 (no fear channel)",
+        "H1": "phi > 0 (positive fear transmission)",
+        "test_sidedness": "one-sided"
+      },
+      "fear_proxy_primary": "VIX (CBOE)",
+      "fear_proxy_robustness": "CFIX (Crypto Fear & Greed Index)",
+      "citations": ["engle2002", "glosten1993"]
+    },
+    {
+      "id": "4.2",
+      "title": "GARCH-X Base Model Selection",
+      "word_target": 200,
+      "primary_specification": "MF-GJR(1,1,1)-X with Student-t innovations",
+      "baselines": [
+        "GARCH(1,1)",
+        "GJR-GARCH(1,1,1)",
+        "GARCH(1,1)-X (no asymmetry, with fear term)"
+      ],
+      "justification_kurtosis": "K1129 BTC daily kurtosis = 7.97",
+      "justification_cross_market": "K949 MF-GJR(VIX) Harvey-significant 4/5 markets, theta1 ~ 2.1",
+      "citations": ["glosten1993", "engle2002"]
+    },
+    {
+      "id": "4.3",
+      "title": "Statistical Tests",
+      "word_target": 200,
+      "tests": [
+        {"name": "Robust t-stat for phi", "reference": "bollerslev1992"},
+        {"name": "Likelihood Ratio Test (GARCH-X vs GJR)", "df": 1},
+        {"name": "Diebold-Mariano test", "reference": "diebold1995"},
+        {"name": "Harvey (1997) small-sample correction", "reference": "harvey1997"},
+        {"name": "Patton QLIKE loss", "reference": "patton2011"},
+        {"name": "Harvey-Liu-Zhu threshold", "threshold": "|t| > 3.0", "reference": "harvey2016"},
+        {"name": "Sub-period robustness", "splits": ["pre-ETF 2015-02 to 2023-12-31", "post-ETF 2024-01-01 to 2026-04"], "reference_K": "k1133b"}
+      ]
+    },
+    {
+      "id": "4.4",
+      "title": "Identification Strategy",
+      "word_target": 150,
+      "requirements": [
+        {"id": "a", "name": "Exogenous fear proxy", "argument": "VIX is determined by S&P 500 options market (much larger than BTC), reverse feedback negligible"},
+        {"id": "b", "name": "Directional precedence", "argument": "VIX Granger-causes BTC sigma^2 at lag 1; reverse test fails"},
+        {"id": "c", "name": "Instrumental-variable alternative", "argument": "AR(p) BIC-filtered VIX innovation regressed on conditional variance; phi remains positive and HLN-significant"}
+      ]
+    }
+  ],
+  "global_citations": [
+    {"key": "engle2002", "role": "GARCH-X variance-domain convention"},
+    {"key": "glosten1993", "role": "GJR asymmetry term"},
+    {"key": "bollerslev1992", "role": "Robust GARCH inference"},
+    {"key": "diebold1995", "role": "Predictive accuracy test"},
+    {"key": "harvey1997", "role": "Small-sample DM correction"},
+    {"key": "harvey2016", "role": "|t|>3.0 threshold, multiple testing"},
+    {"key": "patton2011", "role": "QLIKE proxy-robust loss"}
+  ],
+  "open_decisions_for_main_thread": [
+    "Whether §4.1-§4.4 replace or complement existing outline §4.1-§4.5 (Granger / QR / DY / DCC / forecasting)",
+    "Ordering: fear-channel GARCH-X as anchor vs. appendix module",
+    "Sub-sample convention: K1133b two-regime (pre/post-ETF) vs. K1025 five-regime",
+    "IV alternative (§4.4 (c)) as subsection vs. footnote"
+  ],
+  "files": [
+    "k1239_methodology_draft.md",
+    "k1239_methodology_outline.json",
+    "README.md"
+  ]
+}
