@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Agent Orchestration
 
 這份文件是 `autonomous-research` 的派工與 brief 規格。

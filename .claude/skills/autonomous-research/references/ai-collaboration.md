@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # AI 協作模式（Claude + Codex + Gemini）
 
 ## 角色分工

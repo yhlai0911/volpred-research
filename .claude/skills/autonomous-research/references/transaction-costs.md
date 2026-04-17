@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # 交易成本參考表（所有實驗和文章必須引用此文件）
 
 **最後更新：2026-03-28**

@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Platform API Manual
 
 這份文件給本地 `Claude Code` 使用，目的不是介紹產品，而是讓 agent 能可靠地：

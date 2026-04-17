@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 ---
 name: autonomous-research
 description: >
@@ -215,21 +217,25 @@ uv run python scripts/build_knowledge_index.py build
 系統 crontab 已設定永久任務（5-min 數據收集 + daily update）。
 但以下 session-only cron 需要每次新 session 重新建立：
 
+**Canonical source**：`config/runtime_schedules.json`
+若本段與其他文件不一致，以該檔為準。
+
 #### 最小啟動集（保守模式）
 ```
-CronCreate(cron="13 */6 * * *", prompt="會員問題研究")               # :13 每6小時
-CronCreate(cron="37 */6 * * *", prompt="平台巡檢")                   # :37 每6小時
-CronCreate(cron="47 */2 * * *", prompt="每2小時 git commit")        # :47
-CronCreate(cron="7 * * * *", prompt="知識索引更新")                 # :07
+CronCreate(cron="17 */6 * * *", prompt="會員問題研究摘要：先跑 question-ranking-workflow；只有 pending_questions > 0 才建立/執行後續任務")
+CronCreate(cron="37 */6 * * *", prompt="平台巡檢摘要：先跑 ops health + platform-cycle-summary；只有異常或 release_due 才建立/執行後續任務")
+CronCreate(cron="3 9 * * *", prompt="每日任務審視與執行計劃：(1) 盤點 user queue / scheduled queue / approval backlog (2) 盤點草稿池與今日已發佈文章缺口 (3) 讀 research_program.md 事件日曆，確認今日是否有 CPI/NFP/FOMC/TSMC 等重要事件 (4) 有事件→立即建立或執行事件任務（必要時 status=published）(5) 檢查 research_program.md 行數(<700)、知識索引是否過期(>24h) (6) 用 uv run volpred ops assign 建立今日正式任務")
+CronCreate(cron="7 */6 * * *", prompt="知識索引檢查：先判斷是否真的需要更新")
+CronCreate(cron="23 22 * * *", prompt="Token 用量日報：每日一次 detailed；週五再補 weekly")
 ```
 
-#### 全速模式（確認穩定後加入）
-```
-CronCreate(cron="*/4 * * * *", prompt="繼續研究")                   # 每 4 分鐘 heartbeat（在 5 分鐘 cache TTL 內維持 warm）
-CronCreate(cron="37 */2 * * *", prompt="網站健康檢查（含自動修復）")   # :37 每2小時
-```
-
-**為什麼 4 分鐘**：5 分鐘 cache TTL 內維持 warm 又不過度 heartbeat。原 15 分鐘是早期保守設定；3 分鐘曾測過但比 4 分鐘額外消耗 25% heartbeat 成本而效益相同。
+#### Idle-driven continuation（取代高頻 heartbeat）
+- 不再建立 `*/4 * * * *` 的「繼續研究」cron
+- agent 完成主任務後，先檢查 `user queue`
+- `user queue` 為空，再檢查 `scheduled queue`
+- queue 皆空，才允許做一輪 discovery / research continuation
+- discovery pass 最多每 30 分鐘一次
+- 只要 queue 裡存在 `user-assigned` 任務，discovery 直接停用
 
 也可以安排**單次性提醒**避免忘記（範例格式，日期需依實際事件更新）：
 ```
@@ -399,9 +405,9 @@ All publications in **繁體中文**. Details in `references/publishing-guide.md
 
 **論文更新後必須同步網頁：**
 1. 編譯 PDF: `cd paper/leverage-direction && xelatex main.tex`
-2. 複製到前端: `cp paper/leverage-direction/main.pdf frontend/public/paper/leverage-direction-matters.pdf`
-3. 更新頁數: `frontend/src/app/paper/page.tsx` 中的 "Download PDF (XX pages)"
-4. Push 到 Zeabur
+2. 標準流程：`uv run volpred ops paper-update --paper-id leverage-direction`
+3. `paper-update` 會同步 metadata + PDF 到 active frontend configured `paper_public_dir`（見 `config/project_targets.json`）
+4. 只有前端程式碼或部署環境改動時才需要 deploy
 
 ## Reference Files
 

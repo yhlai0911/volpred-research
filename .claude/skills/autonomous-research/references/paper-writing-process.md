@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # 論文寫作標準流程（從實證結果到投稿）
 
 **此流程不可跳步。違反等同論文失敗。**

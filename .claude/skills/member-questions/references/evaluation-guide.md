@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # 會員問題審查與流轉 Guide
 
 本檔是 `member-questions` 的 canonical reference。所有會員問題的評分、排序、承接與回覆綁定，都以這份 guide 為準。

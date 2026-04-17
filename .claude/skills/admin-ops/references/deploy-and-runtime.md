@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Deploy And Runtime
 
 這份文件是 `admin-ops` 的 runtime / deploy 入口。
@@ -38,12 +40,13 @@
 
 ## 系統地圖
 
-- 前端線上版：`frontend-v2-fix/`
-- 主要服務：`volpred-v3`
+- 前端線上版：看 `config/project_targets.json` 的 `active_frontend`（目前 `frontend-v2-fix/`）
+- 主要服務：看 `config/project_targets.json` 的 `active_service`（目前 `volpred-v3`）
 - 平台資料源頭：`storage/`
 - 平台寫入口：`uv run volpred ops ...`
 - DB / Auth：Supabase
 - 記憶鏡像：Mirror API
+- 前端 / deploy / mirror target 的 source-of-truth：`config/project_targets.json`
 
 完整事實以 `references/architecture.md` 與 `docs/architecture.md` 為準。
 
@@ -79,6 +82,7 @@
 
 ## Zeabur 目前識別資訊
 
+- Source of truth: `config/project_targets.json`
 - Project ID: `69b5b264800a475a1f82b073`
 - Environment ID: `69b5b2646853f6f4f5f6a16d`
 - `volpred-web`: `69b5b279e0a0c18cef9d780d`
@@ -89,7 +93,7 @@
 
 ```bash
 npx zeabur@latest auth status
-npx zeabur@latest service list --project-id 69b5b264800a475a1f82b073 --json
+npx zeabur@latest service list --project-id <project_id from config> --json
 npx zeabur@latest service redeploy --id <service_id> -i=false -y
 cd frontend-v2-fix && ./scripts/deploy-zeabur-safe.sh
 uv run volpred ops health

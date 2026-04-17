@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Strategy Launch Gate
 
 這份文件是 `autonomous-research` 的 runtime reference。

@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Agent Brief Template
 
 **每個 agent prompt 必須填寫此模板。不可省略任何段落。**

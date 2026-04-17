@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Agent Result Template
 
 **Agent 完成實驗後，必須以此格式回報結果。不可省略任何段落。**

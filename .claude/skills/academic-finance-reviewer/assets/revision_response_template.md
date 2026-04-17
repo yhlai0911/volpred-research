@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Response to Reviewers - Template
 
 **Manuscript Title**: _____________________________________________________

@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Platform Surfaces
 
 這份文件是 `admin-ops` skill 的快速索引，目的是讓 Claude Code 先知道：
@@ -35,7 +37,7 @@
 - `/admin/health`
   - 站務健康監看台：概覽指標、Session Cron 工作包、內容釋出節奏、Analytics/問答摘要、最近平台工作、failed sync 樣本、workflow 快照狀態、下一步建議
 - `/admin/schedules`
-  - 排程管理：session cron 定義（from CLAUDE.md + skills）、system crontab 即時讀取（`crontab -l`）、核心永久任務覆蓋檢查、判讀建議
+  - 排程管理：canonical schedule spec（`config/runtime_schedules.json`）中的 session cron / RemoteTrigger + system crontab 即時讀取（`crontab -l`）+ 核心永久任務覆蓋檢查 + 判讀建議
 - `/admin/paper-trading`
   - Portfolio / 策略績效面板
 
@@ -72,7 +74,7 @@
 - `GET /api/admin/health`
   - 站務健康監看台：local + jobs + workflows + content_release + analytics + questions + suggestions
 - `GET /api/admin/schedules`
-  - 排程管理：session cron 定義 + system crontab 即時讀取 + 覆蓋檢查
+  - 排程管理：canonical schedule spec + RemoteTrigger + system crontab 即時讀取 + 覆蓋檢查
 - `GET /api/admin/questions/candidates`
   - 研究候選池
 - `POST /api/admin/questions/candidates`

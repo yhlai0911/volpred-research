@@ -1,3 +1,5 @@
+<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
+
 # Common Rejection Reasons in Financial Econometrics
 
 A guide to frequent rejection reasons at top finance journals, with specific examples and how to avoid them.
