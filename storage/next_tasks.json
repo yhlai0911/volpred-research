@@ -1023,5 +1023,18 @@
       "compliance"
     ],
     "completed_at": "2026-04-17T15:47:34+08:00"
+  },
+  {
+    "id": "Paper_folders_backfill_remaining_4",
+    "title": "論文資料夾補齊剩 4 個：prg-periodic-garch / volatility-absorption / vt-crowding-abm / vt-insurance-cost",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T15:50:02+08:00",
+    "description": "承 Paper_folders_backfill_selfcontained (commit 5b785551) Paper 9 + Paper 4 已完成，剩 4 個資料夾。**投稿 hard requirement**: 期刊要求附原始資料+腳本供審稿人復現，非 nice-to-have。目標：(A) prg-periodic-garch (Paper 6) — 只缺 experiments.md 與 K 編號索引(B) volatility-absorption — 缺 results/README.md 與 figures/ soft-link(C) vt-crowding-abm — 缺 results/README.md、figures/、experiments 索引(D) vt-insurance-cost — 缺 results/README.md、figures/方法：照 Paper 9/4 的 agent 模式（worktree isolation，禁碰 .tex），commit 格式：'paper-folder backfill: <4 folder names> self-contained indexes'.樣板：paper/leverage-direction/, paper/taiwan-vt/, paper/vt-trend-following/.規範參考：agent-specs/claude_rules/paper-workflow.md 投稿前檢查清單段。",
+    "tags": [
+      "paper",
+      "infrastructure",
+      "submission-readiness"
+    ]
   }
 ]
