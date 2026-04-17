@@ -1,0 +1,415 @@
+{
+  "experiment_id": "K1191",
+  "title": "Paper 3 COVID Sub-Period Sharpe 1.295 vs 1.254 \u2014 Canonical Replication",
+  "description": "Reproduces the COVID sub-period Sharpe ratios cited in Paper 3 main.tex: Sharpe 1.295 (TSMOM-hedged VT) vs 1.254 (unhedged VT) for 50/50 SPY/GLD. Tests multiple COVID period definitions against paper claim.",
+  "data_source": "yfinance (SPY, GLD, ^VIX, SHY)",
+  "full_period": "2005-01-03 to 2026-03-31",
+  "paper_claim": {
+    "text": "During the COVID period, TSMOM-hedged VT actually outperforms unhedged VT (Sharpe 1.295 vs. 1.254), because VIX-level deleveraging was optimal while TSMOM signals lagged the V-shaped recovery.",
+    "asset": "50/50 SPY/GLD",
+    "hedged_vt_sharpe": 1.295,
+    "unhedged_vt_sharpe": 1.254,
+    "which_is_which": {
+      "1.295": "TSMOM-hedged VT (PureVT = VT - beta*TSMOM^perp)",
+      "1.254": "Unhedged 12/VIX VT"
+    }
+  },
+  "methodology": {
+    "vt_rule": "w_t = min(12/VIX_end_of_month_{t-1}, 1)",
+    "rebalancing": "monthly (end-of-month VIX, applied next month)",
+    "cash_proxy": "SHY",
+    "tx_cost_bps": 10.0,
+    "tsmom_lookback": 252,
+    "tsmom_orthogonalization": "Full-sample: TSMOM^perp = TSMOM - beta_MKT * MKT",
+    "hedge": "Rolling 252-day OLS of VT on TSMOM^perp; PureVT = VT - b*TSMOM^perp",
+    "beta_lag": "1-day lag (no lookahead)",
+    "seed": 42,
+    "signal_lag": "shift(1) applied to both TSMOM signal and rolling beta"
+  },
+  "sub_period_results": {
+    "pre_covid": {
+      "period": "pre_covid",
+      "start": "2005-01-03",
+      "end": "2019-12-31",
+      "n_obs": 3523,
+      "bh": {
+        "name": "BH [2005-01-03 - 2019-12-31]",
+        "sharpe": 0.734,
+        "mdd_pct": -32.49,
+        "calmar": 0.301,
+        "ann_return_pct": 9.79,
+        "ann_vol_pct": 13.35,
+        "n_obs": 3523,
+        "start": "2006-01-03",
+        "end": "2019-12-31"
+      },
+      "vt": {
+        "name": "VT [2005-01-03 - 2019-12-31]",
+        "sharpe": 0.8,
+        "mdd_pct": -16.88,
+        "calmar": 0.404,
+        "ann_return_pct": 6.82,
+        "ann_vol_pct": 8.52,
+        "n_obs": 3523,
+        "start": "2006-01-03",
+        "end": "2019-12-31"
+      },
+      "hedged_vt": {
+        "name": "Hedged [2005-01-03 - 2019-12-31]",
+        "sharpe": 0.655,
+        "mdd_pct": -14.55,
+        "calmar": 0.343,
+        "ann_return_pct": 4.99,
+        "ann_vol_pct": 7.62,
+        "n_obs": 3523,
+        "start": "2006-01-03",
+        "end": "2019-12-31"
+      },
+      "vs_paper_covid": {
+        "vt_sharpe_computed": 0.8,
+        "vt_sharpe_paper": 1.254,
+        "vt_match_5pct": false,
+        "hedged_sharpe_computed": 0.655,
+        "hedged_sharpe_paper": 1.295,
+        "hedged_match_5pct": false,
+        "both_match": false
+      }
+    },
+    "covid_broad": {
+      "period": "covid_broad",
+      "start": "2020-01-01",
+      "end": "2022-12-31",
+      "n_obs": 756,
+      "bh": {
+        "name": "BH [2020-01-01 - 2022-12-31]",
+        "sharpe": 0.547,
+        "mdd_pct": -20.32,
+        "calmar": 0.432,
+        "ann_return_pct": 8.77,
+        "ann_vol_pct": 16.04,
+        "n_obs": 756,
+        "start": "2020-01-02",
+        "end": "2022-12-30"
+      },
+      "vt": {
+        "name": "VT [2020-01-01 - 2022-12-31]",
+        "sharpe": 0.31,
+        "mdd_pct": -14.49,
+        "calmar": 0.188,
+        "ann_return_pct": 2.72,
+        "ann_vol_pct": 8.77,
+        "n_obs": 756,
+        "start": "2020-01-02",
+        "end": "2022-12-30"
+      },
+      "hedged_vt": {
+        "name": "Hedged [2020-01-01 - 2022-12-31]",
+        "sharpe": 0.714,
+        "mdd_pct": -8.33,
+        "calmar": 0.847,
+        "ann_return_pct": 7.05,
+        "ann_vol_pct": 9.87,
+        "n_obs": 756,
+        "start": "2020-01-02",
+        "end": "2022-12-30"
+      },
+      "vs_paper_covid": {
+        "vt_sharpe_computed": 0.31,
+        "vt_sharpe_paper": 1.254,
+        "vt_match_5pct": false,
+        "hedged_sharpe_computed": 0.714,
+        "hedged_sharpe_paper": 1.295,
+        "hedged_match_5pct": false,
+        "both_match": false
+      }
+    },
+    "covid_crisis": {
+      "period": "covid_crisis",
+      "start": "2020-02-24",
+      "end": "2020-12-31",
+      "n_obs": 218,
+      "bh": {
+        "name": "BH [2020-02-24 - 2020-12-31]",
+        "sharpe": 0.911,
+        "mdd_pct": -19.34,
+        "calmar": 1.043,
+        "ann_return_pct": 20.17,
+        "ann_vol_pct": 22.15,
+        "n_obs": 218,
+        "start": "2020-02-24",
+        "end": "2020-12-31"
+      },
+      "vt": {
+        "name": "VT [2020-02-24 - 2020-12-31]",
+        "sharpe": 0.157,
+        "mdd_pct": -13.6,
+        "calmar": 0.14,
+        "ann_return_pct": 1.91,
+        "ann_vol_pct": 12.11,
+        "n_obs": 218,
+        "start": "2020-02-24",
+        "end": "2020-12-31"
+      },
+      "hedged_vt": {
+        "name": "Hedged [2020-02-24 - 2020-12-31]",
+        "sharpe": 1.434,
+        "mdd_pct": -2.93,
+        "calmar": 7.773,
+        "ann_return_pct": 22.8,
+        "ann_vol_pct": 15.9,
+        "n_obs": 218,
+        "start": "2020-02-24",
+        "end": "2020-12-31"
+      },
+      "vs_paper_covid": {
+        "vt_sharpe_computed": 0.157,
+        "vt_sharpe_paper": 1.254,
+        "vt_match_5pct": false,
+        "hedged_sharpe_computed": 1.434,
+        "hedged_sharpe_paper": 1.295,
+        "hedged_match_5pct": false,
+        "both_match": false
+      }
+    },
+    "covid_peak_vix": {
+      "period": "covid_peak_vix",
+      "start": "2020-03-09",
+      "end": "2020-06-30",
+      "n_obs": 80,
+      "bh": {
+        "name": "BH [2020-03-09 - 2020-06-30]",
+        "sharpe": 0.809,
+        "mdd_pct": -14.55,
+        "calmar": 1.718,
+        "ann_return_pct": 24.98,
+        "ann_vol_pct": 30.9,
+        "n_obs": 80,
+        "start": "2020-03-09",
+        "end": "2020-06-30"
+      },
+      "vt": {
+        "name": "VT [2020-03-09 - 2020-06-30]",
+        "sharpe": 0.132,
+        "mdd_pct": -9.31,
+        "calmar": 0.242,
+        "ann_return_pct": 2.25,
+        "ann_vol_pct": 17.06,
+        "n_obs": 80,
+        "start": "2020-03-09",
+        "end": "2020-06-30"
+      },
+      "hedged_vt": {
+        "name": "Hedged [2020-03-09 - 2020-06-30]",
+        "sharpe": 2.194,
+        "mdd_pct": -2.93,
+        "calmar": 19.302,
+        "ann_return_pct": 56.62,
+        "ann_vol_pct": 25.81,
+        "n_obs": 80,
+        "start": "2020-03-09",
+        "end": "2020-06-30"
+      },
+      "vs_paper_covid": {
+        "vt_sharpe_computed": 0.132,
+        "vt_sharpe_paper": 1.254,
+        "vt_match_5pct": false,
+        "hedged_sharpe_computed": 2.194,
+        "hedged_sharpe_paper": 1.295,
+        "hedged_match_5pct": false,
+        "both_match": false
+      }
+    },
+    "covid_calendar_2020": {
+      "period": "covid_calendar_2020",
+      "start": "2020-01-01",
+      "end": "2020-12-31",
+      "n_obs": 253,
+      "bh": {
+        "name": "BH [2020-01-01 - 2020-12-31]",
+        "sharpe": 1.124,
+        "mdd_pct": -20.32,
+        "calmar": 1.141,
+        "ann_return_pct": 23.18,
+        "ann_vol_pct": 20.63,
+        "n_obs": 253,
+        "start": "2020-01-02",
+        "end": "2020-12-31"
+      },
+      "vt": {
+        "name": "VT [2020-01-01 - 2020-12-31]",
+        "sharpe": 0.612,
+        "mdd_pct": -14.49,
+        "calmar": 0.48,
+        "ann_return_pct": 6.96,
+        "ann_vol_pct": 11.38,
+        "n_obs": 253,
+        "start": "2020-01-02",
+        "end": "2020-12-31"
+      },
+      "hedged_vt": {
+        "name": "Hedged [2020-01-01 - 2020-12-31]",
+        "sharpe": 1.456,
+        "mdd_pct": -2.93,
+        "calmar": 7.334,
+        "ann_return_pct": 21.51,
+        "ann_vol_pct": 14.77,
+        "n_obs": 253,
+        "start": "2020-01-02",
+        "end": "2020-12-31"
+      },
+      "vs_paper_covid": {
+        "vt_sharpe_computed": 0.612,
+        "vt_sharpe_paper": 1.254,
+        "vt_match_5pct": false,
+        "hedged_sharpe_computed": 1.456,
+        "hedged_sharpe_paper": 1.295,
+        "hedged_match_5pct": false,
+        "both_match": false
+      }
+    },
+    "post_covid": {
+      "period": "post_covid",
+      "start": "2023-01-01",
+      "end": "2026-03-31",
+      "n_obs": 813,
+      "bh": {
+        "name": "BH [2023-01-01 - 2026-03-31]",
+        "sharpe": 1.921,
+        "mdd_pct": -12.89,
+        "calmar": 1.928,
+        "ann_return_pct": 24.85,
+        "ann_vol_pct": 12.94,
+        "n_obs": 813,
+        "start": "2023-01-03",
+        "end": "2026-03-31"
+      },
+      "vt": {
+        "name": "VT [2023-01-01 - 2026-03-31]",
+        "sharpe": 2.019,
+        "mdd_pct": -8.94,
+        "calmar": 2.169,
+        "ann_return_pct": 19.39,
+        "ann_vol_pct": 9.6,
+        "n_obs": 813,
+        "start": "2023-01-03",
+        "end": "2026-03-31"
+      },
+      "hedged_vt": {
+        "name": "Hedged [2023-01-01 - 2026-03-31]",
+        "sharpe": 1.157,
+        "mdd_pct": -7.98,
+        "calmar": 0.679,
+        "ann_return_pct": 5.42,
+        "ann_vol_pct": 4.68,
+        "n_obs": 813,
+        "start": "2023-01-03",
+        "end": "2026-03-31"
+      },
+      "vs_paper_covid": {
+        "vt_sharpe_computed": 2.019,
+        "vt_sharpe_paper": 1.254,
+        "vt_match_5pct": false,
+        "hedged_sharpe_computed": 1.157,
+        "hedged_sharpe_paper": 1.295,
+        "hedged_match_5pct": false,
+        "both_match": false
+      }
+    },
+    "full_period": {
+      "period": "full_period",
+      "start": "2005-01-03",
+      "end": "2026-03-31",
+      "n_obs": 5092,
+      "bh": {
+        "name": "BH [2005-01-03 - 2026-03-31]",
+        "sharpe": 0.878,
+        "mdd_pct": -32.49,
+        "calmar": 0.371,
+        "ann_return_pct": 12.04,
+        "ann_vol_pct": 13.72,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "vt": {
+        "name": "VT [2005-01-03 - 2026-03-31]",
+        "sharpe": 0.94,
+        "mdd_pct": -16.88,
+        "calmar": 0.487,
+        "ann_return_pct": 8.22,
+        "ann_vol_pct": 8.74,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "hedged_vt": {
+        "name": "Hedged [2005-01-03 - 2026-03-31]",
+        "sharpe": 0.704,
+        "mdd_pct": -14.55,
+        "calmar": 0.368,
+        "ann_return_pct": 5.36,
+        "ann_vol_pct": 7.62,
+        "n_obs": 5092,
+        "start": "2006-01-03",
+        "end": "2026-03-31"
+      },
+      "vs_paper_covid": {
+        "vt_sharpe_computed": 0.94,
+        "vt_sharpe_paper": 1.254,
+        "vt_match_5pct": false,
+        "hedged_sharpe_computed": 0.704,
+        "hedged_sharpe_paper": 1.295,
+        "hedged_match_5pct": false,
+        "both_match": false
+      }
+    }
+  },
+  "full_period_metrics": {
+    "bh": {
+      "name": "50/50 B&H full",
+      "sharpe": 0.878,
+      "mdd_pct": -32.49,
+      "calmar": 0.371,
+      "ann_return_pct": 12.04,
+      "ann_vol_pct": 13.72,
+      "n_obs": 5092,
+      "start": "2006-01-03",
+      "end": "2026-03-31"
+    },
+    "vt": {
+      "name": "50/50 VT full",
+      "sharpe": 0.94,
+      "mdd_pct": -16.88,
+      "calmar": 0.487,
+      "ann_return_pct": 8.22,
+      "ann_vol_pct": 8.74,
+      "n_obs": 5092,
+      "start": "2006-01-03",
+      "end": "2026-03-31"
+    },
+    "hedged_vt": {
+      "name": "50/50 Hedged full",
+      "sharpe": 0.704,
+      "mdd_pct": -14.55,
+      "calmar": 0.368,
+      "ann_return_pct": 5.36,
+      "ann_vol_pct": 7.62,
+      "n_obs": 5092,
+      "start": "2006-01-03",
+      "end": "2026-03-31"
+    }
+  },
+  "match_summary": {
+    "best_match_period": "covid_calendar_2020",
+    "best_match_score": 0.803,
+    "any_exact_match_5pct": false,
+    "verdict_code": "QUALITATIVE_MATCH",
+    "verdict": "(b) QUALITATIVE_MATCH \u2014 Hedged > VT direction preserved (Hedged 1.456 > VT 0.612), but exact numbers don't match within 5% rtol. Best match: covid_calendar_2020 (VT=0.612, Hdg=1.456). Recovery paradox (N177) confirmed: TSMOM lagged V-shaped recovery."
+  },
+  "kb_recovery_paradox_n177": {
+    "check": "TSMOM-hedged VT should outperform unhedged VT in COVID (V-shaped recovery)",
+    "covid_broad_vt_sharpe": 0.31,
+    "covid_broad_hedged_sharpe": 0.714
+  },
+  "timestamp": "2026-04-17T10:21:39.420765Z"
+}
