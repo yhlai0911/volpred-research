@@ -1,0 +1,194 @@
+/Users/yhlai0911/opt/anaconda3/lib/python3.9/site-packages/pandas/core/arrays/masked.py:61: UserWarning: Pandas requires version '1.3.6' or newer of 'bottleneck' (version '1.3.4' currently installed).
+  from pandas.core import (
+========================================================================
+K1138: Equity compendium (SPY/QQQ/IWM) robust models
+Paper 4 universal-null asset-class extension
+========================================================================
+
+[0] Downloading VIX...
+  VIX: 2000-01-03 ~ 2026-04-10, n=6607
+
+[0] Downloading SPY...
+  Observations: 6606
+  Date range: 2000-01-04 ~ 2026-04-10
+  Mean r: 0.0308%, Std r: 1.2212%
+  Mean Park: 1.0012 (pct²)
+  Mean VIX: 19.85
+
+[0] Downloading QQQ...
+  Observations: 6606
+  Date range: 2000-01-04 ~ 2026-04-10
+  Mean r: 0.0425%, Std r: 1.6893%
+  Mean Park: 2.0762 (pct²)
+  Mean VIX: 19.85
+
+[0] Downloading IWM...
+  Observations: 6354
+  Date range: 2001-01-03 ~ 2026-04-10
+  Mean r: 0.0386%, Std r: 1.5023%
+  Mean Park: 1.5894 (pct²)
+  Mean VIX: 19.71
+
+============================================================
+  Processing: SPY
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [SPY] 0% (0/1323) 4.5s
+  [SPY] 19% (252/1323) 25.3s
+  [SPY] 38% (504/1323) 46.1s
+  [SPY] 57% (756/1323) 65.8s
+  [SPY] 76% (1008/1323) 85.0s
+  [SPY] 95% (1260/1323) 105.6s
+  [SPY] done in 105.7s
+  Valid OOS: 1323
+
+  --- Target: parkinson ---
+    M1_GJR_N: QLIKE=0.488359, rho=0.614
+    M3_GARCH_MIDAS_X: QLIKE=0.473462, rho=0.613
+    M4_HAR_RV_X: QLIKE=0.347283, rho=0.673
+    M5_HAR_RV: QLIKE=0.389882, rho=0.641
+    M6_GAS_t: QLIKE=0.542575, rho=0.540
+    DM-HLN M3_GARCH_MIDAS_X vs M1: t=3.942, p=8.513e-05, rel=+3.05%
+    DM-HLN M4_HAR_RV_X vs M1: t=8.088, p=1.332e-15, rel=+28.89%
+    DM-HLN M5_HAR_RV vs M1: t=4.492, p=7.682e-06, rel=+20.16%
+    DM-HLN M6_GAS_t vs M1: t=-5.243, p=1.842e-07, rel=-11.10%
+    DM-HLN M4 vs M5 (VIX marginal): t=4.185, rel=+10.93%
+
+  --- Target: r2_close ---
+    M1_GJR_N: QLIKE=1.473663, rho=0.332
+    M3_GARCH_MIDAS_X: QLIKE=1.466111, rho=0.332
+    M4_HAR_RV_X: QLIKE=1.532309, rho=0.387
+    M5_HAR_RV: QLIKE=1.552831, rho=0.372
+    M6_GAS_t: QLIKE=1.527235, rho=0.277
+    DM-HLN M3_GARCH_MIDAS_X vs M1: t=1.356, p=1.754e-01, rel=+0.51%
+    DM-HLN M4_HAR_RV_X vs M1: t=-1.730, p=8.389e-02, rel=-3.98%
+    DM-HLN M5_HAR_RV vs M1: t=-1.962, p=4.994e-02, rel=-5.37%
+    DM-HLN M6_GAS_t vs M1: t=-3.267, p=1.113e-03, rel=-3.64%
+    DM-HLN M4 vs M5 (VIX marginal): t=0.961, rel=+1.32%
+
+============================================================
+  Processing: QQQ
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [QQQ] 0% (0/1323) 7.1s
+  [QQQ] 19% (252/1323) 32.4s
+  [QQQ] 38% (504/1323) 54.8s
+  [QQQ] 57% (756/1323) 84.0s
+  [QQQ] 76% (1008/1323) 104.0s
+  [QQQ] 95% (1260/1323) 125.9s
+  [QQQ] done in 126.0s
+  Valid OOS: 1323
+
+  --- Target: parkinson ---
+    M1_GJR_N: QLIKE=0.431337, rho=0.600
+    M3_GARCH_MIDAS_X: QLIKE=0.422477, rho=0.604
+    M4_HAR_RV_X: QLIKE=0.313510, rho=0.641
+    M5_HAR_RV: QLIKE=0.341069, rho=0.619
+    M6_GAS_t: QLIKE=0.481491, rho=0.550
+    DM-HLN M3_GARCH_MIDAS_X vs M1: t=3.698, p=2.265e-04, rel=+2.05%
+    DM-HLN M4_HAR_RV_X vs M1: t=7.728, p=2.154e-14, rel=+27.32%
+    DM-HLN M5_HAR_RV vs M1: t=5.276, p=1.542e-07, rel=+20.93%
+    DM-HLN M6_GAS_t vs M1: t=-5.354, p=1.014e-07, rel=-11.63%
+    DM-HLN M4 vs M5 (VIX marginal): t=4.219, rel=+8.08%
+
+  --- Target: r2_close ---
+    M1_GJR_N: QLIKE=1.455917, rho=0.301
+    M3_GARCH_MIDAS_X: QLIKE=1.456538, rho=0.302
+    M4_HAR_RV_X: QLIKE=1.553892, rho=0.353
+    M5_HAR_RV: QLIKE=1.548455, rho=0.340
+    M6_GAS_t: QLIKE=1.494267, rho=0.256
+    DM-HLN M3_GARCH_MIDAS_X vs M1: t=-0.197, p=8.440e-01, rel=-0.04%
+    DM-HLN M4_HAR_RV_X vs M1: t=-3.371, p=7.700e-04, rel=-6.73%
+    DM-HLN M5_HAR_RV vs M1: t=-3.119, p=1.855e-03, rel=-6.36%
+    DM-HLN M6_GAS_t vs M1: t=-2.806, p=5.095e-03, rel=-2.63%
+    DM-HLN M4 vs M5 (VIX marginal): t=-0.406, rel=-0.35%
+
+============================================================
+  Processing: IWM
+============================================================
+  OOS: 2021-01-04 ~ 2026-04-10 (1323 obs)
+  [IWM] 0% (0/1323) 6.1s
+  [IWM] 19% (252/1323) 33.0s
+  [IWM] 38% (504/1323) 66.8s
+  [IWM] 57% (756/1323) 98.0s
+  [IWM] 76% (1008/1323) 117.7s
+  [IWM] 95% (1260/1323) 137.9s
+  [IWM] done in 138.0s
+  Valid OOS: 1323
+
+  --- Target: parkinson ---
+    M1_GJR_N: QLIKE=0.362242, rho=0.395
+    M3_GARCH_MIDAS_X: QLIKE=0.358132, rho=0.395
+    M4_HAR_RV_X: QLIKE=0.276245, rho=0.521
+    M5_HAR_RV: QLIKE=0.289544, rho=0.490
+    M6_GAS_t: QLIKE=0.400560, rho=0.343
+    DM-HLN M3_GARCH_MIDAS_X vs M1: t=3.331, p=8.906e-04, rel=+1.13%
+    DM-HLN M4_HAR_RV_X vs M1: t=5.797, p=8.451e-09, rel=+23.74%
+    DM-HLN M5_HAR_RV vs M1: t=5.120, p=3.516e-07, rel=+20.07%
+    DM-HLN M6_GAS_t vs M1: t=-4.801, p=1.754e-06, rel=-10.58%
+    DM-HLN M4 vs M5 (VIX marginal): t=2.064, rel=+4.59%
+
+  --- Target: r2_close ---
+    M1_GJR_N: QLIKE=1.333954, rho=0.169
+    M3_GARCH_MIDAS_X: QLIKE=1.332448, rho=0.170
+    M4_HAR_RV_X: QLIKE=1.385649, rho=0.263
+    M5_HAR_RV: QLIKE=1.343695, rho=0.269
+    M6_GAS_t: QLIKE=1.339316, rho=0.149
+    DM-HLN M3_GARCH_MIDAS_X vs M1: t=1.010, p=3.128e-01, rel=+0.11%
+    DM-HLN M4_HAR_RV_X vs M1: t=-1.656, p=9.801e-02, rel=-3.88%
+    DM-HLN M5_HAR_RV vs M1: t=-0.446, p=6.560e-01, rel=-0.73%
+    DM-HLN M6_GAS_t vs M1: t=-0.488, p=6.258e-01, rel=-0.40%
+    DM-HLN M4 vs M5 (VIX marginal): t=-2.139, rel=-3.12%
+
+========================================================================
+9-CELL UNIVERSAL-NULL ANALYSIS (3 assets × 3 robust models)
+Fair-test view: each model on its native target vs M1 baseline.
+  HAR-RV-X: fair test = M4 vs M5 on Parkinson (VIX marginal, same-target)
+  GARCH-MIDAS-X: fair test = M3 vs M1 on r² (close²-native)
+  GAS-t: fair test = M6 vs M1 on r² (close²-native)
+========================================================================
+
+Asset                  HAR-RV-X          GARCH-MIDAS-X                  GAS-t
+-----------------------------------------------------------------------------
+SPY      t= +4.18 p_BH=0.000 PASS t= +1.36 p_BH=0.263 t= -3.27 p_BH=0.003
+QQQ      t= +4.22 p_BH=0.000 PASS t= -0.20 p_BH=0.844 t= -2.81 p_BH=0.011
+IWM      t= +2.06 p_BH=0.071 t= +1.01 p_BH=0.402 t= -0.49 p_BH=0.704
+
+  PASS cells / 9: 2
+
+Per-asset NULL (cross-model):
+  SPY: max DM_t=+4.18 → PASS
+  QQQ: max DM_t=+4.22 → PASS
+  IWM: max DM_t=+2.06 → PASS
+
+Per-model NULL (cross-asset):
+  HAR-RV-X: max DM_t=+4.22 → PASS
+  GARCH-MIDAS-X: max DM_t=+1.36 → NULL
+  GAS-t: max DM_t=-0.49 → NULL
+
+Harvey joint threshold (t>3 & BH p<0.05): 2/9 cells
+
+*** VERDICT: MIXED ***
+
+========================================================================
+K1136 commodity vs K1138 equity max DM-t comparison
+========================================================================
+K1136 commodity (max DM-t across fair tests):
+  USO: MIDAS-r² t=+1.23, HAR-VIX-park t=+1.65 → max +1.65
+  GLD: MIDAS-r² t=+0.94, HAR-VIX-park t=-0.88 → max +0.94
+  UNG: MIDAS-r² t=+0.62, HAR-VIX-park t=+0.74 → max +0.74
+  BTC-USD: MIDAS-r² t=-0.32, HAR-VIX-park t=+0.52 → max +0.52
+
+K1138 equity (max DM-t across 3 robust models):
+  SPY: max t=+4.18 (best model: HAR-RV-X)
+  QQQ: max t=+4.22 (best model: HAR-RV-X)
+  IWM: max t=+2.06 (best model: HAR-RV-X)
+
+Charts saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1138/dm_heatmap_equity.png, /Users/yhlai0911/Desktop/volpred-research/experiments/k1138/equity_vs_commodity_fair_tests.png
+
+Results saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1138/k1138_results.json
+
+FINAL VERDICT: MIXED
+Paper 4 implication: Mixed results: some (asset, model) combos PASS, others NULL. Paper 4 should report the specific passing combos explicitly rather than claiming universal null.
+
+K1138 complete.
