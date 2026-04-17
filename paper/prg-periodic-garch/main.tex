@@ -108,11 +108,22 @@ which requires only that the \emph{product} of session-specific persistences be 
     \label{eq:uncond_var}
 \end{equation}
 
-For forecasting, the PRG produces session-level variance forecasts $\hat{h}_{d,0}$ and $\hat{h}_{d,1}$. The full-day forecast is
+\paragraph{Forecast timing and information sets.}
+The session ordering dictates a two-phase forecasting protocol for full-day variance. Let $\mathcal{F}_{d-1}^{\,c}$ denote the information set available at the close of day $d-1$ (after the intraday session ends) and $\mathcal{F}_{d}^{\,o}$ the information set available at the open of day $d$ (after the overnight session closes). Because the overnight session spans the interval from the day-$(d-1)$ close to the day-$d$ open, the overnight return $r_{d,0}$ is realized---not forecasted---by the time $\mathcal{F}_{d}^{\,o}$ is formed. The PRG therefore produces two sequential session-level forecasts:
+\begin{align}
+    \hat{h}_{d,0} &= \mathbb{E}\!\left[r^2_{d,0} \mid \mathcal{F}_{d-1}^{\,c}\right]
+    = \omega_{0} + \alpha_{0}\, r^2_{d-1,1} + \gamma_{0}\, r^2_{d-1,1}\, \mathbb{1}(r_{d-1,1} < 0) + \beta_{0}\, h_{d-1,1},
+    \label{eq:prg_ov_forecast} \\[2pt]
+    \hat{h}_{d,1} &= \mathbb{E}\!\left[r^2_{d,1} \mid \mathcal{F}_{d}^{\,o}\right]
+    = \omega_{1} + \alpha_{1}\, r^2_{d,0} + \gamma_{1}\, r^2_{d,0}\, \mathbb{1}(r_{d,0} < 0) + \beta_{1}\, \hat{h}_{d,0}.
+    \label{eq:prg_in_forecast}
+\end{align}
+Equation~(\ref{eq:prg_ov_forecast}) is a standard one-step-ahead forecast issued at the day-$(d-1)$ close. Equation~(\ref{eq:prg_in_forecast}) is a \emph{conditional} forecast issued at the day-$d$ open: the input $r^2_{d,0}$ is the realized (not forecasted) overnight squared return and is therefore an element of $\mathcal{F}_{d}^{\,o}$. This timing convention is standard in the session-based volatility literature \citep{Linton2020,Opschoor2021} and mirrors how overnight information is exploited in practice: a market participant observes the realized overnight return at the day-$d$ open and adjusts risk exposure or initiates positions at the opening price accordingly. Acting at the open on fully realized overnight information is a legitimate and routinely implementable timing convention, not a look-ahead construct. The full-day forecast is the sum
 \begin{equation}
-    \hat{\sigma}^2_{\text{full},d} = \hat{h}_{d,0} + \hat{h}_{d,1}.
+    \hat{\sigma}^2_{\text{full},d} = \hat{h}_{d,0} + \hat{h}_{d,1},
     \label{eq:prg_fullday}
 \end{equation}
+which is \emph{not} a single-timepoint forecast issued at $\mathcal{F}_{d-1}^{\,c}$ but rather the sum of two conditional forecasts issued at the two session boundaries. All benchmark models in Section~2.3 that target $\sigma^2_{\text{full},d}$ directly (GJR, HAR) are evaluated under the \emph{more restrictive} information set $\mathcal{F}_{d-1}^{\,c}$; the PRG's advantage under the two-phase protocol therefore captures, in addition to functional-form differences, the practical value of acting on overnight information at the open.
 
 \subsection{Benchmark models}
 
@@ -188,7 +199,7 @@ EEM     & 0.664 & 6.63$^{***}$ & $-$6.34$^{***}$ & 6.30$^{***}$ & 0.469 & All \\
 \end{tabular}
 \begin{flushleft}
 \footnotesize
-\emph{Notes:} Best QLIKE refers to the PRG Extended model (PRG Basic for GLD). DM $t$-statistics test PRG Extended vs.\ the named benchmark; positive values favor PRG. ``PRG vs Sep'' tests whether the cross-session recursion adds value beyond session-specific parameters. Spearman $\rho$ is between PRG Extended forecasts and realized $\sigma^2_{\text{full}}$. MCS reports surviving models at the 10\% level. $^{***}$Significant at the \citet{Harvey2016} $|t| > 3.0$ threshold.
+\emph{Notes:} Best QLIKE refers to the PRG Extended model (PRG Basic for GLD). DM $t$-statistics test PRG Extended vs.\ the named benchmark; positive values favor PRG. ``PRG vs Sep'' tests whether the cross-session recursion adds value beyond session-specific parameters. Spearman $\rho$ is between PRG Extended forecasts and realized $\sigma^2_{\text{full}}$. MCS reports surviving models at the 10\% level. $^{***}$Significant at the \citet{Harvey2016} $|t| > 3.0$ threshold. The PRG full-day forecast $\hat{\sigma}^2_{\text{full},d}$ follows the two-phase timing convention in Eqs.~(\ref{eq:prg_ov_forecast})--(\ref{eq:prg_fullday}): the overnight component is issued at the day-$(d-1)$ close, while the intraday component is issued at the day-$d$ open conditional on the realized overnight return. Benchmarks (GJR, HAR) are evaluated under the more restrictive $\mathcal{F}_{d-1}^{\,c}$ information set.
 \end{flushleft}
 \end{table}
 
@@ -278,7 +289,7 @@ PRG Extended    & 1.66 & 23.6 & $-$11.5 & 1.65 \\
 \end{tabular}
 \begin{flushleft}
 \footnotesize
-\emph{Notes:} Sharpe and Sortino ratios are annualized. CAGR is the compound annual growth rate. MDD is the maximum drawdown. The VT strategy scales exposure inversely to conditional volatility, with a cap at 100\% weight. Transaction costs are not deducted; average daily turnover ranges from 4.5\% (HAR) to 6.6\% (GJR).
+\emph{Notes:} Sharpe and Sortino ratios are annualized. CAGR is the compound annual growth rate. MDD is the maximum drawdown. The VT strategy scales exposure inversely to conditional volatility, with a cap at 100\% weight. Transaction costs are not deducted; average daily turnover ranges from 4.5\% (HAR) to 6.6\% (GJR). Position rebalancing is executed at the day-$d$ open, using the PRG full-day variance forecast from Eq.~(\ref{eq:prg_fullday}); this timing is implementable in practice, as the realized overnight return entering $\hat{h}_{d,1}$ is observed at the open and the opening price itself is a tradable reference.
 \end{flushleft}
 \end{table}
 
