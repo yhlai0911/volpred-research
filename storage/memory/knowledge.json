@@ -27393,5 +27393,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T20:59:47.268476"
+  },
+  {
+    "item_id": "5e676068",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1198 Paper 1 Tables 10/11/12/C3 KB-only 6 values formal rebuild. **VERDICT: 3/6 MATCHED**. **MATCHED 3**: T11 BH ES(1%) -4.53% vs paper -4.68%; T11 BH kurtosis 14.51 vs 14.71; **T12 Spearman \u03c1=1.000 EXACT match** (SPY>QQQ>EEM>USO>BTC>TLT>GLD ranking). **DIVERGED 3**: T10 avg stock \u03b3 0.094 vs paper 0.076 (+24%, paper 50 stocks vs K1198 20), T10 t-stat -10.53 vs -16.92 (same sample size issue); C3 gold t-stat -3.79 vs -4.71 \u4f46 bull \u03b3=-0.044 paper -0.043 \u543b\u5408. **KB \u03c1=1.000 for 7 assets CONFIRMED**. \u03c1=0.874 for 17 assets \u8d85\u51fa\u672c\u5be6\u9a57\u7bc4\u570d (K1196 12 assets). **\u5efa\u8b70 (b) MODIFY_PAPER**: Table 10 \u66f4\u65b0 avg stock \u03b3=0.094 t=-10.53 \u52a0 N=20 \u8173\u6ce8; C3 body \u00a74.2.3 \u66f4\u65b0 t=-3.79 bear \u03b3=+0.066; Table 11 VT \u503c\u6a19 'Hybrid VT specific'; Table 12 Spearman \u03c1=1.000 \u5df2\u6b63\u5f0f\u78ba\u8a8d\u4e0d\u6539. Paper 1 pre-K era 6 values now formally documented. commit 9080fbb3.",
+    "evidence": [
+      "experiments/k1198/k1198.py",
+      "experiments/k1198/k1198_results.json"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T21:04:39.340694"
   }
 ]
