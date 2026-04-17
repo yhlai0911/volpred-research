@@ -27497,5 +27497,28 @@
     ],
     "confidence": 0.92,
     "created_at": "2026-04-18T00:40:22.158566"
+  },
+  {
+    "item_id": "d449f0e1",
+    "category": "K1108d",
+    "content": "K1108d D2 non-capex guidance PRELIMINARY NULL (coverage 8.9%). Spec: theta_EAV ~ utilisation_delta_pp + wafer_asp_delta_pct + rd_delta_pct + firm_FE + year_FE. 3 betas univariate: util +2.58e-05, asp -4.51e-05, rd -7.30e-05. Max |HAC t|=0.968 (rd). Partial-F(3,37)=0.347 p=0.791 strongly fails to reject. All-3 coverage 12/135=8.9%, per-col 23.7/11.1/23.7%. Bootstrap 95% CI all cross 0. Hand-coded subset (N=19 util, N=5 asp) also NULL. Orthogonality: capex guide_delta_pct control no effect on non-capex coefs. Coverage <60% gate so marked PRELIMINARY (need MOPS/10-Q transcript scrape for \u226560% before final). 6-layer NULL stack confirmed preliminary; Paper 2 narrative = PROVISIONAL_INDUSTRY_FE_FRAMING.",
+    "evidence": [
+      "experiments/k1108d/k1108d_results.json",
+      "experiments/k1108d/README.md",
+      "commit b021b6da"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-04-18T00:53:30.785251"
+  },
+  {
+    "item_id": "a76df6e4",
+    "category": "Paper2_foundry_synthesis",
+    "content": "Paper 2 foundry theta_2>0 mechanism search: 6-LAYER NULL STACK (PRELIMINARY at D2 8.9% coverage). (1) K1108 single-firm binary INCONCLUSIVE. (2) K1108b 5-foundry binary NULL. (3) K1108c continuous magnitude NULL (t=-1.34). (4) K1108e operating leverage D3 NULL (partial-F p=0.102, firm-FE absorbs SMIC confound). (5) K1108f regime-split D4 NULL (Wald p=0.849, same-sign same-magnitude). (6) K1108d non-capex guidance D2 PRELIMINARY NULL (partial-F p=0.791 at 8.9% coverage). Conclusion: capex guidance (binary/continuous/regime-interacted) AND balance-sheet (op leverage) AND non-capex guidance (util/ASP/R&D) all NULL. Narrative commitment: PROVISIONAL_INDUSTRY_FE_FRAMING \u2014 foundry theta_2>0 from K1104 most likely industry fixed effect without attributable event-driven channel. Pre-submission requirement: K1108d coverage must reach >=60% via MOPS/10-Q transcript scrape before finalizing industry-FE commitment.",
+    "evidence": [
+      "K1108-K1108d experiments",
+      "commits 5bcd8143 9e8a1061 80f923ce 4c569f52 b021b6da"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-18T00:53:30.908954"
   }
 ]
