@@ -1,0 +1,262 @@
+{
+  "k_id": "K1236",
+  "produced": "2026-04-17",
+  "supersedes": ["K1220", "K1226"],
+  "purpose": "TRUE FINAL session close-out decision gates (post-K1220 session progress integrated: K1216c/K1222b/K1223-K1234)",
+  "seed": 42,
+  "paper_status_counts": {
+    "ready_immediate": 4,
+    "ready_after_15min_review": 1,
+    "blocked_on_user_decision": 4,
+    "pending_experiment": 1,
+    "kickoff": 1,
+    "total": 11
+  },
+  "decision_gates": [
+    {
+      "id": "P1",
+      "priority": "HIGH",
+      "gate": "Paper 2 §5 adopt K1222b FINAL (rho=+0.379 REBOUND + §5.4 new multistart methodology contribution)",
+      "source": "K1222b",
+      "change_vs_k1226": "unchanged (K1216c resolved path choice)",
+      "user_action": "Read K1222b revision guide (2925 words) + confirm adoption",
+      "user_time_min": 15,
+      "blocker": null,
+      "downstream_impact": "Paper 2 submission credibility: ladder REBOUNDS to modestly-weaker-but-surviving; adds methodological §5.4 contribution",
+      "execution_effort_hr": 2.5,
+      "evidence": {
+        "spearman_refined_9market": 0.379,
+        "p_value": 0.201,
+        "harvey_t": 1.36,
+        "N": 13,
+        "fisher_z_vs_canonical_0_441": 0.16,
+        "fisher_z_p": 0.87,
+        "canonical_N12": 0.441
+      }
+    },
+    {
+      "id": "P2",
+      "priority": "MEDIUM",
+      "gate": "Paper 4 CONFLICT-A4: Version A channel-specific vs Version B UNIVERSAL_NULL",
+      "source": "K1225",
+      "change_vs_k1226": "unchanged from K1220 P2 / K1226 P2",
+      "user_action": "Pick Version A or B per K1225 dual-framing guide",
+      "user_time_min": 5,
+      "blocker": "User framing pick",
+      "downstream_impact": "Paper 4 body_v4 rewrite unblock; K1208 1762-word draft currently leans Version B UNIVERSAL_NULL",
+      "execution_effort_hr": 2.5,
+      "evidence": {
+        "universal_null_panorama": "7/7 assets (SPY/QQQ/GLD/USO/TLT/BTC/EEM)",
+        "tlt_finstress_rejected_under_triple_gate": true,
+        "prior_decision_commit": "7ecab636"
+      }
+    },
+    {
+      "id": "P3",
+      "priority": "MEDIUM",
+      "gate": "Paper 7 K846 sub-period footnote path (a) script update vs (b) reword",
+      "source": "K1233",
+      "change_vs_k1226": "NEW gate (K1233 introduction)",
+      "user_action": "Pick path (a) or (b)",
+      "user_time_min": 5,
+      "blocker": "Path choice for P7-3 footnote",
+      "downstream_impact": "Paper 7 final polish; completes 三方一致 compliance",
+      "execution_effort_hr": 0.25,
+      "evidence": {
+        "path_a": "update K846 script to emit rho_2012_2024 + rebalancing_premium_bps_2012_2024 (~15 min)",
+        "path_b": "reword footnote to 'unreported robustness' (~5 min)",
+        "k846_json_full_sample_bps": 53.67,
+        "k846_json_theoretical_bps": 81.46,
+        "footnote_values_subperiod_rho": 0.04,
+        "footnote_values_subperiod_bps": 48
+      }
+    },
+    {
+      "id": "P4",
+      "priority": "MEDIUM",
+      "gate": "Paper 3 K1128 pivot a/b/c (K1205 recommends b)",
+      "source": "K1227",
+      "change_vs_k1226": "unchanged from K1220 P3 / K1226 P3",
+      "user_action": "Commit path a / b / c",
+      "user_time_min": 30,
+      "blocker": "Path choice",
+      "downstream_impact": "Paper 3 narrative commit; enables paper/prg-hybrid-null/ scaffolding per K1217",
+      "execution_effort_hr_a": 120,
+      "execution_effort_hr_b": 80,
+      "execution_effort_hr_c": 0,
+      "evidence": {
+        "path_a": "K1142 vol-norm anchor paper (3 weeks fresh body; target IRFA / FRL / PBFJ; HIGH risk)",
+        "path_b": "K1205-recommended hybrid null+positive; K1217 4991-word pre-draft; lowest risk",
+        "path_c": "abandon + repurpose as feed articles",
+        "k1128_4branch_null": "K1128 discrete / K1131 spline / K1199 expanding / K1142 partial OOS t=+2.255 Harvey-fail AUC 0.671",
+        "structural_root_cause": "IS VIX [9,37] does not intersect COVID OOS [12,83]"
+      }
+    },
+    {
+      "id": "P5",
+      "priority": "MEDIUM",
+      "gate": "Paper 8 K721 Table 5 revision willingness (N=127/203/89 -> 79/182/146)",
+      "source": "K1231",
+      "change_vs_k1226": "NEW gate (K1231 introduction)",
+      "user_action": "Confirm willingness to publish revised N + recompute t-stats OR opt for reconstruction K716-K722 ~12h path",
+      "user_time_min": 15,
+      "blocker": "Revision willingness for reviewer S2 severe item",
+      "downstream_impact": "Paper 8 reproduce_report.json traceability 50.7% -> >=85%; resolves reviewer S2 severe",
+      "execution_effort_hr": 12.5,
+      "evidence": {
+        "k721_reconstruction_decision": {
+          "K716": "(a) 1h LOW - SPY end-date alignment",
+          "K717": "(c) 0.25h LOW - Section 6 pending-errata note",
+          "K718": "(a) 3-4h HIGH - Table 4 central; 0050.TW 57.9% drift",
+          "K719": "(a) 3h MEDIUM - new structured K1232-like Table 8 CB ratios script",
+          "K720": "(a) 2h MEDIUM - VRP quintile dump",
+          "K721": "(b) 2h HIGH - paper body revision; 60% N discrepancy",
+          "K722": "(c) 0.5h LOW - Section 7.3 robustness errata"
+        },
+        "verdict_counts": "(a) x4 | (b) x1 | (c) x2",
+        "total_effort_hr": "12-13"
+      }
+    },
+    {
+      "id": "P6",
+      "priority": "LOW",
+      "gate": "BTC GAS negative paper go / no-go",
+      "source": "K1214 + K1228",
+      "change_vs_k1226": "unchanged from K1220 P4 / K1226 P4",
+      "user_action": "Confirm new paper slot + 5 K1228 gate questions",
+      "user_time_min": 15,
+      "blocker": "Go/no-go + sample expansion + primary journal lock + target length + Codex/Gemini sequencing + standalone vs Paper 10 slot",
+      "downstream_impact": "New paper pipeline (11th slot); K1214 4829-word draft unblocked",
+      "execution_effort_hr": 1.75,
+      "evidence": {
+        "k1214_draft_words": 4829,
+        "k1228_phases": 5,
+        "k1228_steps": 24,
+        "total_execution_min": 105,
+        "target_journals": ["J. Empirical Finance (primary, IF 2.1)", "J. Financial Econometrics (secondary)", "Journal of Risk (tertiary)"],
+        "full_sample_DM_t": -4.58,
+        "P1_pre_institutional_DM_t": -4.67,
+        "P1_N": 1441,
+        "student_t_attribution_pct": 75
+      }
+    },
+    {
+      "id": "P7",
+      "priority": "MONITOR",
+      "gate": "K1235 Paper 9 FEZ + STOXX50E A4f OOS 2019-2026 real experiment",
+      "source": "K1232",
+      "change_vs_k1226": "NEW (K1232 introduction)",
+      "user_action": "Await background agent completion; process result via K1232 §Aggregate Fix Sequence",
+      "user_time_min": 0,
+      "blocker": "Background agent execution",
+      "downstream_impact": "Paper 9 replication package NEEDS-FIX -> audit-clean; resolves D1 + D2",
+      "execution_effort_hr": 3.0,
+      "evidence": {
+        "paper_claim_FEZ_t": 3.45,
+        "paper_claim_STOXX50E_t": 3.64,
+        "target_tolerance_FEZ": "[3.40, 3.50]",
+        "target_tolerance_STOXX50E": "[3.60, 3.70]",
+        "citation_items_resolved": "6/8 (1 MAJOR conrad2015 + 5 MED DOIs in commit 2bf5f2f6)",
+        "items_pending": "2 P1 (FEZ + STOXX50E real experiment)",
+        "conditional_action": "If within tolerance: no tex change; else update Table 6 rows 525-526 + Abstract + Conclusion"
+      }
+    }
+  ],
+  "immediate_ready_sequence": [
+    {
+      "step": 1,
+      "task": "K1233 Paper 5 script fix",
+      "paper_folder": "paper/vt-crowding-abm/",
+      "duration_min": 15,
+      "change": "experiments/k827v3_abm_fixed_liquidity.py lines 603+605: > 30 -> > 50",
+      "decision_required": false
+    },
+    {
+      "step": 2,
+      "task": "K1224 Paper 1 body_v4 cherry-pick",
+      "paper_folder": "paper/leverage-direction/",
+      "duration_min": 75,
+      "items": 7,
+      "baseline_commit": "0a442356",
+      "decision_required": false
+    },
+    {
+      "step": 3,
+      "task": "K1223 Paper 6 body_v2 + Appendix A",
+      "paper_folder": "paper/prg-periodic-garch/",
+      "duration_min": 100,
+      "items": 6,
+      "blockers": 3,
+      "warnings": 3,
+      "baseline_commit": "7d35418b",
+      "decision_required": false
+    },
+    {
+      "step": 4,
+      "task": "K1233 Paper 7 small fixes",
+      "paper_folder": "paper/vt-insurance-cost/",
+      "duration_min": 27,
+      "items": 3,
+      "decision_required": "path a/b for P7-3 (P3 gate)",
+      "decision_optional": true
+    },
+    {
+      "step": 5,
+      "task": "K1222b Paper 2 body_v(n+1) §5 rewrite",
+      "paper_folder": "paper/taiwan-vt/",
+      "duration_min": 150,
+      "items": 13,
+      "decision_required": "15-min review of K1222b revision guide (P1 gate)",
+      "decision_optional": false
+    }
+  ],
+  "major_findings_summary": [
+    "K1216c ROOT_CAUSE_METHODOLOGY: 9/9 markets multistart-FRAGILE; LR 146-2837 vs chi^2(1)=3.84; two-basin likelihood surface universal design issue",
+    "K1222b Paper 2 §5 REBOUND: 9-market symmetric refined rho=+0.379 p=0.201 N=13 Fisher-z indistinguishable from canonical +0.441 (p~0.87)",
+    "K1203 Paper 4 UNIVERSAL_NULL 7/7: 28-cell DM matrix SPY/QQQ/GLD/USO/TLT/BTC/EEM all baseline wins; TLT finstress +3.74 rejected under triple-gate",
+    "K1200 Paper 6 clean-slate replication: K880 DM 6.00 -> K1200 DM 6.13; K880v2 two-phase timing defensible",
+    "K1108 Paper 2 foundry 6-layer NULL FINAL: industry fixed effect absorbs foundry-specific content; K1202 96.3% coverage confirmed",
+    "K1128/K1131/K1142/K1199 Paper 3 4-branch NULL: K1142 partial OOS t=+2.255 Harvey-fail AUC 0.671 best of 4",
+    "K1133/K1133b BTC GAS negative paper VIABLE: DM t=-4.58; ~75% Student-t innovation attribution; MS-GAS-t cannot rescue",
+    "New methodology rule: multistart necessity for cross-market pooled MLE + symmetric refinement required across panels"
+  ],
+  "blocked_persistent": [
+    "K1100h: TAIFEX TX tick 2017-2021 Dropbox (user-gated)",
+    "K1116d: FRED_API_KEY missing env",
+    "K1161b: paid options data (ThetaData/OptionMetrics)",
+    "K1175 legacy: GDELT/GCP BigQuery capacity",
+    "I4: yfinance VIX futures gap"
+  ],
+  "papers_final_status": {
+    "Paper 1 leverage-direction": {"status": "READY", "effort_min": 75, "blocker": null, "materials": "K1209 Batch 2 + K1224 7-item edit guide"},
+    "Paper 2 taiwan-vt": {"status": "READY_15MIN_REVIEW", "effort_min": 150, "blocker": null, "materials": "K1222b FINAL 2925w ρ=+0.379 REBOUND"},
+    "Paper 3 vt-trend-following": {"status": "BLOCKED", "effort_hr": "2-3 weeks if b", "blocker": "P4 path a/b/c", "materials": "K1217 path-b draft 4991w + K1227 triple-path"},
+    "Paper 4 vix-sufficiency": {"status": "BLOCKED", "effort_hr": 2.5, "blocker": "P2 CONFLICT-A4", "materials": "K1208 UNIVERSAL_NULL draft 1762w + K1225 dual-framing A/B"},
+    "Paper 5 vt-crowding-abm": {"status": "READY", "effort_min": 15, "blocker": null, "materials": "K1229 97.5% audit + K1233 P5-1 script fix"},
+    "Paper 6 prg-periodic-garch": {"status": "READY", "effort_min": 100, "blocker": null, "materials": "K1200 replication + K1218 Appendix A 930w + K1223 6-item edit guide"},
+    "Paper 7 vt-insurance-cost": {"status": "READY", "effort_min": 27, "blocker": "P3 optional path choice", "materials": "K1229 96% audit + K1233 P7-1/P7-2/P7-3 3 tex fixes"},
+    "Paper 8 volatility-absorption": {"status": "BLOCKED", "effort_hr": "12-13", "blocker": "P5 K721 revision willingness", "materials": "K1229 50.7% traceability + K1231 7-K a/b/c"},
+    "Paper 9 garch-x-vix": {"status": "PENDING_K1235", "effort_hr": 3, "blocker": "P7 K1235 FEZ+STOXX50E experiment", "materials": "K1229 85% audit + K1232 6/8 resolved"},
+    "Paper 10 crypto-fear-channel": {"status": "KICKOFF", "effort_days": "11-14", "blocker": "4 open decisions + body writing", "materials": "K1234 §2-9 kickoff guide 9000w body gap"},
+    "NEW btc-gas-negative": {"status": "BLOCKED", "effort_hr": 1.75, "blocker": "P6 go/no-go", "materials": "K1133/K1133b + K1214 4829w draft + K1228 5-phase 24-step"}
+  },
+  "next_session_focus": [
+    "Execute immediate-ready sequence (2.5 hr)",
+    "Resolve decision gates P1-P6 (user budget ~85 min)",
+    "Monitor K1235 + process FEZ/STOXX50E result",
+    "Paper 3 body rewrite per chosen path (if P4 resolved)",
+    "Paper 4 body_v4 per chosen framing (if P2 resolved)",
+    "Paper 8 K716-K722 reconstruction week (if P5 resolved)",
+    "BTC GAS paper/btc-gas-negative/ initialization (if P6 go)",
+    "Paper 10 §2-9 drafting if writing day"
+  ],
+  "compliance": {
+    "worktree_scope": "experiments/k1236/ only",
+    "mutations_allowed": "none",
+    "output_formats": ["md", "json"],
+    "tex_output": false,
+    "seed_declared": 42,
+    "rng_used": false,
+    "verbatim_sources": ["K1216c", "K1222b", "K1200", "K1203", "K1209", "K1214", "K1223", "K1224", "K1225", "K1227", "K1228", "K1229", "K1230", "K1231", "K1232", "K1233", "K1234"]
+  }
+}
