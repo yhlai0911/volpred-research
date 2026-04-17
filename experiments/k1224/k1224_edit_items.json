@@ -1,0 +1,318 @@
+{
+  "experiment_id": "K1224",
+  "title": "Paper 1 body_v4 integration edit guide (K1209 Batch 2 + K1206 Table 6 errata + K1198/K1188 findings)",
+  "date": "2026-04-17",
+  "paper_id": "leverage-direction",
+  "paper_path": "paper/leverage-direction/",
+  "target_file": "paper/leverage-direction/body_v4.tex",
+  "target_tables_file": "paper/leverage-direction/tables.tex",
+  "new_file_to_create": "paper/leverage-direction/experiments.md",
+  "baseline_commit": "0a442356",
+  "rollback_commit": "0a442356",
+  "parallel_guide": "experiments/k1223/k1223_edit_guide.md",
+  "source_experiments": [
+    {
+      "id": "K1209",
+      "commit": "2ca9f2f8",
+      "role": "Paper 1 Batch 2 markdown draft (8 items, 3574 words, 1 dropped)",
+      "artifact": "experiments/k1209/k1209_batch2_draft.md"
+    },
+    {
+      "id": "K1206",
+      "commit": "d8bdb205",
+      "role": "Table 6 forensic sensitivity (A vintage / B bisection / C CF variants all falsify Paper 1 values → errata_recommended)",
+      "artifact": "experiments/k1206/README.md"
+    },
+    {
+      "id": "K1198",
+      "role": "Tables 10/11/12 + §4.2.3 (C3) pre-K rebuild: 3/6 matched, 3/6 diverged (N=20 vs N=50 constituents + sample 2005-2026 vs 2010-2026)",
+      "artifact": "experiments/k1198/README.md"
+    },
+    {
+      "id": "K1188",
+      "role": "Table 8 window robustness 15/15 matched (STILL_NO_SOURCE resolved)",
+      "artifact": "experiments/k1188/README.md"
+    },
+    {
+      "id": "K1187",
+      "role": "Table 7 cross-asset: 6/20 matched; per-asset period undisclosed",
+      "artifact": "experiments/k1187/README.md"
+    },
+    {
+      "id": "K1186",
+      "role": "Table 6 canonical replication: 2/5 matched, 3/5 diverged",
+      "artifact": "experiments/k1186/README.md"
+    },
+    {
+      "id": "K1185",
+      "role": "Table 4 VaR 1% attribution: 3/4 matched (Normal 33→30 yfinance revision)",
+      "artifact": "experiments/k1185/README.md"
+    },
+    {
+      "id": "K903",
+      "role": "Rolling-window QLIKE (matches Table 8 within 0.003; Table 3 differs by 0.363)",
+      "artifact": "experiments/k903/k903_vs_paper_diff.md"
+    }
+  ],
+  "summary": {
+    "total_items": 7,
+    "dropped_items": 1,
+    "estimated_minutes_total": 70,
+    "estimated_minutes_min": 60,
+    "estimated_minutes_max": 90
+  },
+  "seed": 42,
+  "seed_used_for_computation": false,
+  "worktree_scope": "experiments/k1224/",
+  "forbidden_edits": [
+    "paper/leverage-direction/body_v3.tex",
+    "paper/leverage-direction/body_v4.tex",
+    "paper/leverage-direction/tables.tex",
+    "paper/leverage-direction/main_v4.tex",
+    "storage/memory/knowledge.json",
+    "storage/reports/feed.json"
+  ],
+  "items": [
+    {
+      "order": 1,
+      "id": "ITEM1",
+      "severity": "ERRATA_FOOTNOTE",
+      "category": "aggregation_convention_disclosure",
+      "source_experiment": ["K903", "K1188"],
+      "source_files": [
+        "experiments/k903/k903_vs_paper_diff.md",
+        "experiments/k1188/README.md"
+      ],
+      "title": "Table 3 vs Table 8 SPY 2023-24 GJR QLIKE aggregation footnote",
+      "target_file": "paper/leverage-direction/body_v4.tex",
+      "line_approx": 219,
+      "action": "add_footnote",
+      "canonical_numbers": {
+        "k903_rolling_w504_step63": -8.674,
+        "paper_table8_w504_spy_2023_24": -8.671,
+        "paper_table3_spy_2023_24_gjr": -9.034,
+        "delta_table3_vs_table8_pct": 4.1
+      },
+      "preserves_v3_number": true,
+      "footnote_text_verbatim_ready": true,
+      "estimated_minutes": 10,
+      "alternative_option_1B": "Replace -9.034 with -8.671 and re-run all Table 3 DM p-values (requires new K experiment)",
+      "already_handled_by_batch1": false
+    },
+    {
+      "order": 2,
+      "id": "ITEM2",
+      "severity": "ERRATA_CELL_UPDATE",
+      "category": "table_rewrite_plus_sentence_plus_footnote",
+      "source_experiment": ["K1186", "K1206"],
+      "source_files": [
+        "experiments/k1186/README.md",
+        "experiments/k1206/README.md",
+        "experiments/k1206/k1206_results.json"
+      ],
+      "title": "Table 6 VaR panel errata (3 cell updates + Trinity sentence + footnote)",
+      "target_file": "paper/leverage-direction/body_v4.tex",
+      "target_secondary_file": "paper/leverage-direction/tables.tex",
+      "line_approx": 249,
+      "action": "rewrite_table_rows_plus_sentence_plus_footnote",
+      "cell_updates": {
+        "Normal": {"paper_v3_pct": 57.1, "proposed_v4_pct": 57.1, "unchanged": true},
+        "FHS": {"paper_v3_pct": 76.2, "proposed_v4_pct": 76.2, "unchanged": true},
+        "StudentT5": {"paper_v3_pct": 57.1, "proposed_v4_pct": 76.2, "delta_pp": 19.1, "cells": "16/21"},
+        "SkewedT": {"paper_v3_pct": 76.2, "proposed_v4_pct": 90.5, "delta_pp": 14.3, "cells": "19/21"},
+        "CFVaR": {"paper_v3_pct": 66.7, "proposed_v4_pct": 76.2, "delta_pp": 9.5, "cells": "16/21"}
+      },
+      "k1206_hypotheses_falsified": {
+        "A_vintage_truncation_2025_Q1": "StudentT5 71.4% (still +14.3pp gap); SkewedT 90.5% unchanged; CFVaR 76.2% unchanged",
+        "B_skewed_t_bisection_vs_closed_form": "numerically equivalent; zero cell disagreement across 63 cells",
+        "C_CF_3rd_only_or_maillard": "both 81.0% (further from 66.7% target)"
+      },
+      "untested_residual_hypotheses": [
+        "mixed GJR/GARCH base model per asset",
+        "different in-sample window for skewed-t fit",
+        "CF-VaR rolling moments window length",
+        "true price-vintage shift (archived raw data not available)"
+      ],
+      "secondary_task": "Regenerate per-asset ✓/✗ marks in tab:var_panel from K1186 cell-level JSON to keep column subtotals consistent",
+      "footnote_text_verbatim_ready": true,
+      "estimated_minutes": 20,
+      "already_handled_by_batch1": false
+    },
+    {
+      "order": 3,
+      "id": "ITEM3",
+      "severity": "METHODOLOGY_CLARIFICATION",
+      "category": "footnote",
+      "source_experiment": ["K1185"],
+      "source_files": ["experiments/k1185/README.md"],
+      "title": "Table 4 base = GARCH(1,1) not GJR methodology footnote",
+      "target_file": "paper/leverage-direction/body_v4.tex",
+      "line_approx": 247,
+      "action": "add_footnote",
+      "k1185_reconstruction_summary": {
+        "Normal": {"paper_v3": 33, "k1185": 30, "delta": -3, "match": "diverged_yfinance_post_2025Q4_revision"},
+        "StudentT5": {"paper_v3": 18, "k1185": 19, "delta": 1, "match": "matched_within_pm1"},
+        "Adaptive": {"paper_v3": 14, "k1185": 14, "delta": 0, "match": "exact"},
+        "JumpAugment": {"paper_v3": 14, "k1185": 14, "delta": 0, "match": "exact"}
+      },
+      "rationale": "Section 4.3 prescribes GJR for SPY but Table 4 attribution uses GARCH(1,1). K1185 flags as top reader-confusion source.",
+      "footnote_text_verbatim_ready": true,
+      "estimated_minutes": 5,
+      "already_handled_by_batch1": false
+    },
+    {
+      "order": 4,
+      "id": "ITEM4",
+      "severity": "REPRODUCIBILITY_DISCLOSURE",
+      "category": "amend_caption_plus_footnote",
+      "source_experiment": ["K1187"],
+      "source_files": ["experiments/k1187/README.md"],
+      "title": "Table 7 per-asset evaluation period disclosure",
+      "target_file": "paper/leverage-direction/body_v4.tex",
+      "target_secondary_file": "paper/leverage-direction/tables.tex",
+      "line_approx": 279,
+      "action": "amend_sentence_plus_footnote_plus_caption_addendum",
+      "inferred_per_asset_periods": {
+        "SPY": "2014-2026",
+        "EEM": "2013-2025",
+        "TLT": "2010-2025",
+        "GLD": "2022-2026 (gold bull regime, body Section 4.2)",
+        "BTC-USD": "2019-2025"
+      },
+      "k1187_match_rate": "6/20 metrics (30%)",
+      "rationale": "Body says '7-16 year periods' without per-asset disclosure; primary cause of K1187 low match rate.",
+      "footnote_text_verbatim_ready": true,
+      "estimated_minutes": 10,
+      "already_handled_by_batch1": false
+    },
+    {
+      "order": 5,
+      "id": "ITEM5",
+      "severity": "REPRODUCIBILITY_DISCLOSURE",
+      "category": "footnote",
+      "source_experiment": ["K1187"],
+      "source_files": ["experiments/k1187/README.md"],
+      "title": "Table 7 GLD 1.56 Sharpe forensic footnote",
+      "target_file": "paper/leverage-direction/body_v4.tex",
+      "line_approx": 294,
+      "action": "add_footnote",
+      "canonical_numbers": {
+        "gld_bh_sharpe_paper_2022_2026": 1.56,
+        "gld_bh_sharpe_k1187_max_alt_period": 1.29,
+        "alt_periods_tested": ["2010-2026", "2014-2026", "2017-2026"]
+      },
+      "rationale": "1.56 is period-specific (2022-2026 only); footnote frames load-bearing nature + long-window robustness.",
+      "footnote_text_verbatim_ready": true,
+      "estimated_minutes": 5,
+      "already_handled_by_batch1": false
+    },
+    {
+      "order": 6,
+      "id": "ITEM6",
+      "severity": "PAPER_WORKFLOW_REQUIREMENT",
+      "category": "new_file",
+      "source_experiment": ["K903", "K1185", "K1186", "K1187", "K1188", "K1198", "K1206"],
+      "source_files": ["experiments/k*/README.md (7 experiments)"],
+      "title": "Create paper/leverage-direction/experiments.md (K-experiment index)",
+      "target_file": "paper/leverage-direction/experiments.md",
+      "action": "add_new_file",
+      "content_sections": [
+        "Table-level replications (Tables 2,3,4,5,6,7,8,10,11,12 + §4.2.3)",
+        "Section-level supporting experiments (K799, K802, K824v2, K899)",
+        "Methodology & sensitivity experiments (K1185-K1206)",
+        "Status (v3 batch1 done commit 0a442356, v4 batch2 pending)",
+        "Reproducibility (seed=42, canonical JSON per experiment)"
+      ],
+      "rationale": "Mandatory per paper-workflow rule '論文資料夾必備內容'. Folder lacks experiments.md; K1198 rescan already assumes this file exists.",
+      "estimated_minutes": 10,
+      "already_handled_by_batch1": false
+    },
+    {
+      "order": 7,
+      "id": "ITEM7",
+      "severity": "PRE_K_DISCLOSURE",
+      "category": "unified_footnote",
+      "source_experiment": ["K1198"],
+      "source_files": ["experiments/k1198/README.md"],
+      "title": "Tables 10/11/12 + §4.2.3 (C3) unified pre-K rebuild footnote",
+      "target_file": "paper/leverage-direction/body_v4.tex",
+      "line_approx": "first tab:amplify / Table 10 in-body reference (main thread chooses)",
+      "action": "add_unified_footnote",
+      "rebuild_summary": {
+        "spy_avg_constituent_gamma": {"paper_v3": 0.076, "k1198": 0.0939, "match": "diverged", "reason": "N=20 vs N=50 constituents"},
+        "etf_vs_stock_t_stat": {"paper_v3": -16.92, "k1198": -10.53, "match": "diverged", "reason": "N=20 vs N=50 constituents"},
+        "bh_es_1pct": {"paper_v3": -4.68, "k1198": -4.53, "match": "matched_within_5pct_rtol"},
+        "bh_excess_kurtosis": {"paper_v3": 14.71, "k1198": 14.51, "match": "matched_within_5pct_rtol"},
+        "spearman_gamma_beta_trend": {"paper_v3": 1.000, "k1198": 1.000, "match": "exact"},
+        "gold_regime_t_stat": {"paper_v3": -4.71, "k1198": -3.79, "match": "diverged", "reason": "extended sample 2005-2026 vs 2010-2026"}
+      },
+      "match_count": "3/6",
+      "qualitative_conclusions_preserved": true,
+      "footnote_text_verbatim_ready": true,
+      "estimated_minutes": 10,
+      "already_handled_by_batch1": false
+    },
+    {
+      "order": null,
+      "id": "ITEM_DROPPED",
+      "severity": "DROPPED",
+      "category": "already_covered_by_batch1",
+      "source_experiment": [],
+      "title": "gamma_HM Sec 4.7 second disambiguation",
+      "drop_reason": "Batch 1 commit 0a442356 Sec 5.4 footnote already covers all three gamma_HM values (-0.035, -0.068, -0.043). K1209 grep in Sec 4.7 region found no second unfootnoted instance.",
+      "action": "none",
+      "estimated_minutes": 0,
+      "already_handled_by_batch1": true
+    }
+  ],
+  "execution_sequence": [
+    "cd paper/leverage-direction && cp body_v3.tex body_v4.tex (preserve v3)",
+    "cp main_v3.tex main_v4.tex and update \\input{body_v3} -> \\input{body_v4} if applicable",
+    "Apply Item 1 (line ~219): Table 3 vs Table 8 footnote",
+    "Apply Item 3 (line ~247): Table 4 GARCH(1,1) footnote",
+    "Apply Item 4 (line ~279 + tables.tex tab:vt caption): Table 7 per-asset period disclosure",
+    "Apply Item 2 (line ~249 + tables.tex tab:var_panel): Table 6 3-cell errata + Trinity sentence + footnote; regenerate per-asset marks from K1186",
+    "Apply Item 5 (line ~294): GLD 1.56 forensic footnote",
+    "Apply Item 7 (first tab:amplify reference): Tables 10/11/12/C3 unified footnote",
+    "Create paper/leverage-direction/experiments.md (Item 6)",
+    "cd paper/leverage-direction && /Library/TeX/texbin/xelatex -interaction=nonstopmode main_v4.tex (twice)",
+    "Visually inspect main_v4.pdf: Table 6 shows 90.5/76.2/76.2; footnotes 1/3/4/5/7 render; experiments.md exists",
+    "uv run volpred ops paper-update --paper-id leverage-direction",
+    "git commit (template in guide)"
+  ],
+  "rollback_plan": {
+    "triggers": [
+      "xelatex compile error",
+      "mis-rendered PDF (broken footnote, orphan brace, missing ref)",
+      "Table 6 column subtotals inconsistent with updated pass rates"
+    ],
+    "steps": [
+      "git diff paper/leverage-direction/body_v4.tex",
+      "git checkout 0a442356 -- paper/leverage-direction/body_v4.tex (revert v4 only, v3 preserved)",
+      "Re-apply items one-by-one (1, 3, 4, 5, 7 first — low-risk; then 2; then 6)",
+      "Document fix in docs/error_log.md under 'Paper 1 body_v4 integration — compile trap'"
+    ],
+    "forbidden": [
+      "git worktree remove --force",
+      "destructive reset of body_v3.tex or any main-thread commit"
+    ]
+  },
+  "post_adoption_commit_template": {
+    "title": "Paper 1 body_v4 Batch 2: Tables 3/6/7 errata + experiments.md + pre-K footnote",
+    "body_bullets": [
+      "Table 6 Trinity pass-rate: StudentT5 57.1→76.2, Skewed-t 76.2→90.5, CF-VaR 66.7→76.2 (K1186 canonical, K1206 sensitivity exhaustion → errata_recommended)",
+      "Table 3 vs Table 8 QLIKE aggregation footnote (K903, K1188)",
+      "Table 4 GARCH(1,1) baseline footnote (K1185)",
+      "Table 7 per-asset period disclosure + GLD 1.56 forensic footnote (K1187)",
+      "Tables 10/11/12/C3 unified pre-K rebuild footnote (K1198: 3/6 matched)",
+      "New file: paper/leverage-direction/experiments.md (K-experiment index)"
+    ]
+  },
+  "verification": {
+    "numbers_verbatim_from_canonical_sources": true,
+    "no_new_rng_runs": true,
+    "no_tex_edits_in_worktree": true,
+    "seed": 42,
+    "seed_notes": "N/A for synthesis task; declared for repo-rule compliance"
+  }
+}
