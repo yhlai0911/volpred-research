@@ -4,6 +4,8 @@ import os
 from datetime import date, datetime, timezone
 from pathlib import Path
 
+from volpred.config.runtime import get_default_remote_url
+
 class Publisher:
     """Publishes research results to storage/reports/ for Web platform consumption.
 
@@ -11,7 +13,7 @@ class Publisher:
     """
 
     # Set this to Zeabur URL to enable dual publishing
-    REMOTE_URL = os.environ.get("VOLPRED_REMOTE_URL", "https://volpred.zeabur.app")
+    REMOTE_URL = os.environ.get("VOLPRED_REMOTE_URL", get_default_remote_url())
 
     def __init__(self, storage_dir: str = 'storage'):
         self.reports_dir = Path(storage_dir) / 'reports'

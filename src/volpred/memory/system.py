@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -12,6 +13,12 @@ from volpred.memory.schemas import ExperimentRecord, KnowledgeItem, ResearchLogE
 
 
 class MemorySystem:
+    SUPPORTED_MIRROR_FILES = {
+        "thinking_journal.json",
+        "knowledge.json",
+        "experiments.json",
+        "research_log.json",
+    }
     MIRROR_URL = os.environ.get("VOLPRED_MIRROR_URL", get_default_mirror_url())
     MIRROR_TOKEN = os.environ.get("RESEARCH_MIRROR_TOKEN", "")
 
@@ -22,13 +29,25 @@ class MemorySystem:
         for d in [self.memory_dir, self.results_dir]:
             d.mkdir(parents=True, exist_ok=True)
 
-    def _sync_to_remote(self, filename: str, new_entries: list[dict] | None = None) -> None:
+    def _sync_to_remote(
+        self,
+        filename: str,
+        new_entries: list[dict] | None = None,
+        *,
+        raise_on_error: bool = False,
+    ) -> bool:
         """Sync memory to Mirror API. Append new entries if given, else full push."""
+        if filename not in self.SUPPORTED_MIRROR_FILES:
+            return False
         if not self.MIRROR_URL or not self.MIRROR_TOKEN:
-            return
+            if raise_on_error:
+                raise RuntimeError("Mirror URL/token not configured")
+            return False
         filepath = self.memory_dir / filename
         if not filepath.exists():
-            return
+            if raise_on_error:
+                raise FileNotFoundError(filepath)
+            return False
         try:
             import urllib.request
             auth_headers = {
@@ -54,16 +73,24 @@ class MemorySystem:
                     method="PUT",
                 )
             urllib.request.urlopen(req, timeout=30)
-        except Exception:
-            pass  # Don't fail research for sync issues
+            return True
+        except Exception as exc:
+            print(f"Warning: Mirror sync failed for {filename}: {exc}", file=sys.stderr)
+            if raise_on_error:
+                raise
+            return False
 
     def reconcile_remote(self) -> dict[str, str]:
         """Full sync all memory files to remote (for initial population or recovery)."""
         results = {}
         for filename in ["thinking_journal.json", "knowledge.json", "experiments.json", "research_log.json"]:
             try:
-                self._sync_to_remote(filename, new_entries=None)  # full push
-                results[filename] = "ok"
+                synced = self._sync_to_remote(
+                    filename,
+                    new_entries=None,
+                    raise_on_error=True,
+                )
+                results[filename] = "ok" if synced else "skipped"
             except Exception as e:
                 results[filename] = str(e)
         return results

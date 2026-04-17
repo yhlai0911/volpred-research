@@ -1,17 +1,20 @@
 # 系統架構
 
 ## 網站架構（v4 Supabase + Admin CMS + Mirror API）
-- **前端（線上版）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，部署於 volpred-v3 服務）
-- **前端（舊版）**：`frontend-v2/`（已停用，保留參考）
+- **前端 target 設定**：`config/project_targets.json`（唯一來源；目前 `active_frontend=frontend-v2-fix`、`active_service=volpred-v3`）
+- **排程 target 設定**：`config/runtime_schedules.json`（唯一來源；session cron / RemoteTrigger / system crontab spec）
+- **前端（目前線上版）**：`frontend-v2-fix/`（Next.js 15 + React 19 + Supabase，部署於 volpred-v3 服務）
+- **Legacy 前端快照**：舊版已自 root retire；如需參考請看 `archive/root-clutter/local/舊前端/`
 - **Mirror API**：`mirror-api.zeabur.app`（研究記憶檔案鏡像，減少 Supabase egress）
 - **資料庫**：Supabase（PostgreSQL + Auth + REST API + RPC）
-- **Zeabur Dashboard**：https://zeabur.com/projects/69b5b264800a475a1f82b073
+- **Zeabur Project / Service IDs**：見 `config/project_targets.json`
 - **線上網址**：https://volpred.zeabur.app
 - **舊版**：https://volpred-old.zeabur.app（過渡期保留）
 
 ### 前端 v4 架構（frontend-v2-fix/）
 - **SSR + CSR 混合**：首頁用 Server Component 初始載入 → `FeedBrowser` 用 `useSWRInfinite` 無限滾動
 - **Admin CMS**（12 個面板）：analytics / content / health / ops / paper-trading / papers / program / questions / schedules / strategies / thinking / users
+  - `/admin/schedules` 讀 canonical schedule spec + live `crontab -l`，不再從 rendered guide 逆向解析
 - （原 legacy `program` 已重新啟用為主面板之一；`thinking` 為 Claude 思考日誌檢視器）
 - **用戶專區** `/me`：書籤、提問歷史、活動摘要
 - **API 路由 45+**：含 `/api/admin/*`（12 端點）、`/api/me/*`（3 端點）、`/api/strategy-overview`、`/api/portfolio-overview`
@@ -29,10 +32,13 @@
   - **Draft 同步**：用 `published_at OR created_at` 過濾（支持 draft sync）
 - `scripts/daily_update.py` → 每日 08:03 台灣時間（crontab `3 8 * * 2-6`，美股收盤後）計算策略權重 + 同步 Supabase + 重算績效指標 + Supabase heartbeat
 - `scripts/recalc_metrics.py` → 從 paper_trading.json 重算 Sharpe/MDD 等（daily_update 自動呼叫）
+- `config/project_targets.json` + `src/volpred/config/runtime.py` → 控制 active frontend、Zeabur deploy service、paper public dir、strategy metrics local sync target、預設 remote/mirror URL
+- `config/runtime_schedules.json` + `src/volpred/config/schedules.py` → 控制 canonical session cron / RemoteTrigger / system crontab spec
 - **Paper Trading 資料結構**：
   - `paper_trading.json` 是唯一源頭，不可手動修改歷史數據
   - `daily_update.py` 正確使用 next-day return（K692 驗證），forward tracking 自動修正
   - `recalc_metrics.py` 每次執行自動 sync 到 Supabase `strategy_metrics_cache`
+  - `recalc_metrics.py` 也會同步到 active frontend 的 configured metrics target（目前 `frontend-v2-fix/data/strategy_metrics.json`）
   - **不修改歷史數據**：歷史 entries 反映當時追蹤的結果，隨新的正確條目累積 metrics 自然收斂
   - 市場數據統一存在 `_market_daily`（key=日期），不在每個 entry 重複
 - **新策略評估**：
@@ -40,12 +46,14 @@
   - 與已上架策略的 paper_trading actual returns 做公平比較（同期間、同 lag、同 TX cost）
   - 通過同期間比較 + cross-OOS 才能進入上架流程
 - `src/volpred/ops/` + `uv run volpred ops ...` → agent-first 操作層（真人與本機 agent 共用）
+- `uv run volpred ops experiments ...` → `experiments/` 結構治理工具；v2 採「新規先行 + touched-file migration」，不一次性批量搬歷史散檔
 - 前端從 Supabase 讀取策略 metadata，不需靜態檔案同步
-- **Mirror 資料流**：`MemorySystem._sync_to_remote()` → 前端 `/api/sync/{file}` → 雙寫 Supabase + Mirror API
+- **Mirror 資料流**：`MemorySystem._sync_to_remote()` 直接呼叫 Mirror API（預設 URL 由 `config/project_targets.json` 提供，可被 `VOLPRED_MIRROR_URL` 覆蓋）
   - 平時：增量 append（POST，只送新 entry）
   - 初始/復原：整檔覆蓋（PUT，`reconcile_remote()`）
   - Mirror 存：thinking_journal / knowledge / experiments / research_log（4 個大型記憶檔案）
   - Supabase 存：articles / questions / papers / paper_trades / strategy_signals（產品面向資料）
+  - 本地 frontend data mirror 預設不啟用；只有 `project_targets.json` 明確配置 `local_data_sync_dirs` 才會寫入
   - Rollout 文件：`docs/research-mirror-rollout.md`
 
 ### 策略管理（DB 驅動，無需重新部署）
@@ -53,7 +61,7 @@
 - Registry 驅動三件事：Feed 文章（只列 active）、Supabase 同步、Paper trading
 - **新增策略**：(1) 加入 STRATEGY_REGISTRY (2) 加計算邏輯到 strat_list (3) `add_strategy.py` 寫 DB
 - **下架策略**：改 STRATEGY_REGISTRY 的 `is_active=False`（面板隱藏、文章不列、paper trading 繼續記錄）
-- **績效指標**：每日由 `daily_update.py` 自動重算 → `strategy_metrics.json`
+- **績效指標**：每日由 `daily_update.py` 自動重算 → `storage/strategy_metrics.json` → active frontend configured target
 - 詳細流程見 `.claude/skills/autonomous-research/references/add-strategy-guide.md`
 
 ### 發佈流程
@@ -110,10 +118,11 @@
 
 ## 程式碼架構
 - **Python CLI (volpred)**：研究引擎（實驗、評估、記憶、發佈）
+- **config/project_targets.json**：前端 / 部署 / Mirror target 的版本控制設定
+- **src/volpred/config/runtime.py**：程式側讀取 runtime target 的 helper
 - **storage/**：唯一資料源頭（JSON），跨 session 保存
 - **frontend-v2-fix/**：Next.js 15 前端（線上版，volpred-v3 服務）
-- **frontend-v2/**：舊版前端（已停用）
-- **frontend/**：最舊版前端（已棄用）
+- **archive/root-clutter/local/舊前端/**：legacy snapshot 存放處；不參與 active code path / deploy
 - **scripts/supabase_sync.py**：資料同步到 Supabase
 - **src/volpred/ops/jobs.py**：Supabase-backed job queue（agent + human 共用）
 - **research_program.md**：研究策略文件（北極星）

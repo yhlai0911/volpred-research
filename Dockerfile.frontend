@@ -1,11 +1,13 @@
 FROM node:22-alpine
 
+ARG FRONTEND_DIR=frontend-v2-fix
+
 WORKDIR /app
 
-COPY frontend/package.json frontend/package-lock.json ./
+COPY ${FRONTEND_DIR}/package.json ${FRONTEND_DIR}/package-lock.json ./
 RUN npm ci
 
-COPY frontend/ ./
+COPY ${FRONTEND_DIR}/ ./
 
 # Build for production
 RUN npm run build

@@ -1,0 +1,30 @@
+{
+  "active_frontend": "frontend-v2-fix",
+  "frontends": {
+    "frontend-v2-fix": {
+      "path": "frontend-v2-fix",
+      "kind": "nextjs",
+      "deploy_service": "volpred-v3",
+      "local_data_sync_dirs": [],
+      "strategy_metrics_targets": [
+        "data/strategy_metrics.json"
+      ],
+      "paper_public_dir": "public/paper"
+    }
+  },
+  "deploy": {
+    "zeabur_project_id": "69b5b264800a475a1f82b073",
+    "active_service": "volpred-v3",
+    "services": {
+      "volpred-web": "69b5b279e0a0c18cef9d780d",
+      "volpred-v2": "69b8ed895a53b5901a3c8d25",
+      "volpred-v3": "69be521a1066986b9a1692be"
+    }
+  },
+  "mirror": {
+    "default_url": "https://mirror-api.zeabur.app"
+  },
+  "site": {
+    "default_remote_url": "https://volpred.zeabur.app"
+  }
+}

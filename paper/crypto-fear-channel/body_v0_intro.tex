@@ -1,0 +1,87 @@
+% Paper 6: The Crypto Fear Channel — Asymmetric BTC-Equity Volatility Spillover
+% Main-thread draft, 2026-04-17. Introduction only (v0).
+% Numbers all sourced from experiments/k1025/k1025_results.json.
+
+\documentclass[11pt,a4paper]{article}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage{natbib}
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{url}
+
+\title{The Crypto Fear Channel:\\ Asymmetric, Tail-Concentrated, and Regime-Dependent Volatility Spillover from Bitcoin to Equity Markets}
+
+\author{Yi-Hao Lai\thanks{Department of Finance, Da-Yeh University, Taiwan. Email: yihao.lai@gmail.com.}}
+
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\noindent Using daily returns on SPY, BTC-USD, and VIX from 2015-02 to 2026-04 ($N = 2{,}812$), we document three stylized facts about the crypto-to-equity volatility spillover. First, the spillover is \emph{asymmetric}: Bitcoin downside volatility Granger-causes VIX, whereas Bitcoin upside volatility does not. Second, the spillover is \emph{tail-concentrated}: the quantile-regression coefficient of VIX on BTC realized variance rises from $2.61$ at the median to $22.31$ at the 95th percentile, an $8.5\times$ amplification. Third, the spillover is \emph{regime-dependent}: in a five-subperiod breakdown, Granger causality is statistically significant only during 2020 ($F = 11.05$, $p < 0.001$) and non-significant in 2015--2017, 2018--2019, 2021--2022, and 2023--2026. In the Diebold-Yilmaz framework, Bitcoin is a \emph{net receiver}, rehabilitating the narrative from ``crypto as a fear originator'' to ``crypto as a fear amplifier'' conditional on pre-existing equity stress. Out-of-sample forecasts, however, show that adding BTC realized volatility does not statistically improve an AR model of VIX (Diebold-Mariano $t = -0.98$, $p = 0.33$), highlighting that Granger causality is a necessary but not sufficient condition for forecastability. Taken together, our findings reframe the crypto-equity spillover as a \emph{crisis-time amplifier}: informative for ex-post risk attribution and margin design, but inadequate as an ex-ante predictor of equity fear. \\
+
+\noindent\textbf{Keywords:} volatility spillover, Bitcoin, VIX, asymmetric causality, quantile regression, Diebold-Yilmaz, crypto-equity linkage \\
+\textbf{JEL:} G11, G15, G17, C22
+\end{abstract}
+
+\section{Introduction}
+
+Since the institutionalization of Bitcoin trading and the 2024 approval of U.S.\ spot BTC ETFs, the question of whether cryptocurrency markets transmit fear to traditional equity markets has acquired first-order practical importance for portfolio risk management, prudential supervision, and margin design. Yet the empirical literature has yielded an uneasy consensus. On one hand, correlation-based studies report rising BTC-equity co-movement in stress periods, suggesting that cryptocurrency is no longer a standalone asset class.\footnote{See, e.g., \citet{bouri2020}, \citet{corbet2018}, and \citet{matkovskyy2019} for the early post-2017 literature.} On the other hand, return-predictability tests often fail to find that Bitcoin-based signals improve forecasts of equity volatility at practical horizons. This tension motivates a central question: is the crypto-equity fear channel \emph{real but nonlinear}, \emph{real but regime-dependent}, or an artifact of tail-period correlation without predictive content?
+
+We resolve this tension by decomposing the spillover along three dimensions that the prior literature has typically examined in isolation: directional asymmetry, tail dependence, and regime stability. Each of these dimensions yields a stylized fact that materially changes how one should interpret correlation-based evidence.
+
+\paragraph{Asymmetry.} Using the asymmetric Granger-causality framework of \citet{hatemi2012}, we separate Bitcoin positive and negative realized volatility and test whether each Granger-causes VIX over lags 1 through 10. We find that the negative branch carries the entire spillover: Bitcoin downside volatility Granger-causes VIX at conventional lags, while the upside branch is uniformly non-significant. This is not merely a statistical artifact of a leverage effect --- the asymmetry survives standard symmetric Granger tests as well. Our interpretation is behavioral: retail-heavy crypto markets transmit \emph{fear}, not \emph{euphoria}, into the institutional equity complex.
+
+\paragraph{Tail concentration.} Quantile regressions of VIX on BTC realized variance show that the slope coefficient is essentially flat at low-to-median quantiles (2.61 at $\tau = 0.5$) but rises steeply at upper quantiles (22.31 at $\tau = 0.95$), an $8.5\times$ amplification. The spillover is therefore not a uniform channel but a \emph{tail-conditional} phenomenon. Conventional OLS or DCC-GARCH estimates --- which implicitly weight all observations equally --- systematically understate the crisis-time impact of crypto volatility on equity fear.
+
+\paragraph{Regime dependence.} A five-subperiod breakdown reveals that Granger significance is concentrated entirely in 2020 ($F = 11.05$, $p < 10^{-6}$). Pre-mania (2015--2017), crypto-winter (2018--2019), bull-bear (2021--2022), and recovery-plus-ETF (2023--2026) all fail to reject non-causality. Combined with the finding from \citet{diebold2012} spillover-index analysis that Bitcoin is a \emph{net receiver} rather than net sender, this suggests that the spillover is not a permanent feature of cross-market architecture but a \emph{conditional amplification mechanism} that activates only during pre-existing equity stress.
+
+\paragraph{The forecastability gap.} A natural next question is whether these three stylized facts translate into out-of-sample predictive power. They do not. Comparing an AR($p$) specification of VIX against one augmented with BTC realized volatility over an OOS window of 1,826 days (2019--2026), the Diebold-Mariano test returns $t = -0.98$, $p = 0.33$ --- statistically indistinguishable from zero, and below the \citet{harvey2016} $|t| > 3$ threshold for newly proposed factors. This result echoes a broader methodological point: \emph{Granger causality is a necessary but not sufficient condition for forecastability}. An informative signal that appears only in tail events and only during rare regimes may be too sparse to outperform a well-specified autoregressive benchmark on average over a long OOS sample.
+
+We make three contributions to the literature. First, by combining asymmetric Granger causality, quantile regression for tail dependence, Diebold-Yilmaz spillover direction, and an honest out-of-sample forecasting test in a single framework, we show that each dimension tells a distinct story that prior single-technique studies have missed. Second, the regime-dependent finding --- that COVID-2020 is a structural watershed --- implies that volatility spillover from crypto is a \emph{crisis-time amplifier} rather than a steady-state channel, with direct implications for margin and capital requirements during regime transitions. Third, the predictive-power null, reported transparently rather than hidden, contributes to a growing methodological awareness in the volatility forecasting literature that in-sample significance and out-of-sample usefulness can diverge substantially \citep{harvey2016, conrad2020}.
+
+The remainder of the paper is organized as follows. Section 2 surveys the crypto-equity spillover literature and positions our contribution. Section 3 describes the data and preliminary diagnostics. Section 4 details the five methodological building blocks. Sections 5 and 6 present the main results and robustness checks. Section 7 reports the out-of-sample forecasting evaluation. Section 8 discusses mechanisms and policy implications. Section 9 concludes.
+
+% --- References (temporary stub; full bib to follow in main draft) ---
+\begin{thebibliography}{99}
+
+\bibitem[Bouri et al., 2020]{bouri2020}
+Bouri, E., Shahzad, S.J.H., Roubaud, D., Kristoufek, L., and Lucey, B. (2020).
+\newblock Bitcoin, gold, and commodities as safe havens for stocks.
+\newblock {\em Finance Research Letters}, 37:101764.
+
+\bibitem[Corbet et al., 2018]{corbet2018}
+Corbet, S., Larkin, C., Lucey, B., Meegan, A., and Yarovaya, L. (2018).
+\newblock Cryptocurrency reaction to FOMC announcements.
+\newblock {\em Economics Letters}, 165:28--34.
+
+\bibitem[Matkovskyy and Jalan, 2019]{matkovskyy2019}
+Matkovskyy, R. and Jalan, A. (2019).
+\newblock From financial markets to Bitcoin markets: A fresh look at the contagion effect.
+\newblock {\em Finance Research Letters}, 31:388--393.
+
+\bibitem[Hatemi-J, 2012]{hatemi2012}
+Hatemi-J, A. (2012).
+\newblock Asymmetric causality tests with an application.
+\newblock {\em Empirical Economics}, 43:447--456.
+
+\bibitem[Diebold and Yilmaz, 2012]{diebold2012}
+Diebold, F.X. and Yilmaz, K. (2012).
+\newblock Better to give than to receive: Predictive directional measurement of volatility spillovers.
+\newblock {\em International Journal of Forecasting}, 28(1):57--66.
+
+\bibitem[Harvey et al., 2016]{harvey2016}
+Harvey, C.R., Liu, Y., and Zhu, H. (2016).
+\newblock \ldots and the cross-section of expected returns.
+\newblock {\em Review of Financial Studies}, 29(1):5--68.
+
+\bibitem[Conrad and Kleen, 2020]{conrad2020}
+Conrad, C. and Kleen, O. (2020).
+\newblock Two are better than one: Volatility forecasting using multiplicative component GARCH-MIDAS models.
+\newblock {\em Journal of Applied Econometrics}, 35(1):19--45.
+
+\end{thebibliography}
+
+\end{document}

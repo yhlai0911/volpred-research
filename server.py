@@ -19,10 +19,26 @@ BASE = Path(__file__).parent
 STORAGE = BASE / "storage"
 MEMORY = STORAGE / "memory"
 REPORTS = STORAGE / "reports"
+PROJECT_TARGETS = BASE / "config" / "project_targets.json"
 
 
 def _read_json(path: Path) -> list | dict:
     return json.loads(path.read_text()) if path.exists() else []
+
+
+def _active_frontend_export_dir() -> Path | None:
+    """Resolve the active frontend static export directory from project config."""
+    try:
+        payload = json.loads(PROJECT_TARGETS.read_text())
+        active = payload.get("active_frontend")
+        frontends = payload.get("frontends") or {}
+        config = frontends.get(active) or {}
+        rel_path = config.get("path")
+        if not isinstance(rel_path, str) or not rel_path.strip():
+            return None
+        return BASE / rel_path / "out"
+    except Exception:
+        return None
 
 
 # ========== API ==========
@@ -224,7 +240,9 @@ function esc(s){var d=document.createElement('div');d.textContent=s;return d.inn
 
 frontend = BASE / "static"  # On Zeabur: static/ alongside server.py
 if not frontend.exists():
-    frontend = BASE / "frontend" / "out"  # Local dev fallback
+    active_export = _active_frontend_export_dir()
+    if active_export is not None:
+        frontend = active_export  # Local dev fallback to active frontend export
 
 if frontend.exists():
     for subdir in ["_next", "data"]:

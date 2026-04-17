@@ -36,6 +36,12 @@ uv run volpred ops job-show <job_id>                 # 查看任務詳情及日�
 uv run volpred ops enqueue --action daily_update     # 手動入隊任務
 uv run volpred ops worker --poll-interval 10         # 啟動本地 worker
 
+# experiments/ 結構整理（新規先行 + touched-file migration）
+uv run volpred ops experiments report                # 查看 experiments/ 根層散檔與遷移候選
+uv run volpred ops experiments scaffold --experiment-id k1121 --title "..."   # 建立 experiments/k1121/ 標準骨架
+uv run volpred ops experiments migrate --experiment-id k1121                  # 只看遷移計畫（dry-run）
+uv run volpred ops experiments migrate --experiment-id k1121 --apply          # 實際搬移該實驗的根層散檔
+
 # Zeabur CLI（部署 + 域名管理）
 # Project ID: 69b5b264800a475a1f82b073
 # Environment ID: 69b5b2646853f6f4f5f6a16d

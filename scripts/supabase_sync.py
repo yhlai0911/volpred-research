@@ -82,32 +82,19 @@ _MARKET_DAILY_COLUMNS = {
 }
 
 
-def _filter_schema_cols(table: str, row: dict) -> dict:
-    """Strip keys not in the table's schema whitelist.
-
-    Prevents silent PGRST204 "column X does not exist" errors that were
-    the root cause of 2026-04-12..17 market_daily sync failures.
-    Only applied to tables with explicit whitelists.
-    """
-    if table == "market_daily":
-        return {k: v for k, v in row.items() if k in _MARKET_DAILY_COLUMNS}
-    return row
-
-
 def _post(table: str, data: list | dict) -> bool:
     """POST (upsert) to Supabase table. Returns success.
-    Falls back to PATCH on 409 conflict."""
+    Falls back to PATCH on 409 conflict.
+
+    Note: schema-level column filtering is handled by the table-specific
+    helpers (e.g. `sync_market_daily`) — `_post` stays generic.
+    """
     if not SUPABASE_KEY:
         return False
     conflict = CONFLICT_KEYS.get(table)
     url = f"{SUPABASE_URL}/rest/v1/{table}"
     if conflict:
         url += f"?on_conflict={conflict}"
-    # Filter rows to known schema columns for protected tables
-    if isinstance(data, list):
-        data = [_filter_schema_cols(table, row) for row in data]
-    elif isinstance(data, dict):
-        data = _filter_schema_cols(table, data)
     payload = json.dumps(data if isinstance(data, list) else [data],
                          ensure_ascii=False).encode("utf-8")
     req = Request(url, data=payload, headers=HEADERS, method="POST")

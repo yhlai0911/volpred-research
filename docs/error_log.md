@@ -74,9 +74,9 @@
 | D. 前端 timeout | 5s → 15s | `api.ts` L11 |
 | E. Weight 格式 | `{"SPY": 150}` → `{"SPY": 1.50}` | `daily_update.py` Fear DCA |
 
-**待執行**：
-- 在 Supabase Dashboard SQL Editor 執行 migration 018（去重+加 constraint+加 index）
-- 重新部署前端（timeout 修正）
+**✅ 已完成（2026-04-17 驗證）**：
+- Migration 018 已在 live Supabase 生效（MCP `execute_sql` 確認 constraint 與 index 都存在）
+- 前端 redeploy 已生效（timeout 已為 15000ms，`volpred.zeabur.app/api/health` 200）
 
 **教訓**：
 1. 上架新策略時必須驗證 Supabase 所有相關表的數據正確性（用 `list_new_strategy.py --verify-only`）
@@ -104,9 +104,10 @@
 | 10 | 策略無連結文章 | articles 欄位空 | 手動連結 | ✅ |
 | 11 | 市場數據冗餘 | 每策略重複 spy_close 等 | _market_daily 正規化 | ✅(local) ⏳(DB) |
 
-**⏳ 需要 Supabase Dashboard 操作**：
-- Migration 018: unique constraint + index
-- Migration 019: market_daily 表
+**✅ 已完成（2026-04-17 透過 MCP `execute_sql` 驗證）**：
+- Migration 018: unique constraint + index 已上線（`paper_trades_strategy_trade_date_key` + `idx_paper_trades_strategy_date` 存在於 `qxhfgdfzazwpkdgesavm`）
+- Migration 019: `market_daily` 表已上線，825 rows（2023-01-04 → 2026-04-17）
+- Frontend redeploy 已完成，`volpred.zeabur.app/api/health` 200 且 `fetchAPI` timeout 為 15000ms
 
 **策略上架完整 SOP（更新版）**：
 1. STRATEGY_REGISTRY + 計算邏輯

@@ -15,6 +15,11 @@ from scripts.supabase_sync import (
     _select_rows,
 )
 
+from ..config.runtime import (
+    get_active_frontend_paper_dir,
+    get_frontend_path,
+    iter_frontend_paper_public_dirs,
+)
 from .common import project_path
 
 PAPER_SELECT = (
@@ -325,10 +330,12 @@ def update_paper_full(
     }
     frontend_name = slug_map.get(paper_id)
     if frontend_name:
-        frontend_dst = PROJECT / "frontend-v2-fix" / "public" / "paper" / frontend_name
-        if frontend_dst.parent.exists():
+        frontend_dir = get_frontend_path()
+        frontend_paper_dir = get_active_frontend_paper_dir()
+        if frontend_paper_dir is not None and frontend_dir.exists():
+            frontend_paper_dir.mkdir(parents=True, exist_ok=True)
             import shutil
-            shutil.copy2(pdf_path, frontend_dst)
+            shutil.copy2(pdf_path, frontend_paper_dir / frontend_name)
 
     return paper
 
@@ -337,12 +344,8 @@ def _resolve_static_pdf_path(pdf_url: str | None) -> Path | None:
     if not isinstance(pdf_url, str) or not pdf_url.startswith("/paper/"):
         return None
     relative = pdf_url.lstrip("/")
-    candidates = [
-        project_path("frontend-v2-fix", "public", relative),
-        project_path("frontend-v2", "public", relative),
-        project_path("frontend", "public", relative),
-    ]
-    for candidate in candidates:
+    for paper_dir in iter_frontend_paper_public_dirs(active_first=True):
+        candidate = paper_dir.parent / relative
         if candidate.exists():
             return candidate
     return None

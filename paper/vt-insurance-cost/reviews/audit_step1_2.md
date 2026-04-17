@@ -12,7 +12,7 @@
 
 | Experiment | File | Period | Description |
 |---|---|---|---|
-| K811v2 | `experiments/k811v2_insurance_premium_vov_fixed_results.json` | 2012-01-03 to 2024-12-31 | Main VoV-conditional VT analysis (bug-fixed) |
+| K811v2 | `experiments/k811v2/k811v2_insurance_premium_vov_fixed_results.json` | 2012-01-03 to 2024-12-31 | Main VoV-conditional VT analysis (bug-fixed) |
 | K846 | `experiments/k846_rebalancing_premium_results.json` | 2006-01-04 to 2024-12-31 | Rebalancing premium quantification |
 | K811 (original) | `experiments/k811_insurance_premium_vov_results.json` | 2006-01-03 to 2026-03-31 | Original (superseded, 2 HIGH bugs) |
 
