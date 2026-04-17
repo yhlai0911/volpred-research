@@ -1,0 +1,73 @@
+============================================================================
+K1206: Forensic sensitivity for Paper 1 Table 6 K1186 divergent cells
+  seed=42
+============================================================================
+
+[Load] returns (cached)
+  SPY: 2000-01-04 -> 2026-04-16  (n=6610)
+  QQQ: 2000-01-04 -> 2026-04-16  (n=6610)
+  GLD: 2004-11-19 -> 2026-04-16  (n=5384)
+  TLT: 2002-07-31 -> 2026-04-16  (n=5966)
+  EEM: 2003-04-15 -> 2026-04-16  (n=5788)
+  BTC-USD: 2014-09-18 -> 2026-04-17  (n=4230)
+  IWM: 2000-05-30 -> 2026-04-16  (n=6509)
+
+============================================================================
+EXPERIMENT A: Data vintage (truncation proxy)
+============================================================================
+
+  [A-current] OOS 2020-01-01 -> 2025-12-31
+    SPY: n_oos=1508, valid=1508, skt df=28.75 lam=-0.192
+    QQQ: n_oos=1508, valid=1508, skt df=28.00 lam=-0.252
+    GLD: n_oos=1508, valid=1508, skt df=30.00 lam=-0.031
+    TLT: n_oos=1508, valid=1508, skt df=30.00 lam=-0.053
+    EEM: n_oos=1508, valid=1508, skt df=30.00 lam=-0.158
+    BTC: n_oos=2192, valid=2192, skt df=30.00 lam=0.001
+    IWM: n_oos=1508, valid=1508, skt df=30.00 lam=-0.182
+
+  [A-vintage] OOS 2020-01-01 -> 2025-03-31
+    SPY: n_oos=1318, valid=1318, skt df=28.75 lam=-0.192
+    QQQ: n_oos=1318, valid=1318, skt df=28.00 lam=-0.252
+    GLD: n_oos=1318, valid=1318, skt df=30.00 lam=-0.031
+    TLT: n_oos=1318, valid=1318, skt df=30.00 lam=-0.053
+    EEM: n_oos=1318, valid=1318, skt df=30.00 lam=-0.158
+    BTC: n_oos=1917, valid=1917, skt df=30.00 lam=0.001
+    IWM: n_oos=1318, valid=1318, skt df=30.00 lam=-0.182
+
+============================================================================
+EXPERIMENT B: Skewed-t formula (closed-form vs bisection)
+============================================================================
+
+  [B-skewt] OOS 2020-01-01 -> 2025-12-31
+    SPY: n_oos=1508, valid=1508, skt df=28.75 lam=-0.192
+    QQQ: n_oos=1508, valid=1508, skt df=28.00 lam=-0.252
+    GLD: n_oos=1508, valid=1508, skt df=30.00 lam=-0.031
+    TLT: n_oos=1508, valid=1508, skt df=30.00 lam=-0.053
+    EEM: n_oos=1508, valid=1508, skt df=30.00 lam=-0.158
+    BTC: n_oos=2192, valid=2192, skt df=30.00 lam=0.001
+    IWM: n_oos=1508, valid=1508, skt df=30.00 lam=-0.182
+
+============================================================================
+EXPERIMENT C: Cornish-Fisher variants (full / 3rd-only / Maillard)
+============================================================================
+
+  [C-cfvar] OOS 2020-01-01 -> 2025-12-31
+    SPY: n_oos=1508, valid=1508, skt df=28.75 lam=-0.192
+    QQQ: n_oos=1508, valid=1508, skt df=28.00 lam=-0.252
+    GLD: n_oos=1508, valid=1508, skt df=30.00 lam=-0.031
+    TLT: n_oos=1508, valid=1508, skt df=30.00 lam=-0.053
+    EEM: n_oos=1508, valid=1508, skt df=30.00 lam=-0.158
+    BTC: n_oos=2192, valid=2192, skt df=30.00 lam=0.001
+    IWM: n_oos=1508, valid=1508, skt df=30.00 lam=-0.182
+
+============================================================================
+RECONSTRUCTION SUMMARY vs Paper 1 Table 6
+============================================================================
+
+  Method     |  Paper |  K1186 | A-vint |  B-bis |  C-3rd | C-mail | Verdict
+  ------------------------------------------------------------------------------------
+  Normal     |   57.1 |   57.1 |      - |      - |      - |      - | baseline-match
+  FHS        |   76.2 |   76.2 |      - |      - |      - |      - | baseline-match
+  StudentT5  |   57.1 |   76.2 |   71.4 |      - |      - |      - | neither_reconstructs
+  SkewedT    |   76.2 |   90.5 |   90.5 |   90.5 |      - |      - | neither_reconstructs
+  CFVaR      |   66.7 |   76.2 |   76.2 |      - |   81.0 |   81.0 | no_variant_reconstructs
