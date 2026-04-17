@@ -1,4 +1,6 @@
-# Paper 6: The Crypto Fear Channel — Asymmetric BTC–Equity Volatility Spillover
+# Paper 10: The Crypto Fear Channel — Asymmetric BTC–Equity Volatility Spillover
+
+> **Numbering note (2026-04-17)**: Renumbered from Paper 6 to Paper 10. Paper 6 slot remains `paper/prg-periodic-garch/` (Periodic Realized GARCH, established earlier).
 
 **Status**: kick-off (outline only, body pending)
 **Created**: 2026-04-17
