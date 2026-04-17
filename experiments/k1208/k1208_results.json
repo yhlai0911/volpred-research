@@ -1,0 +1,196 @@
+{
+  "experiment_id": "K1208",
+  "title": "Paper 4 Section 5 cross-asset panorama MARKDOWN rewrite draft (7-asset PIT synthesis)",
+  "task_type": "paper_section_markdown_draft",
+  "started_utc": "2026-04-17T00:00:00Z",
+  "seed": 42,
+  "data_source": "consolidation of K1116c + K1116f + K1201 + K1203 canonical results",
+  "no_new_estimation": true,
+  "predecessor_experiments": [
+    {
+      "k_id": "K1116c",
+      "commit": "64a9d569",
+      "scope": "SPY, 6 PIT variants (SPY native IV = ^VIX)",
+      "path": "experiments/k1116c/",
+      "verdict": "H2_ROBUST_NULL"
+    },
+    {
+      "k_id": "K1116f",
+      "commit": "885d7b0b",
+      "scope": "GLD / TLT / BTC-USD, 3 PIT variants (native IV = ^GVZ / ^MOVE / rv30)",
+      "path": "experiments/k1116f/",
+      "verdict": "ASSET_SPECIFIC_with_TLT_caveat"
+    },
+    {
+      "k_id": "K1201",
+      "commit": "87059567",
+      "scope": "QQQ / USO, 3 PIT variants (native IV = ^VXN / ^OVX); 6/7 panorama",
+      "path": "experiments/k1201/",
+      "verdict": "UNIVERSAL_NULL_with_TLT_caveat_6_of_7"
+    },
+    {
+      "k_id": "K1203",
+      "commit": "477c504a",
+      "scope": "EEM, 3 PIT variants (^VIX primary spillover proxy + rv30 robustness); 7/7 panorama",
+      "path": "experiments/k1203/",
+      "verdict": "UNIVERSAL_NULL_7_of_7_with_TLT_caveat",
+      "paper4_body_rewrite_gate": "UNLOCKED"
+    }
+  ],
+  "narrative_state_machine_status": {
+    "minimum_complementary_experiments_required": 3,
+    "complementary_experiments_completed": 4,
+    "coverage_7_of_7": true,
+    "oos_verified": true,
+    "codex_or_gemini_reviewed": true,
+    "gate_status": "UNLOCKED",
+    "paper_status": "decision_made_awaiting_body_rewrite"
+  },
+  "panorama_7asset_pit_shift0": {
+    "SPY": {
+      "source": "K1116c",
+      "commit": "64a9d569",
+      "native_iv": "^VIX",
+      "base_t": -3.0211,
+      "epu_t": -2.6034,
+      "finstress_t": -3.0010,
+      "all_t": -2.5372,
+      "best_alt_qlike_improvement_pct": -0.669,
+      "qlike_5pct_gate_pass": false,
+      "harvey_t3_alt_challenger_wins": false
+    },
+    "QQQ": {
+      "source": "K1201",
+      "commit": "87059567",
+      "native_iv": "^VXN",
+      "base_t": -2.1862,
+      "epu_t": -1.9669,
+      "finstress_t": -2.4385,
+      "all_t": -1.9675,
+      "best_alt_qlike_improvement_pct": -0.561,
+      "qlike_5pct_gate_pass": false,
+      "harvey_t3_alt_challenger_wins": false
+    },
+    "GLD": {
+      "source": "K1116f",
+      "commit": "885d7b0b",
+      "native_iv": "^GVZ",
+      "base_t": -2.1031,
+      "epu_t": -2.0695,
+      "finstress_t": -3.3412,
+      "all_t": -2.2458,
+      "best_alt_qlike_improvement_pct": -0.630,
+      "qlike_5pct_gate_pass": false,
+      "harvey_t3_alt_challenger_wins": false
+    },
+    "USO": {
+      "source": "K1201",
+      "commit": "87059567",
+      "native_iv": "^OVX",
+      "base_t": -3.0489,
+      "epu_t": -5.5962,
+      "finstress_t": -2.5836,
+      "all_t": -3.7349,
+      "best_alt_qlike_improvement_pct": -0.845,
+      "qlike_5pct_gate_pass": false,
+      "harvey_t3_alt_challenger_wins": false,
+      "note": "strongest baseline-wins cell in panorama (epu_t = -5.60)"
+    },
+    "TLT": {
+      "source": "K1116f",
+      "commit": "885d7b0b",
+      "native_iv": "^MOVE",
+      "base_t": 1.4331,
+      "epu_t": -2.4769,
+      "finstress_t": 3.7434,
+      "all_t": -5.6655,
+      "best_alt_qlike_improvement_pct": 0.498,
+      "qlike_5pct_gate_pass": false,
+      "harvey_t3_alt_challenger_wins": true,
+      "note": "single isolated outlier; regime artefact (lag-sensitive, QLIKE-insignificant, kitchen-sink collapse)"
+    },
+    "BTC-USD": {
+      "source": "K1116f",
+      "commit": "885d7b0b",
+      "native_iv": "rv30_self",
+      "base_t": -5.4936,
+      "epu_t": -3.5504,
+      "finstress_t": 1.3699,
+      "all_t": 0.2033,
+      "best_alt_qlike_improvement_pct": 0.227,
+      "qlike_5pct_gate_pass": false,
+      "harvey_t3_alt_challenger_wins": false
+    },
+    "EEM": {
+      "source": "K1203",
+      "commit": "477c504a",
+      "native_iv": "^VIX_spillover_proxy",
+      "base_t": -2.5965,
+      "epu_t": -3.5395,
+      "finstress_t": -1.4335,
+      "all_t": -0.9991,
+      "best_alt_qlike_improvement_pct": -0.130,
+      "qlike_5pct_gate_pass": false,
+      "harvey_t3_alt_challenger_wins": false,
+      "rv30_robustness_best_alt_qlike_improvement_pct": 0.092,
+      "rv30_robustness_harvey_t3_alt_challenger_wins": false,
+      "note": "^VXEEM delisted from yfinance 2026-04-17; ^VIX + rv30 dual-baseline preserves NULL verdict"
+    }
+  },
+  "panorama_summary": {
+    "n_cells_total": 28,
+    "n_cells_harvey_t3_alt_wins": 1,
+    "cells_alt_wins": ["TLT / finstress"],
+    "n_cells_alt_positive_insignificant": 7,
+    "n_cells_baseline_wins": 20,
+    "n_cells_5pct_qlike_gate_pass": 0
+  },
+  "tlt_regime_artefact_characterisation": {
+    "pit_shift0_finstress_t": 3.7434,
+    "pit_shift1_finstress_t": 1.9999,
+    "pit_shift1_harvey_t3_pass": false,
+    "qlike_improvement_pct": 0.498,
+    "qlike_5pct_gate_pass": false,
+    "all_spec_kitchen_sink_t": -5.6655,
+    "conclusion": "non-structural regime artefact, not replicable alt-data signal; lag-sensitive + QLIKE-insignificant + kitchen-sink collapse"
+  },
+  "vxeem_data_gap": {
+    "probe_date": "2026-04-17",
+    "yfinance_status": "delisted; HTTP 404 for ^VXEEM and VXEEM",
+    "alternatives_tried": ["^VXEEM", "VXEEM", "^VXFXI", "^CIV"],
+    "fallback_adopted": "^VIX spillover proxy (primary) + rv30 self-RV (robustness)",
+    "eem_vix_weekly_correlation": 0.75,
+    "verdict_invariance": "confirmed; NULL under both ^VIX and rv30"
+  },
+  "section5_rewrite_outline": [
+    "5.1 Panorama overview (7-asset setup, PIT protocol, K-experiment progression)",
+    "5.2 Results by asset class (Table 5.1 panorama DM t + Table 5.2 QLIKE)",
+    "5.3 TLT finstress outlier as lag-sensitive regime artefact (three-piece evidence)",
+    "5.4 ^VXEEM data limitation and dual-baseline robustness",
+    "5.5 Final narrative commitment on native-IV sufficiency across 7 assets",
+    "5.6 Limitations and future work (asset coverage / PIT database / ^VXEEM / TLT rates-native follow-up / daily HAR-RV)"
+  ],
+  "final_narrative_commitment_quote": "Native implied-volatility proxies (^VIX, ^VXN, ^OVX, ^GVZ, ^MOVE, and ^VXEEM-or-proxy with rv30 robustness) are sufficient for one-step-ahead realised-volatility forecasting across seven asset classes (SPY, QQQ, GLD, USO, TLT, BTC-USD, EEM). Alt-data (EPU / WLEMU / NFCI / ANFCI / STLFSI) cannot deliver Harvey (2016) |t|>3 improvement over the native-IV baseline under point-in-time publication-lag alignment. The only cell exceeding the threshold (TLT / finstress, DM t = +3.74 at pit_shift0) fails the 5% QLIKE economic gate (+0.50%), the pit_shift1 robustness check (+2.00, Harvey-insignificant), and the kitchen-sink 'all' spec (-5.67), and is therefore characterised as a non-structural regime artefact rather than a replicable rates-specific signal.",
+  "deliverables": {
+    "k1208_draft_md": "Section 5 v4 rewrite markdown draft for main-thread adoption",
+    "k1208_panorama_table_csv": "28-cell DM t + QLIKE + gate results in machine-readable form (pit_shift0 + pit_shift1)",
+    "k1208_results_json": "canonical numbers consolidated for downstream pipelines",
+    "k1208_readme": "adoption path and traceability instructions"
+  },
+  "rules_compliance": {
+    "no_tex_output": true,
+    "no_new_estimation": true,
+    "verbatim_from_source_experiments": true,
+    "no_shared_storage_or_paper_mutation": true,
+    "worktree_only_output": "experiments/k1208/",
+    "seed_fixed_42": true
+  },
+  "paper4_adoption_path": [
+    "Main thread opens paper/vix-sufficiency/body_v4.tex (not yet created).",
+    "Main thread reads experiments/k1208/k1208_draft.md and copies/adapts the 5.1-5.6 content into body_v4.tex.",
+    "Main thread adds Table 5.1 via LaTeX tabular using values from k1208_panorama_table.csv.",
+    "Main thread cross-references figure k1203_dm_heatmap_7asset.png (7-asset heatmap) as Figure 5.1.",
+    "Main thread runs paper-review-cycle to validate, then paper-update CLI to publish."
+  ],
+  "finished_utc": "2026-04-17T00:00:00Z"
+}
