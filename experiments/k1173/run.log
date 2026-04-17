@@ -1,0 +1,30 @@
+  drop IN: ρ=+0.364, p=0.2716
+  drop JP: ρ=+0.327, p=0.3259
+  drop KR: ρ=+0.336, p=0.3118
+  drop MX: ρ=+0.609, p=0.0467
+  drop TW: ρ=+0.355, p=0.2847
+  drop US: ρ=+0.364, p=0.2716
+
+[Per-market diff summary]
+  BR: yf_mean=0.486, refined_mean=0.368, Δ=-0.117
+  CH: yf_mean=0.157, refined_mean=0.283, Δ=+0.126
+  IN: yf_mean=0.383, refined_mean=0.569, Δ=+0.186
+  MX: yf_mean=0.195, refined_mean=0.236, Δ=+0.045
+
+[panel refined] N_stocks=172
+
+[Panel OLS joint (refined inst_pct)]:
+  log_analyst: β=+1.235e-03, t=+3.86, p=0.000
+  institutions_pct: β=-1.687e-03, t=-1.20, p=0.232
+  log_mcap: β=-2.560e-04, t=-1.53, p=0.128
+
+[K1172 panel baseline (yfinance)]:
+  log_analyst: β=+1.278e-03, t=+3.79, p=0.000
+  institutions_pct: β=-2.149e-03, t=-1.32, p=0.188
+  log_mcap: β=-2.523e-04, t=-1.53, p=0.127
+
+===== VERDICT: NULL =====
+refined ρ=+0.385 within ±0.10 of yfinance baseline ρ=+0.441 (Δρ=-0.056). EM off-ladder is STRUCTURAL, not a yfinance proxy artefact. Paper 2 §5 narrative: keep K1172 'STRENGTHENED with emerging-market scale residual caveat'; emerging markets genuinely sit off the developed institutional-ownership ladder even when the proxy is re-estimated from SEBI/CVM/BMV/SSE regulatory disclosures.
+
+[figures] wrote scatter + diff barplot
+[json] wrote k1173_results.json

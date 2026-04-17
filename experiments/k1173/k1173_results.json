@@ -1,0 +1,1253 @@
+{
+  "experiment_id": "K1173",
+  "title": "Refined institutional-ownership proxy for EM (BR/CH/IN/MX) to test K1168/K1172 off-ladder residuals",
+  "proposer": "User brief (\u627f\u63a5 K1168 STRENGTHENED / K1172 PARTIAL EM residual)",
+  "executor": "Claude (worktree agent)",
+  "timestamp_utc": "2026-04-17T17:19:45.960716+00:00",
+  "random_seed": 42,
+  "coverage": {
+    "IN": 10,
+    "BR": 10,
+    "MX": 10,
+    "CH": 10,
+    "total": 40
+  },
+  "data_sources": [
+    "screener.in: quarterly SEBI shareholding patterns for 10 Indian tickers (Dec 2025 / Mar 2026)",
+    "simplywall.st: aggregated company filings for BR/MX/CH (Apr 2026 snapshot)",
+    "yfinance Ticker.major_holders (K1172 baseline)",
+    "K1172 per-market summary + theta_rel",
+    "K1172 per-stock panel table"
+  ],
+  "refined_spec": {
+    "IN": "FII + DII (SEBI canonical 'institutional', excludes promoter)",
+    "BR": "simplywall.st 'Institutions' bucket only (excludes 'Private Companies' = controlling shareholder, 'Government' = state, 'Individual Insiders' = family)",
+    "MX": "simplywall.st 'Institutions' bucket only (excludes controlling-family 'Private Companies' and insiders)",
+    "CH": "simplywall.st 'Institutions' + 'Sovereign Wealth Funds' (excludes 'State or Government' and 'Private Companies' when the latter holds the SOE parent)"
+  },
+  "per_market_diff": {
+    "BR": {
+      "n": 10,
+      "yfinance_mean": 0.4856220004,
+      "yfinance_median": 0.484825015,
+      "refined_mean": 0.36835000000000007,
+      "refined_median": 0.3375,
+      "diff_mean": -0.11727200039999999
+    },
+    "CH": {
+      "n": 10,
+      "yfinance_mean": 0.1569000014,
+      "yfinance_median": 0.16463,
+      "refined_mean": 0.28325,
+      "refined_median": 0.2635,
+      "diff_mean": 0.1263499986
+    },
+    "IN": {
+      "n": 10,
+      "yfinance_mean": 0.382842999,
+      "yfinance_median": 0.39468000999999997,
+      "refined_mean": 0.56867,
+      "refined_median": 0.5544,
+      "diff_mean": 0.185827001
+    },
+    "MX": {
+      "n": 10,
+      "yfinance_mean": 0.19547777733333332,
+      "yfinance_median": 0.18514,
+      "refined_mean": 0.23613999999999996,
+      "refined_median": 0.177,
+      "diff_mean": 0.04534444488888889
+    }
+  },
+  "baseline_cross_market": {
+    "label": "yfinance_baseline",
+    "markets_used": [
+      "BR",
+      "CA",
+      "CH",
+      "EU",
+      "HK",
+      "ID",
+      "IN",
+      "JP",
+      "KR",
+      "MX",
+      "TW",
+      "US"
+    ],
+    "primary_spearman": {
+      "rho": 0.44055944055944063,
+      "p": 0.1517350357167303,
+      "n": 12
+    },
+    "inst_pct_values": {
+      "BR": 0.4856220004,
+      "CA": 0.551501006,
+      "CH": 0.1569000014,
+      "EU": 0.41582052947368425,
+      "HK": 0.26067700000000005,
+      "ID": 0.153744001,
+      "IN": 0.382842999,
+      "JP": 0.42508333099999995,
+      "KR": 0.365204996,
+      "MX": 0.19547777733333332,
+      "TW": 0.24696709580645163,
+      "US": 0.7496643360000002
+    },
+    "theta_rel_values": {
+      "BR": 1.8867051764668052,
+      "CA": 1.4484048051571432,
+      "CH": 0.3037377992879883,
+      "EU": 0.14,
+      "HK": 0.17956196672805746,
+      "ID": 0.23765282907382518,
+      "IN": 1.1696466686766267,
+      "JP": 0.39,
+      "KR": 0.2757092296599137,
+      "MX": 1.2017366550891662,
+      "TW": 0.17,
+      "US": 0.59
+    },
+    "leave_one_out": {
+      "BR": {
+        "rho": 0.3181818181818182,
+        "p": 0.34029761418190324,
+        "n": 11
+      },
+      "CA": {
+        "rho": 0.3181818181818182,
+        "p": 0.34029761418190324,
+        "n": 11
+      },
+      "CH": {
+        "rho": 0.43636363636363645,
+        "p": 0.17966487658001115,
+        "n": 11
+      },
+      "EU": {
+        "rho": 0.5636363636363637,
+        "p": 0.07095173447637548,
+        "n": 11
+      },
+      "HK": {
+        "rho": 0.46363636363636374,
+        "p": 0.1509014992924859,
+        "n": 11
+      },
+      "ID": {
+        "rho": 0.4000000000000001,
+        "p": 0.22286835013351997,
+        "n": 11
+      },
+      "IN": {
+        "rho": 0.45454545454545453,
+        "p": 0.16014543725525887,
+        "n": 11
+      },
+      "JP": {
+        "rho": 0.36363636363636365,
+        "p": 0.2716375409938225,
+        "n": 11
+      },
+      "KR": {
+        "rho": 0.4272727272727273,
+        "p": 0.1899437249654271,
+        "n": 11
+      },
+      "MX": {
+        "rho": 0.6090909090909091,
+        "p": 0.0466957093540989,
+        "n": 11
+      },
+      "TW": {
+        "rho": 0.46363636363636374,
+        "p": 0.1509014992924859,
+        "n": 11
+      },
+      "US": {
+        "rho": 0.4272727272727273,
+        "p": 0.1899437249654271,
+        "n": 11
+      }
+    }
+  },
+  "refined_cross_market": {
+    "label": "refined_em",
+    "markets_used": [
+      "BR",
+      "CA",
+      "CH",
+      "EU",
+      "HK",
+      "ID",
+      "IN",
+      "JP",
+      "KR",
+      "MX",
+      "TW",
+      "US"
+    ],
+    "primary_spearman": {
+      "rho": 0.3846153846153847,
+      "p": 0.21702022575997731,
+      "n": 12
+    },
+    "inst_pct_values": {
+      "BR": 0.36835,
+      "CA": 0.551501006,
+      "CH": 0.28325,
+      "EU": 0.41582052947368425,
+      "HK": 0.26067700000000005,
+      "ID": 0.153744001,
+      "IN": 0.56867,
+      "JP": 0.42508333099999995,
+      "KR": 0.365204996,
+      "MX": 0.23614000000000002,
+      "TW": 0.24696709580645163,
+      "US": 0.7496643360000002
+    },
+    "theta_rel_values": {
+      "BR": 1.8867051764668052,
+      "CA": 1.4484048051571432,
+      "CH": 0.3037377992879883,
+      "EU": 0.14,
+      "HK": 0.17956196672805746,
+      "ID": 0.23765282907382518,
+      "IN": 1.1696466686766267,
+      "JP": 0.39,
+      "KR": 0.2757092296599137,
+      "MX": 1.2017366550891662,
+      "TW": 0.17,
+      "US": 0.59
+    },
+    "leave_one_out": {
+      "BR": {
+        "rho": 0.41818181818181827,
+        "p": 0.20057021703405048,
+        "n": 11
+      },
+      "CA": {
+        "rho": 0.29090909090909095,
+        "p": 0.38545696969136567,
+        "n": 11
+      },
+      "CH": {
+        "rho": 0.33636363636363636,
+        "p": 0.31182431390038634,
+        "n": 11
+      },
+      "EU": {
+        "rho": 0.5181818181818182,
+        "p": 0.10249153979096377,
+        "n": 11
+      },
+      "HK": {
+        "rho": 0.3545454545454546,
+        "p": 0.28469274095588665,
+        "n": 11
+      },
+      "ID": {
+        "rho": 0.3090909090909091,
+        "p": 0.3550284397015072,
+        "n": 11
+      },
+      "IN": {
+        "rho": 0.36363636363636365,
+        "p": 0.2716375409938225,
+        "n": 11
+      },
+      "JP": {
+        "rho": 0.3272727272727273,
+        "p": 0.3258949410128414,
+        "n": 11
+      },
+      "KR": {
+        "rho": 0.33636363636363636,
+        "p": 0.31182431390038634,
+        "n": 11
+      },
+      "MX": {
+        "rho": 0.6090909090909091,
+        "p": 0.0466957093540989,
+        "n": 11
+      },
+      "TW": {
+        "rho": 0.3545454545454546,
+        "p": 0.28469274095588665,
+        "n": 11
+      },
+      "US": {
+        "rho": 0.36363636363636365,
+        "p": 0.2716375409938225,
+        "n": 11
+      }
+    }
+  },
+  "delta": {
+    "delta_rho": -0.05594405594405594,
+    "delta_p": 0.06528519004324701,
+    "baseline_rho": 0.44055944055944063,
+    "baseline_p": 0.1517350357167303,
+    "refined_rho": 0.3846153846153847,
+    "refined_p": 0.21702022575997731,
+    "N": 12
+  },
+  "panel_ols_refined": {
+    "analyst_only": {
+      "n": 172,
+      "k": 13,
+      "r2": 0.2120647583094315,
+      "coefs": {
+        "D_BR": {
+          "beta": 0.005088818709491952,
+          "se": 0.004533541877557678,
+          "t": 1.1224819019943442,
+          "p": 0.263349749794084
+        },
+        "D_CA": {
+          "beta": 0.0034863045239066017,
+          "se": 0.004045074953457421,
+          "t": 0.8618640109318061,
+          "p": 0.3900603133352738
+        },
+        "D_EU": {
+          "beta": 0.0034472832466300664,
+          "se": 0.004008377906401188,
+          "t": 0.860019520895203,
+          "p": 0.39107315962594047
+        },
+        "D_HK": {
+          "beta": 0.003927283448465571,
+          "se": 0.004518295820452271,
+          "t": 0.869195733198465,
+          "p": 0.38605025956172834
+        },
+        "D_ID": {
+          "beta": 0.00528225193050733,
+          "se": 0.005271155818441997,
+          "t": 1.0021050624279615,
+          "p": 0.3178154780743778
+        },
+        "D_IN": {
+          "beta": 0.003951504307908158,
+          "se": 0.004669744344679761,
+          "t": 0.8461928568766524,
+          "p": 0.3987168836984867
+        },
+        "D_JP": {
+          "beta": 0.005343182504632509,
+          "se": 0.004822782577027529,
+          "t": 1.1079044968943472,
+          "p": 0.26957620405237237
+        },
+        "D_KR": {
+          "beta": 0.004323641085881668,
+          "se": 0.00511240780153684,
+          "t": 0.8457152194670267,
+          "p": 0.39898254615783735
+        },
+        "D_MX": {
+          "beta": 0.004469139306255441,
+          "se": 0.004357536202702292,
+          "t": 1.0256115149390932,
+          "p": 0.30663253045853245
+        },
+        "D_TW": {
+          "beta": 0.00463556548716195,
+          "se": 0.0043314495642617825,
+          "t": 1.070211119485123,
+          "p": 0.28614620820698566
+        },
+        "D_US": {
+          "beta": 0.0048298906538344274,
+          "se": 0.004119241607382396,
+          "t": 1.1725193892920542,
+          "p": 0.24274231609887909
+        },
+        "log_analyst": {
+          "beta": 0.0011224239652276747,
+          "se": 0.00027645369478099377,
+          "t": 4.0600794506177875,
+          "p": 7.679000211080478e-05
+        },
+        "log_mcap": {
+          "beta": -0.00024699207327581274,
+          "se": 0.00017256009711881534,
+          "t": -1.4313394428941917,
+          "p": 0.1542955816565672
+        }
+      }
+    },
+    "inst_only_refined": {
+      "n": 172,
+      "k": 13,
+      "r2": 0.1551953404483305,
+      "coefs": {
+        "D_BR": {
+          "beta": 0.002399964116570243,
+          "se": 0.004510133080658506,
+          "t": 0.5321271176813777,
+          "p": 0.5953807261102817
+        },
+        "D_CA": {
+          "beta": 0.0012632264061932198,
+          "se": 0.003990990785039425,
+          "t": 0.31651949960108494,
+          "p": 0.7520233934707896
+        },
+        "D_EU": {
+          "beta": 0.001408277317878928,
+          "se": 0.004021244449424711,
+          "t": 0.350209328378532,
+          "p": 0.7266450986096484
+        },
+        "D_HK": {
+          "beta": 0.0009751072044527367,
+          "se": 0.004488483467136123,
+          "t": 0.2172464734675527,
+          "p": 0.8282947905664884
+        },
+        "D_ID": {
+          "beta": 0.001020917931115823,
+          "se": 0.005245790479456743,
+          "t": 0.1946166045163035,
+          "p": 0.845941547937408
+        },
+        "D_IN": {
+          "beta": 0.0016747253805636068,
+          "se": 0.004659704582890111,
+          "t": 0.35940591313728387,
+          "p": 0.719768319451298
+        },
+        "D_JP": {
+          "beta": 0.0018530782447056878,
+          "se": 0.004731314894768162,
+          "t": 0.3916624206845336,
+          "p": 0.6958320747590718
+        },
+        "D_KR": {
+          "beta": 0.0008772904951093912,
+          "se": 0.0050764735628558745,
+          "t": 0.17281494412350556,
+          "p": 0.8630166800921972
+        },
+        "D_MX": {
+          "beta": 0.0012931045919518072,
+          "se": 0.004325900780147725,
+          "t": 0.2989214634524394,
+          "p": 0.7653903051944364
+        },
+        "D_TW": {
+          "beta": 0.0010096332728306468,
+          "se": 0.004242261767190297,
+          "t": 0.23799410037333446,
+          "p": 0.8121920909601288
+        },
+        "D_US": {
+          "beta": 0.003147292136177678,
+          "se": 0.004129716655557863,
+          "t": 0.7621084928289169,
+          "p": 0.44712427931688503
+        },
+        "institutions_pct": {
+          "beta": -0.0010237233714103788,
+          "se": 0.0013382445810021897,
+          "t": -0.7649747930559367,
+          "p": 0.44542047516428074
+        },
+        "log_mcap": {
+          "beta": -1.3305775214543012e-05,
+          "se": 0.00016173012231906065,
+          "t": -0.08227147190486521,
+          "p": 0.9345343172059701
+        }
+      }
+    },
+    "joint_refined": {
+      "n": 172,
+      "k": 14,
+      "r2": 0.22922077824536125,
+      "coefs": {
+        "D_BR": {
+          "beta": 0.005646601535124684,
+          "se": 0.004351819383745871,
+          "t": 1.2975266290266663,
+          "p": 0.19634128114255622
+        },
+        "D_CA": {
+          "beta": 0.004329069308313545,
+          "se": 0.0038900249296403917,
+          "t": 1.1128641555296512,
+          "p": 0.2674570501385012
+        },
+        "D_EU": {
+          "beta": 0.004025951750769927,
+          "se": 0.003846391544182631,
+          "t": 1.0466827686481546,
+          "p": 0.29684448628329463
+        },
+        "D_HK": {
+          "beta": 0.004427534899883881,
+          "se": 0.00434463109387555,
+          "t": 1.0190818976840628,
+          "p": 0.309721983106346
+        },
+        "D_ID": {
+          "beta": 0.005513042260069819,
+          "se": 0.005087448209482897,
+          "t": 1.0836557018494308,
+          "p": 0.28016836778310705
+        },
+        "D_IN": {
+          "beta": 0.004769712898793978,
+          "se": 0.004483218738529856,
+          "t": 1.0639036765710141,
+          "p": 0.2889956002024492
+        },
+        "D_JP": {
+          "beta": 0.006021457822518467,
+          "se": 0.00463912647659445,
+          "t": 1.2979723344250742,
+          "p": 0.19618844557574744
+        },
+        "D_KR": {
+          "beta": 0.004860434577968044,
+          "se": 0.004916413868648874,
+          "t": 0.9886137961171658,
+          "p": 0.32436367903369523
+        },
+        "D_MX": {
+          "beta": 0.0048315623655163665,
+          "se": 0.004212054880782666,
+          "t": 1.1470796326895403,
+          "p": 0.25308275157739213
+        },
+        "D_TW": {
+          "beta": 0.005069818790295781,
+          "se": 0.004171117750988004,
+          "t": 1.2154580841298244,
+          "p": 0.2260044685728979
+        },
+        "D_US": {
+          "beta": 0.0059493894789889945,
+          "se": 0.004038718443415735,
+          "t": 1.4730884468285228,
+          "p": 0.14271655857677157
+        },
+        "log_analyst": {
+          "beta": 0.001235008393731455,
+          "se": 0.0003201931091876564,
+          "t": 3.85707361680807,
+          "p": 0.00016673614028595019
+        },
+        "institutions_pct": {
+          "beta": -0.001687486610043409,
+          "se": 0.0014069001082519707,
+          "t": -1.1994359799574243,
+          "p": 0.23215406622668788
+        },
+        "log_mcap": {
+          "beta": -0.0002560029780286146,
+          "se": 0.00016709566269634187,
+          "t": -1.532074345303872,
+          "p": 0.1275039126126658
+        }
+      }
+    }
+  },
+  "panel_ols_baseline_k1172": {
+    "n": 172,
+    "k": 14,
+    "r2": 0.23693164160759228,
+    "coefs": {
+      "D_BR": {
+        "beta": 0.00586149564934955,
+        "se": 0.004295245309531791,
+        "t": 1.3646474710866956,
+        "p": 0.17430421430195242
+      },
+      "D_CA": {
+        "beta": 0.004369165082468901,
+        "se": 0.0038292735667826306,
+        "t": 1.1409905837936487,
+        "p": 0.2556002895062006
+      },
+      "D_EU": {
+        "beta": 0.003991690884903877,
+        "se": 0.0037885547751765666,
+        "t": 1.0536183642000643,
+        "p": 0.29366626055090217
+      },
+      "D_HK": {
+        "beta": 0.004354456968951559,
+        "se": 0.004278567649273135,
+        "t": 1.0177370853751293,
+        "p": 0.3103587988719343
+      },
+      "D_ID": {
+        "beta": 0.005340848080030177,
+        "se": 0.005016122251636734,
+        "t": 1.064736426287754,
+        "p": 0.28861966391222893
+      },
+      "D_IN": {
+        "beta": 0.004368139519675549,
+        "se": 0.004417660366945753,
+        "t": 0.9887902547600234,
+        "p": 0.32427759113039256
+      },
+      "D_JP": {
+        "beta": 0.0059897319184657825,
+        "se": 0.004566762103538759,
+        "t": 1.3115927176991269,
+        "p": 0.191560258444061
+      },
+      "D_KR": {
+        "beta": 0.004770947004000183,
+        "se": 0.004841983585033326,
+        "t": 0.9853290330738175,
+        "p": 0.32596894058903825
+      },
+      "D_MX": {
+        "beta": 0.004637902178624455,
+        "se": 0.004137266441376091,
+        "t": 1.1210064046737702,
+        "p": 0.26398606436488903
+      },
+      "D_TW": {
+        "beta": 0.005000001697191175,
+        "se": 0.004106954650952883,
+        "t": 1.2174475060325027,
+        "p": 0.22524915774696153
+      },
+      "D_US": {
+        "beta": 0.006047213992361654,
+        "se": 0.0039769357733337625,
+        "t": 1.5205711977823646,
+        "p": 0.1303661662995581
+      },
+      "log_analyst": {
+        "beta": 0.0012779414988463669,
+        "se": 0.00033724475492986287,
+        "t": 3.7893591528566297,
+        "p": 0.00021437897391352045
+      },
+      "institutions_pct": {
+        "beta": -0.002148873564808577,
+        "se": 0.0016258820125526993,
+        "t": -1.3216663621456517,
+        "p": 0.18818976270094434
+      },
+      "log_mcap": {
+        "beta": -0.0002523388237259283,
+        "se": 0.00016466166184614975,
+        "t": -1.5324685837417271,
+        "p": 0.12740669850467246
+      }
+    }
+  },
+  "verdict": "NULL",
+  "verdict_narrative": "refined \u03c1=+0.385 within \u00b10.10 of yfinance baseline \u03c1=+0.441 (\u0394\u03c1=-0.056). EM off-ladder is STRUCTURAL, not a yfinance proxy artefact. Paper 2 \u00a75 narrative: keep K1172 'STRENGTHENED with emerging-market scale residual caveat'; emerging markets genuinely sit off the developed institutional-ownership ladder even when the proxy is re-estimated from SEBI/CVM/BMV/SSE regulatory disclosures.",
+  "per_stock_table": [
+    {
+      "ticker": "RELIANCE.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2025-12",
+      "yfinance_inst_pct": 0.27867,
+      "refined_inst_pct": 0.3939,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.5001,
+      "fii_pct": 0.1909,
+      "dii_pct": 0.203,
+      "public_pct": 0.1064,
+      "institutions_breakdown_notes": "FII 19.09 + DII 20.3 = refined; promoter 50.01 excluded"
+    },
+    {
+      "ticker": "TCS.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2025-12",
+      "yfinance_inst_pct": 0.16973,
+      "refined_inst_pct": 0.2318,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.7177,
+      "fii_pct": 0.1037,
+      "dii_pct": 0.1281,
+      "public_pct": 0.0498,
+      "institutions_breakdown_notes": "FII 10.37 + DII 12.81; promoter 71.77 excluded"
+    },
+    {
+      "ticker": "HDFCBANK.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2026-03",
+      "yfinance_inst_pct": 0.55576,
+      "refined_inst_pct": 0.8419,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.4405,
+      "dii_pct": 0.4014,
+      "public_pct": 0.1564,
+      "institutions_breakdown_notes": "Promoter 0 (post-HDFC merger); FII+DII=84.19"
+    },
+    {
+      "ticker": "INFY.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2026-03",
+      "yfinance_inst_pct": 0.49056,
+      "refined_inst_pct": 0.7164,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.1438,
+      "fii_pct": 0.2845,
+      "dii_pct": 0.4319,
+      "public_pct": 0.1354,
+      "institutions_breakdown_notes": "FII 28.45 + DII 43.19; promoter 14.38 excluded"
+    },
+    {
+      "ticker": "ICICIBANK.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2025-12",
+      "yfinance_inst_pct": 0.55856,
+      "refined_inst_pct": 0.9061,
+      "state_soe_pct": 0.0027,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.4387,
+      "dii_pct": 0.4674,
+      "public_pct": 0.0913,
+      "institutions_breakdown_notes": "FII 43.87 + DII 46.74; no promoter"
+    },
+    {
+      "ticker": "SBIN.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2025-12",
+      "yfinance_inst_pct": 0.2891,
+      "refined_inst_pct": 0.3738,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.555,
+      "fii_pct": 0.1034,
+      "dii_pct": 0.2704,
+      "public_pct": 0.0697,
+      "institutions_breakdown_notes": "Gov-controlled (promoter 55.5%); FII+DII=37.38"
+    },
+    {
+      "ticker": "BHARTIARTL.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2025-12",
+      "yfinance_inst_pct": 0.31827,
+      "refined_inst_pct": 0.4829,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.4887,
+      "fii_pct": 0.2875,
+      "dii_pct": 0.1954,
+      "public_pct": 0.0265,
+      "institutions_breakdown_notes": "Promoter 48.87 (Bharti/Singtel); FII+DII=48.29"
+    },
+    {
+      "ticker": "HINDUNILVR.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2025-12",
+      "yfinance_inst_pct": 0.19452,
+      "refined_inst_pct": 0.2639,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.619,
+      "fii_pct": 0.1071,
+      "dii_pct": 0.1568,
+      "public_pct": 0.1164,
+      "institutions_breakdown_notes": "Promoter Unilever 61.9; FII+DII=26.39"
+    },
+    {
+      "ticker": "ITC.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2025-12",
+      "yfinance_inst_pct": 0.50216997,
+      "refined_inst_pct": 0.8501,
+      "state_soe_pct": 0.0004,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.3611,
+      "dii_pct": 0.489,
+      "public_pct": 0.1495,
+      "institutions_breakdown_notes": "No single promoter (BAT 29% counted in FII); FII+DII=85.01"
+    },
+    {
+      "ticker": "KOTAKBANK.NS",
+      "market": "IN",
+      "source": "screener.in",
+      "disclosure_period": "2026-03",
+      "yfinance_inst_pct": 0.47109002,
+      "refined_inst_pct": 0.6259,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.2587,
+      "fii_pct": 0.264,
+      "dii_pct": 0.3619,
+      "public_pct": 0.1154,
+      "institutions_breakdown_notes": "Promoter Uday Kotak 25.87; FII+DII=62.59"
+    },
+    {
+      "ticker": "VALE3.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.57060003,
+      "refined_inst_pct": 0.551,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.00328,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.379,
+      "institutions_breakdown_notes": "Institutions 55.1; Private Co 0.33 minimal; Gov near zero"
+    },
+    {
+      "ticker": "PETR4.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.61049,
+      "refined_inst_pct": 0.365,
+      "state_soe_pct": 0.29,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.265,
+      "institutions_breakdown_notes": "Gov (Brazil state) 29% + VC/PE 8.03 separate; Inst=36.5"
+    },
+    {
+      "ticker": "ITUB4.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.60033,
+      "refined_inst_pct": 0.31,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.463,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.226,
+      "institutions_breakdown_notes": "Itausa controlling 46.3%; Inst=31"
+    },
+    {
+      "ticker": "BBDC4.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.39905,
+      "refined_inst_pct": 0.371,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.285,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.343,
+      "institutions_breakdown_notes": "Cidade de Deus private controlling 28.5; Inst=37.1"
+    },
+    {
+      "ticker": "BBAS3.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.28485,
+      "refined_inst_pct": 0.18,
+      "state_soe_pct": 0.502,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.318,
+      "institutions_breakdown_notes": "Gov (federal) 50.2%; Inst 18"
+    },
+    {
+      "ticker": "ABEV3.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.099980004,
+      "refined_inst_pct": 0.253,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.723,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.024,
+      "institutions_breakdown_notes": "AB InBev controlling 62.3 + Zerrenner 10.3 = 72.6 controlling; Inst 25.3"
+    },
+    {
+      "ticker": "B3SA3.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.82895,
+      "refined_inst_pct": 0.641,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.36,
+      "institutions_breakdown_notes": "No dominant controller; Inst 64.1 close to yfinance 82.9 but slightly lower"
+    },
+    {
+      "ticker": "ITSA4.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.37798,
+      "refined_inst_pct": 0.244,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.331,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.375,
+      "institutions_breakdown_notes": "Villela family insiders 33.1 + Foundation 4.39 controlling; Inst 24.4"
+    },
+    {
+      "ticker": "MGLU3.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.29201,
+      "refined_inst_pct": 0.1855,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.498,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.221,
+      "institutions_breakdown_notes": "LTD Administra\u00e7\u00e3o 49.8 controlling; Inst 18.7 + Hedge 7.85"
+    },
+    {
+      "ticker": "RENT3.SA",
+      "market": "BR",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.79197997,
+      "refined_inst_pct": 0.583,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.184,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.23,
+      "institutions_breakdown_notes": "Mattar family insiders 18.4; Inst 58.3"
+    },
+    {
+      "ticker": "WALMEX.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.13196,
+      "refined_inst_pct": 0.129,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.712,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.159,
+      "institutions_breakdown_notes": "Walmart Inc parent 71.2; Inst 12.9"
+    },
+    {
+      "ticker": "AMXB.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.069860004,
+      "refined_inst_pct": 0.16,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.667,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.173,
+      "institutions_breakdown_notes": "Slim family trusts 47.7 private + 19 insiders = 66.7; Inst 16"
+    },
+    {
+      "ticker": "GFNORTEO.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.42558,
+      "refined_inst_pct": 0.402,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.598,
+      "institutions_breakdown_notes": "No dominant controller; Inst 40.2"
+    },
+    {
+      "ticker": "FEMSAUBD.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.21014999,
+      "refined_inst_pct": 0.0817,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.918,
+      "institutions_breakdown_notes": "Widely dispersed post-KOF divestment; Inst 8.17 (news 2024 reported 55% institutional earlier; current structure more dispersed)"
+    },
+    {
+      "ticker": "CEMEXCPO.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.24355,
+      "refined_inst_pct": 0.565,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0122,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.423,
+      "institutions_breakdown_notes": "Insiders 1.22; Inst 56.5"
+    },
+    {
+      "ticker": "BIMBOA.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.060310002,
+      "refined_inst_pct": 0.0557,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.681,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.264,
+      "institutions_breakdown_notes": "Servitje-family Normaciel 41 + private 68.1; Inst 5.57"
+    },
+    {
+      "ticker": "GMEXICOB.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.18514,
+      "refined_inst_pct": 0.27,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.598,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.131,
+      "institutions_breakdown_notes": "Larrea family (EIM 40.6 + 19.2 insider) = 59.8 controlling; Inst 27"
+    },
+    {
+      "ticker": "KOFUBL.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.31076,
+      "refined_inst_pct": 0.144,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.75,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.106,
+      "institutions_breakdown_notes": "FEMSA 47.2 + Coca-Cola Co 27.8 = 75 controlling; Inst 14.4"
+    },
+    {
+      "ticker": "TLEVISACPO.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.12199,
+      "refined_inst_pct": 0.36,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.41,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.13,
+      "institutions_breakdown_notes": "Azcarraga/Tricio/Angoitia insiders 41 + Private 9.8; Inst ~36 (approx from news, news reported 53 earlier)"
+    },
+    {
+      "ticker": "GRUMAB.MX",
+      "market": "MX",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": NaN,
+      "refined_inst_pct": 0.194,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.806,
+      "institutions_breakdown_notes": "No dominant controller; Inst 19.4 (yfinance None)"
+    },
+    {
+      "ticker": "600519.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.093210004,
+      "refined_inst_pct": 0.201,
+      "state_soe_pct": 0.544,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.255,
+      "institutions_breakdown_notes": "Moutai Group SOE parent 54.4 (state-controlled via Guizhou SASAC); Inst 20.1 incl QFII+funds"
+    },
+    {
+      "ticker": "601398.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.07453,
+      "refined_inst_pct": 0.474,
+      "state_soe_pct": 0.311,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.171,
+      "institutions_breakdown_notes": "ICBC: MoF 31.1 state + Central Huijin 34.8 (captured in Inst); Inst 42.1 + Sovereign 5.33 = refined 47.43"
+    },
+    {
+      "ticker": "601318.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.20679002,
+      "refined_inst_pct": 0.4315,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.436,
+      "institutions_breakdown_notes": "Ping An: Shenzhen Inv 6.74 + Charoen 5.07 dispersed; Inst 36.4 + Sovereign 6.74 = 43.15 (Private Co 6.5 excluded as strategic Chinese partner)"
+    },
+    {
+      "ticker": "600036.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.18457001,
+      "refined_inst_pct": 0.253,
+      "state_soe_pct": 0.276,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.378,
+      "institutions_breakdown_notes": "China Merchants Bank: CM Group SOE 27.6 (Private Co bucket = SOE parent); Inst 25.3"
+    },
+    {
+      "ticker": "600276.SS",
+      "market": "CH",
+      "source": "simplywallst-search",
+      "disclosure_period": "2023-10",
+      "yfinance_inst_pct": 0.1958,
+      "refined_inst_pct": 0.307,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.255,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.438,
+      "institutions_breakdown_notes": "Hengrui: Founder Jiang 25.5 private; Inst 30.7 per dcfmodeling summary"
+    },
+    {
+      "ticker": "600887.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.25391,
+      "refined_inst_pct": 0.25,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.0,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.615,
+      "institutions_breakdown_notes": "Yili: Hohhot Inv Co 8.54 VC; Inst 25"
+    },
+    {
+      "ticker": "601166.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.24201,
+      "refined_inst_pct": 0.319,
+      "state_soe_pct": 0.0398,
+      "controlling_family_pct": 0.274,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.367,
+      "institutions_breakdown_notes": "Industrial Bank: Fujian Fin Holdings 16.6 private (SOE-linked) + State 3.98; Inst 31.9"
+    },
+    {
+      "ticker": "600030.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.14468999,
+      "refined_inst_pct": 0.205,
+      "state_soe_pct": 0.0009,
+      "controlling_family_pct": 0.184,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.531,
+      "institutions_breakdown_notes": "CITIC Securities: CITIC Group 18.4 private (SOE-controlled); Inst 20.5; Public 53.1"
+    },
+    {
+      "ticker": "600028.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.04593,
+      "refined_inst_pct": 0.118,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.72,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.163,
+      "institutions_breakdown_notes": "Sinopec: China Petrochemical Group 69.9 private (100% SOE); Inst 11.8"
+    },
+    {
+      "ticker": "600585.SS",
+      "market": "CH",
+      "source": "simplywallst",
+      "disclosure_period": "2026-04",
+      "yfinance_inst_pct": 0.12755999,
+      "refined_inst_pct": 0.274,
+      "state_soe_pct": 0.0,
+      "controlling_family_pct": 0.372,
+      "promoter_pct": 0.0,
+      "fii_pct": 0.0,
+      "dii_pct": 0.0,
+      "public_pct": 0.332,
+      "institutions_breakdown_notes": "Anhui Conch: Anhui Conch Holdings 37.2 private (Anhui Prov Gov controlled); Inst 27.4"
+    }
+  ]
+}
