@@ -1093,7 +1093,7 @@
     "title": "K1213: AU pooled multi-start refit to escape secondary local minimum (K1210 NUMERICAL_FRAGILITY follow-up)",
     "priority": 3,
     "description": "K1210 diagnosed AU pooled theta_EAV 3.2e-5 stuck in secondary local minimum (per-stock mean 1.8e-4, 6x divergence; jitter bimodal 2/10 explode; drop-BHP LOO 0.150->1.37 amplification). Run multi-start pooled MLE on K1171 AU 10-stock pool with 50-100 random initializations, keep best by LL. Compare basin-A (current 0.150) vs basin-B (likely closer to per-stock mean). If basin-B is global → AU below-ladder CONFIRMED or OVERTURNED depending on new rho direction.",
-    "status": "pending",
+    "status": "completed",
     "created_at": "2026-04-18T02:35:58.757216",
     "tags": [
       "K1210-followup",
@@ -1101,6 +1101,21 @@
       "AU",
       "numerical-fragility",
       "pooled-MLE"
+    ],
+    "completed_at": "2026-04-18T02:50:33.770850",
+    "outcome": "ABOVE_LADDER_OVERTURNED: basin-B θ_rel=1.476 LR vs K1171 >>χ²(1). K1171 stuck in neither local max — it was artifact. AU sits ABOVE US in ladder. K1211 draft §5.5 revision required."
+  },
+  {
+    "id": "K1211_revise_AU",
+    "title": "K1211 Paper 2 §5 draft: revise §5.5 AU from below-ladder to above-ladder (K1213 result)",
+    "priority": 3,
+    "description": "K1213 overturns K1171 below-ladder framing. K1211 §5.5 must be revised: AU θ_rel ∈ [1.07, 1.48] ABOVE ladder. K1210 H2 ±1-day precision partially superseded by numerical entrapment. Primary Spearman unchanged (ρ=+0.418). Update trajectory table + narrative commitment.",
+    "status": "pending",
+    "created_at": "2026-04-18T02:50:33.770865",
+    "tags": [
+      "K1211-revision",
+      "Paper2",
+      "AU-overturned"
     ]
   }
 ]
