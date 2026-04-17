@@ -1087,5 +1087,20 @@
       "Table6",
       "K1186-K1206-followup"
     ]
+  },
+  {
+    "id": "K1213_AU_multistart",
+    "title": "K1213: AU pooled multi-start refit to escape secondary local minimum (K1210 NUMERICAL_FRAGILITY follow-up)",
+    "priority": 3,
+    "description": "K1210 diagnosed AU pooled theta_EAV 3.2e-5 stuck in secondary local minimum (per-stock mean 1.8e-4, 6x divergence; jitter bimodal 2/10 explode; drop-BHP LOO 0.150->1.37 amplification). Run multi-start pooled MLE on K1171 AU 10-stock pool with 50-100 random initializations, keep best by LL. Compare basin-A (current 0.150) vs basin-B (likely closer to per-stock mean). If basin-B is global → AU below-ladder CONFIRMED or OVERTURNED depending on new rho direction.",
+    "status": "pending",
+    "created_at": "2026-04-18T02:35:58.757216",
+    "tags": [
+      "K1210-followup",
+      "Paper2",
+      "AU",
+      "numerical-fragility",
+      "pooled-MLE"
+    ]
   }
 ]
