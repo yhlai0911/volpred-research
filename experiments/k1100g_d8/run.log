@@ -1,0 +1,157 @@
+  [sanity] Hansen skewed-t lam=0 matches scaled Student-t OK
+[03:11:33] K1100g_d8 Hansen skewed-t gap² PRG start
+
+=== [N225] (^N225) ===
+  [cache] ^N225 -> n225_daily_2010-2026.parquet n=3971
+  Aligned rows (finite overnight): 3970
+  Date range: 2010-01-05 .. 2026-03-31
+  r_intraday skew=-0.977  kurt=+15.676
+  Train n=2447  Test n=1465
+  [03:11:33] IS fits (4 models) ...
+    IS elapsed: base_st=11.1s  gap_st=7.8s  base_sk=13.7s  gap_sk=13.5s
+    M_base_st  ll= 13582.961 df=5.12  success=True
+    M_gap_st   ll= 13614.148 df=6.61 ξ=+0.1403  success=True
+    M_base_sk  ll= 13576.723 η=7.60 λ=-0.078  success=True
+    M_gap_sk   ll= 13607.646 η=7.10 λ=-0.127 ξ=+0.0914  success=True
+  [03:12:19] OOS 4 models (this takes a while) ...
+    [N225_base_st t=2572/3970 elapsed=6s refits=5]
+    [N225_base_st t=2697/3970 elapsed=11s refits=10]
+    [N225_base_st t=2822/3970 elapsed=17s refits=15]
+    [N225_base_st t=2947/3970 elapsed=25s refits=20]
+    [N225_base_st t=3072/3970 elapsed=33s refits=25]
+    [N225_base_st t=3197/3970 elapsed=41s refits=30]
+    [N225_base_st t=3322/3970 elapsed=49s refits=35]
+    [N225_base_st t=3447/3970 elapsed=58s refits=40]
+    [N225_base_st t=3572/3970 elapsed=66s refits=45]
+    [N225_base_st t=3697/3970 elapsed=75s refits=50]
+    [N225_base_st t=3822/3970 elapsed=84s refits=55]
+    [N225_base_st t=3947/3970 elapsed=94s refits=60]
+    base_st: refits=61  elapsed=96.1s
+    [N225_gap_st t=2572/3970 elapsed=8s refits=5]
+    [N225_gap_st t=2697/3970 elapsed=15s refits=10]
+    [N225_gap_st t=2822/3970 elapsed=23s refits=15]
+    [N225_gap_st t=2947/3970 elapsed=31s refits=20]
+    [N225_gap_st t=3072/3970 elapsed=40s refits=25]
+    [N225_gap_st t=3197/3970 elapsed=49s refits=30]
+    [N225_gap_st t=3322/3970 elapsed=58s refits=35]
+    [N225_gap_st t=3447/3970 elapsed=67s refits=40]
+    [N225_gap_st t=3572/3970 elapsed=76s refits=45]
+    [N225_gap_st t=3697/3970 elapsed=86s refits=50]
+    [N225_gap_st t=3822/3970 elapsed=96s refits=55]
+    [N225_gap_st t=3947/3970 elapsed=106s refits=60]
+    gap_st:  refits=61  elapsed=108.8s
+    [N225_base_sk t=2572/3970 elapsed=7s refits=5]
+    [N225_base_sk t=2697/3970 elapsed=12s refits=10]
+    [N225_base_sk t=2822/3970 elapsed=19s refits=15]
+    [N225_base_sk t=2947/3970 elapsed=27s refits=20]
+    [N225_base_sk t=3072/3970 elapsed=36s refits=25]
+    [N225_base_sk t=3197/3970 elapsed=45s refits=30]
+    [N225_base_sk t=3322/3970 elapsed=54s refits=35]
+    [N225_base_sk t=3447/3970 elapsed=63s refits=40]
+    [N225_base_sk t=3572/3970 elapsed=72s refits=45]
+    [N225_base_sk t=3697/3970 elapsed=82s refits=50]
+    [N225_base_sk t=3822/3970 elapsed=91s refits=55]
+    [N225_base_sk t=3947/3970 elapsed=102s refits=60]
+    base_sk: refits=61  λ-boundary hits=0  elapsed=104.5s
+    [N225_gap_sk t=2572/3970 elapsed=9s refits=5]
+    [N225_gap_sk t=2697/3970 elapsed=17s refits=10]
+    [N225_gap_sk t=2822/3970 elapsed=26s refits=15]
+    [N225_gap_sk t=2947/3970 elapsed=35s refits=20]
+    [N225_gap_sk t=3072/3970 elapsed=45s refits=25]
+    [N225_gap_sk t=3197/3970 elapsed=55s refits=30]
+    [N225_gap_sk t=3322/3970 elapsed=66s refits=35]
+    [N225_gap_sk t=3447/3970 elapsed=76s refits=40]
+    [N225_gap_sk t=3572/3970 elapsed=86s refits=45]
+    [N225_gap_sk t=3697/3970 elapsed=97s refits=50]
+    [N225_gap_sk t=3822/3970 elapsed=108s refits=55]
+    [N225_gap_sk t=3947/3970 elapsed=121s refits=60]
+    gap_sk:  refits=61  λ-boundary hits=0  elapsed=123.9s
+  [OOS] n_valid across all 4 models = 1465
+  [OOS] DM(gap_st): t=-1.919  QLIKE imp=-0.38%  (d7 replica)
+  [OOS] DM(gap_sk): t=-1.333  QLIKE imp=-0.69%  Harvey |t|>3: False  <-- KEY
+  [OOS] DM(innov_base): t=-2.226  QLIKE imp=-0.06%  (skewt vs student base)
+  [OOS] DM(innov_gap): t=-0.821  QLIKE imp=-0.38%  (skewt vs student gap)
+
+=== [SPY] (SPY) ===
+  [cache] SPY -> spy_daily_2010-2026.parquet n=4085
+  Aligned rows (finite overnight): 4084
+  Date range: 2010-01-05 .. 2026-03-31
+  r_intraday skew=+0.115  kurt=+10.826
+  Train n=2515  Test n=1508
+  [03:19:33] IS fits (4 models) ...
+    IS elapsed: base_st=11.4s  gap_st=10.7s  base_sk=14.3s  gap_sk=6.9s
+    M_base_st  ll= 14612.380 df=9.05  success=True
+    M_gap_st   ll= 14669.223 df=6.50 ξ=+0.0601  success=True
+    M_base_sk  ll= 14684.452 η=9.60 λ=-0.113  success=True
+    M_gap_sk   ll= 14719.739 η=7.59 λ=-0.137 ξ=+0.0651  success=True
+  [03:20:16] OOS 4 models (this takes a while) ...
+    [SPY_base_st t=2640/4084 elapsed=6s refits=5]
+    [SPY_base_st t=2765/4084 elapsed=12s refits=10]
+    [SPY_base_st t=2890/4084 elapsed=18s refits=15]
+    [SPY_base_st t=3015/4084 elapsed=24s refits=20]
+    [SPY_base_st t=3140/4084 elapsed=31s refits=25]
+    [SPY_base_st t=3265/4084 elapsed=38s refits=30]
+    [SPY_base_st t=3390/4084 elapsed=45s refits=35]
+    [SPY_base_st t=3515/4084 elapsed=52s refits=40]
+    [SPY_base_st t=3640/4084 elapsed=59s refits=45]
+    [SPY_base_st t=3765/4084 elapsed=65s refits=50]
+    [SPY_base_st t=3890/4084 elapsed=72s refits=55]
+    [SPY_base_st t=4015/4084 elapsed=80s refits=60]
+    base_st: refits=63  elapsed=84.9s
+    [SPY_gap_st t=2640/4084 elapsed=4s refits=5]
+    [SPY_gap_st t=2765/4084 elapsed=5s refits=10]
+    [SPY_gap_st t=2890/4084 elapsed=6s refits=15]
+    [SPY_gap_st t=3015/4084 elapsed=7s refits=20]
+    [SPY_gap_st t=3140/4084 elapsed=8s refits=25]
+    [SPY_gap_st t=3265/4084 elapsed=9s refits=30]
+    [SPY_gap_st t=3390/4084 elapsed=10s refits=35]
+    [SPY_gap_st t=3515/4084 elapsed=11s refits=40]
+    [SPY_gap_st t=3640/4084 elapsed=12s refits=45]
+    [SPY_gap_st t=3765/4084 elapsed=13s refits=50]
+    [SPY_gap_st t=3890/4084 elapsed=14s refits=55]
+    [SPY_gap_st t=4015/4084 elapsed=16s refits=60]
+    gap_st:  refits=63  elapsed=16.1s
+    [SPY_base_sk t=2640/4084 elapsed=6s refits=5]
+    [SPY_base_sk t=2765/4084 elapsed=13s refits=10]
+    [SPY_base_sk t=2890/4084 elapsed=20s refits=15]
+    [SPY_base_sk t=3015/4084 elapsed=25s refits=20]
+    [SPY_base_sk t=3140/4084 elapsed=33s refits=25]
+    [SPY_base_sk t=3265/4084 elapsed=43s refits=30]
+    [SPY_base_sk t=3390/4084 elapsed=49s refits=35]
+    [SPY_base_sk t=3515/4084 elapsed=55s refits=40]
+    [SPY_base_sk t=3640/4084 elapsed=62s refits=45]
+    [SPY_base_sk t=3765/4084 elapsed=68s refits=50]
+    [SPY_base_sk t=3890/4084 elapsed=75s refits=55]
+    [SPY_base_sk t=4015/4084 elapsed=83s refits=60]
+    base_sk: refits=63  λ-boundary hits=0  elapsed=87.6s
+    [SPY_gap_sk t=2640/4084 elapsed=7s refits=5]
+    [SPY_gap_sk t=2765/4084 elapsed=11s refits=10]
+    [SPY_gap_sk t=2890/4084 elapsed=16s refits=15]
+    [SPY_gap_sk t=3015/4084 elapsed=19s refits=20]
+    [SPY_gap_sk t=3140/4084 elapsed=25s refits=25]
+    [SPY_gap_sk t=3265/4084 elapsed=30s refits=30]
+    [SPY_gap_sk t=3390/4084 elapsed=37s refits=35]
+    [SPY_gap_sk t=3515/4084 elapsed=40s refits=40]
+    [SPY_gap_sk t=3640/4084 elapsed=43s refits=45]
+    [SPY_gap_sk t=3765/4084 elapsed=46s refits=50]
+    [SPY_gap_sk t=3890/4084 elapsed=50s refits=55]
+    [SPY_gap_sk t=4015/4084 elapsed=53s refits=60]
+    gap_sk:  refits=63  λ-boundary hits=0  elapsed=55.5s
+  [OOS] n_valid across all 4 models = 1508
+  [OOS] DM(gap_st): t=-2.098  QLIKE imp=-19.73%  (d7 replica)
+  [OOS] DM(gap_sk): t=-1.742  QLIKE imp=-1.31%  Harvey |t|>3: False  <-- KEY
+  [OOS] DM(innov_base): t=-0.472  QLIKE imp=-0.49%  (skewt vs student base)
+  [OOS] DM(innov_gap): t=+1.883  QLIKE imp=+14.97%  (skewt vs student gap)
+
+[03:24:20] Loading d7 anchor ...
+  d7 SPY: DM t_student=+0.660  n_valid=1508
+  d7 N225: DM t_student=+2.315  n_valid=1465
+
+[03:24:20] === Verdict: STILL_BORDERLINE ===
+  N225 gap² DM-HLN t=-1.33 under skewed-t; weak but not a regression.
+
+[OK] results -> k1100g_d8_results.json
+  [plot] k1100g_d8_dm_progression.png
+  [plot] k1100g_d8_innovation_density_n225.png
+
+[DONE] total elapsed: 767.1s
