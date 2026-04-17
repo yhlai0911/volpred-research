@@ -112,7 +112,9 @@
     "title": "K1163: EU earnings via BaFin/AMF/FCA local filings (K1153 follow-up)",
     "priority": 3,
     "description": "K1153 EU yfinance earnings 資料稀疏 (12/30 skip)，N=18 DAX-biased。改用 BaFin (DE)/AMF (FR)/FCA (UK) 本地 filing API 取完整 CAC+FTSE earnings，N=30 重測是否改變 θ_rel=0.137 cluster 歸屬。",
-    "status": "pending"
+    "status": "completed",
+    "completed_at": "2026-04-18T01:29:22.302596",
+    "outcome": "ROBUST: 30/30 coverage. θ_rel 0.137→0.194 still low-cluster. Bootstrap t +4.19→+4.81; placebo z +14.77σ→+22.27σ. Paper 2 §5 two-cluster taxonomy robust."
   },
   {
     "id": "K1169",
