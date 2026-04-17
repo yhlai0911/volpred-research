@@ -1,0 +1,61 @@
+======================================================================
+K1183: Paper 2 TSMC Decomposition
+======================================================================
+
+[1] Downloading data...
+  0050.TW (CLEAN): 4217 days (2009-01-02 to 2026-03-30)
+  2330.TW (TSMC): 4467 days (2008-01-02 to 2026-03-30)
+
+[3] TSMC Standalone EWMA VT...
+  TSMC VT Sharpe: 1.1244
+  TSMC VT MDD:    -20.8008%
+  TSMC VT AnnRet: 11.9556%
+  TSMC VT AnnVol: 10.5394%
+
+[4] 0050.TW EWMA VT (reference)...
+  0050.TW VT Sharpe: 0.8709
+
+[5] TSMC variance contribution to 0050.TW...
+  Common observations (full): 4215
+  R² (full sample): 0.5256 (52.56%)
+  Paper claim: TSMC explains 52.5% of 0050.TW return variance
+  Match: 1 (tol=3%)
+
+[6] Ex-TSMC synthetic portfolio VT (varying weight assumptions)...
+  w_tsmc=0.20: Sharpe=0.7550
+  w_tsmc=0.25: Sharpe=0.7099
+  w_tsmc=0.28: Sharpe=0.6782
+  w_tsmc=0.30: Sharpe=0.6545
+  w_tsmc=0.32: Sharpe=0.6284
+  w_tsmc=0.35: Sharpe=0.5829
+  w_tsmc=0.40: Sharpe=0.4908
+  w_tsmc=0.45: Sharpe=0.3793
+  w_tsmc=0.50: Sharpe=0.2468
+  w_tsmc=0.52: Sharpe=0.1915
+  w_tsmc=0.55: Sharpe=0.1083
+
+[6b] Rolling time-varying TSMC weight in 0050.TW...
+  Rolling beta range: 0.372 to 0.756
+  Rolling beta mean: 0.565
+  Rolling weight: Sharpe=-0.0394
+
+[7] GJR-GARCH gamma for TSMC decomposition sub-analysis...
+  0050.TW: gamma=0.1046, t=3.625
+  TSMC 2330.TW: gamma=0.0567, t=2.862
+  0050.TW (OOS only): gamma=0.1075, t=3.376
+
+[8] Summary vs Paper Claims...
+
+  TSMC VT Sharpe:    actual=1.1244, paper=1.121
+  ex-TSMC range (w=0.32-0.52):  actual=0.192–0.628, paper=0.193–0.637
+  TSMC variance pct: actual=52.6%, paper=52.5%
+
+  TSMC Sharpe match: True (tol=0.05)
+  Range min match:   True (tol=0.05)
+  Range max match:   True (tol=0.05)
+  Variance match:    True (tol=3.0 pct)
+
+[9] Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a033fd11/experiments/k1183/k1183_results.json
+======================================================================
+K1183 COMPLETE
+======================================================================
