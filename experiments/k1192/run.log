@@ -1,0 +1,152 @@
+2026-04-17 17:52:46,553 INFO ======================================================================
+2026-04-17 17:52:46,553 INFO K1192: Paper 3 Table 6 Bootstrap MDD CI — Formal Reproduce
+2026-04-17 17:52:46,553 INFO ======================================================================
+2026-04-17 17:52:46,553 INFO Period: 2005-01-03 to 2026-04-01
+2026-04-17 17:52:46,553 INFO VT: monthly rebalancing, w=min(12/VIX_month_end, 1), lag 1 month
+2026-04-17 17:52:46,553 INFO Bootstrap: B=10000, block=252, seed=42
+2026-04-17 17:52:46,553 INFO CI: 90% (5th/95th percentile)
+2026-04-17 17:52:46,553 INFO 
+2026-04-17 17:52:46,553 INFO Paper Table 6 target (body_v2.tex):
+2026-04-17 17:52:46,553 INFO   SPY: point=93, CI=[86, 97]
+2026-04-17 17:52:46,553 INFO   50/50: point=96, CI=[90, 99]
+2026-04-17 17:52:46,553 INFO   DIA: point=91, CI=[83, 96]
+2026-04-17 17:52:46,554 INFO   QQQ: point=90, CI=[82, 95]
+2026-04-17 17:52:46,554 INFO   IWM: point=97, CI=[91, 100]
+2026-04-17 17:52:46,554 INFO Downloading ['SPY', 'GLD', 'DIA', 'QQQ', 'IWM', '^VIX', 'SHY'] from 2004-06-01 to 2026-04-01
+2026-04-17 17:52:47,475 INFO Data range: 2004-06-01 to 2026-03-31, shape=(5493, 7)
+2026-04-17 17:52:47,480 INFO 
+Monthly VT weights: first 5 distinct = [0.837, 0.783, 0.785, 0.9, 0.738]
+2026-04-17 17:52:47,480 INFO 
+============================================================
+2026-04-17 17:52:47,480 INFO Analyzing: SPY
+2026-04-17 17:52:47,480 INFO ============================================================
+2026-04-17 17:52:47,487 INFO   Aligned period: 2005-06-02 to 2026-03-31, n=5240
+2026-04-17 17:52:47,487 INFO   BH MDD: -55.2%
+2026-04-17 17:52:47,487 INFO   VT MDD: -26.3%
+2026-04-17 17:52:47,488 INFO   Hedged MDD: -25.3%
+2026-04-17 17:52:47,488 INFO   BH Sharpe: 0.617
+2026-04-17 17:52:47,488 INFO   VT Sharpe: 0.699
+2026-04-17 17:52:47,488 INFO   Hedged Sharpe: 0.674
+2026-04-17 17:52:47,488 INFO   Point estimates: retention=103.7%, vt_red=52.3%, hedged_abs=-25.3%, hedged_vs_bh=-54.2%
+2026-04-17 17:52:47,489 INFO   Running 10000 bootstrap replications (block=252, n=5240)
+2026-04-17 17:52:49,419 INFO   Paper reference: point=93, CI=[86, 97]
+2026-04-17 17:52:49,419 INFO   Def a_retention: computed=[93.0, 182.3], diff=[7.0, 85.3], match=False
+2026-04-17 17:52:49,420 INFO   Def b_vt_reduction: computed=[27.4, 55.3], diff=[-58.6, -41.7], match=False
+2026-04-17 17:52:49,420 INFO   Def c_hedged_abs: computed=[-33.9, -12.4], diff=[-119.9, -109.4], match=False
+2026-04-17 17:52:49,420 INFO   Def d_hedged_vs_bh: computed=[-59.8, -42.2], diff=[-145.8, -139.2], match=False
+2026-04-17 17:52:49,420 INFO 
+============================================================
+2026-04-17 17:52:49,420 INFO Analyzing: 50/50
+2026-04-17 17:52:49,420 INFO ============================================================
+2026-04-17 17:52:49,427 INFO   Aligned period: 2005-11-18 to 2026-03-31, n=5121
+2026-04-17 17:52:49,427 INFO   BH MDD: -32.5%
+2026-04-17 17:52:49,427 INFO   VT MDD: -16.8%
+2026-04-17 17:52:49,427 INFO   Hedged MDD: -17.5%
+2026-04-17 17:52:49,427 INFO   BH Sharpe: 0.887
+2026-04-17 17:52:49,427 INFO   VT Sharpe: 0.968
+2026-04-17 17:52:49,427 INFO   Hedged Sharpe: 0.811
+2026-04-17 17:52:49,428 INFO   Point estimates: retention=95.6%, vt_red=48.2%, hedged_abs=-17.5%, hedged_vs_bh=-46.0%
+2026-04-17 17:52:49,428 INFO   Running 10000 bootstrap replications (block=252, n=5121)
+2026-04-17 17:52:51,305 INFO   Paper reference: point=96, CI=[90, 99]
+2026-04-17 17:52:51,305 INFO   Def a_retention: computed=[76.0, 189.9], diff=[-14.0, 90.9], match=False
+2026-04-17 17:52:51,306 INFO   Def b_vt_reduction: computed=[21.6, 49.0], diff=[-68.4, -50.0], match=False
+2026-04-17 17:52:51,306 INFO   Def c_hedged_abs: computed=[-21.5, -9.1], diff=[-111.5, -108.1], match=False
+2026-04-17 17:52:51,306 INFO   Def d_hedged_vs_bh: computed=[-56.0, -21.6], diff=[-146.0, -120.6], match=False
+2026-04-17 17:52:51,306 INFO 
+============================================================
+2026-04-17 17:52:51,306 INFO Analyzing: DIA
+2026-04-17 17:52:51,306 INFO ============================================================
+2026-04-17 17:52:51,312 INFO   Aligned period: 2005-06-02 to 2026-03-31, n=5240
+2026-04-17 17:52:51,312 INFO   BH MDD: -51.9%
+2026-04-17 17:52:51,312 INFO   VT MDD: -26.8%
+2026-04-17 17:52:51,312 INFO   Hedged MDD: -25.2%
+2026-04-17 17:52:51,312 INFO   BH Sharpe: 0.604
+2026-04-17 17:52:51,312 INFO   VT Sharpe: 0.688
+2026-04-17 17:52:51,312 INFO   Hedged Sharpe: 0.548
+2026-04-17 17:52:51,313 INFO   Point estimates: retention=106.2%, vt_red=48.4%, hedged_abs=-25.2%, hedged_vs_bh=-51.4%
+2026-04-17 17:52:51,313 INFO   Running 10000 bootstrap replications (block=252, n=5240)
+2026-04-17 17:52:53,192 INFO   Paper reference: point=91, CI=[83, 96]
+2026-04-17 17:52:53,192 INFO   Def a_retention: computed=[82.3, 154.3], diff=[-0.7, 58.3], match=False
+2026-04-17 17:52:53,193 INFO   Def b_vt_reduction: computed=[25.5, 56.8], diff=[-57.5, -39.2], match=False
+2026-04-17 17:52:53,193 INFO   Def c_hedged_abs: computed=[-35.3, -11.1], diff=[-118.3, -107.1], match=False
+2026-04-17 17:52:53,193 INFO   Def d_hedged_vs_bh: computed=[-59.0, -33.2], diff=[-142.0, -129.2], match=False
+2026-04-17 17:52:53,193 INFO 
+============================================================
+2026-04-17 17:52:53,193 INFO Analyzing: QQQ
+2026-04-17 17:52:53,193 INFO ============================================================
+2026-04-17 17:52:53,199 INFO   Aligned period: 2005-06-02 to 2026-03-31, n=5240
+2026-04-17 17:52:53,199 INFO   BH MDD: -53.4%
+2026-04-17 17:52:53,199 INFO   VT MDD: -28.5%
+2026-04-17 17:52:53,199 INFO   Hedged MDD: -26.2%
+2026-04-17 17:52:53,199 INFO   BH Sharpe: 0.745
+2026-04-17 17:52:53,199 INFO   VT Sharpe: 0.789
+2026-04-17 17:52:53,199 INFO   Hedged Sharpe: 0.767
+2026-04-17 17:52:53,200 INFO   Point estimates: retention=109.0%, vt_red=46.7%, hedged_abs=-26.2%, hedged_vs_bh=-50.9%
+2026-04-17 17:52:53,200 INFO   Running 10000 bootstrap replications (block=252, n=5240)
+2026-04-17 17:52:55,064 INFO   Paper reference: point=90, CI=[82, 95]
+2026-04-17 17:52:55,064 INFO   Def a_retention: computed=[89.0, 210.0], diff=[7.0, 115.0], match=False
+2026-04-17 17:52:55,064 INFO   Def b_vt_reduction: computed=[26.3, 49.7], diff=[-55.7, -45.3], match=False
+2026-04-17 17:52:55,064 INFO   Def c_hedged_abs: computed=[-32.7, -12.8], diff=[-114.7, -107.8], match=False
+2026-04-17 17:52:55,064 INFO   Def d_hedged_vs_bh: computed=[-65.7, -41.2], diff=[-147.7, -136.2], match=False
+2026-04-17 17:52:55,064 INFO 
+============================================================
+2026-04-17 17:52:55,064 INFO Analyzing: IWM
+2026-04-17 17:52:55,064 INFO ============================================================
+2026-04-17 17:52:55,070 INFO   Aligned period: 2005-06-02 to 2026-03-31, n=5240
+2026-04-17 17:52:55,070 INFO   BH MDD: -58.6%
+2026-04-17 17:52:55,070 INFO   VT MDD: -31.0%
+2026-04-17 17:52:55,070 INFO   Hedged MDD: -30.3%
+2026-04-17 17:52:55,070 INFO   BH Sharpe: 0.452
+2026-04-17 17:52:55,070 INFO   VT Sharpe: 0.463
+2026-04-17 17:52:55,070 INFO   Hedged Sharpe: 0.530
+2026-04-17 17:52:55,071 INFO   Point estimates: retention=102.2%, vt_red=47.2%, hedged_abs=-30.3%, hedged_vs_bh=-48.2%
+2026-04-17 17:52:55,071 INFO   Running 10000 bootstrap replications (block=252, n=5240)
+2026-04-17 17:52:56,937 INFO   Paper reference: point=97, CI=[91, 100]
+2026-04-17 17:52:56,937 INFO   Def a_retention: computed=[87.4, 184.2], diff=[-3.6, 84.2], match=False
+2026-04-17 17:52:56,937 INFO   Def b_vt_reduction: computed=[18.2, 51.3], diff=[-72.8, -48.7], match=False
+2026-04-17 17:52:56,937 INFO   Def c_hedged_abs: computed=[-44.7, -21.1], diff=[-135.7, -121.1], match=False
+2026-04-17 17:52:56,937 INFO   Def d_hedged_vs_bh: computed=[-54.9, -24.5], diff=[-145.9, -124.5], match=False
+2026-04-17 17:52:56,937 INFO 
+================================================================================
+2026-04-17 17:52:56,938 INFO SUMMARY: 4-Definition CI vs Paper Table 6
+2026-04-17 17:52:56,938 INFO ================================================================================
+2026-04-17 17:52:56,938 INFO 
+SPY:
+2026-04-17 17:52:56,938 INFO   Paper: [86, 97]
+2026-04-17 17:52:56,938 INFO   (a) Retention fraction: [93.0, 182.3]
+2026-04-17 17:52:56,938 INFO   (b) VT MDD reduction:   [27.4, 55.3]
+2026-04-17 17:52:56,938 INFO   (c) Hedged abs MDD:     [-33.9, -12.4]
+2026-04-17 17:52:56,938 INFO   (d) Hedged vs BH:       [-59.8, -42.2]
+2026-04-17 17:52:56,938 INFO 
+50/50:
+2026-04-17 17:52:56,938 INFO   Paper: [90, 99]
+2026-04-17 17:52:56,938 INFO   (a) Retention fraction: [76.0, 189.9]
+2026-04-17 17:52:56,938 INFO   (b) VT MDD reduction:   [21.6, 49.0]
+2026-04-17 17:52:56,938 INFO   (c) Hedged abs MDD:     [-21.5, -9.1]
+2026-04-17 17:52:56,938 INFO   (d) Hedged vs BH:       [-56.0, -21.6]
+2026-04-17 17:52:56,938 INFO 
+DIA:
+2026-04-17 17:52:56,938 INFO   Paper: [83, 96]
+2026-04-17 17:52:56,938 INFO   (a) Retention fraction: [82.3, 154.3]
+2026-04-17 17:52:56,938 INFO   (b) VT MDD reduction:   [25.5, 56.8]
+2026-04-17 17:52:56,938 INFO   (c) Hedged abs MDD:     [-35.3, -11.1]
+2026-04-17 17:52:56,938 INFO   (d) Hedged vs BH:       [-59.0, -33.2]
+2026-04-17 17:52:56,938 INFO 
+QQQ:
+2026-04-17 17:52:56,938 INFO   Paper: [82, 95]
+2026-04-17 17:52:56,938 INFO   (a) Retention fraction: [89.0, 210.0]
+2026-04-17 17:52:56,938 INFO   (b) VT MDD reduction:   [26.3, 49.7]
+2026-04-17 17:52:56,938 INFO   (c) Hedged abs MDD:     [-32.7, -12.8]
+2026-04-17 17:52:56,938 INFO   (d) Hedged vs BH:       [-65.7, -41.2]
+2026-04-17 17:52:56,938 INFO 
+IWM:
+2026-04-17 17:52:56,938 INFO   Paper: [91, 100]
+2026-04-17 17:52:56,938 INFO   (a) Retention fraction: [87.4, 184.2]
+2026-04-17 17:52:56,938 INFO   (b) VT MDD reduction:   [18.2, 51.3]
+2026-04-17 17:52:56,938 INFO   (c) Hedged abs MDD:     [-44.7, -21.1]
+2026-04-17 17:52:56,938 INFO   (d) Hedged vs BH:       [-54.9, -24.5]
+2026-04-17 17:52:56,938 INFO 
+Match counts (both lo+hi within 5pp): {'a': 0, 'b': 0, 'c': 0, 'd': 0}
+2026-04-17 17:52:56,938 INFO Best matching definition: (a) with 0/5 assets
+2026-04-17 17:52:56,939 INFO 
+Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-aff924a6/experiments/k1192/k1192_results.json
