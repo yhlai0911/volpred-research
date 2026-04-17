@@ -1,0 +1,95 @@
+section,location,description,tex_value,source_experiment,script_value,rtol,status,notes
+abstract,abstract,r=0.564 (cross-sectional Pearson gamma vs TSMOM),0.564,vt_tsmom_final_n22.json,0.5644,0.001,✓,Exact match
+abstract,abstract,p=0.006,0.006,vt_tsmom_final_n22.json,0.006216,0.05,✓,Rounds to 0.006
+abstract,abstract,N=22,22,vt_tsmom_final_n22.json,22,0,✓,Exact
+abstract,abstract,SPY MDD retention 93%,93,k898_paper3_table3_supplement_results.json,107 (script) vs 93 (paper_comparison),--,✗,CRITICAL: Script computes 107% (hedged VT better than VT on MDD for SPY); paper_comparison field stores 93%. Retention definition discrepancy.
+abstract,abstract,50/50 SPY/GLD MDD retention 96%,96,k898_paper3_table3_supplement_results.json,110 (script) vs 96 (paper_comparison),--,✗,Same issue: script=110% vs paper=96%
+abstract,abstract,DIA MDD retention 91%,91,k898_paper3_table3_supplement_results.json,104 (script) vs 91 (paper_comparison),--,✗,Script=104% vs paper=91%
+abstract,abstract,QQQ MDD retention 90%,90,k898_paper3_table3_supplement_results.json,120 (script) vs 90 (paper_comparison),--,✗,Script=120% vs paper=90%
+abstract,abstract,IWM MDD retention 97%,97,k898_paper3_table3_supplement_results.json,115 (script) vs 97 (paper_comparison),--,✗,Script=115% vs paper=97%
+abstract,abstract,13/13 markets MDD improvement,13,k901_international_vt_13markets_results.json,13,0,✓,All 13 markets show MDD improvement
+abstract,abstract,average 28.7 pp MDD improvement,28.7,k901_international_vt_13markets_results.json,17.3 (computed from K901),--,✗,CRITICAL: K901 avg MDD improvement is ~17.3 pp not 28.7 pp (different assets / sample period)
+abstract,abstract,t=15.70,15.70,k901_international_vt_13markets_results.json,NOT FOUND in K901,--,?,K901 does not report t=15.70 for MDD improvement
+abstract,abstract,r=-0.770 VIX sensitivity vs delta MDD,−0.770,k901_international_vt_13markets_results.json,NOT DIRECTLY FOUND,--,?,K901 cross_sectional has rho=0.401 for gamma vs MDD; no r=−0.770 found
+abstract,abstract,~4%/year Sharpe drag,~4%,k901_international_vt_13markets_results.json,avg delta_sharpe=−0.192,--,✗,Review_v2 flags this as problematic - 4%/yr conflates Sharpe units with return units
+table1_tab:alpha_decomp,Table1 SPY,gamma=0.261,0.261,vt_tsmom_final_n22.json,0.2611,0.001,✓,Exact match
+table1_tab:alpha_decomp,Table1 SPY,M1_alpha=1.35%,1.35,vt_tsmom_final_n22.json,1.35%,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 SPY,M1_t=1.44,1.44,vt_tsmom_final_n22.json,1.4426,0.01,✓,Rounds to 1.44
+table1_tab:alpha_decomp,Table1 SPY,M1_R2=0.802,0.802,vt_tsmom_final_n22.json,0.802,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 SPY,M2_beta_TSMOM=0.121,0.121,vt_tsmom_final_n22.json,0.1208,0.01,✓,Rounds to 0.121
+table1_tab:alpha_decomp,Table1 SPY,M2_t=7.65,7.65,vt_tsmom_final_n22.json,7.6452,0.01,✓,Rounds to 7.65
+table1_tab:alpha_decomp,Table1 SPY,M2_R2=0.867,0.867,vt_tsmom_final_n22.json,0.8667,0.001,✓,Rounds to 0.867
+table1_tab:alpha_decomp,Table1 SPY,delta_alpha=26.9%,26.9,vt_tsmom_final_n22.json,26.85,0.01,✓,Rounds to 26.9
+table1_tab:alpha_decomp,Table1 QQQ,gamma=0.225,0.225,vt_tsmom_final_n22.json,0.2251,0.001,✓,Rounds to 0.225
+table1_tab:alpha_decomp,Table1 QQQ,M1_alpha=1.55%,1.55,vt_tsmom_final_n22.json,1.55%,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 QQQ,M2_beta=0.112,0.112,vt_tsmom_final_n22.json,0.112,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 QQQ,M2_t=6.58,6.58,vt_tsmom_final_n22.json,6.58,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 DIA,gamma=0.235,0.235,vt_tsmom_final_n22.json,0.2350,0.001,✓,Rounds to 0.235
+table1_tab:alpha_decomp,Table1 DIA,M2_t=11.57,11.57,vt_tsmom_final_n22.json,11.57,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 DIA,delta_alpha=54.0%,54.0,vt_tsmom_final_n22.json,53.97,0.01,✓,Rounds to 54.0
+table1_tab:alpha_decomp,Table1 GLD,gamma=-0.037,−0.037,vt_tsmom_final_n22.json,−0.037,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 TLT,gamma=-0.015,−0.015,vt_tsmom_final_n22.json,−0.015,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 TLT,M2_beta=-0.078,−0.078,vt_tsmom_final_n22.json,−0.078,0.001,✓,Exact
+table1_tab:alpha_decomp,Table1 TLT,M2_t=-4.55,−4.55,vt_tsmom_final_n22.json,−4.55,0.001,✓,Exact
+table2_tab:cross_section,Table2,Pearson r=0.564,0.564,vt_tsmom_final_n22.json,0.5644,0.001,✓,Exact
+table2_tab:cross_section,Table2,p=0.006,0.006,vt_tsmom_final_n22.json,0.006216,0.05,✓,Rounds to 0.006
+table2_tab:cross_section,Table2,Spearman rho=0.544,0.544,vt_tsmom_final_n22.json,0.5438,0.001,✓,Rounds to 0.544
+table2_tab:cross_section,Table2,Spearman p=0.009,0.009,vt_tsmom_final_n22.json,0.008902,0.01,✓,Rounds to 0.009
+table2_tab:cross_section,Table2,CI=[0.263,0.772],0.263/0.772,vt_tsmom_final_n22.json,0.2629/0.7719,0.001,✓,Exact
+table2_tab:cross_section,Table2,gamma1=0.568 t=3.06 R2=0.319,0.568/3.06/0.319,vt_tsmom_final_n22.json,0.5681/3.0575/0.3185,0.01,✓,Close match
+table2_tab:cross_section,Table2,Equity mean beta=0.087,0.087,vt_tsmom_final_n22.json,0.0872,0.01,✓,Rounds to 0.087
+table2_tab:cross_section,Table2,Welch t=1.98 p=0.080,1.98/0.080,vt_tsmom_final_n22.json,1.978/0.0802,0.01,✓,Rounds to 1.98
+table3_tab:dual_mechanism,Table3 SPY B&H,Sharpe=0.611,0.611,k898_paper3_table3_supplement_results.json,0.616,0.01,≈,Within 1% (0.8% diff)
+table3_tab:dual_mechanism,Table3 SPY B&H,MDD=-55.2%,−55.2,k898_paper3_table3_supplement_results.json,−55.2,0.001,✓,Exact
+table3_tab:dual_mechanism,Table3 SPY VT,Sharpe=0.797,0.797,k898_paper3_table3_supplement_results.json,0.805,0.01,≈,Within 1%
+table3_tab:dual_mechanism,Table3 SPY VT,MDD=-24.7%,−24.7,k898_paper3_table3_supplement_results.json,−24.7,0.001,✓,Exact
+table3_tab:dual_mechanism,Table3 SPY Hedged VT,Sharpe=0.737,0.737,k898_paper3_table3_supplement_results.json,0.848,0.15,✗,DIVERGENT: Script=0.848 vs paper=0.737. K898 hedged VT has HIGHER Sharpe than VT for SPY.
+table3_tab:dual_mechanism,Table3 SPY Hedged VT,MDD=-26.9%,−26.9,k898_paper3_table3_supplement_results.json,−22.5,0.18,✗,DIVERGENT: Script=−22.5% vs paper=−26.9%. K898 hedged VT has LESS drawdown than paper claims.
+table3_tab:dual_mechanism,Table3 SPY Pure TSMOM,Sharpe=0.172,0.172,k898_paper3_table3_supplement_results.json,0.242,0.41,✗,DIVERGENT: Script=0.242 vs paper=0.172
+table3_tab:dual_mechanism,Table3 SPY Pure TSMOM,MDD=-27.5%,−27.5,k898_paper3_table3_supplement_results.json,−51.4,0.87,✗,DIVERGENT: Script=−51.4% vs paper=−27.5%
+table3_tab:dual_mechanism,Table3 50/50 B&H,Sharpe=0.865,0.865,k898_paper3_table3_supplement_results.json,0.878,0.015,≈,Near match
+table3_tab:dual_mechanism,Table3 50/50 B&H,MDD=-32.5%,−32.5,k898_paper3_table3_supplement_results.json,−32.5,0.001,✓,Exact
+table3_tab:dual_mechanism,Table3 50/50 VT,Sharpe=0.982,0.982,k898_paper3_table3_supplement_results.json,0.998,0.016,≈,Near match
+table3_tab:dual_mechanism,Table3 50/50 VT,MDD=-12.4%,−12.4,k898_paper3_table3_supplement_results.json,−12.4,0.001,✓,Exact
+table3_tab:dual_mechanism,Table3 50/50 Hedged,Sharpe=0.937,0.937,k898_paper3_table3_supplement_results.json,0.830,0.115,✗,DIVERGENT: Script=0.830 vs paper=0.937
+table3_tab:dual_mechanism,Table3 50/50 Hedged,MDD=-13.1%,−13.1,k898_paper3_table3_supplement_results.json,−13.3,0.015,≈,Within 2%
+table3_tab:dual_mechanism,Table3 decomp SPY delta_sharpe,+0.186,0.186,k898_paper3_table3_supplement_results.json,0.189,0.016,≈,Near match
+table3_tab:dual_mechanism,Table3 decomp SPY sharpe_from_TSMOM,-0.060 (32%),−0.060 / 32%,k898_paper3_table3_supplement_results.json,−0.043 / −22.8%,0.28,✗,DIVERGENT: Script shows TSMOM actually IMPROVES Sharpe by reducing risk (negative % = TSMOM helps)
+table3_tab:dual_mechanism,Table3 MDD protection 30.5 pp,30.5,k898_paper3_table3_supplement_results.json,30.5,0.001,✓,Exact (via MDD diff)
+table3_tab:dual_mechanism,Table3 MDD retained 28.3 pp (93%),93%,k898_paper3_table3_supplement_results.json,107% (bootstrap CI 95%),--,✗,CRITICAL: 107% means hedged VT REDUCES MDD more than VT. Paper claims 93% retention.
+table4_tab:ff5,Table4 M1 alpha,1.45%/yr,1.45,ff5_factor_controls.json,1.45,0.001,✓,Exact
+table4_tab:ff5,Table4 M1 t,1.60,1.60,ff5_factor_controls.json,1.604,0.01,✓,Rounds to 1.60
+table4_tab:ff5,Table4 M1 R2,0.787,0.787,ff5_factor_controls.json,0.7869,0.001,✓,Rounds to 0.787
+table4_tab:ff5,Table4 M1 N,5049,5049,ff5_factor_controls.json,5049,0,✓,Exact
+table4_tab:ff5,Table4 M2 alpha,1.45%/yr,1.45,ff5_factor_controls.json,1.45,0.001,✓,Exact
+table4_tab:ff5,Table4 M2 t,1.72,1.72,ff5_factor_controls.json,1.7164,0.01,✓,Rounds to 1.72
+table4_tab:ff5,Table4 M2 beta_TSMOM,0.121,0.121,ff5_factor_controls.json,0.1212,0.001,✓,Rounds to 0.121
+table4_tab:ff5,Table4 M2 t_TSMOM,8.89,8.89,ff5_factor_controls.json,8.8922,0.001,✓,Rounds to 8.89
+table4_tab:ff5,Table4 M2 R2,0.849,0.849,ff5_factor_controls.json,0.8494,0.001,✓,Rounds to 0.849
+table4_tab:ff5,Table4 M5 alpha,1.28%/yr,1.28,ff5_factor_controls.json,1.276,0.003,✓,Rounds to 1.28
+table4_tab:ff5,Table4 M5 t,1.50,1.50,ff5_factor_controls.json,1.4962,0.003,✓,Rounds to 1.50
+table4_tab:ff5,Table4 M5 beta_TSMOM,0.117,0.117,ff5_factor_controls.json,0.1166,0.004,✓,Rounds to 0.117
+table4_tab:ff5,Table4 M5 t_TSMOM implied,"8.07 (paper says M5)",8.07,ff5_factor_controls.json,8.0683,0.001,✓,Exact
+table4_tab:ff5,Table4 M5 beta_BAB,-0.022,−0.022,ff5_factor_controls.json,−0.0217,0.015,✓,Rounds to −0.022
+table4_tab:ff5,Table4 M5 t_BAB,-3.31,−3.31,ff5_factor_controls.json,−3.3122,0.001,✓,Exact
+table4_tab:ff5,Table4 M5 R2,0.853,0.853,ff5_factor_controls.json,0.8533,0.001,✓,Rounds to 0.853
+table4_tab:ff5,Table4 M5 N,3740 (paper) vs actual,3740,ff5_factor_controls.json,5049,--,✗,CRITICAL HIGH ISSUE: Paper says N=3740 (post-2011 subsample) but K54 experiment uses N=5049 (full sample). BAB proxy used full sample in experiment vs paper claims truncated.
+table4_tab:ff5,Table4 AIC M5,-47213,−47213,ff5_factor_controls.json,−47212.7,0.001,✓,Rounds to −47213
+table4_tab:ff5,Table4 DeltaR2 TSMOM,+0.063,0.063,ff5_factor_controls.json,0.0625,0.008,✓,Rounds to 0.063
+table4_tab:ff5,Table4 DeltaR2 FF5,+0.002,0.002,ff5_factor_controls.json,0.0023,0.15,✓,Rounds to 0.002
+table4_tab:ff5,Table4 DeltaR2 MOM,+0.000,0.000,ff5_factor_controls.json,0.0004,--,✓,Rounds to 0.000
+table4_tab:ff5,Table4 DeltaR2 BAB,+0.001,0.001,ff5_factor_controls.json,0.0012,0.2,✓,Rounds to 0.001
+table5_tab:international,Table5 avg delta_MDD,28.7 pp,28.7,k901_international_vt_13markets_results.json,~17.3 pp (different assets),--,✗,CRITICAL: K901 avg is ~17.3 pp not 28.7. Assets differ (K901 has EWH/EWY not in paper; paper has EWC/VGK/MCHI not in K901)
+table5_tab:international,Table5 n=13 MDD improved,13,13,k901_international_vt_13markets_results.json,13,0,✓,All 13 improved in both
+table5_tab:international,Table5 r=-0.770 VIX sens vs MDD,−0.770,−0.770,k901_international_vt_13markets_results.json,NOT FOUND,--,?,K901 reports Spearman rho=0.401 for gamma vs MDD; no r=−0.770 found
+table5_tab:international,Table5 GJR gamma vs delta_Sharpe Spearman,0.830,0.830,k901_international_vt_13markets_results.json,NOT FOUND,--,?,K901 does not report this value
+table5_tab:international,Table5 developed avg delta_MDD,32.0 pp,32.0,k901_international_vt_13markets_results.json,~26.0 pp (from K901 DM markets),--,✗,Divergent; different sample period likely
+table5_tab:international,Table5 emerging avg delta_MDD,24.7 pp,24.7,k901_international_vt_13markets_results.json,~13.7 pp (from K901 EM markets),--,✗,Divergent
+section3.3_text,Sec 3.3,1.4% TSMOM contribution to total strategy Sharpe,1.4%,NO_SOURCE,NOT FOUND,--,✗,HIGH ISSUE (review_v2 C.1): Formula/derivation not found in any experiment. 0.060/0.797=7.5% not 1.4%.
+section3.1_text,Sec 3.1,TSMOM loading t-stats range 7.98 to 10.91,7.98-10.91,paper3_fixes.json,7.98-10.91 (threshold 8-20),0.01,✓,VIX threshold sensitivity check confirmed
+section3.1_text,Sec 3.1,beta_TSMOM range [0.10,0.14],0.10-0.14,paper3_fixes.json,range matches,0.05,✓,Confirmed in threshold sensitivity
+section4.1_text,Sec 4.1,5 TF strategies all fail Harvey t>3.0,all fail,k518_trend_following_results.json,all t<3.0 confirmed,0,✓,SMA200 t=0.43; Faber t=0.28; all fail
+section4.2_text,Sec 4.2,daily break-even 3.4 bps,3.4,k499_rebalancing_frequency_results.json,3.4,0.001,✓,Exact
+section4.2_text,Sec 4.2,monthly break-even 14.9 bps,14.9,k499_rebalancing_frequency_results.json,14.9,0.001,✓,Exact
+section4.2_text,Sec 4.2,427 VT configurations,427,k568_optimal_weight_function_results.json,427,0,✓,Confirmed (total_param_configs_tested=427)
+vix_predictive,K697 cited,VIX predicts vol corr 0.57 not direction corr 0.04,0.57/0.04,k697_results.json,0.5704/0.0417,0.01,✓,K697 vix_predictive_power confirmed (but NOT cited in main.tex)

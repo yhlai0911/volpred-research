@@ -1,0 +1,200 @@
+{
+  "audit_timestamp": "2026-04-17",
+  "paper": "vt-trend-following (Paper 3)",
+  "experiments_checked": [
+    "vt_tsmom_final_n22.json (K55: N=22 cross-sectional analysis)",
+    "ff5_factor_controls.json (K54: FF5+TSMOM+BAB factor models)",
+    "k898_paper3_table3_supplement_results.json (K898: Table 3 dual mechanism, 2005-2026)",
+    "k901_international_vt_13markets_results.json (K901: International 13-market VT)",
+    "k518_trend_following_results.json (K518: 5 TF strategies Harvey test)",
+    "k499_rebalancing_frequency_results.json (K499: Rebalancing breakeven)",
+    "k568_optimal_weight_function_results.json (K568: 427 config optimization)",
+    "k687_results.json (K687: Post-correction strategy ranking)",
+    "k688_results.json (K688: CRRA utility with lagged signals)",
+    "k697_results.json (K697: VIX predictive power - direction vs magnitude)",
+    "paper3_fixes.json (VIX threshold sensitivity 8-20)"
+  ],
+  "key_values_extracted": {
+    "cross_sectional_n22": {
+      "source": "vt_tsmom_final_n22.json",
+      "pearson_r_gamma_vs_tsmom": 0.5644,
+      "pearson_p": 0.006216,
+      "pearson_ci_95": [0.2629, 0.7719],
+      "spearman_rho": 0.5438,
+      "spearman_p": 0.008902,
+      "cs_regression_gamma0": 0.0009,
+      "cs_regression_gamma1": 0.5681,
+      "cs_regression_gamma1_t": 3.0575,
+      "cs_regression_r2": 0.3185,
+      "equity_n": 15,
+      "non_equity_n": 7,
+      "equity_mean_beta_tsmom_orth": 0.0872,
+      "equity_std_beta_tsmom_orth": 0.0604,
+      "welch_t": 1.978,
+      "welch_p": 0.080185,
+      "sample_period": "2007-01-01 to 2026-03-20"
+    },
+    "table3_dual_mechanism": {
+      "source": "k898_paper3_table3_supplement_results.json",
+      "period": "2005-01-03 to 2026-04-01",
+      "SPY": {
+        "bh_sharpe": 0.616,
+        "bh_mdd_pct": -55.2,
+        "vt_sharpe": 0.805,
+        "vt_mdd_pct": -24.7,
+        "hedged_sharpe": 0.848,
+        "hedged_mdd_pct": -22.5,
+        "pure_tsmom_sharpe": 0.242,
+        "pure_tsmom_mdd_pct": -51.4,
+        "decomp_delta_sharpe": 0.189,
+        "decomp_tsmom_sharpe_lost": -0.043,
+        "decomp_mdd_protection_pp": 30.5,
+        "decomp_mdd_retention_pct": 107,
+        "bootstrap_ci_lower": 95,
+        "bootstrap_ci_upper": 172,
+        "avg_tsmom_beta": 0.3176
+      },
+      "50_50": {
+        "bh_sharpe": 0.878,
+        "bh_mdd_pct": -32.5,
+        "vt_sharpe": 0.998,
+        "vt_mdd_pct": -12.4,
+        "hedged_sharpe": 0.830,
+        "hedged_mdd_pct": -13.3,
+        "decomp_delta_sharpe": 0.120,
+        "decomp_mdd_retention_pct": 110
+      },
+      "NOTE": "K898 period starts 2005 (includes 2005-2006 warmup). Table 3 notes say 2005-2026."
+    },
+    "table4_ff5": {
+      "source": "ff5_factor_controls.json",
+      "period": "Jan 2005 - Mar 2026",
+      "M1": {
+        "alpha_ann_pct": 1.45,
+        "t_nw": 1.604,
+        "R2": 0.7869,
+        "N": 5049
+      },
+      "M2": {
+        "alpha_ann_pct": 1.45,
+        "t_nw": 1.716,
+        "beta_TSMOM_orth": 0.1212,
+        "t_TSMOM": 8.8922,
+        "R2": 0.8494,
+        "N": 5049
+      },
+      "M3": {
+        "alpha_ann_pct": 1.32,
+        "t_nw": 1.524,
+        "beta_TSMOM_orth": 0.1199,
+        "t_TSMOM": 8.2442,
+        "R2": 0.8517,
+        "N": 5049
+      },
+      "M4": {
+        "alpha_ann_pct": 1.35,
+        "t_nw": 1.547,
+        "beta_TSMOM_orth": 0.1228,
+        "t_TSMOM": 8.6677,
+        "R2": 0.8521,
+        "N": 5049
+      },
+      "M5": {
+        "alpha_ann_pct": 1.28,
+        "t_nw": 1.496,
+        "beta_TSMOM_orth": 0.1166,
+        "t_TSMOM": 8.0683,
+        "beta_SMB": -0.0218,
+        "t_SMB": -2.4596,
+        "beta_HML": -0.0325,
+        "t_HML": -2.8267,
+        "beta_RMW": 0.0193,
+        "t_RMW": 1.2168,
+        "beta_CMA": 0.0003,
+        "t_CMA": 0.0203,
+        "beta_MOM": -0.0074,
+        "t_MOM": -0.9639,
+        "beta_BAB": -0.0217,
+        "t_BAB": -3.3122,
+        "R2": 0.8533,
+        "AIC": -47212.7,
+        "N": 5049,
+        "CRITICAL_NOTE": "Experiment uses N=5049 (full sample with IWD-QQQ BAB proxy pre-2011). Paper Table 4 notes say N=3740 (post-2011 SPLV-SPHB only). DISCREPANCY."
+      },
+      "incremental_R2": {
+        "TSMOM": 0.0625,
+        "FF5": 0.0023,
+        "MOM": 0.0004,
+        "BAB": 0.0012
+      }
+    },
+    "table5_international": {
+      "source": "k901_international_vt_13markets_results.json",
+      "n_markets": 13,
+      "n_mdd_improved": 13,
+      "n_sharpe_improved": 0,
+      "computed_avg_mdd_improvement_pp": 17.3,
+      "cross_sectional_spearman_gamma_vs_mdd": 0.401,
+      "paper_claims_avg_mdd_28.7_pp": "NOT REPRODUCED by K901",
+      "NOTE": "K901 asset universe differs from paper Table 5 (EWH/EWY in K901; EWC/VGK/MCHI in paper). Sample period not matched. Cannot directly verify Table 5 numbers from K901.",
+      "per_market_K901": {
+        "SPY": {"bh_mdd": -0.565, "vt_mdd": -0.283, "mdd_improvement_pp": 28.2},
+        "EWJ": {"bh_mdd": -0.558, "vt_mdd": -0.303, "mdd_improvement_pp": 25.5},
+        "EWG": {"bh_mdd": -0.651, "vt_mdd": -0.378, "mdd_improvement_pp": 27.3},
+        "EWU": {"bh_mdd": -0.669, "vt_mdd": -0.444, "mdd_improvement_pp": 22.6},
+        "EWA": {"bh_mdd": -0.697, "vt_mdd": -0.495, "mdd_improvement_pp": 20.2},
+        "EWC": {"bh_mdd": -0.621, "vt_mdd": -0.394, "mdd_improvement_pp": 22.7},
+        "EWZ": {"bh_mdd": -0.828, "vt_mdd": -0.769, "mdd_improvement_pp": 5.8},
+        "EEM": {"bh_mdd": -0.672, "vt_mdd": -0.531, "mdd_improvement_pp": 14.1},
+        "EFA": {"bh_mdd": -0.632, "vt_mdd": -0.337, "mdd_improvement_pp": 29.5},
+        "FXI": {"bh_mdd": -0.733, "vt_mdd": -0.683, "mdd_improvement_pp": 5.1},
+        "EWH": {"bh_mdd": -0.647, "vt_mdd": -0.442, "mdd_improvement_pp": 20.5},
+        "EWT": {"bh_mdd": -0.647, "vt_mdd": -0.373, "mdd_improvement_pp": 27.4},
+        "EWY": {"bh_mdd": -0.746, "vt_mdd": -0.469, "mdd_improvement_pp": 27.6}
+      }
+    },
+    "k687_strategy_ranking": {
+      "source": "k687_results.json",
+      "BH_50_50_sharpe": 0.545,
+      "12vix_cap1_5_sharpe": 0.438,
+      "period": "2007-01-03 to 2026-03-27",
+      "NOTE": "After lookahead fix, BH 50/50 Sharpe=0.545 > 12/VIX Sharpe=0.438. Paper Table 3 uses different period/asset (SPY-only or 50/50) and reports VT beating BH on Sharpe (0.982 vs 0.865)."
+    },
+    "k688_crra_utility": {
+      "source": "k688_results.json",
+      "breakeven_gamma": "Between 3 and 5 (at gamma=5, EWMA VT beats BH 50/50; 12/VIX still below BH at all gammas tested)",
+      "at_gamma_5": {
+        "12vix_CE_pct": 4.8,
+        "BH_50_50_CE_pct": 6.98,
+        "EWMA_VT_CE_pct": 7.17,
+        "winner": "EWMA VT"
+      },
+      "NOTE": "12/VIX does NOT win at any tested gamma for 50/50 universe; EWMA VT wins at gamma>=5."
+    },
+    "k697_vix_predictive": {
+      "source": "k697_results.json",
+      "corr_vix_lag_absret": 0.5704,
+      "corr_vix_lag_ret": 0.0417,
+      "interpretation": "VIX predicts |return| (vol magnitude) r=0.570 but NOT direction r=0.042",
+      "NOT_CITED_IN_PAPER": true
+    },
+    "k518_tf_strategies": {
+      "source": "k518_trend_following_results.json",
+      "SMA200_harvey_t": 0.4291,
+      "Faber_harvey_t": 0.2804,
+      "all_fail_harvey_3_0_threshold": true,
+      "NOTE": "Paper discussion section cites these as SPY-only, consistent with K518"
+    },
+    "k499_breakeven": {
+      "source": "k499_rebalancing_frequency_results.json",
+      "daily_breakeven_bps": 3.4,
+      "monthly_breakeven_bps": 14.9,
+      "MATCH": true
+    },
+    "k568_configs": {
+      "source": "k568_optimal_weight_function_results.json",
+      "total_configs_tested": 427,
+      "MATCH": true
+    }
+  }
+}
