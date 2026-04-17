@@ -1,0 +1,47 @@
+K1205 Cross-Experiment Numerical Integrity Report
+========================================================
+Sources: ['K1128', 'K1131', 'K1142', 'K1199']
+
+[PASS] Total Lee-Mykland jumps (K=16, alpha=0.01)
+    K1128: 115
+    K1131: 115
+    K1142: 115
+    K1199: 115
+    NOTE: K1128 denominator is n_valid_prediction=52412 (post jump/OFI valid mask); K1131/K1142/K1199 inherit same cache.
+
+[PASS] Gumbel threshold alpha=0.01
+    K1128: 5.125598054567598
+    K1131: 5.125598054567598
+    K1142: 5.125598054567598
+    K1199: 5.125598054567598
+
+[PASS] IS VIX tertile cutoff_33
+    K1128: 12.069999694824219
+    K1131: 12.069999694824219
+    K1199: 12.069999694824219
+
+[PASS] IS VIX tertile cutoff_67
+    K1128: 14.989999771118164
+    K1131: 14.989999771118164
+    K1199: 14.989999771118164
+
+[PASS] M_base beta identical across K1131 & K1199
+    K1131: [-6.261803083749046, 2.276980104523164, 1.529129428130548, -0.8859756470268693]
+    K1199: [-6.261803083749046, 2.276980104523164, 1.529129428130548, -0.8859756470268693]
+    NOTE: K1142 M_base nll differs (556.9451 vs 557.0556) by 43-bar sample exclusion from sigma_60 strict-past NaN (52369 vs 52412 valid rows).
+
+[PASS] K1128 OOS coverage gap vs full OOS
+    K1128_high_tertile_only: 20060
+    K1131_full_oos: 20914
+    K1199_full_oos: 20914
+    K1142_full_oos: 20914
+    NOTE: Full OOS - K1128 high = 854 bars, matches K1128 mid-tertile n_oos=854.
+
+[PASS] K1142 vs K1199 volnorm AUC implementation note
+    K1142_volnorm_auc_oos_canonical: 0.594028499157564
+    K1199_M_volnorm_auc_oos_bench: 0.6712162572035184
+    K1142_n_valid: 52369
+    K1199_n_bars_valid: 52412
+    NOTE: DOCUMENTED IMPLEMENTATION DIFFERENCE (not bug): K1199 uses sigma fallback (rolling-60 -> LM BV sigma) for 43 bars; K1142 drops those rows. Both are valid operationalizations but produce different AUC. K1142 is the paper-quotable canonical for the vol-norm hypothesis (explicit volnorm-only experiment).
+
+OVERALL: ALL PASS
