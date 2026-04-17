@@ -1,0 +1,254 @@
+{
+  "experiment_id": "K903",
+  "title": "Paper 1 Tables 2/3 Canonical 2010-Start Replication (K902 extension)",
+  "timestamp": "2026-04-17T08:45:00.990256+00:00",
+  "elapsed_seconds": 150.1,
+  "data_source": "yfinance",
+  "key_changes_vs_k902": [
+    "data_start=2010-01-01 (K902 used 2017-01-01)",
+    "Rolling OOS window w=504 (K902 used expanding)",
+    "Rolling step=63 days (K902 used ~50)",
+    "HAC lags=8 (K902 used 5)"
+  ],
+  "methodology": {
+    "table2": {
+      "period": "2010-01-01 to present",
+      "rolling_window": 504,
+      "step": "63 days (paper: quarterly)",
+      "gamma_estimator": "GJR unconstrained (allows negative gamma)",
+      "hac_lags": 8,
+      "paper_citation": "body.tex: \"504-day windows advanced by 63 trading days\" + 8 HAC lags"
+    },
+    "table3": {
+      "oos_primary": "2023-01-01 to 2024-12-31",
+      "oos_validation": "2025-01-01 to 2026-03-31",
+      "oos_method": "ROLLING window w=504 (paper: \"rolling window approach\")",
+      "refit_every": 63,
+      "qlike_formula": "QLIKE_t = log(h_t) + r\u00b2_t / h_t",
+      "dm_test": "Newey-West HAC"
+    }
+  },
+  "table2_rolling_gamma": {
+    "SPY": {
+      "data_start": "2010-01-04",
+      "data_end": "2026-04-16",
+      "n_obs": 4096,
+      "mean_gamma": 0.132,
+      "std_gamma": 0.061,
+      "pct_negative": 0.0,
+      "hac_tstat": 11.08,
+      "n_windows": 58
+    },
+    "QQQ": {
+      "data_start": "2010-01-04",
+      "data_end": "2026-04-16",
+      "n_obs": 4096,
+      "mean_gamma": 0.116,
+      "std_gamma": 0.052,
+      "pct_negative": 0.0,
+      "hac_tstat": 10.76,
+      "n_windows": 58
+    },
+    "EEM": {
+      "data_start": "2010-01-04",
+      "data_end": "2026-04-16",
+      "n_obs": 4096,
+      "mean_gamma": 0.087,
+      "std_gamma": 0.034,
+      "pct_negative": 2.0,
+      "hac_tstat": 11.88,
+      "n_windows": 58
+    },
+    "GLD": {
+      "data_start": "2010-01-04",
+      "data_end": "2026-04-16",
+      "n_obs": 4096,
+      "mean_gamma": 0.002,
+      "std_gamma": 0.055,
+      "pct_negative": 67.0,
+      "hac_tstat": 0.15,
+      "n_windows": 58
+    },
+    "TLT": {
+      "data_start": "2010-01-04",
+      "data_end": "2026-04-16",
+      "n_obs": 4096,
+      "mean_gamma": -0.005,
+      "std_gamma": 0.044,
+      "pct_negative": 69.0,
+      "hac_tstat": -0.46,
+      "n_windows": 58
+    },
+    "BTC-USD": {
+      "data_start": "2014-09-18",
+      "data_end": "2026-04-16",
+      "n_obs": 4229,
+      "mean_gamma": 0.072,
+      "std_gamma": 0.105,
+      "pct_negative": 25.0,
+      "hac_tstat": 2.88,
+      "n_windows": 60
+    },
+    "SLV": {
+      "data_start": "2010-01-04",
+      "data_end": "2026-04-16",
+      "n_obs": 4096,
+      "mean_gamma": -0.009,
+      "std_gamma": 0.044,
+      "pct_negative": 71.0,
+      "hac_tstat": -0.68,
+      "n_windows": 58
+    }
+  },
+  "table3_oos_qlike": {
+    "SPY": {
+      "2023-2024": {
+        "garch_qlike": -8.623,
+        "gjr_qlike": -8.674,
+        "delta_pct": -0.59,
+        "dm_tstat": 2.945,
+        "dm_pvalue": 0.0032,
+        "dm_significant_5pct": true,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 502,
+        "n_oos_gjr": 502
+      },
+      "2025": {
+        "garch_qlike": -8.268,
+        "gjr_qlike": -8.412,
+        "delta_pct": -1.74,
+        "dm_tstat": 1.979,
+        "dm_pvalue": 0.0478,
+        "dm_significant_5pct": true,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 311,
+        "n_oos_gjr": 311
+      }
+    },
+    "QQQ": {
+      "2023-2024": {
+        "garch_qlike": -7.953,
+        "gjr_qlike": -7.979,
+        "delta_pct": -0.33,
+        "dm_tstat": 1.336,
+        "dm_pvalue": 0.1814,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 502,
+        "n_oos_gjr": 502
+      },
+      "2025": {
+        "garch_qlike": -7.765,
+        "gjr_qlike": -7.889,
+        "delta_pct": -1.6,
+        "dm_tstat": 1.714,
+        "dm_pvalue": 0.0864,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 311,
+        "n_oos_gjr": 311
+      }
+    },
+    "GLD": {
+      "2023-2024": {
+        "garch_qlike": -8.435,
+        "gjr_qlike": -8.402,
+        "delta_pct": 0.39,
+        "dm_tstat": -3.218,
+        "dm_pvalue": 0.0013,
+        "dm_significant_5pct": true,
+        "dm_harvey_pass": true,
+        "n_oos_garch": 502,
+        "n_oos_gjr": 502
+      },
+      "2025": {
+        "garch_qlike": -7.46,
+        "gjr_qlike": -7.345,
+        "delta_pct": 1.54,
+        "dm_tstat": -1.815,
+        "dm_pvalue": 0.0696,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 311,
+        "n_oos_gjr": 311
+      }
+    },
+    "TLT": {
+      "2023-2024": {
+        "garch_qlike": -8.15,
+        "gjr_qlike": -8.134,
+        "delta_pct": 0.2,
+        "dm_tstat": -1.181,
+        "dm_pvalue": 0.2375,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 502,
+        "n_oos_gjr": 502
+      },
+      "2025": {
+        "garch_qlike": -8.826,
+        "gjr_qlike": -8.855,
+        "delta_pct": -0.33,
+        "dm_tstat": 1.501,
+        "dm_pvalue": 0.1332,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 311,
+        "n_oos_gjr": 311
+      }
+    },
+    "EEM": {
+      "2023-2024": {
+        "garch_qlike": -8.239,
+        "gjr_qlike": -8.24,
+        "delta_pct": -0.01,
+        "dm_tstat": 0.064,
+        "dm_pvalue": 0.9488,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 502,
+        "n_oos_gjr": 502
+      },
+      "2025": {
+        "garch_qlike": -7.896,
+        "gjr_qlike": -8.01,
+        "delta_pct": -1.44,
+        "dm_tstat": 1.504,
+        "dm_pvalue": 0.1325,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 311,
+        "n_oos_gjr": 311
+      }
+    },
+    "BTC-USD": {
+      "2023-2024": {
+        "garch_qlike": -6.322,
+        "gjr_qlike": -6.326,
+        "delta_pct": -0.06,
+        "dm_tstat": 0.191,
+        "dm_pvalue": 0.8482,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 731,
+        "n_oos_gjr": 731
+      },
+      "2025": {
+        "garch_qlike": -6.538,
+        "gjr_qlike": -6.572,
+        "delta_pct": -0.52,
+        "dm_tstat": 1.133,
+        "dm_pvalue": 0.2573,
+        "dm_significant_5pct": false,
+        "dm_harvey_pass": false,
+        "n_oos_garch": 455,
+        "n_oos_gjr": 455
+      }
+    }
+  },
+  "diff_summary": {
+    "recommendation": "DIVERGENT",
+    "max_divergence": 7.760000000000001,
+    "max_divergence_cell": "EEM HAC t"
+  }
+}
