@@ -1,0 +1,156 @@
+{
+  "audit_metadata": {
+    "audit_date": "2026-04-17",
+    "auditor": "Claude Sonnet 4.6 (reproducibility-audit-agent)",
+    "worktree": "agent-adb9418c",
+    "paper": "Paper 9: Multiplicative GARCH-X with VIX (garch-x-vix)",
+    "paper_status": "submitted (under review)",
+    "target_journals": ["Journal of Empirical Finance", "International Journal of Forecasting"],
+    "main_tex": "paper/garch-x-vix/main.tex",
+    "protocol": "Three-way consistency check: tex number vs script output JSON"
+  },
+  "experiment_coverage": {
+    "K988": {
+      "path": "experiments/k988/k988_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "A4f_qlike": -8.360769450776205,
+        "GJR_qlike": -8.277222480688362,
+        "A4f_dm_t_vs_gjr": 4.482553559343101,
+        "n_oos": 1825,
+        "timestamp": "2026-04-07T19:15:37.384062+00:00"
+      },
+      "note": "K988 has different DM t for A4f (4.48) vs mcs_dm_results.json (4.03). Different computation method/period."
+    },
+    "K988b": {
+      "path": "experiments/k988/k988b_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "A3f_vrp_spearman": 0.8190692153176923,
+        "A2n_vrp_spearman": 0.8008446882164573,
+        "A4n_vrp_spearman": 0.7780480727514051,
+        "raw_ratio_vrp_spearman": 0.1508960438175109,
+        "n_oos": 1824,
+        "note": "n_oos=1824 here vs 1825 in mcs_dm_results.json"
+      }
+    },
+    "K989": {
+      "path": "experiments/k989/k989_mf2_vix2_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "n_oos": 1824,
+        "oos_start": "2019-01-02",
+        "var_backtest_note": "K989 tests MF2-VIX variants, not A4f; VaR numbers in paper come from K995"
+      }
+    },
+    "K994": {
+      "path": "experiments/k994/k994_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "QQQ_A4f_qlike": 1.419541,
+        "QQQ_GJR_qlike": 1.480611,
+        "QQQ_A4f_dm_t": -3.7081,
+        "QQQ_A4f_dm_direction": "gjr_better_label_but_A4f_lower_qlike",
+        "EEM_A4f_dm_t": -2.4677,
+        "GLD_A4f_dm_t": -1.0771,
+        "0050TW_A4f_dm_t": -1.4388
+      }
+    },
+    "K995": {
+      "path": "experiments/k995/k995_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "GJR_t_df_mean": 5.9377,
+        "GJR_t_df_median": 5.8753,
+        "A4f_residual_df_mean": 8.1182,
+        "A4f_residual_df_median": 7.8456,
+        "VaR_1pct_GJR_Normal_violation_rate": 0.023013698630136987,
+        "VaR_1pct_A4f_t_violation_rate": 0.014246575342465753,
+        "VaR_1pct_A4f_t_UC_p": 0.0865,
+        "VaR_1pct_A4f_t_PASS": true,
+        "VaR_25pct_A4f_t_DQ_p": 0.0060,
+        "VaR_25pct_A4f_t_PASS": false,
+        "VaR_5pct_A4f_t_PASS": true,
+        "ES_25pct_all_models_PASS": true,
+        "n_oos": 1825
+      }
+    },
+    "K997": {
+      "path": "experiments/k997/k997_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "GLD_A4f_GVZ_qlike": 1.457399,
+        "GLD_A4f_GVZ_dm_t_vs_gjr": -3.173,
+        "GLD_A4f_VIX_GVZ_dm_t_vs_gjr": -3.3854,
+        "EEM_A4f_VIX_dm_t": -2.5217,
+        "0050TW_A4f_VIX_dm_t": -1.677,
+        "0050TW_A4f_VIX_lag2_dm_t": -1.547
+      }
+    },
+    "K998": {
+      "path": "experiments/k998/k998_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "granger_h1_p": 2.034683532770032e-11,
+        "granger_h22_p": 0.18457715067106628,
+        "pred_reg_h1_t_g_model2": -1.9472,
+        "pred_reg_h1_t_g_model3_full_controls": -2.2713,
+        "variance_swap_sharpe": -0.6389942462868932,
+        "baseline_always_sell_sharpe": 0.8451993553757743,
+        "oos_r2_h1": 0.013425833950629351,
+        "n_oos": 1824
+      }
+    },
+    "K1085": {
+      "path": "experiments/k1085/k1085_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "GLD_A4f_GVZ_full_oos_dm_t": 4.45724410961828,
+        "GLD_A4f_GVZ_full_oos_n": 2645,
+        "GLD_A4f_GVZ_late_covid_dm_t": "see per_window Late_COVID",
+        "note": "Full OOS (2007-2026, n=2645) DM t=4.46 vs paper Table 6 value 3.17 which comes from K997"
+      }
+    },
+    "K1088": {
+      "path": "experiments/k1088/k1088_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "USO_A4f_OVX_full_oos_dm_t": 4.4746788059402895,
+        "USO_A4f_OVX_full_oos_n": 2960,
+        "note": "K1088 tests USO+OVX; paper mentions K1088 DM t=4.48 in README but not in main.tex Table"
+      }
+    },
+    "K1098": {
+      "path": "experiments/k1098/k1098_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "TW_A4f_vix_dm_t": 2.6795769132453984,
+        "TW_A4f_vixtwn_dm_t": 1.858572415907047,
+        "note": "K1098 n varies; paper says 0050.TW t=1.44 but K1098 a4f_vix t=2.68 and K997 t=1.68"
+      }
+    },
+    "mcs_dm_results": {
+      "path": "paper/garch-x-vix/mcs_dm_results.json",
+      "status": "EXISTS",
+      "key_outputs": {
+        "A4f_qlike": -8.35979424907558,
+        "GJR_qlike": -8.272503655198381,
+        "A4f_dm_t_vs_GJR": 4.030378564428692,
+        "n_oos": 1825,
+        "mcs_alpha10_all_survive": true,
+        "mcs_alpha25_gjr_eliminated_p": 0.229,
+        "gw_A4f_vs_GJR_chi2": 16.278273536008857,
+        "gw_A4f_vs_B1_chi2": 3.7686055382555637,
+        "timestamp": "2026-04-10T06:18:31.127669+00:00"
+      }
+    }
+  },
+  "missing_experiment_sources": [
+    "Table 11 (residual diagnostics): excess kurtosis 3.065/1.238, skewness -0.856/-0.594, JB 938.8/224.2 — no dedicated results JSON",
+    "Table 12 (sensitivity): refit frequency DM t (4.29/3.36/3.32), window size DM t (3.18/3.49/3.92/5.13/4.94) — no dedicated sensitivity JSON",
+    "Section 5.3 VIX vs macro DM t=4.77 — no dedicated macro comparison experiment JSON",
+    "Section 4.3 seven two-year windows sub-period analysis — no dedicated results JSON",
+    "Discussion: Corr(tau_t, g_t)=0.49, theta1-ratio=0.78 — no dedicated JSON",
+    "Summary statistics table (VIX mean/SPY ann std) — would need to rerun from data"
+  ]
+}
