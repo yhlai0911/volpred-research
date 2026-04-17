@@ -27450,5 +27450,17 @@
     ],
     "confidence": 0.88,
     "created_at": "2026-04-18T00:01:49.748444"
+  },
+  {
+    "item_id": "f3d32614",
+    "category": "K1142",
+    "content": "Volatility-normalized OFI (|OFI|/sigma_t, sigma from strictly-past 60 5-min bars) PARTIAL_OOS_ONLY vs K1128/K1131 NULL baseline. DM M_volnorm vs M_base: IS t=+1.45 NS; OOS t=+2.255 methodological |t|>2 pass but Harvey |t|>3 fail. AUC OOS base 0.5542 -> volnorm 0.5940 (+0.040). Realvol-tertile AUC 0.666 but DM t=+1.98; DM volnorm vs realvolT = -1.57 NS (two specs substantively equivalent). Lag-12 robustness: DM t collapses to -0.28 -> signal is intraday high-freq adaptive, not slow regime. 33 OOS jumps insufficient for Harvey gate. Narrative pivot potential: K1128 story can PARTIALLY reframe from regime-dependent to vol-normalized adaptive signal; sigma_hat bypasses VIX regime identification problem. Not sufficient alone for Paper 3 anchor; requires narrative state machine synthesis with K1128/K1131/K1142.",
+    "evidence": [
+      "experiments/k1142/k1142_results.json",
+      "experiments/k1142/README.md",
+      "commit 6e3b764f"
+    ],
+    "confidence": 0.7,
+    "created_at": "2026-04-18T00:34:41.092363"
   }
 ]

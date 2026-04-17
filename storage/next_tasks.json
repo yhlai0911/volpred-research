@@ -213,8 +213,10 @@
     "id": "K1142_vol_normalized_ofi",
     "title": "K1142: Volatility-normalized OFI (alternative specification, no VIX-regime)",
     "priority": 3,
-    "status": "pending",
-    "description": "K1131 agent suggested alt-direction: instead of VIX-conditional beta, normalize OFI by rolling realized vol. |OFI|/sigma_t_hat provides regime-free standardization. Test if this 繞過 regime-switching 本身. If PASS → K1128 story changes from \"regime-dependent\" to \"vol-normalized signal\". [Renumbered from K1134_vol_normalized_ofi: collision with existing experiments/k1134]"
+    "status": "completed",
+    "description": "K1131 agent suggested alt-direction: instead of VIX-conditional beta, normalize OFI by rolling realized vol. |OFI|/sigma_t_hat provides regime-free standardization. Test if this 繞過 regime-switching 本身. If PASS → K1128 story changes from \"regime-dependent\" to \"vol-normalized signal\". [Renumbered from K1134_vol_normalized_ofi: collision with existing experiments/k1134]",
+    "completed_at": "2026-04-18T00:34:41.286222",
+    "outcome": "PARTIAL_OOS_ONLY: DM t=+2.255 OOS (Harvey fail), AUC +0.040. Realvol-tertile equivalent. Lag-12 breaks. 33 jumps underpowered. Narrative pivot viable but needs more power."
   },
   {
     "id": "Paper4_channel_specific_pivot",
