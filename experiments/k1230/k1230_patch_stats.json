@@ -1,0 +1,142 @@
+{
+  "experiment_id": "K1230",
+  "purpose": "research_program.md comprehensive update patch supersedes K1212 delta",
+  "session_window_start": "2026-04-17T00:00",
+  "session_window_end": "2026-04-18T23:59",
+  "supersedes": {
+    "experiment_id": "K1212",
+    "commit": "1a23e22c",
+    "path": "experiments/k1212/k1212_research_program_delta.md",
+    "reason": "pre-K1216c state; ladder framed STRENGTHENED at canonical +0.441; K1216b interpreted as COLLAPSE; Paper 4 CONFLICT-A4 unresolved; no K1222b/K1223/K1224/K1225/K1227/K1228 guides integrated"
+  },
+  "seed": 42,
+  "rng_used": false,
+  "patch_scope": ["Section A (per-paper findings)", "Section B (methodology upgrades)", "Section C (narrative state transitions)", "Section D (backlog)", "Section E (research directions forward)"],
+  "word_count_patch_body": 3500,
+  "papers_updated": [
+    "Paper 1 leverage-direction (READY, K1224)",
+    "Paper 2 taiwan-vt (MODESTLY WEAKER + NEW methodology, K1222b)",
+    "Paper 3 vt-trend-following (triple-path K1227, BLOCKED)",
+    "Paper 4 vix-sufficiency (dual-framing K1225, BLOCKED)",
+    "Paper 6 prg-periodic-garch (READY, K1223)",
+    "Paper 9 garch-x-vix (unchanged)",
+    "NEW BTC GAS negative paper (K1228 repo init READY, BLOCKED on go/no-go)"
+  ],
+  "narrative_state_transitions": {
+    "paper1": {"previous": "Batch 2 draft pending", "current": "READY FOR IMMEDIATE EXECUTION (K1224)"},
+    "paper2": {"previous": "STRENGTHENED ladder (K1211)", "current": "MODESTLY WEAKER but SURVIVING + NEW methodology contribution (K1222b FINAL)"},
+    "paper3": {"previous": "Gate met A/B/C pending", "current": "Gate met + triple-path K1227 (BLOCKED)"},
+    "paper4": {"previous": "7/7 UNIVERSAL_NULL + CONFLICT-A4 flagged", "current": "CONFLICT-A4 via K1225 dual-framing (BLOCKED)"},
+    "paper6": {"previous": "Defensibility CONFIRMED K1200", "current": "READY FOR IMMEDIATE EXECUTION (K1223)"},
+    "btc_gas": {"previous": "New candidate", "current": "K1228 5-phase 24-step repo init READY (BLOCKED on user go/no-go)"}
+  },
+  "key_numerical_updates_vs_k1212": {
+    "paper2_primary_spearman_N13_final": {"value": 0.37912087912087916, "p": 0.20140608996104342, "harvey_t": 1.3588432170088491, "source": "experiments/k1216c/k1216c_results.json"},
+    "paper2_primary_spearman_N12_canonical": {"value": 0.441, "p": 0.152, "source": "experiments/k1172/k1172_results.json"},
+    "paper2_fisher_z_canonical_vs_refined": {"z_stat": 0.16, "two_sided_p": 0.87},
+    "paper2_k1216b_asymmetric_artefact": {"spearman_N13": -0.071, "p": 0.817, "harvey_t": -0.24},
+    "paper2_sector_fe_incremental_adj_r2": 0.148,
+    "paper2_inst_fe_incremental_adj_r2": 0.0046,
+    "paper2_sector_fe_joint_F": 689.5,
+    "paper2_sector_fe_joint_p": 7.9e-14,
+    "paper2_cross_sector_inst_sector_rho": -0.006,
+    "paper2_cross_sector_inst_sector_p": 0.987,
+    "paper2_panel_harvey_t_sequence": [3.236, 3.556, 3.627, 3.789, 3.808],
+    "paper6_k1200_dm_t": 6.128,
+    "paper6_k880_canonical_dm_t": 6.004,
+    "paper6_k1200_delta_dm_t": 0.124,
+    "paper4_tlt_finstress_dm_t_pit_shift0": 3.743,
+    "paper4_tlt_finstress_dm_t_pit_shift1": 2.00,
+    "paper4_tlt_finstress_all_spec_dm_t": -5.67,
+    "paper4_tlt_finstress_qlike_improvement_pct": 0.50,
+    "btc_k1129_full_sample_dm_t": -4.58,
+    "btc_k1133_p1_dm_t": -4.67,
+    "btc_k1133_p2_dm_t": -0.82,
+    "btc_k1133_p3_dm_t": -0.80,
+    "btc_k1133b_gas_normal_dm_t": -1.90,
+    "btc_k1133b_m4_vs_m3_dm": 2.67
+  },
+  "multistart_9_market_lr_record": [
+    {"market": "AU", "exp": "K1213", "canon_theta_rel": 0.150, "refined_theta_rel": 1.476, "lr": 198.9, "chi2_multiple": 51.8, "verdict": "ABOVE_LADDER_OVERTURNED"},
+    {"market": "BR", "exp": "K1216", "canon_theta_rel": 1.887, "refined_theta_rel": 2.691, "lr": 145.66, "chi2_multiple": 37.9, "verdict": "FRAGILE"},
+    {"market": "IN", "exp": "K1216", "canon_theta_rel": 1.170, "refined_theta_rel": 3.077, "lr": 410.76, "chi2_multiple": 107.0, "verdict": "FRAGILE"},
+    {"market": "MX", "exp": "K1216", "canon_theta_rel": 1.202, "refined_theta_rel": 1.845, "lr": 347.27, "chi2_multiple": 90.0, "verdict": "FRAGILE"},
+    {"market": "CH", "exp": "K1216b", "canon_theta_rel": 0.304, "refined_theta_rel": 1.469, "lr": 597.94, "chi2_multiple": 156.0, "verdict": "FRAGILE"},
+    {"market": "ID", "exp": "K1216b", "canon_theta_rel": 0.238, "refined_theta_rel": 1.917, "lr": 365.36, "chi2_multiple": 95.0, "verdict": "FRAGILE"},
+    {"market": "US", "exp": "K1216c", "canon_theta_rel": 0.415, "refined_theta_rel": 8.614, "lr": 2836.68, "chi2_multiple": 739.0, "verdict": "FRAGILE"},
+    {"market": "EU", "exp": "K1216c", "canon_theta_rel": 0.196, "refined_theta_rel": 1.434, "lr": 837.97, "chi2_multiple": 218.0, "verdict": "FRAGILE"},
+    {"market": "JP", "exp": "K1216c", "canon_theta_rel": 1.668, "refined_theta_rel": 4.706, "lr": 235.57, "chi2_multiple": 61.3, "verdict": "FRAGILE"},
+    {"market": "TW", "exp": "K1216c", "canon_theta_rel": 0.314, "refined_theta_rel": 1.364, "lr": 587.78, "chi2_multiple": 153.0, "verdict": "FRAGILE"}
+  ],
+  "experiments_completed_session": [
+    "K1108", "K1108b", "K1108c", "K1108d", "K1108e", "K1108f",
+    "K1100", "K1100b", "K1100c", "K1100d", "K1100e", "K1100f", "K1100g",
+    "K1100g_d1", "K1100g_d2", "K1100g_d3", "K1100g_d4", "K1100g_d5", "K1100g_d6", "K1100g_d7", "K1100g_d8",
+    "K1116", "K1116b", "K1116c", "K1116f", "K1117", "K1117b", "K1118", "K1118b", "K1121", "K1123",
+    "K1128", "K1129", "K1131", "K1133", "K1133b",
+    "K1142", "K1156", "K1163", "K1165", "K1166", "K1167", "K1168", "K1170", "K1171", "K1172", "K1173",
+    "K1175", "K1176", "K1177", "K1178", "K1179", "K1180", "K1181", "K1182", "K1183", "K1184",
+    "K1185", "K1186", "K1187", "K1188", "K1190", "K1191", "K1192", "K1193", "K1194", "K1195", "K1196", "K1197", "K1198",
+    "K1199", "K1200", "K1201", "K1202", "K1203", "K1204", "K1205", "K1206", "K1207",
+    "K1213", "K1216", "K1216b", "K1216c"
+  ],
+  "guides_and_drafts_produced": [
+    {"id": "K1204", "role": "Paper 2 consolidation notes"},
+    {"id": "K1205", "role": "Paper 3 cross-experiment integrity synthesis"},
+    {"id": "K1208", "role": "Paper 4 UNIVERSAL_NULL body draft", "words": 1762, "status": "BLOCKED on CONFLICT-A4"},
+    {"id": "K1209", "role": "Paper 1 Batch 2 draft", "words": 3574, "feeds": "K1224"},
+    {"id": "K1211", "role": "Paper 2 §5 STRENGTHENED draft", "words": 2380, "status": "SUPERSEDED by K1222b"},
+    {"id": "K1212", "role": "Session delta (earlier consolidation)", "words": 1900, "status": "SUPERSEDED by K1230"},
+    {"id": "K1214", "role": "BTC GAS negative paper draft", "words": 4829, "status": "BLOCKED on go/no-go"},
+    {"id": "K1215", "role": "Paper 2 §5 + AU revised draft", "status": "SUPERSEDED by K1222b"},
+    {"id": "K1217", "role": "Paper 3 path-b body draft", "words": 4991, "status": "BLOCKED on Paper3_strategic_decision"},
+    {"id": "K1218", "role": "Paper 6 Appendix A draft", "words": 930, "feeds": "K1223"},
+    {"id": "K1219", "role": "Cherry-pick dashboard", "status": "SUPERSEDED by K1226"},
+    {"id": "K1220", "role": "Executive briefing", "status": "SUPERSEDED by K1226"},
+    {"id": "K1221", "role": "Paper 6 pre-submission audit", "feeds": "K1223"},
+    {"id": "K1222", "role": "Paper 2 §5 WITHDRAWN guide", "status": "SUPERSEDED by K1222b"},
+    {"id": "K1222b", "role": "Paper 2 §5 FINAL revision guide", "words": 2925, "status": "ACTIVE"},
+    {"id": "K1223", "role": "Paper 6 edit guide (6 items, 80-120 min)", "status": "ACTIVE READY"},
+    {"id": "K1224", "role": "Paper 1 edit guide (7 items, 60-90 min)", "status": "ACTIVE READY"},
+    {"id": "K1225", "role": "Paper 4 dual-framing guide", "status": "ACTIVE BLOCKED"},
+    {"id": "K1226", "role": "Master index (FINAL close briefing)", "words": 2400, "status": "ACTIVE FINAL"},
+    {"id": "K1227", "role": "Paper 3 triple-path edit guide (a/b/c)", "status": "ACTIVE BLOCKED"},
+    {"id": "K1228", "role": "BTC GAS repo init guide (5 phases, 24 steps)", "status": "ACTIVE BLOCKED"},
+    {"id": "K1230", "role": "research_program.md comprehensive update patch (supersedes K1212)", "status": "ACTIVE this document"}
+  ],
+  "methodology_upgrades": [
+    "B.1 Multistart-before-pooled-MLE protocol (K1213 → K1216 → K1216b → K1216c, 10-step)",
+    "B.2 Symmetric refinement across cross-market panels (K1216b artefact lesson)",
+    "B.3 Agent Markdown draft pattern validated (~30000 words, 6+ drafts, 1 session)",
+    "B.4 PIT alignment triple-gate (K1116-family, from K1212 delta retained)",
+    "B.5 Sector-FE decomposition standard (K1207, from K1212 delta retained)",
+    "B.6 Two-phase forecast timing (K1200 K880v2, from K1212 delta retained)"
+  ],
+  "blocked_persistent_external": [
+    "K1100h (Dropbox TAIFEX tick 2017-2021)",
+    "K1116d (FRED_API_KEY missing)",
+    "K1161b (paid options data)",
+    "K1175 legacy (GDELT / GCP BigQuery capacity)",
+    "I4 (yfinance VIX futures no data)"
+  ],
+  "conflicts_pending": {
+    "CONFLICT_A4": "Paper 4 body_v4 narrative = channel-specific (user 2026-04-17 commit 7ecab636) vs UNIVERSAL_NULL (session K1203 gate) — K1225 dual-framing produced"
+  },
+  "decision_gates_outstanding": [
+    {"id": "P1", "priority": "HIGH", "gate": "Paper 2 §5 K1222b FINAL adoption", "user_time_min": 15, "downstream": "Paper 2 submission credibility + NEW methodology §5.4"},
+    {"id": "P2", "priority": "MEDIUM", "gate": "Paper 4 CONFLICT-A4 (Version A vs B)", "user_time_min": 5, "downstream": "Paper 4 body_v4 rewrite"},
+    {"id": "P3", "priority": "MEDIUM", "gate": "Paper 3 path a/b/c (K1205 recommends b)", "user_time_min": 30, "downstream": "Paper 3 narrative commit"},
+    {"id": "P4", "priority": "LOW", "gate": "BTC GAS negative paper go/no-go", "user_time_min": 5, "downstream": "new paper/btc-gas-negative/ scaffolding"},
+    {"id": "P5", "priority": "LOW", "gate": "Approve K1224 Paper 1 Batch 2 execution", "user_time_min": 2, "downstream": "JBF reproducibility audit clear"},
+    {"id": "P6", "priority": "LOW", "gate": "Approve K1223 Paper 6 Appendix A + errata execution", "user_time_min": 2, "downstream": "FRL submission path clear"}
+  ],
+  "compliance": {
+    "no_research_program_md_mutation": true,
+    "no_paper_tex_mutation": true,
+    "no_storage_mutation": true,
+    "no_knowledge_json_mutation": true,
+    "worktree_scope_only": "experiments/k1230/",
+    "verbatim_upstream_numbers": true,
+    "seed_declared": 42
+  }
+}
