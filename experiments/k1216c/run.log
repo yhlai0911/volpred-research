@@ -1,0 +1,178 @@
+
+========================================================================
+K1216c: Root-cause diagnostic -- DEV multistart audit
+100 random starts per DEV market, seeds 43..142
+========================================================================
+
+========================================================================
+[K1216c US] loading stocks
+========================================================================
+[US] loaded 10/10 DEV tickers
+   AAPL: n_obs=3016, n_events=48, sigma2=3.176e-04
+   MSFT: n_obs=3016, n_events=48, sigma2=2.744e-04
+   NVDA: n_obs=3016, n_events=48, sigma2=8.717e-04
+   GOOGL: n_obs=3016, n_events=48, sigma2=3.165e-04
+   AMZN: n_obs=3016, n_events=48, sigma2=4.273e-04
+   META: n_obs=3015, n_events=48, sigma2=5.312e-04
+   TSLA: n_obs=3016, n_events=48, sigma2=1.282e-03
+   BRK-B: n_obs=3016, n_events=48, sigma2=1.413e-04
+   UNH: n_obs=3016, n_events=48, sigma2=3.197e-04
+   V: n_obs=3016, n_events=48, sigma2=2.285e-04
+[US] S=10 mean_sigma2=4.710e-04 vix2_mean=3.720e+02
+[US] fitting K1216c canonical joint MLE (single init)...
+[US] canonical joint: theta_eav=1.954e-04 theta_rel=0.415 LL=79291.63
+  [start 10/100] converged=7/10 elapsed=2.2s
+  [start 20/100] converged=16/20 elapsed=5.4s
+  [start 30/100] converged=25/30 elapsed=9.3s
+  [start 40/100] converged=31/40 elapsed=12.4s
+  [start 50/100] converged=40/50 elapsed=16.3s
+  [start 60/100] converged=48/60 elapsed=20.5s
+  [start 70/100] converged=56/70 elapsed=24.2s
+  [start 80/100] converged=61/80 elapsed=26.0s
+  [start 90/100] converged=70/90 elapsed=30.1s
+  [start 100/100] converged=78/100 elapsed=33.4s
+[US] multistart done in 33.4s
+[US] converged = 78/100
+[US] basin: A frac=0.60 theta_mean=0.00020437401922277317 ll_max=79984.07965425256 | B frac=0.40 theta_mean=0.002451974733269414 ll_max=80402.39042010707
+[US] best LL theta_eav=1.667e-03 LL=80402.39 basin=B theta_rel=3.538
+[US] SE: Hessian=9.216163449291388e-05 t=18.082831944665564; HAC=0.0003201565076149237 t=5.205402072556125
+[US] running NM + DE sensitivity...
+[US] NM theta_eav=0.00405702789650959 LL=80709.9720299538
+[US] DE theta_eav=0.004984173591305041 LL=-10000000000000.0
+[US] max sens delta = 143.4%
+[US] REFINED best LL from Nelder-Mead: theta_eav=4.057e-03 LL=80709.97 theta_rel=8.614
+[US] LR = 2*(LL_refined - LL_canon_joint) = +2836.68
+[US] VERDICT: FRAGILE (LL gap=+1418.34, theta_shift=1976.5%, sens=143.4%)
+
+========================================================================
+[K1216c EU] loading stocks
+========================================================================
+[EU] loaded 10/10 DEV tickers
+   SAP.DE: n_obs=3046, n_events=48, sigma2=2.417e-04
+   SIE.DE: n_obs=3046, n_events=48, sigma2=2.816e-04
+   ALV.DE: n_obs=3046, n_events=48, sigma2=1.996e-04
+   MRK.DE: n_obs=3046, n_events=48, sigma2=2.539e-04
+   BMW.DE: n_obs=3046, n_events=48, sigma2=3.074e-04
+   BAS.DE: n_obs=3046, n_events=48, sigma2=2.789e-04
+   MBG.DE: n_obs=3046, n_events=48, sigma2=3.577e-04
+   DTE.DE: n_obs=3046, n_events=48, sigma2=1.704e-04
+   ADS.DE: n_obs=3046, n_events=48, sigma2=3.845e-04
+   VOW3.DE: n_obs=3046, n_events=48, sigma2=4.352e-04
+[EU] S=10 mean_sigma2=2.911e-04 vix2_mean=3.704e+02
+[EU] fitting K1216c canonical joint MLE (single init)...
+[EU] canonical joint: theta_eav=5.698e-05 theta_rel=0.196 LL=83936.06
+  [start 10/100] converged=6/10 elapsed=3.2s
+  [start 20/100] converged=14/20 elapsed=6.9s
+  [start 30/100] converged=22/30 elapsed=10.2s
+  [start 40/100] converged=27/40 elapsed=13.5s
+  [start 50/100] converged=33/50 elapsed=17.0s
+  [start 60/100] converged=42/60 elapsed=21.4s
+  [start 70/100] converged=49/70 elapsed=24.1s
+  [start 80/100] converged=53/80 elapsed=27.2s
+  [start 90/100] converged=58/90 elapsed=29.6s
+  [start 100/100] converged=64/100 elapsed=33.7s
+[EU] multistart done in 33.7s
+[EU] converged = 64/100
+[EU] basin: A frac=0.72 theta_mean=0.00015346253581533247 ll_max=84130.90192246507 | B frac=0.28 theta_mean=0.0005115773040461108 ll_max=84161.22898494973
+[EU] best LL theta_eav=5.707e-04 LL=84161.23 basin=B theta_rel=1.961
+[EU] SE: Hessian=7.410164621464107e-05 t=7.702001312696366; HAC=0.00019284890651868005 t=2.9594721936514796
+[EU] running NM + DE sensitivity...
+[EU] NM theta_eav=0.0004174399029791623 LL=84355.0484726158
+[EU] DE theta_eav=0.0030804230786465247 LL=-10000000000000.0
+[EU] max sens delta = 26.9%
+[EU] REFINED best LL from Nelder-Mead: theta_eav=4.174e-04 LL=84355.05 theta_rel=1.434
+[EU] LR = 2*(LL_refined - LL_canon_joint) = +837.97
+[EU] VERDICT: FRAGILE (LL gap=+418.99, theta_shift=632.6%, sens=26.9%)
+
+========================================================================
+[K1216c JP] loading stocks
+========================================================================
+[JP] loaded 10/10 DEV tickers
+   7203.T: n_obs=2952, n_events=48, sigma2=2.868e-04
+   6758.T: n_obs=2952, n_events=48, sigma2=4.175e-04
+   9984.T: n_obs=2952, n_events=47, sigma2=6.997e-04
+   8306.T: n_obs=2952, n_events=48, sigma2=3.466e-04
+   6861.T: n_obs=2952, n_events=47, sigma2=3.663e-04
+   9432.T: n_obs=2952, n_events=48, sigma2=1.892e-04
+   6098.T: n_obs=2759, n_events=40, sigma2=5.125e-04
+   7974.T: n_obs=2951, n_events=48, sigma2=5.001e-04
+   6594.T: n_obs=2952, n_events=48, sigma2=4.473e-04
+   8035.T: n_obs=2952, n_events=48, sigma2=5.924e-04
+[JP] S=10 mean_sigma2=4.358e-04 vix2_mean=3.704e+02
+[JP] fitting K1216c canonical joint MLE (single init)...
+[JP] canonical joint: theta_eav=7.268e-04 theta_rel=1.668 LL=75325.33
+  [start 10/100] converged=6/10 elapsed=2.5s
+  [start 20/100] converged=15/20 elapsed=5.4s
+  [start 30/100] converged=23/30 elapsed=8.7s
+  [start 40/100] converged=30/40 elapsed=12.0s
+  [start 50/100] converged=36/50 elapsed=15.3s
+  [start 60/100] converged=44/60 elapsed=18.3s
+  [start 70/100] converged=50/70 elapsed=21.6s
+  [start 80/100] converged=54/80 elapsed=23.5s
+  [start 90/100] converged=60/90 elapsed=26.6s
+  [start 100/100] converged=68/100 elapsed=29.9s
+[JP] multistart done in 29.9s
+[JP] converged = 68/100
+[JP] basin: A frac=0.47 theta_mean=0.00013586330564482177 ll_max=75193.47295939854 | B frac=0.53 theta_mean=0.0012314675194133194 ll_max=75294.77162852885
+[JP] best LL theta_eav=1.844e-03 LL=75294.77 basin=B theta_rel=4.232
+[JP] SE: Hessian=0.00018306960768277577 t=10.07455409073534; HAC=0.0005404216742394212 t=3.4127881113678815
+[JP] running NM + DE sensitivity...
+[JP] NM theta_eav=0.002050840613928572 LL=75443.11826855195
+[JP] DE theta_eav=0.004612067821737362 LL=-10000000000000.0
+[JP] max sens delta = 11.2%
+[JP] REFINED best LL from Nelder-Mead: theta_eav=2.051e-03 LL=75443.12 theta_rel=4.706
+[JP] LR = 2*(LL_refined - LL_canon_joint) = +235.57
+[JP] VERDICT: FRAGILE (LL gap=+117.79, theta_shift=182.2%, sens=11.2%)
+
+========================================================================
+[K1216c TW] loading stocks
+========================================================================
+[TW] loaded 10/10 DEV tickers
+   2330.TW: n_obs=3911, n_events=61, sigma2=2.599e-04
+   2303.TW: n_obs=3911, n_events=61, sigma2=3.655e-04
+   6239.TW: n_obs=3911, n_events=61, sigma2=3.762e-04
+   2454.TW: n_obs=3911, n_events=60, sigma2=5.095e-04
+   2379.TW: n_obs=3911, n_events=61, sigma2=4.880e-04
+   3034.TW: n_obs=3911, n_events=61, sigma2=4.734e-04
+   3035.TW: n_obs=3911, n_events=61, sigma2=8.562e-04
+   3443.TW: n_obs=3911, n_events=61, sigma2=8.722e-04
+   2388.TW: n_obs=3911, n_events=61, sigma2=1.147e-03
+   2881.TW: n_obs=3911, n_events=61, sigma2=2.174e-04
+[TW] S=10 mean_sigma2=5.566e-04 vix2_mean=3.852e+02
+[TW] fitting K1216c canonical joint MLE (single init)...
+[TW] canonical joint: theta_eav=1.748e-04 theta_rel=0.314 LL=95629.74
+  [start 10/100] converged=8/10 elapsed=4.1s
+  [start 20/100] converged=16/20 elapsed=7.8s
+  [start 30/100] converged=25/30 elapsed=11.4s
+  [start 40/100] converged=32/40 elapsed=16.4s
+  [start 50/100] converged=42/50 elapsed=21.6s
+  [start 60/100] converged=50/60 elapsed=25.8s
+  [start 70/100] converged=59/70 elapsed=32.3s
+  [start 80/100] converged=64/80 elapsed=34.2s
+  [start 90/100] converged=71/90 elapsed=38.2s
+  [start 100/100] converged=79/100 elapsed=41.9s
+[TW] multistart done in 41.9s
+[TW] converged = 79/100
+[TW] basin: A frac=0.23 theta_mean=-0.00012527948805171127 ll_max=91654.92776781466 | B frac=0.77 theta_mean=0.0002842787226559086 ll_max=95641.32192046175
+[TW] best LL theta_eav=5.121e-04 LL=95641.32 basin=B theta_rel=0.920
+[TW] SE: Hessian=6.829651286439448e-05 t=7.49751648259114; HAC=0.00026364998948438106 t=1.9421742891236873
+[TW] running NM + DE sensitivity...
+[TW] NM theta_eav=0.0007593050306750663 LL=95923.63334467637
+[TW] DE theta_eav=0.005889825567449506 LL=-10000000000000.0
+[TW] max sens delta = 48.3%
+[TW] REFINED best LL from Nelder-Mead: theta_eav=7.593e-04 LL=95923.63 theta_rel=1.364
+[TW] LR = 2*(LL_refined - LL_canon_joint) = +587.78
+[TW] VERDICT: FRAGILE (LL gap=+293.89, theta_shift=334.5%, sens=48.3%)
+
+===== CROSS-MARKET 4-DEV VERDICT: ROOT_CAUSE_METHODOLOGY =====
+All 4 DEV markets (US/EU/JP/TW) show the same K1216 pathology: joint pooled MLE canonical trapped in a secondary local minimum. Combined with K1213 AU + K1216 BR/IN/MX + K1216b CH/ID, the optimizer fragility is UNIVERSAL across the 9-market Paper 2 panel. Section 5 methodology requires panel-wide revision: every market's canonical theta_rel in K1165/K1168/K1172 must be replaced with the multistart-refined estimate. The K1172 N=12 primary Spearman is a single-init artefact.
+
+[Spearman variants]
+  K1172_baseline_N12: rho=+0.441 p=0.1517 n=12
+  K1216b_5EM_refined_plus_K1213_AU_N13: rho=-0.071 p=0.8166 n=13
+  K1216c_FULL_9market_refined_plus_AU_N13: rho=+0.379 p=0.2014 n=13
+[figures] wrote 4 basin hists + 9-market trajectory
+[csv] wrote k1216c_multistart_results.csv (400 rows)
+[csv] wrote k1216c_per_market_summary.csv
+[json] wrote k1216c_results.json
+[done] total 147.5s
