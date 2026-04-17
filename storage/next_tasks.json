@@ -1244,15 +1244,16 @@
   {
     "id": "Paper3_D1_TSMOM_hedge_table3_source",
     "title": "Paper 3 BLOCKER: Table 3 TSMOM hedge SPY Hedged VT 數字無 source (Sharpe/MDD 皆不符 K898)",
-    "status": "pending",
+    "status": "resolved_errata_required_direction_reversal",
     "priority": 4,
     "created_at": "2026-04-17T16:30:37+08:00",
-    "description": "Paper 3 audit (0fa27397): Table 3 SPY Hedged VT Sharpe paper 0.737 vs K898 0.848 (15% diff), MDD retention paper 93% vs K898 107% (K898 TSMOM hedge 反而改善 MDD). K898 非原始 source. **動作**: 建 K1176 canonical TSMOM hedge replication 對齊 paper Table 3 數字, 或若不可 reproduce -> 主線程 body edit 改為 K898 canonical. Agent-launchable.",
+    "description": "Paper 3 audit (0fa27397): Table 3 SPY Hedged VT Sharpe paper 0.737 vs K898 0.848 (15% diff), MDD retention paper 93% vs K898 107% (K898 TSMOM hedge 反而改善 MDD). K898 非原始 source. **動作**: 建 K1176 canonical TSMOM hedge replication 對齊 paper Table 3 數字, 或若不可 reproduce -> 主線程 body edit 改為 K898 canonical. Agent-launchable. [K1177 DONE commit 25af9f1e: (b) Paper errata. K1177 monthly 0.692 + K898 daily 0.848 都 retention >100% (hedging 改善 MDD), paper 寫 93% (降低) **DIRECTION REVERSED**. Paper 3 narrative \"93% of protection survives\" → \"100%+ retained, hedging enhances MDD protection\". text/code inconsistency: VT MDD=-24.7% daily 指紋 vs paper 說 monthly.]",
     "tags": [
       "paper-3",
       "vt-trend-following",
       "blocker"
-    ]
+    ],
+    "completed_at": "2026-04-17T17:29:23+08:00"
   },
   {
     "id": "Paper3_D2_Table5_international_13markets",
@@ -1626,6 +1627,22 @@
       "paper-9",
       "subperiod-update",
       "main-thread"
+    ]
+  },
+  {
+    "id": "Paper3_D1_errata_TSMOM_direction_research_integrity",
+    "title": "Paper 3 ERRATA: Table 3 narrative 'TSMOM hedge 93% retention' → '100%+ enhances MDD'",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:29:23+08:00",
+    "description": "K1177 (25af9f1e) + K898 雙 independent implementation 都顯示 TSMOM hedging retention >100% (107-141%), **paper 聲稱 93% (protection 降低) 方向反了**. 類似 Paper 4 DIV-1 41.8% 方向錯 pattern. **Research integrity issue**. 主線程 body edit: (1) Table 3 narrative 'TSMOM hedging only retains 93% of VT protection' → 'TSMOM hedging retains 100%+ of VT protection and further enhances MDD reduction'; (2) Section 4.7 γ_HM 解釋需改 (hedge coefficient 方向); (3) Abstract/Conclusion 重新措辭; (4) 同時修 text/code inconsistency (paper 寫 monthly 但 -24.7% 是 daily) — 選 K1177 monthly canonical 或 paper 原 daily, 在 methodology section 明載選擇. 投稿 JPM/FAJ 前必做.",
+    "tags": [
+      "paper-3",
+      "vt-trend-following",
+      "research-integrity",
+      "errata",
+      "main-thread",
+      "direction-reversal"
     ]
   }
 ]

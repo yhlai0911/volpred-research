@@ -27107,5 +27107,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:25:09.262141"
+  },
+  {
+    "item_id": "c59f1868",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered from cd race] K1177 Paper 3 Table 3 TSMOM hedge canonical replication. **VERDICT: (b) Paper errata \u2014 TSMOM hedging DIRECTION \u8207 paper \u8072\u7a31\u76f8\u53cd**. K1177 \u6578\u5b57 (SPY): B&H Sharpe=0.616 MDD=-55.2%; 12/VIX VT (\u6708\u5ea6): Sharpe=0.683 MDD=-26.4%; TSMOM Hedged VT: Sharpe=0.692 MDD=-17.2%; **MDD Retention=132%**. **vs Paper**: Paper Sharpe 0.737 / MDD retention 93% \u2014 K1177 0.692/132%, K898 0.848/107%. **\u95dc\u9375\u767c\u73fe**: Paper \u8072\u7a31 retention 93% (protection \u964d\u4f4e), \u4f46 K1177 (\u6708\u5ea6 canonical) + K898 (daily) \u90fd\u986f\u793a retention >100% (hedging \u6539\u5584 MDD). **5 \u500b assets \u90fd\u4e00\u81f4**: retention 107-141%, \u65b9\u5411\u662f\u6539\u5584 protection \u800c\u975e\u964d\u4f4e. **text/code inconsistency bonus**: Paper VT MDD=-24.7% \u662f daily rebalancing \u6307\u7d0b (\u6708\u5ea6=-26.4%), paper \u6587\u5b57\u5beb monthly \u4f46 numbers \u4f86\u81ea daily script. **(b) ERRATA \u78ba\u8a8d**: Paper 3 Table 3 'narrative 93% of protection survives' \u5fc5\u9808\u6539\u70ba '100%+ of protection retained, hedging enhances MDD protection.' **Pattern confirmed**: Paper 3 D1 \u662f direction-reversed claim \u985e\u4f3c Paper 4 DIV-1 (41.8% \u65b9\u5411\u53cd). research integrity issue. Paper 3 \u6295\u7a3f JPM/FAJ \u524d\u5fc5\u89e3. commit 25af9f1e.",
+    "evidence": [
+      "experiments/k1177/k1177.py",
+      "experiments/k1177/k1177_results.json",
+      "experiments/k1177/k1177_vs_paper3_table3_diff.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:29:07.932228"
   }
 ]
