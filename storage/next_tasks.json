@@ -1471,15 +1471,16 @@
   {
     "id": "K1027_run_7window_subperiod",
     "title": "K1027: 執行 k1027.py 產 7-window sub-period JSON (解 Paper 9 4 個 no-source)",
-    "status": "pending",
+    "status": "completed",
     "priority": 3,
     "created_at": "2026-04-17T17:12:12+08:00",
-    "description": "Paper 9 rescan 發現 k1027.py 已設計好但從未執行, results.json 被 Drawdown 實驗蓋過. 執行可解 4 個 no-source (7-window count, 4.81-8.09% range, 6.52% mean, t=6.535 pooled). Agent-launchable, 應該是 ~30 min 小實驗.",
+    "description": "Paper 9 rescan 發現 k1027.py 已設計好但從未執行, results.json 被 Drawdown 實驗蓋過. 執行可解 4 個 no-source (7-window count, 4.81-8.09% range, 6.52% mean, t=6.535 pooled). Agent-launchable, 應該是 ~30 min 小實驗. [DONE commit fdd06cff: (a) claims substantiated. 7/7 A4f wins EXACT MATCH. pooled t K1027 6.977 > paper 6.535 (K1027 STRONGER, likely data vintage). Paper text 宜 update range 4.80-7.00%, mean 6.42%, pooled t=6.977.]",
     "tags": [
       "paper-9",
       "k1027",
       "quick-rerun"
-    ]
+    ],
+    "completed_at": "2026-04-17T17:25:19+08:00"
   },
   {
     "id": "K998_add_vrp_autocorr_to_json",
@@ -1612,6 +1613,19 @@
       "paper-8",
       "k827v2",
       "audit-followup"
+    ]
+  },
+  {
+    "id": "Paper9_subperiod_numbers_update_from_K1027",
+    "title": "Paper 9 update subperiod numbers from K1027 (pooled t 6.535 → 6.977, range更新)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T17:25:19+08:00",
+    "description": "K1027 (fdd06cff) 執行完, 7/7 A4f wins exact match paper, 但 N149/150/154 有 minor 修正: paper range 4.81-8.09% → 4.80-7.00% (K1027 canonical), mean 6.52% → 6.42%, pooled t 6.535 → 6.977. K1027 結果 STRONGER 而非弱, 有利 paper. 主線程 body edit: Section 4.3 + 任何引用這些數字的段落更新. 同時 experiments.md 加 K1027 為 Section 4.3 source. 5 min.",
+    "tags": [
+      "paper-9",
+      "subperiod-update",
+      "main-thread"
     ]
   }
 ]

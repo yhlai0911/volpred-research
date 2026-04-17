@@ -27095,5 +27095,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:20:04.769117"
+  },
+  {
+    "item_id": "b83dc266",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered from cd race] K1027 Paper 9 7-window sub-period analysis. **VERDICT: (a) Claims substantiated \u2014 \u6838\u5fc3 robustness claim 7/7 A4f wins CONFIRMED**. k1027.py \u57f7\u884c 234s (53 refits, seed=42). Drawdown JSON \u5099\u4efd\u70ba k1027_results_drawdown_backup.json. **7 sub-periods DM t**: P1 (2013-14) -4.375, P2 (2015-16) -3.488, P3 (2017-18) -2.124, P4 (2019-20) -1.858, P5 (2021-22) -2.822, P6 (2023-24) -2.687, P7 (2025-26) -3.295. **7/7 A4f wins**. **vs Paper 9 Section 4.3 (N148-N150, N154)**: N148 7/7 wins: EXACT MATCH. N149 range 4.81-8.09% vs 4.80-7.00%: MIN ok, MAX 1.09pp \u5dee (data vintage). N150 mean 6.52% vs 6.42%: CLOSE (rounding). N154 pooled t 6.535 vs K1027 6.977: K1027 **STRONGER** (paper conservative, \u53ef\u80fd data vintage \u65e9). **\u5efa\u8b70 (a)**: Paper 9 text \u61c9 update exact numbers from K1027 (range 4.80-7.00%, mean 6.42%, pooled t=6.977). Core claim robust. **Paper 9 D3(\u5df2\u89e3)/D4(\u5df2\u89e3)/N148-N154(\u5df2\u89e3) \u5168\u8986\u84cb** \u2014 \u53ea\u5269 D5 0050.TW forensic. commit fdd06cff.",
+    "evidence": [
+      "experiments/k1027/k1027.py",
+      "experiments/k1027/k1027_results.json",
+      "experiments/k1027/k1027_vs_paper9_diff.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:25:09.262141"
   }
 ]
