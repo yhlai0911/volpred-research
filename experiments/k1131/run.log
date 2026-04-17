@@ -1,0 +1,82 @@
+======================================================================
+K1131 - Continuous VIX-dependent beta via spline
+======================================================================
+
+[1] Loading cached bars from _cache_bars_2017-01-01_2021-12-31.parquet
+    Loaded 73,203 bars, 1223 days, 2017-01-03 00:00:00 .. 2021-12-30 00:00:00
+
+[2] Lee-Mykland jump detection (K=16, alpha=0.01)
+    Gumbel threshold = 5.126
+    Jumps: 115 (0.214%)
+
+[3] Loading VIX (T-1 lag)
+    VIX lag1 merged. IS VIX range: 9.14 - 37.32
+    OOS VIX range: 12.32 - 82.69
+
+[4] IS: N=31,498 (2017-01-03..2019-12-31)  jumps=81
+    OOS: N=20,914 (2020-01-02..2021-12-30)  jumps=33
+
+[5] Spline knots (IS [20. 40. 60. 80.] percentile):
+    knot_0 (q=0.20): VIX=11.048
+    knot_1 (q=0.40): VIX=12.500
+    knot_2 (q=0.60): VIX=14.250
+    knot_3 (q=0.80): VIX=17.300
+    IS median VIX = 13.110
+
+[6] Tertile cutoffs (K1128 replication): 33%=12.070  67%=14.990
+
+[7] Fitting M_base, M_tertile, M_spline on IS via MLE...
+    M_base: p=4   nll_is=557.0556  success=True
+    M_tertile: p=8   nll_is=554.8611  success=True
+    M_spline: p=10  nll_is=553.0321  success=True
+
+[8] H1: LRT spline vs base
+    chi^2 = 8.047, df = 6, p = 0.23467
+    (reference) tertile vs base: chi^2=4.389, df=4, p=0.35591
+
+[9] OOS predictions (log-loss)
+    base   : mean log-loss = 0.01171
+    tertile: mean log-loss = 0.01172
+    spline : mean log-loss = 0.01248
+    OOS AUC: base=0.5543  tertile=0.5559  spline=0.4965
+
+[10] H2: DM-HLN tests on OOS log-loss (positive t => 2nd model better)
+     spline vs tertile: t=-3.937  (n=20914, mean_d=-7.58e-04)
+     spline vs base   : t=-3.934
+     tertile vs base  : t=-0.416
+
+[11] Computing f(VIX) curve for H4 visualization
+    f_abs(VIX) shape: U-shape_or_single_turn
+    f_abs(VIX) range: [-0.576, 20.432]
+    f_sgn(VIX) range: [-1.994, 6.520]
+
+[12] H3: OOS economic significance (contribution to log-odds)
+    spline  abs_contrib : mean=+2.034e-01  std=3.604e-01
+    spline  sgn_contrib : mean=-1.442e-03  std=1.338e-01
+    spline  total       : mean=+2.020e-01  std=4.197e-01
+    tertile abs_contrib : mean=+8.863e-02  std=7.136e-02
+    tertile sgn_contrib : mean=-1.102e-02  std=9.675e-02
+
+[13] OOS VIX distribution comparison (tertile vs spline coverage)
+    K1128 tertile OOS count: low=0, mid=854, high=20060
+    Spline: continuous — all 20,914 OOS bars get nonzero f(VIX) coefficient
+    f_abs at OOS VIX Q25/Q50/Q75 = 17.8/22.0/27.6: -0.068 / +1.290 / +3.034
+
+======================================================================
+K1131 VERDICT
+======================================================================
+H1 global LRT spline vs base: chi^2(6)=8.05, p=0.2347 -> FAIL
+H2 OOS DM-HLN spline vs tertile: t=-3.937 -> FAIL
+H3 OOS contrib nontrivial (|mean|>0, |mean abs|>1e-4): mean_total_contrib=+2.020e-01 -> PASS
+H4 f(VIX) shape sensible: U-shape_or_single_turn -> PASS
+
+=> VERDICT: NULL
+
+[14] Saving results (runtime=1.8s)...
+    Saved /Users/yhlai0911/Desktop/volpred-research/experiments/k1131/k1131_results.json
+
+[15] Plotting spline_beta_vs_vix.png and tertile_vs_spline_comparison.png ...
+    Saved /Users/yhlai0911/Desktop/volpred-research/experiments/k1131/spline_beta_vs_vix.png
+    Saved /Users/yhlai0911/Desktop/volpred-research/experiments/k1131/tertile_vs_spline_comparison.png
+
+K1131 complete. Runtime: 1.8s  Verdict: NULL
