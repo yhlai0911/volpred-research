@@ -1,0 +1,73 @@
+
+========================================================================
+K1171: close AU gap -> N=13 cross-market mechanism test
+========================================================================
+
+[panel] rows: 182 - {'TW': 30, 'US': 30, 'JP': 30, 'EU': 18, 'KR': 10, 'CA': 10, 'BR': 10, 'IN': 10, 'ID': 10, 'AU': 10, 'MX': 9, 'HK': 5}
+
+Per-market summary (sorted by institutions_pct_mean):
+         n  theta_eav_mean  theta_eav_median  sigma2_sample_mean  analyst_median  market_cap_median  log_mcap_median  institutions_pct_mean  institutions_pct_median  theta_rel
+market                                                                                                                                                                         
+ID      10        0.000428          0.000364            0.000407            20.0       1.707472e+14        32.626418               0.153744                 0.169580   0.237653
+CH      10        0.000351          0.000349            0.000352             NaN       5.474078e+11        26.985204               0.156900                 0.164630   0.303738
+MX      10        0.000660          0.000300            0.000345            13.0       4.383392e+11        26.778987               0.195478                 0.185140   1.201737
+TW      31        0.000379          0.000085            0.000380             7.5       3.271991e+11        26.513835               0.246967                 0.249310   0.170000
+HK       5        0.000247          0.000125            0.000290            17.0       2.388137e+12        28.501535               0.260677                 0.210880   0.179562
+KR      10        0.000077          0.000081            0.000459            25.5       5.176361e+13        31.574097               0.365205                 0.348070   0.275709
+AU      10        0.000295          0.000116            0.000211            14.0       1.215791e+11        25.521419               0.367725                 0.364005   0.149817
+IN      10        0.000698          0.000609            0.000278            37.0       9.310789e+12        29.861427               0.382843                 0.394680   1.169647
+EU      19        0.000661          0.000242            0.000291            21.0       1.167161e+11        25.471210               0.415821                 0.407700   0.140000
+JP      30        0.001019          0.000762            0.000364            14.5       9.899296e+12        29.923456               0.425083                 0.433995   0.390000
+BR      10        0.001680          0.000791            0.000647            13.0       1.911760e+11        25.966856               0.485622                 0.484825   1.886705
+CA      10        0.000360          0.000105            0.000216            14.5       1.301472e+11        25.591141               0.551501                 0.530065   1.448405
+US      30        0.002019          0.000232            0.000326            32.5       4.430608e+11        26.816881               0.749664                 0.758265   0.590000
+
+Cross-market Spearman (N=13):
+  institutions_pct_vs_theta_rel: rho=+0.385, p=0.1944, n=13
+  analyst_median_vs_theta_rel: rho=-0.063, p=0.8454, n=12
+  log_mcap_median_vs_theta_rel: rho=+0.093, p=0.7615, n=13
+
+[panel_valid] n=182 - markets: {'TW': 30, 'US': 30, 'JP': 30, 'EU': 18, 'KR': 10, 'CA': 10, 'BR': 10, 'IN': 10, 'ID': 10, 'AU': 10, 'MX': 9, 'HK': 5}
+
+Panel OLS (market FE + log_mcap):
+  analyst_only: R2=0.217, n=182
+    log_analyst: beta=+1.118e-03, t=+4.08, p=0.000
+    log_mcap: beta=-2.418e-04, t=-1.43, p=0.155
+  inst_only: R2=0.164, n=182
+    institutions_pct: beta=-1.274e-03, t=-0.86, p=0.390
+    log_mcap: beta=-4.142e-06, t=-0.03, p=0.979
+  joint: R2=0.241, n=182
+    log_analyst: beta=+1.265e-03, t=+3.81, p=0.000
+    institutions_pct: beta=-2.063e-03, t=-1.30, p=0.195
+    log_mcap: beta=-2.440e-04, t=-1.51, p=0.134
+
+Within-market (demeaned) Pearson:
+  log_analyst_x_theta_eav: r=+0.231, p=0.002, n=182
+  institutions_pct_x_theta_eav: r=-0.106, p=0.155, n=182
+  log_analyst_x_institutions_pct: r=+0.235, p=0.001, n=182
+
+Two-level R2 decomposition:
+  between-market (N=12): {'institutions_pct': 0.4194408675389064, 'log_analyst': 0.03522789513651903, 'log_mcap': 0.0656094479792626}
+  within-market  (N=182): {'log_analyst': 0.05335826723618908, 'institutions_pct': 0.011197139212234086, 'log_mcap': 0.00020178919429703068}
+
+Leave-one-out (drop each market, N=12 each):
+  drop AU: rho=+0.441, p=0.1517
+  drop BR: rho=+0.252, p=0.4299
+  drop CA: rho=+0.252, p=0.4299
+  drop CH: rho=+0.392, p=0.2081
+  drop EU: rho=+0.497, p=0.1006
+  drop HK: rho=+0.413, p=0.1826
+  drop ID: rho=+0.364, p=0.2453
+  drop IN: rho=+0.371, p=0.2356
+  drop JP: rho=+0.294, p=0.3541
+  drop KR: rho=+0.385, p=0.2170
+  drop MX: rho=+0.545, p=0.0666
+  drop TW: rho=+0.413, p=0.1826
+  drop US: rho=+0.343, p=0.2756
+
+===== VERDICT: DATA_LIMITED =====
+AU added at N=13: rho=+0.385 (Delta_rho=-0.056), p=0.1944 (Delta_p=+0.042). AU inclusion WEAKENS cross-market correlation. AU is an off-ladder LOW-theta_rel RESIDUAL: it sits at inst_pct~0.37 (mid-high) but theta_rel~0.15 (very low), inverting the developed-market ladder. Drop-AU LOO recovers K1172 rho=+0.441, confirming AU is a mild leverage point. Structural interpretation: ASX Top 10 is heavy on banks/miners where earnings reports generate less idiosyncratic volatility than in US/CA/BR. Gap NOT closed by AU.
+
+[figures] wrote cross_market_scatter.png + delta_vs_k1172.png
+[csv] wrote k1171_per_stock_table.csv (n=182)
+[json] wrote k1171_results.json
