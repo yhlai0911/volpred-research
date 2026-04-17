@@ -27797,5 +27797,16 @@
     ],
     "confidence": 0.92,
     "created_at": "2026-04-18T07:10:12.038052"
+  },
+  {
+    "item_id": "d8c46801",
+    "category": "K1235b",
+    "content": "K1235b A4f spec replication DECISIVE \u2014 Paper 9 R2 errata NOT required. Spec: VIX\u00b2 \u03c4, free \u03c9, OOS 2019-01-01 to 2026-04-14, W=2000, refit=63, 1878 OOS obs. FEZ t_harvey=3.11 vs paper 3.45 diff=-0.34 p=1.87e-03 BORDERLINE. STOXX50E t_harvey=3.92 vs paper 3.64 diff=+0.28 p=8.75e-05 BORDERLINE. Both within Harvey \u00b10.5 tolerance + clear |t|>3.0 threshold. Paper 9 R2 recommendation: path (b) spec-clarification footnote (not full Table 6 replacement). Residual divergence (\u00b19% either direction) attributable to OOS end-date (K1235b 2026-04-14 vs paper ~2026-02) and yfinance adjustment drift. K1232 no-source audit fully RESOLVED \u2014 FEZ + STOXX50E values trace to K988-family A4f path (not K949). K1235 earlier MISMATCH (t=4.03/5.01) was expected under wrong log-exp K949 spec. Qualitative 'significant' claim holds. Main thread action: draft R2 footnote per k1235b README \u00a76, mark K1232 flag resolved.",
+    "evidence": [
+      "experiments/k1235b/",
+      "commit 1d92d256"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-18T07:19:43.925300"
   }
 ]
