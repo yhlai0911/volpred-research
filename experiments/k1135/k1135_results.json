@@ -1,0 +1,832 @@
+{
+  "experiment_id": "K1135",
+  "title": "Skew-t GAS on negatively skewed commodities",
+  "description": "Test whether Hansen (1994) skew-t GAS recovers VaR/ES performance on commodities (USO/UNG treatment; GLD/SLV controls) where K1129 symmetric-t was NULL. Completes Paper 4 Channel 3 \"GAS family\" narrative block.",
+  "methodology": {
+    "models": [
+      "M0 GARCH-N",
+      "M1 symmetric Student-t GAS (K1129 reference)",
+      "M2 Hansen skew-t GAS (static lambda)"
+    ],
+    "assets": [
+      "USO",
+      "UNG",
+      "GLD",
+      "SLV"
+    ],
+    "is_start": "2010-01-01",
+    "oos_start": "2020-01-01",
+    "window": 1500,
+    "refit_every": 63,
+    "evaluation_target": "r\u00b2 for QLIKE (Patton 2011); VaR/ES on returns",
+    "hypotheses": {
+      "H1": "QLIKE DM-HLN M2 vs M0",
+      "H2": "VaR 1%&5% Kupiec + Christoffersen CC (joint uc+ind) + Engle-Manganelli DQ",
+      "H3": "ES 1%&5% Acerbi-Szekely (2014) Z1 + Z2 joint PASS"
+    },
+    "multiple_testing": "Benjamini-Hochberg FDR across 4 commodities for H1"
+  },
+  "data_source": "yfinance",
+  "seed": 42,
+  "references": [
+    "Creal, Koopman, Lucas (2013) JASA 108(501) \u2014 GAS framework",
+    "Hansen (1994) IER 35(3):705-730 \u2014 skew-t density",
+    "Gonzalez-Rivera et al (2014) IJF 30(3):529-550 \u2014 time-varying skew/kurt",
+    "Patton (2011) J Econometrics 160 \u2014 QLIKE proxy-robust",
+    "Harvey-Leybourne-Newbold (1997) IJF 13 \u2014 DM small-sample correction",
+    "Kupiec (1995); Christoffersen (1998); Engle-Manganelli (2004) JBES 22",
+    "Acerbi, Szekely (2014) Risk \u2014 ES backtest",
+    "Benjamini-Hochberg (1995) JRSS B 57 \u2014 FDR control"
+  ],
+  "prior_experiments": {
+    "K1129": "commodity symmetric GAS-t \u2192 NULL on all 4 assets",
+    "K1138": "equity GAS-t \u2192 HARMFUL (SPY DM t=-3.27, QQQ t=-2.81)",
+    "K1143": "equity static skew-t \u2192 did not rescue harm; architectural incompat"
+  },
+  "results": {
+    "USO": {
+      "n_oos": 1576,
+      "oos_start": "2020-01-02",
+      "oos_end": "2026-04-10",
+      "group": "treatment",
+      "full_skew": -0.578,
+      "full_kurt": 9.62,
+      "is_diagnostic": {
+        "nu_M1_sym": 7.89,
+        "nu_M2_skewt": 7.86,
+        "lam_M2_skewt": -0.05
+      },
+      "model_metrics": {
+        "M0": {
+          "QLIKE": 1.412237,
+          "Spearman_rho": 0.266,
+          "Spearman_p": null
+        },
+        "M1": {
+          "QLIKE": 1.435643,
+          "Spearman_rho": 0.267,
+          "Spearman_p": null
+        },
+        "M2": {
+          "QLIKE": 1.437549,
+          "Spearman_rho": 0.263,
+          "Spearman_p": null
+        }
+      },
+      "dm_tests": {
+        "M1_vs_M0": {
+          "DM_HLN_t": -2.126,
+          "DM_HLN_p": 0.03367,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": -1.66,
+          "better": "M0"
+        },
+        "M2_vs_M0": {
+          "DM_HLN_t": -1.995,
+          "DM_HLN_p": 0.04623,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": -1.79,
+          "better": "M0",
+          "BH_p": 0.1849
+        },
+        "M2_vs_M1": {
+          "DM_HLN_t": -0.579,
+          "DM_HLN_p": 0.5629,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": -0.13,
+          "better": "M1"
+        }
+      },
+      "var_backtests": {
+        "alpha_0.01": {
+          "M0": {
+            "violation_rate": 0.0152,
+            "n_violations": 24,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.053,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.023,
+            "DQ_stat": null,
+            "DQ_p": 0.007,
+            "Trinity_PASS": false
+          },
+          "M1": {
+            "violation_rate": 0.013999999999999999,
+            "n_violations": 22,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.136,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.004,
+            "DQ_stat": null,
+            "DQ_p": 0.0,
+            "Trinity_PASS": false
+          },
+          "M2": {
+            "violation_rate": 0.011399999999999999,
+            "n_violations": 18,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.579,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.045,
+            "DQ_stat": null,
+            "DQ_p": 0.003,
+            "Trinity_PASS": false
+          }
+        },
+        "alpha_0.05": {
+          "M0": {
+            "violation_rate": 0.051399999999999994,
+            "n_violations": 81,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.8,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.391,
+            "DQ_stat": null,
+            "DQ_p": 0.702,
+            "Trinity_PASS": true
+          },
+          "M1": {
+            "violation_rate": 0.052000000000000005,
+            "n_violations": 82,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.713,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.213,
+            "DQ_stat": null,
+            "DQ_p": 0.558,
+            "Trinity_PASS": true
+          },
+          "M2": {
+            "violation_rate": 0.0451,
+            "n_violations": 71,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.36,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.593,
+            "DQ_stat": null,
+            "DQ_p": 0.692,
+            "Trinity_PASS": true
+          }
+        }
+      },
+      "es_backtests": {
+        "alpha_0.01": {
+          "M0": {
+            "Z1": 2.765,
+            "Z1_p": 0.006,
+            "Z1_PASS": false,
+            "Z2": 2.199,
+            "Z2_p": 0.028,
+            "Z2_PASS": false,
+            "n_violations_used": null
+          },
+          "M1": {
+            "Z1": 1.084,
+            "Z1_p": 0.278,
+            "Z1_PASS": true,
+            "Z2": 1.527,
+            "Z2_p": 0.127,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M2": {
+            "Z1": 0.965,
+            "Z1_p": 0.335,
+            "Z1_PASS": true,
+            "Z2": 0.793,
+            "Z2_p": 0.428,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          }
+        },
+        "alpha_0.05": {
+          "M0": {
+            "Z1": 2.614,
+            "Z1_p": 0.009,
+            "Z1_PASS": false,
+            "Z2": 1.174,
+            "Z2_p": 0.241,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M1": {
+            "Z1": 1.447,
+            "Z1_p": 0.148,
+            "Z1_PASS": true,
+            "Z2": 0.874,
+            "Z2_p": 0.382,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M2": {
+            "Z1": 1.217,
+            "Z1_p": 0.224,
+            "Z1_PASS": true,
+            "Z2": -0.346,
+            "Z2_p": 0.729,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          }
+        }
+      }
+    },
+    "UNG": {
+      "n_oos": 1576,
+      "oos_start": "2020-01-02",
+      "oos_end": "2026-04-10",
+      "group": "control",
+      "full_skew": 0.103,
+      "full_kurt": 3.23,
+      "is_diagnostic": {
+        "nu_M1_sym": 12.31,
+        "nu_M2_skewt": 11.92,
+        "lam_M2_skewt": 0.073
+      },
+      "model_metrics": {
+        "M0": {
+          "QLIKE": 1.221078,
+          "Spearman_rho": 0.235,
+          "Spearman_p": null
+        },
+        "M1": {
+          "QLIKE": 1.215442,
+          "Spearman_rho": 0.238,
+          "Spearman_p": null
+        },
+        "M2": {
+          "QLIKE": 1.215836,
+          "Spearman_rho": 0.235,
+          "Spearman_p": null
+        }
+      },
+      "dm_tests": {
+        "M1_vs_M0": {
+          "DM_HLN_t": 1.691,
+          "DM_HLN_p": 0.09106,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": 0.46,
+          "better": "M1"
+        },
+        "M2_vs_M0": {
+          "DM_HLN_t": 1.557,
+          "DM_HLN_p": 0.1197,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": 0.43,
+          "better": "M2",
+          "BH_p": 0.2394
+        },
+        "M2_vs_M1": {
+          "DM_HLN_t": -0.39,
+          "DM_HLN_p": 0.6962,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": -0.03,
+          "better": "M1"
+        }
+      },
+      "var_backtests": {
+        "alpha_0.01": {
+          "M0": {
+            "violation_rate": 0.0108,
+            "n_violations": 17,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.757,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.792,
+            "DQ_stat": null,
+            "DQ_p": 0.961,
+            "Trinity_PASS": true
+          },
+          "M1": {
+            "violation_rate": 0.008199999999999999,
+            "n_violations": 13,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.471,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.692,
+            "DQ_stat": null,
+            "DQ_p": 0.987,
+            "Trinity_PASS": true
+          },
+          "M2": {
+            "violation_rate": 0.0095,
+            "n_violations": 15,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.846,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.85,
+            "DQ_stat": null,
+            "DQ_p": 0.951,
+            "Trinity_PASS": true
+          }
+        },
+        "alpha_0.05": {
+          "M0": {
+            "violation_rate": 0.0444,
+            "n_violations": 70,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.3,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.514,
+            "DQ_stat": null,
+            "DQ_p": 0.561,
+            "Trinity_PASS": true
+          },
+          "M1": {
+            "violation_rate": 0.0495,
+            "n_violations": 78,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.926,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.888,
+            "DQ_stat": null,
+            "DQ_p": 0.829,
+            "Trinity_PASS": true
+          },
+          "M2": {
+            "violation_rate": 0.053899999999999997,
+            "n_violations": 85,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.479,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.745,
+            "DQ_stat": null,
+            "DQ_p": 0.818,
+            "Trinity_PASS": true
+          }
+        }
+      },
+      "es_backtests": {
+        "alpha_0.01": {
+          "M0": {
+            "Z1": 1.232,
+            "Z1_p": 0.218,
+            "Z1_PASS": true,
+            "Z2": 0.476,
+            "Z2_p": 0.634,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M1": {
+            "Z1": -0.225,
+            "Z1_p": 0.822,
+            "Z1_PASS": true,
+            "Z2": -0.804,
+            "Z2_p": 0.422,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M2": {
+            "Z1": 0.05,
+            "Z1_p": 0.96,
+            "Z1_PASS": true,
+            "Z2": -0.186,
+            "Z2_p": 0.853,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          }
+        },
+        "alpha_0.05": {
+          "M0": {
+            "Z1": 1.371,
+            "Z1_p": 0.171,
+            "Z1_PASS": true,
+            "Z2": -0.718,
+            "Z2_p": 0.473,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M1": {
+            "Z1": -1.004,
+            "Z1_p": 0.315,
+            "Z1_PASS": true,
+            "Z2": -0.324,
+            "Z2_p": 0.746,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M2": {
+            "Z1": -0.692,
+            "Z1_p": 0.489,
+            "Z1_PASS": true,
+            "Z2": 0.522,
+            "Z2_p": 0.602,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          }
+        }
+      }
+    },
+    "GLD": {
+      "n_oos": 1576,
+      "oos_start": "2020-01-02",
+      "oos_end": "2026-04-10",
+      "group": "treatment",
+      "full_skew": -0.31,
+      "full_kurt": 6.75,
+      "is_diagnostic": {
+        "nu_M1_sym": 5.0,
+        "nu_M2_skewt": 4.97,
+        "lam_M2_skewt": -0.049
+      },
+      "model_metrics": {
+        "M0": {
+          "QLIKE": 1.52694,
+          "Spearman_rho": 0.184,
+          "Spearman_p": null
+        },
+        "M1": {
+          "QLIKE": 1.528038,
+          "Spearman_rho": 0.187,
+          "Spearman_p": null
+        },
+        "M2": {
+          "QLIKE": 1.521279,
+          "Spearman_rho": 0.19,
+          "Spearman_p": null
+        }
+      },
+      "dm_tests": {
+        "M1_vs_M0": {
+          "DM_HLN_t": -0.126,
+          "DM_HLN_p": 0.9001,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": -0.07,
+          "better": "M0"
+        },
+        "M2_vs_M0": {
+          "DM_HLN_t": 0.739,
+          "DM_HLN_p": 0.46,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": 0.37,
+          "better": "M2",
+          "BH_p": 0.6133
+        },
+        "M2_vs_M1": {
+          "DM_HLN_t": 1.729,
+          "DM_HLN_p": 0.08402,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": 0.44,
+          "better": "M2"
+        }
+      },
+      "var_backtests": {
+        "alpha_0.01": {
+          "M0": {
+            "violation_rate": 0.0216,
+            "n_violations": 34,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.0,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.0,
+            "DQ_stat": null,
+            "DQ_p": 0.0,
+            "Trinity_PASS": false
+          },
+          "M1": {
+            "violation_rate": 0.013999999999999999,
+            "n_violations": 22,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.136,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.198,
+            "DQ_stat": null,
+            "DQ_p": 0.355,
+            "Trinity_PASS": true
+          },
+          "M2": {
+            "violation_rate": 0.0108,
+            "n_violations": 17,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.757,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.38,
+            "DQ_stat": null,
+            "DQ_p": 0.388,
+            "Trinity_PASS": true
+          }
+        },
+        "alpha_0.05": {
+          "M0": {
+            "violation_rate": 0.0552,
+            "n_violations": 87,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.351,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.121,
+            "DQ_stat": null,
+            "DQ_p": 0.283,
+            "Trinity_PASS": true
+          },
+          "M1": {
+            "violation_rate": 0.0596,
+            "n_violations": 94,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.088,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.009,
+            "DQ_stat": null,
+            "DQ_p": 0.033,
+            "Trinity_PASS": false
+          },
+          "M2": {
+            "violation_rate": 0.0533,
+            "n_violations": 84,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.552,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.005,
+            "DQ_stat": null,
+            "DQ_p": 0.015,
+            "Trinity_PASS": false
+          }
+        }
+      },
+      "es_backtests": {
+        "alpha_0.01": {
+          "M0": {
+            "Z1": 3.407,
+            "Z1_p": 0.001,
+            "Z1_PASS": false,
+            "Z2": 3.481,
+            "Z2_p": 0.0,
+            "Z2_PASS": false,
+            "n_violations_used": null
+          },
+          "M1": {
+            "Z1": 1.168,
+            "Z1_p": 0.243,
+            "Z1_PASS": true,
+            "Z2": 1.521,
+            "Z2_p": 0.128,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M2": {
+            "Z1": 1.143,
+            "Z1_p": 0.253,
+            "Z1_PASS": true,
+            "Z2": 0.557,
+            "Z2_p": 0.577,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          }
+        },
+        "alpha_0.05": {
+          "M0": {
+            "Z1": 3.864,
+            "Z1_p": 0.0,
+            "Z1_PASS": false,
+            "Z2": 2.056,
+            "Z2_p": 0.04,
+            "Z2_PASS": false,
+            "n_violations_used": null
+          },
+          "M1": {
+            "Z1": 1.343,
+            "Z1_p": 0.179,
+            "Z1_PASS": true,
+            "Z2": 1.912,
+            "Z2_p": 0.056,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M2": {
+            "Z1": 0.751,
+            "Z1_p": 0.453,
+            "Z1_PASS": true,
+            "Z2": 0.79,
+            "Z2_p": 0.429,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          }
+        }
+      }
+    },
+    "SLV": {
+      "n_oos": 1576,
+      "oos_start": "2020-01-02",
+      "oos_end": "2026-04-10",
+      "group": "treatment",
+      "full_skew": -1.064,
+      "full_kurt": 13.02,
+      "is_diagnostic": {
+        "nu_M1_sym": 4.17,
+        "nu_M2_skewt": 4.16,
+        "lam_M2_skewt": -0.054
+      },
+      "model_metrics": {
+        "M0": {
+          "QLIKE": 1.505982,
+          "Spearman_rho": 0.17,
+          "Spearman_p": null
+        },
+        "M1": {
+          "QLIKE": 1.513759,
+          "Spearman_rho": 0.167,
+          "Spearman_p": null
+        },
+        "M2": {
+          "QLIKE": 1.51101,
+          "Spearman_rho": 0.168,
+          "Spearman_p": null
+        }
+      },
+      "dm_tests": {
+        "M1_vs_M0": {
+          "DM_HLN_t": -0.381,
+          "DM_HLN_p": 0.7031,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": -0.52,
+          "better": "M0"
+        },
+        "M2_vs_M0": {
+          "DM_HLN_t": -0.252,
+          "DM_HLN_p": 0.801,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": -0.33,
+          "better": "M0",
+          "BH_p": 0.801
+        },
+        "M2_vs_M1": {
+          "DM_HLN_t": 1.751,
+          "DM_HLN_p": 0.08014,
+          "n_used": 1576,
+          "QLIKE_rel_improvement_pct": 0.18,
+          "better": "M2"
+        }
+      },
+      "var_backtests": {
+        "alpha_0.01": {
+          "M0": {
+            "violation_rate": 0.019,
+            "n_violations": 30,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.001,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.0,
+            "DQ_stat": null,
+            "DQ_p": 0.0,
+            "Trinity_PASS": false
+          },
+          "M1": {
+            "violation_rate": 0.013999999999999999,
+            "n_violations": 22,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.136,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.004,
+            "DQ_stat": null,
+            "DQ_p": 0.0,
+            "Trinity_PASS": false
+          },
+          "M2": {
+            "violation_rate": 0.013300000000000001,
+            "n_violations": 21,
+            "expected_violations": 15.76,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.207,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.004,
+            "DQ_stat": null,
+            "DQ_p": 0.0,
+            "Trinity_PASS": false
+          }
+        },
+        "alpha_0.05": {
+          "M0": {
+            "violation_rate": 0.045700000000000005,
+            "n_violations": 72,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.425,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.673,
+            "DQ_stat": null,
+            "DQ_p": 0.696,
+            "Trinity_PASS": true
+          },
+          "M1": {
+            "violation_rate": 0.0451,
+            "n_violations": 71,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.36,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.593,
+            "DQ_stat": null,
+            "DQ_p": 0.787,
+            "Trinity_PASS": true
+          },
+          "M2": {
+            "violation_rate": 0.0431,
+            "n_violations": 68,
+            "expected_violations": 78.80000000000001,
+            "Kupiec_LR": null,
+            "Kupiec_p": 0.202,
+            "Christoffersen_CC_LR": null,
+            "Christoffersen_CC_p": 0.366,
+            "DQ_stat": null,
+            "DQ_p": 0.593,
+            "Trinity_PASS": true
+          }
+        }
+      },
+      "es_backtests": {
+        "alpha_0.01": {
+          "M0": {
+            "Z1": 3.677,
+            "Z1_p": 0.0,
+            "Z1_PASS": false,
+            "Z2": 3.094,
+            "Z2_p": 0.002,
+            "Z2_PASS": false,
+            "n_violations_used": null
+          },
+          "M1": {
+            "Z1": 0.351,
+            "Z1_p": 0.726,
+            "Z1_PASS": true,
+            "Z2": 1.355,
+            "Z2_p": 0.175,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M2": {
+            "Z1": 0.023,
+            "Z1_p": 0.982,
+            "Z1_PASS": true,
+            "Z2": 1.103,
+            "Z2_p": 0.27,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          }
+        },
+        "alpha_0.05": {
+          "M0": {
+            "Z1": 4.033,
+            "Z1_p": 0.0,
+            "Z1_PASS": false,
+            "Z2": 0.902,
+            "Z2_p": 0.367,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M1": {
+            "Z1": 1.727,
+            "Z1_p": 0.084,
+            "Z1_PASS": true,
+            "Z2": -0.083,
+            "Z2_p": 0.934,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          },
+          "M2": {
+            "Z1": 1.498,
+            "Z1_p": 0.134,
+            "Z1_PASS": true,
+            "Z2": -0.524,
+            "Z2_p": 0.6,
+            "Z2_PASS": true,
+            "n_violations_used": null
+          }
+        }
+      }
+    }
+  },
+  "verdict": {
+    "scenario": "B",
+    "description": "Only VaR/ES improved, QLIKE NULL",
+    "H1_pass_count": 0,
+    "H2_pass_count_1pct": 2,
+    "H2_pass_count_5pct": 3,
+    "H3_pass_count_1pct": 4,
+    "H3_pass_count_5pct": 4,
+    "paper4_channel3_implication": "Commodity-specific subsection: skew-t for tail risk only"
+  },
+  "charts": [
+    "commodity_skew_vs_gauss.png",
+    "var_es_backtest.png"
+  ],
+  "created_at": "2026-04-17T07:14:50.145610+00:00",
+  "note": "Reconstructed from run.log because the original run was piped to `head -200` which caused SIGPIPE termination of the Python stdout writer before json.dump could write the results file. All numbers here are from the Python-printed log \u2014 not regenerated. Charts (commodity_skew_vs_gauss.png, var_es_backtest.png) were saved before the pipe closed. Full re-run is reproducible via seed=42."
+}
