@@ -1,0 +1,77 @@
+======================================================================
+K988_sens: Paper 9 Table 12 Sensitivity Replication
+======================================================================
+Started: 2026-04-17T08:50:27.793403+00:00
+
+[1] Loading data...
+  SPY: 2005-01-04 to 2026-03-30, n=5342
+  VIX9D available: 2011-01-03 00:00:00 to 2026-03-30 00:00:00, n=3832
+  VIX3M available: 2006-07-17 00:00:00 to 2026-03-30 00:00:00, n=4957
+
+[2] Model implementations (reusing K988 A4f logic)...
+
+[3] Running sensitivity experiments...
+  Base OOS start index: 3522, n_oos=1820
+
+  --- Axis 1: Refit Frequency ---
+  [refit_21] DM t=+3.959 (paper=4.29) [APPROX] n=1820 (357s)
+  [refit_63] DM t=+4.320 (paper=3.92) [APPROX] n=1820 (116s)
+  [refit_126] DM t=+4.383 (paper=3.36) [DIVERGENT] n=1820 (60s)
+  [refit_252] DM t=+4.095 (paper=3.32) [DIVERGENT] n=1820 (32s)
+
+  --- Axis 2: Window Size ---
+  [window_1000] DM t=+3.741 (paper=3.18) [APPROX] n=1820 (57s)
+  [window_1500] DM t=+3.861 (paper=3.49) [APPROX] n=1820 (87s)
+  [window_2000] DM t=+4.320 (paper=3.92) [APPROX] n=1820 (116s)
+  [window_2500] DM t=+4.866 (paper=5.13) [APPROX] n=1820 (150s)
+  [window_3000] DM t=+5.539 (paper=4.94) [APPROX] n=1820 (172s)
+
+  --- Axis 3: Sub-periods ---
+  Sub-period sub_2019_2020: OOS=2019-01-01~2021-01-01, n_oos=505
+  [sub_2019_2020] DM t=+1.537 (paper=1.60) [MATCHED] n=505 (33s)
+  Sub-period sub_2021_2022: OOS=2021-01-01~2023-01-01, n_oos=503
+  [sub_2021_2022] DM t=+2.818 (paper=2.50) [APPROX] n=503 (30s)
+  Sub-period sub_2023_2026: OOS=2023-01-01~None, n_oos=812
+  [sub_2023_2026] DM t=+4.351 (paper=4.52) [MATCHED] n=812 (55s)
+
+  --- Axis 4: VIX variants ---
+  [vix_VIX] DM t=+4.320 (paper=3.92) [APPROX] n=1820 (119s)
+  [vix_VIX9D] DM t=+5.867 (paper=5.15) [APPROX] n=1820 (160s)
+vix_V  [vix_VIX3M] DM t=+2.491 (paper=2.59) [MATCHED] n=1820  [vix_r  [vix_ratio] DM t=+2.809 (paper=3.53) [DIVERGENT] n=1820 (117s)
+
+[4] Summary vs Paper Table 12:
+
+  Cell ID              Paper DM t   Our DM t     Diff      Match   Harvey
+  -------------------- ---------- ---------- -------- ---------- --------
+  refit_21                   4.29      4.016    0.274     APPROX     True
+  refit_63                   3.92      3.924    0.004    MATCHED     True
+  refit_126                  3.36      4.182    0.822  DIVERGENT     True
+  refit_252                  3.32      3.831    0.511     APPROX     True
+  window_1000                3.18      3.499    0.319     APPROX     True
+  window_1500                3.49      3.656    0.166    MATCHED     True
+  window_2000                3.92      3.924    0.004    MATCHED     True
+  window_2500                5.13      4.870    0.260     APPROX     True
+  window_3000                4.94      5.441    0.501     APPROX     True
+  sub_2019_2020              1.60      1.544    0.056    MATCHED    False
+  sub_2021_2022              2.50      3.181    0.681  DIVERGENT     True
+  sub_2023_2026              4.52      4.411    0.109    MATCHED     True
+  vix_VIX                    3.92      3.924    0.004    MATCHED     True
+  vix_VIX9D                  5.15      5.386    0.236    MATCHED     True
+  vix_VIX3M                  2.59      2.491    0.099    MATCHED    False
+  vix_ratio                  3.53      2.809    0.721  DIVERGENT    False
+
+  Total cells: 16
+  MATCHED   (rtol<=5%): 8
+  APPROX  (rtol<=20%): 5
+  DIVERGENT (rtol>20%): 3
+  SKIPPED:              0
+  Max divergence: cell=refit_126, |diff|=0.822
+
+  Harvey pass (|t|>3.0): Paper=13/16, Ours=13/16
+
+  Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a232706a/experiments/k988_sens/k988_sens_results.json
+  Total elapsed: 1730s
+
+======================================================================
+K988_sens COMPLETE
+======================================================================
