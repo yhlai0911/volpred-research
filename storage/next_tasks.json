@@ -1009,5 +1009,18 @@
     "priority": 3,
     "status": "pending",
     "description": "K1137 發現 TLT/GLD/USO HAR-RV-X +30-52% on Parkinson — 比 VIX regressor 效果大. 測純 HAR-RV (no VIX X) vs GJR-GARCH: 是 HAR 的 daily+weekly+monthly 結構本身帶 value 還是 VIX 才是 driver? 若 HAR alone PASS → Paper 4 新 subsection \"HAR structure universally dominates GJR (on commodity+bond), VIX only marginal increment on equity\"."
+  },
+  {
+    "id": "Paper_folders_backfill_selfcontained",
+    "title": "論文資料夾 self-contained 補齊：data/scripts/results/experiments.md",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T15:33:04+08:00",
+    "description": "Audit 2026-04-17: 10 個 paper/ 有 6 個缺項（參考 agent-specs/claude_rules/paper-workflow.md 新增規範）。缺口清單：(1) crypto-fear-channel (Paper 10, kick-off) — 缺 data/script/results（kickoff 階段，可暫緩）;(2) garch-x-vix (Paper 9, submitted) — 缺 results/figures 與 expref;(3) vix-sufficiency (Paper 4, 39 pages) — 缺 results/figures 與 experiments 索引;(4) volatility-absorption — 缺 results;(5) vt-crowding-abm — 缺 results + expref;(6) vt-insurance-cost — 缺 results。處理策略：主線程分批補 experiments.md + figures soft-link（從對應 experiments/kXXX/）+ scripts/README.md 指向實驗入口檔。不需搬移原始資料（仍在 experiments/kXXX/），只需建立引用。參考樣板：paper/leverage-direction/、paper/taiwan-vt/、paper/vt-trend-following/。注意：Kickoff 階段（outline-only）可暫緩，body drafting 開始時必須補齊；第一次投稿前再做完整性檢查。",
+    "tags": [
+      "paper",
+      "infrastructure",
+      "compliance"
+    ]
   }
 ]
