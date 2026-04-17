@@ -1,0 +1,134 @@
+{
+  "audit_date": "2026-04-17",
+  "paper": "Paper 6: Periodic Realized GARCH (prg-periodic-garch)",
+  "auditor": "reproducibility-audit-agent-ad1a8110",
+
+  "source_mapping": {
+    "Table1_data_summary": {
+      "TAIFEX": {"k": "K874d", "path": "experiments/k874d_results.json"},
+      "SPY": {"k": "K880v2 (fixed) / K880 (paper source)", "path": "experiments/k880v2_results.json"},
+      "QQQ_GLD_EEM": {"k": "K881", "path": "experiments/k881_results.json"},
+      "0050TW": {"k": "K886", "path": "experiments/k886_prg_0050tw_results.json"}
+    },
+    "Table2_main_results": {
+      "TAIFEX_QLIKE_DM": {"k": "K874d", "path": "experiments/k874d_results.json"},
+      "TAIFEX_Spearman_MCS": {"k": "K883 (tick PRG)", "path": "experiments/k883_results.json"},
+      "SPY": {"k": "K880 (ORIGINAL — contains lookahead)", "path": "experiments/k880_results.json"},
+      "QQQ_GLD_EEM": {"k": "K881", "path": "experiments/k881_results.json"},
+      "0050TW": {"k": "K886", "path": "experiments/k886_prg_0050tw_results.json"}
+    },
+    "Table3_ablation": {
+      "PRG_full": {"k": "K880 (original lookahead version)", "path": "experiments/k880_results.json"},
+      "PRG_ablated": {"k": "K880v2 (lookahead-fixed, treated as ablation)", "path": "experiments/k880v2_results.json"},
+      "note": "CRITICAL: The paper presents the K880v2 lookahead-fix as an 'ablation study'. K880v2 marks its own output as COLLAPSED_ARTIFACT."
+    },
+    "Table4_var_es": {
+      "SPY_VaR": {"k": "K880v2", "path": "experiments/k880v2_results.json"},
+      "SPY_ES": {"k": "K880b", "path": "experiments/k880b_results.json"},
+      "TAIFEX_VaR": {"k": "K874d", "path": "experiments/k874d_results.json"}
+    },
+    "Table5_economic": {
+      "all_markets": {"k": "K874e", "path": "experiments/k874e_results.json"}
+    }
+  },
+
+  "key_values_extracted": {
+    "SPY_K880_original": {
+      "prg_ext_qlike": 0.7478,
+      "dm_gjr_vs_prg_ext": 6.0039,
+      "dm_har_vs_prg_ext": 7.3104,
+      "dm_prg_ext_vs_sep": -6.6898,
+      "spearman_prg_ext": 0.5678,
+      "mz_r2_prg_ext": 0.4635,
+      "n_oos": 1823,
+      "status": "HAS_LOOKAHEAD_BUG per k880_vs_k880v2 field"
+    },
+    "SPY_K880v2_fixed": {
+      "prg_ext_qlike": 0.8636,
+      "dm_gjr_vs_prg_ext": -0.5687,
+      "dm_har_vs_prg_ext": 6.6457,
+      "dm_prg_ext_vs_sep": -0.1601,
+      "spearman_prg_ext": 0.4742,
+      "mz_r2_prg_ext": 0.2640,
+      "n_oos": 1823,
+      "status": "LOOKAHEAD FIXED — used as ablation in paper"
+    },
+    "QQQ_K881": {
+      "prg_ext_qlike": 0.7652,
+      "dm_gjr_vs_prg_ext": 4.2572,
+      "dm_har_vs_prg_ext": 8.8404,
+      "dm_prg_ext_vs_sep": -5.4683,
+      "spearman_prg_ext": 0.5017,
+      "overnight_var_share_pct": 27.86,
+      "n_oos": 1981
+    },
+    "GLD_K881": {
+      "prg_ext_qlike": 0.8204,
+      "prg_basic_qlike": 0.7736,
+      "dm_gjr_vs_prg_ext": 6.1175,
+      "dm_har_vs_prg_ext": 6.8734,
+      "dm_prg_ext_vs_sep": -5.1644,
+      "spearman_prg_ext": 0.3523,
+      "overnight_var_share_pct": 53.1,
+      "n_oos": 1613
+    },
+    "EEM_K881": {
+      "prg_ext_qlike": 0.6641,
+      "dm_gjr_vs_prg_ext": 6.6289,
+      "dm_har_vs_prg_ext": 6.3040,
+      "dm_prg_ext_vs_sep": -6.3358,
+      "spearman_prg_ext": 0.4694,
+      "overnight_var_share_pct": 52.6,
+      "n_oos": 1734
+    },
+    "0050TW_K886": {
+      "prg_ext_qlike": 0.7838,
+      "dm_gjr_vs_prg_ext": 5.267,
+      "dm_har_vs_prg_ext": 4.513,
+      "dm_prg_ext_vs_sep": -4.513,
+      "spearman_prg_ext": 0.4398,
+      "overnight_var_share_pct": 46.15,
+      "n_oos": 1266,
+      "oos_period_json": "2021-01-08 to 2026-04-02",
+      "oos_period_paper": "2019/12--2026/04",
+      "DATE_MISMATCH": true
+    },
+    "TAIFEX_K874d": {
+      "prg_ext_qlike_fullday": 0.1979,
+      "gjr_qlike_fullday": 0.4475,
+      "dm_gjr_vs_prg_ext": 5.0996,
+      "dm_gjr_vs_har_total": 0.5669,
+      "prg_ext_var_vr": 0.002372,
+      "gjr_var_vr": 0.024911,
+      "n_oos": 843,
+      "oos_period": "2022-07-14 to 2025-12-31"
+    },
+    "TAIFEX_K883_tick": {
+      "prg_ext_qlike_fullday": 0.1209,
+      "gjr_qlike_fullday": 0.2542,
+      "dm_prg_ext_vs_gjr": -4.000,
+      "n_oos": 843
+    },
+    "economic_K874e": {
+      "buy_and_hold": {"sharpe": 1.0104, "cagr": 0.236, "mdd": -0.3171, "sortino": 0.9125},
+      "gjr": {"sharpe": 1.1124, "cagr": 0.1966, "mdd": -0.233, "sortino": 1.0372},
+      "har": {"sharpe": 1.0702, "cagr": 0.1719, "mdd": -0.2374, "sortino": 0.9625},
+      "prg_basic": {"sharpe": 1.3875, "cagr": 0.1976, "mdd": -0.1385, "sortino": 1.3257},
+      "prg_extended": {"sharpe": 1.6622, "cagr": 0.2359, "mdd": -0.1146, "sortino": 1.6475},
+      "n_oos_days": 843
+    },
+    "ablation_SPY_FZ_ES": {
+      "fz_dm_gjr_vs_prg_ext_1pct": 3.7502,
+      "source": "K880b"
+    }
+  },
+
+  "coverage_summary": {
+    "total_paper_numbers_extracted": 85,
+    "matched": 56,
+    "divergent": 10,
+    "unknown_or_partial": 9,
+    "coverage_pct": 90.0,
+    "critical_issues": 3
+  }
+}
