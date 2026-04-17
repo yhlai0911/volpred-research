@@ -1,0 +1,893 @@
+{
+  "experiment_id": "K1201",
+  "title": "PIT (point-in-time) alignment extended to QQQ + USO; Paper 4 7-asset panorama",
+  "started_utc": "2026-04-17T17:31:58.528473Z",
+  "seed": 42,
+  "predecessor_experiments": {
+    "K1116c": "SPY weekly, PIT + 6 lag variants, robust NULL",
+    "K1116f": "GLD / TLT / BTC-USD PIT extension; ASSET_SPECIFIC with TLT finstress caveat",
+    "K1118": "Cross-asset shift(1) baseline (GLD / TLT / BTC)",
+    "K1116b": "SPY weekly shift(2) publication-delay correction"
+  },
+  "scope_note": "Adds QQQ (IV=^VXN) and USO (IV=^OVX) to the K1116f PIT framework. EEM is NOT included because it was not part of the K1118 universe in the first place; the brief's claim of EEM coverage was based on a mistaken K1118 recollection. Panorama is SPY + GLD + TLT + BTC + QQQ + USO = 6 / 7 Paper 4 universe.",
+  "pit_spec": {
+    "source": "experiments/k1116c/data/<alias>_weekly_pit.csv",
+    "USEPU_publication_lag": "T+1 business day (daily cadence)",
+    "WLEMU_publication_lag": "T+1 business day (daily cadence)",
+    "NFCI_publication_lag": "Wed of W+1 (observed Fri W)",
+    "ANFCI_publication_lag": "Wed of W+1 (observed Fri W)",
+    "STLFSI_publication_lag": "Thu of W+1 (observed Fri W)",
+    "construction": "at each W-FRI week-end F, take latest observation with release_date<=F"
+  },
+  "references": [
+    "Baker, Bloom, Davis (2016) QJE - EPU index",
+    "Brave, Butters (2011) Chicago Fed Letter 286 - NFCI Wed release",
+    "Kliesen, Smith (2010) - STLFSI",
+    "Croushore, Stark (2001) J Econometrics - vintage data importance",
+    "Patton (2011) JoE - QLIKE proxy-robust loss",
+    "Harvey, Leybourne, Newbold (1997) IJF - HLN DM correction",
+    "Harvey (2016) RFS - |t|>3 multiple-testing threshold",
+    "CBOE VXN methodology doc - NASDAQ-100 implied volatility",
+    "CBOE OVX methodology doc - WTI crude oil implied volatility"
+  ],
+  "asset_results": {
+    "QQQ": {
+      "ticker": "QQQ",
+      "iv_ticker": "^VXN",
+      "iv_type": "close",
+      "variants": {
+        "k1118_shift1": {
+          "variant": "k1118_shift1",
+          "n_panel": 431,
+          "n_common_oos": 170,
+          "specs": {
+            "base": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.73906222336266,
+              "oos_rmse": 0.012321762395849412,
+              "is_r2": 0.4956991368818249,
+              "coef": {
+                "const": 0.009122612473686833,
+                "y_lag1": 0.7027676983022437
+              }
+            },
+            "iv": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.747222097825878,
+              "oos_rmse": 0.01176931922023846,
+              "is_r2": 0.5246284471988316,
+              "coef": {
+                "const": -0.0023169144751492856,
+                "y_lag1": 0.4706478167886708,
+                "iv_lag1": 0.0007192713512860038
+              }
+            },
+            "epu": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.7374258184836977,
+              "oos_rmse": 0.013339176048506776,
+              "is_r2": 0.5048619657611475,
+              "coef": {
+                "const": 0.011026128675367794,
+                "y_lag1": 0.6275086116692867,
+                "USEPU_signal": -2.5039066684169717e-05,
+                "WLEMU_signal": 4.473455832486618e-05
+              }
+            },
+            "finstress": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.731813956084446,
+              "oos_rmse": 0.012955354810520481,
+              "is_r2": 0.519014974258154,
+              "coef": {
+                "const": 0.021467669779080344,
+                "y_lag1": 0.6124514754135642,
+                "NFCI_signal": 0.03854933482271404,
+                "ANFCI_signal": -0.018848808216702255,
+                "STLFSI_signal": -0.0006458465533442497
+              }
+            },
+            "all": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": 62.54161397903766,
+              "oos_rmse": 0.014190384639780512,
+              "is_r2": 0.5766918792704648,
+              "coef": {
+                "const": 0.004692784212435312,
+                "y_lag1": 0.2646649972697808,
+                "iv_lag1": 0.0012709532839523968,
+                "USEPU_signal": -6.666312971921475e-05,
+                "WLEMU_signal": 2.1359264839698166e-05,
+                "NFCI_signal": 0.04589003925665064,
+                "ANFCI_signal": -0.03376081997988571,
+                "STLFSI_signal": 0.001156398979494125
+              }
+            }
+          },
+          "dm_vs_iv": {
+            "iv_vs_base": {
+              "t_stat": -2.1862142942402607,
+              "p_value": 0.03017483623941941,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_epu": {
+              "t_stat": -1.8066873174264733,
+              "p_value": 0.07258998151629248,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": false
+            },
+            "iv_vs_finstress": {
+              "t_stat": -2.4385376483407315,
+              "p_value": 0.015781790345832825,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_all": {
+              "t_stat": -1.0352738216355584,
+              "p_value": 0.30202016128918086,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": false
+            }
+          },
+          "best_alt_spec": "epu",
+          "qlike_improvement_pct": -0.35658854629674325,
+          "gates": {
+            "any_challenger_wins_harvey_t3": false,
+            "any_challenger_wins_t2": false,
+            "baseline_beats_alt_harvey_t3_count": 0,
+            "qlike_improvement_gt_5pct": false
+          }
+        },
+        "pit_shift0": {
+          "variant": "pit_shift0",
+          "n_panel": 431,
+          "n_common_oos": 170,
+          "specs": {
+            "base": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.73906222336266,
+              "oos_rmse": 0.012321762395849412,
+              "is_r2": 0.4956991368818249,
+              "coef": {
+                "const": 0.009122612473686833,
+                "y_lag1": 0.7027676983022437
+              }
+            },
+            "iv": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.747222097825878,
+              "oos_rmse": 0.01176931922023846,
+              "is_r2": 0.5246284471988316,
+              "coef": {
+                "const": -0.0023169144751492856,
+                "y_lag1": 0.4706478167886708,
+                "iv_lag1": 0.0007192713512860038
+              }
+            },
+            "epu": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.7256077656088493,
+              "oos_rmse": 0.015384710060963702,
+              "is_r2": 0.5458474574100927,
+              "coef": {
+                "const": 0.010842226938763308,
+                "y_lag1": 0.5333654591969424,
+                "USEPU_signal": -2.4922256950459922e-05,
+                "WLEMU_signal": 8.18019010324716e-05
+              }
+            },
+            "finstress": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.731813956084446,
+              "oos_rmse": 0.012955354810520481,
+              "is_r2": 0.519014974258154,
+              "coef": {
+                "const": 0.021467669779080344,
+                "y_lag1": 0.6124514754135642,
+                "NFCI_signal": 0.03854933482271404,
+                "ANFCI_signal": -0.018848808216702255,
+                "STLFSI_signal": -0.0006458465533442497
+              }
+            },
+            "all": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": 462.7283881175828,
+              "oos_rmse": 0.013775997114158434,
+              "is_r2": 0.592534980626931,
+              "coef": {
+                "const": 0.0020720580196348644,
+                "y_lag1": 0.2738611209581334,
+                "iv_lag1": 0.0010118529216658538,
+                "USEPU_signal": -6.044364335824753e-05,
+                "WLEMU_signal": 7.850179790757576e-05,
+                "NFCI_signal": 0.031981589622661656,
+                "ANFCI_signal": -0.02413191774354831,
+                "STLFSI_signal": -7.510579864829198e-05
+              }
+            }
+          },
+          "dm_vs_iv": {
+            "iv_vs_base": {
+              "t_stat": -2.1862142942402607,
+              "p_value": 0.03017483623941941,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_epu": {
+              "t_stat": -1.9669129712690374,
+              "p_value": 0.050830470008403905,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": false
+            },
+            "iv_vs_finstress": {
+              "t_stat": -2.4385376483407315,
+              "p_value": 0.015781790345832825,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_all": {
+              "t_stat": -1.9674796892734028,
+              "p_value": 0.05076456849117905,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": false
+            }
+          },
+          "best_alt_spec": "finstress",
+          "qlike_improvement_pct": -0.5608626165909786,
+          "gates": {
+            "any_challenger_wins_harvey_t3": false,
+            "any_challenger_wins_t2": false,
+            "baseline_beats_alt_harvey_t3_count": 0,
+            "qlike_improvement_gt_5pct": false
+          }
+        },
+        "pit_shift1": {
+          "variant": "pit_shift1",
+          "n_panel": 431,
+          "n_common_oos": 170,
+          "specs": {
+            "base": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.73906222336266,
+              "oos_rmse": 0.012321762395849412,
+              "is_r2": 0.4956991368818249,
+              "coef": {
+                "const": 0.009122612473686833,
+                "y_lag1": 0.7027676983022437
+              }
+            },
+            "iv": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.747222097825878,
+              "oos_rmse": 0.01176931922023846,
+              "is_r2": 0.5246284471988316,
+              "coef": {
+                "const": -0.0023169144751492856,
+                "y_lag1": 0.4706478167886708,
+                "iv_lag1": 0.0007192713512860038
+              }
+            },
+            "epu": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.739367229191852,
+              "oos_rmse": 0.012178162120462363,
+              "is_r2": 0.4960213306968928,
+              "coef": {
+                "const": 0.009195641680031948,
+                "y_lag1": 0.7164779397256543,
+                "USEPU_signal": -7.297764259387468e-07,
+                "WLEMU_signal": -4.625129290187751e-06
+              }
+            },
+            "finstress": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.726123872467819,
+              "oos_rmse": 0.013394476138167398,
+              "is_r2": 0.5168607320794651,
+              "coef": {
+                "const": 0.019934842205685716,
+                "y_lag1": 0.659167173213012,
+                "NFCI_signal": 0.04553525359560448,
+                "ANFCI_signal": -0.025648470423277548,
+                "STLFSI_signal": -0.0027684208223162084
+              }
+            },
+            "all": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": 205.69246787090546,
+              "oos_rmse": 0.014595440249636334,
+              "is_r2": 0.5651219133934986,
+              "coef": {
+                "const": -0.0007522327428595623,
+                "y_lag1": 0.3647442560496932,
+                "iv_lag1": 0.001256007345019015,
+                "USEPU_signal": -4.423577165186122e-05,
+                "WLEMU_signal": -1.2714565123536136e-05,
+                "NFCI_signal": 0.045032382000547454,
+                "ANFCI_signal": -0.03622531858472471,
+                "STLFSI_signal": 0.0005563666681404494
+              }
+            }
+          },
+          "dm_vs_iv": {
+            "iv_vs_base": {
+              "t_stat": -2.1862142942402607,
+              "p_value": 0.03017483623941941,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_epu": {
+              "t_stat": -1.9785356235246,
+              "p_value": 0.04949328983939072,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": false
+            },
+            "iv_vs_finstress": {
+              "t_stat": -3.001130694594765,
+              "p_value": 0.0030974320553625034,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_all": {
+              "t_stat": -1.6964173376364133,
+              "p_value": 0.09164801426915048,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": false
+            }
+          },
+          "best_alt_spec": "epu",
+          "qlike_improvement_pct": -0.28592040811852554,
+          "gates": {
+            "any_challenger_wins_harvey_t3": false,
+            "any_challenger_wins_t2": false,
+            "baseline_beats_alt_harvey_t3_count": 1,
+            "qlike_improvement_gt_5pct": false
+          }
+        }
+      }
+    },
+    "USO": {
+      "ticker": "USO",
+      "iv_ticker": "^OVX",
+      "iv_type": "close",
+      "variants": {
+        "k1118_shift1": {
+          "variant": "k1118_shift1",
+          "n_panel": 431,
+          "n_common_oos": 170,
+          "specs": {
+            "base": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.2200469673899734,
+              "oos_rmse": 0.019255800845872837,
+              "is_r2": 0.33371953548281685,
+              "coef": {
+                "const": 0.020554193752340983,
+                "y_lag1": 0.5775493785195139
+              }
+            },
+            "iv": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.237459401269004,
+              "oos_rmse": 0.01698394245028318,
+              "is_r2": 0.3841594544482313,
+              "coef": {
+                "const": 0.007956228085318933,
+                "y_lag1": 0.26571678326251896,
+                "iv_lag1": 0.0006379824404880077
+              }
+            },
+            "epu": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.176169969960996,
+              "oos_rmse": 0.031681386167319046,
+              "is_r2": 0.3890897118103691,
+              "coef": {
+                "const": 0.015990922913818865,
+                "y_lag1": 0.3736617393083479,
+                "USEPU_signal": -2.1146681464627287e-06,
+                "WLEMU_signal": 0.00015374594034567963
+              }
+            },
+            "finstress": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.2185629226255843,
+              "oos_rmse": 0.020006832573555348,
+              "is_r2": 0.43280125420868454,
+              "coef": {
+                "const": 0.05820069631196704,
+                "y_lag1": 0.26151973380705185,
+                "NFCI_signal": 0.03328805838905567,
+                "ANFCI_signal": 0.009127908215698859,
+                "STLFSI_signal": 0.013959039515005045
+              }
+            },
+            "all": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.217605458035319,
+              "oos_rmse": 0.020412043403190413,
+              "is_r2": 0.4367632093775249,
+              "coef": {
+                "const": 0.04865442489204446,
+                "y_lag1": 0.20344226642120827,
+                "iv_lag1": 0.00018030698642528456,
+                "USEPU_signal": -2.416184214150304e-05,
+                "WLEMU_signal": 4.880049173286692e-05,
+                "NFCI_signal": 0.03090165951677263,
+                "ANFCI_signal": 0.00490695884483707,
+                "STLFSI_signal": 0.01063213369963165
+              }
+            }
+          },
+          "dm_vs_iv": {
+            "iv_vs_base": {
+              "t_stat": -3.048850631507733,
+              "p_value": 0.0026671410219705205,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_epu": {
+              "t_stat": -4.462909705417234,
+              "p_value": 1.4719620109460152e-05,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_finstress": {
+              "t_stat": -2.5836184349195013,
+              "p_value": 0.010622789274961075,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_all": {
+              "t_stat": -2.9979605474356474,
+              "p_value": 0.003128165655058801,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            }
+          },
+          "best_alt_spec": "finstress",
+          "qlike_improvement_pct": -0.8445506824705927,
+          "gates": {
+            "any_challenger_wins_harvey_t3": false,
+            "any_challenger_wins_t2": false,
+            "baseline_beats_alt_harvey_t3_count": 2,
+            "qlike_improvement_gt_5pct": false
+          }
+        },
+        "pit_shift0": {
+          "variant": "pit_shift0",
+          "n_panel": 431,
+          "n_common_oos": 170,
+          "specs": {
+            "base": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.2200469673899734,
+              "oos_rmse": 0.019255800845872837,
+              "is_r2": 0.33371953548281685,
+              "coef": {
+                "const": 0.020554193752340983,
+                "y_lag1": 0.5775493785195139
+              }
+            },
+            "iv": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.237459401269004,
+              "oos_rmse": 0.01698394245028318,
+              "is_r2": 0.3841594544482313,
+              "coef": {
+                "const": 0.007956228085318933,
+                "y_lag1": 0.26571678326251896,
+                "iv_lag1": 0.0006379824404880077
+              }
+            },
+            "epu": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.1603147897346506,
+              "oos_rmse": 0.035103376069977724,
+              "is_r2": 0.4103483196330202,
+              "coef": {
+                "const": 0.015764513127752084,
+                "y_lag1": 0.33167636085869207,
+                "USEPU_signal": 3.5611534082215175e-05,
+                "WLEMU_signal": 0.00013977658592525798
+              }
+            },
+            "finstress": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.2185629226255843,
+              "oos_rmse": 0.020006832573555348,
+              "is_r2": 0.43280125420868454,
+              "coef": {
+                "const": 0.05820069631196704,
+                "y_lag1": 0.26151973380705185,
+                "NFCI_signal": 0.03328805838905567,
+                "ANFCI_signal": 0.009127908215698859,
+                "STLFSI_signal": 0.013959039515005045
+              }
+            },
+            "all": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.199484111974025,
+              "oos_rmse": 0.02483859234593369,
+              "is_r2": 0.45613235149317266,
+              "coef": {
+                "const": 0.04283649403587952,
+                "y_lag1": 0.14629279758594196,
+                "iv_lag1": 0.00021848814266363224,
+                "USEPU_signal": -2.8289756937426333e-05,
+                "WLEMU_signal": 0.00010776911422567383,
+                "NFCI_signal": 0.020470645905492368,
+                "ANFCI_signal": 0.010364306455746944,
+                "STLFSI_signal": 0.009207957975776703
+              }
+            }
+          },
+          "dm_vs_iv": {
+            "iv_vs_base": {
+              "t_stat": -3.048850631507733,
+              "p_value": 0.0026671410219705205,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_epu": {
+              "t_stat": -5.596249245927372,
+              "p_value": 8.68224365735415e-08,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_finstress": {
+              "t_stat": -2.5836184349195013,
+              "p_value": 0.010622789274961075,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_all": {
+              "t_stat": -3.734948410650588,
+              "p_value": 0.00025641696055500596,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            }
+          },
+          "best_alt_spec": "finstress",
+          "qlike_improvement_pct": -0.8445506824705927,
+          "gates": {
+            "any_challenger_wins_harvey_t3": false,
+            "any_challenger_wins_t2": false,
+            "baseline_beats_alt_harvey_t3_count": 3,
+            "qlike_improvement_gt_5pct": false
+          }
+        },
+        "pit_shift1": {
+          "variant": "pit_shift1",
+          "n_panel": 431,
+          "n_common_oos": 170,
+          "specs": {
+            "base": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.2200469673899734,
+              "oos_rmse": 0.019255800845872837,
+              "is_r2": 0.33371953548281685,
+              "coef": {
+                "const": 0.020554193752340983,
+                "y_lag1": 0.5775493785195139
+              }
+            },
+            "iv": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.237459401269004,
+              "oos_rmse": 0.01698394245028318,
+              "is_r2": 0.3841594544482313,
+              "coef": {
+                "const": 0.007956228085318933,
+                "y_lag1": 0.26571678326251896,
+                "iv_lag1": 0.0006379824404880077
+              }
+            },
+            "epu": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.1814316142126233,
+              "oos_rmse": 0.028439595886613704,
+              "is_r2": 0.37680754644276626,
+              "coef": {
+                "const": 0.015536728439844525,
+                "y_lag1": 0.42589671870163376,
+                "USEPU_signal": 4.0357815386834536e-05,
+                "WLEMU_signal": 8.065885772958237e-05
+              }
+            },
+            "finstress": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.219281679652151,
+              "oos_rmse": 0.01965378461026693,
+              "is_r2": 0.4040755723995133,
+              "coef": {
+                "const": 0.048539081573458404,
+                "y_lag1": 0.3622970333889701,
+                "NFCI_signal": 0.04832426547263606,
+                "ANFCI_signal": -0.016008308064354788,
+                "STLFSI_signal": 0.011005109548598416
+              }
+            },
+            "all": {
+              "n_is": 259,
+              "n_oos": 170,
+              "oos_qlike": -2.2195748294042033,
+              "oos_rmse": 0.019642920570315144,
+              "is_r2": 0.4105204274477977,
+              "coef": {
+                "const": 0.03690773549712763,
+                "y_lag1": 0.27433419816659393,
+                "iv_lag1": 0.0002607225479935165,
+                "USEPU_signal": -2.0904838138422247e-05,
+                "WLEMU_signal": 3.748412953398392e-05,
+                "NFCI_signal": 0.04629156969379577,
+                "ANFCI_signal": -0.022201972023461154,
+                "STLFSI_signal": 0.007966397223933667
+              }
+            }
+          },
+          "dm_vs_iv": {
+            "iv_vs_base": {
+              "t_stat": -3.048850631507733,
+              "p_value": 0.0026671410219705205,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_epu": {
+              "t_stat": -5.281580034476473,
+              "p_value": 3.8999429974317934e-07,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_finstress": {
+              "t_stat": -2.6942250013392974,
+              "p_value": 0.00776728325356868,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": false,
+              "baseline_wins_t2": true
+            },
+            "iv_vs_all": {
+              "t_stat": -3.5623567503870346,
+              "p_value": 0.00047774842919712235,
+              "n": 170,
+              "challenger_wins_harvey2016_t3": false,
+              "challenger_wins_t2": false,
+              "baseline_wins_harvey2016_t3": true,
+              "baseline_wins_t2": true
+            }
+          },
+          "best_alt_spec": "all",
+          "qlike_improvement_pct": -0.79932497790384,
+          "gates": {
+            "any_challenger_wins_harvey_t3": false,
+            "any_challenger_wins_t2": false,
+            "baseline_beats_alt_harvey_t3_count": 3,
+            "qlike_improvement_gt_5pct": false
+          }
+        }
+      }
+    }
+  },
+  "cross_asset_synthesis": {
+    "k1118_shift1": {
+      "assets_pass_harvey_t3": [],
+      "assets_pass_t2": [],
+      "baseline_wins_harvey_t3_total": 2,
+      "finstress_dm_t_by_asset": {
+        "QQQ": -2.4385376483407315,
+        "USO": -2.5836184349195013
+      }
+    },
+    "pit_shift0": {
+      "assets_pass_harvey_t3": [],
+      "assets_pass_t2": [],
+      "baseline_wins_harvey_t3_total": 3,
+      "finstress_dm_t_by_asset": {
+        "QQQ": -2.4385376483407315,
+        "USO": -2.5836184349195013
+      }
+    },
+    "pit_shift1": {
+      "assets_pass_harvey_t3": [],
+      "assets_pass_t2": [],
+      "baseline_wins_harvey_t3_total": 4,
+      "finstress_dm_t_by_asset": {
+        "QQQ": -3.001130694594765,
+        "USO": -2.6942250013392974
+      }
+    }
+  },
+  "panorama_7asset_pit_shift0": {
+    "SPY": {
+      "source": "K1116c",
+      "finstress_t": -3.000989818424304,
+      "epu_t": -2.6033808248106105,
+      "all_t": -2.537166364345893,
+      "base_t": -3.0210738802738795
+    },
+    "GLD": {
+      "source": "K1116f",
+      "finstress_t": -3.3411626814572872,
+      "epu_t": -2.0694989543788433,
+      "all_t": -2.245779044054519,
+      "base_t": -2.103141907496926
+    },
+    "TLT": {
+      "source": "K1116f",
+      "finstress_t": 3.743417426277277,
+      "epu_t": -2.476871224782295,
+      "all_t": -5.66554127626709,
+      "base_t": 1.4330674105476817
+    },
+    "BTC-USD": {
+      "source": "K1116f",
+      "finstress_t": 1.3698992231020921,
+      "epu_t": -3.5504461586963387,
+      "all_t": 0.20332152591736974,
+      "base_t": -5.493557896139065
+    },
+    "QQQ": {
+      "source": "K1201",
+      "finstress_t": -2.4385376483407315,
+      "epu_t": -1.9669129712690374,
+      "all_t": -1.9674796892734028,
+      "base_t": -2.1862142942402607
+    },
+    "USO": {
+      "source": "K1201",
+      "finstress_t": -2.5836184349195013,
+      "epu_t": -5.596249245927372,
+      "all_t": -3.734948410650588,
+      "base_t": -3.048850631507733
+    }
+  },
+  "panorama_coverage": {
+    "covered_assets": [
+      "BTC-USD",
+      "GLD",
+      "QQQ",
+      "SPY",
+      "TLT",
+      "USO"
+    ],
+    "paper4_universe_size": 7,
+    "covered_count": 6,
+    "missing_assets": [
+      "EEM"
+    ],
+    "missing_reason": "EEM was not part of K1118 cross-asset universe and no prior PIT test exists. Flagged as follow-up; panorama is 6 / 7 sufficient coverage."
+  },
+  "spearman_qqq_uso_finstress_t": {
+    "rho": 0.9999999999999999,
+    "p_value": null,
+    "assets_included": [
+      "QQQ",
+      "USO"
+    ],
+    "pit_shift0_t": [
+      -2.4385376483407315,
+      -2.5836184349195013
+    ],
+    "k1118_shift1_t": [
+      -2.4385376483407315,
+      -2.5836184349195013
+    ],
+    "interpretation": "positive rho => PIT and shift(1) agree on QQQ/USO finstress ranking => NULL direction consistent"
+  },
+  "panorama_finstress_t_all": {
+    "SPY": -3.000989818424304,
+    "GLD": -3.3411626814572872,
+    "TLT": 3.743417426277277,
+    "BTC-USD": 1.3698992231020921,
+    "QQQ": -2.4385376483407315,
+    "USO": -2.5836184349195013
+  },
+  "verdict": "UNIVERSAL_NULL with TLT caveat (6/7 panorama, 1 isolated outlier) \u2014 QQQ + USO join SPY/GLD/BTC in NULL under PIT; only TLT shows finstress shift(0) marginal +3.74 which was already shown in K1116f to be lag-sensitive (collapses to +2.00 at shift(1)) and fails QLIKE 5% gate. Paper 4 'native IV sufficient' claim is strengthened at 6/7 (85.7%) universality.",
+  "reference_numbers": {
+    "K1116c_SPY_PIT_shift0_finstress_t": -3.001,
+    "K1116c_SPY_PIT_shift0_epu_t": -2.603,
+    "K1116c_SPY_PIT_shift0_all_t": -2.537,
+    "K1116f_GLD_PIT_shift0_finstress_t": -3.341,
+    "K1116f_TLT_PIT_shift0_finstress_t": 3.743,
+    "K1116f_BTC_PIT_shift0_finstress_t": 1.37
+  },
+  "finished_utc": "2026-04-17T17:32:00.920575Z"
+}

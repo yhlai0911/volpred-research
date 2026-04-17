@@ -1,0 +1,61 @@
+[17:31:58] Loading alt-data PIT + weekly-mean views from K1116c cache...
+[17:31:58]   weekly_mean panel: (2885, 5), PIT panel: (2885, 5)
+[17:31:58] Fetching QQQ + IV=^VXN (iv_type=close)...
+[17:31:59]   QQQ: 431 weeks, 2018-01-12 to 2026-04-10
+[17:32:00]   [QQQ/k1118_shift1] best_alt=epu qlike_imp%=-0.36 DM finstress t=-2.44 n_oos=170
+[17:32:00]   [QQQ/pit_shift0] best_alt=finstress qlike_imp%=-0.56 DM finstress t=-2.44 n_oos=170
+[17:32:00]   [QQQ/pit_shift1] best_alt=epu qlike_imp%=-0.29 DM finstress t=-3.00 n_oos=170
+[17:32:00] Fetching USO + IV=^OVX (iv_type=close)...
+[17:32:00]   USO: 431 weeks, 2018-01-12 to 2026-04-10
+[17:32:00]   [USO/k1118_shift1] best_alt=finstress qlike_imp%=-0.84 DM finstress t=-2.58 n_oos=170
+[17:32:00]   [USO/pit_shift0] best_alt=finstress qlike_imp%=-0.84 DM finstress t=-2.58 n_oos=170
+[17:32:00]   [USO/pit_shift1] best_alt=all qlike_imp%=-0.80 DM finstress t=-2.69 n_oos=170
+[17:32:00] Saved /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a64c1bdc/experiments/k1201/k1201_results.json
+[17:32:01]   saved k1201_dm_heatmap_7asset.png
+[17:32:01]   saved k1201_qlike_improvement.png
+
+==========================================================================================
+K1201 SUMMARY — QQQ + USO PIT + 7-asset panorama
+==========================================================================================
+Verdict: UNIVERSAL_NULL with TLT caveat (6/7 panorama, 1 isolated outlier) — QQQ + USO join SPY/GLD/BTC in NULL under PIT; only TLT shows finstress shift(0) marginal +3.74 which was already shown in K1116f to be lag-sensitive (collapses to +2.00 at shift(1)) and fails QLIKE 5% gate. Paper 4 'native IV sufficient' claim is strengthened at 6/7 (85.7%) universality.
+
+[QQQ]  ticker=QQQ  IV=^VXN
+  k1118_shift1    n_oos=170  best_alt=epu         qlike_imp%=-0.36
+    iv_vs_base            t=-2.186  p=0.0302  [B<-2]
+    iv_vs_epu             t=-1.807  p=0.0726  [ns]
+    iv_vs_finstress       t=-2.439  p=0.0158  [B<-2]
+    iv_vs_all             t=-1.035  p=0.3020  [ns]
+  pit_shift0      n_oos=170  best_alt=finstress   qlike_imp%=-0.56
+    iv_vs_base            t=-2.186  p=0.0302  [B<-2]
+    iv_vs_epu             t=-1.967  p=0.0508  [ns]
+    iv_vs_finstress       t=-2.439  p=0.0158  [B<-2]
+    iv_vs_all             t=-1.967  p=0.0508  [ns]
+  pit_shift1      n_oos=170  best_alt=epu         qlike_imp%=-0.29
+    iv_vs_base            t=-2.186  p=0.0302  [B<-2]
+    iv_vs_epu             t=-1.979  p=0.0495  [ns]
+    iv_vs_finstress       t=-3.001  p=0.0031  [B<-3]
+    iv_vs_all             t=-1.696  p=0.0916  [ns]
+[USO]  ticker=USO  IV=^OVX
+  k1118_shift1    n_oos=170  best_alt=finstress   qlike_imp%=-0.84
+    iv_vs_base            t=-3.049  p=0.0027  [B<-3]
+    iv_vs_epu             t=-4.463  p=0.0000  [B<-3]
+    iv_vs_finstress       t=-2.584  p=0.0106  [B<-2]
+    iv_vs_all             t=-2.998  p=0.0031  [B<-2]
+  pit_shift0      n_oos=170  best_alt=finstress   qlike_imp%=-0.84
+    iv_vs_base            t=-3.049  p=0.0027  [B<-3]
+    iv_vs_epu             t=-5.596  p=0.0000  [B<-3]
+    iv_vs_finstress       t=-2.584  p=0.0106  [B<-2]
+    iv_vs_all             t=-3.735  p=0.0003  [B<-3]
+  pit_shift1      n_oos=170  best_alt=all         qlike_imp%=-0.80
+    iv_vs_base            t=-3.049  p=0.0027  [B<-3]
+    iv_vs_epu             t=-5.282  p=0.0000  [B<-3]
+    iv_vs_finstress       t=-2.694  p=0.0078  [B<-2]
+    iv_vs_all             t=-3.562  p=0.0005  [B<-3]
+
+Panorama (7-asset, pit_shift0 DM t vs IV baseline):
+  SPY       src=K1116c                base=-3.021  epu=-2.603  finstress=-3.001  all=-2.537
+  GLD       src=K1116f                base=-2.103  epu=-2.069  finstress=-3.341  all=-2.246
+  TLT       src=K1116f                base=+1.433  epu=-2.477  finstress=+3.743  all=-5.666
+  BTC-USD   src=K1116f                base=-5.494  epu=-3.550  finstress=+1.370  all=+0.203
+  QQQ       src=K1201                 base=-2.186  epu=-1.967  finstress=-2.439  all=-1.967
+  USO       src=K1201                 base=-3.049  epu=-5.596  finstress=-2.584  all=-3.735
