@@ -1,0 +1,142 @@
+{
+  "experiment_id": "K1108f",
+  "parent": "K1108c (continuous pooled NULL)",
+  "hypothesis": "D4: capex guidance sensitivity is regime-dependent",
+  "timestamp": "2026-04-17T16:37:03.451023+00:00",
+  "data_source": [
+    "experiments/k1108c/k1108c_merged_pool.csv (N=135 events, 4 firms, \u03b8_EAV reused verbatim)",
+    "TSMC quarterly revenue (NT$ bn) hand-coded 2013Q1-2026Q1 from TSMC IR press releases"
+  ],
+  "regime_definition": {
+    "UP_PERIODS": [
+      [
+        "2020-04-01",
+        "2021-12-31"
+      ],
+      [
+        "2024-01-01",
+        "2026-04-15"
+      ]
+    ],
+    "DOWN_PERIODS": [
+      [
+        "2022-01-01",
+        "2023-11-30"
+      ]
+    ],
+    "TRANS_PERIODS": [
+      [
+        "2020-01-01",
+        "2020-03-31"
+      ],
+      [
+        "2023-12-01",
+        "2023-12-31"
+      ]
+    ],
+    "note": "Fixed a priori at top of k1108f.py; not data-adaptive."
+  },
+  "regime_counts": {
+    "UP": 54,
+    "NEUTRAL": 47,
+    "DOWN": 32,
+    "TRANSITION": 2
+  },
+  "power": {
+    "n_up": 54,
+    "n_down": 32,
+    "underpowered": false,
+    "warnings": []
+  },
+  "spec1_regime_dummy": {
+    "description": "\u03b8_EAV = \u03b2\u2080 + \u03b2_up\u00b7\u0394pct\u00b71[UP] + \u03b2_down\u00b7\u0394pct\u00b71[DOWN]",
+    "n": 86,
+    "beta0": 0.0018850324739609285,
+    "beta_up": -1.7623695023551485e-05,
+    "se_hac_up": 2.9436116598676343e-05,
+    "t_hac_up": -0.5987099203277368,
+    "p_hac_up": 0.5493663406729066,
+    "beta_down": -1.1724632108174737e-05,
+    "se_hac_down": 1.3589071503125579e-05,
+    "t_hac_down": -0.8627986176596386,
+    "p_hac_down": 0.38824819933170374,
+    "R2": 0.0025151332807110682,
+    "newey_west_bw": 3,
+    "wald_up_eq_down_chi2": 0.03619108442630469,
+    "wald_p_chi2": 0.8491214245953914
+  },
+  "spec2_continuous_yoy": {
+    "description": "\u03b8_EAV = \u03b2\u2080 + \u03b2\u2081\u00b7\u0394pct + \u03b2\u2082\u00b7\u0394pct\u00b7TSMC_YoY_lag (PIT t-1)",
+    "n": 133,
+    "beta0": 0.0012836020876211916,
+    "beta1_main": -5.899696940717518e-06,
+    "se_hac_b1": 1.0631745873948434e-05,
+    "t_hac_b1": -0.5549132767717745,
+    "p_hac_b1": 0.5789539801753261,
+    "beta2_interaction": -5.423138400490211e-05,
+    "se_hac_b2": 6.186047575713911e-05,
+    "t_hac_b2": -0.87667259815155,
+    "p_hac_b2": 0.3806644943890716,
+    "R2": 0.004202223192920296,
+    "newey_west_bw": 4
+  },
+  "block_bootstrap_spec1": {
+    "n_reps": 1000,
+    "block_size": 10,
+    "beta_up_mean": 6.705903505007822e-06,
+    "beta_up_ci_95": [
+      -2.4482524162458243e-05,
+      3.7562358483873144e-05
+    ],
+    "beta_down_mean": 1.5178716492179456e-05,
+    "beta_down_ci_95": [
+      -1.1730401031273415e-05,
+      6.846173108968236e-05
+    ],
+    "diff_up_minus_down_ci_95": [
+      -6.214025703909393e-05,
+      3.6322069239100695e-05
+    ],
+    "diff_up_minus_down_p_two_sided": 0.794
+  },
+  "block_bootstrap_spec2": {
+    "n_reps": 1000,
+    "block_size": 10,
+    "beta1_mean": 1.8927080541293583e-06,
+    "beta1_ci_95": [
+      -1.1186696044213709e-05,
+      2.2728474884114237e-05
+    ],
+    "beta2_mean": -4.650863410051667e-05,
+    "beta2_ci_95": [
+      -0.00020242586583469783,
+      6.098978537578203e-05
+    ]
+  },
+  "verdict": {
+    "label": "H2_REGIME_NULL_CONFIRMED",
+    "bullets": [
+      "\u03b2_up   = -1.762e-05  t_HAC = -0.599  (n_up=54)",
+      "\u03b2_down = -1.172e-05  t_HAC = -0.863  (n_dn=32)",
+      "Wald \u03c7\u00b2 (\u03b2_up = \u03b2_down) = 0.036  p = 0.8491",
+      "Spec 2 |t_b2| (interaction) = 0.877"
+    ],
+    "conclusion_vs_K1108c_pool": "4-layer null stack (K1108 / K1108b / K1108c / K1108f) CONFIRMS capex guidance is NOT the foundry \u03b8\u2082>0 mechanism, whether as binary flag, continuous magnitude, OR regime-interacted. Paper 2 must pivot to K1108d/e (non-capex quantitative guidance, operating leverage)."
+  },
+  "comparison_stack": {
+    "K1108": "TSMC single-firm N=48 INCONCLUSIVE (t=0.94)",
+    "K1108b": "Pool binary N=136 DECISIVE NULL (pool Wald t=-0.0003)",
+    "K1108c": "Pool continuous N=135 DECISIVE NULL (\u03b2\u2081=-1.29e-05, t=-1.34)",
+    "K1108f": "Pool regime-split (H2_REGIME_NULL_CONFIRMED)"
+  },
+  "references": [
+    "K1108c (parent: continuous magnitude NULL)",
+    "Newey & West (1987) HAC SE",
+    "Andrews (1991) automatic bandwidth",
+    "Harvey et al. (2016) t > 3.0 multi-testing threshold",
+    "Politis & Romano (1994) stationary bootstrap",
+    "Wald (1943) large-sample \u03c7\u00b2 test"
+  ],
+  "random_seed": 42,
+  "runtime_seconds": 2.1658880710601807
+}
