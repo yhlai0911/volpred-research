@@ -1010,8 +1010,9 @@
     "id": "K1138b_har_structure_vs_gjr",
     "title": "K1138b: Pure HAR structure vs GJR baseline (isolate HAR from VIX regressor)",
     "priority": 3,
-    "status": "pending",
-    "description": "K1137 發現 TLT/GLD/USO HAR-RV-X +30-52% on Parkinson — 比 VIX regressor 效果大. 測純 HAR-RV (no VIX X) vs GJR-GARCH: 是 HAR 的 daily+weekly+monthly 結構本身帶 value 還是 VIX 才是 driver? 若 HAR alone PASS → Paper 4 新 subsection \"HAR structure universally dominates GJR (on commodity+bond), VIX only marginal increment on equity\"."
+    "status": "completed",
+    "description": "K1137 發現 TLT/GLD/USO HAR-RV-X +30-52% on Parkinson — 比 VIX regressor 效果大. 測純 HAR-RV (no VIX X) vs GJR-GARCH: 是 HAR 的 daily+weekly+monthly 結構本身帶 value 還是 VIX 才是 driver? 若 HAR alone PASS → Paper 4 新 subsection \"HAR structure universally dominates GJR (on commodity+bond), VIX only marginal increment on equity\". [DONE commit eaf414cd: Scenario A HAR_STRUCTURE_DRIVES_ALL. HAR alone PASS 5/6 (+14-46%); VIX X Commodity/Bond 平均 +2% near-placebo, Equity +7% SPY-only PASS. Paper 4 Channel 1 升級: HAR 結構是主 driver 非 VIX X. **K1141 table/figure 可能需 refresh 以納入 K1138b 結果**（K1141 目前跑中）.]",
+    "completed_at": "2026-04-17T16:12:59+08:00"
   },
   {
     "id": "Paper_folders_backfill_selfcontained",
