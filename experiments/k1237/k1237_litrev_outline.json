@@ -1,0 +1,141 @@
+{
+  "experiment_id": "k1237",
+  "task": "Paper 10 crypto-fear-channel Section 2 Literature Review initial draft",
+  "date": "2026-04-17",
+  "worktree": "agent-a2340790",
+  "parent_task": "K1234 kickoff guide Section 2 deliverable",
+  "target_paper_slot": "paper/crypto-fear-channel/",
+  "target_journal_primary": "Journal of International Financial Markets, Institutions & Money (JIFMIM)",
+  "target_journal_secondary": "Journal of Empirical Finance",
+  "target_journal_backup": "Finance Research Letters",
+  "deliverable_type": "markdown draft (not .tex)",
+  "main_thread_adoption": "cherry-pick into body_v1.tex after citation-verifier pass",
+  "word_count_target": 1000,
+  "word_count_actual": 1006,
+  "subsection_count": 4,
+  "reference_count": 24,
+  "seed": 42,
+  "subsections": [
+    {
+      "id": "2.1",
+      "title": "Cryptocurrency volatility modelling",
+      "word_count_target": 250,
+      "primary_claim": "GARCH-family models adequately capture Bitcoin volatility with heavy-tailed innovations; Paper 10 takes realized Bitcoin volatility as given and examines cross-market information content.",
+      "key_references": [
+        "katsiampa2017",
+        "chu2017",
+        "corbet2018crypto",
+        "conlon2020",
+        "bouri2020",
+        "liu2021"
+      ],
+      "positioning": "Paper 10 does not propose a new volatility model; complements the vol-modelling literature with cross-market identification."
+    },
+    {
+      "id": "2.2",
+      "title": "Fear-channel mechanisms and implied volatility",
+      "word_count_target": 250,
+      "primary_claim": "VIX is a canonical forward-looking equity fear gauge; retail-dominated crypto markets may transmit negative-tail sentiment into institutional equity fear.",
+      "key_references": [
+        "whaley2000",
+        "bollerslev2009",
+        "bekaert2014",
+        "bouri2020",
+        "gkillas2022"
+      ],
+      "positioning": "Motivates directional-asymmetric spillover from BTC downside to VIX as empirical signature of retail-to-institutional fear channel."
+    },
+    {
+      "id": "2.3",
+      "title": "VIX-crypto and cross-market volatility spillover",
+      "word_count_target": 250,
+      "primary_claim": "Prior spillover literature uses unconditional or rolling spillover without distinguishing upside from downside branches; most studies stop at or before 2020.",
+      "key_references": [
+        "diebold2012",
+        "dieboldyilmaz2009",
+        "gabauer2020",
+        "ji2018",
+        "bouri2018",
+        "matkovskyy2019",
+        "corbet2020crisis",
+        "harvey1997",
+        "harvey2016"
+      ],
+      "positioning": "Paper 10 (i) extends sample through 2026-04, (ii) integrates net-direction spillover with asymmetric Granger and tail QR, (iii) reports honest OOS DM null."
+    },
+    {
+      "id": "2.4",
+      "title": "Asymmetric causality, quantile dependence, and regime-switching",
+      "word_count_target": 250,
+      "primary_claim": "Asymmetric-Granger (Hatemi-J), quantile regression (Koenker-Bassett), and regime-switching (Hamilton, Catania) are complementary identification tools; companion negative-result paper (K1214) and Paper 10 are complementary.",
+      "key_references": [
+        "hatemi2012",
+        "koenker1978",
+        "hamilton1989",
+        "catania2018",
+        "lai2026btc",
+        "harvey2016"
+      ],
+      "positioning": "Paper 10 positive cross-market identification result vs K1214 companion negative single-asset BTC forecasting result; both reinforce Harvey (2016) in-sample vs OOS discipline."
+    }
+  ],
+  "references": [
+    {"key": "bekaert2014", "authors": "Bekaert, Hoerova, Lo Duca", "year": 2014, "title": "Risk, uncertainty and monetary policy", "journal": "Journal of Monetary Economics", "volume": "60", "issue": "7", "pages": "771-788"},
+    {"key": "bollerslev2009", "authors": "Bollerslev, Tauchen, Zhou", "year": 2009, "title": "Expected stock returns and variance risk premia", "journal": "Review of Financial Studies", "volume": "22", "issue": "11", "pages": "4463-4492"},
+    {"key": "bouri2018", "authors": "Bouri, Das, Gupta, Roubaud", "year": 2018, "title": "Spillovers between Bitcoin and other assets during bear and bull markets", "journal": "Applied Economics", "volume": "50", "issue": "55", "pages": "5935-5949"},
+    {"key": "bouri2020", "authors": "Bouri, Shahzad, Roubaud, Kristoufek, Lucey", "year": 2020, "title": "Bitcoin, gold, and commodities as safe havens for stocks", "journal": "Finance Research Letters", "volume": "37", "pages": "101764", "shared_with_body_v0": true},
+    {"key": "catania2018", "authors": "Catania", "year": 2018, "title": "Dynamic adaptive mixture models with an application to volatility and risk", "journal": "Journal of Financial Econometrics", "volume": "16", "issue": "3", "pages": "493-544"},
+    {"key": "chu2017", "authors": "Chu, Chan, Nadarajah, Osterrieder", "year": 2017, "title": "GARCH modelling of cryptocurrencies", "journal": "Journal of Risk and Financial Management", "volume": "10", "issue": "4", "pages": "17"},
+    {"key": "conlon2020", "authors": "Conlon, McGee", "year": 2020, "title": "Safe haven or risky hazard? Bitcoin during the Covid-19 bear market", "journal": "Finance Research Letters", "volume": "35", "pages": "101607"},
+    {"key": "corbet2018crypto", "authors": "Corbet, Meegan, Larkin, Lucey, Yarovaya", "year": 2018, "title": "Exploring the dynamic relationships between cryptocurrencies and other financial assets", "journal": "Economics Letters", "volume": "165", "pages": "28-34", "shared_with_body_v0": true},
+    {"key": "corbet2020crisis", "authors": "Corbet, Larkin, Lucey", "year": 2020, "title": "The contagion effects of the COVID-19 pandemic: Evidence from gold and cryptocurrencies", "journal": "Finance Research Letters", "volume": "35", "pages": "101554"},
+    {"key": "dieboldyilmaz2009", "authors": "Diebold, Yilmaz", "year": 2009, "title": "Measuring financial asset return and volatility spillovers, with application to global equity markets", "journal": "Economic Journal", "volume": "119", "issue": "534", "pages": "158-171"},
+    {"key": "diebold2012", "authors": "Diebold, Yilmaz", "year": 2012, "title": "Better to give than to receive: Predictive directional measurement of volatility spillovers", "journal": "International Journal of Forecasting", "volume": "28", "issue": "1", "pages": "57-66", "shared_with_body_v0": true},
+    {"key": "gabauer2020", "authors": "Gabauer", "year": 2020, "title": "Volatility impulse response analysis for DCC-GARCH models: The role of volatility transmission mechanisms", "journal": "Journal of Forecasting", "volume": "39", "issue": "5", "pages": "788-796"},
+    {"key": "gkillas2022", "authors": "Gkillas, Bouri, Gupta, Roubaud", "year": 2022, "title": "Spillovers in higher-order moments of crude oil, gold, and Bitcoin", "journal": "Quarterly Review of Economics and Finance", "volume": "84", "pages": "398-406"},
+    {"key": "hamilton1989", "authors": "Hamilton", "year": 1989, "title": "A new approach to the economic analysis of nonstationary time series and the business cycle", "journal": "Econometrica", "volume": "57", "issue": "2", "pages": "357-384"},
+    {"key": "harvey2016", "authors": "Harvey, Liu, Zhu", "year": 2016, "title": "... and the cross-section of expected returns", "journal": "Review of Financial Studies", "volume": "29", "issue": "1", "pages": "5-68", "shared_with_body_v0": true},
+    {"key": "harvey1997", "authors": "Harvey, Leybourne, Newbold", "year": 1997, "title": "Testing the equality of prediction mean squared errors", "journal": "International Journal of Forecasting", "volume": "13", "issue": "2", "pages": "281-291"},
+    {"key": "hatemi2012", "authors": "Hatemi-J", "year": 2012, "title": "Asymmetric causality tests with an application", "journal": "Empirical Economics", "volume": "43", "issue": "1", "pages": "447-456", "shared_with_body_v0": true},
+    {"key": "ji2018", "authors": "Ji, Bouri, Lau, Roubaud", "year": 2018, "title": "Dynamic connectedness and integration in cryptocurrency markets", "journal": "International Review of Financial Analysis", "volume": "63", "pages": "257-272"},
+    {"key": "katsiampa2017", "authors": "Katsiampa", "year": 2017, "title": "Volatility estimation for Bitcoin: A comparison of GARCH models", "journal": "Economics Letters", "volume": "158", "pages": "3-6"},
+    {"key": "koenker1978", "authors": "Koenker, Bassett", "year": 1978, "title": "Regression quantiles", "journal": "Econometrica", "volume": "46", "issue": "1", "pages": "33-50"},
+    {"key": "lai2026btc", "authors": "Lai", "year": 2026, "title": "Why GAS-t fails on Bitcoin: Student-t innovation is the culprit, regime-switching cannot rescue", "journal": "Working paper, Da-Yeh University", "internal_id": "K1214", "status": "companion paper, draft in experiments/k1214/k1214_paper_draft.md"},
+    {"key": "liu2021", "authors": "Liu, Tsyvinski", "year": 2021, "title": "Risks and returns of cryptocurrency", "journal": "Review of Financial Studies", "volume": "34", "issue": "6", "pages": "2689-2727"},
+    {"key": "matkovskyy2019", "authors": "Matkovskyy, Jalan", "year": 2019, "title": "From financial markets to Bitcoin markets: A fresh look at the contagion effect", "journal": "Finance Research Letters", "volume": "31", "pages": "388-393", "shared_with_body_v0": true},
+    {"key": "whaley2000", "authors": "Whaley", "year": 2000, "title": "The investor fear gauge", "journal": "Journal of Portfolio Management", "volume": "26", "issue": "3", "pages": "12-17"}
+  ],
+  "reference_count_total": 24,
+  "reference_count_minimum_required": 15,
+  "shared_keys_with_body_v0_intro": ["bouri2020", "corbet2018crypto", "matkovskyy2019", "hatemi2012", "diebold2012", "harvey2016"],
+  "new_references_introduced_in_section_2": [
+    "bekaert2014", "bollerslev2009", "bouri2018", "catania2018", "chu2017", "conlon2020",
+    "corbet2020crisis", "dieboldyilmaz2009", "gabauer2020", "gkillas2022", "hamilton1989",
+    "harvey1997", "ji2018", "katsiampa2017", "koenker1978", "lai2026btc", "liu2021", "whaley2000"
+  ],
+  "adoption_notes": {
+    "cherry_pick_target": "paper/crypto-fear-channel/body_v1.tex section 2",
+    "preserve_keys": true,
+    "citation_verifier_required": true,
+    "expansion_optional": "§2.3 may be expanded with additional quantitative-spillover-magnitude references if JIFMIM editor prefers",
+    "cross_reference_companion": "§2.4 includes forward-ref to K1214 / lai2026btc; retain in final"
+  },
+  "non_scope": [
+    "No .tex modification",
+    "No storage/memory/*.json modification",
+    "No figure generation",
+    "No statistical estimation",
+    "No data retrieval or yfinance call"
+  ],
+  "success_criteria_check": {
+    "experiments_k1237_folder_exists": true,
+    "draft_md_present": true,
+    "word_count_approximately_1000": true,
+    "subsection_count_4": true,
+    "reference_count_at_least_15": true,
+    "references_are_real_mainstream": true,
+    "readme_present": true,
+    "outline_json_present": true,
+    "worktree_commit_pending": true
+  }
+}
