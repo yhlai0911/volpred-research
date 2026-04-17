@@ -1,0 +1,308 @@
+{
+  "experiment_id": "K1130",
+  "title": "Extended IS 2012-2019 for K1128 OFI-jump regime test (error_log fix #1)",
+  "timestamp": "2026-04-17T13:17:24.604070",
+  "data_source": "TAIFEX TX futures 5-min bars 2012-2021 (rebuilt cache this experiment)",
+  "period_IS_extended": "2012-01-01..2019-12-31 (8 years)",
+  "period_IS_k1128_reference": "2017-01-01..2019-12-31 (3 years)",
+  "period_OOS": "2020-01-01..2021-12-31",
+  "vix_source": "yfinance ^VIX daily close, T-1 lag (Taiwan prev-US-close rule)",
+  "n_bars_total": 146944,
+  "n_valid": 105209,
+  "n_is_extended": 84295,
+  "n_is_k1128": 31498,
+  "n_oos": 20914,
+  "jump_detection": {
+    "method": "Lee-Mykland (2008) L_t=|r|/sigma with rolling BV K=16 strictly past",
+    "K_window": 16,
+    "alpha": 0.01,
+    "threshold_Gumbel": 5.2521440948868445,
+    "n_jumps": 270,
+    "jump_rate_pct": 0.25078020508247884
+  },
+  "vix_tertile_cutoffs": {
+    "extended_IS_2012_2019": {
+      "cutoff_33": 13.149999618530273,
+      "cutoff_67": 15.90999984741211,
+      "min": 9.140000343322754,
+      "mean": 15.183929415086855,
+      "std": 3.7974454992868347,
+      "max": 40.7400016784668
+    },
+    "k1128_IS_2017_2019": {
+      "cutoff_33": 12.069999694824219,
+      "cutoff_67": 14.989999771118164,
+      "min": 9.140000343322754,
+      "mean": 14.344739332586041,
+      "std": 4.187115253483659,
+      "max": 37.31999969482422
+    }
+  },
+  "oos_regime_coverage": {
+    "k1128_cutoffs_pct": {
+      "1": 4.083389117337669,
+      "2": 95.91661088266234
+    },
+    "extended_cutoffs_pct": {
+      "0": 1.630486755283542,
+      "1": 6.756239839342068,
+      "2": 91.6132734053744
+    },
+    "n_oos": 20914,
+    "min_coverage_pct_extended": 1.630486755283542,
+    "H4_threshold_pct": 10.0,
+    "H4_pass": false
+  },
+  "per_tertile_extended": {
+    "low": {
+      "tertile_idx": 0,
+      "status": "skipped_insufficient_jumps",
+      "n_is": 28291,
+      "n_oos": 341,
+      "n_is_jumps": 91,
+      "n_oos_jumps": 1
+    },
+    "mid": {
+      "tertile_idx": 1,
+      "status": "skipped_insufficient_jumps",
+      "n_is": 27969,
+      "n_oos": 1413,
+      "n_is_jumps": 69,
+      "n_oos_jumps": 3
+    },
+    "high": {
+      "tertile_idx": 2,
+      "status": "ok",
+      "n_is": 28035,
+      "n_oos": 19160,
+      "n_is_jumps": 78,
+      "n_oos_jumps": 26,
+      "vix_range": {
+        "is_min": 15.920000076293945,
+        "is_max": 40.7400016784668,
+        "oos_min": 15.970000267028809,
+        "oos_max": 82.69000244140625
+      },
+      "M1": {
+        "name": "M1_ext_high",
+        "n_features": 1,
+        "coefs": [
+          0.11924112542941777
+        ],
+        "intercept": -5.901531570911382,
+        "scaler_mean": [
+          0.0027108970929195647
+        ],
+        "scaler_scale": [
+          0.051995654913378736
+        ],
+        "auc_is": 0.5114970517910746,
+        "auc_oos": 0.5185513503951886,
+        "brier_is": 0.0027729902739458546,
+        "brier_oos": 0.00135548976133524,
+        "ll_is": -0.019052447573934934,
+        "ll_oos": -0.010645322651751712,
+        "n_is": 28035,
+        "n_oos": 19160,
+        "n_is_positive": 78,
+        "n_oos_positive": 26
+      },
+      "M3": {
+        "name": "M3_ext_high",
+        "n_features": 3,
+        "coefs": [
+          0.11313266961252387,
+          0.20887838816484652,
+          0.019241181381579753
+        ],
+        "intercept": -5.928955448336184,
+        "scaler_mean": [
+          0.0027108970929195647,
+          0.15560894187253965,
+          0.019525439330335435
+        ],
+        "scaler_scale": [
+          0.051995654913378736,
+          0.12196445197238556,
+          0.19674406612290282
+        ],
+        "auc_is": 0.5803316998724231,
+        "auc_oos": 0.5606441614202669,
+        "brier_is": 0.0027728911696624837,
+        "brier_oos": 0.0013546083994141356,
+        "ll_is": -0.018973902164391564,
+        "ll_oos": -0.01048595843354319,
+        "n_is": 28035,
+        "n_oos": 19160,
+        "n_is_positive": 78,
+        "n_oos_positive": 26
+      },
+      "dm_M3_vs_M1": {
+        "t": 3.4923692499641166,
+        "t_plain": 3.492460390516345,
+        "mean_d": 0.00015936421820852381,
+        "se": 4.5630930744775754e-05,
+        "n": 19160
+      }
+    }
+  },
+  "per_tertile_k1128": {
+    "low": {
+      "tertile_idx": 0,
+      "status": "skipped_insufficient_jumps",
+      "n_is": 10585,
+      "n_oos": 0,
+      "n_is_jumps": 36,
+      "n_oos_jumps": 0
+    },
+    "mid": {
+      "tertile_idx": 1,
+      "status": "skipped_insufficient_jumps",
+      "n_is": 10451,
+      "n_oos": 854,
+      "n_is_jumps": 16,
+      "n_oos_jumps": 1
+    },
+    "high": {
+      "tertile_idx": 2,
+      "status": "ok",
+      "n_is": 10462,
+      "n_oos": 20060,
+      "n_is_jumps": 26,
+      "n_oos_jumps": 29,
+      "M3": {
+        "name": "M3_k1128_high",
+        "n_features": 3,
+        "coefs": [
+          0.1395561524087359,
+          -0.07450496572007419,
+          -0.12224695989285626
+        ],
+        "intercept": -6.038091459837677,
+        "scaler_mean": [
+          0.0024851844771554194,
+          0.14605792466317888,
+          0.01881625363715872
+        ],
+        "scaler_scale": [
+          0.0497896408429497,
+          0.12054271145664455,
+          0.18843941000039457
+        ],
+        "auc_is": 0.5389682902379338,
+        "auc_oos": 0.5984482672547208,
+        "brier_is": 0.0024752620043927724,
+        "brier_oos": 0.0014428735327261899,
+        "ll_is": -0.017185423612105864,
+        "ll_oos": -0.011015176474341136,
+        "n_is": 10462,
+        "n_oos": 20060,
+        "n_is_positive": 26,
+        "n_oos_positive": 29
+      }
+    }
+  },
+  "base_extended_IS": {
+    "name": "Base_extIS",
+    "n_features": 3,
+    "coefs": [
+      0.10530438778986001,
+      0.15791911818007828,
+      -0.10926490618597601
+    ],
+    "intercept": -5.876898055294516,
+    "scaler_mean": [
+      0.0027759653597485023,
+      0.17250761534673495,
+      0.016663903272860107
+    ],
+    "scaler_scale": [
+      0.05261425069379947,
+      0.1337069858605739,
+      0.21762065561028332
+    ],
+    "auc_is": 0.567583166604734,
+    "auc_oos": 0.5597283406754773,
+    "brier_is": 0.0028140889101501343,
+    "brier_oos": 0.0014319800700555295,
+    "ll_is": -0.019256899137373253,
+    "ll_oos": -0.010997517995612056,
+    "n_is": 84295,
+    "n_oos": 20914,
+    "n_is_positive": 238,
+    "n_oos_positive": 30
+  },
+  "base_k1128_IS": {
+    "name": "Base_k1128IS",
+    "n_features": 3,
+    "coefs": [
+      0.1160169290965592,
+      0.19638139993510523,
+      -0.20955195994660245
+    ],
+    "intercept": -6.062725973190893,
+    "scaler_mean": [
+      0.002444599657121087,
+      0.1666897175095923,
+      0.019670460642983466
+    ],
+    "scaler_scale": [
+      0.04938242186889472,
+      0.13190191953974154,
+      0.21165219412939937
+    ],
+    "auc_is": 0.5983082798805268,
+    "auc_oos": 0.5707750750175573,
+    "brier_is": 0.002467459305751396,
+    "brier_oos": 0.001430530918508838,
+    "ll_is": -0.017098107227228446,
+    "ll_oos": -0.01078050732843716,
+    "n_is": 31498,
+    "n_oos": 20914,
+    "n_is_positive": 78,
+    "n_oos_positive": 30
+  },
+  "H1_LRT": {
+    "nll_base_extIS": 1623.2603127848784,
+    "nll_regime_extIS": 1622.208375477798,
+    "lrt_chi2_ext": 2.103874614160759,
+    "df_ext": 1,
+    "p_ext": 0.14692640468298035,
+    "nll_base_k1128IS": 538.5561814432416,
+    "nll_regime_k1128IS": 537.4743317761211,
+    "lrt_chi2_k1128": 2.1636993342410733,
+    "df_k1128": 1,
+    "p_k1128": 0.141304139921287,
+    "pass": false,
+    "note": "PASS if extended LRT > K1128 LRT AND p_ext < 0.05"
+  },
+  "H2_OOS_DM_ext_regime_vs_base": {
+    "t": 0.8388624281951494,
+    "t_plain": 0.8388824839595169,
+    "mean_d": 2.1825790828401888e-05,
+    "n": 20914,
+    "pass": false,
+    "note": "convention: positive t => regime beats base in OOS LL. PASS if t>=+2.0."
+  },
+  "H3_OOS_DM_ext_vs_k1128": {
+    "t": -0.5325143396651334,
+    "t_plain": -0.5325270711712298,
+    "mean_d": -2.4606515194124925e-05,
+    "n": 20914,
+    "pass": false,
+    "note": "convention: positive t => extended beats K1128 in OOS LL. PASS if t>=+2.0."
+  },
+  "H4_oos_coverage_min_10pct": false,
+  "scenario": "D",
+  "implication_error_log_fix_1": "INVALIDATED (structural) - extended IS still cannot cover COVID OOS. OFI-jump regime narrative must be abandoned.",
+  "seed": 42,
+  "runtime_sec": 403.673719,
+  "references": [
+    "Lee & Mykland (2008) RFS 21(6), 2535-2563",
+    "Cont, Kukanov, Stoikov (2014) JFE 12(1), 47-88",
+    "Harvey, Leybourne, Newbold (1997) IJF 13(2), 281-291",
+    "K1128 (this project): original VIX tertile regime split",
+    "K1131 (this project): natural cubic spline rescue (NULL)",
+    "error_log.md 2026-04-13 entry: IS-regime degeneracy on COVID OOS"
+  ]
+}

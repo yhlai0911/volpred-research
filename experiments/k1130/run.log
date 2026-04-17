@@ -1,0 +1,122 @@
+======================================================================
+K1130 - Extended IS 2012-2019 OFI-jump regime retest
+======================================================================
+
+[Step 1] Loading bars 2012-2021 (build extended cache if needed)...
+[TAIFEX] Scanning /Users/yhlai0911/Dropbox/TAIFEXDATA/TAIFEXDATA/python for 2012-01-01..2021-12-31
+  processed 200 days, elapsed 23.9s
+  processed 400 days, elapsed 46.8s
+  processed 600 days, elapsed 66.1s
+  processed 800 days, elapsed 90.2s
+  processed 1000 days, elapsed 124.4s
+  processed 1200 days, elapsed 156.6s
+  processed 1400 days, elapsed 184.4s
+  processed 1600 days, elapsed 221.4s
+  processed 1800 days, elapsed 260.9s
+  processed 2000 days, elapsed 294.7s
+  processed 2200 days, elapsed 342.4s
+  processed 2400 days, elapsed 392.0s
+[TAIFEX] Loaded 2455 days, 146944 bars, 401.5s
+[CACHE] Saved to _cache_bars_2012-01-01_2021-12-31.parquet
+  Loaded 146,944 bars across 2455 days
+  Period: 2012-01-02 00:00:00 to 2021-12-30 00:00:00
+
+[Step 2] Computing Lee-Mykland jump statistic...
+  Valid L obs: 107,664
+  Gumbel threshold (alpha=0.01): 5.252
+  Jumps: 270 (0.25%)
+
+[Step 3] Building features and jump_{t+1} target...
+  Valid bars: 105,209
+  Jump rate: 0.255%
+
+[Step 4] Loading daily VIX (T-1 lag)...
+  VIX days: 2557, missing in merged: 0
+
+[Step 5] VIX tertile cutoffs (extended IS 2012-2019)...
+  Extended IS VIX: min=9.14, mean=15.18, std=3.80, max=40.74
+  K1128 IS VIX:    min=9.14, mean=14.34, std=4.19, max=37.32
+  Extended cutoffs: 33%=13.150, 67%=15.910
+  K1128 cutoffs:    33%=12.070, 67%=14.990
+
+[Step 6] OOS regime coverage comparison (H4)...
+  OOS total bars: 20,914
+  K1128 IS tertile OOS %: low=0.00%, mid=4.08%, high=95.92%
+  Extended IS OOS %:     low=1.63%, mid=6.76%, high=91.61%
+  H4 PASS (min coverage >= 10%): False (min=1.63%)
+
+[Step 7] Building features and fitting per-tertile models (extended IS)...
+
+  [Extended IS] Tertile 0 (low):
+    IS N=28,291 (jumps=91), OOS N=341 (jumps=1)
+    SKIP: insufficient jumps
+
+  [Extended IS] Tertile 1 (mid):
+    IS N=27,969 (jumps=69), OOS N=1,413 (jumps=3)
+    SKIP: insufficient jumps
+
+  [Extended IS] Tertile 2 (high):
+    IS N=28,035 (jumps=78), OOS N=19,160 (jumps=26)
+    M1 AUC IS=0.5115 OOS=0.5186
+    M3 AUC IS=0.5803 OOS=0.5606
+    M3 coefs (std): jump=+0.113 |OFI|=+0.209 OFI=+0.019
+    DM M3 vs M1: t=+3.492
+
+[Step 8] H2 - OOS DM: extended-IS regime model vs no-regime base
+  Base (no-regime) IS AUC=0.5676, OOS AUC=0.5597
+  [INFO] 1754 OOS bars have no regime model; filling with base prediction
+  DM regime_ext vs base: t=+0.839 (positive => regime wins)
+    (convention: t>0 means regime_ext LL > base LL, i.e., regime predicts better)
+
+[Step 9] H1 - LRT: extended-IS regime vs no-regime base on IS...
+  NLL base (IS): 1623.260
+  NLL regime (IS, extended): 1622.208
+  LRT chi²=2.104, df=1, p=0.1469
+
+  Computing K1128 reference LRT (IS 2017-2019) for comparison...
+    K1128 base IS AUC=0.5983, OOS AUC=0.5708
+    K1128 LRT chi²=2.164, df=1, p=0.1413
+  H1 PASS (ext LRT > K1128 LRT AND p<0.05): False
+
+[Step 10] H3 - Extended IS regime vs K1128 original regime (OOS DM)...
+  DM extended_regime vs K1128_regime: t=-0.533 (positive => extended wins)
+
+[Step 11] Scenario verdict...
+  Scenario: D
+  Implication: INVALIDATED (structural) - extended IS still cannot cover COVID OOS. OFI-jump regime narrative must be abandoned.
+
+[Step 12] Plotting...
+  Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1130/is_extended_vs_original.png
+  Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1130/oos_regime_coverage.png
+
+[Step 13] Saving results (runtime=403.7s)...
+  Saved: /Users/yhlai0911/Desktop/volpred-research/experiments/k1130/k1130_results.json
+
+======================================================================
+K1130 SUMMARY
+======================================================================
+
+IS extended 2012-2019: N=84,295, VIX range=9.14-40.74
+IS K1128 2017-2019:    N=31,498, VIX range=9.14-37.32
+OOS 2020-2021:         N=20,914, VIX range=12.32-82.69
+
+Extended cutoffs: 33%=13.150, 67%=15.910
+K1128 cutoffs:    33%=12.070, 67%=14.990
+
+OOS regime coverage:
+  K1128: low=0.00% mid=4.08% high=95.92%
+  Ext:   low=1.63% mid=6.76% high=91.61%
+
+Hypotheses:
+  H1 (LRT ext > K1128 AND p<0.05): False
+       ext  chi²=2.104, df=1, p=0.1469
+       K1128 chi²=2.164, df=1, p=0.1413
+  H2 (OOS DM ext_regime > base, t>=+2): False
+       t=+0.839
+  H3 (OOS DM ext > K1128, t>=+2): False
+       t=-0.533
+  H4 (min OOS coverage >= 10%): False
+       min=1.63%
+
+Scenario: D
+Implication: INVALIDATED (structural) - extended IS still cannot cover COVID OOS. OFI-jump regime narrative must be abandoned.
