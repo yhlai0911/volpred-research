@@ -6,12 +6,13 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
+from volpred.config.runtime import get_default_mirror_url
 from volpred.core.types import ExperimentResult
 from volpred.memory.schemas import ExperimentRecord, KnowledgeItem, ResearchLogEntry
 
 
 class MemorySystem:
-    MIRROR_URL = os.environ.get("VOLPRED_MIRROR_URL", "https://mirror-api.zeabur.app")
+    MIRROR_URL = os.environ.get("VOLPRED_MIRROR_URL", get_default_mirror_url())
     MIRROR_TOKEN = os.environ.get("RESEARCH_MIRROR_TOKEN", "")
 
     def __init__(self, storage_dir: str = "storage"):
@@ -242,8 +243,13 @@ class MemorySystem:
         filepath = self.memory_dir / filename
         data = self._load_index(filename)
         data.append(record)
-        with open(filepath, "w") as f:
+        tmp_path = filepath.with_name(f".{filepath.name}.tmp")
+        with open(tmp_path, "w") as f:
             json.dump(data, f, indent=2, default=str)
+        # Post-write sanity: reject write if result is not parseable (2026-04-17 guard)
+        with open(tmp_path) as f:
+            json.load(f)
+        tmp_path.replace(filepath)
         # Incremental sync: only send the new entry
         self._sync_to_remote(filename, new_entries=[record])
 

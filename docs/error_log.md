@@ -4,6 +4,7 @@
 
 | 日期 | 問題 | 現象 | 過程 | 解決方法 |
 |------|------|------|------|---------|
+| 2026-04-17 | `knowledge.json` 尾端 stray `]}` 導致全系統 JSON parse 失敗 | 檔案尾 3 行為 `]}\n]}\n]\n`（正常只需 `]\n`），python `json.load` 丟 `Extra data: line 26548`，1928 entries 無法讀取，所有 memory-dependent 腳本（daily_update/supabase_sync/memory add）全部會 crash | `MemorySystem._append_to_index` 本身是 atomic load→append→rewrite 不會產生此 pattern。推論：外部手動 jq/sed 操作 append 了 stray token，或某個一次性腳本 `>>` append 而非 `>` overwrite。mtime=Apr 16 16:36，HEAD 28fc3772（04-16）之後發生 | (1) 備份 `knowledge.json.bak_2026-04-17_corrupted` (2) 刪除 line 26548-26549 兩行 stray `]}` (3) python `json.load` 驗證 1928 entries 與 HEAD 一致 (4) 合法 diff 僅 i1b/i3/i9/i10 路徑更新 91 行。**防禦建議待實作**：`_append_to_index` 寫入後加 `json.loads(path.read_text())` sanity check，失敗即 rollback 並 raise。教訓：所有 JSON writer 都應該有 post-write validation |
 | 2026-04-13 | IS-based regime cutoffs degenerate when OOS 含 unprecedented volatility（K1128 教訓） | K1128 VIX tertile split: IS 2017-2019 VIX 9-37 vs OOS 2020-2021 VIX 15-82 (COVID)，IS quantile cutoff 套 OOS 變 low tertile=0 bars + mid 854 + high 20060 | IS quantile 邊界在 unprecedented event 下失效 — 所有 IS-based threshold 都有此風險 | (1) IS 擴含 prior crises (2008/2011/2015) (2) Expanding-window adaptive quantile (3) 連續 VIX-dependent β via spline 取代離散 tertile (4) Rolling quantile。診斷：套 cutoff 前先 `assert OOS_low_count > 0 and OOS_mid_count > 0`。影響範圍：regime-switching GARCH、HMM、K1121 NFCI threshold（需回查）。已記 E064 |
 | 2026-04-13 | TAIFEX bar-bucket overflow + active contract selection lookahead（K1124 教訓） | OFI 計算遇到 2 個 subtle bug 都會誇大效果 | (1) DAY_END=13:45 → bar=60 包含收盤後 1 秒，會讓 bar 59 預測 bar 60 (2) Active contract 用整天成交量選最活躍 = 轉倉日用下午 winner 決定早盤訊號 = lookahead | (1) DAY_END 改 13:44:59 (2) active contract 改 T-1 rolling (3) 加 M6/M7 strict lag-1 spec 驗證 beta 仍穩健 → 排除 current-bar leak。教訓：tick-level data 的 timing edge case 多，必須 explicit lag-1 + Codex 審 |
 | 2026-04-13 | FRED publication delay = 隱性 lookahead bug（K1121 教訓） | K1121 第一版 alt-data allocation S4 EPU-regime Sharpe 1.250 看似有 edge | NFCI 觀測週五但週三才公佈（5 calendar days delay），需 `shift(5)`；EPU 觀測 X 日 X+1 公佈，需 `shift(2)` | (1) 修正後 S4 Sharpe 1.250→1.283 (tied baseline 1.309) (2) 規則新增：所有 macro/economic 數據查 publication schedule (3) Codex 救援避免 false positive。教訓：「結果太好」第一反應應該是「找 bug」不是「歡呼」（呼應 E059 LRT-DM divergence）。已記 E062 |
@@ -185,7 +186,7 @@
 - 台股最低資金門檻可能低於我們估計的 $80 萬
 
 **修正行動（已完成 2026-03-27）**：
-- [x] 建立 K625 更正實驗（`experiments/k625_tx_cost_correction.py`），使用正確成本參數重新計算
+- [x] 建立 K625 更正實驗（`experiments/k625/k625_tx_cost_correction.py`），使用正確成本參數重新計算
 - [x] 修正 12 個 Python 實驗檔案中的台股成本常數：
   - k502, k506, k515, k516, k517, k499, k238, k263, taiwan_paper_fixes, tsmc_concentration_test
 - [x] 在 25 篇已發佈文章頂部加入「⚠️ 更正聲明（2026-03-27）」
