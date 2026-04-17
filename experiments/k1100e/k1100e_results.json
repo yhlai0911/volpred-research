@@ -1,0 +1,3752 @@
+{
+  "experiment_id": "K1100e",
+  "pair_results": {
+    "SPY-QQQ": {
+      "pair_name": "SPY-QQQ",
+      "asset1": "SPY",
+      "asset2": "QQQ",
+      "asset_class": "equity-equity",
+      "n_oos": 3234,
+      "full_sample_corr": 0.9203537804548719,
+      "lambda_L_t_mean": 0.5885729399028311,
+      "lambda_U_joe_mean": 0.38977373914459273,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.1761294791859882,
+                "p_value": 0.67472082453999,
+                "violations": 71,
+                "rate": 0.023809523809523808,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.8720450486221125,
+                "p_value": 0.3503897742618737,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.454545454545454,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.030139219522804517,
+                "p_value": 0.9759560222714437,
+                "pass": true,
+                "n_violations": 71
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.023809523809523808
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.3310912720386483,
+                "p_value": 0.5650172130274125,
+                "violations": 33,
+                "rate": 0.011066398390342052,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.7696120567405709,
+                "p_value": 0.3803370924314937,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.0,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.14150155067862968,
+                "p_value": 0.8874737351048267,
+                "pass": true,
+                "n_violations": 33
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.011066398390342052
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.166268669667859,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.080742223743234,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -4.7279349851332615,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -4.69583854260344,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.3297101726381868,
+                "p_value": 0.5658297987759723,
+                "violations": 86,
+                "rate": 0.026592455163883734,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.21414124820257996,
+                "p_value": 0.6435407195056004,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.166666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.03747490277616494,
+                "p_value": 0.9701063507701022,
+                "pass": true,
+                "n_violations": 86
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.026592455163883734
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 2.663815550063319,
+                "p_value": 0.10265421861456825,
+                "violations": 42,
+                "rate": 0.012987012987012988,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.616334577638071,
+                "p_value": 0.01779382527114104,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.5,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.2651322695777494,
+                "p_value": 0.7909075690725388,
+                "pass": true,
+                "n_violations": 42
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.012987012987012988
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.169656570984824,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.046410909251534,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 1.6539902800216646,
+        "p_value": 0.09812948765392196,
+        "mean_loss_diff": 0.002587232815422872,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": -0.6799521939585784,
+        "p_value": 0.49653473150646643,
+        "mean_loss_diff": -0.00047174839211818826,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -8.37424401729842,
+        "Copula-Joe-A4f-ASYM": -8.371656784482996,
+        "Copula-SkewT-A4f-ASYM": -8.374715765690539
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-IWM": {
+      "pair_name": "SPY-IWM",
+      "asset1": "SPY",
+      "asset2": "IWM",
+      "asset_class": "equity-equity",
+      "n_oos": 3234,
+      "full_sample_corr": 0.8951450911592306,
+      "lambda_L_t_mean": 0.4012084449091685,
+      "lambda_U_joe_mean": 0.38731304893146506,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.6071050033418715,
+                "p_value": 0.20489922731698873,
+                "violations": 64,
+                "rate": 0.021462105969148222,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.5193289428298122,
+                "p_value": 0.2177210724476375,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.818181818181818,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.14826254587043908,
+                "p_value": 0.8821355726952368,
+                "pass": true,
+                "n_violations": 64
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.021462105969148222
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.001095314697678873,
+                "p_value": 0.9735984002136028,
+                "violations": 30,
+                "rate": 0.01006036217303823,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.727272727272727,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.010062660942500745,
+                "p_value": 0.9919712936875935,
+                "pass": true,
+                "n_violations": 30
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.01006036217303823
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.162081946343897,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.009609586244676,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 152.92006450084364,
+                "p_value": 0.0,
+                "violations": 1,
+                "rate": 0.00030921459492888067,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.08333333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 1
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.00030921459492888067
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -4.9075850413769375,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -4.869298465448508,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.282707357744897,
+                "p_value": 0.2573962542064737,
+                "violations": 71,
+                "rate": 0.021954236239950527,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.11994876625002426,
+                "p_value": 0.7290900633068385,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.916666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.11123140865350645,
+                "p_value": 0.9114328456614952,
+                "pass": true,
+                "n_violations": 71
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.021954236239950527
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.05686647668471778,
+                "p_value": 0.8115189616486072,
+                "violations": 31,
+                "rate": 0.0095856524427953,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 4.41322113042084,
+                "p_value": 0.03566144253669423,
+                "clusters": 2,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.5833333333333335,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.03362482907742348,
+                "p_value": 0.9731763227198617,
+                "pass": true,
+                "n_violations": 31
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.0095856524427953
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.219341830240948,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.070222088096774,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": -2.125402556231912,
+        "p_value": 0.03355303717549234,
+        "mean_loss_diff": -0.004618010131977112,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": -2.164679756638171,
+        "p_value": 0.03041221839166816,
+        "mean_loss_diff": -0.00471640084830587,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -8.309308424545383,
+        "Copula-Joe-A4f-ASYM": -8.313926434677361,
+        "Copula-SkewT-A4f-ASYM": -8.31402482539369
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-XLF": {
+      "pair_name": "SPY-XLF",
+      "asset1": "SPY",
+      "asset2": "XLF",
+      "asset_class": "equity-equity",
+      "n_oos": 3234,
+      "full_sample_corr": 0.8422125341253212,
+      "lambda_L_t_mean": 0.4650471504551243,
+      "lambda_U_joe_mean": 0.38286698375794187,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 3.1176351675088796,
+                "p_value": 0.07744910768824087,
+                "violations": 60,
+                "rate": 0.02012072434607646,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.9864541205898973,
+                "p_value": 0.15871212654286126,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.454545454545454,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.21106655923452955,
+                "p_value": 0.8328353342525177,
+                "pass": true,
+                "n_violations": 60
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.02012072434607646
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.11453303476591259,
+                "p_value": 0.7350412070499952,
+                "violations": 28,
+                "rate": 0.009389671361502348,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 4.8642831805982585,
+                "p_value": 0.027418186694064817,
+                "clusters": 2,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.5454545454545454,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.07947536788215648,
+                "p_value": 0.9366545232103757,
+                "pass": true,
+                "n_violations": 28
+              },
+              "trinity_pass": false,
+              "n_oos": 2982,
+              "violation_rate": 0.009389671361502348
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.184955178504972,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.0927965372921165,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 152.92006450084364,
+                "p_value": 0.0,
+                "violations": 1,
+                "rate": 0.00030921459492888067,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.08333333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 1
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.00030921459492888067
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 56.033171166913874,
+                "p_value": 7.127631818093505e-14,
+                "violations": 1,
+                "rate": 0.00030921459492888067,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.08333333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 1
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.00030921459492888067
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -4.777129955528352,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -4.742729145342,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.981636264364255,
+                "p_value": 0.08421409598191443,
+                "violations": 66,
+                "rate": 0.02040816326530612,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.583621238563385,
+                "p_value": 0.2082398534681419,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.5,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.16088599023343142,
+                "p_value": 0.8721831967314055,
+                "pass": true,
+                "n_violations": 66
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.02040816326530612
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0036232186412092915,
+                "p_value": 0.95200177927357,
+                "violations": 32,
+                "rate": 0.009894867037724181,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 4.187837084056181,
+                "p_value": 0.04071501153411994,
+                "clusters": 2,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.6666666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.029156018874176848,
+                "p_value": 0.976740158161444,
+                "pass": true,
+                "n_violations": 32
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.009894867037724181
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.241081469535978,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.078480639362359,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": -1.0227937286622695,
+        "p_value": 0.3064053838230354,
+        "mean_loss_diff": -0.0026062638939892456,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": -1.8780366595166709,
+        "p_value": 0.06037615022816921,
+        "mean_loss_diff": -0.004833556935145581,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -8.460496740292397,
+        "Copula-Joe-A4f-ASYM": -8.463103004186387,
+        "Copula-SkewT-A4f-ASYM": -8.465330297227542
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-TLT": {
+      "pair_name": "SPY-TLT",
+      "asset1": "SPY",
+      "asset2": "TLT",
+      "asset_class": "equity-bond",
+      "n_oos": 3234,
+      "full_sample_corr": -0.30314988574186147,
+      "lambda_L_t_mean": 0.009345813892667407,
+      "lambda_U_joe_mean": 0.34959604022080976,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.26730860716594407,
+                "p_value": 0.6051429220183349,
+                "violations": 79,
+                "rate": 0.02649228705566734,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 7.870452087074604,
+                "p_value": 0.005024908879396439,
+                "clusters": 7,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.181818181818182,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.07426621161194036,
+                "p_value": 0.9407985619886097,
+                "pass": true,
+                "n_violations": 79
+              },
+              "trinity_pass": false,
+              "n_oos": 2982,
+              "violation_rate": 0.02649228705566734
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.001095314697678873,
+                "p_value": 0.9735984002136028,
+                "violations": 30,
+                "rate": 0.01006036217303823,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.727272727272727,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.012591447143172285,
+                "p_value": 0.9899537441901686,
+                "pass": true,
+                "n_violations": 30
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.01006036217303823
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.767030312751172,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.575041395978788,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.266511713204936,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.210280810212159,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 11.69197074442792,
+                "p_value": 0.0006277037935742413,
+                "violations": 113,
+                "rate": 0.03494124922696351,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 5.207886820676357,
+                "p_value": 0.022484647369455435,
+                "clusters": 9,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 9.416666666666666,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.4102159334962314,
+                "p_value": 0.6816475536640538,
+                "pass": true,
+                "n_violations": 113
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.03494124922696351
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 12.196219461526894,
+                "p_value": 0.00047886462251744977,
+                "violations": 54,
+                "rate": 0.016697588126159554,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.0353935015160172,
+                "p_value": 0.30889524701687543,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Yellow",
+                "violations_per_block": 4.5,
+                "n_blocks": 12,
+                "pass": false
+              },
+              "es_test": {
+                "z_stat": 0.6379527798777165,
+                "p_value": 0.5235044187700397,
+                "pass": true,
+                "n_violations": 54
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.016697588126159554
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.7318561175145355,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.609955574890373,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 10.291740210821708,
+        "p_value": 7.677608028198429e-25,
+        "mean_loss_diff": 0.2384102731773023,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 3.9579248062480903,
+        "p_value": 7.560374857303083e-05,
+        "mean_loss_diff": 0.03009905091286449,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.429129461919796,
+        "Copula-Joe-A4f-ASYM": -9.190719188742495,
+        "Copula-SkewT-A4f-ASYM": -9.399030411006933
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-IEF": {
+      "pair_name": "SPY-IEF",
+      "asset1": "SPY",
+      "asset2": "IEF",
+      "asset_class": "equity-bond",
+      "n_oos": 3234,
+      "full_sample_corr": -0.2915960891516908,
+      "lambda_L_t_mean": 0.019181702792832968,
+      "lambda_U_joe_mean": 0.3494610091365742,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.3105739934647147,
+                "p_value": 0.2522907570223284,
+                "violations": 65,
+                "rate": 0.021797451374916163,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.857443742570123,
+                "p_value": 0.01551130569222925,
+                "clusters": 5,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.909090909090909,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.11412738987036908,
+                "p_value": 0.9091368100984939,
+                "pass": true,
+                "n_violations": 65
+              },
+              "trinity_pass": false,
+              "n_oos": 2982,
+              "violation_rate": 0.021797451374916163
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.5662439081234112,
+                "p_value": 0.4517553596384618,
+                "violations": 34,
+                "rate": 0.011401743796109993,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.6927315715086184,
+                "p_value": 0.40523682315492215,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.090909090909091,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.13169523255699778,
+                "p_value": 0.8952253565423918,
+                "pass": true,
+                "n_violations": 34
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.011401743796109993
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.920554106729629,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.770212930601263,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.6034376867969335,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.5257686122487435,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.086366481506303,
+                "p_value": 0.14861918031283172,
+                "violations": 94,
+                "rate": 0.02906617192331478,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.0442555462673155,
+                "p_value": 0.02470772207850691,
+                "clusters": 7,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.833333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.1555868676993939,
+                "p_value": 0.8763586769334093,
+                "pass": true,
+                "n_violations": 94
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.02906617192331478
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 2.1593565513812365,
+                "p_value": 0.14170401850369052,
+                "violations": 41,
+                "rate": 0.012677798392084107,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.86794436062311,
+                "p_value": 0.015419046597917152,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.4166666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.2631422408100641,
+                "p_value": 0.7924409473776592,
+                "pass": true,
+                "n_violations": 41
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.012677798392084107
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.957376414885141,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.815945148085647,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 7.613114911806171,
+        "p_value": 2.675676965016308e-14,
+        "mean_loss_diff": 0.15301986797908837,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 4.125443345352147,
+        "p_value": 3.700212648927049e-05,
+        "mean_loss_diff": 0.027223904933784952,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.922424065965542,
+        "Copula-Joe-A4f-ASYM": -9.769404197986452,
+        "Copula-SkewT-A4f-ASYM": -9.895200161031756
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-TIP": {
+      "pair_name": "SPY-TIP",
+      "asset1": "SPY",
+      "asset2": "TIP",
+      "asset_class": "equity-bond",
+      "n_oos": 3234,
+      "full_sample_corr": -0.10011353106915123,
+      "lambda_L_t_mean": 0.014008784319603129,
+      "lambda_U_joe_mean": 0.3513352107321812,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.4344195478703625,
+                "p_value": 0.5098282736121846,
+                "violations": 69,
+                "rate": 0.023138832997987926,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.0362092219674537,
+                "p_value": 0.3087047484173393,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.2727272727272725,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.07777717487813685,
+                "p_value": 0.9380053032457837,
+                "pass": true,
+                "n_violations": 69
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.023138832997987926
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.001095314697678873,
+                "p_value": 0.9735984002136028,
+                "violations": 30,
+                "rate": 0.01006036217303823,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 4.365875584952832,
+                "p_value": 0.03666563578368465,
+                "clusters": 2,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.727272727272727,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.0008466781312136407,
+                "p_value": 0.9993244486718482,
+                "pass": true,
+                "n_violations": 30
+              },
+              "trinity_pass": false,
+              "n_oos": 2982,
+              "violation_rate": 0.01006036217303823
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.8927429297921865,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.801984519220448,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 144.85775430202548,
+                "p_value": 0.0,
+                "violations": 2,
+                "rate": 0.0006184291898577613,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.16666666666666666,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 2
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.0006184291898577613
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.512822277877214,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.438510518828231,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.46838363176675557,
+                "p_value": 0.4937317147829017,
+                "violations": 87,
+                "rate": 0.026901669758812616,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.033824364146021,
+                "p_value": 0.3092621240354513,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.25,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.07118549599300361,
+                "p_value": 0.9432501246516878,
+                "pass": true,
+                "n_violations": 87
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.026901669758812616
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.6481522282523144,
+                "p_value": 0.420774081788849,
+                "violations": 37,
+                "rate": 0.011440940012368584,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 6.968481922169829,
+                "p_value": 0.0082957846048487,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.0833333333333335,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.14853999385919847,
+                "p_value": 0.8819166254823984,
+                "pass": true,
+                "n_violations": 37
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.011440940012368584
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.946584628432654,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.791617717375942,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 5.592400238299628,
+        "p_value": 2.2395183552910797e-08,
+        "mean_loss_diff": 0.08469291900363118,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 1.816423018112497,
+        "p_value": 0.06930550691321143,
+        "mean_loss_diff": 0.0061305419182465645,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.86640764879538,
+        "Copula-Joe-A4f-ASYM": -9.781714729791748,
+        "Copula-SkewT-A4f-ASYM": -9.860277106877135
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-GLD": {
+      "pair_name": "SPY-GLD",
+      "asset1": "SPY",
+      "asset2": "GLD",
+      "asset_class": "equity-commodity",
+      "n_oos": 3234,
+      "full_sample_corr": 0.059024934496302,
+      "lambda_L_t_mean": 0.037729335203021463,
+      "lambda_U_joe_mean": 0.35416815408594965,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.0041717315287144174,
+                "p_value": 0.9485012887148506,
+                "violations": 74,
+                "rate": 0.02481556002682763,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.6550807956073257,
+                "p_value": 0.418301998156809,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.7272727272727275,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.01795532657492016,
+                "p_value": 0.9856744918882193,
+                "pass": true,
+                "n_violations": 74
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.02481556002682763
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.5662439081234112,
+                "p_value": 0.4517553596384618,
+                "violations": 34,
+                "rate": 0.011401743796109993,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 3.4954248436988493,
+                "p_value": 0.06153861656430448,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.090909090909091,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.12422043887543821,
+                "p_value": 0.9011407396925836,
+                "pass": true,
+                "n_violations": 34
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.011401743796109993
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.610570409921096,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.525364595902178,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -4.55857463773262,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -4.528658955736002,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.8163431155939804,
+                "p_value": 0.3662515269786798,
+                "violations": 89,
+                "rate": 0.027520098948670378,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 2.1872807223870936,
+                "p_value": 0.1391547973050804,
+                "clusters": 5,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.416666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.1031802534632209,
+                "p_value": 0.9178199117089632,
+                "pass": true,
+                "n_violations": 89
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.027520098948670378
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 1.2998933289529475,
+                "p_value": 0.25423270921483887,
+                "violations": 39,
+                "rate": 0.012059369202226345,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 2.8535000963093236,
+                "p_value": 0.09117524271871835,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.25,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.17358686371241583,
+                "p_value": 0.862190156520961,
+                "pass": true,
+                "n_violations": 39
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.012059369202226345
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.556839742004577,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.431604741575821,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 7.6915846617908645,
+        "p_value": 1.4532372009293228e-14,
+        "mean_loss_diff": 0.11452973433476858,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 1.73681261101281,
+        "p_value": 0.08242025234613291,
+        "mean_loss_diff": 0.006990106721122706,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.113639121020954,
+        "Copula-Joe-A4f-ASYM": -8.999109386686188,
+        "Copula-SkewT-A4f-ASYM": -9.106649014299832
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-SLV": {
+      "pair_name": "SPY-SLV",
+      "asset1": "SPY",
+      "asset2": "SLV",
+      "asset_class": "equity-commodity",
+      "n_oos": 3234,
+      "full_sample_corr": 0.22407468207118436,
+      "lambda_L_t_mean": 0.02291751811108989,
+      "lambda_U_joe_mean": 0.3573164020732546,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.09047104630408853,
+                "p_value": 0.7635791697902232,
+                "violations": 72,
+                "rate": 0.02414486921529175,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.38707548025742256,
+                "p_value": 0.5338406731690173,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.545454545454546,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.0017825966778163282,
+                "p_value": 0.998577694385897,
+                "pass": true,
+                "n_violations": 72
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.02414486921529175
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.3310912720386483,
+                "p_value": 0.5650172130274125,
+                "violations": 33,
+                "rate": 0.011066398390342052,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.7696120567405709,
+                "p_value": 0.3803370924314937,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.0,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.18274244772680404,
+                "p_value": 0.8550001080640379,
+                "pass": true,
+                "n_violations": 33
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.011066398390342052
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.120074249962286,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -4.9825452467285,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -3.732329127495052,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -3.71912847441001,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.21492837558093925,
+                "p_value": 0.642931714634126,
+                "violations": 85,
+                "rate": 0.026283240568954855,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.026923293060580278,
+                "p_value": 0.8696656553224529,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.083333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.10995307072261662,
+                "p_value": 0.9124465933041035,
+                "pass": true,
+                "n_violations": 85
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.026283240568954855
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 1.704309248306231,
+                "p_value": 0.19172538431085118,
+                "violations": 40,
+                "rate": 0.012368583797155226,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.40965909243052234,
+                "p_value": 0.5221425872876827,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.3333333333333335,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.25333258712185813,
+                "p_value": 0.8000112163278291,
+                "pass": true,
+                "n_violations": 40
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.012368583797155226
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.0708629792206406,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -4.894259561827835,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 3.5156773059430058,
+        "p_value": 0.00043863376386949024,
+        "mean_loss_diff": 0.04285549717223259,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 2.3609281300634684,
+        "p_value": 0.018229263062552077,
+        "mean_loss_diff": 0.008869217557503027,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -8.222282725617973,
+        "Copula-Joe-A4f-ASYM": -8.179427228445741,
+        "Copula-SkewT-A4f-ASYM": -8.213413508060471
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-USO": {
+      "pair_name": "SPY-USO",
+      "asset1": "SPY",
+      "asset2": "USO",
+      "asset_class": "equity-commodity",
+      "n_oos": 3234,
+      "full_sample_corr": 0.35177296645023887,
+      "lambda_L_t_mean": 0.0465023857047445,
+      "lambda_U_joe_mean": 0.36669663861637836,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.296472899551162,
+                "p_value": 0.12966815298161527,
+                "violations": 62,
+                "rate": 0.02079141515761234,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.35144227935791506,
+                "p_value": 0.5532978240540374,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.636363636363637,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.129617871081658,
+                "p_value": 0.896868763450966,
+                "pass": true,
+                "n_violations": 62
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.02079141515761234
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.001095314697678873,
+                "p_value": 0.9735984002136028,
+                "violations": 30,
+                "rate": 0.01006036217303823,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.727272727272727,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0317434195880848,
+                "p_value": 0.9746766684950585,
+                "pass": true,
+                "n_violations": 30
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.01006036217303823
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -4.881069570913511,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -4.6908703872359965,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -4.170985151645651,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -4.151497698699995,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.8729851167374818,
+                "p_value": 0.1711335816338797,
+                "violations": 69,
+                "rate": 0.021335807050092765,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.17800057608009823,
+                "p_value": 0.6730971743190075,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.75,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.09112961397454411,
+                "p_value": 0.9273896019888416,
+                "pass": true,
+                "n_violations": 69
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.021335807050092765
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0036232186412092915,
+                "p_value": 0.95200177927357,
+                "violations": 32,
+                "rate": 0.009894867037724181,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.962686760525461,
+                "p_value": 0.3265108774747947,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.6666666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.06990230582607593,
+                "p_value": 0.94427141783727,
+                "pass": true,
+                "n_violations": 32
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.009894867037724181
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -4.958347093658925,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -4.789309664800089,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 3.5176979032830418,
+        "p_value": 0.00043530762149477737,
+        "mean_loss_diff": 0.03143998377632443,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 0.6565109319085047,
+        "p_value": 0.5114954360946948,
+        "mean_loss_diff": 0.0019374495227410964,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -7.89724182748152,
+        "Copula-Joe-A4f-ASYM": -7.865801843705197,
+        "Copula-SkewT-A4f-ASYM": -7.895304377958779
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-UUP": {
+      "pair_name": "SPY-UUP",
+      "asset1": "SPY",
+      "asset2": "UUP",
+      "asset_class": "equity-fx",
+      "n_oos": 3234,
+      "full_sample_corr": -0.1851416355685617,
+      "lambda_L_t_mean": 0.01220009207409669,
+      "lambda_U_joe_mean": 0.34973239916324106,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.0454990641887605,
+                "p_value": 0.3065459748960756,
+                "violations": 66,
+                "rate": 0.022132796780684104,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 3.183165189707122,
+                "p_value": 0.07440047961965746,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.0,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.1003386583309347,
+                "p_value": 0.9200754674292797,
+                "pass": true,
+                "n_violations": 66
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.022132796780684104
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.02298594049764091,
+                "p_value": 0.8794936394454307,
+                "violations": 29,
+                "rate": 0.009725016767270288,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 4.60927754073834,
+                "p_value": 0.03179942755231813,
+                "clusters": 2,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.6363636363636362,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.013588217524648782,
+                "p_value": 0.9891585046576059,
+                "pass": true,
+                "n_violations": 29
+              },
+              "trinity_pass": false,
+              "n_oos": 2982,
+              "violation_rate": 0.009725016767270288
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.870010757542336,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.691744646622055,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 144.85775430202548,
+                "p_value": 0.0,
+                "violations": 2,
+                "rate": 0.0006184291898577613,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.16666666666666666,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 2
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.0006184291898577613
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 56.033171166913874,
+                "p_value": 7.127631818093505e-14,
+                "violations": 1,
+                "rate": 0.00030921459492888067,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.08333333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 1
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.00030921459492888067
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.397030500598997,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.328285593028145,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.0251129154404737,
+                "p_value": 0.31130927370785255,
+                "violations": 90,
+                "rate": 0.027829313543599257,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 3.7774363920524507,
+                "p_value": 0.051948194362369415,
+                "clusters": 6,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.5,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.1608541701307762,
+                "p_value": 0.8722082590960666,
+                "pass": true,
+                "n_violations": 90
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.027829313543599257
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 3.816376359964636,
+                "p_value": 0.05075389041517897,
+                "violations": 44,
+                "rate": 0.013605442176870748,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 2.113469539964173,
+                "p_value": 0.14600795380878884,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.6666666666666665,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.36291786146234273,
+                "p_value": 0.7166662436047151,
+                "pass": true,
+                "n_violations": 44
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.013605442176870748
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.874939150607658,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.718208060211547,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 7.092275466646027,
+        "p_value": 1.3192457922746176e-12,
+        "mean_loss_diff": 0.13141876190356036,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 3.4916217258241047,
+        "p_value": 0.00048009764847030043,
+        "mean_loss_diff": 0.023764235708591916,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.820960873222432,
+        "Copula-Joe-A4f-ASYM": -9.689542111318872,
+        "Copula-SkewT-A4f-ASYM": -9.79719663751384
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-FXE": {
+      "pair_name": "SPY-FXE",
+      "asset1": "SPY",
+      "asset2": "FXE",
+      "asset_class": "equity-fx",
+      "n_oos": 3234,
+      "full_sample_corr": 0.22938703168233798,
+      "lambda_L_t_mean": 0.038575832457940704,
+      "lambda_U_joe_mean": 0.36038385998067785,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.3105739934647147,
+                "p_value": 0.2522907570223284,
+                "violations": 65,
+                "rate": 0.021797451374916163,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 3.3499429661822937,
+                "p_value": 0.06720734196153377,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.909090909090909,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.10018038035840593,
+                "p_value": 0.9202011218527102,
+                "pass": true,
+                "n_violations": 65
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.021797451374916163
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.5166366845469526,
+                "p_value": 0.47227991350810794,
+                "violations": 26,
+                "rate": 0.008718980549966466,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.468252115222862,
+                "p_value": 0.2256216731338222,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.3636363636363638,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.05048805753481944,
+                "p_value": 0.959733465975173,
+                "pass": true,
+                "n_violations": 26
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.008718980549966466
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.859792630367678,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.6300704928928065,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 152.92006450084364,
+                "p_value": 0.0,
+                "violations": 1,
+                "rate": 0.00030921459492888067,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.08333333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 1
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.00030921459492888067
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.3588867262573,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.295891188595651,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.44472585340139403,
+                "p_value": 0.5048502626208093,
+                "violations": 75,
+                "rate": 0.023191094619666047,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.038958553469040424,
+                "p_value": 0.8435307957696314,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 6.25,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.1113245307247227,
+                "p_value": 0.9113590036020901,
+                "pass": true,
+                "n_violations": 75
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.023191094619666047
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 3.0299311757847818,
+                "p_value": 0.0817414837683883,
+                "violations": 23,
+                "rate": 0.007111935683364255,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 2.009850236583409,
+                "p_value": 0.15628074489559496,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 1.9166666666666667,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.24648770860133895,
+                "p_value": 0.8053047180995274,
+                "pass": true,
+                "n_violations": 23
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.007111935683364255
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.83392974130853,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.691231442253039,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 6.984376258370295,
+        "p_value": 2.8612430046400997e-12,
+        "mean_loss_diff": 0.08480448406292981,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 3.3867013661301457,
+        "p_value": 0.0007073834261615876,
+        "mean_loss_diff": 0.012700735131745999,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.598369217778318,
+        "Copula-Joe-A4f-ASYM": -9.51356473371539,
+        "Copula-SkewT-A4f-ASYM": -9.585668482646572
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-LQD": {
+      "pair_name": "SPY-LQD",
+      "asset1": "SPY",
+      "asset2": "LQD",
+      "asset_class": "equity-credit",
+      "n_oos": 3234,
+      "full_sample_corr": 0.19679529989568928,
+      "lambda_L_t_mean": 0.02012293246811928,
+      "lambda_U_joe_mean": 0.3548976860137056,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 1.6071050033418715,
+                "p_value": 0.20489922731698873,
+                "violations": 64,
+                "rate": 0.021462105969148222,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.5193289428298122,
+                "p_value": 0.2177210724476375,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.818181818181818,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.12485245968719927,
+                "p_value": 0.9006403554487388,
+                "pass": true,
+                "n_violations": 64
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.021462105969148222
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.001095314697678873,
+                "p_value": 0.9735984002136028,
+                "violations": 30,
+                "rate": 0.01006036217303823,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.032308624585788,
+                "p_value": 0.3096170543011201,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.727272727272727,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.013367697158247926,
+                "p_value": 0.9893344384725596,
+                "pass": true,
+                "n_violations": 30
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.01006036217303823
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.802058525972913,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.680192508481195,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 137.84255920262825,
+                "p_value": 0.0,
+                "violations": 3,
+                "rate": 0.0009276437847866419,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.25,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.9658392838811757,
+                "p_value": 0.33412460786640263,
+                "pass": true,
+                "n_violations": 3
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.0009276437847866419
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "violations": 0,
+                "rate": 0.0,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 0
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.0
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.5134860460013115,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.442893170692283,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 0.12431165536716549,
+                "p_value": 0.7244043979612194,
+                "violations": 84,
+                "rate": 0.025974025974025976,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.2940286133325145,
+                "p_value": 0.2553068538082125,
+                "clusters": 4,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 7.0,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0672489312694573,
+                "p_value": 0.9463835317390079,
+                "pass": true,
+                "n_violations": 84
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.025974025974025976
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 3.216524662965469,
+                "p_value": 0.07289824784583687,
+                "violations": 43,
+                "rate": 0.013296227581941867,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 5.373337588933108,
+                "p_value": 0.02044681732061826,
+                "clusters": 3,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 3.5833333333333335,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.2974345331379735,
+                "p_value": 0.7661347823167337,
+                "pass": true,
+                "n_violations": 43
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.013296227581941867
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.854510182993391,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.707485143003597,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": 4.5837740486230505,
+        "p_value": 4.56657696118569e-06,
+        "mean_loss_diff": 0.061154651854916656,
+        "n": 3234,
+        "significant_harvey": true
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": 2.8464561510435864,
+        "p_value": 0.004420881726828452,
+        "mean_loss_diff": 0.008215377694138565,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.680299153511143,
+        "Copula-Joe-A4f-ASYM": -9.619144501656228,
+        "Copula-SkewT-A4f-ASYM": -9.672083775817006
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    },
+    "SPY-HYG": {
+      "pair_name": "SPY-HYG",
+      "asset1": "SPY",
+      "asset2": "HYG",
+      "asset_class": "equity-credit",
+      "n_oos": 3234,
+      "full_sample_corr": 0.6830744568235362,
+      "lambda_L_t_mean": 0.17393482725330747,
+      "lambda_U_joe_mean": 0.3781233287764252,
+      "models": {
+        "DCC-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 7.810908416965262,
+                "p_value": 0.0051931792391261,
+                "violations": 52,
+                "rate": 0.017437961099932932,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 1.0243607627774516,
+                "p_value": 0.31148685251166086,
+                "clusters": 2,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 4.7272727272727275,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.3018960279445907,
+                "p_value": 0.7627313238164227,
+                "pass": true,
+                "n_violations": 52
+              },
+              "trinity_pass": false,
+              "n_oos": 2982,
+              "violation_rate": 0.017437961099932932
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.11453303476591259,
+                "p_value": 0.7350412070499952,
+                "violations": 28,
+                "rate": 0.009389671361502348,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.2369111448597776,
+                "p_value": 0.2660671830000877,
+                "clusters": 1,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.5454545454545454,
+                "n_blocks": 11,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.0680785592926878,
+                "p_value": 0.9457230979579564,
+                "pass": true,
+                "n_violations": 28
+              },
+              "trinity_pass": true,
+              "n_oos": 2982,
+              "violation_rate": 0.009389671361502348
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.612726100903268,
+              "n": 2982
+            },
+            "alpha_0.010": {
+              "mean": -5.4955768231015565,
+              "n": 2982
+            }
+          }
+        },
+        "Copula-Joe-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 152.92006450084364,
+                "p_value": 0.0,
+                "violations": 1,
+                "rate": 0.00030921459492888067,
+                "expected_rate": 0.025,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.08333333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 1
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.00030921459492888067
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 56.033171166913874,
+                "p_value": 7.127631818093505e-14,
+                "violations": 1,
+                "rate": 0.00030921459492888067,
+                "expected_rate": 0.01,
+                "pass": false
+              },
+              "christoffersen": {
+                "stat": 0.0,
+                "p_value": 1.0,
+                "clusters": 0,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 0.08333333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": 0.0,
+                "p_value": 1.0,
+                "pass": true,
+                "n_violations": 1
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.00030921459492888067
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -4.914658824425905,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -4.862928857826067,
+              "n": 3234
+            }
+          }
+        },
+        "Copula-SkewT-A4f-ASYM": {
+          "var_tests": {
+            "alpha_0.025": {
+              "kupiec": {
+                "stat": 2.5817487914405035,
+                "p_value": 0.10810217113487386,
+                "violations": 67,
+                "rate": 0.020717377860235003,
+                "expected_rate": 0.025,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 1.479999444818361,
+                "p_value": 0.2237746091656856,
+                "clusters": 3,
+                "pass": true
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 5.583333333333333,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.18059807703166708,
+                "p_value": 0.8566830653700188,
+                "pass": true,
+                "n_violations": 67
+              },
+              "trinity_pass": true,
+              "n_oos": 3234,
+              "violation_rate": 0.020717377860235003
+            },
+            "alpha_0.010": {
+              "kupiec": {
+                "stat": 0.17526147210336518,
+                "p_value": 0.6754774860301009,
+                "violations": 30,
+                "rate": 0.00927643784786642,
+                "expected_rate": 0.01,
+                "pass": true
+              },
+              "christoffersen": {
+                "stat": 4.648780967649472,
+                "p_value": 0.031075608446276992,
+                "clusters": 2,
+                "pass": false
+              },
+              "basel": {
+                "color": "Green",
+                "violations_per_block": 2.5,
+                "n_blocks": 12,
+                "pass": true
+              },
+              "es_test": {
+                "z_stat": -0.045464868037155215,
+                "p_value": 0.9637367771723735,
+                "pass": true,
+                "n_violations": 30
+              },
+              "trinity_pass": false,
+              "n_oos": 3234,
+              "violation_rate": 0.00927643784786642
+            }
+          },
+          "fz_score": {
+            "alpha_0.025": {
+              "mean": -5.670842757261451,
+              "n": 3234
+            },
+            "alpha_0.010": {
+              "mean": -5.490818725930731,
+              "n": 3234
+            }
+          }
+        }
+      },
+      "dm_joe_vs_dcc": {
+        "t_stat": -0.020210815462048993,
+        "p_value": 0.9838752001575446,
+        "mean_loss_diff": -4.324740503311444e-05,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "dm_skt_vs_dcc": {
+        "t_stat": -1.538484384928936,
+        "p_value": 0.12393022362534513,
+        "mean_loss_diff": -0.0019179017197764525,
+        "n": 3234,
+        "significant_harvey": false
+      },
+      "mean_qlike": {
+        "DCC-A4f-ASYM": -9.397495595270627,
+        "Copula-Joe-A4f-ASYM": -9.397538842675658,
+        "Copula-SkewT-A4f-ASYM": -9.399413496990402
+      },
+      "oos_dates_first": "2013-06-03",
+      "oos_dates_last": "2026-04-10"
+    }
+  },
+  "cross_pair_table": [
+    {
+      "pair": "SPY-QQQ",
+      "asset_class": "equity-equity",
+      "corr": 0.9203537804548719,
+      "lambda_L_t_mean": 0.5885729399028311,
+      "lambda_U_joe_mean": 0.38977373914459273,
+      "n_oos": 3234,
+      "dm_joe_t": 1.6539902800216646,
+      "dm_joe_p": 0.09812948765392196,
+      "dm_skt_t": -0.6799521939585784,
+      "dm_skt_p": 0.49653473150646643,
+      "harvey_joe": false,
+      "harvey_skt": false
+    },
+    {
+      "pair": "SPY-IWM",
+      "asset_class": "equity-equity",
+      "corr": 0.8951450911592306,
+      "lambda_L_t_mean": 0.4012084449091685,
+      "lambda_U_joe_mean": 0.38731304893146506,
+      "n_oos": 3234,
+      "dm_joe_t": -2.125402556231912,
+      "dm_joe_p": 0.03355303717549234,
+      "dm_skt_t": -2.164679756638171,
+      "dm_skt_p": 0.03041221839166816,
+      "harvey_joe": false,
+      "harvey_skt": false
+    },
+    {
+      "pair": "SPY-XLF",
+      "asset_class": "equity-equity",
+      "corr": 0.8422125341253212,
+      "lambda_L_t_mean": 0.4650471504551243,
+      "lambda_U_joe_mean": 0.38286698375794187,
+      "n_oos": 3234,
+      "dm_joe_t": -1.0227937286622695,
+      "dm_joe_p": 0.3064053838230354,
+      "dm_skt_t": -1.8780366595166709,
+      "dm_skt_p": 0.06037615022816921,
+      "harvey_joe": false,
+      "harvey_skt": false
+    },
+    {
+      "pair": "SPY-TLT",
+      "asset_class": "equity-bond",
+      "corr": -0.30314988574186147,
+      "lambda_L_t_mean": 0.009345813892667407,
+      "lambda_U_joe_mean": 0.34959604022080976,
+      "n_oos": 3234,
+      "dm_joe_t": 10.291740210821708,
+      "dm_joe_p": 7.677608028198429e-25,
+      "dm_skt_t": 3.9579248062480903,
+      "dm_skt_p": 7.560374857303083e-05,
+      "harvey_joe": true,
+      "harvey_skt": true
+    },
+    {
+      "pair": "SPY-IEF",
+      "asset_class": "equity-bond",
+      "corr": -0.2915960891516908,
+      "lambda_L_t_mean": 0.019181702792832968,
+      "lambda_U_joe_mean": 0.3494610091365742,
+      "n_oos": 3234,
+      "dm_joe_t": 7.613114911806171,
+      "dm_joe_p": 2.675676965016308e-14,
+      "dm_skt_t": 4.125443345352147,
+      "dm_skt_p": 3.700212648927049e-05,
+      "harvey_joe": true,
+      "harvey_skt": true
+    },
+    {
+      "pair": "SPY-TIP",
+      "asset_class": "equity-bond",
+      "corr": -0.10011353106915123,
+      "lambda_L_t_mean": 0.014008784319603129,
+      "lambda_U_joe_mean": 0.3513352107321812,
+      "n_oos": 3234,
+      "dm_joe_t": 5.592400238299628,
+      "dm_joe_p": 2.2395183552910797e-08,
+      "dm_skt_t": 1.816423018112497,
+      "dm_skt_p": 0.06930550691321143,
+      "harvey_joe": true,
+      "harvey_skt": false
+    },
+    {
+      "pair": "SPY-GLD",
+      "asset_class": "equity-commodity",
+      "corr": 0.059024934496302,
+      "lambda_L_t_mean": 0.037729335203021463,
+      "lambda_U_joe_mean": 0.35416815408594965,
+      "n_oos": 3234,
+      "dm_joe_t": 7.6915846617908645,
+      "dm_joe_p": 1.4532372009293228e-14,
+      "dm_skt_t": 1.73681261101281,
+      "dm_skt_p": 0.08242025234613291,
+      "harvey_joe": true,
+      "harvey_skt": false
+    },
+    {
+      "pair": "SPY-SLV",
+      "asset_class": "equity-commodity",
+      "corr": 0.22407468207118436,
+      "lambda_L_t_mean": 0.02291751811108989,
+      "lambda_U_joe_mean": 0.3573164020732546,
+      "n_oos": 3234,
+      "dm_joe_t": 3.5156773059430058,
+      "dm_joe_p": 0.00043863376386949024,
+      "dm_skt_t": 2.3609281300634684,
+      "dm_skt_p": 0.018229263062552077,
+      "harvey_joe": true,
+      "harvey_skt": false
+    },
+    {
+      "pair": "SPY-USO",
+      "asset_class": "equity-commodity",
+      "corr": 0.35177296645023887,
+      "lambda_L_t_mean": 0.0465023857047445,
+      "lambda_U_joe_mean": 0.36669663861637836,
+      "n_oos": 3234,
+      "dm_joe_t": 3.5176979032830418,
+      "dm_joe_p": 0.00043530762149477737,
+      "dm_skt_t": 0.6565109319085047,
+      "dm_skt_p": 0.5114954360946948,
+      "harvey_joe": true,
+      "harvey_skt": false
+    },
+    {
+      "pair": "SPY-UUP",
+      "asset_class": "equity-fx",
+      "corr": -0.1851416355685617,
+      "lambda_L_t_mean": 0.01220009207409669,
+      "lambda_U_joe_mean": 0.34973239916324106,
+      "n_oos": 3234,
+      "dm_joe_t": 7.092275466646027,
+      "dm_joe_p": 1.3192457922746176e-12,
+      "dm_skt_t": 3.4916217258241047,
+      "dm_skt_p": 0.00048009764847030043,
+      "harvey_joe": true,
+      "harvey_skt": true
+    },
+    {
+      "pair": "SPY-FXE",
+      "asset_class": "equity-fx",
+      "corr": 0.22938703168233798,
+      "lambda_L_t_mean": 0.038575832457940704,
+      "lambda_U_joe_mean": 0.36038385998067785,
+      "n_oos": 3234,
+      "dm_joe_t": 6.984376258370295,
+      "dm_joe_p": 2.8612430046400997e-12,
+      "dm_skt_t": 3.3867013661301457,
+      "dm_skt_p": 0.0007073834261615876,
+      "harvey_joe": true,
+      "harvey_skt": true
+    },
+    {
+      "pair": "SPY-LQD",
+      "asset_class": "equity-credit",
+      "corr": 0.19679529989568928,
+      "lambda_L_t_mean": 0.02012293246811928,
+      "lambda_U_joe_mean": 0.3548976860137056,
+      "n_oos": 3234,
+      "dm_joe_t": 4.5837740486230505,
+      "dm_joe_p": 4.56657696118569e-06,
+      "dm_skt_t": 2.8464561510435864,
+      "dm_skt_p": 0.004420881726828452,
+      "harvey_joe": true,
+      "harvey_skt": false
+    },
+    {
+      "pair": "SPY-HYG",
+      "asset_class": "equity-credit",
+      "corr": 0.6830744568235362,
+      "lambda_L_t_mean": 0.17393482725330747,
+      "lambda_U_joe_mean": 0.3781233287764252,
+      "n_oos": 3234,
+      "dm_joe_t": -0.020210815462048993,
+      "dm_joe_p": 0.9838752001575446,
+      "dm_skt_t": -1.538484384928936,
+      "dm_skt_p": 0.12393022362534513,
+      "harvey_joe": false,
+      "harvey_skt": false
+    }
+  ],
+  "spearman_results": {
+    "n": 13,
+    "lambda_L_vs_dm_joe": {
+      "spearman_rho": -0.7912087912087913,
+      "p_two_sided": 0.001275023901741119,
+      "p_one_sided_neg": 0.0006375119508705595,
+      "h1_confirmed_p05": true,
+      "h1_confirmed_p10": true
+    },
+    "lambda_L_vs_dm_skt": {
+      "spearman_rho": -0.8406593406593407,
+      "p_two_sided": 0.00031907124069371445,
+      "p_one_sided_neg": 0.00015953562034685723,
+      "h1_confirmed_p05": true,
+      "h1_confirmed_p10": true
+    },
+    "lambda_arr": [
+      0.5885729399028311,
+      0.4012084449091685,
+      0.4650471504551243,
+      0.009345813892667407,
+      0.019181702792832968,
+      0.014008784319603129,
+      0.037729335203021463,
+      0.02291751811108989,
+      0.0465023857047445,
+      0.01220009207409669,
+      0.038575832457940704,
+      0.02012293246811928,
+      0.17393482725330747
+    ],
+    "dm_joe_arr": [
+      1.6539902800216646,
+      -2.125402556231912,
+      -1.0227937286622695,
+      10.291740210821708,
+      7.613114911806171,
+      5.592400238299628,
+      7.6915846617908645,
+      3.5156773059430058,
+      3.5176979032830418,
+      7.092275466646027,
+      6.984376258370295,
+      4.5837740486230505,
+      -0.020210815462048993
+    ],
+    "dm_skt_arr": [
+      -0.6799521939585784,
+      -2.164679756638171,
+      -1.8780366595166709,
+      3.9579248062480903,
+      4.125443345352147,
+      1.816423018112497,
+      1.73681261101281,
+      2.3609281300634684,
+      0.6565109319085047,
+      3.4916217258241047,
+      3.3867013661301457,
+      2.8464561510435864,
+      -1.538484384928936
+    ]
+  },
+  "scenario": "CONFIRMED",
+  "scenario_description": "\u03bb_L threshold confirmed: Spearman \u03c1<0, p<0.05 (one-sided). N=13, 9 pairs Harvey sig. Paper 3 'asset-class-specific copula' claim supported.",
+  "paper3_decision": "SUPPORT: Publish asset-class-specific copula claim",
+  "core_answers": {
+    "n_pairs_done": 13,
+    "n_harvey_joe": 9,
+    "n_harvey_skt": 4,
+    "harvey_pass_by_class": {
+      "equity-equity": {
+        "total": 3,
+        "pass": 0
+      },
+      "equity-bond": {
+        "total": 3,
+        "pass": 3
+      },
+      "equity-commodity": {
+        "total": 3,
+        "pass": 3
+      },
+      "equity-fx": {
+        "total": 2,
+        "pass": 2
+      },
+      "equity-credit": {
+        "total": 2,
+        "pass": 1
+      }
+    },
+    "h1_confirmed_p05": true,
+    "h1_confirmed_p10": true,
+    "spearman_rho_joe": -0.7912087912087913,
+    "spearman_p1_joe": 0.0006375119508705595
+  },
+  "config": {
+    "oos_start": "2013-06-01",
+    "window": 1250,
+    "refit_every": 63,
+    "alpha_levels": [
+      0.025,
+      0.01
+    ],
+    "weights": [
+      0.5,
+      0.5
+    ],
+    "mc_paths": 5000,
+    "seed": 42
+  },
+  "metadata": {
+    "experiment_id": "K1100e",
+    "parent_experiments": [
+      "K1100c",
+      "K1100b",
+      "K1100",
+      "K1041",
+      "K1092"
+    ],
+    "data_source": "yfinance daily",
+    "data_period": "2005-01-01 to 2026-04-12",
+    "oos_start": "2013-06-01",
+    "pairs_attempted": [
+      "SPY-QQQ",
+      "SPY-IWM",
+      "SPY-XLF",
+      "SPY-TLT",
+      "SPY-IEF",
+      "SPY-TIP",
+      "SPY-GLD",
+      "SPY-SLV",
+      "SPY-USO",
+      "SPY-UUP",
+      "SPY-FXE",
+      "SPY-LQD",
+      "SPY-HYG"
+    ],
+    "pairs_done": [
+      "SPY-QQQ",
+      "SPY-IWM",
+      "SPY-XLF",
+      "SPY-TLT",
+      "SPY-IEF",
+      "SPY-TIP",
+      "SPY-GLD",
+      "SPY-SLV",
+      "SPY-USO",
+      "SPY-UUP",
+      "SPY-FXE",
+      "SPY-LQD",
+      "SPY-HYG"
+    ],
+    "models": [
+      "DCC-A4f-ASYM",
+      "Copula-Joe-A4f-ASYM",
+      "Copula-SkewT-A4f-ASYM"
+    ],
+    "proposer": "User (Lai Yi-Hao) via K1100c follow-up",
+    "runtime_seconds": 1110.7736089229584,
+    "timestamp": "2026-04-17T13:25:52.206256+00:00",
+    "references": [
+      "Joe (1997). Multivariate Models and Dependence Concepts. Chapman&Hall.",
+      "Hansen (1994). Autoregressive Conditional Density. IER 35(3).",
+      "Harvey (1997). Testing DM: A Note. JBES 15(4).",
+      "Patton (2006). Modelling asymmetric exchange rate dependence. IER 47(2).",
+      "K1100c (2026-04-17): MIXED scenario, Joe sig for cross-class.",
+      "K1100b (2026-04-13): symmetric copula 5/5 NULL."
+    ]
+  }
+}
