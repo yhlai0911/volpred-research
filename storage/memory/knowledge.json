@@ -26632,5 +26632,43 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T13:01:31.396604"
+  },
+  {
+    "item_id": "71ef00d4",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1116 \u884d\u751f, \u57f7\u884c: Claude agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1117 Matched-pair alt-data forecast on VIX jump days. **VERDICT: FULL_NULL**. N jumps: primary_2sigma=181, 2.5sigma=110, absVIX>30=231. Matched pairs 156/181 (86.2%), 113 valid after GARCH fit. 6 alt-vars (vvix/USEPU/NFCI/ANFCI/STLFSI/WLEMU) ALL H1 FAIL: max DM-HLN |t|=1.35 (vvix) < Harvey 3.0. H2 (non-jump) + H3 (interaction) \u4e5f NULL. Paper 4 implication: STRENGTHEN universal null claim. K1116 weekly + K1117b monthly + K1117 daily-jump-event = 3-axis robust null. Suggest new Paper 4 subsection 'Event-conditional robustness' with matched-pair DM table on 180 highest-information days. Script: experiments/k1117/k1117.py, commit bd50ac5e.",
+    "evidence": [
+      "experiments/k1117/k1117.py",
+      "experiments/k1117/k1117_results.json",
+      "experiments/k1117/README.md"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-04-17T13:25:06.664898"
+  },
+  {
+    "item_id": "c05163a2",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1131 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1130 Extended IS 2012-2019 OFI-regime retest. **VERDICT: Scenario D - INVALIDATED structural**. Extended IS max VIX=40.74 (vs K1128 37.32), OOS COVID max VIX=82.69 still disjoint. Extended tertile cutoffs 33%=13.15 / 67%=15.91. OOS regime coverage: low=1.63% (\u5f9e 0% \u5fae\u6539) mid=6.76% high=91.61% - \u4ecd\u5931\u8861. H1 LRT chi2=2.10 p=0.147 (vs K1128 chi2=2.16) - no improvement. H2 DM t=+0.84 (\u9700 >=+2.0) FAIL. H3 extended vs K1128 DM t=-0.53 (extended\u7565\u5dee). H4 min coverage 1.63% < 10% threshold. **error_log 2026-04-13 fix #1 EMPIRICALLY INVALIDATED** (combined K1131 fix #3 NULL, now 2/3 fixes \u5df2 invalidated). K1128 narrative pivot: \u653e\u68c4 regime-switching claim, \u6539 'pooled |OFI| continuous microstructure signal' (high-tertile within-regime M3 vs M1 DM=+3.49 suggests |OFI| signal \u672c\u8eab\u5b58\u5728 without regime). Gemini review PASSED 7/7 checks, 0 HIGH/MED. Script: experiments/k1130/k1130.py, commit 04fe1db9.",
+    "evidence": [
+      "experiments/k1130/k1130.py",
+      "experiments/k1130/k1130_results.json",
+      "experiments/k1130/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T13:25:06.692606"
+  },
+  {
+    "item_id": "9e5026b0",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1136 \u884d\u751f, \u57f7\u884c: Claude agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49, self-review only (Codex quota)] K1138 Equity compendium (SPY/QQQ/IWM) HAR-RV-X + GARCH-MIDAS-X + GAS-t. **VERDICT: MIXED** (not universal null, not full equity pass). 9-cell DM-HLN fair test: SPY-HARRVX t=+4.19 p=0.000 PASS; QQQ-HARRVX t=+4.22 p=0.000 PASS; IWM-HARRVX t=+2.06 p=0.071 near miss. SPY-GASt t=-3.27 actively HARMFUL; QQQ-GASt t=-2.81 HARMFUL. All MIDAS cells NULL. 2 PASS cells / 9. **Paper 4 narrative must reframe from 'universal null' to 'channel-specific universal claims'**: (a) HAR+VIX regressor channel = asset-class HETEROGENEOUS (equity PASS, commodity NULL from K1136) - VIX is endogenous IV for equity; (b) MIDAS long-run driver channel = universal NULL (7 assets K1136+K1138 \u5168 null); (c) GAS-t score-driven channel = universally unhelpful (equity actively harmful). Equity VIX channel 2.5x commodity effect size (equity max t=+4.22 vs commodity K1136 max t=+1.65). Commit 55dd6065 main. Derivatives: K1139-K1141 + Paper 4 channel-specific rewrite. Script: experiments/k1138/k1138.py.",
+    "evidence": [
+      "experiments/k1138/k1138.py",
+      "experiments/k1138/k1138_results.json",
+      "experiments/k1138/README.md",
+      "experiments/k1138/dm_heatmap_equity.png",
+      "experiments/k1138/equity_vs_commodity_fair_tests.png"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T13:25:06.720805"
   }
 ]

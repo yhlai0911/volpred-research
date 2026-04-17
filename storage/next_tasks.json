@@ -342,8 +342,9 @@
     "id": "K1117",
     "title": "K1117: Daily-freq alt-data conditional on VIX jumps",
     "priority": 3,
-    "description": "K1116 衍生：唯一還沒測的 angle。matched-pair design around |ΔVIX|>2σ days。",
-    "status": "pending"
+    "description": "K1116 衍生：唯一還沒測的 angle。matched-pair design around |ΔVIX|>2σ days。 [DONE commit bd50ac5e FULL_NULL strengthens Paper 4 universal null]",
+    "status": "completed",
+    "completed_at": "2026-04-17T14:45:00+08:00"
   },
   {
     "id": "K1118",
@@ -504,8 +505,9 @@
     "id": "K1130",
     "title": "K1130: Expanding-window IS with prior crises (OFI regime test v2)",
     "priority": 3,
-    "description": "K1128 衍生 (was agent K1129，avoid conflict with GAS K1129): IS 擴含 2008 GFC / 2011 debt / 2015 China deval → 修正 VIX tertile degeneracy 問題。",
-    "status": "pending"
+    "description": "K1128 衍生 (was agent K1129，avoid conflict with GAS K1129): IS 擴含 2008 GFC / 2011 debt / 2015 China deval → 修正 VIX tertile degeneracy 問題。 [DONE commit 04fe1db9 Scenario D INVALIDATED - error_log fix #1 invalidated]",
+    "status": "completed",
+    "completed_at": "2026-04-17T14:45:00+08:00"
   },
   {
     "id": "K1131",
@@ -569,8 +571,9 @@
     "id": "K1138",
     "title": "K1138: Equity compendium (SPY/QQQ/IWM) robust models",
     "priority": 3,
-    "description": "K1136 擴充：將 MIDAS-X + HAR-RV-X + GAS-t 3 家族套用到 equity，與 commodity 對稱。若 equity 也 NULL → Paper 4 'universal-null' 可含 5 asset classes 全包。",
-    "status": "pending"
+    "description": "K1136 擴充：將 MIDAS-X + HAR-RV-X + GAS-t 3 家族套用到 equity，與 commodity 對稱。若 equity 也 NULL → Paper 4 'universal-null' 可含 5 asset classes 全包。 [DONE commit 55dd6065 MIXED - Paper 4 reframe as channel-specific universal claims]",
+    "status": "completed",
+    "completed_at": "2026-04-17T14:45:00+08:00"
   },
   {
     "id": "K1139",
@@ -923,8 +926,8 @@
     "id": "K1132_extended_is",
     "title": "K1132: Extended IS with prior crises (2008 GFC / 2011 EU debt / 2015 China deval) for OFI-jump regime test",
     "priority": 3,
-    "status": "pending",
-    "description": "K1131 NULL confirms K1128 degeneracy is structural not functional-form. Best remaining fix from error_log 2026-04-13: extend IS training period to include prior VIX spikes so OOS regime is not disjoint from IS training range. Target IS 2008-2019, OOS 2020-2025. Re-test K1128 OFI-jump regime test with this expanded IS. If PASS → error_log fix #1 validated; if FAIL → regime instability may be irreducible."
+    "status": "duplicate",
+    "description": "K1131 NULL confirms K1128 degeneracy is structural not functional-form. Best remaining fix from error_log 2026-04-13: extend IS training period to include prior VIX spikes so OOS regime is not disjoint from IS training range. Target IS 2008-2019, OOS 2020-2025. Re-test K1128 OFI-jump regime test with this expanded IS. If PASS → error_log fix #1 validated; if FAIL → regime instability may be irreducible. [DUPLICATE of existing K1130 which was \"Expanding-window IS with prior crises (OFI regime test v2)\". Deduplicated 2026-04-17.]"
   },
   {
     "id": "K1133_expanding_window",
@@ -939,5 +942,33 @@
     "priority": 3,
     "status": "pending",
     "description": "K1131 agent suggested alt-direction: instead of VIX-conditional beta, normalize OFI by rolling realized vol. |OFI|/sigma_t_hat provides regime-free standardization. Test if this 繞過 regime-switching 本身. If PASS → K1128 story changes from \"regime-dependent\" to \"vol-normalized signal\"."
+  },
+  {
+    "id": "Paper4_channel_specific_pivot",
+    "title": "Paper 4 narrative pivot: universal null -> channel-specific claims (主線程 + 用戶決策)",
+    "priority": 1,
+    "status": "pending",
+    "description": "K1138 MIXED 結果改寫 Paper 4 narrative. Original \"universal robust null\" claim refuted. New structure: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class heterogeneous (equity PASS, commodity NULL); (2) MIDAS long-run = universal NULL (7 assets); (3) GAS-t = universally unhelpful (equity actively harmful). Supporting experiments: K1117 (event-conditional null), K1130 (regime fix invalidated). 待用戶決策 Paper 4 outline 更新後, 主線程執行 body rewrite."
+  },
+  {
+    "id": "K1139_equity_har_deep_dive",
+    "title": "K1139: SPY-HARRVX/QQQ-HARRVX deep dive on which VIX component drives the +4.19 t-stat",
+    "priority": 3,
+    "status": "pending",
+    "description": "K1138 equity HAR-VIX channel is endogenous - what is the mechanism? Decompose VIX into realized-vol, skew, term premium components and test which drives the predictive power. If realized-vol component = the driver -> equity VIX channel is essentially realized-vol proxy; if skew/term drives it -> true IV signal."
+  },
+  {
+    "id": "K1140_gas_t_harm_diagnostic",
+    "title": "K1140: Diagnose why GAS-t actively HARMS equity forecasts (t=-3.27/-2.81)",
+    "priority": 3,
+    "status": "pending",
+    "description": "K1138 GAS-t on equity is actively worse. Why? Is it Student-t DoF miscalibration, scaled score oversmoothing, or equity tail asymmetry that breaks symmetric-t assumption? Skew-t GAS might fix (K1135 candidate)."
+  },
+  {
+    "id": "K1141_paper4_writeup_prep",
+    "title": "K1141: Paper 4 rewrite preparation - data table + figure for channel-specific claims",
+    "priority": 3,
+    "status": "pending",
+    "description": "Prepare Paper 4 §4 results table and cover figure for channel-specific narrative. 3x4 table (3 channels x 4 asset classes: equity/commodity/bond/FX). Requires Paper 4 narrative pivot decision first (Paper4_channel_specific_pivot)."
   }
 ]
