@@ -27665,5 +27665,16 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-18T01:57:46.126419"
+  },
+  {
+    "item_id": "99dc0a30",
+    "category": "K1204",
+    "content": "K1204 Paper 2 \u00a75 cross-market synthesis complete. Integrity 32/32 cross-checks PASS across 7 source JSONs (K1165/K1166/K1168/K1172/K1171/K1173/K1163) zero replication drift. Panel Harvey t(log_analyst joint) monotonic 3.236->3.556->3.627->3.789->3.808 all >Harvey |t|>3 threshold. \u00a75 narrative headline commitment READY: STRENGTHENED with 3 residual caveats \u2014 (i) EM cost-of-capital scale factor (K1173 refined-proxy NULL \u0394\u03c1=-0.056 confirmed structural); (ii) AU below-ladder sector bias (K1171 leverage point, drop-AU LOO restores \u03c1=0.441); (iii) K1163 EU cluster robust under N=30 full coverage (\u03b8_rel=0.194 CI [0.127,0.277] excludes 0.30). Figures produced (300dpi PNG+PDF \u00d7 5): A trajectory \u03c1+CI K1165-K1171; B Panel Harvey t monotonic bar; C two-level R\u00b2 between vs within (7.86-8.79x ratio); D EM residual taxonomy \u03b8_rel vs inst_pct by region + K1173 refined shift arrows; E K1153 N=18 vs K1163 N=30 EU robustness. Paper 2 body rewrite materials READY; narrative state = decision_candidate awaiting main-thread user confirmation before transitioning to decision_made_awaiting_body_rewrite.",
+    "evidence": [
+      "experiments/k1204/k1204_results.json",
+      "commit cf5188eb"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-04-18T02:06:04.545195"
   }
 ]
