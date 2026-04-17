@@ -1,0 +1,222 @@
+{
+  "experiment_id": "K1223",
+  "title": "Paper 6 body_v2 integration edit guide (K1218 appendix + K1221 fixes)",
+  "date": "2026-04-17",
+  "paper_id": "paper-6",
+  "paper_path": "paper/prg-periodic-garch/",
+  "target_file": "paper/prg-periodic-garch/main.tex",
+  "baseline_commit": "7d35418b",
+  "rollback_commit": "7d35418b",
+  "target_journal": "Finance Research Letters (FRL)",
+  "source_experiments": [
+    {
+      "id": "K1218",
+      "commit": "581be90f",
+      "role": "Appendix A markdown draft (A.1-A.5, 930 words)",
+      "artifact": "experiments/k1218/k1218_appendix_draft.md"
+    },
+    {
+      "id": "K1221",
+      "commit": "fc00c7aa",
+      "role": "Pre-submission audit (17 PASS / 3 BLOCKER / 3 WARN / 1 N/A)",
+      "artifact": "experiments/k1221/k1221_submission_checklist.md"
+    }
+  ],
+  "summary": {
+    "total_items": 6,
+    "blockers": 3,
+    "warnings": 3,
+    "estimated_minutes_blockers_only": 75,
+    "estimated_minutes_full": 120
+  },
+  "seed": 42,
+  "seed_used_for_computation": false,
+  "worktree_scope": "experiments/k1223/",
+  "items": [
+    {
+      "order": 1,
+      "id": "B1",
+      "severity": "BLOCKER",
+      "category": "paper_body_typo",
+      "source_experiment": "K1221",
+      "source_audit_item": "3.4",
+      "title": "Table 1 0050.TW OOS date correction",
+      "file": "paper/prg-periodic-garch/main.tex",
+      "line": 160,
+      "action": "edit_in_place",
+      "old_string": "0050.TW    & OHLC (yfinance) & 1{,}266 & 2019/12--2026/04 & 46.1 & 53.9 \\\\",
+      "new_string": "0050.TW    & OHLC (yfinance) & 1{,}266 & 2021/01--2026/04 & 46.1 & 53.9 \\\\",
+      "reason": "K886 JSON actual OOS period is 2021-01-08 to 2026-04-02; n_oos=1266 matches but date string was stale (DIV-2 from reproducibility_audit/diff_report.md)",
+      "estimated_minutes": 15,
+      "verification": "rg -n '0050.TW.*2019/12' main.tex returns zero hits"
+    },
+    {
+      "order": 2,
+      "id": "B2",
+      "severity": "BLOCKER",
+      "category": "appendix_integration",
+      "source_experiment": "K1218",
+      "source_audit_item": "7.1",
+      "title": "K1218 Appendix A integration (cross-ref + appendix body)",
+      "file": "paper/prg-periodic-garch/main.tex",
+      "locations": [
+        {
+          "subitem": "2a",
+          "description": "Cross-reference sentence at end of Section 4.1 first results paragraph",
+          "line_approx": 206,
+          "action": "append_sentence",
+          "new_text": "Appendix~\\ref{app:replication}.3 documents an independent clean-slate replication of the SPY results, yielding DM $t=6.13$ against the main-text $6.00$, which confirms the transcription of Eqs.~(\\ref{eq:prg_ov_forecast})--(\\ref{eq:prg_fullday}).",
+          "source_verbatim_from": "k1218_appendix_draft.md line 146-149"
+        },
+        {
+          "subitem": "2b",
+          "description": "Appendix body between \\end{thebibliography} and \\end{document}",
+          "line_between": [428, 430],
+          "action": "insert_block",
+          "block_source": "k1218_appendix_draft.md A.1-A.5 (verbatim, with markdown H2 -> LaTeX \\subsection conversion)",
+          "new_section_label": "app:replication",
+          "subsections": ["Motivation", "Methodology", "Replication results", "Interpretation", "Reproducibility package"],
+          "contains_table": {
+            "label": "tab:appa_replication",
+            "rows": 5,
+            "columns": 4,
+            "key_numbers": {
+              "K880_GJR_QLIKE": 0.8542,
+              "K1200_GJR_QLIKE": 0.8544,
+              "K880_PRG_Ext_QLIKE": 0.7478,
+              "K1200_PRG_Ext_QLIKE": 0.7355,
+              "K880_DM_t": 6.004,
+              "K1200_DM_t": 6.128,
+              "K880_Spearman": 0.5678,
+              "K1200_Spearman": 0.5761,
+              "n_oos": 1823
+            }
+          },
+          "conversion_notes": [
+            "K1218 markdown H2 -> LaTeX \\subsection under \\section{Independent Replication of the Two-Phase Forecast Timing}",
+            "Change Eqs.~(5)-(6) prose -> \\ref{eq:prg_ov_forecast}--\\ref{eq:prg_fullday} to use existing labels",
+            "Verify \\usepackage{float} for [H] specifier in appa_replication table; fallback to [htbp] if missing",
+            "\\citep{Patton2011} replaces (Patton, 2011) parenthetical"
+          ]
+        }
+      ],
+      "reason": "K1221 classifies as highest-ROI submission fix. Converts internal 7d35418b errata into reviewer-visible defence via K1200 clean-slate replication (MINOR_DIVERGENT band: dQLIKE=-0.012, dDM_t=+0.124, both within tolerance).",
+      "estimated_minutes": 55
+    },
+    {
+      "order": 3,
+      "id": "W1",
+      "severity": "WARN",
+      "category": "replication_package_polish",
+      "source_experiment": "K1221",
+      "source_audit_item": "1.2",
+      "title": "Create data/README.md stub",
+      "file": "paper/prg-periodic-garch/data/README.md",
+      "action": "create_new_file",
+      "content_outline": [
+        "H1: Paper 6 data folder index",
+        "Intro: TAIFEX on request, ETF data via yfinance runtime pull",
+        "Table: Dataset -> Source -> Path",
+        "Pointers to data_sources.md and scripts/README.md"
+      ],
+      "reason": "docs/paper-guide.md rule 1 accepts data/ or data_sources.md; reviewers open data/ first. 10-line stub closes UX gap.",
+      "estimated_minutes": 10
+    },
+    {
+      "order": 4,
+      "id": "W2",
+      "severity": "WARN",
+      "category": "replication_package_polish",
+      "source_experiment": "K1221",
+      "source_audit_item": "1.6",
+      "title": "Append TAIFEX data-on-request clause",
+      "file": "paper/prg-periodic-garch/data_sources.md",
+      "action": "append_section",
+      "new_section_heading": "## Data availability",
+      "new_text": "TAIFEX tick-level raw data are proprietary and not redistributed in this repository. They are available upon written request to the corresponding author; alternatively, the processed daily session realized variances used in the paper are bundled in experiments/k874/data/ and are sufficient to reproduce Tables 2-5 for the TAIFEX rows.",
+      "reason": "FRL 'data available on request' is acceptable but must be explicit. K1221 WARN.",
+      "estimated_minutes": 5
+    },
+    {
+      "order": 5,
+      "id": "W3",
+      "severity": "WARN",
+      "category": "reproducibility_consistency",
+      "source_experiment": "K1221",
+      "source_audit_item": "2.4",
+      "title": "Pin reproduce.py to K880 canonical OR add K1200 band check",
+      "file": "paper/prg-periodic-garch/reproduce.py",
+      "action": "edit_and_annotate",
+      "current_issue": "Line 76 runs k880v2_prg_fixed.py which gives QLIKE=0.864, DM=-0.57; paper Table 2 SPY uses K880 canonical QLIKE=0.748, DM=6.00. Reviewer running reproduce.py will see catastrophic divergence.",
+      "options": [
+        {
+          "id": "a",
+          "description": "Pin K880 canonical: replace k880v2 with k880 canonical script"
+        },
+        {
+          "id": "b",
+          "description": "Add K1200 band check: run k1200.py additionally, verify |dQLIKE|<0.05 and |dDM_t|<0.3 against k880_results.json, emit 'MINOR_DIVERGENT PASS'",
+          "recommended": true
+        }
+      ],
+      "required_comment_block": "# NOTE: Main-text Table 2 SPY row uses K880 canonical (QLIKE=0.748, DM=6.00). K880v2 is a lookahead-bias ablation (QLIKE=0.864, DM=-0.57). See 7d35418b errata + Appendix A (K1200 DM=6.13) for canonical defence.",
+      "reason": "10/10 body numbers match source JSON, but reproduce.py running K880v2 as main result confuses reviewers.",
+      "estimated_minutes": 30
+    },
+    {
+      "order": 6,
+      "id": "B3",
+      "severity": "BLOCKER",
+      "category": "platform_sync",
+      "source_experiment": "K1221",
+      "source_audit_item": "7.3",
+      "title": "Run paper-update CLI after B1+B2 (+ optional W1-W3)",
+      "file": null,
+      "action": "run_cli",
+      "cli": "uv run volpred ops paper-update --paper-id paper-6",
+      "working_dir": "repo_root",
+      "prerequisites": [
+        "B1 and B2 edits applied",
+        "xelatex main.tex executed twice from paper/prg-periodic-garch/",
+        "Visual inspection of regenerated main.pdf confirms Table 1 date fix + cross-ref sentence + Appendix A rendering"
+      ],
+      "reason": "Single CLI call covers B1+B2+B3 in one Supabase/Mirror sync. Running earlier would sync partially-fixed PDF.",
+      "estimated_minutes": 5
+    }
+  ],
+  "execution_sequence": [
+    "1. Create branch paper-6-body-v2 from 7d35418b baseline",
+    "2. Apply B1 (main.tex line 160)",
+    "3. Apply B2a + B2b (cross-ref + appendix body)",
+    "4. Apply W1 (create data/README.md)",
+    "5. Apply W2 (append data_sources.md clause)",
+    "6. Apply W3 (edit reproduce.py, option b recommended)",
+    "7. xelatex main.tex twice in paper/prg-periodic-garch/",
+    "8. Visual PDF inspection",
+    "9. Apply B3 (paper-update CLI from repo root)",
+    "10. git commit 'Paper 6 body_v2: K1218 appendix + K1221 fixes (B1/B2/B3 + W1/W2/W3)'",
+    "11. Re-run K1221 audit to verify readiness=READY"
+  ],
+  "rollback_plan": {
+    "safe_revert": "git checkout 7d35418b -- paper/prg-periodic-garch/main.tex",
+    "preserve_pdf_v3": true,
+    "diagnostic_path": "Re-apply items one-by-one to isolate compile-breaking item",
+    "log_location": "docs/error_log.md under 'Paper 6 body_v2 integration -- compile trap'"
+  },
+  "strict_rules_observed": {
+    "no_tex_output": true,
+    "no_main_tex_edit_by_agent": true,
+    "verbatim_k1218_content": true,
+    "verbatim_k1221_fix_pointers": true,
+    "worktree_output_only": "experiments/k1223/",
+    "seed_fixed": 42,
+    "seed_used": false,
+    "shared_state_unchanged": true
+  },
+  "success_criteria": [
+    "k1223_edit_guide.md lists 6 items in priority order",
+    "Each item has file, line (if applicable), LaTeX diff or new content, and reason",
+    "Main thread can execute guide top-to-bottom without reading K1218/K1221 sources",
+    "Total estimated execution time 80-120 min matches K1221 estimate"
+  ]
+}
