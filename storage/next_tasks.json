@@ -1213,17 +1213,18 @@
   {
     "id": "Paper2_D2_TZ_momentum_cross_market",
     "title": "Paper 2 BLOCKER: Table 4 TZ Momentum 六市場實驗完全缺 (第三貢獻核心)",
-    "status": "pending",
+    "status": "resolved_direction_confirmed_magnitude_offset",
     "priority": 4,
     "created_at": "2026-04-17T16:29:10+08:00",
-    "description": "Paper 2 audit 發現 Table 4 所有數字（TW c2c=1.473, o2o=0.87, t=2.22, 六市場 t-stats, 組合策略）experiments/ 找不到任何 JSON. 這是 Paper 2 **第三貢獻 (TZ Information Transmission) 核心**. **動作**: 建立新 K 跨市場 TZ momentum 實驗 (TW + US + JP + UK + DE + HK). 若 paper 原始實驗從未 tracked → 重建 from main.tex methodology, allclose 驗證. investment priority: paper 最大 contribution 無 replication → desk-reject 風險. Agent-launchable via dedicated K 編號.",
+    "description": "Paper 2 audit 發現 Table 4 所有數字（TW c2c=1.473, o2o=0.87, t=2.22, 六市場 t-stats, 組合策略）experiments/ 找不到任何 JSON. 這是 Paper 2 **第三貢獻 (TZ Information Transmission) 核心**. **動作**: 建立新 K 跨市場 TZ momentum 實驗 (TW + US + JP + UK + DE + HK). 若 paper 原始實驗從未 tracked → 重建 from main.tex methodology, allclose 驗證. investment priority: paper 最大 contribution 無 replication → desk-reject 風險. Agent-launchable via dedicated K 編號. [K1176 DONE commit c9937d49: PARTIAL_MATCH. 6 markets 方向結論全 confirmed, magnitude 系統性 +30% 因 0050.TW 2014 4:1 split (yfinance 保留 -75% 虛假報酬) + o2o 公式定義不同 + data vendor 差 (TEJ vs yfinance). Severity: BLOCKER → documentation gap. 建議 (b) 修論文補 Table 4 注釋 + Methodology data source.]",
     "tags": [
       "paper-2",
       "taiwan-vt",
       "blocker",
       "third-contribution",
       "cross-market"
-    ]
+    ],
+    "completed_at": "2026-04-17T17:05:46+08:00"
   },
   {
     "id": "Paper2_D3D4D5_gamma_VaR_days",
@@ -1362,6 +1363,20 @@
     "tags": [
       "paper-9",
       "ticker-forensic",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper2_Table4_documentation_errata",
+    "title": "Paper 2: Table 4 / Methodology / Data section 補說明 (K1176 發現)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:05:46+08:00",
+    "description": "K1176 (c9937d49) 確認 Paper 2 TZ momentum 方向結論成立，需補 documentation: (1) Table 4 備注: o2o 精確公式 (open→close 日內段 or open_t/open_{t-1}?); (2) 0050.TW 2014-01-02 4:1 split 處理方式腳注 (重要: yfinance auto_adjust 仍保留虛假 -75%); (3) Section 5 methodology: 資料來源 TEJ/Bloomberg/yfinance 明載 + 若差異顯著需討論; (4) experiments.md 加 K1176 為 Table 4 source; (5) 若 paper 最終採 K1176 magnitude → 更新 Sharpe 1.473 → 1.915 (+30%), 組合 Sharpe 1.810 → 2.192. 方向結論不變. 主線程 body edit. 配合 Paper2_errata_Table3_full_rewrite 一併做.",
+    "tags": [
+      "paper-2",
+      "taiwan-vt",
+      "documentation-errata",
       "main-thread"
     ]
   }
