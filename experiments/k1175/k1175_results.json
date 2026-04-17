@@ -1,0 +1,340 @@
+{
+  "experiment_id": "K1175",
+  "title": "Paper 2 Table 3 VT 2010-2026 Canonical Replication",
+  "purpose": "BLOCKER D1 resolution: replicate K900 methodology with data_start=2010-01-01 to produce canonical numbers for Paper 2 Table 3 (VT Performance). Diagnosing match status to guide (a)/(b)/(c) decision.",
+  "data_source": "yfinance (0050.TW, ^VIX) with clean_tw50_data split correction",
+  "data_period": "2009-01-02 to 2026-03-30",
+  "data_period_bh_ewma": "2010-01-01 to 2026-03-31",
+  "data_period_garch_gjr": "2020-01-01 to 2026-03-31",
+  "data_period_vix863": "2016-01-01 to 2026-03-31",
+  "n_tw_trading_days_total": 4217,
+  "configuration": {
+    "ewma_lambda": 0.94,
+    "target_vol": 0.1,
+    "garch_window": 2000,
+    "tx_cost_roundtrip": 0.00186,
+    "vix_lag": "Previous US trading day close (strictly < Taiwan date)",
+    "rebalancing": "Monthly for VIX strategies, daily rebalancing for GARCH/EWMA",
+    "seed": 42,
+    "methodology": "Identical to K900 except per-strategy OOS periods match paper's Table 3 notes"
+  },
+  "paper_table3_claimed": {
+    "buy_hold": {
+      "sharpe": 0.729,
+      "mdd_pct": -41.3,
+      "ann_return_pct": 10.2,
+      "ann_vol_pct": 20.8,
+      "ann_turnover_pct": 0
+    },
+    "ewma_vt": {
+      "sharpe": 0.796,
+      "mdd_pct": -18.4,
+      "ann_return_pct": 7.8,
+      "ann_vol_pct": 10.2,
+      "ann_turnover_pct": 116
+    },
+    "garch_vt": {
+      "sharpe": 0.994,
+      "mdd_pct": -16.8,
+      "ann_return_pct": 8.1,
+      "ann_vol_pct": 10.5,
+      "ann_turnover_pct": 98
+    },
+    "gjr_vt": {
+      "sharpe": 1.108,
+      "mdd_pct": -15.1,
+      "ann_return_pct": 8.4,
+      "ann_vol_pct": 10.3,
+      "ann_turnover_pct": 102
+    },
+    "vix_863": {
+      "sharpe": 0.69,
+      "mdd_pct": -15.3,
+      "ann_return_pct": 7.2,
+      "ann_vol_pct": 12.1,
+      "ann_turnover_pct": 24
+    }
+  },
+  "k1175_results": {
+    "buy_hold": {
+      "name": "Buy & Hold (2010-2026)",
+      "n_days": 3968,
+      "n_years": 15.75,
+      "period": "2010-01-04 to 2026-03-30",
+      "ann_return_pct": 14.48,
+      "ann_vol_pct": 18.13,
+      "sharpe": 0.7989,
+      "sortino": 1.0843,
+      "mdd_pct": -33.83,
+      "calmar": 0.4281,
+      "var_1pct": -2.9995,
+      "var_5pct": -1.7238,
+      "es_1pct": -4.3054,
+      "es_5pct": -2.5919,
+      "ann_turnover_pct": 0.0,
+      "ann_tx_drag_bps": 0.0
+    },
+    "ewma_vt": {
+      "name": "EWMA VT 10% (2010-2026)",
+      "n_days": 3968,
+      "n_years": 15.75,
+      "period": "2010-01-04 to 2026-03-30",
+      "ann_return_pct": 7.42,
+      "ann_vol_pct": 10.58,
+      "sharpe": 0.7012,
+      "sortino": 0.9642,
+      "mdd_pct": -21.17,
+      "calmar": 0.3504,
+      "var_1pct": -1.7604,
+      "var_5pct": -1.043,
+      "es_1pct": -2.3999,
+      "es_5pct": -1.5246,
+      "ann_turnover_pct": 479.9,
+      "ann_tx_drag_bps": 89.3
+    },
+    "garch_vt": {
+      "name": "GARCH VT 10% (2020-2026)",
+      "n_days": 1511,
+      "n_years": 6.0,
+      "period": "2020-01-03 to 2026-03-30",
+      "ann_return_pct": 10.5,
+      "ann_vol_pct": 11.06,
+      "sharpe": 0.9497,
+      "sortino": 1.3201,
+      "mdd_pct": -22.18,
+      "calmar": 0.4733,
+      "var_1pct": -1.8074,
+      "var_5pct": -1.0691,
+      "es_1pct": -2.4568,
+      "es_5pct": -1.5876,
+      "ann_turnover_pct": 677.8,
+      "ann_tx_drag_bps": 126.1
+    },
+    "gjr_vt": {
+      "name": "GJR VT 10% (2020-2026)",
+      "n_days": 1511,
+      "n_years": 6.0,
+      "period": "2020-01-03 to 2026-03-30",
+      "ann_return_pct": 12.19,
+      "ann_vol_pct": 11.35,
+      "sharpe": 1.0742,
+      "sortino": 1.5443,
+      "mdd_pct": -22.25,
+      "calmar": 0.5479,
+      "var_1pct": -1.778,
+      "var_5pct": -1.0907,
+      "es_1pct": -2.4354,
+      "es_5pct": -1.5713,
+      "ann_turnover_pct": 694.3,
+      "ann_tx_drag_bps": 129.1
+    },
+    "vix_863": {
+      "name": "8.63/VIX monthly (2016-2026)",
+      "n_days": 2485,
+      "n_years": 9.86,
+      "period": "2016-01-04 to 2026-03-30",
+      "ann_return_pct": 10.72,
+      "ann_vol_pct": 9.43,
+      "sharpe": 1.1369,
+      "sortino": 1.4836,
+      "mdd_pct": -13.71,
+      "calmar": 0.7817,
+      "var_1pct": -1.5217,
+      "var_5pct": -0.8548,
+      "es_1pct": -2.4171,
+      "es_5pct": -1.347,
+      "ann_turnover_pct": 102.1,
+      "ann_tx_drag_bps": 19.0
+    }
+  },
+  "diff_vs_paper_table3": {
+    "buy_hold": {
+      "sharpe": {
+        "paper": 0.729,
+        "k1175": 0.7989,
+        "abs_diff": 0.0699,
+        "rel_diff_pct": 9.6,
+        "status": "APPROX"
+      },
+      "mdd_pct": {
+        "paper": -41.3,
+        "k1175": -33.83,
+        "abs_diff": 7.47,
+        "rel_diff_pct": 18.1,
+        "status": "DIVERGENT"
+      },
+      "ann_return_pct": {
+        "paper": 10.2,
+        "k1175": 14.48,
+        "abs_diff": 4.28,
+        "rel_diff_pct": 42.0,
+        "status": "DIVERGENT"
+      },
+      "ann_vol_pct": {
+        "paper": 20.8,
+        "k1175": 18.13,
+        "abs_diff": -2.67,
+        "rel_diff_pct": 12.8,
+        "status": "DIVERGENT"
+      },
+      "ann_turnover_pct": {
+        "paper": 0,
+        "k1175": 0.0,
+        "abs_diff": 0.0,
+        "rel_diff_pct": Infinity,
+        "status": "DIVERGENT"
+      }
+    },
+    "ewma_vt": {
+      "sharpe": {
+        "paper": 0.796,
+        "k1175": 0.7012,
+        "abs_diff": -0.0948,
+        "rel_diff_pct": 11.9,
+        "status": "DIVERGENT"
+      },
+      "mdd_pct": {
+        "paper": -18.4,
+        "k1175": -21.17,
+        "abs_diff": -2.77,
+        "rel_diff_pct": 15.1,
+        "status": "DIVERGENT"
+      },
+      "ann_return_pct": {
+        "paper": 7.8,
+        "k1175": 7.42,
+        "abs_diff": -0.38,
+        "rel_diff_pct": 4.9,
+        "status": "MATCHED"
+      },
+      "ann_vol_pct": {
+        "paper": 10.2,
+        "k1175": 10.58,
+        "abs_diff": 0.38,
+        "rel_diff_pct": 3.7,
+        "status": "MATCHED"
+      },
+      "ann_turnover_pct": {
+        "paper": 116,
+        "k1175": 479.9,
+        "abs_diff": 363.9,
+        "rel_diff_pct": 313.7,
+        "status": "DIVERGENT"
+      }
+    },
+    "garch_vt": {
+      "sharpe": {
+        "paper": 0.994,
+        "k1175": 0.9497,
+        "abs_diff": -0.0443,
+        "rel_diff_pct": 4.5,
+        "status": "MATCHED"
+      },
+      "mdd_pct": {
+        "paper": -16.8,
+        "k1175": -22.18,
+        "abs_diff": -5.38,
+        "rel_diff_pct": 32.0,
+        "status": "DIVERGENT"
+      },
+      "ann_return_pct": {
+        "paper": 8.1,
+        "k1175": 10.5,
+        "abs_diff": 2.4,
+        "rel_diff_pct": 29.6,
+        "status": "DIVERGENT"
+      },
+      "ann_vol_pct": {
+        "paper": 10.5,
+        "k1175": 11.06,
+        "abs_diff": 0.56,
+        "rel_diff_pct": 5.3,
+        "status": "APPROX"
+      },
+      "ann_turnover_pct": {
+        "paper": 98,
+        "k1175": 677.8,
+        "abs_diff": 579.8,
+        "rel_diff_pct": 591.6,
+        "status": "DIVERGENT"
+      }
+    },
+    "gjr_vt": {
+      "sharpe": {
+        "paper": 1.108,
+        "k1175": 1.0742,
+        "abs_diff": -0.0338,
+        "rel_diff_pct": 3.1,
+        "status": "MATCHED"
+      },
+      "mdd_pct": {
+        "paper": -15.1,
+        "k1175": -22.25,
+        "abs_diff": -7.15,
+        "rel_diff_pct": 47.4,
+        "status": "DIVERGENT"
+      },
+      "ann_return_pct": {
+        "paper": 8.4,
+        "k1175": 12.19,
+        "abs_diff": 3.79,
+        "rel_diff_pct": 45.1,
+        "status": "DIVERGENT"
+      },
+      "ann_vol_pct": {
+        "paper": 10.3,
+        "k1175": 11.35,
+        "abs_diff": 1.05,
+        "rel_diff_pct": 10.2,
+        "status": "DIVERGENT"
+      },
+      "ann_turnover_pct": {
+        "paper": 102,
+        "k1175": 694.3,
+        "abs_diff": 592.3,
+        "rel_diff_pct": 580.7,
+        "status": "DIVERGENT"
+      }
+    },
+    "vix_863": {
+      "sharpe": {
+        "paper": 0.69,
+        "k1175": 1.1369,
+        "abs_diff": 0.4469,
+        "rel_diff_pct": 64.8,
+        "status": "DIVERGENT"
+      },
+      "mdd_pct": {
+        "paper": -15.3,
+        "k1175": -13.71,
+        "abs_diff": 1.59,
+        "rel_diff_pct": 10.4,
+        "status": "DIVERGENT"
+      },
+      "ann_return_pct": {
+        "paper": 7.2,
+        "k1175": 10.72,
+        "abs_diff": 3.52,
+        "rel_diff_pct": 48.9,
+        "status": "DIVERGENT"
+      },
+      "ann_vol_pct": {
+        "paper": 12.1,
+        "k1175": 9.43,
+        "abs_diff": -2.67,
+        "rel_diff_pct": 22.1,
+        "status": "DIVERGENT"
+      },
+      "ann_turnover_pct": {
+        "paper": 24,
+        "k1175": 102.1,
+        "abs_diff": 78.1,
+        "rel_diff_pct": 325.4,
+        "status": "DIVERGENT"
+      }
+    }
+  },
+  "timestamp": "2026-04-17T16:37:06.965753",
+  "proposer": "User (K1175 BLOCKER D1)",
+  "executor": "Claude (worktree agent-a65a26a5)"
+}
