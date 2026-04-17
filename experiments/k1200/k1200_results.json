@@ -1,0 +1,72 @@
+{
+  "experiment_id": "K1200",
+  "title": "Paper 6 SPY replication under Eq.(5)-(6) two-phase forecast timing",
+  "type": "empirical_replication",
+  "date": "2026-04-18",
+  "paper_reference": {
+    "paper_id": "prg-periodic-garch",
+    "main_tex_commit": "7d35418b",
+    "equations_verified": [
+      "Eq.(5) overnight forecast",
+      "Eq.(6) intraday forecast",
+      "Eq.(7) fullday sum"
+    ]
+  },
+  "data_source": "yfinance (SPY)",
+  "period": "2000-01-04 to 2026-04-02",
+  "is_period": "2000-01-04 to 2018-12-31",
+  "oos_period": "2019-01-02 to 2026-04-02",
+  "n_is": 4778,
+  "n_oos": 1823,
+  "seed": 42,
+  "refit_gjr_days": 63,
+  "refit_prg_days": 126,
+  "prg_n_starts": 10,
+  "k1200_metrics": {
+    "GJR_QLIKE": 0.854375268788663,
+    "PRG_Ext_QLIKE": 0.7354715415283124,
+    "DM_t_PRGExt_vs_GJR": 6.128021625362136,
+    "DM_p_PRGExt_vs_GJR": 1.0878358214228001e-09,
+    "PRG_Ext_Spearman": 0.5761330774908159,
+    "PRG_Ext_Spearman_CI": [
+      0.5425164097641068,
+      0.6076812542626782
+    ],
+    "n_oos_valid_qlike": 1823
+  },
+  "k880_canonical": {
+    "PRG_Extended_QLIKE": 0.7478221332984176,
+    "GJR_QLIKE": 0.8541713650290065,
+    "DM_t_PRGExt_vs_GJR": 6.003887940674553,
+    "PRG_Extended_Spearman": 0.5677794555906424,
+    "n_oos": 1823,
+    "is_period": "2000-01-04 to 2018-12-31",
+    "oos_period": "2019-01-02 to 2026-04-02"
+  },
+  "deltas": {
+    "delta_GJR_QLIKE": 0.00020390375965650964,
+    "delta_PRG_QLIKE": -0.012350591770105224,
+    "delta_DM_t": 0.12413368468758268,
+    "delta_Spearman": 0.008353621900173525
+  },
+  "tolerance_bands": {
+    "REPLICATED": "|\u0394QLIKE| < 0.01 AND |\u0394DM_t| < 0.3",
+    "MINOR_DIVERGENT": "0.01 \u2264 |\u0394QLIKE| < 0.05 OR 0.3 \u2264 |\u0394DM_t| < 0.5",
+    "MAJOR_DIVERGENT": "|\u0394QLIKE| \u2265 0.05 OR |\u0394DM_t| \u2265 0.5"
+  },
+  "verdict": "MINOR_DIVERGENT",
+  "paper6_defensibility": "Minor numerical divergence (likely optimizer randomness / refit seed). Paper 6 narrative still defensible; consider aligning K880 optimizer settings.",
+  "implementation_notes": {
+    "Eq_5_line": "h_hat_t0 = w0 + a0*r2_in[t-1] + g0*r2_in[t-1]*I(r_in[t-1]<0) + b0*h_state",
+    "Eq_6_line": "h_hat_t1 = w1 + a1*r2_ov[t] + g1*r2_ov[t]*I(r_ov[t]<0) + b1*h_hat_t0",
+    "Eq_7_line": "fc[t] = h_hat_t0 + h_hat_t1",
+    "K880_equivalence": "K880 line 512 `x_prev_in = r2_overnight[t]` literally maps to Eq.(6) \u03b1_1\u00b7r\u00b2_{d,0} (day-d overnight realized). This is NOT a lookahead: r_{d,0} is available at the day-d open per Paper 6 Section 2.2 discussion."
+  },
+  "references": [
+    "Paper 6 main.tex (commit 7d35418b) Eqs.(5)-(7)",
+    "K880 experiments/k880/k880_results.json (canonical baseline)",
+    "Patton (2011) on QLIKE robustness to volatility proxy noise",
+    "Harvey et al. (1997), Harvey (2016) on DM test small-sample correction"
+  ],
+  "runtime_seconds": 20.720591
+}
