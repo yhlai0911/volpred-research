@@ -1,0 +1,157 @@
+Using CPython 3.12.10
+Creating virtual environment at: .venv
+   Building volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a97b4fe0
+      Built volpred @ file:///Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a97b4fe0
+Installed 109 packages in 562ms
+================================================================================
+K1133b: BTC GAS-t decomposition (innovation vs dynamics vs regime)
+================================================================================
+
+[0] Downloading BTC-USD 2015-01-01 → 2026-04-15 ...
+  Observations: 4121
+  Range: 2015-01-02 → 2026-04-14
+  Mean=0.1948%  Std=3.5101%  Skew=-0.119  ExcKurt=7.969
+
+================================================================================
+PART A: 5-model rolling OOS by sub-period
+================================================================================
+
+[PartA] Period1_preinstitutional  [2015-01-01 → 2020-12-31]
+  window=750, n_sp=2191, n_oos=1441
+    0/1441 (0%) 0.7s
+    189/1441 (13%) 2.9s
+    378/1441 (26%) 4.9s
+    567/1441 (39%) 7.2s
+    756/1441 (52%) 9.6s
+    945/1441 (66%) 12.0s
+    1134/1441 (79%) 14.4s
+    1323/1441 (92%) 16.9s
+  done in 17.9s
+  valid OOS: 1441
+    M1_GJR_N      : QLIKE=1.992609, rho=+0.329
+    M2_GJR_t      : QLIKE=2.233923, rho=+0.346
+    M3_GAS_t      : QLIKE=2.190373, rho=+0.349
+    M4_GAS_N      : QLIKE=2.040153, rho=+0.295
+    M5_GJR_N_std  : QLIKE=1.992979, rho=+0.330
+    DM M2_GJR_t vs M1: t=-3.355, p=8.143e-04, rel=-12.11%
+    DM M3_GAS_t vs M1: t=-4.669, p=3.305e-06, rel=-9.92%
+    DM M4_GAS_N vs M1: t=-1.898, p=5.795e-02, rel=-2.39%
+    DM M5_GJR_N_std vs M1: t=-0.059, p=9.529e-01, rel=-0.02%
+    DM M4 vs M3: t=+2.665, p=7.775e-03
+
+[PartA] Period2_FTX_Luna_era  [2021-01-01 → 2023-12-31]
+  window=750, n_sp=1095, n_oos=345
+    0/345 (0%) 0.8s
+    189/345 (55%) 3.1s
+  done in 5.2s
+  valid OOS: 345
+    M1_GJR_N      : QLIKE=2.289083, rho=+0.107
+    M2_GJR_t      : QLIKE=2.295808, rho=+0.148
+    M3_GAS_t      : QLIKE=2.316197, rho=+0.116
+    M4_GAS_N      : QLIKE=2.284824, rho=+0.135
+    M5_GJR_N_std  : QLIKE=2.289129, rho=+0.107
+    DM M2_GJR_t vs M1: t=-0.261, p=7.939e-01, rel=-0.29%
+    DM M3_GAS_t vs M1: t=-0.815, p=4.155e-01, rel=-1.18%
+    DM M4_GAS_N vs M1: t=+0.250, p=8.024e-01, rel=+0.19%
+    DM M5_GJR_N_std vs M1: t=-0.188, p=8.507e-01, rel=-0.00%
+    DM M4 vs M3: t=+0.938, p=3.487e-01
+
+[PartA] Period3_spotETF_era  [2024-01-01 → 2026-04-15]
+  window=735, n_sp=835, n_oos=100
+    0/100 (0%) 0.7s
+  done in 1.4s
+  valid OOS: 100
+    M1_GJR_N      : QLIKE=1.975300, rho=+0.152
+    M2_GJR_t      : QLIKE=1.948414, rho=+0.160
+    M3_GAS_t      : QLIKE=2.056324, rho=+0.106
+    M4_GAS_N      : QLIKE=2.018860, rho=+0.145
+    M5_GJR_N_std  : QLIKE=1.974388, rho=+0.150
+    DM M2_GJR_t vs M1: t=+0.786, p=4.337e-01, rel=+1.36%
+    DM M3_GAS_t vs M1: t=-0.803, p=4.238e-01, rel=-4.10%
+    DM M4_GAS_N vs M1: t=-1.001, p=3.193e-01, rel=-2.21%
+    DM M5_GJR_N_std vs M1: t=+0.750, p=4.552e-01, rel=+0.05%
+    DM M4 vs M3: t=+0.558, p=5.784e-01
+
+================================================================================
+PART B: MS-GAS-t OOS forecasting (Klaassen 2002 state-prob)
+================================================================================
+
+[PartB] Period1_preinstitutional
+    block t_oos 0→251: nll=1665.8 conv=True cum_elapsed=18.7s
+    block t_oos 252→503: nll=1761.7 conv=True cum_elapsed=29.0s
+    block t_oos 504→755: nll=1992.3 conv=True cum_elapsed=38.3s
+    block t_oos 756→1007: nll=2056.8 conv=True cum_elapsed=50.1s
+    block t_oos 1008→1259: nll=1991.0 conv=True cum_elapsed=60.4s
+    block t_oos 1260→1440: nll=1860.8 conv=True cum_elapsed=69.1s
+  Part B done in 69.1s
+  MS-GAS-t valid OOS (intersect Part A): 1441
+    DM MS vs M1_GJR_N: t=+0.275, p=7.831e-01, rel=+0.28%
+    DM MS vs M2_GJR_t: t=+3.065, p=2.220e-03, rel=+11.05%
+    DM MS vs M3_GAS_t: t=+5.971, p=2.968e-09, rel=+9.29%
+    DM MS vs M4_GAS_N: t=+1.539, p=1.240e-01, rel=+2.61%
+
+[PartB] Period2_FTX_Luna_era
+    block t_oos 0→251: nll=1979.8 conv=True cum_elapsed=19.3s
+    block t_oos 252→344: nll=1766.7 conv=True cum_elapsed=31.7s
+  Part B done in 31.7s
+  MS-GAS-t valid OOS (intersect Part A): 345
+    DM MS vs M1_GJR_N: t=+0.146, p=8.843e-01, rel=+0.11%
+    DM MS vs M2_GJR_t: t=+0.354, p=7.233e-01, rel=+0.40%
+    DM MS vs M3_GAS_t: t=+0.950, p=3.428e-01, rel=+1.28%
+    DM MS vs M4_GAS_N: t=-0.073, p=9.422e-01, rel=-0.08%
+
+[PartB] Period3_spotETF_era
+    block t_oos 0→99: nll=1662.3 conv=True cum_elapsed=17.6s
+  Part B done in 17.6s
+  MS-GAS-t valid OOS (intersect Part A): 100
+    DM MS vs M1_GJR_N: t=-0.753, p=4.531e-01, rel=-2.11%
+    DM MS vs M2_GJR_t: t=-0.787, p=4.330e-01, rel=-3.52%
+    DM MS vs M3_GAS_t: t=+0.786, p=4.339e-01, rel=+1.91%
+    DM MS vs M4_GAS_N: t=+0.096, p=9.240e-01, rel=+0.09%
+
+================================================================================
+PART C: Decomposition verdict
+================================================================================
+
+  Period1_preinstitutional:
+    DM M2 vs M1 (GJR-t)     : -3.355
+    DM M3 vs M1 (GAS-t)     : -4.669  ← K1133 baseline
+    DM M4 vs M1 (GAS-N NEW) : -1.898  ← isolates GAS dynamics
+    DM M5 vs M1 (std ctrl)  : -0.059
+    DM M4 vs M3 (GAS-N beats GAS-t?): +2.665  ← isolates Student-t
+    DM MS-GAS-t vs M1       : +0.275
+    DM MS-GAS-t vs M3       : +5.971
+    → drivers: Student_t_driven, GAS_Normal_recovers, MS_rescues_single_state_GAS_but_still_worse_than_GJR_N
+
+  Period2_FTX_Luna_era:
+    DM M2 vs M1 (GJR-t)     : -0.261
+    DM M3 vs M1 (GAS-t)     : -0.815  ← K1133 baseline
+    DM M4 vs M1 (GAS-N NEW) : +0.250  ← isolates GAS dynamics
+    DM M5 vs M1 (std ctrl)  : -0.188
+    DM M4 vs M3 (GAS-N beats GAS-t?): +0.938  ← isolates Student-t
+    DM MS-GAS-t vs M1       : +0.146
+    DM MS-GAS-t vs M3       : +0.950
+    → drivers: GAS_framework_neutral, MS_GAS_neutral
+
+  Period3_spotETF_era:
+    DM M2 vs M1 (GJR-t)     : +0.786
+    DM M3 vs M1 (GAS-t)     : -0.803  ← K1133 baseline
+    DM M4 vs M1 (GAS-N NEW) : -1.001  ← isolates GAS dynamics
+    DM M5 vs M1 (std ctrl)  : +0.750
+    DM M4 vs M3 (GAS-N beats GAS-t?): +0.558  ← isolates Student-t
+    DM MS-GAS-t vs M1       : -0.753
+    DM MS-GAS-t vs M3       : +0.786
+    → drivers: GAS_framework_neutral, MS_GAS_neutral
+
+================================================================================
+HEADLINE: DECOMPOSITION: Student-t innovation is the root cause of BTC P1 reversal. GAS-Normal (no heavy-tail penalty) matches GJR-Normal. GAS dynamics per se are NOT the problem.
+PAPER IMPLICATION: Mixed — full results needed for paper framing.
+================================================================================
+
+  Chart 1: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a97b4fe0/experiments/k1133b/k1133b_qlike_5model.png
+  Chart 2: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a97b4fe0/experiments/k1133b/k1133b_ms_state_prob.png
+  Chart 3: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a97b4fe0/experiments/k1133b/k1133b_dm_heatmap.png
+
+  Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a97b4fe0/experiments/k1133b/k1133b_results.json
+
+K1133b complete.
