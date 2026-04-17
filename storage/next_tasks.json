@@ -1644,5 +1644,44 @@
       "main-thread",
       "direction-reversal"
     ]
+  },
+  {
+    "id": "Paper2_experiments_md_add_K515_K516_K512",
+    "title": "Paper 2 QUICK WIN: experiments.md 加 K515/K516/K512 (解 15 UNDOCUMENTED)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:30:16+08:00",
+    "description": "Paper 2 rescan (fc7c9a7c) 發現 15 UNDOCUMENTED_K 可由 3 個 K 涵蓋: K515 (overnight gap 87%, t=6.845), K516 (futures Sharpe=0.93), K512 (fill rate 79/90%). Ready-to-apply block 在 paper/taiwan-vt/reproducibility_audit/undocumented_k_additions_for_experiments_md.md. 5 min main-thread edit. 解 Paper 2 audit 15 no-source.",
+    "tags": [
+      "paper-2",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper2_G12_G20_Section6_formal_experiments",
+    "title": "Paper 2 CRITICAL: G12/G20 Section 6 數字 8 個 knowledge 有但無 formal experiment",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T17:30:16+08:00",
+    "description": "Paper 2 rescan G12/G20: Section 6 共 8 數字在 knowledge.json 有 match 但 experiments/ 無 formal .py + results.json. **不符 research 誠實原則 reproducibility standard**. G12 (Section 6.1 import growth): r=0.214, OOS +5.6%, DM p=0.043 (3 數字). G20 (Section 6.2/6.3 BCI leading): BCI t=-0.53, Leading t=3.74, R²=7.1%, Sharpe 0.732 (5 數字). **動作**: 建 K1179 (Section 6.1 import growth) + K1180 (Section 6.2/6.3 BCI leading) formal experiments, 產生 _results.json 可 replicate knowledge 數字. Agent-launchable.",
+    "tags": [
+      "paper-2",
+      "section-6",
+      "blocker",
+      "new-experiment-required"
+    ]
+  },
+  {
+    "id": "Paper2_STILL_NO_SOURCE_16_new_experiments",
+    "title": "Paper 2: 16 STILL_NO_SOURCE 數字需建新實驗 (VIXTWN stats, Granger, TSMC, skew-t)",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T17:30:16+08:00",
+    "description": "Paper 2 rescan 16 STILL_NO_SOURCE: VIXTWN stats (0.595/0.459/1.393, Steiger Z=16.2), Granger F=58.8, TSMC decomposition (Sharpe 1.121, range 0.193-0.637), skewed-t (η=5.2, λ=-0.05), VIX+leading DM p=0.0005. 需分批建實驗. 可考慮批次: K1181 VIXTWN stats, K1182 Granger, K1183 TSMC decomp, K1184 skew-t params.",
+    "tags": [
+      "paper-2",
+      "new-experiments-batch"
+    ]
   }
 ]

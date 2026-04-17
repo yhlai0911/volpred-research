@@ -27119,5 +27119,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:29:07.932228"
+  },
+  {
+    "item_id": "a67092b3",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree forensic agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Paper 2 (taiwan-vt) no-source systematic rescan. **Stats**: 42 no-source scanned \u2014 11 CONFIRMED_SOURCE (K1175/K1176 already resolved), 15 UNDOCUMENTED_K, 16 STILL_NO_SOURCE, critical G12/G20 docs gap. **UNDOCUMENTED_K** (\u65e2\u6709\u5be6\u9a57\u672a\u767b\u9304 Paper 2 experiments.md): K515 (overnight gap 87%, +10.73bp, t=6.845, 38.5bp ETF cost \u2014 3 \u7cbe\u78ba\u547d\u4e2d), K516 (futures Sharpe=0.93 at 5bp TX), K512 (fill rate 79% 0050 / 90% 0056 \u7cbe\u78ba\u547d\u4e2d, +32%/+69% vol spike). **G12/G20 CRITICAL docs gap**: 8 Section 6 \u6578\u5b57\u5728 knowledge.json \u6709\u7cbe\u78ba match \u4f46\u7121\u6b63\u5f0f .py + results.json. G12: Section 6.1 import growth r=0.214, OOS +5.6%, DM p=0.043 (3 \u6578\u5b57). G20: Section 6.2/6.3 BCI t=-0.53, Leading t=3.74 / R\u00b2=7.1%, Sharpe 0.732 (5 \u6578\u5b57). **Pre-submission CRITICAL BLOCKER**: \u77e5\u8b58\u5eab\u6709\u4f46\u7121 formal experiment \u2014 \u4e0d\u7b26\u5408 research \u8aa0\u5be6\u539f\u5247 reproducibility standard. **STILL_NO_SOURCE (16)**: VIXTWN stats (0.595/0.459/1.393 + Steiger Z=16.2), Granger F=58.8, TSMC decomposition (Sharpe 1.121, range 0.193-0.637), skewed-t params (\u03b7=5.2, \u03bb=-0.05), VIX+leading DM p=0.0005. \u9700\u65b0\u5be6\u9a57 formal backing JSON. **Paper 2 documentation \u9032\u5c55**: 42 no-source \u2192 26 \u53ef source (11 K1175/1176 + 15 UNDOCUMENTED) = 62% \u53ef\u89e3, \u5269 16 \u9700\u65b0\u5be6\u9a57 + G12/G20 \u9700\u5efa formal experiments. commit fc7c9a7c.",
+    "evidence": [
+      "paper/taiwan-vt/reproducibility_audit/nosource_rescan_report.md",
+      "paper/taiwan-vt/reproducibility_audit/undocumented_k_additions_for_experiments_md.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:30:01.665076"
   }
 ]
