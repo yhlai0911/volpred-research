@@ -1,0 +1,109 @@
+location,claim_type,paper_value,json_value,source_k,status,notes
+Abstract,N days,3262,3262,K811v2,OK,data.n_days
+Abstract,N years,12.94,12.94,K811v2,OK,data.n_years
+Abstract,Opp cost share S1,91%,90.7%,K811v2,OK,4.195/4.623*100
+Abstract,S1 opp cost,4.20%,4.195%,K811v2,OK,insurance_cost_decomposed
+Abstract,S1 direct cost,0.43%,0.428%,K811v2,OK,insurance_cost_decomposed
+Abstract,VoV cost reduction,74%,73.7%,K811v2,OK,(4.623-1.218)/4.623*100
+Abstract,VoV total from,4.62%,4.623%,K811v2,OK,insurance_cost_decomposed S1 total
+Abstract,VoV total to,1.22%,1.218%,K811v2,OK,insurance_cost_decomposed S2 total
+Abstract,Rebal premium,54 bps,53.67 bps,K846,OK,part1_empirical.premium_cagr_bps
+Abstract,S2 Sharpe,0.63,0.6335,K811v2,OK,full_period_metrics S2
+Abstract,S4 50/50 Sharpe,0.50,0.5013,K811v2,OK,full_period_metrics S4
+Table1 S0,CAGR,12.51%,12.506%,K811v2,OK,full_period_metrics.S0_BH_SPY.cagr
+Table1 S0,Ann Vol,16.56%,16.555%,K811v2,OK,full_period_metrics.S0_BH_SPY.ann_vol
+Table1 S0,Sharpe,0.60,0.5984,K811v2,OK,full_period_metrics.S0_BH_SPY.sharpe
+Table1 S0,MDD,-34.10%,-34.1%,K811v2,OK,full_period_metrics.S0_BH_SPY.mdd
+Table1 S0,Calmar,0.37,0.3667,K811v2,OK,full_period_metrics.S0_BH_SPY.calmar
+Table1 S0,Sortino,0.55,0.5521,K811v2,OK,full_period_metrics.S0_BH_SPY.sortino
+Table1 S0,CRRA g5,0.217,0.217344,K811v2,OK,full_period_metrics.S0_BH_SPY.crra_gamma5
+Table1 S0,Avg Weight,100.0%,100.0%,K811v2,OK,implicit (BH always 100%)
+Table1 S0,Turnover,0.0%,0.0%,K811v2,OK,implicit (BH no rebalancing)
+Table1 S1,CAGR,7.11%,7.111%,K811v2,OK,full_period_metrics.S1_Always_12VIX.cagr
+Table1 S1,Ann Vol,9.33%,9.325%,K811v2,OK (ROUND_HALF_UP),paper uses ROUND_HALF_UP vs banker's rounding
+Table1 S1,Sharpe,0.54,0.5353,K811v2,OK,full_period_metrics.S1_Always_12VIX.sharpe
+Table1 S1,MDD,-15.46%,-15.46%,K811v2,OK,full_period_metrics.S1_Always_12VIX.mdd
+Table1 S1,Calmar,0.46,0.46,K811v2,OK,full_period_metrics.S1_Always_12VIX.calmar
+Table1 S1,Sortino,0.49,0.4927,K811v2,OK,full_period_metrics.S1_Always_12VIX.sortino
+Table1 S1,CRRA g5,0.190,0.190029,K811v2,OK,full_period_metrics.S1_Always_12VIX.crra_gamma5
+Table1 S1,Avg Weight,74.1%,74.07%,K811v2,OK,weight_stats.S1_Always_12VIX.avg_weight_pct
+Table1 S1,Turnover,872.4%,872.37%,K811v2,OK,weight_stats.S1_Always_12VIX.annualized_turnover_pct
+Table1 S2,CAGR,11.14%,11.144%,K811v2,OK,full_period_metrics.S2_VoV_Conditional.cagr
+Table1 S2,Ann Vol,13.72%,13.715%,K811v2,OK (ROUND_HALF_UP),paper uses ROUND_HALF_UP vs banker's rounding
+Table1 S2,Sharpe,0.63,0.6335,K811v2,OK,full_period_metrics.S2_VoV_Conditional.sharpe
+Table1 S2,MDD,-22.78%,-22.78%,K811v2,OK,full_period_metrics.S2_VoV_Conditional.mdd
+Table1 S2,Calmar,0.49,0.4893,K811v2,OK,full_period_metrics.S2_VoV_Conditional.calmar
+Table1 S2,Sortino,0.61,0.6054,K811v2,OK,full_period_metrics.S2_VoV_Conditional.sortino
+Table1 S2,CRRA g5,0.211,0.211147,K811v2,OK,full_period_metrics.S2_VoV_Conditional.crra_gamma5
+Table1 S2,Avg Weight,93.4%,93.41%,K811v2,OK,weight_stats.S2_VoV_Conditional.avg_weight_pct
+Table1 S2,Turnover,1044.7%,1044.74%,K811v2,OK,weight_stats.S2_VoV_Conditional.annualized_turnover_pct
+Table1 S3,CAGR,8.84%,8.842%,K811v2,OK,full_period_metrics.S3_Smooth_VoV.cagr
+Table1 S3,Ann Vol,11.57%,11.572%,K811v2,OK,full_period_metrics.S3_Smooth_VoV.ann_vol
+Table1 S3,Sharpe,0.57,0.5699,K811v2,OK,full_period_metrics.S3_Smooth_VoV.sharpe
+Table1 S3,MDD,-23.20%,-23.2%,K811v2,OK,full_period_metrics.S3_Smooth_VoV.mdd
+Table1 S3,Calmar,0.38,0.3811,K811v2,OK,full_period_metrics.S3_Smooth_VoV.calmar
+Table1 S3,Sortino,0.53,0.5317,K811v2,OK,full_period_metrics.S3_Smooth_VoV.sortino
+Table1 S3,CRRA g5,0.208,0.207708,K811v2,OK,full_period_metrics.S3_Smooth_VoV.crra_gamma5
+Table1 S3,Avg Weight,86.0%,85.99%,K811v2,OK,weight_stats.S3_Smooth_VoV.avg_weight_pct
+Table1 S3,Turnover,912.4%,912.43%,K811v2,OK,weight_stats.S3_Smooth_VoV.annualized_turnover_pct
+Table1 S4,CAGR,7.89%,7.888%,K811v2,OK,full_period_metrics.S4_5050_SPY_GLD.cagr
+Table1 S4,Ann Vol,11.47%,11.473%,K811v2,OK,full_period_metrics.S4_5050_SPY_GLD.ann_vol
+Table1 S4,Sharpe,0.50,0.5013,K811v2,OK,full_period_metrics.S4_5050_SPY_GLD.sharpe
+Table1 S4,MDD,-21.17%,-21.17%,K811v2,OK,full_period_metrics.S4_5050_SPY_GLD.mdd
+Table1 S4,Calmar,0.37,0.3726,K811v2,OK,full_period_metrics.S4_5050_SPY_GLD.calmar
+Table1 S4,Sortino,0.46,0.464,K811v2,OK,full_period_metrics.S4_5050_SPY_GLD.sortino
+Table1 S4,CRRA g5,0.157,0.156947,K811v2,OK,full_period_metrics.S4_5050_SPY_GLD.crra_gamma5
+Table2 S1,Opp Cost,4.20,4.195,K811v2,OK,insurance_cost_decomposed
+Table2 S1,Direct Cost,0.43,0.428,K811v2,OK,insurance_cost_decomposed
+Table2 S1,Total Premium,4.62,4.623,K811v2,OK,insurance_cost_decomposed
+Table2 S1,Opp Share%,90.7%,90.74%,K811v2,OK,computed: 4.195/4.623*100
+Table2 S1,Delta vs S1,---,---,K811v2,OK,baseline
+Table2 S2,Opp Cost,0.70,0.696,K811v2,OK,insurance_cost_decomposed
+Table2 S2,Direct Cost,0.52,0.522,K811v2,OK,insurance_cost_decomposed
+Table2 S2,Total Premium,1.22,1.218,K811v2,OK,insurance_cost_decomposed
+Table2 S2,Opp Share%,57.1%,57.14%,K811v2,OK,computed: 0.696/1.218*100
+Table2 S2,Delta vs S1,-73.6%,-73.66%,K811v2,OK,(1.218-4.623)/4.623*100
+Table2 S3,Opp Cost,2.85,2.854,K811v2,OK,insurance_cost_decomposed
+Table2 S3,Direct Cost,0.46,0.456,K811v2,OK,insurance_cost_decomposed
+Table2 S3,Total Premium,3.31,3.31,K811v2,OK,insurance_cost_decomposed
+Table2 S3,Opp Share%,86.2%,86.26%,K811v2,OK,computed: 2.854/3.31*100
+Table2 S3,Delta vs S1,-28.4%,-28.38%,K811v2,OK,(3.31-4.623)/4.623*100
+Sec2.3 inline,At 1bps opp share,97%,98.0%,K811v2 computed,DIVERGE,direct@1bp=0.428/5=0.0856; total=4.281; share=4.195/4.281=98.0%
+Sec3.1 inline,S1 CAGR sacrifice,5.40pp,5.395pp,K811v2,OK,12.506-7.111
+Sec3.1 inline,S1 MDD reduction,55%,54.7%,K811v2,OK,(1-15.46/34.10)*100
+Sec3.1 inline,S2 MDD reduction,33%,33.2%,K811v2,OK,(1-22.78/34.10)*100
+Sec3.2 inline,S1 opp share 91%,91%,90.7%,K811v2,OK,rounding
+Sec3.2 inline,S2 reduction 74%,74%,73.7%,K811v2,OK,rounding
+Sec3.2 inline,S2 opp cost reduction 83%,83%,83.4%,K811v2,OK,(1-0.696/4.195)*100
+Sec3.2 inline,S2 fully invested 86%,86%,85.9%,K811v2,OK,weight_stats
+Sec3.2 inline,S2 VT active 14%,14%,14.32%,K811v2,OK,HighVoV_Rising pct
+Sec3.3 inline,SPY-GLD correlation,0.057,0.0572,K846,OK,part1_theoretical.correlation (2006-2024)
+Sec3.3 inline,50/50 vol 11.47%,11.47%,11.473%,K811v2,OK,
+Sec3.3 inline,Vol reduction vs SPY,30.7%,30.7%,K811v2,OK,(1-11.473/16.555)*100
+Sec3.3 inline,Rebal CAGR 10.02%,10.02%,10.0234%,K846,OK,part1_empirical.rebal_cagr
+Sec3.3 inline,BH CAGR 9.49%,9.49%,9.4867%,K846,OK,part1_empirical.bh_cagr
+Sec3.3 inline,54-80 bps range lower,54 bps,53.67 bps,K846,OK,empirical rounded
+Sec3.3 inline,54-80 bps range upper,80 bps,81.46 bps,K846,MINOR,theoretical rounds to 81 not 80
+Sec3.4 inline,HighVoV_Falling %sample,7.7%,7.69%,K811v2,OK,vov_regimes
+Sec3.4 inline,S1 opp cost HighVoV_Fall,19.95%,19.948%,K811v2,OK,insurance_by_regime
+Sec3.4 inline,LowVoV_Falling %sample,45.5%,45.52%,K811v2,OK,vov_regimes
+Sec3.4 inline,S1 opp cost LowVoV_Fall,2.54%,2.535%,K811v2,OK,insurance_by_regime
+Sec3.4 inline,VoV below threshold 76%,76%,76.15%,K811v2,OK,45.52+30.63
+Sec3.5 inline,4 cross-OOS windows,4,4,K811v2,OK,cross_oos.n_periods
+Sec3.5 inline,S2 wins BH 1/4,1,1,K811v2,OK,cross_oos.s2_wins_s0
+Sec3.5 inline,S4 wins BH 2/4,2,2,K811v2,OK,manually verified cross_oos.periods
+Sec3.5 inline,DM S1vsS0 t-stat,2.42,2.4183,K811v2,OK,dm_tests
+Sec3.5 inline,DM S2vsS0 t-stat,0.75,0.7487,K811v2,OK,dm_tests
+Sec3.5 inline,Sens th0.5 opp share,64%,64.2%,k811v2_th0_5,OK,computed from threshold file
+Sec3.5 inline,Sens th1.0 opp share,57%,57.1%,K811v2,OK,same as main result
+Sec3.5 inline,Sens th1.5 opp share,65%,65.3%,k811v2_th1_5,OK,computed from threshold file
+Sec3.5 inline,Sens reduction range low,62%,61.7%,k811v2_th0_5 computed,OK (rounding),rounds up to 62
+Sec3.5 inline,Sens reduction range high,76%,75.6%,k811v2_th1_5 computed,OK (rounding),rounds up to 76
+Sec3.5 footnote,2012-24 sub-period rho,0.04,NOT IN JSON,K846 (subperiod),UNVERIFIABLE,not computed in any experiment file
+Sec3.5 footnote,2012-24 rebal premium,48 bps,NOT IN JSON,K846 (subperiod),UNVERIFIABLE,not computed in any experiment file
+Sec4 inline,S1 turnover 872%,872%,872.37%,K811v2,OK,weight_stats
+Sec4 inline,43 bps direct cost,43 bps,42.8 bps,K811v2,OK,0.428%*100=42.8 bps
+Sec4 inline,420 bps opp cost,420 bps,419.5 bps,K811v2,OK,4.195%*100=419.5 bps
+Sec4 inline,Direct cost share 9%,9%,9.3%,K811v2,OK,0.428/4.623*100
+Sec4 inline,50/50 CAGR 7.89%,7.89%,7.888%,K811v2,OK,
+Sec4 inline,S1 CAGR 7.11%,7.11%,7.111%,K811v2,OK,
