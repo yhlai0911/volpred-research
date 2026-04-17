@@ -27808,5 +27808,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-18T07:19:43.925300"
+  },
+  {
+    "item_id": "93e83449",
+    "category": "K1241",
+    "content": "K1241 Paper 10 primary pooled-variance fear-channel regression NULL \u2014 but strengthens asymmetric/tail/regime narrative. M2 GJR-X(VIX\u00b2) phi=-9.67e-06 SE_BW=7.78e-05 t_BW=-0.12 p=0.90; M3 pure-fear phi same magnitude t_BW=-0.06 p=0.95; LRT M2 vs M1 LR=0.00 p=0.95; OOS DM-HLN M2 vs M1 t=+0.75 p=0.45 (OOS n=1236). Harvey 4-gate verdict FAIL on all (|t|<3, LRT p>0.001, DM<2, sub-period 0/3) -> NULL. Sub-period (P1/P2/P3) phi signs FLIP -/+/- all |t_BW|<1, LRT p>0.6 -- no regime-specific pooled fear channel. Side findings: gamma (leverage)->0 for BTC in all models (Baur & Dimpfl 2018 consistent); nu converged to 2.73 near boundary (excess kurt 11.94) but interior Hessian SE unaffected. NARRATIVE IMPACT: Paper 10 thesis is ASYMMETRIC/TAIL/REGIME-DEPENDENT fear channel (K1025 QR + K746b Granger + DY spillover); pooled-variance NULL is ROBUSTNESS counterpoint showing naive spec insufficient. Main thread action: move Table 3 from \u00a75 Main to \u00a76.1 Robustness with 'naive fear-channel spec does not hold -> tail/asymmetric/regime-dependent reframing warranted' narrative pivot.",
+    "evidence": [
+      "experiments/k1241/",
+      "commit de386885"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-18T07:46:21.747852"
   }
 ]
