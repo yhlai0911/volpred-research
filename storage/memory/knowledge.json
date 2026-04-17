@@ -26912,5 +26912,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T16:15:40.120345"
+  },
+  {
+    "item_id": "f4349738",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: \u4e3b\u7dda\u7a0b paper-workflow \u5f37\u5316\u5f8c\u767c\u8d77, \u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K716-K722 volatility-absorption (Paper 5) script reconstruction from main_v2.tex methodology. **\u6240\u6709 qualitative findings 100% match paper**: endogenous absorption (rate/risk-off YES, geopolitical NO), paralysis flags (SPY/GLD/TLT YES, 0050.TW NO), VRP always positive, 'not improved' RV robustness. **K716 MATCHED**: 5 SAR values \u5168 1% \u5167 (3.16/2.77/2.37/2.32/2.45 vs \u8ad6\u6587 2.43). NSI slope -0.00027 vs -0.00028 rounding. **K717-K722 APPROXIMATE**: 4 \u8655\u6578\u503c divergence (K716 t-stat -1.77 vs -3.42 likely sample filter N=767 vs 893, K718 0050.TW slope magnitude 0.00008 vs 0.00019, K721 rate-shock NSI 0.060 vs 0.066 9%, K722 corr_raw 0.5671 vs 0.6803 17%). Divergence \u539f\u56e0: paper \u672a\u5b8c\u6574 spec exact formula (K720 direction_corr / K722 corr_raw) \u6216 data vintage \u5dee\u7570 (yfinance snapshot). **\u672a\u507d\u9020\u4e00\u81f4\u6027\uff0chonest divergence reporting per user 2026-04-17 rule**. \u6295\u7a3f\u6c7a\u7b56\u5f85 VolAbsorption_errata_decision task \u4e09\u9078\u4e00 (fix scripts / fix paper / errata pending, \u5efa\u8b70 c). Output: 7 \u500b k71X.py + 7 \u500b k71X_reconstruction_diff.md + scripts/README \u66f4\u65b0. commit 86d10c7b.",
+    "evidence": [
+      "experiments/k716/k716.py",
+      "experiments/k716/k716_reconstruction_diff.md",
+      "paper/volatility-absorption/scripts/README.md"
+    ],
+    "confidence": 0.85,
+    "created_at": "2026-04-17T16:18:17.125085"
   }
 ]

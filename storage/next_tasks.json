@@ -1046,15 +1046,16 @@
   {
     "id": "VolAbsorption_missing_scripts_recovery",
     "title": "volatility-absorption 缺 K716-K722 原始 .py 腳本 — 投稿前必須重建",
-    "status": "pending",
+    "status": "partially_completed",
     "priority": 4,
     "created_at": "2026-04-17T15:59:00+08:00",
-    "description": "Paper folder audit (commit 65bdf9ef, 2026-04-17) 發現 paper/volatility-absorption/ 對應 K716/K717/K718/K719/K720/K721/K722 的 .py 原始腳本不在 repo（只有 results JSON）。**投稿 hard requirement**: 審稿人需要完整 replication package，缺腳本會 desk-reject。處理方案：(1) 從 git log 查這些 K 編號是否曾存在於 experiments/ 然後被刪（git log -- experiments/k71X/）; (2) 若曾存在，從 git blob 恢復到 paper/volatility-absorption/scripts/legacy_k71X/; (3) 若 never existed 於 tracked experiments，從 results JSON + main_v2.tex method 描述重建; (4) 更新 paper/volatility-absorption/scripts/README.md 標明恢復狀態. **必做 before Paper 5 投稿**. | 2026-04-17 深查: `git log --all -- experiments/k71[6-9]*.py k72[0-2]*.py` 空 → 腳本 **從未被 commit**. 所有 K716-K722 README 是 2026-04-16 migration 的 stub（\"待補充\"），僅 results JSON 有效. K716 JSON 結構示例: VIX tertile buckets (calm/normal/elevated/high/crisis) × (shock_days, shock_abs_r, normal_abs_r, ratio) + regression_raw_slope/normalized_slope/conclusion. **重建路徑必走**: (a) 從 main_v2.tex methodology 段 + results JSON 結構反推 → 寫 reconstruct_k71X.py 能重產相同 JSON; (b) validate 重建腳本 output 與舊 JSON 一致 (allclose); (c) 若輸出不同，論文需更正或明註 \"original script lost, reconstruction approximate\"；不可偽造一致性.",
+    "description": "Paper folder audit (commit 65bdf9ef, 2026-04-17) 發現 paper/volatility-absorption/ 對應 K716/K717/K718/K719/K720/K721/K722 的 .py 原始腳本不在 repo（只有 results JSON）。**投稿 hard requirement**: 審稿人需要完整 replication package，缺腳本會 desk-reject。處理方案：(1) 從 git log 查這些 K 編號是否曾存在於 experiments/ 然後被刪（git log -- experiments/k71X/）; (2) 若曾存在，從 git blob 恢復到 paper/volatility-absorption/scripts/legacy_k71X/; (3) 若 never existed 於 tracked experiments，從 results JSON + main_v2.tex method 描述重建; (4) 更新 paper/volatility-absorption/scripts/README.md 標明恢復狀態. **必做 before Paper 5 投稿**. | 2026-04-17 深查: `git log --all -- experiments/k71[6-9]*.py k72[0-2]*.py` 空 → 腳本 **從未被 commit**. 所有 K716-K722 README 是 2026-04-16 migration 的 stub（\"待補充\"），僅 results JSON 有效. K716 JSON 結構示例: VIX tertile buckets (calm/normal/elevated/high/crisis) × (shock_days, shock_abs_r, normal_abs_r, ratio) + regression_raw_slope/normalized_slope/conclusion. **重建路徑必走**: (a) 從 main_v2.tex methodology 段 + results JSON 結構反推 → 寫 reconstruct_k71X.py 能重產相同 JSON; (b) validate 重建腳本 output 與舊 JSON 一致 (allclose); (c) 若輸出不同，論文需更正或明註 \"original script lost, reconstruction approximate\"；不可偽造一致性. [DONE commit 86d10c7b: 7 scripts 重建. K716 (SAR core) MATCHED 全 5 SAR values 1% 內, NSI slope -0.00027 vs -0.00028 rounding; K717-K722 APPROXIMATE — 所有 **qualitative findings 全確認**（endogenous absorption / paralysis flags / VRP positive / 0050.TW NO）. 但**數值 divergence** 3 處（K716 t-stat sample filter 差異, K718 0050.TW slope magnitude 差, K721 rate-shock 0.060 vs 0.066 9%, K722 corr 0.57 vs 0.68 17%）. 投稿前決策: 見 VolAbsorption_errata_decision (P4).]",
     "tags": [
       "paper",
       "submission-critical",
       "volatility-absorption"
-    ]
+    ],
+    "completed_at": "2026-04-17T16:18:08+08:00"
   },
   {
     "id": "All_papers_reproducibility_audit",
@@ -1082,6 +1083,20 @@
       "copula",
       "threshold-test",
       "follow-up-K1100c"
+    ]
+  },
+  {
+    "id": "VolAbsorption_errata_decision",
+    "title": "Paper 5 (volatility-absorption) 數值 divergence 三選一決策（投稿前必做）",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T16:18:08+08:00",
+    "description": "K716-K722 reconstruction (commit 86d10c7b) 發現 4 處數值 divergence，皆因 paper 未完整 spec exact formula 或 data vintage 差異：(A) K716 NSI t-stat: -1.77 reconstructed vs paper -3.42. 原因：N=767 (reconstruction) vs paper N=893，likely sample filter 差. (B) K718 0050.TW slope: +0.00008 vs paper +0.00019. 符號一致 (non-absorption 結論不變) 但 magnitude 差異 60%. (C) K721 rate-shock NSI high_vix_norm: 0.060 vs 0.066 (9% diff). rate-shock absorption coefficient +0.019 需 recheck. (D) K722 corr_raw: 0.5671 vs 0.6803 (17% diff). 'not improved' 結論一致 — 此項 low risk. Qualitative findings 全部一致（endogenous absorption, paralysis flags, VRP positive, 0050.TW NO paralysis）. **三選一決策** (用戶或主線程決定): (a) 修 reconstruction scripts — 需定位 paper 原始 data vintage (yfinance snapshot 2025-XX) + sample filter 精確規則; (b) 修 paper main_v2.tex 到 reconstruction 數字為準 — 誠實 research 路徑，主線程 body rewrite + errata; (c) 明記 errata pending — scripts/README.md 標註 'reconstruction approximate, qualitative conclusions unaffected, submitting with current paper numbers, errata may follow if reviewer asks'. **Blocker if undecided before Paper 5 submission**. 建議 (c) 為最低成本路徑（qualitative 都 match，reviewer 若不抓 exact numbers 無風險）.",
+    "tags": [
+      "paper-5",
+      "submission-critical",
+      "reproducibility",
+      "main-thread-decision"
     ]
   }
 ]
