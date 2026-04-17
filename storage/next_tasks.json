@@ -1329,15 +1329,16 @@
   {
     "id": "Paper9_audit_nosource_systematic_rescan",
     "title": "Paper 9: 系統性 rescan 所有 no-source 數字找未登錄 K（K1045 case 可能是 pattern）",
-    "status": "pending",
+    "status": "completed",
     "priority": 3,
     "created_at": "2026-04-17T16:52:19+08:00",
-    "description": "K995b (2b9beac0) 發現 Paper 9 audit 的 D3 Table 11 'no-source' 實際是 K1045 existing experiment 未被 paper/garch-x-vix/experiments.md 登錄. Audit 的 34.8% no-source 比例部分可能同性質. **動作**: 用 grep/find 掃 experiments/*/k*_results.json 內含 paper Table 12 / cross-asset / sensitivity 的 特徵數字, 比對 main.tex 所有 no-source 數字是否有未登錄的 K. 可由 agent 執行.",
+    "description": "K995b (2b9beac0) 發現 Paper 9 audit 的 D3 Table 11 'no-source' 實際是 K1045 existing experiment 未被 paper/garch-x-vix/experiments.md 登錄. Audit 的 34.8% no-source 比例部分可能同性質. **動作**: 用 grep/find 掃 experiments/*/k*_results.json 內含 paper Table 12 / cross-asset / sensitivity 的 特徵數字, 比對 main.tex 所有 no-source 數字是否有未登錄的 K. 可由 agent 執行. [DONE commit 26c7a6ed: 19 UNDOCUMENTED_K (K1045/K1003/K1001/K1023 涵蓋全) + 7 STILL_NO_SOURCE + 18 by parallel. Paper 9 audit 34.8% no-source 大半是 documentation gap.]",
     "tags": [
       "paper-9",
       "audit-followup",
       "documentation-gap"
-    ]
+    ],
+    "completed_at": "2026-04-17T17:12:12+08:00"
   },
   {
     "id": "Paper9_experiments_md_add_K1045",
@@ -1449,6 +1450,72 @@
       "vix-sufficiency",
       "body-rewrite",
       "main-thread"
+    ]
+  },
+  {
+    "id": "Paper9_experiments_md_add_K1045_K1003_K1001_K1023",
+    "title": "Paper 9 QUICK WIN: experiments.md 加 K1045/K1003/K1001/K1023 (5 min main-thread)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:12:12+08:00",
+    "description": "Paper9 rescan (26c7a6ed) 發現 19 UNDOCUMENTED_K 只要 4 個 K 加到 experiments.md 即可. Ready-to-apply block 在 paper/garch-x-vix/reproducibility_audit/undocumented_k_additions_for_experiments_md.md. K1045 (Table 11 residual+Abstract), K1003 (Table 12 sensitivity), K1001 (§5.3 macro), K1023 (Discussion Prop 1/2). **5 min edit 解決 Paper 9 audit 19 個 no-source**.",
+    "tags": [
+      "paper-9",
+      "quick-win",
+      "main-thread",
+      "documentation"
+    ]
+  },
+  {
+    "id": "K1027_run_7window_subperiod",
+    "title": "K1027: 執行 k1027.py 產 7-window sub-period JSON (解 Paper 9 4 個 no-source)",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T17:12:12+08:00",
+    "description": "Paper 9 rescan 發現 k1027.py 已設計好但從未執行, results.json 被 Drawdown 實驗蓋過. 執行可解 4 個 no-source (7-window count, 4.81-8.09% range, 6.52% mean, t=6.535 pooled). Agent-launchable, 應該是 ~30 min 小實驗.",
+    "tags": [
+      "paper-9",
+      "k1027",
+      "quick-rerun"
+    ]
+  },
+  {
+    "id": "K998_add_vrp_autocorr_to_json",
+    "title": "K998: 小 fix — vrp_autocorr_lag1 寫入 JSON (解 Paper 9 1 個 no-source)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T17:12:12+08:00",
+    "description": "K998.py 第 129 行 compute autocorr 但只 print, 未寫入 JSON. 主線程一行 fix: results['vrp_autocorr_lag1'] = float(np.corrcoef(oos_vrp[1:], oos_vrp[:-1])[0,1]). 然後重跑 K998 產 JSON. 解 Paper 9 autocorr=0.20 no-source.",
+    "tags": [
+      "paper-9",
+      "k998",
+      "small-fix",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Data_summary_script_SPY_VIX",
+    "title": "建 data summary script 輸出 SPY std + VIX means (解 Paper 9 3 個 no-source)",
+    "status": "pending",
+    "priority": 2,
+    "created_at": "2026-04-17T17:12:12+08:00",
+    "description": "Paper 9 Table 1 summary stats 3 values 無 script source: SPY ann.std 0.188, OOS VIX mean 22.14, full VIX mean 18.97. 建小腳本導出 descriptive stats JSON.",
+    "tags": [
+      "paper-9",
+      "data-summary",
+      "quick-build"
+    ]
+  },
+  {
+    "id": "Other_papers_nosource_rescan_extension",
+    "title": "其他 paper 做同樣 no-source rescan (K1045 pattern generalization)",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T17:12:12+08:00",
+    "description": "Paper 9 rescan 發現 34.8% no-source 大半是 documentation gap (19 UNDOCUMENTED / 26 可 source). Paper 1 (24% no-source), Paper 2 (51%), Paper 3 (18%), Paper 4 (3%) 可能也有同樣 pattern. **動作**: 對每個已 audit 的 paper 啟 rescan agent 找未登錄 K. 可大幅降低每 paper 的 apparent no-source count.",
+    "tags": [
+      "audit-extension",
+      "pattern-generalization"
     ]
   }
 ]
