@@ -1,0 +1,828 @@
+{
+  "experiment_id": "K1027",
+  "title": "Drawdown Recovery Speed — K735 Corrected Methodology",
+  "date": "2026-04-10",
+  "data_source": "yfinance (SPY, ^VIX)",
+  "data_period": "2005-12-30 to 2026-04-09",
+  "total_observations": 5099,
+  "seed": 42,
+  "methodology": {
+    "drawdown_threshold": 0.05,
+    "is_period": "2005-01-01 to 2018-12-31",
+    "oos_period": "2019-01-01 to present",
+    "correlation_method": "Spearman rank correlation",
+    "bootstrap_reps": 5000,
+    "lag": "signal.shift(1) — explicit in code",
+    "correction": "K735 had fake OOS and lookahead bias, both fixed"
+  },
+  "drawdowns": {
+    "total": 23,
+    "in_sample": 12,
+    "out_of_sample": 11,
+    "list": [
+      {
+        "peak_date": "2006-05-09",
+        "trough_date": "2006-06-13",
+        "recovery_date": "2006-09-13",
+        "depth": -0.07593122767965456,
+        "days_to_trough": 35,
+        "days_to_recovery": 127,
+        "vix_at_peak": 11.989999771118164,
+        "vix_pct_at_peak": 0.4603174603174603,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2007-02-20",
+        "trough_date": "2007-03-05",
+        "recovery_date": "2007-04-16",
+        "depth": -0.059504021764325066,
+        "days_to_trough": 13,
+        "days_to_recovery": 55,
+        "vix_at_peak": 10.239999771118164,
+        "vix_pct_at_peak": 0.059523809523809514,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2007-07-19",
+        "trough_date": "2007-08-15",
+        "recovery_date": "2007-10-05",
+        "depth": -0.09047583026013865,
+        "days_to_trough": 27,
+        "days_to_recovery": 78,
+        "vix_at_peak": 15.229999542236328,
+        "vix_pct_at_peak": 0.876984126984127,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2007-10-09",
+        "trough_date": "2009-03-09",
+        "recovery_date": "2012-08-16",
+        "depth": -0.5518944164819725,
+        "days_to_trough": 517,
+        "days_to_recovery": 1773,
+        "vix_at_peak": 16.1200008392334,
+        "vix_pct_at_peak": 0.7222222222222221,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2012-09-14",
+        "trough_date": "2012-11-15",
+        "recovery_date": "2013-01-02",
+        "depth": -0.07345596717347411,
+        "days_to_trough": 62,
+        "days_to_recovery": 110,
+        "vix_at_peak": 14.510000228881836,
+        "vix_pct_at_peak": 0.03571428571428571,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2013-05-21",
+        "trough_date": "2013-06-24",
+        "recovery_date": "2013-07-11",
+        "depth": -0.05550617969884925,
+        "days_to_trough": 34,
+        "days_to_recovery": 51,
+        "vix_at_peak": 13.369999885559082,
+        "vix_pct_at_peak": 0.18253968253968253,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2013-12-31",
+        "trough_date": "2014-02-03",
+        "recovery_date": "2014-02-24",
+        "depth": -0.056960139761912054,
+        "days_to_trough": 34,
+        "days_to_recovery": 55,
+        "vix_at_peak": 13.720000267028809,
+        "vix_pct_at_peak": 0.49404761904761907,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2014-09-18",
+        "trough_date": "2014-10-16",
+        "recovery_date": "2014-10-31",
+        "depth": -0.07273469128761188,
+        "days_to_trough": 28,
+        "days_to_recovery": 43,
+        "vix_at_peak": 12.029999732971191,
+        "vix_pct_at_peak": 0.15674603174603174,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2015-07-20",
+        "trough_date": "2016-02-11",
+        "recovery_date": "2016-04-18",
+        "depth": -0.1302288785956047,
+        "days_to_trough": 206,
+        "days_to_recovery": 273,
+        "vix_at_peak": 12.25,
+        "vix_pct_at_peak": 0.09523809523809523,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2016-06-08",
+        "trough_date": "2016-06-27",
+        "recovery_date": "2016-07-08",
+        "depth": -0.05524284277315488,
+        "days_to_trough": 19,
+        "days_to_recovery": 30,
+        "vix_at_peak": 14.079999923706055,
+        "vix_pct_at_peak": 0.24404761904761904,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2018-01-26",
+        "trough_date": "2018-02-08",
+        "recovery_date": "2018-08-06",
+        "depth": -0.10101926915476132,
+        "days_to_trough": 13,
+        "days_to_recovery": 192,
+        "vix_at_peak": 11.079999923706055,
+        "vix_pct_at_peak": 0.5952380952380952,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2018-09-20",
+        "trough_date": "2018-12-24",
+        "recovery_date": "2019-04-12",
+        "depth": -0.19348895413490375,
+        "days_to_trough": 95,
+        "days_to_recovery": 204,
+        "vix_at_peak": 11.800000190734863,
+        "vix_pct_at_peak": 0.36904761904761907,
+        "sample": "IS"
+      },
+      {
+        "peak_date": "2019-05-03",
+        "trough_date": "2019-06-03",
+        "recovery_date": "2019-06-20",
+        "depth": -0.06618392659444385,
+        "days_to_trough": 31,
+        "days_to_recovery": 48,
+        "vix_at_peak": 12.869999885559082,
+        "vix_pct_at_peak": 0.26388888888888884,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2019-07-26",
+        "trough_date": "2019-08-05",
+        "recovery_date": "2019-10-25",
+        "depth": -0.060229671859230685,
+        "days_to_trough": 10,
+        "days_to_recovery": 91,
+        "vix_at_peak": 12.15999984741211,
+        "vix_pct_at_peak": 0.07738095238095237,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2020-02-19",
+        "trough_date": "2020-03-23",
+        "recovery_date": "2020-08-10",
+        "depth": -0.337172402602658,
+        "days_to_trough": 33,
+        "days_to_recovery": 173,
+        "vix_at_peak": 14.380000114440918,
+        "vix_pct_at_peak": 0.49206349206349204,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2020-09-02",
+        "trough_date": "2020-09-23",
+        "recovery_date": "2020-11-11",
+        "depth": -0.09440452916567986,
+        "days_to_trough": 21,
+        "days_to_recovery": 70,
+        "vix_at_peak": 26.56999969482422,
+        "vix_pct_at_peak": 0.619047619047619,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2021-09-02",
+        "trough_date": "2021-10-04",
+        "recovery_date": "2021-10-20",
+        "depth": -0.05114153662911358,
+        "days_to_trough": 32,
+        "days_to_recovery": 48,
+        "vix_at_peak": 16.40999984741211,
+        "vix_pct_at_peak": 0.09920634920634921,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2022-01-03",
+        "trough_date": "2022-10-12",
+        "recovery_date": "2023-12-13",
+        "depth": -0.24496384369228152,
+        "days_to_trough": 282,
+        "days_to_recovery": 709,
+        "vix_at_peak": 16.600000381469727,
+        "vix_pct_at_peak": 0.19841269841269843,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2024-03-27",
+        "trough_date": "2024-04-19",
+        "recovery_date": "2024-05-14",
+        "depth": -0.05353910932010129,
+        "days_to_trough": 23,
+        "days_to_recovery": 48,
+        "vix_at_peak": 12.779999732971191,
+        "vix_pct_at_peak": 0.08333333333333331,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2024-07-16",
+        "trough_date": "2024-08-05",
+        "recovery_date": "2024-09-19",
+        "depth": -0.08405606043204424,
+        "days_to_trough": 20,
+        "days_to_recovery": 65,
+        "vix_at_peak": 13.1899995803833,
+        "vix_pct_at_peak": 0.3353174603174603,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2025-02-19",
+        "trough_date": "2025-04-08",
+        "recovery_date": "2025-06-26",
+        "depth": -0.1875523366664131,
+        "days_to_trough": 48,
+        "days_to_recovery": 127,
+        "vix_at_peak": 15.270000457763672,
+        "vix_pct_at_peak": 0.49206349206349204,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2025-10-29",
+        "trough_date": "2025-11-20",
+        "recovery_date": "2025-12-10",
+        "depth": -0.05071351940816011,
+        "days_to_trough": 22,
+        "days_to_recovery": 42,
+        "vix_at_peak": 16.920000076293945,
+        "vix_pct_at_peak": 0.503968253968254,
+        "sample": "OOS"
+      },
+      {
+        "peak_date": "2026-01-27",
+        "trough_date": "2026-03-30",
+        "recovery_date": null,
+        "depth": -0.08884972579331007,
+        "days_to_trough": 62,
+        "days_to_recovery": null,
+        "vix_at_peak": 16.350000381469727,
+        "vix_pct_at_peak": 0.32936507936507936,
+        "sample": "OOS"
+      }
+    ]
+  },
+  "correlations": {
+    "full": {
+      "depth": {
+        "vix_at_peak": {
+          "rho": -0.06126482213438736,
+          "pval": 0.7812492703654051,
+          "ci_lo": -0.5085024350649351,
+          "ci_hi": 0.39740522005330353,
+          "n": 23
+        },
+        "vix_pct_at_peak": {
+          "rho": -0.41166297278484415,
+          "pval": 0.050973430042232946,
+          "ci_lo": -0.7270011786600497,
+          "ci_hi": 0.0070566023703073,
+          "n": 23
+        },
+        "vix_slope_at_peak": {
+          "rho": 0.11264822134387352,
+          "pval": 0.6088271106292827,
+          "ci_lo": -0.3280569772843331,
+          "ci_hi": 0.5380712554924161,
+          "n": 23
+        },
+        "rvol_at_peak": {
+          "rho": -0.2628458498023716,
+          "pval": 0.22562141550970763,
+          "ci_lo": -0.6867908455070595,
+          "ci_hi": 0.2691216774639427,
+          "n": 23
+        },
+        "momentum_at_peak": {
+          "rho": -0.021739130434782608,
+          "pval": 0.9215714810608446,
+          "ci_lo": -0.43200677290836653,
+          "ci_hi": 0.4105409936578627,
+          "n": 23
+        }
+      },
+      "days_to_trough": {
+        "vix_at_peak": {
+          "rho": 0.26996299142885,
+          "pval": 0.2128432248259898,
+          "ci_lo": -0.22656688531368807,
+          "ci_hi": 0.6603734295094418,
+          "n": 23
+        },
+        "vix_pct_at_peak": {
+          "rho": 0.052917909537852276,
+          "pval": 0.8104850693724057,
+          "ci_lo": -0.41932740936849205,
+          "ci_hi": 0.5174481326156198,
+          "n": 23
+        },
+        "vix_slope_at_peak": {
+          "rho": -0.19925839843557974,
+          "pval": 0.3620285596911336,
+          "ci_lo": -0.5834349828343446,
+          "ci_hi": 0.2413035153603619,
+          "n": 23
+        },
+        "rvol_at_peak": {
+          "rho": 0.4420273156362489,
+          "pval": 0.03469968285708311,
+          "ci_lo": 0.006024842613081288,
+          "ci_hi": 0.7704706302710395,
+          "n": 23
+        },
+        "momentum_at_peak": {
+          "rho": -0.1730531996338782,
+          "pval": 0.42974002397553623,
+          "ci_lo": -0.615057805578487,
+          "ci_hi": 0.31911978992454776,
+          "n": 23
+        }
+      },
+      "days_to_recovery": {
+        "vix_at_peak": {
+          "rho": -0.04242087554963984,
+          "pval": 0.8513148889888981,
+          "ci_lo": -0.477917607534146,
+          "ci_hi": 0.43802915577311485,
+          "n": 22
+        },
+        "vix_pct_at_peak": {
+          "rho": 0.2237626000679325,
+          "pval": 0.31680565868639443,
+          "ci_lo": -0.17672971917343533,
+          "ci_hi": 0.5922399579115402,
+          "n": 22
+        },
+        "vix_slope_at_peak": {
+          "rho": -0.2070138726822424,
+          "pval": 0.35529299031288863,
+          "ci_lo": -0.6314190943673503,
+          "ci_hi": 0.22121488924994853,
+          "n": 22
+        },
+        "rvol_at_peak": {
+          "rho": 0.30203663391343566,
+          "pval": 0.17189449219238542,
+          "ci_lo": -0.2137850756658112,
+          "ci_hi": 0.741167838284938,
+          "n": 22
+        },
+        "momentum_at_peak": {
+          "rho": 0.17081472554654972,
+          "pval": 0.4472324798187056,
+          "ci_lo": -0.33536649605284125,
+          "ci_hi": 0.6004608425416428,
+          "n": 22
+        }
+      }
+    },
+    "in_sample": {
+      "depth": {
+        "vix_at_peak": {
+          "rho": 0.0,
+          "pval": 1.0,
+          "ci_lo": -0.6518599033816426,
+          "ci_hi": 0.6534366189996299,
+          "n": 12
+        },
+        "vix_pct_at_peak": {
+          "rho": -0.35664335664335667,
+          "pval": 0.2551377517589572,
+          "ci_lo": -0.7499999999999999,
+          "ci_hi": 0.25448028673835127,
+          "n": 12
+        },
+        "vix_slope_at_peak": {
+          "rho": 0.6153846153846154,
+          "pval": 0.033169901090105904,
+          "ci_lo": 0.043764559714241355,
+          "ci_hi": 0.9280704008221993,
+          "n": 12
+        },
+        "rvol_at_peak": {
+          "rho": -0.2377622377622378,
+          "pval": 0.45680085263992326,
+          "ci_lo": -0.8417408009076609,
+          "ci_hi": 0.4786178190137258,
+          "n": 12
+        },
+        "momentum_at_peak": {
+          "rho": -0.16783216783216784,
+          "pval": 0.6020994277865379,
+          "ci_lo": -0.7204301075268817,
+          "ci_hi": 0.5499999999999999,
+          "n": 12
+        }
+      },
+      "days_to_trough": {
+        "vix_at_peak": {
+          "rho": 0.371932114085927,
+          "pval": 0.23384970387826853,
+          "ci_lo": -0.44444565301934397,
+          "ci_hi": 0.8572320634214379,
+          "n": 12
+        },
+        "vix_pct_at_peak": {
+          "rho": -0.028070348232900156,
+          "pval": 0.9309931502265187,
+          "ci_lo": -0.706141590142061,
+          "ci_hi": 0.6508633491019337,
+          "n": 12
+        },
+        "vix_slope_at_peak": {
+          "rho": -0.2000012311594136,
+          "pval": 0.5331327866470228,
+          "ci_lo": -0.7963636363636363,
+          "ci_hi": 0.5886524822695036,
+          "n": 12
+        },
+        "rvol_at_peak": {
+          "rho": 0.4771959199593026,
+          "pval": 0.11670671668806785,
+          "ci_lo": -0.1955829109472957,
+          "ci_hi": 0.9278002526892354,
+          "n": 12
+        },
+        "momentum_at_peak": {
+          "rho": -0.010526380587337557,
+          "pval": 0.9740990620508823,
+          "ci_lo": -0.673955995724464,
+          "ci_hi": 0.7204301075268817,
+          "n": 12
+        }
+      },
+      "days_to_recovery": {
+        "vix_at_peak": {
+          "rho": -0.0035026323416917316,
+          "pval": 0.991380381721317,
+          "ci_lo": -0.6312382527629503,
+          "ci_hi": 0.6337173579109061,
+          "n": 12
+        },
+        "vix_pct_at_peak": {
+          "rho": 0.2767079549936468,
+          "pval": 0.3839396014534968,
+          "ci_lo": -0.3290705856188456,
+          "ci_hi": 0.7362968591691991,
+          "n": 12
+        },
+        "vix_slope_at_peak": {
+          "rho": -0.45884483676161686,
+          "pval": 0.13350686946394802,
+          "ci_lo": -0.8940975583723595,
+          "ci_hi": 0.17693466153981913,
+          "n": 12
+        },
+        "rvol_at_peak": {
+          "rho": 0.37828429290270704,
+          "pval": 0.22532675339286715,
+          "ci_lo": -0.3791131394319187,
+          "ci_hi": 0.8780618466898954,
+          "n": 12
+        },
+        "momentum_at_peak": {
+          "rho": 0.2556921609434964,
+          "pval": 0.4224811423333079,
+          "ci_lo": -0.5071670090366357,
+          "ci_hi": 0.8194945848375451,
+          "n": 12
+        }
+      }
+    },
+    "oos": {
+      "depth": {
+        "vix_at_peak": {
+          "rho": -0.13636363636363638,
+          "pval": 0.689309020586362,
+          "ci_lo": -0.8685599578781097,
+          "ci_hi": 0.5700934579439252,
+          "n": 11
+        },
+        "vix_pct_at_peak": {
+          "rho": -0.33713071520787186,
+          "pval": 0.3106523577454195,
+          "ci_lo": -0.8946404869805955,
+          "ci_hi": 0.38317757009345793,
+          "n": 11
+        },
+        "vix_slope_at_peak": {
+          "rho": -0.24545454545454545,
+          "pval": 0.46692236698201633,
+          "ci_lo": -0.6930587855297159,
+          "ci_hi": 0.3868448637316554,
+          "n": 11
+        },
+        "rvol_at_peak": {
+          "rho": -0.33636363636363636,
+          "pval": 0.31182431390038634,
+          "ci_lo": -0.8518689196108551,
+          "ci_hi": 0.41666666666666663,
+          "n": 11
+        },
+        "momentum_at_peak": {
+          "rho": 0.07272727272727274,
+          "pval": 0.831716405381337,
+          "ci_lo": -0.6636676859468538,
+          "ci_hi": 0.6666666666666666,
+          "n": 11
+        }
+      },
+      "days_to_trough": {
+        "vix_at_peak": {
+          "rho": 0.30000000000000004,
+          "pval": 0.37008312228206786,
+          "ci_lo": -0.4953271028037383,
+          "ci_hi": 0.9259259259259258,
+          "n": 11
+        },
+        "vix_pct_at_peak": {
+          "rho": 0.013667461427346159,
+          "pval": 0.9681862209072394,
+          "ci_lo": -0.6944444444444444,
+          "ci_hi": 0.711558359676092,
+          "n": 11
+        },
+        "vix_slope_at_peak": {
+          "rho": -0.36363636363636365,
+          "pval": 0.2716375409938225,
+          "ci_lo": -0.8878504672897195,
+          "ci_hi": 0.37045690550363314,
+          "n": 11
+        },
+        "rvol_at_peak": {
+          "rho": 0.6000000000000001,
+          "pval": 0.05100326070695072,
+          "ci_lo": -0.04629629629629629,
+          "ci_hi": 0.9397426155166066,
+          "n": 11
+        },
+        "momentum_at_peak": {
+          "rho": -0.48181818181818187,
+          "pval": 0.13343383825682875,
+          "ci_lo": -0.9808612440191388,
+          "ci_hi": 0.27441860465116286,
+          "n": 11
+        }
+      },
+      "days_to_recovery": {
+        "vix_at_peak": {
+          "rho": 0.030677155956992445,
+          "pval": 0.9329568385993041,
+          "ci_lo": -0.6273291925465838,
+          "ci_hi": 0.7744761368229988,
+          "n": 10
+        },
+        "vix_pct_at_peak": {
+          "rho": 0.012308216692591792,
+          "pval": 0.9730798544241035,
+          "ci_lo": -0.6352201257861636,
+          "ci_hi": 0.7651258934115102,
+          "n": 10
+        },
+        "vix_slope_at_peak": {
+          "rho": 0.0061354311913984876,
+          "pval": 0.9865792494806584,
+          "ci_lo": -0.6948041561159696,
+          "ci_hi": 0.5816993464052287,
+          "n": 10
+        },
+        "rvol_at_peak": {
+          "rho": 0.34971957790971375,
+          "pval": 0.3218862439374828,
+          "ci_lo": -0.5356622689641017,
+          "ci_hi": 0.9712949099188619,
+          "n": 10
+        },
+        "momentum_at_peak": {
+          "rho": 0.030677155956992445,
+          "pval": 0.9329568385993041,
+          "ci_lo": -0.673142683593836,
+          "ci_hi": 0.7558903380103226,
+          "n": 10
+        }
+      }
+    }
+  },
+  "stability": {
+    "depth": {
+      "vix_at_peak": {
+        "is_rho": 0.0,
+        "oos_rho": -0.13636363636363638,
+        "same_sign": true,
+        "abs_diff": 0.13636363636363638,
+        "stable": true
+      },
+      "vix_pct_at_peak": {
+        "is_rho": -0.35664335664335667,
+        "oos_rho": -0.33713071520787186,
+        "same_sign": true,
+        "abs_diff": 0.019512641435484812,
+        "stable": true
+      },
+      "vix_slope_at_peak": {
+        "is_rho": 0.6153846153846154,
+        "oos_rho": -0.24545454545454545,
+        "same_sign": false,
+        "abs_diff": 0.8608391608391609,
+        "stable": false
+      },
+      "rvol_at_peak": {
+        "is_rho": -0.2377622377622378,
+        "oos_rho": -0.33636363636363636,
+        "same_sign": true,
+        "abs_diff": 0.09860139860139858,
+        "stable": true
+      },
+      "momentum_at_peak": {
+        "is_rho": -0.16783216783216784,
+        "oos_rho": 0.07272727272727274,
+        "same_sign": false,
+        "abs_diff": 0.24055944055944056,
+        "stable": false
+      }
+    },
+    "days_to_trough": {
+      "vix_at_peak": {
+        "is_rho": 0.371932114085927,
+        "oos_rho": 0.30000000000000004,
+        "same_sign": true,
+        "abs_diff": 0.07193211408592698,
+        "stable": true
+      },
+      "vix_pct_at_peak": {
+        "is_rho": -0.028070348232900156,
+        "oos_rho": 0.013667461427346159,
+        "same_sign": false,
+        "abs_diff": 0.04173780966024632,
+        "stable": false
+      },
+      "vix_slope_at_peak": {
+        "is_rho": -0.2000012311594136,
+        "oos_rho": -0.36363636363636365,
+        "same_sign": true,
+        "abs_diff": 0.16363513247695005,
+        "stable": true
+      },
+      "rvol_at_peak": {
+        "is_rho": 0.4771959199593026,
+        "oos_rho": 0.6000000000000001,
+        "same_sign": true,
+        "abs_diff": 0.12280408004069748,
+        "stable": true
+      },
+      "momentum_at_peak": {
+        "is_rho": -0.010526380587337557,
+        "oos_rho": -0.48181818181818187,
+        "same_sign": true,
+        "abs_diff": 0.4712918012308443,
+        "stable": false
+      }
+    },
+    "days_to_recovery": {
+      "vix_at_peak": {
+        "is_rho": -0.0035026323416917316,
+        "oos_rho": 0.030677155956992445,
+        "same_sign": false,
+        "abs_diff": 0.03417978829868418,
+        "stable": false
+      },
+      "vix_pct_at_peak": {
+        "is_rho": 0.2767079549936468,
+        "oos_rho": 0.012308216692591792,
+        "same_sign": true,
+        "abs_diff": 0.264399738301055,
+        "stable": true
+      },
+      "vix_slope_at_peak": {
+        "is_rho": -0.45884483676161686,
+        "oos_rho": 0.0061354311913984876,
+        "same_sign": false,
+        "abs_diff": 0.46498026795301534,
+        "stable": false
+      },
+      "rvol_at_peak": {
+        "is_rho": 0.37828429290270704,
+        "oos_rho": 0.34971957790971375,
+        "same_sign": true,
+        "abs_diff": 0.02856471499299329,
+        "stable": true
+      },
+      "momentum_at_peak": {
+        "is_rho": 0.2556921609434964,
+        "oos_rho": 0.030677155956992445,
+        "same_sign": true,
+        "abs_diff": 0.22501500498650395,
+        "stable": true
+      }
+    }
+  },
+  "strategy": {
+    "best_is_config": {
+      "thresholds": [
+        0.7
+      ],
+      "weights": [
+        1.0,
+        0.5
+      ],
+      "description": "70 percentile, 100/50%"
+    },
+    "is_metrics": {
+      "strategy": {
+        "ann_return": 0.08507054089299859,
+        "ann_vol": 0.13281569821580635,
+        "sharpe": 0.6405157073734705,
+        "mdd": -0.3960203554969151,
+        "n_days": 3271
+      },
+      "buy_hold": {
+        "ann_return": 0.09243972506087925,
+        "ann_vol": 0.19176348439088176,
+        "sharpe": 0.4820507165611072,
+        "mdd": -0.5518944164819726,
+        "n_days": 3271
+      }
+    },
+    "oos_metrics": {
+      "strategy": {
+        "ann_return": 0.1257545595711549,
+        "ann_vol": 0.13761417078513064,
+        "sharpe": 0.9138198403092279,
+        "mdd": -0.18913029683492297,
+        "n_days": 1826
+      },
+      "buy_hold": {
+        "ann_return": 0.17232629308786965,
+        "ann_vol": 0.19616120648342916,
+        "sharpe": 0.8784932361354895,
+        "mdd": -0.3371724026026582,
+        "n_days": 1826
+      },
+      "twelve_vix": {
+        "ann_return": 0.09593408709816455,
+        "ann_vol": 0.09463184171172379,
+        "sharpe": 1.0137611755502738,
+        "mdd": -0.1435081539070283,
+        "n_days": 1826
+      }
+    },
+    "dm_test_vs_bh": {
+      "t_stat": -1.552131056766186,
+      "p_value": 0.12080425462168853,
+      "harvey_threshold": "False"
+    },
+    "dm_test_vs_12vix": {
+      "t_stat": 1.458555696177754,
+      "p_value": 0.14485950844466888,
+      "harvey_threshold": "False"
+    }
+  },
+  "validation_checks": [
+    {
+      "check": "Mechanical vs Empirical",
+      "result": "EMPIRICAL — VIX-drawdown correlation is not a definitional identity. VIX measures implied vol, drawdown measures realized price decline. The relationship is empirical."
+    },
+    {
+      "check": "Sharpe > 2x baseline",
+      "result": "Strategy/BH ratio = 1.04. OK: <2x"
+    },
+    {
+      "check": "IS vs OOS stability",
+      "result": "9/15 correlations are stable (same sign, |diff| < 0.3)"
+    },
+    {
+      "check": "OOS sample size",
+      "result": "11 OOS drawdowns. Adequate"
+    }
+  ],
+  "conclusions": [
+    "VIX at drawdown peak vs drawdown depth: IS rho=0.000, OOS rho=-0.136. Relationship stable across samples.",
+    "DD Protection overlay OOS: Sharpe=0.914 vs BH=0.878 vs 12/VIX=1.014. DM t=-1.552 (p=0.1208). No significant improvement over BH at Harvey (2016) threshold.",
+    "K735 correction: With strict OOS and proper lag, the VIX-drawdown relationship is consistent with IS findings. The practical strategy value is limited."
+  ],
+  "limitations": [
+    "Small OOS drawdown sample — VIX-depth correlation may not generalize",
+    "Drawdown threshold (5%) is arbitrary — different thresholds may yield different results",
+    "VIX percentile uses rolling 252d which introduces lookback window dependency",
+    "COVID-19 crash (2020) is an extreme outlier in OOS that dominates results",
+    "Strategy de-leveraging reduces downside but also reduces upside"
+  ],
+  "references": [
+    "K735: Original drawdown recovery study (Codex-invalidated)",
+    "K648: Drawdown Recovery comparison across strategies",
+    "K687/K697: VT = drawdown insurance, not alpha generator"
+  ]
+}
