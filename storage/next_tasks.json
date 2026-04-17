@@ -1692,7 +1692,7 @@
     "status": "pending",
     "priority": 4,
     "created_at": "2026-04-17T17:36:43+08:00",
-    "description": "Paper 1 rescan (dcb84f0c): 0 UNDOCUMENTED_K, 15 STILL_NO_SOURCE — 需建 4 new K experiments. Table 4 (VaR config): K1185 VaR backtest with specific config matching paper 2020-2025 n=1508. Table 6 (pass-rate rows): K1186 Kupiec/Christoffersen pass rate aggregation. Table 7 (5 asset rows): K1187 cross-asset GARCH comparison (SPY/GLD/TLT/BTC/EEM). Table 8 (window robustness): K1188 rolling window sensitivity (w=250/500/1000). Agent-launchable, ~2-3h each = 8-12h total. | K1185 (Table 4) DONE commit 818fff7c: 3/4 MATCHED (StudentT/Adaptive/Jump exact), Normal Δ=-3 data vintage. Knowledge base 驗證一致. 建議 (b1) Table 4 腳注 data-revision disclaimer. Paper 1 base = GARCH(1,1) 非 GJR (methodology clarification). 剩 K1186 (Table 6 pass-rate) + K1187 (Table 7 5-asset) + K1188 (Table 8 window) 3 個 new experiments. | K1188 (Table 8) DONE commit e0212023: **(a) PAPER REPRODUCED 15/15 MATCH** 全 cells ±0.10. Scale quasi-LL confirmed. RANK 3/3. BLOCKER resolved. 剩 K1186 Table 6 + K1187 Table 7 跑中. | K1186 (Table 6) DONE commit 94f4d883: **2/5 matched** (Normal 57.1 exact + FHS 76.2 exact). 3/5 divergent upward (StudentT5/SkewedT/CFVaR +19/+14/+10pp) 根因 data vintage. (a) Normal/FHS confirmed (b) SkewedT/CFVaR paper footnote (c) StudentT5 errata. Paper 1 Tables batch progress: T4 3/4, T6 2/5, T7 跑中, T8 15/15 PERFECT.",
+    "description": "Paper 1 rescan (dcb84f0c): 0 UNDOCUMENTED_K, 15 STILL_NO_SOURCE — 需建 4 new K experiments. Table 4 (VaR config): K1185 VaR backtest with specific config matching paper 2020-2025 n=1508. Table 6 (pass-rate rows): K1186 Kupiec/Christoffersen pass rate aggregation. Table 7 (5 asset rows): K1187 cross-asset GARCH comparison (SPY/GLD/TLT/BTC/EEM). Table 8 (window robustness): K1188 rolling window sensitivity (w=250/500/1000). Agent-launchable, ~2-3h each = 8-12h total. | K1185 (Table 4) DONE commit 818fff7c: 3/4 MATCHED (StudentT/Adaptive/Jump exact), Normal Δ=-3 data vintage. Knowledge base 驗證一致. 建議 (b1) Table 4 腳注 data-revision disclaimer. Paper 1 base = GARCH(1,1) 非 GJR (methodology clarification). 剩 K1186 (Table 6 pass-rate) + K1187 (Table 7 5-asset) + K1188 (Table 8 window) 3 個 new experiments. | K1188 (Table 8) DONE commit e0212023: **(a) PAPER REPRODUCED 15/15 MATCH** 全 cells ±0.10. Scale quasi-LL confirmed. RANK 3/3. BLOCKER resolved. 剩 K1186 Table 6 + K1187 Table 7 跑中. | K1186 (Table 6) DONE commit 94f4d883: **2/5 matched** (Normal 57.1 exact + FHS 76.2 exact). 3/5 divergent upward (StudentT5/SkewedT/CFVaR +19/+14/+10pp) 根因 data vintage. (a) Normal/FHS confirmed (b) SkewedT/CFVaR paper footnote (c) StudentT5 errata. Paper 1 Tables batch progress: T4 3/4, T6 2/5, T7 跑中, T8 15/15 PERFECT. | K1187 (Table 7) DONE commit 5efb638e: **6/20 MATCHED** (SPY/TLT/EEM core). GLD BH=1.56 vs 0.83 (paper internal inconsistency — period 無法驗證), BTC 0.43 vs 0.92. (b) caption 加 per-asset period. Paper 1 Tables batch COMPLETE: T4 3/4 + T6 2/5 + T7 6/20 + T8 15/15. Paper 1 Tables 4+7 有 GJR vs GARCH base + period 不一致 research integrity issues.",
     "tags": [
       "paper-1",
       "leverage-direction",
@@ -1983,10 +1983,10 @@
   {
     "id": "Rate_limit_retry_2026-04-17",
     "title": "Rate limit 撞上 8pm reset: retry K1187 Table 7, K1181 VIXTWN, K1193 split, K1190 sector",
-    "status": "blocked_rate_limit",
+    "status": "partially_completed",
     "priority": 4,
     "created_at": "2026-04-17T20:01:59+08:00",
-    "description": "2026-04-17 晚間 4 agents 全撞 rate limit reset 8pm Asia/Taipei, 無產出: K1187 Paper 1 Table 7 5-asset, K1181 Paper 2 VIXTWN stats, K1193 Paper 3 split-sample, K1190 Paper 3 sector 11 SPDR. Worktrees 清理完畢. 8pm reset 後重啟.",
+    "description": "2026-04-17 晚間 4 agents 全撞 rate limit reset 8pm Asia/Taipei, 無產出: K1187 Paper 1 Table 7 5-asset, K1181 Paper 2 VIXTWN stats, K1193 Paper 3 split-sample, K1190 Paper 3 sector 11 SPDR. Worktrees 清理完畢. 8pm reset 後重啟. | 2/4 complete: K1187 (commit 5efb638e) + K1190 (72187f6d). Still running: K1193 split-sample, K1181 VIXTWN.",
     "tags": [
       "rate-limit",
       "retry",

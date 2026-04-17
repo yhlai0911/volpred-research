@@ -27293,5 +27293,27 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T20:14:00.129079"
+  },
+  {
+    "item_id": "cf07b67a",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1182 Paper 2 Granger F=58.8 formal experiment. **VERDICT: (a) MATCHED \u2014 F=58.9049 vs paper 58.8 (diff 0.10)**. Variables: X=VIX level (^VIX forward-filled TW calendar), Y=0050.TW squared log-returns (r\u00b2), sample 2014-01 ~ 2025-12 (N=2925), lag=2 via grangercausalitytests(maxlag=5). **Window critical**: full 2008-2026 F\u22480.03 null (COVID outliers overwhelm); 2015-24 sub F=41.60 close not match. \u7cbe\u78ba 2014-2025 \u662f paper spec. **All lags 1-5 significant** (F 95.67 to 16.67) \u5728 2015-24 sub, \u78ba\u8a8d paper 'lags 1-5 all significant'. **Reverse**: tw50\u00b2 \u2192 VIX \u5168\u6a23\u672c NS (p=0.78-0.99) \u78ba\u8a8d paper; 2015-24 sub \u53cd\u5411\u986f\u8457 (caveat). TWD p=0.08 **\u672a\u9a57\u8b49** (TWD\u00b2 F\u22480, likely \u4e0d\u540c spec \u5982 TWD returns not squared). **\u5efa\u8b70 action**: paper Table Granger caption \u52a0 '2014-2025 sample window' footnote. Paper 2 SPI-02 by K1182 SOURCED. commit 2ad0ef7a.",
+    "evidence": [
+      "experiments/k1182/k1182.py",
+      "experiments/k1182/k1182_results.json"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T20:22:13.988781"
+  },
+  {
+    "item_id": "9bf1aedf",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1187 Paper 1 Table 7 5-asset cross-section. **VERDICT: (b) \u8a18\u9304\u671f\u9593\u4e0d\u4e00\u81f4, 6/20 MATCHED (30%)**. **MATCHED (6)**: SPY BH Sharpe 0.82\u21920.81, BH MDD -33.7% exact, VT MDD -14.8\u2192-15.2, TLT BH 0.02 exact, EEM BH Sharpe 0.42 exact, EEM MDD -38.2\u2192-39.8. **DIVERGED**: GLD BH Sharpe paper 1.56 vs 0.83 (47% off), BTC BH Sharpe 0.43 vs 0.92 (114% off), SPY VT Sharpe 0.78 vs 0.85 (+8% \u53ef\u80fd sigma_target 12% not 10%). **Paper \u5167\u90e8\u4e0d\u4e00\u81f4 FLAG**: body.tex \u660e\u78ba\u8aaa '2022-2026 BH=1.56' \u4f46\u5be6\u969b 2022-2026 GLD \u53ea 1.29. Exhaustive search \u7121\u4efb\u4f55\u6a19\u6e96 period \u540c\u6642 Sharpe\u22651.56 + MDD\u2264-25%. BTC -76.6% MDD \u5339\u914d 2019-2026 period \u4f46\u90a3\u671f BH Sharpe 0.81\u22600.43. SPY \u03b3=0.211 fingerprint \u6307\u5411 2014-2026 period \u5b8c\u5168\u78ba\u8a8d. **\u5efa\u8b70 (b)**: Table 7 caption \u6bcf asset \u52a0\u660e\u78ba\u8a55\u4f30\u671f\u9593\u6b04\u4f4d. GLD BH=1.56 \u8ddf\u4efb\u4f55\u53ef\u9a57\u8b49 period \u4e0d\u4e00\u81f4 \u2192 paper \u5167\u90e8 inconsistency flag. commit 5efb638e.",
+    "evidence": [
+      "experiments/k1187/k1187.py",
+      "experiments/k1187/k1187_results.json"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T20:22:14.118452"
   }
 ]
