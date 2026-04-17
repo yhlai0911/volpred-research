@@ -1,0 +1,63 @@
+
+========================================================================
+K1213: AU pooled multi-start MLE (100 random starts)
+========================================================================
+
+[data] loaded 10/10 AU stocks from /Users/yhlai0911/Desktop/volpred-research/experiments/k1171/data
+   BHP.AX: n_obs=3036, n_events=22, sigma2=3.077e-04
+   CBA.AX: n_obs=3036, n_events=22, sigma2=1.742e-04
+   CSL.AX: n_obs=3036, n_events=22, sigma2=2.256e-04
+   NAB.AX: n_obs=3036, n_events=21, sigma2=1.866e-04
+   ANZ.AX: n_obs=3036, n_events=21, sigma2=2.020e-04
+   WBC.AX: n_obs=3036, n_events=21, sigma2=2.016e-04
+   WES.AX: n_obs=3036, n_events=22, sigma2=1.578e-04
+   MQG.AX: n_obs=3036, n_events=21, sigma2=2.473e-04
+   TLS.AX: n_obs=3036, n_events=22, sigma2=1.347e-04
+   RIO.AX: n_obs=3036, n_events=22, sigma2=2.743e-04
+
+[pooled] S=10 mean_sigma2=2.112e-04 vix2_mean=3.705e+02
+  [start 10/100] converged=6/10 elapsed=3.2s
+  [start 20/100] converged=14/20 elapsed=7.7s
+  [start 30/100] converged=22/30 elapsed=10.4s
+  [start 40/100] converged=27/40 elapsed=12.2s
+  [start 50/100] converged=33/50 elapsed=15.2s
+  [start 60/100] converged=43/60 elapsed=20.3s
+  [start 70/100] converged=50/70 elapsed=23.5s
+  [start 80/100] converged=54/80 elapsed=25.1s
+  [start 90/100] converged=60/90 elapsed=28.2s
+  [start 100/100] converged=66/100 elapsed=30.6s
+
+[fits] 100 multi-starts in 30.6s
+  converged = 66/100
+
+[basin stats]
+  basin_A_frac: 0.7727272727272727
+  basin_B_frac: 0.22727272727272727
+  basin_A_theta_mean: 0.00010711153598989315
+  basin_B_theta_mean: 0.0003438781628072413
+  basin_A_ll_mean: 88589.52002876253
+  basin_B_ll_mean: 88983.19696058829
+  basin_A_ll_max: 89118.2401831884
+  basin_B_ll_max: 89146.6926548808
+
+[best LL] theta_eav=3.116e-04 LL=89146.69 basin=B (seed=53)
+  Hessian SE=5.3138366493011115e-05 t=5.864539701450595
+
+[sensitivity] re-running from best-LL init with NM + DE
+  NM theta_eav=0.0002259081066151598 LL=89303.19245801578
+  DE theta_eav=0.002234716864426285 LL=-10000000000000.0
+  elapsed=1.4s
+
+[theta_rel] K1213 = +1.4757 (K1171 was +0.1498)
+
+[spearman N=13] rho=+0.418 p=0.1557
+  K1172 baseline (N=12): rho=+0.441 p=0.1520
+
+===== VERDICT: ABOVE_LADDER_OVERTURNED =====
+Basin-B (high theta) wins decisively: best LL=89146.69 vs K1171 89047.22 (Delta LL=+99.47, LR>>chi2_0.05=3.84). Basin-A max LL=89118.24 also > K1171 (Delta=+71.02) but below basin-B. K1213 best theta_EAV=3.116e-04 (theta_rel=1.476). Basin-B fraction=23% of 66 converged starts. NM refinement finds even higher LL=89303.19245801578 at theta_EAV=2.259e-04 (theta_rel=1.070) confirming basin-B direction. Spearman N=13 with K1213 AU: rho=+0.418, p=0.1557. K1171/K1210 below-ladder reading OVERTURNED.
+
+[figures] wrote hist + scatter + per-stock compare
+[csv] wrote k1213_multistart_results.csv (100 rows)
+
+[json] wrote k1213_results.json
+[done] total 32.9s
