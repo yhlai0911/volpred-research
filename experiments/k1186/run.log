@@ -1,0 +1,204 @@
+========================================================================
+K1186: Paper 1 Table 6 VaR Panel Pass-Rate Canonical Replication
+  BASE MODEL: GJR-GARCH(1,1) for all assets, rolling w=504
+  ASSETS: SPY, QQQ, GLD, TLT, EEM, BTC-USD, IWM
+  METHODS: Normal, StudentT5, SkewedT, FHS, CFVaR
+  ALPHA LEVELS: [0.01, 0.025, 0.05]
+  TRINITY: Kupiec + Christoffersen + DQ (p>0.05)
+  OOS: 2020-01-01 to 2025-12-31
+  seed=42
+========================================================================
+
+[1/4] GJR-GARCH OOS forecasting for 7 assets...
+
+  Asset: SPY
+  Loading SPY...
+    n_total=6610, n_oos=1508, oos: 2020-01-02 to 2025-12-31
+    Valid forecasts: 1508/1508
+    Skewed-t params (in-sample fit): df=28.746, lam=-0.1923
+
+  Asset: QQQ
+  Loading QQQ...
+    n_total=6610, n_oos=1508, oos: 2020-01-02 to 2025-12-31
+    Valid forecasts: 1508/1508
+    Skewed-t params (in-sample fit): df=28.004, lam=-0.2522
+
+  Asset: GLD
+  Loading GLD...
+    n_total=5384, n_oos=1508, oos: 2020-01-02 to 2025-12-31
+    Valid forecasts: 1508/1508
+    Skewed-t params (in-sample fit): df=30.000, lam=-0.0312
+
+  Asset: TLT
+  Loading TLT...
+    n_total=5966, n_oos=1508, oos: 2020-01-02 to 2025-12-31
+    Valid forecasts: 1508/1508
+    Skewed-t params (in-sample fit): df=30.000, lam=-0.0527
+
+  Asset: EEM
+  Loading EEM...
+    n_total=5788, n_oos=1508, oos: 2020-01-02 to 2025-12-31
+    Valid forecasts: 1508/1508
+    Skewed-t params (in-sample fit): df=30.000, lam=-0.1584
+
+  Asset: BTC-USD
+  Loading BTC-USD...
+    n_total=4230, n_oos=2192, oos: 2020-01-01 to 2025-12-31
+    Valid forecasts: 2192/2192
+    Skewed-t params (in-sample fit): df=30.000, lam=0.0012
+
+  Asset: IWM
+  Loading IWM...
+    n_total=6509, n_oos=1508, oos: 2020-01-02 to 2025-12-31
+    Valid forecasts: 1508/1508
+    Skewed-t params (in-sample fit): df=30.000, lam=-0.1820
+
+[2/4] Trinity backtests (Kupiec + CC + DQ)...
+
+  Method: Normal
+    SPY α=0.010: Kup.p=0.000 CC.p=0.668 DQ.p=0.025 viol=31/1508 (FAIL)
+    SPY α=0.025: Kup.p=0.007 CC.p=0.996 DQ.p=0.135 viol=55/1508 (FAIL)
+    SPY α=0.050: Kup.p=0.094 CC.p=0.778 DQ.p=0.068 viol=90/1508 (PASS)
+    QQQ α=0.010: Kup.p=0.000 CC.p=0.668 DQ.p=0.021 viol=31/1508 (FAIL)
+    QQQ α=0.025: Kup.p=0.026 CC.p=0.876 DQ.p=0.017 viol=52/1508 (FAIL)
+    QQQ α=0.050: Kup.p=0.074 CC.p=0.220 DQ.p=0.189 viol=91/1508 (PASS)
+    GLD α=0.010: Kup.p=0.005 CC.p=0.507 DQ.p=0.134 viol=27/1508 (FAIL)
+    GLD α=0.025: Kup.p=0.242 CC.p=0.201 DQ.p=0.044 viol=45/1508 (FAIL)
+    GLD α=0.050: Kup.p=0.513 CC.p=0.214 DQ.p=0.356 viol=81/1508 (PASS)
+    TLT α=0.010: Kup.p=0.330 CC.p=1.000 DQ.p=0.867 viol=19/1508 (PASS)
+    TLT α=0.025: Kup.p=0.486 CC.p=1.000 DQ.p=0.324 viol=42/1508 (PASS)
+    TLT α=0.050: Kup.p=0.868 CC.p=0.328 DQ.p=0.942 viol=74/1508 (PASS)
+    EEM α=0.010: Kup.p=0.034 CC.p=1.000 DQ.p=0.140 viol=24/1508 (FAIL)
+    EEM α=0.025: Kup.p=0.037 CC.p=0.536 DQ.p=0.525 viol=51/1508 (FAIL)
+    EEM α=0.050: Kup.p=0.944 CC.p=0.282 DQ.p=0.416 viol=76/1508 (PASS)
+    BTC α=0.010: Kup.p=0.211 CC.p=0.371 DQ.p=0.372 viol=28/2192 (PASS)
+    BTC α=0.025: Kup.p=0.599 CC.p=0.485 DQ.p=0.418 viol=51/2192 (PASS)
+    BTC α=0.050: Kup.p=0.009 CC.p=0.337 DQ.p=0.037 viol=84/2192 (FAIL)
+    IWM α=0.010: Kup.p=0.148 CC.p=1.000 DQ.p=0.417 viol=21/1508 (PASS)
+    IWM α=0.025: Kup.p=0.185 CC.p=0.625 DQ.p=0.337 viol=46/1508 (PASS)
+    IWM α=0.050: Kup.p=0.257 CC.p=0.517 DQ.p=0.111 viol=66/1508 (PASS)
+
+  Method: StudentT5
+    SPY α=0.010: Kup.p=0.148 CC.p=0.296 DQ.p=0.204 viol=21/1508 (PASS)
+    SPY α=0.025: Kup.p=0.037 CC.p=0.833 DQ.p=0.328 viol=51/1508 (FAIL)
+    SPY α=0.050: Kup.p=0.005 CC.p=0.581 DQ.p=0.011 viol=100/1508 (FAIL)
+    QQQ α=0.010: Kup.p=0.463 CC.p=0.209 DQ.p=0.058 viol=18/1508 (PASS)
+    QQQ α=0.025: Kup.p=0.053 CC.p=0.790 DQ.p=0.042 viol=50/1508 (FAIL)
+    QQQ α=0.050: Kup.p=0.008 CC.p=0.104 DQ.p=0.059 viol=99/1508 (FAIL)
+    GLD α=0.010: Kup.p=0.463 CC.p=1.000 DQ.p=0.924 viol=18/1508 (PASS)
+    GLD α=0.025: Kup.p=0.707 CC.p=0.402 DQ.p=0.304 viol=40/1508 (PASS)
+    GLD α=0.050: Kup.p=0.146 CC.p=0.406 DQ.p=0.389 viol=88/1508 (PASS)
+    TLT α=0.010: Kup.p=0.581 CC.p=1.000 DQ.p=0.892 viol=13/1508 (PASS)
+    TLT α=0.025: Kup.p=0.778 CC.p=1.000 DQ.p=0.853 viol=36/1508 (PASS)
+    TLT α=0.050: Kup.p=0.146 CC.p=0.581 DQ.p=0.444 viol=88/1508 (PASS)
+    EEM α=0.010: Kup.p=0.463 CC.p=1.000 DQ.p=0.225 viol=18/1508 (PASS)
+    EEM α=0.025: Kup.p=0.103 CC.p=0.638 DQ.p=0.685 viol=48/1508 (PASS)
+    EEM α=0.050: Kup.p=0.058 CC.p=0.201 DQ.p=0.046 viol=92/1508 (FAIL)
+    BTC α=0.010: Kup.p=0.521 CC.p=0.156 DQ.p=0.077 viol=19/2192 (PASS)
+    BTC α=0.025: Kup.p=0.419 CC.p=0.426 DQ.p=0.338 viol=49/2192 (PASS)
+    BTC α=0.050: Kup.p=0.076 CC.p=0.291 DQ.p=0.154 viol=92/2192 (PASS)
+    IWM α=0.010: Kup.p=0.581 CC.p=1.000 DQ.p=0.844 viol=13/1508 (PASS)
+    IWM α=0.025: Kup.p=0.392 CC.p=0.508 DQ.p=0.487 viol=43/1508 (PASS)
+    IWM α=0.050: Kup.p=0.266 CC.p=0.573 DQ.p=0.216 viol=85/1508 (PASS)
+
+  Method: SkewedT
+    SPY α=0.010: Kup.p=0.148 CC.p=0.296 DQ.p=0.204 viol=21/1508 (PASS)
+    SPY α=0.025: Kup.p=0.392 CC.p=0.828 DQ.p=0.805 viol=43/1508 (PASS)
+    SPY α=0.050: Kup.p=0.868 CC.p=0.473 DQ.p=0.259 viol=74/1508 (PASS)
+    QQQ α=0.010: Kup.p=0.814 CC.p=0.160 DQ.p=0.193 viol=16/1508 (PASS)
+    QQQ α=0.025: Kup.p=0.778 CC.p=0.279 DQ.p=0.194 viol=36/1508 (PASS)
+    QQQ α=0.050: Kup.p=0.443 CC.p=0.466 DQ.p=0.157 viol=69/1508 (PASS)
+    GLD α=0.010: Kup.p=0.019 CC.p=1.000 DQ.p=0.260 viol=25/1508 (FAIL)
+    GLD α=0.025: Kup.p=0.831 CC.p=0.369 DQ.p=0.292 viol=39/1508 (PASS)
+    GLD α=0.050: Kup.p=0.590 CC.p=0.193 DQ.p=0.408 viol=80/1508 (PASS)
+    TLT α=0.010: Kup.p=0.814 CC.p=1.000 DQ.p=0.947 viol=16/1508 (PASS)
+    TLT α=0.025: Kup.p=0.428 CC.p=1.000 DQ.p=0.781 viol=33/1508 (PASS)
+    TLT α=0.050: Kup.p=0.686 CC.p=0.380 DQ.p=0.948 viol=72/1508 (PASS)
+    EEM α=0.010: Kup.p=0.463 CC.p=1.000 DQ.p=0.225 viol=18/1508 (PASS)
+    EEM α=0.025: Kup.p=0.428 CC.p=0.752 DQ.p=0.874 viol=33/1508 (PASS)
+    EEM α=0.050: Kup.p=0.312 CC.p=0.168 DQ.p=0.186 viol=67/1508 (PASS)
+    BTC α=0.010: Kup.p=0.211 CC.p=0.371 DQ.p=0.372 viol=28/2192 (PASS)
+    BTC α=0.025: Kup.p=0.599 CC.p=0.485 DQ.p=0.418 viol=51/2192 (PASS)
+    BTC α=0.050: Kup.p=0.009 CC.p=0.337 DQ.p=0.037 viol=84/2192 (FAIL)
+    IWM α=0.010: Kup.p=0.777 CC.p=1.000 DQ.p=0.878 viol=14/1508 (PASS)
+    IWM α=0.025: Kup.p=0.652 CC.p=0.837 DQ.p=0.392 viol=35/1508 (PASS)
+    IWM α=0.050: Kup.p=0.079 CC.p=0.348 DQ.p=0.136 viol=61/1508 (PASS)
+
+  Method: FHS
+    SPY α=0.010: Kup.p=0.463 CC.p=0.209 DQ.p=0.044 viol=18/1508 (FAIL)
+    SPY α=0.025: Kup.p=0.778 CC.p=0.880 DQ.p=0.688 viol=36/1508 (PASS)
+    SPY α=0.050: Kup.p=0.374 CC.p=0.497 DQ.p=0.166 viol=68/1508 (PASS)
+    QQQ α=0.010: Kup.p=0.330 CC.p=0.237 DQ.p=0.044 viol=19/1508 (FAIL)
+    QQQ α=0.025: Kup.p=0.908 CC.p=0.308 DQ.p=0.048 viol=37/1508 (FAIL)
+    QQQ α=0.050: Kup.p=0.374 CC.p=0.497 DQ.p=0.146 viol=68/1508 (PASS)
+    GLD α=0.010: Kup.p=0.984 CC.p=1.000 DQ.p=0.155 viol=15/1508 (PASS)
+    GLD α=0.025: Kup.p=0.652 CC.p=0.252 DQ.p=0.148 viol=35/1508 (PASS)
+    GLD α=0.050: Kup.p=0.868 CC.p=0.842 DQ.p=0.499 viol=74/1508 (PASS)
+    TLT α=0.010: Kup.p=0.581 CC.p=1.000 DQ.p=0.964 viol=13/1508 (PASS)
+    TLT α=0.025: Kup.p=0.335 CC.p=1.000 DQ.p=0.605 viol=32/1508 (PASS)
+    TLT α=0.050: Kup.p=0.257 CC.p=0.183 DQ.p=0.518 viol=66/1508 (PASS)
+    EEM α=0.010: Kup.p=0.626 CC.p=0.184 DQ.p=0.090 viol=17/1508 (PASS)
+    EEM α=0.025: Kup.p=0.831 CC.p=0.992 DQ.p=0.429 viol=39/1508 (PASS)
+    EEM α=0.050: Kup.p=0.519 CC.p=0.130 DQ.p=0.062 viol=70/1508 (PASS)
+    BTC α=0.010: Kup.p=0.148 CC.p=0.400 DQ.p=0.009 viol=29/2192 (FAIL)
+    BTC α=0.025: Kup.p=0.107 CC.p=0.972 DQ.p=0.117 viol=67/2192 (PASS)
+    BTC α=0.050: Kup.p=0.416 CC.p=0.074 DQ.p=0.015 viol=118/2192 (FAIL)
+    IWM α=0.010: Kup.p=0.581 CC.p=1.000 DQ.p=0.724 viol=13/1508 (PASS)
+    IWM α=0.025: Kup.p=0.778 CC.p=0.880 DQ.p=0.335 viol=36/1508 (PASS)
+    IWM α=0.050: Kup.p=0.443 CC.p=0.132 DQ.p=0.068 viol=69/1508 (PASS)
+
+  Method: CFVaR
+    SPY α=0.010: Kup.p=0.581 CC.p=1.000 DQ.p=0.912 viol=13/1508 (PASS)
+    SPY α=0.025: Kup.p=0.063 CC.p=0.507 DQ.p=0.044 viol=27/1508 (FAIL)
+    SPY α=0.050: Kup.p=0.519 CC.p=0.882 DQ.p=0.150 viol=70/1508 (PASS)
+    QQQ α=0.010: Kup.p=0.161 CC.p=1.000 DQ.p=0.413 viol=10/1508 (PASS)
+    QQQ α=0.025: Kup.p=0.652 CC.p=0.252 DQ.p=0.140 viol=35/1508 (PASS)
+    QQQ α=0.050: Kup.p=0.600 CC.p=0.407 DQ.p=0.225 viol=71/1508 (PASS)
+    GLD α=0.010: Kup.p=0.408 CC.p=1.000 DQ.p=0.040 viol=12/1508 (FAIL)
+    GLD α=0.025: Kup.p=0.535 CC.p=0.795 DQ.p=0.294 viol=34/1508 (PASS)
+    GLD α=0.050: Kup.p=0.513 CC.p=0.428 DQ.p=0.667 viol=81/1508 (PASS)
+    TLT α=0.010: Kup.p=0.225 CC.p=1.000 DQ.p=0.756 viol=20/1508 (PASS)
+    TLT α=0.025: Kup.p=0.139 CC.p=1.000 DQ.p=0.242 viol=47/1508 (PASS)
+    TLT α=0.050: Kup.p=0.318 CC.p=0.733 DQ.p=0.746 viol=84/1508 (PASS)
+    EEM α=0.010: Kup.p=0.814 CC.p=1.000 DQ.p=0.349 viol=16/1508 (PASS)
+    EEM α=0.025: Kup.p=0.335 CC.p=0.710 DQ.p=0.765 viol=32/1508 (PASS)
+    EEM α=0.050: Kup.p=0.519 CC.p=0.436 DQ.p=0.204 viol=70/1508 (PASS)
+    BTC α=0.010: Kup.p=0.000 CC.p=1.000 DQ.p=0.000 viol=1/2192 (FAIL)
+    BTC α=0.025: Kup.p=0.000 CC.p=0.156 DQ.p=0.000 viol=19/2192 (FAIL)
+    BTC α=0.050: Kup.p=0.723 CC.p=0.043 DQ.p=0.110 viol=106/2192 (FAIL)
+    IWM α=0.010: Kup.p=0.267 CC.p=1.000 DQ.p=0.819 viol=11/1508 (PASS)
+    IWM α=0.025: Kup.p=0.428 CC.p=1.000 DQ.p=0.281 viol=33/1508 (PASS)
+    IWM α=0.050: Kup.p=0.079 CC.p=0.348 DQ.p=0.136 viol=61/1508 (PASS)
+
+[3/4] Computing pass rates and comparing to paper...
+
+  Pass rate = # (asset, alpha) cells passing Trinity / 21
+
+  Method       | Cells_pass |    Rate% |   Paper% |  Paper_n/d |  Match
+  -----------------------------------------------------------------
+  Normal       |   12/21   |    57.1% |    57.1% | 12/21 |  MATCH
+  StudentT5    |   16/21   |    76.2% |    57.1% | 12/21 | DIVERGE
+  SkewedT      |   19/21   |    90.5% |    76.2% | 16/21 | DIVERGE
+  FHS          |   16/21   |    76.2% |    76.2% | 16/21 |  MATCH
+  CFVaR        |   16/21   |    76.2% |    66.7% | 14/21 | DIVERGE
+
+  Targets matched: 2/5
+
+  Per-asset ✓/✗ comparison (script vs paper):
+  Method       |  SPY |  QQQ |  GLD |  TLT |  EEM |  BTC |  IWM
+  Normal       |   ✗✓ |   ✗✗ |   ✗✗ |   ✓✗ |   ✗✓ |   ✗✓ |   ✓✓
+  StudentT5    |   ✗✓ |   ✗✓ |   ✓✗ |   ✓✗ |   ✗✓ |   ✓✓ |   ✓✗
+  SkewedT      |   ✓✓ |   ✓✓ |   ✗✓ |   ✓✗ |   ✓✓ |   ✗✓ |   ✓✓
+  FHS          |   ✗✓ |   ✗✓ |   ✓✓ |   ✓✗ |   ✓✓ |   ✗✓ |   ✓✓
+  CFVaR        |   ✗✓ |   ✓✓ |   ✗✗ |   ✓✗ |   ✓✓ |   ✗✓ |   ✓✓
+  (format: script|paper, ✓✓=both pass, ✓✗=script pass/paper fail, etc.)
+
+[4/4] Recommendations...
+  Normal: (a) MATCHED — 57.1% ≈ 57.1% (rtol≤5%)
+  StudentT5: DIVERGED — script=76.2%, paper=57.1% (Δ=+19.1pp)
+    (c) Significant divergence — investigate OOS period / base model mismatch
+  SkewedT: DIVERGED — script=90.5%, paper=76.2% (Δ=+14.3pp)
+    (c) Significant divergence — investigate OOS period / base model mismatch
+  FHS: (a) MATCHED — 76.2% ≈ 76.2% (rtol≤5%)
+  CFVaR: DIVERGED — script=76.2%, paper=66.7% (Δ=+9.5pp)
+    (c) Significant divergence — investigate OOS period / base model mismatch
