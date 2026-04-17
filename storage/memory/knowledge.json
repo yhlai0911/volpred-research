@@ -27676,5 +27676,16 @@
     ],
     "confidence": 0.92,
     "created_at": "2026-04-18T02:06:04.545195"
+  },
+  {
+    "item_id": "7aafbe2d",
+    "category": "K1100g_d7",
+    "content": "K1100g_d7 cross-market gap\u00b2 replication DIRECTION_CONSISTENT_ALL_BORDERLINE verdict. Per-market DM-HLN t: TAIFEX (d5 anchor) +1.49, SPY +0.66, N225 +2.32. Direction 3/3 positive (+,+,+) geographically consistent. Harvey |t|>3 0/3 pass (N225 closest at +2.32). IS LRT all strong: SPY 113.7 / N225 62.4 / TAIFEX 18.9. OOS QLIKE improvement ranking: TAIFEX +6.62% > N225 +2.33% > SPY +1.38%. Overnight-to-intraday variance ratio: TAIFEX 1.586 >> SPY 0.722 \u2248 N225 0.697 (TAIFEX structurally compresses more info into overnight, consistent with d5 largest QLIKE gain). Paper 3 anchor verdict: NOT TAIFEX-only microstructural (SPY/N225 both positive) NOR complete PASS_UNIVERSAL (all borderline strength). Paper 3 narrative candidate upgrade: \"weak-but-universal overnight gap\u00b2 info carrier\" \u2014 3 geographically distinct markets direction-consistent but OOS strength uniformly borderline. N225 +2.32 close to Harvey hints sample extension or asymmetric-t innovation may push at least one market past threshold (follow-up candidate).",
+    "evidence": [
+      "experiments/k1100g_d7/k1100g_d7_results.json",
+      "commit 0ec96389"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-18T02:07:02.257782"
   }
 ]
