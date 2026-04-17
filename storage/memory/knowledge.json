@@ -27199,5 +27199,17 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:55:41.234097"
+  },
+  {
+    "item_id": "bcc62364",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b knowledge-base \u9a57\u8b49 2026-04-17] K1185 Paper 1 Table 4 VaR config canonical replication. **VERDICT: 3/4 MATCHED, 1 cosmetic data-vintage delta. \u8207 knowledge base \u4e00\u81f4**. Results vs Paper 1 Table 4 violation counts: Normal 30 vs paper 33 (\u0394=-3), Student-t(df=5) 19 vs 18 (\u00b11 match), +Adaptive 14=14 EXACT, +Jump 14=14 EXACT. **Knowledge base \u9a57\u8b49**: 'Student-t(df=5) >> Normal for VaR: reduces violations 21-48%' + 'Fixed df=5 >> jointly estimated df (17 vs 24)' \u5b8c\u5168\u4e00\u81f4. Adaptive threshold analysis \u8207 thinking journal \u5339\u914d. **Methodology clarifications from K1185**: (1) Table 4 base = GARCH(1,1) NOT GJR-GARCH (GJR Normal 34 violations \u4e0d\u5339\u914d); (2) Adaptive = 20-day rolling max sigma (\u9632 sigma \u4e0b\u964d\u592a\u5feb, \u975e sigma floor); (3) Student-t scale correction sqrt((df-2)/df) \u5fc5\u9808 (\u5426\u5247 9 violations \u5b8c\u5168\u932f). **Normal \u0394=-3 \u6839\u56e0**: yfinance 2025-Q4 \u5f8c\u5c0f\u5e45\u8cc7\u6599\u4fee\u8a02. K899 \u5148\u524d\u91cd\u8dd1\u5f97 32, K1185 \u4eca\u5929 30, \u5dee\u7570\u4e00\u81f4 yfinance \u8b8a\u52d5. \u975e paper bug. **\u5efa\u8b70 (b1)**: Table 4 \u8173\u6ce8 'Violation counts computed 2025-Q4; minor yfinance data revisions may produce \u00b13 count differences upon replication.' \u6838\u5fc3\u6545\u4e8b (StudentT/Adaptive/Jump sequence reduction 18\u219214\u219214) \u5b8c\u5168\u6210\u7acb. commit 818fff7c.",
+    "evidence": [
+      "experiments/k1185/k1185.py",
+      "experiments/k1185/k1185_results.json",
+      "experiments/k1185/k1185_vs_paper1_table4_diff.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T18:00:54.846970"
   }
 ]
