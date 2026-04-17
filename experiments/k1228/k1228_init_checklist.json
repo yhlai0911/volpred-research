@@ -1,0 +1,180 @@
+{
+  "experiment_id": "K1228",
+  "title": "BTC GAS-t negative paper repo initialization — structured 24-step checklist",
+  "target_paper_repo": "paper/btc-gas-negative/",
+  "source_draft": {
+    "path": "experiments/k1214/k1214_paper_draft.md",
+    "word_count": 4829,
+    "commit": "91e5ab1d"
+  },
+  "seed": 42,
+  "user_gate": {
+    "status": "PENDING_GO_DECISION",
+    "gate_questions": [
+      {
+        "id": 1,
+        "question": "Target journal final decision: JoEF primary (K1214 default) or pivot to JFEC (Catania 2018 home)?",
+        "default": "JoEF primary"
+      },
+      {
+        "id": 2,
+        "question": "Title wording: keep 'Why GAS-t Fails on Bitcoin: Student-t Innovation Is the Culprit, Regime-Switching Cannot Rescue' or soften 'Fails'/'Culprit'?",
+        "default": "keep as-is"
+      },
+      {
+        "id": 3,
+        "question": "Bibliography expansion scope: 16 entries (K1214) or expand to 25-30 before Phase 2? or defer to Phase 5?",
+        "default": "16 Phase 2, expand Phase 5"
+      },
+      {
+        "id": 4,
+        "question": "Figure PDF generation: fresh from K1129/K1133/K1133b in Phase 3, or soft-link PNG now and defer PDF to Phase 5?",
+        "default": "PNG soft-link Phase 3, PDF Phase 5"
+      },
+      {
+        "id": 5,
+        "question": "Orphan K resolution: keep K1133 P2/P3 preliminary caveat in paper, or drop for cleaner narrative?",
+        "default": "keep caveat"
+      }
+    ]
+  },
+  "paper_metadata": {
+    "working_title": "Why GAS-t Fails on Bitcoin: Student-t Innovation Is the Culprit, Regime-Switching Cannot Rescue",
+    "paper_slug": "btc-gas-negative",
+    "target_journals_ranked": [
+      {"rank": 1, "name": "Journal of Empirical Finance", "publisher": "Elsevier", "if_2024": 2.1},
+      {"rank": 2, "name": "Journal of Financial Econometrics", "publisher": "Oxford University Press"},
+      {"rank": 3, "name": "Journal of Risk", "publisher": "Incisive Media"}
+    ],
+    "initial_status": "draft",
+    "supporting_experiments": ["K1129", "K1133", "K1133b"],
+    "core_numbers_verbatim": {
+      "full_sample_btc_n_oos": 1926,
+      "full_sample_m3_vs_m1_dm_hln_t": -4.578252983820725,
+      "p1_n_oos": 1441,
+      "p1_m3_vs_m1_dm_hln_t": -4.669249494856592,
+      "p1_m4_vs_m3_dm_hln_t": 2.665422847474968,
+      "p1_ms_vs_m3_dm_hln_t": 5.9708709100311745,
+      "p1_ms_vs_m1_dm_hln_t": 0.2753833815410044,
+      "student_t_attribution_pct": 75,
+      "gas_dynamics_attribution_pct": 25
+    }
+  },
+  "self_contained_five_item_compliance": {
+    "item1_data": "data_sources.md + optional data/ cache",
+    "item2_scripts": "scripts/README.md + scripts/reproduce_all.py + top-level reproduce.py",
+    "item3_results": "results/*.csv + figures/*.pdf",
+    "item4_experiments_index": "experiments.md",
+    "item5_readme": "README.md"
+  },
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Skeleton",
+      "estimated_duration_min": 10,
+      "goal": "Folder hierarchy + 5 self-contained stub files so compliance is baseline-green from commit 1.",
+      "steps": [
+        {"step": 1, "action": "mkdir -p paper/btc-gas-negative/{scripts,results,figures,data,review_history}", "done": false},
+        {"step": 2, "action": "Write paper/btc-gas-negative/README.md (title, target journal, status=draft, K-list, 2-line data summary)", "done": false},
+        {"step": 3, "action": "Write paper/btc-gas-negative/experiments.md (K1129 + K1133 + K1133b one-line each)", "done": false},
+        {"step": 4, "action": "Write paper/btc-gas-negative/data_sources.md (yfinance BTC-USD 2015-01-02 to 2026-04-14, n=4121, seed=42, retrieval date)", "done": false},
+        {"step": 5, "action": "Write paper/btc-gas-negative/main.tex skeleton (xeCJK preamble, \\input{body_v1}, \\bibliography{references})", "done": false},
+        {"step": 6, "action": "Write paper/btc-gas-negative/body_v1.tex skeleton (Introduction through Conclusion placeholder headers)", "done": false},
+        {"step": 7, "action": "git commit -m 'paper/btc-gas-negative/ repo skeleton initialized (K1228 guide phase 1)'", "done": false}
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "LaTeX cherry-pick from K1214",
+      "estimated_duration_min": 60,
+      "goal": "Populate body_v1.tex with full content from K1214 draft, numbers verbatim.",
+      "steps": [
+        {"step": 8, "action": "Open experiments/k1214/k1214_paper_draft.md alongside body_v1.tex in editor", "done": false},
+        {"step": 9, "action": "Section-by-section Markdown-to-LaTeX conversion (# -> \\section, tables -> booktabs, $...$ inline math, refs -> \\citep)", "done": false},
+        {"step": 10, "action": "Populate references.bib with 16 starter entries from K1214 (Bollerslev 1986, GJR 1993, CKL 2013, Catania 2018, Klaassen 2002, Patton 2011, HLN 1997, Harvey 2016, Hansen-Lunde 2005, Hwang-Valls-Pereira 2006, Chu et al 2017, Hamilton 1989, Gray 1996, Nelson 1991, Harvey 2013, Blasques-Koopman-Lucas 2015, Diebold-Mariano 1995)", "done": false},
+        {"step": 11, "action": "Optional bibliography expansion (Katsiampa 2017, Baur-Dimpfl 2018, Haas et al 2004, Bauwens et al 2014) per user gate Q3", "done": false},
+        {"step": 12, "action": "Verify canonical numbers verbatim (t=-4.58, t=-4.67, t=+2.67, t=+5.97, t=+0.28; 75%/25% attribution)", "done": false},
+        {"step": 13, "action": "git commit -m 'paper/btc-gas-negative/ body_v1.tex populated from K1214 draft (K1228 guide phase 2)'", "done": false}
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Reproducibility package",
+      "estimated_duration_min": 30,
+      "goal": "Three-way consistency (script <-> data <-> paper) per docs/paper-guide.md.",
+      "steps": [
+        {"step": 14, "action": "Write scripts/reproduce_all.py (wrapper invoking K1129/K1133/K1133b entry scripts)", "done": false},
+        {"step": 15, "action": "Write scripts/README.md (per-Table/Figure mapping to source experiments)", "done": false},
+        {"step": 16, "action": "Export results/table1_full_sample.csv, table2_subperiod_dm.csv, table3_5model_decomposition.csv, table4_ms_gas_rescue.csv from K1129/K1133/K1133b JSONs", "done": false},
+        {"step": 17, "action": "Convert K1129/K1133/K1133b PNG figures to PDF via matplotlib.savefig or soft-link PNG (per user gate Q4)", "done": false},
+        {"step": 18, "action": "Write top-level reproduce.py (runs scripts/reproduce_all.py, diffs vs paper body, writes reproduce_report.json)", "done": false},
+        {"step": 19, "action": "Run uv run python paper/btc-gas-negative/reproduce.py; verify reproduce_report.json all match_bool=true (apply paper-guide.md (a)/(b)/(c) if mismatch)", "done": false},
+        {"step": 20, "action": "git commit -m 'paper/btc-gas-negative/ reproduction package complete (K1228 guide phase 3)'", "done": false}
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Compile + paper-upsert",
+      "estimated_duration_min": 15,
+      "goal": "First PDF build + paper registered in platform for paper-review-cycle to target.",
+      "steps": [
+        {"step": 21, "action": "cd paper/btc-gas-negative && xelatex main.tex && bibtex main && xelatex main.tex && xelatex main.tex (no undefined refs / missing citations)", "done": false},
+        {"step": 22, "action": "uv run volpred ops paper-upsert --paper-id btc-gas-negative --title 'Why GAS-t Fails on Bitcoin' --target-journal 'Journal of Empirical Finance' --status draft", "done": false},
+        {"step": 23, "action": "uv run volpred ops paper-upload-pdf --paper-id btc-gas-negative --pdf paper/btc-gas-negative/main.pdf", "done": false},
+        {"step": 24, "action": "git commit -m 'paper/btc-gas-negative/ initial compile + paper-upsert (K1228 guide phase 4)'", "done": false}
+      ]
+    },
+    {
+      "phase": 5,
+      "name": "Review cycle",
+      "estimated_duration": "1-2 weeks",
+      "goal": "Iterate body_v2/v3 via paper-review-cycle skill until ready_for_submission.",
+      "steps_summary": "Invoke paper-review-cycle; archive rounds in review_history/v{n}/; iterate body_v{n+1}.tex via paper-update; stage transitions per paper-stage-classifier (draft -> review -> ready_for_submission -> submitted).",
+      "not_numbered": true
+    }
+  ],
+  "estimated_total_effort": {
+    "phase_1_to_4": "approximately 2 hours",
+    "phase_5": "1-2 weeks review iterations"
+  },
+  "submission_prep_checklist": [
+    "All 5 self-contained items present (data_sources.md / scripts/README.md / results/ / experiments.md / README.md)",
+    "reproduce_report.json all-green match vs paper body numbers (rerun on clean env)",
+    "data_sources.md lists full API endpoint, retrieval date, license/TOS note (yfinance fallback to Binance/Kraken)",
+    "References bib verified via citation-verifier skill (DOI, authors, year)",
+    "Target journal format checklist (JoEF: abstract <= 200 words, keywords 3-6, AMS/JEL subject class)",
+    "Cover letter draft in cover_letter.tex (novelty, fit, first-submission status)",
+    "Orphan K references in experiments.md resolved or tagged 'unused in final draft'",
+    "paper-stage-classifier returns ready_for_submission",
+    "Main-thread final review of body_v{n}.tex (no agent-written .tex)"
+  ],
+  "risk_register": [
+    {"risk": "yfinance API changes break reproduce.py", "mitigation": "data/ cache snapshot + Binance/Kraken fallback in data_sources.md"},
+    {"risk": "P2/P3 sub-period sample-starved (n=345, n=100)", "mitigation": "PRELIMINARY flag in Table 2; main text anchors on P1 (n=1441)"},
+    {"risk": "Catania (2018) JFEC home journal conflict-of-interest", "mitigation": "JoEF primary; JFEC backup with explicit 'tests and falsifies a JFEC claim' framing"},
+    {"risk": "MS-GAS-t 2-state may be under-specified", "mitigation": "Limitations section 5.6 acknowledges; flag as future work"},
+    {"risk": "Negative-result papers face higher rejection rate", "mitigation": "Target JoEF for receptivity; cover letter emphasizes decomposition methodology as generalizable contribution"}
+  ],
+  "strict_constraints_followed": {
+    "no_tex_output": true,
+    "canonical_numbers_verbatim_k1214": true,
+    "docs_paper_guide_self_contained_compliance": true,
+    "seed_42": true,
+    "worktree_only_k1228_files": true,
+    "shared_state_untouched": true
+  },
+  "cross_references": [
+    "docs/paper-guide.md",
+    "docs/error_log.md",
+    "paper/leverage-direction/ (template reference)",
+    "paper/prg-periodic-garch/",
+    "paper/taiwan-vt/",
+    "paper/vt-trend-following/",
+    "experiments/k1214/k1214_paper_draft.md",
+    "experiments/k1214/k1214_paper_outline.json",
+    ".claude/skills/paper-update/SKILL.md",
+    ".claude/skills/paper-review-cycle/SKILL.md",
+    ".claude/skills/paper-stage-classifier/SKILL.md"
+  ],
+  "created_at": "2026-04-17T19:00:00+00:00"
+}
