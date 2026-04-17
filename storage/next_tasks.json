@@ -1800,16 +1800,17 @@
   {
     "id": "K1192_paper3_bootstrap_MDD_CI_Table6_BLOCKER",
     "title": "K1192 BLOCKER: Paper 3 Table 6 Bootstrap MDD CI [86, 97] 需正確公式",
-    "status": "pending",
+    "status": "resolved_BLOCKER_CONFIRMED_errata_required",
     "priority": 4,
     "created_at": "2026-04-17T17:48:11+08:00",
-    "description": "Paper 3 Table 6 Bootstrap MDD CI [86, 97] 無法從 K898 重現 (K898 定義給 [95, 172] 不同). **BLOCKER**: body_v2.tex Table 6 數字目前無法從任何 K 重現. 需 K1192 驗證正確 bootstrap MDD CI 計算公式 — 可能是 percentile bootstrap over MDD distribution vs block-bootstrap. 若公式不同 → paper errata.",
+    "description": "Paper 3 Table 6 Bootstrap MDD CI [86, 97] 無法從 K898 重現 (K898 定義給 [95, 172] 不同). **BLOCKER**: body_v2.tex Table 6 數字目前無法從任何 K 重現. 需 K1192 驗證正確 bootstrap MDD CI 計算公式 — 可能是 percentile bootstrap over MDD distribution vs block-bootstrap. 若公式不同 → paper errata. [K1192 DONE commit d4dfd7bd: 4 CI definitions 全 diverge 0/5 assets. Paper [86,97] implies hedgedVT **WORSE**; K1192 [93, 182] implies **BETTER**. Direction 與 K1177 D1 一致 — **Paper 3 TSMOM hedge direction 橫跨 Table 3 + Table 6 systematic reverse**.]",
     "tags": [
       "paper-3",
       "bootstrap-mdd",
       "table6-blocker",
       "new-experiment"
-    ]
+    ],
+    "completed_at": "2026-04-17T17:55:56+08:00"
   },
   {
     "id": "K1193_paper3_split_sample",
@@ -1863,6 +1864,22 @@
       "g20-section6",
       "main-thread",
       "errata"
+    ]
+  },
+  {
+    "id": "Paper3_TSMOM_systematic_direction_reversal_ERRATA",
+    "title": "Paper 3 SYSTEMATIC ERRATA: TSMOM hedge direction 橫跨 Table 3 + 6 方向全反 (research integrity)",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:55:56+08:00",
+    "description": "K1177 (Table 3) + K1192 (Table 6) 雙獨立實驗 + K898 daily 三方 converge: **TSMOM hedging IMPROVES MDD (retention 100%+), NOT degrades (paper 寫 93%)**. Paper 3 narrative 'TSMOM hedging only retains 90-97% of VT protection' 方向完全反. **Systematic research-integrity issue** - Table 3 + Table 6 一致錯. **主線程 body edit** (不可避免, JPM/FAJ 前必做): (1) Table 3 + Table 6 數字全更新 K1177/K1192 canonical; (2) Abstract/Conclusion/Section 4.7 narrative 全改: 'TSMOM hedging retains 100%+ of VT protection and further enhances MDD reduction'; (3) Hedge coefficient γ_HM 解釋符號需翻轉; (4) experiments.md 加 K1177/K1192 為 Table 3/6 source; (5) error_log.md 記 pattern.",
+    "tags": [
+      "paper-3",
+      "vt-trend-following",
+      "research-integrity",
+      "systematic-reversal",
+      "main-thread",
+      "critical"
     ]
   }
 ]

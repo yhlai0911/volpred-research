@@ -27187,5 +27187,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T17:54:26.322103"
+  },
+  {
+    "item_id": "1baad004",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1192 Paper 3 Table 6 Bootstrap MDD CI. **VERDICT: (a) BLOCKER CONFIRMED \u2014 4 CI definitions \u5168 diverge, 0/5 assets match any definition**. 4 CI definitions tested: (a) retention fraction, (b) VT MDD reduction, (c) Hedged abs MDD, (d) Hedged vs BH. Paper Table 6 CI [86, 97] vs K1192: (a) [93.0, 182.3] \u2014 too wide + too high; (b/c/d) \u5b8c\u5168\u4e0d\u540c\u7bc4\u570d. **Structural root cause**: K898 daily + K1192 monthly \u90fd\u986f\u793a hedgedVT MDD **BETTER** than VT MDD (retention 95-109%), meaning TSMOM hedge \u610f\u5916 further reduces drawdown. Paper Table 6 [86, 97] implies hedgedVT **WORSE** than VT (retention 90-97%) \u2014 \u6839\u672c underlying result \u4e0d\u540c. **\u8207 K1177 D1 finding \u4e00\u81f4** \u2014 Paper 3 TSMOM hedge direction REVERSED \u6a6b\u8de8\u591a tables (Table 3 retention 93%\u2192132% + Table 6 [86,97]\u2192[93,182]). **Paper 3 submitting-paper systematic research-integrity issue**. \u5efa\u8b70: (a) Paper errata Table 6, (b) K1192 canonical [93, 182] monthly + SPY point 103.7%, (c) forensic orthogonalized TSMOM. \u6838\u5fc3\u4e3b\u5f35 'TSMOM hedging retains 90-97% of VT protection' actual 'TSMOM hedging retains 100%+ and further enhances MDD'. commit d4dfd7bd.",
+    "evidence": [
+      "experiments/k1192/k1192.py",
+      "experiments/k1192/k1192_results.json",
+      "experiments/k1192/k1192_vs_paper3_table6_diff.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:55:41.234097"
   }
 ]
