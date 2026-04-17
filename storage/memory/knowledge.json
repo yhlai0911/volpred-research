@@ -26840,5 +26840,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T15:01:45.028858"
+  },
+  {
+    "item_id": "34793a31",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1129/K1143 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review caught 3 issues pre-run, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1135 Skew-t GAS on negatively skewed commodities (USO/UNG/GLD/SLV, OOS 2020-2026 N=1576 each). **VERDICT: Scenario B \u2014 Only VaR/ES improved, QLIKE NULL**. Commodity skew/kurt full sample: USO -0.578/9.62, UNG +0.103/3.23, GLD -0.310/6.75, SLV -1.064/13.02. IS \u03bb\u0302 static skew-t M2: USO -0.050, UNG +0.073, GLD -0.049, SLV -0.054 (negative for 3 treatment assets). H1 QLIKE DM M2 vs M0: 0/4 PASS (USO t=-2.00 wrong direction, UNG/GLD/SLV NS). H2 VaR Trinity @1% PASS 2/4 M2 vs 1/4 M0; @5% PASS 3/4 M2 vs 1/4 M0. H3 ES Acerbi-Szekely Z1+Z2 @1% **4/4 M2 PASS vs 1/4 M0**; @5% 4/4 vs 2/4. Key rescue: GLD 1% VaR M0 viol=2.16% (Trinity p=0.000) \u2192 M2 1.08% PASS; SLV 1% ES M0 Z1=+3.68 (p=0.000) \u2192 M2 Z1=+0.02 (p=0.982). **Paper 4 Channel 3 final narrative**: GAS family asset-class-specific usage. Equity (K1138/K1143): actively harmful, unrescued. Commodity (K1129/K1135): QLIKE NULL but **skew-t GAS is a concrete tail-risk tool** \u2014 4/4 ES PASS. Contribution framing: 'GAS-skewt is a commodity tail-risk tool, not a vol forecasting tool.' Mechanism: Hansen skew-t left-branch extends tail mass (q_01 \u03bd=6 from \u03bb=0 -2.57 to \u03bb=-0.5 -3.10) while central region near Gaussian \u2014 explains QLIKE (central) NULL + ES (tail) PASS. Gemini 3 pre-run issues all fixed: christoffersen CC joint LR spec, AS Z1 empirical SE, skewt_quantile cache+grid (100x speedup). Density sanity max|PDF diff|=2.8e-17. Script: experiments/k1135/k1135.py, commit 100881ac.",
+    "evidence": [
+      "experiments/k1135/k1135.py",
+      "experiments/k1135/k1135_results.json",
+      "experiments/k1135/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T15:19:38.165866"
   }
 ]
