@@ -1,0 +1,47 @@
+======================================================================
+K1179: Paper 2 Section 6.1 Import Growth Formal Experiment
+======================================================================
+Target: r=0.214, OOS+5.6%, DM p=0.043
+IS: up to 2014-12-31, OOS: 2015-01-01 to 2024-09-30
+
+[1] Loading data...
+  Import YoY (NTD): 513 obs, 1982-01-01 to 2024-09-01
+  TWII daily ret: 7032 obs, 1997-07-03 to 2026-03-17
+  Monthly RV: 345 obs
+
+[2] Partial correlation analysis...
+  Full: 327, IS: 210, OOS: 117
+  Fitting GARCH-MIDAS for tau-based partial r...
+  GARCH-MIDAS tau fit done. partial_r=0.1888
+
+  r candidates (sorted by distance to target):
+    partial_MIDAS_tau_full          : r=+0.1888, p=0.000599, n=327 [dist=0.0252]
+    partial_AR1_RV_full             : r=+0.1258, p=0.023110, n=326 [dist=0.0882]
+    spearman_RV_full                : r=+0.1149, p=0.037784, n=327 [dist=0.0991]
+    pearson_RV_full                 : r=+0.0975, p=0.078244, n=327 [dist=0.1165]
+    partial_AR1_logRV_full          : r=+0.0906, p=0.102499, n=326 [dist=0.1234]
+
+  Best: partial_MIDAS_tau_full → r=0.1888 (target=0.214, diff=0.0252, rel=11.8%)
+
+[3] OOS MSE comparison...
+  AR1_logRV     : OOS=1.34%, DM stat=1.5328, DM p=0.0627 (t:0.0640), n=117
+  AR1_RV_level  : OOS=3.35%, DM stat=1.5791, DM p=0.0572 (t:0.0585), n=117
+
+  Best OOS match: AR1_RV_level → 3.35% (target=5.6%, diff=2.25pp, rel=40.1%)
+  Best DM p match: AR1_RV_level → 0.0572 (target=0.043, diff=0.0142, rel=32.9%)
+
+[4] Match assessment...
+  r:    best=0.1888, target=0.214, diff=11.8% → NO_MATCH
+  OOS%: best=3.35%, target=5.6%, diff=40.1% → NO_MATCH
+  DM p: best=0.0572, target=0.043, diff=32.9% → NO_MATCH
+
+  VERDICT: NO_MATCH (0/3 matched at rtol=5%)
+
+  Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ab2423a2/experiments/k1179/k1179_results.json
+
+======================================================================
+K1179 COMPLETE
+  Verdict: NO_MATCH (0/3 at rtol=5%)
+  r: 0.1888 vs 0.214 | OOS: 3.35% vs 5.6% | DM p: 0.0572 vs 0.043
+  Worst divergence: OOS (40.1% rel)
+======================================================================

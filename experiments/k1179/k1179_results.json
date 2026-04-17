@@ -1,0 +1,112 @@
+{
+  "experiment_id": "k1179",
+  "title": "Paper 2 Section 6.1 Import Growth Formal Experiment",
+  "date": "2026-04-17T18:15:02.575388",
+  "author": "VolPred Research System (Yi-Hao Lai)",
+  "seed": 42,
+  "data_sources": {
+    "import_yoy": "storage/macro/tw_dgbas_trade_m.csv (NTD 進口 上年同期增減率%)",
+    "twii_daily": "storage/macro/yf_TWII.csv",
+    "period_is": "1997-07 to 2014-12-31",
+    "period_oos": "2015-01-01 to 2024-09-30",
+    "n_is_monthly": 210,
+    "n_oos_monthly": 117,
+    "n_total_monthly": 327
+  },
+  "paper_targets": {
+    "r": 0.214,
+    "r_p_value": 0.0007,
+    "oos_improvement_pct": 5.6,
+    "dm_p": 0.043,
+    "source": "knowledge.json G12 + body_v2.tex line 333"
+  },
+  "results": {
+    "r_candidates": {
+      "partial_AR1_RV_full": {
+        "r": 0.12579605088684348,
+        "p": 0.023109867573251182,
+        "n": 326
+      },
+      "partial_AR1_logRV_full": {
+        "r": 0.0905976053030893,
+        "p": 0.10249873903444053,
+        "n": 326
+      },
+      "pearson_RV_full": {
+        "r": 0.0975229700043693,
+        "p": 0.0782437784091697,
+        "n": 327
+      },
+      "spearman_RV_full": {
+        "r": 0.11492814802876287,
+        "p": 0.03778393269416315,
+        "n": 327
+      },
+      "partial_MIDAS_tau_full": {
+        "r": 0.1888001007992754,
+        "p": 0.0005992791547006594,
+        "n": 327
+      }
+    },
+    "r_best": {
+      "method": "partial_MIDAS_tau_full",
+      "value": 0.1888001007992754,
+      "p_value": 0.0005992791547006594
+    },
+    "oos_specs": {
+      "AR1_logRV": {
+        "n_oos": 117.0,
+        "mse_base": 0.16133728885651558,
+        "mse_aug": 0.15916869094010516,
+        "oos_improvement_pct": 1.344139307025944,
+        "dm_stat": 1.5328179574462615,
+        "dm_p_normal": 0.06266035740169518,
+        "dm_p_t": 0.06402177260168007
+      },
+      "AR1_RV_level": {
+        "n_oos": 117.0,
+        "mse_base": 0.10521487310692777,
+        "mse_aug": 0.10168539462474355,
+        "oos_improvement_pct": 3.354543305486181,
+        "dm_stat": 1.5791404967371585,
+        "dm_p_normal": 0.05715191733137681,
+        "dm_p_t": 0.05851346585949613
+      }
+    },
+    "oos_best": {
+      "spec": "AR1_RV_level",
+      "oos_improvement_pct": 3.354543305486181
+    },
+    "dmp_best": {
+      "spec": "AR1_RV_level",
+      "dm_p": 0.05715191733137681
+    }
+  },
+  "match_assessment": {
+    "rtol": 0.05,
+    "r_matched": false,
+    "r_best_value": 0.1888001007992754,
+    "r_best_method": "partial_MIDAS_tau_full",
+    "r_rel_diff_pct": 11.7756538321143,
+    "oos_matched": false,
+    "oos_best_value": 3.354543305486181,
+    "oos_best_spec": "AR1_RV_level",
+    "oos_rel_diff_pct": 40.097440973461055,
+    "dmp_matched": false,
+    "dmp_best_value": 0.05715191733137681,
+    "dmp_best_spec": "AR1_RV_level",
+    "dmp_rel_diff_pct": 32.91143565436469,
+    "n_matched": 0,
+    "verdict": "NO_MATCH"
+  },
+  "divergence_summary": {
+    "max_divergence_stat": "OOS",
+    "max_divergence_rel_pct": 40.097440973461055,
+    "r_abs_diff": 0.0251998992007246,
+    "r_rel_diff_pct": 11.7756538321143,
+    "oos_abs_diff_pp": 2.245456694513819,
+    "oos_rel_diff_pct": 40.097440973461055,
+    "dmp_abs_diff": 0.014151917331376815,
+    "dmp_rel_diff_pct": 32.91143565436469
+  }
+}
