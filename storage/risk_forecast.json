@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-04-14T08:05:11.031425",
+  "generated_at": "2026-04-17T08:04:43.119793",
   "model": "GJR-GARCH(1,1) + Skewed-t(MLE) + CF-VaR + Student-t(df=5)",
   "assets": {
     "SPY": {
       "name": "S&P 500 ETF",
-      "price": 686.1,
-      "last_date": "2026-04-13",
-      "sigma_daily_pct": 0.89,
-      "sigma_ann_pct": 14.2,
+      "price": 701.66,
+      "last_date": "2026-04-16",
+      "sigma_daily_pct": 0.79,
+      "sigma_ann_pct": 12.6,
       "regime": {
         "level": "normal",
         "label": "正常",
@@ -15,75 +15,63 @@
       },
       "forecasts": {
         "daily": {
-          "var_pct": 2.33,
-          "es_pct": 3.09,
-          "var_dollar": 23320.0,
-          "es_dollar": 30857.0,
-          "cf_var_pct": 2.98,
-          "cf_es_pct": 3.94,
-          "cf_var_dollar": 29754.0,
-          "cf_es_dollar": 39370.0,
-          "skewt_var_pct": 2.57,
-          "skewt_es_pct": 3.4,
-          "skewt_var_dollar": 25684.0,
-          "skewt_es_dollar": 33984.0
+          "var_pct": 2.06,
+          "es_pct": 2.73,
+          "var_dollar": 20626.0,
+          "es_dollar": 27292.0,
+          "cf_var_pct": 2.63,
+          "cf_es_pct": 3.48,
+          "cf_var_dollar": 26324.0,
+          "cf_es_dollar": 34831.0,
+          "skewt_var_pct": 2.27,
+          "skewt_es_pct": 3.01,
+          "skewt_var_dollar": 22713.0,
+          "skewt_es_dollar": 30054.0
         },
         "weekly": {
-          "var_pct": 5.32,
-          "es_pct": 7.04,
-          "var_dollar": 53197.0,
-          "es_dollar": 70389.0,
-          "cf_var_pct": 6.79,
-          "cf_es_pct": 8.98,
-          "cf_var_dollar": 67872.0,
-          "cf_es_dollar": 89807.0,
-          "skewt_var_pct": 5.86,
-          "skewt_es_pct": 7.75,
-          "skewt_var_dollar": 58588.0,
-          "skewt_es_dollar": 77523.0
+          "var_pct": 4.77,
+          "es_pct": 6.31,
+          "var_dollar": 47700.0,
+          "es_dollar": 63116.0,
+          "cf_var_pct": 6.09,
+          "cf_es_pct": 8.06,
+          "cf_var_dollar": 60877.0,
+          "cf_es_dollar": 80551.0,
+          "skewt_var_pct": 5.25,
+          "skewt_es_pct": 6.95,
+          "skewt_var_dollar": 52528.0,
+          "skewt_es_dollar": 69504.0
         },
         "monthly": {
-          "var_pct": 11.88,
-          "es_pct": 15.72,
-          "var_dollar": 118835.0,
-          "es_dollar": 157241.0,
-          "cf_var_pct": 15.16,
-          "cf_es_pct": 20.06,
-          "cf_var_dollar": 151618.0,
-          "cf_es_dollar": 200619.0,
-          "skewt_var_pct": 13.09,
-          "skewt_es_pct": 17.32,
-          "skewt_var_dollar": 130879.0,
-          "skewt_es_dollar": 173177.0
+          "var_pct": 11.07,
+          "es_pct": 14.64,
+          "var_dollar": 110659.0,
+          "es_dollar": 146423.0,
+          "cf_var_pct": 14.12,
+          "cf_es_pct": 18.69,
+          "cf_var_dollar": 141228.0,
+          "cf_es_dollar": 186871.0,
+          "skewt_var_pct": 12.19,
+          "skewt_es_pct": 16.12,
+          "skewt_var_dollar": 121858.0,
+          "skewt_es_dollar": 161241.0
         }
       },
       "residual_stats": {
-        "skewness": -0.8142,
-        "excess_kurtosis": 2.7801,
-        "cf_1pct_quantile": -3.3255,
-        "skewt_eta": 7.11,
-        "skewt_lambda": -0.2358
+        "skewness": -0.8159,
+        "excess_kurtosis": 2.7833,
+        "cf_1pct_quantile": -3.3265,
+        "skewt_eta": 7.16,
+        "skewt_lambda": -0.2372
       },
       "basel_zone": {
         "year": 2026,
         "violations": 1,
-        "days": 69,
+        "days": 72,
         "zone": "GREEN",
         "rate": 1.4
       },
       "sigma_history": [
-        {
-          "date": "2026-01-15",
-          "sigma_ann": 10.2
-        },
-        {
-          "date": "2026-01-16",
-          "sigma_ann": 9.9
-        },
-        {
-          "date": "2026-01-20",
-          "sigma_ann": 9.6
-        },
         {
           "date": "2026-01-21",
           "sigma_ann": 18.6
@@ -311,17 +299,29 @@
         {
           "date": "2026-04-13",
           "sigma_ann": 14.8
+        },
+        {
+          "date": "2026-04-14",
+          "sigma_ann": 14.2
+        },
+        {
+          "date": "2026-04-15",
+          "sigma_ann": 13.8
+        },
+        {
+          "date": "2026-04-16",
+          "sigma_ann": 13.2
         }
       ],
-      "sigma_vs_5y_avg": -16.5,
+      "sigma_vs_5y_avg": -26.1,
       "hist_avg_sigma_ann": 17.0,
       "alerts": [],
       "model": "GJR-GARCH(1,1) w=2000",
       "params": {
-        "omega": 0.042181,
-        "alpha[1]": 0.023724,
-        "gamma[1]": 0.201124,
-        "beta[1]": 0.844035
+        "omega": 0.042376,
+        "alpha[1]": 0.023629,
+        "gamma[1]": 0.202135,
+        "beta[1]": 0.843576
       },
       "model_note": "GJR-GARCH 是 MCS superior (DM p<0.001)，γ=0.20 顯著不對稱",
       "articles": [
@@ -333,10 +333,10 @@
     },
     "QQQ": {
       "name": "Nasdaq 100 ETF",
-      "price": 617.39,
-      "last_date": "2026-04-13",
-      "sigma_daily_pct": 1.15,
-      "sigma_ann_pct": 18.2,
+      "price": 640.47,
+      "last_date": "2026-04-16",
+      "sigma_daily_pct": 1.05,
+      "sigma_ann_pct": 16.7,
       "regime": {
         "level": "normal",
         "label": "正常",
@@ -344,75 +344,63 @@
       },
       "forecasts": {
         "daily": {
-          "var_pct": 2.99,
-          "es_pct": 3.96,
-          "var_dollar": 29920.0,
-          "es_dollar": 39589.0,
-          "cf_var_pct": 3.48,
-          "cf_es_pct": 4.6,
-          "cf_var_dollar": 34801.0,
-          "cf_es_dollar": 46049.0,
-          "skewt_var_pct": 3.24,
-          "skewt_es_pct": 4.28,
-          "skewt_var_dollar": 32377.0,
-          "skewt_es_dollar": 42841.0
+          "var_pct": 2.74,
+          "es_pct": 3.63,
+          "var_dollar": 27414.0,
+          "es_dollar": 36274.0,
+          "cf_var_pct": 3.19,
+          "cf_es_pct": 4.22,
+          "cf_var_dollar": 31879.0,
+          "cf_es_dollar": 42182.0,
+          "skewt_var_pct": 2.97,
+          "skewt_es_pct": 3.93,
+          "skewt_var_dollar": 29667.0,
+          "skewt_es_dollar": 39255.0
         },
         "weekly": {
-          "var_pct": 6.8,
-          "es_pct": 8.99,
-          "var_dollar": 67963.0,
-          "es_dollar": 89928.0,
-          "cf_var_pct": 7.91,
-          "cf_es_pct": 10.46,
-          "cf_var_dollar": 79052.0,
-          "cf_es_dollar": 104600.0,
-          "skewt_var_pct": 7.35,
-          "skewt_es_pct": 9.73,
-          "skewt_var_dollar": 73546.0,
-          "skewt_es_dollar": 97314.0
+          "var_pct": 6.28,
+          "es_pct": 8.31,
+          "var_dollar": 62772.0,
+          "es_dollar": 83059.0,
+          "cf_var_pct": 7.3,
+          "cf_es_pct": 9.66,
+          "cf_var_dollar": 72996.0,
+          "cf_es_dollar": 96587.0,
+          "skewt_var_pct": 6.79,
+          "skewt_es_pct": 8.99,
+          "skewt_var_dollar": 67929.0,
+          "skewt_es_dollar": 89883.0
         },
         "monthly": {
-          "var_pct": 15.01,
-          "es_pct": 19.86,
-          "var_dollar": 150098.0,
-          "es_dollar": 198608.0,
-          "cf_var_pct": 17.46,
-          "cf_es_pct": 23.1,
-          "cf_var_dollar": 174587.0,
-          "cf_es_dollar": 231011.0,
-          "skewt_var_pct": 16.24,
-          "skewt_es_pct": 21.49,
-          "skewt_var_dollar": 162426.0,
-          "skewt_es_dollar": 214920.0
+          "var_pct": 14.2,
+          "es_pct": 18.79,
+          "var_dollar": 141972.0,
+          "es_dollar": 187856.0,
+          "cf_var_pct": 16.51,
+          "cf_es_pct": 21.85,
+          "cf_var_dollar": 165095.0,
+          "cf_es_dollar": 218452.0,
+          "skewt_var_pct": 15.36,
+          "skewt_es_pct": 20.33,
+          "skewt_var_dollar": 153637.0,
+          "skewt_es_dollar": 203290.0
         }
       },
       "residual_stats": {
-        "skewness": -0.6276,
-        "excess_kurtosis": 1.6773,
-        "cf_1pct_quantile": -3.0317,
-        "skewt_eta": 8.21,
-        "skewt_lambda": -0.2291
+        "skewness": -0.6286,
+        "excess_kurtosis": 1.673,
+        "cf_1pct_quantile": -3.031,
+        "skewt_eta": 8.24,
+        "skewt_lambda": -0.2298
       },
       "basel_zone": {
         "year": 2026,
         "violations": 0,
-        "days": 69,
+        "days": 72,
         "zone": "GREEN",
         "rate": 0.0
       },
       "sigma_history": [
-        {
-          "date": "2026-01-15",
-          "sigma_ann": 15.2
-        },
-        {
-          "date": "2026-01-16",
-          "sigma_ann": 14.7
-        },
-        {
-          "date": "2026-01-20",
-          "sigma_ann": 14.2
-        },
         {
           "date": "2026-01-21",
           "sigma_ann": 20.3
@@ -640,17 +628,29 @@
         {
           "date": "2026-04-13",
           "sigma_ann": 18.9
+        },
+        {
+          "date": "2026-04-14",
+          "sigma_ann": 18.2
+        },
+        {
+          "date": "2026-04-15",
+          "sigma_ann": 17.8
+        },
+        {
+          "date": "2026-04-16",
+          "sigma_ann": 17.4
         }
       ],
-      "sigma_vs_5y_avg": -18.8,
+      "sigma_vs_5y_avg": -25.6,
       "hist_avg_sigma_ann": 22.4,
       "alerts": [],
       "model": "GJR-GARCH(1,1) w=2000",
       "params": {
-        "omega": 0.059021,
-        "alpha[1]": 0.013545,
-        "gamma[1]": 0.163371,
-        "beta[1]": 0.876416
+        "omega": 0.058801,
+        "alpha[1]": 0.013816,
+        "gamma[1]": 0.162861,
+        "beta[1]": 0.876587
       },
       "model_note": "高 γ 資產（γ>0.10），GJR 優於 GARCH",
       "articles": [
@@ -662,10 +662,10 @@
     },
     "GLD": {
       "name": "Gold ETF",
-      "price": 435.36,
-      "last_date": "2026-04-13",
-      "sigma_daily_pct": 1.68,
-      "sigma_ann_pct": 26.7,
+      "price": 440.08,
+      "last_date": "2026-04-16",
+      "sigma_daily_pct": 1.6,
+      "sigma_ann_pct": 25.4,
       "regime": {
         "level": "high",
         "label": "高波動",
@@ -673,75 +673,63 @@
       },
       "forecasts": {
         "daily": {
-          "var_pct": 4.38,
-          "es_pct": 5.79,
-          "var_dollar": 43783.0,
-          "es_dollar": 57933.0,
-          "cf_var_pct": 4.93,
-          "cf_es_pct": 6.52,
-          "cf_var_dollar": 49252.0,
-          "cf_es_dollar": 65169.0,
-          "skewt_var_pct": 4.63,
-          "skewt_es_pct": 6.13,
-          "skewt_var_dollar": 46328.0,
-          "skewt_es_dollar": 61300.0
+          "var_pct": 4.18,
+          "es_pct": 5.53,
+          "var_dollar": 41784.0,
+          "es_dollar": 55288.0,
+          "cf_var_pct": 4.71,
+          "cf_es_pct": 6.23,
+          "cf_var_dollar": 47064.0,
+          "cf_es_dollar": 62275.0,
+          "skewt_var_pct": 4.42,
+          "skewt_es_pct": 5.85,
+          "skewt_var_dollar": 44240.0,
+          "skewt_es_dollar": 58538.0
         },
         "weekly": {
-          "var_pct": 9.65,
-          "es_pct": 12.77,
-          "var_dollar": 96513.0,
-          "es_dollar": 127705.0,
-          "cf_var_pct": 10.86,
-          "cf_es_pct": 14.37,
-          "cf_var_dollar": 108568.0,
-          "cf_es_dollar": 143656.0,
-          "skewt_var_pct": 10.21,
-          "skewt_es_pct": 13.51,
-          "skewt_var_dollar": 102122.0,
-          "skewt_es_dollar": 135126.0
+          "var_pct": 9.22,
+          "es_pct": 12.19,
+          "var_dollar": 92152.0,
+          "es_dollar": 121935.0,
+          "cf_var_pct": 10.38,
+          "cf_es_pct": 13.73,
+          "cf_var_dollar": 103798.0,
+          "cf_es_dollar": 137344.0,
+          "skewt_var_pct": 9.76,
+          "skewt_es_pct": 12.91,
+          "skewt_var_dollar": 97569.0,
+          "skewt_es_dollar": 129102.0
         },
         "monthly": {
-          "var_pct": 19.16,
-          "es_pct": 25.35,
-          "var_dollar": 191559.0,
-          "es_dollar": 253468.0,
-          "cf_var_pct": 21.55,
-          "cf_es_pct": 28.51,
-          "cf_var_dollar": 215485.0,
-          "cf_es_dollar": 285127.0,
-          "skewt_var_pct": 20.27,
-          "skewt_es_pct": 26.82,
-          "skewt_var_dollar": 202691.0,
-          "skewt_es_dollar": 268197.0
+          "var_pct": 18.33,
+          "es_pct": 24.26,
+          "var_dollar": 183328.0,
+          "es_dollar": 242577.0,
+          "cf_var_pct": 20.65,
+          "cf_es_pct": 27.32,
+          "cf_var_dollar": 206496.0,
+          "cf_es_dollar": 273233.0,
+          "skewt_var_pct": 19.41,
+          "skewt_es_pct": 25.68,
+          "skewt_var_dollar": 194104.0,
+          "skewt_es_dollar": 256835.0
         }
       },
       "residual_stats": {
-        "skewness": -0.356,
-        "excess_kurtosis": 1.675,
-        "cf_1pct_quantile": -2.932,
-        "skewt_eta": 5.43,
-        "skewt_lambda": -0.0995
+        "skewness": -0.3586,
+        "excess_kurtosis": 1.6862,
+        "cf_1pct_quantile": -2.9359,
+        "skewt_eta": 5.37,
+        "skewt_lambda": -0.0986
       },
       "basel_zone": {
         "year": 2026,
         "violations": 2,
-        "days": 69,
+        "days": 72,
         "zone": "GREEN",
-        "rate": 2.9
+        "rate": 2.8
       },
       "sigma_history": [
-        {
-          "date": "2026-01-15",
-          "sigma_ann": 20.6
-        },
-        {
-          "date": "2026-01-16",
-          "sigma_ann": 19.6
-        },
-        {
-          "date": "2026-01-20",
-          "sigma_ann": 18.7
-        },
         {
           "date": "2026-01-21",
           "sigma_ann": 27.2
@@ -969,23 +957,35 @@
         {
           "date": "2026-04-13",
           "sigma_ann": 28.2
+        },
+        {
+          "date": "2026-04-14",
+          "sigma_ann": 26.7
+        },
+        {
+          "date": "2026-04-15",
+          "sigma_ann": 28.3
+        },
+        {
+          "date": "2026-04-16",
+          "sigma_ann": 27.0
         }
       ],
-      "sigma_vs_5y_avg": 50.2,
+      "sigma_vs_5y_avg": 43.2,
       "hist_avg_sigma_ann": 17.8,
       "alerts": [
         {
           "type": "regime",
-          "message": "當前處於高波動環境（26.7%）",
+          "message": "當前處於高波動環境（25.4%）",
           "severity": "medium"
         }
       ],
       "model": "GJR-GARCH(1,1) w=2000",
       "params": {
-        "omega": 0.026551,
-        "alpha[1]": 0.13213,
-        "gamma[1]": -0.084409,
-        "beta[1]": 0.886239
+        "omega": 0.027128,
+        "alpha[1]": 0.132144,
+        "gamma[1]": -0.083991,
+        "beta[1]": 0.885359
       },
       "model_note": "γ<0.10（反向槓桿），GARCH 與 GJR 無顯著差異",
       "articles": [
@@ -997,10 +997,10 @@
     },
     "TLT": {
       "name": "20+ Year Treasury ETF",
-      "price": 86.75,
-      "last_date": "2026-04-13",
-      "sigma_daily_pct": 0.68,
-      "sigma_ann_pct": 10.8,
+      "price": 86.28,
+      "last_date": "2026-04-16",
+      "sigma_daily_pct": 0.67,
+      "sigma_ann_pct": 10.7,
       "regime": {
         "level": "low",
         "label": "低波動",
@@ -1008,75 +1008,63 @@
       },
       "forecasts": {
         "daily": {
-          "var_pct": 1.78,
-          "es_pct": 2.36,
-          "var_dollar": 17803.0,
-          "es_dollar": 23556.0,
-          "cf_var_pct": 1.69,
-          "cf_es_pct": 2.23,
-          "cf_var_dollar": 16858.0,
-          "cf_es_dollar": 22306.0,
-          "skewt_var_pct": 1.69,
-          "skewt_es_pct": 2.24,
-          "skewt_var_dollar": 16911.0,
-          "skewt_es_dollar": 22376.0
+          "var_pct": 1.75,
+          "es_pct": 2.32,
+          "var_dollar": 17531.0,
+          "es_dollar": 23197.0,
+          "cf_var_pct": 1.66,
+          "cf_es_pct": 2.2,
+          "cf_var_dollar": 16596.0,
+          "cf_es_dollar": 21960.0,
+          "skewt_var_pct": 1.66,
+          "skewt_es_pct": 2.2,
+          "skewt_var_dollar": 16647.0,
+          "skewt_es_dollar": 22027.0
         },
         "weekly": {
-          "var_pct": 4.06,
-          "es_pct": 5.38,
-          "var_dollar": 40622.0,
-          "es_dollar": 53751.0,
-          "cf_var_pct": 3.85,
-          "cf_es_pct": 5.09,
-          "cf_var_dollar": 38466.0,
-          "cf_es_dollar": 50898.0,
-          "skewt_var_pct": 3.86,
-          "skewt_es_pct": 5.11,
-          "skewt_var_dollar": 38588.0,
-          "skewt_es_dollar": 51059.0
+          "var_pct": 4.01,
+          "es_pct": 5.3,
+          "var_dollar": 40061.0,
+          "es_dollar": 53008.0,
+          "cf_var_pct": 3.79,
+          "cf_es_pct": 5.02,
+          "cf_var_dollar": 37925.0,
+          "cf_es_dollar": 50181.0,
+          "skewt_var_pct": 3.8,
+          "skewt_es_pct": 5.03,
+          "skewt_var_dollar": 38040.0,
+          "skewt_es_dollar": 50334.0
         },
         "monthly": {
-          "var_pct": 9.13,
-          "es_pct": 12.08,
-          "var_dollar": 91293.0,
-          "es_dollar": 120798.0,
-          "cf_var_pct": 8.64,
-          "cf_es_pct": 11.44,
-          "cf_var_dollar": 86448.0,
-          "cf_es_dollar": 114386.0,
-          "skewt_var_pct": 8.67,
-          "skewt_es_pct": 11.47,
-          "skewt_var_dollar": 86720.0,
-          "skewt_es_dollar": 114747.0
+          "var_pct": 9.04,
+          "es_pct": 11.96,
+          "var_dollar": 90424.0,
+          "es_dollar": 119648.0,
+          "cf_var_pct": 8.56,
+          "cf_es_pct": 11.33,
+          "cf_var_dollar": 85602.0,
+          "cf_es_dollar": 113267.0,
+          "skewt_var_pct": 8.59,
+          "skewt_es_pct": 11.36,
+          "skewt_var_dollar": 85863.0,
+          "skewt_es_dollar": 113612.0
         }
       },
       "residual_stats": {
-        "skewness": -0.049,
-        "excess_kurtosis": 0.4561,
-        "cf_1pct_quantile": -2.4681,
-        "skewt_eta": 15.77,
-        "skewt_lambda": -0.0448
+        "skewness": -0.048,
+        "excess_kurtosis": 0.4562,
+        "cf_1pct_quantile": -2.4675,
+        "skewt_eta": 15.76,
+        "skewt_lambda": -0.044
       },
       "basel_zone": {
         "year": 2026,
         "violations": 1,
-        "days": 69,
+        "days": 72,
         "zone": "GREEN",
         "rate": 1.4
       },
       "sigma_history": [
-        {
-          "date": "2026-01-15",
-          "sigma_ann": 9.5
-        },
-        {
-          "date": "2026-01-16",
-          "sigma_ann": 9.2
-        },
-        {
-          "date": "2026-01-20",
-          "sigma_ann": 9.3
-        },
         {
           "date": "2026-01-21",
           "sigma_ann": 10.9
@@ -1304,17 +1292,29 @@
         {
           "date": "2026-04-13",
           "sigma_ann": 11.1
+        },
+        {
+          "date": "2026-04-14",
+          "sigma_ann": 10.8
+        },
+        {
+          "date": "2026-04-15",
+          "sigma_ann": 10.8
+        },
+        {
+          "date": "2026-04-16",
+          "sigma_ann": 10.6
         }
       ],
-      "sigma_vs_5y_avg": -31.4,
+      "sigma_vs_5y_avg": -32.4,
       "hist_avg_sigma_ann": 15.8,
       "alerts": [],
       "model": "GJR-GARCH(1,1) w=2000",
       "params": {
-        "omega": 0.018823,
-        "alpha[1]": 0.088456,
-        "gamma[1]": -0.007827,
-        "beta[1]": 0.89619
+        "omega": 0.019064,
+        "alpha[1]": 0.089124,
+        "gamma[1]": -0.008028,
+        "beta[1]": 0.89537
       },
       "model_note": "γ<0.10，債券波動率受利率政策驅動",
       "articles": [
@@ -1326,10 +1326,10 @@
     },
     "0050.TW": {
       "name": "元大台灣50 ETF",
-      "price": 80.6,
-      "last_date": "2026-04-13",
-      "sigma_daily_pct": 1.56,
-      "sigma_ann_pct": 24.7,
+      "price": 84.15,
+      "last_date": "2026-04-15",
+      "sigma_daily_pct": 1.51,
+      "sigma_ann_pct": 23.9,
       "regime": {
         "level": "high",
         "label": "高波動",
@@ -1337,71 +1337,63 @@
       },
       "forecasts": {
         "daily": {
-          "var_pct": 4.06,
-          "es_pct": 5.38,
-          "var_dollar": 40623.0,
-          "es_dollar": 53751.0,
-          "cf_var_pct": 5.23,
-          "cf_es_pct": 6.92,
-          "cf_var_dollar": 52285.0,
-          "cf_es_dollar": 69183.0,
-          "skewt_var_pct": 4.27,
-          "skewt_es_pct": 5.66,
-          "skewt_var_dollar": 42749.0,
-          "skewt_es_dollar": 56565.0
+          "var_pct": 3.93,
+          "es_pct": 5.2,
+          "var_dollar": 39294.0,
+          "es_dollar": 51993.0,
+          "cf_var_pct": 5.06,
+          "cf_es_pct": 6.7,
+          "cf_var_dollar": 50598.0,
+          "cf_es_dollar": 66951.0,
+          "skewt_var_pct": 4.14,
+          "skewt_es_pct": 5.48,
+          "skewt_var_dollar": 41379.0,
+          "skewt_es_dollar": 54752.0
         },
         "weekly": {
-          "var_pct": 8.89,
-          "es_pct": 11.76,
-          "var_dollar": 88899.0,
-          "es_dollar": 117630.0,
-          "cf_var_pct": 11.44,
-          "cf_es_pct": 15.14,
-          "cf_var_dollar": 114420.0,
-          "cf_es_dollar": 151399.0,
-          "skewt_var_pct": 9.36,
-          "skewt_es_pct": 12.38,
-          "skewt_var_dollar": 93553.0,
-          "skewt_es_dollar": 123788.0
+          "var_pct": 8.64,
+          "es_pct": 11.43,
+          "var_dollar": 86416.0,
+          "es_dollar": 114345.0,
+          "cf_var_pct": 11.13,
+          "cf_es_pct": 14.72,
+          "cf_var_dollar": 111276.0,
+          "cf_es_dollar": 147239.0,
+          "skewt_var_pct": 9.1,
+          "skewt_es_pct": 12.04,
+          "skewt_var_dollar": 91001.0,
+          "skewt_es_dollar": 120412.0
         },
         "monthly": {
-          "var_pct": 17.59,
-          "es_pct": 23.27,
-          "var_dollar": 175890.0,
-          "es_dollar": 232735.0,
-          "cf_var_pct": 22.64,
-          "cf_es_pct": 29.95,
-          "cf_var_dollar": 226385.0,
-          "cf_es_dollar": 299550.0,
-          "skewt_var_pct": 18.51,
-          "skewt_es_pct": 24.49,
-          "skewt_var_dollar": 185098.0,
-          "skewt_es_dollar": 244919.0
+          "var_pct": 17.33,
+          "es_pct": 22.93,
+          "var_dollar": 173277.0,
+          "es_dollar": 229278.0,
+          "cf_var_pct": 22.31,
+          "cf_es_pct": 29.52,
+          "cf_var_dollar": 223126.0,
+          "cf_es_dollar": 295237.0,
+          "skewt_var_pct": 18.25,
+          "skewt_es_pct": 24.14,
+          "skewt_var_dollar": 182471.0,
+          "skewt_es_dollar": 241444.0
         }
       },
       "residual_stats": {
-        "skewness": -0.4181,
-        "excess_kurtosis": 3.3653,
-        "cf_1pct_quantile": -3.3547,
-        "skewt_eta": 4.74,
-        "skewt_lambda": -0.0679
+        "skewness": -0.4214,
+        "excess_kurtosis": 3.3659,
+        "cf_1pct_quantile": -3.3563,
+        "skewt_eta": 4.76,
+        "skewt_lambda": -0.0696
       },
       "basel_zone": {
         "year": 2026,
         "violations": 1,
-        "days": 62,
+        "days": 64,
         "zone": "GREEN",
         "rate": 1.6
       },
       "sigma_history": [
-        {
-          "date": "2026-01-06",
-          "sigma_ann": 20.0
-        },
-        {
-          "date": "2026-01-07",
-          "sigma_ann": 19.4
-        },
         {
           "date": "2026-01-08",
           "sigma_ann": 19.1
@@ -1633,23 +1625,31 @@
         {
           "date": "2026-04-13",
           "sigma_ann": 26.9
+        },
+        {
+          "date": "2026-04-14",
+          "sigma_ann": 24.7
+        },
+        {
+          "date": "2026-04-15",
+          "sigma_ann": 25.5
         }
       ],
-      "sigma_vs_5y_avg": 12.7,
+      "sigma_vs_5y_avg": 8.9,
       "hist_avg_sigma_ann": 22.0,
       "alerts": [
         {
           "type": "regime",
-          "message": "當前處於高波動環境（24.7%）",
+          "message": "當前處於高波動環境（23.9%）",
           "severity": "medium"
         }
       ],
       "model": "GJR-GARCH(1,1) w=2000",
       "params": {
-        "omega": 0.144119,
-        "alpha[1]": 0.045485,
-        "gamma[1]": 0.147649,
-        "beta[1]": 0.798462
+        "omega": 0.13957,
+        "alpha[1]": 0.046632,
+        "gamma[1]": 0.14401,
+        "beta[1]": 0.802264
       },
       "model_note": "台灣波動率放大 4.6x（vs US 2.8x），VIX proxy 有效",
       "articles": [
@@ -1661,10 +1661,10 @@
     },
     "EEM": {
       "name": "新興市場 ETF",
-      "price": 61.07,
-      "last_date": "2026-04-13",
-      "sigma_daily_pct": 1.47,
-      "sigma_ann_pct": 23.3,
+      "price": 62.45,
+      "last_date": "2026-04-16",
+      "sigma_daily_pct": 1.27,
+      "sigma_ann_pct": 20.2,
       "regime": {
         "level": "high",
         "label": "高波動",
@@ -1672,75 +1672,63 @@
       },
       "forecasts": {
         "daily": {
-          "var_pct": 3.82,
-          "es_pct": 5.06,
-          "var_dollar": 38210.0,
-          "es_dollar": 50558.0,
-          "cf_var_pct": 4.09,
-          "cf_es_pct": 5.42,
-          "cf_var_dollar": 40940.0,
-          "cf_es_dollar": 54172.0,
-          "skewt_var_pct": 3.94,
-          "skewt_es_pct": 5.21,
-          "skewt_var_dollar": 39369.0,
-          "skewt_es_dollar": 52092.0
+          "var_pct": 3.31,
+          "es_pct": 4.38,
+          "var_dollar": 33136.0,
+          "es_dollar": 43845.0,
+          "cf_var_pct": 3.55,
+          "cf_es_pct": 4.7,
+          "cf_var_dollar": 35519.0,
+          "cf_es_dollar": 46999.0,
+          "skewt_var_pct": 3.42,
+          "skewt_es_pct": 4.52,
+          "skewt_var_dollar": 34154.0,
+          "skewt_es_dollar": 45192.0
         },
         "weekly": {
-          "var_pct": 8.43,
-          "es_pct": 11.15,
-          "var_dollar": 84265.0,
-          "es_dollar": 111498.0,
-          "cf_var_pct": 9.03,
-          "cf_es_pct": 11.95,
-          "cf_var_dollar": 90287.0,
-          "cf_es_dollar": 119467.0,
-          "skewt_var_pct": 8.68,
-          "skewt_es_pct": 11.49,
-          "skewt_var_dollar": 86820.0,
-          "skewt_es_dollar": 114880.0
+          "var_pct": 7.39,
+          "es_pct": 9.78,
+          "var_dollar": 73913.0,
+          "es_dollar": 97801.0,
+          "cf_var_pct": 7.92,
+          "cf_es_pct": 10.48,
+          "cf_var_dollar": 79229.0,
+          "cf_es_dollar": 104835.0,
+          "skewt_var_pct": 7.62,
+          "skewt_es_pct": 10.08,
+          "skewt_var_dollar": 76182.0,
+          "skewt_es_dollar": 100804.0
         },
         "monthly": {
-          "var_pct": 16.91,
-          "es_pct": 22.37,
-          "var_dollar": 169051.0,
-          "es_dollar": 223686.0,
-          "cf_var_pct": 18.11,
-          "cf_es_pct": 23.97,
-          "cf_var_dollar": 181133.0,
-          "cf_es_dollar": 239673.0,
-          "skewt_var_pct": 17.42,
-          "skewt_es_pct": 23.05,
-          "skewt_var_dollar": 174179.0,
-          "skewt_es_dollar": 230471.0
+          "var_pct": 15.39,
+          "es_pct": 20.36,
+          "var_dollar": 153882.0,
+          "es_dollar": 203614.0,
+          "cf_var_pct": 16.49,
+          "cf_es_pct": 21.83,
+          "cf_var_dollar": 164950.0,
+          "cf_es_dollar": 218259.0,
+          "skewt_var_pct": 15.86,
+          "skewt_es_pct": 20.99,
+          "skewt_var_dollar": 158607.0,
+          "skewt_es_dollar": 209866.0
         }
       },
       "residual_stats": {
-        "skewness": -0.3089,
-        "excess_kurtosis": 1.1771,
-        "cf_1pct_quantile": -2.7928,
+        "skewness": -0.3106,
+        "excess_kurtosis": 1.1785,
+        "cf_1pct_quantile": -2.7939,
         "skewt_eta": 8.16,
-        "skewt_lambda": -0.1237
+        "skewt_lambda": -0.1245
       },
       "basel_zone": {
         "year": 2026,
         "violations": 1,
-        "days": 69,
+        "days": 72,
         "zone": "GREEN",
         "rate": 1.4
       },
       "sigma_history": [
-        {
-          "date": "2026-01-15",
-          "sigma_ann": 14.7
-        },
-        {
-          "date": "2026-01-16",
-          "sigma_ann": 14.4
-        },
-        {
-          "date": "2026-01-20",
-          "sigma_ann": 14.2
-        },
         {
           "date": "2026-01-21",
           "sigma_ann": 15.2
@@ -1968,23 +1956,35 @@
         {
           "date": "2026-04-13",
           "sigma_ann": 24.6
+        },
+        {
+          "date": "2026-04-14",
+          "sigma_ann": 23.3
+        },
+        {
+          "date": "2026-04-15",
+          "sigma_ann": 22.6
+        },
+        {
+          "date": "2026-04-16",
+          "sigma_ann": 21.3
         }
       ],
-      "sigma_vs_5y_avg": 22.8,
+      "sigma_vs_5y_avg": 6.5,
       "hist_avg_sigma_ann": 18.9,
       "alerts": [
         {
           "type": "regime",
-          "message": "當前處於高波動環境（23.3%）",
+          "message": "當前處於高波動環境（20.2%）",
           "severity": "medium"
         }
       ],
       "model": "GJR-GARCH(1,1) w=2000",
       "params": {
-        "omega": 0.077733,
-        "alpha[1]": 0.028911,
-        "gamma[1]": 0.128606,
-        "beta[1]": 0.856254
+        "omega": 0.07823,
+        "alpha[1]": 0.028075,
+        "gamma[1]": 0.129964,
+        "beta[1]": 0.855964
       },
       "model_note": "高 γ 資產，GJR-GARCH 適用",
       "articles": []
