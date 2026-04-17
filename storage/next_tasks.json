@@ -1123,13 +1123,15 @@
     "title": "K1216b: CH/ID multistart completion (EM widespread fragility verification)",
     "priority": 4,
     "description": "Complete EM fragility audit: K1216 covered BR/IN/MX. CH (K1168) + ID (K1172) remaining. Same 100-start L-BFGS-B+NM+DE pattern. If also fragile → Paper 2 §5 certain 6-market-EM revision.",
-    "status": "pending",
+    "status": "completed",
     "created_at": "2026-04-18T03:13:18.883452",
     "tags": [
       "K1216-followup",
       "Paper2",
       "numerical-fragility"
-    ]
+    ],
+    "completed_at": "2026-04-18T03:23:32.609931",
+    "outcome": "ALL_5_EM_FRAGILE: CH LR=598, ID LR=365. Primary ρ N=13 collapses to -0.071 p=0.817 (from K1172 +0.441). Paper 2 §5 cross-market ordering VANISHES at global optimum."
   },
   {
     "id": "K1216c_developed_multistart",
