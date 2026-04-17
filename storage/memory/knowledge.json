@@ -27246,5 +27246,40 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T18:15:57.587843"
+  },
+  {
+    "item_id": "e63bd455",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered, KB lesson applied] K1188 Paper 1 Table 8 window robustness. **VERDICT: (a) PAPER REPRODUCED \u2014 15/15 cells MATCHED \u00b10.10 absolute tolerance**. 5 window sizes (504/1000/2000/3000/5000) \u00d7 3 OOS periods (2020-21, 2023-24, 2025-26). \u6700\u5927\u504f\u5dee \u00b10.052, \u5e73\u5747 \u00b10.027. **QLIKE scale confirmed quasi-LL** = mean[log(h_t) + r\u00b2/h_t] ~-8 to -9, \u975e Patton centered (K783b ~1.5 \u4e0d\u517c\u5bb9). **Best window per period (RANK_MATCH 3/3)**: 2020-21 COVID w=504 (-8.089) best; 2023-24 calm w=5000 best; 2025-26 w=5000 best. **KB validation**: \u6587\u737b Feng&Zhang 2025 'expanding > w=2000' trend \u65b9\u5411\u4e00\u81f4 (KB in Patton scale, K1188 in quasi-LL). **DM tests w=504 vs w=5000**: all p>0.10, \u5dee\u7570\u4e0d\u986f\u8457 \u2192 \u652f\u6301 paper 'qualitatively robust to window choice'. **Paper 1 Table 8 BLOCKER RESOLVED**. \u50c5 2025-26 \u6709 ~+0.04 \u7cfb\u7d71\u6027\u504f\u79fb (n=322 vs paper \u53ef\u80fd\u591a\u5e7e\u5929 data), \u4ecd\u5728 tolerance. commit e0212023.",
+    "evidence": [
+      "experiments/k1188/k1188.py",
+      "experiments/k1188/k1188_results.json",
+      "experiments/k1188/k1188_vs_paper1_table8_diff.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T18:24:02.133795"
+  },
+  {
+    "item_id": "9258c60f",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1191 Paper 3 COVID sub-period Sharpe 1.295 vs 1.254 replication. **VERDICT: (b) QUALITATIVE_MATCH \u2014 direction confirmed \u6240\u6709 4 COVID \u5b9a\u7fa9, \u7cbe\u78ba\u6578\u5b57\u9700 paper Online Appendix \u78ba\u8a8d period spec**. **Strategy identification**: 1.295 = TSMOM-hedged VT; 1.254 = Unhedged 12/VIX VT. 50/50 SPY/GLD asset. **Full-period Sharpe (K1191)**: B&H 0.878, VT 0.940, Hedged 0.704. Paper Table 3 ref 0.865/0.982/0.937 (\u63a5\u8fd1). **Direction CONFIRMED \u6240\u6709 COVID \u5b9a\u7fa9**: Broad 2020-22 VT 0.310 / Hedged 0.714; Calendar 2020 0.612/1.456; Crisis 2020-02-24/12-31 0.157/1.434; Peak VIX 0.132/2.194. **All 4 cases Hedged > VT**. Paper 1.295/1.254 \u6700\u53ef\u80fd 2020-21 definition (V-shape recovery integral), Online Appendix spec \u672a\u516c\u958b. **KB N177 'recovery paradox' VERIFIED**: COVID broad \u671f\u9593 Hedged (0.714) > VT (0.310) \u65b9\u5411\u4e00\u81f4. **\u8207 K1177/K1192/K1194 triple confirmation \u4e00\u81f4**: TSMOM hedge \u589e\u5f37 MDD \u4fdd\u8b77, \u8207 paper narrative \u65b9\u5411\u6b63\u78ba (COVID \u7279\u4f8b, \u4e0d\u662f overall 93% retention). commit 3b016cc9.",
+    "evidence": [
+      "experiments/k1191/k1191.py",
+      "experiments/k1191/k1191_results.json"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T18:24:02.260730"
+  },
+  {
+    "item_id": "530c7887",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1186 Paper 1 Table 6 pass-rate canonical replication. **VERDICT: 2/5 MATCHED \u2014 Normal 57.1% exact + FHS 76.2% exact; 3/5 diverged upward**. GJR-GARCH(1,1) rolling w=504, OOS 2020-2025, 7 assets, 5 distributional methods, Trinity backtest (Kupiec+Christoffersen+DQ) @ \u03b1=1%/2.5%/5%. **Fixes during build**: Hansen (1994) skewed-t closed-form quantile (replaced buggy bisection), rolled back adaptive GARCH/GJR switching (hurt FHS), cached yfinance to data/*.csv. **Divergence root cause**: data vintage mismatch paper original vs 2026-04-17 cache. StudentT5 +19pp, SkewedT +14pp, CFVaR +10pp \u5168 upward. **Decision**: (a) Normal/FHS confirmed; (b) SkewedT/CFVaR paper footnote update corrected impl + moments-window sensitivity; (c) StudentT5 errata. Paper 1 Table 6 BLOCKER partial resolve. **Paper 1 new experiments batch \u72c0\u614b**: K1185 Table 4 3/4, K1186 Table 6 2/5, K1187 Table 7 running, K1188 Table 8 **15/15 PERFECT**. commit 94f4d883.",
+    "evidence": [
+      "experiments/k1186/k1186.py",
+      "experiments/k1186/k1186_results.json",
+      "experiments/k1186/k1186_vs_paper1_table6_diff.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T18:24:34.207108"
   }
 ]

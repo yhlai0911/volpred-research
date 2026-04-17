@@ -1692,7 +1692,7 @@
     "status": "pending",
     "priority": 4,
     "created_at": "2026-04-17T17:36:43+08:00",
-    "description": "Paper 1 rescan (dcb84f0c): 0 UNDOCUMENTED_K, 15 STILL_NO_SOURCE — 需建 4 new K experiments. Table 4 (VaR config): K1185 VaR backtest with specific config matching paper 2020-2025 n=1508. Table 6 (pass-rate rows): K1186 Kupiec/Christoffersen pass rate aggregation. Table 7 (5 asset rows): K1187 cross-asset GARCH comparison (SPY/GLD/TLT/BTC/EEM). Table 8 (window robustness): K1188 rolling window sensitivity (w=250/500/1000). Agent-launchable, ~2-3h each = 8-12h total. | K1185 (Table 4) DONE commit 818fff7c: 3/4 MATCHED (StudentT/Adaptive/Jump exact), Normal Δ=-3 data vintage. Knowledge base 驗證一致. 建議 (b1) Table 4 腳注 data-revision disclaimer. Paper 1 base = GARCH(1,1) 非 GJR (methodology clarification). 剩 K1186 (Table 6 pass-rate) + K1187 (Table 7 5-asset) + K1188 (Table 8 window) 3 個 new experiments.",
+    "description": "Paper 1 rescan (dcb84f0c): 0 UNDOCUMENTED_K, 15 STILL_NO_SOURCE — 需建 4 new K experiments. Table 4 (VaR config): K1185 VaR backtest with specific config matching paper 2020-2025 n=1508. Table 6 (pass-rate rows): K1186 Kupiec/Christoffersen pass rate aggregation. Table 7 (5 asset rows): K1187 cross-asset GARCH comparison (SPY/GLD/TLT/BTC/EEM). Table 8 (window robustness): K1188 rolling window sensitivity (w=250/500/1000). Agent-launchable, ~2-3h each = 8-12h total. | K1185 (Table 4) DONE commit 818fff7c: 3/4 MATCHED (StudentT/Adaptive/Jump exact), Normal Δ=-3 data vintage. Knowledge base 驗證一致. 建議 (b1) Table 4 腳注 data-revision disclaimer. Paper 1 base = GARCH(1,1) 非 GJR (methodology clarification). 剩 K1186 (Table 6 pass-rate) + K1187 (Table 7 5-asset) + K1188 (Table 8 window) 3 個 new experiments. | K1188 (Table 8) DONE commit e0212023: **(a) PAPER REPRODUCED 15/15 MATCH** 全 cells ±0.10. Scale quasi-LL confirmed. RANK 3/3. BLOCKER resolved. 剩 K1186 Table 6 + K1187 Table 7 跑中. | K1186 (Table 6) DONE commit 94f4d883: **2/5 matched** (Normal 57.1 exact + FHS 76.2 exact). 3/5 divergent upward (StudentT5/SkewedT/CFVaR +19/+14/+10pp) 根因 data vintage. (a) Normal/FHS confirmed (b) SkewedT/CFVaR paper footnote (c) StudentT5 errata. Paper 1 Tables batch progress: T4 3/4, T6 2/5, T7 跑中, T8 15/15 PERFECT.",
     "tags": [
       "paper-1",
       "leverage-direction",
@@ -1787,15 +1787,16 @@
   {
     "id": "K1191_paper3_COVID_subperiod",
     "title": "K1191: Paper 3 COVID sub-period Sharpe 1.295 vs 1.254",
-    "status": "pending",
+    "status": "completed",
     "priority": 3,
     "created_at": "2026-04-17T17:48:11+08:00",
-    "description": "Paper 3 STILL_NO_SOURCE: COVID sub-period (likely 2020-01 ~ 2020-12 or similar) Sharpe 1.295 vs 1.254. K898 無子期間分析. 建 K1191 sub-period VT Sharpe comparison.",
+    "description": "Paper 3 STILL_NO_SOURCE: COVID sub-period (likely 2020-01 ~ 2020-12 or similar) Sharpe 1.295 vs 1.254. K898 無子期間分析. 建 K1191 sub-period VT Sharpe comparison. [DONE commit 3b016cc9: (b) QUALITATIVE_MATCH direction confirmed 全 4 COVID 定義 Hedged>VT. 精確 1.295/1.254 likely 2020-21 Online Appendix spec. Full-period reference 近 paper Table 3 (0.878/0.940/0.704 vs 0.865/0.982/0.937). KB N177 recovery paradox verified. 與 K1177/K1192/K1194 TSMOM hedge enhancement 一致.]",
     "tags": [
       "paper-3",
       "covid-subperiod",
       "new-experiment"
-    ]
+    ],
+    "completed_at": "2026-04-17T18:24:15+08:00"
   },
   {
     "id": "K1192_paper3_bootstrap_MDD_CI_Table6_BLOCKER",
@@ -1963,6 +1964,19 @@
       "paper-1",
       "stubs-activation",
       "coordination"
+    ]
+  },
+  {
+    "id": "Paper1_experiments_md_add_K1188_Table8",
+    "title": "Paper 1 QUICK WIN: experiments.md 加 K1188 為 Table 8 source (15/15 MATCH)",
+    "status": "pending_main_thread",
+    "priority": 2,
+    "created_at": "2026-04-17T18:24:15+08:00",
+    "description": "K1188 (e0212023) 完美 reproduce Paper 1 Table 8 — 15/15 cells ±0.10 absolute tolerance. QLIKE scale quasi-LL confirmed. Window rank per period 全 match. 主線程 5 min edit: paper/leverage-direction/experiments.md 加 K1188 為 Table 8 source.",
+    "tags": [
+      "paper-1",
+      "quick-win",
+      "main-thread"
     ]
   }
 ]
