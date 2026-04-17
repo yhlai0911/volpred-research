@@ -1,0 +1,93 @@
+[20:36:35] K1197: Paper 1 GJR vs EWMA Crisis Period Robustness
+[20:36:35] Run started: 2026-04-17T12:36:35.862573+00:00
+[20:36:35] Config: window=500, lambda=[0.94,0.97], target_vol=10%, max_lev=1.5
+[20:36:35] Crises: ['GFC 2008', 'COVID 2020', 'Rate Hike 2022']
+[20:36:35] Assets: ['SPY', 'GLD', 'TLT', 'BTC-USD', 'EEM']
+[20:36:35] 
+============================================================
+[20:36:35] ASSET: SPY
+[20:36:35] ============================================================
+[20:36:36]   Data: 2005-01-04 to 2025-12-30, n=5281
+[20:36:36]   Running rolling GJR-GARCH(1,1,1) w=500...
+[20:38:47]   GJR done in 131s
+[20:38:47]   EWMA done
+[20:38:47]   OOS Sharpe — GJR: 0.414, EWMA(0.97): 0.358
+[20:38:47]   OOS MDD   — GJR: -15.8%, EWMA(0.97): -17.3%
+[20:38:47]   [GFC 2008] n=121, GJR MDD: -12.3%,  EWMA(0.97) MDD: -13.4%,  GJR better: True
+[20:38:47]   [COVID 2020] n=23, GJR MDD: -10.6%,  EWMA(0.97) MDD: -15.3%,  GJR better: True
+[20:38:47]   [Rate Hike 2022] n=196, GJR MDD: -13.3%,  EWMA(0.97) MDD: -14.2%,  GJR better: True
+[20:38:47] 
+============================================================
+[20:38:47] ASSET: GLD
+[20:38:47] ============================================================
+[20:38:47]   Data: 2005-01-04 to 2025-12-30, n=5281
+[20:38:47]   Running rolling GJR-GARCH(1,1,1) w=500...
+[20:41:24]   GJR done in 156s
+[20:41:24]   EWMA done
+[20:41:24]   OOS Sharpe — GJR: 0.680, EWMA(0.97): 0.620
+[20:41:24]   OOS MDD   — GJR: -15.0%, EWMA(0.97): -15.5%
+[20:41:24]   [GFC 2008] n=121, GJR MDD: -5.3%,  EWMA(0.97) MDD: -5.6%,  GJR better: True
+[20:41:24]   [COVID 2020] n=23, GJR MDD: -6.6%,  EWMA(0.97) MDD: -7.5%,  GJR better: True
+[20:41:24]   [Rate Hike 2022] n=196, GJR MDD: -14.7%,  EWMA(0.97) MDD: -15.5%,  GJR better: True
+[20:41:24] 
+============================================================
+[20:41:24] ASSET: TLT
+[20:41:24] ============================================================
+[20:41:24]   Data: 2005-01-04 to 2025-12-30, n=5281
+[20:41:24]   Running rolling GJR-GARCH(1,1,1) w=500...
+[20:44:12]   GJR done in 168s
+[20:44:12]   EWMA done
+[20:44:12]   OOS Sharpe — GJR: -0.578, EWMA(0.97): -0.529
+[20:44:12]   OOS MDD   — GJR: -39.6%, EWMA(0.97): -38.0%
+[20:44:12]   [GFC 2008] n=121, GJR MDD: -7.2%,  EWMA(0.97) MDD: -7.5%,  GJR better: True
+[20:44:12]   [COVID 2020] n=23, GJR MDD: -5.0%,  EWMA(0.97) MDD: -6.6%,  GJR better: True
+[20:44:12]   [Rate Hike 2022] n=196, GJR MDD: -18.9%,  EWMA(0.97) MDD: -18.1%,  GJR better: False
+[20:44:12] 
+============================================================
+[20:44:12] ASSET: BTC-USD
+[20:44:12] ============================================================
+[20:44:13]   Data: 2014-09-18 to 2025-12-30, n=4122
+[20:44:13]   Running rolling GJR-GARCH(1,1,1) w=500...
+[20:46:22]   GJR done in 130s
+[20:46:22]   EWMA done
+[20:46:22]   OOS Sharpe — GJR: 0.214, EWMA(0.97): 0.222
+[20:46:22]   OOS MDD   — GJR: -29.5%, EWMA(0.97): -25.9%
+[20:46:22]   Crisis GFC 2008: skip (n=0)
+[20:46:22]   [COVID 2020] n=33, GJR MDD: -10.9%,  EWMA(0.97) MDD: -14.2%,  GJR better: True
+[20:46:22]   [Rate Hike 2022] n=283, GJR MDD: -15.9%,  EWMA(0.97) MDD: -16.5%,  GJR better: True
+[20:46:22] 
+============================================================
+[20:46:22] ASSET: EEM
+[20:46:22] ============================================================
+[20:46:23]   Data: 2005-01-04 to 2025-12-30, n=5281
+[20:46:23]   Running rolling GJR-GARCH(1,1,1) w=500...
+[20:48:37]   GJR done in 134s
+[20:48:37]   EWMA done
+[20:48:37]   OOS Sharpe — GJR: -0.198, EWMA(0.97): -0.179
+[20:48:37]   OOS MDD   — GJR: -26.9%, EWMA(0.97): -27.0%
+[20:48:37]   [GFC 2008] n=121, GJR MDD: -8.4%,  EWMA(0.97) MDD: -9.0%,  GJR better: True
+[20:48:37]   [COVID 2020] n=23, GJR MDD: -7.8%,  EWMA(0.97) MDD: -10.8%,  GJR better: True
+[20:48:37]   [Rate Hike 2022] n=196, GJR MDD: -18.7%,  EWMA(0.97) MDD: -17.5%,  GJR better: False
+[20:48:37] 
+======================================================================
+[20:48:37] SUMMARY
+[20:48:37] ======================================================================
+[20:48:37] 
+[Full OOS Sharpe vs KB J6]
+[20:48:37]   KB J6 — EWMA(0.97) Sharpe: 0.828, GJR Sharpe: 0.782
+[20:48:37]   EWMA(0.97) wins Sharpe in 3/5 assets
+[20:48:37] 
+[Per-Crisis GJR Better MDD]
+[20:48:37]   GFC 2008: GJR wins MDD 4/4 assets
+[20:48:37]   COVID 2020: GJR wins MDD 5/5 assets
+[20:48:37]   Rate Hike 2022: GJR wins MDD 3/5 assets
+[20:48:37] 
+[SPY Detail]
+[20:48:37]   GFC 2008: GJR MDD=-12.3%, EWMA(0.97) MDD=-13.4%, MDD premium=-1.14%, avg gamma=0.1839
+[20:48:37]   COVID 2020: GJR MDD=-10.6%, EWMA(0.97) MDD=-15.3%, MDD premium=-4.69%, avg gamma=0.3468
+[20:48:37]   Rate Hike 2022: GJR MDD=-13.3%, EWMA(0.97) MDD=-14.2%, MDD premium=-0.91%, avg gamma=0.2445
+[20:48:37] 
+KB J6 Verdict: (b) EWMA win rate < 4/5 — partial match
+[20:48:37] 
+Results saved to /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a73db749/experiments/k1197/k1197_results.json
+[20:48:37] K1197 COMPLETE
