@@ -566,8 +566,9 @@
     "id": "K1137",
     "title": "K1137: Regime-conditional robust models",
     "priority": 3,
-    "description": "K1136 延伸：VIX tertile regime 切分，檢驗 GARCH-MIDAS/HAR-RV-X 在高 VIX regime 是否有條件優勢。控 K1128 IS-regime degeneracy 教訓：regime cutoff 用 rolling ex-ante percentile。",
-    "status": "pending"
+    "description": "K1136 延伸：VIX tertile regime 切分，檢驗 GARCH-MIDAS/HAR-RV-X 在高 VIX regime 是否有條件優勢。控 K1128 IS-regime degeneracy 教訓：regime cutoff 用 rolling ex-ante percentile。 [DONE commit 7a830c8f: Scenario C HAR regime-invariant (17/54 PASS). Rolling ex-ante quantile solves K1128 degeneracy. Paper 4 Channel 1 strengthened + new HAR-structure subsection direction.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T17:45:00+08:00"
   },
   {
     "id": "K1138",
@@ -953,7 +954,7 @@
     "title": "Paper 4 narrative pivot: universal null -> channel-specific claims (主線程 + 用戶決策)",
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
-    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\". | K1143 (2026-04-17) mechanism diagnostic: GAS-t architectural incompatibility on equity with 3 evidence-backed rationale (score skew / near-Gaussian innovations / long-memory). Paper 4 Channel 3 narrative upgraded from \"unhelpful\" to \"mechanistically incompatible\" with concrete diagnostic numbers. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 4 目錄 (robust null compendium) - 這也是 start-from-scratch. 素材 K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143/K1137 (running) 齊全. 主線程需建立 paper/robust-null-compendium/ + outline."
+    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\". | K1143 (2026-04-17) mechanism diagnostic: GAS-t architectural incompatibility on equity with 3 evidence-backed rationale (score skew / near-Gaussian innovations / long-memory). Paper 4 Channel 3 narrative upgraded from \"unhelpful\" to \"mechanistically incompatible\" with concrete diagnostic numbers. | 2026-04-17 REALITY CHECK: 目前 paper/ 沒有 Paper 4 目錄 (robust null compendium) - 這也是 start-from-scratch. 素材 K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143/K1137 (running) 齊全. 主線程需建立 paper/robust-null-compendium/ + outline. | K1137 (2026-04-17) regime-conditional PASS 17/54: HAR-RV-X 15/18 cells PASS regime-invariantly (QQQ 3/3, IWM 3/3). Rolling ex-ante 252d quantile fixes K1128 degeneracy. NEW direction: TLT/GLD/USO HAR-structure effect 30-52% might warrant independent subsection."
   },
   {
     "id": "K1139_equity_har_deep_dive",
@@ -997,6 +998,13 @@
     "title": "Paper 4 kick-off: Channel-specific robust vol compendium (main thread, new paper/)",
     "priority": 2,
     "status": "pending",
-    "description": "素材齊 (K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143 + K1137 K1135 running). 建立 paper/robust-null-compendium/ + outline. Channel-specific narrative: HAR+VIX asset-heterogeneous, MIDAS universal null, GAS-t architectural incompatible."
+    "description": "素材齊 (K1117/K1123/K1130/K1131/K1136/K1138/K1139/K1143 + K1137 K1135 running). 建立 paper/robust-null-compendium/ + outline. Channel-specific narrative: HAR+VIX asset-heterogeneous, MIDAS universal null, GAS-t architectural incompatible. | K1137 (2026-04-17) regime-conditional PASS 17/54: HAR-RV-X 15/18 cells PASS regime-invariantly (QQQ 3/3, IWM 3/3). Rolling ex-ante 252d quantile fixes K1128 degeneracy. NEW direction: TLT/GLD/USO HAR-structure effect 30-52% might warrant independent subsection."
+  },
+  {
+    "id": "K1138b_har_structure_vs_gjr",
+    "title": "K1138b: Pure HAR structure vs GJR baseline (isolate HAR from VIX regressor)",
+    "priority": 3,
+    "status": "pending",
+    "description": "K1137 發現 TLT/GLD/USO HAR-RV-X +30-52% on Parkinson — 比 VIX regressor 效果大. 測純 HAR-RV (no VIX X) vs GJR-GARCH: 是 HAR 的 daily+weekly+monthly 結構本身帶 value 還是 VIX 才是 driver? 若 HAR alone PASS → Paper 4 新 subsection \"HAR structure universally dominates GJR (on commodity+bond), VIX only marginal increment on equity\"."
   }
 ]

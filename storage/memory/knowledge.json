@@ -26797,5 +26797,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T14:44:51.636424"
+  },
+  {
+    "item_id": "a68324f1",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1136/K1138 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review (Codex quota), \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1137 Regime-conditional robust vol models (6 assets \u00d7 4 models \u00d7 3 rolling-quantile regimes, 54 cells). **VERDICT: Scenario C_HAR_REGIME_INVARIANT** (17/54 PASS; 14/54 at Harvey t>3). **Rolling ex-ante 252d quantile SOLVES K1128 degeneracy**: OOS regime distribution 45.6%/22.9%/31.5% low/mid/high (vs K1128 tertile 0%/4%/96% IS-fixed failure; vs K1130 extended IS 1.6% still degenerate). **HAR-RV-X regime-invariant winner**: 15/18 cells PASS (6 assets \u00d7 3 regimes), +20-52% rel QLIKE. Top 5: TLT-HAR-low t=+11.0 (+52%), USO-HAR-low t=+10.6 (+47%), TLT-HAR-mid t=+8.6 (+52%), SPY-HAR-low t=+8.0 (+34%), TLT-HAR-high t=+7.3 (+45%). QQQ HAR 3/3 regimes PASS; IWM 3/3; SPY 2/3 (high-regime BH-p=0.078 just misses). GAS-t: \u53ea TLT \u6709 conditional PASS (low t=+2.53, high t=+3.18); all equity still HARMFUL/NULL (matches K1143 architectural diagnosis). MIDAS 0/6 assets PASS \u2014 universal null \u64f4\u5c55\u5230\u6bcf\u500b regime. **Paper 4 Channel implications**: Channel 1 HAR+VIX: STRENGTHENED \u2014 regime-invariant across 5/6 assets, effect sizes massive; Channel 2 MIDAS: STRENGTHENED \u2014 universal null in every regime; Channel 3 GAS-t: REFINED \u2014 architectural incompatibility asset-class-specific (rescues bonds via heavy-tail score, harms equity where leverage asymmetry already captures). **NEW direction**: TLT/GLD/USO HAR-RV-X +30-52% on Parkinson is largest effect - \u53ef\u80fd 'HAR structure vs GJR baseline' \u7684 value \u8d85\u904e 'VIX as regressor'. Paper 4 \u53ef\u8003\u616e\u7368\u7acb subsection. Script: experiments/k1137/k1137.py, commit 7a830c8f.",
+    "evidence": [
+      "experiments/k1137/k1137.py",
+      "experiments/k1137/k1137_results.json",
+      "experiments/k1137/README.md"
+    ],
+    "confidence": 0.96,
+    "created_at": "2026-04-17T14:49:52.221093"
   }
 ]
