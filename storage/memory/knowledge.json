@@ -27775,5 +27775,16 @@
     ],
     "confidence": 0.75,
     "created_at": "2026-04-18T03:28:41.475895"
+  },
+  {
+    "item_id": "f63b6e01",
+    "category": "K1216c",
+    "content": "K1216c ROOT_CAUSE_METHODOLOGY \u2014 9/9 markets fragile (5 EM + 4 DEV). Per-market LR: US theta_rel 0.415 -> 8.614 LR=+2837 shift 1977%; EU 0.196->1.434 LR=+838 shift 633%; JP 1.668->4.706 LR=+236 shift 182%; TW 0.314->1.364 LR=+588 shift 335%. All FRAGILE. NM polishes past L-BFGS-B basin-B best in all 4 DEV. MLE design issue spans whole Paper 2 panel. CRITICAL 9-market refined Spearman: K1172 baseline N=12 +0.441 p=0.15 -> K1216b EM-only N=13 -0.071 p=0.82 (ARTIFACT of asymmetric refinement: refined EM + canonical DEV) -> K1216c 9-market consistent N=13 +0.379 p=0.20 (Harvey not passed but statistically INDISTINGUISHABLE from +0.441). K1216b -0.071 headline is NOT Paper 2 \u00a75 correct conclusion \u2014 K1222 basing on -0.071 NEEDS REVISION with K1216c +0.379 as true final. Paper 2 \u00a75 revision scope: (1) all 9 markets theta_rel reported with multistart refined; (2) methodology section documents 100-start protocol as standard; (3) main Spearman table lists 3 versions canonical/EM-only/9-market with K1216c +0.379 as final; (4) pivot Paper 2 contribution from 'institutional-ownership proxy' to 'cross-market pooled MLE multistart necessity as methodology contribution'.",
+    "evidence": [
+      "experiments/k1216c/",
+      "commit 3cf6bc84"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-18T06:17:42.367793"
   }
 ]
