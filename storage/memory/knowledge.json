@@ -27061,5 +27061,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:13:35.403267"
+  },
+  {
+    "item_id": "1ef3b68c",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Paper 7 (vt-insurance-cost) reproducibility audit. **Score: 96.0% matched (97/101) \u2014 \u76ee\u524d BEST. Readiness: READY FOR SUBMISSION.** 101 \u6578\u5b57, 97 OK, 2 divergent LOW, 2 unverifiable. **\u7121 direction / sign errors** \u2014 12 checks \u5168 PASS. \u7121 Paper 4 DIV-1 pattern. **2 minor errata \u5efa\u8b70**: (DIV-1 LOW) Sec 2.3 '1 bps opp share 97%' \u61c9\u70ba 98.0% (4.195/4.281 \u5be6\u7b97); (DIV-2 MINOR) Sec 3.3 '54-80 bps' upper bound \u61c9\u70ba 81 bps (K846 theoretical=81.46). **2 unverifiable**: 2012-2024 sub-period footnote (\u03c1=0.04 \u548c 48 bps rebalancing premium), K846 \u53ea\u6db5 full 2006-2024, \u9700\u88dc sub-period \u5206\u6790\u6216\u4fee\u8173\u8a3b. **Counterintuitive claim verified**: S2 direct cost 0.43% \u2192 0.52% \u589e\u52a0 (S2 triggers \u66f4\u591a boundary \u89f8\u767c) \u2014 \u65b9\u5411\u4e00\u81f4. **Prior FLAG 2 resolved**: Sensitivity threshold files (k811v2_th0_5, k811v2_th1_5) \u5b58\u5728\u4e14\u9a57\u8b49 \u2014 opp share 64%/57%/65% \u5168 confirmed. **K860 (prospect theory)** \u5b58\u5728\u65bc experiments/ \u4f46\u672a\u88ab main.tex \u5f15\u7528 \u2014 \u53ef\u80fd\u70ba background work. **\u5c0d\u6bd4\u5f59\u7e3d**: Paper 1/2/4 critical research-integrity issues; Paper 3 1 critical; Paper 6 \u5b58\u4ea1 debate; Paper 7 **clean READY**; Paper 9 cosmetic. Paper 7 \u662f project \u4e2d\u6700 clean \u7684 submitted paper. commit cb1dd9b4. Output paper/vt-insurance-cost/reproducibility_audit/.",
+    "evidence": [
+      "paper/vt-insurance-cost/reproducibility_audit/diff_report.md",
+      "paper/vt-insurance-cost/reproducibility_audit/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:16:42.099044"
   }
 ]
