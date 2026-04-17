@@ -1,0 +1,177 @@
+{
+  "experiment_id": "K1235",
+  "title": "Paper 9 FEZ + STOXX50E K949 spec bundle \u2014 canonical t-statistics for K1232-flagged no-source values",
+  "timestamp": "2026-04-18T07:07:46.673270",
+  "data_source": "yfinance",
+  "tickers": [
+    "FEZ",
+    "^STOXX50E"
+  ],
+  "ticker_labels": {
+    "FEZ": "FEZ",
+    "^STOXX50E": "STOXX50E"
+  },
+  "spec": "K949 verbatim: MF-GJR log-exp tau, constrained omega (E[g]=1), GJR(1,1,1), MLE L-BFGS-B",
+  "oos_period": "2016-01-01 to 2025-12-31",
+  "window": 2000,
+  "refit_every": 21,
+  "seed": 42,
+  "models": [
+    "GARCH(1,1)",
+    "GJR(1,1,1)",
+    "MF-GJR(VIX)"
+  ],
+  "evaluation": "QLIKE on r^2, Spearman rank, DM-HLN test (HAC-robust, Harvey 1997 correction)",
+  "paper_claims": {
+    "FEZ": 3.45,
+    "^STOXX50E": 3.64
+  },
+  "paper9_table6_spec_caveat": "Paper 9 Table 6 uses A4f spec (tau=VIX^2, free omega, OOS 2019-2026, refit=63). K1235 uses K949 spec (log-exp tau, constrained omega, OOS 2016-2025, refit=21) per task brief. MATCH/MISMATCH verdict therefore reflects whether K949 spec alone reproduces the paper value.",
+  "results": {
+    "FEZ": {
+      "GARCH": {
+        "QLIKE": 1.2291621409054547,
+        "Spearman_rho": 0.27015502033943356,
+        "Spearman_pval": 2.350769425924097e-44
+      },
+      "GJR": {
+        "QLIKE": 1.2218702479927197,
+        "Spearman_rho": 0.28598257905431257,
+        "Spearman_pval": 1.0231725410262009e-49
+      },
+      "MF-GJR": {
+        "QLIKE": 1.1629964881726782,
+        "Spearman_rho": 0.32584554763913304,
+        "Spearman_pval": 7.852762083798098e-65
+      },
+      "DM_MFvsGJR": {
+        "t_stat": 4.031161006695938,
+        "t_harvey": 4.030379395365258,
+        "p_value_raw": 5.5502004958851714e-05,
+        "p_value_harvey": 5.568689618873357e-05,
+        "significant_harvey3": true,
+        "mean_loss_diff": 0.05887375982004157,
+        "hac_lag": 13,
+        "n_effective": 2578
+      },
+      "QLIKE_improvement": {
+        "MF_vs_GARCH_pct": 5.3829881779499,
+        "MF_vs_GJR_pct": 4.818331563172024
+      },
+      "theta1_VIX_elasticity": 2.0393425761661264,
+      "theta0": -5.0,
+      "mf_params": {
+        "omega_g": 0.5088919152602323,
+        "alpha": 0.010635511630309007,
+        "gamma": 0.07778621705547265,
+        "beta": 0.9136723944758738,
+        "theta0": -5.0,
+        "theta1": 2.0393425761661264
+      },
+      "n_oos": 2578,
+      "oos_period": "2016-01-04 to 2025-12-30",
+      "paper_comparison": {
+        "paper_claimed_t": 3.45,
+        "k1235_t_harvey": 4.030379395365258,
+        "diff": 0.5803793953652576,
+        "pct_diff": 16.822591170007467,
+        "verdict": "MISMATCH",
+        "tolerance_match_lt": 0.2,
+        "tolerance_borderline_lt": 0.5,
+        "note": "Paper 9 Table 6 uses A4f spec (VIX^2, free omega, OOS 2019-2026, refit=63); K1235 uses K949 spec (log-exp tau, constrained omega, OOS 2016-2025, refit=21). Verdict reflects whether K949 spec alone is sufficient to reproduce the claim."
+      }
+    },
+    "^STOXX50E": {
+      "GARCH": {
+        "QLIKE": 1.003623590944768,
+        "Spearman_rho": 0.26935900172977234,
+        "Spearman_pval": 4.281153663589235e-44
+      },
+      "GJR": {
+        "QLIKE": 0.9618966960152598,
+        "Spearman_rho": 0.32080652175979757,
+        "Spearman_pval": 8.654825484792886e-63
+      },
+      "MF-GJR": {
+        "QLIKE": 0.9034367036830826,
+        "Spearman_rho": 0.35366218394324395,
+        "Spearman_pval": 8.014001622983232e-77
+      },
+      "DM_MFvsGJR": {
+        "t_stat": 5.010902902402195,
+        "t_harvey": 5.009931326600845,
+        "p_value_raw": 5.417524600037638e-07,
+        "p_value_harvey": 5.444946156174524e-07,
+        "significant_harvey3": true,
+        "mean_loss_diff": 0.05845999233217741,
+        "hac_lag": 13,
+        "n_effective": 2578
+      },
+      "QLIKE_improvement": {
+        "MF_vs_GARCH_pct": 9.982516170965425,
+        "MF_vs_GJR_pct": 6.0775749178007175
+      },
+      "theta1_VIX_elasticity": 2.242301612722061,
+      "theta0": -5.0,
+      "mf_params": {
+        "omega_g": 0.20206162363781113,
+        "alpha": 0.001,
+        "gamma": 0.1281556744728164,
+        "beta": 0.8377313534145251,
+        "theta0": -5.0,
+        "theta1": 2.242301612722061
+      },
+      "n_oos": 2578,
+      "oos_period": "2016-01-04 to 2025-12-30",
+      "paper_comparison": {
+        "paper_claimed_t": 3.64,
+        "k1235_t_harvey": 5.009931326600845,
+        "diff": 1.3699313266008448,
+        "pct_diff": 37.63547600551772,
+        "verdict": "MISMATCH",
+        "tolerance_match_lt": 0.2,
+        "tolerance_borderline_lt": 0.5,
+        "note": "Paper 9 Table 6 uses A4f spec (VIX^2, free omega, OOS 2019-2026, refit=63); K1235 uses K949 spec (log-exp tau, constrained omega, OOS 2016-2025, refit=21). Verdict reflects whether K949 spec alone is sufficient to reproduce the claim."
+      }
+    }
+  },
+  "summary_table": [
+    {
+      "Ticker": "FEZ",
+      "Label": "FEZ",
+      "N_OOS": 2578,
+      "QLIKE_GARCH": 1.2291621409054547,
+      "QLIKE_GJR": 1.2218702479927197,
+      "QLIKE_MF": 1.1629964881726782,
+      "Improve_vs_GJR_pct": 4.818331563172024,
+      "DM_t_raw": 4.031161006695938,
+      "DM_t_harvey": 4.030379395365258,
+      "p_harvey": 5.568689618873357e-05,
+      "paper_claim": 3.45,
+      "verdict": "MISMATCH"
+    },
+    {
+      "Ticker": "^STOXX50E",
+      "Label": "STOXX50E",
+      "N_OOS": 2578,
+      "QLIKE_GARCH": 1.003623590944768,
+      "QLIKE_GJR": 0.9618966960152598,
+      "QLIKE_MF": 0.9034367036830826,
+      "Improve_vs_GJR_pct": 6.0775749178007175,
+      "DM_t_raw": 5.010902902402195,
+      "DM_t_harvey": 5.009931326600845,
+      "p_harvey": 5.444946156174524e-07,
+      "paper_claim": 3.64,
+      "verdict": "MISMATCH"
+    }
+  ],
+  "paper9_r2_recommendation": {
+    "code": "errata_required",
+    "message": "MISMATCH found. Paper cannot cite K1235 as matching claim. Options: (a) errata reporting K1235 numbers, (b) spec clarification that Table 6 used A4f spec (OOS 2019-2026) different from K949."
+  },
+  "replication_hash_info": {
+    "yfinance": "daily OHLC auto_adjust=True",
+    "numba": "JIT compiled negloglik",
+    "arch": "GARCH + GJR via arch.arch_model, dist=normal, mean=Zero, rescale=False"
+  }
+}

@@ -1,0 +1,61 @@
+K1235: downloading data...
+  FEZ: 5030 rows, range=2006-01-03..2025-12-30
+  ^STOXX50E: 4701 rows, range=2007-03-30..2025-12-30
+  ^VIX: 5030 rows, range=2006-01-03..2025-12-30
+
+Warming up numba JIT...
+JIT compilation done.
+
+============================================================
+Processing FEZ (ticker=FEZ)...
+============================================================
+  OOS period: 2016-01-04 to 2025-12-30 (2578 days)
+  Total rows incl. IS: 5137
+  FEZ: 500/2578 done
+  FEZ: 1000/2578 done
+  FEZ: 1500/2578 done
+  FEZ: 2000/2578 done
+  FEZ: 2500/2578 done
+  Valid observations: 2578
+  GARCH     : QLIKE=1.2292, Spearman rho=0.2702
+  GJR       : QLIKE=1.2219, Spearman rho=0.2860
+  MF-GJR    : QLIKE=1.1630, Spearman rho=0.3258
+  DM(MF-GJR vs GJR): t=4.031, t_harvey=4.030, p_harvey=0.0001, |t_harvey|>3.0: True
+  Paper claim t=3.45, K1235 t_harvey=4.030, diff=+0.580 (+16.8%), verdict=MISMATCH
+
+============================================================
+Processing STOXX50E (ticker=^STOXX50E)...
+============================================================
+  OOS period: 2016-01-04 to 2025-12-30 (2578 days)
+  Total rows incl. IS: 4826
+  STOXX50E: 500/2578 done
+  STOXX50E: 1000/2578 done
+  STOXX50E: 1500/2578 done
+  STOXX50E: 2000/2578 done
+  STOXX50E: 2500/2578 done
+  Valid observations: 2578
+  GARCH     : QLIKE=1.0036, Spearman rho=0.2694
+  GJR       : QLIKE=0.9619, Spearman rho=0.3208
+  MF-GJR    : QLIKE=0.9034, Spearman rho=0.3537
+  DM(MF-GJR vs GJR): t=5.011, t_harvey=5.010, p_harvey=0.0000, |t_harvey|>3.0: True
+  Paper claim t=3.64, K1235 t_harvey=5.010, diff=+1.370 (+37.6%), verdict=MISMATCH
+
+================================================================================
+K1235 SUMMARY
+================================================================================
+
+   Ticker    Label  N_OOS  QLIKE_GARCH  QLIKE_GJR  QLIKE_MF  Improve_vs_GJR_pct  DM_t_raw  DM_t_harvey     p_harvey  paper_claim  verdict
+      FEZ      FEZ   2578     1.229162   1.221870  1.162996            4.818332  4.031161     4.030379 5.568690e-05         3.45 MISMATCH
+^STOXX50E STOXX50E   2578     1.003624   0.961897  0.903437            6.077575  5.010903     5.009931 5.444946e-07         3.64 MISMATCH
+
+================================================================================
+PAPER 9 R2 IMPLICATION
+================================================================================
+Recommendation: errata_required
+Rationale: MISMATCH found. Paper cannot cite K1235 as matching claim. Options: (a) errata reporting K1235 numbers, (b) spec clarification that Table 6 used A4f spec (OOS 2019-2026) different from K949.
+Figure saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a64ba340/experiments/k1235/k1235_qlike_timeseries.png
+Figure saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a64ba340/experiments/k1235/k1235_dm_rolling.png
+
+Results saved: /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-a64ba340/experiments/k1235/k1235_results.json
+
+K1235 done.
