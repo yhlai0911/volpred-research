@@ -26753,5 +26753,27 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T14:14:16.413417"
+  },
+  {
+    "item_id": "8adb739c",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1100g_d1 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review caught 1 CRITICAL lookahead, \u4e3b\u7dda\u7a0b\u9a57\u8b49 + merge_worktree] K1127 Cross-asset OFI lead-lag (TX vs ES overnight channel, 487 aligned days 2023-11-23 to 2026-04-16). **VERDICT: Scenario D - OFI is local, cross-market info flows at RV-level not OFI-level**. Cross-corr: A (ES->TX) OFI lag 0 t=+0.069 NS (CI +/-0.091); B (TX->ES) OFI lag 0 t=-0.026 NS. RV lag 0/+1/+2 +0.28 to +0.37 STRONG but driven by common news factors not OFI propagation. Granger: OFI both directions FAIL (p=0.36/0.05); RV both p<0.0001 (known co-movement). OOS DM M2 (+ES cross) vs M1 (TX only) t=-1.35 (M2 WORSE); M3 asymmetric t=+0.51 NS. Data fallback: 5-min ES not feasible (yfinance 60d limit), used 1h bars + Chordia-Roll-Subrahmanyam OFI proxy. Gemini caught CRITICAL lookahead: yfinance 1h bar interval-START bug (00:00 UTC covers [00:00, 01:00) includes TX 00:45 open), fixed to window < 00:00 UTC. **Implication**: K1100g_d1 asymmetric signal \u672c\u7368\u7acb\u518d null (K1100g_d2 + K1127 = 2 fails) confirms single-sample artifact hypothesis. Commit 6ac6613d (merged from worktree agent-k1127). Script: experiments/k1127/k1127.py.",
+    "evidence": [
+      "experiments/k1127/k1127.py",
+      "experiments/k1127/k1127_results.json",
+      "experiments/k1127/README.md"
+    ],
+    "confidence": 0.93,
+    "created_at": "2026-04-17T14:24:57.094954"
+  },
+  {
+    "item_id": "ab4fea29",
+    "category": "general_article",
+    "content": "[\u63d0\u51fa: Claude synthesis, \u57f7\u884c: article agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] General article mile_8d3bcedc '\u6211\u5011\u82b1\u4e86\u4e00\u6574\u5e74\u60f3\u6253\u6557 50/50 SPY/GLD' draft 2026-04-17 pool. ~1,300 \u4e2d\u6587\u5b57 + 3 \u771f\u5be6\u5716\u8868. \u5f15\u7528 K846/K1121/K1123. Tags 7 \u500b JSON array \u9a57\u8b49 (--tags fix \u751f\u6548). \u6838\u5fc3: 50/50 SPY/GLD Sharpe 1.31 \u6253\u6557 K1121 single-asset alt-data (tied) \u548c K1123 3-asset alt-data allocation (0.15 Sharpe worse). \u5dee\u7570\u5316 vs 4/1 mile_23ff3397 (static All-Weather): \u672c\u7bc7\u805a\u7126\u52d5\u614b alt-data 3-asset + TLT 2022 drawdown + turnover cost drag.",
+    "evidence": [
+      "storage/reports/mile_8d3bcedc.json"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T14:24:57.120963"
   }
 ]

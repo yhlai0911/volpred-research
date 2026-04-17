@@ -17,6 +17,7 @@ from arch import arch_model
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+from volpred.config.runtime import get_default_mirror_url, get_local_data_sync_dirs
 from volpred.data.manager import DataManager
 from volpred.publisher.publisher import Publisher
 
@@ -92,8 +93,8 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
     """Generate a rich 每日建議 article with chart, VIX interpretation, and advice.
 
     This runs as part of daily_update.py (system crontab) and requires zero
-    Claude session dependency.  It creates a draft article that the hourly
-    release-pool cron will publish.
+    Claude session dependency. Because daily recommendations are time-sensitive,
+    they should be published immediately instead of waiting in the content pool.
 
     Returns the pub_id of the created article, or None if skipped.
     """
@@ -242,14 +243,14 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
 *免責聲明：本文僅供研究參考，不構成投資建議。*
 """
 
-    # --- Publish as draft (hourly cron will release) ---
+    # --- Publish immediately (daily recommendation is time-sensitive) ---
     title = f"每日策略建議：VIX {vix_display}（{regime_name}）— {today}"
     pub_id = pub.publish_milestone(
         title=title,
         tags=["每日建議", "VIX", "策略配置"],
         description=content,
         phase="daily_recommendation",
-        status="draft",
+        status="published",
         audience="daily",
         category="general",
         details={
@@ -269,7 +270,7 @@ def generate_daily_article(pub, strat_list, vix_level, sigma_gjr_ann, spy_close,
         },
     )
 
-    print(f"  Daily recommendation article created: {pub_id} (status=draft)")
+    print(f"  Daily recommendation article created: {pub_id} (status=published)")
     return pub_id
 
 
@@ -885,32 +886,37 @@ def main():
 
     # --- Sync static data ---
     storage = Path("storage")
-    pub_data = Path("frontend/public/data")
-    pub_data.mkdir(parents=True, exist_ok=True)
-    for src, dst in [
-        ("memory/research_log.json", "research_log.json"),
-        ("memory/knowledge.json", "knowledge.json"),
-        ("memory/experiments.json", "experiments.json"),
-        ("memory/thinking_journal.json", "thinking_journal.json"),
-        ("memory/open_questions.json", "open_questions.json"),
-        ("reports/feed.json", "feed.json"),
-    ]:
-        s = storage / src
-        if s.exists():
-            shutil.copy2(s, pub_data / dst)
-    (pub_data / "reports").mkdir(exist_ok=True)
-    for f in (storage / "reports").glob("*.json"):
-        shutil.copy2(f, pub_data / "reports" / f.name)
-    # Sort feed
-    fp = pub_data / "feed.json"
-    feed = json.loads(fp.read_text())
+    feed_source = storage / "reports" / "feed.json"
+    feed = json.loads(feed_source.read_text()) if feed_source.exists() else []
     feed.sort(key=lambda x: x.get("published_at") or "", reverse=True)
-    fp.write_text(json.dumps(feed, indent=2, ensure_ascii=False, default=str))
+    sorted_feed = json.dumps(feed, indent=2, ensure_ascii=False, default=str)
 
-    print(f"  Published + synced locally. Feed: {len(feed)} items")
+    data_sync_dirs = get_local_data_sync_dirs(active_only=True)
+    if data_sync_dirs:
+        for data_dir in data_sync_dirs:
+            data_dir.mkdir(parents=True, exist_ok=True)
+            for src, dst in [
+                ("memory/research_log.json", "research_log.json"),
+                ("memory/knowledge.json", "knowledge.json"),
+                ("memory/experiments.json", "experiments.json"),
+                ("memory/thinking_journal.json", "thinking_journal.json"),
+                ("memory/open_questions.json", "open_questions.json"),
+            ]:
+                source_path = storage / src
+                if source_path.exists():
+                    shutil.copy2(source_path, data_dir / dst)
+            if feed_source.exists():
+                (data_dir / "feed.json").write_text(sorted_feed)
+            report_dir = data_dir / "reports"
+            report_dir.mkdir(exist_ok=True)
+            for report_file in (storage / "reports").glob("*.json"):
+                shutil.copy2(report_file, report_dir / report_file.name)
+        print(f"  Published + synced locally to {len(data_sync_dirs)} configured data mirror(s). Feed: {len(feed)} items")
+    else:
+        print(f"  Published locally. Feed: {len(feed)} items (no configured local data mirrors)")
 
     # --- Sync to Mirror API ---
-    mirror_url = os.environ.get("VOLPRED_MIRROR_URL", "https://mirror-api.zeabur.app")
+    mirror_url = os.environ.get("VOLPRED_MIRROR_URL", get_default_mirror_url())
     mirror_token = os.environ.get("RESEARCH_MIRROR_TOKEN", "")
     if mirror_url and mirror_token:
         import urllib.request
@@ -1019,12 +1025,28 @@ def main():
                         sync_paper_trade(strat_id, enriched, trade_date)
                         pt_synced += 1
         print(f"  Supabase: {pt_synced} paper trades synced (last 30d × {len(strat_list)} strategies)")
-        # Sync today's market_daily row to Supabase
-        today_market = pt.get("_market_daily", {}).get(today)
-        if today_market:
-            from supabase_sync import _post
-            _post("market_daily", {"trade_date": today, **today_market})
-            print(f"  Supabase: market_daily synced for {today}")
+        # Sync market_daily to Supabase — last 30 days (backfills any prior failures)
+        # 2026-04-17 fix: previously only synced today, and silently failed with
+        # HTTP 400 because `overnight_gap`/`gap_alert_level` keys aren't in
+        # market_daily schema. Now _post() filters to whitelist automatically,
+        # and CONFLICT_KEYS["market_daily"]="trade_date" makes it idempotent.
+        from supabase_sync import _post
+        local_md = pt.get("_market_daily", {})
+        md_dates = sorted(local_md.keys())[-30:]
+        md_synced = 0
+        md_failed = 0
+        for d in md_dates:
+            row = {"trade_date": d, **(local_md[d] or {})}
+            # _post() strips non-schema keys and upserts on trade_date
+            ok = _post("market_daily", row)
+            if ok:
+                md_synced += 1
+            else:
+                md_failed += 1
+        if md_failed:
+            print(f"  ⚠️ Supabase: market_daily synced {md_synced}/{len(md_dates)} (FAILED {md_failed})")
+        else:
+            print(f"  Supabase: market_daily synced {md_synced}/{len(md_dates)} dates")
     except Exception as e:
         print(f"  Supabase sync skipped: {e}")
 

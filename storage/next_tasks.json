@@ -471,8 +471,9 @@
     "id": "K1127",
     "title": "K1127: Cross-asset OFI lead-lag (TX vs ES via overnight)",
     "priority": 3,
-    "description": "K1124 衍生：延伸 K1100g night→day channel，跨市場 OFI lead-lag。",
-    "status": "pending"
+    "description": "K1124 衍生：延伸 K1100g night→day channel，跨市場 OFI lead-lag。 [DONE commit 6ac6613d: Scenario D - OFI local not cross-market, RV co-movement is news-driven. K1100g_d1 asymmetric signal 2x independently failed.]",
+    "status": "completed",
+    "completed_at": "2026-04-17T16:55:00+08:00"
   },
   {
     "id": "leverage_direction_review_v2",
@@ -711,8 +712,9 @@
     "id": "K1161",
     "title": "K1161: Options-implied IV crush as continuous EAV regressor",
     "priority": 3,
-    "description": "K1151 yfinance Surprise(%) noisy。改用 30-day IV at T-1 minus T+1 (IV crush) 作為市場彙總 continuous expected impact。OptionMetrics 或 polygon API 需要付費；先試 yfinance options chain 拼湊。",
-    "status": "pending"
+    "description": "K1151 yfinance Surprise(%) noisy。改用 30-day IV at T-1 minus T+1 (IV crush) 作為市場彙總 continuous expected impact。OptionMetrics 或 polygon API 需要付費；先試 yfinance options chain 拼湊。 [DONE commit 6af9df49: DATA_INFEASIBLE. yfinance 歷史 options chain 不足。 Paper 2 §5 不升級。K1161b 待付費 data source。]",
+    "status": "completed",
+    "completed_at": "2026-04-17T16:30:00+08:00"
   },
   {
     "id": "K1162",
@@ -973,5 +975,12 @@
     "priority": 3,
     "status": "pending",
     "description": "Prepare Paper 4 §4 results table and cover figure for channel-specific narrative. 3x4 table (3 channels x 4 asset classes: equity/commodity/bond/FX). Requires Paper 4 narrative pivot decision first (Paper4_channel_specific_pivot)."
+  },
+  {
+    "id": "K1161b_paid_options_data",
+    "title": "K1161b: IV crush retry with paid options data (ThetaData / OptionMetrics)",
+    "priority": 4,
+    "status": "blocked_on_user",
+    "description": "K1161 DATA_INFEASIBLE due to yfinance free options chain history limit (~90d per contract). Requires paid data source: ThetaData Standard (~$50/mo), OptionMetrics IvyDB (academic), HistoricalOptionData.com, or Bloomberg OVDV. 需用戶決定是否訂閱，否則此路線 blocked."
   }
 ]
