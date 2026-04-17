@@ -1,0 +1,19 @@
+
+========================================================================
+K1172: per-stock refit + pooled MLE for new markets (MX, ZA, ID)
+========================================================================
+
+[MX] loaded 10/10 (skipped: [])
+[ZA] loaded 0/10 (skipped: ['NPN.JO', 'BHG.JO', 'AGL.JO', 'SOL.JO', 'MTN.JO', 'SBK.JO', 'FSR.JO', 'ABG.JO', 'SLM.JO', 'CPI.JO'])
+[ID] loaded 10/10 (skipped: [])
+
+[per-stock] MP n_workers=8
+  fits done in 2.1s (20 stocks)
+  wrote /Users/yhlai0911/Desktop/volpred-research/.claude/worktrees/agent-ab1e3cd3/experiments/k1172/k1172_per_stock_table_newmkts.csv
+
+[pooled] per-market pooled MLE (shared MIDAS + stock-FE GJR)
+  MX: pooled fit (1.1s) theta_EAV=4.150e-04 t=11.26
+  ID: pooled fit (0.2s) theta_EAV=9.669e-05 t=4.90
+  wrote k1172_pooled_by_market.json
+
+[done] total 6.7s
