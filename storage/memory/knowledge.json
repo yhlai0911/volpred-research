@@ -27764,5 +27764,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-18T03:23:32.435487"
+  },
+  {
+    "item_id": "f183db4d",
+    "category": "K1100g_d8",
+    "content": "K1100g_d8 Hansen skewed-t innovation on N225+SPY STILL_BORDERLINE preliminary. OOS n=1465 refit_every=25. N225 DM gap_sk vs base_sk t=-1.333 (sign FLIPPED from d7 +2.32) QLIKE imp=-0.69%. SPY DM t=-1.742 (flipped from d7 +0.66). N225 DM innov_gap skewt vs student t=-0.82 no improvement; SPY t=+1.883 borderline (p~0.06). LRT lambda=0 restriction dof=1: N225 chi\u00b2=0.00 (skew absorbed by PRG); SPY chi\u00b2=101-144 significant. KEY CAVEAT: d7 used refit_every=5, d8 dropped to 25 for speed \u2014 sign flip likely refit-cadence artifact not skewed-t effect. SkewT params (eta, lambda) near-fixed at warm-start (8.00, -0.100) suggest (a) likelihood flat or (b) warm-start artifact. Paper 3 narrative: d7 DIRECTION_CONSISTENT_ALL_BORDERLINE stands, Paper 3 canonical innovation remains Student-t. Path (b) NOT triggered by d8. Follow-up K1100g_d9: rerun with d7 cadence (refit_every=5, n_restarts=10) to disambiguate caveat 1.",
+    "evidence": [
+      "experiments/k1100g_d8/k1100g_d8_results.json",
+      "commit e1e161b1"
+    ],
+    "confidence": 0.75,
+    "created_at": "2026-04-18T03:28:41.475895"
   }
 ]
