@@ -1017,14 +1017,16 @@
     "title": "K1203: EEM PIT alt-data test — complete Paper 4 7/7 panorama",
     "priority": 3,
     "description": "K1201 completed QQQ+USO PIT NULL; Paper 4 panorama now 6/7 (SPY/GLD/TLT/BTC/QQQ/USO). EEM remaining. Test weekly AR(1)+IV vs +alt-data (epu/finstress/all) with K1116f PIT lags for ^EEM (or VXEEM proxy if available). agent-launchable 2h.",
-    "status": "pending",
+    "status": "completed",
     "created_at": "2026-04-18T01:34:47.609307",
     "tags": [
       "K1116-followup",
       "Paper4",
       "EEM",
       "PIT"
-    ]
+    ],
+    "completed_at": "2026-04-18T01:46:41.583067",
+    "outcome": "UNIVERSAL_NULL_7_OF_7: EEM DM max |t|=3.54 (epu), zero Harvey pass. Paper 4 body gate UNLOCKED."
   },
   {
     "id": "K1202b_primary_source_verify",
@@ -1038,6 +1040,19 @@
       "Paper2",
       "submission-gate",
       "reviewer-defense"
+    ]
+  },
+  {
+    "id": "Paper4_body_rewrite",
+    "title": "Paper 4 body_v4.tex rewrite: incorporate K1203 + UNIVERSAL_NULL_7_OF_7 FINAL claim",
+    "priority": 4,
+    "description": "Paper 4 body.tex rewrite gate UNLOCKED via K1116c+K1116f+K1201+K1203 4-experiment quorum. Main thread: body_v4.tex new section on 7-asset panorama + ^VXEEM delisting caveat + TLT finstress regime-artefact footnote. FINAL native-IV sufficiency claim.",
+    "status": "pending",
+    "created_at": "2026-04-18T01:46:41.583082",
+    "tags": [
+      "Paper4",
+      "body-rewrite",
+      "narrative-final"
     ]
   }
 ]

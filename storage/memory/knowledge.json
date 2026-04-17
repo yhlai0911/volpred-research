@@ -27621,5 +27621,27 @@
     ],
     "confidence": 0.85,
     "created_at": "2026-04-18T01:41:26.405666"
+  },
+  {
+    "item_id": "28ac0d4d",
+    "category": "K1203",
+    "content": "K1203 EEM PIT NULL closes Paper 4 7-asset panorama UNIVERSAL_NULL_7_OF_7. EEM DM t (pit_shift0, ^VIX baseline): base -2.60, epu -3.54, finstress -1.43, all -1.00. Zero challenger |t|>3. rv30 robustness same NULL (best alt QLIKE imp +0.09%). ^VXEEM delisted from yfinance 2026-04-17 HTTP 404; used ^VIX (SPX spillover proxy, EEM-VIX corr ~0.75) + rv30 dual-baseline robustness. 7-asset panorama final: SPY (K1116c) + GLD + BTC (K1116f) + QQQ + USO (K1201) + EEM (K1203) all NULL. 28 cells, only TLT finstress +3.74 > +3 (K1116f already proved lag-sensitive collapse at pit_shift1). Paper 4 body.tex rewrite gate UNLOCKED: 4/4 criteria passed (7/7 coverage + 4 complementary experiments + no unexplained outliers + EEM primary NULL). Per CLAUDE.md narrative state machine: main thread can now proceed to body rewrite stage for Paper 4 universal native-IV sufficiency FINAL.",
+    "evidence": [
+      "experiments/k1203/k1203_results.json",
+      "commit 477c504a"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-04-18T01:46:41.387637"
+  },
+  {
+    "item_id": "8af36917",
+    "category": "Paper4_synthesis",
+    "content": "Paper 4 (vix-sufficiency) UNIVERSAL_NULL_7_OF_7 PANORAMA COMPLETE \u2014 body rewrite gate UNLOCKED. 4 complementary experiments narrative-state-machine quorum: K1116c (SPY ROBUST NULL) + K1116f (GLD/TLT/BTC extension, TLT M4 caveat weak) + K1201 (QQQ/USO extension, USO epu t=-5.60 STRONGEST NULL) + K1203 (EEM closes gap with ^VIX+rv30 dual-baseline). 28 cells tested under PIT publication lag; only TLT finstress +3.74 (pit_shift0) outlier, K1116f proved pit_shift1 collapse to +2.00 + QLIKE 5% gate fail. Paper 4 narrative FINAL: native IV proxies (^VIX/^VXN/^OVX/^VXEEM when available + rv30 robust) are sufficient; alt-data (EPU, FinStress, joint) cannot deliver Harvey-level improvement under PIT. Main thread can begin body_v4.tex rewrite incorporating K1203 + UNIVERSAL claim + TLT regime-artefact footnote.",
+    "evidence": [
+      "K1116c K1116f K1201 K1203",
+      "commits 477c504a 87059567"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-04-18T01:46:41.512147"
   }
 ]
