@@ -1,0 +1,88 @@
+{
+  "experiment_id": "K1226",
+  "produced_at": "2026-04-18",
+  "produced_by": "worktree agent agent-ad8509ed",
+  "purpose": "Final session 2026-04-17 close briefing — supersedes K1212 delta / K1219 dashboard / K1220 briefing / K1222 (K1222b active).",
+  "supersedes": ["K1212", "K1219", "K1220"],
+  "references": ["K1216c ROOT_CAUSE_METHODOLOGY", "K1222b FINAL revision guide", "K1223 Paper 6 edit guide", "K1224 Paper 1 edit guide"],
+  "seed": 42,
+  "session_stats": {
+    "duration_hours_approx": "14+",
+    "k_experiments_approx": 45,
+    "spend_estimate_usd": "3500-4000",
+    "paper_markdown_words_total": 30000,
+    "knowledge_entries_added_approx": 90,
+    "drafts_or_guides_produced": 18
+  },
+  "critical_update_since_k1220": {
+    "source": "K1216c (commit 3cf6bc84)",
+    "verdict": "ROOT_CAUSE_METHODOLOGY (9/9 markets multistart-FRAGILE)",
+    "dev_lr_stats": {"US": 2836.68, "EU": 837.97, "JP": 235.57, "TW": 587.78},
+    "em_plus_au_lr_stats_range": [146, 598],
+    "spearman_trajectory": [
+      {"scenario": "K1172 canonical N=12", "rho": 0.441, "p": 0.152, "n": 12},
+      {"scenario": "K1216b asymmetric 5EM refined + 4DEV canonical N=13", "rho": -0.071, "p": 0.817, "n": 13, "flag": "ARTEFACT_SUPERSEDED"},
+      {"scenario": "K1216c FINAL 9-market panel-wide refined N=13", "rho": 0.379, "p": 0.201, "n": 13, "flag": "ACTIVE"}
+    ],
+    "fisher_z_canonical_vs_refined": {"z_stat": 0.16, "p_two_sided": 0.87, "verdict": "statistically indistinguishable"},
+    "narrative_state": "REBOUND — ladder MODESTLY WEAKER BUT SURVIVING + NEW multistart methodology contribution (Paper 2 §5.4)"
+  },
+  "paper_status_matrix": [
+    {"paper": "Paper 1 leverage-direction", "primary_drafts": ["K1209 Batch 2 (3574 words)"], "edit_guide": "K1224 (7 items, 60-90 min)", "user_decision": "none", "status": "READY"},
+    {"paper": "Paper 2 taiwan-vt", "primary_drafts": ["K1211 (SUPERSEDED)", "K1215 (SUPERSEDED)", "K1222 (SUPERSEDED)", "K1222b FINAL (2925 words)"], "edit_guide": "K1222b revision guide (13 cherry-pick items) + pending K1226b rewrite-ticket", "user_decision": "confirm K1222b adoption (15 min read)", "status": "READY_PENDING_15MIN_REVIEW"},
+    {"paper": "Paper 3 vt-trend-following", "primary_drafts": ["K1217 CONDITIONAL (4991 words)"], "edit_guide": "pending", "user_decision": "pivot a/b/c (K1205 recommends b)", "status": "BLOCKED"},
+    {"paper": "Paper 4 vix-sufficiency", "primary_drafts": ["K1208 UNIVERSAL_NULL (1762 words)"], "edit_guide": "K1225 dual-framing A/B (not yet produced this session)", "user_decision": "CONFLICT-A4 Version A vs B", "status": "BLOCKED"},
+    {"paper": "Paper 6 prg-periodic-garch", "target_journal": "Finance Research Letters", "primary_drafts": ["K1218 Appendix A (930 words)"], "edit_guide": "K1223 (6 items, 80-120 min)", "user_decision": "none", "status": "READY"},
+    {"paper": "NEW BTC GAS negative paper", "target_journal_primary": "Journal of Empirical Finance", "target_journal_fallback": "JFEC", "primary_drafts": ["K1214 (4829 words)"], "edit_guide": "none", "user_decision": "go/no-go + paper slot confirmation", "status": "BLOCKED"}
+  ],
+  "paper_status_counts": {"READY": 3, "BLOCKED": 3, "total": 6},
+  "decision_gates": [
+    {"id": "P1", "priority": "HIGH", "gate": "Paper 2 §5 — adopt K1222b FINAL (ρ=+0.379 REBOUND + multistart methodology contribution)", "change_vs_k1220": "REVISED — K1216c resolves path selection; K1222b is consolidated answer", "action": "Read K1222b revision guide + confirm adoption", "time_min": 15, "impact": "Paper 2 submission credibility + new §5.4 methodological contribution"},
+    {"id": "P2", "priority": "MEDIUM", "gate": "Paper 4 CONFLICT-A4 (channel-specific vs UNIVERSAL_NULL)", "change_vs_k1220": "UNCHANGED", "action": "Pick Version A or Version B framing", "time_min": 5, "impact": "Paper 4 body_v4 rewrite unblock"},
+    {"id": "P3", "priority": "MEDIUM", "gate": "Paper 3 K1128 pivot (a/b/c) — K1205 recommends b", "change_vs_k1220": "UNCHANGED", "action": "Commit path", "time_min": 30, "impact": "Paper 3 narrative commit"},
+    {"id": "P4", "priority": "LOW", "gate": "BTC GAS negative paper go/no-go", "change_vs_k1220": "UNCHANGED", "action": "Confirm new paper slot", "time_min": 5, "impact": "New paper pipeline"},
+    {"id": "P5", "priority": "LOW", "gate": "Approve K1224 Paper 1 Batch 2 execution", "change_vs_k1220": "UNCHANGED", "action": "2 min approval", "time_min": 2, "impact": "JBF reproducibility audit cleared"},
+    {"id": "P6", "priority": "LOW", "gate": "Approve K1223 Paper 6 Appendix A + errata execution", "change_vs_k1220": "UNCHANGED", "action": "2 min approval", "time_min": 2, "impact": "FRL submission path clear"}
+  ],
+  "immediate_ready_actions": [
+    {"step": 1, "action": "K1224 → Paper 1 body_v4", "time_min_range": [60, 90], "items": 7, "outputs": ["paper/leverage-direction/body_v4.tex", "main_v4.tex", "experiments.md"], "close_commands": ["xelatex main_v4", "xelatex main_v4", "uv run volpred ops paper-update --paper-id leverage-direction", "git commit"]},
+    {"step": 2, "action": "K1223 → Paper 6 body_v2 + Appendix A", "time_min_range": [80, 120], "items": 6, "canonical_numbers_k1200": {"GJR_QLIKE": [0.8542, 0.8544], "PRG_Extended_QLIKE": [0.7478, 0.7355], "DM_t": [6.004, 6.128], "Spearman_rho": [0.5678, 0.5761], "OOS": [1823, 1823]}, "close_commands": ["xelatex main", "xelatex main", "uv run volpred ops paper-update --paper-id prg-periodic-garch", "git commit"]}
+  ],
+  "execution_plan_next_session": {
+    "immediate_no_decision_min": [140, 210],
+    "per_decision_approx_min": 60,
+    "longer_term_followups": [
+      "K1100g_d9 N225 asymmetric-t sign flip disambiguation",
+      "K1202b primary-source hand-verify (Paper 2 foundry credibility)",
+      "Paper 2 §5 body add K1216c multistart methodology §5.4",
+      "K1216d optional — 100-multistart on CA/HK/KR (3 unaudited markets); expected ρ ∈ [0.30, 0.50]",
+      "K1173 aggregate ρ rebuild against panel-wide refined inputs",
+      "Figure 5H — 3-scenario Spearman trajectory panel"
+    ]
+  },
+  "blocked_persistent": [
+    "K1100h Dropbox tick TAIFEX 2017-2021",
+    "K1116d FRED_API_KEY missing",
+    "K1161b paid options data",
+    "K1175 GDELT/GCP BigQuery capacity",
+    "I4 yfinance VIX futures gap"
+  ],
+  "compliance": {
+    "output_files": ["k1226_master_index.md", "k1226_decision_snapshot.json", "README.md"],
+    "no_tex_output": true,
+    "no_shared_state_writes": true,
+    "worktree_scope": "experiments/k1226/",
+    "numbers_verbatim_from_upstream": true,
+    "seed_declared": 42
+  },
+  "source_traceability": {
+    "k1212": "experiments/k1212/k1212_research_program_delta.md",
+    "k1219": "experiments/k1219/k1219_dashboard.md",
+    "k1220": "experiments/k1220/k1220_executive_briefing.md",
+    "k1216c": "experiments/k1216c/README.md + results.json + k1216c_9market_trajectory.png",
+    "k1222b": "experiments/k1222b/k1222b_revision_guide.md + k1222b_vs_k1222_diff.json",
+    "k1223": "experiments/k1223/k1223_edit_guide.md + k1223_edit_items.json",
+    "k1224": "experiments/k1224/k1224_edit_guide.md + k1224_edit_items.json",
+    "knowledge_top_ids": ["f63b6e01 K1216c", "b40d669f K1216b", "5cf52ce6 K1216", "e4d376ad K1213", "5d2d2435 K1207"]
+  }
+}
