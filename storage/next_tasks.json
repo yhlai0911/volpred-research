@@ -1258,16 +1258,17 @@
   {
     "id": "Paper3_D2_Table5_international_13markets",
     "title": "Paper 3 BLOCKER: Table 5 International r=-0.770 t=15.70 13-market 實驗缺",
-    "status": "pending",
+    "status": "resolved_errata_required",
     "priority": 4,
     "created_at": "2026-04-17T16:30:37+08:00",
-    "description": "Paper 3 audit: Table 5 r=-0.770 t=15.70 ρ=0.830 平均 28.7pp 無法從 K901 重現 (asset set 不同, K901 ~17.3pp, 缺 EWC/VGK/MCHI). **動作**: 建 table5_international_13markets.py 專用實驗. Agent-launchable.",
+    "description": "Paper 3 audit: Table 5 r=-0.770 t=15.70 ρ=0.830 平均 28.7pp 無法從 K901 重現 (asset set 不同, K901 ~17.3pp, 缺 EWC/VGK/MCHI). **動作**: 建 table5_international_13markets.py 專用實驗. Agent-launchable. [K1178 DONE commit ca5ec507: (b) paper errata. Core claim 13/13 improvement + Pearson r=-0.806 match paper -0.770. DIVERGE: avg ΔMDD 24.9 vs 28.7pp (-13%), t 10.25 vs 15.70. NOT REPRODUCIBLE: ρ=0.830 GJR γ vs ΔSharpe (K1178 +0.187 NS). K901 asset set 錯 + 未 auto_adjust 是根因.]",
     "tags": [
       "paper-3",
       "vt-trend-following",
       "blocker",
       "international"
-    ]
+    ],
+    "completed_at": "2026-04-17T17:39:42+08:00"
   },
   {
     "id": "Paper3_H4_TSMOM_1.4pct_origin",
@@ -1709,6 +1710,21 @@
       "paper-1",
       "leverage-direction",
       "kb-footnote",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper3_D2_errata_Table5_and_remove_rho_0.830",
+    "title": "Paper 3 ERRATA: Table 5 update K1178 canonical + REMOVE ρ=0.830 unreproducible claim",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:39:42+08:00",
+    "description": "K1178 (ca5ec507) 確認 Paper 3 Table 5: core claim (13/13 改善, r=-0.806) robust; 但 avg ΔMDD 24.9 vs 28.7 + t 10.25 vs 15.70 需更新; **ρ=0.830 GJR γ vs ΔSharpe 完全 NOT REPRODUCIBLE (K1178 +0.187 NS)** — 可能 fabricated 或 pre-K 原 source 丟失. **主線程 body edit**: (1) Table 5 數字全更新為 K1178 canonical (24.9pp, t=10.25, r=-0.806, ρ_spearman=-0.835); (2) **刪除** 'ρ=0.830 GJR γ vs ΔSharpe' 相關段落 (無法 replicate); (3) Section methodology 補 K1178 提到的 auto_adjust + 13 market list; (4) experiments.md 加 K1178 為 Table 5 source.",
+    "tags": [
+      "paper-3",
+      "vt-trend-following",
+      "errata",
+      "research-integrity",
       "main-thread"
     ]
   }
