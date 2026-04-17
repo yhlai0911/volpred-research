@@ -27786,5 +27786,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-18T06:17:42.367793"
+  },
+  {
+    "item_id": "51de04f5",
+    "category": "K1235",
+    "content": "K1235 Paper 9 FEZ + STOXX50E K949 spec bundle both MISMATCH paper claims, reinforcing direction. FEZ K1235 t_harvey=4.030 (raw 4.031 p=5.6e-05 n=2578, QLIKE 1.1630 vs GJR 1.2219 +4.8% improvement) vs paper 3.45 delta +0.58 (+16.8%). STOXX50E (via ^STOXX50E; ^ESTX50/^SX5E delisted yfinance) K1235 t_harvey=5.010 (raw 5.011 p=5.4e-07 n=2578 QLIKE 0.9034 vs GJR 0.9619 +6.1%) vs paper 3.64 delta +1.37 (+37.6%). Both more-significant than paper - Harvey-sig direction reinforced but specific t-stats differ. Root cause CONFIRMED: Paper 9 Table 6 uses A4f spec (VIX\u00b2, free omega, OOS 2019-2026, refit=63); K949/K1235 uses log-exp tau, constrained omega, OOS 2016-2025, refit=21. Both legitimate variants in Paper 9's 17-spec taxonomy. R2 recommended path (b) spec-clarification footnote + schedule K1235b A4f spec replication to vindicate exact 3.45/3.64. Escalate to (a) full Table 6 replacement only if K1235b also diverges.",
+    "evidence": [
+      "experiments/k1235/",
+      "commit 9bbca5b0"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-04-18T07:10:12.038052"
   }
 ]

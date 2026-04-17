@@ -1184,5 +1184,18 @@
       "Paper2",
       "K1216c-integration"
     ]
+  },
+  {
+    "id": "K1235b_A4f_spec_replication",
+    "title": "K1235b: A4f spec replication on FEZ + STOXX50E to vindicate paper Table 6 claimed t=3.45/3.64",
+    "priority": 3,
+    "description": "K1235 with K949 log-exp spec gave FEZ t=4.03 / STOXX50E t=5.01 (MISMATCH paper 3.45/3.64). Paper 9 Table 6 uses A4f spec (VIX², free ω, OOS 2019-2026, refit=63). K1235b replicates A4f spec on same 2 tickers. If A4f matches 3.45/3.64 → paper claim vindicated (path a), no errata needed. If also MISMATCH → path (a) full Table 6 replacement required.",
+    "status": "pending",
+    "created_at": "2026-04-18T07:10:12.244743",
+    "tags": [
+      "K1235-followup",
+      "Paper9",
+      "A4f-spec"
+    ]
   }
 ]
