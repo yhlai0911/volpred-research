@@ -27654,5 +27654,16 @@
     ],
     "confidence": 0.88,
     "created_at": "2026-04-18T01:56:27.207882"
+  },
+  {
+    "item_id": "aab5c94b",
+    "category": "K1205",
+    "content": "K1205 Paper 3 K1128 4-branch synthesis \u2014 recommends path (b) hybrid null+positive negative-result methodology paper. Integrity check 7/7 PASS: Lee-Mykland jumps 115, Gumbel threshold, IS VIX cutoffs, M_base beta all cross-experiment consistent. K1142 vs K1199 M_volnorm AUC difference (0.594 vs 0.671) is documented implementation choice (K1199 sigma fallback) not bug; K1142 is paper-canonical. K1128 raw ll_oos was negative log-loss, sign-flipped to unify units. 4-branch result panorama: K1128 degenerate OOS coverage 0/854/20060; K1131 spline DM t=-3.93; K1199 expanding DM t=+1.14; K1142 vol-norm AUC 0.594 DM t=+2.25 PARTIAL (|t|>2 methodological pass, Harvey |t|>3 fail). Path recommendation: (b) Hybrid \u2014 4-branch honest null combined with K1142 vol-norm partial positive cell feasible as negative-result methodology paper with complete evidence, not overclaimed. Outputs: synthesis_table.csv + integrity_report.txt + Figures A/B/C (panels bar / regime coverage / ROC) publication-quality PNG 300 dpi + PDF.",
+    "evidence": [
+      "experiments/k1205/k1205_results.json",
+      "commit e7088770"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-18T01:57:46.126419"
   }
 ]
