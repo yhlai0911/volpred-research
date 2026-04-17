@@ -29,7 +29,11 @@
       "Bash(git checkout:*)",
       "Bash(rm -rf .claude/skills/journal-review-report .agents/skills/journal-review-report)",
       "Bash(rm .claude/skills/academic-finance-reviewer/SKILL.md)",
-      "Bash(rm .agents/skills/academic-finance-reviewer/SKILL.md)"
+      "Bash(rm .agents/skills/academic-finance-reviewer/SKILL.md)",
+      "Bash(awk '{print $5, $9}')",
+      "Bash(awk '{print $NF}')",
+      "Bash(find *)",
+      "Bash(VERIFY_BASE_URL=https://volpred.zeabur.app node scripts/verify-regressions.mjs)"
     ]
   }
 }
