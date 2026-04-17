@@ -27050,5 +27050,16 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T17:11:50.927992"
+  },
+  {
+    "item_id": "9be32b13",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Paper 6 (prg-periodic-garch) reproducibility audit. **Score: 90% coverage (85 numbers, 56 matched, 10 divergent, 9 partial). Readiness: NEEDS-FIX (conditional). FRL target.** **DIV-1 BLOCKER methodological question**: Paper SPY \u4e3b\u8981\u7d50\u679c (QLIKE=0.748, DM=6.00, Spearman=0.568) \u5168\u4f86\u81ea K880 \u539f\u59cb\u7248. K880 metadata \u6a19\u8a18\u6709 lookahead bug; K880v2 \u4fee\u6b63\u7248 QLIKE=0.8636 DM=-0.57 (\u5b8c\u5168\u7121\u986f\u8457\u512a\u52e2). **Paper Ablation Table 3 \u5be6\u969b\u7528 K880v2 \u7576 '\u5207\u9664\u8de8 session \u9023\u7d50\u5f8c\u7684\u6a21\u578b'**. **\u95dc\u9375**: \u5c0d OHLC \u5e02\u5834 r_{d,0}=log(Open_d/Close_{d-1}) \u5728 intraday session \u958b\u59cb\u524d\u5df2\u77e5 (\u975e lookahead). **K880v2 \u53ef\u80fd over-correction**. \u82e5 overnight return \u662f predetermined conditioning info \u2192 K880 \u6b63\u78ba, K880v2 \u932f, Ablation \u89e3\u91cb\u9700\u6539\u5beb. **\u9700\u4e3b\u7dda\u7a0b verify K880v2 bug1 \u4fee\u6b63\u908f\u8f2f vs Eq.(3) model spec**. **DIV-2 MAJOR**: 0050.TW OOS \u8d77\u59cb paper Table 1 2019/12 vs K886 JSON 2021-01-08 (\u5dee 13 \u6708, n_oos \u4e00\u81f4\u4f46 Spearman n \u4e0d\u4e00\u81f4). **DIV-3 MAJOR**: SPY VaR violation rate paper 0.93% (Kupiec p=0.77) vs K880v2 1.59% (p=0.0196), \u5169\u7248\u90fd\u4e0d\u5339\u914d. **DIV-6 MODERATE**: TAIFEX PRG vs Separate DM=-4.07 \u7121 source (K874d \u7121 Separate \u6bd4\u8f03, K883 \u7d66 -3.30). **DIV-7 MODERATE**: TAIFEX Spearman \u03c1=0.726 \u7121 source (K874d PRG_Ext Spearman=0.537). **PRS 2024 APFM consistency**: session decomposition / TAIFEX data / Harvey-Patton \u4e00\u81f4; PRG = PRS deterministic periodic \u7c21\u5316 \u9023\u63a5\u6e05\u6670. \u552f DIV-1 \u82e5 lookahead \u78ba\u8a8d, PRG \u5c0d PRS 'parsimonious improvement' \u5ba3\u7a31\u9700 revisit. commit 453f921f. Output paper/prg-periodic-garch/reproducibility_audit/.",
+    "evidence": [
+      "paper/prg-periodic-garch/reproducibility_audit/diff_report.md",
+      "paper/prg-periodic-garch/reproducibility_audit/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T17:13:35.403267"
   }
 ]
