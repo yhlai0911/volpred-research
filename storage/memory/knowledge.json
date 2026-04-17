@@ -27223,5 +27223,28 @@
     ],
     "confidence": 0.95,
     "created_at": "2026-04-17T18:12:32.379419"
+  },
+  {
+    "item_id": "28fd5ab5",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] Non-K experiments forensic sweep \u2014 **K1045 pattern \u4e0d\u9069\u7528\u65bc\u5927\u591a non-K folders**. \u6383 47 \u500b non-K experiment \u76ee\u9304, 10 \u500b paper nonK_sweep_report.md \u5168\u7522. **\u4e3b\u8981\u7d50\u8ad6**: \u5927\u591a named non-K folders (jbf_robustness_suite, structural_leverage_panel, taiwan_paper_fixes, vrp_regime_decomposition \u7b49 ~25) \u662f **2026-04-16 planning stubs** \u2014 metrics={}, data_sources=[], \u5f9e\u672a\u57f7\u884c. K1045 pattern (\u672a\u767b\u9304 K \u85cf\u8457\u771f\u5be6\u8cc7\u6599) **\u4e0d\u9069\u7528**\u65bc\u7a7a\u6bbc non-K folders. **\u53ea\u627e\u5230 2 \u500b NONK_UNDOCUMENTED hidden sources**: (1) **Paper 4 vix-sufficiency**: vix_term_structure_vol_pred + v2 \u2014 DM t=-2.21 p=0.027 \u78ba\u8a8d VIX sufficiency (term structure \u7121\u589e\u91cf\u9810\u6e2c\u529b), \u76f4\u63a5\u652f\u6301\u4e3b\u8ad6\u8ff0\u4f46\u672a\u767b\u9304 experiments.md. (2) **Paper 9 garch-x-vix**: garch_midas_test \u2014 GJR QLIKE=1.672 vs GARCH-MIDAS=1.682, \u4f5c\u70ba A4f (1.408) \u9060\u512a\u65bc GARCH-MIDAS \u4f50\u8b49, \u672a\u767b\u9304. **Paper 1 BLOCKER**: 3 \u500b stubs (gjr_vs_ewma_crisis, jbf_robustness_suite, structural_leverage_panel) \u8a2d\u8a08\u70ba\u586b Table 3/7/12 \u7f3a\u53e3\u4f46\u5f9e\u672a\u57f7\u884c \u2014 \u9700 activate \u8207 K1185/K1186/K1187 \u5354\u8abf\u57f7\u884c. **Paper 2 Section 5 TZ momentum \u5b8c\u5168\u7121\u5be6\u9a57 JSON** (BLOCKER \u5df2\u77e5, K1176 \u8655\u7406 Table 4). **Paper 7 / Paper 9 quick-wins**: register 2 non-K folders \u5230 experiments.md (low cost). commit ad6cb402. per-paper reports: paper/*/reproducibility_audit/nonK_sweep_report.md.",
+    "evidence": [
+      "paper/vix-sufficiency/reproducibility_audit/nonK_sweep_report.md",
+      "paper/garch-x-vix/reproducibility_audit/nonK_sweep_report.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T18:15:18.959781"
+  },
+  {
+    "item_id": "d692f491",
+    "category": "experiment",
+    "content": "[\u57f7\u884c: Claude worktree agent, \u4e3b\u7dda\u7a0b recovered] K1179 Paper 2 G12 Section 6.1 import growth formal experiment. **VERDICT: (c) ERRATA PENDING, direction confirmed, magnitude divergent**. 3/3 NO_MATCH (rtol=5%) but **direction \u8207 significance \u5168\u78ba\u8a8d**: Paper partial r=0.214 (p=0.0007) vs K1179 r=0.1888 (p=0.000599): p-value 14% off nearly exact \u2192 partial-r concept \u6b63\u78ba. r magnitude 11.8% off. Paper OOS MSE +5.6% vs K1179 +3.35% (40.1% off): AR1 on RV level, GARCH-MIDAS baseline spec unknown. Paper DM p=0.043 vs K1179 0.0572 (32.9% off): \u908a\u754c significance. **Key insight**: r p-value \u5e7e\u4e4e exact match \u5f37\u8b49\u5be6 partial-r \u6982\u5ff5\u6b63\u78ba. Magnitude \u5dee\u7570\u53cd\u6620 G12 original GARCH-MIDAS implementation \u7d30\u7bc0\u672a recoverable from knowledge.json alone. **\u5efa\u8b70 (c) errata pending**: \u5168 3 statistics directionally correct + statistically consistent \u2014 import YoY is significant predictor of TWII vol. \u5dee\u7570\u53cd\u6620 undocumented GARCH-MIDAS spec \u975e error. Paper body 'spec clarification' flag before PBFJ. K1179 \u4f5c\u70ba formal baseline. Paper 2 G12 doc gap partial resolved. commit ef94120f.",
+    "evidence": [
+      "experiments/k1179/k1179.py",
+      "experiments/k1179/k1179_results.json",
+      "experiments/k1179/k1179_vs_paper2_section6_1_diff.md"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T18:15:57.587843"
   }
 ]

@@ -1828,16 +1828,17 @@
   {
     "id": "Non_K_experiments_forensic_sweep",
     "title": "CRITICAL 未掃到: 非 K 編號 experiments 目錄 ~50 個可能含 paper no-source 數字",
-    "status": "pending",
+    "status": "completed",
     "priority": 4,
     "created_at": "2026-04-17T17:52:41+08:00",
-    "description": "用戶 2026-04-17 發現: rescan 只掃 experiments/k*/ 漏了 ~50 個 non-K 編號目錄. Relevant non-K folders per paper: **Paper 1 JBF**: jbf_robustness_suite, structural_leverage_panel, structural_leverage_index, gjr_vs_ewma_crisis, qlike_error_decomposition, caviar_test. **Paper 2 taiwan**: taiwan_paper_fixes. **Paper 3 VT**: vt_tsmom_cross_asset, rebalance_freq_hybrid_vt, multi_asset_hybrid_vt, multi_asset_hybrid_vt_v2, momentum_overlay_cross_asset_validation. **Paper 4 vix-suff**: vix_sufficiency_boundary, vix_term_structure_vol_pred(_v2), vix_term_structure_trading, vix_zone_cross_period_validation, vix_death_zone_enhanced. **Paper 5 vol-absorption**: vrp_regime_decomposition, rate_hike_vt_experiment. **Paper 6 PRG**: realized_garch_pilot, pairs_trading_garch. **Paper 7 insurance**: vt_insurance_pricing. **Paper 8 ABM**: vt_crowding_simulation, btc_liquidation_abm. **Paper 9 GARCH-X**: garch_midas_test, gld_inventory_vol. **動作**: 啟 agent forensic — 對每個 paper rescan STILL_NO_SOURCE + already-rescanned no-source 重掃, 包含 non-K 目錄 + experiments/ root level 檔. 可能大量降低 STILL_NO_SOURCE count (K1045 pattern 延伸). Agent-launchable.",
+    "description": "用戶 2026-04-17 發現: rescan 只掃 experiments/k*/ 漏了 ~50 個 non-K 編號目錄. Relevant non-K folders per paper: **Paper 1 JBF**: jbf_robustness_suite, structural_leverage_panel, structural_leverage_index, gjr_vs_ewma_crisis, qlike_error_decomposition, caviar_test. **Paper 2 taiwan**: taiwan_paper_fixes. **Paper 3 VT**: vt_tsmom_cross_asset, rebalance_freq_hybrid_vt, multi_asset_hybrid_vt, multi_asset_hybrid_vt_v2, momentum_overlay_cross_asset_validation. **Paper 4 vix-suff**: vix_sufficiency_boundary, vix_term_structure_vol_pred(_v2), vix_term_structure_trading, vix_zone_cross_period_validation, vix_death_zone_enhanced. **Paper 5 vol-absorption**: vrp_regime_decomposition, rate_hike_vt_experiment. **Paper 6 PRG**: realized_garch_pilot, pairs_trading_garch. **Paper 7 insurance**: vt_insurance_pricing. **Paper 8 ABM**: vt_crowding_simulation, btc_liquidation_abm. **Paper 9 GARCH-X**: garch_midas_test, gld_inventory_vol. **動作**: 啟 agent forensic — 對每個 paper rescan STILL_NO_SOURCE + already-rescanned no-source 重掃, 包含 non-K 目錄 + experiments/ root level 檔. 可能大量降低 STILL_NO_SOURCE count (K1045 pattern 延伸). Agent-launchable. [DONE commit ad6cb402: 47 non-K folders scanned. 大多 are 2026-04-16 planning stubs (空殼). Only 2 NONK_UNDOCUMENTED real sources: Paper 4 vix_term_structure_vol_pred(_v2), Paper 9 garch_midas_test. 3 Paper 1 stubs (gjr_vs_ewma_crisis, jbf_robustness_suite, structural_leverage_panel) need 執行 同 K1185/K1186/K1187.]",
     "tags": [
       "forensic",
       "non-K-dirs",
       "all-papers",
       "critical-discovery"
-    ]
+    ],
+    "completed_at": "2026-04-17T18:15:35+08:00"
   },
   {
     "id": "K716_722_file_placement_fixed",
@@ -1923,6 +1924,45 @@
       "footnote",
       "methodology-clarify",
       "main-thread"
+    ]
+  },
+  {
+    "id": "Paper4_experiments_md_add_vix_term_structure",
+    "title": "Paper 4 QUICK WIN: experiments.md 加 vix_term_structure_vol_pred(_v2)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T18:15:35+08:00",
+    "description": "Non-K sweep (ad6cb402) 發現 experiments/vix_term_structure_vol_pred + _v2 是真實 experiment 支持 Paper 4 VIX sufficiency 主論述 (DM t=-2.21 p=0.027, term structure 無增量). 未登錄 paper/vix-sufficiency/experiments.md. 主線程 5 min edit 加入, 解 Paper 4 audit partial no-source.",
+    "tags": [
+      "paper-4",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper9_experiments_md_add_garch_midas_test",
+    "title": "Paper 9 QUICK WIN: experiments.md 加 garch_midas_test",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T18:15:35+08:00",
+    "description": "Non-K sweep 發現 experiments/garch_midas_test 是真實 experiment 支持 Paper 9 A4f vs GARCH-MIDAS 比較 (GJR 1.672 vs MIDAS 1.682, A4f 1.408 遠優). 未登錄 paper/garch-x-vix/experiments.md. 主線程 5 min edit.",
+    "tags": [
+      "paper-9",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper1_stubs_activate_GJR_EWMA_JBF_Leverage",
+    "title": "Paper 1: 3 個 planning stubs 需協調執行 (gjr_vs_ewma_crisis / jbf_robustness_suite / structural_leverage_panel)",
+    "status": "pending",
+    "priority": 3,
+    "created_at": "2026-04-17T18:15:35+08:00",
+    "description": "Non-K sweep 發現 Paper 1 的 3 個 non-K folders 是 planning stubs (metrics={}) 設計為填 Tables 3/7/12 缺口但從未執行. 主線程協調: 當 K1185/K1186/K1187 跑完, 看 Paper 1 各 Table 剩餘 no-source 缺口, 若尚有 stubs 覆蓋的 numbers → agent execute 這些 stubs 而非建新 K. 或最終併成 K1196+ 統一 new experiment. 決策待 K1185-K1188 完成.",
+    "tags": [
+      "paper-1",
+      "stubs-activation",
+      "coordination"
     ]
   }
 ]
