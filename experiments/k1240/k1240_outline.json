@@ -1,0 +1,208 @@
+{
+  "experiment_id": "K1240",
+  "title": "Paper 10 Section 5 (Data Description, complete) + Section 6 (Main Results, skeleton)",
+  "timestamp": "2026-04-17",
+  "seed": 42,
+  "paper": "Paper 10 — The Crypto Fear Channel: Asymmetric BTC-Equity Volatility Spillover",
+  "predecessors": ["K1234", "K1238", "K1239"],
+  "blocking_successor": "K1241",
+  "supporting_experiments": ["K639", "K746b", "K949", "K1025", "K1133b"],
+  "canonical_data_source": "experiments/k1025/k1025_results.json",
+  "worktree_agent": "agent-aa4b5296",
+  "scope": {
+    "section_5_status": "complete_draft",
+    "section_6_status": "skeleton_with_placeholders",
+    "fabrication_check": "no_phi_values_fabricated_all_TBD_flagged"
+  },
+  "section_5": {
+    "label": "Data Description",
+    "target_words": 400,
+    "actual_words": 400,
+    "subsections": [
+      {
+        "id": "5.1",
+        "title": "Summary statistics",
+        "words": 130,
+        "content_source": "K1025 descriptive_statistics",
+        "complete": true,
+        "canonical_values": {
+          "btc_ret_mean": 0.00229,
+          "btc_ret_std": 0.03764,
+          "btc_ret_skew": -0.093,
+          "btc_ret_excess_kurt": 7.579,
+          "spy_ret_mean": 0.00056,
+          "spy_ret_std": 0.01117,
+          "spy_ret_skew": -0.307,
+          "spy_ret_excess_kurt": 14.150,
+          "vix_mean": 18.382,
+          "vix_std": 7.110,
+          "vix_min": 9.140,
+          "vix_max": 82.690,
+          "btc_rv20_mean": 0.5418,
+          "btc_rv20_std": 0.2569,
+          "btc_rv20_min": 0.0980,
+          "btc_rv20_max": 1.7009,
+          "btc_spy_vol_ratio": 3.4,
+          "n_observations": 2812
+        }
+      },
+      {
+        "id": "5.2",
+        "title": "Correlation patterns",
+        "words": 160,
+        "content_source": "K1025 dcc_correlation_by_regime + granger_causality",
+        "complete": true,
+        "canonical_values": {
+          "dcc_low_mean": 0.068,
+          "dcc_normal_mean": 0.265,
+          "dcc_high_mean": 0.449,
+          "dcc_crisis_mean": 0.409,
+          "dcc_low_n": 1037,
+          "dcc_normal_n": 1386,
+          "dcc_high_n": 326,
+          "dcc_crisis_n": 63,
+          "dcc_low_pct_pos": 61.9,
+          "dcc_crisis_pct_pos": 98.4,
+          "granger_vix_to_btc_rv_lag1_F": 6.71,
+          "granger_vix_to_btc_rv_lag1_p": 0.010,
+          "granger_btc_rv_to_vix_lag1_F": 0.64,
+          "granger_btc_rv_to_vix_lag1_p": 0.422
+        }
+      },
+      {
+        "id": "5.3",
+        "title": "Stationarity and autocorrelation",
+        "words": 110,
+        "content_source": "K1025 adf_tests",
+        "complete": true,
+        "canonical_values": {
+          "adf_btc_rv20_stat": -4.898,
+          "adf_btc_rv20_p": 3.5e-05,
+          "adf_btc_rv20_lags": 20,
+          "adf_vix_stat": -5.711,
+          "adf_vix_p": 7.3e-07,
+          "adf_vix_lags": 9,
+          "adf_spy_rv20_stat": -4.460,
+          "adf_spy_rv20_p": 2.3e-04,
+          "adf_spy_rv20_lags": 20,
+          "all_stationary_at_1pct": true
+        }
+      }
+    ],
+    "tables": [
+      {
+        "id": "Table 2",
+        "label": "Descriptive Statistics and Stationarity Tests",
+        "status": "complete_numbers_K1025",
+        "cells_fabricated": 0
+      }
+    ]
+  },
+  "section_6": {
+    "label": "Main Results",
+    "target_words": 600,
+    "actual_words": 600,
+    "subsections": [
+      {
+        "id": "6.1",
+        "title": "Primary Finding: Fear-Channel Transmission",
+        "words": 180,
+        "skeleton": true,
+        "pending_experiment": "K1241",
+        "table_id": "Table 3",
+        "table_columns": ["spec", "phi_hat", "SE", "t_HLN", "LRT_p", "QLIKE", "Harvey_pass"],
+        "table_rows": ["GARCH(1,1)", "GJR-GARCH(1,1,1)", "GARCH(1,1)-X(VIX^2)", "MF-GJR(1,1,1)-X(VIX^2)"],
+        "decision_rule": "Harvey (2016) |t_HLN| > 3.0 threshold",
+        "hypothesis": "H0: phi = 0 vs H1: phi > 0 (one-sided)"
+      },
+      {
+        "id": "6.2",
+        "title": "Alternative Fear Proxies",
+        "words": 150,
+        "skeleton": true,
+        "pending_experiment": "K1241",
+        "table_id": "Table 4",
+        "proxies": ["VIX level", "VIX^2 (preferred, K949 precedent)", "log(VIX)", "CFIX (crypto-native falsification)"],
+        "cross_reference": "K949 MF-GJR(VIX) theta_1 ≈ 2.1 cross-market"
+      },
+      {
+        "id": "6.3",
+        "title": "Pre- and Post-ETF Split",
+        "words": 150,
+        "skeleton": true,
+        "pending_experiment": "K1241",
+        "table_id": "Table 5",
+        "splits": [
+          {"name": "Pre-ETF", "start": "2015-02-02", "end": "2023-12-31"},
+          {"name": "Post-ETF", "start": "2024-01-01", "end": "2026-04-08"}
+        ],
+        "k1025_subperiod_reference": {
+          "covid_2020_F": 11.05,
+          "covid_2020_p": 7.94e-07,
+          "covid_2020_n": 253,
+          "other_four_subpanels": "all insignificant at 10%"
+        },
+        "motivation": "K1133b structural break + U.S. spot-BTC ETF approval 2024-01"
+      },
+      {
+        "id": "6.4",
+        "title": "Granger Causality Direction",
+        "words": 120,
+        "skeleton": true,
+        "pending_figure": "Figure 1 (non-critical, buildable from K1025 JSON without new estimation)",
+        "canonical_values_from_K1025": {
+          "vix_to_btc_rv_lag5_F": 3.90,
+          "vix_to_btc_rv_lag5_p": 0.0016,
+          "btc_rv_to_vix_lag5_F": 5.29,
+          "btc_rv_to_vix_lag5_p": 7.7e-05,
+          "btc_neg_to_vix_lag5_F": 6.64,
+          "btc_pos_to_vix_lag5_F": 0.28
+        }
+      }
+    ],
+    "tables_total": 3,
+    "figures_total": 1,
+    "cells_fabricated": 0,
+    "cells_TBD_pending_K1241": 28
+  },
+  "pending_experiments_detail": {
+    "K1241": {
+      "priority": "critical",
+      "blocks": ["Section 6 numerical population"],
+      "specification": "MF-GJR(1,1,1)-X with Student-t innovations on BTC-USD daily log returns, VIX^2 lag-1 as fear regressor",
+      "baselines": ["GARCH(1,1)", "GJR-GARCH(1,1,1)", "GARCH(1,1)-X(VIX^2)"],
+      "fear_proxy_robustness": ["VIX level", "VIX^2", "log(VIX)", "CFIX"],
+      "subsample_splits": ["Pre-ETF 2015-02-02 to 2023-12-31", "Post-ETF 2024-01-01 to 2026-04-08"],
+      "seed": 42,
+      "lookahead_discipline": "signal.shift(1)",
+      "estimated_runtime": "0.5 day worktree agent",
+      "data_dependency": "reuse K1025 data pull or equivalent yfinance cache"
+    },
+    "Figure 1": {
+      "priority": "non-critical",
+      "buildable_from_K1025": true,
+      "new_estimation_required": false,
+      "description": "3-node Granger causality flow diagram with F-statistics at lag 5"
+    }
+  },
+  "compliance": {
+    "research_honesty_principle_1_fabrication": "pass — no phi values fabricated",
+    "research_honesty_principle_9_null_reporting": "pass — honest NULL ($t=-0.98$) planned for §7",
+    "research_honesty_principle_11_lookahead": "pass — signal.shift(1) inherited from K1238/K1239",
+    "worktree_scope": "pass — only experiments/k1240/ files written",
+    "paper_narrative_state_machine": "pass — no body.tex modification",
+    "seed_fixed": 42
+  },
+  "files_produced": [
+    "experiments/k1240/README.md",
+    "experiments/k1240/k1240_s5_s6_draft.md",
+    "experiments/k1240/k1240_outline.json"
+  ],
+  "word_count_summary": {
+    "section_5_target": 400,
+    "section_5_actual": 400,
+    "section_6_target": 600,
+    "section_6_actual": 600,
+    "total": 1000
+  }
+}
