@@ -199,6 +199,12 @@
 - 檢查順序：(1) 有 user-assigned pending → 挑最高優先 (2) 否則 scheduled pending (3) 否則 agent-discovery；每步都先確認 slot 沒滿
 - 每次 idle / discovery pass 必須真的產生可驗證輸出，不可空轉
 - Admin 目前是 observer，不是 canonical control plane；control plane 真正 source of truth 在本機檔案與 ops layer
+- **Cron skip 回覆用 stub**：當 slot 滿或 agent 仍在執行跳過時，回覆 ≤15 字即可（例：`跳過：slot 3/3`）。省 token，避免重複完整 overhead
+- **論文 narrative 更新 state machine**（2026-04-17 新規則，防 Paper 2/4 單一實驗觸發反覆 pivot）：
+  - **不可單一實驗觸發 narrative pivot**。必須 ≥ 3 個互補實驗（如 K1148 trilogy: continuous/binary/cross-market）都完成後，主線程才進入 narrative decision
+  - 進 decision 前，所有 supporting 實驗必須 OOS-verified + Codex/Gemini-reviewed
+  - Narrative pivot 一經 user confirm，寫入 `storage/next_tasks.json` 對應 task 的 `status='decision_made_awaiting_body_rewrite'` 狀態，body rewrite 才開始
+  - 單一實驗結果只能 update `research_program.md` + knowledge.json，不可直接改 paper body.tex
 
 排程與控制面細節：
 

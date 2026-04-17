@@ -911,8 +911,8 @@
     "id": "Paper2_section5_decision",
     "title": "Paper 2 section 5 narrative decision (main thread + 用戶決策)",
     "priority": 1,
-    "status": "pending",
-    "description": "K1148 trilogy verdict: K1148 TW continuous FAIL | K1148_d1 TW binary Marginal FAIL | K1148_d3 firm-char REJECTED | K1148_d2 **US BOTH PASS (t=-5.58, -5.25 p<0.0001)**. **NEW OPTION 4 (recommended)**: keep universal-magnitude claim as panel regularity with IS identification across both markets; US cross-market OOS validates; TW OOS heterogeneity reframes as market-microstructure subsection. Old options superseded: Opt1 (IS-only) too conservative, Opt2 (OOS heterogeneity no attribution) OK but misses US story, Opt3 REJECTED already. Awaiting user final decision between Opt4 (recommended) or Opt1/2."
+    "status": "decision_made_awaiting_body_rewrite",
+    "description": "**DECISION (2026-04-17): Option 4 CONFIRMED by user**. Execute Paper 2 §5 rewrite: (a) keep universal-magnitude claim as IS-identified panel regularity across TW+US; (b) US cross-market OOS validation as main confirmatory evidence (K1148_d2 t=-5.58 p<0.0001, 19/30 stock PASS); (c) TW OOS heterogeneity as subsection (K1148_d1 t=-1.46, 9/29 stock PASS, framed as market-microstructure anomaly); (d) firm-level attribution REJECTED (K1148_d3 no robust differentiator under BH correction, report as exploratory footnote). 主線程執行 body_v2.tex rewrite，須 read 現有 paper/<paper2-dir>/body.tex 和 §5 相關 data tables。"
   },
   {
     "id": "K1148_d3",
@@ -937,18 +937,18 @@
     "description": "K1131 NULL. Try error_log fix #2: expanding-window rolling quantile so VIX tertile cutoffs update each OOS period with latest info. Bypasses both discrete-cutoff degeneracy and IS-extrapolation explosion. Test if regime-switching beta can be identified under adaptive quantile."
   },
   {
-    "id": "K1134_vol_normalized_ofi",
-    "title": "K1134: Volatility-normalized OFI (alternative specification, no VIX-regime)",
+    "id": "K1142_vol_normalized_ofi",
+    "title": "K1142: Volatility-normalized OFI (alternative specification, no VIX-regime)",
     "priority": 3,
     "status": "pending",
-    "description": "K1131 agent suggested alt-direction: instead of VIX-conditional beta, normalize OFI by rolling realized vol. |OFI|/sigma_t_hat provides regime-free standardization. Test if this 繞過 regime-switching 本身. If PASS → K1128 story changes from \"regime-dependent\" to \"vol-normalized signal\"."
+    "description": "K1131 agent suggested alt-direction: instead of VIX-conditional beta, normalize OFI by rolling realized vol. |OFI|/sigma_t_hat provides regime-free standardization. Test if this 繞過 regime-switching 本身. If PASS → K1128 story changes from \"regime-dependent\" to \"vol-normalized signal\". [Renumbered from K1134_vol_normalized_ofi: collision with existing experiments/k1134]"
   },
   {
     "id": "Paper4_channel_specific_pivot",
     "title": "Paper 4 narrative pivot: universal null -> channel-specific claims (主線程 + 用戶決策)",
     "priority": 1,
-    "status": "pending",
-    "description": "K1138 MIXED 結果改寫 Paper 4 narrative. Original \"universal robust null\" claim refuted. New structure: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class heterogeneous (equity PASS, commodity NULL); (2) MIDAS long-run = universal NULL (7 assets); (3) GAS-t = universally unhelpful (equity actively harmful). Supporting experiments: K1117 (event-conditional null), K1130 (regime fix invalidated). 待用戶決策 Paper 4 outline 更新後, 主線程執行 body rewrite."
+    "status": "decision_made_awaiting_body_rewrite",
+    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。"
   },
   {
     "id": "K1139_equity_har_deep_dive",
@@ -958,11 +958,11 @@
     "description": "K1138 equity HAR-VIX channel is endogenous - what is the mechanism? Decompose VIX into realized-vol, skew, term premium components and test which drives the predictive power. If realized-vol component = the driver -> equity VIX channel is essentially realized-vol proxy; if skew/term drives it -> true IV signal."
   },
   {
-    "id": "K1140_gas_t_harm_diagnostic",
-    "title": "K1140: Diagnose why GAS-t actively HARMS equity forecasts (t=-3.27/-2.81)",
+    "id": "K1143_gas_t_harm_diagnostic",
+    "title": "K1143: Diagnose why GAS-t actively HARMS equity forecasts (t=-3.27/-2.81)",
     "priority": 3,
     "status": "pending",
-    "description": "K1138 GAS-t on equity is actively worse. Why? Is it Student-t DoF miscalibration, scaled score oversmoothing, or equity tail asymmetry that breaks symmetric-t assumption? Skew-t GAS might fix (K1135 candidate)."
+    "description": "K1138 GAS-t on equity is actively worse. Why? Is it Student-t DoF miscalibration, scaled score oversmoothing, or equity tail asymmetry that breaks symmetric-t assumption? Skew-t GAS might fix (K1135 candidate). [Renumbered from K1140_gas_t_harm_diagnostic: collision with existing experiments/k1140]"
   },
   {
     "id": "K1141_paper4_writeup_prep",
