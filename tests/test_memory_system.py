@@ -1,3 +1,4 @@
+import json
 import urllib.request
 from pathlib import Path
 
@@ -23,6 +24,34 @@ def test_sync_to_remote_skips_unsupported_file_without_warning(tmp_path: Path, m
     assert called["value"] is False
     captured = capsys.readouterr()
     assert "Mirror sync failed" not in captured.err
+
+
+def test_append_to_index_writes_provenance_entry(tmp_path: Path, monkeypatch):
+    monkeypatch.setenv("VOLPRED_ACTOR", "claude")
+    memory = MemorySystem(storage_dir=str(tmp_path))
+
+    # Disable mirror to keep test hermetic
+    monkeypatch.setattr(MemorySystem, "MIRROR_URL", "")
+    monkeypatch.setattr(MemorySystem, "MIRROR_TOKEN", "")
+
+    memory._append_to_index("experiments.json", {"experiment_id": "test_prov_1", "value": 1})
+    memory._append_to_index("knowledge.json", {"item_id": "K_test_1", "note": "x"})
+
+    log_path = tmp_path / "ops" / "writer_log.jsonl"
+    assert log_path.exists(), "writer_log.jsonl should be created"
+    lines = [json.loads(line) for line in log_path.read_text().splitlines() if line.strip()]
+    assert len(lines) == 2
+
+    subsystems = {entry["subsystem"] for entry in lines}
+    assert subsystems == {"memory"}
+    targets = {entry["target"] for entry in lines}
+    assert targets == {"memory/experiments.json", "memory/knowledge.json"}
+    record_ids = {entry["record_id"] for entry in lines}
+    assert record_ids == {"test_prov_1", "K_test_1"}
+    for entry in lines:
+        assert entry["actor"] == "claude"
+        assert entry["result"] == "ok"
+        assert entry["ts"].endswith("+00:00") or entry["ts"].endswith("Z")
 
 
 def test_reconcile_remote_reports_failures(tmp_path: Path, monkeypatch, capsys):

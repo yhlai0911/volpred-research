@@ -465,9 +465,57 @@ def _agent_matches_task(
     return False
 
 
+def _reclaim_stale_tasks(storage_dir: str) -> list[str]:
+    """Release tasks whose claimed_by agent has gone stale.
+
+    Must be called inside the plane lock. Returns list of reclaimed task IDs.
+    """
+    from .writer_log import append_writer_log
+
+    reclaimed: list[str] = []
+    # Check both claimed and running — an agent that crashed mid-run leaves
+    # running tasks stuck with a stale heartbeat just as surely.
+    for status in ("claimed", "running"):
+        for task in list_tasks(status=status, storage_dir=storage_dir):
+            claimed_by = task.get("claimed_by")
+            if not claimed_by:
+                continue
+            session = _load_agent(str(claimed_by), storage_dir=storage_dir)
+            if not _agent_is_stale(session):
+                continue
+            now = _utc_now()
+            prior_status = task.get("status")
+            task["status"] = "queued"
+            task["claimed_by"] = None
+            task["claimed_at"] = None
+            task["updated_at"] = now
+            task["last_error"] = f"reclaimed_from_stale_{claimed_by}_at_{now}"
+            _atomic_write_json(_task_path(str(task["id"]), storage_dir=storage_dir), task)
+            # Also reset agent's claimed_task_id so the stale session doesn't still "own" it
+            if session is not None:
+                session["claimed_task_id"] = None
+                session["updated_at"] = now
+                _atomic_write_json(_agent_path(str(claimed_by), storage_dir=storage_dir), session)
+            reclaimed.append(str(task["id"]))
+            append_writer_log(
+                subsystem="control_plane",
+                target=f"ops/tasks/{task['id']}",
+                record_id=str(task["id"]),
+                result=f"reclaimed_from_{prior_status}_{claimed_by}",
+                actor="system",
+                storage_dir=storage_dir,
+            )
+    return reclaimed
+
+
 def claim_next_task(agent_name: str, storage_dir: str = "storage") -> dict[str, Any] | None:
     _validate_choice(agent_name, choices=AGENT_NAMES, field_name="agent_name")
     with _plane_lock(storage_dir):
+        # Reclaim any tasks held by stale agents before matching; this also
+        # prevents the current agent being blocked by its own stale previous
+        # claim if its session clock expired.
+        _reclaim_stale_tasks(storage_dir)
+
         current_session = _load_agent(agent_name, storage_dir=storage_dir)
         if current_session:
             active_task_id = current_session.get("claimed_task_id")
@@ -501,6 +549,48 @@ def claim_next_task(agent_name: str, storage_dir: str = "storage") -> dict[str, 
             _atomic_write_json(_agent_path(agent_name, storage_dir=storage_dir), session.to_dict())
             return task
     return None
+
+
+def admin_override_claim(task_id: str, *, agent_name: str, actor: str, storage_dir: str = "storage") -> dict[str, Any]:
+    """Admin-side override: forcibly assign a specific queued task to an agent.
+
+    Normal claim flow is agent-pull (claim_next_task). This is for the Ops
+    console to explicitly assign on behalf of an operator, e.g. to recover a
+    stuck task or pin a task to a specific agent.
+    """
+    from .writer_log import append_writer_log
+
+    _validate_choice(agent_name, choices=AGENT_NAMES, field_name="agent_name")
+    with _plane_lock(storage_dir):
+        task = _load_task(task_id, storage_dir=storage_dir)
+        if task is None:
+            raise ValueError(f"Unknown task: {task_id}")
+        current_status = str(task.get("status"))
+        if current_status in TERMINAL_TASK_STATUSES:
+            raise ValueError(f"Cannot claim a {current_status} task")
+        now = _utc_now()
+        task["status"] = "claimed"
+        task["claimed_by"] = agent_name
+        task["claimed_at"] = now
+        task["updated_at"] = now
+        _atomic_write_json(_task_path(task_id, storage_dir=storage_dir), task)
+        current_session = _load_agent(agent_name, storage_dir=storage_dir)
+        session = _build_agent_session(
+            agent_name=agent_name,
+            current=current_session,
+            status="busy",
+            claimed_task_id=task_id,
+        )
+        _atomic_write_json(_agent_path(agent_name, storage_dir=storage_dir), session.to_dict())
+        append_writer_log(
+            subsystem="control_plane",
+            target=f"ops/tasks/{task_id}",
+            record_id=task_id,
+            result=f"admin_override_claim_by_{agent_name}",
+            actor=actor,
+            storage_dir=storage_dir,
+        )
+    return task
 
 
 def _write_approval(task_id: str, decision: ApprovalDecision, storage_dir: str = "storage") -> None:

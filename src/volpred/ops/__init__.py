@@ -33,6 +33,7 @@ from .experiments import (
 )
 from .hygiene import build_hygiene_report
 from .local_control_plane import (
+    admin_override_claim,
     approve_task,
     build_control_plane_snapshot,
     claim_next_task,
@@ -49,6 +50,7 @@ from .local_control_plane import (
 from .papers import get_paper, list_papers, migrate_paper_pdf_to_storage, upload_paper_pdf, upsert_paper_metadata
 from .rollback import create_rollback_point, list_rollback_points, restore_rollback_point
 from .schedules import build_schedule_report
+from .shared_lock import shared_state_lock
 from .agent_spec import check_agent_specs, import_agent_specs, render_agent_specs
 from .jobs import SUPPORTED_ACTIONS, enqueue_job, get_job, list_jobs, work_loop, work_once
 from .questions import (
@@ -63,6 +65,7 @@ from .sync import run_daily_update, run_recalc_metrics, sync_all
 
 __all__ = [
     "activate_strategy",
+    "admin_override_claim",
     "adopt_experiment_files",
     "answer_internal_question",
     "build_question_rerank_workflow",
@@ -109,6 +112,7 @@ __all__ = [
     "migrate_experiment_files",
     "scaffold_experiment",
     "send_article_notification",
+    "shared_state_lock",
     "send_daily_digest",
     "rerank_member_questions",
     "run_daily_update",

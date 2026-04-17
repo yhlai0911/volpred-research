@@ -57,12 +57,29 @@ Last updated: 2026-04-17
   - `POST/PATCH /api/admin/local-control-plane` now bridge into the canonical Python file-backed control plane, instead of exposing a read-only mirror only
   - `/admin/ops` can create local `storage/ops/tasks/*.json` work items and approve/reject `awaiting_approval` tasks directly from the console
   - Validation still runs through the existing Python control-plane primitives, so admin writes use the same schema and lock-aware path as CLI usage
+- Phase B dual-agent concurrency guardrails are in place (2026-04-17).
+  - `src/volpred/ops/shared_lock.py` exposes `shared_state_lock(name)` (fcntl LOCK_EX at `storage/ops/locks/<name>.lock`)
+  - `src/volpred/memory/system.py` `_append_to_index` now acquires `memory_<stem>` lock + emits writer_log entry
+  - `src/volpred/publisher/publisher.py` `_append_to_feed` now acquires `publisher_feed` lock + emits writer_log entry (also tmp+rename atomic)
+  - `src/volpred/ops/writer_log.py` writes JSONL provenance to `storage/ops/writer_log.jsonl` (`actor` taken from `VOLPRED_ACTOR` env)
+  - `claim_next_task` reclaims tasks held by stale agents (heartbeat > 5 min) back to queued with writer_log trail
+  - New tests: `tests/test_shared_lock.py`, `tests/test_publisher_provenance.py`, `tests/test_stale_reclaim.py` (all green, plus `test_memory_system` extended)
+- Phase C admin UI action closure (2026-04-17).
+  - `admin-local-control-plane.ts` bridge extended with `claim` / `complete` / `fail` / `rollback_restore` operations
+  - `admin_override_claim(task_id, agent_name, actor)` added to the Python control plane (explicit pin overrides normal claim-pull)
+  - OpsConsole adds per-status task actions: Claim (Claude/Codex), Mark Succeeded, Mark Failed (with prompt for reason)
+  - New `/api/admin/rollback-points` GET (list manifests) + POST (dry-run / force restore)
+  - Dedicated Rollback panel in OpsConsole with dropdown + dry-run preview + double-confirm destructive restore
+- Phase D governance trim + invariants doc (2026-04-17).
+  - `research_program.md` trimmed 958 → 513 lines (-47%); archived sections moved to `agent-specs/references/research_program_archive_2026Q2.md`
+  - New `docs/agent-collab-invariants.md` codifies shared-state lock naming, writer-log schema, VOLPRED_ACTOR convention, stale reclaim rules
+- Phase A.1 rollback points pruning executed (2026-04-17).
+  - `scripts/prune_rollback_points.py` extended with `--preserve <id>` flag
+  - `storage/ops/rollback_points/` reduced 13.6GB → 509MB (10 points removed, 14 preserved incl. 2 baselines + latest 11)
 
 ## In Progress
 
-- Website admin is no longer observer-only, but it is not yet the full canonical control plane.
-  - Create + approve/reject are now surfaced in `/admin/ops`
-  - Claim / complete / fail / rollback flows remain primarily local-agent / CLI driven
+_(no active items — Phase B/C/D closed out below)_
 
 ## Remaining
 
