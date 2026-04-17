@@ -1869,10 +1869,10 @@
   {
     "id": "Paper3_TSMOM_systematic_direction_reversal_ERRATA",
     "title": "Paper 3 SYSTEMATIC ERRATA: TSMOM hedge direction 橫跨 Table 3 + 6 方向全反 (research integrity)",
-    "status": "pending_main_thread",
-    "priority": 4,
+    "status": "pending_forensic_first",
+    "priority": 3,
     "created_at": "2026-04-17T17:55:56+08:00",
-    "description": "K1177 (Table 3) + K1192 (Table 6) 雙獨立實驗 + K898 daily 三方 converge: **TSMOM hedging IMPROVES MDD (retention 100%+), NOT degrades (paper 寫 93%)**. Paper 3 narrative 'TSMOM hedging only retains 90-97% of VT protection' 方向完全反. **Systematic research-integrity issue** - Table 3 + Table 6 一致錯. **主線程 body edit** (不可避免, JPM/FAJ 前必做): (1) Table 3 + Table 6 數字全更新 K1177/K1192 canonical; (2) Abstract/Conclusion/Section 4.7 narrative 全改: 'TSMOM hedging retains 100%+ of VT protection and further enhances MDD reduction'; (3) Hedge coefficient γ_HM 解釋符號需翻轉; (4) experiments.md 加 K1177/K1192 為 Table 3/6 source; (5) error_log.md 記 pattern.",
+    "description": "**WALKBACK 2026-04-17**: earlier conclusion \"systematic direction reversal\" premature. Knowledge.json Paper 3 R1 A.1 entry: \"50/50 MDD retention 96% confirmed. TSMOM hedge implementation-sensitive (different regression normalization). MDD protection 96%+ from VIX channel not TSMOM.\" Plus paper3_fixes.json uses Model 2 raw TSMOM + Model 3 orthogonalized TSMOM. K1177/K1192 likely used one implementation, paper used another. **需先跑 K1194 測 raw vs orthogonalized TSMOM 兩種 hedge implementation**, 再決定是否真的 direction reversal. 原始 task 改為 \"待 K1194 forensic 確認\"; 若 K1194 還是得 inverted direction, 才走 errata.",
     "tags": [
       "paper-3",
       "vt-trend-following",
@@ -1880,6 +1880,34 @@
       "systematic-reversal",
       "main-thread",
       "critical"
+    ]
+  },
+  {
+    "id": "K1194_paper3_TSMOM_raw_vs_orthogonal_forensic",
+    "title": "K1194 FORENSIC: Paper 3 raw vs orthogonalized TSMOM hedge (paper3_fixes dual model replication)",
+    "status": "pending",
+    "priority": 4,
+    "created_at": "2026-04-17T17:59:29+08:00",
+    "description": "K1177/K1192 可能用錯 TSMOM implementation, 知識庫明文 Paper 3 TSMOM hedge implementation-sensitive. paper3_fixes.json 同時跑 Model 2 raw TSMOM + Model 3 orth TSMOM. K1194: 對 SPY replicate paper Table 3 + Table 6 metrics 同時用: (A) Raw TSMOM (K1177 用), (B) Orthogonalized TSMOM (perpendicular to 12/VIX), (C) paper3_fixes Model 3 spec, (D) 回歸 normalization 的多種 variants. **找 retention 93% / CI [86,97] 的 canonical implementation**. 若都找不到 → 真的是 direction reversal, 走 errata; 若找到 → K1177/K1192 用錯方法, paper 數字 valid, 只需補 experiments.md + methodology clarification.",
+    "tags": [
+      "paper-3",
+      "tsmom-hedge",
+      "forensic",
+      "implementation-sensitive"
+    ]
+  },
+  {
+    "id": "Lesson_search_knowledge_before_launching_agent",
+    "title": "LESSON 2026-04-17: 啟動 agent 前必搜 knowledge/experience base (實驗前必做 #2)",
+    "status": "completed",
+    "priority": 3,
+    "created_at": "2026-04-17T17:59:29+08:00",
+    "completed_at": "2026-04-17T17:59:29+08:00",
+    "description": "用戶 2026-04-17 提醒: '有查過知識庫或經驗庫嗎？' Audit 過程中主線程忽略了 CLAUDE.md 實驗前必做 #2 (搜尋 knowledge.json 確認是否已有相似 K). 結果 K1177/K1192 agent 可能用錯 TSMOM implementation (raw vs orth 未區分), 進而誤判 'Paper 3 systematic direction reversal' (應為 'implementation-sensitive'). Knowledge entry 早已標 'TSMOM hedge implementation-sensitive (different regression normalization)' — 若主線程先查就能 brief agent 正確. **新規矩**: 啟動 audit 相關 agent 前 (reproducibility 類別), 先 uv run python scripts/build_knowledge_index.py search '<topic>' 檢查歷史 entries.",
+    "tags": [
+      "lesson",
+      "process-improvement",
+      "knowledge-base"
     ]
   }
 ]
