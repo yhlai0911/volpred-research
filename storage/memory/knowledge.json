@@ -27643,5 +27643,16 @@
     ],
     "confidence": 0.92,
     "created_at": "2026-04-18T01:46:41.512147"
+  },
+  {
+    "item_id": "dc0dae86",
+    "category": "K1171",
+    "content": "K1171 ASX +AU HAND_CODED close gap DATA_LIMITED. Fetch: 10/10 AU stocks via IR archive HAND_CODED (Alpha Vantage demo rate-limits ASX symbols; ALPHA_VANTAGE_API_KEY unset). 216 events (BHP/CBA/CSL/NAB/ANZ/WBC/WES/MQG/TLS/RIO 2015-2025 H1/FY). AU pooled theta_EAV=3.16e-5 t=+2.40 p=0.016, theta_rel=0.150 (second-lowest after EU 0.14). AU inst_pct=0.368 rank 7 (mid-ladder) but theta_rel low -> BELOW-LADDER developed-market residual, mirrors BR/IN/MX ABOVE-LADDER pattern. Primary Spearman N=13 +0.385 p=0.194 (vs K1172 N=12 +0.441 p=0.152: delta_rho=-0.056). Drop-AU LOO rho=+0.441 p=0.152 (K1172 exact replicate confirming AU as leverage point). Panel Harvey t(log_analyst joint) K1165->K1171 monotonic: 3.24->3.56->3.63->3.79->3.81. Verdict: DATA_LIMITED gap NOT closed. Interpretation: AU is below-ladder residual likely from (a) ASX Top 10 financial/mining sector bias; (b) semi-annual reporting cadence; (c) HAND_CODED \u00b11 day. Paper 2 \u00a75 narrative: keep STRENGTHENED-with-caveat, add 'AU below-ladder mirrors BR/IN/MX above-ladder => sector composition orthogonal to inst ownership' line. Two-level R\u00b2 structure intact (between inst 0.42, within analyst 0.053).",
+    "evidence": [
+      "experiments/k1171/k1171_results.json",
+      "commit 17436274"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-18T01:56:27.207882"
   }
 ]
