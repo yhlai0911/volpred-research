@@ -26732,5 +26732,26 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T13:47:57.637524"
+  },
+  {
+    "item_id": "8c506331",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1148_d2 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review, \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1161 Options-implied IV crush EAV predictor - **VERDICT: DATA_INFEASIBLE (terminated Step 1 pre-registered rule)**. Coverage 0/1439 events (0.00% << 10% threshold). yfinance historical options chain \u5c0d\u500b\u80a1\u53ea\u6709 ~90 \u5929 reachback\uff0c5/5 \u904e\u671f\u5408\u7d04 canary all returned 'possibly delisted'. Legal free alternatives confirmed insufficient: AlphaVantage/Polygon/ThetaData free tiers \u7686\u7121 10y per-stock IV. Paid data required: ThetaData Standard ~$50/mo, HistoricalOptionData.com, OptionMetrics IvyDB (academic), CBOE DataShop, Bloomberg OVDV. Gemini 4/4 PASS - DATA_INFEASIBLE defensible (prevents hallucination). **Paper 2 \u00a75 implication**: NO IV-crush upgrade candidate. K1148_d2 binary EAV (US OOS t=-5.58) + K1149 factor-absorbed (US t=-3.31, TW t=-2.48) remain the main narrative. IV-crush subsection \u4f5c future work (K1161b future tag), \u9700\u4ed8\u8cbb data source. No results fabricated. Script: experiments/k1161/k1161.py, commit 6af9df49.",
+    "evidence": [
+      "experiments/k1161/k1161.py",
+      "experiments/k1161/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T14:07:23.887760"
+  },
+  {
+    "item_id": "05d1d808",
+    "category": "research_article",
+    "content": "[\u63d0\u51fa: Claude synthesis, \u57f7\u884c: article agent, \u4e3b\u7dda\u7a0b\u9a57\u8b49] Research article mile_363a296e 'Paper 4 channel-specific universal null narrative' draft pool 2026-04-17T06:13Z. ~2000\u5b57 + 3 \u771f\u5be6\u5716\u8868. \u5f15\u7528 K1117/K1123/K1130/K1131/K1136/K1138/K1139. Tags JSON list 8 \u500b\u6b63\u78ba\u672a\u88ab split (\u9a57\u8b49 --tags fix \u751f\u6548). \u6838\u5fc3: universal null \u88ab K1138 equity \u63a8\u7ffb, \u6539 3-channel narrative: HAR+VIX asset-heterogeneous (equity PASS commodity NULL), MIDAS universal null, GAS-t universally unhelpful. K1139 mechanism: VIX \u662f forward-looking IV aggregator \u4e0d\u662f RV proxy.",
+    "evidence": [
+      "storage/reports/mile_363a296e.json"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-17T14:14:16.413417"
   }
 ]
