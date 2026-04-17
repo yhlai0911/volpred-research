@@ -1,11 +1,9 @@
-<!-- AUTO-GENERATED FROM agent-specs/. Edit canonical sources instead. -->
-
 # 自主波動率預測研究系統
 原則上使用繁體中文互動
 
 ## Bootstrap 原則
 
-這份 `CLAUDE.md` 只保留每次 session 都必須先知道的核心規則。它刻意維持精簡；較長的細節拆到：
+這份 `{{GUIDE_FILE}}` 只保留每次 session 都必須先知道的核心規則。它刻意維持精簡；較長的細節拆到：
 
 - `docs/architecture.md`：網站架構、資料流、Supabase / Mirror / Admin surfaces
 - `docs/quick-commands.md`：常用命令
@@ -16,7 +14,7 @@
 - `docs/project_improvement_status.md`：專案優化計劃狀態
 - `config/project_targets.json`：active frontend / active service / runtime targets 唯一來源
 - `config/runtime_schedules.json`：排程唯一來源
-- `.claude/skills/`：工作流與 task-specific reference
+- `{{SKILL_ROOT}}/`：工作流與 task-specific reference
 - provider-native rules / subagents / config：依照 Claude 與 Codex 官方結構 render 出來的模組化輸出
 
 治理母本永遠在 `agent-specs/`：
@@ -27,7 +25,7 @@
 - `agent-specs/claude_agents/`、`agent-specs/codex/agents/`：provider-native subagents canonical
 - `agent-specs/codex/config.toml`：Codex config canonical
 
-**不要直接手改 render 產物。** `CLAUDE.md`、`.claude/skills/` 與 provider-native rules / subagents / config 都應由 `agent-specs/` render。
+**不要直接手改 render 產物。** `{{GUIDE_FILE}}`、`{{SKILL_ROOT}}/` 與 provider-native rules / subagents / config 都應由 `agent-specs/` render。
 
 ## 研究誠實原則（最高優先，不可違反）
 
@@ -121,7 +119,7 @@
 1. 先讀 `docs/error_log.md`
 2. 搜尋 `storage/memory/knowledge.json`，確認是否已有相似 K
 3. 搜尋相關文獻（至少 3 篇）
-4. 讀 `.claude/skills/autonomous-research/references/experiment-preamble.md`
+4. 讀 `{{SKILL_ROOT}}/autonomous-research/references/experiment-preamble.md`
 5. 在 agent brief 中寫清楚：
    - 動機
    - 差異化
@@ -170,7 +168,7 @@
 
 文章細節與檢查清單：
 
-- `.claude/skills/feed-publisher/SKILL.md`
+- `{{SKILL_ROOT}}/feed-publisher/SKILL.md`
 - `docs/architecture.md`
 - `research_program.md` 的發佈規範段
 
@@ -218,8 +216,8 @@
 - 任務若與目前對話主線無關，優先用 fresh-context subagent。
 - Agent prompt 必須包含必要路徑、K 編號、error log 規則、成功標準與要讀的 skill。
 - 標準模板：
-  - brief：`.claude/skills/autonomous-research/references/agent-brief-template.md`
-  - result：`.claude/skills/autonomous-research/references/agent-result-template.md`
+  - brief：`{{SKILL_ROOT}}/autonomous-research/references/agent-brief-template.md`
+  - result：`{{SKILL_ROOT}}/autonomous-research/references/agent-result-template.md`
 
 ## 活文件原則
 

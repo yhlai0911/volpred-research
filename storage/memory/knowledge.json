@@ -26775,5 +26775,17 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-17T14:24:57.120963"
+  },
+  {
+    "item_id": "60c824b4",
+    "category": "experiment",
+    "content": "[\u63d0\u51fa: Claude K1138 \u884d\u751f, \u57f7\u884c: Claude agent + Gemini review (Codex quota exhausted), \u4e3b\u7dda\u7a0b\u9a57\u8b49] K1143 GAS-t equity harm mechanism diagnostic - 4 variant rescue attempts on SPY/QQQ (OOS 2021-2026). **VERDICT: Scenario D - Architectural incompatibility**. All 4 fixes FAIL to rescue. K1138 baseline reproduced: M1 sym SPY t=-3.27 QQQ t=-2.81. M2 Skew-t: SPY -3.18 QQQ -2.89 (still harmful). M3 clip score \u00b10.30: SPY -2.59 QQQ -2.70 (WORSE with clip). M4 \u03b2<=0.90 persistence cap: SPY -3.80 QQQ -3.85 (WORST). M5 VIX regime switch GAS+HAR: SPY -2.48 QQQ -2.37 (mildest but still FAIL baseline). **Mechanism evidence**: (a) equity \u03bd\u0302\u22486 (SPY 6.27, QQQ 6.04) vs commodity K1129 \u03bd\u0302\u22484-5 - equity innovations insufficiently heavy-tailed for Student-t downweight advantage. (b) IS Fisher-scaled score skew=+1.58 (negative branch hits -0.5 floor, positive unbounded) - structural asymmetry. (c) Skew-t \u03bb\u0302=-0.08/-0.10 but post-2020 SPY realized skew=+0.30 - WRONG DIRECTION over-fit. **Paper 4 upgrade**: 'GAS-t universally unhelpful' \u2192 'GAS-t exhibits asset-class-specific failure with diagnosis: Fisher score right-skewness + equity near-Gaussian innovations + long-memory vol = architectural incompatibility'. Rules out 3 intuitions (asymmetry/overshoot/persistence). **K1135 implication**: commodity skew-t cannot be generalized to equity (asset-class dependent); static \u03bb may be insufficient, need GAS-\u03bb time-varying (Gonzalez-Rivera 2014). Gemini 2 MEDIUM notes are design-intent tradeoffs (acceptable). Script: experiments/k1143/k1143.py, commit 7443e065.",
+    "evidence": [
+      "experiments/k1143/k1143.py",
+      "experiments/k1143/k1143_results.json",
+      "experiments/k1143/README.md"
+    ],
+    "confidence": 0.95,
+    "created_at": "2026-04-17T14:29:40.253204"
   }
 ]

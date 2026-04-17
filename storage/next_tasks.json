@@ -952,7 +952,7 @@
     "title": "Paper 4 narrative pivot: universal null -> channel-specific claims (主線程 + 用戶決策)",
     "priority": 1,
     "status": "decision_made_awaiting_body_rewrite",
-    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\"."
+    "description": "**DECISION (2026-04-17): Channel-specific reframe CONFIRMED by user**. Original \"universal robust null\" claim refuted by K1138 MIXED. New narrative: 3 channels each with distinct universal behavior: (1) HAR+VIX regressor = asset-class HETEROGENEOUS (equity PASS SPY/QQQ t=+4.22, commodity NULL K1136); (2) MIDAS long-run driver = universal NULL (7 assets); (3) GAS-t score-driven = universally unhelpful (equity actively harmful t=-3.27). Supporting evidence: K1117 event-conditional null, K1130 regime fix invalidated. 主線程執行 Paper 4 body rewrite 等 K1139 (VIX component diagnostic) + K1141 write-up prep 完成後再動手。 | K1139 (2026-04-17) 補充: HAR+VIX equity channel 的 mechanism = VIX 是 forward-looking IV components (VRP + TermPrem + SKEW + VVIX) 的 efficient aggregator, 不是 realized-vol proxy. M7 encompass approx M1 表示 decomposition 沒超越 composite VIX. Paper 4 section 5 equity channel 段可加 mechanism subsection but 不可 overclaim \"we found better signal than VIX\". | K1143 (2026-04-17) mechanism diagnostic: GAS-t architectural incompatibility on equity with 3 evidence-backed rationale (score skew / near-Gaussian innovations / long-memory). Paper 4 Channel 3 narrative upgraded from \"unhelpful\" to \"mechanistically incompatible\" with concrete diagnostic numbers."
   },
   {
     "id": "K1139_equity_har_deep_dive",
@@ -963,11 +963,12 @@
     "completed_at": "2026-04-17T15:25:00+08:00"
   },
   {
-    "id": "K1143_gas_t_harm_diagnostic",
+    "id": "K1143",
     "title": "K1143: Diagnose why GAS-t actively HARMS equity forecasts (t=-3.27/-2.81)",
     "priority": 3,
-    "status": "pending",
-    "description": "K1138 GAS-t on equity is actively worse. Why? Is it Student-t DoF miscalibration, scaled score oversmoothing, or equity tail asymmetry that breaks symmetric-t assumption? Skew-t GAS might fix (K1135 candidate). [Renumbered from K1140_gas_t_harm_diagnostic: collision with existing experiments/k1140]"
+    "status": "completed",
+    "description": "K1138 GAS-t on equity is actively worse. Why? Is it Student-t DoF miscalibration, scaled score oversmoothing, or equity tail asymmetry that breaks symmetric-t assumption? Skew-t GAS might fix (K1135 candidate). [Renumbered from K1140_gas_t_harm_diagnostic: collision with existing experiments/k1140] [DONE commit 7443e065: Scenario D architectural incompatibility. All 4 rescue attempts FAIL. Paper 4 narrative upgraded: GAS-t asset-class-specific failure with ν̂≈6 + score skew +1.58 mechanism.]",
+    "completed_at": "2026-04-17T17:05:00+08:00"
   },
   {
     "id": "K1141_paper4_writeup_prep",

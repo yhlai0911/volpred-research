@@ -1028,25 +1028,18 @@ def main():
         # Sync market_daily to Supabase — last 30 days (backfills any prior failures)
         # 2026-04-17 fix: previously only synced today, and silently failed with
         # HTTP 400 because `overnight_gap`/`gap_alert_level` keys aren't in
-        # market_daily schema. Now _post() filters to whitelist automatically,
+        # market_daily schema. Now sync_market_daily() strips unknown columns,
         # and CONFLICT_KEYS["market_daily"]="trade_date" makes it idempotent.
-        from supabase_sync import _post
+        from supabase_sync import sync_market_daily_backfill
         local_md = pt.get("_market_daily", {})
-        md_dates = sorted(local_md.keys())[-30:]
-        md_synced = 0
-        md_failed = 0
-        for d in md_dates:
-            row = {"trade_date": d, **(local_md[d] or {})}
-            # _post() strips non-schema keys and upserts on trade_date
-            ok = _post("market_daily", row)
-            if ok:
-                md_synced += 1
-            else:
-                md_failed += 1
+        # Only last 30 dates — full backfill on demand via force-full
+        recent_dates = sorted(local_md.keys())[-30:]
+        recent_md = {d: local_md[d] for d in recent_dates}
+        md_synced, md_failed = sync_market_daily_backfill(recent_md)
         if md_failed:
-            print(f"  ⚠️ Supabase: market_daily synced {md_synced}/{len(md_dates)} (FAILED {md_failed})")
+            print(f"  ⚠️ Supabase: market_daily synced {md_synced}/{len(recent_md)} (FAILED {md_failed})")
         else:
-            print(f"  Supabase: market_daily synced {md_synced}/{len(md_dates)} dates")
+            print(f"  Supabase: market_daily synced {md_synced}/{len(recent_md)} dates")
     except Exception as e:
         print(f"  Supabase sync skipped: {e}")
 
@@ -1075,7 +1068,65 @@ def main():
     except Exception as e:
         print(f"  Market status update failed: {e}")
 
+    # --- End-of-run sync health check (2026-04-17: catches silent 400/409 drift) ---
+    _run_sync_health_check()
+
     print(f"\n✓ Done!")
+
+
+def _run_sync_health_check() -> None:
+    """Query Supabase max(trade_date) on critical tables vs local. Prints drift alerts."""
+    import json
+    import sys as _sys
+    from urllib.request import Request, urlopen
+    _sys.path.insert(0, str(Path(__file__).parent))
+    try:
+        from supabase_sync import SUPABASE_URL, HEADERS
+    except Exception as e:
+        print(f"\n[health] skipped: {e}")
+        return
+    print("\n--- Sync health check ---")
+    try:
+        pt = json.loads(Path("storage/paper_trading.json").read_text())
+        local_dates = set()
+        if isinstance(pt, dict):
+            for v in pt.values():
+                if isinstance(v, list):
+                    for e in v:
+                        if isinstance(e, dict) and e.get("trade_date"):
+                            local_dates.add(e["trade_date"])
+        elif isinstance(pt, list):
+            for e in pt:
+                if isinstance(e, dict) and e.get("trade_date"):
+                    local_dates.add(e["trade_date"])
+        local_max = max(local_dates) if local_dates else None
+    except Exception as e:
+        print(f"  [health] cannot read local paper_trading: {e}")
+        return
+
+    if not local_max:
+        print("  [health] no local trade_date — skipping")
+        return
+
+    alerts = []
+    for table in ("paper_trades", "market_daily", "strategy_signals"):
+        try:
+            url = f"{SUPABASE_URL}/rest/v1/{table}?select=trade_date&order=trade_date.desc&limit=1"
+            req = Request(url, headers=HEADERS, method="GET")
+            with urlopen(req, timeout=15) as resp:
+                rows = json.loads(resp.read().decode())
+            remote_max = rows[0]["trade_date"] if rows else None
+            if remote_max == local_max:
+                print(f"  {table}: OK ({remote_max})")
+            else:
+                alerts.append(f"{table}: remote={remote_max} local={local_max}")
+                print(f"  ⚠️  {table}: remote={remote_max} local={local_max}")
+        except Exception as e:
+            alerts.append(f"{table}: query failed {e}")
+            print(f"  ⚠️  {table}: query failed — {e}")
+
+    if alerts:
+        print(f"\n⚠️  Sync health: {len(alerts)} table(s) drifted — investigate supabase_sync.py")
 
 
 if __name__ == "__main__":
