@@ -1,0 +1,664 @@
+{
+  "experiment_id": "K1148_d1",
+  "title": "K1145 binary EAV OOS panel DM retest (K1148 infrastructure applied to K1145 binary spec)",
+  "proposer": "Claude (Paper 2 §5 universal-magnitude validation)",
+  "executor": "Claude",
+  "timestamp_utc": "2026-04-17T04:35:24.363630+00:00",
+  "random_seed": 42,
+  "data_source": "yfinance daily close (K1148 cache) + 財報公告日.txt",
+  "data_period": "2010-01-01 ~ 2025-12-31",
+  "is_period": "2010-01-01 ~ 2019-12-31",
+  "oos_period": "2020-01-01 ~ 2025-12-31",
+  "tickers_tried": [
+    "2330.TW",
+    "2303.TW",
+    "6239.TW",
+    "2454.TW",
+    "2379.TW",
+    "3034.TW",
+    "3035.TW",
+    "3443.TW",
+    "2881.TW",
+    "2882.TW",
+    "2886.TW",
+    "2887.TW",
+    "2603.TW",
+    "2615.TW",
+    "2609.TW",
+    "1301.TW",
+    "1303.TW",
+    "1326.TW",
+    "2002.TW",
+    "2027.TW",
+    "2317.TW",
+    "3045.TW",
+    "2382.TW",
+    "2912.TW",
+    "2637.TW",
+    "1215.TW",
+    "2347.TW",
+    "1210.TW",
+    "2892.TW"
+  ],
+  "n_stocks_loaded": 29,
+  "stocks_used": [
+    "2330.TW",
+    "2303.TW",
+    "6239.TW",
+    "2454.TW",
+    "2379.TW",
+    "3034.TW",
+    "3035.TW",
+    "3443.TW",
+    "2881.TW",
+    "2882.TW",
+    "2886.TW",
+    "2887.TW",
+    "2603.TW",
+    "2615.TW",
+    "2609.TW",
+    "1301.TW",
+    "1303.TW",
+    "1326.TW",
+    "2002.TW",
+    "2027.TW",
+    "2317.TW",
+    "3045.TW",
+    "2382.TW",
+    "2912.TW",
+    "2637.TW",
+    "1215.TW",
+    "2347.TW",
+    "1210.TW",
+    "2892.TW"
+  ],
+  "n_stock_bootstrap_reps": 10000,
+  "n_is_events_total": 1036,
+  "n_oos_events_total": 696,
+  "is_fit": {
+    "theta_vix": 9.44903226481669e-08,
+    "theta_eav": 4.898056675859347e-05,
+    "theta_eav_se_hessian": 4.613734818115124e-06,
+    "theta_eav_t_hessian": 10.61625097443372,
+    "pooled_loglik": 198238.81443465067,
+    "n_outer_iters": 8,
+    "converged": false,
+    "per_stock_tickers": [
+      "2330.TW",
+      "2303.TW",
+      "6239.TW",
+      "2454.TW",
+      "2379.TW",
+      "3034.TW",
+      "3035.TW",
+      "3443.TW",
+      "2881.TW",
+      "2882.TW",
+      "2886.TW",
+      "2887.TW",
+      "2603.TW",
+      "2615.TW",
+      "2609.TW",
+      "1301.TW",
+      "1303.TW",
+      "1326.TW",
+      "2002.TW",
+      "2027.TW",
+      "2317.TW",
+      "3045.TW",
+      "2382.TW",
+      "2912.TW",
+      "2637.TW",
+      "1215.TW",
+      "2347.TW",
+      "1210.TW",
+      "2892.TW"
+    ],
+    "per_stock_params": [
+      [
+        8.654875182721345e-05,
+        0.07686883853474384,
+        0.008349619070919911,
+        0.05934880422050971,
+        0.9210655198933198
+      ],
+      [
+        2.7871155660961685e-05,
+        0.2079136107063847,
+        0.06739000195781793,
+        0.0001,
+        0.8977468654032174
+      ],
+      [
+        0.00020530523071942886,
+        0.09274812497658434,
+        0.041699248193012454,
+        0.05319053589055711,
+        0.8710015381496641
+      ],
+      [
+        0.00014984445941266313,
+        0.04792740895040894,
+        0.0001,
+        0.04330329166199508,
+        0.9589995758899132
+      ],
+      [
+        4.810020729519969e-05,
+        0.19205245852051114,
+        0.03426084073668335,
+        0.0001,
+        0.9341160421071603
+      ],
+      [
+        4.7094827470999036e-05,
+        0.04449407431674287,
+        0.015911479910640885,
+        0.01666810683514469,
+        0.9689169757172985
+      ],
+      [
+        2.7335577655761253e-05,
+        0.17610803103729114,
+        0.03516850550018896,
+        0.006670185435555637,
+        0.9458100036496541
+      ],
+      [
+        4.889462483373565e-05,
+        0.04971802254480831,
+        0.032927378623578675,
+        0.0001,
+        0.9602086295028487
+      ],
+      [
+        3.433135515286466e-05,
+        0.051469895529874084,
+        0.04943467036427642,
+        0.004047447525362902,
+        0.9325449802011078
+      ],
+      [
+        3.010659484925666e-05,
+        0.28375082556604725,
+        0.0618237496623753,
+        0.043186517529894955,
+        0.838198528497547
+      ],
+      [
+        4.751285787139476e-05,
+        0.014313826298508433,
+        0.04252881434168813,
+        0.011400875403557928,
+        0.9456236972687619
+      ],
+      [
+        7.146066021005589e-06,
+        0.011728208946838101,
+        0.030764975880766477,
+        0.00010004807306202978,
+        0.9680727192791719
+      ],
+      [
+        6.290241775331126e-05,
+        0.010971510410165223,
+        0.028491851070053288,
+        0.0001,
+        0.9693489200715077
+      ],
+      [
+        5.7155196294550314e-05,
+        0.02721181736690524,
+        0.04753750862388251,
+        0.0001,
+        0.9468425828126572
+      ],
+      [
+        1.3317752560840105e-05,
+        0.12907537353880424,
+        0.04625107367895366,
+        0.025612171128810896,
+        0.9300623419052885
+      ],
+      [
+        3.616345431781522e-05,
+        0.13032280943074195,
+        0.047901387375212025,
+        0.03360912412696516,
+        0.8887746544844615
+      ],
+      [
+        2.024942963182303e-05,
+        0.09475969963119263,
+        0.05330959916811103,
+        0.04986821526377993,
+        0.9025305061885226
+      ],
+      [
+        2.5576772473842332e-05,
+        0.16427598673119334,
+        0.05556395421816463,
+        0.028336134396968825,
+        0.8894783379988154
+      ],
+      [
+        2.8521437219296934e-05,
+        0.02207249509682397,
+        0.04378474730672036,
+        0.024881128314135307,
+        0.9328701414726371
+      ],
+      [
+        7.062116494766089e-05,
+        0.09596282768227807,
+        0.085631730892037,
+        0.0001,
+        0.8820970537305184
+      ],
+      [
+        1.6630113486557688e-05,
+        0.366662615804911,
+        0.04413713291330104,
+        0.03555683312984286,
+        0.8719556663715846
+      ],
+      [
+        5.695289919292326e-05,
+        0.0044786664612721655,
+        0.03732759771331883,
+        0.0001,
+        0.9595505823713549
+      ],
+      [
+        2.8775626813136458e-05,
+        0.008074459410610978,
+        0.011977147745671173,
+        0.0001,
+        0.9860373491380091
+      ],
+      [
+        5.069152658681538e-05,
+        0.260129559658773,
+        0.09021864501088986,
+        0.0001,
+        0.8245373285493951
+      ],
+      [
+        9.869253974179691e-05,
+        0.1718011491616897,
+        0.16397978550085898,
+        0.00010115336763938536,
+        0.6288850074362243
+      ],
+      [
+        2.2988948360419537e-05,
+        0.31382413633234174,
+        0.08754924133799963,
+        0.0001,
+        0.8587305475157424
+      ],
+      [
+        2.1617971560291328e-05,
+        0.027134635763240426,
+        0.029989814852587518,
+        0.0178242999407857,
+        0.9558623437826618
+      ],
+      [
+        2.7806704952131203e-05,
+        0.07591255142742288,
+        0.03846027876514747,
+        0.0001,
+        0.9411177770365814
+      ],
+      [
+        3.696893484677801e-05,
+        0.005932164978124615,
+        0.03791143883297288,
+        0.001115384705600918,
+        0.9588283835156409
+      ]
+    ]
+  },
+  "oos_dm": {
+    "n_stocks_valid": 29,
+    "per_stock_dm": [
+      {
+        "ticker": "2330.TW",
+        "dm_stat": -2.963429477994281,
+        "p_cont_better": 0.0015458971099187725,
+        "mean_qlike_binary": -7.026994340631894,
+        "mean_qlike_gjr": -6.9932738527404466,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2303.TW",
+        "dm_stat": -2.5837266820196563,
+        "p_cont_better": 0.004935370154573255,
+        "mean_qlike_binary": -6.844211665419903,
+        "mean_qlike_gjr": -6.800648251246541,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "6239.TW",
+        "dm_stat": 1.203260954672647,
+        "p_cont_better": 0.8854643846542042,
+        "mean_qlike_binary": -6.959269022999967,
+        "mean_qlike_gjr": -6.966196933501136,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "2454.TW",
+        "dm_stat": 0.935178911021579,
+        "p_cont_better": 0.825074304936342,
+        "mean_qlike_binary": -6.435883443871511,
+        "mean_qlike_gjr": -6.44782609223578,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "2379.TW",
+        "dm_stat": -1.4107318412482925,
+        "p_cont_better": 0.0792688028913048,
+        "mean_qlike_binary": -6.670478029967049,
+        "mean_qlike_gjr": -6.653278816562604,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "3034.TW",
+        "dm_stat": -0.5136008451373055,
+        "p_cont_better": 0.30380456163518105,
+        "mean_qlike_binary": -6.7005364278726,
+        "mean_qlike_gjr": -6.691761369222518,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "3035.TW",
+        "dm_stat": -2.8511796740258735,
+        "p_cont_better": 0.0022086290192931254,
+        "mean_qlike_binary": -5.822932182670621,
+        "mean_qlike_gjr": -5.779942247051998,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "3443.TW",
+        "dm_stat": -2.1497649781061754,
+        "p_cont_better": 0.01586917657614105,
+        "mean_qlike_binary": -5.732566164325588,
+        "mean_qlike_gjr": -5.7088982340947485,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2881.TW",
+        "dm_stat": -1.0198339353976698,
+        "p_cont_better": 0.15398844035140305,
+        "mean_qlike_binary": -7.591044642194972,
+        "mean_qlike_gjr": -7.578970151034378,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2882.TW",
+        "dm_stat": 1.3814822098686688,
+        "p_cont_better": 0.9163285069364133,
+        "mean_qlike_binary": -7.545777673407281,
+        "mean_qlike_gjr": -7.565170052566242,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "2886.TW",
+        "dm_stat": -2.140772178460046,
+        "p_cont_better": 0.016229155830844312,
+        "mean_qlike_binary": -8.115958667834779,
+        "mean_qlike_gjr": -8.092136387351431,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2887.TW",
+        "dm_stat": 0.37031934731893135,
+        "p_cont_better": 0.6444007517428922,
+        "mean_qlike_binary": -7.7996849175563785,
+        "mean_qlike_gjr": -7.809663099494183,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "2603.TW",
+        "dm_stat": -2.6198383739334075,
+        "p_cont_better": 0.004444358138790678,
+        "mean_qlike_binary": -6.080384132395274,
+        "mean_qlike_gjr": -6.045912967662013,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2615.TW",
+        "dm_stat": -2.7769934982891056,
+        "p_cont_better": 0.002778426456406136,
+        "mean_qlike_binary": -5.953234678347117,
+        "mean_qlike_gjr": -5.91167369077296,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2609.TW",
+        "dm_stat": 0.36667573022905803,
+        "p_cont_better": 0.6430428682907723,
+        "mean_qlike_binary": -6.01693857139468,
+        "mean_qlike_gjr": -6.022881879677247,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "1301.TW",
+        "dm_stat": 0.6408719918332931,
+        "p_cont_better": 0.7391465767599282,
+        "mean_qlike_binary": -7.4181817405703,
+        "mean_qlike_gjr": -7.429443153955679,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "1303.TW",
+        "dm_stat": -1.1856294932906675,
+        "p_cont_better": 0.11798118634647815,
+        "mean_qlike_binary": -7.282880773930075,
+        "mean_qlike_gjr": -7.26002910086348,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "1326.TW",
+        "dm_stat": 1.171232658339085,
+        "p_cont_better": 0.8791514143898114,
+        "mean_qlike_binary": -7.451474713006252,
+        "mean_qlike_gjr": -7.468376024530436,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "2002.TW",
+        "dm_stat": -2.6621505091950035,
+        "p_cont_better": 0.003924954924080813,
+        "mean_qlike_binary": -7.552179547111341,
+        "mean_qlike_gjr": -7.498008423678132,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2027.TW",
+        "dm_stat": -1.810594636588977,
+        "p_cont_better": 0.0352049787612555,
+        "mean_qlike_binary": -6.701395312386294,
+        "mean_qlike_gjr": -6.676657381245145,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2317.TW",
+        "dm_stat": 2.3321801716535786,
+        "p_cont_better": 0.9900864306032718,
+        "mean_qlike_binary": -7.078532057775543,
+        "mean_qlike_gjr": -7.125511743311991,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "3045.TW",
+        "dm_stat": -0.8592662164180558,
+        "p_cont_better": 0.19516764872552755,
+        "mean_qlike_binary": -8.63114683491383,
+        "mean_qlike_gjr": -8.621453363404093,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2382.TW",
+        "dm_stat": -0.57645093063058,
+        "p_cont_better": 0.2821998248741,
+        "mean_qlike_binary": -6.87900989406549,
+        "mean_qlike_gjr": -6.862772819026975,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2912.TW",
+        "dm_stat": 2.962095439091947,
+        "p_cont_better": 0.9984474299429136,
+        "mean_qlike_binary": -8.12427229078595,
+        "mean_qlike_gjr": -8.183580077500991,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "2637.TW",
+        "dm_stat": -2.879859178294283,
+        "p_cont_better": 0.002018404456188368,
+        "mean_qlike_binary": -5.807195879385568,
+        "mean_qlike_gjr": -5.764020561642126,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "1215.TW",
+        "dm_stat": 5.343787037971924,
+        "p_cont_better": 0.9999999472285188,
+        "mean_qlike_binary": -7.861967443825268,
+        "mean_qlike_gjr": -7.920514261197483,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      },
+      {
+        "ticker": "2347.TW",
+        "dm_stat": -0.9946586342202317,
+        "p_cont_better": 0.16003390863052785,
+        "mean_qlike_binary": -7.489600998701092,
+        "mean_qlike_gjr": -7.4653035050350525,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "1210.TW",
+        "dm_stat": -0.6346271224686496,
+        "p_cont_better": 0.26288573741933774,
+        "mean_qlike_binary": -7.807923967979399,
+        "mean_qlike_gjr": -7.795191620262472,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": true
+      },
+      {
+        "ticker": "2892.TW",
+        "dm_stat": 0.3666047732451379,
+        "p_cont_better": 0.6430164063446346,
+        "mean_qlike_binary": -8.306778972528747,
+        "mean_qlike_gjr": -8.314197641608049,
+        "n": 1455,
+        "n_events_oos": 24,
+        "binary_wins_by_qlike": false
+      }
+    ],
+    "panel_dm_mean": -0.5365316889818073,
+    "panel_dm_median": -0.8592662164180558,
+    "panel_dm_se_bootstrap": 0.36710023129678604,
+    "panel_dm_t": -1.4615400461244672,
+    "panel_dm_ci_95": [
+      -1.2293253526309944,
+      0.2164843074965134
+    ],
+    "panel_dm_one_sided_p_binary_better": 0.0758,
+    "n_individual_pass_dm_le_neg2": 9,
+    "pct_individual_pass_dm_le_neg2": 0.3103448275862069,
+    "threshold_oos_dm_pass": -2.0,
+    "mean_qlike_binary_pooled": -7.092704654753613,
+    "mean_qlike_baseline_gjr_pooled": -7.084596334568149,
+    "note_dm_spec": "Per-stock DM-HLN (time-series within each stock) then stock-bootstrap (resample 29 t-stats with replacement, 10000 reps). Codex-corrected K1148 spec — no naive pool-all-stock-days."
+  },
+  "comparison_k1148_continuous": {
+    "spec": [
+      "K1145 binary (K1148_d1 retest)",
+      "K1148 continuous"
+    ],
+    "theta_eav_is_pooled": [
+      4.898056675859347e-05,
+      0.00026946295772653717
+    ],
+    "t_hessian_is_pooled": [
+      10.61625097443372,
+      10.425530638421524
+    ],
+    "panel_dm_t_oos": [
+      -1.4615400461244672,
+      -1.1580573545351538
+    ],
+    "panel_dm_p_one_oos": [
+      0.0758,
+      0.1225
+    ]
+  },
+  "scenario": "B",
+  "verdict": "Scenario B: Marginal FAIL. Binary OOS panel DM t=-1.462, p_one=0.0758 — does not meet joint threshold (t ≤ -2 AND p < 0.05). Paper 2 §5 should be downgraded to IS-only pooled θ evidence; OOS panel DM inconclusive in both binary and continuous.",
+  "paper2_implication": {
+    "scenario_A_means": "universal-magnitude claim retained + binary-optimality narrative",
+    "scenario_B_means": "downgrade §5 to IS-only evidence; OOS inconclusive",
+    "scenario_C_means": "withdraw universal-magnitude claim; §5 must pivot",
+    "actual_scenario": "B"
+  },
+  "elapsed_seconds": 7.64708399772644
+}

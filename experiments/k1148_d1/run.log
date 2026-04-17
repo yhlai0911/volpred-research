@@ -1,0 +1,86 @@
+
+========================================================================
+K1148_d1: K1145 binary EAV OOS panel DM retest
+========================================================================
+
+Ticker pool: 29 (match K1148 subset)
+
+[1/6] Loading stocks (binary EAV from 財報公告日.txt) ...
+    2330.TW: n_obs=3911, n_events=60
+    2303.TW: n_obs=3911, n_events=60
+    6239.TW: n_obs=3911, n_events=60
+    2454.TW: n_obs=3911, n_events=59
+    2379.TW: n_obs=3911, n_events=60
+    3034.TW: n_obs=3911, n_events=60
+    3035.TW: n_obs=3911, n_events=60
+    3443.TW: n_obs=3911, n_events=60
+    2881.TW: n_obs=3911, n_events=60
+    2882.TW: n_obs=3911, n_events=60
+    2886.TW: n_obs=3911, n_events=59
+    2887.TW: n_obs=3911, n_events=60
+    2603.TW: n_obs=3911, n_events=60
+    2615.TW: n_obs=3911, n_events=60
+    2609.TW: n_obs=3911, n_events=60
+    1301.TW: n_obs=3911, n_events=60
+    1303.TW: n_obs=3911, n_events=60
+    1326.TW: n_obs=3911, n_events=60
+    2002.TW: n_obs=3911, n_events=60
+    2027.TW: n_obs=3911, n_events=58
+    2317.TW: n_obs=3911, n_events=60
+    3045.TW: n_obs=3911, n_events=61
+    2382.TW: n_obs=3911, n_events=59
+    2912.TW: n_obs=3911, n_events=60
+    2637.TW: n_obs=3684, n_events=57
+    1215.TW: n_obs=3911, n_events=59
+    2347.TW: n_obs=3911, n_events=60
+    1210.TW: n_obs=3911, n_events=60
+    2892.TW: n_obs=3911, n_events=60
+  Loaded 29/29 stocks
+
+[2/6] IS/OOS split (IS: 2010-2019, OOS: 2020-2025) ...
+  IS stocks: 29, OOS stocks: 29
+  IS total obs: 70,968
+  OOS total obs: 42,224
+
+[3/6] Pooled BCD fit on IS (binary EAV) ...
+    [BCD outer 0] θ_VIX=9.921e-08, θ_EAV=+5.0566e-05, pooled_negll=-198172.53, Δll=+inf, Δθ_eav=5.66e-07
+    [BCD outer 1] θ_VIX=9.693e-08, θ_EAV=+4.9694e-05, pooled_negll=-198205.82, Δll=+33.2902, Δθ_eav=8.72e-07
+    [BCD outer 2] θ_VIX=9.562e-08, θ_EAV=+4.9457e-05, pooled_negll=-198214.00, Δll=+8.1774, Δθ_eav=2.37e-07
+    [BCD outer 3] θ_VIX=9.562e-08, θ_EAV=+4.9457e-05, pooled_negll=-198232.44, Δll=+18.4478, Δθ_eav=0.00e+00
+    [BCD outer 4] θ_VIX=9.562e-08, θ_EAV=+4.9323e-05, pooled_negll=-198236.22, Δll=+3.7724, Δθ_eav=1.34e-07
+    [BCD outer 5] θ_VIX=9.562e-08, θ_EAV=+4.9278e-05, pooled_negll=-198238.03, Δll=+1.8094, Δθ_eav=4.52e-08
+    [BCD outer 6] θ_VIX=9.495e-08, θ_EAV=+4.9135e-05, pooled_negll=-198216.69, Δll=-21.3322, Δθ_eav=1.43e-07
+    [BCD outer 7] θ_VIX=9.449e-08, θ_EAV=+4.8981e-05, pooled_negll=-198238.26, Δll=+21.5711, Δθ_eav=1.55e-07
+
+  → IS θ_VIX = 9.4490e-08
+  → IS θ_EAV = +4.8981e-05
+  → IS pooled loglik = 198238.81
+  IS Hessian SE=4.613734818115124e-06, t=10.616
+
+[4/6] Fitting pure-GJR baseline on IS ...
+  Baseline GJR fit complete for 29 stocks
+
+[5/6] OOS forecasts + per-stock DM + stock-bootstrap panel DM ...
+  Per-stock DM stats: n_valid=29
+  Panel DM mean=-0.5365, median=-0.8593, SE(bootstrap,10000)=0.3671
+  Panel DM t=-1.4615, 95% CI=[-1.2293, 0.2165], one-sided p=0.0758
+  Individual stocks with DM ≤ -2: 9/29 (31.0%)
+  Pooled mean QLIKE binary=-7.092705
+  Pooled mean QLIKE GJR   =-7.084596
+
+  SCENARIO: B
+  VERDICT: Scenario B: Marginal FAIL. Binary OOS panel DM t=-1.462, p_one=0.0758 — does not meet joint threshold (t ≤ -2 AND p < 0.05). Paper 2 §5 should be downgraded to IS-only pooled θ evidence; OOS panel DM inconclusive in both binary and continuous.
+
+  Comparison vs K1148 continuous spec:
+  spec                                |     θ_EAV IS |  t_hess |    DM_t |   p_one
+  K1145 binary (K1148_d1 retest)      | +4.898e-05 | +10.62 | -1.462 | 0.0758
+  K1148 continuous                    | +2.695e-04 | +10.43 | -1.158 | 0.1225
+
+[plot] Generating binary_vs_continuous_oos.png ...
+  → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148_d1/binary_vs_continuous_oos.png
+
+  Results → /Users/yhlai0911/Desktop/volpred-research/experiments/k1148_d1/k1148_d1_results.json
+  Elapsed: 7.6s
+
+  CORE VERDICT: Scenario B: Marginal FAIL. Binary OOS panel DM t=-1.462, p_one=0.0758 — does not meet joint threshold (t ≤ -2 AND p < 0.05). Paper 2 §5 should be downgraded to IS-only pooled θ evidence; OOS panel DM inconclusive in both binary and continuous.
+
