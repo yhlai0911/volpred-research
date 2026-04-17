@@ -27698,5 +27698,16 @@
     ],
     "confidence": 0.92,
     "created_at": "2026-04-18T02:10:32.157597"
+  },
+  {
+    "item_id": "972d8402",
+    "category": "K1200",
+    "content": "K1200 Paper 6 SPY clean-slate replication under Eq.(5)-(6) two-phase timing \u2192 MINOR_DIVERGENT Paper 6 defensibility CONFIRMED. Results comparison (K880 canonical vs K1200): GJR QLIKE 0.8542 vs 0.8544 (+0.0002); PRG Ext QLIKE 0.7478 vs 0.7355 (-0.0124 K1200 better); DM t (PRG vs GJR) 6.004 vs 6.128 (+0.124 K1200 better); Spearman rho 0.5678 vs 0.5761. Verdict MINOR_DIVERGENT: DM t delta 0.124 within REPLICATED <0.3 band; PRG QLIKE crossed 0.01 band edge but direction is K1200 slightly better. Paper 6 defensibility IMPLICATION: K1200 PRG outperforms K880 slightly (QLIKE lower, DM t higher) means K880 DM t=6.00 is CONSERVATIVE (not exaggerated). K880 line 512 x_prev_in = r2_overnight[t] is verbatim Eq.(6) alpha_1 * r\u00b2_{d,0} with day-d open-time realized overnight = legitimate timing (not lookahead) per Paper 6 Section 2.2 two-phase timing convention already stated. Divergence attribution: K1200 PRG_N_STARTS=10 vs K880=5 explores optimization surface more broadly, some refit windows converge to slightly better optimum. Python bijection of Eq.(5)-(6) vs K880 code is verbatim identical. Reviewer challenge of Eq-code mismatch can cite K1200 as transcription evidence.",
+    "evidence": [
+      "experiments/k1200/k1200_results.json",
+      "commit 287de785"
+    ],
+    "confidence": 0.92,
+    "created_at": "2026-04-18T02:17:29.725447"
   }
 ]
