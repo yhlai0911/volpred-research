@@ -27520,5 +27520,28 @@
     ],
     "confidence": 0.9,
     "created_at": "2026-04-18T00:53:30.908954"
+  },
+  {
+    "item_id": "70b7049a",
+    "category": "K1199",
+    "content": "K1199 expanding-window adaptive VIX quantile NULL \u2014 CANNOT rescue K1128 regime story. OOS tertile coverage K1199 low=0/mid=6816/high=14098 (still low-degenerate vs K1128 IS-fixed 0/854/20060). DM-HLN vs base t=+1.14 FAILS both Harvey |t|>3 AND weak |t|>2. AUC: base 0.554, K1128 0.556, K1142 volnorm 0.671, K1199 expanding 0.548. Structural failure root cause: IS 2017-2019 VIX range 9-37 does NOT intersect COVID OOS 12-83. Once expanding window ingests Feb-Mar 2020 COVID spike, q33 permanently rises, and later calm-VIX days can never re-enter low tertile. Fix #2 (error_log proposal) is STRUCTURAL failure not algorithmic. 4 complementary NULL/PARTIAL experiments now satisfy >=3 gate for K1128 narrative pivot decision.",
+    "evidence": [
+      "experiments/k1199/k1199_results.json",
+      "experiments/k1199/README.md",
+      "commit b9a66c19"
+    ],
+    "confidence": 0.88,
+    "created_at": "2026-04-18T00:54:17.346383"
+  },
+  {
+    "item_id": "ae05df05",
+    "category": "K1128_synthesis",
+    "content": "K1128 OFI-jump regime-switching story SYNTHESIS: 4-branch NULL exhausted (gate for Paper 3 narrative pivot). (1) K1128 discrete VIX tertile IS-fixed: OOS degenerate coverage (0/854/20060). (2) K1131 natural cubic spline continuous VIX: NULL, IS-extrapolation explosion to COVID VIX=82. (3) K1142 vol-normalized |OFI|/sigma_t (regime-free): PARTIAL OOS t=+2.255 (Harvey fail), AUC 0.671 (best among 4). (4) K1199 expanding-window adaptive quantile: NULL, IS/OOS VIX range disjoint = structural failure. Recommendation for Paper 3 reframe: ABANDON VIX-regime framing; ADOPT pooled continuous microstructure signal framing anchored on K1142 vol-normalization (AUC 0.671 regime-free). K1128 regime story preserved as honest NULL result demonstration for research integrity section. Per narrative state machine: 4 complementary experiments satisfy >=3 gate; main thread may now decide Paper 3 narrative.",
+    "evidence": [
+      "K1128 K1131 K1142 K1199 experiments",
+      "commits b9a66c19 6e3b764f"
+    ],
+    "confidence": 0.9,
+    "created_at": "2026-04-18T00:54:17.473794"
   }
 ]

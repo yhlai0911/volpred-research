@@ -206,8 +206,10 @@
     "id": "K1133_expanding_window",
     "title": "K1133: Expanding-window adaptive VIX quantile for K1128 OFI-jump",
     "priority": 3,
-    "status": "pending",
-    "description": "K1131 NULL. Try error_log fix #2: expanding-window rolling quantile so VIX tertile cutoffs update each OOS period with latest info. Bypasses both discrete-cutoff degeneracy and IS-extrapolation explosion. Test if regime-switching beta can be identified under adaptive quantile."
+    "status": "completed",
+    "description": "K1131 NULL. Try error_log fix #2: expanding-window rolling quantile so VIX tertile cutoffs update each OOS period with latest info. Bypasses both discrete-cutoff degeneracy and IS-extrapolation explosion. Test if regime-switching beta can be identified under adaptive quantile.",
+    "completed_at": "2026-04-18T00:54:17.549836",
+    "outcome": "NULL: AUC 0.548, DM t=+1.14. Structural failure — IS 2017-19 VIX 9-37 disjoint from COVID OOS 12-83. K1128 regime story 4-branch pivot gate satisfied (K1128/K1131/K1142/K1199)."
   },
   {
     "id": "K1142_vol_normalized_ofi",
@@ -967,6 +969,20 @@
       "Paper2",
       "coverage",
       "submission-gate"
+    ]
+  },
+  {
+    "id": "Paper3_K1128_pivot_decision",
+    "title": "Paper 3 K1128 narrative pivot decision: abandon VIX-regime → adopt pooled microstructure signal (K1142 anchor)",
+    "priority": 4,
+    "description": "4 complementary K1128 NULL/PARTIAL experiments done (K1128/K1131/K1142/K1199) satisfying >=3 gate. Main thread decide: (a) Full reframe to K1142 vol-norm pooled signal anchor; (b) Hybrid K1128 null + K1142 positive subframe; (c) Abandon Paper 3 leverage-only direction entirely.",
+    "status": "pending",
+    "created_at": "2026-04-18T00:54:17.549854",
+    "tags": [
+      "Paper3",
+      "narrative-pivot",
+      "decision-required",
+      "K1128"
     ]
   }
 ]
