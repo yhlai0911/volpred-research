@@ -1,0 +1,172 @@
+{
+  "experiment_id": "K1229",
+  "title": "Papers 5/7/8/9/10 + vt-crowding-abm Current-State Audit",
+  "audit_date": "2026-04-17",
+  "scope": "5 paper folders NOT touched in main session 2026-04-17",
+  "main_session_focus": ["Paper 1 leverage-direction", "Paper 2 taiwan-vt", "Paper 3 vt-trend-following", "Paper 4 vt-insurance-cost (noted; also audited here)", "Paper 6 prg-periodic-garch", "BTC GAS paper (K1214/K1228)"],
+  "seed": 42,
+  "read_only": true,
+  "papers": [
+    {
+      "paper_id": 5,
+      "folder": "vt-crowding-abm",
+      "title_short": "ABM VT crowding tipping point",
+      "target_journal": "Finance Research Letters",
+      "self_contained": true,
+      "submission_readiness": "ready",
+      "status_label": "R3 SEVERE=0 + 2026-04-17 reproducibility audit 97.5% match",
+      "supporting_experiments": ["K827", "K827v2", "K827v3", "K864"],
+      "most_recent_commits": [
+        "65bdf9ef 2026-04-17 paper-folder backfill",
+        "1bd06dfe 2026-04-17 reproducibility audit: 97.5% matched, 4 divergent, seed-deterministic"
+      ],
+      "session_impact": "partial",
+      "impact_notes": "Worktree agent a7dacfdf ran reproducibility audit; no methodology changes.",
+      "k1216c_multistart_applicable": false,
+      "k1216c_reason": "Pure simulation (no MLE).",
+      "pending_actions": [
+        {"id": "P5-1", "desc": "Fix DIV-2 threshold classification label in k827v3 script metadata", "severity": "low"}
+      ],
+      "priority": "P4"
+    },
+    {
+      "paper_id": 7,
+      "folder": "vt-insurance-cost",
+      "title_short": "Insurance premium decomposition",
+      "target_journal": "Finance Research Letters",
+      "self_contained": true,
+      "submission_readiness": "ready",
+      "status_label": "R3 SEVERE=0 + 2026-04-17 audit 96% match / READY-FOR-SUBMISSION",
+      "supporting_experiments": ["K811", "K811v2", "K846", "K860"],
+      "most_recent_commits": [
+        "65bdf9ef 2026-04-17 paper-folder backfill",
+        "cb1dd9b4 2026-04-17 Paper 7 reproducibility audit: 96% matched, 2 divergent, no direction issues"
+      ],
+      "session_impact": "partial",
+      "impact_notes": "Worktree agent a1343ea9 ran reproducibility audit. Not touched by K1216c.",
+      "k1216c_multistart_applicable": false,
+      "k1216c_reason": "Descriptive regression / no MLE.",
+      "pending_actions": [
+        {"id": "P7-1", "desc": "Sec 2.3: fix '97%' -> '98%' at 1 bps (computed 4.195/4.281 = 98.0%)", "severity": "low"},
+        {"id": "P7-2", "desc": "Sec 3.3 bound: '54-80 bps' -> '54-81 bps' (K846 theoretical 81.46)", "severity": "minor"},
+        {"id": "P7-3", "desc": "Footnote Sec 3.3: 2012-2024 sub-period rho=0.04, 48 bps unverifiable - add to K846 script or remove", "severity": "minor"},
+        {"id": "P7-4", "desc": "Decide inclusion/exclusion of K860 prospect-theory reference", "severity": "info"}
+      ],
+      "priority": "P3"
+    },
+    {
+      "paper_id": 8,
+      "folder": "volatility-absorption",
+      "title_short": "Diminishing-marginal-fear (volatility absorption)",
+      "target_journal": "TBD",
+      "self_contained": false,
+      "self_contained_gap": "reproducibility_audit only has nonK_sweep_report.md; reproduce_report.json shows 50.7% verification rate; K716-K722 .py scripts missing",
+      "submission_readiness": "draft",
+      "status_label": "R1 review, 5 SEVERE outstanding (S2/S3/S4); main_v2 compiled",
+      "supporting_experiments": ["K716", "K718", "K719", "K720", "K721", "K722", "K741", "K897", "K903", "K904"],
+      "scripts_missing": ["K716", "K718", "K719", "K720", "K721", "K722"],
+      "most_recent_commits": [
+        "65bdf9ef 2026-04-17 paper-folder backfill (no audit refresh)"
+      ],
+      "session_impact": "none_direct",
+      "impact_notes": "Backfill only; no new run or audit on 2026-04-17.",
+      "k1216c_multistart_applicable": false,
+      "k1216c_reason": "Event-study + absorption regression; no multistart MLE.",
+      "pending_actions": [
+        {"id": "P8-1", "desc": "Reconstruct K716-K722 .py scripts OR apply paper-guide (a)/(b)/(c) decision: fix body / fix scripts / document errata", "severity": "high"},
+        {"id": "P8-2", "desc": "S2: Resolve Table 5 N-column methodology", "severity": "high"},
+        {"id": "P8-3", "desc": "S3: Resolve Tables 9-10 untraceability", "severity": "high"},
+        {"id": "P8-4", "desc": "S4: Fix Table 6 NFP systematic discrepancies", "severity": "high"},
+        {"id": "P8-5", "desc": "Run full 6-step reproducibility audit (match Papers 5/7/9 protocol)", "severity": "med"}
+      ],
+      "priority": "P2"
+    },
+    {
+      "paper_id": 9,
+      "folder": "garch-x-vix",
+      "title_short": "Multiplicative GARCH-X with VIX",
+      "target_journal": "Journal of Empirical Finance / International Journal of Forecasting",
+      "self_contained": true,
+      "submission_readiness": "submitted",
+      "status_label": "Submitted under review; replication package NEEDS-FIX (85% match, 7 divergent, 54 no-source)",
+      "supporting_experiments": ["K889", "K889b", "K889v2", "K988", "K988b", "K989", "K1001", "K1003", "K1023", "K1045", "K1077", "K1083", "K1085", "K1088", "K1098"],
+      "most_recent_commits": [
+        "f96888d1 2026-04-17 experiments.md: register K1045/K1003/K1001/K1023",
+        "26c7a6ed 2026-04-17 no-source rescan: 19 undocumented K, 7 still missing",
+        "4e84d37f 2026-04-17 reproducibility audit: 85% matched, 7 divergent, NEEDS-FIX",
+        "5b785551 2026-04-17 paper-folder backfill",
+        "d6dc65a6 2026-04-17 4-hour sync: citation check + token report",
+        "7960fc20 2026-04-17 citation check done (1 MAJOR + 5 MED)",
+        "2bf5f2f6 2026-04-17 bib fix: 1 MAJOR + 5 MED + 2 MINOR DOI"
+      ],
+      "session_impact": "none_new_2026_04_17",
+      "impact_notes": "Heavy activity earlier in the day (audit+citation+experiments.md backfill); the 1 MAJOR fabricated citation and 54 no-source cells from that activity remain the pending items.",
+      "k1216c_multistart_applicable": "weak",
+      "k1216c_reason": "GARCH-MLE based; A4f champion cross-validated via K988/K988b/K989 + K1045 residual diagnostics; recommend spot-check only (e.g. rerun k988 with 16-start grid) to confirm global optimum.",
+      "pending_actions": [
+        {"id": "P9-1", "desc": "CITATION MAJOR: Remove Bayer & Hackethal (2020) - FABRICATED; replace with Prokopczuk et al. (2016) or Bekaert & Hoerova (2014)", "severity": "high"},
+        {"id": "P9-2", "desc": "CITATION MED: Fix 5 DOI issues per citation_check.md", "severity": "med"},
+        {"id": "P9-3", "desc": "CITATION MINOR: rename wang2017 -> wang2015", "severity": "low"},
+        {"id": "P9-4", "desc": "REPRO: Locate or retract FEZ DM t=3.45 (currently no-source)", "severity": "high"},
+        {"id": "P9-5", "desc": "REPRO: Resolve 7 remaining undocumented K references", "severity": "med"},
+        {"id": "P9-6", "desc": "OPTIONAL K1216c spot-check: k988 16-start grid to confirm A4f global optimum", "severity": "low"}
+      ],
+      "priority": "P3"
+    },
+    {
+      "paper_id": 10,
+      "folder": "crypto-fear-channel",
+      "title_short": "BTC -> VIX asymmetric spillover (crypto fear channel)",
+      "target_journal": "Journal of International Financial Markets, Institutions & Money (1st); JEF (2nd); FRL (backup)",
+      "self_contained": false,
+      "self_contained_gap": "Kickoff stage: only outline.md + body_v0_intro.tex; missing README/data_sources/experiments/scripts/results/figures/reproduce.py/body secs 2-9",
+      "submission_readiness": "kickoff",
+      "status_label": "Outline + v0 introduction only",
+      "supporting_experiments": ["K639", "K746b", "K1025"],
+      "most_recent_commits": [
+        "c1165d6f 2026-04-17 Paper numbering fix: Paper 10 (was Paper 6)",
+        "5585bfc5 2026-04-17 kick-off outline + cross-market research article (pool refill)"
+      ],
+      "session_impact": "earlier_session",
+      "impact_notes": "Numbering resolved Paper 6 -> Paper 10 earlier today.",
+      "k1216c_multistart_applicable": false,
+      "k1216c_reason": "Methods are Granger / QR / Diebold-Yilmaz / DCC-EWMA, not multistart MLE.",
+      "pending_actions": [
+        {"id": "P10-1", "desc": "Confirm target journal selection (JIFMIM vs JEF vs FRL)", "severity": "info"},
+        {"id": "P10-2", "desc": "Draft section 2 (lit review) and section 3 (data)", "severity": "med"},
+        {"id": "P10-3", "desc": "Build README.md, data_sources.md, experiments.md before body drafting advances", "severity": "med"},
+        {"id": "P10-4", "desc": "Resolve open questions in outline.md: memecoin comparison? Deribit IV? single vs multi-asset receiver? forecasting section length?", "severity": "info"}
+      ],
+      "priority": "P4"
+    }
+  ],
+  "summary_counts": {
+    "submission_ready": 2,
+    "submitted": 1,
+    "under_review_or_draft": 1,
+    "kickoff": 1,
+    "self_contained_full": 3,
+    "self_contained_partial_or_no": 2
+  },
+  "top_action_item": "P2: Paper 8 reproducibility rescue - decide among (a) reconstruct K716-K722 .py, (b) revise body to match only K741/K897/K903/K904, (c) document explicit errata per paper-guide.",
+  "cross_cutting_observations": {
+    "shared_data_yfinance": ["Papers 7", "8", "9", "10"],
+    "unique_data_taifex": ["Paper 9 (K1098)"],
+    "pure_simulation": ["Paper 5"],
+    "nfp_manual": ["Paper 8"],
+    "numbering_mismatch_flagged": "Reproducibility_audit READMEs use old numbering while paper folder READMEs use new - housekeeping sweep needed."
+  },
+  "main_thread_action_list_ordered": [
+    "[P2] Paper 8 reproducibility rescue (K716-K722 scripts or paper-guide (a)/(b)/(c))",
+    "[P3] Paper 9 revision prep (citations + no-source cells)",
+    "[P3] Paper 7 FRL polish (3 tex fixes + K860 decision)",
+    "[P4] Paper 5 FRL polish (DIV-2 label)",
+    "[P4] Paper 10 body drafting advance + replication package build",
+    "[housekeeping] Paper numbering sweep across audit READMEs"
+  ],
+  "limits": [
+    "Read-only; no recomputation performed",
+    "Git log scoped to 5 target folders only",
+    "Paper 10 PDF not compiled (only body_v0_intro.tex exists)"
+  ]
+}
