@@ -34,7 +34,8 @@
       "Bash(awk '{print $NF}')",
       "Bash(find *)",
       "Bash(VERIFY_BASE_URL=https://volpred.zeabur.app node scripts/verify-regressions.mjs)",
-      "Bash(awk '$6==\"Apr\" && $7==17 {print $6, $7, $8, $5, $NF}')"
+      "Bash(awk '$6==\"Apr\" && $7==17 {print $6, $7, $8, $5, $NF}')",
+      "Bash(awk '{print $1, $2}')"
     ]
   }
 }
