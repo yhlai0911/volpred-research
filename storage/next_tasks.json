@@ -1526,10 +1526,10 @@
   {
     "id": "Paper6_DIV1_K880_vs_K880v2_methodology",
     "title": "Paper 6 BLOCKER: K880 (原) vs K880v2 (修) lookahead 爭議 — 需主線程確認 methodology",
-    "status": "pending_main_thread",
+    "status": "resolved_K880v2_CORRECT_paper_major_errata_required",
     "priority": 4,
     "created_at": "2026-04-17T17:13:53+08:00",
-    "description": "Paper 6 audit (453f921f): Paper SPY 主結果 (QLIKE=0.748, DM=6.00, Spearman=0.568) 全來自 K880 原始版, 但 K880 metadata 標記有 lookahead bug. K880v2 修正版 DM=-0.57 完全無顯著優勢. **關鍵問題**: 對 OHLC 市場 r_{d,0}=log(Open_d/Close_{d-1}) 在 intraday session 開始前已知 → 非 lookahead. K880v2 可能 over-correction. **主線程 decision**: (a) 確認 K880 overnight return 是否為 predetermined conditioning info (read K880/K880v2 code + Eq.(3) model spec); (b) 若 K880 正確 → paper 留原數字 + Ablation Table 3 的 'K880v2' 解釋需改寫為 'lookahead 過度修正 baseline'; (c) 若 K880v2 正確 → paper 主要結果需 errata 到 DM=-0.57 (Paper 6 核心 claim 會崩). **此為 Paper 6 existence 存亡 decision, FRL 投稿前必解**.",
+    "description": "Paper 6 audit (453f921f): Paper SPY 主結果 (QLIKE=0.748, DM=6.00, Spearman=0.568) 全來自 K880 原始版, 但 K880 metadata 標記有 lookahead bug. K880v2 修正版 DM=-0.57 完全無顯著優勢. **關鍵問題**: 對 OHLC 市場 r_{d,0}=log(Open_d/Close_{d-1}) 在 intraday session 開始前已知 → 非 lookahead. K880v2 可能 over-correction. **主線程 decision**: (a) 確認 K880 overnight return 是否為 predetermined conditioning info (read K880/K880v2 code + Eq.(3) model spec); (b) 若 K880 正確 → paper 留原數字 + Ablation Table 3 的 'K880v2' 解釋需改寫為 'lookahead 過度修正 baseline'; (c) 若 K880v2 正確 → paper 主要結果需 errata 到 DM=-0.57 (Paper 6 核心 claim 會崩). **此為 Paper 6 existence 存亡 decision, FRL 投稿前必解**. [Paper 6 rescan c190fefd CONFIRMED K880 IS lookahead: line 512 r2_overnight[t] 是 same-day realized 非 t-1. K880v2 改用 h_ov_t (forecast) 正確. **Paper 6 SPY 主結果 DM=6.00 是 lookahead artifact, K880v2 canonical DM=-0.57 NS**. Paper 6 核心 \"PRG beats GJR on SPY\" claim **崩**. 投稿 FRL 前 major errata 不可避免.]",
     "tags": [
       "paper-6",
       "prg-periodic-garch",
@@ -1537,7 +1537,8 @@
       "lookahead-debate",
       "main-thread",
       "critical"
-    ]
+    ],
+    "completed_at": "2026-04-17T17:43:58+08:00"
   },
   {
     "id": "Paper6_DIV2_0050TW_OOS_date_errata",
@@ -1726,6 +1727,35 @@
       "errata",
       "research-integrity",
       "main-thread"
+    ]
+  },
+  {
+    "id": "Paper6_experiments_md_add_K874c_K874e",
+    "title": "Paper 6 QUICK WIN: experiments.md 加 K874c (Table 2 PRG vs Separate) + K874e (MCS)",
+    "status": "pending_main_thread",
+    "priority": 3,
+    "created_at": "2026-04-17T17:43:58+08:00",
+    "description": "Paper 6 rescan (c190fefd) 發現 2 UNDOCUMENTED_K: K874c exact match Table 2 DM=-4.07, K874e MCS result. Ready-to-apply block 在 paper/prg-periodic-garch/reproducibility_audit/undocumented_k_additions_for_experiments_md.md. 5 min main-thread edit.",
+    "tags": [
+      "paper-6",
+      "quick-win",
+      "main-thread"
+    ]
+  },
+  {
+    "id": "Paper6_major_errata_K880v2_canonical",
+    "title": "Paper 6 MAJOR ERRATA: SPY 主結果改為 K880v2 canonical (DM 6.00 → -0.57)",
+    "status": "pending_main_thread",
+    "priority": 4,
+    "created_at": "2026-04-17T17:43:58+08:00",
+    "description": "Paper 6 rescan 程式碼層級確認 K880 line 512 r2_overnight[t] 是 lookahead. K880v2 才是 canonical. **Paper 6 SPY 核心 claim 'PRG beats GJR on SPY, DM=6.00' 是 artifact**. K880v2 canonical: DM=-0.57 NS, 'PRG no significant advantage on SPY'. **主線程 major decision**: (1) 全面 rewrite SPY 欄位到 K880v2 canonical — paper 主 contribution 弱化為 'TAIFEX only, SPY null' (2) 若保留 K880 敘事 — 需明確 'forecast at open using realized overnight return' methodology Eq 3-4 defensible claim (非 traditional volatility forecast convention); (3) 撤稿或大幅 restructure. **FRL 投稿前不可避免 — 現 paper 數字無法 reviewer replication**.",
+    "tags": [
+      "paper-6",
+      "prg-periodic-garch",
+      "major-errata",
+      "research-integrity",
+      "main-thread",
+      "critical"
     ]
   }
 ]
